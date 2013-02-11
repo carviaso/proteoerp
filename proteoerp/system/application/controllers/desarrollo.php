@@ -703,7 +703,6 @@ class Desarrollo extends Controller{
 			$str .= $tab3.'})'."\n";
 			$str .= $tab2.'};\';'."\n\n";
 
-
 			$str .= $tab2.'$bodyscript .= \''."\n";
 			$str .= $tab2.'function '.strtolower($db).'edit() {'."\n";
 			$str .= $tab3.'var id     = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
@@ -716,7 +715,6 @@ class Desarrollo extends Controller{
 			$str .= $tab4.'});'."\n";
 			$str .= $tab3.'} else { $.prompt("&lt;h1&gt;Por favor Seleccione un Registro&lt;/h1&gt;");}'."\n";
 			$str .= $tab2.'};\';'."\n\n";
-
 
 			$str .= $tab2.'//Wraper de javascript'."\n";
 			$str .= $tab2.'$bodyscript .= \''."\n";
@@ -740,7 +738,6 @@ class Desarrollo extends Controller{
 			$str .= $tab4.'var bValid = true;'."\n";
 			$str .= $tab4.'var murl = $("#df1").attr("action");'."\n";
 			$str .= $tab4.'allFields.removeClass( "ui-state-error" );'."\n";
-			//$str .= $tab4.'if ( bValid ) {'."\n";
 			$str .= $tab4.'$.ajax({'."\n";
 			$str .= $tab5.'type: "POST", dataType: "html", async: false,'."\n";
 			$str .= $tab5.'url: murl,'."\n";
@@ -1683,8 +1680,7 @@ class Desarrollo extends Controller{
 		$db     = $this->input->post('bd');
 		$contro = $this->input->post('contro');
 		file_put_contents('system/application/controllers/'.$contro.'/'.$db.'.php',$code);
-		echo 'Increible ';
-		
+		redirect($this->url.'desarrollo/jqcargar/'.$db.'/'.$contro);
 	}
 
 	function jqcargar(){
@@ -1715,4 +1711,3 @@ class Desarrollo extends Controller{
 
 }
 ?>
--

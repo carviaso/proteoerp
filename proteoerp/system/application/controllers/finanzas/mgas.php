@@ -775,7 +775,6 @@ class Mgas extends validaciones {
 
 		$edit->descrip= new inputField("Descripci&oacute;n", "descrip");
 		$edit->descrip->size = 30;
-		//$edit->descrip->readonly=true;
 
 		$edit->tipo= new dropdownField("Tipo", "tipo");
 		$edit->tipo->style ="width:100px;";
@@ -787,11 +786,6 @@ class Mgas extends validaciones {
 		$edit->grupo= new dropdownField("Grupo", "grupo");
 		$edit->grupo->options('SELECT grupo, CONCAT(grupo," - ",nom_grup) nom_grup from grga order by nom_grup');
 		$edit->grupo->style ="width:200px;";
-		//$edit->grupo->onchange ="grupo();";
-
-		//$edit->nom_grup  = new inputField("nom_grup", "nom_grup");
-
-		//$AddUnidad='<a href="javascript:add_unidad();" title="Haz clic para Agregar una cuenta">'.image('list_plus.png','Agregar',array("border"=>"0")).'</a>';
 
 		$lcuent=anchor_popup("/contabilidad/cpla/dataedit/create",image('list_plus.png','Agregar',array("border"=>"0")),$atts);
 		$edit->cuenta    = new inputField("Cta. Contable", "cuenta");
@@ -809,6 +803,7 @@ class Mgas extends validaciones {
 		$edit->iva->maxlength =5;
 		$edit->iva->rule ="trim";
 */
+
 		$ivas=$this->datasis->ivaplica();
 		$edit->iva = new dropdownField('IVA %', 'iva');
 		foreach($ivas as $tasa=>$ivamonto){

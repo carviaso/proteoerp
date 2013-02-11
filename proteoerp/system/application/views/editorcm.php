@@ -105,8 +105,8 @@ $(function() {
 });
 
 $('#guardar').click(function(){
-	$.post( "<?php echo site_url('/desarrollo/jqguarda') ?>", $('#fprog').serialize())
-	.done(function(data){ alert('Resultado: '+data)});
+	$('#fprog').attr("action","<?php echo site_url('/desarrollo/jqguarda') ?>");
+	$('#fprog').submit();
 });
 
 $('#generar').click(function(){
@@ -115,7 +115,6 @@ $('#generar').click(function(){
 
 $('#cargar').click(function(){
 	window.location = "<?php echo site_url('desarrollo/jqcargar'); ?>"+"/"+$('#bd').val()+"/"+$('#contro').val();
-
 });
 
 
