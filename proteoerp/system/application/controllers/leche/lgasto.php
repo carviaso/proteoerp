@@ -37,8 +37,9 @@ class Lgasto extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
-			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' , 'title'=>'Mostrar Registro'),
+			array('id'=>'fborra', 'title'=>'Elimina registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -82,6 +83,49 @@ class Lgasto extends Controller {
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		};';
+
+		$bodyscript .= '
+		function lgastoshow() {
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id,
+					function(data){
+						$("#fshow").html(data);
+						$("#fshow").dialog( "open" );
+					});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function lgastodel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(r){
+						try{
+							var json = JSON.parse(r);
+							if (json.status == "A"){
+								apprise("Registro Eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+								return true;
+							} else {
+								apprise(json.mensaje);
+							}
+						}catch(e){
+							$("#fborra").html(r);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
 
 		//Wraper de javascript
 		$bodyscript .= '
@@ -146,6 +190,35 @@ class Lgasto extends Controller {
 			},
 			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
 		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 300, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$( this ).dialog( "close" );
+					grid.trigger("reloadGrid");
+				}
+			},
+			close: function() {
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
 		$bodyscript .= '});'."\n";
 
 		$bodyscript .= "\n</script>\n";
@@ -266,6 +339,16 @@ class Lgasto extends Controller {
 		));
 
 
+		$grid->addField('pago');
+		$grid->label('Pago');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
+
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
@@ -296,7 +379,7 @@ class Lgasto extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: lgastoadd,\n\t\teditfunc: lgastoedit");
+		$grid->setBarOptions('addfunc: lgastoadd, editfunc: lgastoedit, delfunc: lgastodel,viewfunc: lgastoshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -459,7 +542,7 @@ class Lgasto extends Controller {
 		$edit->nombre->maxlength =100;
 
 		$edit->tipo = new  dropdownField('Tipo', 'tipo');
-		$edit->tipo->option('D','Deduci&oacute;n');
+		$edit->tipo->option('D','Deducci&oacute;n');
 		$edit->tipo->option('A','Asignaci&oacute;n');
 		$edit->tipo->style='width:150px;';
 		$edit->tipo->size = 5;
@@ -531,7 +614,12 @@ class Lgasto extends Controller {
 	}
 
 	function _pre_delete($do){
-		return true;
+		$pago = $do->get('pago');
+		if(empty($pago) || $pago==0){
+			return true;
+		}
+		$do->error_message_ar['pre_del']='El efecto ya fue deducido o  acreditado, no se puede eliminar.';
+		return false;
 	}
 
 	function _post_insert($do){
