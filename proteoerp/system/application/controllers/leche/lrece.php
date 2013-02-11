@@ -70,7 +70,9 @@ class Lrece extends Controller {
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-		array("id"=>"fedita" , "title"=>"Agregar/Editar Pedido"),
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Pedido'),
+			array('id'=>'fshow' , 'title'=>'Ver Registro'),
+			array('id'=>'fborra', 'title'=>'Elimina registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -95,6 +97,49 @@ class Lrece extends Controller {
 	//***************************
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '		<script type="text/javascript">';
+
+		$bodyscript .= '
+		function lreceshow() {
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				$.post("'.site_url($this->url.'apertura/show').'/"+id,
+					function(data){
+						$("#fshow").html(data);
+						$("#fshow").dialog( "open" );
+					});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function lrecedel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(r){
+						try{
+							var json = JSON.parse(r);
+							if (json.status == "A"){
+								apprise("Registro Eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+								return true;
+							} else {
+								apprise(json.mensaje);
+							}
+						}catch(e){
+							$("#fborra").html(r);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
 
 		$bodyscript .= '
 		function lreceadd() {
@@ -176,6 +221,35 @@ class Lrece extends Controller {
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 300, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$( this ).dialog( "close" );
+					grid.trigger("reloadGrid");
+				}
+			},
+			close: function() {
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
 
 		$bodyscript .= '
 		jQuery("#recalcu").click( function(){
@@ -302,7 +376,7 @@ class Lrece extends Controller {
 		$grid->label('Fecha');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => $editar,
+			'editable'      => 'true',
 			'width'         => 80,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
@@ -622,7 +696,7 @@ class Lrece extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: lreceadd,\n\t\teditfunc: lreceedit");
+		$grid->setBarOptions("addfunc: lreceadd,editfunc: lreceedit,delfunc: lrecedel,viewfunc: lreceshow");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -684,51 +758,39 @@ class Lrece extends Controller {
 		$mcodp  = "??????";
 		$check  = 0;
 
-		//unset($data['oper']);
-		//unset($data['id']);
-		//if($oper == 'add'){
-		//	if(false == empty($data)){
-		//		$check = $this->datasis->dameval("SELECT count(*) FROM lrece WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-		//		if ( $check == 0 ){
-		//			$this->db->insert('lrece', $data);
-		//			echo "Registro Agregado";
-        //
-		//			logusu('LRECE',"Registro ????? INCLUIDO");
-		//		} else
-		//			echo "Ya existe un registro con ese $mcodp";
-		//	} else
-		//		echo "Fallo Agregado!!!";
-        //
-		//} elseif($oper == 'edit') {
-		//	$nuevo  = $data[$mcodp];
-		//	$anterior = $this->datasis->dameval("SELECT $mcodp FROM lrece WHERE id=$id");
-		//	if ( $nuevo <> $anterior ){
-		//		//si no son iguales borra el que existe y cambia
-		//		$this->db->query("DELETE FROM lrece WHERE $mcodp=?", array($mcodp));
-		//		$this->db->query("UPDATE lrece SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-		//		$this->db->where("id", $id);
-		//		$this->db->update("lrece", $data);
-		//		logusu('LRECE',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-		//		echo "Grupo Cambiado/Fusionado en clientes";
-		//	} else {
-		//		unset($data[$mcodp]);
-		//		$this->db->where("id", $id);
-		//		$this->db->update('lrece', $data);
-		//		logusu('LRECE',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-		//		echo "$mcodp Modificado";
-		//	}
-        //
-		//} elseif($oper == 'del') {
-		//	$meco = $this->datasis->dameval("SELECT $mcodp FROM lrece WHERE id=$id");
-		//	//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM lrece WHERE id='$id' ");
-		//	if ($check > 0){
-		//		echo " El registro no puede ser eliminado; tiene movimiento ";
-		//	} else {
-		//		$this->db->simple_query("DELETE FROM lrece WHERE id=$id ");
-		//		logusu('LRECE',"Registro ????? ELIMINADO");
-		//		echo "Registro Eliminado";
-		//	}
-		//};
+		unset($data['oper']);
+		unset($data['id']);
+		if($oper == 'add'){
+			//if(false == empty($data)){
+			//	$check = $this->datasis->dameval("SELECT count(*) FROM lrece WHERE $mcodp=".$this->db->escape($data[$mcodp]));
+			//	if ( $check == 0 ){
+			//		$this->db->insert('lrece', $data);
+			//		echo "Registro Agregado";
+			//		logusu('LRECE',"Registro ????? INCLUIDO");
+			//	} else
+			//		echo "Ya existe un registro con ese $mcodp";
+			//} else
+			//	echo "Fallo Agregado!!!";
+		} elseif($oper == 'edit') {
+			if($this->datasis->sidapuede('LRECE','CAMBIO DE FECHA%' ) || true){
+				$this->db->where('id', $id);
+				$this->db->update('lrece', $data);
+				logusu('LRECE',"Registro $id MODIFICADO");
+				echo "Registro Modificado";
+			}else{
+				echo "No tiene permisos para modificar el registro";
+			}
+		} elseif($oper == 'del') {
+			//$meco = $this->datasis->dameval("SELECT $mcodp FROM lrece WHERE id=$id");
+			////$check =  $this->datasis->dameval("SELECT COUNT(*) FROM lrece WHERE id='$id' ");
+			//if ($check > 0){
+			//	echo " El registro no puede ser eliminado; tiene movimiento ";
+			//} else {
+			//	$this->db->simple_query("DELETE FROM lrece WHERE id=$id ");
+			//	logusu('LRECE',"Registro ????? ELIMINADO");
+			//	echo "Registro Eliminado";
+			//}
+		};
 	}
 
 	//************************************
@@ -1211,6 +1273,67 @@ class Lrece extends Controller {
 		}
 		return true;
 	}
+
+
+	//Se usa solo para borrar
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+		$edit = new DataEdit('', 'lrece');
+
+		$edit->on_save_redirect=false;
+
+		$edit->post_process('delete', '_post_dataedit_delete');
+		$edit->pre_process( 'insert', '_pre_dataedit_insert');
+		$edit->pre_process( 'update', '_pre_dataedit_update');
+		$edit->pre_process( 'delete', '_pre_dataedit_delete');
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro eliminado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			//echo $edit->output;
+			$conten['form'] =&  $edit;
+			$this->load->view('view_lrecean', $conten);
+		}
+
+	}
+
+	function _pre_dataedit_insert($do){
+		return false;
+	}
+	function _pre_dataedit_update($do){
+		return false;
+	}
+	function _pre_dataedit_delete($do){
+		$fecha  = $do->get('fecha');
+		$dbfecha= $this->db->escape($fecha);
+		$cana   = $this->datasis->dameval('SELECT COUNT(*) FROM lcierre WHERE fecha='.$dbfecha);
+
+		if($cana>0){
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
+			return false;
+		}
+	}
+
+	function _post_dataedit_delete($do){
+		$id   = $do->get('id');
+		$dbid = $this->db->escape($id);
+
+		$mSQL="DELETE FROM itlrece WHERE id_lrece=${dbid}";
+		$this->db->simple_query($mSQL);
+
+		$mSQL="DELETE FROM lanal  WHERE id_lrece=${dbid}";
+		$this->db->simple_query($mSQL);
+
+		logusu('lrece','Recepcion $id eliminada');
+	}
+	//Fin para el borrado
+
 
 	//****************************************
 	//
@@ -1875,7 +1998,7 @@ class Lrece extends Controller {
 		$this->db->query($mSQL);
 		$mSQL = 'UPDATE lrece SET lista=TRUNCATE(lista,0); ';
 		$this->db->query($mSQL);
-		$mSQL = 'UPDATE lrece SET litros=TRUNCATE(ROUND((lleno-vacio)/densidad,2),0), neto=lleno-vacio, diferen=ROUND((lleno-vacio)/densidad,2)-lista 
+		$mSQL = 'UPDATE lrece SET litros=TRUNCATE(ROUND((lleno-vacio)/densidad,2),0), neto=lleno-vacio, diferen=ROUND((lleno-vacio)/densidad,2)-lista
 		WHERE vacio>0 AND lleno>0;';
 		$this->db->query($mSQL);
 		$mSQL = 'UPDATE lrece SET diferen=litros-lista;';
