@@ -1028,8 +1028,7 @@ class Lpago extends Controller {
 		//Calcula el moto que se le debe
 		$rt=array('deduc'=>0,'monto'=>0,'tmonto'=>0);
 
-		$jsmontos=$this->_cmonto($proveed);
-		$montos = json_decode($jsmontos,true);
+		$montos = $this->_cmonto($proveed);
 		if(isset($montos['monto']) && isset($montos['tmonto']) && isset($montos['deduc'])){
 			$rt=array(
 				'deduc' => $montos['deduc'],
