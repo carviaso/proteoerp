@@ -948,11 +948,12 @@ class Lpago extends Controller {
 				echo 'Egreso no fue pagado con cheque de banco';
 			}
 		}else{
-			$fila=$this->datasis->damerow('SELECT banco,benefi,monto FROM lpagolote AS a WHERE a.id='.$fila['id_lpagolote']);
+			$fila=$this->datasis->damerow('SELECT banco,benefi,monto,tipo FROM lpagolote AS a WHERE a.id='.$fila['id_lpagolote']);
 			$fila['benefi']= trim($fila['benefi']);
 			$banco  = $fila['banco'];
+			$tipo  = $fila['tipo'];
 
-			if($banco!='CAJ'){
+			if($banco!='CAJ' && $tipo=='D'){
 				$this->load->library('cheques');
 				$nombre = $fila['benefi'];
 				$monto  = $fila['monto'];
