@@ -821,6 +821,15 @@ class Lpago extends Controller {
 		$edit->banco->style='width:200px;';
 		$edit->banco->append('Banco en donde se le depositar&aacute;n a los clientes');
 
+		$edit->numero = new inputField('N&uacute;mero de cheque','numero');
+		$edit->numero->rule='max_length[50]';
+		$edit->numero->size =10;
+		$edit->numero->maxlength =8;
+
+		$edit->benefi = new inputField('Beneficiario','benefi');
+		$edit->benefi->rule='max_length[100]';
+		$edit->benefi->maxlength =100;
+
 		$edit->totalval = new freeField('Total','','<b id="totalval">0,00</b><input type="hidden" name="totallote" id="totallote" value="0"> ');
 
 		$edit->container = new containerField('alert','<table id="loteresu"></table>');
@@ -894,6 +903,7 @@ class Lpago extends Controller {
 			$this->db->from('sprv');
 			$this->db->where('banco1'  ,$bbanco );
 			$this->db->where('prefpago',$tipo );
+			$this->db->orderby('nombre');
 			$query = $this->db->get();
 			//echo $this->db->last_query();
 			foreach ($query->result() as $row){
@@ -902,8 +912,8 @@ class Lpago extends Controller {
 
 				if($monto>0){
 					$arr[]=array(
-						'proveed'   => $row->proveed,
-						'nombre'    => $row->nombre,
+						'proveed'   => utf8_encode($row->proveed),
+						'nombre'    => utf8_encode($row->nombre),
 						'deduc'     => $rt['deduc'],
 						'monto'     => $monto,
 						'montopago' => $monto-$rt['deduc']
@@ -987,6 +997,7 @@ class Lpago extends Controller {
 			$this->db->where("((a.fecha<='$fcorte' AND a.transporte<=0) OR (a.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND a.transporte>0))");
 			$this->db->where('b.codprv',$proveed);
 			$query = $this->db->get();
+
 			if ($query->num_rows() > 0){
 				$row = $query->row();
 				if(!empty($row->monto)) $rt['tmonto'] = round(floatval($row->monto),2);
