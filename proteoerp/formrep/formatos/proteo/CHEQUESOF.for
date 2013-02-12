@@ -1,5 +1,5 @@
 <?php
-$nombre = strtoupper($nombre);
+$nombre = '**'.strtoupper($nombre).'**';
 $dia    = date('d'    ,$mkt);
 $mes    = date('n'    ,$mkt)-1;
 $anio   = date('Y'    ,$mkt);
