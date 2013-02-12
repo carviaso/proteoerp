@@ -1985,13 +1985,14 @@ class gser extends Controller {
 
 	function impcheque($id_gser){
 		$dbid=$this->db->escape($id_gser);
-		$fila=$this->datasis->damerow('SELECT a.codb1,a.cheque1,a.benefi,a.nombre,monto1 FROM gser AS a JOIN sprv AS b ON a.proveed=b.proveed WHERE a.id='.$dbid);
-		$fila['benefi']= trim($fila['benefi']);
-		$fila['nombre']= trim($fila['nombre']);
+		$fila=$this->datasis->damerow('SELECT a.codb1,a.cheque1,a.benefi,a.nombre,monto1 ,tipo1 FROM gser AS a JOIN sprv AS b ON a.proveed=b.proveed WHERE a.id='.$dbid);
+		$fila['benefi'] = trim($fila['benefi']);
+		$fila['nombre'] = trim($fila['nombre']);
 
-		$banco  = Common::_traetipo($fila['codb1']);
+		$banco = Common::_traetipo($fila['codb1']);
+		$tipo  = trim($fila['tipo1']);
 
-		if($banco!='CAJ'){
+		if($banco!='CAJ' && $tipo=='C'){
 			$this->load->library('cheques');
 			$nombre = (empty($fila['benefi']))? $fila['nombre']: $fila['benefi'];
 			$monto  = $fila['monto1'];
