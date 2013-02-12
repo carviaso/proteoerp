@@ -782,10 +782,11 @@ class Lpago extends Controller {
 						total = total+jjson[i].montopago;
 						jQuery("#loteresu").jqGrid("addRowData",i+1,jjson[i]);
 					}
+					//alert(total);
+					$("#totalval").text(nformat(total));
+					$("#totallote").val(total);
 				});
 			}
-			$("#totalval").text(nformat(total));
-			$("#totallote").val(total);
 		}';
 
 		$edit = new DataEdit('', 'lpagolote');
@@ -821,13 +822,14 @@ class Lpago extends Controller {
 		$edit->banco->style='width:200px;';
 		$edit->banco->append('Banco en donde se le depositar&aacute;n a los clientes');
 
-		$edit->numero = new inputField('N&uacute;mero de cheque','numero');
+		$edit->numero = new inputField('Cheque Num/Benefi','numero');
 		$edit->numero->rule='max_length[50]';
 		$edit->numero->size =10;
 		$edit->numero->maxlength =8;
 
 		$edit->benefi = new inputField('Beneficiario','benefi');
 		$edit->benefi->rule='max_length[100]';
+		$edit->benefi->in = 'numero';
 		$edit->benefi->maxlength =100;
 
 		$edit->totalval = new freeField('Total','','<b id="totalval">0,00</b><input type="hidden" name="totallote" id="totallote" value="0"> ');
@@ -927,21 +929,41 @@ class Lpago extends Controller {
 
 	function impcheque($id_gser){
 		$dbid=$this->db->escape($id_gser);
-		$fila=$this->datasis->damerow('SELECT a.banco,a.benefi,a.nombre,a.montopago AS monto FROM lpago AS a WHERE a.id='.$dbid);
-		$fila['benefi']= trim($fila['benefi']);
-		$fila['nombre']= trim($fila['nombre']);
+		$fila=$this->datasis->damerow('SELECT a.banco,a.benefi,a.nombre,a.montopago AS monto,a.id_lpagolote FROM lpago AS a WHERE a.id='.$dbid);
 
-		$banco  = Common::_traetipo($fila['banco']);
+		if(empty($fila['id_lpagolote'])){
+			$fila['benefi']= trim($fila['benefi']);
+			$fila['nombre']= trim($fila['nombre']);
 
-		if($banco!='CAJ'){
-			$this->load->library('cheques');
-			$nombre = (empty($fila['benefi']))? $fila['nombre']: $fila['benefi'];
-			$monto  = $fila['monto'];
-			$fecha  = date('Y-m-d');
-			$banco  = $banco;
-			$this->cheques->genera($nombre,$monto,$banco,$fecha,true);
+			$banco  = Common::_traetipo($fila['banco']);
+
+			if($banco!='CAJ'){
+				$this->load->library('cheques');
+				$nombre = (empty($fila['benefi']))? $fila['nombre']: $fila['benefi'];
+				$monto  = $fila['monto'];
+				$fecha  = date('Y-m-d');
+				$banco  = $banco;
+				$this->cheques->genera($nombre,$monto,$banco,$fecha,true);
+			}else{
+				echo 'Egreso no fue pagado con cheque de banco';
+			}
 		}else{
-			echo 'Egreso no fue pagado con cheque de banco';
+			$fila=$this->datasis->damerow('SELECT banco,benefi,monto FROM lpagolote AS a WHERE a.id='.$fila['id_lpagolote']);
+			$fila['benefi']= trim($fila['benefi']);
+			$banco  = $fila['banco'];
+
+			if($banco!='CAJ'){
+				$this->load->library('cheques');
+				$nombre = $fila['benefi'];
+				$monto  = $fila['monto'];
+				$fecha  = date('Y-m-d');
+				$banco  = $banco;
+				$this->cheques->genera($nombre,$monto,$banco,$fecha,true);
+			}else{
+				echo 'Egreso no fue pagado con cheque de banco';
+			}
+
+
 		}
 	}
 
