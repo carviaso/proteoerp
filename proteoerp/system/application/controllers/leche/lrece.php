@@ -1067,7 +1067,7 @@ class Lrece extends Controller {
 		}
 		if(empty($id)) return "";
 		$grid    = $this->jqdatagrid;
-		$mSQL    = 'SELECT * FROM itlrece WHERE id_lrece='.$this->db->escape($id).' ORDER BY vaquera';
+		$mSQL    = 'SELECT * FROM itlrece WHERE id_lrece='.$this->db->escape($id).' ORDER BY nombre';
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;

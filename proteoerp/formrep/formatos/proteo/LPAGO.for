@@ -1,11 +1,11 @@
 <?php
-$maxlin=30; //Maximo de lineas de items.
+$maxlin=16; //Maximo de lineas de items.
 
 if(count($parametros)==0) show_error('Faltan parametros');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 
-$mSQL_1 = $this->db->query('SELECT
+$mSQL_1 = $this->db->query('SELECT a.numche,
 a.numero, b.nombre,TRIM(b.nomfis) AS nomfis, a.proveed, b.rif,a.montopago,a.fecha,a.tipo
 FROM lpago AS a
 JOIN sprv  AS b ON a.proveed=b.proveed
@@ -22,6 +22,11 @@ $montole  = strtoupper(numletra($row->montopago));
 $fecha    = dbdate_to_human($row->fecha);
 $tipo     = $row->tipo;
 
+if(preg_match("/[0-9]+/i",$row->numche)){
+	$numche = $row->numche;
+}else{
+	$numche = '';
+}
 $dbproveed= $this->db->escape($proveed);
 
 $totcosto= 0;
@@ -30,12 +35,7 @@ $uline   = array();
 
 if($tipo=='T' || $tipo=='A'){
 	$tit = 'POR TRANSPORTE';
-	$mSQL1="SELECT
-		a.fecha,
-		DATE_FORMAT(a.fecha,'%w') AS sem,
-		SUM(IF(a.litros=0,a.lista,a.litros)) AS litros,
-		b.tarifa,
-		SUM(ROUND(IF(a.litros=0, a.lista, a.litros )*b.tarifa,2)) AS totmon
+	$mSQL1="SELECT a.fecha, DATE_FORMAT(a.fecha,'%w') AS sem, SUM(a.lista) AS litros, b.tarifa, SUM(ROUND(a.lista*b.tarifa,2)) AS totmon
 	FROM lrece AS a
 	JOIN lruta AS b ON a.ruta=b.codigo
 	JOIN sprv  AS c ON b.codprv=c.proveed
@@ -46,12 +46,8 @@ if($tipo=='T' || $tipo=='A'){
 
 if($tipo=='P' || $tipo=='A'){
 	$tit = 'POR PRODUCTOR';
-	$mSQL2="SELECT
-		b.fecha,
-		DATE_FORMAT(b.fecha,'%w') AS sem,
-		SUM(a.lista) AS litros,
-		'0' AS tarifa,
-		SUM(ROUND(a.lista*if(c.tipolec=\"F\",k.ultimo,e.ultimo),2)+ROUND(a.lista*(f.ultimo+g.ultimo+h.ultimo)*(c.tipolec=\"F\")+ROUND(a.lista*IF(c.animal=\"B\",if(c.tipolec=\"F\",i.ultimo,j.ultimo), 0 ),2),2))  AS totmon
+	$mSQL2="SELECT b.fecha, DATE_FORMAT(b.fecha,'%w') AS sem, SUM(a.lista) AS litros, '0' AS tarifa,
+		SUM(ROUND(a.lista*if(c.tipolec=\"F\",k.ultimo,e.ultimo),2)+ROUND(a.lista*(IF(c.zona='0112',l.ultimo,f.ultimo)+g.ultimo+h.ultimo)*(c.tipolec=\"F\")+ROUND(a.lista*IF(c.animal=\"B\",if(c.tipolec=\"F\",i.ultimo,j.ultimo), 0 ),2),2))  AS totmon
 	FROM itlrece AS a
 	JOIN lrece AS b ON  a.id_lrece=b.id
 	JOIN lvaca AS c ON a.id_lvaca=c.id
@@ -63,6 +59,7 @@ if($tipo=='P' || $tipo=='A'){
 	LEFT JOIN sinv  AS i ON i.codigo='ZBUFALA'
 	LEFT JOIN sinv  AS j ON j.codigo='ZBUFALAC'
 	LEFT JOIN sinv  AS k ON k.codigo='ZLFRIA'
+	LEFT JOIN sinv  AS l ON l.codigo='ZLMACHI'
 	WHERE a.pago=${dbid} AND MID(b.ruta,1,1) <>'G' AND a.lista>0
 	GROUP BY b.fecha";
 	$mSQL = $mSQL2;
@@ -70,10 +67,53 @@ if($tipo=='P' || $tipo=='A'){
 
 if($tipo=='A'){
 	$tit = '';
-	$mSQL=$mSQL1.' UNION ALL '.$mSQL2;
+	$mSQL = $mSQL1.' UNION ALL '.$mSQL2;
 }
 
+//////////////////////////////////////////////////////////////
+$mSQL="
+SELECT fecha, sem,
+sum(llitros) llitros, round(sum(totleche)/sum(llitros),4) ltarifa, sum(totleche) totleche,
+sum(tlitros) tlitros, round(sum(totransp)/sum(tlitros),4) ttarifa, sum(totransp) tottransp,
+sum(totleche)+sum(totransp) total
+FROM (
+	SELECT
+		a.fecha, DATE_FORMAT(a.fecha,'%w') AS sem,
+		SUM(a.lista) AS tlitros,
+		b.tarifa,
+		SUM(ROUND(a.lista*b.tarifa,2)) AS totransp,
+		0 AS llitros,
+		0 totleche
+	FROM lrece AS a
+		JOIN lruta AS b ON a.ruta=b.codigo
+		JOIN sprv  AS c ON b.codprv=c.proveed
+	WHERE a.pago=${dbid}
+	GROUP BY a.fecha
+UNION ALL
+	SELECT
+		b.fecha, DATE_FORMAT(b.fecha,'%w') AS sem,
+		0 AS litros,
+		0 AS tarifa,
+		0 totrasp,
+		SUM(a.lista) llitros,
+		SUM(ROUND(a.lista*if(c.tipolec='F', if(c.animal='V', e.tarifa1, e.tarifa3), if(c.animal='V', e.tarifa2, e.tarifa4) ),2)) AS totleche
+	FROM itlrece  AS a
+		JOIN lrece    AS b ON a.id_lrece=b.id
+		JOIN lvaca    AS c ON a.id_lvaca=c.id
+		JOIN sprv     AS d ON c.codprv=d.proveed
+		JOIN lprecio  AS e ON e.tarifa1=e.tarifa1
+	WHERE a.pago=${dbid} AND MID(b.ruta,1,1) <>'G' AND a.lista>0
+	GROUP BY b.fecha
+) fff
+GROUP BY fecha";
+///////////////////////////////////////////////////////////////////////
+
 $mSQL_2  = $this->db->query($mSQL);
+
+if ($mSQL_2->num_rows() == 0)
+{
+	echo "Consulta Vacia!!";
+}
 $detalle = $mSQL_2->result();
 
 $mSQL   = "SELECT a.* FROM lgasto AS a WHERE a.pago=${dbid}";
@@ -81,6 +121,8 @@ $mSQL_3 = $this->db->query($mSQL);
 $detalle2  = $mSQL_3->result();
 
 $ngasto =$mSQL_3->num_rows();
+
+
 if($ngasto>0){
 	$det3encab = 5; //Tamanio del encadezado de la segunda tabla
 	$nlgasto=$ngasto+$det3encab;
@@ -90,14 +132,16 @@ if($ngasto>0){
 }
 
 $semana=array('DOMINGO','LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO');
-$ittot = array('totmon'=>0,'litros'=>0);
+
+$ittot = array('lmonto'=>0,'llitros'=>0,'tlitros'=>0,'tmonto'=>0, 'total'=>0 );
+
 ?><html>
 <head>
 <title>Pago a proveedor <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
 </head>
 <body style="margin-left: 30px; margin-right: 30px;">
-
+<!--@size_paper 215.9x139.7-->
 <script type="text/php">
 	if (isset($pdf)) {
 		$texto = array();
@@ -113,9 +157,8 @@ $ittot = array('totmon'=>0,'litros'=>0);
 		//**************VARIABLES MODIFICABLES***************
 
 		$texto[]="ELABORADO POR:";
-		$texto[]="AUDITORIA:";
-		$texto[]="AUTORIZADO POR:";
 		$texto[]="APROBADO:";
+		$texto[]="RECIBIDO POR:";
 
 		$cuadros = 0;   //Cantidad de cuadros (en caso de ser 0 calcula la cantidad)
 		$margenh = 40;  //Distancia desde el borde derecho e izquierdo
@@ -148,36 +191,59 @@ $ittot = array('totmon'=>0,'litros'=>0);
 		$width = Font_Metrics::get_text_width('PP 1 de 2', $font, $size);
 		$pdf->page_text($w / 2 - $width / 2, $y, $text, $font, $size, $color);
 	}
-</script>
 
+
+	/*if (isset($pdf)) {
+		$texto = array();
+		$font  = Font_Metrics::get_font("verdana");
+		$size  = 6;
+		$color = array(0,0,0);
+		$text_height = Font_Metrics::get_font_height($font, $size);
+		$w     = $pdf->get_width();
+		$h     = $pdf->get_height();
+		$y     = $h - $text_height - 24;
+
+		$text = "PP {PAGE_NUM} de {PAGE_COUNT}";
+
+		// Center the text
+		$width = Font_Metrics::get_text_width('PP 1 de 2', $font, $size);
+		$pdf->page_text($w / 2 - $width / 2, $y, $text, $font, $size, $color);
+	}*/
+</script>
+<table width='100%'>
+<tr><td>
 <?php
 //************************
 //     Encabezado
 //************************
 $encabezado = <<<encabezado
-						<table style="width: 100%;" class="header">
-							<tr>
-								<td><h1 style="text-align: left">RECIBO DE PAGO ${tit} No. ${numero}</h1></td>
-								<td><h1 style="text-align: right">Fecha: ${fecha}</h1></td>
-							</tr><tr>
-								<td colspan='2'><h1 style="text-align: center">Por Bs.: ***${monto}***</h1></td>
-							</tr>
-						</table>
-						<table align='center' style="font-size: 8pt;">
-							<tr>
-								<td><b>Hemos cancelado a:</b></td>
-								<td>(${proveed}) ${nombre}</td>
-							</tr>
-							<tr>
-								<td><b>Con RIF:</b></td>
-								<td>${rifci}</td>
-							</tr>
-							<tr>
-								<td><b>La cantidad de:</b></td>
-								<td>${montole} Bs.</td>
-							</tr>
-						</table>
+	<table style="width:100%;" border='1'>
+		<tr><td>
+			<table style="width:100%;border: 1px solid black;" class="header">
+				<tr>
+					<td><span style="text-align: left">RECIBO DE PAGO Nro. <b>${numero}</b></span></td>
+					<td><span style="text-align: right">Fecha: <b>${fecha}</b></span></td>
+					<td style="text-align: center">Por Bs.: <b>*${monto}*</b></td>
+				</tr>
+			</table>
+		</td></tr>
+		<tr><td>
+			<table style="font-size:12pt;">
+				<tr>
+					<td>Pagado a:</td>
+					<td><b>${nombre} </b> </td>
+					<td>RIF o CI: <b>${rifci}</b> (${proveed})</td>
+				</tr>
+			</table>
+		</td></tr>
+	</table>
 encabezado;
+
+
+//								<td><b>La cantidad de:</b></td>
+//								<td>${montole} Bs.</td>
+
+
 // Fin  Encabezado
 
 //************************
@@ -185,35 +251,42 @@ encabezado;
 //************************
 $estilo  = "style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;";
 $encabezado_tabla="
-	<h2>Detalle</h2>
-	<table class=\"change_order_items\" style=\"padding-top:0; \">
-		<thead>
-			<tr>
-				<th ${estilo}' >D&iacute;a  </th>
-				<th ${estilo}' >Fecha       </th>
-				<th ${estilo}' >Total Litros</th>
-				<th ${estilo}' >Bs.Litro    </th>
-				<th ${estilo}' >Total       </th>
-			</tr>
-		</thead>
-		<tbody>
+			<table class=\"change_order_items\" style=\"padding-top:0; \">
+				<thead>
+					<tr>
+						<th ${estilo}' >D&iacute;a   </th>
+						<th ${estilo}' >Leche</th>
+						<!-- th ${estilo}' >Precio       </th -->
+						<th ${estilo}' >Monto Leche  </th>
+						<th ${estilo}' >Trans.   </th>
+						<!-- th ${estilo}' >Tarifa       </th -->
+						<!-- th ${estilo}' >Monto Trans  </th -->
+						<th ${estilo}' >Total Pagar  </th>
+					</tr>
+				</thead>
+				<tbody>
 ";
+
 //Fin Encabezado Tabla
 
 //************************
 //     Pie Pagina
 //************************
 $pie_final=<<<piefinal
-		</tbody>
-		<tfoot style='border:1px solid;background:#EEEEEE;'>
-			<tr>
-				<td colspan='2' >Totales...</td>
-				<td style="text-align: right">%s</td>
-				<td style="text-align: right"></td>
-				<td style="text-align: right">%s</td>
-			</tr>
-		</tfoot>
-	</table>
+				</tbody>
+				<tfoot style='border:1px solid;background:#EEEEEE;'>
+					<tr>
+						<td>Totales...</td>
+						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
+						<!-- td style="text-align:right;font-size:10pt;font-weight:bold;"></td -->
+						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
+						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
+						<!-- td style="text-align:right;font-size:10pt;font-weight:bold;"></td -->
+						<!-- td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td -->
+						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
+					</tr>
+				</tfoot>
+			</table>
 
 piefinal;
 
@@ -233,47 +306,44 @@ $mod     = $clinea = false;
 $npagina = true;
 $i       = 0;
 
-foreach ($detalle AS $items){ $i++;
-	do {
-		if($npagina){
-			$this->incluir('X_CINTILLO');
-			echo $encabezado;
-			echo $encabezado_tabla;
-			$npagina=false;
-		}
-?>
-			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
+$this->incluir('X_CINTILLO');
+echo "</td></tr>\n";
+echo "<tr><td>\n";
+echo $encabezado;
+echo "\n</td></tr>\n";
+echo "<tr><td>\n";
+echo "	<table width='100%'>\n";
+echo "		<tr><td>\n";
+echo $encabezado_tabla;
+$npagina=false;
 
-				<td style="text-align: center"><?php echo $semana[$items->sem]; ?></td>
-				<td style="text-align: center"><?php echo dbdate_to_human($items->fecha);  ?></td>
-				<td style="text-align: right" ><?php $ittot['litros'] += $items->litros; echo nformat($items->litros ,2); ?></td>
-				<td style="text-align: right" ><?php echo nformat($items->totmon/$items->litros ,2); ?></td>
-				<td style="text-align: right" ><?php $ittot['totmon'] += $items->totmon; echo nformat($items->totmon ,2); ?></td>
-				<?php
-				$lineas++;
-				if($lineas >= $maxlin){
-					$lineas =0;
-					$npagina=true;
-					echo $pie_continuo;
-					break;
-				}
-				?>
-			</tr>
+foreach ( $detalle AS $items ){
+?>
+					<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
+						<td style="text-align:left;font-size: 0.7em"><?php echo dbdate_to_human($items->fecha).' '.$semana[$items->sem]; ?></td>
+						<td style="text-align:right" ><?php $ittot['llitros'] += $items->llitros; echo nformat($items->llitros ,0); ?></td>
+						<!-- td style="text-align: right" ><?php echo nformat($items->ltarifa,4); ?></td -->
+						<td style="text-align:right" ><?php $ittot['lmonto'] += $items->totleche; echo nformat($items->totleche ,2); ?></td>
+						<td style="text-align:right" ><?php $ittot['tlitros'] += $items->tlitros; echo nformat($items->tlitros ,0); ?></td>
+						<!-- td style="text-align:right" ><?php echo nformat($items->ttarifa,4); ?></td -->
+						<!-- td style="text-align:right" ><?php $ittot['tmonto'] += $items->tottransp; echo nformat($items->tottransp ,2); ?></td -->
+						<td style="text-align:right" ><?php $ittot['total'] += $items->total; echo nformat($items->total ,2); ?></td>
+					</tr>
 <?php
 		$mod = ! $mod;
-	} while ($clinea);
 }
 
-for(1; $lineas<$maxlin-$nlgasto;$lineas++){ ?>
-			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-				<td>&nbsp;</td><td>&nbsp;</td>
-				<td>&nbsp;</td><td>&nbsp;</td>
-				<td>&nbsp;</td>
-			</tr>
-<?php
-	$mod = ! $mod;
+echo sprintf($pie_final,nformat($ittot['llitros'],0),nformat($ittot['lmonto']),nformat($ittot['tlitros'],0),nformat($ittot['tmonto']), nformat($ittot['total']));
+
+if(!empty($numche)){
+	echo 'CHEQUE Nro. '.$numche;
 }
-echo sprintf($pie_final,nformat($ittot['litros']),nformat($ittot['totmon']));
+
+
+echo "		</td>\n";
+echo "		<td>\n";
+
+
 
 $lineas+=$det3encab;
 //******************************
@@ -281,45 +351,46 @@ $lineas+=$det3encab;
 //******************************
 $ittot = array('tlgasto'=>0);
 if($ngasto>0){
-//************************
-//   Encabezado Tabla
-//************************
+//**********************************
+// Encabezado Tabla Deducciones
+//**********************************
 $encabezado_tabla="
-	<h2>Deducciones:</h2>
-	<table class=\"change_order_items\" style=\"padding-top:0; \">
+	<table class='change_order_items' style='padding-top:0;'>
 		<thead>
+			<tr><td colspan='4'>DEDUCCIONES Y/O ADICCONES</td>
+			</tr>
 			<tr>
 				<th ${estilo}' >Descripci&oacute;n</th>
-				<th ${estilo}' >Fecha</th>
-				<th ${estilo}' >Referencia </th>
-				<th ${estilo}' >Cantidad</th>
+				<!-- th ${estilo}' >Fecha</th -->
+				<th ${estilo}' >Cant.</th>
 				<th ${estilo}' >Precio</th>
 				<th ${estilo}' >Total</th>
 			</tr>
 		</thead>
 		<tbody>
 ";
+
 //Fin Encabezado Tabla
 
 //************************
-//     Pie Pagina
+// Pie Pagina Deducciones
 //************************
 $pie_final='
 		</tbody>
 		<tfoot style=\'border:1px solid;background:#EEEEEE;\'>
 			<tr>
-				<td colspan="5" style="text-align: right;">Total...</td>
-				<td style="text-align: right">%s</td>
+				<td colspan="3" style="text-align: right;">Total...</td>
+				<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
 			</tr>
 		</tfoot>
-</table>
+	</table>
 ';
 
 $pie_continuo=<<<piecontinuo
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="6" style="text-align: right;">CONTINUA...</td>
+				<td colspan="4" style="text-align: right;">CONTINUA...</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -336,48 +407,38 @@ foreach ($detalle2 AS $items2){ $i++;
 			echo $encabezado_tabla;
 			$npagina=false;
 		}
-?>
-			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 
-				<td style="text-align: left"  ><?php echo $items2->descrip;               ?></td>
-				<td style="text-align: center"><?php echo dbdate_to_human($items2->fecha);?></td>
-				<td style="text-align: left"  ><?php echo $items2->referen;               ?></td>
-				<td style="text-align: right" ><?php echo nformat($items2->cantidad,2);   ?></td>
-				<td style="text-align: right" ><?php echo nformat($items2->precio  ,2);   ?></td>
-				<td style="text-align: right" ><?php $ittot['tlgasto']+=$items2->total ; echo nformat($items2->total   ,2);   ?></td>
-				<?php
-				$lineas++;
-				if($lineas > $maxlin){
-					$lineas =0;
-					$npagina=true;
-					break;
-				}
-				?>
-			</tr>
+if($items2->tipo=='D'){
+	$items2->precio =(-1)*$items2->precio;
+	$items2->total  =(-1)*$items2->total;
+}
+?>
+					<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
+						<td style="text-align: left;font-size: 0.7em"  ><?php echo $items2->descrip;               ?></td>
+						<!-- td style="text-align: center"><?php echo dbdate_to_human($items2->fecha);?></td -->
+						<td style="text-align: right" ><?php echo nformat($items2->cantidad,2);   ?></td>
+						<td style="text-align: right" ><?php echo nformat($items2->precio  ,2);   ?></td>
+						<td style="text-align: right" ><?php $ittot['tlgasto']+=$items2->total ; echo nformat($items2->total   ,2);   ?></td>
+					</tr>
 <?php
-		if($npagina){
-			echo $pie_continuo;
-		}else{
+
+		//if($npagina){
+		//	echo $pie_continuo;
+		//}else{
 			$mod = ! $mod;
-		}
+		//}
 	} while ($clinea);
 }
 
-for(1;$lineas<$maxlin;$lineas++){ ?>
-			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-			</tr>
-<?php
-	$mod = ! $mod;
-}
 echo sprintf($pie_final,nformat($ittot['tlgasto']));
 }
-?>
+
+echo "\n		</td></tr>\n";
+echo "	</table>\n";
+echo "\n</td></tr>\n";
+echo "<tr><td>\n";
+
+/*
 <table  style="width: 100%%; height : 50px;">
 	<tr>
 		<td style="font-size: 8pt; text-align:center;" valign="bottom"><b>Recibido por:</b></td>
@@ -385,5 +446,10 @@ echo sprintf($pie_final,nformat($ittot['tlgasto']));
 		<td style="font-size: 8pt; text-align:center;" valign="bottom"><b>Fecha: ____/____/______</b></td>
 	</tr>
 </table>'
+*/
+?>
+
+</td></tr>
+</table>
 </body>
 </html>
