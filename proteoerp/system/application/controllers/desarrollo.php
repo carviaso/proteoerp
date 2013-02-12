@@ -1437,6 +1437,9 @@ class Desarrollo extends Controller{
 		$str .= $tab3.'$this->db->simple_query(\'ALTER TABLE '.$db.' ADD UNIQUE INDEX numero (numero)\');'."\n";
 		$str .= $tab3.'$this->db->simple_query(\'ALTER TABLE '.$db.' ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)\');'."\n";
 		$str .= $tab2.'};*/'."\n";
+
+		$str .= $tab2.'$this->datasis->creaintramenu(array(\'modulo\'=>\'000\',\'titulo\'=>\'Pagos de Producción\',\'mensaje\'=>\'Pagos de Producción\',\'panel\'=>\'LECHE\',\'ejecutar\'=>\'leche/lpago\',\'target\'=>\'popu\',\'visible\'=>\'S\',\'pertenece\'=>\'2\',\'ancho\'=>900,\'alto\'=>600));';
+
 		$str .= $tab2.'$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );'."\n";
 		$str .= $tab2.'redirect($this->url.\'jqdatag\');'."\n";
 		$str .= $tab1.'}'."\n\n";

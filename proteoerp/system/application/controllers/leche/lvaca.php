@@ -166,6 +166,7 @@ class Lvaca extends Controller {
 					$( this ).dialog( "close" );
 					$("#fedita").html("");
 				}
+
 			},
 			close: function() {
 				allFields.val( "" ).removeClass( "ui-state-error" );
