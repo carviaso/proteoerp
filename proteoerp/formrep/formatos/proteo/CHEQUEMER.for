@@ -1,7 +1,7 @@
 <?php
 $nombre = strtoupper($nombre);
 $dia    = date('d'    ,$mkt);
-$mes    = date('j'    ,$mkt);
+$mes    = date('n'    ,$mkt)-1;
 $anio   = date('Y'    ,$mkt);
 $nmes   = $meses[$mes];
 $tmonto = '#'.htmlnformat($monto);

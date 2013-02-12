@@ -1,7 +1,7 @@
 <?php
 $nombre = strtoupper($nombre);
 $dia    = date('d'    ,$mkt);
-$mes    = date('j'    ,$mkt);
+$mes    = date('n'    ,$mkt)-1;
 $anio   = date('Y'    ,$mkt);
 $nmes   = $meses[$mes];
 $tmonto = '#'.htmlnformat($monto);
@@ -31,7 +31,7 @@ div.absolute {
 <div class="absolute" style="top: -30px; right: 0px; font-weight:bold; font-size: 12pt"><?php echo $tmonto; ?></div>
 
 <div class="absolute" style="top: 20px; left: 65px; right: -10px;"><?php echo $nombre; ?></div>
-<div class="absolute" style="top: 50px; left: 20px; right: -10px; text-align:left;text-indent: 50px;font-size: 0.8em;line-height: 1.8em"><?php echo $smonto; ?></div>
+<div class="absolute" style="top: 42px; left: 20px; right: -10px; text-align:left;text-indent: 50px;font-size: 0.8em;line-height: 1.8em"><?php echo $smonto; ?></div>
 
 <div class="absolute" style="top: 85px; left: 10px; right: 350px text-align: right;"><?php echo $ffecha; ?></div>
 <div class="absolute" style="top: 85px; left: 275px;"><?php echo $anio; ?></div>

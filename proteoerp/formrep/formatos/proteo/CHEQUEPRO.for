@@ -1,7 +1,7 @@
 <?php
 $nombre = strtoupper($nombre);
 $dia    = date('d'    ,$mkt);
-$mes    = date('j'    ,$mkt);
+$mes    = date('n'    ,$mkt)-1;
 $anio   = date('Y'    ,$mkt);
 $nmes   = $meses[$mes];
 $tmonto = '#'.htmlnformat($monto);
@@ -34,7 +34,7 @@ div.absolute {
 <div class="absolute" style="top: 74px; left: 10px; right: -10px; text-align:left;text-indent: 50px;font-size: 0.8em;line-height: 1.8em"><?php echo $smonto; ?></div>
 
 <div class="absolute" style="top: 120px; left: 10px; right: 350px text-align: right;"><?php echo $ffecha; ?></div>
-<div class="absolute" style="top: 120px; left: 255px;"><?php echo $anio; ?></div>
+<div class="absolute" style="top: 120px; left: 250px;"><?php echo $anio; ?></div>
 
 <?php if($endosable){ ?>
 <div class="absolute" style="top: 180px; right:30px;font-size: 1.3em;">NO ENDOSABLE</div>
