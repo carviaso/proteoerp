@@ -24,6 +24,11 @@ echo script('codemirror/javascript.js');
 echo script('codemirror/css.js');
 echo script('codemirror/clike.js');
 echo script('codemirror/php.js');
+echo script('codemirror/search.js');
+echo script('codemirror/searchcursor.js');
+echo script('codemirror/dialog.js');
+
+echo style('codemirror/dialog.css');
 echo style('codemirror/docs.css');
 ?>
 <style type="text/css">

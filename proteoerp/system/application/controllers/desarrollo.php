@@ -184,8 +184,12 @@ class Desarrollo extends Controller{
 
 		$crud.="\t\t".'$script= \'<script type="text/javascript" > '."\n";
 		$crud.="\t\t".'$(function() {'."\n";
+
 		$crud.="\t\t\t".'$(".inputnum").numeric(".");'."\n";
 		$crud.="\t\t\t".'$(".inputonlynum").numeric();'."\n";
+
+		$crud.="\t\t\t".'$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });'."\n";
+
 		$crud.="\t\t".'});'."\n";
 		$crud.="\t\t".'</script>\';'."\n\n";
 
@@ -1561,8 +1565,11 @@ class Desarrollo extends Controller{
 
 	function mtab($n = 1){ return str_repeat("\t",$n); }
 
+
+	// Gener Crud 
 	function genecrudjq($tabla=null,$s=true){
-		if (empty($tabla) OR (!$this->db->table_exists($tabla))) show_error('Tabla no existe o faltan parametros');
+		if (empty($tabla) OR (!$this->db->table_exists($tabla))) 
+			show_error('Tabla no existe o faltan parametros');
 
 		$crud ="\n\t".'function dataedit(){'."\n";
 		$crud.="\t\t".'$this->rapyd->load(\'dataedit\');'."\n\n";
@@ -1577,6 +1584,16 @@ class Desarrollo extends Controller{
 		$crud.="\t\t".'$edit->pre_process(\'update\',\'_pre_update\');'."\n";
 		$crud.="\t\t".'$edit->pre_process(\'delete\',\'_pre_delete\');'."\n";
 
+		$crud.="\n";
+
+		$crud.="\t\t".'$script= \' '."\n";
+		$crud.="\t\t".'$(function() {'."\n";
+		$crud.="\t\t\t".'$("#fecha").datepicker({dateFormat:"dd/mm/yy"});'."\n";
+		$crud.="\t\t".'});';
+		$crud.="\t\t".'\';'."\n";
+
+		$crud.="\t\t".'$edit->script($script,\'create\');'."\n";
+		$crud.="\t\t".'$edit->script($script,\'modify\');'."\n";
 		$crud.="\n";
 
 		//$fields = $this->db->field_data($tabla);
@@ -1601,7 +1618,7 @@ class Desarrollo extends Controller{
 				}
 
 				if(strrpos($field->Type,'date')!==false){
-					$input='date';
+					$input='Dateonly';
 				}elseif(strrpos($field->Type,'text')!==false){
 					$input= 'textarea';
 				}else{
@@ -1611,15 +1628,18 @@ class Desarrollo extends Controller{
 				$crud.="\t\t".'$edit->'.$field->Field.' = new '.$input."Field('".ucfirst($field->Field)."','$field->Field');\n";
 
 				if(preg_match("/decimal/i",$field->Type)){
-					$crud.="\t\t".'$edit->'.$field->Field."->rule='max_length[".$def[0]."]|numeric';\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='numeric';\n";
 					$crud.="\t\t".'$edit->'.$field->Field."->css_class='inputnum';\n";
+
 				}elseif(preg_match("/integer|int/i",$field->Type)){
-					$crud.="\t\t".'$edit->'.$field->Field."->rule='max_length[".$def[0]."]|integer';\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='integer';\n";
 					$crud.="\t\t".'$edit->'.$field->Field."->css_class='inputonlynum';\n";
+
 				}elseif(preg_match("/date/i",$field->Type)){
 					$crud.="\t\t".'$edit->'.$field->Field."->rule='chfecha';\n";
+
 				}else{
-					$crud.="\t\t".'$edit->'.$field->Field."->rule='max_length[".$def[0]."]';\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='';\n";
 				}
 
 				if(strrpos($field->Type,'text')===false){
@@ -1636,12 +1656,6 @@ class Desarrollo extends Controller{
 		//$crud.="\t\t".'$edit->buttons(\'modify\', \'save\', \'undo\', \'delete\', \'back\');'."\n";
 		$crud.="\t\t".'$edit->build();'."\n\n";
 
-		$crud.="\t\t".'$script= \'<script type="text/javascript" > '."\n";
-		$crud.="\t\t".'$(function() {'."\n";
-		$crud.="\t\t\t".'$(".inputnum").numeric(".");'."\n";
-		$crud.="\t\t\t".'$(".inputonlynum").numeric();'."\n";
-		$crud.="\t\t".'});'."\n";
-		$crud.="\t\t".'</script>\';'."\n\n";
 
 		$crud.="\t\t".'if($edit->on_success()){'."\n";
 		$crud.="\t\t".'	$rt=array('."\n";
