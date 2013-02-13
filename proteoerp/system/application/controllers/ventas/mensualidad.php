@@ -15,13 +15,21 @@ class mensualidad extends sfac {
 
 	//Para facturar servicios por mes
 	function servxmes($status){
-		 $this->load->library('validation');
+		$this->load->library('validation');
 		$this->genesal=false;
 		$this->back_url=$this->url.'filteredgrid';
 
 		$cliente = $this->input->post('cod_cli');
 		$nombre  = $this->input->post('fnombre');
 		$cana    = $this->input->post('cana_0');
+		$sfpatipo= trim($this->input->post('tipo_0'));
+		$utribu  = $this->input->post('utribu');
+		unset($_POST['utribu']);
+
+		if($sfpatipo=='-' || empty($sfpatipo)){
+			echo 'Debe seleccionar una forma de pago';
+			return;
+		}
 
 		//Averigua si es residencial o no para cobrar iva
 		$tipotari= trim($this->datasis->dameval('SELECT b.tipo FROM scli AS a JOIN tarifa AS b ON a.tarifa=b.id WHERE cliente='.$this->db->escape($cliente)));
@@ -64,6 +72,9 @@ class mensualidad extends sfac {
 		}
 
 		if ($status=='insert'){
+			$meses=array('Enero','Febrero','Marzo','Abril','Mayo','Junio', 'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre');
+
+			$date   = DateTime::createFromFormat('Ymd', $sclir['upago'].'01');
 
 			$desde = dbdate_to_human($sclir['upago'].'01','m/Y');
 
@@ -82,29 +93,50 @@ class mensualidad extends sfac {
 			$_POST['rifci']       = $sclir['rifci'];
 			$_POST['direc']       = $sclir['dire11'];
 			$_POST['upago']       = $sclir['upago'];
-			$_POST['codigoa_0']   = $codigo;
 
-			$_POST['desca_0']     = $sinvr['descrip'];
+			$monto  = 0;
+			$costos = $this->_utributa($sclir['upago'],$cana);
+			foreach($costos as $id=>$val){
+				$preca = round($val[0]*$utribu,2);
+				$tota  = $preca*$val[1];
 
-			$_POST['detalle_0']   = "Desde $desde";
+				$date->add(new DateInterval('P1M'));
+				$ind = 'codigoa_'.$id;  $_POST[$ind] = $codigo;
+				$ind = 'desca_'.$id;    $_POST[$ind] = $sinvr['descrip'];
+				$ind = 'cana_'.$id;     $_POST[$ind] = $val[1];
+				$ind = 'preca_'.$id;    $_POST[$ind] = $preca;
+				$ind = 'tota_'.$id;     $_POST[$ind] = $tota;
+				$ind = 'precio1_'.$id;  $_POST[$ind] = 0;
+				$ind = 'precio2_'.$id;  $_POST[$ind] = 0;
+				$ind = 'precio3_'.$id;  $_POST[$ind] = 0;
+				$ind = 'precio4_'.$id;  $_POST[$ind] = 0;
+				$ind = 'itiva_'.$id;    $_POST[$ind] = round($sinvr['iva'],2);
+				$ind = 'sinvpeso_'.$id; $_POST[$ind] = 0;
+				$ind = 'sinvtipo_'.$id; $_POST[$ind] = 'Servicio';
 
-			//$_POST['cana_0']      = $cana;
-			//$_POST['preca_0']     = $tarifa;
+				$ind = 'detalle_'.$id;
+				if($val[1]>1){
+					$_POST[$ind] = 'Desde '.$meses[$date->format('n')-1].' de '.$date->format('Y');
+					$mm=$val[1]-1;
+					$date->add(new DateInterval('P'.$mm.'M'));
+					$_POST[$ind] .= ' hasta '.$meses[$date->format('n')-1].' de '.$date->format('Y');
+				}else{
+					$_POST[$ind] = 'Mes '.$meses[$date->format('n')-1].' de '.$date->format('Y');
+				}
 
-			$_POST['tota_0']      = $tarifa*$cana;
-			$_POST['precio1_0']   = 0;
-			$_POST['precio2_0']   = 0;
-			$_POST['precio3_0']   = 0;
-			$_POST['precio4_0']   = 0;
-			$_POST['itiva_0']     = round($sinvr['iva'],2);
-			$_POST['sinvpeso_0']  = 0;
-			$_POST['sinvtipo_0']  = 'Servicio';
+				$monto += $tota;
+			}
 
 			//$_POST['tipo_0']     = $this->input->post('fcodigo');
 			$_POST['sfpafecha_0']  = '';
 			//$_POST['num_ref_0']  = $this->input->post('fcomprob');
 			$_POST['banco_0']      = '';
-			$_POST['monto_0']      = $_POST['tota_0']*(1+($sinvr['iva']/100)) ;
+			$_POST['monto_0']      = $monto*(1+($sinvr['iva']/100)) ;
+
+			if($monto<=0){
+				echo 'Monto incorrecto.';
+				return;
+			}
 
 			ob_start();
 				parent::dataedit();
@@ -119,6 +151,79 @@ class mensualidad extends sfac {
 			}
 
 		}
+	}
+
+	function tarifa(){
+		$cliente   = $this->input->post('cliente');
+		$cana      = $this->input->post('cana');
+
+		$dbcliente = $this->db->escape($cliente);
+		$upago     = $this->datasis->dameval('SELECT upago FROM scli WHERE cliente='.$dbcliente);
+
+		$cobros = $this->_utributa($upago,$cana);
+
+		$mSQL="SELECT
+			IF(a.tarimonto>0,ROUND(a.tarimonto,2), ROUND(b.minimo,2)) precio1
+			FROM scli AS a
+			JOIN tarifa AS b ON a.tarifa=b.id
+			WHERE cliente=${dbcliente}";
+		$tarifa = $this->datasis->dameval($mSQL);
+
+		$monto = $cana = 0;
+		foreach($cobros as $val){
+			$monto+= $val[0]*$val[1];
+			$cana += $val[1];
+		}
+		echo round($monto/$cana,2);
+	}
+
+	function _utributa($upago,$cana){
+		$upago  = $upago.'01';
+
+		$date   = DateTime::createFromFormat('Ymd', $upago);
+		$date->add(new DateInterval("P1M"));
+		$fdesde = $date->format('Ymd');
+
+		$date   = DateTime::createFromFormat('Ymd', $upago);
+		$date->add(new DateInterval("P${cana}M"));
+		$hasta  = $date->format('Ym');
+		$fhasta = $date->format('Ymd');
+
+		$dbfdesde = $this->db->escape($fdesde);
+		$dbfhasta = $this->db->escape($fhasta);
+
+		$arr_tari=array();
+		$tarifave=$this->datasis->dameval("SELECT valor FROM utributa WHERE fecha <= $dbfdesde ORDER BY fecha DESC LIMIT 1");
+
+		$arr_tari[substr($upago,0,6)]=$tarifave;
+
+		$mSQL = "SELECT valor,DATE_FORMAT(DATE_ADD(fecha,INTERVAL 1 MONTH),'%Y%m') AS fecha FROM utributa WHERE fecha BETWEEN $dbfdesde AND $dbfhasta";
+		$query = $this->db->query($mSQL);
+		foreach ($query->result() as $row){
+			$indfecha = str_replace('-','',$row->fecha);
+			$arr_tari[$indfecha] = $row->valor;
+		}
+
+		$cobros   = array();
+		$valor    = $tarifave;
+		$cana     =  $i = 0;
+		$date     = DateTime::createFromFormat('Ymd', $upago);
+		$indfecha = date('Ym', mktime(0, 0, 0, $date->format('n')+1, 1,$date->format('Y')));
+		while($indfecha <= $hasta){
+			if(isset($arr_tari[$indfecha]) && $cana > 0){
+				$cobros[]= array($valor,$cana);
+				$cana    = 0;
+				$valor   = $arr_tari[$indfecha];
+			}
+
+			$i++;
+			$cana++;
+			$indfecha = date('Ym', mktime(0, 0, 0, $date->format('n')+1+$i, 1,$date->format('Y')));
+		}
+		if($cana > 0){
+			$cobros[]= array($valor,$cana);
+		}
+		return $cobros;
 	}
 
 	function _pre_insert($do){
@@ -150,8 +255,8 @@ class mensualidad extends sfac {
 		$hasta   = date_format($objdate, 'm/Y');
 
 		$this->_fhasta = date_format($objdate, 'Ym');
-		$det     = "Desde $desde hasta $hasta";
-		$do->set_rel('sitems','detalle',$det,$i);
+		//$det     = "Desde $desde hasta $hasta";
+		//$do->set_rel('sitems','detalle',$det,$i);
 	}
 
 	function _post_insert($do){

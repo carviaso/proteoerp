@@ -382,7 +382,7 @@ class Sfac extends Controller {
 				autoOpen: false, height: 430, width: 540, modal: true,
 				buttons: {
 					"Guardar": function() {
-						$.post("'.site_url('ventas/mensualidad/servxmes/insert').'", { cod_cli: $("#fcliente").val(),cana_0: $("#fmespaga").val(),tipo_0: $("#fcodigo").val(),num_ref_0: $("#fcomprob").val(),preca_0: $("#ftarifa").val(),fnombre: $("#fnombre").val()},
+						$.post("'.site_url('ventas/mensualidad/servxmes/insert').'", { cod_cli: $("#fcliente").val(),cana_0: $("#fmespaga").val(),tipo_0: $("#fcodigo").val(),num_ref_0: $("#fcomprob").val(),preca_0: $("#ftarifa").val(),fnombre: $("#fnombre").val(),utribu: $("#utribu").val()},
 							function(data) {
 								if( data.substr(0,14) == "Venta Guardada"){
 									$("#fcobroser").dialog( "close" );
@@ -1935,8 +1935,20 @@ class Sfac extends Controller {
 			$("#vuelto").text(nformat(vuelto,2));
 		}
 
-		$("#fmespaga").keyup(totaliza);
+		var mespaga = function (){
+		$.post("'.site_url('ventas/mensualidad/tarifa').'",{cliente: $("#fcliente").val() , cana: $("#fmespaga").val()  }, function(data) {
+			var monto  = roundNumber(Number(data),2);
+			var cana   = $("#fmespaga").val();
+			var utribu = $("#utribu").val();
+			$("#ftarifa").val(roundNumber(monto*utribu,2));
+			totaliza();
+		});
+
+		}
+
+		$("#fmespaga").keyup(mespaga);
 		$("#pagado").keyup(totaliza);
+		$(".inputonlynum").numeric();
 
 		$("#fcliente").autocomplete({
 			source: function( req, add){
@@ -1955,7 +1967,8 @@ class Sfac extends Controller {
 								$("#ftelefono").val("");
 								$("#ftarifa").val("");
 								$("#fupago").val("");
-								$("#utribu").text("0,000");
+								$("#utribu").val("0");
+								$("#utribu_val").text("0,000");
 								$("#taritipo").val("");
 								apprise("Cliente inexistente");
 							}else{
@@ -1974,6 +1987,7 @@ class Sfac extends Controller {
 				select: function( event, ui ){
 					$("#fcliente").attr("readonly", "readonly");
 
+					$("#fcliente").val(ui.item.value);
 					$("#fnombre").val(ui.item.nombre);
 					$("#ftelefono").val(ui.item.telefono);
 					$("#ftarifa").val(ui.item.precio1);
@@ -1981,8 +1995,9 @@ class Sfac extends Controller {
 					$("#fdire11").val(ui.item.direc);
 					$("#fupago").val(ui.item.upago);
 					$("#taritipo").val(ui.item.taritipo);
-					$("#utribu").text(nformat(ui.item.utribu,3));
-					totaliza();
+					$("#utribu").val(ui.item.utribu);
+					$("#utribu_val").text(nformat(ui.item.utribu,3));
+					mespaga();
 					setTimeout(function() {  $("#fcliente").removeAttr("readonly"); }, 1500);
 				}
 			});
@@ -1995,18 +2010,18 @@ class Sfac extends Controller {
 		<table width="90%" align="center" border="0">
 		<tr>
 			<td class="CaptionTD" align="right">Cliente:</td>
-			<td>&nbsp;<input name="fcliente" id="fcliente" type="text" value="" maxlengh="12" size="12" />
+			<td>&nbsp;<input name="fcliente" id="fcliente" type="text" value="" maxlength="12" size="12" />
 			<a href="'.site_url('ventas/scli/dataeditexpresser/create').'" target="_blank" onClick="window.open(this.href, this.target, \'width=500,height=550,screenx=\'+((screen.availWidth/2)-250)+\',screeny=\'+((screen.availHeight/2)-200)); return false;">'.image('add1-.png').'</a>
 			</td>
-			<td class="CaptionTD" align="right">Telefono: </td>
-			<td>&nbsp;<input name="ftelefono" id="ftelefono" type="text" value="" maxlengh="12" size="12" /></td>
+			<td class="CaptionTD" align="right">Tel&eacute;fono: </td>
+			<td>&nbsp;<input name="ftelefono" id="ftelefono" type="text" value="" maxlength="12" size="12" /></td>
 		</tr>
 		<tr>
 			<td class="CaptionTD" align="right">Nombre: </td>
 			<td colspan="3">&nbsp;<input name="fnombre" id="fnombre" value="" size="50" ></td>
 		</tr>
 		<tr>
-			<td class="CaptionTD" align="right">Direccion: </td>
+			<td class="CaptionTD" align="right">Direcci&oacute;n: </td>
 			<td colspan="3">&nbsp;<input name="fdire11" id="fdire11" value="" size="50"></td>
 		</tr>
 		<tr>
@@ -2019,15 +2034,15 @@ class Sfac extends Controller {
 		<fieldset style="border: 2px outset #9AC8DA;background: #FFFDE9;">
 		<table width="90%" align="center" border="0">
 		<tr>
-			<td class="CaptionTD" align="right">Ultimo Pago: </td>
-			<td>&nbsp;<input name="fupago" id="fupago" type="text" value="201112" maxlengh="12" size="8" /></td>
+			<td class="CaptionTD" align="right">&Uacute;ltimo Pago: </td>
+			<td>&nbsp;<input name="fupago" id="fupago" type="text" value="201112" maxlength="6" size="9" class="inputonlynum" /></td>
 			<td  class="CaptionTD"  align="right">Unidades Trub.</td>
-			<td>&nbsp;<b id="utribu">0,000</b>
+			<td>&nbsp;<b id="utribu_val">0,000</b><input type="hidden" name="utribu"  id="utribu"  value="0" />
 				<input type="hidden" name="fcodtar"  id="fcodtar"  value="" />
 				<input type="hidden" name="taritipo" id="taritipo" value="" />
 			</td>
 			<td  class="CaptionTD"  align="right">Monto</td>
-			<td>&nbsp;<input name="ftarifa" id="ftarifa" type="text" value="" maxlengh="12" size="12"  /></td>
+			<td>&nbsp;<input name="ftarifa" id="ftarifa" type="text" value="" maxlength="12" size="12"  class="inputonlynum" /></td>
 		</tr>
 		</table>
 		</fieldset>
@@ -2037,7 +2052,7 @@ class Sfac extends Controller {
 		<table width="90%" align="center" border="0">
 		<tr>
 			<td class="CaptionTD" align="right">Nro de meses que paga: </td>
-			<td>&nbsp;<input name="fmespaga" id="fmespaga" type="text" value="12" maxlengh="12" size="8" /></td>
+			<td>&nbsp;<input name="fmespaga" id="fmespaga" type="text" value="12" maxlength="12" size="8"  class="inputonlynum" /></td>
 		</tr>
 		</table>
 		</fieldset>
@@ -2047,12 +2062,12 @@ class Sfac extends Controller {
 		<tr>
 			<td class="CaptionTD" align="right">Forma de Pago</td>
 			<td>&nbsp;'.$tarjeta.'</td>
-			<td  class="CaptionTD"  align="right">Numero</td>
-			<td>&nbsp;<input name="fcomprob" id="fcomprob" type="text" value="" maxlengh="12" size="12" /></td>
+			<td  class="CaptionTD"  align="right">N&uacute;mero</td>
+			<td>&nbsp;<input name="fcomprob" id="fcomprob" type="text" value="" maxlength="12" size="12" /></td>
 		</tr>
 		<tr>
 			<td align="right">Paga con:</td>
-			<td ><input name="pagado" id="pagado" type="text" value="" maxlengh="12" size="12" /></td>
+			<td ><input name="pagado" id="pagado" type="text" value="" maxlength="12" size="12"  class="inputonlynum" /></td>
 			<td colspan="2" align="center"><div style="font-size:12px;font-weight:bold">Vuelto: <span id="vuelto">0,00</span></div></td>
 		</tr>
 
