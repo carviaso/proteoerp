@@ -164,6 +164,7 @@ class Desarrollo extends Controller{
 					$crud.="\t\t".'$edit->'.$field->Field."->css_class='inputonlynum';\n";
 				}elseif(preg_match("/date/i",$field->Type)){
 					$crud.="\t\t".'$edit->'.$field->Field."->rule='chfecha';\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->calendar=false;\n";
 				}else{
 					$crud.="\t\t".'$edit->'.$field->Field."->rule='max_length[".$def[0]."]';\n";
 				}
@@ -450,13 +451,16 @@ class Desarrollo extends Controller{
 
 		$crud="\n";
 		$crud.="\t".'function _pre_insert($do){'."\n";
+		$crud.="\t\t".'$do->error_message_ar[\'pre_ins\']=\'\';'."\n";
 		$crud.="\t\t".'return true;'."\n";
 		$crud.="\t".'}'."\n\n";
 		$crud.="\t".'function _pre_update($do){'."\n";
+		$crud.="\t\t".'$do->error_message_ar[\'pre_upd\']=\'\';'."\n";
 		$crud.="\t\t".'return true;'."\n";
 		$crud.="\t".'}'."\n\n";
 		$crud.="\t".'function _pre_delete($do){'."\n";
-		$crud.="\t\t".'return true;'."\n";
+		$crud.="\t\t".'$do->error_message_ar[\'pre_del\']=\'\';'."\n";
+		$crud.="\t\t".'return false;'."\n";
 		$crud.="\t".'}'."\n";
 
 		if($s){
@@ -480,6 +484,8 @@ class Desarrollo extends Controller{
 		$crud.="\t\t\t".'$mSQL="'.str_replace("\n","\n\t\t\t",$row['Create Table']).'";'."\n";
 		$crud.="\t\t\t".'$this->db->simple_query($mSQL);'."\n";
 		$crud.="\t\t".'}'."\n";
+		$crud.="\t\t".'//$campos=$this->db->list_fields(\''.$tabla.'\');'."\n";
+		$crud.="\t\t".'//if(!in_array(\'<#campo#>\',$campos)){ }'."\n";
 		$crud.="\t".'}'."\n";
 
 		if($s){
@@ -666,7 +672,9 @@ class Desarrollo extends Controller{
 			$str .= $tab2.'$WestPanel = $grid->deploywestp();'."\n\n";
 
 			$str .= $tab2.'$adic = array('."\n";
-			$str .= $tab2.'array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")'."\n";
+			$str .= $tab3.'array(\'id\'=>\'fedita\',  \'title\'=>\'Agregar/Editar Registro\'),'."\n";
+			$str .= $tab3.'array(\'id\'=>\'fshow\' ,  \'title\'=>\'Mostrar Registro\'),'."\n";
+			$str .= $tab3.'array(\'id\'=>\'fborra\',  \'title\'=>\'Eliminar Registro\')'."\n";
 			$str .= $tab2.');'."\n";
 			$str .= $tab2.'$SouthPanel = $grid->SouthPanel($this->datasis->traevalor(\'TITULO1\'), $adic);'."\n\n";
 
@@ -699,7 +707,7 @@ class Desarrollo extends Controller{
 			$str .= $tab2.'&lt;script type="text/javascript"&gt;\';'."\n\n";
 
 			$str .= $tab2.'$bodyscript .= \''."\n";
-			$str .= $tab2.'function '.strtolower($db).'add() {'."\n";
+			$str .= $tab2.'function '.strtolower($db).'add(){'."\n";
 			$str .= $tab3.'$.post("\'.site_url($this->url'.'.\'dataedit/create\').\'",'."\n";
 			$str .= $tab3.'function(data){'."\n";
 			$str .= $tab4.'$("#fedita").html(data);'."\n";
@@ -708,21 +716,65 @@ class Desarrollo extends Controller{
 			$str .= $tab2.'};\';'."\n\n";
 
 			$str .= $tab2.'$bodyscript .= \''."\n";
-			$str .= $tab2.'function '.strtolower($db).'edit() {'."\n";
+			$str .= $tab2.'function '.strtolower($db).'edit(){'."\n";
 			$str .= $tab3.'var id     = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
-			$str .= $tab3.'if (id)	{'."\n";
+			$str .= $tab3.'if(id){'."\n";
 			$str .= $tab4.'var ret    = $("#newapi\'.$grid0.\'").getRowData(id);'."\n";
 			$str .= $tab4.'mId = id;'."\n";
 			$str .= $tab4.'$.post("\'.site_url($this->url'.'.\'dataedit/modify\').\'/"+id, function(data){'."\n";
 			$str .= $tab5.'$("#fedita").html(data);'."\n";
 			$str .= $tab5.'$("#fedita").dialog( "open" );'."\n";
 			$str .= $tab4.'});'."\n";
-			$str .= $tab3.'} else { $.prompt("&lt;h1&gt;Por favor Seleccione un Registro&lt;/h1&gt;");}'."\n";
+			$str .= $tab3.'} else {'."\n";
+			$str .= $tab4.'$.prompt("&lt;h1&gt;Por favor Seleccione un Registro&lt;/h1&gt;");'."\n";
+			$str .= $tab3.'}'."\n";
 			$str .= $tab2.'};\';'."\n\n";
+
+			$str .= $tab2.'$bodyscript .= \''."\n";
+			$str .= $tab2.'function '.strtolower($db).'show(){'."\n";
+			$str .= $tab3.'var id     = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
+			$str .= $tab3.'if(id){'."\n";
+			$str .= $tab4.'var ret    = $("#newapi\'.$grid0.\'").getRowData(id);'."\n";
+			$str .= $tab4.'mId = id;'."\n";
+			$str .= $tab4.'$.post("\'.site_url($this->url'.'.\'dataedit/show\').\'/"+id, function(data){'."\n";
+			$str .= $tab5.'$("#fshow").html(data);'."\n";
+			$str .= $tab5.'$("#fshow").dialog( "open" );'."\n";
+			$str .= $tab4.'});'."\n";
+			$str .= $tab3.'} else {'."\n";
+			$str .= $tab4.'$.prompt("&lt;h1&gt;Por favor Seleccione un Registro&lt;/h1&gt;");'."\n";
+			$str .= $tab3.'}'."\n";
+			$str .= $tab2.'};\';'."\n\n";
+
+			$str .= $tab2.'$bodyscript .= \''."\n";
+			$str .= $tab2.'function '.strtolower($db).'del() {'."\n";
+			$str .= $tab2.'var id = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
+			$str .= $tab2.'if(id){'."\n";
+			$str .= $tab2.'	if(confirm(" Seguro desea eliminar el registro?")){'."\n";
+			$str .= $tab2.'		var ret    = $("#newapi\'.$grid0.\'").getRowData(id);'."\n";
+			$str .= $tab2.'		mId = id;'."\n";
+			$str .= $tab2.'		$.post("\'.site_url($this->url.\'dataedit/do_delete\').\'/"+id, function(data){'."\n";
+			$str .= $tab5.'try{'."\n";
+			$str .= $tab5.'	var json = JSON.parse(data);'."\n";
+			$str .= $tab5.'	if (json.status == "A"){'."\n";
+			$str .= $tab5.'		apprise("Registro eliminado");'."\n";
+			$str .= $tab5.'	}else{'."\n";
+			$str .= $tab5.'		apprise("Registro no se puede eliminado");'."\n";
+			$str .= $tab5.'	}'."\n";
+			$str .= $tab5.'}catch(e){'."\n";
+			$str .= $tab5.'	$("#fborra").html(data);'."\n";
+			$str .= $tab5.'	$("#fborra").dialog( "open" );'."\n";
+			$str .= $tab5.'}'."\n";
+			$str .= $tab2.'		});'."\n";
+			$str .= $tab2.'	}'."\n";
+			$str .= $tab2.'}else{'."\n";
+			$str .= $tab2.'	$.prompt("<h1>Por favor Seleccione un Registro</h1>");'."\n";
+			$str .= $tab2.'}'."\n";
+			$str .= $tab2.'};\';'."\n";
+
 
 			$str .= $tab2.'//Wraper de javascript'."\n";
 			$str .= $tab2.'$bodyscript .= \''."\n";
-			$str .= $tab2.'$(function() {'."\n";
+			$str .= $tab2.'$(function(){'."\n";
 			$str .= $tab3.'$("#dialog:ui-dialog").dialog( "destroy" );'."\n";
 			$str .= $tab3.'var mId = 0;'."\n";
 			$str .= $tab3.'var montotal = 0;'."\n";
@@ -738,30 +790,30 @@ class Desarrollo extends Controller{
 			$str .= $tab2.'$("#fedita").dialog({'."\n";
 			$str .= $tab3.'autoOpen: false, height: 500, width: 700, modal: true,'."\n";
 			$str .= $tab3.'buttons: {'."\n";
-			$str .= $tab3.'"Guardar": function() {'."\n";
-			$str .= $tab4.'var bValid = true;'."\n";
-			$str .= $tab4.'var murl = $("#df1").attr("action");'."\n";
-			$str .= $tab4.'allFields.removeClass( "ui-state-error" );'."\n";
-			$str .= $tab4.'$.ajax({'."\n";
-			$str .= $tab5.'type: "POST", dataType: "html", async: false,'."\n";
-			$str .= $tab5.'url: murl,'."\n";
-			$str .= $tab5.'data: $("#df1").serialize(),'."\n";
-			$str .= $tab5.'success: function(r,s,x){'."\n";
+			$str .= $tab4.'"Guardar": function() {'."\n";
+			$str .= $tab5.'var bValid = true;'."\n";
+			$str .= $tab5.'var murl = $("#df1").attr("action");'."\n";
+			$str .= $tab5.'allFields.removeClass( "ui-state-error" );'."\n";
+			$str .= $tab5.'$.ajax({'."\n";
+			$str .= $tab6.'type: "POST", dataType: "html", async: false,'."\n";
+			$str .= $tab6.'url: murl,'."\n";
+			$str .= $tab6.'data: $("#df1").serialize(),'."\n";
+			$str .= $tab6.'success: function(r,s,x){'."\n";
 
-			$str .= $tab6.'try{'."\n";
-			$str .= $tab7.'var json = JSON.parse(r);'."\n";
-			$str .= $tab7.'if (json.status == "A"){'."\n";
-			$str .= $tab7.'	apprise("Registro Guardado");'."\n";
-			$str .= $tab7.'	$( "#fedita" ).dialog( "close" );'."\n";
-			$str .= $tab7.'	grid.trigger("reloadGrid");'."\n";
-			$str .= $tab7.'	\'.$this->datasis->jwinopen(site_url(\'formatos/ver/'.strtoupper($db).'\').\'/\\\'+res.id+\\\'/id\\\'\').\';'."\n";
-			$str .= $tab7.'	return true;'."\n";
-			$str .= $tab7.'} else {'."\n";
-			$str .= $tab7.'	apprise(json.mensaje);'."\n";
+			$str .= $tab7.'try{'."\n";
+			$str .= $tab8.'var json = JSON.parse(r);'."\n";
+			$str .= $tab8.'if (json.status == "A"){'."\n";
+			$str .= $tab8.'	apprise("Registro Guardado");'."\n";
+			$str .= $tab8.'	$( "#fedita" ).dialog( "close" );'."\n";
+			$str .= $tab8.'	grid.trigger("reloadGrid");'."\n";
+			$str .= $tab8.'	\'.$this->datasis->jwinopen(site_url(\'formatos/ver/'.strtoupper($db).'\').\'/\\\'+res.id+\\\'/id\\\'\').\';'."\n";
+			$str .= $tab8.'	return true;'."\n";
+			$str .= $tab8.'} else {'."\n";
+			$str .= $tab8.'	apprise(json.mensaje);'."\n";
+			$str .= $tab8.'}'."\n";
+			$str .= $tab7.'}catch(e){'."\n";
+			$str .= $tab7.'	$("#fedita").html(r);'."\n";
 			$str .= $tab7.'}'."\n";
-			$str .= $tab6.'}catch(e){'."\n";
-			$str .= $tab6.'	$("#fedita").html(r);'."\n";
-			$str .= $tab6.'}'."\n";
 
 			//$str .= $tab6.'if ( r.length == 0 ) {'."\n";
 			//$str .= $tab7.'apprise("Registro Guardado");'."\n";
@@ -773,15 +825,51 @@ class Desarrollo extends Controller{
 			//$str .= $tab7.'$("#fedita").html(r);'."\n";
 			//$str .= $tab6.'}'."\n";
 
-			$str .= $tab5.'}'."\n";
+			$str .= $tab6.'}'."\n";
 			//$str .= $tab4.'}'."\n";
-			$str .= $tab3.'})},'."\n";
-			$str .= $tab3.'"Cancelar": function() { $( this ).dialog( "close" ); }'."\n";
+			$str .= $tab5.'})'."\n";
+			$str .= $tab4.'},'."\n";
+			$str .= $tab4.'"Cancelar": function() {'."\n";
+			$str .= $tab5.'$("#fedita").html("");'."\n";
+			$str .= $tab5.'$( this ).dialog( "close" );'."\n";
+			$str .= $tab4.'}'."\n";
 			$str .= $tab3.'},'."\n";
-			$str .= $tab3.'close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}'."\n";
+			$str .= $tab3.'close: function() {'."\n";
+			$str .= $tab4.'$("#fedita").html("");'."\n";
+			$str .= $tab4.'allFields.val( "" ).removeClass( "ui-state-error" );'."\n";
+			$str .= $tab3.'}'."\n";
+			$str .= $tab2.'});\';'."\n\n";
 			//$str .= $tab2.'});'."\n";
 
-			$str .= $tab2.'});\';'."\n";
+			$str .= $tab2.'$bodyscript .= \''."\n";
+			$str .= $tab2.'$("#fshow").dialog({'."\n";
+			$str .= $tab3.'autoOpen: false, height: 500, width: 700, modal: true,'."\n";
+			$str .= $tab3.'buttons: {'."\n";
+			$str .= $tab4.'"Aceptar": function() {'."\n";
+			$str .= $tab5.'$("#fshow").html("");'."\n";
+			$str .= $tab5.'$( this ).dialog( "close" );'."\n";
+			$str .= $tab4.'},'."\n";
+			$str .= $tab3.'},'."\n";
+			$str .= $tab3.'close: function() {'."\n";
+			$str .= $tab4.'$("#fshow").html("");'."\n";
+			$str .= $tab3.'}'."\n";
+			$str .= $tab2.'});\''.";\n\n";
+
+			$str .= $tab2.'$bodyscript .= \''."\n";
+			$str .= $tab2.'$("#fborra").dialog({'."\n";
+			$str .= $tab3.'autoOpen: false, height: 300, width: 400, modal: true,'."\n";
+			$str .= $tab3.'buttons: {'."\n";
+			$str .= $tab4.'"Aceptar": function() {'."\n";
+			$str .= $tab5.'$("#fborra").html("");'."\n";
+			$str .= $tab5.'jQuery("#newapi\'.$grid0.\'").trigger("reloadGrid");'."\n";
+			$str .= $tab5.'$( this ).dialog( "close" );'."\n";
+			$str .= $tab4.'},'."\n";
+			$str .= $tab3.'},'."\n";
+			$str .= $tab3.'close: function() {'."\n";
+			$str .= $tab4.'jQuery("#newapi\'.$grid0.\'").trigger("reloadGrid");'."\n";
+			$str .= $tab4.'$("#fborra").html("");'."\n";
+			$str .= $tab3.'}'."\n";
+			$str .= $tab2.'});\''.";\n\n";
 
 			$str .= $tab2.'$bodyscript .= \'});\'."\n";'."\n\n";
 
@@ -891,7 +979,7 @@ class Desarrollo extends Controller{
 
 			$str .= $tab2.'$grid->setShrinkToFit(\'false\');'."\n\n";
 
-			$str .= $tab2.'$grid->setBarOptions("\t\taddfunc: '.strtolower($db).'add,\n\t\teditfunc: '.strtolower($db).'edit");'."\n\n";
+			$str .= $tab2.'$grid->setBarOptions("addfunc: '.strtolower($db).'add, editfunc: '.strtolower($db).'edit, delfunc: '.strtolower($db).'del, viewfunc: '.strtolower($db).'show");'."\n\n";
 
 			$str .= $tab2.'#Set url'."\n";
 			$str .= $tab2.'$grid->setUrlput(site_url($this->url.\'setdata/\'));'."\n\n";
@@ -909,8 +997,7 @@ class Desarrollo extends Controller{
 			$str .= $tab1.'/**'."\n";
 			$str .= $tab1.'* Busca la data en el Servidor por json'."\n";
 			$str .= $tab1.'*/'."\n";
-			$str .= $tab1.'function getdata()'."\n";
-			$str .= $tab1.'{'."\n";
+			$str .= $tab1.'function getdata(){'."\n";
 
 			//$str .= $tab2.'$filters = $this->input->get_post(\'filters\');'."\n";
 
@@ -928,8 +1015,7 @@ class Desarrollo extends Controller{
 			$str .= $tab1.'/**'."\n";
 			$str .= $tab1.'* Guarda la Informacion'."\n";
 			$str .= $tab1.'*/'."\n";
-			$str .= $tab1.'function setData()'."\n";
-			$str .= $tab1.'{'."\n";
+			$str .= $tab1.'function setData(){'."\n";
 			$str .= $tab2.'$this->load->library(\'jqdatagrid\');'."\n";
 			$str .= $tab2.'$oper   = $this->input->post(\'oper\');'."\n";
 			$str .= $tab2.'$id     = $this->input->post(\'id\');'."\n";
@@ -990,8 +1076,9 @@ class Desarrollo extends Controller{
 
 			$str .= $this->genecrudjq($db, false);
 
-			$str  .= $this->genepre($db, false);
+			$str  .= $this->genepre($db,  false);
 			$str  .= $this->genepost($db, false);
+			$str  .= $this->geneinstalar($db, false);
 
 			$str .= '}'."\n";
 
@@ -1075,8 +1162,11 @@ class Desarrollo extends Controller{
 			$str .= $tab2.'$centerpanel = $grid->centerpanel( $id = "radicional", $param[\'grids\'][0][\'gridname\'], $param[\'grids\'][1][\'gridname\'] );'."\n\n";
 
 			$str .= $tab2.'$adic = array('."\n";
-			$str .= $tab2.'array("id"=>"fedita" , "title"=>"Agregar/Editar Pedido"),'."\n";
-			$str .= $tab2.');'."\n\n";
+			$str .= $tab3.'array(\'id\'=>\'fedita\',  \'title\'=>\'Agregar/Editar Registro\'),'."\n";
+			$str .= $tab3.'array(\'id\'=>\'fshow\' ,  \'title\'=>\'Mostrar Registro\'),'."\n";
+			$str .= $tab3.'array(\'id\'=>\'fborra\',  \'title\'=>\'Eliminar Registro\')'."\n";
+			$str .= $tab2.');'."\n";
+
 			$str .= $tab2.'$SouthPanel = $grid->SouthPanel($this->datasis->traevalor(\'TITULO1\'), $adic);'."\n\n";
 
 			$str .= $tab2.'$param[\'WestPanel\']    = $WestPanel;'."\n";
@@ -1108,28 +1198,72 @@ class Desarrollo extends Controller{
 			$str .= $tab2.'$bodyscript = \'';
 			$str .= $tab2.'&lt;script type="text/javascript"&gt;\';'."\n\n";
 
+
 			$str .= $tab2.'$bodyscript .= \''."\n";
-			$str .= $tab2.'function '.strtolower($db).'add() {'."\n";
-			$str .= $tab3.'$.post("\'.site_url(\''.$contro.'/'.$db.'/dataedit/create\').\'",'."\n";
+			$str .= $tab2.'function '.strtolower($db).'add(){'."\n";
+			$str .= $tab3.'$.post("\'.site_url($this->url'.'.\'dataedit/create\').\'",'."\n";
 			$str .= $tab3.'function(data){'."\n";
 			$str .= $tab4.'$("#fedita").html(data);'."\n";
 			$str .= $tab4.'$("#fedita").dialog( "open" );'."\n";
 			$str .= $tab3.'})'."\n";
 			$str .= $tab2.'};\';'."\n\n";
 
-
 			$str .= $tab2.'$bodyscript .= \''."\n";
-			$str .= $tab2.'function '.strtolower($db).'edit() {'."\n";
+			$str .= $tab2.'function '.strtolower($db).'edit(){'."\n";
 			$str .= $tab3.'var id     = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
-			$str .= $tab3.'if (id)	{'."\n";
+			$str .= $tab3.'if(id){'."\n";
 			$str .= $tab4.'var ret    = $("#newapi\'.$grid0.\'").getRowData(id);'."\n";
 			$str .= $tab4.'mId = id;'."\n";
-			$str .= $tab4.'$.post("\'.site_url(\''.$contro.'/'.$db.'/dataedit/modify\').\'/"+id, function(data){'."\n";
+			$str .= $tab4.'$.post("\'.site_url($this->url'.'.\'dataedit/modify\').\'/"+id, function(data){'."\n";
 			$str .= $tab5.'$("#fedita").html(data);'."\n";
 			$str .= $tab5.'$("#fedita").dialog( "open" );'."\n";
 			$str .= $tab4.'});'."\n";
-			$str .= $tab3.'} else { $.prompt("&lt;h1&gt;Por favor Seleccione un Registro&lt;/h1&gt;");}'."\n";
+			$str .= $tab3.'} else {'."\n";
+			$str .= $tab4.'$.prompt("&lt;h1&gt;Por favor Seleccione un Registro&lt;/h1&gt;");'."\n";
+			$str .= $tab3.'}'."\n";
 			$str .= $tab2.'};\';'."\n\n";
+
+			$str .= $tab2.'$bodyscript .= \''."\n";
+			$str .= $tab2.'function '.strtolower($db).'show(){'."\n";
+			$str .= $tab3.'var id     = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
+			$str .= $tab3.'if(id){'."\n";
+			$str .= $tab4.'var ret    = $("#newapi\'.$grid0.\'").getRowData(id);'."\n";
+			$str .= $tab4.'mId = id;'."\n";
+			$str .= $tab4.'$.post("\'.site_url($this->url'.'.\'dataedit/show\').\'/"+id, function(data){'."\n";
+			$str .= $tab5.'$("#fshow").html(data);'."\n";
+			$str .= $tab5.'$("#fshow").dialog( "open" );'."\n";
+			$str .= $tab4.'});'."\n";
+			$str .= $tab3.'} else {'."\n";
+			$str .= $tab4.'$.prompt("&lt;h1&gt;Por favor Seleccione un Registro&lt;/h1&gt;");'."\n";
+			$str .= $tab3.'}'."\n";
+			$str .= $tab2.'};\';'."\n\n";
+
+			$str .= $tab2.'$bodyscript .= \''."\n";
+			$str .= $tab2.'function '.strtolower($db).'del() {'."\n";
+			$str .= $tab2.'var id = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
+			$str .= $tab2.'if(id){'."\n";
+			$str .= $tab2.'	if(confirm(" Seguro desea eliminar el registro?")){'."\n";
+			$str .= $tab2.'		var ret    = $("#newapi\'.$grid0.\'").getRowData(id);'."\n";
+			$str .= $tab2.'		mId = id;'."\n";
+			$str .= $tab2.'		$.post("\'.site_url($this->url.\'dataedit/do_delete\').\'/"+id, function(data){'."\n";
+			$str .= $tab5.'try{'."\n";
+			$str .= $tab5.'	var json = JSON.parse(data);'."\n";
+			$str .= $tab5.'	if (json.status == "A"){'."\n";
+			$str .= $tab5.'		apprise("Registro eliminado");'."\n";
+			$str .= $tab5.'	}else{'."\n";
+			$str .= $tab5.'		apprise("Registro no se puede eliminado");'."\n";
+			$str .= $tab5.'	}'."\n";
+			$str .= $tab5.'}catch(e){'."\n";
+			$str .= $tab5.'	$("#fborra").html(data);'."\n";
+			$str .= $tab5.'	$("#fborra").dialog( "open" );'."\n";
+			$str .= $tab5.'}'."\n";
+			$str .= $tab2.'		});'."\n";
+			$str .= $tab2.'	}'."\n";
+			$str .= $tab2.'}else{'."\n";
+			$str .= $tab2.'	$.prompt("&lt;h1&gt;Por favor Seleccione un Registro&lt;/h1&gt;"");'."\n";
+			$str .= $tab2.'}'."\n";
+			$str .= $tab2.'};\';'."\n";
+
 
 			$str .= $tab2.'//Wraper de javascript'."\n";
 			$str .= $tab2.'$bodyscript .= \''."\n";
@@ -1144,42 +1278,90 @@ class Desarrollo extends Controller{
 			$str .= $tab3.'var tips = $( ".validateTips" );'."\n";
 			$str .= $tab3.'s = grid.getGridParam(\\\'selarrrow\\\');'."\n";
 			$str .= $tab3.'\';'."\n\n";
-
 			$str .= $tab2.'$bodyscript .= \''."\n";
 			$str .= $tab2.'$("#fedita").dialog({'."\n";
 			$str .= $tab3.'autoOpen: false, height: 500, width: 700, modal: true,'."\n";
 			$str .= $tab3.'buttons: {'."\n";
-			$str .= $tab3.'"Guardar": function() {'."\n";
-			$str .= $tab4.'var bValid = true;'."\n";
-			$str .= $tab4.'var murl = $("#df1").attr("action");'."\n";
-			$str .= $tab4.'allFields.removeClass( "ui-state-error" );'."\n";
+			$str .= $tab4.'"Guardar": function() {'."\n";
+			$str .= $tab5.'var bValid = true;'."\n";
+			$str .= $tab5.'var murl = $("#df1").attr("action");'."\n";
+			$str .= $tab5.'allFields.removeClass( "ui-state-error" );'."\n";
+			$str .= $tab5.'$.ajax({'."\n";
+			$str .= $tab6.'type: "POST", dataType: "html", async: false,'."\n";
+			$str .= $tab6.'url: murl,'."\n";
+			$str .= $tab6.'data: $("#df1").serialize(),'."\n";
+			$str .= $tab6.'success: function(r,s,x){'."\n";
 
-			$str .= $tab4.'$.ajax({'."\n";
-			$str .= $tab5.'type: "POST", dataType: "html", async: false,'."\n";
-			$str .= $tab5.'url: murl,'."\n";
-			$str .= $tab5.'data: $("#df1").serialize(),'."\n";
-			$str .= $tab5.'success: function(r,s,x){'."\n";
+			$str .= $tab7.'try{'."\n";
+			$str .= $tab8.'var json = JSON.parse(r);'."\n";
+			$str .= $tab8.'if (json.status == "A"){'."\n";
+			$str .= $tab8.'	apprise("Registro Guardado");'."\n";
+			$str .= $tab8.'	$( "#fedita" ).dialog( "close" );'."\n";
+			$str .= $tab8.'	grid.trigger("reloadGrid");'."\n";
+			$str .= $tab8.'	\'.$this->datasis->jwinopen(site_url(\'formatos/ver/'.strtoupper($db).'\').\'/\\\'+res.id+\\\'/id\\\'\').\';'."\n";
+			$str .= $tab8.'	return true;'."\n";
+			$str .= $tab8.'} else {'."\n";
+			$str .= $tab8.'	apprise(json.mensaje);'."\n";
+			$str .= $tab8.'}'."\n";
+			$str .= $tab7.'}catch(e){'."\n";
+			$str .= $tab7.'	$("#fedita").html(r);'."\n";
+			$str .= $tab7.'}'."\n";
 
-			$str .= $tab6.'if ( r.length == 0 ) {'."\n";
-
-			$str .= $tab7.'apprise("Registro Guardado");'."\n";
-			$str .= $tab7.'$( "#fedita" ).dialog( "close" );'."\n";
-			$str .= $tab7.'grid.trigger("reloadGrid");'."\n";
-			$str .= $tab7.'\'.$this->datasis->jwinopen(site_url(\'formatos/ver/'.strtoupper($db).'\').\'/\\\'+res.id+\\\'/id\\\'\').\';'."\n";
-			$str .= $tab7.'return true;'."\n";
-			$str .= $tab6.'} else { '."\n";
-			$str .= $tab7.'$("#fedita").html(r);'."\n";
+			//$str .= $tab6.'if ( r.length == 0 ) {'."\n";
+			//$str .= $tab7.'apprise("Registro Guardado");'."\n";
+			//$str .= $tab7.'$( "#fedita" ).dialog( "close" );'."\n";
+			//$str .= $tab7.'grid.trigger("reloadGrid");'."\n";
+			//$str .= $tab7.'\'.$this->datasis->jwinopen(site_url(\'formatos/ver/'.strtoupper($db).'\').\'/\\\'+res.id+\\\'/id\\\'\').\';'."\n";
+			//$str .= $tab7.'return true;'."\n";
+			//$str .= $tab6.'} else { '."\n";
+			//$str .= $tab7.'$("#fedita").html(r);'."\n";
+			//$str .= $tab6.'}'."\n";
 
 			$str .= $tab6.'}'."\n";
-			$str .= $tab5.'}'."\n";
-
-			$str .= $tab3.'})},'."\n";
-			$str .= $tab3.'"Cancelar": function() { $( this ).dialog( "close" ); }'."\n";
+			//$str .= $tab4.'}'."\n";
+			$str .= $tab5.'})'."\n";
+			$str .= $tab4.'},'."\n";
+			$str .= $tab4.'"Cancelar": function() {'."\n";
+			$str .= $tab5.'$("#fedita").html("");'."\n";
+			$str .= $tab5.'$( this ).dialog( "close" );'."\n";
+			$str .= $tab4.'}'."\n";
 			$str .= $tab3.'},'."\n";
-			$str .= $tab3.'close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}'."\n";
+			$str .= $tab3.'close: function() {'."\n";
+			$str .= $tab4.'$("#fedita").html("");'."\n";
+			$str .= $tab4.'allFields.val( "" ).removeClass( "ui-state-error" );'."\n";
+			$str .= $tab3.'}'."\n";
+			$str .= $tab2.'});\';'."\n\n";
+			//$str .= $tab2.'});'."\n";
 
-			$str .= $tab2.'});\';'."\n";
+			$str .= $tab2.'$bodyscript .= \''."\n";
+			$str .= $tab2.'$("#fshow").dialog({'."\n";
+			$str .= $tab3.'autoOpen: false, height: 500, width: 700, modal: true,'."\n";
+			$str .= $tab3.'buttons: {'."\n";
+			$str .= $tab4.'"Aceptar": function() {'."\n";
+			$str .= $tab5.'$("#fshow").html("");'."\n";
+			$str .= $tab5.'$( this ).dialog( "close" );'."\n";
+			$str .= $tab4.'},'."\n";
+			$str .= $tab3.'},'."\n";
+			$str .= $tab3.'close: function() {'."\n";
+			$str .= $tab4.'$("#fshow").html("");'."\n";
+			$str .= $tab3.'}'."\n";
+			$str .= $tab2.'});\''.";\n\n";
 
+			$str .= $tab2.'$bodyscript .= \''."\n";
+			$str .= $tab2.'$("#fborra").dialog({'."\n";
+			$str .= $tab3.'autoOpen: false, height: 300, width: 400, modal: true,'."\n";
+			$str .= $tab3.'buttons: {'."\n";
+			$str .= $tab4.'"Aceptar": function() {'."\n";
+			$str .= $tab5.'$("#fborra").html("");'."\n";
+			$str .= $tab5.'jQuery("#newapi\'.$grid0.\'").trigger("reloadGrid");'."\n";
+			$str .= $tab5.'$( this ).dialog( "close" );'."\n";
+			$str .= $tab4.'},'."\n";
+			$str .= $tab3.'},'."\n";
+			$str .= $tab3.'close: function() {'."\n";
+			$str .= $tab4.'jQuery("#newapi\'.$grid0.\'").trigger("reloadGrid");'."\n";
+			$str .= $tab4.'$("#fborra").html("");'."\n";
+			$str .= $tab3.'}'."\n";
+			$str .= $tab2.'});\''.";\n\n";
 			$str .= $tab2.'$bodyscript .= \'});\'."\n";'."\n\n";
 
 			$str .= $tab2.'$bodyscript .= "\n&lt;/script&gt;\n";'."\n";
@@ -1229,7 +1411,8 @@ class Desarrollo extends Controller{
 
 			$str .= $tab2.'$grid->setShrinkToFit(\'false\');'."\n\n";
 
-			$str .= $tab2.'$grid->setBarOptions("\t\taddfunc: '.strtolower($db).'add,\n\t\teditfunc: '.strtolower($db).'edit");'."\n\n";
+			$str .= $tab2.'$grid->setBarOptions("addfunc: '.strtolower($db).'add, editfunc: '.strtolower($db).'edit, delfunc: '.strtolower($db).'del, viewfunc: '.strtolower($db).'show");'."\n\n";
+
 
 			$str .= $tab2.'#Set url'."\n";
 			$str .= $tab2.'$grid->setUrlput(site_url($this->url.\'setdata/\'));'."\n\n";
@@ -1401,6 +1584,7 @@ class Desarrollo extends Controller{
 
 			$str .= $this->genepre( $db, false);
 			$str .= $this->genepost($db, false);
+			$str .= $this->geneinstalar($db, false);
 
 			$str .= '}'."\n";
 
@@ -1442,7 +1626,7 @@ class Desarrollo extends Controller{
 		$str .= $tab3.'$this->db->simple_query(\'ALTER TABLE '.$db.' ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)\');'."\n";
 		$str .= $tab2.'};*/'."\n";
 
-		$str .= $tab2.'$this->datasis->creaintramenu(array(\'modulo\'=>\'000\',\'titulo\'=>\'Pagos de Producción\',\'mensaje\'=>\'Pagos de Producción\',\'panel\'=>\'LECHE\',\'ejecutar\'=>\'leche/lpago\',\'target\'=>\'popu\',\'visible\'=>\'S\',\'pertenece\'=>\'2\',\'ancho\'=>900,\'alto\'=>600));';
+		$str .= $tab2.'//$this->datasis->creaintramenu(array(\'modulo\'=>\'000\',\'titulo\'=>\'<#titulo#>\',\'mensaje\'=>\'<#mensaje#>\',\'panel\'=>\'<#panal#>\',\'ejecutar\'=>\'<#ejecuta#>\',\'target\'=>\'popu\',\'visible\'=>\'S\',\'pertenece\'=>\'<#pertenece#>\',\'ancho\'=>900,\'alto\'=>600));';
 
 		$str .= $tab2.'$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );'."\n";
 		$str .= $tab2.'redirect($this->url.\'jqdatag\');'."\n";
@@ -1571,9 +1755,21 @@ class Desarrollo extends Controller{
 		if (empty($tabla) OR (!$this->db->table_exists($tabla))) 
 			show_error('Tabla no existe o faltan parametros');
 
+
+
 		$crud ="\n\t".'function dataedit(){'."\n";
-		$crud.="\t\t".'$this->rapyd->load(\'dataedit\');'."\n\n";
+		$crud.="\t\t".'$this->rapyd->load(\'dataedit\');'."\n";
+
+		$crud.="\t\t".'$script= \''."\n";
+		$crud.="\t\t".'$(function() {'."\n";
+		$crud.="\t\t\t".'$(".inputnum").numeric(".");'."\n";
+		$crud.="\t\t\t".'$(".inputonlynum").numeric();'."\n";
+		$crud.="\t\t".'});'."\n";
+		$crud.="\t\t".'\';'."\n\n";
+
 		$crud.="\t\t".'$edit = new DataEdit($this->tits, \''.$tabla.'\');'."\n\n";
+		$crud.="\t\t".'$edit->script($script,\'modify\');'."\n";
+		$crud.="\t\t".'$edit->script($script,\'create\');'."\n";
 		$crud.="\t\t".'$edit->on_save_redirect=false;'."\n\n";
 		$crud.="\t\t".'$edit->back_url = site_url($this->url.\'filteredgrid\');'."\n\n";
 
@@ -1656,7 +1852,6 @@ class Desarrollo extends Controller{
 		//$crud.="\t\t".'$edit->buttons(\'modify\', \'save\', \'undo\', \'delete\', \'back\');'."\n";
 		$crud.="\t\t".'$edit->build();'."\n\n";
 
-
 		$crud.="\t\t".'if($edit->on_success()){'."\n";
 		$crud.="\t\t".'	$rt=array('."\n";
 		$crud.="\t\t".'		\'status\' =>\'A\','."\n";
@@ -1713,7 +1908,7 @@ class Desarrollo extends Controller{
 			$leer = file_get_contents('system/application/controllers/'.$db.'.php');
 		else
 			$leer = file_get_contents('system/application/controllers/'.$contro.'/'.$db.'.php');
-		
+
 		$data['programa']    = $leer;
 		$data['bd']          = $db;
 		$data['controlador'] = $contro;
@@ -1727,4 +1922,3 @@ class Desarrollo extends Controller{
 
 
 }
-?>

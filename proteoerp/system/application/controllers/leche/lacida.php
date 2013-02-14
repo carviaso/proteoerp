@@ -1,8 +1,8 @@
 <?php
 class Lacida extends Controller {
 	var $mModulo = 'LACIDA';
-	var $titp    = 'Notificacion de Leche Acida';
-	var $tits    = 'Notificacion de Leche Acida';
+	var $titp    = 'Notificaci&oacute; de leche acida';
+	var $tits    = 'Notificaci&oacute; de leche acida';
 	var $url     = 'leche/lacida/';
 
 	function Lacida(){
@@ -13,11 +13,14 @@ class Lacida extends Controller {
 	}
 
 	function index(){
-		$this->datasis->creaintramenu( $data = array('modulo'=>'229','titulo'=>'Leche Acida','mensaje'=>'Leche Acida','panel'=>'LECHE','ejecutar'=>'leche/lacida','target'=>'popu','visible'=>'S','pertenece'=>'2','ancho'=>800,'alto'=>600));
-		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		/*if ( !$this->datasis->iscampo('lacida','id') ) {
+			$this->db->simple_query('ALTER TABLE lacida DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE lacida ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE lacida ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};*/
+		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
-
 
 	//***************************
 	//Layout en la Ventana
@@ -36,7 +39,9 @@ class Lacida extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -60,7 +65,7 @@ class Lacida extends Controller {
 		$bodyscript = '		<script type="text/javascript">';
 
 		$bodyscript .= '
-		function lacidaadd() {
+		function lacidaadd(){
 			$.post("'.site_url($this->url.'dataedit/create').'",
 			function(data){
 				$("#fedita").html(data);
@@ -69,21 +74,63 @@ class Lacida extends Controller {
 		};';
 
 		$bodyscript .= '
-		function lacidaedit() {
+		function lacidaedit(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog( "open" );
 				});
-			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
 		};';
 
+		$bodyscript .= '
+		function lacidashow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function lacidadel() {
+		var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+		if(id){
+			if(confirm(" Seguro desea eliminar el registro?")){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+					try{
+						var json = JSON.parse(data);
+						if (json.status == "A"){
+							apprise("Registro eliminado");
+						}else{
+							apprise("Registro no se puede eliminado");
+						}
+					}catch(e){
+						$("#fborra").html(data);
+						$("#fborra").dialog( "open" );
+					}
+				});
+			}
+		}else{
+			$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+		}
+		};';
 		//Wraper de javascript
 		$bodyscript .= '
-		$(function() {
+		$(function(){
 			$("#dialog:ui-dialog").dialog( "destroy" );
 			var mId = 0;
 			var montotal = 0;
@@ -99,35 +146,73 @@ class Lacida extends Controller {
 		$("#fedita").dialog({
 			autoOpen: false, height: 500, width: 700, modal: true,
 			buttons: {
-			"Guardar": function() {
-				var bValid = true;
-				var murl = $("#df1").attr("action");
-				allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						try{
-							var json = JSON.parse(r);
-							if (json.status == "A"){
-								apprise("Registro Guardado");
-								$( "#fedita" ).dialog( "close" );
-								grid.trigger("reloadGrid");
-								'.$this->datasis->jwinopen(site_url('formatos/ver/LACIDA').'/\'+res.id+\'/id\'').';
-								return true;
-							} else {
-								apprise(json.mensaje);
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/LACIDA').'/\'+res.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
 							}
-						}catch(e){
-							$("#fedita").html(r);
 						}
-					}
-			})},
-			"Cancelar": function() { $( this ).dialog( "close" ); }
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
 			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
 		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
 		$bodyscript .= '});'."\n";
 
 		$bodyscript .= "\n</script>\n";
@@ -325,6 +410,21 @@ class Lacida extends Controller {
 		));
 
 
+		$grid->addField('precio');
+		$grid->label('Precio');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
@@ -355,7 +455,7 @@ class Lacida extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: lacidaadd,\n\t\teditfunc: lacidaedit");
+		$grid->setBarOptions("addfunc: lacidaadd, editfunc: lacidaedit, delfunc: lacidadel, viewfunc: lacidashow");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -373,8 +473,7 @@ class Lacida extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -388,8 +487,7 @@ class Lacida extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -446,9 +544,17 @@ class Lacida extends Controller {
 
 	function dataedit(){
 		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$(".inputnum").numeric(".");
+			$(".inputonlynum").numeric();
+		});
+		';
 
 		$edit = new DataEdit($this->tits, 'lacida');
 
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
 		$edit->on_save_redirect=false;
 
 		$edit->back_url = site_url($this->url.'filteredgrid');
@@ -533,14 +639,13 @@ class Lacida extends Controller {
 		$edit->gadm->size =12;
 		$edit->gadm->maxlength =10;
 
-		$edit->build();
+		$edit->precio = new inputField('Precio','precio');
+		$edit->precio->rule='max_length[10]|numeric';
+		$edit->precio->css_class='inputnum';
+		$edit->precio->size =12;
+		$edit->precio->maxlength =10;
 
-		$script= '<script type="text/javascript" > 
-		$(function() {
-			$(".inputnum").numeric(".");
-			$(".inputonlynum").numeric();
-		});
-		</script>';
+		$edit->build();
 
 		if($edit->on_success()){
 			$rt=array(
@@ -555,15 +660,18 @@ class Lacida extends Controller {
 	}
 
 	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
 		return true;
 	}
 
 	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
 		return true;
 	}
 
 	function _pre_delete($do){
-		return true;
+		$do->error_message_ar['pre_del']='';
+		return false;
 	}
 
 	function _post_insert($do){
@@ -579,6 +687,33 @@ class Lacida extends Controller {
 	function _post_delete($do){
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits $primary ");
+	}
+
+	function instalar(){
+		if (!$this->db->table_exists('lacida')) {
+			$mSQL="CREATE TABLE `lacida` (
+			  `fecha` date DEFAULT NULL,
+			  `ruta` char(4) DEFAULT NULL COMMENT 'Ruta ',
+			  `vaquera` int(11) DEFAULT NULL COMMENT 'Vaquera',
+			  `nombre` char(45) DEFAULT NULL COMMENT 'Nombre de la ruta o vaquera',
+			  `litros` decimal(16,2) DEFAULT NULL COMMENT 'Litros de Leche Acida',
+			  `acidez` decimal(10,0) DEFAULT NULL COMMENT 'Acidez',
+			  `alcohol` decimal(10,0) DEFAULT '0' COMMENT 'Alcohol',
+			  `codigo` varchar(15) DEFAULT NULL COMMENT 'Queso producido ',
+			  `descrip` varchar(45) DEFAULT NULL COMMENT 'Descripcion del Producto',
+			  `peso` decimal(10,2) DEFAULT '0.00' COMMENT 'Peso Producido',
+			  `rendimiento` decimal(10,2) DEFAULT '0.00' COMMENT 'Factor de Rendimiento',
+			  `promedio` decimal(10,2) DEFAULT '0.00' COMMENT 'Promedio Litros/Kg',
+			  `gadm` decimal(10,2) DEFAULT '0.40' COMMENT 'Gasstos Administrativos',
+			  `precio` decimal(10,2) DEFAULT '0.00' COMMENT 'Precio de la leche',
+			  `id` int(11) NOT NULL AUTO_INCREMENT,
+			  PRIMARY KEY (`id`),
+			  KEY `fecha` (`fecha`)
+			) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COMMENT='Notificacion de leche Acida'";
+			$this->db->simple_query($mSQL);
+		}
+		//$campos=$this->db->list_fields('lacida');
+		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
 
