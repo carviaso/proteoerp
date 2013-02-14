@@ -64,11 +64,14 @@ class venta extends sfac {
 			$sfpade.="<option value='".trim($row->cod_banc)."'>".trim($row->nomb_banc)."</option>";
 		}
 
-		$jsc='function calcula(){
+		$jsc='
+		function calcula(){
 			if($("#vh_precio").val().length>0) base=parseFloat($("#vh_precio").val()); else base=0;
 			if($("#vh_tasa").val().length>0  ) tasa=parseFloat($("#vh_tasa").val())  ; else tasa=0;
-			$("#vh_monto").text(nformat(base*(1+(tasa/100))+'.$precioplaca.',2));
-			$("#totalg").val(roundNumber(base*(1+(tasa/100))+'.$precioplaca.',2));
+			placa = Number($("#vh_precioplaca").val());
+
+			$("#vh_monto").text(nformat(base*(1+(tasa/100))+placa ,2));
+			$("#totalg").val(roundNumber(base*(1+(tasa/100))+placa ,2));
 		}
 
 		function calculaiva(){
@@ -193,7 +196,7 @@ class venta extends sfac {
 		$edit->peso->group = 'Datos del veh&iacute;culo';
 
 		if(empty($placa)){
-			$edit->placa =  new inputField('Placa','vh_placa');
+			$edit->placa = new inputField('Placa','vh_placa');
 			//$edit->placa->rule  = 'required';
 			$edit->placa->size  = 10;
 			$edit->placa->group = 'Datos del veh&iacute;culo';
@@ -202,16 +205,21 @@ class venta extends sfac {
 			$edit->placa->group = 'Datos del veh&iacute;culo';
 		}
 
-		$edit->precioplaca = new freeField('Precio placa.','vh_precioplaca',nformat($precioplaca));
-		$edit->precioplaca->group = 'Datos del financieros';
-		$edit->precioplaca->showformat='decimal';
+		$edit->precioplaca = new inputField('Precio placa','vh_precioplaca');
+		$edit->precioplaca->insertValue = $precioplaca;
+		$edit->precioplaca->rule  = 'required|mayorcero';
+		$edit->precioplaca->css_class = 'inputnum';
+		$edit->precioplaca->autocomplete=false;
+		$edit->precioplaca->size  = 10;
 
-		$edit->base =  new dropdownField('Monto base de venta','vh_precio');
+		//$edit->precioplaca = new freeField('Precio placa.','vh_precioplaca',nformat($precioplaca));
+		//$edit->precioplaca->group = 'Datos del financieros';
+		//$edit->precioplaca->showformat='decimal';
+
+		$edit->base = new dropdownField('Monto base de venta','vh_precio');
 		$edit->base->rule  = 'required|numeric';
 		$edit->base->style = 'width:150px';
 		$edit->base->group = 'Datos del financieros';
-
-		//$edit->base->options($arrpp);
 		$edit->base->option($precio1,nformat($precio1));
 		$edit->base->option($precio2,nformat($precio2));
 		$edit->base->option($precio3,nformat($precio3));
@@ -320,6 +328,8 @@ class venta extends sfac {
 				$this->db->simple_query($mSQL);
 			}
 
+			$precioplaca=$edit->precioplaca->newValue;
+
 			$_POST['btn_submit']  = 'Guardar';
 			$_POST['pfac']        = '';
 			$_POST['fecha']       = date('d/m/Y');
@@ -411,7 +421,7 @@ class venta extends sfac {
 			$(".inputonlynum").numeric();
 			$("#vh_tasa").change(function(){ calcula(); });
 			$("#vh_precio").change(function(){ calcula(); });
-			//$("#vh_base").bind("keyup",function() { calcula(); });
+			$("#vh_precioplaca").bind("keyup",function() { calcula(); });
 			//$("#vh_montoiva").bind("keyup",function() { calculaiva(); });
 			calcula();
 

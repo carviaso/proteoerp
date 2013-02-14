@@ -3657,6 +3657,12 @@ class Sfac extends Controller {
 
 		$tipo_doc = $do->get('tipo_doc');
 		$numero   = $do->get('numero');
+
+		//Pasa si es una prefactura
+		if($numero[0]=='_' && $tipo_doc=='F'){
+			return true;
+		}
+
 		$fecha    = $do->get('fecha');
 		$referen  = $do->get('referen');
 		$cajero   = $do->get('cajero');
@@ -4068,7 +4074,7 @@ class Sfac extends Controller {
 		$tipo_doc = $do->get('tipo_doc');
 
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Anulo ${tipo_doc}${numero} $this->tits $primary ");
+		logusu($do->table,"Elimino ${tipo_doc}${numero} $this->tits $primary ");
 	}
 
 	function _post_print_update($do){
