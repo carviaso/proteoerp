@@ -31,7 +31,12 @@ class Rnoti extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"recibir",  "img"=>"images/caja-abierta.png",  "alt" => "Recibir Equipo", "label"=>"Recibir Equipo"));
+		$grid->wbotonadd(array("id"=>"revisar",  "img"=>"images/doctor.png",  "alt" => "Revision y Diagnostico ", "label"=>"Revision y Diagnostico"));
+		$grid->wbotonadd(array("id"=>"repuesto", "img"=>"images/notifica.png",  "alt" => "Solicitud de Repuestos", "label"=>"Solicitar Repuestos"));
+		$grid->wbotonadd(array("id"=>"reparar",  "img"=>"images/repara.png",  "alt" => "Reparado", "label"=>"Reparado"));
+		$grid->wbotonadd(array("id"=>"entregar", "img"=>"images/caja-cerrada.png",  "alt" => "Entrega", "label"=>"Entrega"));
+
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -63,6 +68,7 @@ class Rnoti extends Controller {
 			$.post("'.site_url($this->url.'dataedit/create').'",
 			function(data){
 				$("#fedita").html(data);
+				$("#fedita").dialog({height: 400, width: 700, title: "Agregar Notificacion de R.M.A."});
 				$("#fedita").dialog( "open" );
 			})
 		};';
@@ -75,10 +81,100 @@ class Rnoti extends Controller {
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
+					$("#fedita").dialog({height: 400, width: 700, title: "Modificar Notificacion de R.M.A."});
 					$("#fedita").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		};';
+
+		//Recibir Equipo    solo si diagnostico no fue tocado
+		$bodyscript .= '
+		$("#recibir").click( function(){ 
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if ( ret.fechadiag.length == 0 ){
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/recibir/modify').'/"+id, function(data){
+						$("#fedita").html(data);
+						$("#fedita").dialog({height: 430, width: 700, title: "Recibir Equipo de R.M.A."});
+						$("#fedita").dialog( "open" );
+					});
+				} else {
+					$.prompt("<h1>Ya fue diagnosticado, no puede modificar la recepcion</h1>");
+				}
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		});
+		';
+
+		//Revision y Diagnostico
+		$bodyscript .= '
+		$("#revisar").click( function(){ 
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if ( ret.frecep.length > 0  && ret.frepara.length == 0  ){
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/revisar/modify').'/"+id, function(data){
+						$("#fedita").html(data);
+						$("#fedita").dialog({height: 430, width: 700, title: "Revisar y Diagnostico"});
+						$("#fedita").dialog( "open" );
+					});
+				} else {
+					$.prompt("<h1>Ya fue reparado, no puede modificar el diagnostico</h1>");
+				}
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		});
+		';
+
+		//Reparar
+		$bodyscript .= '
+		$("#reparar").click( function(){ 
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if ( ret.fechadiag.length > 0  && ret.fentrega.length == 0  ){
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/reparar/modify').'/"+id, function(data){
+						$("#fedita").html(data);
+						$("#fedita").dialog({height: 430, width: 700, title: "Reparar"});
+						$("#fedita").dialog( "open" );
+					});
+				} else {
+					$.prompt("<h1>Ya fue entregado, no puede modificar</h1>");
+				}
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		});
+		';
+
+		//Entregar
+		$bodyscript .= '
+		$("#entregar").click( function(){ 
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if ( ret.frepara.length > 0  && ret.fentrega.length == 0  ){
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/entregar/modify').'/"+id, function(data){
+						$("#fedita").html(data);
+						$("#fedita").dialog({height: 430, width: 700, title: "Entregar"});
+						$("#fedita").dialog( "open" );
+					});
+				} else {
+					$.prompt("<h1>No puede entregarlo, no ha sido reparado</h1>");
+				}
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		});
+		';
+
 
 		//Wraper de javascript
 		$bodyscript .= '
@@ -96,7 +192,7 @@ class Rnoti extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 400, width: 700, modal: true,
 			buttons: {
 			"Guardar": function() {
 				var bValid = true;
@@ -144,13 +240,13 @@ class Rnoti extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('id');
-		$grid->label('Id');
+		$grid->label('Numero');
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
-			'width'         => 40,
+			'width'         => 60,
 			'editable'      => 'false',
-			'search'        => 'false'
+			'search'        => 'true'
 		));
 
 
@@ -166,30 +262,28 @@ class Rnoti extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
-		$grid->addField('codprod');
-		$grid->label('Codigo producto');
+		$grid->addField('serial');
+		$grid->label('Serial');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 150,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:15, maxlength: 15 }',
-		));
-
-
-		$grid->addField('serial');
-		$grid->label('Serial');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:35, maxlength: 35 }',
 		));
 
+
+		$grid->addField('codprod');
+		$grid->label('Codigo producto');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 100,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
+		));
 
 		$grid->addField('descprod');
 		$grid->label('Descripcion producto');
@@ -263,7 +357,7 @@ class Rnoti extends Controller {
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
 
-
+/*
 		$grid->addField('garantia');
 		$grid->label('Garantia');
 		$grid->params(array(
@@ -285,7 +379,7 @@ class Rnoti extends Controller {
 			'edittype'      => "'textarea'",
 			'editoptions'   => "'{rows:2, cols:60}'",
 		));
-
+*/
 
 		$grid->addField('estado');
 		$grid->label('Estado');
@@ -298,7 +392,7 @@ class Rnoti extends Controller {
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
 
-
+/*
 		$grid->addField('observacion');
 		$grid->label('Observacion');
 		$grid->params(array(
@@ -319,9 +413,10 @@ class Rnoti extends Controller {
 			'edittype'      => "'textarea'",
 			'editoptions'   => "'{rows:2, cols:60}'",
 		));
+*/
 
-		$grid->addField('fechadiag');
-		$grid->label('Fecha Diag');
+		$grid->addField('frecep');
+		$grid->label('Recepcion');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -331,6 +426,43 @@ class Rnoti extends Controller {
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
 		));
+
+		$grid->addField('fechadiag');
+		$grid->label('Revision');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+		$grid->addField('frepara');
+		$grid->label('Reparado');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+		$grid->addField('fentrega');
+		$grid->label('Entregado');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
 		
 		
 		$grid->showpager(true);
@@ -441,10 +573,16 @@ class Rnoti extends Controller {
 		};
 	}
 
+	//******************************************************************
+	//    DataEdit
+	//******************************************************************
 	function dataedit(){
 		$this->rapyd->load('dataedit');
-
 		$edit = new DataEdit($this->tits, 'rnoti');
+
+		$viene = $this->uri->segment(4);
+		if ( $viene == 'modify' ) $viene = '';
+		if ( $viene == 'create' ) $viene = '';
 
 		$edit->on_save_redirect=false;
 
@@ -467,19 +605,18 @@ class Rnoti extends Controller {
 			'descrip' =>'Descripcion',
 			'barras'  =>'Barras'),
 		'filtro'  =>array('codigo'=>'C&oacute;digo','descrip'=>'Descripcion'),
-		'retornar'=>array('codigo'=>'codprod',      'descrip'=>'descprod'),
+		'retornar'=>array('codigo'=>'codprod','descrip'=>'descprod','garantia'=>'garantia'),
 		'titulo'  =>'Buscar Inventario');
 		
 		$sboton=$this->datasis->modbus($sinv);
 
-
 		$edit->back_url = site_url($this->url.'filteredgrid');
 		$script= ' 
 		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-			$("#fechadiag").datepicker({dateFormat:"dd/mm/yy"});
+			$("#fecha"    ).datepicker({dateFormat:"dd/mm/yy"});
 			$("#fechafact").datepicker({dateFormat:"dd/mm/yy"});
 		});';
+
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
 
@@ -490,101 +627,159 @@ class Rnoti extends Controller {
 		$edit->pre_process( 'update','_pre_update');
 		$edit->pre_process( 'delete','_pre_delete');
 
-		$edit->codcliente = new inputField('Cod. Cliente','codcliente');
-		$edit->codcliente->size =7;
+		$edit->serial = new inputField('Serial','serial');
+		$edit->serial->size =20;
+		$edit->serial->maxlength =35;
+		if ( !empty($viene) )
+			$edit->serial->mode = 'autohide';
+
+		$estado = $edit->get_from_dataobjetct('estado');
+
+		$edit->reporte = new inputField('Reporte','reporte');
+		$edit->reporte->rule='';
+		$edit->reporte->size =22;
+		$edit->reporte->maxlength =20;
+		if ( !empty($viene) )
+			$edit->reporte->mode = 'autohide';
+
+		$edit->codcliente = new inputField('Cliente','codcliente');
+		$edit->codcliente->size =6;
 		$edit->codcliente->maxlength =5;
 		$edit->codcliente->append($cboton); 
+		if ( !empty($viene) )
+			$edit->codcliente->mode = 'autohide';
 
-		$edit->nomcliente = new inputField('Nombre cliente','nomcliente');
-		$edit->nomcliente->rule='';
-		$edit->nomcliente->size =47;
+		$edit->nomcliente = new inputField('Nombre','nomcliente');
+		$edit->nomcliente->readonly = true;
+		$edit->nomcliente->size =40;
 		$edit->nomcliente->maxlength =45;
+		if ( !empty($viene) )
+			$edit->nomcliente->mode = 'autohide';
 
-/*
-		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
+		$edit->fecha = new dateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->size = 10;
 		$edit->fecha->rule ='required';
 		$edit->fecha->calendar=false;
 		$edit->fecha->rule='chfecha';
 		$edit->fecha->maxlength =8;
-*/
 
-		$edit->serial = new inputField('Serial','serial');
-		$edit->serial->rule='';
-		$edit->serial->size =37;
-		$edit->serial->maxlength =35;
-
-		$edit->codprod = new inputField('Codigo producto','codprod');
+		$edit->codprod = new inputField('Codigo','codprod');
 		$edit->codprod->rule='';
-		$edit->codprod->size =17;
+		$edit->codprod->size =15;
 		$edit->codprod->maxlength =15;
 		$edit->codprod->append($sboton); 
+		if ( !empty($viene) )
+			$edit->codprod->mode = 'autohide';
 
-		$edit->descprod = new inputField('Descripcion producto','descprod');
-		$edit->descprod->size =47;
+		$edit->descprod = new inputField('Descripcion','descprod');
+		$edit->descprod->size =35;
 		$edit->descprod->maxlength =45;
+		$edit->descprod->readonly = true;
+		if ( !empty($viene) )
+			$edit->descprod->mode = 'autohide';
 
-		$edit->fechafact = new dateField('Fecha venta','fechafact');
+		$edit->fechafact = new dateonlyField('Fecha venta','fechafact');
 		$edit->fechafact->rule='chfecha';
 		$edit->fechafact->size =10;
 		$edit->fechafact->maxlength =8;
 		$edit->fechafact->calendar=false;
+		if ( !empty($viene) )
+			$edit->fechafact->mode = 'autohide';
 
 		$edit->numfact = new inputField('Factura','numfact');
 		$edit->numfact->rule='max_length[8]';
 		$edit->numfact->size =10;
 		$edit->numfact->maxlength =8;
+		if ( !empty($viene) )
+			$edit->numfact->mode = 'autohide';
 
 		$edit->reporte = new inputField('Reporte','reporte');
-		$edit->reporte->rule='max_length[20]';
+		$edit->reporte->rule='';
 		$edit->reporte->size =22;
 		$edit->reporte->maxlength =20;
+		if ( !empty($viene) )
+			$edit->reporte->mode = 'autohide';
 
 		$edit->garantia = new inputField('Garantia','garantia');
 		$edit->garantia->rule='';
 		$edit->garantia->size =4;
 		$edit->garantia->maxlength =2;
+		$edit->garantia->readonly = true;
+		if ( !empty($viene) )
+			$edit->garantia->mode = 'autohide';
 
 		$edit->falla = new textareaField('Falla','falla');
 		$edit->falla->rule='';
-		$edit->falla->cols = 70;
+		$edit->falla->cols = 60;
 		$edit->falla->rows = 4;
-/*
+
 		$edit->observacion = new textareaField('Observacion','observacion');
 		$edit->observacion->rule='';
-		$edit->observacion->cols = 70;
+		$edit->observacion->cols = 60;
 		$edit->observacion->rows = 4;
 
+		$edit->frecep = new dateonlyField('Fecha Recepcion','frecep');
+		$edit->frecep->rule='chfecha';
+		$edit->frecep->size =10;
+		$edit->frecep->maxlength =8;
+		$edit->frecep->calendar=false;
+		$tempo = $edit->get_from_dataobjetct('frecep');
+		if ( empty($tempo)  )
+			$edit->frecep->updateValue = date('Y-m-d');
+		$edit->frecep->readonly = true;
+
+
+
 		$edit->estado = new inputField('Estado','estado');
-		$edit->estado->rule='max_length[20]';
-		$edit->estado->size =22;
+		$edit->estado->rule='';
+		$edit->estado->size = 22;
 		$edit->estado->maxlength =20;
 
 		$edit->diagnostico = new textareaField('Diagnostico','diagnostico');;
-		$edit->diagnostico->cols = 70;
+		$edit->diagnostico->cols = 60;
 		$edit->diagnostico->rows = 4;
 
-		$edit->fechadiag = new dateField('Fecha diagnostico','fechadiag');
+		$edit->fechadiag = new dateonlyField('Fecha','fechadiag');
 		$edit->fechadiag->rule='chfecha';
 		$edit->fechadiag->size =10;
-		$edit->fechadiag->maxlength =8;
+		$edit->fechadiag->maxlength =10;
 		$edit->fechadiag->calendar=false;
-*/
-		$edit->build();
+		$tempo = $edit->get_from_dataobjetct('fechadiag');
+		if ( empty($tempo)  )
+			$edit->fechadiag->updateValue = date('Y-m-d');
+		$edit->fechadiag->readonly = true;
 
-		$script= '<script type="text/javascript" > 
-		$(function() {
-			$(".inputnum").numeric(".");
-			$(".inputonlynum").numeric();
-		});
-		</script>';
-		
-		$script= '<script type="text/javascript" > 
-		$(function() {
-			$("#fecha").datepicker({   dateFormat: "dd/mm/yy" });
-		});
-		</script>';
+		$edit->repara = new textareaField('Reparacion','repara');;
+		$edit->repara->cols = 60;
+		$edit->repara->rows = 4;
+
+		$edit->frepara = new dateonlyField('Fecha','frepara');
+		$edit->frepara->rule='chfecha';
+		$edit->frepara->size =10;
+		$edit->frepara->maxlength =8;
+		$edit->frepara->calendar=false;
+		$tempo = $edit->get_from_dataobjetct('frepara');
+		if ( empty($tempo)  )
+			$edit->frepara->updateValue = date('Y-m-d');
+		$edit->frepara->readonly = true;
+
+
+		$edit->entrega = new textareaField('Entrega','entrega');;
+		$edit->entrega->cols = 60;
+		$edit->entrega->rows = 4;
+
+		$edit->fentrega = new dateonlyField('Fecha','fentrega');
+		$edit->fentrega->rule='chfecha';
+		$edit->fentrega->size =10;
+		$edit->fentrega->maxlength =8;
+		$edit->fentrega->calendar=false;
+		$tempo = $edit->get_from_dataobjetct('fentrega');
+		if ( empty($tempo)  )
+			$edit->fentrega->updateValue = date('Y-m-d');
+		$edit->fentrega->readonly = true;
+
+		$edit->build();
 
 		if($edit->on_success()){
 			$rt=array(
@@ -594,15 +789,30 @@ class Rnoti extends Controller {
 			);
 			echo json_encode($rt);
 		}else{
-			echo $edit->output;
+			//echo $edit->output;
+			if (empty($estado)) $estado='NOTIFICADO';
+			if ( $viene == 'recibir' ) $estado='RECIBIDO';
+			if ( $viene == 'revisar' ) $estado='REVISADO';
+			if ( $viene == 'reparar' ) $estado='REPARADO';
+			if ( $viene == 'entregar') $estado='ENTREGADO';
+
+			$conten['form']   =&  $edit;
+			$conten['estado'] =   $estado;
+			$conten['origen'] =   $viene;
+			$conten['script'] =  '';
+			$this->load->view('view_rnoti', $conten);
+
 		}
 	}
 
 	function _pre_insert($do){
+		$do->set('fecha',date('Y-m-d'));
+		$do->set('estado','NOTIFICADO');
 		return true;
 	}
 
 	function _pre_update($do){
+		
 		return true;
 	}
 
@@ -625,30 +835,38 @@ class Rnoti extends Controller {
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
 
+
+
 	function instalar(){
 		$mSQL = "
-		CREATE TABLE IF NOT EXISTS `rnoti` (
-			id          INT(11) NOT NULL AUTO_INCREMENT,
-			fecha       DATE        NULL DEFAULT NULL,
-			codprod     VARCHAR(15) NULL DEFAULT NULL COMMENT 'codigo o modelo del producto',
-			serial      VARCHAR(35) NULL DEFAULT NULL COMMENT 'serial del producto',
-			descprod    VARCHAR(45) NULL DEFAULT NULL COMMENT 'auto descripcion del producto',
-			codcliente  VARCHAR(5)  NULL DEFAULT NULL COMMENT 'auto codigo del cliente',
-			nomcliente  VARCHAR(45) NULL DEFAULT NULL COMMENT 'automatico nombre del cliente',
-			fechafact   DATE        NULL DEFAULT NULL COMMENT 'automatico fecha de venta',
-			numfact     VARCHAR(8)  NULL DEFAULT NULL COMMENT 'automatico numero de factura de venta',
-			reporte     VARCHAR(20) NULL DEFAULT NULL COMMENT 'opcional numero de reporte del proveedor',
-			garantia    CHAR(2)     NULL DEFAULT NULL COMMENT 'automatico',
-			falla       TEXT        NULL              COMMENT 'observacion, descripcion de la falla ',
-			estado      CHAR(20)    NULL DEFAULT 'NOTIFICADO' COMMENT ' RECIBIDO, REVISADO, ESPERA, REPARADO',
-			observacion TEXT        NULL              COMMENT 'observacion, descripcion del producto',
-			diagnostico TEXT        NULL              COMMENT 'diagnostico del producto',
-			fechadiag   DATE        NULL              DEFAULT NULL COMMENT 'fecha diagnostico del producto',
-			PRIMARY KEY (`id`)
-		)
-		COMMENT='notificacion o reporte de mercancia defectuosa'
-		COLLATE='latin1_swedish_ci'
-		ENGINE=MyISAM;";
+CREATE TABLE IF NOT EXISTS rnoti (
+	`id`          INT(11) NOT NULL AUTO_INCREMENT,
+	`fecha`       DATE        NULL DEFAULT NULL,
+	`codprod`     VARCHAR(15) NULL DEFAULT NULL         COMMENT 'codigo o modelo del producto',
+	`serial`      VARCHAR(35) NULL DEFAULT NULL         COMMENT 'serial del producto',
+	`descprod`    VARCHAR(45) NULL DEFAULT NULL         COMMENT 'auto descripcion del producto',
+	`codcliente`  VARCHAR(5)  NULL DEFAULT NULL         COMMENT 'auto codigo del cliente',
+	`nomcliente`  VARCHAR(45) NULL DEFAULT NULL         COMMENT 'automatico nombre del cliente',
+	`fechafact`   DATE        NULL DEFAULT NULL         COMMENT 'automatico fecha de venta',
+	`numfact`     VARCHAR(8)  NULL DEFAULT NULL         COMMENT 'automatico numero de factura de venta',
+	`reporte`     VARCHAR(20) NULL DEFAULT NULL         COMMENT 'opcional numero de reporte del proveedor',
+	`garantia`    INT(11)     NULL DEFAULT NULL         COMMENT 'automatico',
+	`falla`       TEXT        NULL                      COMMENT 'observacion, descripcion de la falla ',
+	`estado`      VARCHAR(20) NULL DEFAULT 'NOTIFICADO' COMMENT ' RECIBIDO, REVISADO, ESPERA, REPARADO',
+	`frecep`      DATE        NULL DEFAULT NULL         COMMENT 'Fecha de Recepcion',
+	`observacion` TEXT        NULL                      COMMENT 'observacion, descripcion del producto',
+	`diagnostico` TEXT        NULL                      COMMENT 'diagnostico del producto',
+	`fechadiag`   DATE        NULL DEFAULT NULL         COMMENT 'fecha diagnostico del producto',
+	`repara`      TEXT        NULL                      COMMENT 'Comentario de la reparacion',
+	`frepara`     DATE        NULL DEFAULT NULL         COMMENT 'Fecha de la reparacion',
+	`entrega`     TEXT        NULL                      COMMENT 'Entregado',
+	`fentrega`    DATE        NULL DEFAULT NULL         COMMENT 'Entregado',
+	PRIMARY KEY (id)
+)
+COMMENT='notificacion o reporte de mercancia defectuosa'
+COLLATE='latin1_swedish_ci'
+ENGINE=MyISAM
+";
 		$this->db->query($mSQL);
 	
 

@@ -1814,7 +1814,7 @@ class Desarrollo extends Controller{
 				}
 
 				if(strrpos($field->Type,'date')!==false){
-					$input='Dateonly';
+					$input='dateonly';
 				}elseif(strrpos($field->Type,'text')!==false){
 					$input= 'textarea';
 				}else{
