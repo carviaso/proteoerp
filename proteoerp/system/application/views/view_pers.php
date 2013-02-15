@@ -7,31 +7,53 @@ $container_tr=join("&nbsp;", $form->_button_container["TR"]);
 if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	echo $form->output;
 else:
- 
+
 if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>';
 
 echo $form_scripts;
 echo $form_begin
 ?>
 <script type="text/javascript" charset="utf-8">
-	$("#nacimi").datepicker({   dateFormat: "dd/mm/yy" });
+	$("#nacimi").datepicker({  dateFormat: "dd/mm/yy" });
 	$("#vence").datepicker({   dateFormat: "dd/mm/yy" });
 	$("#ingreso").datepicker({ dateFormat: "dd/mm/yy" });
-	$("#retiro").datepicker({ dateFormat: "dd/mm/yy" });
-	$("#vari5").datepicker({ dateFormat: "dd/mm/yy" });
+	$("#retiro").datepicker({  dateFormat: "dd/mm/yy" });
+	$("#vari5").datepicker({   dateFormat: "dd/mm/yy" });
 
 	$("#maintabcontainer").tabs();
 
-	
+	function creascli(id){
+		<?php
+		$codigo=$form->get_from_dataobjetct('codigo');
+		if(!empty($codigo)){
+			$codigo=trim($codigo);
+		?>
+
+		var enlace = $('#enlace').val().toUpperCase();
+		enlace = enlace.replace(/^\s*|\s*$/g,"");
+		var rt= $.ajax({ type: "POST", data: {codigo: enlace},url: "<?php echo site_url('ventas/scli/creafrompers/insert') ?>/"+id, async: false }).responseText;
+		if(rt==''){
+			if(enlace==''){
+				$('#enlace').val('E<?php echo $codigo ?>');
+			}else{
+				$('#enlace').val(enlace);
+			}
+			apprise("<h1>Cliente guardado</h1>");
+		}else{
+			apprise("<h1>"+rt+"</h1>");
+		}
+		<?php } ?>
+	}
+
 	function get_depto(){
 		var divi=$("#divi").val();
 		$.ajax({
 			url: "<?php echo site_url('nomina/pers/depto'); ?>"+'/'+divi,
 			success: function(msg){
-				$("#td_depto").html(msg);								
+				$("#td_depto").html(msg);
 			}
 		});
-	} 
+	}
 </script>
 
 
@@ -80,7 +102,7 @@ echo $form_begin
 			</tr>
 		</table>
 		</fieldset>
-		
+
 <div id="maintabcontainer">
 	<ul>
 		<li><a href="#tab1">Relaci&oacute;n Laboral</a></li>
@@ -89,7 +111,7 @@ echo $form_begin
 		<li><a href="#tab4">Horarios</a></li>
 	</ul>
 	<div id="tab1" style='background:#EEFFFF'>
-		
+
 		<fieldset style='border: 1px outset #8A0808;'>
 		<table width='100%'>
 			<tr>
@@ -115,7 +137,7 @@ echo $form_begin
 				<td class="littletablerow"    ><?php echo $form->profes->output ?></td>
 				<td class="littletableheaderc"><?php echo $form->email->label   ?></td>
 				<td class="littletablerow"    ><?php echo $form->email->output  ?></td>
-			</tr> 
+			</tr>
 			<tr>
 				<td class="littletableheaderc"><?php echo $form->divi->label      ?></td>
 				<td class="littletablerow"    ><?php echo $form->divi->output     ?></td>
@@ -136,7 +158,15 @@ echo $form_begin
 		<fieldset style='border: 1px outset #8A0808;'>
 		<table width='100%'>
 			<tr>
-				<td class="littletableheaderc"><?php echo $form->enlace->label  ?></td>
+				<td class="littletableheaderc"><?php echo $form->enlace->label  ?>
+				<?php
+				if($form->_status!='show' && $form->_status!='create'){
+					$id=$form->get_from_dataobjetct('id');
+				?>
+				<a href="#" onClick="creascli(<?php echo $id ?>); return false" title="Crear empleado como cliente"><?php echo image('add1-.png'); ?></a></td>
+				<?php } ?>
+
+				</td>
 				<td class="littletablerow"    ><?php echo $form->enlace->output ?></td>
 				<td class="littletableheaderc"></td>
 				<td class="littletablerow"    ></td>
