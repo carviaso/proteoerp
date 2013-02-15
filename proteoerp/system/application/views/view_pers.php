@@ -28,7 +28,6 @@ echo $form_begin
 		if(!empty($codigo)){
 			$codigo=trim($codigo);
 		?>
-
 		var enlace = $('#enlace').val().toUpperCase();
 		enlace = enlace.replace(/^\s*|\s*$/g,"");
 		var rt= $.ajax({ type: "POST", data: {codigo: enlace},url: "<?php echo site_url('ventas/scli/creafrompers/insert') ?>/"+id, async: false }).responseText;

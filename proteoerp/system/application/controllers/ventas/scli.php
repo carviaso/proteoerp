@@ -2939,8 +2939,11 @@ function chrif(rif){
 
 				$this->genesal=false;
 				$rt=$this->dataedit();
-
-				echo $rt;
+				if(stripos($rt, 'guardado')!== false){
+					echo '';
+				}else{
+					echo $rt;
+				}
 			}else{
 				echo 'Registro no encontrado';
 			}
