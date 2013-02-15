@@ -1952,8 +1952,8 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 
 		$edit = new DataEdit('Clientes', $do);
 		$edit->back_url = site_url('ventas/scli/filteredgrid');
-//		$edit->script($script, 'create');
-//		$edit->script($script, 'modify');
+		//$edit->script($script, 'create');
+		//$edit->script($script, 'modify');
 
 		$edit->pre_process('delete','_pre_del');
 		$edit->pre_process('insert','_pre_ins');
@@ -1964,7 +1964,7 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		$edit->post_process('delete','_post_delete');
 
 		$edit->cliente = new inputField('C&oacute;digo', 'cliente');
-		$edit->cliente->rule = 'trim|strtoupper|callback_chexiste';
+		$edit->cliente->rule = 'trim|strtoupper|alpha_numeric|callback_chexiste';
 		$edit->cliente->mode = 'autohide';
 		$edit->cliente->size = 9;
 		$edit->cliente->maxlength = 5;
@@ -2024,7 +2024,7 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		$edit->$obj->option('','Seleccionar');
 		$edit->$obj->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
 		$edit->$obj->style = 'width:200px';
-		$edit->$obj->insertValue = $this->datasis->traevalor("CIUDAD");
+		$edit->$obj->insertValue = $this->datasis->traevalor('CIUDAD');
 
 		$obj  ="dire21";
 		$edit->$obj = new inputField('Envio',$obj);
@@ -2083,7 +2083,7 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		$edit->zona->option('','Seleccionar');
 		$edit->zona->options('SELECT codigo, CONCAT(codigo," ", nombre) nombre FROM zona ORDER BY nombre');
 		$edit->zona->style = 'width:166px';
-		$edit->zona->insertValue = $this->datasis->traevalor("ZONAXDEFECTO");
+		$edit->zona->insertValue = $this->datasis->traevalor('ZONAXDEFECTO');
 
 		$edit->pais = new inputField('Pa&iacute;s','pais');
 		$edit->pais->rule = 'trim';
@@ -2221,8 +2221,8 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 .maintabcontainer {width: 780px; margin: 5px auto;}
 </style>';
 
-			$conten["form"]   =&  $edit;
-			$conten["script"] = $script;
+			$conten['form']   =&  $edit;
+			$conten['script'] = $script;
 			$data['content']  = $this->load->view('view_scli', $conten);
 /*
 			$data['content'] .= $this->pi18n->fallas();
@@ -2873,6 +2873,78 @@ function chrif(rif){
 		$this->genesal=false;
 		$rt=$this->dataedit();
 		echo $rt;
+	}
+
+	//Crea un cliente desde pers
+	function creafrompers($status=null,$id_pers=null){
+		if($status=='insert' && !empty($id_pers)){
+			$codigo=$this->input->post('codigo');
+			$dbid_pers=$this->db->escape($id_pers);
+			$query=$this->db->query("SELECT nacional,cedula,codigo,nombre,apellido,direc1,direc2 FROM pers WHERE id=".$dbid_pers);
+			if($query->num_rows()>0){
+				$row = $query->row();
+
+				if(empty($codigo)){
+					$codigo='E'.trim($row->codigo);
+				}
+				$cedula = trim($row->nacional).trim($row->cedula);
+				$mSQL   = 'SELECT nombre FROM scli WHERE rifci='.$this->db->escape($cedula);
+				$nomgua = $this->datasis->dameval($mSQL);
+				if(!empty($nomgua)){
+					echo 'Al parecer ya existen un cliente creado con el mismo documento de identidad';
+					return ;
+				}
+
+				$nombre = trim($row->nombre).' '.trim($row->apellido);
+				$_POST = array (
+					'cliente'    => $codigo,
+					'rifci'      => $cedula,
+					'nombre'     => $nombre,
+					'nomfis'     => $nombre,
+					'contacto'   => '',
+					'tipo'       => '1',
+					'mmargen'    => '',
+					'tiva'       => 'N',
+					'zona'       => $this->datasis->traevalor('ZONAXDEFECTO'),
+					'grupo'      => $this->datasis->dameval('SELECT grupo FROM grcl WHERE gr_desc like "%EMPLEADO%" OR gr_desc like "%TRABAJADOR%"'),
+					'socio'      => '',
+					'dire11'     => $row->direc1,
+					'dire12'     => $row->direc2,
+					'ciudad1'    => $this->datasis->traevalor('CIUDAD'),
+					'dire21'     => '',
+					'dire22'     => '',
+					'ciudad2'    => '',
+					'telefono'   => '',
+					'url'        => '',
+					'telefon2'   => '',
+					'fb'         => '',
+					'pin'        => '',
+					'email'      => '',
+					'twitter'    => '',
+					'repre'      => '',
+					'cirepre'    => '',
+					'vendedor'   => '',
+					'porvend'    => '',
+					'cobrador'   => '',
+					'porcobr'    => '',
+					'cuenta'     => $this->datasis->dameval('SELECT cuenta FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"'),
+					'mensaje'    => '',
+					'observa'    => '',
+					'tarifa'     => '',
+					'tactividad' => '',
+					'tminimo'    => '',
+					'upago'      => '',
+					'tarimonto'  => ''
+				);
+
+				$this->genesal=false;
+				$rt=$this->dataedit();
+
+				echo $rt;
+			}else{
+				echo 'Registro no encontrado';
+			}
+		}
 	}
 
 	// Revisa si existe el codigo

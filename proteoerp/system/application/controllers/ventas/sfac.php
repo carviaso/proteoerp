@@ -2693,6 +2693,8 @@ class Sfac extends Controller {
 		$edit->tipo_doc = new  dropdownField('Documento', 'tipo_doc');
 		$edit->tipo_doc->option('F','Factura');
 		$edit->tipo_doc->option('D','Devoluci&oacute;n');
+		//$edit->tipo_doc->option('M','Fac. Manual');
+		//$edit->tipo_doc->option('O','Dev. Manual');
 		$edit->tipo_doc->style='width:150px;';
 		$edit->tipo_doc->size = 5;
 		$edit->tipo_doc->rule='required';
@@ -3377,7 +3379,7 @@ class Sfac extends Controller {
 		for($i=0;$i<$cana;$i++){
 
 			//Aplica el corte segun maxlin
-			if($i>=$maxlin){
+			if($maxlin>0 && $i>=$maxlin){
 				$this->_creanfac=true;
 				$do->rel_rm('sitems',$i);
 				continue;
