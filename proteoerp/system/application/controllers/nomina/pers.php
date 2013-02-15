@@ -1250,7 +1250,7 @@ class Pers extends Controller {
 		$edit->enlace->maxlength=5;
 		$edit->enlace->group = 'Relaci&oacute;n Laboral';
 		$edit->enlace->append($cboton);
-		$edit->enlace->rule='trim|strtoupper|existesinv';
+		$edit->enlace->rule='trim|strtoupper|existescli';
 
 		$edit->sso = new inputField('Nro. SSO', 'sso');
 		$edit->sso->size =13;
