@@ -157,8 +157,9 @@ class Stra extends Controller {
 								if (json.status == "A"){
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/STRA').'/\'+res.id+\'/id\'').';
-									apprise("Registro Guardado");
+									//window.open(\''.site_url('formatos/ver/STRA').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+									'.$this->datasis->jwinopen(site_url('formatos/ver/STRA').'/\'+json.pk.id+\'/id\'').';
+									//apprise("Registro Guardado");
 									return true;
 								} else {
 									apprise(json.mensaje);
