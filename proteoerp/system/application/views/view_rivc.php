@@ -54,6 +54,8 @@ $(function(){
 	}
 
 	$('#cod_cli').autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('finanzas/rivc/buscascli'); ?>",
@@ -158,6 +160,8 @@ function del_itrivc(id){
 //Agrega el autocomplete
 function autocod(id){
 	$('#numero_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('finanzas/rivc/buscasfac'); ?>",
