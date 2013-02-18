@@ -583,7 +583,6 @@ class Lprod extends Controller {
 
 		$edit->codigo = new inputField('Producto','codigo');
 		$edit->codigo->rule='required';
-		//$edit->codigo->css_class='inputonlynum';
 		$edit->codigo->size =12;
 		$edit->codigo->maxlength =10;
 

@@ -729,8 +729,6 @@ class Rnoti extends Controller {
 			$edit->frecep->updateValue = date('Y-m-d');
 		$edit->frecep->readonly = true;
 
-
-
 		$edit->estado = new inputField('Estado','estado');
 		$edit->estado->rule='';
 		$edit->estado->size = 22;

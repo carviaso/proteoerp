@@ -16,8 +16,6 @@ else:
 
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 
-<?php //echo $origen; ?>
-
 <table border='0' width="100%">
 	<tr>
 		<td>
@@ -140,7 +138,7 @@ else:
 			<fieldset style='border: 1px outset #9AC8DA;background: #F6F8FF;'>
 			<table border='0' width="100%">
 				<tr>
-					<th colspan='2' style="font-size:14pt;align:center;background:#84AA5C;"    >ENTREGA DEL EQUIPO</th>
+					<th colspan='2' style="font-size:14pt;align:center;background:#84AA5C;" >ENTREGA DEL EQUIPO</th>
 				</tr>
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->fentrega->label;  ?></td>

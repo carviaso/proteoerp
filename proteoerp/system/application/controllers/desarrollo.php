@@ -1749,21 +1749,18 @@ class Desarrollo extends Controller{
 
 	function mtab($n = 1){ return str_repeat("\t",$n); }
 
-
+	//******************************************************************
 	// Gener Crud 
 	function genecrudjq($tabla=null,$s=true){
 		if (empty($tabla) OR (!$this->db->table_exists($tabla))) 
 			show_error('Tabla no existe o faltan parametros');
-
-
 
 		$crud ="\n\t".'function dataedit(){'."\n";
 		$crud.="\t\t".'$this->rapyd->load(\'dataedit\');'."\n";
 
 		$crud.="\t\t".'$script= \''."\n";
 		$crud.="\t\t".'$(function() {'."\n";
-		$crud.="\t\t\t".'$(".inputnum").numeric(".");'."\n";
-		$crud.="\t\t\t".'$(".inputonlynum").numeric();'."\n";
+		$crud.="\t\t\t".'$("#fecha").datepicker({dateFormat:"dd/mm/yy"});'."\n";
 		$crud.="\t\t".'});'."\n";
 		$crud.="\t\t".'\';'."\n\n";
 
@@ -1773,12 +1770,15 @@ class Desarrollo extends Controller{
 		$crud.="\t\t".'$edit->on_save_redirect=false;'."\n\n";
 		$crud.="\t\t".'$edit->back_url = site_url($this->url.\'filteredgrid\');'."\n\n";
 
+		$crud.="\t\t".'$edit->script($script,\'create\');'."\n\n";
+		$crud.="\t\t".'$edit->script($script,\'modify\');'."\n\n";
+
 		$crud.="\t\t".'$edit->post_process(\'insert\',\'_post_insert\');'."\n";
 		$crud.="\t\t".'$edit->post_process(\'update\',\'_post_update\');'."\n";
 		$crud.="\t\t".'$edit->post_process(\'delete\',\'_post_delete\');'."\n";
-		$crud.="\t\t".'$edit->pre_process(\'insert\',\'_pre_insert\');'."\n";
-		$crud.="\t\t".'$edit->pre_process(\'update\',\'_pre_update\');'."\n";
-		$crud.="\t\t".'$edit->pre_process(\'delete\',\'_pre_delete\');'."\n";
+		$crud.="\t\t".'$edit->pre_process(\'insert\', \'_pre_insert\' );'."\n";
+		$crud.="\t\t".'$edit->pre_process(\'update\', \'_pre_update\' );'."\n";
+		$crud.="\t\t".'$edit->pre_process(\'delete\', \'_pre_delete\' );'."\n";
 
 		$crud.="\n";
 
@@ -1792,7 +1792,6 @@ class Desarrollo extends Controller{
 		$crud.="\t\t".'$edit->script($script,\'modify\');'."\n";
 		$crud.="\n";
 
-		//$fields = $this->db->field_data($tabla);
 		$mSQL="DESCRIBE $tabla";
 		$query = $this->db->query("DESCRIBE $tabla");
 		foreach ($query->result() as $field){
@@ -1849,7 +1848,6 @@ class Desarrollo extends Controller{
 			}
 		}
 
-		//$crud.="\t\t".'$edit->buttons(\'modify\', \'save\', \'undo\', \'delete\', \'back\');'."\n";
 		$crud.="\t\t".'$edit->build();'."\n\n";
 
 		$crud.="\t\t".'if($edit->on_success()){'."\n";
@@ -1863,13 +1861,6 @@ class Desarrollo extends Controller{
 		$crud.="\t\t".'	echo $edit->output;'."\n";
 		$crud.="\t\t".'}'."\n";
 
-		//$crud.="\t\t".'$data[\'content\'] = $edit->output;'."\n";
-		////$crud.="\t\t".'$data[\'head\']    = $this->rapyd->get_head();'."\n";
-		////$crud.="\t\t".'$data[\'script\']  = script(\'jquery.js\').script(\'plugins/jquery.numeric.pack.js\').script(\'plugins/jquery.floatnumber.js\');'."\n";
-		//$crud.="\t\t".'$data[\'script\'] = $script;'."\n";
-		////$crud.="\t\t".'$data[\'title\']   = heading($this->tits);'."\n";
-		//$crud.="\t\t".'$this->load->view(\'jqgrid/ventanajq\', $data);'."\n\n";
-
 		$crud.="\t".'}'."\n";
 
 		if($s){
@@ -1882,6 +1873,42 @@ class Desarrollo extends Controller{
 			return $crud;
 		}
 	}
+
+	//******************************************************************
+	//    Genera el View a partir de la Tabla 
+	//******************************************************************
+	function geneviewjq($tabla=null,$s=true){
+		if (empty($tabla) OR (!$this->db->table_exists($tabla))) 
+			show_error('Tabla no existe o faltan parametros');
+
+		$crud  ="\t".'<?php'."\n";
+		$crud .="\t".'echo $form_scripts;'."\n";
+		$crud .="\t".'echo $form_begin;'."\n\n";
+		$crud .="\t".'if(isset($form->error_string)) echo \'<div class="alert">\'.$form->error_string.\'</div>\';'."\n";
+		$crud .="\t".'if($form->_status <> \'show\'){ ?>'."\n\n";
+		$crud .="\t".'<script language="javascript" type="text/javascript">'."\n";
+		$crud .="\t".'</script>'."\n";
+		$crud .="\t".'<?php } ?>'."\n\n";
+		$crud .="\t".'<fieldset  style=\'border: 1px outset #FEB404;background: #FFFCE8;\'>'."\n";
+		$crud .="\t".'<table width=\'100%\'>'."\n";
+		
+		$mSQL ="DESCRIBE $tabla";
+		$query = $this->db->query("DESCRIBE $tabla");
+		foreach ($query->result() as $field){
+			$crud .="\t".'	<tr>'."\n";
+			$crud .="\t".'		<td class="littletablerowth"><?php echo $form->'.$field->Field.'->label;  ?></td>'."\n";
+			$crud .="\t".'		<td class="littletablerow"  ><?php echo $form->'.$field->Field.'->output; ?></td>'."\n";
+			$crud .="\t".'	</tr>'."\n";
+		}
+
+		$crud .="\t".'</table>'."\n";
+		$crud .="\t".'</fieldset>'."\n";
+		$crud .="\t".'<?php echo $form_end; ?>'."\n";
+
+		echo '<html><body><pre>'.htmlentities( $crud).'</pre></body></html>';
+
+	}
+
 
 	function editor(){
 			$this->load->view('editorcm');

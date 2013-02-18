@@ -3572,11 +3572,6 @@ class gser extends Controller {
 		//Fin de campos para detalle
 		//*****************************
 
-		//if($edit->_status=='create'){
-		//	$accion="javascript:calcularete()";
-		//	$edit->button_status('btn_crete','Calcular retenciones',$accion,'TR','show');
-		//}
-
 		$edit->buttons('add_rel');
 
 		$edit->on_save_redirect=false;
@@ -3604,44 +3599,6 @@ class gser extends Controller {
 				echo json_encode($rt);
 			}
 		}
-
-
-		//if($this->genesal){
-		//	$edit->build();
-		//	$conten['form']  =&  $edit;
-		//	$conten['solo']  = $this->solo;
-		//	if (  $this->solo ){
-		//		$data['content'] = $this->load->view('view_gser', $conten);
-		//	} else {
-		//		$smenu['link']   = barra_menu('518');
-		//		$data['content'] =  $this->load->view('view_gser', $conten,true);
-		//		$data['smenu']   =  $this->load->view('view_sub_menu', $smenu,true);
-		//		$data['title']   =  heading('Registro de Gastos o Nota de Debito');
-		//		$data['head']    =  script('jquery.js').script('jquery-ui.js');
-		//		$data['head']   .=  script('plugins/jquery.numeric.pack.js');
-		//		$data['head']   .=  script('plugins/jquery.meiomask.js');
-		//		$data['head']   .=  style('redmond/jquery-ui-1.8.1.custom.css');
-		//		$data['head']   .=  $this->rapyd->get_head();
-		//		$data['head']   .=  phpscript('nformat.js');
-		//		$data['head']   .=  script('plugins/jquery.floatnumber.js');
-		//		$data['head']   .=  script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
-		//		$this->load->view('view_ventanas', $data);
-        //
-		//	}
-		//} else {
-		//	$edit->on_save_redirect=false;
-		//	$edit->build();
-		//	if($edit->on_success()){
-		//		//$this->claves=$edit->_dataobject->pk;
-		//		//$this->claves['control']=$edit->_dataobject->get('control');
-		//		$rt= 'Gasto Guardado';
-		//
-		//
-		//	}elseif($edit->on_error()){
-		//		$rt= html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string));
-		//	}
-		//	return $rt;
-		//}
 	}
 
 	//Calcula las retenciones para enviarlas por ajax

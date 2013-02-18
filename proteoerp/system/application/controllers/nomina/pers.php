@@ -1218,21 +1218,20 @@ class Pers extends Controller {
 		$edit->depa->style ="width:200px;";
 		$edit->depa->option("","");
 
-		//if($edit->_status=='modify' || $edit->_status=='show' ){
 		$divi=$edit->getval('divi');
-			if($divi!==FALSE){
-				$edit->depa->options("SELECT departa,depadesc FROM depa where division='$divi' ORDER BY division");
-			}else{
-				$edit->depa->option("","Seleccione un Division");
-			}
-		//}
+
+		if( $divi !== false ){
+			$edit->depa->options("SELECT departa,depadesc FROM depa where division='$divi' ORDER BY division");
+		}else{
+			$edit->depa->option("","Seleccione un Division");
+		}
+
 		$edit->depa->group = "Relaci&oacute;n Laboral";
 
 		$edit->contrato = new dropdownField("Contrato","contrato");
 		$edit->contrato->style ="width:350px;";
 		$edit->contrato->option("","");
 		$edit->contrato->options("SELECT codigo,CONCAT('',codigo,nombre)as nombre FROM noco ORDER BY codigo");
-		//$edit->contrato->group = "Relaci&oacute;n Laboral";
 
 		$edit->vencimiento = new DateonlyField('Vencimiento', 'vence','d/m/Y');
 		$edit->vencimiento->size = 10;

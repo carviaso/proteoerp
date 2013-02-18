@@ -540,7 +540,7 @@ class Lvaca extends Controller {
 		$edit->finca->maxlength =100;
 
 		$edit->ruta = new dropdownField('Ruta', 'ruta');
-		$edit->ruta->rule = 'trim|max_length[4]';
+		$edit->ruta->rule = 'trim';
 		$edit->ruta->option('','Seleccionar');
 		$edit->ruta->options('SELECT codigo, CONCAT(codigo," ", nombre) nombre FROM lruta ORDER BY nombre');
 		$edit->ruta->style = 'width:166px';

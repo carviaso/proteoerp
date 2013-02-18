@@ -13,12 +13,8 @@ class Lacida extends Controller {
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('lacida','id') ) {
-			$this->db->simple_query('ALTER TABLE lacida DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE lacida ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE lacida ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
-		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->datasis->creaintramenu(array('modulo'=>'225','titulo'=>'Leche Acida','mensaje'=>'Notificacion Leche Acida','panel'=>'LECHE','ejecutar'=>'leche/lacida','target'=>'popu','visible'=>'S','pertenece'=>'2','ancho'=>900,'alto'=>600));	
+		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -39,9 +35,7 @@ class Lacida extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
-			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
-			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Notificacion de Leche Acida'),
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -144,7 +138,7 @@ class Lacida extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 410, width: 600, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -220,21 +214,32 @@ class Lacida extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
 
 		$grid  = new $this->jqdatagrid;
 
+
+		$grid->addField('id');
+		$grid->label('Numero');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
+
 		$grid->addField('fecha');
 		$grid->label('Fecha');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 70,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
@@ -261,7 +266,7 @@ class Lacida extends Controller {
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 100,
+			'width'         => 50,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -269,12 +274,12 @@ class Lacida extends Controller {
 		));
 
 
-		$grid->addField('nombre');
-		$grid->label('Nombre');
+		$grid->addField('nomvaca');
+		$grid->label('Nomvaca');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 150,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:45, maxlength: 45 }',
@@ -288,7 +293,7 @@ class Lacida extends Controller {
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 100,
+			'width'         => 70,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -303,7 +308,7 @@ class Lacida extends Controller {
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 100,
+			'width'         => 50,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -318,7 +323,7 @@ class Lacida extends Controller {
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 100,
+			'width'         => 50,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -331,7 +336,7 @@ class Lacida extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 150,
+			'width'         => 60,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:15, maxlength: 15 }',
@@ -343,13 +348,28 @@ class Lacida extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 150,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:45, maxlength: 45 }',
 		));
 
 
+		$grid->addField('precio');
+		$grid->label('Precio');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 70,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+/*
 		$grid->addField('peso');
 		$grid->label('Peso');
 		$grid->params(array(
@@ -378,7 +398,7 @@ class Lacida extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
-
+*/
 
 		$grid->addField('promedio');
 		$grid->label('Promedio');
@@ -387,7 +407,7 @@ class Lacida extends Controller {
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 100,
+			'width'         => 70,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -396,13 +416,13 @@ class Lacida extends Controller {
 
 
 		$grid->addField('gadm');
-		$grid->label('Gadm');
+		$grid->label('Gasto Adm');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 100,
+			'width'         => 80,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -410,29 +430,18 @@ class Lacida extends Controller {
 		));
 
 
-		$grid->addField('precio');
-		$grid->label('Precio');
+		$grid->addField('pleche');
+		$grid->label('Pagar');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 100,
+			'width'         => 70,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('id');
-		$grid->label('Id');
-		$grid->params(array(
-			'align'         => "'center'",
-			'frozen'        => 'true',
-			'width'         => 40,
-			'editable'      => 'false',
-			'search'        => 'false'
 		));
 
 
@@ -470,7 +479,7 @@ class Lacida extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -484,7 +493,7 @@ class Lacida extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -542,16 +551,118 @@ class Lacida extends Controller {
 		};
 	}
 
+	//******************************************************************
+	//  Data Edit
+	//
 	function dataedit(){
 		$this->rapyd->load('dataedit');
-		$script= '
-		$(function() {
-			$(".inputnum").numeric(".");
-			$(".inputonlynum").numeric();
-		});
-		';
 
 		$edit = new DataEdit($this->tits, 'lacida');
+
+
+		$script= "
+		$(document).ready(function() {
+			$('#vaquera').autocomplete({
+				source: function( req, add){
+					$.ajax({
+						url:  '".site_url('ajax/buscalvaca')."',
+						type: 'POST',
+						dataType: 'json',
+						data: 'q='+req.term,
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$('#vaquera').val('')
+									$('#nomvaca').val('');
+									$('#nomvaca_val').text('');
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+									add(sugiere);
+								}
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$('#vaquera').attr('readonly', 'readonly');
+					$('#vaquera').val(ui.item.vaquera);
+					$('#nomvaca').val(ui.item.nombre);
+					setTimeout(function() {  $('#vaquera').removeAttr('readonly'); }, 1500);
+				}
+			});
+
+			$('#codigo').autocomplete({
+				source: function( req, add){
+					$.ajax({
+						url:  '".site_url('ajax/buscasinv')."',
+						type: 'POST',
+						dataType: 'json',
+						data: 'q='+req.term,
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$('#codigo').val('')
+									$('#descrip').val('');
+									$('#descrip_val').text('');
+									$('#precio').val('');
+									$('#precio_val').text('');
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+									add(sugiere);
+								}
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$('#codigo').attr('readonly', 'readonly');
+					$('#codigo').val(ui.item.codigo);
+					$('#descrip').val(ui.item.descrip);
+					$('#descrip_val').text(ui.item.descrip);
+					$('#precio').val(ui.item.base1);
+					$('#precio_val').text(ui.item.base1);
+
+					setTimeout(function() {  $('#codigo').removeAttr('readonly'); }, 1500);
+				}
+			});
+		});
+		";
+
+		$script .= " 
+		function totalizar(){
+			var precio = Number($('#precio').val());
+			var promed = Number($('#promedio').val());
+			var gastos = Number($('#gadm').val());
+			if ( precio.length = 0  ){ precio = 1 };
+			if ( promed.length = 0  ){ promed = 1 };
+			if ( gastos.length = 0  ){ gastos = 0.4 };
+			$(\"#pleche\").val(roundNumber( precio/promed - 0.4 ,2));
+		};
+			
+		$('#precio').change(   function(){ totalizar();} );
+		$('#promedio').change( function(){ totalizar();}  );
+		$('#gadm').change(     function(){ totalizar();}  );
+		";
+
+		$script .= ' 
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+		});';
+
+
+
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -566,84 +677,99 @@ class Lacida extends Controller {
 		$edit->pre_process('update','_pre_update');
 		$edit->pre_process('delete','_pre_delete');
 
+		$edit->id = new inputField('Numero','id');
+		$edit->id->rule='numeric';
+		$edit->id->css_class='inputnum';
+		$edit->id->size =12;
+		$edit->id->maxlength =10;
+		$edit->id->readonly = true;
+		$edit->id->insertValue=date('0');
+
 		$edit->fecha = new dateField('Fecha','fecha');
 		$edit->fecha->rule='chfecha';
 		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
+		$edit->fecha->calendar = false;
+		$edit->fecha->insertValue=date('Y-m-d');
 
-		$edit->ruta = new inputField('Ruta','ruta');
-		$edit->ruta->rule='max_length[4]';
-		$edit->ruta->size =6;
-		$edit->ruta->maxlength =4;
+		$edit->ruta = new dropdownField('Ruta', 'ruta');
+		$edit->ruta->rule = 'trim';
+		$edit->ruta->option('','Seleccionar');
+		$edit->ruta->options('SELECT codigo, CONCAT( nombre," ",codigo) nombre FROM lruta ORDER BY nombre');
+		$edit->ruta->style = 'width:350px';
 
 		$edit->vaquera = new inputField('Vaquera','vaquera');
-		$edit->vaquera->rule='max_length[11]|integer';
-		$edit->vaquera->css_class='inputonlynum';
-		$edit->vaquera->size =13;
-		$edit->vaquera->maxlength =11;
+		$edit->vaquera->size = 6;
+		$edit->vaquera->maxlength =10;
 
-		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='max_length[45]';
-		$edit->nombre->size =47;
-		$edit->nombre->maxlength =45;
+		$edit->nomvaca = new inputField('Nombre','nomvaca');
+		$edit->nomvaca->size = 35;
+		$edit->nomvaca->maxlength = 45;
 
 		$edit->litros = new inputField('Litros','litros');
-		$edit->litros->rule='max_length[16]|numeric';
+		$edit->litros->rule='numeric';
 		$edit->litros->css_class='inputnum';
-		$edit->litros->size =18;
-		$edit->litros->maxlength =16;
+		$edit->litros->size = 8;
+		$edit->litros->maxlength = 16;
 
 		$edit->acidez = new inputField('Acidez','acidez');
-		$edit->acidez->rule='max_length[10]|numeric';
+		$edit->acidez->rule='numeric';
 		$edit->acidez->css_class='inputnum';
-		$edit->acidez->size =12;
-		$edit->acidez->maxlength =10;
+		$edit->acidez->size = 6;
+		$edit->acidez->maxlength = 6;
+		$edit->acidez->insertValue=date('21');
 
 		$edit->alcohol = new inputField('Alcohol','alcohol');
-		$edit->alcohol->rule='max_length[10]|numeric';
+		$edit->alcohol->rule='numeric';
 		$edit->alcohol->css_class='inputnum';
-		$edit->alcohol->size =12;
-		$edit->alcohol->maxlength =10;
+		$edit->alcohol->size = 6;
+		$edit->alcohol->maxlength = 6;
+		$edit->alcohol->insertValue=date('1');
 
 		$edit->codigo = new inputField('Codigo','codigo');
-		$edit->codigo->rule='max_length[15]';
 		$edit->codigo->size =17;
 		$edit->codigo->maxlength =15;
 
-		$edit->descrip = new inputField('Descrip','descrip');
-		$edit->descrip->rule='max_length[45]';
+		$edit->descrip = new inputField('Descripcion','descrip');
 		$edit->descrip->size =47;
 		$edit->descrip->maxlength =45;
 
+		$edit->precio = new inputField('Precio','precio');
+		$edit->precio->rule='numeric';
+		$edit->precio->css_class='inputnum';
+		$edit->precio->size =10;
+		$edit->precio->maxlength =10;
+
 		$edit->peso = new inputField('Peso','peso');
-		$edit->peso->rule='max_length[10]|numeric';
+		$edit->peso->rule='numeric';
 		$edit->peso->css_class='inputnum';
 		$edit->peso->size =12;
 		$edit->peso->maxlength =10;
 
 		$edit->rendimiento = new inputField('Rendimiento','rendimiento');
-		$edit->rendimiento->rule='max_length[10]|numeric';
+		$edit->rendimiento->rule='numeric';
 		$edit->rendimiento->css_class='inputnum';
 		$edit->rendimiento->size =12;
 		$edit->rendimiento->maxlength =10;
 
 		$edit->promedio = new inputField('Promedio','promedio');
-		$edit->promedio->rule='max_length[10]|numeric';
+		$edit->promedio->rule='numeric';
 		$edit->promedio->css_class='inputnum';
-		$edit->promedio->size =12;
-		$edit->promedio->maxlength =10;
+		$edit->promedio->size =6;
+		$edit->promedio->maxlength =6;
 
-		$edit->gadm = new inputField('Gadm','gadm');
-		$edit->gadm->rule='max_length[10]|numeric';
+		$edit->gadm = new inputField('Gastos Adm.','gadm');
+		$edit->gadm->rule='numeric';
 		$edit->gadm->css_class='inputnum';
-		$edit->gadm->size =12;
-		$edit->gadm->maxlength =10;
+		$edit->gadm->size =6;
+		$edit->gadm->maxlength =6;
+		$edit->gadm->insertValue=date('0.4');
 
-		$edit->precio = new inputField('Precio','precio');
-		$edit->precio->rule='max_length[10]|numeric';
-		$edit->precio->css_class='inputnum';
-		$edit->precio->size =12;
-		$edit->precio->maxlength =10;
+		$edit->pleche = new inputField('Precio','pleche');
+		$edit->pleche->rule='numeric';
+		$edit->pleche->css_class='inputnum';
+		$edit->pleche->size =8;
+		$edit->pleche->maxlength =10;
+		$edit->pleche->readonly = true;
 
 		$edit->build();
 
@@ -655,7 +781,11 @@ class Lacida extends Controller {
 			);
 			echo json_encode($rt);
 		}else{
-			echo $edit->output;
+			$conten['form']   =&  $edit;
+			$conten['script'] =  '';
+			$this->load->view('view_lacida', $conten);
+
+			//echo $edit->output;
 		}
 	}
 
@@ -712,8 +842,6 @@ class Lacida extends Controller {
 			) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COMMENT='Notificacion de leche Acida'";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('lacida');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
 

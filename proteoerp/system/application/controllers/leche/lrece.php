@@ -1932,7 +1932,6 @@ class Lrece extends Controller {
 				minLength: 2,
 				select: function( event, ui ) {
 					$('#vaquera').attr('readonly', 'readonly');
-
 					$('#vaquera').val(ui.item.vaquera);
 					$('#nombre').val(ui.item.nombre);
 					$('#nombre_val').text(ui.item.nombre);
