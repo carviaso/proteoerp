@@ -6,9 +6,9 @@
 *  $temas        => Arreglo con los temas UI a cargar
 *  $jquerys      => Pluggins de JQuery que se quieran cargar
 *  $LayoutStyle  => Scripts de Style adicionales
-*  
-*  
-*  
+*
+*
+*
 **********************************************************************/
 
 //Por compatibilidad con version anterior
@@ -60,7 +60,7 @@ if ( isset($readyLayout) == false ){
 	function westonre (pane, $Pane){
 		jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);
 	};
-	
+
 ';
 }
 
@@ -108,8 +108,8 @@ if (isset($listados)) {
 		hiddengrid: true,
 		width: 190,
 		caption: "Reportes",
-		ondblClickRow: function(id, row, col, e){ 
-			var ret = $("#listados").getRowData(id); 
+		ondblClickRow: function(id, row, col, e){
+			var ret = $("#listados").getRowData(id);
 			window.open("'.base_url().'reportes/ver/"+ret.nombre, "_blank", "width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400)),screeny=((screen.availWidth/2)-300)");
 			}
 	});
@@ -136,7 +136,7 @@ if (isset($otros)) {
 		hiddengrid: true,
 		width: 190,
 		caption: "Funciones",
-		ondblClickRow: function(id, row, col, e){ 
+		ondblClickRow: function(id, row, col, e){
 			var ret = $("#otros").getRowData(id);
 			if (ret.proteo) {
 				eval(ret.proteo+"()");
@@ -188,7 +188,7 @@ if ( isset($jquerys) ) {
 }
 
 echo "\n<!-- Block Out -->\n";
-echo script('plugins/jquery.blockUI.js'); 
+echo script('plugins/jquery.blockUI.js');
 
 echo "\n<!-- Impromptu -->\n";
 echo script('jquery-impromptu.js');
@@ -284,15 +284,15 @@ if ( isset($tamano) )
 //Funcion para bloquear y esperar
 function esperar(url){
 	$.blockUI({
-		message: $('#displayBox'), 
-		css: { 
-			top:  ($(window).height() - 400) /2 + 'px', 
-			left: ($(window).width()  - 400) /2 + 'px', 
-			width: '300px' 
+		message: $('#displayBox'),
+		css: {
+			top:  ($(window).height() - 400) /2 + 'px',
+			left: ($(window).width()  - 400) /2 + 'px',
+			width: '300px'
 		}
 	});
 	$.get(url, function(data) {
-		setTimeout($.unblockUI, 2); 
+		setTimeout($.unblockUI, 2);
 		$.prompt(data);
 	});
 	return false;
@@ -307,12 +307,12 @@ function esperar(url){
 
 <?php echo (isset($WestPanel) == true)? $WestPanel:''; ?>
 
-<?php 
+<?php
 if(isset($centerpanel) == true) {
 	echo $centerpanel;
 } else{?>
 <div id="RightPane" class="ui-layout-center ui-helper-reset ui-widget-content" align="center"><!-- Tabs pane -->
-	<table id="newapi<?php echo $grids[0]['gridname'];?>"></table> 
+	<table id="newapi<?php echo $grids[0]['gridname'];?>"></table>
 	<div   id="pnewapi<?php echo $grids[0]['gridname'];?>"></div>
 </div> <!-- #RightPane -->
 

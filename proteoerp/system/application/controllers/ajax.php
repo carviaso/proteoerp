@@ -745,6 +745,37 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//Busca los articulos que esten por rma
+	function buscastrarma(){
+		$sprv = $this->input->post('sprv');
+		$alma = $this->input->post('alma');
+
+		$data = '[ ]';
+		if($sprv !== false && $alma !== false){
+			$dbsprv = $this->db->escape($sprv);
+			$dbalma = $this->db->escape($alma);
+			$retArray = $retorno = array();
+			$mSQL="SELECT a.codigo, SUM(IF(b.envia=$dbalma,-1,1)*a.cantidad) AS cantidad, a.descrip
+				FROM itstra AS a
+				JOIN stra AS b ON a.numero=b.numero
+				WHERE b.proveed=$dbsprv AND (b.envia=$dbalma OR b.recibe=$dbalma)
+				GROUP BY a.codigo
+				HAVING cantidad>0";
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $id=>$row ) {
+					$retArray['codigo']  = utf8_encode($row['codigo']);
+					$retArray['descrip'] = utf8_encode($row['descrip']);
+					$retArray['cantidad']= $row['cantidad'];
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
 	//
 	// Busca Plan de cuentas
 	//

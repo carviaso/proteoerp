@@ -33,10 +33,19 @@ if($form->_status!='show'){
 itstra_cont=<?php echo $form->max_rel_count['itstra'] ?>;
 
 $(function(){
+
+	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
 	$(".inputnum").numeric(".");
 	for(var i=0;i < <?php echo $form->max_rel_count['itstra']; ?>;i++){
 		autocod(i.toString());
 	}
+
+	$('input[name^="cantidad_"]').keypress(function(e) {
+		if(e.keyCode == 13) {
+		    add_itstra();
+			return false;
+		}
+	});
 });
 
 function post_modbus(id){
@@ -90,6 +99,13 @@ function add_itstra(){
 	$("#cantidad_"+can).numeric(".");
 	$("#codigo_"+can).focus();
 	autocod(can);
+	$("#cantidad_"+can).keypress(function(e) {
+		if(e.keyCode == 13) {
+		    add_itstra();
+			return false;
+		}
+	});
+
 	itstra_cont=itstra_cont+1;
 }
 

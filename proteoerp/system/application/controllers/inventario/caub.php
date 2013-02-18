@@ -6,9 +6,9 @@ class Caub extends validaciones {
 	var $titp='Almacenes';
 	var $tits='Almacenes';
 	var $url ='inventario/caub/';
-	
+
 	function caub(){
-		parent::Controller(); 
+		parent::Controller();
 
 		$this->load->helper('url');
 		$this->load->helper('text');
@@ -17,7 +17,7 @@ class Caub extends validaciones {
 		$this->load->library('jqdatagrid');
 		//$this->load->library('jformer');
 	}
- 
+
 	function index(){
 		$this->datasis->modulo_id(307,1);
 		if ( !$this->datasis->iscampo('caub','id') ) {
@@ -46,18 +46,18 @@ class Caub extends validaciones {
 		$c=$this->datasis->dameval('SELECT COUNT(*) FROM caub WHERE ubica="AJUS"');
 		if(!($c>0)) $this->db->simple_query('INSERT IGNORE INTO caub (ubica,ubides,gasto,invfis) VALUES ("AJUS","AJUSTES","S","N")');
 		$this->db->simple_query('UPDATE caub SET ubides="AJUSTES", gasto="S",invfis="N" WHERE  ubica="AJUS" ');
-		
+
 		$c=$this->datasis->dameval("SELECT COUNT(*) FROM caub WHERE ubica='INFI'");
 		if(!($c>0)) $this->db->simple_query("INSERT IGNORE INTO caub (ubica,ubides,gasto,invfis) VALUES ('INFI','INVENTARIO FISICO','S','S')");
 		$this->db->simple_query("UPDATE caub SET ubides='INVENTARIO FISICO', gasto='S',invfis='S' WHERE ubica='INFI'");
-		
+
 		$this->db->simple_query("ALTER TABLE `caub`  ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,  DROP PRIMARY KEY,  ADD PRIMARY KEY ( `id`)");
-		
+
 		//redirect("inventario/caub/caubextjs");
 		redirect('inventario/caub/jqdatag');
 
 	}
- 
+
 	//***************************
 	//Layout en la Ventana
 	//
@@ -89,9 +89,9 @@ class Caub extends validaciones {
 		$param['temas']       = array('proteo','darkness','anexos1');
 		//$param['tabs']        = false;
 		$param['encabeza']    = $this->titp;
-		
+
 		$this->load->view('jqgrid/crud2',$param);
-	}	
+	}
 
 	function defgrid( $deployed = false ){
 		$i = 1;
@@ -112,7 +112,7 @@ class Caub extends validaciones {
 		);
 
 		$grid->addField('ubica');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 				'width'       => 60,
 				'editable'    => 'true',
@@ -171,7 +171,7 @@ class Caub extends validaciones {
 		);
 
 		$grid->addField('tipo');
-		$grid->label('Disp.');
+		$grid->label('Disp. Ventas');
 		$grid->params(array(
 				'align'       => "'center'",
 				'width'       => 40,
@@ -239,7 +239,6 @@ class Caub extends validaciones {
 			)
 		);
 
-
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('310');
@@ -251,14 +250,14 @@ class Caub extends validaciones {
 
 
 		#show/hide navigations buttons
-		$grid->setAdd(true);                               
+		$grid->setAdd(true);
 		$grid->setEdit(true);
 		$grid->setDelete(true);
 		$grid->setSearch(false);
 		$grid->setRowNum(30);
-            
+
 		$grid->setShrinkToFit('false');
-            
+
 		#export buttons
 		//$grid->setPdf(true,array('title' => 'Test pdf'));
 
@@ -278,8 +277,7 @@ class Caub extends validaciones {
 	/**
 	* Get data result as json
 	*/
-	function getData()
-	{
+	function getData(){
 		$grid       = $this->jqdatagrid;
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('bcaj');
@@ -287,17 +285,16 @@ class Caub extends validaciones {
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
-	
+
 	/**
 	* Put information
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$codigo = $this->input->post('ubica');
-		
+
 		$data = $_POST;
 
 		unset($data['oper']);
@@ -342,7 +339,7 @@ class Caub extends validaciones {
 		<input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
 	</fieldset>
 	</form>';
-	
+
 		echo $salida;
 
 	}
@@ -358,7 +355,7 @@ class Caub extends validaciones {
 		}
 
 		$message['failureHtml'] = '<p style="margin-bottom: .5em;">Thanks for Contacting Us</p><p>Your message has been successfully sent.</p>';
-   
+
 		return $message;
 	}
 

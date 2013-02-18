@@ -43,6 +43,7 @@ class Stra extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'boton1','img'=>'assets/default/images/print.png','alt'=> 'Imprimir transferencia', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'brma'  ,'img'=>'images/caja-cerrada.png','alt'=> 'Movimiento por RMA', 'label'=>'Traslado por RMA'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -60,8 +61,8 @@ class Stra extends Controller {
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
-		$param['listados']    = $this->datasis->listados('STRA', 'JQ');
-		$param['otros']       = $this->datasis->otros('STRA', 'JQ');
+		$param['listados']     = $this->datasis->listados('STRA', 'JQ');
+		$param['otros']        = $this->datasis->otros('STRA', 'JQ');
 		$param['centerpanel']  = $centerpanel;
 		//$param['funciones']    = $funciones;
 		$param['temas']        = array('proteo','darkness','anexos1');
@@ -77,15 +78,6 @@ class Stra extends Controller {
 	//******************************************************************
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
-
-		$bodyscript .= '
-		jQuery("#boton1").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/STRA').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
-			} else { $.prompt("<h1>Por favor Seleccione una tranferencia</h1>");}
-		});';
 
 		$bodyscript .= '
 		function straadd() {
@@ -128,6 +120,24 @@ class Stra extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 			';
+
+		$bodyscript .= '
+		jQuery("#brma").click( function(){
+			$.post("'.site_url('inventario/stra/dataeditrma/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			});
+		});';
+
+		$bodyscript .= '
+		jQuery("#boton1").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url('formatos/ver/STRA').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+			} else { $.prompt("<h1>Por favor Seleccione una tranferencia</h1>");}
+		});';
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -945,6 +955,155 @@ class Stra extends Controller {
 		}
 	}
 
+	function dataeditrma(){
+		$this->rapyd->load('dataobject','datadetails');
+		$modbus=array(
+			'tabla'   =>'sinv',
+			'columnas'=>array(
+				'codigo' =>'C&oacute;digo',
+				'descrip'=>'Descripci&oacute;n',
+				'precio1' =>'Precio 1',
+				'precio2' =>'Precio 2',
+				'precio3' =>'Precio 3',
+				'existen' =>'Existencia',
+				'peso'=>'Peso'),
+			'filtro'  =>array('codigo' =>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
+			'retornar'=>array('codigo'=>'codigo_<#i#>','descrip'=>'descrip_<#i#>'),
+			'where'   =>'activo = "S" AND tipo="Articulo"',
+			'script'  =>array('post_modbus("<#i#>")'),
+			'p_uri'=>array(4=>'<#i#>'),
+			'titulo'  =>'Busqueda de producto en inventario');
+		$btn=$this->datasis->p_modbus($modbus,'<#i#>');
+
+		$script="
+		function post_add_itstra(id){
+			$('#cantidad_'+id).numeric('.');
+			return true;
+		}";
+
+		$do = new DataObject('stra');
+		$do->pointer('sprv' ,'sprv.proveed=stra.proveed','sprv.nombre AS sprvnombre','left');
+		$do->rel_one_to_many('itstra', 'itstra', 'numero');
+		//$do->rel_pointer('itstra','sinv','itstra.codigo=sinv.codigo','sinv.descrip as sinvdescrip');
+
+		$edit = new DataDetails('Transferencia', $do);
+		//$edit->back_url = $this->back_dataedit;
+		$edit->set_rel_title('itstra','Producto <#o#>');
+
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
+
+		$edit->pre_process('insert','_pre_insert');
+		$edit->pre_process('update','_pre_update');
+		$edit->pre_process('delete','_pre_delete');
+		$edit->post_process('insert','_post_insert');
+
+		$edit->numero= new inputField('N&uacute;mero', 'numero');
+		$edit->numero->mode='autohide';
+		$edit->numero->size=10;
+		$edit->numero->apply_rules=false; //necesario cuando el campo es clave y no se pide al usuario
+		$edit->numero->when=array('show','modify');
+
+		$edit->proveed = new inputField('Proveedor', 'proveed');
+		$edit->proveed->rule     = 'trim|required';
+		$edit->proveed->size     = 8;
+		$edit->proveed->maxlength= 5;
+		$edit->proveed->autocomplete=false;
+		$edit->proveed->rule     = 'required';
+
+		$edit->nombre = new inputField('', 'sprvnombre');
+		$edit->nombre->db_name  = 'sprvnombre';
+		$edit->nombre->pointer  = true;
+		$edit->nombre->type     = 'inputhidden';
+		$edit->nombre->rule     = 'required';
+
+		$edit->fecha = new  dateonlyField('Fecha', 'fecha');
+		$edit->fecha->rule='required|chfecha';
+		$edit->fecha->calendar=false;
+		$edit->fecha->insertValue = date('Y-m-d');
+		$edit->fecha->size =14;
+
+		$edit->envia = new dropdownField('Env&iacute;a', 'envia');
+		$edit->envia->option('','Seleccionar');
+		$edit->envia->options('SELECT ubica, CONCAT(ubides," (",ubica,")") FROM caub WHERE invfis<>"S" ORDER BY ubides');
+		$edit->envia->rule ='required|callback_crma';
+		$edit->envia->style='width:180px;';
+
+		$edit->recibe = new dropdownField('Recibe', 'recibe');
+		$edit->recibe->option('','Seleccionar');
+		$edit->recibe->options('SELECT ubica, CONCAT(ubides," (",ubica,")") FROM caub WHERE invfis<>"S" ORDER BY ubides');
+		$edit->recibe->rule ='required|callback_chrecibe|callback_crma';
+		$edit->recibe->style='width:180px;';
+
+		$edit->observ1 = new inputField('Nota:','observ1');
+		$edit->observ1->rule  = 'trim|required';
+		$edit->observ1->style = 'width:90%;';
+		$edit->observ1->size  = 32;
+		$edit->observ1->maxlength =30;
+
+		//**************************************************************
+		// Comienza el Detalle
+		//**************************************************************
+		$edit->codigo = new inputField('C&oacute;digo <#o#>', 'codigo_<#i#>');
+		$edit->codigo->db_name='codigo';
+		$edit->codigo->append($btn);
+		$edit->codigo->rule = 'trim|required';
+		$edit->codigo->rel_id='itstra';
+		$edit->codigo->maxlength=15;
+		$edit->codigo->size     =15;
+
+		$edit->descrip = new inputField('Descripci&oacute;n', 'descrip_<#i#>');
+		$edit->descrip->db_name  = 'descrip';
+		$edit->descrip->rel_id   = 'itstra';
+		$edit->descrip->type     = 'inputhidden';
+		$edit->descrip->maxlength= 45;
+		$edit->descrip->size     = 40;
+
+		$edit->cantidad = new inputField('Cantidad', 'cantidad_<#i#>');
+		$edit->cantidad->db_name  ='cantidad';
+		$edit->cantidad->css_class='inputnum';
+		$edit->cantidad->rel_id   ='itstra';
+		$edit->cantidad->rule     ='numeric|mayorcero|required';
+		$edit->cantidad->maxlength=10;
+		$edit->cantidad->autocomplete=false;
+		$edit->cantidad->size     =10;
+		//Fin del detalle
+
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
+		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
+
+		$edit->buttons('save', 'undo', 'add','back','add_rel');
+
+		if($this->genesal){
+			$edit->on_save_redirect=false;
+			$edit->build();
+
+			if($edit->on_success()){
+				$rt=array(
+						'status' =>'A',
+						'mensaje'=>'Registro guardado',
+						'pk'     =>$edit->_dataobject->pk
+					);
+
+				echo json_encode($rt);
+			}else{
+				$conten['form']  =& $edit;
+				$data['content'] = $this->load->view('view_strarma', $conten, false);
+			}
+		}else{
+			$edit->on_save_redirect=false;
+			$edit->build();
+			if($edit->on_success()){
+				$rt= 'Transferencia Guardada';
+			}elseif($edit->on_error()){
+				$rt= html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string));
+			}
+			return $rt;
+		}
+	}
+
+
 	//******************************************************************
 	//  Aparta Mercancia en Ordenes de Produccion
 	//******************************************************************
@@ -1525,6 +1684,10 @@ class Stra extends Controller {
 			$this->db->simple_query('ALTER TABLE stra DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE stra ADD UNIQUE INDEX numero (numero)');
 			$this->db->simple_query('ALTER TABLE stra ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		if(!in_array('proveed',$campos)){
+			$this->db->simple_query('ALTER TABLE `stra` ADD COLUMN `proveed` CHAR(5) NULL DEFAULT NULL COMMENT \'Para el caso de las transferencias por RMS\'');
 		}
 
 		if(!in_array('ordp',$campos)){

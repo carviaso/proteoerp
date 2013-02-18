@@ -74,6 +74,8 @@ $(function(){
 	}
 
 	$('#cod_cli').autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscascli'); ?>",
@@ -126,6 +128,8 @@ $(function(){
 	$('#factura').autocomplete({
 		source: function( req, add){
 			$.ajax({
+				delay: 600,
+				autoFocus: true,
 				url:  "<?php echo site_url('ajax/buscasfacdev'); ?>",
 				type: "POST",
 				dataType: "json",
@@ -180,6 +184,8 @@ $(function(){
 			truncate();
 			$("#tipo_doc").val('D');
 			$.ajax({
+				delay: 600,
+				autoFocus: true,
 				url: "<?php echo site_url('ajax/buscasinvdev'); ?>",
 				dataType: 'json',
 				type: 'POST',
