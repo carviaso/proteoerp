@@ -1,17 +1,31 @@
 <?php
-$maxlin=43; //Maximo de lineas de items.
+$maxlin=40; //Maximo de lineas de items.
 
 if(count($parametros)==0) show_error('Faltan parametros');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 
-$mSQL = 'SELECT
-a.numero,a.fecha,a.envia,a.recibe,CONCAT_WS("",TRIM(a.observ1),a.observ2) AS observa
-,b.ubides AS enviades, c.ubides AS recibedes
-FROM stra AS a
-LEFT JOIN caub AS b ON a.envia =b.ubica
-LEFT JOIN caub AS c ON a.recibe=c.ubica
-WHERE a.id='.$dbid;
+if ($this->db->field_exists('proveed', 'stra')){
+	$rma=true;
+	$mSQL = 'SELECT
+	a.numero,a.fecha,a.envia,a.recibe,CONCAT_WS("",TRIM(a.observ1),a.observ2) AS observa
+	,b.ubides AS enviades, c.ubides AS recibedes,TRIM(a.proveed) AS proveed,d.nombre,TRIM(d.nomfis) AS nomfis, a.condiciones
+	FROM stra AS a
+	LEFT JOIN caub AS b ON a.envia =b.ubica
+	LEFT JOIN caub AS c ON a.recibe=c.ubica
+	LEFT JOIN sprv AS d ON a.proveed=d.proveed
+	WHERE a.id='.$dbid;
+}else{
+	$rma=false;
+	$mSQL = 'SELECT
+	a.numero,a.fecha,a.envia,a.recibe,CONCAT_WS("",TRIM(a.observ1),a.observ2) AS observa
+	,b.ubides AS enviades, c.ubides AS recibedes,"" AS proveed,"" AS nombre,"" AS nomfis,"" AS condiciones
+	FROM stra AS a
+	LEFT JOIN caub AS b ON a.envia =b.ubica
+	LEFT JOIN caub AS c ON a.recibe=c.ubica
+	WHERE a.id='.$dbid;
+
+}
 
 $mSQL_1 = $this->db->query($mSQL);
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
@@ -25,13 +39,24 @@ $recibe    = htmlspecialchars(trim($row->recibe));
 $recibedes = htmlspecialchars(trim($row->recibedes));
 $observa   = htmlspecialchars(trim($row->observa));
 $dbnumero  = $this->db->escape($numero);
+$sprv      = htmlspecialchars(trim($row->proveed));
+$nombre    = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
+$condi     = htmlspecialchars(trim($row->condiciones));
 
 if($envia=='INFI'){
 	$invfis = true;
 	$titulo = 'INVENTARIO FISICO';
 }else{
 	$invfis = false;
-	$titulo = 'TRANSFERENCIA';
+	if(empty($sprv)){
+		$titulo = 'TRANSFERENCIA';
+		$titulo2= 'Observaci&oacute;n';
+		$oob    ='observa';
+	}else{
+		$titulo = 'TRANSFERENCIA POR RMA';
+		$titulo2= 'Condiciones:';
+		$oob    ='condi';
+	}
 }
 
 $totcosto= 0;
@@ -67,13 +92,19 @@ $encabezado = "
 			<td>Almac&eacute;n que recibe:<b>(${recibe}) ${recibedes}</b></td>
 		</tr>
 		<tr>
-			<td colspan='2' style='text-align:center;'><b>Observaci&oacute;n</b></td>
+			<td colspan='2' style='text-align:center;'><b>${titulo2}</b></td>
 		</tr>
 		<tr>
-			<td colspan='2' style='text-align:center;'>${observa}</td>
+			<td colspan='2' style='text-align:center;'>".$$oob."</td>
 		</tr>
-	</table><br />
 ";
+if(!empty($sprv)){
+	$encabezado.="
+		<tr>
+			<td colspan='2'>Proveedor:<b>(${sprv}) ${nombre}</b></td>
+		</tr>";
+}
+$encabezado .= '</table><br />';
 // Fin  Encabezado
 
 //************************

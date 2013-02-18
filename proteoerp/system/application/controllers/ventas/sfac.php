@@ -21,7 +21,6 @@ class Sfac extends Controller {
 
 	//Ventana principal de facturacion
 	function jqdatag(){
-
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
 
@@ -35,12 +34,12 @@ class Sfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"boton1"   ,"img"=>"assets/default/images/print.png","alt" => 'Reimprimir'    ,"label"=>"Reimprimir Documento"));
-		$grid->wbotonadd(array("id"=>"precierre","img"=>"images/dinero.png"              ,"alt" => 'Cierre de Caja',"label"=>"Cierre de Caja"));
+		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir'    ,'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png'              ,'alt' => 'Cierre de Caja','label'=>'Cierre de Caja'));
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
-			$grid->wbotonadd(array("id"=>"bcierrex","img"=>"assets/default/images/print.png", "alt" => 'Imprimir Cierre X',"label"=>"Cierre X"));
-			$grid->wbotonadd(array("id"=>"bcierrez","img"=>"assets/default/images/print.png", "alt" => 'Imprimir Cierre Z',"label"=>"Cierre Z"));
+			$grid->wbotonadd(array('id'=>'bcierrex','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre X','label'=>'Cierre X'));
+			$grid->wbotonadd(array('id'=>'bcierrez','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre Z','label'=>'Cierre Z'));
 		}
 
 		$WestPanel = $grid->deploywestp();
@@ -49,9 +48,9 @@ class Sfac extends Controller {
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array("id"=>"fedita" , "title"=>"Agregar/Editar Registro"),
+			array('id'=>'fedita' , 'title'=>'Agregar/Editar Registro'),
 			array('id'=>'scliexp', 'title'=>'Ficha de Cliente' ),
-			array("id"=>"fshow"  , "title"=>"Mostrar registro")
+			array('id'=>'fshow'  , 'title'=>'Mostrar registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -71,7 +70,6 @@ class Sfac extends Controller {
 		$param['encabeza']     = $this->titp;
 		$param['tamano']       = $this->datasis->getintramenu( substr($this->url,0,-1) );
 		$this->load->view('jqgrid/crud2',$param);
-
 	}
 
 	//Ventana principal de facturacion de servicios

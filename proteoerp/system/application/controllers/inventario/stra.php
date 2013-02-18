@@ -467,7 +467,8 @@ class Stra extends Controller {
 		#show/hide navigations buttons
 		$grid->setAdd(    $this->datasis->sidapuede('STRA','INCLUIR%' ));
 		$grid->setEdit( false );  //  $this->datasis->sidapuede('STRA','MODIFICA%'));
-		$grid->setDelete( $this->datasis->sidapuede('STRA','BORR_REG%'));
+		$grid->setDelete(false);
+		//$grid->setDelete( $this->datasis->sidapuede('STRA','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('STRA','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
@@ -1035,11 +1036,11 @@ class Stra extends Controller {
 		$edit->recibe->rule ='required|callback_chrecibe|callback_crma';
 		$edit->recibe->style='width:180px;';
 
-		$edit->observ1 = new inputField('Nota:','observ1');
-		$edit->observ1->rule  = 'trim|required';
-		$edit->observ1->style = 'width:90%;';
-		$edit->observ1->size  = 32;
-		$edit->observ1->maxlength =30;
+		$edit->condiciones = new textareaField('Condiciones:','condiciones');
+		$edit->condiciones->rule  = 'trim|required';
+		$edit->condiciones->style = 'width:98%;';
+		$edit->condiciones->cols = 70;
+		$edit->condiciones->rows = 3;
 
 		//**************************************************************
 		// Comienza el Detalle
@@ -1699,6 +1700,11 @@ class Stra extends Controller {
 
 		if(!in_array('tipoordp',$campos)){
 			$mSQL="ALTER TABLE `stra` ADD COLUMN `tipoordp` CHAR(1) NULL DEFAULT NULL COMMENT 'Si es entrega a estacion o retiro de estacion'";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('condiciones',$campos)){
+			$mSQL="ALTER TABLE `stra` ADD COLUMN `condiciones` TEXT NULL DEFAULT NULL";
 			$this->db->simple_query($mSQL);
 		}
 	}
