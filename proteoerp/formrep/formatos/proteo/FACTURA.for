@@ -61,6 +61,7 @@ elseif($tipo_doc == "X")
 else
 	$documento = "DOCUMENTO";
 
+$ivaaplica = $this->datasis->ivaplica($row->fecha);
 $lineas = 0;
 $uline  = array();
 
@@ -161,33 +162,65 @@ $encabezado_tabla="
 //************************
 //     Pie Pagina
 //************************
-$pie_final=<<<piefinal
+$pie_final="
 		</tbody>
-		<tfoot style='border:1px solid;background:#EEEEEE;'>
-			<tr>
-				<td style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;"><b>Monto Total Exento o Exonerado del IVA:</b></td>
-				<td colspan="3" style="text-align: right;font-size:14px;font-weight:bold;">${exento}</td>
+		<tfoot style='border:1px solid;background:#EEEEEE;'>";
+if($row->exento>0){
+	$pie_final.="<tr>
+				<td style='text-align: right;'></td>
+				<td colspan='2' style='text-align: right;'><b>Monto Total Exento o Exonerado del IVA:</b></td>
+				<td colspan='3' style='text-align: right;font-size:14px;font-weight:bold;'>${exento}</td>
+			</tr>";
+}
+
+if($row->monredu>0){
+	$alicuota=nformat($ivaaplica['redutasa']);
+	$pie_final.="<tr>
+				<td  style='text-align: right;'></td>
+				<td colspan='2' style='text-align: right;'><b>Monto Total de la Base Imponible seg&uacute;n Alicuota ${alicuota}%:</b></td>
+				<td colspan='3' style='text-align: right;font-size:16px;font-weight:bold;' >${monredu}</td>
 			</tr>
 			<tr>
-				<td  style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;"><b>Monto Total de la Base Imponible seg&uacute;n Alicuota :</b></td>
-				<td colspan="3" style="text-align: right;font-size:16px;font-weight:bold;" >${montasa}</td>
+				<td style='text-align: right;'></td>
+				<td colspan='2' style='text-align: right;'><b>Monto Total del Impuesto seg&uacute;n Alicuota ${alicuota}%:</b></td>
+				<td colspan='3' style='text-align: right;font-size:16px;font-weight:bold;'>${reducida}</td>
+			</tr>";
+}
+
+$alicuota=nformat($ivaaplica['tasa']);
+$pie_final.="<tr>
+			<td  style='text-align: right;'></td>
+			<td colspan='2' style='text-align: right;'><b>Monto Total de la Base Imponible seg&uacute;n Alicuota ${alicuota}%:</b></td>
+			<td colspan='3' style='text-align: right;font-size:16px;font-weight:bold;' >${montasa}</td>
+		</tr>
+		<tr>
+			<td style='text-align: right;'></td>
+			<td colspan='2' style='text-align: right;'><b>Monto Total del Impuesto seg&uacute;n Alicuota ${alicuota}%:</b></td>
+			<td colspan='3' style='text-align: right;font-size:16px;font-weight:bold;'>${tasa}</td>
+		</tr>";
+
+if($row->monadic>0){
+	$alicuota=nformat($ivaaplica['sobretasa']);
+	$pie_final.="<tr>
+				<td  style='text-align: right;'></td>
+				<td colspan='2' style='text-align: right;'><b>Monto Total de la Base Imponible seg&uacute;n Alicuota ${alicuota}%:</b></td>
+				<td colspan='3' style='text-align: right;font-size:16px;font-weight:bold;' >${monadic}</td>
 			</tr>
 			<tr>
-				<td style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;"><b>Monto Total del Impuesto seg&uacute;n Alicuota:</b></td>
-				<td colspan="3" style="text-align: right;font-size:16px;font-weight:bold;">${tasa}</td>
-			</tr>
-			<tr style='border-top: 1px solid;background:#AAAAAA;'>
-				<td style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;"><b>VALOR TOTAL DE LA VENTA O SERVICIO:</b></td>
-				<td colspan="3" style="text-align: right;font-size:20px;font-weight:bold;">${gtotal}</td>
+				<td style='text-align: right;'></td>
+				<td colspan='2' style='text-align: right;'><b>Monto Total del Impuesto seg&uacute;n Alicuota ${alicuota}%:</b></td>
+				<td colspan='3' style='text-align: right;font-size:16px;font-weight:bold;'>${sobretasa}</td>
+			</tr>";
+}
+
+$pie_final.=	"<tr style='border-top: 1px solid;background:#AAAAAA;'>
+				<td style='text-align: right;'></td>
+				<td colspan='2' style='text-align: right;'><b>VALOR TOTAL DE LA VENTA O SERVICIO:</b></td>
+				<td colspan='3' style='text-align: right;font-size:20px;font-weight:bold;'>${gtotal}</td>
 			</tr>
 		</tfoot>
+	</table>";
 
-	</table>
-piefinal;
 
 
 $pie_continuo=<<<piecontinuo

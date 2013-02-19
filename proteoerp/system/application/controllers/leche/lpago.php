@@ -578,6 +578,8 @@ class Lpago extends Controller {
 			$('#proveed').autocomplete({
 				source: function( req, add){
 					$.ajax({
+						delay: 600,
+						autoFocus: true,
 						url:  '".site_url('ajax/buscasprv')."',
 						type: 'POST',
 						dataType: 'json',
@@ -975,7 +977,8 @@ class Lpago extends Controller {
 		if(!empty($proveed)){
 			$this->db->_escape_char='';
 			$this->db->_protect_identifiers=false;
-			$fcorte = date('Y-m-d',mktime(0, 0, 0, date('n'),date('j')-1*date('w')));
+			$fcorte   = date('Y-m-d',mktime(0, 0, 0, date('n'),date('j')-1*date('w')));
+			$dbfcorte = $this->db->escape($fcorte);
 
 			//Deducciones
 			$sel=array('SUM(a.total*IF(a.tipo="A",-1,1)) AS val');
@@ -990,6 +993,8 @@ class Lpago extends Controller {
 				if(!empty($row->val)) $rt['deduc'] = round(floatval($row->val),2);
 			}
 
+			$idlprecio = $this->datasis->dameval("SELECT id FROM lprecio WHERE fecha <= $dbfcorte ORDER BY fecha DESC LIMIT 1");
+
 			//Productores
 			$sel=array('SUM(ROUND(a.lista*if(c.tipolec="F",if(c.animal="V",if(c.zona="0112",e.tarifa5,e.tarifa1),e.tarifa3), if(c.animal="V",e.tarifa2,e.tarifa4)),2)) AS total');
 			$this->db->select($sel);
@@ -997,7 +1002,7 @@ class Lpago extends Controller {
 			$this->db->join('lrece   AS b','a.id_lrece=b.id');
 			$this->db->join('lvaca   AS c','a.id_lvaca=c.id');
 			$this->db->join('sprv    AS d','c.codprv=d.proveed','LEFT');
-			$this->db->join('lprecio AS e','e.tarifa1>=0');
+			$this->db->join('lprecio AS e','e.id='.$this->db->escape($idlprecio));
 			$this->db->where('a.lista >','0');
 			$this->db->where('MID(b.ruta,1,1) <>','G');
 			$this->db->where("((b.fecha<='$fcorte' AND b.transporte<=0) OR (b.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND b.transporte>0))");
