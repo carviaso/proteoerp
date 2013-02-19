@@ -5,9 +5,9 @@ if(count($parametros)==0) show_error('Faltan parametros');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 
-$mSQL_1 = $this->db->query('SELECT a.numche,
+$mSQL_1 = $this->db->query('SELECT
 a.numero, b.nombre,TRIM(b.nomfis) AS nomfis, a.proveed, b.rif,a.montopago,a.fecha,a.tipo
-FROM lpago AS a
+FROM lpago AS a 
 JOIN sprv  AS b ON a.proveed=b.proveed
 WHERE a.id='.$dbid);
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
@@ -22,67 +22,30 @@ $montole  = strtoupper(numletra($row->montopago));
 $fecha    = dbdate_to_human($row->fecha);
 $tipo     = $row->tipo;
 
-if(preg_match("/[0-9]+/i",$row->numche)){
-	$numche = $row->numche;
-}else{
-	$numche = '';
-}
 $dbproveed= $this->db->escape($proveed);
 
 $totcosto= 0;
 $lineas  = 0;
 $uline   = array();
 
-if($tipo=='T' || $tipo=='A'){
-	$tit = 'POR TRANSPORTE';
-	$mSQL1="SELECT a.fecha, DATE_FORMAT(a.fecha,'%w') AS sem, SUM(a.lista) AS litros, b.tarifa, SUM(ROUND(a.lista*b.tarifa,2)) AS totmon
-	FROM lrece AS a
-	JOIN lruta AS b ON a.ruta=b.codigo
-	JOIN sprv  AS c ON b.codprv=c.proveed
-	WHERE a.pago=${dbid}
-	GROUP BY a.fecha";
-	$mSQL = $mSQL1;
-}
-
-if($tipo=='P' || $tipo=='A'){
-	$tit = 'POR PRODUCTOR';
-	$mSQL2="SELECT b.fecha, DATE_FORMAT(b.fecha,'%w') AS sem, SUM(a.lista) AS litros, '0' AS tarifa,
-		SUM(ROUND(a.lista*if(c.tipolec=\"F\",k.ultimo,e.ultimo),2)+ROUND(a.lista*(IF(c.zona='0112',l.ultimo,f.ultimo)+g.ultimo+h.ultimo)*(c.tipolec=\"F\")+ROUND(a.lista*IF(c.animal=\"B\",if(c.tipolec=\"F\",i.ultimo,j.ultimo), 0 ),2),2))  AS totmon
-	FROM itlrece AS a
-	JOIN lrece AS b ON  a.id_lrece=b.id
-	JOIN lvaca AS c ON a.id_lvaca=c.id
-	JOIN sprv  AS d ON c.codprv=d.proveed
-	LEFT JOIN sinv  AS e ON e.codigo='ZLCALIENTE'
-	LEFT JOIN sinv  AS f ON f.codigo='ZMANFRIO'
-	LEFT JOIN sinv  AS g ON g.codigo='ZPGRASA'
-	LEFT JOIN sinv  AS h ON h.codigo='ZBACTE'
-	LEFT JOIN sinv  AS i ON i.codigo='ZBUFALA'
-	LEFT JOIN sinv  AS j ON j.codigo='ZBUFALAC'
-	LEFT JOIN sinv  AS k ON k.codigo='ZLFRIA'
-	LEFT JOIN sinv  AS l ON l.codigo='ZLMACHI'
-	WHERE a.pago=${dbid} AND MID(b.ruta,1,1) <>'G' AND a.lista>0
-	GROUP BY b.fecha";
-	$mSQL = $mSQL2;
-}
-
-if($tipo=='A'){
-	$tit = '';
-	$mSQL = $mSQL1.' UNION ALL '.$mSQL2;
-}
+// Determina la Tarifa
+$quepaga = $this->datasis->dameval("SELECT MIN(b.fecha) fecha FROM itlrece a JOIN lrece b ON a.id_lrece=b.id WHERE a.pago=${dbid} ") ;
+$precios = $this->datasis->dameval("SELECT id FROM lprecio WHERE fecha<='".$quepaga."' ORDER BY fecha DESC LIMIT 1 ") ;
+if(empty($precios)) $precios = 1;
 
 //////////////////////////////////////////////////////////////
 $mSQL="
-SELECT fecha, sem,
-sum(llitros) llitros, round(sum(totleche)/sum(llitros),4) ltarifa, sum(totleche) totleche,
-sum(tlitros) tlitros, round(sum(totransp)/sum(tlitros),4) ttarifa, sum(totransp) tottransp,
+SELECT fecha, sem, 
+sum(llitros) llitros, round(sum(totleche)/sum(llitros),4) ltarifa, sum(totleche) totleche, 
+sum(tlitros) tlitros, round(sum(totransp)/sum(tlitros),4) ttarifa, sum(totransp) tottransp, 
 sum(totleche)+sum(totransp) total
 FROM (
 	SELECT
 		a.fecha, DATE_FORMAT(a.fecha,'%w') AS sem,
-		SUM(a.lista) AS tlitros,
-		b.tarifa,
-		SUM(ROUND(a.lista*b.tarifa,2)) AS totransp,
-		0 AS llitros,
+		SUM(a.lista) AS tlitros, 
+		b.tarifa, 
+		SUM(ROUND(a.lista*b.tarifa,2)) AS totransp, 
+		0 AS llitros, 
 		0 totleche
 	FROM lrece AS a
 		JOIN lruta AS b ON a.ruta=b.codigo
@@ -101,12 +64,14 @@ UNION ALL
 		JOIN lrece    AS b ON a.id_lrece=b.id
 		JOIN lvaca    AS c ON a.id_lvaca=c.id
 		JOIN sprv     AS d ON c.codprv=d.proveed
-		JOIN lprecio  AS e ON e.tarifa1=e.tarifa1
+		JOIN lprecio  AS e ON e.id=$precios 
 	WHERE a.pago=${dbid} AND MID(b.ruta,1,1) <>'G' AND a.lista>0
 	GROUP BY b.fecha
-) fff
+) fff 
 GROUP BY fecha";
 ///////////////////////////////////////////////////////////////////////
+
+//echo $mSQL;
 
 $mSQL_2  = $this->db->query($mSQL);
 
@@ -133,7 +98,7 @@ if($ngasto>0){
 
 $semana=array('DOMINGO','LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO');
 
-$ittot = array('lmonto'=>0,'llitros'=>0,'tlitros'=>0,'tmonto'=>0, 'total'=>0 );
+$ittot = array('lmonto'=>0,'llitros'=>0,'tlitros'=>0,'tmonto'=>0, 'total'=>0 ,'incen'=>0);
 
 ?><html>
 <head>
@@ -239,11 +204,6 @@ $encabezado = <<<encabezado
 	</table>
 encabezado;
 
-
-//								<td><b>La cantidad de:</b></td>
-//								<td>${montole} Bs.</td>
-
-
 // Fin  Encabezado
 
 //************************
@@ -257,11 +217,12 @@ $encabezado_tabla="
 						<th ${estilo}' >D&iacute;a   </th>
 						<th ${estilo}' >Leche</th>
 						<!-- th ${estilo}' >Precio       </th -->
-						<th ${estilo}' >Monto Leche  </th>
+						<th ${estilo}' >Bs. Leche  </th>
 						<th ${estilo}' >Trans.   </th>
 						<!-- th ${estilo}' >Tarifa       </th -->
-						<!-- th ${estilo}' >Monto Trans  </th -->
-						<th ${estilo}' >Total Pagar  </th>
+						<!-- th ${estilo}' >Bs. Trans  </th -->
+						<th ${estilo}' >Incentivo</th>
+						<th ${estilo}' >Total Pagar</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -283,6 +244,7 @@ $pie_final=<<<piefinal
 						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
 						<!-- td style="text-align:right;font-size:10pt;font-weight:bold;"></td -->
 						<!-- td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td -->
+						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
 						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
 					</tr>
 				</tfoot>
@@ -317,28 +279,29 @@ echo "		<tr><td>\n";
 echo $encabezado_tabla;
 $npagina=false;
 
-foreach ( $detalle AS $items ){
+foreach ( $detalle AS $items ){ 
 ?>
 					<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 						<td style="text-align:left;font-size: 0.7em"><?php echo dbdate_to_human($items->fecha).' '.$semana[$items->sem]; ?></td>
-						<td style="text-align:right" ><?php $ittot['llitros'] += $items->llitros; echo nformat($items->llitros ,0); ?></td>
-						<!-- td style="text-align: right" ><?php echo nformat($items->ltarifa,4); ?></td -->
-						<td style="text-align:right" ><?php $ittot['lmonto'] += $items->totleche; echo nformat($items->totleche ,2); ?></td>
-						<td style="text-align:right" ><?php $ittot['tlitros'] += $items->tlitros; echo nformat($items->tlitros ,0); ?></td>
-						<!-- td style="text-align:right" ><?php echo nformat($items->ttarifa,4); ?></td -->
-						<!-- td style="text-align:right" ><?php $ittot['tmonto'] += $items->tottransp; echo nformat($items->tottransp ,2); ?></td -->
-						<td style="text-align:right" ><?php $ittot['total'] += $items->total; echo nformat($items->total ,2); ?></td>
+						<td style="text-align:right" ><?php $ittot['llitros'] += $items->llitros;  echo nformat($items->llitros ,0);  ?></td>
+						<td style="text-align:right" ><?php 
+							$totleche = $items->llitros*3;
+							$ittot['lmonto']  += $totleche; 
+							echo nformat($totleche,2); 
+						?></td>
+						<td style="text-align:right" ><?php $ittot['tlitros'] += $items->tlitros;  echo nformat($items->tlitros ,0);  ?></td>
+						<td style="text-align:right" ><?php 
+							$incent = $items->totleche-$totleche;
+							$ittot['incen']   += $incent;
+							echo nformat($incent ,2); 
+						?></td>
+						<td style="text-align:right" ><?php $ittot['total']   += $items->total; echo nformat($items->total ,2); ?></td>
 					</tr>
 <?php
 		$mod = ! $mod;
 }
 
-echo sprintf($pie_final,nformat($ittot['llitros'],0),nformat($ittot['lmonto']),nformat($ittot['tlitros'],0),nformat($ittot['tmonto']), nformat($ittot['total']));
-
-if(!empty($numche)){
-	echo 'CHEQUE Nro. '.$numche;
-}
-
+echo sprintf($pie_final,nformat($ittot['llitros'],0),nformat($ittot['lmonto']),nformat($ittot['tlitros'],0),nformat($ittot['tmonto']), nformat($ittot['incen']),nformat($ittot['total']));
 
 echo "		</td>\n";
 echo "		<td>\n";
@@ -409,7 +372,7 @@ foreach ($detalle2 AS $items2){ $i++;
 		}
 
 if($items2->tipo=='D'){
-	$items2->precio =(-1)*$items2->precio;
+	$items2->precio =(-1)*$items2->precio; 
 	$items2->total  =(-1)*$items2->total;
 }
 ?>
@@ -422,31 +385,20 @@ if($items2->tipo=='D'){
 					</tr>
 <?php
 
-		//if($npagina){
-		//	echo $pie_continuo;
-		//}else{
-			$mod = ! $mod;
-		//}
+		$mod = ! $mod;
 	} while ($clinea);
 }
 
 echo sprintf($pie_final,nformat($ittot['tlgasto']));
 }
-
 echo "\n		</td></tr>\n";
 echo "	</table>\n";
 echo "\n</td></tr>\n";
-echo "<tr><td>\n";
+echo "<tr><td style='font-size:7pt;' >\n";
+$tarifas = $this->datasis->damereg("SELECT * FROM lprecio WHERE id=$precios");
 
-/*
-<table  style="width: 100%%; height : 50px;">
-	<tr>
-		<td style="font-size: 8pt; text-align:center;" valign="bottom"><b>Recibido por:</b></td>
-		<td style="font-size: 8pt; text-align:center;" valign="bottom"><b>CI:</b></td>
-		<td style="font-size: 8pt; text-align:center;" valign="bottom"><b>Fecha: ____/____/______</b></td>
-	</tr>
-</table>'
-*/
+echo "TARIFAS: VACA F-".$tarifas['tarifa1']." C-".$tarifas['tarifa2']." BUFA F-".$tarifas['tarifa3']." C-".$tarifas['tarifa4'];
+
 ?>
 
 </td></tr>

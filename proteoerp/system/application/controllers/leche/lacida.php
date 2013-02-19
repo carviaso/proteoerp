@@ -300,7 +300,6 @@ class Lacida extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('acidez');
 		$grid->label('Acidez');
 		$grid->params(array(
@@ -314,7 +313,6 @@ class Lacida extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
-
 
 		$grid->addField('alcohol');
 		$grid->label('Alcohol');
@@ -330,7 +328,6 @@ class Lacida extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('codigo');
 		$grid->label('Codigo');
 		$grid->params(array(
@@ -342,7 +339,6 @@ class Lacida extends Controller {
 			'editoptions'   => '{ size:15, maxlength: 15 }',
 		));
 
-
 		$grid->addField('descrip');
 		$grid->label('Descrip');
 		$grid->params(array(
@@ -353,7 +349,6 @@ class Lacida extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:45, maxlength: 45 }',
 		));
-
 
 		$grid->addField('precio');
 		$grid->label('Precio');
@@ -822,24 +817,25 @@ class Lacida extends Controller {
 	function instalar(){
 		if (!$this->db->table_exists('lacida')) {
 			$mSQL="CREATE TABLE `lacida` (
-			  `fecha` date DEFAULT NULL,
-			  `ruta` char(4) DEFAULT NULL COMMENT 'Ruta ',
-			  `vaquera` int(11) DEFAULT NULL COMMENT 'Vaquera',
-			  `nombre` char(45) DEFAULT NULL COMMENT 'Nombre de la ruta o vaquera',
-			  `litros` decimal(16,2) DEFAULT NULL COMMENT 'Litros de Leche Acida',
-			  `acidez` decimal(10,0) DEFAULT NULL COMMENT 'Acidez',
-			  `alcohol` decimal(10,0) DEFAULT '0' COMMENT 'Alcohol',
-			  `codigo` varchar(15) DEFAULT NULL COMMENT 'Queso producido ',
-			  `descrip` varchar(45) DEFAULT NULL COMMENT 'Descripcion del Producto',
-			  `peso` decimal(10,2) DEFAULT '0.00' COMMENT 'Peso Producido',
-			  `rendimiento` decimal(10,2) DEFAULT '0.00' COMMENT 'Factor de Rendimiento',
-			  `promedio` decimal(10,2) DEFAULT '0.00' COMMENT 'Promedio Litros/Kg',
-			  `gadm` decimal(10,2) DEFAULT '0.40' COMMENT 'Gasstos Administrativos',
-			  `precio` decimal(10,2) DEFAULT '0.00' COMMENT 'Precio de la leche',
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
+				`fecha`       DATE          NULL DEFAULT NULL,
+				`ruta`        CHAR(4)       NULL DEFAULT NULL   COMMENT 'Ruta ',
+				`vaquera`     INT(11)       NULL DEFAULT NULL   COMMENT 'Vaquera',
+				`nomvaca`     VARCHAR(45)   NULL DEFAULT NULL   COMMENT 'Nombre de la ruta o vaquera',
+				`litros`      DECIMAL(16,2) NULL DEFAULT NULL   COMMENT 'Litros de Leche Acida',
+				`acidez`      DECIMAL(10,0) NULL DEFAULT NULL   COMMENT 'Acidez',
+				`alcohol`     DECIMAL(10,0) NULL DEFAULT '0'    COMMENT 'Alcohol',
+				`codigo`      VARCHAR(15)   NULL DEFAULT NULL   COMMENT 'Queso producido ',
+				`descrip`     VARCHAR(45)   NULL DEFAULT NULL   COMMENT 'Descripcion del Producto',
+				`precio`      DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Precio del queso',
+				`peso`        DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Peso Producido',
+				`rendimiento` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Factor de Rendimiento',
+				`promedio`    DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Promedio Litros/Kg',
+				`gadm`        DECIMAL(10,2) NULL DEFAULT '0.40' COMMENT 'Gasstos Administrativos',
+				`pleche`      DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Precio de la leche',
+				`id`          INT(11)   NOT NULL AUTO_INCREMENT,
 			  PRIMARY KEY (`id`),
 			  KEY `fecha` (`fecha`)
-			) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COMMENT='Notificacion de leche Acida'";
+			) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Notificacion de leche Acida'";
 			$this->db->simple_query($mSQL);
 		}
 	}

@@ -5,22 +5,18 @@ $filter->attributes=array('onsubmit'=>'is_loaded()');
 
 
 $sel=array(
-'LPAD(a.id,5,"0") numero',
-'IF(b.transporte>0,DATE_SUB(b.fecha, INTERVAL 1 DAY),b.fecha) AS fecha',
-'b.ruta', 'c.codigo', 'c.nombre nomvaca',
-'if(c.tipolec="F",k.ultimo,e.ultimo) leche', 'f.ultimo frio', 'g.ultimo grasa', 'h.ultimo bacter',
-'d.proveed', 'd.nombre', 'a.lista', 'd.banco1, d.cuenta1',
-'a.lista monto', 'a.dtoagua', 'a.temp',
-'ROUND(a.lista*if(c.tipolec="F",f.ultimo,e.ultimo),2) monto',
-'ROUND(a.lista*(f.ultimo+g.ultimo+h.ultimo)*(c.tipolec="F"),2) incent',
-'(f.ultimo+g.ultimo+h.ultimo) pincent',
-'ROUND(a.lista*if(c.tipolec="F",k.ultimo,e.ultimo),2)+ROUND(a.lista*(f.ultimo+g.ultimo+h.ultimo)*(c.tipolec="F"),2) total',
-'ROUND(a.lista*IF(c.animal="B",if(c.tipolec="F",i.ultimo,j.ultimo), 0 ),2) bufala',
-'ROUND(a.lista*if(c.tipolec="F",k.ultimo,e.ultimo),2)+ROUND(a.lista*(f.ultimo+g.ultimo+h.ultimo)*(c.tipolec="F")+ROUND(a.lista*IF(c.animal="B",if(c.tipolec="F",i.ultimo,j.ultimo), 0 ),2),2) gtotal'
-
+'LPAD(a.id,5,"0") numero', 
+'IF(b.transporte>0,DATE_SUB(b.fecha, INTERVAL 1 DAY),b.fecha) AS fecha', 
+'b.ruta', 'c.codigo', 'c.nombre nomvaca', 'a.lista',
+'ROUND(if(c.tipolec="F", if(c.zona="0112",e.tarifa5,e.tarifa1)-(e.enfria+e.grasa+e.bacteria), e.tarifa2),2) leche', 
+'ROUND((if(c.tipolec="F", if(c.zona="0112",e.tarifa5,e.tarifa1)-(e.enfria+e.grasa+e.bacteria) ,e.tarifa2))*a.lista,2) monto',
+'if(c.tipolec="F",e.bacteria+e.grasa+e.enfria, 0.00 ) pincent',
+'ROUND(a.lista*if(c.tipolec="F",e.bacteria+e.grasa+e.enfria, 0.00 ),2) incent',
+'ROUND(if(c.animal="B", if(c.tipolec="F", e.tarifa3-tarifa1,e.tarifa4-e.tarifa2), 0 )*a.lista,2) bufala',
+'ROUND(a.lista*if(c.tipolec="F",if(c.animal="V",if(c.zona="0112",e.tarifa5,e.tarifa1),e.tarifa3), if(c.animal="V",e.tarifa2,e.tarifa4)),2) gtotal', 
+'e.grasa grasa', 'e.bacteria bacter', 'd.proveed', 'd.nombre', 'd.banco1', 'd.cuenta1', 'd.prefpago', 
+'a.dtoagua', 'a.temp'
 );
-//'(SELECT sum(total) from lgasto mm WHERE mm.proveed=d.proveed AND mm.pago=0 ) deduc'
-
 
 $filter->db->select($sel);
 $filter->db->from('itlrece AS a');
@@ -28,18 +24,11 @@ $filter->db->join('lrece   AS b','a.id_lrece=b.id');
 $filter->db->join('lvaca   AS c','a.id_lvaca=c.id');
 $filter->db->join('sprv    AS d','c.codprv=d.proveed','LEFT');
 
-
-$filter->db->join('sinv e','e.codigo="ZLCALIENTE"','LEFT');
-$filter->db->join('sinv f','f.codigo="ZMANFRIO"',  'LEFT');
-$filter->db->join('sinv g','g.codigo="ZPGRASA"',   'LEFT');
-$filter->db->join('sinv h','h.codigo="ZBACTE"',    'LEFT');
-$filter->db->join('sinv i','i.codigo="ZBUFALA"',   'LEFT');
-$filter->db->join('sinv j','j.codigo="ZBUFALAC"',   'LEFT');
-$filter->db->join('sinv k','k.codigo="ZLFRIA"',   'LEFT');
-
 $filter->db->where('a.lista >',0);
 $filter->db->where('MID(b.ruta,1,1) <>','G');
-//$filter->db->orderby('c.proveed, a.id_lvaca');
+$filter->db->orderby('c.proveed, a.id_lvaca, b.fecha');
+
+$filter->db->having("lista >","0");
 
 $filter->fecha = new dateonlyField("Desde", "dfecha",'d/m/Y');
 $filter->fecha->db_name ='b.fecha';
@@ -48,7 +37,7 @@ $filter->fecha->clause ='';
 $filter->fecha->dbformat='Y-m-d';
 $filter->fecha->rule='chfecha|required';
 $filter->fecha->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n'),date('j')-1*(date('w')+6)));
-$filter->fecha->operator='>=';
+$filter->fecha->operator='>='; 
 
 $filter->hasta = new dateonlyField("Hasta", "hfecha",'d/m/Y');
 $filter->hasta->db_name ='b.fecha';
@@ -56,8 +45,24 @@ $filter->hasta->db_name ='b.fecha';
 $filter->hasta->clause ='';
 $filter->hasta->dbformat='Y-m-d';
 $filter->hasta->rule='chfecha|required';
-$filter->hasta->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n'),date('j')-1*date('w')));
-$filter->hasta->operator='<=';
+$filter->hasta->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n'),date('j')-1*date('w'))); 
+$filter->hasta->operator='<='; 
+
+$filter->prefpago = new dropdownField('Preferencia de pago','prefpago');
+$filter->prefpago->option('','Seleccione');
+$filter->prefpago->option('T','Transferencia');
+$filter->prefpago->option('C','Cobro en caja');
+$filter->prefpago->option('D','Deposito');
+$filter->prefpago->style = 'width:140px;';
+$filter->prefpago->db_name ='d.prefpago';
+$filter->prefpago->clause ='where';
+
+$filter->enbanco = new dropdownField('Banco a depositar','banco1');
+$filter->enbanco->db_name ='d.banco1';
+$filter->enbanco->option('','Seleccionar');
+$filter->enbanco->options("SELECT banco1, CONCAT_WS('-',banco1,nomb_banc) AS label FROM sprv AS a JOIN tban AS b  ON a.banco1=b.cod_banc GROUP BY banco1 ORDER BY cod_banc");
+$filter->enbanco->rule='max_length[50]|required';
+$filter->enbanco->clause ='where';
 
 $filter->salformat = new radiogroupField("Formato de salida","salformat");
 $filter->salformat->options($this->opciones);
@@ -66,8 +71,8 @@ $filter->salformat->clause = '';
 
 $filter->buttons("search");
 $filter->build();
-
-if($this->rapyd->uri->is_set("search")){
+ 
+if($this->rapyd->uri->is_set("search")){	
 	$arr_fdesde=explode('-',$filter->fecha->newValue);
 	$arr_fhasta=explode('-',$filter->hasta->newValue);
 
@@ -77,20 +82,28 @@ if($this->rapyd->uri->is_set("search")){
 	$gdbdesde= date('Y-m-d',mktime(0, 0, 0, $arr_fdesde[1],$arr_fdesde[2]+1,$arr_fdesde[0]));
 	$gdbhasta= date('Y-m-d',mktime(0, 0, 0, $arr_fhasta[1],$arr_fhasta[2]+1,$arr_fhasta[0]));
 
+	// Determina la Tarifa
+	$precios = $this->datasis->dameval("SELECT id FROM lprecio WHERE fecha<='$gdbdesde' ORDER BY fecha DESC LIMIT 1 ") ;
+	if(empty($precios)) $precios = 1;
+	$filter->db->join('lprecio  AS e',"e.id=$precios");
+ 
 	$this->db->where("(b.fecha BETWEEN '$fdbdesde' AND '$fdbhasta' AND b.transporte<=0)");
 	$this->db->or_where("(b.fecha BETWEEN '$gdbdesde' AND '$gdbhasta' AND b.transporte>0)");
 
 	$mSQL=$this->rapyd->db->_compile_select();
 
-	$mSQL2 ='
+	$mSQL2 =' 
 UNION ALL
-SELECT referen numero, fecha, "XXXX" ruta, "XXXX" codigo, "GATOS Y DEDUCCIONES" nomvaca, 0 leche, 0 frio, 0 grasa, 0 bacter, a.proveed, a.nombre, 0, b.banco1, b.cuenta1, 0 monto, 0 dtoagua, 0 temp, 0  monto, 0 incent, 0 pincent,  -a.total, 0 bufala, -a.total gtotal
-FROM lgasto a  JOIN sprv b ON a.proveed=b.proveed
+SELECT referen numero, fecha, "XXXX" ruta, "XXXX" codigo, "GATOS Y DEDUCCIONES" nomvaca, 0 leche, 0 frio, 0 grasa, 0 bacter, a.proveed, a.nombre, 0, b.banco1, b.cuenta1, 0 monto, 0 dtoagua, 0 temp, 0  monto, 0 incent, 0 pincent,  -a.total, 0 bufala, -a.total gtotal 
+FROM lgasto a  JOIN sprv b ON a.proveed=b.proveed 
 WHERE a.pago=0 ORDER BY proveed, codigo';
+	
+	//echo $mSQL;
 
-	//echo $mSQL.$mSQL2;
+	$mSQL = str_replace('(b.fecha BETWEEN','((b.fecha BETWEEN', $mSQL);
+	$mSQL = str_replace('AND b.transporte>0)','AND b.transporte>0)))', $mSQL);
 
-	$pdf = new PDFReporte($mSQL.$mSQL2); //,'L');
+	$pdf = new PDFReporte($mSQL); //,'L');
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
 	$pdf->setTitulo("Relacion de Productores por pagar ".$filter->fecha->value);
@@ -100,11 +113,11 @@ WHERE a.pago=0 ORDER BY proveed, codigo';
 
 	$pdf->setType('fecha','date');
 
-	$pdf->AddCol('fecha',  17,'Fecha',  'L',8);
-	$pdf->AddCol('id',     10,'Nro.',   'L',8);
-	$pdf->AddCol('ruta',   10,'Ruta',   'L',8);
+	$pdf->AddCol('fecha',    17,'Fecha',  'L',8);
+	$pdf->AddCol('id',       10,'Nro.',   'L',8); 
+	$pdf->AddCol('ruta',     10,'Ruta',   'L',8);
 	//$pdf->AddCol('codigo', 10,'Prod', 'L',8);
-
+ 
 	//$pdf->AddCol('nomvaca', 50,'Vaquera',   'L',8);
 	$pdf->AddCol('lista',   17,'Lista',     'R',8);
 	$pdf->AddCol('leche',   10,'Precio',    'R',8);
@@ -124,7 +137,7 @@ WHERE a.pago=0 ORDER BY proveed, codigo';
 	$pdf->setTotalizar('lista','litros','monto','bufala', 'incent','total','gtotal');
 	$pdf->Table();
 	$pdf->Output();
-
+			
 }else{
 	$data["filtro"] = $filter->output;
 	$data["titulo"] = '<h2 class="mainheader">Recepci&oacute;n de leche</h2>';

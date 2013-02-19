@@ -388,9 +388,10 @@ class Lpago extends Controller {
 		$grid->addField('banco');
 		$grid->label('Banco');
 		$grid->params(array(
+			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 40,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:50, maxlength: 50 }',
@@ -414,7 +415,7 @@ class Lpago extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'true',
-			'width'         => 50,
+			'width'         => 200,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 100 }',

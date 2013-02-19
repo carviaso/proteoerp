@@ -314,7 +314,7 @@ class Lprecio extends Controller {
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(    false ); //$this->datasis->sidapuede('LPRECIO','INCLUIR%' ));
+		$grid->setAdd(    $this->datasis->sidapuede('LPRECIO','INCLUIR%' ));
 		$grid->setEdit(   $this->datasis->sidapuede('LPRECIO','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('LPRECIO','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('LPRECIO','BUSQUEDA%'));
@@ -426,10 +426,19 @@ class Lprecio extends Controller {
 		$edit->pre_process('update','_pre_update');
 		$edit->pre_process('delete','_pre_delete');
 
+		$script= ' 
+		$(function() {
+			$("#fecha"    ).datepicker({dateFormat:"dd/mm/yy"});
+		});';
+
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
+
 		$edit->fecha = new dateField('Fecha','fecha');
-		$edit->fecha->rule='chfecha';
-		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
+		$edit->fecha->rule = 'chfecha';
+		$edit->fecha->size = 10;
+		$edit->fecha->maxlength = 8;
+		$edit->fecha->calendar  = false;
 
 		$edit->tarifa1 = new inputField('Leche de Vaca Fria','tarifa1');
 		$edit->tarifa1->rule='numeric';

@@ -1648,7 +1648,6 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 
 		$salida = '';
 
-//{color:"#FFFFFF", \'background-color\':"#AF1001"
 		$salida  .= '<table width="100%" cellspacing="0">';
 		if ( $tipo == '0' )
 			$salida .= '<tr style="background-color:#AF1001; color:#FFFFFF; font-size:14px;font-weight:bold;"><td colspan="2" align="center">CLIENTE INACTIVO</td></tr>'."\n";
@@ -1713,8 +1712,6 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			'retornar' => array('tarifa'=>'id'),
 			'titulo'   => 'Buscar Tarifa',
 			);
-
-
 
 		$boton = $this->datasis->modbus($mSCLId);
 		$bcpla = $this->datasis->modbus($mCPLA);

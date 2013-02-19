@@ -13,7 +13,7 @@ class Rrepu extends Controller {
 	}
 
 	function index(){
-	$this->datasis->creaintramenu(array('modulo'=>'351','titulo'=>'Solicitud de repuesto','mensaje'=>'Solicitud de repuesto','panel'=>'RMA','ejecutar'=>'rma/rrepu','target'=>'popu','visible'=>'S','pertenece'=>'3','ancho'=>900,'alto'=>600));
+		$this->datasis->creaintramenu(array('modulo'=>'351','titulo'=>'Solicitud de repuesto','mensaje'=>'Solicitud de repuesto','panel'=>'RMA','ejecutar'=>'rma/rrepu','target'=>'popu','visible'=>'S','pertenece'=>'3','ancho'=>900,'alto'=>600));
 		redirect($this->url.'jqdatag');
 	}
 
@@ -95,7 +95,7 @@ class Rrepu extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 400, width: 700, modal: true,
 			buttons: {
 			"Guardar": function() {
 				var bValid = true;
@@ -133,9 +133,9 @@ class Rrepu extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -348,7 +348,7 @@ class Rrepu extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata()
@@ -363,7 +363,7 @@ class Rrepu extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData()
@@ -422,10 +422,58 @@ class Rrepu extends Controller {
 		};
 	}
 
+
+	//******************************************************************
+	//
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 
 		$edit = new DataEdit($this->tits, 'rrepu');
+
+
+		$scrip = '
+	$("#tarifa").autocomplete({
+		source: function( req, add){
+			$.ajax({
+				url:  "'.site_url('ajax/buscarnoti').'",
+				type: "POST",
+				dataType: "json",
+				data: "q="+req.term,
+				success:
+					function(data){
+						var sugiere = [];
+						if(data.length==0){
+							$("#tarifa").val("");
+							$("#tactividad").val("");
+							$("#tactividad_val").text("");
+							$("#tminimo").val("");
+							$("#tminimo_val").text("");
+						}else{
+							$.each(data,
+								function(i, val){
+									sugiere.push( val );
+								}
+							);
+						}
+						add(sugiere);
+					},
+			})
+		},
+		minLength: 2,
+		select: function( event, ui ) {
+			$("#tarifa").attr("readonly", "readonly");
+
+			$("#tarifa").val(ui.item.value);
+			$("#tactividad").val(ui.item.actividad);
+			$("#tactividad_val").text(ui.item.actividad);
+			$("#tminimo").val(ui.item.minimo);
+			$("#tminimo_val").text(ui.item.minimo);
+			setTimeout(function() {  $("#tarifa").removeAttr("readonly"); }, 1500);
+		}
+	});
+';
+
+
 
 		$edit->on_save_redirect=false;
 
@@ -438,81 +486,93 @@ class Rrepu extends Controller {
 		$edit->pre_process('update','_pre_update');
 		$edit->pre_process('delete','_pre_delete');
 
+		$edit->id = new inputField('Numero','id');
+		$edit->id->rule='integer';
+		$edit->id->css_class='inputonlynum';
+		$edit->id->size =8;
+		$edit->id->maxlength =11;
+		$edit->id->insertValue = '0';
+		$edit->id->readonly = true;
+
 		$edit->fecha = new dateField('Fecha','fecha');
 		$edit->fecha->rule='chfecha';
 		$edit->fecha->size =10;
+		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->maxlength =8;
+		$edit->fecha->calendar = false;
+		$edit->fecha->readonly = true;
 
-		$edit->proveed = new inputField('Cod prove','proveed');
-		$edit->proveed->rule='max_length[5]';
+		$edit->proveed = new inputField('Proveedor','proveed');
+		$edit->proveed->rule='';
 		$edit->proveed->size =7;
 		$edit->proveed->maxlength =5;
 
 		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='max_length[45]';
-		$edit->nombre->size =47;
+		$edit->nombre->rule='';
+		$edit->nombre->size =40;
 		$edit->nombre->maxlength =45;
+		$edit->nombre->readonly = true;
 
-		$edit->idrnoti = new inputField('Numero notificacion','idrnoti');
-		$edit->idrnoti->rule='max_length[11]|integer';
+		$edit->idrnoti = new inputField('Notificacion','idrnoti');
+		$edit->idrnoti->rule='integer';
 		$edit->idrnoti->css_class='inputonlynum';
-		$edit->idrnoti->size =13;
+		$edit->idrnoti->size =8;
 		$edit->idrnoti->maxlength =11;
 
-		$edit->codprod = new inputField('Codigo producto','codprod');
-		$edit->codprod->rule='max_length[15]';
-		$edit->codprod->size =17;
+		$edit->codprod = new inputField('Producto','codprod');
+		$edit->codprod->rule='';
+		$edit->codprod->size =15;
 		$edit->codprod->maxlength =15;
+		$edit->codprod->readonly = true;
 
-		$edit->descprod = new textareaField('Descripcion producto','descprod');
-		$edit->descprod->rule='max_length[8]';
-		$edit->descprod->cols = 70;
-		$edit->descprod->rows = 4;
+		$edit->descprod = new inputField('Descripcion','descprod');
+		$edit->descprod->rule='';
+		$edit->descprod->size =35;
+		$edit->descprod->maxlength =45;
+		$edit->descprod->readonly = true;
 
 		$edit->serial = new inputField('Serial','serial');
-		$edit->serial->rule='max_length[35]';
-		$edit->serial->size =37;
+		$edit->serial->rule='';
+		$edit->serial->size =30;
 		$edit->serial->maxlength =35;
+		$edit->serial->readonly = true;
 
 		$edit->diagnostico = new textareaField('Diagnostico','diagnostico');
-		$edit->diagnostico->rule='max_length[8]';
-		$edit->diagnostico->cols = 70;
+		$edit->diagnostico->rule='';
+		$edit->diagnostico->cols = 60;
 		$edit->diagnostico->rows = 4;
+		$edit->diagnostico->readonly = true;
 
 		$edit->repuesto = new textareaField('Repuesto','repuesto');
-		$edit->repuesto->rule='max_length[8]';
-		$edit->repuesto->cols = 70;
+		$edit->repuesto->rule='';
+		$edit->repuesto->cols = 60;
 		$edit->repuesto->rows = 4;
 
 		$edit->cant = new inputField('Cantidad','cant');
-		$edit->cant->rule='max_length[11]|integer';
+		$edit->cant->rule='integer';
 		$edit->cant->css_class='inputonlynum';
-		$edit->cant->size =11;
-		$edit->cant->maxlength =11;
+		$edit->cant->size = 8;
+		$edit->cant->maxlength = 11;
 
 		$edit->reporte = new inputField('Reporte','reporte');
-		$edit->reporte->rule='max_length[20]';
-		$edit->reporte->size =22;
-		$edit->reporte->maxlength =20;
+		$edit->reporte->rule = '';
+		$edit->reporte->size = 22;
+		$edit->reporte->maxlength = 20;
+		$edit->reporte->readonly = true;
 
 		$edit->estado = new inputField('Recibido','estado');
-		$edit->estado->rule='max_length[2]';
-		$edit->estado->size =4;
-		$edit->estado->maxlength =2;
+		$edit->estado->rule = '';
+		$edit->estado->size = 4;
+		$edit->estado->maxlength = 2;
 
 		$edit->fecharecep = new dateField('Fecha recepcion','fecharecep');
-		$edit->fecharecep->rule='chfecha';
-		$edit->fecharecep->size =10;
-		$edit->fecharecep->maxlength =8;
+		$edit->fecharecep->rule = 'chfecha';
+		$edit->fecharecep->size = 10;
+		$edit->fecharecep->maxlength = 8;
 
 		$edit->build();
 
-		$script= '<script type="text/javascript" > 
-		$(function() {
-			$(".inputnum").numeric(".");
-			$(".inputonlynum").numeric();
-		});
-		</script>';
+		$script= '';
 
 		if($edit->on_success()){
 			$rt=array(
@@ -522,7 +582,10 @@ class Rrepu extends Controller {
 			);
 			echo json_encode($rt);
 		}else{
-			echo $edit->output;
+			$conten['form']   =&  $edit;
+			$conten['script'] =  '';
+			$this->load->view('view_rrepu', $conten);
+			//echo $edit->output;
 		}
 	}
 
