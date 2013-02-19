@@ -707,14 +707,13 @@ class Ajax extends Controller {
 		if($mid !== false){
 			$dbfactura = $this->db->escape($mid);
 			$retArray = $retorno = array();
-			$mSQL="SELECT TRIM(a.descrip) AS descrip,b.cana,SUM(d.cana) AS dev,TRIM(a.codigo) AS codigo, a.precio1,a.precio2,a.precio3,a.precio4,
+			$mSQL="SELECT TRIM(a.descrip) AS descrip,b.cana,(d.cana) AS dev,TRIM(a.codigo) AS codigo, a.precio1,a.precio2,a.precio3,a.precio4,
 				a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond,b.preca
 				FROM sinv AS a
 				JOIN sitems AS b ON a.codigo=b.codigoa
 				LEFT JOIN sfac AS c  ON b.numa=c.factura AND c.tipo_doc='D'
 				LEFT JOIN sitems AS d ON c.numero=d.numa AND c.tipo_doc=d.tipoa AND b.codigoa=d.codigoa
 				WHERE b.numa=$dbfactura AND b.tipoa='F'
-				GROUP BY b.codigoa
 				ORDER BY a.descrip";
 
 			$query = $this->db->query($mSQL);
