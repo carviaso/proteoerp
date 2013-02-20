@@ -195,6 +195,7 @@ $(function(){
 							function(id, val){
 								add_sitems();
 								$('#codigoa_'+id).val(val.codigo);
+								$('#detalle_'+id).val(val.detalle);
 								$('#desca_'+id).val(val.descrip);
 								$('#preca_'+id).val(val.preca);
 								$('#precio1_'+id).val(val.base1);

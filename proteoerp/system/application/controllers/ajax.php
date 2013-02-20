@@ -676,13 +676,17 @@ class Ajax extends Controller {
 			$dbfactura = $this->db->escape($mid);
 			$referen   = $this->datasis->dameval('SELECT referen FROM sfac WHERE tipo_doc=\'F\' AND numero='.$dbfactura);
 			$retArray = $retorno = array();
-			$mSQL="SELECT SUM(ROUND((aa.cana-aa.dev)*preca*(1+aa.iva/100),2)) AS monto FROM (
-				SELECT  b.codigoa, b.cana, SUM(COALESCE(d.cana,0)) AS dev, b.preca,b.iva
-				FROM sitems AS b
-				LEFT JOIN sfac AS c  ON b.numa=c.factura AND c.tipo_doc='D'
-				LEFT JOIN sitems AS d ON c.numero=d.numa AND c.tipo_doc=d.tipoa AND b.codigoa=d.codigoa
+			$mSQL="SELECT SUM(ROUND((bb.cana-bb.dev)*preca*(1+bb.iva/100),2)) AS monto FROM (
+				SELECT aa.cana,SUM(COALESCE(d.cana,0)) AS dev,aa.codigo,aa.iva,aa.preca
+				FROM (SELECT SUM(b.cana) AS cana,TRIM(a.codigo) AS codigo,a.iva,b.preca,b.numa
+				FROM sinv AS a
+				JOIN sitems AS b ON a.codigo=b.codigoa
 				WHERE b.numa=$dbfactura AND b.tipoa='F'
-				GROUP BY b.codigoa) AS aa";
+				GROUP BY b.codigoa,b.preca) AS aa
+				LEFT JOIN sfac   AS c  ON aa.numa=c.factura AND c.tipo_doc='D'
+				LEFT JOIN sitems AS d ON c.numero=d.numa AND c.tipo_doc=d.tipoa AND aa.codigo=d.codigoa AND aa.preca=d.preca
+				GROUP BY aa.codigo,aa.preca
+				) AS bb";
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
@@ -703,18 +707,23 @@ class Ajax extends Controller {
 	function buscasinvdev(){
 		$mid = $this->input->post('q');
 
-		$data = '[{ }]';
+		$data = '[ ]';
 		if($mid !== false){
 			$dbfactura = $this->db->escape($mid);
 			$retArray = $retorno = array();
-			$mSQL="SELECT TRIM(a.descrip) AS descrip,b.cana,(d.cana) AS dev,TRIM(a.codigo) AS codigo, a.precio1,a.precio2,a.precio3,a.precio4,
-				a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond,b.preca
+			$mSQL="SELECT
+				aa.descrip,aa.cana,SUM(COALESCE(d.cana,0)) AS dev,aa.codigo, aa.precio1,aa.precio2,aa.precio3,aa.precio4,
+				aa.iva,aa.existen,aa.tipo,aa.peso, aa.ultimo, aa.pond,aa.preca,aa.detalle
+				FROM (SELECT TRIM(a.descrip) AS descrip,SUM(b.cana) AS cana,TRIM(a.codigo) AS codigo, a.precio1,a.precio2,a.precio3,a.precio4,
+				a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond,b.preca,b.numa,b.detalle
 				FROM sinv AS a
 				JOIN sitems AS b ON a.codigo=b.codigoa
-				LEFT JOIN sfac AS c  ON b.numa=c.factura AND c.tipo_doc='D'
-				LEFT JOIN sitems AS d ON c.numero=d.numa AND c.tipo_doc=d.tipoa AND b.codigoa=d.codigoa
 				WHERE b.numa=$dbfactura AND b.tipoa='F'
-				ORDER BY a.descrip";
+				GROUP BY b.codigoa,b.preca) AS aa
+				LEFT JOIN sfac   AS c  ON aa.numa=c.factura AND c.tipo_doc='D'
+				LEFT JOIN sitems AS d ON c.numero=d.numa AND c.tipo_doc=d.tipoa AND aa.codigo=d.codigoa AND aa.preca=d.preca
+				GROUP BY aa.codigo,aa.preca
+				ORDER BY aa.descrip";
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
@@ -724,6 +733,7 @@ class Ajax extends Controller {
 					$saldo = $row['cana']-$row['dev'];
 					if($saldo <=0) continue;
 					$retArray['codigo']  = utf8_encode($row['codigo']);
+					$retArray['detalle'] = utf8_encode(trim($row['detalle']));
 					$retArray['cana']    = $saldo;
 					$retArray['tipo']    = $row['tipo'];
 					$retArray['peso']    = $row['peso'];

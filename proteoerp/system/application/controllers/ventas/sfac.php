@@ -3228,19 +3228,24 @@ class Sfac extends Controller {
 				$this->devpreca=array();
 				$mSQL="SELECT b.codigoa,b.preca
 				FROM sitems AS b
-				WHERE b.numa=$dbfactura AND b.tipoa='F'";
+				WHERE b.numa=$dbfactura AND b.tipoa='F'
+				GROUP BY b.codigoa,b.preca";
 				$query = $this->db->query($mSQL);
 				foreach ($query->result() as $row){
 					$ind=trim($row->codigoa);
-					$this->devpreca[$ind]=$row->preca;
+					$this->devpreca[$ind][]=$row->preca;
 				}
 			}
 
 			if(isset($this->devpreca[$codigo])){
-				$this->validation->set_message('chpreca', 'El art&iacute;culo '.$codigo.' se esta devolviendo por un monto distinto al facturado que fue de '.nformat($this->devpreca[$codigo]));
-				if($this->devpreca[$codigo]-$val==0){
-					return true;
+				$rt=false;
+				$this->validation->set_message('chpreca', 'El art&iacute;culo '.$codigo.' se esta devolviendo por un monto distinto al facturado que fue de '.implode(', ',$this->devpreca[$codigo]));
+				foreach($this->devpreca[$codigo] AS $precio){
+					if($precio-$val==0){
+						$rt=true;
+					}
 				}
+				return $rt;
 			}else{
 				$this->validation->set_message('chpreca', 'El art&iacute;culo '.$codigo.' no fue facturado');
 				return false;
@@ -3269,31 +3274,39 @@ class Sfac extends Controller {
 		$tipo_doc = $this->input->post('tipo_doc');
 		$factura  = $this->input->post('factura');
 		$codigo   = $this->input->post('codigoa_'.$i);
+		$precio   = number_format($this->input->post('preca_'.$i),2);
 
 		if($tipo_doc=='D'){
 			$dbfactura=$this->db->escape($factura);
 
 			if(!isset($this->devitems)){
 				$this->devitems=array();
-				$mSQL="SELECT b.codigoa,b.cana,SUM(d.cana) AS dev
-				FROM sitems AS b
-				LEFT JOIN sfac AS c  ON b.numa=c.factura AND c.tipo_doc='D'
-				LEFT JOIN sitems AS d ON c.numero=d.numa AND c.tipo_doc=d.tipoa AND b.codigoa=d.codigoa
+
+				$mSQL="SELECT
+				aa.cana,SUM(COALESCE(d.cana,0)) AS dev,aa.codigo AS codigoa,aa.preca
+				FROM (SELECT SUM(b.cana) AS cana,TRIM(a.codigo) AS codigo,b.preca,b.numa
+				FROM sinv AS a
+				JOIN sitems AS b ON a.codigo=b.codigoa
 				WHERE b.numa=$dbfactura AND b.tipoa='F'
-				GROUP BY b.codigoa";
+				GROUP BY b.codigoa,b.preca) AS aa
+				LEFT JOIN sfac   AS c  ON aa.numa=c.factura AND c.tipo_doc='D'
+				LEFT JOIN sitems AS d ON c.numero=d.numa AND c.tipo_doc=d.tipoa AND aa.codigo=d.codigoa AND aa.preca=d.preca
+				GROUP BY aa.codigo,aa.preca";
+
 				$query = $this->db->query($mSQL);
 				foreach ($query->result() as $row){
-					$ind=trim($row->codigoa);
+					$ind =trim($row->codigoa);
+					$ind2=number_format($row->preca,2);
 					$c=(empty($row->cana))? 0 : $row->cana;
 					$d=(empty($row->dev))?  0 : $row->dev;
-					$this->devitems[$ind]=$c-$d;
+					$this->devitems[$ind][$ind2]=$c-$d;
 				}
 			}
-			if(isset($this->devitems[$codigo])){
-				if($val <= $this->devitems[$codigo]){
+			if(isset($this->devitems[$codigo][$precio])){
+				if($val <= $this->devitems[$codigo][$precio]){
 					return true;
 				}
-				$this->validation->set_message('chcanadev', 'Esta devolviendo m&aacute;s de lo que se facturo del art&iacute;culo '.$codigo.' puede devolver m&aacute;ximo '.$this->devitems[$codigo]);
+				$this->validation->set_message('chcanadev', 'Esta devolviendo m&aacute;s de lo que se facturo del art&iacute;culo '.$codigo.' puede devolver m&aacute;ximo '.implode(', ',$this->devitems[$codigo]));
 			}else{
 				$this->validation->set_message('chcanadev', 'El art&iacute;culo '.$codigo.' no se puede devolver, nunca fue facturado o ya esta devuelto');
 			}

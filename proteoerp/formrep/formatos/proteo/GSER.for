@@ -4,6 +4,8 @@ if(count($parametros)==0) show_error('Faltan parametros ');
 $id = $parametros[0];
 
 $mSQL_1 = $this->db->query("SELECT * FROM gser  WHERE id=$id ");
+
+if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row    = $mSQL_1->row();
 
 $fecha  = dbdate_to_human($row->fecha);
@@ -82,7 +84,7 @@ $encabeza1p = '
 				</tr>
 				<tr class="odd_row">
 					<td>Forma de Pago: <b></b></td>';
-if ($monto1 > 0 ){ 
+if ($monto1 > 0 ){
 	$encabeza1p .= '
 					<td colspan="5">
 					<table width="100%">
@@ -97,7 +99,7 @@ if ($monto1 > 0 ){
 							<td><b>'.$monto1.'</b></td>
 						</tr>
 					</table>';
-} else { 
+} else {
 	$encabeza1p .= '
 					<td colspan="5"><b>CREDITO</b>';
 
@@ -136,7 +138,7 @@ $continua = '
 //Genera el HTML
 echo $this->rephead('REPHEAD','Gasto o Egresos '.$serie);
 echo '<body>';
-echo $this->scriptphp(); 
+echo $this->scriptphp();
 
 ///////////////////////////////////////////////////////////
 
@@ -163,12 +165,12 @@ $principal .= $encatabla."\n";
 $principal .= '					</thead>'."\n";
 $principal .= '					<tbody>'."\n";
 
-$tprecio=0; 
-$tiva=0; 
-$timporte=0; 
-$mod=FALSE; 
-$i=0; 
-foreach ($detalle AS $items){ 
+$tprecio=0;
+$tiva=0;
+$timporte=0;
+$mod=FALSE;
+$i=0;
+foreach ($detalle AS $items){
 	$i++;
 	if ( $pagina == 0 ) {
 		echo $principal;
@@ -190,8 +192,8 @@ foreach ($detalle AS $items){
 	echo '						<td style="text-align: right">'.$items->importe.'</td>'."\n";
 	echo '					</tr>'."\n";
 
-//							if($i%10==0) echo "<p STYLE='page-break-after: always'></p>"; 
-	if( $i%$maxlinea == 0) { 
+//							if($i%10==0) echo "<p STYLE='page-break-after: always'></p>";
+	if( $i%$maxlinea == 0) {
 		$pagina = $pagina+1;
 		$i = 0;
 		echo $continua;   //Pie de pagina cuando continua
@@ -199,8 +201,8 @@ foreach ($detalle AS $items){
 		echo $principal;  //Encabezado Principal
 	};
 
-	$mod = ! $mod; 
-} 
+	$mod = ! $mod;
+}
 while ( $i < $maxlinea ){
 	$i++;
 	echo '					<tr class="'.$estilo.'">';
