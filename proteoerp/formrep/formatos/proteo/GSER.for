@@ -38,22 +38,22 @@ $codb1    = trim($row->codb1);
 $orden    = trim($row->orden);
 $serie    = trim($row->serie);
 
-/*$dbnumero  = $this->db->escape($numero );
+$dbnumero  = $this->db->escape($numero);
 $dbproveed = $this->db->escape($row->proveed);
 $dbfecha   = $this->db->escape($row->fecha);
-$dbtransac = $this->db->escape($row->transac);*/
+$dbtransac = $this->db->escape($row->transac);
 if($row->cajachi=='S'){
 	$cachi = true;
 	$mSQL_2  = $this->db->query("SELECT numero,fecha,proveed,codigo,descrip,precio,iva,importe,rif,proveedor,numfac,fechafac,nfiscal
 	FROM gitser
-	WHERE idgser=${dbid}");
-	//WHERE numero=${dbnumero} AND proveed=${dbproveed} AND fecha=${fecha} AND transac=${dbtransac}");
+	WHERE numero=${dbnumero} AND proveed=${dbproveed} AND fecha=${dbfecha} AND transac=${dbtransac}");
+	//WHERE idgser=${dbid}");
 }else{
 	$cachi = false;
 	$mSQL_2  = $this->db->query("SELECT numero,fecha,proveed,codigo,descrip,precio,iva,importe
 	FROM gitser
-	WHERE idgser=${dbid}");
-	//WHERE numero=${dbnumero} AND proveed=${dbproveed} AND fecha=${fecha} AND transac=${dbtransac}");
+	WHERE numero=${dbnumero} AND proveed=${dbproveed} AND fecha=${dbfecha} AND transac=${dbtransac}");
+	//WHERE idgser=${dbid}");
 }
 if($mSQL_2->num_rows()==0) show_error('Registro presenta inconsistencias');
 $detalle = $mSQL_2->result();
@@ -300,7 +300,7 @@ foreach ($detalle AS $items){ $i++;
 			</tr>
 			<?php if(!empty($cachi_desc)){ $lineas++; ?>
 			<tr class='<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>'>
-				<td colspan='5' style='text-align: center;font-size:0.7em'><b><?php echo $cachi_desc; ?></b></td>
+				<td colspan='5' style='text-align: center;font-size:0.7em'><b><?php echo htmlspecialchars($cachi_desc); ?></b></td>
 			</tr>
 			<?php } ?>
 

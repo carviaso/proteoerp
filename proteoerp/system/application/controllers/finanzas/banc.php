@@ -987,9 +987,9 @@ class Banc extends Controller {
 		$salida = '';
 		$salida  .= '<table width="90%" border="1" align="center">';
 		if ( $activo == 'S')
-			$salida  .= '<tr><th colspan="2" style="background:#A6FAA6;">Saldos por Mes</th></tr>';
+			$salida  .= '<tr><th colspan="2" style="background:#A6FAA6;">Movimientos por Mes</th></tr>';
 		else
-			$salida  .= '<tr><th colspan="2" style="background:#F97070;">Saldos por Mes</th></tr>';
+			$salida  .= '<tr><th colspan="2" style="background:#F97070;">Movimientos por Mes</th></tr>';
 
 		foreach( $data AS $mes=>$saldo ){
 			$salida .= "<tr><td>".$mes."</td><td align='right'>".$saldo."</td></tr>\n";
