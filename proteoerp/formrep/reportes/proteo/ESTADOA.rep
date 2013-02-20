@@ -1,0 +1,109 @@
+$pasamos=false;
+$query = $this->db->query("SELECT formato, DATE_FORMAT(inicio, '/%m/%Y')as inicio,final FROM cemp LIMIT 0,1");
+
+if ($query->num_rows() > 0){
+	$pasamos=true;
+	$row   = $query->row();
+	$final   =$row->final;
+	$inicio  =$row->inicio;
+}
+
+$base_process_uri= $this->rapyd->uri->implode_uri("base_uri","gfid","orderby");
+
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, "search"));
+$filter->title('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
+$filter->fechah->insertValue = $final;
+$filter->fechah->rule = "required"; 
+$filter->fechah->group = "Fecha";
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit("btnsubmit","Buscar");
+$filter->build_form();
+
+if($this->rapyd->uri->is_set("search") AND $filter->is_valid() AND $pasamos){
+
+	$nivel1 = $this->datasis->lennivel(1) ;
+	$nivel2 = $this->datasis->lennivel(2) ;
+	$nivel3 = $this->datasis->lennivel(3) ;
+
+	// Nivel 1
+	$mSQL = '
+	SELECT MID(a.cuenta,1,1) nivel, a.cuenta, c.descrip, " " nivel1, " " nivel2, " " nivel3  
+	FROM itcasi a JOIN casi b ON a.comprob=b.comprob JOIN cpla c ON MID(a.cuenta,1,1)=c.codigo JOIN cemp d
+	WHERE a.fecha >= "'.$inicio.'"  AND a.fecha <= '.$filter->fechah->newValue.' AND MID(a.cuenta,1,1) > d.patrimo
+	GROUP BY MID(a.cuenta,1,1)
+	UNION ALL
+	SELECT CONCAT(MID(a.cuenta,1,1),"Z") nivel, a.cuenta, CONCAT("TOTAL ",c.descrip) descrip, " " nivel1, " " nivel2, 
+	format(sum(a.debe-a.haber),2) nivel3  
+	FROM itcasi a JOIN casi b ON a.comprob=b.comprob JOIN cpla c ON MID(a.cuenta,1,1)=c.codigo JOIN cemp d
+	WHERE a.fecha>="'.$inicio.'"  AND a.fecha <= '.$filter->fechah->newValue.' AND MID(a.cuenta,1,1) > d.patrimo
+	GROUP BY MID(a.cuenta,1,1) 
+	UNION ALL
+	SELECT CONCAT(MID(a.cuenta,1,1),"ZZ") nivel, a.cuenta, " " descrip, " " nivel1, " " nivel2, 
+	"===============" nivel3  
+	FROM itcasi a JOIN casi b ON a.comprob=b.comprob JOIN cpla c ON MID(a.cuenta,1,1)=c.codigo JOIN cemp d
+	WHERE a.fecha>="'.$inicio.'"  AND a.fecha <= '.$filter->fechah->newValue.' AND MID(a.cuenta,1,1) > d.patrimo
+	GROUP BY MID(a.cuenta,1,1)
+	';
+	
+	$mSQL .= '
+	UNION ALL
+	SELECT MID(a.cuenta,1,'.$nivel2.') nivel, a.cuenta, CONCAT("      ",c.descrip) descrip, " " debe, " " haber, " " saldo 
+	FROM itcasi a JOIN casi b ON a.comprob=b.comprob JOIN cpla c ON MID(a.cuenta,1,'.$nivel2.')=c.codigo JOIN cemp d
+	WHERE a.fecha>="'.$inicio.'"  AND a.fecha <= '.$filter->fechah->newValue.' AND MID(a.cuenta,1,1) > d.patrimo
+	GROUP BY MID(a.cuenta,1,'.$nivel2.')
+	
+	UNION ALL
+	SELECT CONCAT(MID(a.cuenta,1,'.$nivel2.'),"Z") nivel, a.cuenta, CONCAT("      TOTAL ",c.descrip) descrip, " " nivel1, format(sum(a.debe-a.haber),2) nivel2, " " nivel3 
+	FROM itcasi a JOIN casi b ON a.comprob=b.comprob JOIN cpla c ON MID(a.cuenta,1,'.$nivel2.')=c.codigo JOIN cemp d
+	WHERE a.fecha>="'.$inicio.'"  AND a.fecha <= '.$filter->fechah->newValue.' AND MID(a.cuenta,1,1) > d.patrimo
+	GROUP BY MID(a.cuenta,1,'.$nivel2.')
+	';
+	
+	$mSQL .= '
+	UNION ALL
+	SELECT MID(a.cuenta,1,'.$nivel3.') nivel, a.cuenta, CONCAT("              ",c.descrip) descrip, format(sum(a.debe-a.haber),2) nivel1, " " nivel2, " " nivel2 
+	FROM itcasi a JOIN casi b ON a.comprob=b.comprob JOIN cpla c ON MID(a.cuenta,1,'.$nivel3.')=c.codigo JOIN cemp d
+	WHERE a.fecha>="'.$inicio.'"  AND a.fecha <= '.$filter->fechah->newValue.' AND MID(a.cuenta,1,1) > d.patrimo
+	GROUP BY MID(a.cuenta,1,'.$nivel3.')
+
+	UNION ALL
+	SELECT "AZ" nivel, a.cuenta, "UTILIDAD O PERDIDA EN OPERACIONES" descrip, " " nivel1, " " nivel2, format(sum(a.debe-a.haber),2) nivel3  
+	FROM itcasi a JOIN casi b ON a.comprob=b.comprob JOIN cpla c ON MID(a.cuenta,1,1)=c.codigo JOIN cemp d
+	WHERE a.fecha>="'.$inicio.'"  AND a.fecha <= '.$filter->fechah->newValue.' AND MID(a.cuenta,1,1) > d.patrimo
+
+	
+	ORDER BY nivel
+	';
+
+//echo $mSQL;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Estado de Ganancias y Perdidas");
+	$pdf->setSubTitulo("Desde la fecha: $inicio Hasta ".$this->input->post('fechah'));
+
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+   
+	$pdf->AddCol('descrip',  90,' ','L',8);
+	$pdf->AddCol('nivel1',   25,' ','R',8);
+	$pdf->AddCol('nivel2',   25,' ','R',8);
+	$pdf->AddCol('nivel3',   25,' ','R',8);
+
+	$pdf->Table(); 
+	$pdf->Output();
+}else{
+	$data["filtro"] = $filter->output;
+	$data["titulo"] = '<h2 class="mainheader">Balance General<h2>';
+	$data["head"] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

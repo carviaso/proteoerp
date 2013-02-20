@@ -432,7 +432,7 @@ class Rrepu extends Controller {
 
 
 		$scrip = '
-	$("#tarifa").autocomplete({
+	$("#idrnoti").autocomplete({
 		source: function( req, add){
 			$.ajax({
 				url:  "'.site_url('ajax/buscarnoti').'",

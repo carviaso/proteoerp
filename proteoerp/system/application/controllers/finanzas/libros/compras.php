@@ -520,7 +520,7 @@ ORDER BY fecha,numo
 			$msqlnum
 		FROM itscst AS a JOIN scst as b ON a.control=b.control
 		LEFT JOIN sprv AS c ON b.proveed=c.proveed
-		WHERE b.recep BETWEEN $fdesde AND $fhasta AND b.actuali >= b.fecha AND c.tiva<>'I'
+		WHERE b.recep BETWEEN $fdesde AND $fhasta AND b.actuali >= b.fecha AND c.tiva<>'I' AND b.tipo_doc<>'XX'
 		GROUP BY b.control";
 
 		// Procesando Compras scst

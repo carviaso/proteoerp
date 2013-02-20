@@ -400,6 +400,63 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	/**************************************************************
+	 *
+	 *  BUSCA LOS INVENTARIO
+	 *
+	*/
+	function buscarnoti(){
+		$comodin= $this->datasis->traevalor('COMODIN');
+		$mid    = $this->input->post('q');
+		if($mid == false) $mid  = $this->input->post('term');
+
+		if(strlen($comodin)==1 && $comodin!='%' && $mid!==false){
+			$mid=str_replace($comodin,'%',$mid);
+		}
+		$qdb  = $this->db->escape($mid.'%');
+		$qba  = $this->db->escape($mid);
+
+		$data = '[]';
+		if($mid !== false){
+			$retArray = $retorno = array();
+
+			$mSQL="
+				SELECT DISTINCT a.id AS numero, a.serial AS codigo,
+				a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras
+				FROM rnoti AS a
+				WHERE (a.id LIKE $qdb OR a.nomcliente LIKE  $qdb OR a.serial=$qba) a.estado<>'ENTREGADO'
+				ORDER BY a.id LIMIT ".$this->autolimit;
+			$cana=1;
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$retArray['label']   = '('.$row['codigo'].')'.utf8_encode($row['descrip']).' Bs.'.$row['precio1'].'  '.$row['existen'].'';
+					$retArray['value']   = $row['codigo'];
+					$retArray['codigo']  = $row['codigo'];
+					$retArray['cana']    = $cana;
+					$retArray['tipo']    = $row['tipo'];
+					$retArray['peso']    = $row['peso'];
+					$retArray['ultimo']  = $row['ultimo'];
+					$retArray['pond']    = $row['pond'];
+					$retArray['base1']   = round($row['precio1']*100/(100+$row['iva']),2);
+					$retArray['base2']   = round($row['precio2']*100/(100+$row['iva']),2);
+					$retArray['base3']   = round($row['precio3']*100/(100+$row['iva']),2);
+					$retArray['base4']   = round($row['precio4']*100/(100+$row['iva']),2);
+					$retArray['descrip'] = utf8_encode($row['descrip']);
+					$retArray['barras']  = $row['barras'];
+					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
+					$retArray['iva']     = $row['iva'];
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
+
+
 	//Busca icon
 	function buscaicon(){
 		$comodin= $this->datasis->traevalor('COMODIN');

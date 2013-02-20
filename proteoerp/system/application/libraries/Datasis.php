@@ -593,12 +593,36 @@ class Datasis {
 		return $perido;
 	}
 
-	//niveles de cpla
+	//******************************************************************
+	//       Total de Niveles en el formato
+	//
 	function nivel(){
 		$formato=$this->dameval('SELECT formato FROM cemp LIMIT 1');
 		$formato=explode('.',$formato);
 		return count($formato);
 	}
+
+	//******************************************************************
+	//       Total de caracteres de un nivel
+	//
+	function lennivel( $n = 1){
+		$formato=$this->dameval('SELECT formato FROM cemp LIMIT 1');
+		$formato = explode('.',$formato);
+		$meco = '';
+		if ( $n > count($formato) )
+			$n = count($formato);
+		$lon = $n;
+		if ($n > 1){
+			$lon = $lon-1;
+			for($i=0; $i < $n ;$i++ ) {
+				$lon += strlen($formato[$i]);
+				$meco .= $formato[$i].' ';
+			}
+		} else 
+			$lon = 1;
+		return $lon;
+	}
+
 
 	function formato_cpla(){
 		$formato=$this->dameval('SELECT formato FROM cemp LIMIT 0,1');
@@ -621,7 +645,9 @@ class Datasis {
 		$return = $this->dameval($mSQL);
 	}
 
-
+	//******************************************************************
+	// Proximo Numero de documento en el banco
+	//
 	function banprox($codban){
 		$CI =& get_instance();
 		$dbcodban=$CI->db->escape($codban);
@@ -638,7 +664,6 @@ class Datasis {
 			}
 			return $numero;
 		} else {
-			//$mSQL  = "UPDATE banc SET proxch='000000000000'  WHERE codbanc='$codban'";
 			$mSQL  = "UPDATE banc SET proxch=LPAD(proxch+1,12,'0')  WHERE codbanc='$codban'";
 			$CI->db->simple_query($mSQL);
 			$numero = $CI->datasis->dameval("SELECT proxch FROM banc WHERE codbanc='$codban'");
