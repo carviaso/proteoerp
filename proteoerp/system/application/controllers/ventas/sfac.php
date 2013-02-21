@@ -34,9 +34,9 @@ class Sfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir'    ,'label'=>'Reimprimir Documento'));
-		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png'              ,'alt' => 'Cierre de Caja','label'=>'Cierre de Caja'));
-		$grid->wbotonadd(array('id'=>'fmanual',  'img' =>'images/mano.png',                 'alt' => 'Facctura Manual',  'label'=>'Factura Manual'));
+		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir'      ,'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png'              ,'alt' => 'Cierre de Caja'  ,'label'=>'Cierre de Caja'));
+		$grid->wbotonadd(array('id'=>'fmanual'  ,'img'=>'images/mano.png'                ,'alt' => 'Factura Manual'  ,'label'=>'Factura Manual'));
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
 			$grid->wbotonadd(array('id'=>'bcierrex','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre X','label'=>'Cierre X'));
@@ -2899,7 +2899,7 @@ class Sfac extends Controller {
 		$tipo_doc = $this->input->post('tipo_doc');
 		$codigo   = $this->input->post('codigoa_'.$i);
 		$manual   = $this->input->post('manual');
-		if($manual=='S') return false;
+		if($manual=='S') return true;
 
 		if($tipo_doc == 'D'){
 			$factura  = $this->input->post('factura');
