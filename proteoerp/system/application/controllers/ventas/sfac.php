@@ -1471,7 +1471,7 @@ class Sfac extends Controller {
 */
 
 		$grid->addField('codigoa');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1483,7 +1483,7 @@ class Sfac extends Controller {
 
 
 		$grid->addField('desca');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1540,7 +1540,7 @@ class Sfac extends Controller {
 
 
 		$grid->addField('iva');
-		$grid->label('Iva');
+		$grid->label('IVA');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1595,7 +1595,7 @@ class Sfac extends Controller {
 
 
 		$grid->addField('comision');
-		$grid->label('Comision');
+		$grid->label('Comisi&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1725,7 +1725,7 @@ class Sfac extends Controller {
 		));
 
 		$grid->addField('precio4');
-		$grid->label('Precio4');
+		$grid->label('Precio 4');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1751,7 +1751,7 @@ class Sfac extends Controller {
 
 
 		$grid->addField('fdespacha');
-		$grid->label('Fdespacha');
+		$grid->label('F.Despacho');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1764,7 +1764,7 @@ class Sfac extends Controller {
 
 
 		$grid->addField('udespacha');
-		$grid->label('Udespacha');
+		$grid->label('U.Despacho');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -2686,7 +2686,9 @@ class Sfac extends Controller {
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->mode = 'autohide';
-		$edit->fecha->when = array('show');
+		//$edit->fecha->when = array('show');
+		$edit->fecha->insertValue=date('Y-m-d');
+		$edit->fecha->rule = 'required|chfecha';
 		$edit->fecha->calendar = false;
 		$edit->fecha->size = 10;
 
@@ -2695,13 +2697,16 @@ class Sfac extends Controller {
 		$edit->tipo_doc->option('D','Devoluci&oacute;n');
 		//$edit->tipo_doc->option('M','Fac. Manual');
 		//$edit->tipo_doc->option('O','Dev. Manual');
-		$edit->tipo_doc->style='width:150px;';
+		$edit->tipo_doc->style='width:140px;';
 		$edit->tipo_doc->size = 5;
 		$edit->tipo_doc->rule='required';
 
+		$edit->manual =  new checkboxField('Manual', 'manual','S','N');
+		$edit->manual->insertValue = 'N';
+
 		$edit->vd = new  dropdownField ('Vendedor', 'vd');
 		$edit->vd->options('SELECT vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend ORDER BY vendedor');
-		$edit->vd->style='width:150px;';
+		$edit->vd->style='width:140px;';
 		$edit->vd->insertValue=$this->secu->getvendedor();
 
 		$edit->almacen= new dropdownField ('Almac&eacute;n', 'almacen');
@@ -3159,6 +3164,7 @@ class Sfac extends Controller {
 		$edit->buttons('save', 'undo');
 		$edit->build();
 
+		$manual   = $edit->get_from_dataobjetct('manual');
 		$tipo_doc = $edit->get_from_dataobjetct('tipo_doc');
 		if($tipo_doc=='F'){
 			$maestra  = $edit->get_from_dataobjetct('maestra');
@@ -3195,7 +3201,7 @@ class Sfac extends Controller {
 			$edit->build();
 		}
 
-		if($st=='modify'){
+		if($st=='modify' && $manual!='S'){
 			$script= '<script type="text/javascript" >
 			$(function() {
 				setTimeout(\'window.location="'.$url.'"\',100);
@@ -3343,6 +3349,7 @@ class Sfac extends Controller {
 	function _pre_insert($do){
 		$cliente= $do->get('cod_cli');
 		$tipoa  = $do->get('tipo_doc');
+		$manual = $do->get('manual');
 		$con=$this->db->query("SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1");
 		if($con->num_rows() > 0){
 			$t=$con->row('tasa');$rt=$con->row('redutasa');$st=$con->row('sobretasa');
@@ -3464,7 +3471,9 @@ class Sfac extends Controller {
 		$do->set('montasa'  ,$montasa  );
 		$do->set('monredu'  ,$monredu  );
 		$do->set('monadic'  ,$monadic  );
-		$do->set('fecha'    ,date('Y-m-d'));
+		if($manual!='S'){
+			$do->set('fecha' ,date('Y-m-d'));
+		}
 
 		$fecha  = $do->get('fecha');
 		//Validacion del limite de credito del cliente
@@ -3574,7 +3583,11 @@ class Sfac extends Controller {
 		}
 
 		if($tipoa=='F'){
-			$numero = $this->datasis->fprox_numero('nsfac');
+			if($manual!='S'){
+				$numero = $this->datasis->fprox_numero('nsfac');
+			}else{
+				$numero = '1'.substr($this->datasis->fprox_numero('nsfacman'),-7);
+			}
 		}else{
 			$numero = $this->datasis->fprox_numero('nccli');
 		}

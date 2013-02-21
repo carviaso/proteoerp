@@ -650,6 +650,11 @@ function sfpatipo(id){
 				<td class="littletablerow">   <?php echo $form->fecha->output;    ?></td>
 				<td class="littletableheader"><?php echo $form->factura->label;   ?></td>
 				<td class="littletablerow"   ><?php echo $form->factura->output;  ?></td>
+			</tr><tr>
+				<td class="littletableheader"><?php echo $form->manual->label;     ?></td>
+				<td class="littletablerow">   <?php echo $form->manual->output;    ?></td>
+				<td class="littletableheader">&nbsp;</td>
+				<td class="littletablerow"   >&nbsp;</td>
 			</tr>
 			</table>
 			</fieldset>
