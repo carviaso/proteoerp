@@ -374,14 +374,14 @@ class Sfac extends Controller {
 										} else {
 											//$( "#fedita" ).dialog( "close" );
 
-			$.post("'.site_url($this->url.'dataedit/S/create').'",
-			function(data){
-				$("#fedita").html(data);
-			})
+											$.post("'.site_url($this->url.'dataedit/S/create').'",
+											function(data){
+												$("#fedita").html(data);
+											})
 
 											//jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-											alert("Factura guardada");
-											//window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											//alert("Factura guardada");
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 											return true;
 										}
 
@@ -2762,13 +2762,26 @@ class Sfac extends Controller {
 		$edit->pre_process( 'insert','_pre_print_insert');
 		$edit->pre_process( 'delete','_pre_print_delete');
 
-		$edit->container = new containerField('impresion','La descarga se realizara en algunos segundos, en caso de no hacerlo haga click '.anchor('formatos/'.$sfacforma.'/FACTURA/'.$uid,'aqui'));
+		$manual = $this->datasis->dameval('SELECT manual FROM sfac WHERE id='.$this->db->escape($uid));
+		if($manual!='S'){
+			$edit->container = new containerField('impresion','La descarga se realizara en algunos segundos, en caso de no hacerlo haga click '.anchor('formatos/'.$sfacforma.'/FACTURA/'.$uid,'aqui'));
+		}else{
+			$edit->container = new containerField('impresion','Haga click '.anchor('formatos/descargar/FACTURA/'.$uid,'aqui').' para descargar el comprobante de registro');
+		}
 
-		$edit->nfiscal = new inputField('N&uacute;mero f&iacute;scal','nfiscal');
+		$edit->nfiscal = new inputField('Control f&iacute;scal','nfiscal');
 		$edit->nfiscal->rule='max_length[12]|required';
 		$edit->nfiscal->size =14;
 		$edit->nfiscal->maxlength =12;
 		$edit->nfiscal->autocomplete=false;
+
+		if($manual=='S'){
+			$edit->nromanual = new inputField('N&uacute;mero de factura manual','nfiscal');
+			$edit->nromanual->rule='max_length[14]|required';
+			$edit->nromanual->size =18;
+			$edit->nromanual->maxlength =14;
+			$edit->nromanual->autocomplete=false;
+		}
 
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
@@ -2835,7 +2848,6 @@ class Sfac extends Controller {
 		$edit->buttons('save', 'undo');
 		$edit->build();
 
-		$manual   = $edit->get_from_dataobjetct('manual');
 		$tipo_doc = $edit->get_from_dataobjetct('tipo_doc');
 		if($tipo_doc=='F'){
 			$maestra  = $edit->get_from_dataobjetct('maestra');
@@ -3023,6 +3035,10 @@ class Sfac extends Controller {
 		$cliente= $do->get('cod_cli');
 		$tipoa  = $do->get('tipo_doc');
 		$manual = $do->get('manual');
+		$fecha  = $do->get('fecha');
+		$estampa= $do->get('estampa');
+
+
 		$con=$this->db->query("SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1");
 		if($con->num_rows() > 0){
 			$t=$con->row('tasa');$rt=$con->row('redutasa');$st=$con->row('sobretasa');
@@ -3072,7 +3088,7 @@ class Sfac extends Controller {
 		for($i=0;$i<$cana;$i++){
 
 			//Aplica el corte segun maxlin
-			if($maxlin>0 && $i>=$maxlin){
+			if($maxlin>0 && $i>=$maxlin && $manual!='S'){
 				$this->_creanfac=true;
 				$do->rel_rm('sitems',$i);
 				continue;
@@ -3137,6 +3153,13 @@ class Sfac extends Controller {
 		}
 		//Fin del calculo a credito
 
+		if($manual=='S' && $fecha!=$estampa && $credito-$sfpa_monto!=0){
+			$do->error_message_ar['pre_ins']='Una factura manual solo se puede pagar en efectivo si es el mismo d&iacute;a, en caso contrario se debe cargar a cr&eacute;dito y luego hacer la cobranza.';
+			return false;
+		}
+
+
+
 		$do->set('exento'   ,$exento   );
 		$do->set('tasa'     ,$tasa     );
 		$do->set('reducida' ,$reducida );
@@ -3150,7 +3173,7 @@ class Sfac extends Controller {
 
 		$fecha  = $do->get('fecha');
 		//Validacion del limite de credito del cliente
-		if($credito>0 && $tipoa=='F'){
+		if($credito>0 && $tipoa=='F' && $manual!='S'){
 			$dbcliente=$this->db->escape($cliente);
 			$rrow    = $this->datasis->damerow("SELECT limite,formap,credito,tolera,TRIM(socio) AS socio FROM scli WHERE cliente=$dbcliente");
 			if($rrow!=false){
@@ -3259,11 +3282,11 @@ class Sfac extends Controller {
 			if($manual!='S'){
 				$numero = $this->datasis->fprox_numero('nsfac');
 			}else{
-				$numero = 'M'.substr($this->datasis->fprox_numero('nsfacman'),-7);
+				$numero = 'M'.$this->datasis->fprox_numero('nsfacman',7);
 			}
 		}else{
 			if($manual!='S'){
-				$numero = 'M'.substr($this->datasis->fprox_numero('nccliman'),-7);
+				$numero = 'M'.$this->datasis->fprox_numero('nccliman',7);
 			}else{
 				$numero = $this->datasis->fprox_numero('nccli');
 			}
