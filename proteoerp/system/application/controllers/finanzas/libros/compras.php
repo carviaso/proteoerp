@@ -446,9 +446,9 @@ ORDER BY fecha,numo
 		$fhasta=$mes.$udia;
 
 		//Procesando Compras scst
-		$this->db->simple_query("UPDATE scst SET montasa=0, tasa =0     WHERE montasa IS NULL ");
-		$this->db->simple_query("UPDATE scst SET monredu=0, reducida=0  WHERE monredu IS NULL ");
-		$this->db->simple_query("UPDATE scst SET monadic=0, sobretasa=0 WHERE monadic IS NULL ");
+		$this->db->simple_query('UPDATE scst SET montasa=0, tasa =0     WHERE montasa IS NULL');
+		$this->db->simple_query('UPDATE scst SET monredu=0, reducida=0  WHERE monredu IS NULL');
+		$this->db->simple_query('UPDATE scst SET monadic=0, sobretasa=0 WHERE monadic IS NULL');
 
 		$this->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='CP' ");
 		$sql="UPDATE scst SET

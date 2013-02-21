@@ -635,7 +635,7 @@ class Scst extends Controller {
 
 
 		$grid->addField('ncont');
-		$grid->label('Ncont');
+		$grid->label('N.Cont');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
