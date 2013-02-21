@@ -630,7 +630,7 @@ class Libros extends Controller {
 		$data[]=array('metodo'=>'wlvexcelpdvfiscalq1','activo'=>'N','tipo'=>'D' ,'nombre' => 'Libro de Ventas PDV Quincenta 1 Fiscal');
 		$data[]=array('metodo'=>'wlvexcelpdvfiscalq2','activo'=>'N','tipo'=>'D' ,'nombre' => 'Libro de Ventas PDV Quincenta 2 Fiscal');
 		$data[]=array('metodo'=>'wlvexcel'           ,'activo'=>'S','tipo'=>'D' ,'nombre' => 'Libro de Ventas'          );
-		$data[]=array('metodo'=>'wlvexcel2'          ,'activo'=>'S','tipo'=>'D' ,'nombre' => 'Libro de Ventas no Agrupadas');
+		$data[]=array('metodo'=>'wlvexcel2'          ,'activo'=>'N','tipo'=>'D' ,'nombre' => 'Libro de Ventas no Agrupadas');
 		$data[]=array('metodo'=>'wlvexcelfiscal'     ,'activo'=>'S','tipo'=>'D' ,'nombre' => 'Libro de Ventas Agrupadas Fiscal');
 		$data[]=array('metodo'=>'wlvcierrez'         ,'activo'=>'N','tipo'=>'D' ,'nombre' => 'Libro de Ventas basado en cierre Z');
 		$data[]=array('metodo'=>'wlvexcelsucu'       ,'activo'=>'N','tipo'=>'D' ,'nombre' => 'Libro de Ventas por Sucursal');
@@ -648,9 +648,9 @@ class Libros extends Controller {
 		$data[]=array('metodo'=>'genegastos'          ,'activo'=>'S','tipo'=>'G' ,'nombre' => 'Generar Libro de compras GASTOS'  );
 		$data[]=array('metodo'=>'genecxp'             ,'activo'=>'S','tipo'=>'G' ,'nombre' => 'Generar Libro de compras CXP'     );
 		$data[]=array('metodo'=>'genesfac'            ,'activo'=>'S','tipo'=>'G' ,'nombre' => 'Generar Libro de ventas Facturas' );
-		$data[]=array('metodo'=>'genesfacfiscal'      ,'activo'=>'S','tipo'=>'G' ,'nombre' => 'Generar Libro de ventas Facturas Fiscal' );
+		$data[]=array('metodo'=>'genesfacfiscal'      ,'activo'=>'N','tipo'=>'G' ,'nombre' => 'Generar Libro de ventas Facturas Fiscal' );
 		$data[]=array('metodo'=>'geneventasfiscalpdv' ,'activo'=>'N','tipo'=>'G' ,'nombre' => 'Generar Libro de ventas Fiscal PDV'   );
-		$data[]=array('metodo'=>'genesfmay'           ,'activo'=>'S','tipo'=>'G' ,'nombre' => 'Generar Libro de ventas Facturas al mayor' );
+		$data[]=array('metodo'=>'genesfmay'           ,'activo'=>'N','tipo'=>'G' ,'nombre' => 'Generar Libro de ventas Facturas al mayor' );
 		$data[]=array('metodo'=>'genesmov'            ,'activo'=>'N','tipo'=>'G' ,'nombre' => 'Generar Libro de ventas CXC'      );
 		$data[]=array('metodo'=>'geneotin'            ,'activo'=>'S','tipo'=>'G' ,'nombre' => 'Generar Libro de ventas O.Ingresos');
 		$data[]=array('metodo'=>'generest'            ,'activo'=>'N','tipo'=>'G' ,'nombre'  =>'Generar Libro de ventas Restaurante');
@@ -684,6 +684,11 @@ class Libros extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
+		if (!in_array('manual',$campos)){
+			$mSQL="ALTER TABLE `siva` ADD COLUMN `manual` CHAR(1) NULL DEFAULT 'N' COMMENT 'Indica si el documento fue realizado manual o por sistema'";
+			$this->db->simple_query($mSQL);
+		}
+
 		$mSQL="ALTER TABLE `siva` CHANGE `numero` `numero` VARCHAR(20) NULL";
 		$this->db->simple_query($mSQL);
 
@@ -695,6 +700,13 @@ class Libros extends Controller {
 
 		//$mSQL="ALTER TABLE `siva`  CHANGE COLUMN `numero` `numero` VARCHAR(20) NOT NULL DEFAULT '' AFTER `fecha`";
 		//$this->db->simple_query($mSQL);
+
+
+		$campos = $this->db->list_fields('sfac');
+
+		if(!in_array('manual'  ,$campos)){
+			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `manual` CHAR(50) NULL DEFAULT 'N'");
+		}
 
 		echo $uri = anchor('finanzas/libros/configurar','Configurar');
 	}

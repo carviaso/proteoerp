@@ -2776,7 +2776,7 @@ class Sfac extends Controller {
 		$edit->nfiscal->autocomplete=false;
 
 		if($manual=='S'){
-			$edit->nromanual = new inputField('N&uacute;mero de factura manual','nfiscal');
+			$edit->nromanual = new inputField('N&uacute;mero de factura manual','nromanual');
 			$edit->nromanual->rule='max_length[14]|required';
 			$edit->nromanual->size =18;
 			$edit->nromanual->maxlength =14;
@@ -3157,8 +3157,6 @@ class Sfac extends Controller {
 			$do->error_message_ar['pre_ins']='Una factura manual solo se puede pagar en efectivo si es el mismo d&iacute;a, en caso contrario se debe cargar a cr&eacute;dito y luego hacer la cobranza.';
 			return false;
 		}
-
-
 
 		$do->set('exento'   ,$exento   );
 		$do->set('tasa'     ,$tasa     );
