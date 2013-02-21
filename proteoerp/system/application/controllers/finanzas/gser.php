@@ -531,10 +531,10 @@ class gser extends Controller {
 		$grid->label('N.Cheque');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => 'true',
+			'editable'      => $editar,
 			'width'         => 120,
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
+			'editrules'     => '{ required:false}',
 			'editoptions'   => '{ size:12, maxlength: 12 }',
 		));
 
@@ -1242,12 +1242,13 @@ class gser extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = "numero";
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
+			/*
 			if(false == empty($data)){
 				$check = $this->datasis->dameval("SELECT count(*) FROM gser WHERE $mcodp=".$this->db->escape($data[$mcodp]));
 				if ( $check == 0 ){
@@ -1258,25 +1259,14 @@ class gser extends Controller {
 					echo "Ya existe un registro con ese $mcodp";
 			} else
 				echo "Fallo Agregado!!!";
+			*/
 
 		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM gser WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM gser WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE gser SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("gser", $data);
-				logusu('GSER',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('gser', $data);
-				logusu('GSER',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
+			unset($data[$mcodp]);
+			$this->db->where("id", $id);
+			$this->db->update('gser', $data);
+			logusu('GSER',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+			echo "Gasto Modificado";
 
 		} elseif($oper == 'del') {
 		$meco = $this->datasis->dameval("SELECT $mcodp FROM gser WHERE id=$id");
@@ -1284,8 +1274,8 @@ class gser extends Controller {
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
-				$this->db->simple_query("DELETE FROM gser WHERE id=$id ");
-				logusu('GSER',"Registro ????? ELIMINADO");
+				//$this->db->simple_query("DELETE FROM gser WHERE id=$id ");
+				//logusu('GSER',"Registro ????? ELIMINADO");
 				echo "Registro Eliminado";
 			}
 		};
