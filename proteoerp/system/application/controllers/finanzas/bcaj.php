@@ -29,11 +29,9 @@ class Bcaj extends Controller {
 	}
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//***************************
+	//******************************************************************
 	//Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 		if (!$this->datasis->sidapuede('BCAJ', 'TODOS')) {
 			redirect('/bienvenido/noautorizado');
@@ -45,177 +43,12 @@ class Bcaj extends Controller {
 		$grid1   = $this->defgridit();
 		$param['grids'][] = $grid1->deploy();
 
+		// Configura los Paneles
+		$readyLayout = $grid->readyLayout2( 212, 200, $param['grids'][0]['gridname'],$param['grids'][1]['gridname']);
 
-		$readyLayout = '
-	$(\'body\').layout({
-		minSize: 30,
-		north__size: 60,
-		resizerClass: \'ui-state-default\',
-		west__size: 212,
-		west__onresize: function (pane, $Pane){jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);},
-	});
-	
-	$(\'div.ui-layout-center\').layout({
-		minSize: 30,
-		resizerClass: "ui-state-default",
-		center__paneSelector: ".centro-centro",
-		south__paneSelector:  ".centro-sur",
-		south__size: 200,
-		center__onresize: function (pane, $Pane) {
-			jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'setGridWidth\', $Pane.innerWidth()-6);
-			jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'setGridHeight\',$Pane.innerHeight()-100);
-			jQuery("#newapi'.$param['grids'][1]['gridname'].'").jqGrid(\'setGridWidth\', $Pane.innerWidth()-6);
-		}
-	});
-	';
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
-		$bodyscript = '
-<script type="text/javascript">
-jQuery("#impPdf").click( function(){
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\''.base_url().'formatos/ver/BANCAJA/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-
-jQuery("#impHtml").click( function(){
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\''.base_url().'formatos/verhtml/BANCAJA/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-
-jQuery("#chdevo").click( function(){
-	var id = jQuery("#newapi'. $param['grids'][1]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][1]['gridname'].'").jqGrid(\'getRowData\',id);
-		$.prompt(
-			"<h1>Cheque Devuelto </h1><table width=\"100%\"><tr><td>Numero: "+ret.num_ref+"</td><td>Fecha: "+ret.fecha+"</td></tr><tr><td>Banco: "+ret.banco+"</td><td>Monto: "+ret.monto+"</td></tr></table>",
-			{
-				buttons: { "Devolver":true, "Cancelar": false }, focus: 1,
-				callback: function(e,v,m,f){
-					if (v == true) {
-						$.get("'.base_url().'finanzas/prmo/prmochdev/"+id,
-						function(data){ alert(data); });
-					}
-				}
-			}
-		);
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-
-function probar( o, n ) {
-	if ( o.val().length < 1 ) {
-		o.addClass( "ui-state-error" );
-		updateTips( "Seleccion un " + n + "." );
-		return false;
-	} else {
-		return true;
-	}
-};
-
-$(function() {
-	$("#dialog:ui-dialog").dialog( "destroy" );
-	var mId = 0;
-	var montotal = 0;
-	var fnumero = $("#fnumero");
-	var ffecha = $("#ffecha");
-	var grid = jQuery("#newapi'.$param['grids'][0]['gridname'].'");
-	var s;
-	var allFields = $( [] ).add( fnumero ).add( ffecha );
-	
-	var tips = $( ".validateTips" );
-
-	s = grid.getGridParam(\'selarrrow\'); 
-	$( "input:submit, a, button", ".otros" ).button();
-
-	$( "#cerrardpt" ).click(function() {
-		var id     = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-		if (id)	{
-			var ret    = $("#newapi'. $param['grids'][0]['gridname'].'").getRowData(id);  
-			mId = id;
-			$.post("'.base_url().'finanzas/bcaj/formacierre/"+id, function(data){
-				$("#forma1").html(data);
-			});
-			if ( ret["status"] == "P" ){
-				$( "#forma1" ).dialog( "open" );
-			} else {
-				$.prompt("<h1>Movimiento no esta Pendiente</h1>");
-			}
-			
-		} else { $.prompt("<h1>Por favor Seleccione un Deposito</h1>");}
-	});
-
-	
-	$( "#borrar" ).click(function() {
-		var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-		var m = "";
-		if (id)	{
-			$.prompt( "Eliminar Registro? ",{
-					buttons: { Borrar:true, Cancelar:false},
-					callback: function(e,v,m,f){
-						if (v == true) {
-							$.get("'.base_url().$this->url.'bcajborra/"+id,
-							function(data){
-								alert(data);
-							});
-						}
-					}
-				}
-			);
-		} else { $.prompt("<h2>Por favor Seleccione un Movimiento</h2>");}
-	});
-		
-	var fnombre = $( "#name" ),
-		email = $( "#email" ),
-		password = $( "#password" ),
-		allFields = $( [] ).add( name ).add( email ).add( password ),
-		tips = $( ".validateTips" );
-
-	$( "#forma1" ).dialog({
-		autoOpen: false,
-		height: 470,
-		width: 550,
-		modal: true,
-		buttons: {
-			"Cerrar Deposito": function() {
-				var bValid = true;
-				allFields.removeClass( "ui-state-error" );
-				if ( bValid ) {
-					$.ajax({
-						type: "POST",
-						dataType: "html",
-						url:"'.site_url("finanzas/bcaj/cerrardpt").'",
-						async: false,
-						data: $("#cierreforma").serialize(),
-						success: function(r,s,x){
-							var res = $.parseJSON(r);
-							if ( res.status == "E"){
-								alert("Error: "+res.mensaje);
-							} else {
-								alert(res.mensaje);
-								grid.trigger("reloadGrid");
-								$( "#forma1" ).dialog( "close" );
-								return [true, a ];
-							}
-						}
-					});
-				}
-			},
-			Cancel: function() {
-				$( this ).dialog( "close" );
-			}
-		},
-		close: function() {
-			allFields.val( "" ).removeClass( "ui-state-error" );
-		}
-	});
-});
-
-</script>
-';
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -272,26 +105,15 @@ $(function() {
 </div> <!-- #LeftPane -->
 ';
 
-		$centerpanel = '
-<div id="RightPane" class="ui-layout-center">
-	<div class="centro-centro">
-		<table id="newapi'.$param['grids'][0]['gridname'].'"></table>
-		<div id="pnewapi'.$param['grids'][0]['gridname'].'"></div>
-	</div>
-	<div class="centro-sur" id="adicional" style="overflow:auto;">
-		<table id="newapi'.$param['grids'][1]['gridname'].'"></table>
-	</div>
-</div> <!-- #RightPane -->
-';
 
-		$SouthPanel = '
-<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
-<p>'.$this->datasis->traevalor('TITULO1').'</p>
-</div> <!-- #BottomPanel -->
+		//Panel Central
+		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
-<div id="forma1" title="Recepcion de Depositos"></div>
+		$adic = array(
+		array("id"=>"forma1",  "title"=>"Agregar/Editar Registro")
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-';
 
 		$funciones = '';
 
@@ -313,6 +135,177 @@ $(function() {
 		
 		$this->load->view('jqgrid/crud2',$param);
 	}
+
+
+	//******************************************************************
+	//Funciones de los Botones
+	//******************************************************************
+	function bodyscript( $grid0, $grid1 ){
+		$bodyscript = '<script type="text/javascript">';
+
+		//Imprime a PDF
+		$bodyscript .= '
+		jQuery("#impPdf").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.base_url().'formatos/ver/BANCAJA/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});
+		';
+
+		//Imprime a HTML
+		$bodyscript .= '
+		jQuery("#impHtml").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.base_url().'formatos/verhtml/BANCAJA/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});
+		';
+
+		//Imprime a HTML
+		$bodyscript .= '
+		jQuery("#chdevo").click( function(){
+			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid1.'").jqGrid(\'getRowData\',id);
+				$.prompt(
+					"<h1>Cheque Devuelto </h1><table width=\"100%\"><tr><td>Numero: "+ret.num_ref+"</td><td>Fecha: "+ret.fecha+"</td></tr><tr><td>Banco: "+ret.banco+"</td><td>Monto: "+ret.monto+"</td></tr></table>",
+					{
+						buttons: { "Devolver":true, "Cancelar": false }, focus: 1,
+						callback: function(e,v,m,f){
+							if (v == true) {
+								$.get("'.base_url().'finanzas/prmo/prmochdev/"+id,
+								function(data){ alert(data); });
+							}
+						}
+					}
+				);
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});
+		';
+/*
+		//Imprime a HTML
+		$bodyscript .= '
+		function probar( o, n ) {
+			if ( o.val().length < 1 ) {
+				o.addClass( "ui-state-error" );
+				updateTips( "Seleccion un " + n + "." );
+				return false;
+			} else {
+				return true;
+			}
+		};
+		';
+*/
+
+		//Imprime a HTML
+		$bodyscript .= '
+		$(function() {
+			$("#dialog:ui-dialog").dialog( "destroy" );
+			var mId = 0;
+			var montotal = 0;
+			var fnumero = $("#fnumero");
+			var ffecha = $("#ffecha");
+			var grid = jQuery("#newapi'.$grid0.'");
+			var s;
+			var allFields = $( [] ).add( fnumero ).add( ffecha );
+
+			var tips = $( ".validateTips" );
+
+			s = grid.getGridParam(\'selarrrow\'); 
+			$( "input:submit, a, button", ".otros" ).button();
+
+			$("#cerrardpt").click(function() {
+				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					var ret    = $("#newapi'. $grid0.'").getRowData(id);  
+					mId = id;
+					$.post("'.base_url().'finanzas/bcaj/formacierre/"+id, function(data){
+						$("#forma1").html(data);
+					});
+					if ( ret["status"] == "P" ){
+						$( "#forma1" ).dialog( "open" );
+					} else {
+						$.prompt("<h1>Movimiento no esta Pendiente</h1>");
+					}
+				} else { $.prompt("<h1>Por favor Seleccione un Deposito</h1>");}
+			});
+
+			$("#borrar").click(function() {
+				var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				var m = "";
+				if (id)	{
+					$.prompt( "Eliminar Registro? ",{
+							buttons: { Borrar:true, Cancelar:false},
+							callback: function(e,v,m,f){
+								if (v == true) {
+									$.get("'.base_url().$this->url.'bcajborra/"+id,
+									function(data){
+										alert(data);
+									});
+								}
+							}
+						}
+					);
+				} else { $.prompt("<h2>Por favor Seleccione un Movimiento</h2>");}
+			});
+
+			var fnombre = $("#name" ),
+				email = $( "#email" ),
+				password = $( "#password" ),
+				allFields = $( [] ).add( name ).add( email ).add( password ),
+				tips = $( ".validateTips" );
+
+			$( "#forma1").dialog({
+				autoOpen: false,
+				height: 470,
+				width: 550,
+				modal: true,
+				buttons: {
+					"Cerrar Deposito": function() {
+						var bValid = true;
+						allFields.removeClass( "ui-state-error" );
+						if ( bValid ) {
+							$.ajax({
+								type: "POST",
+								dataType: "html",
+								url:"'.site_url("finanzas/bcaj/cerrardpt").'",
+								async: false,
+								data: $("#cierreforma").serialize(),
+								success: function(r,s,x){
+									var res = $.parseJSON(r);
+									if ( res.status == "E"){
+										alert("Error: "+res.mensaje);
+									} else {
+										alert(res.mensaje);
+										grid.trigger("reloadGrid");
+										$( "#forma1" ).dialog( "close" );
+										return [true, a ];
+									}
+								}
+							});
+						}
+					},
+					Cancel: function() {
+						$( this ).dialog( "close" );
+					}
+				},
+				close: function() {
+					allFields.val( "" ).removeClass( "ui-state-error" );
+				}
+			});
+		});
+		';
+
+
+		$bodyscript .= "\n</script>\n";
+		return $bodyscript;
+	}
+
+
 
 	//***************************
 	//Definicion del Grid y la Forma
@@ -1155,11 +1148,6 @@ $(function() {
 		$grid->setToolbar('false', '"top"');
 		$grid->setOndblClickRow('');
 
-
-		//$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
-		//$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
-		//$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
-
 		#show/hide navigations buttons
 		$grid->setAdd(false);
 		$grid->setEdit(false);
@@ -1604,16 +1592,16 @@ $(function() {
 
 
 	/*********************************
-	 *
-	 * Elimina Movimiento
-	 *
-	 */
+	*
+	* Elimina Movimiento
+	*
+	*/
 	function bcajborra(){
 		$id = $this->uri->segment($this->uri->total_segments());
 		
 		$transac = $this->datasis->dameval("SELECT transac FROM bcaj WHERE id=$id");
-		$status  = $this->datasis->dameval("SELECT status FROM bcaj WHERE id=$id");
-		$numero  = $this->datasis->dameval("SELECT numero FROM bcaj WHERE id=$id");
+		$status  = $this->datasis->dameval("SELECT status  FROM bcaj WHERE id=$id");
+		$numero  = $this->datasis->dameval("SELECT numero  FROM bcaj WHERE id=$id");
 
 		if ( $this->datasis->dameval("SELECT COUNT(*) FROM bmov WHERE transac='$transac' ") > 0 ){
 			$mSQL = "SELECT codbanc, fecha, monto*if(tipo_op IN ('CH','ND'),1,-1) monto FROM bmov WHERE transac='$transac'";
@@ -1625,16 +1613,19 @@ $(function() {
 			}
 		}
 
-		$this->db->simple_query("DELETE FROM bcaj   WHERE transac=?", array($transac));
-		$this->db->simple_query("DELETE FROM bmov   WHERE transac=?", array($transac));
-		$this->db->simple_query("DELETE FROM gser   WHERE transac=?", array($transac));
-		$this->db->simple_query("DELETE FROM smov   WHERE transac=?", array($transac));
-		$this->db->simple_query("DELETE FROM itccli WHERE transac=?", array($transac));
-		$this->db->simple_query("DELETE FROM gitser WHERE transac=?", array($transac));
+		$this->db->query("DELETE FROM bcaj   WHERE transac=?", array($transac));
+		$this->db->query("DELETE FROM bmov   WHERE transac=?", array($transac));
+		$this->db->query("DELETE FROM gser   WHERE transac=?", array($transac));
+		$this->db->query("DELETE FROM smov   WHERE transac=?", array($transac));
+		$this->db->query("DELETE FROM itccli WHERE transac=?", array($transac));
+		$this->db->query("DELETE FROM gitser WHERE transac=?", array($transac));
+
+		// Cambia el estaus de los cheques
+		$this->db->query("UPDATE sfpa SET status='' WHERE deposito='".$numero."'");
 
 		// LIBERA LOS CHEQUES SI ES DE
 		$this->db->simple_query("UPDATE sfpa SET status='' AND deposito='' WHERE deposito=?", array($numero));
-		logusu('BCAJ',"MOVIMIENTO DE CAJA $numero ELIMINADO");
+		logusu('BCAJ',"MOVIMIENTO DE CAJA $numero Transaccion $transac ELIMINADO");
 		echo "Movimiento de Caja Eliminado ";
 	}
 

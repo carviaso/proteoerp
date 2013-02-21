@@ -54,7 +54,7 @@ class sfpach extends Controller {
 		$grid->wbotonadd(array("id"=>"efectivo",  "img"=>"assets/default/images/monedas.png", "alt" => 'Enviar Efectivo', "label"=>"Enviar Efectivo"));
 		$WestPanel = $grid->deploywestp();
 
-		$mSQL  = "SELECT codbanc, CONCAT(codbanc, ' ', TRIM(banco), IF(tbanco='CAJ',' ',numcuent) ) banco FROM banc WHERE tbanco='CAJ' AND activo='S' ORDER BY codbanc ";
+		$mSQL  = "SELECT codbanc, CONCAT(codbanc, ' ', TRIM(banco), IF(tbanco='CAJ',' ',numcuent) ) banco FROM banc WHERE tbanco='CAJ' AND activo='S' AND codbanc<>'00' ORDER BY codbanc ";
 		$cajas = $this->datasis->llenaopciones($mSQL, true, 'envia');
 		$efcaja = $this->datasis->llenaopciones($mSQL, true, 'efcaja');
 
@@ -459,35 +459,6 @@ class sfpach extends Controller {
 	}
 
 
-/*
-	function ddtarjeta(){
-		$mSQL = "SELECT tipo, CONCAT(tipo,' ',nombre) nombre FROM tarjeta WHERE activo!='N' AND tipo NOT IN ('EF', 'DE', 'NC','RI','IR','RP')";
-		echo $this->datasis->llenaopciones($mSQL, true);
-	}
-
-	function ddbanco(){
-		$mSQL = "SELECT cod_banc, CONCAT(cod_banc, ' ', nomb_banc) banco FROM tban WHERE cod_banc<>'CAJ' ORDER BY nomb_banc ";
-		echo $this->datasis->llenaopciones($mSQL, true);
-	}
-
-	function ddusuario(){
-		$mSQL = "SELECT us_codigo, CONCAT(us_codigo, ' ', us_nombre) us_nombre FROM usuario ORDER BY us_codigo";
-		echo $this->datasis->llenaopciones($mSQL, true);
-	}
-
-	function ddcajero(){
-		$mSQL = "SELECT cajero, CONCAT(cajero, ' ', nombre) nombre FROM scaj ORDER BY nombre";
-		echo $this->datasis->llenaopciones($mSQL, true);
-	}
-
-	function ddcaja($tipo=''){
-		$mSQL = "SELECT codbanc, CONCAT(codbanc, ' ', TRIM(banco), IF(tbanco='CAJ','',cuenta) ) banco FROM banc ";
-		if ( !empty($tipo) ) $mSQL .= " WHERE tbanco='$tipo' ";
-		$mSQL .= " ORDER BY codbanc ";
-		echo $this->datasis->llenaopciones($mSQL, true);
-	}
-*/
-
 	/**
 	* Get data result as json
 	*/
@@ -501,7 +472,6 @@ class sfpach extends Controller {
 		
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere($tabla);
-		//memowrite("where=".serialize($mWHERE));
 		$response   = $grid->getData($tabla, array(array()), array(), false, $mWHERE );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;

@@ -623,57 +623,91 @@ function sfpatipo(id){
 }
 </script>
 <?php } ?>
-<table align='center' width="95%">
+<table align='center' width="95%" cellpadding='0' cellspacing='0'>
 	<tr>
 		<td align=right><?php echo $container_tr; ?><?php echo $form->pfac->output; ?></td>
 	</tr>
 </table>
-<table align='center' width="100%">
+<table align='center' width="100%" border='0' cellpadding='0' cellspacing='0'>
 	<tr>
 		<td>
-		<table width='100%'>
-		<tr><td style="width:50%">
-			<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9; min-height:105px;'>
-			<table style="margin: 0;">
+		<table width='100%' cellpadding='0' cellspacing='0'>
+		<tr>
+			<td>
+			<table style="margin: 0;" width='100%'>
 			<tr>
-				<td class="littletableheader"><?php echo $form->tipo_doc->label;  ?></td>
-				<td class="littletablerow"   ><?php echo $form->tipo_doc->output; ?></td>
-				<td class="littletableheader"><?php echo $form->cajero->label;    ?>*</td>
-				<td class="littletablerow">   <?php echo $form->cajero->output;   ?></td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->vd->label;        ?></td>
-				<td class="littletablerow">   <?php echo $form->vd->output;       ?></td>
-				<td class="littletableheader"><?php echo $form->almacen->label;   ?>*</td>
-				<td class="littletablerow">   <?php echo $form->almacen->output;  ?></td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->fecha->label;     ?></td>
-				<td class="littletablerow">   <?php echo $form->fecha->output;    ?></td>
-				<td class="littletableheader"><?php echo $form->factura->label;   ?></td>
-				<td class="littletablerow"   ><?php echo $form->factura->output;  ?></td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->manual->label;     ?></td>
-				<td class="littletablerow">   <?php echo $form->manual->output;    ?></td>
-				<td class="littletableheader">&nbsp;</td>
-				<td class="littletablerow"   >&nbsp;</td>
-			</tr>
+				<td>
+					<fieldset style='border: 1px outset #9AC8DA;background: #EFFFEA;'>
+					<table widthi='100%'>
+						<tr>
+							<td class="littletableheader" width='80' style='background:#EFFFEA;'><?php echo $form->cliente->label;  ?>*
+							<?php 
+								if($form->_status!='show'){ ?>
+									<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;"><?php echo image('add1-.png'); ?></a>
+							<?php } ?>
+							</td>
+						</tr><tr>
+							<td class="littletablerow" width='80'   ><?php echo $form->cliente->output,$form->sclitipo->output.$form->upago->output; ?>&nbsp;</td>
+						</tr>
+					</table>
+					</fieldset>
+				</td>
+				<td>
+					<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
+					<table><tr>
+						<td>
+							<table widthi='100%'>
+								<tr>
+									<td class="littletableheader"><?php echo $form->tipo_doc->label;  ?></td>
+									<td class="littletablerow"   ><?php echo $form->tipo_doc->output; ?></td>
+								</tr><tr>
+									<td class="littletableheader"><?php echo $form->vd->label;        ?></td>
+									<td class="littletablerow">   <?php echo $form->vd->output;       ?></td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<table widthi='100%'>
+								<tr>
+									<td class="littletableheader"><?php echo $form->cajero->label;    ?>*</td>
+									<td class="littletablerow">   <?php echo $form->cajero->output;   ?></td>
+								</tr><tr>
+									<td class="littletableheader"><?php echo $form->almacen->label;   ?>*</td>
+									<td class="littletablerow">   <?php echo $form->almacen->output;  ?></td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<table widthi='100%'>
+								<tr>
+									<td class="littletableheader"><?php echo $form->fecha->label;     ?></td>
+									<td class="littletablerow">   <?php echo $form->fecha->output;    ?></td>
+								</tr><tr>
+									<td class="littletableheader"><?php echo $form->factura->label;   ?></td>
+									<td class="littletablerow"   ><?php echo $form->factura->output;  ?></td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<table>
+					</fieldset>
+				</td>
+			</tr>	
+			<?php echo $form->manual->output; ?>
 			</table>
-			</fieldset>
-		</td><td style="width:50%">
-			<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9; min-height:105px;'>
-			<table style="margin: 0;width:100%">
+		</tr></table>
+		</td>
+	</tr><tr>
+		<td style="width:50%">
+			<fieldset style='border: 1px outset #9AC8DA;background: #EFFFEA;'>
+			<table style="margin:0;width:100%">
 			<tr>
-				<td class="littletableheader"><?php echo $form->cliente->label;  ?>*
-				<?php if($form->_status!='show'){ ?>
-				<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;"><?php echo image('add1-.png'); ?></a></td>
-				<?php } ?>
-				<td class="littletablerow">   <?php echo $form->cliente->output,$form->sclitipo->output.$form->upago->output; ?>&nbsp;</td>
-				<td class="littletablerow">   <b id='rifci_val'><?php echo $form->rifci->value; ?></b><?php echo $form->rifci->output;   ?>&nbsp;</td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->nombre->label; ?></td>
-				<td class="littletablerow" colspan='2'><b id='nombre_val'><?php echo $form->nombre->value; ?></b><?php echo $form->nombre->output;  ?>&nbsp;</td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->direc->label  ?>&nbsp;</td>
-				<td class="littletablerow" colspan='2'><b id='direc_val'><?php echo $form->direc->value; ?></b><?php echo $form->direc->output ?>&nbsp;</td>
+				<td class="littletableheader" style='background:#EFFFEA;' width='30'>RIF:</td>
+				<td class="littletablerow" width='90'   ><b id='rifci_val'><?php echo $form->rifci->value; ?></b><?php echo $form->rifci->output;   ?>&nbsp;</td>
+				<!-- td class="littletableheader">< ?php echo $form->nombre->label; ?></td -->
+				<td class="littletablerow"              ><b id='nombre_val'><?php echo $form->nombre->value; ?></b><?php echo $form->nombre->output;  ?>&nbsp;</td>
+				<td class="littletableheader" width='30' style='background:#EFFFEA;'>Dir.</td>
+				<td class="littletablerow"              ><b id='direc_val'><?php echo $form->direc->value; ?></b><?php echo $form->direc->output ?>&nbsp;</td>
 			</tr>
 			</table>
 			</fieldset>
@@ -784,7 +818,7 @@ function sfpatipo(id){
 		</table>
 	</tr><tr>
 		<td>
-		<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9;'>
+		<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
 		<table width='100%'>
 			<tr>
 				<td class="littletableheader" align='right'><?php echo $form->totals->label;  ?></td>
@@ -795,7 +829,13 @@ function sfpatipo(id){
 				<td class="littletablerow"    align='right' style='font-size:18px;font-weight: bold'><b id='totalg_val'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
 			</tr>
 			<tr>
-				<td colspan='6'><?php echo  $form->observ1->label.$form->observ1->output; ?></td>
+				<td colspan='4'><?php echo  $form->observ1->label.$form->observ1->output; ?> </td>
+				<td  colspan='2' align='center'>
+				<?php 
+					if ($form->manual->value == 'S')
+						echo "<span style='font-size:11pt;font-weight: bold;background:#087C0E;color:white;' >&nbsp;&nbsp;FACTURACION MANUAL&nbsp;&nbsp;</span>";  
+				?>
+				</td>
 			</tr>
 		</table>
 		</fieldset>

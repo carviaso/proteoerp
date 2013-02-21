@@ -36,6 +36,7 @@ class Sfac extends Controller {
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir'    ,'label'=>'Reimprimir Documento'));
 		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png'              ,'alt' => 'Cierre de Caja','label'=>'Cierre de Caja'));
+		$grid->wbotonadd(array('id'=>'fmanual',  'img' =>'images/mano.png',                 'alt' => 'Facctura Manual',  'label'=>'Factura Manual'));
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
 			$grid->wbotonadd(array('id'=>'bcierrex','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre X','label'=>'Cierre X'));
@@ -98,11 +99,9 @@ class Sfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'cobroser', 'img' =>'images/agrega4.png'             , 'alt' => 'Cobro de Servicio','label'=>'Cobro de Servicio'));
+		$grid->wbotonadd(array('id'=>'cobroser', 'img' =>'images/agrega4.png',              'alt' => 'Cobro de Servicio','label'=>'Cobro de Servicio'));
 		$grid->wbotonadd(array('id'=>'imptxt',   'img' =>'assets/default/images/print.png', 'alt' => 'Imprimir Servicio','label'=>'Imprimir Factura'));
-		$grid->wbotonadd(array('id'=>'precierre','img' =>'images/dinero.png'              , 'alt' => 'Cierre de Caja'   ,'label'=>'Cierre de Caja'));
-
-
+		$grid->wbotonadd(array('id'=>'precierre','img' =>'images/dinero.png',               'alt' => 'Cierre de Caja',   'label'=>'Cierre de Caja'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -143,13 +142,25 @@ class Sfac extends Controller {
 
 		$bodyscript .= '
 		function sfacadd() {
-			$.post("'.site_url($this->url.'dataedit/create').'",
+			$.post("'.site_url($this->url.'dataedit/N/create').'",
 			function(data){
 				$("#fimpser").html("");
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
-		};';
+		};
+		';
+
+		$bodyscript .= '
+		$("#fmanual").click( function() {
+			$.post("'.site_url($this->url.'dataedit/S/create').'",
+			function(data){
+				$("#fimpser").html("");
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
 
 		$bodyscript .= '
 		function sfacshow() {
@@ -163,7 +174,8 @@ class Sfac extends Controller {
 			} else {
 				$.prompt("<h1>Por favor Seleccione un registro</h1>");
 			}
-		};';
+		};
+		';
 
 		$bodyscript .= '
 		function sfacedit() {
@@ -181,7 +193,9 @@ class Sfac extends Controller {
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-		};';
+		};
+		';
+		
 
 		$bodyscript .= '
 		function sfacdel() {
@@ -200,12 +214,13 @@ class Sfac extends Controller {
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-		};';
+		};
+		';
 
 		$bodyscript .= '$(function() { ';
 
 		$bodyscript .= '
-			jQuery("#boton1").click( function(){
+			$("#boton1").click( function(){
 				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
 					//alert(Math.ceil((screen.availHeight))+\'x\'+Math.ceil((screen.availWidth)));
@@ -215,26 +230,26 @@ class Sfac extends Controller {
 			});';
 
 		$bodyscript .= '
-			jQuery("#boton2").click( function(){
+			$("#boton2").click( function(){
 				window.open(\''.site_url('ventas/sfac/dataedit/create').'\', \'_blank\', \'width=900,height=700,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-350)\');
 			});';
 
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
 			$bodyscript .= '
-			jQuery("#bcierrex").click( function(){
+			$("#bcierrex").click( function(){
 				window.open(\''.site_url('formatos/descargartxt/CIERREX').'\', \'_blank\', \'width=300,height=300,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-350)\');
 			});';
 
 			$bodyscript .= '
-			jQuery("#bcierrez").click( function(){
+			$("#bcierrez").click( function(){
 				window.open(\''.site_url('formatos/descargartxt/CIERREZ').'\', \'_blank\', \'width=300,height=300,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-350)\');
 			});';
 		}
 
 		//Precierre
 		$bodyscript .= '
-			jQuery("#precierre").click( function(){
+			$("#precierre").click( function(){
 				//$.prompt("<h1>Seguro que desea hacer cierre?</h1>")
 				window.open(\''.site_url('ventas/rcaj/precierre/99/').'/'.$this->secu->getcajero().'\', \'_blank\', \'width=900,height=700,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-350)\');
 			});';
@@ -336,12 +351,11 @@ class Sfac extends Controller {
 		//Agregar Factura
 		$bodyscript .= '
 			$("#fedita").dialog({
-				autoOpen: false, height: 500, width: 800, modal: true,
+				autoOpen: false, height: 600, width: 800, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;
 						var murl = $("#df1").attr("action");
-						//allFields.removeClass( "ui-state-error" );
 						$.ajax({
 							type: "POST",
 							dataType: "html",
@@ -352,10 +366,25 @@ class Sfac extends Controller {
 								try{
 									var json = JSON.parse(r);
 									if ( json.status == "A" ) {
-										$( "#fedita" ).dialog( "close" );
-										jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-										window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
-										return true;
+										if ( json.manual == "N" ) {
+											$( "#fedita" ).dialog( "close" );
+											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											return true;
+										} else {
+											//$( "#fedita" ).dialog( "close" );
+											
+			$.post("'.site_url($this->url.'dataedit/S/create').'",
+			function(data){
+				$("#fedita").html(data);
+			})												
+												
+											//jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+											alert("Factura guardada");
+											//window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											return true;
+										}
+
 									} else {
 										apprise(json.mensaje);
 									}
@@ -368,6 +397,7 @@ class Sfac extends Controller {
 					"Cancelar": function() {
 						$("#fedita").html("");
 						$( this ).dialog( "close" );
+						$("#newapi'.$grid0.'").trigger("reloadGrid");
 					}
 				},
 				close: function() {
@@ -574,33 +604,6 @@ class Sfac extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
-/*
-		$grid->addField('direc');
-		$grid->label('Direc');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 40 }',
-		));
-
-
-		$grid->addField('dire1');
-		$grid->label('Dire1');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 40 }',
-		));
-*/
-
-
 		$grid->addField('orden');
 		$grid->label('Orden');
 		$grid->params(array(
@@ -706,18 +709,6 @@ class Sfac extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 8 }',
 		));
 
-/*
-		$grid->addField('pedido');
-		$grid->label('Pedido');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 8 }',
-		));
-*/
 
 		$grid->addField('usuario');
 		$grid->label('Usuario');
@@ -898,218 +889,6 @@ class Sfac extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-/*
-		$grid->addField('fpago');
-		$grid->label('Fpago');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('comical');
-		$grid->label('Comical');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('exento');
-		$grid->label('Exento');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('tasa');
-		$grid->label('Tasa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('reducida');
-		$grid->label('Reducida');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('sobretasa');
-		$grid->label('Sobretasa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('montasa');
-		$grid->label('Montasa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('monredu');
-		$grid->label('Monredu');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('monadic');
-		$grid->label('Monadic');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('notcred');
-		$grid->label('Notcred');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('fentrega');
-		$grid->label('Fentrega');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('fpagom');
-		$grid->label('Fpagom');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('fdespacha');
-		$grid->label('Fdespacha');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('udespacha');
-		$grid->label('Udespacha');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 12 }',
-		));
-
-
-		$grid->addField('numarma');
-		$grid->label('Numarma');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 8 }',
-		));
-*/
-
 		$grid->addField('maqfiscal');
 		$grid->label('Maq. Fiscal');
 		$grid->params(array(
@@ -1133,95 +912,6 @@ class Sfac extends Controller {
 			'editoptions'   => '{ size:15, maxlength: 20 }',
 		));
 
-/*
-		$grid->addField('nromanual');
-		$grid->label('Nromanual');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 140,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 14 }',
-		));
-
-
-		$grid->addField('fmanual');
-		$grid->label('Fmanual');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-		$grid->addField('reiva');
-		$grid->label('Reiva');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('creiva');
-		$grid->label('Creiva');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 20 }',
-		));
-
-
-		$grid->addField('freiva');
-		$grid->label('Freiva');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('ereiva');
-		$grid->label('Ereiva');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('vexenta');
-		$grid->label('Vexenta');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 1 }',
-		));
-*/
 
 		$grid->addField('observa');
 		$grid->label('Observaci&oacute;n 1');
@@ -1257,30 +947,6 @@ class Sfac extends Controller {
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
-
-/*
-		$grid->addField('certificado');
-		$grid->label('Certificado');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 32 }',
-		));
-
-
-		$grid->addField('sprv');
-		$grid->label('Sprv');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 50,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 5 }',
-		));*/
 
 
 		$grid->addField('maestra');
@@ -2660,6 +2326,10 @@ class Sfac extends Controller {
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
 
+		$manual = $this->uri->segment(4);
+		if ( $manual <> 'S') $manual = 'N';
+
+
 		$do = new DataObject('sfac');
 		$do->rel_one_to_many('sitems', 'sitems', array('id'=>'id_sfac'));
 		$do->rel_one_to_many('sfpa'  , 'sfpa'  , array('numero','transac'));
@@ -2695,14 +2365,14 @@ class Sfac extends Controller {
 		$edit->tipo_doc = new  dropdownField('Documento', 'tipo_doc');
 		$edit->tipo_doc->option('F','Factura');
 		$edit->tipo_doc->option('D','Devoluci&oacute;n');
-		//$edit->tipo_doc->option('M','Fac. Manual');
-		//$edit->tipo_doc->option('O','Dev. Manual');
 		$edit->tipo_doc->style='width:140px;';
 		$edit->tipo_doc->size = 5;
 		$edit->tipo_doc->rule='required';
 
-		$edit->manual =  new checkboxField('Manual', 'manual','S','N');
-		$edit->manual->insertValue = 'N';
+
+		//$edit->manual =  new checkboxField('Manual', 'manual','S','N');
+		$edit->manual =  new hiddenField('Manual', 'manual');
+		$edit->manual->insertValue = $manual;
 
 		$edit->vd = new  dropdownField ('Vendedor', 'vd');
 		$edit->vd->options('SELECT vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend ORDER BY vendedor');
@@ -2738,7 +2408,7 @@ class Sfac extends Controller {
 		$edit->peso->size      = 10;
 
 		$edit->cliente = new inputField('Cliente','cod_cli');
-		$edit->cliente->size = 6;
+		$edit->cliente->size = 8;
 		$edit->cliente->autocomplete=false;
 		$edit->cliente->rule='required|existescli';
 
@@ -2940,7 +2610,8 @@ class Sfac extends Controller {
 					$rt=array(
 						'status' =>'A',
 						'mensaje'=>'Registro guardado',
-						'pk'     =>$edit->_dataobject->pk
+						'pk'     =>$edit->_dataobject->pk,
+						'manual' =>$manual,
 					);
 
 					echo json_encode($rt);
@@ -2949,9 +2620,9 @@ class Sfac extends Controller {
 				$rt=array(
 					'status' =>'A',
 					'mensaje'=>'Registro guardado',
-					'pk'     =>$edit->_dataobject->pk
+					'pk'     =>$edit->_dataobject->pk,
+					'manual' =>$manual,
 				);
-
 				echo json_encode($rt);
 			}
 		}else{
@@ -2968,6 +2639,8 @@ class Sfac extends Controller {
 			}
 		}
 	}
+
+
 
 	function dataprintser($st,$uid){
 		$this->rapyd->load('dataedit');
