@@ -634,34 +634,41 @@ class Sinv extends Controller {
 			var grid = jQuery("#newapi'.$grid0.'");
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				mstatus = "E";
+				var ret     = $("#newapi'.$grid0.'").getRowData(id);
+				var mId     = id;
+				var mstatus = "E";
 				$.post("'.site_url('inventario/sinv/dataedit/modify').'/"+id, function(data){
 				$("#fedita").html(data);
 				$("#fedita").dialog({
 					autoOpen: false, height: 550, width: 800, modal: true,
 					buttons: {
-					"Guardar": function() {
-						var bValid = true;
-						var murl = $("#df1").attr("action");
-						//allFields.removeClass( "ui-state-error" );
-						$.ajax({
-							type: "POST", dataType: "html", async: false,
-							url: murl,
-							data: $("#df1").serialize(),
-							success: function(r,s,x){
-								if ( r.length == 0 ) {
-									$( "#fedita" ).dialog( "close" );
-									grid.trigger("reloadGrid");
-									return true;
-								} else {
-									$("#fedita").html(r);
-							}}
-						})},
-					"Cancelar": function() { $( this ).dialog( "close" ); }
-				},
-				close: function() { }
+						"Guardar": function() {
+							var bValid = true;
+							var murl = $("#df1").attr("action");
+							//allFields.removeClass( "ui-state-error" );
+							$.ajax({
+								type: "POST", dataType: "html", async: false,
+								url: murl,
+								data: $("#df1").serialize(),
+								success: function(r,s,x){
+									if ( r.length == 0 ) {
+										$( "#fedita" ).dialog( "close" );
+										grid.trigger("reloadGrid");
+										//grid.setSelection(id, true);
+										return true;
+									} else {
+										$("#fedita").html(r);
+								}}
+							})
+						},
+						"Cancelar": function() {
+							$("#fedita").html("");
+							$(this).dialog("close");
+						}
+					},
+					close: function() {
+						$("#fedita").html("");
+					}
 				});
 
 					$("#fedita").dialog( "open" );
@@ -925,7 +932,7 @@ class Sinv extends Controller {
 		));
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -937,7 +944,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('descrip');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1026,7 +1033,7 @@ class Sinv extends Controller {
 		));
 
 		$grid->addField('descrip2');
-		$grid->label('Descrip2');
+		$grid->label('Descripci&oacute;n 2');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1101,7 +1108,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('prov1');
-		$grid->label('Prov1');
+		$grid->label('Prov.1');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1115,7 +1122,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('prepro1');
-		$grid->label('Prepro1');
+		$grid->label('Precio.Prov.1');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1131,7 +1138,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('pfecha1');
-		$grid->label('Pfecha1');
+		$grid->label('P.Fecha1');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1142,7 +1149,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('prov2');
-		$grid->label('Prov2');
+		$grid->label('Prov.2');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1155,7 +1162,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('prepro2');
-		$grid->label('Prepro2');
+		$grid->label('Precio.Prov.2');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1171,7 +1178,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('pfecha2');
-		$grid->label('Pfecha2');
+		$grid->label('P.Fecha2');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1182,7 +1189,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('prov3');
-		$grid->label('Prov3');
+		$grid->label('Prov.3');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1195,7 +1202,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('prepro3');
-		$grid->label('Prepro3');
+		$grid->label('Precio.Prov.3');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1211,7 +1218,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('pfecha3');
-		$grid->label('Pfecha3');
+		$grid->label('Prov.Fecha.3');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1358,7 +1365,7 @@ class Sinv extends Controller {
 */
 
 		$grid->addField('exmin');
-		$grid->label('Minima');
+		$grid->label('E.M&iacute;nima');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1373,7 +1380,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('exmax');
-		$grid->label('Maxima');
+		$grid->label('E.M&aacute;xima');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -3542,7 +3549,7 @@ class Sinv extends Controller {
 		$mSQL .= "FROM sinv a ".$where;
 		$this->db->query($mSQL);
 
-		if ( $porcent > 0 ) 
+		if ( $porcent > 0 )
 		$mSQL = "SET
 			a.precio1=ROUND(a.precio1*(100+$porcent)/100,2),
 			a.precio2=ROUND(a.precio2*(100+$porcent)/100,2),

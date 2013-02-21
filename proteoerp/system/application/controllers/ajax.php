@@ -244,6 +244,10 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
+					$dt1 = new DateTime($row['upago'].'01');
+					$dt2 = new DateTime();
+					$interval = $dt1->diff($dt2);
+
 					$retArray['value']    = $row['cliente'];
 					$retArray['label']    = '('.$row['rifci'].') '.utf8_encode($row['nombre']);
 					$retArray['rifci']    = $row['rifci'];
@@ -257,6 +261,7 @@ class Ajax extends Controller {
 					$retArray['utribu']   = $row['utribu'];
 					$retArray['taritipo'] = $row['taritipo'];
 					$retArray['direc']    = utf8_encode($row['direc']);
+					$retArray['cana']     = $interval->format('%m');
 					array_push($retorno, $retArray);
 				}
 			}

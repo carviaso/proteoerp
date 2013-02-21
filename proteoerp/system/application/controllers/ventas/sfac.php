@@ -176,7 +176,7 @@ class Sfac extends Controller {
 					$("#fimpser").html("");
 					$("#fedita").html(data);
 					$("#fedita").dialog({ buttons: { Ok: function() { $( this ).dialog( "close" ); } } });
-					$("#fedita").dialog( "open" );
+					$("#fedita").dialog("open");
 				});
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
@@ -1968,6 +1968,7 @@ class Sfac extends Controller {
 								$("#utribu").val("0");
 								$("#utribu_val").text("0,000");
 								$("#taritipo").val("");
+								$("#fmespaga").val("12");
 								apprise("Cliente inexistente");
 							}else{
 								$.each(data,
@@ -1995,6 +1996,7 @@ class Sfac extends Controller {
 					$("#taritipo").val(ui.item.taritipo);
 					$("#utribu").val(ui.item.utribu);
 					$("#utribu_val").text(nformat(ui.item.utribu,3));
+					$("#fmespaga").val(ui.item.cana);
 					mespaga();
 					setTimeout(function() {  $("#fcliente").removeAttr("readonly"); }, 1500);
 				}
@@ -4198,9 +4200,12 @@ class Sfac extends Controller {
 			$this->db->simple_query("ALTER TABLE sfac ADD comiadi DECIMAL(10,2) DEFAULT 0 ");
 		}
 
-
 		if(!in_array('upago'  ,$campos)){
 			$this->db->query("ALTER TABLE sfac ADD upago INT(10)");
+		}
+
+		if(!in_array('manual'  ,$campos)){
+			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `manual` CHAR(50) NULL DEFAULT 'N'");
 		}
 	}
 }

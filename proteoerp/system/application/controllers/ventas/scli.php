@@ -2494,19 +2494,13 @@ function chrif(rif){
 		$edit->tactividad->type='inputhidden';
 		$edit->tactividad->in = 'tarifa';
 
-		$edit->upago = new dateonlyField('Fecha de Recepci&oacute;n','fecha','Ym');
+		$edit->upago = new dateonlyField('Fecha de &uacute;ltimo pago','fecha','Ym');
 		$edit->upago->rule='chfecha|required';
 		$edit->upago->dbformat='Ym';
 		$edit->upago->insertValue = date('Y-m-d');
 		$edit->upago->size =10;
 		$edit->upago->maxlength =8;
 		$edit->upago->calendar=true;
-
-		//$edit->upago = new inputField('Ultimo Pago', 'upago');
-		//$edit->upago->rule = 'trim';
-		//$edit->upago->size = 6;
-		//$edit->upago->maxlength =6;
-		//$edit->upago->insertValue=date('Y01');
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->rule = 'trim|strtoupper|required';
