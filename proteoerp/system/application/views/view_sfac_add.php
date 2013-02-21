@@ -442,7 +442,14 @@ function cdropdown(nind){
 	var preca   = $("#preca_"+ind).val();
 	var itiva   = Number($('#itiva_'+ind).val());
 	var pprecio = document.createElement("select");
+	var manual   = $("#manual").val()
 	if(tipo_doc=='D') return false;
+
+	if($("#manual").val() == 'S' ) {
+		$("#preca_"+ind).attr('readonly',false);
+		$("#preca_"+ind).attr("onchange" , "post_precioselec("+ind+",this)");
+		return true;
+	}
 
 	pprecio.setAttribute("id"    , "preca_"+ind);
 	pprecio.setAttribute("name"  , "preca_"+ind);
@@ -463,7 +470,7 @@ function cdropdown(nind){
 		opt.text =nformat(ntt,2);
 		opt.value=val;
 		pprecio.add(opt,null);
-		if(val==preca){
+		if(val == preca){
 			ban=1;
 			pprecio.selectedIndex=ii-1;
 		}
@@ -483,6 +490,7 @@ function cdropdown(nind){
 
 	$("#preca_"+ind).replaceWith(pprecio);
 }
+
 
 //Cambia el campo descripcion en caso ser servicio
 function cdescrip(nind){

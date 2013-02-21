@@ -72,6 +72,171 @@ class Conc extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
+
+
+	//Funciones de los Botones
+	//***************************
+	function bodyscript( $grid0 ){
+		$bodyscript = '		<script type="text/javascript">';
+
+		$bodyscript .= '
+		function concadd(){
+			$.post("'.site_url($this->url.'dataedit/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		};';
+
+		$bodyscript .= '
+		function concedit(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function concshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function concdel() {
+		var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+		if(id){
+			if(confirm(" Seguro desea eliminar el registro?")){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+					try{
+						var json = JSON.parse(data);
+						if (json.status == "A"){
+							apprise("Registro eliminado");
+						}else{
+							apprise("Registro no se puede eliminado");
+						}
+					}catch(e){
+						$("#fborra").html(data);
+						$("#fborra").dialog( "open" );
+					}
+				});
+			}
+		}else{
+			$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+		}
+		};';
+		//Wraper de javascript
+		$bodyscript .= '
+		$(function(){
+			$("#dialog:ui-dialog").dialog( "destroy" );
+			var mId = 0;
+			var montotal = 0;
+			var ffecha = $("#ffecha");
+			var grid = jQuery("#newapi'.$grid0.'");
+			var s;
+			var allFields = $( [] ).add( ffecha );
+			var tips = $( ".validateTips" );
+			s = grid.getGridParam(\'selarrrow\');
+			';
+
+		$bodyscript .= '
+		$("#fedita").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/CONC').'/\'+res.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+		$bodyscript .= '});'."\n";
+
+		$bodyscript .= "\n</script>\n";
+		$bodyscript .= "";
+		return $bodyscript;
+	}
+
+
+
 	//***************************
 	//Definicion del Grid y la Forma
 	//***************************
@@ -483,6 +648,7 @@ class Conc extends Controller {
 		$data['head']   = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
+*/
 	function getctade($tipoa=NULL){
 		$this->rapyd->load("fields");
 		$uadministra = new dropdownField("ctade", "ctade");
@@ -505,6 +671,7 @@ class Conc extends Controller {
 		$uadministra->build(); 
 		echo $uadministra->output;
 	}
+
 	function dataedit(){
 		$this->rapyd->load("dataobject","dataedit2");
 			
@@ -696,6 +863,7 @@ script;
 		}
 	}
 
+/*
 	function instalar(){
 		$mSQL="ALTER TABLE conc ADD PRIMARY KEY (concepto);";
 		$this->db->simple_query($mSQL);	
