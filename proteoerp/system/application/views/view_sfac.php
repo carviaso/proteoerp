@@ -1,7 +1,7 @@
 <?php
-$container_bl=join("&nbsp;", $form->_button_container["BL"]);
-$container_br=join("&nbsp;", $form->_button_container["BR"]);
-$container_tr=join("&nbsp;", $form->_button_container["TR"]);
+$container_bl=join('&nbsp;', $form->_button_container["BL"]);
+$container_br=join('&nbsp;', $form->_button_container["BR"]);
+$container_tr=join('&nbsp;', $form->_button_container["TR"]);
 
 if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	echo $form->output;
@@ -18,7 +18,6 @@ var sfpa_cont=<?php echo $form->max_rel_count['sfpa'];?>;
 
 $(document).ready(function() {
 	$(".inputnum").numeric(".");
-	
 });
 
 function add_sitems(){
@@ -54,7 +53,7 @@ function del_sitems(id){
 }
 </script>
 <?php } ?>
-	
+
 <table align='center' width="99%">
 	<tr>
 		<td>
@@ -108,8 +107,8 @@ function del_sitems(id){
 				<?php $scliid = $this->datasis->dameval("SELECT id FROM scli WHERE cliente='".$form->cliente->value."'");?>
 				<fieldset style='border: 1px solid #9AC8DA;background: #FFFDE9;'>
 				<a href="#" onclick="window.open('<?php echo base_url()?>ventas/scli/dataedit/show/<?php echo $scliid ?>', '_blank', 'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');" heigth="600" >
-				
-					
+
+
 				<?php echo $form->cliente->value ?></a>]</legend>
 				<table border='0' width="100%" style="margin: 0; width: 100%;">
 					<tr>
@@ -167,7 +166,7 @@ function del_sitems(id){
 	<ul>
 		<li><a href="#tab1">Observaciones</a></li>
 		<li><a href="#tab2">Forma de Pago</a></li>
-		<li><a href="#tab3">Informacion Adicional</a></li>
+		<li><a href="#tab3">Informaci&oacute;n Adicional</a></li>
 	</ul>
 	<div id="tab1">
 		<fieldset style='border: 1px solid #9AC8DA;background: #FFFBE9;'>
@@ -213,8 +212,8 @@ function del_sitems(id){
 				<td class="littletableheaderdet">Banco</td>
 				<td class="littletableheaderdet">Monto</td>
 			</tr>
-			<?php } 
-			if( $form->referen->value == 'C' ) { 
+			<?php }
+			if( $form->referen->value == 'C' ) {
 			echo "
 			<tr id='tr_sfpa_1'>
 				<td class='littletablerow'nowrap>CR</td>
@@ -225,7 +224,7 @@ function del_sitems(id){
 				echo "</td>";
 			}
 			//echo "		</tr>";
-			
+
 			for($i=0; $i < $form->max_rel_count['sfpa']; $i++) {
 				$tipo   = "tipo_$i";
 				$numref = "numref_$i";
@@ -316,7 +315,7 @@ function del_sitems(id){
 		</table>
 		</fieldset>
 		<?php } ?>
-		
+
 		<fieldset style='border: 1px solid ##8A0808;background: #FFFBE9;'>
 		<legend class="subtitulotabla" style='color: #114411;'>Informacion del Registro</legend>
 		<table width='98%' cellspacing='1' >

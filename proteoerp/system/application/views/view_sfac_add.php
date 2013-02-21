@@ -273,7 +273,7 @@ function importe(id){
 	var ind     = id.toString();
 	var cana    = Number($("#cana_"+ind).val());
 	var preca   = Number($("#preca_"+ind).val());
-	var iimporte = roundNumber(cana*preca,2);
+	var iimporte= roundNumber(cana*preca,2);
 	var itiva   = Number($('#itiva_'+ind).val());
 	$("#tota_"+ind).val(iimporte);
 	$("#tota_"+ind+"_val").text(nformat(iimporte*(1+(itiva/100)),2));
@@ -292,7 +292,7 @@ function apagar(){
 
 //Determina lo que falta por pagar
 function faltante(){
-	totalg=Number($("#totalg").val());
+	totalg= Number($("#totalg").val());
 	paga  = apagar();
 	resto = totalg-paga;
 	return resto;
@@ -375,7 +375,7 @@ function add_sfpa(){
 
 function post_precioselec(ind,obj){
 	if(obj.value=='o'){
-		var itiva   = Number($('#itiva_'+ind).val());
+		var itiva = Number($('#itiva_'+ind).val());
 		otro = prompt('Precio nuevo','');
 		otro = Number(otro);
 		if(otro>0){
@@ -412,23 +412,36 @@ function post_modbus_scli(){
 
 function post_modbus_sinv(nind){
 	ind=nind.toString();
-	var tipo =Number($("#sclitipo").val()); if(tipo>0) tipo=tipo-1;
+	var manual = $("#manual").val();
+	var ctipo  = $("#sclitipo").val()
+	var tipo   = Number(ctipo); if(tipo>0) tipo=tipo-1;
 	$("#preca_"+ind).empty();
-	var arr=$('#preca_'+ind);
-	cdropdown(nind);
+
+	if(manual!='S'){
+		var arr=$('#preca_'+ind);
+		cdropdown(nind);
+		jQuery.each(arr, function() { this.selectedIndex=tipo; });
+	}else{
+		var prec = $('#precio'+ctipo+'_'+ind).val();
+		if(prec!=undefined){
+			$("#preca_"+ind).val(roundNumber(prec,2));
+		}else{
+			$("#preca_"+ind).val($('#precio1_'+ind).val());
+		}
+	}
 	cdescrip(nind);
-	jQuery.each(arr, function() { this.selectedIndex=tipo; });
 	importe(nind);
 	totalizar();
 }
 
 //Saca el dropdown de los precios
 function cdropdown(nind){
-	var tipo_doc=$("#tipo_doc").val();
-	var ind   = nind.toString();
-	var preca = $("#preca_"+ind).val();
-	var itiva = Number($('#itiva_'+ind).val());
-	var pprecio  = document.createElement("select");
+	var manual = $("#manual").val(); if(manual=='S') return true;
+	var tipo_doc= $("#tipo_doc").val();
+	var ind     = nind.toString();
+	var preca   = $("#preca_"+ind).val();
+	var itiva   = Number($('#itiva_'+ind).val());
+	var pprecio = document.createElement("select");
 	if(tipo_doc=='D') return false;
 
 	pprecio.setAttribute("id"    , "preca_"+ind);
@@ -443,10 +456,10 @@ function cdropdown(nind){
 
 	if(preca==null || preca.length==0 || Number(preca)==0) ban=1;
 	for(ii=1;ii<5;ii++){
-		id =ii.toString();
-		val  = Number($("#precio"+id+"_"+ind).val());
-		ntt  = val*(1+(itiva/100));
-		opt  = document.createElement("option");
+		id  = ii.toString();
+		val = Number($("#precio"+id+"_"+ind).val());
+		ntt = val*(1+(itiva/100));
+		opt = document.createElement("option");
 		opt.text =nformat(ntt,2);
 		opt.value=val;
 		pprecio.add(opt,null);
@@ -525,6 +538,8 @@ function autocod(id){
 	$('#codigoa_'+id).autocomplete({
 		source: function( req, add){
 			$.ajax({
+				delay: 600,
+				autoFocus: true,
 				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
 				type: "POST",
 				dataType: "json",
@@ -576,13 +591,16 @@ function autocod(id){
 			$('#cana_'+id).focus();
 			$('#cana_'+id).select();
 
-			var arr  = $('#preca_'+id);
-			var tipo = Number($("#sclitipo").val()); if(tipo>0) tipo=tipo-1;
-			cdropdown(id);
-			cdescrip(id);
-			jQuery.each(arr, function() { this.selectedIndex=tipo; });
-			importe(id);
-			totalizar();
+			post_modbus_sinv(Number(id));
+
+			//var arr  = $('#preca_'+id);
+			//var tipo = Number($("#sclitipo").val()); if(tipo>0) tipo=tipo-1;
+			//cdropdown(id);
+			//cdescrip(id);
+			//jQuery.each(arr, function() { this.selectedIndex=tipo; });
+			//importe(id);
+			//totalizar();
+
 			setTimeout(function() {  $('#codigoa_'+id).removeAttr("readonly"); }, 1500);
 		}
 	});
@@ -641,7 +659,7 @@ function sfpatipo(id){
 					<table widthi='100%'>
 						<tr>
 							<td class="littletableheader" width='80' style='background:#EFFFEA;'><?php echo $form->cliente->label;  ?>*
-							<?php 
+							<?php
 								if($form->_status!='show'){ ?>
 									<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;"><?php echo image('add1-.png'); ?></a>
 							<?php } ?>
@@ -680,7 +698,7 @@ function sfpatipo(id){
 						<td>
 							<table widthi='100%'>
 								<tr>
-									<td class="littletableheader"><?php echo $form->fecha->label;     ?></td>
+									<td class="littletableheader"><?php echo $form->fecha->label;     ?>*</td>
 									<td class="littletablerow">   <?php echo $form->fecha->output;    ?></td>
 								</tr><tr>
 									<td class="littletableheader"><?php echo $form->factura->label;   ?></td>
@@ -692,7 +710,7 @@ function sfpatipo(id){
 					<table>
 					</fieldset>
 				</td>
-			</tr>	
+			</tr>
 			<?php echo $form->manual->output; ?>
 			</table>
 		</tr></table>
@@ -831,9 +849,9 @@ function sfpatipo(id){
 			<tr>
 				<td colspan='4'><?php echo  $form->observ1->label.$form->observ1->output; ?> </td>
 				<td  colspan='2' align='center'>
-				<?php 
+				<?php
 					if ($form->manual->value == 'S')
-						echo "<span style='font-size:11pt;font-weight: bold;background:#087C0E;color:white;' >&nbsp;&nbsp;FACTURACION MANUAL&nbsp;&nbsp;</span>";  
+						echo "<span style='font-size:11pt;font-weight: bold;background:#087C0E;color:white;' >&nbsp;&nbsp;FACTURACION MANUAL&nbsp;&nbsp;</span>";
 				?>
 				</td>
 			</tr>

@@ -2001,21 +2001,21 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		//$edit->rifci->append($lriffis);
 		$edit->rifci->size =13;
 
-		$obj  ="dire11";
+		$obj  ='dire11';
 		$edit->$obj = new inputField('Oficina',$obj);
 		$edit->$obj->rule = 'trim';
 		$edit->$obj->size      = 45;
 		$edit->$obj->maxlength = 60;
 		$edit->$obj->style = 'width:95%;';
 
-		$obj  ="dire12";
+		$obj  ='dire12';
 		$edit->$obj = new inputField('',$obj);
 		$edit->$obj->rule = 'trim';
 		$edit->$obj->size      = 45;
 		$edit->$obj->maxlength = 40;
 		$edit->$obj->style = 'width:95%;';
 
-		$obj="ciudad1";
+		$obj ='ciudad1';
 		$edit->$obj = new dropdownField('Ciudad',$obj);
 		$edit->$obj->rule = 'trim';
 		$edit->$obj->option('','Seleccionar');
@@ -2023,21 +2023,21 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		$edit->$obj->style = 'width:200px';
 		$edit->$obj->insertValue = $this->datasis->traevalor('CIUDAD');
 
-		$obj  ="dire21";
+		$obj  ='dire21';
 		$edit->$obj = new inputField('Envio',$obj);
 		$edit->$obj->rule = 'trim';
 		$edit->$obj->size      = 45;
 		$edit->$obj->maxlength = 40;
 		$edit->$obj->style = 'width:95%;';
 
-		$obj  ="dire22";
+		$obj  ='dire22';
 		$edit->$obj = new inputField('',$obj);
 		$edit->$obj->rule = 'trim';
 		$edit->$obj->size      = 45;
 		$edit->$obj->maxlength = 40;
 		$edit->$obj->style = 'width:95%;';
 
-		$obj="ciudad2";
+		$obj='ciudad2';
 		$edit->$obj = new dropdownField('Ciudad',$obj);
 		$edit->$obj->rule = 'trim';
 		$edit->$obj->option('','Seleccionar');
@@ -2265,9 +2265,22 @@ $(function() {
 		rif=$(this).val();
 		if(!chrif(rif)){
 			alert("Al parecer el Rif colocado no es correcto, por favor verifique con el SENIAT.");
+		}else{
+			$.ajax({
+				type: "POST",
+				url: "'.site_url('ajax/traerif').'",
+				dataType: "json",
+				data: {rifci: rif},
+				success: function(data){
+					if(data.error==0){
+						if($("#nombre").val()==""){
+							$("#nombre").val(data.nombre);
+						}
+					}
+				}
+			});
 		}
 	});
-
 });
 
 function chrif(rif){
@@ -2319,16 +2332,16 @@ function chrif(rif){
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
 
+		$edit->rifci = new inputField('RIF/CI', 'rifci');
+		$edit->rifci->rule = 'trim|strtoupper|required|callback_chci';
+		$edit->rifci->maxlength =13;
+		$edit->rifci->size =13;
+
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->rule = 'trim|strtoupper|required';
 		$edit->nombre->size = 55;
 		$edit->nombre->maxlength = 45;
 		$edit->nombre->style = 'width:95%;';
-
-		$edit->rifci = new inputField('RIF/CI', 'rifci');
-		$edit->rifci->rule = 'trim|strtoupper|required|callback_chci';
-		$edit->rifci->maxlength =13;
-		$edit->rifci->size =13;
 
 		$obj  ="dire11";
 		$edit->$obj = new inputField('Direcci&oacute;n',$obj);

@@ -111,7 +111,7 @@ class Ajax extends Controller {
 
 			//Mira si existe el codigo
 			$mSQL="SELECT id,TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo, dire11 AS direc
-				FROM scli WHERE cliente=${qmid} LIMIT 1";
+				FROM scli WHERE cliente=${qmid} AND tipo<>0  LIMIT 1";
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() == 1){
 				$row = $query->row_array();
@@ -130,7 +130,7 @@ class Ajax extends Controller {
 			}
 
 			$mSQL="SELECT id,TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo , dire11 AS direc
-				FROM scli WHERE (cliente LIKE ${qdb} OR rifci LIKE ${qdb} OR nombre LIKE ${qdb}) $ww
+				FROM scli WHERE (cliente LIKE ${qdb} OR rifci LIKE ${qdb} OR nombre LIKE ${qdb}) AND tipo<>0 $ww
 				ORDER BY rifci LIMIT ".$this->autolimit;
 
 			$query = $this->db->query($mSQL);

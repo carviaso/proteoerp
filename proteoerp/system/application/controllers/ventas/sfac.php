@@ -195,7 +195,7 @@ class Sfac extends Controller {
 			}
 		};
 		';
-		
+
 
 		$bodyscript .= '
 		function sfacdel() {
@@ -373,12 +373,12 @@ class Sfac extends Controller {
 											return true;
 										} else {
 											//$( "#fedita" ).dialog( "close" );
-											
+
 			$.post("'.site_url($this->url.'dataedit/S/create').'",
 			function(data){
 				$("#fedita").html(data);
-			})												
-												
+			})
+
 											//jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 											alert("Factura guardada");
 											//window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
@@ -2327,7 +2327,7 @@ class Sfac extends Controller {
 		$this->rapyd->load('dataobject','datadetails');
 
 		$manual = $this->uri->segment(4);
-		if ( $manual <> 'S') $manual = 'N';
+		if($manual <> 'S') $manual = 'N';
 
 
 		$do = new DataObject('sfac');
@@ -2369,9 +2369,8 @@ class Sfac extends Controller {
 		$edit->tipo_doc->size = 5;
 		$edit->tipo_doc->rule='required';
 
-
 		//$edit->manual =  new checkboxField('Manual', 'manual','S','N');
-		$edit->manual =  new hiddenField('Manual', 'manual');
+		$edit->manual = new hiddenField('Manual', 'manual');
 		$edit->manual->insertValue = $manual;
 
 		$edit->vd = new  dropdownField ('Vendedor', 'vd');
@@ -2472,7 +2471,8 @@ class Sfac extends Controller {
 		$edit->preca->rel_id    = 'sitems';
 		$edit->preca->size      = 10;
 		$edit->preca->rule      = 'required|positive|callback_chpreca[<#i#>]';
-		$edit->preca->readonly  = true;
+		$edit->preca->onkeyup   = 'post_precioselec(<#i#>,this);';
+		//$edit->preca->readonly  = true;
 		$edit->preca->showformat ='decimal';
 
 		$edit->detalle = new hiddenField('', 'detalle_<#i#>');
@@ -2580,7 +2580,7 @@ class Sfac extends Controller {
 		$edit->totalg->readonly  =true;
 		$edit->totalg->size      = 10;
 
-		$edit->observa   = new inputField('Observacion', 'observa');
+		$edit->observa   = new inputField('Observaci&oacute;n', 'observa');
 		$edit->nfiscal   = new inputField('No.Fiscal', 'nfiscal');
 		$edit->observ1   = new inputField('Observaci&oacute;n', 'observ1');
 		$edit->zona      = new inputField('Zona', 'zona');
@@ -2639,8 +2639,6 @@ class Sfac extends Controller {
 			}
 		}
 	}
-
-
 
 	function dataprintser($st,$uid){
 		$this->rapyd->load('dataedit');
@@ -2900,6 +2898,8 @@ class Sfac extends Controller {
 	function chpreca($val,$i){
 		$tipo_doc = $this->input->post('tipo_doc');
 		$codigo   = $this->input->post('codigoa_'.$i);
+		$manual   = $this->input->post('manual');
+		if($manual=='S') return false;
 
 		if($tipo_doc == 'D'){
 			$factura  = $this->input->post('factura');
@@ -3259,10 +3259,14 @@ class Sfac extends Controller {
 			if($manual!='S'){
 				$numero = $this->datasis->fprox_numero('nsfac');
 			}else{
-				$numero = '1'.substr($this->datasis->fprox_numero('nsfacman'),-7);
+				$numero = 'M'.substr($this->datasis->fprox_numero('nsfacman'),-7);
 			}
 		}else{
-			$numero = $this->datasis->fprox_numero('nccli');
+			if($manual!='S'){
+				$numero = 'M'.substr($this->datasis->fprox_numero('nccliman'),-7);
+			}else{
+				$numero = $this->datasis->fprox_numero('nccli');
+			}
 		}
 		$transac = $this->datasis->fprox_numero('ntransa');
 		$do->set('numero' ,$numero);
