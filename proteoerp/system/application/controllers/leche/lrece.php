@@ -2094,6 +2094,14 @@ class Lrece extends Controller {
 		logusu($do->table,"Elimino recepcion $this->tits $primary ");
 	}
 	function _pre_apertura_update($do){
+		$lleno    = $do->get('lleno');
+		$vacio    = $do->get('vacio');
+		$neto     = $lleno-$vacio;
+		$densidad = $do->get('densidad');
+		$litros   = $neto*$densidad;
+		$do->set('litros',$litros);
+		$do->set('neto'  ,$neto);
+
 		$fecha  = $do->get('fecha');
 		$dbfecha= $this->db->escape($fecha);
 		$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
@@ -2118,6 +2126,14 @@ class Lrece extends Controller {
 		return true;
 	}
 	function _pre_apertura_insert($do){
+		$lleno    = $do->get('lleno');
+		$vacio    = $do->get('vacio');
+		$neto     = $lleno-$vacio;
+		$densidad = $do->get('densidad');
+		$litros   = $neto*$densidad;
+		$do->set('litros',$litros);
+		$do->set('neto'  ,$neto);
+
 		$do->set('fecha',date('Y-m-d'));
 
 		$fecha  = $do->get('fecha');

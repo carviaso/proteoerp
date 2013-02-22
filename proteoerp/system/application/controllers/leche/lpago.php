@@ -1027,7 +1027,7 @@ class Lpago extends Controller {
 				$row = $query->row();
 				if(!empty($row->total)) $rt['monto'] = round(floatval($row->total),2);
 			}
-
+echo $this->db->last_query();
 			//Transportista
 			$sel=array('SUM(ROUND(a.lista*b.tarifa,2)+ROUND((litros-lista)*b.tarsob,2)) AS monto');
 			$this->db->select($sel);
@@ -1045,6 +1045,7 @@ class Lpago extends Controller {
 				$row = $query->row();
 				if(!empty($row->monto)) $rt['tmonto'] = round(floatval($row->monto),2);
 			}
+echo $this->db->last_query();
 		}
 		return $rt;
 	}

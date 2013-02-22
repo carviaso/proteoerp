@@ -93,9 +93,7 @@ $encatabla = '
 ';
 
 
-?>
-
-<html>
+?><html>
 <head>
 <title>Compra <?php echo $numero ?></title>
 <link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />

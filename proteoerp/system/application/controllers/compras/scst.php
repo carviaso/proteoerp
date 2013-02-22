@@ -255,26 +255,26 @@ class Scst extends Controller {
 				var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
 					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-					if ( ret.tipo_doc == "XX"){
+					if(ret.tipo_doc == "XX"){
 						$.prompt( "<h1>Documento Eliminado.</h1>");
 					} else {
 					mid = id;
-					if ( ret.actuali < ret.fecha ){'."\n";
+					if(ret.actuali<ret.fecha){'."\n";
 
-		if ( $this->datasis->sidapuede('SCSTOTR','actualizar') ) {
+		if($this->datasis->sidapuede('SCSTOTR','actualizar')){
 
-		//Revisa si puede Actualizar
-		$bodyscript .= '
-						$.post("'.site_url('compras/scst/solo/actualizar').'/"+ret.control,
+			//Revisa si puede Actualizar
+			$bodyscript .= '
+						$.post("'.site_url('compras/scst/actualizar').'/"+ret.control,
 						function(data){
 							$("#fcompra").html("");
 							$("#factuali").html(data);
-							$("#factuali").dialog( "open" );
+							$("#factuali").dialog("open");
 						})
 					';
 		} else {
-		$bodyscript .= '
-						$.prompt( "<h1>Opcion no Autorizada, comuniquese con el supervisor.</h1>");
+			$bodyscript .= '
+						$.prompt( "<h1>Opci&oacute;n no Autorizada, comuniquese con el supervisor.</h1>");
 					';
 		}
 
@@ -289,11 +289,21 @@ class Scst extends Controller {
 						$.prompt( "<h1>Reversar Compra Nro. "+ret.control+" ?</h1>", {
 							buttons: { Reversar: true, Cancelar: false },
 							submit: function(e,v,m,f){
-								if (v){
-									$.get("'.site_url('compras/scst/solo/reversar').'/"+ret.control,
-									function(data){
-										apprise("<h1>"+data+"</h1>");
-										grid.trigger("reloadGrid");
+								if(v){
+									$.get("'.site_url('compras/scst/reversar').'/"+ret.control,
+									function(r){
+										try{
+											var json = JSON.parse(r);
+											if (json.status == "A"){
+												apprise("Compra reversada");
+												grid.trigger("reloadGrid");
+												return true;
+											}else{
+												apprise("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
+											}
+										}catch(e){
+											apprise("Error en respuesta");
+										}
 									});
 								}
 							}
@@ -301,13 +311,15 @@ class Scst extends Controller {
 					';
 		} else {
 		$bodyscript .= '
-						$.prompt( "<h1>Opcion no Autorizada, comuniquese con el supervisor.</h1>");
+						$.prompt( "<h1>Opci&oacute;n no Autorizada, comuniquese con el supervisor.</h1>");
 					';
 		}
 
 		$bodyscript .= '
 					}}
-				} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+				}else{
+					$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
+				}
 			});';
 
 		$bodyscript .= '
@@ -324,15 +336,20 @@ class Scst extends Controller {
 								url: murl,
 								data: $("#df1").serialize(),
 								success: function(r,s,x){
-									var res = $.parseJSON(r);
-									if ( res.status == "A"){
-										apprise(res.mensaje);
-										$( "#factuali" ).dialog("close");
-										grid.trigger("reloadGrid");
-										'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+mid+"/id"').';
-										return true;
-									} else {
-										apprise("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
+
+									try{
+										var json = JSON.parse(r);
+										if (json.status == "A"){
+											apprise("Registro Guardado");
+											$( "#factuali" ).dialog("close");
+											grid.trigger("reloadGrid");
+											'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+mid+"/id"').';
+											return true;
+										}else{
+											apprise("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
+										}
+									}catch(e){
+										$("#factuali").html(r);
 									}
 								}
 							});
@@ -2448,42 +2465,60 @@ class Scst extends Controller {
 	}
 
 	function actualizar($control){
-		$this->rapyd->uri->keep_persistence();
 		$this->rapyd->load('dataform');
+		$dbcontrol = $this->db->escape($control);
 
-		if ( $this->solo )
-			$form = new DataForm("compras/scst/solo/actualizar/$control/process");
-		else
-			$form = new DataForm("compras/scst/actualizar/$control/process");
+		$script = '$(function(){ $("#fecha").datepicker({ dateFormat: "dd/mm/yy" }); })';
 
-		$proveed = $this->datasis->dameval("SELECT CONCAT('Proveedor: </td><td><b>(<b>',proveed,'</b>)</td><td colspan=5><b>',nombre,'</b>') nombre FROM scst WHERE control=$control");
-		$compra  = $this->datasis->dameval("SELECT CONCAT('Compra: </td><td><b>', serie,'</b></td><td> Fecha: </td><td><b>', fecha, '</b></td><td>Vence: </td><td><b>', vence,'</b>') factura FROM scst WHERE control=$control");
-		$montos  = $this->datasis->dameval("SELECT CONCAT('Sub Total: </td><td><b>', format(montotot,2),'</b></td><td> I.V.A.: </td><td><b>', format(montoiva,2), '</b></td><td>Monto: </td><td><b>', format(montonet,2),'</b>') factura FROM scst WHERE control=$control");
+		$form = new DataForm("compras/scst/actualizar/$control/process");
+		$form->script($script);
 
-		$script = '<script>$(function() {$("#rafecha").datepicker({ dateFormat: "dd/mm/yy" });})</script>';
+		$scstrow = $this->datasis->damerow("SELECT proveed,nombre,fecha,montotot, montoiva,montonet,serie,vence FROM scst WHERE control=$dbcontrol");
 
-		$form->aaaa = new containerField('iii',$script."\n<table width='100%' style='background-color:#FBEC88;text-align:center;font-size:12px'><tr><td>".$proveed."</td></tr><tr><td>".$compra."</td></tr><tr><td>".$montos."</td></tr></table><br>&nbsp;");
+
+		$htmltabla="<table width='100%' style='background-color:#FBEC88;text-align:center;font-size:12px'>
+			<tr>
+				<td>Proveedor:</td>
+				<td><b>(".htmlspecialchars($scstrow['proveed']).")</b></td>
+				<td colspan='4'><b>".htmlspecialchars($scstrow['nombre'])."</b></td>
+			</tr><tr>
+				<td>Compra:</td>
+				<td>".htmlspecialchars($scstrow['serie'])."</b></td>
+				<td>Fecha: </td>
+				<td><b>".dbdate_to_human($scstrow['fecha'])."</b></td>
+				<td>Vence:</td>
+				<td><b>".dbdate_to_human($scstrow['vence'])."</b></td>
+			</tr><tr>
+				<td>Sub Total:</td>
+				<td><b>".nformat($scstrow['montotot'])."</b></td>
+				<td> I.V.A.: </td>
+				<td><b>".nformat($scstrow['montoiva'])."</b></td>
+				<td>Monto: </td>
+				<td><b>".nformat($scstrow['montonet'])."</b></td>
+			</tr>
+		</table>";
+
+		$form->tablafo = new containerField('tablafo',$htmltabla);
 
 		$form->cprecio = new  dropdownField ('Cambiar precios', 'cprecio');
 		$form->cprecio->option('D','Dejar el precio mayor');
 		$form->cprecio->option('N','No');
 		$form->cprecio->option('S','Si');
-		$form->cprecio->rule='enum[D,N,S]';
+		$form->cprecio->rule  = 'enum[D,N,S]';
 		$form->cprecio->style = 'width:150px;';
 		$form->cprecio->rule  = 'required';
 
+		//$form->ffecha = new dateonlyField('Fecha de la compra', 'fecha','d/m/Y');
+		//$form->ffecha->insertValue = date('Y-m-d');
+		//$form->ffecha->rule='required|callback_chddate';
+		//$form->ffecha->calendar = false;
+		//$form->ffecha->size=10;
+
 		$form->fecha = new dateonlyField('Fecha de recepci&oacute;n de la compra', 'fecha','d/m/Y');
-		//$form->fecha->db_name = 'fecha';
 		$form->fecha->insertValue = date('Y-m-d');
 		$form->fecha->rule='required|callback_chddate';
 		$form->fecha->calendar = false;
 		$form->fecha->size=10;
-
-		if ( !$this->solo ) {
-			$form->submit('btnsubmit','Actualizar');
-			$accion="javascript:window.location='".site_url('compras/scst/dataedit/show/'.$control)."'";
-			$form->button('btn_regre','Regresar',$accion,'BR','show');
-		}
 
 		$form->build_form();
 
@@ -2491,35 +2526,32 @@ class Scst extends Controller {
 			$cprecio   = $form->cprecio->newValue;
 			$actualiza = $form->fecha->newValue;
 			$cambio    = $cprecio;
+			$dbcontrol = $this->db->escape($control);
 
-			$id = $this->datasis->dameval("SELECT id FROM scst WHERE control=$control");
+			$id = $this->datasis->dameval("SELECT id FROM scst WHERE control=$dbcontrol");
 			$rt = $this->_actualizar($id,$cambio,$actualiza);
 			if($rt === false){
-				$data['content']  = $this->error_string.br();
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>utf8_encode($this->error_string),
+					'pk'     =>array('id'=>$id)
+				);
+				echo json_encode($rt);
 			}else{
 				$data['content']  = 'Compra actualizada'.br();
-			}
-			if ($this->solo ){
-				return array( $rt, $data['content'] );
-			} else {
-				$data['content'] .= anchor('compras/scst/dataedit/show/'.$control,'Regresar');
-				$data['head']    = $this->rapyd->get_head();
-				$data['title']   = heading('Actualizar compra');
-				$this->load->view('view_ventanas', $data);
+				$rt=array(
+					'status' =>'A',
+					'mensaje'=>'Registro guardado',
+					'pk'     =>array('id'=>$id)
+				);
+				echo json_encode($rt);
 			}
 		}else{
-			$data['content'] = $form->output;
-			if ($this->solo ){
-				echo $data['content'];
-			} else {
-				$data['head']    = $this->rapyd->get_head();
-				$data['title']   = heading('Actualizar compra');
-				$this->load->view('view_ventanas', $data);
-			}
+			echo $form->output;
 		}
 	}
 
-	//Proporciona por ajax el
+	//Proporciona por ajax el dato vehicular
 	function getvehicular($id=null){
 		//$id  = $this->input->post('id');
 		if(!empty($id)){
@@ -3126,15 +3158,45 @@ class Scst extends Controller {
 		}
 	}
 
-	function reversar($control){
+	function reversar($control=null){
+		if(empty($control)){
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>'Parametros invalidos',
+				'pk'     =>null
+			);
+			echo json_encode($rt);
+		}else{
+			$rt = $this->_reversar($control);
+			if($rt){
+				$rt=array(
+					'status' =>'A',
+					'mensaje'=>'Compra reversada',
+					'pk'     =>null
+				);
+				echo json_encode($rt);
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>utf8_encode($this->error_string),
+					'pk'     =>null
+				);
+				echo json_encode($rt);
+			}
+		}
+	}
+
+	function _reversar($control){
 		// Condiciones para reversar
 		// Si no tiene transaccion vino por migracion desde otro sistema
+		$dbcontrol = $this->db->escape($control);
 
-		$mSQL = "SELECT * FROM scst WHERE control=$control";
+		$mSQL = "SELECT * FROM scst WHERE control=$dbcontrol";
 		$query=$this->db->query($mSQL);
 
 		if($query->num_rows()==0){
-			return;
+			$this->error_string = 'Compra inexistente';
+			return false;
 		}
 
 		$scst     = $query->row_array();
@@ -3166,24 +3228,23 @@ class Scst extends Controller {
 		};
 
 		// CONDICIONES QUE DEBEN CUMPLIR PARA PODER REVERSAR
-		// si esta abonada
+		//Si esta abonada
 		if ($abonado > 0.1 ) {
-			echo "Compra abonada, elimine el pago primero!";
-			return;
+			$this->error_string = 'Compra abonada, elimine el pago primero!';
+			return false;
 		}
-		// si no tiene transaccion
+		//Si no tiene transaccion
 		if (empty($mTRANSAC)){
-			echo "Compra sin nro de transaccion, llame a soporte";
-			return;
+			$this->error_string= 'Compra sin nro de transaccion, llame a soporte';
+			return false;
 		}
-		// si no esta cargada
+		// Si no esta cargada
 		if ( $mACTUALI < $fecha ){
-			echo 'Factura no ha sido cargada';
-			return ;
+			$this->error_string= 'Factura no ha sido cargada';
+			return false;
 		}
 
 		//Chequea si tiene vehiculos y estan registrados los seriales
-		$dbcontrol=$this->db->escape($control);
 		$id_scst=$this->datasis->dameval("SELECT id FROM scst WHERE control=$dbcontrol");
 		$SQL="SELECT COUNT(*) AS cana
 			FROM itscst AS b
@@ -3198,7 +3259,7 @@ class Scst extends Controller {
 			$cana = $this->datasis->dameval($SQL);
 			if($cana > 0){
 				echo 'Compra con venta vehicular, no se puede reversar';
-				return ;
+				return false;
 			}else{
 				$mSQL = "DELETE FROM sinvehicular WHERE id_scst=$id_scst";
 				$this->db->simple_query($mSQL);
@@ -3214,7 +3275,6 @@ class Scst extends Controller {
 			$mSQL = "UPDATE sprm SET abonos=abonos-$montonet-$reteiva WHERE numero='$fafecta' AND tipo_doc='FC' AND cod_prv='$proveed' ";
 			$this->db->simple_query($mSQL);
 		}
-
 
 		$mSQL = "DELETE FROM itppro WHERE transac='$mTRANSAC'";
 		$this->db->simple_query($mSQL);
@@ -3236,17 +3296,12 @@ class Scst extends Controller {
 		//$query->destroy();
 
 		// DESACTUALIZA INVENTARIO
-		//
 		$query = $this->db->query("SELECT codigo, cantidad FROM itscst WHERE control='$control'");
 		foreach ( $query->result() as $row ) {
 			$mTIPO = $this->datasis->dameval("SELECT MID(tipo,1,1) FROM sinv WHERE codigo='".$row->codigo."'");
 
-			if ( $tipo_doc == 'FC' or $tipo_doc =='NE' ) {
-				//CMNJ(mm_DETA[i,1]+" "+XDEPO+" "+STR( -mm_DETA[i,3]))
+			if ( $tipo_doc == 'FC' || $tipo_doc =='NE' ) {
 				$this->datasis->sinvcarga($row->codigo,  $mALMA, -$row->cantidad);
-				//IF mTIPO = 'L'
-				//	SINVLOTCARGA( mm_DETA[i,1], XDEPO, mm_DETA[i,8], -mm_DETA[i,3] )
-				//ENDIF
 
 				// DEBE ARREGLAR EL PROMEDIO BUSCANDO EN KARDEX
 				$mSQL = "SELECT promedio FROM costos WHERE codigo='".$row->codigo."' ORDER BY fecha DESC LIMIT 1";
@@ -3272,9 +3327,7 @@ class Scst extends Controller {
 								} elseif ($mTEMPO < $mSALDO) {
 									$mSQL   = "UPDATE itordc SET recibido=recibido-$mTEMPO WHERE numero='$orden' AND codigo='"+$row->codigo+"'";
 									$this->db->simple_query($mSQL);
-									//EJECUTASQL(mSQL,{ mTEMPO, mORDENES[m], mm_DETA[i,1] })
 									$mSQL = "UPDATE sinv SET exord=exord+$mTEMPO WHERE codigo='".$row->codigo."' ";
-									//EJECUTASQL(mSQL,{ mTEMPO, mm_DETA[i,1] })
 									$mSALDO -= $mTEMPO;
 								}
 							}
@@ -3283,9 +3336,6 @@ class Scst extends Controller {
 				}
 			} else {
 				$this->datasis->sinvcarga($row->codigo, $mALMA, $row->cantidad);
-				//if ($mTIPO = 'L' )
-				//	SINVLOTCARGA( mm_DETA[i,1], XDEPO, mm_DETA[i,8], mm_DETA[i,3] )
-				//ENDIF
 			}
 		}
 
@@ -3299,23 +3349,15 @@ class Scst extends Controller {
 				$mSQL = "UPDATE itordc SET recibido=0 WHERE numero='$orden' AND recibido<0 ";
 				$this->db->simple_query($mSQL);
 				$mSQL = "SELECT COUNT(*) FROM itordc WHERE numero='$orden' AND recibido>0";
-				if ($this->datasis->dameval($mSQL) == 0 ){
+				if($this->datasis->dameval($mSQL) == 0){
 					$mSQL = "UPDATE ordc SET status='PE' WHERE numero='$orden' ";
-				} else {
+				}else{
 					$mSQL = "UPDATE ordc SET status='BA' WHERE numero='$orden' ";
 				}
 				$this->db->simple_query($mSQL);
 			}
 		}
-		if ( $this->solo )
-			return 'Compra Reversada en Inventario y CxP';
-		else {
-			$data['head']    = $this->rapyd->get_head();
-			$data['content'] = 'Compra Reversada en Inventario y CxP'.br();
-			$data['content'].= anchor('compras/scst/dataedit/show/'.$control,'Regresar');
-			$data['title']   = heading('Reverso de compra');
-			$this->load->view('view_ventanas', $data);
-		}
+		return true;
 	}
 
 	function creadseri($cod_prov,$factura){
@@ -3532,22 +3574,22 @@ class Scst extends Controller {
 	}
 
 	function chddate($fecha){
-		$d1 = DateTime::createFromFormat(RAPYD_DATE_FORMAT, $fecha);
-		$d2 = new DateTime();
+		$control   = $this->uri->segment($this->uri->total_segments()-1);
+		$dbcontrol = $this->db->escape($control);
+		$f=$this->datasis->dameval('SELECT fecha FROM scst WHERE control='.$dbcontrol);
 
-		$control= $this->uri->segment(4);
-		$controle=$this->db->escape($control);
-
-		$f=$this->datasis->dameval("SELECT fecha FROM scst WHERE control=$controle");
-
-		$d3 = DateTime::createFromFormat(RAPYD_DATE_FORMAT, dbdate_to_human($f));
+		$d1 = DateTime::createFromFormat(RAPYD_DATE_FORMAT, $fecha);              //Fecha de recepcion
+		$d2 = new DateTime();                                                     //Fecha de hoy
+		$d3 = DateTime::createFromFormat(RAPYD_DATE_FORMAT, dbdate_to_human($f)); //Fecha de la factura
 
 		if($d2>=$d1 && $d1>=$d3){
 			return true;
+		}elseif($d1<$d3){
+			$this->validation->set_message('chddate', 'No se puede recepcionar una compra con fecha superior al la fecha de la factura '.$d3->format(RAPYD_DATE_FORMAT).'.');
 		}else{
 			$this->validation->set_message('chddate', 'No se puede recepcionar una compra con fecha superior al d&iacute;a de hoy.');
-			return false;
 		}
+		return false;
 	}
 
 	function printrete($id_scst){
@@ -3594,7 +3636,6 @@ class Scst extends Controller {
 	}
 
 	function _post_cxp_update($do){
-		exit();
 		return false;
 	}
 
