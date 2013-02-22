@@ -62,12 +62,7 @@ if($form->_status!='show'){?>
 		<td class="littletablerowth"><?php echo $form->alcohol->label; ?></td>
 		<td class="littletablerow"  ><?php echo $form->alcohol->output; ?></td>
 	</tr>
-</table>
-</fieldset>
-
-<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
-<table width='100%'>
-	</tr>
+	<tr>
 		<td class="littletablerowth"><?php echo $form->promedio->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->promedio->output; ?></td>
 		<td class="littletablerowth"><?php echo $form->gadm->label;      ?></td>
@@ -77,4 +72,17 @@ if($form->_status!='show'){?>
 	</tr>
 </table>
 </fieldset>
+<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+<table width='100%'>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->precioref->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->precioref->output; ?></td>
+		<td class="littletablerowth"><?php echo $form->descuento->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->descuento->output; ?></td>
+	</tr>
+</table>
+</fieldset>
+
+
+
 <?php echo $form_end; ?>

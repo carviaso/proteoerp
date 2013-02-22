@@ -379,7 +379,6 @@ class Lacida extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('rendimiento');
 		$grid->label('Rendimiento');
 		$grid->params(array(
@@ -395,20 +394,6 @@ class Lacida extends Controller {
 		));
 */
 
-		$grid->addField('promedio');
-		$grid->label('Promedio');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 70,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
 
 		$grid->addField('gadm');
 		$grid->label('Gasto Adm');
@@ -418,6 +403,21 @@ class Lacida extends Controller {
 			'align'         => "'right'",
 			'edittype'      => "'text'",
 			'width'         => 80,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('precioref');
+		$grid->label('P.Referen');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 70,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -437,6 +437,34 @@ class Lacida extends Controller {
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('descuento');
+		$grid->label('Descuento');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 70,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('pago');
+		$grid->label('Nro.Pago');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 70,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0	 }'
 		));
 
 
@@ -635,18 +663,36 @@ class Lacida extends Controller {
 
 		$script .= " 
 		function totalizar(){
-			var precio = Number($('#precio').val());
-			var promed = Number($('#promedio').val());
-			var gastos = Number($('#gadm').val());
-			if ( precio.length = 0  ){ precio = 1 };
-			if ( promed.length = 0  ){ promed = 1 };
-			if ( gastos.length = 0  ){ gastos = 0.4 };
-			$(\"#pleche\").val(roundNumber( precio/promed - 0.4 ,2));
+			var precio = Number($('#precio'   ).val());
+			var promed = Number($('#promedio' ).val());
+			var gastos = Number($('#gadm'     ).val());
+			var descue = Number($('#desuento' ).val());
+			var preref = Number($('#precioref').val());
+			var litros = Number($('#litros'   ).val());
+
+			if ( precio.length = 0 ){ precio = 30   };
+			if ( promed.length = 0 ){ promed = 1   };
+			if ( gastos.length = 0 ){ gastos = 0.4 };
+			if ( descue.length = 0 ){ descue = 5   };
+			if ( preref.length = 0 ){ preref = 5   };
+			if ( litros.length = 0 ){ litros = 1   };
+
+			$(\"#pleche\").val(roundNumber( precio/promed - gastos ,2));
+			if ( preref > (precio/promed-gastos ) ) {
+				$(\"#descuento\").val(roundNumber( (preref-(precio/promed-gastos ))*litros,2));
+			} else {
+				$(\"#descuento\").val(0.00);
+			}
+
 		};
 			
-		$('#precio').change(   function(){ totalizar();} );
-		$('#promedio').change( function(){ totalizar();}  );
-		$('#gadm').change(     function(){ totalizar();}  );
+		$('#precio'   ).change( function(){ totalizar();} );
+		$('#promedio' ).change( function(){ totalizar();} );
+		$('#gadm'     ).change( function(){ totalizar();} );
+		$('#precioref').change( function(){ totalizar();} );
+		$('#litros'   ).change( function(){ totalizar();} );
+		
+		
 		";
 
 		$script .= ' 
@@ -760,11 +806,25 @@ class Lacida extends Controller {
 		$edit->gadm->insertValue=date('0.4');
 
 		$edit->pleche = new inputField('Precio','pleche');
-		$edit->pleche->rule='numeric';
-		$edit->pleche->css_class='inputnum';
-		$edit->pleche->size =8;
-		$edit->pleche->maxlength =10;
-		$edit->pleche->readonly = true;
+		$edit->pleche->rule = 'numeric';
+		$edit->pleche->css_class = 'inputnum';
+		$edit->pleche->size = 8;
+		$edit->pleche->maxlength = 10;
+		$edit->pleche->readonly  = true;
+
+		$edit->precioref = new inputField('Precio Pagado','precioref');
+		$edit->precioref->rule      = 'numeric';
+		$edit->precioref->css_class = 'inputnum';
+		$edit->precioref->size      =  8;
+		$edit->precioref->maxlength = 10;
+
+		$edit->descuento = new inputField('Monto a descontar','descuento');
+		$edit->descuento->rule      = 'numeric';
+		$edit->descuento->css_class = 'inputnum';
+		$edit->descuento->size      = 8;
+		$edit->descuento->maxlength =10;
+		$edit->descuento->readonly  = true;
+
 
 		$edit->build();
 
@@ -816,26 +876,32 @@ class Lacida extends Controller {
 
 	function instalar(){
 		if (!$this->db->table_exists('lacida')) {
-			$mSQL="CREATE TABLE `lacida` (
-				`fecha`       DATE          NULL DEFAULT NULL,
-				`ruta`        CHAR(4)       NULL DEFAULT NULL   COMMENT 'Ruta ',
-				`vaquera`     INT(11)       NULL DEFAULT NULL   COMMENT 'Vaquera',
-				`nomvaca`     VARCHAR(45)   NULL DEFAULT NULL   COMMENT 'Nombre de la ruta o vaquera',
-				`litros`      DECIMAL(16,2) NULL DEFAULT NULL   COMMENT 'Litros de Leche Acida',
-				`acidez`      DECIMAL(10,0) NULL DEFAULT NULL   COMMENT 'Acidez',
-				`alcohol`     DECIMAL(10,0) NULL DEFAULT '0'    COMMENT 'Alcohol',
-				`codigo`      VARCHAR(15)   NULL DEFAULT NULL   COMMENT 'Queso producido ',
-				`descrip`     VARCHAR(45)   NULL DEFAULT NULL   COMMENT 'Descripcion del Producto',
-				`precio`      DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Precio del queso',
-				`peso`        DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Peso Producido',
-				`rendimiento` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Factor de Rendimiento',
-				`promedio`    DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Promedio Litros/Kg',
-				`gadm`        DECIMAL(10,2) NULL DEFAULT '0.40' COMMENT 'Gasstos Administrativos',
-				`pleche`      DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Precio de la leche',
-				`id`          INT(11)   NOT NULL AUTO_INCREMENT,
-			  PRIMARY KEY (`id`),
-			  KEY `fecha` (`fecha`)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Notificacion de leche Acida'";
+			$mSQL="
+			CREATE TABLE `lacida` (
+				fecha     DATE          NULL DEFAULT NULL,
+				ruta      CHAR(4)       NULL DEFAULT NULL   COMMENT 'Ruta ',
+				vaquera   INT(11)       NULL DEFAULT NULL   COMMENT 'Vaquera',
+				nomvaca   VARCHAR(45)   NULL DEFAULT NULL   COMMENT 'Nombre de la ruta o vaquera',
+				litros    DECIMAL(16,2) NULL DEFAULT NULL   COMMENT 'Litros de Leche Acida',
+				acidez    DECIMAL(10,0) NULL DEFAULT NULL   COMMENT 'Acidez',
+				alcohol   DECIMAL(10,0) NULL DEFAULT '0'    COMMENT 'Alcohol',
+				codigo    VARCHAR(15)   NULL DEFAULT NULL   COMMENT 'Queso producido ',
+				descrip   VARCHAR(45)   NULL DEFAULT NULL   COMMENT 'Descripcion del Producto',
+				precio    DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Precio del queso',
+				precioref DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Precio Referencia',
+				descuento DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Monto a Descontar',
+				promedio  DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Promedio Litros/Kg',
+				gadm      DECIMAL(10,2) NULL DEFAULT '0.40' COMMENT 'Gasstos Administrativos',
+				pleche    DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Precio de la leche',
+				pago      INT(11)       NULL DEFAULT '0'    COMMENT 'Nro de Pago',
+				id        INT(11)   NOT NULL AUTO_INCREMENT,
+				PRIMARY KEY (id),
+				INDEX fecha (fecha)
+			)
+			COMMENT='Notificacion de leche Acida'
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM
+			";
 			$this->db->simple_query($mSQL);
 		}
 	}
