@@ -590,10 +590,10 @@ class Lpago extends Controller {
 			$('.inputnum').numeric('.');
 			$('#fecha').datepicker({   dateFormat: 'dd/mm/yy' });
 			$('#proveed').autocomplete({
+				delay: 600,
+				autoFocus: true,
 				source: function( req, add){
 					$.ajax({
-						delay: 600,
-						autoFocus: true,
 						url:  '".site_url('ajax/buscasprv')."',
 						type: 'POST',
 						dataType: 'json',
@@ -1027,7 +1027,8 @@ class Lpago extends Controller {
 				$row = $query->row();
 				if(!empty($row->total)) $rt['monto'] = round(floatval($row->total),2);
 			}
-echo $this->db->last_query();
+
+			//echo $this->db->last_query();
 			//Transportista
 			$sel=array('SUM(ROUND(a.lista*b.tarifa,2)+ROUND((litros-lista)*b.tarsob,2)) AS monto');
 			$this->db->select($sel);
@@ -1045,7 +1046,7 @@ echo $this->db->last_query();
 				$row = $query->row();
 				if(!empty($row->monto)) $rt['tmonto'] = round(floatval($row->monto),2);
 			}
-echo $this->db->last_query();
+			//echo $this->db->last_query();
 		}
 		return $rt;
 	}
@@ -1138,7 +1139,9 @@ echo $this->db->last_query();
 			itlrece AS a
 			JOIN lrece AS b ON a.id_lrece=b.id
 			JOIN lvaca AS c ON a.id_lvaca=c.id
-			SET a.pago=${dbid} WHERE c.codprv=${dbproveed} AND (a.pago IS NULL OR a.pago=0) AND b.fecha <=${dbfcorte} AND MID(b.ruta,1,1)<>'G'";
+			SET a.pago=${dbid} WHERE c.codprv=${dbproveed} AND (a.pago IS NULL OR a.pago=0)
+			AND ((b.fecha<=${dbfcorte} AND b.transporte<=0) OR (b.fecha<=ADDDATE(${dbfcorte},INTERVAL 1 DAY) AND b.transporte>0))
+			AND MID(b.ruta,1,1)<>'G'";
 			$this->db->query($mSQL);
 		}
 

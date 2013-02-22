@@ -55,7 +55,7 @@ if($form->_status!='show'){
 
 <script language="javascript" type="text/javascript">
 var sitems_cont=<?php echo $form->max_rel_count['sitems']; ?>;
-var sfpa_cont=<?php echo $form->max_rel_count['sfpa'];?>;
+var sfpa_cont  =<?php echo $form->max_rel_count['sfpa'];?>;
 
 $(function(){
 	$(".inputnum").numeric(".");
@@ -76,7 +76,7 @@ $(function(){
 	$('#cod_cli').autocomplete({
 		delay: 600,
 		autoFocus: true,
-		source: function( req, add){
+		source: function(req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscascli'); ?>",
 				type: "POST",
@@ -126,10 +126,10 @@ $(function(){
 	});
 
 	$('#factura').autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				delay: 600,
-				autoFocus: true,
 				url:  "<?php echo site_url('ajax/buscasfacdev'); ?>",
 				type: "POST",
 				dataType: "json",
@@ -184,8 +184,6 @@ $(function(){
 			truncate();
 			$("#tipo_doc").val('D');
 			$.ajax({
-				delay: 600,
-				autoFocus: true,
 				url: "<?php echo site_url('ajax/buscasinvdev'); ?>",
 				dataType: 'json',
 				type: 'POST',
@@ -544,10 +542,10 @@ function cdescrip(nind){
 //Agrega el autocomplete
 function autocod(id){
 	$('#codigoa_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				delay: 600,
-				autoFocus: true,
 				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
 				type: "POST",
 				dataType: "json",
