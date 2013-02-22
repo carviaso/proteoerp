@@ -833,6 +833,7 @@ script;
 		$this->load->view('view_ventanas', $data);  
 	}
 
+
 	function _post_insert($do){
 		$codigo=$do->get('concepto');
 		$nombre=$do->get('descrip');

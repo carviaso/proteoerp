@@ -36,9 +36,10 @@ class Lpago extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'bimpri' , 'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Documento', 'label'=>'Imprimir recibo' ));
-		$grid->wbotonadd(array('id'=>'bcheque', 'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cheque'   , 'label'=>'Imprimir cheque' ));
-		$grid->wbotonadd(array('id'=>'blote'  , 'img'=>'images/agrega4.png'             , 'alt' => 'Pagar lote'        , 'label'=>'Pagar lote'      ));
+		$grid->wbotonadd(array('id'=>'bimpri',   'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Documento', 'label'=>'Imprimir recibo' ));
+		$grid->wbotonadd(array('id'=>'bcheque',  'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cheque',    'label'=>'Imprimir cheque' ));
+		$grid->wbotonadd(array('id'=>'blote',    'img'=>'images/agrega4.png'             , 'alt' => 'Pagar lote',         'label'=>'Pagar lote'      ));
+		$grid->wbotonadd(array('id'=>'bimpriau', 'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Auditoria', 'label'=>'Imprimir Auditoria' ));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -166,6 +167,18 @@ class Lpago extends Controller {
 				$.prompt("<h1>Por favor Seleccione un registro</h1>");
 			}
 		});';
+
+		$bodyscript .= '
+		jQuery("#bimpriau").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('formatos/ver/LPAGOAUD').'/\'+id+\'/id\'').';
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		});';
+
 
 		$bodyscript .= '
 		jQuery("#bcheque").click( function(){
