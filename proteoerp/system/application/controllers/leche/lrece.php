@@ -1991,11 +1991,11 @@ class Lrece extends Controller {
 	// RECALCULA LOS VALORES DE LAS RECEPCIONES
 	//******************************************************************
 	function recalcula(){
-		$mSQL = 'UPDATE lrece a SET lista=(SELECT sum(lista) FROM itlrece b WHERE a.id=b.id_lrece );';
+		$mSQL = 'UPDATE lrece a SET lista=(SELECT SUM(lista) FROM itlrece b WHERE a.id=b.id_lrece );';
 		$this->db->query($mSQL);
 		$mSQL = 'UPDATE lrece SET litros=lleno, neto=lleno, diferen=lleno-lista WHERE vacio=0 AND lleno>0;';
 		$this->db->query($mSQL);
-		$mSQL = 'UPDATE lrece SET lista=TRUNCATE(lista,0); ';
+		$mSQL = 'UPDATE lrece SET lista=TRUNCATE(lista,0);';
 		$this->db->query($mSQL);
 		$mSQL = 'UPDATE lrece SET litros=TRUNCATE(ROUND((lleno-vacio)/densidad,2),0), neto=lleno-vacio, diferen=ROUND((lleno-vacio)/densidad,2)-lista
 		WHERE vacio>0 AND lleno>0;';

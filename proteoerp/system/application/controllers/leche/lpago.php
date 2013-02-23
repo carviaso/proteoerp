@@ -18,6 +18,21 @@ class Lpago extends Controller {
 
 	function index(){
 		$this->instalar();
+
+		//Arregla los totales de la recepcion
+		$mSQL = 'UPDATE lrece a SET lista=(SELECT SUM(lista) FROM itlrece b WHERE a.id=b.id_lrece );';
+		$this->db->query($mSQL);
+		$mSQL = 'UPDATE lrece SET litros=lleno, neto=lleno, diferen=lleno-lista WHERE vacio=0 AND lleno>0;';
+		$this->db->query($mSQL);
+		$mSQL = 'UPDATE lrece SET lista=TRUNCATE(lista,0);';
+		$this->db->query($mSQL);
+		$mSQL = 'UPDATE lrece SET litros=TRUNCATE(ROUND((lleno-vacio)/densidad,2),0), neto=lleno-vacio, diferen=ROUND((lleno-vacio)/densidad,2)-lista
+		WHERE vacio>0 AND lleno>0;';
+		$this->db->query($mSQL);
+		$mSQL = 'UPDATE lrece SET diferen=litros-lista;';
+		$this->db->query($mSQL);
+		//Fin del arreglo de los totales de la recepcion
+
 		$this->datasis->creaintramenu(array('modulo'=>'227','titulo'=>'Pagos de Producción','mensaje'=>'Pagos de Producción','panel'=>'LECHE','ejecutar'=>'leche/lpago','target'=>'popu','visible'=>'S','pertenece'=>'2','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');

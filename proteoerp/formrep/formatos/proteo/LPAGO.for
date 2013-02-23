@@ -7,7 +7,7 @@ $dbid = $this->db->escape($id);
 
 $mSQL_1 = $this->db->query('SELECT
 a.numero, b.nombre,TRIM(b.nomfis) AS nomfis, a.proveed, b.rif,a.montopago,a.fecha,a.tipo
-FROM lpago AS a 
+FROM lpago AS a
 JOIN sprv  AS b ON a.proveed=b.proveed
 WHERE a.id='.$dbid);
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
@@ -35,17 +35,19 @@ if(empty($precios)) $precios = 1;
 
 //////////////////////////////////////////////////////////////
 $mSQL="
-SELECT fecha, sem, 
-sum(llitros) llitros, round(sum(totleche)/sum(llitros),4) ltarifa, sum(totleche) totleche, 
-sum(tlitros) tlitros, round(sum(totransp)/sum(tlitros),4) ttarifa, sum(totransp) tottransp, 
-sum(totleche)+sum(totransp) total
+SELECT fecha, sem,
+SUM(faltante) AS faltante,
+SUM(llitros) llitros, round(sum(totleche)/sum(llitros),4) ltarifa, sum(totleche) totleche,
+SUM(tlitros) tlitros, round(sum(totransp)/sum(tlitros),4) ttarifa, sum(totransp) tottransp,
+SUM(totleche)+sum(totransp) total
 FROM (
 	SELECT
+		SUM(litros-lista) AS faltante,
 		a.fecha, DATE_FORMAT(a.fecha,'%w') AS sem,
-		SUM(a.lista) AS tlitros, 
-		b.tarifa, 
-		SUM(ROUND(a.lista*b.tarifa,2)) AS totransp, 
-		0 AS llitros, 
+		SUM(a.lista) AS tlitros,
+		b.tarifa,
+		SUM(ROUND(a.lista*b.tarifa,2)+ROUND((litros-lista)*b.tarsob,2)) AS totransp,
+		0 AS llitros,
 		0 totleche
 	FROM lrece AS a
 		JOIN lruta AS b ON a.ruta=b.codigo
@@ -54,20 +56,21 @@ FROM (
 	GROUP BY a.fecha
 UNION ALL
 	SELECT
+		0 AS faltante,
 		b.fecha, DATE_FORMAT(b.fecha,'%w') AS sem,
 		0 AS litros,
 		0 AS tarifa,
 		0 totrasp,
 		SUM(a.lista) llitros,
-		SUM(ROUND(a.lista*if(c.tipolec='F', if(c.animal='V', e.tarifa1, e.tarifa3), if(c.animal='V', e.tarifa2, e.tarifa4) ),2)) AS totleche
+		SUM(ROUND(a.lista*if(c.tipolec='F', if(c.animal='V', if(c.zona='0112', e.tarifa5, e.tarifa1), e.tarifa3), if(c.animal='V', if(c.zona='0112', e.tarifa6, e.tarifa2), e.tarifa4) ),2)) AS totleche
 	FROM itlrece  AS a
 		JOIN lrece    AS b ON a.id_lrece=b.id
 		JOIN lvaca    AS c ON a.id_lvaca=c.id
 		JOIN sprv     AS d ON c.codprv=d.proveed
-		JOIN lprecio  AS e ON e.id=$precios 
+		JOIN lprecio  AS e ON e.id=$precios
 	WHERE a.pago=${dbid} AND MID(b.ruta,1,1) <>'G' AND a.lista>0
 	GROUP BY b.fecha
-) fff 
+) fff
 GROUP BY fecha";
 ///////////////////////////////////////////////////////////////////////
 
@@ -98,7 +101,7 @@ if($ngasto>0){
 
 $semana=array('DOMINGO','LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO');
 
-$ittot = array('lmonto'=>0,'llitros'=>0,'tlitros'=>0,'tmonto'=>0, 'total'=>0 ,'incen'=>0);
+$ittot = array('lmonto'=>0,'llitros'=>0,'tlitros'=>0,'tmonto'=>0, 'total'=>0 ,'incen'=>0,'tfalta'=>0);
 
 ?><html>
 <head>
@@ -219,6 +222,7 @@ $encabezado_tabla="
 						<!-- th ${estilo}' >Precio       </th -->
 						<th ${estilo}' >Bs. Leche  </th>
 						<th ${estilo}' >Trans.   </th>
+						<th ${estilo}' >Fal./Sob.</th>
 						<!-- th ${estilo}' >Tarifa       </th -->
 						<!-- th ${estilo}' >Bs. Trans  </th -->
 						<th ${estilo}' >Incentivo</th>
@@ -243,7 +247,7 @@ $pie_final=<<<piefinal
 						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
 						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
 						<!-- td style="text-align:right;font-size:10pt;font-weight:bold;"></td -->
-						<!-- td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td -->
+						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
 						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
 						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
 					</tr>
@@ -256,7 +260,7 @@ $pie_continuo=<<<piecontinuo
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="5" style="text-align: right;">CONTINUA...</td>
+				<td colspan="6" style="text-align: right;">CONTINUA...</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -279,21 +283,22 @@ echo "		<tr><td>\n";
 echo $encabezado_tabla;
 $npagina=false;
 
-foreach ( $detalle AS $items ){ 
+foreach ( $detalle AS $items ){
 ?>
 					<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 						<td style="text-align:left;font-size: 0.7em"><?php echo dbdate_to_human($items->fecha).' '.$semana[$items->sem]; ?></td>
 						<td style="text-align:right" ><?php $ittot['llitros'] += $items->llitros;  echo nformat($items->llitros ,0);  ?></td>
-						<td style="text-align:right" ><?php 
+						<td style="text-align:right" ><?php
 							$totleche = $items->llitros*3;
-							$ittot['lmonto']  += $totleche; 
-							echo nformat($totleche,2); 
+							$ittot['lmonto']  += $totleche;
+							echo nformat($totleche,2);
 						?></td>
 						<td style="text-align:right" ><?php $ittot['tlitros'] += $items->tlitros;  echo nformat($items->tlitros ,0);  ?></td>
-						<td style="text-align:right" ><?php 
+						<td style="text-align:right" ><?php $ittot['tfalta']  += $items->faltante; echo nformat($items->faltante,0);  ?></td>
+						<td style="text-align:right" ><?php
 							$incent = $items->totleche-$totleche;
 							$ittot['incen']   += $incent;
-							echo nformat($incent ,2); 
+							echo nformat($incent ,2);
 						?></td>
 						<td style="text-align:right" ><?php $ittot['total']   += $items->total; echo nformat($items->total ,2); ?></td>
 					</tr>
@@ -301,7 +306,7 @@ foreach ( $detalle AS $items ){
 		$mod = ! $mod;
 }
 
-echo sprintf($pie_final,nformat($ittot['llitros'],0),nformat($ittot['lmonto']),nformat($ittot['tlitros'],0),nformat($ittot['tmonto']), nformat($ittot['incen']),nformat($ittot['total']));
+echo sprintf($pie_final,nformat($ittot['llitros'],0),nformat($ittot['lmonto']),nformat($ittot['tlitros'],0),nformat($ittot['tfalta']), nformat($ittot['incen']),nformat($ittot['total']));
 
 echo "		</td>\n";
 echo "		<td>\n";
@@ -372,7 +377,7 @@ foreach ($detalle2 AS $items2){ $i++;
 		}
 
 if($items2->tipo=='D'){
-	$items2->precio =(-1)*$items2->precio; 
+	$items2->precio =(-1)*$items2->precio;
 	$items2->total  =(-1)*$items2->total;
 }
 ?>
