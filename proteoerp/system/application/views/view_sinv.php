@@ -1232,7 +1232,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class="littletablerow"><?php echo $form->minven->output?></td>
 				</tr>
 				<tr>
-					<td class='littletableheaderc' style="text-align:center" colspan='2'><b>*(0)Cero para desactivar</b></td>
+					<td class='littletableheaderc' style="text-align:center" colspan='2'><b>*(0) inactiva</b></td>
 				</tr>
 			</table>
 		</td>
@@ -1335,7 +1335,9 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			<fieldset style='border: 1px outset #B45F04;background: #FFEFFF;'>
 			<table width='100%' cellspacing='0'>
 				<tr>
-					<td class='littletableheaderc' align="right">Aumento (%) si se vende detallado</td>
+					<td class='littletableheaderc' align="right">Precio Minimo</td>
+					<td class="littletablerow"                  ><?php echo $form->premin->output; ?></td>
+					<td class='littletableheaderc' align="right">Aumento (%) venta detallada</td>
 					<td class="littletablerow"                  ><?php echo $form->aumento->output; ?></td>
 				</tr>
 			</table>

@@ -37,6 +37,10 @@ class Sinv extends Controller {
 			$this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `maxven` INT(10) NULL DEFAULT '0' COMMENT 'Maximo de venta', ADD COLUMN `minven` INT(10) NULL DEFAULT '0' COMMENT 'Minimo de venta' AFTER `maxven`");
 		};
 
+		if(!in_array('premin',$campos)) {
+			$mSQL="ALTER TABLE sinv ADD COLUMN premin CHAR(1) NULL DEFAULT '0' COMMENT 'Precio Minimo de Venta' ";
+			$this->db->simple_query($mSQL);
+		}
 
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
 			if (!in_array('mpps',       $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `mpps`        VARCHAR(20) NULL  COMMENT 'Numero de Ministerior de Salud'");
@@ -2801,6 +2805,13 @@ class Sinv extends Controller {
 		$edit->serial->option('V','Vehicular');
 		$edit->serial->in='activo';
 
+		$edit->premin = new dropdownField('Precio Minimo', 'premin');
+		$edit->premin->style='width:100px;';
+		$edit->premin->option('0','Inactivo');
+		$edit->premin->option('2','Precio 2');
+		$edit->premin->option('3','Precio 3');
+		$edit->premin->option('4','Precio 4');
+
 		$edit->tdecimal2 = new freeField('','free','Usa Decimales');
 		$edit->tdecimal2->in='activo';
 
@@ -5057,6 +5068,8 @@ class Sinv extends Controller {
 			DROP COLUMN `segundos`";
 			$this->db->simple_query($mSQL);
 		}
+
+
 
 		if(!$this->db->table_exists('esta')){
 			$mSQL="CREATE TABLE `esta` (

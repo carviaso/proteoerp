@@ -20,6 +20,11 @@ class Grup extends Controller {
 			$this->db->simple_query('ALTER TABLE grup ADD UNIQUE INDEX numero (numero)');
 			$this->db->simple_query('ALTER TABLE grup ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};*/
+		
+		$campos = $this->db->list_fields('grup');
+		if(!in_array('precio'  ,$campos)){
+			$this->db->simple_query("ALTER TABLE grup ADD COLUMN precio CHAR(1) NULL DEFAULT '0'");
+		}
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -1011,7 +1016,7 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 
 		$edit->precio = new dropdownField("Precio Minimo ", "precio");
 		$edit->precio->option("0","No Aplica");
-		$edit->precio->option("1","Precio 1");
+		//$edit->precio->option("1","Precio 1");
 		$edit->precio->option("2","Precio 2");
 		$edit->precio->option("3","Precio 3");
 		$edit->precio->option("4","Precio 4");
