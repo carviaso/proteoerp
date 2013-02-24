@@ -1263,9 +1263,15 @@ class gser extends Controller {
 
 		} elseif($oper == 'edit') {
 			unset($data[$mcodp]);
+			$info    = $this->datasis->dameval("SELECT CONCAT(fecha, ' ',tipo_doc,' ', numero, ' ', proveed) aaa FROM gser WHERE id=$id");
+			$transac = $this->datasis->dameval("SELECT transac FROM gser WHERE id=$id");
 			$this->db->where("id", $id);
 			$this->db->update('gser', $data);
-			logusu('GSER',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+			//SI TIENE retencion debe cambiar ahi tambien
+			$mSQL = 'UPDATE gser a JOIN riva b ON a.transac = b.transac SET b.nfiscal=a.nfiscal WHERE a.id='.$this->db->escape($id);
+			$this->db->simple_query($mSQL);
+
+			logusu('GSER',"Gasto/Egreso ".$info." MODIFICADO");
 			echo "Gasto Modificado";
 
 		} elseif($oper == 'del') {

@@ -152,7 +152,7 @@ class Grup extends Controller {
 
 		$bodyscript .= '
 		$("#fgrupo").dialog({
-			autoOpen: false, height: 500, width: 600, modal: true,
+			autoOpen: false, height: 550, width: 600, modal: true,
 			buttons: {
 			"Guardar": function() {
 				var bValid = true;
@@ -365,6 +365,19 @@ class Grup extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
 		));
 
+		$grid->addField('precio');
+		$grid->label('Precio Minimo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+		));
 
 
 		$grid->addField('id');
@@ -995,6 +1008,14 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 		$edit->margenc->css_class='inputnum';
 		$edit->margenc->group='Margenes';
 		$edit->margenc->rule='trim|callback_chporcent|numeric|callback_positivo';
+
+		$edit->precio = new dropdownField("Precio Minimo ", "precio");
+		$edit->precio->option("0","No Aplica");
+		$edit->precio->option("1","Precio 1");
+		$edit->precio->option("2","Precio 2");
+		$edit->precio->option("3","Precio 3");
+		$edit->precio->option("4","Precio 4");
+		$edit->precio->style='width:120px;';
 
 
 		$edit->cu_inve =new inputField("Cuenta Inventario", "cu_inve");

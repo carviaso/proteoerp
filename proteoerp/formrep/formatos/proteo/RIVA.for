@@ -1,7 +1,7 @@
 <?php if(count($parametros) < 1) show_error('Faltan parametros');
 $id = $parametros[0];
 
-$sel=array('a.emision','a.periodo','a.tipo_doc','a.fecha','a.numero','a.nfiscal','a.afecta'
+$sel=array('a.emision','a.periodo','a.tipo_doc','a.fecha','a.numero','a.nfiscal','a.afecta', 'c.serie serie1','d.serie serie2'
 ,'a.clipro','TRIM(b.nombre) AS nombre','TRIM(b.nomfis) AS nomfis','a.rif','a.exento','CONCAT_WS(\' \',TRIM(b.direc1),b.direc2) AS direc'
 ,'a.tasa'    ,'a.general'  ,'a.geneimpu'
 ,'a.tasaadic','a.adicional','adicimpu'
@@ -10,6 +10,9 @@ $sel=array('a.emision','a.periodo','a.tipo_doc','a.fecha','a.numero','a.nfiscal'
 $this->db->select($sel);
 $this->db->from('riva AS a');
 $this->db->join('sprv AS b','a.clipro=b.proveed');
+$this->db->join('gser AS c','a.transac=c.transac','LEFT');
+$this->db->join('scst AS d','a.transac=d.transac','LEFT');
+
 $this->db->where('a.id' , $id);
 $mSQL_1 = $this->db->get();
 
@@ -22,7 +25,8 @@ $emision   = dbdate_to_human($row->emision);
 $periodo   = trim($row->periodo)  ;
 $tipo_doc  = trim($row->tipo_doc) ;
 $fecha     = dbdate_to_human($row->fecha);
-$numero    = trim($row->numero) ;
+//$numero    = trim($row->numero) ;
+$numero    = trim($row->serie1.$row->serie2) ;
 $nfiscal   = trim($row->nfiscal);
 $afecta    = trim($row->afecta) ;
 $clipro    = trim($row->clipro) ;
