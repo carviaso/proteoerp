@@ -142,6 +142,15 @@ class MY_Validation extends CI_Validation{
 		}
 	}
 
+	function hora($hora){
+		if (preg_match("/(^([01][0-9]|2[0-3])(:[0-5][0-9]){1,2}[[:blank:]]*$)|(^[[:blank:]]*$)/", $hora)>0){
+			return TRUE;
+		}else {
+			$this->set_message('hora', "El dato introducido ('$hora') en el campo <b>%s</b> parece no corresponder con el formato [00-23]:[00-59]:[00-59]");
+			return FALSE;
+		}
+	}
+
 	//Para validar fecha con condi_required
 	function chitfecha($validar,$format=null,$fname=null){
 		if(empty($validar)) return true;

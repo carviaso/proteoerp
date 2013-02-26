@@ -99,7 +99,7 @@ jQuery("#boton4").click( function(){
 */
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"boton1", "img"=>"images/pdf_logo.gif",  "alt" => 'Imprimir Asiento',  "label"=>"Imprimir Asiento"));
+		$grid->wbotonadd(array('id'=>'bimp', 'img'=>'assets/default/images/print.png',  'alt' => 'Reiprimir Asiento',  'label'=>'Imprimir Asiento'));
 		//$grid->wbotonadd(array("id"=>"boton2", "img"=>"images/agrega4.png",   "alt" => 'Agregar',           "label"=>"Agregar Asiento"));
 		//$grid->wbotonadd(array("id"=>"boton3", "img"=>"images/editar.png",    "alt" => 'Editar',            "label"=>"Editar Asiento"));
 		$grid->wbotonadd(array("id"=>"boton4", "img"=>"images/checklist.png", "alt" => 'Auditoria',         "label"=>"Herramientas"));
@@ -213,7 +213,7 @@ jQuery("#boton4").click( function(){
 		$bodyscript .= '$(function() {';
 
 		$bodyscript .= '
-		jQuery("#boton1").click( function(){
+		jQuery("#bimp").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);

@@ -460,7 +460,24 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//Trae el precio 1 para las tarifas de estacionamiento
+	function buscaprecio1(){
+		$mid  = $this->input->post('q');
 
+		$data='0.0';
+		if($mid !== false){
+			$dbmid = $this->db->escape($mid);
+			$retArray = $retorno = array();
+			$mSQL="SELECT precio1 FROM sinv WHERE codigo=${dbmid} LIMIT 1";
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				$row  = $query->row();
+				$data = $row->precio1;
+			}
+		}
+		echo $data;
+		return true;
+	}
 
 	//Busca icon
 	function buscaicon(){
