@@ -3284,9 +3284,9 @@ class Sfac extends Controller {
 			}
 		}else{
 			if($manual!='S'){
-				$numero = 'M'.$this->datasis->fprox_numero('nccliman',7);
-			}else{
 				$numero = $this->datasis->fprox_numero('nccli');
+			}else{
+				$numero = 'M'.$this->datasis->fprox_numero('nccliman',7);
 			}
 		}
 		$transac = $this->datasis->fprox_numero('ntransa');
