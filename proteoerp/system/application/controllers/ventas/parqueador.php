@@ -514,6 +514,20 @@ class parqueador extends Sfac {
 		}
 	}
 
+	//Busca la data en el Servidor por json
+	function getdata(){
+		$grid       = $this->jqdatagrid;
+
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('sfac');
+		$mWHERE[] = array('', 'fecha', date('Ymd'), '' );
+		$mWHERE[] = array('', 'usuario', $this->session->userdata('usuario'),'');
+
+		$response   = $grid->getData('sfac', array(array()), array(), false, $mWHERE, 'id', 'desc' );
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+	}
+
 	function chplaca($placa){
 		if (preg_match("/^[A-Za-z0-9\-]+$/", $placa)>0){
 			return true;
