@@ -34,7 +34,7 @@ class parqueador extends Sfac {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir'    ,'label'=>'Reimprimir Documento'));
-		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png'              ,'alt' => 'Cierre de Caja','label'=>'Cierre de Cajall'));
+		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png'              ,'alt' => 'Cierre de Caja','label'=>'Cierre de Caja'));
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
 			$grid->wbotonadd(array('id'=>'bcierrex','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre X','label' => 'Cierre X'));
@@ -428,7 +428,7 @@ class parqueador extends Sfac {
 		$form->cana->maxlength = 5;
 
 		$form->codigo = new dropdownField('Tipo veh&iacute;culo', 'codigoa_0');
-		$form->codigo->option('','Seleccionar');
+		//$form->codigo->option('','Seleccionar');
 		$form->codigo->options('SELECT codigo,CONCAT_WS("-",descrip,precio1) AS val FROM sinv WHERE clave LIKE "TARIFA%" AND tipo="Servicio"');
 		$form->codigo->style    = 'width:140px;';
 		$form->codigo->onchange = 'tarifa()';
