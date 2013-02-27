@@ -216,6 +216,8 @@ class venta extends sfac {
 		//$edit->precioplaca->group = 'Datos del financieros';
 		//$edit->precioplaca->showformat='decimal';
 
+		$edit->observa   = new inputField('Observaci&oacute;n', 'observa');
+
 		$edit->base = new dropdownField('Monto base de venta','vh_precio');
 		$edit->base->rule  = 'required|numeric';
 		$edit->base->style = 'width:150px';

@@ -3460,6 +3460,13 @@ class Sfac extends Controller {
 			$mSQL = "UPDATE scli SET upago=${dbupago} WHERE cliente=${dbcliente}";
 			$this->db->simple_query($mSQL);
 		}
+
+		//Chequea si es una venta vehicular
+		if($this->db->table_exists('sinvehiculo') && $tipo_doc=='F'){
+			$id=$do->get('id');
+			$this->db->simple_query("UPDATE sinvehiculo SET id_sfac=NULL WHERE id_sfac=${id}");
+
+		}
 		return false;
 	}
 

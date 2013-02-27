@@ -73,8 +73,10 @@ class Scli extends validaciones {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-		array("id"=>"fedita",   "title"=>"Agregar/Editar Cliente"),
-		array("id"=>"feditcr",  "title"=>"Cambia Limite de Credito")
+		array('id'=>'fedita' , 'title'=>'Agregar/Editar Cliente'),
+		array('id'=>'feditcr', 'title'=>'Cambia Limite de Credito'),
+		array('id'=>'fshow'  , 'title'=>'Mostrar Registro'),
+		array('id'=>'fborra' , 'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -357,6 +359,47 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		};';
 
+		$bodyscript .= '
+		function sclidel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function sclishow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function() {
@@ -431,6 +474,35 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		});';
 
 
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
 
 		$bodyscript .= '});'."\n";
 
@@ -1465,7 +1537,7 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: scliadd,\n\t\teditfunc: scliedit");
+		$grid->setBarOptions('addfunc: scliadd, editfunc: scliedit, delfunc: sclidel, viewfunc: sclishow');
 
 
 		#Set url
