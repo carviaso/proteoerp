@@ -95,6 +95,99 @@ class Ajax extends Controller {
 
 	/**************************************************************
 	 *
+	 *  BUSCA LOS CHEQUES DE CLIENTES
+	 *
+	*/
+	function buscachequecli(){
+		$mid     = $this->input->post('q');
+		$cod_cli = $this->input->post('cod_cli');
+		if($mid == false) $mid  = $this->input->post('term');
+
+
+		$data = '[ ]';
+		if($mid !== false && $cod_cli !== false ){
+			$qmid = $this->db->escape($mid);
+			$qdb  = $this->db->escape('%'.$mid.'%');
+			$mcod_cli = $this->db->escape($cod_cli);
+
+			$retArray = $retorno = array();
+
+			//Mira si existe el codigo
+			$mSQL="SELECT id, num_ref, fecha, monto 
+				FROM sfpa WHERE cod_cli=${mcod_cli} AND num_ref LIKE ${qdb} AND tipo='CH' 
+				ORDER BY fecha DESC LIMIT ".$this->autolimit;
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$retArray['value']   = $row['num_ref'];
+					$retArray['label']   = $row['fecha'].' '.utf8_encode($row['num_ref'].' '.number_format($row['monto'],2));
+					$retArray['fecha']   = $row['fecha'];
+					$retArray['num_ref'] = utf8_encode($row['num_ref']);
+					$retArray['monto']   = $row['monto'];
+					$retArray['id']      = $row['id'];
+					array_push($retorno, $retArray);
+				}
+			}
+			
+			if(count($data)>0)
+				$data = json_encode($retorno);
+		}
+		echo $data;
+		return true;
+	}
+
+	/**************************************************************
+	 *
+	 *  BUSCA LOS CHEQUES DE PROVEEDORES
+	 *
+	*/
+	function buscachequeprv(){
+		$mid     = $this->input->post('q');
+		$cod_prv = $this->input->post('cod_prv');
+		$codbanc = $this->input->post('codbanc');
+		
+		if($mid == false) $mid  = $this->input->post('term');
+
+
+		$data = '[ ]';
+		if($mid !== false && $cod_prv !== false && $codbanc !== false ){
+			$qmid     = $this->db->escape($mid);
+			$qdb      = $this->db->escape('%'.$mid.'%');
+			$mcod_prv = $this->db->escape($cod_prv);
+			$mcodbanc = $this->db->escape($codbanc);
+
+			$retArray = $retorno = array();
+
+			//Mira si existe el codigo
+			$mSQL="SELECT id, numero, fecha, monto FROM bmov 
+				WHERE clipro='P' AND codcp=${mcod_prv} AND numero LIKE ${qdb} AND tipo_op='CH' AND codbanc=${codbanc} 
+				ORDER BY fecha DESC LIMIT ".$this->autolimit;
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$retArray['value']   = $row['numero'];
+					$retArray['label']   = $row['fecha'].' '.utf8_encode($row['numero'].' '.number_format($row['monto'],2));
+					$retArray['fecha']   = $row['fecha'];
+					$retArray['numero'] = utf8_encode($row['numero']);
+					$retArray['monto']   = $row['monto'];
+					$retArray['id']      = $row['id'];
+					array_push($retorno, $retArray);
+				}
+			}
+			
+			if(count($data)>0)
+				$data = json_encode($retorno);
+		}
+		echo $data;
+		return true;
+	}
+
+
+
+	/**************************************************************
+	 *
 	 *  BUSCA LOS CLIENTES
 	 *
 	*/

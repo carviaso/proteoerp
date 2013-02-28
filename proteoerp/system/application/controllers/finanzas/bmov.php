@@ -28,45 +28,12 @@ class Bmov extends Controller {
 	function jqdatag(){
 
 		$grid = $this->defgrid();
-		$param['grid'] = $grid->deploy();
+		$param['grids'][] = $grid->deploy();
 
-		$bodyscript = '<script type="text/javascript">
-	$(function() {
-		$( "input:submit, a, button", ".otros" ).button();
-	});
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
-	jQuery("#a1").click( function(){
-		var id = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-		if (id)	{
-			var ret = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getRowData\',id);
-			window.open(\'/proteoerp/formatos/ver/BMOV/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-		} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-	});
-</script>
-';
-
-		$readyLayout = '
-	$(\'body\').layout({
-		minSize: 30,
-		north__size: 60,
-		resizerClass: \'ui-state-default\',
-		west__size: 212,
-		west__onresize: function (pane, $Pane){jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);},
-	});
-	
-	$(\'div.ui-layout-center\').layout({
-		minSize: 30,
-		resizerClass: "ui-state-default",
-		center__paneSelector: ".centro-centro",
-		south__paneSelector:  ".centro-sur",
-		south__size: 100,
-		center__onresize: function (pane, $Pane) {
-			jQuery("#newapi'.$param['grid']['gridname'].'").jqGrid(\'setGridWidth\',$Pane.innerWidth()-6);
-			jQuery("#newapi'.$param['grid']['gridname'].'").jqGrid(\'setGridHeight\',$Pane.innerHeight()-110);
-		}
-	});
-';
-
+		$readyLayout = $grid->readyLayout2( 212	, 115, $param['grids'][0]['gridname']);
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -77,49 +44,33 @@ class Bmov extends Controller {
 		//$datos = $this->datasis->jqdata($mSQL1,'databanc');
 		$funciones = $this->datasis->jqtablawest('saldobanc', 'Saldo de Bancos', $colModel,  $mSQL1);
 
+		$WpAdic = "<tr><td><div class=\"tema1\"><table id=\"saldobanc\"></table></div></td></tr>\n";
+		$grid->setWpAdicional($WpAdic);
 
+		//Botones Panel Izq
+		//$grid->wbotonadd(array('id'=>'bimpriau', 'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Auditoria', 'label'=>'Imprimir Auditoria' ));
+		$WestPanel = $grid->deploywestp();
 
-		$WestPanel = '
-<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-<div class="anexos">
-
-<table id="west-grid" align="center">
-	<tr>
-		<td><div class="tema1"><table id="listados"></table></div></td>
-	</tr>
-	<tr><td>
-		<td><div class="tema1"><table id="otros"></table></div></td>
-	</td></tr>
-</table>
-</div>
-<table id="west-grid" align="center">
-	<tr>
-		<td><div class="tema1" style="font-size: 80%;"><table id="saldobanc"></table></div></td>
-	</tr>
-</table>
-
-'.
-//		<td><a style="width:190px" href="#" id="a1">Imprimir Copia</a></td>
-'</div> <!-- #LeftPane -->
-';
 
 		$centerpanel = '
-<div id="RightPane" class="ui-layout-center">
-	<div class="centro-centro">
-		<table id="newapi'.$param['grid']['gridname'].'"></table>
-		<div id="pnewapi'.$param['grid']['gridname'].'"></div>
-	</div>
-	<div class="centro-sur" id="adicional" style="overflow:auto;">
-	</div>
-</div> <!-- #RightPane -->
-';
+		<div id="RightPane" class="ui-layout-center">
+			<div class="centro-centro">
+				<table id="newapi'.$param['grids'][0]['gridname'].'"></table>
+				<div id="pnewapi'.$param['grids'][0]['gridname'].'"></div>
+			</div>
+			<div class="centro-sur" id="adicional" style="overflow:auto;">
+			</div>
+		</div> <!-- #RightPane -->
+		';
 
+		//Panel Central y Sur
+		$centerpanel = $grid->centerpanel( $id = "adicional", $param['grids'][0]['gridname'] );
 
-		$SouthPanel = '
-<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
-<p>'.$this->datasis->traevalor('TITULO1').'</p>
-</div> <!-- #BottomPanel -->
-';
+		$adic = array(
+		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
+
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
@@ -135,8 +86,33 @@ class Bmov extends Controller {
 		$param['tabs']         = false;
 		$param['encabeza']     = $this->titp;
 		
-		$this->load->view('jqgrid/crud',$param);
+		$this->load->view('jqgrid/crud2',$param);
 	}
+
+	//***************************
+	//Funciones de los Botones
+	//fuera del doc ready
+	//***************************
+	function bodyscript( $grid0 ){
+		$bodyscript = '<script type="text/javascript">';
+
+		$bodyscript .= '
+		$("#a1").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\'/proteoerp/formatos/ver/BMOV/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});
+		';
+
+		$bodyscript .= "\n</script>\n";
+		$bodyscript .= "";
+		return $bodyscript;
+	}
+
+
+
 
 	//***************************
 	//Definicion del Grid y la Forma

@@ -39,7 +39,7 @@ class Sinv extends Controller {
 
 		if(!in_array('premin',$campos)) {
 			$mSQL="ALTER TABLE sinv ADD COLUMN premin CHAR(1) NULL DEFAULT '0' COMMENT 'Precio Minimo de Venta' ";
-			$this->db->simple_query($mSQL);
+			$this->db->query($mSQL);
 		}
 
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
@@ -565,14 +565,6 @@ class Sinv extends Controller {
 		var verinactivos = 0;
 		var mstatus = "";
 		';
-
-/*
-		$bodyscript .= '
-		function almubica( id, ubica){
-			alert("Almacen="+ubica+" id="+id);
-		};
-		';
-*/
 
 		// Agregar
 		$bodyscript .= '

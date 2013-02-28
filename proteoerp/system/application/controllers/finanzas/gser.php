@@ -2236,7 +2236,7 @@ class gser extends Controller {
 
 		$edit->codbanc = new dropdownField('Codigo de la caja','codbanc');
 		$edit->codbanc->option('','Seleccionar');
-		$edit->codbanc->options("SELECT codbanc, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE tbanco='CAJ' ORDER BY codbanc");
+		$edit->codbanc->options("SELECT codbanc, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE tbanco='CAJ' AND activo='S' ORDER BY codbanc");
 		$edit->codbanc->rule='max_length[5]|required';
 
 		$edit->fechafac = new dateField('Fecha de la factura','fechafac');

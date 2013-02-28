@@ -430,48 +430,84 @@ class Rrepu extends Controller {
 
 		$edit = new DataEdit($this->tits, 'rrepu');
 
+		$script = '
+		$("#idrnoti").autocomplete({
+			source: function( req, add){
+				$.ajax({
+					url:  "'.site_url('ajax/buscarnoti').'",
+					type: "POST",
+					dataType: "json",
+					data: "q="+req.term,
+					success:
+						function(data){
+							var sugiere = [];
+							if(data.length==0){
+								$("#idrnoti").val("");
+								$("#serial").val("");
+								$("#codprod").val("");
+								$("#descprod").val("");
+							}else{
+								$.each(data,
+									function(i, val){
+										sugiere.push( val );
+									}
+								);
+							}
+							add(sugiere);
+						},
+				})
+			},
+			minLength: 2,
+			select: function( event, ui ) {
+				$("#idrnoti").attr("readonly", "readonly");
+				$("#idrnoti" ).val(ui.item.idrnoti);
+				$("#serial"  ).val(ui.item.serial);
+				$("#codprod" ).val(ui.item.codprod);
+				$("#descprod").val(ui.item.descprod);
+				setTimeout(function() {  $("#idrnoti").removeAttr("readonly"); }, 1500);
+			}
+		});
+		';
 
-		$scrip = '
-	$("#idrnoti").autocomplete({
-		source: function( req, add){
-			$.ajax({
-				url:  "'.site_url('ajax/buscarnoti').'",
-				type: "POST",
-				dataType: "json",
-				data: "q="+req.term,
-				success:
-					function(data){
-						var sugiere = [];
-						if(data.length==0){
-							$("#tarifa").val("");
-							$("#tactividad").val("");
-							$("#tactividad_val").text("");
-							$("#tminimo").val("");
-							$("#tminimo_val").text("");
-						}else{
-							$.each(data,
-								function(i, val){
-									sugiere.push( val );
-								}
-							);
-						}
-						add(sugiere);
-					},
-			})
-		},
-		minLength: 2,
-		select: function( event, ui ) {
-			$("#tarifa").attr("readonly", "readonly");
 
-			$("#tarifa").val(ui.item.value);
-			$("#tactividad").val(ui.item.actividad);
-			$("#tactividad_val").text(ui.item.actividad);
-			$("#tminimo").val(ui.item.minimo);
-			$("#tminimo_val").text(ui.item.minimo);
-			setTimeout(function() {  $("#tarifa").removeAttr("readonly"); }, 1500);
-		}
-	});
-';
+		$script .= "
+		$('#proveed').autocomplete({
+			delay: 600,
+			autoFocus: true,
+			source: function( req, add){
+				$.ajax({
+					url:  '".site_url('ajax/buscasprv')."',
+					type: 'POST',
+					dataType: 'json',
+					data: 'q='+req.term,
+					success:
+						function(data){
+							if(data.length==0){
+								$('#nombre').val('');
+								$('#nombre_val').text('');
+								$('#proveed').val('');
+							}else{
+								var sugiere = [];
+								$.each(data,
+									function(i, val){
+										sugiere.push( val );
+									}
+								);
+								add(sugiere);
+							}
+						},
+				})
+			},
+			minLength: 2,
+			select: function( event, ui ) {
+				$('#proveed').attr('readonly', 'readonly');
+				$('#nombre').val(ui.item.nombre);
+				$('#nombre_val').text(ui.item.nombre);
+				$('#proveed').val(ui.item.proveed);
+				setTimeout(function() { $('#proveed').removeAttr('readonly'); }, 1500);
+			}
+		});
+		";
 
 
 
@@ -479,12 +515,15 @@ class Rrepu extends Controller {
 
 		$edit->back_url = site_url($this->url.'filteredgrid');
 
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
+
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert','_pre_insert');
-		$edit->pre_process('update','_pre_update');
-		$edit->pre_process('delete','_pre_delete');
+		$edit->pre_process('insert' ,'_pre_insert' );
+		$edit->pre_process('update' ,'_pre_update' );
+		$edit->pre_process('delete' ,'_pre_delete' );
 
 		$edit->id = new inputField('Numero','id');
 		$edit->id->rule='integer';
@@ -553,6 +592,8 @@ class Rrepu extends Controller {
 		$edit->cant->css_class='inputonlynum';
 		$edit->cant->size = 8;
 		$edit->cant->maxlength = 11;
+		$edit->cant->insertValue = '1';
+
 
 		$edit->reporte = new inputField('Reporte','reporte');
 		$edit->reporte->rule = '';
