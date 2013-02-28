@@ -1968,7 +1968,7 @@ class Prmo extends Controller {
 		} elseif ( $tipop == '6' ){
 
 			// Crea bmov egreso
-			$this->datasis->actusal($codban, $fecha, $monto );
+			$this->datasis->actusal($codban, $fecha, -1*$monto );
 
 			$mREG = $this->datasis->damereg("SELECT numcuent, banco, saldo, tbanco FROM banc WHERE codbanc='".$codban."'");
 			$mCUENTA  = $mREG['numcuent'];

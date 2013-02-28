@@ -42,6 +42,12 @@ class Sinv extends Controller {
 			$this->db->query($mSQL);
 		}
 
+		if(!in_array('vnega',$campos)) {
+			$mSQL="ALTER TABLE sinv ADD COLUMN vnega CHAR(1) NULL DEFAULT 'S' COMMENT 'Permitir Venta Negativa' ";
+			$this->db->query($mSQL);
+		}
+
+
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
 			if (!in_array('mpps',       $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `mpps`        VARCHAR(20) NULL  COMMENT 'Numero de Ministerior de Salud'");
 			if (!in_array('cpe',        $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpe`         VARCHAR(20) NULL  COMMENT 'Registro de CPE'");
@@ -2803,6 +2809,12 @@ class Sinv extends Controller {
 		$edit->premin->option('2','Precio 2');
 		$edit->premin->option('3','Precio 3');
 		$edit->premin->option('4','Precio 4');
+
+		$edit->vnega = new dropdownField('Venta Neg.', 'vnega');
+		$edit->vnega->style='width:60px;';
+		$edit->vnega->option('S','Si');
+		$edit->vnega->option('N','No');
+
 
 		$edit->tdecimal2 = new freeField('','free','Usa Decimales');
 		$edit->tdecimal2->in='activo';
