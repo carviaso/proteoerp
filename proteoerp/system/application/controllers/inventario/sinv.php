@@ -2810,7 +2810,7 @@ class Sinv extends Controller {
 		$edit->premin->option('3','Precio 3');
 		$edit->premin->option('4','Precio 4');
 
-		$edit->vnega = new dropdownField('Venta Neg.', 'vnega');
+		$edit->vnega = new dropdownField('Venta Negativa', 'vnega');
 		$edit->vnega->style='width:60px;';
 		$edit->vnega->option('S','Si');
 		$edit->vnega->option('N','No');

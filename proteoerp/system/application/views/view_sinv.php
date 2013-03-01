@@ -1487,29 +1487,32 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			<legend class="titulofieldset" >Existencias</legend>
 			<table width='100%' border=0 >
 				<tr>
-					<td class="littletableheaderc"           ><?php echo $form->existen->label  ?></td>
-					<td class="littletablerow" align='right' ><?php echo $form->existen->output ?></td>
+					<td class="littletableheaderc"><?php echo $form->existen->label  ?></td>
+					<td class="littletablerow"    ><?php echo $form->existen->output ?></td>
 				</tr>
 				<tr>
-					<td class="littletableheaderc"          ><?php echo $form->exmin->label  ?></td>
-					<td class="littletablerow" align='right'><?php echo $form->exmin->output ?></td>
+					<td class="littletableheaderc"><?php echo $form->exmin->label  ?></td>
+					<td class="littletablerow"    ><?php echo $form->exmin->output ?></td>
 				</tr>
 				<tr>
-					<td class="littletableheaderc"          ><?php echo $form->exmax->label  ?></td>
-					<td class="littletablerow" align='right'><?php echo $form->exmax->output ?></td>
+					<td class="littletableheaderc"><?php echo $form->exmax->label  ?></td>
+					<td class="littletablerow"    ><?php echo $form->exmax->output ?></td>
 				</tr>
 				<tr>
-					<td class="littletableheaderc"          ><?php echo $form->exord->label  ?></td>
-					<td class="littletablerow" align='right'><?php echo $form->exord->output ?></td>
+					<td class="littletableheaderc"><?php echo $form->exord->label  ?></td>
+					<td class="littletablerow"    ><?php echo $form->exord->output ?></td>
 				</tr>
 				<tr>
-					<td class="littletableheaderc"          ><?php echo $form->exdes->label  ?></td>
-					<td class="littletablerow" align='right'><?php echo $form->exdes->output ?></td>
+					<td class="littletableheaderc"><?php echo $form->exdes->label  ?></td>
+					<td class="littletablerow"    ><?php echo $form->exdes->output ?></td>
+				</tr>
+				<tr>
+					<td class="littletableheaderc"><?php echo $form->vnega->label  ?></td>
+					<td class="littletablerow"    ><?php echo $form->vnega->output ?></td>
 				</tr>
 			</table>
 			</fieldset>
 		</td>
-
   		<td valign="top">
 			<fieldset  style='border: 2px outset #FEB404;background: #FFFCE8;'>
 			<legend class="titulofieldset" >Ubicaciones</legend>
