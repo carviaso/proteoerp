@@ -42,10 +42,13 @@ $dbnumero  = $this->db->escape($numero);
 $sprv      = htmlspecialchars(trim($row->proveed));
 $nombre    = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
 $condi     = htmlspecialchars(trim($row->condiciones));
+$vacio     = '';
 
 if($envia=='INFI'){
 	$invfis = true;
 	$titulo = 'INVENTARIO FISICO';
+	$titulo2= '';
+	$oob    = 'vacio';
 }else{
 	$invfis = false;
 	if(empty($sprv)){

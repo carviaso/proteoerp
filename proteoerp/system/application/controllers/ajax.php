@@ -557,18 +557,18 @@ class Ajax extends Controller {
 	function buscaprecio1(){
 		$mid  = $this->input->post('q');
 
-		$data='0.0';
+		$data=array(0.0,0.0);
 		if($mid !== false){
 			$dbmid = $this->db->escape($mid);
 			$retArray = $retorno = array();
-			$mSQL="SELECT precio1 FROM sinv WHERE codigo=${dbmid} LIMIT 1";
+			$mSQL="SELECT base1,base2,iva FROM sinv WHERE codigo=${dbmid} LIMIT 1";
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				$row  = $query->row();
-				$data = $row->precio1;
+				$data = array($row->base1,$row->base2,$row->iva);
 			}
 		}
-		echo $data;
+		echo json_encode($data);
 		return true;
 	}
 

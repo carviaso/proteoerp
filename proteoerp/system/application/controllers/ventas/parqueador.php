@@ -54,8 +54,10 @@ class parqueador extends Sfac {
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$param['jquerys']      = array('plugins/jquery.ui.timepicker.addon.js','i18n/grid.locale-es.js');
+		//$param['jquerys']      = array('plugins/jquery.maskedinput.min.js');
 		$param['WestPanel']    = $WestPanel;
 		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		$param['script']      .= script('plugins/jquery.maskedinput.min.js');
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
@@ -359,10 +361,13 @@ class parqueador extends Sfac {
 
 		$script = '
 		function totaliza(){
-			var preca  = Number($("#preca_0").val());
+			var preca  = Number($("#ttpreca_0").val());
+			var preca2 = Number($("#ttpreca_1").val());
 			var thora  = $("#horaentrada").val();
-			var t = thora.split(":");
-			var d = new Date();
+			var iva    = Number($("#ttiva").val());
+			var t      = thora.split(":");
+			var d      = new Date();
+			var total  = 0;
 
 			var hentra = Number(t[0]);
 			var mentra = Number(t[1]);
@@ -371,16 +376,20 @@ class parqueador extends Sfac {
 			var mactual = d.getMinutes();
 
 			var cana = hactual-hentra;
+			var fraci= 0;
 
 			var dminu = mactual- mentra;
-			if(dminu > 15){
-				cana = cana+0.5;
+			if(dminu >0 && dminu <=30){
+				fraci = 1;
 			}else if(dminu > 30){
 				cana = cana+1;
 			}
 
-			$("#cana_0").val(cana);
-			$("#total").text(nformat(cana*preca,2));
+			$("#ttcana_0").val(cana);
+			$("#ttcana_1").val(fraci);
+			total = total+(cana*preca);
+			total = total+(fraci*preca2);
+			$("#total").text(nformat(total*(1+(iva/100)),2));
 		}
 
 		function tarifa(){
@@ -389,21 +398,29 @@ class parqueador extends Sfac {
 		}
 
 		function buscapreca(){
-			var codigo = $("#codigoa_0").val();
-			var tarifa   = $.ajax({ type: "POST", url: "'.site_url('ajax/buscaprecio1').'/", data: {q : codigo} ,async: false }).responseText;
-			$("#preca_0").val(tarifa);
+			var codigo = $("#ttcodigoa_0").val();
+			var tarifa = JSON.parse($.ajax({ type: "POST", url: "'.site_url('ajax/buscaprecio1').'/", data: {q : codigo} ,dataType: "json",async: false }).responseText);
+
+			$("#ttpreca_0").val(tarifa[0]);
+			$("#ttpreca_1").val(tarifa[1]);
+			$("#ttiva").val(tarifa[2]);
 		}
 
 		$(function() {
-			$("#horaentrada").timepicker({
-				timeFormat: "hh:mm",
-				onClose: function(dateText, inst){
-					totaliza();
-				},
-				onSelect: function(selectedDateTime){
-					tarifa();
-				}
+			$("#horaentrada").mask("99:99");
+			$("#horaentrada").keyup(function(e) {
+				totaliza();
 			});
+
+			//$("#horaentrada").timepicker({
+			//	timeFormat: "hh:mm",
+			//	onClose: function(dateText, inst){
+			//		totaliza();
+			//	},
+			//	onSelect: function(selectedDateTime){
+			//		tarifa();
+			//	}
+			//});
 			tarifa();
 		});
 		';
@@ -412,33 +429,52 @@ class parqueador extends Sfac {
 		$form->script($script);
 
 		$form->placa = new inputField('Placa', 'placa');
-		$form->placa->rule = 'trim|required|strtoupper|max_length[20]|callback_chplaca';
+		$form->placa->rule = 'trim|strtoupper|max_length[20]|callback_chplaca';
 		$form->placa->size      = 10;
 		$form->placa->maxlength = 7;
 
 		$form->horaentrada = new inputField('Hora de entrada','horaentrada');
-		$form->horaentrada->rule      = 'required|hora';
-		$form->horaentrada->size      = 10;
-		$form->horaentrada->maxlength = 5;
+		$form->horaentrada->rule       = 'required|hora';
+		$form->horaentrada->size       = 10;
+		$form->horaentrada->maxlength  = 5;
+		$form->horaentrada->insertValue= date('H:i',mktime(date('H')-1,date('i')));
 
-		$form->cana = new inputField('Cantidad','cana_0');
-		$form->cana->rule      = 'required|mayorcero';
-		$form->cana->size      = 10;
+		$form->cana = new inputField('Cantidad','ttcana_0');
+		$form->cana->rule      = 'required|numeric';
+		$form->cana->size      = 4;
+		$edit->cana->css_class = 'inputnum';
 		$form->cana->onkeyup   = 'tarifa()';
 		$form->cana->maxlength = 5;
 
-		$form->codigo = new dropdownField('Tipo veh&iacute;culo', 'codigoa_0');
+		$form->cana2 = new inputField('fraccion','ttcana_1');
+		$form->cana2->rule      = 'required|numeric';
+		$form->cana2->size      = 3;
+		$edit->cana2->css_class = 'inputnum';
+		$form->cana2->in        = 'cana';
+		$form->cana2->onkeyup   = 'tarifa()';
+		$form->cana2->maxlength = 5;
+
+		$form->codigo = new dropdownField('Tipo veh&iacute;culo', 'ttcodigoa_0');
 		//$form->codigo->option('','Seleccionar');
 		$form->codigo->options('SELECT codigo,CONCAT_WS("-",descrip,precio1) AS val FROM sinv WHERE clave LIKE "TARIFA%" AND tipo="Servicio"');
 		$form->codigo->style    = 'width:140px;';
 		$form->codigo->onchange = 'tarifa()';
 		$form->codigo->rule     = 'required';
 
-		$form->preca = new inputField('Tarifa', 'preca_0');
+		$form->preca = new inputField('Tarifa', 'ttpreca_0');
 		$form->preca->rule = 'required|mayorcero';
-		$form->preca->size      = 10;
-		//$form->preca->
+		$form->preca->size      = 5;
 		$form->preca->maxlength = 7;
+
+		$form->preca2 = new inputField('fraccion', 'ttpreca_1');
+		$form->preca2->rule = 'required|mayorcero';
+		$form->preca2->size      = 5;
+		$form->preca2->maxlength = 5;
+		$form->preca2->in = 'preca';
+
+		$form->iva = new hiddenField('', 'ttiva');
+		$form->iva->rule = 'required|mayorcero';
+		$form->iva->in = 'preca';
 
 		$form->total = new freeField('Monto a pagar', 'total','<span style="font-size:2em;" id="total">0,00</span>');
 
@@ -446,8 +482,11 @@ class parqueador extends Sfac {
 
 		if ($form->on_success()){
 			$monto  = 0;
+			$placa  = trim($form->placa->newValue);
 			$cana   = $form->cana->newValue;
+			$cana2  = $form->cana2->newValue;
 			$preca  = $form->preca->newValue;
+			$preca2 = $form->preca2->newValue;
 			$codigo = $form->codigo->newValue;
 			$sinvr  = $this->datasis->damereg("SELECT descrip,iva,tipo FROM sinv WHERE codigo = ".$this->db->escape($codigo));
 
@@ -465,31 +504,86 @@ class parqueador extends Sfac {
 			$_POST['rifci']       = 'V000000';
 			$_POST['direc']       = '';
 
+			unset($_POST['iva']);
+
 			//Items
 			$id  = 0;
-			$tota= $cana*$preca;
-			$ind = 'codigoa_'.$id;  $_POST[$ind] = $codigo;
-			$ind = 'desca_'.$id;    $_POST[$ind] = $sinvr['descrip'];
-			$ind = 'cana_'.$id;     $_POST[$ind] = $cana;
-			$ind = 'preca_'.$id;    $_POST[$ind] = $preca;
-			$ind = 'tota_'.$id;     $_POST[$ind] = $tota;
-			$ind = 'precio1_'.$id;  $_POST[$ind] = 0;
-			$ind = 'precio2_'.$id;  $_POST[$ind] = 0;
-			$ind = 'precio3_'.$id;  $_POST[$ind] = 0;
-			$ind = 'precio4_'.$id;  $_POST[$ind] = 0;
-			$ind = 'itiva_'.$id;    $_POST[$ind] = round($sinvr['iva'],2);
-			$ind = 'sinvpeso_'.$id; $_POST[$ind] = 0;
-			$ind = 'sinvtipo_'.$id; $_POST[$ind] = $sinvr['tipo'];
-			$ind = 'detalle_'.$id;  $_POST[$ind] = 'ESTACIONAMIENTO PLACA '.$form->placa->newValue;
-			$monto += $tota;
+			if($cana>0){
+				$tota= $cana*$preca;
+				$ind = 'codigoa_'.$id;  $_POST[$ind] = $codigo;
+				$ind = 'desca_'.$id;    $_POST[$ind] = $sinvr['descrip'];
+				$ind = 'cana_'.$id;     $_POST[$ind] = $cana;
+				$ind = 'preca_'.$id;    $_POST[$ind] = $preca;
+				$ind = 'tota_'.$id;     $_POST[$ind] = $tota;
+				$ind = 'precio1_'.$id;  $_POST[$ind] = 0;
+				$ind = 'precio2_'.$id;  $_POST[$ind] = 0;
+				$ind = 'precio3_'.$id;  $_POST[$ind] = 0;
+				$ind = 'precio4_'.$id;  $_POST[$ind] = 0;
+				$ind = 'itiva_'.$id;    $_POST[$ind] = round($sinvr['iva'],2);
+				$ind = 'sinvpeso_'.$id; $_POST[$ind] = 0;
+				$ind = 'sinvtipo_'.$id; $_POST[$ind] = $sinvr['tipo'];
+				$monto += $tota;
+			}else{
+				$ind = 'codigoa_'.$id;  unset($_POST[$ind]);
+				$ind = 'desca_'.$id;    unset($_POST[$ind]);
+				$ind = 'cana_'.$id;     unset($_POST[$ind]);
+				$ind = 'preca_'.$id;    unset($_POST[$ind]);
+				$ind = 'tota_'.$id;     unset($_POST[$ind]);
+				$ind = 'precio1_'.$id;  unset($_POST[$ind]);
+				$ind = 'precio2_'.$id;  unset($_POST[$ind]);
+				$ind = 'precio3_'.$id;  unset($_POST[$ind]);
+				$ind = 'precio4_'.$id;  unset($_POST[$ind]);
+				$ind = 'itiva_'.$id;    unset($_POST[$ind]);
+				$ind = 'sinvpeso_'.$id; unset($_POST[$ind]);
+				$ind = 'sinvtipo_'.$id; unset($_POST[$ind]);
+			}
 
+			$id++;
+			if($cana2>0){
+				$tota= $cana2*$preca2;
+				$ind = 'codigoa_'.$id;  $_POST[$ind] = $codigo;
+				$ind = 'desca_'.$id;    $_POST[$ind] = $sinvr['descrip'];
+				$ind = 'cana_'.$id;     $_POST[$ind] = $cana2;
+				$ind = 'preca_'.$id;    $_POST[$ind] = $preca2;
+				$ind = 'tota_'.$id;     $_POST[$ind] = $tota;
+				$ind = 'precio1_'.$id;  $_POST[$ind] = 0;
+				$ind = 'precio2_'.$id;  $_POST[$ind] = 0;
+				$ind = 'precio3_'.$id;  $_POST[$ind] = 0;
+				$ind = 'precio4_'.$id;  $_POST[$ind] = 0;
+				$ind = 'itiva_'.$id;    $_POST[$ind] = round($sinvr['iva'],2);
+				$ind = 'sinvpeso_'.$id; $_POST[$ind] = 0;
+				$ind = 'sinvtipo_'.$id; $_POST[$ind] = $sinvr['tipo'];
+				$monto += $tota;
+			}else{
+				$ind = 'codigoa_'.$id;  unset($_POST[$ind]);
+				$ind = 'desca_'.$id;    unset($_POST[$ind]);
+				$ind = 'cana_'.$id;     unset($_POST[$ind]);
+				$ind = 'preca_'.$id;    unset($_POST[$ind]);
+				$ind = 'tota_'.$id;     unset($_POST[$ind]);
+				$ind = 'precio1_'.$id;  unset($_POST[$ind]);
+				$ind = 'precio2_'.$id;  unset($_POST[$ind]);
+				$ind = 'precio3_'.$id;  unset($_POST[$ind]);
+				$ind = 'precio4_'.$id;  unset($_POST[$ind]);
+				$ind = 'itiva_'.$id;    unset($_POST[$ind]);
+				$ind = 'sinvpeso_'.$id; unset($_POST[$ind]);
+				$ind = 'sinvtipo_'.$id; unset($_POST[$ind]);
+			}
+
+			if(!empty($placa)){
+				if(isset($_POST['codigoa_1'])){
+					$ind = 'detalle_1';  $_POST[$ind] = 'ESTACIONAMIENTO PLACA '.$placa;
+				}else{
+					$ind = 'detalle_0';  $_POST[$ind] = 'ESTACIONAMIENTO PLACA '.$placa;
+				}
+			}
 			//Forma de pago
 			$_POST['tipo_0']       = 'EF';
 			$_POST['sfpafecha_0']  = '';
 			$_POST['num_ref_0']    = '';
 			$_POST['banco_0']      = '';
 			$_POST['monto_0']      = $monto*(1+($sinvr['iva']/100)) ;
-
+//echo '<pre>'; print_r($_POST); echo '</ppre>';
+//exit();
 			if($monto<=0){
 				$rt=array(
 					'status' =>'B',

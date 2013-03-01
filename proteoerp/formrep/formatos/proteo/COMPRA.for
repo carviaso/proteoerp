@@ -3,7 +3,7 @@ if(count($parametros)==0) show_error('Faltan parametros ');
 $id  = $parametros[0];
 $dbid= $this->db->escape($id);
 if(count($parametros)>1){
-	$control = $this->datasis->dameval("SELECT control  FROM scst  WHERE id=".$control  );
+	$control = $this->datasis->dameval('SELECT control  FROM scst  WHERE id='.$dbid);
 }
 
 //ENCABEZADO
