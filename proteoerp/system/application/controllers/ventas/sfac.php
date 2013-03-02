@@ -3096,7 +3096,7 @@ class Sfac extends Controller {
 			//fin del corte por maxlin
 
 			$itcana    = $do->get_rel('sitems','cana' ,$i);
-			$itpreca   = $do->get_rel('sitems','preca',$i);
+			$itpreca   = round($do->get_rel('sitems','preca',$i),2);
 			$itiva     = $do->get_rel('sitems','iva'  ,$i);
 			$itimporte = $itpreca*$itcana;
 			$iva       = $itimporte*($itiva/100);
