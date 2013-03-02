@@ -294,6 +294,7 @@ class parqueador extends Sfac {
 										$( "#fedita" ).dialog( "close" );
 										sfacadd();
 										jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+										//$("#horaentrada").focus();
 										window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 										return true;
 									} else {
@@ -422,6 +423,22 @@ class parqueador extends Sfac {
 			//	}
 			//});
 			tarifa();
+
+			//tab enter
+			$("#placa,#ttcodigoa_0,#ttcana_0,#ttcana_1,#ttpreca_0,#ttpreca_1").keydown( function(e) {
+				var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+				if(key == 13) {
+					e.preventDefault();
+					var inputs = $(this).closest("form").find(":input:visible").not("#ttcodigoa_0,#ttcana_0,#ttcana_1,#ttpreca_0,#ttpreca_1");
+					inputs.eq(inputs.index(this)+1).focus();
+				}
+			});
+			$("#horaentrada,#ttcodigoa_0,#ttcana_0,#ttcana_1,#ttpreca_0,#ttpreca_1").keydown( function(e) {
+				var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+				if(key == 13) {
+					$(":button:contains(\'Guardar\')").click();
+				}
+			});
 		});
 		';
 
@@ -432,11 +449,14 @@ class parqueador extends Sfac {
 		$form->placa->rule = 'trim|strtoupper|max_length[20]|callback_chplaca';
 		$form->placa->size      = 10;
 		$form->placa->maxlength = 7;
+		$form->placa->tabindex   = '1';
 
 		$form->horaentrada = new inputField('Hora de entrada','horaentrada');
 		$form->horaentrada->rule       = 'required|hora';
-		$form->horaentrada->size       = 10;
+		$form->horaentrada->tabindex   = '2';
+		$form->horaentrada->size       = 7;
 		$form->horaentrada->maxlength  = 5;
+		$form->horaentrada->style      = 'font-size: 2.3em;font-weight:bold;';
 		$form->horaentrada->insertValue= date('H:i',mktime(date('H')-1,date('i')));
 
 		$form->cana = new inputField('Cantidad','ttcana_0');
@@ -453,6 +473,7 @@ class parqueador extends Sfac {
 		$form->cana2->in        = 'cana';
 		$form->cana2->onkeyup   = 'tarifa()';
 		$form->cana2->maxlength = 5;
+		$form->cana2->tabindex   = '3';
 
 		$form->codigo = new dropdownField('Tipo veh&iacute;culo', 'ttcodigoa_0');
 		//$form->codigo->option('','Seleccionar');
