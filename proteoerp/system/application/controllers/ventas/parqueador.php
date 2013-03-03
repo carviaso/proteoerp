@@ -53,7 +53,7 @@ class parqueador extends Sfac {
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$param['jquerys']      = array('plugins/jquery.ui.timepicker.addon.js','i18n/grid.locale-es.js');
+		//$param['jquerys']      = array('plugins/jquery.ui.timepicker.addon.js','i18n/grid.locale-es.js');
 		//$param['jquerys']      = array('plugins/jquery.maskedinput.min.js');
 		$param['WestPanel']    = $WestPanel;
 		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
@@ -272,10 +272,14 @@ class parqueador extends Sfac {
 				}
 			});';
 
+		$sfacforma=$this->datasis->traevalor('FORMATOSFAC','Especifica el metodo a ejecutar para descarga de formato de factura en Proteo Ej. descargartxt...');
+		if(empty($sfacforma)) $sfacforma='descargar';
+		$url=site_url('formatos/'.$sfacforma.'/FACTURA');
+
 		//Agregar Factura
 		$bodyscript .= '
 			$("#fedita").dialog({
-				autoOpen: false, height: 300, width: 400, modal: true,
+				autoOpen: false, height: 380, width: 500, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;
@@ -295,7 +299,8 @@ class parqueador extends Sfac {
 										sfacadd();
 										jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 										//$("#horaentrada").focus();
-										window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+										'.$this->datasis->jwinopen($url.'/\'+json.pk.id').';
+										//window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 										return true;
 									} else {
 										apprise(json.mensaje);
@@ -372,14 +377,20 @@ class parqueador extends Sfac {
 
 			var hentra = Number(t[0]);
 			var mentra = Number(t[1]);
+			var mmentr = hentra*60+mentra;
 
 			var hactual = d.getHours();
 			var mactual = d.getMinutes();
+			var mmactua = hactual*60+mactual;
 
-			var cana = hactual-hentra;
+			var diff = mmactua-mmentr;
+			var cana = Math.floor(diff/60);
+			var dminu= diff-cana*60
+
+			//var cana = hactual-hentra;
 			var fraci= 0;
 
-			var dminu = mactual- mentra;
+			//var dminu = mactual- mentra;
 			if(dminu >0 && dminu <=30){
 				fraci = 1;
 			}else if(dminu > 30){
@@ -442,21 +453,23 @@ class parqueador extends Sfac {
 		});
 		';
 
+		$tisize='1.6';
 		$form = new DataForm($this->url.'datapar/insert');
 		$form->script($script);
 
-		$form->placa = new inputField('Placa', 'placa');
+		$form->placa = new inputField('<span style="font-size:'.$tisize.'em">Placa</span>', 'placa');
 		$form->placa->rule = 'trim|strtoupper|max_length[20]|callback_chplaca';
 		$form->placa->size      = 10;
 		$form->placa->maxlength = 7;
-		$form->placa->tabindex   = '1';
+		$form->placa->style     = 'font-size: 3em;font-weight:bold;';
+		$form->placa->tabindex  = '1';
 
-		$form->horaentrada = new inputField('Hora de entrada','horaentrada');
+		$form->horaentrada = new inputField('<span style="font-size:'.$tisize.'em">Hora de entrada</span>','horaentrada');
 		$form->horaentrada->rule       = 'required|hora';
 		$form->horaentrada->tabindex   = '2';
-		$form->horaentrada->size       = 7;
+		$form->horaentrada->size       = 10;
 		$form->horaentrada->maxlength  = 5;
-		$form->horaentrada->style      = 'font-size: 2.3em;font-weight:bold;';
+		$form->horaentrada->style      = 'font-size: 3em;font-weight:bold;';
 		$form->horaentrada->insertValue= date('H:i',mktime(date('H')-1,date('i')));
 
 		$form->cana = new inputField('Cantidad','ttcana_0');
@@ -475,7 +488,7 @@ class parqueador extends Sfac {
 		$form->cana2->maxlength = 5;
 		$form->cana2->tabindex   = '3';
 
-		$form->codigo = new dropdownField('Tipo veh&iacute;culo', 'ttcodigoa_0');
+		$form->codigo = new dropdownField('<span style="font-size:'.$tisize.'em">Tipo veh&iacute;culo</span>', 'ttcodigoa_0');
 		//$form->codigo->option('','Seleccionar');
 		$form->codigo->options('SELECT codigo,CONCAT_WS("-",descrip,precio1) AS val FROM sinv WHERE clave LIKE "TARIFA%" AND tipo="Servicio"');
 		$form->codigo->style    = 'width:140px;';
@@ -497,7 +510,7 @@ class parqueador extends Sfac {
 		$form->iva->rule = 'required|mayorcero';
 		$form->iva->in = 'preca';
 
-		$form->total = new freeField('Monto a pagar', 'total','<span style="font-size:2em;" id="total">0,00</span>');
+		$form->total = new freeField('<span style="font-size:'.$tisize.'em">Monto a pagar</span>', 'total','<span style="font-size:3em;" id="total">0,00</span>');
 
 		$form->build_form();
 
