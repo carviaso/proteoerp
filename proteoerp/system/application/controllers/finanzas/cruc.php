@@ -735,14 +735,18 @@ class Cruc extends Controller {
 	//***********************************
 
 	function dataedit(){
-		$this->rapyd->load('dataedit');
+		$this->rapyd->load('datadetail');
 		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});
 		';
 
-		$edit = new DataEdit($this->tits, 'cruc');
+		$do = new DataObject('cruc');
+		$do->pointer('sprv' ,'sprv.proveed=gser.proveed','sprv.tipo AS sprvtipo, sprv.reteiva AS sprvreteiva','left');
+		$do->rel_one_to_many('itcruc' ,'itcruc' ,array('numero'));
+
+		$edit = new DataEdit($this->tits, $do);
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -777,10 +781,15 @@ class Cruc extends Controller {
 		$edit->fecha->size =10;
 		$edit->fecha->maxlength =8;
 
-		$edit->tipo = new inputField('Tipo','tipo');
-		$edit->tipo->rule='';
-		$edit->tipo->size =5;
-		$edit->tipo->maxlength =3;
+		$edit->tipo = new  dropdownField('Tipo', 'tipo');
+		$edit->tipo->option('P-C','Prov->Cliente');
+		$edit->tipo->option('C-C','Cliente');
+		$edit->tipo->option('P-P','Proveedores');
+		$edit->tipo->option('C-P','Clnte->Prov');
+		$edit->tipo->style='width:120px;';
+		$edit->tipo->size = 5;
+		$edit->tipo->rule='required';
+
 
 		$edit->proveed = new inputField('Proveedor','proveed');
 		$edit->proveed->rule='';
@@ -845,10 +854,48 @@ class Cruc extends Controller {
 		$edit->transac->size =10;
 		$edit->transac->maxlength =8;
 
+		//inicio del detalle
+		$edit->it_tipo = new inputField('Tipo','ittipo_<#i#>');
+		$edit->it_tipo->rule='max_length[3]';
+		$edit->it_tipo->size =5;
+		$edit->it_tipo->maxlength =3;
+		$edit->it_tipo->db_name='tipo';
+		$edit->it_tipo->rel_id ='itcruc';
+
+		$edit->it_onumero = new inputField('N&uacute;mero','itonumero_<#i#>');
+		$edit->it_onumero->rule='max_length[10]';
+		$edit->it_onumero->size =12;
+		$edit->it_onumero->maxlength =10;
+		$edit->it_onumero->db_name='onumero';
+		$edit->it_onumero->rel_id ='itcruc';
+
+		$edit->it_ofecha = new dateField('OFecha','itofecha_<#i#>');
+		$edit->it_ofecha->rule='chfecha';
+		$edit->it_ofecha->calendar=false;
+		$edit->it_ofecha->size =10;
+		$edit->it_ofecha->maxlength =8;
+		$edit->it_ofecha->db_name  ='ofecha';
+		$edit->it_ofecha->rel_id   ='itcruc';
+
+		$edit->it_oregist = new inputField('Oregist','itoregist_<#i#>');
+		$edit->it_oregist->rule='max_length[8]|integer';
+		$edit->it_oregist->css_class='inputonlynum';
+		$edit->it_oregist->size =10;
+		$edit->it_oregist->maxlength =8;
+		$edit->it_oregist->db_name='oregist';
+		$edit->it_oregist->rel_id ='itcruc';
+
+		$edit->it_monto = new inputField('Monto','itmonto_<#i#>');
+		$edit->it_monto->rule='max_length[17]|numeric';
+		$edit->it_monto->css_class='inputnum';
+		$edit->it_monto->size =19;
+		$edit->it_monto->maxlength =17;
+		$edit->it_monto->db_name='monto';
+		$edit->it_monto->rel_id ='itcruc';
+		//Fin del detalle
+
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
-
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
-
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
 		$edit->build();

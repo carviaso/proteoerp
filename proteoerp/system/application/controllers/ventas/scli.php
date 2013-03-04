@@ -2415,20 +2415,27 @@ function chrif(rif){
 		$edit->nombre->maxlength = 45;
 		$edit->nombre->style = 'width:95%;';
 
-		$obj  ="dire11";
-		$edit->$obj = new inputField('Direcci&oacute;n',$obj);
-		$edit->$obj->rule = 'trim';
-		$edit->$obj->size      = 45;
-		$edit->$obj->maxlength = 40;
-		$edit->$obj->style = 'width:95%;';
+		$edit->grupo = new dropdownField('Grupo', 'grupo');
+		$edit->grupo->option('','Seleccione un grupo');
+		$edit->grupo->options('SELECT grupo, CONCAT(grupo," ",gr_desc) gr_desc FROM grcl ORDER BY gr_desc');
+		$edit->grupo->rule = 'required';
+		$edit->grupo->size = 6;
+		$edit->grupo->maxlength = 4;
+		$edit->grupo->style = 'width:200px';
+		$edit->grupo->insertValue = $this->datasis->dameval('SELECT grupo FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"');
 
-		$obj="ciudad1";
-		$edit->$obj = new dropdownField('Ciudad',$obj);
-		$edit->$obj->rule = 'trim';
-		$edit->$obj->option('','Seleccionar');
-		$edit->$obj->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
-		$edit->$obj->style = 'width:200px';
-		$edit->$obj->insertValue = $this->datasis->traevalor("CIUDAD");
+		$edit->dire11 = new inputField('Direcci&oacute;n','dire11');
+		$edit->dire11->rule = 'trim';
+		$edit->dire11->size      = 45;
+		$edit->dire11->maxlength = 40;
+		$edit->dire11->style = 'width:95%;';
+
+		$edit->ciudad1 = new dropdownField('Ciudad','ciudad1');
+		$edit->ciudad1->rule = 'trim';
+		$edit->ciudad1->option('','Seleccionar');
+		$edit->ciudad1->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
+		$edit->ciudad1->style = 'width:200px';
+		$edit->ciudad1->insertValue = $this->datasis->traevalor("CIUDAD");
 
 		$edit->tiva = new dropdownField('Tipo Fiscal', 'tiva');
 		$edit->tiva->option('N','No Contribuyente');
