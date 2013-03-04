@@ -3406,13 +3406,20 @@ class Sfac extends Controller {
 		$iva=$totals=0;
 		$cana=$do->count_rel('sitems');
 		for($i=0;$i<$cana;$i++){
-			$itcana    = $do->get_rel('sitems','cana',$i);
-			$itpreca   = $do->get_rel('sitems','preca',$i);
-			$itiva     = $do->get_rel('sitems','iva',$i);
+			$itcodigo  = $do->get_rel('sitems','codigoa',$i);
+			$itcana    = $do->get_rel('sitems','cana'   ,$i);
+			$itpreca   = $do->get_rel('sitems','preca'  ,$i);
+			$itiva     = $do->get_rel('sitems','iva'    ,$i);
 			$itimporte = $itpreca*$itcana;
 			$do->set_rel('sitems','tota'    ,$itimporte,$i);
 			//$do->set_rel('sitems','mostrado',$itimporte*(1+($itiva/100)),$i);
 			$do->set_rel('sitems','mostrado',0,$i);
+
+
+			$rowval = $this->datasis->damerow('SELECT pond, precio1,precio4 FROM sinv WHERE codigo='.$this->db->escape($itcodigo));
+			$do->set_rel('sitems','costo'  , $rowval['pond']   ,$i);
+			$do->set_rel('sitems','pvp'    , $rowval['precio1'],$i);
+			$do->set_rel('sitems','precio4', $rowval['precio4'],$i);
 
 			$iva    +=$itimporte*($itiva/100);
 			$totals +=$itimporte;
