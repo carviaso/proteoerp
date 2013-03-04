@@ -3417,9 +3417,9 @@ class Sfac extends Controller {
 			$do->set_rel('sitems','mostrado',0,$i);
 
 
-			$rowval = $this->datasis->damerow('SELECT pond, precio1,precio4 FROM sinv WHERE codigo='.$this->db->escape($itcodigo));
+			$rowval = $this->datasis->damerow('SELECT pond, base1,precio4 FROM sinv WHERE codigo='.$this->db->escape($itcodigo));
 			$do->set_rel('sitems','costo'  , $rowval['pond']   ,$i);
-			$do->set_rel('sitems','pvp'    , $rowval['precio1'],$i);
+			$do->set_rel('sitems','pvp'    , $rowval['base1'],$i);
 			$do->set_rel('sitems','precio4', $rowval['precio4'],$i);
 
 			$iva    +=$itimporte*($itiva/100);
