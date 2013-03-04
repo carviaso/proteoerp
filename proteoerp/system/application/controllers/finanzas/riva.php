@@ -84,7 +84,7 @@ class Riva extends Controller {
 			'width'         => 60,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 8 }',
+			'editoptions'   => '{ size:10, maxlength: 8 }',
 		));
 
 		$grid->addField('nrocomp');
