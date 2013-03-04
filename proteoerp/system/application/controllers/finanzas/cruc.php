@@ -120,28 +120,28 @@ class Cruc extends Controller {
 
 		$bodyscript .= '
 		function crucdel() {
-		var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-		if(id){
-			if(confirm(" Seguro desea eliminar el registro?")){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
-					try{
-						var json = JSON.parse(data);
-						if (json.status == "A"){
-							apprise("Registro eliminado");
-						}else{
-							apprise("Registro no se puede eliminado");
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
 						}
-					}catch(e){
-						$("#fborra").html(data);
-						$("#fborra").dialog( "open" );
-					}
-				});
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-		}else{
-			$.prompt("<h1>Por favor Seleccione un Registro</h1>"");
-		}
 		};';
 		//Wraper de javascript
 		$bodyscript .= '

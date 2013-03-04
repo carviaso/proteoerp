@@ -252,7 +252,7 @@ class Ordi extends Controller {
 		$edit->cambioofi->maxlength=17;
 		$edit->cambioofi->size     =10;
 		$edit->cambioofi->autocomplete= false;
-		$edit->cambioofi->insertValue = 4.3;
+		$edit->cambioofi->insertValue = 6.3;
 		$edit->cambioofi->showformat  = 'decimal';
 
 		$edit->cambioreal = new inputField('Cambio Real', 'cambioreal');

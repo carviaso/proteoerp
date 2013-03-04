@@ -747,28 +747,28 @@ class Desarrollo extends Controller{
 
 			$str .= $tab2.'$bodyscript .= \''."\n";
 			$str .= $tab2.'function '.strtolower($db).'del() {'."\n";
-			$str .= $tab2.'var id = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
-			$str .= $tab2.'if(id){'."\n";
-			$str .= $tab2.'	if(confirm(" Seguro desea eliminar el registro?")){'."\n";
-			$str .= $tab2.'		var ret    = $("#newapi\'.$grid0.\'").getRowData(id);'."\n";
-			$str .= $tab2.'		mId = id;'."\n";
-			$str .= $tab2.'		$.post("\'.site_url($this->url.\'dataedit/do_delete\').\'/"+id, function(data){'."\n";
-			$str .= $tab5.'try{'."\n";
-			$str .= $tab5.'	var json = JSON.parse(data);'."\n";
-			$str .= $tab5.'	if (json.status == "A"){'."\n";
-			$str .= $tab5.'		apprise("Registro eliminado");'."\n";
-			$str .= $tab5.'	}else{'."\n";
-			$str .= $tab5.'		apprise("Registro no se puede eliminado");'."\n";
-			$str .= $tab5.'	}'."\n";
-			$str .= $tab5.'}catch(e){'."\n";
-			$str .= $tab5.'	$("#fborra").html(data);'."\n";
-			$str .= $tab5.'	$("#fborra").dialog( "open" );'."\n";
-			$str .= $tab5.'}'."\n";
-			$str .= $tab2.'		});'."\n";
-			$str .= $tab2.'	}'."\n";
-			$str .= $tab2.'}else{'."\n";
-			$str .= $tab2.'	$.prompt("<h1>Por favor Seleccione un Registro</h1>");'."\n";
-			$str .= $tab2.'}'."\n";
+			$str .= $tab3.'var id = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
+			$str .= $tab3.'if(id){'."\n";
+			$str .= $tab3.'	if(confirm(" Seguro desea eliminar el registro?")){'."\n";
+			$str .= $tab3.'		var ret    = $("#newapi\'.$grid0.\'").getRowData(id);'."\n";
+			$str .= $tab3.'		mId = id;'."\n";
+			$str .= $tab3.'		$.post("\'.site_url($this->url.\'dataedit/do_delete\').\'/"+id, function(data){'."\n";
+			$str .= $tab3.'try{'."\n";
+			$str .= $tab3.'	var json = JSON.parse(data);'."\n";
+			$str .= $tab3.'	if (json.status == "A"){'."\n";
+			$str .= $tab3.'		apprise("Registro eliminado");'."\n";
+			$str .= $tab3.'	}else{'."\n";
+			$str .= $tab3.'		apprise("Registro no se puede eliminado");'."\n";
+			$str .= $tab3.'	}'."\n";
+			$str .= $tab3.'}catch(e){'."\n";
+			$str .= $tab3.'	$("#fborra").html(data);'."\n";
+			$str .= $tab3.'	$("#fborra").dialog( "open" );'."\n";
+			$str .= $tab3.'}'."\n";
+			$str .= $tab3.'		});'."\n";
+			$str .= $tab3.'	}'."\n";
+			$str .= $tab3.'}else{'."\n";
+			$str .= $tab3.'	$.prompt("<h1>Por favor Seleccione un Registro</h1>");'."\n";
+			$str .= $tab3.'}'."\n";
 			$str .= $tab2.'};\';'."\n";
 
 
@@ -1240,28 +1240,28 @@ class Desarrollo extends Controller{
 
 			$str .= $tab2.'$bodyscript .= \''."\n";
 			$str .= $tab2.'function '.strtolower($db).'del() {'."\n";
-			$str .= $tab2.'var id = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
-			$str .= $tab2.'if(id){'."\n";
-			$str .= $tab2.'	if(confirm(" Seguro desea eliminar el registro?")){'."\n";
-			$str .= $tab2.'		var ret    = $("#newapi\'.$grid0.\'").getRowData(id);'."\n";
-			$str .= $tab2.'		mId = id;'."\n";
-			$str .= $tab2.'		$.post("\'.site_url($this->url.\'dataedit/do_delete\').\'/"+id, function(data){'."\n";
-			$str .= $tab5.'try{'."\n";
-			$str .= $tab5.'	var json = JSON.parse(data);'."\n";
-			$str .= $tab5.'	if (json.status == "A"){'."\n";
-			$str .= $tab5.'		apprise("Registro eliminado");'."\n";
-			$str .= $tab5.'	}else{'."\n";
-			$str .= $tab5.'		apprise("Registro no se puede eliminado");'."\n";
-			$str .= $tab5.'	}'."\n";
-			$str .= $tab5.'}catch(e){'."\n";
-			$str .= $tab5.'	$("#fborra").html(data);'."\n";
-			$str .= $tab5.'	$("#fborra").dialog( "open" );'."\n";
-			$str .= $tab5.'}'."\n";
-			$str .= $tab2.'		});'."\n";
-			$str .= $tab2.'	}'."\n";
-			$str .= $tab2.'}else{'."\n";
-			$str .= $tab2.'	$.prompt("&lt;h1&gt;Por favor Seleccione un Registro&lt;/h1&gt;"");'."\n";
-			$str .= $tab2.'}'."\n";
+			$str .= $tab3.'var id = jQuery("#newapi\'.$grid0.\'").jqGrid(\\\'getGridParam\\\',\\\'selrow\\\');'."\n";
+			$str .= $tab3.'if(id){'."\n";
+			$str .= $tab3.'	if(confirm(" Seguro desea eliminar el registro?")){'."\n";
+			$str .= $tab3.'		var ret    = $("#newapi\'.$grid0.\'").getRowData(id);'."\n";
+			$str .= $tab3.'		mId = id;'."\n";
+			$str .= $tab3.'		$.post("\'.site_url($this->url.\'dataedit/do_delete\').\'/"+id, function(data){'."\n";
+			$str .= $tab3.'try{'."\n";
+			$str .= $tab3.'	var json = JSON.parse(data);'."\n";
+			$str .= $tab3.'	if (json.status == "A"){'."\n";
+			$str .= $tab3.'		apprise("Registro eliminado");'."\n";
+			$str .= $tab3.'	}else{'."\n";
+			$str .= $tab3.'		apprise("Registro no se puede eliminado");'."\n";
+			$str .= $tab3.'	}'."\n";
+			$str .= $tab3.'}catch(e){'."\n";
+			$str .= $tab3.'	$("#fborra").html(data);'."\n";
+			$str .= $tab3.'	$("#fborra").dialog( "open" );'."\n";
+			$str .= $tab3.'}'."\n";
+			$str .= $tab3.'		});'."\n";
+			$str .= $tab3.'	}'."\n";
+			$str .= $tab3.'}else{'."\n";
+			$str .= $tab3.'	$.prompt("&lt;h1&gt;Por favor Seleccione un Registro&lt;/h1&gt;");'."\n";
+			$str .= $tab3.'}'."\n";
 			$str .= $tab2.'};\';'."\n";
 
 
@@ -1750,9 +1750,9 @@ class Desarrollo extends Controller{
 	function mtab($n = 1){ return str_repeat("\t",$n); }
 
 	//******************************************************************
-	// Gener Crud 
+	// Gener Crud
 	function genecrudjq($tabla=null,$s=true){
-		if (empty($tabla) OR (!$this->db->table_exists($tabla))) 
+		if (empty($tabla) OR (!$this->db->table_exists($tabla)))
 			show_error('Tabla no existe o faltan parametros');
 
 		$crud ="\n\t".'function dataedit(){'."\n";
@@ -1875,10 +1875,10 @@ class Desarrollo extends Controller{
 	}
 
 	//******************************************************************
-	//    Genera el View a partir de la Tabla 
+	//    Genera el View a partir de la Tabla
 	//******************************************************************
 	function geneviewjq($tabla=null,$s=true){
-		if (empty($tabla) OR (!$this->db->table_exists($tabla))) 
+		if (empty($tabla) OR (!$this->db->table_exists($tabla)))
 			show_error('Tabla no existe o faltan parametros');
 
 		$crud  ="\t".'<?php'."\n";
@@ -1891,7 +1891,7 @@ class Desarrollo extends Controller{
 		$crud .="\t".'<?php } ?>'."\n\n";
 		$crud .="\t".'<fieldset  style=\'border: 1px outset #FEB404;background: #FFFCE8;\'>'."\n";
 		$crud .="\t".'<table width=\'100%\'>'."\n";
-		
+
 		$mSQL ="DESCRIBE $tabla";
 		$query = $this->db->query("DESCRIBE $tabla");
 		foreach ($query->result() as $field){
