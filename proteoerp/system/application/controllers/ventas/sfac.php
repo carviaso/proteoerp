@@ -2425,14 +2425,15 @@ class Sfac extends Controller {
 		redirect('ventas/scli/dataedit/show/'.$id);
 	}
 
+	//******************************************************************
 	//Forma de facturacion
+	//
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
 
 		$manual = $this->uri->segment(4);
 		if($manual <> 'S') $manual = 'N';
-
-
+		
 		$do = new DataObject('sfac');
 		$do->rel_one_to_many('sitems', 'sitems', array('id'=>'id_sfac'));
 		$do->rel_one_to_many('sfpa'  , 'sfpa'  , array('numero','transac'));

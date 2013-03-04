@@ -511,6 +511,10 @@ class sfac_add extends sfac {
 		$edit->freiva    = new inputField('Fecha', 'freiva');
 		$edit->ereiva    = new inputField('Emision', 'ereiva');
 
+		$edit->manual = new hiddenField('Manual', 'manual');
+		$edit->manual->insertValue = 'N';
+
+
 		$edit->usuario   = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 		$edit->estampa   = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora      = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
