@@ -36,7 +36,7 @@ class Chat extends Controller {
 	{
 		$mensaje = '';
 		$usuario = $this->db->escape($this->secu->usuario());
-		$mSQL = "SELECT * FROM chat WHERE usuario=".$usuario." OR para IN ('-',".$usuario.") ORDER BY id DESC LIMIT 30";
+		$mSQL = "SELECT * FROM chat WHERE usuario=".$usuario." OR para IN ('-',".$usuario.") ORDER BY id DESC LIMIT 15";
 		$query = $this->db->query($mSQL);
 		if ( $query->num_rows() > 0 ) {
 			foreach( $query->result() as $row ) {

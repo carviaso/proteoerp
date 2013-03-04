@@ -80,7 +80,7 @@ class Riva extends Controller {
 		$grid->params(array(
 			'align'         => '"center"',
 			'search'        => 'true',
-			'editable'      => $editar,
+			'editable'      => 'true',
 			'width'         => 60,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
@@ -188,7 +188,7 @@ class Riva extends Controller {
 			'editable'      => 'true',
 			'width'         => 80,
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
+			'editrules'     => '{ required:false }',
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 			'formoptions'   => '{ label:"Fact.Afectada" }'
 		));
