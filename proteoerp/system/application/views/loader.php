@@ -6,9 +6,9 @@
 <meta http-equiv="Content-Language" content="en-us" />
 <meta name="ROBOTS" content="NONE" />
 <meta name="MSSmartTagsPreventParsing" content="true" />
-<meta name="Keywords" content="<?=property('app_keywords')?>" />
-<meta name="Description" content="<?=property('app_description')?>" />
-<meta name="Copyright" content="<?=property('app_copyright')?>" />
+<meta name="Keywords"                  content="<?php echo property('app_keywords');   ?>" />
+<meta name="Description"               content="<?php echo property('app_description');?>" />
+<meta name="Copyright"                 content="<?php echo property('app_copyright');  ?>" />
 <title><?php echo property('app_title')?></title>
 <?php echo style("estilos.css");  ?>
 <?php echo style("menutab.css");  ?>
@@ -33,11 +33,11 @@ $(document).ready(function() {
 		url=this.href;
 		pos=url.lastIndexOf('/');
 		carga=url.substring(pos);
-		$('#accordion').load('<?php echo site_url('bienvenido/accordion') ?>'+carga,'',function() {
+		$('#accordion').load('<?php echo site_url('bienvenido/accordion'); ?>'+carga,'',function() {
 			$('#accordion').myAccordion({ speed: 'fast', defautContent: 0 });
 		});
 		$(this).addClass('current');
-		$('#tumblelog').load('<?php echo site_url('bienvenido/cargapanel') ?>'+carga,'' ,function(){
+		$('#tumblelog').load('<?php echo site_url('bienvenido/cargapanel'); ?>'+carga,'' ,function(){
 			$('#maso').masonry({ 
 				singleMode: true,
 				itemSelector: '.box'
@@ -52,7 +52,6 @@ $(document).ready(function() {
 <body>
 	<div id="container">
 	<?php $this->load->view($data['settings']['default'].'/'.$data['settings']['commons']."header", $data); ?>
-
 		<table border='0' cellpadding='0' cellspacing='0' width='100%'>
 			<tr>
 				<td  valign='top' id='tablemenu'>
@@ -60,12 +59,18 @@ $(document).ready(function() {
 					<?php echo $smenu ?>
 					</div>
 				</td>
-				<td  valign='top'>
+				<td valign='top'>
 					<?php $this->load->view($data['settings']['default'].'/'.$data['settings']['content'].$view,  $data); ?>
+				</td>
+				<td valign='top' width='300' align='right'>
+				<?php
+					if ( $this->secu->es_logeado() )
+						$this->load->view('chat/chat'); 
+				?>
 				</td>
 			</tr>
 		</table>
-<br>
+		<br>
 		<div id="pie">
 		<table class='pie' width="100%" border=0 cellspacing=0 cellpadding=0>
 			<tr>
@@ -78,12 +83,12 @@ $(document).ready(function() {
 					?></p></div>
 				</td>
 				<td align='center'>
-					<p style="font-size:8px"><?php echo $copyright ?></p>
-					<?php echo image('codeigniter.gif'); ?>
-					<?=image('php-power-micro.png')?>
-					<?=image('jquery-icon.png')?>
-					<?=image('mysqlpowered.png')?>
-					<?=image('buttongnugpl.png')?>
+					<p style="font-size:8px"><?php echo $copyright; ?></p>
+					<?php echo image('codeigniter.gif');     ?>
+					<?php echo image('php-power-micro.png'); ?>
+					<?php echo image('jquery-icon.png');     ?>
+					<?php echo image('mysqlpowered.png');    ?>
+					<?php echo image('buttongnugpl.png');    ?>
 				</td>
 				<td width='178px'>
 					<div>&nbsp;</div>

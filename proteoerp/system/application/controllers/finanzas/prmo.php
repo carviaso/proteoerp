@@ -41,12 +41,12 @@ class Prmo extends Controller {
 		$readyLayout = $grid->readyLayout2( 212	, 115, $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"prmo1", "img"=>"images/pdf_logo.gif",  "alt" => "Prestamo Otorgado",     "label"=>"Prestamo Otorgado"));
-		$grid->wbotonadd(array("id"=>"prmo2", "img"=>"images/pdf_logo.gif",  "alt" => "Prestamo Recibido",     "label"=>"Prestamo Recibido"));
-		$grid->wbotonadd(array("id"=>"prmo3", "img"=>"images/pdf_logo.gif",  "alt" => "Cheq Devuelto Cliente", "label"=>"Cheq Devuelto Cliente"));
-		$grid->wbotonadd(array("id"=>"prmo4", "img"=>"images/pdf_logo.gif",  "alt" => "Cheq Devuelto Proveed", "label"=>"Cheq Devuelto Proveed"));
-		$grid->wbotonadd(array("id"=>"prmo5", "img"=>"images/pdf_logo.gif",  "alt" => "Deposito por Analizar", "label"=>"Deposito por Analizar"));
-		$grid->wbotonadd(array("id"=>"prmo6", "img"=>"images/pdf_logo.gif",  "alt" => "Cargos Indebidos Banco","label"=>"Cargos Indebidos Banco"));
+		$grid->wbotonadd(array("id"=>"prmo1", "img"=>"images/mano.png",          "alt" => "Prestamo Otorgado",        "label"=>"Prestamo Otorgado",     "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"prmo2", "img"=>"images/check.png",         "alt" => "Prestamo Recibido",        "label"=>"Prestamo Recibido",     "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"prmo3", "img"=>"images/face-sad.png",      "alt" => "Cheq Devuelto Cliente",    "label"=>"Cheq Devuelto Cliente", "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"prmo4", "img"=>"images/face-surprise.png", "alt" => "Cheq Devuelto Proveed",    "label"=>"Cheq Devuelto Proveed", "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"prmo5", "img"=>"images/dinero.png",        "alt" => "Deposito por Analizar",    "label"=>"Deposito por Analizar", "tema"=>"tema1"));
+		$grid->wbotonadd(array("id"=>"prmo6", "img"=>"images/retencion.gif",     "alt" => "Cargos Indebidos en Banco","label"=>"Cargos Indebidos ",     "tema"=>"anexos"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -67,7 +67,7 @@ class Prmo extends Controller {
 		$param['readyLayout'] = $readyLayout;
 		$param['listados']    = $this->datasis->listados('PRMO', 'JQ');
 		$param['otros']       = $this->datasis->otros('PRMO', 'JQ');
-		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['temas']       = array('proteo','darkness','anexos1','blitzer');
 		$param['bodyscript']  = $bodyscript;
 		$param['tabs']        = false;
 		$param['encabeza']    = $this->titp;

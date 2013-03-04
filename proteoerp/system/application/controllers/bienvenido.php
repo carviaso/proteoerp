@@ -114,17 +114,17 @@ class Bienvenido extends Controller {
 
 	function cargapanel($pertenece=NULL) {
 		if(empty($pertenece)) return;
-		$dbpertenece=$this->db->escape($pertenece);
-		$out='';
-		$arreglo=arr_menu(2,$pertenece);
-		$arreglo=arr2panel($arreglo);
+		$dbpertenece = $this->db->escape($pertenece);
+		$out         = '';
+		$arreglo     = arr_menu(2,$pertenece);
+		$arreglo     = arr2panel($arreglo);
 		if (count($arreglo)>0){
-			$out  ='';
+			$out    = '';
 			$desca  = $this->datasis->dameval("SELECT mensaje FROM intramenu WHERE modulo=$dbpertenece");
 			$imagen = $this->datasis->dameval("SELECT TRIM(imagen) imagen  FROM intramenu WHERE modulo=$dbpertenece");
 			$desca  = htmlentities($desca);
-			$out .= '<div>';
-			$out .= '<table width="100%" border="0"><tr>';
+			$out   .= '<div>';
+			$out   .= '<table width="100%" border="0"><tr>';
 			if ( strlen($imagen) == 0  )
 				$out .= '<td>&nbsp;</td>';
 			else

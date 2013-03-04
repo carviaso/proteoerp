@@ -67,43 +67,27 @@ class Bcaj extends Controller {
 
 <table id="west-grid" align="center">
 	<tr>
-		<td><div class="tema1"><a style="width:90px" href="#" id="impPdf">Imprimir '.img(array('src' => 'images/pdf_logo.gif', 'alt' => 'Formato PDF',  'title' => 'Formato PDF', 'border'=>'0')).'</a></div></td>
-		<td><div class="tema1"><a style="width:90px" href="#" id="impHtml">Ver en '.img(array('src' => 'images/html_icon.gif', 'alt' => 'Formato HTML',  'title' => 'Formato HTML', 'border'=>'0')).'</a></div></td>
+		<td><div class="anexos"><a style="width:90px" href="#" id="impPdf">'.img(array('src' => 'images/pdf_logo.gif', 'alt' => 'Formato PDF',  'title' => 'Formato PDF', 'border'=>'0')).' Imprime</a></div></td>
+		<td><div class="anexos"><a style="width:90px" href="#" id="impHtml">'.img(array('src' => 'images/html_icon.gif', 'alt' => 'Formato HTML',  'title' => 'Formato HTML', 'border'=>'0')).' Ver en </a></div></td>
 	</tr><tr>
-		<td colspan="2"><div class="tema1"><a style="width:190px" href="#" id="cerrardpt">Cerrar Deposito '.img(array('src' => 'images/candado.jpg', 'alt' => 'Eliminar',  'title' => 'Eliminar', 'border'=>'0')).'</a></div></td>
+		<td colspan="2" ><div class="anexos"><a style="width:190px;vertical-align:text-top;" href="#" id="cerrardpt">'.img(array('src' => 'images/candado.png', 'alt' => 'Cerrar',  'title' => 'Cerrar', 'border'=>'0', 'height'=>'18')).' Cerrar Deposito </a></div></td>
 	</tr><tr>
-		<td colspan="2">&nbsp;</td>
+		<td colspan="2"><div class="anexos"><a style="width:190px" href="#" id="borrar">'.img(array('src' => 'images/delete.png', 'alt' => 'Eliminar',  'title' => 'Eliminar', 'border'=>'0', 'height'=>'18')).' Eliminar Movimiento </a></div></td>
 	</tr><tr>
-		<td colspan="2">&nbsp;</td>
-	</tr><tr>
-		<td colspan="2"><div class="tema1"><a style="width:190px" href="#" id="borrar">Eliminar Movimiento '.img(array('src' => 'images/delete.jpg', 'alt' => 'Eliminar',  'title' => 'Eliminar', 'border'=>'0')).'</a></div></td>
-	</tr><tr>
-		<td colspan="2">&nbsp;</td>
-	</tr><tr>
-		<td colspan="2">&nbsp;</td>
-	</tr><tr>
-		<td colspan="2">&nbsp;</td>
-	</tr><tr>
-		<td colspan="2">&nbsp;</td>
-	</tr><tr>
-		<td colspan="2">&nbsp;</td>
-	</tr><tr>
-		<td colspan="2">&nbsp;</td>
-	</tr><tr>
-		<td colspan="2">&nbsp;</td>
-	</tr><tr>
-		<td colspan="2">&nbsp;</td>
-	</tr><tr>
-		<td colspan="2">&nbsp;</td>
-	</tr><tr>
-		<td colspan="2">&nbsp;<br><br></td>
-	</tr><tr>
-		<td colspan="2"><div class="tema1"><a style="width:190px" href="#" id="chdevo">Cheque Devuelto '.img(array('src' => 'images/delete.jpg', 'alt' => 'Cheque devuelto',  'title' => 'Cheque devuelto', 'border'=>'0')).'</a></div></td>
+		<td colspan="2"><div class="tema2"><a style="width:190px" href="#" id="chdevo">Cheque Devuelto '.img(array('src' => 'images/delete.jpg', 'alt' => 'Cheque devuelto',  'title' => 'Cheque devuelto', 'border'=>'0')).'</a></div></td>
+
 	</tr>
 </table>
 </div>
 </div> <!-- #LeftPane -->
 ';
+
+
+		$grid->wbotonadd(array("id"=>"impPdf",    "img"=>"images/pdf_logo.gif", "alt" => "Cargos Indebidos en Banco", "label"=>"Imprimir Documento ", "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"cerrardpt", "img"=>"images/candado.png",  "alt" => "Cerrar Deposito",           "label"=>"Cerrar Deposito",     "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"borrar",    "img"=>"images/delete.png",   "alt" => "Eliminar Movimiento",       "label"=>"Eliminar Movimiento", "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"chdevo",    "img"=>"images/delete.png",   "alt" => "Eliminar Cheque Devuelto",  "label"=>"Eliminar CH. Devuelto",     "tema"=>"anexos"));
+		$WestPanel = $grid->deploywestp();
 
 
 		//Panel Central
@@ -323,7 +307,7 @@ class Bcaj extends Controller {
 			'frozen'   => 'true',
 			'width'    => 60,
 			'editable' => 'false',
-			'search'   => 'false'
+			'search'   => 'true'
 		));
 
 		$grid->addField('tipo');
@@ -1623,7 +1607,7 @@ class Bcaj extends Controller {
 		// Cambia el estaus de los cheques
 		$this->db->query("UPDATE sfpa SET status='' WHERE deposito='".$numero."'");
 
-		// LIBERA LOS CHEQUES SI ES DE
+		// LIBERA LOS CHEQUES SI ES DEPOSITO
 		$this->db->simple_query("UPDATE sfpa SET status='' AND deposito='' WHERE deposito=?", array($numero));
 		logusu('BCAJ',"MOVIMIENTO DE CAJA $numero Transaccion $transac ELIMINADO");
 		echo "Movimiento de Caja Eliminado ";
