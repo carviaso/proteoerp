@@ -21,6 +21,9 @@ class Sprm extends Controller {
 			$this->db->simple_query('ALTER TABLE sprm ADD UNIQUE INDEX numpri (cod_prv, tipo_doc, numero)');
 			$this->db->simple_query('ALTER TABLE sprm ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};
+		if ( !$this->datasis->iscampo('sprm','tbanco') ) {
+			$this->db->simple_query('ALTER TABLE sprm ADD COLUMN tbanco CHAR(3) ');
+		};
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -308,7 +311,7 @@ class Sprm extends Controller {
 
 
 		$grid->addField('banco');
-		$grid->label('Banco');
+		$grid->label('Cta.Banco');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -431,19 +434,7 @@ class Sprm extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-/*
-		$grid->addField('posdata');
-		$grid->label('Posdata');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-*/
+
 
 		$grid->addField('benefi');
 		$grid->label('Benefi');
@@ -755,6 +746,37 @@ class Sprm extends Controller {
 			'edittype'      => "'text'",
 		));
 */
+
+		$mSQL = "SELECT cod_banc, CONCAT(cod_banc, ' ', nomb_banc) descrip FROM tban ORDER BY cod_banc ";
+		$tbanco  = $this->datasis->llenajqselect($mSQL, false );
+
+		$grid->addField('tbanco');
+		$grid->label('Banco');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 40,
+			'edittype'      => "'select'",
+			'editrules'     => '{ required:false}',
+			'editoptions'   => '{value: '.$tbanco.',  style:"width:300px" }',
+			'editrules'     => '{ required:true}',
+		));
+
+
+
+		$grid->addField('posdata');
+		$grid->label('Fecha Pago');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:false,date:true}',
+			'formoptions'   => '{ label:"Fecha Pago" }'
+		));
+
+
 
 		$grid->addField('id');
 		$grid->label('Id');
