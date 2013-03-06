@@ -303,6 +303,7 @@ class Caub extends validaciones {
 		if($oper == 'add'){
 			if(false == empty($data)){
 				$this->db->insert('caub', $data);
+				logusu('caub',"Almacen $codigo CREADO");
 			}
 			echo '';
 			return;
@@ -311,6 +312,7 @@ class Caub extends validaciones {
 			unset($data['ubica']);
 			$this->db->where('id', $id);
 			$this->db->update('caub', $data);
+			logusu('caub',"Almacen $codigo MODIFICADO");
 			return;
 
 		} elseif($oper == 'del') {
@@ -319,7 +321,7 @@ class Caub extends validaciones {
 				echo " El almacen no fuede ser eliminado; tiene movimiento ";
 			} else {
 				$this->db->simple_query("DELETE FROM caub WHERE id=$id ");
-				logusu('caub',"Almacen $codigo ELIMINADO");
+				logusu('caub',"Almacen $id ELIMINADO");
 				echo "Almacen Eliminado";
 			}
 
@@ -328,17 +330,17 @@ class Caub extends validaciones {
 
 	function forma(){
 		$salida = '
-	<p class="validateTips">Todos los Campos son Necesarios.</p>
-	<form>
-	<fieldset>
-		<label for="name">Nombre</label>
-		<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" value="Meco" />
-		<label for="email">Email</label>
-		<input type="text" name="email" id="email" value="" class="text ui-widget-content ui-corner-all" />
-		<label for="password">Password</label>
-		<input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
-	</fieldset>
-	</form>';
+		<p class="validateTips">Todos los Campos son Necesarios.</p>
+		<form>
+		<fieldset>
+			<label for="name">Nombre</label>
+			<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" value="Meco" />
+			<label for="email">Email</label>
+			<input type="text" name="email" id="email" value="" class="text ui-widget-content ui-corner-all" />
+			<label for="password">Password</label>
+			<input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
+		</fieldset>
+		</form>';
 
 		echo $salida;
 
@@ -358,9 +360,4 @@ class Caub extends validaciones {
 
 		return $message;
 	}
-
-// Process any request to the form
-//$contact->processRequest();
-
 }
-?>

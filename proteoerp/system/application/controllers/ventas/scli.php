@@ -2459,6 +2459,8 @@ function chrif(rif){
 		$edit->email->size =22;
 		$edit->email->maxlength =100;
 
+
+		$edit->tipo = new autoUpdateField('tipo','1', '1');
 		$edit->buttons('save', 'undo');
 		$edit->build();
 
@@ -2651,6 +2653,7 @@ function chrif(rif){
 		$edit->email->size =22;
 		$edit->email->maxlength =100;
 
+		$edit->tipo = new autoUpdateField('tipo','1', '1');
 		$edit->buttons('save', 'undo');
 		$edit->build();
 
