@@ -3426,7 +3426,7 @@ class Scst extends Controller {
 			$itiva     = $do->get_rel('itscst','iva'     ,$i);
 
 			//$itimporte = $itprecio*$itcana;
-			$itimporte = $do->get_rel('itscst','importe',$i)
+			$itimporte = $do->get_rel('itscst','importe',$i);
 			$iiva      = $itimporte*($itiva/100);
 
 			$mSQL='SELECT ultimo,existen,pond,standard,formcal,margen1,margen2,margen3,margen4,precio1,precio2,precio3,precio4,iva FROM sinv WHERE codigo='.$this->db->escape($itcodigo);
