@@ -136,7 +136,7 @@ function totalizar(){
 				itpeso  = Number($("#sinvpeso_"+ind).val());
 
 				peso    = peso+(itpeso*cana);
-				iva     = iva+importe*(itiva/100);
+				iva     = importe*(itiva/100);
 				totals  = totals+importe;
 
 				if(itiva-tasa_general==0){
@@ -155,7 +155,7 @@ function totalizar(){
 		}
 	});
 
-	civas=roundNumber(cgenera*(tasa_general/100)+creduci*(tasa_reducid/100)+cadicio*(tasa_adicion/100),2);
+	civas=roundNumber((cgenera*tasa_general+creduci*tasa_reducid+cadicio*tasa_adicion)/100,2);
 	montotot = Number($("#montotot").val());
 	montoiva = Number($("#montoiva").val());
 	porreten = Number($("#sprvreteiva").val());
