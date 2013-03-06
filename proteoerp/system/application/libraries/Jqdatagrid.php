@@ -1581,7 +1581,6 @@ class Jqdatagrid
 	</tr>'."\n";
 		
 		$wlista .= $this->wpadicional;
-
 		$wlista .='
 </table>
 </div>

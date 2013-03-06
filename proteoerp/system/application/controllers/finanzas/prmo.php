@@ -41,12 +41,13 @@ class Prmo extends Controller {
 		$readyLayout = $grid->readyLayout2( 212	, 115, $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"prmo1", "img"=>"images/mano.png",          "alt" => "Prestamo Otorgado",        "label"=>"Prestamo Otorgado",     "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"prmo2", "img"=>"images/check.png",         "alt" => "Prestamo Recibido",        "label"=>"Prestamo Recibido",     "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"prmo3", "img"=>"images/face-sad.png",      "alt" => "Cheq Devuelto Cliente",    "label"=>"Cheq Devuelto Cliente", "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"prmo4", "img"=>"images/face-surprise.png", "alt" => "Cheq Devuelto Proveed",    "label"=>"Cheq Devuelto Proveed", "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"prmo5", "img"=>"images/dinero.png",        "alt" => "Deposito por Analizar",    "label"=>"Deposito por Analizar", "tema"=>"tema1"));
-		$grid->wbotonadd(array("id"=>"prmo6", "img"=>"images/retencion.gif",     "alt" => "Cargos Indebidos en Banco","label"=>"Cargos Indebidos ",     "tema"=>"anexos"));
+		$grid->wbotonadd(array('id'=>'imprime','img'=>'assets/default/images/print.png','alt' => 'Reimprimir',         'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array("id"=>"prmo1",  "img"=>"images/mano.png",          "alt" => "Prestamo Otorgado",        "label"=>"Prestamo Otorgado",     "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"prmo2",  "img"=>"images/check.png",         "alt" => "Prestamo Recibido",        "label"=>"Prestamo Recibido",     "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"prmo3",  "img"=>"images/face-sad.png",      "alt" => "Cheq Devuelto Cliente",    "label"=>"Cheq Devuelto Cliente", "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"prmo4",  "img"=>"images/face-surprise.png", "alt" => "Cheq Devuelto Proveed",    "label"=>"Cheq Devuelto Proveed", "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"prmo5",  "img"=>"images/dinero.png",        "alt" => "Deposito por Analizar",    "label"=>"Deposito por Analizar", "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"prmo6",  "img"=>"images/retencion.gif",     "alt" => "Cargos Indebidos en Banco","label"=>"Cargos Indebidos ",     "tema"=>"anexos"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -82,9 +83,6 @@ class Prmo extends Controller {
 		$bodyscript = '		<script type="text/javascript">';
 
 		// Prestamo Otorgado CxC
-		// Crea una ND en cliente
-		// Crea un Movimiento en bmov correspondiente al cheque o efectivo entregado
-		// cuando crea el egreso llena el campo negreso
 		$bodyscript .= '
 		$("#prmo1").click( function() {
 			$.post("'.site_url($this->url.'deprmo1/create').'",
@@ -97,9 +95,6 @@ class Prmo extends Controller {
 		';
 
 		// Prestamo Recibido
-		// Crea una ND en proveedor CxP
-		// Crea un Movimiento en bmov correspondiente al deposito o cheque recibdo 
-		// cuando crea el ingreso llena el campo ningreso
 		$bodyscript .= '
 		$("#prmo2").click( function() {
 			$.post("'.site_url($this->url.'deprmo2/create').'",
@@ -112,9 +107,6 @@ class Prmo extends Controller {
 		';
 
 		// Cheque devuelto de Cliente
-		// Crea una ND en el cliente CxP
-		// Crea un Movimiento en bmov correspondiente a ND 
-		// 
 		$bodyscript .= '
 		$("#prmo3").click( function() {
 			$.post("'.site_url($this->url.'deprmo3/create').'",
@@ -128,9 +120,6 @@ class Prmo extends Controller {
 
 
 		// Cheque devuelto de Proveedor
-		// Crea una ND en el cliente CxP
-		// Crea un Movimiento en bmov correspondiente a ND 
-		// 
 		$bodyscript .= '
 		$("#prmo4").click( function() {
 			$.post("'.site_url($this->url.'deprmo4/create').'",
@@ -144,9 +133,6 @@ class Prmo extends Controller {
 
 
 		// Depositos por Analizar
-		// Crea una ND en el cliente CxP
-		// Crea un Movimiento en bmov correspondiente a ND 
-		// 
 		$bodyscript .= '
 		$("#prmo5").click( function() {
 			$.post("'.site_url($this->url.'deprmo5/create').'",
@@ -159,9 +145,6 @@ class Prmo extends Controller {
 		';
 
 		// Cargos Indebidos
-		// Crea una ND en el cliente CxP
-		// Crea un Movimiento en bmov correspondiente a ND 
-		// 
 		$bodyscript .= '
 		$("#prmo6").click( function() {
 			$.post("'.site_url($this->url.'deprmo6/create').'",

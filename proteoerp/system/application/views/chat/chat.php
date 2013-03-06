@@ -77,7 +77,7 @@ a:hover { text-decoration:underline; }
 	margin:0 auto;
 	padding-bottom:5px;
 	background:#7E4335;
-	width:280px;
+	width:260px;
 	border:1px solid #7E4335; 
 }
 
@@ -87,8 +87,8 @@ a:hover { text-decoration:underline; }
 	margin-bottom:5px;
 	padding:10px;
 	background:#fff;
-	height:200px;
-	width:250px;
+	height:160px;
+	width:230px;
 	border:1px solid #7E4335;
 	overflow:auto; 
 }
@@ -100,12 +100,12 @@ a:hover { text-decoration:underline; }
 	padding:0,0,0,0;
 	background:#fff;
 	border:none;
-	width:275px;
+	width:255px;
 	overflow:auto; 
 	background:#7E4335;
 }
 
-#usermsg { width:250px; border:1px solid #ACD8F0; }
+#usermsg { width:230px; border:1px solid #ACD8F0; }
 #submit { width: 60px; }
 #chatmenu { padding:2.5px 25px 4.0px 20px; height:14px; background-color:#7E4335; }
 .welcome { float:left; height:20px; font-size:14px;color:white; font-weight:bold; text-align:center }
@@ -118,7 +118,7 @@ a:hover { text-decoration:underline; }
 		<div id="chatbox"></div>
 		<table width='100%'>
 			<tr>
-				<td colspan='2'><textarea name="usermsg" id="usermsg" rows="2" cols="30"></textarea></td> 
+				<td colspan='2'><textarea name="usermsg" id="usermsg" rows="1" cols="30"></textarea></td> 
 			</tr><tr>
 				<td><span style='color:white;'>Para:</span> <?php echo $usuario; ?></td>
 				<td><input name="submitmsg" id="submitmsg" type="button" value="Enviar" /></td>

@@ -2,8 +2,8 @@
 
 class Cruc extends Controller {
 	var $mModulo = 'CRUC';
-	var $titp    = 'Modulo CRUC';
-	var $tits    = 'Modulo CRUC';
+	var $titp    = 'Cruce de Cuentas';
+	var $tits    = 'Cruce de Cuentas';
 	var $url     = 'finanzas/cruc/';
 
 	function Cruc(){
@@ -14,11 +14,11 @@ class Cruc extends Controller {
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('cruc','id') ) {
+		if ( !$this->datasis->iscampo('cruc','id') ) {
 			$this->db->simple_query('ALTER TABLE cruc DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE cruc ADD UNIQUE INDEX numero (numero)');
 			$this->db->simple_query('ALTER TABLE cruc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
+		};
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -34,17 +34,21 @@ class Cruc extends Controller {
 		$param['grids'][] = $grid->deploy();
 
 		$grid1   = $this->defgridit();
-		$grid1->setHeight('190');
+		$grid1->setHeight('140');
 		$param['grids'][] = $grid1->deploy();
 
 		// Configura los Paneles
-		$readyLayout = $grid->readyLayout2( 212, 220, $param['grids'][0]['gridname'],$param['grids'][1]['gridname']);
+		$readyLayout = $grid->readyLayout2( 212, 172, $param['grids'][0]['gridname'],$param['grids'][1]['gridname']);
 
 		//Funciones que ejecutan los botones
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'imprime',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'imprime','img'=>'assets/default/images/print.png','alt' => 'Reimprimir',          'label'=>'Reimprimir Documento', 'tema'=>'tema1'));
+		$grid->wbotonadd(array('id'=>'fcc',    'img'=>'assets/default/images/print.png','alt' => 'Cliente->Cliente',    'label'=>'Cliente->Cliente',     'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'fcp',    'img'=>'assets/default/images/print.png','alt' => 'Cliente->Proveedor',  'label'=>'Cliente->Proveedor',   'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'fpc',    'img'=>'assets/default/images/print.png','alt' => 'Proveedor->Cliente',  'label'=>'Proveedor->Cliente',   'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'fpp',    'img'=>'assets/default/images/print.png','alt' => 'Proveedor->Proveedor','label'=>'Proveedor->Proveedor', 'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -79,9 +83,62 @@ class Cruc extends Controller {
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '<script type="text/javascript">';
 
+
+		// Cruce Cliente Cliente
+		$bodyscript .= '
+		$("#fcc").click( function() {
+			$.post("'.site_url($this->url.'declicli/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Cliente Cliente"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
+
+
+		// Cruce Cliente Proveedor
+		$bodyscript .= '
+		$("#fcp").click( function() {
+			$.post("'.site_url($this->url.'declipro/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Cliente Proveedor"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
+
+
+		// Cruce Proveedor Proveedor
+		$bodyscript .= '
+		$("#fpp").click( function() {
+			$.post("'.site_url($this->url.'depropro/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Proveedor Proveedor"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
+
+
+		// Cruce Proveedor Cliente
+		$bodyscript .= '
+		$("#fpc").click( function() {
+			$.post("'.site_url($this->url.'deprocli/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Proveedor Cliente"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
+
+/*
 		$bodyscript .= '
 		function crucadd(){
-			$.post("'.site_url($this->url.'dataedit/create').'",
+			$.post("'.site_url($this->url.'declipro/create').'",
 			function(data){
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
@@ -102,7 +159,7 @@ class Cruc extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
-
+*/
 		$bodyscript .= '
 		function crucshow(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -159,7 +216,7 @@ class Cruc extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 400, width: 600, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -358,30 +415,6 @@ class Cruc extends Controller {
 		));
 
 
-		$grid->addField('codbanc');
-		$grid->label('Cod.Banco');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:2, maxlength: 2 }',
-		));
-
-
-		$grid->addField('banco');
-		$grid->label('Banco');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 30 }',
-		));
-
-
 		$grid->addField('monto');
 		$grid->label('Monto');
 		$grid->params(array(
@@ -469,7 +502,6 @@ class Cruc extends Controller {
 			'editoptions'   => '{ size:12, maxlength: 12 }',
 		));
 
-
 		$grid->addField('id');
 		$grid->label('ID');
 		$grid->params(array(
@@ -480,10 +512,9 @@ class Cruc extends Controller {
 			'search'        => 'false'
 		));
 
-
 		$grid->showpager(true);
 		$grid->setWidth('');
-		$grid->setHeight('290');
+		$grid->setHeight('230');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
@@ -496,19 +527,19 @@ class Cruc extends Controller {
 				}
 			}'
 		);
-		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
-		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setFormOptionsE(''); //'closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setFormOptionsA(''); //'closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(    $this->datasis->sidapuede('CRUC','INCLUIR%' ));
-		$grid->setEdit(   $this->datasis->sidapuede('CRUC','MODIFICA%'));
+		$grid->setAdd(   false );  // $this->datasis->sidapuede('CRUC','INCLUIR%' ));
+		$grid->setEdit(  false );  // $this->datasis->sidapuede('CRUC','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('CRUC','BORR_REG%'));
-		$grid->setSearch( $this->datasis->sidapuede('CRUC','BUSQUEDA%'));
+		$grid->setSearch( true ); //$this->datasis->sidapuede('CRUC','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: crucadd, editfunc: crucedit, delfunc: crucdel, viewfunc: crucshow");
+		//$grid->setBarOptions("addfunc: crucadd, editfunc: crucedit, delfunc: crucdel, viewfunc: crucshow");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -523,7 +554,7 @@ class Cruc extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -537,7 +568,7 @@ class Cruc extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -566,21 +597,11 @@ class Cruc extends Controller {
 		} elseif($oper == 'edit') {
 			$nuevo  = $data[$mcodp];
 			$anterior = $this->datasis->dameval("SELECT $mcodp FROM cruc WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM cruc WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE cruc SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("cruc", $data);
-				logusu('CRUC',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('cruc', $data);
-				logusu('CRUC',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
+			unset($data[$mcodp]);
+			$this->db->where("id", $id);
+			//$this->db->update('cruc', $data);
+			//logusu('CRUC',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+			echo "$mcodp Modificado";
 
 		} elseif($oper == 'del') {
 			$meco = $this->datasis->dameval("SELECT $mcodp FROM cruc WHERE id=$id");
@@ -588,16 +609,16 @@ class Cruc extends Controller {
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
-				$this->db->simple_query("DELETE FROM cruc WHERE id=$id ");
-				logusu('CRUC',"Registro ????? ELIMINADO");
+				//$this->db->simple_query("DELETE FROM cruc WHERE id=$id ");
+				//logusu('CRUC',"Registro ????? ELIMINADO");
 				echo 'Registro Eliminado';
 			}
 		};
 	}
 
-	//***************************
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgridit( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -640,8 +661,8 @@ class Cruc extends Controller {
 		));
 
 
-		$grid->addField('O.Fecha');
-		$grid->label('Ofecha');
+		$grid->addField('ofecha');
+		$grid->label('Fecha');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -708,7 +729,9 @@ class Cruc extends Controller {
 		}
 	}
 
-	/**
+
+
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait( $id = 0 ){
@@ -730,6 +753,361 @@ class Cruc extends Controller {
 	function setDatait(){
 	}
 
+
+	//******************************************************************
+	// Cruce Cliente Proveedor
+	//
+	function declipro(){
+
+		$this->rapyd->load('dataedit');
+		$edit = $this->decruc();
+
+		// script para buscar cheque
+		$script= '
+		$("#numche").change( function() {
+			$("#observa2").val("BANCO/CAJA ("+$("#codban").val()+") "+$("#tipo").val()+" "+$("#numche").val() );
+		});
+		$("#clipro").change( function() {
+			$("#observa1").val("PRESTAMO OTORGADO A ("+$("#clipro").val()+") "+$("#nombre").val() );
+		});
+		';
+
+		$edit->proveed = new inputField('Cliente','proveed');
+		$edit->proveed->rule      = '';
+		$edit->proveed->size      =  6;
+		$edit->proveed->maxlength =  5;
+
+		$edit->cliente = new inputField('Proveedor','cliente');
+		$edit->cliente->rule      = '';
+		$edit->cliente->size      = 6;
+		$edit->cliente->maxlength = 5;
+
+		//$edit->script($this->scriptscli().$script,'modify');
+		//$edit->script($this->scriptscli().$script,'create');
+
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->insertValue = 'C-P';
+
+		$this->dataedit($edit);
+
+	}
+
+
+	//******************************************************************
+	// Cruce Cliente Cliente
+	//
+	function declicli(){
+
+		$this->rapyd->load('dataedit');
+		$edit = $this->decruc();
+
+		// script para buscar cheque
+		$script= '
+		$("#numche").change( function() {
+			$("#observa2").val("BANCO/CAJA ("+$("#codban").val()+") "+$("#tipo").val()+" "+$("#numche").val() );
+		});
+		$("#clipro").change( function() {
+			$("#observa1").val("PRESTAMO OTORGADO A ("+$("#clipro").val()+") "+$("#nombre").val() );
+		});
+		';
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+
+
+		$edit->proveed = new inputField('Cede','proveed');
+		$edit->proveed->rule      = '';
+		$edit->proveed->size      =  6;
+		$edit->proveed->maxlength =  5;
+
+		$edit->cliente = new inputField('Recibe','cliente');
+		$edit->cliente->rule      = '';
+		$edit->cliente->size      = 6;
+		$edit->cliente->maxlength = 5;
+
+
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->insertValue = 'C-C';
+
+		$this->dataedit($edit);
+
+	}
+
+
+
+	//******************************************************************
+	// Cruce Proveedor Proveedor
+	//
+	function depropro(){
+
+		$this->rapyd->load('dataedit');
+		$edit = $this->decruc();
+
+		// script para buscar cheque
+		$script= '
+		$("#numche").change( function() {
+			$("#observa2").val("BANCO/CAJA ("+$("#codban").val()+") "+$("#tipo").val()+" "+$("#numche").val() );
+		});
+		$("#clipro").change( function() {
+			$("#observa1").val("PRESTAMO OTORGADO A ("+$("#clipro").val()+") "+$("#nombre").val() );
+		});
+		';
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+
+
+		$edit->proveed = new inputField('Cede','proveed');
+		$edit->proveed->rule      = '';
+		$edit->proveed->size      =  6;
+		$edit->proveed->maxlength =  5;
+
+		$edit->cliente = new inputField('Recibe','cliente');
+		$edit->cliente->rule      = '';
+		$edit->cliente->size      = 6;
+		$edit->cliente->maxlength = 5;
+
+
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->insertValue = 'P-P';
+
+		$this->dataedit($edit);
+
+	}
+
+	//******************************************************************
+	// Cruce Proveedor Cliente
+	//
+	function deprocli(){
+
+		$this->rapyd->load('dataedit');
+		$edit = $this->decruc();
+
+		// script para buscar cheque
+		$script= '
+		$("#numche").change( function() {
+			$("#observa2").val("BANCO/CAJA ("+$("#codban").val()+") "+$("#tipo").val()+" "+$("#numche").val() );
+		});
+		$("#clipro").change( function() {
+			$("#observa1").val("PRESTAMO OTORGADO A ("+$("#clipro").val()+") "+$("#nombre").val() );
+		});
+		';
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+
+
+		$edit->proveed = new inputField('Proveedor','proveed');
+		$edit->proveed->rule      = '';
+		$edit->proveed->size      =  6;
+		$edit->proveed->maxlength =  5;
+
+		$edit->cliente = new inputField('Cliente','cliente');
+		$edit->cliente->rule      = '';
+		$edit->cliente->size      = 6;
+		$edit->cliente->maxlength = 5;
+
+
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->insertValue = 'P-C';
+
+		$this->dataedit($edit);
+
+	}
+
+
+
+	//******************************************************************
+	//   Dataedit Todos
+	//
+	function decruc(){
+		$this->rapyd->load('dataedit');
+		$script = '';
+
+		$edit   = new DataEdit($this->tits, 'cruc');
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		//$edit->back_url = site_url($this->url.'filteredgrid');
+
+		$edit->post_process('insert', '_post_insert');
+		$edit->post_process('update', '_post_update');
+		$edit->post_process('delete', '_post_delete');
+		$edit->pre_process( 'insert', '_pre_insert' );
+		$edit->pre_process( 'update', '_pre_update' );
+		$edit->pre_process( 'delete', '_pre_delete' );
+
+		$script= '';
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
+
+		$edit->numero = new inputField('Numero','numero');
+		$edit->numero->rule      = '';
+		$edit->numero->size      = 10;
+		$edit->numero->maxlength =  8;
+
+		$edit->fecha = new dateonlyField('Fecha','fecha');
+		$edit->fecha->rule      = 'chfecha';
+		$edit->fecha->size      = 10;
+		$edit->fecha->maxlength =  8;
+		$edit->fecha->calendar  = false;
+		$edit->fecha->insertValue=date('Y-m-d');
+
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->rule      = '';
+		$edit->tipo->size      =  5;
+		$edit->tipo->maxlength =  3;
+
+		$edit->proveed = new inputField('Proveedor','proveed');
+		$edit->proveed->rule      = '';
+		$edit->proveed->size      =  6;
+		$edit->proveed->maxlength =  5;
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->rule      = '';
+		$edit->nombre->size      = 35;
+		$edit->nombre->maxlength = 40;
+
+		$edit->saldoa = new inputField('Saldo','saldoa');
+		$edit->saldoa->rule      = 'numeric';
+		$edit->saldoa->css_class = 'inputnum';
+		$edit->saldoa->size      = 10;
+		$edit->saldoa->maxlength = 16;
+
+		$edit->cliente = new inputField('Cliente','cliente');
+		$edit->cliente->rule      = '';
+		$edit->cliente->size      = 6;
+		$edit->cliente->maxlength = 5;
+
+		$edit->nomcli = new inputField('Nomcli','nomcli');
+		$edit->nomcli->rule      = '';
+		$edit->nomcli->size      = 35;
+		$edit->nomcli->maxlength = 40;
+
+		$edit->saldod = new inputField('Saldo','saldod');
+		$edit->saldod->rule      = 'numeric';
+		$edit->saldod->css_class = 'inputnum';
+		$edit->saldod->size      = 10;
+		$edit->saldod->maxlength = 16;
+
+		$edit->monto = new inputField('Monto','monto');
+		$edit->monto->rule       = 'numeric';
+		$edit->monto->css_class  = 'inputnum';
+		$edit->monto->size       = 12;
+		$edit->monto->maxlength  = 16;
+
+		$edit->concept1 = new inputField('Concepto','concept1');
+		$edit->concept1->rule      = '';
+		$edit->concept1->size      = 42;
+		$edit->concept1->maxlength = 40;
+
+		$edit->concept2 = new inputField(' ','concept2');
+		$edit->concept2->rule      = '';
+		$edit->concept2->size      = 42;
+		$edit->concept2->maxlength = 40;
+
+		$edit->transac = new inputField('Transac','transac');
+		$edit->transac->rule='';
+		$edit->transac->size =10;
+		$edit->transac->maxlength =8;
+
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
+		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
+
+		return $edit;
+	}
+
+
+	//******************************************************************
+	// Dataedit para todos
+	//
+	function dataedit($edit){
+		$this->rapyd->load('dataedit');
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form'] =&  $edit;
+			$this->load->view('view_cruc', $conten);
+		}
+	}
+
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do){
+		$do->error_message_ar['pre_del']='';
+		return false;
+	}
+
+	function _post_insert($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits $primary ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
+	function _post_delete($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Elimino $this->tits $primary ");
+	}
+
+	function instalar(){
+		if (!$this->db->table_exists('cruc')) {
+			$mSQL="CREATE TABLE `cruc` (
+			  `numero` varchar(8) NOT NULL DEFAULT '',
+			  `fecha` date DEFAULT NULL,
+			  `tipo` char(3) DEFAULT NULL,
+			  `proveed` varchar(5) DEFAULT NULL,
+			  `nombre` varchar(40) DEFAULT NULL,
+			  `saldoa` decimal(16,2) DEFAULT NULL,
+			  `cliente` varchar(5) DEFAULT NULL,
+			  `nomcli` varchar(40) DEFAULT NULL,
+			  `saldod` decimal(16,2) DEFAULT NULL,
+			  `monto` decimal(16,2) DEFAULT NULL,
+			  `concept1` varchar(40) DEFAULT NULL,
+			  `concept2` varchar(40) DEFAULT NULL,
+			  `transac` varchar(8) DEFAULT NULL,
+			  `estampa` date DEFAULT NULL,
+			  `hora` varchar(8) DEFAULT NULL,
+			  `usuario` varchar(12) DEFAULT NULL,
+			  `id` int(11) NOT NULL AUTO_INCREMENT,
+			  PRIMARY KEY (`id`),
+			  UNIQUE KEY `numero` (`numero`),
+			  KEY `transaccion` (`transac`),
+			  KEY `fecha` (`fecha`)
+			) ENGINE=MyISAM AUTO_INCREMENT=437 DEFAULT CHARSET=latin1";
+			$this->db->simple_query($mSQL);
+		}
+		//$campos=$this->db->list_fields('cruc');
+		//if(!in_array('<#campo#>',$campos)){ }
+	}
+
+
+
+
+/*
 	//***********************************
 	// DataEdit
 	//***********************************
@@ -822,16 +1200,6 @@ class Cruc extends Controller {
 		$edit->saldod->css_class='inputnum';
 		$edit->saldod->size =18;
 		$edit->saldod->maxlength =16;
-
-		$edit->codbanc = new inputField('Cod.Banco','codbanc');
-		$edit->codbanc->rule='';
-		$edit->codbanc->size =4;
-		$edit->codbanc->maxlength =2;
-
-		$edit->banco = new inputField('Banco','banco');
-		$edit->banco->rule='';
-		$edit->banco->size =32;
-		$edit->banco->maxlength =30;
 
 		$edit->monto = new inputField('Monto','monto');
 		$edit->monto->rule='numeric';
@@ -954,8 +1322,6 @@ class Cruc extends Controller {
 			  `cliente` varchar(5) DEFAULT NULL,
 			  `nomcli` varchar(40) DEFAULT NULL,
 			  `saldod` decimal(16,2) DEFAULT NULL,
-			  `codbanc` char(2) DEFAULT NULL,
-			  `banco` varchar(30) DEFAULT NULL,
 			  `monto` decimal(16,2) DEFAULT NULL,
 			  `concept1` varchar(40) DEFAULT NULL,
 			  `concept2` varchar(40) DEFAULT NULL,
@@ -974,4 +1340,5 @@ class Cruc extends Controller {
 		//$campos=$this->db->list_fields('cruc');
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
+*/
 }

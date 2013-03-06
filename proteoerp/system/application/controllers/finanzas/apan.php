@@ -529,13 +529,11 @@ jQuery("#fimprime").click( function(){
 		$grid->setOnSelectRow('
 			function(id){
 				if (id){
-					var ret = $("#titulos").getRowData(id);
 					jQuery(gridId2).jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
 					jQuery(gridId2).trigger("reloadGrid");
 				}
 			}
 		');
-
 		$grid->setFormOptionsE('-');
 		$grid->setFormOptionsA('-');
 		$grid->setAfterSubmit("-");
