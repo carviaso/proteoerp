@@ -111,6 +111,7 @@ $encabezado_tabla.="</tr>
 //     Pie Pagina
 //************************
 if($mprec){
+	$col_span=6;
 	$pie_final=<<<piefinal
 			</tbody>
 			<tfoot style='border:1px solid;background:#EEEEEE;'>
@@ -134,6 +135,7 @@ if($mprec){
 		</table>
 piefinal;
 }else{
+		$col_span=3;
 		$pie_final=<<<piefinal
 			</tbody>
 		</table>
@@ -144,7 +146,7 @@ $pie_continuo=<<<piecontinuo
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="6" style="text-align: right;">CONTINUA...</td>
+				<td colspan="${col_span}" style="text-align: right;">CONTINUA...</td>
 			</tr>
 		</tfoot>
 	</table>
