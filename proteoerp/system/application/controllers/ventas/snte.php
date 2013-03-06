@@ -44,7 +44,8 @@ class Snte extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'imprimir', 'img'=>'assets/default/images/print.png',  'alt' => 'Reimprimir', 'label'=>'Reimprimir documento'));
+		$grid->wbotonadd(array('id'=>'imprimir'  ,'img'=>'assets/default/images/print.png',  'alt' => 'Reimprimir', 'label'=>'Reimprimir documento'));
+		$grid->wbotonadd(array('id'=>'imprimirnp','img'=>'assets/default/images/print.png',  'alt' => 'Reimprimir sin precios', 'label'=>'Reimprimir sin precios'));
 		$WestPanel = $grid->deploywestp();
 		//Panel Central y Sur
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
@@ -150,7 +151,16 @@ class Snte extends Controller {
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/SNTE').'/\'+id+"/id", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+				window.open(\''.site_url('formatos/ver/SNTE').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});';
+
+		$bodyscript .='
+		jQuery("#imprimirnp").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url('formatos/ver/SNTE').'/\'+id+"/S", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});';
 

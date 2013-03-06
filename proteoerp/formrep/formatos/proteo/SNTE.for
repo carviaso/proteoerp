@@ -4,6 +4,16 @@ $maxlin=39; //Maximo de lineas de items.
 if(count($parametros)==0) show_error('Faltan parametros');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
+//Para esconder o no los precios
+if(isset($parametros[1])){
+	if($parametros[1]=='S'){
+		$mprec=false;
+	}else{
+		$mprec=true;
+	}
+}else{
+	$mprec=true;
+}
 
 $mSQL = "
 SELECT a.numero,a.cod_cli,c.nombre,TRIM(c.nomfis) AS nomfis,c.rifci,CONCAT_WS('',TRIM(c.dire11), c.dire12) AS direccion,a.fecha,a.vende AS vd,
@@ -85,11 +95,13 @@ $encabezado_tabla="
 			<tr>
 				<th ${estilo}' >C&oacute;digo</th>
 				<th ${estilo}' >Descripci&oacute;n</th>
-				<th ${estilo}' >Cant.</th>
-				<th ${estilo}' >Precio U.</th>
+				<th ${estilo}' >Cant.</th>";
+if($mprec){
+	$encabezado_tabla.="<th ${estilo}' >Precio U.</th>
 				<th ${estilo}' >Monto</th>
-				<th ${estilo}' >IVA%</th>
-			</tr>
+				<th ${estilo}' >IVA%</th>";
+}
+$encabezado_tabla.="</tr>
 		</thead>
 		<tbody>
 ";
@@ -98,29 +110,35 @@ $encabezado_tabla="
 //************************
 //     Pie Pagina
 //************************
-$pie_final=<<<piefinal
-		</tbody>
-		<tfoot style='border:1px solid;background:#EEEEEE;'>
-			<tr>
-				<td  style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;"><b>Sub-Total:</b></td>
-				<td colspan="3" style="text-align: right;font-size:16px;font-weight:bold;" >${stotal}</td>
-			</tr>
-			<tr>
-				<td style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;"><b>Impuesto</b></td>
-				<td colspan="3" style="text-align: right;font-size:16px;font-weight:bold;">${iva}</td>
-			</tr>
-			<tr style='border-top: 1px solid;background:#AAAAAA;'>
-				<td style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;"><b>MONTO TOTAL:</b></td>
-				<td colspan="3" style="text-align: right;font-size:20px;font-weight:bold;">${gtotal}</td>
-			</tr>
-		</tfoot>
+if($mprec){
+	$pie_final=<<<piefinal
+			</tbody>
+			<tfoot style='border:1px solid;background:#EEEEEE;'>
+				<tr>
+					<td  style="text-align: right;"></td>
+					<td colspan="2" style="text-align: right;"><b>Sub-Total:</b></td>
+					<td colspan="3" style="text-align: right;font-size:16px;font-weight:bold;" >${stotal}</td>
+				</tr>
+				<tr>
+					<td style="text-align: right;"></td>
+					<td colspan="2" style="text-align: right;"><b>Impuesto</b></td>
+					<td colspan="3" style="text-align: right;font-size:16px;font-weight:bold;">${iva}</td>
+				</tr>
+				<tr style='border-top: 1px solid;background:#AAAAAA;'>
+					<td style="text-align: right;"></td>
+					<td colspan="2" style="text-align: right;"><b>MONTO TOTAL:</b></td>
+					<td colspan="3" style="text-align: right;font-size:20px;font-weight:bold;">${gtotal}</td>
+				</tr>
+			</tfoot>
 
-	</table>
+		</table>
 piefinal;
-
+}else{
+		$pie_final=<<<piefinal
+			</tbody>
+		</table>
+piefinal;
+}
 
 $pie_continuo=<<<piecontinuo
 		</tbody>
@@ -177,10 +195,12 @@ foreach ($detalle AS $items){ $i++;
 					if(count($arr_des)==0 && $clinea) $clinea=false;
 					?>
 				</td>
-				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->cana); ?></td>
-				<td style="text-align: right;" ><?php echo ($clinea)? '': nformat($items->preca); ?></td>
-				<td class="change_order_total_col"><?php echo ($clinea)? '':nformat($items->preca*$items->cana); ?></td>
-				<td style="text-align: right;" ><?php echo ($clinea)? '': nformat($items->iva); ?></td>
+				<td style="text-align: right;"><?php     echo ($clinea)? '': nformat($items->cana); ?></td>
+				<?php if($mprec){ ?>
+					<td style="text-align: right;"><?php     echo ($clinea)? '':nformat($items->preca); ?></td>
+					<td class="change_order_total_col"><?php echo ($clinea)? '':nformat($items->preca*$items->cana); ?></td>
+					<td style="text-align: right;" ><?php    echo ($clinea)? '': nformat($items->iva); ?></td>
+				<?php }?>
 			</tr>
 <?php
 		if($npagina){
@@ -196,9 +216,11 @@ for(1;$lineas<$maxlin;$lineas++){ ?>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
+				<?php if($mprec){ ?>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
+				<?php }?>
 			</tr>
 <?php
 	$mod = ! $mod;
