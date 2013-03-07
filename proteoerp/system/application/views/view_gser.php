@@ -193,7 +193,7 @@ function reteiva(){
 			$("#sprvreteiva").val(100);
 			riva=totiva;
 		}else{
-			riva = Math.round(totiva*preten);
+			riva = Math.round((totiva*preten).toFixed(2));
 			riva = riva/100;
 			$("#reteiva").val(riva);
 		}

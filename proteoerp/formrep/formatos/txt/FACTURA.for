@@ -61,8 +61,9 @@ $mSQL="SELECT
 FROM sitems
 WHERE numa=$dbnumero AND tipoa=$dbtipo_doc";
 
-$mSQL_2 = $this->db->query($mSQL);
+$mSQL_2   = $this->db->query($mSQL);
 $detalle  = $mSQL_2->result();
+$art_cana = $mSQL_2->num_rows();
 $separador='Ä';
 
 //************************
@@ -108,7 +109,15 @@ foreach ($detalle AS $items){ $i++;
 		if($npagina){
 			echo $encabezado;
 			echo $encabezado_tabla;
-			$lineas =  substr_count($encabezado,"\n")+substr_count($encabezado_tabla,"\n");
+			$lineas =  substr_count($encabezado,"\n")+substr_count($encabezado_tabla,"\n")+substr_count($pie_continuo,"\n");;
+
+			//if($lineas+substr_count($pie_final,"\n")+$art_cana <= $maxlin ){
+			//	$lineas += substr_count($pie_final,"\n");
+			//}else{
+			//	$lineas += substr_count($pie_continuo,"\n");
+			//}
+
+
 			$npagina=false;
 		}
 		if(!$clinea){
@@ -131,6 +140,7 @@ foreach ($detalle AS $items){ $i++;
 			$uline   = array_shift($arr_des);
 			echo sprintf('%\'*3d %-10s %-40s %10s %10s %5s',$items->cana,$items->codigo,$uline,nformat($items->preca),nformat($items->cana*$items->preca),nformat($items->iva,0));
 			echo "\n";
+			$art_cana--;
 			$lineas++;
 		}
 
