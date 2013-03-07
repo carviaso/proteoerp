@@ -113,8 +113,8 @@ class Ajax extends Controller {
 			$retArray = $retorno = array();
 
 			//Mira si existe el codigo
-			$mSQL="SELECT id, num_ref, fecha, monto 
-				FROM sfpa WHERE cod_cli=${mcod_cli} AND num_ref LIKE ${qdb} AND tipo='CH' 
+			$mSQL="SELECT id, num_ref, fecha, monto
+				FROM sfpa WHERE cod_cli=${mcod_cli} AND num_ref LIKE ${qdb} AND tipo='CH'
 				ORDER BY fecha DESC LIMIT ".$this->autolimit;
 
 			$query = $this->db->query($mSQL);
@@ -129,7 +129,7 @@ class Ajax extends Controller {
 					array_push($retorno, $retArray);
 				}
 			}
-			
+
 			if(count($data)>0)
 				$data = json_encode($retorno);
 		}
@@ -146,7 +146,7 @@ class Ajax extends Controller {
 		$mid     = $this->input->post('q');
 		$cod_prv = $this->input->post('cod_prv');
 		$codbanc = $this->input->post('codbanc');
-		
+
 		if($mid == false) $mid  = $this->input->post('term');
 
 
@@ -160,8 +160,8 @@ class Ajax extends Controller {
 			$retArray = $retorno = array();
 
 			//Mira si existe el codigo
-			$mSQL="SELECT id, numero, fecha, monto FROM bmov 
-				WHERE clipro='P' AND codcp=${mcod_prv} AND numero LIKE ${qdb} AND tipo_op='CH' AND codbanc=${codbanc} 
+			$mSQL="SELECT id, numero, fecha, monto FROM bmov
+				WHERE clipro='P' AND codcp=${mcod_prv} AND numero LIKE ${qdb} AND tipo_op='CH' AND codbanc=${codbanc}
 				ORDER BY fecha DESC LIMIT ".$this->autolimit;
 
 			$query = $this->db->query($mSQL);
@@ -176,7 +176,7 @@ class Ajax extends Controller {
 					array_push($retorno, $retArray);
 				}
 			}
-			
+
 			if(count($data)>0)
 				$data = json_encode($retorno);
 		}
@@ -955,6 +955,107 @@ class Ajax extends Controller {
 	        }
 		}
 		echo $data;
+	}
+	//***********************************************
+	//Busca los efectos que se deben para los cruces
+	//***********************************************
+	function buscasprm(){
+		$mid = $this->input->post('sprv');
+
+		$data = '[ ]';
+		if($mid !== false){
+			$dbsprv   = $this->db->escape($mid);
+			$retArray = $retorno = array();
+			$mSQL="SELECT id, fecha,monto, numero, tipo_doc, monto-abonos AS saldo
+			FROM sprm
+			WHERE tipo_doc IN ('FC','ND','GI') AND abonos<monto AND cod_prv=${dbsprv}";
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $id=>$row ) {
+					$retArray['numero']  = trim($row['numero']);
+					$retArray['tipo_doc']= trim($row['tipo_doc']);
+					$retArray['fecha']   = $row['fecha'];
+					$retArray['monto']   = $row['monto'];
+					$retArray['saldo']   = $row['saldo'];
+					$retArray['id']      = $row['id'];
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
+	//***********************************************
+	//Busca los efectos que se deben para los cruces
+	//***********************************************
+	function buscasmov(){
+		$mid = $this->input->post('scli');
+
+		$data = '[ ]';
+		if($mid !== false){
+			$dbscli   = $this->db->escape($mid);
+			$retArray = $retorno = array();
+			$mSQL="SELECT id, fecha,monto, numero, tipo_doc, monto-abonos AS saldo
+			FROM smov
+			WHERE tipo_doc IN ('FC','ND','GI') AND abonos<monto AND cod_cli=${dbscli}";
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $id=>$row ) {
+					$retArray['numero']  = trim($row['numero']);
+					$retArray['tipo_doc']= trim($row['tipo_doc']);
+					$retArray['fecha']   = $row['fecha'];
+					$retArray['monto']   = $row['monto'];
+					$retArray['saldo']   = $row['saldo'];
+					$retArray['id']      = $row['id'];
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
+	//Saldo de proveedor
+	function ajaxsaldosprv(){
+		$mid = $this->input->post('clipro');
+
+		if($mid !== false){
+			$dbsprv = $this->db->escape($mid);
+
+			$this->db->select_sum('a.monto - a.abonos','saldo');
+			$this->db->from('sprm AS a');
+			$this->db->where('a.cod_prv',$mid);
+			$this->db->where('a.monto > a.abonos');
+			$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
+			$q=$this->db->get();
+			$row = $q->row_array();
+			echo (empty($row['saldo']))? 0: $row['saldo'];
+		}else{
+			echo 0;
+		}
+	}
+
+	//Saldo de cliente
+	function ajaxsaldoscli(){
+		$mid = $this->input->post('clipro');
+
+		if($mid !== false){
+			$this->db->select_sum('a.monto - a.abonos','saldo');
+			$this->db->from('smov AS a');
+			$this->db->where('a.cod_cli',$mid);
+			$this->db->where('a.monto > a.abonos');
+			$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
+			$q=$this->db->get();
+			$row = $q->row_array();
+			echo (empty($row['saldo']))? 0: $row['saldo'];
+		}else{
+			echo 0;
+		}
 	}
 
 	//

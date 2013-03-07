@@ -45,10 +45,10 @@ class Cruc extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprime','img'=>'assets/default/images/print.png','alt' => 'Reimprimir',          'label'=>'Reimprimir Documento', 'tema'=>'tema1'));
-		$grid->wbotonadd(array('id'=>'fcc',    'img'=>'assets/default/images/print.png','alt' => 'Cliente->Cliente',    'label'=>'Cliente->Cliente',     'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'fcp',    'img'=>'assets/default/images/print.png','alt' => 'Cliente->Proveedor',  'label'=>'Cliente->Proveedor',   'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'fpc',    'img'=>'assets/default/images/print.png','alt' => 'Proveedor->Cliente',  'label'=>'Proveedor->Cliente',   'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'fpp',    'img'=>'assets/default/images/print.png','alt' => 'Proveedor->Proveedor','label'=>'Proveedor->Proveedor', 'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'fcc',    'img'=>'images/star.png','alt' => 'Cliente->Cliente',    'label'=>'Cliente->Cliente',     'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'fcp',    'img'=>'images/star.png','alt' => 'Cliente->Proveedor',  'label'=>'Cliente->Proveedor',   'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'fpc',    'img'=>'images/star.png','alt' => 'Proveedor->Cliente',  'label'=>'Proveedor->Cliente',   'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'fpp',    'img'=>'images/star.png','alt' => 'Proveedor->Proveedor','label'=>'Proveedor->Proveedor', 'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -82,58 +82,6 @@ class Cruc extends Controller {
 	//***************************
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '<script type="text/javascript">';
-
-
-		// Cruce Cliente Cliente
-		$bodyscript .= '
-		$("#fcc").click( function() {
-			$.post("'.site_url($this->url.'declicli/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Cliente Cliente"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-
-		// Cruce Cliente Proveedor
-		$bodyscript .= '
-		$("#fcp").click( function() {
-			$.post("'.site_url($this->url.'declipro/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Cliente Proveedor"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-
-		// Cruce Proveedor Proveedor
-		$bodyscript .= '
-		$("#fpp").click( function() {
-			$.post("'.site_url($this->url.'depropro/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Proveedor Proveedor"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-
-		// Cruce Proveedor Cliente
-		$bodyscript .= '
-		$("#fpc").click( function() {
-			$.post("'.site_url($this->url.'deprocli/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Proveedor Cliente"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
 
 /*
 		$bodyscript .= '
@@ -213,6 +161,68 @@ class Cruc extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 			';
+
+
+		$bodyscript .= '
+		jQuery("#imprime").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url('formatos/ver/CRUCDE').'/\'+id, \'_blank\', \'width=300,height=200,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+			} else { $.prompt("<h1>Por favor Seleccione una Factura</h1>");}
+		});';
+
+
+		// Cruce Cliente Cliente
+		$bodyscript .= '
+		$("#fcc").click( function() {
+			$.post("'.site_url($this->url.'declicli/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Cliente Cliente"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
+
+
+		// Cruce Cliente Proveedor
+		$bodyscript .= '
+		$("#fcp").click( function() {
+			$.post("'.site_url($this->url.'declipro/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Cliente Proveedor"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
+
+
+		// Cruce Proveedor Proveedor
+		$bodyscript .= '
+		$("#fpp").click( function() {
+			$.post("'.site_url($this->url.'depropro/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Proveedor Proveedor"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
+
+
+		// Cruce Proveedor Cliente
+		$bodyscript .= '
+		$("#fpc").click( function() {
+			$.post("'.site_url($this->url.'deprocli/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 500, width: 620, title: "Cruce Proveedor Cliente"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -758,37 +768,146 @@ class Cruc extends Controller {
 	// Cruce Cliente Proveedor
 	//
 	function declipro(){
-
 		$this->rapyd->load('dataedit');
-		$edit = $this->decruc();
+		$edit = $this->_decruc();
 
-		// script para buscar cheque
 		$script= '
-		$("#numche").change( function() {
-			$("#observa2").val("BANCO/CAJA ("+$("#codban").val()+") "+$("#tipo").val()+" "+$("#numche").val() );
-		});
-		$("#clipro").change( function() {
-			$("#observa1").val("PRESTAMO OTORGADO A ("+$("#clipro").val()+") "+$("#nombre").val() );
-		});
-		';
+		$(function() {
+			$("#proveed").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscascli').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#proveed").val("");
 
-		$edit->proveed = new inputField('Cliente','proveed');
-		$edit->proveed->rule      = '';
-		$edit->proveed->size      =  6;
-		$edit->proveed->maxlength =  5;
+									$("#nombre").val("");
+									$("#nombre_val").text("");
 
-		$edit->cliente = new inputField('Proveedor','cliente');
-		$edit->cliente->rule      = '';
-		$edit->cliente->size      = 6;
-		$edit->cliente->maxlength = 5;
+									$("#saldo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#proveed").attr("readonly", "readonly");
 
-		//$edit->script($this->scriptscli().$script,'modify');
-		//$edit->script($this->scriptscli().$script,'create');
+					$("#nombre").val(ui.item.nombre);
+					$("#nombre_val").text(ui.item.nombre);
 
-		$edit->tipo = new hiddenField('Tipo','tipo');
-		$edit->tipo->insertValue = 'C-P';
+					setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
 
-		$this->dataedit($edit);
+					$.ajax({
+						url: "'.site_url('ajax/buscasmov').'",
+						dataType: "json",
+						type: "POST",
+						data: {"scli" : ui.item.value},
+						success: function(data){
+								truncate();
+								$.each(data,
+									function(id, val){
+										can=add_itcruc();
+
+										$("#itonumero_"+can).val(val.tipo_doc+val.numero);
+										$("#itofecha_"+can ).val(val.fecha);
+										$("#itpmonto_"+can  ).val(val.monto);
+										$("#itpsaldo_"+can  ).val(val.saldo);
+										$("#itmonto_"+can ).val("0");
+
+										$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
+										$("#itofecha_"+can+"_val" ).text(val.fecha);
+										$("#itpmonto_"+can+"_val"  ).text(nformat(val.monto,2));
+										$("#itpsaldo_"+can+"_val"  ).text(nformat(val.saldo,2));
+
+										$("#itmonto_"+can ).focus(function(){
+											var valor = $(this).val();
+											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+												$(this).val(val.saldo);
+												totaliza();
+											}
+										});
+									}
+								);
+							},
+					});
+
+					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
+					$("#saldoa").val(roundNumber(saldo,2))
+
+				}
+			});
+
+			$("#cliente").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscasprv').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#cliente").val("");
+
+									$("#nomcli").val("");
+									$("#nomcli_val").text("");
+
+									$("#saldo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#cliente").attr("readonly", "readonly");
+
+					$("#nomcli").val(ui.item.nombre);
+					$("#nomcli_val").text(ui.item.nombre);
+
+					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
+
+					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
+					$("#saldod").val(roundNumber(saldo,2))
+				}
+			});
+		});';
+
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+
+		$edit->proveed->label = 'Cliente';
+
+		$edit->cliente->label = 'Proveedor';
+
+		$edit->tipo = new autoUpdateField('tipo','C-P','C-P');
+
+		$this->_dataedit($edit);
 
 	}
 
@@ -799,37 +918,145 @@ class Cruc extends Controller {
 	function declicli(){
 
 		$this->rapyd->load('dataedit');
-		$edit = $this->decruc();
+		$edit = $this->_decruc();
 
-		// script para buscar cheque
 		$script= '
-		$("#numche").change( function() {
-			$("#observa2").val("BANCO/CAJA ("+$("#codban").val()+") "+$("#tipo").val()+" "+$("#numche").val() );
-		});
-		$("#clipro").change( function() {
-			$("#observa1").val("PRESTAMO OTORGADO A ("+$("#clipro").val()+") "+$("#nombre").val() );
-		});
-		';
+		$(function() {
+			$("#proveed").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscascli').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#proveed").val("");
+
+									$("#nombre").val("");
+									$("#nombre_val").text("");
+
+									$("#saldo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#proveed").attr("readonly", "readonly");
+
+					$("#nombre").val(ui.item.nombre);
+					$("#nombre_val").text(ui.item.nombre);
+
+					setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
+
+					$.ajax({
+						url: "'.site_url('ajax/buscasmov').'",
+						dataType: "json",
+						type: "POST",
+						data: {"scli" : ui.item.value},
+						success: function(data){
+								truncate();
+								$.each(data,
+									function(id, val){
+										can=add_itcruc();
+
+										$("#itonumero_"+can).val(val.tipo_doc+val.numero);
+										$("#itofecha_"+can ).val(val.fecha);
+										$("#itpmonto_"+can  ).val(val.monto);
+										$("#itpsaldo_"+can  ).val(val.saldo);
+										$("#itmonto_"+can ).val("0");
+
+										$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
+										$("#itofecha_"+can+"_val" ).text(val.fecha);
+										$("#itpmonto_"+can+"_val"  ).text(nformat(val.monto,2));
+										$("#itpsaldo_"+can+"_val"  ).text(nformat(val.saldo,2));
+
+										$("#itmonto_"+can ).focus(function(){
+											var valor = $(this).val();
+											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+												$(this).val(val.saldo);
+												totaliza();
+											}
+										});
+									}
+								);
+							},
+					});
+
+					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
+					$("#saldoa").val(roundNumber(saldo,2))
+
+				}
+			});
+
+			$("#cliente").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscascli').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#cliente").val("");
+
+									$("#nomcli").val("");
+									$("#nomcli_val").text("");
+
+									$("#saldo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#cliente").attr("readonly", "readonly");
+
+					$("#nomcli").val(ui.item.nombre);
+					$("#nomcli_val").text(ui.item.nombre);
+
+					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
+
+					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
+					$("#saldod").val(roundNumber(saldo,2))
+				}
+			});
+		});';
+
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
 
+		$edit->proveed->label = 'Cede';
 
-		$edit->proveed = new inputField('Cede','proveed');
-		$edit->proveed->rule      = '';
-		$edit->proveed->size      =  6;
-		$edit->proveed->maxlength =  5;
+		$edit->cliente->label = 'Recibe';
 
-		$edit->cliente = new inputField('Recibe','cliente');
-		$edit->cliente->rule      = '';
-		$edit->cliente->size      = 6;
-		$edit->cliente->maxlength = 5;
+		$edit->tipo = new autoUpdateField('tipo','C-C','C-C');
 
-
-		$edit->tipo = new hiddenField('Tipo','tipo');
-		$edit->tipo->insertValue = 'C-C';
-
-		$this->dataedit($edit);
+		$this->_dataedit($edit);
 
 	}
 
@@ -841,37 +1068,144 @@ class Cruc extends Controller {
 	function depropro(){
 
 		$this->rapyd->load('dataedit');
-		$edit = $this->decruc();
+		$edit = $this->_decruc();
 
-		// script para buscar cheque
 		$script= '
-		$("#numche").change( function() {
-			$("#observa2").val("BANCO/CAJA ("+$("#codban").val()+") "+$("#tipo").val()+" "+$("#numche").val() );
-		});
-		$("#clipro").change( function() {
-			$("#observa1").val("PRESTAMO OTORGADO A ("+$("#clipro").val()+") "+$("#nombre").val() );
-		});
-		';
+		$(function() {
+			$("#proveed").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscasprv').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#proveed").val("");
+
+									$("#nombre").val("");
+									$("#nombre_val").text("");
+
+									$("#saldo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#proveed").attr("readonly", "readonly");
+
+					$("#nombre").val(ui.item.nombre);
+					$("#nombre_val").text(ui.item.nombre);
+
+					setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
+
+					$.ajax({
+						url: "'.site_url('ajax/buscasprm').'",
+						dataType: "json",
+						type: "POST",
+						data: {"sprv" : ui.item.value},
+						success: function(data){
+								truncate();
+								$.each(data,
+									function(id, val){
+										can=add_itcruc();
+
+										$("#itonumero_"+can).val(val.tipo_doc+val.numero);
+										$("#itofecha_"+can ).val(val.fecha);
+										$("#itpmonto_"+can  ).val(val.monto);
+										$("#itpsaldo_"+can  ).val(val.saldo);
+										$("#itmonto_"+can ).val("0");
+
+										$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
+										$("#itofecha_"+can+"_val" ).text(val.fecha);
+										$("#itpmonto_"+can+"_val"  ).text(nformat(val.monto,2));
+										$("#itpsaldo_"+can+"_val"  ).text(nformat(val.saldo,2));
+
+										$("#itmonto_"+can ).focus(function(){
+											var valor = $(this).val();
+											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+												$(this).val(val.saldo);
+												totaliza();
+											}
+										});
+									}
+								);
+							},
+					});
+
+					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
+					$("#saldoa").val(roundNumber(saldo,2))
+
+				}
+			});
+
+			$("#cliente").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscasprv').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#cliente").val("");
+
+									$("#nomcli").val("");
+									$("#nomcli_val").text("");
+
+									$("#saldo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#cliente").attr("readonly", "readonly");
+
+					$("#nomcli").val(ui.item.nombre);
+					$("#nomcli_val").text(ui.item.nombre);
+
+					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
+
+					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
+					$("#saldod").val(roundNumber(saldo,2))
+				}
+			});
+		});';
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
 
+		$edit->proveed->label = 'Cede';
 
-		$edit->proveed = new inputField('Cede','proveed');
-		$edit->proveed->rule      = '';
-		$edit->proveed->size      =  6;
-		$edit->proveed->maxlength =  5;
+		$edit->cliente->label = 'Recibe';
 
-		$edit->cliente = new inputField('Recibe','cliente');
-		$edit->cliente->rule      = '';
-		$edit->cliente->size      = 6;
-		$edit->cliente->maxlength = 5;
+		$edit->tipo = new autoUpdateField('tipo','P-P','P-P');
 
-
-		$edit->tipo = new hiddenField('Tipo','tipo');
-		$edit->tipo->insertValue = 'P-P';
-
-		$this->dataedit($edit);
+		$this->_dataedit($edit);
 
 	}
 
@@ -879,58 +1213,162 @@ class Cruc extends Controller {
 	// Cruce Proveedor Cliente
 	//
 	function deprocli(){
-
 		$this->rapyd->load('dataedit');
-		$edit = $this->decruc();
+		$edit = $this->_decruc();
 
-		// script para buscar cheque
 		$script= '
-		$("#numche").change( function() {
-			$("#observa2").val("BANCO/CAJA ("+$("#codban").val()+") "+$("#tipo").val()+" "+$("#numche").val() );
-		});
-		$("#clipro").change( function() {
-			$("#observa1").val("PRESTAMO OTORGADO A ("+$("#clipro").val()+") "+$("#nombre").val() );
-		});
-		';
+		$(function() {
+			$("#proveed").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscasprv').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#proveed").val("");
+
+									$("#nombre").val("");
+									$("#nombre_val").text("");
+
+									$("#saldo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#proveed").attr("readonly", "readonly");
+
+					$("#nombre").val(ui.item.nombre);
+					$("#nombre_val").text(ui.item.nombre);
+
+					setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
+
+					$.ajax({
+						url: "'.site_url('ajax/buscasprm').'",
+						dataType: "json",
+						type: "POST",
+						data: {"sprv" : ui.item.value},
+						success: function(data){
+								truncate();
+								$.each(data,
+									function(id, val){
+										can=add_itcruc();
+
+										$("#itonumero_"+can).val(val.tipo_doc+val.numero);
+										$("#itofecha_"+can ).val(val.fecha);
+										$("#itpmonto_"+can  ).val(val.monto);
+										$("#itpsaldo_"+can  ).val(val.saldo);
+										$("#itmonto_"+can ).val("0");
+
+										$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
+										$("#itofecha_"+can+"_val" ).text(val.fecha);
+										$("#itpmonto_"+can+"_val"  ).text(nformat(val.monto,2));
+										$("#itpsaldo_"+can+"_val"  ).text(nformat(val.saldo,2));
+
+										$("#itmonto_"+can ).focus(function(){
+											var valor = $(this).val();
+											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+												$(this).val(val.saldo);
+												totaliza();
+											}
+										});
+									}
+								);
+							},
+					});
+
+					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
+					$("#saldoa").val(roundNumber(saldo,2))
+
+				}
+			});
+
+			$("#cliente").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscascli').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#cliente").val("");
+
+									$("#nomcli").val("");
+									$("#nomcli_val").text("");
+
+									$("#saldo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#cliente").attr("readonly", "readonly");
+
+					$("#nomcli").val(ui.item.nombre);
+					$("#nomcli_val").text(ui.item.nombre);
+
+					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
+
+					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
+					$("#saldod").val(roundNumber(saldo,2))
+				}
+			});
+		});';
+
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
 
+		$edit->proveed->label = 'Proveedor';
 
-		$edit->proveed = new inputField('Proveedor','proveed');
-		$edit->proveed->rule      = '';
-		$edit->proveed->size      =  6;
-		$edit->proveed->maxlength =  5;
+		$edit->cliente->label = 'Cliente';
 
-		$edit->cliente = new inputField('Cliente','cliente');
-		$edit->cliente->rule      = '';
-		$edit->cliente->size      = 6;
-		$edit->cliente->maxlength = 5;
+		$edit->tipo = new autoUpdateField('tipo','P-C','P-C');
 
-
-		$edit->tipo = new hiddenField('Tipo','tipo');
-		$edit->tipo->insertValue = 'P-C';
-
-		$this->dataedit($edit);
-
+		$this->_dataedit($edit);
 	}
-
 
 
 	//******************************************************************
 	//   Dataedit Todos
 	//
-	function decruc(){
-		$this->rapyd->load('dataedit');
-		$script = '';
+	function _decruc(){
+		$this->rapyd->load('dataobject','datadetails');
 
-		$edit   = new DataEdit($this->tits, 'cruc');
+		$do = new DataObject('cruc');
+		$do->rel_one_to_many('itcruc', 'itcruc','numero');
+		//$do->pointer('scli' ,'scli.cliente=sfac.cod_cli','scli.tipo AS sclitipo','left');
+		//$do->rel_pointer('sitems','sinv','sitems.codigoa=sinv.codigo','sinv.descrip AS sinvdescrip');
 
-		$edit->script($script,'modify');
-		$edit->script($script,'create');
+		$edit = new DataDetails($this->tits, $do);
 		$edit->on_save_redirect=false;
-
-		//$edit->back_url = site_url($this->url.'filteredgrid');
 
 		$edit->post_process('insert', '_post_insert');
 		$edit->post_process('update', '_post_update');
@@ -939,33 +1377,26 @@ class Cruc extends Controller {
 		$edit->pre_process( 'update', '_pre_update' );
 		$edit->pre_process( 'delete', '_pre_delete' );
 
-		$script= '';
-		$edit->script($script,'create');
-		$edit->script($script,'modify');
-
-		$edit->numero = new inputField('Numero','numero');
+		$edit->numero = new inputField('N&uacute;mero','numero');
 		$edit->numero->rule      = '';
 		$edit->numero->size      = 10;
 		$edit->numero->maxlength =  8;
+		$edit->numero->when      = array('show');
 
 		$edit->fecha = new dateonlyField('Fecha','fecha');
-		$edit->fecha->rule      = 'chfecha';
-		$edit->fecha->size      = 10;
-		$edit->fecha->maxlength =  8;
-		$edit->fecha->calendar  = false;
-		$edit->fecha->insertValue=date('Y-m-d');
-
-		$edit->tipo = new hiddenField('Tipo','tipo');
-		$edit->tipo->rule      = '';
-		$edit->tipo->size      =  5;
-		$edit->tipo->maxlength =  3;
+		$edit->fecha->rule       = 'chfecha';
+		$edit->fecha->size       = 10;
+		$edit->fecha->maxlength  =  8;
+		$edit->fecha->calendar   = false;
+		$edit->fecha->insertValue= date('Y-m-d');
 
 		$edit->proveed = new inputField('Proveedor','proveed');
-		$edit->proveed->rule      = '';
+		$edit->proveed->rule      = 'trim|required';
 		$edit->proveed->size      =  6;
 		$edit->proveed->maxlength =  5;
 
 		$edit->nombre = new inputField('Nombre','nombre');
+		//$edit->nombre->type      = 'inputhidden';
 		$edit->nombre->rule      = '';
 		$edit->nombre->size      = 35;
 		$edit->nombre->maxlength = 40;
@@ -977,11 +1408,12 @@ class Cruc extends Controller {
 		$edit->saldoa->maxlength = 16;
 
 		$edit->cliente = new inputField('Cliente','cliente');
-		$edit->cliente->rule      = '';
+		$edit->cliente->rule      = 'trim|required';
 		$edit->cliente->size      = 6;
 		$edit->cliente->maxlength = 5;
 
 		$edit->nomcli = new inputField('Nomcli','nomcli');
+		//$edit->nomcli->type      = 'inputhidden';
 		$edit->nomcli->rule      = '';
 		$edit->nomcli->size      = 35;
 		$edit->nomcli->maxlength = 40;
@@ -993,7 +1425,7 @@ class Cruc extends Controller {
 		$edit->saldod->maxlength = 16;
 
 		$edit->monto = new inputField('Monto','monto');
-		$edit->monto->rule       = 'numeric';
+		$edit->monto->rule       = 'numeric|positive';
 		$edit->monto->css_class  = 'inputnum';
 		$edit->monto->size       = 12;
 		$edit->monto->maxlength  = 16;
@@ -1008,10 +1440,31 @@ class Cruc extends Controller {
 		$edit->concept2->size      = 42;
 		$edit->concept2->maxlength = 40;
 
-		$edit->transac = new inputField('Transac','transac');
-		$edit->transac->rule='';
-		$edit->transac->size =10;
-		$edit->transac->maxlength =8;
+		//inicio del detalle
+		$edit->itonumero = new inputField('Numero','itonumero_<#i#>');
+		$edit->itonumero->rule      = 'max_length[10]';
+		$edit->itonumero->db_name   = 'onumero';
+		$edit->itonumero->type      = 'inputhidden';
+		$edit->itonumero->size      = 13;
+		$edit->itonumero->maxlength = 10;
+		$edit->itonumero->rel_id='itcruc';
+
+		$edit->itofecha = new dateField('Fecha','itofecha_<#i#>');
+		//$edit->itofecha->rule     = 'chfecha';
+		$edit->itofecha->db_name  = 'ofecha';
+		$edit->itofecha->type     = 'inputhidden';
+		$edit->itofecha->size     = 10;
+		$edit->itofecha->maxlength= 8;
+		$edit->itofecha->rel_id='itcruc';
+
+		$edit->itmonto = new inputField('Monto','itmonto_<#i#>');
+		$edit->itmonto->rule      = 'max_length[17]|numeric';
+		$edit->itmonto->css_class = 'inputnum';
+		$edit->itmonto->db_name   = 'monto';
+		$edit->itmonto->rel_id    = 'itcruc';
+		$edit->itmonto->size      = 19;
+		$edit->itmonto->maxlength = 17;
+		//fin del detalle
 
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
@@ -1024,8 +1477,7 @@ class Cruc extends Controller {
 	//******************************************************************
 	// Dataedit para todos
 	//
-	function dataedit($edit){
-		$this->rapyd->load('dataedit');
+	function _dataedit($edit){
 
 		$edit->build();
 
@@ -1042,15 +1494,46 @@ class Cruc extends Controller {
 		}
 	}
 
-
 	function _pre_insert($do){
-		$do->error_message_ar['pre_ins']='';
+		$numero  = 'C'.$this->datasis->fprox_numero('ncruc',7);
+		$trans   = $this->datasis->fprox_numero('ntransa');
+		$tipo    = $do->get('tipo');
+		$cliente = $do->get('cliente');
+		$proveed = $do->get('proveed');
+
+		if($tipo=='C-C' || $tipo=='P-P'){
+			if($cliente == $proveed ){
+				$do->error_message_ar['pre_ins']='Cruce entre el mismo no es valido';
+				return false;
+			}
+		}
+
+		$do->set('transac',$trans );
+		$do->set('numero' ,$numero);
+
+		$cana=$do->count_rel('itcruc');
+		for($i=0;$i<$cana;$i++){
+			$onumero = $do->get_rel('itcruc','onumero' ,$i);
+			$monto   = $do->get_rel('itcruc','monto'   ,$i);
+
+			if($monto == 0){
+				$do->rel_rm('itcruc',$i);
+				continue;
+			}
+
+			if(substr($onumero,0,2)=='FC' || substr($onumero,0,2)=='GI' || substr($onumero,0,2)=='ND'){
+				$do->set_rel('itcruc','tipo','ADE',$i);
+			}else{
+				$do->set_rel('itcruc','tipo','APA',$i);
+			}
+		}
+
 		return true;
 	}
 
 	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='';
-		return true;
+		$do->error_message_ar['pre_upd']='Los cruces no se pueden editar, debe borrarlos y volverlos a procesar';
+		return false;
 	}
 
 	function _pre_delete($do){
@@ -1103,242 +1586,4 @@ class Cruc extends Controller {
 		//$campos=$this->db->list_fields('cruc');
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
-
-
-
-
-/*
-	//***********************************
-	// DataEdit
-	//***********************************
-
-	function dataedit(){
-		$this->rapyd->load('datadetail');
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});
-		';
-
-		$do = new DataObject('cruc');
-		$do->pointer('sprv' ,'sprv.proveed=gser.proveed','sprv.tipo AS sprvtipo, sprv.reteiva AS sprvreteiva','left');
-		$do->rel_one_to_many('itcruc' ,'itcruc' ,array('numero'));
-
-		$edit = new DataEdit($this->tits, $do);
-
-		$edit->script($script,'modify');
-		$edit->script($script,'create');
-		$edit->on_save_redirect=false;
-
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
-		$edit->script($script,'create');
-		$edit->script($script,'modify');
-
-		$edit->post_process('insert', '_post_insert');
-		$edit->post_process('update', '_post_update');
-		$edit->post_process('delete', '_post_delete');
-		$edit->pre_process( 'insert', '_pre_insert' );
-		$edit->pre_process( 'update', '_pre_update' );
-		$edit->pre_process( 'delete', '_pre_delete' );
-
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});';
-		$edit->script($script,'create');
-		$edit->script($script,'modify');
-
-		$edit->numero = new inputField('N&uacute;mero','numero');
-		$edit->numero->rule='';
-		$edit->numero->size =10;
-		$edit->numero->maxlength =8;
-
-		$edit->fecha = new dateonlyField('Fecha','fecha');
-		$edit->fecha->rule='chfecha';
-		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
-
-		$edit->tipo = new  dropdownField('Tipo', 'tipo');
-		$edit->tipo->option('P-C','Prov->Cliente');
-		$edit->tipo->option('C-C','Cliente');
-		$edit->tipo->option('P-P','Proveedores');
-		$edit->tipo->option('C-P','Clnte->Prov');
-		$edit->tipo->style='width:120px;';
-		$edit->tipo->size = 5;
-		$edit->tipo->rule='required';
-
-
-		$edit->proveed = new inputField('Proveedor','proveed');
-		$edit->proveed->rule='';
-		$edit->proveed->size =7;
-		$edit->proveed->maxlength =5;
-
-		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='';
-		$edit->nombre->size =42;
-		$edit->nombre->maxlength =40;
-
-		$edit->saldoa = new inputField('Saldo A.','saldoa');
-		$edit->saldoa->rule='numeric';
-		$edit->saldoa->css_class='inputnum';
-		$edit->saldoa->size =18;
-		$edit->saldoa->maxlength =16;
-
-		$edit->cliente = new inputField('Cliente','cliente');
-		$edit->cliente->rule='';
-		$edit->cliente->size =7;
-		$edit->cliente->maxlength =5;
-
-		$edit->nomcli = new inputField('Nombre','nomcli');
-		$edit->nomcli->rule='';
-		$edit->nomcli->size =42;
-		$edit->nomcli->maxlength =40;
-
-		$edit->saldod = new inputField('Saldo D.','saldod');
-		$edit->saldod->rule='numeric';
-		$edit->saldod->css_class='inputnum';
-		$edit->saldod->size =18;
-		$edit->saldod->maxlength =16;
-
-		$edit->monto = new inputField('Monto','monto');
-		$edit->monto->rule='numeric';
-		$edit->monto->css_class='inputnum';
-		$edit->monto->size =18;
-		$edit->monto->maxlength =16;
-
-		$edit->concept1 = new inputField('Concepto 1','concept1');
-		$edit->concept1->rule='';
-		$edit->concept1->size =42;
-		$edit->concept1->maxlength =40;
-
-		$edit->concept2 = new inputField('Concepto 2','concept2');
-		$edit->concept2->rule='';
-		$edit->concept2->size =42;
-		$edit->concept2->maxlength =40;
-
-		$edit->transac = new inputField('Transaci&oacute;n','transac');
-		$edit->transac->rule='';
-		$edit->transac->size =10;
-		$edit->transac->maxlength =8;
-
-		//inicio del detalle
-		$edit->it_tipo = new inputField('Tipo','ittipo_<#i#>');
-		$edit->it_tipo->rule='max_length[3]';
-		$edit->it_tipo->size =5;
-		$edit->it_tipo->maxlength =3;
-		$edit->it_tipo->db_name='tipo';
-		$edit->it_tipo->rel_id ='itcruc';
-
-		$edit->it_onumero = new inputField('N&uacute;mero','itonumero_<#i#>');
-		$edit->it_onumero->rule='max_length[10]';
-		$edit->it_onumero->size =12;
-		$edit->it_onumero->maxlength =10;
-		$edit->it_onumero->db_name='onumero';
-		$edit->it_onumero->rel_id ='itcruc';
-
-		$edit->it_ofecha = new dateField('OFecha','itofecha_<#i#>');
-		$edit->it_ofecha->rule='chfecha';
-		$edit->it_ofecha->calendar=false;
-		$edit->it_ofecha->size =10;
-		$edit->it_ofecha->maxlength =8;
-		$edit->it_ofecha->db_name  ='ofecha';
-		$edit->it_ofecha->rel_id   ='itcruc';
-
-		$edit->it_oregist = new inputField('Oregist','itoregist_<#i#>');
-		$edit->it_oregist->rule='max_length[8]|integer';
-		$edit->it_oregist->css_class='inputonlynum';
-		$edit->it_oregist->size =10;
-		$edit->it_oregist->maxlength =8;
-		$edit->it_oregist->db_name='oregist';
-		$edit->it_oregist->rel_id ='itcruc';
-
-		$edit->it_monto = new inputField('Monto','itmonto_<#i#>');
-		$edit->it_monto->rule='max_length[17]|numeric';
-		$edit->it_monto->css_class='inputnum';
-		$edit->it_monto->size =19;
-		$edit->it_monto->maxlength =17;
-		$edit->it_monto->db_name='monto';
-		$edit->it_monto->rel_id ='itcruc';
-		//Fin del detalle
-
-		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
-		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
-		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-
-		$edit->build();
-
-		if($edit->on_success()){
-			$rt=array(
-				'status' =>'A',
-				'mensaje'=>'Registro guardado',
-				'pk'     =>$edit->_dataobject->pk
-			);
-			echo json_encode($rt);
-		}else{
-			echo $edit->output;
-		}
-	}
-
-	function _pre_insert($do){
-		$do->error_message_ar['pre_ins']='';
-		return true;
-	}
-
-	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='';
-		return true;
-	}
-
-	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
-		return false;
-	}
-
-	function _post_insert($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
-	}
-
-	function _post_update($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
-	}
-
-	function _post_delete($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
-	}
-
-	function instalar(){
-		if (!$this->db->table_exists('cruc')) {
-			$mSQL="CREATE TABLE `cruc` (
-			  `numero` varchar(8) NOT NULL DEFAULT '',
-			  `fecha` date DEFAULT NULL,
-			  `tipo` char(3) DEFAULT NULL,
-			  `proveed` varchar(5) DEFAULT NULL,
-			  `nombre` varchar(40) DEFAULT NULL,
-			  `saldoa` decimal(16,2) DEFAULT NULL,
-			  `cliente` varchar(5) DEFAULT NULL,
-			  `nomcli` varchar(40) DEFAULT NULL,
-			  `saldod` decimal(16,2) DEFAULT NULL,
-			  `monto` decimal(16,2) DEFAULT NULL,
-			  `concept1` varchar(40) DEFAULT NULL,
-			  `concept2` varchar(40) DEFAULT NULL,
-			  `transac` varchar(8) DEFAULT NULL,
-			  `estampa` date DEFAULT NULL,
-			  `hora` varchar(8) DEFAULT NULL,
-			  `usuario` varchar(12) DEFAULT NULL,
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  PRIMARY KEY (`id`),
-			  UNIQUE KEY `numero` (`numero`),
-			  KEY `transaccion` (`transac`),
-			  KEY `fecha` (`fecha`)
-			) ENGINE=MyISAM AUTO_INCREMENT=374 DEFAULT CHARSET=latin1";
-			$this->db->simple_query($mSQL);
-		}
-		//$campos=$this->db->list_fields('cruc');
-		//if(!in_array('<#campo#>',$campos)){ }
-	}
-*/
 }

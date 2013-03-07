@@ -2433,7 +2433,7 @@ class Sfac extends Controller {
 
 		$manual = $this->uri->segment(4);
 		if($manual <> 'S') $manual = 'N';
-		
+
 		$do = new DataObject('sfac');
 		$do->rel_one_to_many('sitems', 'sitems', array('id'=>'id_sfac'));
 		$do->rel_one_to_many('sfpa'  , 'sfpa'  , array('numero','transac'));
@@ -3623,8 +3623,8 @@ class Sfac extends Controller {
 				$data['hora']     = $hora;
 				$data['transac']  = $transac;
 				$data['usuario']  = $usuario;
-				$data['codigo']   = 'NOCON';
-				$data['descrip']  = 'NOTA DE CONTABILIDAD';
+				$data['codigo']   = '';
+				$data['descrip']  = '';
 
 				$sql= $this->db->insert_string('smov', $data);
 				$ban=$this->db->simple_query($sql);
@@ -3718,8 +3718,8 @@ class Sfac extends Controller {
 					$data['hora']       = $hora;
 					$data['transac']    = $transac;
 					$data['usuario']    = $usuario;
-					$data['codigo']     = 'NOCON';
-					$data['descrip']    = 'NOTA DE CONTABILIDAD';
+					$data['codigo']     = '';
+					$data['descrip']    = '';
 
 					$mSQL = $this->db->insert_string('smov', $data);
 					$ban=$this->db->simple_query($mSQL);
@@ -3746,8 +3746,8 @@ class Sfac extends Controller {
 					$data['hora']       = $hora;
 					$data['transac']    = $transac;
 					$data['usuario']    = $usuario;
-					$data['codigo']     = 'NOCON';
-					$data['descrip']    = 'NOTA DE CONTABILIDAD';
+					$data['codigo']     = '';
+					$data['descrip']    = '';
 
 					$mSQL = $this->db->insert_string('smov', $data);
 					$ban=$this->db->simple_query($mSQL);
