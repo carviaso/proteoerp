@@ -428,6 +428,8 @@ class Lruta extends Controller {
 
 		$script='
 		$(document).ready(function() {
+			$(".inputnum").numeric(".");
+
 			$("#codprv").autocomplete({
 				source: function( req, add){
 					$.ajax({

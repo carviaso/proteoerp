@@ -35,8 +35,9 @@ class Lvaca extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-			array("id"=>"fedita",  "title"=>"Agregar/Editar Vaquera"),
-			array("id"=>"fborra",  "title"=>"Agregar/Editar Registro")
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Vaquera' ),
+			array('id'=>'fshow' , 'title'=>'Mostrar Vaquera'),
+			array('id'=>'fborra', 'title'=>'Agregar/Editar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -60,15 +61,6 @@ class Lvaca extends Controller {
 		$bodyscript = '		<script type="text/javascript">';
 
 		$bodyscript .= '
-		jQuery("#recibo").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/APANCO').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
-			} else { $.prompt("<h1>Por favor Seleccione una vaquera</h1>");}
-		});';
-
-		$bodyscript .= '
 		function lvacaadd() {
 			$.post("'.site_url($this->url.'dataedit/create').'",
 			function(data){
@@ -78,36 +70,8 @@ class Lvaca extends Controller {
 		};';
 
 		$bodyscript .= '
-		function lvacadel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				if(confirm(" Seguro desea eliminar el registro?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
-					mId = id;
-					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(r){
-						try{
-							var json = JSON.parse(r);
-							if (json.status == "A"){
-								apprise("Registro Eliminado");
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-								return true;
-							} else {
-								apprise(json.mensaje);
-							}
-						}catch(e){
-							$("#fborra").html(r);
-							$("#fborra").dialog("open");
-						}
-					});
-				}
-			}else{
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
-
-		$bodyscript .= '
 		function lvacaedit() {
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
@@ -116,6 +80,48 @@ class Lvaca extends Controller {
 					$("#fedita").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+		};';
+
+		$bodyscript .= '
+		function lvacashow(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function lvacadel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
 		};';
 
 		//Wraper de javascript
@@ -131,6 +137,16 @@ class Lvaca extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 			';
+
+		$bodyscript .= '
+		jQuery("#recibo").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url('formatos/ver/APANCO').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+			} else { $.prompt("<h1>Por favor Seleccione una vaquera</h1>");}
+		});';
+
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -175,21 +191,38 @@ class Lvaca extends Controller {
 		});';
 
 		$bodyscript .= '
-		$("#fborra").dialog({
-			autoOpen: false, height: 300, width: 300, modal: true,
+		$("#fshow").dialog({
+			autoOpen: false, height: 300, width: 500, modal: true,
 			buttons: {
 				"Aceptar": function() {
-					$( this ).dialog( "close" );
-					grid.trigger("reloadGrid");
-				}
+					$("#fshow").html("");
+					$(this).dialog("close");
+				},
 			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
 		});';
 
 		$bodyscript .= '});'."\n";
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -247,7 +280,7 @@ class Lvaca extends Controller {
 		));
 
 		$grid->addField('ubicacion');
-		$grid->label('Ubicacion');
+		$grid->label('Ubicaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -357,7 +390,7 @@ class Lvaca extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: lvacaadd,\n\t\teditfunc: lvacaedit ,delfunc: lvacadel");
+		$grid->setBarOptions("addfunc: lvacaadd, editfunc: lvacaedit, delfunc: lvacadel, viewfunc: lvacashow");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -376,24 +409,24 @@ class Lvaca extends Controller {
 	function resumen(){
 
 		$mSQL = '
-		SELECT LPAD(a.id,5,"0") numero, IF(b.transporte>0,DATE_SUB(b.fecha, INTERVAL 1 DAY),b.fecha) AS fecha, b.ruta, c.codigo, c.nombre nomvaca, e.ultimo leche, f.ultimo frio, g.ultimo grasa, h.ultimo bacter, d.proveed, d.nombre, a.lista, d.banco1, d.cuenta1, a.lista monto, a.dtoagua, a.temp, ROUND(a.lista*e.ultimo,2) monto, ROUND(a.lista*(f.ultimo+g.ultimo+h.ultimo)*(c.tipolec="F"),2) incent, (f.ultimo+g.ultimo+h.ultimo) pincent, ROUND(a.lista*e.ultimo,2)+ROUND(a.lista*(f.ultimo+g.ultimo+h.ultimo)*(c.tipolec="F"),2) total, ROUND(a.lista*IF(c.animal="B",i.ultimo, 0 ),2) bufala, ROUND(a.lista*e.ultimo,2)+ROUND(a.lista*(f.ultimo+g.ultimo+h.ultimo)*(c.tipolec="F")+ROUND(a.lista*IF(c.animal="B",i.ultimo, 0 ),2),2) gtotal 
-		FROM (itlrece AS a) 
-		JOIN lrece AS b ON a.id_lrece=b.id 
-		JOIN lvaca AS c ON a.id_lvaca=c.id 
-		LEFT JOIN sprv AS d ON c.codprv=d.proveed 
-		LEFT JOIN sinv e ON e.codigo="ZLCALIENTE" 
-		LEFT JOIN sinv f ON f.codigo="ZMANFRIO" 
-		LEFT JOIN sinv g ON g.codigo="ZPGRASA" 
-		LEFT JOIN sinv h ON h.codigo="ZBACTE" 
-		LEFT JOIN sinv i ON i.codigo="ZBUFALA" 
-		WHERE a.lista > 0 AND MID(b.ruta,1,1) <> "G" AND (b.fecha BETWEEN "2013-01-28" AND "2013-02-03" AND b.transporte<=0) OR (b.fecha BETWEEN "2013-01-29" AND "2013-02-04" AND b.transporte>0) 
-		UNION ALL 
-		SELECT referen numero, fecha, "XXXX" ruta, "XXXX" codigo, "GATOS Y DEDUCCIONES" nomvaca, 0 leche, 0 frio, 0 grasa, 0 bacter, a.proveed, a.nombre, 0, b.banco1, b.cuenta1, 0 monto, 0 dtoagua, 0 temp, 0 monto, 0 incent, 0 pincent, -a.total, 0 bufala, -a.total gtotal 
-		FROM lgasto a JOIN sprv b ON a.proveed=b.proveed 
-		WHERE a.pago=0 
+		SELECT LPAD(a.id,5,"0") numero, IF(b.transporte>0,DATE_SUB(b.fecha, INTERVAL 1 DAY),b.fecha) AS fecha, b.ruta, c.codigo, c.nombre nomvaca, e.ultimo leche, f.ultimo frio, g.ultimo grasa, h.ultimo bacter, d.proveed, d.nombre, a.lista, d.banco1, d.cuenta1, a.lista monto, a.dtoagua, a.temp, ROUND(a.lista*e.ultimo,2) monto, ROUND(a.lista*(f.ultimo+g.ultimo+h.ultimo)*(c.tipolec="F"),2) incent, (f.ultimo+g.ultimo+h.ultimo) pincent, ROUND(a.lista*e.ultimo,2)+ROUND(a.lista*(f.ultimo+g.ultimo+h.ultimo)*(c.tipolec="F"),2) total, ROUND(a.lista*IF(c.animal="B",i.ultimo, 0 ),2) bufala, ROUND(a.lista*e.ultimo,2)+ROUND(a.lista*(f.ultimo+g.ultimo+h.ultimo)*(c.tipolec="F")+ROUND(a.lista*IF(c.animal="B",i.ultimo, 0 ),2),2) gtotal
+		FROM (itlrece AS a)
+		JOIN lrece AS b ON a.id_lrece=b.id
+		JOIN lvaca AS c ON a.id_lvaca=c.id
+		LEFT JOIN sprv AS d ON c.codprv=d.proveed
+		LEFT JOIN sinv e ON e.codigo="ZLCALIENTE"
+		LEFT JOIN sinv f ON f.codigo="ZMANFRIO"
+		LEFT JOIN sinv g ON g.codigo="ZPGRASA"
+		LEFT JOIN sinv h ON h.codigo="ZBACTE"
+		LEFT JOIN sinv i ON i.codigo="ZBUFALA"
+		WHERE a.lista > 0 AND MID(b.ruta,1,1) <> "G" AND (b.fecha BETWEEN "2013-01-28" AND "2013-02-03" AND b.transporte<=0) OR (b.fecha BETWEEN "2013-01-29" AND "2013-02-04" AND b.transporte>0)
+		UNION ALL
+		SELECT referen numero, fecha, "XXXX" ruta, "XXXX" codigo, "GATOS Y DEDUCCIONES" nomvaca, 0 leche, 0 frio, 0 grasa, 0 bacter, a.proveed, a.nombre, 0, b.banco1, b.cuenta1, 0 monto, 0 dtoagua, 0 temp, 0 monto, 0 incent, 0 pincent, -a.total, 0 bufala, -a.total gtotal
+		FROM lgasto a JOIN sprv b ON a.proveed=b.proveed
+		WHERE a.pago=0
 		ORDER BY proveed, codigo';
-		
-		
+
+
 	}
 
 	/**
@@ -521,9 +554,9 @@ class Lvaca extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert','_pre_insert');
-		$edit->pre_process('update','_pre_update');
-		$edit->pre_process('delete','_pre_delete');
+		$edit->pre_process( 'insert','_pre_insert');
+		$edit->pre_process( 'update','_pre_update');
+		$edit->pre_process( 'delete','_pre_delete');
 
 		$edit->codigo = new inputField('C&oacute;digo','codigo');
 		$edit->codigo->rule='max_length[10]';
@@ -603,6 +636,14 @@ class Lvaca extends Controller {
 	}
 
 	function _pre_delete($do){
+		$id_lvaca = $this->db->escape($do->get('id'));
+		$check    = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM itlrece WHERE id_lvaca='.$id_lvaca);
+
+		if ($check > 0){
+			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Vaquera con recepcion, no puede ser borrada';
+			return false;
+		}
+
 		return true;
 	}
 

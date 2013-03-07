@@ -1139,12 +1139,26 @@ class Lpago extends Controller {
 		$fcorte   = $this->fcorte;
 		$dbfcorte = $this->db->escape($fcorte);
 
+			$sel=array('SUM(ROUND(a.lista*b.tarifa,2)+ROUND((litros-lista)*b.tarsob,2)) AS monto');
+			$this->db->select($sel);
+			$this->db->from('lrece AS a');
+			$this->db->join('lruta AS b','a.ruta=b.codigo');
+			$this->db->join('sprv  AS c','b.codprv=c.proveed');
+			$this->db->where('a.lista >',0);
+			$this->db->where('(a.pago IS NULL OR a.pago=0)');
+			$this->db->where('MID(a.ruta,1,1) <>','G');
+			$this->db->where("((a.fecha<='$fcorte' AND a.transporte<=0) OR (a.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND a.transporte>0))");
+			$this->db->where('b.codprv',$proveed);
+
+
 		//Marca los pagos por transporte
 		if($tipo=='T' || $tipo=='A'){
 			$mSQL="UPDATE
 				lrece AS a
 				JOIN lruta AS b ON a.ruta=b.codigo
-			SET a.pago=${dbid} WHERE b.codprv=${dbproveed} AND (a.pago IS NULL OR a.pago=0) AND a.fecha <=${dbfcorte} AND MID(a.ruta,1,1)<>'G'";
+			SET a.pago=${dbid} WHERE b.codprv=${dbproveed} AND (a.pago IS NULL OR a.pago=0)
+			AND ((a.fecha<=${dbfcorte} AND a.transporte<=0) OR (a.fecha<=ADDDATE(${dbfcorte},INTERVAL 1 DAY)  AND a.transporte>0))
+			AND MID(a.ruta,1,1)<>'G'";
 			$this->db->query($mSQL);
 		}
 
