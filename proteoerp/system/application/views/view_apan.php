@@ -1,4 +1,62 @@
 <?php
+echo $form_scripts;
+echo $form_begin;
+
+if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
+if($form->_status <> 'show'){ ?>
+
+<script language="javascript" type="text/javascript">
+</script>
+<?php } ?>
+
+<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+<table width='100%'>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->numero->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->numero->output; ?></td>
+		<td class="littletablerowth"><?php echo $form->fecha->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->fecha->output; ?></td>
+		<td class="littletablerowth"><?php echo $form->tipo->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->tipo->output; ?></td>
+	</tr>
+</table>
+</fieldset>
+
+<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+<table width='100%'>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->clipro->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->clipro->output; ?></td>
+		<td class="littletablerowth"><?php echo $form->nombre->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->nombre->output; ?></td>
+	</tr>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->monto->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->monto->output; ?></td>
+	</tr>
+</table>
+</fieldset>
+
+	<!-- tr>
+		<td class="littletablerowth"><?php echo $form->reinte->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->reinte->output; ?></td>
+	</tr -->
+
+<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+<table width='100%' cellspacing='0' cellpadding='0'>
+	<tr>
+		<td class="littletablerowth">Observaciones:</td>
+		<td class="littletablerow"  ><?php echo $form->observa1->output; ?></td>
+		<td class="littletablerowth">&nbsp;</td>
+		<td class="littletablerow"  ><?php echo $form->observa2->output; ?></td>
+	</tr>
+</table>
+</fieldset>
+<?php echo $form_end; ?>
+
+
+<?php
+/*
 $container_bl=join("&nbsp;", $form->_button_container["BL"]);
 $container_br=join("&nbsp;", $form->_button_container["BR"]);
 $container_tr=join("&nbsp;", $form->_button_container["TR"]);
@@ -222,3 +280,5 @@ function del_itccli(id){
 	<?php } ?>
 </table>
 <?php endif; ?>
+*/
+?>

@@ -1,10 +1,10 @@
 <?php require_once(BASEPATH.'application/controllers/validaciones.php');
 class Apan extends Controller {
 	var $mModulo='APAN';
-	var $titp='Aplicacion de Anticipos';
-	var $tits='Aplicacion de Anticipos';
+	var $titp='Aplicacion de Anticipos y NC';
+	var $tits='Aplicacion de Anticipos y NC';
 	var $url ='finanzas/apan/';
-
+ 
 	function Apan(){
 		parent::Controller();
 		$this->load->library('rapyd');
@@ -33,83 +33,13 @@ class Apan extends Controller {
 		$grid1   = $this->defgridit();
 		$param['grids'][] = $grid1->deploy();
 
+		$readyLayout = $grid->readyLayout2( 212	, 150, $param['grids'][0]['gridname']);
 
-		$readyLayout = '
-		$(\'body\').layout({
-			minSize: 30,
-			north__size: 60,
-			resizerClass: \'ui-state-default\',
-			west__size: 212,
-			west__onresize: function (pane, $Pane){jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);},
-		});
-	
-		$(\'div.ui-layout-center\').layout({
-			minSize: 30,
-			resizerClass: "ui-state-default",
-			center__paneSelector: ".centro-centro",
-			south__paneSelector:  ".centro-sur",
-			south__size: 150,
-			center__onresize: function (pane, $Pane) {
-				jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'setGridWidth\',$Pane.innerWidth()-6);
-				jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'setGridHeight\',$Pane.innerHeight()-110);
-				jQuery("#newapi'.$param['grids'][1]['gridname'].'").jqGrid(\'setGridWidth\',$Pane.innerWidth()-6);
-			}
-		});
-		';
-
-
-		$bodyscript = '
-<script type="text/javascript">
-jQuery("#fimprime").click( function(){
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\'/proteoerp/formatos/ver/APAN/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-</script>
-';
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
-
-/*
-		$WestPanel = '
-<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-
-<div class="anexos">
-<table id="west-grid" align="center">
-	<tr>
-		<td><div class="tema1"><table id="listados"></table></div></td>
-	</tr><tr>
-		<td><div class="tema1"><table id="otros"></table></div></td>
-	</tr>
-</table>
-</div>
-<table id="west-grid" align="center">
-	<tr>
-		<td><div class="tema1 boton1"><a style="width:190px" href="#" id="boton1">Reimprimir Documento '.img(array('src' => 'images/pdf_logo.gif', 'alt' => 'Formato PDF',  'title' => 'Formato PDF', 'border'=>'0')).'</a></div></td>
-	</tr>
-</table>
-
-'.
-
-'</div> <!-- #LeftPane -->
-';
-
-		$centerpanel = '
-<div id="RightPane" class="ui-layout-center">
-	<div class="centro-centro">
-		<table id="newapi'.$param['grids'][0]['gridname'].'"></table>
-		<div id="pnewapi'.$param['grids'][0]['gridname'].'"></div>
-	</div>
-	<div class="centro-sur" id="adicional" style="overflow:auto;">
-
-		<table id="newapi'.$param['grids'][1]['gridname'].'"></table>
-	</div>
-</div> <!-- #RightPane -->
-';
-*/
 
 
 		//Botones Panel Izq
@@ -150,17 +80,17 @@ jQuery("#fimprime").click( function(){
 
 
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	//  Funciones de los Botones
+	//
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
 		jQuery("#fimprime").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				window.open(\'/proteoerp/formatos/ver/APAN/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});
@@ -325,9 +255,9 @@ jQuery("#fimprime").click( function(){
 
 
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	//   Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -616,9 +546,9 @@ jQuery("#fimprime").click( function(){
 		};
 	}
 
-	//**********************************
+	//******************************************************************
 	//Definicion del Grid del Item
-	//**********************************
+	//
 	function defgridit( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -749,9 +679,9 @@ jQuery("#fimprime").click( function(){
 		}
 	}
 
-	/*
-	* Busca la data en el Servidor por json
-	*/
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
 	function getdatait()
 	{
 		$id = $this->uri->segment(4);
@@ -772,6 +702,148 @@ jQuery("#fimprime").click( function(){
 			$rs ='';
 		echo $rs;
 	}
+
+
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+		});
+		';
+
+		$edit = new DataEdit($this->tits, 'apan');
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		$edit->back_url = site_url($this->url.'filteredgrid');
+
+		$edit->script($script,'create');
+
+		$edit->script($script,'modify');
+
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process('insert', '_pre_insert' );
+		$edit->pre_process('update', '_pre_update' );
+		$edit->pre_process('delete', '_pre_delete' );
+
+		$script= ' 
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+		});		';
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
+
+		$edit->numero = new inputField('Numero','numero');
+		$edit->numero->rule='';
+		$edit->numero->size =10;
+		$edit->numero->maxlength =8;
+
+		$edit->fecha = new dateonlyField('Fecha','fecha');
+		$edit->fecha->rule='chfecha';
+		$edit->fecha->size =10;
+		$edit->fecha->maxlength =8;
+
+		$edit->tipo = new inputField('Tipo','tipo');
+		$edit->tipo->rule='';
+		$edit->tipo->size =3;
+		$edit->tipo->maxlength =1;
+
+		$edit->clipro = new inputField('Clipro','clipro');
+		$edit->clipro->rule='';
+		$edit->clipro->size =7;
+		$edit->clipro->maxlength =5;
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->rule='';
+		$edit->nombre->size =32;
+		$edit->nombre->maxlength =30;
+
+		$edit->monto = new inputField('Monto','monto');
+		$edit->monto->rule='numeric';
+		$edit->monto->css_class='inputnum';
+		$edit->monto->size =19;
+		$edit->monto->maxlength =17;
+
+		$edit->reinte = new inputField('Reinte','reinte');
+		$edit->reinte->rule='';
+		$edit->reinte->size =7;
+		$edit->reinte->maxlength =5;
+
+		$edit->observa1 = new inputField('Observa1','observa1');
+		$edit->observa1->rule='';
+		$edit->observa1->size =52;
+		$edit->observa1->maxlength =50;
+
+		$edit->observa2 = new inputField('Observa2','observa2');
+		$edit->observa2->rule='';
+		$edit->observa2->size =52;
+		$edit->observa2->maxlength =50;
+
+		$edit->transac = new inputField('Transac','transac');
+		$edit->transac->rule='';
+		$edit->transac->size =10;
+		$edit->transac->maxlength =8;
+
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+
+		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
+
+		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form'] =&  $edit;
+			$this->load->view('view_apan', $conten);
+
+//			echo $edit->output;
+		}
+	}
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do){
+		$do->error_message_ar['pre_del']='';
+		return false;
+	}
+
+	function _post_insert($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits $primary ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
+	function _post_delete($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Elimino $this->tits $primary ");
+	}
+
+
+
 
 
 
@@ -797,7 +869,11 @@ class apan extends validaciones {
 		//redirect("finanzas/apan/filteredgrid");
 	}
 
-*/
+
+
+	//******************************************************************
+	// Dataedit para todos
+	//
 	function dataedit($tipo)	{
 		$this->rapyd->load('dataobject','datadetails');
 		$do = new DataObject("apan");
@@ -810,7 +886,6 @@ class apan extends validaciones {
 			$do->rel_one_to_many('itccli', 'itccli', array('transac'=>'transac'));
 			$title='itccli';
 		}
-
 
 		$edit = new DataDetails('Aplicaci&oacute;n de Anticipos', $do);
 		$edit->back_url = site_url('finanzas/apan/filteredgrid');
@@ -981,6 +1056,7 @@ class apan extends validaciones {
 		$data["head"]    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
+*/
 
 	function instalar(){
 		//$sql="ALTER TABLE `apan`  DROP PRIMARY KEY";
@@ -991,7 +1067,6 @@ class apan extends validaciones {
 
 
 /*
-
 	function griditapan(){
 		$numero   = isset($_REQUEST['numero'])  ? $_REQUEST['numero']   :  '';
 		if ($numero == '' ){
@@ -1030,9 +1105,7 @@ function renderSinv(value, p, record) {
 	return Ext.String.format(mreto,	value, record.data.codid );
 }
 	";
-
-
 */
-}
 
+}
 ?>

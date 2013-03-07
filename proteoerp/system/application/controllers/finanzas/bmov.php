@@ -51,18 +51,6 @@ class Bmov extends Controller {
 		//$grid->wbotonadd(array('id'=>'bimpriau', 'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Auditoria', 'label'=>'Imprimir Auditoria' ));
 		$WestPanel = $grid->deploywestp();
 
-
-		$centerpanel = '
-		<div id="RightPane" class="ui-layout-center">
-			<div class="centro-centro">
-				<table id="newapi'.$param['grids'][0]['gridname'].'"></table>
-				<div id="pnewapi'.$param['grids'][0]['gridname'].'"></div>
-			</div>
-			<div class="centro-sur" id="adicional" style="overflow:auto;">
-			</div>
-		</div> <!-- #RightPane -->
-		';
-
 		//Panel Central y Sur
 		$centerpanel = $grid->centerpanel( $id = "adicional", $param['grids'][0]['gridname'] );
 

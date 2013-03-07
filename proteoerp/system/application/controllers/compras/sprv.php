@@ -67,10 +67,87 @@ class Sprv extends Controller {
 		}
 		';
 
+		// Fusionar Proveedor
+		$funciones .= '
+		function fusionar(){
+			var yurl = "";
+			var id = jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var mnuevo = "";
+				var ret = jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
+				var mviejo = ret.proveed;
+				$.prompt("<h1>Cambiar Codigo</h1>Proveedor: <b>"+ret.nombre+"</b><br>Codigo Actual: <b>"+ret.proveed+"</b><br><br>Codigo Nuevo <input type=\'text\' id=\'codnuevo\' name=\'mcodigo\' size=\'6\' maxlength=\'5\' >",{
+					buttons: { Cambiar:true, Salir:false},
+					callback: function(e,v,m,f){
+						mnuevo = f.mcodigo;
+						if (v) {
+							yurl = encodeURIComponent(mnuevo);
+							$.ajax({
+								url: "'.site_url('compras/sprv/sprvexiste').'",
+								global: false,
+								type: "POST",
+								data: ({ codigo : encodeURIComponent(mnuevo) }),
+								dataType: "text",
+								async: false,
+								success: function(sino) {
+									sprvcambia(sino, mviejo, mnuevo, ret.nombre);
+								},
+								error: function(h,t,e) { apprise("Error..codigo="+yurl+" ",e) }
+							});
+						}
+					}
+				});
+			} else
+				$.prompt("<h1>Por favor Seleccione un Poveedor</h1>");
+		};
+
+		function sprvcambia( sino, mviejo, mnuevo, nviejo ) {
+			var aprueba = false;
+			if (sino.substring(0,1)=="S"){
+				apprise("<h1>FUSIONAR: Ya existe el proveedor</h1><h2 style=\"background: #ffdddd;text-align:center;\">("+mnuevo+") "+sino.substring(1)+"</h2><p style=\"font-size:130%\">Si prosigue se eliminara el proveedor ("+mviejo+") "+nviejo+"<br>y los movimientos seran agregados a ("+mnuevo+") </"+"p> <p style=\"align:center;font-size:150%\">Desea <strong>Fusionarlos?</"+"strong></"+"p>",
+					{ "confirm":true, "textCancel":"Salir", "textOk":"Proseguir"},
+					function(v){
+						if (v) {
+							sprvfusdef(mnuevo, mviejo)
+							jQuery(gridId1).trigger("reloadGrid");
+						}
+					}
+				);
+			} else {
+				apprise("<h1>Sustitur Codigo actual</h1> <center><h2 style=\"background: #ddeedd\">"+mviejo+" por "+mnuevo+"</"+"h2></"+"center> <p style=\"font-size:130%\">Al cambiar de codigo del proveedor, todos los movimientos y estadisticas <br>se cambiaran correspondientemente.</"+"p> ",
+					{ "confirm":true, "textCancel":"Salir", "textOk":"Proseguir"},
+					function(v){
+						if (v) {
+							sprvfusdef(mnuevo, mviejo);
+							jQuery(gridId1).trigger("reloadGrid");
+						}
+					}
+				)
+			}
+		};
+
+		function sprvfusdef(mnuevo, mviejo){
+			$.ajax({
+				url: "'.site_url('compras/sprv/sprvfusion').'",
+				global: false,
+				type: "POST",
+				data: ({mviejo: encodeURIComponent(mviejo),
+					mnuevo: encodeURIComponent(mnuevo) }),
+				dataType: "text",
+				async: false,
+				success: function(sino) {
+					alert("Cambio finalizado "+sino,"Finalizado Exitosamente")
+				},
+				error: function(h,t,e) {alert("Error..","Finalizado con Error" )}
+			});
+		};
+		';
+
+
 
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
-		//$param['funciones']   = $funciones;
+		$param['funciones']   = $funciones;
 		$param['SouthPanel']  = $SouthPanel;
 		$param['listados']    = $this->datasis->listados('SPRV', 'JQ');
 		$param['otros']       = $this->datasis->otros('SPRV', 'JQ');
@@ -80,6 +157,20 @@ class Sprv extends Controller {
 		$param['encabeza']    = $this->titp;
 		$this->load->view('jqgrid/crud2',$param);
 	}
+
+
+	// Revisa si existe el codigo
+	function sprvexiste(){
+		$cliente = rawurldecode($this->input->post('codigo'));
+		$existe  = $this->datasis->dameval("SELECT count(*) FROM sprv WHERE proveed=".$this->db->escape($cliente));
+		$devo    = 'N ';
+		if ($existe > 0 ) {
+			$devo  ='S';
+			$devo .= $this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed=".$this->db->escape($cliente));
+		}
+		echo $devo;
+	}
+
 
 	//***************************
 	//Funciones de los Botones
@@ -963,13 +1054,11 @@ class Sprv extends Controller {
 		$edit->telefono->cols = 27;
 		$edit->telefono->rows =  2;
 		$edit->telefono->maxlength =200;
-		//$edit->nomfis->style = 'width:170;';
 
 		$edit->email  = new inputField("Email", "email");
 		$edit->email->rule = "trim|valid_email";
 		$edit->email->size =29;
 		$edit->email->maxlength =30;
-		//$edit->email->group = "Datos del Proveedor";
 
 		$edit->url = new inputField("URL", "url");
 		$edit->url->group = "Datos del Proveedor";
@@ -987,7 +1076,6 @@ class Sprv extends Controller {
 				'screeny'   =>'5');
 
 		$lcli=anchor_popup("/ventas/scli/dataedit/create",image('list_plus.png','Agregar',array("border"=>"0")),$atts);
-		//$AddUnidad='<a href="javascript:add_unidad();" title="Haz clic para Agregar una unidad nueva">'.image('list_plus.png','Agregar',array("border"=>"0")).'</a>';
 
 		$edit->observa  = new inputField("Observaci&oacute;n", "observa");
 		$edit->observa->group = "Datos del Proveedor";
@@ -997,6 +1085,7 @@ class Sprv extends Controller {
 		$edit->banco1 = new dropdownField("Cuenta en bco. (1)", "banco1");
 		$edit->banco1->option("","Ninguno");
 		$edit->banco1->options("SELECT cod_banc,nomb_banc FROM tban ORDER BY nomb_banc");
+
 		$edit->banco1->group = "Cuentas Bancarias";
 		$edit->banco1->style='width:140px;';
 
@@ -1005,7 +1094,6 @@ class Sprv extends Controller {
 		$edit->cuenta1->rule = "trim";
 		$edit->cuenta1->maxlength = 25;
 		$edit->cuenta1->group = "Cuentas Bancarias";
-		//$edit->cuenta1->in="banco$i";
 
 		$edit->banco2 = new dropdownField("Cuenta en bco. (2)", 'banco2');
 		$edit->banco2->option('','Ninguno');
@@ -1043,14 +1131,11 @@ class Sprv extends Controller {
 		$edit->nomfis->maxlength =200;
 		$edit->nomfis->style = 'width:170;';
 
-
-		//$lcuent=anchor_popup('/contabilidad/cpla/dataedit/create','Agregar Cuenta Contable',$atts);
 		$edit->cuenta = new inputField('Contable', 'cuenta');
 		$edit->cuenta->rule='trim|callback_chcuentac';
 		$edit->cuenta->size =17;
 		$edit->cuenta->maxlength =15;
 		$edit->cuenta->append($bcpla);
-		//$edit->cuenta->append($lcuent);
 
 		$edit->reteiva  = new inputField('Retenci&oacute;n','reteiva');
 		$edit->reteiva->size = 6;
@@ -1064,18 +1149,6 @@ class Sprv extends Controller {
 			$edit->build();
 			$conten['form']  =&  $edit;
 			$data['content'] = $this->load->view('view_sprv', $conten);
-
-
-			//$smenu['link']=barra_menu('230');
-			//$data['content'] = $edit->output;
-			//$data['smenu']   = $this->load->view('view_sub_menu', $smenu,true);
-			//$data['title'] = heading('Proveedores');
-
-			//$data['head']  = script('jquery.js');
-			//$data['head'] .= script('plugins/jquery.numeric.pack.js');
-			//$data['head'] .= script('plugins/jquery.floatnumber.js');
-			//$data['head'] .= $this->rapyd->get_head();
-			//$this->load->view('view_ventanas', $data);
 		}else{
 			$edit->on_save_redirect=false;
 			$edit->build();
@@ -1299,11 +1372,12 @@ class Sprv extends Controller {
 		}
 	}
 
-	function vcard($id_sprv){
-		$dbid=$this->db->escape($id_sprv);
-		$sprv=$this->datasis->damerow("SELECT contacto,nombre,telefono,direc1 AS dire11 FROM sprv WHERE id=$dbid");
+	function vcard($id_sprv) {
+		$dbid = $this->db->escape($id_sprv);
+		$sprv = $this->datasis->damerow("SELECT contacto, nombre, telefono, direc1 dire11 FROM sprv WHERE id=$dbid");
 
-		if(!empty($sprv)){
+		if ( !empty($sprv) ) {
+
 			$this->load->library('Qr');
 			$contacto=trim($sprv['contacto']);
 			$nombre  =trim($sprv['nombre']);
@@ -1327,11 +1401,13 @@ class Sprv extends Controller {
 			$text.= "ADR;WORK:$direc\n";
 			$text.= "END:VCARD";
 			$this->qr->imgcode($text);
+
 		}
+ 
 	}
 
-	function instalar(){
 
+	function instalar(){
 		$campos=$this->db->list_fields('sprv');
 		if (!in_array('id',$campos)){
 			$this->db->simple_query('ALTER TABLE `sprv` DROP PRIMARY KEY');
@@ -1357,5 +1433,111 @@ class Sprv extends Controller {
 		$this->db->simple_query('ALTER TABLE sprv CHANGE COLUMN telefono telefono TEXT NULL DEFAULT NULL');
 	}
 
+	//******************************************************************
+	// Fusionar
+	//
+	function sprvfusion(){
+		$mviejo    = strtoupper($_REQUEST['mviejo']);
+		$mnuevo    = strtoupper($_REQUEST['mnuevo']);
+
+		//ELIMINAR DE SCLI
+		$mYaEsta = $this->datasis->dameval("SELECT count(*) FROM sprv WHERE proveed=".$this->db->escape($mnuevo));
+
+		if ( $mYaEsta > 0 )
+			$this->db->query("DELETE FROM sprv WHERE proveed=".$this->db->escape($mviejo));
+		else
+			$this->db->query("UPDATE sprv SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo));
+
+		// SPRM
+		$mSQL = "UPDATE sprm SET cod_prv=".$this->db->escape($mnuevo)." WHERE cod_prv=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// APAN
+		$mSQL = "UPDATE apan SET clipro=".$this->db->escape($mnuevo)." WHERE clipro=".$this->db->escape($mviejo)." AND tipo='P' ";
+		$this->db->simple_query($mSQL);
+
+		//APAN
+		$mSQL = "UPDATE apan SET reinte=".$this->db->escape($mnuevo)." WHERE reinte=".$this->db->escape($mviejo)." AND tipo='C' ";
+
+		// ITPPRO
+		$mSQL = "UPDATE itppro SET cod_prv=".$this->db->escape($mnuevo)." WHERE cod_prv=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// BMOV CLIPRO='P'  CODCP 
+		$mSQL = "UPDATE bmov SET codcp=".$this->db->escape($mnuevo)." WHERE codcp=".$this->db->escape($mviejo)." AND clipro='P'";
+		$this->db->simple_query($mSQL);
+
+		// SCST
+		$mSQL = "UPDATE scst SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// ITSCST
+		$mSQL = "UPDATE itscst SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// ORDS
+		$mSQL = "UPDATE ords SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// ITORDS
+		$mSQL = "UPDATE itords SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// ORDC
+		$mSQL = "UPDATE ordc SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// ITORDS
+		$mSQL = "UPDATE itordc SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// GSER
+		$mSQL = "UPDATE gser SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// GITSER
+		$mSQL = "UPDATE gitser SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// CRUC
+		$mSQL = "UPDATE cruc SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo)." AND MID(tipo,1,1)='P'";
+		$this->db->simple_query($mSQL);
+
+		// CRUC
+		$mSQL = "UPDATE cruc SET cliente=".$this->db->escape($mnuevo)." WHERE cliente=".$this->db->escape($mviejo)." AND MID(tipo,3,1)='P'";
+		$this->db->simple_query($mSQL);
+
+		// PRMO
+		$mSQL = "UPDATE prmo SET clipro=".$this->db->escape($mnuevo)." WHERE clipro=".$this->db->escape($mviejo)." AND tipop NOT IN ('1','3','6')";
+		$this->db->simple_query($mSQL);
+
+		// RIVA
+		$mSQL = "UPDATE riva SET clipro=".$this->db->escape($mnuevo)." WHERE clipro=".$this->db->escape($mviejo);
+		$this->db->simple_query($mSQL);
+
+		// LVACA
+		if ( $this->datasis->istabla('lvaca')){
+			$mSQL = "UPDATE lvaca SET codprv=".$this->db->escape($mnuevo)." WHERE codprv=".$this->db->escape($mviejo);
+			$this->db->simple_query($mSQL);
+		}
+
+		// LRUTA
+		if ( $this->datasis->istabla('lruta')){
+			$mSQL = "UPDATE lruta SET codprv=".$this->db->escape($mnuevo)." WHERE codprv=".$this->db->escape($mviejo);
+			$this->db->simple_query($mSQL);
+		}
+
+		// LPAGO
+		if ( $this->datasis->istabla('lpago')){
+			$mSQL = "UPDATE lpago SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
+			$this->db->simple_query($mSQL);
+		}
+
+		// LREDU
+		if ( $this->datasis->istabla('lgasto')){
+			$mSQL = "UPDATE lgasto SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
+			$this->db->simple_query($mSQL);
+		}
+	}
 }
 ?>
