@@ -637,7 +637,7 @@ class Lvaca extends Controller {
 
 	function _pre_delete($do){
 		$id_lvaca = $this->db->escape($do->get('id'));
-		$check    = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM itlrece WHERE id_lvaca='.$id_lvaca);
+		$check    = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM itlrece WHERE  lista > 0 AND id_lvaca='.$id_lvaca);
 
 		if ($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Vaquera con recepcion, no puede ser borrada';
@@ -658,6 +658,10 @@ class Lvaca extends Controller {
 	}
 
 	function _post_delete($do){
+		$id_lvaca = $this->db->escape($do->get('id'));
+		$mSQL='DELETE FROM itlrece WHERE  id_lvaca='.$id_lvaca;
+		$this->db->simple_query($mSQL);
+
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
