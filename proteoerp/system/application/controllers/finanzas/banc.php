@@ -14,7 +14,6 @@ class Banc extends Controller {
 
 	function index(){
 		$this->instalar();
-
 		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}

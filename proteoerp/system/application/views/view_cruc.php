@@ -107,7 +107,7 @@ $(function() {
 </table>
 </fieldset>
 
-<div align='center' style='border: 3px outset #EFEFEF;background: #EFEFFF '>
+<div align='center' style='border: 1px outset #EFEFEF;background: #EFEFFF '>
 	<div id='grid1_container' style='width:580px;height:150px'>
 		<table style='width:100%;'>
 			<tr id='__PNPL__'>

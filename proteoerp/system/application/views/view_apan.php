@@ -9,44 +9,89 @@ if($form->_status <> 'show'){ ?>
 </script>
 <?php } ?>
 
-<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
-<table width='100%'>
+<?php echo $form->tipo->output; ?>
+<fieldset  style='border: 1px outset #FEB404; background: #EDDA4E;'>
+<table width='100%' cellspacing='0' cellpadding='0'>
 	<tr>
-		<td class="littletablerowth"><?php echo $form->numero->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->numero->output; ?></td>
-		<td class="littletablerowth"><?php echo $form->fecha->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->fecha->output; ?></td>
-		<td class="littletablerowth"><?php echo $form->tipo->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->tipo->output; ?></td>
+<?php if ($form->tipo->insertValue == 'C') {  ?>
+		<td style='font-size:14pt;text-align:center;font-weight:bold;'>APLICACION DE ANTICIPOS A CLIENTE</td>
+<?php } elseif ($form->tipo->insertValue == 'P') { ?>
+		<td style='font-size:14pt;text-align:center;font-weight:bold;'>APLICACION DE ANTICIPOS A PROVEEDOR</td>
+<?php } ?>
 	</tr>
 </table>
 </fieldset>
+
+
+<!-- fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+<table width='100%'>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->fecha->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->fecha->output; ?></td>
+	</tr>
+</table>
+</fieldset -->
 
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 <table width='100%'>
 	<tr>
 		<td class="littletablerowth"><?php echo $form->clipro->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->clipro->output; ?></td>
-		<td class="littletablerowth"><?php echo $form->nombre->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->nombre->output; ?></td>
-	</tr>
-	<tr>
 		<td class="littletablerowth"><?php echo $form->monto->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->monto->output; ?></td>
 	</tr>
 </table>
 </fieldset>
 
-	<!-- tr>
-		<td class="littletablerowth"><?php echo $form->reinte->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->reinte->output; ?></td>
-	</tr -->
+<div align='center' style='border: 1px outset #EFEFEF;background: #EFEFFF '>
+	<table style='width:100%;'>
+		<tr>
+			<td align='center'>
+				<div id='grid1_container' style='width:260px;height:210px; border: 1px outset #123;background: #FFFFFF; '>
+					<table style='width:100%;' >
+						<tr id='__PNPL__'>
+							<th colspan='4' class="littletableheaderdet">ANTICIPOS O NC</th>
+						</tr>
+
+						<tr id='__PNPL__'>
+							<th class="littletableheaderdet">N&uacute;mero</th>
+							<th class="littletableheaderdet">Fecha</th>
+							<th class="littletableheaderdet">Saldo</th>
+							<th class="littletableheaderdet">Aplicar</th>
+						</tr>
+					</table>
+				</div>
+			</td>
+			<td align='center'>
+				<div id='grid2_container' style='width:280px;height:210px; border: 1px outset #123;background: #FFFFFF;'>
+					<table style='width:100%;'>
+					<tr id='__PNPL__'>
+						<th colspan='5' class="littletableheaderdet">EFECTOS</th>
+					</tr>
+					<tr id='__PNPL__'>
+						<th class="littletableheaderdet">N&uacute;mero</th>
+						<th class="littletableheaderdet">Fecha</th>
+						<th class="littletableheaderdet">Monto</th>
+						<th class="littletableheaderdet">Saldo</th>
+						<th class="littletableheaderdet">Abono</th>
+					</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+
+
 
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 <table width='100%' cellspacing='0' cellpadding='0'>
 	<tr>
 		<td class="littletablerowth">Observaciones:</td>
 		<td class="littletablerow"  ><?php echo $form->observa1->output; ?></td>
+	</tr>
+	<tr>
 		<td class="littletablerowth">&nbsp;</td>
 		<td class="littletablerow"  ><?php echo $form->observa2->output; ?></td>
 	</tr>

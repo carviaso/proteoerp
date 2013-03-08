@@ -902,7 +902,6 @@ class Cruc extends Controller {
 		$edit->script($script,'create');
 
 		$edit->proveed->label = 'Cliente';
-
 		$edit->cliente->label = 'Proveedor';
 
 		$edit->tipo = new autoUpdateField('tipo','C-P','C-P');

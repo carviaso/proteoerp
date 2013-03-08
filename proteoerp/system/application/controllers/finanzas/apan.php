@@ -9,7 +9,7 @@ class Apan extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		//$this->datasis->modulo_id('NNN',1);
+		$this->datasis->modulo_nombre( 'APAN', $ventana=0 );
 	}
 
 	function index(){
@@ -18,6 +18,7 @@ class Apan extends Controller {
 			$this->db->simple_query('ALTER TABLE apan ADD UNIQUE INDEX numero (numero)');
 			$this->db->simple_query('ALTER TABLE apan ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};
+		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -41,13 +42,11 @@ class Apan extends Controller {
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
-
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'fcliente', 'img'=>'images/agrega4.png',  'alt' => 'Anticipo de Cliente',   'label'=>'Anticipo de Cliente'   ));
 		$grid->wbotonadd(array('id'=>'fproveed', 'img'=>'images/agrega4.png',  'alt' => 'Anticipo de Proveedor', 'label'=>'Anticipo de Proveedor' ));
 		$grid->wbotonadd(array('id'=>'fimprime', 'img'=>'images/pdf_logo.gif', 'alt' => 'Imprimir Documento',    'label'=>'Imprimir Documento'    ));
 		$WestPanel = $grid->deploywestp();
-
 
 		//Panel Central
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
@@ -55,7 +54,7 @@ class Apan extends Controller {
 		$funciones = '';
 
 		$adic = array(
-		array("id"=>"forma1",  "title"=>"Agregar/Editar Registro")
+		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -85,6 +84,30 @@ class Apan extends Controller {
 	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
+
+		// Anticipo a Cliente
+		$bodyscript .= '
+		$("#fcliente").click( function() {
+			$.post("'.site_url($this->url.'decliente/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 450, width: 620, title: "Aplicacion de Anticipo a Cliente"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
+
+		// Anticipo a Cliente
+		$bodyscript .= '
+		$("#fproveed").click( function() {
+			$.post("'.site_url($this->url.'deproveed/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 450, width: 620, title: "Aplicacion de Anticipo a Proveedor"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
 
 		$bodyscript .= '
 		jQuery("#fimprime").click( function(){
@@ -704,7 +727,31 @@ class Apan extends Controller {
 	}
 
 
-	function dataedit(){
+	//******************************************************************
+	// Dataedit para todos
+	//
+	function _dataedit($edit){
+		$this->rapyd->load('dataedit');
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form'] =&  $edit;
+			$this->load->view('view_apan', $conten);
+		}
+	}
+
+	//******************************************************************
+	// DataEdit Compartido
+	//
+	function _deapan(){
 		$this->rapyd->load('dataedit');
 		$script= '
 		$(function() {
@@ -721,7 +768,6 @@ class Apan extends Controller {
 		$edit->back_url = site_url($this->url.'filteredgrid');
 
 		$edit->script($script,'create');
-
 		$edit->script($script,'modify');
 
 		$edit->post_process('insert','_post_insert');
@@ -731,72 +777,71 @@ class Apan extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});		';
-		$edit->script($script,'create');
-		$edit->script($script,'modify');
-
 		$edit->numero = new inputField('Numero','numero');
-		$edit->numero->rule='';
-		$edit->numero->size =10;
-		$edit->numero->maxlength =8;
+		$edit->numero->rule      = '';
+		$edit->numero->size      = 10;
+		$edit->numero->maxlength = 8;
 
 		$edit->fecha = new dateonlyField('Fecha','fecha');
-		$edit->fecha->rule='chfecha';
-		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
+		$edit->fecha->rule      = 'chfecha';
+		$edit->fecha->size      = 10;
+		$edit->fecha->maxlength = 8;
+		$edit->fecha->calendar  = false;
+		$edit->fecha->insertValue= date('Y-m-d');
+		$edit->fecha->readonly  = true;
 
-		$edit->tipo = new inputField('Tipo','tipo');
-		$edit->tipo->rule='';
-		$edit->tipo->size =3;
-		$edit->tipo->maxlength =1;
+
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->rule      = '';
+		$edit->tipo->size      = 3;
+		$edit->tipo->maxlength = 1;
 
 		$edit->clipro = new inputField('Clipro','clipro');
-		$edit->clipro->rule='';
-		$edit->clipro->size =7;
-		$edit->clipro->maxlength =5;
+		$edit->clipro->rule      = '';
+		$edit->clipro->size      = 7;
+		$edit->clipro->maxlength = 5;
 
 		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='';
-		$edit->nombre->size =32;
-		$edit->nombre->maxlength =30;
+		$edit->nombre->rule      = '';
+		$edit->nombre->size      = 30;
+		$edit->nombre->maxlength = 30;
 
 		$edit->monto = new inputField('Monto','monto');
-		$edit->monto->rule='numeric';
-		$edit->monto->css_class='inputnum';
-		$edit->monto->size =19;
-		$edit->monto->maxlength =17;
+		$edit->monto->rule      = 'numeric';
+		$edit->monto->css_class = 'inputnum';
+		$edit->monto->size      = 10;
+		$edit->monto->maxlength = 17;
 
 		$edit->reinte = new inputField('Reinte','reinte');
-		$edit->reinte->rule='';
-		$edit->reinte->size =7;
-		$edit->reinte->maxlength =5;
+		$edit->reinte->rule      = '';
+		$edit->reinte->size      = 7;
+		$edit->reinte->maxlength = 5;
 
 		$edit->observa1 = new inputField('Observa1','observa1');
-		$edit->observa1->rule='';
-		$edit->observa1->size =52;
-		$edit->observa1->maxlength =50;
+		$edit->observa1->rule      = '';
+		$edit->observa1->size      = 52;
+		$edit->observa1->maxlength = 50;
 
 		$edit->observa2 = new inputField('Observa2','observa2');
-		$edit->observa2->rule='';
-		$edit->observa2->size =52;
-		$edit->observa2->maxlength =50;
+		$edit->observa2->rule      = '';
+		$edit->observa2->size      = 52;
+		$edit->observa2->maxlength = 50;
 
 		$edit->transac = new inputField('Transac','transac');
-		$edit->transac->rule='';
-		$edit->transac->size =10;
-		$edit->transac->maxlength =8;
+		$edit->transac->rule      = '';
+		$edit->transac->size      = 10;
+		$edit->transac->maxlength =  8;
 
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
-
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
-
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
-		$edit->build();
+		//$this->_dataedit($edit);
 
+		return $edit;
+
+/*
+		$edit->build();
 		if($edit->on_success()){
 			$rt=array(
 				'status' =>'A',
@@ -807,10 +852,52 @@ class Apan extends Controller {
 		}else{
 			$conten['form'] =&  $edit;
 			$this->load->view('view_apan', $conten);
-
-//			echo $edit->output;
 		}
+*/
 	}
+
+
+	//******************************************************************
+	// Cruce Cliente Proveedor
+	//
+	function decliente(){
+		$this->rapyd->load('dataedit');
+		$edit = $this->_deapan();
+
+		$script= '';
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+
+		$edit->clipro->label = 'Cliente';
+
+		$edit->tipo = new autoUpdateField('tipo','C','C');
+
+		$this->_dataedit($edit);
+
+	}
+
+	//******************************************************************
+	// Cruce Cliente Proveedor
+	//
+	function deproveed(){
+		$this->rapyd->load('dataedit');
+		$edit = $this->_deapan();
+
+		$script= '';
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+
+		$edit->clipro->label = 'Proveedor';
+
+		$edit->tipo = new autoUpdateField('tipo','P','P');
+
+		$this->_dataedit($edit);
+
+	}
+
+
 
 	function _pre_insert($do){
 		$do->error_message_ar['pre_ins']='';
