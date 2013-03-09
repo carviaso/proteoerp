@@ -31,11 +31,11 @@ class Banc extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"recalban", "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Recalcular Saldo"));
+		$grid->wbotonadd(array('id'=>'recalban', 'img'=>'images/pdf_logo.gif',  'alt' => 'Formato PDF', 'label'=>'Recalcular Saldo'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Banco o Caja")
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Banco o Caja')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 

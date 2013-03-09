@@ -42,23 +42,23 @@ class Prmo extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprime','img'=>'assets/default/images/print.png','alt' => 'Reimprimir',         'label'=>'Reimprimir Documento'));
-		$grid->wbotonadd(array("id"=>"prmo1",  "img"=>"images/mano.png",          "alt" => "Prestamo Otorgado",        "label"=>"Prestamo Otorgado",     "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"prmo2",  "img"=>"images/check.png",         "alt" => "Prestamo Recibido",        "label"=>"Prestamo Recibido",     "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"prmo3",  "img"=>"images/face-sad.png",      "alt" => "Cheq Devuelto Cliente",    "label"=>"Cheq Devuelto Cliente", "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"prmo4",  "img"=>"images/face-surprise.png", "alt" => "Cheq Devuelto Proveed",    "label"=>"Cheq Devuelto Proveed", "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"prmo5",  "img"=>"images/dinero.png",        "alt" => "Deposito por Analizar",    "label"=>"Deposito por Analizar", "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"prmo6",  "img"=>"images/retencion.gif",     "alt" => "Cargos Indebidos en Banco","label"=>"Cargos Indebidos ",     "tema"=>"anexos"));
+		$grid->wbotonadd(array('id'=>'prmo1'  ,'img'=>'images/mano.png',          'alt' => 'Prestamo Otorgado',        'label'=>'Prestamo Otorgado',     'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'prmo2'  ,'img'=>'images/check.png',         'alt' => 'Prestamo Recibido',        'label'=>'Prestamo Recibido',     'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'prmo3'  ,'img'=>'images/face-sad.png',      'alt' => 'Cheq Devuelto Cliente',    'label'=>'Cheq Devuelto Cliente', 'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'prmo4'  ,'img'=>'images/face-surprise.png', 'alt' => 'Cheq Devuelto Proveed',    'label'=>'Cheq Devuelto Proveed', 'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'prmo5'  ,'img'=>'images/dinero.png',        'alt' => 'Deposito por Analizar',    'label'=>'Deposito por Analizar', 'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'prmo6'  ,'img'=>'images/retencion.gif',     'alt' => 'Cargos Indebidos en Banco','label'=>'Cargos Indebidos',      'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
-			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
-			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' , 'title'=>'Mostrar Registro'),
+			array('id'=>'fborra', 'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		//Panel Central y Sur
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'] );
 
 
 		$param['WestPanel']   = $WestPanel;
@@ -82,81 +82,6 @@ class Prmo extends Controller {
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
 
-		// Prestamo Otorgado CxC
-		$bodyscript .= '
-		$("#prmo1").click( function() {
-			$.post("'.site_url($this->url.'deprmo1/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 400, width: 620, title: "Prestamo Otorgado"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-		// Prestamo Recibido
-		$bodyscript .= '
-		$("#prmo2").click( function() {
-			$.post("'.site_url($this->url.'deprmo2/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 400, width: 610, title: "Prestamo Recibido"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-		// Cheque devuelto de Cliente
-		$bodyscript .= '
-		$("#prmo3").click( function() {
-			$.post("'.site_url($this->url.'deprmo3/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 400, width: 610, title: "Prestamo Recibido"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-
-		// Cheque devuelto de Proveedor
-		$bodyscript .= '
-		$("#prmo4").click( function() {
-			$.post("'.site_url($this->url.'deprmo4/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 400, width: 610, title: "Prestamo Recibido"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-
-		// Depositos por Analizar
-		$bodyscript .= '
-		$("#prmo5").click( function() {
-			$.post("'.site_url($this->url.'deprmo5/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 400, width: 610, title: "Prestamo Recibido"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-		// Cargos Indebidos
-		$bodyscript .= '
-		$("#prmo6").click( function() {
-			$.post("'.site_url($this->url.'deprmo6/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 400, width: 610, title: "Prestamo Recibido"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-
 		$bodyscript .= '
 		function prmoadd(){
 			$.post("'.site_url($this->url.'dataedit/create').'",
@@ -164,8 +89,7 @@ class Prmo extends Controller {
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
-		};
-		';
+		};';
 
 		$bodyscript .= '
 		function prmoedit(){
@@ -199,29 +123,30 @@ class Prmo extends Controller {
 
 		$bodyscript .= '
 		function prmodel() {
-		var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-		if(id){
-			if(confirm(" Seguro desea eliminar el registro?")){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
-					try{
-						var json = JSON.parse(data);
-						if (json.status == "A"){
-							apprise("Registro eliminado");
-						}else{
-							apprise("Registro no se puede eliminado");
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
 						}
-					}catch(e){
-						$("#fborra").html(data);
-						$("#fborra").dialog( "open" );
-					}
-				});
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-		}else{
-			$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-		}
 		};';
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function(){
@@ -235,6 +160,72 @@ class Prmo extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 			';
+
+		// Prestamo Otorgado CxC
+		$bodyscript .= '
+		$("#prmo1").click( function() {
+			$.post("'.site_url($this->url.'deprmo1/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 400, width: 620, title: "Prestamo Otorgado"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});';
+
+		// Prestamo Recibido
+		$bodyscript .= '
+		$("#prmo2").click( function() {
+			$.post("'.site_url($this->url.'deprmo2/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 400, width: 610, title: "Prestamo Recibido"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});';
+
+		// Cheque devuelto de Cliente
+		$bodyscript .= '
+		$("#prmo3").click( function() {
+			$.post("'.site_url($this->url.'deprmo3/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 400, width: 610, title: "Prestamo Recibido"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});';
+
+		// Cheque devuelto de Proveedor
+		$bodyscript .= '
+		$("#prmo4").click( function() {
+			$.post("'.site_url($this->url.'deprmo4/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 400, width: 610, title: "Prestamo Recibido"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});';
+
+		// Depositos por Analizar
+		$bodyscript .= '
+		$("#prmo5").click( function() {
+			$.post("'.site_url($this->url.'deprmo5/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 400, width: 610, title: "Prestamo Recibido"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});';
+
+		// Cargos Indebidos
+		$bodyscript .= '
+		$("#prmo6").click( function() {
+			$.post("'.site_url($this->url.'deprmo6/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 400, width: 610, title: "Prestamo Recibido"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});';
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -309,8 +300,7 @@ class Prmo extends Controller {
 
 		$bodyscript .= '});'."\n";
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -319,7 +309,7 @@ class Prmo extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -955,7 +945,7 @@ class Prmo extends Controller {
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
 		return $edit;
-		
+
 	}
 
 
@@ -1004,7 +994,7 @@ class Prmo extends Controller {
 	// Dataedit para Prestamo Recibido
 	//
 	function deprmo2(){
-		
+
 		$this->rapyd->load('dataedit');
 		$edit = $this->deprmo();
 
@@ -1036,7 +1026,7 @@ class Prmo extends Controller {
 		$edit->tipo->style = 'width:120px';
 
 		$this->dataedit($edit);
-		
+
 	}
 
 
@@ -1085,7 +1075,7 @@ class Prmo extends Controller {
 		});
 		';
 
-		
+
 		$this->rapyd->load('dataedit');
 		$edit = $this->deprmo();
 
@@ -1112,7 +1102,7 @@ class Prmo extends Controller {
 		$edit->codban->style = "width:210px;";
 
 		$this->dataedit($edit);
-		
+
 	}
 
 
@@ -1120,7 +1110,7 @@ class Prmo extends Controller {
 	// Dataedit para Cheque devuelto a Proveedor
 	//
 	function deprmo4(){
-		
+
 		$this->rapyd->load('dataedit');
 		$edit = $this->deprmo();
 
@@ -1187,14 +1177,14 @@ class Prmo extends Controller {
 
 
 		$this->dataedit($edit);
-		
+
 	}
 
 	//******************************************************************
 	// Dataedit para Depositos por Analizar
 	//
 	function deprmo5(){
-		
+
 		$this->rapyd->load('dataedit');
 		$edit = $this->deprmo();
 
@@ -1230,7 +1220,7 @@ class Prmo extends Controller {
 
 
 		$this->dataedit($edit);
-		
+
 	}
 
 
@@ -1238,7 +1228,7 @@ class Prmo extends Controller {
 	// Dataedit para Cargos Indebidos en Banco
 	//
 	function deprmo6(){
-		
+
 		$this->rapyd->load('dataedit');
 		$edit = $this->deprmo();
 
@@ -1267,7 +1257,7 @@ class Prmo extends Controller {
 
 
 		$this->dataedit($edit);
-		
+
 	}
 
 
@@ -1309,26 +1299,26 @@ class Prmo extends Controller {
 			$do->error_message_ar['pre_ins']='Tipo de Movimiento errado';
 			return false;
 		}
-		
+
 		if ( $monto <= 0 ){
 			$do->error_message_ar['pre_ins']='Falta colocar el Monto';
 			return false;
-		} 
+		}
 
 		if ( empty($escaja) ){
 			$do->error_message_ar['pre_ins']='Error con el banco o la caja, reintente...';
 			return false;
-		} 
+		}
 
 		//Validaciones PRESTAMO OTORGADO
 		if ( $tipop == '1' ){
-			if ( $escaja == 'CAJ' ) 
+			if ( $escaja == 'CAJ' )
 				$numche = $this->datasis->fprox_numero('ncaja'.$codban);
 			else {
 				if ( empty( $numche ) ){
 					$do->error_message_ar['pre_ins']='Falta colocar el Numero de Documento';
 					return false;
-				}  	
+				}
 				// Busca si ya esta en bmov
 				$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
 				$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
@@ -1343,7 +1333,7 @@ class Prmo extends Controller {
 			$transac = $this->datasis->fprox_numero('ntransa');
 			$negreso = $this->datasis->fprox_numero('negreso');
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
-			
+
 			$do->set('numero', $numero);
 			$do->set('transac',$transac);
 			$do->set('negreso',$negreso);
@@ -1351,13 +1341,13 @@ class Prmo extends Controller {
 
 		//Validaciones PRESTAMO RECIBIDO
 		} elseif ( $tipop == '2' ){
-			if ( $escaja == 'CAJ' ) 
+			if ( $escaja == 'CAJ' )
 				$numche = $this->datasis->fprox_numero('ncaja'.$codban);
 			else {
 				if ( empty( $numche ) ){
 					$do->error_message_ar['pre_ins']='Falta colocar el Numero de Documento';
 					return false;
-				}  	
+				}
 				// Busca si ya esta en bmov
 				$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
 				$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
@@ -1381,16 +1371,16 @@ class Prmo extends Controller {
 		//Validaciones CHEQUE DEVUELTO CLIENTE
 		} elseif ( $tipop == '3' ){
 
-			if ( $escaja == 'CAJ' ) 
+			if ( $escaja == 'CAJ' )
 				$numche = $this->datasis->fprox_numero('ncaja'.$codban);
 			else {
 				if ( empty( $numche ) ){
 					$do->error_message_ar['pre_ins']='Falta colocar el Numero de Documento';
 					return false;
-				}  	
+				}
 				// Busca si ya esta en bmov
 				$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
-		
+
 				$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
 
 				if ( !empty($esta) ) {
@@ -1402,7 +1392,7 @@ class Prmo extends Controller {
 			$numero  = $this->datasis->fprox_numero('nprmo');
 			$transac = $this->datasis->fprox_numero('ntransa');
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
-			
+
 			$do->set('vence',  $do->get('fecha'));
 			$do->set('numche', $numche);
 			$do->set('numero', $numero);
@@ -1413,15 +1403,15 @@ class Prmo extends Controller {
 
 			if ( empty( $numche ) ){
 				$numche  = $this->datasis->fprox_numero('nprmocd');
-			}  	
+			}
 
 			if ( empty( $docum ) ){
 				$do->error_message_ar['pre_ins']='Falta colocar el Numero de Documento';
 				return false;
-			}  	
+			}
 			// Busca si ya esta en bmov
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
-	
+
 			$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
 				if ( !empty($esta) ) {
 				$do->error_message_ar['pre_ins']='Movimiento ya existe en bancos ('.$esta.')';
@@ -1431,7 +1421,7 @@ class Prmo extends Controller {
 			$numero  = $this->datasis->fprox_numero('nprmo');
 			$transac = $this->datasis->fprox_numero('ntransa');
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
-			
+
 			$do->set('vence',  $do->get('fecha'));
 			$do->set('numche', $numche);
 			$do->set('numero', $numero);
@@ -1443,11 +1433,11 @@ class Prmo extends Controller {
 			if ( empty( $numche ) ){
 				$do->error_message_ar['pre_ins']='Falta colocar el Numero del Deposito';
 				return false;
-			}  	
+			}
 
 			// Busca si ya esta en bmov
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
-	
+
 			$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
 			if ( !empty($esta) ) {
 				$do->error_message_ar['pre_ins']='Movimiento ya existe en bancos ('.$esta.')';
@@ -1469,7 +1459,7 @@ class Prmo extends Controller {
 
 			$do->set('clipro', $clipro);
 			$do->set('nombre', $nombre);
-			
+
 			$do->set('vence',  $do->get('fecha'));
 			$do->set('numche', $numche);
 			$do->set('numero', $numero);
@@ -1481,10 +1471,10 @@ class Prmo extends Controller {
 			if ( empty( $numche ) ){
 				$do->error_message_ar['pre_ins']='Falta colocar el Numero de Documento';
 				return false;
-			}  	
+			}
 			// Busca si ya esta en bmov
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
-	
+
 			$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
 				if ( !empty($esta) ) {
 				$do->error_message_ar['pre_ins']='Movimiento ya existe en bancos ('.$esta.')';
@@ -1494,15 +1484,12 @@ class Prmo extends Controller {
 			$numero  = $this->datasis->fprox_numero('nprmo');
 			$transac = $this->datasis->fprox_numero('ntransa');
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
-			
+
 			$do->set('vence',  $do->get('fecha'));
 			$do->set('numche', $numche);
 			$do->set('numero', $numero);
 			$do->set('transac',$transac);
-
-
 		}
-
 
 		return true;
 	}
@@ -1518,7 +1505,7 @@ class Prmo extends Controller {
 			$do->error_message_ar['pre_ins']='Documento ya existe ('.$esta.')';
 			return 'Documento ya existe ('.$esta.')';
 		}
-		return '';						
+		return '';
 	}
 
 	function _pre_update($do){
@@ -1540,13 +1527,13 @@ class Prmo extends Controller {
 		$fecha   = $do->get('fecha');
 		$negreso = $do->get('negreso');
 		$tipo    = $do->get('tipo');
-		
+
 		//GUARDA PRESTAMO OTORGADO
 		if ( $tipop == '1' ){
 
 			// Crea bmov egreso
 			$this->datasis->actusal($codban, $fecha, -1*$monto );
-		
+
 			$mREG = $this->datasis->damereg("SELECT numcuent, banco, saldo, tbanco FROM banc WHERE codbanc='".$codban."'");
 
 			$mCUENTA  = $mREG['numcuent'];
@@ -1554,7 +1541,7 @@ class Prmo extends Controller {
 			$mSALDO   = $mREG['saldo'];
 			$mTBANCO  = $mREG['tbanco'];
 			if ( $mTBANCO == 'CAJ' ) $tipo = 'ND';
-			
+
 			$data = array();
 			$data["codbanc"]  = $codban;
 			$data["numcuent"] = $mCUENTA;
@@ -1564,7 +1551,7 @@ class Prmo extends Controller {
 			$data["tipo_op"]  = $tipo;
 			$data["numero"]   = $do->get('numche');
 			$data["concepto"] = "PRESTAMO OTORGADO ".$do->get('numero');
-			$data["clipro"]   = 'C'; 
+			$data["clipro"]   = 'C';
 			$data["concep2"]  = $do->get('observa1');
 			$data["concep3"]  = $do->get('observa2');
 			$data["monto"]    = $monto;
@@ -1642,7 +1629,7 @@ class Prmo extends Controller {
 			$data["tipo_op"]  = $tipo;
 			$data["numero"]   = $do->get('numche');
 			$data["concepto"] = "PRESTAMO RECIBIDO ".$do->get('numero');
-			$data["clipro"]   = 'P'; 
+			$data["clipro"]   = 'P';
 			$data["concep2"]  = $do->get('observa1');
 			$data["concep3"]  = $do->get('observa2');
 			$data["monto"]    = $monto;
@@ -1688,7 +1675,7 @@ class Prmo extends Controller {
 			$data["numche"]   = $do->get('numche');
  			$data["tipo_op"]  = $do->get('tipo');
 			$data["benefi"]   = $do->get('benefi');
-			
+
 			$data["usuario"]  = $do->get('usuario');
 			$data["transac"]  = $do->get('transac');
 			$data["estampa"]  = $do->get('estampa');
@@ -1703,7 +1690,7 @@ class Prmo extends Controller {
 
 			// Crea bmov egreso
 			$this->datasis->actusal($codban, $fecha, -1*$monto );
-		
+
 			$mREG = $this->datasis->damereg("SELECT numcuent, banco, saldo, tbanco FROM banc WHERE codbanc='".$codban."'");
 
 			$mCUENTA  = $mREG['numcuent'];
@@ -1711,18 +1698,18 @@ class Prmo extends Controller {
 			$mSALDO   = $mREG['saldo'];
 			$mTBANCO  = $mREG['tbanco'];
 			$COMPROB  = $this->datasis->fprox_numero('ncomprob');
-			
+
 			$data = array();
 			$data["codbanc"]  = $codban;
 			$data["numcuent"] = $mCUENTA;
 			$data["banco"]    = $mBANCO;
 			$data["saldo"]    = $mSALDO;
-			
+
 			$data["fecha"]    = $fecha;
 			$data["tipo_op"]  = $do->get('tipo');
 			$data["numero"]   = $do->get('numche');
 			$data["concepto"] = "CHEQUE DEVUELTO CLIENTE ".$do->get('numero');
-			$data["clipro"]   = 'C'; 
+			$data["clipro"]   = 'C';
 			$data["concep2"]  = $do->get('observa1');
 			$data["concep3"]  = $do->get('observa2');
 			$data["monto"]    = $monto;
@@ -1791,7 +1778,7 @@ class Prmo extends Controller {
 			$mBANCO   = $mREG['banco'];
 			$mSALDO   = $mREG['saldo'];
 			$mTBANCO  = $mREG['tbanco'];
-			
+
 			$data = array();
 			$data["codbanc"]  = $codban;
 			$data["numcuent"] = $mCUENTA;
@@ -1802,7 +1789,7 @@ class Prmo extends Controller {
 			$data["tipo_op"]  = $do->get('tipo');
 			$data["numero"]   = $do->get('numche');
 			$data["concepto"] = "CHEQUE O NOTA DEVUELTO DE PROVEEDOR ".$do->get('numero');
-			$data["clipro"]   = 'P'; 
+			$data["clipro"]   = 'P';
 			$data["concep2"]  = $do->get('observa1');
 			$data["concep3"]  = $do->get('observa2');
 			$data["monto"]    = $monto;
@@ -1834,27 +1821,26 @@ class Prmo extends Controller {
 			}
 
 			$data = array();
-			$data["cod_prv"]  = $do->get('clipro');
- 			$data["nombre"]   = $do->get('nombre');
-			$data["tipo_doc"] = "ND";
- 			$data["numero"]   = $mNUMERO;
-   			$data["fecha"]    = $fecha;
-   			$data["monto"]    = $do->get('monto');
-			$data["impuesto"] = 0;
-   			$data["vence"]    = $do->get('vence');
-			$data["tipo_ref"] = "PR";
-			$data["num_ref"]  = $do->get('numero');
-			$data["observa1"] = $do->get('observa1');
-			$data["observa2"] = $do->get('observa2');
-   			$data["banco"]    = $do->get('codban');
-			$data["numche"]   = $do->get('docum');
- 			$data["tipo_op"]  = $do->get('tipo');
-			$data["benefi"]   = $do->get('benefi');
-			
-			$data["usuario"]  = $do->get('usuario');
-			$data["transac"]  = $do->get('transac');
-			$data["estampa"]  = $do->get('estampa');
-			$data["hora"]     = $do->get('hora');
+			$data['cod_prv']  = $do->get('clipro');
+ 			$data['nombre']   = $do->get('nombre');
+			$data['tipo_doc'] = 'ND';
+ 			$data['numero']   = $mNUMERO;
+   			$data['fecha']    = $fecha;
+   			$data['monto']    = $do->get('monto');
+			$data['impuesto'] = 0;
+   			$data['vence']    = $do->get('vence');
+			$data['tipo_ref'] = 'PR';
+			$data['num_ref']  = $do->get('numero');
+			$data['observa1'] = $do->get('observa1');
+			$data['observa2'] = $do->get('observa2');
+   			$data['banco']    = $do->get('codban');
+			$data['numche']   = $do->get('docum');
+ 			$data['tipo_op']  = $do->get('tipo');
+			$data['benefi']   = $do->get('benefi');
+			$data['usuario']  = $do->get('usuario');
+			$data['transac']  = $do->get('transac');
+			$data['estampa']  = $do->get('estampa');
+			$data['hora']     = $do->get('hora');
 
 			$mSQL = $this->db->insert_string('sprm', $data);
 			$ban = $this->db->simple_query($mSQL);
@@ -1875,35 +1861,31 @@ class Prmo extends Controller {
 			$mBANCO   = $mREG['banco'];
 			$mSALDO   = $mREG['saldo'];
 			$mTBANCO  = $mREG['tbanco'];
-			
+
 			$data = array();
-			$data["codbanc"]  = $codban;
-			$data["numcuent"] = $mCUENTA;
-			$data["banco"]    = $mBANCO;
-			$data["saldo"]    = $mSALDO;
-
-			$data["fecha"]    = $fecha;
-			$data["tipo_op"]  = $do->get('tipo');
-			$data["numero"]   = $do->get('numche');
-			$data["concepto"] = "DEPOSITO POR ANALIZAR ".$do->get('numero');
-
-			$data["clipro"]   = 'P'; 
-			$data["concep2"]  = $do->get('observa1');
-			$data["concep3"]  = $do->get('observa2');
-			$data["monto"]    = $monto;
-			$data["codcp"]    = $do->get('clipro');
-			$data["nombre"]   = $do->get('nombre');
-			$data["benefi"]   = $do->get('benefi');
-
-			$data["posdata"]  = $fecha;
-			$data["negreso"]  = '';
-			$data["posdata"]  = $fecha;
-			$data["liable"]   = 'S';
-
-			$data["usuario"]  = $do->get('usuario');
-			$data["transac"]  = $do->get('transac');
-			$data["estampa"]  = $do->get('estampa');
-			$data["hora"]     = $do->get('hora');
+			$data['codbanc']  = $codban;
+			$data['numcuent'] = $mCUENTA;
+			$data['banco']    = $mBANCO;
+			$data['saldo']    = $mSALDO;
+			$data['fecha']    = $fecha;
+			$data['tipo_op']  = $do->get('tipo');
+			$data['numero']   = $do->get('numche');
+			$data['concepto'] = "DEPOSITO POR ANALIZAR ".$do->get('numero');
+			$data['clipro']   = 'P';
+			$data['concep2']  = $do->get('observa1');
+			$data['concep3']  = $do->get('observa2');
+			$data['monto']    = $monto;
+			$data['codcp']    = $do->get('clipro');
+			$data['nombre']   = $do->get('nombre');
+			$data['benefi']   = $do->get('benefi');
+			$data['posdata']  = $fecha;
+			$data['negreso']  = '';
+			$data['posdata']  = $fecha;
+			$data['liable']   = 'S';
+			$data['usuario']  = $do->get('usuario');
+			$data['transac']  = $do->get('transac');
+			$data['estampa']  = $do->get('estampa');
+			$data['hora']     = $do->get('hora');
 
 			$mSQL = $this->db->insert_string('bmov', $data);
 			$ban  = $this->db->simple_query($mSQL);
@@ -1919,27 +1901,27 @@ class Prmo extends Controller {
 			}
 
 			$data = array();
-			$data["cod_prv"]  = $do->get('clipro');
- 			$data["nombre"]   = $do->get('nombre');
-			$data["tipo_doc"] = "ND";
- 			$data["numero"]   = $mNUMERO;
-   			$data["fecha"]    = $fecha;
-   			$data["monto"]    = $do->get('monto');
-			$data["impuesto"] = 0;
-   			$data["vence"]    = $do->get('vence');
-			$data["tipo_ref"] = "PR";
-			$data["num_ref"]  = $do->get('numero');
-			$data["observa1"] = $do->get('observa1');
-			$data["observa2"] = $do->get('observa2');
-   			$data["banco"]    = $do->get('codban');
-			$data["numche"]   = $do->get('numche');
- 			$data["tipo_op"]  = $do->get('tipo');
-			//$data["benefi"]   = $do->get('benefi');
-			
-			$data["usuario"]  = $do->get('usuario');
-			$data["transac"]  = $do->get('transac');
-			$data["estampa"]  = $do->get('estampa');
-			$data["hora"]     = $do->get('hora');
+			$data['cod_prv']  = $do->get('clipro');
+ 			$data['nombre']   = $do->get('nombre');
+			$data['tipo_doc'] = 'ND';
+ 			$data['numero']   = $mNUMERO;
+   			$data['fecha']    = $fecha;
+   			$data['monto']    = $do->get('monto');
+			$data['impuesto'] = 0;
+   			$data['vence']    = $do->get('vence');
+			$data['tipo_ref'] = 'PR';
+			$data['num_ref']  = $do->get('numero');
+			$data['observa1'] = $do->get('observa1');
+			$data['observa2'] = $do->get('observa2');
+   			$data['banco']    = $do->get('codban');
+			$data['numche']   = $do->get('numche');
+ 			$data['tipo_op']  = $do->get('tipo');
+			//$data['benefi']   = $do->get('benefi');
+
+			$data['usuario']  = $do->get('usuario');
+			$data['transac']  = $do->get('transac');
+			$data['estampa']  = $do->get('estampa');
+			$data['hora']     = $do->get('hora');
 
 			$mSQL = $this->db->insert_string('sprm', $data);
 			$ban = $this->db->simple_query($mSQL);
@@ -1958,35 +1940,31 @@ class Prmo extends Controller {
 			$mBANCO   = $mREG['banco'];
 			$mSALDO   = $mREG['saldo'];
 			$mTBANCO  = $mREG['tbanco'];
-			
+
 			$data = array();
-			$data["codbanc"]  = $codban;
-			$data["numcuent"] = $mCUENTA;
-			$data["banco"]    = $mBANCO;
-			$data["saldo"]    = $mSALDO;
-
-			$data["fecha"]    = $fecha;
-			$data["tipo_op"]  = $do->get('tipo');
-			$data["numero"]   = $do->get('numche');
-			$data["concepto"] = "CARGOS INDEBIDOS DEL BANCO  ".$do->get('numero');
-
-			$data["clipro"]   = 'C'; 
-			$data["concep2"]  = $do->get('observa1');
-			$data["concep3"]  = $do->get('observa2');
-			$data["monto"]    = $monto;
-			$data["codcp"]    = $do->get('clipro');
-			$data["nombre"]   = $do->get('nombre');
-			$data["benefi"]   = $do->get('benefi');
-
-			$data["posdata"]  = $fecha;
-			$data["negreso"]  = '';
-			$data["posdata"]  = $fecha;
-			$data["liable"]   = 'S';
-
-			$data["usuario"]  = $do->get('usuario');
-			$data["transac"]  = $do->get('transac');
-			$data["estampa"]  = $do->get('estampa');
-			$data["hora"]     = $do->get('hora');
+			$data['codbanc']  = $codban;
+			$data['numcuent'] = $mCUENTA;
+			$data['banco']    = $mBANCO;
+			$data['saldo']    = $mSALDO;
+			$data['fecha']    = $fecha;
+			$data['tipo_op']  = $do->get('tipo');
+			$data['numero']   = $do->get('numche');
+			$data['concepto'] = 'CARGOS INDEBIDOS DEL BANCO  '.$do->get('numero');
+			$data['clipro']   = 'C';
+			$data['concep2']  = $do->get('observa1');
+			$data['concep3']  = $do->get('observa2');
+			$data['monto']    = $monto;
+			$data['codcp']    = $do->get('clipro');
+			$data['nombre']   = $do->get('nombre');
+			$data['benefi']   = $do->get('benefi');
+			$data['posdata']  = $fecha;
+			$data['negreso']  = '';
+			$data['posdata']  = $fecha;
+			$data['liable']   = 'S';
+			$data['usuario']  = $do->get('usuario');
+			$data['transac']  = $do->get('transac');
+			$data['estampa']  = $do->get('estampa');
+			$data['hora']     = $do->get('hora');
 
 			$mSQL = $this->db->insert_string('bmov', $data);
 			$ban  = $this->db->simple_query($mSQL);
@@ -2002,34 +1980,33 @@ class Prmo extends Controller {
 			}
 
 			$data = array();
-			$data["cod_cli"]  = $do->get('clipro');
-			$data["nombre"]   = $do->get('nombre');
-			$data["tipo_doc"] = "ND";
-			$data["numero"]   = $mNUMERO;
-			$data["fecha"]    = $fecha;
-			$data["monto"]    = $do->get('monto');
-			$data["impuesto"] = 0;
-			$data["vence"]    = $do->get('vence');
-			$data["tipo_ref"] = "PR";
-			$data["num_ref"]  = $do->get('numero');
-			$data["observa1"] = $do->get('observa1');
-			$data["observa2"] = $do->get('observa2');
-
-			$data["banco"]    = $do->get('codban');
-			$data["fecha_op"] = $do->get('fecha');
-			$data["num_op"]   = $do->get('numche');
-			$data["tipo_op"]  = $do->get('tipo');
-			$data["usuario"]  = $do->get('usuario');
-			$data["transac"]  = $do->get('transac');
-			$data["estampa"]  = $do->get('estampa');
-			$data["hora"]     = $do->get('hora');
+			$data['cod_cli']  = $do->get('clipro');
+			$data['nombre']   = $do->get('nombre');
+			$data['tipo_doc'] = 'ND';
+			$data['numero']   = $mNUMERO;
+			$data['fecha']    = $fecha;
+			$data['monto']    = $do->get('monto');
+			$data['impuesto'] = 0;
+			$data['vence']    = $do->get('vence');
+			$data['tipo_ref'] = 'PR';
+			$data['num_ref']  = $do->get('numero');
+			$data['observa1'] = $do->get('observa1');
+			$data['observa2'] = $do->get('observa2');
+			$data['banco']    = $do->get('codban');
+			$data['fecha_op'] = $do->get('fecha');
+			$data['num_op']   = $do->get('numche');
+			$data['tipo_op']  = $do->get('tipo');
+			$data['usuario']  = $do->get('usuario');
+			$data['transac']  = $do->get('transac');
+			$data['estampa']  = $do->get('estampa');
+			$data['hora']     = $do->get('hora');
 
 			$mSQL = $this->db->insert_string('smov', $data);
 			$ban = $this->db->simple_query($mSQL);
 			if( $ban == false ){ memowrite($mSQL,'smov');}
 
 		}
-	
+
 		logusu($do->table,"Creo $this->tits $primary ");
 	}
 
@@ -2048,7 +2025,7 @@ class Prmo extends Controller {
 /*
 
 // -- Funcion de escritura Replace -- \\
-// -- Lee los campos 
+// -- Lee los campos
 FUNCTION PRMORC
 LOCAL mTRANSAC := PROX_SQL("ntransa")
 LOCAL aLISTA, mSQL, aVALORES, mREG, mMEG, mTBANCO
@@ -2096,7 +2073,7 @@ LOCAL aLISTA, mSQL, aVALORES, mREG, mMEG, mTBANCO
 
 	AADD(aLISTA, {"NEGRESO",  XNEGRESO })
 	AADD(aLISTA, {"NINGRESO", XNINGRESO })
-   
+
 	IF XTIPOP = '1' .AND. XCLIPRO = 'REIVA'
 		AADD(aLISTA, {"RETENCION", XRETENCION })
 		AADD(aLISTA, {"REMISION",  XREMISION })
@@ -2217,9 +2194,9 @@ LOCAL aLISTA, mSQL, aVALORES, mREG, mMEG, mTBANCO
 				AADD(aLISTA, {"NUMERO",   mNUMERO })
 				AADD(aLISTA, {"FECHA",    XFECHA })
 				AADD(aLISTA, {"ORDEN",    "" })
-				AADD(aLISTA, {"COD_CLI",  "" })  
-				AADD(aLISTA, {"RIFCI",    "" })    
-				AADD(aLISTA, {"NOMBRE",   "" })   
+				AADD(aLISTA, {"COD_CLI",  "" })
+				AADD(aLISTA, {"RIFCI",    "" })
+				AADD(aLISTA, {"NOMBRE",   "" })
 				AADD(aLISTA, {"DIREC",    "" })
 				AADD(aLISTA, {"DIRE1",    "" })
 				AADD(aLISTA, {"TOTALS",   mIDB })
@@ -2316,17 +2293,17 @@ LOCAL aLISTA, mSQL, aVALORES, mREG, mMEG, mTBANCO
       mNUMERO   := PROX_SQL("num_nd")
       aLISTA := {}
       AADD(aLISTA, {"COD_PRV",  XCLIPRO })
-      AADD(aLISTA, {"NOMBRE",   XNOMBRE })   
+      AADD(aLISTA, {"NOMBRE",   XNOMBRE })
       AADD(aLISTA, {"TIPO_DOC", "ND" })
-      AADD(aLISTA, {"NUMERO",   mNUMERO })   
-      AADD(aLISTA, {"FECHA",    XFECHA })    
+      AADD(aLISTA, {"NUMERO",   mNUMERO })
+      AADD(aLISTA, {"FECHA",    XFECHA })
       AADD(aLISTA, {"MONTO",    XMONTO })
       AADD(aLISTA, {"IMPUESTO", 0 })
-      AADD(aLISTA, {"VENCE",    XVENCE })    
+      AADD(aLISTA, {"VENCE",    XVENCE })
       AADD(aLISTA, {"TIPO_REF", "PR" })
       AADD(aLISTA, {"NUM_REF",  XNUMERO })
-      AADD(aLISTA, {"OBSERVA1", XOBSERVA1 }) 
-      AADD(aLISTA, {"OBSERVA2", XOBSERVA2 }) 
+      AADD(aLISTA, {"OBSERVA1", XOBSERVA1 })
+      AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
       AADD(aLISTA, {"BANCO",    XCODBAN })
       AADD(aLISTA, {"NUMCHE",   XNUMCHE })
       AADD(aLISTA, {"TIPO_OP",  XTIPO })
@@ -2386,15 +2363,6 @@ LOCAL aLISTA, mSQL, aVALORES, mREG, mMEG, mTBANCO
 RETURN("")
 
 */
-
-
-
-
-
-
-
-
-
 
 
 	//******************************************************************
@@ -2485,8 +2453,6 @@ RETURN("")
 
 	}
 
-
-
 	function instalar(){
 		if (!$this->db->table_exists('prmo')) {
 			$mSQL="CREATE TABLE `prmo` (
@@ -2533,58 +2499,58 @@ RETURN("")
 	//
 	function prmochdev(){
 		$id = $this->uri->segment($this->uri->total_segments());
-		
-		$transac = $this->datasis->prox_sql("ntransa");
+
+		$transac = $this->datasis->prox_sql('ntransa');
 		//LOCAL aLISTA, mSQL, aVALORES, mREG, mMEG, mTBANCO
 
 		$mSQL = "SELECT a.*, b.recibe codban FROM sfpa a JOIN bcaj b ON a.deposito=b.numero WHERE a.id=$id";
 		$reg  = $this->datasis->damereg($mSQL);
-		
+
 		if ( $reg['tipo'] <> 'CH' ){
-			echo "Cheque ya devuelto";
+			echo 'Cheque ya devuelto';
 			return;
 		}
-		
 
-		$XNEGRESO  = "        ";
-		$XNINGRESO = "        ";
-		$XTIPO     = "ND";
+
+		$XNEGRESO  = '        ';
+		$XNINGRESO = '        ';
+		$XTIPO     = 'ND';
 		$XVENCE    = date('Y/m/d');
 		$XFECHA    = date('Y/m/d');
 		$XCODBAN   = $reg['codban'];
 		$mTBANCO   = $this->datasis->dameval("SELECT tbanco FROM banc WHERE codbanc='$XCODBAN'");
-		$XNUMERO   = $this->datasis->prox_sql("nprmo");
+		$XNUMERO   = $this->datasis->prox_sql('nprmo');
 		$XNOMBRE   = $this->datasis->dameval("SELECT nombre FROM scli WHERE cliente='".$reg['cod_cli']."'");
 
 		// Guarda en PRMO
-		$aLISTA["tipop"]    = "3";
-		$aLISTA["numero"]   = $XNUMERO;
-		$aLISTA["fecha"]    = $XFECHA;
-		$aLISTA["codban"]   = $XCODBAN;
-		$aLISTA["tipo"]     = "ND";
-		$aLISTA["numche"]   =  $reg['num_ref'];
-		$aLISTA["benefi"]   =  "";
-		$aLISTA["comprob"]  =  "";
-		$aLISTA["clipro"]   =  $reg['cod_cli'];
-		$aLISTA["nombre"]   =  $XNOMBRE ;
-		$aLISTA["docum"]    =  $reg['deposito'];
-		$aLISTA["banco"]    =  $reg['banco'] ;
-		$aLISTA["monto"]    =  $reg['monto'] ;
-		$aLISTA["cuotas"]   =  1 ;
-		$aLISTA["vence"]    = $XVENCE ;
-		$aLISTA["observa1"] = "CHEQUE DEVUELTO" ;
-		$aLISTA["observa2"] = "" ;
-		$aLISTA["cadano"]   = 1 ;
-		$aLISTA["apartir"]  = $XFECHA;
+		$aLISTA['tipop']    = '3';
+		$aLISTA['numero']   = $XNUMERO;
+		$aLISTA['fecha']    = $XFECHA;
+		$aLISTA['codban']   = $XCODBAN;
+		$aLISTA['tipo']     = 'ND';
+		$aLISTA['numche']   = $reg['num_ref'];
+		$aLISTA['benefi']   = '';
+		$aLISTA['comprob']  = '';
+		$aLISTA['clipro']   = $reg['cod_cli'];
+		$aLISTA['nombre']   = $XNOMBRE ;
+		$aLISTA['docum']    = $reg['deposito'];
+		$aLISTA['banco']    = $reg['banco'] ;
+		$aLISTA['monto']    = $reg['monto'] ;
+		$aLISTA['cuotas']   = 1 ;
+		$aLISTA['vence']    = $XVENCE ;
+		$aLISTA['observa1'] = 'CHEQUE DEVUELTO';
+		$aLISTA['observa2'] = '';
+		$aLISTA['cadano']   = 1;
+		$aLISTA['apartir']  = $XFECHA;
 
-		$aLISTA["usuario"]  = $this->secu->usuario() ;
-		$aLISTA["transac"]  = $transac ;
-		$aLISTA["estampa"]  = date('Y/m/d') ;
-		$aLISTA["hora"]     = date('H:i:s') ;
-		
+		$aLISTA['usuario']  = $this->secu->usuario() ;
+		$aLISTA['transac']  = $transac ;
+		$aLISTA['estampa']  = date('Y/m/d') ;
+		$aLISTA['hora']     = date('H:i:s') ;
+
 		//$aLISTA["negreso"]  =  XNEGRESO ;
 		//$aLISTA["ningreso"] = XNINGRESO ;
-   
+
 		$this->db->insert('prmo', $aLISTA);
 
   		// GUARDA EN BANCO
@@ -2670,7 +2636,7 @@ require_once(BASEPATH.'application/controllers/validaciones.php');
 
 class Prmo extends validaciones {
 	function prmo(){
-		parent::Controller(); 
+		parent::Controller();
 		$this->load->library("rapyd");
 		//$this->datasis->modulo_id(206,1);
 		//I use THISFILE, instead __FILE__ to prevent some documented php-bugs with higlight_syntax()&__FILE__
@@ -2681,52 +2647,52 @@ class Prmo extends validaciones {
 	}
 	function filteredgrid(){
 		$this->rapyd->load("datafilter","datagrid");
-		
+
 		$filter = new DataFilter("Filtro de Otros Movimientos de Caja y Bancos", "prmo");
-		
+
 		$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
 		$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
 		$filter->fechad->clause  =$filter->fechah->clause="where";
 		$filter->fechad->db_name =$filter->fechah->db_name="fecha";
 		$filter->fechah->size=$filter->fechad->size=10;
-		$filter->fechad->operator=">="; 
+		$filter->fechad->operator=">=";
 		$filter->fechah->operator="<=";
-		
+
 		$filter->codban = new dropdownField("Caja/Banco", "codban");
 		$filter->codban->option("","");
 		$filter->codban->options("SELECT codbanc, banco FROM bmov ORDER BY banco ");
-		
+
 		$filter->banco = new dropdownField("Tipo", "tipo");
 		$filter->banco->option("","");
-		$filter->banco->option("1","Prestamo Otorgado");		
+		$filter->banco->option("1","Prestamo Otorgado");
 		$filter->banco->option("2","Prestamo Recibido");
 		$filter->banco->option("3","Cheque Devuelto Cliente");
 		$filter->banco->option("4","Cheque Devuelto Proveedor");
 		$filter->banco->option("5","Deposito por Analizar");
 		$filter->banco->option("6","Cargos Indevidos por el Banco");
 		$filter->banco->option("7","Todos");
-		
+
 		$filter->clipro = new inputField("Cli/Prv", "monto");
 		$filter->clipro->size=12;
-		
+
 		$filter->monto = new inputField("Monto", "monto");
 		$filter->monto->size=12;
-		
+
 		$filter->buttons("reset","search");
 		$filter->build();
-		
+
 		$uri = anchor('finanzas/prmo/dataedit/show/<#numero#>','<#numero#>');
-		
+
 		$grid = new DataGrid("Lista de Otros Movimientos de Caja y Bancos");
 		$grid->order_by("numero","asc");
 		$grid->per_page = 10;
-		
+
 		$grid->column("Numero",$uri);
 		$grid->column("Fecha","<dbdate_to_human><#fecha#></dbdate_to_human>","align='center'");
 		$grid->column("Banco","banco");
 		$grid->column("Cli/Prv","clipro");
 		$grid->column("Monto","monto","align='right'");
-		
+
 		$grid->add("finanzas/prmo/dataedit/create");
 		$grid->build();
 

@@ -4,7 +4,7 @@ class Apan extends Controller {
 	var $titp='Aplicacion de Anticipos y NC';
 	var $tits='Aplicacion de Anticipos y NC';
 	var $url ='finanzas/apan/';
- 
+
 	function Apan(){
 		parent::Controller();
 		$this->load->library('rapyd');
@@ -13,11 +13,7 @@ class Apan extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('apan','id') ) {
-			$this->db->simple_query('ALTER TABLE apan DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE apan ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE apan ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -43,9 +39,9 @@ class Apan extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'fcliente', 'img'=>'images/agrega4.png',  'alt' => 'Anticipo de Cliente',   'label'=>'Anticipo de Cliente'   ));
-		$grid->wbotonadd(array('id'=>'fproveed', 'img'=>'images/agrega4.png',  'alt' => 'Anticipo de Proveedor', 'label'=>'Anticipo de Proveedor' ));
-		$grid->wbotonadd(array('id'=>'fimprime', 'img'=>'images/pdf_logo.gif', 'alt' => 'Imprimir Documento',    'label'=>'Imprimir Documento'    ));
+		$grid->wbotonadd(array('id'=>'fimprime', 'img'=>'assets/default/images/print.png','alt' => 'Formato PDF',      'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'fcliente', 'img'=>'images/agrega4.png' , 'alt' => 'Anticipo de Cliente'  , 'label'=>'Anticipo de Cliente'   ));
+		$grid->wbotonadd(array('id'=>'fproveed', 'img'=>'images/agrega4.png' , 'alt' => 'Anticipo de Proveedor', 'label'=>'Anticipo de Proveedor' ));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -54,7 +50,7 @@ class Apan extends Controller {
 		$funciones = '';
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -64,7 +60,7 @@ class Apan extends Controller {
 		$param['SouthPanel']   = $SouthPanel;
 		$param['listados']     = $this->datasis->listados('APAN', 'JQ');
 		$param['otros']        = $this->datasis->otros('APAN', 'JQ');
-		
+
 		$param['centerpanel']  = $centerpanel;
 		//$param['funciones']    = $funciones;
 
@@ -84,40 +80,6 @@ class Apan extends Controller {
 	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
-
-		// Anticipo a Cliente
-		$bodyscript .= '
-		$("#fcliente").click( function() {
-			$.post("'.site_url($this->url.'decliente/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 450, width: 620, title: "Aplicacion de Anticipo a Cliente"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-		// Anticipo a Cliente
-		$bodyscript .= '
-		$("#fproveed").click( function() {
-			$.post("'.site_url($this->url.'deproveed/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 450, width: 620, title: "Aplicacion de Anticipo a Proveedor"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-		$bodyscript .= '
-		jQuery("#fimprime").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\'/proteoerp/formatos/ver/APAN/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});
-		';
 
 		$bodyscript .= '
 		function apanadd(){
@@ -183,6 +145,7 @@ class Apan extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function(){
@@ -196,6 +159,37 @@ class Apan extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 			';
+
+		// Anticipo a Cliente
+		$bodyscript .= '
+		$("#fcliente").click( function() {
+			$.post("'.site_url($this->url.'decliente/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 450, width: 620, title: "Aplicacion de Anticipo a Cliente"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});';
+
+		// Anticipo a Cliente
+		$bodyscript .= '
+		$("#fproveed").click( function() {
+			$.post("'.site_url($this->url.'deproveed/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 450, width: 620, title: "Aplicacion de Anticipo a Proveedor"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});';
+
+		$bodyscript .= '
+		jQuery("#fimprime").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\'/proteoerp/formatos/ver/APANCO/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});';
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -270,12 +264,9 @@ class Apan extends Controller {
 
 		$bodyscript .= '});'."\n";
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
-
-
 
 
 	//******************************************************************
@@ -489,7 +480,7 @@ class Apan extends Controller {
 		');
 		$grid->setFormOptionsE('-');
 		$grid->setFormOptionsA('-');
-		$grid->setAfterSubmit("-");
+		$grid->setAfterSubmit('-');
 		$grid->setOndblClickRow('');
 
 		#show/hide navigations buttons
@@ -516,8 +507,7 @@ class Apan extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -531,8 +521,7 @@ class Apan extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -548,14 +537,14 @@ class Apan extends Controller {
 
 				logusu('APAN',"Registro ????? INCLUIDO");
 			} else
-			echo "Fallo Agregado!!!";
+			echo 'Fallo Agregado!!!';
 
 		} elseif($oper == 'edit') {
 			//unset($data['ubica']);
 			$this->db->where('id', $id);
 			$this->db->update('apan', $data);
 			logusu('APAN',"Registro ????? MODIFICADO");
-			echo "Registro Modificado";
+			echo 'Registro Modificado';
 
 		} elseif($oper == 'del') {
 			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM apan WHERE id='$id' ");
@@ -574,12 +563,12 @@ class Apan extends Controller {
 	//
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('origen');
-		$grid->label('Origen');
+		$grid->label('Or&iacute;gen');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -602,7 +591,7 @@ class Apan extends Controller {
 		));
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
@@ -677,7 +666,7 @@ class Apan extends Controller {
 
 		$grid->setFormOptionsE('-');
 		$grid->setFormOptionsA('-');
-		$grid->setAfterSubmit("-");
+		$grid->setAfterSubmit('-');
 		$grid->setOndblClickRow('');
 
 
@@ -705,18 +694,18 @@ class Apan extends Controller {
 	//******************************************************************
 	// Busca la data en el Servidor por json
 	//
-	function getdatait()
-	{
-		$id = $this->uri->segment(4);
+	function getdatait(){
+		$id  = $this->uri->segment(4);
+		$dbid= $this->db->escape($id);
 		if ($id){
-			$transac = $this->datasis->dameval("SELECT transac FROM apan WHERE id=$id");
+			$transac = $this->datasis->dameval('SELECT transac FROM apan WHERE id='.$dbid);
 			$grid       = $this->jqdatagrid;
 			$mSQL = "
 				SELECT 'Cliente' origen, cod_cli, fecha, CONCAT(tipoccli,numccli) anticipo, CONCAT(tipo_doc, numero) numero, monto, abono, ppago, reten, reteiva, id
-				FROM itccli WHERE transac='$transac' 
+				FROM itccli WHERE transac='${transac}'
 				UNION ALL
 				SELECT 'Prveed' origen, cod_prv, fecha, CONCAT(tipoppro,numppro) anticipo, CONCAT(tipo_doc, numero) numero, monto, abono, ppago, reten, reteiva, id
-				FROM itppro WHERE transac='$transac'
+				FROM itppro WHERE transac='${transac}'
 			";
 
 			$response   = $grid->getDataSimple($mSQL);
@@ -790,7 +779,6 @@ class Apan extends Controller {
 		$edit->fecha->insertValue= date('Y-m-d');
 		$edit->fecha->readonly  = true;
 
-
 		$edit->tipo = new hiddenField('Tipo','tipo');
 		$edit->tipo->rule      = '';
 		$edit->tipo->size      = 3;
@@ -836,35 +824,63 @@ class Apan extends Controller {
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
-		//$this->_dataedit($edit);
-
 		return $edit;
-
-/*
-		$edit->build();
-		if($edit->on_success()){
-			$rt=array(
-				'status' =>'A',
-				'mensaje'=>'Registro guardado',
-				'pk'     =>$edit->_dataobject->pk
-			);
-			echo json_encode($rt);
-		}else{
-			$conten['form'] =&  $edit;
-			$this->load->view('view_apan', $conten);
-		}
-*/
 	}
 
 
 	//******************************************************************
-	// Cruce Cliente Proveedor
+	// Anticipo de Cliente
 	//
 	function decliente(){
 		$this->rapyd->load('dataedit');
 		$edit = $this->_deapan();
 
-		$script= '';
+		$script= '
+		$(function() {
+			$("#clipro").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscasprv').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#clipro").val("");
+
+									$("#nombre").val("");
+									//$("#nombre_val").text("");
+
+									$("#saldo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#clipro").attr("readonly", "readonly");
+
+					$("#nombre").val(ui.item.nombre);
+					//$("#nombre_val").text(ui.item.nombre);
+
+					setTimeout(function() {  $("#clipro").removeAttr("readonly"); }, 1500);
+
+					//var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
+					//$("#saldod").val(roundNumber(saldo,2))
+				}
+			});
+		});';
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -878,13 +894,94 @@ class Apan extends Controller {
 	}
 
 	//******************************************************************
-	// Cruce Cliente Proveedor
+	// Anticipo de Proveedor
 	//
 	function deproveed(){
 		$this->rapyd->load('dataedit');
 		$edit = $this->_deapan();
 
-		$script= '';
+		$script= '
+		$(function() {
+			$("#clipro").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscasprv').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#proveed").val("");
+
+									$("#nombre").val("");
+									$("#nombre_val").text("");
+
+									$("#saldo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#proveed").attr("readonly", "readonly");
+
+					$("#nombre").val(ui.item.nombre);
+					$("#nombre_val").text(ui.item.nombre);
+
+					setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
+
+					//$.ajax({
+					//	url: "'.site_url('ajax/buscasprm').'",
+					//	dataType: "json",
+					//	type: "POST",
+					//	data: {"sprv" : ui.item.value},
+					//	success: function(data){
+					//			truncate();
+					//			$.each(data,
+					//				function(id, val){
+					//					can=add_itcruc();
+                    //
+					//					$("#itonumero_"+can).val(val.tipo_doc+val.numero);
+					//					$("#itofecha_"+can ).val(val.fecha);
+					//					$("#itpmonto_"+can  ).val(val.monto);
+					//					$("#itpsaldo_"+can  ).val(val.saldo);
+					//					$("#itmonto_"+can ).val("0");
+                    //
+					//					$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
+					//					$("#itofecha_"+can+"_val" ).text(val.fecha);
+					//					$("#itpmonto_"+can+"_val"  ).text(nformat(val.monto,2));
+					//					$("#itpsaldo_"+can+"_val"  ).text(nformat(val.saldo,2));
+                    //
+					//					$("#itmonto_"+can ).focus(function(){
+					//						var valor = $(this).val();
+					//						if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+					//							$(this).val(val.saldo);
+					//							totaliza();
+					//						}
+					//					});
+					//				}
+					//			);
+					//		},
+					//});
+                    //
+					//var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
+					//$("#saldoa").val(roundNumber(saldo,2))
+
+				}
+			});
+
+		});';
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -897,16 +994,14 @@ class Apan extends Controller {
 
 	}
 
-
-
 	function _pre_insert($do){
 		$do->error_message_ar['pre_ins']='';
 		return true;
 	}
 
 	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='';
-		return true;
+		$do->error_message_ar['pre_upd']= 'Rgistro no se puede modificar, debe reversarlo y volverlo a hacer.';
+		return false;
 	}
 
 	function _pre_delete($do){
@@ -929,270 +1024,11 @@ class Apan extends Controller {
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
 
-
-
-
-
-
-
-
-/*
-class apan extends validaciones {
-
-	function apan(){
-		parent::Controller();
-		$this->load->library("rapyd");
-	}
-
-	function index(){
-		if ( !$this->datasis->iscampo('apan','id') ) {
-			$this->db->simple_query('ALTER TABLE apan DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE apan ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE apan ADD UNIQUE INDEX numero (numero)');
-			echo "Indice ID Creado";
-		}
-		$this->datasis->modulo_id(505,1);
-		$this->apanextjs();
-		//redirect("finanzas/apan/filteredgrid");
-	}
-
-
-
-	//******************************************************************
-	// Dataedit para todos
-	//
-	function dataedit($tipo)	{
-		$this->rapyd->load('dataobject','datadetails');
-		$do = new DataObject("apan");
-		$title="";
-		if($tipo=='P'){
-			$do->rel_one_to_many('itppro', 'itppro', array('transac'=>'transac'));
-			$title='itppro';
-		}
-		else {
-			$do->rel_one_to_many('itccli', 'itccli', array('transac'=>'transac'));
-			$title='itccli';
-		}
-
-		$edit = new DataDetails('Aplicaci&oacute;n de Anticipos', $do);
-		$edit->back_url = site_url('finanzas/apan/filteredgrid');
-		$edit->set_rel_title($title,'Anticipo <#o#>');
-
-		$edit->numero = new inputField("N&uacute;mero", "numero");
-		$edit->numero->mode="autohide";
-		$edit->numero->size =12;
-		$edit->numero->rule="trim|required";
-		$edit->numero->maxlength=8;
-
-		$edit->fecha = new DateonlyField("Fecha", "fecha");
-		$edit->fecha->size = 12;
-		$edit->fecha->rule="required|chfecha";
-		$edit->fecha->insertValue = date("Y-m-d");
-
-		$edit->tipo = new dropdownField("Tipo", "tipo");
-		$edit->tipo->option("C","Cliente");
-		$edit->tipo->option("P","Proveedor");
-		$edit->tipo->style="width:100px";
-			
-		$edit->clipro =new inputField("Codigo", "clipro");
-		$edit->clipro->rule='trim|required';
-		$edit->clipro->size =12;
-		$edit->clipro->readonly=true;
-
-		$edit->nombre =   new inputField("Nombre", "nombre");
-		$edit->nombre->size =30;
-		$edit->nombre->rule = "trim|strtoupper";
-		$edit->nombre->readonly=true;
-
-		$edit->monto =    new inputField("Monto", "monto");
-		$edit->monto->size = 12;
-		$edit->monto->css_class='inputnum';
-		$edit->monto->rule='trim|numeric';
-		$edit->monto->maxlengxlength=0;
-		$edit->monto->rule='positive';
-
-		$edit->reinte =   new inputField("Convertido", "reinte");
-		$edit->reinte->rule='trim|required';
-		$edit->reinte->size =12;
-		$edit->reinte->readonly=true;
-
-		$edit->nombreintes=new inputField("Nombre","nombreintes");
-		$edit->nombreintes->size=30;
-		$edit->nombreintes->readonly=true;
-
-		$edit->observa1 = new inputField("Observaciones", "observa1");
-		$edit->observa1->rule='trim';
-		$edit->observa1->size =50;
-		$edit->observa1->maxlength=50;
-
-		$edit->observa2 = new inputField("", "observa2");
-		$edit->observa2->rule='trim';
-		$edit->observa2->size =50;
-		$edit->observa2->maxlength=50;
-
-		//Detalles itppro
-		if($tipo=='P'){
-			$edit->tipoppro = new inputField("Tipo <#o#>","tipoppro_<#i#>");
-			$edit->tipoppro->db_name = "tipoppro";
-			$edit->tipoppro->rel_id  = 'itppro';
-			$edit->tipoppro->rule='trim|required';
-			$edit->tipoppro->size =10;
-			$edit->tipoppro->readonly=true;
-
-			$edit->tipo_doc = new inputField("Tipo Documento <#o#>","tipo_doc_<#i#>");
-			$edit->tipo_doc->db_name = "tipo_doc";
-			$edit->tipo_doc->rel_id  = 'itppro';
-			$edit->tipo_doc->rule='trim|required';
-			$edit->tipo_doc->size =10;
-			$edit->tipo_doc->readonly=true;
-
-			$edit->itnumero = new inputField("N&uacute;mero <#o#>","itnumero_<#i#>");
-			$edit->itnumero->db_name = "numero";
-			$edit->itnumero->rel_id  = 'itppro';
-			$edit->itnumero->rule='trim|required';
-			$edit->itnumero->size =10;
-			$edit->itnumero->readonly=true;
-
-			$edit->itnumppro = new inputField("N&uacute;mero <#o#>","itnumppro_<#i#>");
-			$edit->itnumppro->db_name = "numppro";
-			$edit->itnumppro->rel_id  = 'itppro';
-			$edit->itnumppro->rule='trim|required';
-			$edit->itnumppro->size =10;
-			$edit->itnumppro->readonly=true;
-
-			$edit->itfechap = new DateonlyField("Fecha", "itfechap_<#i#>");
-			$edit->itfechap->db_name = "fecha";
-			$edit->itfechap->rel_id  = 'itppro';
-			$edit->itfechap->size = 12;
-			$edit->itfechap->rule="required|chfecha";
-			$edit->itfechap->insertValue = date("Y-m-d");
-
-			$edit->itmontop = new inputField("Monto <#o#>", "itmontop_<#i#>");
-			$edit->itmontop->db_name='monto';
-			$edit->itmontop->css_class='inputnum';
-			$edit->itmontop->rel_id   ='itppro';
-			$edit->itmontop->size=3;
-			$edit->itmontop->rule='positive';
-
-			$edit->itabonop = new inputField("Abono <#o#>", "itabonop_<#i#>");
-			$edit->itabonop->db_name='abono';
-			$edit->itabonop->css_class='inputnum';
-			$edit->itabonop->rel_id   ='itppro';
-			$edit->itabonop->size=3;
-			$edit->itabonop->rule='positive';
-		}
-		//Detalles itccli
-		if($tipo=='C'){
-			$edit->tipoccli = new inputField("Tipo <#o#>","tipoccli_<#i#>");
-			$edit->tipoccli->db_name = "tipoccli";
-			$edit->tipoccli->rel_id  = 'itccli';
-			$edit->tipoccli->rule='trim|required';
-			$edit->tipoccli->size =10;
-			$edit->tipoccli->readonly=true;
-
-			$edit->tipo_doc_c = new inputField("Tipo Documento <#o#>","tipo_doc_C<#i#>");
-			$edit->tipo_doc_c->db_name = "tipo_doc";
-			$edit->tipo_doc_c->rel_id  = 'itccli';
-			$edit->tipo_doc_c->rule='trim|required';
-			$edit->tipo_doc_c->size =10;
-			$edit->tipo_doc_c->readonly=true;
-
-			$edit->itnumero_c = new inputField("N&uacute;mero <#o#>","itnumero_c_<#i#>");
-			$edit->itnumero_c->db_name = "numero";
-			$edit->itnumero_c->rel_id  = 'itccli';
-			$edit->itnumero_c->rule='trim|required';
-			$edit->itnumero_c->size =10;
-			$edit->itnumero_c->readonly=true;
-
-			$edit->numccli = new inputField("N&uacute;mero <#o#>","numccli_<#i#>");
-			$edit->numccli->db_name = "numccli";
-			$edit->numccli->rel_id  = 'itccli';
-			$edit->numccli->rule='trim|required';
-			$edit->numccli->size =10;
-			$edit->numccli->readonly=true;
-
-			$edit->itfechac = new DateonlyField("Fecha", "itfechac_<#i#>");
-			$edit->itfechac->db_name = "fecha";
-			$edit->itfechac->rel_id  = 'itccli';
-			$edit->itfechac->size = 12;
-			$edit->itfechac->rule="required|chfecha";
-			$edit->itfechac->insertValue = date("Y-m-d");
-
-			$edit->itmontoc = new inputField("Monto <#o#>", "itmontoc_<#i#>");
-			$edit->itmontoc->db_name='monto';
-			$edit->itmontoc->css_class='inputnum';
-			$edit->itmontoc->rel_id   ='itccli';
-			$edit->itmontoc->size=3;
-			$edit->itmontoc->rule='positive';
-
-			$edit->itabonoc = new inputField("Abono <#o#>", "itabonoc_<#i#>");
-			$edit->itabonoc->db_name='abono';
-			$edit->itabonoc->css_class='inputnum';
-			$edit->itabonoc->rel_id   ='itccli';
-			$edit->itabonoc->size=3;
-			$edit->itabonoc->rule='positive';
-		}
-		///fin de detalles
-		$edit->buttons("modify", "save", "undo", "delete", "back");
-		$edit->build();
-
-		$conten['form']  =&  $edit;
-		$data['content'] = $this->load->view('view_apan', $conten,true);
-		$data['title']   = "<h1>Aplicaci&oacute;n de Anticipos</h1>";
-		$data["script"]  = script("jquery.pack.js").script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js");
-		$data["head"]    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
-	}
-*/
-
 	function instalar(){
-		//$sql="ALTER TABLE `apan`  DROP PRIMARY KEY";
-		//$this->db->query($sql);
-		$sql="ALTER TABLE `apan`  ADD COLUMN `id` INT(10) NULL AUTO_INCREMENT AFTER `usuario`,  ADD PRIMARY KEY (`id`)";
-		$this->db->query($sql);
+		if(!$this->datasis->iscampo('apan','id')){
+			$this->db->simple_query('ALTER TABLE apan DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE apan ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE apan ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};
 	}
-
-
-/*
-	function griditapan(){
-		$numero   = isset($_REQUEST['numero'])  ? $_REQUEST['numero']   :  '';
-		if ($numero == '' ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM apan ")  ;
-		} else
-			$id = $this->datasis->dameval("SELECT id FROM apan WHERE numero='$numero' ")  ;
-
-		$transac  =  $this->datasis->dameval("SELECT transac FROM apan WHERE id=$id ")  ;
-		
-	
-		$mSQL = "
-SELECT
-'1' origen, cod_cli, fecha, tipo_doc, numero, monto, abono, ppago, reten, reteiva
-FROM itccli WHERE transac='$transac' 
-UNION ALL
-SELECT
-'2' origen, cod_prv, fecha, tipo_doc, numero, monto, abono, ppago, reten, reteiva
-FROM itppro WHERE transac='$transac'
-";
-	}
-
-		$funciones = "
-function renderScli(value, p, record) {
-	var mreto='';
-	if ( record.data.cod_cli == '' ){
-		mreto = '{0}';
-	} else {
-		mreto = '<a href=\'javascript:void(0);\' onclick=\"window.open(\''+urlAjax+'sclibu/{1}\', \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx='+mxs+',screeny='+mys+'\');\" heigth=\"600\">{0}</a>';
-	}
-	return Ext.String.format(mreto,	value, record.data.numero );
 }
-
-function renderSinv(value, p, record) {
-	var mreto='';
-	mreto = '<a href=\'javascript:void(0);\' onclick=\"window.open(\''+urlApp+'inventario/sinv/dataedit/show/{1}\', \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx='+mxs+',screeny='+mys+'\');\" heigth=\"600\">{0}</a>';
-	return Ext.String.format(mreto,	value, record.data.codid );
-}
-	";
-*/
-
-}
-?>
