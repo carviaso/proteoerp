@@ -47,7 +47,6 @@ $(document).ready(function() {
 	});
 });
 </script>
-
 </head>
 <body>
 	<div id="container">
@@ -63,10 +62,16 @@ $(document).ready(function() {
 					<?php $this->load->view($data['settings']['default'].'/'.$data['settings']['content'].$view,  $data); ?>
 				</td>
 				<td valign='top' width='300' align='right'>
-				<?php
-					if ( $this->secu->es_logeado() )
-						$this->load->view('chat/chat'); 
-				?>
+				<table cellpadding='0' cellspacing='0' >
+					<tr>
+						<td>
+						<?php
+							if ( $this->secu->es_logeado() )
+								$this->load->view('chat/chat'); 
+						?>
+						</td>
+					</tr>
+				</table>
 				</td>
 			</tr>
 		</table>

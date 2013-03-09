@@ -416,6 +416,13 @@ class Usuarios extends Controller {
 		}
 	}
 
+	function cambiaclave(){
+		echo anchor(site_url('usuarios/cambiac'), img('src'=>'images/llave.png') ) ;
+	}
+
+
+	function 
+
 /*
 class Usuarios extends Controller {
 
@@ -466,7 +473,6 @@ class Usuarios extends Controller {
 		$grid->column_orderby('Vendedor'           ,'<#vendedor#>-<#vendnom#>','vendedor','align=\'center\'');
 		$grid->column_orderby('Cajero'             ,'<#cajero#>-<#cajnom#>','cajero'     ,'align=\'center\'');
 		$grid->column('Cambio clave'   ,$uri2      ,'align="center"');
-		//$grid->column('Asignar Accesos',$uri3       ,'align="center"');
 
 		$grid->add('supervisor/usuarios/dataedit/create','Crear un nuevo usuario');
 		$grid->build();
@@ -539,20 +545,6 @@ class Usuarios extends Controller {
 			LEFT JOIN intrasida AS b ON a.modulo=b.modulo AND b.usuario='$usr'
 			WHERE MID(a.modulo,1,1)!=0 ORDER BY MID(a.modulo,1,1), a.panel,a.modulo";
 		$select=array('a.modulo','a.titulo', "IFNULL(b.acceso,'N') AS acceso",'a.panel',"MID(a.modulo,1,1) AS pertenece");
-
-		//$grid = new DataGrid2("Accesos del Usuario $usr");
-		//$grid->agrupar('Panel: ', 'panel');
-		//$grid->use_function('convierte','number_format','str_replace');
-		//$grid->db->select($select);
-		//$grid->db->from('intramenu AS a');
-		//$grid->db->join('intrasida AS b',"a.modulo=b.modulo AND b.usuario='$usr'",'LEFT');
-		//$grid->db->where('MID(a.modulo,1,1)!=0');
-		//$grid->db->orderby('a.modulo, a.panel');
-		////$grid->per_page = 20;
-		//$grid->column("Titulo" ,"titulo");
-		//$grid->column("Modulo" ,"modulo",'align=left');
-		//$grid->column("Acceso" ,"acceso",'align=right');
-		//$grid->build();
 
 		$mc = $this->db->query($mSQL);
 		$tabla=form_open('accesos/guardar').form_hidden('usuario',$usr).'<div id=\'ContenedoresDeData\'><table width=100% cellspacing="0">';

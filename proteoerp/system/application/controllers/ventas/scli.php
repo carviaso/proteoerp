@@ -89,9 +89,6 @@ class Scli extends validaciones {
 		$link21=site_url('ventas/scli/sclicodigo');
 
 		$postready ='
-//	$("#tiva").change(function () { anomfis(); }).change();
-//	//$(":input").enter2tab();
-//	$("#maintabcontainer").tabs();
 
 $(function() {
 	//Default Action

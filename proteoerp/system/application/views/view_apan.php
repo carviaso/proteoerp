@@ -83,8 +83,6 @@ if($form->_status <> 'show'){ ?>
 	</table>
 </div>
 
-
-
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 <table width='100%' cellspacing='0' cellpadding='0'>
 	<tr>
