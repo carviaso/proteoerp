@@ -35,100 +35,30 @@ class Sprm extends Controller {
 	function jqdatag(){
 
 		$grid = $this->defgrid();
-		$param['grid'] = $grid->deploy();
+		$param['grids'][] = $grid->deploy();
 
-		$readyLayout = '
-		$(\'body\').layout({
-			minSize: 30,
-			north__size: 60,
-			resizerClass: \'ui-state-default\',
-			west__size: 212,
-			west__onresize: function (pane, $Pane){jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);},
-		});
+		$readyLayout = $grid->readyLayout2( 212, 140, $param['grids'][0]['gridname']);
 
-		$(\'div.ui-layout-center\').layout({
-			minSize: 30,
-			resizerClass: "ui-state-default",
-			center__paneSelector: ".centro-centro",
-			south__paneSelector:  ".centro-sur",
-			south__size: 140,
-			center__onresize: function (pane, $Pane) {
-				jQuery("#newapi'.$param['grid']['gridname'].'").jqGrid(\'setGridWidth\',$Pane.innerWidth()-6);
-				jQuery("#newapi'.$param['grid']['gridname'].'").jqGrid(\'setGridHeight\',$Pane.innerHeight()-110);
-			}
-		});
-		';
+		//Panel Central y Sur
+		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'] );
 
-		$centerpanel = '
-		<div id="RightPane" class="ui-layout-center">
-			<div class="centro-centro">
-				<table id="newapi'.$param['grid']['gridname'].'"></table>
-				<div id="pnewapi'.$param['grid']['gridname'].'"></div>
-			</div>
-			<div class="centro-sur" id="adicional" style="overflow:auto;">
-			</div>
-		</div> <!-- #RightPane -->
-		';
-
-
-		$bodyscript = '<script type="text/javascript">
-		$(function() {
-			$( "input:submit, a, button", ".boton1" ).button();';
-
-
-		$bodyscript .= '
-		jQuery("#princheque").click( function(){
-			var id = jQuery("#newapi'.$param['grid']['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$param['grid']['gridname'].'").jqGrid(\'getRowData\',id);
-				if(ret.tipo_op=="CH"){
-					window.open(\''.site_url($this->url.'/impcheque').'/\'+id, \'_blank\', \'width=300,height=400,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-200), screeny=((screen.availWidth/2)-150)\');
-				}else{
-					$.prompt("<h1>El efecto seleccionado no possee cheques</h1>");
-				}
-			} else {
-				$.prompt("<h1>Por favor Seleccione una Egreso</h1>");
-			}
-		});';
-
-
-		$bodyscript .= '
-			jQuery("#boton1").click( function(){
-				var id = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-				if (id)	{
-					var ret = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getRowData\',id);
-					window.open(\''.site_url($this->url.'sprmprint').'/\'+id, \'_blank\', \'width=300,height=300,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-				} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-			});';
-
-		$bodyscript .= '});</script>';
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
-		$WestPanel = '
-		<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-		<div class="anexos">
-		<table id="west-grid" align="center">
-			<tr><td><div class="tema1"><table id="listados"></table></div></td></tr>
-			<tr><td><div class="tema1"><table id="otros"></table></div></td></td>
-			<tr><td><div class="boton1"><a style="width:190px" href="#" id="boton1">'.img(array('src' =>"assets/default/images/print.png",'height' => 18, 'alt' => 'Imprimir', 'title' => 'Imprimir', 'border'=>'0')).' Reimprimir Documento</a></div></td></tr>
-			<tr><td><div class="boton1"><a style="width:190px;text-align:left;vertical-align:top;text-align:center;" href="#" id="princheque">Imprimir Cheque</a></div></td>
-				</tr>
-		</table>
-		<table id="west-grid" align="center">
-			<tr>
-				<td></td>
-			</tr>
-		</table>
-		</div>
-		</div> <!-- #LeftPane -->';
 
-		$SouthPanel = '
-<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
-<p>'.$this->datasis->traevalor('TITULO1').'</p>
-</div> <!-- #BottomPanel -->
-';
+		//Botones Panel Izq
+		$grid->wbotonadd(array('id'=>'imprime',   'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir',      'label'=>'Reimprimir Documento', 'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'princheque','img'=>'images/check.png',                'alt' => 'Emitir Cheque', 'label'=>'Imprimir cheque',      'tema'=>'anexos'));
+		$WestPanel = $grid->deploywestp();
+
+
+		$adic = array(
+		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$funciones = '';
 
@@ -147,12 +77,207 @@ class Sprm extends Controller {
 		$param['tabs']         = false;
 		$param['encabeza']     = $this->titp;
 
-		$this->load->view('jqgrid/crud',$param);
+		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
+
+
+	//******************************************************************
+	//Funciones de los Botones
+	//
+	function bodyscript( $grid0 ){
+		$bodyscript = '<script type="text/javascript">';
+
+
+		$bodyscript .= '
+		jQuery("#princheque").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if(ret.tipo_op=="CH"){
+					window.open(\''.site_url($this->url.'/impcheque').'/\'+id, \'_blank\', \'width=300,height=400,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-200), screeny=((screen.availWidth/2)-150)\');
+				}else{
+					$.prompt("<h1>El efecto seleccionado no possee cheques</h1>");
+				}
+			} else {
+				$.prompt("<h1>Por favor Seleccione una Egreso</h1>");
+			}
+		});';
+
+
+		$bodyscript .= '
+		jQuery("#imprime").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url($this->url.'sprmprint').'/\'+id, \'_blank\', \'width=300,height=300,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});';
+
+
+		$bodyscript .= '
+		function sprmadd(){
+			$.post("'.site_url($this->url.'dataedit/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		};';
+
+		$bodyscript .= '
+		function sprmedit(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function sprmshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function sprmdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+		//Wraper de javascript
+		$bodyscript .= '
+		$(function(){
+			$("#dialog:ui-dialog").dialog( "destroy" );
+			var mId = 0;
+			var montotal = 0;
+			var ffecha = $("#ffecha");
+			var grid = jQuery("#newapi'.$grid0.'");
+			var s;
+			var allFields = $( [] ).add( ffecha );
+			var tips = $( ".validateTips" );
+			s = grid.getGridParam(\'selarrrow\');
+			';
+
+		$bodyscript .= '
+		$("#fedita").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/SPRM').'/\'+res.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+		$bodyscript .= '});'."\n";
+
+		$bodyscript .= "\n</script>\n";
+		$bodyscript .= "";
+		return $bodyscript;
+	}
+
+
+
+
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -805,7 +930,7 @@ class Sprm extends Controller {
 					url: "'.base_url().$this->url.'tabla/"+id,
 					success: function(msg){
 						//alert( "El ultimo codigo ingresado fue: " + msg );
-						$("#adicional").html(msg);
+						$("#radicional").html(msg);
 					}
 				});
 			}

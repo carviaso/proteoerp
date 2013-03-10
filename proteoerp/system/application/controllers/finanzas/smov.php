@@ -71,10 +71,10 @@ class Smov extends Controller {
 
 	}
 
-	//***************************
+	//******************************************************************
 	//Funciones de los Botones
 	//fuera del doc ready
-	//***************************
+	//
 	function bodyscript( $grid0 ){
 
 		$bodyscript  = '<script type="text/javascript">';
@@ -187,11 +187,11 @@ class Smov extends Controller {
 	}
 
 
-	//************************************
+
+	//******************************************************************
 	//
 	//Definicion del Grid y la Forma
 	//
-	//************************************
 	function defgrid( $deployed = false ){
 		$i = 1;
 

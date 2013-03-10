@@ -21,6 +21,11 @@
 <?php //echo script("plugins/interface.js"); ?>
 <?php echo script("plugins/jquery.masonry.min.js"); ?>
 
+
+<style>
+<?php $this->load->view('loadstyle'); ?>
+</style>
+
 <script type="text/javascript" charset="<?php echo $this->config->item('charset'); ?>">
 $(document).ready(function() {
 	$("#accordion").myAccordion({
@@ -45,6 +50,10 @@ $(document).ready(function() {
 		});
 		return false;
 	});
+
+<?php $this->load->view('loadready'); ?>
+
+
 });
 </script>
 </head>
@@ -68,6 +77,14 @@ $(document).ready(function() {
 						<?php
 							if ( $this->secu->es_logeado() )
 								$this->load->view('chat/chat'); 
+						?>
+						</td>
+					</tr>
+					<tr>
+						<td>
+						<?php
+							if ( $this->secu->es_logeado() )
+								$this->load->view('ultlog'); 
 						?>
 						</td>
 					</tr>
