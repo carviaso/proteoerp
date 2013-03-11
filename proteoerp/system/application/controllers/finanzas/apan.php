@@ -14,7 +14,7 @@ class Apan extends Controller {
 
 	function index(){
 		$this->instalar();
-		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1) );
+		$this->datasis->modintramenu( 1024, 700, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -45,7 +45,7 @@ class Apan extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$funciones = '';
 
@@ -72,7 +72,6 @@ class Apan extends Controller {
 
 		$this->load->view('jqgrid/crud2',$param);
 	}
-
 
 
 	//******************************************************************
@@ -165,7 +164,7 @@ class Apan extends Controller {
 		$("#fcliente").click( function() {
 			$.post("'.site_url($this->url.'decliente/create').'",
 			function(data){
-				$("#fedita").dialog( {height: 450, width: 620, title: "Aplicacion de Anticipo a Cliente"} );
+				$("#fedita").dialog( {height: 450, width: 750, title: "Aplicacion de Anticipo a Cliente"} );
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
@@ -176,7 +175,7 @@ class Apan extends Controller {
 		$("#fproveed").click( function() {
 			$.post("'.site_url($this->url.'deproveed/create').'",
 			function(data){
-				$("#fedita").dialog( {height: 450, width: 620, title: "Aplicacion de Anticipo a Proveedor"} );
+				$("#fedita").dialog( {height: 450, width: 750, title: "Aplicacion de Anticipo a Proveedor"} );
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
@@ -193,7 +192,7 @@ class Apan extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 500, width: 800, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -274,12 +273,12 @@ class Apan extends Controller {
 	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -369,7 +368,7 @@ class Apan extends Controller {
 
 
 		$grid->addField('observa1');
-		$grid->label('Observa1');
+		$grid->label('Observaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -393,7 +392,7 @@ class Apan extends Controller {
 */
 
 		$grid->addField('transac');
-		$grid->label('Transac');
+		$grid->label('Transaci&oacute;n');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
@@ -533,9 +532,9 @@ class Apan extends Controller {
 		if($oper == 'add'){
 			if(false == empty($data)){
 				$this->db->insert('apan', $data);
-				echo "Registro Agregado";
+				echo 'Registro Agregado';
 
-				logusu('APAN',"Registro ????? INCLUIDO");
+				logusu('APAN','Registro ????? INCLUIDO');
 			} else
 			echo 'Fallo Agregado!!!';
 
@@ -543,17 +542,17 @@ class Apan extends Controller {
 			//unset($data['ubica']);
 			$this->db->where('id', $id);
 			$this->db->update('apan', $data);
-			logusu('APAN',"Registro ????? MODIFICADO");
+			logusu('APAN','Registro ????? MODIFICADO');
 			echo 'Registro Modificado';
 
 		} elseif($oper == 'del') {
 			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM apan WHERE id='$id' ");
 			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
+				echo ' El registro no puede ser eliminado; tiene movimiento ';
 			} else {
-				$this->db->simple_query("DELETE FROM apan WHERE id=$id ");
-				logusu('APAN',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
+				$this->db->simple_query("DELETE FROM apan WHERE id=$id");
+				logusu('APAN','Registro ????? ELIMINADO');
+				echo 'Registro Eliminado';
 			}
 		};
 	}
@@ -766,7 +765,7 @@ class Apan extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$edit->numero = new inputField('Numero','numero');
+		$edit->numero = new inputField('N&uacute;mero','numero');
 		$edit->numero->rule      = '';
 		$edit->numero->size      = 10;
 		$edit->numero->maxlength = 8;
@@ -787,7 +786,6 @@ class Apan extends Controller {
 		$edit->clipro = new inputField('Clipro','clipro');
 		$edit->clipro->rule      = '';
 		$edit->clipro->size      = 7;
-		$edit->clipro->maxlength = 5;
 
 		$edit->nombre = new inputField('Nombre','nombre');
 		$edit->nombre->rule      = '';
@@ -815,11 +813,6 @@ class Apan extends Controller {
 		$edit->observa2->size      = 52;
 		$edit->observa2->maxlength = 50;
 
-		$edit->transac = new inputField('Transac','transac');
-		$edit->transac->rule      = '';
-		$edit->transac->size      = 10;
-		$edit->transac->maxlength =  8;
-
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
@@ -842,7 +835,7 @@ class Apan extends Controller {
 				autoFocus: true,
 				source: function( req, add){
 					$.ajax({
-						url:  "'.site_url('ajax/buscasprv').'",
+						url:  "'.site_url('ajax/buscascli').'",
 						type: "POST",
 						dataType: "json",
 						data: {"q":req.term},
@@ -876,8 +869,86 @@ class Apan extends Controller {
 
 					setTimeout(function() {  $("#clipro").removeAttr("readonly"); }, 1500);
 
+					truncate();
+
+					$.ajax({
+						url: "'.site_url('ajax/buscasmovapan/annc').'",
+						dataType: "json",
+						type: "POST",
+						data: {"scli" : ui.item.value},
+						success: function(data){
+								$.each(data,
+									function(id, val){
+										can= add_itannc();
+
+										$("#itnumero_" +can).val(val.tipo_doc+val.numero);
+                                        $("#itfecha_"  +can).val(val.fecha);
+                                        $("#itsaldo_"  +can).val(val.saldo);
+                                        $("#itnumero_" +can+"_val").text(val.tipo_doc+val.numero);
+                                        $("#itfecha_"  +can+"_val").text(val.fecha);
+                                        $("#itsaldo_"  +can+"_val").text(val.saldo);
+
+										$("#itmonto_"+can ).focus(function(){
+											var valor = $(this).val();
+											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+												$(this).val(val.saldo);
+												totaliza();
+											}
+										});
+									}
+								);
+							},
+					});
+
+
+					$.ajax({
+						url: "'.site_url('ajax/buscasmovapan/fcndgi').'",
+						dataType: "json",
+						type: "POST",
+						data: {"scli" : ui.item.value},
+						success: function(data){
+								$.each(data,
+									function(id, val){
+										can= add_itefec();
+
+										$("#itenumero_" +can).val(val.tipo_doc+val.numero);
+                                        $("#itefecha_"  +can).val(val.fecha);
+                                        $("#itesaldo_"  +can).val(val.saldo);
+                                        $("#itenumero_" +can+"_val").text(val.tipo_doc+val.numero);
+                                        $("#itefecha_"  +can+"_val").text(val.fecha);
+                                        $("#itesaldo_"  +can+"_val").text(val.saldo);
+
+										$("#iteaplicar_"+can ).focus(function(){
+											totaliza();
+											var valor  = $(this).val();
+											var nvalor = 0;
+											var aplica = totalefe();
+											var monto  = Number($("#monto").val());
+											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+												nvalor = Number(valor);
+												if(monto >= aplica+val.saldo){
+													$(this).val(val.saldo);
+												}else{
+													if(monto-aplica==0){
+														$(this).val("");
+													}else{
+														$(this).val(roundNumber(monto-aplica,2));
+													}
+												}
+											}else{
+												if(aplica>monto){
+													$(this).val("");
+												}
+											}
+										});
+									}
+								);
+							},
+					});
+
 					//var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					//$("#saldod").val(roundNumber(saldo,2))
+					//$("#saldoa").val(roundNumber(saldo,2))
+
 				}
 			});
 		});';
@@ -941,40 +1012,81 @@ class Apan extends Controller {
 
 					setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
 
-					//$.ajax({
-					//	url: "'.site_url('ajax/buscasprm').'",
-					//	dataType: "json",
-					//	type: "POST",
-					//	data: {"sprv" : ui.item.value},
-					//	success: function(data){
-					//			truncate();
-					//			$.each(data,
-					//				function(id, val){
-					//					can=add_itcruc();
-                    //
-					//					$("#itonumero_"+can).val(val.tipo_doc+val.numero);
-					//					$("#itofecha_"+can ).val(val.fecha);
-					//					$("#itpmonto_"+can  ).val(val.monto);
-					//					$("#itpsaldo_"+can  ).val(val.saldo);
-					//					$("#itmonto_"+can ).val("0");
-                    //
-					//					$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
-					//					$("#itofecha_"+can+"_val" ).text(val.fecha);
-					//					$("#itpmonto_"+can+"_val"  ).text(nformat(val.monto,2));
-					//					$("#itpsaldo_"+can+"_val"  ).text(nformat(val.saldo,2));
-                    //
-					//					$("#itmonto_"+can ).focus(function(){
-					//						var valor = $(this).val();
-					//						if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
-					//							$(this).val(val.saldo);
-					//							totaliza();
-					//						}
-					//					});
-					//				}
-					//			);
-					//		},
-					//});
-                    //
+					truncate();
+
+					$.ajax({
+						url: "'.site_url('ajax/buscasprmapan/annc').'",
+						dataType: "json",
+						type: "POST",
+						data: {"sprv" : ui.item.value},
+						success: function(data){
+								$.each(data,
+									function(id, val){
+										can= add_itannc();
+
+										$("#itnumero_" +can).val(val.tipo_doc+val.numero);
+                                        $("#itfecha_"  +can).val(val.fecha);
+                                        $("#itsaldo_"  +can).val(val.saldo);
+                                        $("#itnumero_" +can+"_val").text(val.tipo_doc+val.numero);
+                                        $("#itfecha_"  +can+"_val").text(val.fecha);
+                                        $("#itsaldo_"  +can+"_val").text(val.saldo);
+
+										$("#itmonto_"+can ).focus(function(){
+											var valor = $(this).val();
+											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+												$(this).val(val.saldo);
+												totaliza();
+											}
+										});
+									}
+								);
+							},
+					});
+
+					$.ajax({
+						url: "'.site_url('ajax/buscasprmapan/fcndgi').'",
+						dataType: "json",
+						type: "POST",
+						data: {"sprv" : ui.item.value},
+						success: function(data){
+								$.each(data,
+									function(id, val){
+										can= add_itefec();
+
+										$("#itenumero_" +can).val(val.tipo_doc+val.numero);
+                                        $("#itefecha_"  +can).val(val.fecha);
+                                        $("#itesaldo_"  +can).val(val.saldo);
+                                        $("#itenumero_" +can+"_val").text(val.tipo_doc+val.numero);
+                                        $("#itefecha_"  +can+"_val").text(val.fecha);
+                                        $("#itesaldo_"  +can+"_val").text(val.saldo);
+
+										$("#iteaplicar_"+can ).focus(function(){
+											totaliza();
+											var valor  = $(this).val();
+											var nvalor = 0;
+											var aplica = totalefe();
+											var monto  = Number($("#monto").val());
+											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+												nvalor = Number(valor);
+												if(monto >= aplica+val.saldo){
+													$(this).val(val.saldo);
+												}else{
+													if(monto-aplica==0){
+														$(this).val("");
+													}else{
+														$(this).val(roundNumber(monto-aplica,2));
+													}
+												}
+											}else{
+												if(aplica>monto){
+													$(this).val("");
+												}
+											}
+										});
+									}
+								);
+							},
+					});
 					//var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
 					//$("#saldoa").val(roundNumber(saldo,2))
 

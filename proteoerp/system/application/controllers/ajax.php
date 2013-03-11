@@ -988,6 +988,83 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+
+	//***********************************************
+	//Busca los efectos que pueden aplicarse
+	//***********************************************
+	function buscasmovapan($tipo=null){
+		$mid = $this->input->post('scli');
+
+		if($tipo=='annc'){
+			$ww = 'tipo_doc IN (\'AN\',\'NC\')';
+		}else{
+			$ww = 'tipo_doc IN (\'FC\',\'ND\',\'GI\')';
+		}
+
+		$data = '[ ]';
+		if($mid !== false){
+			$dbscli   = $this->db->escape($mid);
+			$retArray = $retorno = array();
+			$mSQL="SELECT id, fecha,monto, numero, tipo_doc, monto-abonos AS saldo
+			FROM smov
+			WHERE ${ww} AND abonos<monto AND cod_cli=${dbscli}";
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $id=>$row ) {
+					$retArray['numero']  = trim($row['numero']);
+					$retArray['tipo_doc']= trim($row['tipo_doc']);
+					$retArray['fecha']   = $row['fecha'];
+					$retArray['monto']   = $row['monto'];
+					$retArray['saldo']   = $row['saldo'];
+					$retArray['id']      = $row['id'];
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
+	//***********************************************
+	//Busca los efectos que pueden aplicarse a proveedor
+	//***********************************************
+	function buscasprmapan($tipo=null){
+		$mid = $this->input->post('sprv');
+
+		if($tipo=='annc'){
+			$ww = 'tipo_doc IN (\'AN\',\'NC\')';
+		}else{
+			$ww = 'tipo_doc IN (\'FC\',\'ND\',\'GI\')';
+		}
+
+		$data = '[ ]';
+		if($mid !== false){
+			$dbsprv   = $this->db->escape($mid);
+			$retArray = $retorno = array();
+			$mSQL="SELECT id, fecha,monto, numero, tipo_doc, monto-abonos AS saldo
+			FROM sprm
+			WHERE ${ww} AND abonos<monto AND cod_prv=${dbsprv}";
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $id=>$row ) {
+					$retArray['numero']  = trim($row['numero']);
+					$retArray['tipo_doc']= trim($row['tipo_doc']);
+					$retArray['fecha']   = $row['fecha'];
+					$retArray['monto']   = $row['monto'];
+					$retArray['saldo']   = $row['saldo'];
+					$retArray['id']      = $row['id'];
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
 	//***********************************************
 	//Busca los efectos que se deben para los cruces
 	//***********************************************

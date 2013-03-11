@@ -145,7 +145,7 @@ $pie_final=<<<piefinal
 		</tbody>
 		<tfoot style='border:1px solid;background:#EEEEEE;'>
 			<tr>
-				<td style="text-align: right;" colspan='3'><b>TOTALES</b></td>
+				<td style="text-align: right;" colspan='3'><b>TOTAL</b></td>
 				<td style="text-align: right;font-size:16px;font-weight:bold;" > %s </td>
 			</tr>
 		</tfoot>
