@@ -1392,7 +1392,7 @@ class Cruc extends Controller {
 		$edit->proveed = new inputField('Proveedor','proveed');
 		$edit->proveed->rule      = 'trim|required';
 		$edit->proveed->size      =  6;
-		$edit->proveed->maxlength =  5;
+		//$edit->proveed->maxlength =  5;
 
 		$edit->nombre = new inputField('Nombre','nombre');
 		//$edit->nombre->type      = 'inputhidden';
@@ -1409,7 +1409,7 @@ class Cruc extends Controller {
 		$edit->cliente = new inputField('Cliente','cliente');
 		$edit->cliente->rule      = 'trim|required';
 		$edit->cliente->size      = 6;
-		$edit->cliente->maxlength = 5;
+		//$edit->cliente->maxlength = 5;
 
 		$edit->nomcli = new inputField('Nomcli','nomcli');
 		//$edit->nomcli->type      = 'inputhidden';
@@ -1493,6 +1493,7 @@ class Cruc extends Controller {
 		}
 	}
 
+
 	function _pre_insert($do){
 		$numero  = 'C'.$this->datasis->fprox_numero('ncruc',7);
 		$trans   = $this->datasis->fprox_numero('ntransa');
@@ -1549,9 +1550,126 @@ class Cruc extends Controller {
 
 
 		if ( $tipo == 'P-C' ) {
+			// PROVEEDOR ----> CLIENTE
 			$mNUMERO = $this->datasis->fprox_numero("nccli");
 			$data = array();
 			$data["cod_cli"]  = $cliente;
+			$data["nombre"]   = $do->get('nomcli');
+			$data["tipo_doc"] = "NC";
+			$data["numero"]   = $mNUMERO;
+			$data["fecha"]    = $do->get('fecha');
+			$data["monto"]    = $do->get('monto');
+			$data["abonos"]   = $do->get('monto');
+			$data["vence"]    = $do->get('fecha');
+			$data["observa1"] = $do->get('concept1');
+			$data["observa2"] = $do->get('concept2');
+			$data["tipo_ref"] = 'CR';
+			$data["num_ref"]  = $do->get('numero');
+
+			$data["estampa"] = $do->get('estampa');
+			$data["hora"]    = $do->get('hora');
+			$data["transac"] = $do->get('transac');
+			$data["usuario"] = $do->get('usuario');
+
+			$this->db->insert('smov', $data);
+
+			// DEBE ABONAR A DESDE
+			$cana = $do->count_rel('itcruc');
+			for( $i = 0; $i < $cana; $i++ ){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = $do->get_rel('itcruc', 'monto',   $i);
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+
+				if ( $tipoit == 'APA'){
+					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
+					         AND numero='".substr($onumero,2,8)."' 
+					         AND fecha=".$fechait." AND cod_cli='".$cliente."' ";
+					$this->db->query($mSQL);
+				}
+			}
+
+			$mNUMERO = $this->datasis->fprox_numero("num_nc");
+
+			$data["cod_prv"]  = $proveed;
+			$data["nombre"]   = $do->get('nombre');
+			$data["tipo_doc"] = "NC";
+			$data["numero"]   = $mNUMERO;
+			$data["fecha"]    = $do->get('fecha');
+			$data["monto"]    = $do->get('monto');
+			$data["impuesto"] = 0;
+			$data["abonos"]   = $do->get('monto');
+			$data["vence"]    = $do->get('fecha');
+			$data["observa1"] = $do->get('concept1');
+			$data["observa2"] = $do->get('concept2');
+			$data["tipo_ref"] = 'CR';
+			$data["num_ref"]  = $do->get('numero');
+
+			$data["estampa"] = $do->get('estampa');
+			$data["hora"]    = $do->get('hora');
+			$data["transac"] = $do->get('transac');
+			$data["usuario"] = $do->get('usuario');
+
+			$this->db->insert('sprm', $data);
+
+			// DEBE ABONAR A DESDE
+			$cana = $do->count_rel('itcruc');
+			for( $i = 0; $i < $cana; $i++ ){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = $do->get_rel('itcruc', 'monto',   $i);
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+
+				if ( $tipoit == 'ADE'){
+					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
+					         AND numero='".substr($onumero,2,8)."' 
+					         AND fecha=".$fechait." AND cod_prv='".$proveed."' ";
+					$this->db->query($mSQL);
+				}
+			}
+
+		} elseif ( $tipo == 'C-P' ) {
+			// CLIENTE ----> PROVEEDOR
+			$mNUMERO = $this->datasis->fprox_numero("num_nc");
+			$data["cod_prv"]  = $cliente;
+			$data["nombre"]   = $do->get('nomcli');
+			$data["tipo_doc"] = "NC";
+			$data["numero"]   = $mNUMERO;
+			$data["fecha"]    = $do->get('fecha');
+			$data["monto"]    = $do->get('monto');
+			$data["impuesto"] = 0;
+			$data["abonos"]   = $do->get('monto');
+			$data["vence"]    = $do->get('fecha');
+			$data["observa1"] = $do->get('concept1');
+			$data["observa2"] = $do->get('concept2');
+			$data["tipo_ref"] = 'CR';
+			$data["num_ref"]  = $do->get('numero');
+
+			$data["estampa"] = $do->get('estampa');
+			$data["hora"]    = $do->get('hora');
+			$data["transac"] = $do->get('transac');
+			$data["usuario"] = $do->get('usuario');
+
+			$this->db->insert('sprm', $data);
+
+			// DEBE ABONAR A DESDE
+			$cana = $do->count_rel('itcruc');
+			for( $i = 0; $i < $cana; $i++ ){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = $do->get_rel('itcruc', 'monto',   $i);
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+				if ( $tipoit == 'APA'){
+					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
+					         AND numero='".substr($onumero,2,8)."' 
+					         AND fecha=".$fechait." AND cod_prv='".$cliente."' ";
+					$this->db->query($mSQL);
+				}
+			}
+
+			$mNUMERO = $this->datasis->fprox_numero("nccli");
+			$data = array();
+			$data["cod_cli"]  = $proveed;
 			$data["nombre"]   = $do->get('nombre');
 			$data["tipo_doc"] = "NC";
 			$data["numero"]   = $mNUMERO;
@@ -1563,76 +1681,156 @@ class Cruc extends Controller {
 			$data["observa2"] = $do->get('concept2');
 			$data["tipo_ref"] = 'CR';
 			$data["num_ref"]  = $do->get('numero');
+
+			$data["estampa"]  = $do->get('estampa');
+			$data["hora"]     = $do->get('hora');
+			$data["transac"]  = $do->get('transac');
+			$data["usuario"]  = $do->get('usuario');
+
 			$this->db->insert('smov', $data);
 
 			// DEBE ABONAR A DESDE
-			$mSQL = "UPDATE smov SET abonos=abonos+? WHERE tipo_doc=? AND numero=? AND fecha=? AND cod_cli=?"
-
 			$cana = $do->count_rel('itcruc');
 			for( $i = 0; $i < $cana; $i++ ){
-				$onumero = $do->get_rel('itcruc','onumero' ,$i);
-				$monto   = $do->get_rel('itcruc','monto'   ,$i);
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = $do->get_rel('itcruc', 'monto',   $i);
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
 
-
-
-
+				if ( $tipoit == 'ADE'){
+					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
+					         AND numero='".substr($onumero,2,8)."' 
+					         AND fecha=".$fechait." AND cod_cli='".$proveed."' ";
+					$this->db->query($mSQL);
+				}
 			}
 
+		} elseif ( $tipo == 'C-C' ) {
+			// CLIENTE ----> CLIENTE
+			$mNUMERO = $this->datasis->fprox_numero("nccli");
+			$data = array();
+			$data["cod_cli"]  = $proveed;
+			$data["nombre"]   = $do->get('nombre');
+			$data["tipo_doc"] = "NC";
+			$data["numero"]   = $mNUMERO;
+			$data["fecha"]    = $do->get('fecha');
+			$data["monto"]    = $do->get('monto');
+			$data["abonos"]   = $do->get('monto');
+			$data["vence"]    = $do->get('fecha');
+			$data["observa1"] = $do->get('concept1');
+			$data["observa2"] = $do->get('concept2');
+			$data["tipo_ref"] = 'CR';
+			$data["num_ref"]  = $do->get('numero');
 
-			
-			$mIMPUESTO = 0;
-			FOR i := 1 TO LEN(mAPA) {
-				// ABONANDO
-				IF mAPA[i,7] = 0
-					LOOP
-				ENDIF
+			$data["estampa"]  = $do->get('estampa');
+			$data["hora"]     = $do->get('hora');
+			$data["transac"]  = $do->get('transac');
+			$data["usuario"]  = $do->get('usuario');
 
-				mSQL := "UPDATE smov SET abonos=abonos+"+ALLTRIM(STR(mAPA[i,7]))+" "
-				mSQL += "WHERE tipo_doc='"+SUBSTR(mAPA[i,1],1,2)+"' "
-				mSQL += "AND numero='"+SUBSTR(mAPA[i,1],3,8)+"' "
-				mSQL += "AND FECHA="+DTOS(mAPA[i,2])+" AND cod_cli='"+XCLIENTE+"' "
-				EJECUTASQL(mSQL)
+			$this->db->insert('smov', $data);
+
+			// DEBE ABONAR A DESDE
+			$cana = $do->count_rel('itcruc');
+			for( $i = 0; $i < $cana; $i++ ){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = $do->get_rel('itcruc', 'monto',   $i);
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+
+				if ( $tipoit == 'ADE'){
+					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
+					         AND numero='".substr($onumero,2,8)."' 
+					         AND fecha=".$fechait." AND cod_cli='".$proveed."' ";
+					$this->db->query($mSQL);
+				}
 			}
 
-		mNUMERO := PROX_SQL("num_nc")
-		aLISTA := {}
-		AADD(aLISTA, {"COD_PRV", XPROVEED })
-		AADD(aLISTA, {"NOMBRE",  XNOMBRE })
-		AADD(aLISTA, {"TIPO_DOC","NC" })
-		AADD(aLISTA, {"NUMERO",  mNUMERO })
-		AADD(aLISTA, {"FECHA",   XFECHA })
-		AADD(aLISTA, {"MONTO",   XMONTO })
-		AADD(aLISTA, {"IMPUESTO",0 })
-		AADD(aLISTA, {"ABONOS",  XMONTO })
-		AADD(aLISTA, {"VENCE",   XFECHA })
-		AADD(aLISTA, {"OBSERVA1",XCONCEPT1 })
-		AADD(aLISTA, {"OBSERVA2",XCONCEPT2 })
-		AADD(aLISTA, {"TIPO_REF",'CR' })
-		AADD(aLISTA, {"NUM_REF", XNUMERO })
+			$mNUMERO = $this->datasis->fprox_numero("ndcli");
+			$data = array();
 
-		aVALORES := {}
-		mSQL := "INSERT INTO sprm SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-		EJECUTASQL(mSQL,aVALORES)
+			$data["cod_cli"]  = $cliente;
+			$data["nombre"]   = $do->get('nomcli');
+			$data["tipo_doc"] = "ND";
+			$data["numero"]   = $mNUMERO;
+			$data["fecha"]    = $do->get('fecha');
+			$data["monto"]    = $do->get('monto');
+			$data["abonos"]   =   0;
+			$data["vence"]    = $do->get('fecha');
+			$data["observa1"] = $do->get('concept1');
+			$data["observa2"] = $do->get('concept1');
+			$data["impuesto"] = 0;
+			$data["tipo_ref"] = 'CR';
+			$data["num_ref"]  = $do->get('numero');
 
-		// DEBE ABONAR A DESDE
-		mIMPUESTO := 0
-		FOR i := 1 TO LEN(mADE)
-			IF mADE[i,7] = 0
-				LOOP
-			ENDIF
+			$data["estampa"]  = $do->get('estampa');
+			$data["hora"]     = $do->get('hora');
+			$data["transac"]  = $do->get('transac');
+			$data["usuario"]  = $do->get('usuario');
 
-			mSQL := "UPDATE sprm SET abonos=abonos+"+ALLTRIM(STR(mADE[i,7]))+" "
-			mSQL += "WHERE tipo_doc='"+SUBSTR(mADE[i,1],1,2)+"' "
-			mSQL += "AND numero='"+SUBSTR(mADE[i,1],3,8)+"' "
-			mSQL += "AND FECHA="+DTOS(mADE[i,2])+" AND cod_prv='"+XPROVEED+"' "
-			EJECUTASQL(mSQL)
-		NEXT
+			$this->db->insert('smov', $data);
+
+		} elseif ( $tipo == 'P-P' ) {
+			// PROVEEDOR ----> PROVEEDOR
+			$mNUMERO = $this->datasis->fprox_numero("num_nc");
+			$data["cod_prv"]  = $proveed;
+			$data["nombre"]   = $do->get('nombre');
+			$data["tipo_doc"] = "NC";
+			$data["numero"]   = $mNUMERO;
+			$data["fecha"]    = $do->get('fecha');
+			$data["monto"]    = $do->get('monto');
+			$data["impuesto"] = 0;
+			$data["abonos"]   = $do->get('monto');
+			$data["vence"]    = $do->get('fecha');
+			$data["observa1"] = $do->get('concept1');
+			$data["observa2"] = $do->get('concept2');
+			$data["tipo_ref"] = 'CR';
+			$data["num_ref"]  = $do->get('numero');
+
+			$data["estampa"] = $do->get('estampa');
+			$data["hora"]    = $do->get('hora');
+			$data["transac"] = $do->get('transac');
+			$data["usuario"] = $do->get('usuario');
+
+			$this->db->insert('sprm', $data);
+
+			// DEBE ABONAR A DESDE
+			$cana = $do->count_rel('itcruc');
+			for( $i = 0; $i < $cana; $i++ ){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = $do->get_rel('itcruc', 'monto',   $i);
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+				if ( $tipoit == 'ADE'){
+					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
+					         AND numero='".substr($onumero,2,8)."' 
+					         AND fecha=".$fechait." AND cod_prv='".$proveed."' ";
+					$this->db->query($mSQL);
+				}
+			}
+   
+			$mNUMERO = $this->datasis->fprox_numero("num_nd");
+			$data["cod_prv"]  = $cliente;
+			$data["nombre"]   = $do->get('nomcli');
+			$data["tipo_doc"] = "ND";
+			$data["numero"]   = $mNUMERO;
+			$data["fecha"]    = $do->get('fecha');
+			$data["monto"]    = $do->get('monto');
+			$data["impuesto"] = 0;
+			$data["abonos"]   = $do->get('monto');
+			$data["vence"]    = $do->get('fecha');
+			$data["observa1"] = $do->get('concept1');
+			$data["observa2"] = $do->get('concept2');
+			$data["tipo_ref"] = 'CR';
+			$data["num_ref"]  = $do->get('numero');
+
+			$data["estampa"] = $do->get('estampa');
+			$data["hora"]    = $do->get('hora');
+			$data["transac"] = $do->get('transac');
+			$data["usuario"] = $do->get('usuario');
+
+			$this->db->insert('sprm', $data);
+
 		}
-
-
-
-
 
 		logusu($do->table,"Creo $this->tits $primary ");
 	}
@@ -1646,346 +1844,6 @@ class Cruc extends Controller {
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
-
-/*
-
-
-	mTRANSAC := PROX_SQL("ntransa")
-	XNUMERO  := "C"+SUBSTR(PROX_SQL("ncruc"),2,7)
-	aLISTA := {}
-
-	AADD(aLISTA, {"NUMERO",  XNUMERO } )
-	AADD(aLISTA, {"FECHA",   XFECHA } )
-	AADD(aLISTA, {"TIPO",    XTIPO } )
-	AADD(aLISTA, {"PROVEED", XPROVEED } )
-	AADD(aLISTA, {"NOMBRE",  XNOMBRE } )
-	AADD(aLISTA, {"SALDOA",  XSALDOA } )
-	AADD(aLISTA, {"CLIENTE", XCLIENTE } )   
-	AADD(aLISTA, {"NOMCLI",  XNOMCLI } )
-	AADD(aLISTA, {"SALDOD",  XSALDOD } )
-	AADD(aLISTA, {"MONTO",   XMONTO } )
-	AADD(aLISTA, {"CONCEPT1",XCONCEPT1 } )
-	AADD(aLISTA, {"CONCEPT2",XCONCEPT2 } )
-
-	aVALORES := {}
-	mSQL := "INSERT INTO cruc SET "
-	oCursor:Insert()
-	LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-	//EJECUTASQL(mSQL,aVALORES)
-	GUARDAOCUR(aLISTA,mTRANSAC)
-
-	LOGUSU("CRUCE DE CUENTAS "+XNUMERO+" TIPO "+XTIPO+" DE "+XPROVEED+ ;
-          " A "+XCLIENTE+" CREADO, TRANSACCION #" + mTRANSAC )
-
-	// GUARDA LOS ITEMS EN SELECT ITCRUC
-	FOR i := 1 TO LEN(mADE)
-		IF mADE[i,7] = 0
-			LOOP
-		ENDIF
-		aLISTA := {}
-		AADD(aLISTA,{"NUMERO",  XNUMERO })
-		AADD(aLISTA,{"TIPO",    "ADE" })
-		AADD(aLISTA,{"ONUMERO", mADE[i,1] })
-		AADD(aLISTA,{"OFECHA",  mADE[i,2] })
-		AADD(aLISTA,{"OREGIST", mADE[i,8] })
-		AADD(aLISTA,{"MONTO",   mADE[i,7] })
-
-		aVALORES := {}
-		mSQL := "INSERT INTO itcruc SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA )
-		EJECUTASQL(mSQL,aVALORES)
-	NEXT
-
-	FOR i := 1 TO LEN(mAPA)
-		IF mAPA[i,7] = 0
-			LOOP
-		ENDIF
-		aLISTA := {}
-		AADD(aLISTA, {"NUMERO",  XNUMERO })
-		AADD(aLISTA, {"TIPO",    "APA" })
-		AADD(aLISTA, {"ONUMERO", mAPA[i,1] })
-		AADD(aLISTA, {"OFECHA",  mAPA[i,2] })
-		AADD(aLISTA, {"OREGIST", mAPA[i,8] })
-		AADD(aLISTA, {"MONTO",   mAPA[i,7] })
-
-		aVALORES := {}
-		mSQL := "INSERT INTO itcruc SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA )
-		EJECUTASQL(mSQL,aVALORES)
-	NEXT
-
-
-
-	IF XTIPO = 'P-C'
-		mNUMERO   := PROX_SQL("nccli")
-		aLISTA := {}
-		AADD(aLISTA, {"COD_CLI", XCLIENTE })
-		AADD(aLISTA, {"NOMBRE",  XNOMCLI  })
-		AADD(aLISTA, {"TIPO_DOC",  "NC" })
-		AADD(aLISTA, {"NUMERO",    mNUMERO })
-		AADD(aLISTA, {"FECHA",     XFECHA })
-		AADD(aLISTA, {"MONTO",     XMONTO })
-		AADD(aLISTA, {"ABONOS",    XMONTO })
-		AADD(aLISTA, {"VENCE",     XFECHA })
-		AADD(aLISTA, {"OBSERVA1",  XCONCEPT1 })
-		AADD(aLISTA, {"OBSERVA2",  XCONCEPT2 })
-		AADD(aLISTA, {"TIPO_REF",  'CR' })
-		AADD(aLISTA, {"NUM_REF",   XNUMERO })
-
-		aVALORES := {}
-		mSQL := "INSERT INTO smov SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-		EJECUTASQL(mSQL,aVALORES)
-
-		// DEBE ABONAR A DESDE
-		mSQL := "UPDATE smov SET abonos=abonos+? WHERE tipo_doc=? AND "
-		mSQL += "numero=? AND fecha=? AND cod_cli=?"
-		mIMPUESTO := 0
-		FOR i := 1 TO LEN(mAPA)
-			// ABONANDO
-			IF mAPA[i,7] = 0
-				LOOP
-			ENDIF
-
-			mSQL := "UPDATE smov SET abonos=abonos+"+ALLTRIM(STR(mAPA[i,7]))+" "
-			mSQL += "WHERE tipo_doc='"+SUBSTR(mAPA[i,1],1,2)+"' "
-			mSQL += "AND numero='"+SUBSTR(mAPA[i,1],3,8)+"' "
-			mSQL += "AND FECHA="+DTOS(mAPA[i,2])+" AND cod_cli='"+XCLIENTE+"' "
-			EJECUTASQL(mSQL)
-		NEXT
-
-		mNUMERO := PROX_SQL("num_nc")
-		aLISTA := {}
-		AADD(aLISTA, {"COD_PRV", XPROVEED })
-		AADD(aLISTA, {"NOMBRE",  XNOMBRE })
-		AADD(aLISTA, {"TIPO_DOC","NC" })
-		AADD(aLISTA, {"NUMERO",  mNUMERO })
-		AADD(aLISTA, {"FECHA",   XFECHA })
-		AADD(aLISTA, {"MONTO",   XMONTO })
-		AADD(aLISTA, {"IMPUESTO",0 })
-		AADD(aLISTA, {"ABONOS",  XMONTO })
-		AADD(aLISTA, {"VENCE",   XFECHA })
-		AADD(aLISTA, {"OBSERVA1",XCONCEPT1 })
-		AADD(aLISTA, {"OBSERVA2",XCONCEPT2 })
-		AADD(aLISTA, {"TIPO_REF",'CR' })
-		AADD(aLISTA, {"NUM_REF", XNUMERO })
-
-		aVALORES := {}
-		mSQL := "INSERT INTO sprm SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-		EJECUTASQL(mSQL,aVALORES)
-
-		// DEBE ABONAR A DESDE
-		mIMPUESTO := 0
-		FOR i := 1 TO LEN(mADE)
-			IF mADE[i,7] = 0
-				LOOP
-			ENDIF
-
-			mSQL := "UPDATE sprm SET abonos=abonos+"+ALLTRIM(STR(mADE[i,7]))+" "
-			mSQL += "WHERE tipo_doc='"+SUBSTR(mADE[i,1],1,2)+"' "
-			mSQL += "AND numero='"+SUBSTR(mADE[i,1],3,8)+"' "
-			mSQL += "AND FECHA="+DTOS(mADE[i,2])+" AND cod_prv='"+XPROVEED+"' "
-			EJECUTASQL(mSQL)
-		NEXT
-	ENDIF
-
-	// CLIENTE ----> PROVEEDOR
-	IF XTIPO = 'C-P'
-		mNUMERO := PROX_SQL("num_nc")
-		aLISTA := {}
-		AADD(aLISTA, {"COD_PRV",   XCLIENTE })
-		AADD(aLISTA, {"NOMBRE",    XNOMCLI  })
-		AADD(aLISTA, {"TIPO_DOC",  "NC" })
-		AADD(aLISTA, {"NUMERO",    mNUMERO })
-		AADD(aLISTA, {"FECHA",     XFECHA })
-		AADD(aLISTA, {"MONTO",     XMONTO })
-		AADD(aLISTA, {"IMPUESTO",  0 })
-		AADD(aLISTA, {"ABONOS",    XMONTO })
-		AADD(aLISTA, {"VENCE",     XFECHA })
-		AADD(aLISTA, {"OBSERVA1",  XCONCEPT1 })
-		AADD(aLISTA, {"OBSERVA2",  XCONCEPT2 })
-		AADD(aLISTA, {"TIPO_REF",  'CR' })
-		AADD(aLISTA, {"NUM_REF",   XNUMERO })
-
-		aVALORES := {}
-		mSQL := "INSERT INTO sprm SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-		EJECUTASQL(mSQL,aVALORES)
-
-		// DEBE ABONAR A DESDE
-		mIMPUESTO := 0
-
-		mSQL := "UPDATE sprm SET abonos=abonos+? WHERE "
-		mSQL += "numero=? AND fecha=? AND cod_prv=?"
-		FOR i := 1 TO LEN(mAPA)
-			IF mAPA[i,7] = 0
-				LOOP
-			ENDIF
-			mSQL := "UPDATE sprm SET abonos=abonos+"+ALLTRIM(STR(mAPA[i,7]))+" "
-			mSQL += "WHERE tipo_doc='"+SUBSTR(mAPA[i,1],1,2)+"' "
-			mSQL += "AND numero='"+SUBSTR(mAPA[i,1],3,8)+"' "
-			mSQL += "AND FECHA="+DTOS(mAPA[i,2])+" AND cod_prv='"+XCLIENTE+"' "
-			EJECUTASQL(mSQL)
-		NEXT
-
-		mNUMERO   := PROX_SQL("nccli")
-		aLISTA := {}
-		AADD(aLISTA, {"COD_CLI",  XPROVEED })
-		AADD(aLISTA, {"NOMBRE",   XNOMBRE })
-		AADD(aLISTA, {"TIPO_DOC", "NC" })
-		AADD(aLISTA, {"NUMERO",   mNUMERO })
-		AADD(aLISTA, {"FECHA",    XFECHA })
-		AADD(aLISTA, {"MONTO",    XMONTO })
-		AADD(aLISTA, {"IMPUESTO", 0 })
-		AADD(aLISTA, {"ABONOS",   XMONTO })
-		AADD(aLISTA, {"VENCE",    XFECHA })
-		AADD(aLISTA, {"OBSERVA1", XCONCEPT1 })
-		AADD(aLISTA, {"OBSERVA2", XCONCEPT2 })
-		AADD(aLISTA, {"TIPO_REF", 'CR' })
-		AADD(aLISTA, {"NUM_REF",  XNUMERO })
-
-		aVALORES := {}
-		mSQL := "INSERT INTO smov SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-		EJECUTASQL(mSQL,aVALORES)
-
-		// DEBE ABONAR A DESDE
-		mIMPUESTO := 0
-		mSQL := "UPDATE smov SET abonos=abonos+? WHERE "
-		mSQL += "numero=? AND fecha=? AND cod_cli=?"
-		FOR i := 1 TO LEN(mADE)
-			IF mADE[i,7] = 0
-				LOOP
-			ENDIF
-
-			mSQL := "UPDATE smov SET abonos=abonos+"+ALLTRIM(STR(mADE[i,7]))+" "
-			mSQL += "WHERE tipo_doc='"+SUBSTR(mADE[i,1],1,2)+"' "
-			mSQL += "AND numero='"+SUBSTR(mADE[i,1],3,8)+"' "
-			mSQL += "AND FECHA="+DTOS(mADE[i,2])+" AND cod_cli='"+XPROVEED+"' "
-			EJECUTASQL(mSQL)
-
-		NEXT
-	ENDIF
-
-	IF XTIPO = 'C-C'
-		mNUMERO   := PROX_SQL("nccli")
-		aLISTA := {}
-		AADD(aLISTA, {"COD_CLI",  XPROVEED  })
-		AADD(aLISTA, {"NOMBRE",   XNOMBRE   })
-		AADD(aLISTA, {"TIPO_DOC", "NC"      })
-		AADD(aLISTA, {"NUMERO",   mNUMERO   })
-		AADD(aLISTA, {"FECHA",    XFECHA    })
-		AADD(aLISTA, {"MONTO",    XMONTO    })
-		AADD(aLISTA, {"ABONOS",   XMONTO    })
-		AADD(aLISTA, {"VENCE",    XFECHA    })  
-		AADD(aLISTA, {"OBSERVA1", XCONCEPT1 })
-		AADD(aLISTA, {"OBSERVA2", XCONCEPT2 })
-		AADD(aLISTA, {"TIPO_REF", 'CR'      })
-		AADD(aLISTA, {"NUM_REF",  XNUMERO   })
-
-		aVALORES := {}
-		mSQL := "INSERT INTO smov SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-		EJECUTASQL(mSQL,aVALORES)
-
-		// DEBE ABONAR A DESDE
-		mIMPUESTO := 0
-		FOR i := 1 TO LEN(mADE)
-			IF mADE[i,7] = 0
-				LOOP
-			ENDIF
-
-			mSQL := "UPDATE smov SET abonos=abonos+"+ALLTRIM(STR(mADE[i,7]))+" "
-			mSQL += "WHERE tipo_doc='"+SUBSTR(mADE[i,1],1,2)+"' "
-			mSQL += "AND numero='"+SUBSTR(mADE[i,1],3,8)+"' "
-			mSQL += "AND FECHA="+DTOS(mADE[i,2])+" AND cod_cli='"+XPROVEED+"' "
-			EJECUTASQL(mSQL)
-
-		NEXT
-
-		mNUMERO   := PROX_SQL("ndcli")
-		aLISTA := {}
-		AADD(aLISTA, {"COD_CLI",  XCLIENTE })
-		AADD(aLISTA, {"NOMBRE",   XNOMCLI })
-		AADD(aLISTA, {"TIPO_DOC", "ND" })
-		AADD(aLISTA, {"NUMERO",   mNUMERO })
-		AADD(aLISTA, {"FECHA",    XFECHA })
-		AADD(aLISTA, {"MONTO",    XMONTO })
-		AADD(aLISTA, {"ABONOS",   0 })
-		AADD(aLISTA, {"VENCE",    XFECHA })
-		AADD(aLISTA, {"OBSERVA1", XCONCEPT1 })
-		AADD(aLISTA, {"OBSERVA2", XCONCEPT2 })
-		AADD(aLISTA, {"IMPUESTO", mIMPUESTO })
-		AADD(aLISTA, {"TIPO_REF", 'CR' })
-		AADD(aLISTA, {"NUM_REF",  XNUMERO })
-
-		aVALORES := {}
-		mSQL := "INSERT INTO smov SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-		EJECUTASQL(mSQL,aVALORES)
-	ENDIF
-
-
-	IF XTIPO = 'P-P'
-		mNUMERO := PROX_SQL("num_nc")
-		aLISTA := {}
-		AADD(aLISTA, {"COD_PRV",  XPROVEED })
-		AADD(aLISTA, {"NOMBRE",   XNOMBRE })
-		AADD(aLISTA, {"TIPO_DOC", "NC" })
-		AADD(aLISTA, {"NUMERO",   mNUMERO })
-		AADD(aLISTA, {"FECHA",    XFECHA })
-		AADD(aLISTA, {"MONTO",    XMONTO })
-		AADD(aLISTA, {"ABONOS",   XMONTO })
-		AADD(aLISTA, {"VENCE",    XFECHA })
-		AADD(aLISTA, {"OBSERVA1", XCONCEPT1 })
-		AADD(aLISTA, {"OBSERVA2", XCONCEPT2 })
-		AADD(aLISTA, {"TIPO_REF", 'CR' })
-		AADD(aLISTA, {"NUM_REF",  XNUMERO })
-
-		aVALORES := {}
-		mSQL := "INSERT INTO sprm SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-		EJECUTASQL(mSQL,aVALORES)
-
-		// DEBE ABONAR A DESDE
-		mIMPUESTO := 0
-		FOR i := 1 TO LEN(mADE)
-			IF mADE[i,7] = 0
-				LOOP
-			ENDIF
-
-			mSQL := "UPDATE sprm SET abonos=abonos+"+ALLTRIM(STR(mADE[i,7]))+" "
-			mSQL += "WHERE tipo_doc='"+SUBSTR(mADE[i,1],1,2)+"' "
-			mSQL += "AND numero='"+SUBSTR(mADE[i,1],3,8)+"' "
-			mSQL += "AND FECHA="+DTOS(mADE[i,2])+" AND cod_prv='"+XPROVEED+"' "
-			EJECUTASQL(mSQL)
-		NEXT
-   
-		mNUMERO := PROX_SQL("num_nd")
-		aLISTA := {}
-		AADD(aLISTA, {"COD_PRV",  XCLIENTE })
-		AADD(aLISTA, {"NOMBRE",   XNOMCLI })
-		AADD(aLISTA, {"TIPO_DOC", "ND" })
-		AADD(aLISTA, {"NUMERO",   mNUMERO })
-		AADD(aLISTA, {"FECHA",    XFECHA })
-		AADD(aLISTA, {"MONTO",    XMONTO })
-		AADD(aLISTA, {"IMPUESTO", mIMPUESTO })
-		AADD(aLISTA, {"ABONOS",   0 })
-		AADD(aLISTA, {"VENCE",    XFECHA })
-		AADD(aLISTA, {"OBSERVA1", XCONCEPT1 })
-		AADD(aLISTA, {"OBSERVA2", XCONCEPT2 })
-		AADD(aLISTA, {"TIPO_REF", 'CR' })
-		AADD(aLISTA, {"NUM_REF",  XNUMERO })
-		aVALORES := {}
-		mSQL := "INSERT INTO sprm SET "
-		LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-		EJECUTASQL(mSQL,aVALORES)
-	ENDIF
-	CRUCIMP()
-
-
-*/
 
 	function instalar(){
 		if (!$this->db->table_exists('cruc')) {
@@ -2014,8 +1872,6 @@ class Cruc extends Controller {
 			) ENGINE=MyISAM AUTO_INCREMENT=437 DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('cruc');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 
 

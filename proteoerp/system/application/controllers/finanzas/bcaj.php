@@ -53,36 +53,6 @@ class Bcaj extends Controller {
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
-		$WestPanel = '
-<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-<div class="otros">
-
-<table id="west-grid" align="center">
-	<tr><td>
-		<div class="anexos"><table id="listados"></table></div></td>
-	</tr><tr>
-		<td><table id="otros"></table></td>
-	</tr>
-</table>
-
-<table id="west-grid" align="center">
-	<tr>
-		<td><div class="anexos"><a style="width:90px" href="#" id="impPdf">'.img(array('src' => 'images/pdf_logo.gif', 'alt' => 'Formato PDF',  'title' => 'Formato PDF', 'border'=>'0')).' Imprime</a></div></td>
-		<td><div class="anexos"><a style="width:90px" href="#" id="impHtml">'.img(array('src' => 'images/html_icon.gif', 'alt' => 'Formato HTML',  'title' => 'Formato HTML', 'border'=>'0')).' Ver en </a></div></td>
-	</tr><tr>
-		<td colspan="2" ><div class="anexos"><a style="width:190px;vertical-align:text-top;" href="#" id="cerrardpt">'.img(array('src' => 'images/candado.png', 'alt' => 'Cerrar',  'title' => 'Cerrar', 'border'=>'0', 'height'=>'18')).' Cerrar Deposito </a></div></td>
-	</tr><tr>
-		<td colspan="2"><div class="anexos"><a style="width:190px" href="#" id="borrar">'.img(array('src' => 'images/delete.png', 'alt' => 'Eliminar',  'title' => 'Eliminar', 'border'=>'0', 'height'=>'18')).' Eliminar Movimiento </a></div></td>
-	</tr><tr>
-		<td colspan="2"><div class="tema2"><a style="width:190px" href="#" id="chdevo">Cheque Devuelto '.img(array('src' => 'images/delete.jpg', 'alt' => 'Cheque devuelto',  'title' => 'Cheque devuelto', 'border'=>'0')).'</a></div></td>
-
-	</tr>
-</table>
-</div>
-</div> <!-- #LeftPane -->
-';
-
-
 		$grid->wbotonadd(array("id"=>"impPdf",    "img"=>"images/pdf_logo.gif", "alt" => "Cargos Indebidos en Banco", "label"=>"Imprimir Documento ", "tema"=>"anexos"));
 		$grid->wbotonadd(array("id"=>"cerrardpt", "img"=>"images/candado.png",  "alt" => "Cerrar Deposito",           "label"=>"Cerrar Deposito",     "tema"=>"anexos"));
 		$grid->wbotonadd(array("id"=>"borrar",    "img"=>"images/delete.png",   "alt" => "Eliminar Movimiento",       "label"=>"Eliminar Movimiento", "tema"=>"anexos"));
