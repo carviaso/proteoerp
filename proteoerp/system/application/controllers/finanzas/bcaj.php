@@ -1582,7 +1582,7 @@ class Bcaj extends Controller {
 		// LIBERA LOS CHEQUES SI ES DEPOSITO
 		$this->db->simple_query("UPDATE sfpa SET status='' AND deposito='' WHERE deposito=?", array($numero));
 		logusu('BCAJ',"MOVIMIENTO DE CAJA $numero Transaccion $transac ELIMINADO");
-		echo "Movimiento de Caja Eliminado ";
+		echo "Movimiento de Caja Eliminado $transac";
 	}
 
 
@@ -3324,7 +3324,13 @@ class Bcaj extends Controller {
 	function formacierre(){
 		$id  = $this->uri->segment($this->uri->total_segments());
 		$reg = $this->datasis->damereg("SELECT a.numero, a.fecha, a.monto, a.codbanc, a.envia, b.banco, a.efectivo, a.cheques FROM bcaj a JOIN banc b ON a.codbanc=b.codbanc WHERE a.id=$id");
+		$salida = '';
 
+		if (empty($reg)){
+			echo "Error Leyendo Tabla ::SELECT a.numero, a.fecha, a.monto, a.codbanc, a.envia, b.banco, a.efectivo, a.cheques FROM bcaj a JOIN banc b ON a.codbanc=b.codbanc WHERE a.id=$id";
+			return;
+		}
+		
 		if ( $reg['cheques'] > 0 ) {
 
 		$salida = '
