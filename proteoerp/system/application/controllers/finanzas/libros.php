@@ -9,6 +9,7 @@ class Libros extends Controller {
 	}
 
 	function index() {
+		$this->instalar();
 		$this->rapyd->load('datagrid');
 		$this->load->helper('fecha');
 
