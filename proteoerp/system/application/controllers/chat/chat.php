@@ -45,5 +45,21 @@ class Chat extends Controller {
 		}
 		echo $mensaje;
 	}
+
+	function status()
+	{
+		$mensaje = '';
+		$usuario = $this->db->escape($this->secu->usuario());
+		$mSQL = "SELECT * FROM chat WHERE usuario=".$usuario." OR para IN ('-',".$usuario.") ORDER BY id DESC LIMIT 15";
+		$query = $this->db->query($mSQL);
+		if ( $query->num_rows() > 0 ) {
+			foreach( $query->result() as $row ) {
+				$mensaje = "<div class='msgln'>(".substr($row->hora,0,5).") <b>".$row->usuario."</b>: ".$row->mensaje."<br></div>\n".$mensaje;
+			}
+		}
+		echo strlen($mensaje);
+	}
+
+
 }
 ?>

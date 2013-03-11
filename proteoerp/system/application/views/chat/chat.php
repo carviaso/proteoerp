@@ -22,7 +22,7 @@
 	}
 ?>
 <div id="wrapper" style='font:11px arial; color: #222; text-align:center;'>
-						<div id="chatmenu"><p class="welcome">MENSAJERIA</p></div>
+						<div id="chatmenu"><table width='100%' cellpadding='0' cellspacing='0'><tr><td><div id='status'><?php echo img('images/msg.png');?></div></td><td>&nbsp;&nbsp;<p class="welcome">MENSAJERIA</p></td></tr></table></div>
 						<div id='colap'>
 							<div id="chatbox"></div>
 							<table width='100%'>

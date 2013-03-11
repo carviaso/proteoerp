@@ -21,6 +21,10 @@
 <?php //echo script("plugins/interface.js"); ?>
 <?php echo script("plugins/jquery.masonry.min.js"); ?>
 
+<?php echo "\n<!-- Impromptu -->\n"; ?>
+<?php echo script('jquery-impromptu.js'); ?>
+<?php echo style('impromptu/default.css'); ?>
+
 
 <style>
 <?php $this->load->view('loadstyle'); ?>
@@ -53,8 +57,10 @@ $(document).ready(function() {
 
 <?php $this->load->view('loadready'); ?>
 
-
 });
+
+<?php $this->load->view('loadscript'); ?>
+
 </script>
 </head>
 <body>
@@ -96,13 +102,25 @@ $(document).ready(function() {
 		<div id="pie">
 		<table class='pie' width="100%" border=0 cellspacing=0 cellpadding=0>
 			<tr>
-				<td width='178px' valign='top'>
-					<div><p style="font-size:10px"><?php 
-						echo "Conectado a: ".$this->db->database; 
+				<td width='188px' valign='top'>
+					<div>
+						<table style="font-size:10px;color:white;width:100%;" border='0'>
+							<tr>
+								<td><?php echo "Conectado a: <b>".strtoupper($this->db->database); ?></b></td>
+						<?php 
 						if(isset($_SERVER['REMOTE_ADDR'])){
-							echo br().'Tu ip: '.$_SERVER['REMOTE_ADDR'];
+							echo "\t\t\t\t\t\t\t\t</tr><tr>\n";
+							echo "\t\t\t\t\t\t\t\t\t<td>Tu ip: <b>".$_SERVER['REMOTE_ADDR']."</b></td>\n";
 						}
-					?></p></div>
+						
+						if ( $this->secu->es_logeado() ){
+							echo "\t\t\t\t\t\t\t\t</tr><tr>\n";
+							echo "\t\t\t\t\t\t\t\t\t<td><div onclick='camclave()'><b>Cambio de Clave</b></div></td>";
+						}
+					?>
+							</tr>
+						</table>
+					</div>
 				</td>
 				<td align='center'>
 					<p style="font-size:8px"><?php echo $copyright; ?></p>

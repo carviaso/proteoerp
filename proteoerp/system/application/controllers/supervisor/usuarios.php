@@ -39,7 +39,7 @@ class Usuarios extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"camclave",   "img"=>"images/candado.png",  "alt" => "Cambiar Clave", "label"=>"Cambiar Clave"));
+		$grid->wbotonadd(array("id"=>"camclave",   "img"=>"images/candado.png",  "alt" => "Cambiar Clave", "label"=>"Cambiar Clave", "tema"=>"anexos"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -75,6 +75,7 @@ class Usuarios extends Controller {
 		$(function() {
 			$( "input:submit, a, button", ".a1" ).button();
 		});
+		
 		jQuery("#camclave").click( function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
@@ -417,10 +418,10 @@ class Usuarios extends Controller {
 	}
 
 	function cambiaclave(){
-		echo anchor(site_url('usuarios/cambiac'), img('src'=>'images/llave.png') ) ;
+		echo anchor( site_url('usuarios/cambiac'), img(array('src'=>'images/llave.png', 'height' => 16, 'alt'=>'Cambiar Clave', 'title'=>'Cambiar Clave', 'border'=>'0')) ) ;
 	}
 
-
+/*
 	function 
 
 /*
@@ -611,6 +612,7 @@ class Usuarios extends Controller {
 	}
 
 */
+
 	function soporte(){
 		$mSQL="INSERT INTO `usuario` (`us_codigo`, `us_nombre`, `us_clave`,`supervisor`) VALUES ('SOPORTE', 'PERS. DREMANVA', 'DREMANVA','S');";
 		$this->db->simple_query($mSQL);
@@ -672,13 +674,79 @@ class Usuarios extends Controller {
 		$us_clave  = $this->input->post('us_clave');
 		$us_clave1 = $this->input->post('us_clave1');
 		$id        = $this->input->post('id');
+		
 		if ( $us_clave == $us_clave1) {
 			$clave = $this->db->escape($us_clave);
-			if ( $id > 0)
+			if ( $id > 0 ){
+				$codigo = $this->datasis->dameval("SELECT us_codigo FROM usuario WHERE id=$id");
 				$this->db->simple_query("UPDATE usuario SET us_clave=".$clave." WHERE id=$id");
+				logusu('USUARIOS',"CAMBIO LA CLAVE DEL USUARIO $codigo");
+			}
 		}
 		redirect($this->url.'jqdatag');
 	}
+
+
+
+	function ccclave(){
+		$us_codigo =  $this->secu->usuario();
+		$id        = $this->datasis->dameval('SELECT id FROM usuario WHERE us_codigo='.$this->db->escape($us_codigo));
+		$us_nombre = $this->datasis->dameval("SELECT us_nombre FROM usuario WHERE id=$id");
+
+		$salir = '
+<h2>Cambio de Clave:</h2><center><h1>'.$us_nombre.'</h1></center>
+<p id="error" style="color:red"></p>
+<form action="'.site_url('supervisor/usuarios/ccclaveg').'" method="post" id="fclave">
+	<table style="margin: 0pt; width: 98%;">
+		<tbody>
+		<tr id="tr_us_codigo">
+			<td style="width: 120px;" >Código</td>
+			<td style="padding: 1px;" id="td_us_codigo">'.$us_codigo.'&nbsp;</td>
+		</tr>
+		<tr id="tr_us_actual">
+			<td style="width: 120px;" >Clave Actual</td>
+			<td style="padding: 1px;" id="td_us_actual"><input name="us_actual" value="" id="us_actual" size="12" maxlength="15" type="password">&nbsp;</td>
+		</tr>
+		<tr id="tr_us_clave">
+			<td style="width: 120px;" >Clave*</td>
+			<td style="padding: 1px;" id="td_us_clave"><input name="us_clave" value="" id="us_clave" size="12" maxlength="15" type="password">&nbsp;</td>
+		</tr>
+		<tr id="tr_us_clave1">
+			<td style="width: 120px;">Confirmar*</td>
+			<td style="padding: 1px;" id="td_us_clave1"><input name="us_clave1" value="" id="us_clave1" size="12" maxlength="15" type="password">&nbsp;</td>
+		</tr>
+		</tbody>
+	</table>
+</form>
+';
+		echo $salir;
+
+	}
+
+
+	function ccclaveg(){
+		$us_actual = $this->input->post('us_actual');
+
+		$us_clave  = $this->input->post('us_clave');
+		$us_clave1 = $this->input->post('us_clave1');
+		
+		$msg = 'Cambio Exitoso';
+		$us_codigo = $this->secu->usuario();
+		$clavea = $this->datasis->dameval("SELECT us_clave FROM usuario WHERE us_codigo=".$this->db->escape($us_codigo));
+		$id = $this->datasis->dameval("SELECT id FROM usuario WHERE us_codigo=".$this->db->escape($us_codigo));
+		if ( $clavea == $us_actual ){
+			if ( $us_clave == $us_clave1) {
+				$clave = $this->db->escape($us_clave);
+				$codigo = $this->datasis->dameval("SELECT us_codigo FROM usuario WHERE id=$id");
+				$this->db->query("UPDATE usuario SET us_clave=".$clave." WHERE id=$id");
+				logusu('USUARIOS',"El Usuario ($codigo) cambio su clave");
+			} else $msg = 'Calves no coinciden!!!';
+		} else $msg = 'Calve actual incorrecta!!!';
+
+		echo $msg;
+	}
+
+
 
 	function _pos_updatec($do){
 		$codigo=$do->get('us_codigo');
