@@ -734,10 +734,10 @@ class Apan extends Controller {
 			$act = false;
 		}
 
-		if ($form->on_error()){
+		if ($edit->on_error()){
 			$rt=array(
 				'status' =>'B',
-				'mensaje'=>'Registro guardado',
+				'mensaje'=>html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string)),
 				'pk'     =>null,
 			);
 			echo json_encode($rt);
@@ -798,7 +798,7 @@ class Apan extends Controller {
 		$edit->tipo->maxlength = 1;
 
 		$edit->clipro = new inputField('Clipro','clipro');
-		$edit->clipro->rule      = '';
+		$edit->clipro->rule      = 'required';
 		$edit->clipro->size      = 7;
 
 		$edit->nombre = new inputField('Nombre','nombre');
@@ -807,7 +807,7 @@ class Apan extends Controller {
 		$edit->nombre->maxlength = 30;
 
 		$edit->monto = new inputField('Monto','monto');
-		$edit->monto->rule      = 'numeric';
+		$edit->monto->rule      = 'numeric|mayorcero';
 		$edit->monto->css_class = 'inputnum';
 		$edit->monto->size      = 10;
 		$edit->monto->maxlength = 17;
@@ -914,7 +914,6 @@ class Apan extends Controller {
 							},
 					});
 
-
 					$.ajax({
 						url: "'.site_url('ajax/buscasmovapan/fcndgi').'",
 						dataType: "json",
@@ -959,9 +958,6 @@ class Apan extends Controller {
 								);
 							},
 					});
-
-					//var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					//$("#saldoa").val(roundNumber(saldo,2))
 
 				}
 			});

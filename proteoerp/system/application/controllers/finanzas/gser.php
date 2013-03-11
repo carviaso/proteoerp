@@ -83,9 +83,10 @@ class gser extends Controller {
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array('id'=>'fgasto',  'title'=>'Agregar/Editar Gasto/Egreso'),
-			array('id'=>'fshow'  , 'title'=>'Mostrar registro'),
-			array('id'=>'fimpri',  'title'=>'Imprimir Gasto/Egreso')
+			array('id'=>'fgasto', 'title'=>'Agregar/Editar Gasto/Egreso'),
+			array('id'=>'fshow' , 'title'=>'Mostrar registro'),
+			array('id'=>'fimpri', 'title'=>'Imprimir Gasto/Egreso'),
+			array('id'=>'fborra', 'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -151,7 +152,32 @@ class gser extends Controller {
 			}
 		};';
 
-
+		$bodyscript .= '
+		function gserdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Gasto eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
 
 		//Wraper de javascript
 		$bodyscript .= '
@@ -318,7 +344,6 @@ class gser extends Controller {
 				}
 			});';
 
-
 		$bodyscript .= '
 			$("#fimpri").dialog({
 				autoOpen: false, height: 590, width: 950, modal: true,
@@ -341,6 +366,22 @@ class gser extends Controller {
 					$("#fimpri").html("");
 				}
 			});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
 
 		$bodyscript .= '});';
 
@@ -382,7 +423,7 @@ class gser extends Controller {
 		));
 
 		$grid->addField('proveed');
-		$grid->label('Proveed');
+		$grid->label('Proveedor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1205,7 +1246,7 @@ class gser extends Controller {
 		$grid->setShrinkToFit('false');
 
 		//$grid->setBarOptions("\t\taddfunc: gseradd,\n\t\teditfunc: gseredit");
-		$grid->setBarOptions('addfunc: gseradd, viewfunc: gsershow');
+		$grid->setBarOptions('addfunc: gseradd, viewfunc: gsershow, delfunc: gserdel');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -3257,31 +3298,31 @@ class gser extends Controller {
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
 
-		$edit->tipo_doc =  new dropdownField("Documento", "tipo_doc");
-		$edit->tipo_doc->style="width:100px";
-		$edit->tipo_doc->option('FC',"Factura");
-		$edit->tipo_doc->option('ND',"Nota Debito");
+		$edit->tipo_doc =  new dropdownField('Documento', 'tipo_doc');
+		$edit->tipo_doc->style='width:100px';
+		$edit->tipo_doc->option('FC','Factura');
+		$edit->tipo_doc->option('ND','Nota Debito');
 		if($edit->_status=='show'){
-			$edit->tipo_doc->option('XX',"Anulado");
-			$edit->tipo_doc->option('AD',"Amortizacion");
-			$edit->tipo_doc->option('GA',"Gasto de Nomina");
+			$edit->tipo_doc->option('XX','Anulado');
+			$edit->tipo_doc->option('AD','Amortizacion');
+			$edit->tipo_doc->option('GA','Gasto de Nomina');
 		}
 
-		$edit->ffactura = new DateonlyField("Fecha", "ffactura","d/m/Y");
-		$edit->ffactura->insertValue = date("Y-m-d");
+		$edit->ffactura = new DateonlyField('Fecha', 'ffactura','d/m/Y');
+		$edit->ffactura->insertValue = date('Y-m-d');
 		$edit->ffactura->size = 10;
 		$edit->ffactura->rule = 'required';
 		$edit->ffactura->calendar = false;
 		//$edit->ffactura->insertValue = date("Y-m-d");
 
 		$edit->fecha = new DateonlyField('Registro', 'fecha');
-		$edit->fecha->insertValue = date("Y-m-d");
+		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->size = 10;
 		$edit->fecha->rule = 'required';
 		$edit->fecha->calendar = false;
 
-		$edit->vence = new DateonlyField("Vence", "vence","d/m/Y");
-		$edit->vence->insertValue = date("Y-m-d");
+		$edit->vence = new DateonlyField('Vence', 'vence','d/m/Y');
+		$edit->vence->insertValue = date('Y-m-d');
 		$edit->vence->size = 10;
 		//$edit->vence->insertValue = date("Y-m-d");
 		$edit->vence->calendar = false;
@@ -3291,28 +3332,28 @@ class gser extends Controller {
 		$edit->compra->size =10;
 		$edit->compra->maxlength =8;
 
-		$edit->numero = new inputField("Numero", "numero");
+		$edit->numero = new inputField('N&uacute;mero', 'numero');
 		$edit->numero->size = 10;
 		$edit->numero->maxlength=8;
 		$edit->numero->autocomplete=false;
 		$edit->numero->rule='required';
 
-		$edit->proveed = new inputField("Proveedor","proveed");
+		$edit->proveed = new inputField('Proveedor','proveed');
 		$edit->proveed->size = 6;
 		$edit->proveed->maxlength=5;
 		$edit->proveed->append($bSPRV);
-		$edit->proveed->rule= "required";
+		$edit->proveed->rule= 'required';
 
-		$edit->nfiscal  = new inputField("Control Fiscal", "nfiscal");
+		$edit->nfiscal  = new inputField('Control Fiscal', 'nfiscal');
 		$edit->nfiscal->size = 10;
 		$edit->nfiscal->autocomplete=false;
 		$edit->nfiscal->maxlength=20;
 
-		$edit->nombre = new inputField("Nombre", "nombre");
+		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->size = 30;
 		$edit->nombre->maxlength=40;
 		$edit->nombre->type='inputhidden';
-		$edit->nombre->rule= "required";
+		$edit->nombre->rule= 'required';
 
 		$edit->sprvtipo = new hiddenField('','sprvtipo');
 		$edit->sprvtipo->db_name = 'sclitipo';
@@ -3323,20 +3364,20 @@ class gser extends Controller {
 		$edit->sprvreteiva->insertValue=($tipo_rete=='ESPECIAL' && strtoupper($rif[0])!='V') ? '75':'0';
 		$edit->sprvreteiva->pointer = true;
 
-		$edit->totpre  = new inputField("Sub.Total", "totpre");
+		$edit->totpre  = new inputField('Sub.Total', 'totpre');
 		$edit->totpre->size = 10;
 		$edit->totpre->css_class='inputnum';
 		$edit->totpre->readonly = true;
 		$edit->totpre->showformat ='decimal';
 		$edit->totpre->type='inputhidden';
 
-		$edit->totbruto= new inputField("Total", "totbruto");
+		$edit->totbruto= new inputField('Total', 'totbruto');
 		$edit->totbruto->size = 10;
 		$edit->totbruto->css_class='inputnum';
 		$edit->totbruto->showformat ='decimal';
 		$edit->totbruto->type='inputhidden';
 
-		$edit->totiva = new inputField("Total IVA", "totiva");
+		$edit->totiva = new inputField('Total IVA', 'totiva');
 		$edit->totiva->css_class ='inputnum';
 		$edit->totiva->size      = 10;
 		$edit->totiva->showformat ='decimal';
@@ -3361,23 +3402,23 @@ class gser extends Controller {
 		$edit->codb1->style = 'width:120px';
 		$edit->codb1->onchange="esbancaja(this.value)";
 
-		$edit->tipo1 =  new dropdownField("Cheque/ND", "tipo1");
-		$edit->tipo1->option('','Ninguno');
+		$edit->tipo1 =  new dropdownField('Cheque/ND', 'tipo1');
+		$edit->tipo1->option('' ,'Ninguno');
 		$edit->tipo1->option('C','Cheque');
 		$edit->tipo1->option('D','Debito');
-		$edit->tipo1->rule = 'condi_required|callback_chtipoe';
-		$edit->tipo1->style="width:100px";
+		$edit->tipo1->rule ='condi_required|callback_chtipoe';
+		$edit->tipo1->style='width:100px';
 
-		$edit->cheque1 = new inputField('Numero',"cheque1");
+		$edit->cheque1 = new inputField('Numero','cheque1');
 		$edit->cheque1->rule = 'condi_required|callback_chobliganumerog';
 		$edit->cheque1->size = 12;
 		$edit->cheque1->maxlength=20;
 
-		$edit->benefi = new inputField("Beneficiario","benefi");
+		$edit->benefi = new inputField('Beneficiario','benefi');
 		$edit->benefi->size = 39;
 		$edit->benefi->maxlength=40;
 
-		$edit->monto1= new inputField("Contado", "monto1");
+		$edit->monto1= new inputField('Contado', 'monto1');
 		$edit->monto1->size = 10;
 		$edit->monto1->css_class='inputnum';
 		$edit->monto1->onkeyup="contado()";
@@ -3385,15 +3426,15 @@ class gser extends Controller {
 		$edit->monto1->autocomplete=false;
 		$edit->monto1->showformat ='decimal';
 
-		$edit->credito= new inputField("Credito", "credito");
+		$edit->credito= new inputField('Cr&eacute;dito', 'credito');
 		$edit->credito->size = 10;
 		$edit->credito->showformat ='decimal';
 		$edit->credito->css_class='inputnum';
-		$edit->credito->onkeyup="ccredito()";
+		$edit->credito->onkeyup='ccredito()';
 		$edit->credito->autocomplete=false;
 		$edit->credito->readonly=true;
 
-		$edit->reten = new inputField("Ret. ISLR","reten");
+		$edit->reten = new inputField('Ret. ISLR','reten');
 		$edit->reten->size = 10;
 		$edit->reten->maxlength=10;
 		$edit->reten->css_class='inputnum';
@@ -3401,24 +3442,24 @@ class gser extends Controller {
 		$edit->reten->showformat ='decimal';
 		$edit->reten->type='inputhidden';
 
-		$edit->reteiva = new inputField("Ret.de IVA","reteiva");
+		$edit->reteiva = new inputField('Ret.de IVA','reteiva');
 		$edit->reteiva->size = 10;
 		$edit->reteiva->maxlength=10;
 		$edit->reteiva->rule = 'callback_chreteiva';
-		$edit->reteiva->onchange="totalizar()";
+		$edit->reteiva->onchange ='totalizar()';
 		$edit->reteiva->css_class='inputnum';
 		$edit->reteiva->showformat ='decimal';
 		$edit->reteiva->autocomplete=false;
 		//$edit->reteiva->onkeyup="reteiva()";
 
-		$edit->reteica = new inputField("Ret. ICA","reteica");
+		$edit->reteica = new inputField('Ret. ICA','reteica');
 		$edit->reteica->size = 10;
 		$edit->reteica->maxlength=10;
 		//$edit->reteica->rule = 'callback_chreteiva';
 		$edit->reteica->css_class='inputnum';
 		$edit->reteica->when=array('show');
 
-		$edit->totneto = new inputField("Neto","totneto");
+		$edit->totneto = new inputField('Neto','totneto');
 		$edit->totneto->size = 10;
 		$edit->totneto->maxlength=10;
 		$edit->totneto->css_class='inputnum';
@@ -3433,31 +3474,31 @@ class gser extends Controller {
 		//***************************
 		//Campos para el detalle 1
 		//***************************
-		$edit->codigo = new inputField("Codigo <#o#>", "codigo_<#i#>");
+		$edit->codigo = new inputField('Codigo <#o#>', 'codigo_<#i#>');
 		$edit->codigo->size=5;
 		$edit->codigo->db_name='codigo';
 		//$edit->codigo->append($btn);
-		$edit->codigo->rule="required";
-		$edit->codigo->rel_id='gitser';
+		$edit->codigo->rule  = 'required';
+		$edit->codigo->rel_id= 'gitser';
 
-		$edit->descrip = new inputField("Descripcion <#o#>", "descrip_<#i#>");
+		$edit->descrip = new inputField('Descripcion <#o#>', 'descrip_<#i#>');
 		$edit->descrip->size=25;
 		$edit->descrip->db_name='descrip';
 		$edit->descrip->maxlength=50;
 		$edit->descrip->rel_id='gitser';
 
-		$edit->precio = new inputField("Precio <#o#>", "precio_<#i#>");
+		$edit->precio = new inputField('Precio <#o#>', 'precio_<#i#>');
 		$edit->precio->db_name='precio';
 		$edit->precio->css_class='inputnum';
 		$edit->precio->size=10;
 		$edit->precio->rule='required|positive';
 		$edit->precio->rel_id='gitser';
 		$edit->precio->autocomplete=false;
-		$edit->precio->onkeyup="importe(<#i#>)";
+		$edit->precio->onkeyup='importe(<#i#>)';
 		$edit->precio->showformat ='decimal';
 
 		$ivas=$this->datasis->ivaplica();
-		$edit->tasaiva =  new dropdownField("IVA <#o#>", "tasaiva_<#i#>");
+		$edit->tasaiva =  new dropdownField('IVA <#o#>', 'tasaiva_<#i#>');
 		$edit->tasaiva->option($ivas['tasa']     ,$ivas['tasa'].'%');
 		$edit->tasaiva->option($ivas['redutasa'] ,$ivas['redutasa'].'%');
 		$edit->tasaiva->option($ivas['sobretasa'],$ivas['sobretasa'].'%');
@@ -3466,28 +3507,28 @@ class gser extends Controller {
 		$edit->tasaiva->rule='positive';
 		$edit->tasaiva->style="30px";
 		$edit->tasaiva->rel_id   ='gitser';
-		$edit->tasaiva->onchange="importe(<#i#>)";
+		$edit->tasaiva->onchange ='importe(<#i#>)';
 
-		$edit->iva = new inputField("importe <#o#>", "iva_<#i#>");
+		$edit->iva = new inputField('importe <#o#>', 'iva_<#i#>');
 		$edit->iva->db_name='iva';
 		$edit->iva->css_class='inputnum';
 		$edit->iva->rel_id   ='gitser';
 		$edit->iva->size=8;
 		$edit->iva->rule='positive|callback_chretiva';
-		$edit->iva->onkeyup="valida(<#i#>)";
+		$edit->iva->onkeyup='valida(<#i#>)';
 		$edit->iva->showformat ='decimal';
 		$edit->iva->type='inputhidden';
 
-		$edit->importe = new inputField("importe <#o#>", "importe_<#i#>");
+		$edit->importe = new inputField('importe <#o#>', 'importe_<#i#>');
 		$edit->importe->db_name='importe';
 		$edit->importe->css_class='inputnum';
 		$edit->importe->rel_id   ='gitser';
 		$edit->importe->size=10;
-		$edit->importe->onkeyup="valida(<#i#>)";
+		$edit->importe->onkeyup='valida(<#i#>)';
 		$edit->importe->showformat ='decimal';
 		$edit->importe->type='inputhidden';
 
-		$edit->departa =  new dropdownField("Departamento <#o#>", "departa_<#i#>");
+		$edit->departa =  new dropdownField('Departamento <#o#>', 'departa_<#i#>');
 		$edit->departa->option('','Seleccionar');
 		$edit->departa->options("SELECT TRIM(depto) AS codigo, CONCAT_WS('-',depto,TRIM(descrip)) AS label FROM dpto WHERE tipo='G' ORDER BY depto");
 		$edit->departa->db_name='departa';
@@ -3496,7 +3537,7 @@ class gser extends Controller {
 		$edit->departa->rel_id   ='gitser';
 		$edit->departa->onchange="gdeparta(this.value)";
 
-		$edit->sucursal =  new dropdownField("Sucursal <#o#>", "sucursal_<#i#>");
+		$edit->sucursal =  new dropdownField('Sucursal <#o#>', 'sucursal_<#i#>');
 		$edit->sucursal->options("SELECT codigo,CONCAT(codigo,'-', sucursal) AS sucursal FROM sucu ORDER BY codigo");
 		$edit->sucursal->db_name='sucursal';
 		$edit->sucursal->rule='required';
@@ -3598,7 +3639,7 @@ class gser extends Controller {
 
 		$data=array();
 		foreach($post as $ind=>$val){
-			$subject = "abcdef";
+			$subject = 'abcdef';
 			$pattern = '/^def/';
 			if(preg_match('/^codigo_(?P<id>\d+)+/',$ind, $match)>0){
 				$id=$match['id'];
