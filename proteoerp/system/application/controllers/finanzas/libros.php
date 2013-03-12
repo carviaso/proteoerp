@@ -540,15 +540,15 @@ class Libros extends Controller {
 		$this->rapyd->load("datafilter","datagrid");
 		$uri = anchor('finanzas/libros/cedit/show/<#metodo#>','<#nombre#>');
 		$link=site_url('/finanzas/libros');
-		$grid = new DataGrid("Seleccione las opciones que desea activar para el modulo");
+		$grid = new DataGrid('Seleccione las opciones que desea activar para el modulo');
 		$grid->use_function('form_checkbox');
 		$grid->db->select(array('nombre','IF(tipo="D","Descarga","Generar") AS tipo',' (activo="S") AS activo ','metodo'));
 		$grid->db->from('libros');
-		$grid->order_by("tipo","asc");
-		$grid->column("Activo", "<form_checkbox><#metodo#>|<#metodo#>|<#activo#></form_checkbox>",'align="center"');
-		$grid->column("Nombre",$uri);
-		$grid->column("Tipo","tipo");
-		$grid->add("finanzas/libros/cedit/create");
+		$grid->order_by('tipo','asc');
+		$grid->column('Activo', '<form_checkbox><#metodo#>|<#metodo#>|<#activo#></form_checkbox>','align="center"');
+		$grid->column('Nombre',$uri);
+		$grid->column('Tipo'  ,'tipo');
+		$grid->add('finanzas/libros/cedit/create');
 		$grid->button('back',RAPYD_BUTTON_BACK, "javascript:window.location='$link'", "BL");
 		$grid->build();
 		//echo $grid->db->last_query();
@@ -572,8 +572,8 @@ class Libros extends Controller {
 		}
 		</script>';
 		$data['content'] = '<form>'.$grid->output.'</form>';
-		$data['title']   = "<h1>Configuracion de libros</h1>";
-		$data["head"]    = script("jquery-1.2.6.pack.js").$this->rapyd->get_head();
+		$data['title']   = '<h1>Configuraci&oacute;n de libros</h1>';
+		$data['head']    = script('jquery-1.2.6.pack.js').$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -583,30 +583,30 @@ class Libros extends Controller {
 	}
 
 	function cedit(){
-		$this->rapyd->load("dataedit");
+		$this->rapyd->load('dataedit');
 
-		$edit = new DataEdit("Edici&oacute;n de caja", "libros");
-		$edit->back_url = site_url("finanzas/libros/configurar");
+		$edit = new DataEdit('Edici&oacute;n de caja', 'libros');
+		$edit->back_url = site_url('finanzas/libros/configurar');
 
-		$edit->metodo = new inputField("Metodo", "metodo");
-		$edit->metodo->rule = "required";
+		$edit->metodo = new inputField('Metodo', 'metodo');
+		$edit->metodo->rule = 'required';
 		//$edit->metodo->mode = "autohide";
 
-		$edit->tipo = new dropdownField("Tipo", "tipo");
-		$edit->tipo->option("G","Generar" );
-		$edit->tipo->option("D","Descarga");
+		$edit->tipo = new dropdownField('Tipo', 'tipo');
+		$edit->tipo->option('G','Generar' );
+		$edit->tipo->option('D','Descarga');
 
-		$edit->activo = new dropdownField("Activo", "activo");
-		$edit->activo->option("S","Si");
-		$edit->activo->option("N","No");
+		$edit->activo = new dropdownField('Activo', 'activo');
+		$edit->activo->option('S','Si');
+		$edit->activo->option('N','No');
 
-		$edit->nombre = new inputField("Nombre", "nombre");
+		$edit->nombre = new inputField('Nombre', 'nombre');
 
-		$edit->buttons("modify", "save", "undo", "delete", "back");
+		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 		$edit->build();
 
 		$data['content'] = $edit->output;
-		$data['title']   = "<h1>Configuracion de libros</h1>";
+		$data['title']   = '<h1>Configuraci&oacute;n de libros</h1>';
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
@@ -709,6 +709,6 @@ class Libros extends Controller {
 			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `manual` CHAR(50) NULL DEFAULT 'N'");
 		}
 
-		echo $uri = anchor('finanzas/libros/configurar','Configurar');
+		//echo $uri = anchor('finanzas/libros/configurar','Configurar');
 	}
 }

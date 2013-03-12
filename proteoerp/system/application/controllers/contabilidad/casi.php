@@ -1350,7 +1350,7 @@ jQuery("#boton4").click( function(){
 		$data['content'] = ($grid->recordCount > 0) ? $form->output : '';
 		$data['content'].= $grid->output;
 		$data['head']    = $this->rapyd->get_head();
-		$data['title']   = heading('Auditoria de cuentas en maestro de gatos');
+		$data['title']   = heading('Auditoria de cuentas en bancos');
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -1406,7 +1406,7 @@ jQuery("#boton4").click( function(){
 
 		$data['content'] = $grid->output;
 		$data['head']    = $this->rapyd->get_head();
-		$data['title']   = heading('Auditoria de cuentas en maestro de gatos');
+		$data['title']   = heading('Auditoria de cuentas en reglas');
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -1761,7 +1761,7 @@ jQuery("#boton4").click( function(){
 		$data['content'] = ($grid->recordCount > 0) ? $form->output : '';
 		$data['content'].= $grid->output;
 		$data['head']    = $this->rapyd->get_head();
-		$data['title']   = heading('Auditoria en otros conceptos contables');
+		$data['title']   = heading('Auditoria en contable en lineas');
 		$this->load->view('view_ventanas', $data);
 	}
 

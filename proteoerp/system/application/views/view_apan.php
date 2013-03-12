@@ -9,7 +9,7 @@ if($form->_status <> 'show'){
 //$campos=$form->template_details('itcruc');
 
 $scampos  ='<tr id="tr_itannc_<#i#>">';
-$scampos .='<td class="littletablerow" align="left" ><input type="hidden" name="itnumero_<#i#>"  id="itnumero_<#i#>" ><span id="itnumero_<#i#>_val"></span></td>';
+$scampos .='<td class="littletablerow" align="left" ><input type="hidden" name="itnumero_<#i#>"  id="itnumero_<#i#>" ><input type="hidden" name="ittipo_<#i#>"  id="ittipo_<#i#>" ><span id="itnumero_<#i#>_val"></span><input type="hidden" name="itid_<#i#>"  id="itid_<#i#>" ></td>';
 $scampos .='<td class="littletablerow" align="left" ><input type="hidden" name="itfecha_<#i#>"   id="itfecha_<#i#>"  ><span id="itfecha_<#i#>_val" ></span></td>';
 $scampos .='<td class="littletablerow" align="right"><input type="hidden" name="itsaldo_<#i#>"   id="itsaldo_<#i#>"  ><span id="itsaldo_<#i#>_val" ></span></td>';
 $scampos .='<td class="littletablerow" align="right"><input type="text" size="10" name="itmonto_<#i#>" id="itmonto_<#i#>" class="inputnum"></td>';
@@ -17,7 +17,7 @@ $scampos .='</tr>';
 $campos=$form->js_escape($scampos);
 
 $scampos  ='<tr id="tr_itefec_<#i#>">';
-$scampos .='<td class="littletablerow" align="left" ><input type="hidden" name="itenumero_<#i#>" id="itenumero_<#i#>"><span id="itenumero_<#i#>_val"></span></td>';
+$scampos .='<td class="littletablerow" align="left" ><input type="hidden" name="itenumero_<#i#>" id="itenumero_<#i#>"><input type="hidden" name="itetipo_<#i#>" id="itetipo_<#i#>"><span id="itenumero_<#i#>_val"></span><input type="hidden" name="iteid_<#i#>"  id="iteid_<#i#>" ></td>';
 $scampos .='<td class="littletablerow" align="left" ><input type="hidden" name="itefecha_<#i#>"  id="itefecha_<#i#>" ><span id="itefecha_<#i#>_val" ></span></td>';
 $scampos .='<td class="littletablerow" align="right"><input type="hidden" name="itemonto_<#i#>"  id="itemonto_<#i#>" ><span id="itemonto_<#i#>_val" ></span></td>';
 $scampos .='<td class="littletablerow" align="right"><input type="hidden" name="itesaldo_<#i#>"  id="itesaldo_<#i#>" ><span id="itesaldo_<#i#>_val" ></span></td>';

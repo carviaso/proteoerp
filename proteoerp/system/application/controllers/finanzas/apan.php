@@ -891,27 +891,28 @@ class Apan extends Controller {
 						type: "POST",
 						data: {"scli" : ui.item.value},
 						success: function(data){
-								$.each(data,
-									function(id, val){
-										can= add_itannc();
+							$.each(data,
+								function(id, val){
+									can= add_itannc();
 
-										$("#itnumero_" +can).val(val.tipo_doc+val.numero);
-                                        $("#itfecha_"  +can).val(val.fecha);
-                                        $("#itsaldo_"  +can).val(val.saldo);
-                                        $("#itnumero_" +can+"_val").text(val.tipo_doc+val.numero);
-                                        $("#itfecha_"  +can+"_val").text(val.fecha);
-                                        $("#itsaldo_"  +can+"_val").text(val.saldo);
+									$("#itnumero_" +can).val(val.tipo_doc+val.numero);
+									$("#itfecha_"  +can).val(val.fecha);
+									$("#itsaldo_"  +can).val(val.saldo);
+									$("#itid_"     +can).val(val.id);
+									$("#itnumero_" +can+"_val").text(val.tipo_doc+val.numero);
+									$("#itfecha_"  +can+"_val").text(val.fecha);
+									$("#itsaldo_"  +can+"_val").text(val.saldo);
 
-										$("#itmonto_"+can ).focus(function(){
-											var valor = $(this).val();
-											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
-												$(this).val(val.saldo);
-												totaliza();
-											}
-										});
-									}
-								);
-							},
+									$("#itmonto_"+can ).focus(function(){
+										var valor = $(this).val();
+										if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+											$(this).val(val.saldo);
+											totaliza();
+										}
+									});
+								}
+							);
+						},
 					});
 
 					$.ajax({
@@ -925,11 +926,12 @@ class Apan extends Controller {
 										can= add_itefec();
 
 										$("#itenumero_" +can).val(val.tipo_doc+val.numero);
-                                        $("#itefecha_"  +can).val(val.fecha);
-                                        $("#itesaldo_"  +can).val(val.saldo);
-                                        $("#itenumero_" +can+"_val").text(val.tipo_doc+val.numero);
-                                        $("#itefecha_"  +can+"_val").text(val.fecha);
-                                        $("#itesaldo_"  +can+"_val").text(val.saldo);
+										$("#itefecha_"  +can).val(val.fecha);
+										$("#itesaldo_"  +can).val(val.saldo);
+										$("#iteid_"     +can).val(val.id);
+										$("#itenumero_" +can+"_val").text(val.tipo_doc+val.numero);
+										$("#itefecha_"  +can+"_val").text(val.fecha);
+										$("#itesaldo_"  +can+"_val").text(val.saldo);
 
 										$("#iteaplicar_"+can ).focus(function(){
 											totaliza();
@@ -1034,9 +1036,11 @@ class Apan extends Controller {
 									function(id, val){
 										can= add_itannc();
 
-										$("#itnumero_" +can).val(val.tipo_doc+val.numero);
+										$("#itnumero_" +can).val(val.numero);
+										$("#ittipo_"   +can).val(val.tipo_doc);
                                         $("#itfecha_"  +can).val(val.fecha);
                                         $("#itsaldo_"  +can).val(val.saldo);
+                                        $("#itid_"     +can).val(val.id);
                                         $("#itnumero_" +can+"_val").text(val.tipo_doc+val.numero);
                                         $("#itfecha_"  +can+"_val").text(val.fecha);
                                         $("#itsaldo_"  +can+"_val").text(val.saldo);
@@ -1063,9 +1067,11 @@ class Apan extends Controller {
 									function(id, val){
 										can= add_itefec();
 
-										$("#itenumero_" +can).val(val.tipo_doc+val.numero);
+										$("#itenumero_" +can).val(val.numero);
+										$("#itetipo_"   +can).val(val.tipo_doc);
                                         $("#itefecha_"  +can).val(val.fecha);
                                         $("#itesaldo_"  +can).val(val.saldo);
+                                        $("#iteid_"     +can).val(val.id);
                                         $("#itenumero_" +can+"_val").text(val.tipo_doc+val.numero);
                                         $("#itefecha_"  +can+"_val").text(val.fecha);
                                         $("#itesaldo_"  +can+"_val").text(val.saldo);
@@ -1117,7 +1123,132 @@ class Apan extends Controller {
 	}
 
 	function _pre_insert($do){
-		$do->error_message_ar['pre_ins']='';
+		$tipo    = $do->get('tipo');
+		$clipro  = $do->get('clipro');
+		$transac = $do->get('transac');
+		$estampa = $do->get('estampa');
+		$hora    = $do->get('hora');
+		$usuario = $do->get('usuario');
+
+		//Calcula los efectos
+		$arr_efe=array();
+		$i=$efectos=0;
+		while(true){
+			$ind = 'itenumero_'.$i; $numero = $this->input->post($ind);
+			$ind = 'itetipo_'.$i;   $tipo   = $this->input->post($ind);
+			$ind = 'itefecha_'.$i;  $fecha  = $this->input->post($ind);
+
+			if($numero === false || $tipo === false || $fecha === false ){
+				break;
+			}
+
+			$ind = 'itemonto_'.$i;  $monto  = $this->input->post($ind);
+			$ind = 'iteid_'.$i;     $id     = $this->input->post($ind);
+			if(!is_numeric($monto)){
+				$do->error_message_ar['pre_ins'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no es num&eacute;rico.';
+				return false;
+				break;
+			}
+			$efectos += $monto;
+			$arr_efe[] = array('id'=>$id,'numero'=>$numero,'tipo'=>$tipo,'fecha'=>$fecha,'abono'=>$monto);
+			$i++;
+		}
+		//Fin de los efectos
+
+		//Calcula la aplicacion
+		$arr_apl = array();
+		$i=$aplicar=0;
+		while(true){
+			$ind = 'itnumero_'.$i; $numero = $this->input->post($ind);
+			$ind = 'ittipo_'.$i;   $tipo   = $this->input->post($ind);
+			$ind = 'itfecha_'.$i;  $fecha  = $this->input->post($ind);
+
+			if($numero === false || $tipo === false || $fecha === false ){
+				break;
+			}
+
+			$ind = 'itaplicar_'.$i;  $aplica = $this->input->post($ind);
+			$ind = 'itmonto_'.$i;    $monto  = $this->input->post($ind);
+			$ind = 'itid_'.$i;       $id     = $this->input->post($ind);
+			if(!is_numeric($monto)){
+				$do->error_message_ar['pre_ins'] = 'El monto del efecto '.$tipo.$numero.' no es num&eacute;rico.';
+				return false;
+				break;
+			}
+
+			$aplicar += $monto;
+			$arr_apl[] = array('id'=>$id,'numero'=>$numero,'tipo'=>$tipo,'fecha'=>$fecha,'abono'=>$aplica,'monto'=>$monto);
+			$i++;
+		}
+		//Fin de la aplicacion
+
+		if($aplicar-$efectos != 0){
+			$do->error_message_ar['pre_ins']='El monto a aplicar es diferente al aplicado';
+			return false;
+		}
+
+		$data = $mSQLs = array();
+		$data['transac'] = $transac;
+		$data['estampa'] = $estampa;
+		$data['hora']    = $hora;
+		$data['usuario'] = $usuario;
+		$data['ppago']=$data['reteiva']=$data['reten']=$data['cambio']=$data['mora']=0;
+		$saldoapl=0;
+
+		foreach($arr_efe AS $efe){
+
+			$saldoefe=$efe['abono'];
+			do{
+				if($saldoapl<=0){
+					$apl = array_shift($arr_apl);
+				}
+
+				$data['numero']   = $efe['numero'];
+				$data['tipo_doc'] = $efe['tipo'];
+				$data['fecha']    = $efe['fecha'];
+				$data['abono']    = $apl['abono'];
+				if($saldoefe <= $apl['monto']){
+					$data['monto'] = $apl['monto'];
+					$saldoefe -= $apl['monto'];
+					$saldoapl  = 0;
+				}else{
+					$data['monto'] = $saldo;
+					$saldoapl = $apl['abono']-$saldo;
+					$saldoefe = 0;
+				}
+
+				if($tipo=='C'){
+					$data['numccli']  = $apl['numero'];
+					$data['tipoccli'] = $apl['tipo'];
+					$data['cod_cli']  = $clipro;
+					$data['reteiva']  = '';
+					$data['nroriva']  = '';
+					$data['emiriva']  = '';
+					$data['recriva']  = '';
+					$mSQLs[] = $this->db->insert_string('itccli', $data);
+					$mSQLs[] = 'UPDATE smov SET abonos=abonos+'.$apl['abono'].' WHERE id='.$this->db->escape($apl['id']);
+				}elseif($tipo == 'P'){
+					$data['numppro']  = $apl['numero'];
+					$data['tipoppro'] = $apl['tipo'];
+					$data['cod_prv']  = $clipro;
+					$data['preten']   = '';
+					$data['creten']   = '';
+					$data['breten']   = '';
+					$mSQLs[] = $this->db->insert_string('itppro', $data);
+					$mSQLs[] = 'UPDATE sprm SET abonos=abonos+'.$apl['abono'].' WHERE id='.$this->db->escape($apl['id']);
+				}
+			}while( $saldoefe>0 );
+
+			if($tipo=='C'){
+				$mSQLs[] = 'UPDATE smov SET abonos=abonos+'.$efe['abono'].' WHERE id='.$this->db->escape($efe['id']);
+			}else{
+				$mSQLs[] = 'UPDATE sprm SET abonos=abonos+'.$efe['abono'].' WHERE id='.$this->db->escape($efe['id']);
+			}
+		}
+
+		$do->error_message_ar['pre_ins']='lalalalalaal';
+		return false;
+
 		return true;
 	}
 
