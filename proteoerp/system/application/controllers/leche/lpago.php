@@ -1030,7 +1030,7 @@ class Lpago extends Controller {
 			$this->db->from('itlrece AS a');
 			$this->db->join('lrece   AS b','a.id_lrece=b.id');
 			$this->db->join('lvaca   AS c','a.id_lvaca=c.id');
-			$this->db->join('sprv    AS d','c.codprv=d.proveed','LEFT');
+			$this->db->join('sprv    AS d','c.codprv=d.proveed','left');
 			$this->db->join('lprecio AS e','e.id='.$this->db->escape($idlprecio));
 			$this->db->where('a.lista >','0');
 			$this->db->where('MID(b.ruta,1,1) <>','G');
@@ -1056,7 +1056,6 @@ class Lpago extends Controller {
 			$this->db->where("((a.fecha<='$fcorte' AND a.transporte<=0) OR (a.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND a.transporte>0))");
 			$this->db->where('b.codprv',$proveed);
 			$query = $this->db->get();
-
 			if ($query->num_rows() > 0){
 				$row = $query->row();
 				if(!empty($row->monto)) $rt['tmonto'] = round(floatval($row->monto),2);
@@ -1138,18 +1137,6 @@ class Lpago extends Controller {
 		$dbproveed= $this->db->escape($proveed);
 		$fcorte   = $this->fcorte;
 		$dbfcorte = $this->db->escape($fcorte);
-
-			$sel=array('SUM(ROUND(a.lista*b.tarifa,2)+ROUND((litros-lista)*b.tarsob,2)) AS monto');
-			$this->db->select($sel);
-			$this->db->from('lrece AS a');
-			$this->db->join('lruta AS b','a.ruta=b.codigo');
-			$this->db->join('sprv  AS c','b.codprv=c.proveed');
-			$this->db->where('a.lista >',0);
-			$this->db->where('(a.pago IS NULL OR a.pago=0)');
-			$this->db->where('MID(a.ruta,1,1) <>','G');
-			$this->db->where("((a.fecha<='$fcorte' AND a.transporte<=0) OR (a.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND a.transporte>0))");
-			$this->db->where('b.codprv',$proveed);
-
 
 		//Marca los pagos por transporte
 		if($tipo=='T' || $tipo=='A'){
@@ -1239,11 +1226,7 @@ class Lpago extends Controller {
 			$_POST['nombre']  = $row->nombre;
 
 			//Calcula el moto que se le debe
-			ob_start();
-				$this->ajaxmonto();
-				$jsmontos=ob_get_contents();
-			@ob_end_clean();
-			$montos = json_decode($jsmontos,true);
+			$montos = $this->_cmonto($row->proveed);
 			if(isset($montos['monto']) && isset($montos['tmonto']) && isset($montos['deduc'])){
 				$_POST['deduc']     = round($montos['deduc'],2);
 				$_POST['monto']     = round($montos['monto']+$montos['tmonto'],2);
