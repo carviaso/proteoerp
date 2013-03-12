@@ -315,11 +315,13 @@ class Lpago extends Controller {
 					}
 				},
 				"Cerrar": function() {
+					$(":button:contains(\'Guardar\')").button("enable");
 					$("#flote").html("");
 					$( this ).dialog( "close" );
 				}
 			},
 			close: function() {
+				$(":button:contains(\'Guardar\')").button("enable");
 				$("#flote").html("");
 				allFields.val("").removeClass( "ui-state-error" );
 			}
