@@ -280,6 +280,7 @@ class Lpago extends Controller {
 			autoOpen: false, height: 500, width: 700, modal: true,
 			buttons: {
 				"Guardar": function() {
+					$(":button:contains(\'Guardar\')").button("disable");
 					var bValid = true;
 					var murl = $("#df1").attr("action");
 					allFields.removeClass( "ui-state-error" );
@@ -305,10 +306,12 @@ class Lpago extends Controller {
 								}catch(e){
 									$("#flote").html(r);
 								}
+								$(":button:contains(\'Guardar\')").button("enable");
 							}
 						});
 					}else{
 						alert("El monto del pago por lote debe ser mayor a cero");
+						$(":button:contains(\'Guardar\')").button("enable");
 					}
 				},
 				"Cerrar": function() {
