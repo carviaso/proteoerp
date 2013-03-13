@@ -61,13 +61,13 @@ class Lrece extends Controller {
 		$grid->setWpAdicional($WpAdic);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"imprime",  "img"=>"assets/default/images/print.png","alt" => 'Reimprimir', "label"=>"Reimprimir Documento"));
-		$grid->wbotonadd(array("id"=>"recalcu"  , "img"=>"images/vaca.png","alt" => 'Recalcular'  , "label"=>'Recalcular'  ));
-		$grid->wbotonadd(array("id"=>"bagrega"  , "img"=>"images/vaca.png","alt" => 'Agrega'  , "label"=>'Agregar Vaquera'  ));
+		//$grid->wbotonadd(array('id'=>'imprime',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'recalcu'  , 'img'=>'images/vaca.png','alt' => 'Recalcular' , 'label'=>'Recalcular'  ));
+		$grid->wbotonadd(array('id'=>'bagrega'  , 'img'=>'images/vaca.png','alt' => 'Agrega'     , 'label'=>'Agregar Vaquera'  ));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
 			array('id'=>'fedita', 'title'=>'Agregar/Editar Pedido'),
@@ -2264,22 +2264,24 @@ class Lrece extends Controller {
 				`ruta` CHAR(4) NULL DEFAULT NULL COMMENT 'Ruta Grupo de Proveedor',
 				`flete` CHAR(5) NULL DEFAULT NULL COMMENT 'Proveedor Flete',
 				`nombre` CHAR(45) NULL DEFAULT NULL COMMENT 'Nombre Chofer ',
-				`lleno` DECIMAL(16,3) NULL DEFAULT NULL COMMENT 'Peso de la Unidad llena',
-				`vacio` DECIMAL(16,3) NULL DEFAULT NULL COMMENT 'Peso de la Unidad Vacia',
-				`neto` DECIMAL(16,3) NULL DEFAULT NULL COMMENT 'Neto lleno-vacio',
-				`densidad` DECIMAL(10,5) NULL DEFAULT NULL COMMENT 'Densidad',
-				`litros` DECIMAL(16,3) NULL DEFAULT NULL COMMENT 'Total Litros neto*densidad',
-				`lista` DECIMAL(16,3) NULL DEFAULT NULL COMMENT 'Segun Lista',
+				`lleno` DECIMAL(16,2) NULL DEFAULT NULL COMMENT 'Peso de la Unidad llena',
+				`vacio` DECIMAL(16,2) NULL DEFAULT NULL COMMENT 'Peso de la Unidad Vacia',
+				`neto` DECIMAL(16,2) NULL DEFAULT NULL COMMENT 'Neto lleno-vacio',
+				`densidad` DECIMAL(10,4) NULL DEFAULT NULL COMMENT 'Densidad',
+				`litros` DECIMAL(16,2) NULL DEFAULT NULL COMMENT 'Total Litros neto*densidad',
+				`lista` DECIMAL(16,2) NULL DEFAULT NULL COMMENT 'Segun Lista',
 				`diferen` DECIMAL(16,3) NULL DEFAULT NULL COMMENT 'Diferencia Neto/Lista',
 				`animal` CHAR(1) NULL DEFAULT NULL COMMENT 'Vaca o Bufala',
-				`crios` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'Crioscopia',
-				`h2o` DECIMAL(10,3) NULL DEFAULT NULL COMMENT '% de Agua',
-				`temp` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'Temperatura',
-				`brix` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'Grados Brix',
+				`crios` DECIMAL(10,0) NULL DEFAULT NULL COMMENT 'Crioscopia',
+				`h2o` DECIMAL(10,2) NULL DEFAULT NULL COMMENT '% de Agua',
+				`temp` DECIMAL(10,2) NULL DEFAULT NULL COMMENT 'Temperatura',
+				`brix` DECIMAL(10,2) NULL DEFAULT NULL COMMENT 'Grados Brix',
 				`grasa` DECIMAL(10,3) NULL DEFAULT NULL COMMENT '% Grasa',
-				`acidez` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'Acidez',
-				`cloruros` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'Cloruros',
-				`dtoagua` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'Dto. Agua',
+				`acidez` DECIMAL(10,0) NULL DEFAULT NULL COMMENT 'Acidez',
+				`cloruros` DECIMAL(10,0) NULL DEFAULT NULL COMMENT 'Cloruros',
+				`dtoagua` DECIMAL(10,2) NULL DEFAULT NULL COMMENT 'Dto. Agua',
+				`pago` INT(11) NULL DEFAULT '0' COMMENT 'Nro de Pago',
+				`montopago` DECIMAL(12,2) NULL DEFAULT '0.00' COMMENT 'Monto del pago',
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
 				PRIMARY KEY (`id`),
 				UNIQUE INDEX `numero` (`numero`),
@@ -2289,6 +2291,11 @@ class Lrece extends Controller {
 			COMMENT='Recepcion de Leche'
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!$this->db->field_exists('montopago', 'lrece')){
+			$mSQL="ALTER TABLE `lrece` ADD COLUMN `montopago` DECIMAL(12,2) NULL DEFAULT '0' COMMENT 'Monto del pago' AFTER `pago`";
 			$this->db->simple_query($mSQL);
 		}
 
@@ -2302,6 +2309,11 @@ class Lrece extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
+		if(!$this->db->field_exists('montopago', 'itlrece')){
+			$mSQL = "ALTER TABLE `itlrece` ADD COLUMN `montopago` DECIMAL(12,2) NULL DEFAULT '0' COMMENT 'Monto del pago' AFTER `pago`";
+			$this->db->simple_query($mSQL);
+		}
+
 		if(!$this->db->field_exists('alcohol', 'lanal')){
 			$mSQL = "ALTER TABLE lanal ADD COLUMN `alcohol` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'alcohol' AFTER `dtoagua`";
 			$this->db->simple_query($mSQL);
@@ -2310,26 +2322,34 @@ class Lrece extends Controller {
 
 		if(!$this->db->table_exists('itlrece')){
 			$mSQL="CREATE TABLE `itlrece` (
-			`vaquera`  VARCHAR(5)    NULL DEFAULT NULL COMMENT 'Vaquera',
-			`nombre`   VARCHAR(45)   NULL DEFAULT NULL COMMENT 'Productor ',
-			`densidad` decimal(10,5) DEFAULT 1.032 COMMENT 'Densidad',
-			`lista`    decimal(16,3) DEFAULT NULL COMMENT 'Segun Lista',
-			`animal`   char(1)       DEFAULT NULL COMMENT 'Vaca o Bufala',
-			`crios`    decimal(10,3) DEFAULT NULL COMMENT 'Crioscopia',
-			`h2o`      decimal(10,3) DEFAULT NULL COMMENT '% de Agua',
-			`temp`     decimal(10,3) DEFAULT NULL COMMENT 'Temperatura',
-			`brix`     decimal(10,3) DEFAULT NULL COMMENT 'Grados Brix',
-			`grasa`    decimal(10,3) DEFAULT NULL COMMENT '% Grasa',
-			`acidez`   decimal(10,3) DEFAULT NULL COMMENT 'Acidez',
-			`cloruros` decimal(10,3) DEFAULT NULL COMMENT 'Cloruros',
-			`dtoagua`  decimal(10,3) DEFAULT NULL COMMENT 'Dto. Agua',
-			`id_lrece` int(11)       DEFAULT NULL,
-			`id_lvaca` int(11)       DEFAULT NULL,
-			`id`       int(11)       NOT NULL AUTO_INCREMENT,
-			PRIMARY KEY (`id`),
-			KEY `id_lrece` (`id_lrece`),
-			KEY `id_lvaca` (`id_lvaca`)
-			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 COMMENT='Detalle Recepcion de Leche'";
+				`vaquera` VARCHAR(5) NULL DEFAULT NULL COMMENT 'Vaquera',
+				`nombre` VARCHAR(45) NULL DEFAULT NULL COMMENT 'Productor ',
+				`densidad` DECIMAL(10,4) NULL DEFAULT '1.0164' COMMENT 'Densidad',
+				`lista` DECIMAL(16,2) NULL DEFAULT NULL COMMENT 'Segun Lista',
+				`animal` CHAR(1) NULL DEFAULT 'V' COMMENT 'Vaca o Bufala',
+				`crios` DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'Crioscopia',
+				`h2o` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT '% de Agua',
+				`temp` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Temperatura',
+				`brix` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Grados Brix',
+				`grasa` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT '% Grasa',
+				`acidez` DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'Acidez',
+				`cloruros` DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'Cloruros',
+				`dtoagua` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Dto. Agua',
+				`alcohol` DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'alcohol',
+				`id_lrece` INT(11) NULL DEFAULT NULL,
+				`id_lvaca` INT(11) NULL DEFAULT NULL,
+				`activa` CHAR(1) NULL DEFAULT 'A' COMMENT 'Activa Si o No',
+				`pago` INT(11) NULL DEFAULT '0' COMMENT 'ID del pago lpago',
+				`montopago` DECIMAL(12,2) NULL DEFAULT '0' COMMENT 'Monto del pago',
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				PRIMARY KEY (`id`),
+				UNIQUE INDEX `vaquera` (`vaquera`, `id_lrece`),
+				INDEX `id_lrece` (`id_lrece`),
+				INDEX `id_lvaca` (`id_lvaca`)
+			)
+			COMMENT='Detalle Recepcion de Leche'
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
 	}

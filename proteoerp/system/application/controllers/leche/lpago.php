@@ -1005,6 +1005,48 @@ class Lpago extends Controller {
 		}
 	}
 
+	//Hace la consulta para el pago por productores
+	function _sqlprod($idlprecio,$proveed,$fcorte,$sum=true){
+		if($sum){
+			$ssum='SUM';
+		}else{
+			$ssum='';
+		}
+
+		$sel=array($ssum.'(ROUND(a.lista*if(c.tipolec="F",if(c.animal="V",if(c.zona="0112",e.tarifa5,e.tarifa1),e.tarifa3), if(c.animal="V",e.tarifa2,e.tarifa4)),2)) AS monto');
+		$this->db->select($sel);
+		$this->db->from('itlrece AS a');
+		$this->db->join('lrece   AS b','a.id_lrece=b.id');
+		$this->db->join('lvaca   AS c','a.id_lvaca=c.id');
+		$this->db->join('sprv    AS d','c.codprv=d.proveed','left');
+		$this->db->join('lprecio AS e','e.id='.$this->db->escape($idlprecio));
+		$this->db->where('a.lista >','0');
+		$this->db->where('MID(b.ruta,1,1) <>','G');
+		$this->db->where("((b.fecha<='$fcorte' AND b.transporte<=0) OR (b.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND b.transporte>0))");
+		$this->db->where('(a.pago IS NULL OR a.pago=0)');
+		$this->db->where('c.codprv',$proveed);
+	}
+
+	//Hace la consulta para el pago de los transportistas
+	function _sqltran($idlprecio,$proveed,$fcorte,$sum=true){
+		if($sum){
+			$ssum='SUM';
+		}else{
+			$ssum='';
+		}
+
+		$sel=array($ssum.'(ROUND(a.lista*b.tarifa,2)+ROUND((litros-lista)*b.tarsob,2)) AS monto');
+		$this->db->select($sel);
+		$this->db->from('lrece AS a');
+		$this->db->join('lruta AS b','a.ruta=b.codigo');
+		$this->db->join('sprv  AS c','b.codprv=c.proveed');
+		$this->db->where('a.lista >',0);
+		$this->db->where('(a.pago IS NULL OR a.pago=0)');
+		$this->db->where('MID(a.ruta,1,1) <>','G');
+		$this->db->where("((a.fecha<='$fcorte' AND a.transporte<=0) OR (a.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND a.transporte>0))");
+		$this->db->where('b.codprv',$proveed);
+	}
+
 	function _cmonto($proveed=null){
 
 		$rt = array('deduc'=>0 , 'tmonto'=>0 , 'monto'=>0);
@@ -1030,36 +1072,16 @@ class Lpago extends Controller {
 			$idlprecio = $this->datasis->dameval("SELECT id FROM lprecio WHERE fecha <= $dbfcorte ORDER BY fecha DESC LIMIT 1");
 
 			//Productores
-			$sel=array('SUM(ROUND(a.lista*if(c.tipolec="F",if(c.animal="V",if(c.zona="0112",e.tarifa5,e.tarifa1),e.tarifa3), if(c.animal="V",e.tarifa2,e.tarifa4)),2)) AS total');
-			$this->db->select($sel);
-			$this->db->from('itlrece AS a');
-			$this->db->join('lrece   AS b','a.id_lrece=b.id');
-			$this->db->join('lvaca   AS c','a.id_lvaca=c.id');
-			$this->db->join('sprv    AS d','c.codprv=d.proveed','left');
-			$this->db->join('lprecio AS e','e.id='.$this->db->escape($idlprecio));
-			$this->db->where('a.lista >','0');
-			$this->db->where('MID(b.ruta,1,1) <>','G');
-			$this->db->where("((b.fecha<='$fcorte' AND b.transporte<=0) OR (b.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND b.transporte>0))");
-			$this->db->where('c.codprv'  , $proveed);
-			$this->db->where('(a.pago IS NULL OR a.pago=0)');
+			$this->_sqlprod($idlprecio,$proveed,$fcorte);
 			$query = $this->db->get();
 			if($query->num_rows() > 0){
 				$row = $query->row();
-				if(!empty($row->total)) $rt['monto'] = round(floatval($row->total),2);
+				if(!empty($row->monto)) $rt['monto']  = round(floatval($row->monto),2);
 			}
 
 			//echo $this->db->last_query();
 			//Transportista
-			$sel=array('SUM(ROUND(a.lista*b.tarifa,2)+ROUND((litros-lista)*b.tarsob,2)) AS monto');
-			$this->db->select($sel);
-			$this->db->from('lrece AS a');
-			$this->db->join('lruta AS b','a.ruta=b.codigo');
-			$this->db->join('sprv  AS c','b.codprv=c.proveed');
-			$this->db->where('a.lista >',0);
-			$this->db->where('(a.pago IS NULL OR a.pago=0)');
-			$this->db->where('MID(a.ruta,1,1) <>','G');
-			$this->db->where("((a.fecha<='$fcorte' AND a.transporte<=0) OR (a.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND a.transporte>0))");
-			$this->db->where('b.codprv',$proveed);
+			$this->_sqltran($idlprecio,$proveed,$fcorte);
 			$query = $this->db->get();
 			if ($query->num_rows() > 0){
 				$row = $query->row();
@@ -1142,28 +1164,36 @@ class Lpago extends Controller {
 		$dbproveed= $this->db->escape($proveed);
 		$fcorte   = $this->fcorte;
 		$dbfcorte = $this->db->escape($fcorte);
+		$idlprecio= $this->datasis->dameval("SELECT id FROM lprecio WHERE fecha <= $dbfcorte ORDER BY fecha DESC LIMIT 1");
 
 		//Marca los pagos por transporte
 		if($tipo=='T' || $tipo=='A'){
-			$mSQL="UPDATE
-				lrece AS a
-				JOIN lruta AS b ON a.ruta=b.codigo
-			SET a.pago=${dbid} WHERE b.codprv=${dbproveed} AND (a.pago IS NULL OR a.pago=0)
-			AND ((a.fecha<=${dbfcorte} AND a.transporte<=0) OR (a.fecha<=ADDDATE(${dbfcorte},INTERVAL 1 DAY)  AND a.transporte>0))
-			AND MID(a.ruta,1,1)<>'G'";
-			$this->db->query($mSQL);
+
+			$this->db->select('a.id');
+			$this->_sqltran($idlprecio,$proveed,$fcorte,false);
+			$query = $this->db->get();
+			if($query->num_rows() > 0){
+				foreach ($query->result() as $row){
+					$mSQL='UPDATE lrece SET montopago='.$row->monto.', pago='.$dbid.' WHERE id='.$row->id;
+					echo $mSQL;
+					$this->db->simple_query($mSQL);
+				}
+			}
 		}
 
 		//Marca los pagos por productor
 		if($tipo=='P' || $tipo=='A'){
-			$mSQL="UPDATE
-			itlrece AS a
-			JOIN lrece AS b ON a.id_lrece=b.id
-			JOIN lvaca AS c ON a.id_lvaca=c.id
-			SET a.pago=${dbid} WHERE c.codprv=${dbproveed} AND (a.pago IS NULL OR a.pago=0)
-			AND ((b.fecha<=${dbfcorte} AND b.transporte<=0) OR (b.fecha<=ADDDATE(${dbfcorte},INTERVAL 1 DAY) AND b.transporte>0))
-			AND MID(b.ruta,1,1)<>'G'";
-			$this->db->query($mSQL);
+
+			$this->db->select('a.id');
+			$this->_sqlprod($idlprecio,$proveed,$fcorte,false);
+			$query = $this->db->get();
+			if($query->num_rows() > 0){
+				foreach ($query->result() as $row){
+					$mSQL='UPDATE itlrece SET montopago='.$row->monto.', pago='.$dbid.' WHERE id='.$row->id;
+					echo $mSQL;
+					$this->db->simple_query($mSQL);
+				}
+			}
 		}
 
 		//Marca la deducciones
@@ -1309,7 +1339,7 @@ class Lpago extends Controller {
 				INDEX `numero` (`numero`)
 			)
 			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM;";
+			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
 
