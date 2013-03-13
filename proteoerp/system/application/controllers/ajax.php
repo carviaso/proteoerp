@@ -679,7 +679,7 @@ class Ajax extends Controller {
 		$qdb  = $this->db->escape($mid.'%');
 		$qba  = $this->db->escape($mid);
 
-		$data = '[{ }]';
+		$data = '[]';
 		if($mid !== false){
 			$retArray = $retorno = array();
 
@@ -711,24 +711,7 @@ class Ajax extends Controller {
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
-	        }else{
-				$retArray[0]['label']    = 'No se consiguieron productos';
-				$retArray[0]['value']    = '';
-				$retArray[0]['codigo']   = '';
-				$retArray[0]['cana']     = 0;
-				$retArray[0]['tipo']     = 0;
-				$retArray[0]['peso']     = 0;
-				$retArray[0]['ultimo']   = 0;
-				$retArray[0]['pond']     = 0;
-				$retArray[0]['base1']    = 0;
-				$retArray[0]['base2']    = 0;
-				$retArray[0]['base3']    = 0;
-				$retArray[0]['base4']    = 0;
-				$retArray[0]['descrip']  = 0;
-				$retArray[0]['iva']      = 0;
-
-				$data = json_encode($retArray);
-			}
+	        }
 		}
 		echo $data;
 	}

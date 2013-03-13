@@ -166,34 +166,34 @@ class Snte extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 595, width: 795, modal: true,
+			autoOpen: false, height: 550, width: 750, modal: true,
 			buttons: {
-			"Guardar": function() {
-				var bValid = true;
-				var murl = $("#df1").attr("action");
-				allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						try{
-							var json = JSON.parse(r);
-							if (json.status == "A"){
-								apprise("Registro Guardado");
-								$( "#fedita" ).dialog( "close" );
-								grid.trigger("reloadGrid");
-								'.$this->datasis->jwinopen(site_url('formatos/ver/SNTE').'/\'+res.id+\'/id\'').';
-								return true;
-							} else {
-								apprise(json.mensaje);
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/SNTE').'/\'+res.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
 							}
-						}catch(e){
-							$("#fedita").html(r);
 						}
-					}
-				})
-			},
+					})
+				},
 				"Cancelar": function() {
 					$("#fedita").html("");
 					$( this ).dialog( "close" );
@@ -210,31 +210,33 @@ class Snte extends Controller {
 			autoOpen: false, height: 500, width: 700, modal: true,
 			buttons: {
 				"Aceptar": function() {
+					$("#fshow").html("");
 					$( this ).dialog( "close" );
 				},
 			},
 			close: function() {
 				$("#fshow").html("");
-				allFields.val( "" ).removeClass( "ui-state-error" );
 			}
 		});';
 
 		$bodyscript .= '
 		$("#fborra").dialog({
-			autoOpen: false, height: 300, width: 300, modal: true,
+			autoOpen: false, height: 300, width: 400, modal: true,
 			buttons: {
 				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 					$( this ).dialog( "close" );
-					grid.trigger("reloadGrid");
-				}
+				},
 			},
 			close: function() {
-				allFields.val( "" ).removeClass( "ui-state-error" );
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
 			}
 		});';
 
 		$bodyscript .= '	});';
-		$bodyscript .= "\n</script>\n";
+		$bodyscript .= '</script>';
 
 		return $bodyscript;
 	}
@@ -676,7 +678,7 @@ class Snte extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -882,6 +884,8 @@ class Snte extends Controller {
 		if ($id == false ){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM snte");
 		}
+		if(empty($id)) return '';
+
 		$numero   = $this->datasis->dameval("SELECT numero FROM snte WHERE id=$id");
 		$grid     = $this->jqdatagrid;
 		$mSQL     = "SELECT * FROM itsnte WHERE numero='$numero' ORDER BY codigo ";
@@ -900,7 +904,7 @@ class Snte extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = '??????';
 		$check  = 0;
 /*
 		unset($data['oper']);
@@ -993,12 +997,12 @@ class Snte extends Controller {
 			'tipo'=>'Tipo'),
 		'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre'),
 		'retornar'=>array('cliente'=>'cod_cli','nombre'=>'nombre',
-						  'dire11'=>'dir_cli','tipo'=>'sclitipo'),
+						  'dire11' =>'dir_cli','tipo'  =>'sclitipo'),
 		'titulo'  =>'Buscar Cliente',
 		'script'  => array('post_modbus_scli()'));
 		$btnc =$this->datasis->modbus($mSCLId);
 
-		$do = new DataObject("snte");
+		$do = new DataObject('snte');
 		$do->rel_one_to_many('itsnte', 'itsnte', 'numero');
 		$do->pointer('scli' ,'scli.cliente=snte.cod_cli','scli.tipo AS sclitipo','left');
 		$do->rel_pointer('itsnte','sinv','itsnte.codigo=sinv.codigo','sinv.descrip AS sinvdescrip, sinv.base1 AS sinvprecio1, sinv.base2 AS sinvprecio2, sinv.base3 AS sinvprecio3, sinv.base4 AS sinvprecio4, sinv.iva AS sinviva, sinv.peso AS sinvpeso,sinv.tipo AS sinvtipo');
@@ -1007,9 +1011,9 @@ class Snte extends Controller {
 		$edit->on_save_redirect=false;
 		$edit->set_rel_title('itsnte','Producto <#o#>');
 
-		$edit->pre_process('insert' ,'_pre_insert');
-		$edit->pre_process('update' ,'_pre_update');
-		$edit->pre_process('delete' ,'_pre_delete');
+		$edit->pre_process( 'insert','_pre_insert');
+		$edit->pre_process( 'update','_pre_update');
+		$edit->pre_process( 'delete','_pre_delete');
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
@@ -1018,6 +1022,7 @@ class Snte extends Controller {
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->rule = 'required';
 		$edit->fecha->mode = 'autohide';
+		$edit->fecha->calendar = false;
 		$edit->fecha->size = 10;
 
 		$edit->vende = new  dropdownField ('Vendedor', 'vende');
@@ -1045,6 +1050,7 @@ class Snte extends Controller {
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->size = 25;
+		$edit->nombre->type='inputhidden';
 		$edit->nombre->maxlength=40;
 		$edit->nombre->autocomplete=false;
 
@@ -1055,19 +1061,20 @@ class Snte extends Controller {
 		$edit->almacen = new  dropdownField ('Almac&eacute;n', 'almacen');
 		$edit->almacen->options('SELECT ubica, CONCAT(ubica,\' \',ubides) nombre FROM caub ORDER BY ubica');
 		$edit->almacen->rule = 'required';
-		$edit->almacen->style='width:200px;';
+		$edit->almacen->style= 'width:200px;';
 		$edit->almacen->size = 5;
 
-		$edit->orden = new inputField("Orden", "orden");
+		$edit->orden = new inputField('Orden', 'orden');
 		$edit->orden->size = 10;
 
-		$edit->observa = new inputField("Observaci&oacute;n", "observa");
+		$edit->observa = new inputField('Observaci&oacute;n', 'observa');
 		$edit->observa->size = 37;
 
-		$edit->dir_cli = new inputField("Direcci&oacute;n","dir_cli");
+		$edit->dir_cli = new inputField('Direcci&oacute;n','dir_cli');
+		$edit->dir_cli->type='inputhidden';
 		$edit->dir_cli->size = 37;
 
-		//$edit->dir_cl1 = new inputField(" ","dir_cl1");
+		//$edit->dir_cl1 = new inputField(' ','dir_cl1');
 		//$edit->dir_cl1->size = 55;
 
 		//Para saber que precio se le va a dar al cliente
@@ -1078,9 +1085,8 @@ class Snte extends Controller {
 
 		//Campos para el detalle
 		$edit->codigo = new inputField('C&oacute;digo <#o#>', 'codigo_<#i#>');
-		$edit->codigo->size     = 12;
+		$edit->codigo->size     = 8;
 		$edit->codigo->db_name  = 'codigo';
-		//$edit->codigo->readonly = true;
 		$edit->codigo->rel_id   = 'itsnte';
 		$edit->codigo->rule     = 'required';
 		$edit->codigo->append($btn);
@@ -1089,7 +1095,7 @@ class Snte extends Controller {
 		$edit->desca = new inputField('Descripci&oacute;n <#o#>', 'desca_<#i#>');
 		$edit->desca->size=36;
 		$edit->desca->db_name='desca';
-		$edit->desca->maxlength=50;
+		$edit->desca->maxlength=40;
 		$edit->desca->readonly  = true;
 		$edit->desca->rel_id='itsnte';
 		$edit->desca->style    = 'width:98%';
@@ -1119,7 +1125,8 @@ class Snte extends Controller {
 		$edit->importe->size=10;
 		$edit->importe->css_class='inputnum';
 		$edit->importe->rel_id   ='itsnte';
-		$edit->importe->style    = 'width:98%';
+		$edit->importe->style    ='width:98%';
+		$edit->importe->type     ='inputhidden';
 
 		for($i=1;$i<=4;$i++){
 			$obj='precio'.$i;

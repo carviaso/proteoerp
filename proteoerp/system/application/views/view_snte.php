@@ -36,6 +36,15 @@ var itsnte_cont=<?php echo $form->max_rel_count['itsnte']; ?>;
 
 $(function(){
 	$(".inputnum").numeric(".");
+	$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+
+	$('input[id^="cana_"]').keypress(function(e) {
+		if(e.keyCode == 13) {
+		    add_itsnte();
+			return false;
+		}
+	});
+
 	totalizar();
 	for(var i=0;i < <?php echo $form->max_rel_count['itsnte']; ?>;i++){
 		cdropdown(i);
@@ -43,12 +52,14 @@ $(function(){
 	}
 
 	$('#cod_cli').autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscascli'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {'q':req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -99,8 +110,10 @@ function importe(id){
 	var ind     = id.toString();
 	var cana    = Number($("#cana_"+ind).val());
 	var precio  = Number($("#precio_"+ind).val());
+	var iva     = Number($("#itiva_"+ind).val());
 	var importe = roundNumber(cana*precio,2);
 	$("#importe_"+ind).val(importe);
+	$("#importe_"+ind+"_val").text(nformat(importe*(100+iva)/100,2));
 
 	totalizar();
 }
@@ -153,17 +166,25 @@ function add_itsnte(){
 	autocod(can);
 	$('#codigo_'+can).focus();
 
+	$("#cana_"+can).keypress(function(e) {
+		if(e.keyCode == 13) {
+		    add_itsnte();
+			return false;
+		}
+	});
+
 	itsnte_cont=itsnte_cont+1;
 }
 
 function post_precioselec(ind,obj){
 	if(obj.value=='o'){
+		var itiva = Number($('#itiva_'+ind).val());
 		otro = prompt('Precio nuevo','');
 		otro = Number(otro);
 		if(otro>0){
 			var opt=document.createElement("option");
+			opt.value= roundNumber(otro*100/(100+itiva),2);
 			opt.text = nformat(otro,2);
-			opt.value= otro;
 			obj.add(opt,null);
 			obj.selectedIndex=obj.length-1;
 		}
@@ -173,6 +194,10 @@ function post_precioselec(ind,obj){
 
 function post_modbus_scli(){
 	var tipo  =Number($("#sclitipo").val()); if(tipo>0) tipo=tipo-1;
+
+	$('#nombre_val').text($('#nombre').val());
+	$('#rifci_val').text($('#rifci').val());
+	$('#dir_cli_val').text($('#dir_cli').val());
 
 	//var cambio=confirm('Deseas cambiar los precios por los que tenga asginado el cliente?');
 
@@ -199,13 +224,15 @@ function post_modbus_sinv(nind){
 	cdescrip(nind);
 	jQuery.each(arr, function() { this.selectedIndex=tipo; });
 	importe(nind);
+	$('#codigo_'+ind).focus();
 	totalizar();
 }
 
 function cdropdown(nind){
-	var ind=nind.toString();
-	var preca=$("#precio_"+ind).val();
-	var pprecio  = document.createElement("select");
+	var ind     = nind.toString();
+	var preca   = $("#precio_"+ind).val();
+	var itiva   = Number($('#itiva_'+ind).val());
+	var pprecio = document.createElement("select");
 
 	pprecio.setAttribute("id"    , "precio_"+ind);
 	pprecio.setAttribute("name"  , "precio_"+ind);
@@ -232,7 +259,7 @@ function cdropdown(nind){
 	}
 	if(ban==0){
 		opt=document.createElement("option");
-		opt.text = nformat(preca,2);
+		opt.text = nformat(Number(preca)*(1+(itiva/100)),2);
 		opt.value= preca;
 		pprecio.add(opt,null);
 		pprecio.selectedIndex=4;
@@ -255,21 +282,38 @@ function del_itsnte(id){
 //Agrega el autocomplete
 function autocod(id){
 	$('#codigo_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('ventas/spre/buscasinv'); ?>",
+				url:  "<?php echo site_url('ajax/buscasinvart'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {'q': req.term},
 				success:
 					function(data){
 						var sugiere = [];
-						$.each(data,
-							function(i, val){
-								sugiere.push( val );
-							}
-						);
-						add(sugiere);
+						if(data.length==0){
+							$('#codigo_'+id).val('');
+							$('#desca_'+id).val('');
+							$('#precio1_'+id).val('');
+							$('#precio2_'+id).val('');
+							$('#precio3_'+id).val('');
+							$('#precio4_'+id).val('');
+							$('#itiva_'+id).val('');
+							$('#sinvtipo_'+id).val('');
+							$('#sinvpeso_'+id).val('');
+							$('#itcosto_'+id).val('');
+							$('#itpvp_'+id).val('');
+							$('#cana_'+id).val('');
+						}else{
+							$.each(data,
+								function(i, val){
+									sugiere.push( val );
+								}
+							);
+							add(sugiere);
+						}
 					},
 			})
 		},
@@ -299,17 +343,14 @@ function autocod(id){
 			jQuery.each(arr, function() { this.selectedIndex=tipo; });
 			importe(id);
 			totalizar();
-			setTimeout(function() {  $('#codigo_'+id).removeAttr("readonly"); }, 1500);
+			setTimeout(function(){ $('#codigo_'+id).removeAttr("readonly"); }, 1500);
 		}
 	});
 }
 </script>
 <?php } ?>
 
-<table align='center' width="95%" border='0'>
-	<tr>
-		<td align=right><?php echo $container_tr?></td>
-	</tr>
+<table align='center' width="100%" border='0'>
 	<tr>
 		<td colspan=2>
 			<table width='100%'><tr><td>
@@ -317,13 +358,12 @@ function autocod(id){
 				<legend class="titulofieldset" style='color: #114411;'>Documento</legend>
 				<table width="100%" style="margin: 0; width: 100%;">
 				<tr>
-					<td class="littletableheader"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
-					<td class="littletablerow">   <?php echo $form->fecha->output;   ?>&nbsp;</td>
-
-				</tr>
-				<tr>
 					<td class="littletableheader"><?php echo $form->vende->label     ?>&nbsp;</td>
 					<td class="littletablerow">   <?php echo $form->vende->output    ?>&nbsp;</td>
+				</tr>
+				<tr>
+					<td class="littletableheader"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
+					<td class="littletablerow">   <?php echo $form->fecha->output;   ?>&nbsp;</td>
 				</tr>
 				<tr>
 					<td class="littletableheader"><?php echo $form->peso->label;  ?>&nbsp;</td>
@@ -354,19 +394,19 @@ function autocod(id){
 		</td>
 	</tr>
 </table>
-<table align='center' width="95%">
+<table align='center' width="100%">
 	<tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:190px'>
 		<table width='100%'>
 			<tr id='__INPL__'>
-				<td bgcolor='#7098D0'><strong>C&oacute;digo</strong></td>
-				<td bgcolor='#7098D0'><strong>Descripci&oacute;n</strong></td>
-				<td bgcolor='#7098D0'><strong>Cantidad</strong></td>
-				<td bgcolor='#7098D0'><strong>Precio</strong></td>
-				<td bgcolor='#7098D0'><strong>Importe</strong></td>
+				<td bgcolor='#7098D0'><b>C&oacute;digo</b></td>
+				<td bgcolor='#7098D0'><b>Descripci&oacute;n</b></td>
+				<td bgcolor='#7098D0'><b>Cantidad</b></td>
+				<td bgcolor='#7098D0'><b>Precio</b></td>
+				<td bgcolor='#7098D0'><b>Importe</b></td>
 				<?php if($form->_status!='show') {?>
-					<td bgcolor='#7098D0'><strong>&nbsp;</strong></td>
+					<td bgcolor='#7098D0'>&nbsp;</td>
 				<?php } ?>
 			</tr>
 
@@ -391,10 +431,10 @@ function autocod(id){
 			?>
 
 			<tr id='tr_itsnte_<?php echo $i; ?>'>
-				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
+				<td class="littletablerow" align="left" nowrap><?php echo $form->$it_codigo->output; ?></td>
 				<td class="littletablerow" align="left" ><?php echo $form->$it_desca->output;  ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_cana->output;   ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_precio->output;  ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$it_precio->output; ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_importe->output.$pprecios;?></td>
 
 				<?php if($form->_status!='show') {?>
@@ -404,10 +444,6 @@ function autocod(id){
 				<?php } ?>
 			</tr>
 			<?php } ?>
-
-			<tr id='__UTPL__'>
-				<td id='cueca'></td>
-			</tr>
 		</table>
 		</div>
 		<?php echo $container_bl ?>
@@ -420,21 +456,21 @@ function autocod(id){
 		<table width='100%'>
 			<tr>
 				<td class="littletableheader" width='100'><?php echo $form->observa->label;  ?>&nbsp;</td>
-				<td class="littletablerow"  width='400' ><?php echo $form->observa->output; ?>&nbsp;</td>
+				<td class="littletablerow"    width='400'><?php echo $form->observa->output; ?>&nbsp;</td>
 
-				<td class="littletableheader">           <?php echo $form->impuesto->label;    ?></td>
+				<td class="littletableheader"><?php echo $form->impuesto->label;    ?></td>
 				<td class="littletablerow" align='right'><b id='impuesto_val'><?php echo nformat($form->impuesto->value); ?></b><?php echo $form->impuesto->output; ?></td>
 			</tr><tr>
 				<td class="littletableheader"><?php echo $form->orden->label;  ?>&nbsp;</td>
 				<td class="littletablerow" align="left"><?php echo $form->orden->output; ?>&nbsp;</td>
 
-				<td class="littletableheader">           <?php echo $form->stotal->label;  ?></td>
+				<td class="littletableheader"><?php echo $form->stotal->label;  ?></td>
 				<td class="littletablerow" align='right'><b id='stotal_val'><?php echo nformat($form->stotal->value); ?></b><?php echo $form->stotal->output; ?></td>
 			</tr><tr>
 				<td class="littletableheader"><?php echo $form->factura->label;  ?>&nbsp;</td>
 				<td class="littletablerow" align="left"><?php echo $form->factura->output; ?>&nbsp;</td>
 
-				<td class="littletableheader">           <?php echo $form->gtotal->label;  ?></td>
+				<td class="littletableheader"><?php echo $form->gtotal->label;  ?></td>
 				<td class="littletablerow" align='right'  style='font-size:18px;font-weight: bold'><b id='gtotal_val'><?php echo nformat($form->gtotal->value); ?></b> <?php echo $form->gtotal->output; ?> </td>
 			</tr>
 		</table>

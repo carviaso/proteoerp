@@ -14,8 +14,7 @@ $scampos .='<td class="littletablerow" align="left" >'.$campos['descrip']['field
 $scampos .='<td class="littletablerow" align="right">'.$campos['cant']['field'].  '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['saldo']['field']. '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['entrega']['field'];
-
-$scampos .= '<td class="littletablerow"><a href=# onclick="del_itsnot(<#i#>);return false;">Eliminar</a></td></tr>';
+$scampos .='<td class="littletablerow"><a href=# onclick="del_itsnot(<#i#>);return false;">Eliminar</a></td></tr>';
 $campos=$form->js_escape($scampos);
 
 if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
@@ -48,7 +47,7 @@ function del_itsnot(id){
 </script>
 <?php } ?>
 
-<table align='center' width="95%">
+<table align='center' width="100%">
 	<tr>
 		<td align=right><?php echo $container_tr?></td>
 	</tr>
@@ -56,7 +55,7 @@ function del_itsnot(id){
 		<td>
 		<table width="100%" style="margin: 0; width: 100%;">
 			<tr>
-				<th colspan='5' class="littletableheader">Nota de Entrega <b><?php if($form->_status=='show' or $form->_status=='modify' ) echo str_pad($form->numero->output,8,0,0); ?></b></th>
+				<th colspan='5' class="littletableheader">Nota de Despacho <b><?php if($form->_status=='show' or $form->_status=='modify' ) echo str_pad($form->numero->output,8,0,0); ?></b></th>
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
@@ -84,7 +83,7 @@ function del_itsnot(id){
 		<td>
 		<table width='100%'>
 			<tr>
-				<th colspan='6' class="littletableheader">Lista de Notad de entrega</th>
+				<th colspan='6' class="littletableheader">Lista de Nota de despacho</th>
 			</tr>
 			<tr>
 				<td class="littletableheader">C&oacute;digo</td>
@@ -92,7 +91,6 @@ function del_itsnot(id){
 				<td class="littletableheader">Cantidad</td>
 				<td class="littletableheader">Saldo</td>
 				<td class="littletableheader">Entrega</td>
-				<td class="littletableheader">Factura</td>
 				<?php if($form->_status!='show') {?>
 					<td class="littletableheader">&nbsp;</td>
 				<?php } ?>
@@ -105,7 +103,7 @@ function del_itsnot(id){
 				$it_saldo   = "saldo_$i";
 				$it_entrega = "entrega_$i";
 				$it_fact     = "itfactura_$i";
-				
+
 				$pprecios='';
 			?>
 
@@ -115,8 +113,6 @@ function del_itsnot(id){
 				<td class="littletablerow" align="right"><?php echo $form->$it_cant->output;   ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_saldo->output;  ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_entrega->output?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_fact->output?></td>
-
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow">
 					<a href='#' onclick='del_itsnot(<?=$i ?>);return false;'>Eliminar</a>
@@ -133,7 +129,7 @@ function del_itsnot(id){
 		<?php echo $container_br ?>
 		<?php echo $form_end; ?>
 		</td>
-		
+
 	</tr>
 </table>
 <?php endif; ?>

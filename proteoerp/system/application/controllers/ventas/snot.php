@@ -46,10 +46,13 @@ class Snot extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar NOTAS DE DESPACHO")
+			array('id'=>'fedita',  'title'=>'Agregar/Editar NOTAS DE DESPACHO'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -68,7 +71,7 @@ class Snot extends Controller {
 		$param['encabeza']     = $this->titp;
 		$param['tamano']       = $this->datasis->getintramenu( substr($this->url,0,-1) );
 		$this->load->view('jqgrid/crud2',$param);
-		
+
 	}
 
 	//***************************
@@ -99,6 +102,48 @@ class Snot extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		};';
 
+		$bodyscript .= '
+		function snotshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function snotdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function() {
@@ -117,34 +162,76 @@ class Snot extends Controller {
 		$("#fedita").dialog({
 			autoOpen: false, height: 500, width: 700, modal: true,
 			buttons: {
-			"Guardar": function() {
-				var bValid = true;
-				var murl = $("#df1").attr("action");
-				allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						if ( r.length == 0 ) {
-							apprise("Registro Guardado");
-							$( "#fedita" ).dialog( "close" );
-							grid.trigger("reloadGrid");
-							'.$this->datasis->jwinopen(site_url('formatos/ver/SNOT').'/\'+res.id+\'/id\'').';
-							return true;
-						} else { 
-							$("#fedita").html(r);
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/SNOT').'/\'+res.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
 						}
-					}
-			})},
-			"Cancelar": function() { $( this ).dialog( "close" ); }
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
 			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
 		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
 		$bodyscript .= '});'."\n";
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -153,12 +240,12 @@ class Snot extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -195,7 +282,7 @@ class Snot extends Controller {
 
 
 		$grid->addField('cod_cli');
-		$grid->label('Cod_cli');
+		$grid->label('Cliente');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -203,19 +290,6 @@ class Snot extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
-		));
-
-
-		$grid->addField('fechafa');
-		$grid->label('Fechafa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
 		));
 
 
@@ -230,6 +304,17 @@ class Snot extends Controller {
 			'editoptions'   => '{ size:40, maxlength: 40 }',
 		));
 
+		$grid->addField('fechafa');
+		$grid->label('Fecha.Fac');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
 
 		$grid->addField('precio');
 		$grid->label('Precio');
@@ -311,7 +396,7 @@ class Snot extends Controller {
 
 
 		$grid->addField('transac');
-		$grid->label('Transac');
+		$grid->label('Transaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -323,7 +408,7 @@ class Snot extends Controller {
 
 
 		$grid->addField('observa1');
-		$grid->label('Observa1');
+		$grid->label('Observaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -335,7 +420,7 @@ class Snot extends Controller {
 
 
 		$grid->addField('observa2');
-		$grid->label('Observa2');
+		$grid->label('Observaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -383,17 +468,6 @@ class Snot extends Controller {
 		));
 
 
-		$grid->addField('id');
-		$grid->label('Id');
-		$grid->params(array(
-			'align'         => "'center'",
-			'frozen'        => 'true',
-			'width'         => 40,
-			'editable'      => 'false',
-			'search'        => 'false'
-		));
-
-
 		$grid->addField('tipo');
 		$grid->label('Tipo');
 		$grid->params(array(
@@ -403,6 +477,17 @@ class Snot extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:1, maxlength: 1 }',
+		));
+
+
+		$grid->addField('id');
+		$grid->label('ID');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
 		));
 
 
@@ -422,15 +507,6 @@ class Snot extends Controller {
 			}'
 		);
 
-/*
-					$.ajax({
-						url: "'.base_url().$this->url.'tabla/"+id,
-						success: function(msg){
-							$("#ladicional").html(msg);
-						}
-					});
-*/
-
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
@@ -444,7 +520,7 @@ class Snot extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: snotadd,\n\t\teditfunc: snotedit");
+		$grid->setBarOptions('addfunc: snotadd, editfunc: snotedit, delfunc: snotdel, viewfunc: snotshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -462,8 +538,7 @@ class Snot extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -477,13 +552,12 @@ class Snot extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = '??????';
 		$check  = 0;
 /*
 		unset($data['oper']);
@@ -545,7 +619,7 @@ class Snot extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -557,7 +631,7 @@ class Snot extends Controller {
 
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -569,7 +643,7 @@ class Snot extends Controller {
 
 
 		$grid->addField('descrip');
-		$grid->label('Descrip');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -581,7 +655,7 @@ class Snot extends Controller {
 
 
 		$grid->addField('cant');
-		$grid->label('Cant');
+		$grid->label('Cant.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -706,8 +780,7 @@ class Snot extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdatait( $id = 0 )
-	{
+	function getdatait( $id = 0 ){
 		if ($id === 0 ){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM snot");
 		}
@@ -724,78 +797,12 @@ class Snot extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setDatait()
-	{
+	function setDatait(){
 	}
-
-
-/*
-class snot extends Controller {
-
-	function snot(){
-		parent::Controller();
-		$this->load->library('rapyd');
-		$this->back_dataedit='ventas/snot/filteredgrid';
-	}
-
-	function index() {
-		if ( !$this->datasis->iscampo('snot','id') ) {
-			$this->db->simple_query('ALTER TABLE snot DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE snot ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE snot ADD UNIQUE INDEX numero (numero)');
-		}
-		$this->snotextjs();
-
-	}
-
-	function filteredgrid(){
-		$this->rapyd->load('datafilter','datagrid');
-		$this->rapyd->uri->keep_persistence();
-
-		$filter = new DataFilter('Filtro de Notas de entrega','snot');
-		
-		$filter->fecha = new dateonlyField('Fecha', 'fecha');
-		$filter->fecha->size=15;
-		$filter->fecha->maxlength=15;
-		$filter->fecha->rule='trim';
-
-		$filter->numero = new inputField('N&uacute;mero', 'numero');
-		$filter->numero->size=15;
-
-		$filter->factura = new inputField('Factura', 'factura');
-		$filter->factura->size=15;
-
-		$filter->buttons('reset','search');
-		$filter->build();
-
-		$uri = anchor('ventas/snot/dataedit/show/<#numero#>','<#numero#>');
-
-		$grid = new DataGrid('Lista de Notas de Entrega');
-		$grid->use_function('dbdate_to_human');
-		$grid->order_by('numero','desc');
-		$grid->per_page = 10;
-
-		$grid->column_orderby('N&uacute;mero', $uri,'numero');
-		$grid->column_orderby('Fecha','<dbdate_to_human><#fecha#></dbdate_to_human>','fecha');
-		$grid->column_orderby('Factura','factura','factura');
-		$grid->column_orderby('Fecha F.','<dbdate_to_human><#fechafa#></dbdate_to_human>','fechafa');
-		$grid->column_orderby('Nombre', 'nombre','nombre');
-
-		//$grid->add('ventas/ssnot/dataedit/create');
-		$grid->build();
-
-		$data['content'] = $grid->output;
-		$data['filtro']  = $filter->output;
-		$data['title']   = heading('Notas de Entrega');
-		$data['head']    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
-	}
-*/
-
 
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
-		
+
 		$modbusSinv=array(
 			'tabla'   =>'sinv',
 			'columnas'=>array(
@@ -840,20 +847,29 @@ class snot extends Controller {
 		$do->rel_pointer('itsnot','sinv','itsnot.codigo=sinv.codigo','sinv.descrip AS sinvdescrip','sinv.ultimo AS sinvultimo');
 
 		$edit = new DataDetails('Nota de Entrega', $do);
-		$edit->back_url = $this->back_dataedit;
+		$edit->on_save_redirect=false;
+		//$edit->back_url = $this->back_dataedit;
 		$edit->set_rel_title('itsnot','Producto <#o#>');
 
-		//$edit->script($script,'create');
-		//$edit->script($script,'modify');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$("#fechafa").datepicker({dateFormat:"dd/mm/yy"});
+		});		';
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
 
-		$edit->pre_process('insert' ,'_pre_insert');
-		$edit->pre_process('update' ,'_pre_update');
+		$edit->pre_process( 'insert','_pre_insert');
+		$edit->pre_process( 'delete','_pre_delete');
+		$edit->pre_process( 'update','_pre_update');
 		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->mode = 'autohide';
+		$edit->fecha->calendar=false;
 		$edit->fecha->size = 10;
 
 		$edit->numero = new inputField('N&uacute;mero', 'numero');
@@ -862,18 +878,19 @@ class snot extends Controller {
 		$edit->numero->maxlength=8;
 		$edit->numero->apply_rules=false; //necesario cuando el campo es clave y no se pide al usuario
 		$edit->numero->when=array('show','modify');
-		
+
 		$edit->fechafa = new DateonlyField('Fecha Factura', 'fechafa','d/m/Y');
 		$edit->fechafa->insertValue = date('Y-m-d');
 		$edit->fechafa->rule = 'required';
 		$edit->fechafa->mode = 'autohide';
+		$edit->fechafa->calendar=false;
 		$edit->fechafa->size = 10;
 
 		$edit->factura = new inputField('Factura', 'factura');
 		$edit->factura->size = 10;
 		$edit->factura->mode='autohide';
 		$edit->factura->maxlength=8;
-		
+
 		$edit->peso = new inputField('Peso', 'peso');
 		$edit->peso->css_class = 'inputnum';
 		$edit->peso->readonly  = true;
@@ -889,7 +906,7 @@ class snot extends Controller {
 		$edit->nombre->maxlength=40;
 		$edit->nombre->autocomplete=false;
 		$edit->nombre->rule= 'required';
-		
+
 		$edit->observa1 = new inputField('Observaciones', 'observ1');
 		$edit->observa1->size      = 40;
 		$edit->observa1->maxlength = 80;
@@ -920,7 +937,7 @@ class snot extends Controller {
 		$edit->cant->size     = 6;
 		$edit->cant->rule     = 'required|positive';
 		$edit->cant->autocomplete=false;
-		
+
 		$edit->saldo = new inputField('Saldo <#o#>', 'saldo_<#i#>');
 		$edit->saldo->db_name  = 'saldo';
 		$edit->saldo->css_class= 'inputnum';
@@ -929,7 +946,7 @@ class snot extends Controller {
 		$edit->saldo->size     = 6;
 		$edit->saldo->rule     = 'required|positive';
 		$edit->saldo->autocomplete=false;
-		
+
 		$edit->entrega = new inputField('Entrega <#o#>', 'entrega_<#i#>');
 		$edit->entrega->db_name  = 'entrega';
 		$edit->entrega->css_class= 'inputnum';
@@ -938,7 +955,7 @@ class snot extends Controller {
 		$edit->entrega->size     = 6;
 		$edit->entrega->rule     = 'required|positive';
 		$edit->entrega->autocomplete=false;
-		
+
 		$edit->itfactura = new inputField('Factura <#o#>', 'itfactura_<#i#>');
 		$edit->itfactura->size     = 12;
 		$edit->itfactura->db_name  = 'factura';
@@ -948,31 +965,52 @@ class snot extends Controller {
 		//**************************
 		//fin de campos para detalle
 		//**************************
+
+		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
 		//$edit->buttons('save', 'undo', 'delete', 'back','add_rel');
 		$edit->buttons('add_rel');
 		$edit->build();
 
-		$conten['form']  =&  $edit;
-		$data['content'] = $this->load->view('view_snot', $conten,false);
-		//$data['title']   = heading('Notas De Entrega');
-		//$data['head']    = script('jquery.js').script('jquery-ui.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.meiomask.js').style('vino/jquery-ui.css').$this->rapyd->get_head().phpscript('nformat.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js').phpscript('nformat.js');
-		//$this->load->view('view_ventanas', $data);
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form']  =&  $edit;
+			$data['content'] = $this->load->view('view_snot', $conten,false);
+		}
+
 	}
 
 	function _pre_insert($do){
-		return false;
+		$do->error_message_ar['pre_ins']='';
+		return true;
 	}
 
 	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do){
+		$do->error_message_ar['pre_del']='';
 		return false;
 	}
 
 	function _post_insert($do){
-		//trafrac ittrafrac
 		$codigo=$do->get('numero');
 		logusu('snot',"Nota Entrega $codigo CREADO");
+	}
+
+	function _post_update($do){
+		$codigo=$do->get('numero');
+		logusu('snot',"Nota Entrega $codigo MODIFICADO");
 	}
 
 	function _post_delete($do){
@@ -987,7 +1025,7 @@ class snot extends Controller {
 		$filters = isset($_REQUEST['filter']) ? $_REQUEST['filter']  : null;
 
 		$where = $this->datasis->extjsfiltro($filters,'snot');
-	
+
 		$this->db->_protect_identifiers=false;
 		$this->db->select('*');
 		$this->db->from('snot');
@@ -1023,7 +1061,7 @@ class snot extends Controller {
 			$salida = "<br><table width='100%' border=1>";
 			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento en Cuentas X Cobrar</td></tr>";
 			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-			
+
 			foreach ($query->result_array() as $row)
 			{
 				$salida .= "<tr>";
@@ -1070,7 +1108,7 @@ class snot extends Controller {
 
 		$mSQL = "SELECT * FROM itsnot a JOIN sinv b ON a.codigo=b.codigo WHERE a.numero='$numero' ORDER BY a.codigo";
 		$query = $this->db->query($mSQL);
-		$results =  0; 
+		$results =  0;
 		$arr = array();
 		foreach ($query->result_array() as $row)
 		{
@@ -1088,260 +1126,4 @@ class snot extends Controller {
 		$id = $this->datasis->dameval("SELECT b.id FROM snot a JOIN scli b ON a.cod_cli=b.cliente WHERE numero='$numero'");
 		redirect('ventas/scli/dataedit/show/'.$id);
 	}
-
-	function snotextjs() {
-		$encabeza='NOTAS DE DESPACHO';
-
-		$modulo = 'snot';
-		$urlajax = 'ventas/snot/';
-		
-		$listados= $this->datasis->listados($modulo);
-		$otros=$this->datasis->otros($modulo, $urlajax);
-
-
-		$columnas = "
-		{ header: 'Numero',     width: 60, sortable: true, dataIndex: 'numero',     field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'Fecha',      width: 70, sortable: true, dataIndex: 'fecha',      field: { type: 'date' }, filter: { type: 'date' }},
-		{ header: 'Cliente',    width: 60, sortable: true, dataIndex: 'cod_cli',    field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'Nombre',     width:200, sortable: true, dataIndex: 'nombre',     field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'Factura',    width: 60, sortable: true, dataIndex: 'factura',    field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'F.Factura',  width: 70, sortable: true, dataIndex: 'fechafa',    field: { type: 'date' }, filter: { type: 'date' }},
-		{ header: 'peso',       width: 60, sortable: true, dataIndex: 'peso',       field: { type: 'numberfield'}, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')},
-		{ header: 'observa1',   width: 60, sortable: true, dataIndex: 'observa1',   field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'observa2',   width: 60, sortable: true, dataIndex: 'observa2',   field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'modificado', width: 60, sortable: true, dataIndex: 'modificado', field: { type: 'date' }, filter: { type: 'date' }},
-		{ header: 'Almacen',    width: 60, sortable: true, dataIndex: 'almaorg',    field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'almades',    width: 60, sortable: true, dataIndex: 'almades',    field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'id',         width: 60, sortable: true, dataIndex: 'id',         field: { type: 'numberfield'}, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')}";
-
-		$coldeta = "
-	var Deta1Col = [
-		{ header: 'Codigo',      width: 90, sortable: true, dataIndex: 'codigo' , field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'Descripcion', width:250, sortable: true, dataIndex: 'descrip' , field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'Cantidad',    width: 80, sortable: true, dataIndex: 'cant' , field: { type: 'numberfield'}, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')},
-		{ header: 'Saldo',       width: 80, sortable: true, dataIndex: 'saldo' , field: { type: 'numberfield'}, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')},
-		{ header: 'Entrega',     width: 80, sortable: true, dataIndex: 'entrega' , field: { type: 'numberfield'}, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')},
-		{ header: 'Factura',     width: 60, sortable: true, dataIndex: 'factura' , field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'id',          width: 60, sortable: true, dataIndex: 'id' , field: { type: 'numberfield'}, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('000')},
-		{ header: 'Modificado',  width: 60, sortable: true, dataIndex: 'modificado' , field: { type: 'date' }, filter: { type: 'date' }}
-		]";
-
-
-		$variables='';
-		
-		$valida="		{ type: 'length', field: 'numero',  min:  1 }";
-		
-
-		$funciones = "
-function renderScli(value, p, record) {
-	var mreto='';
-	if ( record.data.cod_cli == '' ){
-		mreto = '{0}';
-	} else {
-		mreto = '<a href=\'javascript:void(0);\' onclick=\"window.open(\''+urlAjax+'sclibu/{1}\', \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx='+mxs+',screeny='+mys+'\');\" heigth=\"600\">{0}</a>';
-	}
-	return Ext.String.format(mreto,	value, record.data.numero );
-}
-
-
-function renderSinv(value, p, record) {
-	var mreto='';
-	mreto = '<a href=\'javascript:void(0);\' onclick=\"window.open(\''+urlApp+'inventario/sinv/dataedit/show/{1}\', \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx='+mxs+',screeny='+mys+'\');\" heigth=\"600\">{0}</a>';
-	return Ext.String.format(mreto,	value, record.data.codid );
-}
-
-	";
-
-		$campos = $this->datasis->extjscampos($modulo);
-
-		$stores = "
-	Ext.define('It".$modulo."', {
-		extend: 'Ext.data.Model',
-		fields: [".$this->datasis->extjscampos("it".$modulo)."],
-		proxy: {
-			type: 'ajax',
-			noCache: false,
-			api: {
-				read   : urlAjax + 'gridit".$modulo."',
-				method: 'POST'
-			},
-			reader: {
-				type: 'json',
-				root: 'data',
-				successProperty: 'success',
-				messageProperty: 'message',
-				totalProperty: 'results'
-			}
-		}
-	});
-
-	//////////////////////////////////////////////////////////
-	// create the Data Store
-	var storeIt".$modulo." = Ext.create('Ext.data.Store', {
-		model: 'It".$modulo."',
-		autoLoad: false,
-		autoSync: true,
-		method: 'POST'
-	});
-	
-	//////////////////////////////////////////////////////////
-	//
-	var gridDeta1 = Ext.create('Ext.grid.Panel', {
-		width:   '100%',
-		height:  '100%',
-		store:   storeIt".$modulo.",
-		title:   'Detalle de la NE',
-		iconCls: 'icon-grid',
-		frame:   true,
-		features: [ { ftype: 'filters', encode: 'json', local: false } ],
-		columns: Deta1Col
-	});
-
-	var ".$modulo."TplMarkup = [
-		'<table width=\'100%\' bgcolor=\"#F3F781\">',
-		'<tr><td colspan=3 align=\'center\'><p style=\'font-size:14px;font-weight:bold\'>IMPRIMIR DESPACHO</p></td></tr><tr>',
-		'<td align=\'center\'><a href=\'javascript:void(0);\' onclick=\"window.open(\''+urlApp+'formatos/verhtml/PRESUP/{numero}\', \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx='+mxs+',screeny='+mys+'\');\" heigth=\"600\">".img(array('src' => 'images/html_icon.gif', 'alt' => 'Formato HTML', 'title' => 'Formato HTML','border'=>'0'))."</a></td>',
-		'<td align=\'center\'>{numero}</td>',
-		'<td align=\'center\'><a href=\'javascript:void(0);\' onclick=\"window.open(\''+urlApp+'formatos/ver/PRESUP/{numero}\',     \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx='+mxs+',screeny='+mys+'\');\" heigth=\"600\">".img(array('src' => 'images/pdf_logo.gif', 'alt' => 'Formato PDF',   'title' => 'Formato PDF', 'border'=>'0'))."</a></td></tr>',
-		'<tr><td colspan=3 align=\'center\' >--</td></tr>',		
-		'</table>','nanai'
-	];
-
-	// Al cambiar seleccion
-	gridMaest.getSelectionModel().on('selectionchange', function(sm, selectedRecord) {
-		if (selectedRecord.length) {
-			gridMaest.down('#delete').setDisabled(selectedRecord.length === 0);
-			gridMaest.down('#update').setDisabled(selectedRecord.length === 0);
-			numero = selectedRecord[0].data.numero;
-			gridDeta1.setTitle(selectedRecord[0].data.numero+' '+selectedRecord[0].data.nombre);
-			storeIt".$modulo.".load({ params: { numero: numero }});
-			var meco1 = Ext.getCmp('imprimir');
-			Ext.Ajax.request({
-				url: urlAjax +'tabla',
-				params: { numero: numero, id: selectedRecord[0].data.id },
-				success: function(response) {
-					var vaina = response.responseText;
-					".$modulo."TplMarkup.pop();
-					".$modulo."TplMarkup.push(vaina);
-					var ".$modulo."Tpl = Ext.create('Ext.Template', ".$modulo."TplMarkup );
-					meco1.setTitle('Imprimir Compra');
-					".$modulo."Tpl.overwrite(meco1.body, selectedRecord[0].data );
-				}
-			});
-		}
-	});
-";
-
-		$acordioni = "{
-					layout: 'fit',
-					items:[
-						{
-							name: 'imprimir',
-							id: 'imprimir',
-							border:false,
-							html: 'Para imprimir seleccione una Compra '
-						}
-					]
-				},
-";
-
-
-		$dockedItems = "{
-			xtype: 'toolbar',
-			items: [
-				{
-					iconCls: 'icon-add',
-					text: 'Agregar',
-					scope: this,
-					handler: function(){
-						window.open(urlAjax+'dataedit/create', '_blank', 'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx='+mxs+',screeny='+mys);
-					}
-				},
-				{
-					iconCls: 'icon-update',
-					text: 'Modificar',
-					disabled: true,
-					itemId: 'update',
-					scope: this,
-					handler: function(selModel, selections){
-						var selection = gridMaest.getView().getSelectionModel().getSelection()[0];
-						gridMaest.down('#delete').setDisabled(selections.length === 0);
-						window.open(urlAjax+'dataedit/modify/'+selection.data.id, '_blank', 'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx='+mxs+',screeny='+mys);
-					}
-				},{
-					iconCls: 'icon-delete',
-					text: 'Eliminar',
-					disabled: true,
-					itemId: 'delete',
-					scope: this,
-					handler: function() {
-						var selection = gridMaest.getView().getSelectionModel().getSelection()[0];
-						Ext.MessageBox.show({
-							title: 'Confirme', 
-							msg: 'Seguro que quiere eliminar la compra Nro. '+selection.data.numero, 
-							buttons: Ext.MessageBox.YESNO, 
-							fn: function(btn){ 
-								if (btn == 'yes') { 
-									if (selection) {
-										//storeMaest.remove(selection);
-									}
-									storeMaest.load();
-								} 
-							}, 
-							icon: Ext.MessageBox.QUESTION 
-						});  
-					}
-				}
-			]
-		}		
-		";
-
-		$grid2 = ",{
-				itemId: 'viewport-center-detail',
-				activeTab: 0,
-				region: 'south',
-				height: '40%',
-				split: true,
-				margins: '0 0 0 0',
-				preventHeader: true,
-				items: gridDeta1
-			}";
-
-
-		$titulow = 'Compras';
-		
-		$filtros = "";
-		$features = "
-		features: [ { ftype: 'filters', encode: 'json', local: false } ],
-		plugins: [Ext.create('Ext.grid.plugin.CellEditing', { clicksToEdit: 2 })],
-";
-
-		$final = "storeIt".$modulo.".load();";
-
-		$data['listados']    = $listados;
-		$data['otros']       = $otros;
-		$data['encabeza']    = $encabeza;
-		$data['urlajax']     = $urlajax;
-		$data['variables']   = $variables;
-		$data['funciones']   = $funciones;
-		$data['valida']      = $valida;
-		$data['stores']      = $stores;
-		$data['columnas']    = $columnas;
-		$data['campos']      = $campos;
-		$data['titulow']     = $titulow;
-		$data['dockedItems'] = $dockedItems;
-		$data['features']    = $features;
-		$data['filtros']     = $filtros;
-		$data['grid2']       = $grid2;
-		$data['coldeta']     = $coldeta;
-		$data['acordioni']   = $acordioni;
-		$data['final']       = $final;
-		
-		$data['title']  = heading('Notas de Despacho');
-		$this->load->view('extjs/extjsvenmd',$data);
-		
-	}
-
-
-
 }
