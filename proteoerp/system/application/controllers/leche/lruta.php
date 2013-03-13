@@ -312,7 +312,7 @@ class Lruta extends Controller {
 		$grid->addField('tipolec');
 		$grid->label('Tipo');
 		$grid->params(array(
-			'align'        = > 'center',
+			'align'         => 'center',
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 60,
