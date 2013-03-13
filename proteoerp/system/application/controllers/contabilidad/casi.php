@@ -1850,14 +1850,29 @@ jQuery("#boton4").click( function(){
 			$maxlen='8';
 		}
 
+
+
+		// Si manda el valor en el uri
+		if ( $this->uri->total_segments() == 6 ) {
+			$tt = $this->uri->segment($this->uri->total_segments());
+			if ( $this->uri->segment(5) == 'procesar' ) {
+				$_POST['valor'] = $tt;
+			}
+		} else 
+			$tt = 'procesar';
+
 		$this->rapyd->load('datagrid','dataform');
 
 		$filter = new dataForm('contabilidad/casi/localizador/'.$tipo.'/procesar');
+
 		$filter->valor = new inputField($tit, 'valor');
 		$filter->valor->rule = 'required'.$rul;
 		$filter->valor->autocomplete=false;
 		$filter->valor->maxlength=$maxlen;
 		$filter->valor->size=10;
+		if ( $tt <> 'procesar') {
+			$filter->valor->insertValue = $tt;
+		}
 
 		$action = "javascript:window.location='".site_url('contabilidad/casi/auditoria')."'";
 		$filter->button('btn_regresa', 'Regresar', $action, 'BL');
@@ -1865,10 +1880,21 @@ jQuery("#boton4").click( function(){
 		$filter->build_form();
 
 		$sal='';
-		if ($filter->on_success() && $filter->is_valid()){
+		$verdad = ($filter->on_success() && $filter->is_valid());
+			
+		if ( $tt <> 'procesar') {
+			$verdad = true; 
+		}
+			
+		if ( $verdad ) {
 			$this->load->library('table');
 			$this->table->set_heading('Tabla', 'Campo', 'Coincidencias');
-			$valor=$this->db->escape(str_pad($filter->valor->newValue,8,'0', STR_PAD_LEFT));
+			$valor = str_pad($filter->valor->newValue,8,'0', STR_PAD_LEFT);
+
+			if ( $valor == '00000000' )
+				$valor = $tt;
+
+			$valor = $this->db->escape($valor);
 
 			$tables = $this->db->list_tables();
 			foreach ($tables as $table){
@@ -1899,11 +1925,14 @@ jQuery("#boton4").click( function(){
 				}
 			}
 		}
+
 		$data['content'] = $filter->output.$sal;
 		$data['title']   = heading('Localizador de Transacciones');
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
+
+
 
 	function chvalidt($transac){
 		if (preg_match("/^[0-9]{1,8}$/i",$transac)) return true;

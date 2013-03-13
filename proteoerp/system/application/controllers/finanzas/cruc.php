@@ -61,10 +61,21 @@ class Cruc extends Controller {
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
+
+		$funciones = '
+		function ltransac(el, val, opts){
+			var meco=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return meco;
+		};
+		';
+
+
+
 		$param['WestPanel']    = $WestPanel;
 		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
+		$param['funciones']   = $funciones;
 		$param['listados']     = $this->datasis->listados('CRUC', 'JQ');
 		$param['otros']        = $this->datasis->otros('CRUC', 'JQ');
 		$param['centerpanel']  = $centerpanel;
@@ -108,6 +119,17 @@ class Cruc extends Controller {
 			}
 		};';
 */
+
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};
+		';
+
 		$bodyscript .= '
 		function crucshow(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -348,7 +370,7 @@ class Cruc extends Controller {
 
 
 		$grid->addField('proveed');
-		$grid->label('Proveedor');
+		$grid->label('Envia');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -387,7 +409,7 @@ class Cruc extends Controller {
 
 
 		$grid->addField('cliente');
-		$grid->label('Cliente');
+		$grid->label('Recibe');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -473,6 +495,7 @@ class Cruc extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
+			'formatter'     => 'ltransac'
 		));
 
 
@@ -1740,7 +1763,10 @@ class Cruc extends Controller {
 				if ( $tipoit == 'ADE'){
 					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
 					         AND numero='".substr($onumero,2,8)."' 
-					         AND fecha=".$fechait." AND cod_cli='".$proveed."' ";
+					         AND cod_cli='".$proveed."' ";
+
+//					         AND fecha=".$fechait." 
+
 					$this->db->query($mSQL);
 				}
 			}

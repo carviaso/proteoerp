@@ -952,28 +952,21 @@ class Pers extends Controller {
 		} elseif($oper == 'edit') {
 			$nuevo  = $data[$mcodp];
 			$anterior = $this->datasis->dameval("SELECT $mcodp FROM pers WHERE id=$id");
-			//if ( $nuevo <> $anterior ){
-			//	//si no son iguales borra el que existe y cambia
-			//	$this->db->query("DELETE FROM pers WHERE $mcodp=?", array($mcodp));
-			//	$this->db->query("UPDATE pers SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-			//	$this->db->where("id", $id);
-			//	$this->db->update("pers", $data);
-			//	logusu('PERS',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-			//	echo "Grupo Cambiado/Fusionado en clientes";
-			//} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('pers', $data);
-				logusu('PERS',"Personal  ".$nuevo." MODIFICADO");
-				echo "$nuevo Modificado";
-			//}
+			unset($data[$mcodp]);
+			$this->db->where("id", $id);
+			$this->db->update('pers', $data);
+			logusu('PERS',"Personal  ".$nuevo." MODIFICADO");
+			echo "$nuevo Modificado";
+
 
 		} elseif($oper == 'del') {
-			$codigo = $this->datasis->dameval("SELECT $mcodp FROM pers WHERE id=$id");
+			$codigo = $this->datasis->dameval("SELECT codigo FROM pers WHERE id=$id");
 			$check  = $this->datasis->dameval("SELECT COUNT(*) FROM nomina WHERE codigo=".$this->db->escape($codigo));
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
+				$this->db->simple_query("DELETE FROM prenom WHERE codigo=".$this->db->escape($codigo));
+				$this->db->simple_query("DELETE FROM pretab WHERE codigo=".$this->db->escape($codigo));
 				$this->db->simple_query("DELETE FROM pers WHERE id=$id ");
 				logusu('PERS',"Registro $codigo ELIMINADO");
 				echo "Registro Eliminado";
