@@ -13,6 +13,10 @@ class Lruta extends Controller {
 	}
 
 	function index(){
+		if ( !$this->datasis->iscampo('lruta','tipolec') ) {
+			$this->db->simple_query('ALTER TABLE lruta ADD COLUMN tipolec CHAR(1) COMMENT "Tipo de Leche Fria o Caliente" ');
+		};
+
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		$this->datasis->creaintramenu( $data = array('modulo'=>'221','titulo'=>'Rutas de Acopio','mensaje'=>'Rutas de Acopio','panel'=>'LECHE','ejecutar'=>'leche/lruta','target'=>'popu','visible'=>'S','pertenece'=>'2','ancho'=>900,'alto'=>600));
 		redirect($this->url.'jqdatag');
@@ -305,6 +309,18 @@ class Lruta extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		$grid->addField('tipolec');
+		$grid->label('Tipo');
+		$grid->params(array(
+			'align'        = > 'center',
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 60,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
+		));
+
 
 		$grid->addField('id');
 		$grid->label('Id');
@@ -524,6 +540,13 @@ class Lruta extends Controller {
 		$edit->tarsob->css_class='inputnum';
 		$edit->tarsob->size =7;
 		$edit->tarsob->maxlength =10;
+
+		$edit->tipolec = new  dropdownField ('Tipo', 'tipolec');
+		$edit->tipolec->option('C' ,'Caliente');
+		$edit->tipolec->option('F' ,'Fria');
+		$edit->tipolec->rule = 'required';
+		$edit->tipolec->style= 'width:100px;';
+
 
 
 		$edit->build();

@@ -1471,7 +1471,7 @@ class Cruc extends Controller {
 		$edit->itonumero->maxlength = 10;
 		$edit->itonumero->rel_id='itcruc';
 
-		$edit->itofecha = new dateField('Fecha','itofecha_<#i#>');
+		$edit->itofecha = new inputField('Fecha','itofecha_<#i#>');
 		//$edit->itofecha->rule     = 'chfecha';
 		$edit->itofecha->db_name  = 'ofecha';
 		$edit->itofecha->type     = 'inputhidden';
@@ -1614,6 +1614,7 @@ class Cruc extends Controller {
 
 			$mNUMERO = $this->datasis->fprox_numero("num_nc");
 
+			$data = array();
 			$data["cod_prv"]  = $proveed;
 			$data["nombre"]   = $do->get('nombre');
 			$data["tipo_doc"] = "NC";
@@ -1646,8 +1647,9 @@ class Cruc extends Controller {
 				if ( $tipoit == 'ADE'){
 					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
 					         AND numero='".substr($onumero,2,8)."' 
-					         AND fecha=".$fechait." AND cod_prv='".$proveed."' ";
+					         AND cod_prv='".$proveed."' ";
 					$this->db->query($mSQL);
+//					         AND fecha=".$fechait." 
 				}
 			}
 
@@ -1685,8 +1687,9 @@ class Cruc extends Controller {
 				if ( $tipoit == 'APA'){
 					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
 					         AND numero='".substr($onumero,2,8)."' 
-					         AND fecha=".$fechait." AND cod_prv='".$cliente."' ";
+					         AND cod_prv='".$cliente."' ";
 					$this->db->query($mSQL);
+//					         AND fecha=".$fechait." 
 				}
 			}
 
@@ -1723,8 +1726,9 @@ class Cruc extends Controller {
 				if ( $tipoit == 'ADE'){
 					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
 					         AND numero='".substr($onumero,2,8)."' 
-					         AND fecha=".$fechait." AND cod_cli='".$proveed."' ";
+					         AND cod_cli='".$proveed."' ";
 					$this->db->query($mSQL);
+//					         AND fecha=".$fechait." 
 				}
 			}
 
@@ -1829,12 +1833,15 @@ class Cruc extends Controller {
 				if ( $tipoit == 'ADE'){
 					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
 					         AND numero='".substr($onumero,2,8)."' 
-					         AND fecha=".$fechait." AND cod_prv='".$proveed."' ";
+					         AND cod_prv='".$proveed."' ";
 					$this->db->query($mSQL);
+//					         AND fecha=".$fechait." 
 				}
 			}
+
    
 			$mNUMERO = $this->datasis->fprox_numero("num_nd");
+			$data = array();
 			$data["cod_prv"]  = $cliente;
 			$data["nombre"]   = $do->get('nomcli');
 			$data["tipo_doc"] = "ND";

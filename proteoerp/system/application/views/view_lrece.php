@@ -56,6 +56,7 @@ function del_itlrece(id){
 		add_itlrece();
 	}
 }
+
 </script>
 <?php } ?>
 <table width='100%' style='font-size:11pt;background:#F2E69D;'>

@@ -146,7 +146,7 @@ class Lrece extends Controller {
 			$.post("'.site_url($this->url.'apertura/create').'",
 			function(data){
 				$("#fedita").html(data);
-				$("#fedita").dialog({height: 350, width: 550, title: "Agregar Recepcion de Leche"});
+				$("#fedita").dialog({height: 400, width: 500, title: "Agregar Recepcion de Leche"});
 				$("#fedita").dialog( "open" );
 			});
 		};';
@@ -384,6 +384,31 @@ class Lrece extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
+		$grid->addField('fechal');
+		$grid->label('Llegada');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha Llegada" }'
+		));
+
+		$grid->addField('fechar');
+		$grid->label('Recoleccion');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha de Recoleccion" }'
+		));
+
+
 		$grid->addField('ruta');
 		$grid->label('Ruta');
 		$grid->params(array(
@@ -394,7 +419,6 @@ class Lrece extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:4, maxlength: 4 }',
 		));
-
 
 		$grid->addField('flete');
 		$grid->label('Flete');
@@ -407,8 +431,6 @@ class Lrece extends Controller {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-
-
 		$grid->addField('nombre');
 		$grid->label('Nombre del Chofer');
 		$grid->params(array(
@@ -419,7 +441,6 @@ class Lrece extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:45, maxlength: 45 }',
 		));
-
 
 		$grid->addField('lista');
 		$grid->label('Lista');
@@ -435,7 +456,6 @@ class Lrece extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('lleno');
 		$grid->label('Peso Lleno');
 		$grid->params(array(
@@ -450,7 +470,6 @@ class Lrece extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('vacio');
 		$grid->label('Peso Vacio');
 		$grid->params(array(
@@ -464,7 +483,6 @@ class Lrece extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
-
 
 		$grid->addField('neto');
 		$grid->label('P.Neto');
@@ -1231,6 +1249,18 @@ class Lrece extends Controller {
 		$edit->proveed->type      = 'inputhidden';
 		$edit->proveed->maxlength = 45;
 		$edit->proveed->in        = 'flete';
+
+		$edit->fechal = new DateonlyField("Fecha llegada", "fechal","d/m/Y");
+		$edit->fechal->size = 10;
+		$edit->fechal->rule="trim|chfecha";
+		$edit->fechal->insertValue = date('Y-m-d');
+		$edit->fechal->calendar = false;
+
+		$edit->fechar = new DateonlyField("Fecha Recoleccion", "fechar","d/m/Y");
+		$edit->fechar->size = 10;
+		$edit->fechar->rule="trim|chfecha";
+		$edit->fechar->insertValue = date('Y-m-d');
+		$edit->fechar->calendar = false;
 
 		$edit->vacio = new inputField('Peso vac&iacute;o','vacio');
 		$edit->vacio->rule       = 'numeric|required';
@@ -2304,6 +2334,16 @@ class Lrece extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
+		if(!$this->db->field_exists('fechal', 'lrece')){
+			$mSQL="ALTER TABLE `lrece` ADD COLUMN `fechal` DATE NULL DEFAULT NULL COMMENT 'Fecha de Llegada' AFTER `transporte`";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!$this->db->field_exists('fechar', 'lrece')){
+			$mSQL="ALTER TABLE `lrece` ADD COLUMN `fechar` DATE NULL DEFAULT NULL COMMENT 'Fecha de Recoleccion' AFTER `fechal`";
+			$this->db->simple_query($mSQL);
+		}
+
 		if(!$this->db->field_exists('alcohol', 'itlrece')){
 			$mSQL = "ALTER TABLE itlrece ADD COLUMN `alcohol` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'alcohol' AFTER `dtoagua`";
 			$this->db->simple_query($mSQL);
@@ -2318,7 +2358,6 @@ class Lrece extends Controller {
 			$mSQL = "ALTER TABLE lanal ADD COLUMN `alcohol` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'alcohol' AFTER `dtoagua`";
 			$this->db->simple_query($mSQL);
 		}
-
 
 		if(!$this->db->table_exists('itlrece')){
 			$mSQL="CREATE TABLE `itlrece` (

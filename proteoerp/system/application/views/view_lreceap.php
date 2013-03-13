@@ -59,22 +59,31 @@ function calconeto(){
 	}
 }
 
+$(function() {
+	$("#fechal").datepicker({dateFormat:"dd/mm/yy"});
+	$("#fechar").datepicker({dateFormat:"dd/mm/yy"});
+});
 
 </script>
 <table width='100%' style='font-size:11pt;background:#BEFCB5;'>
 	<tr>
 		<td class="littletableheaderc"><?php echo $form->ruta->label;    ?></td>
-		<td class="littletablerow"    ><?php echo $form->ruta->output;   ?></td>
+		<td colspan='3' class="littletablerow"    ><?php echo $form->ruta->output;   ?></td>
 	</tr>
 	<tr>
 		<td class="littletableheaderc"><?php echo $form->nombre->label;    ?></td>
-		<td class="littletablerow"    ><?php echo $form->nombre->output;   ?></td>
+		<td colspan='3' class="littletablerow"    ><?php echo $form->nombre->output;   ?></td>
 	</tr>
 	<tr>
 		<td class="littletableheaderc"><?php echo $form->flete->label;    ?></td>
-		<td class="littletablerow"    ><?php echo $form->flete->output;   ?></td>
+		<td colspan='3' class="littletablerow"    ><?php echo $form->flete->output;   ?></td>
 	</tr>
-
+	<tr>
+		<td class="littletableheaderc"><?php echo $form->fechal->label;    ?></td>
+		<td class="littletablerow"    ><?php echo $form->fechal->output;   ?></td>
+		<td class="littletableheaderc"><?php echo $form->fechar->label;    ?></td>
+		<td class="littletablerow"    ><?php echo $form->fechar->output;   ?></td>
+	</tr>
 </table>
 <br />
 <fieldset style='border: 1px outset #407E13;background: #FAFAFA;'>
