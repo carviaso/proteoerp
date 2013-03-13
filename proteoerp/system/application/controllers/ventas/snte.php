@@ -1040,6 +1040,7 @@ class Snte extends Controller {
 		$edit->peso = new inputField('Peso', 'peso');
 		$edit->peso->css_class = 'inputnum';
 		$edit->peso->readonly  = true;
+		$edit->peso->type      = 'inputhidden' ;
 		$edit->peso->size      = 10;
 
 		$edit->cliente = new inputField('Cliente','cod_cli');
@@ -1221,7 +1222,7 @@ class Snte extends Controller {
 		//revisa si elimina el nro
 		if ($factura == 0) {
 			$this->db->simple_query("UPDATE snte SET factura='', fechafac=0 WHERE numero='$numero'");
-			logusu('SNTE',"Quita Nro. Factura $numero  ");
+			logusu('SNTE',"Quita Nro. Factura $numero");
 			echo "Nro de Factura eliminado";
 		} else {
 			if ($this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE tipo_doc='F' AND numero='$factura' AND cod_cli='$cod_cli'")==1)
@@ -1273,19 +1274,27 @@ class Snte extends Controller {
 	}
 
 	function _post_insert($do){
-		$codigo = $do->get('numero');
-		$almacen= $do->get('almacen');
+		$numero   = $do->get('numero');
+		$almacen  = $do->get('almacen');
+		$dbnumero = $this->db->escape($numero);
+		$dbalmacen= $this->db->escape($almacen);
 
-		$mSQL='UPDATE sinv JOIN itsnte ON sinv.codigo=itsnte.codigo SET sinv.existen=sinv.existen-itsnte.cana WHERE itsnte.numero='.$this->db->escape($codigo);
+		$mSQL='UPDATE sinv
+		JOIN itsnte ON sinv.codigo=itsnte.codigo
+		SET sinv.existen=sinv.existen-itsnte.cana
+		WHERE itsnte.numero='.$dbnumero;
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'snte'); }
 
-		$mSQL='UPDATE itsinv JOIN itsnte ON itsinv.codigo=itsnte.codigo SET itsinv.existen=itsinv.existen-itsnte.cana WHERE itsnte.numero='.$this->db->escape($codigo).' AND itsinv.alma='.$this->db->escape($almacen);
+		$mSQL='UPDATE itsinv
+		JOIN itsnte ON itsinv.codigo=itsnte.codigo
+		SET itsinv.existen=itsinv.existen-itsnte.cana
+		WHERE itsnte.numero='.$dbnumero.' AND itsinv.alma='.$dbalmacen;
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'snte'); }
 
 		$codigo=$do->get('numero');
-		logusu('snte',"Nota entrega $codigo CREADO");
+		logusu('snte',"Nota entrega $numero CREADO");
 	}
 
 	function chpreca($preca,$ind){
@@ -1302,10 +1311,40 @@ class Snte extends Controller {
 	}
 
 	function _pre_delete($do){
-		return false;
+		$tipo = $do->get('tipo');
+
+		if($tipo=='C'){
+			$do->error_message_ar['pre_del']='La nota de entrega esta cerrada, no se puede anular';
+			return false;
+		}
+
+		if($tipo=='A'){
+			$do->error_message_ar['pre_del']='La nota de entrega ya fue anulada en otro momento';
+			return false;
+		}
+
+		if($tipo=='E'){
+			$mSQL='UPDATE sinv
+			JOIN itsnte ON sinv.codigo=itsnte.codigo
+			SET sinv.existen=sinv.existen+itsnte.cana
+			WHERE itsnte.numero='.$dbnumero;
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'snte'); }
+
+			$mSQL='UPDATE itsinv
+			JOIN itsnte ON itsinv.codigo=itsnte.codigo
+			SET itsinv.existen=itsinv.existen+itsnte.cana
+			WHERE itsnte.numero='.$dbnumero.' AND itsinv.alma='.$dbalmacen;
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'snte'); }
+
+			$do->error_message_ar['pre_del']='La nota de entrega esta cerrada, no se puede eliminar';
+			return false;
+		}
 	}
 
 	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='No se puede cambiar una nota de entrega';
 		return false;
 	}
 
@@ -1313,7 +1352,6 @@ class Snte extends Controller {
 		$codigo=$do->get('numero');
 		logusu('snte',"Nota Entrega $codigo ELIMINADO");
 	}
-
 
 	function sclibu(){
 		$numero = $this->uri->segment(4);

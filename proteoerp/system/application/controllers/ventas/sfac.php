@@ -2461,7 +2461,9 @@ class Sfac extends Controller {
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->mode = 'autohide';
 		//$edit->fecha->when = array('show');
-		$edit->fecha->insertValue=date('Y-m-d');
+		if($manual <> 'S'){
+			$edit->fecha->insertValue=date('Y-m-d');
+		}
 		$edit->fecha->rule = 'required|chfecha';
 		$edit->fecha->calendar = false;
 		$edit->fecha->size = 10;

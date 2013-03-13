@@ -10,7 +10,7 @@ else:
 
 $campos=$form->template_details('itsnte');
 $scampos  ='<tr id="tr_itsnte_<#i#>">';
-$scampos .='<td class="littletablerow" align="left" >'.$campos['codigo']['field'].'</td>';
+$scampos .='<td class="littletablerow" align="left" nowrap>'.$campos['codigo']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['desca']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['cana']['field'].  '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['precio']['field']. '</td>';
@@ -148,6 +148,7 @@ function totalizar(){
 	$("#stotal").val(roundNumber(totals,2));
 	$("#impuesto").val(roundNumber(iva,2));
 
+	$("#peso_val").text(nformat(peso,2));
 	$("#gtotal_val").text(nformat(totals+iva,2));
 	$("#stotal_val").text(nformat(totals,2));
 	$("#impuesto_val").text(nformat(iva,2));
