@@ -1238,13 +1238,13 @@ class Snte extends Controller {
 	}
 
 	function _pre_insert($do){
-		$numero = $this->datasis->fprox_numero('nsnte');
-		$transac= $this->datasis->fprox_numero('ntransa');
-		$fecha  = $do->get('fecha');
-		$vende  = $do->get('vende');
-		$usuario= $do->get('usuario');
-		$estampa= date('Ymd');
-		$hora   = date("H:i:s");
+		$numero  = $this->datasis->fprox_numero('nsnte');
+		$transac = $this->datasis->fprox_numero('ntransa');
+		$fecha   = $do->get('fecha');
+		$vende   = $do->get('vende');
+		$usuario = $do->get('usuario');
+		$estampa = $do->get('estampa');
+		$hora    = $do->get('hora');
 
 		$iva=$stotal=0;
 		$cana=$do->count_rel('itsnte');
@@ -1262,8 +1262,6 @@ class Snte extends Controller {
 			$stotal +=$itimporte;
 		}
 		$gtotal=$stotal+$iva;
-		$do->set('estampa' ,$estampa);
-		$do->set('hora'    ,$hora);
 		$do->set('transac' ,$transac);
 		$do->set('stotal'  ,round($stotal,2));
 		$do->set('gtotal'  ,round($gtotal,2));
@@ -1276,6 +1274,15 @@ class Snte extends Controller {
 	function _post_insert($do){
 		$numero   = $do->get('numero');
 		$almacen  = $do->get('almacen');
+		$fecha    = $do->get('fecha');
+		$cod_cli  = $do->get('cod_cli');
+		$nombre   = $do->get('nombre');
+		$monto    = $do->get('gtotal');
+		$estampa  = $do->get('estampa');
+		$hora     = $do->get('hora');
+		$transac  = $do->get('transac');
+		$usuario  = $do->get('usuario');
+
 		$dbnumero = $this->db->escape($numero);
 		$dbalmacen= $this->db->escape($almacen);
 
@@ -1294,6 +1301,37 @@ class Snte extends Controller {
 		if($ban==false){ memowrite($mSQL,'snte'); }
 
 		$codigo=$do->get('numero');
+
+		$sntend = $this->datasis->traevalor('SNTEND','Crea la cuenta por cobrar para las notas de entrega');
+		if($sntend=='S'){
+			$mnumnd = $this->datasis->fprox_numero('ndcli');
+			$data=array();
+			$data['cod_cli']    = $cod_cli;
+			$data['nombre']     = $nombre;
+			$data['tipo_doc']   = 'ND';
+			$data['numero']     = $mnumnd;
+			$data['fecha']      = $fecha;
+			$data['monto']      = $monto;
+			$data['impuesto']   = 0;
+			$data['abonos']     = 0;
+			$data['vence']      = $fecha;
+			$data['tipo_ref']   = 'NE';
+			$data['num_ref']    = $numero;
+			$data['observa1']   = 'NOTA DE ENTREGA POR COBRAR';
+			$data['estampa']    = $estampa;
+			$data['hora']       = $hora;
+			$data['transac']    = $transac;
+			$data['usuario']    = $usuario;
+			$data['codigo']     = 'NOCON';
+			$data['descrip']    = 'NOTA DE CONTABILIDAD';
+			$data['nroriva']    = '';
+			$data['emiriva']    = '';
+
+			$mSQL = $this->db->insert_string('smov', $data);
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'snte'); }
+		}
+
 		logusu('snte',"Nota entrega $numero CREADO");
 	}
 
@@ -1311,7 +1349,9 @@ class Snte extends Controller {
 	}
 
 	function _pre_delete($do){
-		$tipo = $do->get('tipo');
+		$tipo     = $do->get('tipo');
+		$transac  = $do->get('transac');
+		$dbtransac= $this->db->escape($transac);
 
 		if($tipo=='C'){
 			$do->error_message_ar['pre_del']='La nota de entrega esta cerrada, no se puede anular';
@@ -1324,6 +1364,13 @@ class Snte extends Controller {
 		}
 
 		if($tipo=='E'){
+
+			$abonos = $this->datasis->dameval('SELECT abonos FROM smov WHERE transac='.$dbtransac);
+			if($abonos > 0){
+				$do->error_message_ar['pre_del']='La nota de debito relacionada a esta nota esta abonada, debe primero reversar el pago.';
+				return false;
+			}
+
 			$mSQL='UPDATE sinv
 			JOIN itsnte ON sinv.codigo=itsnte.codigo
 			SET sinv.existen=sinv.existen+itsnte.cana
@@ -1338,9 +1385,15 @@ class Snte extends Controller {
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'snte'); }
 
-			$do->error_message_ar['pre_del']='La nota de entrega esta cerrada, no se puede eliminar';
+			$mSQL ="UPDATE snte SET tipo='A' WHERE numero = ${dbnumero}";
+			$this->db->simple_query($mSQL);
+
+			$do->error_message_ar['pre_del']='La nota de entrega fue anulada';
 			return false;
 		}
+
+		$do->error_message_ar['pre_del']='Accion no valida';
+		return false;
 	}
 
 	function _pre_update($do){

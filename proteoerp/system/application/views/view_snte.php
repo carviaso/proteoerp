@@ -45,6 +45,10 @@ $(function(){
 		}
 	});
 
+	$('input[id^="cana_"]').focus(function() {
+		$(this).select();
+	});
+
 	totalizar();
 	for(var i=0;i < <?php echo $form->max_rel_count['itsnte']; ?>;i++){
 		cdropdown(i);
@@ -166,6 +170,11 @@ function add_itsnte(){
 	cdropdown(itsnte_cont);
 	autocod(can);
 	$('#codigo_'+can).focus();
+
+	$('#cana_'+can).focus(function() {
+		$(this).select();
+	});
+	//$('#cana_'+can).select();
 
 	$("#cana_"+can).keypress(function(e) {
 		if(e.keyCode == 13) {
