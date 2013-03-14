@@ -179,6 +179,29 @@ class Formatos extends Controller{
 		}
 	}
 
+	function verhtmllocal(){
+		$parametros= func_get_args();
+		$this->_direccion='http://localhost/'.trim_slashes($this->config->item('base_url'));
+		if (count($parametros)>0){
+			$_fnombre  = array_shift($parametros);
+			$_dbfnombre= $this->db->escape($_fnombre);
+			$query = $this->db->query('SELECT proteo FROM formatos WHERE nombre='.$_dbfnombre);
+			if ($query->num_rows() > 0){
+				$row  = $query->row();
+				$forma= $row->proteo;
+				if(empty($forma)){
+					$forma=$this->_crearep($_fnombre);
+				}
+				eval('?>'.preg_replace('/;*\s*\?>/', '; ?>', str_replace('<?=', '<?php echo ', $forma)).'<?php ');
+			}else{
+				$forma=$this->_crearep($_fnombre);
+				eval('?>'.preg_replace('/;*\s*\?>/', '; ?>', str_replace('<?=', '<?php echo ', $forma)).'<?php ');
+			}
+		}else{
+			echo 'Faltan parametros';
+		}
+	}
+
 	function cintillo($cinti = 'CINTILLO'){
 		// Cintillo por defecto si no existe
 		$mhtml = "\n";

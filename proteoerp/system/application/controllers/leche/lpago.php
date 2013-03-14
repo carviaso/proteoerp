@@ -51,10 +51,11 @@ class Lpago extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'bimpri',   'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Documento', 'label'=>'Imprimir recibo' ));
-		$grid->wbotonadd(array('id'=>'bcheque',  'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cheque',    'label'=>'Imprimir cheque' ));
-		$grid->wbotonadd(array('id'=>'blote',    'img'=>'images/agrega4.png'             , 'alt' => 'Pagar lote',         'label'=>'Pagar lote'      ));
-		$grid->wbotonadd(array('id'=>'bimpriau', 'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Auditoria', 'label'=>'Imprimir Auditoria' ));
+		$grid->wbotonadd(array('id'=>'bimpri'    ,'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Documento','label'=>'Imprimir recibo'    ));
+		$grid->wbotonadd(array('id'=>'bimprilote','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir lote'     ,'label'=>'Imprimir x Lote'    ));
+		$grid->wbotonadd(array('id'=>'bcheque'   ,'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cheque'   ,'label'=>'Imprimir cheque'    ));
+		$grid->wbotonadd(array('id'=>'blote'     ,'img'=>'images/agrega4.png'             , 'alt' => 'Pagar lote'        ,'label'=>'Pagar lote'         ));
+		$grid->wbotonadd(array('id'=>'bimpriau'  ,'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Auditoria','label'=>'Imprimir Auditoria' ));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -178,6 +179,21 @@ class Lpago extends Controller {
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				'.$this->datasis->jwinopen(site_url('formatos/ver/LPAGO').'/\'+id+\'/id\'').';
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		});';
+
+		$bodyscript .= '
+		jQuery("#bimprilote").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if(ret.id_lpagolote!=""){
+					'.$this->datasis->jwinopen(site_url($this->url.'limplote').'/\'+ret.id_lpagolote+\'\'').';
+				}else{
+					$.prompt("<h1>El pago seleccionado no fue en lote</h1>");
+				}
 			} else {
 				$.prompt("<h1>Por favor Seleccione un registro</h1>");
 			}
@@ -499,6 +515,17 @@ class Lpago extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+
+
+		$grid->addField('id_lpagolote');
+		$grid->label('Lote');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100
+		));
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -1000,8 +1027,6 @@ class Lpago extends Controller {
 			}else{
 				echo 'Egreso no fue pagado con cheque de banco';
 			}
-
-
 		}
 	}
 
@@ -1090,6 +1115,51 @@ class Lpago extends Controller {
 			//echo $this->db->last_query();
 		}
 		return $rt;
+	}
+
+	function limplote($idlote){
+		$query = $this->db->query('SELECT id FROM lpago WHERE id_lpagolote='.$this->db->escape($idlote));
+		$imp = '';
+		foreach ($query->result() as $row){
+			$id = $row->id;
+			$url=$this->_direccion='http://localhost/'.site_url('formatos/verhtmllocal/LPAGO/'.$id);
+			$data = file_get_contents($url);
+
+			if(preg_match('/<!\-\-\@size_paper (?P<x>[0-9\.]+)x(?P<y>[0-9\.]+)\-\->/', $data, $matches)){
+				$x = $matches['x'];
+				$y = $matches['y'];
+				$papersize = '<!--@size_paper '.$x.'x'.$y.'-->';
+			}else{
+				$papersize = '';
+			}
+
+			if(preg_match('/<body(?P<bodyparr>[^>]+)>/', $data, $matches)){
+				$bodyparr = $matches['bodyparr'];
+			}else{
+				$bodyparr = '';
+			}
+
+			$inicio= stripos($data, '<body');
+			$fin   = stripos($data, '</body>');
+			$encab = substr($data,0,$inicio);
+			$piepa = substr($data,$fin);
+
+			$data  = substr($data,0,$fin);
+			$data  = substr($data,$inicio);
+
+			$data = preg_replace('/<.*body[^>]*>/', '', $data);
+			$data = preg_replace('/<!--[^>]*-->/' , '', $data);
+
+			$imp .= $data.'<div style="page-break-before: always;"></div>';
+			//preg_match('/<body[^>]*>(?P<conte>.+)<\/body>/', $data, $matches);
+			//print_r($matches);
+			//$imp .= $data;
+
+		}
+		$imp = $encab."\n<body ${bodyparr}>\n".$papersize.$imp.$piepa;
+
+		$this->load->library('dompdf/cidompdf');
+		$this->cidompdf->html2pdf($imp,'prueba',true);
 	}
 
 	function ajaxmonto(){
