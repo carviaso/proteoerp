@@ -1850,8 +1850,6 @@ jQuery("#boton4").click( function(){
 			$maxlen='8';
 		}
 
-
-
 		// Si manda el valor en el uri
 		if ( $this->uri->total_segments() == 6 ) {
 			$tt = $this->uri->segment($this->uri->total_segments());
