@@ -541,13 +541,11 @@ class Lruta extends Controller {
 		$edit->tarsob->size =7;
 		$edit->tarsob->maxlength =10;
 
-		$edit->tipolec = new  dropdownField ('Tipo', 'tipolec');
+		$edit->tipolec = new  dropdownField ('Tipo de Leche', 'tipolec');
 		$edit->tipolec->option('C' ,'Caliente');
 		$edit->tipolec->option('F' ,'Fria');
 		$edit->tipolec->rule = 'required';
 		$edit->tipolec->style= 'width:100px;';
-
-
 
 		$edit->build();
 
