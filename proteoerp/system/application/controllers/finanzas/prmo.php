@@ -18,7 +18,7 @@ class Prmo extends Controller {
 			$this->db->simple_query('ALTER TABLE prmo ADD UNIQUE INDEX numero (numero)');
 			$this->db->simple_query('ALTER TABLE prmo ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};
-		$this->datasis->creaintramenu(array('modulo'=>'52A','titulo'=>'Otros Movimientos','mensaje'=>'Otros Movimientos','panel'=>'TESORERIA','ejecutar'=>'finanzas/prmo','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>900,'alto'=>600));
+		$this->datasis->creaintramenu(array('modulo'=>'52C','titulo'=>'Otros Movimientos','mensaje'=>'Otros Movimientos','panel'=>'TESORERIA','ejecutar'=>'finanzas/prmo','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>900,'alto'=>600));
 		//$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -31,7 +31,6 @@ class Prmo extends Controller {
 
 		$grid = $this->defgrid();
 		$grid->setHeight('230');
-
 
 		$param['grids'][] = $grid->deploy();
 

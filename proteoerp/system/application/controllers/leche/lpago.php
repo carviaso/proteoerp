@@ -39,7 +39,7 @@ class Lpago extends Controller {
 	}
 
 	//***************************
-	//Layout en la Ventana
+	// Layout en la Ventana
 	//
 	//***************************
 	function jqdatag(){
@@ -172,7 +172,6 @@ class Lpago extends Controller {
 			});
 		});';
 
-
 		$bodyscript .= '
 		jQuery("#bimpri").click( function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -209,7 +208,6 @@ class Lpago extends Controller {
 				$.prompt("<h1>Por favor Seleccione un registro</h1>");
 			}
 		});';
-
 
 		$bodyscript .= '
 		jQuery("#bcheque").click( function(){
@@ -350,9 +348,9 @@ class Lpago extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//***********************************************
+	//   Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -1382,6 +1380,93 @@ class Lpago extends Controller {
 	function _pre_lote_delete($do){
 
 	}
+
+	function imppago(){
+		// Si manda el valor en el uri
+
+		if ( $this->uri->total_segments() == 6 ) {
+			$tt = $this->uri->segment($this->uri->total_segments());
+			if ( $this->uri->segment(5) == 'procesar' ) {
+				$_POST['valor'] = $tt;
+			}
+		} else 
+			$tt = 'procesar';
+
+		$this->rapyd->load('datagrid','dataform');
+
+		$filter = new dataForm('contabilidad/casi/localizador/'.$tipo.'/procesar');
+
+		$filter->valor = new inputField($tit, 'valor');
+		$filter->valor->rule = 'required'.$rul;
+		$filter->valor->autocomplete=false;
+		$filter->valor->maxlength=$maxlen;
+		$filter->valor->size=15;
+
+		if ( $tt <> 'procesar') {
+			$filter->valor->insertValue = $tt;
+		}
+
+		$action = "javascript:window.location='".site_url('contabilidad/casi/auditoria')."'";
+		$filter->button('btn_regresa', 'Regresar', $action, 'BL');
+		$filter->submit('btnsubmit','Buscar');
+		$filter->build_form();
+
+		$sal='';
+
+/*
+		$verdad = ($filter->on_success() && $filter->is_valid());
+		if ( $tt <> 'procesar') {
+			$verdad = true; 
+		}
+*/
+
+		if ( $filter->on_success() && $filter->is_valid() ) {
+			$this->load->library('table');
+			$this->table->set_heading('Tabla', 'Campo', 'Coincidencias');
+			//$valor = str_pad($filter->valor->newValue,8,'0', STR_PAD_LEFT);
+
+			if ( $valor == '00000000' )
+				$valor = $tt;
+
+			$valor = $this->db->escape($valor);
+
+			$tables = $this->db->list_tables();
+			foreach ($tables as $table){
+				if (preg_match("/^view_.*$|^sp_.*$|^viemovinxventas$/i",$table)) continue;
+
+				$fields = $this->db->list_fields($table);
+				if (in_array($cc, $fields)){
+					$mSQL="SELECT COUNT(*) AS cana FROM `$table` WHERE $cc = $valor";
+
+					$cana=$this->datasis->dameval($mSQL);
+					if($cana>0){
+
+						$grid = new DataGrid("$table: $cana");
+						//$grid->per_page = $cana;
+						$grid->db->from($table);
+						$grid->db->where("$cc = $valor");
+						$grid->db->limit(200);
+						if(in_array('id', $fields)){
+							$grid->db->orderby('id','desc');
+						}
+
+						foreach($fields as $ff){
+							$grid->column($ff , $ff);
+						}
+						$grid->build();
+						$sal.=$grid->output;
+					}
+				}
+			}
+		}
+
+		$data['content'] = $filter->output.$sal;
+		$data['title']   = heading('Localizador de Transacciones');
+		$data['head']    = $this->rapyd->get_head();
+		$this->load->view('view_ventanas', $data);
+	}
+
+
 
 	function instalar(){
 		if(!$this->db->table_exists('lpago')) {
