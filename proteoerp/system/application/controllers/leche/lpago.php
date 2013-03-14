@@ -1151,15 +1151,11 @@ class Lpago extends Controller {
 			$data = preg_replace('/<!--[^>]*-->/' , '', $data);
 
 			$imp .= $data.'<div style="page-break-before: always;"></div>';
-			//preg_match('/<body[^>]*>(?P<conte>.+)<\/body>/', $data, $matches);
-			//print_r($matches);
-			//$imp .= $data;
-
 		}
 		$imp = $encab."\n<body ${bodyparr}>\n".$papersize.$imp.$piepa;
 
 		$this->load->library('dompdf/cidompdf');
-		$this->cidompdf->html2pdf($imp,'prueba',true);
+		$this->cidompdf->html2pdf($imp,'lote'.$idlote.'.pdf',true);
 	}
 
 	function ajaxmonto(){
@@ -1245,7 +1241,6 @@ class Lpago extends Controller {
 			if($query->num_rows() > 0){
 				foreach ($query->result() as $row){
 					$mSQL='UPDATE lrece SET montopago='.$row->monto.', pago='.$dbid.' WHERE id='.$row->id;
-					echo $mSQL;
 					$this->db->simple_query($mSQL);
 				}
 			}
@@ -1260,7 +1255,6 @@ class Lpago extends Controller {
 			if($query->num_rows() > 0){
 				foreach ($query->result() as $row){
 					$mSQL='UPDATE itlrece SET montopago='.$row->monto.', pago='.$dbid.' WHERE id='.$row->id;
-					echo $mSQL;
 					$this->db->simple_query($mSQL);
 				}
 			}
