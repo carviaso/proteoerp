@@ -119,7 +119,7 @@ class Bcaj extends Controller {
 		});
 		';
 
-		//Imprime a HTML
+		//Cheque Devuelto
 		$bodyscript .= '
 		jQuery("#chdevo").click( function(){
 			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -155,7 +155,7 @@ class Bcaj extends Controller {
 		';
 */
 
-		//Imprime a HTML
+		//Cierre de Deposito
 		$bodyscript .= '
 		$(function() {
 			$("#dialog:ui-dialog").dialog( "destroy" );
@@ -198,6 +198,7 @@ class Bcaj extends Controller {
 								if (v == true) {
 									$.get("'.base_url().$this->url.'bcajborra/"+id,
 									function(data){
+										grid.trigger("reloadGrid");
 										alert(data);
 									});
 								}
