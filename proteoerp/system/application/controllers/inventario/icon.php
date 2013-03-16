@@ -36,7 +36,8 @@ class Icon extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"ingreso", "img"=>"images/pdf_logo.gif", "alt" => "Concepto de Ingreso", "label"=>"Concepto de Ingreso"));
+		$grid->wbotonadd(array("id"=>"egreso",  "img"=>"images/pdf_logo.gif", "alt" => "Concepto de Egreso", "label"=>"Concepto de Egreso"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -66,8 +67,24 @@ class Icon extends Controller {
 		$bodyscript = '		<script type="text/javascript">';
 
 		$bodyscript .= '
-		function iconadd(){
-			$.post("'.site_url($this->url.'dataedit/create').'",
+		$("#ingreso").click( function(){
+			iconadd("I");
+		});';
+
+
+		$bodyscript .= '
+		$("#egreso").click( function(){
+			iconadd("E");
+		});';
+
+
+		$bodyscript .= '
+		function iconadd(tipo){
+			var ruta = "'.site_url($this->url.'deegreso/create').'";
+			if ( tipo == "I") {
+				ruta = "'.site_url($this->url.'deingreso/create').'";
+			}
+			$.post(ruta,
 			function(data){
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
@@ -146,7 +163,7 @@ class Icon extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 300, width: 450, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -383,7 +400,7 @@ class Icon extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = "codigo";
 		$check  = 0;
 
 		unset($data['oper']);
@@ -395,7 +412,7 @@ class Icon extends Controller {
 					$this->db->insert('icon', $data);
 					echo "Registro Agregado";
 
-					logusu('ICON',"Registro ????? INCLUIDO");
+					logusu('ICON',"Registro codigo INCLUIDO");
 				} else
 					echo "Ya existe un registro con ese $mcodp";
 			} else
@@ -427,31 +444,96 @@ class Icon extends Controller {
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
 				$this->db->simple_query("DELETE FROM icon WHERE id=$id ");
-				logusu('ICON',"Registro ????? ELIMINADO");
+				logusu('ICON',"Registro codigo ELIMINADO");
 				echo "Registro Eliminado";
 			}
 		};
 	}
 
-	function dataedit(){
+	function deingreso(){
 		$this->rapyd->load('dataedit');
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});
-		';
 
 		$edit = new DataEdit($this->tits, 'icon');
 
-		$edit->script($script,'modify');
-		$edit->script($script,'create');
 		$edit->on_save_redirect=false;
 
 		$edit->back_url = site_url($this->url.'filteredgrid');
 
-		$edit->script($script,'create');
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process('insert', '_pre_insert' );
+		$edit->pre_process('update', '_pre_update' );
+		$edit->pre_process('delete', '_pre_delete' );
 
+		$script= ' 
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+		});		';
+		$edit->script($script,'create');
 		$edit->script($script,'modify');
+
+		$edit->codigo = new inputField('Codigo','codigo');
+		$edit->codigo->rule='';
+		$edit->codigo->size =8;
+		$edit->codigo->maxlength =6;
+
+		$edit->concepto = new inputField('Concepto','concepto');
+		$edit->concepto->rule='';
+		$edit->concepto->size =32;
+		$edit->concepto->maxlength =30;
+/*
+		$edit->gasto = new inputField('Gasto','gasto');
+		$edit->gasto->rule='';
+		$edit->gasto->size =8;
+		$edit->gasto->maxlength =6;
+
+		$edit->gastode = new inputField('Gastode','gastode');
+		$edit->gastode->rule='';
+		$edit->gastode->size =32;
+		$edit->gastode->maxlength =30;
+*/
+		$edit->ingreso = new inputField('Ingreso','ingreso');
+		$edit->ingreso->rule='';
+		$edit->ingreso->size =7;
+		$edit->ingreso->maxlength =5;
+
+		$edit->ingresod = new inputField('Descripcion','ingresod');
+		$edit->ingresod->rule='';
+		$edit->ingresod->size =32;
+		$edit->ingresod->maxlength =30;
+/*
+		$edit->depto = new inputField('Depto','depto');
+		$edit->depto->rule='';
+		$edit->depto->size =4;
+		$edit->depto->maxlength =2;
+*/
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->insertValue = 'I';
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form'] =&  $edit;
+			$this->load->view('view_icon', $conten);
+		}
+	}
+
+	function deegreso(){
+		$this->rapyd->load('dataedit');
+
+		$edit = new DataEdit($this->tits, 'icon');
+
+		$edit->on_save_redirect=false;
+
+		$edit->back_url = site_url($this->url.'filteredgrid');
 
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
@@ -482,17 +564,17 @@ class Icon extends Controller {
 		$edit->gasto->size =8;
 		$edit->gasto->maxlength =6;
 
-		$edit->gastode = new inputField('Gastode','gastode');
+		$edit->gastode = new inputField('Descripcion','gastode');
 		$edit->gastode->rule='';
 		$edit->gastode->size =32;
 		$edit->gastode->maxlength =30;
-
+/*
 		$edit->ingreso = new inputField('Ingreso','ingreso');
 		$edit->ingreso->rule='';
 		$edit->ingreso->size =7;
 		$edit->ingreso->maxlength =5;
 
-		$edit->ingresod = new inputField('Ingresod','ingresod');
+		$edit->ingresod = new inputField('Descripcion','ingresod');
 		$edit->ingresod->rule='';
 		$edit->ingresod->size =32;
 		$edit->ingresod->maxlength =30;
@@ -501,11 +583,9 @@ class Icon extends Controller {
 		$edit->depto->rule='';
 		$edit->depto->size =4;
 		$edit->depto->maxlength =2;
-
-		$edit->tipo = new inputField('Tipo','tipo');
-		$edit->tipo->rule='';
-		$edit->tipo->size =3;
-		$edit->tipo->maxlength =1;
+*/
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->insertValue = 'E';
 
 		$edit->build();
 
@@ -517,9 +597,11 @@ class Icon extends Controller {
 			);
 			echo json_encode($rt);
 		}else{
-			echo $edit->output;
+			$conten['form'] =&  $edit;
+			$this->load->view('view_icon', $conten);
 		}
 	}
+
 
 	function _pre_insert($do){
 		$do->error_message_ar['pre_ins']='';
@@ -554,19 +636,19 @@ class Icon extends Controller {
 	function instalar(){
 		if (!$this->db->table_exists('icon')) {
 			$mSQL="CREATE TABLE `icon` (
-			  `codigo` char(6) DEFAULT NULL,
-			  `concepto` char(30) DEFAULT NULL,
-			  `gasto` char(6) DEFAULT NULL,
-			  `gastode` char(30) DEFAULT NULL,
-			  `ingreso` char(5) DEFAULT NULL,
-			  `ingresod` char(30) DEFAULT NULL,
-			  `depto` char(2) DEFAULT NULL,
-			  `tipo` char(1) DEFAULT 'E'
+				codigo   char( 6) DEFAULT NULL,
+				concepto char(30) DEFAULT NULL,
+				gasto    char( 6) DEFAULT NULL,
+				gastode  char(30) DEFAULT NULL,
+				ingreso  char( 5) DEFAULT NULL,
+				ingresod char(30) DEFAULT NULL,
+				depto    char( 2) DEFAULT NULL,
+				tipo     char( 1) DEFAULT 'E',
+				id       INT( 11) NOT NULL AUTO_INCREMENT,
+				PRIMARY KEY (`id`)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('icon');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 
 }

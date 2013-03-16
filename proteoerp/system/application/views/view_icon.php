@@ -12,92 +12,75 @@ if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'<
 
 //echo $form_scripts;
 echo $form_begin;
+
 if($form->_status!='show'){ ?>
 
 <script language="javascript" type="text/javascript">
 $(function(){
-	$("#gastos").hide();
-	$("#ingresos").hide();
-	$("#gastosde").hide();
-	$("#ingresosde").hide();
-	$("#tipo").change(function(){
-		var tipo=$("#tipo").val();
-		if(tipo=="I"){
-			$("#gastode").val("");
-			$("#gasto").val("");
-			$("#gastosde").hide();
-			$("#ingresosde").show();
-			$("#gastos").hide();
-			$("#ingresos").show();
-			
-		}else if(tipo=="E"){
-			$("#ingresod").val("");
-			$("#ingreso").val("");
-			$("#gastosde").show();
-			$("#ingresosde").hide();
-			$("#gastos").show();
-			$("#ingresos").hide();
-			
-		}else{
-			$("#ingresod").val("");
-			$("#ingreso").val("");
-			$("#gastode").val("");
-			$("#gasto").val("");
-			$("#gastos").hide();
-			$("#ingresos").hide();
-			$("#gastosde").hide();
-			$("#ingresosde").hide();
-			
-		}
-	});
+		
+
 
 });
 </script>
 <?php } ?>
 
+<?php echo $form->tipo->output; ?>
+
+<fieldset  style='border: 1px outset #FEB404; background: #EDDA4E;'>
+<table width='100%' cellspacing='0' cellpadding='0'>
+	<tr>
+	<?php if ($form->tipo->value == 'I') { //Ingreso ?>
+		<td style='font-size:14pt;text-align:center;font-weight:bold;'>CONCEPTOS DE INGRESOS</td>
+	<?php } else { ?>
+		<td style='font-size:14pt;text-align:center;font-weight:bold;'>CONCEPTOS DE EGRESOS</td>
+	<?php } ?>
+	</tr>
+</table>
+</fieldset>
+<br>
+<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+<table width='100%'>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->codigo->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->codigo->output; ?></td>
+	</tr>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->concepto->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->concepto->output; ?></td>
+	</tr>
+</table>
+</fieldset>
+<br>
+
+<?php if ($form->tipo->value == 'E') { //Prestamo Otorgado ?>
+<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+<table width='100%'>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->gasto->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->gasto->output; ?></td>
+	</tr>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->gastode->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->gastode->output; ?></td>
+	</tr>
+</table>
+</fieldset>
+<?php } else { ?>
+<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+<table width='100%'>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->ingreso->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->ingreso->output; ?></td>
+	</tr>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->ingresod->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->ingresod->output; ?></td>
+	</tr>
+</table>
+</fieldset>
+<?php } ?>
+
 <table align='center' width="95%">
-	<tr>
-		<td align=right><?php echo $container_tr?></td>
-	</tr>
-	<tr>
-		<td>
-		<table width="100%" style="margin: 0; width: 100%;">
-			<tr>
-				<th colspan='5' class="littletableheader">Conceptos de Inventario </th>
-			</tr>
-			<tr>
-				<td class="littletableheader"><?php echo $form->codigo->label;    ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->codigo->output;   ?>&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="littletableheader"><?php echo $form->concepto->label;  ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->concepto->output; ?>&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="littletableheader"><?php echo $form->tipo->label;  ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->tipo->output; ?>&nbsp;</td>
-			</tr>
-				<tr>
-					<td class="littletableheader"><?php echo $form->gasto->label;  ?>&nbsp;</td>
-					<td class="littletablerow"><div id="gastos">   <?php echo $form->gasto->output; ?>&nbsp;</div></td>
-				</tr>
-				<tr>
-					<td class="littletableheader"><?php echo $form->gastode->label;  ?>&nbsp;</td>
-					<td class="littletablerow"><div id="gastosde">   <?php echo $form->gastode->output; ?>&nbsp;</div></td>
-				</tr>
-				<tr>
-					<td class="littletableheader"><?php echo $form->ingreso->label;  ?>&nbsp;</td>
-					<td class="littletablerow"><div id="ingresos">   <?php echo $form->ingreso->output; ?>&nbsp;</div></td>
-				</tr>
-				<tr>
-					<td class="littletableheader"><?php echo $form->ingresod->label;  ?>&nbsp;</td>
-					<td class="littletablerow"><div id="ingresosde">   <?php echo $form->ingresod->output; ?>&nbsp;</div></td>
-				</tr>
-			
-			
-		</table><br>
-		</td>
-	</tr>
 	<tr>
 		<td>
 		<?php echo $container_bl ?>

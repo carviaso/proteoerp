@@ -36,7 +36,6 @@ e.codigorete,c.activida,e.base,e.porcen,e.monto
 FROM gereten AS e
 JOIN rete AS c ON c.codigo=e.codigorete
 WHERE e.idd='.$dbid);
-
 ?>
 <html>
 <head>
