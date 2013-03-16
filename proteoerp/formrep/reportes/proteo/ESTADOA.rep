@@ -105,7 +105,7 @@ if($this->rapyd->uri->is_set("search") AND $filter->is_valid() AND $pasamos){
 
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
-	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setSubHeadValores('TITULO2','TITULO3','RIF');
 	$pdf->setTitulo("Estado de Ganancias y Perdidas");
 	$pdf->setSubTitulo("Desde $inicio hasta ".$this->input->post('fechah'));
 

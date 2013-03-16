@@ -2184,7 +2184,8 @@ class gser extends Controller {
 		$sobretasa = $ivas['sobretasa']/100;
 
 		$consulrif=$this->datasis->traevalor('CONSULRIF');
-		$script="
+
+		$script = "
 		function consulrif(){
 			vrif=$('#rif').val();
 			if(vrif.length==0){
@@ -2195,7 +2196,9 @@ class gser extends Controller {
 				window.open('$consulrif'+'?p_rif='+vrif,'CONSULRIF','height=350,width=410');
 			}
 		}
+		";
 
+		$script .= "
 		function poneiva(tipo){
 			if(tipo==1){
 				ptasa = $redutasa;
@@ -2214,7 +2217,9 @@ class gser extends Controller {
 			$('#'+campo).val(roundNumber(base*ptasa,2));
 			totaliza();
 		}
+		";
 
+		$script .= "
 		function totaliza(){
 			if($('#montasa').val().length>0)   montasa  =parseFloat($('#montasa').val());   else  montasa  =0;
 			if($('#tasa').val().length>0)      tasa     =parseFloat($('#tasa').val());      else  tasa     =0;
@@ -2228,7 +2233,9 @@ class gser extends Controller {
 			$('#importe').val(total);
 			$('#importe_val').text(nformat(total));
 		}
+		";
 
+		$script .= "
 		$('#codigo').autocomplete({
 			source: function( req, add){
 				$.ajax({
@@ -2263,7 +2270,9 @@ class gser extends Controller {
 				setTimeout(function() {  $('#codigo').removeAttr('readonly'); }, 1500);
 			}
 		});
+		";
 
+		$script .= "
 		$('#importe_val').css('font-size','2em');
 		$('#importe_val').css('font-weight','bold');
 		";

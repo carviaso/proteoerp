@@ -779,7 +779,9 @@ class Ajax extends Controller {
 
 	}
 
+	//******************************************************************
 	//Busca facturas para aplicarles devolucion
+	//
 	function buscasfacdev(){
 		$mid   = $this->input->post('q');
 		$scli  = $this->input->post('scli');
@@ -822,7 +824,9 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Busca las formas de pago de una factura para devolverlos
+	//
 	function buscasfpadev(){
 		$mid = $this->input->post('q');
 
@@ -858,7 +862,9 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Busca los articulos de una factura para devolverlos
+	//
 	function buscasinvdev(){
 		$mid = $this->input->post('q');
 
@@ -909,7 +915,9 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Busca los articulos que esten por rma
+	//
 	function buscastrarma(){
 		$sprv = $this->input->post('sprv');
 		$alma = $this->input->post('alma');
@@ -939,9 +947,9 @@ class Ajax extends Controller {
 		}
 		echo $data;
 	}
-	//***********************************************
-	//Busca los efectos que se deben para los cruces
-	//***********************************************
+	//******************************************************************
+	//  Busca los efectos que se deben para los cruces
+	//
 	function buscasprm(){
 		$mid = $this->input->post('sprv');
 
@@ -972,9 +980,9 @@ class Ajax extends Controller {
 	}
 
 
-	//***********************************************
+	//******************************************************************
 	//Busca los efectos que pueden aplicarse
-	//***********************************************
+	//
 	function buscasmovapan($tipo=null){
 		$mid = $this->input->post('scli');
 
@@ -1010,9 +1018,9 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
-	//***********************************************
+	//******************************************************************
 	//Busca los efectos que pueden aplicarse a proveedor
-	//***********************************************
+	//
 	function buscasprmapan($tipo=null){
 		$mid = $this->input->post('sprv');
 
@@ -1048,9 +1056,9 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
-	//***********************************************
+	//******************************************************************
 	//Busca los efectos que se deben para los cruces
-	//***********************************************
+	//
 	function buscasmov(){
 		$mid = $this->input->post('scli');
 
@@ -1080,6 +1088,7 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Saldo de proveedor
 	function ajaxsaldosprv(){
 		$mid = $this->input->post('clipro');
@@ -1100,6 +1109,7 @@ class Ajax extends Controller {
 		}
 	}
 
+	//******************************************************************
 	//Saldo de cliente
 	function ajaxsaldoscli(){
 		$mid = $this->input->post('clipro');
@@ -1118,7 +1128,7 @@ class Ajax extends Controller {
 		}
 	}
 
-	//
+	//******************************************************************
 	// Busca Plan de cuentas
 	//
 	function buscacpla(){
@@ -1177,6 +1187,7 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Autocomplete para buscar las reservaciones
 	function buscares(){
 		$mid   = $this->input->post('q');
@@ -1230,6 +1241,7 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Autocomplete para mgas
 	function automgas(){
 		$q   = $this->input->post('q');
@@ -1259,6 +1271,7 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Autocomplete para las labores de sinv
 	function buscaordplabor(){
 		$mid   = $this->input->post('q');
@@ -1288,6 +1301,7 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Autocomplete para las recetas de sinv
 	function buscaordpitem(){
 		$mid   = $this->input->post('q');
@@ -1317,7 +1331,9 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Para cerrar la ventana luego de una operacion exitosa
+	//
 	function reccierraventana($reload=null){
 		if($reload!='N') $rr='$(window).unload(function() { window.opener.location.reload(); });'; else $rr='';
 		$script='
@@ -1415,7 +1431,9 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
-	//Busca sinv solo articulos
+	//******************************************************************
+	//  Busca sinv solo articulos
+	//
 	function buscaaran(){
 		$comodin= $this->datasis->traevalor('COMODIN');
 		$mid    = $this->input->post('q');
@@ -1446,7 +1464,9 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Funcion para traer los clientes en los pedidos ligeros
+	//
 	function scliex(){
 		$comodin= $this->datasis->traevalor('COMODIN');
 		$mid    = $this->input->post('q');
@@ -1564,9 +1584,9 @@ class Ajax extends Controller {
 
 
 
-	//***************************************
+	//******************************************************************
 	//          BUSCA GASTO
-	//***************************************
+	//
 	function buscamgas(){
 		$mid  = $this->input->post('q');
 		if($mid == false) $mid  = $this->input->post('term');
@@ -1577,22 +1597,6 @@ class Ajax extends Controller {
 		$data = '[{ }]';
 		if($mid !== false){
 			$retArray = $retorno = array();
-
-			//Cheque si existe el codigo
-			/*
-			$mSQL="SELECT TRIM(descrip) AS descrip, codigo FROM mgas WHERE codigo=${qmid} LIMIT 1";
-			$query = $this->db->query($mSQL);
-			if ($query->num_rows() == 1){
-				$row = $query->row_array();
-				$retArray['value']   = $row['codigo'];
-				$retArray['label']   = '('.$row['codigo'].') '.utf8_encode($row['nombre']);
-				array_push($retorno, $retArray);
-				$ww=" AND codigo<>${qmid}";
-			}else{
-				$ww='';
-			}
-			*/
-
 			$mSQL="SELECT TRIM(descrip) AS nombre, codigo FROM mgas WHERE descrip LIKE ${qdb} OR codigo LIKE ${qmid} ORDER BY descrip LIMIT 20";
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
@@ -1608,9 +1612,9 @@ class Ajax extends Controller {
 		return true;
 	}
 
-	//***************************************
+	//******************************************************************
 	//          BUSCA GASTO o PROVEEDOR
-	//***************************************
+	//
 	function buscasprvmgas(){
 		$tipo  = $this->input->post('cargo');
 		$cta   = $this->input->post('acelem');
@@ -1626,9 +1630,9 @@ class Ajax extends Controller {
 			$this->buscamgas();
 	}
 
-	//***************************************
-	//          BUSCA PERSONA
-	//***************************************
+	//******************************************************************
+	//          BUSCA TRABAJADOR
+	//
 	function buscapers(){
 		$mid  = $this->input->post('q');
 		if($mid == false) $mid  = $this->input->post('term');
@@ -1659,9 +1663,9 @@ class Ajax extends Controller {
 		return true;
 	}
 
-	//***************************************
-	//          BUSCA PERSONA
-	//***************************************
+	//******************************************************************
+	//          BUSCA CONCEPTO DE NOMINA
+	//
 	function buscaconc(){
 		$mid  = $this->input->post('q');
 		if($mid == false) $mid  = $this->input->post('term');
@@ -1694,9 +1698,9 @@ class Ajax extends Controller {
 	}
 
 
-	//***************************************
+	//******************************************************************
 	//      BUSCA EFECTOS DE CLIENTE
-	//***************************************
+	//
 	function buscasmovep(){
 		$mid  = $this->input->post('q');
 		if($mid == false) $mid  = $this->input->post('term');
@@ -1728,6 +1732,9 @@ class Ajax extends Controller {
 		return true;
 	}
 
+	//******************************************************************
+	//  BUSCA PROVEEDOR EN SPRV Y PROVOCA
+	//
 	function ajaxsprv(){
 		$rif=$this->input->post('rif');
 		if($rif!==false){
@@ -1749,9 +1756,9 @@ class Ajax extends Controller {
 		}
 	}
 
-	//***************************************
+	//******************************************************************
 	//  CONSULTA LA CEDULA O RIF EN INTERNET
-	//***************************************
+	//
 	function traerif(){
 		$rifci = $this->input->post('rifci');
 		$t=array(

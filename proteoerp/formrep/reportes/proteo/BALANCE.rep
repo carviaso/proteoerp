@@ -123,7 +123,7 @@ if($this->rapyd->uri->is_set("search") AND $filter->is_valid() AND $pasamos){
 
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
-	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setSubHeadValores('TITULO2','TITULO3','RIF');
 	$pdf->setTitulo("Balance General");
 	$pdf->setSubTitulo("Al ".$this->input->post('fechah'));
 
