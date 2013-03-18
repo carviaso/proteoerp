@@ -95,7 +95,7 @@ if ( isset($pdf) ) {
 							<tr>
 								<td align='center' colspan='2'>(Ley IVA - Art. 11: Seran responsables del pago del Impuesto en calidad de agentes de retenci&oacute;n
 								los compradores o adquirientes de determinados bienes muebles y los receptores de
-								ciertos servicios, a quienes la administraci&oacute;n designe como tal o CUAL.)</td>
+								ciertos servicios, a quienes la administraci&oacute;n designe como tal o cual.)</td>
 							</tr>
 						</table>
 						<br />

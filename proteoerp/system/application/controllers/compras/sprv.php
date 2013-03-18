@@ -241,7 +241,7 @@ class Sprv extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 470, width: 700, modal: true,
+			autoOpen: false, height: 520, width: 720, modal: true,
 			buttons: {
 			"Guardar": function() {
 				var bValid = true;
@@ -493,41 +493,26 @@ class Sprv extends Controller {
 
 
 		$grid->addField('cuenta');
-		$grid->label('Cuenta');
+		$grid->label('Cta.Contable');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
-			'width'         => 150,
+			'width'         => 90,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:false}',
 			'editoptions'   => '{'.$grid->autocomplete($link, 'cuenta','cucucu','<div id=\"cucucu\"><b>"+ui.item.descrip+"</b></div>').'}',
-//			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
 
-/*
-
-		$grid->addField('observa');
-		$grid->label('Observaciones');
+		$grid->addField('canticipo');
+		$grid->label('Cta.Anticipo');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 250,
-			'edittype'      => "'textarea'",
-			'editoptions'   => "'{rows:2, cols:60}'",
-		));
-
-		$grid->addField('nit');
-		$grid->label('Nit');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
+			'editable'      => 'false',
+			'width'         => 90,
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 12 }',
+			'editrules'     => '{ required:false}',
+			'editoptions'   => '{'.$grid->autocomplete($link, 'cuenta','cucucu','<div id=\"cucucu\"><b>"+ui.item.descrip+"</b></div>').'}',
 		));
-
-*/
 
 		$linea = $linea + 1;
 		$grid->addField('email');
@@ -845,8 +830,21 @@ class Sprv extends Controller {
 			'where'=>"codigo LIKE \"$qformato\"",
 			);
 
+		$mANTI=array(
+			'tabla'   =>'cpla',
+			'columnas'=>array(
+				'codigo' =>'C&oacute;digo',
+				'descrip'=>'Descripci&oacute;n'),
+			'filtro'  =>array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
+			'retornar'=>array('codigo'=>'canticipo'),
+			'titulo'  =>'Buscar Cuenta',
+			'where'=>"codigo LIKE \"$qformato\"",
+			);
+
+
 		$bsclid =$this->datasis->modbus($mSCLId);
 		$bcpla  =$this->datasis->modbus($mCPLA);
+		$banti  =$this->datasis->modbus($mANTI,'bamti');
 
 		$smenu['link']=barra_menu('131');
 		$consulrif=$this->datasis->traevalor('CONSULRIF');
@@ -1127,7 +1125,7 @@ class Sprv extends Controller {
 		$edit->nomfis = new textareaField('Raz&oacute;n Social', 'nomfis');
 		$edit->nomfis->rule = 'trim';
 		$edit->nomfis->cols = 33;
-		$edit->nomfis->rows =  2;
+		$edit->nomfis->rows =  3;
 		$edit->nomfis->maxlength =200;
 		$edit->nomfis->style = 'width:170;';
 
@@ -1136,6 +1134,12 @@ class Sprv extends Controller {
 		$edit->cuenta->size =17;
 		$edit->cuenta->maxlength =15;
 		$edit->cuenta->append($bcpla);
+
+		$edit->canticipo = new inputField('Anticipo', 'canticipo');
+		$edit->canticipo->rule='trim|callback_chcuentac';
+		$edit->canticipo->size =17;
+		$edit->canticipo->maxlength =15;
+		$edit->canticipo->append($banti);
 
 		$edit->reteiva  = new inputField('Retenci&oacute;n','reteiva');
 		$edit->reteiva->size = 6;
@@ -1410,20 +1414,22 @@ class Sprv extends Controller {
 	function instalar(){
 		$campos=$this->db->list_fields('sprv');
 		if (!in_array('id',$campos)){
-			$this->db->simple_query('ALTER TABLE `sprv` DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE sprv DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE sprv ADD UNIQUE INDEX proveed (proveed)');
 			$this->db->simple_query('ALTER TABLE sprv ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 
-		if (!in_array('copre'   ,$campos)) $this->db->simple_query('ALTER TABLE `sprv` ADD copre VARCHAR(11) DEFAULT NULL NULL AFTER cuenta');
-		if (!in_array('ocompra' ,$campos)) $this->db->simple_query('ALTER TABLE `sprv` ADD ocompra CHAR(1) DEFAULT NULL NULL AFTER copre');
-		if (!in_array('dcredito',$campos)) $this->db->simple_query('ALTER TABLE `sprv` ADD dcredito DECIMAL(3,0) DEFAULT "0" NULL AFTER ocompra');
-		if (!in_array('despacho',$campos)) $this->db->simple_query('ALTER TABLE `sprv` ADD despacho DECIMAL(3,0) DEFAULT NULL NULL AFTER dcredito');
-		if (!in_array('visita'  ,$campos)) $this->db->simple_query('ALTER TABLE `sprv` ADD visita VARCHAR(9) DEFAULT NULL NULL AFTER despacho');
-		if (!in_array('cate'    ,$campos)) $this->db->simple_query('ALTER TABLE `sprv` ADD cate VARCHAR(20) NULL AFTER visita');
-		if (!in_array('reteiva' ,$campos)) $this->db->simple_query('ALTER TABLE `sprv` ADD reteiva DECIMAL(7,2) DEFAULT "0.00" NULL AFTER cate');
-		if (!in_array('ncorto'  ,$campos)) $this->db->simple_query('ALTER TABLE `sprv` ADD ncorto VARCHAR(20) DEFAULT NULL NULL AFTER nombre');
-		if (!in_array('prefpago',$campos)) $this->db->simple_query('ALTER TABLE `sprv` ADD COLUMN `prefpago` CHAR(1) NULL DEFAULT \'T\' COMMENT \'Preferencia de pago, Transferencia, Deposito, Caja\' AFTER `reteiva`');
+		if (!in_array('copre'    ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN copre     VARCHAR(11)  NULL DEFAULT NULL   AFTER cuenta');
+		if (!in_array('ocompra'  ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ocompra   CHAR(1)      NULL DEFAULT NULL   AFTER copre');
+		if (!in_array('dcredito' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN dcredito  DECIMAL(3,0) NULL DEFAULT "0"    AFTER ocompra');
+		if (!in_array('despacho' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN despacho  DECIMAL(3,0) NULL DEFAULT NULL   AFTER dcredito');
+		if (!in_array('visita'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN visita    VARCHAR(9)   NULL DEFAULT NULL   AFTER despacho');
+		if (!in_array('cate'     ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN cate      VARCHAR(20)  NULL DEFAULT NULL   AFTER visita');
+		if (!in_array('reteiva'  ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN reteiva   DECIMAL(7,2) NULL DEFAULT "0.00" AFTER cate');
+		if (!in_array('ncorto'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ncorto    VARCHAR(20)  NULL DEFAULT NULL   AFTER nombre');
+		if (!in_array('prefpago' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN prefpago  CHAR(1)      NULL DEFAULT "T"    COMMENT "Preferencia de pago, Transferencia, Deposito, Caja" AFTER reteiva');
+		if (!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE sprv ADD COLUMN canticipo VARCHAR(15)  NULL DEFAULT NULL   COMMENT 'Cuenta contable de Anticipo'                        AFTER cuenta");
+
 
 		//$this->db->simple_query('ALTER TABLE sprv CHANGE direc1 direc1 VARCHAR(105) DEFAULT NULL NULL');
 		//$this->db->simple_query('ALTER TABLE sprv CHANGE direc2 direc2 VARCHAR(105) DEFAULT NULL NULL');

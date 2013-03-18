@@ -28,80 +28,18 @@ class Casi extends Controller {
 	function jqdatag(){
 
 		$grid = $this->defgrid();
+		$grid->setHeight('145');
 		$param['grids'][] = $grid->deploy();
 
 		$grid1   = $this->defgridit();
 		$param['grids'][] = $grid1->deploy();
 
+
 		$readyLayout = $grid->readyLayout2( 212, 220, $param['grids'][0]['gridname'],$param['grids'][1]['gridname']);
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
-/*
-		$readyLayout = '
-	$(\'body\').layout({
-		minSize: 30,
-		north__size: 60,
-		resizerClass: \'ui-state-default\',
-		west__size: 212,
-		west__onresize: function (pane, $Pane){jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);},
-	});
-
-	$(\'div.ui-layout-center\').layout({
-		minSize: 30,
-		resizerClass: "ui-state-default",
-		center__paneSelector: ".centro-centro",
-		south__paneSelector:  ".centro-sur",
-		south__size: 150,
-		center__onresize: function (pane, $Pane) {
-			jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'setGridWidth\',$Pane.innerWidth()-6);
-			jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'setGridHeight\',$Pane.innerHeight()-110);
-
-			jQuery("#newapi'.$param['grids'][1]['gridname'].'").jqGrid(\'setGridWidth\',$Pane.innerWidth()-6);
-			jQuery("#newapi'.$param['grids'][1]['gridname'].'").jqGrid(\'setGridHeight\',$("div#adicional").innerHeight()-60);
-		}
-	});
-	';
-
-
-		$bodyscript = '
-<script type="text/javascript">
-$(function() {
-	$( "input:submit, a, button", ".boton1" ).button();
-});
-
-jQuery("#boton1").click( function(){
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\''.base_url().'formatos/ver/CASI/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-
-jQuery("#boton2").click( function(){
-		window.open(\''.base_url().'contabilidad/casi/dataedit/create/\', \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-});
-
-jQuery("#boton3").click( function(){
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\''.base_url().'contabilidad/casi/dataedit/modify/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-
-jQuery("#boton4").click( function(){
-	window.open(\''.base_url().'contabilidad/casi/auditoria/\', \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-});
-
-
-</script>
-';
-*/
-
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'bimp', 'img'=>'assets/default/images/print.png',  'alt' => 'Reiprimir Asiento',  'label'=>'Imprimir Asiento'));
-		//$grid->wbotonadd(array("id"=>"boton2", "img"=>"images/agrega4.png",   "alt" => 'Agregar',           "label"=>"Agregar Asiento"));
-		//$grid->wbotonadd(array("id"=>"boton3", "img"=>"images/editar.png",    "alt" => 'Editar',            "label"=>"Editar Asiento"));
 		$grid->wbotonadd(array("id"=>"boton4", "img"=>"images/checklist.png", "alt" => 'Auditoria',         "label"=>"Herramientas"));
 		$WestPanel = $grid->deploywestp();
 

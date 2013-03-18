@@ -70,6 +70,10 @@
 				<td class="littletablerow"><?php echo $form->cuenta->label;?></td>
 				<td class="littletablerow"><?php echo $form->cuenta->output;?></td>
 			</tr>
+			<tr><tr>
+				<td class="littletablerow"><?php echo $form->canticipo->label;?></td>
+				<td class="littletablerow"><?php echo $form->canticipo->output;?></td>
+			</tr>
 			</table>
 		</td>
 	</tr>

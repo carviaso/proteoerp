@@ -41,20 +41,20 @@ $tban = $this->datasis->damerow($sql);
 
 if($tipo_op=='CH'){
 	$tbanco = 'banco';
-	$tpago  = $tban['banco'].' <b>Cuenta:</b> '.$tban['numcuent'].' <b>Cheque:</b> '.$numche;
-	$titu   = 'COMPROBANTE DE PAGO POR CHEQUE';
+	$tpago  = '<td>Banco</td><td><b>'.$tban['banco'].'</b></td><td>Cuenta:</td><td><b>'.$tban['numcuent'].' </b></td><td>Cheque:</td><td><b> '.$numche.'</b></td>';
+	$titu   = 'EGRESO CON CHEQUE';
 }elseif($tipo_op=='ND' && $tban['tbanco']=='CAJ'){
 	$tbanco = 'caja';
 	$tpago  = $tban['banco'];
-	$titu   = 'COMPROBANTE DE PAGO EN EFECTIVO';
+	$titu   = 'EGRESO EN EFECTIVO';
 }elseif($tipo_op=='ND' && $tban['tbanco']!='CAJ'){
 	$tbanco = 'banco';
 	$tpago  = $tban['banco'].' <b>Cuenta:</b> '.$tban['numcuent'].' <b>D&eacute;bito:</b> '.$numche;
-	$titu   = 'COMPROBANTE DE PAGO POR TRANSFERENCIA BANCARIA';
+	$titu   = 'EGRESO POR TRANSFERENCIA BANCARIA';
 }else{
 	$tbanco = '';
 	$tpago  = '';
-	$titu   = 'COMPROBANTE DE PAGO';
+	$titu   = 'EGRESO ';
 }
 
 $sel=array('b.tipo_doc','b.numero','b.fecha','b.monto','b.abono','b.reten','b.ppago','b.cambio','b.mora','b.reteiva');
@@ -134,38 +134,38 @@ $ittot['monto']=$ittot['reten']=$ittot['ppago']=$ittot['cambio']=$ittot['mora']=
 //     Encabezado
 //************************
 $encabezado = <<<encabezado
-						<table style="width: 100%;" class="header">
+						<table style="width: 100%;" class="header" border='0'>
 							<tr>
 								<td><h1 style="text-align: left">${titu} No. ${numero}</h1></td>
 								<td><h1 style="text-align: right">Fecha: ${hfecha}</h1></td>
 							</tr><tr>
-								<td colspan='2'><h1 style="text-align: center">Por Bs.: ***${monto}***</h1></td>
+								<td colspan='2' style="text-align: center;font-size:18pt;font-weight:bold;">Por Bs.: ***${monto}***</td>
+							</tr><tr>
+								<td colspan='2' style="text-align: center;font-size:8pt;">(Son: ${montole} Bs.)</td>
 							</tr>
 						</table>
-						<table align='center' style="font-size: 8pt;">
+						<br>
+						<table align='center' style="font-size: 8pt;width:95%;" border='0'>
 							<tr>
-								<td><b>Pagado a:</b></td>
-								<td>(${proveed}) ${nombre}</td>
+								<td width='70'>Pagado a:</td>
+								<td style="font-size:11pt;">(${proveed}) <b>${nombre}</b></td>
 							</tr>
 							<tr>
-								<td><b>Con RIF:</b></td>
-								<td>${rifci}</td>
+								<td>RIF o C.I.:</td>
+								<td style="font-size:11pt;"><b>${rifci}</b></td>
 							</tr>
 							<tr>
-								<td><b>La cantidad de:</b></td>
-								<td>${montole} Bs.</td>
+								<td>Forma de Pago:</td>
+								<td><table><tr>${tpago}</tr></table></td>
 							</tr>
-							<tr>
-								<td><b>Por concepto de:</b></td>
-								<td>${observa}</td>
-							</tr>
-							<tr>
-								<td><b>Por ${tbanco}:</b></td>
-								<td>${tpago}</td>
-							</tr>
-
 						</table>
 encabezado;
+
+//							<tr>
+//								<td>Concepto de:</td>
+//								<td><b>${observa}</b></td>
+//							</tr>
+
 // Fin  Encabezado
 
 //************************
@@ -173,24 +173,28 @@ encabezado;
 //************************
 $estilo  = "style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;";
 $encabezado_tabla="
-	<h2>Detalle</h2>
 	<table class=\"change_order_items\" style=\"padding-top:0; \">
 		<thead>
 			<tr>
 				<th ${estilo}' >Documento   </th>
 				<th ${estilo}' >Fecha       </th>
-				<th ${estilo}' >Monto/Abono </th>
+				<th ${estilo}' >Monto       </th>
 				<th ${estilo}' >Ret/ISLR    </th>
 				<th ${estilo}' >Desc./P/Pago</th>
-				<th ${estilo}' >Dif/Cambio  </th>
-				<th ${estilo}' >Int./Mora   </th>
-				<th ${estilo}' >Ret/IVA     </th>
 				<th ${estilo}' >Abono neto  </th>
 			</tr>
 		</thead>
 		<tbody>
 ";
+
+//				<!-- th ${estilo}' >Dif/Cambio  </th>
+//				<th ${estilo}' >Int./Mora   </th>
+//				<th ${estilo}' >Ret/IVA     </th -->
+
+
 //Fin Encabezado Tabla
+
+
 
 //************************
 //     Pie Pagina
@@ -200,9 +204,6 @@ $pie_final=<<<piefinal
 		<tfoot style='border:1px solid;background:#EEEEEE;'>
 			<tr>
 				<td colspan='2' >Totales...</td>
-				<td style="text-align: right">%s</td>
-				<td style="text-align: right">%s</td>
-				<td style="text-align: right">%s</td>
 				<td style="text-align: right">%s</td>
 				<td style="text-align: right">%s</td>
 				<td style="text-align: right">%s</td>
@@ -219,6 +220,11 @@ $pie_final=<<<piefinal
 		</tr>
 	</table>
 piefinal;
+
+//				<!--td style="text-align: right">%s</td>
+//				<td style="text-align: right">%s</td>
+//				<td style="text-align: right">%s</td -->
+
 
 $pie_continuo=<<<piecontinuo
 		</tbody>
@@ -252,9 +258,6 @@ foreach ($detalle AS $items){ $i++;
 				<td style="text-align: right"><?php $ittot['monto']   += $items->monto  ; echo nformat($items->monto  ,2); ?></td>
 				<td style="text-align: right"><?php $ittot['reten']   += $items->reten  ; echo nformat($items->reten  ,2); ?></td>
 				<td style="text-align: right"><?php $ittot['ppago']   += $items->ppago  ; echo nformat($items->ppago  ,2); ?></td>
-				<td style="text-align: right"><?php $ittot['cambio']  += $items->cambio ; echo nformat($items->cambio ,2); ?></td>
-				<td style="text-align: right"><?php $ittot['mora']    += $items->mora   ; echo nformat($items->mora   ,2); ?></td>
-				<td style="text-align: right"><?php $ittot['reteiva'] += $items->reteiva; echo nformat($items->reteiva,2); ?></td>
 				<td style="text-align: right"><?php $ittot['abono']   += $items->abono  ; echo nformat($items->abono  ,2); ?></td>
 				<?php
 				$lineas++;
@@ -267,6 +270,12 @@ foreach ($detalle AS $items){ $i++;
 				?>
 			</tr>
 <?php
+
+//				<!-- td style="text-align: right"><?php $ittot['cambio']  += $items->cambio ; echo nformat($items->cambio ,2); ? ></td>
+//				<td style="text-align: right"><?php $ittot['mora']    += $items->mora   ; echo nformat($items->mora   ,2); ? ></td>
+//				<td style="text-align: right"><?php $ittot['reteiva'] += $items->reteiva; echo nformat($items->reteiva,2); ? ></td -->
+
+
 		$mod = ! $mod;
 	} while ($clinea);
 }
@@ -276,12 +285,10 @@ for(1; $lineas<$maxlin;$lineas++){ ?>
 				<td>&nbsp;</td><td>&nbsp;</td>
 				<td>&nbsp;</td><td>&nbsp;</td>
 				<td>&nbsp;</td><td>&nbsp;</td>
-				<td>&nbsp;</td><td>&nbsp;</td>
-				<td>&nbsp;</td>
 			</tr>
 <?php
 	$mod = ! $mod;
 }
-echo sprintf($pie_final,nformat($ittot['monto']),nformat($ittot['reten']),nformat($ittot['ppago']),nformat($ittot['cambio']),nformat($ittot['mora']),nformat($ittot['reteiva']),nformat($ittot['abono']));
+echo sprintf($pie_final,nformat($ittot['monto']),nformat($ittot['reten']),nformat($ittot['ppago']),nformat($ittot['abono']));
 ?></body>
 </html>

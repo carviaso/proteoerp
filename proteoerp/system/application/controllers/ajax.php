@@ -1272,6 +1272,37 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
+	//Autocomplete para botr
+	function autobotr(){
+		$q   = $this->input->post('q');
+
+		$data = '[{ }]';
+		if($q!==false){
+			$mid = $this->db->escape('%'.$q.'%');
+			$mSQL = "SELECT a.codigo, a.nombre descrip
+				FROM botr AS a
+			WHERE a.codigo LIKE ${mid} OR a.nombre LIKE ${mid} ORDER BY a.nombre LIMIT ".$this->autolimit;
+
+			$query = $this->db->query($mSQL);
+			$retArray = array();
+			$retorno = array();
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$retArray['value']      = $row['codigo'];
+					$retArray['label']      = trim($row['codigo']).' - '.utf8_encode(trim($row['descrip']));
+					$retArray['codigo']     = utf8_encode(trim($row['codigo']));
+					$retArray['descrip']    = utf8_encode(trim($row['descrip']));
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+			}
+		}
+		echo $data;
+	}
+
+
+	//******************************************************************
 	//Autocomplete para las labores de sinv
 	function buscaordplabor(){
 		$mid   = $this->input->post('q');

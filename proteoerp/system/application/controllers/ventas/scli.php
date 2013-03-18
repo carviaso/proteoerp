@@ -29,7 +29,8 @@ class Scli extends validaciones {
 		if (!in_array('twitter',  $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN twitter VARCHAR(120) NULL ');
 		if (!in_array('upago',    $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN upago  VARCHAR(6) NULL ');
 		if (!in_array('tarifa',   $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN tarifa VARCHAR(15) NULL ');
-		if (!in_array('tarimonto',$campos)) $this->db->query("ALTER TABLE `scli` ADD COLUMN `tarimonto` FLOAT UNSIGNED NULL DEFAULT NULL COMMENT 'unidades tributarias a cobrar por servicio'");
+		if (!in_array('tarimonto',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN tarimonto FLOAT UNSIGNED NULL DEFAULT NULL COMMENT 'unidades tributarias a cobrar por servicio'");
+		if (!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN canticipo VARCHAR(15) NULL DEFAULT NULL COMMENT 'Cuenta contable de Anticipo' AFTER cuenta");
 
 
 		if(!$this->db->table_exists('tarifa')){
@@ -79,173 +80,6 @@ class Scli extends validaciones {
 		array('id'=>'fborra' , 'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
-
-/*
-		$consulrif     = trim($this->datasis->traevalor('CONSULRIF'));
-		$lcuenta       = site_url('contabilidad/cpla/autocomplete/codigo');
-		$lsocio        = site_url('ventas/scli/autocomplete/cliente');
-
-		$link20=site_url('ventas/scli/scliexiste');
-		$link21=site_url('ventas/scli/sclicodigo');
-
-		$postready ='
-
-$(function() {
-	//Default Action
-	$("#cuenta").autocomplete("'.$lcuenta.'",{
-		delay:10,
-		//minChars:2,
-		matchSubset:1,
-		matchContains:1,
-		cacheLength:10,
-		formatItem:formato,
-		width:350,
-		autoFill:true
-	});
-
-	$("#socio").autocomplete("'.$lsocio.'",{
-		delay:10,
-		matchSubset:1,
-		matchContains:1,
-		cacheLength:10,
-		formatItem:formato,
-		width:350,
-		autoFill:true
-	});
-
-	$("#rifci").focusout(function() {
-		rif=$(this).val();
-		if(!chrif(rif)){
-			alert("Al parecer el Rif colocado no es correcto, por favor verifique con el SENIAT.");
-		}
-	});
-});
-function formato(row) {
-	return row[0] + "-" + row[1];
-}
-
-function anomfis(){
-	vtiva=$("#tiva").val();
-	if(vtiva=="C" || vtiva=="E" || vtiva=="R"){
-		$("#tr_nomfis").show();
-		$("#tr_riffis").show();
-	}else{
-		$("#nomfis").val("");
-		$("#riffis").val("");
-		$("#tr_nomfis").hide();
-		$("#tr_riffis").hide();
-	}
-}
-
-function consulrif(campo){
-	vrif=$("#"+campo).val();
-	if(vrif.length==0){
-		alert("Debe introducir primero un RIF");
-	}else{
-		vrif=vrif.toUpperCase();
-		$("#riffis").val(vrif);
-		window.open("'.$consulrif.'"+"?p_rif="+vrif,"CONSULRIF","height=350,width=410");
-	}
-}
-
-function chrif(rif){
-	rif.toUpperCase();
-	var patt=/[EJPGV][0-9]{9} * /g;
-	if(patt.test(rif)){
-		var factor= new Array(4,3,2,7,6,5,4,3,2);
-		var v=0;
-		if(rif[0]=="V"){
-			v=1;
-		}else if(rif[0]=="E"){
-			v=2;
-		}else if(rif[0]=="J"){
-			v=3;
-		}else if(rif[0]=="P"){
-			v=4;
-		}else if(rif[0]=="G"){
-			v=5;
-		}
-		acum=v*factor[0];
-		for(i=1;i<9;i++){
-			acum=acum+parseInt(rif[i])*factor[i];
-		}
-		acum=11-acum%11;
-		if(acum>=10 || acum<=0){
-			acum=0;
-		}
-		return (acum==parseInt(rif[9]));
-	}else{
-		return true;
-	}
-}
-
-function fusionar(mviejo){
-	var yurl = "";
-	$.prompt("Codigo Nuevo","" ,"Codigo Nuevo", function(mcodigo){
-		if( mcodigo==null ){
-			jAlert("Cancelado por el usuario","Informacion");
-		} else if( mcodigo=="" ) {
-			jAlert("Cancelado,  Codigo vacio","Informacion");
-		} else {
-			//mcodigo=jQuery.trim(mcodig);
-			//jAlert("Aceptado "+mcodigo);
-			yurl = encodeURIComponent(mcodigo);
-			$.ajax({
-				url: "'.$link20.'",
-				global: false,
-				type: "POST",
-				data: ({ codigo : encodeURIComponent(mcodigo) }),
-				dataType: "text",
-				async: false,
-				success: function(sino) {
-					if (sino.substring(0,1)=="S"){
-						jConfirm(
-							"Ya existe el codigo <div style=\"font-size: 200%;font-weight: bold \">"+mcodigo+"</"+"div>"+sino.substring(1)+"<p>si prosigue se eliminara el producto anterior y<br/> todo el movimiento de este, pasara al codigo "+mcodigo+"</"+"p> <p style=\"align: center;\">Desea <strong>Fusionarlos?</"+"strong></"+"p>",
-							"Confirmar Fusion",
-							function(r){
-							if (r) { sclicambia("S", mviejo, mcodigo); }
-							}
-						);
-					} else {
-						jConfirm(
-							"Sustitur el codigo actual  por: <center><h2 style=\"background: #ddeedd\">"+mcodigo+"</"+"h2></"+"center> <p>Al cambiar de codigo el producto, todos los<br/> movimientos y estadisticas se cambiaran<br/> correspondientemente.</"+"p> ",
-							"Confirmar cambio de codigo",
-							function(r) {
-								if (r) { sclicambia("N", mviejo, mcodigo); }
-							}
-						)
-					}
-				},
-				error: function(h,t,e) { jAlert("Error..codigo="+yurl+" ",e) }
-			});
-		}
-	})
-};
-
-function sclicambia( mtipo, mviejo, mcodigo ) {
-	$.ajax({
-		url: "'.$link21.'",
-		global: false,
-		type: "POST",
-		data: ({ tipo:  mtipo,
-			 viejo: mviejo,
-			 codigo: encodeURIComponent(mcodigo) }),
-		dataType: "text",
-		async: false,
-		success: function(sino) {
-			jAlert("Cambio finalizado "+sino,"Finalizado Exitosamente")
-		},
-		error: function(h,t,e) {jAlert("Error..","Finalizado con Error" )
-		}
-	});
-
-	if( mtipo=="N" ) {
-		location.reload(true);
-	} else {
-		location.replace("'.site_url("inventario/sinv/filteredgrid").'");
-	}
-}
-';*/
 
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
@@ -857,42 +691,31 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
 
-/*
-		$grid->addField('gr_desc');
-		$grid->label('Grupo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 130,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 20 }',
-		));
-
-		$grid->addField('nit');
-		$grid->label('Nit');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 150,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 15 }',
-		));
-*/
-
 		$linea = $linea + 1;
 		$grid->addField('cuenta');
-		$grid->label('Contable');
+		$grid->label('Cta.Contable');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 150,
+			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:false}',
 			'editoptions'   => '{'.$grid->autocomplete($link, 'cuenta','cucucu','<div id=\"cucucu\"><b>"+ui.item.descrip+"</b></div>').'}',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
+
+		$grid->addField('canticipo');
+		$grid->label('Cta.Anticipo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:false}',
+			'editoptions'   => '{'.$grid->autocomplete($link, 'canticipo','cacaca','<div id=\"cacaca\"><b>"+ui.item.descrip+"</b></div>').'}',
+			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
+		));
+
 
 		$grid->addField('dire11');
 		$grid->label('Direccion 1');
@@ -1047,43 +870,8 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			'editable'      => $editar,
 			'width'         => 50,
 			'edittype'      => "'text'",
-			//'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
-
-		/*$grid->addField('dire21');
-		$grid->label('Dire21');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 40 }',
-		));
-
-		$grid->addField('dire22');
-		$grid->label('Dire22');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 40 }',
-		));
-
-		$grid->addField('ciudad2');
-		$grid->label('Ciudad2');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 40 }',
-		));
-*/
 
 		$linea = $linea + 1;
 		$grid->addField('pais');
@@ -1093,7 +881,7 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			'editable'      => $editar,
 			'width'         => 180,
 			'edittype'      => "'text'",
-			//'editrules'     => '{ required:true}',
+			'editrules'     => '{ required:false}',
 			'editoptions'   => '{ size:30, maxlength: 18 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
@@ -1133,7 +921,7 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			'editable'      => $editar,
 			'width'         => 150,
 			'edittype'      => "'text'",
-			//'editrules'     => '{ required:true}',
+			'editrules'     => '{ required:false}',
 			'editoptions'   => '{ size:30, maxlength: 30 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
@@ -1145,11 +933,10 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			'editable'      => $editar,
 			'width'         => 90,
 			'edittype'      => "'text'",
-			//'editrules'     => '{ required:true}',
+			'editrules'     => '{ required:false}',
 			'editoptions'   => '{ size:10, maxlength: 13 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
-
 
 		$linea = $linea + 1;
 		$grid->addField('email');
@@ -1187,7 +974,7 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			'editable'      => $editar,
 			'width'         => 180,
 			'edittype'      => "'text'",
-			//'editrules'     => '{ required:true}',
+			'editrules'     => '{ required:false}',
 			'editoptions'   => '{ size:30, maxlength: 18 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
@@ -1227,81 +1014,6 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
 
-/*
-		$grid->addField('ciudad');
-		$grid->label('Ciudad');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 100,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 40 }',
-		));
-
-		$grid->addField('separa');
-		$grid->label('Separa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 1 }',
-		));
-
-		$grid->addField('copias');
-		$grid->label('Copias');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
-		));
-
-		$grid->addField('regimen');
-		$grid->label('Regimen');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 1 }',
-		));
-
-		$grid->addField('comisio');
-		$grid->label('Comisio');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 50,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 5 }',
-		));
-
-		$grid->addField('porcomi');
-		$grid->label('Porcomi');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-*/
-
 		$grid->addField('fecha1');
 		$grid->label('Fecha1');
 		$grid->params(array(
@@ -1314,43 +1026,6 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			'editrules'     => '{ required:false,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
 		));
-
-/*
-		$grid->addField('fecha2');
-		$grid->label('Fecha2');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-		$grid->addField('clave');
-		$grid->label('Clave');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 12 }',
-		));
-
-		$grid->addField('riffis');
-		$grid->label('Riffis');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 100,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 10 }',
-		));
-*/
-
 
 		$grid->addField('mensaje');
 		$grid->label('Mensaje');
@@ -1771,6 +1446,17 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			'where'    => "codigo LIKE \"$qformato\"",
 			);
 
+		$mANTI=array(
+			'tabla'    => 'cpla',
+			'columnas' => array(
+			'codigo'   => 'C&oacute;digo',
+			'descrip'  => 'Descripci&oacute;n'),
+			'filtro'   => array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
+			'retornar' => array('codigo'=>'canticipo'),
+			'titulo'   => 'Buscar Cuenta',
+			'where'    => "codigo LIKE \"$qformato\"",
+			);
+
 
 		$mTARIFA=array(
 			'tabla'     => 'tarifa',
@@ -1784,6 +1470,7 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 
 		$boton = $this->datasis->modbus($mSCLId);
 		$bcpla = $this->datasis->modbus($mCPLA);
+		$banti = $this->datasis->modbus($mANTI,'canticipo');
 
 		$smenu['link'] = barra_menu('131');
 		$consulrif     = trim($this->datasis->traevalor('CONSULRIF'));
@@ -1941,75 +1628,6 @@ function chrif(rif){
 		return true;
 	}
 }
-'./*
-function fusionar(mviejo){
-	var yurl = "";
-	$.prompt("Codigo Nuevo","" ,"Codigo Nuevo", function(mcodigo){
-		if( mcodigo==null ){
-			jAlert("Cancelado por el usuario","Informacion");
-		} else if( mcodigo=="" ) {
-			jAlert("Cancelado,  Codigo vacio","Informacion");
-		} else {
-			//mcodigo=jQuery.trim(mcodig);
-			//jAlert("Aceptado "+mcodigo);
-			yurl = encodeURIComponent(mcodigo);
-			$.ajax({
-				url: "'.$link20.'",
-				global: false,
-				type: "POST",
-				data: ({ codigo : encodeURIComponent(mcodigo) }),
-				dataType: "text",
-				async: false,
-				success: function(sino) {
-					if (sino.substring(0,1)=="S"){
-						jConfirm(
-							"Ya existe el codigo <div style=\"font-size: 200%;font-weight: bold \">"+mcodigo+"</"+"div>"+sino.substring(1)+"<p>si prosigue se eliminara el producto anterior y<br/> todo el movimiento de este, pasara al codigo "+mcodigo+"</"+"p> <p style=\"align: center;\">Desea <strong>Fusionarlos?</"+"strong></"+"p>",
-							"Confirmar Fusion",
-							function(r){
-							if (r) { sclicambia("S", mviejo, mcodigo); }
-							}
-						);
-					} else {
-						jConfirm(
-							"Sustitur el codigo actual  por: <center><h2 style=\"background: #ddeedd\">"+mcodigo+"</"+"h2></"+"center> <p>Al cambiar de codigo el producto, todos los<br/> movimientos y estadisticas se cambiaran<br/> correspondientemente.</"+"p> ",
-							"Confirmar cambio de codigo",
-							function(r) {
-								if (r) { sclicambia("N", mviejo, mcodigo); }
-							}
-						)
-					}
-				},
-				error: function(h,t,e) { jAlert("Error..codigo="+yurl+" ",e) }
-			});
-		}
-	})
-};
-
-function sclicambia( mtipo, mviejo, mcodigo ) {
-	$.ajax({
-		url: "'.$link21.'",
-		global: false,
-		type: "POST",
-		data: ({ tipo:  mtipo,
-			 viejo: mviejo,
-			 codigo: encodeURIComponent(mcodigo) }),
-		dataType: "text",
-		async: false,
-		success: function(sino) {
-			jAlert("Cambio finalizado "+sino,"Finalizado Exitosamente")
-		},
-		error: function(h,t,e) {jAlert("Error..","Finalizado con Error" )
-		}
-	});
-
-	if( mtipo=="N" ) {
-		location.reload(true);
-	} else {
-		location.replace("'.site_url("inventario/sinv/filteredgrid").'");
-	}
-}
-*/
-'
 </script>
 ';
 
@@ -2018,8 +1636,6 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 
 		$edit = new DataEdit('Clientes', $do);
 		$edit->back_url = site_url('ventas/scli/filteredgrid');
-		//$edit->script($script, 'create');
-		//$edit->script($script, 'modify');
 
 		$edit->pre_process('delete','_pre_del');
 		$edit->pre_process('insert','_pre_ins');
@@ -2063,11 +1679,9 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		$edit->grupo->style = 'width:200px';
 		$edit->grupo->insertValue = $this->datasis->dameval('SELECT grupo FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"');
 
-		//$lriffis='<a href="javascript:consulrif(\'rifci\');" title="SENIAT" onclick="" style="color:red;font-size:9px;border:none; "> SENIAT</a>';
 		$edit->rifci = new inputField($this->pi18n->msj('rifci','RIF/CI'), 'rifci');
 		$edit->rifci->rule = 'trim|strtoupper|required|callback_chci';
 		$edit->rifci->maxlength =13;
-		//$edit->rifci->append($lriffis);
 		$edit->rifci->size =13;
 
 		$obj  ='dire11';
@@ -2131,12 +1745,9 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 
 		$arr_tiva=$this->pi18n->arr_msj('tivaarr','N=No Contribuyente,C=Contribuyente,E=Especial,R=Regimen Exento,O=Otro');
 		$edit->tiva = new dropdownField('Tipo Fiscal', 'tiva');
-		//$edit->tiva->option('','Seleccionar');
 		$edit->tiva->options($arr_tiva);
 		$edit->tiva->style = 'width:130px';
 		$edit->tiva->insertValue = 'N';
-
-		//$edit->tiva->rule='required|callback_chdfiscal';
 
 		$lriffis='<a href="javascript:consulrif(\'riffis\');" title="Consultar RIF en el SENIAT" onclick=""> SENIAT</a>';
 		$edit->riffis = new inputField('RIF F&iacute;scal', 'riffis');
@@ -2161,12 +1772,18 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		$edit->email->size =22;
 		$edit->email->maxlength =100;
 
-		$edit->cuenta = new inputField('Contable', 'cuenta');
+		$edit->cuenta = new inputField('Cta.Contable', 'cuenta');
 		$edit->cuenta->rule='trim|callback_chcuentac';
 		$edit->cuenta->append($bcpla);
 		$edit->cuenta->size=15;
 		$edit->cuenta->maxlength =15;
 		$edit->cuenta->insertValue = $this->datasis->dameval('SELECT cuenta FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"');
+
+		$edit->canticipo = new inputField('Cta.Anticipo', 'canticipo');
+		$edit->canticipo->rule='trim|callback_chcuentac';
+		$edit->canticipo->append($banti);
+		$edit->canticipo->size=15;
+		$edit->canticipo->maxlength =15;
 
 		$edit->telefono = new inputField('Tel&eacute;fonos', 'telefono');
 		$edit->telefono->rule = 'trim';
@@ -2259,7 +1876,6 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		$edit->tarifa = new inputField('Tarifa', 'tarifa');
 		$edit->tarifa->rule = 'trim|callback_chtarifa';
 		$edit->tarifa->size = 6;
-		//$edit->tarifa->maxlength =15;
 
 		$edit->tarimonto = new inputField('Tarifa ajustada', 'tarimonto');
 		$edit->tarimonto->rule = 'trim';
@@ -2277,7 +1893,6 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 		$edit->tminimo->showformat  = 'decimal';
 		$edit->tminimo->type='inputhidden';
 
-		//$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 
 		if($this->genesal){
 			$edit->build();
@@ -2290,27 +1905,6 @@ function sclicambia( mtipo, mviejo, mcodigo ) {
 			$conten['form']   =&  $edit;
 			$conten['script'] = $script;
 			$data['content']  = $this->load->view('view_scli', $conten);
-/*
-			$data['content'] .= $this->pi18n->fallas();
-			$data['smenu']    = $this->load->view('view_sub_menu', $smenu,true);
-			$data['title']    = heading('('.$edit->cliente->value.') '.substr($edit->nombre->value,0,30));
-			$data['script']   = script('jquery.js');
-			$data["script"]  .= script("jquery-ui.js");
-			$data["script"]  .= script("jquery.alerts.js");
-			$data['script']  .= script('plugins/jquery.numeric.pack.js');
-			$data['script']  .= script('plugins/jquery.floatnumber.js');
-			$data['script']  .= script('plugins/jquery.autocomplete.js');
-			$data["script"]  .= script("plugins/jquery.blockUI.js");
-//			$data["script"]  .= script("sinvmaes.js");
-			$data["script"]  .= $script;
-			$data['style']	 = style("jquery.alerts.css");
-			$data['style']	.= style("redmond/jquery-ui.css");
-			$data['style']  .= style('jquery.autocomplete.css');
-			$data['style']	.= $style;
-
-			$data['head']    = $this->rapyd->get_head();
-			//$this->load->view('view_ventanas', $data);
-*/
 
 		}else{
 			$edit->on_save_redirect=false;

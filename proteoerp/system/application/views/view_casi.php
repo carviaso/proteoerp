@@ -173,15 +173,13 @@ function post_modbus(nind){
 	</tr>
 	<tr>
 		<td>
+		<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
 		<table width="100%" style="margin: 0; width: 100%;">
 			<tr>
-				<th colspan='5' class="littletableheader">Asientos</th>
-			</tr>
-			<tr>
-				<td class="littletableheader"><?php echo $form->comprob->label; ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->comprob->output;?>&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->status->label   ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->status->output  ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->comprob->label;  ?>*&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->comprob->output; ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->status->label;   ?>*&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->status->output;  ?>&nbsp;</td>
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->fecha->label;   ?>*&nbsp;</td>
@@ -190,14 +188,13 @@ function post_modbus(nind){
 				<td class="littletablerow">   <?php echo $form->descrip->output; ?>&nbsp;</td>
 			</tr>
 		</table><br>
+		</fieldset>
 		</td>
 	</tr>
 	<tr>
 		<td>
+		<div id='grid_container' style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px'>
 		<table width='100%'>
-			<tr>
-				<th colspan='8' class="littletableheader">Lista de cuentas</th>
-			</tr>
 			<tr>
 				<td class="littletableheader">Cuenta</td>
 				<td class="littletableheader">Referencia</td>
@@ -210,7 +207,6 @@ function post_modbus(nind){
 					<td class="littletableheader">&nbsp;</td>
 				<?php } ?>
 			</tr>
-
 			<?php for($i=0;$i<$form->max_rel_count['itcasi'];$i++) {
 				$it_cuenta     = "cuenta_$i";
 				$it_concepto   = "concepto_$i";
@@ -221,11 +217,9 @@ function post_modbus(nind){
 				$it_sucursal   = "itsucursal_$i";
 				$it_cplaccosto = "cplaccosto_$i";
 				$it_cpladeparta= "cpladeparta_$i";
-
 				$pprecios = $form->$it_cplaccosto->output;
 				$pprecios .= $form->$it_cpladeparta->output;
 			?>
-
 			<tr id='tr_itcasi_<?php echo $i; ?>'>
 				<td class="littletablerow" align="left" nowrap><?php echo $form->$it_cuenta->output;  ?></td>
 				<td class="littletablerow" align="left" ><?php echo $form->$it_referen->output; ?></td>
@@ -246,17 +240,17 @@ function post_modbus(nind){
 				<td id='cueca'></td>
 			</tr>
 		</table>
-		<?php echo $container_bl ?>
-		<?php echo $container_br ?>
+		</div>
 		</td>
 	</tr>
 	<tr>
 		<td>
 		<table width='100%'>
 			<tr>
-				<th colspan='6' class="littletableheader">Res&uacute;men</th>
-			</tr>
-			<tr>
+				<td>
+					<?php echo $container_bl ?>
+					<?php echo $container_br ?>
+				</td>
 				<td class="littletableheader">           <?php echo $form->debe->label;   ?></td>
 				<td class="littletablerow" align='right'><?php echo $form->debe->output;  ?></td>
 				<td class="littletableheader">           <?php echo $form->haber->label;  ?></td>

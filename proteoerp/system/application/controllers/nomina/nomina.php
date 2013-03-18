@@ -1,6 +1,6 @@
 <?php
 class Nomina extends Controller {
-	var $mModulo = 'NOMINA';
+	var $mModulo = 'NOMI';
 	var $titp    = 'NOMINAS GUARDADAS';
 	var $tits    = 'NOMINAS GUARDADAS';
 	var $url     = 'nomina/nomina/';
@@ -9,15 +9,15 @@ class Nomina extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		$this->datasis->modulo_nombre( 'NOMINA', $ventana=0 );
+		$this->datasis->modulo_nombre( 'NOMI', $ventana=0 );
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('nomina','id') ) {
+		if ( !$this->datasis->iscampo('nomina','id') ) {
 			$this->db->simple_query('ALTER TABLE nomina DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE nomina ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE nomina ADD INDEX numero (numero)');
 			$this->db->simple_query('ALTER TABLE nomina ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
+		};
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -48,8 +48,8 @@ class Nomina extends Controller {
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
 		$param['SouthPanel']  = $SouthPanel;
-		$param['listados']    = $this->datasis->listados('NOMINA', 'JQ');
-		$param['otros']       = $this->datasis->otros('NOMINA', 'JQ');
+		$param['listados']    = $this->datasis->listados('NOMI', 'JQ');
+		$param['otros']       = $this->datasis->otros('NOMI', 'JQ');
 		$param['temas']       = array('proteo','darkness','anexos1');
 		$param['bodyscript']  = $bodyscript;
 		$param['tabs']        = false;
@@ -235,15 +235,28 @@ class Nomina extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
 
 
+		$grid->addField('fecha');
+		$grid->label('Fecha');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 70,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+
 		$grid->addField('frecuencia');
-		$grid->label('Frecuencia');
+		$grid->label('Frec.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -259,31 +272,18 @@ class Nomina extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
-
-
-		$grid->addField('depto');
-		$grid->label('Depto');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
 
 		$grid->addField('codigo');
 		$grid->label('Codigo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 150,
+			'width'         => 90,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:15, maxlength: 15 }',
@@ -369,19 +369,6 @@ class Nomina extends Controller {
 			'editable'      => $editar,
 			'width'         => 140,
 			'edittype'      => "'text'",
-		));
-
-
-		$grid->addField('fecha');
-		$grid->label('Fecha');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
 		));
 
 
@@ -478,6 +465,17 @@ class Nomina extends Controller {
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
 
+		$grid->addField('depto');
+		$grid->label('Depto');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:8, maxlength: 8 }',
+		));
+
 
 		$grid->addField('fechap');
 		$grid->label('Fechap');
@@ -527,10 +525,10 @@ class Nomina extends Controller {
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(    $this->datasis->sidapuede('NOMINA','INCLUIR%' ));
-		$grid->setEdit(   $this->datasis->sidapuede('NOMINA','MODIFICA%'));
-		$grid->setDelete( $this->datasis->sidapuede('NOMINA','BORR_REG%'));
-		$grid->setSearch( $this->datasis->sidapuede('NOMINA','BUSQUEDA%'));
+		$grid->setAdd(    $this->datasis->sidapuede('NOMI','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('NOMI','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('NOMI','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('NOMI','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
@@ -558,14 +556,15 @@ class Nomina extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('nomina');
 
-		$response   = $grid->getData('nomina', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('nomina', array(array()), array(), false, $mWHERE, 'numero DESC, codigo, concepto ' );
 		$rs = $grid->jsonresult( $response);
+
 		echo $rs;
 	}
 
-	/**
-	* Guarda la Informacion
-	*/
+	//******************************************************************
+	// Guarda la Informacion
+	//
 	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
@@ -583,7 +582,7 @@ class Nomina extends Controller {
 					$this->db->insert('nomina', $data);
 					echo "Registro Agregado";
 
-					logusu('NOMINA',"Registro ????? INCLUIDO");
+					logusu('NOMI',"Registro ????? INCLUIDO");
 				} else
 					echo "Ya existe un registro con ese $mcodp";
 			} else
@@ -619,6 +618,7 @@ class Nomina extends Controller {
 				echo "Registro Eliminado";
 			}
 		};
+
 	}
 
 	function dataedit(){
@@ -656,49 +656,49 @@ class Nomina extends Controller {
 		$edit->script($script,'modify');
 
 		$edit->numero = new inputField('Numero','numero');
-		$edit->numero->rule='';
-		$edit->numero->size =10;
-		$edit->numero->maxlength =8;
+		$edit->numero->rule          = '';
+		$edit->numero->size          = 10;
+		$edit->numero->maxlength     =  8;
 
 		$edit->frecuencia = new inputField('Frecuencia','frecuencia');
-		$edit->frecuencia->rule='';
-		$edit->frecuencia->size =3;
-		$edit->frecuencia->maxlength =1;
+		$edit->frecuencia->rule      = '';
+		$edit->frecuencia->size      =  3;
+		$edit->frecuencia->maxlength =  1;
 
 		$edit->contrato = new inputField('Contrato','contrato');
-		$edit->contrato->rule='';
-		$edit->contrato->size =10;
-		$edit->contrato->maxlength =8;
+		$edit->contrato->rule        = '';
+		$edit->contrato->size        = 10;
+		$edit->contrato->maxlength   =  8;
 
 		$edit->depto = new inputField('Depto','depto');
-		$edit->depto->rule='';
-		$edit->depto->size =10;
-		$edit->depto->maxlength =8;
+		$edit->depto->rule           = '';
+		$edit->depto->size           = 10;
+		$edit->depto->maxlength      =  8;
 
 		$edit->codigo = new inputField('Codigo','codigo');
-		$edit->codigo->rule='';
-		$edit->codigo->size =17;
-		$edit->codigo->maxlength =15;
+		$edit->codigo->rule          = '';
+		$edit->codigo->size          = 17;
+		$edit->codigo->maxlength     = 15;
 
 		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='';
-		$edit->nombre->size =32;
-		$edit->nombre->maxlength =30;
+		$edit->nombre->rule          = '';
+		$edit->nombre->size          = 32;
+		$edit->nombre->maxlength     = 30;
 
 		$edit->concepto = new inputField('Concepto','concepto');
-		$edit->concepto->rule='';
-		$edit->concepto->size =6;
-		$edit->concepto->maxlength =4;
+		$edit->concepto->rule        = '';
+		$edit->concepto->size        =  6;
+		$edit->concepto->maxlength   =  4;
 
 		$edit->tipo = new inputField('Tipo','tipo');
-		$edit->tipo->rule='';
-		$edit->tipo->size =3;
-		$edit->tipo->maxlength =1;
+		$edit->tipo->rule            = '';
+		$edit->tipo->size            =  3;
+		$edit->tipo->maxlength       =  1;
 
 		$edit->descrip = new inputField('Descrip','descrip');
-		$edit->descrip->rule='';
-		$edit->descrip->size =37;
-		$edit->descrip->maxlength =35;
+		$edit->descrip->rule         = '';
+		$edit->descrip->size         = 37;
+		$edit->descrip->maxlength    = 35;
 
 		$edit->grupo = new inputField('Grupo','grupo');
 		$edit->grupo->rule='';

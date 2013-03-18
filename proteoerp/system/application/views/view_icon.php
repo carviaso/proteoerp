@@ -8,21 +8,15 @@ if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unk
 	echo $form->output;
 else:
 
-if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
+if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string."</div>\n";
 
-//echo $form_scripts;
+echo $form_scripts;
 echo $form_begin;
 
 if($form->_status!='show'){ ?>
-
-<script language="javascript" type="text/javascript">
-$(function(){
-		
-
-
-});
-</script>
 <?php } ?>
+
+
 
 <?php echo $form->tipo->output; ?>
 

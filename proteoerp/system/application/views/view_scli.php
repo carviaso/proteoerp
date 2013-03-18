@@ -9,58 +9,13 @@ if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unk
 	echo $meco."</td><td align='center'>".img("images/borrar.jpg");
 else:
 ?>
-<?php echo $script ?>
+<?php echo $script; ?>
 
-<?php echo $form_scripts?>
+<?php echo $form_scripts; ?>
 
-<?php echo $form_begin?>
+<?php echo $form_begin; ?>
 
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
-<?php
-/*
-<table border='0' width='100%' style='background: #EEEEEE'>
-	<tr>
-		<td width='40' align='center'>
-			<?php if($form->_status=='show'){ ?>
-			<a href='<?php echo base_url()."ventas/scli/consulta/".$form->_dataobject->get('id'); ?>'>
-			<?php
-				$propiedad = array('src' => 'images/ojos.png', 'alt' => 'Consultar Movimiento', 'title' => 'Consultar Detalles','border'=>'0','height'=>'25');
-				echo img($propiedad);
-			?>
-			</a>
-		</td>
-		<td width='40' align='center'>
-			<a href='javascript:fusionar("<?php echo $form->_dataobject->get('cliente'); ?>")'>
-			<?php
-				$propiedad = array('src' => 'images/fusionar.png', 'alt' => 'Cambio de Codigo', 'title' => 'Cambio de codigo','border'=>'0','height'=>'30','width'=>'32');
-				echo img($propiedad);
-			?>
-			</a>
-		</td>
-
-		</td>
-
-		<td align='center' valign='middle' width='40'>
-			<?php } ?>
-
-			<a href='<?php echo base_url()."reportes/index/scli" ?>'>
-			<?php
-				$propiedad = array('src' => 'images/reportes.gif', 'alt' => 'Reportes', 'title' => 'Reportes','border'=>'0','height'=>'20');
-				echo img($propiedad);
-			?>
-			</a>
-		</td>
-		<td align='center' valign='middle'>
-			<?php  if ($form->tipo->value=='0') echo "<div style='font-size:14px;font-weight:bold;color: #B40404'>***DESACTIVADO***</div>"; ?>&nbsp;
-		</td>
-		<td align='right'><?php echo $container_tr; ?></td>
-	</tr>
-</table>
-<legend class="titulofieldset" style='color: #114411;'>Identificacion</legend>
-#FFFDE9
-*/
-?>
-
 <fieldset style='border: 1px outset #9AC8DA;background: #F6F8FF;'>
 <table border='0' width="100%">
 	<tr>
@@ -157,15 +112,9 @@ else:
 		<td valign='top' width='50%' style='border-top: 1px dotted; border-left: 1px dotted'>
 			<table border='0'  width='100%'>
 				<tr>
-					<td colspan='2' class="littletableheaderc">Direccion de Envio</td>
-				</tr>
-				<tr>
-					<td colspan='2' class="littletablerow"><?php echo $form->dire21->output ?>&nbsp;</td>
-				</tr>
-				<tr>
-					<td colspan='2' class="littletablerow"><?php echo $form->dire22->output ?>&nbsp;</td>
-				</tr>
-				<tr>
+					<td class="littletableheaderc">Direccion de Envio</td>
+					<td class="littletablerow"><?php echo $form->dire21->output ?>&nbsp;</td>
+					<td class="littletablerow"><?php echo $form->dire22->output ?>&nbsp;</td>
 					<td class="littletableheaderc"><?php echo $form->ciudad2->label ?></td>
 					<td class="littletablerow" style='font-size:11;'><?=$form->ciudad2->output ?>&nbsp;</td>
 				</tr>
@@ -223,28 +172,43 @@ else:
 			<td class="littletableheaderc">Cuenta Contable</td>
 			<td class="littletablerow"    ><?php echo $form->cuenta->output; ?>
 			<?php
-			if ( $form->_status == 'show' ) {
-				$mSQL = "SELECT descrip FROM cpla WHERE codigo='".trim($form->cuenta->output)."'";
+			if  ( !empty($form->cuenta->value) ) {
+				$mSQL = "SELECT descrip FROM cpla WHERE codigo='".trim($form->cuenta->value)."' limit 1";
 				echo $this->datasis->dameval($mSQL);
 			}
 			?>
 			</td>
+		</tr>
+		<tr>
+			<td class="littletableheaderc">Cuenta Anticipo</td>
+			<td class="littletablerow"    ><?php echo $form->canticipo->output; ?>
+			<?php
+			if  ( !empty($form->canticipo->value) ) {
+				$mSQL = "SELECT descrip FROM cpla WHERE codigo='".trim($form->canticipo->value)."' limit 1";
+				echo $this->datasis->dameval($mSQL);
+			}
+			?>
+			</td>
+		</tr>
+		</table>
 	</tr>
-	</table>
-	<table width= '100%' >
-		<tr>
-			<td class="littletableheaderc"><?php echo $form->mensaje->label;  ?></td>
-			<td class="littletablerow"><?php echo $form->mensaje->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletableheaderc"><?php echo $form->observa->label;  ?></td>
-			<td class="littletablerow"><?php echo $form->observa->output; ?></td>
-		</tr>
 	</table>
 	</fieldset>
         </div>
         <div id="tab3" style='background:#EEFFFF'>
 			<fieldset style='border: 1px outset #8AF8F8;background:#EEFFFF;'>
+			<table width= '100%' >
+				<tr>
+					<td class="littletableheaderc"><?php echo $form->mensaje->label;  ?></td>
+					<td class="littletablerow"><?php echo $form->mensaje->output; ?></td>
+				</tr>
+				<tr>
+					<td class="littletableheaderc"><?php echo $form->observa->label;  ?></td>
+					<td class="littletablerow"><?php echo $form->observa->output; ?></td>
+				</tr>
+			</table>
+			</fieldset>
+			<fieldset style='border: 1px outset #FEB404; background: #EFECDA;'>
 			<table width= '100%' >
 			<tr>
 				<td class="littletableheaderc" width='100'><?php echo $form->tarifa->label;  ?></td>
@@ -252,12 +216,8 @@ else:
 					echo $form->tarifa->output.$form->tactividad->output;
 					echo ' ('.$form->tminimo->output.')';
 					?></td>
-			</tr>
-			<tr>
 				<td class="littletableheaderc"><?php echo $form->upago->label;  ?></td>
 				<td class="littletablerow"><?php echo $form->upago->output; ?></td>
-			</tr>
-			<tr>
 				<td class="littletableheaderc"><?php echo $form->tarimonto->label;  ?></td>
 				<td class="littletablerow"><?php echo $form->tarimonto->output; ?></td>
 			</tr>

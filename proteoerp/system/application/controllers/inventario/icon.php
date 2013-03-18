@@ -36,8 +36,8 @@ class Icon extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"ingreso", "img"=>"images/pdf_logo.gif", "alt" => "Concepto de Ingreso", "label"=>"Concepto de Ingreso"));
-		$grid->wbotonadd(array("id"=>"egreso",  "img"=>"images/pdf_logo.gif", "alt" => "Concepto de Egreso", "label"=>"Concepto de Egreso"));
+		$grid->wbotonadd(array("id"=>"fingreso", "img"=>"images/agrega4.png", "alt" => "Concepto de Ingreso", "label"=>"Concepto de Ingreso",'tema'=>'anexos'));
+		$grid->wbotonadd(array("id"=>"fegreso",  "img"=>"images/agrega4.png", "alt" => "Concepto de Egreso",  "label"=>"Concepto de Egreso", 'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -67,28 +67,29 @@ class Icon extends Controller {
 		$bodyscript = '		<script type="text/javascript">';
 
 		$bodyscript .= '
-		$("#ingreso").click( function(){
-			iconadd("I");
+		$("#fingreso").click( function(){
+			$.post("'.site_url($this->url.'deingreso/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+
 		});';
 
 
 		$bodyscript .= '
-		$("#egreso").click( function(){
-			iconadd("E");
+		$("#fegreso").click( function(){
+			$.post("'.site_url($this->url.'deegreso/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
 		});';
 
 
 		$bodyscript .= '
 		function iconadd(tipo){
-			var ruta = "'.site_url($this->url.'deegreso/create').'";
-			if ( tipo == "I") {
-				ruta = "'.site_url($this->url.'deingreso/create').'";
-			}
-			$.post(ruta,
-			function(data){
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
+			alert("Use los Botones para Agregar");
 		};';
 
 		$bodyscript .= '
@@ -97,10 +98,17 @@ class Icon extends Controller {
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
-				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
-				});
+				if ( ret.tipo == "I" ){
+					$.post("'.site_url($this->url.'deingreso/modify').'/"+id, function(data){
+						$("#fedita").html(data);
+						$("#fedita").dialog( "open" );
+					});
+				} else {
+					$.post("'.site_url($this->url.'deegreso/modify').'/"+id, function(data){
+						$("#fedita").html(data);
+						$("#fedita").dialog( "open" );
+					});
+				}
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
@@ -248,6 +256,18 @@ class Icon extends Controller {
 
 		$grid  = new $this->jqdatagrid;
 
+		$grid->addField('tipo');
+		$grid->label('Tipo');
+		$grid->params(array(
+			'align'         => "'center'",
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
+		));
+
 		$grid->addField('codigo');
 		$grid->label('Codigo');
 		$grid->params(array(
@@ -285,7 +305,7 @@ class Icon extends Controller {
 
 
 		$grid->addField('gastode');
-		$grid->label('Gastode');
+		$grid->label('Descripcion');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -309,7 +329,7 @@ class Icon extends Controller {
 
 
 		$grid->addField('ingresod');
-		$grid->label('Ingresod');
+		$grid->label('Descripcion');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -319,7 +339,18 @@ class Icon extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 30 }',
 		));
 
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
 
+
+/*
 		$grid->addField('depto');
 		$grid->label('Depto');
 		$grid->params(array(
@@ -330,18 +361,9 @@ class Icon extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:2, maxlength: 2 }',
 		));
+*/
 
 
-		$grid->addField('tipo');
-		$grid->label('Tipo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:1, maxlength: 1 }',
-		));
 
 
 		$grid->showpager(true);
@@ -356,7 +378,7 @@ class Icon extends Controller {
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(    $this->datasis->sidapuede('ICON','INCLUIR%' ));
+		$grid->setAdd( false ); //  $this->datasis->sidapuede('ICON','INCLUIR%' ));
 		$grid->setEdit(   $this->datasis->sidapuede('ICON','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('ICON','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('ICON','BUSQUEDA%'));
@@ -466,50 +488,63 @@ class Icon extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});		';
+		$script = "
+		$('#ingreso').autocomplete({
+			source: function( req, add){
+				$.ajax({
+					url:  '".site_url('ajax/autobotr')."',
+					type: 'POST',
+					dataType: 'json',
+					data: 'q='+encodeURIComponent(req.term),
+					success:
+						function(data){
+							var sugiere = [];
+							if(data.length==0){
+								$('#ingreso').val('');
+								$('#ingresod').val('');
+							}else{
+								$.each(data,function(i, val){sugiere.push( val );});
+							}
+							add(sugiere);
+						},
+				})
+			},
+			minLength: 1,
+			select: function( event, ui ) {
+				$('#ingreso').attr('readonly', 'readonly');
+				$('#ingreso').val(ui.item.codigo);
+				$('#ingresod').val(ui.item.descrip);
+				setTimeout(function() { $('#ingreso').removeAttr('readonly'); }, 1500);
+			}
+		});
+		";
+
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
 
 		$edit->codigo = new inputField('Codigo','codigo');
-		$edit->codigo->rule='';
-		$edit->codigo->size =8;
-		$edit->codigo->maxlength =6;
+		$edit->codigo->rule        = '';
+		$edit->codigo->size        =  8;
+		$edit->codigo->maxlength   =  6;
 
 		$edit->concepto = new inputField('Concepto','concepto');
-		$edit->concepto->rule='';
-		$edit->concepto->size =32;
-		$edit->concepto->maxlength =30;
-/*
-		$edit->gasto = new inputField('Gasto','gasto');
-		$edit->gasto->rule='';
-		$edit->gasto->size =8;
-		$edit->gasto->maxlength =6;
+		$edit->concepto->rule      = '';
+		$edit->concepto->size      = 32;
+		$edit->concepto->maxlength = 30;
 
-		$edit->gastode = new inputField('Gastode','gastode');
-		$edit->gastode->rule='';
-		$edit->gastode->size =32;
-		$edit->gastode->maxlength =30;
-*/
 		$edit->ingreso = new inputField('Ingreso','ingreso');
-		$edit->ingreso->rule='';
-		$edit->ingreso->size =7;
-		$edit->ingreso->maxlength =5;
+		$edit->ingreso->rule       = '';
+		$edit->ingreso->size       =  7;
+		$edit->ingreso->maxlength  = 20;
 
 		$edit->ingresod = new inputField('Descripcion','ingresod');
-		$edit->ingresod->rule='';
-		$edit->ingresod->size =32;
-		$edit->ingresod->maxlength =30;
-/*
-		$edit->depto = new inputField('Depto','depto');
-		$edit->depto->rule='';
-		$edit->depto->size =4;
-		$edit->depto->maxlength =2;
-*/
+		$edit->ingresod->rule      = '';
+		$edit->ingresod->size      = 32;
+		$edit->ingresod->maxlength = 30;
+		$edit->ingresod->readonly  = true;
+
 		$edit->tipo = new hiddenField('Tipo','tipo');
-		$edit->tipo->insertValue = 'I';
+		$edit->tipo->insertValue   = 'I';
 
 		$edit->build();
 
@@ -542,50 +577,68 @@ class Icon extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});		';
+		$script = "
+		$('#gasto').autocomplete({
+			source: function( req, add){
+				$.ajax({
+					url:  '".site_url('ajax/automgas')."',
+					type: 'POST',
+					dataType: 'json',
+					data: 'q='+encodeURIComponent(req.term),
+					success:
+						function(data){
+							var sugiere = [];
+
+							if(data.length==0){
+								$('#gasto').val('');
+								$('#gastode').val('');
+							}else{
+								$.each(data,
+									function(i, val){
+										sugiere.push( val );
+									}
+								);
+							}
+							add(sugiere);
+						},
+				})
+			},
+			minLength: 1,
+			select: function( event, ui ) {
+				$('#gasto').attr('readonly', 'readonly');
+				$('#gasto').val(ui.item.codigo);
+				$('#gastode').val(ui.item.descrip);
+				setTimeout(function() {  $('#gasto').removeAttr('readonly'); }, 1500);
+			}
+		});
+		";
+
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
 
 		$edit->codigo = new inputField('Codigo','codigo');
-		$edit->codigo->rule='';
-		$edit->codigo->size =8;
-		$edit->codigo->maxlength =6;
+		$edit->codigo->rule        = '';
+		$edit->codigo->size        =  8;
+		$edit->codigo->maxlength   =  6;
 
 		$edit->concepto = new inputField('Concepto','concepto');
-		$edit->concepto->rule='';
-		$edit->concepto->size =32;
-		$edit->concepto->maxlength =30;
+		$edit->concepto->rule      = '';
+		$edit->concepto->size      = 32;
+		$edit->concepto->maxlength = 30;
 
 		$edit->gasto = new inputField('Gasto','gasto');
-		$edit->gasto->rule='';
-		$edit->gasto->size =8;
-		$edit->gasto->maxlength =6;
+		$edit->gasto->rule         = '';
+		$edit->gasto->size         =  8;
+		$edit->gasto->maxlength    = 20;
 
 		$edit->gastode = new inputField('Descripcion','gastode');
-		$edit->gastode->rule='';
-		$edit->gastode->size =32;
-		$edit->gastode->maxlength =30;
-/*
-		$edit->ingreso = new inputField('Ingreso','ingreso');
-		$edit->ingreso->rule='';
-		$edit->ingreso->size =7;
-		$edit->ingreso->maxlength =5;
+		$edit->gastode->rule       = '';
+		$edit->gastode->size       = 32;
+		$edit->gastode->maxlength  = 30;
+		$edit->gastode->readonly   = true;
 
-		$edit->ingresod = new inputField('Descripcion','ingresod');
-		$edit->ingresod->rule='';
-		$edit->ingresod->size =32;
-		$edit->ingresod->maxlength =30;
-
-		$edit->depto = new inputField('Depto','depto');
-		$edit->depto->rule='';
-		$edit->depto->size =4;
-		$edit->depto->maxlength =2;
-*/
 		$edit->tipo = new hiddenField('Tipo','tipo');
-		$edit->tipo->insertValue = 'E';
+		$edit->tipo->insertValue   = 'E';
 
 		$edit->build();
 
