@@ -1250,15 +1250,15 @@ class Lrece extends Controller {
 		$edit->proveed->maxlength = 45;
 		$edit->proveed->in        = 'flete';
 
-		$edit->fechal = new DateonlyField("Fecha llegada", "fechal","d/m/Y");
+		$edit->fechal = new DateonlyField('Fecha llegada', 'fechal','d/m/Y');
 		$edit->fechal->size = 10;
-		$edit->fechal->rule="trim|chfecha";
+		$edit->fechal->rule='required|chfecha';
 		$edit->fechal->insertValue = date('Y-m-d');
 		$edit->fechal->calendar = false;
 
-		$edit->fechar = new DateonlyField("Fecha Recoleccion", "fechar","d/m/Y");
+		$edit->fechar = new DateonlyField('Fecha Recolecci&oacute;n', 'fechar','d/m/Y');
 		$edit->fechar->size = 10;
-		$edit->fechar->rule="trim|chfecha";
+		$edit->fechar->rule='required|chfecha';
 		$edit->fechar->insertValue = date('Y-m-d');
 		$edit->fechar->calendar = false;
 
@@ -1358,7 +1358,6 @@ class Lrece extends Controller {
 			$conten['form'] =&  $edit;
 			$this->load->view('view_lrecean', $conten);
 		}
-
 	}
 
 	function _pre_dataedit_insert($do){
@@ -2171,6 +2170,7 @@ class Lrece extends Controller {
 
 		return true;
 	}
+
 	function _pre_apertura_delete($do){
 		$fecha  = $do->get('fecha');
 		$dbfecha= $this->db->escape($fecha);
@@ -2183,16 +2183,48 @@ class Lrece extends Controller {
 
 		return true;
 	}
+
 	function _pre_apertura_insert($do){
+		$do->set('fecha',date('Y-m-d'));
+
+		$hoy       = new DateTime();
+		$fregistro = new DateTime($do->get('fecha' ));
+		$frecolec  = new DateTime($do->get('fechar')); //Vaca
+		$fllegada  = new DateTime($do->get('fechal')); //llego transporte
+
+		if($frecolec > $hoy){
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'La fecha de llegada no puede mayor que la fecha actual';
+			return false;
+		}
+
+		if($fllegada  > $hoy){
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'La fecha de la llegada no puede mayor que la fecha actual';
+			return false;
+		}
+
+		if($frecolec > $fllegada){
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'La fecha de la recoleccion no puede ser mayor que la fecha de llegada';
+			return false;
+		}
+
+		$interval = date_diff($frecolec, $fllegada);
+		$diffdia  = intval($interval->format('%a'));
+		if($diffdia>1){
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'La fecha de la recoleccion no puede diferir mas de un dia con la fecha de llegada';
+			return false;
+		}
+
 		$lleno    = $do->get('lleno');
 		$vacio    = $do->get('vacio');
 		$neto     = $lleno-$vacio;
 		$densidad = $do->get('densidad');
 		$litros   = $neto*$densidad;
-		$do->set('litros',$litros);
+		if($vacio==0){
+			$do->set('litros',$lleno );
+		}else{
+			$do->set('litros',$litros);
+		}
 		$do->set('neto'  ,$neto);
-
-		$do->set('fecha',date('Y-m-d'));
 
 		$fecha  = $do->get('fecha');
 		$dbfecha= $this->db->escape($fecha);

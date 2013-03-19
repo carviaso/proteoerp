@@ -1045,13 +1045,15 @@ class Lpago extends Controller {
 		$this->db->join('lprecio AS e','e.id='.$this->db->escape($idlprecio));
 		$this->db->where('a.lista >','0');
 		$this->db->where('MID(b.ruta,1,1) <>','G');
-		$this->db->where("((b.fecha<='$fcorte' AND b.transporte<=0) OR (b.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND b.transporte>0))");
+		//$this->db->where("((b.fecha<='$fcorte' AND b.transporte<=0) OR (b.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND b.transporte>0))");
+		$this->db->where("b.fechar <= '$fcorte'");
 		$this->db->where('(a.pago IS NULL OR a.pago=0)');
 		$this->db->where('c.codprv',$proveed);
 	}
 
 	//Hace la consulta para el pago de los transportistas
 	function _sqltran($idlprecio,$proveed,$fcorte,$sum=true){
+
 		if($sum){
 			$ssum='SUM';
 		}else{
@@ -1066,7 +1068,9 @@ class Lpago extends Controller {
 		$this->db->where('a.lista >',0);
 		$this->db->where('(a.pago IS NULL OR a.pago=0)');
 		$this->db->where('MID(a.ruta,1,1) <>','G');
-		$this->db->where("((a.fecha<='$fcorte' AND a.transporte<=0) OR (a.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND a.transporte>0))");
+		//$this->db->where("((a.fecha<='$fcorte' AND a.transporte<=0) OR (a.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND a.transporte>0))");
+		$this->db->where("LEAST(a.fechal,a.fecha) <= '$fcorte'");
+
 		$this->db->where('b.codprv',$proveed);
 	}
 
@@ -1389,7 +1393,7 @@ class Lpago extends Controller {
 			if ( $this->uri->segment(5) == 'procesar' ) {
 				$_POST['valor'] = $tt;
 			}
-		} else 
+		} else
 			$tt = 'procesar';
 
 		$this->rapyd->load('datagrid','dataform');
@@ -1416,7 +1420,7 @@ class Lpago extends Controller {
 /*
 		$verdad = ($filter->on_success() && $filter->is_valid());
 		if ( $tt <> 'procesar') {
-			$verdad = true; 
+			$verdad = true;
 		}
 */
 

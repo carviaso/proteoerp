@@ -2,6 +2,8 @@ $base_process_uri   = $this->rapyd->uri->implode_uri("base_uri","gfid","orderby"
 $filter = new DataForm("");
 $filter->_process_uri = $this->rapyd->uri->add_clause($base_process_uri,"search");
 
+$filter->container = new containerField("alert","<b style='color:red;'>Si necesita sacar la existencia al d&iacute;a de hoy este no es el reporte correcto, utilice un reporte general de inventario, este reporte es solo para consultas de d&iacute;as pasados, ya que no se toman en cuenta las transacciones del d&iacute;a actual.</b>");
+
 $filter->fechad = new dateonlyField("Fecha", "fechad",'d/m/Y');
 $filter->fechad->insertValue = date("Y-m-d",mktime(0, 0, 0, date("m"), 0, date("Y")));
 $filter->fechad->rule='required';

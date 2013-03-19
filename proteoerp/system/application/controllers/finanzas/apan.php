@@ -1145,7 +1145,7 @@ class Apan extends Controller {
 			$ind = 'itemonto_'.$i;  $monto  = $this->input->post($ind);
 			$ind = 'iteid_'.$i;     $id     = $this->input->post($ind);
 			if(!is_numeric($monto)){
-				$do->error_message_ar['pre_ins'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no es num&eacute;rico.';
+				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no es num&eacute;rico.';
 				return false;
 				break;
 			}
@@ -1171,7 +1171,7 @@ class Apan extends Controller {
 			$ind = 'itmonto_'.$i;    $monto  = $this->input->post($ind);
 			$ind = 'itid_'.$i;       $id     = $this->input->post($ind);
 			if(!is_numeric($monto)){
-				$do->error_message_ar['pre_ins'] = 'El monto del efecto '.$tipo.$numero.' no es num&eacute;rico.';
+				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto '.$tipo.$numero.' no es num&eacute;rico.';
 				return false;
 				break;
 			}
@@ -1183,7 +1183,7 @@ class Apan extends Controller {
 		//Fin de la aplicacion
 
 		if($aplicar-$efectos != 0){
-			$do->error_message_ar['pre_ins']='El monto a aplicar es diferente al aplicado';
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto a aplicar es diferente al aplicado';
 			return false;
 		}
 
@@ -1246,7 +1246,7 @@ class Apan extends Controller {
 			}
 		}
 
-		$do->error_message_ar['pre_ins']='lalalalalaal';
+		$do->error_message_ar['pre_ins']=$do->error_message_ar['insert']='lalalalalaal';
 		return false;
 
 		return true;

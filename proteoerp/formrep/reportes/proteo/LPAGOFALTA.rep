@@ -1,0 +1,76 @@
+$base_process_uri   = $this->rapyd->uri->implode_uri("base_uri","gfid","orderby");
+
+$filter = new DataForm("Filtro del Reporte");
+$filter->_process_uri  = $this->rapyd->uri->add_clause($base_process_uri, "search");
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->fecha = new dateonlyField('Hasta', 'dfecha','d/m/Y');
+$filter->fecha->db_name ='a.fecha';
+$filter->fecha->clause ='where';
+$filter->fecha->dbformat='Y-m-d';
+$filter->fecha->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n'),date('j')-1*date('w')));
+$filter->fecha->operator='>=';
+$filter->fecha->rule='required';
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit("btnsubmit",RAPYD_BUTTON_SEARCH);
+$filter->build_form();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+
+	$fecha = $filter->fecha->newValue;
+
+	$mSQL="SELECT c.codprv, d.nombre, b.fecha,a.lista,a.id_lvaca,c.nombre AS nvaca,b.id,b.numero, 'Productores' AS tipo
+	FROM itlrece   AS a
+	JOIN lrece     AS b ON a.id_lrece=b.id
+	JOIN lvaca     AS c ON a.id_lvaca=c.id
+	LEFT JOIN sprv AS d ON c.codprv=d.proveed
+	WHERE a.lista > 0
+	 AND MID(b.ruta,1,1) <>'G'
+	 AND ((b.fecha<='${fecha}' AND b.transporte<=0) OR (b.fecha<=ADDDATE('${fecha}',INTERVAL 1 DAY)  AND b.transporte>0))
+	 AND (a.pago IS NULL OR a.pago=0)
+	UNION ALL
+	SELECT b.codprv, c.nombre, a.fecha,a.lista,'' AS id_lvaca,'' AS nvaca,a.id,a.numero,'Transportista' AS tipo
+	FROM lrece AS a
+	JOIN lruta AS b ON a.ruta=b.codigo
+	JOIN sprv  AS c ON b.codprv=c.proveed
+	WHERE a.lista >0
+	 AND (a.pago IS NULL OR a.pago=0)
+	 AND MID(a.ruta,1,1) <>'G'
+	 AND ((a.fecha<='${fecha}' AND a.transporte<=0) OR (a.fecha<=ADDDATE('${fecha}',INTERVAL 1 DAY)  AND a.transporte>0))
+	ORDER BY tipo,codprv,fecha";
+
+//echo $mSQL; exit();
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Recepciones sin pagar');
+	$pdf->setSubTitulo('Hasta la fecha: '.$filter->fecha->value);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+	$pdf->setType('fecha','date');
+
+	$pdf->AddCol('id'      , 20,'Recepcion' , 'L',9);
+	$pdf->AddCol('fecha'   , 20,'Fecha'     , 'L',9);
+	$pdf->AddCol('codprv'  , 20,'Proveedor' , 'L',9);
+	$pdf->AddCol('nombre'  , 80,'Nombre'    , 'L',9);
+	$pdf->AddCol('lista'   , 15,'Lista'     , 'R',9);
+	$pdf->AddCol('id_lvaca', 20,'Vaquera'   , 'R',9);
+	$pdf->AddCol('nvaca'   , 80,'N.vaquera' , 'L',9);
+
+	$pdf->setGrupoLabel('<#tipo#>');
+	$pdf->setGrupo('tipo');
+	$pdf->setTotalizar('lista');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data["filtro"] = $filter->output;
+	$data["titulo"] = '<h2 class="mainheader">Recepciones sin pagar</h2>';
+	$data["head"] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
