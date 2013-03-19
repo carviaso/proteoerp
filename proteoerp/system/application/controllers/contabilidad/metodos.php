@@ -4,7 +4,7 @@ class Metodos extends Controller {
 	//Genera las consulta para la contabilidad
 	function _hace_regla($modulo, $mCONTROL, $mGRUPO, $mFDESDE=null ) {
 		$cwhere = " a.$mCONTROL='$mGRUPO'";
-		$query=$this->db->query("SELECT modulo,regla,tabla,fecha,comprob,origen,condicion,agrupar,cuenta,referen,concepto,debe,haber,ccosto,sucursal FROM `reglascont` WHERE modulo='$modulo'  ORDER BY tabla,regla");
+		$query=$this->db->query("SELECT modulo, regla, tabla, fecha, comprob, origen, condicion, agrupar, cuenta, referen, concepto, debe, haber, ccosto, sucursal FROM reglascont WHERE modulo='$modulo'  ORDER BY tabla,regla");
 		foreach ($query->result_array() as $fila){
 			if ( $fila['tabla'] == "ITCASI" ) {
 				$select ="
@@ -35,7 +35,7 @@ class Metodos extends Controller {
 				if(count($exp)>0){
 					$ttabla  = array_shift($exp);
 					$dbfdesde= $this->db->escape($mFDESDE);
-					foreach($exp as $val){
+					foreach($exp as $val) {
 						if(strtoupper($val) == 'AS'){
 							continue;
 						}else{
@@ -44,12 +44,8 @@ class Metodos extends Controller {
 						}
 					}
 					$campos = $this->db->list_fields($ttabla);
+					$where .= " AND ".$fila['fecha']." >= $dbfdesde";
 
-					if(in_array('fecha'  ,$campos)){
-						$where .= " AND ${alias}.fecha >= $dbfdesde";
-					}elseif(in_array('recep'  ,$campos)){
-						$where .= " AND ${alias}.recep >= $dbfdesde";
-					}
 				}
 			}
 

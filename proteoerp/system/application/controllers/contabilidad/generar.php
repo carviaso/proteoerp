@@ -144,7 +144,7 @@ class Generar extends Metodos {
 	}
 
 
-	function _procesar($qfechai,$qfechaf,$generar=FALSE){
+	function _procesar( $qfechai, $qfechaf, $generar=FALSE){
 		$error=FALSE;
 
 		if($generar){
@@ -156,8 +156,8 @@ class Generar extends Metodos {
 				if ($mod_query->num_rows() > 0){
 					$mod_row = $mod_query->row_array();
 
-					$mTABLA  =$mod_row['origen'];
-					$mCONTROL=$mod_row['control'];
+					$mTABLA   = $mod_row['origen'];
+					$mCONTROL = $mod_row['control'];
 
 					$query=$this->db->simple_query("DELETE FROM casi   WHERE fecha BETWEEN $qfechai AND $qfechaf AND origen='$modulo'");
 					$query=$this->db->simple_query("DELETE FROM itcasi WHERE fecha BETWEEN $qfechai AND $qfechaf AND origen LIKE '$modulo%'");
@@ -180,15 +180,25 @@ class Generar extends Metodos {
 				$query = $this->db->query($mSQL);
 				foreach ($query->result_array() as $fila){
 					$aregla = $this->_hace_regla($modulo, $mCONTROL, $fila['mgrupo'],$qfechai);
+					
 					foreach ($aregla['casi'] as $casi){
 						$ejecasi='INSERT IGNORE INTO casi ( comprob, fecha, descrip, origen ) '.$casi;
 						$ejec=$this->db->simple_query($ejecasi);
-						if($ejec==FALSE){ memowrite($ejecasi,'generar'); $error=true; }
+						if($ejec==FALSE) {
+							memowrite($ejecasi,'generarca'); 
+							$error=true; 
+						}
+						
 					}
+					$mm = 1;
 					foreach ($aregla['itcasi'] as $itcasi){
 						$ejeitcasi ='INSERT INTO itcasi (fecha, comprob, origen,  cuenta, referen, concepto, debe,  haber, sucursal, ccosto) '.$itcasi;
 						$ejec=$this->db->simple_query($ejeitcasi);
-						if($ejec==FALSE){ memowrite($ejeitcasi,'generar'); $error=true; }
+						if($ejec==FALSE) {
+							memowrite($ejeitcasi,'generarit'.$mm); 
+							$error=true;
+						}
+						$mm++; 
 					}
 				}
 				$this->_borra_huerfano();
