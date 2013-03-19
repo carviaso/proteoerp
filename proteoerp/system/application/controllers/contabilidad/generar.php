@@ -14,12 +14,6 @@ class Generar extends Metodos {
 		$this->datasis->modulo_id($this->modulo,1);
 		$this->rapyd->load('datagrid','dataform','fields');
 
-		//$script='$(document).ready(function() {
-		//	$("#todos").click(function() { $("#genera").checkCheckboxes();   });
-		//	$("#nada").click(function()  { $("#genera").unCheckCheckboxes(); });
-		//	$("#alter").click(function() { $("#genera").toggleCheckboxes();  });
-		//});';
-
 		$control=$this->uri->segment(4);
 		$checkbox =  '<input type="checkbox" name="genera[]" value="<#modulo#>" CHECKED>';
 
@@ -167,18 +161,17 @@ class Generar extends Metodos {
 
 					$query=$this->db->simple_query("DELETE FROM casi   WHERE fecha BETWEEN $qfechai AND $qfechaf AND origen='$modulo'");
 					$query=$this->db->simple_query("DELETE FROM itcasi WHERE fecha BETWEEN $qfechai AND $qfechaf AND origen LIKE '$modulo%'");
-					//echo "DELETE FROM itcasi WHERE fecha BETWEEN $qfechai AND $qfechaf AND origen LIKE '$modulo%'";
 				}else{
 					continue;
 				}
 
-				$mSQL="UPDATE scst SET reten=0   WHERE reten   IS NULL AND  recep >= $qfechai ";
-				$query = $this->db->query($mSQL);
-
-				$mSQL="UPDATE scst SET reteiva=0 WHERE reteiva IS NULL AND  recep >= $qfechai ";
-				$query = $this->db->query($mSQL);
-
 				if ($modulo == 'SCST' ) {
+					$mSQL="UPDATE scst SET reten=0  WHERE reten IS NULL AND recep >= $qfechai ";
+					$query = $this->db->query($mSQL);
+
+					$mSQL="UPDATE scst SET reteiva=0 WHERE reteiva IS NULL AND  recep >= $qfechai ";
+					$query = $this->db->query($mSQL);
+					
 					$mSQL="SELECT a.$mCONTROL mgrupo FROM $mTABLA WHERE a.recep BETWEEN $qfechai AND $qfechaf GROUP BY a.$mCONTROL";
 				} else {
 					$mSQL="SELECT a.$mCONTROL mgrupo FROM $mTABLA WHERE a.fecha BETWEEN $qfechai AND $qfechaf GROUP BY a.$mCONTROL";

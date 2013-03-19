@@ -31,7 +31,7 @@ class Banc extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'recalban', 'img'=>'images/pdf_logo.gif',  'alt' => 'Formato PDF', 'label'=>'Recalcular Saldo'));
+		//$grid->wbotonadd(array('id'=>'recalban', 'img'=>'images/pdf_logo.gif',  'alt' => 'Formato PDF', 'label'=>'Recalcular Saldo'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -71,15 +71,78 @@ class Banc extends Controller {
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
 
+		$mSQL = "SELECT ano, ano nombre FROM bsal WHERE ano <= YEAR(curdate()) GROUP BY ano ORDER BY ano DESC";
+		$mano = $this->datasis->llenaopciones($mSQL, false, 'mmano');
+		$mano = str_replace('"',"'",$mano);
+
 		$bodyscript .= '
-		jQuery("#recalban").click( function(){
+		function crecalban() {
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
-				$.blockUI({message: "<h1>Calculando Saldos.....</h1><img  src=\''.base_url().'images/doggydig.gif\' width=\'131px\' height=\'79px\'  /> "});
-				$.post("'.site_url('finanzas/banc/recalban').'/"+ret.codbanc, function(){ $.unblockUI(); })
+				$.prompt( "<h1>Recalcular Saldo de Banco:</h1><br/><center>Periodo: '.$mano.' Saldo Inicial: <input class=\'inputnum\' type=\'text\' id=\'msaldo\' name=\'msaldo\' value=\'0.00\' maxlengh=\'10\' size=\'10\' ></center><br/>",
+				{
+					buttons: { Aplicar: true, Cancelar: false },
+					submit: function(e,v,m,f){
+						if (v) {
+							if( f.mmano==null ){
+								apprise("Cancelado por el usuario");
+							} else if( f.mmano=="" ) {
+								apprise("<h1>Cancelado</h1>Fecha vacia");
+							} else {
+								saldo = Math.round(f.msaldo*100,0);
+								frecalbanco( id, f.mmano, saldo );							}
+						}
+					}
+				});
+			} else { $.prompt("<h1>Por favor Seleccione un Banco</h1>");}
+		};
+		';
+
+/*
+		$bodyscript .= '
+		$("#recalban").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				$.prompt( "<h1>Recalcular Saldo de Banco:</h1><br/><center>Periodo: '.$mano.' Saldo Inicial: <input class=\'inputnum\' type=\'text\' id=\'msaldo\' name=\'msaldo\' value=\'0.00\' maxlengh=\'10\' size=\'10\' ></center><br/>",
+				{
+					buttons: { Aplicar: true, Cancelar: false },
+					submit: function(e,v,m,f){
+						if (v) {
+							if( f.mmano==null ){
+								apprise("Cancelado por el usuario");
+							} else if( f.mmano=="" ) {
+								apprise("<h1>Cancelado</h1>Fecha vacia");
+							} else {
+								saldo = Math.round(f.msaldo*100,0);
+								frecalbanco( id, f.mmano, saldo );							}
+						}
+					}
+				});
 			} else { $.prompt("<h1>Por favor Seleccione un Banco</h1>");}
 		});
+		';
+*/
+
+		$bodyscript .= '
+		function fresumen( id, ano ){
+			$.ajax({
+				url: "'.base_url().$this->url.'resumen/"+id+"/"+ano,
+				success: function(msg){
+					$("#ladicional").html(msg);
+				}
+			});
+		};
+		';
+
+		$bodyscript .= '
+		function frecalbanco( id, ano, saldo ){
+			//saldo = Math.round(saldo,0);
+			//alert("ano="+ano);
+			$.blockUI({message: "<h1>Calculando Saldos.....</h1><img  src=\''.base_url().'images/doggydig.gif\' width=\'131px\' height=\'79px\'  /> "});
+			$.post("'.site_url('finanzas/banc/recalban').'/"+id+"/"+ano+"/"+saldo, function(){ $.unblockUI(); })
+		};
 		';
 
 		$bodyscript .= '
@@ -543,6 +606,17 @@ class Banc extends Controller {
 		function(id){
 			if (id){
 				var ret = jQuery(gridId1).jqGrid(\'getRowData\',id);
+				fresumen( id, 0 );
+			}
+		}'
+		);
+
+
+/*
+		$grid->setOnSelectRow('
+		function(id){
+			if (id){
+				var ret = jQuery(gridId1).jqGrid(\'getRowData\',id);
 				$.ajax({
 					url: "'.base_url().$this->url.'resumen/"+id,
 					success: function(msg){
@@ -552,7 +626,7 @@ class Banc extends Controller {
 			}
 		}'
 		);
-
+*/
 		#show/hide navigations buttons
 		$grid->setAdd(    $this->datasis->sidapuede('BANC','INCLUIR%' ));
 		$grid->setEdit(   $this->datasis->sidapuede('BANC','MODIFICA%'));
@@ -972,28 +1046,45 @@ class Banc extends Controller {
 	//
 	//Resumen rapido
 	//
-	function resumen( $id ) {
-		//$id = $this->uri->segment($this->uri->total_segments());
-		$row = $this->datasis->damereg("SELECT codbanc, saldo, activo FROM banc WHERE id=$id");
+	function resumen( $id, $ano = 0 ) {
+
+		$row = $this->datasis->damereg("SELECT codbanc, saldo, activo, YEAR(curdate()) anno FROM banc WHERE id=$id");
 		$codbanc  = $row['codbanc'];
 		$saldo    = $row['saldo'];
 		$activo   = $row['activo'];
 
-		$mSQL = "SELECT saldo Inicial, saldo01 Ene, saldo02 Feb, saldo03 Mar, saldo04 Abr, saldo05 May, saldo06 Jun, saldo07 jul, saldo08 Ago, saldo09 Sep, saldo10 Oct, saldo11 Nov, saldo12 Dic  FROM bsal WHERE ano = YEAR(curdate()) AND codbanc=".$this->db->escape($codbanc);
+		if ( $ano == 0)
+			$ano = $row['anno'];
+
+		$mSQL = "SELECT saldo Inicial, saldo01 Ene, saldo02 Feb, saldo03 Mar, saldo04 Abr, saldo05 May, saldo06 Jun, saldo07 jul, saldo08 Ago, saldo09 Sep, saldo10 Oct, saldo11 Nov, saldo12 Dic  FROM bsal WHERE ano = $ano AND codbanc=".$this->db->escape($codbanc);
 
 		$query = $this->db->query($mSQL);
 		$data = $query->row();
 		$salida = '';
 		$salida  .= '<table width="90%" border="1" align="center">';
 		if ( $activo == 'S')
-			$salida  .= '<tr><th colspan="2" style="background:#A6FAA6;">Movimientos por Mes</th></tr>';
+			$salida  .= '<tr><th colspan="2" style="background:#A6FAA6;">Movimientos para el '.$ano.'</th></tr>';
 		else
 			$salida  .= '<tr><th colspan="2" style="background:#F97070;">Movimientos por Mes</th></tr>';
-
+		$total = 0;
 		foreach( $data AS $mes=>$saldo ){
-			$salida .= "<tr><td>".$mes."</td><td align='right'>".$saldo."</td></tr>\n";
+			if ( $saldo < 0 )
+				$salida .= "<tr><td>".$mes."</td><td align='right' style='color:red;'>".nformat($saldo)."</td></tr>\n";
+			else
+				$salida .= "<tr><td>".$mes."</td><td align='right'>".nformat($saldo)."</td></tr>\n";
+
+			$total += $saldo;
 		}
+		$salida .= "<tr><td>Final</td><td align='right'>".nformat($total)."</td></tr>\n";
 		$salida .= "</table>\n";
+		$anterior = $ano-1;
+		$proximo  = $ano+1;
+		$salida  .= '<table width="90%" border="0" align="center" style="border:1px solid; background:#E4E4E4;"><tr>';
+		$salida .= '<td align="center"><a href="#" onclick="fresumen('.$id.','.$anterior.')"> '.img('images/arrow_left.png').'</a></td>';
+		$salida .= '<td align="center"><a href="#" onclick="crecalban()" >RECALCULAR</a></td>';
+		$salida .= '<td align="center"><a href="#" onclick="fresumen('.$id.','.$proximo.')">'.img('images/arrow_right.png').'</a>';
+		$salida .= "</td></tr></table>\n";
+
 		echo $salida;
 	}
 
@@ -1001,17 +1092,29 @@ class Banc extends Controller {
 	//*****************************
 	//    RECALCULAR BSAL
 	//
-	function recalban($codbanc){
+	function recalban( $id, $ano = 0, $saldo = 0 ) {
 
-		$ano = date('Y');
+		if ( $ano > date('Y') ) 
+			$ano = date('Y');
+		// 
+		if ( $ano < date('Y') - 20 ) 
+			$ano = date('Y');
+			
+		$saldo = $saldo/100;
+		
+		$codbanc = $this->datasis->dameval("SELECT codbanc FROM banc WHERE id=$id");
 
 		$mSQL = "INSERT IGNORE INTO bsal SET
 		codbanc=".$this->db->escape($codbanc).",
-		ano=$ano, saldo=0,
-		saldo01=0, saldo02=0, saldo03=0, saldo04=0,
-		saldo05=0, saldo06=0, saldo07=0, saldo08=0,
-		saldo09=0, saldo10=0, saldo11=0, saldo12=0 ";
+		ano=$ano,  saldo=0,   saldo01=0, saldo02=0, saldo03=0, saldo04=0,saldo05=0, 
+		saldo06=0, saldo07=0, saldo08=0, saldo09=0, saldo10=0, saldo11=0, saldo12=0 ";
 		$this->db->query($mSQL);
+
+		//Coloca Saldo Inicial
+		if ( $saldo <> 0 ){
+			$mSQL = 'UPDATE bsal SET saldo='.$saldo.' WHERE ano='.$ano.' AND codbanc='.$this->db->escape($codbanc);
+			$this->db->query($mSQL);
+		}
 
 		$mSQL = "SELECT
 		SUM( monto*(month(fecha)= 1)*(tipo_op NOT IN ('CH','ND')) - monto*(month(fecha)=1)*(tipo_op  IN ('CH','ND'))) saldo01,
@@ -1028,10 +1131,11 @@ class Banc extends Controller {
 		SUM( monto*(month(fecha)=12)*(tipo_op NOT IN ('CH','ND')) - monto*(month(fecha)=12)*(tipo_op IN ('CH','ND'))) saldo12
 		FROM bmov WHERE year(fecha)=$ano AND codbanc=".$this->db->escape($codbanc)."
 		GROUP BY codbanc, YEAR(fecha)";
-		//memowrite($mSQL);
+
+		memowrite($mSQL);
 
 		$query = $this->db->query($mSQL);
-		$data = $query->row();
+		$data  = $query->row();
 
 		if ( count($data) == 1 ){
 			$this->db->where('codbanc', $codbanc);
