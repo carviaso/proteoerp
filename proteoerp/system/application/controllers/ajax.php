@@ -337,7 +337,7 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$dt1 = new DateTime($row['upago'].'01');
+					$dt1 = DateTime::createFromFormat('Ymd',$row['upago'].'01');
 					$dt2 = new DateTime();
 					$interval = $dt1->diff($dt2);
 
@@ -354,7 +354,7 @@ class Ajax extends Controller {
 					$retArray['utribu']   = $row['utribu'];
 					$retArray['taritipo'] = $row['taritipo'];
 					$retArray['direc']    = utf8_encode($row['direc']);
-					$retArray['cana']     = $interval->format('%m');
+					$retArray['cana']     = $interval->format('%m')+$interval->format('%Y')*12;
 					array_push($retorno, $retArray);
 				}
 			}
