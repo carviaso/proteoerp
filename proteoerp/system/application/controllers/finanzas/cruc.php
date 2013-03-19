@@ -69,8 +69,6 @@ class Cruc extends Controller {
 		};
 		';
 
-
-
 		$param['WestPanel']    = $WestPanel;
 		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
 		$param['readyLayout']  = $readyLayout;
@@ -93,32 +91,6 @@ class Cruc extends Controller {
 	//***************************
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '<script type="text/javascript">';
-
-/*
-		$bodyscript .= '
-		function crucadd(){
-			$.post("'.site_url($this->url.'declipro/create').'",
-			function(data){
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		};';
-
-		$bodyscript .= '
-		function crucedit(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
-				});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
-*/
 
 		$bodyscript .= '
 		function tconsulta(transac){

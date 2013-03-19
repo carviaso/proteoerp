@@ -62,11 +62,14 @@ class Casi extends Controller {
 </div> <!-- #RightPane -->
 ';
 
-		/*$SouthPanel .= '
-<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
-<p>'.$this->datasis->traevalor('TITULO1').'</p>
-</div> <!-- #BottomPanel -->
-';*/
+		$funciones = '
+		function ltransac(el, val, opts){
+			var meco=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return meco;
+		};
+		';
+
+
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
@@ -75,7 +78,7 @@ class Casi extends Controller {
 		$param['otros']        = $this->datasis->otros('CASI', 'JQ');
 
 		$param['centerpanel']  = $centerpanel;
-		//$param['funciones']    = $funciones;
+		$param['funciones']    = $funciones;
 
 		$param['temas']        = array('proteo','darkness','anexos1');
 
@@ -93,6 +96,17 @@ class Casi extends Controller {
 	//***************************
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
+
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};
+		';
+
 
 		$bodyscript .= '
 		function casiadd() {
@@ -275,6 +289,7 @@ class Casi extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 8 }',
+			'formatter'     => 'ltransac'
 		));
 
 

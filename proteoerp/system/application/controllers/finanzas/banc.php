@@ -1118,7 +1118,7 @@ class Banc extends Controller {
 
 		$mSQL = "SELECT
 		SUM( monto*(month(fecha)= 1)*(tipo_op NOT IN ('CH','ND')) - monto*(month(fecha)=1)*(tipo_op  IN ('CH','ND'))) saldo01,
-		SUM( monto*(month(fecha)= 2)*(tipo_op NOT IN ('CH','ND')) - monto*(month(fecha)=3)*(tipo_op  IN ('CH','ND'))) saldo02,
+		SUM( monto*(month(fecha)= 2)*(tipo_op NOT IN ('CH','ND')) - monto*(month(fecha)=2)*(tipo_op  IN ('CH','ND'))) saldo02,
 		SUM( monto*(month(fecha)= 3)*(tipo_op NOT IN ('CH','ND')) - monto*(month(fecha)=3)*(tipo_op  IN ('CH','ND'))) saldo03,
 		SUM( monto*(month(fecha)= 4)*(tipo_op NOT IN ('CH','ND')) - monto*(month(fecha)=4)*(tipo_op  IN ('CH','ND'))) saldo04,
 		SUM( monto*(month(fecha)= 5)*(tipo_op NOT IN ('CH','ND')) - monto*(month(fecha)=5)*(tipo_op  IN ('CH','ND'))) saldo05,
