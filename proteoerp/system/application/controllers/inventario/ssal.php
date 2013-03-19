@@ -562,7 +562,7 @@ class Ssal extends Controller {
 */
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -574,7 +574,7 @@ class Ssal extends Controller {
 
 
 		$grid->addField('descrip');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -749,8 +749,7 @@ class Ssal extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdatait($id = 0)
-	{
+	function getdatait($id = 0){
 
 		if ($id === 0 ){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM ssal");

@@ -240,11 +240,12 @@ class mensualidad extends sfac {
 		$tarifa  = trim($row['tarifa']);
 		if(empty($upago)) $upago=20120101;
 
+		$cana = 0;
 		$ccana=$do->count_rel('sitems');
-		$i = 0;
-
-		$detalle = $do->get_rel('sitems','detalle',$i);
-		$cana    = $do->get_rel('sitems','cana'   ,$i);
+		for($i = 0;$i < $ccana;$i++){
+			//$detalle = $do->get_rel('sitems','detalle',$i);
+			$cana    += $do->get_rel('sitems','cana'    ,$i);
+		}
 
 		$objdated = date_create(dbdate_to_human($upago,'Y-m-d'));
 		$objdated->add(new DateInterval('P1M'));
