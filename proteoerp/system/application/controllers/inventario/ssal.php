@@ -835,100 +835,6 @@ class Ssal extends Controller {
 	}
 
 
-
-//require_once(BASEPATH.'application/controllers/validaciones.php');
-
-/*
-class ssal extends validaciones {
-
-	function ssal(){
-		parent::Controller();
-		$this->load->library('rapyd');
-		//$this->datasis->modulo_id(104,1);
-		$this->back_dataedit='inventario/ssal/index';
-	}
-
-	function index() {
-		redirect('inventario/ssal/filteredgrid');
-	}
-
-	function filteredgrid(){
-		$this->rapyd->load('datagrid','datafilter');
-
-		$caub=array(
-			'tabla'   =>'caub',
-			'columnas'=>array(
-			'ubica' =>'C&oacute;digo',
-			'ubides'=>'Nombre',
-		),
-
-		'filtro'  =>array('ubica'=>'C&oacute;digo','ubides'=>'Nombre'),
-		'retornar'=>array('ubica'=>'almacen'),
-		'titulo'  =>'Buscar Almacen');
-		$boton=$this->datasis->modbus($caub);
-
-		$filter = new DataFilter('Filtro de Salidad y Entradas');
-		$filter->db->select(array('a.fecha','a.numero','a.tipo','a.almacen','a.cargo','a.motivo','a.descrip','b.ubica as ubica','b.ubides as ubides'));
-		$filter->db->from('ssal as a');
-		$filter->db->join('caub as b','a.almacen=b.ubica');
-
-		$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
-		$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
-		$filter->fechad->clause  =$filter->fechah->clause ='where';
-		$filter->fechad->db_name =$filter->fechah->db_name='fecha';
-
-		$filter->fechah->size=$filter->fechad->size=10;
-		$filter->fechad->operator='>=';
-		$filter->fechah->operator='<=';
-
-		$filter->numero = new inputField('N&uacute;mero', 'numero');
-		$filter->numero->size = 10;
-
-		$filter->tipo = new  dropdownField ('Tipo', 'tipo');
-		$filter->tipo->option('','');
-		$filter->tipo->option('S','Salida');
-		$filter->tipo->option('E','Entrada');
-		$filter->tipo->style='width:80px;';
-		$filter->tipo->size = 5;
-
-		$filter->alamcen = new inputField('Alamcen', 'almacen');
-		$filter->alamcen->size = 5;
-		$filter->alamcen->append($boton);
-
-		$filter->buttons('reset','search');
-		$filter->build();
-
-		$uri = anchor('inventario/ssal/dataedit/show/<#numero#>','<#numero#>');
-
-		function tipo($t){
-			if($t=='S')return 'Salida';
-			if($t=='E')return 'Entrada';
-		}
-
-		$grid = new DataGrid();
-		$grid->order_by('numero','desc');
-		$grid->per_page = 15;
-		$grid->use_function('tipo');
-
-		$grid->column_orderby('N&uacute;mero',$uri,'numero');
-		$grid->column_orderby('Fecha'    ,'<dbdate_to_human><#fecha#></dbdate_to_human>','fecha','align=\'center\'');
-		$grid->column_orderby('Tipo'   ,'<tipo><#tipo#></tipo>','tipo');
-		$grid->column_orderby('Almacen','ubides','ubides');
-		$grid->column_orderby('Descripci&ocaute;n'   ,'descrip','descrip');
-		$grid->column_orderby('Motivo'   ,'motivo','motivo');
-
-		$grid->add('inventario/ssal/dataedit/create');
-		$grid->build();
-		//echo $grid->db->last_query();
-
-		$data['content'] = $filter->output.$grid->output;
-		$data['head']    = $this->rapyd->get_head();
-		$data['title']   = heading('Entrada y Salidas');
-		$this->load->view('view_ventanas', $data);
-	}
-*/
-
-
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
 
@@ -979,7 +885,6 @@ class ssal extends validaciones {
 		$edit->fecha->mode = 'autohide';
 		$edit->fecha->readonly = true;
 		$edit->fecha->calendar = false;
-
 		$edit->fecha->size = 10;
 
 		$edit->tipo = new  dropdownField ('Tipo', 'tipo');
