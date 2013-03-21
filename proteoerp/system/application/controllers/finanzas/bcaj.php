@@ -1921,7 +1921,7 @@ class Bcaj extends Controller {
 		$edit->numeroe->in='envia';
 		$edit->numeroe->rule='condi_required|callback_chnumeroe';
 		$edit->numeroe->size=15;
-		$edit->numeroe->append('Solo para transferencia entre bancos');
+		$edit->numeroe->append('Solo si son bancos');
 
 		$env=$this->input->post('envia');
 		$edit->recibe = new dropdownField('Banco/Caja que recibe','recibe');
