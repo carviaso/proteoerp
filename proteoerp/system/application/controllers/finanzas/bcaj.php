@@ -15,7 +15,6 @@ class Bcaj extends Controller {
 			$this->config->set_item('cajas', array('cobranzas'=>'99','efectivo'=>'99', 'valores'=>'99', 'tarjetas'=>'99', 'gastos'=>'99'));
 		}
 		$this->guitipo=array('DE'=>'Deposito','TR'=>'Transferencia');
-		//$this->datasis->modulo_id('51D',1);
 		$this->bcajnumero='';
 	}
 
@@ -30,7 +29,7 @@ class Bcaj extends Controller {
 
 
 	//******************************************************************
-	//Layout en la Ventana
+	//   Layout en la Ventana
 	//
 	function jqdatag(){
 		if (!$this->datasis->sidapuede('BCAJ', 'TODOS')) {
@@ -53,10 +52,14 @@ class Bcaj extends Controller {
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
-		$grid->wbotonadd(array("id"=>"impPdf",    "img"=>"images/pdf_logo.gif", "alt" => "Cargos Indebidos en Banco", "label"=>"Imprimir Documento ", "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"cerrardpt", "img"=>"images/candado.png",  "alt" => "Cerrar Deposito",           "label"=>"Cerrar Deposito",     "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"borrar",    "img"=>"images/delete.png",   "alt" => "Eliminar Movimiento",       "label"=>"Eliminar Movimiento", "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"chdevo",    "img"=>"images/delete.png",   "alt" => "Eliminar Cheque Devuelto",  "label"=>"Eliminar CH. Devuelto",     "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"impPdf",    "img"=>"assets/default/images/print.png", "alt" => "Cargos Indebidos en Banco", "label"=>"Imprimir Documento ", "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"dtarjeta",  "img"=>"images/tarjetas.jpg",    "alt" => "Deposito de Tarjetas",     "label"=>"Deposito de Tarjetas", "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"cerrardpt", "img"=>"images/candado.png",   "alt" => "Cerrar Deposito",          "label"=>"Cerrar Deposito CH",      "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"transferen", "img"=>"images/fusionar.png", "alt" => "Cerrar Deposito",          "label"=>"Transferencias",       "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"borrar",    "img"=>"images/delete.png",    "alt" => "Eliminar Movimiento",      "label"=>"Eliminar Movimiento",  "tema"=>"anexos"));
+		$grid->wbotonadd(array("id"=>"chdevo",    "img"=>"images/delete.png",    "alt" => "Eliminar Cheque Devuelto", "label"=>"Eliminar CH. Devuelto","tema"=>"anexos"));
+
+
 		$WestPanel = $grid->deploywestp();
 
 
@@ -64,12 +67,17 @@ class Bcaj extends Controller {
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-		array("id"=>"forma1",  "title"=>"Agregar/Editar Registro")
+			array("id"=>"forma1", "title"=>"Agregar/Editar Registro"),
+			array("id"=>"fedita", "title"=>"Agregar/Editar Registro")
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-
-		$funciones = '';
+		$funciones = '
+		function ltransac(el, val, opts){
+			var meco=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return meco;
+		};
+		';
 
 		$param['WestPanel']    = $WestPanel;
 		$param['readyLayout']  = $readyLayout;
@@ -77,7 +85,7 @@ class Bcaj extends Controller {
 		//$param['EastPanel']  = $EastPanel;
 		$param['listados']     = $this->datasis->listados('BCAJ', 'JQ');
 		$param['otros']        = $this->datasis->otros('BCAJ', 'JQ');
-		//$param['funciones']  = $funciones;
+		$param['funciones']  = $funciones;
 
 		$param['centerpanel']  = $centerpanel;
 		$param['SouthPanel']   = $SouthPanel;
@@ -97,17 +105,56 @@ class Bcaj extends Controller {
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '<script type="text/javascript">';
 
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};
+		';
+
 		//Imprime a PDF
 		$bodyscript .= '
 		jQuery("#impPdf").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.base_url().'formatos/ver/BANCAJA/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+				window.open(\''.site_url('formatos/ver/BANCAJA').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});
 		';
 
+		//Transferencia
+		$bodyscript .= '
+		jQuery("#transferen").click( function(){
+			$.post("'.site_url($this->url.'transferencia/create').'",
+				function(data){
+					$("#fedita").dialog( {height: 350, width: 500, title: "Prestamo Otorgado"} );
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+			})
+			
+		});
+		';
+
+
+		//Deposito de Tarjetas
+		$bodyscript .= '
+		jQuery("#dtarjeta").click( function(){
+			$.post("'.site_url($this->url.'depositotar/create').'",
+			function(data){
+				$("#fedita").dialog( {height: 380, width: 520, title: "Prestamo Otorgado"} );
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});
+		';
+
+
+
+/*
 		//Imprime a HTML
 		$bodyscript .= '
 		jQuery("#impHtml").click( function(){
@@ -118,6 +165,7 @@ class Bcaj extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});
 		';
+*/
 
 		//Cheque Devuelto
 		$bodyscript .= '
@@ -215,10 +263,7 @@ class Bcaj extends Controller {
 				tips = $( ".validateTips" );
 
 			$( "#forma1").dialog({
-				autoOpen: false,
-				height: 470,
-				width: 550,
-				modal: true,
+				autoOpen: false, height: 470, width: 550, modal: true,
 				buttons: {
 					"Cerrar Deposito": function() {
 						var bValid = true;
@@ -254,6 +299,48 @@ class Bcaj extends Controller {
 			});
 		});
 		';
+
+		$bodyscript .= '
+		$("#fedita").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/BCAJ').'/\'+res.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
 
 
 		$bodyscript .= "\n</script>\n";
@@ -592,6 +679,7 @@ class Bcaj extends Controller {
 			'editable'      => 'false',
 			'width'         => 70,
 			'edittype'      => "'text'",
+			'formatter'     => 'ltransac'
 		));
 
 		$grid->addField('usuario');
@@ -1628,67 +1716,6 @@ class Bcaj extends Controller {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
-	function filteredgrid(){
-
-		$this->rapyd->load('datafilter','datagrid');
-		$smenu['link']=barra_menu('51D');
-
-		$atts = array(
-			'width'      => '800',
-			'height'     => '600',
-			'scrollbars' => 'yes',
-			'status'     => 'yes',
-			'resizable'  => 'yes',
-			'screenx'    => '0',
-			'screeny'    => '0'
-		);
-
-		$filter = new DataFilter('Filtro','bcaj');
-		$filter->fecha = new dateonlyField('Fecha','fecha');
-		$filter->fecha->size=10;
-		$filter->fecha->operator='=';
-
-		$filter->numero = new inputField('N&uacute;mero', 'numero');
-		$filter->numero->size=20;
-
-		//$filter->nombre = new inputField('Nombre', 'nombre');
-		//$filter->nombre->size=40;
-
-		//$filter->banco = new dropdownField('Banco', 'codbanc');
-		//$filter->banco->option('','');
-		//$filter->banco->options('SELECT codbanc,banco FROM banc where tbanco<>\'CAJ\' ORDER BY codbanc');
-
-		$filter->buttons('reset','search');
-		$filter->build();
-
-		$uri = anchor('finanzas/bcaj/dataedit/show/<#numero#>','<#numero#>');
-		$uri1 = anchor('formatos/ver/BANCAJA/<#numero#>','<#numero#>');
-
-		$grid = new DataGrid('Lista');
-		$grid->order_by('numero','desc');
-		$grid->per_page = 15;
-
-		$uri2 = anchor_popup('finanzas/bcaj/formato/<#numero#>/<#tipo#>', img(array('src'=>'images/pdf_logo.gif','border'=>'0','alt'=>'PDF'))  ,$atts);
-		//$uri2 .= "&nbsp;".anchor('finanzas/gser/mgserdataedit/modify/<#id#>',img(array('src'=>'images/pdf_logo.gif','border'=>'0','alt'=>'PDF')));
-
-		$grid->column_orderby('N&uacute;mero',$uri,'numero');
-		$grid->column_orderby('Fecha'        ,'<dbdate_to_human><#fecha#></dbdate_to_human>','fecha');
-		$grid->column_orderby('Env&iacute;a' ,'<#envia#>-<#bancoe#>','bancoe');
-		$grid->column_orderby('Recibe'       ,'<#recibe#>-<#bancor#>','bancor');
-		$grid->column_orderby('Monto'        ,'<nformat><#monto#></nformat>' ,'monto','align=right');
-		$grid->column_orderby('Concepto'     ,'concepto','concepto');
-		$grid->column('Vista',$uri2,"align='center'");
-
-		$grid->add('finanzas/bcaj/agregar');
-		$grid->build();
-
-		$data['content'] = $filter->output.$grid->output;
-		$data['smenu']   = $this->load->view('view_sub_menu', $smenu,true);
-
-		$data['title']   = '<h1>Movimientos de Caja</h1>';
-		$data['head']    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
-	}
 
 	function dataedit(){
 		$this->rapyd->load('dataedit');
@@ -1731,11 +1758,12 @@ class Bcaj extends Controller {
 
 	function agregar(){
 		$data['content'] = '<table align="center">';
-
+/*
 		$data['content'].= '<tr><td><img src="'.base_url().'images/dinero.jpg'.'" height="100px"></td><td bgcolor="#ddeedd">';
 		$data['content'].= '<p>'.anchor('finanzas/bcaj/depositoefe'  ,'Deposito de efectivo: ');
 		$data['content'].= 'Esta opci&oacute;n se utiliza para depositar lo recaudado en efectivo desde
 		                    las cajas para los bancos, debe tener a mano el n&uacute;mero del deposito.</p>';
+
 
 		$data['content'].= '</td></tr><tr><td><img src="'.base_url().'images/tarjetas.jpg'.'" height="100px"></td><td>';
 		$data['content'].= '<p>'.anchor('finanzas/bcaj/depositotar'  ,'Deposito de tarjetas: ');
@@ -1747,6 +1775,7 @@ class Bcaj extends Controller {
 		$data['content'].= 'Puede hacer transferencias entre cajas o entre cuentas bancarias, las que correspondan a
 		                    cuentas bancarias pueden realizarce mediante cheque-deposito (manual) o NC-ND por transferencia
 		                    electr&oacute;nica, en cualquier caso debe tener los n&uacute;meros de documentos correspondientes.</p>';
+*/
 
 		$data['content'].= '</td></tr><tr><td><img src="'.base_url().'images/caja_activa.gif'.'" height="100px" ></td><td>';
 		$data['content'].= '<p>'.anchor('finanzas/bcaj/autotranfer','Transferencia de Cierre de Caja: ');
@@ -1882,19 +1911,20 @@ class Bcaj extends Controller {
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->rule = 'chfecha|required';
+		$edit->fecha->calendar = false;
+		$edit->fecha->size=10;
 
-		$edit->envia = new dropdownField('Envia y N&uacute;mero','envia');
+		$edit->envia = new dropdownField('Banco/Caja que Envia','envia');
 		$edit->envia->option('','Seleccionar');
 
 		$edit->numeroe = new inputField('N&uacute;mero de envio', 'numeroe');
 		$edit->numeroe->in='envia';
 		$edit->numeroe->rule='condi_required|callback_chnumeroe';
-		$edit->numeroe->size=20;
-		$edit->numeroe->append('Solo si el que env&iacute;a es un banco');
-
+		$edit->numeroe->size=15;
+		$edit->numeroe->append('Solo para transferencia entre bancos');
 
 		$env=$this->input->post('envia');
-		$edit->recibe = new dropdownField('Recibe y N&uacute;mero','recibe');
+		$edit->recibe = new dropdownField('Banco/Caja que recibe','recibe');
 		$edit->recibe->option('','Seleccionar');
 		if($env!==false){
 			$tipo  = $this->_traetipo($env);
@@ -1906,7 +1936,7 @@ class Bcaj extends Controller {
 		$edit->numeror = new inputField('N&uacute;mero de envio', 'numeror');
 		$edit->numeror->in='recibe';
 		$edit->numeror->rule='condi_required|callback_chnumeror';
-		$edit->numeror->size=20;
+		$edit->numeror->size=15;
 		$edit->numeror->append('Solo si el que recibe es un banco');
 
 		$desca='CONCAT_WS(\'-\',codbanc,banco) AS desca';
@@ -1924,11 +1954,11 @@ class Bcaj extends Controller {
 		}
 		$edit->recibe->rule  = 'required';
 
-		$edit->tipoe = new dropdownField('Documento de emisi&oacute;n','tipoe');
+		$edit->tipoe = new dropdownField('Tipo de Documento','tipoe');
 		$edit->tipoe->option('ND','Nota de debito');
 		$edit->tipoe->option('CH','Cheque');
 		$edit->tipoe->rule='condi_required|callback_chtipoe';
-		$edit->tipoe->style  = 'width:180px';
+		$edit->tipoe->style  = 'width:120px';
 
 		$edit->moneda = new dropdownField('Moneda','moneda');
 		$edit->moneda->options('SELECT moneda,descrip FROM mone ORDER BY descrip');
@@ -1938,12 +1968,17 @@ class Bcaj extends Controller {
 		$edit->monto->css_class='inputnum';
 		$edit->monto->rule='trim|numeric|required';
 		$edit->monto->maxlength =15;
-		$edit->monto->size = 20;
+		$edit->monto->size = 12;
 		$edit->monto->autocomplete=false;
 
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->insertValue = 'TR';
+		//$edit->tipo->size =4;
+		//$edit->tipo->maxlength =2;
+
 		$edit->envia->rule   = 'required';
-		$edit->envia->style  = 'width:180px';
-		$edit->recibe->style = 'width:180px';
+		$edit->envia->style  = 'width:220px';
+		$edit->recibe->style = 'width:220px';
 
 		$back_url = site_url('finanzas/bcaj/agregar');
 		$edit->button('btn_undo', 'Regresar', "javascript:window.location='${back_url}'", 'BL');
@@ -1961,6 +1996,7 @@ class Bcaj extends Controller {
 			$tipoe  = $edit->tipoe->newValue;
 			$moneda = $edit->moneda->newValue;
 			$rt=$this->_transferencaj($fecha,$monto,$envia,$recibe,false,$numeror,$numeroe,$tipoe,$moneda);
+
 			if($rt){
 				redirect('/finanzas/bcaj/listo/n/'.$this->bcajnumero);
 			}else{
@@ -1968,12 +2004,18 @@ class Bcaj extends Controller {
 			}
 		}
 
-		$this->rapyd->jquery[]='$(".inputnum").numeric(".");';
-		//$this->rapyd->jquery[]='get_trrecibe();';
-		$data['content'] = $edit->output;
-		$data['title']   = heading('Transferencias');
-		$data['head']    = $this->rapyd->get_head().phpscript('nformat.js');
-		$this->load->view('view_ventanas', $data);
+		//$this->rapyd->jquery[]='$(".inputnum").numeric(".");';
+		//$data['content'] = $edit->output;
+		//$data['title']   = heading('Transferencias');
+		//$data['head']    = $this->rapyd->get_head().phpscript('nformat.js');
+
+		//$this->load->view('view_ventanas', $data);
+
+		$conten['form'] =&  $edit;
+		$this->load->view('view_bcaj', $conten);
+
+
+
 	}
 
 	function depositoefe(){
@@ -2106,8 +2148,8 @@ class Bcaj extends Controller {
 		}else{
 			echo 'Debe seleccionar un receptor.';
 		}
-
 	}
+
 
 	function depositotar(){
 		$this->rapyd->load('dataform');
@@ -2119,20 +2161,25 @@ class Bcaj extends Controller {
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->size = 10;
 		$edit->fecha->rule = 'chfecha|required';
+		$edit->fecha->calendar = false;
 
-		$edit->envia = new dropdownField('Envia','envia');
+		$edit->envia = new dropdownField('Caja que envia','envia');
 		$edit->envia->option('','Seleccionar');
+		$edit->envia->rule   = 'required';
+		$edit->envia->style  = 'width:220px';
 
-		$edit->recibe = new dropdownField('Recibe','recibe');
+		$edit->recibe = new dropdownField('Banco que recibe','recibe');
 		$edit->recibe->option('','Seleccionar');
+		$edit->recibe->style = 'width:220px';
 
-		$edit->tipo = new dropdownField('Tipo','tipo');
-		$edit->tipo->option('NC','Nota de credito');
-		$edit->tipo->option('DE','Deposito');
+		$edit->tipor = new dropdownField('Tipo','tipor');
+		$edit->tipor->option('NC','Nota de credito');
+		$edit->tipor->option('DE','Deposito');
+		$edit->tipor->style  = 'width:120px';
 
-		$edit->numero = new inputField('N&uacute;mero de deposito', 'numero');
-		$edit->numero->rule='required';
-		$edit->numero->size=20;
+		$edit->numeror = new inputField('N&uacute;mero de deposito', 'numeror');
+		$edit->numeror->rule='required';
+		$edit->numeror->size=20;
 
 		$desca='CONCAT_WS(\'-\',codbanc,banco) AS desca';
 		$sql='SELECT TRIM(a.codbanc) AS codbanc,b.comitc, b.comitd, b.impuesto FROM banc AS a JOIN tban AS b ON a.tbanco=b.cod_banc AND b.cod_banc<>\'CAJ\'';
@@ -2201,20 +2248,23 @@ class Bcaj extends Controller {
 			$edit->$obj->css_class='inputnum';
 			$edit->$obj->rule='trim|numeric';
 			$edit->$obj->maxlength =15;
-			$edit->$obj->size = 20;
+			$edit->$obj->size = 10;
 			$edit->$obj->group = 'Montos';
 			$edit->$obj->autocomplete=false;
 		}
 		$edit->$obj->readonly=true;
 
-		$edit->envia->rule   = 'required';
-		$edit->envia->style  = 'width:180px';
-		$edit->recibe->style = 'width:180px';
 
-		$back_url = site_url('finanzas/bcaj/agregar');
-		$edit->button('btn_undo', 'Regresar', "javascript:window.location='${back_url}'", 'TR');
+		//$edit->tipor = new dropdownField('Tipo','tipor');
+	
+	
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->insertValue = 'DE';
 
-		$edit->submit('btnsubmit','Guardar');
+		//$back_url = site_url('finanzas/bcaj/agregar');
+		//$edit->button('btn_undo', 'Regresar', "javascript:window.location='${back_url}'", 'TR');
+
+		//$edit->submit('btnsubmit','Guardar');
 		$edit->build_form();
 
 		//**********************
@@ -2239,10 +2289,14 @@ class Bcaj extends Controller {
 			}
 		}
 
-		$data['content'] = $edit->output;
-		$data['title']   = heading('Deposito');
-		$data['head']    = $this->rapyd->get_head().phpscript('nformat.js');
-		$this->load->view('view_ventanas', $data);
+		//$data['content'] = $edit->output;
+		//$data['title']   = heading('Deposito');
+		//$data['head']    = $this->rapyd->get_head().phpscript('nformat.js');
+		//$this->load->view('view_ventanas', $data);
+
+		$conten['form'] =&  $edit;
+		$this->load->view('view_bcaj', $conten);
+
 	}
 
 
@@ -3352,7 +3406,6 @@ class Bcaj extends Controller {
 		onSelectAll: sumadepo
 	});
 
-	
 	var mcheques = [
 ';
 		$mSQL = "SELECT id, banco, num_ref, cuentach, monto FROM sfpa WHERE deposito='".$reg['numero']."'";
