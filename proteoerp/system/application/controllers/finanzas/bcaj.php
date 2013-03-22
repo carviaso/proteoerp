@@ -52,19 +52,17 @@ class Bcaj extends Controller {
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
-		$grid->wbotonadd(array("id"=>"impPdf",    "img"=>"assets/default/images/print.png", "alt" => "Cargos Indebidos en Banco", "label"=>"Imprimir Documento ", "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"dtarjeta",  "img"=>"images/tarjetas.jpg",    "alt" => "Deposito de Tarjetas",     "label"=>"Deposito de Tarjetas", "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"cerrardpt", "img"=>"images/candado.png",   "alt" => "Cerrar Deposito",          "label"=>"Cerrar Deposito CH",      "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"transferen", "img"=>"images/fusionar.png", "alt" => "Cerrar Deposito",          "label"=>"Transferencias",       "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"borrar",    "img"=>"images/delete.png",    "alt" => "Eliminar Movimiento",      "label"=>"Eliminar Movimiento",  "tema"=>"anexos"));
-		$grid->wbotonadd(array("id"=>"chdevo",    "img"=>"images/delete.png",    "alt" => "Eliminar Cheque Devuelto", "label"=>"Eliminar CH. Devuelto","tema"=>"anexos"));
-
+		$grid->wbotonadd(array('id'=>'impPdf',    'img'=>'assets/default/images/print.png', 'alt' => 'Cargos Indebidos en Banco' , 'label' =>'Imprimir Documento'   , 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'dtarjeta',  'img'=>'images/tarjetas.jpg'            , 'alt' => 'Deposito de Tarjetas'      , 'label' =>'Deposito de Tarjetas' , 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'cerrardpt', 'img'=>'images/candado.png'             , 'alt' => 'Cerrar Deposito'           , 'label' =>'Cerrar Deposito CH'   , 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'transferen','img'=>'images/fusionar.png'            , 'alt' => 'Cerrar Deposito'           , 'label' =>'Transferencias'       , 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'borrar',    'img'=>'images/delete.png'              , 'alt' => 'Eliminar Movimiento'       , 'label' =>'Eliminar Movimiento'  , 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'chdevo',    'img'=>'images/delete.png'              , 'alt' => 'Eliminar Cheque Devuelto'  , 'label' =>'Eliminar CH. Devuelto', 'tema'=> 'anexos'));
 
 		$WestPanel = $grid->deploywestp();
 
-
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
 			array("id"=>"forma1", "title"=>"Agregar/Editar Registro"),
@@ -90,11 +88,11 @@ class Bcaj extends Controller {
 		$param['centerpanel']  = $centerpanel;
 		$param['SouthPanel']   = $SouthPanel;
 		$param['temas']        = array('proteo','darkness','anexos1');
-		
+
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
 		$param['encabeza']     = $this->titp;
-		
+
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
@@ -135,7 +133,7 @@ class Bcaj extends Controller {
 					$("#fedita").html(data);
 					$("#fedita").dialog( "open" );
 			})
-			
+
 		});
 		';
 
@@ -217,13 +215,13 @@ class Bcaj extends Controller {
 
 			var tips = $( ".validateTips" );
 
-			s = grid.getGridParam(\'selarrrow\'); 
+			s = grid.getGridParam(\'selarrrow\');
 			$( "input:submit, a, button", ".otros" ).button();
 
 			$("#cerrardpt").click(function() {
 				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
-					var ret    = $("#newapi'. $grid0.'").getRowData(id);  
+					var ret    = $("#newapi'. $grid0.'").getRowData(id);
 					mId = id;
 					$.post("'.base_url().'finanzas/bcaj/formacierre/"+id, function(data){
 						$("#forma1").html(data);
@@ -839,7 +837,7 @@ class Bcaj extends Controller {
 				$fecha   = $this->datasis->dameval("SELECT fecha   FROM bcaj WHERE id=$id ");
 				$this->datasis->actusal($envia,  $fecha,  $monto);
 				$this->datasis->actusal($recibe, $fecha, -$monto);
-				
+
 				$this->datasis->actusal($envia,  $fecha, -$data['monto']);
 				$this->datasis->actusal($recibe, $fecha,  $data['monto']);
 
@@ -849,7 +847,7 @@ class Bcaj extends Controller {
 			} else {
 				echo 'No se puede modificar si tiene comision o ISLR';
 			}
-			
+
 
 		} elseif($oper == 'del') {
 			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM itsinv WHERE alma='$codigo' AND existen>0");
@@ -1226,7 +1224,7 @@ class Bcaj extends Controller {
 		$deposito = $this->datasis->dameval("SELECT numero FROM bcaj WHERE id=$id");
 		$grid     = $this->jqdatagrid;
 		$mSQL    = "SELECT * FROM sfpa WHERE deposito='$deposito' ";
-		
+
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
@@ -1286,7 +1284,7 @@ class Bcaj extends Controller {
 	function cerrardpt(){
 		// Genera el deposito pendiente
 		$deposito = $this->input->get_post('fdeposito'); //Nro deposito
-		$fecha    = $this->input->get_post('ffecha'); 
+		$fecha    = $this->input->get_post('ffecha');
 		$id       = $this->input->get_post('fid');
 		$tipo     = $this->input->get_post('ftipo');
 		$monto    = $this->input->get_post('fmonto');
@@ -1296,9 +1294,9 @@ class Bcaj extends Controller {
 		$codbanc  = '';
 		$mensaje  = "";
 		$envia    = '00';
-	
+
 		$reg = $this->datasis->damereg("SELECT * FROM bcaj WHERE id=$id ");
-	
+
 		// Revisamos
 		$check = 0;
 		if ($id <= 0) {
@@ -1340,11 +1338,11 @@ class Bcaj extends Controller {
 			{
 				// Revisamos si el monto coincide con la suma
 				$fecha = substr($fecha,-4,4).substr($fecha,3,2).substr($fecha,0,2);
-	
+
 				$mMdepo = $this->datasis->dameval("SELECT SUM(monto) FROM sfpa WHERE id IN ( $cheques )");
 				$monto  = $this->datasis->dameval("SELECT SUM(monto) FROM sfpa WHERE deposito='$numbcaj'");
-				$bancoo = 
-			
+				$bancoo =
+
 				// GUARDA EN BCAJ
 				$numeroe = $this->datasis->banprox('00');
 				$numeror = $this->datasis->banprox($codbanc);
@@ -1391,13 +1389,13 @@ class Bcaj extends Controller {
 				//Guarda en BCAJ
 				$this->db->insert('bcaj', $data);
 				$this->datasis->actusal( '00', $fecha, -$mMdepo );
-	
+
 				$mSQL = "UPDATE sfpa SET deposito='$numero', status='C' WHERE id IN ($cheques)";
 				$this->db->simple_query($mSQL);
-	
+
 				//GUARDA EN BMOV LA SALIDA DE CAJA
 				$data = array();
-		
+
 				$data['codbanc']  = '00';
 				$data['numcuent'] = $this->datasis->dameval("SELECT numcuent FROM banc WHERE codbanc='00'");
 				$data['banco']    = $this->datasis->dameval("SELECT banco    FROM banc WHERE codbanc='00'");
@@ -1417,7 +1415,7 @@ class Bcaj extends Controller {
 				$data['hora']     = date('H:i:s');
 				$data['transac']  = $transac;
 				$this->db->insert('bmov', $data);
-		
+
 				//Actualiza saldo en caja de transito
 				$this->datasis->actusal($codbanc, $fecha, $mMdepo);
 
@@ -1440,7 +1438,7 @@ class Bcaj extends Controller {
 				$data['hora']     = date('H:i:s');
 				$data['transac']  = $transac;
 				$this->db->insert('bmov', $data);
-	
+
 				//Si los montos son diferentes genera la devolucion
 				///devuelve las cheques no depositados
 				if ($monto > $mMdepo){
@@ -1466,7 +1464,7 @@ class Bcaj extends Controller {
 					$data['hora']     = date('H:i:s');
 					$data['transac']  = $transac;
 					$this->db->insert('bmov', $data);
-				
+
 					$mSQL = "UPDATE sfpa SET status='' WHERE  status='P' AND deposito='$numbcaj'";
 					$this->db->simple_query($mSQL);
 
@@ -1519,11 +1517,11 @@ class Bcaj extends Controller {
 			{
 				// Revisamos si el monto coincide con la suma
 				$fecha = substr($fecha,-4,4).substr($fecha,3,2).substr($fecha,0,2);
-	
+
 				$mMdepo = $reg['monto'];
 				$monto  = $reg['monto'];
-				$bancoo = 
-			
+				$bancoo =
+
 				// GUARDA EN BCAJ
 				$numeroe = $this->datasis->banprox('00');
 				$numeror = $this->datasis->banprox($codbanc);
@@ -1570,13 +1568,13 @@ class Bcaj extends Controller {
 				//Guarda en BCAJ
 				$this->db->insert('bcaj', $data);
 				$this->datasis->actusal( '00', $fecha, -$mMdepo );
-	
+
 				$mSQL = "UPDATE sfpa SET deposito='$numero', status='C' WHERE id IN ($cheques)";
 				$this->db->simple_query($mSQL);
-	
+
 				//GUARDA EN BMOV LA SALIDA DE CAJA
 				$data = array();
-		
+
 				$data['codbanc']  = '00';
 				$data['numcuent'] = $this->datasis->dameval("SELECT numcuent FROM banc WHERE codbanc='00'");
 				$data['banco']    = $this->datasis->dameval("SELECT banco    FROM banc WHERE codbanc='00'");
@@ -1596,7 +1594,7 @@ class Bcaj extends Controller {
 				$data['hora']     = date('H:i:s');
 				$data['transac']  = $transac;
 				$this->db->insert('bmov', $data);
-		
+
 				//Actualiza saldo en caja de transito
 				$this->datasis->actusal($codbanc, $fecha, $mMdepo);
 
@@ -1631,7 +1629,7 @@ class Bcaj extends Controller {
 				echo '{"status":"E","numero":"'.$id.'","mensaje":"'.$mensaje.'"}';
 			}
 		}
-		
+
 
 	}
 
@@ -1643,7 +1641,7 @@ class Bcaj extends Controller {
 	*/
 	function bcajborra(){
 		$id = $this->uri->segment($this->uri->total_segments());
-		
+
 		$transac = $this->datasis->dameval("SELECT transac FROM bcaj WHERE id=$id");
 		$status  = $this->datasis->dameval("SELECT status  FROM bcaj WHERE id=$id");
 		$numero  = $this->datasis->dameval("SELECT numero  FROM bcaj WHERE id=$id");
@@ -1682,7 +1680,7 @@ class Bcaj extends Controller {
 	 */
 	function bcajdevo(){
 		$id = $this->uri->segment($this->uri->total_segments());
-		
+
 		$transac = $this->datasis->dameval("SELECT transac FROM sfpa WHERE id=$id");
 		$status  = $this->datasis->dameval("SELECT status  FROM sfpa WHERE id=$id");
 		$numero  = $this->datasis->dameval("SELECT numero  FROM sfpa WHERE id=$id");
@@ -2256,8 +2254,8 @@ class Bcaj extends Controller {
 
 
 		//$edit->tipor = new dropdownField('Tipo','tipor');
-	
-	
+
+
 		$edit->tipo = new hiddenField('Tipo','tipo');
 		$edit->tipo->insertValue = 'DE';
 
@@ -3385,7 +3383,7 @@ class Bcaj extends Controller {
 			echo "Error Leyendo Tabla ::SELECT a.numero, a.fecha, a.monto, a.codbanc, a.envia, b.banco, a.efectivo, a.cheques FROM bcaj a JOIN banc b ON a.codbanc=b.codbanc WHERE a.id=$id";
 			return;
 		}
-		
+
 		if ( $reg['cheques'] > 0 ) {
 
 		$salida = '
@@ -3422,17 +3420,17 @@ class Bcaj extends Controller {
 		$salida .= '
 	];
 	for(var i=0;i<=mcheques.length;i++) jQuery("#aceptados").jqGrid(\'addRowData\',i+1,mcheques[i]);
-	
+
 	$("#ffecha").datepicker({dateFormat:"dd/mm/yy"});
 
 	function sumadepo()
-        { 
+        {
 		var grid = jQuery("#aceptados");
 		var s;
 		var total = 0;
 		var meco = "";
 		var rowcells=new Array();
-		s = grid.getGridParam(\'selarrrow\'); 
+		s = grid.getGridParam(\'selarrrow\');
 		$("#fsele").html("");
 		if(s.length)
 		{
@@ -3442,7 +3440,7 @@ class Bcaj extends Controller {
 				total += Number(entirerow["monto"]);
 				meco = meco+entirerow["id"]+",";
 			}
-			total = Math.round(total*100)/100;	
+			total = Math.round(total*100)/100;
 			$("#grantotal").html(nformat(total,2));
 			$("input#fsele").val(meco);
 			$("input#fmonto").val(total);
@@ -3452,7 +3450,7 @@ class Bcaj extends Controller {
 			$("#grantotal").html(" "+nformat(total,2));
 			$("input#fsele").val("");
 			$("input#fmonto").val(total);
-			montotal = total;	
+			montotal = total;
 		}
 	};
 
@@ -3460,7 +3458,7 @@ class Bcaj extends Controller {
 	<p class="validateTips"></p>
 	<h1 style="text-align:center">Cierre de Deposito Nro. '.$reg['numero'].'</h1>
 	<p style="text-align:center;font-size:12px;">Fecha: '.$reg['fecha'].' Banco: '.$reg['codbanc'].' '.$reg['banco'].'</p>
-	<form id="cierreforma">	
+	<form id="cierreforma">
 	<table width="80%" align="center"><tr>
 		<td  class="CaptionTD" align="right">Numero</td>
 		<td><input type="text" name="fdeposito" id="fdeposito" class="text ui-widget-content ui-corner-all" maxlengh="12" size="12" value="" /></td>
@@ -3479,9 +3477,9 @@ class Bcaj extends Controller {
 	<td>Monto en Transito: <div style="font-size:20px;font-weight:bold">'.nformat($reg['monto']).'</div></td><td>
 	Depositado:<div id="grantotal" style="font-size:20px;font-weight:bold">0.00</div>
 	</td></table>
-	
+
 	';
-	
+
 		} elseif ( $reg['efectivo'] > 0) {
 //////////////////////////////////////////////////////////////////
 //           DEPOSITOS EFECTIVO
@@ -3493,7 +3491,7 @@ class Bcaj extends Controller {
 	<p class="validateTips"></p>
 	<h1 style="text-align:center">Cierre de Deposito Nro. '.$reg['numero'].'</h1>
 	<p style="text-align:center;font-size:12px;">Fecha: '.$reg['fecha'].' Banco: '.$reg['codbanc'].' '.$reg['banco'].'</p>
-	<form id="cierreforma">	
+	<form id="cierreforma">
 	<table width="80%" align="center">
 	<tr>
 		<td  class="CaptionTD" align="right">Numero</td>
@@ -3514,15 +3512,15 @@ class Bcaj extends Controller {
 		<td align="right">Monto en Efectivo: </td><td style="font-size:20px;font-weight:bold">'.nformat($reg['monto']).'</td>
 		</tr>
 	</table>
-	
+
 	';
 
 		}
 		echo $salida;
 
 	}
-	
-	
+
+
 }
 
 ?>

@@ -961,7 +961,15 @@ function bobo(url){'."
 				$aver=0; //<-- falta consultar la version actual
 				$ver =@svn_update($dir);
 
+				$antes = $this->datasis->traevalor('SVNVER','Version svn de proteo');
+				if(empty($antes)) $antes=0;
+
 				if($ver>0){
+					if($ver >= $antes){
+						$dbver = $this->db->escape($ver);
+						$mSQL="UPDATE valores SET  valor=${dbver} WHERE nombre='SVNVER'";
+						$this->db->escape($mSQL);
+					}
 					if($ver>$aver){
 						$responde .= 'Actualizado a la versi&oacute;n: '.$ver;
 					}else{

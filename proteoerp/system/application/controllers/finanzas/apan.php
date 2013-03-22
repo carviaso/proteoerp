@@ -1314,7 +1314,7 @@ class Apan extends Controller {
 	}
 
 	function _pre_update($do){
-		$do->error_message_ar['pre_upd']= 'Rgistro no se puede modificar, debe reversarlo y volverlo a hacer.';
+		$do->error_message_ar['pre_upd']= 'Registro no se puede modificar, debe reversarlo y volverlo a hacer.';
 		return false;
 	}
 
