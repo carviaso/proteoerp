@@ -126,20 +126,21 @@ class Apan extends Controller {
 				if(confirm(" Seguro desea eliminar el registro?")){
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
 					mId = id;
-					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
-			try{
-				var json = JSON.parse(data);
-				if (json.status == "A"){
-					apprise("Registro eliminado");
-				}else{
-					apprise("Registro no se puede eliminado");
-				}
-			}catch(e){
-				$("#fborra").html(data);
-				$("#fborra").dialog( "open" );
-			}
+					$.post("'.site_url($this->url.'decliente/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
 					});
 				}
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
@@ -207,9 +208,9 @@ class Apan extends Controller {
 								var json = JSON.parse(r);
 								if (json.status == "A"){
 									apprise("Registro Guardado");
-									$( "#fedita" ).dialog( "close" );
+									$("#fedita").dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/APAN').'/\'+res.id+\'/id\'').';
+									'.$this->datasis->jwinopen(site_url('formatos/ver/APANCO').'/\'+json.pk.id+\'/id\'').';
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -483,12 +484,16 @@ class Apan extends Controller {
 		$grid->setOndblClickRow('');
 
 		#show/hide navigations buttons
-		$grid->setAdd(false);
 		$grid->setEdit(false);
-		$grid->setDelete(false);
-		$grid->setSearch(false);
+		$grid->setAdd(false);
+		$grid->setDelete(true);
+		//$grid->setDelete($this->datasis->sidapuede('APAN','ELIMINA%'));
+		$grid->setSearch($this->datasis->sidapuede('APAN','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+
+		//$grid->setBarOptions("addfunc: apanadd, editfunc: apanedit, delfunc: apandel, viewfunc: apanshow");
+		$grid->setBarOptions("delfunc: apandel");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -527,34 +532,34 @@ class Apan extends Controller {
 		$data   = $_POST;
 		$check  = 0;
 
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$this->db->insert('apan', $data);
-				echo 'Registro Agregado';
-
-				logusu('APAN','Registro ????? INCLUIDO');
-			} else
-			echo 'Fallo Agregado!!!';
-
-		} elseif($oper == 'edit') {
-			//unset($data['ubica']);
-			$this->db->where('id', $id);
-			$this->db->update('apan', $data);
-			logusu('APAN','Registro ????? MODIFICADO');
-			echo 'Registro Modificado';
-
-		} elseif($oper == 'del') {
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM apan WHERE id='$id' ");
-			if ($check > 0){
-				echo ' El registro no puede ser eliminado; tiene movimiento ';
-			} else {
-				$this->db->simple_query("DELETE FROM apan WHERE id=$id");
-				logusu('APAN','Registro ????? ELIMINADO');
-				echo 'Registro Eliminado';
-			}
-		};
+		//unset($data['oper']);
+		//unset($data['id']);
+		//if($oper == 'add'){
+		//	if(false == empty($data)){
+		//		$this->db->insert('apan', $data);
+		//		echo 'Registro Agregado';
+        //
+		//		logusu('APAN','Registro ????? INCLUIDO');
+		//	} else
+		//	echo 'Fallo Agregado!!!';
+        //
+		//} elseif($oper == 'edit') {
+		//	//unset($data['ubica']);
+		//	$this->db->where('id', $id);
+		//	$this->db->update('apan', $data);
+		//	logusu('APAN','Registro ????? MODIFICADO');
+		//	echo 'Registro Modificado';
+        //
+		//} elseif($oper == 'del') {
+		//	//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM apan WHERE id='$id' ");
+		//	if ($check > 0){
+		//		echo ' El registro no puede ser eliminado; tiene movimiento ';
+		//	} else {
+		//		$this->db->simple_query("DELETE FROM apan WHERE id=$id");
+		//		logusu('APAN','Registro ????? ELIMINADO');
+		//		echo 'Registro Eliminado';
+		//	}
+		//};
 	}
 
 	//******************************************************************
@@ -737,7 +742,7 @@ class Apan extends Controller {
 		if ($edit->on_error()){
 			$rt=array(
 				'status' =>'B',
-				'mensaje'=>html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string)),
+				'mensaje'=>preg_replace('/<[^>]*>/', '', $edit->error_string),
 				'pk'     =>null,
 			);
 			echo json_encode($rt);
@@ -895,13 +900,14 @@ class Apan extends Controller {
 								function(id, val){
 									can= add_itannc();
 
-									$("#itnumero_" +can).val(val.tipo_doc+val.numero);
+									$("#itnumero_" +can).val(val.numero);
+									$("#ittipo_"   +can).val(val.tipo_doc);
 									$("#itfecha_"  +can).val(val.fecha);
 									$("#itsaldo_"  +can).val(val.saldo);
 									$("#itid_"     +can).val(val.id);
 									$("#itnumero_" +can+"_val").text(val.tipo_doc+val.numero);
 									$("#itfecha_"  +can+"_val").text(val.fecha);
-									$("#itsaldo_"  +can+"_val").text(val.saldo);
+									$("#itsaldo_"  +can+"_val").text(nformat(val.saldo,2));
 
 									$("#itmonto_"+can ).focus(function(){
 										var valor = $(this).val();
@@ -925,23 +931,27 @@ class Apan extends Controller {
 									function(id, val){
 										can= add_itefec();
 
-										$("#itenumero_" +can).val(val.tipo_doc+val.numero);
+										$("#itenumero_" +can).val(val.numero);
+										$("#itetipo_"   +can).val(val.tipo_doc);
 										$("#itefecha_"  +can).val(val.fecha);
 										$("#itesaldo_"  +can).val(val.saldo);
+										$("#itemonto_"  +can).val(val.monto);
 										$("#iteid_"     +can).val(val.id);
 										$("#itenumero_" +can+"_val").text(val.tipo_doc+val.numero);
 										$("#itefecha_"  +can+"_val").text(val.fecha);
-										$("#itesaldo_"  +can+"_val").text(val.saldo);
+										$("#itesaldo_"  +can+"_val").text(nformat(val.saldo,2));
+										$("#itemonto_"  +can+"_val").text(nformat(val.monto,2));
 
 										$("#iteaplicar_"+can ).focus(function(){
 											totaliza();
 											var valor  = $(this).val();
 											var nvalor = 0;
+											var saldo  = Number(val.saldo);
 											var aplica = totalefe();
 											var monto  = Number($("#monto").val());
 											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
 												nvalor = Number(valor);
-												if(monto >= aplica+val.saldo){
+												if(monto >= aplica+saldo){
 													$(this).val(val.saldo);
 												}else{
 													if(monto-aplica==0){
@@ -1038,12 +1048,12 @@ class Apan extends Controller {
 
 										$("#itnumero_" +can).val(val.numero);
 										$("#ittipo_"   +can).val(val.tipo_doc);
-                                        $("#itfecha_"  +can).val(val.fecha);
-                                        $("#itsaldo_"  +can).val(val.saldo);
-                                        $("#itid_"     +can).val(val.id);
-                                        $("#itnumero_" +can+"_val").text(val.tipo_doc+val.numero);
-                                        $("#itfecha_"  +can+"_val").text(val.fecha);
-                                        $("#itsaldo_"  +can+"_val").text(val.saldo);
+										$("#itfecha_"  +can).val(val.fecha);
+										$("#itsaldo_"  +can).val(val.saldo);
+										$("#itid_"     +can).val(val.id);
+										$("#itnumero_" +can+"_val").text(val.tipo_doc+val.numero);
+										$("#itfecha_"  +can+"_val").text(val.fecha);
+										$("#itsaldo_"  +can+"_val").text(nformat(val.saldo,2));
 
 										$("#itmonto_"+can ).focus(function(){
 											var valor = $(this).val();
@@ -1069,12 +1079,14 @@ class Apan extends Controller {
 
 										$("#itenumero_" +can).val(val.numero);
 										$("#itetipo_"   +can).val(val.tipo_doc);
-                                        $("#itefecha_"  +can).val(val.fecha);
-                                        $("#itesaldo_"  +can).val(val.saldo);
-                                        $("#iteid_"     +can).val(val.id);
-                                        $("#itenumero_" +can+"_val").text(val.tipo_doc+val.numero);
-                                        $("#itefecha_"  +can+"_val").text(val.fecha);
-                                        $("#itesaldo_"  +can+"_val").text(val.saldo);
+										$("#itefecha_"  +can).val(val.fecha);
+										$("#itemonto_"  +can).val(val.monto);
+										$("#itesaldo_"  +can).val(val.saldo);
+										$("#iteid_"     +can).val(val.id);
+										$("#itenumero_" +can+"_val").text(val.tipo_doc+val.numero);
+										$("#itefecha_"  +can+"_val").text(val.fecha);
+										$("#itesaldo_"  +can+"_val").text(nformat(val.saldo,2));
+										$("#itemonto_"  +can+"_val").text(nformat(val.monto,2));
 
 										$("#iteaplicar_"+can ).focus(function(){
 											totaliza();
@@ -1082,9 +1094,10 @@ class Apan extends Controller {
 											var nvalor = 0;
 											var aplica = totalefe();
 											var monto  = Number($("#monto").val());
+											var saldo  = Number(val.saldo);
 											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
 												nvalor = Number(valor);
-												if(monto >= aplica+val.saldo){
+												if(monto >= aplica+saldo){
 													$(this).val(val.saldo);
 												}else{
 													if(monto-aplica==0){
@@ -1123,39 +1136,13 @@ class Apan extends Controller {
 	}
 
 	function _pre_insert($do){
-		$tipo    = $do->get('tipo');
+		$ttipo   = $do->get('tipo');
 		$clipro  = $do->get('clipro');
-		$transac = $do->get('transac');
 		$estampa = $do->get('estampa');
 		$hora    = $do->get('hora');
 		$usuario = $do->get('usuario');
 
-		//Calcula los efectos
-		$arr_efe=array();
-		$i=$efectos=0;
-		while(true){
-			$ind = 'itenumero_'.$i; $numero = $this->input->post($ind);
-			$ind = 'itetipo_'.$i;   $tipo   = $this->input->post($ind);
-			$ind = 'itefecha_'.$i;  $fecha  = $this->input->post($ind);
-
-			if($numero === false || $tipo === false || $fecha === false ){
-				break;
-			}
-
-			$ind = 'itemonto_'.$i;  $monto  = $this->input->post($ind);
-			$ind = 'iteid_'.$i;     $id     = $this->input->post($ind);
-			if(!is_numeric($monto)){
-				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no es num&eacute;rico.';
-				return false;
-				break;
-			}
-			$efectos += $monto;
-			$arr_efe[] = array('id'=>$id,'numero'=>$numero,'tipo'=>$tipo,'fecha'=>$fecha,'abono'=>$monto);
-			$i++;
-		}
-		//Fin de los efectos
-
-		//Calcula la aplicacion
+		//Calcula los movimientos aplicables
 		$arr_apl = array();
 		$i=$aplicar=0;
 		while(true){
@@ -1166,26 +1153,78 @@ class Apan extends Controller {
 			if($numero === false || $tipo === false || $fecha === false ){
 				break;
 			}
-
-			$ind = 'itaplicar_'.$i;  $aplica = $this->input->post($ind);
-			$ind = 'itmonto_'.$i;    $monto  = $this->input->post($ind);
-			$ind = 'itid_'.$i;       $id     = $this->input->post($ind);
-			if(!is_numeric($monto)){
-				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto '.$tipo.$numero.' no es num&eacute;rico.';
-				return false;
+			if(empty($numero)|| empty($tipo) || empty($fecha)){
 				break;
 			}
 
-			$aplicar += $monto;
-			$arr_apl[] = array('id'=>$id,'numero'=>$numero,'tipo'=>$tipo,'fecha'=>$fecha,'abono'=>$aplica,'monto'=>$monto);
+			$ind = 'itsaldo_'.$i;  $itsaldo= $this->input->post($ind);
+			$ind = 'itmonto_'.$i;  $monto  = $this->input->post($ind);
+			$ind = 'itid_'.$i;     $id     = $this->input->post($ind);
+			if(!empty($monto)){
+				if(!is_numeric($monto)){
+					$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto '.$tipo.$numero.' no es num&eacute;rico.';
+					return false;
+					break;
+				}
+
+				$aplicar += $monto;
+				$arr_apl[] = array('id'=>$id,'numero'=>$numero,'tipo'=>$tipo,'fecha'=>$fecha,'monto'=>$monto);
+			}
 			$i++;
 		}
-		//Fin de la aplicacion
+		//Fin de los aplicables
 
-		if($aplicar-$efectos != 0){
-			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto a aplicar es diferente al aplicado';
+		//Calcula los efectos a los que se aplica
+		$arr_efe=array();
+		$i=$efectos=0;
+		while(true){
+			$ind = 'itenumero_'.$i; $numero = $this->input->post($ind);
+			$ind = 'itetipo_'.$i;   $tipo   = $this->input->post($ind);
+			$ind = 'itefecha_'.$i;  $fecha  = $this->input->post($ind);
+
+			if($numero === false || $tipo === false || $fecha === false ){
+				break;
+			}
+			if(empty($numero)|| empty($tipo) || empty($fecha)){
+				break;
+			}
+
+			$ind = 'iteaplicar_'.$i; $abono  = $this->input->post($ind);
+			$ind = 'itemonto_'.$i;   $monto  = $this->input->post($ind);
+			$ind = 'iteid_'.$i;      $id     = $this->input->post($ind);
+			if(!empty($abono)){
+				if(!is_numeric($abono)){
+					$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no es num&eacute;rico.';
+					return false;
+					break;
+				}
+				$efectos += $abono;
+				if($abono > $monto){
+					$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no puede exceder su saldo.';
+					return false;
+					break;
+				}
+				$arr_efe[] = array('id'=>$id,'numero'=>$numero,'tipo'=>$tipo,'fecha'=>$fecha,'abono'=>$abono,'monto'=>$monto);
+			}
+			$i++;
+		}
+		if($efectos<=0){
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto de los efectos a aplicar debe ser mayor a cero.';
 			return false;
 		}
+		//Fin de los efectos
+
+
+		if($aplicar-$efectos != 0){
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto a aplicar es diferente al aplicado. '."$aplicar-$efectos";
+			return false;
+		}
+
+		$transac = $this->datasis->fprox_numero('ntransa');
+		$numero  = $this->datasis->fprox_numero('napan');
+		$do->set('transac',$transac);
+		$do->set('numero' ,$numero );
+		$do->set('fecha'  ,date('Y-m-d'));
 
 		$data = $mSQLs = array();
 		$data['transac'] = $transac;
@@ -1193,31 +1232,34 @@ class Apan extends Controller {
 		$data['hora']    = $hora;
 		$data['usuario'] = $usuario;
 		$data['ppago']=$data['reteiva']=$data['reten']=$data['cambio']=$data['mora']=0;
-		$saldoapl=0;
+		$saldoefe=0;
+		$centi = '';
 
-		foreach($arr_efe AS $efe){
+		foreach($arr_apl AS $apl){
 
-			$saldoefe=$efe['abono'];
+			$saldoapl = $apl['monto'];
 			do{
-				if($saldoapl<=0){
-					$apl = array_shift($arr_apl);
+				if($saldoefe<=0){
+					$efe = array_shift($arr_efe);
+					if(empty($efe)) break;
 				}
 
-				$data['numero']   = $efe['numero'];
-				$data['tipo_doc'] = $efe['tipo'];
-				$data['fecha']    = $efe['fecha'];
-				$data['abono']    = $apl['abono'];
-				if($saldoefe <= $apl['monto']){
-					$data['monto'] = $apl['monto'];
-					$saldoefe -= $apl['monto'];
-					$saldoapl  = 0;
+				$data['numero']    = $efe['numero'];
+				$data['tipo_doc']  = $efe['tipo'];
+				$data['fecha']     = $efe['fecha'];
+				$data['monto']     = $efe['monto'];
+
+				if($saldoapl >= $efe['abono']){
+					$data['abono'] = $efe['abono'];
+					$saldoapl      = $saldoapl-$efe['abono'];
+					$saldoefe      = 0;
 				}else{
-					$data['monto'] = $saldo;
-					$saldoapl = $apl['abono']-$saldo;
-					$saldoefe = 0;
+					$data['abono'] = $saldoapl;
+					$saldoefe      = $apl['monto']-$saldoapl;
+					$saldoapl      = 0;
 				}
 
-				if($tipo=='C'){
+				if($ttipo=='C'){
 					$data['numccli']  = $apl['numero'];
 					$data['tipoccli'] = $apl['tipo'];
 					$data['cod_cli']  = $clipro;
@@ -1226,8 +1268,8 @@ class Apan extends Controller {
 					$data['emiriva']  = '';
 					$data['recriva']  = '';
 					$mSQLs[] = $this->db->insert_string('itccli', $data);
-					$mSQLs[] = 'UPDATE smov SET abonos=abonos+'.$apl['abono'].' WHERE id='.$this->db->escape($apl['id']);
-				}elseif($tipo == 'P'){
+					$mSQLs[] = 'UPDATE smov SET abonos=abonos+'.$efe['abono'].' WHERE id='.$this->db->escape($efe['id']);
+				}elseif($ttipo == 'P'){
 					$data['numppro']  = $apl['numero'];
 					$data['tipoppro'] = $apl['tipo'];
 					$data['cod_prv']  = $clipro;
@@ -1235,20 +1277,21 @@ class Apan extends Controller {
 					$data['creten']   = '';
 					$data['breten']   = '';
 					$mSQLs[] = $this->db->insert_string('itppro', $data);
-					$mSQLs[] = 'UPDATE sprm SET abonos=abonos+'.$apl['abono'].' WHERE id='.$this->db->escape($apl['id']);
+					$mSQLs[] = 'UPDATE sprm SET abonos=abonos+'.$efe['abono'].' WHERE id='.$this->db->escape($efe['id']);
 				}
-			}while( $saldoefe>0 );
+			}while($saldoapl>0);
 
-			if($tipo=='C'){
-				$mSQLs[] = 'UPDATE smov SET abonos=abonos+'.$efe['abono'].' WHERE id='.$this->db->escape($efe['id']);
-			}else{
-				$mSQLs[] = 'UPDATE sprm SET abonos=abonos+'.$efe['abono'].' WHERE id='.$this->db->escape($efe['id']);
+			if($ttipo=='C'){
+				$mSQLs[] = 'UPDATE smov SET abonos=abonos+'.$apl['monto'].' WHERE id='.$this->db->escape($apl['id']);
+			}elseif($ttipo=='P'){
+				$mSQLs[] = 'UPDATE sprm SET abonos=abonos+'.$apl['monto'].' WHERE id='.$this->db->escape($apl['id']);
 			}
 		}
 
-		$do->error_message_ar['pre_ins']=$do->error_message_ar['insert']='lalalalalaal';
-		return false;
+		//$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = print_r($arr_apl,true);
+		//return false;
 
+		$this->_sqls=$mSQLs;
 		return true;
 	}
 
@@ -1258,23 +1301,74 @@ class Apan extends Controller {
 	}
 
 	function _pre_delete($do){
+
 		$do->error_message_ar['pre_del']='';
-		return false;
+		return true;
 	}
 
 	function _post_insert($do){
+		$numero = $do->get('numero');
+		foreach($this->_sqls as $mSQL){
+			$rt=$this->db->simple_query($mSQL);
+		}
+
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits numero ${numero} id $primary ");
 	}
 
 	function _post_update($do){
+		$numero = $do->get('numero');
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits numero ${numero} id $primary ");
 	}
 
 	function _post_delete($do){
+		$numero  = $do->get('numero');
+		$transac = $do->get('transac');
+		$tipo    = $do->get('tipo');
+		$clipro  = $do->get('clipro');
+		$dbtransa= $this->db->escape($transac);
+		$dbclipro= $this->db->escape($clipro);
+
+		if($tipo=='C'){
+			$query = $this->db->query('SELECT numccli,tipoccli,numero,tipo_doc,fecha,abono FROM itccli WHERE transac='.$dbtransa.' AND cod_cli='.$dbclipro);
+
+			foreach ($query->result() as $row){
+				$dbnumero = $this->db->escape($row->numccli);
+				$dbtipo   = $this->db->escape($row->tipoccli);
+				$dbtnumero= $this->db->escape($row->numero);
+				$dbttipo  = $this->db->escape($row->tipo_doc);
+				$abono    = $row->abono;
+
+				$mSQL = "UPDATE smov SET abonos=abonos-${abono} WHERE cod_cli=${dbclipro} AND tipo_doc=${dbttipo} AND numero=${dbtnumero}";
+				$this->db->simple_query($mSQL);
+				$mSQL = "UPDATE smov SET abonos=abonos-${abono} WHERE cod_cli=${dbclipro} AND tipo_doc=${dbtipo} AND numero=${dbnumero}";
+				$this->db->simple_query($mSQL);
+			}
+			$mSQL='DELETE FROM itccli WHERE transac='.$dbtransa.' AND cod_cli='.$dbclipro;
+			$this->db->simple_query($mSQL);
+
+		}elseif($tipo=='P'){
+			$query = $this->db->query('SELECT numppro,tipoppro,numero,tipo_doc,fecha,abono FROM itppro WHERE transac='.$dbtransa.' AND cod_prv='.$dbclipro);
+
+			foreach ($query->result() as $row){
+				$dbnumero = $this->db->escape($row->numppro);
+				$dbtipo   = $this->db->escape($row->tipoppro);
+				$dbtnumero= $this->db->escape($row->numero);
+				$dbttipo  = $this->db->escape($row->tipo_doc);
+				$abono    = $row->abono;
+
+				$mSQL = "UPDATE sprm SET abonos=abonos-${abono} WHERE cod_cli=${dbclipro} AND tipo_doc=${dbttipo} AND numero=${dbtnumero}";
+				$this->db->simple_query($mSQL);
+				$mSQL = "UPDATE sprm SET abonos=abonos-${abono} WHERE cod_cli=${dbclipro} AND tipo_doc=${dbtipo} AND numero=${dbnumero}";
+				$this->db->simple_query($mSQL);
+			}
+			$mSQL='DELETE FROM itppro WHERE transac='.$dbtransa.' AND cod_prv='.$dbclipro;
+			$this->db->simple_query($mSQL);
+		}
+
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		logusu($do->table,"Elimino $this->tits numero ${numero} id $primary ");
 	}
 
 	function instalar(){

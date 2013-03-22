@@ -3653,8 +3653,9 @@ class Scst extends Controller {
 	}
 
 	function _post_delete($do){
-		$codigo=$do->get('numero');
-		logusu('scst',"Compra $codigo ELIMINADA");
+		$codigo =$do->get('numero');
+		$control=$do->get('control');
+		logusu('scst',"Compra ${codigo} Control ${control} ELIMINADA");
 	}
 
 	function _pre_vehi_insert($do){ return false; }
