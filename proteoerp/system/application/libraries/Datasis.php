@@ -618,7 +618,7 @@ class Datasis {
 				$lon += strlen($formato[$i]);
 				$meco .= $formato[$i].' ';
 			}
-		} else 
+		} else
 			$lon = 1;
 		return $lon;
 	}
@@ -749,7 +749,6 @@ class Datasis {
 		$query = $CI->db->query($mSQL);
 		$opciones = '';
 		$colu = array();
-		$arreglo = '{ ';
 		$select = '<select>';
 		if ( !empty($id)) $select = '<select id="'.$id.'" name="'.$id.'">';
 		foreach( $query->list_fields() as $campo ) {
@@ -757,12 +756,10 @@ class Datasis {
 		}
 		if ($query->num_rows() > 0){
 			foreach ($query->result_array() as $row){
-				$opciones .= "<option value=\"".$row[$colu[0]]."\">".utf8_encode(trim($row[$colu[1]]))."</option>";
-				$arreglo .= "\"".$row[$colu[0]]."\":\"".utf8_encode(trim($row[$colu[1]]))."\", ";
+				$opciones .= "<option value=\"". htmlentities($row[$colu[0]])."\">". htmlentities (utf8_encode(trim($row[$colu[1]])))."</option>";
 			}
 		}
 		$query->free_result();
-		$arreglo .= " }";
 		if ( $todos ){
 			return $select.'<option value="-">Seleccione</option>'.$opciones.'</select>';
 		} else {
@@ -796,7 +793,7 @@ class Datasis {
 		$CI->load->helper('directory');
 		$map = directory_map('./system/application/controllers/', FALSE);
 		return $map;
-		
+
 	}
 
 	function actusal($codbanc, $fecha, $monto){

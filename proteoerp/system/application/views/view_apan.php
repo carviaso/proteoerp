@@ -99,7 +99,59 @@ function totalefe(){
 			tmonto = tmonto+abono;
 		}
 	});
+
 	return tmonto;
+}
+
+function cnota(){
+	var mascara= "APLICA <#apl#>A <#efe#>";
+	var aplica = "";
+	var efecto = "";
+
+	//Aplicables
+	var i = 0;
+	var arr=$('input[name^="itmonto_"]');
+	jQuery.each(arr, function() {
+		nom=this.name;
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			var abono = Number(this.value);
+			if(abono > 0){
+				if(i > 0) aplica = aplica+",";
+				var ind   = this.name.substring(pos+1);
+				var tipo  = $("#ittipo_"+ind).val();
+				var numero= $("#itnumero_"+ind).val();
+
+				aplica = aplica+tipo+numero+" ";
+				i = i+1;
+			}
+		}
+	});
+
+	//Efectos
+	i = 0;
+	var arr=$('input[name^="iteaplicar_"]');
+	jQuery.each(arr, function() {
+		nom=this.name;
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			var abono = Number(this.value);
+			if(abono > 0){
+				if(i > 0) efecto = efecto+",";
+				var ind   = this.name.substring(pos+1);
+				var tipo  = $("#itetipo_"+ind).val();
+				var numero= $("#itenumero_"+ind).val();
+
+				efecto = efecto+tipo+numero+" ";
+				i = i+1;
+			}
+		}
+	});
+
+	mascara = mascara.replace(/<#apl#>/g,aplica);
+	mascara = mascara.replace(/<#efe#>/g,efecto);
+
+	$("#observa1").val(mascara);
 }
 
 function totaliza(){
@@ -185,10 +237,7 @@ function truncate(id){
 		<td class="littletablerowth">Observaciones:</td>
 		<td class="littletablerow"  ><?php echo $form->observa1->output; ?></td>
 	</tr>
-	<tr>
-		<td class="littletablerowth">&nbsp;</td>
-		<td class="littletablerow"  ><?php echo $form->observa2->output; ?></td>
-	</tr>
+
 </table>
 </fieldset>
 <?php echo $form_end; ?>

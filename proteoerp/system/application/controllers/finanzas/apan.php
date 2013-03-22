@@ -822,15 +822,19 @@ class Apan extends Controller {
 		$edit->reinte->size      = 7;
 		$edit->reinte->maxlength = 5;
 
-		$edit->observa1 = new inputField('Observa1','observa1');
-		$edit->observa1->rule      = '';
-		$edit->observa1->size      = 52;
-		$edit->observa1->maxlength = 50;
+		$edit->observa1 = new textareaField('Observa1','observa1');
+		$edit->observa1->cols = 70;
+		$edit->observa1->rows = 2;
 
-		$edit->observa2 = new inputField('Observa2','observa2');
+		//$edit->observa1 = new textField('Observa1','observa1');
+		//$edit->observa1->rule      = '';
+		//$edit->observa1->size      = 52;
+		//$edit->observa1->maxlength = 50;
+
+		/*$edit->observa2 = new inputField('Observa2','observa2');
 		$edit->observa2->rule      = '';
 		$edit->observa2->size      = 52;
-		$edit->observa2->maxlength = 50;
+		$edit->observa2->maxlength = 50;*/
 
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
@@ -915,6 +919,8 @@ class Apan extends Controller {
 											$(this).val(val.saldo);
 											totaliza();
 										}
+										$(this).select();
+										cnota();
 									});
 								}
 							);
@@ -965,6 +971,8 @@ class Apan extends Controller {
 													$(this).val("");
 												}
 											}
+											$(this).select();
+											cnota();
 										});
 									}
 								);
@@ -1061,6 +1069,8 @@ class Apan extends Controller {
 												$(this).val(val.saldo);
 												totaliza();
 											}
+											$(this).select();
+											cnota();
 										});
 									}
 								);
@@ -1111,6 +1121,8 @@ class Apan extends Controller {
 													$(this).val("");
 												}
 											}
+											$(this).select();
+											cnota();
 										});
 									}
 								);
@@ -1291,6 +1303,12 @@ class Apan extends Controller {
 		//$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = print_r($arr_apl,true);
 		//return false;
 
+
+		$observa = $do->get('observa1');
+		$do->set('observa1',substr($observa,0,50));
+		$do->set('observa2',substr($observa,50));
+		//$obs = wordwrap($observa, 50,"\n");
+
 		$this->_sqls=$mSQLs;
 		return true;
 	}
@@ -1342,7 +1360,7 @@ class Apan extends Controller {
 
 				$mSQL = "UPDATE smov SET abonos=abonos-${abono} WHERE cod_cli=${dbclipro} AND tipo_doc=${dbttipo} AND numero=${dbtnumero}";
 				$this->db->simple_query($mSQL);
-				$mSQL = "UPDATE smov SET abonos=abonos-${abono} WHERE cod_cli=${dbclipro} AND tipo_doc=${dbtipo} AND numero=${dbnumero}";
+				$mSQL = "UPDATE smov SET abonos=abonos-${abono} WHERE cod_cli=${dbclipro} AND tipo_doc=${dbtipo}  AND numero=${dbnumero}";
 				$this->db->simple_query($mSQL);
 			}
 			$mSQL='DELETE FROM itccli WHERE transac='.$dbtransa.' AND cod_cli='.$dbclipro;
@@ -1358,9 +1376,9 @@ class Apan extends Controller {
 				$dbttipo  = $this->db->escape($row->tipo_doc);
 				$abono    = $row->abono;
 
-				$mSQL = "UPDATE sprm SET abonos=abonos-${abono} WHERE cod_cli=${dbclipro} AND tipo_doc=${dbttipo} AND numero=${dbtnumero}";
+				$mSQL = "UPDATE sprm SET abonos=abonos-${abono} WHERE cod_prv=${dbclipro} AND tipo_doc=${dbttipo} AND numero=${dbtnumero}";
 				$this->db->simple_query($mSQL);
-				$mSQL = "UPDATE sprm SET abonos=abonos-${abono} WHERE cod_cli=${dbclipro} AND tipo_doc=${dbtipo} AND numero=${dbnumero}";
+				$mSQL = "UPDATE sprm SET abonos=abonos-${abono} WHERE cod_prv=${dbclipro} AND tipo_doc=${dbtipo}  AND numero=${dbnumero}";
 				$this->db->simple_query($mSQL);
 			}
 			$mSQL='DELETE FROM itppro WHERE transac='.$dbtransa.' AND cod_prv='.$dbclipro;

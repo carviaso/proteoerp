@@ -39,11 +39,11 @@ class Usuarios extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"camclave",   "img"=>"images/candado.png",  "alt" => "Cambiar Clave", "label"=>"Cambiar Clave", "tema"=>"anexos"));
+		$grid->wbotonadd(array('id'=>'camclave',   'img'=>'images/candado.png',  'alt' => 'Cambiar Clave', 'label'=>'Cambiar Clave', 'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-			array("id"=>"fedita",  "title"=>"Agregar/Editar Usuario"),
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Usuario'),
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -75,7 +75,7 @@ class Usuarios extends Controller {
 		$(function() {
 			$( "input:submit, a, button", ".a1" ).button();
 		});
-		
+
 		jQuery("#camclave").click( function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
@@ -127,7 +127,7 @@ class Usuarios extends Controller {
 		));
 
 		$grid->addField('us_codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -366,8 +366,7 @@ class Usuarios extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -381,8 +380,7 @@ class Usuarios extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -422,7 +420,7 @@ class Usuarios extends Controller {
 	}
 
 /*
-	function 
+	function
 
 /*
 class Usuarios extends Controller {
@@ -674,7 +672,7 @@ class Usuarios extends Controller {
 		$us_clave  = $this->input->post('us_clave');
 		$us_clave1 = $this->input->post('us_clave1');
 		$id        = $this->input->post('id');
-		
+
 		if ( $us_clave == $us_clave1) {
 			$clave = $this->db->escape($us_clave);
 			if ( $id > 0 ){
@@ -729,7 +727,7 @@ class Usuarios extends Controller {
 
 		$us_clave  = $this->input->post('us_clave');
 		$us_clave1 = $this->input->post('us_clave1');
-		
+
 		$msg = 'Cambio Exitoso';
 		$us_codigo = $this->secu->usuario();
 		$clavea = $this->datasis->dameval("SELECT us_clave FROM usuario WHERE us_codigo=".$this->db->escape($us_codigo));
@@ -747,7 +745,6 @@ class Usuarios extends Controller {
 	}
 
 
-
 	function _pos_updatec($do){
 		$codigo=$do->get('us_codigo');
 		$superv=$do->get('supervisor');
@@ -755,4 +752,3 @@ class Usuarios extends Controller {
 		return true;
 	}
 }
-?>
