@@ -246,7 +246,7 @@ class comprassuper{
 			
 			$ws->write_string( $mm, 20, $row->nrocomp, $cuerpo );
 			if ( !empty($row->emision) ) {
-				$ws->write_string( $mm, 21, substr($row->emision,8,2)."-".$ameses[substr($row->emision,5,2)-1]."-".substr($row->emision,0,4), $cuerpo );
+				$ws->write_string( $mm, 21, substr($row->emision,8,2).'/'.substr($row->emision,5,2).'/'.substr($row->emision,0,4), $cuerpo );
 			} else {
 				$ws->write_string( $mm, 21, $row->emision, $cuerpo );
 			}
