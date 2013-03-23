@@ -721,7 +721,6 @@ class Usuarios extends Controller {
 
 	}
 
-
 	function ccclaveg(){
 		$us_actual = $this->input->post('us_actual');
 

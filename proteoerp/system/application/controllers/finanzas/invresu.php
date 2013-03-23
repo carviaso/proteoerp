@@ -343,6 +343,21 @@ class Invresu extends Controller {
 		));
 
 
+		$grid->addField('conver');
+		$grid->label('Conversion');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
 		$grid->addField('ventas');
 		$grid->label('Ventas');
 		$grid->params(array(
@@ -360,6 +375,20 @@ class Invresu extends Controller {
 
 		$grid->addField('trans');
 		$grid->label('Transferencias');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('ajuste');
+		$grid->label('Ajustes');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -403,8 +432,8 @@ class Invresu extends Controller {
 		));
 
 
-		$grid->addField('mcompras');
-		$grid->label('Monto compras');
+		$grid->addField('trans');
+		$grid->label('Transferencias');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -543,10 +572,8 @@ class Invresu extends Controller {
 	*/
 	function getdata(){
 		$grid       = $this->jqdatagrid;
-
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('invresu');
-
 		$response   = $grid->getData('invresu', array(array()), array(), false, $mWHERE );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
@@ -650,12 +677,12 @@ class Invresu extends Controller {
 		$edit->on_save_redirect=false;
 		$edit->back_url = site_url($this->url.'filteredgrid');
 
-		$edit->post_process('insert','_post_insert');
-		$edit->post_process('update','_post_update');
-		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert','_pre_insert');
-		$edit->pre_process('update','_pre_update');
-		$edit->pre_process('delete','_pre_delete');
+		$edit->post_process('insert', '_post_insert');
+		$edit->post_process('update', '_post_update');
+		$edit->post_process('delete', '_post_delete');
+		$edit->pre_process( 'insert', '_pre_insert');
+		$edit->pre_process( 'update', '_pre_update');
+		$edit->pre_process( 'delete', '_pre_delete');
 
 		$edit->mes = new inputField('A&ntilde;o/Mes','mes');
 		$edit->mes->rule='max_length[6]||integer';
@@ -828,15 +855,7 @@ class Invresu extends Controller {
 		$this->rapyd->load('datafilter','datagrid','fields');
 		$this->rapyd->uri->keep_persistence();
 
-		$filter = new DataFilter('Libro de inventario','view_invresutotal');
-		//$filter->error_string=$error;
-
-		// Genera automaticamente si no estan
-		$mes  = date('Y');
-		if ( $this->datasis->dameval("SELECT count(*) FROM sitems WHERE year(fecha)=$mes") == 0 ) {
-			$mSQL = "INSERT IGNORE INTO invresu (mes, codigo) SELECT CONCAT(YEAR(fecha),MONTH(fecha)) mes, codigoa FROM sitems WHERE YEAR(ffecha)=YEAR(curdate()) GROUP BY YEAR(fecha), MONTH(fecha) ";
-			$this->db->simple_query($mSQL);
-		}
+		$filter = new DataFilter('','view_invresutotal');
 
 		$mes = $this->datasis->dameval("SELECT MID(MAX(mes),1,4) FROM invresu");
 
@@ -846,13 +865,17 @@ class Invresu extends Controller {
 		$filter->fecha->clause   = 'where';
 		$filter->fecha->insertValue = $mes;
 
-		$filter->buttons('reset','search');
+		$actionb = 'bobo(\''.site_url('finanzas/invresu/calcula').'/\'+$(\'#anno\').val()+\'01\');return true;';
+
+		$filter->button('btn_recalculo', 'Generar todo', $actionb, 'BR','show');
+
+		$filter->buttons('search');
 		$filter->build();
 
 		$monto = new inputField('Monto', 'monto');
-		//$monto->db_name  ='final';
+
 		$monto->grid_name='monto[<#anno#>][<#mes#>]';
-		//$monto->status   ='modify';
+
 		$monto->size     = 14;
 		$monto->css_class= 'inputnum';
 		$monto->autocomplete=false;
@@ -860,19 +883,21 @@ class Invresu extends Controller {
 		$grid = new DataGrid('Lista');
 		$grid->per_page = 12;
 
-		$uri2 = anchor('#',img(array('src'=>'images/engrana.png','border'=>'0','alt'=>'Calcula')),array('onclick'=>'bobo(\''.base_url().'finanzas/invresu/calcula/<#anno#><#mes#>\');return false;'));
+		$uri2 = anchor('#',img(array('src'=>'images/engrana.png','border'=>'0','alt'=>'Calcula')),                  array('onclick'=>'bobo(\''.base_url().'finanzas/invresu/calcula/<#anno#><#mes#>\');return false;'));
 		$uri2 .= "&nbsp;&nbsp;";
-		$uri2 .= anchor('#',img(array('src'=>'images/refresh.png','border'=>'0','alt'=>'Rebaja')),array('onclick'=>'foo(\''.base_url().'finanzas/invresu/recalcula/<#anno#><#mes#>\');return false;'));
+		$uri2 .= anchor('#',img(array('src'=>'images/refresh.png','border'=>'0','alt'=>'Rebaja')),                  array('onclick'=>'foo(\''.base_url().'finanzas/invresu/recalcula/<#anno#><#mes#>\');return false;'));
+		$uri2 .= "&nbsp;&nbsp;";
+		$uri2 .= anchor('#',img(array('src'=>'images/ojo.png',    'border'=>'0','alt'=>'Consulta', 'height'=>'18')),array('onclick'=>'fconsulta(\'<#anno#><#mes#>\'); return false;'));
 
-		$grid->column('A&ntilde;o','anno' ,'align="center"');
-		$grid->column('Mes'       ,'mes'  ,'align="center"');
-		$grid->column('Inicial'   ,'<nformat><#inicial#></nformat>'  ,'align=\'right\'');
-		$grid->column('Compras'   ,'<nformat><#compras#></nformat>'  ,'align=\'right\'');
-		$grid->column('Ventas'    ,'<nformat><#ventas#></nformat>'   ,'align=\'right\'');
-		$grid->column('Retiros'   ,'<nformat><#retiros#></nformat>'  ,'align=\'right\'');
-		$grid->column('Por Despachar' ,'<nformat><#despachar#></nformat>','align=\'right\'');
-		$grid->column('Final'     ,'<nformat><#final#></nformat>'    ,'align=\'right\'');
-		$grid->column('Accion',$uri2, 'align=\'center\'');
+		$grid->column('Accion',$uri2,  'align=\'center\' bgcolor=\'#041C87\'');
+		$grid->column('A&ntilde;o',    'anno' ,'align="center"');
+		$grid->column('Mes',           'mes'  ,'align="center"');
+		$grid->column('Inicial',       '<nformat><#inicial#></nformat>',  'align=\'right\'');
+		$grid->column('Compras',       '<nformat><#compras#></nformat>',  'align=\'right\'');
+		$grid->column('Ventas',        '<nformat><#ventas#></nformat>',   'align=\'right\'');
+		$grid->column('Retiros',       '<nformat><#retiros#></nformat>',  'align=\'right\'');
+		$grid->column('Por Despachar', '<nformat><#despachar#></nformat>','align=\'right\'');
+		$grid->column('Final',         '<nformat><#final#></nformat>',    'align=\'right\'');
 
 		$grid->build();
 
@@ -882,10 +907,25 @@ class Invresu extends Controller {
 		$ggrid.=form_close();
 
 		$script ='
-		<script type="text/javascript">
+<script type="text/javascript">
 		$(function() {
 			$(".inputnum").numeric(".");
+
+		$("#consulta").dialog({
+			autoOpen: false, height: 400, width: 600, modal: true,
+			buttons: {
+				"Salir": function() {
+					$("#consulta").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#consulta").html("");
+			}
 		});
+
+		});
+
 		function foo(url){
 			valor=$("#porcent").val();
 			uurl=url+"/"+valor;'."
@@ -920,37 +960,230 @@ class Invresu extends Controller {
 			}
 			return false;
 		}
-		</script>';
-		$espera = '<div id="displayBox" style="display:none" ><p>Espere.....</p><img  src="'.base_url().'images/doggydig.gif" width="131px" height="79px"  /></div>';
-		$porcent  = "<div align='left'><a href='".base_url()."reportes/ver/INVENTA/SINV'>Listado</a></div> ";
-		$porcent .= "<div align='right'>Porcentaje de Variaci&oacute;n";
+
+		function fconsulta( mes ) {
+			$.post("'.site_url($this->url.'consulta/').'"+\'/\'+mes,
+			function(data){
+				$("#consulta").html(data);
+				$("#consulta").dialog("open");
+			})
+		};
+
+</script>';
+		
+		$espera  = "\n".'<div id="displayBox" style="display:none" ><p>Espere.....</p><img  src="'.base_url().'images/doggydig.gif" width="131px" height="79px"  /></div>';
+		$espera .= "\n".'<div id="consulta" name="consulta" title="Detalle del Mes"></div>';
+
+		$porcent  = "\n<div align='center' style='font-size:16pt;'><a href='".base_url()."reportes/ver/INVENTA/SINV'>Emitir Listado</a></div> ";
+		$porcent .= "\n<div align='right'>Porcentaje de Variaci&oacute;n";
 		$porcent .= form_input(array('name'=>'porcent','id'=>'porcent','value'=>'0','size'=>'10','style'=>'text-align:right' ) );
-		$porcent .= "</div>";
+		$porcent .= "\n</div>";
+
 
 		$data['content'] = $filter->output.$porcent.$ggrid.$espera;
 		$data['title']   = heading('Libro de inventario');
 		$data['style']   = style('impromptu/default.css');
+		$data['style']  .= style('themes/proteo/proteo.css');
+
 		$data['script']  = script("jquery.js");
 		$data['script'] .= script('plugins/jquery.numeric.pack.js');
 		$data['script'] .= script('plugins/jquery.floatnumber.js');
 		$data['script'] .= script('plugins/jquery.blockUI.js');
+		$data['script'] .= script('jquery-ui.custom.min.js');
+
 		$data['script'] .= script('jquery-impromptu.js');
+
 		$data['script'] .= $script;
 
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
+	function consulta($mes){
+		
+		$mSQL = '
+		SELECT a.mes   AS mes, a.codigo AS codigo, if(isnull(b.descrip),
+			concat(a.codigo, "Articulo fusionado"), b.descrip) AS descrip, 
+			sum(a.minicial) AS minicial,
+			sum(a.mcompras) AS mcompras,
+			sum(a.mconver)  AS mconver,
+			sum(a.mventas)  AS mventas,
+			sum(a.mtrans)   AS mtrans,
+			sum(a.majuste)  AS majuste,
+			sum(a.mfisico)  AS mfisico,
+			sum(a.mnotas)   AS mnotas,
+			sum(a.mfinal)   AS mfinal,
+			sum(a.minicial*(minicial<0) ) AS ininega,
+			sum(a.mfinal*(mfinal<0) )     AS finnega
+ 		FROM invresu a LEFT JOIN sinv b ON a.codigo = b.codigo 
+		WHERE a.mes='.$mes.'
+		GROUP BY a.mes';
+
+		$reg = $this->datasis->damereg($mSQL);
+		$sale = "<div style='font-size:12pt;font-weight:bold;text-align:center;'>RESUMEN DE MOVIMIENTO DEL ${mes}</div>";
+		
+		$sale .= "
+		<table align='center' width='95%'>
+			<tr>
+				<td>Valor Inicial</td><td>&nbsp;</td><td align='right'><b>".nformat($reg['minicial'])."</b></td>			
+			</tr>
+			<tr>
+				<td>Compras</td><td align='right'>".nformat($reg['mcompras'])."</td><td>&nbsp;</td>			
+			</tr>
+			<tr>
+				<td>Ventas</td><td align='right'>".nformat($reg['mventas'])."</td><td>&nbsp;</td>			
+			</tr>
+			<tr>
+				<td>Compra-Venta</td><td>&nbsp;</td><td align='right'><b>".nformat($reg['mcompras']-$reg['mventas'])."</b></td>			
+			</tr>
+			<tr>
+				<td>Conversiones</td><td align='right'>".nformat($reg['mconver'])."</td><td>&nbsp;</td>			
+			</tr>
+			<tr>
+				<td>Transferencias</td><td align='right'>".nformat($reg['mtrans'])."</td><td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td>Ajustes de Inventario</td><td align='right'>".nformat($reg['majuste'])."</td><td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td>Notas de Entrega</td><td align='right'>".nformat($reg['mnotas'])."</td><td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td>Inventario Fisico</td><td align='right'>".nformat($reg['mfisico'])."</td><td>&nbsp;</td>			
+			</tr>
+			<tr>
+				<td>Total Retiros</td><td>&nbsp;</td><td align='right'><b>".nformat($reg['mconver']+$reg['mtrans']-$reg['mnotas']+$reg['mfisico'])."</b></td>			
+			</tr>
+			<tr>
+				<td>Valor Final</td><td align='right'>".nformat($reg['mfinal'])."</td><td align='right'><b>".nformat($reg['minicial']+$reg['mcompras']-$reg['mventas']+$reg['mconver']+$reg['mtrans']-$reg['mnotas']+$reg['mfisico']  )."</b></td>
+			</tr>
+		</table>
+		<br>
+		<table align='center' width='95%' style='border:1px solid;' cellspacing='2' cellpadding='2'>
+			<tr>
+				<td>Productos en Negativo</td><td align='right'>".nformat($reg['ininega'])."</td><td>Inicial Ajustado</td><td align='right'><b>".nformat($reg['minicial']-$reg['ininega'])."</b></td>
+			</tr>
+			<tr>
+				<td>Monto Final Negativo</td><td align='right'>".nformat($reg['finnega'])."</td><td>Final Ajustado</td><td align='right'><b>".nformat($reg['mfinal']-$reg['finnega'])."</b></td>
+			</tr>
+		</table>
+		";
+	
+		echo $sale;
+	}
+
 	function calcula(){
 		$meco = $this->uri->segment(4);
 		$ano = substr($meco,0,4)*100;
+
 		while ( $meco-$ano < 13 ) {
-			$this->db->simple_query("CALL sp_invresu(".$meco.")");
+			$this->_calcula($meco);
 			$meco++;
 		}
 		logusu('invresu','Genero para la fecha '.$ano);
 		echo "Calculo Concluido";
 	}
+
+	function _calcula( $mes){
+
+		//Borra lo que hay
+		$this->db->query("DELETE FROM invresu WHERE mes=${mes}");
+
+		// Carga desde costos
+		$mSQL = "
+		INSERT INTO invresu ( mes, codigo, descrip, inicial, compras, conver, ventas, trans, ajuste, fisico, notas, final, minicial, mcompras, mconver, mventas, mtrans, majuste, mfisico, mnotas, mfinal, mpventa )
+		SELECT 
+		EXTRACT(YEAR_MONTH FROM a.fecha) AS mes, a.codigo, b.descrip, 
+		0                                                                AS inicial, 
+		sum(a.cantidad*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1)) AS compras, 
+		sum(a.cantidad*(a.origen IN ('6C') ))                            AS conver,  
+		sum(a.cantidad*(a.origen IN ('3I','3M') ))                       AS ventas, 
+		sum(a.cantidad*(a.origen IN ('1T') ))                            AS trans,
+		sum(a.cantidad*(a.origen IN ('5C') ))                            AS ajuste,
+		sum((a.cantidad-a.anteri)*(a.origen IN ('0F','8F')))             AS fisico,
+		sum(a.cantidad*(a.origen='4N'))                                  AS notas, 
+		0                                                                AS final,
+		0                                                                AS minicial,  
+		sum(a.monto*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1))    AS mcompras, 
+		sum(a.cantidad*a.promedio*(a.origen IN ('6C') ))                 AS mconver,  
+		sum(a.cantidad*a.promedio*(a.origen IN ('3I','3M')))             AS mventas, 
+		sum(a.cantidad*a.promedio*(a.origen IN ('1T','6C','5C') ))       AS mtrans, 
+		sum(a.cantidad*a.promedio*(a.origen IN ('5C') ))                 AS majuste,
+		sum((a.cantidad-a.anteri)*a.promedio*(a.origen IN ('0F','8F')))  AS mfisico, 
+		sum(a.cantidad*a.promedio*(a.origen='4N'))                       AS mnotas, 
+		0                                                                AS mfinal, 
+		sum(venta)                                                       AS mpventas  
+		FROM costos AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo  
+		WHERE EXTRACT(YEAR_MONTH FROM a.fecha)=${mes} AND MID(b.tipo,1,1) != 'S' 
+		GROUP BY EXTRACT(YEAR_MONTH FROM a.fecha),a.codigo";
+		$this->db->query($mSQL);
+
+		// Trae saldos Iniciales
+		$mesante = $this->datasis->dameval("SELECT mes FROM invresu WHERE mes < ${mes} ORDER BY mes DESC LIMIT 1");
+
+		if ( $mesante ) {
+
+			// Agrega codigos desde los anteriores
+			$mSQL = "
+			INSERT IGNORE INTO invresu ( mes, codigo, descrip, inicial,   compras,   conver,   ventas,   trans,   ajuste,   fisico,   notas,   final,   minicial,   mcompras,   mconver,   mventas,   mtrans,   majuste,   mfisico,   mnotas,   mfinal,    mpventa )
+			SELECT ${mes}                mes, codigo, '',    0 inicial, 0 compras, 0 conver, 0 ventas, 0 trans, 0 ajuste, 0 fisico, 0 notas, 0 final, 0 minicial, 0 mcompras, 0 mconver, 0 mventas, 0 mtrans, 0 majuste, 0 mfisico, 0 mnotas, 0 mfiscal, 0 mpventas FROM invresu WHERE mes=${mesante};
+			";
+			$this->db->query($mSQL);
+
+			// Coloca saldos anteriores
+			$mSQL = "
+			UPDATE invresu a JOIN  invresu b ON a.codigo=b.codigo AND a.mes=${mes} AND b.mes=${mesante}
+			SET a.inicial=b.final, a.minicial=b.mfinal;";
+			$this->db->query($mSQL);
+
+			// Recalcula saldo final
+			$mSQL = "
+			UPDATE invresu SET 
+			final  =  inicial + compras  + conver  - ventas  - notas  + trans  + ajuste  + fisico,
+			mfinal = minicial + mcompras + mconver - mventas - mnotas + mtrans + majuste + mfisico 
+			WHERE mes = ${mes} ";
+			$this->db->query($mSQL);
+
+		}
+
+		#memowrite($mSQL);
+
+
+		$mSQL = "
+SELECT mes INTO @mPAPA FROM invresu WHERE mes < mFECHA ORDER BY mes DESC LIMIT 1;
+IF @mPAPA > 0 THEN
+	REPLACE INTO invresu ( mes, codigo, descrip, inicial, compras, ventas, trans, fisico, notas, final, minicial, mcompras, mventas, mtrans, mfisico, mnotas, mfinal, mpventa )
+	SELECT mFECHA mes, codigo, '',       final,  0 compras, 0 ventas, 0 trans, 0 fisico, 0 notas, final, mfinal, 0 mcompras, 0 mventas, 0 mtrans, 0 mfisico, 0 mnotas, 0 mfiscal, 0 mpventas  FROM invresu WHERE mes=@mPAPA;
+END IF;
+
+DROP TABLE IF EXISTS INVRESUTEM;
+CREATE TABLE INVRESUTEM
+SELECT EXTRACT(YEAR_MONTH FROM a.fecha) AS mes, a.codigo, b.descrip, 0 AS inicial, 
+sum(a.cantidad*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1)) AS compras, 
+sum(a.cantidad*(a.origen IN ('3I','3M') )) AS ventas, 
+sum(a.cantidad*(a.origen IN ('1T','6C','5C')  )) AS trans,  
+sum((a.cantidad-a.anteri)*(a.origen IN ('0F','9F'))) AS fisico,  
+sum(a.cantidad*(a.origen='4N')) AS notas,  0 AS final,  0 AS minicial,  
+sum(a.monto*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1)) AS mcompras, 
+sum(a.cantidad*a.promedio*(a.origen IN ('3I','3M'))) AS mventas, 
+sum(a.cantidad*a.promedio*(a.origen IN ('1T','6C','5C') )) AS mtrans, 
+sum((a.cantidad-a.anteri)*a.promedio*(a.origen IN ('0F','9F'))) AS mfisico, 
+sum(a.cantidad*a.promedio*(a.origen='4N')) AS mnotas, 
+0 AS mfinal, sum(venta)  
+FROM costos AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo  
+WHERE EXTRACT(YEAR_MONTH FROM a.fecha) = mFECHA AND MID(b.tipo,1,1)!='S' 
+GROUP BY EXTRACT(YEAR_MONTH FROM a.fecha),a.codigo ;
+
+UPDATE invresu a JOIN INVRESUTEM b ON a.mes=b.mes AND a.codigo=b.codigo
+SET a.compras=b.compras, a.ventas = b.ventas,a.notas = b.notas,a.trans = b.trans,a.fisico = b.fisico,
+a.mcompras = b.mcompras,a.mventas = b.mventas,a.mnotas = b.mnotas,a.mtrans = b.mtrans,
+a.mfisico = b.mfisico ;
+DROP TABLE IF EXISTS INVRESUTEM;
+UPDATE invresu SET final=inicial+compras-ventas-notas+trans+fisico,mfinal=minicial+mcompras-mventas-mnotas+mtrans+mfisico WHERE mes=mFECHA;";
+		
+	}
+
+
 
 	function recalcula(){
 		$meco = $this->uri->segment(4);
@@ -1005,5 +1238,22 @@ class Invresu extends Controller {
 			$this->db->simple_query('ALTER TABLE `invresu` ADD UNIQUE INDEX `mes_codigo` (`mes`, `codigo`);');
 			$this->db->simple_query('ALTER TABLE invresu ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};
+
+		if(!$this->datasis->iscampo('invresu','conver') ) {
+			$this->db->simple_query('ALTER TABLE invresu ADD COLUMN conver  DECIMAL(20,3) NULL DEFAULT "0.00" COMMENT "CONVERSIONES" AFTER compras');
+		};
+
+		if(!$this->datasis->iscampo('invresu','mconver') ) {
+			$this->db->simple_query('ALTER TABLE invresu ADD COLUMN mconver DECIMAL(20,3) NULL DEFAULT "0.00" COMMENT "CONVERSIONES" AFTER mcompras');
+		};
+
+		if(!$this->datasis->iscampo('invresu','ajuste') ) {
+			$this->db->simple_query('ALTER TABLE invresu ADD COLUMN ajuste  DECIMAL(20,3) NULL DEFAULT "0.00" COMMENT "AJUSTES DE INVENTARIO" AFTER trans');
+		};
+
+		if(!$this->datasis->iscampo('invresu','majuste') ) {
+			$this->db->simple_query('ALTER TABLE invresu ADD COLUMN majuste DECIMAL(20,3) NULL DEFAULT "0.00" COMMENT "AJUSTES DE INVENTARIO" AFTER mtrans ');
+		};
+		
 	}
 }

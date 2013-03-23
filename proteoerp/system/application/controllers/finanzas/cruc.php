@@ -246,13 +246,11 @@ class Cruc extends Controller {
 								$("#fedita").html(r);
 							}
 						}
-					})
-				},
+				})},
 				"Cancelar": function() {
 					$("#fedita").html("");
 					$( this ).dialog( "close" );
-				}
-			},
+			}},
 			close: function() {
 				$("#fedita").html("");
 				allFields.val( "" ).removeClass( "ui-state-error" );
