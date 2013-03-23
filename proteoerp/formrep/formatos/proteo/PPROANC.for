@@ -61,7 +61,7 @@ if($tipo_op=='CH'){
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
 </head>
 <body style="margin-left: 30px; margin-right: 30px;">
-
+<!--@size_paper 215.9x139.7-->
 <script type="text/php">
 	if (isset($pdf)) {
 		$texto = array();
@@ -151,10 +151,7 @@ $encabezado = <<<encabezado
 			</table>
 encabezado;
 // Fin  Encabezado
-?>
-<body>
-<!--@size_paper 215.9x139.7-->
-<?php
+
 $this->incluir('X_CINTILLO');
 echo $encabezado;
 ?>

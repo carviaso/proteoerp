@@ -171,7 +171,7 @@ class Generar extends Metodos {
 
 					$mSQL="UPDATE scst SET reteiva=0 WHERE reteiva IS NULL AND  recep >= $qfechai ";
 					$query = $this->db->query($mSQL);
-					
+
 					$mSQL="SELECT a.$mCONTROL mgrupo FROM $mTABLA WHERE a.recep BETWEEN $qfechai AND $qfechaf GROUP BY a.$mCONTROL";
 				} else {
 					$mSQL="SELECT a.$mCONTROL mgrupo FROM $mTABLA WHERE a.fecha BETWEEN $qfechai AND $qfechaf GROUP BY a.$mCONTROL";
@@ -180,25 +180,25 @@ class Generar extends Metodos {
 				$query = $this->db->query($mSQL);
 				foreach ($query->result_array() as $fila){
 					$aregla = $this->_hace_regla($modulo, $mCONTROL, $fila['mgrupo'],$qfechai);
-					
+
 					foreach ($aregla['casi'] as $casi){
 						$ejecasi='INSERT IGNORE INTO casi ( comprob, fecha, descrip, origen ) '.$casi;
 						$ejec=$this->db->simple_query($ejecasi);
 						if($ejec==FALSE) {
-							memowrite($ejecasi,'generarca'); 
-							$error=true; 
+							memowrite($ejecasi,'generarca');
+							$error=true;
 						}
-						
+
 					}
 					$mm = 1;
 					foreach ($aregla['itcasi'] as $itcasi){
 						$ejeitcasi ='INSERT INTO itcasi (fecha, comprob, origen,  cuenta, referen, concepto, debe,  haber, sucursal, ccosto) '.$itcasi;
 						$ejec=$this->db->simple_query($ejeitcasi);
 						if($ejec==FALSE) {
-							memowrite($ejeitcasi,'generarit'.$mm); 
+							memowrite($ejeitcasi,'generarit'.$mm);
 							$error=true;
 						}
-						$mm++; 
+						$mm++;
 					}
 				}
 				$this->_borra_huerfano();

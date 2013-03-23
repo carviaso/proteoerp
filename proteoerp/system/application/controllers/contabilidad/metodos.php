@@ -30,7 +30,7 @@ class Metodos extends Controller {
 			$groupby = $fila['agrupar'];
 
 			if(!empty($mFDESDE)){
-				$alias   = '';
+				/*$alias   = '';
 				$exp     = explode(' ',trim($fila['origen']));
 				if(count($exp)>0){
 					$ttabla  = array_shift($exp);
@@ -45,8 +45,8 @@ class Metodos extends Controller {
 					}
 					$campos = $this->db->list_fields($ttabla);
 					$where .= " AND ".$fila['fecha']." >= $dbfdesde";
-
-				}
+				}*/
+				$where .= " AND ".$fila['fecha']." >= $dbfdesde";
 			}
 
 			$data ="SELECT $select FROM $from WHERE $where";
@@ -61,4 +61,3 @@ class Metodos extends Controller {
 		return $areglo;
 	}
 }
-?>

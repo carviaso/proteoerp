@@ -19,11 +19,7 @@ class Bcaj extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('bcaj','id') ) {
-			$this->db->simple_query('ALTER TABLE bcaj DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE bcaj ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE bcaj ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -52,12 +48,12 @@ class Bcaj extends Controller {
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
-		$grid->wbotonadd(array('id'=>'impPdf',    'img'=>'assets/default/images/print.png', 'alt' => 'Cargos Indebidos en Banco' , 'label' =>'Imprimir Documento'   , 'tema'=> 'anexos'));
-		$grid->wbotonadd(array('id'=>'dtarjeta',  'img'=>'images/tarjetas.jpg'            , 'alt' => 'Deposito de Tarjetas'      , 'label' =>'Deposito de Tarjetas' , 'tema'=> 'anexos'));
-		$grid->wbotonadd(array('id'=>'cerrardpt', 'img'=>'images/candado.png'             , 'alt' => 'Cerrar Deposito'           , 'label' =>'Cerrar Deposito CH'   , 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'impPdf'    ,'img'=>'assets/default/images/print.png', 'alt' => 'Cargos Indebidos en Banco' , 'label' =>'Imprimir Documento'   , 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'dtarjeta'  ,'img'=>'images/tarjetas.jpg'            , 'alt' => 'Deposito de Tarjetas'      , 'label' =>'Deposito de Tarjetas' , 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'cerrardpt' ,'img'=>'images/candado.png'             , 'alt' => 'Cerrar Deposito'           , 'label' =>'Cerrar Deposito CH'   , 'tema'=> 'anexos'));
 		$grid->wbotonadd(array('id'=>'transferen','img'=>'images/fusionar.png'            , 'alt' => 'Cerrar Deposito'           , 'label' =>'Transferencias'       , 'tema'=> 'anexos'));
-		$grid->wbotonadd(array('id'=>'borrar',    'img'=>'images/delete.png'              , 'alt' => 'Eliminar Movimiento'       , 'label' =>'Eliminar Movimiento'  , 'tema'=> 'anexos'));
-		$grid->wbotonadd(array('id'=>'chdevo',    'img'=>'images/delete.png'              , 'alt' => 'Eliminar Cheque Devuelto'  , 'label' =>'Eliminar CH. Devuelto', 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'borrar'    ,'img'=>'images/delete.png'              , 'alt' => 'Eliminar Movimiento'       , 'label' =>'Eliminar Movimiento'  , 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'chdevo'    ,'img'=>'images/delete.png'              , 'alt' => 'Eliminar Cheque Devuelto'  , 'label' =>'Eliminar CH. Devuelto', 'tema'=> 'anexos'));
 
 		$WestPanel = $grid->deploywestp();
 
@@ -65,8 +61,8 @@ class Bcaj extends Controller {
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array("id"=>"forma1", "title"=>"Agregar/Editar Registro"),
-			array("id"=>"fedita", "title"=>"Agregar/Editar Registro")
+			array('id'=>'forma1', 'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -74,8 +70,7 @@ class Bcaj extends Controller {
 		function ltransac(el, val, opts){
 			var meco=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
 			return meco;
-		};
-		';
+		};';
 
 		$param['WestPanel']    = $WestPanel;
 		$param['readyLayout']  = $readyLayout;
@@ -83,7 +78,7 @@ class Bcaj extends Controller {
 		//$param['EastPanel']  = $EastPanel;
 		$param['listados']     = $this->datasis->listados('BCAJ', 'JQ');
 		$param['otros']        = $this->datasis->otros('BCAJ', 'JQ');
-		$param['funciones']  = $funciones;
+		$param['funciones']    = $funciones;
 
 		$param['centerpanel']  = $centerpanel;
 		$param['SouthPanel']   = $SouthPanel;
@@ -110,96 +105,7 @@ class Bcaj extends Controller {
 			} else {
 				$.prompt("<h1>Transaccion invalida</h1>");
 			}
-		};
-		';
-
-		//Imprime a PDF
-		$bodyscript .= '
-		jQuery("#impPdf").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/BANCAJA').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});
-		';
-
-		//Transferencia
-		$bodyscript .= '
-		jQuery("#transferen").click( function(){
-			$.post("'.site_url($this->url.'transferencia/create').'",
-				function(data){
-					$("#fedita").dialog( {height: 350, width: 500, title: "Prestamo Otorgado"} );
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
-			})
-
-		});
-		';
-
-
-		//Deposito de Tarjetas
-		$bodyscript .= '
-		jQuery("#dtarjeta").click( function(){
-			$.post("'.site_url($this->url.'depositotar/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 380, width: 520, title: "Prestamo Otorgado"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
-
-
-
-/*
-		//Imprime a HTML
-		$bodyscript .= '
-		jQuery("#impHtml").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.base_url().'formatos/verhtml/BANCAJA/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});
-		';
-*/
-
-		//Cheque Devuelto
-		$bodyscript .= '
-		jQuery("#chdevo").click( function(){
-			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid1.'").jqGrid(\'getRowData\',id);
-				$.prompt(
-					"<h1>Cheque Devuelto </h1><table width=\"100%\"><tr><td>Numero: "+ret.num_ref+"</td><td>Fecha: "+ret.fecha+"</td></tr><tr><td>Banco: "+ret.banco+"</td><td>Monto: "+ret.monto+"</td></tr></table>",
-					{
-						buttons: { "Devolver":true, "Cancelar": false }, focus: 1,
-						callback: function(e,v,m,f){
-							if (v == true) {
-								$.get("'.base_url().'finanzas/prmo/prmochdev/"+id,
-								function(data){ alert(data); });
-							}
-						}
-					}
-				);
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});
-		';
-/*
-		//Imprime a HTML
-		$bodyscript .= '
-		function probar( o, n ) {
-			if ( o.val().length < 1 ) {
-				o.addClass( "ui-state-error" );
-				updateTips( "Seleccion un " + n + "." );
-				return false;
-			} else {
-				return true;
-			}
-		};
-		';
-*/
+		};';
 
 		//Cierre de Deposito
 		$bodyscript .= '
@@ -212,12 +118,71 @@ class Bcaj extends Controller {
 			var grid = jQuery("#newapi'.$grid0.'");
 			var s;
 			var allFields = $( [] ).add( fnumero ).add( ffecha );
-
 			var tips = $( ".validateTips" );
-
 			s = grid.getGridParam(\'selarrrow\');
 			$( "input:submit, a, button", ".otros" ).button();
 
+			var fnombre = $("#name" ),
+				email = $( "#email" ),
+				password = $( "#password" ),
+				allFields = $( [] ).add( name ).add( email ).add( password ),
+				tips = $( ".validateTips" );';
+
+		//Cheque Devuelto
+		$bodyscript .= '
+			jQuery("#chdevo").click( function(){
+				var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					var ret = jQuery("#newapi'.$grid1.'").jqGrid(\'getRowData\',id);
+					$.prompt(
+						"<h1>Cheque Devuelto </h1><table width=\"100%\"><tr><td>Numero: "+ret.num_ref+"</td><td>Fecha: "+ret.fecha+"</td></tr><tr><td>Banco: "+ret.banco+"</td><td>Monto: "+ret.monto+"</td></tr></table>",
+						{
+							buttons: { "Devolver":true, "Cancelar": false }, focus: 1,
+							callback: function(e,v,m,f){
+								if (v == true) {
+									$.get("'.base_url().'finanzas/prmo/prmochdev/"+id,
+									function(data){ alert(data); });
+								}
+							}
+						}
+					);
+				} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+			});';
+
+		//Imprime a PDF
+		$bodyscript .= '
+			jQuery("#impPdf").click( function(){
+				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+					window.open(\''.site_url('formatos/ver/BANCAJA').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+				} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+			});';
+
+		//Transferencia
+		$bodyscript .= '
+			jQuery("#transferen").click( function(){
+				$.post("'.site_url($this->url.'transferencia/create').'",
+					function(data){
+						$("#fedita").dialog( {height: 350, width: 500, title: "Prestamo Otorgado"} );
+						$("#fedita").html(data);
+						$("#fedita").dialog( "open" );
+				})
+
+			});';
+
+		//Deposito de Tarjetas
+		$bodyscript .= '
+			jQuery("#dtarjeta").click( function(){
+				$.post("'.site_url($this->url.'depositotar/create').'",
+				function(data){
+					$("#fedita").dialog( {height: 380, width: 520, title: "Prestamo Otorgado"} );
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				})
+			});';
+
+		$bodyscript .= '
 			$("#cerrardpt").click(function() {
 				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
@@ -232,8 +197,9 @@ class Bcaj extends Controller {
 						$.prompt("<h1>Movimiento no esta Pendiente</h1>");
 					}
 				} else { $.prompt("<h1>Por favor Seleccione un Deposito</h1>");}
-			});
+			});';
 
+		$bodyscript .= '
 			$("#borrar").click(function() {
 				var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				var m = "";
@@ -251,16 +217,13 @@ class Bcaj extends Controller {
 							}
 						}
 					);
-				} else { $.prompt("<h2>Por favor Seleccione un Movimiento</h2>");}
-			});
+				} else {
+					$.prompt("<h2>Por favor Seleccione un Movimiento</h2>");
+				}
+			});';
 
-			var fnombre = $("#name" ),
-				email = $( "#email" ),
-				password = $( "#password" ),
-				allFields = $( [] ).add( name ).add( email ).add( password ),
-				tips = $( ".validateTips" );
-
-			$( "#forma1").dialog({
+		$bodyscript .= '
+			$("#forma1").dialog({
 				autoOpen: false, height: 470, width: 550, modal: true,
 				buttons: {
 					"Cerrar Deposito": function() {
@@ -294,60 +257,53 @@ class Bcaj extends Controller {
 				close: function() {
 					allFields.val( "" ).removeClass( "ui-state-error" );
 				}
-			});
-		});
-		';
+			});';
 
 		$bodyscript .= '
-		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
-			buttons: {
-				"Guardar": function() {
-					var bValid = true;
-					var murl = $("#df1").attr("action");
-					allFields.removeClass( "ui-state-error" );
-					$.ajax({
-						type: "POST", dataType: "html", async: false,
-						url: murl,
-						data: $("#df1").serialize(),
-						success: function(r,s,x){
-							try{
-								var json = JSON.parse(r);
-								if (json.status == "A"){
-									apprise("Registro Guardado");
-									$( "#fedita" ).dialog( "close" );
-									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/BCAJ').'/\'+res.id+\'/id\'').';
-									return true;
-								} else {
-									apprise(json.mensaje);
+			$("#fedita").dialog({
+				autoOpen: false, height: 500, width: 700, modal: true,
+				buttons: {
+					"Guardar": function() {
+						var bValid = true;
+						var murl = $("#df1").attr("action");
+						allFields.removeClass( "ui-state-error" );
+						$.ajax({
+							type: "POST", dataType: "html", async: false,
+							url: murl,
+							data: $("#df1").serialize(),
+							success: function(r,s,x){
+								try{
+									var json = JSON.parse(r);
+									if (json.status == "A"){
+										apprise("Registro Guardado");
+										$( "#fedita" ).dialog( "close" );
+										grid.trigger("reloadGrid");
+										'.$this->datasis->jwinopen(site_url('formatos/ver/BCAJ').'/\'+res.id+\'/id\'').';
+										return true;
+									} else {
+										apprise(json.mensaje);
+									}
+								}catch(e){
+									$("#fedita").html(r);
 								}
-							}catch(e){
-								$("#fedita").html(r);
 							}
-						}
-					})
+						})
+					},
+					"Cancelar": function() {
+						$("#fedita").html("");
+						$( this ).dialog( "close" );
+					}
 				},
-				"Cancelar": function() {
+				close: function() {
 					$("#fedita").html("");
-					$( this ).dialog( "close" );
+					allFields.val( "" ).removeClass( "ui-state-error" );
 				}
-			},
-			close: function() {
-				$("#fedita").html("");
-				allFields.val( "" ).removeClass( "ui-state-error" );
-			}
-		});';
+			});';
 
-
-
-		$bodyscript .= "\n</script>\n";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
-
-
-
-
 
 	//***************************
 	//Definicion del Grid y la Forma
@@ -395,7 +351,7 @@ class Bcaj extends Controller {
 		));
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
@@ -408,7 +364,7 @@ class Bcaj extends Controller {
 		));
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
@@ -504,7 +460,7 @@ class Bcaj extends Controller {
 		));
 
 		$grid->addField('numeror');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero R.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
@@ -573,7 +529,7 @@ class Bcaj extends Controller {
 		));
 
 		$grid->addField('comision');
-		$grid->label('Comision');
+		$grid->label('Comisi&oacute;n');
 		$grid->params(array(
 			'search'        => 'false',
 			'editable'      => 'true',
@@ -648,7 +604,7 @@ class Bcaj extends Controller {
 		));
 
 		$grid->addField('comprob');
-		$grid->label('Comprob');
+		$grid->label('Comprobante');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
@@ -671,7 +627,7 @@ class Bcaj extends Controller {
 		));
 
 		$grid->addField('transac');
-		$grid->label('Transac');
+		$grid->label('Transaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
@@ -711,7 +667,7 @@ class Bcaj extends Controller {
 		));
 
 		$grid->addField('deldia');
-		$grid->label('Dia Cierre');
+		$grid->label('D&iacute;a Cierre');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
@@ -723,7 +679,7 @@ class Bcaj extends Controller {
 		));
 
 		$grid->addField('modificado');
-		$grid->label('modificado');
+		$grid->label('Modificado');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
@@ -787,8 +743,7 @@ class Bcaj extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		//$filters = $this->input->get_post('filters');
 		$grid       = $this->jqdatagrid;
 
@@ -803,8 +758,7 @@ class Bcaj extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -869,7 +823,7 @@ class Bcaj extends Controller {
 	//************************************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -936,7 +890,7 @@ class Bcaj extends Controller {
 
 
 		$grid->addField('num_ref');
-		$grid->label('Num_ref');
+		$grid->label('Num.Ref');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -989,7 +943,7 @@ class Bcaj extends Controller {
 
 */
 		$grid->addField('cod_cli');
-		$grid->label('Cod_cli');
+		$grid->label('Cliente');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1025,7 +979,7 @@ class Bcaj extends Controller {
 */
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1173,7 +1127,7 @@ class Bcaj extends Controller {
 		));
 
 		$grid->addField('cuentach');
-		$grid->label('Cuentach');
+		$grid->label('Cuenta.CH');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1207,7 +1161,7 @@ class Bcaj extends Controller {
 
 		if ($deployed) {
 			return $grid->deploy();
-		} else {
+		}else{
 			return $grid;
 		}
 	}
@@ -1215,8 +1169,7 @@ class Bcaj extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdatait()
-	{
+	function getdatait(){
 		$id = $this->uri->segment(4);
 		if ($id == false ){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM bcaj");
@@ -1233,8 +1186,7 @@ class Bcaj extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setDataIt()
-	{
+	function setDataIt(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -1268,13 +1220,8 @@ class Bcaj extends Controller {
 				logusu('SFPA',"Registro ????? ELIMINADO");
 				echo "Registro Eliminado";
 			}
-		};
+		}
 	}
-
-
-//****************************************************
-
-
 
 	/*********************************
 	 *
@@ -1292,7 +1239,7 @@ class Bcaj extends Controller {
 		$numbcaj  = $this->input->get_post('fnumbcaj'); //Nro de Bcaj
 		$caja     = '';
 		$codbanc  = '';
-		$mensaje  = "";
+		$mensaje  = '';
 		$envia    = '00';
 
 		$reg = $this->datasis->damereg("SELECT * FROM bcaj WHERE id=$id ");
@@ -1333,9 +1280,8 @@ class Bcaj extends Controller {
 			$mensaje .= 'No esta definido el banco receptor ';
 		}
 
-		if ( $tipo == "C" ) {
-			if ( $check == 0 )
-			{
+		if($tipo == 'C'){
+			if($check == 0){
 				// Revisamos si el monto coincide con la suma
 				$fecha = substr($fecha,-4,4).substr($fecha,3,2).substr($fecha,0,2);
 
@@ -1512,9 +1458,8 @@ class Bcaj extends Controller {
 			} else {
 				echo '{"status":"E","numero":"'.$id.'","mensaje":"'.$mensaje.'"}';
 			}
-		} elseif ( $tipo == "E") {
-			if ( $check == 0 )
-			{
+		}elseif($tipo == 'E'){
+			if ( $check == 0 ){
 				// Revisamos si el monto coincide con la suma
 				$fecha = substr($fecha,-4,4).substr($fecha,3,2).substr($fecha,0,2);
 
@@ -1629,8 +1574,6 @@ class Bcaj extends Controller {
 				echo '{"status":"E","numero":"'.$id.'","mensaje":"'.$mensaje.'"}';
 			}
 		}
-
-
 	}
 
 
@@ -1671,7 +1614,6 @@ class Bcaj extends Controller {
 		logusu('BCAJ',"MOVIMIENTO DE CAJA $numero Transaccion $transac ELIMINADO");
 		echo "Movimiento de Caja Eliminado $transac";
 	}
-
 
 	/*********************************
 	 *
@@ -2011,9 +1953,6 @@ class Bcaj extends Controller {
 
 		$conten['form'] =&  $edit;
 		$this->load->view('view_bcaj', $conten);
-
-
-
 	}
 
 	function depositoefe(){
@@ -2148,7 +2087,6 @@ class Bcaj extends Controller {
 		}
 	}
 
-
 	function depositotar(){
 		$this->rapyd->load('dataform');
 
@@ -2193,7 +2131,7 @@ class Bcaj extends Controller {
 		}
 		$json_comis=json_encode($comis);
 		$script='
-			comis=eval('.$json_comis.');
+			comis = JSON.parse(\''.$json_comis.'\');
 			function calcomis(){
 				if($("#recibe").val().length>0){
 					tasa='.$this->datasis->traevalor('tasa').';
@@ -2202,8 +2140,8 @@ class Bcaj extends Controller {
 					eval("tc=comis."+banco+".comitc;"  );
 					eval("im=comis."+banco+".impuesto;");
 
-					if($("#tarjeta").val().length>0)  tarjeta=parseFloat($("#tarjeta").val());   else tarjeta =0;
-					if($("#tdebito").val().length>0)  tdebito =parseFloat($("#tdebito").val());  else tdebito =0;
+					if($("#tarjeta").val().length>0) tarjeta=parseFloat($("#tarjeta").val()); else tarjeta =0;
+					if($("#tdebito").val().length>0) tdebito=parseFloat($("#tdebito").val()); else tdebito =0;
 
 					islr    =tarjeta*10/(100+tasa);
 					islr    =islr*(im/10);
@@ -2223,11 +2161,14 @@ class Bcaj extends Controller {
 				if($("#islr").val().length>0)     islr    =parseFloat($("#islr").val());     else     islr=0;
 				monto   =tarjeta+tdebito-comision-islr;
 				$("#monto").val(roundNumber(monto,2));
-			}';
+			}
 
-		$this->rapyd->jquery[]='$("#tarjeta,#tdebito").bind("keyup",function() { calcomis(); });';
-		$this->rapyd->jquery[]='$("#comision,#islr").bind("keyup",function() { totaliza(); });';
-		$this->rapyd->jquery[]='$("#recibe").change(function() { calcomis(); });';
+			$(function() {
+				$("#tarjeta,#tdebito").bind("keyup",function() { calcomis(); });
+				$("#comision,#islr").bind("keyup",function() { totaliza(); });
+				$("#recibe").change(function() { calcomis(); });
+			});';
+
 		$edit->script($script);
 
 		$edit->envia->options( "SELECT TRIM(codbanc) AS codbanc,$desca FROM banc WHERE tbanco='CAJ'");
@@ -2254,7 +2195,6 @@ class Bcaj extends Controller {
 
 
 		//$edit->tipor = new dropdownField('Tipo','tipor');
-
 
 		$edit->tipo = new hiddenField('Tipo','tipo');
 		$edit->tipo->insertValue = 'DE';
@@ -3517,10 +3457,19 @@ class Bcaj extends Controller {
 
 		}
 		echo $salida;
-
 	}
 
+	function instalar(){
+		$campos=$this->db->list_fields('bcaj');
 
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE bcaj DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE bcaj ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE bcaj ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		if(!in_array('deposito',$campos)){
+			$this->db->simple_query('ALTER TABLE sfpa ADD COLUMN deposito CHAR(12) NULL DEFAULT NULL');
+		}
+	}
 }
-
-?>
