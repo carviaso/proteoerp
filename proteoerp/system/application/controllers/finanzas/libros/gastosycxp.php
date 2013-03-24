@@ -135,7 +135,7 @@ class gastosycxp{
 
 		$mSQL = "SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,a.montasa,a.tasa,a.monredu,a.reducida,a.monadic,
 		a.sobretasa, a.exento, a.impuesto, a.monto, a.reteiva, a.fecha, a.fecapl, b.rif, b.nomfis,
-		GROUP_CONCAT(TRIM(c.numero)) AS afecta,a.codigo
+		GROUP_CONCAT(TRIM(c.numero)) AS afecta,a.codigo,a.serie
 		FROM sprm AS a
 		LEFT JOIN sprv AS b ON a.cod_prv=b.proveed
 		JOIN itppro  AS c ON a.numero=c.numppro AND a.tipo_doc=c.tipoppro AND c.cod_prv=a.cod_prv
@@ -160,7 +160,8 @@ class gastosycxp{
 				$data['fuente']   = 'MP';
 				$data['sucursal'] = '00';
 				$data['fecha']    = $fecha;
-				$data['numero']   = $row->numero;
+				$data['numero']   = trim($row->numero);
+				$data['serie']    = trim($row->serie);
 				$data['clipro']   = $row->cod_prv;
 				$data['nombre']   = $row->nomfis;
 				$data['contribu'] = 'CO';
