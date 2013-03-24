@@ -32,21 +32,22 @@ class comprassuper{
 			IF(a.tipo='NC',a.numero,'        ') numnc,
 			IF(a.tipo='FC','01-Reg','03-Reg') oper, 
 			'        ' compla, 
-			sum(a.gtotal*IF(a.tipo='NC',-1,1)) gtotal,
-			sum(a.exento*IF(a.tipo='NC',-1,1)) exento, 
-			sum(a.general*IF(a.tipo='NC',-1,1)) general,
-			sum(a.geneimpu*IF(a.tipo='NC',-1,1)) geneimpu,
-			sum(a.adicional*IF(a.tipo='NC',-1,1)) adicional,
-			sum(a.adicimpu*IF(a.tipo='NC',-1,1)) adicimpu, 
-			sum(a.reducida*IF(a.tipo='NC',-1,1)) reducida,
-			sum(a.reduimpu*IF(a.tipo='NC',-1,1)) reduimpu, 
-			sum(b.reiva*IF(a.tipo='NC',-1,1)) reiva,
+			SUM(a.gtotal*IF(a.tipo='NC',-1,1)) gtotal,
+			SUM(a.exento*IF(a.tipo='NC',-1,1)) exento, 
+			SUM(a.general*IF(a.tipo='NC',-1,1)) general,
+			SUM(a.geneimpu*IF(a.tipo='NC',-1,1)) geneimpu,
+			SUM(a.adicional*IF(a.tipo='NC',-1,1)) adicional,
+			SUM(a.adicimpu*IF(a.tipo='NC',-1,1)) adicimpu, 
+			SUM(a.reducida*IF(a.tipo='NC',-1,1)) reducida,
+			SUM(a.reduimpu*IF(a.tipo='NC',-1,1)) reduimpu, 
+			SUM(b.reiva*IF(a.tipo='NC',-1,1)) reiva,
 			CONCAT(EXTRACT(YEAR_MONTH FROM fechal),b.nrocomp) nrocomp,
 			b.emision, a.numero numo, a.tipo
-		FROM siva AS a LEFT JOIN riva AS b ON a.numero=b.numero and a.clipro=b.clipro AND a.tipo=b.tipo_doc AND MID(b.transac,1,1)<>'_' 
+		FROM siva AS a 
+		LEFT JOIN riva    AS b ON a.numero=b.numero AND a.clipro=b.clipro AND a.tipo=b.tipo_doc AND MID(b.transac,1,1)<>'_' 
 		LEFT JOIN provoca AS d ON a.rif=d.rif 
-		LEFT JOIN scst e ON a.numero=e.numero AND a.tipo=e.tipo_doc AND a.clipro=e.proveed AND a.fuente='CP' 
-		LEFT JOIN sprm f ON a.numero=f.numero AND a.clipro=f.cod_prv AND f.tipo_doc='NC'  
+		LEFT JOIN scst    AS e ON a.numero=e.numero AND a.tipo=e.tipo_doc AND a.clipro=e.proveed AND a.fuente='CP' 
+		LEFT JOIN sprm    AS f ON a.numero=f.numero AND a.clipro=f.cod_prv AND f.tipo_doc='NC' 
 		WHERE libro='C' AND fechal BETWEEN $fdesde AND $fhasta AND a.fecha>0 
 		GROUP BY a.fecha,a.tipo,numo,a.rif 
 		UNION ALL
@@ -71,7 +72,7 @@ class comprassuper{
 			a.adicimpu * 0, 
 			a.reducida * 0,
 			a.reduimpu * 0, 
-			sum(b.reiva*IF(a.tipo='NC',-1,1)) reiva,
+			SUM(b.reiva*IF(a.tipo='NC',-1,1)) reiva,
 			CONCAT(EXTRACT(YEAR_MONTH FROM fechal),b.nrocomp) nrocomp,
 			b.emision, a.numero numo, a.tipo
 		FROM siva AS a JOIN riva b ON a.numero=b.numero and a.clipro!=b.clipro AND a.tipo=b.tipo_doc AND MID(b.transac,1,1)<>'_' AND a.reiva=b.reiva 

@@ -22,7 +22,7 @@ class compras{
 		$redutasa  = $aa['redutasa'];
 		$sobretasa = $aa['sobretasa'];
 
-		if($this->db->field_exists('serie', 'scst') AND $this->db->field_exists('serie', 'siva')){
+		if($this->db->field_exists('serie', 'siva') AND $this->db->field_exists('serie', 'siva')){
 			$dbcampo='COALESCE(a.serie,a.numero)';
 		}else{
 			$dbcampo='a.numero';
@@ -471,8 +471,14 @@ ORDER BY fecha,numo
 		$mivar = $tasas['reducida'];
 		$mivaa = $tasas['adicional'];
 
-		if($this->db->field_exists('serie', 'scst') AND $this->db->field_exists('serie', 'siva')){
+		$campos = $this->db->list_fields('scst');
+		$chsiva = $this->db->field_exists('serie', 'siva');
+		if(in_array('serie'  ,$campos) && $chsiva){
 			$msqlnum=',IF(LENGTH(b.serie)>0,b.serie,b.numero) AS serie';
+			$addcamp=',serie';
+		}elseif(in_array('nrorig'  ,$campos) && $chsiva){ 
+			//Utiliza el orgen para el caso de supermercado
+			$msqlnum=',IF(TRIM(b.nrorig)<>"",b.nrorig,b.numero) AS serie';
 			$addcamp=',serie';
 		}else{
 			$msqlnum='';

@@ -1936,6 +1936,9 @@ class ventassuper{
 		$ws->write_string( $mm,23, "Fecha", $titulo );
 		$ws->write_string( $mm,24, "", $titulo );
 		$ws->write_string( $mm,25, "", $titulo );
+		$ws->write_string( $mm,25, "", $titulo );
+		$ws->write_string( $mm,26, "", $titulo );
+
 
 		$mm++;
 		$ws->write_string( $mm, 0, "Num.", $titulo );
@@ -1994,6 +1997,8 @@ class ventassuper{
 		$ws->write_string( $mm,23, "Emision", $titulo );
 		$ws->write_string( $mm,24, "Percibido", $titulo );
 		$ws->write_string( $mm,25, "", $titulo );
+		$ws->write_string( $mm,26, "", $titulo );
+
 
 		$mm++;
 		$ii = $mm+1;
@@ -2010,8 +2015,13 @@ class ventassuper{
 			if ($caja == 'zytrdsefg') $caja=$row->caja;
 
 			// imprime contribuyente
-			$fecha = $row->fecha;
-			$fecha = substr($fecha,8,2)."/".substr($fecha,5,2)."/".substr($fecha,0,4);
+			$fecha     = $row->fecha;
+			$fecha     = substr($fecha,8,2)."/".substr($fecha,5,2)."/".substr($fecha,0,4);
+			if(empty($row->fechacomp)){
+				$fechacomp = '';
+			}else{
+				$fechacomp = substr($row->fechacomp,8,2)."/".substr($row->fechacomp,5,2)."/".substr($row->fechacomp,0,4);
+			}
 
 			$ws->write_string( $mm, 0, $mm-8, $cuerpo );
 			$ws->write_string( $mm, 1, $fecha,           $cuerpo );             // Fecha
@@ -2038,7 +2048,7 @@ class ventassuper{
 			//$ws->write_formula( $mm,14,"=M$num*N$num/100" , $numero );        //I.V.A.
 			$ws->write_number( $mm,21, $row->reiva,         $numero );          // IVA RETENIDO
 			$ws->write_string( $mm,22, $row->comprobante,   $cuerpo );          // NRO COMPROBANTE
-			$ws->write_string( $mm,23, $row->fechacomp,     $cuerpo );          // FECHA COMPROB
+			$ws->write_string( $mm,23, $fechacomp,          $cuerpo );          // FECHA COMPROB
 			$ws->write_number( $mm,24, $row->impercibido,   $numero );          // IMPUESTO PERCIBIDO
 			$ws->write_string( $mm,25, $row->serial,        $cuerpo );          // SERIAL
 			$ws->write_string( $mm,26, $row->cierrez,       $cuerpo );          // CIERRE Z
