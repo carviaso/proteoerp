@@ -277,7 +277,7 @@ jQuery("#bcopiar").click( function(){
 		if ( $modulo) {
 			$usuario = $this->uri->segment(5);
 			// CREA SI FALTA ALGUNO
-			$mSQL = "INSERT IGNORE INTO sida SELECT ".$this->db->escape(trim($usuario))." usuario, codigo modulo, 'N' acceso FROM tmenus";
+			$mSQL = "INSERT IGNORE INTO sida (usuario, modulo, acceso, proteo)  SELECT ".$this->db->escape(trim($usuario))." usuario, codigo modulo, 'N' acceso, 'N' proteo FROM tmenus";
 			$this->db->simple_query($mSQL);
 			memowrite($mSQL);
 			if ( $modulo == 'MENUDTS') {
