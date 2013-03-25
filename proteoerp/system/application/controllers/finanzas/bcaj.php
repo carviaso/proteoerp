@@ -155,7 +155,7 @@ class Bcaj extends Controller {
 				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
 					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-					window.open(\''.site_url('formatos/ver/BANCAJA').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+					window.open(\''.site_url($this->url.'bcajprint').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 				} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 			});';
 
@@ -278,7 +278,7 @@ class Bcaj extends Controller {
 										apprise("Registro Guardado");
 										$( "#fedita" ).dialog( "close" );
 										grid.trigger("reloadGrid");
-										'.$this->datasis->jwinopen(site_url('formatos/ver/BCAJ').'/\'+res.id+\'/id\'').';
+										'.$this->datasis->jwinopen(site_url($this->url.'bcajprint').'/\'+json.pk+\'/id\'').';
 										return true;
 									} else {
 										apprise(json.mensaje);
@@ -1937,11 +1937,28 @@ class Bcaj extends Controller {
 			$moneda = $edit->moneda->newValue;
 			$rt=$this->_transferencaj($fecha,$monto,$envia,$recibe,false,$numeror,$numeroe,$tipoe,$moneda);
 
-			if($rt){
+			/*if($rt){
 				redirect('/finanzas/bcaj/listo/n/'.$this->bcajnumero);
 			}else{
 				redirect('/finanzas/bcaj/listo/s');
+			}*/
+
+			if($rt){
+				$rt=array(
+					'status' =>'A',
+					'mensaje'=>'Registro guardado',
+					'pk'     => $this->bcaj_id
+				);
+				echo json_encode($rt);
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>'Problemas al guardar el registro',
+					'pk'     =>null
+				);
+				echo json_encode($rt);
 			}
+			return true;
 		}
 
 		//$this->rapyd->jquery[]='$(".inputnum").numeric(".");';
@@ -2041,11 +2058,29 @@ class Bcaj extends Controller {
 			$cheque  = $edit->cheques->newValue;
 
 			$rt=$this->_transferendepefe($fecha,$efectivo,$cheque,$envia,$recibe,$numeror);
-			if($rt){
+
+			/*if($rt){
 				redirect('finanzas/bcaj/listo/n/'.$this->bcajnumero);
 			}else{
 				redirect('finanzas/bcaj/listo/s');
+			}*/
+
+			if($rt){
+				$rt=array(
+					'status' =>'A',
+					'mensaje'=>'Registro guardado',
+					'pk'     => $this->bcaj_id
+				);
+				echo json_encode($rt);
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>'Problemas al guardar el registro',
+					'pk'     =>null
+				);
+				echo json_encode($rt);
 			}
+			return true;
 		}
 
 		$data['content'] = $edit->output;
@@ -2216,15 +2251,33 @@ class Bcaj extends Controller {
 			$tdebito =$edit->tdebito->newValue;
 			$comision=$edit->comision->newValue;
 			$islr    =$edit->islr->newValue;
-			$numeror =$edit->numero->newValue;
+			$numeror =$edit->numeror->newValue;
 			$tipo    =$edit->tipo->newValue;
 
 			$rt=$this->_transferendeptar($fecha,$tarjeta,$tdebito,$comision,$islr,$envia,$recibe,$numeror,$tipo);
-			if($rt){
+
+			/*if($rt){
 				redirect('/finanzas/bcaj/listo/n/'.$this->bcajnumero);
 			}else{
 				redirect('/finanzas/bcaj/listo/s');
+			}*/
+
+			if($rt){
+				$rt=array(
+					'status' =>'A',
+					'mensaje'=>'Registro guardado',
+					'pk'     => $this->bcaj_id
+				);
+				echo json_encode($rt);
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>'Problemas al guardar el registro',
+					'pk'     =>null
+				);
+				echo json_encode($rt);
 			}
+			return true;
 		}
 
 		//$data['content'] = $edit->output;
@@ -2396,6 +2449,22 @@ class Bcaj extends Controller {
 		echo $monto;
 	}
 
+	function bcajprint($id){
+		$dbid = $this->db->escape($id);
+		$tipo = $this->datasis->dameval('SELECT tipo FROM bcaj WHERE id='.$dbid);
+
+		switch($tipo){
+			case 'TR':
+				redirect('formatos/descargar/BTRANCI/'.$id);
+				break;
+			case 'DE':
+				redirect('formatos/descargar/BANCAJA/'.$id);
+				break;
+			default:
+				echo 'Formato no definido';
+		}
+	}
+
 	//Metodo que reversa las tranferencias automaticas
 	function reverautotranfer($fecha){
 		$this->load->library('validation');
@@ -2423,13 +2492,15 @@ class Bcaj extends Controller {
 				if($ban==false){ memowrite($sql,'bcaj'); $error++; }
 
 				$monto=$row->monto;
-				$sql='CALL sp_actusal('.$this->db->escape($row->envia).",'$sp_fecha',$monto)";
-				$ban=$this->db->simple_query($sql);
-				if($ban==false){ memowrite($sql,'bcaj'); $error++; }
+				$this->datasis->actusal($row->envia,$sp_fecha, $monto);
+				//$sql='CALL sp_actusal('.$this->db->escape($row->envia).",'$sp_fecha',$monto)";
+				//$ban=$this->db->simple_query($sql);
+				//if($ban==false){ memowrite($sql,'bcaj'); $error++; }
 
-				$sql='CALL sp_actusal('.$this->db->escape($row->recibe).",'$sp_fecha',-$monto)";
-				$ban=$this->db->simple_query($sql);
-				if($ban==false){ memowrite($sql,'bcaj'); $error++; }
+				$this->datasis->actusal($row->recibe,$sp_fecha, (-1)*$monto);
+				//$sql='CALL sp_actusal('.$this->db->escape($row->recibe).",'$sp_fecha',-$monto)";
+				//$ban=$this->db->simple_query($sql);
+				//if($ban==false){ memowrite($sql,'bcaj'); $error++; }
 			}
 		}
 		$sql="DELETE FROM bcaj WHERE fecha=$dbfecha AND concep2='AUTOTRANFER'";
@@ -2516,12 +2587,13 @@ class Bcaj extends Controller {
 		);
 		$sql=$this->db->insert_string('bcaj', $data);
 		$ban=$this->db->simple_query($sql);
-		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
+		if($ban==false){ memowrite($sql,'bcaj'); $error++; }else{ $this->bcaj_id=$this->db->insert_id(); }
 
 		//Crea el egreso en el banco
-		$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$monto)";
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
+		$this->datasis->actusal($envia,$sp_fecha, (-1)*$monto);
+		//$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$monto)";
+		//$ban=$this->db->simple_query($mSQL);
+		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $envia;
@@ -2547,9 +2619,10 @@ class Bcaj extends Controller {
 		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
 
 		//Crea el ingreso la otra caja
-		$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$monto)";
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
+		$this->datasis->actusal($recibe,$sp_fecha, $monto);
+		//$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$monto)";
+		//$ban=$this->db->simple_query($mSQL);
+		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $recibe;
@@ -2645,12 +2718,13 @@ class Bcaj extends Controller {
 
 		$sql=$this->db->insert_string('bcaj', $data);
 		$ban=$this->db->simple_query($sql);
-		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
+		if($ban==false){ memowrite($sql,'bcaj'); $error++; }else{ $this->bcaj_id=$this->db->insert_id(); }
 
 		//Crea el egreso en el banco
-		$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$monto)";
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
+		$this->datasis->actusal($envia,$sp_fecha, (-1)*$monto);
+		//$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$monto)";
+		//$ban=$this->db->simple_query($mSQL);
+		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $envia;
@@ -2679,9 +2753,10 @@ class Bcaj extends Controller {
 		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
 
 		//Crea el ingreso la otra caja
-		$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$monto)";
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
+		$this->datasis->actusal($recibe,$sp_fecha, $monto);
+		//$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$monto)";
+		//$ban=$this->db->simple_query($mSQL);
+		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $recibe;
@@ -2783,7 +2858,7 @@ class Bcaj extends Controller {
 		);
 		$sql=$this->db->insert_string('bcaj', $data);
 		$ban=$this->db->simple_query($sql);
-		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
+		if($ban==false){ memowrite($sql,'bcaj'); $error++; }else{ $this->bcaj_id=$this->db->insert_id(); }
 
 		//Crea el egreso en el banco
 		$data=array();
@@ -2809,9 +2884,11 @@ class Bcaj extends Controller {
 		$sql=$this->db->insert_string('bmov', $data);
 		$ban=$this->db->simple_query($sql);
 		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
-		$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$data[monto])";
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
+
+		$this->datasis->actusal($envia,$sp_fecha, (-1)*$data['monto']);
+		//$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$data[monto])";
+		//$ban=$this->db->simple_query($mSQL);
+		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		//Crea el ingreso la otra caja
 
@@ -2843,9 +2920,10 @@ class Bcaj extends Controller {
 		$ban=$this->db->simple_query($sql);
 		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
 
-		$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$data[monto])";
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
+		$this->datasis->actusal($recibe,$sp_fecha, $data['monto']);
+		//$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$data[monto])";
+		//$ban=$this->db->simple_query($mSQL);
+		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		if($comision>0){
 			if($formaca=='BRUTA'){
@@ -3061,12 +3139,14 @@ class Bcaj extends Controller {
 
 		$sql=$this->db->insert_string('bcaj', $data);
 		$ban=$this->db->simple_query($sql);
-		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
+		if($ban==false){ memowrite($sql,'bcaj'); $error++; }else{ $this->bcaj_id=$this->db->insert_id(); }
 
 		//Crea el egreso en el banco
-		$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$monto)";
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
+
+		$this->datasis->actusal($envia,$sp_fecha, (-1)*$monto);
+		//$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$monto)";
+		//$ban=$this->db->simple_query($mSQL);
+		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $envia;
@@ -3092,9 +3172,10 @@ class Bcaj extends Controller {
 		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
 
 		//Crea el ingreso la otra caja
-		$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$monto)";
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
+		$this->datasis->actusal($recibe,$sp_fecha, $monto);
+		//$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$monto)";
+		//$ban=$this->db->simple_query($mSQL);
+		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $recibe;

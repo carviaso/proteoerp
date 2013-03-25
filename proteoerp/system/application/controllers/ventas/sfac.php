@@ -141,7 +141,7 @@ class Sfac extends Controller {
 		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
-		function sfacadd() {
+		function sfacadd(){
 			$.post("'.site_url($this->url.'dataedit/N/create').'",
 			function(data){
 				$("#fimpser").html("");
