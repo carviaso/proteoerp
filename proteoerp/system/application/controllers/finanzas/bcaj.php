@@ -48,7 +48,7 @@ class Bcaj extends Controller {
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
-		$grid->wbotonadd(array('id'=>'impPdf'    ,'img'=>'assets/default/images/print.png', 'alt' => 'Cargos Indebidos en Banco' , 'label' =>'Imprimir Documento'   , 'tema'=> 'anexos'));
+		$grid->wbotonadd(array('id'=>'impbtn'    ,'img'=>'assets/default/images/print.png', 'alt' => 'Cargos Indebidos en Banco' , 'label' =>'Imprimir Documento'   , 'tema'=> 'anexos'));
 		$grid->wbotonadd(array('id'=>'dtarjeta'  ,'img'=>'images/tarjetas.jpg'            , 'alt' => 'Deposito de Tarjetas'      , 'label' =>'Deposito de Tarjetas' , 'tema'=> 'anexos'));
 		$grid->wbotonadd(array('id'=>'cerrardpt' ,'img'=>'images/candado.png'             , 'alt' => 'Cerrar Deposito'           , 'label' =>'Cerrar Deposito CH'   , 'tema'=> 'anexos'));
 		$grid->wbotonadd(array('id'=>'transferen','img'=>'images/fusionar.png'            , 'alt' => 'Cerrar Deposito'           , 'label' =>'Transferencias'       , 'tema'=> 'anexos'));
@@ -149,9 +149,9 @@ class Bcaj extends Controller {
 				} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 			});';
 
-		//Imprime a PDF
+
 		$bodyscript .= '
-			jQuery("#impPdf").click( function(){
+			jQuery("#impbtn").click( function(){
 				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
 					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
@@ -208,10 +208,15 @@ class Bcaj extends Controller {
 							buttons: { Borrar:true, Cancelar:false},
 							callback: function(e,v,m,f){
 								if (v == true) {
-									$.get("'.base_url().$this->url.'bcajborra/"+id,
+									$.get("'.site_url($this->url.'bcajborra').'/"+id,
 									function(data){
-										grid.trigger("reloadGrid");
-										alert(data);
+										var res = $.parseJSON(data);
+										if ( res.status == "A"){
+											grid.trigger("reloadGrid");
+											apprise("Movimiento Eliminado");
+										} else {
+											apprise(res.mensaje);
+										}
 									});
 								}
 							}
@@ -722,7 +727,7 @@ class Bcaj extends Controller {
 		#show/hide navigations buttons
 		$grid->setAdd(false);
 		$grid->setEdit(false);
-		$grid->setDelete(true);
+		$grid->setDelete(false);
 		$grid->setSearch(true);
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
@@ -1583,20 +1588,52 @@ class Bcaj extends Controller {
 	*
 	*/
 	function bcajborra(){
-		$id = $this->uri->segment($this->uri->total_segments());
+		$id  = $this->uri->segment($this->uri->total_segments());
+		$dbid= $this->db->escape($id);
 
-		$transac = $this->datasis->dameval("SELECT transac FROM bcaj WHERE id=$id");
-		$status  = $this->datasis->dameval("SELECT status  FROM bcaj WHERE id=$id");
-		$numero  = $this->datasis->dameval("SELECT numero  FROM bcaj WHERE id=$id");
+		$drow    = $this->datasis->damerow('SELECT transac,status,numero FROM bcaj WHERE id='.$dbid);
+		$transac = $drow['transac'];
+		$status  = $drow['status'];
+		$numero  = $drow['numero'];
 
-		if ( $this->datasis->dameval("SELECT COUNT(*) FROM bmov WHERE transac='$transac' ") > 0 ){
-			$mSQL = "SELECT codbanc, fecha, monto*if(tipo_op IN ('CH','ND'),1,-1) monto FROM bmov WHERE transac='$transac'";
+		$dbtransac = $this->db->escape($transac);
+		$cana      = $this->datasis->dameval('SELECT COUNT(*) FROM bmov WHERE transac='.$dbtransac);
+
+		if($cana > 0){
+			$mSQL = 'SELECT codbanc, fecha, monto*if(tipo_op IN (\'CH\',\'ND\'),1,-1) monto FROM bmov WHERE transac='.$dbtransac;
 			$query = $this->db->query($mSQL);
 			if ( $query->num_rows() > 0 ) {
 				foreach( $query->result() as $row ) {
 					$this->datasis->actusal($row->codbanc, $row->fecha, $row->monto);
 				}
 			}
+		}
+		$fla=false;
+		$query = $this->db->query('SELECT concilia FROM bmov WHERE transac='.$dbtransac);
+		foreach ($query->result() as $row){
+			if($row->concilia!='0000-00-00'){
+				$fla=true;
+			}
+		}
+		if($fla){
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>'Movimiento ya fue conciliado.',
+				'pk'     => null
+			);
+			echo json_encode($rt);
+			return true;
+		}
+
+		$cana = $this->datasis->dameval('SELECT COUNT(*) FROM smov WHERE abonos>0 AND transac='.$dbtransac);
+		if($cana>0){
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>'Movimiento tiene efectos abonados.',
+				'pk'     => null
+			);
+			echo json_encode($rt);
+			return true;
 		}
 
 		$this->db->query("DELETE FROM bcaj   WHERE transac=?", array($transac));
@@ -1606,13 +1643,16 @@ class Bcaj extends Controller {
 		$this->db->query("DELETE FROM itccli WHERE transac=?", array($transac));
 		$this->db->query("DELETE FROM gitser WHERE transac=?", array($transac));
 
-		// Cambia el estaus de los cheques
-		$this->db->query("UPDATE sfpa SET status='' WHERE deposito='".$numero."'");
-
 		// LIBERA LOS CHEQUES SI ES DEPOSITO
-		$this->db->simple_query("UPDATE sfpa SET status='' AND deposito='' WHERE deposito=?", array($numero));
+		$this->db->simple_query('UPDATE sfpa SET status=\'\' AND deposito=\'\' WHERE deposito=?"', array($numero));
 		logusu('BCAJ',"MOVIMIENTO DE CAJA $numero Transaccion $transac ELIMINADO");
-		echo "Movimiento de Caja Eliminado $transac";
+
+		$rt=array(
+			'status' =>'A',
+			'mensaje'=>'Movimiento eliminado',
+			'pk'     => null
+		);
+		echo json_encode($rt);
 	}
 
 	/*********************************

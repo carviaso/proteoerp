@@ -297,6 +297,16 @@ class Prmo extends Controller {
 			}
 		});';
 
+
+		$bodyscript .= '
+			jQuery("#imprime").click( function(){
+				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+					window.open(\''.site_url($this->url.'prmoprint').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+				} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+			});';
+
 		$bodyscript .= '});'."\n";
 
 		$bodyscript .= '</script>';
@@ -313,7 +323,7 @@ class Prmo extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('tipop');
-		$grid->label('Tipop');
+		$grid->label('Tip.Op');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -325,7 +335,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -350,7 +360,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('codban');
-		$grid->label('Codban');
+		$grid->label('Banco');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -374,7 +384,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('numche');
-		$grid->label('Numche');
+		$grid->label('Num.Cheque');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -386,7 +396,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('benefi');
-		$grid->label('Benefi');
+		$grid->label('Beneficiario');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -398,7 +408,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('comprob');
-		$grid->label('Comprob');
+		$grid->label('Comprobante');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -410,7 +420,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('clipro');
-		$grid->label('Clipro');
+		$grid->label('Cli/Pro');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -434,7 +444,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('docum');
-		$grid->label('Docum');
+		$grid->label('Documento');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -501,7 +511,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('observa1');
-		$grid->label('Observa1');
+		$grid->label('Observaci&oacute;n 1');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -513,7 +523,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('observa2');
-		$grid->label('Observa2');
+		$grid->label('Observaci&oacute;n 2');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -525,7 +535,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('transac');
-		$grid->label('Transac');
+		$grid->label('Transaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -604,7 +614,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('negreso');
-		$grid->label('Negreso');
+		$grid->label('N.Egreso');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -616,7 +626,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('ningreso');
-		$grid->label('Ningreso');
+		$grid->label('N.Ingreso');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -628,7 +638,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('retencion');
-		$grid->label('Retencion');
+		$grid->label('Retenci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -652,7 +662,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('remision');
-		$grid->label('Remision');
+		$grid->label('Remisi&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -779,6 +789,40 @@ class Prmo extends Controller {
 		};
 	}
 
+
+	function prmoprint($id){
+		$dbid = $this->db->escape($id);
+		$tipo = $this->datasis->dameval('SELECT tipop FROM prmo WHERE id='.$dbid);
+
+		switch($tipo){
+			case '1':
+				//Prestamo otrogado
+				redirect('formatos/descargar/PRMOOD/'.$id);
+				break;
+			case '2':
+				//Prestamo recibido
+				redirect('formatos/descargar/PRMOR/'.$id);
+				break;
+			case '3':
+				//Cheq Devuelto cliente
+				redirect('formatos/descargar/PRMOCC/'.$id);
+				break;
+			case '4':
+				//Cheq Devuelto proveedor
+				redirect('formatos/descargar/PRMOCP/'.$id);
+				break;
+			case '5':
+				//Deposito por analizar
+				redirect('formatos/descargar/PRMODA/'.$id);
+				break;
+			case '6':
+				//Cargos indebidos Banco
+				redirect('formatos/descargar/PRMOCI/'.$id);
+				break;
+			default:
+				echo 'Formato no definido';
+		}
+	}
 
 	//******************************************************************
 	// Dataedit para Todos

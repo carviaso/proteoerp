@@ -65,22 +65,30 @@ $cnumcuent= htmlspecialchars(trim($row->cnumcuent));
 		<tr>
 			<td colspan="2"><h2>EFECTIVO CONSIGNADO A BANCOS:</h2></td>
 		</tr>
+		<?php if($efectivo>0){ ?>
 		<tr>
 			<td style="text-indent: 1.5em;"><b>Monto en Billetes y Monedas</b></td>
 			<td style="text-align: right;" ><?php echo nformat($efectivo); ?></td>
 		</tr>
+		<?php } ?>
+		<?php if($cheques>0){ ?>
 		<tr>
 			<td style="text-indent: 1.5em;"><b>Monto en Cheques</b></td>
 			<td style="text-align: right;" ><?php echo nformat($cheques); ?></td>
 		</tr>
+		<?php } ?>
+		<?php if($tarjeta>0){ ?>
 		<tr>
 			<td style="text-indent: 1.5em;"><b>Monto en Tarjeta de Cr&eacute;dito</b></td>
 			<td style="text-align: right;" ><?php echo nformat($tarjeta); ?></td>
 		</tr>
+		<?php } ?>
+		<?php if($tdebito>0){ ?>
 		<tr>
 			<td style="text-indent: 1.5em;"><b>Monto en Tarjeta de D&eacute;bito</b></td>
 			<td style="text-align: right;border-bottom-style:dotted;" ><?php echo nformat($tdebito); ?></td>
 		</tr>
+		<?php } ?>
 		<tr style="font-size:1.5em;border-bottom-style:solid;">
 			<td style="text-indent: 1.5em;"><b>Monto total del dep&oacute;sito</b></td>
 			<td style="text-align: right;" ><b><?php echo nformat($efectivo+$cheques+$tarjeta+$tdebito); ?></b></td>
@@ -88,6 +96,7 @@ $cnumcuent= htmlspecialchars(trim($row->cnumcuent));
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
+		<?php if($tdebito+$tarjeta>0){ ?>
 		<tr>
 			<td colspan="2"><h2>MENOS DEDUCCIONES:</h2></td>
 		</tr>
@@ -106,6 +115,7 @@ $cnumcuent= htmlspecialchars(trim($row->cnumcuent));
 		<tr>
 			<td colspan="2">&nbsp;</td>
 		</tr>
+		<?php } ?>
 		<tr>
 			<td colspan="2" style="font-size:2em;text-align:center;"><b>Monto neto del deposito <?php echo nformat($monto); ?></b></td>
 		</tr>

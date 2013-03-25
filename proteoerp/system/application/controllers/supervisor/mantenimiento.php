@@ -958,20 +958,18 @@ function bobo(url){'."
 			if(!is_writable($svn)){
 				$responde .= 'No se tiene permiso al directorio .svn, comuniquese con soporte t&eacute;cnico...';
 			}else{
-				$aver=0; //<-- falta consultar la version actual
-				$ver =@svn_update($dir);
 
 				$antes = $this->datasis->traevalor('SVNVER','Version svn de proteo');
-				if(empty($antes)) $antes=0;
+				if(empty($antes)) $aver=0; else $aver=intval($antes);
+
+				$ver =@svn_update($dir);
 
 				if($ver>0){
-					if($ver >= $antes){
-						$dbver = $this->db->escape($ver);
-						$mSQL="UPDATE valores SET  valor=${dbver} WHERE nombre='SVNVER'";
-						$this->db->escape($mSQL);
-					}
 					if($ver>$aver){
 						$responde .= 'Actualizado a la versi&oacute;n: '.$ver;
+						$dbver = $this->db->escape($ver);
+						$mSQL="UPDATE valores SET valor=${dbver} WHERE nombre='SVNVER'";
+						$this->db->escape($mSQL);
 					}else{
 						$responde .= 'Ya estaba la ultima versi&oacute;n instalada '.$arr['revision'];
 					}
