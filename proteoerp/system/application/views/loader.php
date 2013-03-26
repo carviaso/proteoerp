@@ -110,7 +110,7 @@ $(document).ready(function() {
 						<?php 
 						if(isset($_SERVER['REMOTE_ADDR'])){
 							echo "\t\t\t\t\t\t\t\t</tr><tr>\n";
-							echo "\t\t\t\t\t\t\t\t\t<td>Tu ip: <b>".$_SERVER['REMOTE_ADDR']."</b></td>\n";
+							echo "\t\t\t\t\t\t\t\t\t<td>IP: <b>".$_SERVER['REMOTE_ADDR']."</b></td>\n";
 						}
 						
 						if ( $this->secu->es_logeado() ){
@@ -118,6 +118,8 @@ $(document).ready(function() {
 							echo "\t\t\t\t\t\t\t\t\t<td><div onclick='camclave()'><b>Cambio de Clave</b></div></td>";
 						}
 					?>
+							</tr><tr>
+								<td>Build: <?php echo $this->datasis->traevalor("SVNVER"); ?></td>
 							</tr>
 						</table>
 					</div>

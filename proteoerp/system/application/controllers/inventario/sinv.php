@@ -72,7 +72,6 @@ class Sinv extends Controller {
 		$this->db->query("UPDATE tmenus SET proteo='etiquetas'   WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVETIQ%' ");
 
 		if ( !$this->datasis->istabla('sinvalub') ) {
-			$campos = $this->db->list_fields('sinv');
 			$mSQL = "CREATE TABLE sinvalub (
 					codigo VARCHAR(15) NOT NULL DEFAULT '',
 					alma   VARCHAR(4)  NOT NULL DEFAULT '',
@@ -82,6 +81,35 @@ class Sinv extends Controller {
 					COLLATE='latin1_swedish_ci' ENGINE=MyISAM;";
 			$this->db->query($mSQL);
 		}
+
+		if ( !$this->datasis->istabla('sinvpa') ) {
+			$mSQL = "CREATE TABLE sinvpa (
+					codigo CHAR(15) NOT NULL DEFAULT '',
+					pactivo INT(11) NOT NULL,
+					id INT(11) NOT NULL AUTO_INCREMENT,
+					PRIMARY KEY (`id`),
+					UNIQUE INDEX `codigo` (`codigo`, `pactivo`)
+					)
+					COLLATE='latin1_swedish_ci' 
+					ENGINE=MyISAM;";
+			$this->db->query($mSQL);
+		}
+
+
+		if ( !$this->datasis->istabla('pactivo') ) {
+			$mSQL = "CREATE TABLE pactivo (
+					id INT(11) NOT NULL AUTO_INCREMENT,
+					nombre VARCHAR(250) NULL DEFAULT NULL,
+					PRIMARY KEY (`id`),
+					UNIQUE INDEX `nombre` (`nombre`)
+					)
+					COMMENT='Principios Activos'
+					COLLATE='latin1_swedish_ci'
+					ENGINE=MyISAM;";
+			$this->db->query($mSQL);
+		}
+
+
 		$this->db->query("INSERT IGNORE INTO sinvalub SELECT a.codigo, b.ubica, a.ubica FROM sinv a JOIN caub b WHERE MID(a.tipo,1,1) <> 'S' AND b.gasto='N' ");
 		$this->datasis->modintramenu( 950, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -108,7 +136,9 @@ class Sinv extends Controller {
 		$grid->wbotonadd(array("id"=>"hinactivo","img"=>"images/basura.png",   "alt" => 'Oculta/Muestra Inactivos', "label"=>"Mostrar Inactivos"));
 
 		$WpAdic = "
-		<tr><td><div class=\"tema1\"><table id=\"bpos1\"></table></div><div id='pbpos1'></div></td></tr>\n
+		<tr><td><div class=\"tema1\"><table id=\"bpos1\">   </table></div><div id='pbpos1'>   </div></td></tr>\n
+		<tr><td><div class=\"tema1\"><table id=\"tpactivo\"></table></div><div id='ptpactivo'></div></td></tr>\n
+
 		<tr><td><div class=\"tema1\">
 			<table cellpadding='0' cellspacing='0'>
 				<tr>
@@ -159,8 +189,6 @@ class Sinv extends Controller {
 	function funciones($grid0){
 
 		//Coloca la Basura a los Productos Inactivos
-//			postdata: { sinvid: $("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\')},
-
 		$funciones = '
 		jQuery("#bpos1").jqGrid({
 			url:\''.site_url('inventario/sinv/bpos1').'\',
@@ -218,6 +246,86 @@ class Sinv extends Controller {
 		}
 			';
 
+		$funciones .= '
+		jQuery("#tpactivo").jqGrid({
+			url:\''.site_url('inventario/sinv/pactivo').'\',
+			ajaxGridOptions: { type: "POST"},
+			jsonReader: { root: "data", repeatitems: false},
+			datatype: "json",
+			hiddengrid: true,
+			postdata: { apid: "wapi"},
+			width: 190,
+			height: 100,
+			colNames:[\'id\', \'nombre\'],
+			colModel:[
+				{name:\'id\',index:\'id\', width:10, hidden:true},
+				{name:\'nombre\',index:\'nombre\', width:105, editable:false, hidden:false, },
+			],
+			rowNum:1000,
+			pginput: false,
+			pgbuttons: false,
+			rowList:[],
+			pager: \'#ptpactivo\',
+			sortname: \'id\',
+			viewrecords: false,
+			sortorder: "desc",
+			editurl: \''.site_url('inventario/sinv/pactivo').'\',
+			caption: "Principio Activo"
+		});
+
+		jQuery("#tpactivo").jqGrid(\'navGrid\',"#ptpactivo",{edit:false, add:true, del:true, search: false, addfunc: pactivoadd });
+
+		function pactivoadd(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				$.prompt( "<h1>Agregar Principio Activo</h1><center><input type=\'text\' id=\'mpactivo\' name=\'mpactivo\' value=\'\' maxlengh=\'100\' size=\'30\' ></center><br/>", {
+					buttons: { Agregar: true, Cancelar: false },
+					submit: function(e,v,m,f){
+						if (v) {
+							if( f.mpactivo ) {
+								$.ajax({
+									type: "POST",
+									url: "'.site_url('inventario/sinv/prinactivo').'",
+									data: { id: id, pactivo: f.mpactivo },
+									complete: function(){
+										$("#tpactivo").trigger("reloadGrid");
+									}
+								});
+							} else {
+								alert("Debe colocar un numero");
+							}
+						}
+					}
+				});
+				$("#mpactivo").autocomplete({
+					source: function( req, add){
+						$.ajax({
+							url: "'.site_url('inventario/sinv/autopactivo/').'",
+							type: "POST",
+							dataType: "json",
+							data: "tecla="+req.term,
+							success:
+								function(data) {
+									var sugiere = [];
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+									add(sugiere);
+								},
+						})
+					},
+					minLength: 3,
+					select: function(evento, ui){
+						$("#mpactivo").val(ui.item.pactivo);
+					}
+				});
+			
+			}
+			//alert("camina");
+		}
+		';
 
 		$funciones .= '
 		function factivo(el, val, opts){
@@ -514,7 +622,6 @@ class Sinv extends Controller {
 			}
 		};
 		';
-//SFAC 10811
 
 		// Busca si estan la opcion en tmenus
 		$mSQL = "SELECT COUNT(*) FROM tmenus WHERE modulo='SINVOTR' AND proteo='recaldolar'";
@@ -2438,6 +2545,9 @@ class Sinv extends Controller {
 					jQuery("#bpos1").jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'bpos1/').'/"+id+"/", page:1});
 					jQuery("#bpos1").trigger("reloadGrid");
 
+					jQuery("#tpactivo").jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'pactivo/').'/"+id+"/", page:1});
+					jQuery("#tpactivo").trigger("reloadGrid");
+
 				}
 			}
 		');
@@ -2564,6 +2674,37 @@ class Sinv extends Controller {
 			}
 		}
 
+	}
+
+	/**
+	* Busca la data en el Servidor por json
+	*/
+	function pactivo()
+	{
+		$oper   = $this->input->post('oper');
+		if ($oper == 'del'){
+			// Borra
+			$id     = $this->input->post('id');
+			$this->db->query("DELETE FROM sinvpa WHERE id=$id ");
+			logusu('SINV',"Principio Activo desligado del producto $id ELIMINADO");
+			echo "Registro Eliminado";
+
+		} elseif ( $oper == false ) {
+			$id = $this->uri->segment(4);
+			if ( $id > 0 ) {
+				$codigo = $this->datasis->dameval("SELECT codigo FROM sinv WHERE id=$id");
+
+				$this->db->select(array('a.id', 'b.nombre'));
+				$this->db->from('sinvpa as a');
+				$this->db->join('pactivo as b','a.pactivo=b.id');
+				$this->db->where('a.codigo',$codigo);
+
+				$rs = $this->datasis->codificautf8($this->db->get()->result_array());
+				$response['data'] = $rs;
+				$rs = json_encode( $response);
+				echo $rs;
+			}
+		}
 	}
 
 
@@ -3850,6 +3991,36 @@ class Sinv extends Controller {
 
 	}
 
+	//*****************************
+	//
+	// Busca Principio Activo
+	function autopactivo() {
+		$q   = $this->input->post('tecla');
+		$data = '[{ }]';
+		if($q!==false){
+			$mid = $this->db->escape('%'.$q.'%');
+			$mSQL = "SELECT * FROM pactivo 
+			WHERE nombre LIKE ${mid} ORDER BY nombre LIMIT 30";
+
+			$query = $this->db->query($mSQL);
+			$retArray = array();
+			$retorno = array();
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$retArray['value']   = $row['nombre'];
+					$retArray['label']   = utf8_encode(trim($row['nombre']));
+					$retArray['pactivo'] = utf8_encode(trim($row['nombre']));
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+			}
+		}
+		echo $data;
+
+	}
+
+
+
 	function _sinvcodig(){
 		$mexiste  = $this->input->post('tipo');
 		$mmcodigo = rawurldecode($this->input->post('codigo'));
@@ -3967,6 +4138,24 @@ class Sinv extends Controller {
 			}
 		}
 	}
+
+	// Codigos de barra suplementarios
+	function prinactivo() {
+		$mid      = $this->input->post('id');
+		$mpactivo = trim(rawurldecode($this->input->post('pactivo')));
+		$mpaid    = trim($this->datasis->dameval("SELECT id FROM pactivo WHERE nombre=".$this->db->escape($mpactivo) ));
+
+		$mcodigo  = trim($this->datasis->dameval("SELECT codigo FROM sinv WHERE id=$mid"));
+		$htmlcod  = $this->db->escape($mcodigo);
+
+		//Busca si ya esta
+		$mSQL = "INSERT IGNORE INTO sinvpa SET codigo=".$htmlcod.", pactivo=$mpaid";
+		$this->db->query($mSQL);
+		logusu("SINV","Principio Activo Agregado".$mcodigo."-->".$mpactivo);
+		echo "Registro de Codigo Exitoso";
+	
+	}
+
 
 	// Borra Codigo de barras suplementarios
 	function sinvborrasuple() {

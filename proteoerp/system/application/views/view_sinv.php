@@ -79,15 +79,8 @@ $link13=site_url('inventario/common/add_grupo');
 $link14=site_url('inventario/common/get_grupo');
 ?>
 <style >
-.ui-autocomplete {
-	max-height: 150px;
-	overflow-y: auto;
-	max-width: 600px;
-}
-html.ui-autocomplete {
-	height: 150px;
-	width: 600px;
-}
+.ui-autocomplete {max-height: 150px;overflow-y: auto;max-width: 600px;}
+html.ui-autocomplete {height: 150px;width: 600px;}
 </style>
 
 <?php if($form->_status!='show'){ ?>
@@ -808,6 +801,7 @@ $(document).ready(function() {
 			$("#cod_prv").val(ui.item.codigo);
 		}
 	});
+
 
 	$( "#cliente" ).autocomplete({
 		source: function( req, add){

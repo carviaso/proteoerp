@@ -238,6 +238,9 @@ echo script('jquery.jqGrid.min.js');
 
 ?>
 <style>
+.ui-autocomplete {max-height: 150px;overflow-y: auto;max-width: 600px;}
+html.ui-autocomplete {height: 150px;width: 600px;}
+
 <?php echo $LayoutStyle; ?>
 
 </style>
