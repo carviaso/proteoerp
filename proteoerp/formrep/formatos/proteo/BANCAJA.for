@@ -150,16 +150,16 @@ $cnumcuent= htmlspecialchars(trim($row->cnumcuent));
 </div>
 <br>
 <div>
-	<table width="100%">
+	<table width="100%" style="border-collapse: collapse;" >
 		<tr>
-			<td style="text-align:center; border-style:solid;" valign="bottom"><br><br><br><b>Recibido por:</b></td>
-			<td style="text-align:center; border-style:solid;" valign="bottom"><b>C.I.:        </b></td>
-			<td style="text-align:center; border-style:solid;" valign="bottom"><b>Fecha:       </b></td>
+			<td style="text-align:center; border-style:solid; border-width:2px;font-size:8pt" valign="bottom"><br><br><br>Recibido por:</td>
+			<td style="text-align:center; border-style:solid; border-width:2px;font-size:8pt" valign="bottom">C.I.:        </td>
+			<td style="text-align:center; border-style:solid; border-width:2px;font-size:8pt" valign="bottom">Fecha:       </td>
 		</tr>
-		<tr style="height:80px">
-			<td style="text-align:center; border-style:solid;" valign="bottom"><br><br><br><b>Elaborado por: </b></td>
-			<td style="text-align:center; border-style:solid;" valign="bottom"><b>Autor&iacute;a:</b></td>
-			<td style="text-align:center; border-style:solid;" valign="bottom"><b>Autorizado por:</b></td>
+		<tr>
+			<td style="text-align:center; border-style:solid; border-width:2px;font-size:8pt" valign="bottom"><br><br><br>Elaborado por:</td>
+			<td style="text-align:center; border-style:solid; border-width:2px;font-size:8pt" valign="bottom">Autor&iacute;a:</td>
+			<td style="text-align:center; border-style:solid; border-width:2px;font-size:8pt" valign="bottom">Autorizado por:</td>
 		</tr>
 	</table>
 </div>

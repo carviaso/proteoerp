@@ -360,7 +360,7 @@ class Prmo extends Controller {
 
 
 		$grid->addField('codban');
-		$grid->label('Banco');
+		$grid->label('C.Banco');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -887,7 +887,7 @@ class Prmo extends Controller {
 		$edit->tipo->option('CH','Cheque');  // solo si es banco
 		$edit->tipo->style = 'width:120px';
 */
-		$edit->numche = new inputField('Numero','numche');
+		$edit->numche = new inputField('N&uacute;mero','numche');
 		$edit->numche->rule='';
 		$edit->numche->size =13;
 		$edit->numche->maxlength =12;
@@ -929,7 +929,7 @@ class Prmo extends Controller {
 		$edit->vence->size        = 10;
 		$edit->vence->maxlength   =  8;
 		$edit->vence->calendar    = false;
-		$edit->vence->insertValue =  date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")+30, date("Y")));
+		$edit->vence->insertValue =  date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')+30, date('Y')));
 
 		$edit->observa1 = new inputField('Observaciones','observa1');
 		$edit->observa1->rule='';
@@ -968,7 +968,7 @@ class Prmo extends Controller {
 		$edit->ningreso->size =10;
 		$edit->ningreso->maxlength =8;
 
-		$edit->retencion = new inputField('Retencion','retencion');
+		$edit->retencion = new inputField('Retenci&oacute;n','retencion');
 		$edit->retencion->rule='';
 		$edit->retencion->size =16;
 		$edit->retencion->maxlength =14;
@@ -1007,8 +1007,7 @@ class Prmo extends Controller {
 		});
 		$("#clipro").change( function() {
 			$("#observa1").val("PRESTAMO OTORGADO A ("+$("#clipro").val()+") "+$("#nombre").val() );
-		});
-		';
+		});';
 
 
 		$edit->script($this->scriptscli().$script,'modify');
@@ -1030,7 +1029,6 @@ class Prmo extends Controller {
 		$edit->clipro->rule  = 'required';
 
 		$this->dataedit($edit);
-
 	}
 
 	//******************************************************************
@@ -1069,7 +1067,6 @@ class Prmo extends Controller {
 		$edit->tipo->style = 'width:120px';
 
 		$this->dataedit($edit);
-
 	}
 
 
@@ -1115,8 +1112,7 @@ class Prmo extends Controller {
 		});
 		$("#clipro").change( function() {
 			$("#observa1").val("CHEQUE DEVUELTO ("+$("#clipro").val()+") "+$("#nombre").val() );
-		});
-		';
+		});';
 
 
 		$this->rapyd->load('dataedit');
@@ -1145,7 +1141,6 @@ class Prmo extends Controller {
 		$edit->codban->style = "width:210px;";
 
 		$this->dataedit($edit);
-
 	}
 
 
@@ -1191,9 +1186,7 @@ class Prmo extends Controller {
 		$("#docum").keyup( function() {
 			$("#observa1").val("CHEQUE DEVUELTO DE PROVEEDOR # "+$("#docum").val() );
 			$("#observa2").val($("#codban").val() );
-		});
-		';
-
+		});';
 
 
 		$edit->script($this->scriptsprv().$script,'modify');
@@ -1220,7 +1213,6 @@ class Prmo extends Controller {
 
 
 		$this->dataedit($edit);
-
 	}
 
 	//******************************************************************
@@ -1263,9 +1255,7 @@ class Prmo extends Controller {
 
 
 		$this->dataedit($edit);
-
 	}
-
 
 	//******************************************************************
 	// Dataedit para Cargos Indebidos en Banco
@@ -1302,8 +1292,6 @@ class Prmo extends Controller {
 		$this->dataedit($edit);
 
 	}
-
-
 
 	//******************************************************************
 	// Dataedit para todos
@@ -2063,351 +2051,6 @@ class Prmo extends Controller {
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
 
-
-
-/*
-
-// -- Funcion de escritura Replace -- \\
-// -- Lee los campos
-FUNCTION PRMORC
-LOCAL mTRANSAC := PROX_SQL("ntransa")
-LOCAL aLISTA, mSQL, aVALORES, mREG, mMEG, mTBANCO
-
-	XNEGRESO  := SPACE(8)
-	XNINGRESO := SPACE(8)
-
-	IF XTIPO = 'CH' .AND. EMPTY(XBENEFI)
-		XBENEFI := XNOMBRE
-	ENDIF
-
-	IF EMPTY(XVENCE)
-		XVENCE := XFECHA
-	ENDIF
-
-	mTBANCO := DAMEVAL("SELECT tbanco FROM banc WHERE codbanc='"+XCODBAN+"'")
-	IF mTBANCO = 'CAJ'
-		XNUMCHE := BANCPROX(XCODBAN)
-		// ARREGLA OBSERVA2
-		XOBSERVA2 := PADR(ALLTRIM(XOBSERVA2)+XNUMCHE,50)
-	ENDIF
-
-	XNUMERO := PROX_SQL("nprmo")
-	aLISTA := {}
-	AADD(aLISTA, {"TIPOP",    XTIPOP })
-	AADD(aLISTA, {"NUMERO",   XNUMERO })
-	AADD(aLISTA, {"FECHA",    XFECHA })
-	AADD(aLISTA, {"CODBAN",   XCODBAN })
-	AADD(aLISTA, {"TIPO",     XTIPO })
-	AADD(aLISTA, {"NUMCHE",   XNUMCHE })
-	AADD(aLISTA, {"BENEFI",   XBENEFI })
-	AADD(aLISTA, {"COMPROB",  XCOMPROB })
-	AADD(aLISTA, {"CLIPRO",   XCLIPRO })
-	AADD(aLISTA, {"NOMBRE",   XNOMBRE })
-	AADD(aLISTA, {"DOCUM",    XDOCUM })
-	AADD(aLISTA, {"BANCO",    XBANCO })
-	AADD(aLISTA, {"MONTO",    XMONTO })
-	AADD(aLISTA, {"CUOTAS",   XCUOTAS })
-	AADD(aLISTA, {"VENCE",    XVENCE })
-	AADD(aLISTA, {"OBSERVA1", XOBSERVA1 })
-	AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
-
-	AADD(aLISTA, {"CADANO",   XCADANO })
-	AADD(aLISTA, {"APARTIR",  XAPARTIR })
-
-	AADD(aLISTA, {"NEGRESO",  XNEGRESO })
-	AADD(aLISTA, {"NINGRESO", XNINGRESO })
-
-	IF XTIPOP = '1' .AND. XCLIPRO = 'REIVA'
-		AADD(aLISTA, {"RETENCION", XRETENCION })
-		AADD(aLISTA, {"REMISION",  XREMISION })
-		AADD(aLISTA, {"FACTURA",   XFACTURA })
-	ENDIF
-
-	mSQL := "INSERT INTO prmo SET "
-	aVALORES := {}
-	LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-
-	IF mmTIPO = 'I'
-		LOGUSU("OTROS MOV. DE CAJA Y BANCOS "+XTIPOP+" "+XNUMERO+" CREADO, TRANSACCION "+mTRANSAC )
-		oCursor:Insert()
-	ELSE
-		LOGUSU("OTROS MOV. DE CAJA Y BANCOS "+XTIPOP+" "+XNUMERO+" MODIFICADO, TRANSACCION "+mTRANSAC )
-	ENDIF
-	GUARDAOCUR( aLISTA, mTRANSAC )
-
-	// GUARDA EN BANCO
-
-	ACTUSAL(XCODBAN, XFECHA, XMONTO*IF(XTIPO$'CH,ND',-1,1) )
-	mREG := DAMEREG("SELECT numcuent, banco, saldo, tbanco FROM banc WHERE codbanc='"+XCODBAN+"'")
-
-	mCUENTA := mREG[1]
-	mBANCO  := mREG[2]
-	mSALDO  := mREG[3]
-	mTBANCO := mREG[4]
-	XCOMPROB1 := PROX_SQL("ncomprob")
-
-	aLISTA := {}
-	AADD(aLISTA, {"CODBANC",  XCODBAN })
-	AADD(aLISTA, {"NUMCUENT", mCUENTA })
-	AADD(aLISTA, {"BANCO",    mBANCO })
-	AADD(aLISTA, {"SALDO",    mSALDO })
-	AADD(aLISTA, {"FECHA",    XFECHA })
-	AADD(aLISTA, {"TIPO_OP",  XTIPO })
-	AADD(aLISTA, {"NUMERO",   XNUMCHE })
-
-	IF XTIPOP = '1'
-		AADD(aLISTA, {"CONCEPTO", "PRESTAMO OTORGADO "+XNUMERO })
-		AADD(aLISTA, {"CLIPRO",   'C' })
-		XNEGRESO  := PROX_SQL("negreso")
-
-	ELSEIF XTIPOP = '2'
-		AADD(aLISTA, {"CONCEPTO", "PRESTAMO RECIBIDO "+XNUMERO })
-		AADD(aLISTA, {"CLIPRO",   'P' })
-		IF DAMEVAL("SELECT tbanco FROM banc WHERE codbanc='"+XCODBAN+"' ") = 'CAJ'
-			IF EMPTY(XNUMCHE)
-				XNUMCHE := BANCPROX(XCODBAN)
-			ENDIF
-		ENDIF
-		IF TRAEVALOR('PAIS') = 'COLOMBIA'
-			XNINGRESO  := PROX_SQL("ningreso")
-		ELSE
-			XNINGRESO  := PROX_SQL("nrcaja")  //NO SE PQ?
-		ENDIF
-
-	ELSEIF XTIPOP = '3'
-		AADD(aLISTA, {"CONCEPTO", "CHEQUE DEVUELTO CLIENTE " + XNUMERO })
-		AADD(aLISTA, {"CLIPRO",   'C' })
-		AADD(aLISTA, {"LIABLE",   'S' })
-
-	ELSEIF XTIPOP = '4'
-		AADD(aLISTA, {"CONCEPTO", "CHEQUE O NOTA DEVUELTO DE PROVEEDOR " + XNUMERO })
-		AADD(aLISTA, {"CLIPRO",   'P' })
-		AADD(aLISTA, {"LIABLE",   'N' })
-
-	ELSEIF XTIPOP = '5'
-		AADD(aLISTA, {"CONCEPTO", "DEPOSITO POR ANALIZAR " + XNUMERO })
-		AADD(aLISTA, {"CLIPRO",   'P' })
-
-	ELSEIF XTIPOP = '6'
-		AADD(aLISTA, {"CONCEPTO", "CARGOS INDEBIDOS DEL BANCO " + XNUMERO })
-		AADD(aLISTA, {"CLIPRO",   'C' })
-	ENDIF
-
-	AADD(aLISTA, {"CONCEP2", XOBSERVA1 })
-	AADD(aLISTA, {"CONCEP3", XOBSERVA2 })
-	AADD(aLISTA, {"MONTO",   XMONTO })
-	AADD(aLISTA, {"CODCP",   XCLIPRO })
-	AADD(aLISTA, {"NOMBRE",  XNOMBRE })
-	AADD(aLISTA, {"BENEFI",  XBENEFI })
-	AADD(aLISTA, {"COMPROB", XCOMPROB })
-	AADD(aLISTA, {"POSDATA", XFECHA })
-
-	IF XTIPOP = '2'
-		AADD(aLISTA, {"NEGRESO", XNINGRESO })
-	ELSE
-		AADD(aLISTA, {"NEGRESO", XNEGRESO })
-	ENDIF
-
-	mSQL := "INSERT INTO bmov SET "
-	aVALORES := {}
-	LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-	EJECUTASQL(mSQL,aVALORES)
-
-	IF XTIPOP = "4"
-
-		mTRAN := DAMEVAL("SELECT transac FROM bmov WHERE tipo_op='CH' AND numero='"+XDOCUM+"' AND codbanc='"+XCODBAN+"'")
-		EJECUTASQL("UPDATE bmov SET liable='N' WHERE tipo_op='CH' AND numero='"+XDOCUM+"' AND codbanc='"+XCODBAN+"'")
-
-		IF !EMPTY(mTRAN)
-			EJECUTASQL("UPDATE bmov SET liable='N' WHERE transac='"+mTRAN+"'")
-
-			mIDB := DAMEVAL("SELECT monto FROM bmov WHERE transac='"+mTRAN+  ;
-                 "' AND SUBSTRING(numero,1,3)='IDB'",,'N')
-
-			IF VALTYPE(mIDB) <> 'N'
-				mIDB := 0
-			ENDIF
-
-			// DEVUELVE EL IDB
-			IF mIDB <> 0
-				//SELECT OTIN
-				mNUMERO := "O"+SUBSTR(PROX_SQL("notinf"),2,7)
-				aLISTA := {}
-				AADD(aLISTA, {"TIPO_DOC", 'FE' })
-				AADD(aLISTA, {"NUMERO",   mNUMERO })
-				AADD(aLISTA, {"FECHA",    XFECHA })
-				AADD(aLISTA, {"ORDEN",    "" })
-				AADD(aLISTA, {"COD_CLI",  "" })
-				AADD(aLISTA, {"RIFCI",    "" })
-				AADD(aLISTA, {"NOMBRE",   "" })
-				AADD(aLISTA, {"DIREC",    "" })
-				AADD(aLISTA, {"DIRE1",    "" })
-				AADD(aLISTA, {"TOTALS",   mIDB })
-				AADD(aLISTA, {"IVA",      0 })
-				AADD(aLISTA, {"TOTALG",   mIDB })
-				AADD(aLISTA, {"VENCE",    XVENCE })
-				AADD(aLISTA, {"OBSERVA1", 'REVERSO DE IDB POR CHEQUE DEVUELO' })
-				AADD(aLISTA, {"OBSERVA2", 'EMITIDO A PROVEEDOR REF# '+XNUMERO })
-
-				mSQL := "INSERT INTO otin SET "
-				aVALORES := {}
-				LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-				EJECUTASQL(mSQL,aVALORES)
-
-				//SELECT ITOTIN
-				aLISTA := {}
-				AADD(aLISTA, {"TIPO_DOC", 'FE' })
-				AADD(aLISTA, {"NUMERO",   mNUMERO })
-				AADD(aLISTA, {"CODIGO",   "IDB" })
-				AADD(aLISTA, {"DESCRIP",  "IDB RECUPERADO" })
-				AADD(aLISTA, {"PRECIO",   mIDB })
-				AADD(aLISTA, {"IMPUESTO", 0 })
-				AADD(aLISTA, {"IMPORTE",  mIDB })
-
-				mSQL := "INSERT INTO itotin SET "
-				aVALORES := {}
-				LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-				EJECUTASQL(mSQL,aVALORES)
-
-				//SELECT BANC
-				//SEEK XCODBAN
-				ACTUSAL(XCODBAN, XFECHA, mIDB)
-				mSQL := "SELECT numcuent, banco, moneda, saldo FROM banc "
-				mSQL += "WHERE codbanc='"+XCODBAN+"'"
-				mREG := DAMEREG(mSQL)
-				aLISTA := {}
-				AADD(aLISTA, {"CODBANC",  XCODBAN })
-				AADD(aLISTA, {"NUMCUENT", mREG[1] })
-				AADD(aLISTA, {"BANCO",    mREG[2] })
-				AADD(aLISTA, {"MONEDA",   mREG[3] })
-				AADD(aLISTA, {"SALDO",    mREG[4] })
-				AADD(aLISTA, {"FECHA",    XFECHA })
-				AADD(aLISTA, {"BENEFI",   '' })
-				AADD(aLISTA, {"TIPO_OP",  "NC" })
-				AADD(aLISTA, {"NUMERO",   "DIDB"+mNUMERO })
-				AADD(aLISTA, {"CONCEPTO", XOBSERVA1 })
-				AADD(aLISTA, {"CONCEP2",  XOBSERVA2 })
-				AADD(aLISTA, {"CONCEP3",  '' })
-				AADD(aLISTA, {"MONTO",    mIDB })
-				AADD(aLISTA, {"CLIPRO",   'P' })
-				AADD(aLISTA, {"CODCP",    "IDB" })
-				AADD(aLISTA, {"LIABLE",    "S" })
-				AADD(aLISTA, {"NOMBRE",   "IMPUESTO AL DEBITO BANCARIO" })
-
-				mSQL := "INSERT INTO bmov SET "
-				aVALORES := {}
-				LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-				EJECUTASQL(mSQL,aVALORES)
-
-				aLISTA := {}
-				AADD(aLISTA, {"TIPO_DOC",  "NC" })
-				AADD(aLISTA, {"NUMERO",    mNUMERO })
-				AADD(aLISTA, {"TIPO",      "NC" })
-				AADD(aLISTA, {"MONTO",     mIDB })
-				AADD(aLISTA, {"NUM_REF",   mNUMERO })
-				AADD(aLISTA, {"FECHA",     XFECHA })
-				AADD(aLISTA, {"BANCO",     XCODBAN })
-				AADD(aLISTA, {"F_FACTURA", XFECHA })
-				AADD(aLISTA, {"COD_CLI",   XCLIPRO })
-				AADD(aLISTA, {"VENDEDOR",  '' })
-				AADD(aLISTA, {"CLAVE",     '' })
-				AADD(aLISTA, {"CAMBIO",    0 })
-				AADD(aLISTA, {"COBRADOR",  '' })
-
-				mSQL := "INSERT INTO sfpa SET "
-				aVALORES := {}
-				LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-				EJECUTASQL(mSQL,aVALORES)
-			ENDIF
-		ENDIF
-	ENDIF
-
-   // DEBITO BANCARIO
-   IF mTBANCO != 'CAJ' .AND. XTIPOP="1"
-      IF DAMEVAL("SELECT dbporcen FROM banc WHERE codbanc='"+XCODBAN+"' ",,'N') > 0
-         IF SINO("Cargar Debito Bancario?",1) = 1
-            CARGAIDB(XCODBAN, XFECHA, XMONTO, XNUMCHE , XNUMERO, mTRANSAC)
-         ENDIF
-      ENDIF
-   ENDIF
-
-   IF XTIPOP $ "245"
-      // GENERA SPRM UNA ND
-      mNUMERO   := PROX_SQL("num_nd")
-      aLISTA := {}
-      AADD(aLISTA, {"COD_PRV",  XCLIPRO })
-      AADD(aLISTA, {"NOMBRE",   XNOMBRE })
-      AADD(aLISTA, {"TIPO_DOC", "ND" })
-      AADD(aLISTA, {"NUMERO",   mNUMERO })
-      AADD(aLISTA, {"FECHA",    XFECHA })
-      AADD(aLISTA, {"MONTO",    XMONTO })
-      AADD(aLISTA, {"IMPUESTO", 0 })
-      AADD(aLISTA, {"VENCE",    XVENCE })
-      AADD(aLISTA, {"TIPO_REF", "PR" })
-      AADD(aLISTA, {"NUM_REF",  XNUMERO })
-      AADD(aLISTA, {"OBSERVA1", XOBSERVA1 })
-      AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
-      AADD(aLISTA, {"BANCO",    XCODBAN })
-      AADD(aLISTA, {"NUMCHE",   XNUMCHE })
-      AADD(aLISTA, {"TIPO_OP",  XTIPO })
-      AADD(aLISTA, {"BENEFI",   XBENEFI })
-
-      mSQL := "INSERT INTO sprm SET "
-      aVALORES := {}
-      LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-      EJECUTASQL(mSQL,aVALORES)
-   ENDIF
-
-
-	IF XTIPOP$'136'
-		mNUMERO   := PROX_SQL("ndcli")
-		DO WHILE .T.
-			mSQL := "SELECT count(*) FROM smov "
-			mSQL += "WHERE tipo_doc='ND' AND numero='"+mNUMERO+"' "
-			IF DAMEVAL(mSQL,,'N') = 0
-				EXIT
-			ENDIF
-			mNUMERO   := PROX_SQL("ndcli")
-		ENDDO
-
-		aLISTA := {}
-		AADD(aLISTA, {"COD_CLI",  XCLIPRO })
-		AADD(aLISTA, {"NOMBRE",   XNOMBRE })
-		AADD(aLISTA, {"TIPO_DOC", "ND" })
-		AADD(aLISTA, {"NUMERO",   mNUMERO })
-		AADD(aLISTA, {"FECHA",    XFECHA })
-		AADD(aLISTA, {"MONTO",    XMONTO })
-		AADD(aLISTA, {"IMPUESTO", 0 })
-		AADD(aLISTA, {"VENCE",    XVENCE })
-		AADD(aLISTA, {"TIPO_REF", "PR" })
-		AADD(aLISTA, {"NUM_REF",  XNUMERO })
-		AADD(aLISTA, {"OBSERVA1", XOBSERVA1 })
-		AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
-		AADD(aLISTA, {"BANCO",    XCODBAN })
-		AADD(aLISTA, {"FECHA_OP", XFECHA })
-		AADD(aLISTA, {"NUM_OP",   XNUMCHE })
-		AADD(aLISTA, {"TIPO_OP",  XTIPO })
-
-		mSQL := "INSERT INTO smov SET "
-		aVALORES := {}
-		LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC  )
-		EJECUTASQL(mSQL, aVALORES)
-	ENDIF
-
-	// GUARDA EGRESO E INGRESO EN PRMO
-	mSQL := "UPDATE prmo SET negreso=?, ningreso=? WHERE numero=? "
-	EJECUTASQL(mSQL,{XNEGRESO, XNINGRESO, XNUMERO} )
-
-	IF SINO("Imprimir Documento? ",1) = 1
-		IMPPRMO()
-	ENDIF
-
-
-RETURN("")
-
-*/
-
-
 	//******************************************************************
 	// Busca cliente
 	function scriptscli(){
@@ -2449,7 +2092,6 @@ RETURN("")
 		';
 
 		return $script;
-
 	}
 
 	//******************************************************************
@@ -2496,6 +2138,140 @@ RETURN("")
 
 	}
 
+	//*******************************************
+	//
+	// Guarda cheques devueltos en PRMO
+	//
+	function prmochdev(){
+		$id = $this->uri->segment($this->uri->total_segments());
+		$dbid = $this->db->escape($id);
+
+		$transac = $this->datasis->prox_sql('ntransa');
+		//LOCAL aLISTA, mSQL, aVALORES, mREG, mMEG, mTBANCO
+
+		$mSQL = 'SELECT a.*, b.recibe codban FROM sfpa a JOIN bcaj b ON a.deposito=b.numero WHERE a.id='.$dbid;
+		$reg  = $this->datasis->damereg($mSQL);
+
+		if ( $reg['tipo'] <> 'CH' ){
+			echo 'Cheque ya devuelto';
+			return;
+		}
+
+		$XNEGRESO  = '        ';
+		$XNINGRESO = '        ';
+		$XTIPO     = 'ND';
+		$XVENCE    = date('Y/m/d');
+		$XFECHA    = date('Y/m/d');
+		$XCODBAN   = $reg['codban'];
+		$mTBANCO   = $this->datasis->dameval("SELECT tbanco FROM banc WHERE codbanc='$XCODBAN'");
+		$XNUMERO   = $this->datasis->prox_sql('nprmo');
+		$XNOMBRE   = $this->datasis->dameval("SELECT nombre FROM scli WHERE cliente='".$reg['cod_cli']."'");
+
+		// Guarda en PRMO
+		$aLISTA['tipop']    = '3';
+		$aLISTA['numero']   = $XNUMERO;
+		$aLISTA['fecha']    = $XFECHA;
+		$aLISTA['codban']   = $XCODBAN;
+		$aLISTA['tipo']     = 'ND';
+		$aLISTA['numche']   = $reg['num_ref'];
+		$aLISTA['benefi']   = '';
+		$aLISTA['comprob']  = '';
+		$aLISTA['clipro']   = $reg['cod_cli'];
+		$aLISTA['nombre']   = $XNOMBRE ;
+		$aLISTA['docum']    = $reg['deposito'];
+		$aLISTA['banco']    = $reg['banco'] ;
+		$aLISTA['monto']    = $reg['monto'] ;
+		$aLISTA['cuotas']   = 1 ;
+		$aLISTA['vence']    = $XVENCE ;
+		$aLISTA['observa1'] = 'CHEQUE DEVUELTO';
+		$aLISTA['observa2'] = '';
+		$aLISTA['cadano']   = 1;
+		$aLISTA['apartir']  = $XFECHA;
+
+		$aLISTA['usuario']  = $this->secu->usuario() ;
+		$aLISTA['transac']  = $transac ;
+		$aLISTA['estampa']  = date('Y/m/d') ;
+		$aLISTA['hora']     = date('H:i:s') ;
+
+		//$aLISTA['negreso']  =  XNEGRESO ;
+		//$aLISTA['ningreso'] = XNINGRESO ;
+
+		$this->db->insert('prmo', $aLISTA);
+
+  		// GUARDA EN BANCO
+
+		//ACTUSAL(XCODBAN, XFECHA, XMONTO*IF(XTIPO$'CH,ND',-1,1) )
+		$mREG = $this->datasis->damereg("SELECT numcuent, banco, saldo, tbanco FROM banc WHERE codbanc='$XCODBAN'");
+
+		$mCUENTA   = $mREG['numcuent'];
+		$mBANCO    = $mREG['banco'];
+		$mSALDO    = $mREG['saldo'];
+		$mTBANCO   = $mREG['tbanco'];
+		$XCOMPROB  = $this->datasis->prox_sql("ncomprob");
+
+		$aLISTA = array();
+		$aLISTA['codbanc']  = $XCODBAN;
+		$aLISTA['numcuent'] = $mCUENTA;
+		$aLISTA['banco']    = $mBANCO;
+		$aLISTA['saldo']    = $mSALDO;
+		$aLISTA['fecha']    = $XFECHA;
+		$aLISTA['tipo_op']  = 'ND';
+		$aLISTA['numero']   = $reg['num_ref'];
+		$aLISTA['concepto'] = "CHEQUE DEVUELTO CLIENTE ".$XNUMERO;
+		$aLISTA['clipro']   = 'C';
+		$aLISTA['liable']   = 'S';
+		$aLISTA['concep2']  = "CHEQUE DEVUELTO CLIENTE ".$reg['cod_cli'];
+		$aLISTA['concep3']  = '';
+		$aLISTA['monto']    = $reg['monto'];
+		$aLISTA['codcp']    = $reg['cod_cli'];
+		$aLISTA['nombre']   = $XNOMBRE;
+		$aLISTA['comprob']  = $XCOMPROB;
+		$aLISTA['posdata']  = $XFECHA;
+		//$aLISTA['benefi']   = XBENEFI;
+		//$aLISTA['negreso"]  = XNEGRESO;
+
+		$aLISTA['usuario']   = $this->secu->usuario() ;
+		$aLISTA['transac']   = $transac ;
+		$aLISTA['estampa']   = date('Y/m/d') ;
+		$aLISTA['hora']      = date('H:i:s') ;
+
+
+		$this->db->insert('bmov', $aLISTA);
+
+
+		$i = 0;
+		while ( $i == 0 ){
+			$mNUMERO = $this->datasis->prox_sql('ndcli');
+			$mSQL    = "SELECT count(*) FROM smov WHERE tipo_doc='ND' AND numero='$mNUMERO' ";
+			$i       = $this->datasis->dameval($mSQL);
+		}
+
+		$aLISTA = array();
+		$aLISTA["COD_CLI"]  = $reg['cod_cli'];
+		$aLISTA["NOMBRE"]   = $XNOMBRE ;
+		$aLISTA["TIPO_DOC"] = 'ND';
+		$aLISTA["NUMERO"]   = $mNUMERO;
+		$aLISTA["FECHA"]    = $XFECHA;
+		$aLISTA["MONTO"]    = $reg['monto'];
+		$aLISTA["IMPUESTO"] = 0;
+		$aLISTA["VENCE"]    = $XVENCE;
+		$aLISTA["TIPO_REF"] = 'PR';
+		$aLISTA["NUM_REF"]  = $XNUMERO;
+		$aLISTA["OBSERVA1"] = "CHEQUE DEVUELTO CLIENTE ".$XNUMERO;
+		$aLISTA["OBSERVA2"] = "CHEQUE DEVUELTO CLIENTE ".$reg['cod_cli'];
+		$aLISTA["BANCO"]    = $XCODBAN;
+		$aLISTA["FECHA_OP"] = $XFECHA;
+		$aLISTA["NUM_OP"]   = $reg['num_ref'];
+		$aLISTA["TIPO_OP"]  = 'ND';
+		$aLISTA["usuario"]   = $this->secu->usuario() ;
+		$aLISTA["transac"]   = $transac ;
+		$aLISTA["estampa"]   = date('Y/m/d') ;
+		$aLISTA["hora"]      = date('H:i:s') ;
+		$this->db->insert('smov', $aLISTA);
+		$this->db->simple_query("UPDATE sfpa SET tipo='CD' WHERE id=$id");
+		echo "Cheque Devuelto ";
+	}
+
 	function instalar(){
 		if (!$this->db->table_exists('prmo')) {
 			$mSQL="CREATE TABLE `prmo` (
@@ -2535,215 +2311,4 @@ RETURN("")
 		//$campos=$this->db->list_fields('prmo');
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
-
-	//*******************************************
-	//
-	// Guarda cheques devueltos en PRMO
-	//
-	function prmochdev(){
-		$id = $this->uri->segment($this->uri->total_segments());
-
-		$transac = $this->datasis->prox_sql('ntransa');
-		//LOCAL aLISTA, mSQL, aVALORES, mREG, mMEG, mTBANCO
-
-		$mSQL = "SELECT a.*, b.recibe codban FROM sfpa a JOIN bcaj b ON a.deposito=b.numero WHERE a.id=$id";
-		$reg  = $this->datasis->damereg($mSQL);
-
-		if ( $reg['tipo'] <> 'CH' ){
-			echo 'Cheque ya devuelto';
-			return;
-		}
-
-
-		$XNEGRESO  = '        ';
-		$XNINGRESO = '        ';
-		$XTIPO     = 'ND';
-		$XVENCE    = date('Y/m/d');
-		$XFECHA    = date('Y/m/d');
-		$XCODBAN   = $reg['codban'];
-		$mTBANCO   = $this->datasis->dameval("SELECT tbanco FROM banc WHERE codbanc='$XCODBAN'");
-		$XNUMERO   = $this->datasis->prox_sql('nprmo');
-		$XNOMBRE   = $this->datasis->dameval("SELECT nombre FROM scli WHERE cliente='".$reg['cod_cli']."'");
-
-		// Guarda en PRMO
-		$aLISTA['tipop']    = '3';
-		$aLISTA['numero']   = $XNUMERO;
-		$aLISTA['fecha']    = $XFECHA;
-		$aLISTA['codban']   = $XCODBAN;
-		$aLISTA['tipo']     = 'ND';
-		$aLISTA['numche']   = $reg['num_ref'];
-		$aLISTA['benefi']   = '';
-		$aLISTA['comprob']  = '';
-		$aLISTA['clipro']   = $reg['cod_cli'];
-		$aLISTA['nombre']   = $XNOMBRE ;
-		$aLISTA['docum']    = $reg['deposito'];
-		$aLISTA['banco']    = $reg['banco'] ;
-		$aLISTA['monto']    = $reg['monto'] ;
-		$aLISTA['cuotas']   = 1 ;
-		$aLISTA['vence']    = $XVENCE ;
-		$aLISTA['observa1'] = 'CHEQUE DEVUELTO';
-		$aLISTA['observa2'] = '';
-		$aLISTA['cadano']   = 1;
-		$aLISTA['apartir']  = $XFECHA;
-
-		$aLISTA['usuario']  = $this->secu->usuario() ;
-		$aLISTA['transac']  = $transac ;
-		$aLISTA['estampa']  = date('Y/m/d') ;
-		$aLISTA['hora']     = date('H:i:s') ;
-
-		//$aLISTA["negreso"]  =  XNEGRESO ;
-		//$aLISTA["ningreso"] = XNINGRESO ;
-
-		$this->db->insert('prmo', $aLISTA);
-
-  		// GUARDA EN BANCO
-
-		//ACTUSAL(XCODBAN, XFECHA, XMONTO*IF(XTIPO$'CH,ND',-1,1) )
-		$mREG = $this->datasis->damereg("SELECT numcuent, banco, saldo, tbanco FROM banc WHERE codbanc='$XCODBAN'");
-
-		$mCUENTA   = $mREG['numcuent'];
-		$mBANCO    = $mREG['banco'];
-		$mSALDO    = $mREG['saldo'];
-		$mTBANCO   = $mREG['tbanco'];
-		$XCOMPROB  = $this->datasis->prox_sql("ncomprob");
-
-		$aLISTA = array();
-		$aLISTA["codbanc"]  = $XCODBAN;
-		$aLISTA["numcuent"] = $mCUENTA;
-		$aLISTA["banco"]    = $mBANCO;
-		$aLISTA["saldo"]    = $mSALDO;
-		$aLISTA["fecha"]    = $XFECHA;
-		$aLISTA["tipo_op"]  = 'ND';
-		$aLISTA["numero"]   = $reg['num_ref'];
-		$aLISTA["concepto"] = "CHEQUE DEVUELTO CLIENTE ".$XNUMERO;
-		$aLISTA["clipro"]   = 'C';
-		$aLISTA["liable"]   = 'S';
-		$aLISTA["concep2"]  = "CHEQUE DEVUELTO CLIENTE ".$reg['cod_cli'];
-		$aLISTA["concep3"]  = "";
-		$aLISTA["monto"]    = $reg['monto'];
-		$aLISTA["codcp"]    = $reg['cod_cli'];
-		$aLISTA["nombre"]   = $XNOMBRE;
-		//$aLISTA["benefi"]   = XBENEFI;
-		$aLISTA["comprob"]  = $XCOMPROB;
-		$aLISTA["posdata"]  = $XFECHA;
-		//$aLISTA["negreso"]  = XNEGRESO;
-
-		$aLISTA["usuario"]   = $this->secu->usuario() ;
-		$aLISTA["transac"]   = $transac ;
-		$aLISTA["estampa"]   = date('Y/m/d') ;
-		$aLISTA["hora"]      = date('H:i:s') ;
-
-
-		$this->db->insert('bmov', $aLISTA);
-
-
-		$i = 0;
-		while ( $i == 0 ){
-			$mNUMERO = $this->datasis->prox_sql("ndcli");
-			$mSQL    = "SELECT count(*) FROM smov WHERE tipo_doc='ND' AND numero='$mNUMERO' ";
-			$i       = $this->datasis->dameval($mSQL);
-		}
-
-		$aLISTA = array();
-		$aLISTA["COD_CLI"]  = $reg['cod_cli'];
-		$aLISTA["NOMBRE"]   = $XNOMBRE ;
-		$aLISTA["TIPO_DOC"] = "ND";
-		$aLISTA["NUMERO"]   = $mNUMERO;
-		$aLISTA["FECHA"]    = $XFECHA;
-		$aLISTA["MONTO"]    = $reg['monto'];
-		$aLISTA["IMPUESTO"] = 0;
-		$aLISTA["VENCE"]    = $XVENCE;
-		$aLISTA["TIPO_REF"] = "PR";
-		$aLISTA["NUM_REF"]  = $XNUMERO;
-		$aLISTA["OBSERVA1"] = "CHEQUE DEVUELTO CLIENTE ".$XNUMERO;
-		$aLISTA["OBSERVA2"] = "CHEQUE DEVUELTO CLIENTE ".$reg['cod_cli'];
-		$aLISTA["BANCO"]    = $XCODBAN;
-		$aLISTA["FECHA_OP"] = $XFECHA;
-		$aLISTA["NUM_OP"]   = $reg['num_ref'];
-		$aLISTA["TIPO_OP"]  = 'ND';
-
-		$aLISTA["usuario"]   = $this->secu->usuario() ;
-		$aLISTA["transac"]   = $transac ;
-		$aLISTA["estampa"]   = date('Y/m/d') ;
-		$aLISTA["hora"]      = date('H:i:s') ;
-		$this->db->insert('smov', $aLISTA);
-		$this->db->simple_query("UPDATE sfpa SET tipo='CD' WHERE id=$id");
-		echo "Cheque Devuelto ";
-	}
-
-
 }
-
-/*
-require_once(BASEPATH.'application/controllers/validaciones.php');
-
-class Prmo extends validaciones {
-	function prmo(){
-		parent::Controller();
-		$this->load->library("rapyd");
-		//$this->datasis->modulo_id(206,1);
-		//I use THISFILE, instead __FILE__ to prevent some documented php-bugs with higlight_syntax()&__FILE__
-		//define ("THISFILE",   APPPATH."controllers/finanzas/". $this->uri->segment(2).EXT);
-	}
-	function index(){
-		redirect("finanzas/prmo/filteredgrid");
-	}
-	function filteredgrid(){
-		$this->rapyd->load("datafilter","datagrid");
-
-		$filter = new DataFilter("Filtro de Otros Movimientos de Caja y Bancos", "prmo");
-
-		$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
-		$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
-		$filter->fechad->clause  =$filter->fechah->clause="where";
-		$filter->fechad->db_name =$filter->fechah->db_name="fecha";
-		$filter->fechah->size=$filter->fechad->size=10;
-		$filter->fechad->operator=">=";
-		$filter->fechah->operator="<=";
-
-		$filter->codban = new dropdownField("Caja/Banco", "codban");
-		$filter->codban->option("","");
-		$filter->codban->options("SELECT codbanc, banco FROM bmov ORDER BY banco ");
-
-		$filter->banco = new dropdownField("Tipo", "tipo");
-		$filter->banco->option("","");
-		$filter->banco->option("1","Prestamo Otorgado");
-		$filter->banco->option("2","Prestamo Recibido");
-		$filter->banco->option("3","Cheque Devuelto Cliente");
-		$filter->banco->option("4","Cheque Devuelto Proveedor");
-		$filter->banco->option("5","Deposito por Analizar");
-		$filter->banco->option("6","Cargos Indevidos por el Banco");
-		$filter->banco->option("7","Todos");
-
-		$filter->clipro = new inputField("Cli/Prv", "monto");
-		$filter->clipro->size=12;
-
-		$filter->monto = new inputField("Monto", "monto");
-		$filter->monto->size=12;
-
-		$filter->buttons("reset","search");
-		$filter->build();
-
-		$uri = anchor('finanzas/prmo/dataedit/show/<#numero#>','<#numero#>');
-
-		$grid = new DataGrid("Lista de Otros Movimientos de Caja y Bancos");
-		$grid->order_by("numero","asc");
-		$grid->per_page = 10;
-
-		$grid->column("Numero",$uri);
-		$grid->column("Fecha","<dbdate_to_human><#fecha#></dbdate_to_human>","align='center'");
-		$grid->column("Banco","banco");
-		$grid->column("Cli/Prv","clipro");
-		$grid->column("Monto","monto","align='right'");
-
-		$grid->add("finanzas/prmo/dataedit/create");
-		$grid->build();
-
-		$data['content'] = $filter->output.$grid->output;
-		$data['title']   = "<h1>Otros Movimientos de Caja y Bancos</h1>";
-		$data["head"]    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
-	}
-}
-*/
-?>
