@@ -3841,7 +3841,7 @@ class Sinv extends Controller {
 
 	//*****************************
 	//
-	//  Cambia el Codigo
+	//  Existe el Codigo
 	//
 	function sinvcodigoexiste(){
 		$id = rawurldecode($this->input->post('codigo'));
@@ -3942,6 +3942,10 @@ class Sinv extends Controller {
 
 		$mSQL = "UPDATE IGNORE barraspos SET codigo=".$mcodigo." WHERE codigo=".$mviejo;
 		$this->db->query($mSQL);
+
+		$mSQL = "UPDATE IGNORE sinvpa SET codigo=".$mcodigo." WHERE codigo=".$mviejo;
+		$this->db->query($mSQL);
+
 
 		$mSQL = "UPDATE IGNORE sinvfot SET codigo=".$mcodigo." WHERE codigo=".$mviejo;
 		$this->db->query($mSQL);
