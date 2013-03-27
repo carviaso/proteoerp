@@ -376,7 +376,7 @@ class Lrece extends Controller {
 		$grid->label('Fecha');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => 'true',
+			'editable'      => 'false',
 			'width'         => 80,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
@@ -1251,13 +1251,13 @@ class Lrece extends Controller {
 		$edit->proveed->in        = 'flete';
 
 		$edit->fechal = new DateonlyField('Fecha llegada', 'fechal','d/m/Y');
-		$edit->fechal->size = 10;
+		$edit->fechal->size = 12;
 		$edit->fechal->rule='required|chfecha';
 		$edit->fechal->insertValue = date('Y-m-d');
 		$edit->fechal->calendar = false;
 
 		$edit->fechar = new DateonlyField('Fecha Recolecci&oacute;n', 'fechar','d/m/Y');
-		$edit->fechar->size = 10;
+		$edit->fechar->size = 12;
 		$edit->fechar->rule='required|chfecha';
 		$edit->fechar->insertValue = date('Y-m-d');
 		$edit->fechar->calendar = false;

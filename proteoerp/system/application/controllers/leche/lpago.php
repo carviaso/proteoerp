@@ -1069,7 +1069,8 @@ class Lpago extends Controller {
 		$this->db->where('(a.pago IS NULL OR a.pago=0)');
 		$this->db->where('MID(a.ruta,1,1) <>','G');
 		//$this->db->where("((a.fecha<='$fcorte' AND a.transporte<=0) OR (a.fecha<=ADDDATE('$fcorte',INTERVAL 1 DAY)  AND a.transporte>0))");
-		$this->db->where("LEAST(a.fechal,a.fecha) <= '$fcorte'");
+		//$this->db->where("LEAST(a.fechal,a.fecha) <= '$fcorte'");
+		$this->db->where("a.fechar <= '$fcorte'");
 
 		$this->db->where('b.codprv',$proveed);
 	}
