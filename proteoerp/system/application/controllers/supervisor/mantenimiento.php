@@ -969,7 +969,7 @@ function bobo(url){'."
 						$responde .= 'Actualizado a la versi&oacute;n: '.$ver;
 						$dbver = $this->db->escape($ver);
 						$mSQL="UPDATE valores SET valor=${dbver} WHERE nombre='SVNVER'";
-						$this->db->escape($mSQL);
+						$this->db->simple_query($mSQL);
 					}else{
 						$responde .= 'Ya estaba la ultima versi&oacute;n instalada '.$arr['revision'];
 					}

@@ -36,7 +36,7 @@ $(document).ready(function() {
 		speed: "fast",   // @param : low, medium, fast
 		defautContent: 0 // @param : number
 	});
-	
+
 	$("a[name='_mp']").click(function () {
 		$("a[name='_mp']").removeClass("current");
 		url=this.href;
@@ -47,7 +47,7 @@ $(document).ready(function() {
 		});
 		$(this).addClass('current');
 		$('#tumblelog').load('<?php echo site_url('bienvenido/cargapanel'); ?>'+carga,'' ,function(){
-			$('#maso').masonry({ 
+			$('#maso').masonry({
 				singleMode: true,
 				itemSelector: '.box'
 			});
@@ -82,7 +82,7 @@ $(document).ready(function() {
 						<td>
 						<?php
 							if ( $this->secu->es_logeado() )
-								$this->load->view('chat/chat'); 
+								$this->load->view('chat/chat');
 						?>
 						</td>
 					</tr>
@@ -90,7 +90,7 @@ $(document).ready(function() {
 						<td>
 						<?php
 							if ( $this->secu->es_logeado() )
-								$this->load->view('ultlog'); 
+								$this->load->view('ultlog');
 						?>
 						</td>
 					</tr>
@@ -107,19 +107,19 @@ $(document).ready(function() {
 						<table style="font-size:10px;color:white;width:100%;" border='0'>
 							<tr>
 								<td><?php echo "Conectado a: <b>".strtoupper($this->db->database); ?></b></td>
-						<?php 
+						<?php
 						if(isset($_SERVER['REMOTE_ADDR'])){
 							echo "\t\t\t\t\t\t\t\t</tr><tr>\n";
 							echo "\t\t\t\t\t\t\t\t\t<td>IP: <b>".$_SERVER['REMOTE_ADDR']."</b></td>\n";
 						}
-						
+
 						if ( $this->secu->es_logeado() ){
 							echo "\t\t\t\t\t\t\t\t</tr><tr>\n";
 							echo "\t\t\t\t\t\t\t\t\t<td><div onclick='camclave()'><b>Cambio de Clave</b></div></td>";
 						}
 					?>
 							</tr><tr>
-								<td>Build: <?php echo $this->datasis->traevalor("SVNVER"); ?></td>
+								<td>Build: <?php echo $this->datasis->traevalor('SVNVER','Version svn de proteo'); ?></td>
 							</tr>
 						</table>
 					</div>
