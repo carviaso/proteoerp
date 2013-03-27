@@ -46,6 +46,7 @@ class Metodos extends Controller {
 					$campos = $this->db->list_fields($ttabla);
 					$where .= " AND ".$fila['fecha']." >= $dbfdesde";
 				}*/
+				$dbfdesde= $this->db->escape($mFDESDE);
 				$where .= " AND ".$fila['fecha']." >= $dbfdesde";
 			}
 

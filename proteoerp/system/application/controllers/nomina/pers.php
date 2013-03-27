@@ -1086,10 +1086,6 @@ class Pers extends Controller {
 		$edit->cedula->rule="trim|required";
 		$edit->cedula->css_class='inputnum';
 
-		//$lriffis='<a href="javascript:consulrif();" title="Consultar RIF en el SENIAT" onclick="">SENIAT</a>';
-		//$edit->rif->mode="autohide";
-		//$edit->rif->append($lriffis);
-
 		$edit->rif =  new inputField("RIF", "rif");
 		$edit->rif->rule      = "trim|strtoupper|callback_chrif";
 		$edit->rif->maxlength = 13;
@@ -1106,7 +1102,6 @@ class Pers extends Controller {
 		$edit->apellido->group = "Datos del Trabajador";
 		$edit->apellido->size = 30;
 		$edit->apellido->maxlength=30;
-		//$edit->apellido->in = "nombre";
 		$edit->apellido->rule="trim|required|strtoupper";
 
 		$edit->sexo = new dropdownField("Sexo", "sexo");
@@ -1115,9 +1110,6 @@ class Pers extends Controller {
 		$edit->sexo->option("M","Masculino");
 		$edit->sexo->group = "Datos del Trabajador";
 
-		//$edit->label1 = new freeField("EC","EC","<id class='littletableheader'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Estado Civil&nbsp;&nbsp; </id>");
-		//$edit->label1->in = "sexo";
-
 		$edit->civil = new dropdownField("Estado Civil", "civil");
 		$edit->civil->style = "width:100px;";
 		$edit->civil->option("S","Soltero");
@@ -1125,7 +1117,6 @@ class Pers extends Controller {
 		$edit->civil->option("D","Divorciado");
 		$edit->civil->option("V","Viudo");
 		$edit->civil->group = "Datos del Trabajador";
-		//$edit->civil->in = "sexo";
 
 		$edit->direc1 = new inputField("Direcci&oacute;n", "direc1");
 		$edit->direc1->group = "Datos del Trabajador";
@@ -1156,14 +1147,6 @@ class Pers extends Controller {
 		$edit->email->group = "Datos del Trabajador";
 		$edit->email->maxlength=50;
 		$edit->email->rule="trim";
-
-
-		//$edit->posicion = new dropdownField("Tipo de Escritura" ,"escritura");
-		//$edit->posicion->option("","");
-		//$edit->posicion->options("SELECT codigo,posicion FROM posicion  ORDER BY codigo");
-		//$edit->posicion->group = "Datos del Trabajador";
-		//$edit->posicion->rule="trim|strtoupper";
-		//$edit->posicion->style ="width:170px;";
 
 
 		$edit->civil = new dropdownField("Estado Civil", "civil");
