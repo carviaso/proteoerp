@@ -16,12 +16,23 @@ $(function(){
 	calcolitro();
 
 	$('#transporte').change(function() {
-		var actual= '<?php echo date('d/m/Y'); ?>';
+		var fechal= $('#fechal').val();
 		var fechar= $('#fechar').val();
 		var valor = $('#transporte').val();
 
-		if(valor.length>0 && actual==fechar){
-			$('#fechar').val('<?php echo date('d/m/Y',mktime(0, 0, 0, date('n'),date('j')-1)); ?>');
+		if(valor.length>0 && fechal==fechar){
+			var year =Number(fechal.slice(-4));
+			var month=Number(fechal.slice(3,5))-1;
+			var day  =Number(fechal.slice(0,2));
+
+			f = new Date();
+			f.setFullYear(year,month,day-1);
+			d=f.getDate();
+			m=f.getMonth()+1;
+			a=f.getFullYear();
+			ffetch=pad(d.toString(),2,'0',1)+'/'+pad(m.toString(),2,'0',1)+'/'+a.toString();
+
+			$('#fechar').val(ffetch);
 		}else{
 			$('#fechar').val(actual);
 		}

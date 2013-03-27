@@ -61,7 +61,7 @@ function del_itlrece(id){
 <?php } ?>
 <table width='100%' style='font-size:11pt;background:#F2E69D;'>
 	<tr>
-		<td                           width='60'>Numero:</td>
+		<td                           width='60'>N&uacute;mero:</td>
 		<td style='font-weight:bold;' width='70'><?php echo str_pad(trim($form->id->output),7,'0',STR_PAD_LEFT);    ?></td>
 		<td                           width='60' align='right'>Fecha:</td>
 		<td style='font-weight:bold;' width='90'><?php echo $form->fecha->output; ?></td>
