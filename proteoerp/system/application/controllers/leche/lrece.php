@@ -358,7 +358,7 @@ class Lrece extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -675,8 +675,9 @@ class Lrece extends Controller {
 			'width'         => 100,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+			'formatter'     => "'int'",
+			//'formatter'     => "'number'",
+			//'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
 		));
 
 		$grid->addField('lpago');
@@ -1228,9 +1229,15 @@ class Lrece extends Controller {
 		$edit->lleno->maxlength  = 16;
 		$edit->lleno->showformat = 'decimal';
 
+		$fechai = $edit->getval('fecha');
+		if($fechai !== false){
+			$dbfechai=$this->db->escape($fechai);
+		}else{
+			$dbfechai='CURDATE()';
+		}
 		$edit->transporte = new dropdownField('Transporte', 'transporte');
 		$edit->transporte->option('','Seleccionar');
-		$edit->transporte->options("SELECT id, CONCAT( RUTA, ' ', nombre) FROM lrece WHERE fecha=CURDATE() AND MID(ruta,1,1)='G' ORDER BY nombre");
+		$edit->transporte->options("SELECT id, CONCAT( RUTA, ' ', nombre) FROM lrece WHERE fecha=${dbfechai} AND MID(ruta,1,1)='G' ORDER BY nombre");
 		$edit->transporte->rule  ='condi_required|callback_chtransporte';
 		$edit->transporte->style ='width:240px;';
 
