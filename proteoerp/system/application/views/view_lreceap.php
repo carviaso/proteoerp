@@ -15,10 +15,15 @@ $(function(){
 	calconeto();
 	calcolitro();
 
-	$('#ruta').change(function() {
-		var valor=$('#ruta').val();
-		if(valor.length>0 && valor.slice(0,1)=='G'){
-			$('#fechar').val('<?php echo date('d/m/Y',mktime(0, 0, 0, date('n'),date('j')-1)); ?>')
+	$('#transporte').change(function() {
+		var actual= '<?php echo date('d/m/Y'); ?>';
+		var fechar= $('#fechar').val();
+		var valor = $('#transporte').val();
+
+		if(valor.length>0 && actual==fechar){
+			$('#fechar').val('<?php echo date('d/m/Y',mktime(0, 0, 0, date('n'),date('j')-1)); ?>');
+		}else{
+			$('#fechar').val(actual);
 		}
 	});
 });
