@@ -971,7 +971,7 @@ function bobo(url){'."
 						$mSQL="UPDATE valores SET valor=${dbver} WHERE nombre='SVNVER'";
 						$this->db->simple_query($mSQL);
 					}else{
-						$responde .= 'Ya estaba la ultima versi&oacute;n instalada '.$arr['revision'];
+						$responde .= 'Ya estaba la ultima versi&oacute;n instalada '.$aver;
 					}
 				}else{
 					$responde .= 'Hubo problemas con la actualizaci&oacute;n, comuniquese con soporte t&eacute;cnico';
