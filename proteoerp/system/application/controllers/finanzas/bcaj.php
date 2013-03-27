@@ -1691,44 +1691,6 @@ class Bcaj extends Controller {
 		echo "Cheque Devuelto ";
 	}
 
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-
-	function dataedit(){
-		$this->rapyd->load('dataedit');
-		$edit = new DataEdit('Deposito en caja', 'bcaj');
-		$edit->back_url = site_url('finanzas/bcaj/index');
-
-		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
-		$edit->fecha->insertValue = date('Y-m-d');
-		$edit->fecha->rule = 'chfecha|required';
-
-		$edit->tipo = new dropdownField('Tipo', 'tipo');
-		$edit->tipo->options($this->guitipo);
-		$edit->tipo->rule = 'required';
-		$edit->tipo->style = 'width:180px';
-
-		$edit->envia = new dropdownField('Envia','envia');
-		$edit->envia->option('','Seleccionar');
-
-		$edit->recibe = new dropdownField('Recibe','recibe');
-		$edit->recibe->option('','Seleccionar');
-
-		//Poner los campos que faltan
-
-		$edit->buttons('modify', 'save', 'undo', 'back');
-		$edit->build();
-
-		$data['content'] = $edit->output;
-		$data['title']   = '<h1>Depositos,transferencias y remesas</h1>';
-		$data['head']    = $this->rapyd->get_head().phpscript('nformat.js');
-		$this->load->view('view_ventanas', $data);
-	}
-*/
-
 	function formato($numero){
 		$formato=$this->_formato($numero);
 		$url='formatos/ver/'.$formato.'/'.$numero;

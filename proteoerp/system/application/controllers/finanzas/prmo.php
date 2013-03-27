@@ -83,26 +83,12 @@ class Prmo extends Controller {
 
 		$bodyscript .= '
 		function prmoadd(){
-			$.post("'.site_url($this->url.'dataedit/create').'",
-			function(data){
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
+			$.prompt("<h1>Opcion no disponible</h1>");
 		};';
 
 		$bodyscript .= '
 		function prmoedit(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
-				});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
+			$.prompt("<h1>Opcion no disponible</h1>");
 		};';
 
 		$bodyscript .= '
@@ -127,7 +113,7 @@ class Prmo extends Controller {
 				if(confirm(" Seguro desea eliminar el registro?")){
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
 					mId = id;
-					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+					$.post("'.site_url($this->url.'deprmodel/do_delete').'/"+id, function(data){
 						try{
 							var json = JSON.parse(data);
 							if (json.status == "A"){
@@ -695,14 +681,14 @@ class Prmo extends Controller {
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(    $this->datasis->sidapuede('PRMO','INCLUIR%' ));
-		$grid->setEdit(   $this->datasis->sidapuede('PRMO','MODIFICA%'));
+		$grid->setAdd(    false);
+		$grid->setEdit(   false);
 		$grid->setDelete( $this->datasis->sidapuede('PRMO','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('PRMO','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: prmoadd, editfunc: prmoedit, delfunc: prmodel, viewfunc: prmoshow");
+		$grid->setBarOptions('addfunc: prmoadd, editfunc: prmoedit, delfunc: prmodel, viewfunc: prmoshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -991,6 +977,11 @@ class Prmo extends Controller {
 
 	}
 
+	function deprmodel(){
+		$this->rapyd->load('dataedit');
+		$edit = $this->deprmo();
+		$this->dataedit($edit);
+	}
 
 	//******************************************************************
 	// Dataedit para Prestamo Otorgado
@@ -1009,7 +1000,6 @@ class Prmo extends Controller {
 			$("#observa1").val("PRESTAMO OTORGADO A ("+$("#clipro").val()+") "+$("#nombre").val() );
 		});';
 
-
 		$edit->script($this->scriptscli().$script,'modify');
 		$edit->script($this->scriptscli().$script,'create');
 
@@ -1020,7 +1010,6 @@ class Prmo extends Controller {
 		$edit->tipo->option('CH','Cheque');  // solo si es banco
 		$edit->tipo->option('ND','Nota Debito');
 		$edit->tipo->style = 'width:120px';
-
 
 		$edit->clipro = new inputField('Cliente','clipro');
 		$edit->clipro->rule='';
@@ -1545,7 +1534,9 @@ class Prmo extends Controller {
 	}
 
 	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
+		$transac =$do->get('transac');
+
+		$do->error_message_ar['pre_del']='Registro no se puede elimnar';
 		return false;
 	}
 

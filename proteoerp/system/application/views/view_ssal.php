@@ -39,6 +39,8 @@ $(function(){
 //Agrega el autocomplete para el codigo
 function autocod(id){
 	$('#codigo_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasinvart'); ?>",
@@ -85,6 +87,8 @@ function autocod(id){
 //Agrega el autocomplete para el cocepto
 function autoicon(id){
 	$('#concepto_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscaicon'); ?>",
