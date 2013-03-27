@@ -10,10 +10,39 @@ $mod=true;
 if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>';
 ?>
 <script type="text/javascript">
+function gettransporte(){
+	var fechal = $("#fechal").val();
+	$.ajax({
+		url: "<?php echo site_url('ajax/lrecetrans'); ?>",
+		dataType: 'json',
+		type: 'POST',
+		data: {'q': fechal},
+		success: function(data){
+				var transpdd=$('#transporte');
+				transpdd.empty();
+				transpdd.append($('<option></option>').val('').html('Seleccionar'));
+				$.each(data,
+					function(id, val){
+						transpdd.append($('<option></option>').val(val.value).html(val.label));
+					}
+				);
+			},
+	});
+}
+
 $(function(){
 	$('.inputnum').numeric('.');
 	calconeto();
 	calcolitro();
+
+	$("#fechal").datepicker({
+		dateFormat:"dd/mm/yy",
+		onSelect: function(dateText) {
+				gettransporte();
+		},
+	});
+
+	$("#fechar").datepicker({dateFormat:"dd/mm/yy"});
 
 	$('#transporte').change(function() {
 		var fechal= $('#fechal').val();
@@ -33,10 +62,12 @@ $(function(){
 			ffetch=pad(d.toString(),2,'0',1)+'/'+pad(m.toString(),2,'0',1)+'/'+a.toString();
 
 			$('#fechar').val(ffetch);
-		}else{
-			$('#fechar').val(actual);
+		}else if(valor.length==0 && fechal!=fechar){
+			$('#fechar').val(fechal);
 		}
 	});
+
+
 });
 
 function calcolitro(){
@@ -81,12 +112,6 @@ function calconeto(){
 		$('#litros_val').text(roundNumber(neto/densidad,2));
 	}
 }
-
-$(function() {
-	$("#fechal").datepicker({dateFormat:"dd/mm/yy"});
-	$("#fechar").datepicker({dateFormat:"dd/mm/yy"});
-});
-
 </script>
 <table width='100%' style='font-size:11pt;background:#BEFCB5;'>
 	<tr>

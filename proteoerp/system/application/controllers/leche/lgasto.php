@@ -624,17 +624,23 @@ class Lgasto extends Controller {
 
 	function _post_insert($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits ${primary} ");
 	}
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${primary} ");
 	}
 
 	function _post_delete($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		$primary     = implode(',',$do->pk);
+		$id_lpagolote= $do->get('id_lpagolote');
+		if(empty($id_lpagolote)){
+			$idlote  = ' lote: '.$id_lpagolote;
+		}else{
+			$idlote  = '';
+		}
+		logusu($do->table,"Elimino $this->tits ${primary} ${idlote}");
 	}
 
 	function instalar(){

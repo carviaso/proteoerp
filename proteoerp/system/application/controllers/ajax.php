@@ -572,6 +572,37 @@ class Ajax extends Controller {
 		return true;
 	}
 
+	//Busca los transportistas para las recepciones
+	function lrecetrans(){
+		$mid    = $this->input->post('q');
+
+		$data = '[]';
+		if($mid !== false && preg_match('/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/', $mid)){
+			$date    = DateTime::createFromFormat('d/m/Y', $mid);
+			$dbfecha = $this->db->escape($date->format('Y-m-d'));
+
+			$dbmid = $this->db->escape($mid);
+			$retArray = $retorno = array();
+
+			$mSQL="SELECT id, CONCAT(ruta, ' ', nombre) AS val
+			FROM lrece
+			WHERE fechal=${dbfecha} AND MID(ruta,1,1)='G'
+			ORDER BY nombre";
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$retArray['label']    = utf8_encode(trim($row['val']));
+					$retArray['value']    = $row['id'];
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
 	//Busca icon
 	function buscaicon(){
 		$comodin= $this->datasis->traevalor('COMODIN');

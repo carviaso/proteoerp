@@ -1229,18 +1229,6 @@ class Lrece extends Controller {
 		$edit->lleno->maxlength  = 16;
 		$edit->lleno->showformat = 'decimal';
 
-		$fechai = $edit->getval('fecha');
-		if($fechai !== false){
-			$dbfechai=$this->db->escape($fechai);
-		}else{
-			$dbfechai='CURDATE()';
-		}
-		$edit->transporte = new dropdownField('Transporte', 'transporte');
-		$edit->transporte->option('','Seleccionar');
-		$edit->transporte->options("SELECT id, CONCAT( RUTA, ' ', nombre) FROM lrece WHERE fecha=${dbfechai} AND MID(ruta,1,1)='G' ORDER BY nombre");
-		$edit->transporte->rule  ='condi_required|callback_chtransporte';
-		$edit->transporte->style ='width:240px;';
-
 		$edit->nombre = new inputField('Chofer','nombre');
 		$edit->nombre->rule      = 'strtoupper|required';
 		$edit->nombre->size      = 40;
@@ -1268,6 +1256,18 @@ class Lrece extends Controller {
 		$edit->fechar->rule='required|chfecha';
 		$edit->fechar->insertValue = date('Y-m-d');
 		$edit->fechar->calendar = false;
+
+		$fechai = $edit->getval('fechal');
+		if($fechai !== false){
+			$dbfechai=$this->db->escape($fechai);
+		}else{
+			$dbfechai='CURDATE()';
+		}
+		$edit->transporte = new dropdownField('Transporte', 'transporte');
+		$edit->transporte->option('','Seleccionar');
+		$edit->transporte->options("SELECT id, CONCAT(ruta, ' ', nombre) AS val FROM lrece WHERE fechal=${dbfechai} AND MID(ruta,1,1)='G' ORDER BY nombre");
+		$edit->transporte->rule  ='condi_required|callback_chtransporte';
+		$edit->transporte->style ='width:240px;';
 
 		$edit->vacio = new inputField('Peso vac&iacute;o','vacio');
 		$edit->vacio->rule       = 'numeric|required';
