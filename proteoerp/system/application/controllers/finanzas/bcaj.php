@@ -426,7 +426,7 @@ class Bcaj extends Controller {
 
 
 		$grid->addField('numeroe');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
