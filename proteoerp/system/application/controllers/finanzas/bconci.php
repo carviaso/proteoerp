@@ -13,12 +13,9 @@ class Bconci extends Controller {
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('bconci','id') ) {
-			$this->db->simple_query('ALTER TABLE bconci DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE bconci ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE bconci ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
-		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->instalar();
+		$this->datasis->creaintramenu(array('modulo'=>'52B','titulo'=>'Conciliacion Bancaria','mensaje'=>'Conciliacion Bancaria','panel'=>'TESORERIA','ejecutar'=>'finanzas/bconci','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>900,'alto'=>600));
+		//$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -644,6 +641,9 @@ class Bconci extends Controller {
 	function _pre_insert($do){
 		$codbanc  = $do->get('codbanc');
 		$fecha    = $do->get('fecha');
+		$fecha    = substr($fecha,0,6).days_in_month(substr($fecha,4,2),substr($fecha,0,4));
+		$do->set('fecha',$fecha);
+
 		$dbfecha  = $this->db->escape($fecha);
 		$dbcodbanc= $this->db->escape($codbanc);
 
