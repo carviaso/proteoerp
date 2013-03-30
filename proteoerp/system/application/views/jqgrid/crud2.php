@@ -243,6 +243,7 @@ html.ui-autocomplete {height: 150px;width: 600px;}
 
 <?php echo $LayoutStyle; ?>
 
+th.ui-th-column div{white-space:normal !important;height:auto !important;padding:2px;}
 </style>
 
 <script type="text/javascript">
@@ -302,6 +303,7 @@ function esperar(url){
 };
 
 </script>
+
 </head>
 
 <body id="dt_proteo">

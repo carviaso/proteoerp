@@ -3,6 +3,7 @@ class fnomina{
 
 	var $ci;
 	var $CODIGO;
+
 	var $fdesde;
 	var $fhasta;
 
@@ -11,16 +12,17 @@ class fnomina{
 	}
 
 	function SUELDO_MES(){
-		$CODIGO=$this->ci->db->escape($this->CODIGO);
+		$CODIGO  = $this->ci->db->escape($this->CODIGO);
 		$SUELDOA = 0;
 		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=$CODIGO");
-		$mMONTO  = $this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=$CODIGO");
-
+		$mSUELDO = $this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=$CODIGO");
 		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
-		if($mFRECU == 'S') $SUELDOA = $mMONTO * 52 / 12;
-		if($mFRECU == 'B') $SUELDOA = $mMONTO * 26 / 12;
-		if($mFRECU == 'Q') $SUELDOA = $mMONTO * 2;
-		if($mFRECU == 'M') $SUELDOA = $mMONTO;
+
+		if($mFRECU == 'S') $SUELDOA = $mSUELDO * 52 / 12;
+		if($mFRECU == 'B') $SUELDOA = $mSUELDO * 26 / 12;
+		if($mFRECU == 'Q') $SUELDOA = $mSUELDO * 2;
+		if($mFRECU == 'M') $SUELDOA = $mSUELDO;
+		//memowrite($SUELDOA,"SUELDO_MES");
 		return $SUELDOA;
 	}
 
@@ -35,7 +37,7 @@ class fnomina{
 		if($mFRECU == 'B') $SUELDOA = $mMONTO * 26 / 24;
 		if($mFRECU == 'Q') $SUELDOA = $mMONTO;
 		if($mFRECU == 'M') $SUELDOA = $mMONTO/2;
-		return $SUELDOA;
+		//return $SUELDOA;
 	}
 
 	function SUELDO_SEM(){
@@ -49,6 +51,8 @@ class fnomina{
 		if($mFRECU == 'B') $SUELDOA = $mMONTO/2;
 		if($mFRECU == 'Q') $SUELDOA = $mMONTO*24/52;
 		if($mFRECU == 'M') $SUELDOA = $mMONTO*12/52 ;
+		memowrite($SUELDOA,"SUELDO_SEM");
+
 		return $SUELDOA;
 	}
 
@@ -99,31 +103,54 @@ class fnomina{
 	}
 
 	function ASIGNA(){
-		return 1;
+		$mSQL  = "SELECT sum(valor) cuenta FROM prenom WHERE codigo='".$this->CODIGO."' AND tipo='A' AND MID(concepto,1,1)<9 ";
+		$query = $this->ci->db->query($mSQL);
+		$row   = $query->row();
+		$suma  = $row->cuenta;
+		return $suma;
 	}
 
 	function SEMANAS(){
 		$dsemana  = 1; //1 para lunes, 2 para martes .... 7 domingo
 		$dated    = new DateTime($this->fdesde);
 		$dateh    = new DateTime($this->fhasta);
+		
 		$interva1 = new DateInterval('P1D');
 		$interva2 = new DateInterval('P7D');
 		$dias  = 0;
 
-		while($dated<=$dateh){
-			if(date('N',$dated->getTimestamp())==$dsemana) $dias++;
+		while( $dated <= $dateh ){
+			//if(date('N',$dated->getTimestamp())==$dsemana) $dias++;
+			if( date('N',$dated->getTimestamp()) == $dsemana ) $dias++;
+			$dated->add($interva1);
+
+
+/*
 			if($dias>0)
 				$dated->add($interva1);
 			else
 				$dated->add($interva2);
+*/
 		}
+
+		memowrite("Dias=".$dias,'SEMANAS');
+
 		return $dias;
 	}
 }
 
 class Pnomina extends fnomina{
 
-	var $MONTO;
+	var $MONTO  = 0;
+	var $SUELDO = 0;
+
+	var $VARI1 = 0;
+	var $VARI2 = 0;
+	var $VARI3 = 0;
+	var $VARI4 = 0;
+	var $VARI5 = 0;
+	var $VARI6 = 0;
+
 
 	function pnomina(){
 		parent::fnomina();
@@ -131,8 +158,20 @@ class Pnomina extends fnomina{
 	}
 
 	function evalform($formula){
-		$MONTO=$this->MONTO;
-		$fformula=$this->_traduce($formula);
+		$MONTO  = $this->MONTO;
+		$SUELDO = $this->SUELDO;
+
+		$VARI1 = $this->VARI1;
+		$VARI2 = $this->VARI2;
+		$VARI3 = $this->VARI3;
+		$VARI4 = $this->VARI4;
+		$VARI5 = $this->VARI5;
+		$VARI6 = $this->VARI6;
+
+		$fformula = $this->_traduce($formula);
+		if ( strpos($formula,'SEMANAS') )
+memowrite($fformula,'formula');
+
 		$retorna='$rt='.$fformula.';';
 		eval($retorna);
 		return $rt;
@@ -193,10 +232,21 @@ class Pnomina extends fnomina{
 				}
 			}
 		}
-		$formula=str_replace('XMONTO','$MONTO',$formula);
+		$formula=str_replace('XMONTO', '$MONTO', $formula);
+		$formula=str_replace('XSUELDO','$SUELDO',$formula);
+
+		$formula=str_replace('XVARI1','$VARI1',$formula);
+		$formula=str_replace('XVARI2','$VARI2',$formula);
+		$formula=str_replace('XVARI3','$VARI3',$formula);
+		$formula=str_replace('XVARI4','$VARI4',$formula);
+		$formula=str_replace('XVARI5','$VARI5',$formula);
+		$formula=str_replace('XVARI6','$VARI6',$formula);
+
+
 		$formula=str_replace('.AND.','&&',$formula);
 		$formula=str_replace('.OR.','||',$formula);
 		$formula=str_replace('.NOT.','!',$formula);
+
 
 		return $formula;
 	}

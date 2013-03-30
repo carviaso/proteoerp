@@ -13,7 +13,7 @@ class Prenom extends Controller {
 
 		$form->contrato = new dropdownField("Contrato", "contrato");
 		$form->contrato->option("","Seleccionar");
-		$form->contrato->options("SELECT codigo,nombre FROM noco ORDER BY nombre");
+		$form->contrato->options("SELECT codigo, concat(codigo,' ',nombre) nombre FROM noco ORDER BY nombre");
 		$form->contrato->rule='required';
 
 		$form->fechac = new dateonlyField("Fecha de corte", "fechac");
@@ -32,87 +32,139 @@ class Prenom extends Controller {
 		if ($form->on_success()){
 			$this->load->dbforge();
 
-			$tabla   ='prenom';
-			$tablap  ='pretab';
-			$this->db->simple_query("TRUNCATE $tabla");
-			$this->db->simple_query("TRUNCATE $tablap");
-			$contrato=$this->db->escape($form->contrato->newValue);
-			$fechac  =$form->fechac->newValue;
-			$fechap  =$form->fechap->newValue;
+			$prenom  ='prenom';
+			$pretab  ='pretab';
 
-			$mSQL  = "INSERT IGNORE INTO $tabla (contrato, codigo,nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap,cuota,cuotat,pprome,trabaja) ";
-			$mSQL .= "SELECT $contrato, b.codigo, CONCAT(RTRIM(b.apellido),'/',b.nombre) nombre, ";
-			$mSQL .= "a.concepto, a.grupo, a.tipo, a.descrip, a.formula, 0, $fechac, $fechap , 0, 0, 0, $contrato ";
-			$mSQL .= "FROM conc a JOIN itnoco c ON a.concepto=c.concepto ";
-			$mSQL .= "JOIN pers b ON b.contrato=c.codigo WHERE c.codigo=$contrato AND b.status='A' ";
+			$contrato= $form->contrato->newValue;
+			$fechac  = $form->fechac->newValue;
+			$fechap  = $form->fechap->newValue;
 
-			$this->db->simple_query($mSQL);
-
-			$fields = $this->db->list_fields($tablap);
-			$ii=count($fields);
-			for($i=5;$i<$ii;$i++)
-				$this->dbforge->drop_column($tablap,$fields[$i]);
-			unset($fields);
-
-			$query = $this->db->query("SELECT concepto FROM itnoco WHERE codigo=$contrato ORDER BY concepto");
-			foreach ($query->result() as $row){
-				$ind    = 'c'.trim($row->concepto);
-				$fields[$ind]=array('type' => 'decimal(17,2)','default' => 0);
-			}
-
-			$this->dbforge->add_column($tablap, $fields);
-			unset($fields);
-
-			$frec=$this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=$contrato");
-			$query = $this->db->query("SELECT codigo,CONCAT(RTRIM(apellido),'/',nombre) AS nombre FROM pers WHERE contrato=$contrato");
-			foreach ($query->result() as $row){
-				$data['codigo'] = $row->codigo;
-				$data['frec']   = $frec;
-				$data['fecha']  = $fechac;
-				$data['nombre'] = $row->nombre;
-				$data['total']  = 0;
-				$mSQL = $this->db->insert_string($tablap, $data);
-				$this->db->simple_query($mSQL);
-				redirect('nomina/prenom/montos');
-			}
-
-			/*$query = $this->db->query("SELECT FROM pers JOIN ON WHERE");
-			if ($query->num_rows() > 0){
-				foreach ($query->result() as $row){
-					$data['contrato'] ='';
-					$data['codigo']   ='';
-					$data['nombre']   ='';
-					$data['concepto'] ='';
-					$data['tipo']     ='';
-					$data['descrip']  ='';
-					$data['grupo']    ='';
-					$data['formula']  ='';
-					$data['monto']    ='';
-					$data['fecha']    ='';
-					$data['cuota']    ='';
-					$data['cuotat']   ='';
-					$data['valor']    ='';
-					$data['adicional']='';
-					$data['fechap']   ='';
-					$data['trabaja']  ='';
-					$data['pprome']   ='';
-				}
-			}*/
-		}
-
-		$data['content'] = $form->output;
-		$data['title']   = '<h1>'.$this->titulo.'</h1>';
-		$data["head"]    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
+			$this->_creaprenom($contrato, $fechac, $fechap );
+			$this->_creapretab();
+			echo "crea los 2 $contrato, $fechac, $fechap";
+		} else 
+			echo $form->output;
+		
 	}
+
+	//******************************************************************
+	//  Crea Pretab => Tabla de Prenomina Detalle
+	//
+	function _creaprenom($contrato, $fecha, $fechap ){
+		$contdb = $this->db->escape($contrato);
+		$prenom  = 'prenom';
+		$pretab  = 'pretab';
+		
+		// APLICA AUMENTOS DE SUELDO
+		$mSQL  = "UPDATE ausu a JOIN pers b ON a.codigo=b.codigo ";
+		$mSQL .= "SET b.sueldo=a.sueldo WHERE a.fecha<='".$fecha."'";
+		//$this->db->query($mSQL);
+		
+		// TRAE FRECUENCIA DE CONTRATO
+		$FRECUEN = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=".$contdb);
+		$this->db->query("UPDATE pers SET tipo='".$FRECUEN."' WHERE contrato=".$contdb);
+
+		$this->db->query("TRUNCATE ${prenom}");
+		
+		// ---- CONCEPTOS FIJOS ---- //
+		$mSQL  = "INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
+		$mSQL .= "SELECT ".$contdb." contrato, b.codigo, CONCAT(RTRIM(b.apellido),', ',b.nombre) nombre,";
+		$mSQL .= "a.concepto, c.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fechap."' ";
+		$mSQL .= "FROM asig a JOIN pers b ON a.codigo=b.codigo ";
+		$mSQL .= "JOIN conc c ON a.concepto=c.concepto ";
+		$mSQL .= "WHERE b.tipo='".$FRECUEN."' AND b.contrato=".$contdb." AND b.status='A' ";
+		$this->db->query($mSQL);
+
+		$mSQL  = "INSERT IGNORE INTO prenom (contrato, codigo,nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
+		$mSQL .= "SELECT ".$contdb.", b.codigo, CONCAT(RTRIM(b.apellido),', ',b.nombre) nombre, ";
+		$mSQL .= "a.concepto, a.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fechap."' ";
+		$mSQL .= "FROM conc a JOIN itnoco c ON a.concepto=c.concepto ";
+		$mSQL .= "JOIN pers b ON b.contrato=c.codigo WHERE c.codigo=".$contdb." AND b.status='A' ";
+		$this->db->query($mSQL);
+
+		$this->db->query("UPDATE prenom SET trabaja=contrato");
+
+	}
+
+	//******************************************************************
+	//  Crea Pretab => Tabla de Prenomina Resumen
+	//
+	function _creapretab(){
+		$prenom  ='prenom';
+		$pretab  ='pretab';
+
+		$this->db->query("DROP TABLE IF EXISTS  ${pretab}");
+		$mSQL  = "CREATE TABLE ${pretab} (";
+		$mSQL .= "	codigo   CHAR(15)      NOT NULL DEFAULT '', ";
+		$mSQL .= "	frec     CHAR(1)       NULL DEFAULT NULL, ";
+		$mSQL .= "	fecha    DATE          NULL DEFAULT NULL, ";
+		$mSQL .= "	nombre   CHAR(80)      NULL DEFAULT NULL, ";
+		$mSQL .= "	total    DECIMAL(17,2) NULL DEFAULT '0.00', ";
+		
+		$query = $this->db->query("SELECT concepto FROM ${prenom} GROUP BY concepto ");
+		foreach ($query->result() as $row){
+			$mSQL .= "	c".$row->concepto." DECIMAL(17,2) DEFAULT 0.00, ";
+		}
+		$mSQL .= "	id       INT(11)       NOT NULL AUTO_INCREMENT, ";
+		$mSQL .= "	PRIMARY KEY (id), ";
+		$mSQL .= "	UNIQUE INDEX codigo (codigo) ";
+		$mSQL .= ") ";
+		$mSQL .= "COLLATE='latin1_swedish_ci' ";
+		$mSQL .= "ENGINE=MyISAM; ";
+		$this->db->query($mSQL);
+
+		// -- LLENA PRETAB
+		$mSQL = "
+		INSERT IGNORE INTO pretab (codigo, frec, fecha, nombre)
+		SELECT a.codigo, b.tipo, a.fecha, a.nombre 
+		FROM prenom a JOIN noco b ON a.contrato=b.codigo 
+		GROUP BY a.codigo";
+		$this->db->query($mSQL);
+
+		$this->calcula('048');
+
+	}
+
+
+	function calcula($codigo){
+		$this->load->library('pnomina');
+		$this->pnomina->CODIGO = $codigo;
+
+		$this->pnomina->fdesde = strtotime('2013.03.01');
+		$this->pnomina->fhasta = strtotime('2013.03.15');
+
+	
+		$query = $this->db->query('SELECT * FROM prenom a JOIN pers b ON a.codigo=b.codigo WHERE a.codigo='.$this->db->escape($codigo).' ORDER BY a.tipo, a.concepto');
+		if ($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+				$this->pnomina->MONTO   = $row->monto;
+				$this->pnomina->SUELDO  = $row->sueldo;
+
+				$this->pnomina->VARI1  = $row->vari1;
+				$this->pnomina->VARI2  = $row->vari2;
+				$this->pnomina->VARI3  = $row->vari3;
+				$this->pnomina->VARI4  = $row->vari4;
+				$this->pnomina->VARI5  = $row->vari5;
+				$this->pnomina->VARI6  = $row->vari6;
+
+				$valor = $this->pnomina->evalform($row->formula);
+				$this->db->query("UPDATE prenom SET valor=${valor} WHERE concepto='".$row->concepto."' AND codigo=".$this->db->escape($codigo) );
+				
+
+			}
+		}
+	}
+
+
+
 
 	function montos(){
 		$this->rapyd->load('datagrid','fields','datafilter');
 
 		$error='';
 		if($this->input->post('pros')!==FALSE){
-			$concepto =$this->db->escape($this->input->post('concepto'));
-			$pmontos  =$this->input->post('monto');
+			$concepto = $this->db->escape($this->input->post('concepto'));
+			$pmontos  = $this->input->post('monto');
 
 			$this->load->library('pnomina');
 			$formula=$this->datasis->dameval("SELECT formula FROM conc WHERE concepto=$concepto");
@@ -121,8 +173,8 @@ class Prenom extends Controller {
 				if(!is_numeric($cant)){
 					$error.="$cant no es un valor num&eacute;rico<br>";
 				}else{
-					$this->pnomina->CODIGO=$cod;
-					$this->pnomina->MONTO =$cant;
+					$this->pnomina->CODIGO = $cod;
+					$this->pnomina->MONTO  = $cant;
 					//$valor=0;
 					$valor=$this->pnomina->evalform($formula);
 
@@ -195,7 +247,6 @@ class Prenom extends Controller {
 				echo $row->formula." = ";
 				echo $this->pnomina->evalform($row->formula);
 				echo "\n";
-				//echo $this->pnomina->_traduce($row->formula)."\n\n";
 			}
 		}
 	}
