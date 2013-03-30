@@ -23,7 +23,7 @@ var bmov_cont =0;
 
 $(function(){
 	$("#fecha").datepicker({
-		dateFormat:"dd/mm/yy",
+		dateFormat:"mm/yy",
 		onSelect: function(dateText) {
 			cambiaban();
 		},

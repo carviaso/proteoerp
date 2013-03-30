@@ -548,8 +548,8 @@ class Bconci extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$edit->fecha = new dateonlyField('Fecha','fecha');
-		$edit->fecha->rule='chfecha';
+		$edit->fecha = new dateonlyField('Fecha','fecha','m/Y');
+		$edit->fecha->rule='chfecha[m/Y]';
 		$edit->fecha->size =10;
 		$edit->fecha->maxlength =8;
 		$edit->fecha->insertValue=date('Y-m-d',mktime(0, 0, 0, date('n'),0));
@@ -664,15 +664,31 @@ class Bconci extends Controller {
 			return false;
 		}
 
-		$cana=0;
+		$cana=$conciliado=0;
 		$this->mSQLs=array();
 		foreach($_POST as $ind=>$val){
-			if (preg_match("/^itid_[0-9]+$/", $ind) && $val>0) {
+			if (preg_match("/^itid_(?P<con>\d+)$/", $ind,$matches) && $val>0) {
+				$con    = $matches['con'];
+				$ittipo = $this->input->post('ittipo_'.$con);
+				$itmonto= $this->input->post('itmonto_'.$con);
+				if($ittipo===false || $itmonto===false){
+					$do->error_message_ar['pre_ins']='Error en la data.';
+					return false;
+				}
+
+				//Calcula el monto conciliado
+				if($ittipo=='CH' || $ittipo=='ND'){
+					$conciliado += $itmonto;
+				}else{
+					$conciliado -= $itmonto;
+				}
+
 				$dbval=$this->db->escape($val);
 				$this->mSQLs[] = "UPDATE bmov SET concilia=${dbfecha} WHERE id=${dbval}";
 				$cana++;
 			}
 		}
+
 
 		if($cana==0){
 			$do->error_message_ar['pre_ins']='Necesita seleccionar al menos un efecto.';

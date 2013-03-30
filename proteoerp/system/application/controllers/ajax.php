@@ -607,11 +607,13 @@ class Ajax extends Controller {
 	function buscaconci(){
 		$mid  = $this->input->post('codbanc');
 		$mid2 = $this->input->post('fecha');
-		$data = '[]';
-		if($mid !== false && $mid2 !== false){
 
-			$date    = DateTime::createFromFormat('d/m/Y', $mid2);
-			$dbfecha = $this->db->escape($date->format('Y-m-d'));
+		$data = '[]';
+		if($mid !== false && preg_match("/^(0[1-9]|1[012])\/[0-9]{4}$/", $mid2)){
+
+			$edate   = explode('/',$mid2);
+			$fecha   = date('Y-m-d',mktime(0, 0, 0, $edate[0]+1,0,$edate[1]));
+			$dbfecha = $this->db->escape($fecha);
 
 			$dbmid = $this->db->escape($mid);
 			$retArray = $retorno = array();
