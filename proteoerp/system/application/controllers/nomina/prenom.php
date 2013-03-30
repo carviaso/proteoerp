@@ -11,6 +11,16 @@ class Prenom extends Controller {
 		$this->rapyd->load("dataform");
 		$form = new DataForm('nomina/prenom/index/process');
 
+		$script = '
+		$(function() {
+			$("#fechac").datepicker({dateFormat:"dd/mm/yy"});
+			$("#fechap").datepicker({dateFormat:"dd/mm/yy"});
+		});
+		';
+
+		$form->script($script,'modify');
+		$form->script($script,'create');
+
 		$form->contrato = new dropdownField("Contrato", "contrato");
 		$form->contrato->option("","Seleccionar");
 		$form->contrato->options("SELECT codigo, concat(codigo,' ',nombre) nombre FROM noco ORDER BY nombre");
@@ -19,14 +29,16 @@ class Prenom extends Controller {
 		$form->fechac = new dateonlyField("Fecha de corte", "fechac");
 		$form->fechac->rule='required|chfecha';
 		$form->fechac->insertValue = date("Y-m-d");
-		$form->fechac->size=12;
+		$form->fechac->size     = 12;
+		$form->fechac->calendar = false;
+		
 
 		$form->fechap = new dateonlyField("Fecha de pago", "fechap");
 		$form->fechap->rule='required|chfecha';
 		$form->fechap->insertValue = date("Y-m-d");
 		$form->fechap->size=12;
+		$form->fechap->calendar = false;
 
-		$form->submit("btnsubmit","Generar");
 		$form->build_form();
 
 		if ($form->on_success()){
@@ -41,6 +53,9 @@ class Prenom extends Controller {
 
 			$this->_creaprenom($contrato, $fechac, $fechap );
 			$this->_creapretab();
+			$this->calcuto();
+
+			
 			echo "crea los 2 $contrato, $fechac, $fechap";
 		} else 
 			echo $form->output;
@@ -121,17 +136,39 @@ class Prenom extends Controller {
 		GROUP BY a.codigo";
 		$this->db->query($mSQL);
 
-		$this->calcula('048');
-
 	}
 
 
+	//******************************************************************
+	// Calcula un Trabajador
+	//
 	function calcula($codigo){
 		$this->load->library('pnomina');
 		$this->pnomina->CODIGO = $codigo;
 
-		$this->pnomina->fdesde = strtotime('2013.03.01');
-		$this->pnomina->fhasta = strtotime('2013.03.15');
+		$mCONTRATO = $this->datasis->dameval('SELECT contrato FROM prenom LIMIT 1');
+		$fhasta    = $this->datasis->dameval('SELECT fecha FROM prenom LIMIT 1');
+
+		$this->pnomina->fhasta = $fhasta;
+
+		// Busca la Frecuencia en el Contrato
+		$mFREC = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=".$this->db->escape($mCONTRATO));
+
+		// Busca la fecha inical
+		if ( $mFREC == 'Q' ){
+			//$d = new DateTime($fhasta);
+			//$this->pnomina->fdesde = $d->format('Y-m-t');
+			if ( substr($fhasta,8,2) > 15 ) {
+				$this->pnomina->fdesde = substr($fhasta,0,8).'15' ;
+			} else
+				$this->pnomina->fdesde = substr($fhasta,0,8).'01' ;
+
+		} elseif ( $mFREC == 'M'){
+			$this->pnomina->fdesde = substr($fhasta,0,8).'01' ;
+		} elseif ( $mFREC == 'S'){
+
+		}
+
 
 	
 		$query = $this->db->query('SELECT * FROM prenom a JOIN pers b ON a.codigo=b.codigo WHERE a.codigo='.$this->db->escape($codigo).' ORDER BY a.tipo, a.concepto');
@@ -149,12 +186,22 @@ class Prenom extends Controller {
 
 				$valor = $this->pnomina->evalform($row->formula);
 				$this->db->query("UPDATE prenom SET valor=${valor} WHERE concepto='".$row->concepto."' AND codigo=".$this->db->escape($codigo) );
-				
 
 			}
 		}
 	}
 
+	//******************************************************************
+	// Calcula todos los Trabajadores
+	//
+	function calcuto(){
+		$query = $this->db->query('SELECT codigo FROM prenom GROUP BY codigo');
+		if ($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+				$this->calcula($row->codigo);
+			}
+		}
+	}
 
 
 

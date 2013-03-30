@@ -102,6 +102,9 @@ class fnomina{
 		return 1;
 	}
 
+	//******************************************************************
+	// Suma de todas las asignaciones
+	//
 	function ASIGNA(){
 		$mSQL  = "SELECT sum(valor) cuenta FROM prenom WHERE codigo='".$this->CODIGO."' AND tipo='A' AND MID(concepto,1,1)<9 ";
 		$query = $this->ci->db->query($mSQL);
@@ -109,34 +112,26 @@ class fnomina{
 		$suma  = $row->cuenta;
 		return $suma;
 	}
-
-	function SEMANAS(){
-		$dsemana  = 1; //1 para lunes, 2 para martes .... 7 domingo
-		$dated    = new DateTime($this->fdesde);
-		$dateh    = new DateTime($this->fhasta);
+	
+	//******************************************************************
+	// Calcula los lunes del periodo
+	// 
+	function SEMANAS(){ 
+		$desde = $this->fdesde;
+		$hasta = $this->fhasta;
 		
-		$interva1 = new DateInterval('P1D');
-		$interva2 = new DateInterval('P7D');
-		$dias  = 0;
+		$first_date = strtotime($desde." -1 days");
+		$first_date = strtotime(date("M d Y",$first_date)." next ".'Monday');
 
-		while( $dated <= $dateh ){
-			//if(date('N',$dated->getTimestamp())==$dsemana) $dias++;
-			if( date('N',$dated->getTimestamp()) == $dsemana ) $dias++;
-			$dated->add($interva1);
+		$last_date = strtotime($hasta." +1 days");
+		$last_date = strtotime(date("M d Y",$last_date)." last ".'Monday');
 
-
-/*
-			if($dias>0)
-				$dated->add($interva1);
-			else
-				$dated->add($interva2);
-*/
-		}
-
-		memowrite("Dias=".$dias,'SEMANAS');
+		$dias = floor(($last_date - $first_date)/(7*86400)) + 1;
 
 		return $dias;
 	}
+
+
 }
 
 class Pnomina extends fnomina{
