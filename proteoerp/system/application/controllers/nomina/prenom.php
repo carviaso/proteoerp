@@ -21,21 +21,21 @@ class Prenom extends Controller {
 		$form->script($script,'modify');
 		$form->script($script,'create');
 
-		$form->contrato = new dropdownField("Contrato", "contrato");
-		$form->contrato->option("","Seleccionar");
+		$form->contrato = new dropdownField('Contrato', 'contrato');
+		$form->contrato->option('','Seleccionar');
 		$form->contrato->options("SELECT codigo, concat(codigo,' ',nombre) nombre FROM noco ORDER BY nombre");
 		$form->contrato->rule='required';
 
-		$form->fechac = new dateonlyField("Fecha de corte", "fechac");
+		$form->fechac = new dateonlyField('Fecha de corte', 'fechac');
+		//$form->fechac->rule='required|chfecha|callback_chcfecha';
 		$form->fechac->rule='required|chfecha';
-		$form->fechac->insertValue = date("Y-m-d");
+		$form->fechac->insertValue = date('Y-m-d');
 		$form->fechac->size     = 12;
 		$form->fechac->calendar = false;
-		
 
-		$form->fechap = new dateonlyField("Fecha de pago", "fechap");
+		$form->fechap = new dateonlyField('Fecha de pago', 'fechap');
 		$form->fechap->rule='required|chfecha';
-		$form->fechap->insertValue = date("Y-m-d");
+		$form->fechap->insertValue = date('Y-m-d');
 		$form->fechap->size=12;
 		$form->fechap->calendar = false;
 
@@ -48,18 +48,70 @@ class Prenom extends Controller {
 			$pretab  ='pretab';
 
 			$contrato= $form->contrato->newValue;
-			$fechac  = $form->fechac->newValue;
 			$fechap  = $form->fechap->newValue;
+
+
+			$fechac = $form->fechac->newValue;
+			$date   = DateTime::createFromFormat('Ymd', $fechac);
+			$ultdia = intval(days_in_month(substr($fechac,4,2), substr($fechac,0,4)));
+			$dia    = intval(substr($fechac,6,2));
+
+			$dbcont = $this->db->escape($contrato);
+			$tipo = $this->datasis->dameval('SELECT tipo FROM noco WHERE codigo='.$dbcont);
+			if($tipo=='Q'){
+				if($dia != $ultdia || $dia != 15){
+					if($dia<15){
+						$fechac = substr($fechac,0,6).'15';
+					}else{
+						$fechac = substr($fechac,0,6).$ultdia;
+					}
+				}
+			}elseif($tipo=='M'){
+				if($dia != $ultdia){
+					$fechac = substr($fechac,0,6).$ultdia;
+				}
+			}elseif($tipo=='S'){ //Falta implementar
+
+			}else{
+
+			}
 
 			$this->_creaprenom($contrato, $fechac, $fechap );
 			$this->_creapretab();
 			$this->calcuto();
 
-			
-			echo "crea los 2 $contrato, $fechac, $fechap";
-		} else 
+
+			echo "Crea los 2 $contrato, $fechac, $fechap";
+		} else
 			echo $form->output;
-		
+
+	}
+
+	function chcfecha($fecha){
+		$cont=$this->input->post('contrato');
+		$arr_fecha = explode('/',$fecha);
+		$ultdia    = days_in_month($arr_fecha[1], $arr_fecha[2]);
+		$dia       = $arr_fecha[0];
+
+		if($cont!==false){
+			$dbcont = $this->db->escape($cont);
+			$tipo = $this->datasis->dameval('SELECT tipo FROM noco WHERE codigo='.$dbcont);
+			if($tipo=='Q'){
+				if($dia != $ultdia || $dia != '15'){
+					$this->validation->set_message('chcfecha', 'La nomina quincenal solo se puede cortar el 15 o el '.$ultdia.' del mes.');
+					return false;
+				}
+			}elseif($tipo=='M'){
+				if($dia != $ultdia){
+					$this->validation->set_message('chcfecha', 'La nomina mensual solo se puede cortar el ${ultdia} del mes.');
+					return false;
+				}
+			}elseif($tipo=='S'){
+
+			}
+
+		}
+		return true;
 	}
 
 	//******************************************************************
@@ -69,18 +121,18 @@ class Prenom extends Controller {
 		$contdb = $this->db->escape($contrato);
 		$prenom  = 'prenom';
 		$pretab  = 'pretab';
-		
+
 		// APLICA AUMENTOS DE SUELDO
 		$mSQL  = "UPDATE ausu a JOIN pers b ON a.codigo=b.codigo ";
 		$mSQL .= "SET b.sueldo=a.sueldo WHERE a.fecha<='".$fecha."'";
 		//$this->db->query($mSQL);
-		
+
 		// TRAE FRECUENCIA DE CONTRATO
 		$FRECUEN = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=".$contdb);
 		$this->db->query("UPDATE pers SET tipo='".$FRECUEN."' WHERE contrato=".$contdb);
 
 		$this->db->query("TRUNCATE ${prenom}");
-		
+
 		// ---- CONCEPTOS FIJOS ---- //
 		$mSQL  = "INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
 		$mSQL .= "SELECT ".$contdb." contrato, b.codigo, CONCAT(RTRIM(b.apellido),', ',b.nombre) nombre,";
@@ -115,7 +167,7 @@ class Prenom extends Controller {
 		$mSQL .= "	fecha    DATE          NULL DEFAULT NULL, ";
 		$mSQL .= "	nombre   CHAR(80)      NULL DEFAULT NULL, ";
 		$mSQL .= "	total    DECIMAL(17,2) NULL DEFAULT '0.00', ";
-		
+
 		$query = $this->db->query("SELECT concepto FROM ${prenom} GROUP BY concepto ");
 		foreach ($query->result() as $row){
 			$mSQL .= "	c".$row->concepto." DECIMAL(17,2) DEFAULT 0.00, ";
@@ -131,8 +183,8 @@ class Prenom extends Controller {
 		// -- LLENA PRETAB
 		$mSQL = "
 		INSERT IGNORE INTO pretab (codigo, frec, fecha, nombre)
-		SELECT a.codigo, b.tipo, a.fecha, a.nombre 
-		FROM prenom a JOIN noco b ON a.contrato=b.codigo 
+		SELECT a.codigo, b.tipo, a.fecha, a.nombre
+		FROM prenom a JOIN noco b ON a.contrato=b.codigo
 		GROUP BY a.codigo";
 		$this->db->query($mSQL);
 
@@ -170,7 +222,7 @@ class Prenom extends Controller {
 		}
 
 
-	
+
 		$query = $this->db->query('SELECT * FROM prenom a JOIN pers b ON a.codigo=b.codigo WHERE a.codigo='.$this->db->escape($codigo).' ORDER BY a.tipo, a.concepto');
 		if ($query->num_rows() > 0){
 			foreach ($query->result() as $row){
@@ -344,7 +396,7 @@ class Prenom extends Controller {
 		//echo a()[0];
 		$fdesde='2010-06-01';
 		$fhasta='2010-07-20';
-		
+
 		$dsemana=1; //1 para lunes, 2 para martes .... 7 domingo
 		$dated = new DateTime($fdesde);
 		$dateh = new DateTime($fhasta);

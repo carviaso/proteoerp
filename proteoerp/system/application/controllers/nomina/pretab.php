@@ -36,7 +36,7 @@ class Pretab extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"genepre",   "img"=>"images/pdf_logo.gif",  "alt" => "Genera Prenomina", "label"=>"Genera Prenomina"));
+		$grid->wbotonadd(array('id'=>'genepre',   'img'=>'images/star.png',  'alt' => 'Genera Prenomina', 'label'=>'Genera Prenomina'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -467,7 +467,7 @@ class Pretab extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
+		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});		';
@@ -506,9 +506,9 @@ class Pretab extends Controller {
 		if ($query->num_rows() > 0){
 			foreach ($query->result() as $row){
 				if ( substr($row->Field,0,1) == 'c' && $row->Field != 'codigo' ) {
-					
+
 					$obj = $row->Field;
-					
+
 					$edit->$obj = new inputField('C010', $obj);
 					$edit->$obj->rule='numeric';
 					$edit->$obj->css_class='inputnum';
