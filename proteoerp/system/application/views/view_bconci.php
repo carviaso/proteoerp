@@ -6,12 +6,12 @@ $container_bl=join('&nbsp;', $form->_button_container['BL']);
 $container_br=join('&nbsp;', $form->_button_container['BR']);
 $mod=true;
 
-$campos=$form->template_details('bmov');
 $scampos  ='<tr id="tr_bmov_<#i#>">';
-$scampos .='<td class="littletablerow" align="center">'.$campos['itfecha']['field'].'</td>';
-$scampos .='<td class="littletablerow" align="left"  >'.$campos['ittipo']['field'].'</td>';
-$scampos .='<td class="littletablerow" align="center">'.$campos['itnumero']['field'].'</td>';
-$scampos .='<td class="littletablerow" align="center">'.$campos['itmonto']['field'].'</td>';
+$scampos .='<td class="littletablerow" align="center"><span id="itfecha_<#i#>_val"  ></span></td>';
+$scampos .='<td class="littletablerow" align="left"  ><span id="ittipo_<#i#>_val"   ></span></td>';
+$scampos .='<td class="littletablerow" align="left"  ><span id="itnumero_<#i#>_val" ></span><input type="hidden" name="ittipo_<#i#>" id="ittipo_<#i#>"></td>';
+$scampos .='<td class="littletablerow" align="right" ><span id="itmonto_<#i#>_val"  ></span><input type="hidden" name="itmonto_<#i#>" id="itmonto_<#i#>"></td>';
+$scampos .='<td class="littletablerow" align="center"><input type="checkbox" name="itid_<#i#>" id="itid_<#i#>" onchange="totalizar()"></td>';
 $scampos .='</tr>';
 $campos=$form->js_escape($scampos);
 
@@ -19,66 +19,95 @@ if($form->_status!='show'){
 ?>
 
 <script language="javascript" type="text/javascript">
-var bmov_cont =<?php echo $form->max_rel_count['bmov']; ?>;
+var bmov_cont =0;
 
 $(function(){
-	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
-	$(".inputnum").numeric(".");
-
-});
-
-function truncate(){
-	var arr=$('input[name^="itcodigo_"]');
-	jQuery.each(arr, function() {
-		nom=this.name;
-		pos=this.name.lastIndexOf('_');
-		if(pos>0){
-			val=this.value;
-			if(val==''){
-				ind = this.name.substring(pos+1);
-				del_itlcierre(parseInt(ind));
-			}
-		}
+	$("#fecha").datepicker({
+		dateFormat:"dd/mm/yy",
+		onSelect: function(dateText) {
+			cambiaban();
+		},
 	});
 
-	//$('tr[id^="tr_itlcierre_"]').remove();
-	//itlcierre_cont=0;
+	$("#codbanc").change(function(){
+		cambiaban();
+	});
+
+	$(".inputnum").numeric(".");
+});
+
+function cambiaban(){
+	var codban=$('#codbanc').val();
+	var fecha =$('#fecha').val();
+	if(codbanc!='' && fecha!=''){
+		truncate();
+		$.ajax({
+			url: "<?php echo site_url('ajax/buscaconci'); ?>",
+			dataType: "json",
+			type: "POST",
+			data: {"codbanc" : codban , "fecha": fecha},
+			success: function(data){
+					$.each(data,
+						function(id, val){
+							can= add_itbmov();
+
+							$("#itid_" +can).val(val.id);
+							$("#itnumero_" +can+"_val").text(val.numero);
+							$("#ittipo_"   +can+"_val").text(val.tipo);
+							$("#itfecha_"  +can+"_val").text(val.fecha);
+							$("#itmonto_"  +can+"_val").text(nformat(val.monto,2));
+							$("#itmonto_"  +can).val(val.monto);
+							$("#ittipo_"   +can).val(val.tipo);
+						}
+					);
+				},
+		});
+	}
 }
 
-function add_itlcierre(){
+function truncate(){
+	bmov_cont =0;
+	$('tr[id^="tr_bmov_"]').remove();
+}
+
+function add_itbmov(){
 	var htm = <?php echo $campos; ?>;
-	can = itlcierre_cont.toString();
-	con = (itlcierre_cont+1).toString();
+	can = bmov_cont.toString();
+	con = (bmov_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
 	htm = htm.replace(/<#o#>/g,con);
 	$("#__UTPL__bmov").before(htm);
-
-	$("#itmonto_"+can).numeric(".");
-	$('#itmonto_'+can).focus();
 
 	bmov_cont=bmov_cont+1;
 	return can;
 }
 
-function del_bmov(id){
+function del_itbmov(id){
 	id = id.toString();
-	$('#tr_itlcierre_'+id).remove();
+	$('#tr_bmov_'+id).remove();
 }
 
 function totalizar(){
-
-	var arr=$('input[name^="itmonto_"]');
+	var total = 0;
+	var arr=$('input[name^="itid_"]');
 	jQuery.each(arr, function() {
 		nom=this.name;
 		pos=this.name.lastIndexOf('_');
 		if(pos>0){
-			ind     = this.name.substring(pos+1);
-			litros = litros+Number(Math.abs(this.value));
+			ind    = this.name.substring(pos+1);
+			if(this.checked){
+				monto  = Number($('#itmonto_'+ind).val());
+				tipo   = $('#ittipo_'+ind).val();
+				if(tipo=='CH' || tipo=='ND'){
+					monto=(-1)*monto;
+				}
+				total  = total+Number(monto);
+			}
 		}
 	});
 
-	//$("#litros").val(roundNumber(litros,2));
-	//$("#litros_val").text(nformat(litros,2));
+	//$("#total").val(roundNumber(total,2));
+	$("#conciliado").text(nformat(total,2));
 }
 
 </script>
@@ -97,22 +126,22 @@ function totalizar(){
 		<td>   <?php echo $form->deposito->output; ?></td>
 	</tr>
 	<tr>
-		<td><b><?php echo $form->saldoi->label;  ?></b></td>
-		<td>   <?php echo $form->saldoi->output; ?></td>
-		<td><b><?php echo $form->credito->label; ?></b></td>
-		<td>   <?php echo $form->credito->output;?></td>
+		<td><b><?php echo $form->saldoi->label;    ?></b></td>
+		<td>   <?php echo $form->saldoi->output;   ?></td>
+		<td><b><?php echo $form->credito->label;   ?></b></td>
+		<td>   <?php echo $form->credito->output;  ?></td>
 	</tr>
 	<tr>
-		<td><b><?php echo $form->saldof->label;  ?></b></td>
-		<td>   <?php echo $form->saldof->output; ?></td>
-		<td><b><?php echo $form->cheque->label;  ?></b></td>
-		<td>   <?php echo $form->cheque->output; ?></td>
+		<td><b><?php echo $form->saldof->label;    ?></b></td>
+		<td>   <?php echo $form->saldof->output;   ?></td>
+		<td><b><?php echo $form->cheque->label;    ?></b></td>
+		<td>   <?php echo $form->cheque->output;   ?></td>
 	</tr>
 	<tr>
-		<td><b></b></td>
-		<td>   </td>
-		<td><b><?php echo $form->debito->label;  ?></b></td>
-		<td>   <?php echo $form->debito->output; ?></td>
+		<td><b>Conciliado</b></td>
+		<td><span id='conciliado'></span></td>
+		<td><b><?php echo $form->debito->label;    ?></b></td>
+		<td>   <?php echo $form->debito->output;   ?></td>
 	</tr>
 </table>
 <div style='border: 1px solid #9AC8DA;background: #FAFAFA'>
@@ -125,24 +154,9 @@ function totalizar(){
 		<th align="center">&nbsp;</th>
 	</tr>
 
-<?php
-	for($i=0;$i<$form->max_rel_count['bmov'];$i++) {
-		$it_fecha    ='itfecha_'.$i;
-		$it_tipo     ='ittipo_'.$i;
-		$it_numero   ='itnumero_'.$i;
-		$it_monto    ='itmonto_'.$i;
-?>
-	<tr id='tr_itlcierre_<?php echo $i; ?>'>
-		<td class="littletablerow" align="center"><?php echo $form->$it_fecha->output;    ?></td>
-		<td class="littletablerow" align="left"  ><?php echo $form->$it_tipo->output;   ?></td>
-		<td class="littletablerow" align="center"><?php echo $form->$it_numero->output;  ?></td>
-		<td class="littletablerow" align="center"><?php echo $form->$it_monto->output;    ?></td>
-	</tr>
-	<?php
-	$mod=!$mod;
-	} ?>
+
 	<tr id='__UTPL__bmov'>
-		<td colspan='<?php echo ($form->_status!='show')? 6: 5 ?>' class="littletableheaderdet">&nbsp;</td>
+		<td colspan='5' class="littletableheaderdet">&nbsp;</td>
 	</tr>
 </table>
 </div>

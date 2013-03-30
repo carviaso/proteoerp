@@ -1,8 +1,8 @@
 <?php
 class Bconci extends Controller {
 	var $mModulo = 'BCONCI';
-	var $titp    = 'Conciliaci&oacute;n Bacaria';
-	var $tits    = 'Conciliaci&oacute;n Bacaria';
+	var $titp    = 'Conciliaci&oacute;n Bancaria';
+	var $tits    = 'Conciliaci&oacute;n Bancaria';
 	var $url     = 'finanzas/bconci/';
 
 	function Bconci(){
@@ -536,23 +536,10 @@ class Bconci extends Controller {
 	}
 
 	function dataedit(){
-		$this->rapyd->load('datadetails','dataobject');
+		$this->rapyd->load('dataedit');
 
-		$script='';
-		$do = new DataObject('bconci');
-		//$do->pointer('scli' ,'scli.cliente=rivc.cod_cli','sprv.tipo AS sprvtipo, sprv.reteiva AS sprvreteiva','left');
-		$do->rel_one_to_many('bmov' ,'bmov' ,array('fecha'=>'concilia','codbanc'=>'codbanc'));
-		$edit = new DataDetails($this->tits, $do);
-
-		$edit->script($script,'modify');
-		$edit->script($script,'create');
+		$edit = new DataEdit($this->tits, 'bconci');
 		$edit->on_save_redirect=false;
-
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
-		$edit->script($script,'create');
-
-		$edit->script($script,'modify');
 
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
@@ -561,18 +548,11 @@ class Bconci extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});		';
-		$edit->script($script,'create');
-		$edit->script($script,'modify');
-
 		$edit->fecha = new dateonlyField('Fecha','fecha');
 		$edit->fecha->rule='chfecha';
 		$edit->fecha->size =10;
 		$edit->fecha->maxlength =8;
-		$edit->fecha->insertValue=date('Y-m-d',mktime(0, 0, 0, 0));
+		$edit->fecha->insertValue=date('Y-m-d',mktime(0, 0, 0, date('n'),0));
 		$edit->fecha->calendar=false;
 
 		$edit->codbanc = new dropdownField('Banco','codbanc');
@@ -581,23 +561,15 @@ class Bconci extends Controller {
 		$edit->codbanc->option('','Seleccionar');
 		$edit->codbanc->options("SELECT TRIM(codbanc) AS codbanc,CONCAT_WS('-',codbanc,banco,numcuent) AS desca FROM banc WHERE tbanco<>'CAJ'");
 
-		/*$edit->numcuent = new inputField('N&uacute;mero de cuenta','numcuent');
-		$edit->numcuent->rule='';
-		$edit->numcuent->size =20;
-		$edit->numcuent->maxlength =18;
-
-		$edit->banco = new inputField('Banco','banco');
-		$edit->banco->rule='';
-		$edit->banco->size =32;
-		$edit->banco->maxlength =30;*/
-
 		$edit->saldoi = new inputField('Saldo Inicial','saldoi');
 		$edit->saldoi->rule='numeric';
+		$edit->saldoi->insertValue='0.0';
 		$edit->saldoi->css_class='inputnum';
 		$edit->saldoi->size =20;
 		$edit->saldoi->maxlength =18;
 
 		$edit->saldof = new inputField('Saldo Final','saldof');
+		$edit->saldof->insertValue='0.0';
 		$edit->saldof->rule='numeric';
 		$edit->saldof->css_class='inputnum';
 		$edit->saldof->size =20;
@@ -605,24 +577,28 @@ class Bconci extends Controller {
 
 		$edit->deposito = new inputField('Dep&oacute;sito','deposito');
 		$edit->deposito->rule='numeric';
+		$edit->deposito->insertValue='0.0';
 		$edit->deposito->css_class='inputnum';
 		$edit->deposito->size =20;
 		$edit->deposito->maxlength =18;
 
 		$edit->credito = new inputField('Cr&eacute;dito','credito');
 		$edit->credito->rule='numeric';
+		$edit->credito->insertValue='0.0';
 		$edit->credito->css_class='inputnum';
 		$edit->credito->size =20;
 		$edit->credito->maxlength =18;
 
 		$edit->cheque = new inputField('Cheque','cheque');
 		$edit->cheque->rule='numeric';
+		$edit->cheque->insertValue='0.0';
 		$edit->cheque->css_class='inputnum';
 		$edit->cheque->size =20;
 		$edit->cheque->maxlength =18;
 
 		$edit->debito = new inputField('D&eacute;bito','debito');
 		$edit->debito->rule='numeric';
+		$edit->debito->insertValue='0.0';
 		$edit->debito->css_class='inputnum';
 		$edit->debito->size =20;
 		$edit->debito->maxlength =18;
@@ -631,46 +607,6 @@ class Bconci extends Controller {
 		$edit->status->rule='';
 		$edit->status->size =3;
 		$edit->status->maxlength =1;
-
-		//Inicio del detalle
-		$edit->itfecha = new dateonlyField('Fecha','fecha_<#i#>');
-		$edit->itfecha->rule='chfecha|required';
-		$edit->itfecha->size =12;
-		$edit->itfecha->maxlength =8;
-		$edit->itfecha->db_name='fecha';
-		$edit->itfecha->rel_id='bmov';
-
-		$edit->itmonto = new inputField('Monto','itmonto_<#i#>');
-		$edit->itmonto->rule='numeric';
-		$edit->itmonto->css_class='inputnum|required';
-		$edit->itmonto->size =20;
-		$edit->itmonto->maxlength =18;
-		$edit->itmonto->db_name='monto';
-		$edit->itmonto->rel_id='bmov';
-
-		$edit->ittipo = new inputField('Tipo','ittipo_<#i#>');
-		$edit->ittipo->rule='numeric';
-		$edit->ittipo->css_class='inputnum|required';
-		$edit->ittipo->size =20;
-		$edit->ittipo->maxlength =18;
-		$edit->ittipo->db_name='tipo';
-		$edit->ittipo->rel_id='bmov';
-
-		$edit->itnumero = new inputField('Numero','itnumero_<#i#>');
-		$edit->itnumero->rule='numeric';
-		$edit->itnumero->css_class='inputnum|required';
-		$edit->itnumero->size =20;
-		$edit->itnumero->maxlength =18;
-		$edit->itnumero->db_name='numero';
-		$edit->itnumero->rel_id='bmov';
-
-		$edit->itconcilia = new dateonlyField('Fecha','concilia_<#i#>');
-		$edit->itconcilia->rule='chfecha|required';
-		$edit->itconcilia->size =12;
-		$edit->itconcilia->maxlength =8;
-		$edit->itconcilia->db_name='concilia';
-		$edit->itconcilia->rel_id='bmov';
-		//Fin del detalle
 
 		$edit->usuario = new autoUpdateField('usuario',$this->secu->usuario(),$this->secu->usuario());
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
@@ -685,40 +621,102 @@ class Bconci extends Controller {
 				'pk'     =>$edit->_dataobject->pk
 			);
 			echo json_encode($rt);
-		}else{
+			return true;
+		}
+
+		if($edit->on_error()){
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>preg_replace('/<[^>]*>/', '', $edit->error_string),
+				'pk'     =>null,
+			);
+			echo json_encode($rt);
+			$act = false;
+			return true;
+		}
+
+		if($edit->on_show()){
 			$conten['form'] =&  $edit;
 			$this->load->view('view_bconci', $conten);
 		}
 	}
 
 	function _pre_insert($do){
-		$do->error_message_ar['pre_ins']='';
+		$codbanc  = $do->get('codbanc');
+		$fecha    = $do->get('fecha');
+		$dbfecha  = $this->db->escape($fecha);
+		$dbcodbanc= $this->db->escape($codbanc);
+
+
+		$ant = intval($this->datasis->dameval('SELECT COUNT(*) FROM bconci WHERE codbanc='.$dbcodbanc.' AND fecha='.$dbfecha));
+		if($ant>0){
+			$do->error_message_ar['pre_ins']='Ya existe una conciliacion con esa fecha para el mismo banco.';
+			return false;
+		}
+
+
+		$row = $this->datasis->damerow('SELECT numcuent,banco FROM banc WHERE codbanc='.$dbcodbanc);
+		if(!empty($row)){
+			$do->set('numcuent',$row['numcuent']);
+			$do->set('banco'   ,$row['banco']);
+		}else{
+			$do->error_message_ar['pre_ins']='Banco no valido';
+			return false;
+		}
+
+		$cana=0;
+		$this->mSQLs=array();
+		foreach($_POST as $ind=>$val){
+			if (preg_match("/^itid_[0-9]+$/", $ind) && $val>0) {
+				$dbval=$this->db->escape($val);
+				$this->mSQLs[] = "UPDATE bmov SET concilia=${dbfecha} WHERE id=${dbval}";
+				$cana++;
+			}
+		}
+
+		if($cana==0){
+			$do->error_message_ar['pre_ins']='Necesita seleccionar al menos un efecto.';
+			return false;
+		}
+
 		return true;
 	}
 
 	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='';
+		$do->error_message_ar['pre_upd']='No se puede editar una conciliaci&oacute;n, debe eliminarla y volverla a hace.';
 		return true;
 	}
 
 	function _pre_delete($do){
 		$do->error_message_ar['pre_del']='';
-		return false;
+		return true;
 	}
 
 	function _post_insert($do){
+		$fecha = $do->get('fecha');
+		foreach($this->mSQLs AS $mSQL){
+			$this->db->simple_query($mSQL);
+		}
+
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits $primary fecha ${fecha}");
 	}
 
 	function _post_update($do){
+		$fecha = $do->get('fecha');
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits $primary fecha ${fecha}");
 	}
 
 	function _post_delete($do){
+		$fecha  = $do->get('fecha');
+		$dbfecha= $this->db->escape($fecha);
+
+		$mSQL= 'UPDATE bmov SET concilia=\'0000-00-00\' WHERE concilia='.$dbfecha;
+		$this->db->simple_query($mSQL);
+
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		logusu($do->table,"Elimino $this->tits ${primary} fecha ${fecha}");
 	}
 
 	function instalar(){

@@ -603,6 +603,46 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//Busca los efectos para ser conciliados
+	function buscaconci(){
+		$mid  = $this->input->post('codbanc');
+		$mid2 = $this->input->post('fecha');
+		$data = '[]';
+		if($mid !== false && $mid2 !== false){
+
+			$date    = DateTime::createFromFormat('d/m/Y', $mid2);
+			$dbfecha = $this->db->escape($date->format('Y-m-d'));
+
+			$dbmid = $this->db->escape($mid);
+			$retArray = $retorno = array();
+
+			$mSQL="SELECT id,numero, tipo_op AS tipo, fecha, monto
+			FROM bmov
+			WHERE codbanc=${dbmid} AND anulado<>'S' AND liable<>'N'
+			AND fecha <= ${dbfecha} AND tipo_op<>'DE'
+			AND (concilia='0000-00-00' OR concilia IS NULL OR concilia=${dbfecha})
+			AND concilia < fecha
+			ORDER BY fecha";
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$objdate = date_create($row['fecha']);
+
+					$retArray['id']      = $row['id'];
+					$retArray['numero']  = $row['numero'];
+					$retArray['tipo']    = $row['tipo'];
+					$retArray['fecha']   = $objdate->format('d/m/Y');
+					$retArray['monto']   = $row['monto'];
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+			}
+		}
+		echo $data;
+	}
+
 	//Busca icon
 	function buscaicon(){
 		$comodin= $this->datasis->traevalor('COMODIN');
