@@ -165,9 +165,10 @@ class Pnomina extends fnomina{
 
 		$fformula = $this->_traduce($formula);
 		if ( strpos($formula,'SEMANAS') )
-memowrite($fformula,'formula');
+memowrite($formula.' == >> '.$fformula,'formula');
 
 		$retorna='$rt='.$fformula.';';
+
 		eval($retorna);
 		return $rt;
 	}

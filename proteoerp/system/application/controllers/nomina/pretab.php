@@ -184,6 +184,7 @@ class Pretab extends Controller {
 							try{
 								var json = JSON.parse(r);
 								if (json.status == "A"){
+									$.post("'.base_url().'nomina/prenom/calcula/"+json.pk);
 									apprise("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
@@ -540,38 +541,32 @@ class Pretab extends Controller {
 	function dataedit(){
 		$this->rapyd->load('dataform');
 
-		$id = $this->uri->segment($this->uri->total_segments());
 
-		$edit = new DataForm('nomina/pretab/dataedit/process');
+		if ( $this->uri->segment($this->uri->total_segments()) != 'process')
+			$id = $this->uri->segment($this->uri->total_segments());
+		else
+			$id = $this->uri->segment($this->uri->total_segments()-1);
 
-		$edit->on_save_redirect=false;
 
-		//$edit->back_url = site_url($this->url.'filteredgrid');
+		$edit = new DataForm('nomina/pretab/dataedit/'.$id.'/process');
 
-/*
-		$edit->post_process('insert','_post_insert');
-		$edit->post_process('update','_post_update');
-		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
-
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});		';
-		$edit->script($script,'create');
-		$edit->script($script,'modify');
-*/
 
 		$mReg = $this->datasis->damereg("SELECT codigo, frec, fecha, nombre, total FROM pretab WHERE id=$id");
-
 		$codigo = $mReg['codigo'];
+
+
+		$edit->back_url = site_url('nomina/pretab/index');
+
+		//$edit->on_save_redirect=false;
+
 		
 		if ( empty($mReg) ){
 			echo 'Registro no encontrado '.$id;
 			return true;
 		}
+
+		$edit->id = new hiddenField('ID','id');
+		$edit->id->insertValue = $id;
 
 		$edit->codigo = new inputField('Codigo','codigo');
 		$edit->codigo->rule        = '';
@@ -630,10 +625,12 @@ class Pretab extends Controller {
 			}
 		}
 
-		$edit->build();
+		//$edit->build();
+		$edit->build_form();
 
 		if($edit->on_success()){
-			$codigo  = $edit->codigo->newValue;
+
+			$codigo = $edit->codigo->newValue;
 
 			$query = $this->db->query("DESCRIBE pretab");
 			$i = 0;
@@ -652,7 +649,7 @@ class Pretab extends Controller {
 					}
 				}
 			}
-
+			
 			$rt=array(
 				'status'  => 'A',
 				'mensaje' => 'Registro guardado',
@@ -699,42 +696,9 @@ class Pretab extends Controller {
 
 	function instalar(){
 		if (!$this->db->table_exists('pretab')) {
-			$mSQL="CREATE TABLE `pretab` (
-			  `codigo` char(15) NOT NULL DEFAULT '',
-			  `frec` char(1) DEFAULT NULL,
-			  `fecha` date DEFAULT NULL,
-			  `nombre` char(30) DEFAULT NULL,
-			  `total` decimal(17,2) DEFAULT '0.00',
-			  `c010` decimal(17,2) DEFAULT '0.00',
-			  `c018` decimal(17,2) DEFAULT '0.00',
-			  `c030` decimal(17,2) DEFAULT '0.00',
-			  `c060` decimal(17,2) DEFAULT '0.00',
-			  `c070` decimal(17,2) DEFAULT '0.00',
-			  `c080` decimal(17,2) DEFAULT '0.00',
-			  `c090` decimal(17,2) DEFAULT '0.00',
-			  `c102` decimal(17,2) DEFAULT '0.00',
-			  `c110` decimal(17,2) DEFAULT '0.00',
-			  `c120` decimal(17,2) DEFAULT '0.00',
-			  `c125` decimal(17,2) DEFAULT '0.00',
-			  `c130` decimal(17,2) DEFAULT '0.00',
-			  `c195` decimal(17,2) DEFAULT '0.00',
-			  `c330` decimal(17,2) DEFAULT '0.00',
-			  `c340` decimal(17,2) DEFAULT '0.00',
-			  `c600` decimal(17,2) DEFAULT '0.00',
-			  `c610` decimal(17,2) DEFAULT '0.00',
-			  `c620` decimal(17,2) DEFAULT '0.00',
-			  `c650` decimal(17,2) DEFAULT '0.00',
-			  `c690` decimal(17,2) DEFAULT '0.00',
-			  `c900` decimal(17,2) DEFAULT '0.00',
-			  `c910` decimal(17,2) DEFAULT '0.00',
-			  `c920` decimal(17,2) DEFAULT '0.00',
-			  `c930` decimal(17,2) DEFAULT '0.00',
-			  PRIMARY KEY (`codigo`)
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8";
-			$this->db->simple_query($mSQL);
+
+
 		}
-		//$campos=$this->db->list_fields('pretab');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
 

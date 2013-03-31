@@ -193,7 +193,12 @@ class Prenom extends Controller {
 	//******************************************************************
 	// Calcula un Trabajador
 	//
-	function calcula($codigo) {
+	function calcula( $codigo = '' ) {
+		if ( !$codigo ) {
+			echo 'Vacio';
+			return false;
+		}
+		
 		$this->load->library('pnomina');
 		$this->pnomina->CODIGO = $codigo;
 
