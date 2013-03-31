@@ -50,7 +50,6 @@ class Prenom extends Controller {
 			$contrato= $form->contrato->newValue;
 			$fechap  = $form->fechap->newValue;
 
-
 			$fechac = $form->fechac->newValue;
 			$date   = DateTime::createFromFormat('Ymd', $fechac);
 			$ultdia = intval(days_in_month(substr($fechac,4,2), substr($fechac,0,4)));
@@ -166,7 +165,7 @@ class Prenom extends Controller {
 		$mSQL .= "	frec     CHAR(1)       NULL DEFAULT NULL, ";
 		$mSQL .= "	fecha    DATE          NULL DEFAULT NULL, ";
 		$mSQL .= "	nombre   CHAR(80)      NULL DEFAULT NULL, ";
-		$mSQL .= "	total    DECIMAL(17,2) NULL DEFAULT '0.00', ";
+		$mSQL .= "	total    DECIMAL(17,2) NULL DEFAULT '0.00',";
 
 		$query = $this->db->query("SELECT concepto FROM ${prenom} GROUP BY concepto ");
 		foreach ($query->result() as $row){
@@ -194,7 +193,7 @@ class Prenom extends Controller {
 	//******************************************************************
 	// Calcula un Trabajador
 	//
-	function calcula($codigo){
+	function calcula($codigo) {
 		$this->load->library('pnomina');
 		$this->pnomina->CODIGO = $codigo;
 
@@ -207,24 +206,29 @@ class Prenom extends Controller {
 		$mFREC = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=".$this->db->escape($mCONTRATO));
 
 		// Busca la fecha inical
-		if ( $mFREC == 'Q' ){
-			//$d = new DateTime($fhasta);
-			//$this->pnomina->fdesde = $d->format('Y-m-t');
+		if ( $mFREC == 'Q' ){        // Quincenal
 			if ( substr($fhasta,8,2) > 15 ) {
 				$this->pnomina->fdesde = substr($fhasta,0,8).'15' ;
 			} else
 				$this->pnomina->fdesde = substr($fhasta,0,8).'01' ;
 
-		} elseif ( $mFREC == 'M'){
+		} elseif ( $mFREC == 'M'){   // Mensual
 			$this->pnomina->fdesde = substr($fhasta,0,8).'01' ;
-		} elseif ( $mFREC == 'S'){
 
+		} elseif ( $mFREC == 'S'){   // Semanal
+			$d = new DateTime($fhasta);
+			$d->sub('P7D');
+			$this->pnomina->fdesde = $d->format('Y-m-d');
+
+		} elseif ( $mFREC == 'B'){   // Bisemanal
+			$d = new DateTime($fhasta);
+			$d->sub('P14D');
+			$this->pnomina->fdesde = $d->format('Y-m-d');
 		}
 
-
-
 		$query = $this->db->query('SELECT * FROM prenom a JOIN pers b ON a.codigo=b.codigo WHERE a.codigo='.$this->db->escape($codigo).' ORDER BY a.tipo, a.concepto');
-		if ($query->num_rows() > 0){
+		if ($query->num_rows() > 0) {
+			$this->db->query("UPDATE pretab SET total=0 WHERE codigo=".$this->db->escape($codigo) );
 			foreach ($query->result() as $row){
 				$this->pnomina->MONTO   = $row->monto;
 				$this->pnomina->SUELDO  = $row->sueldo;
@@ -239,6 +243,10 @@ class Prenom extends Controller {
 				$valor = $this->pnomina->evalform($row->formula);
 				$this->db->query("UPDATE prenom SET valor=${valor} WHERE concepto='".$row->concepto."' AND codigo=".$this->db->escape($codigo) );
 
+				$this->db->query("UPDATE pretab SET c".$row->concepto."=${valor} WHERE codigo=".$this->db->escape($codigo) );
+
+				if ( substr($row->concepto,0,1) != '9' )
+					$this->db->query("UPDATE pretab SET total=total+${valor} WHERE codigo=".$this->db->escape($codigo) );
 			}
 		}
 	}

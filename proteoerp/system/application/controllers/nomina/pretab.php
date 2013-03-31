@@ -23,10 +23,9 @@ class Pretab extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
-	//Layout en la Ventana
+	//******************************************************************
+	//  Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -59,9 +58,9 @@ class Pretab extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	//  Funciones de los Botones
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
 
@@ -77,6 +76,16 @@ class Pretab extends Controller {
 		});
 		';
 
+		$bodyscript .= '
+		function frecibo( id ){
+			$.ajax({
+				url: "'.base_url().$this->url.'recibo/"+id,
+				success: function(msg){
+					$("#ladicional").html(msg);
+				}
+			});
+		};
+		';
 
 
 		$bodyscript .= '
@@ -144,6 +153,7 @@ class Pretab extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function(){
@@ -236,9 +246,86 @@ class Pretab extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+
+	//******************************************************************
+	//  Resumen rapido
+	//
+	function recibo( $id ) {
+
+		$row = $this->datasis->damereg("SELECT a.codigo, a.nombre, CONCAT(b.nacional,b.cedula) ci, b.enlace FROM pretab a JOIN pers b ON a.codigo=b.codigo WHERE a.id=$id");
+		$codigo  = $row['codigo'];
+		$nombre  = $row['nombre'];
+		$cedula  = $row['ci'];
+		$cod_cli = $row['enlace'];
+		$fecha   = date('Y-m-d');
+		$mPRESTA = 0;
+		$mSALDO  = 0;
+
+
+		$mSQL = "SELECT a.concepto, b.descrip, a.tipo, a.monto, a.valor, a.fecha FROM prenom a JOIN conc b ON a.concepto=b.concepto WHERE MID(a.concepto,1,1)<>'9' AND a.valor<>0 AND a.codigo=".$this->db->escape($codigo)." ORDER BY tipo, codigo ";
+		$query = $this->db->query($mSQL);
+
+		//$data = $query->row();
+		$salida = '';
+		$salida  .= '<table width="90%" style="background:#FBEC88;" align="center">';
+		$salida  .= '<tr><td>Cod: '.$codigo.'</td><td>C.I. '.$cedula.'</td></tr>';
+		$salida  .= '<tr><td colspan="2">'.$nombre.'</td></tr>';
+		$salida  .= '</table>';
+		
+		$salida  .= '<table width="90%" border="1" align="center" cellspacing="0" cellpadding="0">';
+		$total = 0;
+
+		if ($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+				if ( $row->valor < 0 )
+					$salida .= "<tr><td>".$row->descrip."</td><td align='right' style='color:red;'>".nformat($row->valor)."</td></tr>\n";
+				else
+					$salida .= "<tr><td>".$row->descrip."</td><td align='right'>".nformat($row->valor)."</td></tr>\n";
+
+				$total += $row->valor;
+				$fecha = $row->fecha;
+			}
+		}
+		$salida .= "<tr style='background:#BAF202;'><td>Total a Pagar</td><td align='right'>".nformat($total)."</td></tr>\n";
+		$salida .= "</table>\n";
+
+
+		// PRESTAMOS
+		if ( !empty($cod_cli) ){ 
+			$mSQL  = "SELECT a.tipo_doc, a.numero, b.monto, b.abonos, a.cuota, b.monto-b.abonos saldo ";
+			$mSQL .= "FROM pres a JOIN smov b ON a.cod_cli=b.cod_cli AND a.tipo_doc=b.tipo_doc AND a.numero=b.numero ";
+			$mSQL .= "WHERE a.cod_cli='".$cod_cli."' AND b.monto>b.abonos AND a.apartir<='".$fecha."'";
+			$query = $this->db->query($mSQL);
+
+			if ($query->num_rows() > 0){
+				$salida .= '<table width="90%" border="0" align="center" style="border:1px solid; background:#E4E4E4;">';
+				$salida .= '<tr><td colspan="3" align="center">PRESTAMOS</td></tr>';
+				foreach ($query->result() as $row){
+					$salida .= '<tr><td>'.$row->tipo_doc.$row->numero.'</td><td>'.nformat($row->saldo).'</td><td>'.nformat($row->cuota).'</td></tr>';
+					$mSALDO += $row->cuota;
+				}
+				$salida .= "<tr style='background:#BAF202;'><td>Neto a Pagar</td><td align='right' colspan='2'>".nformat($total-$mSALDO)."</td></tr>\n";
+				$salida .= "</table>\n";
+
+			}
+
+		}
+
+
+		//$salida .= '<table width="90%" border="0" align="center" style="border:1px solid; background:#E4E4E4;"><tr>';
+		//$salida .= '<td align="center"><a href="#" onclick="fresumen('.$id.','.$anterior.')"> '.img('images/arrow_left.png').'</a></td>';
+		//$salida .= '<td align="center"><a href="#" onclick="crecalban()" >RECALCULAR</a></td>';
+		//$salida .= '<td align="center"><a href="#" onclick="fresumen('.$id.','.$proximo.')">'.img('images/arrow_right.png').'</a>';
+		//$salida .= "</td></tr></table>\n";
+
+		echo $salida;
+	}
+
+
+
+	//******************************************************************
+	//  Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -324,7 +411,7 @@ class Pretab extends Controller {
 						'editable'      => $editar,
 						'align'         => "'right'",
 						'edittype'      => "'text'",
-						'width'         => 100,
+						'width'         => 90,
 						'editrules'     => '{ required:true }',
 						'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 						'formatter'     => "'number'",
@@ -340,6 +427,16 @@ class Pretab extends Controller {
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
+
+		$grid->setOnSelectRow('
+		function(id){
+			if (id){
+				var ret = jQuery(gridId1).jqGrid(\'getRowData\',id);
+				frecibo(id);
+			}
+		}'
+		);
+
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
@@ -368,9 +465,9 @@ class Pretab extends Controller {
 		}
 	}
 
-	/**
-	* Busca la data en el Servidor por json
-	*/
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
 	function getdata(){
 		$grid       = $this->jqdatagrid;
 
@@ -382,9 +479,9 @@ class Pretab extends Controller {
 		echo $rs;
 	}
 
-	/**
-	* Guarda la Informacion
-	*/
+	//******************************************************************
+	// Guarda la Informacion
+	//
 	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
@@ -441,25 +538,17 @@ class Pretab extends Controller {
 	}
 
 	function dataedit(){
-		$this->rapyd->load('dataedit');
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});
-		';
+		$this->rapyd->load('dataform');
 
-		$edit = new DataEdit($this->tits, 'pretab');
+		$id = $this->uri->segment($this->uri->total_segments());
 
-		$edit->script($script,'modify');
-		$edit->script($script,'create');
+		$edit = new DataForm('nomina/pretab/dataedit/process');
+
 		$edit->on_save_redirect=false;
 
-		$edit->back_url = site_url($this->url.'filteredgrid');
+		//$edit->back_url = site_url($this->url.'filteredgrid');
 
-		$edit->script($script,'create');
-
-		$edit->script($script,'modify');
-
+/*
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
@@ -473,210 +562,108 @@ class Pretab extends Controller {
 		});		';
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
+*/
+
+		$mReg = $this->datasis->damereg("SELECT codigo, frec, fecha, nombre, total FROM pretab WHERE id=$id");
+
+		$codigo = $mReg['codigo'];
+		
+		if ( empty($mReg) ){
+			echo 'Registro no encontrado '.$id;
+			return true;
+		}
 
 		$edit->codigo = new inputField('Codigo','codigo');
-		$edit->codigo->rule='';
-		$edit->codigo->size =17;
-		$edit->codigo->maxlength =15;
+		$edit->codigo->rule        = '';
+		$edit->codigo->size        = 10;
+		$edit->codigo->maxlength   = 15;
+		$edit->codigo->insertValue = $codigo;
 
-		$edit->frec = new inputField('Frec','frec');
-		$edit->frec->rule='';
-		$edit->frec->size =3;
-		$edit->frec->maxlength =1;
+		$edit->frec = new inputField('Frecuencia','frec');
+		$edit->frec->rule        = '';
+		$edit->frec->size        =  3;
+		$edit->frec->maxlength   =  1;
+		$edit->frec->insertValue = $mReg['frec'];
 
 		$edit->fecha = new dateonlyField('Fecha','fecha');
-		$edit->fecha->rule='chfecha';
-		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
+		$edit->fecha->rule      = 'chfecha';
+		$edit->fecha->size      = 10;
+		$edit->fecha->maxlength =  8;
+		$edit->fecha->calendar  = false;
+		$edit->fecha->insertValue = $mReg['fecha'];
 
 		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='';
-		$edit->nombre->size =32;
-		$edit->nombre->maxlength =30;
+		$edit->nombre->rule      = '';
+		$edit->nombre->size      = 30;
+		$edit->nombre->maxlength = 30;
+		$edit->nombre->insertValue = $mReg['nombre'];
 
 		$edit->total = new inputField('Total','total');
-		$edit->total->rule='numeric';
-		$edit->total->css_class='inputnum';
-		$edit->total->size =19;
-		$edit->total->maxlength =17;
-
+		$edit->total->rule      = 'numeric';
+		$edit->total->css_class = 'inputnum';
+		$edit->total->size      = 12;
+		$edit->total->maxlength = 12;
+		$edit->total->insertValue = $mReg['total'];
 
 		$query = $this->db->query("DESCRIBE pretab");
 		$i = 0;
 		if ($query->num_rows() > 0){
 			foreach ($query->result() as $row){
-				if ( substr($row->Field,0,1) == 'c' && $row->Field != 'codigo' ) {
 
-					$obj = $row->Field;
+				if ( substr($row->Field,0,1) == 'c' && $row->Field != 'codigo' && substr($row->Field,1,1) != '9' ) {
+					$reg     = $this->datasis->damereg('SELECT descrip, formula FROM conc WHERE concepto="'.substr($row->Field,1,4).'"');
+					$nombre  = $reg['descrip'];
+					$formula = $reg['formula'];
 
-					$edit->$obj = new inputField('C010', $obj);
-					$edit->$obj->rule='numeric';
-					$edit->$obj->css_class='inputnum';
-					$edit->$obj->size =19;
-					$edit->$obj->maxlength =17;
+					if ( strpos($formula, 'MONTO') ) {
+						$dReg = $this->datasis->damereg('SELECT monto, valor FROM prenom WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"');
+
+						$obj = $row->Field;
+						$edit->$obj = new inputField($nombre, $obj);
+						$edit->$obj->rule      = 'numeric';
+						$edit->$obj->css_class = 'inputnum';
+						$edit->$obj->size      = 10;
+						$edit->$obj->maxlength = 10;
+						$edit->$obj->insertValue = $dReg['monto'];
+					}
 				}
 			}
 		}
 
-
-/*
-		$edit->c010 = new inputField('C010','c010');
-		$edit->c010->rule='numeric';
-		$edit->c010->css_class='inputnum';
-		$edit->c010->size =19;
-		$edit->c010->maxlength =17;
-
-		$edit->c018 = new inputField('C018','c018');
-		$edit->c018->rule='numeric';
-		$edit->c018->css_class='inputnum';
-		$edit->c018->size =19;
-		$edit->c018->maxlength =17;
-
-		$edit->c030 = new inputField('C030','c030');
-		$edit->c030->rule='numeric';
-		$edit->c030->css_class='inputnum';
-		$edit->c030->size =19;
-		$edit->c030->maxlength =17;
-
-		$edit->c060 = new inputField('C060','c060');
-		$edit->c060->rule='numeric';
-		$edit->c060->css_class='inputnum';
-		$edit->c060->size =19;
-		$edit->c060->maxlength =17;
-
-		$edit->c070 = new inputField('C070','c070');
-		$edit->c070->rule='numeric';
-		$edit->c070->css_class='inputnum';
-		$edit->c070->size =19;
-		$edit->c070->maxlength =17;
-
-		$edit->c080 = new inputField('C080','c080');
-		$edit->c080->rule='numeric';
-		$edit->c080->css_class='inputnum';
-		$edit->c080->size =19;
-		$edit->c080->maxlength =17;
-
-		$edit->c090 = new inputField('C090','c090');
-		$edit->c090->rule='numeric';
-		$edit->c090->css_class='inputnum';
-		$edit->c090->size =19;
-		$edit->c090->maxlength =17;
-
-		$edit->c102 = new inputField('C102','c102');
-		$edit->c102->rule='numeric';
-		$edit->c102->css_class='inputnum';
-		$edit->c102->size =19;
-		$edit->c102->maxlength =17;
-
-		$edit->c110 = new inputField('C110','c110');
-		$edit->c110->rule='numeric';
-		$edit->c110->css_class='inputnum';
-		$edit->c110->size =19;
-		$edit->c110->maxlength =17;
-
-		$edit->c120 = new inputField('C120','c120');
-		$edit->c120->rule='numeric';
-		$edit->c120->css_class='inputnum';
-		$edit->c120->size =19;
-		$edit->c120->maxlength =17;
-
-		$edit->c125 = new inputField('C125','c125');
-		$edit->c125->rule='numeric';
-		$edit->c125->css_class='inputnum';
-		$edit->c125->size =19;
-		$edit->c125->maxlength =17;
-
-		$edit->c130 = new inputField('C130','c130');
-		$edit->c130->rule='numeric';
-		$edit->c130->css_class='inputnum';
-		$edit->c130->size =19;
-		$edit->c130->maxlength =17;
-
-		$edit->c195 = new inputField('C195','c195');
-		$edit->c195->rule='numeric';
-		$edit->c195->css_class='inputnum';
-		$edit->c195->size =19;
-		$edit->c195->maxlength =17;
-
-		$edit->c330 = new inputField('C330','c330');
-		$edit->c330->rule='numeric';
-		$edit->c330->css_class='inputnum';
-		$edit->c330->size =19;
-		$edit->c330->maxlength =17;
-
-		$edit->c340 = new inputField('C340','c340');
-		$edit->c340->rule='numeric';
-		$edit->c340->css_class='inputnum';
-		$edit->c340->size =19;
-		$edit->c340->maxlength =17;
-
-		$edit->c600 = new inputField('C600','c600');
-		$edit->c600->rule='numeric';
-		$edit->c600->css_class='inputnum';
-		$edit->c600->size =19;
-		$edit->c600->maxlength =17;
-
-		$edit->c610 = new inputField('C610','c610');
-		$edit->c610->rule='numeric';
-		$edit->c610->css_class='inputnum';
-		$edit->c610->size =19;
-		$edit->c610->maxlength =17;
-
-		$edit->c620 = new inputField('C620','c620');
-		$edit->c620->rule='numeric';
-		$edit->c620->css_class='inputnum';
-		$edit->c620->size =19;
-		$edit->c620->maxlength =17;
-
-		$edit->c650 = new inputField('C650','c650');
-		$edit->c650->rule='numeric';
-		$edit->c650->css_class='inputnum';
-		$edit->c650->size =19;
-		$edit->c650->maxlength =17;
-
-		$edit->c690 = new inputField('C690','c690');
-		$edit->c690->rule='numeric';
-		$edit->c690->css_class='inputnum';
-		$edit->c690->size =19;
-		$edit->c690->maxlength =17;
-
-		$edit->c900 = new inputField('C900','c900');
-		$edit->c900->rule='numeric';
-		$edit->c900->css_class='inputnum';
-		$edit->c900->size =19;
-		$edit->c900->maxlength =17;
-
-		$edit->c910 = new inputField('C910','c910');
-		$edit->c910->rule='numeric';
-		$edit->c910->css_class='inputnum';
-		$edit->c910->size =19;
-		$edit->c910->maxlength =17;
-
-		$edit->c920 = new inputField('C920','c920');
-		$edit->c920->rule='numeric';
-		$edit->c920->css_class='inputnum';
-		$edit->c920->size =19;
-		$edit->c920->maxlength =17;
-
-		$edit->c930 = new inputField('C930','c930');
-		$edit->c930->rule='numeric';
-		$edit->c930->css_class='inputnum';
-		$edit->c930->size =19;
-		$edit->c930->maxlength =17;
-*/
-
-
 		$edit->build();
 
 		if($edit->on_success()){
+			$codigo  = $edit->codigo->newValue;
+
+			$query = $this->db->query("DESCRIBE pretab");
+			$i = 0;
+			if ($query->num_rows() > 0){
+				foreach ($query->result() as $row){
+					if ( substr($row->Field,0,1) == 'c' && $row->Field != 'codigo' && substr($row->Field,1,1) != '9' ) {
+						$reg     = $this->datasis->damereg('SELECT descrip, formula FROM conc WHERE concepto="'.substr($row->Field,1,4).'"');
+						$nombre  = $reg['descrip'];
+						$formula = $reg['formula'];
+
+						if ( strpos($formula, 'MONTO') ) {
+							$obj = $row->Field;
+							$this->db->query('UPDATE prenom SET monto='.$edit->$obj->newValue.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"');
+							memowrite('UPDATE prenom SET monto='.$edit->$obj->newValue.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"','meco');
+						}
+					}
+				}
+			}
+
 			$rt=array(
-				'status' =>'A',
-				'mensaje'=>'Registro guardado',
-				'pk'     =>$edit->_dataobject->pk
+				'status'  => 'A',
+				'mensaje' => 'Registro guardado',
+				'pk'      => $codigo
 			);
 			echo json_encode($rt);
+
 		}else{
-			echo $edit->output;
+			$conten['form'] =&  $edit;
+			$this->load->view('view_pretab', $conten);
+			
 		}
 	}
 
