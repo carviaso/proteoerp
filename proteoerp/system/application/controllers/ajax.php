@@ -621,10 +621,10 @@ class Ajax extends Controller {
 			$mSQL="SELECT id,numero, tipo_op AS tipo, fecha, monto
 			FROM bmov
 			WHERE codbanc=${dbmid} AND anulado<>'S' AND liable<>'N'
-			AND fecha <= ${dbfecha} AND tipo_op<>'DE'
+			AND fecha <= ${dbfecha}
 			AND (concilia='0000-00-00' OR concilia IS NULL OR concilia=${dbfecha})
 			AND concilia < fecha
-			ORDER BY fecha";
+			ORDER BY fecha, numero";
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){

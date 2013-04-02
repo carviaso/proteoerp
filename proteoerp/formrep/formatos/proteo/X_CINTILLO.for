@@ -8,7 +8,7 @@ $cintillo_titulo3= trim($this->datasis->traevalor('TITULO3'));
 $cintillo_titulo2= preg_replace('/[Rr][Ii][Ff] *:? *[VJPGvjpg][0-9\-]+/', ' ', $cintillo_titulo2);
 $cintillo_titulo3= preg_replace('/[Rr][Ii][Ff] *:? *[VJPGvjpg][0-9\-]+/', ' ', $cintillo_titulo3);
 ?>
-<div id="section_header">
+<div>
 	<table style="width: 100%;" >
 		<tr>
 			<td width="130" rowspan="3"><img src="<?php echo $this->_direccion.'/images/logo.jpg'; ?>" width="127" alt="Logo"></td>

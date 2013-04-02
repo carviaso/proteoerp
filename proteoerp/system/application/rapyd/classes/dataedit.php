@@ -506,10 +506,11 @@ class DataEdit extends DataForm {
 					$requestValue =$this->_dataobject->get($this->$obj->db_name);
 				}
 				if (empty($requestValue)) $requestValue = false;
-				
-			}
-			if($this->$obj->type=='date'){
-				$requestValue = human_to_dbdate($requestValue, $this->$obj->format);
+
+			}else{
+				if($this->$obj->type=='date'){
+					$requestValue = human_to_dbdate($requestValue, $this->$obj->format);
+				}
 			}
 		}elseif($this->_dataobject->loaded){
 			$requestValue = $this->_dataobject->get($obj);

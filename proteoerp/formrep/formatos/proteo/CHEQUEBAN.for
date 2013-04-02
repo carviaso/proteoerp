@@ -28,10 +28,10 @@ div.absolute {
 <body>
 <!--@size_paper 177x79-->
 
-<div class="absolute" style="top: -30px; right: 0px; font-weight:bold; font-size: 12pt"><?php echo $tmonto; ?></div>
+<div class="absolute" style="top: -30px; right: 30px; font-weight:bold; font-size: 12pt"><?php echo $tmonto; ?></div>
 
 <div class="absolute" style="top: 20px; left: 65px; right: -10px;"><?php echo $nombre; ?></div>
-<div class="absolute" style="top: 42px; left: 20px; right: -10px; text-align:left;text-indent: 60px;font-size: 0.8em;line-height: 1.8em"><?php echo $smonto; ?></div>
+<div class="absolute" style="top: 42px; left: 20px; right: -10px; text-align:left;text-indent: 66px;font-size: 0.8em;line-height: 1.8em"><?php echo $smonto; ?></div>
 
 <div class="absolute" style="top: 85px; left: 10px; right: 350px text-align: right;"><?php echo $ffecha; ?></div>
 <div class="absolute" style="top: 85px; left: 275px;"><?php echo $anio; ?></div>
