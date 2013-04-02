@@ -862,7 +862,7 @@ class gser extends Controller {
 
 
 		$grid->addField('preten');
-		$grid->label('Preten');
+		$grid->label('% Retenci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -877,7 +877,7 @@ class gser extends Controller {
 
 
 		$grid->addField('creten');
-		$grid->label('Creten');
+		$grid->label('Cod.Retenci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -889,7 +889,7 @@ class gser extends Controller {
 
 
 		$grid->addField('breten');
-		$grid->label('Breten');
+		$grid->label('Base.Retenci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -965,7 +965,7 @@ class gser extends Controller {
 		));*/
 
 		$grid->addField('cajachi');
-		$grid->label('Cajachi');
+		$grid->label('Caja Chica');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1150,7 +1150,7 @@ class gser extends Controller {
 */
 
 		$grid->addField('retesimple');
-		$grid->label('Retesimple');
+		$grid->label('Rete.Simple');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1334,7 +1334,7 @@ class gser extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -1366,7 +1366,7 @@ class gser extends Controller {
 
 
 		$grid->addField('proveed');
-		$grid->label('Proveed');
+		$grid->label('Proveedor');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1883,17 +1883,20 @@ class gser extends Controller {
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM gser");
 		}
 		if(empty($id)) return '';
+		$dbid = $this->db->escape($id);
 
-		$proveed = $this->datasis->dameval("SELECT proveed FROM gser WHERE id=$id");
-		$numero  = $this->datasis->dameval("SELECT numero  FROM gser WHERE id=$id");
-		$fecha   = $this->datasis->dameval("SELECT fecha   FROM gser WHERE id=$id");
+		$row = $this->datasis->damerow('SELECT proveed,numero,fecha,transac FROM gser WHERE id='.$dbid);
+
+		$proveed = $this->db->escape($row['proveed']);
+		$numero  = $this->db->escape($row['numero']);
+		$fecha   = $this->db->escape($row['fecha']);
+		$transac = $this->db->escape($row['transac']);
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM gitser WHERE numero=".$this->db->escape($numero)." AND proveed=".$this->db->escape($proveed)." AND fecha='$fecha'";
+		$mSQL    = "SELECT * FROM gitser WHERE numero=${numero} AND proveed={$proveed} AND fecha=${fecha} AND transac=${transac}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
-
 	}
 
 	/**
@@ -2952,9 +2955,10 @@ class gser extends Controller {
 					$ban=$this->db->simple_query($sql);
 					if($ban==false){ memowrite($sql,'gser'); $error++;}
 
-					$sql='CALL sp_actusal('.$this->db->escape($cargo).",'$sp_fecha',-$totneto)";
-					$ban=$this->db->simple_query($sql);
-					if($ban==false){ memowrite($sql,'gser'); $error++; }
+					$this->datasis->actusal($cargo,$sp_fecha,(-1)*$totneto);
+					//$sql='CALL sp_actusal('.$this->db->escape($cargo).",'$sp_fecha',-$totneto)";
+					//$ban=$this->db->simple_query($sql);
+					//if($ban==false){ memowrite($sql,'gser'); $error++; }
 				}
 
 				$data = array();
@@ -3140,12 +3144,11 @@ class gser extends Controller {
 	}
 
 	//genera el movimiento de banco cuando el pago es al contado
-	function _bmovgser($codbanc,$codprv,$cargo,$negreso,$cheque,$fecha,$totneto,$benefi,$transac,$msj=''){
+	function _bmovgser($codbanc,$codprv,$cargo,$negreso,$cheque,$fecha,$totneto,$benefi,$transac,$tipo_op,$msj=''){
 		$nombre  = $this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$this->db->escape($codprv));
 		$datacar = common::_traebandata($cargo);
 		$sp_fecha = str_replace('-','',$fecha);
 		$ttipo   = $datacar['tbanco'];
-		$tipo1   = ($ttipo=='CAJ') ? 'D': 'C';
 		$error   = 0;
 
 		$data=array();
@@ -3154,7 +3157,7 @@ class gser extends Controller {
 		$data['numcuent']   = $datacar['numcuent'];
 		$data['banco']      = $datacar['banco'];
 		$data['saldo']      = $datacar['saldo'];
-		$data['tipo_op']    = ($ttipo=='CAJ') ? 'ND': 'CH';
+		$data['tipo_op']    = ($ttipo=='CAJ') ? 'ND': $tipo_op;
 		$data['numero']     = str_pad($cheque, 12, '0', STR_PAD_LEFT);
 		$data['fecha']      = $fecha;
 		$data['clipro']     = 'P';
@@ -3181,9 +3184,10 @@ class gser extends Controller {
 		$ban=$this->db->simple_query($sql);
 		if($ban==false){ memowrite($sql,'gser'); $error++;}
 
-		$sql='CALL sp_actusal('.$this->db->escape($cargo).",'$sp_fecha',-$totneto)";
-		$ban=$this->db->simple_query($sql);
-		if($ban==false){ memowrite($sql,'gser'); $error++; }
+		$this->datasis->actusal($cargo,$sp_fecha,(-1)*$totneto);
+		//$sql='CALL sp_actusal('.$this->db->escape($cargo).",'$sp_fecha',-$totneto)";
+		//$ban=$this->db->simple_query($sql);
+		//if($ban==false){ memowrite($sql,'gser'); $error++; }
 
 		return ($error==0)? true : false;
 	}
@@ -3196,22 +3200,28 @@ class gser extends Controller {
 
 		$query = $this->db->get();
 		foreach ($query->result() as $row){
-			$data = array(
-               'anulado' => 'S',
-            );
 
 			$this->db->where('codbanc', $row->codbanc);
 			$this->db->where('tipo_op', $row->tipo_op);
 			$this->db->where('numero' , $row->numero);
-			$this->db->update('bmov', $data);
+			$this->db->where('transac', $transac);
+
+			if($row->tipo_op=='CH'){
+				$data = array('anulado' => 'S');
+
+				$this->db->update('bmov', $data);
+			}else{
+				$this->db->delete('bmov');
+			}
 
 			$cargo   =$row->codbanc;
 			$totneto =$row->monto;
 			$sp_fecha=date('Ymd');
 
-			$sql='CALL sp_actusal('.$this->db->escape($cargo).",'$sp_fecha',$totneto)";
-			$ban=$this->db->simple_query($sql);
-			if($ban==false){ memowrite($sql,'gser');}
+			$this->datasis->actusal($cargo,$sp_fecha,$totneto);
+			//$sql='CALL sp_actusal('.$this->db->escape($cargo).",'$sp_fecha',$totneto)";
+			//$ban=$this->db->simple_query($sql);
+			//if($ban==false){ memowrite($sql,'gser');}
 		}
 	}
 
@@ -3902,6 +3912,7 @@ class gser extends Controller {
 			if(!empty($codigorete)){
 				$importe = $do->get_rel('gereten','base'  ,$i);
 				$monto   = $do->get_rel('gereten','monto' ,$i);
+				$porcen  = $do->get_rel('gereten','porcen',$i);
 
 				//$do->set_rel('gereten','monto'    ,$monto           ,$i);
 				//$do->set_rel('gereten','porcen'   ,$rete['tari1']   ,$i);
@@ -3911,7 +3922,14 @@ class gser extends Controller {
 			}
 		}
 		$do->set('reten',$retemonto);
-		if($rete_cana_vacio==$rete_cana) $do->unset_rel('gereten'); //si no hay retencion elimina la relacion
+		if($rete_cana_vacio==$rete_cana){
+			$do->unset_rel('gereten'); //si no hay retencion elimina la relacion
+		}elseif($rete_cana-$rete_cana_vacio == 1){
+			//Cuando la retencion es una sola
+			$do->set('creten',$codigorete);
+			$do->set('breten',$importe   );
+			$do->set('preten',$porcen    );
+		}
 		//Fin de las retenciones exepto iva
 
 		$ivat=$subt=$total=0;
@@ -4181,8 +4199,13 @@ class gser extends Controller {
 		//Crea el movimiento en banco del monto al contado
 		if($monto1 > 0.00){
 			$benefi=$do->get('benefi');
-			$msj = "EGRESO AL CONTADO SEGUN FACTURA $numero";
-			$this->_bmovgser($codbanc,$codprv,$codbanc,$negreso,$cheque,$fecha,$monto1,$benefi,$transac,$msj);
+			$msj = "EGRESO AL CONTADO SEGUN FACTURA ${numero}";
+			if($tipo1=='D'){
+				$tipo_op='ND';
+			}else{
+				$tipo_op='CH';
+			}
+			$this->_bmovgser($codbanc,$codprv,$codbanc,$negreso,$cheque,$fecha,$monto1,$benefi,$transac,$tipo_op,$msj);
 		}
 		//Fin del movimiento en el banco
 
@@ -4358,6 +4381,9 @@ class gser extends Controller {
 		$transac  = $do->get('transac');
 		$tipo_doc = $do->get('tipo_doc');
 		$cod_prv  = $do->get('proveed');
+		$numero   = $do->get('numero');
+		$fecha    = $do->get('fecha');
+		$id       = $do->get('id');
 
 		if($tipo_doc=='XX'){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='El gasto ya fue anulado.';
@@ -4398,10 +4424,34 @@ class gser extends Controller {
 		$this->_rm_gserrete($transac);
 		$this->_rm_bmovgser($transac);
 
-		$this->db->where('transac', $transac);
+		$dbcod_prv = $this->db->escape($cod_prv);
+		$dbnumero  = $this->db->escape($numero);
+		$dbfecha   = $this->db->escape($fecha);
+		$dbtransac = $this->db->escape($transac);
+		//Borra los articulos
+		$mSQL="DELETE FROM gitser WHERE numero=${dbnumero} AND fecha=${dbfecha} AND proveed=${dbcod_prv} AND transac=${dbtransac}";
+		$this->db->simple_query($mSQL);
+
+
+		//Revisa si fue anulado previamente para borrar el registro y evitar registro duplicado
+		$query     = $this->db->query("SELECT id, transac FROM gser WHERE tipo_doc='XX' AND fecha=${dbfecha} AND numero=${dbnumero} AND proveed=${dbcod_prv}");
+		foreach($query->result() as $row){
+			$dbitid     = $this->db->escape($row->id);
+			$dbittransac= $this->db->escape($row->transac);
+
+			$mSQL='DELETE FROM gser WHERE id='.$dbitid;
+			$this->db->simple_query($mSQL);
+
+			$mSQL="DELETE FROM gitser WHERE numero=${dbnumero} AND fecha=${dbfecha} AND proveed=${dbcod_prv} AND transac=${dbittransac}";
+			$this->db->simple_query($mSQL);
+		}
+		//Fin de la eliminacion del registro
+
+		$this->db->where( 'id'  , $id);
 		$this->db->update('gser', array('tipo_doc'=>'XX'));
 
 		$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Gasto Anulado.';
+		logusu('gser',"Gasto ${numero} fecha ${fecha} proveed ${cod_prv} Anulado");
 		return false;
 	}
 
