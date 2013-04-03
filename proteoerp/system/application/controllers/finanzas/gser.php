@@ -3424,11 +3424,11 @@ class gser extends Controller {
 		$edit->tipo1 =  new dropdownField('Cheque/ND', 'tipo1');
 		$edit->tipo1->option('' ,'Ninguno');
 		$edit->tipo1->option('C','Cheque');
-		$edit->tipo1->option('D','Debito');
+		$edit->tipo1->option('D','N.Debito');
 		$edit->tipo1->rule ='condi_required|callback_chtipoe';
 		$edit->tipo1->style='width:100px';
 
-		$edit->cheque1 = new inputField('Numero','cheque1');
+		$edit->cheque1 = new inputField('N&uacute;mero','cheque1');
 		$edit->cheque1->rule = 'condi_required|callback_chobliganumerog';
 		$edit->cheque1->size = 12;
 		$edit->cheque1->maxlength=20;
