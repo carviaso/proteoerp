@@ -304,6 +304,7 @@ function esperar(url){
 
 </script>
 
+
 </head>
 
 <body id="dt_proteo">
@@ -327,13 +328,13 @@ if(isset($centerpanel) == true) {
 
 
 <div id="dtg_dialog" title="Exporta Datos">
-    <ul>
+	<ul>
        <?php echo (isset($grid['export']['pdf'])   && $grid['export']['pdf']   == true)?"<li><a href='javascript:void(0);' onClick=\"dtgExport('pdf'," . $grid['querystring'] . ");\" >Pdf</a></li>":''; ?>
        <?php echo (isset($grid['export']['csv'])   && $grid['export']['csv']   == true)?"<li><a href='javascript:void(0);' onClick=\"dtgExport('csv'," . $grid['querystring'] . ");\" >Csv</a></li>":''; ?>
        <?php echo (isset($grid['export']['excel']) && $grid['export']['excel'] == true)?"<li><a href=\"#\">Excel</a></li>":''; ?>
        <?php echo (isset($grid['export']['print']) && $grid['export']['print'] == true)?"<li><a href=\"#\">Print</a></li>":''; ?>
        <?php echo (isset($grid['export']['xml'])   && $grid['export']['xml']   == true)?"<li><a href='javascript:void(0);' onClick=\"dtgExport('xml'," . $grid['querystring'] . ");\" >Xml</a></li>":''; ?>
-    </ul>
+	</ul>
 </div>
 
 <?php if(isset($bodyscript)) echo $bodyscript; ?>

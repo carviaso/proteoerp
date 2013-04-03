@@ -164,8 +164,9 @@ class Pnomina extends fnomina{
 		$VARI6 = $this->VARI6;
 
 		$fformula = $this->_traduce($formula);
-		if ( strpos($formula,'SEMANAS') )
-memowrite($formula.' == >> '.$fformula,'formula');
+
+		//if ( strpos($formula,'SEMANAS') )
+		//	memowrite($formula.' == >> '.$fformula,'formula');
 
 		$retorna='$rt='.$fformula.';';
 
@@ -246,6 +247,60 @@ memowrite($formula.' == >> '.$fformula,'formula');
 
 		return $formula;
 	}
+
+	//******************************************************************
+	//  Crea Pretab => Tabla de Prenomina Resumen
+	//
+	function creapretab(){
+		$prenom  ='prenom';
+		$pretab  ='pretab';
+
+		$this->ci->db->query("DROP TABLE IF EXISTS  ${pretab}");
+		$mSQL  = "CREATE TABLE ${pretab} (";
+		$mSQL .= "	codigo   CHAR(15)      NOT NULL DEFAULT '', ";
+		$mSQL .= "	frec     CHAR(1)       NULL DEFAULT NULL, ";
+		$mSQL .= "	fecha    DATE          NULL DEFAULT NULL, ";
+		$mSQL .= "	nombre   CHAR(80)      NULL DEFAULT NULL, ";
+		$mSQL .= "	total    DECIMAL(17,2) NULL DEFAULT '0.00',";
+
+		$query = $this->ci->db->query("SELECT concepto FROM ${prenom} GROUP BY concepto ");
+		foreach ($query->result() as $row){
+			$mSQL .= "	c".$row->concepto." DECIMAL(17,2) DEFAULT 0.00, ";
+		}
+		$mSQL .= "	id       INT(11)       NOT NULL AUTO_INCREMENT, ";
+		$mSQL .= "	PRIMARY KEY (id), ";
+		$mSQL .= "	UNIQUE INDEX codigo (codigo) ";
+		$mSQL .= ") ";
+		$mSQL .= "COLLATE='latin1_swedish_ci' ";
+		$mSQL .= "ENGINE=MyISAM; ";
+		$this->ci->db->query($mSQL);
+
+		// -- LLENA PRETAB
+		$mSQL = "
+		INSERT IGNORE INTO pretab (codigo, frec, fecha, nombre)
+		SELECT a.codigo, b.tipo, a.fecha, a.nombre
+		FROM prenom a JOIN noco b ON a.contrato=b.codigo
+		GROUP BY a.codigo";
+		$this->ci->db->query($mSQL);
+
+	}
+
+	//******************************************************************
+	//  Crea Pretab => Tabla de Prenomina Resumen
+	//
+	function llenapretab(){
+		$prenom  ='prenom';
+		$pretab  ='pretab';
+		$query = $this->ci->db->query("SELECT codigo, concepto, valor FROM ${prenom}");
+		if ( $query->num_rows() > 0 ) {
+			foreach( $query->result() as $row){
+				$mSQL = "UPDATE ${pretab} SET c".$row->concepto."=".$row->valor.', total=total+'.$row->valor.' WHERE codigo="'.$row->codigo.'"';
+				$this->ci->db->query($mSQL);
+			}
+		}
+	}
+
+
 
 }
 ?>

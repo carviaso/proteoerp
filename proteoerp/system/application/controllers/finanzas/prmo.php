@@ -2137,7 +2137,7 @@ class Prmo extends Controller {
 		$id = $this->uri->segment($this->uri->total_segments());
 		$dbid = $this->db->escape($id);
 
-		$transac = $this->datasis->prox_sql('ntransa');
+		$transac = $this->datasis->fprox_numero('ntransa');
 		//LOCAL aLISTA, mSQL, aVALORES, mREG, mMEG, mTBANCO
 
 		$mSQL = 'SELECT a.*, b.recibe codban FROM sfpa a JOIN bcaj b ON a.deposito=b.numero WHERE a.id='.$dbid;
@@ -2155,7 +2155,7 @@ class Prmo extends Controller {
 		$XFECHA    = date('Y/m/d');
 		$XCODBAN   = $reg['codban'];
 		$mTBANCO   = $this->datasis->dameval("SELECT tbanco FROM banc WHERE codbanc='$XCODBAN'");
-		$XNUMERO   = $this->datasis->prox_sql('nprmo');
+		$XNUMERO   = $this->datasis->fprox_numero('nprmo');
 		$XNOMBRE   = $this->datasis->dameval("SELECT nombre FROM scli WHERE cliente='".$reg['cod_cli']."'");
 
 		// Guarda en PRMO
@@ -2198,7 +2198,7 @@ class Prmo extends Controller {
 		$mBANCO    = $mREG['banco'];
 		$mSALDO    = $mREG['saldo'];
 		$mTBANCO   = $mREG['tbanco'];
-		$XCOMPROB  = $this->datasis->prox_sql("ncomprob");
+		$XCOMPROB  = $this->datasis->fprox_numero("ncomprob");
 
 		$aLISTA = array();
 		$aLISTA['codbanc']  = $XCODBAN;
@@ -2232,7 +2232,7 @@ class Prmo extends Controller {
 
 		$i = 0;
 		while ( $i == 0 ){
-			$mNUMERO = $this->datasis->prox_sql('ndcli');
+			$mNUMERO = $this->datasis->fprox_numero('ndcli');
 			$mSQL    = "SELECT count(*) FROM smov WHERE tipo_doc='ND' AND numero='$mNUMERO' ";
 			$i       = $this->datasis->dameval($mSQL);
 		}

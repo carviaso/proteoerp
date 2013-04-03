@@ -69,16 +69,20 @@ class Prenom extends Controller {
 				if($dia != $ultdia){
 					$fechac = substr($fechac,0,6).$ultdia;
 				}
-			}elseif($tipo=='S'){ //Falta implementar
+			}elseif($tipo=='S'){ //Fecha - 7
+				$date->sub(new DateInterval('P7D'));
+				$fechac = $date->format('Ymd');
 
+			}elseif($tipo=='S'){ //Fecha -14
+				$date->sub(new DateInterval('P14D'));
+				$fechac = $date->format('Ymd');
 			}else{
 
 			}
 
 			$this->_creaprenom($contrato, $fechac, $fechap );
-			$this->_creapretab();
-			$this->calcuto();
-
+			$this->_creapretab();  // Crea Pretabla
+			$this->calcuto();      // Calcula todos
 
 			echo "Crea los 2 $contrato, $fechac, $fechap";
 		} else
@@ -156,37 +160,8 @@ class Prenom extends Controller {
 	//  Crea Pretab => Tabla de Prenomina Resumen
 	//
 	function _creapretab(){
-		$prenom  ='prenom';
-		$pretab  ='pretab';
-
-		$this->db->query("DROP TABLE IF EXISTS  ${pretab}");
-		$mSQL  = "CREATE TABLE ${pretab} (";
-		$mSQL .= "	codigo   CHAR(15)      NOT NULL DEFAULT '', ";
-		$mSQL .= "	frec     CHAR(1)       NULL DEFAULT NULL, ";
-		$mSQL .= "	fecha    DATE          NULL DEFAULT NULL, ";
-		$mSQL .= "	nombre   CHAR(80)      NULL DEFAULT NULL, ";
-		$mSQL .= "	total    DECIMAL(17,2) NULL DEFAULT '0.00',";
-
-		$query = $this->db->query("SELECT concepto FROM ${prenom} GROUP BY concepto ");
-		foreach ($query->result() as $row){
-			$mSQL .= "	c".$row->concepto." DECIMAL(17,2) DEFAULT 0.00, ";
-		}
-		$mSQL .= "	id       INT(11)       NOT NULL AUTO_INCREMENT, ";
-		$mSQL .= "	PRIMARY KEY (id), ";
-		$mSQL .= "	UNIQUE INDEX codigo (codigo) ";
-		$mSQL .= ") ";
-		$mSQL .= "COLLATE='latin1_swedish_ci' ";
-		$mSQL .= "ENGINE=MyISAM; ";
-		$this->db->query($mSQL);
-
-		// -- LLENA PRETAB
-		$mSQL = "
-		INSERT IGNORE INTO pretab (codigo, frec, fecha, nombre)
-		SELECT a.codigo, b.tipo, a.fecha, a.nombre
-		FROM prenom a JOIN noco b ON a.contrato=b.codigo
-		GROUP BY a.codigo";
-		$this->db->query($mSQL);
-
+		$this->load->library('pnomina');
+		$this->pnomina->creapretab();
 	}
 
 
@@ -324,7 +299,6 @@ class Prenom extends Controller {
 			$monto->css_class='inputnum';
 
 			$grid = new DataGrid("Concepto (".$filter->concepto->newValue.") ".$filter->concepto->options[$filter->concepto->newValue]);
-			//$grid->per_page = $filter->db->num_rows() ;
 			$grid->column('C&oacute;digo', 'codigo');
 			$grid->column('Nombre', 'nombre');
 			$grid->column('Monto' , $monto  ,'align=\'right\'');

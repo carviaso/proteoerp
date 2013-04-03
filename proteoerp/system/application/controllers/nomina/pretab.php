@@ -35,13 +35,15 @@ class Pretab extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'genepre',   'img'=>'images/star.png',  'alt' => 'Genera Prenomina', 'label'=>'Genera Prenomina'));
+		$grid->wbotonadd(array('id'=>'genepre',  'img'=>'images/star.png', 'alt'=>'Genera Prenomina',     'label'=>'Genera Prenomina'));
+		$grid->wbotonadd(array('id'=>'respalda', 'img'=>'images/star.png', 'alt'=>'Respaldar Prenominas', 'label'=>'Respaldar/Recuperar'));
+		$grid->wbotonadd(array('id'=>'genenom',  'img'=>'images/star.png', 'alt'=>'Actualiar Nomina',        'label'=>'Genera Nomina'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
-			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
-			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' , 'title'=>'Mostrar Registro'),
+			array('id'=>'fborra', 'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -69,12 +71,133 @@ class Pretab extends Controller {
 		$("#genepre").click( function() {
 			$.post("'.base_url().'nomina/prenom/",
 			function(data){
-				$("#fedita").dialog( {height: 230, width: 450, title: "Cruce Cliente Cliente"} );
+				$("#fedita").dialog( {height: 230, width: 450, title: "Generar Pre-Nomina"} );
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
 		});
 		';
+
+		// Guarda Nomina
+/*
+		$bodyscript .= '
+		$("#genenom").click( function() {
+			$.prompt("Generar Nomina", {
+				buttons: { Generar: true, Cancelar: false },
+				submit: function(e,v,m,f){
+					if (v) {
+						$.post("'.site_url($this->url.'nomina').'/", 
+							function(data){
+								//jQuery.prompt.getStateContent(\'state1\').find(\'#in_prom\').text(data);									
+								//jQuery.prompt.goToState(\'state1\');
+								//jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+								alert(data);
+						});
+					}
+				}
+			});
+		});
+		';
+*/
+
+
+		// Respaldar y Recuperar Nomina
+		$bodyscript .= '
+		var mguardanom = 
+		{
+			state0: {
+				html: "<h1>Guarda la Nomina</h1>Guarda la nomina al historico y genera los movimientos correspondientes en cuentas por cobrar y pagar.",
+				buttons: { Generar: true, Cancelar: false },
+				submit: function(e,v,m,f){
+					mnuevo = f.mcodigo;
+					if (v) {
+						$.post("'.site_url($this->url.'nomina').'/", 
+							function(data){
+								jQuery.prompt.getStateContent(\'state1\').find(\'#in_prom1\').text(data);
+								jQuery.prompt.goToState(\'state1\');
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+						});
+						return false;
+					} 
+				}
+			},
+			state1: { 
+				html: "<h1>Resultado</h1><span id=\'in_prome1\'></span>",
+				focus: 1,
+				buttons: { Ok:true }
+			}		
+		};
+
+		$("#genenom").click( function() 
+		{
+			$.prompt(mguardanom);
+		});
+		';
+
+
+		//Busca nominas respaldadas
+		$query = $this->db->query("SHOW TABLES LIKE 'PRENOM%'");
+		$respaldos = '';
+		if ( $query->num_rows() > 0 ) {
+			$respaldos .= '<center><select id=\'mtabla\' name=\'mtabla\'>';
+			$respaldos .= '<option value=\'\'>Seleccione un Respaldo</option>';
+			foreach( $query->result_array() as $row ) {
+				$aa    = each($row);
+				$tabla = substr($aa[1],6);
+				$respaldos .= '<option value=\''.$aa[1].'\'>';
+				$respaldos .= dbdate_to_human($this->datasis->dameval("SELECT fecha FROM ".$aa[1]." limit 1"))." ";
+				$respaldos .= $this->datasis->dameval("SELECT CONCAT(codigo,' ',nombre) nomina FROM noco WHERE codigo='$tabla'");
+				$respaldos .= '</option>';
+			}
+			$respaldos .= '</select></center>';
+		}
+
+		// Respaldar y Recuperar Nomina
+		$bodyscript .= '
+		var mcome = "<h1>Respaldar y Recuperar Pre-Nominas</h1>"+
+			"<p>Si va a respaldar solo presione el boton de RESPALDAR.</p>"+
+			"<p>Para traer un respaldo seleccionelo y presione el boton RECUPERAR </p>'.$respaldos.'";
+
+		var mcontenido = 
+		{
+			state0: {
+				html: mcome,
+				buttons: { Respaldar:1, Recuperar:2, salir:false},
+				submit: function(e,v,m,f){
+					mnuevo = f.mcodigo;
+					if (v == 1 ) {
+						$.post("'.site_url($this->url.'respalda').'/", 
+							function(data){
+								jQuery.prompt.getStateContent(\'state1\').find(\'#in_prom\').text(data);									
+								jQuery.prompt.goToState(\'state1\');
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+						});
+						return false;
+						
+					} else if ( v == 2 ) {
+						$.post("'.site_url($this->url.'recupera').'/"+f.mtabla,
+							function(data){ 
+								$.prompt.getStateContent(\'state1\').find(\'#in_prome\').text(data);									
+								$.prompt.goToState(\'state1\');
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+						});
+						return false;
+					}
+				}
+			},
+			state1: { 
+				html: "<h1>Resultado</h1><span id=\'in_prome\'></span>",
+				focus: 1,
+				buttons: { Ok:true }
+			}		
+		};
+
+		$("#respalda").click( function() 
+		{
+			$.prompt(mcontenido);
+		});
+		';
+
 
 		$bodyscript .= '
 		function frecibo( id ){
@@ -168,9 +291,12 @@ class Pretab extends Controller {
 			s = grid.getGridParam(\'selarrrow\');
 			';
 
+
+		$titulo = $this->datasis->dameval("SELECT concat_ws(' ',b.codigo, b.nombre, 'Fecha:', a.fecha) contrato FROM prenom a JOIN noco b ON a.contrato=b.codigo LIMIT 1");
+
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 500, width: 700, modal: true, title: "'.$titulo.'",
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -323,6 +449,30 @@ class Pretab extends Controller {
 	}
 
 
+	//******************************************************************
+	// Respalda Nomina Activa
+	function respalda(){
+		$mCONTRATO = $this->datasis->dameval("SELECT TRIM(contrato) contrato FROM prenom LIMIT 1");
+		$mTABLA    = strtoupper("PRENOM".$mCONTRATO);
+		$this->db->query("DROP TABLE IF EXISTS ".$mTABLA);
+		$this->db->query("CREATE TABLE ".$mTABLA." SELECT * FROM prenom");
+		echo "Nomina Respaldada ".$mCONTRATO;
+		
+	}
+
+
+	//******************************************************************
+	// Recupera Nomina Guardada
+	function recupera($nomina){
+		$this->load->library('pnomina');
+		$this->db->query('TRUNCATE TABLE prenom');
+		$this->db->query("INSERT INTO prenom SELECT * FROM $nomina");
+		$this->pnomina->creapretab();
+		$this->pnomina->llenapretab();
+		$mreg = $this->datasis->damereg("SELECT contrato, fecha FROM prenom LIMIT 1");
+		echo "Nomina Restaurada para el Contrato ".$mreg['contrato']." de Fecha ".dbdate_to_human($mreg["fecha"]);
+	}
+
 
 	//******************************************************************
 	//  Definicion del Grid y la Forma
@@ -412,7 +562,7 @@ class Pretab extends Controller {
 						'editable'      => $editar,
 						'align'         => "'right'",
 						'edittype'      => "'text'",
-						'width'         => 90,
+						'width'         => 100,
 						'editrules'     => '{ required:true }',
 						'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 						'formatter'     => "'number'",
@@ -422,10 +572,13 @@ class Pretab extends Controller {
 			}
 		}
 
+		$titulo = $this->datasis->dameval("SELECT concat_ws(' ',b.codigo, b.nombre, 'Fecha:', a.fecha) contrato FROM prenom a JOIN noco b ON a.contrato=b.codigo LIMIT 1");
+		$cana = $this->datasis->dameval("SELECT count(*) FROM pretab");
+
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('290');
-		$grid->setTitle($this->titp);
+		$grid->setTitle($titulo.' Trabajadores:'.$cana);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
 
@@ -664,6 +817,278 @@ class Pretab extends Controller {
 		}
 	}
 
+
+	//******************************************************************
+	// GENERA LA NOMINA 
+	//
+	function nomina(){
+
+/*	
+LOCAL mTEMPO, mC, mREG, mTRANSAC, mNOMINA, mPRESTAMO := {}
+PRIVATE XFECHA, XCONTRATO, XTRABAJA, XFECHAP, XPPROME := 3
+
+RECUADRO(5,10,20,74,,' /W',' Nomina ')
+IF CMNJ(" ¨ Desea Guardar la Nomina y hacer los enlaces; administrativos Correspondientes ? ",{'Guardar','Cancelar'}) = 2
+   PRETABLA()
+   RETURN .t.
+ENDIF
+
+IF DAMEVAL("SELECT COUNT(*) FROM prenom",,'N') = 0
+   CMNJ("No hay ninguna Nomina Generada; generela una primero")
+   RETURN .T.
+ENDIF
+*/
+
+		$mreg     = $this->datasis->damereg("SELECT fecha, contrato, trabaja, fechap FROM prenom LIMIT 1");
+
+		$fecha    = $mreg['fecha'];
+		$contrato = $mreg['contrato'];
+		$trabaja  = $mreg['trabaja'];
+		$fechap   = $mreg['fechap'];
+		$tipo     = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo='".$contrato."' ");
+		$existe   = $this->datasis->dameval("SELECT count(*) FROM nomina WHERE contrato='".$contrato."' AND fecha='".$fecha."' AND trabaja='".$trabaja."' ");
+
+		if ( $existe > 0 AND $tipo <> 'O' ) {
+			echo "Nomina ya Guardada debe eliminarla primero!!";
+			return false;
+		}
+
+/*
+// RECALCULAR PRENOM
+RECUADRO(7,20,13,60)
+@ 8,25 SAY "RECALCULANDO MONTOS....."
+mC := DAMECUR("SELECT a.*, CONCAT(RTRIM(b.nombre),' ',RTRIM(b.apellido)) FROM pretab a JOIN pers b ON a.codigo=b.codigo GROUP BY codigo ")
+DO WHILE !mC:EOF()
+	@ 10,25 SAY PADR(mC:FieldGet('NOMBRE'),30)
+	TABSUMA( .T., mC:FieldGet('CODIGO') )
+	mC:Skip()
+ENDDO
+*/
+
+		$mNOMINA  = $this->datasis->fprox_numero("nnomina");
+		$mGSERNUM = $this->datasis->fprox_numero("ngser");
+		$mFREC    = $tipo;
+
+		$transac = $this->datasis->fprox_numero("ntransa");
+		$estampa = date('Ymd');
+		$hora    = date('H:i:s');
+		$usuario = $this->session->userdata('usuario');
+
+		// GENERAR ITEMS GITSER
+		$mGSER = $this->datasis->fprox_numero('ngser');
+		$mSQL= "INSERT INTO gitser (fecha, numero, proveed, codigo, descrip, precio,   iva, importe, unidades, fraccion, almacen, departa, sucursal, usuario, estampa, transac) 
+				SELECT fechap, '".$mNOMINA."',ctaac, ctade,   CONCAT(RTRIM(b.descrip),' ',d.depadesc), SUM(valor), 0, SUM(valor), 0,        0,        '',     d.enlace, c.sucursal, '".$usuario."', '".$estampa."','".$transac."' 
+				FROM prenom a JOIN conc b ON a.concepto=b.concepto 
+					JOIN pers c ON a.codigo=c.codigo 
+					JOIN depa d ON c.depto=d.departa 
+				WHERE valor<>0 AND tipod='G' 
+				GROUP BY ctade, d.enlace ";
+		$this->db->query($mSQL);
+
+		// CALCULA LAS DEDUCCIONES
+		$mSQL = "SELECT sum(valor) total 
+				FROM prenom a JOIN conc b ON a.concepto=b.concepto 
+					JOIN pers c ON a.codigo=c.codigo 
+				WHERE valor<>0 AND tipod!='G' ";
+		
+		$mDEDU = $this->datasis->dameval($mSQL);
+
+		// CALCULA LOS PRESTAMOS
+		$mSQL = "SELECT SUM(IF(b.monto-b.abonos-a.cuota>0,a.cuota,b.monto-b.abonos)) 
+				FROM pres a JOIN smov b ON a.cod_cli=b.cod_cli AND a.tipo_doc=b.tipo_doc AND a.numero=b.numero 
+				WHERE a.codigo IN (SELECT codigo FROM prenom GROUP BY codigo) 
+				AND b.monto>b.abonos AND a.apartir<='".$fecha."' ";
+
+		$mPRE   = $this->datasis->dameval($mSQL);
+		$mDEDU  = abs($mDEDU)+$mPRE;
+		$mNOMI  = $this->datasis->dameval("SELECT ctaac FROM conc WHERE tipo='A' LIMIT 1");
+
+		// GENERA EL ENCABEZADO DE GSER
+		$mSQL = "INSERT INTO gser (fecha, numero, proveed, nombre, vence, totpre,   totiva, totbruto, reten, totneto,    codb1, tipo1, cheque1, monto1, credito, anticipo, orden, tipo_doc, usuario, estampa, transac) 
+				SELECT a.fechap, '".$mNOMINA."', b.ctaac, d.nombre, a.fechap, SUM(a.valor), 0, SUM(a.valor), 0, SUM(a.valor), '', '' , '', ".$mDEDU."*(b.ctaac='".$mNOMI."'), sum(a.valor)-".$mDEDU."*(b.ctaac='".$mNOMI."'), 0, '', 'GA','".$usuario."', '".$estampa."', '".$transac."' 
+				FROM prenom a JOIN conc b ON a.concepto=b.concepto 
+					JOIN pers c ON a.codigo=c.codigo JOIN sprv d ON ctaac=d.proveed 
+				WHERE valor<>0 AND tipod='G' 
+				GROUP BY ctaac ";
+		$this->db->query($mSQL);
+
+		// GENERA CXP
+		$mNUMCXP = $mNOMINA;
+		$mSQL ="INSERT INTO sprm (tipo_doc, fecha, numero, cod_prv, nombre, vence, monto, impuesto, tipo_ref, num_ref, codigo, descrip, usuario, estampa, transac, observa1 )
+				SELECT 'ND' tipo_doc, fecha, CONCAT('N',MID(numero,2,7)), proveed, nombre, vence, credito, 0, 'GA', '' ,'NOCON', 'NOMINA', '".$usuario."', '".$estampa."', '".$transac."', 'NOMINA ' 
+				FROM gser 
+				WHERE tipo_doc='GA' AND numero='".$mNOMINA."' AND transac='".$transac."'";
+		$this->db->query($mSQL);
+
+		// GENERA LAS ND EN PROVEEDORES SPRM
+		$mSQL= "SELECT b.ctaac, a.fechap fecha, sum(valor) valor, d.nombre, b.descrip 
+				FROM prenom a JOIN conc b ON a.concepto=b.concepto 
+					JOIN pers c ON a.codigo=c.codigo 
+					JOIN sprv d ON ctaac=d.proveed 
+				WHERE valor<>0 AND tipod='P' AND tipoa='P' 
+				GROUP BY ctaac ";
+		$query  = $this->db->query($mSQL);
+
+		if ($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+				$mCONTROL = $this->datasis->fprox_numero("nsprm");
+				$mNOTADEB = $this->datasis->fprox_numero("num_nd");
+
+				$data = array();
+				$data["cod_prv"]  = $row->ctaac;
+				$data["nombre"]   = $row->nombre; 
+				$data["tipo_doc"] = 'ND';
+				$data["numero"]   = $mNOTADEB;
+				$data["fecha"]    = $row->fecha;
+				$data["monto"]    = abs($row->valor);
+				$data["impuesto"] = 0;
+				$data["vence"]    = $row->fecha;
+				$data["abonos"]   = 0;
+				$data["tipo_ref"] = 'GA';
+				$data["num_ref"]  = $mNOMINA;
+				$data["observa1"] = $row->descrip;
+				$data["observa2"] = 'NOMINA';
+				$data["control"]  = $mCONTROL;
+				$data["reteiva"]  = 0;
+				$data["codigo"]   = 'NOCON';
+				$data["descrip"]  = 'NOMINA';
+
+				$data["usuario"]  = $usuario;
+				$data["estampa"]  = $estampa;
+				$data["hora"]     = $hora;
+				$data["transac"]  = $transac;
+
+				$this->db->insert('sprm',$data);
+
+				//$mSQL = "REPLACE INTO sprm SET "
+	
+			}
+		}
+
+		$mPRESTAMO = array();
+
+		// PRESTAMOS
+		$mSQL= "SELECT b.cod_cli, b.nombre, b.tipo_doc, b.numero, b.fecha, a.codigo, a.nombre, 
+						IF(b.monto-b.abonos-a.cuota>0,a.cuota,b.monto-b.abonos) cuota, b.monto 
+				FROM pres a JOIN smov b ON a.cod_cli=b.cod_cli AND a.tipo_doc=b.tipo_doc AND a.numero=b.numero 
+				WHERE a.codigo IN (SELECT codigo FROM prenom GROUP BY codigo) 
+				AND b.monto>b.abonos AND a.apartir<='".$fecha."' ";
+		$query  = $this->db->query($mSQL);
+
+		if ($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+
+				$mCONTROL = $this->datasis->fprox_numero("nsmov");
+				$mNOTACRE = $this->datasis->fprox_numero("nccli");
+
+				$data = array();
+				$data["cod_cli"]  = $row->cod_cli;
+				$data["nombre"]   = $row->nombre; 
+				$data["tipo_doc"] = 'NC';
+				$data["numero"]   = $mNOTACRE;
+				$data["fecha"]    = $fechap;
+				$data["monto"]    = abs( $row->cuota );
+				$data["impuesto"] = 0;
+				$data["vence"]    = $fechap;
+				$data["abonos"]   = abs( $row->cuota );
+				$data["tipo_ref"] = 'GA';
+				$data["num_ref"]  = $mNOMINA;
+				$data["observa1"] = 'PAGO A '.$row->tipo_doc.$row->numero;
+				$data["observa2"] = 'POR DESCUENTO DE NOMINA';
+				$data["control"]  = $mCONTROL;
+				$data["codigo"]   = 'NOCON';
+				$data["descrip"]  = 'NOMINA';
+				$data["usuario"]  = $usuario;
+				$data["estampa"]  = $estampa;
+				$data["hora"]     = $hora;
+				$data["transac"]  = $transac;
+
+				$this->db->insert('smov',$data);
+
+				// ACTUALIZA EL DOCUMENTO ORIGEN
+				$mSQL = "UPDATE smov SET abonos=abonos+".abs($row->cuota)."
+				WHERE tipo_doc='".$row->tipo_doc."' AND numero='".$row->numero."' 
+				AND cod_cli='".$row->cod_cli."' AND fecha='".$row->fecha."' LIMIT 1";
+				$this->db->query($mSQL);   // { ABS(mC:FieldGet('CUOTA')),mC:FieldGet('TIPO_DOC'), mC:FieldGet('NUMERO'), mC:FieldGet('COD_CLI'), mC:FieldGet('FECHA')  })
+		
+				// CARGA EL MOVIMIENTO EN ITCCLI
+				//$mSQL = "INSERT INTO itccli (numccli, tipoccli, cod_cli, tipo_doc, numero, fecha, monto, abono, transac, estampa, hora, usuario ) "
+				//mSQL = "VALUES             (  ?,       'NC',    ?,       ?,        ?,      ?,     ?,     ?,      ?,     now(),     ?,     ?     )"
+
+				$data = array();
+				$data['numccli']  = $mNOTACRE;
+				$data['tipoccli'] = 'NC';
+				$data['cod_cli']  = $row->cod_cli;
+				$data['tipo_doc'] = $row->tipo_doc;
+				$data['numero']   = $row->numero;
+				$data['fecha']    = $row->fecha;
+				$data['monto']    = $row->monto;
+				$data['abono']    = abs($row->cuota);
+				$data["usuario"]  = $usuario;
+				$data["estampa"]  = $estampa;
+				$data["hora"]     = $hora;
+				$data["transac"]  = $transac;
+				$this->db->insert('itccli',$data);
+				$mPRESTAMO[] = array( $row->codigo, $row->nombre, $row->cuota );
+			}
+		}
+
+		// MANDA LA NOMINA AL HISTORICO
+		$mSQL= "INSERT INTO nomina (numero, frecuencia,               contrato,   depto,   codigo,   nombre,   concepto,   tipo,   descrip,   grupo,   formula,   monto,   fecha,   valor, estampa, usuario,          transac,      hora, fechap, trabaja ) 
+				SELECT '".$mNOMINA."' numa, '".$mFREC."' frecu, a.contrato, b.depto, a.codigo, a.nombre, a.concepto, a.tipo, a.descrip, a.grupo, a.formula, a.monto, a.fecha, a.valor, now(), '".$usuario."', '".$transac."', CURTIME(), a.fechap,'".$trabaja."'
+				FROM prenom a JOIN pers b ON a.codigo=b.codigo 
+				WHERE a.valor<>0 ";
+		$this->db->query($mSQL);
+
+
+		$mVALOR = "SUM(IF(b.monto-b.abonos-a.cuota>0,a.cuota,b.monto-b.abonos))";
+
+		// MANDA LOS PRESTAMOS
+		foreach ( $mPRESTAMO as $meco ) {
+			//$mSQL = "INSERT INTO nomina SET ";
+			//          1         2            3           4       5         6                                                                                               7       8
+			$mDEPTO = $this->datasis->dameval("SELECT depto FROM pers WHERE codigo='".$mPRESTAMO[0]."'");
+
+			$data = array();
+			$data["numero"]     = $mNOMINA; 
+			$data["frecuencia"] = $mFREC; 
+			$data["contrato"]   = $contrato; 
+			$data["depto"]      = $mDEPTO; 
+			$data["codigo"]     = $meco[0]; 
+			$data["nombre"]     = $meco[1];
+			$data["concepto"]   = 'PRES'; 
+			$data["tipo"]       = 'D'; 
+			$data["descrip"]    = 'PAGO DE PRESTAMO'; 
+			$data["grupo"]      = ''; 
+			$data["formula"]    = ''; 
+			$data["monto"]      = 0; 
+			$data["fecha"]      = $fecha; 
+			$data["valor"]      = -$meco[2]; 
+			$data["estampa"]    = $estampa; 
+			$data["usuario"]    = $usuario; 
+
+			$data["transac"]    = $transac; 
+			$data["hora"]       = $hora; 
+			$data["fechap"]     = $fechap; 
+			$data["trabaja"]    = $trabaja; 
+			$this->db->insert('nomina', $data);
+
+			//              1       2       3          4            5           6               7            8              9       10
+			//mVALORES := {, , XCONTRATO, mDEPTO, mPRESTAMO[i,1], mPRESTAMO[i,2],DTOS(XFECHA),-1*mPRESTAMO[i,3], ms_CODIGO, mTRANSAC, XFECHAP, XTRABAJA }
+			//EJECUTASQL(mSQL,mVALORES)
+		}
+
+		$this->db->query("TRUNCATE prenom");
+		$this->db->query("TRUNCATE pretab");
+		
+		echo "Nomina Guardada";
+
+	}
+
+
+
+
+/*
 	function _pre_insert($do){
 		$do->error_message_ar['pre_ins']='';
 		return true;
@@ -693,7 +1118,7 @@ class Pretab extends Controller {
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
-
+*/
 	function instalar(){
 		if (!$this->db->table_exists('pretab')) {
 

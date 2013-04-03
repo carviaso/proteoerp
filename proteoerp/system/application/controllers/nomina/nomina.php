@@ -13,6 +13,16 @@ class Nomina extends Controller {
 	}
 
 	function index(){
+
+		if ( !$this->db->table_exists('view_nomina') ) {
+			$mSQL = "
+			CREATE ALGORITHM = UNDEFINED VIEW view_nomina AS 
+			SELECT `a`.`contrato` AS `contrato`, a.trabaja, `b`.`nombre` AS `nombre`,`a`.`numero` AS `numero`,`a`.`frecuencia` AS `frecuencia`,`a`.`fecha` AS `fecha`,`a`.`fechap` AS `fechap`,`a`.`estampa` AS `estampa`,`a`.`usuario` AS `usuario`,`a`.`transac` AS `transac` 
+			FROM (`nomina` `a` join `noco` `b` on((`a`.`contrato` = `b`.`codigo`))) 
+			GROUP BY `a`.`numero`;";
+			$this->db->query($mSQL);
+		}
+	
 		if ( !$this->datasis->iscampo('nomina','id') ) {
 			$this->db->simple_query('ALTER TABLE nomina DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE nomina ADD INDEX numero (numero)');
@@ -241,6 +251,52 @@ class Nomina extends Controller {
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
 
+		$grid->addField('contrato');
+		$grid->label('Contrato');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:8, maxlength: 8 }',
+		));
+
+
+		$grid->addField('trabaja');
+		$grid->label('Personal');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:8, maxlength: 8 }',
+		));
+
+
+		$grid->addField('nombre');
+		$grid->label('Nombre');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 200,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:40, maxlength: 40 }',
+		));
+
+		$grid->addField('frecuencia');
+		$grid->label('Frecuencia');
+		$grid->params(array(
+			'align'         => '"center"',
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
+		));
 
 		$grid->addField('fecha');
 		$grid->label('Fecha');
@@ -254,166 +310,16 @@ class Nomina extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
-		$grid->addField('frecuencia');
-		$grid->label('Frec.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:1, maxlength: 1 }',
-		));
-
-
-		$grid->addField('contrato');
-		$grid->label('Contrato');
+		$grid->addField('fechap');
+		$grid->label('Fechap');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 70,
+			'align'         => "'center'",
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-		$grid->addField('codigo');
-		$grid->label('Codigo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 90,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:15, maxlength: 15 }',
-		));
-
-
-		$grid->addField('nombre');
-		$grid->label('Nombre');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 30 }',
-		));
-
-
-		$grid->addField('concepto');
-		$grid->label('Concepto');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:4, maxlength: 4 }',
-		));
-
-
-		$grid->addField('tipo');
-		$grid->label('Tipo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:1, maxlength: 1 }',
-		));
-
-
-		$grid->addField('descrip');
-		$grid->label('Descrip');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:35, maxlength: 35 }',
-		));
-
-
-		$grid->addField('grupo');
-		$grid->label('Grupo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:4, maxlength: 4 }',
-		));
-
-
-		$grid->addField('formula');
-		$grid->label('Formula');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:120, maxlength: 120 }',
-		));
-
-
-		$grid->addField('monto');
-		$grid->label('Monto');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 140,
-			'edittype'      => "'text'",
-		));
-
-
-		$grid->addField('cuota');
-		$grid->label('Cuota');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
-		));
-
-
-		$grid->addField('cuotat');
-		$grid->label('Cuotat');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
-		));
-
-
-		$grid->addField('valor');
-		$grid->label('Valor');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
 		));
 
 
@@ -422,7 +328,7 @@ class Nomina extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 70,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
@@ -435,7 +341,7 @@ class Nomina extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 120,
+			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:12, maxlength: 12 }',
@@ -447,69 +353,10 @@ class Nomina extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('hora');
-		$grid->label('Hora');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-		$grid->addField('depto');
-		$grid->label('Depto');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('fechap');
-		$grid->label('Fechap');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('trabaja');
-		$grid->label('Trabaja');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('id');
-		$grid->label('Id');
-		$grid->params(array(
-			'align'         => "'center'",
-			'frozen'        => 'true',
-			'width'         => 40,
-			'editable'      => 'false',
-			'search'        => 'false'
 		));
 
 
@@ -525,8 +372,8 @@ class Nomina extends Controller {
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(    $this->datasis->sidapuede('NOMI','INCLUIR%' ));
-		$grid->setEdit(   $this->datasis->sidapuede('NOMI','MODIFICA%'));
+		$grid->setAdd(    false ); //$this->datasis->sidapuede('NOMI','INCLUIR%' ));
+		$grid->setEdit(   false ); //$this->datasis->sidapuede('NOMI','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('NOMI','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('NOMI','BUSQUEDA%'));
 		$grid->setRowNum(30);
@@ -554,9 +401,9 @@ class Nomina extends Controller {
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
-		$mWHERE = $grid->geneTopWhere('nomina');
+		$mWHERE = $grid->geneTopWhere('view_nomina');
 
-		$response   = $grid->getData('nomina', array(array()), array(), false, $mWHERE, 'numero DESC, codigo, concepto ' );
+		$response   = $grid->getData('view_nomina', array(array()), array(), false, $mWHERE, 'numero', 'DESC' );
 		$rs = $grid->jsonresult( $response);
 
 		echo $rs;
