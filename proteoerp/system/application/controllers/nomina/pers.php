@@ -1148,7 +1148,6 @@ class Pers extends Controller {
 		$edit->email->maxlength=50;
 		$edit->email->rule="trim";
 
-
 		$edit->civil = new dropdownField("Estado Civil", "civil");
 		$edit->civil->style = "width:80px;";
 		$edit->civil->option("S","Soltero");
@@ -1168,7 +1167,6 @@ class Pers extends Controller {
 		$edit->nacimi->calendar=false;
 
 /*
-
 		$edit->nacimi->size = 12;
 		$edit->nacimi->group = "Datos del Trabajador";
 		$edit->nacimi->rule="trim|chfecha";
@@ -1177,11 +1175,7 @@ class Pers extends Controller {
 		$edit->sucursal = new dropdownField("Sucursal", "sucursal");
 		$edit->sucursal->style ="width:120px;";
 		$edit->sucursal->options("SELECT codigo, CONCAT(codigo,' ',sucursal) desrip FROM sucu ORDER BY sucursal");
-		//$edit->sucursal->size =4;
-		//$edit->sucursal->maxlength=2;
 		$edit->sucursal->group = "Relaci&oacute;n Laboral";
-		//$edit->sucursal->append($boton);
-		//$edit->sucursal->rule="trim|strtoupper";
 
 		$edit->divi = new dropdownField("Divisi&oacute;n", "divi");
 		$edit->divi->style ="width:200px;";
@@ -1255,12 +1249,6 @@ class Pers extends Controller {
 		$edit->retiro->rule="trim|chfecha";
 		$edit->retiro->calendar = false;
 
-		//$edit->trabaja = new dropdownField("Tipo de Trabajador","tipot");
-		//$edit->trabaja->option("","");
-		//$edit->trabaja->options("SELECT codigo,tipo  FROM tipot ORDER BY codigo");
-		//$edit->trabaja->group = "Relaci&oacute;n Laboral";
-		//$edit->trabaja->style = "width:200px;";
-
 		$edit->dialib = new inputField("Dias libres", "dialib");
 		$edit->dialib->group = "Relaci&oacute;n Laboral";
 		$edit->dialib->size =4;
@@ -1276,11 +1264,8 @@ class Pers extends Controller {
 		$edit->dialab->size =4;
 		$edit->dialab->maxlength=2;
 		$edit->dialab->in = "dialib";
-		//$edit->dialab->rule="trim|numeric";
-		//$edit->dialab->css_class='inputnum';
 
 		$edit->status = new dropdownField("Estatus", "status");
-		//$edit->status->option("","");
 		$edit->status->options(array("A"=> "Activo","V"=>"Vacaciones","R"=>"Retirado","I"=>"Inactivo","P"=>"Permiso"));
 		$edit->status->group = "Relaci&oacute;n Laboral";
 		$edit->status->style = "width:100px;";
@@ -1344,7 +1329,6 @@ class Pers extends Controller {
 		$edit->cuentab->group = 'Datos Cuenta Bancaria';
 		$edit->cuentab->size =20;
 		$edit->cuentab->maxlength=40;
-
 
 		$vari1 = $this->datasis->traevalor('NOMVARI1');
 		$vari2 = $this->datasis->traevalor('NOMVARI2');

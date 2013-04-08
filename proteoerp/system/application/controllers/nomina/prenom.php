@@ -90,6 +90,101 @@ class Prenom extends Controller {
 
 	}
 
+
+	//******************************************************************
+	//  Genera Prenomina
+	//
+	function geneprenom(){
+		$this->load->helper('date');
+		$contrato = $this->input->post('contrato');
+		$fechac   = $this->input->post('fechac');
+		$fechap   = $this->input->post('fechap');
+
+		$prenom  ='prenom';
+		$pretab  ='pretab';
+
+		$date   = DateTime::createFromFormat('d/m/Y', $fechap);
+		$fechap = $date->format('Ymd');
+
+		$date   = DateTime::createFromFormat('d/m/Y', $fechac);
+		$fechac = $date->format('Ymd');
+
+		$ultdia = intval(days_in_month(substr($fechac,4,2), substr($fechac,0,4)));
+		$dia    = intval(substr($fechac,6,2));
+
+		$dbcont = $this->db->escape($contrato);
+		$tipo = $this->datasis->dameval('SELECT tipo FROM noco WHERE codigo='.$dbcont);
+		if( $tipo == 'Q' ){
+			if($dia != $ultdia || $dia != 15){
+				if($dia<15){
+					$fechac = substr($fechac,0,6).'15';
+				}else{
+					$fechac = substr($fechac,0,6).$ultdia;
+				}
+			}
+		}elseif($tipo=='M'){
+			if($dia != $ultdia){
+				$fechac = substr($fechac,0,6).$ultdia;
+			}
+		}elseif($tipo=='S'){ //Fecha - 7
+			$date->sub(new DateInterval('P7D'));
+			$fechac = $date->format('Ymd');
+
+		}elseif($tipo=='S'){ //Fecha -14
+			$date->sub(new DateInterval('P14D'));
+			$fechac = $date->format('Ymd');
+		}else{
+
+		}
+
+		$this->_creaprenom($contrato, $fechac, $fechap );
+		$this->_creapretab();  // Crea Pretabla
+		$this->calcuto();      // Calcula todos
+
+		echo 'Contrato='.$contrato.' Fecha de Corte: '.$fechac.' Fecha de pago: '.$fechap ;
+	}
+
+	//******************************************************************
+	//  Genera Prenomina
+	//
+	function regenepre(){
+		$this->load->helper('date');
+
+		$mreg = $this->datasis->damereg("SELECT contrato, trabaja, fecha, fechap FROM prenom LIMIT 1");
+		$contrato = $mreg['contrato'];
+		$fechac   = $mreg['fecha'];
+		$fechap   = $mreg['fechap'];
+
+		$prenom  ='prenom';
+		$pretab  ='pretab';
+
+		$dbcont = $this->db->escape($contrato);
+		$tipo = $this->datasis->dameval('SELECT tipo FROM noco WHERE codigo='.$dbcont);
+
+		// Elimina los Trabajadores que no estan en el contrato
+		$mSQL = "DELETE prenom FROM prenom JOIN pers ON prenom.codigo = pers.codigo AND prenom.contrato=pers.contrato ";
+		$this->db->query($mSQL);
+
+		// Elimina los Conceptos que no estan en el contrato
+		$mSQL = "DELETE prenom FROM prenom LEFT JOIN itnoco ON prenom.contrato = itnoco.codigo WHERE itnoco.codigo IS NULL";
+		$this->db->query($mSQL);
+
+		$this->_creaprenom($contrato, $fechac, $fechap, false );
+		$this->_creapretab();  // Crea Pretabla
+		$this->calcuto();      // Calcula todos
+
+		$rt=array(
+			'status'  => 'A',
+			'mensaje' => 'Nomina Regenerada Contrato: '.$contrato.' Fecha de Corte: '.$fechac.' Fecha de pago: '.$fechap,
+			'pk'      => $contrato
+		);
+		echo json_encode($rt);
+	
+
+	}
+
+
+
 	function chcfecha($fecha){
 		$cont=$this->input->post('contrato');
 		$arr_fecha = explode('/',$fecha);
@@ -120,7 +215,7 @@ class Prenom extends Controller {
 	//******************************************************************
 	//  Crea Pretab => Tabla de Prenomina Detalle
 	//
-	function _creaprenom($contrato, $fecha, $fechap ){
+	function _creaprenom($contrato, $fecha, $fechap, $sobrescribe = true ){
 		$contdb = $this->db->escape($contrato);
 		$prenom  = 'prenom';
 		$pretab  = 'pretab';
@@ -134,7 +229,9 @@ class Prenom extends Controller {
 		$FRECUEN = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=".$contdb);
 		$this->db->query("UPDATE pers SET tipo='".$FRECUEN."' WHERE contrato=".$contdb);
 
-		$this->db->query("TRUNCATE ${prenom}");
+		if ($sobrescribe)
+			$this->db->query("TRUNCATE ${prenom}");
+		
 
 		// ---- CONCEPTOS FIJOS ---- //
 		$mSQL  = "INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";

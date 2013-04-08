@@ -48,12 +48,13 @@ if ( isset($readyLayout) == false ){
 		north__size: 60,
 		resizerClass: \'ui-state-default\',
 		west__size: '.$WestSize.',
-		west__onresize: function (pane, $Pane){jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);},
+		west__onresize: function (pane, $Pane){
+			jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);},
 		center__onresize: centeronre
 	});
 
-	function centeronre ( pane, $Pane ) {
-		jQuery("#newapi'.$grids[0]['gridname'].'").jqGrid(\'setGridWidth\',$Pane.innerWidth()-6);
+	function centeronre ( pane, $Pane, paneState ) {
+		jQuery("#newapi'.$grids[0]['gridname'].'").jqGrid(\'setGridWidth\', $Pane.innerWidth()-6);
 		jQuery("#newapi'.$grids[0]['gridname'].'").jqGrid(\'setGridHeight\',$Pane.innerHeight()-'.$grids[0]['menosalto'].');
 	};
 

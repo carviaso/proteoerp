@@ -1,0 +1,104 @@
+$mPrvd=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código Proveedor',
+		'nombre'=>'Nombre',
+		'rif'=>'RIF'),
+	'filtro'  =>array('proveed'=>'Código Proveedor','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'cod_prvd'),
+	'titulo'  =>'Buscar Proveedor');
+$mPrvh=$mPrvd;
+$mPrvh['retornar']=array('proveed'=>'cod_prvh');
+
+$bPrvd=$this->datasis->modbus($mPrvd);
+$bPrvh=$this->datasis->modbus($mPrvh,'sprvh');
+
+
+$filter = new DataFilter("Filtro del Reporte");
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+$filter->db->select(array("cod_prv,numero,max(fecha) fecha,observa1,b.nombre as nombre, sum(monto*IF(tipo_doc IN ('AN', 'NC', 'AB'),-1,1)) as saldo, sum(monto*IF(tipo_doc IN ('AN', 'NC', 'AB'),1,0)) as debe, sum(monto*IF(tipo_doc IN ('AN', 'NC', 'AB'),0,1)) as haber"));
+$filter->db->from('sprm a');
+$filter->db->join("sprv b" ,"cod_prv=proveed");
+$filter->db->where("tipo_doc <> 'XX'");
+$filter->db->groupby('cod_prv');
+$this->db->having('saldo<>0');
+
+//$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
+//$filter->fechad->clause  ="where";
+//$filter->fechad->db_name ="a.fecha";
+//$filter->fechad->operator=">=";
+//$filter->fechad->insertValue = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
+//$filter->fechad->group = "Fecha";
+
+$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
+$filter->fechah->clause="where";
+$filter->fechah->insertValue = date("Y-m-d");
+$filter->fechah->db_name="a.fecha";
+$filter->fechah->operator="<=";
+$filter->fechah->group = "Fecha";
+ 
+$filter->cod_prvd = new inputField("Desde", "cod_prvd"); 
+$filter->cod_prvd->clause="where";
+$filter->cod_prvd->db_name="a.cod_prv";
+$filter->cod_prvd->operator=">=";
+$filter->cod_prvd->append($bPrvd);
+$filter->cod_prvd->group="Proveedor";
+
+$filter->cod_prvh = new inputField("Hasta", "cod_prvh");
+$filter->cod_prvh->clause="where";
+$filter->cod_prvh->db_name="a.cod_prv";
+$filter->cod_prvh->operator="<=";
+$filter->cod_prvh->append($bPrvh);
+$filter->cod_prvh->group="Proveedor";
+
+$filter->grupo = new dropdownField("Grupo", "grupo");   
+$filter->grupo->option("","");  
+$filter->grupo->options("SELECT grupo, gr_desc FROM grpr ORDER BY gr_desc"); 
+$filter->grupo->db_name='b.grupo';
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons("search");
+$filter->build();
+
+if($this->rapyd->uri->is_set("search")){
+	$mSQL=$this->rapyd->db->_compile_select();
+	$subtitu='';
+	if(!empty($_POST['cod_prvd'])) $subtitu.=' Desde el proveedor '.$_POST['cod_prvd'];
+	if(!empty($_POST['cod_prvh'])) $subtitu.=' Hasta '.$_POST['cod_prvh'];
+	//echo $mSQL;
+
+	$sobretabla='';
+	if (!empty($filter->grupo->newValue)) $sobretabla.='  Grupo: '.$filter->grupo->description;
+
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Saldos por Pagar al ".dbdate_to_human($filter->fechah->newValue));
+	$pdf->setSubTitulo($subtitu);
+	$pdf->setSobreTabla($sobretabla,7);
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+	$pdf->AddCol('fecha',    20,'Fecha',      'L',7);
+	$pdf->AddCol('cod_prv',  16,'Código',     'L',7);
+	$pdf->AddCol('nombre',   60,'Proveedor',  'L',7);
+	$pdf->AddCol('debe',     20,'Debitos',    'R',7);
+	$pdf->AddCol('haber',    20,'Creditos',   'R',7);
+	$pdf->AddCol('saldo',    20,'Saldo',      'R',7);
+	
+	$pdf->setGrupoLabel('(<#mgascu#>), <#mgasdesc#>');
+	$pdf->setGrupo('mgascu');
+	$pdf->setTotalizar('saldo');
+	$pdf->Table();
+	$pdf->Output();
+			
+}else{
+	$data["filtro"] = $filter->output;
+	$data["titulo"] = '<h2 class="mainheader">Saldos por Pagar<h2>';
+	$data["head"] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

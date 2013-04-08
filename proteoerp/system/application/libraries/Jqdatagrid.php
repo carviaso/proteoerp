@@ -1,4 +1,5 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php 
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
  * Manage datagrid class
@@ -691,6 +692,8 @@ class Jqdatagrid
 		
 		if($this->height){
 			$html  .= $margen.",height:'$this->height'\r\n";
+		} else {
+			$html  .= $margen.",height:'100%'\r\n";
 		}
 
 		if($this->showpager){
@@ -905,7 +908,7 @@ class Jqdatagrid
             
 		if ($this->filterToolbar){
 			$bar .= "\t$(\"#newapi{$this->_gridname}\").jqGrid('filterToolbar');\r\n";
-			$this->return['menosalto'] = 105;
+			$this->return['menosalto'] = 115;
 		} else $this->return['menosalto'] = 90;
 			//$this->_buttons['excel'];
 			$this->return['pager'] = $bar;
@@ -1575,16 +1578,19 @@ class Jqdatagrid
 <div class="anexos">
 <table id="west-grid" align="center">
 	<tr>
-		<td><div class="tema1"><table id="listados"></table></div></td>
+		<td>
+			<div class="tema1"><table id="listados"></table></div>
+		</td>
 	</tr><tr>
-		<td><div class="tema1"><table id="otros"></table></div></td>
+		<td>
+			<div class="tema1"><table id="otros"></table></div>
+		</td>
 	</tr>'."\n";
-		
-		$wlista .= $this->wpadicional;
-		$wlista .='
+	$wlista .= $this->wpadicional;
+	$wlista .='
 </table>
 </div>
-';
+<div id="wbotones">'."\n";
 
 		$wbotones = "<table id='west-grid' align='center'>\n";
 		foreach( $this->Wbotones as $bt  ){
@@ -1592,14 +1598,15 @@ class Jqdatagrid
 			if ( !isset($bt['tema'])) $bt['tema'] = 'tema1'; 
 			$wbotones .= '
 	<tr>
-		<td style="vertical-align:top;"><div class="'.$bt["tema"].' botones"><a style="width:190px;text-align:left;vertical-align:top;" href="#" id="'.$bt["id"].'">'.img(array('src' => $bt["img"],  'height' => $bt['height'], 'alt' => $bt["alt"],  'title' => $bt["alt"], 'border'=>'0')).'&nbsp;&nbsp;&nbsp;&nbsp;'.$bt["label"].'</a></div></td>
+		<td style="vertical-align:top;"><div class="'.$bt["tema"].' botones"><a style="width:190px;text-align:left;vertical-align:top;" href="#" id="'.$bt["id"].'">'.img(array('src' => $bt["img"], 'height' => $bt['height'], 'alt' => $bt["alt"], 'title' => $bt["alt"], 'border'=>'0')).'&nbsp;&nbsp;&nbsp;&nbsp;'.$bt["label"].'</a></div></td>
 	</tr>';
-			
-		}
 
+		}
 
 		$wbotones .= '
 </table>
+</div>
+
 <div class="centro-sur" id="ladicional" style="overflow:auto;"></div>
 </div> <!-- #LeftPane -->
 ';

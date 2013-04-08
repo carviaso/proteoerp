@@ -17,9 +17,15 @@ class Nomina extends Controller {
 		if ( !$this->db->table_exists('view_nomina') ) {
 			$mSQL = "
 			CREATE ALGORITHM = UNDEFINED VIEW view_nomina AS 
-			SELECT `a`.`contrato` AS `contrato`, a.trabaja, `b`.`nombre` AS `nombre`,`a`.`numero` AS `numero`,`a`.`frecuencia` AS `frecuencia`,`a`.`fecha` AS `fecha`,`a`.`fechap` AS `fechap`,`a`.`estampa` AS `estampa`,`a`.`usuario` AS `usuario`,`a`.`transac` AS `transac` 
-			FROM (`nomina` `a` join `noco` `b` on((`a`.`contrato` = `b`.`codigo`))) 
-			GROUP BY `a`.`numero`;";
+			SELECT a.contrato, a.trabaja, b.nombre, a.numero, a.frecuencia, a.fecha, a.fechap, 
+				a.estampa, a.usuario, a.transac, 
+				sum(a.valor*(MID(concepto,1,1)<>'9' AND valor>0 AND concepto<>'PRES')) asigna, 
+				sum(a.valor*(MID(concepto,1,1)<>'9' AND valor<0 AND concepto<>'PRES')) deduc, 
+				sum(a.valor*(MID(concepto,1,1)<>'9')) total, 
+				sum(a.valor*(concepto='PRES')) presta, 
+				sum(a.valor*(MID(concepto,1,1)='9')) patronal 
+			FROM nomina a join noco b on a.contrato = b.codigo 
+			GROUP BY a.numero";
 			$this->db->query($mSQL);
 		}
 	
@@ -28,7 +34,8 @@ class Nomina extends Controller {
 			$this->db->simple_query('ALTER TABLE nomina ADD INDEX numero (numero)');
 			$this->db->simple_query('ALTER TABLE nomina ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};
-		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
+		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -45,7 +52,7 @@ class Nomina extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"regene",   "img"=>"images/repara.png",  "alt" => "Regenerar Nomina", "label"=>"Regenerar Nomina", "tema"=>"anexos"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -55,11 +62,20 @@ class Nomina extends Controller {
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
+		$funciones = '
+		function ltransac(el, val, opts){
+			var meco=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return meco;
+		};
+		';
+
+
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
 		$param['SouthPanel']  = $SouthPanel;
 		$param['listados']    = $this->datasis->listados('NOMI', 'JQ');
 		$param['otros']       = $this->datasis->otros('NOMI', 'JQ');
+		$param['funciones']   = $funciones;
 		$param['temas']       = array('proteo','darkness','anexos1');
 		$param['bodyscript']  = $bodyscript;
 		$param['tabs']        = false;
@@ -73,6 +89,17 @@ class Nomina extends Controller {
 	//***************************
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
+
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};
+		';
+
 
 		$bodyscript .= '
 		function nominaadd(){
@@ -113,11 +140,108 @@ class Nomina extends Controller {
 			}
 		};';
 
+
+		$bodyscript .= '
+		$("#regene").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var mrege = 
+				{
+					state0: {
+						html: "<h1>Regenerar Nomina "+ret.numero+"</h1>Util para asegurar que todos los movimientos relacionados estan efectivamente cargados en el sistema administrativo.",
+						buttons: { Regenerar: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							if (v) {
+								mId = id;
+								$.post("'.site_url($this->url.'nomirege').'/"+ret.numero, function(data){
+									try{
+										var json = JSON.parse(data);
+										if (json.status == "A"){
+											$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(json.mensaje);
+											$.prompt.goToState(\'state1\');
+											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+										}else{
+											$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(json.mensaje);
+											$.prompt.goToState(\'state1\');
+										}
+									}catch(e){
+										$("#fborra").html(data);
+										$("#fborra").dialog( "open" );
+									}
+								});
+								return false;
+							} 
+						}
+					},
+					state1: { 
+						html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
+						focus: 1,
+						buttons: { Ok:true }
+					}		
+				};
+
+				$.prompt(mrege);
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
+
 		$bodyscript .= '
 		function nominadel() {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				if(confirm(" Seguro desea eliminar el registro?")){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var mrever = 
+				{
+					state0: {
+						html: "<h1>Reverar Pre-Nomina "+ret.numero+"</h1>",
+						buttons: { Reversar: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							if (v) {
+								mId = id;
+								$.post("'.site_url($this->url.'nomirev').'/"+ret.numero, function(data){
+									try{
+										var json = JSON.parse(data);
+										if (json.status == "A"){
+											$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(json.mensaje);
+											$.prompt.goToState(\'state1\');
+											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+										}else{
+											$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(json.mensaje);
+											$.prompt.goToState(\'state1\');
+											apprise("Registro no se puede eliminado");
+										}
+									}catch(e){
+										$("#fborra").html(data);
+										$("#fborra").dialog( "open" );
+									}
+								});
+								return false;
+							} 
+						}
+					},
+					state1: { 
+						html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
+						focus: 1,
+						buttons: { Ok:true }
+					}		
+				};
+
+				$.prompt(mrever);
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};
+		';
+
+/*
+		$bodyscript .= '
+		function nominadel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				$.prompt(
+				if(confirm("Seguro desea eliminar el registro?")){
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
 					mId = id;
 					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
@@ -135,10 +259,15 @@ class Nomina extends Controller {
 						}
 					});
 				}
+	
+				
+				
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+*/
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function(){
@@ -251,29 +380,28 @@ class Nomina extends Controller {
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
 
+		$grid->addField('fecha');
+		$grid->label('Fecha');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
 		$grid->addField('contrato');
 		$grid->label('Contrato');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
-
-
-		$grid->addField('trabaja');
-		$grid->label('Personal');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
 
 		$grid->addField('nombre');
 		$grid->label('Nombre');
@@ -298,16 +426,78 @@ class Nomina extends Controller {
 			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
 
-		$grid->addField('fecha');
-		$grid->label('Fecha');
+		$grid->addField('total');
+		$grid->label('Total');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 70,
-			'align'         => "'center'",
+			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('asigna');
+		$grid->label('Asigna');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('deduc');
+		$grid->label('Deduc');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('presta');
+		$grid->label('Presta');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('patronal');
+		$grid->label('Patronal');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
 		$grid->addField('fechap');
@@ -315,20 +505,30 @@ class Nomina extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 70,
+			'width'         => 80,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
+		$grid->addField('trabaja');
+		$grid->label('Trabaja');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:8, maxlength: 8 }',
+		));
 
 		$grid->addField('estampa');
 		$grid->label('Estampa');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 70,
+			'width'         => 80,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
@@ -341,7 +541,7 @@ class Nomina extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 120,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:12, maxlength: 12 }',
@@ -353,12 +553,12 @@ class Nomina extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 70,
+			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
+			'formatter'     => 'ltransac'
 		));
-
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -436,6 +636,7 @@ class Nomina extends Controller {
 				echo "Fallo Agregado!!!";
 
 		} elseif($oper == 'edit') {
+/*
 			$nuevo  = $data[$mcodp];
 			$anterior = $this->datasis->dameval("SELECT $mcodp FROM nomina WHERE id=$id");
 			if ( $nuevo <> $anterior ){
@@ -453,7 +654,7 @@ class Nomina extends Controller {
 				logusu('NOMINA',"Grupo de Cliente  ".$nuevo." MODIFICADO");
 				echo "$mcodp Modificado";
 			}
-
+*/
 		} elseif($oper == 'del') {
 			$meco = $this->datasis->dameval("SELECT $mcodp FROM nomina WHERE id=$id");
 			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM nomina WHERE id='$id' ");
@@ -468,6 +669,381 @@ class Nomina extends Controller {
 
 	}
 
+
+	//******************************
+	//      REVERSAR NOMINA
+	//
+	function nomirev( $nomina = 0 ) {
+		if ( $nomina == 0)
+			$nomina = $this->uri->segment($this->uri->total_segments());
+		
+		if ( $nomina == 0) {
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>'Numero de nomina invalido',
+				'pk'     => $nomina
+			);
+			echo json_encode($rt);
+			return true;
+		}
+
+		if ($this->datasis->dameval('SELECT COUNT(*) FROM nomina WHERE numero="'.$nomina.'"') == 0 ) {
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>'NO EXISTE NINGUNA NOMINA CON ESE NUMERO!',
+				'pk'     => $nomina
+			);
+			echo json_encode($rt);
+			return true;
+		}
+
+		if ($this->datasis->dameval("SELECT COUNT(*) FROM nomina") == 0 ){
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>'No hay ninguna Nomina Generada; genere una primero',
+				'pk'     => $nomina
+			);
+			echo json_encode($rt);
+			return true;
+		}
+
+		$mSQL  = "SELECT fecha, fechap, contrato, trabaja, transac FROM nomina WHERE numero=".$nomina." LIMIT 1";
+		$mreg  = $this->datasis->damereg($mSQL);
+
+		$fecha    = $mreg['fecha'];
+		$fechap   = $mreg['fechap'];
+		$contrato = $mreg['contrato'];
+		$trabaja  = $mreg['trabaja'];
+		$transac  = $mreg['transac'];
+		$gsernum  = '';
+
+		$mSQL = "SELECT b.tipo FROM prenom a JOIN noco b ON a.contrato=b.codigo LIMIT 1";
+		$frec = $this->datasis->dameval($mSQL);
+
+		// VERIFICA SI NO ESTA PAGADA
+		$mSQL = "SELECT abonos FROM sprm WHERE transac='".$transac."' AND tipo_doc IN ('ND') ";
+		if ($this->datasis->dameval($mSQL) > 0) {
+			echo "NOMINA TIENE CANCELACIONES;NO SE PUEDE ELIMINAR ";
+			return true;
+		}
+
+		// ELIMINA POR TRANSACCION GENERAR ITEMS 
+		$this->db->query("DELETE FROM gser   WHERE transac='".$transac."'");
+		$this->db->query("DELETE FROM gitser WHERE transac='".$transac."'");
+
+		// GENERA CXP
+		$this->db->query("DELETE FROM sprm WHERE transac='".$transac."'");
+
+		// PRESTAMOS
+		$mSQL = "SELECT * FROM smov WHERE num_ref=".$nomina." AND transac='".$transac."' ";
+		$query = $this->db->query($mSQL);
+
+		if ($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+
+				$COD_CLI  = $row->cod_cli;
+				$TIPO_DOC = $row->tipo_doc;
+				$NUMERO   = $row->numero;
+				$FECHA    = $row->fecha;
+				$MONTO    = $row->monto;
+
+				$mSQL= "DELETE FROM smov 
+						WHERE cod_cli='".$COD_CLI."' AND 
+							tipo_doc='".$TIPO_DOC."' AND fecha='".$FECHA."'
+							AND numero='".$NUMERO."' AND transac='".$transac."' ";
+				$this->db->query($mSQL);
+
+				// DESCARGA EL MOVIMIENTO EN ITCCLI
+				$mSQL= "SELECT abono, tipo_doc, numero, cod_cli, fecha FROM itccli 
+						WHERE numccli='".$NUMERO."' AND tipoccli='".$TIPO_DOC."' 
+						AND cod_cli='".$COD_CLI."' AND transac='".$transac."' ";
+				$mREG = $this->datasis->damereg($mSQL);
+
+				$mSQL= "DELETE FROM itccli 
+						WHERE numccli='".$NUMERO."' AND tipoccli='".$TIPO_DOC."' 
+						AND cod_cli='".$COD_CLI."' AND transac='".$transac."' ";
+				$this->db->query($mSQL);
+
+				// ACTUALIZA EL DOCUMENTO ORIGEN
+				$mSQL = "UPDATE smov SET abonos=abonos-".$mREG['abono']." 
+				WHERE tipo_doc='".$mREG['tipo_doc']."' AND 
+				numero='".$mREG['numero']."' AND 
+				cod_cli='".$mREG['cod_cli']."' AND fecha='".$mREG['fecha']."'";
+
+				$this->db->query($mSQL);
+			}
+		}
+
+		$this->nomprenom($nomina);
+
+		$mSQL  = "DELETE FROM nomina WHERE numero='".$nomina."'";
+		$this->db->query($mSQL);
+
+		logusu('NOMI',"NOMINA $nomina REVERSADA");
+
+		$rt=array(
+			'status' =>'A',
+			'mensaje'=>'Nomina Reversada',
+			'pk'     => $nomina
+		);
+		echo json_encode($rt);
+
+
+	}
+
+	//***************************************
+	//
+	//  DEVUELVE LA NOMINA A PRENOMINA
+	//
+	function nomprenom( $nomina) {
+
+		$mreg = $this->datasis->damereg("SELECT fecha, fechap, contrato, trabaja, frecuencia FROM nomina WHERE numero='".$nomina."' LIMIT 1");
+
+		$fecha    = $mreg['fecha'];
+		$fechap   = $mreg['fechap'];
+		$contrato = $mreg['contrato'];
+		$trabaja  = $mreg['trabaja'];
+		$frec     = $mreg['frecuencia'];
+
+		// MANDA LA NOMINA DE REGRESO A PRENOM
+		$mSQL = "TRUNCATE prenom ";
+		$this->db->query($mSQL);
+
+		$mSQL ="INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, tipo, descrip, grupo, formula, monto, fecha, valor,fechap, trabaja ) 
+				SELECT contrato, codigo, nombre, concepto, tipo, descrip, grupo, formula, monto, fecha, valor, fechap, trabaja FROM nomina 
+				WHERE numero='".$nomina."' AND concepto<>'PRES' ";
+		$this->db->query($mSQL);
+
+		$mSQL = "
+			INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) 
+			SELECT '".$contrato."', b.codigo, CONCAT(RTRIM(b.apellido),'/',b.nombre) nombre,
+			a.concepto, c.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fechap."' 
+			FROM asig a JOIN pers b ON a.codigo=b.codigo 
+			JOIN conc c ON a.concepto=c.concepto 
+			WHERE b.tipo='".$frec."' AND b.contrato='".$contrato."' AND b.status='A' ";
+		$this->db->query($mSQL);
+
+		$mSQL = "
+			INSERT IGNORE INTO prenom (contrato, codigo,nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) 
+			SELECT '".$contrato."', b.codigo, CONCAT(RTRIM(b.apellido),'/',b.nombre) nombre, 
+				a.concepto, a.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fecha."' 
+			FROM conc a JOIN itnoco c ON a.concepto=c.concepto 
+			JOIN pers b ON b.contrato=c.codigo WHERE c.codigo='".$contrato."' AND b.status='A' ";
+		$this->db->query($mSQL);
+
+		$this->db->query("UPDATE prenom SET trabaja='".$trabaja."'");
+
+		$this->load->library('pnomina');
+		$this->pnomina->creapretab();
+		$this->pnomina->llenapretab();
+
+
+	}
+
+
+
+	//******************************************************************
+	//  REGENRA LA NOMINA SIN BORRARLA
+	//
+	function nomirege( $nomina ) {
+
+		$mNOMI = $this->datasis->dameval("SELECT ctaac FROM conc WHERE formula='XSUELDO' ");
+
+		//COLOCAR + LAS NOMINAS
+		$mSQL = "UPDATE nomina SET valor=ABS(valor) WHERE MID(concepto,1,1)='9' ";
+		$this->db->query($mSQL);
+
+		$mSQL = 'SELECT COUNT(*) FROM nomina WHERE numero="'.$nomina.'"';
+		if ($this->datasis->dameval($mSQL) == 0 ) {
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>'NO EXISTE NINGUNA NOMINA CON EL NUMERO '.$nomina,
+				'pk'     => $nomina
+			);
+			echo json_encode($rt);
+			return true;
+		}
+
+		$mreg = $this->datasis->damereg('SELECT transac, fecha FROM nomina WHERE numero="'.$nomina.'"');
+		$mTRANSAC = $mreg['transac'];
+		$FECHA    = $mreg['fecha'];
+
+		$mSQL = "DELETE FROM gitser WHERE transac='".$mTRANSAC."' ";
+		$this->db->query($mSQL);
+
+		$mSQL= "INSERT INTO gitser (fecha, numero, proveed, codigo, descrip, precio, iva, importe, unidades, fraccion, almacen, departa, sucursal, usuario, estampa, transac) 
+				SELECT a.fechap fecha, a.numero, b.ctaac proveed, b.ctade codigo,   CONCAT(RTRIM(b.descrip),' ',d.depadesc) descrip, SUM(a.valor), 0, SUM(a.valor), 0, 0, '', d.enlace, c.sucursal, a.usuario, a.estampa, a.transac  
+				FROM nomina a JOIN conc b ON a.concepto=b.concepto JOIN pers c ON a.codigo=c.codigo JOIN depa d ON c.depto=d.departa 
+				WHERE valor<>0 AND tipod='G' AND a.numero='".$nomina."' GROUP BY ctade, d.enlace ";
+		$this->db->query($mSQL);
+
+		//GENERA EL ENCABEZADO DE GSER
+		$mSQL = "DELETE FROM gser WHERE  transac='".$mTRANSAC."' ";
+		$this->db->query($mSQL);
+
+		$mSQL= "INSERT INTO gser (fecha, numero, proveed, nombre, vence, totpre,  totiva, totbruto, reten, totneto, codb1, tipo1, cheque1, monto1, credito, anticipo, orden, tipo_doc, usuario, estampa, transac) 
+				SELECT a.fechap fecha, a.numero numero, b.ctaac proveed, d.nombre, a.fechap vence, SUM(a.valor) totpre, 0 totiva, SUM(a.valor) totbruto, 0 reten, SUM(a.valor) totneto, '' codb1, '' tipo1, '' cheque1, 
+					(
+						SELECT ABS(SUM(bbb.monto)) FROM (SELECT sum(d.valor) monto FROM nomina d JOIN conc e ON d.concepto=e.concepto JOIN pers f ON d.codigo=f.codigo WHERE d.valor<>0 AND e.tipod!='G' AND d.numero='".$nomina."' 
+						UNION ALL 
+						SELECT SUM(valor) monto FROM nomina g WHERE g.numero='".$nomina."' AND g.concepto='PRES' ) bbb)*(b.ctaac='".$mNOMI."'
+					) monto1, 
+					sum(a.valor)+(
+						SELECT SUM(valor) FROM (SELECT sum(valor) valor FROM nomina a JOIN conc b ON a.concepto=b.concepto JOIN pers c ON a.codigo=c.codigo WHERE valor<>0 AND tipod!='G' AND a.numero='".$nomina."' 
+						UNION ALL 
+						SELECT SUM(valor) FROM nomina a WHERE a.numero='".$nomina."' AND concepto='PRES' ) aaa)*(b.ctaac='".$mNOMI."') credito, 
+					0 anticipo, '', 'GA', a.usuario, a.estampa, a.transac FROM nomina a JOIN conc b ON a.concepto=b.concepto 
+				JOIN pers c ON a.codigo=c.codigo JOIN sprv d ON ctaac=d.proveed 
+				WHERE valor<>0 AND tipod='G' AND a.numero='".$nomina."' GROUP BY ctaac ";
+		$this->db->query($mSQL);
+
+		//Borras los que empiezan por N
+		$mSQL = "DELETE FROM sprm WHERE transac='".$mTRANSAC."' AND numero='N".substr($nomina,1,7)."' ";
+		$this->db->query($mSQL);
+
+		// GENERA LAS ND EN PROVEEDORES SPRM
+		// debe revisar cuales esta
+		$mSQL= "SELECT b.ctaac, a.fechap fecha, sum(valor) valor, d.nombre, b.descrip 
+				FROM nomina a JOIN conc b ON a.concepto=b.concepto 
+				JOIN pers c ON a.codigo=c.codigo 
+				JOIN sprv d ON b.ctaac=d.proveed 
+				WHERE a.valor<>0 AND b.tipod='P' AND b.tipoa='P' AND a.numero='".$nomina."'
+				GROUP BY b.ctaac ";
+
+		$query = $this->db->query($mSQL);
+
+		if ($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+
+				$data = array();
+				$data["cod_prv"]  = $row->ctaac;
+				$data["nombre"]   = $row->nombre; 
+				$data["tipo_doc"] = 'ND';
+				$data["fecha"]    = $row->fecha;
+				$data["monto"]    = abs($row->valor);
+				$data["vence"]    = $row->fecha;
+				$data["tipo_ref"] = 'GA';
+				$data["num_ref"]  = $nomina;
+				$data["observa1"] = $row->descrip;
+				$data["observa2"] = $row->nomina;
+				$data["reteiva"]  = 0;
+				$data["codigo"]   = $row->nocon;
+				$data["descrip"]  = $row->nomina;
+				$data["impuesto"] = 0;
+
+				$mSQL = "SELECT COUNT(*) FROM sprm WHERE transac='".$mTRANSAC."' AND cod_prv='".$row->ctaac."' AND tipo_doc='ND' AND fecha='".$row->fecha."' AND numero<>'".$nomina."'";
+				if ( $this->datasis->dameval($mSQL) == 0 ){
+					//SI NO ESTA
+					$mCONTROL = $this->datasis->fprox_numero("nsprm");
+					$mNOTADEB = $this->datasis->fprox_numero("num_nd");
+					
+					$data["NUMERO"]  = $mNOTADEB;
+					$data["ABONOS"]  = 0;
+					$data["CONTROL"] = $mCONTROL;
+
+					$this->db->insert('sprm', $data);
+					//mSQL := "INSERT INTO sprm SET "
+					//aVALORES := {}
+					//LLENASQL(@mSQL, @aVALORESs, aLISTA, mTRANSAC )
+				} else {
+					$mSQL = "SELECT numero, abonos, control, id FROM sprm WHERE transac='".$mTRANSAC."' AND cod_prv='".$row->ctaac."' AND tipo_doc='ND' AND fecha='".$row->fecha."'";
+					$mREG = $this->datasis->damereg($mSQL);
+					$data["NUMERO"]  = $mREG['numero'];
+					$data["ABONOS"]  = $mREG['abonos'];
+					$data["CONTROL"] = $mREG['control'];
+					
+					$this->db->update('sprm', $data, "id=".$mREG['id']);
+				}
+				$this->db->query($mSQL);
+			}
+		}
+
+
+		$mSQL = "DELETE FROM sprm WHERE transac='".$mTRANSAC."' AND numero='".$nomina."'";
+		$this->db->query($mSQL);
+
+		$mSQL= "INSERT IGNORE INTO sprm (tipo_doc, fecha, numero, cod_prv, nombre, vence, monto, impuesto, tipo_ref, num_ref, codigo, descrip, usuario, estampa, transac, observa1 ) 
+				SELECT 'ND' tipo_doc, fecha, '".$nomina."'  numero, proveed, nombre, vence, credito, 0, 'GA', '' ,'NOCON', 'NOMINA', usuario, estampa, transac, 'NOMINA ' 
+				FROM gser WHERE tipo_doc='GA' AND numero='".$nomina."' ";
+		$this->db->query($mSQL);
+
+
+/*
+mPRESTAMO := {}
+
+// PRESTAMOS
+mSQL := "SELECT b.cod_cli, b.nombre, b.tipo_doc, b.numero, b.fecha, a.codigo, a.nombre, "
+mSQL += "IF(b.monto-b.abonos-a.cuota>0,a.cuota,b.monto-b.abonos) cuota, b.monto "
+mSQL += "FROM pres a JOIN smov b ON a.cod_cli=b.cod_cli AND a.tipo_doc=b.tipo_doc AND a.numero=b.numero "
+mSQL += "WHERE a.codigo IN (SELECT codigo FROM prenom GROUP BY codigo) "
+mSQL += "AND b.monto>b.abonos AND a.apartir<="+DTOS(XFECHA)+" "
+
+mSQL := "SELECT * FROM nomina a JOIN pers b ON a.codigo=b.codigo LEFT JOIN smov c ON a.transac=c.transac AND b.enlace=c.cod_cli AND ABS(a.valor)=c.monto "
+mSQL += "WHERE a.concepto='PRES' AND a.numero='"+mNOMINA+"' AND a.valor<>0 AND c.cod_cli IS NULL"
+
+mC := DAMECUR(mSQL)
+DO WHILE !mC:EoF()
+	mCONTROL := PROX_SQL("nsmov")
+	mNOTACRE := PROX_SQL("nccli")
+	aLISTA := {}
+	AADD(aLISTA, { "COD_CLI",  mC:FieldGet('COD_CLI') } )
+	AADD(aLISTA, { "NOMBRE",   mC:FieldGet('NOMBRE') } ) 
+	AADD(aLISTA, { "TIPO_DOC", 'NC' } )
+	AADD(aLISTA, { "NUMERO",   mNOTACRE } )
+	AADD(aLISTA, { "FECHA",    XFECHAP } )
+	AADD(aLISTA, { "MONTO",    ABS(mC:FieldGet('CUOTA')) } )
+	AADD(aLISTA, { "IMPUESTO", 0 } )
+	AADD(aLISTA, { "VENCE",    XFECHAP } )
+	AADD(aLISTA, { "ABONOS",   ABS(mC:FieldGet('CUOTA')) } )
+	AADD(aLISTA, { "TIPO_REF", 'GA' } )
+	AADD(aLISTA, { "NUM_REF",  mNOMINA } )
+	AADD(aLISTA, { "OBSERVA1", 'PAGO A '+mC:FieldGet('TIPO_DOC')+mC:FieldGet('NUMERO') } )
+	AADD(aLISTA, { "OBSERVA2", 'POR DESCUENTO DE NOMINA' } )
+	AADD(aLISTA, { "CONTROL",  mCONTROL } )
+	AADD(aLISTA, { "CODIGO",   'NOCON' } )
+	AADD(aLISTA, { "DESCRIP",  'NOMINA' } )
+
+	mSQL := "INSERT INTO smov SET "
+	aVALORES := {}
+	LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
+	EJECUTASQL(mSQL,aVALORES)
+
+	// ACTUALIZA EL DOCUMENTO ORIGEN
+   
+	mSQL := "UPDATE smov SET abonos=abonos+"+STR(ABS(mC:FieldGet('CUOTA')))
+	mSQL += " WHERE tipo_doc='"+mC:FieldGet('TIPO_DOC')+"' "
+	mSQL += " AND numero='"+mC:FieldGet('NUMERO')+"' "
+	mSQL += " AND cod_cli='"+mC:FieldGet('COD_CLI')+"' AND fecha="+DTOS(mC:FieldGet('FECHA'))+" LIMIT 1"
+
+	EJECUTASQL(mSQL) //, { ABS(mC:FieldGet('CUOTA')),mC:FieldGet('TIPO_DOC'), mC:FieldGet('NUMERO'), mC:FieldGet('COD_CLI'), mC:FieldGet('FECHA')  })
+
+	// CARGA EL MOVIMIENTO EN ITCCLI
+	mSQL := "INSERT INTO itccli (numccli, tipoccli, cod_cli, tipo_doc, numero, fecha, monto, abono, transac, estampa, hora, usuario ) "
+	mSQL += "VALUES             (  ?,       'NC',    ?,       ?,        ?,      ?,     ?,     ?,      ?,     now(),     ?,     ?     )"
+	EJECUTASQL(mSQL, { mNOTACRE, mC:FieldGet('COD_CLI'), mC:FieldGet('TIPO_DOC'), mC:FieldGet('NUMERO'), mC:FieldGet('FECHA'),  mC:FieldGet('MONTO'), ABS(mC:FieldGet('CUOTA')), mTRANSAC, TIME(), ms_CODIGO })
+	AADD(mPRESTAMO, { mC:FieldGet('CODIGO'), mC:FieldGet('NOMBRE'), mC:FieldGet('CUOTA')  } )
+
+	mC:Skip()
+ENDDO
+mC:Destroy()
+*/
+
+			logusu('NOMI',"NOMINA $nomina REGENERADA");
+
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'NOMINA REGENERADA '.$nomina,
+				'pk'     => $nomina
+			);
+			echo json_encode($rt);
+
+
+	}
+
+
+
+
+/*
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 		$script= '
@@ -620,6 +1196,7 @@ class Nomina extends Controller {
 		}
 	}
 
+
 	function _pre_insert($do){
 		$do->error_message_ar['pre_ins']='';
 		return true;
@@ -691,56 +1268,7 @@ class Nomina extends Controller {
 
 
 /*
-	function Nomina(){
-		parent::Controller(); 
-		$this->load->library("rapyd");
-	}
 
-	function index(){
-		$this->datasis->modulo_id(712,1);
-		//redirect("nomina/nomina/filteredgrid");
-		redirect("nomina/nomina/extgrid");
-	}
-
-	function extgrid(){
-		$script = $this->nomiextjs();
-		$data["script"] = $script;
-		$data['title']  = heading('Nomina');
-		$this->load->view('extjs/noco',$data);
-	}
-
-	function filteredgrid(){
-		$this->rapyd->load("datafilter","datagrid");
-		$this->rapyd->uri->keep_persistence();
-
-		$filter = new DataFilter("Filtro de Nomina", 'nomina');
-		
-		$filter->nombre = new inputField("Nombre", "nombre");
-		
-		$filter->descrip = new inputField("Descripci&oacute;n", "descrip");
-		
-		$filter->buttons("reset","search");
-		$filter->build();
-
-		$uri = anchor('nomina/nomina/dataedit/show/<#id#>','<#numero#>');
-
-		$grid = new DataGrid("Lista de Nomina");
-		$grid->order_by("numero","asc");
-		$grid->per_page = 10;
-		$grid->column("N&uacute;mero",$uri);
-		$grid->column("Nombre","nombre");
-		$grid->column("Descripci&oacute;n","descrip");
-		$grid->column("Formula","formula");
-		$grid->column("Fecha","fecha");
-		$grid->add("nomina/nomina/dataedit/create");
-		$grid->build();
-		
-		$data['content'] = $filter->output.$grid->output;
-		$data['title']   = "<h1>Nomina</h1>";
-		$data["head"]    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
-	}
-	
 	function dataedit(){
 		$this->rapyd->load("dataedit");
 		$edit = new DataEdit("clientes", "nomina");

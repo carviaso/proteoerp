@@ -618,7 +618,7 @@ Para <b>ELIMINAR</b> un concepto del contrato, seleccione uno y haga doble click
 		$grid->setEdit(true);
 		$grid->setDelete(true);
 		$grid->setSearch(true);
-		$grid->setRowNum(30);
+		$grid->setRowNum(300);
 		$grid->setShrinkToFit('false');
 
 		#GET url

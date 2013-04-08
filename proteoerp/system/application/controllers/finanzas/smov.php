@@ -54,7 +54,6 @@ class Smov extends Controller {
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
@@ -256,7 +255,7 @@ class Smov extends Controller {
 		$grid->label('Monto');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => 'false',
+			'editable'      => 'true',
 			'align'         => "'right'",
 			'edittype'      => "'text'",
 			'width'         => 100,

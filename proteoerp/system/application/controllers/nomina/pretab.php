@@ -35,9 +35,10 @@ class Pretab extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'genepre',  'img'=>'images/star.png', 'alt'=>'Genera Prenomina',     'label'=>'Genera Prenomina'));
-		$grid->wbotonadd(array('id'=>'respalda', 'img'=>'images/star.png', 'alt'=>'Respaldar Prenominas', 'label'=>'Respaldar/Recuperar'));
-		$grid->wbotonadd(array('id'=>'genenom',  'img'=>'images/star.png', 'alt'=>'Actualiar Nomina',        'label'=>'Genera Nomina'));
+		$grid->wbotonadd(array('id'=>'genepre',  'img'=>'images/engrana.png',       'alt'=>'Genera Prenomina',      'label'=>'Genera Prenomina',      'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'respalda', 'img'=>'images/database_link.png', 'alt'=>'Respaldar Prenominas',  'label'=>'Respaldar/Recuperar',   'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'genenom',  'img'=>'images/databaseadd.png',   'alt'=>'Guardar la Pre-Nomina', 'label'=>'Guardar la Pre-Nomina', 'tema'=>'anexos'));
+		$grid->wbotonadd(array("id"=>"regene",   "img"=>"images/repara.png",        'alt'=>'Regenerar Pre Nomina',  'label'=>'Regenerar Pre Nomina',  'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -64,44 +65,98 @@ class Pretab extends Controller {
 	//  Funciones de los Botones
 	//
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
+
 
 		// Prepara Prenomina
-		$bodyscript .= '
-		$("#genepre").click( function() {
-			$.post("'.base_url().'nomina/prenom/",
-			function(data){
-				$("#fedita").dialog( {height: 230, width: 450, title: "Generar Pre-Nomina"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
 
-		// Guarda Nomina
-/*
+		$noco = $this->datasis->llenaopciones("SELECT codigo, CONCAT(codigo,' ', tipo, ' ', nombre) FROM noco ORDER BY codigo", false, 'mcontrato');
+		$noco = str_replace('"',"'",$noco);
+
 		$bodyscript .= '
-		$("#genenom").click( function() {
-			$.prompt("Generar Nomina", {
+		var mcome1 = "<h1>Generar Pre-Nomina</h1>"+
+			"<center><p>Seleccione el Contrato:</p>"+"'.$noco.'</center><br>"+
+			"<table align=\'center\'>"+
+			"<tr><td>Fecha de Corte: </td><td><input id=\'mfechac\' name=\'mfechac\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
+			"<tr><td>Fecha de Pago:  </td><td><input id=\'mfechap\' name=\'mfechap\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
+			"</table>"
+		;
+		var mprepanom = 
+		{
+			state0: {
+				html: mcome1,
 				buttons: { Generar: true, Cancelar: false },
 				submit: function(e,v,m,f){
+					mnuevo = f.mcodigo;
 					if (v) {
-						$.post("'.site_url($this->url.'nomina').'/", 
+						$.post("'.site_url('nomina/prenom/geneprenom').'/", { contrato: f.mcontrato , fechac: f.mfechac , fechap: f.mfechac }, 
 							function(data){
-								//jQuery.prompt.getStateContent(\'state1\').find(\'#in_prom\').text(data);									
-								//jQuery.prompt.goToState(\'state1\');
-								//jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-								alert(data);
+								$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
+								$.prompt.goToState(\'state1\');
+								$("#newapi'.$grid0.'").trigger("reloadGrid");
 						});
-					}
+						return false;
+					} 
 				}
-			});
+			},
+			state1: { 
+				html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
+				focus: 1,
+				buttons: { Ok:true }
+			}		
+		};
+		$("#genepre").click( function() 
+		{
+			$.prompt(mprepanom);
+			$("#mfechac").datepicker({dateFormat:"dd/mm/yy"});
+			$("#mfechap").datepicker({dateFormat:"dd/mm/yy"});
 		});
 		';
-*/
+
+		$bodyscript .= '
+		$("#regene").click( function(){
+			var mrege = 
+			{
+				state0: {
+					html: "<h1>Regenerar Pre Nomina </h1>Regenra la nomina si se hicieron cambios en los trabajadores, contratos o conceptos.",
+					buttons: { Regenerar: true, Cancelar: false },
+					submit: function(e,v,m,f){
+						if (v) {
+							$.post("'.site_url('nomina/prenom/regenepre').'", function(data){
+								//try{
+									var json = JSON.parse(data);
+									if (json.status == "A"){
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(json.mensaje);
+										$.prompt.goToState(\'state1\');
+										$("#newapi'.$grid0.'").trigger("reloadGrid");
+									}else{
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(json.mensaje);
+										$.prompt.goToState(\'state1\');
+									}
+								//}catch(e){
+								//	$("#fborra").html(data);
+								//	$("#fborra").dialog( "open" );
+								//}
+							});
+							return false;
+						} 
+					}
+				},
+				state1: { 
+					html: "<h1>Resultado</h1><span id=\'in_prome3\'></span>",
+					focus: 1,
+					buttons: { Ok:true }
+				}		
+			};
+
+			$.prompt(mrege);
+			
+		});';
 
 
-		// Respaldar y Recuperar Nomina
+
+
+		// Guarda Nomina
 		$bodyscript .= '
 		var mguardanom = 
 		{
@@ -111,9 +166,9 @@ class Pretab extends Controller {
 				submit: function(e,v,m,f){
 					mnuevo = f.mcodigo;
 					if (v) {
-						$.post("'.site_url($this->url.'nomina').'/", 
+						$.post("'.site_url($this->url.'nomina').'/",  
 							function(data){
-								jQuery.prompt.getStateContent(\'state1\').find(\'#in_prom1\').text(data);
+								jQuery.prompt.getStateContent(\'state1\').find(\'#in_prome1\').text(data);
 								jQuery.prompt.goToState(\'state1\');
 								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 						});
@@ -289,6 +344,8 @@ class Pretab extends Controller {
 			var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
+
+
 			';
 
 
@@ -577,7 +634,7 @@ class Pretab extends Controller {
 
 		$grid->showpager(true);
 		$grid->setWidth('');
-		$grid->setHeight('290');
+		$grid->setHeight(290);
 		$grid->setTitle($titulo.' Trabajadores:'.$cana);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
@@ -710,8 +767,6 @@ class Pretab extends Controller {
 
 		$edit->back_url = site_url('nomina/pretab/index');
 
-		//$edit->on_save_redirect=false;
-
 		
 		if ( empty($mReg) ){
 			echo 'Registro no encontrado '.$id;
@@ -823,22 +878,6 @@ class Pretab extends Controller {
 	//
 	function nomina(){
 
-/*	
-LOCAL mTEMPO, mC, mREG, mTRANSAC, mNOMINA, mPRESTAMO := {}
-PRIVATE XFECHA, XCONTRATO, XTRABAJA, XFECHAP, XPPROME := 3
-
-RECUADRO(5,10,20,74,,' /W',' Nomina ')
-IF CMNJ(" ¨ Desea Guardar la Nomina y hacer los enlaces; administrativos Correspondientes ? ",{'Guardar','Cancelar'}) = 2
-   PRETABLA()
-   RETURN .t.
-ENDIF
-
-IF DAMEVAL("SELECT COUNT(*) FROM prenom",,'N') = 0
-   CMNJ("No hay ninguna Nomina Generada; generela una primero")
-   RETURN .T.
-ENDIF
-*/
-
 		$mreg     = $this->datasis->damereg("SELECT fecha, contrato, trabaja, fechap FROM prenom LIMIT 1");
 
 		$fecha    = $mreg['fecha'];
@@ -852,18 +891,6 @@ ENDIF
 			echo "Nomina ya Guardada debe eliminarla primero!!";
 			return false;
 		}
-
-/*
-// RECALCULAR PRENOM
-RECUADRO(7,20,13,60)
-@ 8,25 SAY "RECALCULANDO MONTOS....."
-mC := DAMECUR("SELECT a.*, CONCAT(RTRIM(b.nombre),' ',RTRIM(b.apellido)) FROM pretab a JOIN pers b ON a.codigo=b.codigo GROUP BY codigo ")
-DO WHILE !mC:EOF()
-	@ 10,25 SAY PADR(mC:FieldGet('NOMBRE'),30)
-	TABSUMA( .T., mC:FieldGet('CODIGO') )
-	mC:Skip()
-ENDDO
-*/
 
 		$mNOMINA  = $this->datasis->fprox_numero("nnomina");
 		$mGSERNUM = $this->datasis->fprox_numero("ngser");
@@ -1011,10 +1038,6 @@ ENDDO
 				AND cod_cli='".$row->cod_cli."' AND fecha='".$row->fecha."' LIMIT 1";
 				$this->db->query($mSQL);   // { ABS(mC:FieldGet('CUOTA')),mC:FieldGet('TIPO_DOC'), mC:FieldGet('NUMERO'), mC:FieldGet('COD_CLI'), mC:FieldGet('FECHA')  })
 		
-				// CARGA EL MOVIMIENTO EN ITCCLI
-				//$mSQL = "INSERT INTO itccli (numccli, tipoccli, cod_cli, tipo_doc, numero, fecha, monto, abono, transac, estampa, hora, usuario ) "
-				//mSQL = "VALUES             (  ?,       'NC',    ?,       ?,        ?,      ?,     ?,     ?,      ?,     now(),     ?,     ?     )"
-
 				$data = array();
 				$data['numccli']  = $mNOTACRE;
 				$data['tipoccli'] = 'NC';
@@ -1045,8 +1068,6 @@ ENDDO
 
 		// MANDA LOS PRESTAMOS
 		foreach ( $mPRESTAMO as $meco ) {
-			//$mSQL = "INSERT INTO nomina SET ";
-			//          1         2            3           4       5         6                                                                                               7       8
 			$mDEPTO = $this->datasis->dameval("SELECT depto FROM pers WHERE codigo='".$mPRESTAMO[0]."'");
 
 			$data = array();
@@ -1073,13 +1094,11 @@ ENDDO
 			$data["trabaja"]    = $trabaja; 
 			$this->db->insert('nomina', $data);
 
-			//              1       2       3          4            5           6               7            8              9       10
-			//mVALORES := {, , XCONTRATO, mDEPTO, mPRESTAMO[i,1], mPRESTAMO[i,2],DTOS(XFECHA),-1*mPRESTAMO[i,3], ms_CODIGO, mTRANSAC, XFECHAP, XTRABAJA }
-			//EJECUTASQL(mSQL,mVALORES)
 		}
 
 		$this->db->query("TRUNCATE prenom");
 		$this->db->query("TRUNCATE pretab");
+		logusu('NOMI',"NOMINA $mNOMINA CREADA");
 		
 		echo "Nomina Guardada";
 

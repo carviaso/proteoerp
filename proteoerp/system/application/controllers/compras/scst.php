@@ -1603,7 +1603,7 @@ class Scst extends Controller {
 		$grid->setEdit(true);
 		$grid->setDelete(true);
 		$grid->setSearch(true);
-		$grid->setRowNum(30);
+		$grid->setRowNum(300);
 		$grid->setShrinkToFit('false');
 
 		#Set url
