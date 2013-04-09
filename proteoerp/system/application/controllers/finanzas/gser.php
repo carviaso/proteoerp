@@ -75,7 +75,7 @@ class gser extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'creamga', 'img'=>'images/agrega4.png' , 'alt' => 'Crear gasto caja chica', 'label'=>'Gasto caja chica' ));
-		$grid->wbotonadd(array('id'=>'creaprv', 'img'=>'images/agrega4.png' , 'alt' => 'Imprimir Retención'    , 'label'=>'Crea Proveedor'   ));
+		$grid->wbotonadd(array('id'=>'creaprv', 'img'=>'images/agrega4.png' , 'alt' => 'Crear proveedor'       , 'label'=>'Crear Proveedor'   ));
 		$WestPanel = $grid->deploywestp();
 
 
@@ -3462,7 +3462,7 @@ class gser extends Controller {
 		$edit->reten->type='inputhidden';
 
 		$edit->reteiva = new inputField('Ret.de IVA','reteiva');
-		$edit->reteiva->size = 10;
+		$edit->reteiva->size = 7;
 		$edit->reteiva->maxlength=10;
 		$edit->reteiva->rule = 'callback_chreteiva';
 		$edit->reteiva->onchange ='totalizar()';

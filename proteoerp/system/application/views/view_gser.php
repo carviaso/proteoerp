@@ -70,6 +70,9 @@ var comis    = <?php echo $json_comis; ?>;
 var rete     = <?php echo $json_rete;  ?>;
 
 $(document).ready(function() {
+	$('#_rivaex').change(function () {
+		totalizar();
+	});
 	$(".inputnum").numeric(".");
 	totalizar();
 
@@ -186,6 +189,12 @@ function reteiva(){
 	<?php
 	$rif = trim($this->datasis->traevalor('RIF'));
 	if($tipo_rete=='ESPECIAL' && strtoupper($rif[0])!='V'){ ?>
+
+		if($('#_rivaex').attr('checked')){
+			$("#reteiva").val(0.0);
+			return 0.0;
+		}
+
 		reteval= Number($("#reteiva").val());
 		totiva = Number($("#totiva").val());
 		preten = Number($("#sprvreteiva").val());
@@ -656,7 +665,12 @@ function toggle() {
 			<table width='100%'>
 				<tr>
 					<td class="littletableheader">           <?php echo $form->reteiva->label  ?>&nbsp;</td>
-					<td class="littletablerow" align='right'><?php echo $form->reteiva->output ?>&nbsp;</td>
+					<td class="littletablerow" align='right'><?php
+						if($form->_status!='show'){
+							echo '<input type="checkbox" name="_rivaex" id="_rivaex" value="S"> Exonerar';
+						}
+						echo $form->reteiva->output;
+					?>&nbsp;</td>
 				</tr>
 				<tr>
 					<td class="littletableheader">           <?php echo $form->credito->label  ?>&nbsp;</td>
@@ -676,7 +690,7 @@ function toggle() {
 	<tr>
 		<td>
 			<fieldset style='border: 1px outset #8A0808;background: #FFFBE9;'>
-			<legend class="titulofieldset" style='color: #114411;'>Informacion del Registro</legend>
+			<legend class="titulofieldset" style='color: #114411;'>Informaci&oacute;n del Registro</legend>
 			<table width='100%' cellspacing='1' >
 				<tr style='font-size:12px;color:#0B3B0B;background-color: #F7BE81;'>
 					<td align='center' >Usuario</td>

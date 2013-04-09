@@ -211,10 +211,9 @@ class Bconci extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
+		$bodyscript .= '});';
 
 		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
 		return $bodyscript;
 	}
 
@@ -223,7 +222,7 @@ class Bconci extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -241,7 +240,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('codbanc');
-		$grid->label('Codbanc');
+		$grid->label('Cod.Banc');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -253,7 +252,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('numcuent');
-		$grid->label('Numcuent');
+		$grid->label('# Cuenta');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -277,7 +276,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('saldoi');
-		$grid->label('Saldoi');
+		$grid->label('Saldo inicial');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -292,7 +291,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('saldof');
-		$grid->label('Saldof');
+		$grid->label('Saldo final');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -307,7 +306,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('deposito');
-		$grid->label('Deposito');
+		$grid->label('Dep&oacute;sitos');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -322,7 +321,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('credito');
-		$grid->label('Credito');
+		$grid->label('Cr&eacute;dito');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -352,7 +351,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('debito');
-		$grid->label('Debito');
+		$grid->label('D&eacute;bito');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -445,7 +444,7 @@ class Bconci extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: bconciadd, editfunc: bconciedit, delfunc: bconcidel, viewfunc: bconcishow");
+		$grid->setBarOptions('addfunc: bconciadd, editfunc: bconciedit, delfunc: bconcidel, viewfunc: bconcishow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
