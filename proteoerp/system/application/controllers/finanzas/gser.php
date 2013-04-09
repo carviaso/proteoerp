@@ -411,15 +411,15 @@ class gser extends Controller {
 		));
 
 
-		$grid->addField('tipo1');
-		$grid->label('Tipo');
+		$grid->addField('tipo_doc');
+		$grid->label('Tipo doc.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 40,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 1 }',
+			'editoptions'   => '{ size:30, maxlength: 2 }',
 		));
 
 
@@ -555,6 +555,16 @@ class gser extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		$grid->addField('tipo1');
+		$grid->label('Tipo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:30, maxlength: 1 }',
+		));
 
 		$grid->addField('codb1');
 		$grid->label('Banco');
@@ -743,18 +753,6 @@ class gser extends Controller {
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('tipo_doc');
-		$grid->label('Tipo doc.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 2 }',
 		));
 
 
