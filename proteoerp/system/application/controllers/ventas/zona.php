@@ -222,7 +222,7 @@ jQuery("#a1").click( function(){
 				unset($data['codigo']);
 				$this->db->where( 'id',   $id);
 				$this->db->update('zona', $data);
-				logusu('ZONA',"Registro ".$data['codigo']." ".$data['nombre']." EDITADO");
+				logusu('ZONA',"Registro ".$zonav." EDITADO");
 				$mRet = "Registro Modificado";
 
 			} else {
