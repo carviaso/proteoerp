@@ -1,9 +1,9 @@
 <?php echo $form_scripts?>
 <?php echo $form_begin?>
 <?php 
-$container_tr=join("&nbsp;", $form->_button_container["TR"]);
-$container_bl=join("&nbsp;", $form->_button_container["BL"]);
-$container_br=join("&nbsp;", $form->_button_container["BR"]);
+//$container_tr=join("&nbsp;", $form->_button_container["TR"]);
+//$container_bl=join("&nbsp;", $form->_button_container["BL"]);
+//$container_br=join("&nbsp;", $form->_button_container["BR"]);
 ?>
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 <table border=0 width="100%">
@@ -13,73 +13,88 @@ $container_br=join("&nbsp;", $form->_button_container["BR"]);
 <legend class="subtitulotabla" >Producto </legend>
 <table border=0 width="100%">
 	<tr>
-    <td width="80"class="littletableheader"><?=$form->codigo->label  ?></td>
-		<td width="80"><?=$form->codigo->output ?>
-    <td width="20" colspan=2 class="littletableheader"><?=$form->tipo->label    ?></td>
-		<td><?=$form->tipo->output   ?></td>
+		<td class="littletableheader"><?php echo $form->codigo->label;  ?></td>
+		<td class="littletablerow"   ><?php echo $form->codigo->output; ?></td>
+		<td class="littletableheader"><?php echo $form->tipo->label;    ?></td>
+		<td class="littletablerow"   ><?php echo $form->tipo->output    ?></td>
 	</tr>
+	<tr>
+		<td class="littletableheader"><?php echo $form->descrip->label;  ?></td>
+		<td class="littletablerow"   ><?php echo $form->descrip->output; ?></td>
+		<td class="littletableheader"><?php echo $form->corta->label;    ?></td>
+		<td class="littletablerow"   ><?php echo $form->corta->output;   ?></td>
+	</tr>
+	<tr>
+		<td class="littletableheader"><?php echo $form->marca->label;  ?></td>
+		<td class="littletablerow"   ><?php echo $form->marca->output; ?></td>
+		<td class="littletableheader"><?php echo $form->susti->label;  ?></td>
+		<td class="littletablerow"   ><?php echo $form->susti->output; ?></td>
+	</tr>
+</table>
+</fieldset>
 
+<legend class="subtitulotabla" >Producto </legend>
+<table border=0 width="100%">
 	<tr>
-		<td class="littletableheader"><?=$form->descrip->label    ?></td>
-		<td colspan=10 height=3><?=$form->descrip->output   ?></td>
+		<td>
+			<table border=0 width="100%">
+				<tr>
+					<td class="littletableheader"><?php echo $form->depto->label    ?></td>
+					<td class="littletablerow"   ><?php echo $form->depto->output   ?></td>
+				</tr>
+				<tr>
+					<td class="littletableheader"><?php echo $form->familia->label ?></td>
+					<td class="littletablerow" id='td_familia'><?php echo $form->familia->output?></td>
+				</tr>
+				<tr>
+					<td class="littletableheader"><?php echo $form->grupo->label   ?></td>
+					<td class="littletablerow" id='td_grupo' ><?php echo $form->grupo->output  ?></td>
+				</tr>
+			</table>
+		</td>
+		<td>
+			<table border=0 width="100%">
+				<tr>
+					<td class="littletableheader"><?php echo $form->referen->label;  ?></td>
+					<td class="littletablerow"   ><?php echo $form->referen->output; ?></td>
+				</tr>
+				<tr>
+					<td class="littletableheader"><?php echo $form->barras->label;  ?></td>
+					<td class="littletablerow"   ><?php echo $form->barras->output ?></td>
+				</tr>
+				<tr>
+					<td class="littletableheader"><?php echo $form->cu_inve->label;  ?></td>
+					<td class="littletablerow"   ><?php echo $form->cu_inve->output; ?></td>
+				</tr>
+			</table>
+		</td>
 	</tr>
-		<td class="littletableheader"><?=$form->corta->label    ?></td>
-		<td colspan=10><?=$form->corta->output   ?></td>
-	</tr>
-	<tr>
-		<td class="littletableheader"><?=$form->marca->label ?></td>
-		<td colspan=10><?=$form->marca->output?></td>
-	</tr>
-	<tr>
-		<td class="littletableheader"><?=$form->susti->label   ?></td>
-		<td colspan=10><?=$form->susti->output  ?></td>
-	</tr>
-	<tr>
-		<td class="littletableheader"><?=$form->dpto->label    ?></td>
-		<td colspan=10><?=$form->dpto->output   ?></td>
-	</tr>
-	<tr>
-		<td class="littletableheader"><?=$form->familia->label ?></td>
-		<td colspan=10 id='td_familia'><?=$form->familia->output?></td>
-	</tr>
-	<tr>
-		<td class="littletableheader"><?=$form->grupo->label   ?></td>
-		<td colspan=10 id='td_grupo'><?=$form->grupo->output  ?></td>
-	</tr>
-	<tr>
-		<td class="littletableheader"><?=$form->referen->label  ?></td>
-		<td colspan=10><?=$form->referen->output ?></td>
-	</tr>
-	<tr>
-		<td class="littletableheader"><?=$form->barras->label  ?></td>
-		<td colspan=10><?=$form->barras->output ?></td>
-	</tr>
-	<tr>
-		<td class="littletableheader"><?=$form->cu_inve->label  ?></td>
-		<td colspan=10><?=$form->cu_inve->output ?></td>
-	</tr>
+</table>
+</fieldset>
+
+<legend class="subtitulotabla" >Producto </legend>
+<table border=0 width="100%">
 	<tr>
 		<td class="littletableheader"><?=$form->empaque->label  ?></td>
-		<td colspan=10><?=$form->empaque->output ?></td>
+		<td class="littletablerow"   ><?=$form->empaque->output ?></td>
 	</tr>
 	<tr>
 		<td class="littletableheader"><?=$form->ensambla->label  ?></td>
-		<td colspan=10><?=$form->ensambla->output ?></td>
+		<td class="littletablerow"><?=$form->ensambla->output ?></td>
 	</tr>
 	<tr>
 		<td class="littletableheader">Presentaci&oacute;n</td>
-		<td colspan=10><?=$form->fracxuni->output ?> X <?=$form->dempaq->output ?> = <?=$form->mempaq->output ?></td>
+		<td class="littletablerow"   ><?php echo $form->fracxuni->output; ?> X <?php echo $form->dempaq->output; ?> = <?php echo $form->mempaq->output; ?></td>
+	</tr>
+	<tr>
+		<td class="littletableheader"><?php echo $form->alcohol->label;   ?></td>
+		<td class="littletablerow"   ><?php echo $form->alcohol->output;  ?>X<?php echo $form->implic->output   ?></td>
+	</tr>
+	<tr>
+		<td class="littletableheader"><?php echo $form->conjunto->label; ?></td>
+		<td class="littletablerow"   ><?php echo $form->conjunto->output;?></td>
 	</tr>
 
-	<tr>
-		<td class="littletableheader"><?=$form->alcohol->label   ?></td>
-		<td colspan=10><?=$form->alcohol->output  ?>X<?=$form->implic->output   ?></td>
-	</tr>
-	<tr>
-		<td class="littletableheader"><?=$form->conjunto->label ?></td>
-		<td colspan=10><?=$form->conjunto->output?></td>
-	</tr>
-	
 </table>
 </fieldset>
 </tr>
@@ -96,43 +111,43 @@ $container_br=join("&nbsp;", $form->_button_container["BR"]);
 				<td></td>
 				<td class="littletableheader">Margen</td>
 				<td class="littletableheader">Base  </td>
-				<td class="littletableheader"">Precio</td>
+				<td class="littletableheader">Precio</td>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?=$form->costo->label    ?></td>
-				<td><?=$form->costo->output   ?></td>
+				<td class="littletableheader"><?php echo $form->costo->label; ?></td>
+				<td class="littletablerow"   ><?php echo $form->costo->output;   ?></td>
 				<td class="littletableheader">Precio 1</td>
-				<td><?=$form->margen1->output ?></td>
-				<td><?=$form->base1->output   ?></td>
-				<td><?=$form->precio1->output ?></td>
+				<td><?php echo $form->margen1->output; ?></td>
+				<td><?php echo $form->base1->output;   ?></td>
+				<td><?php echo $form->precio1->output; ?></td>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?=$form->ultimo->label   ?></td>
-				<td><?=$form->ultimo->output  ?></td>
+				<td class="littletableheader"><?php echo $form->ultimo->label   ?></td>
+				<td class="littletablerow"   ><?php echo $form->ultimo->output  ?></td>
 				<td class="littletableheader">Precio 2</td>
 				<td><?=$form->margen2->output ?></td>
 				<td><?=$form->base2->output   ?></td>
 				<td><?=$form->precio2->output ?></td>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?=$form->iva->label   ?></td>
-				<td><?=$form->iva->output  ?>%</td>
+				<td class="littletableheader"><?php echo $form->iva->label   ?></td>
+				<td class="littletablerow"   ><?php echo $form->iva->output  ?>%</td>
 				<td class="littletableheader">Precio 3</td>
 				<td><?=$form->margen3->output ?></td>
 				<td><?=$form->base3->output   ?></td>
 				<td><?=$form->precio3->output ?></td>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?=$form->fcalc->label    ?></td>
-				<td><?=$form->fcalc->output   ?></td>
+				<td class="littletableheader"><?php echo $form->fcalc->label; ?></td>
+				<td class="littletablerow"   ><?php echo $form->fcalc->output;   ?></td>
 				<td class="littletableheader">Precio 4</td>
 				<td><?=$form->margen4->output ?></td>
 				<td><?=$form->base4->output   ?></td>
 				<td><?=$form->precio4->output ?></td>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?=$form->redondeo->label ?></td>
-				<td><?=$form->redondeo->output?></td>
+				<td class="littletableheader"><?php echo $form->redondeo->label ?></td>
+				<td class="littletablerow"   ><?php echo $form->redondeo->output?></td>
 				<td class="littletableheader">Precio 5</td>
 				<td><?=$form->margen5->output ?></td>
 				<td><?=$form->base5->output   ?></td>

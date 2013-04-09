@@ -19,6 +19,18 @@ class Ppro extends Controller {
 		if ( !$this->datasis->iscampo('sprm','preppago') ) {
 			$this->db->simple_query('ALTER TABLE sprm ADD preppago DECIMAL(17,2) NULL DEFAULT 0 AFTER preabono ');
 		};
+
+		if ( !$this->datasis->istabla('view_ppro') ) {
+			$mSQL= 'CREATE ALGORITHM=UNDEFINED 
+					DEFINER=datasis@localhost 
+					SQL SECURITY 
+					DEFINER VIEW view_ppro AS 
+					SELECT trim(a.cod_prv) AS cod_prv, b.rif AS rif, b.nombre AS nombre, sum((a.monto - a.abonos)) AS saldo, max(a.fecha) AS nueva, min(a.fecha) AS vieja, count(0) AS cantidad, sum((a.vence-curdate())) AS dias, b.id AS id from (sprm a join sprv b on((a.cod_prv = b.proveed))) 
+					WHERE ((a.monto > a.abonos) and (a.tipo_doc in ("FC","ND","GI"))) 
+					GROUP BY a.cod_prv';
+			$this->db->query($mSQL);
+		};
+
 		$this->datasis->modintramenu( 900, 600, 'finanzas/ppro' );
 		redirect($this->url.'jqdatag');
 	}
