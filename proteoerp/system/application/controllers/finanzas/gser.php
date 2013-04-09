@@ -3095,7 +3095,7 @@ class gser extends Controller {
 	function _rm_gserrete($transac){
 		$dbtransac = $this->db->escape($transac);
 		$mSQL      = 'UPDATE riva SET transac = CONCAT("_",MID(transac,2)) WHERE transac='.$dbtransac;
-		$this->db->simple_querry($mSQL);
+		$this->db->simple_query($mSQL);
 	}
 
 	//Crea la cuenta por pagar en caso de que el gasto sea a credito
