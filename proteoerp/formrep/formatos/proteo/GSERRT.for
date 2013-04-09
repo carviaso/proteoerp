@@ -170,13 +170,13 @@ if ( isset($pdf) ) {
 		</tr>
 	</table>
 	<p style='height:20px'> </p>
-	
+
 	<div style='height:70px;width: 100%;align:center;'>
 	<p style='height: 50px;'> </p>
 	<table style="width:90%;border-top:1px solid;"  class="header" align='center' >
 		<tr>
-			<td><b><div align="center" style="font-size: 8pt"><b>Firma y Sello:</b></div></td>
 			<td><b><div align="center" style="font-size: 8pt"><b>Agente de Retenci&oacute;n:</b></div></td>
+			<td><b><div align="center" style="font-size: 8pt"><b>Firma y Sello:</b></div></td>
 		</tr>
 	</table>
 	</div>
