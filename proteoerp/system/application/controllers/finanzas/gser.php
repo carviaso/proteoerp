@@ -4074,45 +4074,6 @@ class gser extends Controller {
 		$totneto  = $do->get('totneto');
 		$totcred  = round($totneto-$monto1,2);
 
-		//Crea el abono
-		if($monto1>0 && $credito>0){
-			$absprm  = $this->datasis->fprox_numero('num_nd');
-			$control = $this->datasis->fprox_numero('nsprm');
-
-			$data=array();
-			$data['cod_prv']    = $codprv;
-			$data['nombre']     = $nombre;
-			$data['tipo_doc']   = 'AB';
-			$data['numero']     = $absprm;
-			$data['fecha']      = $fecha ;
-			$data['monto']      = $monto1;
-			$data['impuesto']   = 0 ;
-			$data['abonos']     = $monto1;
-			$data['vence']      = $fecha;
-			$data['observa1']   = 'ABONA A '.$tipo.$numero;
-			$data['transac']    = $transac;
-			$data['estampa']    = $estampa;
-			$data['hora']       = $hora;
-			$data['usuario']    = $usuario;
-			$data['banco']      = $codb1;
-			$data['tipo_op']    = ($tipo1=='C')? 'CH' :'DE';
-			$data['numche']     = $cheque;
-			$data['reteiva']    = 0;
-			$data['montasa']    = 0;
-			$data['monredu']    = 0;
-			$data['monadic']    = 0;
-			$data['tasa']       = 0;
-			$data['reducida']   = 0;
-			$data['sobretasa']  = 0;
-			$data['exento']     = 0;
-			$data['control']    = $control;
-
-			$sql=$this->db->insert_string('sprm', $data);
-			$ban=$this->db->simple_query($sql);
-			if($ban==false){ memowrite($sql,'gser');}
-		}
-		//Fin de la creacion del abono
-
 		//Crea el movimiento para la retencion ISLR
 		if($reten>0){
 			$mnsprm  = $this->datasis->fprox_numero('num_nd');
@@ -4209,6 +4170,7 @@ class gser extends Controller {
 		}
 		//Fin del movimiento en el banco
 
+
 		//Crea la cuenta por pagar si es necesario
 		if($totcred > 0.00){
 			$causado = $this->datasis->fprox_numero('ncausado');
@@ -4243,6 +4205,71 @@ class gser extends Controller {
 			$sql=$this->db->insert_string('sprm', $data);
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'gser');}
+
+			//Crea el abono si lo tiene
+			if($monto1 > 0){
+				$absprm  = $this->datasis->fprox_numero('num_ab');
+				$control = $this->datasis->fprox_numero('nsprm');
+
+				$data=array();
+				$data['cod_prv']    = $codprv;
+				$data['nombre']     = $nombre;
+				$data['tipo_doc']   = 'AB';
+				$data['numero']     = $absprm;
+				$data['fecha']      = $fecha ;
+				$data['monto']      = $monto1;
+				$data['impuesto']   = 0 ;
+				$data['abonos']     = $monto1;
+				$data['vence']      = $fecha;
+				$data['observa1']   = 'ABONA A '.$tipo.$numero;
+				$data['transac']    = $transac;
+				$data['estampa']    = $estampa;
+				$data['hora']       = $hora;
+				$data['usuario']    = $usuario;
+				$data['banco']      = $codb1;
+				$data['tipo_op']    = ($tipo1=='C')? 'CH' :'DE';
+				$data['numche']     = $cheque;
+				$data['reteiva']    = 0;
+				$data['montasa']    = 0;
+				$data['monredu']    = 0;
+				$data['monadic']    = 0;
+				$data['tasa']       = 0;
+				$data['reducida']   = 0;
+				$data['sobretasa']  = 0;
+				$data['exento']     = 0;
+				$data['control']    = $control;
+
+				$sql=$this->db->insert_string('sprm', $data);
+				$ban=$this->db->simple_query($sql);
+				if($ban==false){ memowrite($sql,'gser');}
+
+				//Aplica el AB a la FC
+				$itppro=array();
+				$itppro['numppro']    = $absprm;
+				$itppro['tipoppro']   = 'AB';
+				$itppro['cod_prv']    = $codprv;
+				$itppro['tipo_doc']   = 'FC';
+				$itppro['numero']     = $numero;
+				$itppro['fecha']      = $fecha;
+				$itppro['monto']      = $monto1;
+				$itppro['abono']      = $monto1;
+				$itppro['ppago']      = 0;
+				$itppro['reten']      = 0;
+				$itppro['cambio']     = 0;
+				$itppro['mora']       = 0;
+				$itppro['transac']    = $transac;
+				$itppro['estampa']    = $estampa;
+				$itppro['hora']       = $hora;
+				$itppro['usuario']    = $usuario;
+				$itppro['preten']     = 0;
+				$itppro['creten']     = 0;
+				$itppro['breten']     = 0;
+				$itppro['reteiva']    = 0;
+				$mSQL = $this->db->insert_string('itppro', $itppro);
+				$ban=$this->db->simple_query($mSQL);
+				if(!$ban){ memowrite($mSQL,'gser'); $error++;}
+			}
+			//Fin de la creacion del abono
 
 			//Si tiene retencion de IVA
 			if($reiva>0){
@@ -4304,7 +4331,6 @@ class gser extends Controller {
 				$mSQL = $this->db->insert_string('itppro', $itppro);
 				$ban=$this->db->simple_query($mSQL);
 				if(!$ban){ memowrite($mSQL,'gser'); $error++;}
-
 			}
 			//Fin de la retencion de IVA
 
@@ -4373,7 +4399,7 @@ class gser extends Controller {
 		}
 		//Fin de la cuenta por pagar
 
-		logusu('gser',"Gasto $numero CREADO");
+		logusu('gser',"Gasto ${numero} ${codprv}  ${fecha} CREADO");
 		return true;
 	}
 
