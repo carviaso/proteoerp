@@ -411,6 +411,18 @@ class gser extends Controller {
 		));
 
 
+		$grid->addField('tipo1');
+		$grid->label('Tipo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:30, maxlength: 1 }',
+		));
+
+
 		$grid->addField('numero');
 		$grid->label('N&uacute;mero');
 		$grid->params(array(
@@ -553,18 +565,6 @@ class gser extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 2 }',
-		));
-
-
-		$grid->addField('tipo1');
-		$grid->label('Tipo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 1 }',
 		));
 
 
@@ -3095,7 +3095,9 @@ class gser extends Controller {
 	}
 
 	function _rm_gserrete($transac){
-		$this->db->delete('riva', array('transac' => $transac));
+		$dbtransac = $this->db->escape($transac);
+		$mSQL      = 'UPDATE riva SET transac = CONCAT("_",MID(transac,2)) WHERE transac='.$dbtransac;
+		$this->db->simple_querry($mSQL);
 	}
 
 	//Crea la cuenta por pagar en caso de que el gasto sea a credito
@@ -3329,20 +3331,20 @@ class gser extends Controller {
 
 		$edit->ffactura = new DateonlyField('Fecha', 'ffactura','d/m/Y');
 		$edit->ffactura->insertValue = date('Y-m-d');
-		$edit->ffactura->size = 10;
+		$edit->ffactura->size = 12;
 		$edit->ffactura->rule = 'required';
 		$edit->ffactura->calendar = false;
 		//$edit->ffactura->insertValue = date("Y-m-d");
 
 		$edit->fecha = new DateonlyField('Registro', 'fecha');
 		$edit->fecha->insertValue = date('Y-m-d');
-		$edit->fecha->size = 10;
+		$edit->fecha->size = 12;
 		$edit->fecha->rule = 'required';
 		$edit->fecha->calendar = false;
 
 		$edit->vence = new DateonlyField('Vence', 'vence','d/m/Y');
 		$edit->vence->insertValue = date('Y-m-d');
-		$edit->vence->size = 10;
+		$edit->vence->size = 12;
 		//$edit->vence->insertValue = date("Y-m-d");
 		$edit->vence->calendar = false;
 
@@ -4430,6 +4432,10 @@ class gser extends Controller {
 		$dbtransac = $this->db->escape($transac);
 		//Borra los articulos
 		$mSQL="DELETE FROM gitser WHERE numero=${dbnumero} AND fecha=${dbfecha} AND proveed=${dbcod_prv} AND transac=${dbtransac}";
+		$this->db->simple_query($mSQL);
+
+		//Borra las retenciones islr
+		$mSQL='DELETE FROM gereten WHERE idd='.$id;
 		$this->db->simple_query($mSQL);
 
 

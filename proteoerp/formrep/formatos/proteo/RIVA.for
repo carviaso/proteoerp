@@ -20,20 +20,20 @@ if ($mSQL_1->num_rows() == 0){ show_error('Retención no encontrada');}
 
 $row = $mSQL_1->row();
 
-$nrocomp   = trim($row->nrocomp)  ;
+$nrocomp   = htmlspecialchars(trim($row->nrocomp));
 $emision   = dbdate_to_human($row->emision);
 $periodo   = trim($row->periodo)  ;
-$tipo_doc  = trim($row->tipo_doc) ;
+$tipo_doc  = htmlspecialchars(trim($row->tipo_doc));
 $fecha     = dbdate_to_human($row->fecha);
 //$numero    = trim($row->numero) ;
-$numero    = trim($row->serie1.$row->serie2) ;
-$nfiscal   = trim($row->nfiscal);
-$afecta    = trim($row->afecta) ;
-$clipro    = trim($row->clipro) ;
-$nombre    = (empty($row->nomfis))? $row->nombre : $row->nomfis;
-$direc     = trim($row->direc);
+$numero    = htmlspecialchars(trim($row->serie1.$row->serie2)) ;
+$nfiscal   = htmlspecialchars(trim($row->nfiscal));
+$afecta    = htmlspecialchars(trim($row->afecta)) ;
+$clipro    = htmlspecialchars(trim($row->clipro)) ;
+$nombre    = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars(trim($row->nomfis));
+$direc     = htmlspecialchars(trim($row->direc));
 
-$rif       = $row->rif      ;
+$rif       = htmlspecialchars(trim($row->rif));
 $exento    = $row->exento   ;
 $tasa      = $row->tasa     ;
 $general   = $row->general  ;
