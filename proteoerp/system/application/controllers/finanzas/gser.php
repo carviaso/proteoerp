@@ -3438,6 +3438,7 @@ class gser extends Controller {
 		$edit->benefi->maxlength=40;
 
 		$edit->monto1= new inputField('Contado', 'monto1');
+		$edit->monto1->rule = 'numeric|positive';
 		$edit->monto1->size = 10;
 		$edit->monto1->css_class='inputnum';
 		$edit->monto1->onkeyup="contado()";
@@ -3446,6 +3447,7 @@ class gser extends Controller {
 		$edit->monto1->showformat ='decimal';
 
 		$edit->credito= new inputField('Cr&eacute;dito', 'credito');
+		$edit->credito->rule = 'numeric|positive';
 		$edit->credito->size = 10;
 		$edit->credito->showformat ='decimal';
 		$edit->credito->css_class='inputnum';
@@ -3454,6 +3456,7 @@ class gser extends Controller {
 		$edit->credito->readonly=true;
 
 		$edit->reten = new inputField('Ret. ISLR','reten');
+		$edit->reten->rule = 'numeric|positive';
 		$edit->reten->size = 10;
 		$edit->reten->maxlength=10;
 		$edit->reten->css_class='inputnum';
@@ -3462,6 +3465,7 @@ class gser extends Controller {
 		$edit->reten->type='inputhidden';
 
 		$edit->reteiva = new inputField('Ret.de IVA','reteiva');
+		$edit->reteiva->rule = 'numeric|positive';
 		$edit->reteiva->size = 7;
 		$edit->reteiva->maxlength=10;
 		$edit->reteiva->rule = 'callback_chreteiva';
@@ -3479,6 +3483,7 @@ class gser extends Controller {
 		$edit->reteica->when=array('show');
 
 		$edit->totneto = new inputField('Neto','totneto');
+		$edit->totneto->rule = 'numeric|positive';
 		$edit->totneto->size = 10;
 		$edit->totneto->maxlength=10;
 		$edit->totneto->css_class='inputnum';

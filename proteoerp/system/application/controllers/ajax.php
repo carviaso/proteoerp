@@ -44,6 +44,7 @@ class Ajax extends Controller {
 		if($mid == false) $mid  = $this->input->post('term');
 
 		$qdb  = $this->db->escape('%'.$mid.'%');
+		$qdbi = $this->db->escape($mid.'%');
 		$qmid = $this->db->escape($mid);
 
 		$data = '[]';
@@ -70,7 +71,7 @@ class Ajax extends Controller {
 			}
 
 			$mSQL="SELECT TRIM(nombre) AS nombre, TRIM(rif) AS rif, proveed, direc1 AS direc, reteiva
-				FROM sprv WHERE rif LIKE ${qdb} OR nombre LIKE ${qdb} OR proveed=${qmid} ${ww}
+				FROM sprv WHERE rif LIKE ${qdb} OR nombre LIKE ${qdb} OR proveed=${qdbi} ${ww}
 				ORDER BY rif LIMIT ".$this->autolimit;
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){

@@ -23,13 +23,20 @@ $campos.=' <td class="littletablerow" align="center"><a href=\'#\' onclick="del_
 $campos=$form->js_escape($campos);
 
 
-foreach($form->detail_fields['gereten'] AS $ind=>$data){
-	if(!empty($data['field'])){
-		$ggereten[]=$data['field'];
-	}
-}
+//foreach($form->detail_fields['gereten'] AS $ind=>$data){
+//	if(!empty($data['field'])){
+//		$ggereten[]=$data['field'];
+//	}
+//}
 
-$cgereten =' <tr id="tr_gereten_<#i#>"><td class="littletablerow">'.join('</td><td align="right">',$ggereten).'</td>';
+
+$ccampos=$form->detail_fields['gereten'];
+$cgereten ='<tr id="tr_gereten_<#i#>">';
+//$cgereten.=' <td class="littletablerow">'.join('</td><td align="right">',$ggereten).'</td>';
+$cgereten.=' <td class="littletablerow" nowrap>       '.$ccampos['codigorete']['field'].'</td>';
+$cgereten.=' <td class="littletablerow" align="right">'.$ccampos['base']['field']      .'</td>';
+$cgereten.=' <td class="littletablerow" align="right">'.$ccampos['porcen']['field']    .'</td>';
+$cgereten.=' <td class="littletablerow" align="right">'.$ccampos['monto']['field']     .'</td>';
 $cgereten.=' <td class="littletablerow" align="center"><a href=\'#\' onclick="del_gereten(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
 $cgereten=$form->js_escape($cgereten);
 
@@ -85,12 +92,14 @@ $(document).ready(function() {
 	desactivacampo(codb1);
 	autocod(0);
 	$('#proveed').autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasprv'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -378,12 +387,14 @@ function del_gitser(id){
 //Agrega el autocomplete
 function autocod(id){
 	$('#codigo_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/automgas'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+encodeURIComponent(req.term)+"&sprv="+encodeURIComponent($("#proveed").val()),
+				data: {"q" :req.term},
 				success:
 					function(data){
 						var sugiere = [];
