@@ -70,7 +70,7 @@ class Ajax extends Controller {
 			}
 
 			$mSQL="SELECT TRIM(nombre) AS nombre, TRIM(rif) AS rif, proveed, direc1 AS direc, reteiva
-				FROM sprv WHERE rif LIKE ${qdb} OR nombre LIKE ${qdb} ${ww}
+				FROM sprv WHERE rif LIKE ${qdb} OR nombre LIKE ${qdb} OR proveed=${qmid} ${ww}
 				ORDER BY rif LIMIT ".$this->autolimit;
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
