@@ -141,7 +141,7 @@ class Prenom extends Controller {
 		$this->_creapretab();  // Crea Pretabla
 		$this->calcuto();      // Calcula todos
 
-		echo 'Contrato='.$contrato.' Fecha de Corte: '.$fechac.' Fecha de pago: '.$fechap ;
+		echo 'Prenomina Generada exitosamente, Contrato: '.$contrato.' Fecha de Corte: '.dbdate_to_human($fechac).' Fecha de pago: '.dbdate_to_human($fechap) ;
 	}
 
 	//******************************************************************

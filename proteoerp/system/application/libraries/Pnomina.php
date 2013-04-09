@@ -1,5 +1,5 @@
 <?php
-class fnomina{
+class fnomina {
 
 	var $ci;
 	var $CODIGO;
@@ -134,7 +134,7 @@ class fnomina{
 
 }
 
-class Pnomina extends fnomina{
+class Pnomina extends fnomina {
 
 	var $MONTO  = 0;
 	var $SUELDO = 0;
@@ -166,7 +166,7 @@ class Pnomina extends fnomina{
 		$fformula = $this->_traduce($formula);
 
 		//if ( strpos($formula,'SEMANAS') )
-		//	memowrite($formula.' == >> '.$fformula,'formula');
+		memowrite($formula.' == >> '.$fformula,'formula');
 
 		$retorna='$rt='.$fformula.';';
 
@@ -239,6 +239,9 @@ class Pnomina extends fnomina{
 		$formula=str_replace('XVARI5','$VARI5',$formula);
 		$formula=str_replace('XVARI6','$VARI6',$formula);
 
+		$formula=str_replace('VAL(','floatval(',$formula);
+
+		$formula=str_replace('TRAEVALOR','$this->ci->datasis->traevalor',$formula);
 
 		$formula=str_replace('.AND.','&&',$formula);
 		$formula=str_replace('.OR.','||',$formula);
