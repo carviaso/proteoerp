@@ -136,9 +136,43 @@ class Bcaj extends Controller {
 		$mSQL   = "SELECT codbanc, CONCAT(codbanc, ' ', TRIM(banco),' ', IF(tbanco='CAJ',' ',numcuent) ) banco FROM banc WHERE tbanco<>'CAJ' AND activo='S' ORDER BY codbanc ";
 		$efbanco = $this->datasis->llenaopciones($mSQL, true, 'efbanco');
 
+/*
+				var mforma = "<h1>Deposito en Efectivo</h1>
+					<label for="caj">Caja</label>
+					<select id='efcaja' name='efcaja'><option value='-'>Seleccione</option><option value='05'>05 CARGOS DIF COMPRAS</option><option value='99'>99 CAJA</option><option value='C0'>C0 CAJA</option><option value='C1'>C1 FONDO DE CAJA CHICA</option><option value='C2'>C2 FONDO DE CAJA CHICA</option><option value='C3'>C3 FONDO DE CAJA CHICA</option><option value='C4'>C4 FONDO DE CAJA CHICA</option><option value='CP'>CP CAJA</option><option value='DF'>DF CAJA</option><option value='F0'>F0 FONDOS PARA CAMBIO</option><option value='F1'>F1 FONDOS PARA CAMBIO</option><option value='F2'>F2 FONDOS PARA CAMBIO</option><option value='F3'>F3 CAJA</option><option value='F4'>F4 CAJA</option><option value='FR'>FR CAJA</option><option value='S0'>S0 CAJA</option><option value='S1'>S1 CAJA</option><option value='S2'>S2 CAJA</option><option value='S3'>S3 CAJA</option><option value='S4'>S4 CAJA</option><option value='VC'>VC VALORES Y CHEQUES</option><option value='VS'>VS CAJA</option></select><br><br>
+					<label for="banc">Banco</label>
+					<select id='efbanco' name='efbanco'><option value='-'>Seleccione</option><option value='00'>00 SOFITASA 0137-0003-63-0000000121</option><option value='01'>01 BANCO NACIONAL DE CR 0191-0041-30-2141000025</option><option value='02'>02 CENTRAL 0175-327-82-0671000196</option><option value='03'>03 BANCARIBE CURACAO BA 008738</option><option value='04'>04 BONOS VENEZOLANOS BONOS VENEZOLANOS</option><option value='06'>06 CARIBE CORRIENTE 0114-0435-97-4350015960</option><option value='07'>07 CARIBE AHORRO 0114-0435-435-2-04434-8</option><option value='08'>08 PROVINCIAL 0108-0070-61-0100005478</option><option value='09'>09 BICENTENARIO 0007-0001-18-0000095194</option><option value='10'>10 DE VENEZUELA 0102-0119-54-0001018583</option><option value='11'>11 BANESCO 0134-0435-67-4353001049</option><option value='12'>12 DE VENEZUELA 0102-0119-50-0100038651</option><option value='13'>13 MERCANTIL 01050093181093096500</option><option value='14'>14 CORP-BANCA 01210312360008314705</option><option value='15'>15 PROVINCIAL 01080070660100167583</option><option value='16'>16 FONDO COMUN 0151-0135-15-3000055677</option><option value='AC'>AC BANESCO ACCIONES BANESCO</option><option value='BC'>BC CARIBE ACCIONES BANCARIBE</option><option value='BS'>BS BANESCO BONO SUR 07 BONO SUE ARG-VZLA</option><option value='IT'>IT CARIBE BONOS 05 INVERSIONES TEMPORALES</option><option value='PV'>PV VENEZUELA BONO 07 BONOS PETROLEROS USD</option></select><br><br>
+					<label for='banc'>Monto</label>
+					<input class='inputnum' id='efmonto' size='12' type='text' style='text-align:right;'>
+				";
+
+*/
+
+		//Cierre de Deposito
 		$bodyscript .= '
-			// Enviar deposito en efectivo
-				
+		$(function() {
+			$("#dialog:ui-dialog").dialog( "destroy" );
+			var mId = 0;
+			var montotal = 0;
+			var fnumero  = $("#fnumero");
+			var ffecha   = $("#ffecha");
+			var grid     = jQuery("#newapi'.$grid0.'");
+			var s;
+			var allFields = $( [] ).add( fnumero ).add( ffecha );
+			var tips = $( ".validateTips" );
+
+			s = grid.getGridParam(\'selarrrow\');
+			$( "input:submit, a, button", ".otros" ).button();
+
+			var fnombre = $("#name" ),
+				email = $( "#email" ),
+				password = $( "#password" ),
+				allFields = $( [] ).add( name ).add( email ).add( password ),
+				tips = $( ".validateTips" );';
+
+
+		// Enviar deposito en efectivo
+		$bodyscript .= '
 			$( "#efectivo" ).click(function() {
 				var mforma = "<h1>Deposito en Efectivo</h1>"+
 							 "Caja que Envia:<br> "+
@@ -147,16 +181,14 @@ class Bcaj extends Controller {
 							"'.str_replace('"',"'",$efbanco).'<br><br>"+
 							"Monto en efectivo a Depositar: "+
 							"<input class=\'inputnum\' id=\'efmonto\' name=\'efmonto\' size=\'12\' type=\'text\' style=\'text-align:right;\'><br>";
-
-
-				var mrege = 
+				var mrege =
 				{
 					state0: {
 						html: mforma,
 						buttons: { Guardar: true, Cancelar: false },
 						submit: function(e,v,m,f){
-							if (v) {
-								$.post("'.site_url("finanzas/sfpach/efectivo").'", 
+							if(v){
+								$.post("'.site_url("finanzas/sfpach/efectivo").'",
 								{ caja: f.efcaja, banco: f.efbanco, monto: f.efmonto },
 								function(data) {
 									try{
@@ -175,21 +207,22 @@ class Bcaj extends Controller {
 									}
 								});
 								return false;
-							} 
+							}
 						}
 					},
-					state1: { 
+					state1: {
 						html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
 						focus: 1,
 						buttons: { Ok:true }
-					}		
+					}
 				};
 
 				$.prompt(mrege);
+				//$("#efmonto").numeric(".");
+			});';
 
-			});
-
-			$( "#efectivo-form" ).dialog({
+		$bodyscript .= '
+			$("#efectivo-form").dialog({
 				autoOpen: false,
 				height: 300,
 				width: 420,
@@ -225,42 +258,6 @@ class Bcaj extends Controller {
 				},
 				close: function() {allFields.val( "" ).removeClass( "ui-state-error" );}
 			});';
-
-
-/*
-				var mforma = "<h1>Deposito en Efectivo</h1>
-					<label for="caj">Caja</label>
-					<select id='efcaja' name='efcaja'><option value='-'>Seleccione</option><option value='05'>05 CARGOS DIF COMPRAS</option><option value='99'>99 CAJA</option><option value='C0'>C0 CAJA</option><option value='C1'>C1 FONDO DE CAJA CHICA</option><option value='C2'>C2 FONDO DE CAJA CHICA</option><option value='C3'>C3 FONDO DE CAJA CHICA</option><option value='C4'>C4 FONDO DE CAJA CHICA</option><option value='CP'>CP CAJA</option><option value='DF'>DF CAJA</option><option value='F0'>F0 FONDOS PARA CAMBIO</option><option value='F1'>F1 FONDOS PARA CAMBIO</option><option value='F2'>F2 FONDOS PARA CAMBIO</option><option value='F3'>F3 CAJA</option><option value='F4'>F4 CAJA</option><option value='FR'>FR CAJA</option><option value='S0'>S0 CAJA</option><option value='S1'>S1 CAJA</option><option value='S2'>S2 CAJA</option><option value='S3'>S3 CAJA</option><option value='S4'>S4 CAJA</option><option value='VC'>VC VALORES Y CHEQUES</option><option value='VS'>VS CAJA</option></select><br><br>
-					<label for="banc">Banco</label>
-					<select id='efbanco' name='efbanco'><option value='-'>Seleccione</option><option value='00'>00 SOFITASA 0137-0003-63-0000000121</option><option value='01'>01 BANCO NACIONAL DE CR 0191-0041-30-2141000025</option><option value='02'>02 CENTRAL 0175-327-82-0671000196</option><option value='03'>03 BANCARIBE CURACAO BA 008738</option><option value='04'>04 BONOS VENEZOLANOS BONOS VENEZOLANOS</option><option value='06'>06 CARIBE CORRIENTE 0114-0435-97-4350015960</option><option value='07'>07 CARIBE AHORRO 0114-0435-435-2-04434-8</option><option value='08'>08 PROVINCIAL 0108-0070-61-0100005478</option><option value='09'>09 BICENTENARIO 0007-0001-18-0000095194</option><option value='10'>10 DE VENEZUELA 0102-0119-54-0001018583</option><option value='11'>11 BANESCO 0134-0435-67-4353001049</option><option value='12'>12 DE VENEZUELA 0102-0119-50-0100038651</option><option value='13'>13 MERCANTIL 01050093181093096500</option><option value='14'>14 CORP-BANCA 01210312360008314705</option><option value='15'>15 PROVINCIAL 01080070660100167583</option><option value='16'>16 FONDO COMUN 0151-0135-15-3000055677</option><option value='AC'>AC BANESCO ACCIONES BANESCO</option><option value='BC'>BC CARIBE ACCIONES BANCARIBE</option><option value='BS'>BS BANESCO BONO SUR 07 BONO SUE ARG-VZLA</option><option value='IT'>IT CARIBE BONOS 05 INVERSIONES TEMPORALES</option><option value='PV'>PV VENEZUELA BONO 07 BONOS PETROLEROS USD</option></select><br><br>
-					<label for='banc'>Monto</label>
-					<input class='inputnum' id='efmonto' size='12' type='text' style='text-align:right;'>
-				";
-
-*/
-
-		//Cierre de Deposito
-		$bodyscript .= '
-		$(function() {
-			$("#dialog:ui-dialog").dialog( "destroy" );
-			var mId = 0;
-			var montotal = 0;
-			var fnumero  = $("#fnumero");
-			var ffecha   = $("#ffecha");
-			var grid     = jQuery("#newapi'.$grid0.'");
-			var s;
-			var allFields = $( [] ).add( fnumero ).add( ffecha );
-			var tips = $( ".validateTips" );
-
-			s = grid.getGridParam(\'selarrrow\');
-			$( "input:submit, a, button", ".otros" ).button();
-
-			var fnombre = $("#name" ),
-				email = $( "#email" ),
-				password = $( "#password" ),
-				allFields = $( [] ).add( name ).add( email ).add( password ),
-				tips = $( ".validateTips" );';
-
 
 		//Cheque Devuelto
 		$bodyscript .= '
@@ -3657,12 +3654,14 @@ class Bcaj extends Controller {
 			$this->db->simple_query('ALTER TABLE bcaj ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 
+		if (!in_array('codbanc',$campos)){
+			$this->db->query('ALTER TABLE bcaj ADD COLUMN codbanc CHAR(2) NULL DEFAULT NULL ');
+		};
+
+		$campos=$this->db->list_fields('sfpa');
 		if(!in_array('deposito',$campos)){
 			$this->db->query('ALTER TABLE sfpa ADD COLUMN deposito CHAR(12) NULL DEFAULT NULL');
 		}
-		if ( !$this->datasis->iscampo('bcaj','codbanc') ) {
-			$this->db->query('ALTER TABLE bcaj ADD COLUMN codbanc CHAR(2) NULL DEFAULT NULL ');
-		};
 
 	}
 }
