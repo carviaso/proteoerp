@@ -180,7 +180,8 @@ class Bcaj extends Controller {
 							"Banco que Recibe"+
 							"'.str_replace('"',"'",$efbanco).'<br><br>"+
 							"Monto en efectivo a Depositar: "+
-							"<input class=\'inputnum\' id=\'efmonto\' name=\'efmonto\' size=\'12\' type=\'text\' style=\'text-align:right;\'><br>";
+							"<input class=\'inputnum\' id=\'efmonto\' name=\'efmonto\' size=\'12\' type=\'text\' style=\'text-align:right;\'><br>"+
+							"<script type=\'text/javascript\'>$(function(){ $(\'#efmonto\').numeric(\'.\'); });"+"</"+"script>";
 				var mrege =
 				{
 					state0: {
@@ -218,7 +219,6 @@ class Bcaj extends Controller {
 				};
 
 				$.prompt(mrege);
-				//$("#efmonto").numeric(".");
 			});';
 
 		$bodyscript .= '
