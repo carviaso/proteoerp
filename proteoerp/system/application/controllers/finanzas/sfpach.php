@@ -18,15 +18,15 @@ class sfpach extends Controller {
 			$this->db->simple_query('ALTER TABLE sfpa ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};
 		if ( !$this->datasis->iscampo('sfpa','deposito') ) {
-			$this->db->simple_query('ALTER TABLE sfpa ADD COLUMN deposito CHAR(12) NULL DEFAULT NULL ');
+			$this->db->query('ALTER TABLE sfpa ADD COLUMN deposito CHAR(12) NULL DEFAULT NULL ');
 		};
 		if ( !$this->datasis->iscampo('sfpa','cuentach') ) {
-			$this->db->simple_query('ALTER TABLE sfpa ADD COLUMN cuentach CHAR(22) NULL DEFAULT NULL ');
+			$this->db->query('ALTER TABLE sfpa ADD COLUMN cuentach CHAR(22) NULL DEFAULT NULL ');
 		};
 		if ( !$this->datasis->iscampo('bcaj','codbanc') ) {
-			$this->db->simple_query('ALTER TABLE bcaj ADD COLUMN codbanc CHAR(2) NULL DEFAULT NULL ');
+			$this->db->query('ALTER TABLE bcaj ADD COLUMN codbanc CHAR(2) NULL DEFAULT NULL ');
 		};
-		$this->db->simple_query("INSERT IGNORE INTO banc SET codbanc='00', tbanco='CAJ', proxch='000000000000', saldo=0, numcuent='CAJA TRANSITO', banco='CAJA TRANSITO', activo='S', tipocta='K'");
+		$this->db->query("INSERT IGNORE INTO banc SET codbanc='00', tbanco='CAJ', proxch='000000000000', saldo=0, numcuent='CAJA TRANSITO', banco='CAJA TRANSITO', activo='S', tipocta='K'");
 		redirect($this->url.'jqdatag');
 	}
 
@@ -707,7 +707,7 @@ class sfpach extends Controller {
 			$data['numeror']    = $numeror;
 			$data['concepto']   = "TRANSITO DESDE CAJA $envia A BANCO $recibe ";
 			$data['concep2']    = "CHEQUES";
-			$data['status']     = 'P';  // Pendiente/Cerrado/Anulado
+			$data['status']     = 'C';  // Pendiente/Cerrado/Anulado
 			$data['usuario']    = $this->secu->usuario();
 			$data['estampa']    = $fecha;
 			$data['hora']       = date('H:i:s');
@@ -736,7 +736,7 @@ class sfpach extends Controller {
 			$data['monto']    = $monto;
 			$data['concepto'] = "DEPOSITO DESDE CAJA $envia A BANCO $recibe ";
 			$data['concep2']  = "";
-				$data['benefi']   = "";
+			$data['benefi']   = "";
 			$data['usuario']  = $this->secu->usuario();
 			$data['estampa']  = $fecha;
 			$data['hora']     = date('H:i:s');
@@ -767,9 +767,24 @@ class sfpach extends Controller {
 			$this->db->insert('bmov', $data);
 	
 			logusu('BCAJ',"Deposito en efectivo de caja Nro. $numero creada");
-			echo "{\"numero\":\"$numero\",\"mensaje\":\"Registro Agregado\"}";
+
+			$rt=array(
+				'status'  => 'A',
+				'mensaje' => 'Deposito Agregado',
+				'pk'      => $transac
+			);
+			echo json_encode($rt);
+
+			//echo "{\"numero\":\"$numero\",\"mensaje\":\"Registro Agregado\"}";
 		} else {
-			echo "{\"numero\":\"$numero\",\"mensaje\":\"Error \"}";
+			$rt=array(
+				'status'  => 'B',
+				'mensaje' => 'Error guardando el Deposito',
+				'pk'      => $transac
+			);
+			echo json_encode($rt);
+			
+			//echo "{\"numero\":\"$numero\",\"mensaje\":\"Error \"}";
 		}
 		
 	}

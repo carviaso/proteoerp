@@ -95,6 +95,7 @@ jQuery("#a1").click( function(){
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
+			'hidden'   => 'true',
 			'align'    => "'center'",
 			'frozen'   => 'true',
 			'width'    => 40,

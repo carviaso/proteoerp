@@ -802,7 +802,6 @@ $(document).ready(function() {
 		}
 	});
 
-
 	$( "#cliente" ).autocomplete({
 		source: function( req, add){
 			$.ajax({

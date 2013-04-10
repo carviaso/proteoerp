@@ -1834,6 +1834,7 @@ class Maes extends Controller {
 		$script= ' 
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$("#maintabcontainer").tabs();
 		});		';
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
@@ -1914,6 +1915,7 @@ class Maes extends Controller {
 		$edit->tipo->size =3;
 		$edit->tipo->maxlength =1;
 */
+
 		$edit->tipo = new dropdownField("Tipo", "tipo");
 		$edit->tipo->style='width:120px;';
 		$edit->tipo->option("Articulo","Art&iacute;culo" );
@@ -1976,11 +1978,22 @@ class Maes extends Controller {
 		$edit->medida->size =6;
 		$edit->medida->maxlength =4;
 
+/*
 		$edit->iva = new inputField('Iva','iva');
 		$edit->iva->rule='numeric';
 		$edit->iva->css_class='inputnum';
 		$edit->iva->size =10;
 		$edit->iva->maxlength =8;
+*/
+		$ivas=$this->datasis->ivaplica();
+		$edit->iva = new dropdownField('IVA %', 'iva');
+		foreach($ivas as $tasa=>$ivamonto){
+			$edit->iva->option($ivamonto,nformat($ivamonto));
+		}
+		$edit->iva->style='width:100px;';
+		$edit->iva->insertValue = $ivas['tasa'];
+		$edit->iva->onchange='calculos(\'S\');';
+
 
 		$edit->descrip = new inputField('Descrip','descrip');
 		$edit->descrip->rule='';
@@ -2005,37 +2018,31 @@ class Maes extends Controller {
 		$edit->costo = new inputField('Costo','costo');
 		$edit->costo->rule='numeric';
 		$edit->costo->css_class='inputnum';
-		$edit->costo->size =19;
+		$edit->costo->size =15;
 		$edit->costo->maxlength =17;
-
-		$edit->costotal = new inputField('Costotal','costotal');
-		$edit->costotal->rule='numeric';
-		$edit->costotal->css_class='inputnum';
-		$edit->costotal->size =19;
-		$edit->costotal->maxlength =17;
 
 		$edit->existen = new inputField('Existen','existen');
 		$edit->existen->rule='integer';
 		$edit->existen->css_class='inputonlynum';
-		$edit->existen->size =13;
+		$edit->existen->size =10;
 		$edit->existen->maxlength =11;
 
 		$edit->fracci = new inputField('Fracci','fracci');
 		$edit->fracci->rule='integer';
 		$edit->fracci->css_class='inputonlynum';
-		$edit->fracci->size =13;
+		$edit->fracci->size =10;
 		$edit->fracci->maxlength =11;
 
 		$edit->maximo = new inputField('Maximo','maximo');
 		$edit->maximo->rule='integer';
 		$edit->maximo->css_class='inputonlynum';
-		$edit->maximo->size =13;
+		$edit->maximo->size =10;
 		$edit->maximo->maxlength =11;
 
 		$edit->minimo = new inputField('Minimo','minimo');
 		$edit->minimo->rule='integer';
 		$edit->minimo->css_class='inputonlynum';
-		$edit->minimo->size =13;
+		$edit->minimo->size =10;
 		$edit->minimo->maxlength =11;
 
 		$edit->susti = new inputField('Clave','susti');
@@ -2051,7 +2058,7 @@ class Maes extends Controller {
 		$edit->volumen = new inputField('Volumen','volumen');
 		$edit->volumen->rule='numeric';
 		$edit->volumen->css_class='inputnum';
-		$edit->volumen->size =14;
+		$edit->volumen->size =12;
 		$edit->volumen->maxlength =12;
 
 		$edit->peso = new inputField('Peso','peso');
@@ -2079,7 +2086,7 @@ class Maes extends Controller {
 		$edit->ultimo = new inputField('Ultimo','ultimo');
 		$edit->ultimo->rule='numeric';
 		$edit->ultimo->css_class='inputnum';
-		$edit->ultimo->size =19;
+		$edit->ultimo->size =15;
 		$edit->ultimo->maxlength =17;
 
 		$edit->uprv1 = new inputField('Uprv1','uprv1');
@@ -3873,12 +3880,12 @@ class maes extends Controller {
   	if(!empty($codigo)){
   		$this->rapyd->load('dataedit','datagrid'); 
 			
-			$grid = new DataGrid('Cantidad por almac&eacute;n');
+			$grid = new DataGrid('');
 			
 			$grid->db->select=array("ubica","locali","cantidad","fraccion");
 			$grid->db->from('ubic');
 			$grid->db->where('codigo',$codigo);
-			
+
 			$grid->column("Almacen"          ,"ubica" );
 			$grid->column("Ubicaci&oacute;n" ,"locali");
 			$grid->column("Cantidad"         ,"cantidad",'align="RIGHT"');

@@ -35,10 +35,9 @@ class Ppro extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
+	//******************************************************************
 	//Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -75,7 +74,7 @@ class Ppro extends Controller {
 	}
 
 
-	//*********************************************
+	//******************************************************************
 	//
 	// Funciones de botones en javascript
 	//
@@ -288,9 +287,9 @@ class Ppro extends Controller {
 
 	}
 
-	//***************************
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -431,9 +430,9 @@ class Ppro extends Controller {
 		}
 	}
 
-	/**
-	* Busca la data en el Servidor por json
-	*/
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
 	function getdata(){
 		$grid = $this->jqdatagrid;
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -443,9 +442,9 @@ class Ppro extends Controller {
 		echo $rs;
 	}
 
-	/**
-	* Guarda la Informacion
-	*/
+	//******************************************************************
+	// Guarda la Informacion
+	//
 	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
@@ -482,7 +481,7 @@ class Ppro extends Controller {
 		};
 	}
 
-	//*********************************************************
+	//******************************************************************
 	// Forma de Abono
 	//
 	function formapabono(){

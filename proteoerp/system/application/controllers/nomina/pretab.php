@@ -89,7 +89,7 @@ class Pretab extends Controller {
 				submit: function(e,v,m,f){
 					mnuevo = f.mcodigo;
 					if (v) {
-						$.post("'.site_url('nomina/prenom/geneprenom').'/", { contrato: f.mcontrato , fechac: f.mfechac , fechap: f.mfechac }, 
+						$.post("'.site_url('nomina/prenom/geneprenom').'/", { contrato: f.mcontrato, fechac: f.mfechac, fechap: f.mfechac }, 
 							function(data){
 								$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
 								$.prompt.goToState(\'state1\');
