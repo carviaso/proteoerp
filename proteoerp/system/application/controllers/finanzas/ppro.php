@@ -293,12 +293,12 @@ class Ppro extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('cod_prv');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -379,7 +379,7 @@ class Ppro extends Controller {
 		));
 
 		$grid->addField('dias');
-		$grid->label('Dias');
+		$grid->label('D&iacute;as');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
@@ -434,8 +434,7 @@ class Ppro extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid = $this->jqdatagrid;
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('view_ppro');
@@ -447,8 +446,7 @@ class Ppro extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -1021,25 +1019,25 @@ class Ppro extends Controller {
 		$fsele   = $this->input->post('fsele');
 		$check   = 0;
 		$meco    = json_decode($grid);
+		$dbcodban= $this->db->escape($codbanc);
 
 		//Convierte la fecha a YYYYmmdd
 		$fecha = substr($fecha,6,4).substr($fecha,3,2).substr($fecha,0,2);
 
 		// Validacion
-		if ( $codbanc == '' ) {
+		if( $codbanc == '' ){
 			echo '{"status":"E","id":"'.$id.'" ,"mensaje":"Debe seleccionar un Banco o Caja "}';
 			return;
 		}
 
-		if ( $this->datasis->dameval("SELECT count(*) FROM banc WHERE codbanc=".$this->db->escape($codbanc))==0 )
-		{
+		if( $this->datasis->dameval('SELECT count(*) FROM banc WHERE codbanc='.$dbcodban)==0 ){
 			echo '{"status":"E","id":"'.$id.'" ,"mensaje":"Debe seleccionar un Banco o Caja "}';
 			return;
 		}
 
-		$tbanco = $this->datasis->dameval("SELECT tbanco FROM banc WHERE codbanc=".$this->db->escape($codbanc));
+		$tbanco = $this->datasis->dameval('SELECT tbanco FROM banc WHERE codbanc='.$dbcodban);
 
-		if ( $tbanco <> 'CAJ' && $numche == ''  ) {
+		if ( $tbanco <> 'CAJ' && $numche == ''  ){
 			echo '{"status":"E","id":"'.$id.'" ,"mensaje":"Falta colocar el numero de Documento"}';
 			return;
 		}
@@ -1056,58 +1054,78 @@ class Ppro extends Controller {
 		$observa2 = '';
 		$mTempo = "SELECT impuesto FROM sprm WHERE cod_prv=".$this->db->escape($cod_prv);
 		foreach( $linea as $efecto ){
-			if ($efecto['abonar'] > 0 ){
-				$totalab  += $efecto['abonar'] - $efecto['ppago'];
-				$ppago    += $efecto['ppago'];
-				$observa1 .= $efecto['tipo_doc'].$efecto['numero'].', ';
-				$impuesto += $efecto['abonar']*$this->datasis->dameval($mTempo." AND tipo_doc='".$efecto['tipo_doc']."' AND numero='".$efecto['numero']."'" )/$efecto['monto'];
+			if(is_numeric($efecto['abonar'])){
+				$efecto['abonar']=floatval($efecto['abonar']);
+				if ($efecto['abonar'] > 0 ){
+					$totalab  += $efecto['abonar'] - $efecto['ppago'];
+					$ppago    += $efecto['ppago'];
+					$observa1 .= $efecto['tipo_doc'].$efecto['numero'].', ';
+
+					$dbittipo   = $this->db->escape($efecto['tipo_doc']);
+					$dbitnumero = $this->db->escape($efecto['numero']);
+
+					$impuesto += $efecto['abonar']*$this->datasis->dameval($mTempo." AND tipo_doc=${dbittipo} AND numero=".$dbitnumero)/$efecto['monto'];
+				}
+			}else{
+				$rt=array(
+					'status' => 'E',
+					'id'     => $id,
+					'mensaje'=> 'Efecto '.$efecto['tipo_doc'].$efecto['numero'].' tiene la cantidad errada.'
+				);
+				echo json_encode($rt);
+				return ;
 			}
 		}
 
 		$observa2 = '';
-		if ( strlen($observa1)>50) {
+		if(strlen($observa1)>50){
 			$observa2 = substr($observa1, 49);
 			$observa1 = substr($observa1, 0, 50);
 		}
 
-		if ( $totalab <= 0) {
-			echo '{"status":"E","id":"'.$id.'" ,"mensaje":"Seleccione los efectos a abonar"}';
-			return;
+		if($totalab <= 0){
+			$rt=array(
+				'status' => 'E',
+				'id'     => $id,
+				'mensaje'=> 'Seleccione los efectos a abonar.'
+			);
+			echo json_encode($rt);
+			return ;
 		}
 
 		//Crea el Abono
-		$transac  = $this->datasis->prox_sql("ntransa",8);
-		$mnroegre = $this->datasis->prox_sql("nroegre",8);
+		$transac  = $this->datasis->prox_sql('ntransa',8);
+		$mnroegre = $this->datasis->prox_sql('nroegre',8);
 		$tipo_doc = 'AB';
-		$xnumero  = $this->datasis->prox_sql("num_ab",8);
-		$mcontrol = $this->datasis->prox_sql("nsprm",8);
+		$xnumero  = $this->datasis->prox_sql('num_ab',8);
+		$mcontrol = $this->datasis->prox_sql('nsprm' ,8);
 
 		$data = array();
-		$data["tipo_doc"] = $tipo_doc;
-		$data["numero"]   = $xnumero;
-		$data["cod_prv"]  = $cod_prv;
-		$data["nombre"]   = $nombre;
-		$data["fecha"]    = $fecha;
-		$data["monto"]    = $totalab;
-		$data["impuesto"] = $impuesto;
-		$data["vence"]    = $fecha;
-		$data["observa1"] = $observa1;
-		$data["observa2"] = $observa2;
+		$data['tipo_doc'] = $tipo_doc;
+		$data['numero']   = $xnumero;
+		$data['cod_prv']  = $cod_prv;
+		$data['nombre']   = $nombre;
+		$data['fecha']    = $fecha;
+		$data['monto']    = $totalab;
+		$data['impuesto'] = $impuesto;
+		$data['vence']    = $fecha;
+		$data['observa1'] = $observa1;
+		$data['observa2'] = $observa2;
 
-		$data["banco"]    = $codbanc;
-		$data["tipo_op"]  = $tipo_op;
-		$data["numche"]   = $numche;
-		$data["benefi"]   = $benefi;
-		$data["reten"]    = 0;
-		$data["reteiva"]  = 0;
-		$data["ppago"]    = $ppago ;
-		$data["control"]  = $mcontrol ;
-		$data["cambio"]   = 0 ;
-		$data["nfiscal"]  = '' ;
-		$data["mora"]     = 0 ;
+		$data['banco']    = $codbanc;
+		$data['tipo_op']  = $tipo_op;
+		$data['numche']   = $numche;
+		$data['benefi']   = $benefi;
+		$data['reten']    = 0;
+		$data['reteiva']  = 0;
+		$data['ppago']    = $ppago ;
+		$data['control']  = $mcontrol ;
+		$data['cambio']   = 0 ;
+		$data['nfiscal']  = '' ;
+		$data['mora']     = 0 ;
 
-		$data["comprob"]  = '' ;
-		$data["abonos"]   = $totalab ;
+		$data['comprob']  = '' ;
+		$data['abonos']   = $totalab ;
 
 		$data['usuario']  = $this->secu->usuario();
 		$data['estampa']  = date('Ymd');
@@ -1124,21 +1142,21 @@ class Ppro extends Controller {
 			$mcdppago  = $mcontrol;
 
 			$data = array();
-			$data["tipo_doc"] =  "NC";
-			$data["numero"]   =   $mnumero;
-			$data["cod_prv"]  =   $cod_prv;
-			$data["nombre"]   =   $nombre;
-			$data["fecha"]    =   $fecha;
-			$data["monto"]    =   $ppago;
+			$data['tipo_doc'] =  'NC';
+			$data['numero']   =  $mnumero;
+			$data['cod_prv']  =  $cod_prv;
+			$data['nombre']   =  $nombre;
+			$data['fecha']    =  $fecha;
+			$data['monto']    =  $ppago;
 
-			$data["impuesto"] = round($ppago*$impuesto/$totalab,2) ;
+			$data['impuesto'] = round($ppago*$impuesto/$totalab,2) ;
 
-			$data["vence"]    = $fecha;
-			$data["observa1"] = 'DESC. P.PAGO A '.$tipo_doc.$numero;
-			$data["codigo"]   = 'DESPP';
-			$data["descrip"]  = 'DESCUENTO PRONTO PAGO';
-			$data["abonos"]   = $ppago;
-			$data["control"]  = $mcontrol;
+			$data['vence']    = $fecha;
+			$data['observa1'] = 'DESC. P.PAGO A '.$tipo_doc.$numero;
+			$data['codigo']   = 'DESPP';
+			$data['descrip']  = 'DESCUENTO PRONTO PAGO';
+			$data['abonos']   = $ppago;
+			$data['control']  = $mcontrol;
 
 			$data['usuario']  = $this->secu->usuario();
 			$data['estampa']  = date('Ymd');
@@ -1158,33 +1176,33 @@ class Ppro extends Controller {
 		//Crea Movimiento en Bancos
 		$mndebito = '';
 
-		if ( $tbanco == 'CAJ' ) $tipo_op = 'ND';
+		if ( $tbanco  == 'CAJ' ) $tipo_op = 'ND';
 		if ( $tipo_op == 'ND' && $tbanco != 'CAJ' ) $mndebito = $this->datasis->prox_sql("ndebito",8);
 
 		$data = array();
 
-		$data["codbanc"]  = $codbanc;
+		$data['codbanc']  = $codbanc;
 
-		$mTempo = " FROM banc WHERE codbanc=".$this->db->escape($codbanc);
-		$data["numcuent"] = $this->datasis->dameval("SELECT numcuent ".$mTempo);
-		$data["banco"]    = $this->datasis->dameval("SELECT banco    ".$mTempo);
-		$data["saldo"]    = $this->datasis->dameval("SELECT saldo    ".$mTempo);
+		$mTempo = ' FROM banc WHERE codbanc='.$dbcodban;
+		$data['numcuent'] = $this->datasis->dameval('SELECT numcuent '.$mTempo);
+		$data['banco']    = $this->datasis->dameval('SELECT banco    '.$mTempo);
+		$data['saldo']    = $this->datasis->dameval('SELECT saldo    '.$mTempo);
 
-		$data["fecha"]    = $fecha;
-		$data["tipo_op"]  = $tipo_op;
-		$data["numero"]   = $numche;
+		$data['fecha']    = $fecha;
+		$data['tipo_op']  = $tipo_op;
+		$data['numero']   = $numche;
 
-		$data["concepto"] = $observa1;
-		$data["concep2"]  = $observa2;
-		$data["monto"]    = $totalab;
-		$data["clipro"]   = 'P' ;
+		$data['concepto'] = $observa1;
+		$data['concep2']  = $observa2;
+		$data['monto']    = $totalab;
+		$data['clipro']   = 'P' ;
 
-		$data["codcp"]    = $cod_prv;
-		$data["nombre"]   = $nombre;
-		$data["benefi"]   = $benefi;
+		$data['codcp']    = $cod_prv;
+		$data['nombre']   = $nombre;
+		$data['benefi']   = $benefi;
 
-		$data["negreso"]  = $mnroegre;
-		$data["ndebito"]  = $mndebito;
+		$data['negreso']  = $mnroegre;
+		$data['ndebito']  = $mndebito;
 
 		$data['usuario']  = $this->secu->usuario();
 		$data['estampa']  = date('Ymd');
@@ -1202,21 +1220,21 @@ class Ppro extends Controller {
 			if ( $efecto['abonar'] > 0 ) {
 				// Guarda en itppro
 				$data = array();
-				$data["numppro"]  = $xnumero;
-				$data["tipoppro"] = $tipo_doc;
-				$data["cod_prv"]  = $cod_prv;
-				$data["numero"]   = $efecto['numero'];
-				$data["tipo_doc"] = $efecto['tipo_doc'];
-				$data["fecha"]    = $fecha;
-				$data["monto"]    = $efecto['numero'];
-				$data["abono"]    = $efecto['abonar'];
-				$data["breten"]   = 0;
-				$data["creten"]   = '';
-				$data["reten"]    = 0;
-				$data["reteiva"]  = 0;
-				$data["ppago"]    = 0;
-				$data["cambio"]   = 0;
-				$data["mora"]     = 0;
+				$data['numppro']  = $xnumero;
+				$data['tipoppro'] = $tipo_doc;
+				$data['cod_prv']  = $cod_prv;
+				$data['numero']   = $efecto['numero'];
+				$data['tipo_doc'] = $efecto['tipo_doc'];
+				$data['fecha']    = $fecha;
+				$data['monto']    = $efecto['numero'];
+				$data['abono']    = $efecto['abonar'];
+				$data['breten']   = 0;
+				$data['creten']   = '';
+				$data['reten']    = 0;
+				$data['reteiva']  = 0;
+				$data['ppago']    = 0;
+				$data['cambio']   = 0;
+				$data['mora']     = 0;
 
 				$data['usuario']  = $this->secu->usuario();
 				$data['estampa']  = date('Ymd');
