@@ -4,7 +4,7 @@
  * @link    http://www.dompdf.com/
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: table_frame_decorator.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: table_frame_decorator.cls.php 462 2012-01-29 22:44:23Z fabien.menager $
  */
 
 /**
@@ -142,6 +142,22 @@ class Table_Frame_Decorator extends Frame_Decorator {
 
       parent::split($child);
     }
+  }
+
+  /**
+   * Return a copy of this frame with $node as its node
+   * 
+   * @param DomNode $node 
+   * @return Frame
+   */ 
+  function copy(DomNode $node) {
+    $deco = parent::copy($node);
+    
+    // In order to keep columns' widths through pages
+    $deco->_cellmap->set_columns($this->_cellmap->get_columns());
+    $deco->_cellmap->lock_columns();
+
+    return $deco;
   }
 
   /**

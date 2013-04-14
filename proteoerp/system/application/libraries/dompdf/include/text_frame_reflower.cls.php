@@ -5,7 +5,7 @@
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: text_frame_reflower.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: text_frame_reflower.cls.php 462 2012-01-29 22:44:23Z fabien.menager $
  */
 
 /**
@@ -163,8 +163,6 @@ class Text_Frame_Reflower extends Frame_Reflower {
     $text = $frame->get_text();
     $size = $style->font_size;
     $font = $style->font_family;
-    $word_spacing = $style->length_in_pt($style->word_spacing);
-    $char_spacing = $style->length_in_pt($style->letter_spacing);
 
     // Determine the text height
     $style->height = Font_Metrics::get_font_height( $font, $size );

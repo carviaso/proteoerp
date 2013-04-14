@@ -6,7 +6,7 @@
  * @author  Helmut Tischer <htischer@weihenstephan.org>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: style.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: style.cls.php 469 2012-02-05 22:25:30Z fabien.menager $
  */
 
 /**
@@ -413,12 +413,19 @@ class Style {
    * @return float
    */
   function length_in_pt($length, $ref_size = null) {
-
+    static $cache = array();
+    
     if ( !is_array($length) )
       $length = array($length);
 
     if ( !isset($ref_size) )
       $ref_size = self::$default_font_size;
+      
+    $key = implode("@", $length)."/$ref_size";
+    
+    if ( isset($cache[$key]) ) {
+      return $cache[$key];
+    }
 
     $ret = 0;
     foreach ($length as $l) {
@@ -511,7 +518,7 @@ class Style {
       $ret += $ref_size;
     }
 
-    return $ret;
+    return $cache[$key] = $ret;
   }
 
   

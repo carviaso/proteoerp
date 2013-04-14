@@ -4,7 +4,7 @@
  * @link    http://www.dompdf.com/
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: frame_tree.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: frame_tree.cls.php 464 2012-01-30 20:44:53Z fabien.menager $
  */
 
 /**
@@ -82,8 +82,8 @@ class Frame_Tree {
 
   /**
    * Returns the root frame of the tree
-   *
-   * @return Frame
+   * 
+   * @return Page_Frame_Decorator
    */
   function get_root() { return $this->_root; }
 
@@ -125,12 +125,13 @@ class Frame_Tree {
   protected function fix_tables(){
     $xp = new DOMXPath($this->_dom);
     
-    /*$captions = $xp->query("//table/caption");
+    // Move table caption before the table
+    // FIXME find a better way to deal with it...
+    $captions = $xp->query("//table/caption");
     foreach($captions as $caption) {
-      $tr = $this->_dom->createElement("tr");
-      $tr = $caption->parentNode->insertBefore($tr, $caption);
-      $tr->appendChild($caption);
-    }*/
+      $table = $caption->parentNode;
+      $table->parentNode->insertBefore($caption, $table);
+    }
     
     $rows = $xp->query("//table/tr");
     foreach($rows as $row) {
@@ -217,5 +218,7 @@ class Frame_Tree {
       $parent->prepend_child($frame, false);
     else 
       $parent->append_child($frame, false);
+      
+    return $frame_id;
   }
 }

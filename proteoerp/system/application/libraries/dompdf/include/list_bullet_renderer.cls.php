@@ -5,7 +5,7 @@
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @author  Helmut Tischer <htischer@weihenstephan.org>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: list_bullet_renderer.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: list_bullet_renderer.cls.php 468 2012-02-05 10:51:40Z fabien.menager $
  */
 
 /**
@@ -15,6 +15,53 @@
  * @package dompdf
  */
 class List_Bullet_Renderer extends Abstract_Renderer {
+  static function get_counter_chars($type) {
+    static $cache = array();
+    
+    if ( isset($cache[$type]) ) {
+      return $cache[$type];
+    }
+    
+    $uppercase = false;
+    $text = "";
+    
+    switch ($type) {
+      case "decimal-leading-zero":
+      case "decimal":
+      case "1":
+        return "0123456789";
+      
+      case "upper-alpha":
+      case "upper-latin":
+      case "A":
+        $uppercase = true;
+      case "lower-alpha":
+      case "lower-latin":
+      case "a":
+        $text = "abcdefghijklmnopqrstuvwxyz";
+        break;
+        
+      case "upper-roman":
+      case "I":
+        $uppercase = true;
+      case "lower-roman":
+      case "i":
+        $text = "ivxlcdm";
+        break;
+      
+      case "lower-greek":
+        for($i = 0; $i < 24; $i++) {
+          $text .= unichr($i+944);
+        }
+        break;
+    }
+    
+    if ( $uppercase ) {
+      $text = strtoupper($text);
+    }
+    
+    return $cache[$type] = "$text.";
+  }
 
   //........................................................................
   private function make_counter($n, $type, $pad = null){
@@ -55,10 +102,11 @@ class List_Bullet_Renderer extends Abstract_Renderer {
         break;
     }
     
-    if ($uppercase) 
+    if ( $uppercase ) {
       $text = strtoupper($text);
-      
-    return $text.".";
+    }
+    
+    return "$text.";
   }
   
   function render(Frame $frame) {
@@ -133,22 +181,31 @@ class List_Bullet_Renderer extends Abstract_Renderer {
       case "i":
       case "A":
       case "I":
-        list($x,$y) = $frame->get_position();
+        $li = $frame->get_parent();
         
         $pad = null;
         if ( $bullet_style === "decimal-leading-zero" ) {
-          $pad = strlen($frame->get_parent()->get_parent()->get_node()->getAttribute("dompdf-children-count"));
+          $pad = strlen($li->get_parent()->get_node()->getAttribute("dompdf-children-count"));
         }
         
         $index = $frame->get_node()->getAttribute("dompdf-counter");
         $text = $this->make_counter($index, $bullet_style, $pad);
-        $font_family = $style->font_family;
-        $spacing = 0; //$frame->get_text_spacing() + $style->word_spacing;
         
-        if ( trim($text) == "" )
+        if ( trim($text) == "" ) {
           return;
+        }
+        
+        $spacing = 0;
+        $font_family = $style->font_family;
+        
+        $line = $li->get_containing_line();
+        list($x, $y) = array($frame->get_position("x"), $line->y);
 
         $x -= Font_Metrics::get_text_width($text, $font_family, $font_size, $spacing);
+        
+        // Take line-height into account
+        $line_height = $style->line_height;
+        $y += ($line_height - $font_size) / 4; // FIXME I thought it should be 2, but 4 gives better results
         
         $this->_canvas->text($x, $y, $text,
                              $font_family, $font_size,

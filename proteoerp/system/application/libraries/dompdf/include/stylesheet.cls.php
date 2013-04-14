@@ -6,7 +6,7 @@
  * @author  Helmut Tischer <htischer@weihenstephan.org>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: stylesheet.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: stylesheet.cls.php 461 2012-01-26 20:26:02Z fabien.menager $
  */
 
 /**
@@ -281,10 +281,26 @@ class Stylesheet {
 
     set_error_handler("record_warnings");
     $css = file_get_contents($file, null, $this->_dompdf->get_http_context());
+    
+    $good_mime_type = true;
+    
+    if ( !$this->_dompdf->get_quirksmode() ) {
+      // See http://the-stickman.com/web-development/php/getting-http-response-headers-when-using-file_get_contents/
+      if ( isset($http_response_header) ) {
+        foreach($http_response_header as $_header) {
+          if ( preg_match("@Content-Type:\s*([\w/]+)@i", $_header, $matches) ) {
+            if ( $matches[1] !== "text/css" ) {
+              $good_mime_type = false;
+            }
+          }
+        }
+      }
+    }
+    
     restore_error_handler();
 
-    if ( $css == "" ) {
-      record_warnings(E_USER_WARNING, "Unable to load css file $file", __FILE__, __LINE__);;
+    if ( !$good_mime_type || $css == "" ) {
+      record_warnings(E_USER_WARNING, "Unable to load css file $file", __FILE__, __LINE__);
       return;
     }
 
@@ -764,6 +780,11 @@ class Stylesheet {
       
       foreach ($nodes as $i => $node) {
         foreach ($query["pseudo_elements"] as $pos) {
+          // Do not add a new pseudo element if another one already matched
+          if ( $node->hasAttribute("dompdf_{$pos}_frame_id") ) {
+            continue;
+          }
+          
           if (($src = $this->_image($style->content)) !== "none") {
             $new_node = $node->ownerDocument->createElement("img_generated");
             $new_node->setAttribute("src", $src);
@@ -771,9 +792,12 @@ class Stylesheet {
           else {
             $new_node = $node->ownerDocument->createElement("dompdf_generated");
           }
+          
           $new_node->setAttribute($pos, $pos);
           
-          $tree->insert_node($node, $new_node, $pos);
+          $new_frame_id = $tree->insert_node($node, $new_node, $pos);
+          
+          $node->setAttribute("dompdf_{$pos}_frame_id", $new_frame_id);
         }
       }
     }
@@ -977,12 +1001,17 @@ class Stylesheet {
 
         case "media":
           $acceptedmedia = self::$ACCEPTED_GENERIC_MEDIA_TYPES;
+          
           if ( defined("DOMPDF_DEFAULT_MEDIA_TYPE") ) {
             $acceptedmedia[] = DOMPDF_DEFAULT_MEDIA_TYPE;
-          } else {
+          } 
+          else {
             $acceptedmedia[] = self::$ACCEPTED_DEFAULT_MEDIA_TYPE;
           }
-          if ( in_array(mb_strtolower(trim($match[3])), $acceptedmedia ) ) {
+          
+          $media = preg_split("/\s*,\s*/", mb_strtolower(trim($match[3])));
+          
+          if ( count(array_intersect($acceptedmedia, $media)) ) {
             $this->_parse_sections($match[5]);
           }
           break;
@@ -1017,6 +1046,8 @@ class Stylesheet {
               
             case ":left":
             case ":right":
+            case ":odd":
+            case ":even":
             case ":first":
               $key = $page_selector;
               

@@ -4,7 +4,7 @@
  * @link    http://www.dompdf.com/
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: page_frame_decorator.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: page_frame_decorator.cls.php 457 2012-01-22 11:48:20Z fabien.menager $
  */
 
 /**
@@ -573,13 +573,20 @@ class Page_Frame_Decorator extends Frame_Decorator {
     unset($this->_floating_frames[$key]);
   }
 
-  public function remove_floating_frames($side) {
+  public function get_lowest_float_offset(Frame $child) {
+    $style = $child->get_style();
+    $side = $style->clear;
+    $float = $style->float;
+    
     $y = 0;
     
     foreach($this->_floating_frames as $key => $frame) {
       if ( $side === "both" || $frame->get_style()->float === $side ) {
         $y = max($y, $frame->get_position("y") + $frame->get_margin_height());
-        unset($this->_floating_frames[$key]);
+        
+        if ( $float !== "none" ) {
+          $this->remove_floating_frame($key);
+        }
       }
     }
     

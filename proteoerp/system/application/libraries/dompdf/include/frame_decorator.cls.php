@@ -4,7 +4,7 @@
  * @link    http://www.dompdf.com/
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: frame_decorator.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: frame_decorator.cls.php 464 2012-01-30 20:44:53Z fabien.menager $
  */
 
 /**
@@ -352,6 +352,9 @@ abstract class Frame_Decorator extends Frame {
         $this->_frame->set_root($root);
   }
   
+  /**
+   * @return Page_Frame_Decorator
+   */
   function get_root() { return $this->_root; }
   
   //........................................................................
@@ -391,7 +394,7 @@ abstract class Frame_Decorator extends Frame {
     }
     
     if ( !$p ) {
-      $p = $this->_root;
+      $p = $this->_root->get_first_child(); // <body>
     }
 
     return $this->_positionned_parent = $p;

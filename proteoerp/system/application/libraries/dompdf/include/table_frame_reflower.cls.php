@@ -4,7 +4,7 @@
  * @link    http://www.dompdf.com/
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: table_frame_reflower.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: table_frame_reflower.cls.php 465 2012-01-30 21:58:11Z fabien.menager $
  */
 
 /**
@@ -114,6 +114,10 @@ class Table_Frame_Reflower extends Frame_Reflower {
     $style->width = $width;
 
     $cellmap = $this->_frame->get_cellmap();
+    
+    if ( $cellmap->is_columns_locked() ) {
+      return;
+    }
 
     // If the whole table fits on the page, then assign each column it's max width
     if ( $width == $max_width ) {
@@ -410,20 +414,26 @@ class Table_Frame_Reflower extends Frame_Reflower {
 
     $diff = $cb["w"] - $width;
 
-    if ( $left === "auto" && $right === "auto" && $diff > 0 ) {
-      $left = $right = $diff / 2;
+    if ( $left === "auto" && $right === "auto" ) {
+      if ( $diff < 0 ) {
+        $left = 0;
+        $right = $diff;
+      }
+      else {
+        $left = $right = $diff / 2;
+      }
+      
       $style->margin_left = "$left pt";
       $style->margin_right = "$right pt";
 
     } else {
-        if ( $left === "auto" ) {
-          $left = $style->length_in_pt($cb["w"] - $right - $width, $cb["w"]);
-        }
-        if ( $right === "auto" ) {
-          $left = $style->length_in_pt($left, $cb["w"]);
-        }
+      if ( $left === "auto" ) {
+        $left = $style->length_in_pt($cb["w"] - $right - $width, $cb["w"]);
+      }
+      if ( $right === "auto" ) {
+        $left = $style->length_in_pt($left, $cb["w"]);
+      }
     }
-
 
     list($x, $y) = $frame->get_position();
 
@@ -438,7 +448,6 @@ class Table_Frame_Reflower extends Frame_Reflower {
       $h = $cb["h"];
     else
       $h = null;
-
 
     $cellmap = $frame->get_cellmap();
     $col =& $cellmap->get_column(0);
@@ -478,7 +487,7 @@ class Table_Frame_Reflower extends Frame_Reflower {
     // Debugging:
     //echo ($this->_frame->get_cellmap());
     
-    if ( $block && $style->float === "none" ) {
+    if ( $block && $style->float === "none" && $frame->is_in_flow() ) {
       $block->add_frame_to_line($frame);
       $block->add_line();
     }

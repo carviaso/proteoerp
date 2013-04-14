@@ -4,7 +4,7 @@
  * @link    http://php-font-lib.googlecode.com/
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: font_binary_stream.cls.php 36 2011-11-03 23:02:06Z fabien.menager $
+ * @version $Id: font_binary_stream.cls.php 42 2012-02-05 10:49:20Z fabien.menager $
  */
 
 /**
@@ -77,6 +77,13 @@ class Font_Binary_Stream {
   }
   
   /**
+   * Close the internal file pointer
+   */
+  public function close() {
+    return fclose($this->f) != false;
+  }
+  
+  /**
    * Change the internal file pointer
    * 
    * @param resource $fp
@@ -94,9 +101,13 @@ class Font_Binary_Stream {
    * 
    * @return resource the temporary file pointer resource
    */
-  public static function getTempFile() {
+  public static function getTempFile($allow_memory = true) {
+    $f = null;
+    
+    if ($allow_memory) {
       // PHP 5.1+
-    $f = @fopen("php://temp", "rb+");
+      @fopen("php://temp", "rb+");
+    }
     
     if (!$f) {
       $f = fopen(tempnam(sys_get_temp_dir(), "fnt"), "rb+");
@@ -166,6 +177,7 @@ class Font_Binary_Stream {
 
   public function readUInt16() {
     $a = unpack("nn", $this->read(2));
+    //if ($a == null) var_dump(debug_backtrace(false));
     return $a["n"];
   }
 

@@ -6,7 +6,7 @@
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: load_font.php 449 2011-11-13 13:07:48Z fabien.menager $
+ * @version $Id: load_font.php 467 2012-02-04 13:25:17Z fabien.menager $
  */
 
 require_once "dompdf_config.inc.php";
@@ -65,7 +65,8 @@ if ( $_SERVER["argc"] < 3 && @$_SERVER["argv"][1] != "system_fonts" ) {
  * @param string $bold_italic the filename of the bold italic face font subtype
  */
 function install_font_family($fontname, $normal, $bold = null, $italic = null, $bold_italic = null) {
-
+  Font_Metrics::init();
+  
   // Check if the base filename is readable
   if ( !is_readable($normal) )
     throw new DOMPDF_Exception("Unable to read '$normal'.");

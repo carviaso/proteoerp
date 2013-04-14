@@ -7,7 +7,7 @@
  * @author  Helmut Tischer <htischer@weihenstephan.org>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: cpdf_adapter.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: cpdf_adapter.cls.php 466 2012-02-04 13:08:38Z fabien.menager $
  */
 
 // FIXME: Need to sanity check inputs to this class
@@ -691,6 +691,10 @@ class CPDF_Adapter implements Canvas {
       $text = mb_convert_encoding($text, 'Windows-1252', 'UTF-8');
     }
     return $this->_pdf->getTextWidth($size, $text, $word_spacing, $char_spacing);
+  }
+  
+  function register_string_subset($font, $string) {
+    return $this->_pdf->registerText($font, $string);
   }
 
   //........................................................................

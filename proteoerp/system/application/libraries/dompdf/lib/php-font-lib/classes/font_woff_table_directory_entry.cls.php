@@ -4,7 +4,7 @@
  * @link    http://php-font-lib.googlecode.com/
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: font_woff_table_directory_entry.cls.php 34 2011-10-23 13:53:25Z fabien.menager $
+ * @version $Id: font_woff_table_directory_entry.cls.php 39 2012-01-15 12:25:22Z fabien.menager $
  */
 
 require_once dirname(__FILE__)."/font_table_directory_entry.cls.php";
@@ -21,38 +21,5 @@ class Font_WOFF_Table_Directory_Entry extends Font_Table_Directory_Entry {
     $this->length = $this->readUInt32();
     $this->origLength = $this->readUInt32();
     $this->checksum = $this->readUInt32();
-  }
-  
-  function startRead(){
-    parent::startRead();
-    
-    if ($this->length == $this->origLength) {
-      return true;
-    }
-    
-    $font = $this->font;
-    $font->fileOffset = $font->pos();
-    
-    $data = $font->read($this->length);
-    
-    $f = self::getTempFile();
-    fwrite($f, gzuncompress($data));
-    rewind($f);
-    
-    $font->origF = $font->f;
-    $font->f = $f;
-  }
-  
-  function endRead(){
-    parent::endRead();
-    
-    $font = $this->font;
-    
-    if ($font->origF) {
-      fclose($font->f);
-      $font->f = $font->origF;
-      $font->origF = null;
-      $font->fileOffset = 0;
-    }
   }
 }

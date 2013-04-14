@@ -4,7 +4,7 @@
  * @link    http://php-font-lib.googlecode.com/
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: font_table_loca.cls.php 35 2011-11-02 22:30:45Z fabien.menager $
+ * @version $Id: font_table_loca.cls.php 43 2012-02-05 22:26:53Z fabien.menager $
  */
 
 /**
@@ -15,11 +15,12 @@
 class Font_Table_loca extends Font_Table {
   protected function _parse(){
     $font = $this->getFont();
+    $offset = $font->pos();
     
     $indexToLocFormat = $font->getData("head", "indexToLocFormat");
     $numGlyphs = $font->getData("maxp", "numGlyphs");
     
-    $this->entry->startRead();
+    $font->seek($offset);
     
     $data = array();
     
@@ -52,13 +53,12 @@ class Font_Table_loca extends Font_Table {
     
     $indexToLocFormat = $font->getData("head", "indexToLocFormat");
     $numGlyphs = $font->getData("maxp", "numGlyphs");
-    
     $length = 0;
     
     // 2 bytes
     if ($indexToLocFormat == 0) {
       for ($i = 0; $i <= $numGlyphs; $i++) {
-        $length += $font->writeUInt32($data[$i] / 2);
+        $length += $font->writeUInt16($data[$i] / 2);
       }
     }
     

@@ -6,7 +6,7 @@
  * @author  Helmut Tischer <htischer@weihenstephan.org>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: font_metrics.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: font_metrics.cls.php 469 2012-02-05 22:25:30Z fabien.menager $
  */
 
 require_once DOMPDF_LIB_DIR . "/class.pdf.php";
@@ -69,10 +69,13 @@ class Font_Metrics {
    * Class initialization
    *
    */
-  static function init() {
+  static function init(Canvas $canvas = null) {
     if (!self::$_pdf) {
-      self::load_font_families();
-      self::$_pdf = Canvas_Factory::get_instance();
+      if (!$canvas) {
+        $canvas = Canvas_Factory::get_instance();
+      }
+      
+      self::$_pdf = $canvas;
     }
   }
 
@@ -86,7 +89,31 @@ class Font_Metrics {
    * @return float
    */
   static function get_text_width($text, $font, $size, $word_spacing = 0, $char_spacing = 0) {
-    return self::$_pdf->get_text_width($text, $font, $size, $word_spacing, $char_spacing);
+    //return self::$_pdf->get_text_width($text, $font, $size, $word_spacing, $char_spacing);
+    
+    // @todo Make sure this cache is efficient before enabling it
+    static $cache = array();
+    
+    if ( $text === "" ) {
+      return 0;
+    }
+    
+    // Don't cache long strings
+    $use_cache = !isset($text[50]); // Faster than strlen
+    
+    $key = "$font/$size/$word_spacing/$char_spacing";
+    
+    if ( $use_cache && isset($cache[$key][$text]) ) {
+      return $cache[$key]["$text"];
+    }
+    
+    $width = self::$_pdf->get_text_width($text, $font, $size, $word_spacing, $char_spacing);
+    
+    if ( $use_cache ) {
+      $cache[$key][$text] = $width;
+    }
+    
+    return $width;
   }
 
   /**
@@ -305,4 +332,4 @@ class Font_Metrics {
   }
 }
 
-Font_Metrics::init();
+Font_Metrics::load_font_families();

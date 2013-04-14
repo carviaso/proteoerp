@@ -6,7 +6,7 @@
  * @author  Helmut Tischer <htischer@weihenstephan.org>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: dompdf_config.inc.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: dompdf_config.inc.php 468 2012-02-05 10:51:40Z fabien.menager $
  */
 
 //error_reporting(E_STRICT | E_ALL | E_DEPRECATED);
@@ -132,6 +132,11 @@ def("DOMPDF_CHROOT", realpath(DOMPDF_DIR));
 def("DOMPDF_UNICODE_ENABLED", true);
 
 /**
+ * Whether to make font subsetting or not.
+ */
+def("DOMPDF_ENABLE_FONTSUBSETTING", false);
+
+/**
  * The PDF rendering backend to use
  *
  * Valid settings are 'PDFLib', 'CPDF' (the bundled R&OS PDF class), 'GD' and
@@ -251,7 +256,7 @@ def("DOMPDF_DPI", 96);
  *
  * @var bool
  */
-def("DOMPDF_ENABLE_PHP", true);
+def("DOMPDF_ENABLE_PHP", false);
 
 /**
  * Enable inline Javascript

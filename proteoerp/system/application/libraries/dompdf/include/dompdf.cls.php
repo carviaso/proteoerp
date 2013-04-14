@@ -5,7 +5,7 @@
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: dompdf.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: dompdf.cls.php 468 2012-02-05 10:51:40Z fabien.menager $
  */
 
 /**
@@ -174,7 +174,7 @@ class DOMPDF {
   /**
    * @var bool Tells wether the DOM document is in quirksmode (experimental)
    */
-  private $_quirskmode = false;
+  private $_quirksmode = false;
   
   public static $native_fonts = array("courier", "courier-bold", "courier-oblique", "courier-boldoblique",
                           "helvetica", "helvetica-bold", "helvetica-oblique", "helvetica-boldoblique",
@@ -481,15 +481,21 @@ class DOMPDF {
       $doc = new DOMDocument();
       $doc->preserveWhiteSpace = true;
       $doc->loadHTML($str);
-    
-      // HTML5 <!DOCTYPE html>
-      if ( !$doc->doctype->publicId && !$doc->doctype->systemId ) {
-        $quirksmode = false;
-      }
       
-      // not XHTML
-      if ( !preg_match("/xhtml/i", $doc->doctype->publicId) ) {
+      // If some text is before the doctype of before the <html> tag, we are in quirksmode
+      if ( preg_match("/^(.+)<(!doctype|html)/i", ltrim($str), $matches) ) {
         $quirksmode = true;
+      }
+      else {
+        // HTML5 <!DOCTYPE html>
+        if ( !$doc->doctype->publicId && !$doc->doctype->systemId ) {
+          $quirksmode = false;
+        }
+        
+        // not XHTML
+        if ( !preg_match("/xhtml/i", $doc->doctype->publicId) ) {
+          $quirksmode = true;
+        }
       }
     }
     
@@ -565,6 +571,11 @@ class DOMPDF {
       }
 
     }
+    
+    // Set the base path of the Stylesheet to that of the file being processed
+    $this->_css->set_protocol($this->_protocol);
+    $this->_css->set_host($this->_base_host);
+    $this->_css->set_base_path($this->_base_path);
 
     // load <style> tags
     $styles = $this->_xml->getElementsByTagName("style");
@@ -590,11 +601,6 @@ class DOMPDF {
 
       } else
         $css = $style->nodeValue;
-      
-      // Set the base path of the Stylesheet to that of the file being processed
-      $this->_css->set_protocol($this->_protocol);
-      $this->_css->set_host($this->_base_host);
-      $this->_css->set_base_path($this->_base_path);
 
       $this->_css->load_css($css);
     }
@@ -647,6 +653,15 @@ class DOMPDF {
     }
   }
   
+  /**
+   * Get the quirks mode
+   * 
+   * @return boolean true if quirks mode is active
+   */
+  function get_quirksmode(){
+    return $this->_quirksmode;
+  }
+  
   function parse_default_view($value) {
     $valid = array("XYZ", "Fit", "FitH", "FitV", "FitR", "FitB", "FitBH", "FitBV");
     
@@ -682,11 +697,49 @@ class DOMPDF {
     
     $this->_css->apply_styles($this->_tree);
     
+    // @page style rules : size, margins
+    $page_styles = $this->_css->get_page_styles();
+    
+    $base_page_style = $page_styles["base"];
+    unset($page_styles["base"]);
+    
+    foreach($page_styles as $_page_style) {
+      $_page_style->inherit($base_page_style);
+    }
+    
+    if ( is_array($base_page_style->size) ) {
+      $this->set_paper(array(0, 0, $base_page_style->size[0], $base_page_style->size[1]));
+    }
+    
+    $this->_pdf = Canvas_Factory::get_instance($this->_paper_size, $this->_paper_orientation);
+    Font_Metrics::init($this->_pdf);
+    
+    if (DOMPDF_ENABLE_FONTSUBSETTING && $this->_pdf instanceof CPDF_Adapter) {
+      foreach ($this->_tree->get_frames() as $frame) {
+        $style = $frame->get_style();
+        $node  = $frame->get_node();
+        
+        // Handle text nodes
+        if ( $node->nodeName === "#text" ) {
+          $this->_pdf->register_string_subset($style->font_family, $node->nodeValue);
+          continue;
+        }
+        
+        // Handle generated content (list items)
+        if ( $style->display === "list-item" ) {
+          $chars = List_Bullet_Renderer::get_counter_chars($style->list_style_type);
+          $this->_pdf->register_string_subset($style->font_family, $chars);
+          continue;
+        }
+        
+        // TODO Handle other generated content (pseudo elements)
+      }
+    }
+    
     $root = null;
 
     foreach ($this->_tree->get_frames() as $frame) {
       // Set up the root frame
-
       if ( is_null($root) ) {
         $root = Frame_Factory::decorate_root( $this->_tree->get_root(), $this );
         continue;
@@ -730,22 +783,6 @@ class DOMPDF {
       }
 
     }
-    
-    // @page style rules : size, margins
-    $page_styles = $this->_css->get_page_styles();
-    
-    $base_page_style = $page_styles["base"];
-    unset($page_styles["base"]);
-    
-    foreach($page_styles as $_page_style) {
-      $_page_style->inherit($base_page_style);
-    }
-    
-    if ( is_array($base_page_style->size) ) {
-      $this->set_paper(array(0, 0, $base_page_style->size[0], $base_page_style->size[1]));
-    }
-    
-    $this->_pdf = Canvas_Factory::get_instance($this->_paper_size, $this->_paper_orientation);
 
     // Add meta information
     $title = $this->_xml->getElementsByTagName("title");

@@ -13,7 +13,7 @@
  * @author  Blake Ross <BlakeR1234@aol.com>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: html.css 449 2011-11-13 13:07:48Z fabien.menager $
+ * @version $Id: html.css 456 2012-01-21 11:20:37Z fabien.menager $
  */
 
 @page {
@@ -158,7 +158,7 @@ td, th, tr {
    
 /* caption inherits from table not table-outer */  
 caption {
-  display: table-caption;
+  display: block;
   text-align: center;
 }
 

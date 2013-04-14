@@ -4,7 +4,7 @@
  * @link    http://www.dompdf.com/
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: frame.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: frame.cls.php 450 2012-01-10 22:29:32Z fabien.menager $
  */
 
 /**
@@ -161,7 +161,7 @@ class Frame {
    *
    * @param DOMNode $node the DOMNode this frame represents
    */
-  function __construct(DomNode $node) {
+  function __construct(DOMNode $node) {
     $this->_node = $node;
       
     $this->_parent = null;

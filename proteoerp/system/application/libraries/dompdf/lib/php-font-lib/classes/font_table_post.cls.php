@@ -4,7 +4,7 @@
  * @link    http://php-font-lib.googlecode.com/
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: font_table_post.cls.php 37 2011-11-07 07:38:44Z fabien.menager $
+ * @version $Id: font_table_post.cls.php 40 2012-01-22 21:48:41Z fabien.menager $
  */
 
 /**
@@ -84,13 +84,13 @@ class Font_Table_post extends Font_Table {
   function _encode(){
     $font = $this->getFont();
     $data = $this->data;
-    $data["format"] = 1;
+    $data["format"] = 3;
     
     $length = $font->pack($this->def, $data);
+    
     return $length;
     
-    /*
-    $names = $data["names"];
+    $subset = $font->getSubset();
     
     switch($data["format"]) {
       case 1:
@@ -98,15 +98,25 @@ class Font_Table_post extends Font_Table {
       break;
       
       case 2:
+        $old_names = $data["names"];
+        
+        $glyphNameIndex = range(0, count($subset));
+        
+        $names = array();
+        foreach($subset as $gid) {
+          $names[] = $data["names"][$data["glyphNameIndex"][$gid]];
+        }
+    
         $numberOfGlyphs = count($names);
         $length += $font->writeUInt16($numberOfGlyphs);
         
-        foreach($data["glyphNameIndex"] as $gni) {
+        foreach($glyphNameIndex as $gni) {
           $length += $font->writeUInt16($gni);
         }
         
-        $names = array_slice($names, 257);
+        //$names = array_slice($names, 257);
         foreach($names as $name) {
+          var_dump($name);
           $len = strlen($name);
           $length += $font->writeUInt8($len);
           $length += $font->write($name, $len);
@@ -127,6 +137,6 @@ class Font_Table_post extends Font_Table {
       break;
     }
     
-    return $length;*/
+    return $length;
   }
 }

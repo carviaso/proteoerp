@@ -4,7 +4,7 @@
  * @link    http://www.dompdf.com/
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: table_cell_frame_reflower.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: table_cell_frame_reflower.cls.php 457 2012-01-22 11:48:20Z fabien.menager $
  */
 
 /**
@@ -84,7 +84,8 @@ class Table_Cell_Frame_Reflower extends Block_Frame_Reflower {
     
       $child->set_containing_block($content_x, $content_y, $cb_w, $h);
       $child->reflow($this->_frame);
-
+    
+      $this->process_float($child, $x + $left_space, $w - $right_space - $left_space);
     }
 
     // Determine our height

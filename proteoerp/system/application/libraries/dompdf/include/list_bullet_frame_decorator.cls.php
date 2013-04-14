@@ -5,7 +5,7 @@
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @author  Helmut Tischer <htischer@weihenstephan.org>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: list_bullet_frame_decorator.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: list_bullet_frame_decorator.cls.php 451 2012-01-14 14:54:23Z fabien.menager $
  */
 
 /**
@@ -32,18 +32,25 @@ class List_Bullet_Frame_Decorator extends Frame_Decorator {
   
   function get_margin_width() {
     $style = $this->_frame->get_style();
+    
     // Small hack to prevent extra indenting of list text on list_style_position === "inside"
     // and on suppressed bullet
     if ( $style->list_style_position === "outside" ||
-         $style->list_style_type === "none" )
+         $style->list_style_type === "none" ) {
       return 0;
+    }
+    
     return $style->get_font_size() * self::BULLET_SIZE + 2 * self::BULLET_PADDING;
   }
 
   //hits only on "inset" lists items, to increase height of box
   function get_margin_height() {
     $style = $this->_frame->get_style();
-    if ( $style->list_style_type === "none" ) return 0;
+    
+    if ( $style->list_style_type === "none" ) {
+      return 0;
+    }
+    
     return $style->get_font_size() * self::BULLET_SIZE + 2 * self::BULLET_PADDING;
   }
 

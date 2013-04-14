@@ -6,7 +6,7 @@
  * @author  Brian Sweeney <eclecticgeek@gmail.com>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: text_frame_decorator.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: text_frame_decorator.cls.php 459 2012-01-25 21:38:50Z fabien.menager $
  */
 
 /**
@@ -150,8 +150,6 @@ class Text_Frame_Decorator extends Frame_Decorator {
 
     $p = $this->get_parent();
     $p->insert_child_after($deco, $this, false);
-    
-    //$this->find_block_parent()->get_reflower()->get_float_offsets($deco, 200);
 
     if ( $p instanceof Inline_Frame_Decorator )
       $p->split($deco);

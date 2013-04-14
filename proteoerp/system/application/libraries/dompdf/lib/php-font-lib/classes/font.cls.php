@@ -4,7 +4,7 @@
  * @link    http://php-font-lib.googlecode.com/
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: font.cls.php 36 2011-11-03 23:02:06Z fabien.menager $
+ * @version $Id: font.cls.php 41 2012-02-04 18:01:38Z fabien.menager $
  */
 
 /**
@@ -13,6 +13,8 @@
  * @package php-font-lib
  */
 class Font {
+  static $debug = false;
+  
   /**
    * @param string $file The font file
    * @return Font_TrueType $file
@@ -56,6 +58,7 @@ class Font {
   }
   
   static function d($str) {
+    if (!self::$debug) return;
     echo "$str\n";
   }
   

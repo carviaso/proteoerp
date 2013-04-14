@@ -4,7 +4,7 @@
  * @link    http://www.dompdf.com/
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: frame_factory.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: frame_factory.cls.php 470 2012-02-06 19:36:13Z fabien.menager $
  */
 
 /**
@@ -153,6 +153,7 @@ class Frame_Factory {
       break;
     }
 
+    // Handle CSS position
     $position = $style->position;
     
     if ( $position === "absolute" )
@@ -160,6 +161,15 @@ class Frame_Factory {
 
     else if ( $position === "fixed" )
       $positioner = "Fixed";
+      
+    // Handle nodeName
+    $node_name = $frame->get_node()->nodeName;
+    
+    if ( $node_name === "img" ) {
+      $style->display = "-dompdf-image";
+      $decorator = "Image";
+      $reflower = "Image";
+    }
   
     $positioner .= "_Positioner";
     $decorator .= "_Frame_Decorator";

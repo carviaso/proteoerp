@@ -4,9 +4,9 @@
  * @link    http://www.dompdf.com/
  * @author  Benj Carson <benjcarson@digitaljunkies.ca>
  * @author  Helmut Tischer <htischer@weihenstephan.org>
- * @author  Fabien Ménager <fabien.menager@gmail.com>
+ * @author  Fabien MÃ©nager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: image_cache.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: image_cache.cls.php 455 2012-01-19 19:25:18Z eclecticgeek@gmail.com $
  */
 
 /**
@@ -154,7 +154,7 @@ class Image_Cache {
   }
   
   static function detect_type($file) {
-    list($width, $height, $type) = dompdf_getimagesize($img);
+    list($width, $height, $type) = dompdf_getimagesize($file);
     return $type;
   }
   

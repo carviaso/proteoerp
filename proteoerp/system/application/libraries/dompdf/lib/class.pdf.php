@@ -12,7 +12,7 @@
  * @author  Ryan H. Masten <ryan.masten@gmail.com>
  * @author  Brian Sweeney <eclecticgeek@gmail.com>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
- * @version $Id: class.pdf.php 445 2011-10-27 20:34:07Z fabien.menager $
+ * @version $Id: class.pdf.php 469 2012-02-05 22:25:30Z fabien.menager $
  * @license Public Domain http://creativecommons.org/licenses/publicdomain/
  * @package Cpdf
  */
@@ -300,6 +300,11 @@ class Cpdf {
    * @var array Current page size
    */
   protected $currentPageSize = array("width" => 0, "height" => 0);
+  
+  /**
+   * @var array All the chars that will be required in the font subsets
+   */
+  protected $stringSubsets = array();
   
   /**
    * @var string The target internal encoding
@@ -2327,11 +2332,78 @@ EOT;
           } elseif (isset($font['Weight']) && preg_match('!(bold|black)!i', $font['Weight'])) {
             $stemV = 120;
           }
-
+          
           // load the pfb file, and put that into an object too.
           // note that pdf supports only binary format type 1 font files, though there is a
           // simple utility to convert them from pfa to pfb.
-          $data =  file_get_contents($fbfile);
+          if (!$this->isUnicode || $fbtype !== 'ttf' || empty($this->stringSubsets)) {
+            $data = file_get_contents($fbfile);
+          }
+          else {
+            require_once dirname(__FILE__)."/php-font-lib/classes/font.cls.php";
+            
+            $this->stringSubsets[$fontName][] = 32; // Force space if not in yet
+            
+            $subset = $this->stringSubsets[$fontName];
+            sort($subset);
+            
+            // Load font
+            $font_obj = Font::load($fbfile);
+            $font_obj->parse();
+            
+            // Define subset
+            $font_obj->setSubset($subset);
+            $font_obj->reduce();
+            
+            // Write new font
+            $tmp_name = "$fbfile.tmp.".sprintf("%u", crc32(implode($subset)));
+            $font_obj->open($tmp_name, Font_Binary_Stream::modeWrite);
+            $font_obj->encode(array("OS/2"));
+            $font_obj->close();
+            
+            // Parse the new font to get cid2gid and widths
+            $font_obj = Font::load($tmp_name);
+            
+            // Find Unicode char map table
+            $subtable = null;
+            foreach($font_obj->getData("cmap", "subtables") as $_subtable) {
+              if ($_subtable["platformID"] == 0 || $_subtable["platformID"] == 3 && $_subtable["platformSpecificID"] == 1) {
+                $subtable = $_subtable;
+                break;
+              }
+            }
+            
+            if ($subtable) {
+              $glyphIndexArray = $subtable["glyphIndexArray"];
+              $hmtx = $font_obj->getData("hmtx");
+              
+              unset($glyphIndexArray[0xFFFF]);
+              
+              $cidtogid = str_pad('', max(array_keys($glyphIndexArray))*2+1, "\x00");
+              $font['CIDWidths'] = array();
+              
+              foreach($glyphIndexArray as $cid => $gid) {
+                if ($cid >= 0 && $cid < 0xFFFF && $gid) {
+                  $cidtogid[$cid*2] = chr($gid >> 8);
+                  $cidtogid[$cid*2 + 1] = chr($gid & 0xFF);
+                }
+                
+                $width = $font_obj->normalizeFUnit(isset($hmtx[$gid]) ? $hmtx[$gid][0] : $hmtx[0][0]);
+                $font['CIDWidths'][$cid] = $width;
+              }
+              
+              $font['CIDtoGID'] = base64_encode(gzcompress($cidtogid));
+              $font['CIDtoGID_Compressed'] = true;
+              
+              $data = file_get_contents($tmp_name);
+            }
+            else {
+              $data = file_get_contents($fbfile);
+            }
+            
+            $font_obj->close();
+            unlink($tmp_name);
+          }
 
           // create the font descriptor
           $this->numObj++;
@@ -3453,6 +3525,21 @@ EOT;
   /**
    * add text to the document, at a specified location, size and angle on the page
    */
+  function registerText($font, $text) {
+    if ( !$this->isUnicode || in_array(mb_strtolower(basename($font)), self::$coreFonts) ) {
+      return;
+    }
+    
+    if ( !isset($this->stringSubsets[$font]) ) {
+      $this->stringSubsets[$font] = array();
+    }
+    
+    $this->stringSubsets[$font] = array_unique(array_merge($this->stringSubsets[$font], $this->utf8toCodePointsArray($text)));
+  }
+
+  /**
+   * add text to the document, at a specified location, size and angle on the page
+   */
   function addText($x, $y, $size, $text, $angle =  0, $wordSpaceAdjust =  0, $charSpaceAdjust =  0, $smallCaps = false) {
     if  (!$this->numFonts) {
       $this->selectFont($this->defaultFont);
@@ -3596,6 +3683,8 @@ EOT;
    * this can be called externally, but is alse used by the other class functions
    */
   function getTextWidth($size, $text, $word_spacing =  0, $char_spacing =  0) {
+    static $ord_cache = array();
+    
     // this function should not change any of the settings, though it will need to
     // track any directives which change during calculation, so copy them at the start
     // and put them back at the end.
@@ -3657,7 +3746,8 @@ EOT;
       $len = mb_strlen($text, 'Windows-1252');
 
       for ($i = 0; $i < $len; $i++) {
-        $char = ord($text[$i]);
+        $c = $text[$i];
+        $char = isset($ord_cache[$c]) ? $ord_cache[$c] : ($ord_cache[$c] = ord($c));
         
         // check if we have to replace character
         if ( isset($current_font['differences'][$char])) {
@@ -4171,11 +4261,24 @@ EOT;
       return;
     }
     
+    // FIXME The pixel transformation doesn't work well with 8bit PNGs
+    $eight_bit = ($byte & 4) !== 4;
+    
     $wpx = imagesx($img);
     $hpx = imagesy($img);
-    
+      
     imagesavealpha($img, false);
     
+    // create temp alpha file
+    $tempfile_alpha = tempnam($this->tmp, "cpdf_img_");
+    @unlink($tempfile_alpha);
+    $tempfile_alpha = "$tempfile_alpha.png";
+    
+    // create temp plain file
+    $tempfile_plain = tempnam($this->tmp, "cpdf_img_");
+    @unlink($tempfile_plain);
+    $tempfile_plain = "$tempfile_plain.png";
+      
     $imgalpha = imagecreate($wpx, $hpx);
     imagesavealpha($imgalpha, false);
     
@@ -4183,63 +4286,113 @@ EOT;
     for ($c = 0; $c < 256; ++$c) {
       imagecolorallocate($imgalpha, $c, $c, $c);
     }
-   
-    // FIXME The pixel transformation doesn't work well with 8bit PNGs
-    $eight_bit = ($byte & 4) !== 4;
     
-    // allocated colors cache
-    $allocated_colors = array();
-    
-    // extract alpha channel
-    for ($xpx = 0; $xpx < $wpx; ++$xpx) {
-      for ($ypx = 0; $ypx < $hpx; ++$ypx) {
-        $color = imagecolorat($img, $xpx, $ypx);
-        $col = imagecolorsforindex($img, $color);
-        $alpha = $col['alpha'];
-        
-        if ($eight_bit) {
-          // with gamma correction
-          $gammacorr = 2.2;
-          $pixel = pow((((127 - $alpha) * 255 / 127) / 255), $gammacorr) * 255;
-        }
-        
-        else {
-          // without gamma correction
-          $pixel = (127 - $alpha) * 2;
-          
-          $key = implode("-", array($col['red'], $col['green'], $col['blue']));
-          
-          if (!isset($allocated_colors[$key])) {
-            $pixel_img = imagecolorallocate($img, $col['red'], $col['green'], $col['blue']);
-            $allocated_colors[$key] = $pixel_img;
-          }
-          else {
-            $pixel_img = $allocated_colors[$key]; 
-          }
-          
-          imagesetpixel($img, $xpx, $ypx, $pixel_img);
-        }
-        
-        imagesetpixel($imgalpha, $xpx, $ypx, $pixel);
-      }
-    }
+    // Use PECL gmagick + Graphics Magic to process transparent PNG images
+    if (extension_loaded("gmagick")) {
+      $gmagick = new Gmagick($file);
+      $gmagick->setimageformat('png');
       
-    // create temp alpha file
-    $tempfile_alpha = tempnam($this->tmp, "cpdf_img_");
-    @unlink($tempfile_alpha);
-    $tempfile_alpha = "$tempfile_alpha.png";
-    imagepng($imgalpha, $tempfile_alpha);
+      // Get opacity channel (negative of alpha channel)
+      $alpha_channel_neg = clone $gmagick;
+      $alpha_channel_neg->separateimagechannel(Gmagick::CHANNEL_OPACITY);
+      
+      // Negate opacity channel
+      $alpha_channel = new Gmagick();
+      $alpha_channel->newimage($wpx, $hpx, "#FFFFFF", "png");
+      $alpha_channel->compositeimage($alpha_channel_neg, Gmagick::COMPOSITE_DIFFERENCE, 0, 0);
+      $alpha_channel->separateimagechannel(Gmagick::CHANNEL_RED);
+      $alpha_channel->writeimage($tempfile_alpha);
+      
+      // Cast to 8bit+palette
+      $imgalpha_ = imagecreatefrompng($tempfile_alpha);
+      imagecopy($imgalpha, $imgalpha_, 0, 0, 0, 0, $wpx, $hpx);
+      imagedestroy($imgalpha_);
+      imagepng($imgalpha, $tempfile_alpha);
+      
+      // Make opaque image
+      $color_channels = new Gmagick();
+      $color_channels->newimage($wpx, $hpx, "#FFFFFF", "png");
+      $color_channels->compositeimage($gmagick, Gmagick::COMPOSITE_COPYRED, 0, 0);
+      $color_channels->compositeimage($gmagick, Gmagick::COMPOSITE_COPYGREEN, 0, 0);
+      $color_channels->compositeimage($gmagick, Gmagick::COMPOSITE_COPYBLUE, 0, 0);
+      $color_channels->writeimage($tempfile_plain);
+      
+      $imgplain = imagecreatefrompng($tempfile_plain);
+    }
     
-    // extract image without alpha channel
-    $imgplain = imagecreatetruecolor($wpx, $hpx);
-    imagecopy($imgplain, $img, 0, 0, 0, 0, $wpx, $hpx);
-    imagedestroy($img);
-    
-    // create temp image file
-    $tempfile_plain = tempnam($this->tmp, "cpdf_img_");
-    @unlink($tempfile_plain);
-    $tempfile_plain = "$tempfile_plain.png";
-    imagepng($imgplain, $tempfile_plain);
+    // Use PECL imagick + ImageMagic to process transparent PNG images
+    elseif (extension_loaded("imagick")) {
+      $imagick = new Imagick($file);
+      $imagick->setFormat('png');
+      
+      // Get opacity channel (negative of alpha channel)
+      $alpha_channel = clone $imagick;
+      $alpha_channel->separateImageChannel(Imagick::CHANNEL_ALPHA);
+      $alpha_channel->negateImage(true);
+      $alpha_channel->writeImage($tempfile_alpha);
+      
+      // Cast to 8bit+palette
+      $imgalpha_ = imagecreatefrompng($tempfile_alpha);
+      imagecopy($imgalpha, $imgalpha_, 0, 0, 0, 0, $wpx, $hpx);
+      imagedestroy($imgalpha_);
+      imagepng($imgalpha, $tempfile_alpha);
+      
+      // Make opaque image
+      $color_channels = new Imagick();
+      $color_channels->newImage($wpx, $hpx, "#FFFFFF", "png");
+      $color_channels->compositeImage($imagick, Imagick::COMPOSITE_COPYRED, 0, 0);
+      $color_channels->compositeImage($imagick, Imagick::COMPOSITE_COPYGREEN, 0, 0);
+      $color_channels->compositeImage($imagick, Imagick::COMPOSITE_COPYBLUE, 0, 0);
+      $color_channels->writeImage($tempfile_plain);
+      
+      $imgplain = imagecreatefrompng($tempfile_plain);
+    }
+    else {
+      // allocated colors cache
+      $allocated_colors = array();
+      
+      // extract alpha channel
+      for ($xpx = 0; $xpx < $wpx; ++$xpx) {
+        for ($ypx = 0; $ypx < $hpx; ++$ypx) {
+          $color = imagecolorat($img, $xpx, $ypx);
+          $col = imagecolorsforindex($img, $color);
+          $alpha = $col['alpha'];
+          
+          if ($eight_bit) {
+            // with gamma correction
+            $gammacorr = 2.2;
+            $pixel = pow((((127 - $alpha) * 255 / 127) / 255), $gammacorr) * 255;
+          }
+          
+          else {
+            // without gamma correction
+            $pixel = (127 - $alpha) * 2;
+            
+            $key = $col['red'].$col['green'].$col['blue'];
+            
+            if (!isset($allocated_colors[$key])) {
+              $pixel_img = imagecolorallocate($img, $col['red'], $col['green'], $col['blue']);
+              $allocated_colors[$key] = $pixel_img;
+            }
+            else {
+              $pixel_img = $allocated_colors[$key]; 
+            }
+            
+            imagesetpixel($img, $xpx, $ypx, $pixel_img);
+          }
+          
+          imagesetpixel($imgalpha, $xpx, $ypx, $pixel);
+        }
+      }
+      
+      // extract image without alpha channel
+      $imgplain = imagecreatetruecolor($wpx, $hpx);
+      imagecopy($imgplain, $img, 0, 0, 0, 0, $wpx, $hpx);
+      imagedestroy($img);
+        
+      imagepng($imgalpha, $tempfile_alpha);
+      imagepng($imgplain, $tempfile_plain);
+    }
     
     // embed mask image
     $this->addImagePng($tempfile_alpha, $x, $y, $w, $h, $imgalpha, true);
@@ -4265,13 +4418,16 @@ EOT;
     } 
     
     else {
-      $color_type = ord (file_get_contents ($file, false, null, 25, 1));
+      $info = file_get_contents ($file, false, null, 24, 5);
+      $meta = unpack("CbitDepth/CcolorType/CcompressionMethod/CfilterMethod/CinterlaceMethod", $info);
+      $bit_depth = $meta["bitDepth"];
+      $color_type = $meta["colorType"];
       
       // http://www.w3.org/TR/PNG/#11IHDR
       // 3 => indexed
       // 4 => greyscale with alpha
       // 6 => fullcolor with alpha
-      $is_alpha = in_array($color_type, array(3, 4, 6));
+      $is_alpha = in_array($color_type, array(4, 6)) || ($color_type == 3 && $bit_depth != 4);
 
       if ($is_alpha) { // exclude grayscale alpha
         return $this->addImagePngAlpha($file, $x, $y, $w, $h, $color_type);

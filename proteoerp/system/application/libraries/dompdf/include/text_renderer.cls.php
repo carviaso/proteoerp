@@ -6,7 +6,7 @@
  * @author  Helmut Tischer <htischer@weihenstephan.org>
  * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- * @version $Id: text_renderer.cls.php 448 2011-11-13 13:00:03Z fabien.menager $
+ * @version $Id: text_renderer.cls.php 471 2012-02-06 21:59:10Z fabien.menager $
  */
 
 /**
@@ -108,7 +108,7 @@ class Text_Renderer extends Abstract_Renderer {
     while ( $p = $p->get_parent() )
       $stack[] = $p;
     
-    while ( count($stack) > 0 ) {
+    while ( isset($stack[0]) ) {
       $f = array_pop($stack);
 
       if ( ($text_deco = $f->get_style()->text_decoration) === "none" )
