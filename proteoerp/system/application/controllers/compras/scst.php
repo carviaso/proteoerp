@@ -2577,7 +2577,7 @@ class Scst extends Controller {
 	function dataeditvehiculo($sta,$id){
 		$this->rapyd->load('dataobject','datadetails');
 
-		//Cheque que tenga vehiculos
+		//Chequea que tenga vehiculos
 		$dbid=$this->db->escape($id);
 		$cana=$this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinvehiculo WHERE id_scst=$dbid");
 		if(empty($cana)){
@@ -3191,7 +3191,7 @@ class Scst extends Controller {
 		// Si no tiene transaccion vino por migracion desde otro sistema
 		$dbcontrol = $this->db->escape($control);
 
-		$mSQL = "SELECT * FROM scst WHERE control=$dbcontrol";
+		$mSQL = 'SELECT * FROM scst WHERE control='.$dbcontrol;
 		$query=$this->db->query($mSQL);
 
 		if($query->num_rows()==0){
@@ -3655,10 +3655,17 @@ class Scst extends Controller {
 	function _post_delete($do){
 		$codigo =$do->get('numero');
 		$control=$do->get('control');
+		$id     =$do->get('id');
+		$dbid   =$this->db->escape($id);
+
+		//Borra los vehiculos
+		$this->db->simple_query('DELETE FROM sinvehiculo WHERE id_scst='.$dbid);
+
+
 		logusu('scst',"Compra ${codigo} Control ${control} ELIMINADA");
 	}
 
-	function _pre_vehi_insert($do){ return false; }
+	function _pre_vehi_insert($do){ return false;}
 	function _pre_vehi_delete($do){ return false;}
 
 	function _pre_vehi_update($do){

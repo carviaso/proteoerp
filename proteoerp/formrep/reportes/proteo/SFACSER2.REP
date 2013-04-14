@@ -1,0 +1,157 @@
+$base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, 'search'));
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->fecha = new dateonlyField('Mes de pago', 'fecha','m/Y');
+$filter->fecha->rule='chfecha[m/Y]|required';
+$filter->fecha->clause  ='';
+$filter->fecha->db_name ='a.fecha';
+$filter->fecha->insertValue = date('Y-m-d');
+$filter->fecha->operator='>=';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit','Descargar');
+$filter->build_form();
+
+if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
+	$fecha = $filter->fecha->newValue;
+	$anio  = substr($fecha,0,4);
+	$mes   = substr($fecha,4,2);
+
+	$dbfdesde = $this->db->escape($fecha);
+	$dbfhasta = $this->db->escape(date('Ymd', mktime(0, 0, 0, $mes+1, 0, $anio)));
+
+	$mSQL="CREATE TABLE IF NOT EXISTS `sfacser` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`cod_cli` VARCHAR(5) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`tipo_doc` CHAR(1) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
+	`numero` VARCHAR(8) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
+	`ffactura` DATE NOT NULL DEFAULT '0000-00-00',
+	`fdesde` DATE NULL DEFAULT NULL,
+	`fhasta` DATE NULL DEFAULT NULL,
+	`cpaga` DECIMAL(35,3) NULL DEFAULT NULL,
+	`monto` DECIMAL(45,2) NULL DEFAULT NULL,
+	UNIQUE INDEX `tipo_doc_numero` (`tipo_doc`, `numero`),
+	PRIMARY KEY (`id`),
+	INDEX `cod_cli` (`cod_cli`),
+	INDEX `fdesde` (`fdesde`),
+	INDEX `fhasta` (`fhasta`)
+	)
+	COLLATE='latin1_swedish_ci'
+	ENGINE=MyISAM";
+	$this->db->simple_query($mSQL);
+
+	$ffactura=$this->datasis->dameval("SELECT MAX(ffactura) FROM sfacser");
+	if(!empty($ffactura)){
+		$dbffactura = $this->db->escape($ffactura);
+	}else{
+		$dbffactura = "'2013-01-01'";
+	}
+
+	$mSQL="INSERT IGNORE INTO sfacser
+	SELECT
+	NULL AS id,
+	aa.cod_cli,
+	aa.tipo_doc,aa.numero,
+	aa.fecha AS ffactura,
+	CAST(CONCAT(aa.upago,'01') AS DATE) AS fdesde,
+	CONCAT(aa.upago,'01') + INTERVAL aa.cpaga MONTH AS fhasta,
+	aa.cpaga,ROUND(aa.tota/aa.cpaga,2) AS monto
+	FROM (
+	SELECT a.cod_cli,a.fecha,a.upago,a.tipo_doc,a.numero ,IF(a.tipo_doc='F',1,-1)*SUM(b.cana) AS cpaga,IF(a.tipo_doc='F',1,-1)*SUM(tota) AS tota
+	FROM sfac   AS a
+	JOIN sitems AS b ON a.tipo_doc=b.tipoa AND a.numero=b.numa
+	WHERE a.tipo_doc<>'X' AND a.fecha >= ${dbffactura}
+	GROUP BY a.tipo_doc,a.numero
+	) AS aa";
+	$this->db->simple_query($mSQL);
+
+	$dfechad = $this->datasis->dameval("SELECT MIN(fdesde) FROM sfacser WHERE ffactura BETWEEN ${dbfdesde} AND ${dbfhasta}");
+	$dfechah = $this->datasis->dameval("SELECT MAX(fhasta) FROM sfacser WHERE ffactura BETWEEN ${dbfdesde} AND ${dbfhasta}");
+
+	$fechad  = new DateTime($dfechad);
+	$fechah  = new DateTime($dfechah);
+	$adesde  = $fechad->format('Y');
+	$ahasta  = $fechah->format('Y');
+
+	$mSQLs = array();
+	for($anio=$adesde; $anio <= $ahasta; $anio++){
+		$final = date('Ymd', mktime(0, 0, 0, 1, 0, $anio+1));
+		$mSQLs[] = "SELECT
+			'${anio}' AS anio,
+			SUM(monto*('${anio}-01-01' > fdesde AND '${anio}-01-01' <= fhasta)) AS m01,
+			SUM(monto*('${anio}-02-01' > fdesde AND '${anio}-02-01' <= fhasta)) AS m02,
+			SUM(monto*('${anio}-03-01' > fdesde AND '${anio}-03-01' <= fhasta)) AS m03,
+			SUM(monto*('${anio}-04-01' > fdesde AND '${anio}-04-01' <= fhasta)) AS m04,
+			SUM(monto*('${anio}-05-01' > fdesde AND '${anio}-05-01' <= fhasta)) AS m05,
+			SUM(monto*('${anio}-06-01' > fdesde AND '${anio}-06-01' <= fhasta)) AS m06,
+			SUM(monto*('${anio}-07-01' > fdesde AND '${anio}-07-01' <= fhasta)) AS m07,
+			SUM(monto*('${anio}-08-01' > fdesde AND '${anio}-08-01' <= fhasta)) AS m08,
+			SUM(monto*('${anio}-09-01' > fdesde AND '${anio}-09-01' <= fhasta)) AS m09,
+			SUM(monto*('${anio}-10-01' > fdesde AND '${anio}-10-01' <= fhasta)) AS m10,
+			SUM(monto*('${anio}-11-01' > fdesde AND '${anio}-11-01' <= fhasta)) AS m11,
+			SUM(monto*('${anio}-12-01' > fdesde AND '${anio}-12-01' <= fhasta)) AS m12
+		FROM sfacser
+		WHERE ffactura BETWEEN ${dbfdesde} AND ${dbfhasta}
+		AND fdesde IS NOT NULL AND fhasta IS NOT NULL AND monto IS NOT NULL";
+	}
+
+	$mSQL=implode(' UNION ALL ',$mSQLs);
+
+	$mSQL="SELECT aa.anio,
+		aa.m01, aa.m02,
+		aa.m03, aa.m04,
+		aa.m05, aa.m06,
+		aa.m07, aa.m08,
+		aa.m09, aa.m10,
+		aa.m11, aa.m12,
+		(aa.m01+aa.m02+aa.m03+aa.m04+aa.m05+aa.m06+aa.m07+aa.m08+aa.m09+aa.m10+aa.m11+aa.m12) AS total
+	FROM ($mSQL) AS aa
+	WHERE (aa.m01+aa.m02+aa.m03+aa.m04+aa.m05+aa.m06+aa.m07+aa.m08+aa.m09+aa.m10+aa.m11+aa.m12)>0";
+
+	//echo $mSQL;
+
+	$sobretabla='';
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Servicio pagado el mes '.$_POST['fecha']);
+	//$pdf->setSubTitulo("Facturado desde ".$_POST['fechad'].' hasta '.$_POST['fechah']);
+	//$pdf->setSobreTabla($sobretabla,9);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol('anio' ,10,'Año'       ,  'R',8);
+	$pdf->AddCol('m01'  ,20,'Enero'     ,  'R',8);
+	$pdf->AddCol('m02'  ,20,'Febrero'   ,  'R',8);
+	$pdf->AddCol('m03'  ,20,'Marzo'     ,  'R',8);
+	$pdf->AddCol('m04'  ,20,'Abril'     ,  'R',8);
+	$pdf->AddCol('m05'  ,20,'Mayo'      ,  'R',8);
+	$pdf->AddCol('m06'  ,20,'Junio'     ,  'R',8);
+	$pdf->AddCol('m07'  ,20,'Julio'     ,  'R',8);
+	$pdf->AddCol('m08'  ,20,'Agosto'    ,  'R',8);
+	$pdf->AddCol('m09'  ,20,'Septiembre',  'R',8);
+	$pdf->AddCol('m10'  ,20,'Octubre'   ,  'R',8);
+	$pdf->AddCol('m11'  ,20,'Noviembre' ,  'R',8);
+	$pdf->AddCol('m12'  ,20,'Diciembre' ,  'R',8);
+	$pdf->AddCol('total',20,'Total'     ,  'R',8);
+
+	$pdf->setTotalizar('total');
+	//$pdf->setGrupoLabel('Grupo <#gr_desc#>');
+	//$pdf->setGrupo('grupo');
+	//$pdf->setGrupo('ffactura');
+
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data["filtro"] = $filter->output;
+	$data["titulo"] = '<h2 class="mainheader">Ventas por Fecha<h2>';
+	$data["head"] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

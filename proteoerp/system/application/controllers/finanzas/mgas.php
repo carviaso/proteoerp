@@ -1282,17 +1282,20 @@ class Mgas extends validaciones {
 	}
 
 	function _post_insert($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		$primary = implode(',',$do->pk);
+		$codigo  = $do->get('codigo');
+		logusu($do->table,"Creo $this->tits codigo: ${codigo} id: ${primary}");
 	}
 
 	function _post_update($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		$primary = implode(',',$do->pk);
+		$codigo  = $do->get('codigo');
+		logusu($do->table,"Modifico $this->tits codigo: ${codigo} id: ${primary}");
 	}
 
 	function _post_delete($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		$primary = implode(',',$do->pk);
+		$codigo  = $do->get('codigo');
+		logusu($do->table,"Elimino $this->tits codigo: ${codigo} id: ${primary}");
 	}
 }
