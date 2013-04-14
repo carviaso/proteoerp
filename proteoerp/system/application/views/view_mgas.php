@@ -1,14 +1,15 @@
 <?php
-if (empty($form->output)):
+
+if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record' || strlen($form->output)==0):
 	echo $form->output;
 else:
 
 echo $form_scripts?>
 <?php echo $form_begin?>
 <?php
-$container_tr=join("&nbsp;", $form->_button_container["TR"]);
-$container_bl=join("&nbsp;", $form->_button_container["BL"]);
-$container_br=join("&nbsp;", $form->_button_container["BR"]);
+$container_tr=join('&nbsp;', $form->_button_container['TR']);
+$container_bl=join('&nbsp;', $form->_button_container['BL']);
+$container_br=join('&nbsp;', $form->_button_container['BR']);
 ?>
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 <table border=0 width="100%">

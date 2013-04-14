@@ -1,6 +1,5 @@
 <?php
 require_once(BASEPATH.'application/controllers/validaciones.php');
-require_once(APPPATH.'/controllers/finanzas/gser.php');
 class Mgas extends validaciones {
 
 	var $mModulo = 'MGAS';
@@ -40,8 +39,11 @@ class Mgas extends validaciones {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Inventario de Gastos")
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
+
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$param['WestPanel']   = $WestPanel;
@@ -63,8 +65,9 @@ class Mgas extends validaciones {
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
 
+
 		$bodyscript .= '
-		function mgasadd() {
+		function mgasadd(){
 			$.post("'.site_url($this->url.'dataedit/create').'",
 			function(data){
 				$("#fedita").html(data);
@@ -73,17 +76,63 @@ class Mgas extends validaciones {
 		};';
 
 		$bodyscript .= '
-		function mgasedit() {
+		function mgasedit(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog( "open" );
 				});
-			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
 		};';
+
+		$bodyscript .= '
+		function mgasshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function mgasdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+
 
 		//Wraper de javascript
 		$bodyscript .= '
@@ -103,34 +152,75 @@ class Mgas extends validaciones {
 		$("#fedita").dialog({
 			autoOpen: false, height: 400, width: 700, modal: true,
 			buttons: {
-			"Guardar": function() {
-				var bValid = true;
-				var murl = $("#df1").attr("action");
-				allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "json", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						if ( r.status == "A" ) {
-							$( "#fedita" ).dialog( "close" );
-							grid.trigger("reloadGrid");
-							apprise("Registro Guardado");
-							'.$this->datasis->jwinopen(site_url('formatos/ver/MGAS').'/\'+r.pk.id+\'/id\'').';
-							return true;
-						} else {
-							apprise(r.mensaje);
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
 						}
-					}
-			})},
-			"Cancelar": function() { $( this ).dialog( "close" ); }
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
 			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
 		});';
-		$bodyscript .= '});'."\n";
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 400, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -139,12 +229,12 @@ class Mgas extends validaciones {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -168,8 +258,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('descrip');
-		$grid->label('Descrip');
-		$grid->label('Descrip');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -193,7 +282,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('nom_grup');
-		$grid->label('Nom_grup');
+		$grid->label('Nombre de grupo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -232,7 +321,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('fraxuni');
-		$grid->label('Fraxuni');
+		$grid->label('Fracci&oacute;n x Unidad');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -247,7 +336,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('minimo');
-		$grid->label('Minimo');
+		$grid->label('M&iacute;nimo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -262,7 +351,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('maximo');
-		$grid->label('Maximo');
+		$grid->label('M&aacute;ximo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -277,7 +366,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('ultimo');
-		$grid->label('Ultimo');
+		$grid->label('&Uacute;ltimo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -322,7 +411,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('fraccion');
-		$grid->label('Fraccion');
+		$grid->label('Fracci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -348,8 +437,8 @@ class Mgas extends validaciones {
 		));
 
 
-		$grid->addField('tasa1');
-		$grid->label('Tasa1');
+		/*$grid->addField('tasa1');
+		$grid->label('Tasa');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -364,7 +453,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('base1');
-		$grid->label('Base1');
+		$grid->label('Base');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -379,7 +468,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('desde1');
-		$grid->label('Desde1');
+		$grid->label('Desde');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -525,11 +614,11 @@ class Mgas extends validaciones {
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
+		));*/
 
 
 		$grid->addField('amorti');
-		$grid->label('Amorti');
+		$grid->label('Amortizaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -541,7 +630,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('dacumu');
-		$grid->label('Dacumu');
+		$grid->label('Depreciaci&oacute;n Acumulada');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -553,7 +642,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('rica');
-		$grid->label('Rica');
+		$grid->label('Ret.ICA');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -565,7 +654,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('reten');
-		$grid->label('Reten');
+		$grid->label('Retenci&oacute;n Natural');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -577,7 +666,7 @@ class Mgas extends validaciones {
 
 
 		$grid->addField('retej');
-		$grid->label('Retej');
+		$grid->label('Retenci&oacute;n Jur&iacute;dica');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -618,7 +707,7 @@ class Mgas extends validaciones {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: mgasadd,editfunc: mgasedit");
+		$grid->setBarOptions('addfunc: mgasadd, editfunc: mgasedit, delfunc: mgasdel, viewfunc: mgasshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -636,8 +725,7 @@ class Mgas extends validaciones {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -651,8 +739,7 @@ class Mgas extends validaciones {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -708,7 +795,7 @@ class Mgas extends validaciones {
 	}
 
 	function dataedit(){
-		$this->rapyd->load("dataedit");
+		$this->rapyd->load('dataedit');
 		$link=site_url('finanzas/mgas/ultimo');
 
 		$script ='
@@ -760,30 +847,38 @@ class Mgas extends validaciones {
 				'screenx'   =>'5',
 				'screeny'   =>'5');
 
-		$edit = new DataEdit("Maestro de Gastos", "mgas");
-		$edit->script($script, "create");
-		$edit->script($script, "modify");
+		$edit = new DataEdit('Maestro de Gastos', 'mgas');
+		$edit->script($script, 'create');
+		$edit->script($script, 'modify');
 		$edit->on_save_redirect=false;
 
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process( 'insert', '_pre_insert');
+		$edit->pre_process( 'update', '_pre_update');
+		$edit->pre_process( 'delete', '_pre_delete');
+
+
 		$ultimo='<a href="javascript:ultimo();" title="Consultar ultimo codigo ingresado" onclick="">Consultar ultimo codigo</a>';
-		$edit->codigo= new inputField("C&oacute;digo", "codigo");
-		$edit->codigo->mode="autohide";
+		$edit->codigo= new inputField('C&oacute;digo', 'codigo');
+		$edit->codigo->mode='autohide';
 		$edit->codigo->size = 12;
 		$edit->codigo->maxlength = 6;
-		$edit->codigo->rule = "trim|required|callback_chexiste";
+		$edit->codigo->rule = 'trim|required||alpha_numeric|strtoupper|callback_chexiste';
 		$edit->codigo->append($ultimo);
 
-		$edit->descrip= new inputField("Descripci&oacute;n", "descrip");
+		$edit->descrip= new inputField('Descripci&oacute;n', 'descrip');
 		$edit->descrip->size = 30;
 
-		$edit->tipo= new dropdownField("Tipo", "tipo");
-		$edit->tipo->style ="width:100px;";
-		$edit->tipo->option("G","Gasto");
-		$edit->tipo->option("I","Inventario");
-		$edit->tipo->option("S","Suministro");
-		$edit->tipo->option("A","Activo Fijo");
+		$edit->tipo= new dropdownField('Tipo', 'tipo');
+		$edit->tipo->style ='width:100px;';
+		$edit->tipo->option('G','Gasto');
+		$edit->tipo->option('I','Inventario');
+		$edit->tipo->option('S','Suministro');
+		$edit->tipo->option('A','Activo Fijo');
 
-		$edit->grupo= new dropdownField("Grupo", "grupo");
+		$edit->grupo= new dropdownField('Grupo', 'grupo');
 		$edit->grupo->options('SELECT grupo, CONCAT(grupo," - ",nom_grup) nom_grup from grga order by nom_grup');
 		$edit->grupo->style ="width:200px;";
 
@@ -791,7 +886,7 @@ class Mgas extends validaciones {
 		$edit->cuenta    = new inputField("Cta. Contable", "cuenta");
 		$edit->cuenta->size = 12;
 		$edit->cuenta->maxlength = 15;
-		$edit->cuenta->rule = "trim|callback_chcuentac";
+		$edit->cuenta->rule = 'trim|callback_chcuentac';
 		$edit->cuenta->append($bcpla);
 		$edit->cuenta->append($lcuent);
 		$edit->cuenta->readonly=true;
@@ -813,8 +908,6 @@ class Mgas extends validaciones {
 		$edit->iva->insertValue=$ivas['tasa'];
 		//$edit->iva->onchange='calculos(\'S\');';
 
-
-
 		//$edit->medida    = new inputField("Unidad Medida", "medida");
 		//$edit->medida->size = 5;
 
@@ -825,58 +918,68 @@ class Mgas extends validaciones {
 		$edit->medida->options('SELECT unidades, unidades AS valor FROM unidad ORDER BY unidades');
 		$edit->medida->append($AddUnidad);
 
-		$edit->fraxuni   = new inputField("Cant. X Caja", "fraxuni");
+		$edit->fraxuni   = new inputField('Cant. X Caja', 'fraxuni');
 		$edit->fraxuni->css_class='inputnum';//no sirve
 		$edit->fraxuni->group = 'Existencias';
 		$edit->fraxuni->size = 5;
 
-		$edit->ultimo    = new inputField("Costo", "ultimo");
+		$edit->ultimo    = new inputField('Costo', 'ultimo');
 		$edit->ultimo->css_class='inputnum';//no sirve
 		$edit->ultimo->size = 9;
 
-		$edit->promedio  = new inputField("Promedio", "promedio");
+		$edit->promedio  = new inputField('Promedio', 'promedio');
 		$edit->promedio->css_class='inputnum';//no sirve
 		$edit->promedio->size = 9;
 
-		$edit->minimo    = new inputField("M&iacute;nima", "minimo");
+		$edit->minimo    = new inputField('M&iacute;nima', 'minimo');
 		$edit->minimo->css_class='inputnum';//no sirve
 		$edit->minimo->group = 'Existencias';
 		$edit->minimo->size = 5;
 
-		$edit->maximo    = new inputField("M&aacute;xima", "maximo");
+		$edit->maximo    = new inputField('M&aacute;xima', 'maximo');
 		$edit->maximo->css_class='inputnum';//no sirve
 		$edit->maximo->group = 'Existencias';
 		$edit->maximo->size = 5;
 
-		$edit->unidades  = new inputField("Cajas", "unidades");
+		$edit->unidades  = new inputField('Cajas', 'unidades');
 		$edit->unidades->css_class='inputnum';//no sirve
 		$edit->unidades->group = 'Existencias';
 		$edit->unidades->size = 5;
 
-		$edit->fraccion  = new inputField("Fracci&oacute;nes", "fraccion");
+		$edit->fraccion  = new inputField('Fracci&oacute;nes', 'fraccion');
 		$edit->fraccion->css_class='inputnum';//no sirve
 		$edit->fraccion->group = 'Existencias';
 		$edit->fraccion->size = 5;
 
-		$edit->reten= new dropdownField("Natural.", "reten");
+		$edit->reten= new dropdownField('Natural.', 'reten');
 		$edit->reten->option('','Ninguno');
 		$edit->reten->options('SELECT codigo, CONCAT(codigo," - ",activida) val FROM rete WHERE tipo="NR" ORDER BY codigo');
-		$edit->reten->style ="width:220px;";
+		$edit->reten->style ='width:220px;';
 
 		$edit->retej= new dropdownField("Jur&iacute;dica.", "retej");
 		$edit->retej->option('','Ninguno');
 		$edit->retej->options('SELECT codigo, CONCAT(codigo," - ",activida) val FROM rete WHERE tipo="JD" ORDER BY codigo');
-		$edit->retej->style ="width:220px;";
+		$edit->retej->style ='width:220px;';
 
-		$codigo=$edit->_dataobject->get("codigo");
+		$codigo=$edit->_dataobject->get('codigo');
 		$edit->almacenes = new containerField('almacenes',$this->_detalle($codigo));
-		$edit->almacenes->when = array("show","modify");
+		$edit->almacenes->when = array('show','modify');
 
 		//$edit->buttons("modify", "save", "undo", "back");
 		$edit->build();
 
-		$conten["form"]  =&  $edit;
-		$this->load->view('view_mgas', $conten);
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form']  =&  $edit;
+			$this->load->view('view_mgas', $conten);
+		}
+
 	}
 
 	function chexiste(){
@@ -1149,5 +1252,47 @@ class Mgas extends validaciones {
 			logusu('mgas',"GASTO $codigo ELIMINADO");
 			echo "{ success: true, message: 'Gasto Eliminado'}";
 		}
+	}
+
+	function _pre_insert($do){
+		//$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		//$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do){
+		$dbcodigo = $this->db->escape($do->get('codigo'));
+		$check = 0;
+
+		$check += $this->datasis->dameval('SELECT COUNT(*) AS cana FROM gitser WHERE codigo='.$dbcodigo);
+		$check += $this->datasis->dameval('SELECT COUNT(*) AS cana FROM itords WHERE codigo='.$dbcodigo);
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM conc   WHERE ctade=${dbcodigo} AND tipod='G'");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM conc   WHERE ctaac=${dbcodigo} AND tipoa='G'");
+
+		if($check>0){
+			$do->error_message_ar['pre_del']='No se puede eliminar el registro por tener movimiento.';
+			return false;
+		}
+
+		return true;
+	}
+
+	function _post_insert($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits $primary ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
+	function _post_delete($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Elimino $this->tits $primary ");
 	}
 }
