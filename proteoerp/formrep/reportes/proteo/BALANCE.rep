@@ -117,8 +117,6 @@ if($this->rapyd->uri->is_set("search") AND $filter->is_valid() AND $pasamos){
 	';
 
 
-
-
 //echo $mSQL;
 
 	$pdf = new PDFReporte($mSQL);
