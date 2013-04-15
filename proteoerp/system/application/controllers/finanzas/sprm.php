@@ -927,7 +927,7 @@ class Sprm extends Controller {
 		$grid->setonSelectRow('
 			function(id){
 				$.ajax({
-					url: "'.base_url().$this->url.'tabla/"+id,
+					url: "'.site_url($this->url.'tabla').'/"+id,
 					success: function(msg){
 						//alert( "El ultimo codigo ingresado fue: " + msg );
 						$("#radicional").html(msg);

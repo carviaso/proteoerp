@@ -344,8 +344,6 @@ class Pretab extends Controller {
 			var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
-
-
 			';
 
 
