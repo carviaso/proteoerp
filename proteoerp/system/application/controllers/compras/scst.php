@@ -77,6 +77,7 @@ class Scst extends Controller {
 			array('id'=>'factuali', 'title'=>'Actualizar'),
 			array('id'=>'fvehi'   , 'title'=>'Seriales Vehiculares'),
 			array('id'=>'fcmonto' , 'title'=>'Cambiar los montos que van a CxP'),
+			array('id'=>'fshow'   , 'title'=>'Mostrar Compra'),
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -108,55 +109,20 @@ class Scst extends Controller {
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '<script type="text/javascript">';
 
-		// Imprime Compra
 		$bodyscript .= '
-		jQuery("#imprimir").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+id+"/id"').';
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});';
-
-		//Imprimir retencion
-		$bodyscript .= '
-		jQuery("#reteprin").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+		function scstshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				if ( ret.actuali >= ret.fecha ) {
-					'.$this->datasis->jwinopen(site_url($this->url.'printrete').'/\'+id+"/id"').';
-				}else{
-					$.prompt("<h1>Debe actualizar la compra para imprimir la retenci&oacute;n.</h1>");
-				}
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
-			}
-		});';
-
-
-		$bodyscript .= '
-		jQuery("#serie").click( function(){
-			var gr = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if( gr != null ){
-				jQuery("#newapi'.$grid0.'").jqGrid(\'editGridRow\',gr,
-				{
-					closeAfterEdit:true,
-					mtype: "POST",
-					height:200,
-					width: 350,
-					closeOnEscape: true,
-					top: 50,
-					left:20,
-					recreateForm:true,
-					afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},
-					reloadAfterSubmit:false
+				mId = id;
+				$.post("'.site_url($this->url.'solo/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
 				});
-			}else{
-				$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-		});';
+		};';
 
 		$bodyscript .= '
 		function scstadd(){
@@ -168,50 +134,6 @@ class Scst extends Controller {
 				$("#fcompra").dialog( "open" );
 			});
 		};';
-
-		$bodyscript .= '
-		jQuery("#vehiculo").click(function(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var rt= $.ajax({ type: "POST", url: "'.site_url($this->url.'getvehicular').'/"+id, async: false }).responseText;
-				if(rt=="1"){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
-					mId = id;
-					$.post("'.site_url('compras/scst/dataeditvehiculo/modify').'/"+id, function(data){
-						$("#factuali").html("");
-						$("#fcompra").html("");
-						$("#fvehi").html(data);
-						$("#fvehi").dialog("open");
-					});
-				}else{
-					$.prompt("<h1>La compra seleccionada no posee veh&iacute;culos</h1>");
-				}
-			}else{
-				$.prompt("<h1>Por favor Seleccione una compra</h1>");
-			}
-		});';
-
-		$bodyscript .= '
-		jQuery("#bcmonto").click(function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				if ( ret.actuali >= ret.fecha ) {
-					$.prompt("<h1>Compra ya Actualizada</h1>Debe reversarla si desea hacer modificaciones");
-				}else{
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
-					mId = id;
-					$.post("'.site_url('compras/scst/montoscxp/modify').'/"+id, function(data){
-						$("#factuali").html("");
-						$("#fcompra").html("");
-						$("#fcmonto").html(data);
-						$("#fcmonto").dialog("open");
-					});
-				}
-			}else{
-				$.prompt("<h1>Por favor Seleccione una compra</h1>");
-			}
-		});';
 
 		$bodyscript .= '
 		function scstedit() {
@@ -246,8 +168,114 @@ class Scst extends Controller {
 			var s;
 			var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
-			s = grid.getGridParam(\'selarrrow\');
-		';
+			s = grid.getGridParam(\'selarrrow\');';
+
+		// Imprime Compra
+		$bodyscript .= '
+			jQuery("#imprimir").click( function(){
+				var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+					'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+id+"/id"').';
+				} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+			});';
+
+		//Imprimir retencion
+		$bodyscript .= '
+			jQuery("#reteprin").click( function(){
+				var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					if ( ret.actuali >= ret.fecha ) {
+						'.$this->datasis->jwinopen(site_url($this->url.'printrete').'/\'+id+"/id"').';
+					}else{
+						$.prompt("<h1>Debe actualizar la compra para imprimir la retenci&oacute;n.</h1>");
+					}
+				} else {
+					$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
+				}
+			});';
+
+		$bodyscript .= '
+			jQuery("#serie").click( function(){
+				var gr = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if( gr != null ){
+					jQuery("#newapi'.$grid0.'").jqGrid(\'editGridRow\',gr,
+					{
+						closeAfterEdit:true,
+						mtype: "POST",
+						height:200,
+						width: 350,
+						closeOnEscape: true,
+						top: 50,
+						left:20,
+						recreateForm:true,
+						afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},
+						reloadAfterSubmit:false
+					});
+				}else{
+					$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
+				}
+			});';
+
+		$bodyscript .= '
+			jQuery("#vehiculo").click(function(){
+				var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					var rt= $.ajax({ type: "POST", url: "'.site_url($this->url.'getvehicular').'/"+id, async: false }).responseText;
+					if(rt=="1"){
+						var ret    = $("#newapi'.$grid0.'").getRowData(id);
+						mId = id;
+						$.post("'.site_url('compras/scst/dataeditvehiculo/modify').'/"+id, function(data){
+							$("#factuali").html("");
+							$("#fcompra").html("");
+							$("#fvehi").html(data);
+							$("#fvehi").dialog("open");
+						});
+					}else{
+						$.prompt("<h1>La compra seleccionada no posee veh&iacute;culos</h1>");
+					}
+				}else{
+					$.prompt("<h1>Por favor Seleccione una compra</h1>");
+				}
+			});';
+
+		$bodyscript .= '
+			jQuery("#bcmonto").click(function(){
+				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					if ( ret.actuali >= ret.fecha ) {
+						$.prompt("<h1>Compra ya Actualizada</h1>Debe reversarla si desea hacer modificaciones");
+					}else{
+						var ret    = $("#newapi'.$grid0.'").getRowData(id);
+						mId = id;
+						$.post("'.site_url('compras/scst/montoscxp/modify').'/"+id, function(data){
+							$("#factuali").html("");
+							$("#fcompra").html("");
+							$("#fcmonto").html(data);
+							$("#fcmonto").dialog("open");
+						});
+					}
+				}else{
+					$.prompt("<h1>Por favor Seleccione una compra</h1>");
+				}
+			});';
+
+		$bodyscript .= '
+			$("#fshow").dialog({
+				autoOpen: false, height: 500, width: 700, modal: true,
+				buttons: {
+					"Aceptar": function() {
+						$("#fshow").html("");
+						$( this ).dialog( "close" );
+					},
+				},
+				close: function() {
+					$("#fshow").html("");
+				}
+			});';
 
 		//Actualizar y Reversar
 		$bodyscript .= '
@@ -383,8 +411,7 @@ class Scst extends Controller {
 						});
 					}
 				} else { $.prompt("<h1>Por favor Seleccione una compra no actualizada</h1>");}
-			});
-		';
+			});';
 
 
 		$bodyscript .= '
@@ -513,10 +540,11 @@ class Scst extends Controller {
 					$( "#fvehi" ).html("");
 
 				}
-			});
-		});';
+			});';
 
-		$bodyscript .= "\n</script>\n";
+		$bodyscript .= '});';
+
+		$bodyscript .= '</script>';
 
 		return $bodyscript;
 
@@ -1296,7 +1324,7 @@ class Scst extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: scstadd,\n\t\teditfunc: scstedit");
+		$grid->setBarOptions('addfunc: scstadd, editfunc: scstedit, viewfunc: scstshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -1736,7 +1764,14 @@ class Scst extends Controller {
 				'codigo' =>'C&oacute;digo',
 				'descrip'=>'Descripci&oacute;n'),
 			'filtro'  =>array('codigo' =>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
-			'retornar'=>array('codigo'=>'codigo_<#i#>','descrip'=>'descrip_<#i#>','pond'=>'costo_<#i#>','iva'=>'iva_<#i#>','peso'=>'sinvpeso_<#i#>'),
+			'retornar'=>array(
+				'codigo' => 'codigo_<#i#>',
+				'descrip'=> 'descrip_<#i#>',
+				'pond'   => 'costo_<#i#>',
+				'iva'    => 'iva_<#i#>',
+				'peso'   => 'sinvpeso_<#i#>',
+				'precio1'=> 'precio1_<#i#>'
+			),
 			'p_uri'=>array(4=>'<#i#>'),
 			'script'  => array('post_modbus_sinv(<#i#>)'),
 			'titulo'  =>'Buscar Art&iacute;culo',
@@ -1791,14 +1826,12 @@ class Scst extends Controller {
 		$edit->actuali->mode ='autohide';
 		$edit->actuali->calendar=false;
 
-
 		$edit->recep = new DateonlyField('recibido', 'v','d/m/Y');
 		//$edit->recep->insertValue = date('Y-m-d');
 		$edit->recep->size = 10;
 		$edit->recep->mode = 'autohide';
 		$edit->recep->when=array('show');
 		$edit->recep->calendar=false;
-
 
 		$edit->serie = new inputField('N&uacute;mero', 'serie');
 		$edit->serie->size = 15;
@@ -1938,13 +1971,14 @@ class Scst extends Controller {
 		$edit->costo->css_class       = 'inputnum';
 		$edit->costo->rule            = 'required|positive';
 		$edit->costo->onkeyup         = 'importe(<#i#>)';
-		$edit->costo->size            = 10;
+		$edit->costo->size            = 9;
 		$edit->costo->autocomplete    = false;
 		$edit->costo->db_name         = 'costo';
 		$edit->costo->rel_id          = 'itscst';
 		$edit->costo->showformat      = 'decimal';
 
 		$edit->importe = new inputField('Importe', 'importe_<#i#>');
+		$edit->importe->rule          = 'numeric';
 		$edit->importe->db_name       = 'importe';
 		$edit->importe->size          = 12;
 		$edit->importe->rel_id        = 'itscst';
@@ -1952,6 +1986,15 @@ class Scst extends Controller {
 		$edit->importe->onkeyup       = 'costo(<#i#>)';
 		$edit->importe->css_class     = 'inputnum';
 		$edit->importe->showformat    = 'decimal';
+
+		$edit->precio1 = new inputField('PVP', 'precio1_<#i#>');
+		$edit->precio1->rule          = 'numeric';
+		$edit->precio1->db_name       = 'precio1';
+		$edit->precio1->size          = 9;
+		$edit->precio1->rel_id        = 'itscst';
+		$edit->precio1->autocomplete  = false;
+		$edit->precio1->css_class     = 'inputnum';
+		$edit->precio1->showformat    = 'decimal';
 
 		$edit->sinvpeso = new hiddenField('', 'sinvpeso_<#i#>');
 		$edit->sinvpeso->db_name      = 'sinvpeso';
@@ -2058,7 +2101,8 @@ class Scst extends Controller {
 			$rt = $this->actualizar($control);
 			if ( strlen($rt[1]) > 0 )
 				if ( $rt[0] === false ) $p = 'E'; else $p='A';
-				echo '{"status":"'.$p.'","id":"'.$control.'" ,"mensaje":"<h1>'.$rt[1].'</h1>"}';
+				$rtjson = array('status'=>$p, 'id'=> $control, 'mensaje'=> $rt[1]);
+				echo json_encode($rtjson);
 		} else {
 			$modo = $this->uri->segment($this->uri->total_segments()-1);
 
@@ -2073,8 +2117,13 @@ class Scst extends Controller {
 			} else {
 				if ( $modo == 'update' ) $this->genesal = false;
 				$rt = $this->dataedit();
-				if ( strlen($rt) > 0 )
-					echo '{"status":"A","id":"'.$id.'" ,"mensaje":"'.$rt.'"}';
+				if($rt=='Compra Guardada'){
+					$p='A';
+				}else{
+					$p='C';
+				}
+				$rtjson = array('status'=>$p, 'id'=> $id, 'mensaje'=> $rt);
+				echo json_encode($rtjson);
 			}
 		}
 	}
@@ -2640,7 +2689,7 @@ class Scst extends Controller {
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
-		$edit->fecha->size = 10;
+		$edit->fecha->size = 12;
 		$edit->fecha->rule ='required';
 		$edit->fecha->calendar=false;
 		$edit->fecha->mode = 'autohide';
@@ -2648,7 +2697,7 @@ class Scst extends Controller {
 
 		$edit->vence = new DateonlyField('Vence', 'vence','d/m/Y');
 		$edit->vence->insertValue = date('Y-m-d');
-		$edit->vence->size = 10;
+		$edit->vence->size = 12;
 		$edit->vence->rule ='required';
 		$edit->vence->mode = 'autohide';
 		$edit->vence->calendar=false;
@@ -3422,8 +3471,9 @@ class Scst extends Controller {
 		for($i=0;$i<$cana;$i++){
 			$itcodigo  = $do->get_rel('itscst','codigo'  ,$i);
 			$itcana    = $do->get_rel('itscst','cantidad',$i);
-			$itprecio  = $do->get_rel('itscst','costo'   ,$i);
-			$itiva     = $do->get_rel('itscst','iva'     ,$i);
+			$itprecio  = floatval($do->get_rel('itscst','costo'  ,$i));
+			$itiva     = floatval($do->get_rel('itscst','iva'    ,$i));
+			$itpvp1    = floatval($do->get_rel('itscst','precio1',$i));
 
 			//$itimporte = $itprecio*$itcana;
 			$itimporte = $do->get_rel('itscst','importe',$i);
@@ -3440,7 +3490,17 @@ class Scst extends Controller {
 				$costo=$this->_costos($row->formcal,$costo_pond,$costo_ulti,$row->standard);
 			}
 
-			for($o=1;$o<5;$o++){
+			if($itpvp1 > 0){
+				if($itprecio >= $itpvp1){
+					$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']="El producto ${itcodigo} tiene un precio por debajo de su costo, debe ajustarlo.";
+					return false;
+				}
+				$io=2;
+			}else{
+				$io=1;
+			}
+
+			for($o=$io;$o<5;$o++){
 				$obj='margen'.$o;
 				$pob='precio'.$o;
 
@@ -3462,12 +3522,21 @@ class Scst extends Controller {
 
 					//Si no puede hacer nada manda error.
 					if($cmargen>=100){
-						$do->error_message_ar['pre_ins']="El producto $itcodigo presenta problema con los márgenes, por favor cambielos por el módulo de maestro de inventario.";
+						$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']="El producto ${itcodigo} presenta problema con los márgenes, por favor cambielos por el módulo de maestro de inventario.";
 						return false;
 					}
 				}else{
 					$pp=(($costo*100)/(100-$cmargen))*(1+($itiva/100));
 				}
+
+				if($o==1){
+					$itpvp1 = $pp;
+				}elseif($o==4 && $pp>=$itpvp1){
+					$pp= $itpvp1*0.99;
+				}elseif($pp >= $itpvp1){
+					$pp = $itpvp1;
+				}
+
 				$do->set_rel('itscst','precio'.$o ,$pp,$i);
 			}
 
@@ -3642,14 +3711,17 @@ class Scst extends Controller {
 
 
 	function _pre_update($do){
-		$actuali= new DateTime($do->get('actuali'));
-		$fecha  = new DateTime($do->get('fecha'));
+		$aactuali = $do->get('actuali');
+		if(!empty($aactuali)){
+			$actuali= new DateTime($aactuali);
+			$fecha  = new DateTime($do->get('fecha'));
 
-		if($actuali >= $fecha){
-			$do->error_message_ar['pre_upd'] = $do->error_message_ar['update']='No se puede modificar una compra actualizada, debe reversarla primero.';
-			return false;
+			if($actuali >= $fecha){
+				$do->error_message_ar['pre_upd'] = $do->error_message_ar['update']='No se puede modificar una compra actualizada, debe reversarla primero.';
+				return false;
+			}
 		}
-		$this->_pre_insert($do);
+		return $this->_pre_insert($do);
 	}
 
 	function _post_delete($do){

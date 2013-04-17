@@ -619,7 +619,7 @@ class Ajax extends Controller {
 			$dbmid = $this->db->escape($mid);
 			$retArray = $retorno = array();
 
-			$mSQL="SELECT id,numero, tipo_op AS tipo, fecha, monto
+			$mSQL="SELECT id,numero, tipo_op AS tipo, fecha, monto,concilia
 			FROM bmov
 			WHERE codbanc=${dbmid} AND anulado<>'S' AND liable<>'N'
 			AND fecha <= ${dbfecha}
@@ -637,6 +637,7 @@ class Ajax extends Controller {
 					$retArray['tipo']    = $row['tipo'];
 					$retArray['fecha']   = $objdate->format('d/m/Y');
 					$retArray['monto']   = $row['monto'];
+					$retArray['concilia']= false;
 
 					array_push($retorno, $retArray);
 				}
@@ -726,6 +727,7 @@ class Ajax extends Controller {
 					$retArray['peso']    = $row['peso'];
 					$retArray['ultimo']  = $row['ultimo'];
 					$retArray['pond']    = $row['pond'];
+					$retArray['precio1'] = $row['precio1'];
 					$retArray['base1']   = $row['precio1']*100/(100+$row['iva']);
 					$retArray['base2']   = $row['precio2']*100/(100+$row['iva']);
 					$retArray['base3']   = $row['precio3']*100/(100+$row['iva']);
@@ -775,6 +777,7 @@ class Ajax extends Controller {
 					$retArray['peso']    = $row['peso'];
 					$retArray['ultimo']  = $row['ultimo'];
 					$retArray['pond']    = $row['pond'];
+					$retArray['precio1'] = $row['precio1'];
 					$retArray['base1']   = $row['precio1']*100/(100+$row['iva']);
 					$retArray['base2']   = $row['precio2']*100/(100+$row['iva']);
 					$retArray['base3']   = $row['precio3']*100/(100+$row['iva']);

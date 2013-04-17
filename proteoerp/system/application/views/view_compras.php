@@ -15,6 +15,7 @@ $scampos .='<td class="littletablerow" align="right">'.$campos['cantidad']['fiel
 $scampos .='<td class="littletablerow" align="right">'.$campos['costo']['field']. '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['importe']['field'];
 $scampos .= $campos['sinvpeso']['field'].$campos['iva']['field'].'</td>';
+$scampos .='<td class="littletablerow" align="right">'.$campos['precio1']['field'].'</td>';
 $scampos .='<td class="littletablerow"><a href=# onclick="del_itscst(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
 $campos=$form->js_escape($scampos);
 
@@ -50,6 +51,8 @@ $(function(){
 	});
 
 	$('#proveed').autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasprv'); ?>",
@@ -295,12 +298,14 @@ function del_itscst(id){
 //Agrega el autocomplete
 function autocod(id){
 	$('#codigo_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasinvart'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -313,6 +318,7 @@ function autocod(id){
 							$('#sinvpeso_'+id).val(0);
 							$('#costo_'+id).val(0);
 							$('#cantidad_'+id).val('');
+							$('#precio1_'+id).val('');
 						}else{
 							$.each(data,
 								function(i, val){
@@ -335,6 +341,7 @@ function autocod(id){
 			$('#iva_'+id).val(ui.item.iva);
 			$('#sinvpeso_'+id).val(ui.item.peso);
 			$('#costo_'+id).val(ui.item.pond);
+			$('#precio1_'+id).val(ui.item.precio1);
 			if(cana<=0) $("#cantidad_"+id).val('1');
 			$('#cantidad_'+id).focus();
 			$('#cantidad_'+id).select();
@@ -428,6 +435,7 @@ if (!$solo){
 				<th bgcolor='#7098D0'>Cantidad          </th>
 				<th bgcolor='#7098D0'>Precio            </th>
 				<th bgcolor='#7098D0'>Importe           </th>
+				<th bgcolor='#7098D0'>PVP               </th>
 				<?php if($form->_status!='show') {?>
 					<th bgcolor='#7098D0'>&nbsp;</th>
 				<?php } ?>
@@ -441,7 +449,7 @@ if (!$solo){
 				$it_importe = "importe_$i";
 				$it_peso    = "sinvpeso_$i";
 				$it_iva     = "iva_$i";
-				//$it_tipo    = "sinvtipo_$i";
+				$it_pvp    = "precio1_$i";
 			?>
 
 			<tr id='tr_itscst_<?php echo $i; ?>'>
@@ -454,6 +462,7 @@ if (!$solo){
 				<td class="littletablerow" align="right"><?php echo $form->$it_importe->output; ?>
 				<?php echo $form->$it_peso->output.$form->$it_iva->output; ?>
 				</td>
+				<td class="littletablerow" align="right"><?php echo $form->$it_pvp->output; ?></td>
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow">
 					<a href='#' onclick='del_itscst(<?php echo $i ?>);return false;'><?php echo img("images/delete.jpg");?></a>
@@ -514,6 +523,5 @@ if (!$solo){
 		<td>
 	<tr>
 <table>
-
 <?php echo $form_end?>
 <?php endif; ?>
