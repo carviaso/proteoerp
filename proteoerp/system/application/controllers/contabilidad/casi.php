@@ -858,7 +858,7 @@ class Casi extends Controller {
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->rule = 'required';
 		$edit->fecha->mode = 'autohide';
-		$edit->fecha->size = 10;
+		$edit->fecha->size = 12;
 
 		$edit->comprob = new inputField('N&uacute;mero', 'comprob');
 		$edit->comprob->size     = 12;
@@ -887,7 +887,7 @@ class Casi extends Controller {
 		$edit->cuenta->append($btn);
 
 		$edit->referen = new inputField('Referencia <#o#>', 'referen_<#i#>');
-		$edit->referen->size      = 12;
+		$edit->referen->size      = 10;
 		$edit->referen->db_name   = 'referen';
 		$edit->referen->maxlength = 12;
 		$edit->referen->rel_id    = 'itcasi';
@@ -898,7 +898,6 @@ class Casi extends Controller {
 		$edit->concepto->maxlength = 50;
 		$edit->concepto->readonly  = true;
 		$edit->concepto->rel_id    = 'itcasi';
-		$edit->concepto->type      ='inputhidden';
 
 		$edit->itdebe = new inputField('Debe <#o#>', 'itdebe_<#i#>');
 		$edit->itdebe->db_name      = 'debe';
@@ -1809,7 +1808,7 @@ class Casi extends Controller {
 			if ( $this->uri->segment(5) == 'procesar' ) {
 				$_POST['valor'] = $tt;
 			}
-		} else 
+		} else
 			$tt = 'procesar';
 
 		$this->rapyd->load('datagrid','dataform');
@@ -1832,11 +1831,11 @@ class Casi extends Controller {
 
 		$sal='';
 		$verdad = ($filter->on_success() && $filter->is_valid());
-			
+
 		if ( $tt <> 'procesar') {
-			$verdad = true; 
+			$verdad = true;
 		}
-			
+
 		if ( $verdad ) {
 			$this->load->library('table');
 			$this->table->set_heading('Tabla', 'Campo', 'Coincidencias');

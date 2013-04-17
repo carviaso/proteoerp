@@ -34,8 +34,71 @@ $(function(){
 	});
 
 	$(".inputnum").numeric(".");
+
+	jQuery("#tliable").jqGrid({
+		datatype: "local",
+		height: 230,
+		colNames:["Fecha","Tipo", "N&uacute;mero", "Monto"," "],
+		colModel:[
+			{name:"fecha"  , index:"fecha"  , width:70   },
+			{
+				name: "tipo",
+				index:"tipo",
+				width:40,
+				formatter: function (cellvalue, options, rowObject) {
+					return cellvalue+'<input type="hidden" name="ittipo_'+rowObject.id+'" id="ittipo_'+rowObject.id+'" value="'+cellvalue+'">';
+				}
+			},
+			{name:"numero" , index:"numero" , width:100 , align:"right" },
+			{
+				name: "monto",
+				index:"monto",
+				width:100,
+				align:"right",
+				sorttype:"float",
+				formatter: function (cellvalue, options, rowObject) {
+					return nformat(cellvalue,2)+'<input type="hidden" name="itmonto_'+rowObject.id+'" id="itmonto_'+rowObject.id+'" value="'+cellvalue+'">';
+				}
+			},
+			{
+				name:'id',
+				width:40,
+				align:"center",
+				formatter: function (cellvalue, options, rowObject) {
+					return '<input type="checkbox" name="itid_'+rowObject.id+'" id="itid_'+rowObject.id+'" onchange="totalizar()">';
+				}
+			}
+
+		],
+		multiselect: false,
+		caption: "Efectos liables",
+		//multiselect: true
+	});
 });
 
+
+function cambiaban(){
+	var codban=$('#codbanc').val();
+	var fecha =$('#fecha').val();
+	if(codbanc!='' && fecha!=''){
+		jQuery("#tliable").jqGrid("clearGridData",true).trigger("reloadGrid");
+		$.ajax({
+			url: "<?php echo site_url('ajax/buscaconci'); ?>",
+			dataType: "json",
+			type: "POST",
+			data: {"codbanc" : codban , "fecha": fecha},
+			success: function(data){
+					$.each(data,
+						function(id, val){
+							jQuery("#tliable").jqGrid("addRowData",id,val);
+						}
+					);
+				},
+		});
+	}
+}
+
+/*
 function cambiaban(){
 	var codban=$('#codbanc').val();
 	var fecha =$('#fecha').val();
@@ -64,6 +127,7 @@ function cambiaban(){
 		});
 	}
 }
+*/
 
 function truncate(){
 	bmov_cont =0;
@@ -145,6 +209,8 @@ function totalizar(){
 	</tr>
 </table>
 <div style='border: 1px solid #9AC8DA;background: #FAFAFA'>
+<table id="tliable"></table>
+<!--
 <table width='100%' cellspacing='0' cellpadding='0'>
 	<tr style='background:#030B7A;color:#FDFDFD;font-size:10pt;'>
 		<th align="center">Fecha</th>
@@ -154,11 +220,11 @@ function totalizar(){
 		<th align="center">&nbsp;</th>
 	</tr>
 
-
 	<tr id='__UTPL__bmov'>
 		<td colspan='5' class="littletableheaderdet">&nbsp;</td>
 	</tr>
 </table>
+-->
 </div>
 
 <?php echo $container_bl.$container_br; ?>

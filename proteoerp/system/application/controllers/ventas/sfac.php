@@ -3449,7 +3449,7 @@ class Sfac extends Controller {
 				}
 
 				if($sfpatipo=='EF') $do->set_rel('sfpa', 'fecha' , $fecha , $i);
-				$do->set_rel('sfpa','tipo_doc' ,($tipoa=='F')? 'FC':'DE',$i);
+				$do->set_rel('sfpa','tipo_doc' ,($tipoa=='F')? 'FE':'DE',$i);
 				$do->set_rel('sfpa','transac'  ,$transac   ,$i);
 				$do->set_rel('sfpa','vendedor' ,$vd        ,$i);
 				$do->set_rel('sfpa','cod_cli'  ,$cliente   ,$i);

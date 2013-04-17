@@ -151,7 +151,7 @@ if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
 
 }else{
 	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Ventas por Fecha<h2>';
+	$data["titulo"] = '<h2 class="mainheader">Ventas por Fecha</h2>';
 	$data["head"] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }
