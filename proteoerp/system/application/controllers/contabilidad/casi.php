@@ -896,7 +896,6 @@ class Casi extends Controller {
 		$edit->concepto->size      = 24;
 		$edit->concepto->db_name   = 'concepto';
 		$edit->concepto->maxlength = 50;
-		$edit->concepto->readonly  = true;
 		$edit->concepto->rel_id    = 'itcasi';
 
 		$edit->itdebe = new inputField('Debe <#o#>', 'itdebe_<#i#>');

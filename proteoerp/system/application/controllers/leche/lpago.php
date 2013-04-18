@@ -817,14 +817,15 @@ class Lpago extends Controller {
 				height: 230,
 				colNames:["Cod.","Nombre", "Monto", "Adic. y Dedu.","Total pago"],
 				colModel:[
-					{name:"proveed"  , index:"proveed"   , width:60   },
-					{name:"nombre"   , index:"nombre"    , width:240  },
-					{name:"monto"    , index:"monto"     , width:110 , align:"right",sorttype:"float"},
-					{name:"deduc"    , index:"deduc"     , width:90 , align:"right",sorttype:"float"},
-					{name:"montopago", index:"montopago" , width:110 , align:"right",sorttype:"float"},
+					{name:"proveed"  , index:"proveed"   , width:60  },
+					{name:"nombre"   , index:"nombre"    , width:240 },
+					{name:"monto"    , index:"monto"     , width:110 , align:"right" , sorttype:"float"},
+					{name:"deduc"    , index:"deduc"     , width:90  , align:"right" , sorttype:"float"},
+					{name:"montopago", index:"montopago" , width:110 , align:"right" , sorttype:"float"},
 				],
 				multiselect: false,
-				caption: "Resumen de pago en lote"
+				caption: "Resumen de pago en lote",
+				rowNum:9000000000
 			});
 		});
 

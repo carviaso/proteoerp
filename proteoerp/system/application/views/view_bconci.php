@@ -61,17 +61,23 @@ $(function(){
 				}
 			},
 			{
-				name:'id',
+				name:'concilia',
 				width:40,
 				align:"center",
 				formatter: function (cellvalue, options, rowObject) {
-					return '<input type="checkbox" name="itid_'+rowObject.id+'" id="itid_'+rowObject.id+'" onchange="totalizar()">';
+					if(cellvalue){
+						checkp = 'checked="checked"';
+					}else{
+						checkp = '';
+					}
+					return '<input type="checkbox" name="itid_'+rowObject.id+'" id="itid_'+rowObject.id+'" onchange="totalizar('+rowObject.id+')" '+checkp+'>';
 				}
 			}
 
 		],
 		multiselect: false,
 		caption: "Efectos liables",
+		rowNum:9000000000,
 		//multiselect: true
 	});
 });
@@ -88,9 +94,12 @@ function cambiaban(){
 			type: "POST",
 			data: {"codbanc" : codban , "fecha": fecha},
 			success: function(data){
+					var cana = 0;
 					$.each(data,
 						function(id, val){
-							jQuery("#tliable").jqGrid("addRowData",id,val);
+							//val.rowid = id;
+							jQuery("#tliable").jqGrid("addRowData",val.id,val);
+							cana ++;
 						}
 					);
 				},
@@ -151,14 +160,17 @@ function del_itbmov(id){
 	$('#tr_bmov_'+id).remove();
 }
 
-function totalizar(){
+function totalizar(id){
+	//indexes = jQuery("#tliable").jqGrid('getGridParam', '_index');
+	//alert(indexes[id]);
+	jQuery("#tliable").jqGrid('getLocalRow', id).concilia = ! jQuery("#tliable").jqGrid('getLocalRow', id).concilia;
 	var total = 0;
 	var arr=$('input[name^="itid_"]');
 	jQuery.each(arr, function() {
 		nom=this.name;
 		pos=this.name.lastIndexOf('_');
 		if(pos>0){
-			ind    = this.name.substring(pos+1);
+			ind = this.name.substring(pos+1);
 			if(this.checked){
 				monto  = Number($('#itmonto_'+ind).val());
 				tipo   = $('#ittipo_'+ind).val();
