@@ -1921,7 +1921,7 @@ class Desarrollo extends Controller{
 		$db     = $this->input->post('bd');
 		$contro = $this->input->post('contro');
 		file_put_contents('system/application/controllers/'.$contro.'/'.$db.'.php',$code);
-		redirect($this->url.'desarrollo/jqcargar/'.$db.'/'.$contro);
+		//redirect(base_url.'desarrollo/jqcargar/'.$db.'/'.$contro);
 	}
 
 	function jqcargar(){

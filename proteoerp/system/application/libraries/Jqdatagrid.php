@@ -659,13 +659,13 @@ class Jqdatagrid
 		* check if we must export result
 		*/
 		$this->export();
-		$margen = '			';
+		$margen = "\t\t\t";
 
 		$html      = '';
 		$loadbutton = false;
 
 		if(false == empty($this->url_get)){
-			$html .= $margen.",url:'{$this->url_get}/'\r\n";
+			$html .= "\t\t".",url:'{$this->url_get}/'\r\n";
 			$post = (false == empty($this->url_put)) ? $this->url_put : $this->url_get;
 			$html .=  $margen.",editurl:'{$post}/'\r\n";
 		}
