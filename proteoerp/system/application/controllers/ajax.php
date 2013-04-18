@@ -1173,7 +1173,7 @@ class Ajax extends Controller {
 			$this->db->select_sum('a.monto*IF(tipo_doc IN ("FC","ND","GI"),1,-1)','saldo');
 			$this->db->from('sprm AS a');
 			$this->db->where('a.cod_prv',$mid);
-			$this->db->where('a.monto > a.abonos');
+			//$this->db->where('a.monto > a.abonos');
 			$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
 			$q=$this->db->get();
 			$row = $q->row_array();
