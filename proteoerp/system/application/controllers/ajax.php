@@ -1174,7 +1174,7 @@ class Ajax extends Controller {
 			$this->db->from('sprm AS a');
 			$this->db->where('a.cod_prv',$mid);
 			//$this->db->where('a.monto > a.abonos');
-			$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
+			//$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
 			$q=$this->db->get();
 			$row = $q->row_array();
 			echo (empty($row['saldo']))? 0: $row['saldo'];
@@ -1189,11 +1189,12 @@ class Ajax extends Controller {
 		$mid = $this->input->post('clipro');
 
 		if($mid !== false){
-			$this->db->select_sum('a.monto - a.abonos','saldo');
+			$this->db->select_sum('a.monto*IF(tipo_doc IN ("FC","ND","GI"),1,-1)','saldo');
+//			$this->db->select_sum('a.monto - a.abonos','saldo');
 			$this->db->from('smov AS a');
 			$this->db->where('a.cod_cli',$mid);
-			$this->db->where('a.monto > a.abonos');
-			$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
+			//$this->db->where('a.monto > a.abonos');
+			//$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
 			$q=$this->db->get();
 			$row = $q->row_array();
 			echo (empty($row['saldo']))? 0: $row['saldo'];
