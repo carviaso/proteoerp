@@ -32,6 +32,7 @@ if($form->_status!='show'){ ?>
 var itcasi_cont=<?php echo $form->max_rel_count['itcasi']; ?>;
 
 $(function(){
+	$( "#fecha" ).datepicker({ dateFormat: "dd/mm/yy" });
 	$(".inputnum").numeric(".");
 	totaliza();
 
@@ -51,7 +52,7 @@ $(function(){
 			autocod(ind);
 		}
 	});
-	
+
 });
 
 //Agrega el autocomplete

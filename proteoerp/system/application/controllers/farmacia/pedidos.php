@@ -28,7 +28,7 @@ class Pedidos extends Controller {
 
 		$filter->db->from('sitems     AS a');
 		$filter->db->join('sinv       AS b','a.codigoa=b.codigo');
-		$filter->db->join('costos     AS c','a.codigoa=c.codigo');
+		$filter->db->join('costos     AS c','a.codigoa=c.codigo AND a.fecha=c.fecha');
 		$filter->db->join('farmaxasig AS d','a.codigoa=d.abarras');
 
 		$filter->db->where('b.existen <= b.exmin ');
