@@ -172,10 +172,10 @@ class Minfra extends Controller {
 				$line.=$row['retiro'].';';
 				$line.="\r\n";
 			}
-			$line.= $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4);
-			$line.="\r\n";
+			//$line.= $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4);
+			//$line.="\r\n";
 		}
-		$name = 'FAOV.txt';
+		$name = $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4);
 		force_download($name,$line);
 	}
 }
