@@ -121,8 +121,8 @@ class Minfra extends Controller {
 
 		$query=$this->db->query($mSQL);
 		$line=$error='';
-		$line='NACIONAL;CEDULA;1ER_NOMBRE;2DO_NOMBRE;1ER_APELLIDO;2DO_APELLIDO;SALARIO;INGRESO;RETIRO';
-		$line.="\r\n";
+		//$line='NACIONAL;CEDULA;1ER_NOMBRE;2DO_NOMBRE;1ER_APELLIDO;2DO_APELLIDO;SALARIO;INGRESO;RETIRO';
+		//$line.="\r\n";
 		if ($query->num_rows() > 0){
 			$rem=array('.','-');
 			foreach($query->result_array() as $row){
@@ -172,6 +172,8 @@ class Minfra extends Controller {
 				$line.=$row['retiro'].';';
 				$line.="\r\n";
 			}
+			$line.= $this->datasis->traevalor('CODIGOFAOV').substr($dbfechad,4,2).substr($dbfechad,0,4);
+			$line.="\r\n";
 		}
 		$name = 'FAOV.txt';
 		force_download($name,$line);
