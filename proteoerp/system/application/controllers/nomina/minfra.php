@@ -169,7 +169,8 @@ class Minfra extends Controller {
 				$line.=rtrim($nombre1).';'.rtrim($nombre2).',';
 				$line.=number_format($row['asignacion'],2,'','').",";
 				$line.=$row['ingreso'].',';
-				$line.=$row['retiro'].',';
+				if ($row['retiro'] != '00000000' )
+				    $line.=$row['retiro'];
 				$line.="\r\n";
 			}
 			//$line.= $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4);
