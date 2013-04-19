@@ -111,7 +111,7 @@ class Minfra extends Controller {
 		 SUM(a.valor*(a.concepto IN ('620', '621' ))) +SUM(a.valor*(a.concepto IN ('920', '921' ))) as total,
 		 CONCAT(RTRIM(b.nombre), ' ',RTRIM(b.apellido)) nombre, c.descrip,
 		 a.fecha, a.contrato, d.nombre contnom, b.sexo,
-		 b.nacional,b.cedula,b.nombre,b.apellido,b.sueldo,DATE_FORMAT(b.ingreso,'%w%m%Y')AS ingreso,DATE_FORMAT(b.retiro,'%w%m%Y')AS retiro
+		 b.nacional,b.cedula,b.nombre,b.apellido,b.sueldo,DATE_FORMAT(b.ingreso,'%d%m%Y')AS ingreso,DATE_FORMAT(b.retiro,'%d%m%Y')AS retiro
 		 FROM (nomina a) JOIN pers as b ON a.codigo=b.codigo
 		 JOIN conc as c ON a.concepto=c.concepto
 		 LEFT JOIN noco d ON a.contrato=d.codigo
@@ -126,8 +126,8 @@ class Minfra extends Controller {
 		if ($query->num_rows() > 0){
 			$rem=array('.','-');
 			foreach($query->result_array() as $row){
-				$line.=trim($row['nacional']).';';
-				$line.=trim($row['cedula']).';';
+				$line.=trim($row['nacional']).',';
+				$line.=trim($row['cedula']).',';
 
 				$temp=preg_replace('/\s\s+/', ' ', trim($row['nombre']));
 
@@ -147,7 +147,7 @@ class Minfra extends Controller {
 						$nombre2.=$token.' ';
 					}
 				}
-				$line.=trim($nombre1).';'.trim($nombre2).';';
+				$line.=trim($nombre1).','.trim($nombre2).',';
 
 				$temp=preg_replace('/\s\s+/', ' ', trim($row['apellido']));
 				$temp=str_replace('¥','&ntilde;',$temp);
@@ -166,10 +166,10 @@ class Minfra extends Controller {
 						$nombre2.=$token.' ';
 					}
 				}
-				$line.=rtrim($nombre1).';'.rtrim($nombre2).';';
-				$line.=number_format($row['asignacion'],2,'','').";";
-				$line.=$row['ingreso'].';';
-				$line.=$row['retiro'].';';
+				$line.=rtrim($nombre1).';'.rtrim($nombre2).',';
+				$line.=number_format($row['asignacion'],2,'','').",";
+				$line.=$row['ingreso'].',';
+				$line.=$row['retiro'].',';
 				$line.="\r\n";
 			}
 			//$line.= $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4);
