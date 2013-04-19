@@ -166,7 +166,7 @@ class Minfra extends Controller {
 						$nombre2.=$token.' ';
 					}
 				}
-				$line.=rtrim($nombre1).';'.rtrim($nombre2).',';
+				$line.=rtrim($nombre1).','.rtrim($nombre2).',';
 				$line.=number_format($row['asignacion'],2,'','').",";
 				$line.=$row['ingreso'].',';
 				if ($row['retiro'] != '00000000' )
