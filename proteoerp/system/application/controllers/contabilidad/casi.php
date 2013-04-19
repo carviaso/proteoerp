@@ -1941,7 +1941,6 @@ class Casi extends Controller {
 		$do->set('hora'   ,$hora);
 		$do->set('transac',$transac);
 
-		return false;
 		return true;
 	}
 
