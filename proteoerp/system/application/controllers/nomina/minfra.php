@@ -175,7 +175,7 @@ class Minfra extends Controller {
 			//$line.= $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4);
 			//$line.="\r\n";
 		}
-		$name = $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4);
+		$name = $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4).'.txt';
 		force_download($name,$line);
 	}
 }
