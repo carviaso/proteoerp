@@ -31,6 +31,13 @@ function gettransporte(){
 }
 
 $(function(){
+	$('.inputnum').focus(function (){
+		$(this).select();
+	});
+	$('.inputnum').click(function (){
+		$(this).select();
+	});
+
 	$('.inputnum').numeric('.');
 	calconeto();
 	calcolitro();

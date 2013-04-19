@@ -103,13 +103,13 @@ class Lcierre extends Controller {
 		$bodyscript .= '
 		function lcierreshow() {
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				$.post("'.site_url($this->url.'dataedit/show').'/"+id,
 					function(data){
 						$("#fshow").html(data);
-						$("#fshow").dialog( "open" );
+						$("#fshow").dialog( "open");
 					});
-			} else {
+			}else{
 				$.prompt("<h1>Por favor seleccione un registro</h1>");
 			}
 		};';
@@ -708,9 +708,22 @@ class Lcierre extends Controller {
 		//$edit->pre_process('delete' ,'_pre_delete_lcierre');
 
 		$edit->requeson = new inputField('Requeson','requeson');
+		$edit->requeson->css_class='inputnum';
 		$edit->requeson->rule='required';
 		$edit->requeson->size =12;
 		$edit->requeson->maxlength =10;
+
+		$dbfecha   = $this->db->escape($fecha);
+		$recibido  = $this->datasis->dameval("SELECT SUM(litros)            AS val FROM lrece WHERE fecha=${dbfecha}"); //Litros recibidos
+		$producido = $this->datasis->dameval("SELECT SUM(litros-inventario) AS val FROM lprod WHERE fecha=${dbfecha}"); //Litros recibidos usados en produccion
+		$enfria    = $recibido-$producido; //Litros que quedan para enfriar
+
+		$edit->enfriamiento = new inputField('Leche para Enfriamiento','enfriamiento');
+		$edit->enfriamiento->css_class='inputnum';
+		$edit->enfriamiento->rule='required';
+		$edit->enfriamiento->size =12;
+		$edit->enfriamiento->insertValue=$enfria;
+		$edit->enfriamiento->maxlength =10;
 
 		$edit->dia = new inputField('D&iacute;a','dia');
 		$edit->dia->size =12;
@@ -792,7 +805,6 @@ class Lcierre extends Controller {
 		$fecha  = $do->get('fecha');
 		$dbfecha= $this->db->escape($fecha);
 		$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
-
 		if($cana>0){
 			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya existe un cierre para el d&iacute;a '.dbdate_to_human($fecha).' no puede realizar otro.';
 			return false;

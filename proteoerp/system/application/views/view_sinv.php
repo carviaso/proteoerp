@@ -106,6 +106,15 @@ function ocultatab(){
 }
 
 $(function(){
+
+	$('.inputnum').focus(function (){
+		$(this).select();
+	});
+	$('.inputnum').click(function (){
+		$(this).select();
+	});
+
+
 	ocultatab();
 	$("#fdesde").datepicker({ dateFormat: "dd/mm/yy" });
 	$("#fhasta").datepicker({ dateFormat: "dd/mm/yy" });

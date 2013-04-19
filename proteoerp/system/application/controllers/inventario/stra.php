@@ -1298,7 +1298,7 @@ class Stra extends Controller {
 			if(empty($it_cana)){
 				$rt=array(
 					'status' =>'B',
-					'mensaje'=> utf8_encode('No puede cerrar el día sin producción.'),
+					'mensaje'=> 'No puede cerrar el día sin producción.',
 					'pk'     =>''
 				);
 				echo json_encode($rt);

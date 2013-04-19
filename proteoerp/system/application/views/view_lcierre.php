@@ -1,9 +1,9 @@
 <?php
 echo $form_begin;
 
-$container_tr=join("&nbsp;", $form->_button_container["TR"]);
-$container_bl=join("&nbsp;", $form->_button_container["BL"]);
-$container_br=join("&nbsp;", $form->_button_container["BR"]);
+$container_tr=join('&nbsp;', $form->_button_container['TR']);
+$container_bl=join('&nbsp;', $form->_button_container['BL']);
+$container_br=join('&nbsp;', $form->_button_container['BR']);
 $mod=true;
 
 $campos=$form->template_details('itlcierre');
@@ -26,6 +26,8 @@ var itlcierre_cont =<?php echo $form->max_rel_count['itlcierre']; ?>;
 $(function(){
 	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
 	$(".inputnum").numeric(".");
+	$('.inputnum').focus(function (){ $(this).select(); });
+	$('.inputnum').click(function (){ $(this).select(); });
 
 	for(var i=0;i < <?php echo $form->max_rel_count['itlcierre']; ?>;i++){
 		autocod(i.toString());
@@ -157,15 +159,16 @@ function totalizar(){
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 <table width='100%' style='font-size:11pt;background:#F2E69D;'>
 	<tr>
-		<td width='60'><b><?php echo $form->dia->label;     ?></b></td>
-		<td width='70'>   <?php echo $form->dia->output;    ?></td>
-		<td width='50' colspan='2'></td>
+		<td><b><?php echo $form->dia->label;     ?></b></td>
+		<td>   <?php echo $form->dia->output;    ?></td>
+		<td><b><?php echo $form->enfriamiento->label;     ?></b></td>
+		<td>   <?php echo $form->enfriamiento->output;    ?></td>
 	</tr>
 	<tr>
-		<td width='60'><b><?php echo $form->fecha->label;     ?></b></td>
-		<td width='70'>   <?php echo $form->fecha->output;    ?></td>
-		<td width='90'><b><?php echo $form->requeson->label; ?></b></td>
-		<td width='50'>   <?php echo $form->requeson->output; ?></td>
+		<td><b><?php echo $form->fecha->label;     ?></b></td>
+		<td>   <?php echo $form->fecha->output;    ?></td>
+		<td><b><?php echo $form->requeson->label; ?></b></td>
+		<td>   <?php echo $form->requeson->output; ?></td>
 	</tr>
 </table>
 <div style='border: 1px solid #9AC8DA;background: #FAFAFA'>

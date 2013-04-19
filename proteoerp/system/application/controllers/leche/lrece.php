@@ -367,7 +367,7 @@ class Lrece extends Controller {
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
-			'width'         => 40,
+			'width'         => 45,
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
@@ -377,7 +377,7 @@ class Lrece extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
-			'width'         => 80,
+			'width'         => 120,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
@@ -388,7 +388,7 @@ class Lrece extends Controller {
 		$grid->label('Llegada');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => 'true',
+			'editable'      => $editar,
 			'width'         => 80,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
@@ -400,7 +400,7 @@ class Lrece extends Controller {
 		$grid->label('Recoleccion');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => 'true',
+			'editable'      => $editar,
 			'width'         => 80,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
@@ -2050,7 +2050,6 @@ class Lrece extends Controller {
 		}
 	}
 
-
 	//******************************************************************
 	// RECALCULA LOS VALORES DE LAS RECEPCIONES
 	//******************************************************************
@@ -2153,10 +2152,12 @@ class Lrece extends Controller {
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Modifico Apertura $this->tits $primary ");
 	}
+
 	function _post_apertura_delete($do){
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino recepcion $this->tits $primary ");
 	}
+
 	function _pre_apertura_update($do){
 		$lleno    = $do->get('lleno');
 		$vacio    = $do->get('vacio');
@@ -2166,33 +2167,31 @@ class Lrece extends Controller {
 		$do->set('litros',$litros);
 		$do->set('neto'  ,$neto);
 
-		$fecha  = $do->get('fecha');
-		$dbfecha= $this->db->escape($fecha);
-		$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
-
-		if($cana>0){
-			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
-			return false;
-		}
+		//$fecha  = $do->get('fecha');
+		//$dbfecha= $this->db->escape($fecha);
+		//$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
+		//if($cana>0){
+		//	$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
+		//	return false;
+		//}
 
 		return true;
 	}
 
 	function _pre_apertura_delete($do){
-		$fecha  = $do->get('fecha');
-		$dbfecha= $this->db->escape($fecha);
-		$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
-
-		if($cana>0){
-			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
-			return false;
-		}
+		//$fecha  = $do->get('fecha');
+		//$dbfecha= $this->db->escape($fecha);
+		//$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
+		//if($cana>0){
+		//	$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
+		//	return false;
+		//}
 
 		return true;
 	}
 
 	function _pre_apertura_insert($do){
-		$do->set('fecha',date('Y-m-d'));
+		$do->set('fecha',date('Y-m-d H:i:s'));
 
 		$hoy       = new DateTime();
 		$fregistro = new DateTime($do->get('fecha' ));
@@ -2233,14 +2232,13 @@ class Lrece extends Controller {
 		}
 		$do->set('neto'  ,$neto);
 
-		$fecha  = $do->get('fecha');
-		$dbfecha= $this->db->escape($fecha);
-		$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
-
-		if($cana>0){
-			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
-			return false;
-		}
+		//$fecha  = $do->get('fecha');
+		//$dbfecha= $this->db->escape($fecha);
+		//$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
+		//if($cana>0){
+		//	$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
+		//	return false;
+		//}
 
 		$lleno = floatval($do->get('lleno'));
 		if($lleno>0) $do->set('transporte','');
@@ -2260,14 +2258,13 @@ class Lrece extends Controller {
 		return false;
 	}
 	function _pre_analisis_update($do){
-		$fecha  = $do->get('fecha');
-		$dbfecha= $this->db->escape($fecha);
-		$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
-
-		if($cana>0){
-			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
-			return false;
-		}
+		//$fecha  = $do->get('fecha');
+		//$dbfecha= $this->db->escape($fecha);
+		//$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
+		//if($cana>0){
+		//	$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
+		//	return false;
+		//}
 
 		$densidad= $do->get('densidad');
 		$lleno   = $do->get('lleno');
@@ -2301,14 +2298,13 @@ class Lrece extends Controller {
 		return false;
 	}
 	function _pre_vaqueras_update($do){
-		$fecha  = $do->get('fecha');
-		$dbfecha= $this->db->escape($fecha);
-		$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
-
-		if($cana>0){
-			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
-			return false;
-		}
+		//$fecha  = $do->get('fecha');
+		//$dbfecha= $this->db->escape($fecha);
+		//$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
+		//if($cana>0){
+		//	$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
+		//	return false;
+		//}
 
 		$lista=0;
 		$rel='itlrece';
@@ -2328,8 +2324,10 @@ class Lrece extends Controller {
 		if(!$this->db->table_exists('lrece')){
 			$mSQL="CREATE TABLE `lrece` (
 				`numero` CHAR(8) NULL DEFAULT NULL,
-				`fecha` DATE NULL DEFAULT NULL,
+				`fecha` DATETIME NULL DEFAULT NULL,
 				`transporte` INT(11) NULL DEFAULT NULL COMMENT 'Transporte',
+				`fechal` DATE NULL DEFAULT NULL COMMENT 'Fecha de Llegada',
+				`fechar` DATE NULL DEFAULT NULL COMMENT 'Fecha de Recoleccion',
 				`ruta` CHAR(4) NULL DEFAULT NULL COMMENT 'Ruta Grupo de Proveedor',
 				`flete` CHAR(5) NULL DEFAULT NULL COMMENT 'Proveedor Flete',
 				`nombre` CHAR(45) NULL DEFAULT NULL COMMENT 'Nombre Chofer ',
