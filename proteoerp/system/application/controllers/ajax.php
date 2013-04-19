@@ -376,7 +376,12 @@ class Ajax extends Controller {
 		if($mid == false) $mid  = $this->input->post('term');
 
 		$fecha = $this->input->post('fecha');
-		if($fecha == false) $fecha=date('Y-m-d');
+		if($fecha == false){
+			$fecha=date('Y-m-d');
+		}else{
+			$edate   = explode('/',$fecha);
+			$fecha   = date('Y-m-d',mktime(0, 0, 0, $edate[1],$edate[0],$edate[2]));
+		}
 
 		$qmid  = $this->db->escape($mid);
 		$qdb   = $this->db->escape('%'.$mid.'%');

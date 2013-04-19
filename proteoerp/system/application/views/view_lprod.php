@@ -25,17 +25,20 @@ var itlprod_cont =<?php echo $form->max_rel_count['itlprod']; ?>;
 
 $(function(){
 	$(".inputnum").numeric(".");
+	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
 	for(var i=0;i < <?php echo $form->max_rel_count['itlprod']; ?>;i++){
 		autocod(i.toString());
 	}
 
 	$('#codigo').autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {'q':req.term,'fecha':$("#fecha").val()},
 				success:
 					function(data){
 						var sugiere = [];
@@ -112,12 +115,14 @@ function del_itlprod(id){
 //Agrega el autocomplete
 function autocod(id){
 	$('#codrut_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscalruta'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+encodeURIComponent(req.term),
+				data: {"q":req.term,'fecha':$('#fecha').val()},
 				success:
 					function(data){
 						var sugiere = [];
@@ -160,15 +165,16 @@ function autocod(id){
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 <table width='100%' style='font-size:11pt;background:#F2E69D;'>
 	<tr>
-		<td width='60'><b><?php echo $form->codigo->label;     ?></b></td>
-		<td width='70'><?php echo $form->codigo->output;    ?></td>
-		<td width='50' colspan='2'><?php echo $form->descrip->output; ?></td>
+		<td><b><?php echo $form->litros->label;      ?></b></td>
+		<td>   <?php echo $form->litros->output;     ?></td>
+		<td><b><?php echo $form->codigo->label;     ?></b><?php echo $form->codigo->output;    ?></td>
+		<td>   <?php echo $form->descrip->output; ?></td>
 	</tr>
 	<tr>
-		<td width='60'><b><?php echo $form->inventario->label;     ?></b></td>
-		<td width='70'><?php echo $form->inventario->output;    ?></td>
-		<td width='90'><b><?php echo $form->litros->label; ?></b></td>
-		<td width='50'><?php echo $form->litros->output; ?></td>
+		<td><b><?php echo $form->fecha->label;      ?></b></td>
+		<td>   <?php echo $form->fecha->output;     ?></td>
+		<td><b><?php echo $form->inventario->label;  ?></b></td>
+		<td>   <?php echo $form->inventario->output; ?></td>
 	</tr>
 </table>
 <div style='border: 1px solid #9AC8DA;background: #FAFAFA'>

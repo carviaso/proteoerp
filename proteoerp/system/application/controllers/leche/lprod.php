@@ -43,7 +43,7 @@ class Lprod extends Controller {
 		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir','label'=>'Reimprimir Documento'));
 
 		if($this->datasis->sidapuede('LCIERRE','INCLUIR%')){
-			$grid->wbotonadd(array('id'=>'bcierre', 'img'=>'images/candado.png'             ,'alt' => 'Cierre Producci&oacute;n','label'=>'Cierre Producci&oacute;n'));
+			$grid->wbotonadd(array('id'=>'bcierre', 'img'=>'images/candado.png' ,'alt' => 'Cierre Producci&oacute;n','label'=>'Cierre Producci&oacute;n'));
 		}
 		$WestPanel = $grid->deploywestp();
 
@@ -51,8 +51,8 @@ class Lprod extends Controller {
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array('id'=>'fedita' , 'title'=>'Agregar/Editar Pedido'),
-			array('id'=>'fshow'  , 'title'=>'Mostrar registro')
+			array('id'=>'fedita' , 'title'=>'Agregar/Editar Producci&oacute;n'),
+			array('id'=>'fshow'  , 'title'=>'Mostrar producci&oacute;n')
 		);
 
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
@@ -178,8 +178,6 @@ class Lprod extends Controller {
 						});
 					}
 				}
-
-
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
 			}
@@ -591,11 +589,12 @@ class Lprod extends Controller {
 		$edit->descrip->size =12;
 		$edit->descrip->maxlength =10;
 
-		//$edit->fecha = new dateField('Fecha','fecha');
-		//$edit->fecha->rule='chfecha|required';
-		//$edit->fecha->size =10;
-		//$edit->fecha->maxlength =8;
-		//$edit->fecha->calendar=false;
+		$edit->fecha = new dateField('Fecha','fecha');
+		$edit->fecha->rule='chfecha|required';
+		$edit->fecha->size =12;
+		$edit->fecha->insertValue=date('Y-m-d');
+		$edit->fecha->maxlength =8;
+		$edit->fecha->calendar=false;
 
 		$edit->inventario = new inputField('Leche de inventario','inventario');
 		$edit->inventario->rule='max_length[12]|numeric|required';
@@ -640,7 +639,7 @@ class Lprod extends Controller {
 
 		$edit->itlitros = new inputField('litros','itlitros_<#i#>');
 		$edit->itlitros->db_name = 'litros';
-		$edit->itlitros->rule='max_length[12]|numeric|mayorcero|callback_chlitros[<#i#>]';
+		$edit->itlitros->rule='max_length[12]|numeric|required|mayorcero|callback_chlitros[<#i#>]';
 		$edit->itlitros->css_class='inputnum';
 		$edit->itlitros->size =14;
 		$edit->itlitros->maxlength =12;
@@ -670,7 +669,7 @@ class Lprod extends Controller {
 	function chlitros($litros,$ind){
 		$litros = round($litros,2);
 		$ruta   = $this->input->post('codrut_'.$ind);
-		$fecha  = date('Y-m-d');
+		$fecha  = human_to_dbdate($this->input->post('fecha'));
 		$id     = $this->input->post('itid_'.$ind);
 		if(!empty($id)){
 			$ww='AND a.id <> '.$this->db->escape($id);
@@ -678,17 +677,20 @@ class Lprod extends Controller {
 			$ww='';
 		}
 
+		$this->validation->set_message('chlitros',$fecha);
+		return false;
+
 		$dbfecha= $this->db->escape($fecha);
 		$dbruta = $this->db->escape($ruta);
 
-		$usados = round($this->datasis->dameval("SELECT SUM(a.litros) FROM itlprod AS a JOIN lprod AS b ON a.id_lprod=b.id WHERE a.codrut=$dbruta AND b.fecha=$dbfecha $ww"),2);
-		$recibi = round($this->datasis->dameval("SELECT SUM(litros) FROM lrece   WHERE ruta=$dbruta AND fecha=$dbfecha"),2);
+		$usados = round($this->datasis->dameval("SELECT SUM(a.litros) FROM itlprod AS a JOIN lprod AS b ON a.id_lprod=b.id WHERE a.codrut=${dbruta} AND b.fecha=${dbfecha} ${ww}"),2);
+		$recibi = round($this->datasis->dameval("SELECT SUM(litros)   FROM lrece   WHERE ruta=${dbruta} AND fecha=${dbfecha}"),2);
 
 		$disponible = $recibi-$usados-$litros;
 		if ($disponible < 0){
 			if($recibi-$usados < 0) $disponible = 0; else $disponible = $recibi-$usados ;
 
-			$this->validation->set_message('chlitros',"No hay suficiente leche recibida de la ruta $ruta para producir, disponible: ".nformat(abs($disponible)));
+			$this->validation->set_message('chlitros',"No hay suficiente leche recibida de la ruta ${ruta} para producir, disponible: ".nformat(abs($disponible)));
 			return false;
 		}else{
 			return true;
@@ -717,7 +719,8 @@ class Lprod extends Controller {
 
 
 	function _pre_insert($do){
-		$do->set('fecha',date('Y-m-d'));
+		//$do->set('fecha',date('Y-m-d'));
+		$leche = $do->get('inventario');
 
 		$fecha  = $do->get('fecha');
 		$dbfecha= $this->db->escape($fecha);
@@ -735,6 +738,12 @@ class Lprod extends Controller {
 			if(empty($codrut)){
 				$do->rel_rm('itlprod',$i);
 			}
+			$leche += $do->get_rel('itlprod','itlitros' ,$i);
+		}
+
+		if($leche <= 0){
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'No puede tener una produccion sin leche como materia prima.';
+			return false;
 		}
 
 		return true;
