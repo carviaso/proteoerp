@@ -1263,7 +1263,7 @@ class Lrece extends Controller {
 		}else{
 			$dbfechai='CURDATE()';
 		}
-		$edit->transporte = new dropdownField('Transporte '.$fechai , 'transporte');
+		$edit->transporte = new dropdownField('Transporte', 'transporte');
 		$edit->transporte->option('','Seleccionar');
 		$edit->transporte->options("SELECT id, CONCAT(ruta, ' ', nombre) AS val FROM lrece WHERE fechal=${dbfechai} AND MID(ruta,1,1)='G' ORDER BY nombre");
 		$edit->transporte->rule  ='condi_required|callback_chtransporte';
