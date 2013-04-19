@@ -847,8 +847,8 @@ class Casi extends Controller {
 		$edit->on_save_redirect=false;
 		$edit->set_rel_title('itcasi','cuenta contables');
 
-		$edit->pre_process('insert' ,'_pre_insert');
-		$edit->pre_process('update' ,'_pre_update');
+		$edit->pre_process( 'insert','_pre_insert');
+		$edit->pre_process( 'update','_pre_update');
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('delete','_post_delete');
 		$edit->post_process('update','_post_update');
@@ -1891,16 +1891,18 @@ class Casi extends Controller {
 	}
 
 	function _pre_insert($do){
-		$cana=$do->count_rel('itcasi');
+
 		$comprob=$do->get('comprob');
 		$fecha  =$do->get('fecha');
 		$monto=$debe=$haber=0;
 
+		$cana=$do->count_rel('itcasi');
 		for($i=0;$i<$cana;$i++){ $o=$i+1;
-			$adebe =$do->get_rel('itcasi','debe',$i);
-			$ahaber=$do->get_rel('itcasi','haber' ,$i);
+			$adebe =$do->get_rel('itcasi','debe' ,$i);
+			$ahaber=$do->get_rel('itcasi','haber',$i);
 			$do->set_rel('itcasi','comprob',$comprob,$i);
 			$do->set_rel('itcasi','fecha'  ,$fecha  ,$i);
+
 
 			if ($adebe!=0 && $ahaber!=0){
 				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert']='No puede tener debe y haber en el asiento '.$o;
@@ -1939,16 +1941,24 @@ class Casi extends Controller {
 		$do->set('hora'   ,$hora);
 		$do->set('transac',$transac);
 
+		return false;
 		return true;
 	}
 
 	function _pre_update($do){
-		$cana=$do->count_rel('itcasi');
-		$monto=$debe=$haber=0;
+
+		$comprob= $do->get('comprob');
+		$fecha  = $do->get('fecha');
+		$cana   = $do->count_rel('itcasi');
+		$monto  = $debe=$haber=0;
 
 		for($i=0;$i<$cana;$i++){ $o=$i+1;
-			$adebe=$do->get_rel('itcasi','debe',$i);
-			$ahaber=$do->get_rel('itcasi','haber' ,$i);
+			$adebe = $do->get_rel('itcasi','debe',$i);
+			$ahaber= $do->get_rel('itcasi','haber' ,$i);
+
+			$do->set_rel('itcasi','comprob',$comprob,$i);
+			$do->set_rel('itcasi','fecha'  ,$fecha  ,$i);
+
 			if ($adebe!=0 && $ahaber!=0){
 				$do->error_message_ar['pre_upd'] = $do->error_message_ar['update']='No puede tener debe y haber en el asiento '.$o;
 				return false;
