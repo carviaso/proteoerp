@@ -42,7 +42,7 @@ $encabezado = <<<encabezado
 	<table style="width: 100%;" class="header">
 		<tr>
 			<td><h1 style="text-align: left">Pedido de cliente</h1></td>
-			<td><h1 style="text-align: right">Número: ${numero}</h1></td>
+			<td><h1 style="text-align: right">N&uacute;mero: ${numero}</h1></td>
 		</tr><tr>
 			<td>Cliente:<b>${cod_cli}</b></td>
 			<td>Fecha:  <b>${fecha}</b></td>
@@ -50,7 +50,7 @@ $encabezado = <<<encabezado
 			<td>Nombre: <b>${nombre}</b></td>
 			<td>Rif/CI: <b>${rifci}</b></td>
 		</tr><tr>
-			<td>Dirección: <b>${direccion}</b></td>
+			<td>Direcci&oacute;n: <b>${direccion}</b></td>
 			<td>Peso:      <b>${peso}</b></td>
 		</tr>
 	</table>
@@ -65,8 +65,8 @@ $encabezado_tabla=<<<encabezado_tabla
 	<table class="change_order_items">
 		<thead>
 			<tr>
-				<th ${estilo}'>Código</th>
-				<th ${estilo}'>Descripción</th>
+				<th ${estilo}'>C&oacute;digo</th>
+				<th ${estilo}'>Descripci&oacute;n</th>
 				<th ${estilo}'>Cantidad</th>
 				<th ${estilo}'>Precio</th>
 				<th ${estilo}'>Importe</th>
@@ -85,17 +85,17 @@ $pie_final=<<<piefinal
 			<tr>
 				<td  style="text-align: right;"></td>
 				<td colspan="2" style="text-align: right;"><b>Monto Total de la Base Imponible seg&uacute;n Alicuota :</b></td>
-				<td colspan="3" style="text-align: right;font-size:16px;font-weight:bold;" >${stotal}</td>
+				<td colspan="2" style="text-align: right;font-size:16px;font-weight:bold;" >${stotal}</td>
 			</tr>
 			<tr>
 				<td style="text-align: right;"></td>
 				<td colspan="2" style="text-align: right;"><b>Monto Total del Impuesto seg&uacute;n Alicuota:</b></td>
-				<td colspan="3" style="text-align: right;font-size:16px;font-weight:bold;">${impuesto}</td>
+				<td colspan="2" style="text-align: right;font-size:16px;font-weight:bold;">${impuesto}</td>
 			</tr>
 			<tr style='border-top: 1px solid;background:#AAAAAA;'>
 				<td style="text-align: right;"></td>
 				<td colspan="2" style="text-align: right;"><b>VALOR TOTAL:</b></td>
-				<td colspan="3" style="text-align: right;font-size:20px;font-weight:bold;">${gtotal}</td>
+				<td colspan="2" style="text-align: right;font-size:20px;font-weight:bold;">${gtotal}</td>
 			</tr>
 		</tfoot>
 
