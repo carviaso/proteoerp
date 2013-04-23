@@ -9,7 +9,7 @@ else:
 
 if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>';
 echo $form_scripts;
-echo $form_begin; 
+echo $form_begin;
 
 $atts = array(
   'width'      => '800',
@@ -36,7 +36,19 @@ $atts = array(
 					<td width="100" class="littletablerowth"><?php echo $form->fecha->label     ?></td>
 					<td width="100" class="littletablerow">  <?php echo $form->fecha->output    ?></td>
 					<td width="100" class="littletablerowth"><?php echo $form->pcontrol->label  ?></td>
-					<td width="100" class="littletablerow">  <?php echo (strlen($form->pcontrol->value)) ? anchor_popup('compras/scst/dataedit/show/'.$form->pcontrol->value,$form->pcontrol->value, $atts) : 'No cargado'; ?></td>
+					<td width="100" class="littletablerow">  <?php
+						if(empty($form->pcontrol->value)>0){
+							echo 'No cargados';
+						}else{
+							$id_scst=$this->datasis->dameval('SELECT id FROM scst WHERE control='.$this->db->escape());
+
+							if(!empty($id_scst)){
+								echo 'Eliminada';
+							}else{
+								echo anchor_popup('compras/scst/dataedit/show/'.$id_scst, $atts);
+							}
+						}
+						?></td>
 					<td width="119" class="littletablerowth"><?php echo $form->proveedor->label  ?></td>
 					<td             class="littletablerow">  <?php echo $form->proveedor->output?></td>
 				</tr><tr>
