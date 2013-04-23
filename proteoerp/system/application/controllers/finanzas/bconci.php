@@ -605,8 +605,8 @@ class Bconci extends Controller {
 		$edit->status->maxlength =1;
 
 		$edit->usuario = new autoUpdateField('usuario',$this->secu->usuario(),$this->secu->usuario());
-		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
-		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd')  , date('Ymd'));
+		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
 
 		$edit->build();
 
@@ -635,6 +635,38 @@ class Bconci extends Controller {
 			$conten['form'] =&  $edit;
 			$this->load->view('view_bconci', $conten);
 		}
+	}
+
+	function concilia(){
+		$id    = $this->input->post('id');
+		$fecha = $this->input->post('fecha');
+		$act   = $this->input->post('act');
+
+		$rt=array('status'=>'B');
+		echo json_encode($rt);
+		return true;
+		if($fecha !==false && $id !==false && $act !== false){
+			$dbid = $this->db->escape($id);
+			$act  = (bool) $act;
+
+			if($act){
+				$arr_fec  = explode('/',$fecha);
+				$concilia = date('Y-m-d', mktime(0, 0, 0,$arr_fec[0]+1, 0,$arr_fec[1]));
+				$dbconcilia = $this->db->escape($concilia);
+			}else{
+				$dbconcilia = 'NULL';
+			}
+
+			//$fconci = $this->datasis->dameval("SELECT concilia FROM bmov WHERE id = ${dbid}");
+
+			$mSQL = "UPDATE bmov SET concilia=${dbconcilia} WHERE id = ${dbid}";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban){
+				$rt['status'] = 'A';
+			}
+		}
+
+		echo json_encode($rt);
 	}
 
 	function _pre_insert($do){

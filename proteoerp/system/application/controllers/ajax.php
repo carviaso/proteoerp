@@ -624,12 +624,11 @@ class Ajax extends Controller {
 			$dbmid = $this->db->escape($mid);
 			$retArray = $retorno = array();
 
-			$mSQL="SELECT id,numero, tipo_op AS tipo, fecha, monto
+			$mSQL="SELECT id,numero, tipo_op AS tipo, fecha, monto,concilia
 			FROM bmov
 			WHERE codbanc=${dbmid} AND anulado<>'S' AND liable<>'N'
 			AND fecha <= ${dbfecha}
 			AND (concilia='0000-00-00' OR concilia IS NULL OR concilia=${dbfecha})
-			AND concilia < fecha
 			ORDER BY fecha, numero";
 
 			$query = $this->db->query($mSQL);
@@ -642,6 +641,7 @@ class Ajax extends Controller {
 					$retArray['tipo']    = $row['tipo'];
 					$retArray['fecha']   = $objdate->format('d/m/Y');
 					$retArray['monto']   = $row['monto'];
+					$retArray['concilia']= (empty($row['concilia']) || $row['concilia']=='0000-00-00')? false : true;
 
 					array_push($retorno, $retArray);
 				}

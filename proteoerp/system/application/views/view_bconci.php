@@ -11,7 +11,7 @@ $scampos .='<td class="littletablerow" align="center"><span id="itfecha_<#i#>_va
 $scampos .='<td class="littletablerow" align="left"  ><span id="ittipo_<#i#>_val"   ></span></td>';
 $scampos .='<td class="littletablerow" align="left"  ><span id="itnumero_<#i#>_val" ></span><input type="hidden" name="ittipo_<#i#>" id="ittipo_<#i#>"></td>';
 $scampos .='<td class="littletablerow" align="right" ><span id="itmonto_<#i#>_val"  ></span><input type="hidden" name="itmonto_<#i#>" id="itmonto_<#i#>"></td>';
-$scampos .='<td class="littletablerow" align="center"><input type="checkbox" name="itid_<#i#>" id="itid_<#i#>" onchange="totalizar()"></td>';
+$scampos .='<td class="littletablerow" align="center"><input type="checkbox" name="itid_<#i#>" id="itid_<#i#>" onchange="totalizar(0)"></td>';
 $scampos .='</tr>';
 $campos=$form->js_escape($scampos);
 
@@ -102,6 +102,43 @@ function cambiaban(){
 							cana ++;
 						}
 					);
+					totalizar(0);
+				},
+		});
+	}
+}
+
+function actualizalist(){
+	var codban=$('#codbanc').val();
+	var fecha =$('#fecha').val();
+	if(codbanc!='' && fecha!=''){
+
+		//Eliminas las no tildadas
+		var lista = jQuery("#tliable").getDataIDs();
+		for(i=0;i<lista.length;i++){
+			//rowData = jQuery("#tliable").getRowData(lista[i]);
+			if(!$('#itid_'+lista[i]).is(':checked')){
+				jQuery("#tliable").delRowData(lista[i]);
+			}
+		}
+		//fin de la eliminacion de las no tildadas
+
+		$.ajax({
+			url: "<?php echo site_url('ajax/buscaconci'); ?>",
+			dataType: "json",
+			type: "POST",
+			data: {"codbanc" : codban , "fecha": fecha},
+			success: function(data){
+					var cana = 0;
+					$.each(data,
+						function(id, val){
+							//val.rowid = id;
+							if(jQuery.isEmptyObject(jQuery("#tliable").jqGrid('getRowData', val.id))){
+								jQuery("#tliable").jqGrid("addRowData",val.id,val);
+							}
+						}
+					);
+					totalizar(0);
 				},
 		});
 	}
@@ -161,9 +198,26 @@ function del_itbmov(id){
 }
 
 function totalizar(id){
-	//indexes = jQuery("#tliable").jqGrid('getGridParam', '_index');
-	//alert(indexes[id]);
-	jQuery("#tliable").jqGrid('getLocalRow', id).concilia = ! jQuery("#tliable").jqGrid('getLocalRow', id).concilia;
+
+	if(id>0){
+		//Realiza lo marca de conciliado
+		var fecha =$('#fecha').val();
+		$.ajax({
+			url: "<?php echo site_url('finanzas/bconci/concilia'); ?>",
+			dataType: "json",
+			type: "POST",
+			data: {"id" : id ,"fecha": fecha, act : $('#itid_'+id).is(':checked')},
+			success: function(data){
+				if(data.status=='A'){
+					jQuery("#tliable").jqGrid('getLocalRow', id).concilia = ! jQuery("#tliable").jqGrid('getLocalRow', id).concilia;
+				}else{
+					$('#itid_'+id).attr("checked", !$('#itid_'+id).attr("checked"));
+				}
+			}
+		}).fail(function() { $('#itid_'+id).attr("checked", !$('#itid_'+id).attr("checked")); });
+		//fin de la marca
+	}
+
 	var total = 0;
 	var arr=$('input[name^="itid_"]');
 	jQuery.each(arr, function() {
@@ -193,7 +247,7 @@ function totalizar(id){
 <table width='100%' style='font-size:11pt;background:#F2E69D;'>
 	<tr>
 		<td><b><?php echo $form->codbanc->label;     ?></b></td>
-		<td colspan='3'><?php echo $form->codbanc->output;    ?></td>
+		<td colspan='3'><?php echo $form->codbanc->output;  ?><a href='#' onclick='actualizalist();return false;'>Actualizar</a></td>
 	</tr>
 	<tr>
 		<td><b><?php echo $form->fecha->label;     ?></b></td>

@@ -163,7 +163,7 @@ class notifica extends controller {
 		$filter->buttons('reset','search');
 		$filter->build();
 
-		$grid = new DataGrid('Cheques emitidos');
+		$grid = new DataGrid('Eventos programados');
 		$grid->per_page = 10;
 
 		$uri = anchor('sincro/notifica/dataediteventos/show/<#id#>','<#nombre#>');

@@ -651,7 +651,9 @@ class Lcierre extends Controller {
 		$id     = $this->input->post('id');
 		$data   = $_POST;
 		$check  = 0;
-		$status = $this->datasis->dameval('SELECT a.status FROM lcierre AS a JOIN itlcierre AS b ON b.id='.$this->db->escape($id));
+		$mSQL = 'SELECT a.status FROM lcierre AS a JOIN itlcierre AS b ON a.id=b.id_lcierre WHERE  b.id='.$this->db->escape($id);
+		$status = $this->datasis->dameval($mSQL);
+		echo $mSQL;
 		if($status=='C'){
 			echo 'Registro ya fue cerrado';
 			return false;
