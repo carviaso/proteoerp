@@ -40,12 +40,12 @@ $atts = array(
 						if(empty($form->pcontrol->value)>0){
 							echo 'No cargados';
 						}else{
-							$id_scst=$this->datasis->dameval('SELECT id FROM scst WHERE control='.$this->db->escape($control));
+							$id_scst=$this->datasis->dameval('SELECT id FROM scst WHERE control='.$this->db->escape($form->pcontrol->value));
 
 							if(!empty($id_scst)){
 								echo 'Eliminada';
 							}else{
-								echo anchor_popup('compras/scst/dataedit/show/'.$id_scst, $atts);
+								echo anchor_popup('compras/scst/dataedit/show/'.$id_scst,$form->pcontrol->value, $atts);
 							}
 						}
 						?></td>
