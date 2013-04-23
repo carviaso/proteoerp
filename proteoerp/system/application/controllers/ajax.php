@@ -609,6 +609,7 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
 	//Busca los efectos para ser conciliados
 	function buscaconci(){
 		$mid  = $this->input->post('codbanc');
@@ -650,7 +651,8 @@ class Ajax extends Controller {
 		}
 		echo $data;
 	}
-
+	
+	//******************************************************************
 	//Busca icon
 	function buscaicon(){
 		$comodin= $this->datasis->traevalor('COMODIN');

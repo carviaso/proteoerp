@@ -1897,10 +1897,9 @@ function chrif(rif){
 		if($this->genesal){
 			$edit->build();
 
-			$style = '
-<style type="text/css">
-.maintabcontainer {width: 780px; margin: 5px auto;}
-</style>';
+			$style  = '<style type="text/css">'."\n";
+			$style .= '\t.maintabcontainer {width: 780px; margin: 5px auto;}'."\n";
+			$style .= '</style>'."\n";
 
 			$conten['form']   =&  $edit;
 			$conten['script'] = $script;

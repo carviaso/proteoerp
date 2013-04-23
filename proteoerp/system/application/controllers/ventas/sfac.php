@@ -3217,7 +3217,7 @@ class Sfac extends Controller {
 				$sobretasa+=$iva;
 				$monadic  +=$itimporte;
 			}else{
-				$exento+=$itimporte;
+				$exento += $itimporte;
 			}
 
 			$totalg    +=$itimporte+$iva;
@@ -3250,8 +3250,8 @@ class Sfac extends Controller {
 		}
 
 		//Calcula el credito
-		$cana=$do->count_rel('sfpa');
-		$credito=0;
+		$cana    = $do->count_rel('sfpa');
+		$credito = 0;
 		for($i=0;$i<$cana;$i++){
 			$sfpa_tipo = $do->get_rel('sfpa','tipo',$i);
 			$sfpa_monto= $do->get_rel('sfpa','monto',$i);

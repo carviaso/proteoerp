@@ -18,11 +18,6 @@ class gser extends Controller {
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('gser','id') ) {
-			$this->db->simple_query('ALTER TABLE gser DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE gser ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE gser ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
 		$this->datasis->modintramenu( 990, 700, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -49,8 +44,6 @@ class gser extends Controller {
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
-
-
 
 		$WpAdic = "
 		<tr><td><div class=\"tema1\"><table id=\"bpos1\"></table></div><div id='pbpos1'></div></td></tr>\n

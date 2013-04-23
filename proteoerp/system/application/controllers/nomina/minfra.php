@@ -179,4 +179,50 @@ class Minfra extends Controller {
 		$name = $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4).'.txt';
 		force_download($name,$line);
 	}
+
+
+
+	function islrtxt($fechad='',$fechah=''){
+		$this->load->dbutil();
+		$dbfechad=$this->db->escape($fechad);
+		$dbfechah=$this->db->escape($fechah);
+
+		$mSQL="SELECT a.codigo, a.monto, 
+			SUM(a.valor*(a.concepto IN ('010' ))) sueldo,
+			SUM(a.valor*(a.concepto IN ('920' ))) retencion, 
+			'N/A' control, 0.00 reten,
+			a.fecha, a.contrato, d.nombre contnom, '0000000000' factura, '001' codcon,
+			CONCAT(b.nacional,b.cedula) cedula , 0 AS ingreso,DATE_FORMAT(b.retiro,'%d%m%Y')AS retiro 
+		FROM (nomina a) JOIN pers as b ON a.codigo=b.codigo 
+			JOIN conc as c ON a.concepto=c.concepto 
+			LEFT JOIN noco d ON a.contrato=d.codigo 
+		WHERE a.valor<>0 AND a.fecha >= $dbfechad AND a.fecha <= $dbfechah 
+		GROUP BY EXTRACT( YEAR_MONTH FROM a.fecha ), a.codigo"; 
+
+		$query=$this->db->query($mSQL);
+		$line=$error='';
+		if ($query->num_rows() > 0){
+
+			$line .= '<?xml version="1.0" encoding="ISO-8859-1"?>';
+			$line .= "\r\n";
+			$line .= '<RelacionRetencionesISLR RifAgente="'.$this->datasis->traevalor('RIF').'" Periodo="'.substr($fechad,0,6).'">';
+			$line .= "\r\n";
+
+			$rem=array('.','-');
+			foreach($query->result_array() as $row){
+				$line .= "\t".'<DetalleRetencion>'."\r\n";
+				$line .= "\t\t".'<RifRetenido>'.$row['cedula'].'</RifRetenido>'."\r\n";
+				$line .= "\t\t".'<NumeroFactura>'.$row['factura'].'</NumeroFactura>'."\r\n";
+				$line .= "\t\t".'<NumeroControl>'.$row['control'].'</NumeroControl>'."\r\n";
+				$line .= "\t\t".'<CodigoConcepto>'.$row['codcon'].'</CodigoConcepto>'."\r\n";
+				$line .= "\t\t".'<MontoOperacion>'.$row['sueldo'].'</MontoOperacion>'."\r\n";
+				$line .= "\t\t".'<PorcentajeRetencion>'.$row['reten'].'</PorcentajeRetencion>'."\r\n";
+				$line .= "\t".'<DetalleRetencion>'."\r\n";
+			}
+		}
+		$name = 'relislr.txt';
+		force_download($name,$line);
+	}
+
+
 }

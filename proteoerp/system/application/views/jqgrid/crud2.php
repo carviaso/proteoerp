@@ -183,6 +183,8 @@ echo style('jquery.ui.selectmenu.css');
 echo "\n";
 echo script('plugins/jquery.numeric.pack.js');
 echo script('plugins/jquery.floatnumber.js');
+echo script('plugins/jquery.maskedinput.min.js');
+
 echo "\n";
 if ( isset($jquerys) ) {
 	foreach( $jquerys as $jq ){ echo script($jq); }
