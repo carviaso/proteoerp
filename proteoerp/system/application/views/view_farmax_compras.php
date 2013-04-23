@@ -40,7 +40,7 @@ $atts = array(
 						if(empty($form->pcontrol->value)>0){
 							echo 'No cargados';
 						}else{
-							$id_scst=$this->datasis->dameval('SELECT id FROM scst WHERE control='.$this->db->escape());
+							$id_scst=$this->datasis->dameval('SELECT id FROM scst WHERE control='.$this->db->escape($control));
 
 							if(!empty($id_scst)){
 								echo 'Eliminada';
