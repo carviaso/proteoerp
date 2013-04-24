@@ -1,20 +1,19 @@
 <?php
-class Tbofici extends Controller {
-	var $mModulo = 'TBOFICI';
-	var $titp    = 'OFICINAS';
-	var $tits    = 'Modulo TBOFICI';
-	var $url     = 'pasajes/tbofici/';
+class Tbgastos extends Controller {
+	var $mModulo = 'TBGASTOS';
+	var $titp    = 'GASTOS DE LIQUIDACION';
+	var $tits    = 'GASTOS DE LIQUIDACION';
+	var $url     = 'pasajes/tbgastos/';
 
-	function Tbofici(){
+	function Tbgastos(){
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		$this->datasis->modulo_nombre( 'TBOFICI', $ventana=0 );
+		$this->datasis->modulo_nombre( 'TBGASTOS', $ventana=0 );
 	}
 
 	function index(){
-		$this->datasis->creaintramenu(array('modulo'=>'161','titulo'=>'Oficinas','mensaje'=>'Oficinas','panel'=>'PASAJES','ejecutar'=>'pasajes/tbofici','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
-		$this->instalar();
+		$this->datasis->creaintramenu(array('modulo'=>'167','titulo'=>'Gastos ','mensaje'=>'Gastos','panel'=>'PASAJES','ejecutar'=>'1','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -45,8 +44,8 @@ class Tbofici extends Controller {
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
 		$param['SouthPanel']  = $SouthPanel;
-		$param['listados']    = $this->datasis->listados('TBOFICI', 'JQ');
-		$param['otros']       = $this->datasis->otros('TBOFICI', 'JQ');
+		$param['listados']    = $this->datasis->listados('TBGASTOS', 'JQ');
+		$param['otros']       = $this->datasis->otros('TBGASTOS', 'JQ');
 		$param['temas']       = array('proteo','darkness','anexos1');
 		$param['bodyscript']  = $bodyscript;
 		$param['tabs']        = false;
@@ -62,7 +61,7 @@ class Tbofici extends Controller {
 		$bodyscript = '		<script type="text/javascript">';
 
 		$bodyscript .= '
-		function tboficiadd(){
+		function tbgastosadd(){
 			$.post("'.site_url($this->url.'dataedit/create').'",
 			function(data){
 				$("#fedita").html(data);
@@ -71,7 +70,7 @@ class Tbofici extends Controller {
 		};';
 
 		$bodyscript .= '
-		function tboficiedit(){
+		function tbgastosedit(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
@@ -86,7 +85,7 @@ class Tbofici extends Controller {
 		};';
 
 		$bodyscript .= '
-		function tboficishow(){
+		function tbgastosshow(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
@@ -101,7 +100,7 @@ class Tbofici extends Controller {
 		};';
 
 		$bodyscript .= '
-		function tboficidel() {
+		function tbgastosdel() {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				if(confirm(" Seguro desea eliminar el registro?")){
@@ -142,7 +141,7 @@ class Tbofici extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 350, width: 500, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -159,7 +158,7 @@ class Tbofici extends Controller {
 									apprise("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/TBOFICI').'/\'+res.id+\'/id\'').';
+									'.$this->datasis->jwinopen(site_url('formatos/ver/TBGASTOS').'/\'+res.id+\'/id\'').';
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -227,9 +226,10 @@ class Tbofici extends Controller {
 
 		$grid  = new $this->jqdatagrid;
 
-		$grid->addField('codofi');
+		$grid->addField('codgas');
 		$grid->label('Codigo');
 		$grid->params(array(
+			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 50,
@@ -239,99 +239,103 @@ class Tbofici extends Controller {
 		));
 
 
-		$grid->addField('desofi');
-		$grid->label('Descripcion');
+		$grid->addField('nomgas');
+		$grid->label('Nombre');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 200,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:100, maxlength: 100 }',
+			'editoptions'   => '{ size:60, maxlength: 60 }',
 		));
 
 
-		$grid->addField('dirofi');
-		$grid->label('Dirección');
+		$grid->addField('ref_liq');
+		$grid->label('Liquid.');
 		$grid->params(array(
+			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 50,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:100, maxlength: 100 }',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
 
 
-		$grid->addField('telofi');
-		$grid->label('Tel Oficina');
+		$grid->addField('ref_cua');
+		$grid->label('Cuadre');
 		$grid->params(array(
+			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 50,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:50, maxlength: 50 }',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
 
 
-		$grid->addField('gereofi');
-		$grid->label('Gerente');
+		$grid->addField('var_bus');
+		$grid->label('Variable');
 		$grid->params(array(
+			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 50,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:50, maxlength: 50 }',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
 
 
-		$grid->addField('telegofi');
-		$grid->label('Tel Gerente');
+		$grid->addField('moddes');
+		$grid->label('Tipo');
 		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:50, maxlength: 50 }',
-		));
-
-
-		$grid->addField('estado');
-		$grid->label('Estado');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:50, maxlength: 50 }',
-		));
-
-
-		$grid->addField('zona');
-		$grid->label('Zona');
-		$grid->params(array(
+			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 40,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:4, maxlength: 4 }',
+			'editoptions'   => '{ size:60, maxlength: 60 }',
 		));
 
-/*
+		$grid->addField('mondes');
+		$grid->label('Valor');
+		$grid->params(array(
+			'align'         => "'right'",
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 50,
+			'edittype'      => "'text'",
+		));
+
+
+		$grid->addField('opcmod');
+		$grid->label('Mod.');
+		$grid->params(array(
+			'align'         => "'center'",
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
+		));
+
+
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
+			'hidden'        => 'true',
 			'align'         => "'center'",
 			'frozen'        => 'true',
 			'width'         => 40,
 			'editable'      => 'false',
 			'search'        => 'false'
-		));*/
+		));
 
 
 		$grid->showpager(true);
@@ -346,14 +350,14 @@ class Tbofici extends Controller {
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(    $this->datasis->sidapuede('TBOFICI','INCLUIR%' ));
-		$grid->setEdit(   $this->datasis->sidapuede('TBOFICI','MODIFICA%'));
-		$grid->setDelete( $this->datasis->sidapuede('TBOFICI','BORR_REG%'));
-		$grid->setSearch( $this->datasis->sidapuede('TBOFICI','BUSQUEDA%'));
+		$grid->setAdd(    $this->datasis->sidapuede('TBGASTOS','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('TBGASTOS','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('TBGASTOS','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('TBGASTOS','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: tboficiadd, editfunc: tboficiedit, delfunc: tboficidel, viewfunc: tboficishow");
+		$grid->setBarOptions("addfunc: tbgastosadd, editfunc: tbgastosedit, delfunc: tbgastosdel, viewfunc: tbgastosshow");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -375,9 +379,9 @@ class Tbofici extends Controller {
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
-		$mWHERE = $grid->geneTopWhere('tbofici');
+		$mWHERE = $grid->geneTopWhere('tbgastos');
 
-		$response   = $grid->getData('tbofici', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('tbgastos', array(array()), array(), false, $mWHERE, 'codgas' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -397,12 +401,12 @@ class Tbofici extends Controller {
 		unset($data['id']);
 		if($oper == 'add'){
 			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM tbofici WHERE $mcodp=".$this->db->escape($data[$mcodp]));
+				$check = $this->datasis->dameval("SELECT count(*) FROM tbgastos WHERE $mcodp=".$this->db->escape($data[$mcodp]));
 				if ( $check == 0 ){
-					$this->db->insert('tbofici', $data);
+					$this->db->insert('tbgastos', $data);
 					echo "Registro Agregado";
 
-					logusu('TBOFICI',"Registro ????? INCLUIDO");
+					logusu('TBGASTOS',"Registro ????? INCLUIDO");
 				} else
 					echo "Ya existe un registro con ese $mcodp";
 			} else
@@ -410,31 +414,31 @@ class Tbofici extends Controller {
 
 		} elseif($oper == 'edit') {
 			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM tbofici WHERE id=$id");
+			$anterior = $this->datasis->dameval("SELECT $mcodp FROM tbgastos WHERE id=$id");
 			if ( $nuevo <> $anterior ){
 				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM tbofici WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE tbofici SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
+				$this->db->query("DELETE FROM tbgastos WHERE $mcodp=?", array($mcodp));
+				$this->db->query("UPDATE tbgastos SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
 				$this->db->where("id", $id);
-				$this->db->update("tbofici", $data);
-				logusu('TBOFICI',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
+				$this->db->update("tbgastos", $data);
+				logusu('TBGASTOS',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
 				echo "Grupo Cambiado/Fusionado en clientes";
 			} else {
 				unset($data[$mcodp]);
 				$this->db->where("id", $id);
-				$this->db->update('tbofici', $data);
-				logusu('TBOFICI',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+				$this->db->update('tbgastos', $data);
+				logusu('TBGASTOS',"Grupo de Cliente  ".$nuevo." MODIFICADO");
 				echo "$mcodp Modificado";
 			}
 
 		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM tbofici WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM tbofici WHERE id='$id' ");
+			$meco = $this->datasis->dameval("SELECT $mcodp FROM tbgastos WHERE id=$id");
+			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM tbgastos WHERE id='$id' ");
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
-				$this->db->simple_query("DELETE FROM tbofici WHERE id=$id ");
-				logusu('TBOFICI',"Registro ????? ELIMINADO");
+				$this->db->simple_query("DELETE FROM tbgastos WHERE id=$id ");
+				logusu('TBGASTOS',"Registro ????? ELIMINADO");
 				echo "Registro Eliminado";
 			}
 		};
@@ -448,7 +452,7 @@ class Tbofici extends Controller {
 		});
 		';
 
-		$edit = new DataEdit($this->tits, 'tbofici');
+		$edit = new DataEdit('', 'tbgastos');
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -474,48 +478,37 @@ class Tbofici extends Controller {
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
 
-		$edit->codofi = new inputField('Codigo','codofi');
-		$edit->codofi->rule='';
-		$edit->codofi->size =7;
-		$edit->codofi->maxlength =5;
-		$edit->codofi->mode = "autohide";
+		$edit->codgas = new inputField('Codigo','codgas');
+		$edit->codgas->rule='';
+		$edit->codgas->size =6;
+		$edit->codgas->maxlength =5;
+		$edit->codgas->mode = 'autohide';
 
-		$edit->desofi = new inputField('Descripción','desofi');
-		$edit->desofi->rule='';
-		$edit->desofi->size =50;
-		$edit->desofi->maxlength =100;
+		$edit->nomgas = new inputField('Nombre','nomgas');
+		$edit->nomgas->rule='';
+		$edit->nomgas->size =32;
+		$edit->nomgas->maxlength =80;
 
-		$edit->dirofi = new inputField('Dirección','dirofi');
-		$edit->dirofi->rule='';
-		$edit->dirofi->size =50;
-		$edit->dirofi->maxlength =100;
+		$edit->ref_liq = new checkboxField('Liquidacion','ref_liq','S','N');
 
-		$edit->telofi = new textareaField('Tel Oficina','telofi');
-		$edit->telofi->rule='trim';
-		$edit->telofi->cols =47;
-		$edit->telofi->rows =2;
-		$edit->telofi->maxlength =50;
+		$edit->ref_cua = new checkboxField('Cuadre','ref_cua','S','N');
 
-		$edit->gereofi = new inputField('Gerente','gereofi');
-		$edit->gereofi->rule='';
-		$edit->gereofi->size =50;
-		$edit->gereofi->maxlength =50;
+		$edit->var_bus = new checkboxField('Variable','var_bus','S','N');
 
-		$edit->telegofi = new inputField('Tel Gerente','telegofi');
-		$edit->telegofi->rule='';
-		$edit->telegofi->size =50;
-		$edit->telegofi->maxlength =50;
+		$edit->moddes = new dropdownField('Tipo','moddes');
+		$edit->moddes->option("1","% Descuento");
+		$edit->moddes->option("2","Monto Fijo");
+		$edit->moddes->option("3","Por Pasaje");
+		$edit->moddes->option("4","Por Ruta");
+		$edit->moddes->style='width:100px;';
 
-		$edit->estado = new inputField('Estado','estado');
-		$edit->estado->rule='';
-		$edit->estado->size =50;
-		$edit->estado->maxlength =50;
+		$edit->mondes = new inputField('Valor','mondes');
+		$edit->mondes->css_class='inputnum';
+		$edit->mondes->rule='';
+		$edit->mondes->size =10;
+		$edit->mondes->maxlength =8;
 
-		$edit->zona = new dropdownField('Zona','zona');
-		$edit->zona->rule='required';
-		$edit->zona->options('select codigo, CONCAT(codigo, " ", nombre) nombre FROM zona ORDER BY codigo');
-		//$edit->zona->size =6;
-		//$edit->zona->maxlength =4;
+		$edit->opcmod = new checkboxField('Modificable','opcmod','1','0');
 
 		$edit->build();
 
@@ -543,7 +536,7 @@ class Tbofici extends Controller {
 
 	function _pre_delete($do){
 		$do->error_message_ar['pre_del']='';
-		return true;
+		return false;
 	}
 
 	function _post_insert($do){
@@ -562,23 +555,24 @@ class Tbofici extends Controller {
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('tbofici')) {
-			$mSQL="CREATE TABLE `tbofici` (
-			  `codofi` varchar(5) NOT NULL DEFAULT '',
-			  `desofi` varchar(100) DEFAULT '',
-			  `dirofi` varchar(100) DEFAULT NULL,
-			  `telofi` varchar(50) DEFAULT NULL,
-			  `gereofi` varchar(50) DEFAULT NULL,
-			  `telegofi` varchar(50) DEFAULT NULL,
-			  `estado` varchar(50) DEFAULT NULL,
-			  `zona` varchar(4) DEFAULT NULL,
+		if (!$this->db->table_exists('tbgastos')) {
+			$mSQL="CREATE TABLE `tbgastos` (
+			  `codgas` varchar(5) NOT NULL DEFAULT '',
+			  `nomgas` varchar(60) DEFAULT '',
+			  `ref_liq` char(1) DEFAULT '',
+			  `ref_cua` char(1) DEFAULT '',
+			  `var_bus` char(1) DEFAULT '',
+			  `moddes` varchar(60) DEFAULT '0',
+			  `mondes` double DEFAULT '0',
+			  `opcmod` varchar(1) DEFAULT NULL,
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
 			  PRIMARY KEY (`id`),
-			  UNIQUE KEY `codofi` (`codofi`)
-			) ENGINE=MyISAM AUTO_INCREMENT=132 DEFAULT CHARSET=latin1";
+			  UNIQUE KEY `codgas` (`codgas`),
+			  KEY `ref_cua` (`ref_cua`)
+			) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('tbofici');
+		//$campos=$this->db->list_fields('tbgastos');
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }

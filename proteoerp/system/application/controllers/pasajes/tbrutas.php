@@ -50,9 +50,9 @@ class Tbrutas extends Controller {
 */
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"agregad",   "img"=>"images/pdf_logo.gif",  "alt" => "Agrega Destino",   "label"=>"Agrega Destino", "tema"=>'anexos'));
-		$grid->wbotonadd(array("id"=>"modifid",   "img"=>"images/pdf_logo.gif",  "alt" => "Modifica Destino", "label"=>"Modifica Destino", "tema"=>'anexos'));
-		$grid->wbotonadd(array("id"=>"elimind",   "img"=>"images/pdf_logo.gif",  "alt" => "Elimina Destino",  "label"=>"Elimina Destino", "tema"=>'anexos'));
+		$grid->wbotonadd(array("id"=>"agregad",   "img"=>"images/agrega4.png",  "alt" => "Agrega Destino",   "label"=>"Agrega Destino", "tema"=>'anexos'));
+		$grid->wbotonadd(array("id"=>"modifid",   "img"=>"images/editar.png",  "alt" => "Modifica Destino", "label"=>"Modifica Destino", "tema"=>'anexos'));
+		$grid->wbotonadd(array("id"=>"elimind",   "img"=>"images/delete.png",  "alt" => "Elimina Destino",  "label"=>"Elimina Destino", "tema"=>'anexos'));
 
 		$WestPanel = $grid->deploywestp();
 
@@ -78,9 +78,9 @@ class Tbrutas extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	// Funciones de los Botones
+	//
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '		<script type="text/javascript">';
 
@@ -150,83 +150,36 @@ class Tbrutas extends Controller {
 			}
 		};';
 
-/*
-		$bodyscript .= '
-		var mcome1 = "<h1>Generar Pre-Nomina</h1>"+
-			"<center><p>Seleccione el Contrato:</p>"+"'.$noco.'</center><br>"+
-			"<table align=\'center\'>"+
-			"<tr><td>Fecha de Corte: </td><td><input id=\'mfechac\' name=\'mfechac\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
-			"<tr><td>Fecha de Pago:  </td><td><input id=\'mfechap\' name=\'mfechap\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
-			"</table>"
-		;
-		var mprepanom = 
-		{
-			state0: {
-				html: mcome1,
-				buttons: { Generar: true, Cancelar: false },
-				submit: function(e,v,m,f){
-					mnuevo = f.mcodigo;
-					if (v) {
-						$.post("'.site_url('nomina/prenom/geneprenom').'/", { contrato: f.mcontrato, fechac: f.mfechac, fechap: f.mfechac }, 
-							function(data){
-								$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
-								$.prompt.goToState(\'state1\');
-								$("#newapi'.$grid0.'").trigger("reloadGrid");
-						});
-						return false;
-					} 
-				}
-			},
-			state1: { 
-				html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
-				focus: 1,
-				buttons: { Ok:true }
-			}		
-		};
-		$("#genepre").click( function() 
-		{
-			$.prompt(mprepanom);
-			$("#mfechac").datepicker({dateFormat:"dd/mm/yy"});
-			$("#mfechap").datepicker({dateFormat:"dd/mm/yy"});
-		});
-		';
-*/
 
 		$noco = $this->datasis->llenaopciones("SELECT codofi, CONCAT(codofi,' ', desofi) FROM tbofici ORDER BY codofi", false, 'moficina');
 		$noco = str_replace('"',"'",$noco);
 
 
-		//
+		// Modificar Destino
 		$bodyscript .= '
 		jQuery("#modifid").click( function(){
 			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
+			var chec = \'\';
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid1.'").jqGrid(\'getRowData\',id);
-				$.prompt(mprepanom);
-			} else { $.prompt("<h1>Por favor Seleccione un Destino</h1>");}
-		});';
-
-		//Agrgaga destinos
-		$bodyscript .= '
-		jQuery("#agregad").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if ( ret.mostrar == \'S\' ){
+					chec = \'checked\';
+				}
 				var mcome1 = "<h1>Destinos</h1>"+
 					"<table align=\'center\'>"+
-					"<tr><td>Oficina:</tdtd><td colspan=\'3\'>"+"'.$noco.'</td></tr>"+
-					"<tr><td>Hora: </td><td><input               id=\'mhora\'    name=\'mhora\'    size=\'6\' class=\'input\' value=\'\'></td>"+
-					"<td align=\'right\'>Mostrar:  </td><td align=\'left\'><input type=\'checkbox\' id=\'mmostrar\' name=\'mmostrar\' class=\'input\' value=\'S\'></td></tr>"+
+					"<tr><td>Hora: </td><td><input id=\'mhora\'  name=\'mhora\'  size=\'6\' class=\'input\' value=\'"+ret.hora+"\'></td>"+
+					"<tr><td>Orden:</td><td><input id=\'morden\' name=\'morden\' size=\'6\' class=\'input\' value=\'"+ret.orden+"\'></td>"+
+					"<td align=\'right\'>Mostrar:</td><td align=\'left\'><input type=\'checkbox\' id=\'mmostrar\' name=\'mmostrar\' class=\'input\' value=\'S\' "+chec+" ></td></tr>"+
 					"</table>";
 				var mprepanom = 
 				{
 					state0: {
 						html: mcome1,
-						buttons: { Generar: true, Cancelar: false },
+						buttons: { Guardar: true, Cancelar: false },
 						submit: function(e,v,m,f){
 							moficina = f.moficina;
 							if (v) {
-								$.post("'.site_url('pasajes/tbrutas/destiadd').'/", { oficina: f.moficina, hora: f.mhora, mostrar: f.mmostrar, mid: id }, 
+								$.post("'.site_url('pasajes/tbrutas/destino').'/", { hora: f.mhora, mostrar: f.mmostrar, orden: f.morden, mid: id, oper: \'Edit\' }, 
 									function(data){
 										$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
 										$.prompt.goToState(\'state1\');
@@ -249,14 +202,70 @@ class Tbrutas extends Controller {
 		});';
 
 
-/*
-				$.post("'.site_url('finanzas/mgas/dataedit/create').'",
-				function(data){
-					$("#fgasto").html(data);
-					$("#fgasto").dialog({height: 400, width: 700, title: "Agregar Gasto"});
-					$("#fgasto").dialog( "open" );
-				});
-*/
+		// Eliminar Destino
+		$bodyscript .= '
+		jQuery("#elimind").click( function(){
+			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid1.'").jqGrid(\'getRowData\',id);
+				$.prompt("<h1>Eliminar Destino Seleccionado</h1>", {
+					buttons: { Eliminar: true, Salir: false },
+					callback: function(e,v,m,f){
+						if (v) {
+							$.post("'.site_url('pasajes/tbrutas/destino').'/", { mid: id, oper: \'Del\' }, 
+								function(data){
+									//$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
+									//$.prompt.goToState(\'state1\');
+									$("#newapi'.$grid1.'").trigger("reloadGrid");
+								});
+							};
+						}
+					})
+			} else { $.prompt("<h1>Por favor Seleccione un Destino</h1>");}
+		});';
+
+
+		// Agrgaga Destinos
+		$bodyscript .= '
+		jQuery("#agregad").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var mcome1 = "<h1>Destinos</h1>"+
+					"<table align=\'center\'>"+
+					"<tr><td>Oficina:</tdtd><td colspan=\'3\'>"+"'.$noco.'</td></tr>"+
+					"<tr><td>Hora: </td><td><input               id=\'mhora\'    name=\'mhora\'    size=\'6\' class=\'input\' value=\'\'></td>"+
+					"<td align=\'right\'>Mostrar:  </td><td align=\'left\'><input type=\'checkbox\' id=\'mmostrar\' name=\'mmostrar\' class=\'input\' value=\'S\'></td></tr>"+
+					"</table>";
+				var mprepanom = 
+				{
+					state0: {
+						html: mcome1,
+						buttons: { Guardar: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							moficina = f.moficina;
+							if (v) {
+								$.post("'.site_url('pasajes/tbrutas/destino').'/", { oficina: f.moficina, hora: f.mhora, mostrar: f.mmostrar, mid: id, oper: \'Add\' }, 
+									function(data){
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
+										$.prompt.goToState(\'state1\');
+										$("#newapi'.$grid1.'").trigger("reloadGrid");
+								});
+								return false;
+							} 
+						}
+					},
+					state1: { 
+						html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
+						focus: 1,
+						buttons: { Ok:true }
+					}		
+				};
+				$.prompt(mprepanom);
+				$("#mhora").mask("99:99 a");
+
+			} else { $.prompt("<h1>Por favor Seleccione una Ruta</h1>");}
+		});';
 
 
 		//Wraper de javascript
@@ -353,16 +362,74 @@ class Tbrutas extends Controller {
 	}
 
 	//******************************************************************
+	//  Gestiona Destinos
 	//
-	//
-	function destiadd(){
-		$moficina = $this->input->post('oficina');
-		$mhora    = $this->input->post('hora');
-		$mostrar  = $this->input->post('mostrar');
-		$mid   = $this->input->post('mid'); 
+	function destino(){
+		$mid   = $this->input->post('mid');
+		$oper  = $this->input->post('oper');
+		if ( $oper == 'Add') {
+			$moficina = $this->input->post('oficina');
+			$mhora    = strtoupper($this->input->post('hora'));
+			$mostrar  = $this->input->post('mostrar');
 		
+			if ( $mostrar == '' ) $mostrar = 'N';
+			$data = array();
+
+			$codrut = $this->datasis->dameval("SELECT codrut FROM tbrutas a WHERE a.id=$mid");
 		
-		echo "$moficina $mhora $mostrar $mid";
+			$data['codrut']    = $codrut;
+			$data['codofiorg'] = substr($data['codrut'],0,2);
+			$data['codofides'] = $moficina;
+			$data['hora']      = $mhora;
+			$data['mostrar']   = $mostrar;
+		
+			$orden = $this->datasis->dameval("SELECT max(orden) FROM tbdestinos WHERE codrut='".$data['codrut']."' AND codofiorg='".$data['codofiorg']."'");
+			if ( empty($orden) ) $orden = 0;
+		
+			$data['orden'] = $orden+1;
+ 
+			$this->db->insert('tbdestinos', $data);
+			$salida = "Destino Guardado";
+
+		} elseif ($oper == 'Edit') {
+			$moficina = $this->input->post('oficina');
+			$mhora    = strtoupper($this->input->post('hora'));
+			$mostrar  = $this->input->post('mostrar');
+			$orden    = $this->input->post('orden');
+		
+			if ( $mostrar == '' ) $mostrar = 'N';
+			$data = array();
+
+			$codrut = $this->datasis->dameval("SELECT codrut FROM tbdestinos a WHERE a.id=$mid");
+		
+			$data['hora']     = $mhora;
+			$data['mostrar']  = $mostrar;
+			$data['orden']    = $orden;
+ 
+			$this->db->where('id',$mid);
+			$this->db->update('tbdestinos', $data);
+			
+			$salida = "Destino Guardado";
+	
+		} elseif ($oper == 'Del') {
+			$codrut = $this->datasis->dameval("SELECT codrut FROM tbdestinos a WHERE a.id=$mid");
+			$this->db->query("DELETE FROM tbdestinos WHERE id=$mid");
+			$salida = "Destino Eiminado $mid";
+		}
+
+		//Arregla la Secuencia
+		$mSQL = "SELECT orden, id FROM tbdestinos WHERE codrut='".$codrut."' AND codofiorg='".substr($codrut,0,2)."' ORDER BY orden";
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$i = 1;
+			foreach ($query->result() as $row){
+				$mSQL = "UPDATE tbdestinos SET orden=$i WHERE id=".$row->id;
+				$this->db->query($mSQL);
+				$i++;
+			}
+		}
+		
+		echo $salida;
 		
 	}
 
