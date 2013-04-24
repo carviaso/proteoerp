@@ -403,7 +403,7 @@ class Usuarios extends Controller {
 
 		} elseif($oper == 'del') {
 			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM usuario WHERE id='$id' ");
-			$us_codigo = $data['us_codigo'];
+			$us_codigo = $this->datasis->dameval("SELECT us_codigo FROM usuario WHERE id='$id' ");
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
