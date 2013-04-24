@@ -948,6 +948,7 @@ function bobo(url){'."
 	}
 
 	function actualizaproteo(){
+		set_time_limit(3600);
 		$responde = '<h1>Resultado de la Actualizacion</h1>';
 		if (!extension_loaded('svn')) {
 			$responde .= 'La extension svn no esta cargada, debe cargarla para poder usar estas opciones...';
