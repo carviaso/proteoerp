@@ -70,7 +70,7 @@ $(function(){
 					}else{
 						checkp = '';
 					}
-					return '<input type="checkbox" name="itid_'+rowObject.id+'" id="itid_'+rowObject.id+'" onchange="totalizar('+rowObject.id+')" '+checkp+'>';
+					return '<input type="checkbox" name="itid_'+rowObject.id+'" id="itid_'+rowObject.id+'" onchange="tilda('+rowObject.id+')" '+checkp+'>';
 				}
 			}
 
@@ -102,7 +102,7 @@ function cambiaban(){
 							cana ++;
 						}
 					);
-					totalizar(0);
+					totalizar();
 				},
 		});
 	}
@@ -138,7 +138,7 @@ function actualizalist(){
 							}
 						}
 					);
-					totalizar(0);
+					totalizar();
 				},
 		});
 	}
@@ -197,8 +197,7 @@ function del_itbmov(id){
 	$('#tr_bmov_'+id).remove();
 }
 
-function totalizar(id){
-
+function tilda(id){
 	if(id>0){
 		//Realiza lo marca de conciliado
 		var fecha =$('#fecha').val();
@@ -213,10 +212,14 @@ function totalizar(id){
 				}else{
 					$('#itid_'+id).attr("checked", !$('#itid_'+id).attr("checked"));
 				}
+				totalizar();
 			}
 		}).fail(function() { $('#itid_'+id).attr("checked", !$('#itid_'+id).attr("checked")); });
 		//fin de la marca
 	}
+}
+
+function totalizar(){
 
 	var total = 0;
 	var arr=$('input[name^="itid_"]');

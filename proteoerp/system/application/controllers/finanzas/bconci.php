@@ -643,8 +643,7 @@ class Bconci extends Controller {
 		$act   = $this->input->post('act');
 
 		$rt=array('status'=>'B');
-		echo json_encode($rt);
-		return true;
+
 		if($fecha !==false && $id !==false && $act !== false){
 			$dbid = $this->db->escape($id);
 			$act  = (bool) $act;
