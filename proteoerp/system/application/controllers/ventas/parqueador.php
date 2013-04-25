@@ -396,6 +396,10 @@ class parqueador extends Sfac {
 			}else if(dminu > 30){
 				cana = cana+1;
 			}
+			if(cana ==0 && fraci ==1){
+				cana = 1;
+				fraci= 0;
+			}
 
 			$("#ttcana_0").val(cana);
 			$("#ttcana_1").val(fraci);
