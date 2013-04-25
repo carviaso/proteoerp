@@ -465,21 +465,51 @@ class Ajax extends Controller {
 
 		$data = '[]';
 		if($mid !== false){
-			$retArray = $retorno = array();
 
-			$mSQL="
+			$vdescu=$this->datasis->traevalor('DESCUFIJO');
+			if($vdescu=='S') $colnom='a.descufijo'; else $colnom='0';
+			//Vemos si aplica descuento solo promocional
+			if($this->db->table_exists('sinvpromo')){
+				$mSQL="
 				SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
-				a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras
+				a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo,c.margen AS dgrupo,d.margen AS promo
 				FROM sinv AS a
 				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
-				WHERE (a.codigo LIKE $qdb OR a.descrip LIKE  $qdb OR a.barras LIKE $qdb OR b.suplemen=$qba) AND a.activo='S'
-
+				LEFT JOIN grup AS c ON a.grupo=c.grupo
+				LEFT JOIN sinvpromo AS d ON a.codigo=d.codigo
+				WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S'
 				ORDER BY a.descrip LIMIT ".$this->autolimit;
+			}else{
+				$mSQL="
+				SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
+				a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo, c.margen AS dgrupo,0 AS promo
+				FROM sinv AS a
+				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
+				LEFT JOIN grup AS c ON a.grupo=c.grupo
+				WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S'
+				ORDER BY a.descrip LIMIT ".$this->autolimit;
+			}
+			//Fin del descuento promocional
+
+			$retArray = $retorno = array();
+
+
 			$cana=1;
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
+
+					if($row['descufijo']>0){
+						$descufijo=$row['descufijo'];
+					}elseif($row['promo']>0){
+						$descufijo=$row['promo'];
+					}elseif($row['dgrupo']>0){
+						$descufijo=$row['dgrupo'];
+					}else{
+						$descufijo = 0;
+					}
+
 					$retArray['label']   = '('.$row['codigo'].')'.utf8_encode($row['descrip']).' Bs.'.$row['precio1'].'  '.$row['existen'].'';
 					$retArray['value']   = $row['codigo'];
 					$retArray['codigo']  = $row['codigo'];
@@ -651,7 +681,7 @@ class Ajax extends Controller {
 		}
 		echo $data;
 	}
-	
+
 	//******************************************************************
 	//Busca icon
 	function buscaicon(){
