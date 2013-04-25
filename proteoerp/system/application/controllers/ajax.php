@@ -501,14 +501,15 @@ class Ajax extends Controller {
 				foreach( $query->result_array() as  $row ) {
 
 					if($row['descufijo']>0){
-						$descufijo=$row['descufijo'];
+						$descufijo=$row['descufijo']/100;
 					}elseif($row['promo']>0){
-						$descufijo=$row['promo'];
+						$descufijo=$row['promo']/100;
 					}elseif($row['dgrupo']>0){
-						$descufijo=$row['dgrupo'];
+						$descufijo=$row['dgrupo']/100;
 					}else{
 						$descufijo = 0;
 					}
+					if($descufijo>1) $descufijo = 0;
 
 					$retArray['label']   = '('.$row['codigo'].')'.utf8_encode($row['descrip']).' Bs.'.$row['precio1'].'  '.$row['existen'].'';
 					$retArray['value']   = $row['codigo'];
@@ -518,7 +519,7 @@ class Ajax extends Controller {
 					$retArray['peso']    = $row['peso'];
 					$retArray['ultimo']  = $row['ultimo'];
 					$retArray['pond']    = $row['pond'];
-					$retArray['base1']   = round($row['precio1']*100/(100+$row['iva']),2);
+					$retArray['base1']   = round(($row['precio1']*100/(100+$row['iva']))*(1-$descufijo),2);
 					$retArray['base2']   = round($row['precio2']*100/(100+$row['iva']),2);
 					$retArray['base3']   = round($row['precio3']*100/(100+$row['iva']),2);
 					$retArray['base4']   = round($row['precio4']*100/(100+$row['iva']),2);
