@@ -46,31 +46,45 @@ $(function(){
 	}
 
 	$('#cod_cli').autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscascli'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
-						$.each(data,
-							function(i, val){
-								sugiere.push( val );
-							}
-						);
-						add(sugiere);
+						if(data.length==0){
+							$('#nombre').val('');
+							$('#rifci').val('');
+							$('#cod_cli').val('');
+							$('#sclitipo').val('');
+							$('#direc').val('');
+						}else{
+							$.each(data,
+								function(i, val){
+									sugiere.push( val );
+								}
+							);
+							add(sugiere);
+						}
 					},
 			})
 		},
 		minLength: 2,
 		select: function( event, ui ) {
+			$('#cod_cli').attr("readonly", "readonly");
+
 			$('#nombre').val(ui.item.nombre);
 			$('#rifci').val(ui.item.rifci);
 			$('#cod_cli').val(ui.item.cod_cli);
 			$('#sclitipo').val(ui.item.tipo);
 			$('#direc').val(ui.item.direc);
+
+			setTimeout(function() {  $('#cod_cli').removeAttr("readonly"); }, 1500);
 		}
 	});
 
@@ -126,7 +140,7 @@ function totalizar(){
 	$("#totalg_val").text(nformat(totals+iva,2));
 	$("#totals_val").text(nformat(totals,2));
 	$("#ivat_val").text(nformat(iva,2));
-	
+
 }
 
 function add_itspre(){
@@ -292,12 +306,14 @@ function cdescrip(nind){
 //Agrega el autocomplete
 function autocod(id){
 	$('#codigo_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -312,6 +328,8 @@ function autocod(id){
 		},
 		minLength: 2,
 		select: function( event, ui ) {
+			$('#codigo_'+id).attr("readonly", "readonly");
+
 			$('#codigo_'+id).val(ui.item.codigo);
 			$('#desca_'+id).val(ui.item.descrip);
 			$('#precio1_'+id).val(ui.item.base1);
@@ -327,13 +345,17 @@ function autocod(id){
 			$('#cana_'+id).focus();
 			$('#cana_'+id).select();
 
-			var arr  = $('#preca_'+id);
 			var tipo = Number($("#sclitipo").val()); if(tipo>0) tipo=tipo-1;
+			$("#preca_"+id).empty();
 			cdropdown(id);
 			cdescrip(id);
+
+			var arr  = $('#preca_'+id);
 			jQuery.each(arr, function() { this.selectedIndex=tipo; });
 			importe(id);
 			totalizar();
+
+			setTimeout(function() {  $('#codigo_'+id).removeAttr("readonly"); }, 1500);
 		}
 	});
 }
@@ -344,9 +366,9 @@ function del_itspre(id){
 	totalizar();
 }
 </script>
-<?php 
-} 
-if ($form->_status=='show') { 
+<?php
+}
+if ($form->_status=='show') {
 ?>
 <table align='center' width="100%">
 	<tr>
@@ -478,7 +500,7 @@ if ($form->_status=='show') {
 				<td class="littletableheader">           <?php echo $form->totals->label;  ?></td>
 				<td class="littletablerow" align='right'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
 
-			<tr></tr>	
+			<tr></tr>
 				<td class="littletableheader" width='100'><?php echo $form->condi1->label;    ?></td>
 				<td class="littletablerow"    width='350'><?php echo $form->condi1->output;   ?></td>
 				<td class="littletableheader"><?php echo $form->ivat->label;    ?></td>

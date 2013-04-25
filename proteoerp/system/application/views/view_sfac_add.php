@@ -81,7 +81,7 @@ $(function(){
 				url:  "<?php echo site_url('ajax/buscascli'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -133,7 +133,7 @@ $(function(){
 				url:  "<?php echo site_url('ajax/buscasfacdev'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -187,7 +187,7 @@ $(function(){
 				url: "<?php echo site_url('ajax/buscasinvdev'); ?>",
 				dataType: 'json',
 				type: 'POST',
-				data: "q="+ui.item.value,
+				data: {"q":ui.item.value},
 				success: function(data){
 						$.each(data,
 							function(id, val){
@@ -216,7 +216,7 @@ $(function(){
 				url: "<?php echo site_url('ajax/buscasfpadev'); ?>",
 				dataType: 'json',
 				type: 'POST',
-				data: "q="+ui.item.value,
+				data: {"q":ui.item.value},
 				success: function(data){
 						$.each(data,
 							function(id, val){
@@ -549,7 +549,7 @@ function autocod(id){
 				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
