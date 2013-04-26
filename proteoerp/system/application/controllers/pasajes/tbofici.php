@@ -19,20 +19,39 @@ class Tbofici extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
+	//******************************************************************
 	//Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
+		$grid = $this->defgrid();
+		$grid->setHeight('160');
+		$param['grids'][] = $grid->deploy();
+
+		$grid1   = $this->defgridit();
+		$grid1->setHeight('130');
+		$param['grids'][] = $grid1->deploy();
+
+		// Configura los Paneles
+		$readyLayout = $grid->readyLayout2( 212, 190, $param['grids'][0]['gridname'],$param['grids'][1]['gridname']);
+
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+
+		//Panel Central
+		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+
+/*
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
 
 		//Funciones que ejecutan los botones
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
+*/
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"agregag",   "img"=>"images/agrega4.png",  "alt" => "Agrega Destino",   "label"=>"Agrega Gasto", "tema"=>'anexos'));
+		$grid->wbotonadd(array("id"=>"eliming",   "img"=>"images/delete.png",  "alt" => "Elimina Destino",  "label"=>"Elimina Gasto", "tema"=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -44,7 +63,9 @@ class Tbofici extends Controller {
 
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
+		$param['readyLayout'] = $readyLayout;
 		$param['SouthPanel']  = $SouthPanel;
+		$param['centerpanel'] = $centerpanel;
 		$param['listados']    = $this->datasis->listados('TBOFICI', 'JQ');
 		$param['otros']       = $this->datasis->otros('TBOFICI', 'JQ');
 		$param['temas']       = array('proteo','darkness','anexos1');
@@ -55,10 +76,10 @@ class Tbofici extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
+	//******************************************************************
 	//Funciones de los Botones
-	//***************************
-	function bodyscript( $grid0 ){
+	//
+	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '		<script type="text/javascript">';
 
 		$bodyscript .= '
@@ -126,6 +147,75 @@ class Tbofici extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+
+
+		// Eliminar Destino
+		$bodyscript .= '
+		jQuery("#eliming").click( function(){
+			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid1.'").jqGrid(\'getRowData\',id);
+				$.prompt("<h1>Eliminar Destino Seleccionado</h1>", {
+					buttons: { Eliminar: true, Salir: false },
+					callback: function(e,v,m,f){
+						if (v) {
+							$.post("'.site_url('pasajes/tbofici/gastos').'/", { mid: id, oper: \'Del\' }, 
+								function(data){
+									//$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
+									//$.prompt.goToState(\'state1\');
+									$("#newapi'.$grid1.'").trigger("reloadGrid");
+								});
+							};
+						}
+					})
+			} else { $.prompt("<h1>Por favor Seleccione un Destino</h1>");}
+		});';
+
+		$noco = $this->datasis->llenaopciones("SELECT codgas, CONCAT(codgas,' ', nomgas) FROM tbgastos ORDER BY codgas", false, 'mgasto');
+		$noco = str_replace('"',"'",$noco);
+
+		// Agrgaga Destinos
+		$bodyscript .= '
+		jQuery("#agregag").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var mcome1 = "<h1>Destinos</h1>"+
+					"<table align=\'center\'>"+
+					"<tr><td>Gasto :</tdtd><td colspan=\'3\'>"+"'.$noco.'</td></tr>"+
+					"</table>";
+				var mprepanom = 
+				{
+					state0: {
+						html: mcome1,
+						buttons: { Guardar: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							moficina = f.moficina;
+							if (v) {
+								$.post("'.site_url('pasajes/tbofici/gastos').'/", { gasto: f.mgasto, mid: id, oper: \'Add\' }, 
+									function(data){
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
+										$.prompt.goToState(\'state1\');
+										$("#newapi'.$grid1.'").trigger("reloadGrid");
+								});
+								return false;
+							} 
+						}
+					},
+					state1: { 
+						html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
+						focus: 1,
+						buttons: { Ok:true }
+					}		
+				};
+				$.prompt(mprepanom);
+				$("#mhora").mask("99:99 a");
+
+			} else { $.prompt("<h1>Por favor Seleccione una Ruta</h1>");}
+		});';
+
+
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function(){
@@ -218,9 +308,41 @@ class Tbofici extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	//  Gestiona Destinos
+	//
+	function gastos(){
+		$mid   = $this->input->post('mid');
+		$oper  = $this->input->post('oper');
+		$salida = $oper.' '.$mid;
+		
+		if ( $oper == 'Add') {
+
+			$codgas = $this->input->post('gasto');
+			$codofi = $this->datasis->dameval("SELECT codofi FROM tbofici WHERE id=$mid");
+		
+			$data = array();
+	
+			$data['codgas'] = $codgas;
+			$data['codofi'] = $codofi;
+ 
+			$this->db->insert('tbgasofi', $data);
+			$salida = "Gasto Agregado..";
+	
+		} elseif ($oper == 'Del') {
+			$this->db->query("DELETE FROM tbgasofi WHERE id=$mid");
+			$salida = "Gasto Eiminado $mid";
+		}
+		
+		echo $salida;
+		
+	}
+
+
+
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -341,6 +463,21 @@ class Tbofici extends Controller {
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
 
+		$grid->setOnSelectRow('
+			function(id){
+				if (id){
+					jQuery(gridId2).jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
+					jQuery(gridId2).trigger("reloadGrid");
+					$.ajax({
+						url: "'.base_url().$this->url.'tabla/"+id,
+						success: function(msg){
+							$("#ladicional").html(msg);
+						}
+					});
+				}
+			}'
+		);
+
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
@@ -368,9 +505,9 @@ class Tbofici extends Controller {
 		}
 	}
 
-	/**
-	* Busca la data en el Servidor por json
-	*/
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
 	function getdata(){
 		$grid       = $this->jqdatagrid;
 
@@ -382,9 +519,9 @@ class Tbofici extends Controller {
 		echo $rs;
 	}
 
-	/**
-	* Guarda la Informacion
-	*/
+	//******************************************************************
+	// Guarda la Informacion
+	//
 	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
@@ -440,6 +577,186 @@ class Tbofici extends Controller {
 		};
 	}
 
+
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
+	function defgridit( $deployed = false ){
+		$i      = 1;
+		$editar = "false";
+
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('codgas');
+		$grid->label('Codigo Gasto');
+		$grid->params(array(
+			'search'        => 'true',
+			'align'         => "'center'",
+			'editable'      => $editar,
+			'width'         => 100,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:100, maxlength: 100 }',
+		));
+
+
+		$grid->addField('codofi');
+		$grid->label('Codofi');
+		$grid->params(array(
+			'hidden'        => 'true',
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 50,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:100, maxlength: 100 }',
+		));
+
+		$grid->addField('nomgas');
+		$grid->label('Nombre del Gasto');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 250,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:100, maxlength: 100 }',
+		));
+
+
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'        => 'true',
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
+
+
+		$grid->showpager(false);
+		$grid->setWidth('');
+		$grid->setHeight('290');
+		//$grid->setTitle($this->titp);
+		$grid->setfilterToolbar(true);
+		$grid->setToolbar('false', '"top"');
+
+		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
+
+		#show/hide navigations buttons
+		$grid->setAdd(    $this->datasis->sidapuede('TBGASOFI','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('TBGASOFI','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('TBGASOFI','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('TBGASOFI','BUSQUEDA%'));
+		$grid->setRowNum(30);
+		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions("addfunc: tbgasofiadd, editfunc: tbgasofiedit, delfunc: tbgasofidel, viewfunc: tbgasofishow");
+
+		#Set url
+		$grid->setUrlput(site_url($this->url.'setdatait/'));
+
+		#GET url
+		$grid->setUrlget(site_url($this->url.'getdatait/'));
+
+		if ($deployed) {
+			return $grid->deploy();
+		} else {
+			return $grid;
+		}
+	}
+
+	/*******************************************************************
+	* Busca la data en el Servidor por json
+	*/
+	function getdatait(){
+		$id = $this->uri->segment(4);
+		if ($id === false ){
+			$id = $this->datasis->dameval("SELECT id FROM tbofici ORDER BY codofi LIMIT 1");
+		}
+		
+		if(empty($id)) return '';
+		$dbid = $this->db->escape($id);
+
+		$row = $this->datasis->damerow('SELECT codofi FROM tbofici WHERE id='.$dbid);
+
+		$codofi = $this->db->escape($row['codofi']);
+
+		$grid       = $this->jqdatagrid;
+		$mSQL    = "SELECT a.*, b.nomgas FROM tbgasofi a JOIN tbgastos b ON a.codgas=b.codgas WHERE a.codofi=${codofi} ORDER BY a.codgas";
+		$response   = $grid->getDataSimple($mSQL);
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+
+	}
+
+	/*******************************************************************
+	* Guarda la Informacion
+	*/
+	function setDatait(){
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = $this->input->post('id');
+		$data   = $_POST;
+		$mcodp  = "??????";
+		$check  = 0;
+
+		unset($data['oper']);
+		unset($data['id']);
+		if($oper == 'add'){
+			if(false == empty($data)){
+				$check = $this->datasis->dameval("SELECT count(*) FROM tbgasofi WHERE $mcodp=".$this->db->escape($data[$mcodp]));
+				if ( $check == 0 ){
+					$this->db->insert('tbgasofi', $data);
+					echo "Registro Agregado";
+
+					logusu('TBGASOFI',"Registro ????? INCLUIDO");
+				} else
+					echo "Ya existe un registro con ese $mcodp";
+			} else
+				echo "Fallo Agregado!!!";
+
+		} elseif($oper == 'edit') {
+			$nuevo  = $data[$mcodp];
+			$anterior = $this->datasis->dameval("SELECT $mcodp FROM tbgasofi WHERE id=$id");
+			if ( $nuevo <> $anterior ){
+				//si no son iguales borra el que existe y cambia
+				$this->db->query("DELETE FROM tbgasofi WHERE $mcodp=?", array($mcodp));
+				$this->db->query("UPDATE tbgasofi SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
+				$this->db->where("id", $id);
+				$this->db->update("tbgasofi", $data);
+				logusu('TBGASOFI',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
+				echo "Grupo Cambiado/Fusionado en clientes";
+			} else {
+				unset($data[$mcodp]);
+				$this->db->where("id", $id);
+				$this->db->update('tbgasofi', $data);
+				logusu('TBGASOFI',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+				echo "$mcodp Modificado";
+			}
+
+		} elseif($oper == 'del') {
+			$meco = $this->datasis->dameval("SELECT $mcodp FROM tbgasofi WHERE id=$id");
+			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM tbgasofi WHERE id='$id' ");
+			if ($check > 0){
+				echo " El registro no puede ser eliminado; tiene movimiento ";
+			} else {
+				$this->db->simple_query("DELETE FROM tbgasofi WHERE id=$id ");
+				logusu('TBGASOFI',"Registro ????? ELIMINADO");
+				echo "Registro Eliminado";
+			}
+		};
+	}
+
+
+	//******************************************************************
+	//
+	//
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 		$script= '
@@ -514,8 +831,6 @@ class Tbofici extends Controller {
 		$edit->zona = new dropdownField('Zona','zona');
 		$edit->zona->rule='required';
 		$edit->zona->options('select codigo, CONCAT(codigo, " ", nombre) nombre FROM zona ORDER BY codigo');
-		//$edit->zona->size =6;
-		//$edit->zona->maxlength =4;
 
 		$edit->build();
 
@@ -560,6 +875,63 @@ class Tbofici extends Controller {
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
+
+	function tabla() {
+		$id = $this->uri->segment($this->uri->total_segments());
+/*
+		$transac = $this->datasis->dameval("SELECT transac FROM gser WHERE id='$id'");
+		$mSQL = "SELECT cod_prv, MID(CONCAT(TRIM(cod_prv),' ',nombre),1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE transac='$transac' ORDER BY cod_prv ";
+		$query = $this->db->query($mSQL);
+		$codprv = 'XXXXXXXXXXXXXXXX';
+		$salida = '';
+		$saldo = 0;
+		if ( $query->num_rows() > 0 ){
+			$salida = "<br><table width='100%' border=1>";
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
+
+			foreach ($query->result_array() as $row)
+			{
+				if ( $codprv != $row['cod_prv']){
+					$codprv = $row['cod_prv'];
+					$salida .= "<tr bgcolor='#c7d3c7'>";
+					$salida .= "<td colspan=4>".trim($row['nombre']). "</td>";
+					$salida .= "</tr>";
+				}
+				if ( $row['tipo_doc'] == 'FC' ) {
+					$saldo = $row['monto']-$row['abonos'];
+				}
+				$salida .= "<tr>";
+				$salida .= "<td>".$row['tipo_doc']."</td>";
+				$salida .= "<td>".$row['numero'].  "</td>";
+				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
+				$salida .= "</tr>";
+			}
+			$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
+			$salida .= "</table>";
+		}
+
+		$mSQL = "SELECT codbanc, banco, tipo_op tipo_doc, numero, monto FROM bmov WHERE transac='$transac' ORDER BY codbanc ";
+		$query = $this->db->query($mSQL);
+		$salida .= "\n";
+		if ( $query->num_rows() > 0 ){
+			$salida .= "<br><table width='100%' border=1>";
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Banco</td><td align='center'>Monto</td></tr>";
+			foreach ($query->result_array() as $row)
+			{
+				$salida .= "<tr>";
+				$salida .= "<td>".$row['codbanc']."</td>";
+				$salida .= "<td>".$row['banco'].  "</td>";
+				$salida .= "<td align='right'>".nformat($row['monto'])."</td>";
+				$salida .= "</tr>";
+			}
+			$salida .= "</table>";
+		}
+		echo $salida;
+*/
+	
+	}
+
+
 
 	function instalar(){
 		if (!$this->db->table_exists('tbofici')) {

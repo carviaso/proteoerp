@@ -41,19 +41,36 @@ class Tbrutas extends Controller {
 		//Panel Central
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
-/*
-		$grid = $this->defgrid();
-		$param['grids'][] = $grid->deploy();
 
-		//Funciones que ejecutan los botones
-		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
-*/
+		$WpAdic = "
+		<tr><td><div class=\"tema1\"><table id=\"bpos1\"></table></div><div id='pbpos1'></div></td></tr>\n
+		<tr><td><div class=\"tema1\">
+			<table cellpadding='0' cellspacing='0' style='width:90%;'>
+				<tr>
+					<td style='text-align:center;' colspan='3'><div class='botones' style='background:#EAEAEA;font-size:12pt;'>DESTINOS</div></td>
+				</tr>
+				<tr>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:60px;text-align:left;vertical-align:top;' href='#' id='agregad'>".img(array('src' =>"images/agrega4.png",  'height' => 18, 'alt' => 'Agregar', 'title' => 'Agregar', 'border'=>'0'))."</a></div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:60px;text-align:left;vertical-align:top;' href='#' id='modifid'>".img(array('src' =>"images/editar.png",  'height' => 18, 'alt' => 'Agregar', 'title' => 'Agregar', 'border'=>'0'))."</a></div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:60px;text-align:left;vertical-align:top;' href='#' id='elimind'>".img(array('src' =>"images/delete.png",  'height' => 18, 'alt' => 'Agregar', 'title' => 'Agregar', 'border'=>'0'))."</a></div></td>
+				</tr>
+			</table>
+			<br>
+			<table cellpadding='0' cellspacing='0' style='width:90%;'>
+				<tr >
+					<td style='text-align:center;'>
+						<div class='botones' style='font-size:12pt;' align='right'>GASTOS</div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:40px;text-align:left;vertical-align:top;' href='#' id='agregag'>".img(array('src' =>"images/agrega4.png",  'height' => 18, 'alt' => 'Agregar', 'title' => 'Agregar', 'border'=>'0'))."</a></div></td>
+				</tr>
+			</table>
+			</div>
+		</td></tr>\n
+		";
+
+		$grid->setWpAdicional($WpAdic);
+
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"agregad",   "img"=>"images/agrega4.png",  "alt" => "Agrega Destino",   "label"=>"Agrega Destino", "tema"=>'anexos'));
-		$grid->wbotonadd(array("id"=>"modifid",   "img"=>"images/editar.png",  "alt" => "Modifica Destino", "label"=>"Modifica Destino", "tema"=>'anexos'));
-		$grid->wbotonadd(array("id"=>"elimind",   "img"=>"images/delete.png",  "alt" => "Elimina Destino",  "label"=>"Elimina Destino", "tema"=>'anexos'));
-
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -150,10 +167,8 @@ class Tbrutas extends Controller {
 			}
 		};';
 
-
 		$noco = $this->datasis->llenaopciones("SELECT codofi, CONCAT(codofi,' ', desofi) FROM tbofici ORDER BY codofi", false, 'moficina');
 		$noco = str_replace('"',"'",$noco);
-
 
 		// Modificar Destino
 		$bodyscript .= '
@@ -266,6 +281,64 @@ class Tbrutas extends Controller {
 
 			} else { $.prompt("<h1>Por favor Seleccione una Ruta</h1>");}
 		});';
+
+
+		$gasto = $this->datasis->llenaopciones("SELECT codgas, CONCAT(codgas,' ', nomgas) FROM tbgastos ORDER BY codgas", false, 'mgasto');
+		$gasto = str_replace('"',"'",$gasto);
+
+		// Agrgaga Gastos
+		$bodyscript .= '
+		jQuery("#agregag").click( function(){
+			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid1.'").jqGrid(\'getRowData\',id);
+				var mcome2 = "<h1>Gastos</h1>"+
+					"<table align=\'center\'>"+
+					"<tr><td>Gasto:</tdtd><td colspan=\'3\'>"+"'.$gasto.'</td></tr>"+
+					"<tr><td>Monto: </td><td><input id=\'mmonto\' name=\'mmonto\' size=\'10\' class=\'inputnum\' value=\'0.00\'></td>"+
+					"</table>";
+				var mprepanom1 = 
+				{
+					state0: {
+						html: mcome2,
+						buttons: { Guardar: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							moficina = f.moficina;
+							if (v) {
+								$.post("'.site_url('pasajes/tbrutas/gasto').'/", { gasto: f.mgasto, monto: f.mmonto, mid: id, oper: \'Add\' }, 
+									function(data){
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(data);
+										$.prompt.goToState(\'state1\');
+								});
+								return false;
+							} 
+						}
+					},
+					state1: { 
+						html: "<h1>Resultado</h1><span id=\'in_prome3\'></span>",
+						focus: 1,
+						buttons: { Ok:true }
+					}		
+				};
+				$.prompt(mprepanom1);
+
+			} else { $.prompt("<h1>Por favor Seleccione una Ruta</h1>");}
+		});';
+
+		// Eliminar Gasto
+		$bodyscript .= '
+		function gastodel(mid){
+			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
+			$.post("'.site_url($this->url.'gastodel').'/"+mid,
+			function(data){
+				$.ajax({
+					url: "'.base_url().$this->url.'tabla/"+id,
+					success: function(msg){
+						$("#ladicional").html(msg);
+					}
+				});
+			})
+		};';
 
 
 		//Wraper de javascript
@@ -434,6 +507,48 @@ class Tbrutas extends Controller {
 	}
 
 
+	//******************************************************************
+	//  Gestiona Gastos
+	//
+	function gasto(){
+		$mid   = $this->input->post('mid');
+		$oper  = $this->input->post('oper');
+		if ( $oper == 'Add') {
+			$gasto = $this->input->post('gasto');
+			$monto = $this->input->post('monto');
+		
+			$data = array();
+			$codrut = $this->datasis->dameval("SELECT codrut    FROM tbdestinos a WHERE a.id=$mid");
+			$codofi = $this->datasis->dameval("SELECT codofides FROM tbdestinos a WHERE a.id=$mid");
+		
+			$data['codrut'] = $codrut;
+			$data['codofi'] = $codofi;
+			$data['codgas'] = $gasto;
+			$data['monto']  = $monto;
+		
+			$this->db->insert('tbgastoruta', $data);
+
+			$salida = "Fasto Agregado";
+		}
+
+		echo $salida;
+		
+	}
+
+
+	//******************************************************************
+	//  Eliminar Gastos
+	//
+	function gastodel($mid){
+	
+		$this->db->query("DELETE FROM tbgastoruta WHERE id=$mid");
+		$salida = "Gasto Eiminado $mid";
+		echo $salida;
+		
+	}
+
+
+
 	//***************************
 	//Definicion del Grid y la Forma
 	//***************************
@@ -537,23 +652,16 @@ class Tbrutas extends Controller {
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
-		
+
 		$grid->setOnSelectRow('
 			function(id){
 				if (id){
 					jQuery(gridId2).jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
 					jQuery(gridId2).trigger("reloadGrid");
-					$.ajax({
-						url: "'.base_url().$this->url.'tabla/"+id,
-						success: function(msg){
-							$("#ladicional").html(msg);
-						}
-					});
 				}
 			}'
 		);
 
-		
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
@@ -772,6 +880,20 @@ class Tbrutas extends Controller {
 		$grid->setfilterToolbar(false);
 		$grid->setToolbar('false', '"top"');
 
+		$grid->setOnSelectRow('
+			function(id){
+				if (id){
+					$.ajax({
+						url: "'.site_url($this->url).'/tabla/"+id,
+						success: function(msg){
+							$("#ladicional").html(msg);
+						}
+					});
+				}
+			}'
+		);
+
+
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
@@ -813,23 +935,12 @@ class Tbrutas extends Controller {
 		$row = $this->datasis->damerow('SELECT codrut FROM tbrutas WHERE id='.$dbid);
 
 		$codrut = $this->db->escape($row['codrut']);
-		//$numero  = $this->db->escape($row['numero']);
-		//$fecha   = $this->db->escape($row['fecha']);
-		//$transac = $this->db->escape($row['transac']);
 
 		$grid       = $this->jqdatagrid;
 		$mSQL    = "SELECT a.*, b.desofi FROM tbdestinos a JOIN tbofici b ON a.codofides=b.codofi WHERE codrut=${codrut} AND codofiorg=MID(codrut,1,2) ORDER BY orden";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
-/*
-		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
-		$mWHERE = $grid->geneTopWhere('tbdestinos');
-
-		$response   = $grid->getData('tbdestinos', array(array()), array(), false, $mWHERE );
-		$rs = $grid->jsonresult( $response);
-		echo $rs;
-*/
 	}
 
 	/**
@@ -1018,58 +1129,35 @@ class Tbrutas extends Controller {
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
 
+	//******************************************************************
+	//
+	//
 	function tabla() {
 		$id = $this->uri->segment($this->uri->total_segments());
-/*
-		$transac = $this->datasis->dameval("SELECT transac FROM gser WHERE id='$id'");
-		$mSQL = "SELECT cod_prv, MID(CONCAT(TRIM(cod_prv),' ',nombre),1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE transac='$transac' ORDER BY cod_prv ";
+
+		$codrut = $this->datasis->dameval("SELECT codrut   FROM tbdestinos WHERE id='$id'");
+		$codofi = $this->datasis->dameval("SELECT codofides FROM tbdestinos WHERE id='$id'");
+
+		$mSQL = "SELECT a.codgas, b.nomgas, a.monto, a.id FROM tbgastoruta a JOIN tbgastos b ON a.codgas=b.codgas WHERE a.codrut='$codrut' AND a.codofi='$codofi' ORDER BY a.codgas ";
 		$query = $this->db->query($mSQL);
-		$codprv = 'XXXXXXXXXXXXXXXX';
 		$salida = '';
-		$saldo = 0;
 		if ( $query->num_rows() > 0 ){
 			$salida = "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
+			$salida .= "<tr bgcolor='#E7E3E7'><td>Cod</td><td align='center'>Gasto</td><td align='center'>Monto</td><td>X</td></tr>";
 
 			foreach ($query->result_array() as $row)
 			{
-				if ( $codprv != $row['cod_prv']){
-					$codprv = $row['cod_prv'];
-					$salida .= "<tr bgcolor='#c7d3c7'>";
-					$salida .= "<td colspan=4>".trim($row['nombre']). "</td>";
-					$salida .= "</tr>";
-				}
-				if ( $row['tipo_doc'] == 'FC' ) {
-					$saldo = $row['monto']-$row['abonos'];
-				}
 				$salida .= "<tr>";
-				$salida .= "<td>".$row['tipo_doc']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
+				$salida .= "<td>".$row['codgas']."</td>";
+				$salida .= "<td>".$row['nomgas'].  "</td>";
 				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-				$salida .= "</tr>";
-			}
-			$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
-			$salida .= "</table>";
-		}
-
-		$mSQL = "SELECT codbanc, banco, tipo_op tipo_doc, numero, monto FROM bmov WHERE transac='$transac' ORDER BY codbanc ";
-		$query = $this->db->query($mSQL);
-		$salida .= "\n";
-		if ( $query->num_rows() > 0 ){
-			$salida .= "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Banco</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row)
-			{
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['codbanc']."</td>";
-				$salida .= "<td>".$row['banco'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto'])."</td>";
+				$salida .= "<td align='center'><a  style='vertical-align:center;' href='#' onclick='gastodel(".$row['id'].")' >".img(array('src' =>"images/N.gif",  'height' => 8, 'alt' => 'Eliminar', 'title' => 'Eliminar', 'border'=>'0'))."</a></td>";
 				$salida .= "</tr>";
 			}
 			$salida .= "</table>";
 		}
 		echo $salida;
-*/
+
 	
 	}
 }
