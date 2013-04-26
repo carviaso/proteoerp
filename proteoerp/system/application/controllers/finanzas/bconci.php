@@ -545,20 +545,22 @@ class Bconci extends Controller {
 		$edit->pre_process('delete', '_pre_delete' );
 
 		$edit->fecha = new dateonlyField('Fecha','fecha','m/Y');
-		$edit->fecha->rule='chfecha[m/Y]';
-		$edit->fecha->size =10;
+		$edit->fecha->mode = 'autohide';
+		$edit->fecha->rule = 'chfecha[m/Y]';
+		$edit->fecha->size = 10;
 		$edit->fecha->maxlength =8;
 		$edit->fecha->insertValue=date('Y-m-d',mktime(0, 0, 0, date('n'),0));
 		$edit->fecha->calendar=false;
 
 		$edit->codbanc = new dropdownField('Banco','codbanc');
 		$edit->codbanc->style= 'width:480px';
+		$edit->codbanc->mode = 'autohide';
 		$edit->codbanc->rule = 'required';
 		$edit->codbanc->option('','Seleccionar');
 		$edit->codbanc->options("SELECT TRIM(codbanc) AS codbanc,CONCAT_WS('-',codbanc,banco,numcuent) AS desca FROM banc WHERE tbanco<>'CAJ'");
 
 		$edit->saldoi = new inputField('Saldo Inicial','saldoi');
-		$edit->saldoi->rule='numeric';
+		$edit->saldoi->rule='numeric|required';
 		$edit->saldoi->insertValue='0.0';
 		$edit->saldoi->css_class='inputnum';
 		$edit->saldoi->size =20;
@@ -566,38 +568,46 @@ class Bconci extends Controller {
 
 		$edit->saldof = new inputField('Saldo Final','saldof');
 		$edit->saldof->insertValue='0.0';
-		$edit->saldof->rule='numeric';
+		$edit->saldof->rule='numeric|required';
 		$edit->saldof->css_class='inputnum';
 		$edit->saldof->size =20;
 		$edit->saldof->maxlength =18;
 
-		$edit->deposito = new inputField('Dep&oacute;sito','deposito');
-		$edit->deposito->rule='numeric';
+		$edit->deposito = new inputField('Dep&oacute;sitos','deposito');
+		$edit->deposito->rule = 'numeric';
+		$edit->deposito->type = 'inputhidden';
 		$edit->deposito->insertValue='0.0';
 		$edit->deposito->css_class='inputnum';
 		$edit->deposito->size =20;
 		$edit->deposito->maxlength =18;
+		$edit->deposito->type='inputhidden';
 
-		$edit->credito = new inputField('Cr&eacute;dito','credito');
+		$edit->credito = new inputField('Notas de Cr&eacute;dito','credito');
 		$edit->credito->rule='numeric';
+		$edit->credito->type = 'inputhidden';
 		$edit->credito->insertValue='0.0';
 		$edit->credito->css_class='inputnum';
 		$edit->credito->size =20;
 		$edit->credito->maxlength =18;
+		$edit->credito->type='inputhidden';
 
-		$edit->cheque = new inputField('Cheque','cheque');
+		$edit->cheque = new inputField('Cheques','cheque');
 		$edit->cheque->rule='numeric';
+		$edit->cheque->type = 'inputhidden';
 		$edit->cheque->insertValue='0.0';
 		$edit->cheque->css_class='inputnum';
 		$edit->cheque->size =20;
 		$edit->cheque->maxlength =18;
+		$edit->cheque->type='inputhidden';
 
-		$edit->debito = new inputField('D&eacute;bito','debito');
+		$edit->debito = new inputField('Notas de D&eacute;bito','debito');
 		$edit->debito->rule='numeric';
+		$edit->debito->type = 'inputhidden';
 		$edit->debito->insertValue='0.0';
 		$edit->debito->css_class='inputnum';
 		$edit->debito->size =20;
 		$edit->debito->maxlength =18;
+		$edit->debito->type='inputhidden';
 
 		$edit->status = new inputField('Estatus','status');
 		$edit->status->rule='';
@@ -605,8 +615,8 @@ class Bconci extends Controller {
 		$edit->status->maxlength =1;
 
 		$edit->usuario = new autoUpdateField('usuario',$this->secu->usuario(),$this->secu->usuario());
-		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd')  , date('Ymd'));
-		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
+		$edit->estampa = new autoUpdateField('estampa',date('Ymd')  , date('Ymd'));
+		$edit->hora    = new autoUpdateField('hora'   ,date('H:i:s'), date('H:i:s'));
 
 		$edit->build();
 
@@ -669,22 +679,26 @@ class Bconci extends Controller {
 	}
 
 	function _pre_insert($do){
-		$codbanc  = $do->get('codbanc');
-		$fecha    = $do->get('fecha');
-		$fecha    = substr($fecha,0,6).days_in_month(substr($fecha,4,2),substr($fecha,0,4));
+		$codbanc = $do->get('codbanc');
+		$fecha   = $do->get('fecha');
+		$fecha   = substr($fecha,0,6).days_in_month(substr($fecha,4,2),substr($fecha,0,4));
 		$do->set('fecha',$fecha);
 
 		$dbfecha  = $this->db->escape($fecha);
-		$dbcodbanc= $this->db->escape($codbanc);
-
-
 		$ant = intval($this->datasis->dameval('SELECT COUNT(*) FROM bconci WHERE codbanc='.$dbcodbanc.' AND fecha='.$dbfecha));
 		if($ant>0){
 			$do->error_message_ar['pre_ins']='Ya existe una conciliacion con esa fecha para el mismo banco.';
 			return false;
 		}
 
+		return $this->_pre_update($do);
+	}
 
+	function _pre_update($do){
+		$codbanc  = $do->get('codbanc');
+		$fecha    = $do->get('fecha');
+
+		$dbcodbanc= $this->db->escape($codbanc);
 		$row = $this->datasis->damerow('SELECT numcuent,banco FROM banc WHERE codbanc='.$dbcodbanc);
 		if(!empty($row)){
 			$do->set('numcuent',$row['numcuent']);
@@ -694,15 +708,15 @@ class Bconci extends Controller {
 			return false;
 		}
 
-		$cana=$conciliado=0;
-		$this->mSQLs=array();
+		$cana=$conciliado=$nc=$nd=$ch=$de=0;
+		//$this->mSQLs=array();
 		foreach($_POST as $ind=>$val){
 			if (preg_match("/^itid_(?P<con>\d+)$/", $ind,$matches) && $val>0) {
 				$con    = $matches['con'];
 				$ittipo = $this->input->post('ittipo_'.$con);
 				$itmonto= $this->input->post('itmonto_'.$con);
 				if($ittipo===false || $itmonto===false){
-					$do->error_message_ar['pre_ins']='Error en la data.';
+					$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Error en la data.';
 					return false;
 				}
 
@@ -713,23 +727,35 @@ class Bconci extends Controller {
 					$conciliado -= $itmonto;
 				}
 
-				$dbval=$this->db->escape($val);
-				$this->mSQLs[] = "UPDATE bmov SET concilia=${dbfecha} WHERE id=${dbval}";
+				if($ittipo=='NC'){
+					$nc+=$itmonto;
+				}elseif($ittipo=='ND'){
+					$nd+=$itmonto;
+				}elseif($ittipo=='CH'){
+					$ch+=$itmonto;
+				}elseif($ittipo=='DE'){
+					$de+=$itmonto;
+				}else{
+					$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']="Tipo de transaccion ${ittipo} no valido.";
+					return false;
+				}
+
+				//$dbval=$this->db->escape($val);
+				//$this->mSQLs[] = "UPDATE bmov SET concilia=${dbfecha} WHERE id=${dbval}";
 				$cana++;
 			}
 		}
 
-
 		if($cana==0){
-			$do->error_message_ar['pre_ins']='Necesita seleccionar al menos un efecto.';
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Necesita seleccionar al menos un efecto.';
 			return false;
 		}
 
-		return true;
-	}
+		$do->set('credito' ,$nc);
+		$do->set('debito'  ,$nd);
+		$do->set('cheque'  ,$ch);
+		$do->set('deposito',$de);
 
-	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='No se puede editar una conciliaci&oacute;n, debe eliminarla y volverla a hace.';
 		return true;
 	}
 
@@ -740,9 +766,9 @@ class Bconci extends Controller {
 
 	function _post_insert($do){
 		$fecha = $do->get('fecha');
-		foreach($this->mSQLs AS $mSQL){
-			$this->db->simple_query($mSQL);
-		}
+		//foreach($this->mSQLs AS $mSQL){
+		//	$this->db->simple_query($mSQL);
+		//}
 
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Creo $this->tits $primary fecha ${fecha}");
@@ -768,23 +794,27 @@ class Bconci extends Controller {
 	function instalar(){
 		if (!$this->db->table_exists('bconci')) {
 			$mSQL="CREATE TABLE `bconci` (
-			  `fecha` date DEFAULT NULL,
-			  `codbanc` char(2) DEFAULT NULL,
-			  `numcuent` varchar(18) DEFAULT NULL,
-			  `banco` varchar(30) DEFAULT NULL,
-			  `saldoi` decimal(18,2) DEFAULT NULL,
-			  `saldof` decimal(18,2) DEFAULT NULL,
-			  `deposito` decimal(18,2) DEFAULT NULL,
-			  `credito` decimal(18,2) DEFAULT NULL,
-			  `cheque` decimal(18,2) DEFAULT NULL,
-			  `debito` decimal(18,2) DEFAULT NULL,
-			  `status` char(1) DEFAULT NULL,
-			  `usuario` varchar(4) DEFAULT NULL,
-			  `estampa` date DEFAULT NULL,
-			  `hora` varchar(8) DEFAULT NULL,
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  PRIMARY KEY (`id`)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+				`fecha` DATE NULL DEFAULT NULL,
+				`codbanc` CHAR(2) NULL DEFAULT NULL,
+				`numcuent` VARCHAR(18) NULL DEFAULT NULL,
+				`banco` VARCHAR(30) NULL DEFAULT NULL,
+				`saldoi` DECIMAL(18,2) NULL DEFAULT NULL,
+				`saldof` DECIMAL(18,2) NULL DEFAULT NULL,
+				`deposito` DECIMAL(18,2) NULL DEFAULT NULL,
+				`credito` DECIMAL(18,2) NULL DEFAULT NULL,
+				`cheque` DECIMAL(18,2) NULL DEFAULT NULL,
+				`debito` DECIMAL(18,2) NULL DEFAULT NULL,
+				`status` CHAR(1) NULL DEFAULT NULL,
+				`usuario` VARCHAR(4) NULL DEFAULT NULL,
+				`estampa` DATE NULL DEFAULT NULL,
+				`hora` VARCHAR(8) NULL DEFAULT NULL,
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				PRIMARY KEY (`id`),
+				INDEX `fecha` (`fecha`),
+				UNIQUE INDEX `fecha_codbanc` (`fecha`, `codbanc`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
 		//$campos=$this->db->list_fields('bconci');

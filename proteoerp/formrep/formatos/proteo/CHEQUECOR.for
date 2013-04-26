@@ -37,7 +37,7 @@ div.absolute {
 <div class="absolute" style="top: 105px; left: 280px;"><?php echo $anio; ?></div>
 
 <?php if($endosable){ ?>
-<div class="absolute" style="top: 180px; right:30px;font-size: 1.3em;">NO ENDOSABLE</div>
+<div class="absolute" style="top: 180px; right:40px;font-size: 1.3em;">NO ENDOSABLE</div>
 <?php } ?>
 </body>
 </html>
