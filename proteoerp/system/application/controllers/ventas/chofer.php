@@ -13,12 +13,7 @@ class Chofer extends Controller {
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('chofer','id') ) {
-			$this->db->simple_query('ALTER TABLE chofer DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE chofer ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE chofer ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
-		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
+		$this->datasis->creaintramenu(array('modulo'=>'149','titulo'=>'Choferes','mensaje'=>'Choferes','panel'=>'DESPACHO','ejecutar'=>'ventas/chofer','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
