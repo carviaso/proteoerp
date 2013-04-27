@@ -7,7 +7,7 @@ $dbid = $this->db->escape($id);
 
 $mSQL_1 = $this->db->query('SELECT
 fecha,vence,ffactura,tipo_doc,numero,proveed,nombre,totpre,totneto,credito,totiva,totbruto,reteiva,anticipo,credito,
-monto1,cheque1,codb1,reten,orden,cajachi,serie,transac
+monto1,cheque1,codb1,reten,orden,cajachi,serie,transac,negreso
 FROM gser WHERE id='.$dbid);
 
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
@@ -37,6 +37,7 @@ $cheque1  = trim($row->cheque1);
 $codb1    = trim($row->codb1);
 $orden    = trim($row->orden);
 $serie    = trim($row->serie);
+$negreso  = trim($row->negreso);
 
 $dbnumero  = $this->db->escape($numero);
 $dbproveed = $this->db->escape($row->proveed);
@@ -73,7 +74,11 @@ if ($row->monto1>0){
 }
 
 if($tipo_doc=='FC'){
-	$documento = 'COMPROBANTE DE EGRESO';
+	if(empty($negreso)){
+		$documento = 'GASTO A CR&Eacute;DITO';
+	}else{
+		$documento = 'COMPROBANTE DE EGRESO Nro '.$negreso;
+	}
 }elseif($tipo_doc=='XX'){
 	$documento = 'COMPROBANTE <span style="color:red">**ANULADO**</span>';
 }elseif($tipo_doc=='ND'){
@@ -127,14 +132,14 @@ $pagina = 0;
 $encabezado = "
 	<table style='width:100%;font-size: 9pt;' class='header' cellpadding='0' cellspacing='0'>
 		<tr>
-			<td colspan='4'><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>${documento} Nro. ${serie}</h1></td>
+			<td colspan='4'><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>${documento}</h1></td>
 			<td colspan='2'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>Fecha: ${fecha}</h1></td>
 		</tr><tr>
 			<td>Proveedor:</td>
 			<td colspan='5'><b>${nombre} (${proveed})</b></td>
 		</tr><tr>
-			<td>N&uacute;mero:</td>
-			<td><b>${numero}</b></td>
+			<td>N&uacute;mero Factura:</td>
+			<td><b>${serie}</b></td>
 			<td>Fecha:</td>
 			<td><b>${fecha}</b></td>
 			<td>Fecha Doc.:</td>
@@ -218,6 +223,19 @@ $pie_final="
 						<td><b>Auditoria:     </b></td>
 						<td><b>Autorizado por:</b></td>
 						<td><b>Aprobado:      </b></td>
+					</tr>
+				</table>
+
+				<table style='width:100%%;border:1px solid grey;text-align:center;font-size:8pt;' class='header'>
+					<tr style='height:100px;'>
+						<td>&nbsp;<br><br><br></td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+					</tr>
+					<tr style='background-color:#EAEAEA;'>
+						<td><b>Recibido por: </b></td>
+						<td><b>C.I.:</b></td>
+						<td><b>Fecha:</b></td>
 					</tr>
 				</table>";
 

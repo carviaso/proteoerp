@@ -79,8 +79,10 @@ class pfaclite extends validaciones{
 			if($status=='P'){
 				$rt = anchor('ventas/sfac_add/creafrompfac/'.$numero.'/create', 'Facturar');
 			}else{
-				if(empty($factura)){
-					$rt = 'Cerrada';
+				if(empty($factura) && $status=='C'){
+					$rt = 'Caducada';
+				}elseif(empty($factura)){
+					$rt = 'Cerrado';
 				}else{
 					$rt = $factura;
 				}
@@ -99,16 +101,17 @@ class pfaclite extends validaciones{
 
 		$grid->column_orderby('N&uacute;mero', $uri ,'numero');
 		if($this->secu->puede('103')){
-			$grid->column_orderby('Factura'      , "<hfactura><#status#>|<#factura#>|<#numero#></hfactura>",'factura');
+			$grid->column_orderby('Factura'     , "<hfactura><#status#>|<#factura#>|<#numero#></hfactura>",'factura');
 		}else{
-			$grid->column_orderby('Factura'      , "<hfactura><#status#>|<#factura#>|<#numero#></hfactura>",'factura');
+			$grid->column_orderby('Factura'     , "<hfactura><#status#>|<#factura#>|<#numero#></hfactura>",'factura');
 		}
 		$grid->column_orderby('Fecha'        , '<dbdate_to_human><#fecha#></dbdate_to_human> <#hora#>','fecha', "align='center'");
 		$grid->column_orderby('Cliente'      , 'cod_cli','cod_cli');
 		$grid->column_orderby('Nombre'       , 'nombre' ,'nombre');
 		if(!(strlen($vd)>0))
 			$grid->column_orderby('Vendedor'     , 'vd'     ,'vd');
-		$grid->column_orderby('Total'        , '<nformat><#totalg#></nformat>', "totalg", "align=right");
+		$grid->column_orderby('Peso'         , '<nformat><#peso#></nformat>'  , 'peso'  , 'align=\'right\'');
+		$grid->column_orderby('Total'        , '<nformat><#totalg#></nformat>', 'totalg', 'align=\'right\'');
 
 		if(strlen($vd)>0){
 			$grid->add($this->url.'filterscli','Incluir nuevo pedido');
@@ -586,9 +589,20 @@ class pfaclite extends validaciones{
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'pfaclite'); }
 		}
-		$codigo = $do->get('numero');
+		$codigo  = $do->get('numero');
+		$dbcodigo= $this->db->escape($codigo);
 
-		logusu('pfac', "Pedido $codigo CREADO");
+		//Guarda el peso del pedido
+		$sql='SELECT SUM(b.peso*a.cana) AS peso
+		FROM itpfac AS a
+		JOIN sinv   AS b ON a.codigoa=b.codigo
+		WHERE a.numa='.$dbcodigo;
+		$peso = $this->datasis->dameval($sql);
+		$sql = "UPDATE pfac SET peso=${peso} WHERE numero=${dbcodigo}";
+		$ban = $this->db->simple_query($sql);
+		//Fin del peso del pedido
+
+		logusu('pfac', "Pedido ${codigo} CREADO");
 	}
 
 	function _pre_update($do){
@@ -624,7 +638,20 @@ class pfaclite extends validaciones{
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'pfaclite'); }
 		}
-		$codigo = $do->get('numero');
+		$codigo  = $do->get('numero');
+		$dbcodigo= $this->db->escape($codigo);
+
+		//Guarda el peso del pedido
+		$sql='SELECT SUM(b.peso*a.cana) AS peso
+		FROM itpfac AS a
+		JOIN sinv   AS b ON a.codigoa=b.codigo
+		WHERE a.numa='.$dbcodigo;
+		$peso = $this->datasis->dameval($sql);
+		$sql = "UPDATE pfac SET peso=${peso} WHERE numero=${dbcodigo}";
+		$ban = $this->db->simple_query($sql);
+		//Fin del peso del pedido
+
+
 		logusu('pfac', "Pedido $codigo MODIFICADO");
 	}
 

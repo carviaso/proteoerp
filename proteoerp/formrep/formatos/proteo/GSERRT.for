@@ -4,7 +4,7 @@ $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 $mSQL_1 = $this->db->query('SELECT
 	a.fecha,a.numero,b.nomfis,a.proveed,a.nombre,a.breten,a.tipo_doc,a.reten,a.creten,a.nombre,
-	b.direc1,b.direc2,b.direc3,b.telefono,b.rif,c.activida,c.base1,c.tari1, a.ffactura
+	b.direc1,b.direc2,b.direc3,b.telefono,b.rif,c.activida,c.base1,c.tari1, a.ffactura,a.nfiscal
 FROM gser AS a
 JOIN sprv AS b ON a.proveed=b.proveed
 LEFT JOIN rete AS c ON c.codigo=a.creten
@@ -28,6 +28,7 @@ $direc3   = htmlspecialchars(trim($row->direc3));
 $telefono = htmlspecialchars(trim($row->telefono));
 $rif      = htmlspecialchars(trim($row->rif));
 $activida = htmlspecialchars(trim($row->activida));
+$nfiscal  = htmlspecialchars(trim($row->nfiscal));
 $base1    = $row->base1;
 $tari1    = $row->tari1;
 
@@ -36,6 +37,12 @@ e.codigorete,c.activida,e.base,e.porcen,e.monto
 FROM gereten AS e
 JOIN rete AS c ON c.codigo=e.codigorete
 WHERE e.idd='.$dbid);
+
+if(!empty($nfiscal)){
+	$titcontrol = '<b>Nro. CONTROL:</b> '.$nfiscal;
+}else{
+	$titcontrol = '';
+}
 ?>
 <html>
 <head>
@@ -108,12 +115,11 @@ if ( isset($pdf) ) {
 			<td><div align="left" style="font-size: 11pt;"><b>DATOS DE LA RETENCI&Oacute;N:</b></div></td>
 		</tr>
 	</table>
-	<!--/div -->
 
 	<table style="width: 80%;" class="header" align='center' -->
 		<tr>
 			<td><div align="left"  style="font-size: 8pt"><b>DOCUMENTO:</b></div></td>
-			<td><div align="rigth" style="font-size: 8pt"><?php echo $tipo_doc.$numero  ?></div></td>
+			<td><div align="rigth" style="font-size: 8pt"><?php echo $tipo_doc.$numero.' '.$titcontrol;  ?></div></td>
 		 </tr><tr>
 			<td><div align="left"  style="font-size: 8pt"><b>FECHA DE EMISION.:</b></div></td>
 			<td><div align="rigth" style="font-size: 8pt"><?php echo $ffecha ?></div></td>
