@@ -13,7 +13,7 @@ class Flota extends Controller {
 	}
 
 	function index(){
-		$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
+		$this->datasis->creaintramenu(array('modulo'=>'150','titulo'=>'Flota','mensaje'=>'Flota','panel'=>'DESPACHO','ejecutar'=>'ventas/flota','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
