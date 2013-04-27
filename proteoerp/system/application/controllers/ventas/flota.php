@@ -549,10 +549,8 @@ class Flota extends Controller {
 		$edit->descrip->size =32;
 		$edit->descrip->maxlength =30;
 
-		$edit->tipo = new inputField('Tipo','tipo');
-		$edit->tipo->rule='';
-		$edit->tipo->size =12;
-		$edit->tipo->maxlength =10;
+		$edit->tipo = new checkboxField('Unidad Propia','tipo','P','F');
+
 
 		$edit->placa = new inputField('Placa','placa');
 		$edit->placa->rule='';
@@ -569,7 +567,7 @@ class Flota extends Controller {
 		$edit->modelo->size =42;
 		$edit->modelo->maxlength =40;
 
-		$edit->ano = new inputField('Ano','ano');
+		$edit->ano = new inputField('Anno','ano');
 		$edit->ano->rule='integer';
 		$edit->ano->css_class='inputonlynum';
 		$edit->ano->size =13;
@@ -581,12 +579,12 @@ class Flota extends Controller {
 		$edit->capacidad->size =12;
 		$edit->capacidad->maxlength =10;
 
-		$edit->serialc = new inputField('Serialc','serialc');
+		$edit->serialc = new inputField('Serial de Carroceria','serialc');
 		$edit->serialc->rule='';
 		$edit->serialc->size =52;
 		$edit->serialc->maxlength =50;
 
-		$edit->serialm = new inputField('Serialm','serialm');
+		$edit->serialm = new inputField('Serial de Motor','serialm');
 		$edit->serialm->rule='';
 		$edit->serialm->size =52;
 		$edit->serialm->maxlength =50;
@@ -632,7 +630,7 @@ class Flota extends Controller {
 
 	function _pre_delete($do){
 		$do->error_message_ar['pre_del']='';
-		return false;
+		return true;
 	}
 
 	function _post_insert($do){
