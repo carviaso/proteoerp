@@ -76,16 +76,24 @@ class pfaclite extends validaciones{
 		$filter->build('dataformfiltro');
 
 		function hfactura($status,$factura,$numero){
-			if($status=='P'){
-				$rt = anchor('ventas/sfac_add/creafrompfac/'.$numero.'/create', 'Facturar');
-			}else{
-				if(empty($factura) && $status=='C'){
-					$rt = 'Caducada';
-				}elseif(empty($factura)){
+			if($status=='P'){        //Pendiente
+				$rt = anchor('ventas/sfac_add/creafrompfac/'.$numero.'/create', 'Pendiente');
+			}elseif($status=='C'){   //Cerrado
+				if(empty($factura)){
 					$rt = 'Cerrado';
 				}else{
 					$rt = $factura;
 				}
+			}elseif($status=='B'){   //BackOrder
+				$rt = 'BackOrder';
+			}elseif($status=='A'){   //Anulado
+				$rt = 'Anulado';
+			}elseif($status=='T'){   //Temporal
+				$rt = 'Temporal';
+			}elseif($status=='E' || $status=='U'){ //Estatus locales de vendores ambulantes (Enviado y por enviar )
+				$rt = 'V.Externo';
+			}else{
+				$rt = 'Desconocido';
 			}
 			return $rt;
 		}
