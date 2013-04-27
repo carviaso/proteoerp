@@ -46,6 +46,8 @@ class Maes extends Controller {
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
+
+		$param['script']      = script('sinvmaes.js');
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
 		$param['SouthPanel']  = $SouthPanel;
@@ -1806,12 +1808,139 @@ class Maes extends Controller {
 
 	function dataedit(){
 		$this->rapyd->load('dataedit');
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+
+		$link  =site_url('inventario/common/add_marc');
+		$link4 =site_url('inventario/common/get_marca');
+		$link5 =site_url('inventario/common/add_unidad');
+		$link6 =site_url('inventario/common/get_unidad');
+		$link7 =site_url('inventario/maes/ultimo');
+		$link8 =site_url('inventario/maes/sugerir');
+		$link9 =site_url('inventario/common/add_depto');
+		$link10=site_url('inventario/common/get_depto');
+		$link11=site_url('inventario/common/add_familia');
+		$link12=site_url('inventario/common/get_familia');
+		$link13=site_url('inventario/common/add_grupo');
+		$link14=site_url('inventario/common/get_grupo_m');
+
+		$script='
+		function dpto_change(){
+			$.post("'.$link12.'",
+					{ depto:$("#depto").val() },
+					function(data){
+						$("#familia").html(data);
+					}
+			)
+			$.post("'.$link14.'",{ fami:"", depto:"" },
+				function(data){
+					$("#grupo").html(data);
+				}
+			)
+		}
+		';
+
+		$script .= '
+		$(function(){
+			$("#depto").change(
+				function(){
+					dpto_change(); 
+				}
+			);
+			
+			$("#familia").change(function(){ 
+				$.post("'.$link14.'",
+					{ fami:$(this).val(), depto: $("#depto").val() },
+					function(data){
+						$("#grupo").html(data);
+					}
+				) 
+			});
+
+			$("#tdecimal").change(function(){
+				var clase;
+				if($(this).attr("value")=="S") clase="inputnum"; else clase="inputonlynum";
+				$("#exmin").unbind();$("#exmin").removeClass(); $("#exmin").addClass(clase);
+				$("#exmax").unbind();$("#exmax").removeClass(); $("#exmax").addClass(clase);
+				$("#exord").unbind();$("#exord").removeClass(); $("#exord").addClass(clase);
+				$("#exdes").unbind();$("#exdes").removeClass(); $("#exdes").addClass(clase);
+
+				$(".inputnum").numeric(".");
+				$(".inputonlynum").numeric("0");
+			});
+
+			requeridos(true);
 		});
 		';
 
+		$script .= '
+		function ultimo(){
+			$.ajax({
+				url: "'.$link7.'",
+				success: function(msg){
+				  alert( "El &uacute;ltimo c&oacute;digo ingresado fue: " + msg );
+				}
+			});
+		}
+		';
+
+		$script .= '
+		function sugerir(){
+			$.ajax({
+				url: "'.$link8.'",
+				success: function(msg){
+					if(msg){
+						$("#codigo").val(msg);
+					}
+					else{
+						alert("No es posible generar otra sugerencia. Coloque el c&oacute;digo manualmente");
+					}
+				}
+			});
+		}
+		';
+
+/*
+		$script .= '
+		function get_familias(){
+			$.post("'.site_url('supermercado/maes/maesfamilias').'",
+				{ depto:$(this).val() },
+				function(data){
+					$("#familia").html(data);
+				}
+			)
+
+			$.post("'.site_url('supermercado/maes/maesgrupos').'",
+				{ familia: "" },
+				function(data){
+					$("#grupo").html(data);
+				}
+			)
+
+			//var url = "'.site_url('supermercado/maes/maesfamilias').'";
+			//var pars = "dpto="+$F("depto");
+			//var myAjax = new Ajax.Updater("td_familia", url, { method: "post", parameters: pars });
+			//var url = "'.site_url('supermercado/maes/maesgrupos').'";
+			//var gmyAjax = new Ajax.Updater("td_grupo", url);
+		}
+		';
+
+		$script .= '
+		function get_grupo(){
+			$.post("'.site_url('supermercado/maes/maesgrupos').'",
+				{ familia:$(this).val() },
+					function(data){
+						$("#grupo").html(data);
+				}
+			)
+
+			//var url = "'.site_url('supermercado/maes/maesgrupos').'";
+			//var pars = "dpto="+$F("depto")+"&fami="+$F("familia");
+			//var myAjax = new Ajax.Updater("td_grupo", url, { method: "post", parameters: pars });
+		}
+
+		';
+
+
+*/
 		$edit = new DataEdit('', 'maes');
 
 		$edit->script($script,'modify');
@@ -1856,65 +1985,40 @@ class Maes extends Controller {
 
 		$edit->depto = new dropdownField("Departamento", "depto");
 		$edit->depto->option("","");
-		$edit->depto->options("SELECT depto,descrip FROM dpto WHERE tipo='I' ORDER BY descrip");
-		$edit->depto->onchange = "get_familias();";
+		$edit->depto->options("SELECT depto, CONCAT(descrip,' (',depto,')') descrip FROM dpto WHERE tipo='I' ORDER BY descrip");
+		//$edit->depto->onchange = "get_familias();";
 		$edit->depto->group = "Datos";
 		$edit->depto->style='width:200px;';
 
-/*
-		$edit->depto = new inputField('Depto','depto');
-		$edit->depto->rule='';
-		$edit->depto->size =6;
-		$edit->depto->maxlength =4;
-*/
 
 		$edit->familia = new dropdownField("Familia","familia");
 		$edit->familia->rule ="required";
 		//$edit->familia->append($AddLinea);
-		//$depto=$edit->getval('depto');
+		//$edit->familia->onchange = "get_grupo();";
+
+		$depto = $edit->getval('depto');
 		$edit->familia->style='width:200px;';
 
-		//if($depto!==FALSE){
-		//	$edit->familia->options("SELECT familia, descrip FROM fami WHERE depto='$depto' ORDER BY descrip");
-		//}else{
-		//	$edit->familia->option("","Seleccione un Departamento primero");
-		//}
+		if($depto!==FALSE){
+			$edit->familia->option("","");
+			$edit->familia->options("SELECT familia, CONCAT( descrip,' (',familia,')') descrip FROM fami WHERE depto='$depto' ORDER BY descrip");
+		}else{
+			$edit->familia->option("","Seleccione un Departamento primero");
+		}
 
-/*
-		$edit->familia = new inputField('Familia','familia');
-		$edit->familia->rule='';
-		$edit->familia->size =6;
-		$edit->familia->maxlength =4;
-*/
 		$edit->grupo = new dropdownField("Grupo", "grupo");
 		$edit->grupo->rule="required";
-		//$familia=$edit->getval('familia');
+		$familia = $edit->getval('familia');
 		//$edit->grupo->options("SELECT grupo, nom_grup FROM grup WHERE familia='$familia' ORDER BY nom_grup");
 		$edit->grupo->style='width:200px;';
 
-		//if($familia!==FALSE){
-			//$edit->grupo->options("SELECT grupo, nom_grup FROM grup WHERE familia='$familia' ORDER BY nom_grup");
-		//}else{
-			//$edit->grupo->option("","Seleccione un Departamento primero");
-		//}
+		if($familia!==FALSE){
+			$edit->grupo->option("","");
+			$edit->grupo->options("SELECT grupo, CONCAT(nom_grup,' (',grupo,')') descrip FROM grup WHERE familia='$familia' ORDER BY nom_grup");
+		}else{
+			$edit->grupo->option("","Seleccione un Departamento primero");
+		}
 
-/*
-		$edit->grupo = new inputField('Grupo','grupo');
-		$edit->grupo->rule='';
-		$edit->grupo->size =6;
-		$edit->grupo->maxlength =4;
-
-
-		$edit->nom_grup = new inputField('Nom_grup','nom_grup');
-		$edit->nom_grup->rule='';
-		$edit->nom_grup->size =22;
-		$edit->nom_grup->maxlength =20;
-
-		$edit->tipo = new inputField('Tipo','tipo');
-		$edit->tipo->rule='';
-		$edit->tipo->size =3;
-		$edit->tipo->maxlength =1;
-*/
 
 		$edit->tipo = new dropdownField("Tipo", "tipo");
 		$edit->tipo->style='width:120px;';
@@ -1978,13 +2082,6 @@ class Maes extends Controller {
 		$edit->medida->size =6;
 		$edit->medida->maxlength =4;
 
-/*
-		$edit->iva = new inputField('Iva','iva');
-		$edit->iva->rule='numeric';
-		$edit->iva->css_class='inputnum';
-		$edit->iva->size =10;
-		$edit->iva->maxlength =8;
-*/
 		$ivas=$this->datasis->ivaplica();
 		$edit->iva = new dropdownField('IVA %', 'iva');
 		foreach($ivas as $tasa=>$ivamonto){
@@ -2437,21 +2534,10 @@ class Maes extends Controller {
 		$edit->redondeo->onchange = "redonde('M');";
 		$edit->redondeo->group = "Costos";
 
-/*
-		$edit->redondeo = new inputField('Redondeo','redondeo');
-		$edit->redondeo->rule='';
-		$edit->redondeo->size =4;
-		$edit->redondeo->maxlength =2;
-*/
 		$edit->pprove = new inputField('Pprove','pprove');
 		$edit->pprove->rule='';
 		$edit->pprove->size =7;
 		$edit->pprove->maxlength =5;
-
-		//$edit->marca = new inputField('Marca','marca');
-		//$edit->marca->rule='';
-		//$edit->marca->size =24;
-		//$edit->marca->maxlength =22;
 
 		//$AddMarca='<a href="javascript:add_marca();" title="Haz clic para Agregar una marca nueva">Agregar Marca</a>';
 		$edit->marca = new dropdownField("Marca", "marca");
@@ -2459,7 +2545,6 @@ class Maes extends Controller {
 		$edit->marca->option("","");
 		$edit->marca->options("SELECT marca as codigo, marca FROM marc ORDER BY marca");
 		//$edit->marca->append($AddMarca);
-
 
 		$edit->ordena = new inputField('Ordena','ordena');
 		$edit->ordena->rule='integer';
@@ -2508,13 +2593,6 @@ class Maes extends Controller {
 		$edit->ensambla->option("S","Si" );
 		$edit->ensambla->group = "Datos";
 
-/*
-		$edit->ensambla = new inputField('Ensambla','ensambla');
-		$edit->ensambla->rule='';
-		$edit->ensambla->size =3;
-		$edit->ensambla->maxlength =1;
-*/
-
 		$edit->garantia = new inputField('Garantia','garantia');
 		$edit->garantia->rule='integer';
 		$edit->garantia->css_class='inputonlynum';
@@ -2538,7 +2616,6 @@ class Maes extends Controller {
 		}else{
 			$conten['form'] =&  $edit;
 			$this->load->view('view_maes', $conten);
-			//echo $edit->output;
 		}
 	}
 
@@ -3199,7 +3276,7 @@ class maes extends Controller {
 		$edit->iva->group = "Costos";
 
 		$edit->costo = new inputField("Promedio", "costo");
-    $edit->costo->css_class='inputnum';
+		$edit->costo->css_class='inputnum';
 		$edit->costo->onchange = "calculos(costo);";
 		$edit->costo->size=21;
 		$edit->costo->maxlength=17;
@@ -3291,7 +3368,13 @@ class maes extends Controller {
 
 		$data['content'] = $edit->output;
 		$data['title']   = "<h1>Maestro de supermercado</h1>";
-		$data["head"]    = script("jquery.pack.js").script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").script("sinvmaes.js").$this->rapyd->get_head();
+		$data["head"]    = 
+		   script("jquery.pack.js").
+		   script("plugins/jquery.numeric.pack.js").
+		   script("plugins/jquery.floatnumber.js").
+		   script("sinvmaes.js").
+		   $this->rapyd->get_head();
+		
 		$this->load->view('view_ventanas', $data);
 	}
 	function dataeditsan() {
@@ -3945,14 +4028,14 @@ class maes extends Controller {
 	function maesfamilias(){
 		$this->rapyd->load("fields");
 		$where = "";
-		$sql = "SELECT familia,descrip FROM fami ";
+		$sql = "SELECT familia, descrip FROM fami ";
 		$linea = new dropdownField("Familia", "familia");
-		$dpto=$this->input->post('dpto');
+		$dpto = $this->input->post('dpto');
 
 		if ($dpto){
-		  $where = "WHERE depto = ".$this->db->escape($dpto);
-		  $sql = "SELECT familia,descrip FROM fami $where ORDER BY descrip";
-		  $linea->option("","");
+			$where = "WHERE depto = ".$this->db->escape($dpto);
+			$sql = "SELECT familia, descrip FROM fami $where ORDER BY descrip";
+			$linea->option("","");
 			$linea->options($sql);
 		}else{
 			 $linea->option("","Seleccione Un Departamento");

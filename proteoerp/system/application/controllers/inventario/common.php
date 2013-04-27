@@ -1,7 +1,7 @@
 <?php
 class Common extends controller {
 	function get_depto(){//usado por sinv
-		$mSQL=$this->db->query("SELECT depto, descrip as valor FROM dpto WHERE tipo='I' ORDER BY valor");
+		$mSQL=$this->db->query("SELECT depto, CONCAT(descrip,' (',depto,')')  as valor FROM dpto WHERE tipo='I' ORDER BY valor");
 		echo "<option value=''></option>";
 		if($mSQL){
 			foreach($mSQL->result() AS $fila ){
@@ -46,7 +46,7 @@ class Common extends controller {
 		echo "<option value=''>Seleccione un Departamento</option>";
 		$depto=$this->input->post('depto');
 		if(!empty($depto)){
-			$mSQL=$this->db->query("SELECT linea,CONCAT_WS('-',linea,descrip) AS descrip FROM line WHERE depto ='$depto'");
+			$mSQL=$this->db->query("SELECT linea,CONCAT_WS(' ',linea,descrip) AS descrip FROM line WHERE depto ='$depto'");
 			if($mSQL){
 				foreach($mSQL->result() AS $fila ){
 					echo "<option value='".$fila->linea."'>".$fila->descrip."</option>";
@@ -73,11 +73,16 @@ class Common extends controller {
 		}
 	}
 
+	function get_familia(){
+	    $this->get_fami();
+
+	}
+
 	function get_fami(){//usado por sinv
 		echo "<option value=''>Seleccione un Departamento</option>";
 		$depto=$this->input->post('depto');
 		if(!empty($depto)){
-			$mSQL=$this->db->query("SELECT familia,descrip FROM fami WHERE depto ='$depto'");
+			$mSQL=$this->db->query("SELECT familia, CONCAT(descrip,' (',familia,')') descrip FROM fami WHERE depto ='$depto'");
 			if($mSQL){
 				foreach($mSQL->result() AS $fila ){
 					echo "<option value='".$fila->familia."'>".$fila->descrip."</option>";
@@ -125,7 +130,7 @@ class Common extends controller {
 	function get_grupo(){//usado por sinv
 		$linea=$this->input->post('linea');
 		if(!empty($linea)){
-			$mSQL=$this->db->query("SELECT grupo,CONCAT_WS('-',grupo,nom_grup) AS nom_grup FROM grup WHERE linea ='$linea' ORDER BY grupo");
+			$mSQL=$this->db->query("SELECT grupo,CONCAT_WS(' ',grupo,nom_grup) AS nom_grup FROM grup WHERE linea ='$linea' ORDER BY grupo");
 			if($mSQL){
 				echo "<option value=''>Seleccione una L&iacute;nea</option>";
 				foreach($mSQL->result() AS $fila ){
@@ -153,9 +158,11 @@ class Common extends controller {
 	}
 
 	function get_grupo_m(){//usado por maes
-		$fami=$this->input->post('fami');
+		$fami  = $this->input->post('fami');
+		$depto = $this->input->post('depto');
+
 		if(!empty($fami)){
-			$mSQL=$this->db->query("SELECT grupo,nom_grup FROM grup WHERE familia ='$fami'");
+			$mSQL=$this->db->query("SELECT grupo, CONCAT( nom_grup,' (',grupo,')') nom_grup FROM grup WHERE familia ='$fami' AND depto='$depto' ORDER BY nom_grup");
 			if($mSQL){
 				echo "<option value=''>Seleccione una familia</option>";
 				foreach($mSQL->result() AS $fila ){
