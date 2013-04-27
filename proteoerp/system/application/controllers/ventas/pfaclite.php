@@ -75,14 +75,16 @@ class pfaclite extends validaciones{
 		$filter->buttons('reset', 'search');
 		$filter->build('dataformfiltro');
 
-		function hfactura($status,$factura,$numero){
+		function hfactura($status,$factura,$numero,$vence=null){
 			if($status=='P'){        //Pendiente
 				$rt = anchor('ventas/sfac_add/creafrompfac/'.$numero.'/create', 'Pendiente');
 			}elseif($status=='C'){   //Cerrado
-				if(empty($factura)){
-					$rt = 'Cerrado';
-				}else{
+				if(!empty($factura)){
 					$rt = $factura;
+				}elseif(!empty($vence)){
+					$rt = 'Expirado';
+				}else{
+					$rt = 'Cerrado';
 				}
 			}elseif($status=='B'){   //BackOrder
 				$rt = 'BackOrder';
@@ -109,15 +111,15 @@ class pfaclite extends validaciones{
 
 		$grid->column_orderby('N&uacute;mero', $uri ,'numero');
 		if($this->secu->puede('103')){
-			$grid->column_orderby('Factura'     , "<hfactura><#status#>|<#factura#>|<#numero#></hfactura>",'factura');
+			$grid->column_orderby('Factura'     , '<hfactura><#status#>|<#factura#>|<#numero#>|<#vence#></hfactura>','factura');
 		}else{
-			$grid->column_orderby('Factura'     , "<hfactura><#status#>|<#factura#>|<#numero#></hfactura>",'factura');
+			$grid->column_orderby('Factura'     , 'factura','factura');
 		}
-		$grid->column_orderby('Fecha'        , '<dbdate_to_human><#fecha#></dbdate_to_human> <#hora#>','fecha', "align='center'");
+		$grid->column_orderby('Fecha'        , '<dbdate_to_human><#fecha#></dbdate_to_human> <#hora#>','fecha', 'align=\'center\'');
 		$grid->column_orderby('Cliente'      , 'cod_cli','cod_cli');
-		$grid->column_orderby('Nombre'       , 'nombre' ,'nombre');
+		$grid->column_orderby('Nombre'       , 'nombre' ,'nombre' );
 		if(!(strlen($vd)>0))
-			$grid->column_orderby('Vendedor'     , 'vd'     ,'vd');
+			$grid->column_orderby('Vend.'     , 'vd'     ,'vd');
 		$grid->column_orderby('Peso'         , '<nformat><#peso#></nformat>'  , 'peso'  , 'align=\'right\'');
 		$grid->column_orderby('Total'        , '<nformat><#totalg#></nformat>', 'totalg', 'align=\'right\'');
 
@@ -158,7 +160,7 @@ class pfaclite extends validaciones{
 				$ban=$this->db->simple_query($mSQL);
 				if($ban==false){ memowrite($mSQL,'pfaclite'); }
 			}
-			$mSQL="UPDATE pfac SET status='C' WHERE fecha < DATE_SUB(CURDATE(),INTERVAL 3 DAY) AND status='P'";
+			$mSQL="UPDATE pfac SET status='C', vence=CURDATE() WHERE fecha < DATE_SUB(CURDATE(),INTERVAL 5 DAY) AND status='P'";
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'pfaclite'); }
 		}
