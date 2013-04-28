@@ -449,20 +449,52 @@ class Tbrutas extends Controller {
 			$data = array();
 
 			$codrut = $this->datasis->dameval("SELECT codrut FROM tbrutas a WHERE a.id=$mid");
-		
+
+			// Guarda la Primera
+
+			$orden = $this->datasis->dameval("SELECT max(orden)+1 FROM tbdestinos WHERE codrut='".$codrut."' AND codofiorg='".substr($codrut,0,2)."'");
+			if ( empty($orden) ) $orden = 1;
 			$data['codrut']    = $codrut;
 			$data['codofiorg'] = substr($data['codrut'],0,2);
 			$data['codofides'] = $moficina;
 			$data['hora']      = $mhora;
 			$data['mostrar']   = $mostrar;
-		
-			$orden = $this->datasis->dameval("SELECT max(orden) FROM tbdestinos WHERE codrut='".$data['codrut']."' AND codofiorg='".$data['codofiorg']."'");
-			if ( empty($orden) ) $orden = 0;
-		
-			$data['orden'] = $orden+1;
- 
+			$data['orden']     = $orden;
 			$this->db->insert('tbdestinos', $data);
+
+			// Guarda la Salida
+			if ( $orden > 1 ){ 
+				$data['codrut']    = $codrut;
+				$data['codofiorg'] = $moficina;
+				$data['codofides'] = $moficina;
+				$data['hora']      = $mhora;
+				$data['mostrar']   = $mostrar;
+				$data['orden']     = $orden;
+				$this->db->insert('tbdestinos', $data);
+			}
+
+			// Guarda los toques
+			if ( $orden > 2 ) { 
+				$mSQL = "SELECT * FROM tbdestinos WHERE codrut='".$codrut."' AND codofiorg='".substr($codrut,0,2)."' AND orden>1 AND orden<${orden} ORDER BY orden";
+				$query = $this->db->query($mSQL);
+				if ( $query->num_rows() > 0 ) {
+					$i = 1;
+					foreach ($query->result() as $row){
+						$data['codrut']    = $codrut;
+						$data['codofiorg'] = $row->codofides;
+						$data['codofides'] = $moficina;
+						$data['hora']      = $mhora;
+						$data['mostrar']   = $mostrar;
+						$data['orden']     = $orden;
+						$this->db->insert('tbdestinos', $data);
+						$i++;
+					}
+				}
+			}
+
 			$salida = "Destino Guardado";
+
+
 
 		} elseif ($oper == 'Edit') {
 			$moficina = $this->input->post('oficina');
@@ -489,7 +521,7 @@ class Tbrutas extends Controller {
 			$this->db->query("DELETE FROM tbdestinos WHERE id=$mid");
 			$salida = "Destino Eiminado $mid";
 		}
-
+/*
 		//Arregla la Secuencia
 		$mSQL = "SELECT orden, id FROM tbdestinos WHERE codrut='".$codrut."' AND codofiorg='".substr($codrut,0,2)."' ORDER BY orden";
 		$query = $this->db->query($mSQL);
@@ -501,6 +533,8 @@ class Tbrutas extends Controller {
 				$i++;
 			}
 		}
+*/
+
 		
 		echo $salida;
 		
@@ -783,43 +817,6 @@ class Tbrutas extends Controller {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-
-		$grid->addField('codofiorg');
-		$grid->label('Origen');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 60,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:5, maxlength: 5 }',
-		));
-
-
-		$grid->addField('codofides');
-		$grid->label('Oficina');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 60,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:5, maxlength: 5 }',
-		));
-
-		$grid->addField('desofi');
-		$grid->label('Destino');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'left'",
-			'edittype'      => "'text'",
-			'width'         => 240,
-		));
-
-
 		$grid->addField('orden');
 		$grid->label('Orden');
 		$grid->params(array(
@@ -834,6 +831,49 @@ class Tbrutas extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
 		));
 
+		$grid->addField('codofiorg');
+		$grid->label('Ofic.');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:5, maxlength: 5 }',
+		));
+
+		$grid->addField('odesofi');
+		$grid->label('Origen');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'left'",
+			'edittype'      => "'text'",
+			'width'         => 150,
+		));
+
+		$grid->addField('codofides');
+		$grid->label('Ofic');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:5, maxlength: 5 }',
+		));
+
+		$grid->addField('ddesofi');
+		$grid->label('Destino');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'left'",
+			'edittype'      => "'text'",
+			'width'         => 150,
+		));
 
 		$grid->addField('mostrar');
 		$grid->label('Ver');
@@ -847,7 +887,6 @@ class Tbrutas extends Controller {
 			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
 
-
 		$grid->addField('hora');
 		$grid->label('Hora');
 		$grid->params(array(
@@ -860,7 +899,6 @@ class Tbrutas extends Controller {
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
 
-
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
@@ -871,7 +909,6 @@ class Tbrutas extends Controller {
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
-
 
 		$grid->showpager(false);
 		$grid->setWidth('');
@@ -936,8 +973,15 @@ class Tbrutas extends Controller {
 
 		$codrut = $this->db->escape($row['codrut']);
 
-		$grid       = $this->jqdatagrid;
-		$mSQL    = "SELECT a.*, b.desofi FROM tbdestinos a JOIN tbofici b ON a.codofides=b.codofi WHERE codrut=${codrut} AND codofiorg=MID(codrut,1,2) ORDER BY orden";
+		$grid    = $this->jqdatagrid;
+		$mSQL    = "
+		SELECT a.*, b.desofi odesofi, c.desofi ddesofi 
+		FROM tbdestinos a 
+			JOIN tbofici b ON a.codofiorg=b.codofi 
+			JOIN tbofici c ON a.codofides=c.codofi 
+		WHERE codrut=${codrut} 
+		ORDER BY orden, a.codofiorg ";
+
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
