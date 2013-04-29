@@ -36,11 +36,11 @@ class Pers extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"a1", "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Imprimir"));
+		$grid->wbotonadd(array('id'=>'a1', 'img'=>'images/pdf_logo.gif',  'alt' => 'Imprimir', 'label'=>'Imprimir'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -892,8 +892,9 @@ class Pers extends Controller {
 		$grid->setSearch( $this->datasis->sidapuede('PERS','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+		$grid->setOndblClickRow('');
 
-		$grid->setBarOptions("\t\taddfunc: persadd,\n\t\teditfunc: persedit");
+		$grid->setBarOptions('addfunc: persadd, editfunc: persedit');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
