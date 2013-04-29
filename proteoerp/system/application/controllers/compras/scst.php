@@ -82,18 +82,21 @@ class Scst extends Controller {
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 
+		$funciones = '
+		function ltransac(el, val, opts){
+			var link=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return link;
+		};';
+
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
 		$param['listados']     = $this->datasis->listados('SCST', 'JQ');
 		$param['otros']        = $this->datasis->otros('SCST', 'JQ');
-
 		$param['centerpanel']  = $centerpanel;
-		//$param['funciones']    = $funciones;
-
+		$param['funciones']    = $funciones;
 		$param['temas']        = array('proteo','darkness','anexos1');
-
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
 		$param['encabeza']     = $this->titp;
@@ -108,6 +111,15 @@ class Scst extends Controller {
 	//***************************
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '<script type="text/javascript">';
+
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};';
 
 		$bodyscript .= '
 		function scstshow(){
@@ -555,7 +567,7 @@ class Scst extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -656,7 +668,7 @@ class Scst extends Controller {
 
 
 		$grid->addField('depo');
-		$grid->label('Depo');
+		$grid->label('Deposito');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -930,6 +942,7 @@ class Scst extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 8 }',
+			'formatter'     => 'ltransac'
 		));
 
 
@@ -1402,7 +1415,7 @@ class Scst extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 

@@ -49,10 +49,16 @@ class Smov extends Controller {
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'] );
 
 		$adic = array(
-			array("id"=>"fedita"  ,  "title"=>"Agregar/Editar Banco o Caja"),
-			array("id"=>"fsclisel",  "title"=>"Seleccionar cliente")
+			array('id'=>'fedita'  , 'title'=>'Agregar/Editar Banco o Caja'),
+			array('id'=>'fsclisel', 'title'=>'Seleccionar cliente')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
+
+		$funciones = '
+		function ltransac(el, val, opts){
+			var link=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return link;
+		};';
 
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
@@ -61,7 +67,7 @@ class Smov extends Controller {
 		$param['listados']     = $this->datasis->listados('SMOV', 'JQ');
 		$param['otros']        = $this->datasis->otros('SMOV', 'JQ');
 		$param['centerpanel']  = $centerpanel;
-		//$param['funciones']    = $funciones;
+		$param['funciones']    = $funciones;
 		$param['temas']        = array('proteo','darkness','anexos1');
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
@@ -77,6 +83,15 @@ class Smov extends Controller {
 	function bodyscript( $grid0 ){
 
 		$bodyscript  = '<script type="text/javascript">';
+
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};';
 
 		$bodyscript .= '
 		function selscli() {
@@ -491,8 +506,11 @@ class Smov extends Controller {
 			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => 'false',
-			'width'         => 70,
+			'width'         => 80,
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:30, maxlength: 8 }',
 			'edittype'      => "'text'",
+			'formatter'     => 'ltransac'
 		));
 
 

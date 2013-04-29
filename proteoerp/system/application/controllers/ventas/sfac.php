@@ -1226,7 +1226,7 @@ class Sfac extends Controller {
 	//Definicion del Grid y la Forma
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 

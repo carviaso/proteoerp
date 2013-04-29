@@ -40,7 +40,7 @@ class Sprm extends Controller {
 		$readyLayout = $grid->readyLayout2( 212, 140, $param['grids'][0]['gridname']);
 
 		//Panel Central y Sur
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'] );
 
 		//Funciones que ejecutan los botones
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
@@ -56,11 +56,15 @@ class Sprm extends Controller {
 
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$funciones = '';
+		$funciones = '
+		function ltransac(el, val, opts){
+			var link=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return link;
+		};';
 
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
@@ -88,6 +92,14 @@ class Sprm extends Controller {
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
 
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};';
 
 		$bodyscript .= '
 		jQuery("#princheque").click( function(){
@@ -562,7 +574,7 @@ class Sprm extends Controller {
 
 
 		$grid->addField('benefi');
-		$grid->label('Benefi');
+		$grid->label('Beneficiario');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -588,6 +600,7 @@ class Sprm extends Controller {
 			'editable'      => $editar,
 			'width'         => 80,
 			'edittype'      => "'text'",
+			'formatter'     => 'ltransac'
 		));
 
 
@@ -640,7 +653,7 @@ class Sprm extends Controller {
 */
 
 		$grid->addField('pmora');
-		$grid->label('Pmora');
+		$grid->label('P.Mora');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
