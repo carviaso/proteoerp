@@ -56,6 +56,12 @@ class Sfac extends Controller {
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 
+		$funciones = '
+		function ltransac(el, val, opts){
+			var link=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return link;
+		};';
+
 		$param['WestPanel']    = $WestPanel;
 		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
 		//$param['EastPanel']  = $EastPanel;
@@ -64,7 +70,7 @@ class Sfac extends Controller {
 		$param['listados']     = $this->datasis->listados('SFAC', 'JQ');
 		$param['otros']        = $this->datasis->otros('SFAC', 'JQ');
 		$param['centerpanel']  = $centerpanel;
-		//$param['funciones']    = $funciones;
+		$param['funciones']    = $funciones;
 		$param['temas']        = array('proteo','darkness','anexos1');
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
@@ -139,6 +145,15 @@ class Sfac extends Controller {
 	//
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '<script type="text/javascript">';
+
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};';
 
 		$bodyscript .= '
 		function sfacadd(){
@@ -448,7 +463,7 @@ class Sfac extends Controller {
 	//Definicion del Grid y la Forma
 	function defgrid( $deployed = false, $xmes = 'true' ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -633,7 +648,7 @@ class Sfac extends Controller {
 
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -859,6 +874,7 @@ class Sfac extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 8 }',
+			'formatter'     => 'ltransac'
 		));
 
 
@@ -3690,81 +3706,54 @@ class Sfac extends Controller {
 				}
 			}else{ //Si es devolucion
 				$factura   = $do->get('factura');
-				$dbfactura = $factura;
-				$debe      = $this->datasis->dameval("SELECT monto-abonos FROM smov WHERE tipo_doc='FC' AND numero=$dbfactura");
+				$dbfactura = $this->db->escape($factura);
+				$debe      = $this->datasis->dameval("SELECT monto-abonos AS saldo FROM smov WHERE tipo_doc='FC' AND numero=${dbfactura}");
 				$haber     = $totneto;
 				if(empty($debe)) $debe=0;
 
-				$saldo  = $debe-$haber;
-
-				//Si se le debe hace un anticipo
-				if($saldo<0){
-					$mnumant = $this->datasis->fprox_numero('nancli');
-
-					$data=array();
-					$data['cod_cli']    = $cod_cli;
-					$data['nombre']     = $nombre;
-					$data['dire1']      = $direc;
-					$data['dire2']      = $dire1;
-					$data['tipo_doc']   = 'AN';
-					$data['numero']     = $mnumant;
-					$data['fecha']      = $estampa;
-					$data['monto']      = abs($saldo);
-					$data['impuesto']   = 0;
-					$data['abonos']     = 0;
-					$data['vence']      = $fecha;
-					$data['tipo_ref']   = 'NC';
-					$data['num_ref']    = $numero;
-					$data['observa1']   = 'POR DEVOLUCION DE FACTURA '.$factura;
-					$data['estampa']    = $estampa;
-					$data['hora']       = $hora;
-					$data['transac']    = $transac;
-					$data['usuario']    = $usuario;
-					$data['codigo']     = '';
-					$data['descrip']    = '';
-
-					$mSQL = $this->db->insert_string('smov', $data);
-					$ban=$this->db->simple_query($mSQL);
-					if($ban==false){ memowrite($mSQL,'sfac');}
+				if($debe >= $haber){
+					$abono=$haber;
+				}else{
+					$abono=$debe;
 				}
 
-				if($debe>0){
-					$data=array();
-					$data['cod_cli']    = $cod_cli;
-					$data['nombre']     = $nombre;
-					$data['dire1']      = $direc;
-					$data['dire2']      = $dire1;
-					$data['tipo_doc']   = 'NC';
-					$data['numero']     = $numero;
-					$data['fecha']      = $fecha;
-					$data['monto']      = $debe;
-					$data['impuesto']   = $iva;
-					$data['abonos']     = 0;
-					$data['vence']      = $fecha;
-					$data['tipo_ref']   = 'DV';
-					$data['num_ref']    = $numero;
-					$data['observa1']   = 'POR DEVOLUCION DE '.$factura ;
-					$data['estampa']    = $estampa;
-					$data['hora']       = $hora;
-					$data['transac']    = $transac;
-					$data['usuario']    = $usuario;
-					$data['codigo']     = '';
-					$data['descrip']    = '';
+				$data=array();
+				$data['cod_cli']    = $cod_cli;
+				$data['nombre']     = $nombre;
+				$data['dire1']      = $direc;
+				$data['dire2']      = $dire1;
+				$data['tipo_doc']   = 'NC';
+				$data['numero']     = $numero;
+				$data['fecha']      = $fecha;
+				$data['monto']      = $totneto;
+				$data['impuesto']   = $iva;
+				$data['abonos']     = $abono;
+				$data['vence']      = $fecha;
+				$data['tipo_ref']   = 'DV';
+				$data['num_ref']    = $numero;
+				$data['observa1']   = 'POR DEVOLUCION DE '.$factura ;
+				$data['estampa']    = $estampa;
+				$data['hora']       = $hora;
+				$data['transac']    = $transac;
+				$data['usuario']    = $usuario;
+				$data['codigo']     = '';
+				$data['descrip']    = '';
 
-					$mSQL = $this->db->insert_string('smov', $data);
-					$ban=$this->db->simple_query($mSQL);
-					if($ban==false){ memowrite($mSQL,'sfac');}
+				$mSQL = $this->db->insert_string('smov', $data);
+				$ban=$this->db->simple_query($mSQL);
+				if($ban==false){ memowrite($mSQL,'sfac');}
 
+				if($abono>0){
 					//Aplica la NC a la FC
 					$data=array();
-					$data['numccli']    = $numero; //numero abono
+					$data['numccli']    = $numero;
 					$data['tipoccli']   = 'NC';
 					$data['cod_cli']    = $cod_cli;
 					$data['tipo_doc']   = 'FC';
 					$data['numero']     = $factura;
 					$data['fecha']      = $fecha;
-					$data['monto']      = $debe;
-					$data['abono']      = $debe;
+					$data['monto']      = $totneto;
+					$data['abono']      = $abono;
 					$data['ppago']      = 0;
 					$data['reten']      = 0;
 					$data['cambio']     = 0;
@@ -3779,6 +3768,11 @@ class Sfac extends Controller {
 					$data['recriva']    = '';
 
 					$sql= $this->db->insert_string('itccli', $data);
+					$ban=$this->db->simple_query($sql);
+					if($ban==false){ memowrite($sql,'sfac'); $error++;}
+
+					$dbcod_cli = $this->db->escape($cod_cli);
+					$sql="UPDATE smov SET abonos=abonos+${abono} WHERE tipo_doc='FC' AND cod_cli=${dbcod_cli} AND numero=${dbfactura}";
 					$ban=$this->db->simple_query($sql);
 					if($ban==false){ memowrite($sql,'sfac'); $error++;}
 				}
@@ -3813,9 +3807,9 @@ class Sfac extends Controller {
 		if($this->db->table_exists('sinvehiculo') && $tipo_doc=='D'){
 			$factura  =$do->get('factura');
 			$dbfactura=$this->db->escape($factura);
-			$id=$this->datasis->dameval("SELECT id FROM sfac WHERE numero=$dbfactura AND tipo_doc='F'");
+			$id=$this->datasis->dameval("SELECT id FROM sfac WHERE numero=${dbfactura} AND tipo_doc='F'");
 			if(!empty($id)){
-				$this->db->simple_query("UPDATE sinvehiculo SET id_sfac=NULL WHERE id_sfac=$id");
+				$this->db->simple_query("UPDATE sinvehiculo SET id_sfac=NULL WHERE id_sfac=${id}");
 			}
 		}
 

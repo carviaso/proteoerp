@@ -39,35 +39,33 @@ class Casi extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'bimp', 'img'=>'assets/default/images/print.png',  'alt' => 'Reiprimir Asiento',  'label'=>'Imprimir Asiento'));
-		$grid->wbotonadd(array("id"=>"boton4", "img"=>"images/checklist.png", "alt" => 'Auditoria',         "label"=>"Herramientas"));
+		$grid->wbotonadd(array('id'=>'bimp'  , 'img'=>'assets/default/images/print.png', 'alt' => 'Reiprimir Asiento', 'label'=>'Imprimir Asiento'));
+		$grid->wbotonadd(array('id'=>'boton4', 'img'=>'images/checklist.png'           , 'alt' => 'Auditoria'        , 'label'=>'Herramientas'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-			array("id"=>"fedita" , "title"=>"Agregar/Editar Pedido"),
-			array("id"=>"fshow"  , "title"=>"Mostrar registro")
+			array('id'=>'fedita' , 'title'=>'Agregar/Editar Pedido'),
+			array('id'=>'fshow'  , 'title'=>'Mostrar registro')
 		);
 
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$centerpanel = '
-<div id="RightPane" class="ui-layout-center">
-	<div class="centro-centro">
-		<table id="newapi'.$param['grids'][0]['gridname'].'"></table>
-		<div id="pnewapi'.$param['grids'][0]['gridname'].'"></div>
-	</div>
-	<div class="centro-sur" id="adicional" style="overflow:auto;">
-		<table id="newapi'.$param['grids'][1]['gridname'].'"></table>
-	</div>
-</div> <!-- #RightPane -->
-';
+		<div id="RightPane" class="ui-layout-center">
+			<div class="centro-centro">
+				<table id="newapi'.$param['grids'][0]['gridname'].'"></table>
+				<div id="pnewapi'.$param['grids'][0]['gridname'].'"></div>
+			</div>
+			<div class="centro-sur" id="adicional" style="overflow:auto;">
+				<table id="newapi'.$param['grids'][1]['gridname'].'"></table>
+			</div>
+		</div> <!-- #RightPane -->';
 
 		$funciones = '
 		function ltransac(el, val, opts){
 			var meco=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
 			return meco;
-		};
-		';
+		};';
 
 
 		$param['WestPanel']    = $WestPanel;
@@ -104,8 +102,7 @@ class Casi extends Controller {
 			} else {
 				$.prompt("<h1>Transaccion invalida</h1>");
 			}
-		};
-		';
+		};';
 
 
 		$bodyscript .= '
@@ -275,7 +272,7 @@ class Casi extends Controller {
 	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -308,7 +305,7 @@ class Casi extends Controller {
 
 
 		$grid->addField('descrip');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -365,7 +362,7 @@ class Casi extends Controller {
 
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
@@ -389,7 +386,7 @@ class Casi extends Controller {
 		));
 
 		$grid->addField('origen');
-		$grid->label('Origen');
+		$grid->label('Or&iacute;gen');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
