@@ -679,9 +679,10 @@ class Bconci extends Controller {
 	}
 
 	function _pre_insert($do){
-		$codbanc = $do->get('codbanc');
-		$fecha   = $do->get('fecha');
-		$fecha   = substr($fecha,0,6).days_in_month(substr($fecha,4,2),substr($fecha,0,4));
+		$codbanc  = $do->get('codbanc');
+		$dbcodbanc= $this->db->escape($codbanc);
+		$fecha    = $do->get('fecha');
+		$fecha    = substr($fecha,0,6).days_in_month(substr($fecha,4,2),substr($fecha,0,4));
 		$do->set('fecha',$fecha);
 
 		$dbfecha  = $this->db->escape($fecha);
