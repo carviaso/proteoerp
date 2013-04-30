@@ -52,12 +52,18 @@ class Bmov extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central y Sur
-		$centerpanel = $grid->centerpanel( $id = "adicional", $param['grids'][0]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'adicional', $param['grids'][0]['gridname'] );
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
+
+		$funciones .= '
+		function ltransac(el, val, opts){
+			var link=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return link;
+		};';
 
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
@@ -65,7 +71,7 @@ class Bmov extends Controller {
 		$param['SouthPanel']   = $SouthPanel;
 		$param['listados']     = $this->datasis->listados('BMOV', 'JQ');
 		$param['otros']        = $this->datasis->otros('BMOV', 'JQ');
-		
+
 		$param['centerpanel']  = $centerpanel;
 		$param['funciones']    = $funciones;
 		$param['tema1']        = 'darkness';
@@ -73,7 +79,7 @@ class Bmov extends Controller {
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
 		$param['encabeza']     = $this->titp;
-		
+
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
@@ -85,17 +91,24 @@ class Bmov extends Controller {
 		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};';
+
+		$bodyscript .= '
 		$("#a1").click( function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				window.open(\'/proteoerp/formatos/ver/BMOV/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});
-		';
+		});';
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -107,7 +120,7 @@ class Bmov extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -122,7 +135,7 @@ class Bmov extends Controller {
 		));
 
 		$grid->addField('codbanc');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'align'      => "'center'",
 			'search'     => 'true',
@@ -143,7 +156,7 @@ class Bmov extends Controller {
 */
 
 		$grid->addField('numcuent');
-		$grid->label('Numcuent');
+		$grid->label('N.Cuenta');
 		$grid->params(array(
 			'search'     => 'true',
 			'editable'   => $editar,
@@ -189,7 +202,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'     => 'true',
 			'editable'   => $editar,
@@ -247,7 +260,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('concep2');
-		$grid->label('Concep2');
+		$grid->label('Concepto 2');
 		$grid->params(array(
 			'search'     => 'true',
 			'editable'   => $editar,
@@ -257,7 +270,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('concep3');
-		$grid->label('Concep3');
+		$grid->label('Concepto 3');
 		$grid->params(array(
 			'search'     => 'true',
 			'editable'   => $editar,
@@ -268,7 +281,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('clipro');
-		$grid->label('Clipro');
+		$grid->label('Cli/Pro');
 		$grid->params(array(
 			'search'     => 'true',
 			'editable'   => $editar,
@@ -309,7 +322,7 @@ class Bmov extends Controller {
 */
 
 		$grid->addField('comprob');
-		$grid->label('Comprob');
+		$grid->label('Comprobante');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -319,7 +332,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -364,7 +377,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('comision');
-		$grid->label('Comision');
+		$grid->label('Comisi&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -423,7 +436,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('concilia');
-		$grid->label('Concilia');
+		$grid->label('Conciliado');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'true',
@@ -449,7 +462,7 @@ class Bmov extends Controller {
 */
 
 		$grid->addField('abanco');
-		$grid->label('Abanco');
+		$grid->label('A.Banco');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -459,7 +472,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('anulado');
-		$grid->label('Nulo');
+		$grid->label('Anulado');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
@@ -470,7 +483,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('negreso');
-		$grid->label('Negreso');
+		$grid->label('N.Egreso');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -490,7 +503,7 @@ class Bmov extends Controller {
 */
 
 		$grid->addField('ndebito');
-		$grid->label('Ndebito');
+		$grid->label('N.D&eacute;bito');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -500,7 +513,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('ncausado');
-		$grid->label('Ncausado');
+		$grid->label('N.Causado');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -510,17 +523,7 @@ class Bmov extends Controller {
 
 
 		$grid->addField('ncredito');
-		$grid->label('Ncredito');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 70,
-			'edittype'      => "'text'",
-		));
-
-
-		$grid->addField('ncredito');
-		$grid->label('Ncredito');
+		$grid->label('N.Cr&eacute;dito');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -530,12 +533,13 @@ class Bmov extends Controller {
 
 
 		$grid->addField('transac');
-		$grid->label('Transac');
+		$grid->label('Transaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 80,
 			'edittype'      => "'text'",
+			'formatter'     => 'ltransac'
 		));
 
 		$grid->addField('usuario');
@@ -631,8 +635,7 @@ class Bmov extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -646,8 +649,7 @@ class Bmov extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -683,7 +685,7 @@ class Bmov extends Controller {
 
 	function tabla() {
 		$id = $this->uri->segment($this->uri->total_segments());
-		
+
 		$row = $this->datasis->damereg("SELECT clipro, tipo_op, numero, estampa, transac FROM bmov WHERE id=$id");
 
 		$transac  = $row['transac'];

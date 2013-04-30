@@ -526,7 +526,7 @@ class Bcaj extends Controller {
 		));
 
 		$grid->addField('envia');
-		$grid->label('Envia');
+		$grid->label('Env&iacute;a');
 		$grid->params(array(
 			'align'    => "'center'",
 			'search'        => 'true',
