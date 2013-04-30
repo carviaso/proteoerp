@@ -133,6 +133,7 @@ class Sinv extends Controller {
 		//Botones Panel Izq
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S')
 			$grid->wbotonadd(array("id"=>"sundecop", "img"=>"images/sundecop.jpeg", "alt" => 'Oculta/Muestra Inactivos', "label"=>"SUNDECOP"));
+
 		$grid->wbotonadd(array("id"=>"hinactivo","img"=>"images/basura.png",   "alt" => 'Oculta/Muestra Inactivos', "label"=>"Mostrar Inactivos"));
 
 		$WpAdic = "
@@ -183,14 +184,14 @@ class Sinv extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//*******************************************
+	//******************************************************************
 	//   Funciones
-	//*******************************************
+	//
 	function funciones($grid0){
 
 		//Coloca la Basura a los Productos Inactivos
 		$funciones = '
-		jQuery("#bpos1").jqGrid({
+		$("#bpos1").jqGrid({
 			url:\''.site_url('inventario/sinv/bpos1').'\',
 			ajaxGridOptions: { type: "POST"},
 			jsonReader: { root: "data", repeatitems: false},

@@ -41,17 +41,26 @@ class Tbofici extends Controller {
 		//Panel Central
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
-/*
-		$grid = $this->defgrid();
-		$param['grids'][] = $grid->deploy();
 
-		//Funciones que ejecutan los botones
-		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
-*/
+		$WpAdic = "
+		<tr><td><div class=\"tema1\">
+			<table cellpadding='0' cellspacing='0' style='width:90%;'>
+				<tr >
+					<td style='text-align:center;'>
+						<div class='botones' style='font-size:12pt;' align='right'>GASTOS &nbsp;</div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:45px;text-align:left;vertical-align:top;' href='#' id='agregag'>".img(array('src' =>"images/agrega4.png", 'height' => 18, 'alt' => 'Agregar', 'title' => 'Agregar', 'border'=>'0'))."</a></div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:45px;text-align:left;vertical-align:top;' href='#' id='eliming'>".img(array('src' =>"images/delete.png",  'height' => 18, 'alt' => 'Agregar', 'title' => 'Agregar', 'border'=>'0'))."</a></div></td>
+				</tr>
+			</table>
+			</div>
+		</td></tr>\n
+		";
+
+		$grid->setWpAdicional($WpAdic);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"agregag",   "img"=>"images/agrega4.png",  "alt" => "Agrega Destino",   "label"=>"Agrega Gasto", "tema"=>'anexos'));
-		$grid->wbotonadd(array("id"=>"eliming",   "img"=>"images/delete.png",  "alt" => "Elimina Destino",  "label"=>"Elimina Gasto", "tema"=>'anexos'));
+		$grid->wbotonadd(array("id"=>"precios", "img"=>"images/recalcular.png", "alt" => "Precios",    "label"=>"Precios",    "tema"=>'anexos'));
+		$grid->wbotonadd(array("id"=>"descue1", "img"=>"images/recalcular.png", "alt" => "Descuentos", "label"=>"Descuentos", "tema"=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -61,8 +70,11 @@ class Tbofici extends Controller {
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
+		$funciones = '';
+
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
+		$param['funciones']   = $funciones;
 		$param['readyLayout'] = $readyLayout;
 		$param['SouthPanel']  = $SouthPanel;
 		$param['centerpanel'] = $centerpanel;
@@ -80,7 +92,7 @@ class Tbofici extends Controller {
 	//Funciones de los Botones
 	//
 	function bodyscript( $grid0, $grid1 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
 		function tboficiadd(){
@@ -105,6 +117,33 @@ class Tbofici extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+
+		$bodyscript .= '
+		$("#precios").click(function(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'precioforma').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"LISTA DE PRECIOS", width: 480, height: 500 } );
+					$("#fshow").dialog( "open" );
+				});
+
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#descue1").click(function(){
+			$.post("'.site_url($this->url.'descueforma').'/", function(data){
+				$("#fshow").html(data);
+				$("#fshow").dialog( { title:"DESCUENTOS", width: 350, height: 350 } );
+				$("#fshow").dialog( "open" );
+			});
+		});';
+
 
 		$bodyscript .= '
 		function tboficishow(){
@@ -148,10 +187,9 @@ class Tbofici extends Controller {
 			}
 		};';
 
-
 		// Eliminar Destino
 		$bodyscript .= '
-		jQuery("#eliming").click( function(){
+		$("#eliming").click( function(){
 			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid1.'").jqGrid(\'getRowData\',id);
@@ -176,7 +214,7 @@ class Tbofici extends Controller {
 
 		// Agrgaga Destinos
 		$bodyscript .= '
-		jQuery("#agregag").click( function(){
+		$("#agregag").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
@@ -213,8 +251,6 @@ class Tbofici extends Controller {
 
 			} else { $.prompt("<h1>Por favor Seleccione una Ruta</h1>");}
 		});';
-
-
 
 		//Wraper de javascript
 		$bodyscript .= '
@@ -309,6 +345,240 @@ class Tbofici extends Controller {
 	}
 
 	//******************************************************************
+	// Formato de la ventana
+	//
+	function precioforma( $id = 0 ){
+		$msalida = '<script type="text/javascript">'."\n";
+		$msalida .= 'var mid='.$id.";\n";
+
+		$codofi  = $this->datasis->dameval("SELECT codofi FROM tbofici WHERE id=$id");
+		$oficina = $this->datasis->dameval("SELECT CONCAT(codofi,' ',desofi) oficina FROM tbofici WHERE id=$id");
+
+		$mSQL  = "SELECT codofi, CONCAT(codofi, ' ', desofi) descrip FROM tbofici WHERE id<>$id AND codofi NOT IN (SELECT codofiorg FROM tbprecios WHERE codofides='$codofi') ORDER BY codofi ";
+		$oficinas = $this->datasis->llenajqselect($mSQL, false );
+		
+		$msalida .= '
+		$("#bpos1").jqGrid({
+			url:\''.site_url($this->url.'precios').'/\'+mid,
+			ajaxGridOptions: { type: "POST"},
+			jsonReader: { root: "data", repeatitems: false},
+			datatype: "json",
+			hiddengrid: false,
+			postdata: { tboficiid: "wapi"},
+			width: 450,
+			height: 300, 
+			colNames:[\'id\', \'Codigo\',\'Oficina\', \'BusCama.\',\'Ejecutivo\'],
+			colModel:[
+				{name:\'id\',       index:\'id\',        width: 10, hidden:true},
+				{name:\'codofides\',index:\'codofides\', width: 50, editable:true, edittype: \'select\', editoptions: { value: '.$oficinas.',  style:"width:160px"} },
+				{name:\'desofi\',   index:\'desofi\',    width:150, editable:true, editoptions: {readonly:\'readonly\'}},
+				{name:\'prec_01\',  index:\'prec_01\',   width: 60, editable:true, editoptions: {size:10,maxlength:10,dataInit:function(elem){$(elem).numeric();}},formatter:\'number\',formatoptions:{decimalSeparator:".",thousandsSeparator:",",decimalPlaces:2}, align:\'right\' },
+				{name:\'prec_02\',  index:\'prec_02\',   width: 60, editable:true, editoptions: {size:10,maxlength:10,dataInit:function(elem){$(elem).numeric();}},formatter:\'number\',formatoptions:{decimalSeparator:".",thousandsSeparator:",",decimalPlaces:2}, align:\'right\' },
+			],
+			rowNum:1000,
+			pginput: false,
+			pgbuttons: false,
+			rowList:[],
+			pager: \'#pbpos1\',
+			sortname: \'id\',
+			viewrecords: false,
+			sortorder: "desc",
+			editurl: \''.site_url($this->url.'precios').'/\'+mid,
+			caption: "Lista de Precios desde '.$oficina.'"
+		});
+		jQuery("#bpos1").jqGrid(\'navGrid\',"#pbpos1",
+			{edit:true, add:true, del:true, search: false },
+			{ beforeShowForm: function(frm){ $(\'#codofides\').hide(); }},
+			{ beforeShowForm: function(frm){ $(\'#codofides\').show(); } }
+		);
+		';
+		$msalida .= "\n</script>\n";
+		$msalida .= "<div class=\"tema1\"><center><table id=\"bpos1\"></table></div><div id='pbpos1'></center></div>\n";
+	
+		echo $msalida;
+
+	}
+
+	//******************************************************************
+	// Formato de la ventana
+	//
+	function descueforma(){
+		$msalida = '<script type="text/javascript">'."\n";
+
+		$msalida .= '
+		$("#descu1").jqGrid({
+			url:\''.site_url($this->url.'descuento').'\',
+			ajaxGridOptions: { type: "POST"},
+			jsonReader: { root: "data", repeatitems: false},
+			datatype: "json",
+			hiddengrid: false,
+			postdata: { tbdescuid: "wapi"},
+			width: 330,
+			height: 170, 
+			colNames:[\'id\', \'Codigo\',\'Descripcion\', \'Procentaje.\'],
+			colModel:[
+				{name:\'id\',     index:\'id\',     width: 10, hidden:true},
+				{name:\'coddes\', index:\'coddes\', width: 50, editable:true },
+				{name:\'desdes\', index:\'desdes\', width:150, editable:true },
+				{name:\'mont\',   index:\'mont\',   width: 60, editable:true, editoptions: {size:10,maxlength:10,dataInit:function(elem){$(elem).numeric();}},formatter:\'number\',formatoptions:{decimalSeparator:".",thousandsSeparator:",",decimalPlaces:2}, align:\'right\' },
+			],
+			rowNum:1000,
+			pginput: false,
+			pgbuttons: false,
+			rowList:[],
+			pager: \'#pdescu1\',
+			sortname: \'id\',
+			viewrecords: false,
+			sortorder: "desc",
+			editurl: \''.site_url($this->url.'descuento').'\',
+			caption: "Descuentos"
+		});
+		';
+
+		$msalida .= '
+		$("#descu1").jqGrid(\'navGrid\',"#pdescu1",
+			{ edit:true, add:true, del:true, search: false },
+			{ beforeShowForm: function(frm){ $(\'#coddes\').attr("readonly", "readonly"); }},
+			{ beforeShowForm: function(frm){ $(\'#coddes\').removeAttr("readonly"); } }
+		);
+		';
+
+		$msalida .= "\n</script>\n";
+
+		$msalida .= "<div><center><table id=\"descu1\"></table></div><div id='pdescu1'></center></div>\n";
+	
+		echo $msalida;
+
+	}
+
+	//******************************************************************
+	// Lista de Precios
+	//
+	function precios( $id = 0 ){
+		$this->load->library('jqdatagrid');
+
+		$oper  = $this->input->post('oper');
+		$mid   = $this->input->post('id');
+		$data  = $_POST;
+
+		unset($data['oper']);
+		unset($data['id']);
+
+		if($oper == 'add'){
+			if(false == empty($data)){
+				$codofi  = $this->datasis->dameval("SELECT codofi FROM tbofici WHERE id=$id");
+				$check = $this->datasis->dameval("SELECT count(*) FROM tbprecios WHERE codofiorg=$codofi AND codofides=".$this->db->escape($data['codofides']));
+				if ( $check == 0 ){
+					unset($data['desofi']);
+					$data['codofiorg'] = $codofi; 
+					$this->db->insert('tbprecios', $data);
+					logusu('TBOFICI',"Precio Agregado ".$this->db->escape($data['codofides'])." INCLUIDO");
+					echo "Registro Agregado id=".$id;
+				} else
+					echo "Ya existe un registro con ese destino";
+			} else
+				echo "Fallo Agregado!!!";
+
+		} elseif($oper == 'edit') {
+			unset($data['codofi']);
+			$this->db->where("id", $mid);
+			$this->db->update('tbprecios', $data);
+			logusu('TBOFICI',"Precio Modificado ".$mid." MODIFICADO");
+			echo "Precio Modificado";
+			
+		} elseif ($oper == 'del'){
+			// Borra
+			$this->db->query("DELETE FROM tbprecios WHERE id=$mid ");
+			logusu('TBOFICI',"Registro   ELIMINADO");
+			echo "Registro Eliminado";
+
+
+		} elseif ( $oper == false ) {
+			$id = $this->uri->segment(4);
+			if ( $id > 0 ) {
+				$codofi  = $this->datasis->dameval("SELECT codofi FROM tbofici WHERE id=$id");
+				
+				$this->db->select(array('a.id', 'a.codofides', 'CONCAT(b.desofi," (",a.codofides,")") desofi', 'a.prec_01', 'a.prec_02'));
+				$this->db->from('tbprecios a');
+				$this->db->join('tbofici b','a.codofides=b.codofi');
+				$this->db->where('codofiorg',$codofi);
+
+				$rs = $this->datasis->codificautf8($this->db->get()->result_array());
+				$response['data'] = $rs;
+				$rs = json_encode( $response);
+				echo $rs;
+			}
+		}
+		
+	}
+
+	//******************************************************************
+	// Descuentos
+	//
+	function descuento(){
+		$this->load->library('jqdatagrid');
+
+		$oper  = $this->input->post('oper');
+		$mid   = $this->input->post('id');
+		$data  = $_POST;
+
+		unset($data['oper']);
+		unset($data['id']);
+
+		if($oper == 'add'){
+			if(false == empty($data)){
+				$check = $this->datasis->dameval("SELECT count(*) FROM tbdescu WHERE coddes=".$this->db->escape($data['coddes']));
+				if ( $check == 0 ){ 
+					$this->db->insert('tbdescu', $data);
+					logusu('TBOFICI',"Descuento Agregado ".$this->db->escape($data['coddes'])." INCLUIDO");
+					echo "Registro Agregado id=".$id;
+				} else
+					echo "Ya existe un descuento con ese codigo";
+			} else
+				echo "Fallo Agregado!!!";
+
+		} elseif($oper == 'edit') {
+			unset($data['coddes']);
+			$this->db->where("id", $mid);
+			$this->db->update('tbdescu', $data);
+			logusu('TBOFICI',"Descuento Modificado ".$mid." MODIFICADO");
+			echo "Descuento Modificado";
+			
+		} elseif ($oper == 'del'){
+			// Borra
+			$this->db->query("DELETE FROM tbdescu WHERE id=$mid ");
+			logusu('TBOFICI',"Descuento ELIMINADO");
+			echo "Descuento Eliminado";
+
+
+		} elseif ( $oper == false ) {
+			$id = $this->uri->segment(4);
+				
+			$this->db->select(array('a.id', 'a.coddes', 'a.desdes', 'a.mont', 'a.opc'));
+			$this->db->from('tbdescu a');
+			$this->db->orderby('a.coddes');
+
+			$rs = $this->datasis->codificautf8($this->db->get()->result_array());
+			$response['data'] = $rs;
+			$rs = json_encode( $response);
+			echo $rs;
+
+		}
+	}
+
+
+
+	//******************************************************************
+	//   Funciones
+	//
+	function funciones($grid0 = ''){
+		$funciones = '';
+		return $funciones;
+	}
+
+
+
+	//******************************************************************
 	//  Gestiona Destinos
 	//
 	function gastos(){
@@ -317,7 +587,6 @@ class Tbofici extends Controller {
 		$salida = $oper.' '.$mid;
 		
 		if ( $oper == 'Add') {
-
 			$codgas = $this->input->post('gasto');
 			$codofi = $this->datasis->dameval("SELECT codofi FROM tbofici WHERE id=$mid");
 		
@@ -474,6 +743,8 @@ class Tbofici extends Controller {
 							$("#ladicional").html(msg);
 						}
 					});
+					jQuery("#bpos1").jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'precios/').'/"+id+"/", page:1});
+					jQuery("#bpos1").trigger("reloadGrid");
 				}
 			}'
 		);
@@ -514,7 +785,7 @@ class Tbofici extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('tbofici');
 
-		$response   = $grid->getData('tbofici', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('tbofici', array(array()), array(), false, $mWHERE, 'codofi' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
