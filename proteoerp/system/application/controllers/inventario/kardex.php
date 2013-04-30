@@ -138,7 +138,7 @@ class Kardex extends Controller {
 			$grid->column('Or&iacute;gen','<convierte><#origen#>|'.$link.'</convierte>','align=\'left\'' );
 			$grid->column('Fecha'        ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
 			$grid->column('Cantidad'     ,'<nformat><#cantidad#></nformat>'  ,'align=\'right\'');
-			$grid->column('Acumulado'    ,'<nformat><#salcant#></nformat>'   ,'align=\'right\'');
+			$grid->column('Acumulado'    ,'<b><nformat><#salcant#></nformat></b>'   ,'align=\'right\'');
 			$grid->column('Monto'        ,'<nformat><#monto#></nformat>'     ,'align=\'right\'');
 			$grid->column('Saldo'        ,'<nformat><#saldo#></nformat>'     ,'align=\'right\'');
 			$grid->column('Costo Prom.'  ,'<nformat><#promedio#></nformat>'  ,'align=\'right\'');

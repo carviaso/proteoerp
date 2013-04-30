@@ -1684,48 +1684,42 @@ function chrif(rif){
 		$edit->rifci->maxlength =13;
 		$edit->rifci->size =13;
 
-		$obj  ='dire11';
-		$edit->$obj = new inputField('Oficina',$obj);
-		$edit->$obj->rule = 'trim';
-		$edit->$obj->size      = 45;
-		$edit->$obj->maxlength = 60;
-		$edit->$obj->style = 'width:95%;';
+		$edit->dire11 = new inputField('Oficina','dire11');
+		$edit->dire11->rule = 'trim';
+		$edit->dire11->size      = 45;
+		$edit->dire11->maxlength = 60;
+		$edit->dire11->style = 'width:95%;';
 
-		$obj  ='dire12';
-		$edit->$obj = new inputField('',$obj);
-		$edit->$obj->rule = 'trim';
-		$edit->$obj->size      = 45;
-		$edit->$obj->maxlength = 40;
-		$edit->$obj->style = 'width:95%;';
+		$edit->dire12 = new inputField('','dire12');
+		$edit->dire12->rule = 'trim';
+		$edit->dire12->size      = 45;
+		$edit->dire12->maxlength = 40;
+		$edit->dire12->style = 'width:95%;';
 
-		$obj ='ciudad1';
-		$edit->$obj = new dropdownField('Ciudad',$obj);
-		$edit->$obj->rule = 'trim';
-		$edit->$obj->option('','Seleccionar');
-		$edit->$obj->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
-		$edit->$obj->style = 'width:200px';
-		$edit->$obj->insertValue = $this->datasis->traevalor('CIUDAD');
+		$edit->ciudad1 = new dropdownField('Ciudad','ciudad1');
+		$edit->ciudad1->rule = 'trim';
+		$edit->ciudad1->option('','Seleccionar');
+		$edit->ciudad1->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
+		$edit->ciudad1->style = 'width:200px';
+		$edit->ciudad1->insertValue = $this->datasis->traevalor('CIUDAD');
 
-		$obj  ='dire21';
-		$edit->$obj = new inputField('Envio',$obj);
-		$edit->$obj->rule = 'trim';
-		$edit->$obj->size      = 45;
-		$edit->$obj->maxlength = 40;
-		$edit->$obj->style = 'width:95%;';
+		$edit->dire21 = new inputField('Envio','dire21');
+		$edit->dire21->rule = 'trim';
+		$edit->dire21->size      = 45;
+		$edit->dire21->maxlength = 40;
+		$edit->dire21->style = 'width:95%;';
 
-		$obj  ='dire22';
-		$edit->$obj = new inputField('',$obj);
-		$edit->$obj->rule = 'trim';
-		$edit->$obj->size      = 45;
-		$edit->$obj->maxlength = 40;
-		$edit->$obj->style = 'width:95%;';
+		$edit->dire22 = new inputField('','dire22');
+		$edit->dire22->rule = 'trim';
+		$edit->dire22->size      = 45;
+		$edit->dire22->maxlength = 40;
+		$edit->dire22->style = 'width:95%;';
 
-		$obj='ciudad2';
-		$edit->$obj = new dropdownField('Ciudad',$obj);
-		$edit->$obj->rule = 'trim';
-		$edit->$obj->option('','Seleccionar');
-		$edit->$obj->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
-		$edit->$obj->style = 'width:200px';
+		$edit->ciudad2 = new dropdownField('Ciudad','ciudad2');
+		$edit->ciudad2->rule = 'trim';
+		$edit->ciudad2->option('','Seleccionar');
+		$edit->ciudad2->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
+		$edit->ciudad2->style = 'width:200px';
 
 		$edit->repre  = new inputField('Representante', 'repre');
 		$edit->repre->rule = 'trim';
