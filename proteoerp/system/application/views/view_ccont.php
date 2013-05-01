@@ -23,10 +23,10 @@ if($form->_status!='show'){
 	?>
 
 <script language="javascript" type="text/javascript">
-itccont_cont=<?=$form->max_rel_count['itccont'] ?>;
+itccont_cont=<?php echo $form->max_rel_count['itccont'] ?>;
 
 function add_itccont(){
-	var htm = <?=$campos ?>;
+	var htm = <?php echo $campos ?>;
 	can = itccont_cont.toString();
 	con = (itccont_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
@@ -83,62 +83,62 @@ function cal_total(){
 		<td colspan=6 class="littletableheader">Encabezado</td>
 	</tr>
 	<tr>
-		<td  class="littletablerowth" width="25%"><?=$form->obrap->label ?></td>
-		<td  class="littletablerow" width="20%"><?=$form->obrap->output ?></td>
+		<td  class="littletablerowth" width="25%"><?php echo $form->obrap->label ?></td>
+		<td  class="littletablerow" width="20%"><?php echo $form->obrap->output ?></td>
 	  </tr>
 	<tr>
-		<td class="littletablerowth"><?=$form->numero->label ?></td>
-		<td class="littletablerow"><?=$form->numero->output ?></td>
+		<td class="littletablerowth"><?php echo $form->numero->label ?></td>
+		<td class="littletablerow"><?php echo $form->numero->output ?></td>
 	  </tr>
 	<tr>
-		<td class="littletablerowth"><?=$form->fecha->label ?></td>
-		<td class="littletablerow"><?=$form->fecha->output ?></td>
+		<td class="littletablerowth"><?php echo $form->fecha->label ?></td>
+		<td class="littletablerow"><?php echo $form->fecha->output ?></td>
 	  </tr>
 	<tr>
-		<td  class="littletablerowth"><?=$form->tipo->label ?></td>
-		<td  class="littletablerow"><?=$form->tipo->output ?></td>
+		<td  class="littletablerowth"><?php echo $form->tipo->label ?></td>
+		<td  class="littletablerow"><?php echo $form->tipo->output ?></td>
 	  </tr>
 	<tr>
 		<td colspan="6" class="littletableheader" align="left" >Datos del Contratista</td>
 	  </tr>
 	<tr>
-	  <td class="littletablerowth"><?=$form->cod_prv->label ?></td>
-	  <td class="littletablerow"><?=$form->cod_prv->output  ?></td>
-	  <td class="littletablerowth"><?=$form->rif->label ?></td>
-	  <td colspan="3" class="littletablerow"><?=$form->rif->output ?></td>
+	  <td class="littletablerowth"><?php echo $form->cod_prv->label ?></td>
+	  <td class="littletablerow"><?php echo $form->cod_prv->output  ?></td>
+	  <td class="littletablerowth"><?php echo $form->rif->label ?></td>
+	  <td colspan="3" class="littletablerow"><?php echo $form->rif->output ?></td>
 	  </tr>
 	<tr>
-	  <td class="littletablerowth"><?=$form->nombre->label ?></td>
-	  <td class="littletablerow"><?=$form->nombre->output  ?></td>
-	  <td class="littletablerowth"><?=$form->telefono->label ?></td>
-	  <td class="littletablerow"><?=$form->telefono->output ?></td>
-	  <td class="littletablerowth"><?=$form->email->label ?></td>
-	  <td class="littletablerow"><?=$form->email->output ?></td>
+	  <td class="littletablerowth"><?php echo $form->nombre->label ?></td>
+	  <td class="littletablerow"><?php echo $form->nombre->output  ?></td>
+	  <td class="littletablerowth"><?php echo $form->telefono->label ?></td>
+	  <td class="littletablerow"><?php echo $form->telefono->output ?></td>
+	  <td class="littletablerowth"><?php echo $form->email->label ?></td>
+	  <td class="littletablerow"><?php echo $form->email->output ?></td>
 	</tr>
 	<tr>
-	  <td colspan="6" class="littletablerowth"><?=$form->direccion->label  ?></td>
+	  <td colspan="6" class="littletablerowth"><?php echo $form->direccion->label  ?></td>
 	 </tr>
 	<tr>
-	  <td colspan="6" class="littletablerow"><?=$form->direccion->output ?></td>
+	  <td colspan="6" class="littletablerow"><?php echo $form->direccion->output ?></td>
 	  </tr>
 	  <tr>
-	  <td colspan="6" class="littletablerowth"><?=$form->detalles->label ?></td>
+	  <td colspan="6" class="littletablerowth"><?php echo $form->detalles->label ?></td>
 	  </tr>
 	  <tr>
-	  	  <td colspan="6" class="littletablerow"><?=$form->detalles->output ?></td>
+	  	  <td colspan="6" class="littletablerow"><?php echo $form->detalles->output ?></td>
   	  </tr>
 	  	<tr>
 		<td colspan="6" class="littletableheader" align="left" >Condiciones Comerciales </td>
 	  </tr>
     	<tr>
-	  	  <td class="littletablerowth"><?=$form->fecha_inicio->label ?></td>
-  	      <td class="littletablerow"><?=$form->fecha_inicio->output ?></td>
-        <td colspan="4" class="littletablerowth"><?=$form->retencion->label ?></td>
+	  	  <td class="littletablerowth"><?php echo $form->fecha_inicio->label ?></td>
+  	      <td class="littletablerow"><?php echo $form->fecha_inicio->output ?></td>
+        <td colspan="4" class="littletablerowth"><?php echo $form->retencion->label ?></td>
       	</tr>
     	<tr>
-	  	  <td class="littletablerowth"><?=$form->fecha_final->label ?></td>
-  	    <td class="littletablerow"><?=$form->fecha_final->output ?></td>
-	  	  <td colspan="4" class="littletablerow"><?=$form->retencion->output ?></td>
+	  	  <td class="littletablerowth"><?php echo $form->fecha_final->label ?></td>
+  	    <td class="littletablerow"><?php echo $form->fecha_final->output ?></td>
+	  	  <td colspan="4" class="littletablerow"><?php echo $form->retencion->output ?></td>
       </tr>
 	</table>		
 	<table width='100%'>
@@ -165,17 +165,17 @@ function cal_total(){
 				$obj5="precio_$i";
 				$obj6="monto_$i";
 			?>
-			<tr id='tr_itccont_<?=$i ?>'>
-				<td class="littletablerow" align="left"><?=$form->$obj1->output ?></td>
-				<td class="littletablerow" align="left"><?=$form->$obj2->output ?></td>
-				<td class="littletablerow" align="center"><?=$form->$obj3->output ?></td>
-				<td class="littletablerow" align="right"><?=$form->$obj4->output ?></td>
-				<td class="littletablerow" align="right"><?=$form->$obj5->output ?></td>
-				<td class="littletablerow" align="right"><?=$form->$obj6->output ?></td>
+			<tr id='tr_itccont_<?php echo $i ?>'>
+				<td class="littletablerow" align="left"><?php echo $form->$obj1->output ?></td>
+				<td class="littletablerow" align="left"><?php echo $form->$obj2->output ?></td>
+				<td class="littletablerow" align="center"><?php echo $form->$obj3->output ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$obj4->output ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$obj5->output ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$obj6->output ?></td>
 				
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow"><a href=#
-					onclick='del_itccont(<?=$i ?>);return false;'>Eliminar</a></td>
+					onclick='del_itccont(<?php echo $i ?>);return false;'>Eliminar</a></td>
 					<?php } ?>
 			</tr>
 			<?php } ?>
@@ -204,19 +204,19 @@ function cal_total(){
 	  	  <td colspan=6 class="littletableheader">Totales</td>      
 	    </tr>                                                         
 	    <tr>                                                 
-		  <td  class="littletablerowth"  width="90%" align="right"><?=$form->base->label ?> </td>
-		  <td  class="littletablerow"    width="10%" align="right"><?=$form->base->output ?> </td>
+		  <td  class="littletablerowth"  width="90%" align="right"><?php echo $form->base->label ?> </td>
+		  <td  class="littletablerow"    width="10%" align="right"><?php echo $form->base->output ?> </td>
        </tr>
        <tr><?php $iva=$this->datasis->dameval('SELECT tasa FROM civa ORDER BY fecha DESC');?>
-	 	 <td class="littletablerowth" align="right"><?=$form->impuesto->label.' '.$iva.'%' ?></td>
-		 <td class="littletablerow"   align="right"><?=$form->impuesto->output ?></td>
+	 	 <td class="littletablerowth" align="right"><?php echo $form->impuesto->label.' '.$iva.'%' ?></td>
+		 <td class="littletablerow"   align="right"><?php echo $form->impuesto->output ?></td>
        </tr>
 	   <tr>
-		 <td class="littletablerowth" align="right"><?=$form->tota->label ?></td>
-		 <td class="littletablerow"   align="right"><?=$form->tota->output ?></td>
+		 <td class="littletablerowth" align="right"><?php echo $form->tota->label ?></td>
+		 <td class="littletablerow"   align="right"><?php echo $form->tota->output ?></td>
       </tr>
 	   <tr>
-	     <td class="littletablerowth" align="right" colspan="2"><?=$form->itccont->output ?></span></td>
+	     <td class="littletablerowth" align="right" colspan="2"><?php echo $form->itccont->output ?></span></td>
     </tr>
 </table>
 <?php endif; ?>

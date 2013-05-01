@@ -1,9 +1,9 @@
 <html>
 <head>
-<meta http-equiv="Content-type" content="text/html; charset=<?=$this->config->item('charset'); ?>" />
-<title><?=$this->datasis->traevalor("SISTEMA") ?></title>
-<?=style("ventanas.css");?>
-<?=script("jquery.js") ?>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" />
+<title><?php echo $this->datasis->traevalor("SISTEMA") ?></title>
+<?php echo style("ventanas.css");?>
+<?php echo script("jquery.js") ?>
 <?php if (isset($style))  echo $style;   ?>
 <style type="text/css">
 <?php if($tabla=="") {?>
@@ -47,9 +47,9 @@ $("#cajafiltro").hide();
 	<tr>
 		<td></td>
 		<td><?php if (isset($filtro)) { ?>
-		<div><a href="#" id="mostrafiltro">Filtro<?=image("", "#", array("border"=>"none")); ?></a>
+		<div><a href="#" id="mostrafiltro">Filtro<?php echo image("", "#", array("border"=>"none")); ?></a>
 		</div>
-		<div id="cajafiltro"><?=$filtro.$tabla; ?></div>
+		<div id="cajafiltro"><?php echo $filtro.$tabla; ?></div>
 		<?php } ?></td>
 	</tr>
 	<tr>

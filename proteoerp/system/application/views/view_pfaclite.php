@@ -63,7 +63,7 @@ function totalizar(){
 </table>
 
 
-<table width='100%' <?=($form->_status!='show'?' border="0" cellpadding="0" cellspacing="0"':'')?>>
+<table width='100%' <?php echo ($form->_status!='show'?' border="0" cellpadding="0" cellspacing="0"':'') ?>>
 	<col>
 	<?php if($act_meta) echo '<col align=\'center\'>'; ?>
 	<col>

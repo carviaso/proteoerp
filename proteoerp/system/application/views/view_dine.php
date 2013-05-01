@@ -25,19 +25,19 @@ echo $form_begin?>
               <td colspan=15 class="littletableheader">Encabezado</td>
             </tr>
             <tr>
-               <td class="littletablerowth"><?=$form->numero->label ?></td>
-               <td class="littletablerow"><?=$form->numero->output ?></td>
+               <td class="littletablerowth"><?php echo $form->numero->label ?></td>
+               <td class="littletablerow"><?php echo $form->numero->output ?></td>
             </tr>
             <tr>
-               <td class="littletablerowth"><?=$form->fecha->label ?></td>
-               <td class="littletablerow"><?=$form->fecha->output ?></td>
+               <td class="littletablerowth"><?php echo $form->fecha->label ?></td>
+               <td class="littletablerow"><?php echo $form->fecha->output ?></td>
             </tr>
             <tr>
-               <td class="littletablerowth"><?=$form->cajero->label ?></td>
-               <td class="littletablerow"><?=$form->cajero->output ?></td>
+               <td class="littletablerowth"><?php echo $form->cajero->label ?></td>
+               <td class="littletablerow"><?php echo $form->cajero->output ?></td>
              <tr>
-               <td class="littletablerowth"><?=$form->caja->label ?></td>              
-               <td class="littletablerow"><?=$form->caja->output ?></td>
+               <td class="littletablerowth"><?php echo $form->caja->label ?></td>              
+               <td class="littletablerow"><?php echo $form->caja->output ?></td>
             </tr>
         </table>
         <?php echo $form->detalle->output ?>
@@ -46,14 +46,14 @@ echo $form_begin?>
 	  	       <td colspan=10 class="littletableheader"><div align=""> Totales</div></td>      
 	       </tr>                                                          
 	       <tr>                                                 
-             <td class="littletablerowth"><?=$form->monedas->label ?></td>
-             <td class="littletablerow"><?=$form->monedas->output ?></td>
-             <td class="littletablerowth"><?=$form->recibido->label ?></td>
-             <td class="littletablerow"><?=$form->recibido->output ?></td>
-             <td class="littletablerowth"><?=$form->computa->label ?></td>
-             <td class="littletablerow"><?=$form->computa->output ?></td>
-             <td class="littletablerowth"><?=$form->diferen->label ?></td> 
-             <td class="littletablerow"><?=$form->diferen->output ?></td>
+             <td class="littletablerowth"><?php echo $form->monedas->label ?></td>
+             <td class="littletablerow"><?php echo $form->monedas->output ?></td>
+             <td class="littletablerowth"><?php echo $form->recibido->label ?></td>
+             <td class="littletablerow"><?php echo $form->recibido->output ?></td>
+             <td class="littletablerowth"><?php echo $form->computa->label ?></td>
+             <td class="littletablerow"><?php echo $form->computa->output ?></td>
+             <td class="littletablerowth"><?php echo $form->diferen->label ?></td> 
+             <td class="littletablerow"><?php echo $form->diferen->output ?></td>
          </tr>
 			</table>
 <?php echo $form_end?>

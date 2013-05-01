@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>ProteoERP<?php if(isset($title)) echo ':'.preg_replace('/<[^>]*>/', '', $title); ?></title>
-<?=style("ventanas.css");?>
+<?php echo style("ventanas.css");?>
 <?php if (isset($head))   echo $head;   ?>
 <?php if (isset($script)) echo $script; ?>
 </head>

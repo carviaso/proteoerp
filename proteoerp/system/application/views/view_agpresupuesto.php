@@ -10,29 +10,29 @@
             </tr>
             <tr>
               <td width="100" class="littletablerowth">Numero</td>
-              <td width="100" class="littletablerow">  <?=$numero?></td>
+              <td width="100" class="littletablerow">  <?php echo $numero?></td>
               <td width="100" class="littletablerowth">Cliente</td>
-              <td width="100" class="littletablerow"><?=$cod_cli ?></td>
+              <td width="100" class="littletablerow"><?php echo $cod_cli ?></td>
               <td width="100" class="littletablerowth">Rif/Cedula</td>
-              <td width="100" class="littletablerow"><?=$rifci ?></td>
+              <td width="100" class="littletablerow"><?php echo $rifci ?></td>
             </tr>
             <tr>
               <td class="littletablerowth">Fecha</td>
-              <td class="littletablerow"><?=$fecha ?></td>
+              <td class="littletablerow"><?php echo $fecha ?></td>
               <td class="littletablerowth">Nombre</td>
-              <td colspan="3" class="littletablerow"><?=$nombre ?></td>
+              <td colspan="3" class="littletablerow"><?php echo $nombre ?></td>
             </tr>
             <tr>
               <td class="littletablerowth">Vendedor</td>
-              <td class="littletablerow"><?=$vd?></td>
+              <td class="littletablerow"><?php echo $vd?></td>
               <td class="littletablerowth">Dirección</td>
-              <td colspan="3" class="littletablerow"><?=$direc ?></td>
+              <td colspan="3" class="littletablerow"><?php echo $direc ?></td>
             </tr>
             <tr>
               <td class="littletablerowth">Peso</td>
-              <td class="littletablerow"><?=$peso ?></td>
+              <td class="littletablerow"><?php echo $peso ?></td>
               <td class="littletablerowth"></td>
-              <td colspan="3" class="littletablerow"><?=$dire1?></td>
+              <td colspan="3" class="littletablerow"><?php echo $dire1?></td>
             </tr>
           </table>
           <?php echo $items ?>
@@ -42,18 +42,18 @@
 	  <td colspan=10 class="littletableheader">Totales</td>      
 	 </tr>
 	 <tr>
-     <td class="littletablerow"><?=$condi1 ?></td>
+     <td class="littletablerow"><?php echo $condi1 ?></td>
      <td class="littletablerowth">I.V.A</td>
-     <td class="littletablerow"><?=$iva ?></td>
+     <td class="littletablerow"><?php echo $iva ?></td>
      <td class="littletablerowth">Sub-Total</td>                       
-     <td colspan="3" class="littletablerow"><?=$totals ?></td>
+     <td colspan="3" class="littletablerow"><?php echo $totals ?></td>
    </tr>
    <tr>
-     <td class="littletablerow"><?=$condi2 ?></td>
+     <td class="littletablerow"><?php echo $condi2 ?></td>
      <td class="littletablerowth">Adelanto</td>
-     <td class="littletablerow"><?=$inicial ?></td>
+     <td class="littletablerow"><?php echo $inicial ?></td>
      <td class="littletablerowth">Total</td>                       
-     <td colspan="3" class="littletablerow"><?=$totalg ?></td>
+     <td colspan="3" class="littletablerow"><?php echo $totalg ?></td>
    </tr>                                                         
 </table>
 	  <td>

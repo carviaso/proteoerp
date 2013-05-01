@@ -11,13 +11,13 @@ $mon=$moneda->moneda;
 		
 			<?php $ban2=true;
 			foreach ($grupo AS $item){?>
-			<?php $a="<?=$item->tipocta?>"?>
+			<?php $a="<?php echo $item->tipocta?>"?>
 			
 			    <?php $total=0;$class='odd';$c=1;?>			    
 			    <?php 
 			    $ban=true;
 			    foreach ($detalle AS $items){?>
-			    <?php $b="<?=$items->tipocta?>";$mon2=$items->moneda; ?>
+			    <?php $b="<?php echo $items->tipocta?>";$mon2=$items->moneda; ?>
 					<?php if(($a==$b)&&($mon==$mon2)){
 								if($ban2){
 									$ban2=false;
@@ -37,7 +37,7 @@ $mon=$moneda->moneda;
 									?>
 										<table width="100%" align="center" border="0">
 			  							<tr>
-			  							  <td colspan="2" bgcolor="#D4D2D0" class="tableheader"><b><?=$item->tipocta2 ?></b></td>
+			  							  <td colspan="2" bgcolor="#D4D2D0" class="tableheader"><b><?php echo $item->tipocta2 ?></b></td>
 			  							</tr>
 			  							<tr>
 			  						  	<td colspan="2" >
@@ -46,11 +46,11 @@ $mon=$moneda->moneda;
 					<?php $total+=$items->saldo;if(($c%2)==0)$class='even';else $class='odd'; $c++;?>
 			 
 			   <table width="100%" align="center" border="0" >
-			      <tr class="<?=$class?>" >
+			      <tr class="<?php echo $class?>" >
 			        <td width="10%" class="littletablerow"><? echo anchor("/finanzas/analisisbanc/meses/$items->codbanc/$ano",$items->codbanc);$t=$items->codbanc;//movimientos/$items->codbanc
 			         ?></td>
-			        <td width="40%" class="littletablerow"><?=$items->banco ?></td>
-			        <td width="25%" class="littletablerow"><?=$items->numcuent ?></td>
+			        <td width="40%" class="littletablerow"><?php echo $items->banco ?></td>
+			        <td width="25%" class="littletablerow"><?php echo $items->numcuent ?></td>
 			        <td width="25%" class="littletablerow"><div align="right"><?echo number_format($items->saldo,2,',','.'); ?></div></td>			        
 			      </tr>
 			    </table>
@@ -77,11 +77,11 @@ $mon=$moneda->moneda;
 
 			<?php $ban2=true;
 			foreach ($grupo2 AS $item2){?>
-			<?php $a="<?=$item2->tipocta?>"?>
+			<?php $a="<?php echo $item2->tipocta?>"?>
 			
 			    <?php $total=0;$class='odd';$c=1;?>			    
 			    <?php foreach ($detalle2 AS $items2){?>
-			    <?php $b="<?=$items->tipocta?>";$mon2=$items2->moneda; ?>
+			    <?php $b="<?php echo $items->tipocta?>";$mon2=$items2->moneda; ?>
 					<?php if(($a==$b)&&($mon==$mon2)){
 								if($ban2){
 									$ban2=false;
@@ -102,7 +102,7 @@ $mon=$moneda->moneda;
 									?>
 										<table width="100%" align="center" border="0">
 			  							<tr>
-			  							  <td colspan="2" bgcolor="#D4D2D0" class="tableheader"><b><?=$item2->tipocta2 ?></d></td>
+			  							  <td colspan="2" bgcolor="#D4D2D0" class="tableheader"><b><?php echo $item2->tipocta2 ?></d></td>
 			  							</tr>
 			  							<tr>
 			  						  	<td colspan="2" >
@@ -111,11 +111,11 @@ $mon=$moneda->moneda;
 					<?php $total+=$items2->saldo;if(($c%2)==0)$class='even';else $class='odd'; $c++;?>
 			 
 			   <table width="100%" align="center" border="0" >
-			      <tr class="<?=$class?>" >
+			      <tr class="<?php echo $class?>" >
 			        <td width="10%" class="littletablerow"><? echo anchor("/finanzas/analisisbanc/meses/$items->codbanc/$ano",$items2->codbanc);$t=$items->codbanc; //movimientos/$items->codbanc
 			        ?></td>
-			        <td width="40%" class="littletablerow"><?=$items2->banco ?></td>
-			        <td width="25%" class="littletablerow"><?=$items2->numcuent ?></td>
+			        <td width="40%" class="littletablerow"><?php echo $items2->banco ?></td>
+			        <td width="25%" class="littletablerow"><?php echo $items2->numcuent ?></td>
 			        <td width="25%" class="littletablerow"><div align="right"><?echo number_format($items2->saldo,2,',','.'); ?></div></td>			        
 			      </tr>
 			    </table>

@@ -25,23 +25,23 @@ echo $form_begin?>
               <td colspan=13 class="littletablerowth">Producto</td>
            </tr>
            <tr>
-            	<td width="112" class="littletableheader"><?=$form->barras->label ?></td>
-              <td width="108" class="littletablerow"><?=$form->barras->output ?></td>
+            	<td width="112" class="littletableheader"><?php echo $form->barras->label ?></td>
+              <td width="108" class="littletablerow"><?php echo $form->barras->output ?></td>
            </tr>
            <tr>
-              <td width="109" class="littletableheader"><?=$form->codigo->label ?></td>
-              <td width="143" class="littletablerow"><?=$form->codigo->output ?></td>
+              <td width="109" class="littletableheader"><?php echo $form->codigo->label ?></td>
+              <td width="143" class="littletablerow"><?php echo $form->codigo->output ?></td>
            </tr>
            <tr>
-              <td width="112" class="littletableheader"><?=$form->descrip->label ?></td>
-              <td width="108" class="littletablerow"><?=$form->descrip->output ?></td>
+              <td width="112" class="littletableheader"><?php echo $form->descrip->label ?></td>
+              <td width="108" class="littletablerow"><?php echo $form->descrip->output ?></td>
            <tr>
-              <td width="112" class="littletableheader"><?=$form->descrip2->label ?></td>
-              <td width="108" class="littletablerow"><?=$form->descrip2->output ?></td>
+              <td width="112" class="littletableheader"><?php echo $form->descrip2->label ?></td>
+              <td width="108" class="littletablerow"><?php echo $form->descrip2->output ?></td>
            </tr>
            <tr>
-              <td width="112" class="littletableheader"><?=$form->precio1->label ?></td>
-              <td width="108" class="littletablerow"><?=$form->precio1->output ?></td>
+              <td width="112" class="littletableheader"><?php echo $form->precio1->label ?></td>
+              <td width="108" class="littletablerow"><?php echo $form->precio1->output ?></td>
            </tr> 
 				</table>
 

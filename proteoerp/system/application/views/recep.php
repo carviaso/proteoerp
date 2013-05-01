@@ -291,14 +291,14 @@ function del_seri(id){
 				$obj3="itserial_$i";
 				$obj4="itcant_$i";
 			?>
-			<tr id='tr_seri_<?=$i ?>'>
-				<td class="littletablerow"><?=$form->$obj0->output ?></td>
-				<td class="littletablerow"><?=$form->$obj1->output ?></td>
-				<td class="littletablerow"><?=$form->$obj2->output ?></td>
-				<td class="littletablerow"><?=$form->$obj3->output ?></td>
-				<td class="littletablerow" align="right"><?=$form->$obj4->output ?></td>
+			<tr id='tr_seri_<?php echo $i ?>'>
+				<td class="littletablerow"><?php echo $form->$obj0->output ?></td>
+				<td class="littletablerow"><?php echo $form->$obj1->output ?></td>
+				<td class="littletablerow"><?php echo $form->$obj2->output ?></td>
+				<td class="littletablerow"><?php echo $form->$obj3->output ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$obj4->output ?></td>
 				<?php if($form->_status!='show') {?>
-				<td class="littletablerow" align='center'><a href=# onclick='del_seri(<?=$i ?>);return false;'><?php echo  img("images/delete.jpg",'Eliminar elemento',array("border"=>0));?></a></td>
+				<td class="littletablerow" align='center'><a href=# onclick='del_seri(<?php echo $i ?>);return false;'><?php echo  img("images/delete.jpg",'Eliminar elemento',array("border"=>0));?></a></td>
 				<?php } ?>
 			</tr>
 			<?php } ?>

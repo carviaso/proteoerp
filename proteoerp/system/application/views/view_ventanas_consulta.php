@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>Sistemas DataSIS</title>
-<?=style("ventanas.css");?>
+<?php echo style("ventanas.css");?>
 <?php if (isset($head))   echo $head;   ?>
 <?php if (isset($script)) echo $script; ?>
 </head>

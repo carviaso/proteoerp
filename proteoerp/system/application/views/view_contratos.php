@@ -25,26 +25,26 @@ echo $form_begin?>
 		<td colspan=5 class="littletableheader">Encabezado</td>
 	</tr>
 	<tr>
-		<td class="littletablerowth"><?=$form->codigo->label ?></td>
-		<td class="littletablerow"><?=$form->codigo->output ?></td>
-		<td class="littletablerowth" align='rigth'><center><?=$form->tipo->label ?></center></td>
-		<td class="littletablerow" ><?=$form->tipo->output ?></td>
+		<td class="littletablerowth"><?php echo $form->codigo->label ?></td>
+		<td class="littletablerow"><?php echo $form->codigo->output ?></td>
+		<td class="littletablerowth" align='rigth'><center><?php echo $form->tipo->label ?></center></td>
+		<td class="littletablerow" ><?php echo $form->tipo->output ?></td>
 	</tr>
 	<tr>	
-		<td class="littletablerowth"><?=$form->nombre->label ?></td>
-		<td class="littletablerow" colspan='3'><?=$form->nombre->output ?></td>
+		<td class="littletablerowth"><?php echo $form->nombre->label ?></td>
+		<td class="littletablerow" colspan='3'><?php echo $form->nombre->output ?></td>
 	</tr>
 </table>
 <?php echo $form->detalle->output ?>
 <table style="margin:0;width:98%;">
 	<tr>
-		<td class="littletableheader"><?=$form->observa1->label ?></td>
+		<td class="littletableheader"><?php echo $form->observa1->label ?></td>
 	</tr>
 	<tr>
-		<td class="littletablerow"  ><?=$form->observa1->output ?></td>
+		<td class="littletablerow"  ><?php echo $form->observa1->output ?></td>
 	</tr>
 	<tr>	
-		<td class="littletablerow"  ><?=$form->observa2->output ?></td>
+		<td class="littletablerow"  ><?php echo $form->observa2->output ?></td>
 	</tr>
 </table>
 

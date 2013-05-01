@@ -116,7 +116,7 @@ function cal_dxapli(nind){
 	preca2=parseFloat($("#precat_"+ind).val());
 	dxapli2=parseFloat($("#dxapli_"+ind).val());
 
-	$.post("<?=site_url('ventas/pfac/cal_dxapli')?>",{ preca:preca2,dxapli:dxapli2 },function(data){
+	$.post("<?php echo site_url('ventas/pfac/cal_dxapli')?>",{ preca:preca2,dxapli:dxapli2 },function(data){
 		if(data=='_||_'){
 			alert("El descuento a aplicar debe contener solo numeros y '+'. ejemplo:2+2");
 			$("#preca_"+ind).val(preca2);
@@ -561,7 +561,7 @@ function autocod(id){
 
 				<?php if($form->_status!='show' && !($faplica < $fenvia)) {?>
 				<td class="littletablerow" align="center">
-					<a href='#' onclick='del_itpfac(<?=$i ?>);return false;'><?php echo img("images/delete.jpg") ?></a>
+					<a href='#' onclick='del_itpfac(<?php echo $i ?>);return false;'><?php echo img("images/delete.jpg") ?></a>
 				</td>
 				<?php } ?>
 			</tr>

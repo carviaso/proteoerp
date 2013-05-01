@@ -92,8 +92,8 @@ else:
 				<?php } ?>
 
 				<tr>
-					<td class="littletableheaderc"><?=$form->contacto->label  ?></td>
-					<td colspan='5' class="littletablerow"><?=$form->contacto->output ?></td>
+					<td class="littletableheaderc"><?php echo $form->contacto->label  ?></td>
+					<td colspan='5' class="littletablerow"><?php echo $form->contacto->output ?></td>
 				</tr>
 
 			</table>
@@ -101,8 +101,8 @@ else:
 		<td valign='top' width='25%'>
 			<table border=0 width="100%">
 				<tr>
-					<td class="littletableheaderc"> <?=$form->tipo->label ?></td>
-					<td class="littletablerow"> <?=$form->tipo->output ?></td>
+					<td class="littletableheaderc"> <?php echo $form->tipo->label ?></td>
+					<td class="littletablerow"> <?php echo $form->tipo->output ?></td>
 				</tr>
 				<tr>
 					<td colspan='2'>
@@ -110,8 +110,8 @@ else:
 			<legend class="titulofieldset" style='color: #114411;'>Credito</legend>
 			<table width= '100%' >
 				<tr>
-					<td class="littletableheaderc"><?=$form->formap->label  ?></td>
-					<td class="littletablerow"><?=$form->formap->output ?></td>
+					<td class="littletableheaderc"><?php echo $form->formap->label  ?></td>
+					<td class="littletablerow"><?php echo $form->formap->output ?></td>
 				</tr>
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->limite->label  ?></td>
@@ -127,18 +127,18 @@ else:
 </table>
 <table width='100%' style='border: 1px dotted #8A0808;background: #FFFBE9;'>
 	<tr>
-		<td class="littletableheaderc"><?=$form->grupo->label ?></td>
-		<td class="littletablerow"><?=$form->grupo->output?></td>
-		<td class="littletableheaderc"><?=$form->tiva->label  ?></td>
-		<td class="littletablerow"><?=$form->tiva->output ?></td>
-		<td  width="70" class="littletableheaderc"><?=$form->zona->label  ?></td>
-		<td class="littletablerow"><?=$form->zona->output ?></td>
+		<td class="littletableheaderc"><?php echo $form->grupo->label ?></td>
+		<td class="littletablerow"><?php echo $form->grupo->output?></td>
+		<td class="littletableheaderc"><?php echo $form->tiva->label  ?></td>
+		<td class="littletablerow"><?php echo $form->tiva->output ?></td>
+		<td  width="70" class="littletableheaderc"><?php echo $form->zona->label  ?></td>
+		<td class="littletablerow"><?php echo $form->zona->output ?></td>
 	</tr>
 </table>
 <table width= '100%' style='border: 1px dotted #8A0808;background: #FFFBE9;'>
 	<tr>
 		<td class="littletableheaderc">Cuenta Contable</td>
-		<td class="littletablerow"    ><?=$form->cuenta->output; ?>
+		<td class="littletablerow"    ><?php echo $form->cuenta->output; ?>
 		<?php
 		if ( $form->_status == 'show' ) {
 			$mSQL = "SELECT descrip FROM cpla WHERE codigo='".trim($form->cuenta->output)."'";
@@ -147,7 +147,7 @@ else:
 		?>
 		</td>
 		<td class="littletableheaderc">Cliente Asociado</td>
-		<td class="littletablerow"><?=$form->socio->output ?></td>
+		<td class="littletablerow"><?php echo $form->socio->output ?></td>
 <?php if (!empty($form->socio->value)) { ?>
 		<td class="littletablerow"><?php echo $this->datasis->dameval("SELECT nombre FROM scli WHERE cliente='".$form->socio->value."'") ?></td>
 <?php }; ?>
@@ -176,14 +176,14 @@ else:
 					<td colspan='2' class="littletableheaderc">Direccion de Oficina</td>
 				</tr>
 				<tr>
-					<td colspan='2' class="littletablerow"><?=$form->dire11->output ?>&nbsp;</td>
+					<td colspan='2' class="littletablerow"><?php echo $form->dire11->output ?>&nbsp;</td>
 				</tr>
 				<tr>
-					<td colspan='2' class="littletablerow"><?=$form->dire12->output ?>&nbsp;</td>
+					<td colspan='2' class="littletablerow"><?php echo $form->dire12->output ?>&nbsp;</td>
 				</tr>
 				<tr>
-					<td class="littletableheaderc"><?=$form->ciudad1->label   ?></td>
-					<td class="littletablerow" ><?=$form->ciudad1->output  ?>&nbsp;</td>
+					<td class="littletableheaderc"><?php echo $form->ciudad1->label   ?></td>
+					<td class="littletablerow" ><?php echo $form->ciudad1->output  ?>&nbsp;</td>
 				</tr>
 			</table>
 		</td>
@@ -193,14 +193,14 @@ else:
 					<td colspan='2' class="littletableheaderc">Direccion de Envio</td>
 				</tr>
 				<tr>
-					<td colspan='2' class="littletablerow"><?=$form->dire21->output ?>&nbsp;</td>
+					<td colspan='2' class="littletablerow"><?php echo $form->dire21->output ?>&nbsp;</td>
 				</tr>
 				<tr>
-					<td colspan='2' class="littletablerow"><?=$form->dire22->output ?>&nbsp;</td>
+					<td colspan='2' class="littletablerow"><?php echo $form->dire22->output ?>&nbsp;</td>
 				</tr>
 				<tr>
-					<td class="littletableheaderc"><?=$form->ciudad2->label ?></td>
-					<td class="littletablerow" style='font-size:11;'><?=$form->ciudad2->output ?>&nbsp;</td>
+					<td class="littletableheaderc"><?php echo $form->ciudad2->label ?></td>
+					<td class="littletablerow" style='font-size:11;'><?php echo $form->ciudad2->output ?>&nbsp;</td>
 				</tr>
 			</table>
 		</td>
@@ -209,16 +209,16 @@ else:
 	<br />
 	<table style='height: 100%;width: 100%;border: 1px dotted;'>
 	<tr>
-		<td class="littletableheaderc"><?=$form->telefono->label  ?></td>
-		<td class="littletablerow"    ><?=$form->telefono->output ?></td>
-		<td class="littletableheaderc"><?=$form->telefon2->label  ?></td>
-		<td class="littletablerow"    ><?=$form->telefon2->output ?></td>
+		<td class="littletableheaderc"><?php echo $form->telefono->label  ?></td>
+		<td class="littletablerow"    ><?php echo $form->telefono->output ?></td>
+		<td class="littletableheaderc"><?php echo $form->telefon2->label  ?></td>
+		<td class="littletablerow"    ><?php echo $form->telefon2->output ?></td>
 	</tr>
 	<tr>
-		<td class="littletableheaderc"><?=$form->pais->label  ?> </td>
-		<td class="littletablerow"    ><?=$form->pais->output ?> </td>
-		<td class="littletableheaderc"><?=$form->email->label  ?></td>
-		<td class="littletablerow"    ><?=$form->email->output ?></td>
+		<td class="littletableheaderc"><?php echo $form->pais->label  ?> </td>
+		<td class="littletablerow"    ><?php echo $form->pais->output ?> </td>
+		<td class="littletableheaderc"><?php echo $form->email->label  ?></td>
+		<td class="littletablerow"    ><?php echo $form->email->output ?></td>
 	</tr>
 	</table>
 	</div>
@@ -228,24 +228,24 @@ else:
 	<table border='0' >
 	<tr>
 		<td class="littletableheaderc">Representante Legal</td>
-		<td class="littletablerow"><?=$form->repre->output ?></td>
+		<td class="littletablerow"><?php echo $form->repre->output ?></td>
 		<td class="littletableheaderc">C.I.</td>
-		<td class="littletablerow"><?=$form->cirepre->output ?></td>
+		<td class="littletablerow"><?php echo $form->cirepre->output ?></td>
 	</tr>
 	</table>
 	<br />
 	<table >
 	<tr>
-		<td class="littletableheaderc"><?=$form->vendedor->label  ?></td>
-		<td class="littletablerow"><?=$form->vendedor->output ?></td>
+		<td class="littletableheaderc"><?php echo $form->vendedor->label  ?></td>
+		<td class="littletablerow"><?php echo $form->vendedor->output ?></td>
 		<td class="littletableheaderc">Comision %</td>
-		<td class="littletablerow"><?=$form->porvend->output ?></td>
+		<td class="littletablerow"><?php echo $form->porvend->output ?></td>
 	</tr>				
 	<tr>
-		<td class="littletableheaderc"><?=$form->cobrador->label  ?></td>
-		<td class="littletablerow"><?=$form->cobrador->output ?></td>
+		<td class="littletableheaderc"><?php echo $form->cobrador->label  ?></td>
+		<td class="littletablerow"><?php echo $form->cobrador->output ?></td>
 		<td class="littletableheaderc">Comision %</td>
-		<td class="littletablerow"><?=$form->porcobr->output ?></td>
+		<td class="littletablerow"><?php echo $form->porcobr->output ?></td>
 	</tr>				
 	</table>
 	</fieldset>
@@ -255,12 +255,12 @@ else:
 	<fieldset style='border: 2px outset #8A0808;background: #FFFBE9;'>
 	<table width= '100%' >
 		<tr>
-			<td class="littletableheaderc"><?=$form->mensaje->label  ?></td>
-			<td class="littletablerow"><?=$form->mensaje->output ?></td>
+			<td class="littletableheaderc"><?php echo $form->mensaje->label  ?></td>
+			<td class="littletablerow"><?php echo $form->mensaje->output ?></td>
 		</tr>				
 		<tr>
-			<td class="littletableheaderc"><?=$form->observa->label  ?></td>
-			<td class="littletablerow"><?=$form->observa->output ?></td>
+			<td class="littletableheaderc"><?php echo $form->observa->label  ?></td>
+			<td class="littletablerow"><?php echo $form->observa->output ?></td>
 		</tr>				
 	</table>
 	</fieldset>

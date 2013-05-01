@@ -25,30 +25,30 @@ echo $form_begin?>
             <td colspan=13 class="littletableheader">Encabezado</td>
             </tr>
             <tr>
-              <td width="100" class="littletablerowth"><?=$form->tipo->label ?></td>
-              <td width="100" class="littletablerow"><?=$form->tipo->output ?></td>
-              <td width="119" class="littletablerowth"><?=$form->cliente->label ?></td>
-              <td width="137" class="littletablerow"><?=$form->cliente->output ?></td>
-              <td width="50" class="littletablerowth"><?=$form->rifci->label ?></td>
-              <td width="300" colspan="2" class="littletablerow"><?=$form->rifci->output ?></td>
+              <td width="100" class="littletablerowth"><?php echo $form->tipo->label ?></td>
+              <td width="100" class="littletablerow"><?php echo $form->tipo->output ?></td>
+              <td width="119" class="littletablerowth"><?php echo $form->cliente->label ?></td>
+              <td width="137" class="littletablerow"><?php echo $form->cliente->output ?></td>
+              <td width="50" class="littletablerowth"><?php echo $form->rifci->label ?></td>
+              <td width="300" colspan="2" class="littletablerow"><?php echo $form->rifci->output ?></td>
             </tr>
             <tr>
-              <td class="littletablerowth"><?=$form->numero->label ?></td>
-              <td class="littletablerow"><?=$form->numero->output ?></td>
-              <td class="littletablerowth"><?=$form->nombre->label ?></td>
-              <td colspan="5" class="littletablerow"><?=$form->nombre->output ?></td>
+              <td class="littletablerowth"><?php echo $form->numero->label ?></td>
+              <td class="littletablerow"><?php echo $form->numero->output ?></td>
+              <td class="littletablerowth"><?php echo $form->nombre->label ?></td>
+              <td colspan="5" class="littletablerow"><?php echo $form->nombre->output ?></td>
             </tr>
             <tr>
-              <td class="littletablerowth"><?=$form->fecha->label ?></td>
-              <td class="littletablerow"><?=$form->fecha->output ?></td>
-              <td class="littletablerowth"><?=$form->direc->label ?></td>
-              <td colspan="3" class="littletablerow"><?=$form->direc->output ?></td>
+              <td class="littletablerowth"><?php echo $form->fecha->label ?></td>
+              <td class="littletablerow"><?php echo $form->fecha->output ?></td>
+              <td class="littletablerowth"><?php echo $form->direc->label ?></td>
+              <td colspan="3" class="littletablerow"><?php echo $form->direc->output ?></td>
               </tr>
             <tr>
-              <td class="littletablerowth"><?=$form->vende->label ?></td>
-              <td class="littletablerow"><?=$form->vende->output ?></td>
-              <td class="littletablerowth"><?=$form->dire1->label ?></td>
-              <td colspan="3" class="littletablerow"><?=$form->dire1->output ?></td>
+              <td class="littletablerowth"><?php echo $form->vende->label ?></td>
+              <td class="littletablerow"><?php echo $form->vende->output ?></td>
+              <td class="littletablerowth"><?php echo $form->dire1->label ?></td>
+              <td colspan="3" class="littletablerow"><?php echo $form->dire1->output ?></td>
             </tr>
         </table>
         <?php echo $form->detalle->output ?>
@@ -58,20 +58,20 @@ echo $form_begin?>
 	  	<td colspan=10 class="littletableheader">Totales</td>      
 	    </tr>                                                          
 	    <tr>                                                 
-      	<td width="102" class="littletablerowth"><?=$form->orden->label ?> </td>
-		  	<td width="97" class="littletablerow"><?=$form->orden->output ?> </td>
-	    	<td width="66" class="littletablerowth"><?=$form->iva->label ?> </td>
-		  	<td width="115" class="littletablerow" ><?=$form->iva->output ?> </td>
-		  	<td width="93" class="littletablerowth" ><?=$form->subtotal->label ?> </td>
-		  	<td width="280" class="littletablerow" ><?=$form->subtotal->output ?> </td>
+      	<td width="102" class="littletablerowth"><?php echo $form->orden->label ?> </td>
+		  	<td width="97" class="littletablerow"><?php echo $form->orden->output ?> </td>
+	    	<td width="66" class="littletablerowth"><?php echo $form->iva->label ?> </td>
+		  	<td width="115" class="littletablerow" ><?php echo $form->iva->output ?> </td>
+		  	<td width="93" class="littletablerowth" ><?php echo $form->subtotal->label ?> </td>
+		  	<td width="280" class="littletablerow" ><?php echo $form->subtotal->output ?> </td>
        </tr>
        <tr>
-        <td class="littletablerowth"><?=$form->formapago->label ?></td>
-	 	 		<td class="littletablerow" ><?=$form->formapago->output ?></td>
-        <td class="littletablerowth"><?=$form->inicial->label ?></td>
-		 		<td class="littletablerow" ><?=$form->inicial->output ?></td>
-		 		<td class="littletablerowth"><?=$form->total->label ?></td>
-		 		<td class="littletablerow" ><?=$form->total->output ?></td>
+        <td class="littletablerowth"><?php echo $form->formapago->label ?></td>
+	 	 		<td class="littletablerow" ><?php echo $form->formapago->output ?></td>
+        <td class="littletablerowth"><?php echo $form->inicial->label ?></td>
+		 		<td class="littletablerow" ><?php echo $form->inicial->output ?></td>
+		 		<td class="littletablerowth"><?php echo $form->total->label ?></td>
+		 		<td class="littletablerow" ><?php echo $form->total->output ?></td>
        </tr>
 </table>
 

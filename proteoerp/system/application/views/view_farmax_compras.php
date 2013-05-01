@@ -70,12 +70,12 @@ $atts = array(
 					<td width="139" class="littletablerow" align='right'><?php echo $form->subt->output ?> </td>
 				</tr><tr>
 					<td class="littletablerow">Cantidad de unidades: <b><?php echo $form->unidades->output; ?></td>
-					<td class="littletablerowth"><?=$form->iva->label ?></td>
-					<td class="littletablerow" align='right'><?=$form->iva->output ?></td>
+					<td class="littletablerowth"><?php echo $form->iva->label ?></td>
+					<td class="littletablerow" align='right'><?php echo $form->iva->output ?></td>
 				</tr><tr>
 					<td class="littletablerowth">&nbsp;</td>
 					<td class="littletablerowth"><?php echo $form->total->label ?></td>
-					<td class="littletablerow" align='right'><?=$form->total->output ?></td>
+					<td class="littletablerow" align='right'><?php echo $form->total->output ?></td>
 				</tr>
 			</table>
 			<?php echo $form_end?>

@@ -522,7 +522,7 @@ function toggle() {
 					$ivaval=$form->$obj11->output;
 				}
 			?>
-			<tr id='tr_gitser_<?=$i ?>'>
+			<tr id='tr_gitser_<?php echo $i ?>'>
 				<td class="littletablerow" nowrap><?php echo $form->$obj1->output ?></td>
 				<td class="littletablerow">       <?php echo $form->$obj2->output ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$obj3->output  ?></td>
@@ -538,7 +538,7 @@ function toggle() {
 			</tr>
 			<?php if( $form->_status == 'show') {?>
 				<?php if( $form->_dataobject->get('cajachi') == 'S' ) { ?>
-			<tr id='tr_gitser_D<?=$i ?>'>
+			<tr id='tr_gitser_D<?php echo $i ?>'>
 				<td style='font-size:11px;background: #DFEFFF;font-weight: bold;' colspan=8>
 				<?php
 					echo '* '.$form->_dataobject->get_rel('gitser','rif',$i);

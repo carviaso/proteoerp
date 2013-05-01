@@ -8,7 +8,7 @@
 <?php if (isset($filtro)) { ?>
 <style type="text/css">
 #cajafiltro {width: 100%;display: block;padding: 5px;border-bottom: 1px solid #2067B5;background-color: #D7DEF0;}
-#mostrafiltro {display: block;width: 100%;padding: 5px;border-bottom: 1px solid #2067B5;background-color: #F5F5F5;background:url(<?=base_url();?>images/huellaazul.gif);}
+#mostrafiltro {display: block;width: 100%;padding: 5px;border-bottom: 1px solid #2067B5;background-color: #F5F5F5;background:url(<?php echo base_url();?>images/huellaazul.gif);}
 </style>
 <?php }; ?>
 
@@ -48,7 +48,7 @@ $(function(){
 		<tr>
 			<td colspan='2'>
 				<div>
-					<a style="text-decoration:none;color:#4F1010;font: bold 18px Verdana;" href="#" id="mostrafiltro"><?=image("huella.jpg", "#", array("border"=>"none")); ?> Buscar y Filtrar </a>
+					<a style="text-decoration:none;color:#4F1010;font: bold 18px Verdana;" href="#" id="mostrafiltro"><?php echo image("huella.jpg", "#", array("border"=>"none")); ?> Buscar y Filtrar </a>
 				</div>
 				<div id="cajafiltro"><?php echo $filtro.$tabla; ?></div>
 			</td>

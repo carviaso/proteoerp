@@ -71,8 +71,8 @@ function del_itsnot(id){
 				<td class="littletablerow" colspan='2'><?php echo $form->factura->output;?>&nbsp;</td>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?=$form->peso->label  ?>&nbsp;</td>
-				<td class="littletablerow" align="left"><?=$form->peso->output ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->peso->label  ?>&nbsp;</td>
+				<td class="littletablerow" align="left"><?php echo $form->peso->output ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->observa1->label  ?>&nbsp;</td>
 				<td class="littletablerow" colspan='2'><?php echo $form->observa1->output ?>&nbsp;</td>
 			</tr>
@@ -115,7 +115,7 @@ function del_itsnot(id){
 				<td class="littletablerow" align="right"><?php echo $form->$it_entrega->output?></td>
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow">
-					<a href='#' onclick='del_itsnot(<?=$i ?>);return false;'>Eliminar</a>
+					<a href='#' onclick='del_itsnot(<?php echo $i ?>);return false;'>Eliminar</a>
 				</td>
 				<?php } ?>
 			</tr>

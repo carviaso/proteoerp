@@ -10,29 +10,29 @@
             </tr>
             <tr>
               <td width="100" class="littletablerowth">Numero</td>
-              <td width="100" class="littletablerow">  <?=$numero?></td>
+              <td width="100" class="littletablerow">  <?php echo $numero?></td>
               <td width="100" class="littletablerowth">Cliente</td>
-              <td width="100" class="littletablerow"><?=$cod_cli ?></td>
+              <td width="100" class="littletablerow"><?php echo $cod_cli ?></td>
               <td width="100" class="littletablerowth">Almacen</td>
-              <td width="100" class="littletablerow"><?=$almacen ?></td>
+              <td width="100" class="littletablerow"><?php echo $almacen ?></td>
             </tr>
             <tr>
               <td class="littletablerowth">Fecha</td>
-              <td class="littletablerow"><?=$fecha ?></td>
+              <td class="littletablerow"><?php echo $fecha ?></td>
               <td class="littletablerowth">Nombre</td>
-              <td colspan="3" class="littletablerow"><?=$nombre ?></td>
+              <td colspan="3" class="littletablerow"><?php echo $nombre ?></td>
             </tr>
             <tr>
               <td class="littletablerowth">Vendedor</td>
-              <td class="littletablerow"><?=$vende?></td>
+              <td class="littletablerow"><?php echo $vende?></td>
               <td class="littletablerowth">Dirección</td>
-              <td colspan="3" class="littletablerow"><?=$dir_cli ?></td>
+              <td colspan="3" class="littletablerow"><?php echo $dir_cli ?></td>
             </tr>
             <tr>
               <td class="littletablerowth">Factura</td>
-              <td class="littletablerow"><?=$factura?></td>
+              <td class="littletablerow"><?php echo $factura?></td>
               <td class="littletablerowth"></td>
-              <td colspan="3" class="littletablerow"><?=$dir_cl1?></td>
+              <td colspan="3" class="littletablerow"><?php echo $dir_cl1?></td>
             </tr>
           </table>
           <?php echo $items ?>
@@ -43,17 +43,17 @@
 	 </tr>
 	 <tr>
      <td class="littletablerowth">Orden</td>
-     <td class="littletablerow"><?=$orden ?></td>
+     <td class="littletablerow"><?php echo $orden ?></td>
      <td class="littletablerowth">I.V.A</td>
      <td class="littletablerowth">Sub-Total</td>                       
-     <td colspan="3" class="littletablerow"><?=$stotal ?></td>
+     <td colspan="3" class="littletablerow"><?php echo $stotal ?></td>
    </tr>
    <tr>
      <td class="littletablerowth">Observacion</td>
-     <td class="littletablerow"><?=$observa ?></td>
-     <td class="littletablerow"><?=$impuesto ?></td>
+     <td class="littletablerow"><?php echo $observa ?></td>
+     <td class="littletablerow"><?php echo $impuesto ?></td>
      <td class="littletablerowth">Total</td>                       
-     <td colspan="3" class="littletablerow"><?=$gtotal ?></td>
+     <td colspan="3" class="littletablerow"><?php echo $gtotal ?></td>
    </tr>                                                         
 </table>
 	  <td>

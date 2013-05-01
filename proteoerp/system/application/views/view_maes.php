@@ -23,8 +23,8 @@
 		<td class="littletablerow"   ><?php echo $form->susti->output; ?></td>
 	</tr>
 	<tr>
-		<td class="littletableheader"><?=$form->empaque->label  ?></td>
-		<td class="littletablerow"   ><?=$form->empaque->output ?></td>
+		<td class="littletableheader"><?php echo $form->empaque->label  ?></td>
+		<td class="littletablerow"   ><?php echo $form->empaque->output ?></td>
 		<td class="littletableheader"><?php echo $form->conjunto->label; ?></td>
 		<td class="littletablerow"   ><?php echo $form->conjunto->output;?></td>
 	</tr>
@@ -122,33 +122,33 @@
 				<td class="littletableheader"><?php echo $form->ultimo->label   ?></td>
 				<td class="littletablerow"   ><?php echo $form->ultimo->output  ?></td>
 				<td class="littletableheader">Precio 2</td>
-				<td><?=$form->margen2->output ?></td>
-				<td><?=$form->base2->output   ?></td>
-				<td><?=$form->precio2->output ?></td>
+				<td><?php echo $form->margen2->output ?></td>
+				<td><?php echo $form->base2->output   ?></td>
+				<td><?php echo $form->precio2->output ?></td>
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->iva->label   ?></td>
 				<td class="littletablerow"   ><?php echo $form->iva->output  ?>%</td>
 				<td class="littletableheader">Precio 3</td>
-				<td><?=$form->margen3->output ?></td>
-				<td><?=$form->base3->output   ?></td>
-				<td><?=$form->precio3->output ?></td>
+				<td><?php echo $form->margen3->output ?></td>
+				<td><?php echo $form->base3->output   ?></td>
+				<td><?php echo $form->precio3->output ?></td>
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->fcalc->label; ?></td>
 				<td class="littletablerow"   ><?php echo $form->fcalc->output;   ?></td>
 				<td class="littletableheader">Precio 4</td>
-				<td><?=$form->margen4->output ?></td>
-				<td><?=$form->base4->output   ?></td>
-				<td><?=$form->precio4->output ?></td>
+				<td><?php echo $form->margen4->output ?></td>
+				<td><?php echo $form->base4->output   ?></td>
+				<td><?php echo $form->precio4->output ?></td>
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->redondeo->label ?></td>
 				<td class="littletablerow"   ><?php echo $form->redondeo->output?></td>
 				<td class="littletableheader">Precio 5</td>
-				<td><?=$form->margen5->output ?></td>
-				<td><?=$form->base5->output   ?></td>
-				<td><?=$form->precio5->output ?></td>
+				<td><?php echo $form->margen5->output ?></td>
+				<td><?php echo $form->base5->output   ?></td>
+				<td><?php echo $form->precio5->output ?></td>
 			</tr>		
 		</table>	
 	</div>

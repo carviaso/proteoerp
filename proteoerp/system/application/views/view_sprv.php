@@ -36,36 +36,36 @@
 		<td colspan='2'>
 			<table border=0 width="100%">
 			<tr>
-				<td width="70" class="littletableheaderc"><?=$form->proveed->label  ?></td>
-				<td width='140' class="littletablerow" ><?=$form->proveed->output ?></td>
-				<td class="littletableheaderc"><?=$form->rif->label ?></td>
-				<td align='right' class="littletablerow"><?=$form->rif->output ?></td>
+				<td width="70" class="littletableheaderc"><?php echo $form->proveed->label  ?></td>
+				<td width='140' class="littletablerow" ><?php echo $form->proveed->output ?></td>
+				<td class="littletableheaderc"><?php echo $form->rif->label ?></td>
+				<td align='right' class="littletablerow"><?php echo $form->rif->output ?></td>
 			</tr><tr>
-				<td class="littletableheaderc"><?=$form->nombre->label ?></td>
-				<td colspan='3' class="littletablerow"><?=$form->nombre->output?></td>
+				<td class="littletableheaderc"><?php echo $form->nombre->label ?></td>
+				<td colspan='3' class="littletablerow"><?php echo $form->nombre->output?></td>
 			</tr><tr>
-				<td class="littletableheaderc"><?=$form->contacto->label  ?></td>
-				<td colspan='3' class="littletablerow"><?=$form->contacto->output ?></td>
+				<td class="littletableheaderc"><?php echo $form->contacto->label  ?></td>
+				<td colspan='3' class="littletablerow"><?php echo $form->contacto->output ?></td>
 			</tr><tr>
-				<td class="littletablerow"><?=$form->nomfis->label;?></td>
-				<td colspan='3' class="littletablerow"><?=$form->nomfis->output?></td>
+				<td class="littletablerow"><?php echo $form->nomfis->label;?></td>
+				<td colspan='3' class="littletablerow"><?php echo $form->nomfis->output?></td>
 			</tr>
 			</table>
 		</td>
 		<td>
 			<table border=0 width="100%">
 			<tr>
-				<td width='50' class="littletableheaderc"><?=$form->grupo->label ?></td>
-				<td  class="littletablerow"><?=$form->grupo->output?></td>
+				<td width='50' class="littletableheaderc"><?php echo $form->grupo->label ?></td>
+				<td  class="littletablerow"><?php echo $form->grupo->output?></td>
 			</tr><tr>
-				<td class="littletableheaderc"> <?=$form->tipo->label ?></td>
-				<td class="littletablerow"> <?=$form->tipo->output ?></td>
+				<td class="littletableheaderc"> <?php echo $form->tipo->label ?></td>
+				<td class="littletablerow"> <?php echo $form->tipo->output ?></td>
 			</tr><tr>
-				<td class="littletableheaderc"><?=$form->tiva->label  ?></td>
-				<td class="littletablerow"><?=$form->tiva->output ?></td>
+				<td class="littletableheaderc"><?php echo $form->tiva->label  ?></td>
+				<td class="littletablerow"><?php echo $form->tiva->output ?></td>
 			</tr><tr>
-				<td class="littletableheaderc"><?=$form->reteiva->label  ?></td>
-				<td class="littletablerow"><?=$form->reteiva->output ?></td>
+				<td class="littletableheaderc"><?php echo $form->reteiva->label  ?></td>
+				<td class="littletablerow"><?php echo $form->reteiva->output ?></td>
 			<tr><tr>
 				<td class="littletablerow"><?php echo $form->cuenta->label;?></td>
 				<td class="littletablerow"><?php echo $form->cuenta->output;?></td>

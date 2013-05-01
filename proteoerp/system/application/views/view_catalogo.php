@@ -369,9 +369,9 @@
 				<div id="f" class="f">
 					<table align="center" cellpadding="0" cellspacing="0">
 					  <tr>
-					    <td width="100px" rowspan="3"><img width="100px" src="<?=$this->_direccion.'/images/hiperdata.png'; ?>"> </td>
+					    <td width="100px" rowspan="3"><img width="100px" src="<?php echo $this->_direccion.'/images/hiperdata.png'; ?>"> </td>
 					    <td><strong>HiperData C.A</strong></td>
-					    <td width="100px" rowspan="3"><img width="100px" src="<?=$this->_direccion.'/images/proteo.png'; ?>"> </td>
+					    <td width="100px" rowspan="3"><img width="100px" src="<?php echo $this->_direccion.'/images/proteo.png'; ?>"> </td>
 					  </tr>
 					  <tr>
 					    <td>Sistemas Administrativos y Contables, Impresoras fiscales, Todo en computaci&oacute;n y Redes. Desarrollo de Software</td>

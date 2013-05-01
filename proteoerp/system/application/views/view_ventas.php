@@ -1,15 +1,15 @@
 <html>
 <head>
 <title>Sistemas DataSIS</title>
-<?=style("estilos.css");?>
-<?=$script ?>
+<?php echo style("estilos.css");?>
+<?php echo $script ?>
 </head>
 <body onload="inicia()">
-<?=$titulo ?>
+<?php echo $titulo ?>
 <table width="95%" border=0 align="center">
 <tr>
-<td valign=top><?=$lista ?></td>
-<td><?=$forma ?></td>
+<td valign=top><?php echo $lista ?></td>
+<td><?php echo $forma ?></td>
 </tr>
 </table>
 </body>

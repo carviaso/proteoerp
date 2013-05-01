@@ -29,11 +29,11 @@ if($form->_status!='show'){
 
 
 <script language="javascript" type="text/javascript">
-itsinvlist_cont=<?=$form->max_rel_count['itsinvlist'] ?>;
+itsinvlist_cont=<?php echo $form->max_rel_count['itsinvlist'] ?>;
 
 					
 function add_itsinvlist(){
-	var htm = <?=$campos ?>;
+	var htm = <?php echo $campos ?>;
 	can = itsinvlist_cont.toString();
 	con = (itsinvlist_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
@@ -62,26 +62,26 @@ function del_itsinvlist(id){
 				</td>
 			</tr>
 			<tr>
-				<td class="littletablerowth"><?=$form->nombre->label   ?>&nbsp;</td>
-				<td class="littletablerow"><?=$form->nombre->output  ?>&nbsp;</td>
+				<td class="littletablerowth"><?php echo $form->nombre->label   ?>&nbsp;</td>
+				<td class="littletablerow"><?php echo $form->nombre->output  ?>&nbsp;</td>
 				<td class="littletablerowth">&nbsp;</td>
 				<td class="littletablerow">&nbsp;</td>
 			</tr>
 			<tr>
-				<td class="littletablerowth"><?=$form->fecha->label   ?>&nbsp;</td>
-				<td class="littletablerow"><?=$form->fecha->output  ?>&nbsp;</td>
+				<td class="littletablerowth"><?php echo $form->fecha->label   ?>&nbsp;</td>
+				<td class="littletablerow"><?php echo $form->fecha->output  ?>&nbsp;</td>
 				<td class="littletablerowth">&nbsp;</td>
 				<td class="littletablerow">&nbsp;</td>
 			</tr>
 			<tr>
-				<td class="littletablerowth"><?=$form->concepto->label   ?>&nbsp;</td>
-				<td class="littletablerow"><?=$form->concepto->output  ?>&nbsp;</td>
+				<td class="littletablerowth"><?php echo $form->concepto->label   ?>&nbsp;</td>
+				<td class="littletablerow"><?php echo $form->concepto->output  ?>&nbsp;</td>
 				<td class="littletablerowth">&nbsp;</td>
 				<td class="littletablerow">&nbsp;</td>
 			</tr>
 			<tr>
-				<td class="littletablerowth"><?=$form->usu->label   ?>*&nbsp;</td>
-				<td class="littletablerow"><?=$form->usu->output  ?>&nbsp;</td>
+				<td class="littletablerowth"><?php echo $form->usu->label   ?>*&nbsp;</td>
+				<td class="littletablerow"><?php echo $form->usu->output  ?>&nbsp;</td>
 			</tr>
 
 		</table>
@@ -98,12 +98,12 @@ function del_itsinvlist(id){
 				$obj0="itcodigo_$i";
 				$obj1="itdescrip_$i"
 				?>
-			<tr id='tr_itsinvlist_<?=$i ?>'>
-				<td class="littletablerow"><?=$form->$obj0->output ?></td>
-				<td class="littletablerow"><?=$form->$obj1->output ?></td>
+			<tr id='tr_itsinvlist_<?php echo $i ?>'>
+				<td class="littletablerow"><?php echo $form->$obj0->output ?></td>
+				<td class="littletablerow"><?php echo $form->$obj1->output ?></td>
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow"><a href=#
-					onclick='del_itsinvlist(<?=$i ?>);return false;'>Eliminar</a></td>
+					onclick='del_itsinvlist(<?php echo $i ?>);return false;'>Eliminar</a></td>
 					<?php } ?>
 			</tr>
 			<?php } ?>

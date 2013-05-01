@@ -114,8 +114,8 @@ function del_itotin(id){
 				<td class="littletablerow" colspan='2'><?php echo $form->rifci->output;   ?>&nbsp;</td>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?=$form->tipo_doc->label  ?>&nbsp;</td>
-				<td class="littletablerow"><?=$form->tipo_doc->output ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->tipo_doc->label  ?>&nbsp;</td>
+				<td class="littletablerow"><?php echo $form->tipo_doc->output ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->direc->label  ?>&nbsp;</td>
 				<td class="littletablerow" colspan='2'><?php echo $form->direc->output ?>&nbsp;</td>
 			</tr>
@@ -163,7 +163,7 @@ function del_itotin(id){
 
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow"><a href='#'
-					onclick='del_itotin(<?=$i ?>);return false;'>Eliminar</a></td>
+					onclick='del_itotin(<?php echo $i ?>);return false;'>Eliminar</a></td>
 					<?php } ?>
 			</tr>
 			<?php } ?>
@@ -181,25 +181,25 @@ function del_itotin(id){
 				<th colspan='6' class="littletableheader">Res&uacute;men Financiero</th>
 			</tr>
 			<tr>
-				<td  class="littletablerowth"><?=$form->vence->label ?></td>
-				<td  class="littletablerowth"><?=$form->observa1->label ?>
+				<td  class="littletablerowth"><?php echo $form->vence->label ?></td>
+				<td  class="littletablerowth"><?php echo $form->observa1->label ?>
 				</td>
-				<td  class="littletablerowth"><?=$form->totals->label ?>
+				<td  class="littletablerowth"><?php echo $form->totals->label ?>
 				</td>
-				<td class="littletablerow"><?=$form->totals->output ?>
+				<td class="littletablerow"><?php echo $form->totals->output ?>
 				</td>
 			</tr>
 			<tr>
-				<td class="littletablerow"><?=$form->vence->output ?></td>
-				<td class="littletablerow" ><?=$form->observa->output ?></td>
-				<td class="littletablerowth"><?=$form->iva->label ?></td>
-				<td class="littletablerow"><?=$form->iva->output ?></td>
+				<td class="littletablerow"><?php echo $form->vence->output ?></td>
+				<td class="littletablerow" ><?php echo $form->observa->output ?></td>
+				<td class="littletablerowth"><?php echo $form->iva->label ?></td>
+				<td class="littletablerow"><?php echo $form->iva->output ?></td>
 			</tr>
 			<tr>
 				<td class="littletablerow">&nbsp;</td>
-				<td class="littletablerow"><?=$form->observa1->output ?></td>
-				<td class="littletablerowth"><?=$form->totalg->label ?></td>
-				<td class="littletablerow"><?=$form->totalg->output ?></td>
+				<td class="littletablerow"><?php echo $form->observa1->output ?></td>
+				<td class="littletablerowth"><?php echo $form->totalg->label ?></td>
+				<td class="littletablerow"><?php echo $form->totalg->output ?></td>
 			</tr>
 		</table>
 		<?php echo $form_end; ?></td>

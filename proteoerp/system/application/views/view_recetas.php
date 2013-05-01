@@ -24,16 +24,16 @@ echo $form_begin?>
             <td colspan=13 class="littletableheader">Encabezado</td>
             </tr>
             <tr>
-              <td width="100" class="littletablerowth"><?=$form->codigo->label ?></td>
-              <td width="100" class="littletablerow"><?=$form->codigo->output ?></td>
-              <td width="119" class="littletablerowth"><?=$form->precio->label ?></td>
-              <td width="137" class="littletablerow"><?=$form->precio->output ?></td>
+              <td width="100" class="littletablerowth"><?php echo $form->codigo->label ?></td>
+              <td width="100" class="littletablerow"><?php echo $form->codigo->output ?></td>
+              <td width="119" class="littletablerowth"><?php echo $form->precio->label ?></td>
+              <td width="137" class="littletablerow"><?php echo $form->precio->output ?></td>
             </tr>
             <tr>
-              <td class="littletablerowth"><?=$form->descri1->label ?></td>
-              <td class="littletablerow"><?=$form->descri1->output ?></td>
-              <td class="littletablerowth"><?=$form->fecha->label ?></td>
-              <td class="littletablerow"><?=$form->fecha->output ?></td>
+              <td class="littletablerowth"><?php echo $form->descri1->label ?></td>
+              <td class="littletablerow"><?php echo $form->descri1->output ?></td>
+              <td class="littletablerowth"><?php echo $form->fecha->label ?></td>
+              <td class="littletablerow"><?php echo $form->fecha->output ?></td>
             </tr>
         </table>
         <?php echo $form->detalle->output ?>
@@ -43,10 +43,10 @@ echo $form_begin?>
 	  	<td colspan=10 class="littletableheader">Totales</td>      
 	    </tr>                                                          
 	    <tr>                                                 
-      	<td width="102" class="littletablerowth"><?=$form->rela->label ?> </td>
-		  	<td width="97" class="littletablerow"><?=$form->rela->output ?> </td>
-	    	<td width="66" class="littletablerowth"><?=$form->total->label ?> </td>
-		  	<td width="115" class="littletablerow" ><?=$form->total->output ?> </td>
+      	<td width="102" class="littletablerowth"><?php echo $form->rela->label ?> </td>
+		  	<td width="97" class="littletablerow"><?php echo $form->rela->output ?> </td>
+	    	<td width="66" class="littletablerowth"><?php echo $form->total->label ?> </td>
+		  	<td width="115" class="littletablerow" ><?php echo $form->total->output ?> </td>
       </tr>
 </table>
 

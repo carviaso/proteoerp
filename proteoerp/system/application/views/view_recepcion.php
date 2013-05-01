@@ -25,32 +25,32 @@ echo $form_begin?>
             <td colspan=13 class="littletableheader">Encabezado</td>
             </tr>
             <tr>
-              <td width="100" class="littletablerowth"><?=$form->huesped->label ?></td>
-              <td colspan="3" class="littletablerow"><?=$form->huesped->output ?></td>
+              <td width="100" class="littletablerowth"><?php echo $form->huesped->label ?></td>
+              <td colspan="3" class="littletablerow"><?php echo $form->huesped->output ?></td>
               <td class="littletablerow"><span class="littletablerowth">
-                <?=$form->folio->label ?>
+                <?php echo $form->folio->label ?>
               </span></td>
-              <td colspan="3" class="littletablerow"><?=$form->folio->output ?></td>
+              <td colspan="3" class="littletablerow"><?php echo $form->folio->output ?></td>
             </tr>
             <tr>
-              <td class="littletablerowth"><?=$form->fecha_in->label ?></td>
-              <td width="100" class="littletablerow"><?=$form->fecha_in->output ?></td>
-              <td width="119" class="littletablerowth"><?=$form->cuenta->label ?></td>
-              <td class="littletablerow"><?=$form->cuenta->output ?></td>
+              <td class="littletablerowth"><?php echo $form->fecha_in->label ?></td>
+              <td width="100" class="littletablerow"><?php echo $form->fecha_in->output ?></td>
+              <td width="119" class="littletablerowth"><?php echo $form->cuenta->label ?></td>
+              <td class="littletablerow"><?php echo $form->cuenta->output ?></td>
               <td class="littletablerow"><span class="littletablerowth">
-                <?=$form->otro->label ?>
+                <?php echo $form->otro->label ?>
               </span></td>
-              <td colspan="3" class="littletablerow"><?=$form->otro->output ?></td>
+              <td colspan="3" class="littletablerow"><?php echo $form->otro->output ?></td>
             </tr>
             <tr>
-              <td class="littletablerowth"><?=$form->fecha_ou->label ?></td>
-              <td class="littletablerow"><?=$form->fecha_ou->output ?></td>
-              <td class="littletablerowth"><?=$form->habit->label ?></td>
-              <td class="littletablerow"><?=$form->habit->output ?></td>
+              <td class="littletablerowth"><?php echo $form->fecha_ou->label ?></td>
+              <td class="littletablerow"><?php echo $form->fecha_ou->output ?></td>
+              <td class="littletablerowth"><?php echo $form->habit->label ?></td>
+              <td class="littletablerow"><?php echo $form->habit->output ?></td>
               <td class="littletablerow"><span class="littletablerowth">
-                <?=$form->total->label ?>
+                <?php echo $form->total->label ?>
               </span></td>
-              <td width="78" class="littletablerow"><?=$form->total->output ?></td>
+              <td width="78" class="littletablerow"><?php echo $form->total->output ?></td>
             </tr>
         </table>  
         
@@ -61,8 +61,8 @@ echo $form_begin?>
 	  	<td colspan=13 class="littletableheader">Totales</td>      
 	 </tr>                                                          
 	 <tr>                                                 
-	    <td width="59" class="littletablerowth"><?=$form->saldo->label ?>       &nbsp;</td>
-	   	<td width="18" class="littletablerow"  ><?=$form->saldo->output ?>      &nbsp;</td>	
+	    <td width="59" class="littletablerowth"><?php echo $form->saldo->label ?>       &nbsp;</td>
+	   	<td width="18" class="littletablerow"  ><?php echo $form->saldo->output ?>      &nbsp;</td>	
     </tr>
 	  <td>
 	<tr>

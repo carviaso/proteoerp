@@ -109,7 +109,7 @@ function del_itnoco(id){
 
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow"><a href='#'
-					onclick='del_itnoco(<?=$i ?>);return false;'>Eliminar</a></td>
+					onclick='del_itnoco(<?php echo $i; ?>);return false;'>Eliminar</a></td>
 					<?php } ?>
 			</tr>
 			<?php } ?>

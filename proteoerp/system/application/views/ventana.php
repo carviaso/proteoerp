@@ -2,8 +2,8 @@
 <html>
 <head>
 <title>Proteo ERP</title>
-<link rel="stylesheet" href="<?=base_url()?>assets/default/css/rapyd.css" type="text/css" media="all" />
-<?=$rapyd_head?>
+<link rel="stylesheet" href="<?php echo base_url()?>assets/default/css/rapyd.css" type="text/css" media="all" />
+<?php echo $rapyd_head?>
 </head>
 <body>
 <div class='encabe'>
@@ -12,11 +12,11 @@
 <div id="content">
 	<div>Proteo ERP version 0.1  </div>
 	<div class="line"></div>	
-	<div class="left"><?=$lista ?></div>
+	<div class="left"><?php echo $lista ?></div>
 	<div class="right">
-		<?=$content?>
+		<?php echo $content?>
 		<div class="line"></div>
-		<div class="code"><?=$code?></div>
+		<div class="code"><?php echo $code?></div>
 	</div>
 	<div class="line"></div>
 	<div class="footer">
