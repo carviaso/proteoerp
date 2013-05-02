@@ -1,8 +1,8 @@
 <?php
 class Reparto extends Controller {
 	var $mModulo = 'REPARTO';
-	var $titp    = 'Modulo REPARTO';
-	var $tits    = 'Modulo REPARTO';
+	var $titp    = 'REPARTO AL CLIENTE';
+	var $tits    = 'REPARTO AL CLIENTE';
 	var $url     = 'ventas/reparto/';
 
 	function Reparto(){
@@ -13,13 +13,9 @@ class Reparto extends Controller {
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('reparto','id') ) {
-			$this->db->simple_query('ALTER TABLE reparto DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE reparto ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE reparto ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
-		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
+		$this->datasis->creaintramenu(array('modulo'=>'151','titulo'=>'Reparto','mensaje'=>'Reparto a Domicilio','panel'=>'DESPACHO','ejecutar'=>'ventas/reparto','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->db->query('UPDATE sfac SET reparto=0 WHERE reparto IS NULL');
 		redirect($this->url.'jqdatag');
 	}
 
@@ -44,7 +40,8 @@ class Reparto extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'imprime',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'agregaf', 'img'=>'images/databaseadd.png','alt' => 'Reimprimir', 'label'=>'Agregar Facturas', 'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -87,6 +84,23 @@ class Reparto extends Controller {
 				$("#fedita").dialog( "open" );
 			})
 		};';
+
+		$bodyscript .= '
+		$("#agregaf").click(function(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'factuforma').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"SELECCIONAR FACTURAS", width: 600, height: 450 } );
+					$("#fshow").dialog( "open" );
+				});
+
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
 
 		$bodyscript .= '
 		function repartoedit(){
@@ -160,7 +174,7 @@ class Reparto extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 300, width: 550, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -236,6 +250,141 @@ class Reparto extends Controller {
 		return $bodyscript;
 	}
 
+
+	//******************************************************************
+	// Formato de la ventana
+	//
+	function factuforma( $id = 0 ){
+		$msalida = '<script type="text/javascript">'."\n";
+		$msalida .= 'var mid='.$id.";\n";
+	
+		$msalida .= '
+		$("#bpos1").jqGrid({
+			ajaxGridOptions: { type: "POST"},
+			jsonReader: { root: "data", repeatitems: false},
+			ondblClickRow: pasa,
+			url:\''.site_url($this->url.'facturas').'/\'+mid,
+			editurl: \''.site_url($this->url.'facturasw').'/\'+mid,
+			datatype: "json",
+			rowNum:12,
+
+			height: 280, 
+			pager: \'#pbpos1\',
+			rowList:[],
+			toolbar: [false],
+
+			width:  400,
+			hiddengrid: false,
+			postdata: { tboficiid: "wapi"},
+			colNames:[\'id\', \'Numero\',\'Fecha\', \'Cliente\', \'Zona\', \'Rep\', \'Peso\'],
+			colModel:[
+				{name:\'id\',      index:\'id\',      width: 10, hidden:true},
+				{name:\'numero\',  index:\'numero\',  width: 35, editable:false, search: true},
+				{name:\'fecha\',   index:\'fecha\',   width: 35, editable:false, search: true, align:\'center\',edittype:\'text\', editoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}, defaultValue:\'2013-05-01\'}, searchoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}}},
+				{name:\'cod_cli\', index:\'cod_cli\', width: 20, editable:false, search: true },
+				{name:\'zona\',    index:\'zona\',    width: 20, editable:false, search: true, align:\'center\' },
+				{name:\'reparto\', index:\'reparto\', width: 20, editable:false, search: true, formatter: fsele },
+				{name:\'peso\',    index:\'peso\',    width: 40, editable:false, search: true, editoptions: {size:10,maxlength:10,dataInit:function(elem){$(elem).numeric();}},formatter:\'number\',formatoptions:{decimalSeparator:".",thousandsSeparator:",",decimalPlaces:2}, align:\'right\' }
+			],
+		});
+		$("#bpos1").jqGrid(\'navGrid\',"#pbpos1",{edit:false, add:false, del:false, search: true });
+		$("#bpos1").jqGrid(\'filterToolbar\');
+		
+		function fsele(el, val, opts){
+			var meco=\'<div><img src="'.base_url().'images/circuloverde.png" border="0" /></div>\';
+			if ( el == "0" ){
+				meco=\'<div>&nbsp;</div>\';
+			}
+			return meco;
+		}
+
+
+		function pasa(){
+			var id = $("#bpos1").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				$.post("'.site_url($this->url.'agregaf').'/"+mid+"/"+id, function(data){
+					var json = JSON.parse(data);
+					$("#totpeso").html(json.peso);
+					alert(json.mensaje);
+					$("#bpos1").trigger("reloadGrid");
+				});
+
+			}
+		}
+		';
+	
+		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$id"); 
+		if( !$peso ) $peso = "0.00";
+		$reg  = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=$id");
+		$msalida .= "\n</script>\n";
+		$msalida .= "<table width='100%'><tr><td>
+		<div class=\"tema1\"><table id=\"bpos1\"></table></div>
+		<div id='pbpos1'></div>\n
+		</td><td align='center' valign='top'>
+		<table width='100%' align='center'>
+			<tr>
+				<td bgcolor='#DFDFDF'>VEHICULO</td>
+			</tr>
+				<td style='font-size:10pt;font-weight:bold;'>".$reg['descrip']." ".$reg['placa']."</td>
+			</tr>
+				<td bgcolor='#DFDFDF'>CAPACIDAD Kg.</td>
+			</tr>
+				<tr><td align='center' style='font-size:14pt;font-weight:bold;'>".$reg['capacidad']."</td>
+			</tr>
+		</table>
+		<br><br>
+		<table width='100%' align='center'>
+			<tr>
+				<td bgcolor='#DFDFDF'>TOTAL SELECCION</td>
+			</tr><tr>
+				<td align='center' style='font-size:14pt;font-weight:bold;'><div id='totpeso'>".$peso."</div></td>
+			</tr>
+		</table>
+		</td></tr>
+		</table>\n";
+	
+		echo $msalida;
+
+	}
+
+	//******************************************************************
+	// Agrega Factura
+	//
+	function agregaf($reparto, $factura){
+		$actual = $this->datasis->dameval("SELECT reparto FROM sfac WHERE id=$factura");
+		if ( $actual == 0 ) {
+			$mSQL = "UPDATE sfac SET reparto=$reparto WHERE id=$factura";
+			$this->db->query($mSQL);
+			$msj = 'Factura Agregada';
+		} else {
+			$mSQL = "UPDATE sfac SET reparto=0 WHERE id=$factura";
+			$this->db->query($mSQL);
+			$msj = 'Factura Quitada';
+		}
+		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$reparto"); 
+
+		echo '{ "mensaje": "'.$msj.'", "peso": "'.$peso.'"}';
+		
+	}
+
+	//******************************************************************
+	// Factura
+	//
+	function facturas( $id = 0 ){
+		$this->load->library('jqdatagrid');
+		$grid       = $this->jqdatagrid;
+
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('sfac');
+		$mWHERE[] = array('', 'reparto', array($id,'0'), '' );
+
+		$response   = $grid->getData('sfac', array(array()), array('id', 'numero','fecha', 'cod_cli', 'zona', 'reparto', 'peso'), false, $mWHERE, 'id','desc' );
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+	
+	}
+
+
 	//***************************
 	//Definicion del Grid y la Forma
 	//***************************
@@ -246,11 +395,11 @@ class Reparto extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('id');
-		$grid->label('Id');
+		$grid->label('Numero');
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
-			'width'         => 40,
+			'width'         => 80,
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
@@ -510,9 +659,9 @@ class Reparto extends Controller {
 		};
 	}
 
-	//***************************
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgridit( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -1137,18 +1286,18 @@ class Reparto extends Controller {
 		}
 	}
 
-	/**
-	* Busca la data en el Servidor por json
-	*/
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
 	function getdatait( $id = 0 ){
 		if ($id === 0 ){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM reparto");
 		}
 		if(empty($id)) return "";
-		$numero   = $this->datasis->dameval("SELECT numero FROM reparto WHERE id=$id");
-		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM sfac WHERE numero='$numero' ";
-		$response   = $grid->getDataSimple($mSQL);
+		//$numero   = $this->datasis->dameval("SELECT id FROM reparto WHERE id=$id");
+		$grid     = $this->jqdatagrid;
+		$mSQL     = "SELECT * FROM sfac WHERE reparto='$id' ";
+		$response = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -1159,10 +1308,9 @@ class Reparto extends Controller {
 	function setDatait(){
 	}
 
-	//***********************************
+	//******************************************************************
 	// DataEdit
-	//***********************************
-
+	//
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 		$script= '
@@ -1172,7 +1320,7 @@ class Reparto extends Controller {
 		});
 		';
 
-		$edit = new DataEdit($this->tits, 'reparto');
+		$edit = new DataEdit('', 'reparto');
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -1189,6 +1337,7 @@ class Reparto extends Controller {
 		$edit->pre_process( 'update','_pre_update' );
 		$edit->pre_process( 'delete','_pre_delete' );
 
+/*
 		$edit->tipo = new dropdownField('Tipo', 'tipo');
 		$edit->tipo->option('P','Pendiente');
 		$edit->tipo->option('C','Cargado');
@@ -1197,35 +1346,40 @@ class Reparto extends Controller {
 		$edit->tipo->option('A','Anulado');
 		$edit->tipo->style = 'width:100px;';
 		$edit->tipo->rule='required';
+*/
 
 		$edit->fecha = new dateonlyField('Fecha','fecha');
 		$edit->fecha->rule='chfecha';
+		$edit->fecha->insertValue = date('Ymd');
 		$edit->fecha->size =10;
 		$edit->fecha->maxlength =8;
 		$edit->fecha->calendar=false;
 
+/*
 		$edit->retorno = new dateonlyField('Retorno','retorno');
 		$edit->retorno->rule='chfecha';
 		$edit->retorno->size =10;
 		$edit->retorno->maxlength =8;
 		$edit->retorno->calendar=false;
+*/
 
-		$edit->chofer = new inputField('Chofer','chofer');
-		$edit->chofer->rule='';
-		$edit->chofer->size =7;
-		$edit->chofer->maxlength =5;
+		$edit->chofer = new dropdownField('Chofer','chofer');
+		$edit->chofer->option('','Seleccionar');
+		$edit->chofer->options("SELECT codigo, nombre nombre FROM chofer ORDER BY nombre");
+		$edit->chofer->rule='required';
+		$edit->chofer->style = 'width:300px;';
 
 		$edit->vehiculo = new dropdownField('Veh&iacute;culo','vehiculo');
 		$edit->vehiculo->option('','Seleccionar');
-		$edit->vehiculo->options("SELECT codigo, CONCAT_WS('-','descrip','capacidad') FROM flota ORDER BY descrip");
+		$edit->vehiculo->options("SELECT codigo, CONCAT_WS(' ',codigo, descrip, capacidad) FROM flota ORDER BY descrip");
 		$edit->vehiculo->rule='required';
 		$edit->vehiculo->style = 'width:300px;';
 
 		$edit->observa = new textareaField('Observaci&oacute;n','observa');
 		$edit->observa->rule='';
-		$edit->observa->cols = 70;
+		$edit->observa->cols = 40;
 		$edit->observa->rows = 4;
-
+/*
 		$edit->peso = new inputField('Peso','peso');
 		$edit->peso->rule='numeric';
 		$edit->peso->css_class='inputnum';
@@ -1237,10 +1391,10 @@ class Reparto extends Controller {
 		$edit->facturas->css_class='inputonlynum';
 		$edit->facturas->size =13;
 		$edit->facturas->maxlength =11;
-
+*/
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
+		$edit->hora    = new autoUpdateField('hora',   date('H:i:s'), date('H:i:s'));
 
 		$edit->build();
 
@@ -1258,6 +1412,8 @@ class Reparto extends Controller {
 
 	function _pre_insert($do){
 		$do->error_message_ar['pre_ins']='';
+		// Coloca por defecto el tipo 
+		$do->set('tipo','P');
 		return true;
 	}
 

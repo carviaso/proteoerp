@@ -1037,8 +1037,12 @@ class Jqdatagrid
 					} else {
 						if ( empty($busca[2]) )
 							$this->CI->db->where( $busca[1] );
-						else
-							$this->CI->db->where( $busca[1], $busca[2] );
+						else {
+							if ( is_array($busca[2]) )
+								$this->CI->db->where_in( $busca[1], $busca[2] );
+							else
+								$this->CI->db->where( $busca[1], $busca[2] );
+						}
 					}
 				}
 			}

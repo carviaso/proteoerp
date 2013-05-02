@@ -99,32 +99,6 @@ class Banc extends Controller {
 		};
 		';
 
-/*
-		$bodyscript .= '
-		$("#recalban").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
-				$.prompt( "<h1>Recalcular Saldo de Banco:</h1><br/><center>Periodo: '.$mano.' Saldo Inicial: <input class=\'inputnum\' type=\'text\' id=\'msaldo\' name=\'msaldo\' value=\'0.00\' maxlengh=\'10\' size=\'10\' ></center><br/>",
-				{
-					buttons: { Aplicar: true, Cancelar: false },
-					submit: function(e,v,m,f){
-						if (v) {
-							if( f.mmano==null ){
-								apprise("Cancelado por el usuario");
-							} else if( f.mmano=="" ) {
-								apprise("<h1>Cancelado</h1>Fecha vacia");
-							} else {
-								saldo = Math.round(f.msaldo*100,0);
-								frecalbanco( id, f.mmano, saldo );							}
-						}
-					}
-				});
-			} else { $.prompt("<h1>Por favor Seleccione un Banco</h1>");}
-		});
-		';
-*/
-
 		$bodyscript .= '
 		function fresumen( id, ano ){
 			$.ajax({
