@@ -1205,4 +1205,3 @@ class Tbrutas extends Controller {
 
 	}
 }
-?>

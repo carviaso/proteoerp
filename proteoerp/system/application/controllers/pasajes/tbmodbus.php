@@ -403,7 +403,7 @@ class Tbmodbus extends Controller {
 		$id = $this->uri->segment($this->uri->total_segments());
 
 		$tipbus = $this->datasis->dameval("SELECT tipbus FROM tbmodbus WHERE id=$id");
-		
+
 		$edit = new DataEdit($this->tits, 'tbmodbus');
 
 		$edit->script($script,'modify');
@@ -423,7 +423,7 @@ class Tbmodbus extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
+		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});		';
@@ -457,13 +457,13 @@ class Tbmodbus extends Controller {
 			$edit->$objeto->maxlength=3;
 			$edit->$objeto->autocomplete=false;
 			//$edit->$objeto->rule='required';
-			
+
 			$mSQL = "SELECT valor FROM tbtipbus WHERE indice=$i AND tipbus=".$this->db->escape($tipbus);
 			$valor = $this->datasis->dameval($mSQL);
-			
+
 			//$edit->$objeto->insertValue = "$i";  //$this->datasis->dameval($mSQL) ;
 			$edit->$objeto->updateValue = $valor;  //$this->datasis->dameval($mSQL) ;
-			
+
 		}
 
 		for( $i=100; $i<=148; $i++ ){
@@ -566,5 +566,3 @@ class Tbmodbus extends Controller {
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
-
-?>
