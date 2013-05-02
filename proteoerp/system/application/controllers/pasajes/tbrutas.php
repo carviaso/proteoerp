@@ -186,7 +186,7 @@ class Tbrutas extends Controller {
 					"<tr><td>Orden:</td><td><input id=\'morden\' name=\'morden\' size=\'6\' class=\'input\' value=\'"+ret.orden+"\'></td>"+
 					"<td align=\'right\'>Mostrar:</td><td align=\'left\'><input type=\'checkbox\' id=\'mmostrar\' name=\'mmostrar\' class=\'input\' value=\'S\' "+chec+" ></td></tr>"+
 					"</table>";
-				var mprepanom = 
+				var mprepanom =
 				{
 					state0: {
 						html: mcome1,
@@ -194,21 +194,21 @@ class Tbrutas extends Controller {
 						submit: function(e,v,m,f){
 							moficina = f.moficina;
 							if (v) {
-								$.post("'.site_url('pasajes/tbrutas/destino').'/", { hora: f.mhora, mostrar: f.mmostrar, orden: f.morden, mid: id, oper: \'Edit\' }, 
+								$.post("'.site_url('pasajes/tbrutas/destino').'/", { hora: f.mhora, mostrar: f.mmostrar, orden: f.morden, mid: id, oper: \'Edit\' },
 									function(data){
 										$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
 										$.prompt.goToState(\'state1\');
 										$("#newapi'.$grid1.'").trigger("reloadGrid");
 								});
 								return false;
-							} 
+							}
 						}
 					},
-					state1: { 
+					state1: {
 						html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
 						focus: 1,
 						buttons: { Ok:true }
-					}		
+					}
 				};
 				$.prompt(mprepanom);
 				$("#mhora").mask("99:99 a");
@@ -227,7 +227,7 @@ class Tbrutas extends Controller {
 					buttons: { Eliminar: true, Salir: false },
 					callback: function(e,v,m,f){
 						if (v) {
-							$.post("'.site_url('pasajes/tbrutas/destino').'/", { mid: id, oper: \'Del\' }, 
+							$.post("'.site_url('pasajes/tbrutas/destino').'/", { mid: id, oper: \'Del\' },
 								function(data){
 									//$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
 									//$.prompt.goToState(\'state1\');
@@ -252,7 +252,7 @@ class Tbrutas extends Controller {
 					"<tr><td>Hora: </td><td><input               id=\'mhora\'    name=\'mhora\'    size=\'6\' class=\'input\' value=\'\'></td>"+
 					"<td align=\'right\'>Mostrar:  </td><td align=\'left\'><input type=\'checkbox\' id=\'mmostrar\' name=\'mmostrar\' class=\'input\' value=\'S\'></td></tr>"+
 					"</table>";
-				var mprepanom = 
+				var mprepanom =
 				{
 					state0: {
 						html: mcome1,
@@ -260,21 +260,21 @@ class Tbrutas extends Controller {
 						submit: function(e,v,m,f){
 							moficina = f.moficina;
 							if (v) {
-								$.post("'.site_url('pasajes/tbrutas/destino').'/", { oficina: f.moficina, hora: f.mhora, mostrar: f.mmostrar, mid: id, oper: \'Add\' }, 
+								$.post("'.site_url('pasajes/tbrutas/destino').'/", { oficina: f.moficina, hora: f.mhora, mostrar: f.mmostrar, mid: id, oper: \'Add\' },
 									function(data){
 										$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
 										$.prompt.goToState(\'state1\');
 										$("#newapi'.$grid1.'").trigger("reloadGrid");
 								});
 								return false;
-							} 
+							}
 						}
 					},
-					state1: { 
+					state1: {
 						html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
 						focus: 1,
 						buttons: { Ok:true }
-					}		
+					}
 				};
 				$.prompt(mprepanom);
 				$("#mhora").mask("99:99 a");
@@ -297,7 +297,7 @@ class Tbrutas extends Controller {
 					"<tr><td>Gasto:</tdtd><td colspan=\'3\'>"+"'.$gasto.'</td></tr>"+
 					"<tr><td>Monto: </td><td><input id=\'mmonto\' name=\'mmonto\' size=\'10\' class=\'inputnum\' value=\'0.00\'></td>"+
 					"</table>";
-				var mprepanom1 = 
+				var mprepanom1 =
 				{
 					state0: {
 						html: mcome2,
@@ -305,20 +305,20 @@ class Tbrutas extends Controller {
 						submit: function(e,v,m,f){
 							moficina = f.moficina;
 							if (v) {
-								$.post("'.site_url('pasajes/tbrutas/gasto').'/", { gasto: f.mgasto, monto: f.mmonto, mid: id, oper: \'Add\' }, 
+								$.post("'.site_url('pasajes/tbrutas/gasto').'/", { gasto: f.mgasto, monto: f.mmonto, mid: id, oper: \'Add\' },
 									function(data){
 										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(data);
 										$.prompt.goToState(\'state1\');
 								});
 								return false;
-							} 
+							}
 						}
 					},
-					state1: { 
+					state1: {
 						html: "<h1>Resultado</h1><span id=\'in_prome3\'></span>",
 						focus: 1,
 						buttons: { Ok:true }
-					}		
+					}
 				};
 				$.prompt(mprepanom1);
 
@@ -444,7 +444,7 @@ class Tbrutas extends Controller {
 			$moficina = $this->input->post('oficina');
 			$mhora    = strtoupper($this->input->post('hora'));
 			$mostrar  = $this->input->post('mostrar');
-		
+
 			if ( $mostrar == '' ) $mostrar = 'N';
 			$data = array();
 
@@ -463,7 +463,7 @@ class Tbrutas extends Controller {
 			$this->db->insert('tbdestinos', $data);
 
 			// Guarda la Salida
-			if ( $orden > 1 ){ 
+			if ( $orden > 1 ){
 				$data['codrut']    = $codrut;
 				$data['codofiorg'] = $moficina;
 				$data['codofides'] = $moficina;
@@ -474,7 +474,7 @@ class Tbrutas extends Controller {
 			}
 
 			// Guarda los toques
-			if ( $orden > 2 ) { 
+			if ( $orden > 2 ) {
 				$mSQL = "SELECT * FROM tbdestinos WHERE codrut='".$codrut."' AND codofiorg='".substr($codrut,0,2)."' AND orden>1 AND orden<${orden} ORDER BY orden";
 				$query = $this->db->query($mSQL);
 				if ( $query->num_rows() > 0 ) {
@@ -501,21 +501,21 @@ class Tbrutas extends Controller {
 			$mhora    = strtoupper($this->input->post('hora'));
 			$mostrar  = $this->input->post('mostrar');
 			$orden    = $this->input->post('orden');
-		
+
 			if ( $mostrar == '' ) $mostrar = 'N';
 			$data = array();
 
 			$codrut = $this->datasis->dameval("SELECT codrut FROM tbdestinos a WHERE a.id=$mid");
-		
+
 			$data['hora']     = $mhora;
 			$data['mostrar']  = $mostrar;
 			$data['orden']    = $orden;
- 
+
 			$this->db->where('id',$mid);
 			$this->db->update('tbdestinos', $data);
-			
+
 			$salida = "Destino Guardado";
-	
+
 		} elseif ($oper == 'Del') {
 			$codrut = $this->datasis->dameval("SELECT codrut FROM tbdestinos a WHERE a.id=$mid");
 			$this->db->query("DELETE FROM tbdestinos WHERE id=$mid");
@@ -535,9 +535,9 @@ class Tbrutas extends Controller {
 		}
 */
 
-		
+
 		echo $salida;
-		
+
 	}
 
 
@@ -550,23 +550,23 @@ class Tbrutas extends Controller {
 		if ( $oper == 'Add') {
 			$gasto = $this->input->post('gasto');
 			$monto = $this->input->post('monto');
-		
+
 			$data = array();
 			$codrut = $this->datasis->dameval("SELECT codrut    FROM tbdestinos a WHERE a.id=$mid");
 			$codofi = $this->datasis->dameval("SELECT codofides FROM tbdestinos a WHERE a.id=$mid");
-		
+
 			$data['codrut'] = $codrut;
 			$data['codofi'] = $codofi;
 			$data['codgas'] = $gasto;
 			$data['monto']  = $monto;
-		
+
 			$this->db->insert('tbgastoruta', $data);
 
 			$salida = "Fasto Agregado";
 		}
 
 		echo $salida;
-		
+
 	}
 
 
@@ -574,11 +574,11 @@ class Tbrutas extends Controller {
 	//  Eliminar Gastos
 	//
 	function gastodel($mid){
-	
+
 		$this->db->query("DELETE FROM tbgastoruta WHERE id=$mid");
 		$salida = "Gasto Eiminado $mid";
 		echo $salida;
-		
+
 	}
 
 
@@ -588,13 +588,13 @@ class Tbrutas extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 
 		$grid->addField('codrut');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -633,7 +633,7 @@ class Tbrutas extends Controller {
 
 
 		$grid->addField('origen');
-		$grid->label('Origen');
+		$grid->label('Or&iacute;gen');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -975,11 +975,11 @@ class Tbrutas extends Controller {
 
 		$grid    = $this->jqdatagrid;
 		$mSQL    = "
-		SELECT a.*, b.desofi odesofi, c.desofi ddesofi 
-		FROM tbdestinos a 
-			JOIN tbofici b ON a.codofiorg=b.codofi 
-			JOIN tbofici c ON a.codofides=c.codofi 
-		WHERE codrut=${codrut} 
+		SELECT a.*, b.desofi odesofi, c.desofi ddesofi
+		FROM tbdestinos a
+			JOIN tbofici b ON a.codofiorg=b.codofi
+			JOIN tbofici c ON a.codofides=c.codofi
+		WHERE codrut=${codrut}
 		ORDER BY orden, a.codofiorg ";
 
 		$response   = $grid->getDataSimple($mSQL);
@@ -1075,7 +1075,7 @@ class Tbrutas extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
+		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});		';
@@ -1202,7 +1202,7 @@ class Tbrutas extends Controller {
 		}
 		echo $salida;
 
-	
+
 	}
 }
 ?>

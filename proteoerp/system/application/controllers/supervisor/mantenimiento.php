@@ -948,6 +948,7 @@ function bobo(url){'."
 	}
 
 	function actualizaproteo(){
+		session_write_close();
 		set_time_limit(3600);
 		$responde = '<h1>Resultado de la Actualizacion</h1>';
 		if (!extension_loaded('svn')) {
