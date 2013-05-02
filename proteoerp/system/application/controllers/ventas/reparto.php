@@ -26,15 +26,15 @@ class Reparto extends Controller {
 	function jqdatag(){
 
 		$grid = $this->defgrid();
-		$grid->setHeight('185');
+		$grid->setHeight('155');
 		$param['grids'][] = $grid->deploy();
 
 		$grid1   = $this->defgridit();
-		$grid1->setHeight('190');
+		$grid1->setHeight('160');
 		$param['grids'][] = $grid1->deploy();
 
 		// Configura los Paneles
-		$readyLayout = $grid->readyLayout2( 212, 220, $param['grids'][0]['gridname'],$param['grids'][1]['gridname']);
+		$readyLayout = $grid->readyLayout2( 212, 190, $param['grids'][0]['gridname'],$param['grids'][1]['gridname']);
 
 		//Funciones que ejecutan los botones
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
@@ -42,6 +42,12 @@ class Reparto extends Controller {
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
 		$grid->wbotonadd(array('id'=>'agregaf', 'img'=>'images/databaseadd.png','alt' => 'Reimprimir', 'label'=>'Agregar Facturas', 'tema'=>'anexos'));
+
+		$grid->wbotonadd(array('id'=>'cargard', 'img'=>'images/camion.png',  'alt'=>'Cargar Vehiculo',      'label'=>'Cargar Vehiculo',      'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'entrega', 'img'=>'images/acuerdo.png', 'alt'=>'Entregado al Cliente', 'label'=>'Entregado al Cliente', 'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png', 'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',  'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
+
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -158,6 +164,7 @@ class Reparto extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function() {
@@ -170,7 +177,7 @@ class Reparto extends Controller {
 			var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
-			';
+		';
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -317,10 +324,12 @@ class Reparto extends Controller {
 		if( !$peso ) $peso = "0.00";
 		$reg  = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=$id");
 		$msalida .= "\n</script>\n";
+		
 		$msalida .= "<table width='100%'><tr><td>
 		<div class=\"tema1\"><table id=\"bpos1\"></table></div>
 		<div id='pbpos1'></div>\n
 		</td><td align='center' valign='top'>
+		<p style='background:#ABE278;font-size:10pt;text-align:left;'>Para agregar o quitar facturas haga doble click sobre las mismas</p>\n
 		<table width='100%' align='center'>
 			<tr>
 				<td bgcolor='#DFDFDF'>VEHICULO</td>
@@ -377,11 +386,11 @@ class Reparto extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('sfac');
 		$mWHERE[] = array('', 'reparto', array($id,'0'), '' );
+		$mWHERE[] = array('', 'tipo_doc', 'F', '' );
 
 		$response   = $grid->getData('sfac', array(array()), array('id', 'numero','fecha', 'cod_cli', 'zona', 'reparto', 'peso'), false, $mWHERE, 'id','desc' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
-	
 	}
 
 
@@ -404,7 +413,6 @@ class Reparto extends Controller {
 			'search'        => 'false'
 		));
 
-
 		$grid->addField('tipo');
 		$grid->label('Tipo');
 		$grid->params(array(
@@ -415,7 +423,6 @@ class Reparto extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
-
 
 		$grid->addField('fecha');
 		$grid->label('Fecha');
@@ -429,7 +436,6 @@ class Reparto extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
 		$grid->addField('retorno');
 		$grid->label('Retorno');
 		$grid->params(array(
@@ -442,7 +448,6 @@ class Reparto extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
 		$grid->addField('chofer');
 		$grid->label('Chofer');
 		$grid->params(array(
@@ -453,7 +458,6 @@ class Reparto extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
-
 
 		$grid->addField('vehiculo');
 		$grid->label('Veh&iacute;culo');
@@ -466,7 +470,6 @@ class Reparto extends Controller {
 			'editoptions'   => '{ size:10, maxlength: 10 }',
 		));
 
-
 		$grid->addField('observa');
 		$grid->label('Observaci&oacute;n');
 		$grid->params(array(
@@ -476,7 +479,6 @@ class Reparto extends Controller {
 			'edittype'      => "'textarea'",
 			'editoptions'   => "'{rows:2, cols:60}'",
 		));
-
 
 		$grid->addField('peso');
 		$grid->label('Peso');
@@ -492,7 +494,6 @@ class Reparto extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('facturas');
 		$grid->label('Facturas');
 		$grid->params(array(
@@ -507,7 +508,6 @@ class Reparto extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
 		));
 
-
 		$grid->addField('estampa');
 		$grid->label('Estampa');
 		$grid->params(array(
@@ -520,7 +520,6 @@ class Reparto extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
 		$grid->addField('usuario');
 		$grid->label('Usuario');
 		$grid->params(array(
@@ -532,7 +531,6 @@ class Reparto extends Controller {
 			'editoptions'   => '{ size:12, maxlength: 12 }',
 		));
 
-
 		$grid->addField('hora');
 		$grid->label('Hora');
 		$grid->params(array(
@@ -543,7 +541,6 @@ class Reparto extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
-
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -587,9 +584,9 @@ class Reparto extends Controller {
 		}
 	}
 
-	/**
-	* Busca la data en el Servidor por json
-	*/
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
 	function getdata(){
 		$grid       = $this->jqdatagrid;
 
@@ -601,9 +598,9 @@ class Reparto extends Controller {
 		echo $rs;
 	}
 
-	/**
-	* Guarda la Informacion
-	*/
+	//******************************************************************
+	// Guarda la Informacion
+	//
 	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
@@ -672,6 +669,7 @@ class Reparto extends Controller {
 		$grid->label('Tipo');
 		$grid->params(array(
 			'search'        => 'true',
+			'align'         => "'center'",
 			'editable'      => $editar,
 			'width'         => 40,
 			'edittype'      => "'text'",
@@ -705,28 +703,44 @@ class Reparto extends Controller {
 		));
 
 
-		$grid->addField('vence');
-		$grid->label('Vence');
+		$grid->addField('zona');
+		$grid->label('Zona');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
 			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('vd');
-		$grid->label('Vendedor');
-		$grid->params(array(
-			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 50,
+			'width'         => 40,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:5, maxlength: 5 }',
+			'editoptions'   => '{ size:8, maxlength: 8 }',
+		));
+
+		$grid->addField('peso');
+		$grid->label('Peso');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 70,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('totalg');
+		$grid->label('Monto');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
 
@@ -734,25 +748,13 @@ class Reparto extends Controller {
 		$grid->label('Cliente');
 		$grid->params(array(
 			'search'        => 'true',
+			'align'         => "'center'",
 			'editable'      => $editar,
 			'width'         => 50,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
-
-
-		$grid->addField('rifci');
-		$grid->label('RIF/CI');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 130,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:13, maxlength: 13 }',
-		));
-
 
 		$grid->addField('nombre');
 		$grid->label('Nombre');
@@ -765,115 +767,8 @@ class Reparto extends Controller {
 			'editoptions'   => '{ size:40, maxlength: 40 }',
 		));
 
-
-		$grid->addField('direc');
-		$grid->label('Direcci&oacute;n');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:40, maxlength: 40 }',
-		));
-
-
-		$grid->addField('dire1');
-		$grid->label('Direcci&oacute;n 2');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:40, maxlength: 40 }',
-		));
-
-
-		$grid->addField('iva');
-		$grid->label('IVA');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('totals');
-		$grid->label('Sub-Total');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('totalg');
-		$grid->label('Total');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('status');
-		$grid->label('Estatus');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:1, maxlength: 1 }',
-		));
-
-
-		$grid->addField('observa');
-		$grid->label('Observaci&oacute;n');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:50, maxlength: 50 }',
-		));
-
-
-		$grid->addField('Observaci&oacute;n');
-		$grid->label('Observ1');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:50, maxlength: 50 }',
-		));
-
-
-
-		$grid->addField('cajero');
-		$grid->label('Cajero');
+		$grid->addField('vd');
+		$grid->label('Vende');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -882,6 +777,8 @@ class Reparto extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
+
+
 
 
 		$grid->addField('almacen');
@@ -895,381 +792,16 @@ class Reparto extends Controller {
 			'editoptions'   => '{ size:4, maxlength: 4 }',
 		));
 
-
-		$grid->addField('peso');
-		$grid->label('Peso');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('factura');
-		$grid->label('Factura');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('pedido');
-		$grid->label('Pedido');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('usuario');
-		$grid->label('Usuario');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:12, maxlength: 12 }',
-		));
-
-
-		$grid->addField('estampa');
-		$grid->label('Estampa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('hora');
-		$grid->label('Hora');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 50,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:5, maxlength: 5 }',
-		));
-
-
-		$grid->addField('transac');
-		$grid->label('Transacci&oacute;n');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('nfiscal');
-		$grid->label('N.F&iacute;scal');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:12, maxlength: 12 }',
-		));
-
-
-		$grid->addField('zona');
-		$grid->label('Zona');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('ciudad');
-		$grid->label('Ciudad');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:40, maxlength: 40 }',
-		));
-
-
-		$grid->addField('pagada');
-		$grid->label('Pagada');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-		$grid->addField('dias');
-		$grid->label('D&iacute;as');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-		$grid->addField('fentrega');
-		$grid->label('Fentrega');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('fpagom');
-		$grid->label('Fpagom');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('fdespacha');
-		$grid->label('Fdespacha');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('udespacha');
-		$grid->label('Udespacha');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:12, maxlength: 12 }',
-		));
-
-
-		$grid->addField('numarma');
-		$grid->label('Numarma');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('maqfiscal');
-		$grid->label('Maqfiscal');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:20, maxlength: 20 }',
-		));
-
-
-		$grid->addField('dmaqfiscal');
-		$grid->label('Dmaqfiscal');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:20, maxlength: 20 }',
-		));
-
-
-		$grid->addField('nromanual');
-		$grid->label('Nromanual');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 140,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:14, maxlength: 14 }',
-		));
-
-
-		$grid->addField('fmanual');
-		$grid->label('Fmanual');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('reiva');
-		$grid->label('Reiva');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('creiva');
-		$grid->label('Creiva');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:20, maxlength: 20 }',
-		));
-
-
-		$grid->addField('freiva');
-		$grid->label('Freiva');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('ereiva');
-		$grid->label('Ereiva');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('vexenta');
-		$grid->label('Vexenta');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:1, maxlength: 1 }',
-		));
-
-
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
+			'hidden'        => 'true',
 			'align'         => "'center'",
 			'frozen'        => 'true',
 			'width'         => 40,
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
-
-
-		$grid->addField('certificado');
-		$grid->label('Certificado');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:32, maxlength: 32 }',
-		));
-
-
-		$grid->addField('maestra');
-		$grid->label('Maestra');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('entregado');
-		$grid->label('Entregado');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
 
 
 		$grid->setShrinkToFit('false');
@@ -1296,7 +828,7 @@ class Reparto extends Controller {
 		if(empty($id)) return "";
 		//$numero   = $this->datasis->dameval("SELECT id FROM reparto WHERE id=$id");
 		$grid     = $this->jqdatagrid;
-		$mSQL     = "SELECT * FROM sfac WHERE reparto='$id' ";
+		$mSQL     = "SELECT tipo_doc, numero, fecha, zona, peso, cod_cli, nombre, vd, totalg, almacen, id FROM sfac WHERE reparto='$id' ";
 		$response = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
