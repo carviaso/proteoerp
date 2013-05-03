@@ -302,10 +302,10 @@ function autocod(id){
 		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('ajax/buscasinvart'); ?>",
+				url:  "<?php echo site_url('ajax/buscascstart'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: {"q":req.term},
+				data: {"q":req.term,'sprv':$('#proveed').val()},
 				success:
 					function(data){
 						var sugiere = [];
