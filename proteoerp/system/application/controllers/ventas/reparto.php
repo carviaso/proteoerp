@@ -92,23 +92,6 @@ class Reparto extends Controller {
 		};';
 
 		$bodyscript .= '
-		$("#agregaf").click(function(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'factuforma').'/"+id, function(data){
-					$("#fshow").html(data);
-					$("#fshow").dialog( { title:"SELECCIONAR FACTURAS", width: 600, height: 450 } );
-					$("#fshow").dialog( "open" );
-				});
-
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		});';
-
-		$bodyscript .= '
 		function repartoedit(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
@@ -178,6 +161,34 @@ class Reparto extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 		';
+
+		$bodyscript .= '
+		jQuery("#imprime").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('formatos/ver/REPARTO').'/\'+id+\'/id\'').';
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#agregaf").click(function(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'factuforma').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"SELECCIONAR FACTURAS", width: 600, height: 450 } );
+					$("#fshow").dialog( "open" );
+				});
+
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -264,7 +275,7 @@ class Reparto extends Controller {
 	function factuforma( $id = 0 ){
 		$msalida = '<script type="text/javascript">'."\n";
 		$msalida .= 'var mid='.$id.";\n";
-	
+
 		$msalida .= '
 		$("#bpos1").jqGrid({
 			ajaxGridOptions: { type: "POST"},
@@ -275,7 +286,7 @@ class Reparto extends Controller {
 			datatype: "json",
 			rowNum:12,
 
-			height: 280, 
+			height: 280,
 			pager: \'#pbpos1\',
 			rowList:[],
 			toolbar: [false],
@@ -296,7 +307,7 @@ class Reparto extends Controller {
 		});
 		$("#bpos1").jqGrid(\'navGrid\',"#pbpos1",{edit:false, add:false, del:false, search: true });
 		$("#bpos1").jqGrid(\'filterToolbar\');
-		
+
 		function fsele(el, val, opts){
 			var meco=\'<div><img src="'.base_url().'images/circuloverde.png" border="0" /></div>\';
 			if ( el == "0" ){
@@ -319,12 +330,12 @@ class Reparto extends Controller {
 			}
 		}
 		';
-	
-		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$id"); 
+
+		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$id");
 		if( !$peso ) $peso = "0.00";
 		$reg  = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=$id");
 		$msalida .= "\n</script>\n";
-		
+
 		$msalida .= "<table width='100%'><tr><td>
 		<div class=\"tema1\"><table id=\"bpos1\"></table></div>
 		<div id='pbpos1'></div>\n
@@ -351,7 +362,7 @@ class Reparto extends Controller {
 		</table>
 		</td></tr>
 		</table>\n";
-	
+
 		echo $msalida;
 
 	}
@@ -370,10 +381,10 @@ class Reparto extends Controller {
 			$this->db->query($mSQL);
 			$msj = 'Factura Quitada';
 		}
-		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$reparto"); 
+		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$reparto");
 
 		echo '{ "mensaje": "'.$msj.'", "peso": "'.$peso.'"}';
-		
+
 	}
 
 	//******************************************************************
@@ -944,7 +955,7 @@ class Reparto extends Controller {
 
 	function _pre_insert($do){
 		$do->error_message_ar['pre_ins']='';
-		// Coloca por defecto el tipo 
+		// Coloca por defecto el tipo
 		$do->set('tipo','P');
 		return true;
 	}

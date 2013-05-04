@@ -13,19 +13,20 @@ if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row = $mSQL_1->row();
 
 $fecha    = dbdate_to_human($row->fecha);
-$numero   = $row->numero;
-$cod_cli  = $row->cod_cli;
-$rifci    = $row->rifci;
-$nombre   = $row->nombre;
+$numero   = htmlspecialchars(trim($row->numero));
+$cod_cli  = htmlspecialchars(trim($row->cod_cli));
+$rifci    = htmlspecialchars(trim($row->rifci));
+$nombre   = htmlspecialchars(trim($row->nombre));
 $stotal   = $row->totals;
 $gtotal   = $row->totalg;
 $peso     = $row->peso;
 $impuesto = $row->iva;
-$direccion= $row->direccion;
+$direccion= htmlspecialchars(trim($row->direccion));
+$dbnumero = $this->db->escape($row->numero);
 
 $lineas = 0;
 $uline  = array();
-$mSQL_2 = $this->db->query("SELECT codigoa AS codigo,desca,cana,preca,tota,iva FROM itpfac WHERE numa='$numero'");
+$mSQL_2 = $this->db->query("SELECT codigoa AS codigo,desca,cana,preca,tota,iva FROM itpfac WHERE numa=${dbnumero}");
 $detalle  = $mSQL_2->result();
 ?><html>
 <head>
@@ -128,7 +129,7 @@ foreach ($detalle AS $items){ $i++;
 		}
 ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-				<td style="text-align: center"><?php echo ($clinea)? '': $items->codigo; ?></td>
+				<td style="text-align: center"><?php echo ($clinea)? '':  htmlspecialchars(trim($items->codigo)); ?></td>
 				<td>
 					<?php
 					if(!$clinea){
@@ -141,7 +142,7 @@ foreach ($detalle AS $items){ $i++;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo $uline.'<br />';
+						echo  htmlspecialchars($uline).'<br />';
 						$lineas++;
 						if($lineas >= $maxlin){
 							$lineas =0;
@@ -157,9 +158,9 @@ foreach ($detalle AS $items){ $i++;
 					if(count($arr_des)==0 && $clinea) $clinea=false;
 					?>
 				</td>
-				<td style="text-align: center;"><?php echo ($clinea)? '': nformat($items->cana,3); ?></td>
-				<td style="text-align: right;" ><?php echo ($clinea)? '': nformat($items->preca); ?></td>
-				<td class="change_order_total_col"><?php echo ($clinea)? '':nformat($items->preca*$items->cana); ?></td>
+				<td style="text-align: center;"><?php    echo ($clinea)? '': nformat($items->cana,3); ?></td>
+				<td style="text-align: right;" ><?php    echo ($clinea)? '': nformat($items->preca); ?></td>
+				<td class="change_order_total_col"><?php echo ($clinea)? '': nformat($items->preca*$items->cana); ?></td>
 			</tr>
 <?php
 		if($npagina){
