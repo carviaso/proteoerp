@@ -285,25 +285,26 @@ class Exportar extends Controller {
 				'ignore' =>true,
 				'limpiar'=>false,
 				'table'  =>'sfac',
-				'where'  =>"fecha >= $fecha");
+				'where'  =>"fecha >= ${fecha}");
 		$data[]=array('select' =>'tipoa,numa,codigoa,desca,cana,preca,tota,iva,fecha,vendedor,costo,pos,pvp,comision,cajero,mostrado,usuario,estampa,hora,transac,despacha,flote,precio4,detalle,fdespacha,udespacha,combo,descuento',
 				'distinc'=>false,
 				'ignore' =>true,
 				'limpiar'=>false,
 				'table'  =>'sitems',
-				'where'  =>"fecha >= $fecha");
+				'where'  =>"fecha >= ${fecha}");
 		$data[]=array('select' =>'tipo_doc,numero,tipo,monto,num_ref,clave,fecha,banco,f_factura,cod_cli,vendedor,cobrador,status,cobro,cambio,almacen,transac,usuario,estampa,hora',
 				'distinc'=>false,
 				'ignore' =>true,
 				'limpiar'=>false,
 				'table'  =>'sfpa',
-				'where'  =>"fecha >= $fecha");
+				'where'  =>"fecha >= ${fecha}");
 		$data[]=array('table' => 'smov',
 				'ignore' =>true,
-				'where' => "estampa >= $fecha");
+				'where' => "estampa >= ${fecha}");
 		$data[]=array('table' => 'costos',
 				'ignore' =>false,
-				'limpiar'=>true);
+				'limpiar'=>true,
+				'where'  =>"fecha >=  DATE_SUB(CURDATE(),INTERVAL 365 DAY)");
 		$data[]=array('table' => 'sinv',
 				'select' =>'codigo,grupo,descrip,descrip2,unidad,ubica,tipo,clave,comision,enlace,prov1,prepro1,pfecha1,prov2,prepro2,pfecha2,prov3,prepro3,pfecha3,pond,ultimo,pvp_s,pvp_bs,pvpprc,contbs,contprc,mayobs,mayoprc,exmin,exord,exdes,existen,fechav,fechac,iva,fracci,codbar,barras,exmax,margen1,margen2,margen3,margen4,base1,base2,base3,base4,precio1,precio2,precio3,precio4,serial,tdecimal,activo,dolar,redecen,formcal,fordeci,garantia,costotal,fechac2,peso,pondcal,alterno,aumento,modelo,marca,clase,oferta,fdesde,fhasta,derivado,cantderi,linea,depto,id,gasto,bonifica,bonicant,standard,descufijo',
 				'limpiar'=>true);

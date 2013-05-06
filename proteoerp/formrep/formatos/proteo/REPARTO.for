@@ -60,7 +60,7 @@ $detalle2 = $mSQL_3->result();
 
 
 $det2encab = 5; //Tamanio del encadezado de la segunda tabla
-$nsitems=$mSQL_2->num_rows()+$det2encab;
+$nsitems=$mSQL_3->num_rows()+$det2encab;
 ?><html>
 <head>
 <title>Reparto <?php echo $numero ?></title>
@@ -69,132 +69,6 @@ $nsitems=$mSQL_2->num_rows()+$det2encab;
 <body style="margin-left: 30px; margin-right: 30px;">
 
 <?php
-//************************
-//     Encabezado
-//************************
-$encabezado = <<<encabezado
-	<table style="width: 100%;" class="header">
-		<tr>
-			<td><h1 style="text-align: left">Reparto a cliente</h1></td>
-			<td><h1 style="text-align: right">N&uacute;mero: ${numero}</h1></td>
-		</tr><tr>
-			<td>Chofer:<b>(${chofer}) ${cnombre}</b></td>
-			<td>Fecha:  <b>${fecha}</b></td>
-		</tr><tr>
-			<td colspan='2'>Veh&iacute;culo: <b>${vvehiculo}</b></td>
-		</tr><tr>
-			<td colspan='2'>Observaci&oacute;n: <b>${observa}</b></td>
-		</tr>
-	</table>
-encabezado;
-// Fin  Encabezado
-
-//************************
-//   Encabezado Tabla
-//************************
-$estilo  = "style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;";
-$encabezado_tabla=<<<encabezado_tabla
-	<table class="change_order_items">
-		<thead>
-			<tr>
-				<th ${estilo}'>Factura</th></th>
-				<th ${estilo}'>Zona</th>
-				<th ${estilo}'>Cliente</th>
-				<th ${estilo}'>Peso</th>
-			</tr>
-		</thead>
-		<tbody>
-encabezado_tabla;
-//Fin Encabezado Tabla
-
-//************************
-//     Pie Pagina
-//************************
-$pie_final=<<<piefinal
-		</tbody>
-		<tfoot>
-			<tr>
-				<td colspan="4" style="text-align: right;">&nbsp;</td>
-			</tr>
-		</tfoot>
-	</table>
-piefinal;
-
-$pie_continuo=<<<piecontinuo
-		</tbody>
-		<tfoot>
-			<tr>
-				<td colspan="4" style="text-align: right;">CONTINUA...</td>
-			</tr>
-		</tfoot>
-	</table>
-<div style="page-break-before: always;"></div>
-piecontinuo;
-//Fin Pie Pagina
-
-$mod     = $clinea = false;
-$npagina = true;
-$i       = 0;
-
-foreach ($detalle AS $items){ $i++;
-	do {
-		if($npagina){
-			$this->incluir('X_CINTILLO');
-			echo $encabezado;
-			echo $encabezado_tabla;
-			$npagina=false;
-		}
-?>
-			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-				<td style="text-align: center;"><?php echo ($clinea)? '': $items->tipo_doc.$items->numero; ?></td>
-				<td style="text-align: left;"  ><?php echo ($clinea)? '': $items->zona.' '.$items->nzona; ?></td>
-				<td>
-				<?php
-					if(!$clinea){
-						$descrip = '('.trim($items->cod_cli).') '.trim($items->nombre);
-						$descrip = str_replace("\r",'',$descrip);
-						$descrip = str_replace(array("\t"),' ',$descrip);
-						$descrip = wordwrap($descrip,40,"\n");
-						$arr_des = explode("\n",$descrip);
-					}
-
-					while(count($arr_des)>0){
-						$uline   = array_shift($arr_des);
-						echo $uline.'<br />';
-						$lineas++;
-						if($lineas >= $maxlin){
-							$lineas =0;
-							$npagina=true;
-							if(count($arr_des)>0){
-								$clinea = true;
-							}else{
-								$clinea = false;
-							}
-							break;
-						}
-					}
-					if(count($arr_des)==0 && $clinea) $clinea=false;
-					?>
-				</td>
-				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->peso  ,2); ?></td>
-			</tr>
-<?php
-		if($npagina){
-			echo $pie_continuo;
-		}else{
-			$mod = ! $mod;
-		}
-	} while ($clinea);
-}
-echo $pie_final;
-
-
-
-//************************************
-// Lista de articulos
-//************************************
-
-
 //************************
 //     Encabezado
 //************************
@@ -261,11 +135,10 @@ $pie_continuo=<<<piecontinuo
 piecontinuo;
 //Fin Pie Pagina
 
-$lineas+=$det2encab;
-
-echo '<h2>Lista de art&iacute;culos</h2>';
-$canat = $pesot = 0;
-echo $encabezado_tabla;
+$mod     = $clinea = false;
+$npagina = true;
+$canat   = $pesot = 0;
+$i       = 0;
 foreach ($detalle2 AS $items){ $i++;
 	$canat += $items->cana;
 	$pesot += $items->peso;
@@ -320,10 +193,113 @@ foreach ($detalle2 AS $items){ $i++;
 		}
 	} while ($clinea);
 }
+echo sprintf($pie_final,nformat($canat ),nformat($pesot));
+
+//************************************
+// Lista de articulos
+//************************************
+
+//************************
+//   Encabezado Tabla
+//************************
+$estilo  = "style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;";
+$encabezado_tabla=<<<encabezado_tabla
+	<table class="change_order_items">
+		<thead>
+			<tr>
+				<th ${estilo}'>Factura</th></th>
+				<th ${estilo}'>Zona</th>
+				<th ${estilo}'>Cliente</th>
+				<th ${estilo}'>Peso</th>
+			</tr>
+		</thead>
+		<tbody>
+encabezado_tabla;
+//Fin Encabezado Tabla
+
+//************************
+//     Pie Pagina
+//************************
+$pie_final=<<<piefinal
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="4" style="text-align: right;">&nbsp;</td>
+			</tr>
+		</tfoot>
+	</table>
+piefinal;
+
+$pie_continuo=<<<piecontinuo
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="4" style="text-align: right;">CONTINUA...</td>
+			</tr>
+		</tfoot>
+	</table>
+<div style="page-break-before: always;"></div>
+piecontinuo;
+//Fin Pie Pagina
+
+$lineas+=$det2encab;
+
+echo '<h2>Lista de Facturas</h2>';
+echo $encabezado_tabla;
+
+foreach ($detalle AS $items){ $i++;
+	do {
+		if($npagina){
+			$this->incluir('X_CINTILLO');
+			echo $encabezado;
+			echo $encabezado_tabla;
+			$npagina=false;
+		}
+?>
+			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
+				<td style="text-align: center;"><?php echo ($clinea)? '': $items->tipo_doc.$items->numero; ?></td>
+				<td style="text-align: left;"  ><?php echo ($clinea)? '': $items->zona.' '.$items->nzona; ?></td>
+				<td>
+				<?php
+					if(!$clinea){
+						$descrip = '('.trim($items->cod_cli).') '.trim($items->nombre);
+						$descrip = str_replace("\r",'',$descrip);
+						$descrip = str_replace(array("\t"),' ',$descrip);
+						$descrip = wordwrap($descrip,40,"\n");
+						$arr_des = explode("\n",$descrip);
+					}
+
+					while(count($arr_des)>0){
+						$uline   = array_shift($arr_des);
+						echo $uline.'<br />';
+						$lineas++;
+						if($lineas >= $maxlin){
+							$lineas =0;
+							$npagina=true;
+							if(count($arr_des)>0){
+								$clinea = true;
+							}else{
+								$clinea = false;
+							}
+							break;
+						}
+					}
+					if(count($arr_des)==0 && $clinea) $clinea=false;
+					?>
+				</td>
+				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->peso  ,2); ?></td>
+			</tr>
+<?php
+		if($npagina){
+			echo $pie_continuo;
+		}else{
+			$mod = ! $mod;
+		}
+	} while ($clinea);
+}
 
 for(1;$lineas<$maxlin;$lineas++){ ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
@@ -332,7 +308,7 @@ for(1;$lineas<$maxlin;$lineas++){ ?>
 <?php
 	$mod = ! $mod;
 }
-echo sprintf($pie_final,nformat($canat ),nformat($pesot));
+echo $pie_final;
 ?>
 </body>
 </html>
