@@ -41,12 +41,12 @@ class Reparto extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
-		$grid->wbotonadd(array('id'=>'agregaf', 'img'=>'images/databaseadd.png','alt' => 'Reimprimir', 'label'=>'Agregar Facturas', 'tema'=>'anexos'));
 
-		$grid->wbotonadd(array('id'=>'cargard', 'img'=>'images/camion.png',  'alt'=>'Cargar Vehiculo',      'label'=>'Cargar Vehiculo',      'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'entrega', 'img'=>'images/acuerdo.png', 'alt'=>'Entregado al Cliente', 'label'=>'Entregado al Cliente', 'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png', 'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',  'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'agregaf', 'img'=>'images/databaseadd.png', 'alt'=>'Agregar Factura',      'label'=>'Agregar Facturas',     'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'cargard', 'img'=>'images/camion.png',      'alt'=>'Cargar Vehiculo',      'label'=>'Cargar Vehiculo',      'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'entrega', 'img'=>'images/acuerdo.png',     'alt'=>'Entregado al Cliente', 'label'=>'Entregado al Cliente', 'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png',     'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
 
 		$WestPanel = $grid->deploywestp();
 
@@ -54,12 +54,19 @@ class Reparto extends Controller {
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
-			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
-			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' , 'title'=>'Mostrar Registro'),
+			array('id'=>'fborra', 'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
+		$funciones  = '$("#agregaf").hide();'."\n";
+		$funciones .= '$("#cargard").hide();'."\n";
+		$funciones .= '$("#entrega").hide();'."\n";
+		$funciones .= '$("#cerrard").hide();'."\n";
+
+
+		$param['funciones']    = $funciones;
 		$param['WestPanel']    = $WestPanel;
 		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
 		$param['readyLayout']  = $readyLayout;
@@ -90,6 +97,176 @@ class Reparto extends Controller {
 				$("#fedita").dialog( "open" );
 			})
 		};';
+
+		$bodyscript .= '
+		jQuery("#imprime").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('formatos/ver/REPARTO').'/\'+id+\'/id\'').';
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		});';
+
+
+		$bodyscript .= '
+		$("#agregaf").click(function(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'factuforma').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"SELECCIONAR FACTURAS", width: 600, height: 450 } );
+					$("#fshow").dialog( "open" );
+				});
+
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
+
+		// Modificar Destino
+		$bodyscript .= '
+		$("#cargard").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var mcome1 = "<h1>Fecha de Carga</h1><table align=\'center\'><tr>"+
+					"<td>Fecha de Carga: </td>"+
+					"<td><input id=\'mfecha\' name=\'mfecha\' size=\'10\'  value=\''.date('d/m/Y').'\'></td></tr></table>";
+				var mprepanom =
+				{
+					state0: {
+						html: mcome1,
+						buttons: { Guardar: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							mfecha = f.mfecha;
+							if (v) {
+								$.post("'.site_url('ventas/reparto/cambiatipo').'/", { fecha: f.mfecha, mid: id, oper: \'carga\' },
+									function(data){
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
+										$.prompt.goToState(\'state1\');
+										$("#newapi'.$grid0.'").trigger("reloadGrid");
+								});
+								return false;
+							}
+						}
+					},
+					state1: {html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>", focus:1, buttons: { Ok:true }}
+				};
+				$.prompt(mprepanom);
+				$("#mfecha").datepicker({dateFormat:"dd/mm/yy"});
+
+			} else { $.prompt("<h1>Por favor Seleccione un Reparto</h1>");}
+		});';
+
+		// Cierre
+		$bodyscript .= '
+		$("#cerrard").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var mcome1 = "<h1>Fecha de Cierre</h1><table align=\'center\'><tr>"+
+					"<td>Fecha de Cierre: </td>"+
+					"<td><input id=\'mfecha\' name=\'mfecha\' size=\'10\'  value=\''.date('d/m/Y').'\'></td></tr></table>";
+				var mprepanom =
+				{
+					state0: {
+						html: mcome1,
+						buttons: { Guardar: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							mfecha = f.mfecha;
+							if (v) {
+								$.post("'.site_url('ventas/reparto/cambiatipo').'/", { fecha: f.mfecha, mid: id, oper: \'cierre\' },
+									function(data){
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(data);
+										$.prompt.goToState(\'state1\');
+										$("#newapi'.$grid0.'").trigger("reloadGrid");
+								});
+								return false;
+							}
+						}
+					},
+					state1: {html: "<h1>Resultado</h1><span id=\'in_prome3\'></span>", focus:1, buttons: { Ok:true }}
+				};
+				$.prompt(mprepanom);
+				$("#mfecha").datepicker({dateFormat:"dd/mm/yy"});
+
+			} else { $.prompt("<h1>Por favor Seleccione un Reparto</h1>");}
+		});';
+
+
+		// Cierre
+		$bodyscript .= '
+		$("#anulard").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var mcome1 = "<h1>Eliminar Reparto?</h1><table align=\'center\'><tr>"+
+					"<td>Eliminar Reparto y desmarcar las facturas?</td>"+
+					"</tr></table>";
+				var mprepanom =
+				{
+					state0: {
+						html: mcome1,
+						buttons: { Eliminar: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							if (v) {
+								$.post("'.site_url('ventas/reparto/cambiatipo').'/", { mid: id, oper: \'anular\' },
+									function(data){
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(data);
+										$.prompt.goToState(\'state1\');
+										$("#newapi'.$grid0.'").trigger("reloadGrid");
+								});
+								return false;
+							}
+						}
+					},
+					state1: {html: "<h1>Resultado</h1><span id=\'in_prome3\'></span>", focus:1, buttons: { Ok:true }}
+				};
+				$.prompt(mprepanom);
+				$("#mfecha").datepicker({dateFormat:"dd/mm/yy"});
+
+			} else { $.prompt("<h1>Por favor Seleccione un Reparto</h1>");}
+		});';
+
+
+		// Entrega
+		$bodyscript .= '
+		$("#entrega").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var mcome1 = "<h1>Fecha de Entrega</h1><table align=\'center\'><tr>"+
+					"<td>Fecha de Entrega: </td>"+
+					"<td><input id=\'mfecha\' name=\'mfecha\' size=\'10\'  value=\''.date('d/m/Y').'\'></td></tr></table>";
+				var mprepanom =
+				{
+					state0: {
+						html: mcome1,
+						buttons: { Guardar: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							mfecha = f.mfecha;
+							if (v) {
+								$.post("'.site_url('ventas/reparto/cambiatipo').'/", { fecha: f.mfecha, mid: id, oper: \'entrega\' },
+									function(data){
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(data);
+										$.prompt.goToState(\'state1\');
+										$("#newapi'.$grid0.'").trigger("reloadGrid");
+								});
+								return false;
+							}
+						}
+					},
+					state1: {html: "<h1>Resultado</h1><span id=\'in_prome3\'></span>", focus:1, buttons: { Ok:true }}
+				};
+				$.prompt(mprepanom);
+				$("#mfecha").datepicker({dateFormat:"dd/mm/yy"});
+
+			} else { $.prompt("<h1>Por favor Seleccione un Reparto</h1>");}
+		});';
 
 		$bodyscript .= '
 		function repartoedit(){
@@ -161,34 +338,6 @@ class Reparto extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 		';
-
-		$bodyscript .= '
-		jQuery("#imprime").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				'.$this->datasis->jwinopen(site_url('formatos/ver/REPARTO').'/\'+id+\'/id\'').';
-			} else {
-				$.prompt("<h1>Por favor Seleccione un registro</h1>");
-			}
-		});';
-
-		$bodyscript .= '
-		$("#agregaf").click(function(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'factuforma').'/"+id, function(data){
-					$("#fshow").html(data);
-					$("#fshow").dialog( { title:"SELECCIONAR FACTURAS", width: 600, height: 450 } );
-					$("#fshow").dialog( "open" );
-				});
-
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		});';
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -268,6 +417,55 @@ class Reparto extends Controller {
 		return $bodyscript;
 	}
 
+	//******************************************************************
+	//
+	//
+	function cambiatipo(){
+		$id    = $this->input->post('mid');
+		$fecha = human_to_dbdate($this->input->post('fecha'));
+		$oper  = $this->input->post('oper');
+		if ( $oper == 'carga' ){
+			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=$id");
+			if ($tipo == 'P') {
+				$this->db->where("id", $id);
+				$this->db->update('reparto', array( "tipo" => 'C', "carga" => $fecha ) );
+				echo "Guardada ";
+			} else
+				echo "No esta Pendiente";
+
+		} elseif ( $oper == 'entrega' ){
+			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=$id");
+			if ($tipo == 'C') {
+				$this->db->where("id", $id);
+				$this->db->update('reparto', array( "tipo" => 'E', "entregado" => $fecha ) );
+				echo "Guardada ";
+			} else
+				echo "No esta Cargada";
+
+		} elseif ( $oper == 'cierre' ){
+			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=$id");
+			if ($tipo == 'E') {
+				$this->db->where("id", $id);
+				$this->db->update('reparto', array( "tipo" => 'F', "retorno" => $fecha ) );
+				$entrega = $this->datasis->dameval("SELECT entregado FROM reparto WHERE id=$id");
+				$this->db->query("UPDATE sfac SET entregado='".$entrega."' WHERE reparto=$id");
+				echo "Guardada ";
+			} else
+				echo "No esta Entregada";
+
+		} elseif ( $oper == 'anular' ){
+			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=$id");
+			if ($tipo != 'F') {
+				$this->db->where("id", $id);
+				$this->db->update('reparto', array( "tipo" => 'A' ) );
+				$this->db->query("UPDATE sfac SET entregado='0' WHERE reparto=$id");
+				echo "Reparto Eliminado ";
+			} else
+				echo "Reparto ya finaliado no se puede anular";
+
+		}
+	}
+
 
 	//******************************************************************
 	// Formato de la ventana
@@ -275,7 +473,7 @@ class Reparto extends Controller {
 	function factuforma( $id = 0 ){
 		$msalida = '<script type="text/javascript">'."\n";
 		$msalida .= 'var mid='.$id.";\n";
-
+	
 		$msalida .= '
 		$("#bpos1").jqGrid({
 			ajaxGridOptions: { type: "POST"},
@@ -286,7 +484,7 @@ class Reparto extends Controller {
 			datatype: "json",
 			rowNum:12,
 
-			height: 280,
+			height: 280, 
 			pager: \'#pbpos1\',
 			rowList:[],
 			toolbar: [false],
@@ -307,7 +505,7 @@ class Reparto extends Controller {
 		});
 		$("#bpos1").jqGrid(\'navGrid\',"#pbpos1",{edit:false, add:false, del:false, search: true });
 		$("#bpos1").jqGrid(\'filterToolbar\');
-
+		
 		function fsele(el, val, opts){
 			var meco=\'<div><img src="'.base_url().'images/circuloverde.png" border="0" /></div>\';
 			if ( el == "0" ){
@@ -323,19 +521,18 @@ class Reparto extends Controller {
 				$.post("'.site_url($this->url.'agregaf').'/"+mid+"/"+id, function(data){
 					var json = JSON.parse(data);
 					$("#totpeso").html(json.peso);
-					alert(json.mensaje);
 					$("#bpos1").trigger("reloadGrid");
 				});
 
 			}
 		}
 		';
-
-		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$id");
+	
+		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$id"); 
 		if( !$peso ) $peso = "0.00";
 		$reg  = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=$id");
 		$msalida .= "\n</script>\n";
-
+		
 		$msalida .= "<table width='100%'><tr><td>
 		<div class=\"tema1\"><table id=\"bpos1\"></table></div>
 		<div id='pbpos1'></div>\n
@@ -362,7 +559,7 @@ class Reparto extends Controller {
 		</table>
 		</td></tr>
 		</table>\n";
-
+	
 		echo $msalida;
 
 	}
@@ -381,10 +578,14 @@ class Reparto extends Controller {
 			$this->db->query($mSQL);
 			$msj = 'Factura Quitada';
 		}
-		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$reparto");
+		$row = $this->datasis->damereg("SELECT SUM(peso) peso, count(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=$reparto"); 
+		$peso = $row['peso'];
+		
+		$this->db->where('id',$reparto);
+		$this->db->update('reparto',array("peso"=>$row['peso'], "facturas"=>$row['cana']) );
 
 		echo '{ "mensaje": "'.$msj.'", "peso": "'.$peso.'"}';
-
+		
 	}
 
 	//******************************************************************
@@ -427,6 +628,7 @@ class Reparto extends Controller {
 		$grid->addField('tipo');
 		$grid->label('Tipo');
 		$grid->params(array(
+			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 40,
@@ -462,6 +664,7 @@ class Reparto extends Controller {
 		$grid->addField('chofer');
 		$grid->label('Chofer');
 		$grid->params(array(
+			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 50,
@@ -475,20 +678,10 @@ class Reparto extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 100,
+			'width'         => 60,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:10, maxlength: 10 }',
-		));
-
-		$grid->addField('observa');
-		$grid->label('Observaci&oacute;n');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 250,
-			'edittype'      => "'textarea'",
-			'editoptions'   => "'{rows:2, cols:60}'",
 		));
 
 		$grid->addField('peso');
@@ -563,8 +756,33 @@ class Reparto extends Controller {
 		$grid->setOnSelectRow('
 			function(id){
 				if (id){
+					var ret    = $(gridId1).getRowData(id);
 					jQuery(gridId2).jqGrid("setGridParam",{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
 					jQuery(gridId2).trigger("reloadGrid");
+					if ( ret.tipo == \'P\' ) {
+						$("#agregaf").show();
+						$("#cargard").show();
+						$("#entrega").hide();
+						$("#cerrard").hide();
+					} else if ( ret.tipo == \'C\' ) {
+						$("#agregaf").hide();
+						$("#cargard").hide();
+						$("#entrega").show();
+						$("#cerrard").hide();
+					} else if ( ret.tipo == \'E\' ) {
+						$("#agregaf").hide();
+						$("#cargard").hide();
+						$("#entrega").hide();
+						$("#cerrard").show();
+					} else if ( ret.tipo == \'F\' || ret.tipo == \'A\' ) {
+						$("#agregaf").hide();
+						$("#cargard").hide();
+						$("#entrega").hide();
+						$("#cerrard").hide();
+						$("#anulard").hide();
+					}
+
+					
 				}
 			}'
 		);
@@ -688,7 +906,6 @@ class Reparto extends Controller {
 			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
 
-
 		$grid->addField('numero');
 		$grid->label('N&uacute;mero');
 		$grid->params(array(
@@ -712,7 +929,6 @@ class Reparto extends Controller {
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
 		));
-
 
 		$grid->addField('zona');
 		$grid->label('Zona');
@@ -789,9 +1005,6 @@ class Reparto extends Controller {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-
-
-
 		$grid->addField('almacen');
 		$grid->label('Almacen');
 		$grid->params(array(
@@ -814,6 +1027,22 @@ class Reparto extends Controller {
 			'search'        => 'false'
 		));
 
+		$grid->setOndblClickRow('
+			,ondblClickRow: function(id){
+				var mid = jQuery(gridId1).jqGrid(\'getGridParam\',\'selrow\');
+				if(mid){
+					if (id){
+						$.prompt(\'Eliminar Factura del reparto?\', {
+						submit: function(e,v,m,f){
+							$.post("'.site_url($this->url.'quita').'/"+id);
+						}})
+					}
+				} else {
+					$.prompt("Seleccione un Reparto");
+				} 
+			}
+		');
+
 
 		$grid->setShrinkToFit('false');
 		#Set url
@@ -826,6 +1055,27 @@ class Reparto extends Controller {
 			return $grid->deploy();
 		} else {
 			return $grid;
+		}
+	}
+
+
+	function quita($id){
+		// Quita la vaina
+		$reparto = $this->datasis->dameval("SELECT reparto FROM sfac    WHERE id=$id");
+		$tipo    = $this->datasis->dameval("SELECT tipo    FROM reparto WHERE id=$reparto");
+		if ( $tipo == 'E'){
+			$this->db->where('id',$id);
+			$this->db->update('sfac',array( "reparto" => 0 ));
+			$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS('',eliminadas,".$reparto.") WHERE id=$reparto");
+
+			$row = $this->datasis->damereg("SELECT SUM(peso) peso, count(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=$reparto"); 
+			$peso = $row['peso'];
+		
+			$this->db->where('id',$reparto);
+			$this->db->update('reparto',array("peso"=>$row['peso'], "facturas"=>$row['cana']) );
+
+			echo 'Factura retirada';
+
 		}
 	}
 
@@ -955,7 +1205,7 @@ class Reparto extends Controller {
 
 	function _pre_insert($do){
 		$do->error_message_ar['pre_ins']='';
-		// Coloca por defecto el tipo
+		// Coloca por defecto el tipo 
 		$do->set('tipo','P');
 		return true;
 	}

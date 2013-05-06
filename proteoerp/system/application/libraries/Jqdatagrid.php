@@ -846,7 +846,7 @@ class Jqdatagrid
 		if($this->showpager){
 			$bar   = '';
 			$bar  .= "	
-	jQuery(\"#newapi{$this->_gridname}\").jqGrid('navGrid', '#pnewapi{$this->_gridname}', {
+	$(\"#newapi{$this->_gridname}\").jqGrid('navGrid', '#pnewapi{$this->_gridname}', {
 		view:   {$this->_buttons['view']},
 		edit:   {$this->_buttons['edit']},
 		add:    {$this->_buttons['add']},

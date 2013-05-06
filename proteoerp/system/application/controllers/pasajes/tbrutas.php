@@ -172,7 +172,7 @@ class Tbrutas extends Controller {
 
 		// Modificar Destino
 		$bodyscript .= '
-		jQuery("#modifid").click( function(){
+		$("#modifid").click( function(){
 			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
 			var chec = \'\';
 			if (id)	{

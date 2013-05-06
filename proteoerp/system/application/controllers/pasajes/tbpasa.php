@@ -13,12 +13,7 @@ class Tbpasa extends Controller {
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('tbpasa','id') ) {
-			$this->db->simple_query('ALTER TABLE tbpasa DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE tbpasa ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE tbpasa ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
-		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
+		$this->datasis->creaintramenu(array('modulo'=>'162','titulo'=>'Reservaciones','mensaje'=>'Reservaciones','panel'=>'PASAJES','ejecutar'=>'pasajes/tbpasa','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -235,7 +230,7 @@ class Tbpasa extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 140,
+			'width'         => 60,
 			'edittype'      => "'text'",
 		));
 
@@ -245,7 +240,7 @@ class Tbpasa extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:20, maxlength: 20 }',
@@ -253,11 +248,11 @@ class Tbpasa extends Controller {
 
 
 		$grid->addField('nacio');
-		$grid->label('Nacionalidad');
+		$grid->label('Nac.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 100,
+			'width'         => 40,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:10, maxlength: 10 }',
@@ -269,7 +264,7 @@ class Tbpasa extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:20, maxlength: 20 }',
@@ -510,6 +505,8 @@ class Tbpasa extends Controller {
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
+
+
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
