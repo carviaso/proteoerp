@@ -75,9 +75,13 @@ class pfaclite extends validaciones{
 		$filter->buttons('reset', 'search');
 		$filter->build('dataformfiltro');
 
-		function hfactura($status,$factura,$numero,$vence=null){
+		function hfactura($status,$factura,$numero,$vence=null,$act=false){
 			if($status=='P'){        //Pendiente
-				$rt = anchor('ventas/sfac_add/creafrompfac/'.$numero.'/create', 'Pendiente');
+				if($act){
+					$rt = anchor('ventas/sfac_add/creafrompfac/'.$numero.'/create', 'Pendiente');
+				}else{
+					$rt = 'Pendiente';
+				}
 			}elseif($status=='C'){   //Cerrado
 				if(!empty($factura)){
 					$rt = $factura;
@@ -111,9 +115,9 @@ class pfaclite extends validaciones{
 
 		$grid->column_orderby('N&uacute;mero', $uri ,'numero');
 		if($this->secu->puede('103')){
-			$grid->column_orderby('Factura'     , '<hfactura><#status#>|<#factura#>|<#numero#>|<#vence#></hfactura>','factura');
+			$grid->column_orderby('Factura'     , '<hfactura><#status#>|<#factura#>|<#numero#>|<#vence#>|1</hfactura>','factura');
 		}else{
-			$grid->column_orderby('Factura'     , 'factura','factura');
+			$grid->column_orderby('Factura'     , '<hfactura><#status#>|<#factura#>|<#numero#>|<#vence#></hfactura>','factura');
 		}
 		$grid->column_orderby('Fecha'        , '<dbdate_to_human><#fecha#></dbdate_to_human> <#hora#>','fecha', 'align=\'center\'');
 		$grid->column_orderby('Cliente'      , 'cod_cli','cod_cli');
@@ -292,7 +296,7 @@ class pfaclite extends validaciones{
 		$edit->cliente->rule='required';
 
 		$dbcliente=$this->db->escape($cliente);
-		$nombre=$this->datasis->dameval("SELECT nombre FROM scli WHERE cliente=$dbcliente");
+		$nombre=$this->datasis->dameval("SELECT nombre FROM scli WHERE cliente=${dbcliente}");
 		$edit->nombre = new freeField('Nombre','nombre',$nombre);
 
 		$edit->observa = new inputField('Observaciones', 'observa');
