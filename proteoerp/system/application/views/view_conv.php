@@ -164,7 +164,7 @@ function del_itconv(id){
 
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow">
-					<a href='#' onclick='del_itconv(<?=$i ?>);return false;'><?php echo img("images/delete.jpg"); ?></a>
+					<a href='#' onclick='del_itconv(<?php echo $i ?>);return false;'><?php echo img("images/delete.jpg"); ?></a>
 				</td>
 				<?php } ?>
 			</tr>

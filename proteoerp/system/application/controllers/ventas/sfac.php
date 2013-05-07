@@ -121,6 +121,13 @@ class Sfac extends Controller {
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
+		$funciones = '
+		function ltransac(el, val, opts){
+			var link=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return link;
+		};';
+
+
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
@@ -128,7 +135,7 @@ class Sfac extends Controller {
 		//$param['listados']     = $this->datasis->listados('SFAC', 'JQ');
 		//$param['otros']        = $this->datasis->otros('SFAC', 'JQ');
 		$param['centerpanel']  = $centerpanel;
-		//$param['funciones']    = $funciones;
+		$param['funciones']    = $funciones;
 		$param['temas']        = array('proteo','darkness','anexos1');
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;

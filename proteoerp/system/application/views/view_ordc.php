@@ -231,8 +231,8 @@ if (!$solo){
 			<tr>
 				<td class="littletableheader"><?php echo $form->fechafac->label  ?>&nbsp;</td>
 				<td class="littletablerow" >  <?php echo $form->fechafac->output ?>&nbsp;</td>
-				<td class="littletableheader"><?=$form->peso->label  ?>&nbsp;</td>
-				<td class="littletablerow" align="left"><?=$form->peso->output ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->peso->label  ?>&nbsp;</td>
+				<td class="littletablerow" align="left"><?php echo $form->peso->output ?>&nbsp;</td>
 			</tr>
 		</table>
 		</fieldset>
@@ -286,7 +286,7 @@ if (!$solo){
 
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow">
-					<a href='#' onclick='del_itordc(<?=$i ?>);return false;'><?php echo img("images/delete.jpg");?></a>
+					<a href='#' onclick='del_itordc(<?php echo $i ?>);return false;'><?php echo img("images/delete.jpg");?></a>
 				</td>
 
 				<?php } ?>
