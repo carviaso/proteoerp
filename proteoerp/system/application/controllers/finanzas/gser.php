@@ -2097,7 +2097,7 @@ class gser extends Controller {
 		$filter->proveed->db_name = 'proveedor';
 
 		$filter->aceptado = new dropdownField('Aceptados','aceptado');
-		$filter->aceptado->option('','Todos');
+		$filter->aceptado->option('' ,'Todos');
 		$filter->aceptado->option('S','Aceptados');
 		$filter->aceptado->option('N','No aceptados');
 		$filter->aceptado->style = 'width:120px';
@@ -3883,6 +3883,8 @@ class gser extends Controller {
 		$nfiscal = $do->get('nfiscal');
 		$tipo_doc= $do->get('tipo_doc');
 		$monto1  = $do->get('monto1');
+
+		$rivaex  = $this->input->post('_rivaex');
 		if(empty($monto1)){
 			$monto1  = 0;
 		}
@@ -3971,14 +3973,14 @@ class gser extends Controller {
 		//Calcula la retencion del iva si aplica
 		$rif      = $this->datasis->traevalor('RIF');
 		$contribu = $this->datasis->traevalor('CONTRIBUYENTE');
-		if($contribu=='ESPECIAL' && $rif!='V'){
+		if($contribu=='ESPECIAL' && $rif!='V' &&  $rivaex!='S'){
 			$prete=$this->datasis->dameval('SELECT reteiva FROM sprv WHERE proveed='.$this->db->escape($proveed));
 			if(empty($prete)) $prete=75;
 			$reteiva=$ivat*$prete/100;
 		}else{
 			$reteiva=0;
 		}
-		$do->get('reteiva', $reteiva);
+		$do->set('reteiva', $reteiva);
 		//Fin del calculo de la retencion de iva
 
 		//Chequea que el monto retenido no sea mayor a la base del gasto

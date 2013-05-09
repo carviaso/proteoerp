@@ -569,9 +569,9 @@ function toggle() {
 			<td width="90">&nbsp;</td>
 		<?php } ?>
 			<td align="right"><b>Totales Base:</b></td>
-			<td align='right'><?php echo $form->totpre->output ?>&nbsp;</td>
+			<td align='right'><?php echo $form->totpre->output   ?>&nbsp;</td>
 			<td align="right"><b>Total I.V.A.:</b></td>
-			<td align='right'><?php echo $form->totiva->output  ?>&nbsp;</td>
+			<td align='right'><?php echo $form->totiva->output   ?>&nbsp;</td>
 			<td align="right"><b>Total:</b></td>
 			<td align='right'><?php echo $form->totbruto->output ?>&nbsp;</td>
 		</table>
@@ -638,7 +638,7 @@ function toggle() {
 		</table>
 <?php if( !$solo) {?>
 		<?php if( $form->_status != 'show') {?>
-			<input name="btn_add_gereten" value="Agregar" onclick="add_gereten()" class="button" type="button">
+			<input name="btn_add_gereten" value="Agregar"  onclick="add_gereten()" class="button" type="button">
 			<input name="btn_creten"      value="Calcular" onclick="calcularete()" class="button" type="button">
 		<?php } ?>
 <?php } ?>
@@ -666,7 +666,7 @@ function toggle() {
 				</tr>
 				<tr>
 					<td class="littletableheader"><?php echo $form->benefi->label   ?>&nbsp;</td>
-					<td colspan='3' class="littletablerow">   <?php echo $form->benefi->output  ?>&nbsp;</td>
+					<td colspan='3' class="littletablerow"><?php echo $form->benefi->output  ?>&nbsp;</td>
 				</tr>
 			</table>
 			</fieldset>
@@ -738,11 +738,11 @@ function toggle() {
 						$row = $query->row();
 				?>
 			<fieldset style='border: 1px outset #8A0808;background: #FFFBE9;'>
-			<legend class="titulofieldset" style='color: #114411;'>Retencion de Impuesto</legend>
+			<legend class="titulofieldset" style='color: #114411;'>Retenci&oacute;n de Impuesto</legend>
 			<table width='100%' cellspacing='1' >
 				<tr style='font-size:12px;color:#FFEEFF;background-color: #393B0B;'>
-					<td align='center'>Periodo &nbsp;</td>
-					<td align='center'>Numero &nbsp;</td>
+					<td align='center'>Per&iacute;odo &nbsp;</td>
+					<td align='center'>N&uacute;mero &nbsp;</td>
 					<td align='center'>Emisi&oacute;n &nbsp;</td>
 					<td align='center'>Impuesto &nbsp;</td>
 					<td align='center'>Monto &nbsp;</td>
