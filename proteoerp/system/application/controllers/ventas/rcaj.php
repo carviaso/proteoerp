@@ -148,7 +148,7 @@ class Rcaj extends validaciones {
 		if(is_null($caja) || is_null($cajero) || is_null($fecha)){
 			$redir=false;
 			$usuario = $this->session->userdata('usuario');
-			$mSQL    = 'SELECT cajero,caja FROM usuario WHERE us_codigo= ?';
+			$mSQL    = 'SELECT a.cajero,b.caja FROM usuario AS a LEFT JOIN scaj AS b ON a.cajero=b.cajero WHERE us_codigo= ?';
 			$query   = $this->db->query($mSQL,array($usuario));
 			$rrow    = $query->first_row();
 			$cajero  = trim($rrow->cajero);

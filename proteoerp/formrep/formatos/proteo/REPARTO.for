@@ -40,12 +40,6 @@ $vvehiculo = $placa.' '.$marca.' '.$modelo.' '.$ano.' '.$descrip;
 
 $lineas = 0;
 $uline  = array();
-$mSQL_2 = $this->db->query("SELECT
-a.tipo_doc, a.numero, a.fecha, a.zona, b.nombre AS nzona, a.totalg, a.cod_cli, a.nombre, a.vd, a.almacen,a.peso
-FROM sfac AS a
-JOIN zona AS b ON a.zona=b.codigo
-WHERE a.reparto=${dbid}");
-$detalle  = $mSQL_2->result();
 
 
 $mSQL_3 = $this->db->query("SELECT
@@ -59,8 +53,15 @@ ORDER BY c.peso DESC");
 $detalle2 = $mSQL_3->result();
 
 
+$mSQL_2 = $this->db->query("SELECT
+a.tipo_doc, a.numero, a.fecha, a.zona, b.nombre AS nzona, a.totalg, a.cod_cli, a.nombre, a.vd, a.almacen,a.peso
+FROM sfac AS a
+JOIN zona AS b ON a.zona=b.codigo
+WHERE a.reparto=${dbid}");
+$detalle  = $mSQL_2->result();
+
 $det2encab = 5; //Tamanio del encadezado de la segunda tabla
-$nsitems=$mSQL_3->num_rows()+$det2encab;
+$nsitems=$mSQL_2->num_rows();
 ?><html>
 <head>
 <title>Reparto <?php echo $numero ?></title>
@@ -79,7 +80,7 @@ $encabezado = <<<encabezado
 			<td><h1 style="text-align: right">N&uacute;mero: ${numero}</h1></td>
 		</tr><tr>
 			<td>Chofer:<b>(${chofer}) ${cnombre}</b></td>
-			<td>Fecha:  <b>${fecha}</b></td>
+			<td>Fecha: <b>${fecha}</b></td>
 		</tr><tr>
 			<td colspan='2'>Veh&iacute;culo: <b>${vvehiculo}</b></td>
 		</tr><tr>
@@ -97,7 +98,7 @@ $encabezado_tabla=<<<encabezado_tabla
 	<table class="change_order_items">
 		<thead>
 			<tr>
-				<th ${estilo}'>C&oacute;digo</th></th>
+				<th ${estilo}'>C&oacute;digo</th>
 				<th ${estilo}'>Descripci&oacute;n</th>
 				<th ${estilo}'>Peso U.</th>
 				<th ${estilo}'>Cantidad</th>
@@ -207,7 +208,7 @@ $encabezado_tabla=<<<encabezado_tabla
 	<table class="change_order_items">
 		<thead>
 			<tr>
-				<th ${estilo}'>Factura</th></th>
+				<th ${estilo}'>Factura</th>
 				<th ${estilo}'>Zona</th>
 				<th ${estilo}'>Cliente</th>
 				<th ${estilo}'>Peso</th>
@@ -243,11 +244,11 @@ piecontinuo;
 //Fin Pie Pagina
 
 $lineas+=$det2encab;
-
+$i = 0;
 echo '<h2>Lista de Facturas</h2>';
 echo $encabezado_tabla;
 
-foreach ($detalle AS $items){ $i++;
+foreach ($detalle AS $items){ $i++; $nsitems=$nsitems-1;
 	do {
 		if($npagina){
 			$this->incluir('X_CINTILLO');
@@ -274,8 +275,10 @@ foreach ($detalle AS $items){ $i++;
 						echo $uline.'<br />';
 						$lineas++;
 						if($lineas >= $maxlin){
-							$lineas =0;
-							$npagina=true;
+							if($nsitems>0){
+								$npagina=true;
+								$lineas =0;
+							}
 							if(count($arr_des)>0){
 								$clinea = true;
 							}else{
@@ -290,8 +293,8 @@ foreach ($detalle AS $items){ $i++;
 				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->peso  ,2); ?></td>
 			</tr>
 <?php
-		if($npagina){
-			echo $pie_continuo;
+		if($npagina && $nsitems>0){
+			echo $pie_continuo.$nsitems;
 		}else{
 			$mod = ! $mod;
 		}

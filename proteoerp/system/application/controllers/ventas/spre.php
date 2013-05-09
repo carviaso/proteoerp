@@ -49,7 +49,7 @@ class Spre extends Controller {
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array("id"=>"fedita" , "title"=>"Agregar/Editar Registro"),
+			array('id'=>'fedita' , 'title'=>'Agregar/Editar Registro'),
 			array('id'=>'scliexp', 'title'=>'Ficha de Cliente' )
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
@@ -170,12 +170,12 @@ class Spre extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -200,7 +200,7 @@ class Spre extends Controller {
 
 
 		$grid->addField('vd');
-		$grid->label('Vende');
+		$grid->label('Vendedor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -303,7 +303,7 @@ class Spre extends Controller {
 */
 
 		$grid->addField('rifci');
-		$grid->label('Rif/CI');
+		$grid->label('RIF/CI');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -456,8 +456,7 @@ class Spre extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -477,7 +476,7 @@ class Spre extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "numero";
+		$mcodp  = 'numero';
 		$check  = 0;
 /*
 		unset($data['oper']);
@@ -533,7 +532,7 @@ class Spre extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -552,7 +551,7 @@ class Spre extends Controller {
 */
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -564,7 +563,7 @@ class Spre extends Controller {
 
 
 		$grid->addField('desca');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -621,7 +620,7 @@ class Spre extends Controller {
 
 
 		$grid->addField('vendedor');
-		$grid->label('Vende');
+		$grid->label('Vendedor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -633,7 +632,7 @@ class Spre extends Controller {
 
 
 		$grid->addField('iva');
-		$grid->label('Iva');
+		$grid->label('IVA');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -661,7 +660,7 @@ class Spre extends Controller {
 
 
 		$grid->addField('pond');
-		$grid->label('Pond');
+		$grid->label('Ponderado');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -676,7 +675,7 @@ class Spre extends Controller {
 
 
 		$grid->addField('precio4');
-		$grid->label('Precio4');
+		$grid->label('Precio 4');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -691,7 +690,7 @@ class Spre extends Controller {
 
 
 		$grid->addField('ultimo');
-		$grid->label('Ultimo');
+		$grid->label('&Uacute;ltimo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -706,7 +705,7 @@ class Spre extends Controller {
 
 
 		$grid->addField('totaorg');
-		$grid->label('Totaorg');
+		$grid->label('Total.Org');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -721,7 +720,7 @@ class Spre extends Controller {
 
 
 		$grid->addField('precio1');
-		$grid->label('Precio1');
+		$grid->label('Precio 1');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
