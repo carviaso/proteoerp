@@ -612,15 +612,8 @@ class Tbpasa extends Controller {
 		$this->rapyd->load('dataedit');
 		$script= '
 		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$("#fecven").datepicker({dateFormat:"dd/mm/yy"});
 		});';
-
-		//$do = new DataObject('tbpasa');
-		//$do->rel_one_to_many('', 'sitems', array('id'=>'id_sfac'));
-		//$do->rel_one_to_many('sfpa'  , 'sfpa'  , array('numero','transac'));
-		//$do->pointer('scli' ,'scli.cliente=sfac.cod_cli','scli.tipo AS sclitipo','left');
-		//$do->rel_pointer('sitems','sinv','sitems.codigoa=sinv.codigo','sinv.descrip AS sinvdescrip, sinv.base1 AS sinvprecio1, sinv.base2 AS sinvprecio2, sinv.base3 AS sinvprecio3, sinv.base4 AS sinvprecio4, sinv.iva AS sinviva, sinv.peso AS sinvpeso,sinv.tipo AS sinvtipo');
-
 
 		$edit = new DataEdit($this->tits, 'tbpasa');
 
@@ -630,9 +623,6 @@ class Tbpasa extends Controller {
 
 		$edit->back_url = site_url($this->url.'filteredgrid');
 
-		$edit->script($script,'create');
-		$edit->script($script,'modify');
-
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
@@ -640,18 +630,10 @@ class Tbpasa extends Controller {
 		$edit->pre_process( 'update','_pre_update' );
 		$edit->pre_process( 'delete','_pre_delete' );
 
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});';
-
-		$edit->script($script,'create');
-		$edit->script($script,'modify');
-
 		$edit->fecven = new dateField('Fecha del viaje','fecven');
 		$edit->fecven->rule='chfecha';
-		$edit->fecven->size =17;
-		$edit->fecven->maxlength =15;
+		$edit->fecven->size =10;
+		$edit->fecven->maxlength =12;
 		$edit->fecven->insertValue=date('Y-m-d');
 		$edit->fecven->calendar = false;
 
@@ -688,18 +670,17 @@ class Tbpasa extends Controller {
 		$edit->org = new dropdownField('Origen','org');
 		$edit->org->rule='';
 		$edit->org->option('','Seleccionar');
-		$edit->org->options('SELECT a.codofi,a.desofi FROM tbofici AS a ORDER BY a.desofi');
-		//$edit->org->options("SELECT a.codofiorg,b.desofi FROM tbdestinos AS a JOIN tbofici AS b ON a.codofides=b.codofi ORDER BY b.desofi");
+		$edit->org->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
 
 		$edit->dtn = new dropdownField('Destino','dtn');
 		$edit->dtn->rule='';
 		$edit->dtn->option('','Seleccionar');
-		$edit->dtn->options('SELECT a.codofi,a.desofi FROM tbofici AS a ORDER BY a.desofi');
-		//$edit->dtn->options("SELECT a.codofiorg,b.desofi FROM tbdestinos AS a JOIN tbofici AS b ON a.codofiorg=b.codofi ORDER BY b.desofi");
+		$edit->dtn->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
 
 		$edit->codrut = new dropdownField('Ruta','codrut');
 		$edit->codrut->rule='';
 		$edit->codrut->option('','Seleccionar');
+		$edit->codrut->style ='width:350px;';
 
 		$edit->tippas = new inputField('Tippas','tippas');
 		$edit->tippas->rule='';
@@ -801,9 +782,9 @@ class Tbpasa extends Controller {
 			$qlite = $this->db->escape($mid1.'%'.$mid2);
 
 			$retArray = $retorno = array();
-			$mSQL="SELECT aa.codrut,CONCAT_WS('-',b.origen,b.destino) as label FROM (
+			$mSQL="SELECT aa.codrut,CONCAT_WS('-',b.origen,b.destino,hora) as label FROM (
 				SELECT a.codrut,
-				GROUP_CONCAT(DISTINCT codofides ORDER BY orden) AS toques
+				GROUP_CONCAT(DISTINCT codofides ORDER BY orden) AS toques, GROUP_CONCAT(DISTINCT a.hora ORDER BY orden) hora
 				FROM tbdestinos AS a
 				WHERE a.codofides IN (${qmid1},${qmid2})
 				GROUP BY a.codrut) AS aa

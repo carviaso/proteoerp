@@ -940,7 +940,7 @@ class Tbrutas extends Controller {
 		$grid->setEdit(   true ); //$this->datasis->sidapuede('TBDESTINOS','MODIFICA%'));
 		$grid->setDelete( true ); //$this->datasis->sidapuede('TBDESTINOS','BORR_REG%'));
 		$grid->setSearch( false); //$this->datasis->sidapuede('TBDESTINOS','BUSQUEDA%'));
-		$grid->setRowNum(30);
+		$grid->setRowNum(990);
 		$grid->setShrinkToFit('false');
 
 		$grid->setBarOptions("addfunc: tbdestinosadd, editfunc: tbdestinosedit, delfunc: tbdestinosdel, viewfunc: tbdestinosshow");

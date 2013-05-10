@@ -127,7 +127,7 @@ class gser extends Controller {
 			$.post("'.site_url('finanzas/gser/solo/create').'",
 			function(data){
 				$("#fgasto").html(data);
-				$("#fgasto").dialog({height: 500, width: 950, title: "Agregar Egreso"});
+				$("#fgasto").dialog({height: 600, width: 950, title: "Agregar Egreso"});
 				$( "#fgasto" ).dialog( "open" );
 			})
 		};';
@@ -217,7 +217,7 @@ class gser extends Controller {
 				$.post("'.site_url('finanzas/mgas/dataedit/create').'",
 				function(data){
 					$("#fgasto").html(data);
-					$("#fgasto").dialog({height: 400, width: 700, title: "Agregar Gasto"});
+					$("#fgasto").dialog({height: 500, width: 700, title: "Agregar Gasto"});
 					$("#fgasto").dialog( "open" );
 				});
 		});';
@@ -230,7 +230,7 @@ class gser extends Controller {
 			$.post("'.site_url('compras/sprv/dataedit/create').'",
 			function(data){
 				$("#fgasto").html(data);
-				$("#fgasto").dialog({height: 480, width: 720, title: "Agregar Proveedor"});
+				$("#fgasto").dialog({height: 500, width: 720, title: "Agregar Proveedor"});
 				$("#fgasto").dialog( "open" );
 			})
 		});';
@@ -311,7 +311,7 @@ class gser extends Controller {
 
 		$bodyscript .= '
 			$("#fgasto").dialog({
-				autoOpen: false, height: 590, width: 950, modal: true,
+				autoOpen: false, height: 500, width: 950, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;
@@ -418,18 +418,17 @@ class gser extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
 		$grid->addField('tipo_doc');
-		$grid->label('Tipo doc.');
+		$grid->label('Tipo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
+			'align'         => "'center'",
 			'width'         => 40,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 2 }',
 		));
-
 
 		$grid->addField('numero');
 		$grid->label('N&uacute;mero');
@@ -443,18 +442,19 @@ class gser extends Controller {
 		));
 
 		$grid->addField('proveed');
-		$grid->label('Proveedor');
+		$grid->label('Prov.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 50,
+			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 5 }',
 		));
 
 		$grid->addField('nombre');
-		$grid->label('Nombre');
+		$grid->label('Nombre del Proveedor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -463,7 +463,6 @@ class gser extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 40 }',
 		));
-
 
 		$grid->addField('vence');
 		$grid->label('Vence');
@@ -972,11 +971,12 @@ class gser extends Controller {
 		));*/
 
 		$grid->addField('cajachi');
-		$grid->label('Caja Chica');
+		$grid->label('C.Chica');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 40,
+			'align'         => "'center'",
+			'width'         => 50,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 1 }',

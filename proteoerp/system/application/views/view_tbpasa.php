@@ -7,14 +7,6 @@ if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'<
 if($form->_status <> 'show'){
 
 $campos='\'\'';
-//$campos=$form->template_details('itcruc');
-//$scampos  ='<tr id="tr_itannc_<#i#>">';
-//$scampos .='<td class="littletablerow" align="left" ><input type="hidden" name="itnumero_<#i#>"  id="itnumero_<#i#>" ><input type="hidden" name="ittipo_<#i#>"  id="ittipo_<#i#>" ><span id="itnumero_<#i#>_val"></span><input type="hidden" name="itid_<#i#>"  id="itid_<#i#>" ></td>';
-//$scampos .='<td class="littletablerow" align="left" ><input type="hidden" name="itfecha_<#i#>"   id="itfecha_<#i#>"  ><span id="itfecha_<#i#>_val" ></span></td>';
-//$scampos .='<td class="littletablerow" align="right"><input type="hidden" name="itsaldo_<#i#>"   id="itsaldo_<#i#>"  ><span id="itsaldo_<#i#>_val" ></span></td>';
-//$scampos .='<td class="littletablerow" align="right"><input type="text" size="10" name="itmonto_<#i#>" id="itmonto_<#i#>" class="inputnum"></td>';
-//$scampos .='</tr>';
-//$campos=$form->js_escape($scampos);
 
 ?>
 <script language="javascript" type="text/javascript">
