@@ -65,7 +65,7 @@ $ittot['monto']=$ittot['reten']=$ittot['ppago']=$ittot['cambio']=$ittot['mora']=
 <script type="text/php">
 	if (isset($pdf)) {
 		$texto = array();
-		$font  = Font_Metrics::get_font("verdana");
+		$font  = Font_Metrics::get_font('verdana');
 		$size  = 6;
 		$color = array(0,0,0);
 		$text_height = Font_Metrics::get_font_height($font, $size);
@@ -75,8 +75,8 @@ $ittot['monto']=$ittot['reten']=$ittot['ppago']=$ittot['cambio']=$ittot['mora']=
 
 		//***Inicio cuadro
 		//**************VARIABLES MODIFICABLES***************
-		$texto[]="Recibido por";
-		$texto[]="Firma y sello";
+		$texto[]='Recibido por';
+		$texto[]='Firma y sello';
 
 		$cuadros = 0;   //Cantidad de cuadros (en caso de ser 0 calcula la cantidad)
 		$margenh = 40;  //Distancia desde el borde derecho e izquierdo

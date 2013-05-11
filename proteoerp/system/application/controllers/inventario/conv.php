@@ -50,7 +50,7 @@ class Conv extends Controller {
 
 		$adic = array(
 			array('id'=>'fedita', 'title'=>'Agregar Conversi&oacute;n'),
-			array('id'=>'fshow', 'title'=>'Ver Conversi&oacute;n')
+			array('id'=>'fshow' , 'title'=>'Ver Conversi&oacute;n')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -720,7 +720,6 @@ class Conv extends Controller {
 		$edit->descrip->size=36;
 		$edit->descrip->db_name='descrip';
 		$edit->descrip->maxlength=50;
-		//$edit->descrip->readonly  = true;
 		$edit->descrip->rel_id='itconv';
 		$edit->descrip->type='inputhidden';
 
@@ -805,8 +804,8 @@ class Conv extends Controller {
 		//costo=costo*(entrada o salida segun se el caso)
 		$cana=$do->count_rel('itconv');
 		for($i=0;$i<$cana;$i++){
-			$ent=$do->get_rel('itconv','entrada',$i);
-			$sal=$do->get_rel('itconv','salida' ,$i);
+			$ent   =$do->get_rel('itconv','entrada',$i);
+			$sal   =$do->get_rel('itconv','salida' ,$i);
 			$costo =$do->get_rel('itconv','costo' ,$i);
 			$codigo=$do->get_rel('itconv','codigo' ,$i);
 

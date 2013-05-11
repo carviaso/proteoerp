@@ -53,16 +53,19 @@ class Pfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"imprime",  "img"=>"assets/default/images/print.png","alt" => 'Reimprimir', "label"=>"Reimprimir Documento"));
-		//$grid->wbotonadd(array("id"=>"precierre","img"=>"images/dinero.png", "alt" => 'Cierre de Caja',"label"=>"Cierre de Caja"));
-		//$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
+		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'bffact' , 'img'=>'images/star.png'                ,'alt' => 'Facturar'  , 'label'=>'Facturar'));
+
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array("id"=>"fedita" , "title"=>"Agregar/Editar Pedido"),
+			array('id'=>'ffact' , 'title'=>'Convertir en factura'),
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Pedido'),
+			array('id'=>'fshow' , 'title'=>'Mostrar Registro'),
+			array('id'=>'fborra', 'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -91,16 +94,6 @@ class Pfac extends Controller {
 		$bodyscript = '<script type="text/javascript">'."\n";
 
 		$bodyscript .= '
-		jQuery("#imprime").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/PFAC/').'/\'+id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
-			} else { $.prompt("<h1>Por favor Seleccione una Factura</h1>");}
-		});
-		';
-
-		$bodyscript .= '
 		function pfacadd() {
 			$.post("'.site_url('ventas/pfac/dataedit/create').'",
 			function(data){
@@ -111,17 +104,61 @@ class Pfac extends Controller {
 
 		$bodyscript .= '
 		function pfacedit() {
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				if ( ret.status == "A" ) {
+					mId = id;
+					$.post("'.site_url('ventas/pfac/dataedit/modify').'/"+id, function(data){
+						$("#fedita").html(data);
+						$("#fedita").dialog( "open" );
+					});
+				} else {
+					$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+				}
+			};
+		};';
+
+		$bodyscript .= '
+		function pfacdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function pfacshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
-				$.post("'.site_url('ventas/pfac/dataedit/modify').'/"+id, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
 				});
-			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
-		};
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
 		};';
 
 		//Wraper de javascript
@@ -139,37 +176,155 @@ class Pfac extends Controller {
 			';
 
 		$bodyscript .= '
-		$("#fedita").dialog({
-			autoOpen: false, height: 550, width: 800, modal: true,
-			buttons: {
-			"Guardar": function() {
-				var bValid = true;
-				var murl = $("#df1").attr("action");
-				allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						if ( r.length == 0 ) {
-							apprise("Registro Guardado");
-							$( "#fedita" ).dialog( "close" );
-							grid.trigger("reloadGrid");
-							'.$this->datasis->jwinopen(site_url('formatos/ver/PFAC').'/\'+res.id+\'/id\'').';
-							return true;
-						} else {
-							$("#fedita").html(r);
-						}
-					}
-			})},
-			"Cancelar": function() { $( this ).dialog( "close" ); }
-			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+		jQuery("#imprime").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url('formatos/ver/PFAC/').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes\');
+			} else { $.prompt("<h1>Por favor Seleccione una Factura</h1>");}
 		});';
+
+		$bodyscript .= '
+		jQuery("#bffact").click(function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				$.post("'.site_url('ventas/sfac/creafrompfac/N').'/"+ret.numero+"/create",
+				function(data){
+					$("#ffact").html(data);
+					$("#ffact").dialog( "open" );
+				});
+			} else { $.prompt("<h1>Por favor Seleccione un Presupuesto</h1>");}
+		});';
+
+		$bodyscript .= '
+		$("#fedita").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/PFAC').'/\'+res.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		//Convierte Factura
+		$bodyscript .= '
+			$("#ffact").dialog({
+				autoOpen: false, height: 600, width: 800, modal: true,
+				buttons: {
+					"Guardar": function() {
+						var bValid = true;
+						var murl = $("#df1").attr("action");
+						$.ajax({
+							type: "POST",
+							dataType: "html",
+							async: false,
+							url: murl,
+							data: $("#df1").serialize(),
+							success: function(r,s,x){
+								try{
+									var json = JSON.parse(r);
+									if ( json.status == "A" ) {
+										if ( json.manual == "N" ) {
+											$( "#ffact" ).dialog( "close" );
+											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											return true;
+										} else {
+
+											$.post("'.site_url($this->url.'dataedit/S/create').'",
+											function(data){
+												$("#ffact").html(data);
+											})
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											return true;
+										}
+
+									} else {
+										apprise(json.mensaje);
+									}
+								}catch(e){
+									$("#ffact").html(r);
+								}
+							}
+						})
+					},
+					"Cancelar": function() {
+						$("#ffact").html("");
+						$( this ).dialog( "close" );
+						$("#newapi'.$grid0.'").trigger("reloadGrid");
+					}
+				},
+				close: function() {
+					$("#ffact").html("");
+				}
+			});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
 		$bodyscript .= '});'."\n";
 
-		$bodyscript .= "</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '</script>';
+
 		return $bodyscript;
 	}
 
@@ -178,12 +333,12 @@ class Pfac extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -221,7 +376,7 @@ class Pfac extends Controller {
 
 
 		$grid->addField('vd');
-		$grid->label('Vende');
+		$grid->label('Vendedor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -351,7 +506,7 @@ class Pfac extends Controller {
 
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -363,7 +518,7 @@ class Pfac extends Controller {
 
 
 		$grid->addField('observa');
-		$grid->label('Observacion 1');
+		$grid->label('Observaci&oacute;n 1');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -375,7 +530,7 @@ class Pfac extends Controller {
 
 
 		$grid->addField('observ1');
-		$grid->label('Observacion 2');
+		$grid->label('Observaci&oacute;n 2');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -463,7 +618,7 @@ class Pfac extends Controller {
 
 
 		$grid->addField('transac');
-		$grid->label('Transac');
+		$grid->label('Transaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -499,7 +654,7 @@ class Pfac extends Controller {
 
 
 		$grid->addField('presup');
-		$grid->label('Presup');
+		$grid->label('Presupuesto');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -533,7 +688,7 @@ class Pfac extends Controller {
 		));
 
 
-		$grid->addField('numant');
+		/*$grid->addField('numant');
 		$grid->label('Numant');
 		$grid->params(array(
 			'search'        => 'true',
@@ -555,7 +710,7 @@ class Pfac extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
-		));
+		));*/
 
 
 		$grid->addField('modificado');
@@ -571,7 +726,7 @@ class Pfac extends Controller {
 		));
 
 
-		$grid->addField('fenvia');
+		/*$grid->addField('fenvia');
 		$grid->label('Fenvia');
 		$grid->params(array(
 			'search'        => 'true',
@@ -594,11 +749,11 @@ class Pfac extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
-		));
+		));*/
 
 
 		$grid->addField('id');
-		$grid->label('Id');
+		$grid->label('ID');
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
@@ -636,7 +791,7 @@ class Pfac extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: pfacadd,\n\t\teditfunc: pfacedit");
+		$grid->setBarOptions('addfunc: pfacadd, editfunc: pfacedit, delfunc: pfacdel, viewfunc: pfacshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -654,8 +809,7 @@ class Pfac extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -669,8 +823,7 @@ class Pfac extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -761,7 +914,7 @@ class Pfac extends Controller {
 		));
 
 		$grid->addField('codigoa');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -772,7 +925,7 @@ class Pfac extends Controller {
 		));
 
 		$grid->addField('desca');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -917,7 +1070,7 @@ class Pfac extends Controller {
 */
 
 		$grid->addField('pvp');
-		$grid->label('Pvp');
+		$grid->label('PVP');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1018,7 +1171,7 @@ class Pfac extends Controller {
 		));
 */
 		$grid->addField('id');
-		$grid->label('Id');
+		$grid->label('ID');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'align'         => "'center'",
@@ -1116,7 +1269,7 @@ class Pfac extends Controller {
 				'precio2' =>'Precio 2',
 				'precio3' =>'Precio 3',
 				'existen' =>'Existencia',
-				),
+			),
 			'filtro' => array('codigo' => 'C&oacute;digo', 'descrip' => 'Descripci&oacute;n'),
 			'retornar'  => array(
 				'codigo'  => 'codigoa_<#i#>',
@@ -1158,28 +1311,19 @@ class Pfac extends Controller {
 			'script' => array('post_modbus_scli()'));
 		$boton = $this->datasis->modbus($mSCLId);
 
-		$inven=array();
-		$query=$this->db->query('SELECT TRIM(codigo) AS codigo ,TRIM(descrip) AS descrip,tipo,base1,base2,base3,base4,iva,peso,precio1,pond FROM sinv WHERE activo=\'S\'');
-		if ($query->num_rows() > 0){
-			foreach ($query->result() as $row){
-				$ind='_'.$row->codigo;
-				$inven[$ind]=array(utf8_encode($row->descrip),$row->tipo,$row->base1,$row->base2,$row->base3,$row->base4,$row->iva,$row->peso,$row->precio1,$row->pond);
-			}
-		}
-		$jinven=json_encode($inven);
-
 		$do = new DataObject('pfac');
 		$do->rel_one_to_many('itpfac', 'itpfac', array('numero' => 'numa'));
 		$do->pointer('scli' , 'scli.cliente=pfac.cod_cli', 'scli.tipo AS sclitipo', 'left');
 		$do->rel_pointer('itpfac', 'sinv', 'itpfac.codigoa=sinv.codigo', 'sinv.descrip AS sinvdescrip, sinv.base1 AS sinvprecio1, sinv.base2 AS sinvprecio2, sinv.base3 AS sinvprecio3, sinv.base4 AS sinvprecio4, sinv.iva AS sinviva, sinv.peso AS sinvpeso,sinv.tipo AS sinvtipo,sinv.precio1 As sinvprecio1,sinv.pond AS sinvpond,sinv.mmargen as sinvmmargen,sinv.ultimo sinvultimo,sinv.formcal sinvformcal,sinv.pm sinvpm,itpfac.preca precat');
 
 		$edit = new DataDetails('Pedidos', $do);
+		$edit->on_save_redirect=false;
 		$edit->back_url = site_url('ventas/pfac/filteredgrid');
 		$edit->set_rel_title('itpfac', 'Producto <#o#>');
 
-		$edit->pre_process('insert' , '_pre_insert');
-		$edit->pre_process('update' , '_pre_update');
-		$edit->pre_process('delete' , '_pre_delete');
+		$edit->pre_process( 'insert', '_pre_insert');
+		$edit->pre_process( 'update', '_pre_update');
+		$edit->pre_process( 'delete', '_pre_delete');
 		$edit->post_process('insert', '_post_insert');
 		$edit->post_process('update', '_post_update');
 		$edit->post_process('delete', '_post_delete');
@@ -1192,7 +1336,8 @@ class Pfac extends Controller {
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->rule = 'required';
 		$edit->fecha->mode = 'autohide';
-		$edit->fecha->size = 10;
+		$edit->fecha->size = 12;
+		$edit->fecha->calendar=false;
 
 		$edit->vd = new dropdownField ('Vendedor', 'vd');
 		$edit->vd->options('SELECT vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend ORDER BY vendedor');
@@ -1254,7 +1399,7 @@ class Pfac extends Controller {
 		$edit->codigoa->db_name = 'codigoa';
 		$edit->codigoa->rel_id = 'itpfac';
 		$edit->codigoa->rule = 'required|callback_chcodigoa';
-		$edit->codigoa->onkeyup = 'OnEnter(event,<#i#>)';
+		//$edit->codigoa->onkeyup = 'OnEnter(event,<#i#>)';
 		if(!($faplica < $fenvia))
 		$edit->codigoa->append($btn);
 
@@ -1285,12 +1430,12 @@ class Pfac extends Controller {
 		$edit->preca->rule = 'required|positive|callback_chpreca[<#i#>]';
 		$edit->preca->readonly = true;
 
-		$edit->dxapli = new inputField('Precio <#o#>', 'dxapli_<#i#>');
-		$edit->dxapli->db_name = 'dxapli';
-		$edit->dxapli->rel_id = 'itpfac';
-		$edit->dxapli->size = 1;
-		$edit->dxapli->rule = 'trim';
-		$edit->dxapli->onchange="cal_dxapli(<#i#>)";
+		//$edit->dxapli = new inputField('Descuento <#o#>', 'dxapli_<#i#>');
+		//$edit->dxapli->db_name = 'dxapli';
+		//$edit->dxapli->rel_id = 'itpfac';
+		//$edit->dxapli->size = 1;
+		//$edit->dxapli->rule = 'trim';
+		//$edit->dxapli->onchange="cal_dxapli(<#i#>)";
 
 		$edit->tota = new inputField('importe <#o#>', 'tota_<#i#>');
 		$edit->tota->db_name = 'tota';
@@ -1381,28 +1526,44 @@ class Pfac extends Controller {
 
 		$control=$this->rapyd->uri->get_edited_id();
 
-		if($fenvia < $hoy){
-			$edit->buttons( 'delete', 'back','add_rel');
+		//if($fenvia < $hoy){
+		//	$edit->buttons( 'delete', 'back','add_rel');
+		//	$accion="javascript:window.location='".site_url('ventas/pfaclite/enviar/'.$control)."'";
+		//	$edit->button_status('btn_envia'  ,'Enviar Pedido'         ,$accion,'TR','show');
+		//}elseif($faplica < $fenvia){
+		//	$hide=array('vd','peso','cliente','nombre','rifci','direc','observa','observ1','codigoa','desca','cana');
+		//	foreach($hide as $value)
+		//	$edit->$value->type="inputhidden";
+        //
+		//	$accion="javascript:window.location='".site_url('ventas/pfac/dataedit/modify/'.$control)."'";
+		//	$edit->button_status('btn_envia'  ,'Aplicar Descuentos'         ,$accion,'TR','show');
+        //
+		//	$edit->buttons( 'delete', 'back');
+        //
+		//}else{
+		//	$edit->buttons( 'delete', 'back', 'add_rel');
+        //
+		//}
+		$edit->buttons('add_rel');
+		$edit->build();
 
-			$accion="javascript:window.location='".site_url('ventas/pfaclite/enviar/'.$control)."'";
-			$edit->button_status('btn_envia'  ,'Enviar Pedido'         ,$accion,'TR','show');
-
-		}elseif($faplica < $fenvia){
-			$hide=array('vd','peso','cliente','nombre','rifci','direc','observa','observ1','codigoa','desca','cana');
-			foreach($hide as $value)
-			$edit->$value->type="inputhidden";
-
-			$accion="javascript:window.location='".site_url('ventas/pfac/dataedit/modify/'.$control)."'";
-			$edit->button_status('btn_envia'  ,'Aplicar Descuentos'         ,$accion,'TR','show');
-
-			$edit->buttons( 'delete', 'back');
-
+		if($edit->on_success()){
+			$rt=array(
+				'status' => 'A',
+				'mensaje'=> 'Registro guardado',
+				'pk'     => $edit->_dataobject->pk
+			);
+			echo json_encode($rt);
 		}else{
-			$edit->buttons( 'delete', 'back', 'add_rel');
-
+			$conten['form']    =& $edit;
+			$conten['hoy']     = $hoy;
+			$conten['fenvia']  = $fenvia;
+			$conten['faplica'] = $faplica;
+			$data['content']   = $this->load->view('view_pfac', $conten);
 		}
 
-		if($this->genesal){
+
+		/*if($this->genesal){
 			$edit->build();
 
 			$conten['inven']   = $jinven;
@@ -1410,7 +1571,7 @@ class Pfac extends Controller {
 			$conten['hoy']     = $hoy;
 			$conten['fenvia']  = $fenvia;
 			$conten['faplica'] = $faplica;
-			$data['content'] = $this->load->view('view_pfac', $conten, false);
+			$data['content']   = $this->load->view('view_pfac', $conten, false);
 			//$data['title']   = heading('Pedidos No. '.$edit->numero->value);
 
 			//$data['style']  = style('redmond/jquery-ui.css');
@@ -1434,7 +1595,8 @@ class Pfac extends Controller {
 				return false;
 				$this->msj=html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string));
 			}
-		}
+		}*/
+
 	}
 
 	function pos(){
@@ -1753,9 +1915,9 @@ class Pfac extends Controller {
 	function _post_insert($do){
 		$cana = $do->count_rel('itpfac');
 		for($i = 0;$i < $cana;$i++){
-			$itcodigo= $do->get_rel('itpfac', 'codigoa', $i);
-			$itcana  = $do->get_rel('itpfac', 'cana', $i);
-			$mSQL = "UPDATE sinv SET exdes=exdes+$itcana WHERE codigo=".$this->db->escape($itcodigo);
+			$itcodigo= $do->get_rel('itpfac', 'codigoa',$i);
+			$itcana  = $do->get_rel('itpfac', 'cana'   ,$i);
+			$mSQL = "UPDATE sinv SET exdes=exdes+${itcana} WHERE codigo=".$this->db->escape($itcodigo);
 
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'pfac'); }
@@ -1763,16 +1925,16 @@ class Pfac extends Controller {
 
 		$codigo = $do->get('numero');
 		$this->insert_numero=$codigo;
-		logusu('pfac', "Pedido $codigo CREADO");
+		logusu('pfac', "Pedido ${codigo} CREADO");
 	}
 
 	function chpreca($preca, $ind){
 		$codigo = $this->input->post('codigoa_' . $ind);
-		$precio4 = $this->datasis->dameval('SELECT base4 FROM sinv WHERE codigo=' . $this->db->escape($codigo));
+		$precio4 = $this->datasis->dameval('SELECT base4 FROM sinv WHERE codigo='.$this->db->escape($codigo));
 		if($precio4 < 0) $precio4 = 0;
 
 		if($preca < $precio4){
-			$this->validation->set_message('chpreca', 'El art&iacute;culo ' . $codigo . ' debe contener un precio de al menos ' . nformat($precio4));
+			$this->validation->set_message('chpreca', 'El art&iacute;culo '.$codigo.' debe contener un precio de al menos '.nformat($precio4));
 			return false;
 		}else{
 			return true;
@@ -1781,7 +1943,7 @@ class Pfac extends Controller {
 
 	function enviar($id,$dir='pfac'){
 		$ide=$this->db->escape($id);
-		$this->db->query("UPDATE pfac SET fenvia=CURDATE() WHERE id=$ide");
+		$this->db->query("UPDATE pfac SET fenvia=CURDATE() WHERE id=${ide}");
 		redirect("ventas/$dir/dataedit/show/$id");
 	}
 
@@ -1791,16 +1953,16 @@ class Pfac extends Controller {
 
 	function _post_update($do){
 		$cana = $do->count_rel('itpfac');
-		for($i = 0;$i < $cana;$i++){
+		for($i=0;$i<$cana;$i++){
 			$itcodigo= $do->get_rel('itpfac', 'codigoa', $i);
 			$itcana  = $do->get_rel('itpfac', 'cana', $i);
-			$mSQL = "UPDATE sinv SET exdes=exdes+$itcana WHERE codigo=".$this->db->escape($itcodigo);
+			$mSQL = "UPDATE sinv SET exdes=exdes+${itcana} WHERE codigo=".$this->db->escape($itcodigo);
 
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'pfac'); }
 		}
 		$codigo = $do->get('numero');
-		logusu('pfac', "Pedido $codigo MODIFICADO");
+		logusu('pfac', "Pedido ${codigo} MODIFICADO");
 	}
 
 	function cal_dxapli($preca=null,$dxapli=null){
@@ -1915,27 +2077,6 @@ class Pfac extends Controller {
 			$salida .= "</table>";
 		}
 		$query->free_result();
-
-
-/*
-		// Revisa formas de pago sfpa
-		$mSQL = "SELECT codbanc, numero, monto FROM bmov WHERE transac='$transac' ";
-		$query = $this->db->query($mSQL);
-		if ( $query->num_rows() > 0 ){
-			$salida .= "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento en Caja o Banco</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Bco</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row)
-			{
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['codbanc']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-				$salida .= "</tr>";
-			}
-			$salida .= "</table>";
-		}
-*/
 		echo $salida;
 	}
 

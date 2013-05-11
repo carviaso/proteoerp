@@ -215,8 +215,7 @@ class Sfac extends Controller {
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-		};
-		';
+		};';
 
 
 		$bodyscript .= '
@@ -236,8 +235,7 @@ class Sfac extends Controller {
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-		};
-		';
+		};';
 
 		$bodyscript .= '$(function() { ';
 
@@ -1679,11 +1677,15 @@ class Sfac extends Controller {
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM sfac");
 		}
 		if(empty($id)) return '';
-		$tipo_doc = $this->datasis->dameval("SELECT tipo_doc FROM sfac WHERE id=$id");
-		$numero   = $this->datasis->dameval("SELECT numero   FROM sfac WHERE id=$id");
+		$dbid     = $this->db-escape($id);
+		$tipo_doc = $this->datasis->dameval("SELECT tipo_doc FROM sfac WHERE id=${dbid}");
+		$numero   = $this->datasis->dameval("SELECT numero   FROM sfac WHERE id=${dbid}");
+
+		$dbtipo_doc = $this->db->escape($tipo_doc);
+		$dbnumero   = $this->db->escape($numero);
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM sitems WHERE tipoa='$tipo_doc' AND numa='$numero' ";
+		$mSQL    = "SELECT * FROM sitems WHERE tipoa=${dbtipo_doc} AND numa=${dbnumero}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
@@ -2269,13 +2271,13 @@ class Sfac extends Controller {
 	function creadpfacf($numero){
 		$this->rapyd->load('dataform');
 
-		$form = new DataForm("ventas/sfac/creadpfac/$numero");
-		$form->title('Sellecione el Almacen');
+		$form = new DataForm('ventas/sfac/creadpfac/'.$numero);
+		$form->title('Sellecione el Almac&eacute;n');
 
-		$form->alma = new dropdownField("Almacen", 'alma');
+		$form->alma = new dropdownField('Almac&eacute;n', 'alma');
 		$form->alma->options("SELECT ubica,ubides FROM caub WHERE invfis='N' AND gasto='N'");
 
-		$form->submit("btnsubmit","Facturar");
+		$form->submit('btnsubmit','Facturar');
 		$form->build_form();
 
 		$data['content'] = $form->output;
@@ -2729,6 +2731,7 @@ class Sfac extends Controller {
 		$edit->hora      = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 
 		$edit->buttons('add_rel');
+		if(!empty($this->_url)) $edit->_process_uri=$this->_url; //Necesario cuando se crea desde presupuesto o pedido
 
 		$edit->build();
 
@@ -2757,7 +2760,7 @@ class Sfac extends Controller {
 		}else{
 			if($this->genesal){
 				$conten['form']  =& $edit;
-				$data['content'] =  $this->load->view('view_sfac_add', $conten);
+				$this->load->view('view_sfac_add', $conten);
 			}else{
 				$rt=array(
 					'status' =>'B',
@@ -3828,7 +3831,7 @@ class Sfac extends Controller {
 
 			$sql="UPDATE itpfac AS c JOIN sinv   AS d ON d.codigo=c.codigoa
 			SET d.exord=IF(d.exord>c.cana,d.exord-c.cana,0)
-			WHERE c.numa = $dbpfac";
+			WHERE c.numa = ${dbpfac}";
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}
 		}
@@ -3932,7 +3935,8 @@ class Sfac extends Controller {
 		logusu($do->table,"Imprimio ${tipo_doc}${numero} factura $nfiscal");
 	}
 
-	function creafrompfac($numero,$status=null){
+	//Crea una factura desde un pedido
+	function creafrompfac($manual,$numero,$status=null){
 		$this->_url= $this->url.'dataedit/insert';
 
 		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
@@ -3977,45 +3981,126 @@ class Sfac extends Controller {
 				$i=0;
 
 				foreach ($qquery->result() as $itrow){
-					$_POST["codigoa_$i"]  = rtrim($itrow->codigoa);
-					$_POST["desca_$i"]    = rtrim($itrow->desca);
-					$_POST["cana_$i"]     = $itrow->cana;
-					$_POST["preca_$i"]    = $itrow->preca;
-					$_POST["tota_$i"]     = $itrow->tota;
-					$_POST["precio1_$i"]  = $itrow->precio1;
-					$_POST["precio2_$i"]  = $itrow->precio2;
-					$_POST["precio3_$i"]  = $itrow->precio3;
-					$_POST["precio4_$i"]  = $itrow->precio4;
-					$_POST["itiva_$i"]    = $itrow->iva;
-					$_POST["sinvpeso_$i"] = $itrow->peso;
-					$_POST["sinvtipo_$i"] = $itrow->tipo;
-					$_POST["detalle_$i"]  = '';
+					$_POST["codigoa_${i}"]  = rtrim($itrow->codigoa);
+					$_POST["desca_${i}"]    = rtrim($itrow->desca);
+					$_POST["cana_${i}"]     = $itrow->cana;
+					$_POST["preca_${i}"]    = $itrow->preca;
+					$_POST["tota_${i}"]     = $itrow->tota;
+					$_POST["precio1_${i}"]  = $itrow->precio1;
+					$_POST["precio2_${i}"]  = $itrow->precio2;
+					$_POST["precio3_${i}"]  = $itrow->precio3;
+					$_POST["precio4_${i}"]  = $itrow->precio4;
+					$_POST["itiva_${i}"]    = $itrow->iva;
+					$_POST["sinvpeso_${i}"] = $itrow->peso;
+					$_POST["sinvtipo_${i}"] = $itrow->tipo;
+					$_POST["detalle_${i}"]  = '';
 					$i++;
 				}
 
 				//sfpa
 				$i=0;
-				$_POST["tipo_$i"]      = '';
-				$_POST["sfpafecha_$i"] = '';
-				$_POST["num_ref_$i"]   = '';
-				$_POST["banco_$i"]     = '';
-				$_POST["monto_$i"]     = 0;
+				$_POST["tipo_${i}"]      = '';
+				$_POST["sfpafecha_${i}"] = '';
+				$_POST["num_ref_${i}"]   = '';
+				$_POST["banco_${i}"]     = '';
+				$_POST["monto_${i}"]     = 0;
 
 				$this->dataedit();
 			}else{
-				$url='ventas/pfaclitemayor/filteredgrid';
-				$this->rapyd->uri->keep_persistence();
-				$persistence = $this->rapyd->session->get_persistence($url, $this->rapyd->uri->gfid);
-				$back= (isset($persistence['back_uri'])) ?$persistence['back_uri'] : $url;
-
-				$data['content'] = 'Pedido ya fue facturado'.br();
-				$data['content'].= anchor($back,'Regresar');
-				$data['head']    = $this->rapyd->get_head();
-				$data['title']   = heading('Actualizar compra');
-				$this->load->view('view_ventanas', $data);
+				echo 'Pedido ya facturado';
 			}
+		}else{
+			echo 'Pedido no encontrado';
 		}
 	}
+
+	//Crea una factura desde un presupuesto
+	function creafromspre($manual,$numero,$status=null){
+		$this->_url= $this->url.'dataedit/insert';
+
+		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
+		,'a.totals','a.iva','a.totalg');
+		$this->db->select($sel);
+		$this->db->from('spre AS a');
+		$this->db->join('scli AS b','a.cod_cli=b.cliente','left');
+		$this->db->where('a.numero',$numero);
+		$query = $this->db->get();
+
+		if ($query->num_rows() > 0 && $status=='create'){
+			$row = $query->row();
+
+			$_POST=array(
+				'btn_submit' => 'Guardar',
+				'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
+				'cajero'     => $this->secu->getcajero(),
+				'vd'         => $this->secu->getvendedor(),
+				'almacen'    => $this->secu->getalmacen(),
+				'tipo_doc'   => 'F',
+				'factura'    => '',
+				'cod_cli'    => $row->cod_cli,
+				'sclitipo'   => $row->tipo,
+				'nombre'     => rtrim($row->nombre),
+				'rifci'      => $row->rifci,
+				'direc'      => rtrim($row->direc),
+				'totals'     => $row->totals,
+				'iva'        => $row->iva,
+				'totalg'     => $row->totalg,
+				'pfac'       => $numero,
+			);
+
+			$itsel=array('a.codigo','b.descrip AS desca','a.cana','a.preca','a.importe AS tota','b.iva',
+			'b.precio1','b.precio2','b.precio3','b.precio4','b.tipo','b.peso');
+			$this->db->select($itsel);
+			$this->db->from('itspre AS a');
+			$this->db->join('sinv AS b','b.codigo=a.codigo');
+			$this->db->where('a.numero',$numero);
+			$this->db->where('a.cana >','0');
+			$qquery = $this->db->get();
+			$i=0;
+
+			foreach ($qquery->result() as $itrow){
+				$_POST["codigoa_${i}"]  = rtrim($itrow->codigo);
+				$_POST["desca_${i}"]    = rtrim($itrow->desca);
+				$_POST["cana_${i}"]     = $itrow->cana;
+				$_POST["preca_${i}"]    = $itrow->preca;
+				$_POST["tota_${i}"]     = $itrow->tota;
+				$_POST["precio1_${i}"]  = $itrow->precio1;
+				$_POST["precio2_${i}"]  = $itrow->precio2;
+				$_POST["precio3_${i}"]  = $itrow->precio3;
+				$_POST["precio4_${i}"]  = $itrow->precio4;
+				$_POST["itiva_${i}"]    = $itrow->iva;
+				$_POST["sinvpeso_${i}"] = $itrow->peso;
+				$_POST["sinvtipo_${i}"] = $itrow->tipo;
+				$_POST["detalle_${i}"]  = '';
+				$i++;
+			}
+
+			//sfpa
+			$i=0;
+			$_POST["tipo_${i}"]      = '';
+			$_POST["sfpafecha_${i}"] = '';
+			$_POST["num_ref_${i}"]   = '';
+			$_POST["banco_${i}"]     = '';
+			$_POST["monto_${i}"]     = 0;
+
+			$this->dataedit();
+			//}else{
+			//	$url='ventas/pfaclitemayor/filteredgrid';
+			//	$this->rapyd->uri->keep_persistence();
+			//	$persistence = $this->rapyd->session->get_persistence($url, $this->rapyd->uri->gfid);
+			//	$back= (isset($persistence['back_uri'])) ?$persistence['back_uri'] : $url;
+            //
+			//	$data['content'] = 'Pedido ya fue facturado'.br();
+			//	$data['content'].= anchor($back,'Regresar');
+			//	$data['head']    = $this->rapyd->get_head();
+			//	$data['title']   = heading('Actualizar compra');
+			//	$this->load->view('view_ventanas', $data);
+			//}
+		}else{
+			echo 'Presupuesto no existe';
+		}
+	}
+
 
 	function instalar(){
 		$campos = $this->db->list_fields('sfac');

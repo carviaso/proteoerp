@@ -38,6 +38,7 @@ var itspre_cont=<?php echo $form->max_rel_count['itspre']; ?>;
 
 $(function(){
 	$(".inputnum").numeric(".");
+	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
 	totalizar();
 	for(var i=0;i < <?php echo $form->max_rel_count['itspre']; ?>;i++){
 		cdropdown(i);
@@ -365,20 +366,8 @@ function del_itspre(id){
 	$('#tr_itspre_'+id).remove();
 	totalizar();
 }
+
 </script>
-<?php
-}
-if ($form->_status=='show') {
-?>
-<table align='center' width="100%">
-	<tr>
-		<td>
-		<a href="#" onclick="window.open('<?php echo base_url() ?>formatos/verhtml/PRESUP/<?php echo $form->numero->value ?>', '_blank', 'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');" heigth="600" >
-		<img src='<?php echo base_url() ?>images/html_icon.gif'></a>
-		</td>
-		<td align=right><?php echo $container_tr?></td>
-	</tr>
-</table>
 <?php } ?>
 
 <table align='center' width="100%">
@@ -390,11 +379,11 @@ if ($form->_status=='show') {
 				<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
 				<table width="100%" style="margin: 0; width: 100%;">
 					<tr>
-						<td class="littletableheader"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
-						<td class="littletablerow">   <?php echo $form->fecha->output;   ?>&nbsp;</td>
-					</tr><tr>
 						<td class="littletableheader"><?php echo $form->vd->label     ?>&nbsp;</td>
 						<td class="littletablerow">   <?php echo $form->vd->output    ?>&nbsp;</td>
+					</tr><tr>
+						<td class="littletableheader"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
+						<td class="littletablerow">   <?php echo $form->fecha->output;   ?>&nbsp;</td>
 					</tr><tr>
 						<td class="littletableheader"><?php echo $form->peso->label  ?>&nbsp;</td>
 						<td class="littletablerow" align="left"><?php echo $form->peso->output ?>&nbsp;</td>
@@ -437,19 +426,19 @@ if ($form->_status=='show') {
 			</tr>
 
 			<?php for($i=0;$i<$form->max_rel_count['itspre'];$i++) {
-				$it_codigo  = "codigo_$i";
-				$it_desca   = "desca_$i";
-				$it_cana    = "cana_$i";
-				$it_preca   = "preca_$i";
-				$it_importe = "importe_$i";
-				$it_iva     = "itiva_$i";
-				$it_ultimo  = "ultimo_$i";
-				$it_pond    = "pond_$i";
-				$it_peso    = "sinvpeso_$i";
-				$it_tipo    = "sinvtipo_$i";
-				$it_ultimo  = "ultimo_$i";
-				$it_detalle = "detalle_$i";
-				$it_pond    = "pond_$i";
+				$it_codigo  = "codigo_${i}";
+				$it_desca   = "desca_${i}";
+				$it_cana    = "cana_${i}";
+				$it_preca   = "preca_${i}";
+				$it_importe = "importe_${i}";
+				$it_iva     = "itiva_${i}";
+				$it_ultimo  = "ultimo_${i}";
+				$it_pond    = "pond_${i}";
+				$it_peso    = "sinvpeso_${i}";
+				$it_tipo    = "sinvtipo_${i}";
+				$it_ultimo  = "ultimo_${i}";
+				$it_detalle = "detalle_${i}";
+				$it_pond    = "pond_${i}";
 				$pprecios='';
 				for($o=1;$o<5;$o++){
 					$it_obj   = "precio${o}_${i}";

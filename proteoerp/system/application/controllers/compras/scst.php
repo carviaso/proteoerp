@@ -1809,10 +1809,9 @@ class Scst extends Controller {
 		$edit = new DataDetails('Compras',$do);
 		$edit->set_rel_title('itscst','Producto <#o#>');
 
-		$edit->pre_process('insert' ,'_pre_insert');
-		$edit->pre_process('update' ,'_pre_update');
-		$edit->pre_process('delete' ,'_pre_delete');
-
+		$edit->pre_process( 'insert','_pre_insert');
+		$edit->pre_process( 'update','_pre_update');
+		$edit->pre_process( 'delete','_pre_delete');
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');

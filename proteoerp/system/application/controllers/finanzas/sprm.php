@@ -116,7 +116,6 @@ class Sprm extends Controller {
 			}
 		});';
 
-
 		$bodyscript .= '
 		jQuery("#imprime").click( function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');

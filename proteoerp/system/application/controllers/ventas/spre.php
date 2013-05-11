@@ -41,16 +41,20 @@ class Spre extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"boton1",  "img"=>"assets/default/images/print.png","alt" => 'Reimprimir', "label"=>"Reimprimir Documento"));
+		$grid->wbotonadd(array('id'=>'boton1',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'bffact',  'img'=>'images/star.png'                ,'alt' => 'Facturar'  , 'label'=>'Facturar'));
 
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
 			array('id'=>'fedita' , 'title'=>'Agregar/Editar Registro'),
-			array('id'=>'scliexp', 'title'=>'Ficha de Cliente' )
+			array('id'=>'ffact'  , 'title'=>'Convertir en factura'),
+			array('id'=>'scliexp', 'title'=>'Ficha de Cliente' ),
+			array('id'=>'fshow'  , 'title'=>'Mostrar Registro' ),
+			array('id'=>'fborra' , 'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -79,15 +83,6 @@ class Spre extends Controller {
 		$bodyscript = '		<script type="text/javascript">';
 
 		$bodyscript .= '
-		jQuery("#boton1").click(function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				'.$this->datasis->jwinopen(site_url('formatos/ver/PRESUP').'/\'+id+\'/id\'').';
-			} else { $.prompt("<h1>Por favor Seleccione un Presupuesto</h1>");}
-		});';
-
-		$bodyscript .= '
 		function spreadd() {
 			$.post("'.site_url('ventas/spre/dataedit/create').'",
 			function(data){
@@ -97,16 +92,60 @@ class Spre extends Controller {
 		};';
 
 		$bodyscript .= '
-		function spreedit() {
+		function spreedit(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
-				$.post("'.site_url('ventas/spre/dataedit/modify').'/"+id, function(data){
+				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog( "open" );
 				});
-			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function spreshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function spredel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
 		};';
 
 		//Wraper de javascript
@@ -124,6 +163,28 @@ class Spre extends Controller {
 			';
 
 		$bodyscript .= '
+		jQuery("#boton1").click(function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('formatos/ver/PRESUP').'/\'+id+\'/id\'').';
+			} else { $.prompt("<h1>Por favor Seleccione un Presupuesto</h1>");}
+		});';
+
+		$bodyscript .= '
+		jQuery("#bffact").click(function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				$.post("'.site_url('ventas/sfac/creafromspre/N').'/"+ret.numero+"/create",
+				function(data){
+					$("#ffact").html(data);
+					$("#ffact").dialog( "open" );
+				});
+			} else { $.prompt("<h1>Por favor Seleccione un Presupuesto</h1>");}
+		});';
+
+		$bodyscript .= '
 		$("#fedita").dialog({
 			autoOpen: false, height: 550, width: 800, modal: true,
 			buttons: {
@@ -136,13 +197,18 @@ class Spre extends Controller {
 						url: murl,
 						data: $("#df1").serialize(),
 						success: function(r,s,x){
-							if ( r.length == 0 ) {
-								apprise("Registro Guardado");
-								$( "#fedita" ).dialog( "close" );
-								grid.trigger("reloadGrid");
-								'.$this->datasis->jwinopen(site_url('formatos/ver/SPRE').'/\'+res.id+\'/id\'').';
-								return true;
-							} else {
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/PRESUP').'/\'+json.pk.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
 								$("#fedita").html(r);
 							}
 						}
@@ -158,10 +224,92 @@ class Spre extends Controller {
 				allFields.val( "" ).removeClass( "ui-state-error" );
 			}
 		});';
-		$bodyscript .= '});'."\n";
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		//Convertir Factura
+		$bodyscript .= '
+			$("#ffact").dialog({
+				autoOpen: false, height: 600, width: 800, modal: true,
+				buttons: {
+					"Guardar": function() {
+						var bValid = true;
+						var murl = $("#df1").attr("action");
+						$.ajax({
+							type: "POST",
+							dataType: "html",
+							async: false,
+							url: murl,
+							data: $("#df1").serialize(),
+							success: function(r,s,x){
+								try{
+									var json = JSON.parse(r);
+									if ( json.status == "A" ) {
+										if ( json.manual == "N" ) {
+											$( "#ffact" ).dialog( "close" );
+											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											return true;
+										} else {
+
+											$.post("'.site_url($this->url.'dataedit/S/create').'",
+											function(data){
+												$("#ffact").html(data);
+											})
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											return true;
+										}
+
+									} else {
+										apprise(json.mensaje);
+									}
+								}catch(e){
+									$("#ffact").html(r);
+								}
+							}
+						})
+					},
+					"Cancelar": function() {
+						$("#ffact").html("");
+						$( this ).dialog( "close" );
+						$("#newapi'.$grid0.'").trigger("reloadGrid");
+					}
+				},
+				close: function() {
+					$("#ffact").html("");
+				}
+			});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+		$bodyscript .= '});'."\n";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -394,7 +542,7 @@ class Spre extends Controller {
 
 
 		$grid->addField('id');
-		$grid->label('Id');
+		$grid->label('ID');
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
@@ -438,7 +586,7 @@ class Spre extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: spreadd,\n\t\teditfunc: spreedit");
+		$grid->setBarOptions('addfunc: spreadd, editfunc: spreedit, delfunc: spredel, viewfunc: spreshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -470,8 +618,7 @@ class Spre extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -760,16 +907,6 @@ class Spre extends Controller {
 		));
 */
 
-		$grid->addField('id');
-		$grid->label('Id');
-		$grid->params(array(
-			'align'         => "'center'",
-			'frozen'        => 'true',
-			'width'         => 40,
-			'editable'      => 'false',
-			'search'        => 'false'
-		));
-
 
 		$grid->addField('combo');
 		$grid->label('Combo');
@@ -792,6 +929,16 @@ class Spre extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:12, maxlength: 12 }',
+		));
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
 		));
 
 /*
@@ -838,8 +985,7 @@ class Spre extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdatait( $id = 0 )
-	{
+	function getdatait( $id = 0 ){
 		if ($id === 0 ){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM spre");
 		}
@@ -856,339 +1002,15 @@ class Spre extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setdatait()
-	{
+	function setdatait(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = '??????';
 		$check  = 0;
-
-
 	}
 
-
-
-
-/*
-class spre extends validaciones {
-
-	function spre(){
-		parent::Controller();
-		$this->load->library('rapyd');
-		$this->datasis->modulo_id(104,1);
-	}
-
-	function index() {
-		$this->datasis->modulo_id(104,1);
-		$this->spreextjs();
-	}
-
-
-	function filteredgrid(){
-		$this->rapyd->load('datagrid','datafilter');
-
-		$atts = array(
-			'width'      => '800',
-			'height'     => '600',
-			'scrollbars' => 'yes',
-			'status'     => 'yes',
-			'resizable'  => 'yes',
-			'screenx'    => '0',
-			'screeny'    => '0'
-		);
-
-		$scli=array(
-		'tabla'   =>'scli',
-		'columnas'=>array(
-		'cliente' =>'C&oacute;digo Cliente',
-		'nombre'=>'Nombre',
-		'contacto'=>'Contacto'),
-		'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre'),
-		'retornar'=>array('cliente'=>'cod_cli'),
-		'titulo'  =>'Buscar Cliente');
-		$boton=$this->datasis->modbus($scli);
-
-		$filter = new DataFilter('Filtro de Presupuestos','spre');
-		$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
-		$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
-		$filter->fechad->clause  =$filter->fechah->clause ='where';
-		$filter->fechad->db_name =$filter->fechah->db_name='fecha';
-		$filter->fechad->insertValue = date('Y-m-d');
-		$filter->fechah->insertValue = date('Y-m-d');
-		$filter->fechah->size=$filter->fechad->size=10;
-		$filter->fechad->operator='>=';
-		$filter->fechah->operator='<=';
-
-		$filter->numero = new inputField('N&uacute;mero', 'numero');
-		$filter->numero->size = 30;
-
-		$filter->cliente = new inputField('Cliente', 'cod_cli');
-		$filter->cliente->size = 30;
-		$filter->cliente->append($boton);
-
-		$filter->buttons('reset','search');
-		$filter->build("dataformfiltro");
-
-		$uri  = anchor('ventas/spre/dataedit/<#numero#>','<#numero#>');
-		$uri2 = anchor_popup('formatos/verhtml/PRESUP/<#numero#>','Ver HTML',$atts);
-
-		$mtool  = "<table background='#554455'><tr>";
-		$mtool .= "<td>&nbsp;</td>";
-
-		$mtool .= "<td>&nbsp;<a href='".base_url()."ventas/spre/dataedit/create'>";
-		$mtool .= img(array('src' => 'images/agregar.jpg', 'alt' => 'Agregar Registro', 'title' => 'Agregar Registro','border'=>'0','height'=>'32'));
-		$mtool .= "</a>&nbsp;</td>";
-
-		$mtool .= "<td>&nbsp;<a href='javascript:void(0);' ";
-		$mtool .= 'onclick="window.open(\''.base_url()."reportes/index/spre', '_blank', 'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');".'" heigth="600" width="900" '.'>';
-		$mtool .= img(array('src' => 'images/reportes.gif', 'alt' => 'Reportes', 'title' => 'Reportes','border'=>'0','height'=>'32'));
-		$mtool .= "</a>&nbsp;</td>";
-
-		$mtool .= "</tr></table>";
-
-		$grid = new DataGrid();
-		$grid->order_by('id','desc');
-		$grid->per_page = 50;
-
-		$grid->column_sigma('Accion',       'accion',  '',      'width: 50, frozen: true, renderer:imprimir');
-		$grid->column_sigma('N&uacute;mero','numero',  '',      'width: 60, frozen: true, renderer:sprever');
-		$grid->column_sigma('Fecha',        'fecha',   'date',  'width: 70');
-		$grid->column_sigma('Codigo',       'cod_cli', '',      'width: 50');
-		$grid->column_sigma('Nombre',       'nombre',  '',      'width: 300');
-		$grid->column_sigma('Sub.Total',    'totals',  'float', "width: 80, align: 'right'");
-		$grid->column_sigma('IVA',          'iva'   ,  'float', "width: 80, align: 'right'");
-		$grid->column_sigma('Total',        'totalg',  'float', "width: 80, align: 'right'");
-		$grid->column_sigma('Vendedor',     'vd',      '',      'width: 50');
-		$grid->column_sigma('Id',           'id',      'float', "width: 80, align: 'right'");
-
-		$sigmaA     = $grid->sigmaDsConfig();
-		$dsOption   = $sigmaA["dsOption"];
-
-		$sprever    = "
-function sprever(value, record, columnObj, grid, colNo, rowNo){
-	var url = '';
-	url = '<a href=\"#\" onclick=\"window.open(\'".base_url()."ventas/spre/dataedit/show/'+grid.getCellValue(9,rowNo)+ '\', \'_blank\', \'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'\')\"; heigth=\"600\" >';
-	url = url +value+'</a>';
-	return url;
-}
-
-function imprimir(value, record, columnObj, grid, colNo, rowNo){
-	var url = '';
-	url = '&nbsp;<a href=\"#\" onclick=\"window.open(\'".base_url()."formatos/verhtml/PRESUP/'+grid.getCellValue(1,rowNo)+ '\', \'_blank\', \'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'\')\"; heigth=\"600\" >';
-	url = url +'<img src=\'".base_url()."images/html_icon.gif\'/>'+'</a>';
-	url = url+'&nbsp;<a href=\"#\" onclick=\"window.open(\'".base_url()."formatos/ver/PRESUP/'+grid.getCellValue(1,rowNo)+ '\', \'_blank\', \'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'\')\"; heigth=\"600\" >';
-	url = url +'<img src=\'".base_url()."images/pdf_logo.gif\'/>'+'&nbsp;</a>';
-
-	return url;
-}
-";
-		$colsOption = $sigmaA["colsOption"];
-
-		$gridOption = "
-var gridOption={
-	id : 'grid1',
-	loadURL : '".base_url()."ventas/spre/controlador',
-	width: 700,
-	height: 500,
-	container : 'grid1_container',
-	replaceContainer: true,
-	dataset : dsOption ,
-	columns : colsOption,
-	allowCustomSkin: true,
-	skin: 'vista',
-	pageSize: ".$grid->per_page.",
-	pageSizeList: [30,50,70, 100],
-	toolbarPosition : 'bottom',
-	toolbarContent: 'nav | pagesize | reload print excel pdf filter state',
-	//showGridMenu : true,
-	remotePaging: true,
-	remoteSort: true,
-	remoteFilter: true,
-	autoload: true
-};
-
-var mygrid=new Sigma.Grid(gridOption);
-Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
-";
-
-
-
-		$SigmaCont = "<center><div id=\"grid1_container\" style=\"width:750px;height:500px;\"></div></center>";
-		$grid->add('ventas/spre/dataedit/create');
-		$grid->build('datagridSG');
-
-		$data['style']  = style("redmond/jquery-ui.css");
-		$data['style'] .= style('gt_grid.css');
-		$data['style'] .= style('skin/vista/skinstyle.css');
-
-		$data["script"]  = script("jquery.js");
-		$data['script'] .= script("gt_msg_es.js");
-		$data['script'] .= script("gt_grid_all.js");
-		$data['script'] .= "<script type=\"text/javascript\" >\n".$dsOption.$sprever."\n".$colsOption."\n".$gridOption."</script>";
-
-		$data['content']  = $mtool;
-		$data['content'] .= $SigmaCont;
-
-		$data['head']    = $this->rapyd->get_head();
-		$data['title']   = heading('Presupuesto');
-		$this->load->view('view_ventanas', $data);
-	}
-
-
-	function controlador(){
-		//header('Content-type:text/javascript;charset=UTF-8');
-		if (isset($_POST["_gt_json"]) ) {
-			$json=json_decode(stripslashes($_POST["_gt_json"]));
-			$pageNo   = $json->{'pageInfo'}->{'pageNum'};
-			$pageSize = $json->{'pageInfo'}->{'pageSize'};
-			$filter = '';
-
-			if(isset($json->{'sortInfo'}[0]->{'columnId'})){
-				$sortField = $json->{'sortInfo'}[0]->{'columnId'};
-			} else {
-				$sortField = "numero";
-			}
-
-			if(isset($json->{'sortInfo'}[0]->{'sortOrder'})){
-				$sortOrder = $json->{'sortInfo'}[0]->{'sortOrder'};
-			} else {
-				$sortOrder = "DESC";
-			}
-
-			for ($i = 0; $i < count($json->{'filterInfo'}); $i++) {
-				if($json->{'filterInfo'}[$i]->{'logic'} == "equal"){
-					$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "='" . $json->{'filterInfo'}[$i]->{'value'} . "' ";
-				}elseif($json->{'filterInfo'}[$i]->{'logic'} == "notEqual"){
-					$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "!='" . $json->{'filterInfo'}[$i]->{'value'} . "' ";
-				}elseif($json->{'filterInfo'}[$i]->{'logic'} == "less"){
-					$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "<" . $json->{'filterInfo'}[$i]->{'value'} . " ";
-				}elseif($json->{'filterInfo'}[$i]->{'logic'} == "lessEqual"){
-					$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "<=" . $json->{'filterInfo'}[$i]->{'value'} . " ";
-				}elseif($json->{'filterInfo'}[$i]->{'logic'} == "great"){
-					$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . ">" . $json->{'filterInfo'}[$i]->{'value'} . " ";
-				}elseif($json->{'filterInfo'}[$i]->{'logic'} == "greatEqual"){
-					$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . ">=" . $json->{'filterInfo'}[$i]->{'value'} . " ";
-				}elseif($json->{'filterInfo'}[$i]->{'logic'} == "like"){
-					$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '%" . $json->{'filterInfo'}[$i]->{'value'} . "%' ";
-				}elseif($json->{'filterInfo'}[$i]->{'logic'} == "startWith"){
-					$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '" . $json->{'filterInfo'}[$i]->{'value'} . "%' ";
-				}elseif($json->{'filterInfo'}[$i]->{'logic'} == "endWith"){
-					$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '%" . $json->{'filterInfo'}[$i]->{'value'} . "' ";
-				}
-				$filter .= " AND ";
-			}
-
-			if($json->{'action'} == 'load'){
-
-				//to get how many total records.
-				$mSQL = "SELECT count(*) FROM spre WHERE $filter numero>0";
-				$totalRec = $this->datasis->dameval($mSQL);
-
-
-				//make sure pageNo is inbound
-				if($pageNo<1||$pageNo>ceil(($totalRec/$pageSize))){
-					$pageNo = 1;
-				}
-
-				$mSQL = "SELECT numero, fecha, cod_cli, nombre, totals, iva, totalg, vd, id FROM spre WHERE $filter numero>0 ORDER BY ".$sortField." ".$sortOrder." LIMIT ".($pageNo - 1)*$pageSize.", ".$pageSize;
-				$query = $this->db->query($mSQL);
-				if ($query->num_rows() > 0){
-					$retArray = array();
-					foreach( $query->result_array() as  $row ) {
-						$meco = array();
-						foreach( $row as $idd=>$campo ) {
-							$meco[$idd] = utf8_encode($campo);
-						}
-						$retArray[] = $meco;
-					}
-					$data = json_encode($retArray);
-					$ret = "{data:" . $data .",\n";
-					$ret .= "pageInfo:{totalRowNum:" . $totalRec . "},\n";
-					$ret .= "recordType : 'object'}";
-				} else {
-					$ret = '{data : []}';
-				}
-
-				echo $ret;
-
-			}else if($json->{'action'} == 'save'){
-				$sql = "";
-				$params = array();
-				$errors = "";
-
-				//deal with those deleted
-				$deletedRecords = $json->{'deletedRecords'};
-				foreach ($deletedRecords as $value){
-					$params[] = $value->id;
-				}
-				$sql = "delete from dbtable where id in (" . join(",", $params) . ")";
-				if(mysql_query($sql)==FALSE){
-					$errors .= mysql_error();
-				}
-				//deal with those updated
-				$sql = "";
-				$updatedRecords = $json->{'updatedRecords'};
-				foreach ($updatedRecords as $value){
-					$sql = "update `dbtable` set ".
-					//fill out fields to be updated here
-					"where `id`=".$value->id;
-					if(mysql_query($sql)==FALSE){
-						$errors .= mysql_error();
-					}
-				}
-				//deal with those inserted
-				$sql = "";
-				$insertedRecords = $json->{'insertedRecords'};
-				foreach ($insertedRecords as $value){
-					$sql = "insert into dbtable (//fields to be inserted)";
-					if(mysql_query($sql)==FALSE){
-						$errors .= mysql_error();
-					}
-				}
-				$ret = "{success : true,exception:''}";
-				echo $ret;
-			}
-		} else {
-			$pageNo = 1;
-			$sortField = "numero";
-			$sortOrder = "DESC";
-			$pageSize = 50;//10 rows per page
-
-			//to get how many records totally.
-			$sql = "select count(*) as cnt from spre";
-			$totalRec = $this->datasis->dameval($sql);
-
-			//make sure pageNo is inbound
-			if($pageNo<1||$pageNo>ceil(($totalRec/$pageSize))){
-				$pageNo = 1;
-			}
-
-			//pageno starts with 1 instead of 0
-			$mSQL = "SELECT numero, fecha, cod_cli, nombre, totals, iva, totalg FROM spre ORDER BY numero DESC LIMIT ".($pageNo - 1)*$pageSize.", ".$pageSize;
-			$query = $this->db->query($mSQL);
-
-			if ($query->num_rows() > 0){
-				$retArray = array();
-				foreach( $query->result_array() as  $row ) {
-					$retArray[] = utf8_encode($row);
-				}
-				$data = json_encode($retArray);
-				$ret = "{data:" . $data .",\n";
-				$ret .= "pageInfo:{totalRowNum:" . $totalRec . "},\n";
-				$ret .= "recordType : 'object'}";
-			} else {
-				$ret = '{data : []}';
-			}
-			echo $ret;
-		}
-	}
-*/
-
-	//**********************************************************************************************************
-	//
-	//**********************************************************************************************************
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
 
@@ -1246,6 +1068,7 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 		$edit = new DataDetails('Presupuestos', $do);
 		$edit->back_url = site_url('ventas/spre/filteredgrid');
 		$edit->set_rel_title('itspre','Producto <#o#>');
+		$edit->on_save_redirect=false;
 
 		//$edit->script($script,'create');
 		//$edit->script($script,'modify');
@@ -1260,7 +1083,8 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->rule = 'required';
 		//$edit->fecha->mode = 'autohide';
-		$edit->fecha->size = 10;
+		$edit->fecha->size = 12;
+		$edit->fecha->calendar=false;
 
 		$vend=$this->secu->getvendedor();
 		$edit->vd = new  dropdownField ('Vendedor', 'vd');
@@ -1423,98 +1247,20 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 		$edit->condi2->autocomplete=false;
 
 		//$edit->buttons('modify', 'save', 'undo', 'delete', 'add_rel','add');
-		$edit->buttons('delete', 'add_rel','add');
+		$edit->buttons('add_rel');
 		$edit->build();
 
-		$conten['form']  =&  $edit;
-		$data['content'] = $this->load->view('view_spre', $conten);  //,true);
-		//$data['title']   = heading('Presupuesto No.'.$edit->numero->value);
-
-		//$data['style']  = style('vino/jquery-ui.css');
-		//$data['style']  = style('redmond/jquery-ui-1.8.1.custom.css');
-
-		//$data['script']  = script('jquery.js');
-		//$data['script'] .= script('jquery-ui.js');
-		//$data['script'] .= script('plugins/jquery.numeric.pack.js');
-		//$data['script'] .= script('plugins/jquery.floatnumber.js');
-		//$data['script'] .= script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
-		//$data['script'] .= phpscript('nformat.js');
-
-		//$data['head']    = $this->rapyd->get_head();
-		//$this->load->view('view_ventanas', $data);
-	}
-
-	// Busca Clientes para autocomplete
-	function buscascli($tipo='rifci'){
-		$mid  = $this->input->post('q');
-		$qdb  = $this->db->escape('%'.$mid.'%');
-
-		$data = '{[ ]}';
-		if($mid !== false){
-			$retArray = $retorno = array();
-			$mSQL="SELECT TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo
-				FROM scli WHERE rifci LIKE ${qdb} OR cliente LIKE ${qdb}
-				ORDER BY rifci LIMIT 10";
-
-			$query = $this->db->query($mSQL);
-			if ($query->num_rows() > 0){
-				foreach( $query->result_array() as  $row ) {
-					$retArray['value']   = $row[$tipo];
-					$retArray['label']   = '('.$row['rifci'].') '.$row['nombre'];
-					$retArray['nombre']  = $row['nombre'];
-					$retArray['cod_cli'] = $row['cliente'];
-					$retArray['tipo']    = $row['tipo'];
-					array_push($retorno, $retArray);
-				}
-				$data = json_encode($retorno);
-			}
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form']  =&  $edit;
+			$data['content'] = $this->load->view('view_spre', $conten);
 		}
-		echo $data;
-		return true;
-	}
-
-	// Busca Productos para autocomplete
-	function buscasinv(){
-		$mid  = $this->input->post('q');
-		$qdb  = $this->db->escape('%'.$mid.'%');
-		$qba  = $this->db->escape($mid);
-
-		$data = '{[ ]}';
-		if($mid !== false){
-			$retArray = $retorno = array();
-
-			$mSQL="SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo
-				,a.peso, a.ultimo, a.pond,a.formcal FROM sinv AS a
-				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
-				WHERE (a.codigo LIKE $qdb OR a.descrip LIKE  $qdb OR a.barras LIKE $qdb OR b.suplemen=$qba) AND a.activo='S'
-				ORDER BY a.descrip LIMIT 10";
-			$cana=1;
-
-			$query = $this->db->query($mSQL);
-			if ($query->num_rows() > 0){
-				foreach( $query->result_array() as  $row ) {
-					$retArray['label']   = '('.$row['codigo'].') '.$row['descrip'].' '.$row['precio1'].' Bs. - '.$row['existen'];
-					$retArray['value']   = $row['codigo'];
-					$retArray['codigo']  = $row['codigo'];
-					$retArray['cana']    = $cana;
-					$retArray['tipo']    = $row['tipo'];
-					$retArray['peso']    = $row['peso'];
-					$retArray['ultimo']  = $row['ultimo'];
-					$retArray['pond']    = $row['pond'];
-					$retArray['base1']   = $row['precio1']*100/(100+$row['iva']);
-					$retArray['base2']   = $row['precio2']*100/(100+$row['iva']);
-					$retArray['base3']   = $row['precio3']*100/(100+$row['iva']);
-					$retArray['base4']   = $row['precio4']*100/(100+$row['iva']);
-					$retArray['descrip'] = $row['descrip'];
-					$retArray['formcal'] = $row['formcal'];
-					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
-					$retArray['iva']     = $row['iva'];
-					array_push($retorno, $retArray);
-				}
-				$data = json_encode($retorno);
-	        }
-		}
-		echo $data;
 	}
 
 	function _pre_insert($do){

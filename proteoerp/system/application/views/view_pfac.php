@@ -1,7 +1,7 @@
 <?php
-$container_bl=join("&nbsp;", $form->_button_container["BL"]);
-$container_br=join("&nbsp;", $form->_button_container["BR"]);
-$container_tr=join("&nbsp;", $form->_button_container["TR"]);
+$container_bl=join('&nbsp;', $form->_button_container['BL']);
+$container_br=join('&nbsp;', $form->_button_container['BR']);
+$container_tr=join('&nbsp;', $form->_button_container['TR']);
 
 if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	echo $form->output;
@@ -40,8 +40,6 @@ if($form->_status!='show'){ ?>
 
 <script language="javascript" type="text/javascript">
 itpfac_cont=<?php echo $form->max_rel_count['itpfac']; ?>;
-invent = (<?php echo $inven; ?>);
-//jinven = eval('('+invent+')');
 
 $(function(){
 	/*$(document).keydown(function(e){
@@ -59,12 +57,14 @@ $(function(){
 	}
 
 	$('#cod_cli').autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscascli'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -89,6 +89,8 @@ $(function(){
 		},
 		minLength: 2,
 		select: function( event, ui ) {
+			$('#cod_cli').attr("readonly", "readonly");
+
 			$('#nombre').val(ui.item.nombre);
 			$('#nombre_val').text(ui.item.nombre);
 
@@ -100,8 +102,11 @@ $(function(){
 
 			$('#direc').val(ui.item.direc);
 			$('#direc_val').text(ui.item.direc);
+
+			setTimeout(function() {  $("#cod_cli").removeAttr("readonly"); }, 1500);
 		}
 	});
+
 	$('input[name^="cana_"]').keypress(function(e) {
 		if(e.keyCode == 13) {
 		    add_itpfac();
@@ -112,8 +117,8 @@ $(function(){
 
 function cal_dxapli(nind){
 	ind=nind.toString();
-	cana2=parseFloat($("#cana_"+ind).val());
-	preca2=parseFloat($("#precat_"+ind).val());
+	cana2  =parseFloat($("#cana_"+ind).val());
+	preca2 =parseFloat($("#precat_"+ind).val());
 	dxapli2=parseFloat($("#dxapli_"+ind).val());
 
 	$.post("<?php echo site_url('ventas/pfac/cal_dxapli')?>",{ preca:preca2,dxapli:dxapli2 },function(data){
@@ -134,49 +139,6 @@ function cal_dxapli(nind){
 	})
 }
 
-function dacodigo(nind){
-	ind=nind.toString();
-	var codigo = $("#codigoa_"+ind).val();
-	var eeval;
-	eval('eeval= typeof invent._'+codigo);
-	//alert(eeval);
-	var descrip='';
-	if(eeval != "undefined"){
-		eval('descrip=invent._'+codigo+'[0]');
-		eval('tipo   =invent._'+codigo+'[1]');
-		eval('base1  =invent._'+codigo+'[2]');
-		eval('base2  =invent._'+codigo+'[3]');
-		eval('base3  =invent._'+codigo+'[4]');
-		eval('base4  =invent._'+codigo+'[5]');
-		eval('itiva  =invent._'+codigo+'[6]');
-		eval('peso   =invent._'+codigo+'[7]');
-		eval('precio1=invent._'+codigo+'[8]');
-		eval('pond   =invent._'+codigo+'[9]');
-
-		$("#desca_"+ind).val(descrip);
-		$("#precio1_"+ind).val(base1);
-		$("#precio2_"+ind).val(base2);
-		$("#precio3_"+ind).val(base3);
-		$("#precio4_"+ind).val(base4);
-		$("#itiva_"+ind).val(itiva);
-		$("#sinvtipo_"+ind).val(tipo);
-		$("#sinvpeso_"+ind).val(peso);
-		$("#itpvp_"+ind).val(precio1);
-		$("#itcosto_"+ind).val(pond);
-	}else{
-		$("#desca_"+ind).val('');
-		$("#precio1_"+ind).val('');
-		$("#precio2_"+ind).val('');
-		$("#precio3_"+ind).val('');
-		$("#precio4_"+ind).val('');
-		$("#itiva_"+ind).val('');
-		$("#sinvtipo_"+ind).val('');
-		$("#sinvpeso_"+ind).val('');
-		$("#itpvp_"+ind).val('');
-		$("#itcosto_"+ind).val('');
-	}
-	post_modbus_sinv(nind);
-}
 function importe(id){
 	var ind     = id.toString();
 	var cana    = Number($("#cana_"+ind).val());
@@ -402,12 +364,14 @@ function del_itpfac(id){
 //Agrega el autocomplete
 function autocod(id){
 	$('#codigoa_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('ventas/spre/buscasinv'); ?>",
+				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -422,6 +386,8 @@ function autocod(id){
 		},
 		minLength: 2,
 		select: function( event, ui ) {
+			$('#codigoa_'+id).attr("readonly", "readonly");
+
 			$('#codigoa_'+id).val(ui.item.codigo);
 			$('#desca_'+id).val(ui.item.descrip);
 			$('#precio1_'+id).val(ui.item.base1);
@@ -445,19 +411,14 @@ function autocod(id){
 			jQuery.each(arr, function() { this.selectedIndex=tipo; });
 			importe(id);
 			totalizar();
+			setTimeout(function() {  $("#codigoa_"+id).removeAttr("readonly"); }, 1500);
 		}
 	});
 }
 </script>
 <?php } ?>
-<table align='center' width="95%">
+<table align='center' width="100%">
 	<tr>
-<?php if ($form->_status=='show') { ?>
-		<td>
-		<a href="#" onclick="window.open('<?php echo base_url() ?>formatos/verhtml/PFAC/<?php echo $form->numero->value ?>', '_blank', 'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');" heigth="600" >
-		<img src='<?php echo base_url() ?>images/html_icon.gif'></a>
-		</td>
-<?php } ?>
 		<td align=right><?php echo $container_tr?></td>
 	</tr>
 </table>
@@ -465,138 +426,127 @@ function autocod(id){
 	<tr>
 		<td colspan='2'>
 		<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
-		<table width='100%'>
-			<tr>
-				<td class="littletableheader"><?php echo $form->numero->label;  ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->numero->output; ?>&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->fecha->label;   ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->fecha->output;  ?>&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->vd->label       ?>&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->vd->output      ?>&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->peso->label     ?>&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->peso->output    ?>&nbsp;</td>
-			</tr>
-		</table>
+			<table width='100%'>
+				<tr>
+					<td class="littletableheader"><?php echo $form->fecha->label;   ?>*&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->fecha->output;  ?>&nbsp;</td>
+					<td class="littletableheader"><?php echo $form->vd->label       ?>&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->vd->output      ?>&nbsp;</td>
+					<td class="littletableheader"><?php echo $form->peso->label     ?>&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->peso->output    ?>&nbsp;</td>
+				</tr>
+			</table>
 		</fieldset>
 		</td>
-
 	</tr><tr>
 		<td colspan='2'>
 		<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
-		<table width='100%'>
-			<tr>
-				<td width='60'  class="littletableheader"><?php echo $form->cliente->label;  ?>*&nbsp;</td>
-				<td width='100' class="littletablerow">   <?php echo $form->cliente->output,$form->sclitipo->output; ?>&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->nombre->output;  ?>&nbsp;</td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->rifci->label;  ?>&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->rifci->output; ?>&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->direc->label;  ?>&nbsp;
-				<span class="littletablerow"   ><?php echo $form->direc->output; ?>&nbsp;</span></td>
-			</tr>
-		</table>
+			<table width='100%'>
+				<tr>
+					<td class="littletableheader"><?php echo $form->cliente->label;  ?>*&nbsp;</td>
+					<td class="littletablerow">   <?php echo $form->cliente->output,$form->sclitipo->output; ?>&nbsp;</td>
+					<td class="littletablerow">   <?php echo $form->nombre->output;  ?>&nbsp;</td>
+				</tr><tr>
+					<td class="littletableheader"><?php echo $form->rifci->label;  ?>&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->rifci->output; ?>&nbsp;</td>
+					<td class="littletableheader"><?php echo $form->direc->label;  ?>&nbsp;
+					<span class="littletablerow" ><?php echo $form->direc->output; ?>&nbsp;</span></td>
+				</tr>
+			</table>
 		</fieldset>
 		</td>
-
-
 	</tr><tr>
 		<td>
 		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
-		<table width='100%'>
-			<tr id='__INPL__'>
-				<td bgcolor='#7098D0'><strong>C&oacute;digo</strong></td>
-				<td bgcolor='#7098D0'><strong>Descripci&oacute;n</strong></td>
-				<td bgcolor='#7098D0'><strong>Cantidad</strong></td>
-				<td bgcolor='#7098D0'><strong>Precio</strong></td>
-				<td bgcolor='#7098D0'><strong>Importe</strong></td>
-				<?php if($form->_status!='show'  && !($faplica < $fenvia)) {?>
-					<td  bgcolor='#7098D0' align='center'><strong>&nbsp;</strong></td>
+			<table width='100%'>
+				<tr id='__INPL__'>
+					<td bgcolor='#7098D0'><b>C&oacute;digo</b></td>
+					<td bgcolor='#7098D0'><b>Descripci&oacute;n</b></td>
+					<td bgcolor='#7098D0'><b>Cantidad</b></td>
+					<td bgcolor='#7098D0'><b>Precio</b></td>
+					<td bgcolor='#7098D0'><b>Importe</b></td>
+					<?php if($form->_status!='show'  && !($faplica < $fenvia)) {?>
+						<td  bgcolor='#7098D0' align='center'><b>&nbsp;</b></td>
+					<?php } ?>
+				</tr>
+
+				<?php for($i=0;$i<$form->max_rel_count['itpfac'];$i++) {
+					$it_codigoa  = "codigoa_${i}";
+					$it_desca    = "desca_${i}";
+					$it_cana     = "cana_${i}";
+					$it_preca    = "preca_${i}";
+					$it_tota     = "tota_${i}";
+					$it_iva      = "itiva_${i}";
+					$it_peso     = "sinvpeso_${i}";
+					$it_tipo     = "sinvtipo_${i}";
+					$it_costo    = "itcosto_${i}";
+					$it_pvp      = "itpvp_${i}";
+					$it_mmargen  = "itmmargen_${i}";
+					$it_dxapli   = "dxapli_${i}";
+					$it_pond     = "itpond_${i}";
+					$it_ultimo   = "itultimo_${i}";
+					$it_formcal  = "itformcal_${i}";
+					$it_pm       = "itpm_${i}";
+					$it_precat   = "precat_${i}";
+
+					$pprecios='';
+					for($o=1;$o<5;$o++){
+						$it_obj   = "precio${o}_${i}";
+						$pprecios.= $form->$it_obj->output;
+					}
+					$pprecios .= $form->$it_iva->output;
+					$pprecios .= $form->$it_peso->output;
+					$pprecios .= $form->$it_tipo->output;
+					$pprecios .= $form->$it_costo->output;
+					$pprecios .= $form->$it_pvp->output;
+					$pprecios .= $form->$it_mmargen->output;
+					$pprecios .= $form->$it_pond->output;
+					$pprecios .= $form->$it_ultimo->output;
+					$pprecios .= $form->$it_formcal->output;
+					$pprecios .= $form->$it_pm->output;
+					$pprecios .= $form->$it_precat->output;
+				?>
+
+				<tr id='tr_itpfac_<?php echo $i; ?>'>
+					<td class="littletablerow" align="left" ><?php echo $form->$it_codigoa->output;       ?></td>
+					<td class="littletablerow" align="left" ><?php echo $form->$it_desca->output;         ?></td>
+					<td class="littletablerow" align="right"><?php echo $form->$it_cana->output;          ?></td>
+					<td class="littletablerow" align="right"><?php echo $form->$it_preca->output;         ?></td>
+					<td class="littletablerow" align="right"><?php echo $form->$it_tota->output.$pprecios;?></td>
+
+					<?php if($form->_status!='show' && !($faplica < $fenvia)) {?>
+					<td class="littletablerow" align="center">
+						<a href='#' onclick='del_itpfac(<?php echo $i ?>);return false;'><?php echo img("images/delete.jpg") ?></a>
+					</td>
+					<?php } ?>
+				</tr>
 				<?php } ?>
-			</tr>
-
-			<?php for($i=0;$i<$form->max_rel_count['itpfac'];$i++) {
-				$it_codigoa  = "codigoa_$i";
-				$it_desca    = "desca_$i";
-				$it_cana     = "cana_$i";
-				$it_preca    = "preca_$i";
-				$it_tota     = "tota_$i";
-				$it_iva      = "itiva_$i";
-				$it_peso     = "sinvpeso_$i";
-				$it_tipo     = "sinvtipo_$i";
-				$it_costo    = "itcosto_$i";
-				$it_pvp      = "itpvp_$i";
-				$it_mmargen  = "itmmargen_$i";
-				$it_dxapli   = "dxapli_$i";
-				$it_pond     = "itpond_$i";
-				$it_ultimo   = "itultimo_$i";
-				$it_formcal  = "itformcal_$i";
-				$it_pm       = "itpm_$i";
-				$it_precat   = "precat_$i";
-
-				$pprecios='';
-				for($o=1;$o<5;$o++){
-					$it_obj   = "precio${o}_${i}";
-					$pprecios.= $form->$it_obj->output;
-				}
-				$pprecios .= $form->$it_iva->output;
-				$pprecios .= $form->$it_peso->output;
-				$pprecios .= $form->$it_tipo->output;
-				$pprecios .= $form->$it_costo->output;
-				$pprecios .= $form->$it_pvp->output;
-				$pprecios .= $form->$it_mmargen->output;
-				$pprecios .= $form->$it_pond->output;
-				$pprecios .= $form->$it_ultimo->output;
-				$pprecios .= $form->$it_formcal->output;
-				$pprecios .= $form->$it_pm->output;
-				$pprecios .= $form->$it_precat->output;
-
-			?>
-
-			<tr id='tr_itpfac_<?php echo $i; ?>'>
-				<td class="littletablerow" align="left" nowrap><?php echo $form->$it_codigoa->output; ?></td>
-				<td class="littletablerow" align="left" ><?php echo $form->$it_desca->output;  ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_cana->output;   ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_preca->output.$form->$it_dxapli->output;  ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_tota->output.$pprecios;?></td>
-
-				<?php if($form->_status!='show' && !($faplica < $fenvia)) {?>
-				<td class="littletablerow" align="center">
-					<a href='#' onclick='del_itpfac(<?php echo $i ?>);return false;'><?php echo img("images/delete.jpg") ?></a>
-				</td>
-				<?php } ?>
-			</tr>
-			<?php } ?>
-			<tr id='__UTPL__'>
-				<td id='cueca'></td>
-			</tr>
-		</table>
+				<tr id='__UTPL__'>
+					<td></td>
+				</tr>
+			</table>
 		</div>
-		
-		<?php echo $container_br ?>
+		<?php echo $container_bl ?>
 		</td>
 	</tr>
 	<tr>
 		<td>
 		<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9;'>
-		<table width='100%'>
-			<tr>
-				<td><?php echo $container_bl ?></td>
-				<td class="littletableheader" align='center'><?php echo $form->observa->label;    ?></td>
-				<td class="littletableheader"               >           <?php echo $form->totals->label;  ?></td>
-				<td width='80' class="littletablerow" align='right'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
-
-			<tr></tr>
-				<td>&nbsp;</td>
-				<td class="littletablerow"    width='350'><?php echo $form->observa->output;   ?></td>
-				<td class="littletableheader"><?php echo $form->ivat->label;    ?></td>
-				<td class="littletablerow" align='right'><b id='ivat_val'><?php echo nformat($form->ivat->value); ?></b><?php echo $form->ivat->output; ?></td>
-			<tr></tr>
-				<td>&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->observ1->output;   ?></td>
-				<td class="littletableheader">           <?php echo $form->totalg->label;  ?></td>
-				<td class="littletablerow" align='right' style='font-size:18px;font-weight: bold'><b id='totalg_val'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
-			</tr>
-		</table>
+			<table width='100%'>
+				<tr>
+					<td class="littletableheader" align='center'><?php echo $form->observa->label; ?></td>
+					<td class="littletableheader"               ><?php echo $form->totals->label;  ?></td>
+					<td class="littletablerow" align='right'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
+				<tr></tr>
+					<td class="littletablerow"   ><?php echo $form->observa->output; ?></td>
+					<td class="littletableheader"><?php echo $form->ivat->label;     ?></td>
+					<td class="littletablerow" align='right'><b id='ivat_val'><?php echo nformat($form->ivat->value); ?></b><?php echo $form->ivat->output; ?></td>
+				<tr></tr>
+					<td class="littletablerow"   ><?php echo $form->observ1->output; ?></td>
+					<td class="littletableheader"><?php echo $form->totalg->label;   ?></td>
+					<td class="littletablerow" align='right' style='font-size:18px;font-weight: bold'><b id='totalg_val'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
+				</tr>
+			</table>
 		</fieldset>
 		<?php echo $form->mmargen->output;  ?>
 		<?php echo $form_end; ?>
