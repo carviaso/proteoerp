@@ -87,7 +87,7 @@ class Reparto extends Controller {
 	//Funciones de los Botones
 	//***************************
 	function bodyscript( $grid0, $grid1 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
 		function repartoadd(){
@@ -462,7 +462,6 @@ class Reparto extends Controller {
 				echo "Reparto Eliminado ";
 			} else
 				echo "Reparto ya finaliado no se puede anular";
-
 		}
 	}
 
