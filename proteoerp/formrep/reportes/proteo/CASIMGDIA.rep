@@ -23,10 +23,10 @@ $filter = new DataFilter("Filtro del Reporte");
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
 $select="a.cuenta, b.fecha, sum(a.debe) debe,"."sum(a.haber) haber,"."b.descrip AS compdesc,"."b.status,"."c.descrip as cpladesc, sum(a.debe-a.haber) saldo,".
-"IF(a.comprob='00000000',' ',b.fecha) as mfecha,".
-"IF(a.comprob='00000000',' ',b.fecha) as masiento,".
-"IF(a.comprob='00000000',' ',CONCAT('REDG',b.fecha)) as mreferen,".
-"IF(a.comprob='00000000',' ','Resumen Movimiento Diario') as mconcepto";
+"b.fecha as mfecha, ".
+"b.fecha as masiento, ".
+"CONCAT('REDG',b.fecha) as mreferen, ".
+"'Resumen Movimiento Diario' as mconcepto ";
 
 $filter->db->select($select);
 $filter->db->from('itcasi as a');
@@ -86,14 +86,13 @@ if($this->rapyd->uri->is_set("search")){
 	if ($filter->cuentad->newValue )
 		$mSQL .= "AND a.cuenta BETWEEN '".$filter->cuentad->newValue."' AND '".$filter->cuentah->newValue."' ";
 	$mSQL .= " GROUP BY a.cuenta ";
-	//$mSQL .= " ORDER BY a.fecha, a.comprob ";
 
 	$mSQL .= " HAVING debe<>0 OR haber<>0";
 	$mSQL .= " ORDER BY cuenta, fecha ";
 
 	//echo $mSQL;
 
-       //memowrite($mSQL);
+	//memowrite($mSQL);
 	$sobretabla='';
 	if (!empty($filter->cuentad->newValue)) $sobretabla.='  Cuenta Desde: ('.$filter->cuentad->newValue.') '.$this->datasis->dameval('SELECT descrip FROM cpla WHERE codigo="'.$filter->cuentad->newValue.'"');
 	if (!empty($filter->cuentah->newValue)) $sobretabla.='  Cuenta Hasta: ('.$filter->cuentah->newValue.') '.$this->datasis->dameval('SELECT descrip FROM cpla WHERE codigo="'.$filter->cuentah->newValue.'"');
@@ -101,7 +100,7 @@ if($this->rapyd->uri->is_set("search")){
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	//$pdf->setSubHeadValores('TITULO2','TITULO3');
-	$pdf->setSubHead('RIF: '.$this->datasis->traevalor('RIF'));
+	$pdf->setSubHead('RIF: '.$this->datasis->traevalor('RIF'),9);
 
 	$pdf->setTitulo("Libro Mayor General");
 

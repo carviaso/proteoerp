@@ -844,24 +844,32 @@ class Sinv extends Controller {
 		};';
 
 
-		// Funciones de los Botones
+		// Marcas
 		$bodyscript .= '
 		$("#gmarcas").click( function(){
 			window.open(\''.site_url("inventario/marc").'\', \'_blank\', \'width=420,height=450,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-210), screeny=((screen.availWidth/2)-225)\');
-		});
+		};';
 
+
+		// Unidades
+		$bodyscript .= '
 		$("#gunidad").click( function(){
 			window.open(\''.site_url("inventario/unidad").'\', \'_blank\', \'width=420,height=450,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-225), screeny=((screen.availWidth/2)-250)\');
-		});
+		};';
 
+
+		// Inactivos
+		$bodyscript .= '
 		$("#hinactivo").click( function(){
 			if (verinactivos==0){ verinactivos=1; } else { verinactivos=0;};
 			$("#newapi'.$grid0.'").jqGrid(\'setGridParam\', {postData: { verinactivos: verinactivos }})
 			$("#newapi'.$grid0.'").trigger("reloadGrid");
 			//alert("inactivo="+verinactivos);
-		});
+		};';
 
-		jQuery("#kardex").click( function(){
+		// Kardex
+		$bodyscript .= '
+		$("#kardex").click( function(){
 			var id     = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				window.open(\''.site_url("inventario/kardex/kardexpres").'/\'+id, \'_blank\', \'width=420,height=450,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-225), screeny=((screen.availWidth/2)-250)\');
@@ -870,7 +878,7 @@ class Sinv extends Controller {
 			}
 		});
 		$("#sundecop").click( function(){ sundecop();});
-';
+		';
 
 
 		// Detalle del Registro

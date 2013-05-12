@@ -47,7 +47,6 @@ $filter->cuentad->operator=">=";
 $filter->cuentad->append($bCPLAD);
 $filter->cuentad->group = "Cuenta";
 
-
 $filter->cuentah = new inputField("Hasta", "codigoh");
 $filter->cuentah->db_name  = "codigo";
 $filter->cuentah->clause   = "where";
@@ -64,34 +63,41 @@ $filter->buttons("search");
 $filter->build();
 
 if($this->rapyd->uri->is_set("search")){
-$mSQL=$this->rapyd->db->_compile_select();
+
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
 
 
-//echo $mSQL;
+	$sobretabla='';   
+	if (!empty($filter->fechad->newValue)) $sobretabla.=' Desde: '.dbdate_to_human($filter->fechad->newValue);
+	if (!empty($filter->fechah->newValue)) $sobretabla.=' Hasta: '.dbdate_to_human($filter->fechah->newValue);
+	
+	if (!empty($filter->cuentad->newValue))  $sobretabla.='  Cuenta Desde: ('.$filter->cuentad->newValue.') '.$this->datasis->dameval('SELECT descrip FROM cpla WHERE codigo="'.$filter->cuentad->newValue.'"');
+	if (!empty($filter->cuentah->newValue))  $sobretabla.='  Cuenta Hasta: ('.$filter->cuentah->newValue.') '.$this->datasis->dameval('SELECT descrip FROM cpla WHERE codigo="'.$filter->cuentah->newValue.'"');
 
-$pdf = new PDFReporte($mSQL);
-$pdf->setHeadValores('TITULO1');
-$pdf->setSubHeadValores('TITULO2','TITULO3');
-$pdf->setTitulo("Libro Diario General");
-$pdf->AddPage();
-$pdf->setTableTitu(8,'Times');
-//$pdf->AddCol('fecha'   ,35,'Fecha'              ,'L',8);
-//$pdf->AddCol('asiento' ,35,'Asiento'            ,'L',8);
-//$pdf->AddCol('referen' ,35,'Referencia'         ,'L',8);
-$pdf->AddCol('cuenta'  ,30,'Cuenta'             ,'L',8);
-$pdf->AddCol('cpladesc',55,'Nombre de la Cuenta','L',8);
-$pdf->AddCol('debe'    ,30,'Debitos'            ,'R',8);
-$pdf->AddCol('haber'   ,30,'Creditos'           ,'R',8);
-$pdf->setTotalizar('debe','haber');
 
-$pdf->setGrupoLabel('Comprobante (<#comprob#>) Fecha: <#fecha#>');
-$pdf->setGrupo('comprob');
-$pdf->Table();
-$pdf->Output();
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubTitulo($sobretabla);
+	$pdf->setSubHead('RIF: '.$this->datasis->traevalor('RIF'),9);
+
+	$pdf->setTitulo("Libro Diario General");
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+	$pdf->AddCol('cuenta'  ,30,'Cuenta'             ,'L',8);
+	$pdf->AddCol('cpladesc',55,'Nombre de la Cuenta','L',8);
+	$pdf->AddCol('debe'    ,30,'Debitos'            ,'R',8);
+	$pdf->AddCol('haber'   ,30,'Creditos'           ,'R',8);
+	$pdf->setTotalizar('debe','haber');
+
+	$pdf->setGrupoLabel('Comprobante (<#comprob#>) Fecha: <#fecha#>');
+	$pdf->setGrupo('comprob');
+	$pdf->Table();
+	$pdf->Output();
 }else{
 
-$data["filtro"] = $filter->output;
-$data["titulo"] = '<h2 class="mainheader">Libro Diario General<h2>';
-$data["head"] = $this->rapyd->get_head();
-$this->load->view('view_freportes', $data);}
- 
+	$data["filtro"] = $filter->output;
+	$data["titulo"] = '<h2 class="mainheader">Libro Diario General<h2>';
+	$data["head"] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

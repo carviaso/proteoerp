@@ -65,7 +65,6 @@ class Reparto extends Controller {
 		$funciones .= '$("#entrega").hide();'."\n";
 		$funciones .= '$("#cerrard").hide();'."\n";
 
-
 		$param['funciones']    = $funciones;
 		$param['WestPanel']    = $WestPanel;
 		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
@@ -74,7 +73,7 @@ class Reparto extends Controller {
 		$param['listados']     = $this->datasis->listados('REPARTO', 'JQ');
 		$param['otros']        = $this->datasis->otros('REPARTO', 'JQ');
 		$param['centerpanel']  = $centerpanel;
-		$param['temas']        = array('proteo','darkness','anexos1');
+		$param['temas']        = array('proteo','darkness','anexos');
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
 		$param['encabeza']     = $this->titp;

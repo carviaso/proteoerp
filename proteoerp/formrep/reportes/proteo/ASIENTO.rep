@@ -29,8 +29,8 @@ $filter->db->join("casi as b" ,"a.comprob=b.comprob",'LEFT');
 $filter->db->join("cpla as c" ,"a.cuenta=c.codigo",'LEFT');
 $filter->db->orderby('a.fecha,a.comprob');
 
-$filter->fechad = new dateField("Desde", "fechad",'d/m/Y');
-$filter->fechah = new dateField("Hasta", "fechah",'d/m/Y');
+$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
+$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
 $filter->fechad->clause  =$filter->fechah->clause="where";
 $filter->fechad->db_name =$filter->fechah->db_name="a.fecha";
 $filter->fechad->insertValue = date("Y-m-d");
@@ -86,10 +86,11 @@ if($this->rapyd->uri->is_set("search")){
 
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
-	$pdf->setSubHead('RIF: '.$this->datasis->traevalor('RIF'));
+	$pdf->setSubHead('RIF: '.$this->datasis->traevalor('RIF'),9);
 	$pdf->setTitulo("Diario General");
 	$pdf->setSobreTabla($sobretabla);
 	$pdf->setSubTitulo("Desde la fecha: ".$_POST['fechad']." Hasta ".$_POST['fechah']);
+
 	$pdf->AddPage();
 	$pdf->setTableTitu(9,'Times');
 	$pdf->AddCol('referen' ,25,'Referencia'              ,'L',8);

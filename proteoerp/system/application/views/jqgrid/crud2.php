@@ -176,6 +176,7 @@ if ( isset($temas) ) {
 
 echo "\n<!-- JQUERY -->\n";
 echo script('jquery-min.js');
+echo script('jquery-migrate-min.js'); //SOLO PARA JQUERY 1.9 - 2.0
 echo phpscript('nformat.js');
 echo script('jquery-ui.custom.min.js');
 echo script('jquery.ui.selectmenu.js');
@@ -197,8 +198,8 @@ echo "\n<!-- Impromptu -->\n";
 echo script('jquery-impromptu.js');
 echo style('impromptu/default.css');
 
-echo script('apprise-1.5.min.js');
-echo style('apprise.min.css');
+//echo script('apprise-1.5.min.js');
+//echo style('apprise.min.css');
 
 echo "\n<!-- JQGRID -->\n";
 echo style('themes/ui.jqgrid.css');
