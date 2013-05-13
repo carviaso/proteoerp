@@ -198,8 +198,8 @@ echo "\n<!-- Impromptu -->\n";
 echo script('jquery-impromptu.js');
 echo style('impromptu/default.css');
 
-//echo script('apprise-1.5.min.js');
-//echo style('apprise.min.css');
+echo script('apprise-1.5.min.js');
+echo style('apprise.min.css');
 
 echo "\n<!-- JQGRID -->\n";
 echo style('themes/ui.jqgrid.css');
@@ -281,9 +281,7 @@ if (isset($funciones))  echo $funciones;
 if ( isset($tamano) )
 	if ( count($tamano) == 2 )
 		echo "\n\twindow.resizeTo(".$tamano[0].",".$tamano[1].");\n";
-
 ?>
-
 
 });
 

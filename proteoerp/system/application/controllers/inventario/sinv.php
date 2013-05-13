@@ -116,10 +116,10 @@ class Sinv extends Controller {
 	}
 
 
-	//***************************
+	//******************************************************************
 	//Layout en la Ventana
 	//
-	//***************************
+	//
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -132,15 +132,13 @@ class Sinv extends Controller {
 
 		//Botones Panel Izq
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S')
-			$grid->wbotonadd(array("id"=>"sundecop", "img"=>"images/sundecop.jpeg", "alt" => 'Oculta/Muestra Inactivos', "label"=>"SUNDECOP"));
+			$grid->wbotonadd(array("id"=>"sundecop", "img"=>"images/sundecop.jpeg", "alt" => 'Oculta/Muestra Inactivos', "label"=>"SUNDECOP", "tema"=>"anexos"));
 
-		$grid->wbotonadd(array("id"=>"hinactivo","img"=>"images/basura.png",   "alt" => 'Oculta/Muestra Inactivos', "label"=>"Mostrar Inactivos"));
-
+		$grid->wbotonadd(array("id"=>"hinactivo","img"=>"images/basura.png",   "alt" => 'Oculta/Muestra Inactivos', "label"=>"Mostrar Inactivos", "tema"=>"anexos"));
 		$WpAdic = "
-		<tr><td><div class=\"tema1\"><table id=\"bpos1\">   </table></div><div id='pbpos1'>   </div></td></tr>\n
-		<tr><td><div class=\"tema1\"><table id=\"tpactivo\"></table></div><div id='ptpactivo'></div></td></tr>\n
-
-		<tr><td><div class=\"tema1\">
+		<tr><td><div class=\"anexos\"><table id=\"bpos1\">   </table></div><div id='pbpos1'>   </div></td></tr>\n
+		<tr><td><div class=\"anexos\"><table id=\"tpactivo\"></table></div><div id='ptpactivo'></div></td></tr>\n
+		<tr><td><div class=\"aneos\">
 			<table cellpadding='0' cellspacing='0'>
 				<tr>
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gmarcas'>".img(array('src' =>"images/tux1.png",  'height' => 18, 'alt' => 'Crear Marcas',    'title' => 'Crear Marcas',   'border'=>'0'))."+Marcas</a></div></td>
@@ -157,7 +155,8 @@ class Sinv extends Controller {
 
 		$adic = array(
 		array("id"=>"fedita", "title"=>"Agregar/Editar Registro"),
-		array("id"=>"fborra", "title"=>"Eliminar registro")
+		array("id"=>"fborra", "title"=>"Eliminar registro"),
+		array("id"=>"fshow",  "title"=>"Varios")
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -176,7 +175,7 @@ class Sinv extends Controller {
 		$param['SouthPanel']  = $SouthPanel;
 		$param['listados']    = $this->datasis->listados('SINV', 'JQ');
 		$param['otros']       = $this->datasis->otros('SINV', 'JQ');
-		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['temas']       = array('proteo','darkness','anexos');
 		$param['bodyscript']  = $bodyscript;
 		$param['tabs']        = false;
 		$param['encabeza']    = $this->titp;
@@ -507,7 +506,10 @@ class Sinv extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};
+		';
 
+		//Cambia y fusiona codigo
+		$funciones .= '
 		function sinvcodigocambia( mtipo, mviejo, mcodigo ) {
 			var id   = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			var ret  = $("#newapi'.$grid0.'").getRowData(id);
@@ -668,10 +670,10 @@ class Sinv extends Controller {
 
 	}
 
-	//***************************
+	//******************************************************************
 	//Funciones de los Botones
 	//fuera del doc ready
-	//***************************
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
 
@@ -846,16 +848,32 @@ class Sinv extends Controller {
 
 		// Marcas
 		$bodyscript .= '
-		$("#gmarcas").click( function(){
-			window.open(\''.site_url("inventario/marc").'\', \'_blank\', \'width=420,height=450,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-210), screeny=((screen.availWidth/2)-225)\');
-		};';
+		$("#gmarcas").click(
+			function(){
+				$.post("'.site_url('inventario/sinv/marcaform').'", 
+				function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"GESTION DE MARCAS", width: 320, height: 400 } );
+					$("#fshow").dialog( "open" );
+				}
+				);
+			}
+		);';
+
 
 
 		// Unidades
 		$bodyscript .= '
-		$("#gunidad").click( function(){
-			window.open(\''.site_url("inventario/unidad").'\', \'_blank\', \'width=420,height=450,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-225), screeny=((screen.availWidth/2)-250)\');
-		};';
+		$("#gunidad").click(
+			function(){
+				$.post("'.site_url('inventario/sinv/uniform').'", 
+				function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"GESTION DE UNIDAES", width: 300, height: 400 } );
+					$("#fshow").dialog( "open" );
+				});
+			}
+		);';
 
 
 		// Inactivos
@@ -865,7 +883,7 @@ class Sinv extends Controller {
 			$("#newapi'.$grid0.'").jqGrid(\'setGridParam\', {postData: { verinactivos: verinactivos }})
 			$("#newapi'.$grid0.'").trigger("reloadGrid");
 			//alert("inactivo="+verinactivos);
-		};';
+		});';
 
 		// Kardex
 		$bodyscript .= '
@@ -1528,7 +1546,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('exdes');
-		$grid->label('X Despacho');
+		$grid->label('Despacho');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -2527,7 +2545,7 @@ class Sinv extends Controller {
 
 		$grid->showpager(true);
 		$grid->setWidth('');
-		$grid->setHeight('260');
+		$grid->setHeight('250');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
@@ -5508,4 +5526,168 @@ class Sinv extends Controller {
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
+
+	//******************************************************************
+	//
+	//
+	function marcaform($deployed = false){
+		$url ='inventario/marc/';
+		$titp = 'Marcas';
+
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('ID');
+		$grid->params(array(
+			'hidden'      => 'true',
+			'align'       => "'center'",
+			'width'       => 20,
+			'editable'    => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+			)
+		);
+
+		$grid->addField('marca');
+		$grid->label('Marca');
+		$grid->params(array(
+			'width'     => 180,
+			'editable'  => 'true',
+			'edittype'  => "'text'",
+			'editrules' => '{required:true}'
+			)
+		);
+
+		#show paginator
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('300');
+		$grid->setHeight('280');
+		//$grid->setTitle('Marcas');
+
+		#show/hide navigations buttons
+		$grid->setAdd(true);
+		$grid->setEdit(true);
+		$grid->setDelete(true);
+		$grid->setSearch(false);
+		$grid->setView(false);
+		$grid->setRowNum(200);
+
+		#GET url
+		$grid->setUrlget(site_url('inventario/marc/getdata/'));
+
+		#Set url
+		$grid->setUrlput(site_url('inventario/marc/setdata/'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+
+		$msalida .= '
+	var gridmarc =  $("#newapi'.$mgrid['gridname'].'").jqGrid({
+		ajaxGridOptions : {type:"POST"},
+			jsonReader : {
+				root:"data",
+				repeatitems: false
+			}
+			'.$mgrid['onClick'].'
+			'.$mgrid['ondblClickRow'].'
+		'.$mgrid['table'].'
+	})
+	'.$mgrid['pager'].'
+	$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+';
+
+		$msalida .= "\n</script>\n";
+
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+
+	
+	}
+
+
+	//******************************************************************
+	//
+	//
+	function uniform(){
+		$url ='inventario/unidad/';
+		$titp = 'Unidades';
+
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('ID');
+		$grid->params(array(
+			'hidden'      => 'true',
+			'align' => "'center'",
+			'width' => 20,
+			'editable' => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+		$grid->addField('unidades');
+		$grid->label('Nombre');
+		$grid->params(array(
+			'width' => 180,
+			'editable' => 'true',
+			'edittype' => "'text'",
+			'editrules' => '{required:true}'
+		));
+
+		#show paginator
+		$grid->showpager(true);
+		
+		$grid->setViewRecords(true);
+
+		$grid->setWidth('250');
+		$grid->setHeight('280');
+		//$grid->setTitle($titp);
+
+		$grid->setAdd(true);
+		$grid->setEdit(true);
+		$grid->setDelete(true);
+		$grid->setSearch(false);
+		$grid->setView(false);
+		$grid->setRowNum(200);
+
+		$grid->setUrlget(site_url('inventario/unidad/getdata/'));
+		$grid->setUrlput(site_url('inventario/unidad/setdata/'));
+
+
+		$mgrid = $grid->deploy();
+
+
+		$msalida  = '<script type="text/javascript">'."\n";
+
+		$msalida .= '
+	var gridmarc =  $("#newapi'.$mgrid['gridname'].'").jqGrid({
+		ajaxGridOptions : {type:"POST"},
+			jsonReader : {
+				root:"data",
+				repeatitems: false
+			}
+			'.$mgrid['onClick'].'
+			'.$mgrid['ondblClickRow'].'
+		'.$mgrid['table'].'
+	})
+	'.$mgrid['pager'].'
+	$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+';
+
+		$msalida .= "\n</script>\n";
+
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+
+		echo $msalida;
+
+	
+	}
+
+
+
+
 }

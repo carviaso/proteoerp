@@ -75,9 +75,6 @@ class Marc extends Controller{
 		$grid->setSearch(true);
 		$grid->setView(false);
 		$grid->setRowNum(20);
-		//$grid->setRowList('[]');
-		#export buttons
-		//$grid->setPdf(true,array('title' => 'Test pdf'));
 
 		#GET url
 		$grid->setUrlget(site_url($url.'getdata/'));
@@ -99,9 +96,14 @@ class Marc extends Controller{
 	function getData()
 	{
 		$grid       = $this->jqdatagrid;
-		$response   = $grid->getData('marc',array(array()),array(),false);
+
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('marc');
+
+		$response   = $grid->getData('marc', array(array()), array(), false, $mWHERE, 'marca' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
+
 	}
 
 	/**

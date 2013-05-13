@@ -1577,24 +1577,27 @@ class Jqdatagrid
 	}
 
 	function deploywestp(){
+
+//<div class="anexos">
+
 		$wlista = '
 <div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-<div class="anexos">
 <table id="west-grid" align="center">
 	<tr>
 		<td>
-			<div class="tema1"><table id="listados"></table></div>
+			<div class="anexos"><table id="listados"></table></div>
 		</td>
 	</tr><tr>
 		<td>
-			<div class="tema1"><table id="otros"></table></div>
+			<div class="anexos"><table id="otros"></table></div>
 		</td>
 	</tr>'."\n";
 	$wlista .= $this->wpadicional;
 	$wlista .='
 </table>
-</div>
 <div id="wbotones">'."\n";
+
+//</div>
 
 		$wbotones = "<table id='west-grid' align='center'>\n";
 		foreach( $this->Wbotones as $bt  ){

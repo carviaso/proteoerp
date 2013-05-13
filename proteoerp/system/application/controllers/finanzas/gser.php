@@ -46,17 +46,18 @@ class gser extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		$WpAdic = "
-		<tr><td><div class=\"tema1\"><table id=\"bpos1\"></table></div><div id='pbpos1'></div></td></tr>\n
-		<tr><td><div class=\"tema1\">
-			<table cellpadding='0' cellspacing='0' style='width:100%;'>
+		<tr><td><div class=\"anexos\"><table id=\"bpos1\"></table></div><div id='pbpos1'></div></td></tr>\n
+		<tr><td><div class=\"anexos\">
+			<table cellpadding='0' cellspacing='0' style='width:95%;' align='center'>
 				<tr>
-					<td style='vertical-align:center;border:1px solid #AFAFAF;'><div class='botones'>".img(array('src' =>"assets/default/images/print.png",  'height' => 18, 'alt' => 'Imprimir',    'title' => 'Imprimir', 'border'=>'0'))."</div></td>
-					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:55px;text-align:left;vertical-align:top;' href='#' id='imprimir'>Egreso</a></div></td>
-					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:55px;text-align:left;vertical-align:top;' href='#' id='reteprint'>R.IVA</a></div></td>
-					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:60px;text-align:left;vertical-align:top;' href='#' id='reteislrprint'>R.ISLR</a></div></td>
+					<td style='vertical-align:center;border:1px solid #AFAFAF;'><div class='botones'>".img(array('src' =>"assets/default/images/print.png", 'height'=>18, 'alt'=>'Imprimir','title'=>'Imprimir', 'border'=>'0'))."</div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:78px;text-align:left;vertical-align:top;' href='#' id='imprimir'>Egreso</a></div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:78px;text-align:left;vertical-align:top;text-align:center;' href='#' id='princheque'>Cheque</a></div></td>
 				</tr>
 				<tr>
-					<td colspan='4' style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:198px;text-align:left;vertical-align:top;text-align:center;' href='#' id='princheque'>Imprimir Cheque</a></div></td>
+					<td style='vertical-align:center;border:1px solid #AFAFAF;'><div class='botones'>".img(array('src' =>"assets/default/images/print.png",  'height'=>18, 'alt'=>'Imprimir', 'title'=>'Imprimir', 'border'=>'0'))."</div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:78px;text-align:left;vertical-align:top;' href='#' id='reteprint'>R.I.V.A.</a></div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:78px;text-align:left;vertical-align:top;' href='#' id='reteislrprint'>R.I.S.L.R.</a></div></td>
 				</tr>
 			</table>
 			</div>
@@ -66,8 +67,8 @@ class gser extends Controller {
 		$grid->setWpAdicional($WpAdic);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'creamga', 'img'=>'images/agrega4.png' , 'alt' => 'Crear gasto caja chica', 'label'=>'Gasto caja chica' ));
-		$grid->wbotonadd(array('id'=>'creaprv', 'img'=>'images/agrega4.png' , 'alt' => 'Crear proveedor'       , 'label'=>'Crear Proveedor'   ));
+		$grid->wbotonadd(array('id'=>'creamga', 'img'=>'images/agrega4.png' , 'alt' => 'Crear gasto caja chica', 'label'=>'Gasto caja chica', 'tema'=>'proteo' ));
+		$grid->wbotonadd(array('id'=>'creaprv', 'img'=>'images/agrega4.png' , 'alt' => 'Crear proveedor'       , 'label'=>'Crear Proveedor',  'tema'=>'proteo'   ));
 		$WestPanel = $grid->deploywestp();
 
 
@@ -97,7 +98,7 @@ class gser extends Controller {
 		$param['otros']        = $this->datasis->otros('GSER', 'JQ');
 		$param['centerpanel']  = $centerpanel;
 		$param['funciones']    = $funciones;
-		$param['temas']        = array('proteo','darkness','anexos1');
+		$param['temas']        = array('proteo','darkness','anexos');
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
 		$param['encabeza']     = $this->titp;

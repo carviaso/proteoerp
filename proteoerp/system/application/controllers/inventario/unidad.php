@@ -60,51 +60,22 @@ class Unidad extends Controller{
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-/*
-		$grid  = $this->defgrid();
-		$param['grid']  = $grid->deploy();
 
-
-		// Trae de marc
-		$grid1 = marc::defgrid();
-		$grid1->setHeight('350');
-		$param['grid1'] = $grid1->deploy();
-
-
-		$WestPanel = '
-<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-	<table id="newapi'.$param['grid1']['gridname'].'"></table> 
-	<div   id="pnewapi'.$param['grid1']['gridname'].'"></div>
-</div> <!-- #LeftPane -->
-';
-
-		$param['tabs'] = false;
-		$param['WestSize'] = "410";
-		$param['WestPanel']  = $WestPanel;
-		$param['encabeza'] = 'Unidades y Marcas';
-		$this->load->view('jqgrid/crud',$param);
-
-
-		$grid = $this->defgrid();
-		$param['grid'] = $grid->deploy();
-		$param['tabs'] = false;
-		$param['encabeza'] = $this->titp;
-		$this->load->view('jqgrid/crud',$param);
-
-	}
-*/
-
-	//***************************
+	//******************************************************************
 	//Funciones de los Botones
-	//***************************
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = "";
 		return $bodyscript;
 	}
 
 
-
-	function defgrid($deployed = false){
+	//******************************************************************
+	//
+	//
+	function defgrid($deployed = false ){
+		//$mecho = $this->uri->segment($this->uri->total_segments());
+		
 		$url ='inventario/unidad/';
 		$titp = 'Unidades';
 
@@ -156,13 +127,12 @@ class Unidad extends Controller{
 
 		#Set url
 		$grid->setUrlput(site_url($url.'setdata/'));
-            
+
 		if ($deployed) {
 			return $grid->deploy();
 		} else {
 			return $grid;
 		}
-	
 	}
 
 	/**
@@ -171,7 +141,11 @@ class Unidad extends Controller{
 	function getData()
 	{
 		$grid       = $this->jqdatagrid;
-		$response   = $grid->getData('unidad',array(array()),array(),false);
+
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('unidad');
+
+		$response   = $grid->getData('unidad', array(array()), array(), false, $mWHERE, 'unidades' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -204,7 +178,7 @@ class Unidad extends Controller{
 
 
 
-
+/*
 	function filteredgrid(){
 		$this->rapyd->load("datafilter","datagrid");
 		//$uri = anchor('inventario/unidad/dataedit/show/<raencode><#unidades#></raencode>','<#unidades#>');
@@ -274,7 +248,11 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 		$data["head"]    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas_simple', $data);	
 	}
+*/
 
+	//******************************************************************
+	//
+	//
 	function dataedit(){
 		$this->rapyd->load("dataedit");
 
@@ -311,6 +289,7 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 		}
 	}
 
+/*
 	// sigma grid
 	function controlador(){
 		if (isset($_POST["_gt_json"]) ) {
@@ -404,13 +383,7 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 			echo '{data : []}';
 		}
 	}
-
-	/*function crea(){
-		//print_r($_POST);
-		$this->genesal=false;
-		$rt=$this->dataedit();
-		echo $rt;
-	}*/
+*/
 
 	function modifica(){
 		$valor = $this->uri->segment($this->uri->total_segments());
