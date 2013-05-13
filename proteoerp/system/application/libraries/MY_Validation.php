@@ -27,6 +27,11 @@ class MY_Validation extends CI_Validation{
 		return ( strtolower($_SESSION["captcha"]) == strtolower($str) );
 	}
 
+	function alpha_dash_slash($str){
+		$this->set_message('alpha_dash_slash', 'El campo %s contiene caracteres no permitidos');
+		return (!preg_match('@^([-/a-z0-9_-])+$@i', $str))? false : true;
+	}
+
 	function valid_email($email){
 		$email=trim($email);
 		if(strlen($email)>0)
