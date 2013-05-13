@@ -1,25 +1,25 @@
 <?php
 
-class Reportes extends Controller
-{
+class Reportes extends Controller{
 	var $cargo=0;
 	var $opciones=array();
 
 	function Reportes(){
 		parent::Controller();
-		$this->load->library("rapyd");
-		$this->opciones=array('PDF'=>'pdf','XLS'=>'xls','plano'=>'xls (plano)');
+		$this->load->library('rapyd');
+		$this->opciones=array('PDF'=>'pdf','XLS'=>'xls','plano'=>'xls (plano)','HTML'=>'html');
 	}
 
 	function index(){
 		$repo = $this->uri->segment(3);
 		$data['pre']  = $repo;
-		$data['titu'] = "Listados $repo ".$this->session->userdata('usuario');
+		$data['titu'] = "Listados ${repo} ".$this->session->userdata('usuario');
 		$data['repo'] = $repo;
 		if ( $this->session->userdata('usuario')=='' )
 		    redirect('/ajax/reccierraventana');
 		$this->load->view('view_repoframe',$data);
 	}
+
 	function ver(){
 		//$this->load->library('XLSReporte');
 		$this->rapyd->load('datafilter2');
@@ -46,6 +46,9 @@ class Reportes extends Controller
 					$_mclase='XLSReporteplano';
 					$mc=str_replace('new PDFReporte(','new XLSReporteplano(',$mc);
 					break;
+				case 'HTML':
+					$_mclase='HTMLReporte';
+					break;
 				default:
 					$_mclase='PDFReporte';
 			}
@@ -56,15 +59,15 @@ class Reportes extends Controller
 			eval($mc);
 		} else {
 			echo 'Reporte '.$repo.' no definido para ProteoERP <br>';
-			echo '<a href='.site_url("/reportes/enlistar/$esta").'>Regresar</a>';
+			echo '<a href='.site_url('/reportes/enlistar/'.$esta).'>Regresar</a>';
 		}
 	}
 
 	function enlistar(){
 		//echo '<pre>';print_r($this->session->userdata);echo '</pre>';
 		$repo =$this->uri->segment(3);
-		$this->rapyd->load("datatable");
-		$this->rapyd->config->set_item("theme","clean");
+		$this->rapyd->load('datatable');
+		$this->rapyd->config->set_item('theme','clean');
 
 		$mSQL="UPDATE tmenus SET ejecutar=REPLACE(ejecutar,"."'".'( "'."','".'("'."') WHERE modulo LIKE '%LIS'";
 		$this->db->simple_query($mSQL);
@@ -80,14 +83,14 @@ class Reportes extends Controller
 			$grid->db->_protect_identifiers=false;
 
 			$grid->db->select("CONCAT(a.secu,' ',a.titulo) titulo, a.mensaje, REPLACE(MID(a.ejecutar,10,30),"."'".'")'."','')  nombre");
-			$grid->db->from("tmenus    a" );
-			$grid->db->join("sida      b","a.codigo=b.modulo");
-			$grid->db->join("reportes  d","REPLACE(MID(a.ejecutar,10,30),"."'".'")'."','')=d.nombre");
+			$grid->db->from('tmenus    a');
+			$grid->db->join('sida      b','a.codigo=b.modulo');
+			$grid->db->join('reportes  d',"REPLACE(MID(a.ejecutar,10,30),"."'".'")'."','')=d.nombre");
 			$grid->db->where('b.acceso','S');
 			$grid->db->where('b.usuario',$this->session->userdata('usuario') );
-			$grid->db->like("a.ejecutar","REPOSQL", "after");
-			$grid->db->where('a.modulo',$repo."LIS");
-			$grid->db->orderby("a.secu");
+			$grid->db->like('a.ejecutar','REPOSQL', 'after');
+			$grid->db->where('a.modulo',$repo.'LIS');
+			$grid->db->orderby('a.secu');
 
 			$grid->per_row = 3;
 			$grid->cell_template = '
@@ -101,13 +104,13 @@ class Reportes extends Controller
 			$grid1->db->_escape_char='';
 			$grid1->db->_protect_identifiers=false;
 
-			$grid1->db->select("a.titulo, a.mensaje, a.nombre");
-			$grid1->db->from("intrarepo a" );
+			$grid1->db->select('a.titulo, a.mensaje, a.nombre');
+			$grid1->db->from('intrarepo a');
 			$grid1->db->join("tmenus    b","CONCAT(a.modulo,'LIS')=b.modulo AND b.ejecutar LIKE CONCAT('%',a.nombre,'%') ","left");
-			$grid1->db->where("b.codigo IS NULL");
-			$grid1->db->where("a.modulo",$repo );
-			$grid->db->where("a.activo","S");
-			$grid1->db->orderby("a.titulo");
+			$grid1->db->where('b.codigo IS NULL');
+			$grid1->db->where('a.modulo',$repo );
+			$grid->db->where('a.activo','S');
+			$grid1->db->orderby('a.titulo');
 			$grid1->per_row = 3;
 			$grid1->cell_template = '
 			<div style="color:#119911; font-weight:bold; font-size:16px;background-color:#D3E3D3;padding:4px;border-left: 1px solid;">'
@@ -130,8 +133,8 @@ class Reportes extends Controller
 		};
 
 		$meco = $this->datasis->dameval("SELECT titulo FROM intramenu a WHERE a.panel='REPORTES' AND a.ejecutar LIKE '%$repo' ");
-		$data['head']="";
-		$data['titulo'] = '';
+		$data['head']   ='';
+		$data['titulo'] ='';
 		$data['repo']=$repo;
 		$this->load->view('view_reportes', $data);
 
@@ -151,14 +154,14 @@ class Reportes extends Controller
 	}
 
 	function sinvlineas(){
-		if (!empty($_POST["dpto"])){
-			$departamento=$_POST["dpto"];
-		}elseif (!empty($_POST["depto"])){
-			$departamento=$_POST["depto"];
+		if (!empty($_POST['dpto'])){
+			$departamento=$_POST['dpto'];
+		}elseif (!empty($_POST['depto'])){
+			$departamento=$_POST['depto'];
 		}
 
-		$this->rapyd->load("fields");
-		$where = "";
+		$this->rapyd->load('fields');
+		$where = '';
 		$sql = "SELECT linea, CONCAT_WS('-',linea,descrip) FROM line $where";
 		$linea = new dropdownField("Subcategoria", "linea");
 
@@ -168,17 +171,17 @@ class Reportes extends Controller
 			$linea->option("","");
 			$linea->options($sql);
 		}else{
-			$linea->option("","Seleccione Un Departamento");
+			$linea->option('','Seleccione Un Departamento');
 		}
-		$linea->status   = "modify";
-		$linea->onchange = "get_grupo();";
+		$linea->status   = 'modify';
+		$linea->onchange = 'get_grupo();';
 		$linea->build();
 		echo $linea->output;
 	}
 
 	function sinvgrupos(){
-		$this->rapyd->load("fields");
-		$where = "WHERE ";
+		$this->rapyd->load('fields');
+		$where = 'WHERE ';
 
 		$grupo = new dropdownField("Subcategoria", "grupo");
 		if (!empty($_POST["linea"]) AND !empty($_POST["dpto"])) {
@@ -207,9 +210,9 @@ class Reportes extends Controller
 		  $modelo->option("","");
 			$modelo->options($sql);
 		}else{
-			 $modelo->option("","Seleccione Una Marca");
+			 $modelo->option('','Seleccione una Marca');
 		}
-		$modelo->status   = "modify";
+		$modelo->status   = 'modify';
 		//$linea->onchange = "get_grupo();";
 		$modelo->build();
 		echo $modelo->output;
