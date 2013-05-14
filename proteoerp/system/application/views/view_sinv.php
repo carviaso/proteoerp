@@ -105,6 +105,7 @@ function ocultatab(){
 	}
 }
 
+
 $(function(){
 
 	$('.inputnum').focus(function (){

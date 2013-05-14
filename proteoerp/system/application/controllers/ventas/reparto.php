@@ -108,7 +108,6 @@ class Reparto extends Controller {
 			}
 		});';
 
-
 		$bodyscript .= '
 		$("#agregaf").click(function(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -604,9 +603,9 @@ class Reparto extends Controller {
 	}
 
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -779,8 +778,6 @@ class Reparto extends Controller {
 						$("#cerrard").hide();
 						$("#anulard").hide();
 					}
-
-					
 				}
 			}'
 		);
@@ -968,7 +965,6 @@ class Reparto extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('cod_cli');
 		$grid->label('Cliente');
 		$grid->params(array(
@@ -1097,6 +1093,7 @@ class Reparto extends Controller {
 	* Guarda la Informacion
 	*/
 	function setDatait(){
+
 	}
 
 	//******************************************************************
@@ -1252,7 +1249,5 @@ class Reparto extends Controller {
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('reparto');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }

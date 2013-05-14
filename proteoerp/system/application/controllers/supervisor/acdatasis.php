@@ -232,7 +232,6 @@ jQuery("#bcopiar").click( function(){
 						jQuery(gridId1).jqGrid(\'editRow\',id,true);
 						lastsel2=id;
 					}
-				      
 				}
 		');
 
@@ -243,7 +242,6 @@ jQuery("#bcopiar").click( function(){
 			}
 		';
 		$grid->setOndblClickRow($onclick1);
-
 
 		#show/hide navigations buttons
 		$grid->setAdd(false);
@@ -314,11 +312,6 @@ jQuery("#bcopiar").click( function(){
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-//			if(false == empty($data)){
-//				$this->db->insert('view_tmenusacc', $data);
-//				echo "Registro Agregado";
-//				logusu('VIEW_TMENUSACC',"Registro ????? INCLUIDO");
-//			} else
 			echo "Fallo Agregado!!!";
 
 		} elseif($oper == 'edit') {
@@ -332,13 +325,10 @@ jQuery("#bcopiar").click( function(){
 			echo "Registro Modificado";
 
 		} elseif($oper == 'del') {
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM view_tmenusacc WHERE id='$id' ");
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
-//				$this->db->simple_query("DELETE FROM view_tmenusacc WHERE id=$id ");
-//				logusu('VIEW_TMENUSACC',"Registro ????? ELIMINADO");
-//				echo "Registro Eliminado";
+
 			}
 		};
 	}

@@ -24,6 +24,7 @@ if ( isset($anexos) ) echo style('themes/'.$anexos.'/'.$anexos.'.css');
 <?php
 echo phpscript('nformat.js');
 echo script('jquery-min.js');
+echo script('jquery-migrate-min.js'); //SOLO PARA JQUERY 1.9 - 2.0
 echo script('plugins/jquery.numeric.pack.js');
 echo script('jquery-ui.custom.min.js')
 ?>

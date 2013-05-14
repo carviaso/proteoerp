@@ -119,7 +119,6 @@ class Sinv extends Controller {
 	//******************************************************************
 	//Layout en la Ventana
 	//
-	//
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -130,20 +129,30 @@ class Sinv extends Controller {
 
 		$readyLayout = $grid->readyLayout2( 216	, 135, $param['grids'][0]['gridname']);
 
-		//Botones Panel Izq
-		if ( $this->datasis->traevalor('SUNDECOP') == 'S')
-			$grid->wbotonadd(array("id"=>"sundecop", "img"=>"images/sundecop.jpeg", "alt" => 'Oculta/Muestra Inactivos', "label"=>"SUNDECOP", "tema"=>"anexos"));
+		//$grid->wbotonadd(array("id"=>"hinactivo","img"=>"images/basura.png",   "alt" => 'Oculta/Muestra Inactivos', "label"=>"Mostrar Inactivos", "tema"=>"anexos"));
 
-		$grid->wbotonadd(array("id"=>"hinactivo","img"=>"images/basura.png",   "alt" => 'Oculta/Muestra Inactivos', "label"=>"Mostrar Inactivos", "tema"=>"anexos"));
 		$WpAdic = "
-		<tr><td><div class=\"anexos\"><table id=\"bpos1\">   </table></div><div id='pbpos1'>   </div></td></tr>\n
-		<tr><td><div class=\"anexos\"><table id=\"tpactivo\"></table></div><div id='ptpactivo'></div></td></tr>\n
-		<tr><td><div class=\"aneos\">
+		<tr><td><div class=\"anexos\">
 			<table cellpadding='0' cellspacing='0'>
 				<tr>
-					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gmarcas'>".img(array('src' =>"images/tux1.png",  'height' => 18, 'alt' => 'Crear Marcas',    'title' => 'Crear Marcas',   'border'=>'0'))."+Marcas</a></div></td>
-					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gunidad'>".img(array('src' =>"images/unidad.gif",'height' => 18, 'alt' => 'Crear Unidades',  'title' => 'Crear Unidades', 'border'=>'0'))."+Unidad</a></div></td>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gmarcas'>".img(array('src' =>"images/tux1.png",  'height' => 15, 'alt' => 'Crear Marcas',    'title' => 'Crear Marcas',   'border'=>'0'))."+Marcas</a></div></td>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gunidad'>".img(array('src' =>"images/unidad.gif",'height' => 15, 'alt' => 'Crear Unidades',  'title' => 'Crear Unidades', 'border'=>'0'))."+Unidad</a></div></td>
 				</tr>
+				<tr>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='hinactivo'>".img(array('src' =>"images/basura.png", 'height' => 15, 'alt'=>'Mostrar/Ocultar Inactivos', 'title' => 'Mostrar/Ocultar Inactivos', 'border'=>'0'))."Inactivos</a></div></td>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='bbarras'  >".img(array('src' =>"images/barcode.png",'height' => 15, 'alt'=>'Barras Adicionales',        'title' => 'Barras Adicionales',        'border'=>'0'))."Barras</a></div></td>
+				</tr>";
+				
+		if ( $this->datasis->traevalor('SUNDECOP') == 'S'){
+			$WpAdic .= "
+				<tr>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='sundecop'>".img(array('src'=>"images/sundecop.jpeg", 'height'=>15, 'alt'=>'Parametros SUNDECOP', 'title'=>'Parametros SUNDECOP', 'border'=>'0'))."SuNdeCoP</a></div></td>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='bpactivo'>".img(array('src'=>"images/lab.png",       'height'=>15, 'alt'=>'Crear Unidades',      'title'=>'Crear Unidades',      'border'=>'0'))."P.Activo</a></div></td>
+				</tr>
+			";
+		}
+
+		$WpAdic .= "
 			</table>
 			</div>
 		</td></tr>\n
@@ -188,7 +197,7 @@ class Sinv extends Controller {
 	//
 	function funciones($grid0){
 
-		//Coloca la Basura a los Productos Inactivos
+		//Barras adicionales
 		$funciones = '
 		$("#bpos1").jqGrid({
 			url:\''.site_url('inventario/sinv/bpos1').'\',
@@ -216,7 +225,6 @@ class Sinv extends Controller {
 			editurl: \''.site_url('inventario/sinv/bpos1').'\',
 			caption: "Barras Adicionales"
 		});
-
 		jQuery("#bpos1").jqGrid(\'navGrid\',"#pbpos1",{edit:false, add:true, del:true, search: false, addfunc: bposadd });
 
 		function bposadd(){
@@ -242,92 +250,10 @@ class Sinv extends Controller {
 					}
 				});
 			}
-			//alert("camina");
-		}
-			';
-
-		$funciones .= '
-		jQuery("#tpactivo").jqGrid({
-			url:\''.site_url('inventario/sinv/pactivo').'\',
-			ajaxGridOptions: { type: "POST"},
-			jsonReader: { root: "data", repeatitems: false},
-			datatype: "json",
-			hiddengrid: true,
-			postdata: { apid: "wapi"},
-			width: 190,
-			height: 100,
-			colNames:[\'id\', \'nombre\'],
-			colModel:[
-				{name:\'id\',index:\'id\', width:10, hidden:true},
-				{name:\'nombre\',index:\'nombre\', width:105, editable:false, hidden:false, },
-			],
-			rowNum:1000,
-			pginput: false,
-			pgbuttons: false,
-			rowList:[],
-			pager: \'#ptpactivo\',
-			sortname: \'id\',
-			viewrecords: false,
-			sortorder: "desc",
-			editurl: \''.site_url('inventario/sinv/pactivo').'\',
-			caption: "Principio Activo"
-		});
-
-		jQuery("#tpactivo").jqGrid(\'navGrid\',"#ptpactivo",{edit:false, add:true, del:true, search: false, addfunc: pactivoadd });
-
-		function pactivoadd(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				$.prompt( "<h1>Agregar Principio Activo</h1><center><input type=\'text\' id=\'mpactivo\' name=\'mpactivo\' value=\'\' maxlengh=\'100\' size=\'30\' ></center><br/>", {
-					buttons: { Agregar: true, Cancelar: false },
-					submit: function(e,v,m,f){
-						if (v) {
-							if( f.mpactivo ) {
-								$.ajax({
-									type: "POST",
-									url: "'.site_url('inventario/sinv/prinactivo').'",
-									data: { id: id, pactivo: f.mpactivo },
-									complete: function(){
-										$("#tpactivo").trigger("reloadGrid");
-									}
-								});
-							} else {
-								alert("Debe colocar un numero");
-							}
-						}
-					}
-				});
-				$("#mpactivo").autocomplete({
-					source: function( req, add){
-						$.ajax({
-							url: "'.site_url('inventario/sinv/autopactivo/').'",
-							type: "POST",
-							dataType: "json",
-							data: "tecla="+req.term,
-							success:
-								function(data) {
-									var sugiere = [];
-									$.each(data,
-										function(i, val){
-											sugiere.push( val );
-										}
-									);
-									add(sugiere);
-								},
-						})
-					},
-					minLength: 3,
-					select: function(evento, ui){
-						$("#mpactivo").val(ui.item.pactivo);
-					}
-				});
-
-			}
-			//alert("camina");
 		}
 		';
 
-		$funciones .= '
+		$funciones = '
 		function factivo(el, val, opts){
 			var meco=\'<div><img src="'.base_url().'images/blank.png" width="20" height="18" border="0" /></div>\';
 			if ( el == "N" ){
@@ -664,15 +590,13 @@ class Sinv extends Controller {
 		};
 		';
 
-
-
 		return $funciones;
 
 	}
 
 	//******************************************************************
-	//Funciones de los Botones
-	//fuera del doc ready
+	// Funciones de los Botones
+	//
 	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
@@ -757,7 +681,6 @@ class Sinv extends Controller {
 						"Guardar": function() {
 							var bValid = true;
 							var murl = $("#df1").attr("action");
-							//allFields.removeClass( "ui-state-error" );
 							$.ajax({
 								type: "POST", dataType: "html", async: false,
 								url: murl,
@@ -766,7 +689,6 @@ class Sinv extends Controller {
 									if ( r.length == 0 ) {
 										$( "#fedita" ).dialog( "close" );
 										grid.trigger("reloadGrid");
-										//grid.setSelection(id, true);
 										return true;
 									} else {
 										$("#fedita").html(r);
@@ -832,19 +754,73 @@ class Sinv extends Controller {
 		//VALORES PARA EL SUNDECOP
 		$bodyscript .= '
 		function sundecop() {
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url('inventario/sinv/desundecop/modify').'/"+id, function(data){
 					$("#fborra").html("");
 					$("#fedita").html(data);
-					$("#fedita").dialog({ height:410, width:450, title:"Valores SUNDECOP"});
+					$("#fedita").dialog({
+						autoOpen: false, height: 450, width: 550, modal: true, 
+						title:"Parametros del SUNDECOP",
+						buttons: {
+							"Guardar": function() {
+							var murl = $("#df1").attr("action");
+							$.ajax({
+								type: "POST", dataType: "html", async: false,
+								url: murl,
+								data: $("#df1").serialize(),
+								success: function(r,s,x){
+									if ( r.length == 0 ) {
+										apprise("Registro Guardado");
+										$( "#fedita" ).dialog( "close" );
+										return true;
+									} else {
+										$("#fedita").html(r);
+									}
+								}
+						})},
+						"Cancelar": function() { $( this ).dialog( "close" ); }
+						}
+					});
 					$("#fedita").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		};';
 
+		// Barras Adicionales
+		$bodyscript .= '
+		$("#bbarras").click(
+			function(){
+				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					var ret = $("#newapi'.$grid0.'").getRowData(id);
+					$.post("'.site_url('inventario/sinv/barrasform')."/".'"+id, 
+					function(data){
+						$("#fshow").html(data);
+						$("#fshow").dialog( { title:"BARRAS ADICIONALES", width: 220, height: 300, modal: true } );
+						$("#fshow").dialog( "open" );
+					});
+				} else { 
+					$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+				}	
+		})
+		';
+
+
+		// Principios Activos
+		$bodyscript .= '
+		$("#bpactivo").click(
+			function(){
+				$.post("'.site_url('inventario/sinv/pactivosform').'", 
+				function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"PRINCIPIOS ACTIVOS", width: 350, height: 400, modal: true } );
+					$("#fshow").dialog( "open" );
+				});
+			});
+		';
 
 		// Marcas
 		$bodyscript .= '
@@ -853,14 +829,11 @@ class Sinv extends Controller {
 				$.post("'.site_url('inventario/sinv/marcaform').'",
 				function(data){
 					$("#fshow").html(data);
-					$("#fshow").dialog( { title:"GESTION DE MARCAS", width: 320, height: 400 } );
+					$("#fshow").dialog( { title:"MARCAS", width: 320, height: 400, modal: true } );
 					$("#fshow").dialog( "open" );
-				}
-				);
-			}
-		);';
-
-
+				});
+			});
+		';
 
 		// Unidades
 		$bodyscript .= '
@@ -869,12 +842,11 @@ class Sinv extends Controller {
 				$.post("'.site_url('inventario/sinv/uniform').'",
 				function(data){
 					$("#fshow").html(data);
-					$("#fshow").dialog( { title:"GESTION DE UNIDAES", width: 300, height: 400 } );
+					$("#fshow").dialog( { title:"UNIDAES DE PRESENTACION", width: 270, height: 400, modal: true } );
 					$("#fshow").dialog( "open" );
 				});
-			}
-		);';
-
+			});
+		';
 
 		// Inactivos
 		$bodyscript .= '
@@ -1027,10 +999,8 @@ class Sinv extends Controller {
 			$("#dialog:ui-dialog").dialog( "destroy" );
 			var mId = 0;
 			var montotal = 0;
-			//var ffecha = $("#ffecha");
 			var grid = jQuery("#newapi'.$grid0.'");
 			var s;
-			//var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 			';
@@ -2558,7 +2528,7 @@ class Sinv extends Controller {
 					var ret = $(gridId1).getRowData(id);
 					var url= "'.site_url("inventario/fotos/thumbnail").'/"+id;
 					var sitio = "";
-					var codqr = "<button onclick=\'codqr();\'>Etiqueta</button>";
+					var codqr = "<div class=\'botones\'><button class=\'anexos\' onclick=\'codqr();\'>Etiqueta</button></div>";
 					if ( ret.url.length > 12 )
 						sitio = "<button onclick=\'irurl();\'>Pagina Web</button>";
 
@@ -2569,15 +2539,19 @@ class Sinv extends Controller {
 						function(data){
 							$("#itsinv").html(data);
 					});
+
+				}
+			}
+		');
+
+/*
 					jQuery("#bpos1").jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'bpos1/').'/"+id+"/", page:1});
 					jQuery("#bpos1").trigger("reloadGrid");
 
 					jQuery("#tpactivo").jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'pactivo/').'/"+id+"/", page:1});
 					jQuery("#tpactivo").trigger("reloadGrid");
+*/
 
-				}
-			}
-		');
 
 		$grid->setAfterInsertRow('
 			function( rid, aData, rowe){
@@ -4170,24 +4144,6 @@ class Sinv extends Controller {
 		}
 	}
 
-	// Codigos de barra suplementarios
-	function prinactivo() {
-		$mid      = $this->input->post('id');
-		$mpactivo = trim(rawurldecode($this->input->post('pactivo')));
-		$mpaid    = trim($this->datasis->dameval("SELECT id FROM pactivo WHERE nombre=".$this->db->escape($mpactivo) ));
-
-		$mcodigo  = trim($this->datasis->dameval("SELECT codigo FROM sinv WHERE id=$mid"));
-		$htmlcod  = $this->db->escape($mcodigo);
-
-		//Busca si ya esta
-		$mSQL = "INSERT IGNORE INTO sinvpa SET codigo=".$htmlcod.", pactivo=$mpaid";
-		$this->db->query($mSQL);
-		logusu("SINV","Principio Activo Agregado".$mcodigo."-->".$mpactivo);
-		echo "Registro de Codigo Exitoso";
-
-	}
-
-
 	// Borra Codigo de barras suplementarios
 	function sinvborrasuple() {
 		$codigo   = $this->input->post('codigo');
@@ -5362,21 +5318,16 @@ class Sinv extends Controller {
 		$this->rapyd->load('dataedit');
 
 		$script='';
-		$arr= array(
-			'cpactivo'  => 'pactivo',
-			'cmarca'    => 'marca',
-			'cunidad'   => 'unidad'
-		);
+		$arr= array( 'cdpactivo'=>'pactivo', 'cmarca'=>'marca', 'cunidad'=>'unidad' );
 
 		foreach($arr as $campo=>$autocom){
 			$script.= "
 			$('#${campo}').autocomplete({
+				appendTo: '#fedita',
 				source: function( req, add){
 					$.ajax({
 						url:  '".site_url('ajax/buscasundecob/'.$autocom)."',
-						type: 'POST',
-						dataType: 'json',
-						data: 'q='+req.term,
+						type: 'POST', dataType: 'json', data: 'q='+req.term,
 						success:
 							function(data){
 								var sugiere = [];
@@ -5384,11 +5335,7 @@ class Sinv extends Controller {
 									$('#${campo}').val('');
 									$('#${campo}descrip_val').text('');
 								}else{
-									$.each(data,
-										function(i, val){
-											sugiere.push( val );
-										}
-									);
+									$.each( data, function(i, val){ sugiere.push( val );} );
 								}
 								add(sugiere);
 							},
@@ -5422,14 +5369,25 @@ class Sinv extends Controller {
 		$edit->pre_process('delete',  '_scpre_delete');
 
 		$edit->mpps = new inputField('MPPS','mpps');
-		$edit->mpps->rule='max_length[20]';
-		$edit->mpps->size =22;
-		$edit->mpps->maxlength =20;
+		$edit->mpps->rule      = 'max_length[20]';
+		$edit->mpps->size      = 22;
+		$edit->mpps->maxlength = 20;
 
 		$edit->cpe = new inputField('CPE','cpe');
-		$edit->cpe->rule='max_length[20]';
-		$edit->cpe->size =22;
-		$edit->cpe->maxlength =20;
+		$edit->cpe->rule      = 'max_length[20]';
+		$edit->cpe->size      = 22;
+		$edit->cpe->maxlength = 20;
+
+		$edit->cdpactivo = new inputField('Principio Act.','cdpactivo');
+		$edit->cdpactivo->db_name = 'cpactivo';
+		$edit->cdpactivo->rule = 'max_length[6]|integer';
+		$edit->cdpactivo->size = 8;
+
+		$edit->cpactivodescrip = new inputField('', 'cdpactivodescrip');
+		$edit->cpactivodescrip->db_name = 'cpactivodescrip';
+		$edit->cpactivodescrip->pointer = true;
+		$edit->cpactivodescrip->type    = 'inputhidden';
+		$edit->cpactivodescrip->in      = 'cdpactivo';
 
 		$edit->dcomercial = new dropdownField('Destino Comercial','dcomercial');
 		$edit->dcomercial->style='width:230px;';
@@ -5472,19 +5430,9 @@ class Sinv extends Controller {
 		$edit->cmaterial->options('SELECT codigo,  descrip FROM sc_material ORDER BY descrip');
 
 		$edit->cforma = new dropdownField('Forma','cforma');
-		$edit->cforma->style='width:230px;';
+		$edit->cforma->style = 'width:230px;';
 		$edit->cforma->option('','Seleccionar');
 		$edit->cforma->options('SELECT codigo, descrip FROM sc_forma ORDER BY descrip');
-
-		$edit->cpactivo = new inputField('Principio Act.','cpactivo');
-		$edit->cpactivo->rule='max_length[6]|integer';
-		$edit->cpactivo->size =8;
-
-		$edit->cpactivodescrip = new inputField('', 'cpactivodescrip');
-		$edit->cpactivodescrip->db_name     = 'cpactivodescrip';
-		$edit->cpactivodescrip->pointer     = true;
-		$edit->cpactivodescrip->type='inputhidden';
-		$edit->cpactivodescrip->in = 'cpactivo';
 
 		$edit->fracci = new inputField('Cantidad','fracci');
 		$edit->fracci->rule='max_length[6]|numeric';
@@ -5528,12 +5476,9 @@ class Sinv extends Controller {
 	}
 
 	//******************************************************************
+	// Forma de Marcas
 	//
-	//
-	function marcaform($deployed = false){
-		$url ='inventario/marc/';
-		$titp = 'Marcas';
-
+	function marcaform(){
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('id');
@@ -5557,136 +5502,361 @@ class Sinv extends Controller {
 			)
 		);
 
-		#show paginator
 		$grid->showpager(true);
 		$grid->setViewRecords(false);
 		$grid->setWidth('300');
 		$grid->setHeight('280');
-		//$grid->setTitle('Marcas');
 
-		#show/hide navigations buttons
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(false);
-		$grid->setView(false);
-		$grid->setRowNum(200);
-
-		#GET url
 		$grid->setUrlget(site_url('inventario/marc/getdata/'));
-
-		#Set url
 		$grid->setUrlput(site_url('inventario/marc/setdata/'));
 
 		$mgrid = $grid->deploy();
 
 		$msalida  = '<script type="text/javascript">'."\n";
-
 		$msalida .= '
-	var gridmarc =  $("#newapi'.$mgrid['gridname'].'").jqGrid({
-		ajaxGridOptions : {type:"POST"},
-			jsonReader : {
-				root:"data",
-				repeatitems: false
-			}
-			'.$mgrid['onClick'].'
-			'.$mgrid['ondblClickRow'].'
-		'.$mgrid['table'].'
-	})
-	'.$mgrid['pager'].'
-	$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
-';
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[] 
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
 
 		$msalida .= "\n</script>\n";
-
 		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
 		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
 
 		echo $msalida;
 
-
 	}
 
 
 	//******************************************************************
-	//
+	// Forma para Unidades
 	//
 	function uniform(){
-		$url ='inventario/unidad/';
-		$titp = 'Unidades';
-
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('id');
 		$grid->label('ID');
 		$grid->params(array(
 			'hidden'      => 'true',
-			'align' => "'center'",
-			'width' => 20,
-			'editable' => 'false',
+			'align'       => "'center'",
+			'width'       => 20,
+			'editable'    => 'false',
 			'editoptions' => '{readonly:true,size:10}'
 		));
 
 		$grid->addField('unidades');
 		$grid->label('Nombre');
 		$grid->params(array(
-			'width' => 180,
-			'editable' => 'true',
-			'edittype' => "'text'",
-			'editrules' => '{required:true}'
+			'width'       => 180,
+			'editable'    => 'true',
+			'edittype'    => "'text'",
+			'editrules'   => '{required:true}'
 		));
 
-		#show paginator
 		$grid->showpager(true);
-
 		$grid->setViewRecords(true);
-
 		$grid->setWidth('250');
 		$grid->setHeight('280');
-		//$grid->setTitle($titp);
-
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(false);
-		$grid->setView(false);
-		$grid->setRowNum(200);
 
 		$grid->setUrlget(site_url('inventario/unidad/getdata/'));
 		$grid->setUrlput(site_url('inventario/unidad/setdata/'));
 
-
 		$mgrid = $grid->deploy();
 
-
 		$msalida  = '<script type="text/javascript">'."\n";
-
 		$msalida .= '
-	var gridmarc =  $("#newapi'.$mgrid['gridname'].'").jqGrid({
-		ajaxGridOptions : {type:"POST"},
-			jsonReader : {
-				root:"data",
-				repeatitems: false
-			}
-			'.$mgrid['onClick'].'
-			'.$mgrid['ondblClickRow'].'
-		'.$mgrid['table'].'
-	})
-	'.$mgrid['pager'].'
-	$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
-';
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[] 
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
 
 		$msalida .= "\n</script>\n";
-
 		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
 		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
 
-
 		echo $msalida;
-
-
+	
 	}
 
+
+	//******************************************************************
+	// Barras Adicionles
+	//
+	function barrasform( $id = 0 ){
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('ID');
+		$grid->params(array(
+			'hidden'      => 'true',
+			'align'       => "'center'",
+			'width'       => 20,
+			'editable'    => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+		$grid->addField('suplemen');
+		$grid->label('Barra Adicional');
+		$grid->params(array(
+			'width'       => 150,
+			'editable'    => 'true',
+			'edittype'    => "'text'",
+			'editrules'   => '{required:true}'
+		));
+
+		#show paginator
+		$grid->showpager(true);
+		$grid->setViewRecords(true);
+		$grid->setWidth('200');
+		$grid->setHeight('180');
+
+		$grid->setUrlget(site_url('inventario/sinv/getbarras')."/$id");
+		$grid->setUrlput(site_url('inventario/sinv/setbarras')."/$id");
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[] 
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		';
+
+		//$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+	
+	}
+
+
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
+	function getbarras( $id = 0 ){
+		$grid       = $this->jqdatagrid;
+
+		if ( $id == 0 ){
+			echo '';
+			return;
+		}
+		$codigo = $this->datasis->dameval("SELECT codigo FROM sinv WHERE id=$id");
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('barraspos');
+		$mWHERE[] = array('', 'codigo', $codigo, '' );
+
+		$response   = $grid->getData('barraspos', array(array()), array(), false, $mWHERE, 'suplemen' );
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+	}
+
+
+	//******************************************************************
+	// Guarda la Informacion
+	//
+	function setbarras( $mid = 0 ){
+		$mid = $this->uri->segment($this->uri->total_segments());
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = $this->input->post('id');
+		$data   = $_POST;
+		$check  = 0;
+		$codigo = $this->datasis->dameval("SELECT codigo FROM sinv WHERE id=$mid");
+
+		unset($data['oper']);
+		unset($data['id']);
+		if($oper == 'add'){
+			if(false == empty($data)){
+				$check  = $this->datasis->dameval("SELECT count(*) FROM barraspos WHERE suplemen=".$this->db->escape($data['suplemen']));
+				$check += $this->datasis->dameval("SELECT count(*) FROM sinv      WHERE barras=".$this->db->escape($data['suplemen']));
+				if ( $check == 0 ){
+					$data['codigo'] = $codigo;
+					$this->db->insert('barraspos', $data);
+					logusu('BARRASPOS',"Barra '".$codigo.' => '.$data['suplemen']."' INCLUIDA");
+					echo "Barra adicional agregada";
+				} else
+					echo "Ya existe un registro con esa barra";
+			} else
+				echo "Fallo Agregado!!!";
+
+		} elseif($oper == 'edit') {
+			$check = $this->datasis->dameval("SELECT count(*) FROM barraspos WHERE id <> $id AND suplemen=".$this->db->escape($data['suplemen']));
+			$check += $this->datasis->dameval("SELECT count(*) FROM sinv     WHERE barras=".$this->db->escape($data['suplemen']));
+			if ( $check == 0 ){
+				$this->db->where("id", $id);
+				$this->db->update('barraspos', $data);
+				logusu('BARRASPOS',"Barra Adicional  ".$codigo.'=>'.$data['suplemen']." MODIFICADO");
+				echo "Codigo $codigo => ".$data['suplemen']." Modificado";
+			} else
+				echo "Fallo Agregado!!!";
+
+		} elseif($oper == 'del') {
+			$this->db->query("DELETE FROM barraspos WHERE id=$id ");
+			logusu('BARRASPOS',"Barra adicional $id ELIMINADA");
+			echo "Codigo Adicional Eliminado Eliminado";
+		};
+	}
+
+
+	//******************************************************************
+	// Forma para Principios activos
+	//
+	function pactivosform( $id = 0){
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('ID');
+		$grid->params(array(
+			'hidden'      => 'true',
+			'align'       => "'center'",
+			'width'       => 20,
+			'editable'    => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+		$grid->addField('nombre');
+		$grid->label('Nombre');
+		$grid->params(array(
+			'width'       => 180,
+			'editable'    => 'true',
+			'edittype'    => "'text'",
+			'editrules'   => '{required:true}'
+		));
+
+		#show paginator
+		$grid->showpager(true);
+		$grid->setViewRecords(true);
+		$grid->setWidth('330');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url('inventario/sinv/pagetdata'));
+		$grid->setUrlput(site_url('inventario/sinv/pasetdata'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[] 
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+	
+	}
+
+
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
+	function pagetdata(){
+		$grid       = $this->jqdatagrid;
+
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('pactivo');
+
+		$response   = $grid->getData('pactivo', array(array()), array(), false, $mWHERE, 'nombre' );
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+	}
+
+
+	//******************************************************************
+	// Guarda la Informacion
+	//
+	function pasetdata(){
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = $this->input->post('id');
+		$data   = $_POST;
+		$mcodp  = "nombre";
+		$check  = 0;
+
+		unset($data['oper']);
+		unset($data['id']);
+		if($oper == 'add'){
+			if(false == empty($data)){
+				$check = $this->datasis->dameval("SELECT count(*) FROM pactivo WHERE nombre=".$this->db->escape($data['nombre']));
+				if ( $check == 0 ){
+					$this->db->insert('pactivo', $data);
+					echo "Principio Agregado";
+					logusu('PACTIVO',"Registro '".$data['nombre']."' INCLUIDO");
+				} else
+					echo "Ya existe un registro con ese $mcodp";
+			} else
+				echo "Fallo Agregado!!!";
+
+		} elseif($oper == 'edit') {
+			$nombre  = $data['nombre'];
+			$this->db->where("id", $id);
+			$this->db->update('pactivo', $data);
+			logusu('PACTIVO',"Principio Activo  ".$nombre." MODIFICADO");
+			echo "$nombre Modificado";
+
+		} elseif($oper == 'del') {
+			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sinv WHERE cpactivo='$id' ");
+			if ($check > 0){
+				echo " El registro no puede ser eliminado; tiene inventario asociado ";
+			} else {
+				$this->db->simple_query("DELETE FROM pactivo WHERE id=$id ");
+				logusu('PACTIVO',"Registro $id ELIMINADO");
+				echo "Principio Activo Eliminado";
+			}
+		};
+	}
+
+/*
+	// Principios Activos
+	function prinactivo() {
+		$mid      = $this->input->post('id');
+		$mpactivo = trim(rawurldecode($this->input->post('pactivo')));
+		$mpaid    = trim($this->datasis->dameval("SELECT id FROM pactivo WHERE nombre=".$this->db->escape($mpactivo) ));
+
+		$mcodigo  = trim($this->datasis->dameval("SELECT codigo FROM sinv WHERE id=$mid"));
+		$htmlcod  = $this->db->escape($mcodigo);
+
+		//Busca si ya esta
+		$mSQL = "INSERT IGNORE INTO sinvpa SET codigo=".$htmlcod.", pactivo=$mpaid";
+		$this->db->query($mSQL);
+		logusu("SINV","Principio Activo Agregado".$mcodigo."-->".$mpactivo);
+		echo "Registro de Codigo Exitoso";
+	
+	}
+*/
 
 
 
