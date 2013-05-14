@@ -90,7 +90,7 @@ class Sinv extends Controller {
 					PRIMARY KEY (`id`),
 					UNIQUE INDEX `codigo` (`codigo`, `pactivo`)
 					)
-					COLLATE='latin1_swedish_ci'
+					COLLATE='latin1_swedish_ci' 
 					ENGINE=MyISAM;";
 			$this->db->query($mSQL);
 		}
@@ -826,7 +826,7 @@ class Sinv extends Controller {
 		$bodyscript .= '
 		$("#gmarcas").click(
 			function(){
-				$.post("'.site_url('inventario/sinv/marcaform').'",
+				$.post("'.site_url('inventario/sinv/marcaform').'", 
 				function(data){
 					$("#fshow").html(data);
 					$("#fshow").dialog( { title:"MARCAS", width: 320, height: 400, modal: true } );
@@ -839,7 +839,7 @@ class Sinv extends Controller {
 		$bodyscript .= '
 		$("#gunidad").click(
 			function(){
-				$.post("'.site_url('inventario/sinv/uniform').'",
+				$.post("'.site_url('inventario/sinv/uniform').'", 
 				function(data){
 					$("#fshow").html(data);
 					$("#fshow").dialog( { title:"UNIDAES DE PRESENTACION", width: 270, height: 400, modal: true } );
@@ -2539,7 +2539,6 @@ class Sinv extends Controller {
 						function(data){
 							$("#itsinv").html(data);
 					});
-
 				}
 			}
 		');
@@ -2808,7 +2807,7 @@ class Sinv extends Controller {
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo');
 		$edit->codigo->size=15;
 		$edit->codigo->maxlength=15;
-		$edit->codigo->rule = 'alpha_dash_slash|trim|strtoupper|callback_chexiste';
+		$edit->codigo->rule = 'alpha_numeric|trim|strtoupper|callback_chexiste';
 		$edit->codigo->mode = 'autohide';
 		$edit->codigo->append($sugerir);
 		$edit->codigo->append($ultimo);
@@ -4004,7 +4003,7 @@ class Sinv extends Controller {
 		$data = '[{ }]';
 		if($q!==false){
 			$mid = $this->db->escape('%'.$q.'%');
-			$mSQL = "SELECT * FROM pactivo
+			$mSQL = "SELECT * FROM pactivo 
 			WHERE nombre LIKE ${mid} ORDER BY nombre LIMIT 30";
 
 			$query = $this->db->query($mSQL);
@@ -5531,7 +5530,7 @@ class Sinv extends Controller {
 		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
 
 		echo $msalida;
-
+	
 	}
 
 
