@@ -3362,9 +3362,9 @@ class gser extends Controller {
 		$edit->compra->size =10;
 		$edit->compra->maxlength =8;
 
-		$edit->numero = new inputField('N&uacute;mero', 'numero');
+		$edit->numero = new inputField('N&uacute;mero', 'serie');
 		$edit->numero->size = 10;
-		$edit->numero->maxlength=8;
+		$edit->numero->maxlength=12;
 		$edit->numero->autocomplete=false;
 		$edit->numero->rule='required';
 
@@ -3880,10 +3880,12 @@ class gser extends Controller {
 		$tipo1   = $do->get('tipo1');
 		$benefi  = $do->get('benefi');
 		$nombre  = $do->get('nombre');
-		$numero  = $do->get('numero');
+		$serie   = $do->get('serie');
 		$nfiscal = $do->get('nfiscal');
 		$tipo_doc= $do->get('tipo_doc');
 		$monto1  = $do->get('monto1');
+		$numero   = substr($serie,-8);
+		$do->set('numero',$numero);
 
 		$rivaex  = $this->input->post('_rivaex');
 		if(empty($monto1)){
@@ -3891,10 +3893,6 @@ class gser extends Controller {
 		}
 		//$cheque1= $do->get('cheque1');
 		$_tipo=common::_traetipo($codb1);
-
-		$do->set('serie',$numero);
-		$nnumero = substr($numero,-8);
-		$do->set('numero',$nnumero);
 
 		if(empty($benefi) && $tipo1=='C'){
 			$do->set('benefi',$nombre);
@@ -4091,6 +4089,7 @@ class gser extends Controller {
 		$totbruto = $do->get('totbruto');
 		$totneto  = $do->get('totneto');
 		$totcred  = round($totneto-$monto1,2);
+
 
 		//Crea el movimiento para la retencion ISLR
 		if($reten>0){

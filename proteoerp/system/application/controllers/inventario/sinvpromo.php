@@ -261,16 +261,16 @@ class Sinvpromo extends Controller {
 		));
 
 
-		$grid->addField('tipo');
-		$grid->label('Tipo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:1, maxlength: 1 }',
-		));
+		//$grid->addField('tipo');
+		//$grid->label('Tipo');
+		//$grid->params(array(
+		//	'search'        => 'true',
+		//	'editable'      => $editar,
+		//	'width'         => 40,
+		//	'edittype'      => "'text'",
+		//	'editrules'     => '{ required:true}',
+		//	'editoptions'   => '{ size:1, maxlength: 1 }',
+		//));
 
 
 		$grid->addField('margen');
@@ -341,6 +341,8 @@ class Sinvpromo extends Controller {
 		$grid->setSearch( $this->datasis->sidapuede('SINVPROMO','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+
+		$grid->setOndblClickRow('');
 
 		$grid->setBarOptions("addfunc: sinvpromoadd, editfunc: sinvpromoedit, delfunc: sinvpromodel, viewfunc: sinvpromoshow");
 
@@ -434,8 +436,8 @@ class Sinvpromo extends Controller {
 		$script= '
 		$(function() {
 			$(".inputnum").numeric(".");
-			$("#fechad").datepicker({dateFormat:"dd/mm/yy"});
-			$("#fechah").datepicker({dateFormat:"dd/mm/yy"});
+			$("#fdesde").datepicker({dateFormat:"dd/mm/yy"});
+			$("#fhasta").datepicker({dateFormat:"dd/mm/yy"});
 
 			$("#codigo").autocomplete({
 				delay: 600,
@@ -476,7 +478,7 @@ class Sinvpromo extends Controller {
 		$do = new DataObject('sinvpromo');
 		$do->pointer('sinv' , 'sinvpromo.codigo=sinv.codigo' , 'sinv.descrip AS sinvdescrip' , 'left');
 
-		$edit = new DataEdit('Art&iacute;culo en Promoci&oacute;n', $do);
+		$edit = new DataEdit('', $do);
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -486,9 +488,9 @@ class Sinvpromo extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
 
 		//$mSINV=array(
 		//	'tabla'   =>'sinv',
@@ -520,20 +522,21 @@ class Sinvpromo extends Controller {
 		$edit->cantidad = new inputField('Cantidad', 'cantidad');
 		$edit->cantidad->size     = 15;
 		$edit->cantidad->maxlength= 15;
+		$edit->cantidad->autocomplete = false;
 		$edit->cantidad->css_class= 'inputnum';
 		$edit->cantidad->rule     = 'required';
 
-		$edit->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
-		$edit->fechad->insertValue = date('Y-m-d',mktime(0,0,0,date('m')+3,date('j'),date('Y')));
-		$edit->fechad->size        = 15;
-		$edit->fechad->calendar    = false;
-		$edit->fechad->group       = 'Validez';
+		$edit->fdesde = new dateonlyField('Desde', 'fdesde','d/m/Y');
+		$edit->fdesde->insertValue = date('Y-m-d',mktime(0,0,0,date('m')+3,date('j'),date('Y')));
+		$edit->fdesde->size        = 15;
+		$edit->fdesde->calendar    = false;
+		$edit->fdesde->group       = 'Validez';
 
-		$edit->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
-		$edit->fechah->size        = 15;
-		$edit->fechah->insertValue = date('Y-m-d');
-		$edit->fechah->calendar    = false;
-		$edit->fechah->group       = 'Validez';
+		$edit->fhasta = new dateonlyField('Hasta', 'fhasta','d/m/Y');
+		$edit->fhasta->size        = 15;
+		$edit->fhasta->insertValue = date('Y-m-d');
+		$edit->fhasta->calendar    = false;
+		$edit->fhasta->group       = 'Validez';
 
 		$edit->build();
 
@@ -549,14 +552,39 @@ class Sinvpromo extends Controller {
 		}
 	}
 
-	function _pre_insert($do){
-		$do->error_message_ar['pre_ins']='';
+	function _pre_inserup($do){
+		$id     = $do->get('id');
+		$codigo = $do->get('codigo');
+		$fdesde = $do->get('fdesde');
+		$fhasta = $do->get('fhasta');
+
+		$dbcodigo = $this->db->escape($codigo);
+        $dbfdesde = $this->db->escape($fdesde);
+        $dbfhasta = $this->db->escape($fhasta);
+
+        $mSQL = "SELECT COUNT(*) AS cana
+			FROM sinvpromo
+			WHERE codigo=${dbcodigo} AND (${dbfdesde} BETWEEN fdesde AND fhasta OR ${dbfhasta} BETWEEN fdesde AND fhasta)";
+		if(!empty($id)){
+			 $mSQL .= ' AND id<>'.$this->db->escape($id);
+		}
+		$cana=$this->datasis->dameval($mSQL);
+
+		if($cana>0){
+			$do->error_message_ar['pre_ins']='La promoci&oacute;n se solapa con otra';
+			$do->error_message_ar['pre_upd']='La promoci&oacute;n se solapa con otra';
+			return false;
+		}
 		return true;
+
+	}
+
+	function _pre_insert($do){
+		return $this->_pre_inserup($do);
 	}
 
 	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='';
-		return true;
+		return $this->_pre_inserup($do);
 	}
 
 	function _pre_delete($do){
@@ -565,18 +593,24 @@ class Sinvpromo extends Controller {
 	}
 
 	function _post_insert($do){
+		$codigo = $do->get('codigo');
+		$margen = $do->get('margen');
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo promocion ${codigo} margen ${margen}");
 	}
 
 	function _post_update($do){
+		$codigo = $do->get('codigo');
+		$margen = $do->get('margen');
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico promocion ${codigo} margen ${margen}");
 	}
 
 	function _post_delete($do){
+		$codigo = $do->get('codigo');
+		$margen = $do->get('margen');
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		logusu($do->table,"Elimino promocion ${codigo} margen ${margen}");
 	}
 
 
@@ -607,6 +641,14 @@ class Sinvpromo extends Controller {
 		</script>';
 
 		$edit = new DataEdit('Art&iacute;culo en Promoci&oacute;n', 'sinvpromo');
+
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
+
 		$edit->back_save   = true;
 		$edit->back_cancel = true;
 		$edit->back_cancel_save   = true;
@@ -625,6 +667,25 @@ class Sinvpromo extends Controller {
 		$edit->margen->maxlength = 15;
 		$edit->margen->css_class = 'inputnum';
 		$edit->margen->rule      = 'required|callback_chporcent';
+
+		$edit->cantidad = new inputField('Cantidad', 'cantidad');
+		$edit->cantidad->size     = 15;
+		$edit->cantidad->maxlength= 15;
+		$edit->cantidad->autocomplete = false;
+		$edit->cantidad->css_class= 'inputnum';
+		$edit->cantidad->rule     = 'required';
+
+		$edit->fdesde = new dateonlyField('Desde', 'fdesde','d/m/Y');
+		$edit->fdesde->insertValue = date('Y-m-d',mktime(0,0,0,date('m')+3,date('j'),date('Y')));
+		$edit->fdesde->size        = 15;
+		$edit->fdesde->calendar    = false;
+		$edit->fdesde->group       = 'Validez';
+
+		$edit->fhasta = new dateonlyField('Hasta', 'fhasta','d/m/Y');
+		$edit->fhasta->size        = 15;
+		$edit->fhasta->insertValue = date('Y-m-d');
+		$edit->fhasta->calendar    = false;
+		$edit->fhasta->group       = 'Validez';
 
 		$edit->buttons('modify', 'save','undo','delete');
 		$edit->build();
@@ -677,61 +738,3 @@ class Sinvpromo extends Controller {
 		}
 	}
 }
-
-
-	//function dataedit() {
-	//	$this->rapyd->load('dataedit');
-    //
-	//	$mSINV=array(
-	//		'tabla'   =>'sinv',
-	//		'columnas'=>array(
-	//		'codigo' =>'C&oacute;odigo',
-	//		'descrip'=>'Descripci&oacute;n',
-	//		'descrip2'=>'Descripci&oacute;n 2'),
-	//		'filtro'  =>array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
-	//		'retornar'=>array('codigo'=>'codigo'),
-	//		'titulo'  =>'Buscar Codigo');
-	//	$bSINV=$this->datasis->modbus($mSINV);
-    //
-	//	$script='
-	//	<script language="javascript" type="text/javascript">
-	//	$(function(){
-	//		$(".inputnum").numeric(".");
-	//	});
-	//	</script>';
-    //
-	//	$edit = new DataEdit('Art&iacute;culo en Promoci&oacute;n', 'sinvpromo');
-	//	$edit->back_url = site_url('inventario/sinvpromo/filteredgrid/');
-    //
-	//	$edit->codigo = new inputField('C&oacute;digo', 'codigo');
-	//	$edit->codigo->size      =  15;
-	//	$edit->codigo->maxlength =  15;
-	//	$edit->codigo->rule      = 'required';
-	//	$edit->codigo->append($bSINV);
-    //
-	//	$edit->margen = new inputField('Porcentaje de descuento', 'margen');
-	//	$edit->margen->size      = 15;
-	//	$edit->margen->maxlength = 15;
-	//	$edit->margen->css_class = 'inputnum';
-	//	$edit->margen->rule      = 'required|callback_chporcent';
-    //
-	//	/*$edit->cantidad = new inputField('Cantidad', 'cantidad');
-	//	$edit->cantidad->size     = 15;
-	//	$edit->cantidad->maxlength= 15;
-	//	$edit->cantidad->css_class= 'inputnum';
-	//	$edit->cantidad->rule     = 'required';*/
-    //
-	//	/*$edit->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
-	//	$edit->fechad->insertValue = date('Y-m-d',mktime(0,0,0,date('m')+3,date('j'),date('Y')));
-    //
-	//	$edit->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
-	//	$edit->fechah->insertValue = date('Y-m-d');*/
-    //
-	//	$edit->buttons('modify', 'save','undo','delete' ,'back');
-	//	$edit->build();
-    //
-	//	$data['content'] = $edit->output;
-	//	$data['head']    = script('jquery.js').script('jquery-ui.js').script("plugins/jquery.numeric.pack.js").script('plugins/jquery.meiomask.js').style('vino/jquery-ui.css').$this->rapyd->get_head().$script;
-	//	$data['title']   = '<h1>C&oacute;digo Barras de Inventario</h1>';
-	//	$this->load->view('view_ventanas', $data);
-	//}

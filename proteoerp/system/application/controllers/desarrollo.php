@@ -969,7 +969,7 @@ class Desarrollo extends Controller{
 			//$str .= $tab2.'$grid->setAfterSubmit("$.prompt(\'Respuesta:\'+a.responseText); return [true, a ];");'."\n\n";
 
 			$str .= $tab2.'$grid->setAfterSubmit("$(\'#respuesta\').html(\'&lt;span style='."\\'font-weight:bold; color:red;\\'&gt;'+a.responseText+'&lt;/span&gt;'); return [true, a ];".'");'."\n\n";
-
+			$str .= $tab2.'$grid->setOndblClickRow(\'\');';
 
 			$str .= $tab2.'#show/hide navigations buttons'."\n";
 			$str .= $tab2.'$grid->setAdd(    $this->datasis->sidapuede(\''.strtoupper($db).'\',\'INCLUIR%\' ));'."\n";
@@ -1763,6 +1763,7 @@ class Desarrollo extends Controller{
 		$crud.="\t\t".'$script= \''."\n";
 		$crud.="\t\t".'$(function() {'."\n";
 		$crud.="\t\t\t".'$("#fecha").datepicker({dateFormat:"dd/mm/yy"});'."\n";
+		$crud.="\t\t\t".'$(".inputnum").numeric(".");'."\n";
 		$crud.="\t\t".'});'."\n";
 		$crud.="\t\t".'\';'."\n\n";
 
@@ -1781,17 +1782,6 @@ class Desarrollo extends Controller{
 		$crud.="\t\t".'$edit->pre_process(\'insert\', \'_pre_insert\' );'."\n";
 		$crud.="\t\t".'$edit->pre_process(\'update\', \'_pre_update\' );'."\n";
 		$crud.="\t\t".'$edit->pre_process(\'delete\', \'_pre_delete\' );'."\n";
-
-		$crud.="\n";
-
-		$crud.="\t\t".'$script= \' '."\n";
-		$crud.="\t\t".'$(function() {'."\n";
-		$crud.="\t\t\t".'$("#fecha").datepicker({dateFormat:"dd/mm/yy"});'."\n";
-		$crud.="\t\t".'});';
-		$crud.="\t\t".'\';'."\n";
-
-		$crud.="\t\t".'$edit->script($script,\'create\');'."\n";
-		$crud.="\t\t".'$edit->script($script,\'modify\');'."\n";
 		$crud.="\n";
 
 		$mSQL="DESCRIBE $tabla";
@@ -1948,6 +1938,5 @@ class Desarrollo extends Controller{
 	function ccc(){
 		print_r($this->datasis->controladores());
 	}
-
 
 }
