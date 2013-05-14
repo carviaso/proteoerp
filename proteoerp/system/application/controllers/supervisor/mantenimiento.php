@@ -30,7 +30,7 @@ class Mantenimiento extends Controller{
 
 		//$out=ul($list, $attributes);
 		//$data['content'] = $out;
-//image('repair-database.jpeg')
+		//image('repair-database.jpeg')
 
 		$data['content'] = '
 <center>
@@ -254,15 +254,29 @@ function bobo(url){'."
 	}
 
 	function reparatabla(){
-		$resulta = "<h1>Tablas con Fallas:</h1>\n";
+		$resulta = heading('Tablas con Fallas:');
 		$sifallo = false;
 		$this->datasis->modulo_id('900',1);
 		$this->load->dbutil();
 		$tables = $this->db->list_tables();
 		foreach ($tables as $table){
-			if ( !$this->dbutil->repair_table($table) ){
-				$sifallo = true;
-				$resulta .= "$table\n";
+			if(preg_match('/^(view_[a-zA-Z]*|sp_[a-zA-Z]*)/i', $table)){
+				continue;
+			}
+
+			$query = $this->db->query('CHECK TABLE '.$table);
+			if($query->num_rows() > 0){
+				$row = $query->row();
+				if(($row->Msg_text=='OK') || ($row->Msg_text=='Table is already up to date')){
+					continue;
+				}else{
+					if ($row->Msg_type=='error'){
+						if(!$this->dbutil->repair_table($table)){
+							$sifallo = true;
+							$resulta .= $table."\n";
+						}
+					}
+				}
 			}
 		}
 		if ( !$sifallo) $resulta .= "<p>Todas las Tablas se repararon con Exito</p>";
@@ -403,7 +417,7 @@ function bobo(url){'."
 		}
 		$data['content']  = $filter->output.$tabla;
 		$data['title']    = "<h1>Almacenes con problemas de incosistencias</h1>";
-		$data["head"]     = $this->rapyd->get_head();
+		$data['head']     = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -1136,6 +1150,5 @@ function bobo(url){'."
 		$this->db->simple_query("CALL sp_calcoestadis()");
 		echo '<h1>Recalculo Concluido</h1>';
 	}
-
 
 }
