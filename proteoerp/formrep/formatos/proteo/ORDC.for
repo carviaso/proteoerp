@@ -24,10 +24,10 @@ $numero   = htmlspecialchars(trim($row->numero));
 $proveed  = htmlspecialchars(trim($row->proveed));
 $rifci    = htmlspecialchars(trim($row->rif));
 $nombre   = htmlspecialchars(trim($row->nombre));
-$stotal   = $row->totals;
-$gtotal   = $row->totalg;
-$peso     = $row->peso;
-$impuesto = $row->iva;
+$stotal   = nformat($row->totals);
+$gtotal   = nformat($row->totalg);
+$peso     = nformat($row->peso);
+$impuesto = nformat($row->iva);
 $direccion= htmlspecialchars(trim($row->direccion));
 
 $dbnumero = $this->db->escape($numero);

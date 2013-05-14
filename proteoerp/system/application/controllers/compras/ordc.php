@@ -1,13 +1,10 @@
 <?php
 require_once(BASEPATH.'application/controllers/validaciones.php');
-
 class Ordc extends Controller {
 	var $mModulo = 'ORDC';
 	var $titp    = 'Orden de Compras';
 	var $tits    = 'Orden de Compras';
 	var $url     = 'compras/ordc/';
-	var $genesal = true;
-	var $solo    = false;
 
 
 	function Ordc(){
@@ -1195,35 +1192,6 @@ class Ordc extends Controller {
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 
-	}
-
-
-	function solo() {
-		$this->solo = true;
-		$id = $this->uri->segment($this->uri->total_segments());
-
-		//Creando Orden
-		if ( $id == 'create'){
-			$this->dataedit();
-		} elseif ( $id == 'insert'){
-			$this->genesal = false;
-			$rt = $this->dataedit();
-			//$id = $this->claves["id"];
-			if ( strlen($rt) > 0 )
-				echo '{"status":"A","id":"'.$id.'" ,"mensaje":"'.$rt.'"}';
-		} elseif ( $id == 'process'){
-			$control = $this->uri->segment($this->uri->total_segments()-1);
-			$rt = $this->actualizar($control);
-			if ( strlen($rt[1]) > 0 )
-				if ( $rt[0] === false ) $p = 'E'; else $p='A';
-				echo '{"status":"'.$p.'","id":"'.$control.'" ,"mensaje":"<h1>'.$rt[1].'</h1>"}';
-		} else {
-			$modo = $this->uri->segment($this->uri->total_segments()-1);
-			if ( $modo == 'update' ) $this->genesal = false;
-			$rt = $this->dataedit();
-			if ( strlen($rt) > 0 )
-				echo '{"status":"A","id":"'.$id.'" ,"mensaje":"'.$rt.'"}';
-		}
 	}
 
 	function filteredgrid(){

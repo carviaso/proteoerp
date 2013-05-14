@@ -10,19 +10,20 @@ if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row = $mSQL_1->row();
 
 $fecha    = dbdate_to_human($row->fecha);
-$numero   = $row->numero;
-$cod_cli  = $row->cod_cli;
-$rifci    = $row->rifci;
-$nombre   = $row->nombre;
-$stotal   = $row->totals;
-$gtotal   = $row->totalg;
-$peso     = $row->peso;
-$impuesto = $row->iva;
-$direccion= $row->direccion;
+$numero   = htmlspecialchars(trim($row->numero));
+$cod_cli  = htmlspecialchars(trim($row->cod_cli));
+$rifci    = htmlspecialchars(trim($row->rifci));
+$nombre   = htmlspecialchars(trim($row->nombre));
+$stotal   = nformat($row->totals);
+$gtotal   = nformat($row->totalg);
+$peso     = nformat($row->peso);
+$impuesto = nformat($row->iva);
+$direccion= htmlspecialchars(trim($row->direccion));
 
+$dbnumero = $this->db->escape($numero);
 $lineas = 0;
 $uline  = array();
-$mSQL_2 = $this->db->query("SELECT codigo,desca,cana,preca,importe,totaorg,iva,detalle FROM itspre WHERE numero='$numero'");
+$mSQL_2 = $this->db->query('SELECT codigo,desca,cana,preca,importe,totaorg,iva,detalle FROM itspre WHERE numero='.$dbnumero);
 $detalle  = $mSQL_2->result();
 ?><html>
 <head>
@@ -182,7 +183,7 @@ foreach ($detalle AS $items){ $i++;
 					?>
 				</td>
 				<td style="text-align: center;"><?php echo ($clinea)? '': nformat($items->cana,3); ?></td>
-				<td style="text-align: right;" ><?php echo ($clinea)? '': nformat($items->preca); ?></td>
+				<td style="text-align: right;" ><?php echo ($clinea)? '': nformat($items->preca);  ?></td>
 				<td class="change_order_total_col"><?php echo ($clinea)? '':nformat($items->preca*$items->cana); ?></td>
 			</tr>
 <?php
