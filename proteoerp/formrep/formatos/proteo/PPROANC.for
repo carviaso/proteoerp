@@ -58,7 +58,7 @@ if($tipo_op=='CH'){
 ?><html>
 <head>
 <title>Anticipo a proveedor <?php echo $numero ?></title>
-<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
+<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body style="margin-left: 30px; margin-right: 30px;">
 <!--@size_paper 215.9x139.7-->

@@ -27,7 +27,7 @@ $detalle  = $mSQL_2->result();
 ?><html>
 <head>
 <title>Presupuesto <?php echo $numero ?></title>
-<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
+<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body>
 

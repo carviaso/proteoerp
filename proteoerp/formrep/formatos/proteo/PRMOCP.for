@@ -37,7 +37,7 @@ $lineas=0;
 ?><html>
 <head>
 <title>Registro de cheque devuelto girado a proveedores<?php echo $numero ?></title>
-<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
+<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body style="margin-left: 30px; margin-right: 30px;">
 

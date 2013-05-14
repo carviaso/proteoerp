@@ -38,7 +38,7 @@ jQuery("#bcopiar").click( function(){
 	var ucopia  = $("#copia").val();
 	if ( ucopia == usuario ){
 		$.prompt("<h1>Usuario y copia iguales!!!</h1>");
-	} else {	
+	} else {
 		if (ucopia)	{
 			esperar(\''.site_url("supervisor/acdatasis/copia/").'\'+"/"+usuario+"/"+ucopia);
 		} else {
@@ -65,7 +65,7 @@ jQuery("#bcopiar").click( function(){
 			<td style="font-size:16px;font-weight:bold;">Usuario:</td>
 			<td>&nbsp;'.$this->datasis->llenaopciones($mSQL, false, $id='usuario' ).'</td>
 			<td rowspan="2"><div class="otros"><a style="width:70px;height:30px;" href="#" id="bcopiar">Copiar</a></div><td>
-		</tr></tr>
+		</tr><tr>
 			<td style="font-size:16px;font-weight:bold;">Copiar de:</td><td>&nbsp;'.
 				$this->datasis->llenaopciones($mSQL, true, $id='copia' )
 			.'</td>
@@ -106,12 +106,12 @@ jQuery("#bcopiar").click( function(){
 		hiddengrid: false,
 		width: 375,
 		caption: "Reportes",
-		ondblClickRow: function(id, row, col, e){ 
+		ondblClickRow: function(id, row, col, e){
 			var ret = $("#titulos").getRowData(id);
 			jQuery("'.$grid1Id.'").jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdata/').'/"+ret.modulo+"/"+$("#usuario").val(), page:1});
 			jQuery("'.$grid1Id.'").trigger("reloadGrid");
 		}
-	});	
+	});
 	'.$this->datasis->menuMod().'
 
 	for(var i=0;i<=datamenu.length;i++) jQuery("#titulos").jqGrid(\'addRowData\',i+1,datamenu[i]);
@@ -134,7 +134,7 @@ jQuery("#bcopiar").click( function(){
 		$param['bodyscript'] = $bodyscript;
 		$param['tabs']       = false;
 		$param['encabeza']   = $this->titp;
-		
+
 		$this->load->view('jqgrid/crud',$param);
 	}
 
@@ -336,23 +336,23 @@ jQuery("#bcopiar").click( function(){
 	function copia(){
 		$usuario = $this->uri->segment(4);
 		$copia   = $this->uri->segment(5);
-		
+
 		if ( $usuario != $copia ){
 			//Borra los del usuario
 			$mSQL = "DELETE FROM sida WHERE usuario=? ";
 			$this->db->query($mSQL, array($usuario));
 			echo "Eliminado Accesos anteriores<br>";
-			
+
 			//Porsia Agrega desde tmenus
 			$mSQL = "INSERT IGNORE INTO sida (usuario, modulo, acceso) SELECT ? usuario, codigo modulo, 'N' FROM tmenus ";
 			$this->db->query($mSQL, array($copia));
 			echo 'Insertados Accesos Faltantes<br>';
-			
+
 			//Copia desde el usuario copia
 			$mSQL = "INSERT INTO sida (usuario, modulo, acceso) SELECT ? usuario, modulo, acceso FROM sida WHERE usuario=? ";
 			$this->db->query($mSQL, array($usuario, $copia ));
 			echo "Insertados Nuevos Accesos <br>";
-			
+
 			echo "<h1>El Usuario ".$usuario." ahora tiene los accesos de ".$copia."</h1>";
 		} else {
 			echo "<h1>Usuarios origen y destino iguales ".$usuario."=".$copia."</h1>";

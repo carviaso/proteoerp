@@ -53,6 +53,12 @@ class parqueador extends Sfac {
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
+		$funciones = '
+		function ltransac(el, val, opts){
+			var link=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return link;
+		};';
+
 		//$param['jquerys']      = array('plugins/jquery.ui.timepicker.addon.js','i18n/grid.locale-es.js');
 		//$param['jquerys']      = array('plugins/jquery.maskedinput.min.js');
 		$param['WestPanel']    = $WestPanel;
@@ -64,7 +70,7 @@ class parqueador extends Sfac {
 		$param['listados']     = $this->datasis->listados('SFAC', 'JQ');
 		$param['otros']        = $this->datasis->otros('SFAC', 'JQ');
 		$param['centerpanel']  = $centerpanel;
-		//$param['funciones']    = $funciones;
+		$param['funciones']    = $funciones;
 		$param['temas']        = array('proteo','darkness','anexos1');
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
@@ -81,7 +87,16 @@ class parqueador extends Sfac {
 		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
-		function sfacadd() {
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function sfacadd(){
 			$.post("'.site_url($this->url.'datapar/create').'",
 			function(data){
 				$("#fimpser").html("");

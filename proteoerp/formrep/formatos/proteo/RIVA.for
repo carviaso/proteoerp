@@ -52,7 +52,7 @@ $tipotra   = '01';
 ?><html>
 <head>
 <title>Comprobante de retenci&oacute;n de IVA <?php echo $numero ?></title>
-<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
+<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body>
 <script type="text/php">

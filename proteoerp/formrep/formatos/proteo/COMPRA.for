@@ -68,14 +68,14 @@ $encabeza = '
 $encabeza1p = '
 				<table style="width: 100%; font-size: 8pt;">
 				<tr>
-					<td>Almac&eacute;n: <strong>'.$depo.'</strong></td>
-					<td>Actualizado: <strong>'.$actuali.'</strong></td>
+					<td>Almac&eacute;n: <b>'.$depo.'</b></td>
+					<td>Actualizado: <b>'.$actuali.'</b></td>
 				</tr><tr>
-					<td>Fecha: <strong>'.$fecha.'</strong></td>
-					<td>Vencimiento: <strong>'.$vence.'</strong></td>
+					<td>Fecha: <b>'.$fecha.'</b></td>
+					<td>Vencimiento: <b>'.$vence.'</b></td>
 				</tr><tr>
-					<td>Proveedor: <strong>('.$proveed.') '.$nombre.'</strong></td>
-					<td>Peso: <strong>'.$peso.'</strong></td>
+					<td>Proveedor: <b>('.$proveed.') '.$nombre.'</b></td>
+					<td>Peso: <b>'.$peso.'</b></td>
 				</tr>
 				</table>
 ';
@@ -96,7 +96,7 @@ $encatabla = '
 ?><html>
 <head>
 <title>Compra <?php echo $numero ?></title>
-<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
+<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body>
 <script type="text/php">
@@ -131,7 +131,7 @@ foreach ($detalle AS $items){ $i++;
 ?>
 <table style="width: 100%;">
 		<thead><tr>
-			<td><?php echo $encabeza." ".$encabeza1p ?></td>
+			<td><?php echo $encabeza.' '.$encabeza1p ?></td>
 		</tr></thead>
 		<tr>
 			<td><div id="content"><div class="page" style="font-size: 7pt">
@@ -157,7 +157,7 @@ foreach ($detalle AS $items){ $i++;
 			</tbody>
 			<tfoot>
 			<tr>
-				<td colspan="6" style="text-align: right;font-size:16px"><strong>Continua.........</strong></td>
+				<td colspan="6" style="text-align: right;font-size:16px"><b>Continua.........</b></td>
 			</tr>
 			</tfoot>
 			</table>
@@ -185,20 +185,20 @@ foreach ($detalle AS $items){ $i++;
 			<tr><td colspan="7">
 			<table width="100%">
 				<tr>
-					<td style="text-align:center;"><strong>Preparado por:</strong></td>
-					<td style="text-align:center;"><strong>Autorizado por:</strong></td>
-					<td style="text-align: right;"><strong>SUB-TOTAL:</strong></td>
-					<td style="border-style:solid;" class="change_order_total_col"><strong><?php echo  nformat($montotot).$moneda?></strong></td>
+					<td style="text-align:center;"><b>Preparado por:</b></td>
+					<td style="text-align:center;"><b>Autorizado por:</b></td>
+					<td style="text-align: right;"><b>SUB-TOTAL:</b></td>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($montotot).$moneda?></b></td>
 				</tr	><tr>
 					<td style="text-align:center;"></td>
 					<td style="text-align:center;"></td>
-					<td style="text-align: right;"><strong>IMPUESTO:</strong></td>
-					<td style="border-style:solid;" class="change_order_total_col"><strong><?php echo  nformat($montoiva).$moneda ?></strong></td>
+					<td style="text-align: right;"><b>IMPUESTO:</b></td>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($montoiva).$moneda ?></b></td>
 				</tr><tr>
 					<td style="border-bottom-style:solid;text-align:center;"></td>
 					<td style="border-bottom-style:solid;text-align:center;"></td>
-					<td style="text-align: right;"><strong>TOTAL:</strong></td>
-					<td style="border-style:solid;" class="change_order_total_col"><strong><?php echo  nformat($montonet).$moneda ?></strong></td>
+					<td style="text-align: right;"><b>TOTAL:</b></td>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($montonet).$moneda ?></b></td>
 				</tr>
 			</table>
 			</td></tr>

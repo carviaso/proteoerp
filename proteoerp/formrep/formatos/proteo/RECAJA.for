@@ -25,7 +25,7 @@ $qdev = $this->db->get();
 <html>
 <head>
 <title>Arqueo de Caja<?php echo $numero ?></title>
-<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
+<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body>
 <script type="text/php">

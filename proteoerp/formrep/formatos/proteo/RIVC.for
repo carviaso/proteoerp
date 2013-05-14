@@ -72,7 +72,7 @@ $anticnum =$rrow->numero;
 <html>
 <head>
 <title>Comprobante <?php echo $nrocomp ?></title>
-<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
+<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 
 </head>
 <body>

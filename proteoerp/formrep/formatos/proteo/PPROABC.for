@@ -73,7 +73,7 @@ $ittot['monto']=$ittot['reten']=$ittot['ppago']=$ittot['cambio']=$ittot['mora']=
 ?><html>
 <head>
 <title>Pago a proveedor <?php echo $numero ?></title>
-<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
+<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body style="margin-left: 30px; margin-right: 30px;">
 
