@@ -1300,7 +1300,7 @@ class Desarrollo extends Controller{
 			$str .= $tab8.'	apprise("Registro Guardado");'."\n";
 			$str .= $tab8.'	$( "#fedita" ).dialog( "close" );'."\n";
 			$str .= $tab8.'	grid.trigger("reloadGrid");'."\n";
-			$str .= $tab8.'	\'.$this->datasis->jwinopen(site_url(\'formatos/ver/'.strtoupper($db).'\').\'/\\\'+res.id+\\\'/id\\\'\').\';'."\n";
+			$str .= $tab8.'	\'.$this->datasis->jwinopen(site_url(\'formatos/ver/'.strtoupper($db).'\').\'/\\\'+json.pk.id+\\\'/id\\\'\').\';'."\n";
 			$str .= $tab8.'	return true;'."\n";
 			$str .= $tab8.'} else {'."\n";
 			$str .= $tab8.'	apprise(json.mensaje);'."\n";

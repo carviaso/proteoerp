@@ -738,7 +738,6 @@ class Ajax extends Controller {
 		$qdb    = $this->db->escape($mid.'%');
 		$qba    = $this->db->escape($mid);
 		$sprv   = $this->input->post('sprv');
-		$dbsprv = $this->db->escape($sprv);
 
 		$data = '[{ }]';
 		if($mid !== false){
@@ -747,9 +746,15 @@ class Ajax extends Controller {
 			$mSQL="SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo
 				,a.peso, a.ultimo, a.pond
 				FROM sinv AS a
-				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
-				LEFT JOIN sinvprov  AS c ON c.proveed=$dbsprv AND c.codigo=a.codigo
-				WHERE (a.codigo LIKE $qdb OR a.descrip LIKE  $qdb OR a.barras LIKE $qdb OR b.suplemen=$qba OR a.alterno LIKE $qba OR c.codigop=$qdb) AND a.activo='S' AND a.tipo='Articulo'
+				LEFT JOIN barraspos AS b ON a.codigo=b.codigo ";
+			if(!empty($sprv)){
+				$dbsprv = $this->db->escape($sprv);
+				$mSQL.="LEFT JOIN sinvprov  AS c ON c.proveed=$dbsprv AND c.codigo=a.codigo";
+				$ww = 'OR c.codigop='.$qdb;
+			}else{
+				$ww ='';
+			}
+			$mSQL.=" WHERE (a.codigo LIKE $qdb OR a.descrip LIKE  $qdb OR a.barras LIKE $qdb OR b.suplemen=$qba OR a.alterno LIKE $qba $ww) AND a.activo='S' AND a.tipo='Articulo'
 				ORDER BY a.descrip LIMIT ".$this->autolimit;
 			$cana=1;
 

@@ -2,10 +2,10 @@
 require_once(BASEPATH.'application/controllers/validaciones.php');
 
 class Ordc extends Controller {
-	var $mModulo='ORDC';
-	var $titp = 'Orden de Compras';
-	var $tits = 'Orden de Compras';
-	var $url  = 'compras/ordc/';
+	var $mModulo = 'ORDC';
+	var $titp    = 'Orden de Compras';
+	var $tits    = 'Orden de Compras';
+	var $url     = 'compras/ordc/';
 	var $genesal = true;
 	var $solo    = false;
 
@@ -48,16 +48,19 @@ class Ordc extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"imprime",  "img"=>"images/pdf_logo.gif", "alt" => 'Formato PDF', "label"=>"Reimprimir Documento"));
-		$grid->wbotonadd(array("id"=>"agregar",  "img"=>"images/agrega4.png",  "alt" => 'Agregar',     "label"=>"Agregar Orden"));
-		$grid->wbotonadd(array("id"=>"modifica", "img"=>"images/editar.png",   "alt" => 'Modificar',   "label"=>"Modificar Orden"));
+		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png', 'alt' => 'Reimprimir Documento', 'label'=>'Reimprimir Documento'));
+		//$grid->wbotonadd(array('id'=>'agregar',  'img'=>'images/agrega4.png' , 'alt' => 'Agregar'    , 'label'=>'Agregar Orden'       ));
+		//$grid->wbotonadd(array('id'=>'modifica', 'img'=>'images/editar.png'  , 'alt' => 'Modificar'  , 'label'=>'Modificar Orden'    ));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central y Sur
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array("id"=>"fne",  "title"=>"Agregar/Editar Orden de Compra")
+			//array('id'=>'fne'   ,  'title'=>'Agregar/Editar Orden de Compra'),
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -82,14 +85,71 @@ class Ordc extends Controller {
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript ='<script type="text/javascript">';
 
-		$bodyscript .='
-		jQuery("#imprime").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/ORDC').'/\'+id+"/id", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});';
+		$bodyscript .= '
+		function ordcadd(){
+			$.post("'.site_url($this->url.'dataedit/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		};';
+
+		$bodyscript .= '
+		function ordcedit(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function ordcshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function ordcdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
 
 		//Wraper de javascript
 		$bodyscript .= '
@@ -102,76 +162,91 @@ class Ordc extends Controller {
 			var s;
 			var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
-			s = grid.getGridParam(\'selarrrow\'); 
+			s = grid.getGridParam(\'selarrrow\');
 		';
 
 		$bodyscript .='
-			jQuery("#modifica").click( function(){
-				var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-				if (id)	{
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
-					mId = id;
-					if ( ret.status == "PE" ) {
-						$.post("'.site_url('compras/ordc/solo/modify').'/"+id, function(data){
-							$("#fne").html(data);
-							$( "#fne" ).dialog( "open" );
-						});
-					} else {
-						$.prompt("<h1>Orden no modificable, esta cerrada o en back order");
-					}
-				} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-			});
-			';
-
-		//Agregar Compra
-		$bodyscript .= '
-			$( "#agregar" ).click(function() {
-				$.post("'.site_url('compras/ordc/solo/create').'",
-				function(data){
-					$("#fne").html(data);
-					$( "#fne" ).dialog( "open" );
-				})
-			});';
+		jQuery("#imprime").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url('formatos/ver/ORDC').'/\'+id+"/id", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});';
 
 		$bodyscript .= '
-			$( "#fne" ).dialog({
-				autoOpen: false, height: 510, width: 860, modal: true,
-				buttons: {
-					"Guardar": function() {
-						var bValid = true;
-						var murl = $("#df1").attr("action");
-						allFields.removeClass( "ui-state-error" );
-						if ( bValid ) {
-							$.ajax({
-								type: "POST", dataType: "html", async: false,
-								url: murl,
-								data: $("#df1").serialize(),
-								success: function(r,s,x){
-									var res = $.parseJSON(r);
-									if ( res.status == "A"){
-										apprise(res.mensaje);
-										$( "#fne" ).dialog( "close" );
-										grid.trigger("reloadGrid");
-										'.$this->datasis->jwinopen(site_url('formatos/ver/ORDC').'/\'+res.id+\'/id\'').';
-										return true;
-									} else if ( res.status == "C"){
-										apprise("<div style=\"font-size:16px;font-weight:bold;background:green;color:white\">Mensaje:</div> <h1>"+res.mensaje);
-									} else {
-										apprise("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
-									}
+		$("#fedita").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/ORDC').'/\'+json.pk.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
 								}
-							});
+							}catch(e){
+								$("#fedita").html(r);
+							}
 						}
-					},
-					Cancelar: function() { $( this ).dialog( "close" ); }
+					})
 				},
-				close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
-			});';
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
 
 		$bodyscript .= '	});';
-		$bodyscript .= "\n</script>\n";
-
-
+		$bodyscript .= '</script>';
 
 		return $bodyscript;
 	}
@@ -181,17 +256,17 @@ class Ordc extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 40,
+			'width'         => 45,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 2 }',
@@ -210,7 +285,7 @@ class Ordc extends Controller {
 		));
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -234,7 +309,7 @@ class Ordc extends Controller {
 */
 
 		$grid->addField('proveed');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -471,7 +546,7 @@ class Ordc extends Controller {
 */
 
 		$grid->addField('condi1');
-		$grid->label('Condi1');
+		$grid->label('Condiciones 1');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -483,7 +558,7 @@ class Ordc extends Controller {
 
 
 		$grid->addField('condi2');
-		$grid->label('Condi2');
+		$grid->label('Condiciones 2');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -495,7 +570,7 @@ class Ordc extends Controller {
 
 
 		$grid->addField('condi3');
-		$grid->label('Condi3');
+		$grid->label('Condiciones 3');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -507,7 +582,7 @@ class Ordc extends Controller {
 
 
 		$grid->addField('transac');
-		$grid->label('Transac');
+		$grid->label('Transaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -620,17 +695,19 @@ class Ordc extends Controller {
 			}
 		');
 
-		$grid->setOndblClickRow("");
+		$grid->setOndblClickRow('');
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 460, height:280, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 460, height:280, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
+		$grid->setBarOptions('addfunc: ordcadd, editfunc: ordcedit, delfunc: ordcdel, viewfunc: ordcshow');
+
 		#show/hide navigations buttons
-		$grid->setAdd(false);
-		$grid->setEdit(false);
-		$grid->setDelete(true);
-		$grid->setSearch(true);
+		$grid->setAdd(    $this->datasis->sidapuede('ORDC','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('ORDC','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('ORDC','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('ORDC','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
@@ -650,8 +727,7 @@ class Ordc extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -665,13 +741,12 @@ class Ordc extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = '??????';
 		$check  = 0;
 
 		unset($data['oper']);
@@ -721,13 +796,12 @@ class Ordc extends Controller {
 		};
 	}
 
-
 	//***************************
 	//Definicion del Grid y la Forma
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -781,7 +855,7 @@ class Ordc extends Controller {
 */
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -793,7 +867,7 @@ class Ordc extends Controller {
 
 
 		$grid->addField('descrip');
-		$grid->label('Descrip');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -865,7 +939,7 @@ class Ordc extends Controller {
 
 
 		$grid->addField('iva');
-		$grid->label('Iva');
+		$grid->label('IVA');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -880,7 +954,7 @@ class Ordc extends Controller {
 
 
 		$grid->addField('montoiva');
-		$grid->label('Montoiva');
+		$grid->label('Impuesto G.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -907,7 +981,7 @@ class Ordc extends Controller {
 */
 
 		$grid->addField('garantia');
-		$grid->label('Garantia');
+		$grid->label('Garant&iacute;a');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1082,19 +1156,15 @@ class Ordc extends Controller {
 			cellsubmit: "remote",
 			cellurl: "'.site_url($this->url.'setdatait/').'"
 		');
-		$grid->setOndblClickRow("");
+		$grid->setOndblClickRow('');
 
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
-		#show/hide navigations buttons
-		$grid->setAdd(false);
-		$grid->setEdit(false);
-		$grid->setDelete(false);
-		$grid->setSearch(true);
-		$grid->setRowNum(30);
+
+		$grid->setRowNum(100);
 		$grid->setShrinkToFit('false');
 
 		#Set url
@@ -1113,8 +1183,7 @@ class Ordc extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdatait()
-	{
+	function getdatait(){
 		$id = $this->uri->segment(4);
 		if ($id == false ){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM ordc");
@@ -1127,67 +1196,6 @@ class Ordc extends Controller {
 		echo $rs;
 
 	}
-
-	/**
-	* Guarda la Informacion
-	*/
-/*
-	function setDatait()
-	{
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = "??????";
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM itordc WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('itordc', $data);
-					echo "Registro Agregado";
-
-					logusu('ITORDC',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM itordc WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM itordc WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE itordc SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("itordc", $data);
-				logusu('ITORDC',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('itordc', $data);
-				logusu('ITORDC',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
-		} elseif($oper == 'del') {
-		$meco = $this->datasis->dameval("SELECT $mcodp FROM itordc WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM itordc WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM itordc WHERE id=$id ");
-				logusu('ITORDC',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
-	}
-*/
 
 
 	function solo() {
@@ -1219,7 +1227,7 @@ class Ordc extends Controller {
 	}
 
 	function filteredgrid(){
-		echo "Opcion Eliminada";
+		echo 'Opcion Eliminada';
 	}
 
 	function dataedit(){
@@ -1251,19 +1259,19 @@ class Ordc extends Controller {
 
 		$btn=$this->datasis->p_modbus($modbus,'<#i#>');
 
-
 		$do = new DataObject('ordc');
 		$do->rel_one_to_many('itordc', 'itordc', 'numero');
 		$do->pointer('sprv' ,'sprv.proveed=ordc.proveed','sprv.nombre AS sprvnombre','left');
 		$do->rel_pointer('itordc','sinv','itordc.codigo=sinv.codigo','sinv.descrip AS sinvdescrip, sinv.base1 AS sinvprecio1, sinv.base2 AS sinvprecio2, sinv.base3 AS sinvprecio3, sinv.base4 AS sinvprecio4, sinv.iva AS sinviva, sinv.peso AS sinvpeso,sinv.tipo AS sinvtipo');
 
 		$edit = new DataDetails('Orden De Comnpra', $do);
+		$edit->on_save_redirect=false;
 		$edit->back_url = site_url('compras/ordc/filteredgrid');
 		$edit->set_rel_title('itordc','Producto <#o#>');
 
-		$edit->pre_process('insert' ,'_pre_insert');
-		$edit->pre_process('update' ,'_pre_update');
-		
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
@@ -1275,7 +1283,6 @@ class Ordc extends Controller {
 		$edit->fecha->size = 10;
 		$edit->fecha->calendar = false;
 
-
 		$edit->numero = new inputField('N&uacute;mero', 'numero');
 		$edit->numero->size = 10;
 		$edit->numero->mode='autohide';
@@ -1285,6 +1292,7 @@ class Ordc extends Controller {
 
 		$edit->peso = new inputField('Peso', 'peso');
 		$edit->peso->css_class = 'inputnum';
+		$edit->peso->type      = 'inputhidden';
 		$edit->peso->readonly  = true;
 		$edit->peso->size      = 10;
 
@@ -1301,28 +1309,28 @@ class Ordc extends Controller {
 
 		$edit->status = new  autoupdateField( 'status','PE','PE');
 
-/*
-		$edit->status = new  dropdownField ('Estado', 'status');
+		$edit->status = new  dropdownField ('Estatus', 'status');
 		$edit->status->option('','');
 		$edit->status->option('PE','Pendiente');
 		$edit->status->option('CE','Cerrado');
 		$edit->status->option('BA','BackOrde');
 		$edit->status->style='width:100px;';
-*/
+		$edit->status->when=array('show');
 
-		$edit->arribo = new DateonlyField('Arribo', 'arribo','d/m/Y');
+		$edit->arribo = new DateonlyField('Fecha de Arribo', 'arribo','d/m/Y');
 		$edit->arribo->insertValue = date('Y-m-d');
 		$edit->arribo->rule = 'required';
 		$edit->arribo->mode = 'autohide';
 		$edit->arribo->size = 10;
 		$edit->arribo->calendar = false;
-		
+
 		$edit->fechafac = new DateonlyField('Fecha Factura', 'fechafac','d/m/Y');
 		$edit->fechafac->insertValue = date('Y-m-d');
 		$edit->fechafac->rule = 'required';
 		$edit->fechafac->mode = 'autohide';
 		$edit->fechafac->size = 10;
 		$edit->fechafac->calendar = false;
+		$edit->fechafac->when=array('show');
 
 
 		//**************************
@@ -1340,6 +1348,7 @@ class Ordc extends Controller {
 		$edit->descrip = new inputField('Descripci&oacute;n <#o#>', 'descrip_<#i#>');
 		$edit->descrip->size=36;
 		$edit->descrip->db_name='descrip';
+		$edit->descrip->type = 'inputhidden';
 		$edit->descrip->maxlength=50;
 		$edit->descrip->readonly  = true;
 		$edit->descrip->rel_id='itordc';
@@ -1422,48 +1431,40 @@ class Ordc extends Controller {
 
 		$edit->montoiva = new inputField('Impuesto', 'montoiva');
 		$edit->montoiva->css_class ='inputnum';
+		$edit->montoiva->type='inputhidden';
 		$edit->montoiva->readonly  =true;
 		$edit->montoiva->size      = 10;
 
 		$edit->montotot = new inputField('Sub-Total', 'montotot');
 		$edit->montotot->css_class ='inputnum';
+		$edit->montotot->type='inputhidden';
 		$edit->montotot->readonly  =true;
 		$edit->montotot->size      = 10;
 
 		$edit->montonet = new inputField('Monto Total', 'montonet');
 		$edit->montonet->css_class ='inputnum';
+		$edit->montonet->type='inputhidden';
 		$edit->montonet->readonly  =true;
 		$edit->montonet->size      = 10;
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
-		$edit->buttons('modify', 'save', 'undo', 'delete', 'exit','add_rel');
+		//$edit->buttons('modify', 'save', 'undo', 'delete', 'exit','add_rel');
+		$edit->buttons('add_rel');
 
-		if($this->genesal){
-			$edit->build();
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
 			$conten['form']  =&  $edit;
-			$conten['solo']  = $this->solo;
-			if (  $this->solo ){
-				$data['content'] = $this->load->view('view_ordc', $conten);
-			} else {
-				$data['content'] = $this->load->view('view_ordc', $conten,true);
-				$data['title']   = heading('Orden de Compra');
-				$data['head']    = script('jquery.js').script('jquery-ui.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.meiomask.js').style('vino/jquery-ui.css').$this->rapyd->get_head().phpscript('nformat.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js').phpscript('nformat.js');
-				$this->load->view('view_ventanas', $data);
-			}
-		} else {
-			$edit->on_save_redirect=false;
-			$edit->build();
-			if($edit->on_success()){
-				//$this->claves=$edit->_dataobject->pk;
-				//$this->claves['control']=$edit->_dataobject->get('control');
-				$rt= 'Orden Guardada';
-			}elseif($edit->on_error()){
-				$rt= html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string));
-			}
-			return $rt;
+			$this->load->view('view_ordc', $conten);
 		}
-		
 	}
 
 	function chcodigoa($codigo){
@@ -1518,22 +1519,23 @@ class Ordc extends Controller {
 			//$do->set_rel('itspre','mostrado',$iva+$totals,$i);
 		}
 		$totalg = $totals+$iva;
-		
+
 		$do->set('montonet' ,round($totals ,2));
 		$do->set('montotot' ,round($totalg ,2));
-		$do->set('montoiva'    ,round($iva    ,2));
+		$do->set('montoiva' ,round($iva    ,2));
+		$do->set('status'   ,'PE');
 
 		$numero =$this->datasis->fprox_numero('nordc');
 		$transac=$this->datasis->fprox_numero('ntransa');
 		$usuario=$do->get('usuario');
 		$estampa=date('Ymd');
-		$hora   =date("H:i:s");
-			
+		$hora   =date('H:i:s');
+
 		$do->set('estampa',$estampa);
 		$do->set('hora'   ,$hora);
 		$do->set('numero' ,$numero);
 		$do->set('transac',$transac);
-		
+
 		for($i=0;$i<$cana;$i++){
 			$do->set_rel('itordc','estampa' ,$estampa,$i);
 			$do->set_rel('itordc','hora'    ,$hora   ,$i);
@@ -1544,12 +1546,14 @@ class Ordc extends Controller {
 	}
 
 	function _pre_update($do){
+		$numero   = $do->get('numero');
 		$iva=$totals=0;
 		$cana=$do->count_rel('itordc');
 		for($i=0;$i<$cana;$i++){
+			$itcodigo  = $do->get_rel('itordc','codigo'  ,$i);
 			$itcana    = $do->get_rel('itordc','cantidad',$i);
-			$itpreca   = $do->get_rel('itordc','costo',$i);
-			$itiva     = $do->get_rel('itordc','iva',$i);
+			$itpreca   = $do->get_rel('itordc','costo'   ,$i);
+			$itiva     = $do->get_rel('itordc','iva'     ,$i);
 			$itimporte = $itpreca*$itcana;
 			$do->set_rel('itordc','importe' ,$itimporte,$i);
 
@@ -1559,34 +1563,81 @@ class Ordc extends Controller {
 		}
 		$totalg = $totals+$iva;
 
-		
 		$do->set('montonet' ,round($totals ,2));
 		$do->set('montotot' ,round($totalg ,2));
-		$do->set('montoiva'    ,round($iva    ,2));
+		$do->set('montoiva' ,round($iva    ,2));
+
+		$dbnumero = $this->db->escape($numero);
+		$query = $this->db->query('SELECT cantidad, codigo FROM itordc WHERE numero='.$dbnumero);
+		foreach ($query->result() as $row){
+			$itcana   = $row->cantidad;
+			$itcodigo = $row->codigo;
+			$mSQL = "UPDATE sinv SET exord=exord-${itcana} WHERE codigo=".$this->db->escape($itcodigo);
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'ordc'); }
+		}
 
 		return true;
 	}
 
-	function _post_insert($do){
-		$codigo=$do->get('numero');
-		logusu('ordc',"O.Compra $codigo CREADO");
+	function _pre_delete($do){
+
+		return true;
 	}
 
 	function _post_update($do){
 		$codigo=$do->get('numero');
-		logusu('ordc',"O.Compra $codigo MODIFICADO");
+
+		$cana = $do->count_rel('itordc');
+		for($i = 0;$i < $cana;$i++){
+			$itcodigo= $do->get_rel('itordc', 'codigo'  ,$i);
+			$itcana  = $do->get_rel('itordc', 'cantidad',$i);
+			$mSQL = "UPDATE sinv SET exord=exord+${itcana} WHERE codigo=".$this->db->escape($itcodigo);
+
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'ordc'); }
+		}
+
+		logusu('ordc',"O.Compra ${codigo} MODIFICADO");
 	}
 
 	function _post_delete($do){
 		$codigo=$do->get('numero');
-		logusu('ordc',"O.Compra $codigo ELIMINADO");
+
+		$cana = $do->count_rel('itordc');
+		for($i = 0;$i < $cana;$i++){
+			$itcodigo= $do->get_rel('itordc', 'codigo'  ,$i);
+			$itcana  = $do->get_rel('itordc', 'cantidad',$i);
+			$mSQL = "UPDATE sinv SET exord=exord-${itcana} WHERE codigo=".$this->db->escape($itcodigo);
+
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'ordc'); }
+		}
+
+		logusu('ordc',"O.Compra ${codigo} ELIMINADO");
 	}
-	
+
+	function _post_insert($do){
+		$codigo=$do->get('numero');
+
+		$cana = $do->count_rel('itordc');
+		for($i = 0;$i < $cana;$i++){
+			$itcodigo= $do->get_rel('itordc', 'codigo'  ,$i);
+			$itcana  = $do->get_rel('itordc', 'cantidad',$i);
+			$mSQL = "UPDATE sinv SET exord=exord+${itcana} WHERE codigo=".$this->db->escape($itcodigo);
+
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'ordc'); }
+		}
+
+		logusu('ordc',"O.Compra ${codigo} CREADO");
+	}
+
 	function tabla() {
 		$id = $this->uri->segment($this->uri->total_segments());
 		$numero  = $this->datasis->dameval("SELECT numero  FROM ordc WHERE id='$id'");
 		$transac = $this->datasis->dameval("SELECT transac FROM ordc WHERE id='$id'");
-		
+
 		$mSQL = "SELECT cod_prv, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE transac='$transac' ORDER BY cod_prv ";
 		$query = $this->db->query($mSQL);
 		$codprv = 'XXXXXXXXXXXXXXXX';
@@ -1601,7 +1652,7 @@ class Ordc extends Controller {
 					$codprv = $row['cod_prv'];
 					$salida .= "<tr bgcolor='#c7d3c7'>";
 					$salida .= "<td colspan=4>".trim($row['nombre']). "</td>";
-					$salida .= "</tr>";	
+					$salida .= "</tr>";
 				}
 				if ( $row['tipo_doc'] == 'FC' ) {
 					$saldo = $row['monto']-$row['abonos'];
@@ -1617,5 +1668,4 @@ class Ordc extends Controller {
 		}
 		echo $salida;
 	}
-
 }

@@ -39,7 +39,7 @@ var itordc_cont=<?php echo $form->max_rel_count['itordc']; ?>;
 $(function(){
 	$(".inputnum").numeric(".");
 	totalizar();
-	
+
 	$( "#fecha" ).datepicker({    dateFormat: "dd/mm/yy" });
 	$( "#arribo" ).datepicker({   dateFormat: "dd/mm/yy" });
 	$( "#fechafac" ).datepicker({ dateFormat: "dd/mm/yy" });
@@ -50,12 +50,14 @@ $(function(){
 	}
 
 	$('#proveed').autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasprv'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -70,23 +72,28 @@ $(function(){
 		},
 		minLength: 2,
 		select: function( event, ui ) {
+			$('#proveed').attr("readonly", "readonly");
+
 			$('#nombre').val(ui.item.nombre);
 			$('#nombre_val').text(ui.item.nombre);
 			$('#proveed').val(ui.item.proveed);
+
+			setTimeout(function() {  $('#proveed').removeAttr("readonly"); }, 1500);
 		}
 	});
-
 });
 
 //Agrega el autocomplete
 function autocod(id){
 	$('#codigo_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
+				url:  "<?php echo site_url('ajax/buscascstart'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {'q':req.term,sprv:$('#sprv').val()},
 				success:
 					function(data){
 						var sugiere = [];
@@ -94,7 +101,7 @@ function autocod(id){
 						if(data.length==0){
 							$('#codigo_'+id).val("");
 							$('#descrip_'+id).val("");
-							$('#it_descrip_val_'+id).text("");
+							$('#descrip_'+id+'_val').text("");
 							$('#iva_'+id).val(0);
 							$('#sinvpeso_'+id).val(0);
 							$('#costo_'+id).val(0);
@@ -117,7 +124,7 @@ function autocod(id){
 			var cana=Number($("#cantidad_"+id).val());
 			$('#codigo_'+id).val(ui.item.codigo);
 			$('#descrip_'+id).val(ui.item.descrip);
-			$('#it_descrip_val_'+id).text(ui.item.descrip);
+			$('#descrip_'+id+'_val').text(ui.item.descrip);
 			$('#iva_'+id).val(ui.item.iva);
 			$('#sinvpeso_'+id).val(ui.item.peso);
 			$('#costo_'+id).val(ui.item.pond);
@@ -131,8 +138,6 @@ function autocod(id){
 		}
 	});
 }
-
-
 
 function importe(id){
 	var ind     = id.toString();
@@ -173,6 +178,22 @@ function totalizar(){
 	$("#montonet").val(roundNumber(totals+iva,2));
 	$("#montotot").val(roundNumber(totals,2));
 	$("#montoiva").val(roundNumber(iva,2));
+
+	$("#peso_val").text(nformat(peso,2));
+	$("#montonet_val").text(nformat(totals+iva,2));
+	$("#montotot_val").text(nformat(totals,2));
+	$("#montoiva_val").text(nformat(iva,2));
+
+}
+
+function post_modbus_sinv(id){
+	var cana    = Number($("#cantidad_"+id).val());
+	var descrip = $('#descrip_'+id).val();
+
+	if(cana<=0) $("#cantidad_"+id).val('1');
+	$('#cantidad_'+id).focus();
+	$('#cantidad_'+id).select();
+	$('#descrip_'+id+'_val').text(descrip);
 }
 
 function add_itordc(){
@@ -181,7 +202,7 @@ function add_itordc(){
 	con = (itordc_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
 	htm = htm.replace(/<#o#>/g,con);
-	$("#__UTPL__").before(htm);
+	$("#__PTPL__").after(htm);
 	$("#cantidad_"+can).numeric(".");
 	itordc_cont=itordc_cont+1;
 	autocod(can);
@@ -195,44 +216,29 @@ function del_itordc(id){
 </script>
 <?php } ?>
 
-<table align='center' width="95%">
-	<tr>
-		<td align=right>
-		<?php if ($form->_status=='show') { $id=$form->get_from_dataobjetct('numero'); ?>
-		<a href="#" onclick="window.open('<?php echo base_url() ?>formatos/ver/ORDC/<?php echo $id ?>', '_blank', 'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');" heigth="600" >
-		<img src='<?php echo base_url() ?>images/pdf_logo.gif'></a>
-		<a href="#" onclick="window.open('<?php echo base_url() ?>formatos/verhtml/ORDC/<?php echo $id ?>', '_blank', 'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');" heigth="600" >
-		<img src='<?php echo base_url() ?>images/html_icon.gif'></a>
-		<?php } ?>
-<?php
-if (!$solo){
-	echo $container_tr."</td>";
-}
-?>
-		
-	</tr>
+<table align='center' width="100%">
 	<tr>
 		<td>
 		<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9;'>
 		<table width="100%" style="margin: 0; width: 100%;">
 
-			<tr >
-				<td class="littletableheader" width="110"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
-				<td class="littletablerow"    width="150">   <?php echo $form->fecha->output;   ?>&nbsp;</td>
-				<td class="littletableheader" width="90"><?php echo $form->proveed->label;  ?>&nbsp;</td>
+			<tr>
+				<td class="littletableheader" width="90"> <?php echo $form->proveed->label;  ?>&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->proveed->output ?><b id='nombre_val'><?php echo $form->nombre->value ?></b><?php echo $form->nombre->output ?></td>
+				<td class="littletableheader" width="110"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
+				<td class="littletablerow"    width="150"><?php echo $form->fecha->output;   ?>&nbsp;</td>
 			</tr>
 			<tr>
+				<td class="littletableheader"><?php echo $form->status->label;    ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->status->output;   ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->arribo->label     ?>&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->arribo->output    ?>&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->status->label; ?>&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->status->output;   ?>&nbsp;</td>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?php echo $form->fechafac->label  ?>&nbsp;</td>
-				<td class="littletablerow" >  <?php echo $form->fechafac->output ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->peso->label  ?>&nbsp;</td>
 				<td class="littletablerow" align="left"><?php echo $form->peso->output ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->fechafac->label  ?>&nbsp;</td>
+				<td class="littletablerow" >  <?php echo $form->fechafac->output ?>&nbsp;</td>
 			</tr>
 		</table>
 		</fieldset>
@@ -243,7 +249,7 @@ if (!$solo){
 		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
 		<table width='100%'>
 
-			<tr>
+			<tr id='__PTPL__'>
 				<td class="littletableheaderdet">C&oacute;digo</td>
 				<td class="littletableheaderdet">Descripci&oacute;n</td>
 				<td class="littletableheaderdet">Cantidad</td>
@@ -278,7 +284,7 @@ if (!$solo){
 			?>
 
 			<tr id='tr_itordc_<?php echo $i; ?>'>
-				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
+				<td class="littletablerow" align="left" nowrap><?php echo $form->$it_codigo->output; ?></td>
 				<td class="littletablerow" align="left" ><?php echo $form->$it_descrip->output;  ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_cantidad->output;   ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_costo->output;  ?></td>
@@ -292,10 +298,6 @@ if (!$solo){
 				<?php } ?>
 			</tr>
 			<?php } ?>
-
-			<tr id='__UTPL__'>
-			</tr>
-
 		</table>
 		</div>
 		</td>
@@ -306,19 +308,19 @@ if (!$solo){
 		<table width='100%'>
 			<tr>
 				<td><?php echo $container_bl ?><?php echo $container_br ?></td>
-				<td class="littletablerow" align='center'><?php echo $form->condi1->output; ?></td>
-				<td class="littletablerowth"align='center'><?php echo $form->montotot->label;  ?></td>
-				<td class="littletablerow" align='center'><?php echo $form->montotot->output; ?></td>
+				<td class="littletablerow"   align='center'><?php echo $form->condi1->output;  ?>&nbsp;</td>
+				<td class="littletablerowth" align="right" ><?php echo $form->montotot->label; ?></td>
+				<td class="littletablerow"   align="right" style='font-size:1.2em;font-weight:bold;'><?php echo $form->montotot->output; ?></td>
 			</tr><tr>
 				<td></td>
-				<td class="littletablerow" align='center'><?php echo $form->condi2->output; ?></td>
-				<td class="littletablerowth"align='center'><?php echo $form->montoiva->label;    ?></td>
-				<td class="littletablerow" align='center'><?php echo $form->montoiva->output;   ?></td>
+				<td class="littletablerow"   align='center'><?php echo $form->condi2->output;  ?>&nbsp;</td>
+				<td class="littletablerowth" align="right" ><?php echo $form->montoiva->label; ?></td>
+				<td class="littletablerow"   align="right" style='font-size:1.2em;font-weight:bold;'><?php echo $form->montoiva->output;   ?></td>
 			</tr><tr>
 				<td></td>
-				<td class="littletablerow" align='center'><?php echo $form->condi3->output; ?></td>
-				<td class="littletablerowth"align='center'><?php echo $form->montonet->label;  ?></td>
-				<td class="littletablerow" align='center'><?php echo $form->montonet->output; ?></td>
+				<td class="littletablerow"   align='center'><?php echo $form->condi3->output;  ?>&nbsp;</td>
+				<td class="littletablerowth" align="right" ><?php echo $form->montonet->label; ?></td>
+				<td class="littletablerow"   align="right" style='font-size:1.5em;font-weight:bold;'><?php echo $form->montonet->output; ?></td>
 			</tr>
 		</table>
 		<?php echo $form_end; ?>
@@ -328,7 +330,7 @@ if (!$solo){
 	<tr>
 		<td>
 			<fieldset style='border: 2px outset #8A0808;background: #FFFBE9;'>
-			<legend class="titulofieldset" style='color: #114411;'>Informacion del Registro</legend>
+			<legend class="titulofieldset" style='color: #114411;'>Informaci&oacute;n del Registro</legend>
 			<table width='100%' cellspacing='1' >
 				<tr style='font-size:12px;color:#0B3B0B;background-color: #F7BE81;'>
 					<td align='center' >Usuario</td>
@@ -339,7 +341,7 @@ if (!$solo){
 				</tr>
 				<tr>
 					<?php
-						$mSQL="SELECT us_nombre FROM usuario WHERE us_codigo='".trim($form->_dataobject->get('usuario'))."'";
+						$mSQL='SELECT us_nombre FROM usuario WHERE us_codigo='.$this->db->escape(trim($form->_dataobject->get('usuario')));
 						$us_nombre = $this->datasis->dameval($mSQL);
 
 					?>
