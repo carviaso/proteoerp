@@ -166,7 +166,7 @@ foreach ($detalle AS $items){ $i++;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo $uline.'<br />';
+						echo $uline.'<br>';
 						$lineas++;
 						if($lineas >= $maxlin){
 							$lineas =0;

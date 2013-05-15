@@ -191,6 +191,7 @@ class Ordc extends Controller {
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
 									'.$this->datasis->jwinopen(site_url('formatos/ver/ORDC').'/\'+json.pk.id+\'/id\'').';
+									if(typeof(bus_sug)=="object") bus_sug.close();
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -199,14 +200,16 @@ class Ordc extends Controller {
 								$("#fedita").html(r);
 							}
 						}
-					})
+					});
 				},
 				"Cancelar": function() {
+					if(typeof(bus_sug)=="object") bus_sug.close();
 					$("#fedita").html("");
 					$( this ).dialog( "close" );
 				}
 			},
 			close: function() {
+				if(typeof(bus_sug)=="object") bus_sug.close();
 				$("#fedita").html("");
 				allFields.val( "" ).removeClass( "ui-state-error" );
 			}
@@ -739,58 +742,6 @@ class Ordc extends Controller {
 	* Guarda la Informacion
 	*/
 	function setData(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = '??????';
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM ordc WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('ordc', $data);
-					echo "Registro Agregado";
-
-					logusu('ORDC',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM ordc WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM ordc WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE ordc SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("ordc", $data);
-				logusu('ORDC',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('ordc', $data);
-				logusu('ORDC',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
-		} elseif($oper == 'del') {
-		$meco = $this->datasis->dameval("SELECT $mcodp FROM ordc WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM ordc WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM ordc WHERE id=$id ");
-				logusu('ORDC',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
 	}
 
 	//***************************
@@ -1446,29 +1397,87 @@ class Ordc extends Controller {
 
 	function bussug(){
 		$this->rapyd->load('datagrid','datafilter');
-		$uri   = anchor('compras/ordc/dataedit/show/<#codigo#>','<#codigo#>');
+		//$uri   = anchor('compras/ordc/dataedit/show/<#codigo#>','<#codigo#>');
+		$uri   = '<a href="#" onclick="oselect(<jse><#codigo#></jse>,<jse><#descrip#></jse>,<jse><#iva#></jse>,<jse><#peso#></jse>,<jse><#ultimo#></jse>,<jse><#sug#></jse>)"><#codigo#></a>';
+
+		$script = '
+		function oselect(codigo,descrip,iva,peso,costo,cantidad){
+			if(window.opener !== null){
+				var id=window.opener.add_itordc();
+
+				window.opener.document.getElementById("codigo_"+id).value  =codigo;
+				window.opener.document.getElementById("descrip_"+id).value =descrip;
+				window.opener.document.getElementById("iva_"+id).valuel    =iva;
+				window.opener.document.getElementById("sinvpeso_"+id).value=peso;
+				window.opener.document.getElementById("costo_"+id).value   =costo;
+				window.opener.document.getElementById("cantidad_"+id).value=cantidad;
+				window.opener.post_modbus_sinv(id);
+				window.opener.importe(id);
+				window.opener.totalizar();
+			}else{
+				alert("Ventana de destino no existe");
+			}
+		}';
+
+		function jse($string){
+			$string=str_replace("\r",'',$string);
+			$string=str_replace("\n",'',$string);
+			$string=preg_replace('/\s\s+/', ' ', $string);
+			$string=addslashes($string);
+			$string=str_replace('<','\<',$string);
+			$string=str_replace('>','\>',$string);
+			$string=str_replace(';','\;',$string);
+			$string=str_replace('\\"',"'+String.fromCharCode(34)+'",$string);
+			$string='\''.$string.'\'';
+
+			return $string;
+		}
+
+		$filter = new DataFilter('');
+		$filter->script($script);
+
+		$filter->db->select(array('codigo','descrip','exmax','exmin','existen','ultimo','CEIL(exmax-existen) AS sug','pfecha1','prov1','peso','iva'));
+		$filter->db->from('sinv');
+		$filter->db->where('existen <= exmin');
+		$filter->db->where('activo','S');
+		$filter->db->where('tipo','Articulo');
+
+		$filter->codigo = new inputField('C&oacute;digo','codigo');
+		$filter->codigo->rule      ='max_length[15]';
+		$filter->codigo->size      =10;
+		$filter->codigo->maxlength =15;
+
+		$filter->descrip = new inputField('Descripci&oacute;n','descrip');
+		$filter->descrip->rule      ='max_length[45]';
+		$filter->descrip->size      =47;
+		$filter->descrip->maxlength =45;
+		$filter->descrip->in = 'codigo';
+
+		$filter->buttons('reset', 'search');
+		$filter->build();
 
 		$grid = new DataGrid();
-
-		$grid->db->select(array('codigo','descrip','exmax','exmin','existen','ultimo','exmax - existen AS sug'));
-		$grid->db->from('sinv');
-		$grid->db->where('existen <= exmin');
-		$grid->db->where('activo','S');
+		$grid->use_function('jse');
 
 		$grid->order_by('codigo','desc');
 		$grid->per_page = 40;
 
 		$grid->column_orderby('C&oacute;digo',$uri ,'codigo');
 		$grid->column_orderby('Descripci&oacute;n' ,'descrip' ,'descrip');
-		$grid->column_orderby('M&aacute;ximo'      ,'<nformat><#exmax#></nformat> -- <nformat><#exmin#></nformat>'   ,'exmax'   , "align='right'");
+		$grid->column('M&aacute;x -- Min'          ,'<nformat><#exmax#>|0</nformat> - <nformat><#exmin#>|0</nformat>', "align='center'");
 		$grid->column_orderby('Existencia'         ,'<nformat><#existen#></nformat>' ,'existen' , "align='right'");
-		$grid->column_orderby('Sugerido'           ,'<nformat><#sug#></nformat>'     ,'exmin'   , "align='right'");
-		$grid->column_orderby('&Uacute;ltimo costo','<nformat><#ultimo#></nformat>'  ,'ultimo'  , "align='right'");
+		$grid->column('Sugerido'            ,'<b><nformat><#sug#>|0</nformat></b>'   , "align='right'");
+		$grid->column('&Uacute;ltimo costo' ,'<nformat><#ultimo#></nformat>', "align='right'");
+		$grid->column('&Uacute;ltima compra','<dbdate_to_human><#pfecha1#></dbdate_to_human> <#prov1#>');
 		$grid->build();
 
-		$data['content'] = $grid->output;
+		$data['content'] = $filter->output.$grid->output;
 		$data['title']   = heading('Productos sugueridos');
-		$data['head']    = script('jquery.js').script('jquery-ui.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.meiomask.js').style('vino/jquery-ui.css').$this->rapyd->get_head().phpscript('nformat.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js').phpscript('nformat.js');
+		$data['head']    = script('jquery.js');
+		$data['head']   .= $this->rapyd->get_head();
+		$data['head']   .= phpscript('nformat.js');
+		$data['head']   .= script('plugins/jquery.numeric.pack.js');
+		$data['head']   .= script('plugins/jquery.floatnumber.js');
 		$this->load->view('view_ventanas', $data);
 	}
 

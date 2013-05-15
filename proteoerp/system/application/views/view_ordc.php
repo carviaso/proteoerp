@@ -1,5 +1,4 @@
 <?php
-
 $container_bl=join('&nbsp;', $form->_button_container['BL']);
 $container_br=join('&nbsp;', $form->_button_container['BR']);
 $container_tr=join('&nbsp;', $form->_button_container['TR']);
@@ -31,7 +30,20 @@ if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'<
 
 //echo $form_scripts;
 echo $form_begin;
-if($form->_status!='show'){ ?>
+if($form->_status!='show'){
+ $atts = array(
+              'width'      => '800',
+              'height'     => '600',
+              'scrollbars' => 'yes',
+              'status'     => 'yes',
+              'resizable'  => 'yes',
+              'screenx'    => '0',
+              'screeny'    => '0'
+            );
+
+$sug = anchor_popup('compras/ordc/bussug', 'Buscar Sugerencias', $atts);
+
+?>
 
 <script language="javascript" type="text/javascript">
 var itordc_cont=<?php echo $form->max_rel_count['itordc']; ?>;
@@ -40,10 +52,9 @@ $(function(){
 	$(".inputnum").numeric(".");
 	totalizar();
 
-	$( "#fecha" ).datepicker({    dateFormat: "dd/mm/yy" });
-	$( "#arribo" ).datepicker({   dateFormat: "dd/mm/yy" });
-	$( "#fechafac" ).datepicker({ dateFormat: "dd/mm/yy" });
-
+	$("#fecha").datepicker({    dateFormat: "dd/mm/yy" });
+	$("#arribo").datepicker({   dateFormat: "dd/mm/yy" });
+	//$("#fechafac").datepicker({ dateFormat: "dd/mm/yy" });
 
 	for(var i=0;i < <?php echo $form->max_rel_count['itordc']; ?>;i++){
 		autocod(i.toString());
@@ -206,6 +217,7 @@ function add_itordc(){
 	$("#cantidad_"+can).numeric(".");
 	itordc_cont=itordc_cont+1;
 	autocod(can);
+	return can;
 }
 
 function del_itordc(id){
@@ -307,7 +319,12 @@ function del_itordc(id){
 		<fieldset style='border: 2px outset #9AC8DA;background: #EFEFFF;'>
 		<table width='100%'>
 			<tr>
-				<td><?php echo $container_bl ?><?php echo $container_br ?></td>
+				<td>
+				<?php echo $container_bl.$container_br.br();
+				if($form->_status!='show'){ ?>
+					<a href="javascript:void(0);" onclick="bus_sug=window.open('/proteoerp/compras/ordc/bussug', 'bussug', 'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=0,screeny=0');">Buscar Sugerencias</a>
+				<?php } ?>
+				</td>
 				<td class="littletablerow"   align='center'><?php echo $form->condi1->output;  ?>&nbsp;</td>
 				<td class="littletablerowth" align="right" ><?php echo $form->montotot->label; ?></td>
 				<td class="littletablerow"   align="right" style='font-size:1.2em;font-weight:bold;'><?php echo $form->montotot->output; ?></td>
