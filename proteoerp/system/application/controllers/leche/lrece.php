@@ -2191,7 +2191,8 @@ class Lrece extends Controller {
 	}
 
 	function _pre_apertura_insert($do){
-		$do->set('fecha',date('Y-m-d H:i:s'));
+		$do->set('fecha'  ,date('Y-m-d'));
+		$do->set('estampa',date('Y-m-d H:i:s'));
 
 		$hoy       = new DateTime();
 		$fregistro = new DateTime($do->get('fecha' ));
@@ -2363,6 +2364,15 @@ class Lrece extends Controller {
 
 		if(!$this->db->field_exists('montopago', 'lrece')){
 			$mSQL="ALTER TABLE `lrece` ADD COLUMN `montopago` DECIMAL(12,2) NULL DEFAULT '0' COMMENT 'Monto del pago' AFTER `pago`";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!$this->db->field_exists('estampa', 'lrece')){
+			$mSQL="ALTER TABLE `lrece` ADD COLUMN `estampa` DATETIME NULL DEFAULT NULL AFTER `montopago`";
+			$this->db->simple_query($mSQL);
+			$mSQL="UPDATE lrece SET estampa=fecha";
+			$this->db->simple_query($mSQL);
+			$mSQL="ALTER TABLE `lrece` CHANGE COLUMN `fecha` `fecha` DATE NULL DEFAULT NULL AFTER `numero`";
 			$this->db->simple_query($mSQL);
 		}
 

@@ -14,9 +14,8 @@ $scampos .='<td class="littletablerow" align="left" >'.$campos['descrip']['field
 $scampos .='<td class="littletablerow" align="right">'.$campos['precio']['field'].   '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['impuesto']['field']. '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['importe']['field'].  '</td>';
-
-$scampos .= '<td class="littletablerow"><a href=# onclick="del_itotin(<#i#>);return false;">Eliminar</a></td></tr>';
-$campos=$form->js_escape($scampos);
+$scampos .='<td class="littletablerow"><a href=# onclick="del_itotin(<#i#>);return false;">Eliminar</a></td></tr>';
+$campos   =$form->js_escape($scampos);
 
 if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
 
@@ -46,7 +45,7 @@ function totalizar(){
 	var iva     =0;
 	var totalg  =0;
 	var totals =0;
-	
+
 	var impuesto=0;
 	var importe=0;
 	var arr=$('input[name^="importe_"]');
@@ -73,7 +72,7 @@ function add_itotin(){
 	con = (itotin_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
 	htm = htm.replace(/<#o#>/g,con);
-	$("#__UTPL__").before(htm);
+	$("#__PTPL__").after(htm);
 	itotin_cont=itotin_cont+1;
 }
 
@@ -102,27 +101,27 @@ function del_itotin(id){
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
-				<td class="littletablerow"><?php echo $form->fecha->output;   ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->fecha->output;   ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->cliente->label;  ?>&nbsp;</td>
-				<td class="littletablerow"><?php echo $form->cliente->output; ?>&nbsp;</td>
-				<td class="littletablerow"><?php echo $form->nombre->output;  ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->cliente->output; ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->nombre->output;  ?>&nbsp;</td>
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->orden->label     ?>&nbsp;</td>
-				<td class="littletablerow"><?php echo $form->orden->output    ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->orden->output    ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->rifci->label; ?>&nbsp;</td>
 				<td class="littletablerow" colspan='2'><?php echo $form->rifci->output;   ?>&nbsp;</td>
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->tipo_doc->label  ?>&nbsp;</td>
-				<td class="littletablerow"><?php echo $form->tipo_doc->output ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->tipo_doc->output ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->direc->label  ?>&nbsp;</td>
 				<td class="littletablerow" colspan='2'><?php echo $form->direc->output ?>&nbsp;</td>
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->vence->label;    ?>&nbsp;</td>
-				<td class="littletablerow"><?php echo $form->vence->output;   ?>&nbsp;</td>
-				<td class="littletablerowr"><?php echo $form->dire1->label  ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->vence->output;   ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->dire1->label  ?>&nbsp;</td>
 				<td class="littletablerow" colspan='2'><?php echo $form->dire1->output ?>&nbsp;</td>
 			</tr>
 		</table>
@@ -135,7 +134,7 @@ function del_itotin(id){
 			<tr>
 				<th colspan='6' class="littletableheader">Lista de Ingresos</th>
 			</tr>
-			<tr>
+			<tr id='__PTPL__'>
 				<td class="littletableheader">C&oacute;digo</td>
 				<td class="littletableheader">Nombre</td>
 				<td class="littletableheader">Precio</td>
@@ -147,16 +146,16 @@ function del_itotin(id){
 			</tr>
 
 			<?php for($i=0;$i<$form->max_rel_count['itotin'];$i++) {
-				$it_codigo  = "codigo_$i";
-				$descrip   = "descrip_$i";
-				$impuesto    = "impuesto_$i";
-				$it_precio   = "precio_$i";
-				$it_importe = "importe_$i";
+				$it_codigo  = "codigo_${i}";
+				$descrip    = "descrip_${i}";
+				$impuesto   = "impuesto_${i}";
+				$it_precio  = "precio_${i}";
+				$it_importe = "importe_${i}";
 				?>
 
 			<tr id='tr_itotin_<?php echo $i; ?>'>
-				<td class="littletablerow" align="left"><?php echo $form->$it_codigo->output; ?></td>
-				<td class="littletablerow" align="left"><?php echo $form->$descrip->output;  ?></td>
+				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
+				<td class="littletablerow" align="left" ><?php echo $form->$descrip->output;  ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_precio->output;  ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$impuesto->output;   ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_importe->output;?></td>
@@ -168,9 +167,6 @@ function del_itotin(id){
 			</tr>
 			<?php } ?>
 
-			<tr id='__UTPL__'>
-				<td id='cueca'></td>
-			</tr>
 		</table>
 		<?php echo $container_bl ?> <?php echo $container_br ?></td>
 	</tr>
@@ -179,30 +175,24 @@ function del_itotin(id){
 		<table width='100%'>
 			<tr>
 				<th colspan='6' class="littletableheader">Res&uacute;men Financiero</th>
-			</tr>
-			<tr>
-				<td  class="littletablerowth"><?php echo $form->vence->label ?></td>
-				<td  class="littletablerowth"><?php echo $form->observa1->label ?>
-				</td>
-				<td  class="littletablerowth"><?php echo $form->totals->label ?>
-				</td>
-				<td class="littletablerow"><?php echo $form->totals->output ?>
-				</td>
-			</tr>
-			<tr>
-				<td class="littletablerow"><?php echo $form->vence->output ?></td>
-				<td class="littletablerow" ><?php echo $form->observa->output ?></td>
-				<td class="littletablerowth"><?php echo $form->iva->label ?></td>
-				<td class="littletablerow"><?php echo $form->iva->output ?></td>
-			</tr>
-			<tr>
+			</tr><tr>
+				<td class="littletablerowth"><?php echo $form->vence->label    ?></td>
+				<td class="littletablerowth"><?php echo $form->observa1->label ?></td>
+				<td class="littletablerowth"><?php echo $form->totals->label   ?></td>
+				<td class="littletablerow"  ><?php echo $form->totals->output  ?></td>
+			</tr><tr>
+				<td class="littletablerow"  ><?php echo $form->vence->output   ?></td>
+				<td class="littletablerow"  ><?php echo $form->observa->output ?></td>
+				<td class="littletablerowth"><?php echo $form->iva->label      ?></td>
+				<td class="littletablerow"  ><?php echo $form->iva->output     ?></td>
+			</tr><tr>
 				<td class="littletablerow">&nbsp;</td>
-				<td class="littletablerow"><?php echo $form->observa1->output ?></td>
-				<td class="littletablerowth"><?php echo $form->totalg->label ?></td>
-				<td class="littletablerow"><?php echo $form->totalg->output ?></td>
+				<td class="littletablerow"  ><?php echo $form->observa1->output ?></td>
+				<td class="littletablerowth"><?php echo $form->totalg->label    ?></td>
+				<td class="littletablerow"  ><?php echo $form->totalg->output   ?></td>
 			</tr>
 		</table>
 		<?php echo $form_end; ?></td>
 	</tr>
 </table>
-		<?php endif; ?>
+<?php endif; ?>

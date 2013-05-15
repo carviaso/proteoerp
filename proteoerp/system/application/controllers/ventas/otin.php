@@ -1041,471 +1041,32 @@ class Otin extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setDatait()
-	{
+	function setDatait(){
 	}
-
-/*
-	//***********************************
-	// DataEdit
-	//***********************************
-
-	function dataedit(){
-		$this->rapyd->load('dataedit');
-
-		$edit = new DataEdit($this->tits, 'otin');
-
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
-		$edit->post_process('insert','_post_insert');
-		$edit->post_process('update','_post_update');
-		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert','_pre_insert');
-		$edit->pre_process('update','_pre_update');
-		$edit->pre_process('delete','_pre_delete');
-
-		$edit->tipo_doc = new inputField('Tipo_doc','tipo_doc');
-		$edit->tipo_doc->rule='max_length[2]';
-		$edit->tipo_doc->size =4;
-		$edit->tipo_doc->maxlength =2;
-
-		$edit->numero = new inputField('Numero','numero');
-		$edit->numero->rule='max_length[8]';
-		$edit->numero->size =10;
-		$edit->numero->maxlength =8;
-
-		$edit->fecha = new dateField('Fecha','fecha');
-		$edit->fecha->rule='chfecha';
-		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
-
-		$edit->orden = new inputField('Orden','orden');
-		$edit->orden->rule='max_length[8]';
-		$edit->orden->size =10;
-		$edit->orden->maxlength =8;
-
-		$edit->cod_cli = new inputField('Cod_cli','cod_cli');
-		$edit->cod_cli->rule='max_length[5]';
-		$edit->cod_cli->size =7;
-		$edit->cod_cli->maxlength =5;
-
-		$edit->rifci = new inputField('Rifci','rifci');
-		$edit->rifci->rule='max_length[13]';
-		$edit->rifci->size =15;
-		$edit->rifci->maxlength =13;
-
-		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='max_length[40]';
-		$edit->nombre->size =42;
-		$edit->nombre->maxlength =40;
-
-		$edit->direc = new inputField('Direc','direc');
-		$edit->direc->rule='max_length[40]';
-		$edit->direc->size =42;
-		$edit->direc->maxlength =40;
-
-		$edit->dire1 = new inputField('Dire1','dire1');
-		$edit->dire1->rule='max_length[40]';
-		$edit->dire1->size =42;
-		$edit->dire1->maxlength =40;
-
-		$edit->totals = new inputField('Totals','totals');
-		$edit->totals->rule='max_length[14]|numeric';
-		$edit->totals->css_class='inputnum';
-		$edit->totals->size =16;
-		$edit->totals->maxlength =14;
-
-		$edit->iva = new inputField('Iva','iva');
-		$edit->iva->rule='max_length[14]|numeric';
-		$edit->iva->css_class='inputnum';
-		$edit->iva->size =16;
-		$edit->iva->maxlength =14;
-
-		$edit->totalg = new inputField('Totalg','totalg');
-		$edit->totalg->rule='max_length[14]|numeric';
-		$edit->totalg->css_class='inputnum';
-		$edit->totalg->size =16;
-		$edit->totalg->maxlength =14;
-
-		$edit->vence = new dateField('Vence','vence');
-		$edit->vence->rule='chfecha';
-		$edit->vence->size =10;
-		$edit->vence->maxlength =8;
-
-		$edit->observa1 = new inputField('Observa1','observa1');
-		$edit->observa1->rule='max_length[30]';
-		$edit->observa1->size =32;
-		$edit->observa1->maxlength =30;
-
-		$edit->observa2 = new inputField('Observa2','observa2');
-		$edit->observa2->rule='max_length[30]';
-		$edit->observa2->size =32;
-		$edit->observa2->maxlength =30;
-
-		$edit->transac = new inputField('Transac','transac');
-		$edit->transac->rule='max_length[8]';
-		$edit->transac->size =10;
-		$edit->transac->maxlength =8;
-
-		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-
-		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
-
-		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
-
-		$edit->nfiscal = new inputField('Nfiscal','nfiscal');
-		$edit->nfiscal->rule='max_length[8]';
-		$edit->nfiscal->size =10;
-		$edit->nfiscal->maxlength =8;
-
-		$edit->afecta = new inputField('Afecta','afecta');
-		$edit->afecta->rule='max_length[8]';
-		$edit->afecta->size =10;
-		$edit->afecta->maxlength =8;
-
-		$edit->fafecta = new dateField('Fafecta','fafecta');
-		$edit->fafecta->rule='chfecha';
-		$edit->fafecta->size =10;
-		$edit->fafecta->maxlength =8;
-
-		$edit->montasa = new inputField('Montasa','montasa');
-		$edit->montasa->rule='max_length[17]|numeric';
-		$edit->montasa->css_class='inputnum';
-		$edit->montasa->size =19;
-		$edit->montasa->maxlength =17;
-
-		$edit->monredu = new inputField('Monredu','monredu');
-		$edit->monredu->rule='max_length[17]|numeric';
-		$edit->monredu->css_class='inputnum';
-		$edit->monredu->size =19;
-		$edit->monredu->maxlength =17;
-
-		$edit->monadic = new inputField('Monadic','monadic');
-		$edit->monadic->rule='max_length[17]|numeric';
-		$edit->monadic->css_class='inputnum';
-		$edit->monadic->size =19;
-		$edit->monadic->maxlength =17;
-
-		$edit->tasa = new inputField('Tasa','tasa');
-		$edit->tasa->rule='max_length[17]|numeric';
-		$edit->tasa->css_class='inputnum';
-		$edit->tasa->size =19;
-		$edit->tasa->maxlength =17;
-
-		$edit->reducida = new inputField('Reducida','reducida');
-		$edit->reducida->rule='max_length[17]|numeric';
-		$edit->reducida->css_class='inputnum';
-		$edit->reducida->size =19;
-		$edit->reducida->maxlength =17;
-
-		$edit->sobretasa = new inputField('Sobretasa','sobretasa');
-		$edit->sobretasa->rule='max_length[17]|numeric';
-		$edit->sobretasa->css_class='inputnum';
-		$edit->sobretasa->size =19;
-		$edit->sobretasa->maxlength =17;
-
-		$edit->exento = new inputField('Exento','exento');
-		$edit->exento->rule='max_length[17]|numeric';
-		$edit->exento->css_class='inputnum';
-		$edit->exento->size =19;
-		$edit->exento->maxlength =17;
-
-		$edit->sucu = new inputField('Sucu','sucu');
-		$edit->sucu->rule='max_length[2]';
-		$edit->sucu->size =4;
-		$edit->sucu->maxlength =2;
-
-		$edit->depto = new inputField('Depto','depto');
-		$edit->depto->rule='max_length[3]';
-		$edit->depto->size =5;
-		$edit->depto->maxlength =3;
-
-		$edit->modificado = new inputField('Modificado','modificado');
-		$edit->modificado->rule='max_length[8]';
-		$edit->modificado->size =10;
-		$edit->modificado->maxlength =8;
-
-		$edit->build();
-
-		$script= '';
-
-		$data['content'] = $edit->output;
-		$data['script'] = $script;
-		$this->load->view('jqgrid/ventanajq', $data);
-
-	}
-
-	function _pre_insert($do){
-		return true;
-	}
-
-	function _pre_update($do){
-		return true;
-	}
-
-	function _pre_delete($do){
-		return true;
-	}
-
-	function _post_insert($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
-	}
-
-	function _post_update($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
-	}
-
-	function _post_delete($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
-	}
-}
-*/
-
-/*
-	function dataedit(){
-		$this->rapyd->load('dataedit');
-
-		$edit = new DataEdit($this->tits, 'otin');
-
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
-		$edit->post_process('insert','_post_insert');
-		$edit->post_process('update','_post_update');
-		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert','_pre_insert');
-		$edit->pre_process('update','_pre_update');
-		$edit->pre_process('delete','_pre_delete');
-
-		$edit->tipo_doc = new inputField('Tipo_doc','tipo_doc');
-		$edit->tipo_doc->rule='max_length[2]';
-		$edit->tipo_doc->size =4;
-		$edit->tipo_doc->maxlength =2;
-
-		$edit->numero = new inputField('Numero','numero');
-		$edit->numero->rule='max_length[8]';
-		$edit->numero->size =10;
-		$edit->numero->maxlength =8;
-
-		$edit->fecha = new dateField('Fecha','fecha');
-		$edit->fecha->rule='chfecha';
-		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
-
-		$edit->orden = new inputField('Orden','orden');
-		$edit->orden->rule='max_length[8]';
-		$edit->orden->size =10;
-		$edit->orden->maxlength =8;
-
-		$edit->cod_cli = new inputField('Cod_cli','cod_cli');
-		$edit->cod_cli->rule='max_length[5]';
-		$edit->cod_cli->size =7;
-		$edit->cod_cli->maxlength =5;
-
-		$edit->rifci = new inputField('Rifci','rifci');
-		$edit->rifci->rule='max_length[13]';
-		$edit->rifci->size =15;
-		$edit->rifci->maxlength =13;
-
-		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='max_length[40]';
-		$edit->nombre->size =42;
-		$edit->nombre->maxlength =40;
-
-		$edit->direc = new inputField('Direc','direc');
-		$edit->direc->rule='max_length[40]';
-		$edit->direc->size =42;
-		$edit->direc->maxlength =40;
-
-		$edit->dire1 = new inputField('Dire1','dire1');
-		$edit->dire1->rule='max_length[40]';
-		$edit->dire1->size =42;
-		$edit->dire1->maxlength =40;
-
-		$edit->totals = new inputField('Totals','totals');
-		$edit->totals->rule='max_length[14]|numeric';
-		$edit->totals->css_class='inputnum';
-		$edit->totals->size =16;
-		$edit->totals->maxlength =14;
-
-		$edit->iva = new inputField('Iva','iva');
-		$edit->iva->rule='max_length[14]|numeric';
-		$edit->iva->css_class='inputnum';
-		$edit->iva->size =16;
-		$edit->iva->maxlength =14;
-
-		$edit->totalg = new inputField('Totalg','totalg');
-		$edit->totalg->rule='max_length[14]|numeric';
-		$edit->totalg->css_class='inputnum';
-		$edit->totalg->size =16;
-		$edit->totalg->maxlength =14;
-
-		$edit->vence = new dateField('Vence','vence');
-		$edit->vence->rule='chfecha';
-		$edit->vence->size =10;
-		$edit->vence->maxlength =8;
-
-		$edit->observa1 = new inputField('Observa1','observa1');
-		$edit->observa1->rule='max_length[30]';
-		$edit->observa1->size =32;
-		$edit->observa1->maxlength =30;
-
-		$edit->observa2 = new inputField('Observa2','observa2');
-		$edit->observa2->rule='max_length[30]';
-		$edit->observa2->size =32;
-		$edit->observa2->maxlength =30;
-
-		$edit->transac = new inputField('Transac','transac');
-		$edit->transac->rule='max_length[8]';
-		$edit->transac->size =10;
-		$edit->transac->maxlength =8;
-
-		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-
-		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
-
-		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
-
-		$edit->nfiscal = new inputField('Nfiscal','nfiscal');
-		$edit->nfiscal->rule='max_length[8]';
-		$edit->nfiscal->size =10;
-		$edit->nfiscal->maxlength =8;
-
-		$edit->afecta = new inputField('Afecta','afecta');
-		$edit->afecta->rule='max_length[8]';
-		$edit->afecta->size =10;
-		$edit->afecta->maxlength =8;
-
-		$edit->fafecta = new dateField('Fafecta','fafecta');
-		$edit->fafecta->rule='chfecha';
-		$edit->fafecta->size =10;
-		$edit->fafecta->maxlength =8;
-
-		$edit->montasa = new inputField('Montasa','montasa');
-		$edit->montasa->rule='max_length[17]|numeric';
-		$edit->montasa->css_class='inputnum';
-		$edit->montasa->size =19;
-		$edit->montasa->maxlength =17;
-
-		$edit->monredu = new inputField('Monredu','monredu');
-		$edit->monredu->rule='max_length[17]|numeric';
-		$edit->monredu->css_class='inputnum';
-		$edit->monredu->size =19;
-		$edit->monredu->maxlength =17;
-
-		$edit->monadic = new inputField('Monadic','monadic');
-		$edit->monadic->rule='max_length[17]|numeric';
-		$edit->monadic->css_class='inputnum';
-		$edit->monadic->size =19;
-		$edit->monadic->maxlength =17;
-
-		$edit->tasa = new inputField('Tasa','tasa');
-		$edit->tasa->rule='max_length[17]|numeric';
-		$edit->tasa->css_class='inputnum';
-		$edit->tasa->size =19;
-		$edit->tasa->maxlength =17;
-
-		$edit->reducida = new inputField('Reducida','reducida');
-		$edit->reducida->rule='max_length[17]|numeric';
-		$edit->reducida->css_class='inputnum';
-		$edit->reducida->size =19;
-		$edit->reducida->maxlength =17;
-
-		$edit->sobretasa = new inputField('Sobretasa','sobretasa');
-		$edit->sobretasa->rule='max_length[17]|numeric';
-		$edit->sobretasa->css_class='inputnum';
-		$edit->sobretasa->size =19;
-		$edit->sobretasa->maxlength =17;
-
-		$edit->exento = new inputField('Exento','exento');
-		$edit->exento->rule='max_length[17]|numeric';
-		$edit->exento->css_class='inputnum';
-		$edit->exento->size =19;
-		$edit->exento->maxlength =17;
-
-		$edit->sucu = new inputField('Sucu','sucu');
-		$edit->sucu->rule='max_length[2]';
-		$edit->sucu->size =4;
-		$edit->sucu->maxlength =2;
-
-		$edit->depto = new inputField('Depto','depto');
-		$edit->depto->rule='max_length[3]';
-		$edit->depto->size =5;
-		$edit->depto->maxlength =3;
-
-		$edit->modificado = new inputField('Modificado','modificado');
-		$edit->modificado->rule='max_length[8]';
-		$edit->modificado->size =10;
-		$edit->modificado->maxlength =8;
-
-		$edit->build();
-
-		$script= '';
-
-		$data['content'] = $edit->output;
-		$data['script'] = $script;
-		$this->load->view('jqgrid/ventanajq', $data);
-
-	}
-
-	function _pre_insert($do){
-		return true;
-	}
-
-	function _pre_update($do){
-		return true;
-	}
-
-	function _pre_delete($do){
-		return true;
-	}
-
-	function _post_insert($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
-	}
-
-	function _post_update($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
-	}
-
-	function _post_delete($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
-	}
-*/
 
 
 	function dataedit(){
- 		$this->rapyd->load("dataedit","datadetalle","fields","datagrid");
-
- 		$formato=$this->datasis->dameval('SELECT formato FROM cemp LIMIT 0,1');
- 		$qformato='%';
- 		for($i=1;$i<substr_count($formato, '.')+1;$i++) $qformato.='.%';
- 		$this->qformato=$qformato;
+ 		$this->rapyd->load('datadetails','dataobject');
 
  	 	$modbusp=array(
-	  'tabla'   =>'scli',
-	  'columnas'=> array(
+		'tabla'   =>'scli',
+		'columnas'=> array(
 		'cliente' =>'C&oacute;digo Cliente',
 		'nombre'  =>'Nombre',
 		'dire11'  =>'Direcci&oacute;n',
 		'rifci'   =>'Rif/CI'),
-	  'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre'),
-	  'retornar'=>array('cliente'=>'cod_cli'),
-  	'titulo'  =>'Buscar Cliente');
+		'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre'),
+		'retornar'=>array('cliente'=>'cod_cli'),
+		'titulo'  =>'Buscar Cliente');
 
-    $boton=$this->datasis->modbus($modbusp);
+		$boton=$this->datasis->modbus($modbusp);
  		//Script necesario para totalizar los detalles
 
  		 $modbus=array(
 		'tabla'   =>'sinv',
 		'columnas'=>array(
 		'codigo' =>'C&oacute;digo',
-    'descrip'=>'descrip'),
+		'descrip'=>'descrip'),
 		'filtro'  =>array('codigo' =>'C&oacute;digo','descrip'=>'descrip'),
 		//'retornar'=>array('codigo'=>'codigo<#i#>','precio1'=>'precio1<#i#>','precio2'=>'precio2<#i#>','precio3'=>'precio3<#i#>','precio4'=>'precio4<#i#>','iva'=>'iva<#i#>','pond'=>'costo<#i#>'),
 		'retornar'=>array('codigo'=>'codigo<#i#>'),
@@ -1528,17 +1089,17 @@ class Otin extends Controller {
  			monto=debe=haber=0;
  			amonto=$$(\'input[id^="monto"]\');
 			for(var i=0; i<amonto.length; i++) {
-    		valor=parseFloat(amonto[i].value);
-    		if (isNaN(valor))
+				valor=parseFloat(amonto[i].value);
+				if (isNaN(valor))
 					valor=0.0;
 				if (valor>0)
-    			haber=haber+valor;
-    		else{
-    			valor=valor*(-1);
-    			debe=debe+valor;
-    		}
+					haber=haber+valor;
+				else{
+					valor=valor*(-1);
+					debe=debe+valor;
+				}
 				$("haber").value=haber;
-    		$("debe").value=debe;
+				$("debe").value=debe;
 				$("total").value=haber-debe;
 			}
 		}
@@ -1554,143 +1115,130 @@ class Otin extends Controller {
 		}
 		';
 
-		$edit = new DataEdit(" otrosingresos","otin");
+		$do = new DataObject('otin');
+		$do->rel_one_to_many('itotin', 'itorin', array('tipo_doc'=>'tipo_doc','numero'=>'numero'));
+		$do->pointer('scli' ,'scli.cliente=otin.cod_cli','scli.tipo AS sclitipo','left');
+		$do->rel_pointer('itotin','botr','itotin.codigo=botr.codigo','botr.nombre AS botr.nombre, botr.precio AS botrprecio, botr.iva AS botriva, botr.tipo AS botrtipo');
+
+
+		$edit = new DataEdit('',$do);
 
 		$edit->post_process("insert","_guarda_detalle");
 		$edit->post_process("update","_actualiza_detalle");
-		$edit->post_process("delete","_borra_detalle");
-		$edit->pre_process('insert','_pre_insert');
+		$edit->post_process('delete',"_borra_detalle");
+		$edit->pre_process( 'insert','_pre_insert');
 
-		$edit->back_url = "ventas/ otin";
+		$edit->back_url = 'ventas/otin';
 
-		$edit->fecha = new DateonlyField("Fecha", "fecha","d/m/Y");
-		$edit->fecha->insertValue = date("Y-m-d");
-		$edit->fecha->mode="autohide";
+		$edit->fecha = new DateonlyField('Fecha', 'fecha');
+		$edit->fecha->insertValue = date('Y-m-d');
+		$edit->fecha->mode='autohide';
 		$edit->fecha->size = 10;
 
-		$edit->vence = new DateonlyField("Vence", "vence","d/m/Y");
-		$edit->vence->insertValue = date("Y-m-d");
+		$edit->vence = new DateonlyField('Vence', 'vence');
+		$edit->vence->insertValue = date('Y-m-d');
 		$edit->vence->size = 10;
 
-		$edit->numero = new inputField("N&uacute;mero", "numero");
+		$edit->numero = new inputField('N&uacute;mero', 'numero');
 		$edit->numero->size = 10;
-		$edit->numero->rule= "required";
-		$edit->numero->mode="autohide";
+		$edit->numero->rule= 'required';
+		$edit->numero->mode= 'autohide';
 		$edit->numero->maxlength=8;
 
-    	$edit->nombre = new inputField("Nombre", "nombre");
+		$edit->nombre = new inputField("Nombre", "nombre");
 		$edit->nombre->size = 55;
 		$edit->nombre->maxlength=40;
 
-		$edit->iva  = new inputField("IVA", "iva");
+		$edit->iva  = new inputField('IVA', 'iva');
 		$edit->iva->size = 20;
 		$edit->iva->css_class='inputnum';
 
-		$edit->subtotal  = new inputField("Sub.Total", "totals");
+		$edit->subtotal  = new inputField('Sub.Total', 'totals');
 		$edit->subtotal->size = 20;
 		$edit->subtotal->css_class='inputnum';
 
-		$edit->total  = new inputField("Total", "totalg");
+		$edit->total  = new inputField('Total', 'totalg');
 		$edit->total->size = 20;
 		$edit->total->css_class='inputnum';
 
-		$edit->cliente = new inputField("Cliente"  , "cod_cli");
+		$edit->cliente = new inputField('Cliente'  , 'cod_cli');
 		$edit->cliente->size = 10;
 		$edit->cliente->maxlength=5;
 		$edit->cliente->append($boton);
 
-		$edit->rifci   = new inputField("RIF/CI"  , "rifci");
+		$edit->rifci   = new inputField('RIF/CI'  , 'rifci');
 		$edit->rifci->size = 20;
 
-		$edit->direc = new inputField("Direcci&oacute;n","direc");
+		$edit->direc = new inputField('Direcci&oacute;n','direc');
 		$edit->direc->size = 55;
 
-		$edit->dire1 = new inputField(" ","dire1");
+		$edit->dire1 = new inputField(' ','dire1');
 		$edit->dire1->size = 55;
 
-		$edit->observaciones = new inputField("Observaciones"  , "observa1");
+		$edit->observaciones = new inputField('Observaciones'  , 'observa1');
 		$edit->observaciones->size = 40;
 
-		$edit->observaciones1 = new inputField("Observaciones"  , "observa2");
+		$edit->observaciones1 = new inputField('Observaciones' , 'observa2');
 		$edit->observaciones1->size = 40;
 
-		$edit->orden  = new inputField("Orden","orden");
+		$edit->orden  = new inputField('Orden','orden');
 		$edit->orden->size = 20;
 
-		$edit->tipo = new dropdownField("Tipo", "tipo_doc");
-		$edit->tipo->option("FC","FC");
-		$edit->tipo->option("ND","ND");
-		$edit->tipo->option("OT","OT");
+		$edit->tipo = new dropdownField('Tipo', 'tipo_doc');
+		$edit->tipo->option('FC','FC');
+		$edit->tipo->option('ND','ND');
+		$edit->tipo->option('OT','OT');
 		$edit->tipo->size = 20;
 		$edit->tipo->style='width:70px;';
 
-		$numero=$edit->_dataobject->get('numero');
-		$tipo  =$edit->_dataobject->get('tipo_doc');
-
-		$detalle = new DataDetalle($edit->_status);
 
 		//Campos para el detalle
+		$edit->codigo = new inputField('C&oacute;digo', 'codigo_<#i#>');
+		$edit->codigo->size=18;
+		$edit->codigo->db_name='codigo';
+		$edit->codigo->rel_id ='itotin';
+		$edit->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
 
-		$detalle->db->select('codigo,descrip,precio,impuesto,importe');
-		$detalle->db->from('itotin');
-		$detalle->db->where("numero='$numero'");
-		$detalle->db->where("tipo_doc='$tipo'");
+		$edit->descripcion = new inputField('Descripci&oacute;n', 'descrip_<#i#>');
+		$edit->descripcion->size=30;
+		$edit->descripcion->db_name='descrip';
+		$edit->descripcion->rel_id ='itotin';
+		$edit->descripcion->maxlength=12;
 
-		$detalle->codigo = new inputField("C&oacute;digo", "codigo<#i#>");
-		$detalle->codigo->size=18;
-		$detalle->codigo->db_name='codigo';
-		$detalle->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
-		$detalle->codigo->readonly=TRUE;
+		$edit->precio = new inputField('Precio', 'precio_<#i#>');
+		$edit->precio->css_class='inputnum';
+		$edit->precio->size=20;
+		$edit->precio->rel_id ='itotin';
+		$edit->precio->db_name='precio';
 
-		$detalle->descripcion = new inputField("Descripci&oacute;n", "descrip<#i#>");
-		$detalle->descripcion->size=30;
-		$detalle->descripcion->db_name='descrip';
-		$detalle->descripcion->maxlength=12;
+		$edit->impuesto = new inputField('Impuesto', 'impuesto_<#i#>');
+		$edit->impuesto->css_class='inputnum';
+		$edit->impuesto->size=20;
+		$edit->impuesto->rel_id ='itotin';
+		$edit->impuesto->db_name='impuesto';
 
-		$detalle->precio = new inputField("Precio", "precio<#i#>");
-		$detalle->precio->css_class='inputnum';
-		$detalle->precio->size=20;
-		$detalle->precio->db_name='precio';
-
-		$detalle->impuesto = new inputField("Impuesto", "impuesto<#i#>");
-		$detalle->impuesto->css_class='inputnum';
-		$detalle->impuesto->size=20;
-		$detalle->impuesto->db_name='impuesto';
-
-		$detalle->total = new inputField2("Total", "importe<#i#>");
-		$detalle->total->db_name='importe';
-		$detalle->total->size=20;
-		$detalle->total->css_class='inputnum';
-
+		$edit->total = new inputField2('Total', 'importe_<#i#>');
+		$edit->total->db_name='importe';
+		$edit->total->size=20;
+		$edit->total->rel_id ='itotin';
+		$edit->total->css_class='inputnum';
 		//fin de campos para detalle
 
-		$detalle->onDelete('totalizar()');
-		$detalle->onAdd('totalizar()');
-		$detalle->script($script);
-		$detalle->style="width:110px";
-
-		//Columnas del detalle
-		$detalle->column("C&oacute;digo"      , "<#codigo#>");
-		$detalle->column("Descripci&oacute;n" , "<#descripcion#>");
-		$detalle->column("Precio"      , "<#precio#>");
-		$detalle->column("Impuesto"    , "<#impuesto#>");
-		$detalle->column("Total"       , "<#total#>");
-
-		$detalle->build();
-		$conten['detalle'] = $detalle->output;
-
-		$edit->detalle=new freeField("detalle", 'detalle',$detalle->output);
-
-		$edit->buttons( "save", "undo","back");
+		$edit->buttons('add_rel');
 		$edit->build();
 
-		$smenu['link']=barra_menu('122');
-		$data['smenu'] = $this->load->view('view_sub_menu', $smenu,true);
-		$conten["form"]  =&  $edit;
-		$data['content'] = $this->load->view('view_otrosingresos', $conten,true);
-		$data["head"]    = script("tabber.js").script("prototype.js").$this->rapyd->get_head().script("scriptaculous.js").script("effects.js");
-		$data['title']   = '<h1>Otros Ingresos</h1>';
-		$this->load->view('view_ventanas', $data);
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form']  =&  $edit;
+			$this->load->view('view_otin', $conten);
+		}
 	}
 
 	function dpto() {

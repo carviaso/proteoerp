@@ -1,18 +1,24 @@
 <?php
 $maxlin=16; //Maximo de lineas de items.
 
+$montoregular = $this->datasis->traevalor('MONTOLECHEREG','Monto de la leche regulada');
+if(empty($montoregular)) $montoregular=3;
+
 if(count($parametros)==0) show_error('Faltan parametros');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 
 $mSQL_1 = $this->db->query('SELECT
-a.numero, b.nombre,TRIM(b.nomfis) AS nomfis, a.proveed, b.rif,a.montopago,a.fecha,a.tipo
+a.numero, b.nombre,TRIM(b.nomfis) AS nomfis, a.proveed, b.rif,a.montopago,a.fecha,a.tipo,
+a.numche,c.banco AS nomban,a.id_lpagolote
 FROM lpago AS a
 JOIN sprv  AS b ON a.proveed=b.proveed
+JOIN banc  AS c ON a.banco=c.codbanc
 WHERE a.id='.$dbid);
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row = $mSQL_1->row();
 
+$idlote   = (empty($row->id_lpagolote))? 0:$row->id_lpagolote;
 $numero   = $row->numero;
 $proveed  = $row->proveed;
 $nombre   = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
@@ -21,6 +27,13 @@ $monto    = nformat($row->montopago);
 $montole  = strtoupper(numletra($row->montopago));
 $fecha    = dbdate_to_human($row->fecha);
 $tipo     = $row->tipo;
+$numche   = trim($row->numche);
+$nomban   = trim($row->nomban);
+
+$tit = 'PAGADO POR: '.$nomban;
+if(!empty($numche) && $idlote<=0 ){
+	$tit.= ' CHEQUE NRO. '.$numche;
+}
 
 $dbproveed= $this->db->escape($proveed);
 
@@ -33,36 +46,35 @@ $quepaga = $this->datasis->dameval("SELECT MIN(b.fecha) fecha FROM itlrece a JOI
 $precios = $this->datasis->dameval("SELECT id FROM lprecio WHERE fecha<='".$quepaga."' ORDER BY fecha DESC LIMIT 1 ") ;
 if(empty($precios)) $precios = 1;
 
-//////////////////////////////////////////////////////////////
 $mSQL="
-SELECT fecha, sem,
-SUM(faltante) AS faltante,
-SUM(llitros) llitros, round(sum(totleche)/sum(llitros),4) ltarifa, sum(totleche) totleche,
-SUM(tlitros) tlitros, round(sum(totransp)/sum(tlitros),4) ttarifa, sum(totransp) tottransp,
-SUM(totleche)+sum(totransp) total
+SELECT ff.fecha, ff.sem,
+SUM(ff.faltante) AS faltante,
+SUM(ff.llitros)  AS llitros, ROUND(SUM(ff.totleche)/SUM(ff.llitros),4) AS ltarifa, SUM(ff.totleche) AS totleche,
+SUM(ff.tlitros)  AS tlitros, ROUND(SUM(ff.totransp)/SUM(ff.tlitros),4) AS ttarifa, SUM(ff.totransp) AS tottransp,
+SUM(ff.totleche)+SUM(ff.totransp) AS total
 FROM (
 	SELECT
-		SUM(litros-lista) AS faltante,
-		a.fecha, DATE_FORMAT(a.fecha,'%w') AS sem,
+		SUM((a.litros-a.lista)*(b.tipolec<>'F')) AS faltante,
+		DATE_FORMAT(a.fecha,'%Y-%m-%d') AS fecha, DATE_FORMAT(a.fecha,'%w') AS sem,
 		SUM(a.lista) AS tlitros,
 		b.tarifa,
-		SUM(ROUND(a.lista*b.tarifa,2)+ROUND((litros-lista)*b.tarsob,2)) AS totransp,
+		SUM(a.montopago) AS totransp,
 		0 AS llitros,
 		0 totleche
 	FROM lrece AS a
-		JOIN lruta AS b ON a.ruta=b.codigo
-		JOIN sprv  AS c ON b.codprv=c.proveed
+		JOIN lruta   AS b ON a.ruta=b.codigo
+		JOIN sprv    AS c ON b.codprv=c.proveed
 	WHERE a.pago=${dbid}
 	GROUP BY a.fecha
 UNION ALL
 	SELECT
 		0 AS faltante,
-		b.fecha, DATE_FORMAT(b.fecha,'%w') AS sem,
+		DATE_FORMAT(b.fecha,'%Y-%m-%d') AS fecha, DATE_FORMAT(b.fecha,'%w') AS sem,
 		0 AS litros,
 		0 AS tarifa,
 		0 totrasp,
 		SUM(a.lista) llitros,
-		SUM(ROUND(a.lista*if(c.tipolec='F', if(c.animal='V', if(c.zona='0112', e.tarifa5, e.tarifa1), e.tarifa3), if(c.animal='V', if(c.zona='0112', e.tarifa6, e.tarifa2), e.tarifa4) ),2)) AS totleche
+		SUM(a.montopago) AS totleche
 	FROM itlrece  AS a
 		JOIN lrece    AS b ON a.id_lrece=b.id
 		JOIN lvaca    AS c ON a.id_lvaca=c.id
@@ -70,16 +82,15 @@ UNION ALL
 		JOIN lprecio  AS e ON e.id=$precios
 	WHERE a.pago=${dbid} AND MID(b.ruta,1,1) <>'G' AND a.lista>0
 	GROUP BY b.fecha
-) fff
-GROUP BY fecha";
+) ff
+GROUP BY ff.fecha";
 ///////////////////////////////////////////////////////////////////////
 
-//echo $mSQL;
+//echo $mSQL;exit();
 
 $mSQL_2  = $this->db->query($mSQL);
 
-if ($mSQL_2->num_rows() == 0)
-{
+if ($mSQL_2->num_rows() == 0){
 	echo "Consulta Vacia!!";
 }
 $detalle = $mSQL_2->result();
@@ -101,7 +112,16 @@ if($ngasto>0){
 
 $semana=array('DOMINGO','LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO');
 
-$ittot = array('lmonto'=>0,'llitros'=>0,'tlitros'=>0,'tmonto'=>0, 'total'=>0 ,'incen'=>0,'tfalta'=>0);
+$ittot = array(
+	'lmonto'   =>0,
+	'llitros'  =>0,
+	'tlitros'  =>0,
+	'tmonto'   =>0,
+	'total'    =>0,
+	'incen'    =>0,
+	'tfalta'   =>0,
+	'tottransp'=>0
+);
 
 ?><html>
 <head>
@@ -159,24 +179,6 @@ $ittot = array('lmonto'=>0,'llitros'=>0,'tlitros'=>0,'tmonto'=>0, 'total'=>0 ,'i
 		$width = Font_Metrics::get_text_width('PP 1 de 2', $font, $size);
 		$pdf->page_text($w / 2 - $width / 2, $y, $text, $font, $size, $color);
 	}
-
-
-	/*if (isset($pdf)) {
-		$texto = array();
-		$font  = Font_Metrics::get_font("verdana");
-		$size  = 6;
-		$color = array(0,0,0);
-		$text_height = Font_Metrics::get_font_height($font, $size);
-		$w     = $pdf->get_width();
-		$h     = $pdf->get_height();
-		$y     = $h - $text_height - 24;
-
-		$text = "PP {PAGE_NUM} de {PAGE_COUNT}";
-
-		// Center the text
-		$width = Font_Metrics::get_text_width('PP 1 de 2', $font, $size);
-		$pdf->page_text($w / 2 - $width / 2, $y, $text, $font, $size, $color);
-	}*/
 </script>
 <table width='100%'>
 <tr><td>
@@ -199,7 +201,7 @@ $encabezado = <<<encabezado
 			<table style="font-size:12pt;">
 				<tr>
 					<td>Pagado a:</td>
-					<td><b>${nombre} </b> </td>
+					<td><b>${nombre}</b></td>
 					<td>RIF o CI: <b>${rifci}</b> (${proveed})</td>
 				</tr>
 			</table>
@@ -214,17 +216,15 @@ encabezado;
 //************************
 $estilo  = "style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;";
 $encabezado_tabla="
-			<table class=\"change_order_items\" style=\"padding-top:0; \">
+			<table class=\"change_order_items\" style=\"padding-top:0;font-size: 0.7em\">
 				<thead>
 					<tr>
-						<th ${estilo}' >D&iacute;a   </th>
+						<th ${estilo}' >D&iacute;a</th>
 						<th ${estilo}' >Leche</th>
-						<!-- th ${estilo}' >Precio       </th -->
-						<th ${estilo}' >Bs. Leche  </th>
-						<th ${estilo}' >Trans.   </th>
+						<th ${estilo}' >Bs. Leche</th>
+						<th ${estilo}' >Trans.</th>
+						<th ${estilo}' >M.Trans.</th>
 						<th ${estilo}' >Fal./Sob.</th>
-						<!-- th ${estilo}' >Tarifa       </th -->
-						<!-- th ${estilo}' >Bs. Trans  </th -->
 						<th ${estilo}' >Incentivo</th>
 						<th ${estilo}' >Total Pagar</th>
 					</tr>
@@ -242,14 +242,13 @@ $pie_final=<<<piefinal
 				<tfoot style='border:1px solid;background:#EEEEEE;'>
 					<tr>
 						<td>Totales...</td>
-						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
-						<!-- td style="text-align:right;font-size:10pt;font-weight:bold;"></td -->
-						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
-						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
-						<!-- td style="text-align:right;font-size:10pt;font-weight:bold;"></td -->
-						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
-						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
-						<td style="text-align:right;font-size:10pt;font-weight:bold;">%s</td>
+						<td style="text-align:right;font-size:1em;font-weight:bold;">%s</td>
+						<td style="text-align:right;font-size:1em;font-weight:bold;">%s</td>
+						<td style="text-align:right;font-size:1em;font-weight:bold;">%s</td>
+						<td style="text-align:right;font-size:1em;font-weight:bold;">%s</td>
+						<td style="text-align:right;font-size:1em;font-weight:bold;">%s</td>
+						<td style="text-align:right;font-size:1em;font-weight:bold;">%s</td>
+						<td style="text-align:right;font-size:1em;font-weight:bold;">%s</td>
 					</tr>
 				</tfoot>
 			</table>
@@ -260,7 +259,7 @@ $pie_continuo=<<<piecontinuo
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="6" style="text-align: right;">CONTINUA...</td>
+				<td colspan="8" style="text-align: right;">CONTINUA...</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -289,12 +288,13 @@ foreach ( $detalle AS $items ){
 						<td style="text-align:left;font-size: 0.7em"><?php echo dbdate_to_human($items->fecha).' '.$semana[$items->sem]; ?></td>
 						<td style="text-align:right" ><?php $ittot['llitros'] += $items->llitros;  echo nformat($items->llitros ,0);  ?></td>
 						<td style="text-align:right" ><?php
-							$totleche = $items->llitros*3;
+							$totleche = $items->llitros*$montoregular;
 							$ittot['lmonto']  += $totleche;
 							echo nformat($totleche,2);
 						?></td>
-						<td style="text-align:right" ><?php $ittot['tlitros'] += $items->tlitros;  echo nformat($items->tlitros ,0);  ?></td>
-						<td style="text-align:right" ><?php $ittot['tfalta']  += $items->faltante; echo nformat($items->faltante,0);  ?></td>
+						<td style="text-align:right" ><?php $ittot['tlitros']  += $items->tlitros;   echo nformat($items->tlitros ,0);  ?></td>
+						<td style="text-align:right" ><?php $ittot['tottransp']+= $items->tottransp; echo nformat($items->tottransp);  ?></td>
+						<td style="text-align:right" ><?php $ittot['tfalta']   += $items->faltante;  echo nformat($items->faltante,0);  ?></td>
 						<td style="text-align:right" ><?php
 							$incent = $items->totleche-$totleche;
 							$ittot['incen']   += $incent;
@@ -306,7 +306,7 @@ foreach ( $detalle AS $items ){
 		$mod = ! $mod;
 }
 
-echo sprintf($pie_final,nformat($ittot['llitros'],0),nformat($ittot['lmonto']),nformat($ittot['tlitros'],0),nformat($ittot['tfalta']), nformat($ittot['incen']),nformat($ittot['total']));
+echo sprintf($pie_final,nformat($ittot['llitros'],0),nformat($ittot['lmonto']),nformat($ittot['tlitros'],0),nformat($ittot['tottransp']),nformat($ittot['tfalta']), nformat($ittot['incen']),nformat($ittot['total']));
 
 echo "		</td>\n";
 echo "		<td>\n";
@@ -329,7 +329,6 @@ $encabezado_tabla="
 			</tr>
 			<tr>
 				<th ${estilo}' >Descripci&oacute;n</th>
-				<!-- th ${estilo}' >Fecha</th -->
 				<th ${estilo}' >Cant.</th>
 				<th ${estilo}' >Precio</th>
 				<th ${estilo}' >Total</th>
@@ -382,11 +381,10 @@ if($items2->tipo=='D'){
 }
 ?>
 					<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-						<td style="text-align: left;font-size: 0.7em"  ><?php echo $items2->descrip;               ?></td>
-						<!-- td style="text-align: center"><?php echo dbdate_to_human($items2->fecha);?></td -->
-						<td style="text-align: right" ><?php echo nformat($items2->cantidad,2);   ?></td>
-						<td style="text-align: right" ><?php echo nformat($items2->precio  ,2);   ?></td>
-						<td style="text-align: right" ><?php $ittot['tlgasto']+=$items2->total ; echo nformat($items2->total   ,2);   ?></td>
+						<td style="text-align: left;font-size: 0.7em"><?php echo $items2->descrip; ?></td>
+						<td style="text-align: right" ><?php echo nformat($items2->cantidad,2);    ?></td>
+						<td style="text-align: right" ><?php echo nformat($items2->precio  ,2);    ?></td>
+						<td style="text-align: right" ><?php $ittot['tlgasto']+=$items2->total; echo nformat($items2->total   ,2); ?></td>
 					</tr>
 <?php
 
@@ -402,10 +400,9 @@ echo "\n</td></tr>\n";
 echo "<tr><td style='font-size:7pt;' >\n";
 $tarifas = $this->datasis->damereg("SELECT * FROM lprecio WHERE id=$precios");
 
-echo "TARIFAS: VACA F-".$tarifas['tarifa1']." C-".$tarifas['tarifa2']." BUFA F-".$tarifas['tarifa3']." C-".$tarifas['tarifa4'];
-
+//echo "TARIFAS: VACA F-".$tarifas['tarifa1']." C-".$tarifas['tarifa2']." BUFA F-".$tarifas['tarifa3']." C-".$tarifas['tarifa4'];
+echo $tit;
 ?>
-
 </td></tr>
 </table>
 </body>
