@@ -1572,6 +1572,9 @@ class Jqdatagrid
 	}
 
 
+	//******************************************************************
+	// Agrega Boton al panel izquierdo
+	//
 	function wbotonadd( $boton ){
 		$this->Wbotones[] = $boton;
 	}

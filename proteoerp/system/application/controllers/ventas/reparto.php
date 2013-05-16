@@ -873,7 +873,7 @@ class Reparto extends Controller {
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
-				$this->db->simple_query("DELETE FROM reparto WHERE id=$id ");
+				$this->db->query("DELETE FROM reparto WHERE id=$id ");
 				logusu('REPARTO',"Registro ????? ELIMINADO");
 				echo "Registro Eliminado";
 			}

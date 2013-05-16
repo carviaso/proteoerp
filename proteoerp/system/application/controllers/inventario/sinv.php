@@ -2512,14 +2512,12 @@ class Sinv extends Controller {
 			'search'        => 'false'
 		));
 
-
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('250');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
-
 		$grid->setMultiSelect(true);
 
 		$grid->setOnSelectRow('
@@ -2542,14 +2540,6 @@ class Sinv extends Controller {
 				}
 			}
 		');
-
-/*
-					jQuery("#bpos1").jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'bpos1/').'/"+id+"/", page:1});
-					jQuery("#bpos1").trigger("reloadGrid");
-
-					jQuery("#tpactivo").jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'pactivo/').'/"+id+"/", page:1});
-					jQuery("#tpactivo").trigger("reloadGrid");
-*/
 
 
 		$grid->setAfterInsertRow('

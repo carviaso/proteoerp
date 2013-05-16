@@ -141,7 +141,7 @@ class Tbpasa extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 550, width: 700, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -630,52 +630,56 @@ class Tbpasa extends Controller {
 		$edit->pre_process( 'update','_pre_update' );
 		$edit->pre_process( 'delete','_pre_delete' );
 
-		$edit->fecven = new dateField('Fecha del viaje','fecven');
-		$edit->fecven->rule='chfecha';
-		$edit->fecven->size =10;
-		$edit->fecven->maxlength =12;
-		$edit->fecven->insertValue=date('Y-m-d');
+		$edit->fecven = new dateField('Fecha','fecven');
+		$edit->fecven->rule        = 'chfecha';
+		$edit->fecven->size        = 10;
+		$edit->fecven->maxlength   = 12;
+		$edit->fecven->insertValue = date('Y-m-d');
 		$edit->fecven->calendar = false;
 
-		$edit->nropasa = new inputField('Nro. Pasaje','nropasa');
-		$edit->nropasa->rule='';
-		$edit->nropasa->size =10;
-		$edit->nropasa->maxlength =8;
-
-		$edit->codppr = new inputField('Codppr','codppr');
-		$edit->codppr->rule='';
-		$edit->codppr->size =22;
-		$edit->codppr->maxlength =20;
-
-		$edit->nacio = new inputField('Nacionalidad','nacio');
-		$edit->nacio->rule='';
-		$edit->nacio->size =12;
-		$edit->nacio->maxlength =10;
-
-		$edit->codcli = new inputField('Cod.Cliente','codcli');
-		$edit->codcli->rule='';
-		$edit->codcli->size =22;
-		$edit->codcli->maxlength =20;
-
-		$edit->nomcli = new inputField('Nomcli','nomcli');
-		$edit->nomcli->rule='';
-		$edit->nomcli->size =152;
-		$edit->nomcli->maxlength =150;
-
-		$edit->codcarnet = new inputField('Codcarnet','codcarnet');
-		$edit->codcarnet->rule='';
-		$edit->codcarnet->size =22;
-		$edit->codcarnet->maxlength =20;
-
 		$edit->org = new dropdownField('Origen','org');
-		$edit->org->rule='';
+		$edit->org->rule = '';
 		$edit->org->option('','Seleccionar');
 		$edit->org->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
+		$edit->org->style ='width:200px;';
 
 		$edit->dtn = new dropdownField('Destino','dtn');
 		$edit->dtn->rule='';
 		$edit->dtn->option('','Seleccionar');
 		$edit->dtn->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
+		$edit->dtn->style='width:200px;';
+
+
+		$edit->nropasa = new inputField('Nro. Pasaje','nropasa');
+		$edit->nropasa->rule       = '';
+		$edit->nropasa->size       = 10;
+		$edit->nropasa->maxlength  =  8;
+
+		$edit->codppr = new inputField('Codppr','codppr');
+		$edit->codppr->rule       = '';
+		$edit->codppr->size       = 22;
+		$edit->codppr->maxlength  = 20;
+
+		$edit->nacio = new inputField('Nacionalidad','nacio');
+		$edit->nacio->rule      = '';
+		$edit->nacio->size      = 12;
+		$edit->nacio->maxlength = 10;
+
+		$edit->codcli = new inputField('Cod.Cliente','codcli');
+		$edit->codcli->rule      = '';
+		$edit->codcli->size      = 22;
+		$edit->codcli->maxlength = 20;
+
+		$edit->nomcli = new inputField('Nomcli','nomcli');
+		$edit->nomcli->rule      = '';
+		$edit->nomcli->size      = 152;
+		$edit->nomcli->maxlength = 150;
+
+		$edit->codcarnet = new inputField('Codcarnet','codcarnet');
+		$edit->codcarnet->rule      = '';
+		$edit->codcarnet->size      = 22;
+		$edit->codcarnet->maxlength = 20;
+
 
 		$edit->codrut = new dropdownField('Ruta','codrut');
 		$edit->codrut->rule='';
@@ -768,6 +772,138 @@ class Tbpasa extends Controller {
 			$this->load->view('view_tbpasa', $conten);
 		}
 	}
+
+
+	//******************************************************************
+	// Get data para las rutas
+	//
+	function getbrutas(){
+		$mid1  = $this->uri->segment(4);
+		$mid2  = $this->uri->segment(5);
+		$dia   = $this->uri->segment(6);
+		$mes   = $this->uri->segment(7);
+		$ano   = $this->uri->segment(8);
+		
+		$grid     = $this->jqdatagrid;
+
+		$qmid1 = $this->db->escape($mid1);
+		$qmid2 = $this->db->escape($mid2);
+
+		$mSQL = "
+			SELECT a.id, b.codrut, b.horsal, b.tipuni, b.origen, b.destino, a.orden, a.hora, IF(b.tipserv='01', prec_01, prec_02) precio  
+			FROM tbdestinos a 
+			JOIN tbrutas b ON a.codrut = b.codrut 
+			JOIN tbprecios c ON c.codofiorg=a.codofiorg AND c.codofides=a.codofides 
+			WHERE a.codofiorg = ${qmid1} AND a.codofides = ${qmid2} AND a.mostrar='S' 
+			ORDER BY b.horsal 
+		";
+
+
+
+		$response = $grid->getDataSimple($mSQL);
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+		
+	}
+
+	//******************************************************************
+	// Busca los puestos disponibles
+	//
+	function puestos(){
+		$id = $this->uri->segment(4);
+		$rs = "Ruta ".$id;
+
+
+
+/*
+		$mid2 = $this->uri->segment(5);
+
+		$grid     = $this->jqdatagrid;
+
+		$qmid1 = $this->db->escape($mid1);
+		$qmid2 = $this->db->escape($mid2);
+
+		$mSQL = "
+			SELECT a.id, b.codrut, b.horsal, b.tipuni, b.origen, b.destino, a.orden, a.hora  
+			FROM tbdestinos a JOIN tbrutas b ON a.codrut=b.codrut
+			WHERE a.codofiorg = ${qmid1} AND a.codofides = ${qmid2}
+			ORDER BY b.horsal
+		";
+
+		$response = $grid->getDataSimple($mSQL);
+		$rs = $grid->jsonresult( $response);
+*/
+		echo $rs;
+		
+	}
+
+
+
+
+	function drutas(){
+		session_write_close();
+		$mid1  = $this->input->post('q1');
+		$mid2  = $this->input->post('q2');
+		$feven = $this->input->post('fecven');
+
+//		echo "<h1>Meco el orejon</h1>";
+
+		$data = '<h1>No se encontraron resultados</h1>';
+		if($mid1 !== false && $mid2 !== false){
+			$qmid1 = $this->db->escape($mid1);
+			$qmid2 = $this->db->escape($mid2);
+
+			$qlite = $this->db->escape($mid1.'%'.$mid2);
+
+			$retArray = $retorno = array();
+			$mSQL="SELECT aa.codrut,CONCAT_WS('-',b.origen,b.destino,hora) as label FROM (
+				SELECT a.codrut,
+				GROUP_CONCAT(DISTINCT codofides ORDER BY orden) AS toques, GROUP_CONCAT(DISTINCT a.hora ORDER BY orden) hora
+				FROM tbdestinos AS a
+				WHERE a.codofides IN (${qmid1},${qmid2})
+				GROUP BY a.codrut) AS aa
+				JOIN tbrutas AS b ON aa.codrut=b.codrut
+				WHERE aa.toques LIKE ${qlite}";
+
+			$mSQL = "
+				SELECT a.id, b.codrut, b.horsal, b.tipuni, b.origen, b.destino, a.orden  
+				FROM tbdestinos a JOIN tbrutas b ON a.codrut=b.codrut
+				WHERE a.codofiorg = ${qmid1} AND a.codofides = ${qmid2}
+			";
+
+			//echo $mSQL;
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				$data  = "<table>\n";
+				$data .= "\t<tr>";
+				$data .= "\t\t<td>Ruta<td>";
+				$data .= "<td>Salida<td>";
+				$data .= "<td>Unidad<td>";
+				$data .= "<td>Origen<td>";
+				$data .= "<td>Destino<td>";
+				$data .= "<td>Orden<td>";
+				$data .= "\t</tr>\n";
+
+				foreach( $query->result_array() as  $row ) {
+					$data .= "\t<tr>";
+					$data .= "\t\t<td>".utf8_encode($row['codrut'])."<td>";
+					$data .= "<td>".utf8_encode($row['horsal'])."<td>";
+					$data .= "<td>".utf8_encode($row['tipuni'])."<td>";
+					$data .= "<td>".utf8_encode($row['origen'])."<td>";
+					$data .= "<td>".utf8_encode($row['destino'])."<td>";
+					$data .= "<td>".utf8_encode($row['orden'])."<td>";
+					$data .= "\t</tr>\n";
+				}
+				$data .= "</table>\n";
+			}
+		}
+		echo $data;
+
+		return true;
+	}
+
+
 
 	function getruta(){
 		session_write_close();

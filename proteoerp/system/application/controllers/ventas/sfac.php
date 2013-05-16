@@ -1677,7 +1677,7 @@ class Sfac extends Controller {
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM sfac");
 		}
 		if(empty($id)) return '';
-		$dbid     = $this->db-escape($id);
+		$dbid     = $this->db->escape($id);
 		$tipo_doc = $this->datasis->dameval("SELECT tipo_doc FROM sfac WHERE id=${dbid}");
 		$numero   = $this->datasis->dameval("SELECT numero   FROM sfac WHERE id=${dbid}");
 

@@ -43,8 +43,8 @@ class Tbrutas extends Controller {
 
 
 		$WpAdic = "
-		<tr><td><div class=\"tema1\"><table id=\"bpos1\"></table></div><div id='pbpos1'></div></td></tr>\n
-		<tr><td><div class=\"tema1\">
+		<tr><td><div class=\"anexos\"><table id=\"bpos1\"></table></div><div id='pbpos1'></div></td></tr>\n
+		<tr><td><div class=\"anexos\">
 			<table cellpadding='0' cellspacing='0' style='width:90%;'>
 				<tr>
 					<td style='text-align:center;' colspan='3'><div class='botones' style='background:#EAEAEA;font-size:12pt;'>DESTINOS</div></td>
@@ -87,7 +87,7 @@ class Tbrutas extends Controller {
 		$param['centerpanel'] = $centerpanel;
 		$param['listados']    = $this->datasis->listados('TBRUTAS', 'JQ');
 		$param['otros']       = $this->datasis->otros('TBRUTAS', 'JQ');
-		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['temas']       = array('proteo','darkness','anexos');
 		$param['bodyscript']  = $bodyscript;
 		$param['tabs']        = false;
 		$param['encabeza']    = $this->titp;
