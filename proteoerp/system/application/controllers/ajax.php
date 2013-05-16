@@ -1394,7 +1394,7 @@ class Ajax extends Controller {
 	function autobotr(){
 		$q   = $this->input->post('q');
 
-		$data = '[{ }]';
+		$data = '[]';
 		if($q!==false){
 			$mid = $this->db->escape('%'.$q.'%');
 			$mSQL = "SELECT a.codigo, a.nombre descrip

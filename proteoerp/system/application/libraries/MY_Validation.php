@@ -68,6 +68,19 @@ class MY_Validation extends CI_Validation{
 		}
 	}
 
+	function existebotr($codigo){
+		$dbcod= $this->CI->db->escape($codigo);
+		$mSQL  = "SELECT COUNT(*) AS cana FROM botr WHERE codigo=$dbcod";
+		$this->set_message('existebotr', 'El codigo propuesto en el campo %s no existe');
+
+		$query = $this->CI->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$row = $query->row();
+			if( $row->cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
 
 	function existesprv($sprv){
 		$dbsprv= $this->CI->db->escape($sprv);

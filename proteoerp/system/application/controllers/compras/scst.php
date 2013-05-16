@@ -50,7 +50,7 @@ class Scst extends Controller {
 				<tr>
 					<td style='vertical-align:center;border:1px solid #AFAFAF;'><div class='tema1 botones'>".img(array('src' =>"assets/default/images/print.png",  'height' => 18, 'alt' => 'Imprimir',  'title' => 'Imprimir', 'border'=>'0'))."</div></td>
 					<td style='vertical-align:top;text-align:center;'><div class='tema1 botones'><a style='width:70px;text-align:left;vertical-align:top;' border='0' href='#' id='imprimir'>Compra</a></div></td>
-					<td style='vertical-align:top;text-align:center;'><div class='tema1 botones'><a class='tema1 botones' style='width:80px;text-align:left;vertical-align:top;' href='#' id='reteprin'>Retencion</a></div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='tema1 botones'><a class='tema1 botones' style='width:80px;text-align:left;vertical-align:top;' href='#' id='reteprin'>Retenci&oacute;n</a></div></td>
 				</tr>
 			</table>
 		</td></tr>\n

@@ -662,7 +662,7 @@ function sfpatipo(id){
 			<tr>
 				<td>
 					<fieldset style='border: 1px outset #9AC8DA;background: #EFFFEA;'>
-					<table widthi='100%'>
+					<table width='100%'>
 						<tr>
 							<td class="littletableheader" width='80' style='background:#EFFFEA;'><?php echo $form->cliente->label;  ?>*
 							<?php
@@ -832,12 +832,12 @@ function sfpatipo(id){
 				<td class="littletablerow">       <?php echo $form->$banco->output     ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$monto->output ?></td>
 				<?php if($form->_status!='show') {?>
-					<td class="littletablerow"><a href=# onclick="del_sfpa(<?php echo $i; ?>);return false;"><?php echo img('images/delete.jpg'); ?></a></td>
+					<td class="littletablerow"><a href='#' onclick="del_sfpa(<?php echo $i; ?>);return false;"><?php echo img('images/delete.jpg'); ?></a></td>
 				<?php } ?>
 			</tr>
 			<?php } ?>
 			<tr id='__UTPL__sfpa'>
-				<td colspan='9' class="littletableheaderdet">&nbsp;</td>
+				<td colspan='<?php echo ($form->_status!='show')? '6':'5';  ?>' class="littletableheaderdet">&nbsp;</td>
 			</tr>
 		</table>
 	</tr><tr>
