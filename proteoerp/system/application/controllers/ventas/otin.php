@@ -195,7 +195,7 @@ class Otin extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 500, width: 780, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -1177,7 +1177,8 @@ class Otin extends Controller {
 			),
 			'filtro'  =>array('codigo' =>'C&oacute;digo','nombre'=>'Descripci&oacute;n'),
 			'retornar'=>array('codigo'=>'codigo_<#i#>','nombre'=>'descrip_<#i#>'),
-			'p_uri'=>array(4=>'<#i#>'),
+			'p_uri'   =>array(4=>'<#i#>'),
+			'where'   =>'tipo = "C"',
 			'titulo'  =>'Buscar concepto');
 
 
@@ -1255,18 +1256,21 @@ class Otin extends Controller {
 		$edit->iva->rule     = 'numeric';
 		$edit->iva->type     = 'inputhidden';
 		$edit->iva->css_class= 'inputnum';
+		$edit->iva->showformat ='decimal';
 
 		$edit->totals  = new inputField('Sub-Total', 'totals');
 		$edit->totals->size     = 20;
 		$edit->totals->rule     = 'numeric';
 		$edit->totals->type     = 'inputhidden';
 		$edit->totals->css_class= 'inputnum';
+		$edit->totals->showformat ='decimal';
 
 		$edit->totalg  = new inputField('Total', 'totalg');
 		$edit->totalg->size      = 20;
 		$edit->totalg->rule      ='numeric';
 		$edit->totalg->type      = 'inputhidden';
 		$edit->totalg->css_class='inputnum';
+		$edit->totalg->showformat ='decimal';
 
 		$edit->observa1 = new inputField('Observaciones' , 'observa1');
 		$edit->observa1->size = 40;
@@ -1288,11 +1292,21 @@ class Otin extends Controller {
 		$edit->sucu->rule  ='required';
 		$edit->sucu->style = 'width:100px';
 
+		$edit->afecta = new inputField('Factura Afecta','afecta');
+		$edit->afecta->rule='';
+		$edit->afecta->size =10;
+		$edit->afecta->maxlength =8;
+
+		$edit->fafecta = new dateonlyField('Fecha de la factura afecta','fafecta');
+		$edit->fafecta->rule='chfecha';
+		$edit->fafecta->size =10;
+		$edit->fafecta->maxlength =8;
+
 		//******************************
 		//Campos para el detalle
 		//******************************
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo_<#i#>');
-		$edit->codigo->size   = 12;
+		$edit->codigo->size   = 10;
 		$edit->codigo->db_name= 'codigo';
 		$edit->codigo->rule   = 'required|existebotr';
 		$edit->codigo->rel_id = 'itotin';
@@ -1322,23 +1336,26 @@ class Otin extends Controller {
 		$edit->precio->size     = 10;
 		$edit->precio->onkeyup  ='importe(<#i#>)';
 		$edit->precio->rel_id   = 'itotin';
+		$edit->precio->showformat ='decimal';
 		$edit->precio->db_name  = 'precio';
 
 		$edit->impuesto = new inputField('Impuesto', 'impuesto_<#i#>');
 		$edit->impuesto->css_class= 'inputnum';
 		$edit->impuesto->rule='numeric';
-		$edit->impuesto->size     = 10;
+		$edit->impuesto->size     = 6;
 		$edit->impuesto->onkeyup  ='importe(<#i#>)';
 		$edit->impuesto->rel_id   = 'itotin';
+		$edit->impuesto->showformat ='decimal';
 		$edit->impuesto->db_name  = 'impuesto';
 
-		$edit->importe = new inputField2('Total', 'importe_<#i#>');
+		$edit->importe = new inputField('Total', 'importe_<#i#>');
 		$edit->importe->db_name = 'importe';
 		$edit->importe->rule    = 'numeric|mayorcero';
 		$edit->importe->size    = 10;
 		$edit->importe->type    = 'inputhidden';
 		$edit->importe->rel_id  = 'itotin';
-		$edit->importe->css_class='inputnum';
+		$edit->importe->showformat ='decimal';
+		$edit->importe->css_class  ='inputnum';
 		//*******************************
 		//fin de campos para detalle
 		//*******************************
@@ -1406,7 +1423,7 @@ class Otin extends Controller {
 			);
 			echo json_encode($rt);
 		}else{
-			$conten['form']  =&  $edit;
+			$conten['form'] =& $edit;
 			$this->load->view('view_otin', $conten);
 		}
 	}
@@ -1451,6 +1468,49 @@ class Otin extends Controller {
 		$transac = $this->datasis->fprox_numero('ntransa');
 
 		if($tipo_doc=='ND'){
+			//valida la forma de pago
+		}elseif($tipo_doc=='OC'){
+			$do->unset_rel('sfpa');
+		}else{
+			$do->unset_rel('sfpa');
+		}
+
+		$con=$this->db->query("SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1");
+		if($con->num_rows() > 0){
+			$t=$con->row('tasa');$rt=$con->row('redutasa');$st=$con->row('sobretasa');
+		}else{
+			$do->error_message_ar['pre_ins']='Debe cargar la tabla de IVA.';
+			return false;
+		}
+
+		$stotal = $gtotal = $iva = 0;
+		$tasa=$montasa=$reducida=$monredu=$sobretasa=$monadic=$exento=0;
+		$cana=$do->count_rel('itordc');
+		for($i=0;$i<$cana;$i++){
+			$itprecio   = $do->get_rel('itotin', 'precio'  , $i);
+			$itimpuesto = $do->get_rel('itotin', 'impuesto', $i);
+			$itiva      = $do->get_rel('itotin', 'tasaiva' , $i);
+
+			if($itiva-$t==0) {
+				$tasa   +=$itimpuesto;
+				$montasa+=$itprecio;
+			}elseif($itiva-$rt==0) {
+				$reducida+=$itimpuesto;
+				$monredu +=$itprecio;
+			}elseif($itiva-$st==0) {
+				$sobretasa+=$itimpuesto;
+				$monadic  +=$itprecio;
+			}else{
+				$exento += $itprecio;
+			}
+			$totals += $itprecio;
+			$iva    += $itimpuesto;
+
+			$do->rel_rm_field('itotin','tasaiva',$i);//elimina el campo comodin
+		}
+		$totalg = $totals+$iva;
+
+		if($tipo_doc=='ND'){
 			$numero = $this->datasis->fprox_numero('notind');
 		}elseif($tipo_doc=='FC'){
 			$numero = $this->datasis->fprox_numero('notif');
@@ -1458,6 +1518,17 @@ class Otin extends Controller {
 			$numero = $this->datasis->fprox_numero('notiot');
 		}
 
+		$do->set('exento'   ,$exento   );
+		$do->set('tasa'     ,$tasa     );
+		$do->set('reducida' ,$reducida );
+		$do->set('sobretasa',$sobretasa);
+		$do->set('montasa'  ,$montasa  );
+		$do->set('monredu'  ,$monredu  );
+		$do->set('monadic'  ,$monadic  );
+
+		$do->set('totalg' , $totalg);
+		$do->set('totals' , $totals);
+		$do->set('iva'    , $iva);
 		$do->set('numero' , $numero );
 		$do->set('transac', $transac);
 		$do->set('estampa', 'CURDATE()'     , false);
@@ -1501,11 +1572,11 @@ class Otin extends Controller {
 	}
 
 	function instalar(){
-
-		if (!$this->datasis->iscampo('otin','id') ) {
-			$this->db->simple_query('ALTER TABLE otin DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE otin ADD UNIQUE INDEX tipo_doc, numero (numero)');
-			$this->db->simple_query('ALTER TABLE otin ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		$campos=$this->db->list_fields('otin');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE `otin` DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE `otin` ADD UNIQUE INDEX `numero` (`tipo_doc`, `numero`)');
+			$this->db->simple_query('ALTER TABLE `otin` ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};
 	}
 }

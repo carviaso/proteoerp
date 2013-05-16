@@ -369,7 +369,7 @@ class Lrece extends Controller {
 			'frozen'        => 'true',
 			'width'         => 45,
 			'editable'      => 'false',
-			'search'        => 'false'
+			'search'        => 'true'
 		));
 
 		$grid->addField('fecha');
@@ -2013,6 +2013,7 @@ class Lrece extends Controller {
 		$edit->script($script,'create');
 
 		//$edit->post_process('update','_post_vaqueras_update');
+		$edit->post_process('insert', '_post_itvaqueras_insert');
 		$edit->pre_process( 'insert', '_pre_itvaqueras_insert');
 		//$edit->pre_process( 'update', '_pre_vaqueras_update');
 		//$edit->pre_process( 'delete', '_pre_vaqueras_delete');
@@ -2076,6 +2077,13 @@ class Lrece extends Controller {
 		$id=$this->datasis->dameval('SELECT id FROM lvaca WHERE codigo='.$dbcodigo);
 
 		$do->set('id_lvaca',$id);
+	}
+
+	function _post_itvaqueras_insert($do){
+		$codigo  = $do->get('vaquera');
+		$id_lrece= $do->get('id_lrece');
+
+		logusu($do->table,"Agregada vaquera adicional ${codigo} Recepcion: ${id_lrece}");
 	}
 
 	function _post_apertura_insert($do){

@@ -1391,15 +1391,21 @@ class Ajax extends Controller {
 
 	//******************************************************************
 	//Autocomplete para botr
-	function autobotr(){
+	function autobotr($tipo=null){
 		$q   = $this->input->post('q');
 
 		$data = '[]';
 		if($q!==false){
+			if(!empty($tipo)){
+				$ww = 'AND a.tipo='.$this->db->escape($tipo);
+			}else{
+				$ww = '';
+			}
 			$mid = $this->db->escape('%'.$q.'%');
 			$mSQL = "SELECT a.codigo, a.nombre descrip
 				FROM botr AS a
-			WHERE a.codigo LIKE ${mid} OR a.nombre LIKE ${mid} ORDER BY a.nombre LIMIT ".$this->autolimit;
+			WHERE (a.codigo LIKE ${mid} OR a.nombre LIKE ${mid}) ${ww}
+			ORDER BY a.nombre LIMIT ".$this->autolimit;
 
 			$query = $this->db->query($mSQL);
 			$retArray = array();

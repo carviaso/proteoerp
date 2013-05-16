@@ -20,11 +20,11 @@ $campos   =$form->js_escape($scampos);
 
 $sfpa_campos=$form->template_details('sfpa');
 $sfpa_scampos  ='<tr id="tr_sfpa_<#i#>">';
-$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['tipo']['field'].  '</td>';
-$sfpa_scampos .='<td class="littletablerow" align="center" >'.$sfpa_campos['sfpafecha']['field'].  '</td>';
-$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['numref']['field'].'</td>';
-$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['banco']['field']. '</td>';
-$sfpa_scampos .='<td class="littletablerow" align="right">'.$sfpa_campos['monto']['field']. '</td>';
+$sfpa_scampos .='<td class="littletablerow" align="left"  >'.$sfpa_campos['tipo']['field'].  '</td>';
+$sfpa_scampos .='<td class="littletablerow" align="center">'.$sfpa_campos['sfpafecha']['field'].  '</td>';
+$sfpa_scampos .='<td class="littletablerow" align="left"  >'.$sfpa_campos['numref']['field'].'</td>';
+$sfpa_scampos .='<td class="littletablerow" align="left"  >'.$sfpa_campos['banco']['field']. '</td>';
+$sfpa_scampos .='<td class="littletablerow" align="right" >'.$sfpa_campos['monto']['field']. '</td>';
 $sfpa_scampos .='<td class="littletablerow"><a href=# onclick="del_sfpa(<#i#>);return false;">'.img('images/delete.jpg').'</a></td></tr>';
 $sfpa_campos=$form->js_escape($sfpa_scampos);
 
@@ -61,6 +61,15 @@ $(function(){
 		autocod(i.toString());
 		importe(i);
 	}
+
+	$('#tipo_doc').change(function (){
+		var tipo = $(this).val();
+		if(tipo=='OT'){
+			$('#tsfpa').show();
+		}else{
+			$('#tsfpa').hide();
+		}
+	});
 
 	$('#cod_cli').autocomplete({
 		delay: 600,
@@ -173,22 +182,28 @@ function faltante(){
 
 function importe(id){
 	var ind      = id.toString();
-	var impuesto = Number($("#impuesto_"+ind).val());
+	var tasa     = Number($("#tasaiva_"+ind).val())/100;
 	var precio   = Number($("#precio_"+ind).val());
-	var importe  = roundNumber(precio+impuesto,2);
 
-	$("#importe_"+ind).val(importe);
-	$("#importe_"+ind+"_val").text(nformat(importe,2));
+	var impuesto = roundNumber(tasa*precio,2);
+	var vimporte = roundNumber(precio+impuesto,2);
+
+	$("#impuesto_"+ind).val(roundNumber(impuesto,2));
+	$("#importe_"+ind).val(vimporte);
+
+	$("#importe_"+ind+"_val").text(nformat(vimporte,2));
+	$("#impuesto_"+ind+"_val").text(nformat(impuesto,2));
 	totalizar();
 }
 
 function totalizar(){
-	var iva     =0;
-	var totalg  =0;
+	var iva    =0;
+	var totalg =0;
 	var totals =0;
 
 	var impuesto=0;
-	var importe=0;
+	var vimporte=0;
+	var vprecio =0;
 	var arr=$('input[name^="importe_"]');
 	jQuery.each(arr, function() {
 		nom=this.name
@@ -196,17 +211,19 @@ function totalizar(){
 		if(pos>0){
 			ind      = this.name.substring(pos+1);
 			impuesto = Number($("#impuesto_"+ind).val());
-			importe  = Number(this.value);
+			vimporte = Number(this.value);
+			vprecio  = Number($("#precio_"+ind).val());
 
 			iva     = iva+impuesto;
-			totals  = totals+importe;
+			totalg  = totalg+vimporte;
+			totals  = totals+vprecio;
 		}
 	});
-	$("#totalg_val").text(nformat(totals+iva,2));
+	$("#totalg_val").text(nformat(totalg,2));
 	$("#totals_val").text(nformat(totals,2));
 	$("#iva_val").text(nformat(iva,2));
 
-	$("#totalg").val(roundNumber(totals+iva,2));
+	$("#totalg").val(roundNumber(totalg,2));
 	$("#totals").val(roundNumber(totals,2));
 	$("#iva").val(roundNumber(iva,2));
 }
@@ -228,6 +245,7 @@ function post_modbus_botr(nind){
 	importe(nind);
 	totalizar();
 }
+
 function del_itotin(id){
 	id = id.toString();
 	$('#tr_itotin_'+id).remove();
@@ -242,7 +260,7 @@ function autocod(id){
 		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('ajax/autobotr'); ?>",
+				url:  "<?php echo site_url('ajax/autobotr/C'); ?>",
 				type: "POST",
 				dataType: "json",
 				data: {"q":req.term},
@@ -328,6 +346,7 @@ function autocod(id){
 				<td class="littletableheaderdet">C&oacute;digo</td>
 				<td class="littletableheaderdet">Nombre</td>
 				<td class="littletableheaderdet">Precio</td>
+				<td class="littletableheaderdet">Tasa</td>
 				<td class="littletableheaderdet">Impuesto</td>
 				<td class="littletableheaderdet">Importe</td>
 				<?php if($form->_status!='show') {?>
@@ -341,12 +360,20 @@ function autocod(id){
 				$it_impuesto = "impuesto_${i}";
 				$it_precio   = "precio_${i}";
 				$it_importe  = "importe_${i}";
+				$it_tasaiva  = "tasaiva_${i}";
+
+				if($form->_status=='show'){
+					$ivaval=nformat(round($form->$it_impuesto->value/$form->$it_precio->value,2)*100,2);
+				}else{
+					$ivaval=$form->$it_tasaiva->output;
+				}
 			?>
 
 			<tr id='tr_itotin_<?php echo $i; ?>'>
 				<td class="littletablerow" align="left" nowrap><?php echo $form->$it_codigo->output;  ?></td>
 				<td class="littletablerow" align="left" ><?php echo $form->$it_descrip->output; ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_precio->output;  ?></td>
+				<td class="littletablerow" align="right"><?php echo $ivaval;                    ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_impuesto->output;?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_importe->output; ?></td>
 				<?php if($form->_status!='show') {?>
@@ -359,7 +386,7 @@ function autocod(id){
 		<?php echo $container_bl.$container_br ?></td>
 	</tr><tr>
 		<td>
-		<table width='100%'>
+		<table width='100%' id='tsfpa'>
 			<tr id='__ITPL__sfpa'>
 				<td class="littletableheaderdet">Tipo</td>
 				<td class="littletableheaderdet">Fecha</td>
@@ -373,11 +400,11 @@ function autocod(id){
 			<?php
 
 			for($i=0; $i < $form->max_rel_count['sfpa']; $i++) {
-				$tipo     = "tipo_${i}";
-				$sfpafecha= "sfpafecha_${i}";
-				$numref   = "numref_${i}";
-				$monto    = "monto_${i}";
-				$banco    = "banco_${i}";
+				$tipo      = "tipo_${i}";
+				$sfpafecha = "sfpafecha_${i}";
+				$numref    = "numref_${i}";
+				$monto     = "monto_${i}";
+				$banco     = "banco_${i}";
 			?>
 			<tr id='tr_sfpa_<?php echo $i; ?>'>
 				<td class="littletablerow" nowrap><?php echo $form->$tipo->output      ?></td>

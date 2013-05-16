@@ -13,12 +13,8 @@ class Smov extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('smov','id') ) {
-			$this->db->simple_query('ALTER TABLE smov DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE smov ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE smov ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
 		$this->datasis->creaintramenu(array('modulo'=>'525','titulo'=>'Movimiento de Clientes','mensaje'=>'Movimiento de Clientes','panel'=>'CLIENTES','ejecutar'=>'finanzas/smov','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>900,'alto'=>600));
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -32,7 +28,6 @@ class Smov extends Controller {
 		$param['grids'][] = $grid->deploy();
 
 		$readyLayout = $grid->readyLayout2( 212, 140, $param['grids'][0]['gridname']);
-
 
 		//Funciones que ejecutan los botones
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
@@ -1900,12 +1895,9 @@ class Smov extends Controller {
 	function instalar(){
 		$campos=$this->db->list_fields('smov');
 		if (!in_array('id',$campos)){
-			$mSQL="ALTER TABLE `smov`
-				ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT,
-				DROP PRIMARY KEY,
-				ADD UNIQUE INDEX `unic` (`cod_cli`, `tipo_doc`, `numero`, `fecha`),
-				ADD PRIMARY KEY (`id`)";
-			$this->db->simple_query();
+			$this->db->simple_query('ALTER TABLE smov DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE `otin` ADD UNIQUE INDEX `unico` (`cod_cli`, `tipo_doc`, `numero`, `fecha`)');
+			$this->db->simple_query('ALTER TABLE smov ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 	}
 }
