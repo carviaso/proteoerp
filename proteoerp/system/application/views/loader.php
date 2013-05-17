@@ -10,21 +10,21 @@
 <meta name="Description"               content="<?php echo property('app_description');?>" />
 <meta name="Copyright"                 content="<?php echo property('app_copyright');  ?>" />
 <title><?php echo property('app_title')?></title>
-<?php echo style("estilos.css");  ?>
-<?php echo style("menutab.css");  ?>
-<?php echo style("acordeon.css"); ?>
-<?php echo style("masonry.css"); ?>
+<?php echo style('estilos.css');  ?>
+<?php echo style('menutab.css');  ?>
+<?php echo style('acordeon.css'); ?>
+<?php echo style('masonry.css'); ?>
 
-<?php echo script("jquery-min.js"); ?>
-<?php echo script("jquery-ui.custom.min.js"); ?>
-<?php echo script("plugins/myAccordion.js"); ?>
-<?php //echo script("plugins/interface.js"); ?>
-<?php echo script("plugins/jquery.masonry.min.js"); ?>
+<?php echo script('jquery-min.js'); ?>
+<?php echo script('jquery-migrate-min.js'); ?>
+<?php echo script('jquery-ui.custom.min.js'); ?>
+<?php echo script('plugins/myAccordion.js'); ?>
+<?php //echo script('plugins/interface.js'); ?>
+<?php echo script('plugins/jquery.masonry.min.js'); ?>
 
 <?php echo "\n<!-- Impromptu -->\n"; ?>
 <?php echo script('jquery-impromptu.js'); ?>
 <?php echo style('impromptu/default.css'); ?>
-
 
 <style>
 <?php $this->load->view('loadstyle'); ?>
