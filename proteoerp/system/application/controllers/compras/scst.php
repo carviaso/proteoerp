@@ -1854,7 +1854,6 @@ class Scst extends Controller {
 
 		$edit->proveed = new inputField('Proveedor', 'proveed');
 		$edit->proveed->size     = 7;
-		$edit->proveed->maxlength= 5;
 		$edit->proveed->autocomplete=false;
 		$edit->proveed->rule     = 'required';
 		$edit->proveed->append($this->datasis->modbus($sprvbus));
@@ -1866,7 +1865,7 @@ class Scst extends Controller {
 		$edit->sprvreteiva = new hiddenField('', 'sprvreteiva');
 		$edit->sprvreteiva->pointer=true;
 
-		$edit->cfis = new inputField('Numero fiscal', 'nfiscal');
+		$edit->cfis = new inputField('N&uacute;mero fiscal', 'nfiscal');
 		$edit->cfis->size = 15;
 		$edit->cfis->autocomplete=false;
 		$edit->cfis->rule = 'required';
