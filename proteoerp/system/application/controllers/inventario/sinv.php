@@ -90,7 +90,7 @@ class Sinv extends Controller {
 					PRIMARY KEY (`id`),
 					UNIQUE INDEX `codigo` (`codigo`, `pactivo`)
 					)
-					COLLATE='latin1_swedish_ci' 
+					COLLATE='latin1_swedish_ci'
 					ENGINE=MyISAM;";
 			$this->db->query($mSQL);
 		}
@@ -142,7 +142,7 @@ class Sinv extends Controller {
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='hinactivo'>".img(array('src' =>"images/basura.png", 'height' => 15, 'alt'=>'Mostrar/Ocultar Inactivos', 'title' => 'Mostrar/Ocultar Inactivos', 'border'=>'0'))."Inactivos</a></div></td>
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='bbarras'  >".img(array('src' =>"images/barcode.png",'height' => 15, 'alt'=>'Barras Adicionales',        'title' => 'Barras Adicionales',        'border'=>'0'))."Barras</a></div></td>
 				</tr>";
-				
+
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S'){
 			$WpAdic .= "
 				<tr>
@@ -762,7 +762,7 @@ class Sinv extends Controller {
 					$("#fborra").html("");
 					$("#fedita").html(data);
 					$("#fedita").dialog({
-						autoOpen: false, height: 450, width: 550, modal: true, 
+						autoOpen: false, height: 450, width: 550, modal: true,
 						title:"Parametros del SUNDECOP",
 						buttons: {
 							"Guardar": function() {
@@ -796,15 +796,15 @@ class Sinv extends Controller {
 				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
 					var ret = $("#newapi'.$grid0.'").getRowData(id);
-					$.post("'.site_url('inventario/sinv/barrasform')."/".'"+id, 
+					$.post("'.site_url('inventario/sinv/barrasform')."/".'"+id,
 					function(data){
 						$("#fshow").html(data);
 						$("#fshow").dialog( { title:"BARRAS ADICIONALES", width: 220, height: 300, modal: true } );
 						$("#fshow").dialog( "open" );
 					});
-				} else { 
+				} else {
 					$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-				}	
+				}
 		})
 		';
 
@@ -813,7 +813,7 @@ class Sinv extends Controller {
 		$bodyscript .= '
 		$("#bpactivo").click(
 			function(){
-				$.post("'.site_url('inventario/sinv/pactivosform').'", 
+				$.post("'.site_url('inventario/sinv/pactivosform').'",
 				function(data){
 					$("#fshow").html(data);
 					$("#fshow").dialog( { title:"PRINCIPIOS ACTIVOS", width: 350, height: 400, modal: true } );
@@ -826,7 +826,7 @@ class Sinv extends Controller {
 		$bodyscript .= '
 		$("#gmarcas").click(
 			function(){
-				$.post("'.site_url('inventario/sinv/marcaform').'", 
+				$.post("'.site_url('inventario/sinv/marcaform').'",
 				function(data){
 					$("#fshow").html(data);
 					$("#fshow").dialog( { title:"MARCAS", width: 320, height: 400, modal: true } );
@@ -839,7 +839,7 @@ class Sinv extends Controller {
 		$bodyscript .= '
 		$("#gunidad").click(
 			function(){
-				$.post("'.site_url('inventario/sinv/uniform').'", 
+				$.post("'.site_url('inventario/sinv/uniform').'",
 				function(data){
 					$("#fshow").html(data);
 					$("#fshow").dialog( { title:"UNIDAES DE PRESENTACION", width: 270, height: 400, modal: true } );
@@ -3993,7 +3993,7 @@ class Sinv extends Controller {
 		$data = '[{ }]';
 		if($q!==false){
 			$mid = $this->db->escape('%'.$q.'%');
-			$mSQL = "SELECT * FROM pactivo 
+			$mSQL = "SELECT * FROM pactivo
 			WHERE nombre LIKE ${mid} ORDER BY nombre LIMIT 30";
 
 			$query = $this->db->query($mSQL);
@@ -4561,7 +4561,8 @@ class Sinv extends Controller {
 	}
 
 	function sugerir(){
-		$ultimo=$this->datasis->dameval("SELECT LPAD(hexa,4,0) FROM serie LEFT JOIN sinv ON LPAD(codigo,4,0)=LPAD(hexa,4,0) WHERE valor<65535 AND codigo IS NULL LIMIT 1");
+		$long = 6;
+		$ultimo=$this->datasis->dameval("SELECT LPAD(hexa,${long},0) FROM serie LEFT JOIN sinv ON LPAD(codigo,${long},0)=LPAD(hexa,${long},0) WHERE valor<65535 AND codigo IS NULL LIMIT 1");
 		echo $ultimo;
 	}
 
@@ -5508,7 +5509,7 @@ class Sinv extends Controller {
 			,jsonReader : { root:"data", repeatitems: false }
 			'.$mgrid['table'].'
 			,scroll: true
-			,pgtext: null, pgbuttons: false, rowList:[] 
+			,pgtext: null, pgbuttons: false, rowList:[]
 		})
 		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
 		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
@@ -5520,7 +5521,7 @@ class Sinv extends Controller {
 		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
 
 		echo $msalida;
-	
+
 	}
 
 
@@ -5566,7 +5567,7 @@ class Sinv extends Controller {
 			,jsonReader : { root:"data", repeatitems: false }
 			'.$mgrid['table'].'
 			,scroll: true
-			,pgtext: null, pgbuttons: false, rowList:[] 
+			,pgtext: null, pgbuttons: false, rowList:[]
 		})
 		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
 		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
@@ -5578,7 +5579,7 @@ class Sinv extends Controller {
 		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
 
 		echo $msalida;
-	
+
 	}
 
 
@@ -5625,7 +5626,7 @@ class Sinv extends Controller {
 			,jsonReader : { root:"data", repeatitems: false }
 			'.$mgrid['table'].'
 			,scroll: true
-			,pgtext: null, pgbuttons: false, rowList:[] 
+			,pgtext: null, pgbuttons: false, rowList:[]
 		})
 		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
 		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
@@ -5638,7 +5639,7 @@ class Sinv extends Controller {
 		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
 
 		echo $msalida;
-	
+
 	}
 
 
@@ -5753,7 +5754,7 @@ class Sinv extends Controller {
 			,jsonReader : { root:"data", repeatitems: false }
 			'.$mgrid['table'].'
 			,scroll: true
-			,pgtext: null, pgbuttons: false, rowList:[] 
+			,pgtext: null, pgbuttons: false, rowList:[]
 		})
 		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
 		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
@@ -5765,7 +5766,7 @@ class Sinv extends Controller {
 		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
 
 		echo $msalida;
-	
+
 	}
 
 
@@ -5843,7 +5844,7 @@ class Sinv extends Controller {
 		$this->db->query($mSQL);
 		logusu("SINV","Principio Activo Agregado".$mcodigo."-->".$mpactivo);
 		echo "Registro de Codigo Exitoso";
-	
+
 	}
 */
 

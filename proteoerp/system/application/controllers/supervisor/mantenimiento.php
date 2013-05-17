@@ -241,6 +241,7 @@ function bobo(url){'."
 		$data['style']  .= $style;
 
 		$data['script']  = script('jquery-min.js');
+		$data['script']  = script('jquery-migrate-min.js');
 		$data['script'] .= script('jquery-ui.custom.min.js');
 		$data['script'] .= script('plugins/jquery.blockUI.js');
 		$data['script'] .= script('jquery-impromptu.js');

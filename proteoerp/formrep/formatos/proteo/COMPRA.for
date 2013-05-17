@@ -2,14 +2,11 @@
 if(count($parametros)==0) show_error('Faltan parametros ');
 $id  = $parametros[0];
 $dbid= $this->db->escape($id);
-if(count($parametros)>1){
-	$control = $this->datasis->dameval('SELECT control  FROM scst  WHERE id='.$dbid);
-}
 
 //ENCABEZADO
 $moneda = $this->datasis->traevalor('MONEDA');
 $mSQL_1 = $this->db->query("SELECT
-a.numero,a.fecha,a.vence,a.actuali,a.depo,a.proveed,b.nombre,TRIM(b.nomfis) AS nomfis,a.montotot,a.montoiva,a.montonet,a.peso,
+a.numero,a.fecha,a.vence,a.control,a.actuali,a.depo,a.proveed,b.nombre,TRIM(b.nomfis) AS nomfis,a.montotot,a.montoiva,a.montonet,a.peso,
 if(a.actuali>=a.fecha,'CARGADA','PENDIENTE') cargada, a.control
 FROM scst AS a
 JOIN sprv AS b ON a.proveed=b.proveed
@@ -19,6 +16,7 @@ $row = $mSQL_1->row();
 
 $fecha    =dbdate_to_human($row->fecha);
 $numero   =$row->numero;
+$control  =$row->control;
 $depo     =trim($row->depo);
 $proveed  =htmlspecialchars($row->proveed);
 $nombre   =(empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
