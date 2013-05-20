@@ -20,6 +20,7 @@ class Sinvpromo extends Controller {
 		};*/
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
