@@ -24,7 +24,6 @@ class Reparto extends Controller {
 	//
 	//***************************
 	function jqdatag(){
-
 		$grid = $this->defgrid();
 		$grid->setHeight('155');
 		$param['grids'][] = $grid->deploy();
@@ -518,6 +517,7 @@ class Reparto extends Controller {
 				$.post("'.site_url($this->url.'agregaf').'/"+mid+"/"+id, function(data){
 					var json = JSON.parse(data);
 					$("#totpeso").html(json.peso);
+					$("#totcana").html(json.cana);
 					$("#bpos1").trigger("reloadGrid");
 				});
 
@@ -527,6 +527,10 @@ class Reparto extends Controller {
 	
 		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$id"); 
 		if( !$peso ) $peso = "0.00";
+
+		$cana = $this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE peso IS NOT NULL AND reparto=$id"); 
+		if( !$cana ) $cana = "0.00";
+
 		$reg  = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=$id");
 		$msalida .= "\n</script>\n";
 		
@@ -554,6 +558,14 @@ class Reparto extends Controller {
 				<td align='center' style='font-size:14pt;font-weight:bold;'><div id='totpeso'>".$peso."</div></td>
 			</tr>
 		</table>
+		<br><br>
+		<table width='100%' align='center'>
+			<tr>
+				<td bgcolor='#DFDFDF'>TOTAL FACTURAS</td>
+			</tr><tr>
+				<td align='center' style='font-size:14pt;font-weight:bold;'><div id='totcana'>".$cana."</div></td>
+			</tr>
+		</table>
 		</td></tr>
 		</table>\n";
 	
@@ -573,15 +585,16 @@ class Reparto extends Controller {
 		} else {
 			$mSQL = "UPDATE sfac SET reparto=0 WHERE id=$factura";
 			$this->db->query($mSQL);
-			$msj = 'Factura Quitada';
+			$msj = 'Factura Desmarcada';
 		}
 		$row = $this->datasis->damereg("SELECT SUM(peso) peso, count(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=$reparto"); 
 		$peso = $row['peso'];
+		$cana = $row['cana'];
 		
 		$this->db->where('id',$reparto);
 		$this->db->update('reparto',array("peso"=>$row['peso'], "facturas"=>$row['cana']) );
 
-		echo '{ "mensaje": "'.$msj.'", "peso": "'.$peso.'"}';
+		echo '{ "mensaje": "'.$msj.'", "peso": "'.$peso.'", "cantidad": "'.$cana.'"  }';
 		
 	}
 
@@ -1027,8 +1040,10 @@ class Reparto extends Controller {
 				if(mid){
 					if (id){
 						$.prompt(\'Eliminar Factura del reparto?\', {
+						buttons: { \'Quitar\': true, \'Cancelar\': false },
 						submit: function(e,v,m,f){
 							$.post("'.site_url($this->url.'quita').'/"+id);
+							$(gridId2).trigger("reloadGrid");
 						}})
 					}
 				} else {

@@ -60,7 +60,7 @@ $("#tbrutas").jqGrid({
 function puestos(){
 	var id = $("#tbrutas").jqGrid('getGridParam','selrow');
 	if(id){
-		$.post("<?php echo site_url('pasajes/tbpasa/puestos'); ?>/"+id, function(data){
+		$.post("<?php echo site_url('pasajes/tbpasa/puestos/'); ?>/"+id+"/"+$('#fecven').val(), function(data){
 			$("#puestos").html(data);
 		});
 	}

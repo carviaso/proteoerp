@@ -793,11 +793,11 @@ class Tbpasa extends Controller {
 			SELECT a.id, b.codrut, b.horsal, b.tipuni, b.origen, b.destino, a.orden, a.hora, IF(b.tipserv='01', prec_01, prec_02) precio  
 			FROM tbdestinos a 
 			JOIN tbrutas b ON a.codrut = b.codrut 
-			JOIN tbprecios c ON c.codofiorg=a.codofiorg AND c.codofides=a.codofides 
-			WHERE a.codofiorg = ${qmid1} AND a.codofides = ${qmid2} AND a.mostrar='S' 
+			JOIN tbprecios c ON c.codofiorg=a.codofiorg AND c.codofides=a.codofides
+			LEFT JOIN tbbloqueo d ON a.codrut=d.codrut AND d.fecblo=${ano}${mes}${dia}   
+			WHERE a.codofiorg = ${qmid1} AND a.codofides = ${qmid2} AND a.mostrar='S' AND d.codrut IS NULL
 			ORDER BY b.horsal 
 		";
-
 
 
 		$response = $grid->getDataSimple($mSQL);
@@ -810,36 +810,111 @@ class Tbpasa extends Controller {
 	// Busca los puestos disponibles
 	//
 	function puestos(){
-		$id = $this->uri->segment(4);
-		$rs = "Ruta ".$id;
+		$id    = $this->uri->segment(4);
+		$dia   = $this->uri->segment(5);
+		$mes   = $this->uri->segment(6);
+		$ano   = $this->uri->segment(7);
+
+		$codrut  = $this->datasis->dameval('SELECT codrut    FROM tbdestinos WHERE id='.$id);
+		$origen  = $this->datasis->dameval('SELECT codofiorg FROM tbdestinos WHERE id='.$id);
+		$destino = $this->datasis->dameval('SELECT codofides FROM tbdestinos WHERE id='.$id);
+
+		$mSQL = "SELECT orden FROM tbdestinos WHERE codrut = '${codrut}' AND codofiorg = '${origen}' AND codofides='${origen}' ";
+		$inicio = $this->datasis->dameval($mSQL);
+
+		$mSQL = "SELECT orden FROM tbdestinos WHERE codrut = '${codrut}' AND codofiorg = '${origen}' AND codofides='${destino}' ";
+		$fin = $this->datasis->dameval($mSQL);
+
+		$mSQL1 = "
+		SELECT b.indice, b.valor, if(c.nroasi is null, 'L', c.tipven ) estatus, b.id
+		FROM tbrutas a 
+		JOIN tbtipbus b ON a.tipuni=b.tipbus
+		LEFT JOIN tbpuestos c ON a.codrut=c.codrut 
+			AND b.valor=c.nroasi 
+			AND c.fecpas=${ano}${mes}${dia} 
+			AND c.inicio<${inicio} AND c.fin>${fin} 
+		WHERE a.codrut='${codrut}' AND ";
+
+		$rs = "No hay Disponibilidad";
+		$bl = "\t\t<td>&nbsp;<td>\n";
+		
+		$rs  = "<table>";
+
+		$rs .= "<tr><td colspan='3' align='center'>Ruta: ".$codrut." Fecha: ".$dia."/".$mes."/".$ano."</td></tr>";
+
+		$rs .= "<tr><td>PLANTA BAJA</td><td>&nbsp;&nbsp;</td><td>PLANTA ALTA</td></tr>";
 
 
+		$rs .= "<tr><td><table>\n\t<tr>\n";
 
-/*
-		$mid2 = $this->uri->segment(5);
+		$mSQL = $mSQL1." b.indice < 12 ORDER BY b.indice ";
+		$rs .= $this->busfila($mSQL, 0);
 
-		$grid     = $this->jqdatagrid;
+		$mSQL = $mSQL1."b.indice > 11 AND b.indice < 24 ORDER BY b.indice ";
+		$rs .= $this->busfila($mSQL, 12);
 
-		$qmid1 = $this->db->escape($mid1);
-		$qmid2 = $this->db->escape($mid2);
+		$mSQL = $mSQL1." b.indice > 23 AND b.indice < 36 ORDER BY b.indice ";
+		$rs .= $this->busfila($mSQL, 24);
 
-		$mSQL = "
-			SELECT a.id, b.codrut, b.horsal, b.tipuni, b.origen, b.destino, a.orden, a.hora  
-			FROM tbdestinos a JOIN tbrutas b ON a.codrut=b.codrut
-			WHERE a.codofiorg = ${qmid1} AND a.codofides = ${qmid2}
-			ORDER BY b.horsal
-		";
+		$mSQL = $mSQL1." b.indice > 35 AND b.indice < 48 ORDER BY b.indice ";
+		$rs .= $this->busfila($mSQL, 36);
 
-		$response = $grid->getDataSimple($mSQL);
-		$rs = $grid->jsonresult( $response);
-*/
+		$rs .= "</table>\n</td>\n<td>&nbsp;</td>";
+
+		// SEGUNDO PISO
+		$rs .= "<td>\n<table>\n\t<tr>\n";
+
+		$mSQL = $mSQL1." b.indice >= 100 AND b.indice < 112 ORDER BY b.indice ";
+		$rs .= $this->busfila($mSQL, 100);
+
+		$mSQL = $mSQL1." b.indice > 111 AND b.indice < 124 ORDER BY b.indice ";
+		$rs .= $this->busfila($mSQL, 112);
+
+		$mSQL = $mSQL1." b.indice > 123 AND b.indice < 136 ORDER BY b.indice ";
+		$rs .= $this->busfila($mSQL, 124);
+
+		$mSQL = $mSQL1." b.indice > 135 AND b.indice < 148 ORDER BY b.indice ";
+		$rs .= $this->busfila($mSQL, 136);
+
+		$rs .= "</table>\n</td></tr></table>";
+
 		echo $rs;
 		
 	}
 
+	//
+	function busfila($mSQL, $i) {
+		$libre   = "#9BFF05";
+		$ocupado = "#FFADA0";
+		$reserva = "#F6FF7F";
+		$query = $this->db->query($mSQL);
+		
+		$bl = "\t\t<td>&nbsp;<td>\n";
+		$rs = "";
+		$f = $i+11;
+		if ($query->num_rows() > 0){
+			$rs  = "\t<tr>\n";
+			$rs1 = '';
+			foreach( $query->result_array() as  $row ){
+				$color = $libre;
+				if ($row['estatus'] == 'L')	$color = $libre;
+				if ($row['estatus'] == 'R')	$color = $reserva;
+				if ($row['estatus'] == 'V')	$color = $ocupado;
+				while ( $i != $row['indice'] ){ $rs1 = $bl.$rs1; $i++;	}
+				if ( $i == $row['indice'] )
+					$rs1 = "\t\t<td bgcolor='".$color."' >".utf8_encode($row['valor'])."<td>\n".$rs1;
+				$i ++;
+			}
+			while ( $i <= $f ){ $rs1 = "\t\t<td>&nbsp;<td>\n".$rs1;$i ++;}
+			$rs .= $rs1."\t</tr>\n";
+		}
+		return $rs;
+	}
 
 
-
+	//******************************************************************
+	//
+	//
 	function drutas(){
 		session_write_close();
 		$mid1  = $this->input->post('q1');
