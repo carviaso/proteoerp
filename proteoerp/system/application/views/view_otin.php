@@ -226,6 +226,16 @@ function totalizar(){
 	$("#totalg").val(roundNumber(totalg,2));
 	$("#totals").val(roundNumber(totals,2));
 	$("#iva").val(roundNumber(iva,2));
+
+
+
+	var tipo = $('#tipo_doc').val();
+	if(tipo=='OT'){
+		resto=faltante();
+		utmo =$('input[id^="monto_"]').first();
+		hay  =Number(utmo.val());
+		utmo.val(roundNumber(hay+resto,2));
+	}
 }
 
 function add_itotin(){

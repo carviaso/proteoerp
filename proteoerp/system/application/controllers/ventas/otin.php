@@ -1208,6 +1208,12 @@ class Otin extends Controller {
 		$edit->tipo_doc->rule = 'enum[ND|FC|OT]|required';
 		$edit->tipo_doc->style='width:100px;';
 
+		$edit->cajero= new dropdownField('Cajero', 'cajero');
+		$edit->cajero->options('SELECT cajero,nombre FROM scaj ORDER BY nombre');
+		$edit->cajero->rule ='required|cajerostatus';
+		$edit->cajero->style='width:150px;';
+		$edit->cajero->insertValue=$this->secu->getcajero();
+
 		$edit->numero = new inputField('N&uacute;mero', 'numero');
 		$edit->numero->size = 10;
 		$edit->numero->rule= 'required';
@@ -1331,22 +1337,22 @@ class Otin extends Controller {
 		$edit->tasaiva->onchange ='importe(<#i#>)';
 
 		$edit->precio = new inputField('Precio', 'precio_<#i#>');
-		$edit->precio->css_class= 'inputnum';
-		$edit->precio->rule     = 'numeric|mayorcero';
-		$edit->precio->size     = 10;
-		$edit->precio->onkeyup  ='importe(<#i#>)';
-		$edit->precio->rel_id   = 'itotin';
-		$edit->precio->showformat ='decimal';
-		$edit->precio->db_name  = 'precio';
+		$edit->precio->css_class = 'inputnum';
+		$edit->precio->rule      = 'numeric|mayorcero';
+		$edit->precio->size      = 10;
+		$edit->precio->onkeyup   = 'importe(<#i#>)';
+		$edit->precio->rel_id    = 'itotin';
+		$edit->precio->showformat= 'decimal';
+		$edit->precio->db_name   = 'precio';
 
 		$edit->impuesto = new inputField('Impuesto', 'impuesto_<#i#>');
-		$edit->impuesto->css_class= 'inputnum';
-		$edit->impuesto->rule='numeric';
-		$edit->impuesto->size     = 6;
-		$edit->impuesto->onkeyup  ='importe(<#i#>)';
-		$edit->impuesto->rel_id   = 'itotin';
-		$edit->impuesto->showformat ='decimal';
-		$edit->impuesto->db_name  = 'impuesto';
+		$edit->impuesto->css_class = 'inputnum';
+		$edit->impuesto->rule      = 'numeric';
+		$edit->impuesto->size      = 6;
+		$edit->impuesto->onkeyup   = 'importe(<#i#>)';
+		$edit->impuesto->rel_id    = 'itotin';
+		$edit->impuesto->showformat= 'decimal';
+		$edit->impuesto->db_name   = 'impuesto';
 
 		$edit->importe = new inputField('Total', 'importe_<#i#>');
 		$edit->importe->db_name = 'importe';
@@ -1379,7 +1385,7 @@ class Otin extends Controller {
 		$edit->sfpafecha->size     = 10;
 		$edit->sfpafecha->maxlength= 8;
 		$edit->sfpafecha->calendar = false;
-		$edit->sfpafecha->rule ='condi_required|callback_chtipo[<#i#>]';
+		$edit->sfpafecha->rule     ='condi_required|callback_chtipo[<#i#>]';
 
 		$edit->numref = new inputField('Numero <#o#>', 'num_ref_<#i#>');
 		$edit->numref->size     = 12;
@@ -1462,20 +1468,27 @@ class Otin extends Controller {
 		$this->_guarda_detalle($do);
 	}
 
+	//Chequea los campos de numero y fecha en las formas de pago
+	//cuando deban corresponder
+	function chtipo($val,$i){
+		$tipo=$this->input->post('tipo_'.$i);
+		if(empty($tipo)) return true;
+		$this->validation->set_message('chtipo', 'El campo %s es obligatorio');
+
+		if(empty($val) && ($tipo=='NC' || $tipo=='DP' || $tipo=='DE'))
+			return false;
+		else
+			return true;
+	}
+
 
 	function _pre_insert($do){
 		$tipo_doc= $do->get('tipo_doc');
-		$transac = $this->datasis->fprox_numero('ntransa');
+		$cajero  = $do->get('cajero');
+		$cliente = $do->get('cod_cli');
+		$fecha   = $do->get('fecha');
 
-		if($tipo_doc=='ND'){
-			//valida la forma de pago
-		}elseif($tipo_doc=='OC'){
-			$do->unset_rel('sfpa');
-		}else{
-			$do->unset_rel('sfpa');
-		}
-
-		$con=$this->db->query("SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1");
+		$con=$this->db->query('SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1');
 		if($con->num_rows() > 0){
 			$t=$con->row('tasa');$rt=$con->row('redutasa');$st=$con->row('sobretasa');
 		}else{
@@ -1483,6 +1496,7 @@ class Otin extends Controller {
 			return false;
 		}
 
+		//Totaliza la factura
 		$stotal = $gtotal = $iva = 0;
 		$tasa=$montasa=$reducida=$monredu=$sobretasa=$monadic=$exento=0;
 		$cana=$do->count_rel('itordc');
@@ -1509,6 +1523,33 @@ class Otin extends Controller {
 			$do->rel_rm_field('itotin','tasaiva',$i);//elimina el campo comodin
 		}
 		$totalg = $totals+$iva;
+		//Fin de la totalizacion
+
+		if($tipo_doc=='ND'){
+			//Totaliza los pagos
+			$sfpa=0;
+			$cana=$do->count_rel('sfpa');
+			for($i=0;$i<$cana;$i++){
+				$sfpa_tipo = $do->get_rel('sfpa','tipo' ,$i);
+				$sfpa_monto= $do->get_rel('sfpa','monto',$i);
+				$do->set_rel('sfpa','cobrador',$cajero,$i);
+
+				$sfpa+=$sfpa_monto;
+			}
+			$sfpa=round($sfpa,2);
+			//Fin de la totalizacion del pago
+
+			//Validaciones del pago
+			if(abs($sfpa-$totalg)>0.02){
+				$do->error_message_ar['pre_ins']='El monto del pago no coincide con el monto de la factura (Pago:'.$sfpa.', Factura:'.$totalg.')';
+				return false;
+			}
+			//Fin de la validacion de pago
+		}elseif($tipo_doc=='OC'){
+			$do->unset_rel('sfpa');
+		}else{
+			$do->unset_rel('sfpa');
+		}
 
 		if($tipo_doc=='ND'){
 			$numero = $this->datasis->fprox_numero('notind');
@@ -1518,22 +1559,44 @@ class Otin extends Controller {
 			$numero = $this->datasis->fprox_numero('notiot');
 		}
 
-		$do->set('exento'   ,$exento   );
-		$do->set('tasa'     ,$tasa     );
-		$do->set('reducida' ,$reducida );
-		$do->set('sobretasa',$sobretasa);
-		$do->set('montasa'  ,$montasa  );
-		$do->set('monredu'  ,$monredu  );
-		$do->set('monadic'  ,$monadic  );
+		$do->rm_get('cajero');
 
-		$do->set('totalg' , $totalg);
-		$do->set('totals' , $totals);
-		$do->set('iva'    , $iva);
-		$do->set('numero' , $numero );
-		$do->set('transac', $transac);
-		$do->set('estampa', 'CURDATE()'     , false);
-		$do->set('hora'   , 'CURRENT_TIME()', false);
-		$do->set('usuario', $this->secu->usuario());
+		$transac = $this->datasis->fprox_numero('ntransa');
+
+		$cana=$do->count_rel('sfpa');
+		for($i=0;$i<$cana;$i++){
+
+			$do->set_rel('sfpa','cobrador' ,$cajero    ,$i);
+			$do->set_rel('sfpa','transac'  ,$transac   ,$i);
+			$do->set_rel('sfpa','vendedor' ,$vd        ,$i);
+			$do->set_rel('sfpa','cod_cli'  ,$cliente   ,$i);
+			$do->set_rel('sfpa','f_factura',$fecha     ,$i);
+			$do->set_rel('sfpa','fecha'    ,$fecha     ,$i);
+			$do->set_rel('sfpa','cobrador' ,$cajero    ,$i);
+			$do->set_rel('sfpa','numero'   ,$numero    ,$i);
+			$do->set_rel('sfpa','almacen'  ,$almacen   ,$i);
+			$do->set_rel('sfpa','usuario'  ,$usuario   ,$i);
+			$do->set_rel('sfpa','estampa'  ,$estampa   ,$i);
+			$do->set_rel('sfpa','hora'     ,$hora      ,$i);
+		}
+
+
+
+		$do->set('exento'   , $exento   );
+		$do->set('tasa'     , $tasa     );
+		$do->set('reducida' , $reducida );
+		$do->set('sobretasa', $sobretasa);
+		$do->set('montasa'  , $montasa  );
+		$do->set('monredu'  , $monredu  );
+		$do->set('monadic'  , $monadic  );
+		$do->set('totalg'   , $totalg   );
+		$do->set('totals'   , $totals   );
+		$do->set('iva'      , $iva      );
+		$do->set('numero'   , $numero   );
+		$do->set('transac'  , $transac  );
+		$do->set('estampa'  , 'CURDATE()'     , false);
+		$do->set('hora'     , 'CURRENT_TIME()', false);
+		$do->set('usuario'  , $this->secu->usuario());
 
 		return true;
 	}

@@ -730,7 +730,7 @@ class Sinvpromo extends Controller {
 		}
 
 		$campos=$this->db->list_fields('sinvpromo');
-		if(!in_array('<#campo#>',$campos)){
+		if(!in_array('fdesde',$campos)){
 			$mSQL="ALTER TABLE `sinvpromo`
 			ADD COLUMN `fdesde` DATETIME NULL DEFAULT NULL AFTER `cantidad`,
 			ADD COLUMN `fhasta` DATETIME NULL DEFAULT NULL AFTER `fdesde`";
