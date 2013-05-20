@@ -19,7 +19,7 @@ class Datalog extends Controller {
 			$sess_data = array('usuario' => $row->usuario,'nombre'  => $nombre,'logged_in'=> TRUE );
 			$this->session->set_userdata($sess_data);
 
-			$this->db->simple_query('DELETE FROM enlacedp WHERE clave='.$this->db->escape($mclave));
+			$this->db->query('DELETE FROM enlacedp WHERE clave='.$this->db->escape($mclave));
 			redirect($row->ejecuta);
 		}
 	}

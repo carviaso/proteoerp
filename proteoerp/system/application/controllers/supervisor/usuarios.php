@@ -31,7 +31,6 @@ class Usuarios extends Controller {
 	//
 	//***************************
 	function jqdatag(){
-
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
 
@@ -42,26 +41,28 @@ class Usuarios extends Controller {
 		$grid->wbotonadd(array('id'=>'camclave',   'img'=>'images/candado.png',  'alt' => 'Cambiar Clave', 'label'=>'Cambiar Clave', 'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
+		$funciones = '';
+
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Usuario'),
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$funciones = '';
-
-		$param['WestPanel']  = $WestPanel;
-		//$param['EastPanel']  = $EastPanel;
-		$param['SouthPanel'] = $SouthPanel;
-		$param['funciones'] = $funciones;
-
-		$param['listados'] = $this->datasis->listados('USUARIO', 'JQ');
-		$param['otros']    = $this->datasis->otros('USUARIO', 'JQ');
-		$param['tema1']     = 'darkness';
-		$param['anexos']    = 'anexos1';
-		$param['bodyscript'] = $bodyscript;
-		$param['tabs'] = false;
-		$param['encabeza'] = $this->titp;
+		$param['WestPanel']   = $WestPanel;
+		//$param['EastPanel'] = $EastPanel;
+		$param['SouthPanel']  = $SouthPanel;
+		$param['funciones']   = $funciones;
+		$param['listados']    = $this->datasis->listados('USUARIO', 'JQ');
+		$param['otros']       = $this->datasis->otros('USUARIO', 'JQ');
+		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['bodyscript']  = $bodyscript;
+		$param['tabs']        = false;
+		$param['encabeza']    = $this->titp;
+		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
 		$this->load->view('jqgrid/crud2',$param);
+
 	}
 
 
@@ -72,10 +73,166 @@ class Usuarios extends Controller {
 		$bodyscript = '		<script type="text/javascript">';
 
 		$bodyscript .= '
+		function usuarioadd(){
+			$.post("'.site_url($this->url.'dataedit/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		};';
+
+		$bodyscript .= '
+		function usuarioedit(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function usuarioshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function usuariodel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+		//Wraper de javascript
+		$bodyscript .= '
+		$(function(){
+			$("#dialog:ui-dialog").dialog( "destroy" );
+			var mId = 0;
+			var montotal = 0;
+			var ffecha = $("#ffecha");
+			var grid = jQuery("#newapi'.$grid0.'");
+			var s;
+			var allFields = $( [] ).add( ffecha );
+			var tips = $( ".validateTips" );
+			s = grid.getGridParam(\'selarrrow\');
+			';
+
+		$bodyscript .= '
+		$("#fedita").dialog({
+			autoOpen: false, height: 370, width: 480, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/USUARIO').'/\'+res.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+		$bodyscript .= '});'."\n";
+
+
+/*
+		$bodyscript .= '
 		$(function() {
 			$( "input:submit, a, button", ".a1" ).button();
 		});
+*/
 
+		$bodyscript .= '
 		jQuery("#camclave").click( function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
@@ -112,7 +269,7 @@ class Usuarios extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "true";
+		$editar = "false";
 
 		$grid  = new $this->jqdatagrid;
 
@@ -175,52 +332,52 @@ class Usuarios extends Controller {
 		));
 
 		$mSQL = "SELECT TRIM(vendedor) vendedor, CONCAT(trim(vendedor), ' ', trim(nombre)) nombre FROM vend ORDER BY vendedor ";
-		$link = $this->datasis->llenajqselect($mSQL, true);
+//		$link = $this->datasis->llenajqselect($mSQL, true);
 		$grid->addField('vendedor');
 		$grid->label('Vende');
 		$grid->params(array(
 			'align'         => "'center'",
 			'width'         => 50,
-			'editable'      => 'true',
+			'editable'      => $editar,
 			'edittype'      => "'select'",
-			'editoptions'   => '{ value: '.$link.', style:"width:250px "}',
+//			'editoptions'   => '{ value: '.$link.', style:"width:250px "}',
 			'formoptions'   => '{ label:"Vendedor" }'
 		));
 
 		$mSQL = "SELECT cajero, CONCAT(cajero, ' ', nombre) nombre FROM scaj ORDER BY nombre";
-		$link = $this->datasis->llenajqselect($mSQL, true);
+		//$link = $this->datasis->llenajqselect($mSQL, true);
 		$grid->addField('cajero');
 		$grid->label('Cajero');
 		$grid->params(array(
 			'align'    => "'center'",
 			'width'         => 50,
-			'editable'      => 'true',
+			'editable'      => $editar,
 			'edittype'      => "'select'",
-			'editoptions'   => '{ value: '.$link.', style:"width:250px "}',
+			//'editoptions'   => '{ value: '.$link.', style:"width:250px "}',
 		));
 
 		$mSQL = "SELECT ubica, CONCAT(ubica, ' ', ubides) ubides FROM caub WHERE gasto='N' AND invfis='N' ORDER BY ubica ";
-		$link = $this->datasis->llenajqselect($mSQL, true);
+		//$link = $this->datasis->llenajqselect($mSQL, true);
 		$grid->addField('almacen');
 		$grid->label('Almacen');
 		$grid->params(array(
 			'align'         => "'center'",
 			'width'         => 50,
-			'editable'      => 'true',
+			'editable'      => $editar,
 			'edittype'      => "'select'",
-			'editoptions'   => '{ value: '.$link.', style:"width:250px" }',
+			//'editoptions'   => '{ value: '.$link.', style:"width:250px" }',
 		));
 
 		$mSQL = "SELECT TRIM(codigo) codigo, CONCAT(TRIM(codigo),' ',TRIM(sucursal)) sucursal FROM sucu ORDER BY codigo";
-		$link = $this->datasis->llenajqselect($mSQL, true);
+		//$link = $this->datasis->llenajqselect($mSQL, true);
 		$grid->addField('sucursal');
 		$grid->label('Sucursal');
 		$grid->params(array(
 			'align'    => "'center'",
 			'width'         => 50,
-			'editable'      => 'true',
+			'editable'      => $editar,
 			'edittype'      => "'select'",
-			'editoptions'   => '{ value: '.$link.', style:"width:250px" }',
+			//'editoptions'   => '{ value: '.$link.', style:"width:250px" }',
 		));
 
 		$grid->addField('us_clave');
@@ -238,7 +395,7 @@ class Usuarios extends Controller {
 		$grid->label('Entrada');
 		$grid->params(array(
 			'search'        => 'false',
-			'editable'      => 'false',
+			'editable'      => $editar,
 			'width'         => 80,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
@@ -250,7 +407,7 @@ class Usuarios extends Controller {
 		$grid->label('Movil');
 		$grid->params(array(
 			'search'        => 'false',
-			'editable'      => 'true',
+			'editable'      => $editar,
 			'width'         => 80,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
@@ -298,6 +455,29 @@ class Usuarios extends Controller {
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
 
+		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
+
+		$grid->setOndblClickRow('');
+		$grid->setAdd(    $this->datasis->sidapuede('USUARIO','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('USUARIO','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('USUARIO','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('USUARIO','BUSQUEDA%'));
+		$grid->setRowNum(30);
+		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions("addfunc: usuarioadd, editfunc: usuarioedit, delfunc: usuariodel, viewfunc: usuarioshow");
+
+		#Set url
+		$grid->setUrlput(site_url($this->url.'setdata/'));
+
+		#GET url
+		$grid->setUrlget(site_url($this->url.'getdata/'));
+
+
+
+/*
 		$grid->setFormOptionsE('
 			closeAfterEdit:false,
 			mtype: "POST",
@@ -339,8 +519,7 @@ class Usuarios extends Controller {
 				}
 
 		');
-
-		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
+*/
 
 		#show/hide navigations buttons
 		$grid->setAdd(true);
@@ -349,6 +528,8 @@ class Usuarios extends Controller {
 		$grid->setSearch(true);
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions("addfunc: usuarioadd, editfunc: usuarioedit, delfunc: usuariodel, viewfunc: usuarioshow");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -363,7 +544,7 @@ class Usuarios extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -377,7 +558,7 @@ class Usuarios extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -419,82 +600,33 @@ class Usuarios extends Controller {
 		echo anchor( site_url('usuarios/cambiac'), img(array('src'=>'images/llave.png', 'height' => 16, 'alt'=>'Cambiar Clave', 'title'=>'Cambiar Clave', 'border'=>'0')) ) ;
 	}
 
-/*
-	function
-
-/*
-class Usuarios extends Controller {
-
-	function Usuarios(){
-		parent::Controller();
-		$this->load->library('rapyd');
-		$this->load->library('menues');
-		$this->datasis->modulo_id(906,1);
-	}
-
-	function index(){
-		redirect('supervisor/usuarios/filteredgrid');
-	}
-
-	function filteredgrid(){
-		$this->rapyd->load('datafilter','datagrid');
-		$this->rapyd->uri->keep_persistence();
-
-		$filter = new DataFilter('Filtro de Usuarios');
-		$filter->db->select("a.us_codigo,a.us_nombre,a.supervisor,a.almacen,a.vendedor,a.cajero,
-							c.nombre as vendnom,b.ubides as almdes,d.nombre as cajnom");
-		$filter->db->from('usuario AS a');
-		$filter->db->join('caub AS b','b.ubica=a.almacen'    ,'left');
-		$filter->db->join('vend AS c','c.vendedor=a.vendedor','left');
-		$filter->db->join('scaj AS d','d.cajero=a.cajero'    ,'left');
-
-		$filter->us_codigo = new inputField('C&oacute;digo Usuario', 'us_codigo');
-		$filter->us_codigo->size=15;
-
-		$filter->us_nombre = new inputField('Nombre', 'us_nombre');
-		$filter->us_nombre->size=15;
-
-		$filter->buttons('reset','search');
-		$filter->build();
-
-		$uri  = anchor('supervisor/usuarios/dataedit/show/<#us_codigo#>','<#us_codigo#>');
-		$uri2 = anchor('supervisor/usuarios/cclave/modify/<#us_codigo#>','Cambiar clave');
-		$uri3 = anchor('supervisor/usuarios/accesos/<#us_codigo#>','Asignar Accesos');
-
-		$grid = new DataGrid('Lista de Usuarios');
-		$grid->order_by('us_codigo','asc');
-		$grid->per_page = 10;
-
-		$grid->column_orderby('C&oacute;digo', $uri,'us_codigo' );
-		$grid->column_orderby('Nombre','us_nombre' ,'us_nombre' );
-		$grid->column_orderby('Supervisor'         ,'supervisor' ,'supervisor','align="center"');
-		$grid->column_orderby('Almac&eacute;n'     ,'almdes'     ,'almdes','align=\'left\'');
-		$grid->column_orderby('Vendedor'           ,'<#vendedor#>-<#vendnom#>','vendedor','align=\'center\'');
-		$grid->column_orderby('Cajero'             ,'<#cajero#>-<#cajnom#>','cajero'     ,'align=\'center\'');
-		$grid->column('Cambio clave'   ,$uri2      ,'align="center"');
-
-		$grid->add('supervisor/usuarios/dataedit/create','Crear un nuevo usuario');
-		$grid->build();
-
-		$data['content'] = $filter->output.$grid->output;
-		$data['title']   = heading('Usuarios');
-		$data['head']    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
-	}
-
+	//******************************************************************
+	//
+	//
 	function dataedit(){
 		$this->rapyd->load('dataedit');
-		$this->rapyd->uri->keep_persistence();
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+		});
+		';
 
-		$edit = new DataEdit('Usuarios', 'usuario');
-		$edit->back_url = site_url('supervisor/usuarios/filteredgrid');
+		$edit = new DataEdit('', 'usuario');
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
 
 		$edit->pre_process( 'delete','_pre_delete');
 		$edit->post_process('delete','_pos_delete');
 		$edit->post_process('insert','_pos_insert');
 		$edit->post_process('update','_pos_update');
 
-		$edit->us_codigo = new inputField('C&oacute;digo de Usuario', 'us_codigo');
+		$edit->us_codigo = new inputField('C&oacute;digo', 'us_codigo');
 		$edit->us_codigo->rule = 'strtoupper|required';
 		$edit->us_codigo->mode = 'autohide';
 		$edit->us_codigo->size = 20;
@@ -502,7 +634,7 @@ class Usuarios extends Controller {
 
 		$edit->us_nombre = new inputField('Nombre', 'us_nombre');
 		$edit->us_nombre->rule = 'strtoupper|required';
-		$edit->us_nombre->size = 45;
+		$edit->us_nombre->size = 30;
 
 		$edit->activo = new dropdownField('Activo', 'activo');
 		$edit->activo->rule = 'required';
@@ -520,7 +652,11 @@ class Usuarios extends Controller {
 
 		$edit->cajero = new dropdownField('Cajero', 'cajero');
 		$edit->cajero->option('','Ninguno');
-		$edit->cajero->options("SELECT cajero,CONCAT_WS('-',cajero, nombre) AS descri FROM scaj ORDER BY nombre");
+		$edit->cajero->options("SELECT trim(cajero) cajero, CONCAT_WS('-',trim(cajero), nombre) AS descri FROM scaj ORDER BY nombre");
+
+		$edit->sucursal = new dropdownField('Sucursal','sucursal');
+		$edit->sucursal->option('','Ninguno');
+		$edit->sucursal->options("SELECT TRIM(codigo) codigo, CONCAT(TRIM(codigo),' ',TRIM(sucursal)) sucursal FROM sucu ORDER BY codigo");
 
 		$edit->supervisor = new dropdownField('Es Supervisor', 'supervisor');
 		$edit->supervisor->rule = 'required';
@@ -528,13 +664,19 @@ class Usuarios extends Controller {
 		$edit->supervisor->option('S','Si');
 		$edit->supervisor->style='width:80px';
 
-		$edit->buttons('modify', 'save', 'undo', 'back','delete');
+		//$edit->buttons('modify', 'save', 'undo', 'back','delete');
 		$edit->build();
 
-		$data['content'] = $edit->output;
-		$data['title']   = heading('Usuarios');
-		$data['head']    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
 	}
 
 	function accesos($usr){
@@ -608,8 +750,6 @@ class Usuarios extends Controller {
 		logusu('USUARIOS',"MODIFICADO EL USUARIO $codigo, SUPERVISOR $superv");
 		return TRUE;
 	}
-
-*/
 
 	function soporte(){
 		$mSQL="INSERT INTO `usuario` (`us_codigo`, `us_nombre`, `us_clave`,`supervisor`) VALUES ('SOPORTE', 'PERS. DREMANVA', 'DREMANVA','S');";

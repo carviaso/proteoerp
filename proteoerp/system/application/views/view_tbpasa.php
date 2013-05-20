@@ -66,6 +66,10 @@ function puestos(){
 	}
 }
 
+function reserva(indice){
+	alert("Indice="+indice);
+}
+
 </script>
 <?php } ?>
 

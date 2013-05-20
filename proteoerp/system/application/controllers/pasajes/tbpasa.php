@@ -902,7 +902,7 @@ class Tbpasa extends Controller {
 				if ($row['estatus'] == 'V')	$color = $ocupado;
 				while ( $i != $row['indice'] ){ $rs1 = $bl.$rs1; $i++;	}
 				if ( $i == $row['indice'] )
-					$rs1 = "\t\t<td bgcolor='".$color."' >".utf8_encode($row['valor'])."<td>\n".$rs1;
+					$rs1 = "\t\t<td bgcolor='".$color."' ><a href='#' onclick='reserva(".$row['indice'].")' >".utf8_encode($row['valor'])."</a><td>\n".$rs1;
 				$i ++;
 			}
 			while ( $i <= $f ){ $rs1 = "\t\t<td>&nbsp;<td>\n".$rs1;$i ++;}
