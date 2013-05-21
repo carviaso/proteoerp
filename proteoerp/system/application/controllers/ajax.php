@@ -1206,6 +1206,39 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
+	//Busca la factura afectada para otin
+	//
+	function buscaafecta(){
+		$comodin= $this->datasis->traevalor('COMODIN');
+		$mid    = $this->input->post('q');
+
+		if(strlen($comodin)==1 && $comodin!='%' && $mid!==false){
+			$mid=str_replace($comodin,'%',$mid);
+		}
+		$qdb  = $this->db->escape('%'.$mid.'%');
+
+		$data = '[]';
+		if($mid !== false){
+			$retArray = $retorno = array();
+
+			$mSQL="SELECT numero,fecha,totalg FROM sfac WHERE numero LIKE ${qdb} LIMIT ".$this->autolimit;
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$retArray['label']  = '('.$row['numero'].') '.$row['totalg'];
+					$retArray['value']  = $row['numero'];
+					$retArray['fecha']  = $this->_datehuman($row['fecha']);
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
+	//******************************************************************
 	//Saldo de proveedor
 	function ajaxsaldosprv(){
 		$mid = $this->input->post('clipro');
@@ -1909,6 +1942,18 @@ class Ajax extends Controller {
 			}
 			echo $nombre;
 		}
+	}
+
+	function _datehuman($fecha){
+		$edate   = explode('-',$fecha);
+		$fecha   = date('d/m/Y',mktime(0, 0, 0, $edate[1],$edate[2],$edate[0]));
+		return $fecha;
+	}
+
+	function _humandate($fecha){
+		$edate   = explode('/',$fecha);
+		$fecha   = date('Y-m-d',mktime(0, 0, 0, $edate[1],$edate[0],$edate[2]));
+		return $fecha;
 	}
 
 	//******************************************************************

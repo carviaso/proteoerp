@@ -1415,14 +1415,14 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			</tr>
 			<?php
 			for($i=0;$i<$form->max_rel_count['sinvpitem'];$i++){
-				$it2codigo   = "it2codigo_$i";
-				$it2descrip  = "it2descrip_$i";
-				$it2cantidad = "it2cantidad_$i";
-				$it2merma    = "it2merma_$i";
-				$it2formcal  = "it2formcal_$i";
-				$it2pond     = "it2pond_$i";
-				$it2ultimo   = "it2ultimo_$i";
-				$it2id_sinv  = "it2id_sinv_$i";
+				$it2codigo   = "it2codigo_${i}";
+				$it2descrip  = "it2descrip_${i}";
+				$it2cantidad = "it2cantidad_${i}";
+				$it2merma    = "it2merma_${i}";
+				$it2formcal  = "it2formcal_${i}";
+				$it2pond     = "it2pond_${i}";
+				$it2ultimo   = "it2ultimo_${i}";
+				$it2id_sinv  = "it2id_sinv_${i}";
 			?>
 			<tr id='tr_sinvpitem_<?php echo $i;?>'>
 				<td class="littletablerow" align="left" nowrap><?php echo $form->$it2codigo->output;   ?></td>

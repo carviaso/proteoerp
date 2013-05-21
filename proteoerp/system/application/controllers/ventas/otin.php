@@ -846,7 +846,7 @@ class Otin extends Controller {
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
-		$grid       = $this->jqdatagrid;
+		$grid = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('otin');
@@ -864,7 +864,7 @@ class Otin extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = '??????';
 		$check  = 0;
 
 		unset($data['oper']);
@@ -919,12 +919,12 @@ class Otin extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('tipo_doc');
-		$grid->label('Tipo_doc');
+		$grid->label('Tipo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -936,7 +936,7 @@ class Otin extends Controller {
 
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1081,7 +1081,7 @@ class Otin extends Controller {
 
 
 		$grid->addField('larga');
-		$grid->label('Larga');
+		$grid->label('Detalle');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1176,7 +1176,7 @@ class Otin extends Controller {
 				'nombre' =>'Descripci&oacute;n'
 			),
 			'filtro'  =>array('codigo' =>'C&oacute;digo','nombre'=>'Descripci&oacute;n'),
-			'retornar'=>array('codigo'=>'codigo_<#i#>','nombre'=>'descrip_<#i#>'),
+			'retornar'=>array('codigo'=>'codigo_<#i#>','nombre'=>'descrip_<#i#>','nombre'=>'larga_<#i#>'),
 			'p_uri'   =>array(4=>'<#i#>'),
 			'where'   =>'tipo = "C"',
 			'titulo'  =>'Buscar concepto');
@@ -1201,16 +1201,15 @@ class Otin extends Controller {
 		$edit->pre_process( 'delete','_pre_delete' );
 
 		$edit->tipo_doc = new dropdownField('Tipo', 'tipo_doc');
-		$edit->tipo_doc->option('OT','Otros Ingresos');
-		$edit->tipo_doc->option('OC','Nota Cr&eacute;dito');
-		$edit->tipo_doc->option('ND','Nota D&eacute;bito');
-
-		$edit->tipo_doc->rule = 'enum[ND|FC|OT]|required';
-		$edit->tipo_doc->style='width:100px;';
+		$edit->tipo_doc->option('OT','Otro Ingreso');
+		$edit->tipo_doc->option('OC','Otro Ingreso a Cr&eacute;dito');
+		$edit->tipo_doc->option('ND','Nota de D&eacute;bito');
+		$edit->tipo_doc->rule ='enum[ND|FC|OT]|required';
+		$edit->tipo_doc->style='width:170px;';
 
 		$edit->cajero= new dropdownField('Cajero', 'cajero');
-		$edit->cajero->options('SELECT cajero,nombre FROM scaj ORDER BY nombre');
-		$edit->cajero->rule ='required|cajerostatus';
+		$edit->cajero->options('SELECT cajero,TRIM(nombre) AS nombre FROM scaj ORDER BY nombre');
+		$edit->cajero->rule ='condi_required|callback_chobliga[OT]|cajerostatus';
 		$edit->cajero->style='width:150px;';
 		$edit->cajero->insertValue=$this->secu->getcajero();
 
@@ -1225,7 +1224,7 @@ class Otin extends Controller {
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->mode='autohide';
 		$edit->fecha->rule='chfecha';
-		$edit->fecha->size = 12;
+		$edit->fecha->size=12;
 		$edit->fecha->calendar=false;
 
 		$edit->vence = new DateonlyField('Vence', 'vence');
@@ -1236,13 +1235,12 @@ class Otin extends Controller {
 
 		$edit->cliente = new inputField('Cliente'  , 'cod_cli');
 		$edit->cliente->size = 10;
-		$edit->cliente->maxlength=5;
 		$edit->cliente->rule='required|existescli';
 		$edit->cliente->append($boton);
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->size = 55;
-		$edit->nombre->type      = 'inputhidden';
+		$edit->nombre->type = 'inputhidden';
 		$edit->nombre->maxlength=40;
 
 		$edit->rifci   = new inputField('RIF/CI'  , 'rifci');
@@ -1298,15 +1296,18 @@ class Otin extends Controller {
 		$edit->sucu->rule  ='required';
 		$edit->sucu->style = 'width:100px';
 
-		$edit->afecta = new inputField('Factura Afecta','afecta');
+		$edit->afecta = new inputField('Factura Afectada','afecta');
 		$edit->afecta->rule='';
 		$edit->afecta->size =10;
 		$edit->afecta->maxlength =8;
+		$edit->afecta->rule = 'condi_required|callback_chobliga[ND]';
 
 		$edit->fafecta = new dateonlyField('Fecha de la factura afecta','fafecta');
 		$edit->fafecta->rule='chfecha';
 		$edit->fafecta->size =10;
 		$edit->fafecta->maxlength =8;
+		$edit->fafecta->calendar=false;
+		$edit->fafecta->rule = 'condi_required|callback_chobliga[ND]';
 
 		//******************************
 		//Campos para el detalle
@@ -1322,7 +1323,14 @@ class Otin extends Controller {
 		$edit->descrip->size     = 30;
 		$edit->descrip->db_name  = 'descrip';
 		$edit->descrip->rel_id   = 'itotin';
-		$edit->descrip->maxlength= 12;
+		$edit->descrip->type     = 'inputhidden';
+		//$edit->descrip->maxlength= 12;
+
+		$edit->larga = new textareaField('', 'larga_<#i#>');
+		$edit->larga->db_name  = 'larga';
+		$edit->larga->rel_id   = 'itotin';
+		$edit->larga->rows     = 2;
+		$edit->larga->cols     = 35;
 
 		$ivas=$this->datasis->ivaplica();
 		$edit->tasaiva =  new dropdownField('IVA <#o#>', 'tasaiva_<#i#>');
@@ -1330,9 +1338,9 @@ class Otin extends Controller {
 		$edit->tasaiva->option($ivas['redutasa'] ,$ivas['redutasa'].'%');
 		$edit->tasaiva->option($ivas['sobretasa'],$ivas['sobretasa'].'%');
 		$edit->tasaiva->option('0','0.00%');
-		$edit->tasaiva->db_name='tasaiva';
-		$edit->tasaiva->rule='positive';
-		$edit->tasaiva->style="30px";
+		$edit->tasaiva->db_name  ='tasaiva';
+		$edit->tasaiva->rule     ='positive';
+		$edit->tasaiva->style    ='30px';
 		$edit->tasaiva->rel_id   ='itotin';
 		$edit->tasaiva->onchange ='importe(<#i#>)';
 
@@ -1370,7 +1378,6 @@ class Otin extends Controller {
 		//fin de campos para detalle,inicio detalle2 sfpa
 		//************************************************
 		$edit->tipo = new  dropdownField('Tipo <#o#>', 'tipo_<#i#>');
-		$edit->tipo->option('','CREDITO');
 		$edit->tipo->options('SELECT tipo, nombre FROM tarjeta WHERE activo=\'S\' ORDER BY nombre');
 		$edit->tipo->db_name    = 'tipo';
 		$edit->tipo->rel_id     = 'sfpa';
@@ -1413,7 +1420,7 @@ class Otin extends Controller {
 		$edit->monto->rel_id    = 'sfpa';
 		$edit->monto->size      = 10;
 		$edit->monto->rule      = 'required|mayorcero';
-		$edit->monto->showformat ='decimal';
+		$edit->monto->showformat='decimal';
 		//************************************************
 		// Fin detalle 2 (sfpa)
 		//************************************************
@@ -1432,6 +1439,15 @@ class Otin extends Controller {
 			$conten['form'] =& $edit;
 			$this->load->view('view_otin', $conten);
 		}
+	}
+
+	function chobliga($val,$tipo){
+		$tipo_doc=$this->input->post('tipo_doc');
+		if($tipo_doc==$tipo && empty($val)){
+			$this->validation->set_message('chobliga', 'El campo %s es obligatorio cuando el tipo es '.$tipo_doc);
+			return false;
+		}
+		return true;
 	}
 
 	function dpto() {
@@ -1463,11 +1479,6 @@ class Otin extends Controller {
 		$this->load->view('view_detalle', $data);
 	}
 
-	function _actualiza_detalle($do){
-		$this->_borra_detalle($do);
-		$this->_guarda_detalle($do);
-	}
-
 	//Chequea los campos de numero y fecha en las formas de pago
 	//cuando deban corresponder
 	function chtipo($val,$i){
@@ -1481,12 +1492,16 @@ class Otin extends Controller {
 			return true;
 	}
 
-
 	function _pre_insert($do){
 		$tipo_doc= $do->get('tipo_doc');
 		$cajero  = $do->get('cajero');
 		$cliente = $do->get('cod_cli');
 		$fecha   = $do->get('fecha');
+		$almacen = $this->secu->getalmacen();
+		$usuario = $this->secu->usuario();
+		$vd      = $this->secu->getvendedor();
+		$estampa = date('Y-m-d');
+		$hora    = date('H:i:s');
 
 		$con=$this->db->query('SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1');
 		if($con->num_rows() > 0){
@@ -1497,13 +1512,15 @@ class Otin extends Controller {
 		}
 
 		//Totaliza la factura
-		$stotal = $gtotal = $iva = 0;
+		$totals = $totalg = $iva = 0;
 		$tasa=$montasa=$reducida=$monredu=$sobretasa=$monadic=$exento=0;
-		$cana=$do->count_rel('itordc');
+		$cana=$do->count_rel('itotin');
 		for($i=0;$i<$cana;$i++){
 			$itprecio   = $do->get_rel('itotin', 'precio'  , $i);
 			$itimpuesto = $do->get_rel('itotin', 'impuesto', $i);
 			$itiva      = $do->get_rel('itotin', 'tasaiva' , $i);
+			$itdescrip  = trim($do->get_rel('itotin', 'descrip' , $i));
+			$itlarga    = trim($do->get_rel('itotin', 'larga'   , $i));
 
 			if($itiva-$t==0) {
 				$tasa   +=$itimpuesto;
@@ -1520,12 +1537,21 @@ class Otin extends Controller {
 			$totals += $itprecio;
 			$iva    += $itimpuesto;
 
+			$do->set_rel('itotin','usuario'  ,$usuario   ,$i);
+			$do->set_rel('itotin','estampa'  ,$estampa   ,$i);
+			$do->set_rel('itotin','hora'     ,$hora      ,$i);
+
+			$lend=strlen($itdescrip);
+			if($itdescrip==substr($itlarga,0,$lend)){
+				$do->set_rel('itotin', 'larga',substr($itlarga,$lend), $i);
+			}
+
 			$do->rel_rm_field('itotin','tasaiva',$i);//elimina el campo comodin
 		}
 		$totalg = $totals+$iva;
 		//Fin de la totalizacion
 
-		if($tipo_doc=='ND'){
+		if($tipo_doc=='OT'){
 			//Totaliza los pagos
 			$sfpa=0;
 			$cana=$do->count_rel('sfpa');
@@ -1545,15 +1571,23 @@ class Otin extends Controller {
 				return false;
 			}
 			//Fin de la validacion de pago
-		}elseif($tipo_doc=='OC'){
-			$do->unset_rel('sfpa');
-		}else{
+
+			//Valida que el cajero no este cerrado para la fecha
+			$dbfecha = $this->db->escape($fecha);
+			$mSQL = "SELECT COUNT(*) FROM rcaj WHERE fecha=${dbfecha} AND cajero=".$this->db->escape($cajero);
+			$cana = $this->datasis->dameval($mSQL);
+			if(!empty($cana)){
+				$do->error_message_ar['pre_ins']="El cajero ${cajero} ya fue cerrado para la fecha en que se esta registrando este ingreso";
+				return false;
+			}
+			//fin de la validacion del cajero
+		}elseif($tipo_doc=='OC' || $tipo_doc=='ND'){
 			$do->unset_rel('sfpa');
 		}
 
 		if($tipo_doc=='ND'){
 			$numero = $this->datasis->fprox_numero('notind');
-		}elseif($tipo_doc=='FC'){
+		}elseif($tipo_doc=='OC'){
 			$numero = $this->datasis->fprox_numero('notif');
 		}else{
 			$numero = $this->datasis->fprox_numero('notiot');
@@ -1563,24 +1597,37 @@ class Otin extends Controller {
 
 		$transac = $this->datasis->fprox_numero('ntransa');
 
+		//Asigna campos a los detalles
 		$cana=$do->count_rel('sfpa');
 		for($i=0;$i<$cana;$i++){
+			$sfpatipo  = $do->get_rel('sfpa','tipo'    ,$i);
+			$sfpa_fecha= $do->get_rel('sfpa','fecha'   ,$i);
 
+			if($sfpatipo=='EF')
+				$do->set_rel('sfpa', 'fecha' , $fecha , $i);
+			elseif(empty($sfpa_fecha)){
+				$do->set_rel('sfpa', 'fecha' , $fecha , $i);
+			}
+
+			$do->set_rel('sfpa','num_ref'  ,'OTIN'.$numero,$i);
+			$do->set_rel('sfpa','tipo_doc' ,$tipo_doc  ,$i);
 			$do->set_rel('sfpa','cobrador' ,$cajero    ,$i);
 			$do->set_rel('sfpa','transac'  ,$transac   ,$i);
 			$do->set_rel('sfpa','vendedor' ,$vd        ,$i);
 			$do->set_rel('sfpa','cod_cli'  ,$cliente   ,$i);
 			$do->set_rel('sfpa','f_factura',$fecha     ,$i);
-			$do->set_rel('sfpa','fecha'    ,$fecha     ,$i);
-			$do->set_rel('sfpa','cobrador' ,$cajero    ,$i);
 			$do->set_rel('sfpa','numero'   ,$numero    ,$i);
 			$do->set_rel('sfpa','almacen'  ,$almacen   ,$i);
 			$do->set_rel('sfpa','usuario'  ,$usuario   ,$i);
 			$do->set_rel('sfpa','estampa'  ,$estampa   ,$i);
 			$do->set_rel('sfpa','hora'     ,$hora      ,$i);
 		}
-
-
+		$cana=$do->count_rel('itotin');
+		for($i=0;$i<$cana;$i++){
+			$do->set_rel('itotin','transac' ,$transac ,$i);
+			$do->set_rel('itotin','cantidad',1        ,$i);
+		}
+		//Fin de los campos del detalle
 
 		$do->set('exento'   , $exento   );
 		$do->set('tasa'     , $tasa     );
@@ -1594,36 +1641,169 @@ class Otin extends Controller {
 		$do->set('iva'      , $iva      );
 		$do->set('numero'   , $numero   );
 		$do->set('transac'  , $transac  );
-		$do->set('estampa'  , 'CURDATE()'     , false);
-		$do->set('hora'     , 'CURRENT_TIME()', false);
-		$do->set('usuario'  , $this->secu->usuario());
+		$do->set('usuario'  , $usuario  );
+		$do->set('estampa'  , $estampa  );
+		$do->set('hora'     , $hora     );
 
 		return true;
 	}
 
 	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='';
-		return true;
-	}
-
-	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
+		$do->error_message_ar['pre_upd']='No se puede  cambiar este documento, debe anularlo y volvero a registrar.';
 		return false;
 	}
 
 	function _post_insert($do){
+		$tipo_doc= $do->get('tipo_doc');
+		$cod_cli = $do->get('cod_cli');
+		$nombre  = $do->get('nombre');
+		$numero  = $do->get('numero');
+		$fecha   = $do->get('fecha');
+		$monto   = $do->get('totalg');
+		$estampa = $do->get('estampa');
+		$hora    = $do->get('hora');
+		$transac = $do->get('transac');
+		$usuario = $do->get('usuario');
+		$impuesto= $do->get('iva');
+		$observa1= $do->get('observa1');
+		$observa2= $do->get('observa2');
+
+		if($tipo_doc=='ND' || $tipo_doc=='OC'){
+			//Crea la CxC
+			$data=array();
+			$data['cod_cli']    = $cod_cli;
+			$data['nombre']     = $nombre;
+			$data['tipo_doc']   = 'ND';
+			$data['numero']     = $numero;
+			$data['fecha']      = $fecha;
+			$data['monto']      = $monto;
+			$data['impuesto']   = $impuesto;
+			$data['abonos']     = 0;
+			$data['vence']      = $fecha;
+			$data['tipo_ref']   = '';
+			$data['num_ref']    = '';
+			$data['observa1']   = $observa1;
+			$data['observa2']   = $observa2;
+			$data['estampa']    = $estampa;
+			$data['hora']       = $hora;
+			$data['transac']    = $transac;
+			$data['usuario']    = $usuario;
+			$data['codigo']     = '';
+			$data['descrip']    = '';
+
+			$mSQL = $this->db->insert_string('smov', $data);
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'OTIN'); }
+		}elseif($tipo_doc=='OT'){
+			$cana=$do->count_rel('sfpa');
+			for($i=0;$i<$cana;$i++){
+				$monto = $do->get_rel('sfpa','monto',$i);
+				$tipo  = $do->get_rel('sfpa','tipo' ,$i);
+				$banco = $do->get_rel('sfpa','banco',$i);
+
+				//Crea el movimiento en banco si aplica
+				if($tipo == 'NC' || $tipo == 'DE'){
+					$num_ref = $do->get_rel('sfpa','num_ref',$i);
+					$ffecha  = $do->get_rel('sfpa','fecha'  ,$i);
+					$dbbanco = $this->db->escape($banco);
+					$rowban  = $this->datasis->damerow('SELECT numcuent,banco,saldo,moneda FROM banc WHERE codbanc='.$dbbanco);
+
+					$data['codbanc']  = $banco;
+					$data['numcuent'] = $rowban['numcuent'];
+					$data['banco']    = $rowban['banco'];
+					$data['saldo']    = $rowban['saldo'];
+					$data['moneda']   = $rowban['moneda'];
+					$data['tipo_op']  = $tipo;
+					$data['numero']   = $num_ref;
+					$data['fecha']    = $ffecha;
+					$data['clipro']   = 'C';
+					$data['codcp']    = $cod_cli;
+					$data['nombre']   = $nombre;
+					$data['monto']    = $monto;
+					$data['concepto'] = $observa1;
+					$data['concep2']  = $observa2;
+					$data['benefi']   = '';
+					$data['usuario']  = $usuario;
+					$data['estampa']  = $estampa;
+					$data['hora']     = $hora;
+					$data['transac']  = $transac;
+					$data['anulado']  = 'N';
+					$data['liable']   = 'S';
+
+					$mSQL = $this->db->insert_string('bmov', $data);
+					$ban=$this->db->simple_query($mSQL);
+					if($ban==false){ memowrite($mSQL,'OTIN'); }
+
+					$this->datasis->actusal($banco, $ffecha, $monto);
+				}
+			}
+		}
+
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits numero:${tipo_doc}${numero} ${primary}");
+	}
+
+	function _pre_delete($do){
+		$transac   = $do->get('transac');
+		$fecha     = $do->get('fecha');
+		$dbtransac = $this->db->escape($transac);
+		$dbfecha   = $this->db->escape($fecha);
+
+		$mSQL= 'SELECT COUNT(*) FROM smov WHERE abonos>0 AND transac='.$dbtransac;
+		$cana= $this->datasis->dameval($mSQL);
+		if(!empty($cana)){
+			$do->error_message_ar['pre_del']='El registro tiene efectos abonado, debe reversar primero el abono antes de anular';
+			return false;
+		}
+
+		$sfpa_cana=$do->count_rel('sfpa');
+		for($i=0;$i<$sfpa_cana;$i++){
+			$cajero  = $do->get_rel('sfpa','cobrador',$i);
+			break;
+		}
+
+		if($sfpa_cana>0){
+			$mSQL= 'SELECT COUNT(*) FROM bmov WHERE (concilia IS NOT NULL OR concilia<>\'0000-00-00\') AND transac='.$dbtransac;
+			$cana= $this->datasis->dameval($mSQL);
+			if(!empty($cana)){
+				$do->error_message_ar['pre_del']='El registro tiene movimientos en bancos conciliados, debe reversar primero el abono antes de anular';
+				return false;
+			}
+
+			$mSQL = "SELECT COUNT(*) FROM rcaj WHERE fecha=${dbfecha} AND cajero=".$this->db->escape($cajero);
+			$cana = $this->datasis->dameval($mSQL);
+			if(!empty($cana)){
+				$do->error_message_ar['pre_del']="El cajero ${cajero} ya fue cerrado para la fecha del registro, debe revesar al cierre primero";
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${primary}");
 	}
 
 	function _post_delete($do){
+		$tipo_doc = $do->get('tipo_doc');
+		$numero   = $do->get('numero');
+		$transac  = $do->get('transac');
+		$codbanc  = $do->get('codbanc');
+		$dbtransac= $this->db->escape($transac);
+
+		$mSQL='SELECT codbanc,fecha,monto FROM bmov WHERE transac='.$dbtransac;
+		$query = $this->db->query($mSQL);
+		foreach ($query->result() as $row){
+			$fecha  = $row->fecha;
+			$monto  = (-1)*$row->monto;
+			$codbanc= $row->codbanc;
+			$this->datasis->actusal($codbanc, $fecha, $monto);
+		}
+
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		logusu($do->table,"Elimino $this->tits numero:${tipo_doc}${numero} ${primary}");
 	}
 
 	function _post_print_update($do){
@@ -1631,7 +1811,7 @@ class Otin extends Controller {
 		$tipo_doc = $do->get('tipo_doc');
 		$nfiscal  = $do->get('nfiscal');
 
-		logusu('otin',"Imprimio ${tipo_doc}${numero} factura $nfiscal");
+		logusu('otin',"Imprimio ${tipo_doc}${numero} factura ${nfiscal}");
 	}
 
 	function instalar(){
@@ -1640,6 +1820,6 @@ class Otin extends Controller {
 			$this->db->simple_query('ALTER TABLE `otin` DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE `otin` ADD UNIQUE INDEX `numero` (`tipo_doc`, `numero`)');
 			$this->db->simple_query('ALTER TABLE `otin` ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		}
 	}
 }

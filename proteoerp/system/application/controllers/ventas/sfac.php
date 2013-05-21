@@ -3468,19 +3468,23 @@ class Sfac extends Controller {
 		for($i=0;$i<$cana;$i++){
 			$sfpatip   = $do->get_rel('sfpa', 'tipo',$i);
 			if(!empty($sfpatip)){
-				$sfpatipo  = $do->get_rel('sfpa', 'tipo_doc',$i);
 				$sfpa_monto= $do->get_rel('sfpa','monto'    ,$i);
+				$sfpa_fecha= $do->get_rel('sfpa','fecha'    ,$i);
 				if($tipoa=='D'){
 					$sfpa_monto *= -1;
 				}
 
-				if($sfpatipo=='EF') $do->set_rel('sfpa', 'fecha' , $fecha , $i);
+				if($sfpatip=='EF'){
+					$do->set_rel('sfpa', 'fecha' , $fecha , $i);
+				}elseif(empty($sfpa_fecha)){
+					$do->set_rel('sfpa', 'fecha' , $fecha , $i);
+				}
+
 				$do->set_rel('sfpa','tipo_doc' ,($tipoa=='F')? 'FE':'DE',$i);
 				$do->set_rel('sfpa','transac'  ,$transac   ,$i);
 				$do->set_rel('sfpa','vendedor' ,$vd        ,$i);
 				$do->set_rel('sfpa','cod_cli'  ,$cliente   ,$i);
 				$do->set_rel('sfpa','f_factura',$fecha     ,$i);
-				$do->set_rel('sfpa','fecha'    ,$fecha     ,$i);
 				$do->set_rel('sfpa','cobrador' ,$cajero    ,$i);
 				$do->set_rel('sfpa','numero'   ,$numero    ,$i);
 				$do->set_rel('sfpa','almacen'  ,$almacen   ,$i);
