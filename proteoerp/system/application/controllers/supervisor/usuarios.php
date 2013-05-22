@@ -1,15 +1,14 @@
 <?php		$funciones = "";
 class Usuarios extends Controller {
-	var $mModulo='Usuarios del Sistema';
-	var $titp = 'Modulo de Usuarios del Sistema';
-	var $tits = 'Modulo de Usuarios del Sistema';
+	var $mModulo='usuarios';
+	var $titp = 'Usuarios del Sistema';
+	var $tits = 'Usuarios del Sistema';
 	var $url  = 'supervisor/usuarios/';
 
 	function Usuarios(){
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		//$this->datasis->modulo_id('NNN',1);
 	}
 
 	function index(){
@@ -70,7 +69,8 @@ class Usuarios extends Controller {
 	// Body Script
 	//*******************************
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
+		$ngrid = '#newapi'.$grid0;
 
 		$bodyscript .= '
 		function usuarioadd(){
@@ -83,9 +83,9 @@ class Usuarios extends Controller {
 
 		$bodyscript .= '
 		function usuarioedit(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("'.$ngrid.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
@@ -98,9 +98,9 @@ class Usuarios extends Controller {
 
 		$bodyscript .= '
 		function usuarioshow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret    = $("'.$ngrid.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
 					$("#fshow").html(data);
@@ -113,17 +113,17 @@ class Usuarios extends Controller {
 
 		$bodyscript .= '
 		function usuariodel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				if(confirm(" Seguro desea eliminar el registro?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					var ret    = $("'.$ngrid.'").getRowData(id);
 					mId = id;
 					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
 						try{
 							var json = JSON.parse(data);
 							if (json.status == "A"){
 								apprise("Registro eliminado");
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+								jQuery("'.$ngrid.'").trigger("reloadGrid");
 							}else{
 								apprise("Registro no se puede eliminado");
 							}
@@ -144,7 +144,7 @@ class Usuarios extends Controller {
 			var mId = 0;
 			var montotal = 0;
 			var ffecha = $("#ffecha");
-			var grid = jQuery("#newapi'.$grid0.'");
+			var grid = jQuery("'.$ngrid.'");
 			var s;
 			var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
@@ -156,7 +156,6 @@ class Usuarios extends Controller {
 			autoOpen: false, height: 370, width: 480, modal: true,
 			buttons: {
 				"Guardar": function() {
-					var bValid = true;
 					var murl = $("#df1").attr("action");
 					allFields.removeClass( "ui-state-error" );
 					$.ajax({
@@ -167,15 +166,19 @@ class Usuarios extends Controller {
 							try{
 								var json = JSON.parse(r);
 								if (json.status == "A"){
-									apprise("Registro Guardado");
+									$.prompt("<h1>Registro Guardado</h1>",{
+										submit: function(e,v,m,f){  
+											setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+										}}
+									);
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/USUARIO').'/\'+res.id+\'/id\'').';
+									idactual = json.pk.id;
 									return true;
 								} else {
-									apprise(json.mensaje);
+									$.prompt(json.mensaje);
 								}
-							}catch(e){
+							} catch(e){
 								$("#fedita").html(r);
 							}
 						}
@@ -212,31 +215,23 @@ class Usuarios extends Controller {
 			buttons: {
 				"Aceptar": function() {
 					$("#fborra").html("");
-					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					jQuery("'.$ngrid.'").trigger("reloadGrid");
 					$( this ).dialog( "close" );
 				},
 			},
 			close: function() {
-				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				jQuery("'.$ngrid.'").trigger("reloadGrid");
 				$("#fborra").html("");
 			}
 		});';
 
 		$bodyscript .= '});'."\n";
 
-
-/*
-		$bodyscript .= '
-		$(function() {
-			$( "input:submit, a, button", ".a1" ).button();
-		});
-*/
-
 		$bodyscript .= '
 		jQuery("#camclave").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
 				$.get(\''.base_url().'supervisor/usuarios/cclave/\'+id ,function(data){
 					$.prompt(data,{
 						buttons: { Guardar: true, Cancelar: false },
@@ -469,6 +464,9 @@ class Usuarios extends Controller {
 
 		$grid->setBarOptions("addfunc: usuarioadd, editfunc: usuarioedit, delfunc: usuariodel, viewfunc: usuarioshow");
 
+		//$grid->setGridComplete("cosas");
+
+
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
@@ -664,14 +662,19 @@ class Usuarios extends Controller {
 		$edit->supervisor->option('S','Si');
 		$edit->supervisor->style='width:80px';
 
-		//$edit->buttons('modify', 'save', 'undo', 'back','delete');
+		$edit->uuid = new inputField('Movil UID','uuid');
+		$edit->uuid->rule='';
+		$edit->uuid->size =32;
+		$edit->uuid->maxlength =100;
+
+
 		$edit->build();
 
 		if($edit->on_success()){
 			$rt=array(
-				'status' =>'A',
-				'mensaje'=>'Registro guardado',
-				'pk'     =>$edit->_dataobject->pk
+				'status' => 'A',
+				'mensaje'=> 'Registro guardado',
+				'pk'     => $edit->_dataobject->pk
 			);
 			echo json_encode($rt);
 		}else{
@@ -679,6 +682,9 @@ class Usuarios extends Controller {
 		}
 	}
 
+	//******************************************************************
+	//
+	//
 	function accesos($usr){
 		$this->rapyd->load('datagrid2');
 		$mSQL="SELECT a.modulo,a.titulo, IFNULL(b.acceso,'N') AS acceso,a.panel,MID(a.modulo,1,1) AS pertenece

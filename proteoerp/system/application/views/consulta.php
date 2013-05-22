@@ -16,6 +16,8 @@ $cintu = '
 echo "<!-- JQUERY -->";
 echo phpscript('nformat.js');
 echo script('jquery-min.js');
+echo script('jquery-migrate-min.js');
+
 echo script('plugins/jquery.numeric.pack.js');
 echo script('jquery-ui.custom.min.js');
 echo script('jquery.ui.selectmenu.js');
@@ -94,7 +96,7 @@ jQuery(document).ready(function(){
 	
 	$.jgrid.defaults = $.extend($.jgrid.defaults,{loadui:"enable"});
 	
-	var maintab =jQuery('#tabs','#RightPane').tabs({
+	var maintab = $('#tabs','#RightPane').tabs({
 		add: function(e, ui) {
 			// append close thingy
 			$(ui.tab).parents('li:first')

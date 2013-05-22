@@ -144,7 +144,6 @@ class Sprv extends Controller {
 		';
 
 
-
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['funciones']   = $funciones;
@@ -177,12 +176,13 @@ class Sprv extends Controller {
 	//***************************
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">'."\n";
+		$ngrid = '#newapi'.$grid0;
 
 		$bodyscript .= '
 		jQuery("#edocta").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
 				'.$this->datasis->jwinopen(site_url('reportes/ver/SPRMECU/SPRM/').'/\'+ret.proveed').';
 			} else { $.prompt("<h1>Por favor Seleccione un Proveedor</h1>");}
 		});
@@ -191,9 +191,9 @@ class Sprv extends Controller {
 		// Pagina Web
 		$bodyscript .= '
 		jQuery("#pagweb").click( function(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret  = $("#newapi'.$grid0.'").getRowData(id);
+				var ret  = $("'.$ngrid.'").getRowData(id);
 				if ( ret.url.length > 10 )
 					window.open(ret.url);
 			} else {
@@ -214,9 +214,9 @@ class Sprv extends Controller {
 
 		$bodyscript .= '
 		function sprvedit() {
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id  = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret    = $("'.$ngrid.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url('compras/sprv/dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
@@ -232,7 +232,7 @@ class Sprv extends Controller {
 			var mId = 0;
 			var montotal = 0;
 			var ffecha = $("#ffecha");
-			var grid = jQuery("#newapi'.$grid0.'");
+			var grid = jQuery("'.$ngrid.'");
 			var s;
 			var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
@@ -244,6 +244,44 @@ class Sprv extends Controller {
 			autoOpen: false, height: 520, width: 720, modal: true,
 			buttons: {
 			"Guardar": function() {
+				var murl = $("#df1").attr("action");
+				allFields.removeClass( "ui-state-error" );
+				$.ajax({
+					type: "POST", dataType: "html", async: false,
+					url: murl,
+					data: $("#df1").serialize(),
+					success: function(r,s,x){
+						try{
+							var json = JSON.parse(r);
+							if (json.status == "A"){
+								$("#fedita").dialog( "close" );
+								grid.trigger("reloadGrid");
+								$.prompt("<h1>Registro Guardado</h1>",{
+									submit: function(e,v,m,f){  
+										setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+									}}
+								);
+								idactual = json.pk.id;
+								return true;
+							} else {
+								$.prompt("Error: "+json.mensaje);
+							}
+						} catch(e){
+							$("#fedita").html(r);
+						}
+					}
+				})
+			},
+			"Cancelar": function() { $( this ).dialog( "close" ); },
+			"SENIAT":   function() { consulrif("rifci"); },
+			"URL":   function() { iraurl(); },
+			},
+			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+		});';
+		$bodyscript .= '});'."\n";
+
+
+/*
 				var bValid = true;
 				var murl = $("#df1").attr("action");
 				allFields.removeClass( "ui-state-error" );
@@ -253,22 +291,21 @@ class Sprv extends Controller {
 					data: $("#df1").serialize(),
 					success: function(r,s,x){
 						if ( r.length == 0 ) {
-							apprise("Registro Guardado");
 							$( "#fedita" ).dialog( "close" );
 							grid.trigger("reloadGrid");
+							$.prompt("<h1>Registro Guardado</h1>",{
+								submit: function(e,v,m,f){  
+									setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',id);}, 500);
+								}}
+							);
 							return true;
 						} else {
 							$("#fedita").html(r);
 						}
 					}
-			})},
-			"Cancelar": function() { $( this ).dialog( "close" ); },
-			"SENIAT":   function() { consulrif("rifci"); },
-			"URL":   function() { iraurl(); },
-			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
-		});';
-		$bodyscript .= '});'."\n";
+			})*/
+
+
 
 		$bodyscript .= "\n\t</script>\n";
 		$bodyscript .= "";
@@ -799,10 +836,9 @@ class Sprv extends Controller {
 		echo $salida;
 	}
 
-	// **************************************
+	//******************************************************************
 	//     DATAEDIT
 	//
-	// **************************************
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 
@@ -975,10 +1011,11 @@ class Sprv extends Controller {
 
 			';
 
-		$edit = new DataEdit('Proveedores', 'sprv');
+		$edit = new DataEdit('', 'sprv');
+		$edit->on_save_redirect=false;
 		$edit->script($script, 'create');
 		$edit->script($script, 'modify');
-		$edit->back_url = site_url('compras/sprv/filteredgrid');
+		//$edit->back_url = site_url('compras/sprv/filteredgrid');
 
 		$edit->pre_process('delete','_pre_del');
 		$edit->post_process('insert','_post_insert');
@@ -1147,23 +1184,20 @@ class Sprv extends Controller {
 		$edit->reteiva->insertValue='75.00';
 		$edit->reteiva->append("%");
 
-		$edit->buttons('modify','save','undo','delete','add','back');
+		$edit->build();
 
-		if($this->genesal){
-			$edit->build();
-			$conten['form']  =&  $edit;
-			$data['content'] = $this->load->view('view_sprv', $conten);
+		if($edit->on_success()){
+			$rt=array(
+				'status' => 'A',
+				'mensaje'=> 'Registro guardado',
+				'pk'     => $edit->_dataobject->pk
+			);
+			echo json_encode($rt);
 		}else{
-			$edit->on_save_redirect=false;
-			$edit->build();
-
-			if($edit->on_success()){
-				$rt= array(true, 'Proveedor Guardado');
-			}elseif($edit->on_error()){
-				$rt= array(false,html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string)));
-			}
-			return $rt;
+			$conten['form']  =&  $edit;
+			$data['content']  =  $this->load->view('view_sprv', $conten);
 		}
+
 	}
 
 	function _pre_del($do) {

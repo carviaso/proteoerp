@@ -76,13 +76,13 @@ if ( count($grids) > 0 ){
 
 	var gridId'.$i.' = "#newapi'.$gridi['gridname'].'";
 	var grid'.$i.'   = jQuery(gridId'.$i.').jqGrid({
-		ajaxGridOptions : {type:"POST"},
-			jsonReader : {
-				root:"data",
-				repeatitems: false
-			}
-			'.$gridi['onClick'].'
-			'.$gridi['ondblClickRow'].'
+		ajaxGridOptions : {type:"POST"}
+		,jsonReader : {root:"data", repeatitems: false}';
+			
+		if ($gridi['onClick']) $depgrids .= "\n\t\t".$gridi['onClick'];
+		if ($gridi['onClick']) $depgrids .= "\n\t\t".$gridi['ondblClickRow'];
+
+		$depgrids .= '
 		'.$gridi['table'].'
 	})
 	'.$gridi['pager'].'
@@ -254,7 +254,7 @@ th.ui-th-column div{white-space:normal !important;height:auto !important;padding
 var base_url = '<?php echo base_url() ?>';
 var site_url = '<?php echo site_url() ?>';
 var url = '';
-
+var idactual = 0;
 
 $(function(){$(".inputnum").numeric(".");});
 

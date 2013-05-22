@@ -139,6 +139,7 @@ class Scli extends validaciones {
 	//***************************
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
+		$ngrid = '#newapi'.$grid0;
 
 		$bodyscript .= '
 		jQuery("#edocta").click( function(){
@@ -252,6 +253,7 @@ class Scli extends validaciones {
 			"Guardar": function() {
 				var bValid = true;
 				var murl = $("#df1").attr("action");
+				var id  = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 				allFields.removeClass( "ui-state-error" );
 				$.ajax({
 					type: "POST", dataType: "html", async: false,
@@ -259,9 +261,13 @@ class Scli extends validaciones {
 					data: $("#df1").serialize(),
 					success: function(r,s,x){
 						if ( r.length == 0 ) {
-							apprise("Registro Guardado");
 							$( "#fedita" ).dialog( "close" );
 							grid.trigger("reloadGrid");
+							$.prompt("<h1>Registro Guardado</h1>",{
+								submit: function(e,v,m,f){  
+									setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',id);}, 500);
+								}}
+							);
 							return true;
 						} else {
 							$("#fedita").html(r);

@@ -30,6 +30,218 @@ class Desarrollo extends Controller{
 
 	function index(){
 
+		$styles  = "\n<!-- Estilos -->\n";
+		$styles .= style('rapyd.css');
+		$styles .= style('ventanas.css');
+		$styles .= style('themes/proteo/proteo.css');
+		$styles .= style("themes/ui.jqgrid.css");
+		$styles .= style("themes/ui.multiselect.css");
+
+		$styles .= '
+<style>
+html, body {margin: 0;padding: 0;overflow: hidden;font-size: 75%;}
+#LeftPane {overflow: auto;}
+#RightPane {padding: 2px;overflow: auto;}
+.ui-tabs-nav li {position: relative;}
+.ui-tabs-selected a span {padding-right: 10px;}
+.ui-tabs-close {display: none;position: absolute;top: 3px;right: 0px;z-index: 800;width: 16px;height: 14px;font-size: 10px; font-style: normal;cursor: pointer;}
+.ui-tabs-selected .ui-tabs-close {display: block;}
+.ui-layout-west .ui-jqgrid tr.jqgrow td { border-bottom: 0px none;}
+.ui-datepicker {z-index:1200;}
+.rotate { -webkit-transform: rotate(-90deg); -moz-transform: rotate(-90deg); filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);}
+</style>		
+		';
+
+		$script  = "\n<!-- JQUERY -->\n";
+		$script .= script('jquery-min.js');
+		$script .= script('jquery-migrate-min.js'); 
+		$script .= script('jquery-ui.custom.min.js');
+
+		$script .= script("jquery.layout.js");
+		$script .= script("i18n/grid.locale-sp.js");
+
+		$script .= '
+<script type="text/javascript">
+	$.jgrid.no_legacy_api = true;
+	$.jgrid.useJSON = true;
+</script>
+';
+		$script .= script("ui.multiselect.js");
+		$script .= script("jquery.jqGrid.min.js");
+		$script .= script("jquery.tablednd.js");
+		$script .= script("jquery.contextmenu.js");
+
+		$script .= '
+<script type="text/javascript">
+
+jQuery(document).ready(function(){
+	$(\'body\').layout({
+		resizerClass: \'ui-state-default\',
+        west__onresize: function (pane, $Pane) {
+            jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);
+		}
+	});
+	$.jgrid.defaults = $.extend($.jgrid.defaults,{loadui:"enable"});
+	var maintab =jQuery(\'#tabs\',\'#RightPane\').tabs({
+        add: function(e, ui) {
+            // append close thingy
+            $(ui.tab).parents(\'li:first\')
+                .append(\'<span class="ui-tabs-close ui-icon ui-icon-close" title="Close Tab"></span>\')
+                .find(\'span.ui-tabs-close\')
+				.show()
+                .click(function() {
+                    maintab.tabs(\'remove\', $(\'li\', maintab).index($(this).parents(\'li:first\')[0]));
+                });
+            // select just added tab
+            maintab.tabs(\'select\', \'#\' + ui.panel.id);
+        }
+    });
+    jQuery("#west-grid").jqGrid({
+		ajaxGridOptions : {type: "POST"},
+        url: "'.site_url('desarrollo/menu').'/",
+        datatype: "xml",
+        height: "auto",
+        pager: false,
+        loadui: "disable",
+        colNames: ["id","Items","url"],
+        colModel: [
+            {name: "id",width:1,hidden:true, key:true},
+            {name: "menu", width:150, resizable: false, sortable:false},
+            {name: "url",width:1,hidden:true}
+        ],
+        treeGrid: true,
+		caption: "jqGrid Demos",
+        ExpandColumn: "menu",
+        autowidth: true,
+        //width: 180,
+        rowNum: 200,
+        ExpandColClick: true,
+        treeIcons: {leaf:\'ui-icon-document-b\'},
+        onSelectRow: function(rowid) {
+            var treedata = $("#west-grid").jqGrid(\'getRowData\',rowid);
+            if(treedata.isLeaf=="true") {
+                //treedata.url
+                var st = "#t"+treedata.id;
+				if($(st).html() != null ) {
+					maintab.tabs(\'select\',st);
+				} else {
+					maintab.tabs(\'add\',st, treedata.menu);
+					//$(st,"#tabs").load(treedata.url);
+					$.ajax({
+						url: treedata.url,
+						type: "GET",
+						dataType: "html",
+						complete : function (req, err) {
+							$(st,"#tabs").append(req.responseText);
+
+							var clck = \'<p style="border: 1px solid; background-color: lemonchiffon; width:654px;height:25px;margin-bottom: 8px;padding-top: 8px;text-align: center">\';
+							clck += \'<b>Please, support the jqGrid project by clicking on our sponsors ad! </b></p>\';
+ 
+							var fs = "";
+
+							$(st,"#tabs").append(clck);
+							//$(st,"#tabs").append(fs);
+						}
+					});
+				}
+            }
+        }
+    });
+	
+// end splitter
+
+});
+</script>
+';
+
+/*
+							try { 
+								var pageTracker = _gat._getTracker("UA-5463047-4"); 
+								pageTracker._trackPageview(); 
+							} 
+							catch(err) {};
+
+
+
+var fs = \'
+<iframe src="adds.html"  style="width:336px; height:290px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>\&nbsp;&nbsp;&nbsp;&nbsp;
+<iframe src="adds3.html" style="width:336px; height:290px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>\<br/>
+<iframe src="adds2.html" style="width:728px; height:95px;"  scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/><br>\&nbsp;&nbsp;&nbsp;&nbsp;
+<iframe src="adds4.html" style="width:728px; height:95px;"  scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>\
+\';
+ 
+*/
+
+
+		$title = "
+<div id='encabe'>
+<table width='98%'>
+	<tr>
+		<td>".heading('Herramientas de Desarrollo')."</td>
+		<td align='right' width='40'>".image('cerrar.png','Cerrar Ventana',array('onclick'=>'window.close()','height'=>'20'))."</td>
+	</tr>
+</table>
+</div>
+";
+
+		$tabla  = '
+	<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
+	<table id="west-grid"></table>
+	</div> <!-- #LeftPane -->
+	<div id="RightPane" class="ui-layout-center ui-helper-reset ui-widget-content" ><!-- Tabs pane -->
+    <div id="switcher"></div>
+		<div id="tabs" class="jqgtabs">
+			<ul>
+				<li><a href="#tabs-1">Desarrollo</a></li>
+			</ul>
+			<div id="tabs-1" style="font-size:12px;">
+
+				<p style="border: 1px solid; background-color: lemonchiffon; width:728px;height:25px;margin-bottom: 8px;padding-top: 8px;text-align: center">
+					<b>Meco el Orejon</b>
+				</p>
+
+			</div>
+		</div>
+	</div> <!-- #RightPane -->
+';
+
+/*
+				<iframe src="adds_c.html" style="width:728px; height:100px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>
+
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src=\'" + gaJsHost + "google-analytics.com/ga.js\' type=\'text/javascript\'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPageview(); } catch(err) {}
+</script>
+';
+*/
+
+		
+		$data['content'] = $tabla;
+		$data['title']   = $title; 
+		$data['head']    = $styles;
+		$data['head']   .= $script;
+		
+		$this->load->view('view_ventanas_lite',$data);
+
+/*
+
+	function camposdb(){
+	}
+
+	function lcamposdb(){
+	}
+
+	function acamposdb(){
+	}
+
+	function ccamposdb(){
+	}
+*/
+
 	}
 
 	function camposdb(){
@@ -1939,4 +2151,171 @@ class Desarrollo extends Controller{
 		print_r($this->datasis->controladores());
 	}
 
+
+	function menu(){
+
+		
+		$arbol = '<?xml version=\'1.0\' encoding="utf-8"?>
+<rows>
+    <page>1</page>
+    <total>1</total>
+    <records>1</records>
+    <row><cell>1</cell><cell>Listas de Campos</cell><cell></cell><cell>0</cell><cell>1</cell><cell>10</cell><cell>false</cell><cell>false</cell></row>
+
+    <row><cell>2</cell><cell>En arreglo $data</cell><cell>'.site_url('desarrollo/camposdb').'</cell><cell>1</cell><cell>2</cell><cell>3</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>3</cell><cell>Separados x ,   </cell><cell>jsonex.html   </cell><cell>1</cell><cell>4</cell><cell>5</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>4</cell><cell>Separado x ","  </cell><cell>loadoncex.html</cell><cell>1</cell><cell>6</cell><cell>7</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>5</cell><cell>Separado x \',\'</cell><cell>localex.html  </cell><cell>1</cell><cell>8</cell><cell>9</cell><cell>true</cell><cell>true</cell></row>
+
+    <row><cell>6</cell><cell>Manipulating</cell><cell></cell><cell>0</cell><cell>11</cell><cell>18</cell><cell>false</cell><cell>false</cell></row>
+
+    <row><cell>7</cell><cell>Grid Data  </cell><cell>manipex.html</cell><cell>1</cell><cell>12</cell><cell>13</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>8</cell><cell>Get Methods</cell><cell>getex.html  </cell><cell>1</cell><cell>14</cell><cell>15</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>9</cell><cell>Set Methods</cell><cell>setex.html  </cell><cell>1</cell><cell>16</cell><cell>17</cell><cell>true</cell><cell>true</cell></row>
+
+    <row><cell>10</cell><cell>Advanced       </cell><cell></cell><cell>0</cell><cell>19</cell><cell>32</cell><cell>false</cell><cell>false</cell></row>
+
+    <row><cell>11</cell><cell>Multi Select   </cell><cell>multiex.html     </cell><cell>1</cell><cell>20</cell><cell>21</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>12</cell><cell>Master Detail  </cell><cell>masterex.html    </cell><cell>1</cell><cell>22</cell><cell>23</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>13</cell><cell>Subgrid        </cell><cell>subgrid.html     </cell><cell>1</cell><cell>24</cell><cell>25</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>14</cell><cell>Grid as Subgrid</cell><cell>subgrid_grid.html</cell><cell>1</cell><cell>26</cell><cell>27</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>15</cell><cell>Resizing       </cell><cell>resizeex.html    </cell><cell>1</cell><cell>28</cell><cell>28</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>16</cell><cell>Search Big Sets</cell><cell>bigset.html      </cell><cell>1</cell><cell>30</cell><cell>31</cell><cell>true</cell><cell>true</cell></row>
+
+    <row><cell>17</cell><cell>New since beta 3.0</cell><cell></cell><cell>0</cell><cell>33</cell><cell>44</cell><cell>false</cell><cell>false</cell></row>
+
+    <row><cell>18</cell><cell>Custom Multi Select</cell><cell>cmultiex.html </cell><cell>1</cell><cell>34</cell><cell>35</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>19</cell><cell>Subgrid with JSON  </cell><cell>jsubgrid.html </cell><cell>1</cell><cell>36</cell><cell>37</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>20</cell><cell>After Load Callback</cell><cell>loadcml.html  </cell><cell>1</cell><cell>38</cell><cell>39</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>21</cell><cell>Resizable Columns  </cell><cell>resizecol.html</cell><cell>1</cell><cell>40</cell><cell>41</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>22</cell><cell>Hide/Show Columns  </cell><cell>hideex.html   </cell><cell>1</cell><cell>42</cell><cell>43</cell><cell>true</cell><cell>true</cell></row>
+
+    <row><cell>23</cell><cell>Row Editing (new)</cell><cell></cell><cell>0</cell><cell>45</cell><cell>58</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>24</cell><cell>Basic Example</cell><cell>rowedex1.html</cell><cell>1</cell><cell>46</cell><cell>47</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>25</cell><cell>Custom Edit</cell><cell>rowedex2.html</cell><cell>1</cell><cell>48</cell><cell>49</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>26</cell><cell>Using Events</cell><cell>rowedex3.html</cell><cell>1</cell><cell>50</cell><cell>51</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>27</cell><cell>Full Control</cell><cell>rowedex4.html</cell><cell>1</cell><cell>52</cell><cell>53</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>28</cell><cell>Input types</cell><cell>rowedex5.html</cell><cell>1</cell><cell>54</cell><cell>55</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>135</cell><cell>Inline Navigator (new)</cell><cell>43rowedex.html</cell><cell>1</cell><cell>56</cell><cell>57</cell><cell>true</cell><cell>true</cell></row>
+
+    <row><cell>29</cell><cell>Data Mapping</cell><cell></cell><cell>0</cell><cell>59</cell><cell>66</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>30</cell><cell>XML Mapping</cell><cell>xmlmap.html</cell><cell>1</cell><cell>60</cell><cell>61</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>31</cell><cell>JSON Mapping</cell><cell>jsonmap.html</cell><cell>1</cell><cell>62</cell><cell>63</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>32</cell><cell>Data Optimization</cell><cell>jsonopt.html</cell><cell>1</cell><cell>64</cell><cell>65</cell><cell>true</cell><cell>true</cell></row>
+	
+    <row><cell>33</cell><cell>Integrations</cell><cell></cell><cell>0</cell><cell>67</cell><cell>70</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>34</cell><cell>UI Datepicker</cell><cell>calendar.html</cell><cell>1</cell><cell>68</cell><cell>69</cell><cell>true</cell><cell>true</cell></row>
+	
+    <row><cell>35</cell><cell>Live Data Manipulation</cell><cell></cell><cell>0</cell><cell>70</cell><cell>81</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>36</cell><cell>Searching Data</cell><cell>searching.html</cell><cell>1</cell><cell>71</cell><cell>72</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>37</cell><cell>Edit row</cell><cell>editing.html</cell><cell>1</cell><cell>73</cell><cell>74</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>38</cell><cell>Add row</cell><cell>adding.html</cell><cell>1</cell><cell>75</cell><cell>76</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>39</cell><cell>Delete row</cell><cell>deleting.html</cell><cell>1</cell><cell>77</cell><cell>78</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>40</cell><cell>Navigator</cell><cell>navgrid.html</cell><cell>1</cell><cell>79</cell><cell>80</cell><cell>true</cell><cell>true</cell></row>
+	
+    <row><cell>41</cell><cell>New in version 3.1</cell><cell></cell><cell>0</cell><cell>81</cell><cell>90</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>42</cell><cell>Toolbars and userdata</cell><cell>toolbar.html</cell><cell>1</cell><cell>82</cell><cell>83</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>43</cell><cell>New Methods</cell><cell>methods.html</cell><cell>1</cell><cell>84</cell><cell>85</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>44</cell><cell>Post Data</cell><cell>postdata.html</cell><cell>1</cell><cell>86</cell><cell>87</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>45</cell><cell>Common Params</cell><cell>defparams.html</cell><cell>1</cell><cell>88</cell><cell>89</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>46</cell><cell>New in version 3.2</cell><cell></cell><cell>0</cell><cell>91</cell><cell>106</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>47</cell><cell>New Methods 3.2</cell><cell>methods32.html</cell><cell>1</cell><cell>92</cell><cell>93</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>48</cell><cell>Initial hidden grid</cell><cell>hiddengrid.html</cell><cell>1</cell><cell>94</cell><cell>95</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>49</cell><cell>After Insert Row event</cell><cell>afterinsrow.html</cell><cell>1</cell><cell>96</cell><cell>97</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>50</cell><cell>Controling server errors</cell><cell>loaderror.html</cell><cell>1</cell><cell>98</cell><cell>99</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>51</cell><cell>Hide/Show columns</cell><cell>hideshow.html</cell><cell>1</cell><cell>100</cell><cell>101</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>52</cell><cell>Custom Button and Forms</cell><cell>custbutt.html</cell><cell>1</cell><cell>102</cell><cell>103</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>53</cell><cell>Client Validation</cell><cell>csvalid.html</cell><cell>1</cell><cell>104</cell><cell>105</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>54</cell><cell>New in version 3.3</cell><cell></cell><cell>0</cell><cell>107</cell><cell>126</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>55</cell><cell>Dynamic height and width</cell><cell>gridwidth.html</cell><cell>1</cell><cell>108</cell><cell>109</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>56</cell><cell>Tree Grid</cell><cell>treegrid.html</cell><cell>1</cell><cell>110</cell><cell>111</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>57</cell><cell>Cell Editing</cell><cell>celledit.html</cell><cell>1</cell><cell>112</cell><cell>113</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>58</cell><cell>Visible Columns</cell><cell>setcolumns.html</cell><cell>1</cell><cell>114</cell><cell>115</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>59</cell><cell>HTML Table to Grid</cell><cell>tbltogrid.html</cell><cell>1</cell><cell>116</cell><cell>117</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>60</cell><cell>Multiple Toolbar Search</cell><cell>search1.html</cell><cell>1</cell><cell>118</cell><cell>119</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>61</cell><cell>Multiple Form Search</cell><cell>search2.html</cell><cell>1</cell><cell>120</cell><cell>121</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>62</cell><cell>Data type as function</cell><cell>datatype.html</cell><cell>1</cell><cell>122</cell><cell>123</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>63</cell><cell>Row Drag and Drop</cell><cell>tablednd.html</cell><cell>1</cell><cell>124</cell><cell>125</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>64</cell><cell>New in version 3.4</cell><cell></cell><cell>0</cell><cell>127</cell><cell>140</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>65</cell><cell>Formater</cell><cell>formatter.html</cell><cell>1</cell><cell>128</cell><cell>129</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>66</cell><cell>Custom Formater</cell><cell>custfrm.html</cell><cell>1</cell><cell>130</cell><cell>131</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>67</cell><cell>Import Configuration from XML</cell><cell>xmlimp.html</cell><cell>1</cell><cell>132</cell><cell>133</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>68</cell><cell>Autoloading data when scroll</cell><cell>scrgrid.html</cell><cell>1</cell><cell>134</cell><cell>135</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>69</cell><cell>Scroll with dynamic row select</cell><cell>navgrid2.html</cell><cell>1</cell><cell>136</cell><cell>137</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>70</cell><cell>Tree Grid Adjacency model</cell><cell>treegrid2.html</cell><cell>1</cell><cell>138</cell><cell>139</cell><cell>true</cell><cell>true</cell></row>
+
+    <row><cell>71</cell><cell>New in version 3.5</cell><cell></cell><cell>0</cell><cell>141</cell><cell>160</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>72</cell><cell>Autowidth and row numbering</cell><cell>autowidth.html</cell><cell>1</cell><cell>142</cell><cell>143</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>73</cell><cell>Grid view mode</cell><cell>speed.html</cell><cell>1</cell><cell>144</cell><cell>145</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>74</cell><cell>Integrated Search Toolbar</cell><cell>search3.html</cell><cell>1</cell><cell>146</cell><cell>147</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>75</cell><cell>Advanced Searching</cell><cell>search4.html</cell><cell>1</cell><cell>148</cell><cell>149</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>76</cell><cell>Form Improvements</cell><cell>navgrid3.html</cell><cell>1</cell><cell>150</cell><cell>151</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>77</cell><cell>TreeGrid real world example</cell><cell>treegridadv.html</cell><cell>1</cell><cell>152</cell><cell>153</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>78</cell><cell>Form Navigation</cell><cell>navgrid4.html</cell><cell>1</cell><cell>154</cell><cell>155</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>79</cell><cell>Summary Footer Row</cell><cell>summary.html</cell><cell>1</cell><cell>156</cell><cell>157</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>80</cell><cell>View sortable columns</cell><cell>sortcols.html</cell><cell>1</cell><cell>158</cell><cell>159</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>81</cell><cell>New in version 3.6</cell><cell></cell><cell>0</cell><cell>161</cell><cell>186</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>82</cell><cell>New API</cell><cell>36newapi.html</cell><cell>1</cell><cell>162</cell><cell>163</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>83</cell><cell>RTL Support</cell><cell>36rtl.html</cell><cell>1</cell><cell>164</cell><cell>165</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>84</cell><cell>Column Reordering</cell><cell>36colreorder.html</cell><cell>1</cell><cell>166</cell><cell>167</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>85</cell><cell>Column Chooser</cell><cell>36columnchoice.html</cell><cell>1</cell><cell>168</cell><cell>169</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>86</cell><cell>Custom Validation</cell><cell>36custvalid.html</cell><cell>1</cell><cell>170</cell><cell>171</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>87</cell><cell>Create Custom input element</cell><cell>36custinput.html</cell><cell>1</cell><cell>172</cell><cell>173</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>88</cell><cell>Ajax Improvements</cell><cell>36ajaxing.html</cell><cell>1</cell><cell>174</cell><cell>175</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>89</cell><cell>True scrolling Rows</cell><cell>36scrolling.html</cell><cell>1</cell><cell>176</cell><cell>177</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>90</cell><cell>Sortable Rows</cell><cell>36sortrows.html</cell><cell>1</cell><cell>178</cell><cell>179</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>91</cell><cell>Drag and Drop Rows</cell><cell>36draganddrop.html</cell><cell>1</cell><cell>180</cell><cell>181</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>92</cell><cell>Resizing Grid</cell><cell>36resize.html</cell><cell>1</cell><cell>182</cell><cell>183</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>93</cell><cell>New in version 3.7</cell><cell></cell><cell>0</cell><cell>185</cell><cell>200</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>95</cell><cell>Load array data at once</cell><cell>37array.html</cell><cell>1</cell><cell>186</cell><cell>187</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>96</cell><cell>Load at once from server</cell><cell>37server.html</cell><cell>1</cell><cell>188</cell><cell>189</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>97</cell><cell>Single search</cell><cell>37single.html</cell><cell>1</cell><cell>190</cell><cell>191</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>98</cell><cell>Multiple search</cell><cell>37multiple.html</cell><cell>1</cell><cell>192</cell><cell>193</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>99</cell><cell>Virtual scrolling</cell><cell>37scroll.html</cell><cell>1</cell><cell>194</cell><cell>195</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>100</cell><cell>Tooolbar search</cell><cell>37toolbar.html</cell><cell>1</cell><cell>196</cell><cell>197</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>101</cell><cell>Add/edit/delete on local data</cell><cell>37crud.html</cell><cell>1</cell><cell>198</cell><cell>199</cell><cell>true</cell><cell>true</cell></row>
+   
+    <row><cell>102</cell><cell>Grouping</cell><cell></cell><cell>0</cell><cell>201</cell><cell>229</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>103</cell><cell>Simple grouping with array data</cell><cell>38array.html</cell><cell>1</cell><cell>202</cell><cell>203</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>104</cell><cell>Hide grouping column</cell><cell>38array2.html</cell><cell>1</cell><cell>204</cell><cell>205</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>105</cell><cell>Grouped header row config</cell><cell>38array3.html</cell><cell>1</cell><cell>206</cell><cell>207</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>106</cell><cell>RTL Support</cell><cell>38array4.html</cell><cell>1</cell><cell>208</cell><cell>209</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>107</cell><cell>Grouping row(s) collapsed</cell><cell>38array5.html</cell><cell>1</cell><cell>210</cell><cell>211</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>108</cell><cell>Summary Footers</cell><cell>38array6.html</cell><cell>1</cell><cell>212</cell><cell>213</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>109</cell><cell>Remote Data (sorted)</cell><cell>38remote1.html</cell><cell>1</cell><cell>214</cell><cell>215</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>110</cell><cell>Remote Data (sorted with grandtotals)</cell><cell>38remote2.html</cell><cell>1</cell><cell>216</cell><cell>217</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>111</cell><cell>Dynamically change grouping</cell><cell>38remote4.html</cell><cell>1</cell><cell>218</cell><cell>219</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>112</cell><cell>View Summary Row on Collapse</cell><cell>38remote5.html</cell><cell>1</cell><cell>220</cell><cell>221</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>113</cell><cell>Multi Group all level sums (new)</cell><cell>44remote1.html</cell><cell>1</cell><cell>222</cell><cell>223</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>114</cell><cell>Multi Group one level sum  (new)</cell><cell>44remote2.html</cell><cell>1</cell><cell>224</cell><cell>225</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>115</cell><cell>Multi Group Show sums on header(new)</cell><cell>44remote3.html</cell><cell>1</cell><cell>226</cell><cell>227</cell><cell>true</cell><cell>true</cell></row>
+
+    <row><cell>119</cell><cell>Functionality</cell><cell></cell><cell>0</cell><cell>230</cell><cell>241</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>120</cell><cell>Data colspan</cell><cell>40colspan.html</cell><cell>1</cell><cell>231</cell><cell>232</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>121</cell><cell>Keyboard navigation</cell><cell>40keyboard.html</cell><cell>1</cell><cell>233</cell><cell>234</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>122</cell><cell>Column model templates</cell><cell>40cmtmpl.html</cell><cell>1</cell><cell>235</cell><cell>236</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>123</cell><cell>Add tree node </cell><cell>40addnode.html</cell><cell>1</cell><cell>237</cell><cell>238</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>124</cell><cell>Formatter actions </cell><cell>40frmactions.html</cell><cell>1</cell><cell>239</cell><cell>240</cell><cell>true</cell><cell>true</cell></row>
+
+    <row><cell>131</cell><cell>Searching</cell><cell></cell><cell>0</cell><cell>260</cell><cell>270</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>132</cell><cell>Complex search </cell><cell>40grpsearch.html</cell><cell>1</cell><cell>261</cell><cell>262</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>133</cell><cell>Show query in search </cell><cell>40grpsearch1.html</cell><cell>1</cell><cell>263</cell><cell>264</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>134</cell><cell>Validation in serach </cell><cell>40grpsearch2.html</cell><cell>1</cell><cell>265</cell><cell>266</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>135</cell><cell>Search Templates </cell><cell>40grpsearch3.html</cell><cell>1</cell><cell>267</cell><cell>268</cell><cell>true</cell><cell>true</cell></row>
+
+    <row><cell>140</cell><cell>Hierarchy</cell><cell></cell><cell>0</cell><cell>280</cell><cell>290</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>141</cell><cell>Custom Icons </cell><cell>40subgrid1.html</cell><cell>1</cell><cell>281</cell><cell>282</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>142</cell><cell>Expand all Rows on load </cell><cell>40subgrid2.html</cell><cell>1</cell><cell>283</cell><cell>284</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>143</cell><cell>Load subgrid data only once</cell><cell>40subgrid3.html</cell><cell>1</cell><cell>285</cell><cell>286</cell><cell>true</cell><cell>true</cell></row>
+
+    <row><cell>150</cell><cell>Frozen Cols.Group Header(new)</cell><cell></cell><cell>0</cell><cell>290</cell><cell>300</cell><cell>false</cell><cell>false</cell></row>
+    <row><cell>151</cell><cell>Group Header - no colspan style </cell><cell>43groupnc.html</cell><cell>1</cell><cell>291</cell><cell>292</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>152</cell><cell>Group Header - with colspan style </cell><cell>43groupwc.html</cell><cell>1</cell><cell>293</cell><cell>294</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>153</cell><cell>Frozen column</cell><cell>43frozen1.html</cell><cell>1</cell><cell>295</cell><cell>296</cell><cell>true</cell><cell>true</cell></row>
+    <row><cell>156</cell><cell>Frozen column with group header</cell><cell>43frozen2.html</cell><cell>1</cell><cell>297</cell><cell>298</cell><cell>true</cell><cell>true</cell></row>	
+
+</rows>';
+
+		echo $arbol;
+	}
 }

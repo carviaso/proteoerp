@@ -827,9 +827,8 @@ class Tbpasa extends Controller {
 
 		$mSQL1 = "
 		SELECT b.indice, b.valor, if(c.nroasi is null, 'L', c.tipven ) estatus, b.id
-		FROM tbrutas a 
-		JOIN tbtipbus b ON a.tipuni=b.tipbus
-		LEFT JOIN tbpuestos c ON a.codrut=c.codrut 
+		FROM tbrutas a JOIN tbtipbus b ON a.tipuni=b.tipbus 
+			LEFT JOIN tbpuestos c ON a.codrut=c.codrut 
 			AND b.valor=c.nroasi 
 			AND c.fecpas=${ano}${mes}${dia} 
 			AND c.inicio<${inicio} AND c.fin>${fin} 
@@ -839,12 +838,8 @@ class Tbpasa extends Controller {
 		$bl = "\t\t<td>&nbsp;<td>\n";
 		
 		$rs  = "<table>";
-
-		$rs .= "<tr><td colspan='3' align='center'>Ruta: ".$codrut." Fecha: ".$dia."/".$mes."/".$ano."</td></tr>";
-
+		//$rs .= "<tr><td colspan='3' align='center'>Ruta: ".$codrut." Fecha: ".$dia."/".$mes."/".$ano."</td></tr>";
 		$rs .= "<tr><td>PLANTA BAJA</td><td>&nbsp;&nbsp;</td><td>PLANTA ALTA</td></tr>";
-
-
 		$rs .= "<tr><td><table>\n\t<tr>\n";
 
 		$mSQL = $mSQL1." b.indice < 12 ORDER BY b.indice ";
@@ -878,10 +873,14 @@ class Tbpasa extends Controller {
 
 		$rs .= "</table>\n</td></tr></table>";
 
+
+
 		echo $rs;
 		
 	}
 
+	//******************************************************************
+	//
 	//
 	function busfila($mSQL, $i) {
 		$libre   = "#9BFF05";

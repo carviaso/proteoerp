@@ -64,22 +64,22 @@ class Banc extends Controller {
 
 	}
 
-
-	//***************************
+	//******************************************************************
 	//Funciones de los Botones
-	//***************************
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
-
+		$ngrid      = "#newapi".$grid0;
+		
 		$mSQL = "SELECT ano, ano nombre FROM bsal WHERE ano <= YEAR(curdate()) GROUP BY ano ORDER BY ano DESC";
 		$mano = $this->datasis->llenaopciones($mSQL, false, 'mmano');
 		$mano = str_replace('"',"'",$mano);
 
 		$bodyscript .= '
 		function crecalban() {
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
 				$.prompt( "<h1>Recalcular Saldo de Banco:</h1><br/><center>Periodo: '.$mano.' Saldo Inicial: <input class=\'inputnum\' type=\'text\' id=\'msaldo\' name=\'msaldo\' value=\'0.00\' maxlengh=\'10\' size=\'10\' ></center><br/>",
 				{
 					buttons: { Aplicar: true, Cancelar: false },
@@ -130,9 +130,9 @@ class Banc extends Controller {
 
 		$bodyscript .= '
 		function bancedit() {
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret    = $("'.$ngrid.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url('finanzas/banc/dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
@@ -148,7 +148,7 @@ class Banc extends Controller {
 			var mId = 0;
 			var montotal = 0;
 			var ffecha = $("#ffecha");
-			var grid = jQuery("#newapi'.$grid0.'");
+			var grid = jQuery("'.$ngrid.'");
 			var s;
 			var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
@@ -160,7 +160,6 @@ class Banc extends Controller {
 			autoOpen: false, height: 450, width: 750, modal: true,
 			buttons: {
 			"Guardar": function() {
-				var bValid = true;
 				var murl = $("#df1").attr("action");
 				allFields.removeClass( "ui-state-error" );
 				$.ajax({
@@ -168,17 +167,27 @@ class Banc extends Controller {
 					url: murl,
 					data: $("#df1").serialize(),
 					success: function(r,s,x){
-						if ( r.length == 0 ) {
-							apprise("Registro Guardado");
-							$( "#fedita" ).dialog( "close" );
-							grid.trigger("reloadGrid");
-							'.$this->datasis->jwinopen(site_url('formatos/ver/BANC').'/\'+res.id+\'/id\'').';
-							return true;
-						} else {
+						try{
+							var json = JSON.parse(r);
+							if (json.status == "A"){
+								$("#fedita").dialog( "close" );
+								grid.trigger("reloadGrid");
+								$.prompt("<h1>Registro Guardado</h1>",{
+									submit: function(e,v,m,f){  
+										setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+									}}
+								);
+								idactual = json.pk.id;
+								return true;
+							} else {
+								$.prompt("Error: "+json.mensaje);
+							}
+						} catch(e){
 							$("#fedita").html(r);
 						}
 					}
-			})},
+				})
+			},
 			"Cancelar": function() { $( this ).dialog( "close" ); }
 			},
 			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
@@ -191,10 +200,9 @@ class Banc extends Controller {
 	}
 
 
-
-	//***************************
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "true";
@@ -715,7 +723,7 @@ class Banc extends Controller {
 			'where'=>"codigo LIKE \"$qformato\"",
 			);
 
-		$bcpla =$this->datasis->modbus($mCPLA);
+		$bcpla = $this->datasis->modbus($mCPLA);
 
 		$modbus=array(
 			'tabla'   =>'sprv',
@@ -766,7 +774,8 @@ class Banc extends Controller {
 		});';
 
 		$edit = new DataEdit('Bancos y cajas', 'banc');
-		$edit->back_url = site_url('finanzas/banc/filteredgrid');
+		$edit->on_save_redirect=false;
+
 		$edit->script($script, 'create');
 		$edit->script($script, 'modify');
 
@@ -791,15 +800,6 @@ class Banc extends Controller {
 		$edit->tbanco->option('','Seleccione');
 		$edit->tbanco->options("SELECT cod_banc, concat(cod_banc, ' ',nomb_banc) descrip FROM tban ORDER BY nomb_banc");
 		$edit->tbanco->style = "width:200px";
-
-/*
-		$edit->tbanco->size =12;
-		$edit->tbanco->maxlength =3;
-		$edit->tbanco->rule='trim|required';
-		$edit->tbanco->readonly=true;
-		$edit->tbanco->append($bTBAN);
-		$edit->tbanco->style ='width:80px;';
-*/
 
 		$edit->banco = new inputField('Nombre', 'banco');
 		$edit->banco->size =22;
@@ -904,8 +904,20 @@ class Banc extends Controller {
 		//$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 		$edit->build();
 
-		$conten["form"]  =&  $edit;
-		$data['content'] = $this->load->view('view_banc', $conten, false );
+		if($edit->on_success()){
+			$rt=array(
+				'status' => 'A',
+				'mensaje'=> 'Registro guardado',
+				'pk'     => $edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form']  =&  $edit;
+			$data['content']  =  $this->load->view('view_banc', $conten, false);
+		}
+
+		//$conten["form"]  =&  $edit;
+		//$data['content'] = $this->load->view('view_banc', $conten, false );
 
 	}
 

@@ -168,6 +168,11 @@ class Jqdatagrid
 
 	private $afterPager  = '';
 
+	private $loadComplete  = '';
+	
+	private $gridComplete  = '';
+
+
 /*
 	private $beforeShow = '';
 	private $afterShow = '';
@@ -367,11 +372,27 @@ class Jqdatagrid
 		$this->afterSubmit = $element;
 	}
 
+	//******************************************************************
+	// 
 	public function setBarOptions($element)
 	{
 		$this->BarOptions = $element;
 	}
 
+
+	//******************************************************************
+	// 
+	public function setLoadComplete($element)
+	{
+		$this->loadComplete = $element;
+	}
+
+	//******************************************************************
+	// 
+	public function setGridComplete($element)
+	{
+		$this->gridComplete = $element;
+	}
 
 	/**
 	* After Pager
@@ -659,13 +680,13 @@ class Jqdatagrid
 		* check if we must export result
 		*/
 		$this->export();
-		$margen = "\t\t\t";
+		$margen = "\t\t";
 
 		$html      = '';
 		$loadbutton = false;
 
 		if(false == empty($this->url_get)){
-			$html .= "\t\t".",url:'{$this->url_get}/'\r\n";
+			$html .= ",url:'{$this->url_get}/'\r\n";
 			$post = (false == empty($this->url_put)) ? $this->url_put : $this->url_get;
 			$html .=  $margen.",editurl:'{$post}/'\r\n";
 		}
@@ -673,6 +694,7 @@ class Jqdatagrid
 		$html     .=  $margen.",datatype:'{$this->datatype}'\r\n";
 		$html     .=  $margen.",rowNum:'{$this->rowNum}'\r\n";
 		$html     .=  $margen.",shrinkToFit: $this->shrinkToFit \r\n";
+		$html     .=  $margen.",scrollrows: true \r\n";
 
 		if ( $this->grouping == 'true' ) {
 			$html  .=  $margen.",grouping: true \r\n";
@@ -710,21 +732,19 @@ class Jqdatagrid
 			$html .= $margen.",rowList: []\r\n";
 			$html .= $margen.",pgtext: null\r\n";
 		} else 
-			$html .= $margen.",rowList: $this->rowList\r\n";
+			$html .= $margen.",rowList: ".$this->rowList."\r\n";
 
 		if ($this->onSelectRow)
-			$html .= $margen.",onSelectRow: $this->onSelectRow\r\n";
+			$html .= $margen.",onSelectRow: ".$this->onSelectRow."\r\n";
 
 		if ($this->afterInsertRow)
-			$html .= $margen.", afterInsertRow: $this->afterInsertRow\r\n";
+			$html .= $margen.", afterInsertRow: ".$this->afterInsertRow."\r\n";
 
-/*
-		if ($this->beforeShow) 
-			$html .= $margen.",beforeShowForm: $this->beforeShow \r\n";
+		if ($this->loadComplete) 
+			$html .= $margen.",loadComplete: ".$this->loadComplete."\r\n";
 
-		if ($this->afterShow) 
-			$html .= $margen.",afterShowForm: $this->afterShow \r\n";
-*/
+		if ($this->gridComplete) 
+			$html .= $margen.",gridComplete: ".$this->gridComplete."\r\n";
 
 		if($this->multiSelect == true ){
 			$html .= $margen.",gridComplete: function() { $(this).jqGrid('hideCol', 'cb');}";
@@ -820,7 +840,7 @@ class Jqdatagrid
 		}
 
 
-        $html .= $fieldname . $margen."]\r";
+        $html .= $fieldname.$margen."]\r";
         $this->return['table']       = $html;
         $this->return['gridname']    = $this->_gridname;
         $this->return['export']      = $this->_export;
@@ -853,7 +873,7 @@ class Jqdatagrid
 		del:    {$this->_buttons['delete']},
 		search: {$this->_buttons['search']},\n";
 
-			$bar  .= $this->BarOptions;
+			$bar  .= $margen.$this->BarOptions;
 
 			$bar  .= "	
 	}, \n";
