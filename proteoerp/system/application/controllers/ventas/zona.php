@@ -13,6 +13,7 @@ class Zona extends Controller {
 	}
 
 	function index(){
+		$this->instala();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -268,8 +269,7 @@ jQuery("#a1").click( function(){
 		}
 
 		if (!in_array('margen',$campos)){
-			$query="ALTER TABLE `zona` ADD COLUMN `margen` DECIMAL(5,2) UNSIGNED NOT NULL DEFAULT '0.00'";
-			$this->db->simple_query();
+			$this->db->simple_query("ALTER TABLE `zona` ADD COLUMN `margen` DECIMAL(5,2) UNSIGNED NOT NULL DEFAULT '0.00'");
 		}
 	}
 }
