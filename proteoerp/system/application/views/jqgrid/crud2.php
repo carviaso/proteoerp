@@ -80,7 +80,7 @@ if ( count($grids) > 0 ){
 		,jsonReader : {root:"data", repeatitems: false}';
 			
 		if ($gridi['onClick']) $depgrids .= "\n\t\t".$gridi['onClick'];
-		if ($gridi['onClick']) $depgrids .= "\n\t\t".$gridi['ondblClickRow'];
+		if ($gridi['ondblClickRow']) $depgrids .= "\n\t\t".$gridi['ondblClickRow'];
 
 		$depgrids .= '
 		'.$gridi['table'].'

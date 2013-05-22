@@ -146,17 +146,6 @@ jQuery(document).ready(function(){
 						dataType: "html",
 						complete : function (req, err) {
 							$(st,"#tabs").append(req.responseText);
-							//try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPageview(); } catch(err) {};
-							//var clck = '<p style="border: 1px solid; background-color: lemonchiffon; width:654px;height:25px;margin-bottom: 8px;padding-top: 8px;text-align: center">';
-							//clck += '<b>Please, support the jqGrid project by clicking on our sponsors ad! </b></p>';
-
-							//var fs = '<iframe src="adds.html" style="width:336px; height:290px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>\
-							//		&nbsp;&nbsp;&nbsp;&nbsp;<iframe src="adds3.html" style="width:336px; height:290px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>\
-							//		<br/><iframe src="adds2.html" style="width:728px; height:95px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/><br>\
-							//		&nbsp;&nbsp;&nbsp;&nbsp;<iframe src="adds4.html" style="width:728px; height:95px;"scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>\
-							//';
-							//$(st,"#tabs").append(clck);
-							//$(st,"#tabs").append(fs);
 						}
 					});
 				}

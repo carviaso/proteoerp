@@ -1037,14 +1037,20 @@ class Reparto extends Controller {
 		$grid->setOndblClickRow('
 			,ondblClickRow: function(id){
 				var mid = jQuery(gridId1).jqGrid(\'getGridParam\',\'selrow\');
-				if(mid){
-					if (id){
-						$.prompt(\'Eliminar Factura del reparto?\', {
-						buttons: { \'Quitar\': true, \'Cancelar\': false },
-						submit: function(e,v,m,f){
-							$.post("'.site_url($this->url.'quita').'/"+id);
-							$(gridId2).trigger("reloadGrid");
-						}})
+				if(mid){           // ID del Reparto
+					var id = jQuery(gridId2).jqGrid(\'getGridParam\',\'selrow\');
+					if (id){       // ID de la factura
+						var ret = $(gridId2).getRowData(id);
+						if ( ret.tipo == "E"){
+							$.prompt(\'Eliminar Factura del reparto?\', {
+							buttons: { \'Quitar\': true, \'Cancelar\': false },
+							submit: function(e,v,m,f){
+								$.post("'.site_url($this->url.'quita').'/"+id);
+								$(gridId2).trigger("reloadGrid");
+							}})
+						} else {
+							$.prompt(\'<h2>Solo se pueden Eliminar repartos entregados</h2h2>\');
+						}
 					}
 				} else {
 					$.prompt("Seleccione un Reparto");
