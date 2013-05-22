@@ -1,34 +1,31 @@
 <?php require_once(BASEPATH.'application/controllers/validaciones.php');
+
 class Dpto extends Controller {
-	var $mModulo='DPTO';
-	var $titp='Departamentos de Inventario';
-	var $tits='Departamentos de Inventario';
-	var $url ='inventario/dpto/';
+	var $mModulo = 'DPTO';
+	var $titp    = 'Departamentos';
+	var $tits    = 'Departamentos';
+	var $url     = 'inventario/dpto/';
 
 	function Dpto(){
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		//$this->datasis->modulo_nombre( $modulo, $ventana=0 );
+		$this->datasis->modulo_nombre( 'DPTO', $ventana=0 );
 	}
 
 	function index(){
-		$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('99','G','INVERSION EN ACTIVOS')ON DUPLICATE KEY UPDATE depto='99', tipo='G',descrip='INVERSION EN ACTIVOS'");
-		$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('98','G','GASTOS FINANCIEROS')ON DUPLICATE KEY UPDATE depto='98', tipo='G',descrip='GASTOS FINANCIEROS'");
-		$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('97','G','GASTOS DE ADMINISTRACION')ON DUPLICATE KEY UPDATE depto='97', tipo='G',descrip='GASTOS DE ADMINISTRACION'");
-		$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('96','G','GASTOS DE VENTA')ON DUPLICATE KEY UPDATE depto='96', tipo='G',descrip='GASTOS DE VENTA'");
-		$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('95','G','GASTOS DE COMPRA')ON DUPLICATE KEY UPDATE depto='95', tipo='G',descrip='GASTOS DE COMPRA'");
-		if ( !$this->datasis->iscampo('dpto','id') ) {
+		/*if ( !$this->datasis->iscampo('dpto','id') ) {
 			$this->db->simple_query('ALTER TABLE dpto DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE dpto ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE dpto ADD UNIQUE INDEX depto (depto)');
-		}
-		$this->datasis->modintramenu( 800, 500, substr($this->url,0,-1) );
+			$this->db->simple_query('ALTER TABLE dpto ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE dpto ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};*/
+		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
+		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
 	//***************************
-	//Layout en la Ventana 
+	//Layout en la Ventana
 	//
 	//***************************
 	function jqdatag(){
@@ -36,40 +33,191 @@ class Dpto extends Controller {
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
 
-		$bodyscript = '';
-
-		#Set url
-		$grid->setUrlput(site_url($this->url.'setdata/'));
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Estado de Cuenta"));
+		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
 		$WestPanel = $grid->deploywestp();
 
-		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor("TITULO1"));
+		$adic = array(
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$funciones = '
-		function ftipo(el, val, opts){
-			if ( el == "I" ){
-				meco=\'Inventario\';
-			} else {
-				meco=\'Gasto\';
-			}
-			return meco;
-		}
-		';
-
-		$param['WestPanel']    = $WestPanel;
-		$param['funciones']    = $funciones;
-
-		$param['SouthPanel']   = $SouthPanel;
-		$param['listados']     = $this->datasis->listados('DPTO', 'JQ');
-		$param['otros']        = $this->datasis->otros('DPTO', 'JQ');
-		$param['temas']        = array('proteo','darkness','anexos1');
-		$param['bodyscript']   = $bodyscript;
-		$param['tabs']         = false;
-		$param['encabeza']     = $this->titp;
-		
+		$param['WestPanel']   = $WestPanel;
+		//$param['EastPanel'] = $EastPanel;
+		$param['SouthPanel']  = $SouthPanel;
+		$param['listados']    = $this->datasis->listados('DPTO', 'JQ');
+		$param['otros']       = $this->datasis->otros('DPTO', 'JQ');
+		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['bodyscript']  = $bodyscript;
+		$param['tabs']        = false;
+		$param['encabeza']    = $this->titp;
+		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
 		$this->load->view('jqgrid/crud2',$param);
+	}
+
+	//***************************
+	//Funciones de los Botones
+	//***************************
+	function bodyscript( $grid0 ){
+		$bodyscript = '<script type="text/javascript">';
+
+		$bodyscript .= '
+		function dptoadd(){
+			$.post("'.site_url($this->url.'dataedit/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		};';
+
+		$bodyscript .= '
+		function dptoedit(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function dptoshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function dptodel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+		//Wraper de javascript
+		$bodyscript .= '
+		$(function(){
+			$("#dialog:ui-dialog").dialog( "destroy" );
+			var mId = 0;
+			var montotal = 0;
+			var ffecha = $("#ffecha");
+			var grid = jQuery("#newapi'.$grid0.'");
+			var s;
+			var allFields = $( [] ).add( ffecha );
+			var tips = $( ".validateTips" );
+			s = grid.getGridParam(\'selarrrow\');
+			';
+
+		$bodyscript .= '
+		$("#fedita").dialog({
+			autoOpen: false, height: 350, width: 450, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 350, width: 450, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
+		return $bodyscript;
 	}
 
 	//***************************
@@ -77,37 +225,37 @@ class Dpto extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "true";
-		$link   = site_url('ajax/buscacpla');
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('depto');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
-			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 40,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:3, maxlength: 2 }',
+			'editoptions'   => '{ size:3, maxlength: 3 }',
 		));
+
 
 		$grid->addField('tipo');
 		$grid->label('Tipo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 60,
-			'edittype'      => "'select'",
+			'width'         => 40,
+			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{value: {"I":"Inventario","G":"Gasto" }, style:"width:100px" }',
-			'formatter'     => 'ftipo'
+			//'editoptions'   => '{ size:1, maxlength: 1 }',
+			'editoptions'   => '{value: {"I":"Inventario","G":"Gasto"}, style:"width:100px" }',
 		));
 
+
 		$grid->addField('descrip');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -117,6 +265,7 @@ class Dpto extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 30 }',
 		));
 
+
 		$grid->addField('cu_venta');
 		$grid->label('Cta. Venta');
 		$grid->params(array(
@@ -124,9 +273,10 @@ class Dpto extends Controller {
 			'editable'      => $editar,
 			'width'         => 150,
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:false}',
-			'editoptions'   => '{'.$grid->autocomplete($link, 'cu_venta','ctaventa','<div id=\"ctaventa\"><b>"+ui.item.descrip+"</b></div>').'}',
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
 		));
+
 
 		$grid->addField('cu_inve');
 		$grid->label('Cta. Inventario');
@@ -135,9 +285,10 @@ class Dpto extends Controller {
 			'editable'      => $editar,
 			'width'         => 150,
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:false}',
-			'editoptions'   => '{'.$grid->autocomplete($link, 'cu_inve','ctainve','<div id=\"ctainve\"><b>"+ui.item.descrip+"</b></div>').'}',
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
 		));
+
 
 		$grid->addField('cu_cost');
 		$grid->label('Cta. de Costo');
@@ -146,20 +297,22 @@ class Dpto extends Controller {
 			'editable'      => $editar,
 			'width'         => 150,
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:false}',
-			'editoptions'   => '{'.$grid->autocomplete($link, 'cu_cost','ctacost','<div id=\"ctacost\"><b>"+ui.item.descrip+"</b></div>').'}',
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
 		));
 
+
 		$grid->addField('cu_devo');
-		$grid->label('Cta. Devolucion');
+		$grid->label('Cta. Devoluci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 150,
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:false}',
-			'editoptions'   => '{'.$grid->autocomplete($link, 'cu_devo','ctadevo','<div id=\"ctadevo\"><b>"+ui.item.descrip+"</b></div>').'}',
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
 		));
+
 
 		$grid->addField('id');
 		$grid->label('Id');
@@ -171,6 +324,7 @@ class Dpto extends Controller {
 			'search'        => 'false'
 		));
 
+
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('290');
@@ -178,17 +332,19 @@ class Dpto extends Controller {
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
 
-		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 450, height:350, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
-		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 450, height:350, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
-		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
+		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
-		#show/hide navigations buttons
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(true);
+		$grid->setOndblClickRow('');		#show/hide navigations buttons
+		$grid->setAdd(    $this->datasis->sidapuede('DPTO','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('DPTO','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('DPTO','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('DPTO','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions('addfunc: dptoadd, editfunc: dptoedit, delfunc: dptodel, viewfunc: dptoshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -206,13 +362,13 @@ class Dpto extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('dpto');
-		$response   = $grid->getData('dpto', array(array()), array(), false, $mWHERE, 'tipo desc, depto' );
+
+		$response   = $grid->getData('dpto', array(array()), array(), false, $mWHERE );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -220,13 +376,12 @@ class Dpto extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "depto";
+		$mcodp  = '??????';
 		$check  = 0;
 
 		unset($data['oper']);
@@ -237,262 +392,52 @@ class Dpto extends Controller {
 				if ( $check == 0 ){
 					$this->db->insert('dpto', $data);
 					echo "Registro Agregado";
-					logusu('DPTO',"Registro ".$data[$mcodp]." INCLUIDO");
+
+					logusu('DPTO',"Registro ????? INCLUIDO");
 				} else
-					echo "Ya existe un departamento con ese codigo";
+					echo "Ya existe un registro con ese $mcodp";
 			} else
 				echo "Fallo Agregado!!!";
 
 		} elseif($oper == 'edit') {
 			$nuevo  = $data[$mcodp];
 			$anterior = $this->datasis->dameval("SELECT $mcodp FROM dpto WHERE id=$id");
-			//if ( $nuevo <> $anterior ){
+			if ( $nuevo <> $anterior ){
 				//si no son iguales borra el que existe y cambia
-				//$this->db->query("DELETE FROM dpto WHERE $mcodp=?", array($mcodp));
-				//$this->db->query("UPDATE dpto SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				//$this->db->where("id", $id);
-				//$this->db->update("dpto", $data);
-				//logusu('DPTO',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-			//	echo "Grupo Cambiado/Fusionado en clientes";
-			//} else {
+				$this->db->query("DELETE FROM dpto WHERE $mcodp=?", array($mcodp));
+				$this->db->query("UPDATE dpto SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
+				$this->db->where("id", $id);
+				$this->db->update("dpto", $data);
+				logusu('DPTO',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
+				echo "Grupo Cambiado/Fusionado en clientes";
+			} else {
 				unset($data[$mcodp]);
 				$this->db->where("id", $id);
 				$this->db->update('dpto', $data);
 				logusu('DPTO',"Grupo de Cliente  ".$nuevo." MODIFICADO");
 				echo "$mcodp Modificado";
-			//}
-
-		} elseif($oper == 'del') {
-			$depto = $this->datasis->dameval("SELECT $mcodp FROM dpto WHERE id=$id");
-			//$depto = $campos['depto'];
-			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM line   WHERE depto='$depto'");
-			$check += $this->datasis->dameval("SELECT COUNT(*) FROM gitser WHERE departa='$depto'");
-
-			if ($check > 0){
-				echo "Departamento, con movimiento, no puede ser Borrado";
-			} else {
-				$this->db->simple_query("DELETE FROM dpto WHERE id=$id ");
-				logusu('DPTO',"DEPARTAMENTO $depto ELIMINADO");
-				echo "Departamento Eliminado";
 			}
 
+		} elseif($oper == 'del') {
+			$meco = $this->datasis->dameval("SELECT $mcodp FROM dpto WHERE id=$id");
+			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM dpto WHERE id='$id' ");
+			if ($check > 0){
+				echo " El registro no puede ser eliminado; tiene movimiento ";
+			} else {
+				$this->db->simple_query("DELETE FROM dpto WHERE id=$id ");
+				logusu('DPTO',"Registro ????? ELIMINADO");
+				echo "Registro Eliminado";
+			}
 		};
 	}
 
-/*
-class dpto extends validaciones{
-	 
-	function Dpto(){
-		parent::Controller(); 
-		$this->load->library("rapyd");
-		$this->datasis->modulo_id(309,1);
-	}
-
-	function index(){
-		$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('99','G','INVERSION EN ACTIVOS')ON DUPLICATE KEY UPDATE depto='99', tipo='G',descrip='INVERSION EN ACTIVOS'");
-		$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('98','G','GASTOS FINANCIEROS')ON DUPLICATE KEY UPDATE depto='98', tipo='G',descrip='GASTOS FINANCIEROS'");
-		$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('97','G','GASTOS DE ADMINISTRACION')ON DUPLICATE KEY UPDATE depto='97', tipo='G',descrip='GASTOS DE ADMINISTRACION'");
-		$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('96','G','GASTOS DE VENTA')ON DUPLICATE KEY UPDATE depto='96', tipo='G',descrip='GASTOS DE VENTA'");
-		$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('95','G','GASTOS DE COMPRA')ON DUPLICATE KEY UPDATE depto='95', tipo='G',descrip='GASTOS DE COMPRA'");
-		if ( !$this->datasis->iscampo('dpto','id') ) {
-			$this->db->simple_query('ALTER TABLE dpto DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE dpto ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE dpto ADD UNIQUE INDEX depto (depto)');
-		}
-		$this->datasis->modulo_id(309,1);
-		$this->dptoextjs();
-		//redirect("inventario/dpto/filteredgrid");
-	}
- 
-	function filteredgrid(){
-		$this->rapyd->load("datafilter","datagrid");
-		$this->rapyd->uri->keep_persistence();
-
-		// tool bar		
-		$mtool  = "<table background='#554455'><tr>";
-		$mtool .= "<td>&nbsp;</td>";
-		$mtool .= "<td>&nbsp;<a href='".base_url()."inventario/dpto/dataedit/create'>";
-		$mtool .= img(array('src' => 'images/agregar.jpg', 'alt' => 'Agregar Registro', 'title' => 'Agregar Registro','border'=>'0','height'=>'32'));
-		$mtool .= "</a>&nbsp;</td>";
-		$mtool .= "<td>&nbsp;<a href='javascript:void(0);' ";
-		$mtool .= 'onclick="window.open(\''.base_url()."inventario/line', '_blank', 'width=600, height=500, scrollbars=No, status=No, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');".'" heigth="500"'.'>';
-		$mtool .= img(array('src' => 'images/lineas.png', 'alt' => 'Gestion de Lineas', 'title' => 'Gestion de Lineas','border'=>'0','height'=>'34'));
-		$mtool .= "</a>&nbsp;</td>";
-		$mtool .= "<td>&nbsp;<a href='javascript:void(0);' ";
-		$mtool .= 'onclick="window.open(\''.base_url()."inventario/grup', '_blank', 'width=600, height=500, scrollbars=No, status=No, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');".'" heigth="500"'.'>';
-		$mtool .= img(array('src' => 'images/grupo.jpg', 'alt' => 'Gestion de Grupos', 'title' => 'Gestion de Grupos','border'=>'0','height'=>'32'));
-		$mtool .= "</a>&nbsp;</td>";
-		$mtool .= "</tr></table>";
-
-		$uri = anchor('inventario/dpto/dataedit/show/<raencode><#depto#></raencode>','<#depto#>');
-		$uri_2 = anchor('inventario/dpto/dataedit/create/<raencode><#depto#></raencode>','Duplicar');
-
-		$grid = new DataGrid("Lista de Departamentos");
-		$grid->db->select("tipo,depto,descrip,cu_venta,cu_inve,cu_devo,cu_cost");
-		$grid->db->from("dpto");
-		$grid->order_by("depto","asc");
-		$grid->per_page = 40;
-
-		$grid->column_sigma("C&oacute;digo"            ,'depto',    '', "align:'center', width:50, frozen: true, renderer: ver");
-		$grid->column_sigma("Tipo"                     ,'tipo',     '', "width:80, editor: { type: 'select', options: {'I':'Inventario', 'G':'Gastos'}}, renderer: coltipo");
-		$grid->column_sigma("Descripci&oacute;n"       ,"descrip",  '', "align:'left',   width:200, editor: { type: 'text' }");
-		$grid->column_sigma("Cuenta Venta"             ,"cu_venta", '', "align:'center', width:100");
-		$grid->column_sigma("Cuenta Inventario"        ,"cu_inve",  '', "align:'center', width:100");
-		$grid->column_sigma("Cuenta Costo"             ,"cu_cost",  '', "align:'center', width:100");
-		$grid->column_sigma("Cuenta Devoluci&oacute;n" ,"cu_devo",  '', "align:'center', width:100");
-
-		$sigmaA     = $grid->sigmaDsConfig("dpto","depto","inventario/dpto/");
-		$dsOption   = $sigmaA["dsOption"];
-		$grupver    = "
-function ver(value, record, columnObj, grid, colNo, rowNo){
-       var url = '';
-       url = '<a href=\"#\" onclick=\"window.open(\'".base_url()."inventario/dpto/dataedit/show/'+value+ '\', \'_blank\', \'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'\')\"; heigth=\"600\" >';
-       url = url +value+'</a>';
-       return url;	
-}
-
-function coltipo(value, record, columnObj, grid, colNo, rowNo) {
-	var options = {'I':'Inventario', 'G':'Gastos'};
-	var ret = options[value];
-	if(ret==null){ ret = value; }
-	return ret;
-}
-";
-	      $colsOption = $sigmaA["colsOption"];
-	      $gridOption = $sigmaA["gridOption"];
-	      $gridGuarda = $sigmaA["gridGuarda"];
-
-	      $gridGo = "
-var mygrid=new Sigma.Grid(gridOption);
-mygrid.width  = 550;
-mygrid.height = 400;
-Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
-";
-
-		$SigmaCont = "<center><div id=\"grid1_container\" style=\"width:550px;height:400px;\"></div></center>";
-		$grid->add("inventario/dpto/dataedit/create");
-		$grid->build('datagridSG');
-		//echo $grid->db->last_query();
-
-		$data['style']  = style("redmond/jquery-ui.css");
-		$data['style'] .= style('gt_grid.css');
-
-		$data["script"]  = script("jquery.js");
-		$data['script'] .= script("gt_msg_es.js");
-		$data['script'] .= script("gt_grid_all.js");
-
-		$data['script'] .= "<script type=\"text/javascript\" >\n";
-		$data['script'] .= $dsOption.$grupver."\n";
-		$data['script'] .= $colsOption."\n";
-		$data['script'] .= $gridOption;
-		$data['script'] .= $gridGuarda;
-		$data['script'] .= $gridGo;
-		$data['script'] .= "\n</script>";
-
-		$data['content'] = $mtool.$SigmaCont;  //$grid->output;
-	
-		//$data['content'] = $filter->output.$grid->output;
-		$data['title']   = "<h1>Departamentos</h1>";
-		$data["head"]    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);	
-	}
-
-
-	// sigma grid
-	function controlador() {
-		//header('Content-type:text/javascript;charset=UTF-8');
-		if (isset($_POST["_gt_json"]) ) {
-			$json=json_decode(stripslashes($_POST["_gt_json"]));
-			if($json->{'action'} == 'load') {
-				$pageNo   = $json->{'pageInfo'}->{'pageNum'};
-				$pageSize = $json->{'pageInfo'}->{'pageSize'};
-				$filter = '';
-
-				if(isset($json->{'sortInfo'}[0]->{'columnId'})){
-					$sortField = $json->{'sortInfo'}[0]->{'columnId'};
-				} else {
-					$sortField = "tipo DESC, depto";
-				}    
-	 
-				if(isset($json->{'sortInfo'}[0]->{'sortOrder'})){
-					$sortOrder = $json->{'sortInfo'}[0]->{'sortOrder'};
-				} else {
-					$sortOrder = "ASC";
-				}    
-	
-				for ($i = 0; $i < count($json->{'filterInfo'}); $i++) {
-					if($json->{'filterInfo'}[$i]->{'logic'} == "equal"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "='" . $json->{'filterInfo'}[$i]->{'value'} . "' ";
-					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "notEqual"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "!='" . $json->{'filterInfo'}[$i]->{'value'} . "' ";    
-					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "less"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "<" . $json->{'filterInfo'}[$i]->{'value'} . " ";
-					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "lessEqual"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "<=" . $json->{'filterInfo'}[$i]->{'value'} . " ";    
-					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "great"){
-							$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . ">" . $json->{'filterInfo'}[$i]->{'value'} . " ";
-					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "greatEqual"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . ">=" . $json->{'filterInfo'}[$i]->{'value'} . " ";        
-					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "like"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '%" . $json->{'filterInfo'}[$i]->{'value'} . "%' ";        
-					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "startWith"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '" . $json->{'filterInfo'}[$i]->{'value'} . "%' ";        
-					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "endWith"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '%" . $json->{'filterInfo'}[$i]->{'value'} . "' ";                
-					}
-					$filter .= " AND ";
-				}
-
-				//to get how many total records.
-				$mSQL = "SELECT count(*) FROM dpto WHERE $filter depto IS NOT NULL";
-				$totalRec = $this->datasis->dameval($mSQL);
-  
-				//make sure pageNo is inbound
-				if($pageNo<1||$pageNo>ceil(($totalRec/$pageSize))){
-					$pageNo = 1;
-				}
-
-				$mSQL = "SELECT depto, tipo, descrip,  cu_inve, cu_cost, cu_venta, cu_devo ";
-				$mSQL .= "FROM dpto WHERE $filter depto IS NOT NULL ORDER BY ".$sortField." ".$sortOrder." LIMIT ".($pageNo - 1)*$pageSize.", ".$pageSize;
-				$query = $this->db->query($mSQL);
-				if ($query->num_rows() > 0){
-					$retArray = array();
-					foreach( $query->result_array() as  $row ) {
-						$retArray[] = $row;
-					}
-					$data = json_encode($retArray);
-					$ret = "{data:" . $data .",\n";
-					$ret .= "pageInfo:{totalRowNum:" . $totalRec . "},\n";
-					$ret .= "recordType : 'object'}";
-				} else {
-					$ret = '{data : []}';
-				}
-				echo $ret;
-
-			}else if($json->{'action'} == 'save'){	}
-		} else {
-			// no hay _gt_json
-			echo '{data : []}';
-		}
-	}
-
-       function modifica(){
-	      $valor = $this->uri->segment($this->uri->total_segments());
-	      $campo = $this->uri->segment($this->uri->total_segments()-1);
-	      $grupo = $this->uri->segment($this->uri->total_segments()-2);
-	      $mSQL = "UPDATE dpto SET ".$campo."='".addslashes($valor)."' WHERE depto='".$grupo."' ";
-	      $this->db->simple_query($mSQL);
-	      echo "$valor $campo $grupo";
-       }
-
-
 	function dataedit($status='',$id=''){
-		$this->rapyd->load("dataobject","dataedit");
+		$this->rapyd->load('dataobject','dataedit');
 
 		$qformato=$this->qformato=$this->datasis->formato_cpla();
 		$link=site_url('inventario/dpto/ultimo');
 		$link2=site_url('inventario/common/sugerir_dpto');
-		
+
 		$script='
 		function ultimo(){
 			$.ajax({
@@ -502,7 +447,7 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 				}
 			});
 		}
-		
+
 		function sugerir(){
 			$.ajax({
 					url: "'.$link2.'",
@@ -515,9 +460,9 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 						}
 					}
 				});
-		}		
+		}
 		';
-		
+
 		$modbus=array(
 			'tabla'   =>'cpla',
 			'columnas'=>array(
@@ -534,112 +479,133 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 		$bcu_inve  = $this->datasis->p_modbus($modbus,'cu_inve' );
 		$bcu_cost  = $this->datasis->p_modbus($modbus,'cu_cost' );
 		$bcu_devo  = $this->datasis->p_modbus($modbus,'cu_devo' );
-		
-		$do = new DataObject("dpto");
+
+		$do = new DataObject('dpto');
 		$do->set('tipo', 'I');
-		if($status=="create" && !empty($id)){
+		if($status=='create' && !empty($id)){
 			$do->load($id);
 			$do->set('depto', '');
 		}
-		
-		$edit = new DataEdit("Departamento", $do);
-		$edit->back_url = site_url("inventario/dpto/filteredgrid");
-		$edit->script($script, "create");
-		$edit->script($script, "modify");
-		
+
+		$edit = new DataEdit('', $do);
+		$edit->on_save_redirect=false;
+		$edit->script($script, 'create');
+		$edit->script($script, 'modify');
+
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('delete','_pre_del');
-		
-		$ultimo='<a href="javascript:ultimo();" title="Consultar ultimo c&oacute;digo ingresado"> Consultar ultimo c&oacute;digo</a>';
+		$edit->pre_process( 'delete','_pre_delete' );
+
+		$ultimo ='<a href="javascript:ultimo();" title="Consultar ultimo c&oacute;digo ingresado"> Consultar ultimo c&oacute;digo</a>';
 		$sugerir='<a href="javascript:sugerir();" title="Sugerir un C&oacute;digo aleatorio">Sugerir C&oacute;digo </a>';
-		$edit->depto = new inputField("C&oacute;digo Departamento", "depto");
-		$edit->depto->mode="autohide";
+		$edit->depto = new inputField('C&oacute;digo Departamento', 'depto');
+		$edit->depto->mode='autohide';
 		$edit->depto->size=5;
 		$edit->depto->maxlength=2;
-		$edit->depto->rule ="trim|strtoupper|required|callback_chexiste";
+		$edit->depto->rule ='trim|strtoupper|required|callback_chexiste';
 		$edit->depto->append($sugerir);
 		$edit->depto->append($ultimo);
 
-		$edit->descrip = new inputField("Descripci&oacute;n", "descrip");
+		$edit->descrip = new inputField('Descripci&oacute;n', 'descrip');
 		$edit->descrip->size =35;
 		$edit->descrip->maxlength=30;
-		$edit->descrip->rule ="trim|required|strtoupper";
-		
-		$edit->tipo = new dropdownField("Tipo","tipo");
+		$edit->descrip->rule ='trim|required|strtoupper';
+
+		$edit->tipo = new dropdownField('Tipo','tipo');
 		$edit->tipo->style='width:140px;';
-		$edit->tipo->option("I","Inventario" );
-		$edit->tipo->option("G","Gasto"  );
-		
-		$edit->cu_inve =new inputField("Cuenta Inventario", "cu_inve");
+		$edit->tipo->option('I','Inventario');
+		$edit->tipo->option('G','Gasto');
+
+		$edit->cu_inve =new inputField('Cuenta Inventario', 'cu_inve');
 		$edit->cu_inve->size = 18;
 		$edit->cu_inve->maxlength=15;
-		$edit->cu_inve->rule ="trim|callback_chcuentac";
+		$edit->cu_inve->rule ='trim|callback_chcuentac';
 		$edit->cu_inve->append($bcu_inve);
-		
-		$edit->cu_cost =new inputField("Cuenta Costo", "cu_cost");
+
+		$edit->cu_cost =new inputField('Cuenta Costo', 'cu_cost');
 		$edit->cu_cost->size = 18;
 		$edit->cu_cost->maxlength=15;
-		$edit->cu_cost->rule ="trim|callback_chcuentac";
+		$edit->cu_cost->rule ='trim|callback_chcuentac';
 		$edit->cu_cost->append($bcu_cost);
-		
-		$edit->cu_venta  =new inputField("Cuenta Venta", "cu_venta");
+
+		$edit->cu_venta  =new inputField('Cuenta Venta', 'cu_venta');
 		$edit->cu_venta->size =18;
 		$edit->cu_venta->maxlength=15;
-		$edit->cu_venta->rule ="trim|callback_chcuentac";
+		$edit->cu_venta->rule ='trim|callback_chcuentac';
 		$edit->cu_venta->append($bcu_venta);
-		
-		$edit->cu_devo = new inputField("Cuenta Devoluci&oacute;n","cu_devo");
+
+		$edit->cu_devo = new inputField('Cuenta Devoluci&oacute;n','cu_devo');
 		$edit->cu_devo->size = 18;
 		$edit->cu_devo->maxlength=15;
-		$edit->cu_devo->rule ="trim|callback_chcuentac";
+		$edit->cu_devo->rule ='trim|callback_chcuentac';
 		$edit->cu_devo->append($bcu_devo);
-    
-		$edit->buttons("modify","delete", "save", "undo", "back");
+
+		//$edit->buttons("modify","delete", "save", "undo", "back");
 		$edit->build();
- 
-		$data['content'] = $edit->output;           
-		$data['title']   = "<h1>Departamentos</h1>";        
-		$data["head"]    = script("jquery.pack.js").$this->rapyd->get_head();//script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").
-		$this->load->view('view_ventanas', $data);  
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
 	}
-	
+
 	function _post_insert($do){
 		$codigo=$do->get('depto');
 		$nombre=$do->get('descrip');
-		logusu('dpto',"DEPARTAMENTO $codigo NOMBRE  $nombre CREADO");
+		logusu('dpto',"DEPARTAMENTO ${codigo} NOMBRE  ${nombre} CREADO");
 	}
+
 	function _post_update($do){
 		$codigo=$do->get('depto');
 		$nombre=$do->get('descrip');
-		logusu('dpto',"DEPARTAMENTO $codigo NOMBRE  $nombre  MODIFICADO");
+		logusu('dpto',"DEPARTAMENTO ${codigo} NOMBRE  ${nombre}  MODIFICADO");
 	}
+
 	function _post_delete($do){
 		$codigo=$do->get('depto');
 		$nombre=$do->get('descrip');
-		logusu('dpto',"DEPARTAMENTO $codigo NOMBRE  $nombre  ELIMINADO ");
+		logusu('dpto',"DEPARTAMENTO ${codigo} NOMBRE  ${nombre}  ELIMINADO ");
 	}
-	function chexiste($codigo){
-		$codigo=$this->input->post('depto');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM dpto WHERE depto='$codigo'");
-		if ($check > 0){
-			$depto=$this->datasis->dameval("SELECT descrip FROM dpto WHERE depto='$codigo'");
-			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para el departamento $depto");
-			return FALSE;
-		}else {
-  		return TRUE;
-		}	
-	}
-	
-	function _pre_del($do) {
-		$codigo=$do->get('depto');
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM line WHERE depto='$codigo'");
+
+	function _pre_delete($do) {
+		$codigo  = $do->get('depto');
+		$dbcodigo= $this->db->escape($codigo);
+		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM line WHERE depto=${dbcodigo}");
 		if ($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='El departamento contiene lineas, por ello no puede ser eliminado. Elimine primero todas las l&iacute;neas que pertenezcan a este departamento';
-			return False;
+			return false;
 		}
-		return True;
+		return true;
+	}
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function chexiste($codigo){
+		$codigo  = $this->input->post('depto');
+		$dbcodigo= $this->db->escape($codigo);
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM dpto WHERE depto=${dbcodigo}");
+		if ($check > 0){
+			$depto=$this->datasis->dameval("SELECT descrip FROM dpto WHERE depto=${dbcodigo}");
+			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para el departamento ${depto}");
+			return false;
+		}else {
+  		return true;
+		}
 	}
 
 	function ultimo(){
@@ -647,350 +613,36 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 		echo $ultimo;
 	}
 
-	function grid(){
-		$start   = isset($_REQUEST['start'])  ? $_REQUEST['start']   :  0;
-		$limit   = isset($_REQUEST['limit'])  ? $_REQUEST['limit']   : 50;
-		$sort    = isset($_REQUEST['sort'])   ? $_REQUEST['sort']    : '[{"property":"depto","direction":"ASC"}]';
-		$filters = isset($_REQUEST['filter']) ? $_REQUEST['filter']  : null;
+	function instalar(){
+		//if (!$this->db->table_exists('dpto')) {
+		//	$mSQL="CREATE TABLE `dpto` (
+		//	  `tipo` char(1) NOT NULL DEFAULT 'I',
+		//	  `depto` char(3) NOT NULL DEFAULT '',
+		//	  `descrip` varchar(30) DEFAULT NULL,
+		//	  `cu_venta` varchar(15) DEFAULT NULL,
+		//	  `cu_inve` varchar(15) DEFAULT NULL,
+		//	  `cu_cost` varchar(15) DEFAULT NULL,
+		//	  `cu_devo` varchar(15) DEFAULT NULL,
+		//	  `id` int(11) NOT NULL AUTO_INCREMENT,
+		//	  PRIMARY KEY (`id`),
+		//	  UNIQUE KEY `depto` (`depto`),
+		//	  KEY `depto_2` (`depto`)
+		//	) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=latin1 COMMENT='Departamentos de Inv'";
+		//	$this->db->simple_query($mSQL);
+		//}
 
-		$where = $this->datasis->extjsfiltro($filters);
-		
-		$this->db->_protect_identifiers=false;
-		$this->db->select('*');
-		$this->db->from('dpto');
-		if (strlen($where)>1) $this->db->where($where, NULL, FALSE); 
-		
-		$sort = json_decode($sort, true);
-		if ( count($sort) == 0 ) $this->db->order_by( 'depto', 'asc' );
-		
-		for ( $i=0; $i<count($sort); $i++ ) {
-			$this->db->order_by($sort[$i]['property'],$sort[$i]['direction']);
+		$campos=$this->db->list_fields('dpto');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE dpto DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE dpto ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE dpto ADD UNIQUE INDEX depto (depto)');
 		}
 
-		$this->db->limit($limit, $start);
+		//$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('99','G','INVERSION EN ACTIVOS')ON DUPLICATE KEY UPDATE depto='99', tipo='G',descrip='INVERSION EN ACTIVOS'");
+		//$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('98','G','GASTOS FINANCIEROS')ON DUPLICATE KEY UPDATE depto='98', tipo='G',descrip='GASTOS FINANCIEROS'");
+		//$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('97','G','GASTOS DE ADMINISTRACION')ON DUPLICATE KEY UPDATE depto='97', tipo='G',descrip='GASTOS DE ADMINISTRACION'");
+		//$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('96','G','GASTOS DE VENTA')ON DUPLICATE KEY UPDATE depto='96', tipo='G',descrip='GASTOS DE VENTA'");
+		//$this->db->simple_query("INSERT IGNORE INTO dpto (depto,tipo,descrip) VALUES ('95','G','GASTOS DE COMPRA')ON DUPLICATE KEY UPDATE depto='95', tipo='G',descrip='GASTOS DE COMPRA'");
 
-		$query = $this->db->get();
-		$results = $this->db->count_all('dpto');
-
-		$arr = $this->datasis->codificautf8($query->result_array());
-		echo '{success:true, message:"Loaded data", results:'. $results.', data:'.json_encode($arr).'}';
-	}
-
-
-	function crear(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos   = $data['data'];
-		$depto = $campos['depto'];
-
-		if ( !empty($depto) ) {
-			unset($campos['id']);
-			// Revisa si existe ya ese contrato
-			if ($this->datasis->dameval("SELECT COUNT(*) FROM dpto WHERE depto='$depto'") == 0)
-			{
-				$mSQL = $this->db->insert_string("dpto", $campos );
-				$this->db->simple_query($mSQL);
-				logusu('dpto',"DEPARTAMENTO $depto CREADO");
-				echo "{ success: true, message: 'Departamento Agregado'}";
-			} else {
-				echo "{ success: false, message: 'Ya existe un Departamento con ese Codigo!!'}";
-			}
-			
-		} else {
-			echo "{ success: false, message: 'Ya existe un Departamento con ese Codigo!!'}";
-		}
-	}
-
-	function modificar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-
-		$depto = $campos['depto'];
-		unset($campos['depto']);
-		unset($campos['id']);
-
-		$mSQL = $this->db->update_string("dpto", $campos,"id='".$data['data']['id']."'" );
-		$this->db->simple_query($mSQL);
-		logusu('dpto',"DEPARTAMENTOS DE INVENTARIO $depto ID ".$data['data']['id']." MODIFICADO");
-		echo "{ success: true, message: 'Grupo Modificado -> ".$data['data']['depto']."'}";
-	}
-
-	function eliminar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-
-		$depto = $campos['depto'];
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM line WHERE depto='$depto'");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM gitser WHERE departa='$depto'");
-
-		if ($check > 0){
-			echo "{ success: false, message: 'Departamento, con movimiento, no puede ser Borrado'}";
-		} else {
-			$this->db->simple_query("DELETE FROM dpto WHERE depto='$depto'");
-			logusu('dpto',"DEPARTAMENTO $depto ELIMINADO");
-			echo "{ success: true, message: 'Departamento Eliminado'}";
-		}
-	}
-
-
-//0414 376 0149 juan picapiedras
-
-//****************************************************************8
-//
-//
-//
-//****************************************************************8
-	function dptoextjs(){
-		$encabeza='DEPARTAMENTOS DE INVENTARIO';
-		$listados= $this->datasis->listados('dpto');
-		$otros=$this->datasis->otros('dpto', 'dpto');
-
-		$urlajax = 'inventario/dpto/';
-		$variables = "
-		var mcuentaV = ''
-		var mcuentaI = ''
-		var mcuentaC = ''
-		var mcuentaD = ''
-		";
-		$funciones = "
-function ftipo(val){
-	if ( val == 'I'){
-		return 'Inventario';
-	} else if ( val == 'G'){
-		return  'Gasto';
 	}
 }
-		";
-
-		$valida = "
-		{ type: 'length', field: 'depto',   min: 1 },
-		{ type: 'length', field: 'descrip', min: 1 }
-		";
-		
-		$columnas = "
-			{ header: 'Depto',       width: 50, sortable: true, dataIndex: 'depto',    field: { type: 'textfield' }, filter: { type: 'string' }},
-			{ header: 'Descripcion', width:200, sortable: true, dataIndex: 'descrip',  field: { type: 'textfield' }, filter: { type: 'string' }},
-			{ header: 'Tipo',        width: 90, sortable: true, dataIndex: 'tipo',     field: { type: 'textfield' }, filter: { type: 'string' }, renderer: ftipo },
-			{ header: 'Cta. Venta',  width:100, sortable: true, dataIndex: 'cu_venta', field: { type: 'textfield' }, filter: { type: 'string' }},
-			{ header: 'Cta. Inve.',  width:100, sortable: true, dataIndex: 'cu_inve',  field: { type: 'textfield' }, filter: { type: 'string' }},
-			{ header: 'Cta. Costo',  width:100, sortable: true, dataIndex: 'cu_cost',  field: { type: 'textfield' }, filter: { type: 'string' }},
-			{ header: 'Cta. Devo.',  width:100, sortable: true, dataIndex: 'cu_devo',  field: { type: 'textfield' }, filter: { type: 'string' }},
-	";
-
-		$campos = "'id','tipo','depto','descrip','cu_venta','cu_inve','cu_cost','cu_devo'";
-		
-		$camposforma = "
-							{
-							frame: false,
-							border: false,
-							labelAlign: 'right',
-							defaults: { xtype:'fieldset', labelWidth:70 },
-							style:'padding:4px',
-							items: [
-									{ fieldLabel: 'Depto',       name: 'depto',   width:120, labelWidth: 70, xtype: 'textfield', id: 'depto' },
-									{ fieldLabel: 'Descripcion', name: 'descrip', width:400, labelWidth: 70, xtype: 'textfield' },
-									{ fieldLabel: 'Tipo',        name: 'tipo',    width:200, xtype: 'combo', store: [['G','Gastos'],['I','Inventario']] },
-								]
-							},{
-								frame: false,
-								border: false,
-								labelAlign: 'right',
-								defaults: {xtype:'fieldset'  },
-								style:'padding:4px',
-								items: [
-									{
-										xtype: 'combo',
-										fieldLabel: 'Cuenta Ventas ',
-										labelWidth:100,
-										name: 'cu_venta',
-										id:   'cuenta1',
-										mode: 'remote',
-										hideTrigger: true,
-										typeAhead: true,
-										forceSelection: true,										valueField: 'item',
-										displayField: 'valor',
-										store: cplaStoreV,
-										width: 400
-									},
-									{
-										xtype: 'combo',
-										fieldLabel: 'Cuenta Inventario',
-										labelWidth:100,
-										name: 'cu_inve',
-										id:   'cuenta2',
-										mode: 'remote',
-										hideTrigger: true,
-										typeAhead: true,
-										forceSelection: true,										valueField: 'item',
-										displayField: 'valor',
-										store: cplaStoreI,
-										width: 400
-									},
-									{
-										xtype: 'combo',
-										fieldLabel: 'Cuenta de Costo',
-										labelWidth:100,
-										name: 'cu_cost',
-										id:   'cuenta3',
-										mode: 'remote',
-										hideTrigger: true,
-										typeAhead: true,
-										forceSelection: true,										valueField: 'item',
-										displayField: 'valor',
-										store: cplaStoreC,
-										width: 400
-									},
-									{
-										xtype: 'combo',
-										fieldLabel: 'Cta.de Devolucion',
-										labelWidth:100,
-										name: 'cu_devo',
-										id:   'cuenta4',
-										mode: 'remote',
-										hideTrigger: true,
-										typeAhead: true,
-										forceSelection: true,										valueField: 'item',
-										displayField: 'valor',
-										store: cplaStoreD,
-										width: 400
-									}
-								]
-							}
-		";
-
-		$titulow = 'Departamentos';
-
-		$dockedItems = "
-				{ iconCls: 'icon-reset', itemId: 'close', text: 'Cerrar',   scope: this, handler: this.onClose },
-				{ iconCls: 'icon-save',  itemId: 'save',  text: 'Guardar',  disabled: false, scope: this, handler: this.onSave }
-		";
-
-		$winwidget = "
-				closable: false,
-				closeAction: 'destroy',
-				width: 450,
-				height: 330,
-				resizable: false,
-				modal: true,
-				items: [writeForm],
-				listeners: {
-					beforeshow: function() {
-						var form = this.down('writerform').getForm();
-						this.activeRecord = registro;
-						
-						if (registro) {
-							mcuentaV  = registro.data.cu_venta;
-							cplaStoreV.proxy.extraParams.cu_venta   = mcuentaV ;
-							cplaStoreV.load({ params: { 'cuenta': registro.data.cu_venta, 'origen': 'beforeform' } });
-							
-							mcuentaI  = registro.data.cu_inve;
-							cplaStoreI.proxy.extraParams.cu_inve   = mcuentaI ;
-							cplaStoreI.load({ params: { 'cuenta': registro.data.cu_inve, 'origen': 'beforeform' } });
-							
-							mcuentaC  = registro.data.cu_cost;
-							cplaStoreC.proxy.extraParams.cu_cost   = mcuentaC ;
-							cplaStoreC.load({ params: { 'cuenta': registro.data.cu_cost, 'origen': 'beforeform' } });
-
-							mcuentaD  = registro.data.cu_devo;
-							cplaStoreD.proxy.extraParams.cu_devo   = mcuentaD ;
-							cplaStoreD.load({ params: { 'cuenta': registro.data.cu_devo, 'origen': 'beforeform' } });
-
-							form.loadRecord(registro);
-						} else {
-							mcuentaV  = '';
-							mcuentaI  = '';
-							mcuentaC  = '';
-							mcuentaD  = '';
-						}
-					}
-				}
-";
-
-		$stores = "
-var cplaStoreV = new Ext.data.Store({
-	fields: [ 'item', 'valor'],
-	autoLoad: false,autoSync: false,pageSize: 50,
-	pruneModifiedRecords: true,totalProperty: 'results',
-	proxy: {
-		type: 'ajax',
-		url : urlApp + 'contabilidad/cpla/cplabusca',
-		extraParams: {  'cuenta': mcuentaV, 'origen': 'store' },
-		reader: {type: 'json',	totalProperty: 'results',root: 'data'
-		}
-	},
-	method: 'POST'
-});
-
-var cplaStoreI = new Ext.data.Store({
-	fields: [ 'item', 'valor'],
-	autoLoad: false,autoSync: false,pageSize: 50,
-	pruneModifiedRecords: true,totalProperty: 'results',
-	proxy: {
-		type: 'ajax',
-		url : urlApp + 'contabilidad/cpla/cplabusca',
-		extraParams: {  'cuenta': mcuentaI, 'origen': 'store' },
-		reader: {type: 'json',	totalProperty: 'results',root: 'data'
-		}
-	},
-	method: 'POST'
-});
-
-var cplaStoreC = new Ext.data.Store({
-	fields: [ 'item', 'valor'],
-	autoLoad: false,autoSync: false,pageSize: 50,
-	pruneModifiedRecords: true,totalProperty: 'results',
-	proxy: {
-		type: 'ajax',
-		url : urlApp + 'contabilidad/cpla/cplabusca',
-		extraParams: {  'cuenta': mcuentaC, 'origen': 'store' },
-		reader: {type: 'json',	totalProperty: 'results',root: 'data'
-		}
-	},
-	method: 'POST'
-});
-
-var cplaStoreD = new Ext.data.Store({
-	fields: [ 'item', 'valor'],
-	autoLoad: false,autoSync: false,pageSize: 50,
-	pruneModifiedRecords: true,totalProperty: 'results',
-	proxy: {
-		type: 'ajax',
-		url : urlApp + 'contabilidad/cpla/cplabusca',
-		extraParams: {  'cuenta': mcuentaD, 'origen': 'store' },
-		reader: {type: 'json',	totalProperty: 'results',root: 'data'
-		}
-	},
-	method: 'POST'
-});
-
-
-		";
-
-		$features = "features: [ filters],";
-		$filtros = "var filters = { ftype: 'filters', encode: 'json', local: false }; ";
-
-		$data['listados']    = $listados;
-		$data['otros']       = $otros;
-		$data['encabeza']    = $encabeza;
-		$data['urlajax']     = $urlajax;
-		$data['variables']   = $variables;
-		$data['funciones']   = $funciones;
-		$data['valida']      = $valida;
-		$data['columnas']    = $columnas;
-		$data['campos']      = $campos;
-		$data['stores']      = $stores;
-		$data['camposforma'] = $camposforma;
-		$data['titulow']     = $titulow;
-		$data['dockedItems'] = $dockedItems;
-		$data['winwidget']   = $winwidget;
-		$data['features']    = $features;
-		$data['filtros']     = $filtros;
-		
-		$data['title']  = heading('Departamentos');
-		$this->load->view('extjs/extjsven',$data);
-	}
-*/
-}
-?>
