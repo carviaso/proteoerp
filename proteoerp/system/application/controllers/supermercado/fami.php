@@ -231,7 +231,7 @@
 	}
 	
 	function ultimo(){
-		$ultimo=$this->datasis->dameval("SELECT familia FROM fami ORDER BY familia DESC");
+		$ultimo=$this->datasis->dameval('SELECT familia FROM fami ORDER BY familia DESC LIMIT 1');
 		echo $ultimo;
 	}
 	

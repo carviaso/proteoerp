@@ -14,11 +14,7 @@ class Caja extends Controller {
 
 
 	function index(){
-		if ( !$this->datasis->iscampo('caja','id') ) {
-			$this->db->simple_query('ALTER TABLE caja DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE caja ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE caja ADD UNIQUE INDEX caja (caja)');
-		}
+		$this->instalar();
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -43,7 +39,9 @@ class Caja extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -67,8 +65,8 @@ class Caja extends Controller {
 		$bodyscript = '		<script type="text/javascript">';
 
 		$bodyscript .= '
-		function cajaadd() {
-			$.post("'.site_url('ventas/caja/dataedit/create').'",
+		function cajaadd(){
+			$.post("'.site_url($this->url.'dataedit/create').'",
 			function(data){
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
@@ -76,16 +74,60 @@ class Caja extends Controller {
 		};';
 
 		$bodyscript .= '
-		function cajaedit() {
+		function cajaedit(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
-				$.post("'.site_url('ventas/caja/dataedit/modify').'/"+id, function(data){
+				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog( "open" );
 				});
-			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function cajashow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function cajadel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
 		};';
 
 		//Wraper de javascript
@@ -106,34 +148,75 @@ class Caja extends Controller {
 		$("#fedita").dialog({
 			autoOpen: false, height: 440, width: 700, modal: true,
 			buttons: {
-			"Guardar": function() {
-				var bValid = true;
-				var murl = $("#df1").attr("action");
-				allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						if ( r.length == 0 ) {
-							apprise("Registro Guardado");
-							$( "#fedita" ).dialog( "close" );
-							grid.trigger("reloadGrid");
-							'.$this->datasis->jwinopen(site_url('formatos/ver/CAJA').'/\'+res.id+\'/id\'').';
-							return true;
-						} else {
-							$("#fedita").html(r);
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
 						}
-					}
-			})},
-			"Cancelar": function() { $( this ).dialog( "close" ); }
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
 			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
 		});';
-		$bodyscript .= '});'."\n";
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 440, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -142,7 +225,7 @@ class Caja extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -159,7 +242,7 @@ class Caja extends Controller {
 
 
 		$grid->addField('ubica');
-		$grid->label('Ubica');
+		$grid->label('Ubicaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -171,7 +254,7 @@ class Caja extends Controller {
 
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -219,7 +302,7 @@ class Caja extends Controller {
 
 
 		$grid->addField('almacen');
-		$grid->label('Almacen');
+		$grid->label('Almac&eacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -258,7 +341,7 @@ class Caja extends Controller {
 
 
 		$grid->addField('iparid');
-		$grid->label('Iparid');
+		$grid->label('Pariedad');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -579,7 +662,7 @@ class Caja extends Controller {
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
-		#show/hide navigations buttons
+		$grid->setOndblClickRow('');		#show/hide navigations buttons
 		$grid->setAdd(    $this->datasis->sidapuede('CAJA','INCLUIR%' ));
 		$grid->setEdit(   $this->datasis->sidapuede('CAJA','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('CAJA','BORR_REG%'));
@@ -587,7 +670,7 @@ class Caja extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: cajaadd,\n\t\teditfunc: cajaedit");
+		$grid->setBarOptions('addfunc: cajaadd, editfunc: cajaedit, delfunc: cajadel, viewfunc: cajashow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -605,8 +688,7 @@ class Caja extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -620,8 +702,7 @@ class Caja extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -678,7 +759,7 @@ class Caja extends Controller {
 
 
 	function dataedit(){
-		$this->rapyd->load("dataedit");
+		$this->rapyd->load('dataedit');
 		$this->rapyd->uri->keep_persistence();
 
 		$script ='
@@ -687,7 +768,7 @@ class Caja extends Controller {
 		});';
 
 		$edit = new DataEdit('Edici&oacute;n de caja','caja');
-		$edit->back_url = site_url('ventas/caja/filteredgrid');
+		$edit->on_save_redirect=false;
 		$edit->script($script, 'create');
 		$edit->script($script, 'modify');
 
@@ -697,7 +778,7 @@ class Caja extends Controller {
 		$edit->post_process('delete','_post_delete');
 
 		$edit->caja = new inputField('Caja', 'caja');
-		$edit->caja->rule = 'trim|required|callback_chexiste';
+		$edit->caja->rule = 'trim|required|callback_chexiste|alpha_numeric';
 		$edit->caja->mode = 'autohide';
 		$edit->caja->maxlength=3;
 		$edit->caja->size = 4;
@@ -709,69 +790,69 @@ class Caja extends Controller {
 		$edit->ubica->size = 20;
 		$edit->ubica->rule='trim|strtoupper|callback_ip_caja';
 
-		$edit->status = new dropdownField("Status", "status");
+		$edit->status = new dropdownField('Estatus', 'status');
 		$edit->status->option("C","Cerrado");
 		$edit->status->option("A","Abierto");
 		$edit->status->rule='required';
 		$edit->status->style="width:150";
 
-		$edit->factura = new inputField("Prox. Factura","factura");
+		$edit->factura = new inputField('Prox. Factura','factura');
 		$edit->factura->rule = "trim";
 		$edit->factura->maxlength=6;
 		$edit->factura->size = 7;
 
-		$edit->egreso  = new inputField("Prox. Retiro","egreso");
-		$edit->egreso->rule = "trim";
+		$edit->egreso  = new inputField('Prox. Retiro','egreso');
+		$edit->egreso->rule = 'trim';
 		$edit->egreso->maxlength=6;
 		$edit->egreso->size = 7;
 
-		$edit->ingreso = new inputField("Prox. Egreso","ingreso");
-		$edit->ingreso->rule = "trim";
+		$edit->ingreso = new inputField('Prox. Ingreso','ingreso');
+		$edit->ingreso->rule = 'trim';
 		$edit->ingreso->maxlength=6;
 		$edit->ingreso->size = 7;
 
-		$edit->almacen = new dropdownField("Almacen", "almacen");
+		$edit->almacen = new dropdownField('Almac&eacute;n', 'almacen');
 		$edit->almacen->option('','Seleccionar');
 		$edit->almacen->options("SELECT ubica, ubides FROM caub WHERE gasto='N' ORDER BY ubides");
-		$edit->almacen->style="width:150px";
+		$edit->almacen->style='width:150px';
 
 
 		$opt=array('impre'=>'Impresora','lector'=>'Lector','gaveta'=>'Gaveta','display'=>'Display');
 		$ancho = "width:110px";
 		foreach($opt AS $qu=>$grupo){
 			$obj=$qu;
-			$edit->$obj = new dropdownField("Puerto", $obj);
-			$edit->$obj->options(array("NO/C"=>"NO CONECTADO","LP1"=> "LPT1","LP2"=>"LPT2","COM1"=>"COM1","COM2"=>"COM2"));
+			$edit->$obj = new dropdownField('Puerto', $obj);
+			$edit->$obj->options(array('NO/C'=>'NO CONECTADO','LP1'=> 'LPT1','LP2'=>'LPT2','COM1'=>'COM1','COM2'=>'COM2'));
 			$edit->$obj->group=$grupo;
 			$edit->$obj->style=$ancho;
 
 			$obj=$qu{0}.'baud';
-			$edit->$obj = new inputField("Baud Rate",$obj);
+			$edit->$obj = new inputField('Baud Rate',$obj);
 			$edit->$obj->size = 5;
 			$edit->$obj->maxlength=5;
 			$edit->$obj->css_class='inputnum';
-			$edit->$obj->rule = "trim";
+			$edit->$obj->rule = 'trim';
 			$edit->$obj->group=$grupo;
 
 			$obj=$qu{0}.'parid';
-			$edit->$obj = new dropdownField("Paridad", $obj);
-			$edit->$obj->options(array("N"=>"NONE","E"=> "EVEN","O"=>"ODD"));
+			$edit->$obj = new dropdownField('Paridad', $obj);
+			$edit->$obj->options(array('N'=>'NONE','E'=> 'EVEN','O'=>'ODD'));
 			$edit->$obj->maxlength=1;
 			$edit->$obj->size = 2;
 			$edit->$obj->style=$ancho;
 			$edit->$obj->group=$grupo;
 
 			$obj=$qu{0}.'long';
-			$edit->$obj = new dropdownField("Longitud", $obj);
-			$edit->$obj->options(array("8"=> "8 BITS","7"=>"7 BITS"));
+			$edit->$obj = new dropdownField('Longitud', $obj);
+			$edit->$obj->options(array('8'=> '8 BITS','7'=>'7 BITS'));
 			$edit->$obj->maxlength=1;
 			$edit->$obj->size = 2;
 			$edit->$obj->style=$ancho;
 			$edit->$obj->group=$grupo;
 
 			$obj=$qu{0}.'stop';
-			$edit->$obj = new dropdownField("Bit de parada", $obj);
-			$edit->$obj->options(array("1"=> "1 BIT","2"=>"2 BIT"));
+			$edit->$obj = new dropdownField('Bit de parada', $obj);
+			$edit->$obj->options(array('1'=> '1 BIT','2'=>'2 BIT'));
 			$edit->$obj->maxlength=1;
 			$edit->$obj->size = 2;
 			$edit->$obj->style=$ancho;
@@ -779,7 +860,7 @@ class Caja extends Controller {
 		}
 		for ($i=1;$i<=5;$i++){
 			$obj='cont'.$i;
-			$edit->$obj = new inputField("Codigo ASCII",$obj);
+			$edit->$obj = new inputField('Codigo ASCII',$obj);
 			$edit->$obj->css_class='inputnum';
 			$edit->$obj->maxlength=3;
 			$edit->$obj->size=4;
@@ -789,47 +870,50 @@ class Caja extends Controller {
 		//$edit->buttons("modify", "save", "undo", "delete", "back");
 		$edit->build();
 
-		$conten["form"]  =&  $edit;
-		$data['content'] = $this->load->view('view_caja', $conten );
-
-
-		//$data['content'] = $edit->output;
-		//$data['title']   = "<h1>Cajas</h1>";
-		//$data["head"]    = script("jquery.pack.js").script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").$this->rapyd->get_head();
-		//$this->load->view('view_ventanas_sola', $data);
-		//$this->load->view('view_caja', $data);
-
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
 	}
 
 	function _post_insert($do){
 		$codigo=$do->get('caja');
 		$ubica=$do->get('ubica');
 		$status=$do->get('status');
-		logusu('caja',"CAJA $codigo UBICACION $ubica STATUS $status CREADA");
+		logusu('caja',"CAJA ${codigo} UBICACION ${ubica} STATUS ${status} CREADA");
 	}
+
 	function _post_update($do){
 		$codigo =$do->get('caja');
 		$ubica  =$do->get('ubica');
 		$status =$do->get('status');
-		logusu('caja',"CAJA $codigo UBICACION $ubica STATUS $status MODIFICADA");
+		logusu('caja',"CAJA ${codigo} UBICACION ${ubica} STATUS ${status} MODIFICADA");
 	}
+
 	function _post_delete($do){
 		$codigo=$do->get('caja');
 		$ubica=$do->get('ubica');
 		$status=$do->get('status');
-		logusu('caja',"CAJA $codigo UBICACION $ubica STATUS $status ELIMINADA");
+		logusu('caja',"CAJA ${codigo} UBICACION ${ubica} STATUS ${status} ELIMINADA");
 	}
 
 	//VALIDACIONES
 	function chexiste($codigo){
-		$codigo=$this->input->post('caja');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM caja WHERE caja='$codigo'");
+		$codigo  =$this->input->post('caja');
+		$dbcodigo=$this->db->escape($codigo);
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM caja WHERE caja=${dbcodigo}");
 		if ($check > 0){
-			$ubica=$this->datasis->dameval("SELECT ubica FROM caja WHERE caja='$codigo'");
-			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para la caja $ubica");
-			return FALSE;
+			$ubica=$this->datasis->dameval("SELECT ubica FROM caja WHERE caja=${dbcodigo}");
+			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para la caja ${ubica}");
+			return false;
 		}else {
-			return TRUE;
+			return true;
 		}
 	}
 
@@ -858,5 +942,14 @@ class Caja extends Controller {
 		$ip=trim($ip);
 		$ip=preg_replace('/\.0+/','.',$ip);
 		return str_replace('..','.0.',$ip);
+	}
+
+	function instalar(){
+		$campos=$this->db->list_fields('caja');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE caja DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE caja ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE caja ADD UNIQUE INDEX caja (caja)');
+		}
 	}
 }

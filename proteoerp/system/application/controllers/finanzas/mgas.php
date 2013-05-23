@@ -993,7 +993,7 @@ class Mgas extends validaciones {
 	}
 
 	function ultimo(){
-		$ultimo=$this->datasis->dameval("SELECT codigo FROM mgas ORDER BY codigo DESC");
+		$ultimo=$this->datasis->dameval("SELECT codigo FROM mgas ORDER BY codigo DESC LIMIT 1");
 		echo $ultimo;
 	}
 

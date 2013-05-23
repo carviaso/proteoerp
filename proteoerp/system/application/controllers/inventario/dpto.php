@@ -503,7 +503,7 @@ class Dpto extends Controller {
 		$edit->depto->mode='autohide';
 		$edit->depto->size=5;
 		$edit->depto->maxlength=2;
-		$edit->depto->rule ='trim|strtoupper|required|callback_chexiste';
+		$edit->depto->rule ='trim|strtoupper|required|callback_chexiste|alpha_numeric';
 		$edit->depto->append($sugerir);
 		$edit->depto->append($ultimo);
 
@@ -609,7 +609,7 @@ class Dpto extends Controller {
 	}
 
 	function ultimo(){
-		$ultimo=$this->datasis->dameval("SELECT depto FROM dpto WHERE depto<95 ORDER BY depto DESC");
+		$ultimo=$this->datasis->dameval('SELECT depto FROM dpto WHERE depto<95 ORDER BY depto DESC LIMIT 1');
 		echo $ultimo;
 	}
 

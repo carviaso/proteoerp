@@ -9,12 +9,17 @@ class Grcl extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		//$this->datasis->modulo_nombre( $modulo, $ventana=0 );
+		$this->datasis->modulo_nombre( 'GRCL', $ventana=0 );
 	}
 
 	function index(){
-		$this->instalar();
-		$this->datasis->modintramenu( 750, 500, substr($this->url,0,-1) );
+		/*if ( !$this->datasis->iscampo('grcl','id') ) {
+			$this->db->simple_query('ALTER TABLE grcl DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE grcl ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE grcl ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};*/
+		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
+		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -27,15 +32,19 @@ class Grcl extends Controller {
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
 
-		$bodyscript = '';
-
-		#Set url
-		$grid->setUrlput(site_url($this->url.'setdata/'));
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
+		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
 		$WestPanel = $grid->deploywestp();
 
-		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor("TITULO1"));
+		$adic = array(
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
@@ -46,8 +55,168 @@ class Grcl extends Controller {
 		$param['bodyscript']  = $bodyscript;
 		$param['tabs']        = false;
 		$param['encabeza']    = $this->titp;
-
+		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
 		$this->load->view('jqgrid/crud2',$param);
+	}
+
+	//***************************
+	//Funciones de los Botones
+	//***************************
+	function bodyscript( $grid0 ){
+		$bodyscript = '		<script type="text/javascript">';
+
+		$bodyscript .= '
+		function grcladd(){
+			$.post("'.site_url($this->url.'dataedit/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		};';
+
+		$bodyscript .= '
+		function grcledit(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function grclshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function grcldel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+		//Wraper de javascript
+		$bodyscript .= '
+		$(function(){
+			$("#dialog:ui-dialog").dialog( "destroy" );
+			var mId = 0;
+			var montotal = 0;
+			var ffecha = $("#ffecha");
+			var grid = jQuery("#newapi'.$grid0.'");
+			var s;
+			var allFields = $( [] ).add( ffecha );
+			var tips = $( ".validateTips" );
+			s = grid.getGridParam(\'selarrrow\');
+			';
+
+		$bodyscript .= '
+		$("#fedita").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 280, width: 380, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
+		return $bodyscript;
 	}
 
 	//***************************
@@ -128,13 +297,15 @@ class Grcl extends Controller {
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 420, height:200, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
-		#show/hide navigations buttons
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(true);
+		$grid->setOndblClickRow('');		#show/hide navigations buttons
+		$grid->setAdd(    $this->datasis->sidapuede('GRCL','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('GRCL','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('GRCL','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('GRCL','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions('addfunc: grcladd, editfunc: grcledit, delfunc: grcldel, viewfunc: grclshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -152,8 +323,7 @@ class Grcl extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -167,8 +337,7 @@ class Grcl extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -222,33 +391,10 @@ class Grcl extends Controller {
 		};
 	}
 
-	function instalar(){
-		//if (!$this->db->table_exists('grcl')) {
-		//	$mSQL="CREATE TABLE `grcl` (
-		//	  `grupo` varchar(4) NOT NULL DEFAULT '',
-		//	  `gr_desc` varchar(25) DEFAULT NULL,
-		//	  `clase` char(1) DEFAULT NULL,
-		//	  `cuenta` varchar(15) DEFAULT NULL,
-		//	  PRIMARY KEY (`grupo`)
-		//	) ENGINE=MyISAM DEFAULT CHARSET=latin1";
-		//	$this->db->simple_query($mSQL);
-		//}
-		$campos=$this->db->list_fields('grcl');
-		if(!in_array('id',$campos)){
-			$this->db->simple_query('ALTER TABLE grcl DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE grcl ADD UNIQUE INDEX grupo (grupo)');
-			$this->db->simple_query('ALTER TABLE grcl ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-
-		}
-	}
-}
-
-/*
 	function dataedit(){
-		$this->rapyd->load("dataedit");
+		$this->rapyd->load('dataedit');
 
 		$qformato=$this->qformato=$this->datasis->formato_cpla();
-
 		$mCPLA=array(
 		'tabla'   =>'cpla',
 		'columnas'=>array(
@@ -262,79 +408,111 @@ class Grcl extends Controller {
 
 		$bcpla =$this->datasis->modbus($mCPLA);
 
-		$edit = new DataEdit("Grupo de clientes", "grcl");
-		$edit->back_url = site_url("ventas/grcl/filteredgrid");
+		$edit = new DataEdit('', 'grcl');
+		$edit->on_save_redirect=false;
 
-		$edit->pre_process("delete",'_pre_del');
+		$edit->pre_process( 'delete','_pre_delete' );
 		$edit->post_process('insert','_post_insert');
-		$edit->post_process("update",'_post_update');
-		$edit->post_process("delete",'_post_delete');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
 
-		$edit->grupo = new inputField("Grupo", "grupo");
-		$edit->grupo->mode ="autohide";
-		$edit->grupo->rule ="trim|required|max_length[4]|callback_chexiste";
+		$edit->grupo = new inputField('C&oacute;digo', 'grupo');
+		$edit->grupo->mode ='autohide';
+		$edit->grupo->rule ='trim|required|max_length[4]|callback_chexiste|alpha_numeric';
 		$edit->grupo->size =5;
 		$edit->grupo->maxlength =4;
 
-		$edit->clase = new dropdownField("Clase", "clase");
-		$edit->clase->option("","");
-		$edit->clase->options(array("C"=> "Cliente","O"=>"Otros","I"=>"Internos"));
-		$edit->clase->rule= "required";
+		$edit->clase = new dropdownField('Clase', 'clase');
+		$edit->clase->option('','Seleccionar');
+		$edit->clase->options(array('C'=> 'Cliente','O'=>'Otros','I'=>'Internos'));
+		$edit->clase->rule ='required';
 		$edit->clase->style='width:100px;';
 
-		$edit->gr_desc = new inputField("Descripci&oacute;n", "gr_desc");
+		$edit->gr_desc = new inputField('Descripci&oacute;n', 'gr_desc');
 		$edit->gr_desc->size =30;
 		$edit->gr_desc->maxlength =25;
-		$edit->gr_desc->rule= "required|strtoupper";
+		$edit->gr_desc->rule= 'required|strtoupper';
 
-		$edit->cuenta = new inputField("Cta. Contable", "cuenta");
-		$edit->cuenta->rule= "callback_chcuentac";
+		$edit->cuenta = new inputField('Cta. Contable', 'cuenta');
+		$edit->cuenta->rule= 'callback_chcuentac';
 		$edit->cuenta->size =20;
 		$edit->cuenta->maxlength =15;
 		$edit->cuenta->append($bcpla);
 
-		$edit->buttons("modify", "save", "undo", "delete", "back");
+		//$edit->buttons("modify", "save", "undo", "delete", "back");
 		$edit->build();
 
-		$data['content'] = $edit->output;
-		$data['title']   = "<h1>Grupos de Clientes</h1>";
-		$data["head"]    = script("jquery.pack.js").script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").$this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
 	}
 
-	function _pre_del($do) {
-		$grupo=$do->get('grupo');
-		$check = $this->datasis->dameval("SELECT count(*) FROM scli WHERE grupo='$grupo'");
+	function _pre_delete($do) {
+		$grupo  =$do->get('grupo');
+		$dbgrupo=$this->db->escape($grupo);
+		$check = $this->datasis->dameval("SELECT COUNT(*) FROM scli WHERE grupo=${dbgrupo}");
 		if ($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Cliente con Movimiento no puede ser Borrado';
-			return False;
+			return false;
 		}else	{
-			return True;
+			return true;
 		}
 	}
+
 	function _post_insert($do){
 		$codigo=$do->get('grupo');
-		logusu('grcl',"GRUPO $codigo CREADO");
+		logusu('grcl',"GRUPO ${codigo} CREADO");
 	}
+
 	function _post_update($do){
 		$codigo=$do->get('grupo');
-		$limite=$do->get('limite');
-		logusu('grcl',"GRUPO $codigo MODIFICADO");
+		logusu('grcl',"GRUPO ${codigo} MODIFICADO");
 	}
+
 	function _post_delete($do){
 		$codigo=$do->get('grupo');
-		$limite=$do->get('limite');
-		logusu('grcl',"GRUPO $codigo ELIMINADO");
+		logusu('grcl',"GRUPO ${codigo} ELIMINADO");
 	}
+
 	function chexiste($codigo){
-		$codigo=$this->input->post('grupo');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM grcl WHERE grupo='$codigo'");
+		$codigo  =$this->input->post('grupo');
+		$dbcodigo=$this->db->escape($codigo);
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM grcl WHERE grupo=${dbcodigo}");
 		if ($check > 0){
-			$grupo=$this->datasis->dameval("SELECT gr_desc FROM grcl WHERE grupo='$codigo'");
-			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para el grupo $grupo");
-			return FALSE;
+			$grupo=$this->datasis->dameval("SELECT gr_desc FROM grcl WHERE grupo=${dbcodigo}");
+			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para el grupo ${grupo}");
+			return false;
 		}else {
-  		return TRUE;
+			return true;
 		}
 	}
-*/
+
+
+	function instalar(){
+		//if (!$this->db->table_exists('grcl')) {
+		//	$mSQL="CREATE TABLE `grcl` (
+		//	  `grupo` varchar(4) NOT NULL DEFAULT '',
+		//	  `gr_desc` varchar(25) DEFAULT NULL,
+		//	  `clase` char(1) DEFAULT NULL,
+		//	  `cuenta` varchar(15) DEFAULT NULL,
+		//	  PRIMARY KEY (`grupo`)
+		//	) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+		//	$this->db->simple_query($mSQL);
+		//}
+
+		$campos=$this->db->list_fields('grcl');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE grcl DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE grcl ADD UNIQUE INDEX grupo (grupo)');
+			$this->db->simple_query('ALTER TABLE grcl ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+
+		}
+	}
+}

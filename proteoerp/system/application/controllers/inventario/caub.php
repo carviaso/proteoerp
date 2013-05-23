@@ -15,47 +15,11 @@ class Caub extends validaciones {
 		$this->datasis->modulo_id(307,1);
 		$this->load->library("rapyd");
 		$this->load->library('jqdatagrid');
-		//$this->load->library('jformer');
 	}
 
 	function index(){
-		$this->datasis->modulo_id(307,1);
-		if ( !$this->datasis->iscampo('caub','id') ) {
-			$this->db->simple_query('ALTER TABLE caub DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE caub ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE caub ADD UNIQUE INDEX ubica (ubica)');
-		}
-
-		if ( !$this->datasis->iscampo('caub','url') ) {
-			$this->db->simple_query('ALTER TABLE caub ADD COLUMN url VARCHAR(100)');
-		}
-
-		if ( !$this->datasis->iscampo('caub','odbc') ) {
-			$this->db->simple_query('ALTER TABLE caub ADD COLUMN odbc VARCHAR(100)');
-		}
-
-		if ( !$this->datasis->iscampo('caub','tipo') ) {
-			$this->db->simple_query('ALTER TABLE caub ADD COLUMN tipo CHAR(1)');
-		}
-
-		$this->db->simple_query('UPDATE caub SET tipo="S" WHERE tipo="" OR tipo IS NULL ');
-		$this->db->simple_query('UPDATE caub SET tipo="N" WHERE gasto="S" OR invfis = "S" ');
-
-
-
-		$c=$this->datasis->dameval('SELECT COUNT(*) FROM caub WHERE ubica="AJUS"');
-		if(!($c>0)) $this->db->simple_query('INSERT IGNORE INTO caub (ubica,ubides,gasto,invfis) VALUES ("AJUS","AJUSTES","S","N")');
-		$this->db->simple_query('UPDATE caub SET ubides="AJUSTES", gasto="S",invfis="N" WHERE  ubica="AJUS" ');
-
-		$c=$this->datasis->dameval("SELECT COUNT(*) FROM caub WHERE ubica='INFI'");
-		if(!($c>0)) $this->db->simple_query("INSERT IGNORE INTO caub (ubica,ubides,gasto,invfis) VALUES ('INFI','INVENTARIO FISICO','S','S')");
-		$this->db->simple_query("UPDATE caub SET ubides='INVENTARIO FISICO', gasto='S',invfis='S' WHERE ubica='INFI'");
-
-		$this->db->simple_query("ALTER TABLE `caub`  ADD COLUMN `id` INT NOT NULL AUTO_INCREMENT FIRST,  DROP PRIMARY KEY,  ADD PRIMARY KEY ( `id`)");
-
-		//redirect("inventario/caub/caubextjs");
+		$this->instalar();
 		redirect('inventario/caub/jqdatag');
-
 	}
 
 	//***************************
@@ -98,18 +62,6 @@ class Caub extends validaciones {
 		$link  = site_url('ajax/buscacpla');
 
 		$grid  = new $this->jqdatagrid;
-
-		$grid->addField('id');
-		$grid->label('Id');
-		$grid->params(array(
-				'hidden'   => 'true',
-				'align'    => "'center'",
-				'frozen'   => 'true',
-				'width'    => 50,
-				'editable' => 'false',
-				'search'   => 'false'
-			)
-		);
 
 		$grid->addField('ubica');
 		$grid->label('C&oacute;digo');
@@ -239,6 +191,18 @@ class Caub extends validaciones {
 			)
 		);
 
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+				'hidden'   => 'true',
+				'align'    => "'center'",
+				'frozen'   => 'true',
+				'width'    => 50,
+				'editable' => 'false',
+				'search'   => 'false'
+			)
+		);
+
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('310');
@@ -359,5 +323,40 @@ class Caub extends validaciones {
 		$message['failureHtml'] = '<p style="margin-bottom: .5em;">Thanks for Contacting Us</p><p>Your message has been successfully sent.</p>';
 
 		return $message;
+	}
+
+	function instalar(){
+		$campos=$this->db->list_fields('caub');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE caub DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE caub ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE caub ADD UNIQUE INDEX ubica (ubica)');
+		}
+
+		if(!in_array('url',$campos)){
+			$this->db->simple_query('ALTER TABLE caub ADD COLUMN url VARCHAR(100)');
+		}
+
+		if(!in_array('odbc',$campos)){
+			$this->db->simple_query('ALTER TABLE caub ADD COLUMN odbc VARCHAR(100)');
+		}
+
+		if(!in_array('tipo',$campos)){
+			$this->db->simple_query('ALTER TABLE caub ADD COLUMN tipo CHAR(1)');
+		}
+
+		$this->db->simple_query('UPDATE caub SET tipo="S" WHERE tipo="" OR tipo IS NULL ');
+		$this->db->simple_query('UPDATE caub SET tipo="N" WHERE gasto="S" OR invfis = "S" ');
+
+
+
+		$c=$this->datasis->dameval('SELECT COUNT(*) FROM caub WHERE ubica="AJUS"');
+		if(!($c>0)) $this->db->simple_query('INSERT IGNORE INTO caub (ubica,ubides,gasto,invfis) VALUES ("AJUS","AJUSTES","S","N")');
+		$this->db->simple_query('UPDATE caub SET ubides="AJUSTES", gasto="S",invfis="N" WHERE  ubica="AJUS" ');
+
+		$c=$this->datasis->dameval("SELECT COUNT(*) FROM caub WHERE ubica='INFI'");
+		if(!($c>0)) $this->db->simple_query("INSERT IGNORE INTO caub (ubica,ubides,gasto,invfis) VALUES ('INFI','INVENTARIO FISICO','S','S')");
+		$this->db->simple_query("UPDATE caub SET ubides='INVENTARIO FISICO', gasto='S',invfis='S' WHERE ubica='INFI'");
+
 	}
 }

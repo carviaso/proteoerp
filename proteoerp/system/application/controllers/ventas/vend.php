@@ -506,7 +506,7 @@ class Vend extends Controller {
 		$edit->vendedor = new inputField('C&oacute;digo', 'vendedor');
 		$edit->vendedor->size=5;
 		$edit->vendedor->maxlength=5;
-		$edit->vendedor->rule = 'trim|required|callback_chexiste';
+		$edit->vendedor->rule = 'trim|required|callback_chexiste|alpha_numeric';
 		$edit->vendedor->mode ='autohide';
 
 		$edit->tipo = new dropdownField('Tipo', 'tipo');

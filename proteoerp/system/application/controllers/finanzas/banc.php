@@ -35,7 +35,9 @@ class Banc extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Banco o Caja')
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Banco o Caja'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -70,7 +72,7 @@ class Banc extends Controller {
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
 		$ngrid      = "#newapi".$grid0;
-		
+
 		$mSQL = "SELECT ano, ano nombre FROM bsal WHERE ano <= YEAR(curdate()) GROUP BY ano ORDER BY ano DESC";
 		$mano = $this->datasis->llenaopciones($mSQL, false, 'mmano');
 		$mano = str_replace('"',"'",$mano);
@@ -129,6 +131,21 @@ class Banc extends Controller {
 		};';
 
 		$bodyscript .= '
+		function bancshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
 		function bancedit() {
 			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
@@ -159,43 +176,62 @@ class Banc extends Controller {
 		$("#fedita").dialog({
 			autoOpen: false, height: 450, width: 750, modal: true,
 			buttons: {
-			"Guardar": function() {
-				var murl = $("#df1").attr("action");
-				allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						try{
-							var json = JSON.parse(r);
-							if (json.status == "A"){
-								$("#fedita").dialog( "close" );
-								grid.trigger("reloadGrid");
-								$.prompt("<h1>Registro Guardado</h1>",{
-									submit: function(e,v,m,f){  
-										setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
-									}}
-								);
-								idactual = json.pk.id;
-								return true;
-							} else {
-								$.prompt("Error: "+json.mensaje);
+				"Guardar": function() {
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									$("#fedita").dialog( "close" );
+									grid.trigger("reloadGrid");
+									$.prompt("<h1>Registro Guardado</h1>",{
+										submit: function(e,v,m,f){
+											setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+										}}
+									);
+									idactual = json.pk.id;
+									return true;
+								} else {
+									$.prompt("Error: "+json.mensaje);
+								}
+							} catch(e){
+								$("#fedita").html(r);
 							}
-						} catch(e){
-							$("#fedita").html(r);
 						}
-					}
-				})
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
 			},
-			"Cancelar": function() { $( this ).dialog( "close" ); }
-			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
 		});';
-		$bodyscript .= '});'."\n";
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 450, width: 750, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -205,7 +241,7 @@ class Banc extends Controller {
 	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "true";
+		$editar = 'false';
 		$linea   = 1;
 		$grid  = new $this->jqdatagrid;
 
@@ -223,7 +259,7 @@ class Banc extends Controller {
 		));
 
 		$grid->addField('codbanc');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'align'         => '"center"',
 			'search'        => 'true',
@@ -247,7 +283,7 @@ class Banc extends Controller {
 			'edittype'      => "'select'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{value: '.$tbanco.',  style:"width:300px" }',
-//			'editoptions'   => '{dataUrl: "'.site_url("ajax/ddbanco").'",  style:"width:300px" }',
+			//'editoptions'   => '{dataUrl: "'.site_url("ajax/ddbanco").'",  style:"width:300px" }',
 
 			'editrules'     => '{ required:true}',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
@@ -310,22 +346,8 @@ class Banc extends Controller {
 		));
 
 		$linea = $linea + 1;
-		$grid->addField('dire1');
-		$grid->label('Direccion 1');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:false}',
-			'editoptions'   => '{ size:30, maxlength: 40 }',
-			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
-		));
-
-
-		$linea = $linea + 1;
 		$grid->addField('tipocta');
-		$grid->label('Tipocta');
+		$grid->label('Tipo Cta.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -336,8 +358,21 @@ class Banc extends Controller {
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1, label:"Tipo" }'
 		));
 
+		$linea = $linea + 1;
+		$grid->addField('dire1');
+		$grid->label('Direcci&oacute;n 1');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 200,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:false}',
+			'editoptions'   => '{ size:30, maxlength: 40 }',
+			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
+		));
+
 		$grid->addField('dire2');
-		$grid->label('Direccion 2');
+		$grid->label('Direcci&oacute;n 2');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -351,7 +386,7 @@ class Banc extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('telefono');
-		$grid->label('Telefono');
+		$grid->label('Tel&eacute;fono');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -378,7 +413,7 @@ class Banc extends Controller {
 
 
 		$grid->addField('proxch');
-		$grid->label('Proxch');
+		$grid->label('Proximo cheque');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -617,7 +652,7 @@ class Banc extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: bancadd,\n\t\teditfunc: bancedit");
+		$grid->setBarOptions('addfunc: bancadd,editfunc: bancedit, viewfunc: bancshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -635,8 +670,7 @@ class Banc extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -650,8 +684,7 @@ class Banc extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -773,12 +806,13 @@ class Banc extends Controller {
 			$(".inputnum").numeric(".");
 		});';
 
-		$edit = new DataEdit('Bancos y cajas', 'banc');
+		$edit = new DataEdit('', 'banc');
 		$edit->on_save_redirect=false;
 
 		$edit->script($script, 'create');
 		$edit->script($script, 'modify');
 
+		$edit->pre_process( 'delete','_pre_delete' );
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
@@ -786,7 +820,7 @@ class Banc extends Controller {
 		$lultimo='<a href="javascript:ultimo();" title="Consultar ultimo codigo ingresado" onclick="">Consultar ultimo codigo</a>';
 		$edit->codbanc = new inputField('C&oacute;digo', 'codbanc');
 		$edit->codbanc->rule = 'trim|required|callback_chexiste';
-		$edit->codbanc->mode="autohide";
+		$edit->codbanc->mode ='autohide';
 		$edit->codbanc->maxlength = 2;
 		$edit->codbanc->size = 3;
 		//$edit->codbanc->append($lultimo);
@@ -832,14 +866,14 @@ class Banc extends Controller {
 		$edit->nombre->maxlength=40;
 
 		$edit->moneda = new dropdownField('Moneda','moneda');
-		$edit->moneda->options("SELECT moneda, descrip FROM mone ORDER BY moneda");
-		$edit->moneda->style ="width:100px;";
+		$edit->moneda->options('SELECT moneda, descrip FROM mone ORDER BY moneda');
+		$edit->moneda->style ='width:100px;';
 
 		$edit->tipocta = new dropdownField('Cuenta Tipo', 'tipocta');
-		$edit->tipocta->style ="width:100px;";
-		$edit->tipocta->options(array("K"=>"Caja","C"=>"Corriente","A" =>"Ahorros","P"=>"Plazo Fijo", "T"=>"Tarjeta", "Q"=>"Caja Chica" ));
+		$edit->tipocta->style ='width:100px;';
+		$edit->tipocta->options(array('K'=>'Caja','C'=>'Corriente','A' =>'Ahorros','P'=>'Plazo Fijo', 'T'=>'Tarjeta', 'Q'=>'Caja Chica' ));
 
-		$edit->proxch = new inputField('Proximo CH', 'proxch');
+		$edit->proxch = new inputField('Pr&oacute;ximo CH', 'proxch');
 		$edit->proxch->rule='trim';
 		$edit->proxch->size =12;
 		$edit->proxch->maxlength=12;
@@ -884,7 +918,7 @@ class Banc extends Controller {
 
 		$edit->sucur = new dropdownField('Sucursal', 'sucur');
 		$edit->sucur->option('','Ninguna');
-		$edit->sucur->options("SELECT codigo, TRIM(sucursal) FROM sucu ORDER BY sucursal");
+		$edit->sucur->options('SELECT codigo, TRIM(sucursal) FROM sucu ORDER BY sucursal');
 		$edit->sucur->style ='width:80px;';
 
 		$mSQL="SELECT codigo, CONCAT_WS('-',TRIM(descrip),TRIM(codigo)) AS descrip FROM mgas ORDER BY descrip";
@@ -894,7 +928,7 @@ class Banc extends Controller {
 		$edit->gastoidb->options($mSQL);
 		$edit->gastoidb->style ='width:300px;';
 
-		$edit->gastocom = new dropdownField('Comision', 'gastocom');
+		$edit->gastocom = new dropdownField('Comisi&oacute;n', 'gastocom');
 		$edit->gastocom->rule= 'condi_required|callback_chiscaja|trim';
 		$edit->gastocom->option('','Seleccionar');
 		$edit->gastocom->options($mSQL);
@@ -919,6 +953,11 @@ class Banc extends Controller {
 		//$conten["form"]  =&  $edit;
 		//$data['content'] = $this->load->view('view_banc', $conten, false );
 
+	}
+
+	function _pre_delete($do){
+		$do->error_message_ar['pre_del']='';
+		return false;
 	}
 
 	function _post_insert($do){
@@ -1080,19 +1119,19 @@ class Banc extends Controller {
 	//
 	function recalban( $id, $ano = 0, $saldo = 0 ) {
 
-		if ( $ano > date('Y') ) 
+		if ( $ano > date('Y') )
 			$ano = date('Y');
-		// 
-		if ( $ano < date('Y') - 20 ) 
+		//
+		if ( $ano < date('Y') - 20 )
 			$ano = date('Y');
-			
+
 		$saldo = $saldo/100;
-		
+
 		$codbanc = $this->datasis->dameval("SELECT codbanc FROM banc WHERE id=$id");
 
 		$mSQL = "INSERT IGNORE INTO bsal SET
 		codbanc=".$this->db->escape($codbanc).",
-		ano=$ano,  saldo=0,   saldo01=0, saldo02=0, saldo03=0, saldo04=0,saldo05=0, 
+		ano=$ano,  saldo=0,   saldo01=0, saldo02=0, saldo03=0, saldo04=0,saldo05=0,
 		saldo06=0, saldo07=0, saldo08=0, saldo09=0, saldo10=0, saldo11=0, saldo12=0 ";
 		$this->db->query($mSQL);
 

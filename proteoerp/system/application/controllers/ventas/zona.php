@@ -1,8 +1,8 @@
 <?php
 class Zona extends Controller {
 	var $mModulo='ZONA';
-	var $titp='ZONAS DE VENTAS';
-	var $tits='ZONAS DE VENTAS';
+	var $titp='Zonas de ventas';
+	var $tits='Zonas de ventas';
 	var $url ='ventas/zona/';
 
 	function Zona(){
@@ -27,52 +27,49 @@ class Zona extends Controller {
 		$param['grid'] = $grid->deploy();
 
 		$bodyscript = '
-<script type="text/javascript">
-$(function() {
-	$( "input:submit, a, button", ".otros" ).button();
-});
+		<script type="text/javascript">
+		$(function() {
+			$( "input:submit, a, button", ".otros" ).button();
+		});
 
-jQuery("#a1").click( function(){
-	var id = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\'/proteoerp/formatos/ver/ZONA/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-</script>
-';
+		jQuery("#a1").click( function(){
+			var id = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getRowData\',id);
+				window.open(\'/proteoerp/formatos/ver/ZONA/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});
+		</script>';
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		$WestPanel = '
-<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-<div class="otros">
+		<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
+		<div class="otros">
 
-<table id="west-grid" align="center">
-	<tr><td><div class="tema1">
-		<table id="listados"></table>
+		<table id="west-grid" align="center">
+			<tr><td><div class="tema1">
+				<table id="listados"></table>
+				</div>
+			</td></tr>
+			<tr><td>
+				<table id="otros"></table>
+			</td></tr>
+		</table>
+
+		<table id="west-grid" align="center">
+			<tr>
+				<td><a style="width:190px" href="#" id="a1">Imprimir Copia</a></td>
+			</tr>
+		</table>
 		</div>
-	</td></tr>
-	<tr><td>
-		<table id="otros"></table>
-	</td></tr>
-</table>
-
-<table id="west-grid" align="center">
-	<tr>
-		<td><a style="width:190px" href="#" id="a1">Imprimir Copia</a></td>
-	</tr>
-</table>
-</div>
-</div> <!-- #LeftPane -->
-';
+		</div> <!-- #LeftPane -->';
 
 		$SouthPanel = '
-<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
-<p>'.$this->datasis->traevalor('TITULO1').'</p>
-</div> <!-- #BottomPanel -->
-';
+		<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
+		<p>'.$this->datasis->traevalor('TITULO1').'</p>
+		</div> <!-- #BottomPanel -->';
 		$param['WestPanel']  = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['SouthPanel'] = $SouthPanel;
@@ -93,19 +90,8 @@ jQuery("#a1").click( function(){
 
 		$grid  = new $this->jqdatagrid;
 
-		$grid->addField('id');
-		$grid->label('Id');
-		$grid->params(array(
-			'hidden'   => 'true',
-			'align'    => "'center'",
-			'frozen'   => 'true',
-			'width'    => 40,
-			'editable' => 'false',
-			'search'   => 'false'
-		));
-
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'align'    => "'center'",
 			'search'        => 'true',
@@ -126,7 +112,7 @@ jQuery("#a1").click( function(){
 		));
 
 		$grid->addField('descrip');
-		$grid->label('Descrip.');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'true',
@@ -148,6 +134,17 @@ jQuery("#a1").click( function(){
 			'editoptions'   => '{ size:10, maxlength:10, dataInit: function(elem){ $(elem).numeric(); } }',
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'   => 'true',
+			'align'    => "'center'",
+			'frozen'   => 'true',
+			'width'    => 40,
+			'editable' => 'false',
+			'search'   => 'false'
 		));
 
 		$grid->showpager(true);
@@ -254,7 +251,7 @@ jQuery("#a1").click( function(){
 			} else {
 				$this->db->simple_query("DELETE FROM zona WHERE id=$id ");
 				logusu('ZONA',"Registro zona=".$this->db->escape($codigo)."  ELIMINADO");
-				echo "Registro Eliminado";
+				echo 'Registro Eliminado';
 			}
 		};
 	}
