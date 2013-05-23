@@ -1733,8 +1733,209 @@ class Jqdatagrid
 		}
 		return $SouthPanel;
 	}
+
+
+
+	//******************************************************************
+	//  AYUDA PARA BODYSCRIPT
+	//
+	function bswrapper($ngrid){
+		$bodyscript = '
+		$(function() {
+			$("#dialog:ui-dialog").dialog( "destroy" );
+			var mId = 0;
+			var grid = jQuery("'.$ngrid.'");
+			var s;
+			s = grid.getGridParam(\'selarrrow\');
+		';
+		return $bodyscript;
+	}
+
+
+	//******************************************************************
+	// Dialogo fedita
+	//
+	function bsfedita( $ngrid, $height = "300", $width = "550" ){
+		$bodyscript = '
+		$("#fedita").dialog({
+			autoOpen: false, height: '.$height.', width: '.$width.', modal: true,
+			buttons: {
+				"Guardar": function() {
+					var murl = $("#df1").attr("action");
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									$.prompt("<h1>Registro Guardado</h1>",{
+										submit: function(e,v,m,f){  
+											setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+										}}
+									);
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									idactual = json.pk.id;
+									return true;
+								} else {
+									$.prompt(json.mensaje);
+								}
+							} catch(e) {
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+			}
+		});';
+
+		return $bodyscript;
+	}
+
+
+	//******************************************************************
+	// Dialogo fshow
+	//
+	function bsfshow( $height = "500", $width = "700" ){
+		$bodyscript = '
+		$("#fshow").dialog({
+			autoOpen: false, height: '.$height.', width: '.$width.', modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		return $bodyscript;
+	}
+
+	//******************************************************************
+	// Dialogo fborra
+	//
+	function bsfborra( $ngrid, $height = "300", $width = "400" ){  
+		$bodyscript = '
+		$("#fborra").dialog({
+			autoOpen: false, height: '.$height.', width: '.$width.', modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("'.$ngrid.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("'.$ngrid.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+		return $bodyscript;
+	}
+
+
+	//******************************************************************
+	// Agregar
+	//
+	function bsadd( $modulo, $url ){  
+		$bodyscript = '
+		function '.$modulo.'add(){
+			$.post("'.site_url($url.'dataedit/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		};';
+		return $bodyscript;
+	}
+
+	//******************************************************************
+	//Editar
+	//
+	function bsedit( $modulo, $ngrid, $url ){  
+		$bodyscript = '
+		function '.$modulo.'edit(){
+			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				$.post("'.site_url($url.'dataedit/modify').'/"+id, function(data){
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				})
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+		return $bodyscript;
+	}
+
+	//******************************************************************
+	// Mostrar
+	function bsshow( $modulo, $ngrid, $url ){  
+		$bodyscript = '
+		function '.$modulo.'show(){
+			var id  = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = $("'.$ngrid.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+		return $bodyscript;
+	}
+
+
+	//******************************************************************
+	// Borrar
+	function bsdel( $modulo, $ngrid, $url ){  
+		$bodyscript = '
+		function '.$modulo.'del() {
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("'.$ngrid.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("'.$ngrid.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+		return $bodyscript;
+	}
+
+
 	
 }
-
 /* End of file datagrid.php */
 /* Location: ./system/application/libraries/Datagrid.php */
