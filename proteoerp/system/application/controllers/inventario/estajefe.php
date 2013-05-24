@@ -359,8 +359,6 @@ class Estajefe extends Controller {
 			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
-			$this->db->simple_query($mSQL);
-		}
 
 		$campos=$this->db->list_fields('estajefe');
 		if(!in_array('cedula',$campos)){
