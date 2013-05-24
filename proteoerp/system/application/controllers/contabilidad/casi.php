@@ -1209,7 +1209,7 @@ class Casi extends Controller {
 
 		$form = new DataForm('contabilidad/casi/auditmgas/process');
 		$form->cuenta = new inputField('Cuenta contable', 'cuenta');
-		$form->cuenta->rule = 'trim|required|callback_chcuentac';
+		$form->cuenta->rule = 'trim|required|existecpla';
 		$form->cuenta->size =15;
 		$form->cuenta->append($bcpla.'Coloque la cuenta contable para ser asginada a todos los registros encontrados y presione cambiar.');
 		$form->grupo = new dropdownField('Grupo', 'grupo');
@@ -1281,7 +1281,7 @@ class Casi extends Controller {
 
 		$form = new DataForm('contabilidad/casi/auditban/process');
 		$form->cuenta = new inputField('Cuenta contable', 'cuenta');
-		$form->cuenta->rule = 'trim|required|callback_chcuentac';
+		$form->cuenta->rule = 'trim|required|existecpla';
 		$form->cuenta->size =15;
 		$form->cuenta->append($bcpla.'Coloque la cuenta contable para ser asginada a todos los registros encontrados y presione cambiar.');
 
@@ -1403,7 +1403,7 @@ class Casi extends Controller {
 
 		$form = new DataForm('contabilidad/casi/auditscli/process');
 		$form->cuenta = new inputField('Cuenta contable', 'cuenta');
-		$form->cuenta->rule = 'trim|required|callback_chcuentac';
+		$form->cuenta->rule = 'trim|required|existecpla';
 		$form->cuenta->size =15;
 		$form->cuenta->append($bcpla.'Coloque la cuenta contable para ser asginada a todos los registros encontrados y presione cambiar.');
 		$form->grupo = new dropdownField('Grupo', 'grupo');
@@ -1473,7 +1473,7 @@ class Casi extends Controller {
 
 		$form = new DataForm('contabilidad/casi/auditbotr/process');
 		$form->cuenta = new inputField('Cuenta contable', 'cuenta');
-		$form->cuenta->rule = 'trim|required|callback_chcuentac';
+		$form->cuenta->rule = 'trim|required|existecpla';
 		$form->cuenta->size =15;
 		$form->cuenta->append($bcpla.'Coloque la cuenta contable para ser asginada a todos los registros encontrados y presione cambiar.');
 
@@ -1536,7 +1536,7 @@ class Casi extends Controller {
 
 		$form = new DataForm('contabilidad/casi/auditrete/process');
 		$form->cuenta = new inputField('Cuenta contable', 'cuenta');
-		$form->cuenta->rule = 'trim|required|callback_chcuentac';
+		$form->cuenta->rule = 'trim|required|existecpla';
 		$form->cuenta->size =15;
 		$form->cuenta->append($bcpla.'Coloque la cuenta contable para ser asginada a todos los registros encontrados y presione cambiar.');
 
@@ -1602,7 +1602,7 @@ class Casi extends Controller {
 
 		$form = new DataForm('contabilidad/casi/auditconc/process');
 		$form->cuenta = new inputField('Cuenta contable', 'cuenta');
-		$form->cuenta->rule = 'trim|required|callback_chcuentac';
+		$form->cuenta->rule = 'trim|required|existecpla';
 		$form->cuenta->size =15;
 		$form->cuenta->append($bcpla.'Coloque la cuenta contable para ser asginada a todos los registros encontrados y presione cambiar.');
 		$form->campo = new dropdownField('Campo', 'campo');
@@ -1683,7 +1683,7 @@ class Casi extends Controller {
 
 		$form = new DataForm('contabilidad/casi/auditline/process');
 		$form->cuenta = new inputField('Cuenta contable', 'cuenta');
-		$form->cuenta->rule = 'trim|required|callback_chcuentac';
+		$form->cuenta->rule = 'trim|required|existecpla';
 		$form->cuenta->size =15;
 		$form->cuenta->append($bcpla.'Coloque la cuenta contable para ser asginada a todos los registros encontrados y presione cambiar.');
 		$form->campo = new dropdownField('Campo', 'campo');
@@ -1757,7 +1757,7 @@ class Casi extends Controller {
 
 		$form = new DataForm('contabilidad/casi/auditsprv/process');
 		$form->cuenta = new inputField('Cuenta contable', 'cuenta');
-		$form->cuenta->rule = 'trim|required|callback_chcuentac';
+		$form->cuenta->rule = 'trim|required|existecpla';
 		$form->cuenta->size =15;
 		$form->cuenta->append($bcpla.'Coloque la cuenta contable para ser asginada a todos los registros encontrados y presione cambiar.');
 		$form->grupo = new dropdownField('Grupo', 'grupo');

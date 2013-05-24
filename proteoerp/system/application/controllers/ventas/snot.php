@@ -1,8 +1,8 @@
 <?php
 class Snot extends Controller {
 	var $mModulo = 'SNOT';
-	var $titp    = 'NOTAS DE DESPACHO';
-	var $tits    = 'NOTAS DE DESPACHO';
+	var $titp    = 'Notas de despacho';
+	var $tits    = 'Notas de despacho';
 	var $url     = 'ventas/snot/';
 
 	function Snot(){
@@ -13,11 +13,7 @@ class Snot extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('snot','id') ) {
-			$this->db->simple_query('ALTER TABLE snot DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE snot ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE snot ADD UNIQUE INDEX numero (numero)');
-		}
+		$this->instalar();
 		$this->datasis->modintramenu( 900, 650, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -42,7 +38,7 @@ class Snot extends Controller {
 
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array('id'=>'impri',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -159,6 +155,15 @@ class Snot extends Controller {
 			';
 
 		$bodyscript .= '
+		jQuery("#impri").click(function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('formatos/ver/SNOT').'/\'+id+\'/id\'').';
+			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+		});';
+
+		$bodyscript .= '
 		$("#fedita").dialog({
 			autoOpen: false, height: 500, width: 700, modal: true,
 			buttons: {
@@ -229,8 +234,7 @@ class Snot extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
-
+		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
@@ -444,28 +448,28 @@ class Snot extends Controller {
 		));
 
 
-		$grid->addField('almaorg');
-		$grid->label('Almaorg');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:4, maxlength: 4 }',
-		));
+		//$grid->addField('almaorg');
+		//$grid->label('Alma.Org');
+		//$grid->params(array(
+		//	'search'        => 'true',
+		//	'editable'      => $editar,
+		//	'width'         => 40,
+		//	'edittype'      => "'text'",
+		//	'editrules'     => '{ required:true}',
+		//	'editoptions'   => '{ size:4, maxlength: 4 }',
+		//));
 
 
-		$grid->addField('almades');
-		$grid->label('Almades');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:4, maxlength: 4 }',
-		));
+		//$grid->addField('almades');
+		//$grid->label('Alma.Des');
+		//$grid->params(array(
+		//	'search'        => 'true',
+		//	'editable'      => $editar,
+		//	'width'         => 40,
+		//	'edittype'      => "'text'",
+		//	'editrules'     => '{ required:true}',
+		//	'editoptions'   => '{ size:4, maxlength: 4 }',
+		//));
 
 
 		$grid->addField('tipo');
@@ -481,7 +485,7 @@ class Snot extends Controller {
 
 
 		$grid->addField('id');
-		$grid->label('ID');
+		$grid->label('Id');
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
@@ -614,7 +618,7 @@ class Snot extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -828,9 +832,13 @@ class Snot extends Controller {
 				'cod_cli' =>'Cliente',
 				'rifci'   =>'Rif',
 				'nombre'  =>'Nombre',
-				'tipo_doc' =>'Tipo',
+				'tipo_doc'=>'Tipo',
 				),
-			'filtro'  =>array('numero'=>'N&uacute;mero','cod_cli'=>'Cliente','rifci'=>'Rif','nombre'=>'Nombre'),
+			'filtro'  =>array(
+				'numero' =>'N&uacute;mero',
+				'cod_cli'=>'Cliente',
+				'rifci'  =>'Rif',
+				'nombre' =>'Nombre'),
 			'where'=>'tipo_doc = "F" and mid(numero,1,1) <> "_"',
 			'retornar'=>array(
 				'numero' =>'factura',
@@ -848,7 +856,6 @@ class Snot extends Controller {
 
 		$edit = new DataDetails('Nota de Entrega', $do);
 		$edit->on_save_redirect=false;
-		//$edit->back_url = $this->back_dataedit;
 		$edit->set_rel_title('itsnot','Producto <#o#>');
 
 		$script= '
@@ -890,6 +897,7 @@ class Snot extends Controller {
 		$edit->factura->size = 10;
 		$edit->factura->mode='autohide';
 		$edit->factura->maxlength=8;
+		$edit->factura->append($btn);
 
 		$edit->peso = new inputField('Peso', 'peso');
 		$edit->peso->css_class = 'inputnum';
@@ -899,13 +907,13 @@ class Snot extends Controller {
 		$edit->cliente = new inputField('Cliente','cod_cli');
 		$edit->cliente->size = 6;
 		$edit->cliente->maxlength=5;
-		$edit->cliente->append($btn);
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->size = 25;
 		$edit->nombre->maxlength=40;
 		$edit->nombre->autocomplete=false;
 		$edit->nombre->rule= 'required';
+		$edit->nombre->type = 'inputhidden';
 
 		$edit->observa1 = new inputField('Observaciones', 'observ1');
 		$edit->observa1->size      = 40;
@@ -966,7 +974,7 @@ class Snot extends Controller {
 		//fin de campos para detalle
 		//**************************
 
-		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
+		$edit->hora    = new autoUpdateField('hora'   ,date('H:i:s'), date('H:i:s'));
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
@@ -983,7 +991,7 @@ class Snot extends Controller {
 			echo json_encode($rt);
 		}else{
 			$conten['form']  =&  $edit;
-			$data['content'] = $this->load->view('view_snot', $conten,false);
+			$data['content'] = $this->load->view('view_snot', $conten);
 		}
 
 	}
@@ -994,8 +1002,8 @@ class Snot extends Controller {
 	}
 
 	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='';
-		return true;
+		$do->error_message_ar['pre_upd']='No se puede modificar las notas de despacho, debe anularla.';
+		return false;
 	}
 
 	function _pre_delete($do){
@@ -1080,25 +1088,6 @@ class Snot extends Controller {
 		$query->free_result();
 
 
-/*
-		// Revisa formas de pago sfpa
-		$mSQL = "SELECT codbanc, numero, monto FROM bmov WHERE transac='$transac' ";
-		$query = $this->db->query($mSQL);
-		if ( $query->num_rows() > 0 ){
-			$salida .= "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento en Caja o Banco</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Bco</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row)
-			{
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['codbanc']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-				$salida .= "</tr>";
-			}
-			$salida .= "</table>";
-		}
-*/
 		echo $salida;
 	}
 
@@ -1125,5 +1114,14 @@ class Snot extends Controller {
 		$numero = $this->uri->segment(4);
 		$id = $this->datasis->dameval("SELECT b.id FROM snot a JOIN scli b ON a.cod_cli=b.cliente WHERE numero='$numero'");
 		redirect('ventas/scli/dataedit/show/'.$id);
+	}
+
+	function instalar(){
+		$campos=$this->db->list_fields('snot');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE snot DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE snot ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE snot ADD UNIQUE INDEX numero (numero)');
+		}
 	}
 }

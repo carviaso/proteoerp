@@ -1,7 +1,7 @@
 <html>
 <head>
-<title>ProteoERP<?php if(isset($title)) echo ':'.preg_replace('/<[^>]*>/', '', $title); ?></title>
-<?php echo style("ventanas.css");?>
+<title>ProteoERP <?php if(isset($title)) echo ':'.preg_replace('/<[^>]*>/', '', $title); ?></title>
+<?php echo style('ventanas.css');?>
 <?php if (isset($head))   echo $head;   ?>
 <?php if (isset($script)) echo $script; ?>
 </head>
@@ -12,7 +12,7 @@
 			<td></td>
 			<td><?php if (isset($title)) echo $title; ?></td>
 		</tr>
-	<table>
+	</table>
 
 	<table width="95%" border=0 align="center">
 		<tr>

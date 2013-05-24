@@ -69,7 +69,7 @@ class Scst extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central y Sur
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Panel de pie de forma
 		$adic = array(

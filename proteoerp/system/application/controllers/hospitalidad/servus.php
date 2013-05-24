@@ -133,7 +133,7 @@ class Servus extends validaciones {
 		$edit->cuenta = new inputField("Cuenta", "cuenta");
 		$edit->cuenta->size=18;		
 		$edit->cuenta->maxlength=15;	
-		$edit->cuenta->rule='trim|callback_chcuentac';
+		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->append($bcpla);
 		
 		$edit->titulo = new inputField("T&iacute;tulo", "titulo");

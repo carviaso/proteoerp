@@ -173,7 +173,7 @@ class Carta extends validaciones {
 		$edit->cuenta = new inputField("Cuenta Contable", "cuenta");	
 		$edit->cuenta->size=18;
 		$edit->cuenta->maxlength=15;
-		$edit->cuenta->rule='trim|callback_chcuentac';
+		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->append($bcpla);
 		
 		$dias=$edit->_dataobject->get('activardia');

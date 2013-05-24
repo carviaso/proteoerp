@@ -611,7 +611,7 @@ class Scaj extends Controller {
 		$edit->clave->size = 7;
 
 		$edit->status = new dropdownField('Estatus', 'status');
-		$edit->status->rule = 'required|enum[A|C]';
+		$edit->status->rule = 'required|enum[A,C]';
 		$edit->status->options(array('C'=> 'Cerrado','A'=>'Abierto'));
 		$edit->status->style='width:110px';
 

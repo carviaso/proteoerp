@@ -886,7 +886,7 @@ class Mgas extends validaciones {
 		$edit->cuenta    = new inputField("Cta. Contable", "cuenta");
 		$edit->cuenta->size = 12;
 		$edit->cuenta->maxlength = 15;
-		$edit->cuenta->rule = 'trim|callback_chcuentac';
+		$edit->cuenta->rule = 'trim|existecpla';
 		$edit->cuenta->append($bcpla);
 		$edit->cuenta->append($lcuent);
 		$edit->cuenta->readonly=true;
@@ -1020,7 +1020,7 @@ class Mgas extends validaciones {
 	}
 
 	function consulta(){
-		$this->rapyd->load("datagrid");
+		$this->rapyd->load('datagrid');
 		$fields = $this->db->field_data('mgas');
 		$url_pk = $this->uri->segment_array();
 		$coun=0;
@@ -1117,143 +1117,6 @@ class Mgas extends validaciones {
 
 	}
 
-	function instalar(){
-		$campos=$this->db->list_fields('mgas');
-		if (!in_array('id',$campos)){
-			$mSQL="ALTER TABLE `mgas`
-			ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT,
-			DROP PRIMARY KEY,
-			ADD UNIQUE INDEX `unico` (`codigo`),
-			ADD PRIMARY KEY (`id`);";
-			$this->db->simple_query($mSQL);
-		}
-
-		if (!in_array('reten',$campos)) {
-			$mSQL="ALTER TABLE mgas ADD COLUMN reten VARCHAR(4) NULL DEFAULT NULL AFTER rica, ADD COLUMN retej VARCHAR(4) NULL DEFAULT NULL AFTER reten";
-			$this->db->simple_query($mSQL);
-		}
-
-	}
-
-	/*function sinvgrupos(){
-		$this->rapyd->load("fields");
-		$where = "";
-		$line=$this->input->post('line');
-		$dpto=$this->input->post('dpto');
-
-		$grupo = new dropdownField("Grupo", "grupo");
-		if ($line AND $dpto AND !(empty($line) OR empty($dpto))) {
-			$where .= "WHERE depto = ".$this->db->escape($dpto);
-			$where .= "AND linea = ".$this->db->escape($line);
-			$sql = "SELECT grupo, nom_grup FROM grup $where";
-			$grupo->option("","");
-			$grupo->options($sql);
-		}else{
-			$grupo->option("","Seleccione una linea");
-		}
-		$grupo->status = "modify";
-		$grupo->build();
-		echo $grupo->output;
-	}*/
-
-
-	function grid(){
-		$start   = isset($_REQUEST['start'])  ? $_REQUEST['start']   :  0;
-		$limit   = isset($_REQUEST['limit'])  ? $_REQUEST['limit']   : 50;
-		$sort    = isset($_REQUEST['sort'])   ? $_REQUEST['sort']    : '[{"property":"grupo","direction":"ASC"},{"property":"descrip","direction":"ASC"}]';
-		$filters = isset($_REQUEST['filter']) ? $_REQUEST['filter']  : null;
-
-		$where = $this->datasis->extjsfiltro($filters);
-
-		$this->db->_protect_identifiers=false;
-		$this->db->select('*, CONCAt(grupo, " ", nom_grup ) nomgrup');
-		$this->db->from('mgas');
-		if (strlen($where)>1) $this->db->where($where, NULL, FALSE);
-
-		$sort = json_decode($sort, true);
-		for ( $i=0; $i<count($sort); $i++ ) {
-			$this->db->order_by($sort[$i]['property'],$sort[$i]['direction']);
-		}
-
-		$this->db->limit($limit, $start);
-		$query = $this->db->get();
-		$results = $this->db->count_all('mgas');
-
-		$arr = $this->datasis->codificautf8($query->result_array());
-		echo '{success:true, message:"Loaded data", results:'. $results.', data:'.json_encode($arr).'}';
-	}
-
-	function crear(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos   = $data['data'];
-		$codigo = $campos['codigo'];
-
-		$campos['nom_grup'] = $this->datasis->dameval("SELECT nom_grup FROM grga WHERE grupo='".$campos['grupo']."'");
-
-		if ( !empty($codigo) ) {
-			unset($campos['id']);
-			unset($campos['nomgrup']);
-			// Revisa si existe ya ese contrato
-			if ($this->datasis->dameval("SELECT COUNT(*) FROM mgas WHERE codigo='$codigo'") == 0)
-			{
-				$mSQL = $this->db->insert_string("mgas", $campos );
-				$this->db->simple_query($mSQL);
-				logusu('mgas',"GASTO $codigo CREADO");
-				echo "{ success: true, message: 'Gasto Agregada'}";
-			} else {
-				echo "{ success: false, message: 'Ya existe una gasto con ese codigo!!'}";
-			}
-
-		} else {
-			echo "{ success: false, message: 'Falta el campo codigo!!'}";
-		}
-	}
-
-	function modificar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-		$codigo = $campos['codigo'];
-		$id     = $campos['id'];
-
-		unset($campos['codigo']);
-		unset($campos['id']);
-		unset($campos['nomgrup']);
-
-		$campos['nom_grup'] = $this->datasis->dameval("SELECT nom_grup FROM grga WHERE grupo='".$campos['grupo']."'");
-
-		$mSQL = $this->db->update_string("mgas", $campos,"id=".$id );
-		$this->db->simple_query($mSQL);
-		logusu('mgas',"mgas $codigo ID ".$data['data']['id']." MODIFICADO");
-		echo "{ success: true, message: 'mgas Modificada -> ".$codigo."'}";
-	}
-
-	function eliminar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-
-		$codigo = $campos['codigo'];
-
-		// VER SI PUEDE BORRAR GITSER
-		$check =  $this->datasis->dameval("SELECT count(*) FROM gitser WHERE codigo='$codigo'");
-		// VER SI PUEDE BORRAR ORDENES DE SERVICIO
-		$check +=  $this->datasis->dameval("SELECT count(*) FROM itords WHERE codigo='$codigo'");
-		// VER SI PUEDE BORRAR NOMINAS
-		$check +=  $this->datasis->dameval("SELECT count(*) FROM conc WHERE ctade='$codigo' AND tipod='G' ");
-		// VER SI PUEDE BORRAR NOMINAS
-		$check +=  $this->datasis->dameval("SELECT count(*) FROM conc WHERE ctaac='$codigo' AND tipoa='G' ");
-
-		if ($check > 0){
-			echo "{ success: false, message: 'Gasto no puede ser Borrada'}";
-		} else {
-			$this->db->simple_query("DELETE FROM mgas WHERE codigo='$codigo'");
-			logusu('mgas',"GASTO $codigo ELIMINADO");
-			echo "{ success: true, message: 'Gasto Eliminado'}";
-		}
-	}
-
 	function _pre_insert($do){
 		//$do->error_message_ar['pre_ins']='';
 		return true;
@@ -1277,7 +1140,6 @@ class Mgas extends validaciones {
 			$do->error_message_ar['pre_del']='No se puede eliminar el registro por tener movimiento.';
 			return false;
 		}
-
 		return true;
 	}
 
@@ -1297,5 +1159,22 @@ class Mgas extends validaciones {
 		$primary = implode(',',$do->pk);
 		$codigo  = $do->get('codigo');
 		logusu($do->table,"Elimino $this->tits codigo: ${codigo} id: ${primary}");
+	}
+
+	function instalar(){
+		$campos=$this->db->list_fields('mgas');
+		if (!in_array('id',$campos)){
+			$mSQL="ALTER TABLE `mgas`
+			ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT,
+			DROP PRIMARY KEY,
+			ADD UNIQUE INDEX `unico` (`codigo`),
+			ADD PRIMARY KEY (`id`);";
+			$this->db->simple_query($mSQL);
+		}
+
+		if (!in_array('reten',$campos)) {
+			$mSQL="ALTER TABLE mgas ADD COLUMN reten VARCHAR(4) NULL DEFAULT NULL AFTER rica, ADD COLUMN retej VARCHAR(4) NULL DEFAULT NULL AFTER reten";
+			$this->db->simple_query($mSQL);
+		}
 	}
 }

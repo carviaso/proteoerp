@@ -520,25 +520,25 @@ class Dpto extends Controller {
 		$edit->cu_inve =new inputField('Cuenta Inventario', 'cu_inve');
 		$edit->cu_inve->size = 18;
 		$edit->cu_inve->maxlength=15;
-		$edit->cu_inve->rule ='trim|callback_chcuentac';
+		$edit->cu_inve->rule ='trim|existecpla';
 		$edit->cu_inve->append($bcu_inve);
 
 		$edit->cu_cost =new inputField('Cuenta Costo', 'cu_cost');
 		$edit->cu_cost->size = 18;
 		$edit->cu_cost->maxlength=15;
-		$edit->cu_cost->rule ='trim|callback_chcuentac';
+		$edit->cu_cost->rule ='trim|existecpla';
 		$edit->cu_cost->append($bcu_cost);
 
 		$edit->cu_venta  =new inputField('Cuenta Venta', 'cu_venta');
 		$edit->cu_venta->size =18;
 		$edit->cu_venta->maxlength=15;
-		$edit->cu_venta->rule ='trim|callback_chcuentac';
+		$edit->cu_venta->rule ='trim|existecpla';
 		$edit->cu_venta->append($bcu_venta);
 
 		$edit->cu_devo = new inputField('Cuenta Devoluci&oacute;n','cu_devo');
 		$edit->cu_devo->size = 18;
 		$edit->cu_devo->maxlength=15;
-		$edit->cu_devo->rule ='trim|callback_chcuentac';
+		$edit->cu_devo->rule ='trim|existecpla';
 		$edit->cu_devo->append($bcu_devo);
 
 		//$edit->buttons("modify","delete", "save", "undo", "back");

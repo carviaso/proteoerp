@@ -156,7 +156,7 @@ class Mgascol extends validaciones {
 		$edit->cuenta    = new inputField("Cuenta Contable", "cuenta");
 		$edit->cuenta->size = 12;
 		$edit->cuenta->maxlength = 15;
-		$edit->cuenta->rule = "trim|callback_chcuentac";
+		$edit->cuenta->rule = "trim|existecpla";
 		$edit->cuenta->append($bcpla);
 		$edit->cuenta->append($lcuent);
 		$edit->cuenta->readonly=true;

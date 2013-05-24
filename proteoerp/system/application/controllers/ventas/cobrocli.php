@@ -271,7 +271,7 @@ class Cobrocli extends validaciones {
 		$edit->email->maxlength =18;
 
 		$edit->cuenta = new inputField("Cuenta contable", "cuenta");
-		$edit->cuenta->rule='trim|callback_chcuentac';
+		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->append($bcpla);
 		$edit->cuenta->size=20;
 		$edit->cuenta->maxlength =15;

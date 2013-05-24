@@ -895,7 +895,7 @@ class Banc extends Controller {
 
 		//$lcuent=anchor_popup('/contabilidad/cpla/dataedit/create','Agregar Cuenta Contable',$atts);
 		$edit->cuenta = new inputField('Cta. Contable', 'cuenta');
-		$edit->cuenta->rule='trim|callback_chcuentac';
+		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->size =12;
 		$edit->cuenta->append($bcpla);
 		//$edit->cuenta->append($lcuent);

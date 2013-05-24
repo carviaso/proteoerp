@@ -1204,7 +1204,7 @@ class Otin extends Controller {
 		$edit->tipo_doc->option('OT','Otro Ingreso');
 		$edit->tipo_doc->option('OC','Otro Ingreso a Cr&eacute;dito');
 		$edit->tipo_doc->option('ND','Nota de D&eacute;bito');
-		$edit->tipo_doc->rule ='enum[ND|FC|OT]|required';
+		$edit->tipo_doc->rule ='enum[ND,FC,OT]|required';
 		$edit->tipo_doc->style='width:170px;';
 
 		$edit->cajero= new dropdownField('Cajero', 'cajero');

@@ -84,13 +84,13 @@ class grupomenu extends Controller {
 		$edit->descri1->style="width:180px";
 		 
 		$edit->cuenta = new inputField("Cuenta contable", "cuenta");
-		$edit->cuenta->rule='trim|callback_chcuentac';
+		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->append($bcpla);
 		$edit->cuenta->size=20;
 		$edit->cuenta->maxlength =15; 
 		
 		$edit->observ = new inputField("Observaci&oacute;n", "observ1");
-		$edit->observ->rule='trim|callback_chcuentac';
+		$edit->observ->rule='trim';
 		$edit->observ->size=45;                        
 		
 		$edit->buttons("modify", "save", "undo", "back");		

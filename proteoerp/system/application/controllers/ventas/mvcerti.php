@@ -7,62 +7,22 @@ class Mvcerti extends validaciones {
 	var $url ='ventas/mvcerti/';
 	var $data_type = null;
 	var $data = null;
-	 
+
 	function mvcerti(){
-		parent::Controller(); 
+		parent::Controller();
 		$this->load->helper('url');
 		$this->load->helper('text');
-		$this->load->library("rapyd");
+		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-
-		if (!$this->datasis->istabla('mvcerti')) {
-			$mSQL = "
-				CREATE TABLE mvcerti (
-					id BIGINT(20) NOT NULL AUTO_INCREMENT,
-					cliente CHAR(5) NULL DEFAULT NULL COMMENT 'Codigo del Cliente',
-					numero CHAR(32) NULL DEFAULT NULL COMMENT 'Numero de Certificado',
-					fecha DATE NULL DEFAULT NULL COMMENT 'Fecha del certificado',
-					obra VARCHAR(200) NULL DEFAULT NULL COMMENT 'Nombre de la Obra',
-					status CHAR(1) NULL DEFAULT 'A' COMMENT 'Activo Cerrado',
-					PRIMARY KEY (id),
-					UNIQUE INDEX numero (numero),
-					INDEX cliente (cliente)
-				)
-				COLLATE='latin1_swedish_ci'
-				ENGINE=MyISAM
-				ROW_FORMAT=DEFAULT
-			";
-			$this->db->simple_query($mSQL);
-			
-			$mSQL = "CREATE ALGORITHM=UNDEFINED SQL SECURITY INVOKER VIEW `view_mvcerti` AS
-				select `a`.`id` AS `id`,if((`a`.`status` = 'A'),'ACTIVO','CERRADO') AS `status`,`a`.`cliente` AS `cliente`,`b`.`nombre` AS `nombre`,`a`.`fecha` AS `fecha`,`a`.`numero` AS `numero`,`a`.`obra` AS `obra`
-				from (`mvcerti` `a` join `scli` `b` on((`a`.`cliente` = `b`.`cliente`)))
-				order by `a`.`id` desc";
-				
-			$this->db->simple_query($mSQL);
-			
-		}
-
-		if (!$this->datasis->istabla('view_mvcerti')) {
-			$mSQL = "CREATE ALGORITHM=UNDEFINED 
-					DEFINER=`datasis`@`%` 
-					SQL SECURITY INVOKER VIEW `view_mvcerti` AS 
-					select `a`.`id` AS `id`,if((`a`.`status` = 'A'),'ACTIVO','CERRADO') AS `status`,`a`.`cliente` AS `cliente`,`b`.`nombre` AS `nombre`,`a`.`fecha` AS `fecha`,`a`.`numero` AS `numero`,`a`.`obra` AS `obra` 
-					from (`mvcerti` `a` join `scli` `b` on((`a`.`cliente` = `b`.`cliente`))) 
-					order by `a`.`id` desc";
-			$this->db->simple_query($mSQL);
-		}
+		$this->datasis->modulo_nombre( 'MVCERTI', $ventana=0 );
 	}
 
 
 	function index(){
 		$this->datasis->modulo_id('13C',1);
-		//redirect("ventas/mvcerti/filteredgrid");
-		//$this->mvcertiextjs();
 		redirect($this->url.'jqdatag');
 	}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//***************************
 	//Layout en la Ventana
@@ -83,25 +43,15 @@ class Mvcerti extends validaciones {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$funciones = '
-		function consulmv(){
-			mnumero=$("#numero").val();
-			if(mnumero.length==0){
-				alert("Debe introducir primero el numero de certificado");
-			}else{
-				mnumero=mnumero.toUpperCase();
-				$("#numero").val(mnumero);
-				window.open("'.site_url('ventas/mvcerti/traepdf/').'/"+mnumero,"CONSULTA MV","height=350,width=410");
-			}
-		}
-		';
+		$funciones = '';
 
-
-		//$param['WestPanel']   = $WestPanel;
+		//$param['WestPanel']  = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['funciones']   = $funciones;
 		$param['SouthPanel']  = $SouthPanel;
@@ -119,10 +69,23 @@ class Mvcerti extends validaciones {
 	//Funciones de los Botones
 	//***************************
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
+		$ngrid      = '#newapi'.$grid0;
 
-		$bodyscript .= "\n\t</script>\n";
-		$bodyscript = "";
+		$bodyscript .= $this->jqdatagrid->bsshow('mvcerti', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'mvcerti', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'mvcerti', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('mvcerti', $ngrid, $this->url );
+
+		//Wraper de javascript
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
+
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '300', '450' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '450' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '200', '400' );
+
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -148,7 +111,7 @@ class Mvcerti extends validaciones {
 		));
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'true',
@@ -191,7 +154,7 @@ class Mvcerti extends validaciones {
 		));
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'true',
@@ -209,8 +172,8 @@ class Mvcerti extends validaciones {
 			'edittype'      => "'textarea'",
 			'editrules'     => '{required:true}',
 			'editoptions'   => '{ rows:"2", cols:"60"}'
-			
-			
+
+
 		));
 
 		$grid->showpager(true);
@@ -249,13 +212,15 @@ class Mvcerti extends validaciones {
 
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
-		#show/hide navigations buttons
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(true);
+		$grid->setOndblClickRow('');
+		$grid->setAdd(    $this->datasis->sidapuede('MVCERTI','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('MVCERTI','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('MVCERTI','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('MVCERTI','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions("addfunc: mvcertiadd, editfunc: mvcertiedit, delfunc: mvcertidel, viewfunc: mvcertishow");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -273,8 +238,7 @@ class Mvcerti extends validaciones {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -288,8 +252,7 @@ class Mvcerti extends validaciones {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -326,22 +289,173 @@ class Mvcerti extends validaciones {
 		};
 	}
 
+	function dataedit(){
+		$this->rapyd->load('dataedit','dataobject');
+		$script= '
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
+		function consulmv(){
+			mnumero=$("#numero").val();
+			if(mnumero.length==0){
+				alert("Debe introducir primero el numero de certificado");
+			}else{
+				mnumero=mnumero.toUpperCase();
+				$("#numero").val(mnumero);
+				window.open("'.site_url('ventas/mvcerti/traepdf/').'/"+encodeURIComponent(mnumero),"CONSULTA MV","height=350,width=410");
+			}
+			return false;
+		}
 
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
 
-/*
-	function chexiste($codigo){
-		$codigo=$this->input->post('numero');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM mvcerti WHERE numero='$codigo'");
-		if ($check > 0){
-			$this->validation->set_message('chexiste',"El codigo $codigo ya existe");
-			return FALSE;
-		}else {
-		return TRUE;
+			$("#cliente").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function(req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscascli').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#sclinombre").val("");
+									$("#sclinombre_val").text("");
+									$("#sclirifci").val("");
+									$("#sclirifci_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#cliente").attr("readonly", "readonly");
+					$("#sclinombre").val(ui.item.nombre);
+					$("#sclinombre_val").text(ui.item.nombre);
+					$("#sclirifci").val(ui.item.rifci);
+					$("#sclirifci_val").text(ui.item.rifci);
+					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
+				}
+			});
+		});';
+
+		$do = new DataObject('mvcerti');
+		$do->pointer('scli' ,'mvcerti.cliente =scli.cliente' ,'`scli`.`nombre`  AS sclinombre, `scli`.`rifci`  AS sclirifci'  ,'left');
+
+		$edit = new DataEdit('', $do);
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
+
+		$edit->numero = new inputField('N&uacute;mero','numero');
+		$edit->numero->rule='required|strtoupper|trim|unique';
+		$edit->numero->mode='autohide';
+		$edit->numero->size =34;
+		$edit->numero->maxlength =32;
+		$edit->numero->append('<a href="#" onclick="consulmv();">Consultar</a>');
+
+		$edit->status = new  dropdownField('Estatus','status');
+		$edit->status->option('A','Activo');
+		$edit->status->option('C','Cerrado');
+		$edit->status->style='width:120px;';
+		$edit->status->rule='required|enum[A,C]';
+
+		$edit->cliente = new inputField('Cliente','cliente');
+		$edit->cliente->rule='required|existescli';
+		$edit->cliente->size =7;
+
+		$edit->nombre = new inputField('Nombre','sclinombre');
+		$edit->nombre->type='inputhidden';
+		$edit->nombre->pointer=true;
+		$edit->nombre->in = 'cliente';
+
+		$edit->rifci = new inputField('RIF/CI','sclirifci');
+		$edit->rifci->type='inputhidden';
+		$edit->rifci->pointer=true;
+
+		$edit->fecha = new dateonlyField('Fecha','fecha');
+		$edit->fecha->rule='chfecha';
+		$edit->fecha->insertValue=date('Y-m-d');
+		$edit->fecha->size =10;
+		$edit->fecha->maxlength =8;
+		$edit->fecha->calendar=false;
+
+		$edit->obra= new textareaField('Obra','obra');
+		$edit->obra->cols = 40;
+		$edit->obra->rows = 2;
+		$edit->obra->rule = 'required';
+		//$edit->obra->maxlength =200;
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
 		}
 	}
-*/
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do){
+		$numero  = $do->get('numero');
+		$dbnumero= $this->db->escape($numero);
+
+		$mSQL='SELECT COUNT(*) AS cana FROM sfac WHERE certificado='.$dbnumero;
+		$cana=$this->datasis->dameval($mSQL);
+		if(empty($cana)){
+			return true;
+		}
+		$do->error_message_ar['pre_del']='No se puede eliminar el certificado por que ya fue utilizado';
+		return false;
+	}
+
+	function _post_insert($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits ${primary} ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits ${primary} ");
+	}
+
+	function _post_delete($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Elimino $this->tits ${primary} ");
+	}
+
+
 	function traepdf($certificado){
 		$this->load->helper('pdf2text');
 
@@ -362,12 +476,49 @@ class Mvcerti extends validaciones {
 		if(stripos($output,'errores de ingreso')===false){
 			$tt=fluj2text($output);
 			$desde=stripos($tt,'Se hace constar');
-			echo substr($tt,$desde);
+			$msj=substr($tt,$desde);
 		}else{
-			echo 'Certificado no encontrado';
+			$msj='Certificado no encontrado';
 		}
+
+		$data['content'] = utf8_encode($msj);
+		$data['head']    = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+		$this->load->view('view_ventanas_sola', $data);
 	}
 
-}
+	function instalar(){
+		if (!$this->db->table_exists('mvcerti')) {
+			$mSQL = "CREATE TABLE mvcerti (
+					id BIGINT(20) NOT NULL AUTO_INCREMENT,
+					cliente CHAR(5) NULL DEFAULT NULL COMMENT 'Codigo del Cliente',
+					numero CHAR(32) NULL DEFAULT NULL COMMENT 'Numero de Certificado',
+					fecha DATE NULL DEFAULT NULL COMMENT 'Fecha del certificado',
+					obra VARCHAR(200) NULL DEFAULT NULL COMMENT 'Nombre de la Obra',
+					status CHAR(1) NULL DEFAULT 'A' COMMENT 'Activo Cerrado',
+					PRIMARY KEY (id),
+					UNIQUE INDEX numero (numero),
+					INDEX cliente (cliente)
+				)
+				COLLATE='latin1_swedish_ci'
+				ENGINE=MyISAM
+				ROW_FORMAT=DEFAULT";
+			$this->db->simple_query($mSQL);
 
-?>
+			$mSQL = "CREATE ALGORITHM=UNDEFINED SQL SECURITY INVOKER VIEW `view_mvcerti` AS
+				select `a`.`id` AS `id`,if((`a`.`status` = 'A'),'ACTIVO','CERRADO') AS `status`,`a`.`cliente` AS `cliente`,`b`.`nombre` AS `nombre`,`a`.`fecha` AS `fecha`,`a`.`numero` AS `numero`,`a`.`obra` AS `obra`
+				from (`mvcerti` `a` join `scli` `b` on((`a`.`cliente` = `b`.`cliente`)))
+				order by `a`.`id` desc";
+			$this->db->simple_query($mSQL);
+		}
+
+		if (!$this->db->table_exists('view_mvcerti')){
+			$mSQL = "CREATE ALGORITHM=UNDEFINED
+					DEFINER=`".$this->db->username."`@`".$this->db->hostname."`
+					SQL SECURITY INVOKER VIEW `view_mvcerti` AS
+					select `a`.`id` AS `id`,if((`a`.`status` = 'A'),'ACTIVO','CERRADO') AS `status`,`a`.`cliente` AS `cliente`,`b`.`nombre` AS `nombre`,`a`.`fecha` AS `fecha`,`a`.`numero` AS `numero`,`a`.`obra` AS `obra`
+					from (`mvcerti` `a` join `scli` `b` on((`a`.`cliente` = `b`.`cliente`)))
+					order by `a`.`id` desc";
+			$this->db->simple_query($mSQL);
+		}
+	}
+}

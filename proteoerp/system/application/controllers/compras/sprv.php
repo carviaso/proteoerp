@@ -1167,13 +1167,13 @@ class Sprv extends Controller {
 		$edit->nomfis->style = 'width:170;';
 
 		$edit->cuenta = new inputField('Contable', 'cuenta');
-		$edit->cuenta->rule='trim|callback_chcuentac';
+		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->size =17;
 		$edit->cuenta->maxlength =15;
 		$edit->cuenta->append($bcpla);
 
 		$edit->canticipo = new inputField('Anticipo', 'canticipo');
-		$edit->canticipo->rule='trim|callback_chcuentac';
+		$edit->canticipo->rule='trim|existecpla';
 		$edit->canticipo->size =17;
 		$edit->canticipo->maxlength =15;
 		$edit->canticipo->append($banti);

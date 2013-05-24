@@ -735,14 +735,14 @@ class Conc extends Controller {
 		$edit->cuenta->size =19;
 		$edit->cuenta->maxlength=15;
 		$edit->cuenta->group="Enlase Contable";
-		$edit->cuenta->rule='callback_chcuentac';
+		$edit->cuenta->rule='existecpla';
 		$edit->cuenta->append($bcuenta);
 		
 		$edit->contra =  new inputField("Haber", "contra"); 
 		$edit->contra->size = 19;   
 		$edit->contra->maxlength=15;
 		$edit->contra->group="Enlase Contable";
-		$edit->contra->rule='callback_chcuentac';
+		$edit->contra->rule='existecpla';
 		$edit->contra->append($bcontra);
 		
 		$edit->tipod = new dropdownField ("Deudor", "tipod");

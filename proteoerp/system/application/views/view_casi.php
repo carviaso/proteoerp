@@ -58,12 +58,14 @@ $(function(){
 //Agrega el autocomplete
 function autocod(id){
 	$('#cuenta_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscacpla'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];

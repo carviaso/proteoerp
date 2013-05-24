@@ -3470,7 +3470,7 @@ class Sinv extends Controller {
 		$edit->it3tunidad->db_name     = 'tunidad';
 		$edit->it3tunidad->css_class   = 'inputnum';
 		$edit->it3tunidad->rel_id      = 'sinvplabor';
-		$edit->it3tunidad->rule        = 'enum[H,S,]';
+		$edit->it3tunidad->rule        = 'enum[H,S,D]';
 		$edit->it3tunidad->insertValue = 'H';
 
 		$edit->it3tiempo = new inputField('', 'it3tiempo_<#i#>');

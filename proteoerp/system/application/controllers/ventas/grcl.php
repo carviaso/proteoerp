@@ -396,20 +396,54 @@ class Grcl extends Controller {
 
 		$qformato=$this->qformato=$this->datasis->formato_cpla();
 		$mCPLA=array(
-		'tabla'   =>'cpla',
-		'columnas'=>array(
-		'codigo' =>'C&oacute;digo',
-		'descrip'=>'Descripci&oacute;n'),
-		'filtro'  =>array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
-		'retornar'=>array('codigo'=>'cuenta'),
-		'titulo'  =>'Buscar Cuenta',
-		'where'=>"codigo LIKE \"$qformato\"",
+			'tabla'   =>'cpla',
+			'columnas'=>array(
+				'codigo' =>'C&oacute;digo',
+				'descrip'=>'Descripci&oacute;n'),
+			'filtro'  =>array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
+			'retornar'=>array('codigo'=>'cuenta'),
+			'titulo'  =>'Buscar Cuenta',
+			'where'=>"codigo LIKE \"$qformato\"",
 		);
 
 		$bcpla =$this->datasis->modbus($mCPLA);
 
+		$script='
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+			$("#cu_inve").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscacpla').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								$.each(data,
+									function(i, val){
+										sugiere.push( val );
+									}
+								);
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#cuenta").val(ui.item.codigo);
+				}
+			});
+		});';
+
 		$edit = new DataEdit('', 'grcl');
 		$edit->on_save_redirect=false;
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
 
 		$edit->pre_process( 'delete','_pre_delete' );
 		$edit->post_process('insert','_post_insert');
@@ -434,7 +468,7 @@ class Grcl extends Controller {
 		$edit->gr_desc->rule= 'required|strtoupper';
 
 		$edit->cuenta = new inputField('Cta. Contable', 'cuenta');
-		$edit->cuenta->rule= 'callback_chcuentac';
+		$edit->cuenta->rule= 'existecpla';
 		$edit->cuenta->size =20;
 		$edit->cuenta->maxlength =15;
 		$edit->cuenta->append($bcpla);

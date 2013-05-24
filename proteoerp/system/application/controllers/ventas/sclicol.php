@@ -509,7 +509,7 @@ function cg_docui(valor){
 		$edit->email->maxlength =100;
 
 		$edit->cuenta = new inputField('Contable', 'cuenta');
-		$edit->cuenta->rule='trim|callback_chcuentac';
+		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->append($bcpla);
 		$edit->cuenta->size=15;
 		$edit->cuenta->maxlength =15;

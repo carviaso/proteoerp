@@ -24,7 +24,7 @@ class MY_Validation extends CI_Validation{
 	 * @return	bool
 	 */
 	function captcha($str){
-		return ( strtolower($_SESSION["captcha"]) == strtolower($str) );
+		return ( strtolower($_SESSION['captcha']) == strtolower($str) );
 	}
 
 	function alpha_dash_slash($str){
@@ -40,9 +40,49 @@ class MY_Validation extends CI_Validation{
 			return true;
 	}
 
+	function chci($rifci){
+		if($this->CI->datasis->traevalor('VELCED')=='N'){
+			return true;
+		}
+		if (preg_match("/((^[VEJG][0-9]+[[:blank:]]*$)|(^[P][A-Z0-9]+[[:blank:]]*$))|(^[[:blank:]]*$)/", $rifci)>0){
+			return true;
+		}else {
+			$this->set_message('chci', "El campo <b>%s</b> debe tener el siguiente formato V=Venezolano(a), E=Extranjero(a), G=Gobierno, P=Pasaporte o J=Juridico Como primer caracter seguido del n&uacute;mero de documento. Ej: V123456, J5555555, P56H454");
+			return false;
+		}
+	}
+
+	function chrif($rif){
+		if($this->CI->datasis->traevalor('VELCED')=='N'){
+			return true;
+		}
+		if (preg_match("/(^[VEJG][0-9]{9}[[:blank:]]*$)|(^[[:blank:]]*$)/", $rif)>0){
+			return true;
+		}else {
+			$this->set_message('chrif', "El campo <b>%s</b> debe tener el siguiente formato V=Venezolano(a), G=Gobierno, J=Juridico Como primer caracter seguido del n&uacute;mero de documento. Ej: V123456789, J123456789");
+			return false;
+		}
+	}
+
+	function existecpla($cuenta){
+		$cuenta  =trim($cuenta);
+		if(strlen($cuenta)==0) return true;
+		$dbcuenta=$this->CI->db->escape($cuenta);
+		$mSQL = "SELECT COUNT(*) AS cana FROM cpla WHERE codigo=${dbcuenta}";
+		$this->set_message('existecpla', 'La cuenta contable introducida en el campo %s no es v&aacute;lida');
+
+		$query = $this->CI->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$row = $query->row();
+			if($row->cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
+
 	function existescli($scli){
 		$dbscli= $this->CI->db->escape($scli);
-		$mSQL  = "SELECT COUNT(*) AS cana FROM scli WHERE cliente=$dbscli";
+		$mSQL  = "SELECT COUNT(*) AS cana FROM scli WHERE cliente=${dbscli}";
 		$this->set_message('existescli', 'El cliente propuesto en el campo %s no existe');
 
 		$query = $this->CI->db->query($mSQL);
@@ -56,7 +96,7 @@ class MY_Validation extends CI_Validation{
 
 	function existesinv($codigo){
 		$dbcod= $this->CI->db->escape($codigo);
-		$mSQL  = "SELECT COUNT(*) AS cana FROM sinv WHERE codigo=$dbcod";
+		$mSQL  = "SELECT COUNT(*) AS cana FROM sinv WHERE codigo=${dbcod}";
 		$this->set_message('existesinv', 'El producto propuesto en el campo %s no existe');
 
 		$query = $this->CI->db->query($mSQL);
@@ -99,7 +139,7 @@ class MY_Validation extends CI_Validation{
 	function cajerostatus($scaj){
 		$dbscaj=$this->CI->db->escape($scaj);
 		$this->set_message('cajerostatus', 'El cajero ya fue cerrado para esta fecha');
-		$mSQL  = "SELECT fechac,status FROM scaj WHERE cajero=$dbscaj";
+		$mSQL  = "SELECT fechac,status FROM scaj WHERE cajero=${dbscaj}";
 
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
@@ -110,7 +150,7 @@ class MY_Validation extends CI_Validation{
 
 				if($tmt>$tmc){ //Chequea si lo puede abrir
 					$data = array('fechaa' => date('Ymd'), 'horaa' => date('H:i:s'), 'status' => 'A');
-					$mSQL_2 = $this->CI->db->update_string('scaj', $data, "cajero=$dbscaj");
+					$mSQL_2 = $this->CI->db->update_string('scaj', $data, "cajero=${dbscaj}");
 					$rt=$this->CI->db->simple_query($mSQL_2);
 					return $rt;
 				}else{

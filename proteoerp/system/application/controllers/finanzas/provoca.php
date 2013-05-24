@@ -13,13 +13,7 @@ class Provoca extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('provoca','id') ) {
-			$this->db->simple_query('ALTER TABLE provoca DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE provoca DROP INDEX rif');
-			$this->db->simple_query('ALTER TABLE provoca ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE provoca ADD UNIQUE INDEX rif (rif)');
-		}
-		$this->db->simple_query('UPDATE provoca SET rif=TRIM(rif)');
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -30,105 +24,58 @@ class Provoca extends Controller {
 	function jqdatag(){
 
 		$grid = $this->defgrid();
-		$param['grid'] = $grid->deploy();
+		$param['grids'][] = $grid->deploy();
 
-		$bodyscript = '
-<script type="text/javascript">
-$(function() {
-	$( "input:submit, a, button", ".otros" ).button();
-});
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
-jQuery("#a1").click( function(){
-	var id = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\'/proteoerp/formatos/ver/PROVOCA/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-</script>
-';
+		//Botones Panel Izq
+		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$WestPanel = $grid->deploywestp();
 
-		#Set url
-		$grid->setUrlput(site_url($this->url.'setdata/'));
+		$adic = array(
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$WestPanel = '
-<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-<div class="anexos">
+		$centerpanel = $grid->centerpanel( $id = 'adicional', $param['grids'][0]['gridname'] );
 
-<table id="west-grid" align="center">
-	<tr>
-		<td><div class="tema1"><table id="listados"></table></div></td>
-	</tr>
-	<tr>
-		<td><div class="tema1"><table id="otros"></table></div></td>
-	</tr>
-</table>
 
-<table id="west-grid" align="center">
-	<tr>
-		<td></td>
-	</tr>
-</table>
-</div>
-'.
-//		<td><a style="width:190px" href="#" id="a1">Imprimir Copia</a></td>
-'</div> <!-- #LeftPane -->
-';
-
-		$SouthPanel = '
-<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
-<p>'.$this->datasis->traevalor('TITULO1').'</p>
-</div> <!-- #BottomPanel -->
-';
-
-		$centerpanel = '
-<div id="RightPane" class="ui-layout-center">
-	<div class="centro-centro">
-		<table id="newapi'.$param['grid']['gridname'].'"></table>
-		<div id="pnewapi'.$param['grid']['gridname'].'"></div>
-	</div>
-	<div class="centro-sur" id="adicional" style="overflow:auto;">
-	</div>
-</div> <!-- #RightPane -->
-';
-
-		$readyLayout = '
-	$(\'body\').layout({
-		minSize: 30,
-		north__size: 60,
-		resizerClass: \'ui-state-default\',
-		west__size: 212,
-		west__onresize: function (pane, $Pane){jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);},
-	});
-	
-	$(\'div.ui-layout-center\').layout({
-		minSize: 30,
-		resizerClass: "ui-state-default",
-		center__paneSelector: ".centro-centro",
-		south__paneSelector:  ".centro-sur",
-		south__size: 120,
-		center__onresize: function (pane, $Pane) {
-			jQuery("#newapi'.$param['grid']['gridname'].'").jqGrid(\'setGridWidth\',$Pane.innerWidth()-6);
-			jQuery("#newapi'.$param['grid']['gridname'].'").jqGrid(\'setGridHeight\',$Pane.innerHeight()-110);
-		}
-	});
-	';
-
-		$param['WestPanel']   = $WestPanel;
-		//$param['EastPanel']  = $EastPanel;
-		
+		//$param['WestPanel']   = $WestPanel;
+		//$param['EastPanel'] = $EastPanel;
 		$param['SouthPanel']  = $SouthPanel;
 		$param['listados']    = $this->datasis->listados('PROVOCA', 'JQ');
 		$param['otros']       = $this->datasis->otros('PROVOCA', 'JQ');
-		$param['tema1']       = 'darkness';
-
-		$param['readyLayout']  = $readyLayout;
-		$param['centerpanel']  = $centerpanel;
-		$param['anexos']      = 'anexos1';
+		$param['centerpanel'] = $centerpanel;
+		$param['temas']       = array('proteo','darkness','anexos1');
 		$param['bodyscript']  = $bodyscript;
 		$param['tabs']        = false;
 		$param['encabeza']    = $this->titp;
-		$this->load->view('jqgrid/crud',$param);
+		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
+		$this->load->view('jqgrid/crud2',$param);
+	}
+
+	function bodyscript( $grid0 ){
+		$bodyscript = '<script type="text/javascript">';
+		$ngrid      = '#newapi'.$grid0;
+
+		$bodyscript .= $this->jqdatagrid->bsshow('provoca', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'provoca', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'provoca', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('provoca', $ngrid, $this->url );
+
+		//Wraper de javascript
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
+
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '250', '500' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '250', '500' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
+
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
+		return $bodyscript;
 	}
 
 	//***************************
@@ -136,7 +83,7 @@ jQuery("#a1").click( function(){
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "true";
+		$editar = 'true';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -198,13 +145,17 @@ jQuery("#a1").click( function(){
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 400, height:180, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
-		#show/hide navigations buttons
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(true);
+
+		$grid->setOndblClickRow('');		#show/hide navigations buttons
+		$grid->setAdd(    $this->datasis->sidapuede('PROVOCA','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('PROVOCA','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('PROVOCA','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('PROVOCA','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions("addfunc: provocaadd, editfunc: provocaedit, delfunc: provocadel, viewfunc: provocashow");
+
 
 		$grid->setonSelectRow('
 			function(id){
@@ -229,11 +180,128 @@ jQuery("#a1").click( function(){
 		}
 	}
 
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+
+		$consulrif=$this->datasis->traevalor('CONSULRIF');
+
+		$script ='
+		$(function() {
+			$(".inputnum").numeric(".");
+		});
+
+		function anomfis(){
+			vtiva=$("#tiva").val();
+			if(vtiva=="C" || vtiva=="E" || vtiva=="R"){
+				$("#tr_nomfis").show();
+				$("#tr_riff").show();
+			}else{
+				$("#nomfis").val("");
+				$("#rif").val("");
+				$("#tr_nomfis").hide();
+				$("#tr_rif").hide();
+			}
+		}
+
+		function consulrif(){
+			vrif=$("#rif").val();
+			if(vrif.length==0){
+				alert("Debe introducir primero un RIF");
+			}else{
+				vrif=vrif.toUpperCase();
+				$("#rif").val(vrif);
+				window.open("'.$consulrif.'"+"?p_rif="+vrif,"CONSULRIF","height=350,width=410");
+			}
+		}';
+
+		$edit = new DataEdit('', 'provoca');
+		$edit->on_save_redirect=false;
+		$edit->script($script, 'create');
+		$edit->script($script, 'modify');
+
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'delete','_pre_delete' );
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+
+		$lriffis='<a href="javascript:consulrif();" title="Consultar RIF en el SENIAT" onclick="">Consultar RIF en el SENIAT</a>';
+		$edit->rif =  new inputField('RIF', 'rif');
+		$edit->rif->mode='autohide';
+		$edit->rif->rule = 'strtoupper|required|chrif';
+		$edit->rif->append($lriffis);
+		$edit->rif->maxlength=10;
+		$edit->rif->size = 14;
+
+		$edit->nombre =  new inputField('Nombre', 'nombre');
+		$edit->nombre->rule = 'strtoupper|required';
+		$edit->nombre->size = 40;
+		$edit->nombre->maxlength=80;
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+	function _pre_insert($do){
+		$do->set('fecha',date('Y-m-d'));
+		return true;
+	}
+
+	function _pre_delete($do) {
+		$codigo=$this->db->escape($do->get('rif'));
+		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM gitser WHERE rif=$codigo");
+
+		if ($check > 0){
+			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='No se puede borrar el proveedor porque contiene movimientos';
+			return false;
+		}
+		return true;
+	}
+
+	function _post_insert($do){
+		$codigo=$do->get('rif');
+		$nombre=$do->get('nombre');
+		logusu('provoca',"PROVEEDOR OCASIONAL $codigo NOMBRE $nombre CREADO");
+	}
+
+	function _post_update($do){
+		$codigo=$do->get('rif');
+		$nombre=$do->get('nombre');
+		logusu('provoca',"PROVEEDOR OCASIONAL $codigo NOMBRE $nombre MODIFICADO");
+	}
+
+	function _post_delete($do){
+		$codigo=$do->get('rif');
+		$nombre=$do->get('nombre');
+		logusu('provoca',"PROVEEDOR OCASIONAL $codigo NOMBRE $nombre ELIMINADO");
+	}
+
+	function chexiste($codigo){
+		$codigo=$this->input->post('codigo');
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM importtgas WHERE codigo='$codigo'");
+		if ($check > 0){
+			$nombre=$this->datasis->dameval("SELECT nombre FROM importtgas WHERE codigo='$codigo'");
+			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para el gasto $nombre");
+			return FALSE;
+		}else {
+		return TRUE;
+		}
+	}
+
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -247,8 +315,7 @@ jQuery("#a1").click( function(){
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -300,7 +367,7 @@ jQuery("#a1").click( function(){
 
 	function tabla() {
 		$id = $this->uri->segment($this->uri->total_segments());
-		
+
 		$rif = $this->datasis->dameval("SELECT rif FROM provoca WHERE id=$id");
 
 		$td1  = "<td style='border-style:solid;border-width:1px;border-color:#78FFFF;' valign='top' align='center'>\n";
@@ -319,7 +386,7 @@ jQuery("#a1").click( function(){
 			{
 				$salida .= "<tr>";
 				$salida .= "<td>".$row['proveed']."</td>";
-				$salida .= "<td>".$row['fecha']."</td>";
+				$salida .= "<td>".dbdate_to_human($row['fecha'])."</td>";
 				$salida .= "<td>".$row['numero']."</td>";
 				$salida .= "<td>".$row['numfac']."</td>";
 				$salida .= "<td>".$row['descrip']."</td>";
@@ -332,6 +399,17 @@ jQuery("#a1").click( function(){
 		echo $salida.'</tr></table>';
 	}
 
+	function instalar(){
+		$campos=$this->db->list_fields('provoca');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE provoca DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE provoca DROP INDEX rif');
+			$this->db->simple_query('ALTER TABLE provoca ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE provoca ADD UNIQUE INDEX rif (rif)');
+		}
+		$this->db->simple_query('UPDATE provoca SET rif=TRIM(rif)');
+	}
+
 }
 
 
@@ -339,7 +417,7 @@ jQuery("#a1").click( function(){
 class Provoca extends validaciones {
 
 	function Provoca(){
-		parent::Controller(); 
+		parent::Controller();
 		$this->load->library("rapyd");
 		$this->datasis->modulo_id(206,1);
 		define ("THISFILE",   APPPATH."controllers/finanzas". $this->uri->segment(2).EXT);
@@ -364,13 +442,13 @@ class Provoca extends validaciones {
 		$this->rapyd->uri->keep_persistence();
 
 		$filter = new DataFilter('Filtro de proveedores ocasionales', 'provoca');
-		
+
 		$filter->rif = new inputField('RIF', 'rif');
 		$filter->rif->maxlength=13;
 		$filter->rif->size = 14;
-		
+
 		$filter->nombre = new inputField('Nombre', 'nombre');
-		
+
 		$filter->buttons('reset','search');
 		$filter->build();
 
@@ -379,153 +457,18 @@ class Provoca extends validaciones {
 		$grid = new DataGrid("Filtro de Proveedores Ocasionales");
 		//$grid->order_by("nombre","asc");
 		$grid->per_page = 10;
-		
+
 		$grid->column_orderby('RIF'   ,$uri,'rif');
 		$grid->column_orderby('Nombre','nombre','nombre');
 		$grid->column_orderby('Fecha' ,'<dbdate_to_human><#fecha#></dbdate_to_human>','fecha',"align='center'");
-		
+
 		$grid->add('finanzas/provoca/dataedit/create','Agregar un proveedor ocasional');
 		$grid->build();
-	
+
 		$data['content'] = $filter->output.$grid->output;
 		$data['title']   = "<h1>Proveedores Ocasionales</h1>";
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
-	}
-
-	function dataedit(){
-		$this->rapyd->load("dataedit");
-
-		$mSCLId=array(
-			'tabla'   =>'scli',
-			'columnas'=>array(
-				'cliente' =>'C&oacute;digo Socio',
-				'nombre'=>'Nombre', 
-				'cirepre'=>'Rif/Cedula',
-				'dire11'=>'Direcci&oacute;n'),
-			'filtro'  =>array('cliente'=>'C&oacute;digo Socio','nombre'=>'Nombre'),
-			'retornar'=>array('cliente'=>'socio'),
-			'titulo'  =>'Buscar Socio');
-
-		$qformato=$this->qformato=$this->datasis->formato_cpla();
-		$mCPLA=array(
-			'tabla'   =>'cpla',
-			'columnas'=>array(
-				'codigo' =>'C&oacute;digo',
-				'descrip'=>'Descripci&oacute;n'),
-			'filtro'  =>array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
-			'retornar'=>array('codigo'=>'cuenta'),
-			'titulo'  =>'Buscar Cuenta',
-			'where'=>"codigo LIKE \"$qformato\"",
-			);
-
-		$boton =$this->datasis->modbus($mSCLId);
-		$bcpla =$this->datasis->modbus($mCPLA);
-		
-		$smenu['link']=barra_menu('131');
-		$consulrif=$this->datasis->traevalor('CONSULRIF');
-		
-		$script ='
-		$(function() {
-			$(".inputnum").numeric(".");
-		});
-		
-		function anomfis(){
-				vtiva=$("#tiva").val();
-				if(vtiva=="C" || vtiva=="E" || vtiva=="R"){
-					$("#tr_nomfis").show();
-					$("#tr_riff").show();
-				}else{
-					$("#nomfis").val("");
-					$("#rif").val("");
-					$("#tr_nomfis").hide();
-					$("#tr_rif").hide();
-				}
-		}
-		
-		function consulrif(){
-				vrif=$("#rif").val();
-				if(vrif.length==0){
-					alert("Debe introducir primero un RIF");
-				}else{
-					vrif=vrif.toUpperCase();
-					$("#rif").val(vrif);
-					window.open("'.$consulrif.'"+"?p_rif="+vrif,"CONSULRIF","height=350,width=410");
-				}
-		}
-		
-		';
-		$edit = new DataEdit("Proveedor ocasional", "provoca");
-		$edit->back_url = site_url("finanzas/provoca/filteredgrid");
-		$edit->script($script, 'create');
-		$edit->script($script, 'modify');
-		
-		$edit->pre_process('delete','_pre_del');
-		$edit->post_process('insert','_post_insert');
-		$edit->post_process('update','_post_update');
-		$edit->post_process('delete','_post_delete');
-		
-		$lriffis='<a href="javascript:consulrif();" title="Consultar RIF en el SENIAT" onclick="">Consultar RIF en el SENIAT</a>';
-		$edit->rif =  new inputField('RIF', 'rif');
-		$edit->rif->mode='autohide';
-		$edit->rif->rule = 'strtoupper|required|callback_chrif';
-		$edit->rif->append($lriffis);
-		$edit->rif->maxlength=10;
-		$edit->rif->size = 14;
-		
-		$edit->nombre =  new inputField('Nombre', 'nombre');
-		$edit->nombre->rule = 'strtoupper|required';
-		$edit->nombre->size = 80;
-		$edit->nombre->maxlength=80;
-
-		$edit->fecha =  new dateField('Fecha', 'fecha','d/m/Y');
-		$edit->fecha->insertValue=date('Y-m-d');
-		$edit->fecha->size = 10;
-
-		$edit->buttons("modify", "save", "undo", "delete", "back");
-		$edit->build();
-		
-		$data['content'] = $edit->output;
-		$data['title']   = '<h1>Proveedores Ocasionales</h1>';
-		$data['head']    = script("jquery.pack.js").script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").$this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
-	}
-
-	function _pre_del($do) {
-		$codigo=$this->db->escape($do->get('rif'));
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM gitser WHERE rif=$codigo");
-		
-		if ($check > 0){
-			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='No se puede borrar el proveedor porque contiene movimientos';
-			return False;
-		}
-		return True;
-	}
-	function _post_insert($do){
-		$codigo=$do->get('rif');
-		$nombre=$do->get('nombre');
-		logusu('provoca',"PROVEEDOR OCASIONAL $codigo NOMBRE $nombre CREADO");
-	}
-	function _post_update($do){
-		$codigo=$do->get('rif');
-		$nombre=$do->get('nombre');
-		logusu('provoca',"PROVEEDOR OCASIONAL $codigo NOMBRE $nombre MODIFICADO");
-	}
-	function _post_delete($do){
-		$codigo=$do->get('rif');
-		$nombre=$do->get('nombre');
-		logusu('provoca',"PROVEEDOR OCASIONAL $codigo NOMBRE $nombre ELIMINADO");
-	}
-	function chexiste($codigo){
-		$codigo=$this->input->post('codigo');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM importtgas WHERE codigo='$codigo'");
-		if ($check > 0){
-			$nombre=$this->datasis->dameval("SELECT nombre FROM importtgas WHERE codigo='$codigo'");
-			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para el gasto $nombre");
-			return FALSE;
-		}else {
-		return TRUE;
-		}
 	}
 
 	function grid(){
@@ -539,8 +482,8 @@ class Provoca extends validaciones {
 		$this->db->_protect_identifiers=false;
 		$this->db->select('*');
 		$this->db->from('provoca');
-		if (strlen($where)>1) $this->db->where($where, NULL, FALSE); 
-	
+		if (strlen($where)>1) $this->db->where($where, NULL, FALSE);
+
 		$sort = json_decode($sort, true);
 		for ($i=0;$i<count($sort);$i++) {
 			$this->db->order_by($sort[$i]['property'],$sort[$i]['direction']);
@@ -591,7 +534,7 @@ class Provoca extends validaciones {
 		$campos = $data['data'];
 
 		$rif = $data['data']['rif'];
-		
+
 		// VERIFICAR SI PUEDE
 		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM gitser WHERE rif='$rif'");
 
@@ -625,17 +568,17 @@ class Provoca extends validaciones {
 		$valida = "
 		{ type: 'length', field: 'nombre', min:  3 }
 		";
-		
+
 
 		$columnas = "
-		{ header: 'Nro',    width:  50, sortable: true,  dataIndex: 'id',     field: { type: 'numberfield' }}, 
-		{ header: 'R.I.F.', width: 100, sortable: true,  dataIndex: 'rif',    field: { type: 'textfield' }, filter: { type: 'string' }}, 
-		{ header: 'Nombre', width: 300, sortable: true,  dataIndex: 'nombre', field: { type: 'textfield' }, filter: { type: 'string' }}, 
-		{ header: 'Fecha',  width:  90, sortable: false, dataIndex: 'fecha',  field: { type: 'date'      }, filter: { type: 'date'   }} 
+		{ header: 'Nro',    width:  50, sortable: true,  dataIndex: 'id',     field: { type: 'numberfield' }},
+		{ header: 'R.I.F.', width: 100, sortable: true,  dataIndex: 'rif',    field: { type: 'textfield' }, filter: { type: 'string' }},
+		{ header: 'Nombre', width: 300, sortable: true,  dataIndex: 'nombre', field: { type: 'textfield' }, filter: { type: 'string' }},
+		{ header: 'Fecha',  width:  90, sortable: false, dataIndex: 'fecha',  field: { type: 'date'      }, filter: { type: 'date'   }}
 	";
 
 		$campos = "'id', 'rif', 'nombre', 'fecha'";
-		
+
 		$camposforma = "
 			{
 			frame: false,
@@ -643,7 +586,7 @@ class Provoca extends validaciones {
 			labelAlign: 'right',
 			tdefaults: { xtype:'fieldset', labelWidth:70 },
 			style:'padding:4px',
-			items:[	
+			items:[
 				{ xtype: 'textfield', fieldLabel: 'RIF',    name: 'rif',    allowBlank: false, width: 200 },
 				{ xtype: 'textfield', fieldLabel: 'Nombre', name: 'nombre', allowBlank: false, width: 400 },
 				{ xtype: 'datefield', fieldLabel: 'Fecha',  name: 'fecha',  format: 'd/m/Y', submitFormat: 'Y-m-d', value: new Date(), }
@@ -694,11 +637,10 @@ class Provoca extends validaciones {
 		$data['winwidget']   = $winwidget;
 		$data['features']    = $features;
 		$data['filtros']     = $filtros;
-		
+
 		$data['title']  = heading('Proveedores Ocacionales');
 		$this->load->view('extjs/extjsven',$data);
-		
+
 	}
 }
  */
-?>

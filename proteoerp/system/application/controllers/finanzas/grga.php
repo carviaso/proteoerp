@@ -13,11 +13,7 @@ class Grga extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('grga','id') ) {
-			$this->db->simple_query('ALTER TABLE grga DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE grga ADD UNIQUE INDEX grupo (grupo)');
-			$this->db->simple_query('ALTER TABLE grga ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		$this->datasis->modintramenu( 680, 450, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -31,64 +27,30 @@ class Grga extends Controller {
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
 
-		$bodyscript = '
-<script type="text/javascript">
-$(function() {
-	$( "input:submit, a, button", ".otros" ).button();
-});
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
-jQuery("#a1").click( function(){
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\'/proteoerp/formatos/ver/GRGA/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-</script>
-';
+		//Botones Panel Izq
+		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$WestPanel = $grid->deploywestp();
 
-		#Set url
-		$grid->setUrlput(site_url($this->url.'setdata/'));
+		$adic = array(
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$WestPanel = '
-<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-<div class="anexos">
-
-<table id="west-grid" align="center">
-	<tr>
-		<td><div class="tema1"><table id="listados"></table></div></td>
-	</tr>
-	<tr>
-		<td><div class="tema1"><table id="otros"></table></div></td>
-	</tr>
-</table>
-
-<table id="west-grid" align="center">
-	<tr>
-		<td></td>
-	</tr>
-</table>
-</div>
-'.
-//		<td><a style="width:190px" href="#" id="a1">Imprimir Copia</a></td>
-'</div> <!-- #LeftPane -->
-';
-
-		$SouthPanel = '
-<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
-<p>'.$this->datasis->traevalor('TITULO1').'</p>
-</div> <!-- #BottomPanel -->
-';
-		$param['WestPanel']  = $WestPanel;
-		//$param['EastPanel']  = $EastPanel;
-		$param['SouthPanel'] = $SouthPanel;
-		$param['listados'] = $this->datasis->listados('GRGA', 'JQ');
-		$param['otros']    = $this->datasis->otros('GRGA', 'JQ');
-		$param['tema1']     = 'darkness';
-		$param['anexos']    = 'anexos1';
-		$param['bodyscript'] = $bodyscript;
-		$param['tabs'] = false;
-		$param['encabeza'] = $this->titp;
+		//$param['WestPanel']   = $WestPanel;
+		//$param['EastPanel'] = $EastPanel;
+		$param['SouthPanel']  = $SouthPanel;
+		$param['listados']    = $this->datasis->listados('GRGA', 'JQ');
+		$param['otros']       = $this->datasis->otros('GRGA', 'JQ');
+		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['bodyscript']  = $bodyscript;
+		$param['tabs']        = false;
+		$param['encabeza']    = $this->titp;
+		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
@@ -97,7 +59,7 @@ jQuery("#a1").click( function(){
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "true";
+		$editar = 'false';
 		$link  = site_url('ajax/buscacpla');
 
 		$grid  = new $this->jqdatagrid;
@@ -135,7 +97,7 @@ jQuery("#a1").click( function(){
 			'editable'      => 'true',
 			'edittype'      => "'text'",
 			'editoptions'   => '{'.$grid->autocomplete($link, 'cu_inve','cucucu','<div id=\"cucucu\"><b>"+ui.item.descrip+"</b></div>').'}',
-			'search'        => 'false'
+			'search'        => 'true'
 		));
 
 		$grid->addField('id');
@@ -160,13 +122,15 @@ jQuery("#a1").click( function(){
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 400, height:180, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
-		#show/hide navigations buttons
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(false);
+		$grid->setOndblClickRow('');
+		$grid->setAdd(    $this->datasis->sidapuede('GRGA','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('GRGA','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('GRGA','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('GRGA','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions("addfunc: grgaadd, editfunc: grgaedit, delfunc: grgadel, viewfunc: grgashow");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -181,11 +145,31 @@ jQuery("#a1").click( function(){
 		}
 	}
 
+	function bodyscript( $grid0 ){
+		$bodyscript = '<script type="text/javascript">';
+		$ngrid      = '#newapi'.$grid0;
+
+		$bodyscript .= $this->jqdatagrid->bsshow('grga', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'grga', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'grga', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('grga', $ngrid, $this->url );
+
+		//Wraper de javascript
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
+
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '200', '450' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '200', '450' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '200', '400' );
+
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
+		return $bodyscript;
+	}
+
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -199,8 +183,7 @@ jQuery("#a1").click( function(){
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -229,7 +212,7 @@ jQuery("#a1").click( function(){
 
 		} elseif($oper == 'del') {
 			$grupo = $this->input->post('grupo');
-			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM mgas WHERE grupo='$grupo'");
+			$check = $this->datasis->dameval("SELECT COUNT(*) FROM mgas WHERE grupo='$grupo'");
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
@@ -239,359 +222,141 @@ jQuery("#a1").click( function(){
 			}
 		};
 	}
-}
-
-/*
-class Grga extends validaciones {
-	
-	function grga(){
-		parent::Controller(); 
-		$this->load->library("rapyd");
-	}
-
-	function index(){
-		if ( !$this->datasis->iscampo('grga','id') ) {
-			$this->db->simple_query('ALTER TABLE grga DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE grga ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE grga ADD UNIQUE INDEX grupo (grupo)');
-		}
-		$this->datasis->modulo_id(510,1);
-		$this->grgaextjs();
-
-	}
-
-	function filteredgrid(){
-		$this->rapyd->load("datafilter","datagrid");
-		$this->rapyd->uri->keep_persistence();
-
-		$filter = new DataFilter('Filtro por Grupo', 'grga');
-		$filter->grupo = new inputField('Grupo', 'grupo');
-		$filter->grupo->size=6;
-
-		$filter->nom_grup = new inputField('Descripci&oacute;n','nom_grup');
-
-		$filter->cu_inve = new inputField('Cuenta','cu_inve');
-		$filter->cu_inve->size=15;
-		$filter->cu_inve->like_side='after';
-
-		$filter->buttons('reset','search');
-		$filter->build('dataformfiltro');
-
-		$uri = anchor('finanzas/grga/dataedit/show/<#grupo#>','<#grupo#>');
-
-		$grid = new DataGrid('Lista de Grupos de Gastos');
-		$grid->order_by('grupo','asc');
-		$grid->per_page = 20;
-
-		$grid->column_orderby('Grupo',$uri,'grupo');
-		$grid->column_orderby('Nombre del Grupo','nom_grup','nom_grup');
-		$grid->column_orderby('Cuenta Contable','cu_inve','cu_inve');
-
-		$grid->add('finanzas/grga/dataedit/create');
-		$grid->build();
-
-		$data['content'] = $grid->output;
-		$data['filtro']  = $filter->output;
-		$data['title']   = '<h1>Grupos de Gastos</h1>';
-		$data['head']    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
-	}
 
 	function dataedit(){
-		$this->rapyd->load("dataedit");
+		$this->rapyd->load('dataedit');
 
-		$edit = new DataEdit('Grupos de Gastos', 'grga');
-		$edit->back_url = site_url('finanzas/grga/filteredgrid');
+		$script='
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+			$("#cu_inve").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscacpla').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								$.each(data,
+									function(i, val){
+										sugiere.push( val );
+									}
+								);
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+						$("#cuenta").val(ui.item.codigo);
+				}
+			});
+		});';
+
+		$edit = new DataEdit('', 'grga');
+		$edit->on_save_redirect=false;
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
 
-		$edit->grupo =     new inputField("Grupo", "grupo");
+		$edit->grupo =     new inputField('C&oacute;digo', 'grupo');
 		$edit->grupo->mode="autohide";
 		$edit->grupo->size = 6;
-		$edit->grupo->rule = "trim|required|callback_chexiste";
+		$edit->grupo->rule = 'trim|strtoupper|required|callback_chexiste|alpha_numeric';
 		$edit->grupo->maxlength=5;
 
-		$edit->nom_grup =  new inputField("Nombre del Grupo", "nom_grup");
+		$edit->nom_grup =  new inputField('Nombre del Grupo', 'nom_grup');
 		$edit->nom_grup->size = 35;
-		$edit->nom_grup->rule = "trim|required";
+		$edit->nom_grup->rule = 'trim|strtoupper|required';
 		$edit->nom_grup->maxlength=25;
 
-		$edit->cu_inve =   new inputField("Cuenta Contable", "cu_inve");
+		$edit->cu_inve =   new inputField('Cuenta Contable', 'cu_inve');
 		$edit->cu_inve->size = 18;
 		$edit->cu_inve->maxlength=15;
-		$edit->cu_inve->rule = "trim|callback_chcuentac";
+		$edit->cu_inve->rule = 'trim|existecpla';
 
-		$edit->buttons("modify", "save", "undo", "delete", "back");
 		$edit->build();
- 
-		$data['content'] = $edit->output;           
-		$data['title']   = "<h1>Grupos de Gastos</h1>";        
-		$data["head"]    = script("jquery.pack.js").script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").$this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);  
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do) {
+		$grupo  =$this->db->escape($do->data['grupo']);
+		$dbgrupo=$this->db->escape($grupo);
+		$resulta=$this->datasis->dameval("SELECT COUNT(*) AS cana FROM mgas WHERE grupo=${dbgrupo}");
+		if ($resulta==0){
+			return true;
+		}else{
+			$do->error_message_ar['pre_del']="No se puede borrar el registro ya que existen conceptos de gastos relacionados a este grupo";
+			return false;
+		}
 	}
 
 	function _post_insert($do){
 		$codigo=$do->get('grupo');
 		$nombre=$do->get('nom_grup');
-		logusu('grga',"GRUPO DE GASTOS $codigo NOMBRE  $nombre CREADO");
+		logusu('grga',"GRUPO DE GASTOS ${codigo} NOMBRE  ${nombre} CREADO");
 	}
 
 	function _post_update($do){
 		$codigo=$do->get('grupo');
 		$nombre=$do->get('nom_grup');
-		logusu('grga',"GRUPO DE GASTOS $codigo NOMBRE  $nombre  MODIFICADO");
+		logusu('grga',"GRUPO DE GASTOS ${codigo} NOMBRE  ${nombre}  MODIFICADO");
 	}
 
 	function _post_delete($do){
 		$codigo=$do->get('grupo');
 		$nombre=$do->get('nom_grup');
-		logusu('grga',"GRUPO DE GASTOS $codigo NOMBRE  $nombre  ELIMINADO ");
+		logusu('grga',"GRUPO DE GASTOS ${codigo} NOMBRE  ${nombre}  ELIMINADO ");
 	}
 
 	function chexiste($codigo){
-		$codigo=$this->input->post('grupo');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM grga WHERE grupo='$codigo'");
+		$codigo  =$this->input->post('grupo');
+		$dbcodigo=$this->db->escape($codigo);
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM grga WHERE grupo=${dbcodigo}");
 		if ($check > 0){
-			$grupo=$this->datasis->dameval("SELECT nom_grup FROM grga WHERE grupo='$codigo'");
-			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para el grupo $grupo");
-			return FALSE;
+			$grupo=$this->datasis->dameval("SELECT nom_grup FROM grga WHERE grupo=${dbcodigo}");
+			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para el grupo ${grupo}");
+			return false;
 		}else {
-		return TRUE;
-		}
-	}
-	
-	
-	function grid(){
-		$start   = isset($_REQUEST['start'])  ? $_REQUEST['start']   :  0;
-		$limit   = isset($_REQUEST['limit'])  ? $_REQUEST['limit']   : 50;
-		$sort    = isset($_REQUEST['sort'])   ? $_REQUEST['sort']    : '[{"property":"grupo","direction":"ASC"}]';
-		$filters = isset($_REQUEST['filter']) ? $_REQUEST['filter']  : null;
-
-		$where = $this->datasis->extjsfiltro($filters);
-
-		$this->db->_protect_identifiers=false;
-		$this->db->select('*');
-		$this->db->from('grga');
-
-		if (strlen($where)>1) $this->db->where($where, NULL, FALSE); 
-		
-		$sort = json_decode($sort, true);
-
-		if ( count($sort) == 0 ) $this->db->order_by( 'grupo', 'asc' );
-		
-		for ( $i=0; $i<count($sort); $i++ ) {
-			$this->db->order_by($sort[$i]['property'],$sort[$i]['direction']);
-		}
-
-		$this->db->limit($limit, $start);
-
-		$query = $this->db->get();
-		$results = $this->db->count_all('grga');
-
-		$arr = $this->datasis->codificautf8($query->result_array());
-		echo '{success:true, message:"Loaded data", results:'. $results.', data:'.json_encode($arr).'}';
-	}
-
-
-	function crear(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos   = $data['data'];
-		$grupo = $campos['grupo'];
-
-		if ( !empty($grupo) ) {
-			unset($campos['id']);
-			// Revisa si existe ya ese contrato
-			if ($this->datasis->dameval("SELECT COUNT(*) FROM grga WHERE grupo='$grupo'") == 0)
-			{
-				$mSQL = $this->db->insert_string("grga", $campos );
-				$this->db->simple_query($mSQL);
-				logusu('grga',"GRUPO DE GASTOS $grupo CREADO");
-				echo "{ success: true, message: 'Grupo Agregado'}";
-			} else {
-				echo "{ success: false, message: 'Ya existe un grupo con ese Codigo!!'}";
-			}
-			
-		} else {
-			echo "{ success: false, message: 'Ya existe un grupo con ese Codigo!!'}";
+			return true;
 		}
 	}
 
-	function modificar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-
-		$grupo = $campos['grupo'];
-		unset($campos['grupo']);
-		unset($campos['id']);
-
-		$mSQL = $this->db->update_string("grga", $campos,"id='".$data['data']['id']."'" );
-		$this->db->simple_query($mSQL);
-		logusu('grga',"GRUPO DE GASTOS $grupo ID ".$data['data']['id']." MODIFICADO");
-		echo "{ success: true, message: 'Grupo Modificado -> ".$data['data']['grupo']."'}";
-	}
-
-	function eliminar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-
-		$grupo = $campos['grupo'];
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM mgas WHERE grupo='$grupo'");
-
-		if ($check > 0){
-			echo "{ success: false, message: 'Grupo de Gasto no puede ser Borrado'}";
-		} else {
-			$this->db->simple_query("DELETE FROM grga WHERE grupo='$grupo'");
-			logusu('grga',"GRUPO $grupo ELIMINADO");
-			echo "{ success: true, message: 'Grupo de cliente Eliminado'}";
+	function instalar(){
+		$campos=$this->db->list_fields('grga');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE grga DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE grga ADD UNIQUE INDEX grupo (grupo)');
+			$this->db->simple_query('ALTER TABLE grga ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 	}
 
-
-//0414 376 0149 juan picapiedras
-
-//****************************************************************8
-//
-//
-//
-//****************************************************************8
-	function grgaextjs(){
-		$encabeza='GRUPOS DE GASTOS';
-		$listados= $this->datasis->listados('grga');
-		$otros=$this->datasis->otros('grga', 'grga');
-
-		$urlajax = 'finanzas/grga/';
-		$variables = "var mcuenta = ''";
-		$funciones = "";
-		$valida = "
-		{ type: 'length', field: 'grupo',   min: 1 },
-		{ type: 'length', field: 'nom_grup', min: 1 }
-		";
-		
-		$columnas = "
-		{ header: 'id',          width:  30, sortable: true, dataIndex: 'id' }, 
-		{ header: 'Grupo',       width:  50, sortable: true, dataIndex: 'grupo',    field: { type: 'textfield' }, filter: { type: 'string' } }, 
-		{ header: 'Descripcion', width: 200, sortable: true, dataIndex: 'nom_grup', field: { type: 'textfield' }, filter: { type: 'string' } }, 
-		{ header: 'Cuenta',      width:  90, sortable: true, dataIndex: 'cu_inve',  field: { type: 'textfield' }, filter: { type: 'string' } }
-	";
-
-		$campos = "'id', 'grupo', 'nom_grup', 'cu_inve'";
-		
-		$camposforma = "
-							{
-							frame: false,
-							border: false,
-							labelAlign: 'right',
-							defaults: { xtype:'fieldset', labelWidth:70 },
-							style:'padding:4px',
-							items: [
-									{ xtype: 'textfield', fieldLabel: 'Grupo',       name: 'grupo',   allowBlank: false, width: 120, id: 'grupo' },
-									{ xtype: 'textfield', fieldLabel: 'Descripcion', name: 'nom_grup', allowBlank: false, width: 400, }
-								]
-							},{
-								frame: false,
-								border: false,
-								labelAlign: 'right',
-								defaults: {xtype:'fieldset'  },
-								style:'padding:4px',
-								items: [{
-										xtype: 'combo',
-										fieldLabel: 'Cuenta Contable',
-										labelWidth:100,
-										name: 'cu_inve',
-										id:   'cu_inve',
-										mode: 'remote',
-										hideTrigger: true,
-										typeAhead: true,
-										forceSelection: true,										valueField: 'item',
-										displayField: 'valor',
-										store: cplaStore,
-										width: 400
-									}
-								]
-							}
-		";
-
-		$titulow = 'Grupo de Gastos';
-
-		$dockedItems = "
-				{ iconCls: 'icon-reset', itemId: 'close', text: 'Cerrar',   scope: this, handler: this.onClose },
-				{ iconCls: 'icon-save',  itemId: 'save',  text: 'Guardar',  disabled: false, scope: this, handler: this.onSave }
-		";
-
-		$winwidget = "
-				closable: false,
-				closeAction: 'destroy',
-				width: 450,
-				height: 250,
-				resizable: false,
-				modal: true,
-				items: [writeForm],
-				listeners: {
-					beforeshow: function() {
-						var form = this.down('writerform').getForm();
-						this.activeRecord = registro;
-						
-						if (registro) {
-							mcuenta  = registro.data.cu_inve;
-							cplaStore.proxy.extraParams.cuenta   = mcuenta ;
-							cplaStore.load({ params: { 'cliente': registro.data.cliente, 'origen': 'beforeform' } });
-							form.loadRecord(registro);
-						} else {
-							mcuenta  = '';
-						}
-					}
-				}
-";
-
-		$stores = "
-var cplaStore = new Ext.data.Store({
-	fields: [ 'item', 'valor'],
-	autoLoad: false,
-	autoSync: false,
-	pageSize: 50,
-	pruneModifiedRecords: true,
-	totalProperty: 'results',
-	proxy: {
-		type: 'ajax',
-		url : urlApp + 'contabilidad/cpla/cplabusca',
-		extraParams: {  'cuenta': mcuenta, 'origen': 'store' },
-		reader: {
-			type: 'json',
-			totalProperty: 'results',
-			root: 'data'
-		}
-	},
-	method: 'POST'
-});
-		";
-		$features = "features: [ filters],";
-		$filtros = "var filters = { ftype: 'filters', encode: 'json', local: false }; ";
-
-		$data['listados']    = $listados;
-		$data['otros']       = $otros;
-		$data['encabeza']    = $encabeza;
-		$data['urlajax']     = $urlajax;
-		$data['variables']   = $variables;
-		$data['funciones']   = $funciones;
-		$data['valida']      = $valida;
-		$data['columnas']    = $columnas;
-		$data['campos']      = $campos;
-		$data['stores']      = $stores;
-		$data['camposforma'] = $camposforma;
-		$data['titulow']     = $titulow;
-		$data['dockedItems'] = $dockedItems;
-		$data['winwidget']   = $winwidget;
-		$data['features']    = $features;
-		$data['filtros']     = $filtros;
-		
-		$data['title']  = heading('Tabla de Bancos');
-		$this->load->view('extjs/extjsven',$data);
-		
-	}
 }
-*/
-?>

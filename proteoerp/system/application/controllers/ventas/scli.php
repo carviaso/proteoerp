@@ -1773,14 +1773,14 @@ function chrif(rif){
 		$edit->email->maxlength =100;
 
 		$edit->cuenta = new inputField('Cta.Contable', 'cuenta');
-		$edit->cuenta->rule='trim|callback_chcuentac';
+		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->append($bcpla);
 		$edit->cuenta->size=15;
 		$edit->cuenta->maxlength =15;
 		$edit->cuenta->insertValue = $this->datasis->dameval('SELECT cuenta FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"');
 
 		$edit->canticipo = new inputField('Cta.Anticipo', 'canticipo');
-		$edit->canticipo->rule='trim|callback_chcuentac';
+		$edit->canticipo->rule='trim|existecpla';
 		$edit->canticipo->append($banti);
 		$edit->canticipo->size=15;
 		$edit->canticipo->maxlength =15;

@@ -53,7 +53,7 @@ class Cplacierre extends validaciones {
 		$edit->post_process('delete','_post_delete');
 
 		$edit->cuenta = new inputField("Cuenta", "cuenta");
-		$edit->cuenta->rule= "trim|required|callback_chcuentac";
+		$edit->cuenta->rule= "trim|required|existecpla";
 		$edit->cuenta->mode="autohide";
 		$edit->cuenta->size=20;
 		$edit->cuenta->maxlength =15 ;

@@ -315,7 +315,7 @@ class ordp extends Controller {
 		$edit->it3_tunidad->db_name     = 'tunidad';
 		$edit->it3_tunidad->css_class   = 'inputnum';
 		$edit->it3_tunidad->rel_id      = 'sinvplabor';
-		$edit->it3_tunidad->rule        = 'enum[H,S,]';
+		$edit->it3_tunidad->rule        = 'enum[H,S,D]';
 		$edit->it3_tunidad->insertValue = 'H';
 		$edit->it3_tunidad->rel_id = 'ordplabor';
 

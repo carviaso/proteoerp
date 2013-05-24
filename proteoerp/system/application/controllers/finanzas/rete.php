@@ -476,7 +476,7 @@ jQuery("#a1").click( function(){
 		$edit->concepto->maxlength=5;
 
 		$edit->cuenta = new inputField('Contable', 'cuenta');
-		$edit->cuenta->rule='trim|callback_chcuentac';
+		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->append($bcpla);
 		$edit->cuenta->size=15;
 		$edit->cuenta->maxlength =15;
