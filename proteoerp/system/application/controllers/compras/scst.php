@@ -1783,7 +1783,6 @@ class Scst extends Controller {
 				'pond'   => 'costo_<#i#>',
 				'iva'    => 'iva_<#i#>',
 				'peso'   => 'sinvpeso_<#i#>',
-				'precio1'=> 'precio1_<#i#>'
 			),
 			'p_uri'=>array(4=>'<#i#>'),
 			'script'  => array('post_modbus_sinv(<#i#>)'),
