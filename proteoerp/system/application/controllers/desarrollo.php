@@ -8,18 +8,6 @@
  *
  *
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
 */
 
 class Desarrollo extends Controller{
@@ -31,15 +19,15 @@ class Desarrollo extends Controller{
 	function index(){
 
 		$styles  = "\n<!-- Estilos -->\n";
-		$styles .= style('rapyd.css');
-		$styles .= style('ventanas.css');
+		//$styles .= style('rapyd.css');
+		//$styles .= style('ventanas.css');
 		$styles .= style('themes/proteo/proteo.css');
 		$styles .= style("themes/ui.jqgrid.css");
-		$styles .= style("themes/ui.multiselect.css");
+		//$styles .= style("themes/ui.multiselect.css");
 
 		$styles .= '
 <style>
-html, body {margin: 0;padding: 0;overflow: hidden;font-size: 75%;}
+html, body {margin: 0;padding: 0;overflow: hidden;font-size: 90%;}
 #LeftPane {overflow: auto;}
 #RightPane {padding: 2px;overflow: auto;}
 .ui-tabs-nav li {position: relative;}
@@ -74,15 +62,15 @@ html, body {margin: 0;padding: 0;overflow: hidden;font-size: 75%;}
 		$script .= '
 <script type="text/javascript">
 
-jQuery(document).ready(function(){
+$(document).ready(function(){
 	$(\'body\').layout({
 		resizerClass: \'ui-state-default\',
-        west__onresize: function (pane, $Pane) {
-            jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);
+		west__onresize: function (pane, $Pane) {
+			$("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);
 		}
 	});
 	$.jgrid.defaults = $.extend($.jgrid.defaults,{loadui:"enable"});
-	var maintab =jQuery(\'#tabs\',\'#RightPane\').tabs({
+	var maintab = $(\'#tabs\',\'#RightPane\').tabs({
         add: function(e, ui) {
             // append close thingy
             $(ui.tab).parents(\'li:first\')
@@ -96,24 +84,24 @@ jQuery(document).ready(function(){
             maintab.tabs(\'select\', \'#\' + ui.panel.id);
         }
     });
-    jQuery("#west-grid").jqGrid({
-		ajaxGridOptions : {type: "POST"},
+    
+	$("#west-grid").jqGrid({
+		ajaxGridOptions : { type: "POST "},
         url: "'.site_url('desarrollo/menu').'/",
         datatype: "xml",
         height: "auto",
         pager: false,
         loadui: "disable",
-        colNames: ["id","Items","url"],
+        colNames: ["id","Herramientas","url"],
         colModel: [
-            {name: "id",width:1,hidden:true, key:true},
+            {name: "id",   width:1,   hidden:true, key:true},
             {name: "menu", width:150, resizable: false, sortable:false},
-            {name: "url",width:1,hidden:true}
+            {name: "url",   width:1,  hidden:true}
         ],
         treeGrid: true,
-		caption: "jqGrid Demos",
+		caption: "Desarrollo",
         ExpandColumn: "menu",
         autowidth: true,
-        //width: 180,
         rowNum: 200,
         ExpandColClick: true,
         treeIcons: {leaf:\'ui-icon-document-b\'},
@@ -189,16 +177,14 @@ var fs = \'
 	<table id="west-grid"></table>
 	</div> <!-- #LeftPane -->
 	<div id="RightPane" class="ui-layout-center ui-helper-reset ui-widget-content" ><!-- Tabs pane -->
-    <div id="switcher"></div>
+
+	<div id="switcher"></div>
 		<div id="tabs" class="jqgtabs">
 			<ul>
 				<li><a href="#tabs-1">Desarrollo</a></li>
 			</ul>
-			<div id="tabs-1" style="font-size:12px;">
+			<div id="tabs-1" style="font-size:10px;">
 
-				<p style="border: 1px solid; background-color: lemonchiffon; width:728px;height:25px;margin-bottom: 8px;padding-top: 8px;text-align: center">
-					<b>Meco el Orejon</b>
-				</p>
 
 			</div>
 		</div>
@@ -218,7 +204,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 </script>
 ';
 */
-
 		
 		$data['content'] = $tabla;
 		$data['title']   = $title; 

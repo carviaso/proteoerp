@@ -154,9 +154,9 @@ class Jqdatagrid
 
 	private $Toolbar = '';
 
-	private $FormOptionsE = '';
+	private $FormOptionsE = '-';
 
-	private $FormOptionsA = '';
+	private $FormOptionsA = '-';
 	
 	private $viewrecords = true;
 	
@@ -164,7 +164,7 @@ class Jqdatagrid
 	
 	private $hiddengrid = false;
 
-	private $afterSubmit = '';
+	private $afterSubmit = '-';
 
 	private $afterPager  = '';
 
@@ -343,7 +343,7 @@ class Jqdatagrid
 		elseif($element == '-')
 			$this->FormOptionsA = "-";
 		else
-			$this->FormOptionsA = "{".$element."},";
+			$this->FormOptionsA = ",{".$element."}";
 	}
 
 	/**
@@ -356,9 +356,10 @@ class Jqdatagrid
 		if ($element == '')
 			$this->FormOptionsE = "";
 		elseif($element == '-')
-			$this->FormOptionsA = "";
+			$this->FormOptionsE = "-";
+			//$this->FormOptionsA = "-";
 		else
-			$this->FormOptionsE = "{".$element."},";
+			$this->FormOptionsE = ",{".$element."}";
 
 	}
 
@@ -738,7 +739,7 @@ class Jqdatagrid
 			$html .= $margen.",onSelectRow: ".$this->onSelectRow."\r\n";
 
 		if ($this->afterInsertRow)
-			$html .= $margen.", afterInsertRow: ".$this->afterInsertRow."\r\n";
+			$html .= $margen.",afterInsertRow: ".$this->afterInsertRow."\r\n";
 
 		if ($this->loadComplete) 
 			$html .= $margen.",loadComplete: ".$this->loadComplete."\r\n";
@@ -747,8 +748,9 @@ class Jqdatagrid
 			$html .= $margen.",gridComplete: ".$this->gridComplete."\r\n";
 
 		if($this->multiSelect == true ){
-			$html .= $margen.",gridComplete: function() { $(this).jqGrid('hideCol', 'cb');}";
+			//$html .= $margen.",gridComplete: function() { $(this).jqGrid('hideCol', 'cb');}";
 			$html .= $margen.",multiselect: true\r\n";
+			$html .= $margen.",multiboxonly: true\r\n";
 		}
 
 		if($this->hiddengrid == true )
@@ -848,13 +850,12 @@ class Jqdatagrid
 
 
 	if ( $this->ondblClickRow == 'i'){
-		$this->ondblClickRow = '
-			,ondblClickRow: function(id){
-				var gridwidth = jQuery("#newapi'.$this->_gridname.'").width();
-				gridwidth = gridwidth/2;
-				jQuery("#newapi'.$this->_gridname.'").editGridRow(id, {closeAfterEdit:true,mtype:\'POST\'});
-				return;
-			}';
+		$this->ondblClickRow = ',ondblClickRow: function(id){
+			var gridwidth = jQuery("#newapi'.$this->_gridname.'").width();
+			gridwidth = gridwidth/2;
+			jQuery("#newapi'.$this->_gridname.'").editGridRow(id, {closeAfterEdit:true,mtype:\'POST\'});
+			return;
+		}';
 	}
 	
 	$this->return['ondblClickRow'] = $this->ondblClickRow;
@@ -876,36 +877,38 @@ class Jqdatagrid
 			$bar  .= $margen.$this->BarOptions;
 
 			$bar  .= "	
-	}, \n";
+	} \n";
 
 			if ( $this->FormOptionsE=='' ){
-				$bar  .= "	{closeAfterEdit:true, mtype: 'POST'},\r\n"; // edit options
+				$bar  .= "	,{closeAfterEdit:true, mtype: 'POST'}\r\n"; // edit options
 			} elseif($this->FormOptionsE=='-') {
-				$bar  .= "\n";
+				$bar  .= "";
 			} else {
 				$bar  .= "	".$this->FormOptionsE."\n";
 			}
 
 			if ( $this->FormOptionsA=='' ){
-				$bar  .= "	{closeAfterAdd:true, mtype: 'POST'} ,\r\n"; //add options
+				$bar  .= "	,{closeAfterAdd:true, mtype: 'POST'}\r\n"; //add options
 			} elseif($this->FormOptionsA=='-') {
-				$bar  .= "\n";
+				$bar  .= "";
 			} else {
 				$bar  .= "	".$this->FormOptionsA."\n";
 			}
 
-			$bar   .= "	{mtype: 'POST',	afterSubmit: function(a,b){ ";
-			
 			if ( $this->afterSubmit =='' ) {
+				$bar   .= "	,{mtype: 'POST',	afterSubmit: function(a,b){ ";
 				$bar   .= "if (a.responseText.length > 0) alert(a.responseText); return [true, a ];";
+				$bar   .= "}}\r\n";
 			} elseif($this->afterSubmit=='-') {
-				$bar  .= "\n";
+				$bar  .= "";
 			} else {
+				$bar   .= "	,{mtype: 'POST',	afterSubmit: function(a,b){ ";
 				$bar   .= $this->afterSubmit;
+				$bar   .= "}}\r\n";
 			}
-
-			$bar   .= "}},\r\n";
-			$bar   .= "	{sopt:['eq','cn','ge','le'], overlay:false,mtype: 'POST', multipleSearch:true }"; //search options
+			
+		
+			$bar   .= "	,{sopt:['eq','cn','ge','le'], overlay:false,mtype: 'POST', multipleSearch:true }"; //search options
 			if ( $this->afterPager == '' )
 				$bar .= "\r\n";
 			else

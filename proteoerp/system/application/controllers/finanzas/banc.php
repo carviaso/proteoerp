@@ -547,7 +547,7 @@ class Banc extends Controller {
 			'width'         => 50,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:false}',
-			'editoptions'   => '{'.$grid->autocomplete(site_url('ajax/buscasprv'), 'codprv','ncodprv','<div id=\"ncodprv\"><b>"+ui.item.nombre+"</b></div>').', size:6}',
+//			'editoptions'   => '{'.$grid->autocomplete(site_url('ajax/buscasprv'), 'codprv','ncodprv','<div id=\"ncodprv\"><b>"+ui.item.nombre+"</b></div>').', size:6}',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1, label:"Proveedor" }'
 		));
 
@@ -560,15 +560,16 @@ class Banc extends Controller {
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 40,
-			'edittype'      => "'select'",
+			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{value: '.$dpto.',  style:"width:250px" }',
+//			'editoptions'   => '{value: '.$dpto.',  style:"width:250px" }',
 			'editrules'     => '{ required:true}',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2, label:"Departamento" }'
 		));
 
 
 		$linea = $linea + 1;
+
 
 		$grid->addField('cuenta');
 		$grid->label('Contabilidad');
@@ -578,9 +579,10 @@ class Banc extends Controller {
 			'width'         => 110,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:false}',
-			'editoptions'   => '{'.$grid->autocomplete(site_url('ajax/buscacpla'), 'cuenta','cucucu','<div id=\"cucucu\"><b>"+ui.item.descrip+"</b></div>').', size:12}',
+//			'editoptions'   => '{'.$grid->autocomplete(site_url('ajax/buscacpla'), 'cuenta','cucucu','<div id=\"cucucu\"><b>"+ui.item.descrip+"</b></div>').', size:12}',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1, label:"Cta. Contable" }'
 		));
+
 
 
 		$mSQL = "SELECT codigo, CONCAT(codigo,' ',sucursal) sucursal FROM sucu ORDER BY codigo";
@@ -591,9 +593,9 @@ class Banc extends Controller {
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 40,
-			'edittype'      => "'select'",
+			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{value: '.$sucu.',  style:"width:250px" }',
+//			'editoptions'   => '{value: '.$sucu.',  style:"width:250px" }',
 			'editrules'     => '{ required:true}',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
@@ -615,9 +617,9 @@ class Banc extends Controller {
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
 
-		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 680, height:420, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
-		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 680, height:420, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
-		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
+		//$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 680, height:420, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		//$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 680, height:420, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		//$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
 		$grid->setOnSelectRow('
 		function(id){

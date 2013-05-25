@@ -680,7 +680,6 @@ class Tbpasa extends Controller {
 		$edit->codcarnet->size      = 22;
 		$edit->codcarnet->maxlength = 20;
 
-
 		$edit->codrut = new dropdownField('Ruta','codrut');
 		$edit->codrut->rule='';
 		$edit->codrut->option('','Seleccionar');

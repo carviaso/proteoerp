@@ -457,7 +457,7 @@ class Sinv extends Controller {
 		};
 		';
 
-		// Busca si estan la opcion en tmenus
+		// Busca si esta la opcion en tmenus
 		$mSQL = "SELECT COUNT(*) FROM tmenus WHERE modulo='SINVOTR' AND proteo='cambiamarca'";
 		if ( $this->datasis->dameval($mSQL) == 0 )
 			$this->db->query("INSERT INTO tmenus SET modulo='SINVOTR', secu=14, titulo='Cambiar Marcas', mensaje='Cambia las Marcas de los productos seleccionados', proteo='cambiamarca'");
@@ -472,16 +472,19 @@ class Sinv extends Controller {
 			if ( s.length == 0 ){
 				$.prompt("<h1>Debe seleccionar al menos un Producto</h1>");
 			} else {
-				$.prompt( "<h1>Cambiar Marca de los productos seleccionados:</h1><br/><center>'.$marca.'</center><br/>",
-				{
+				var estados = {
+				state0: {
+					html : "<h1>Cambiar Marca de los productos seleccionados:</h1><br/><center>'.$marca.'</center><br/>",
 					buttons: { Aplicar: true, Cancelar: false },
+					focus: 1,
 					submit: function(e,v,m,f){
 						if (v) {
 							if( f.mmarca==null ){
-								apprise("Cancelado por el usuario");
-							} else if( f.mmarca=="" ) {
-								apprise("<h1>Cancelado</h1>Marca vacia");
+								alert("Cancelado por el usuario"); // No se da
+							} else if( f.mmarca=="-" ) {
+								$.prompt.goToState("state0");
 							} else {
+								e.preventDefault();
 								$.ajax({
 									url: "'.site_url("inventario/sinv/sinvcammarca/").'",
 									global: false,
@@ -490,16 +493,28 @@ class Sinv extends Controller {
 									dataType: "text",
 									async: false,
 									success: function(sino) {
-										alert("Informacion: "+sino);
 										$("#newapi'.$grid0.'").trigger("reloadGrid");
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome1\').text(sino);
+										$.prompt.goToState(\'state1\');
 									},
-									error: function(h,t,e)  { apprise("Error..codigo="+f.marca+" ",e) }
-								});
+									error: function(h,t,e)  { 
+										$.prompt.getStateContent(\'state1\').find(\'#in_prome1\').text("Error..marca="+f.marca+" "+e);
+										$.prompt.goToState(\'state1\');
+								}});
 							}
-
 						}
 					}
-				});
+				},
+				state1: {
+					html: "<h1><div id=\'in_prome1\'></div></h1>",
+					buttons: { Volver: -1, Salir: 0  },
+					submit: function(e,v,m,f){
+						if ( v == 0) $.prompt.close()
+						else $.prompt.goToState("state0");
+						e.preventDefault();
+					}
+				}};
+				$.prompt(estados);
 			}
 		};
 		';
@@ -600,7 +615,7 @@ class Sinv extends Controller {
 	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
-
+		$ngrid = '#newapi'.$grid0;
 		$bodyscript .= '
 		var verinactivos = 0;
 		var mstatus = "";
@@ -609,9 +624,9 @@ class Sinv extends Controller {
 		// Agregar
 		$bodyscript .= '
 		function sinvadd() {
-			var id   = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id   = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			var murl = "'.site_url('inventario/sinv/dataedit/create').'";
-			var grid = jQuery("#newapi'.$grid0.'");
+			var grid = jQuery("'.$ngrid.'");
 			mstatus = "I";
 			if (id)  murl = murl+"/"+id ;
 			$.post(murl,
@@ -622,9 +637,7 @@ class Sinv extends Controller {
 					autoOpen: false, height: 550, width: 800, modal: true,
 					buttons: {
 					"Guardar y Cerrar": function() {
-						var bValid = true;
 						var murl = $("#df1").attr("action");
-						//allFields.removeClass( "ui-state-error" );
 						$.ajax({
 							type: "POST", dataType: "html", async: false,
 							url: murl,
@@ -633,6 +646,7 @@ class Sinv extends Controller {
 								if ( r.length == 0 ) {
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
+									setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
 									return true;
 								} else {
 									$("#fedita").html(r);
@@ -667,11 +681,10 @@ class Sinv extends Controller {
 
 		$bodyscript .= '
 		function sinvedit() {
-			var grid = jQuery("#newapi'.$grid0.'");
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var grid = jQuery("'.$ngrid.'");
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret     = $("#newapi'.$grid0.'").getRowData(id);
-				var mId     = id;
+				var ret     = $("'.$ngrid.'").getRowData(id);
 				var mstatus = "E";
 				$.post("'.site_url('inventario/sinv/dataedit/modify').'/"+id, function(data){
 				$("#fedita").html(data);
@@ -679,20 +692,45 @@ class Sinv extends Controller {
 					autoOpen: false, height: 550, width: 800, modal: true,
 					buttons: {
 						"Guardar": function() {
-							var bValid = true;
 							var murl = $("#df1").attr("action");
 							$.ajax({
 								type: "POST", dataType: "html", async: false,
 								url: murl,
 								data: $("#df1").serialize(),
 								success: function(r,s,x){
+								try{
+									var json = JSON.parse(r);
+									if (json.status == "A"){
+										$("#fedita").dialog( "close" );
+										grid.trigger("reloadGrid");
+										$.prompt("<h1>Registro Guardado</h1>",{
+											submit: function(e,v,m,f){  
+												setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+											}
+										});
+										idactual = json.pk.id;
+										return true;
+									} else {
+										$.prompt("Error: "+json.mensaje);
+									}
+								} catch(e){
+									$("#fedita").html(r);
+								}
+'.
+/*
+
+
+
 									if ( r.length == 0 ) {
 										$( "#fedita" ).dialog( "close" );
 										grid.trigger("reloadGrid");
+										setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
 										return true;
 									} else {
 										$("#fedita").html(r);
-								}}
+									}
+*/'								
+								}
 							})
 						},
 						"Cancelar": function() {
@@ -715,7 +753,7 @@ class Sinv extends Controller {
 		// Fotos
 		$bodyscript .= '
 		function verfotos(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				window.open(\''.site_url("inventario/fotos/dataedit").'/\'+id+\'/create\', \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
 			} else {
@@ -727,9 +765,9 @@ class Sinv extends Controller {
 		// Pagina Web
 		$bodyscript .= '
 		function irurl(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret  = $("#newapi'.$grid0.'").getRowData(id);
+				var ret  = $("'.$ngrid.'").getRowData(id);
 				if ( ret.url.length > 10 )
 					window.open(ret.url);
 			} else {
@@ -741,9 +779,9 @@ class Sinv extends Controller {
 		// Codigo QR
 		$bodyscript .= '
 		function codqr(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret  = $("#newapi'.$grid0.'").getRowData(id);
+				var ret  = $("'.$ngrid.'").getRowData(id);
 				window.open(\''.site_url("inventario/sinv/sinvqr").'/\'+ret.id, \'_blank\', \'width=420,height=450,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-225), screeny=((screen.availWidth/2)-250)\');
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Producto</h1>");
@@ -754,9 +792,9 @@ class Sinv extends Controller {
 		//VALORES PARA EL SUNDECOP
 		$bodyscript .= '
 		function sundecop() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("'.$ngrid.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url('inventario/sinv/desundecop/modify').'/"+id, function(data){
 					$("#fborra").html("");
@@ -793,9 +831,9 @@ class Sinv extends Controller {
 		$bodyscript .= '
 		$("#bbarras").click(
 			function(){
-				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
-					var ret = $("#newapi'.$grid0.'").getRowData(id);
+					var ret = $("'.$ngrid.'").getRowData(id);
 					$.post("'.site_url('inventario/sinv/barrasform')."/".'"+id,
 					function(data){
 						$("#fshow").html(data);
@@ -852,15 +890,15 @@ class Sinv extends Controller {
 		$bodyscript .= '
 		$("#hinactivo").click( function(){
 			if (verinactivos==0){ verinactivos=1; } else { verinactivos=0;};
-			$("#newapi'.$grid0.'").jqGrid(\'setGridParam\', {postData: { verinactivos: verinactivos }})
-			$("#newapi'.$grid0.'").trigger("reloadGrid");
+			$("'.$ngrid.'").jqGrid(\'setGridParam\', {postData: { verinactivos: verinactivos }})
+			$("'.$ngrid.'").trigger("reloadGrid");
 			//alert("inactivo="+verinactivos);
 		});';
 
 		// Kardex
 		$bodyscript .= '
 		$("#kardex").click( function(){
-			var id     = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				window.open(\''.site_url("inventario/kardex/kardexpres").'/\'+id, \'_blank\', \'width=420,height=450,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-225), screeny=((screen.availWidth/2)-250)\');
 			} else {
@@ -874,7 +912,7 @@ class Sinv extends Controller {
 		// Detalle del Registro
 		$bodyscript .= '
 		function detalle(mid){
-			var ret = $("#newapi'.$grid0.'").getRowData(mid);
+			var ret = $("'.$ngrid.'").getRowData(mid);
 			var mSalida = "<table width=\'100%\' style=\'background:#AAAAAA\'>"
 			var mClaser = "<tr class=\'littletablerow\'>";
 			var mClaseh = "<tr class=\'littletableheaderc\'>";
@@ -946,7 +984,7 @@ class Sinv extends Controller {
 		// Etiquetas
 		$bodyscript .= '
 		function etiquetas(){
-			var s = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selarrrow\');
+			var s = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selarrrow\');
 			$.prompt(
 			"<h1>Generar Etiquetas:</h1><br/><center>Cantidad: <input class=\'inputnum\' type=\'text\' id=\'mcantidad\' name=\'mcantidad\' value=\'1\' size=\'3\' />&nbsp;&nbsp; Forma: '.$etiq.' Tipo: <select id=\'mtipo\' name=\'mtipo\'><option value=\'A\'>A</option><option value=\'B\'>B</option></select></center><br/>",
 			{
@@ -969,10 +1007,10 @@ class Sinv extends Controller {
 
 		$bodyscript .= '
 		function sinvdel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				if(confirm(" Seguro desea anular el registro?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					var ret    = $("'.$ngrid.'").getRowData(id);
 					mId = id;
 					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
 						$("#fedita").html("");
@@ -981,7 +1019,7 @@ class Sinv extends Controller {
 							autoOpen: false, height: 350, width: 300, modal: true,
 							buttons: {"Aceptar": function() {
 								$( this ).dialog( "close" );
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+								jQuery("'.$ngrid.'").trigger("reloadGrid");
 							}}
 						});
 						$("#fborra").dialog( "open" );
@@ -2519,6 +2557,7 @@ class Sinv extends Controller {
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
 		$grid->setMultiSelect(true);
+		$grid->setOndblClickRow('');
 
 		$grid->setOnSelectRow('
 			function(id){
@@ -2529,17 +2568,14 @@ class Sinv extends Controller {
 					var codqr = "<div class=\'botones\'><button class=\'anexos\' onclick=\'codqr();\'>Etiqueta</button></div>";
 					if ( ret.url.length > 12 )
 						sitio = "<button onclick=\'irurl();\'>Pagina Web</button>";
-
 					$("#ladicional").html("<center><img src=\'"+url+"\' width=\'160\' ondblclick=\'verfotos()\' ><br>"+codqr+sitio+"<center><div id=\'textofoto\' style=\'text-align:center;\'></div>");
-
 					$("#radicional").html(detalle(id));
 					$.get(\''.site_url("inventario/sinv/sinvitems").'/\'+id,
 						function(data){
 							$("#itsinv").html(data);
 					});
 				}
-			}
-		');
+			}');
 
 
 		$grid->setAfterInsertRow('
@@ -2558,9 +2594,9 @@ class Sinv extends Controller {
 		');
 
 
-		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
-		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
-		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
+		//$grid->setFormOptionsE('-');  //'closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		//$grid->setFormOptionsA('-');  //'closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		//$grid->setAfterSubmit('-');   //"$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
 		$grid->setAdd(    $this->datasis->sidapuede('SINV','INCLUIR%' ));
@@ -2782,6 +2818,8 @@ class Sinv extends Controller {
 		}
 
 		$edit = new DataDetails('Maestro de Inventario', $do);
+		$edit->on_save_redirect=false;
+
 		$edit->pre_process( 'insert','_pre_insert');
 		$edit->pre_process( 'update','_pre_inserup');
 		$edit->pre_process( 'delete','_pre_del'    );
@@ -3511,18 +3549,27 @@ class Sinv extends Controller {
 		$edit->button_status('btn_add_sinvplabor','Agregar','javascript:add_sinvplabor()','LA','create','button_add_rel');
 		$edit->button_status('btn_add_sinvplabor','Agregar','javascript:add_sinvplabor()','LA','modify','button_add_rel');
 
-		//$edit->buttons('modify', 'save', 'undo', 'delete', 'add','back');
 		$edit->build();
 
 		$mcodigo = $edit->codigo->value;
 		$mfdesde = $this->datasis->dameval("SELECT ADDDATE(MAX(fecha),-30) FROM costos WHERE codigo='".addslashes($mcodigo)."'");
 		$mfhasta = $this->datasis->dameval("SELECT MAX(fecha) FROM costos WHERE codigo='".addslashes($mcodigo)."'");
 
+		if($edit->on_success()){
+			$rt=array(
+				'status' => 'A',
+				'mensaje'=> 'Registro guardado',
+				'pk'     => $edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form']  =& $edit;
+			$this->load->view('view_sinv', $conten );
+		}
 
-		$conten['form']  =& $edit;
-
-		$this->load->view('view_sinv', $conten );
 	}
+
+
 
 	function chminven($val){
 		$min=intval($val);

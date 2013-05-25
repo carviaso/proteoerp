@@ -1208,10 +1208,10 @@ class Scli extends validaciones {
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(true);
+		$grid->setAdd(    $this->datasis->sidapuede('SCLI','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('SCLI','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('SCLI','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('SCLI','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
