@@ -360,4 +360,3 @@ jQuery("#bcopiar").click( function(){
 	}
 
 }
-?>

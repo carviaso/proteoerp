@@ -14,7 +14,7 @@ $scampos .='<td class="littletablerow" align="left" >'.$campos['descrip']['field
 $scampos .='<td class="littletablerow" align="right">'.$campos['cant']['field']   .'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['saldo']['field']  .'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['entrega']['field'].'</td>';
-$scampos .='<td class="littletablerow"><a href=\'#\' onclick="del_itsnot(<#i#>);return false;">'.img('images/delete.jpg').'</a></td>';
+//$scampos .='<td class="littletablerow"><a href=\'#\' onclick="del_itsnot(<#i#>);return false;">'.img('images/delete.jpg').'</a></td>';
 $campos=$form->js_escape($scampos);
 
 if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
@@ -66,16 +66,15 @@ $(function(){
 			setTimeout(function() {  $("#cod_cli").removeAttr("readonly"); }, 1500);
 		}
 	});
-});
 
-//Agrega el autocomplete
-function autocod(id){
-	$('#codigo_'+id).autocomplete({
+
+
+	$('#factura').autocomplete({
 		delay: 600,
 		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
+				url:  "<?php echo site_url('ajax/buscasfacdev'); ?>",
 				type: "POST",
 				dataType: "json",
 				data: {"q":req.term},
@@ -83,19 +82,21 @@ function autocod(id){
 					function(data){
 						var sugiere = [];
 						if(data.length==0){
-							$('#codigoa_'+id).val('')
-							$('#desca_'+id).val('');
-							$('#precio1_'+id).val('');
-							$('#precio2_'+id).val('');
-							$('#precio3_'+id).val('');
-							$('#precio4_'+id).val('');
-							$('#itiva_'+id).val('');
-							$('#sinvtipo_'+id).val('');
-							$('#sinvpeso_'+id).val('');
-							$('#pond_'+id).val('');
-							$('#ultimo_'+id).val('');
-							$('#cana_'+id).val('');
-							post_modbus_sinv(id);
+							$('#factura').val('');
+
+							$('#nombre').val('');
+							$('#nombre_val').text('');
+
+							$('#rifci').val('');
+							$('#rifci_val').text('');
+
+							$('#cod_cli').val('');
+							$('#cod_cli_val').text('');
+
+							$('#fechafa').val('');
+							$('#fechafa_val').text('');
+
+							truncate();
 						}else{
 							$.each(data,
 								function(i, val){
@@ -109,29 +110,50 @@ function autocod(id){
 		},
 		minLength: 2,
 		select: function( event, ui ) {
-			$('#codigoa_'+id).attr("readonly", "readonly");
+			$('#factura').attr("readonly", "readonly");
+			$('#factura').val(ui.item.value);
 
-			$('#codigoa_'+id).val(ui.item.codigo);
-			$('#desca_'+id).val(ui.item.descrip);
-			$('#precio1_'+id).val(ui.item.base1);
-			$('#precio2_'+id).val(ui.item.base2);
-			$('#precio3_'+id).val(ui.item.base3);
-			$('#precio4_'+id).val(ui.item.base4);
-			$('#itiva_'+id).val(ui.item.iva);
-			$('#sinvtipo_'+id).val(ui.item.tipo);
-			$('#sinvpeso_'+id).val(ui.item.peso);
-			$('#pond_'+id).val(ui.item.pond);
-			$('#ultimo_'+id).val(ui.item.ultimo);
-			$('#cana_'+id).val('1');
-			$('#cana_'+id).focus();
-			$('#cana_'+id).select();
+			$('#nombre').val(ui.item.nombre);
+			$('#nombre_val').text(ui.item.nombre);
 
-			post_modbus_sinv(Number(id));
+			$('#fechafa').val(ui.item.fecha);
+			$('#fechafa_val').text(ui.item.fecha);
 
-			setTimeout(function() {  $('#codigo_'+id).removeAttr("readonly"); }, 1500);
+			$('#cod_cli').val(ui.item.cod_cli);
+			$('#cod_cli_val').text(ui.item.cod_cli);
+
+			truncate();
+			$.ajax({
+				url: "<?php echo site_url('ajax/buscasinvsnot'); ?>",
+				dataType: 'json',
+				type: 'POST',
+				data: {"q":ui.item.value},
+				success: function(data){
+					$.each(data,
+						function(id, val){
+							add_itsnot();
+							$('#codigo_'+id).val(val.codigo);
+							$('#codigo_'+id+'_val').text(val.codigo);
+							$('#descrip_'+id).val(val.descrip);
+							$('#descrip_'+id+'_val').text(val.descrip);
+							$('#cant_'+id).val(val.cant);
+							$('#cant_'+id+'_val').text(nformat(val.cant,2));
+							$('#saldo_'+id).val(val.saldo);
+							$('#saldo_'+id+'_val').text(nformat(val.saldo,2));
+						}
+					);
+				},
+			});
+			setTimeout(function() {  $("#factura").removeAttr("readonly"); }, 1500);
 		}
 	});
+});
+
+function truncate(){
+	$('tr[id^="tr_itsnot_"]').remove();
+	itsnot_cont = 0;
 }
+
 
 function add_itsnot(){
 	var htm = <?php echo $campos; ?>;
@@ -139,9 +161,11 @@ function add_itsnot(){
 	con = (itsnot_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
 	htm = htm.replace(/<#o#>/g,con);
-	$("#__PTPL__").after(htm);
+	$("#__UTPL__").before(htm);
 	$("#cant_"+can).numeric(".");
+	$("#entrega_"+can).numeric(".");
 	itsnot_cont=itsnot_cont+1;
+	return can;
 }
 function del_itsnot(id){
 	id = id.toString();
@@ -161,7 +185,7 @@ function del_itsnot(id){
 				<th colspan='5' class="littletableheaderdet">Nota de Despacho <b><?php if($form->_status=='show' or $form->_status=='modify' ) echo str_pad($form->numero->output,8,0,0); ?></b></th>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?php echo $form->factura->label;  ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->factura->label;  ?>*&nbsp;</td>
 				<td class="littletablerow"   ><?php echo $form->factura->output; ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->cliente->label;  ?>&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->cliente->output; ?>&nbsp;</td>
@@ -171,11 +195,11 @@ function del_itsnot(id){
 				<td class="littletableheader"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->fecha->output;   ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->fechafa->label   ?>&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->fechafa->output  ?>&nbsp;</td>
+				<td class="littletablerow" colspan='2'><?php echo $form->fechafa->output  ?>&nbsp;</td>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?php echo $form->peso->label  ?>&nbsp;</td>
-				<td class="littletablerow" align="left"><?php echo $form->peso->output ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->tipo->label  ?>&nbsp;</td>
+				<td class="littletablerow" align="left"><?php echo $form->tipo->output ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->observa1->label  ?>&nbsp;</td>
 				<td class="littletablerow" colspan='2'><?php echo $form->observa1->output ?>&nbsp;</td>
 			</tr>
@@ -184,7 +208,7 @@ function del_itsnot(id){
 	</tr>
 	<tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:190px'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px'>
 		<table width='100%'>
 			<tr  id='__PTPL__'>
 				<td class="littletableheaderdet">C&oacute;digo</td>
@@ -192,9 +216,6 @@ function del_itsnot(id){
 				<td class="littletableheaderdet">Cantidad</td>
 				<td class="littletableheaderdet">Saldo</td>
 				<td class="littletableheaderdet">Entrega</td>
-				<?php if($form->_status!='show') {?>
-					<td class="littletableheaderdet">&nbsp;</td>
-				<?php } ?>
 			</tr>
 
 			<?php for($i=0;$i<$form->max_rel_count['itsnot'];$i++){
@@ -203,7 +224,6 @@ function del_itsnot(id){
 				$it_cant    = "cant_${i}";
 				$it_saldo   = "saldo_${i}";
 				$it_entrega = "entrega_${i}";
-				$it_fact    = "itfactura_${i}";
 			?>
 
 			<tr id='tr_itsnot_<?php echo $i; ?>'>
@@ -212,11 +232,11 @@ function del_itsnot(id){
 				<td class="littletablerow" align="right"><?php echo $form->$it_cant->output;    ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_saldo->output;   ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_entrega->output; ?></td>
-				<?php if($form->_status!='show') {?>
-				<td class="littletablerow"><a href='#' onclick="del_itsnot(<?php echo $i; ?>);return false;"><?php echo img('images/delete.jpg'); ?></a></td>
-				<?php } ?>
 			</tr>
 			<?php } ?>
+			<tr id='__UTPL__'>
+				<td colspan='5'></td>
+			</tr>
 		</table>
 		</div>
 		<?php echo $container_bl.$container_br.$form_end; ?>

@@ -46,7 +46,7 @@ class Sfac extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
 			array('id'=>'fedita' , 'title'=>'Agregar/Editar Registro'),
@@ -1119,7 +1119,7 @@ class Sfac extends Controller {
 		$grid->setSearch($this->datasis->sidapuede('SFAC','BUSQUEDA%'));
 
 		$grid->setRowNum(30);
-		$grid->setBarOptions("addfunc: sfacadd, editfunc: sfacedit, delfunc: sfacdel, viewfunc: sfacshow");
+		$grid->setBarOptions('addfunc: sfacadd, editfunc: sfacedit, delfunc: sfacdel, viewfunc: sfacshow');
 		$grid->setShrinkToFit('false');
 
 		#Set url

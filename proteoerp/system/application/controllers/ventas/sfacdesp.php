@@ -254,6 +254,7 @@ class sfacdesp extends Controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
+	//Despacho masivo
 	function procesar(){
 		//print_r($_POST);
 		foreach($_POST['despacha'] as $fila){
@@ -266,6 +267,7 @@ class sfacdesp extends Controller {
 		redirect('ventas/sfacdesp/filteredgrid/search/osp');
 	}
 
+	//Despacho parcial
 	function activar(){
 		$numero  = $this->db->escape($this->input->post('numa'));
 		$codigo  = $this->db->escape($this->input->post('codigoa'));

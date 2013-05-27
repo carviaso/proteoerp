@@ -897,7 +897,7 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
-	//Busca facturas para aplicarles devolucion
+	//Busca facturas para aplicarles devolucion o nota de despacho
 	//
 	function buscasfacdev(){
 		$mid   = $this->input->post('q');
@@ -910,19 +910,20 @@ class Ajax extends Controller {
 		if($mid !== false){
 			$retArray = $retorno = array();
 
-			$mSQL="SELECT a.numero, a.totalg, a.cod_cli, a.nombre,b.rifci, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.tipo, b.dire11 AS direc
+			$mSQL="SELECT a.numero, a.totalg, a.cod_cli, a.nombre,b.rifci, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.tipo, b.dire11 AS direc,a.fecha
 				FROM  sfac AS a
 				JOIN scli AS b ON a.cod_cli=b.cliente
-				WHERE a.numero LIKE $qdb AND a.tipo_doc='F' AND MID(a.numero,1,1)<>'_'
+				WHERE a.numero LIKE ${qdb} AND a.tipo_doc='F' AND MID(a.numero,1,1)<>'_'
 				ORDER BY numero DESC LIMIT ".$this->autolimit;
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']   = $row['numero'].'-'.$row['nombre'].' '.$row['totalg'].' Bs.';
+					$retArray['label']   = utf8_encode($row['numero'].'-'.$row['nombre'].' '.$row['totalg'].' Bs.');
 					$retArray['value']   = $row['numero'];
 					$retArray['cod_cli'] = $row['cod_cli'];
 					$retArray['rifci']   = $row['rifci'];
+					$retArray['fecha']   = $this->_datehuman($row['fecha']);
 					$retArray['tipo']    = $row['tipo'];
 					$retArray['direc']   = utf8_encode($row['direc']);
 					$retArray['nombre']  = utf8_encode($row['nombre']);
@@ -934,12 +935,17 @@ class Ajax extends Controller {
 				$retArray[0]['label']   = 'No se consiguieron facturas para aplicar';
 				$retArray[0]['value']   = '';
 				$retArray[0]['cod_cli'] = '';
+				$retArray[0]['rifci']   = '';
+				$retArray[0]['fecha']   = '';
+				$retArray[0]['tipo']    = '';
 				$retArray[0]['nombre']  = '';
+				$retArray[0]['direc']   = '';
 				$data = json_encode($retArray);
 			}
 		}
 		echo $data;
 	}
+
 
 	//******************************************************************
 	//Busca las formas de pago de una factura para devolverlos
@@ -1031,6 +1037,66 @@ class Ajax extends Controller {
 		}
 		echo $data;
 	}
+
+	//******************************************************************
+	//Busca los articulos de una factura para despacharlos
+	//
+	function buscasinvsnot(){
+		$mid = $this->input->post('q');
+
+		$data = '[]';
+		if($mid !== false){
+			$dbfactura = $this->db->escape($mid);
+			$retArray = $retorno = array();
+			$mSQL="SELECT a.codigoa, a.desca, a.cana,SUM(IF(d.tipo='D',-1,1)*e.entrega) AS entregado
+			FROM (
+				SELECT  aa.codigoa, aa.desca,aa.numa, SUM(aa.cana) AS cana
+				FROM sitems AS aa
+				WHERE aa.numa=${dbfactura} AND aa.tipoa='F' AND aa.despacha='N'
+				GROUP BY aa.codigoa
+			) AS a
+			JOIN sinv   AS c ON a.codigoa=c.codigo AND c.tipo='Articulo'
+			LEFT JOIN itsnot AS e ON a.numa=e.factura AND e.codigo=a.codigoa
+			LEFT JOIN snot   AS d ON  d.numero=e.numero
+			GROUP BY a.codigoa
+			ORDER BY a.desca";
+
+			//Restas las devoluciones
+			$arr_devolu=array();
+			$mSQL_2="SELECT  aa.codigoa, SUM(aa.cana) AS cana
+				FROM sitems AS aa
+				JOIN sfac   AS bb ON bb.tipo_doc=aa.tipoa AND aa.numa=bb.numero
+				WHERE bb.factura=${dbfactura} AND bb.tipo_doc='D'
+				GROUP BY aa.codigoa";
+			$query = $this->db->query($mSQL_2);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as $row ) {
+					$arr_devolu[$row->codigoa]=$row->cana;
+				}
+			}
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $id=>$row ) {
+					$codigo = $row['codigoa'];
+					if(empty($row['entregado'])) $row['entregado']=0;
+					if(isset($arr_devolu[$codigo])) $row['entregado'] += $arr_devolu[$codigo];
+					if(empty($row['cana']))      $row['cana'] =0;
+					$saldo = $row['cana']-$row['entregado'];
+					if($saldo <=0) continue;
+
+					$retArray['codigo']  = utf8_encode(trim($row['codigoa']));
+					$retArray['descrip'] = utf8_encode(trim($row['desca']));
+					$retArray['saldo']   = $saldo;
+					$retArray['cant']    = $row['cana'];
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
 
 	//******************************************************************
 	//Busca los articulos que esten por rma

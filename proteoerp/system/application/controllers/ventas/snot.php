@@ -53,7 +53,7 @@ class Snot extends Controller {
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$param['WestPanel']    = $WestPanel;
-		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		$param['script']       = '';
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
@@ -182,7 +182,7 @@ class Snot extends Controller {
 									apprise("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/SNOT').'/\'+res.id+\'/id\'').';
+									'.$this->datasis->jwinopen(site_url('formatos/ver/SNOT').'/\'+json.pk.id+\'/id\'').';
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -786,13 +786,15 @@ class Snot extends Controller {
 	*/
 	function getdatait( $id = 0 ){
 		if ($id === 0 ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM snot");
+			$id = $this->datasis->dameval('SELECT MAX(id) FROM snot');
 		}
 		if(empty($id)) return '';
-		$numero   = $this->datasis->dameval("SELECT numero FROM snot WHERE id=$id");
+		$dbid   = $this->db->escape($id);
+		$numero = $this->datasis->dameval('SELECT numero FROM snot WHERE id='.$dbid);
+		$dbnumero= $this->db->escape($numero);
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itsnot WHERE numero='$numero' ";
+		$mSQL    = 'SELECT * FROM itsnot WHERE numero='.$dbnumero;
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
@@ -822,7 +824,7 @@ class Snot extends Controller {
 			'titulo'  => 'Buscar Articulo',
 			'where'   => '`activo` = "S" AND `tipo` = "Articulo"'
 		);
-		$boton=$this->datasis->p_modbus($modbusSinv,'<#i#>');
+		//$boton=$this->datasis->p_modbus($modbusSinv,'<#i#>');
 
 		$modbus=array(
 			'tabla'   =>'sfac',
@@ -848,7 +850,7 @@ class Snot extends Controller {
 			),
 			'titulo'  => 'Buscar Factura',
 		);
-		$btn=$this->datasis->modbus($modbus);
+		//$btn=$this->datasis->modbus($modbus);
 
 		$do = new DataObject('snot');
 		$do->rel_one_to_many('itsnot', 'itsnot', 'numero');
@@ -875,6 +877,7 @@ class Snot extends Controller {
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
+		$edit->fecha->rule = 'required|chfecha';
 		$edit->fecha->mode = 'autohide';
 		$edit->fecha->calendar=false;
 		$edit->fecha->size = 10;
@@ -886,27 +889,39 @@ class Snot extends Controller {
 		$edit->numero->apply_rules=false; //necesario cuando el campo es clave y no se pide al usuario
 		$edit->numero->when=array('show','modify');
 
+		$edit->tipo = new  dropdownField('Tipo', 'tipo');
+		$edit->tipo->option('E','Entrega');
+		$edit->tipo->option('D','Devoluci&oacute;n');
+		$edit->tipo->style='width:140px;';
+		$edit->tipo->size = 5;
+		$edit->tipo->rule='required|enum[D,E]';
+		$edit->tipo->insertValue='E';
+
 		$edit->fechafa = new DateonlyField('Fecha Factura', 'fechafa','d/m/Y');
-		$edit->fechafa->insertValue = date('Y-m-d');
-		$edit->fechafa->rule = 'required';
+		$edit->fechafa->rule = 'required|chfecha';
 		$edit->fechafa->mode = 'autohide';
 		$edit->fechafa->calendar=false;
 		$edit->fechafa->size = 10;
+		$edit->fechafa->type = 'inputhidden';
 
 		$edit->factura = new inputField('Factura', 'factura');
 		$edit->factura->size = 10;
 		$edit->factura->mode='autohide';
 		$edit->factura->maxlength=8;
-		$edit->factura->append($btn);
+		$edit->factura->rule='required|existefac|callback_chsnte';
+		//$edit->factura->append($btn);
 
 		$edit->peso = new inputField('Peso', 'peso');
 		$edit->peso->css_class = 'inputnum';
 		$edit->peso->readonly  = true;
 		$edit->peso->size      = 10;
+		$edit->peso->type = 'inputhidden';
 
 		$edit->cliente = new inputField('Cliente','cod_cli');
 		$edit->cliente->size = 6;
 		$edit->cliente->maxlength=5;
+		$edit->cliente->type = 'inputhidden';
+		$edit->cliente->rule = 'required|callback_chsclifa';
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->size = 25;
@@ -922,54 +937,60 @@ class Snot extends Controller {
 		//**************************
 		//  Campos para el detalle
 		//**************************
-		$edit->codigo = new inputField('C&oacute;digo <#o#>', 'codigo_<#i#>');
+		$edit->codigo = new inputField('C&oacute;digo', 'codigo_<#i#>');
 		$edit->codigo->size     = 12;
 		$edit->codigo->db_name  = 'codigo';
 		$edit->codigo->readonly = true;
 		$edit->codigo->rel_id   = 'itsnot';
-		$edit->codigo->rule     = 'required|callback_chrepetidos';
-		$edit->codigo->append($boton);
+		$edit->codigo->rule     = 'required|existesinv|callback_chrepetidos';
+		$edit->codigo->type     = 'inputhidden';
+		//$edit->codigo->append($boton);
 
-		$edit->descrip = new inputField('Descripci&oacute;n <#o#>', 'descrip_<#i#>');
+		$edit->descrip = new inputField('Descripci&oacute;n', 'descrip_<#i#>');
 		$edit->descrip->size=36;
 		$edit->descrip->db_name='descrip';
 		$edit->descrip->maxlength=50;
 		$edit->descrip->readonly  = true;
 		$edit->descrip->rel_id='itsnot';
+		$edit->descrip->type = 'inputhidden';
 
-		$edit->cant = new inputField('Cantidad <#o#>', 'cant_<#i#>');
-		$edit->cant->db_name  = 'cant';
-		$edit->cant->css_class= 'inputnum';
-		$edit->cant->rel_id   = 'itsnot';
-		$edit->cant->maxlength= 10;
-		$edit->cant->size     = 6;
-		$edit->cant->rule     = 'required|positive';
+		$edit->cant = new inputField('Cantidad', 'cant_<#i#>');
+		$edit->cant->db_name   = 'cant';
+		$edit->cant->css_class = 'inputnum';
+		$edit->cant->rel_id    = 'itsnot';
+		$edit->cant->maxlength = 10;
+		$edit->cant->size      = 6;
+		$edit->cant->rule      = 'required|positive|numeric';
+		$edit->cant->type      = 'inputhidden';
+		$edit->cant->showformat= 'decimal';
 		$edit->cant->autocomplete=false;
 
-		$edit->saldo = new inputField('Saldo <#o#>', 'saldo_<#i#>');
-		$edit->saldo->db_name  = 'saldo';
-		$edit->saldo->css_class= 'inputnum';
-		$edit->saldo->rel_id   = 'itsnot';
-		$edit->saldo->maxlength= 10;
-		$edit->saldo->size     = 6;
-		$edit->saldo->rule     = 'required|positive';
+		$edit->saldo = new inputField('Saldo', 'saldo_<#i#>');
+		$edit->saldo->db_name   = 'saldo';
+		$edit->saldo->css_class = 'inputnum';
+		$edit->saldo->rel_id    = 'itsnot';
+		$edit->saldo->maxlength = 10;
+		$edit->saldo->size      = 6;
+		$edit->saldo->showformat= 'decimal';
+		$edit->saldo->rule      = 'required|positive|numeric';
+		$edit->saldo->type      = 'inputhidden';
 		$edit->saldo->autocomplete=false;
 
-		$edit->entrega = new inputField('Entrega <#o#>', 'entrega_<#i#>');
-		$edit->entrega->db_name  = 'entrega';
-		$edit->entrega->css_class= 'inputnum';
-		$edit->entrega->rel_id   = 'itsnot';
-		$edit->entrega->maxlength= 10;
-		$edit->entrega->size     = 6;
-		$edit->entrega->rule     = 'required|positive';
+		$edit->entrega = new inputField('Entrega', 'entrega_<#i#>');
+		$edit->entrega->db_name   = 'entrega';
+		$edit->entrega->css_class = 'inputnum';
+		$edit->entrega->rel_id    = 'itsnot';
+		$edit->entrega->maxlength = 10;
+		$edit->entrega->size      = 6;
+		$edit->entrega->rule      = 'positive|numeric|callback_chitems[<#i#>]';
+		$edit->entrega->showformat='decimal';
 		$edit->entrega->autocomplete=false;
 
-		$edit->itfactura = new inputField('Factura <#o#>', 'itfactura_<#i#>');
-		$edit->itfactura->size     = 12;
-		$edit->itfactura->db_name  = 'factura';
-		$edit->itfactura->readonly = true;
-		$edit->itfactura->rel_id   = 'itsnot';
-		$edit->itfactura->append($boton);
+		//$edit->itfactura = new inputField('Factura <#o#>', 'itfactura_<#i#>');
+		//$edit->itfactura->size     = 12;
+		//$edit->itfactura->db_name  = 'factura';
+		//$edit->itfactura->readonly = true;
+		//$edit->itfactura->rel_id   = 'itsnot';
 		//**************************
 		//fin de campos para detalle
 		//**************************
@@ -979,7 +1000,7 @@ class Snot extends Controller {
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
 		//$edit->buttons('save', 'undo', 'delete', 'back','add_rel');
-		$edit->buttons('add_rel');
+		//$edit->buttons('add_rel');
 		$edit->build();
 
 		if($edit->on_success()){
@@ -993,11 +1014,112 @@ class Snot extends Controller {
 			$conten['form']  =&  $edit;
 			$data['content'] = $this->load->view('view_snot', $conten);
 		}
+	}
+
+	function chsclifa($scli){
+		$factura  = $this->input->post('factura');
+		$dbfactura= $this->db->escape($factura);
+		$mSQL='SELECT TRIM(cliente) AS cliente FROM sfac WHERE tipo_doc="F" AND numero='.$dbfactura;
+		$cliente=$this->datasis->dameval($mSQL);
+		if($scli==$cliente){
+			return true;
+		}
+
+		$this->validation->set_message('chsclifa', 'El cliente '.$scli.' no pertenece a la factura selecionada.');
+		return false;
+	}
+
+	function chfechafa($fecha){
+		//falta implementar
+		return true;
+		$factura = $this->input->post('factura');
+		$dbfactura= $this->db->escape($factura);
+		$mSQL='SELECT fecha AS cliente FROM sfac WHERE tipo_doc="F" AND numero='.$dbfactura;
+		$fechafa=$this->datasis->dameval($mSQL);
+		if($fecha==$fechafa){
+			return true;
+		}
+
+		$this->validation->set_message('chfechafa', 'La fecha '.$fecha.' no pertenece a la factura selecionada.');
+		return false;
+	}
+
+	function chitems($val,$i){
+		$factura = $this->input->post('factura');
+		$codigo  = $this->input->post('codigo_'.$i);
+		$tipo    = $this->input->post('tipo');
+		if($tipo!='D'){
+			$dbcodigo =$this->db->escape($codigo );
+			$dbfactura=$this->db->escape($factura);
+
+			$facturado= $this->datasis->dameval("SELECT SUM(cana) AS cana FROM sitems WHERE tipoa='F' AND numa=${dbfactura} AND codigoa=${dbcodigo}");
+			$entregado= $this->datasis->dameval("SELECT SUM(IF(b.tipo='D',-1,1)*a.entrega) AS cana FROM itsnot AS a JOIN snot AS b ON a.numero=b.numero WHERE b.factura=${dbfactura} AND a.codigo=${dbcodigo}");
+			$devuelto = $this->datasis->dameval("SELECT SUM(a.cana) AS cana FROM sitems AS a JOIN sfac AS b ON a.numa=b.numero AND a.tipoa=b.tipo_doc WHERE b.tipo_doc='D' AND b.factura=${dbfactura} AND a.codigoa=${dbcodigo}");
+
+			if(empty($facturado)){
+				$this->validation->set_message('chitems', 'El articulo '.$codigo.' no pertenece a la factura '.$factura.'.');
+				return false;
+			}
+			if(empty($entregado)){ $entregado=0; }
+			if(empty($devuelto)) { $devuelto =0; }
+			if(empty($val))      { $val=0;       }
+
+			$saldo    = $facturado-$entregado-$devuelto;
+			if($val > $saldo){
+				$this->validation->set_message('chitems', 'Esta intentado entregar mas unidades de articulo '.$codigo.' de las que corresponde ( Max. '.($saldo).').');
+				return false;
+			}
+		}
+		//$this->validation->set_message('chitems',"$facturado-$entregado-$devuelto");
+		return true;
+	}
+
+	function chsnte($factura){
+		$dbfactura= $this->db->escape($factura);
+		$cana=$this->datasis->dameval('SELECT COUNT(*) AS val FROM snte WHERE factura='.$dbfactura);
+		if(empty($cana)){
+			return true;
+		}
+		$this->validation->set_message('chsnte', 'La factura que esta intentando despachar tiene una nota de entrega, por lo tanto se asume que ya fue despachada.');
+		return false;
 
 	}
 
+	function chrepetidos($cod){
+		if(!isset($this->chrepetidos)) $this->chrepetidos=array();
+		if(array_search($cod, $this->chrepetidos)===false){
+			$this->chrepetidos[]=$cod;
+			return true;
+		}else{
+			$this->validation->set_message('chrepetidos', 'El art&iacute;culo '.$cod.' esta repetido');
+			return false;
+		}
+	}
+
 	function _pre_insert($do){
-		$do->error_message_ar['pre_ins']='';
+		$factura  = $do->get('factura');
+
+		$canar= 0;
+		$cana = $do->count_rel('itsnot');
+		for($i = 0;$i < $cana;$i++){
+			$codigoa   = $do->get_rel('itsnot', 'codigo' , $i);
+			$itcant    = $do->get_rel('itsnot', 'cant'   , $i);
+			$itentrega = $do->get_rel('itsnot', 'entrega', $i);
+
+			if(empty($itentrega)){
+				$do->rel_rm('itsnot',$i);
+				continue;
+			}
+			$canar++;
+			$do->set_rel('itsnot', 'factura' , $factura, $i);
+		}
+		if($canar<=0){
+			$do->error_message_ar['pre_ins']='Debe tener al menos un articulo para despachar.';
+			return false;
+		}
+		$numero = $this->datasis->fprox_numero('nsnot');
+		$do->set('numero',$numero);
+
 		return true;
 	}
 
@@ -1007,23 +1129,23 @@ class Snot extends Controller {
 	}
 
 	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
+		$do->error_message_ar['pre_del']='No se puede eliminar una nota de despacho.';
 		return false;
 	}
 
 	function _post_insert($do){
 		$codigo=$do->get('numero');
-		logusu('snot',"Nota Entrega $codigo CREADO");
+		logusu('snot',"Nota Entrega ${codigo} CREADO");
 	}
 
 	function _post_update($do){
 		$codigo=$do->get('numero');
-		logusu('snot',"Nota Entrega $codigo MODIFICADO");
+		logusu('snot',"Nota Entrega ${codigo} MODIFICADO");
 	}
 
 	function _post_delete($do){
 		$codigo=$do->get('numero');
-		logusu('snot',"Nota Entrga $codigo ELIMINADO");
+		logusu('snot',"Nota Entrga ${codigo} ELIMINADA");
 	}
 
 	function grid(){

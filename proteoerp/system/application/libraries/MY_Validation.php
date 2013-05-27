@@ -80,6 +80,22 @@ class MY_Validation extends CI_Validation{
 		}
 	}
 
+	function existefac($numero){
+		$numero  =trim($numero);
+		if(strlen($numero)==0) return true;
+		$dbnumero=$this->CI->db->escape($numero);
+		$mSQL = "SELECT COUNT(*) AS cana FROM sfac WHERE tipo_doc='F' AND numero=${dbnumero}";
+		$this->set_message('existefac', 'La factura introducida en el campo %s no es existe');
+
+		$query = $this->CI->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$row = $query->row();
+			if($row->cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
+
 	function existescli($scli){
 		$dbscli= $this->CI->db->escape($scli);
 		$mSQL  = "SELECT COUNT(*) AS cana FROM scli WHERE cliente=${dbscli}";
