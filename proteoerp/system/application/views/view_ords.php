@@ -1,73 +1,66 @@
 <?php
 
-$container_bl=join("&nbsp;", $form->_button_container["BL"]);
-$container_br=join("&nbsp;", $form->_button_container["BR"]);
-$container_tr=join("&nbsp;", $form->_button_container["TR"]);
+$container_bl=join('&nbsp;', $form->_button_container['BL']);
+$container_br=join('&nbsp;', $form->_button_container['BR']);
+$container_tr=join('&nbsp;', $form->_button_container['TR']);
 
 if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	echo $form->output;
 else:
- 
+
 if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>';
 
 echo $form_scripts;
 echo $form_begin?>
-<table align='center'>
+<table align='center' width="100%" >
 	<tr>
 	<td>
 		<table width="100%"  style="margin:0;width:100%;">
 		<tr>
-			<td width="83"  class="littletablerowth"><?php echo $form->fecha->label;   ?></td>
-			<td width="140" class="littletablerow"  ><?php echo $form->fecha->output;  ?></td>
-			<td width="101" class="littletablerowth"><?php echo $form->numero->label;  ?></td>
-			<td             class="littletablerow"  ><?php echo $form->numero->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->proveedor->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->proveedor->output; ?></td>
+			<td class="littletablerowth"><?php echo $form->proveed->label;  ?></td>
+			<td class="littletablerow"  ><?php echo $form->proveed->output; ?></td>
 			<td class="littletablerowth"><?php echo $form->nombre->label;     ?></td>
 			<td class="littletablerow"  ><?php echo $form->nombre->output;    ?></td>
+		</tr><tr>
+			<td class="littletablerowth"><?php echo $form->fecha->label;      ?></td>
+			<td class="littletablerow"  ><?php echo $form->fecha->output;     ?></td>
+			<td class="littletablerowth"><?php echo $form->numero->label;     ?></td>
+			<td class="littletablerow"  ><?php echo $form->numero->output;    ?></td>
 		</tr>
 		</table>
-		<?php echo $form->detalle->output ?>
-		<?php //echo $detalle ?>
-		<table  width="100%" style="margin:0;width:100%;" > 
-		<tr>                                                           
-			<td colspan=10 class="littletableheader">Totales</td>      
-		</tr>                                                          
-			<tr>                                                 
-  	        <td width="89" class="littletablerowth"><?php echo $form->banco->label ?> </td>
-  	        <td width="89" class="littletablerow" ><?php echo $form->banco->output ?> </td>
-  	        <td width="101" class="littletablerowth"><?php echo $form->numero1->label ?> </td>
-  	        <td width="115" class="littletablerow"><?php echo $form->numero1->output ?> </td>
-  	        <td width="87" class="littletablerowth" ><?php echo $form->subtotal->label ?> </td>
-  	        <td width="256" class="littletablerow" ><?php echo $form->subtotal->output ?> </td>
-       </tr>
-       <tr>
-            <td class="littletablerowth"><?php echo $form->tipo->label ?></td>
-		        <td class="littletablerow" ><?php echo $form->tipo->output ?></td>
-            <td class="littletablerowth"><?php echo $form->anticipo->label ?></td>
-		        <td class="littletablerow" ><?php echo $form->anticipo->output ?></td>
-		        <td class="littletablerowth"><?php echo $form->impuesto->label ?></td>
-		        <td class="littletablerow" ><?php echo $form->impuesto->output ?></td>
-        </tr>
-        <tr>
-            <td colspan="2" class="littletablerowth">&nbsp;</td>
-		        <td class="littletablerowth"><?php echo $form->comprob->label ?></td>
-		        <td class="littletablerow" ><?php echo $form->comprob->output ?></td>
-		        <td class="littletablerowth"><?php echo $form->total->label ?></td>
-		        <td class="littletablerow" ><?php echo $form->total->output ?></td>
-        </tr>
-       </table>
-&nbsp;
-      <table  width="100%" style="margin:0;width:100%;">
-	    <tr>
-            <td width="12%" class="littletablerowth"><?php echo $form->beneficiario->label ?></td>
-            <td width="21%" class="littletablerow" ><?php echo $form->beneficiario->output ?></td>
-            <td width="19%" class="littletablerowth"><?php echo $form->condiciones->label ?></td>
-            <td width="48%" colspan="3" class="littletablerow" ><?php echo $form->condiciones->output ?></td>
-       </tr>
-      </table>
+
+
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px'>
+		<table width='100%'>
+			<tr  id='__PTPL__'>
+				<td class="littletableheaderdet">C&oacute;digo</td>
+				<td class="littletableheaderdet">Descripci&oacute;n</td>
+				<td class="littletableheaderdet">Precio</td>
+				<td class="littletableheaderdet">Impuesto</td>
+				<td class="littletableheaderdet">Importe</td>
+			</tr>
+
+			<?php for($i=0;$i<$form->max_rel_count['itords'];$i++){
+				$it_codigo  = "codigo_${i}";
+				$it_descrip = "descrip_${i}";
+				$it_precio  = "precio_${i}";
+				$it_iva     = "iva_${i}";
+				$it_importe = "importe_${i}";
+			?>
+
+			<tr id='tr_itsnot_<?php echo $i; ?>'>
+				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output;  ?></td>
+				<td class="littletablerow" align="left" ><?php echo $form->$it_descrip->output; ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$it_precio->output;  ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$it_iva->output;     ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$it_importe->output; ?></td>
+			</tr>
+			<?php } ?>
+			<tr id='__UTPL__'>
+				<td colspan='5'></td>
+			</tr>
+		</table>
+		</div>
 
 <?php echo $form_end?>
 <?php echo $container_bl ?>

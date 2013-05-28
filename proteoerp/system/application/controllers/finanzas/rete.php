@@ -14,14 +14,8 @@ class Rete extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('rete','concepto') ) {
-			$this->db->simple_query('ALTER TABLE rete ADD COLUMN concepto VARCHAR(10) NULL ');
-		};
-		if ( !$this->datasis->iscampo('rete','id') ) {
-			$this->db->simple_query('ALTER TABLE rete DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE rete ADD UNIQUE INDEX codigo (codigo)');
-			$this->db->simple_query('ALTER TABLE rete ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
+		//$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -32,67 +26,57 @@ class Rete extends Controller {
 	function jqdatag(){
 
 		$grid = $this->defgrid();
-		$param['grid'] = $grid->deploy();
+		$param['grids'][] = $grid->deploy();
 
-		$bodyscript = '
-<script type="text/javascript">
-$(function() {
-	$( "input:submit, a, button", ".otros" ).button();
-});
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
-jQuery("#a1").click( function(){
-	var id = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grid']['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\'/proteoerp/formatos/ver/RETE/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-</script>
-';
+		//Botones Panel Izq
+		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$WestPanel = $grid->deploywestp();
 
-		#Set url
-		$grid->setUrlput(site_url($this->url.'setdata/'));
+		$adic = array(
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$WestPanel = '
-<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-<div class="anexos">
+		$param['WestPanel']   = $WestPanel;
+		//$param['EastPanel'] = $EastPanel;
+		$param['SouthPanel']  = $SouthPanel;
+		$param['listados']    = $this->datasis->listados('RETE', 'JQ');
+		$param['otros']       = $this->datasis->otros('RETE', 'JQ');
+		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['bodyscript']  = $bodyscript;
+		$param['tabs']        = false;
+		$param['encabeza']    = $this->titp;
+		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
+		$this->load->view('jqgrid/crud2',$param);
+	}
 
-<table id="west-grid" align="center">
-	<tr>
-		<td><div class="tema1"><table id="listados"></table></div></td>
-	</tr>
-	<tr>
-		<td><div class="tema1"><table id="otros"></table></div></td>
-	</tr>
-</table>
+	//***************************
+	//Funciones de los Botones
+	//***************************
+	function bodyscript( $grid0 ){
+		$bodyscript = '<script type="text/javascript">';
+		$ngrid      = '#newapi'.$grid0;
 
-<table id="west-grid" align="center">
-	<tr>
-		<td></td>
-	</tr>
-</table>
-</div>
-'.
-//		<td><a style="width:190px" href="#" id="a1">Imprimir Copia</a></td>
-'</div> <!-- #LeftPane -->
-';
+		$bodyscript .= $this->jqdatagrid->bsshow('rete', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'rete', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'rete', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('rete', $ngrid, $this->url );
 
-		$SouthPanel = '
-<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
-<p>'.$this->datasis->traevalor('TITULO1').'</p>
-</div> <!-- #BottomPanel -->
-';
-		$param['WestPanel']  = $WestPanel;
-		//$param['EastPanel']  = $EastPanel;
-		$param['SouthPanel'] = $SouthPanel;
-		$param['listados'] = $this->datasis->listados('RETE', 'JQ');
-		$param['otros']    = $this->datasis->otros('RETE', 'JQ');
-		$param['tema1']     = 'darkness';
-		$param['anexos']    = 'anexos1';
-		$param['bodyscript'] = $bodyscript;
-		$param['tabs'] = false;
-		$param['encabeza'] = $this->titp;
-		$this->load->view('jqgrid/crud',$param);
+		//Wraper de javascript
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
+
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '350', '500' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '350', '500' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
+
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
+		return $bodyscript;
 	}
 
 	//***************************
@@ -100,13 +84,13 @@ jQuery("#a1").click( function(){
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "true";
+		$editar = 'false';
 		$link  = site_url('ajax/buscacpla');
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -117,7 +101,7 @@ jQuery("#a1").click( function(){
 		));
 
 		$grid->addField('activida');
-		$grid->label('Activida');
+		$grid->label('Actividad');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -137,7 +121,7 @@ jQuery("#a1").click( function(){
 			'editrules'     => '{ required:true}',
 			'edittype'      => "'select'",
 			'search'        => 'false',
-			'editoptions'   => '{value: {"JD":"Juridio Domiciliado", "JN":"Juridico No Domiciliado", "NR":"Natural Residente","NN":"Natural No Residente"} }'
+			'editoptions'   => '{value: {"JD":"Juridico Domiciliado", "JN":"Juridico No Domiciliado", "NR":"Natural Residente","NN":"Natural No Residente"} }'
 
 		));
 
@@ -156,7 +140,7 @@ jQuery("#a1").click( function(){
 		));
 
 		$grid->addField('tari1');
-		$grid->label('Retencion%');
+		$grid->label('%Retenci&oacute;n');
 		$grid->params(array(
 			'search'        => 'false',
 			'editable'      => $editar,
@@ -170,7 +154,7 @@ jQuery("#a1").click( function(){
 		));
 
 		$grid->addField('pama1');
-		$grid->label('Exencion');
+		$grid->label('Exenci&oacute;n');
 		$grid->params(array(
 			'search'        => 'false',
 			'editable'      => $editar,
@@ -245,13 +229,15 @@ jQuery("#a1").click( function(){
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
-		#show/hide navigations buttons
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(false);
-		$grid->setRowNum(100);
+		$grid->setOndblClickRow('');
+		$grid->setAdd(    $this->datasis->sidapuede('RETE','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('RETE','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('RETE','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('RETE','BUSQUEDA%'));
+		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions('addfunc: reteadd, editfunc: reteedit, delfunc: retedel, viewfunc: reteshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -269,8 +255,7 @@ jQuery("#a1").click( function(){
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -295,46 +280,203 @@ jQuery("#a1").click( function(){
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$check  = 0;
+	function setData(){
+	}
 
-		unset($data['oper']);
-		unset($data['id']);
-		unset($data['tipodesc']);
+	function dataedit(){
+		$this->rapyd->load('dataedit');
 
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$codigo    = $this->input->post('codigo');
-				$this->db->insert('rete', $data);
-				echo "Registro Agregado";
-				logusu('RETE',"Registro $codigo INCLUIDO");
-			} else
-			echo "Fallo Agregado!!!";
+		$qformato=$this->datasis->formato_cpla();
 
-		} elseif($oper == 'edit') {
-			$codigo    = $this->input->post('codigo');
-			unset($data['codigo']);
-			$this->db->where('id', $id);
-			$this->db->update('rete', $data);
-			logusu('RETE',"Registro $codigo MODIFICADO");
-			echo "Registro Modificado";
+		$mCPLA=array(
+			'tabla'   =>'cpla',
+			'columnas'=>array(
+				'codigo' =>'C&oacute;digo',
+				'descrip'=>'Descripci&oacute;n'),
+			'filtro'  =>array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
+			'retornar'=>array('codigo'=>'cuenta'),
+			'titulo'  =>'Buscar Cuenta',
+			'where'=>"codigo LIKE \"$qformato\"",
+			);
 
-		} elseif($oper == 'del') {
-			$codigo    = $this->input->post('codigo');
-			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM gser WHERE creten='$codigo'");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM rete WHERE id=$id ");
-				logusu('RETE',"Registro $codigo ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+		$bcpla =$this->datasis->modbus($mCPLA);
+
+		$script ='
+		$(function() {
+			$(".inputnum").numeric(".");
+			$("#cuenta").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscacpla').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								$.each(data,
+									function(i, val){
+										sugiere.push( val );
+									}
+								);
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#cuenta").val(ui.item.codigo);
+				}
+			});
+		});';
+
+		$edit = new DataEdit('', 'rete');
+		$edit->on_save_redirect=false;
+		$edit->script($script, 'create');
+		$edit->script($script, 'modify');
+
+		//$edit->pre_process( 'insert','_pre_insert' );
+		//$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+
+		$edit->codigo = new inputField('C&oacute;digo', 'codigo');
+		$edit->codigo->mode='autohide';
+		$edit->codigo->size =7;
+		$edit->codigo->maxlength=4;
+		$edit->codigo->rule ='required|callback_chexiste';
+
+		$edit->activida = new inputField('Actividad', 'activida');
+		$edit->activida->size =40;
+		$edit->activida->maxlength=45;
+		$edit->activida->rule= 'strtoupper|required';
+
+		$edit->tipo =  new dropdownField('Tipo', 'tipo');
+		$edit->tipo->option('JD','Juridico Domiciliado');
+		$edit->tipo->option('JN','Juridico No Domiciliado');
+		$edit->tipo->option('NN','Natural No Residente');
+		$edit->tipo->option('NR','Natural Residente');
+		$edit->tipo->style='width:150px';
+		$edit->tipo->rule='required|enum[JD,JN,NN,NR]';
+
+		$edit->base1 = new inputField('Base Imponible', 'base1');
+		$edit->base1->size =13;
+		$edit->base1->maxlength=9;
+		$edit->base1->css_class='inputnum';
+		$edit->base1->rule='numeric';
+
+		$edit->tari1 =new inputField('Porcentaje de Retenci&oacute;n', 'tari1');
+		$edit->tari1->size =13;
+		$edit->tari1->maxlength=10;
+		$edit->tari1->css_class='inputnum';
+		$edit->tari1->rule='numeric|porcent';
+
+		$edit->pama1 = new inputField('Para pagos mayores a', 'pama1');
+		$edit->pama1->size =13;
+		$edit->pama1->maxlength=13;
+		$edit->pama1->css_class='inputnum';
+		$edit->pama1->rule='numeric';
+
+		$edit->concepto = new inputField('C&oacute;digo Concepto', 'concepto');
+		$edit->concepto->size =5;
+		$edit->concepto->maxlength=5;
+
+		$edit->cuenta = new inputField('Contable', 'cuenta');
+		$edit->cuenta->rule='trim|existecpla';
+		$edit->cuenta->append($bcpla);
+		$edit->cuenta->size=15;
+		$edit->cuenta->maxlength =15;
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+
+	}
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do){
+		$codigo=$this->db->escape($do->get('codigo'));
+		$check =  $this->datasis->dameval("SELECT COUNT(*) AS val FROM gser   WHERE creten     = ${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS val FROM gereten WHERE codigorete= ${codigo}");
+
+		if ($check > 0){
+			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Concepto con movimientos, no puede ser Borrado';
+			return false;
+		}
+		return true;
+	}
+
+	function _post_insert($do){
+		$codigo=$do->get('codigo');
+		$nombre=$do->get('activida');
+		logusu('rete',"RETENCION ${codigo} ${nombre} CREADO");
+	}
+
+	function _post_update($do){
+		$codigo=$do->get('codigo');
+		$nombre=$do->get('activida');
+		logusu('rete',"RETENCION ${codigo} ${nombre} MODIFICADO");
+	}
+
+	function _post_delete($do){
+		$codigo=$do->get('codigo');
+		$nombre=$do->get('activida');
+		logusu('rete',"RETENCION ${codigo} ${nombre}  ELIMINADO ");
+	}
+
+	function chexiste($codigo){
+		$codigo  =$this->input->post('codigo');
+		$dbcodigo=$this->db->escape($codigo);
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM rete WHERE codigo=${dbcodigo}");
+		if ($check > 0){
+			$activida=$this->datasis->dameval("SELECT activida FROM rete WHERE codigo=${dbcodigo}");
+			$this->validation->set_message('chexiste',"La retencion ${codigo} ya existe para la actividad ${activida}");
+			return false;
+		}else {
+			return true;
+		}
+	 }
+
+
+	function instalar(){
+		$campos=$this->db->list_fields('rete');
+
+		if(!in_array('concepto',$campos)){
+			$this->db->simple_query('ALTER TABLE rete ADD COLUMN concepto VARCHAR(10) NULL ');
+		}
+
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE rete DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE rete ADD UNIQUE INDEX codigo (codigo)');
+			$this->db->simple_query('ALTER TABLE rete ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		if(!in_array('ut',$campos)){
+			$mSQL="ALTER TABLE ADD COLUMN ut DECIMAL(12,2) NULL DEFAULT NULL";
+			$this->db->simple_query($mSQL);
+		}
 	}
 }
 

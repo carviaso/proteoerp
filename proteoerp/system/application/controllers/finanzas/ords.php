@@ -13,11 +13,7 @@ class Ords extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('ords','id') ) {
-			$this->db->simple_query('ALTER TABLE ords DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE ords ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE ords ADD UNIQUE INDEX numero (numero)');
-		}
+		$this->instalar();
 		$this->datasis->modintramenu( 900, 650, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -43,19 +39,21 @@ class Ords extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"imprime",  "img"=>"assets/default/images/print.png","alt" => 'Reimprimir', "label"=>"Reimprimir Documento"));
+		$grid->wbotonadd(array('id'=>'imprime',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array("id"=>"fedita" , "title"=>"Agregar/Editar Orden de Servicio"),
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$param['WestPanel']    = $WestPanel;
-		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		$param['script']       = '';
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
@@ -70,48 +68,17 @@ class Ords extends Controller {
 		$param['tamano']       = $this->datasis->getintramenu( substr($this->url,0,-1) );
 		$this->load->view('jqgrid/crud2',$param);
 
-/*
-		$grid = $this->defgrid();
-		$param['grids'][] = $grid->deploy();
-
-		//Funciones que ejecutan los botones
-		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
-
-		#Set url
-		$grid->setUrlput(site_url($this->url.'setdata/'));
-
-		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
-		$WestPanel = $grid->deploywestp();
-
-		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Ordenes de Compra")
-		);
-		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
-
-		$param['WestPanel']   = $WestPanel;
-		//$param['EastPanel'] = $EastPanel;
-		$param['SouthPanel']  = $SouthPanel;
-		$param['listados']    = $this->datasis->listados('ORDS', 'JQ');
-		$param['otros']       = $this->datasis->otros('ORDS', 'JQ');
-		$param['temas']       = array('proteo','darkness','anexos1');
-		$param['bodyscript']  = $bodyscript;
-		$param['tabs']        = false;
-		$param['encabeza']    = $this->titp;
-		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
-		$this->load->view('jqgrid/crud2',$param);
-*/
 	}
 
 	//***************************
 	//Funciones de los Botones
 	//***************************
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
-		function ordsadd() {
-			$.post("'.site_url('finanzas/ords/dataedit/create').'",
+		function ordsadd(){
+			$.post("'.site_url($this->url.'dataedit/create').'",
 			function(data){
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
@@ -119,21 +86,64 @@ class Ords extends Controller {
 		};';
 
 		$bodyscript .= '
-		function ordsedit() {
+		function ordsedit(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
-				$.post("'.site_url('finanzas/ords/dataedit/modify').'/"+id, function(data){
+				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog( "open" );
 				});
-			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
 		};';
 
+		$bodyscript .= '
+		function ordsshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function ordsdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
 		//Wraper de javascript
 		$bodyscript .= '
-		$(function() {
+		$(function(){
 			$("#dialog:ui-dialog").dialog( "destroy" );
 			var mId = 0;
 			var montotal = 0;
@@ -146,37 +156,90 @@ class Ords extends Controller {
 			';
 
 		$bodyscript .= '
-		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 800, modal: true,
-			buttons: {
-			"Guardar": function() {
-				var bValid = true;
-				var murl = $("#df1").attr("action");
-				allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						if ( r.length == 0 ) {
-							apprise("Registro Guardado");
-							$( "#fedita" ).dialog( "close" );
-							grid.trigger("reloadGrid");
-							'.$this->datasis->jwinopen(site_url('formatos/ver/ORDS').'/\'+res.id+\'/id\'').';
-							return true;
-						} else { 
-							$("#fedita").html(r);
-						}
-					}
-			})},
-			"Cancelar": function() { $( this ).dialog( "close" ); }
-			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+		jQuery("#imprime").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('formatos/ver/ORDS').'/\'+id+\'/id\'').';
+			}else{
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
 		});';
-		$bodyscript .= '});'."\n";
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '
+		$("#fedita").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/ORDS').'/\'+json.pk.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+		$bodyscript .= '});';
+
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -185,12 +248,12 @@ class Ords extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -215,7 +278,7 @@ class Ords extends Controller {
 
 
 		$grid->addField('proveed');
-		$grid->label('Proveed');
+		$grid->label('Proveedor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -311,7 +374,7 @@ class Ords extends Controller {
 
 
 		$grid->addField('tipo_op');
-		$grid->label('Tipo_op');
+		$grid->label('Tipo Op.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -383,7 +446,7 @@ class Ords extends Controller {
 		));
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -394,7 +457,7 @@ class Ords extends Controller {
 		));
 
 		$grid->addField('transac');
-		$grid->label('Transac');
+		$grid->label('Transaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -485,6 +548,7 @@ class Ords extends Controller {
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
+		$grid->setOndblClickRow('');
 		$grid->setAdd(    $this->datasis->sidapuede('ORDS','INCLUIR%' ));
 		$grid->setEdit(   $this->datasis->sidapuede('ORDS','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('ORDS','BORR_REG%'));
@@ -492,7 +556,8 @@ class Ords extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: ordsadd,\n\t\teditfunc: ordsedit");
+
+		$grid->setBarOptions('addfunc: ordsadd, editfunc: ordsedit, delfunc: ordsdel, viewfunc: ordsshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -510,8 +575,7 @@ class Ords extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -525,60 +589,7 @@ class Ords extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setdata()
-	{
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = "??????";
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM ords WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('ords', $data);
-					echo "Registro Agregado";
-
-					logusu('ORDS',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM ords WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM ords WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE ords SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("ords", $data);
-				logusu('ORDS',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('ords', $data);
-				logusu('ORDS',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM ords WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM ords WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM ords WHERE id=$id ");
-				logusu('ORDS',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+	function setdata(){
 	}
 
 	//***************************
@@ -586,7 +597,7 @@ class Ords extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -629,7 +640,7 @@ class Ords extends Controller {
 */
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -641,7 +652,7 @@ class Ords extends Controller {
 
 
 		$grid->addField('descrip');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -728,7 +739,7 @@ class Ords extends Controller {
 */
 
 		$grid->addField('almacen');
-		$grid->label('Almacen');
+		$grid->label('Almac&eacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -752,7 +763,7 @@ class Ords extends Controller {
 
 
 		$grid->addField('departa');
-		$grid->label('Departa');
+		$grid->label('Departamento');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -818,344 +829,161 @@ class Ords extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdatait( $id = 0 )
-	{
+	function getdatait( $id = 0 ){
 		if ($id === 0 ){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM ords");
 		}
 		if(empty($id)) return '';
-		$numero   = $this->datasis->dameval("SELECT numero FROM ords WHERE id=$id");
+		$dbid    = $this->db->escape($id);
+		$numero  = $this->datasis->dameval("SELECT numero FROM ords WHERE id=${dbid}");
+		$dbnumero= $this->db->escape($numero);
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itords WHERE numero='$numero' ";
-		$response   = $grid->getDataSimple($mSQL);
-		$rs = $grid->jsonresult( $response);
+		$mSQL    = "SELECT * FROM itords WHERE numero=${dbnumero}";
+		$response= $grid->getDataSimple($mSQL);
+		$rs      = $grid->jsonresult( $response);
 		echo $rs;
 	}
 
 	/**
 	* Guarda la Informacion
 	*/
-	function setdatait()
-	{
-
+	function setdatait(){
 	}
 
-
-
-
-/*
-class Ords extends Controller {
-
-	function ords(){
-		parent::Controller();
-		$this->load->library("rapyd");
-		$this->datasis->modulo_id(522,1);
-	}
-	
-	function index() {		
-		//redirect('finanzas/ords/filteredgrid');
-		if ( !$this->datasis->iscampo('ords','id') ) {
-			$this->db->simple_query('ALTER TABLE ords DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE ords ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE ords ADD UNIQUE INDEX numero (numero)');
-		}
-		$this->ordsextjs();
-	}
-
-	function filteredgrid(){
-		$this->rapyd->load("datagrid","datafilter");
-		
-		$atts = array(
-              'width'      => '800',
-              'height'     => '600',
-              'scrollbars' => 'yes',
-              'status'     => 'yes',
-              'resizable'  => 'yes',
-              'screenx'    => '0',
-              'screeny'    => '0'
-            );
-		
-		$modbusp=array(
-			'tabla'   =>'sprv',
-			'columnas'=>array(
-			'proveed' =>'C&oacute;digo Proveedor',
-			'nombre'=>'Nombre',
-			'rif'=>'RIF'),
-			'filtro'  =>array('proveed'=>'C&oacute;digo Proveedor','nombre'=>'Nombre'),
-			'retornar'=>array('proveed'=>'proveed'),
-			'titulo'  =>'Buscar Proveedor');
-		
-		$boton=$this->datasis->modbus($modbusp);
-		
-		$filter = new DataFilter("Filtro de Orden de Servicio");
-		$filter->db->select('numero,fecha,nombre,totiva,totbruto,proveed');
-		$filter->db->from('ords');
-		
-		$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
-		$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
-		$filter->fechad->clause  =$filter->fechah->clause="where";
-		$filter->fechad->db_name =$filter->fechah->db_name="fecha";
-		$filter->fechad->insertValue = date("Y-m-d"); 
-		$filter->fechah->insertValue = date("Y-m-d"); 
-		$filter->fechah->size=$filter->fechad->size=10;
-		$filter->fechad->operator=">="; 
-		$filter->fechah->operator="<=";
-		
-		$filter->numero = new inputField("N&uacute;mero", "numero");
-    $filter->numero->size=20;
-
-		$filter->proveedor = new inputField("Proveedor", "proveed");
-		$filter->proveedor->append($boton);
-		$filter->proveedor->db_name = "proveed";
-    $filter->proveedor->size=20;
-
-		$filter->buttons("reset","search");
-		$filter->build();
-    
-		$uri = anchor('finanzas/ords/dataedit/show/<#numero#>','<#numero#>');
-    $uri2 = anchor_popup('formatos/verhtml/ORDS/<#numero#>',"Ver HTML",$atts);
-    
-		$grid = new DataGrid();
-		$grid->order_by("numero","desc");
-		$grid->per_page = 15;
-		
-		$grid->column("N&uacute;mero",$uri);
-		$grid->column("Fecha","<dbdate_to_human><#fecha#></dbdate_to_human>","align='center'");
-		$grid->column("Nombre","nombre");
-		$grid->column("IVA"  ,"totiva"  ,"align='right'");
-		$grid->column("Monto" ,"totbruto" ,"align='right'");
-		$grid->column("Vista",$uri2,"align='center'");	
-		//$grid->add("finanzas/egresos/dataedit/create");
-		$grid->build();
-		//echo $grid->db->last_query();
-		
-		$data['content'] =$filter->output.$grid->output;
-		$data["head"]    = $this->rapyd->get_head();
-		$data['title']   ='<h1>Orden de Servicio</h1>';
-		$this->load->view('view_ventanas', $data);
-	}
-	 
-
-*/
 
 	//
 	//DataEdit
 	//
 	function dataedit(){
- 		$this->rapyd->load("dataedit","datadetalle","fields","datagrid");
- 		
- 		$formato=$this->datasis->dameval('SELECT formato FROM cemp LIMIT 0,1');
- 		$qformato='%';
- 		for($i=1;$i<substr_count($formato, '.')+1;$i++) $qformato.='.%';
- 		$this->qformato=$qformato;
- 		
-		$modbusp=array(
-			'tabla'   =>'sprv',
-			'columnas'=>array(
-			'proveed' =>'C&oacute;digo Proveedor',
-			'nombre'=>'Nombre',
-			'rif'=>'RIF'),
-			'filtro'  =>array('proveed'=>'C&oacute;digo Proveedor','nombre'=>'Nombre'),
-			'retornar'=>array('proveed'=>'proveed'),
-			'titulo'  =>'Buscar Proveedor');
+		$this->rapyd->load('datadetails','dataobject');
 
-			$boton=$this->datasis->modbus($modbusp);
-    
-			$modbus=array(
-				'tabla'   =>'sinv',
-				'columnas'=>array(
-				'codigo' =>'C&oacute;digo',
-				'descrip'=>'descrip'),
-				'filtro'  =>array('codigo' =>'C&oacute;digo','descrip'=>'descrip'),
-				//'retornar'=>array('codigo'=>'codigo<#i#>','precio1'=>'precio1<#i#>','precio2'=>'precio2<#i#>','precio3'=>'precio3<#i#>','precio4'=>'precio4<#i#>','iva'=>'iva<#i#>','pond'=>'costo<#i#>'),
-				'retornar'=>array('codigo'=>'codigo<#i#>'),
-				'p_uri'=>array(4=>'<#i#>'),
-				'titulo'  =>'Buscar Articulo');
- 		
-				//Script necesario para totalizar los detalles
- 		
-			$fdepar = new dropdownField("ccosto", "ccosto");    
-			$fdepar->options("SELECT depto,descrip FROM dpto WHERE tipo='G' ORDER BY descrip");
-			$fdepar->status='create';
-			$fdepar->build();
-			$dpto=$fdepar->output;
-		
-			$dpto=trim($dpto);
-			$dpto=preg_replace('/\n/i', '', $dpto);
- 		
-			$uri=site_url("/contabilidad/casi/dpto/");
+		$do = new DataObject('ords');
+		$do->rel_one_to_many('itords' ,'itords' ,array('numero'));
 
-			$script='
-				function totalizar(){
-					monto=debe=haber=0;
-					amonto=$$(\'input[id^="monto"]\');
-					for(var i=0; i<amonto.length; i++) {
-						valor=parseFloat(amonto[i].value);
-						if (isNaN(valor))
-							valor=0.0;
-						if (valor>0)
-							haber=haber+valor;
-						else{
-							valor=valor*(-1);
-							debe=debe+valor;
-						}
-						$("haber").value=haber;
-						$("debe").value=debe;
-						$("total").value=haber-debe;
-					}
-				}
-				function departa(i){
-					ccosto=$F(\'ccosto\'+i.toString())
-					if (ccosto==\'S\'){
-						//alert("come una matina");
-						departamen=window.open("'.$uri.'/"+i.toString(),"buscardeparta","width=500,height=200,scrollbars=Yes,status=Yes,resizable=Yes,screenx=5,screeny=5,top="+ ((screen.height - 200) / 2) + ",left=" + ((screen.width - 500) / 2)); 
-						departamen.focus();
-						//new Insertion.Before(\'departa\'+i.toString(), \''.$dpto.'\')
-					}
-				}
-	';
- 		
-		$edit = new DataEdit("Orden de Servicio","ords");
-		
-		$edit->post_process("insert","_guarda_detalle");
-		$edit->post_process("update","_actualiza_detalle");
-		$edit->post_process("delete","_borra_detalle");
-		$edit->pre_process('insert','_pre_insert');
-		
-		$edit->back_url = "finanzas/ords";
-		
-		$edit->fecha = new DateonlyField("Fecha", "fecha","d/m/Y");
-		$edit->fecha->insertValue = date("Y-m-d");
-		$edit->fecha->mode="autohide";
+		$edit = new DataDetails('', $do);
+
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
+
+		$edit->fecha = new DateonlyField('Fecha', 'fecha');
+		$edit->fecha->insertValue = date('Y-m-d');
+		$edit->fecha->mode='autohide';
 		$edit->fecha->size = 10;
-			
-		$edit->numero = new inputField("N&uacute;mero", "numero");
-		$edit->numero->size = 10;
-		$edit->numero->rule= "required";
-		$edit->numero->mode="autohide";
+		$edit->fecha->calendar=false;
 
-		$edit->numero1 = new inputField("N&uacute;mero", "cheque");
-		$edit->numero1->size = 10;
-		$edit->numero1->rule= "required";
-		$edit->numero1->mode="autohide";
-		
-		$edit->proveedor = new inputField("Proveedor", "proveed");
-		$edit->proveedor->size = 6; 
-		$edit->proveedor->append($boton);       
-		
-		$edit->nombre = new inputField("Nombre", "nombre");
+		$edit->numero = new inputField('N&uacute;mero', 'numero');
+		$edit->numero->size = 10;
+		$edit->numero->rule='required';
+		$edit->numero->mode='autohide';
+
+		$edit->proveed = new inputField('Proveedor', 'proveed');
+		$edit->proveed->size = 6;
+		//$edit->proveed->append($boton);
+
+		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->size = 30;
-		$edit->nombre->maxlength=30;   
-		
-		$edit->banco = new dropdownField("Banco", "codban");
-		$edit->banco->option("BM","BM");
-		$edit->banco->option("BV","BV");
-		$edit->banco->option("99","99");
-		$edit->banco->style='width:70px;';
-		$edit->banco->size =10;
-		
-		$edit->tipo = new dropdownField("Tipo", "tipo_op");  
-		$edit->tipo->option("CH","CH");
-		$edit->tipo->option("ND","ND");
-		$edit->tipo->size = 10;  
-		$edit->tipo->style='width:70px;';
-	
-		$edit->comprob  = new inputField2("Comprobante", "comprob");
+		$edit->nombre->maxlength=30;
+
+		$edit->codban = new dropdownField('Banco','codban');
+		$edit->codban->option('','Seleccionar');
+		$edit->codban->options("SELECT codbanc, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE activo='S' ORDER BY codbanc");
+		$edit->codban->rule='max_length[5]|required';
+		$edit->codban->style='width:200px;';
+
+		$edit->tipo = new dropdownField('Tipo', 'tipo_op');
+		$edit->tipo->option('CH','Cheque');
+		$edit->tipo->option('ND','Nota de debito');
+		$edit->tipo->size = 10;
+		$edit->tipo->style='width:150px;';
+
+		$edit->cheque = new inputField('N&uacute;mero', 'cheque');
+		$edit->cheque->size = 10;
+		$edit->cheque->rule='required';
+		$edit->cheque->mode='autohide';
+
+		$edit->comprob  = new inputField2('Comprobante', 'comprob');
 		$edit->comprob->size = 20;
-		
-		$edit->beneficiario  = new inputField("Beneficiario", "benefi");
-		$edit->beneficiario->size = 30;
-	
-		$edit->condiciones  = new inputField("Condiciones", "condi");
-		$edit->condiciones->size = 35;
-		$edit->anticipo  = new inputField("Anticipo", "anticipo");
+
+		$edit->benefi  = new inputField('Beneficiario', 'benefi');
+		$edit->benefi->size = 30;
+
+		$edit->condi  = new inputField('Condiciones', 'condi');
+		$edit->condi->size = 35;
+
+		$edit->anticipo  = new inputField('Anticipo', 'anticipo');
 		$edit->anticipo->size = 20;
 		$edit->anticipo->css_class='inputnum';
-				
-		$edit->impuesto  = new inputField("Impuesto", "totiva");
-		$edit->impuesto->size = 10;
-		$edit->impuesto->css_class='inputnum';
-		
-		$edit->total  = new inputField("Total", "totbruto");
-		$edit->total->size = 20;
-		$edit->total->css_class='inputnum';
-		
-		$edit->subtotal  = new inputField("SubTotal", "totpre");
-		$edit->subtotal->size = 10;
-		$edit->subtotal->css_class='inputnum';
-				
-		$numero=$edit->_dataobject->get('numero');
-		
-		$detalle = new DataDetalle($edit->_status);
-		
+
+		$edit->totiva  = new inputField('Impuesto', 'totiva');
+		$edit->totiva->size = 10;
+		$edit->totiva->css_class='inputnum';
+
+		$edit->totbruto  = new inputField('Total', 'totbruto');
+		$edit->totbruto->size = 20;
+		$edit->totbruto->css_class='inputnum';
+
+		$edit->totprel  = new inputField('SubTotal', 'totpre');
+		$edit->totprel->size = 10;
+		$edit->totprel->css_class='inputnum';
+
 		//Campos para el detalle
-		
-		$detalle->db->select('codigo,descrip,precio,iva,importe');
-		$detalle->db->from('itords');
-		$detalle->db->where("numero='$numero'");
-		
-		$detalle->codigo = new inputField("C&oacute;digo", "codigo<#i#>");
-		$detalle->codigo->size=10;
-		$detalle->codigo->db_name='codigo';
-		$detalle->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
-		$detalle->codigo->readonly=TRUE;
-		
-		$detalle->descripcion = new inputField("Descripci&oacute;n", "descrip<#i#>");
-		$detalle->descripcion->size=30;
-		$detalle->descripcion->db_name='descrip';
-		$detalle->descripcion->maxlength=12;
-		
-		$detalle->impuesto = new inputField("Impuesto", "iva<#i#>");
-		$detalle->impuesto->size=10;
-		$detalle->impuesto->db_name='iva';
-		$detalle->impuesto->maxlength=10;
-		$detalle->impuesto->css_class='inputnum';  
-		
-		$detalle->precio = new inputField("Precio", "precio<#i#>");
-		$detalle->precio->css_class='inputnum';
-		$detalle->precio->onchange='totalizar()';
-		$detalle->precio->size=10;
-		$detalle->precio->db_name='precio';
-		
-		$detalle->importe = new inputField2("Importe", "importe<#i#>");
-		$detalle->importe->db_name='importe';
-		$detalle->importe->css_class='inputnum';
-		$detalle->importe->size=10;
+		$edit->codigo = new inputField('C&oacute;digo', 'codigo_<#i#>');
+		$edit->codigo->size=10;
+		$edit->codigo->db_name='codigo';
+		//$edit->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
+		$edit->codigo->readonly=true;
+		$edit->codigo->rel_id ='itords';
 
+		$edit->descrip = new inputField('Descripci&oacute;n', 'descrip_<#i#>');
+		$edit->descrip->size=30;
+		$edit->descrip->db_name='descrip';
+		$edit->descrip->maxlength=12;
+		$edit->descrip->rel_id ='itords';
+
+		$edit->iva = new inputField('Impuesto', 'iva_<#i#>');
+		$edit->iva->size=10;
+		$edit->iva->db_name='iva';
+		$edit->iva->maxlength=10;
+		$edit->iva->css_class='inputnum';
+        $edit->iva->rel_id ='itords';
+
+		$edit->precio = new inputField('Precio', 'precio_<#i#>');
+		$edit->precio->css_class='inputnum';
+		$edit->precio->onchange='totalizar()';
+		$edit->precio->size=10;
+		$edit->precio->db_name='precio';
+        $edit->precio->rel_id ='itords';
+
+		$edit->importe = new inputField2('Importe', 'importe_<#i#>');
+		$edit->importe->db_name='importe';
+		$edit->importe->css_class='inputnum';
+		$edit->importe->size=10;
+		$edit->importe->rel_id ='itords';
 		//fin de campos para detalle
-		
-		$detalle->onDelete('totalizar()');
-		$detalle->onAdd('totalizar()');
-		$detalle->script($script);
-		$detalle->style="width:110px";
-		
-		//Columnas del detalle
-		
-		$detalle->column("C&oacute;digo"    ,  "<#codigo#>");
-		$detalle->column("Descripci&oacute;n", "<#descripcion#>");
-		$detalle->column("Precio"     , "<#precio#>");
-		$detalle->column("Impuesto"  ,  "<#impuesto#>");
-		$detalle->column("Importe"    , "<#importe#>");
-	
-		$detalle->build();	
-		$conten["detalle"] = $detalle->output;
-		
-		$edit->detalle=new freeField("detalle", 'detalle',$detalle->output);
 
-		$edit->buttons( "save", "undo","back");
+		$edit->buttons('add_rel');
 		$edit->build();
-		
-		$smenu['link']=barra_menu('522');
-		$data['smenu'] = $this->load->view('view_sub_menu', $smenu,true);
-		$conten["form"]  =&  $edit;
-		$data['content'] = $this->load->view('view_ords', $conten); 
-		//$data["head"]    = script("tabber.js").script("prototype.js").$this->rapyd->get_head().script("scriptaculous.js").script("effects.js");
-		//$data['title']   = '<h1>Orden de Servicios</h1>';
-		//$this->load->view('view_ventanas', $data);
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form'] =& $edit;
+			$this->load->view('view_ords', $conten);
+		}
 	}
-	function dpto() {		
-		$this->rapyd->load("dataform");
+
+	function dpto() {
+		$this->rapyd->load('dataform');
 		$campo='ccosto'.$this->uri->segment(4);
  		$script='
  		function pasar(){
@@ -1166,7 +994,7 @@ class Ords extends Controller {
 				alert("Debe elegir un departamento");
 			}
 		}';
-		
+
 		$form = new DataForm('');
 		$form->script($script);
 		$form->fdepar = new dropdownField("Departamento", "departa");
@@ -1174,9 +1002,9 @@ class Ords extends Controller {
 		$form->fdepar->options("SELECT depto,descrip FROM dpto WHERE tipo='G' ORDER BY descrip");
 		$form->fdepar->onchange='pasar()';
 		$form->build_form();
-		
+
 		$data['content'] =$form->output;
-		$data["head"]    =script('prototype.js').$this->rapyd->get_head();
+		$data['head']    =script('prototype.js').$this->rapyd->get_head();
 		$data['title']   ='<h1>Seleccione un departamento</h1>';
 		$this->load->view('view_detalle', $data);
 	}
@@ -1187,7 +1015,7 @@ class Ords extends Controller {
 		while($o<$cant){
 			if (isset($_POST["codigo$i"])){
 				if($this->input->post("codigo$i")){
-						
+
 					$sql = "INSERT INTO itords (fecha,numero,proveed,codigo,descrip,precio,importe,unidades,fraccion,almacen,sucursal,departa) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
 					//$haber=($this->input->post("monto$i") < 0)? $this->input->post("monto$i")*(-1) : 0;
 					$llena=array(
@@ -1224,11 +1052,11 @@ class Ords extends Controller {
 		$sql    = 'INSERT INTO ntransa (usuario,fecha) VALUES ("'.$this->session->userdata('usuario').'",NOW())';
 		$query  =$this->db->query($sql);
 		$transac=$this->db->insert_id();
-    
+
 		$sql    = 'INSERT INTO nrds (usuario,fecha) VALUES ("'.$this->session->userdata('usuario').'",NOW())';
 		$query  =$this->db->query($sql);
 		$control =str_pad($this->db->insert_id(),8, "0", STR_PAD_LEFT);
-    
+
 		$do->set('numero', $numero);
 		$do->set('transac', $transac);
 		$do->set('estampa', 'CURDATE()', FALSE);
@@ -1242,62 +1070,13 @@ class Ords extends Controller {
 		redirect('compras/sprv/dataedit/show/'.$id);
 	}
 
-	function tabla() {
-		$id   = isset($_REQUEST['id'])  ? $_REQUEST['id']   :  0;
 
-		$transac = $this->datasis->dameval("SELECT transac FROM ords WHERE id='$id'");
-
-		$mSQL = "SELECT cod_prv, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE transac='$transac' ORDER BY cod_prv ";
-		$query = $this->db->query($mSQL);
-		$codprv = 'XXXXXXXXXXXXXXXX';
-		$salida = '';
-		$saldo = 0;
-		if ( $query->num_rows() > 0 ){
-			$salida = "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento en Cuentas X Pagar</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-			
-			foreach ($query->result_array() as $row)
-			{
-				if ( $codprv != $row['cod_prv']){
-					$codprv = $row['cod_prv'];
-					$salida .= "<tr bgcolor='#c7d3c7'>";
-					$salida .= "<td colspan=4>".trim($row['nombre']). "</td>";
-					$salida .= "</tr>";	
-				}
-				if ( $row['tipo_doc'] == 'FC' ) {
-					$saldo = $row['monto']-$row['abonos'];
-				}
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['tipo_doc']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-				$salida .= "</tr>";
-			}
-			$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
-			$salida .= "</table>";
+	function instalar(){
+		$campos=$this->db->list_fields('ords');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE ords DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE ords ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE ords ADD UNIQUE INDEX numero (numero)');
 		}
-		$query->free_result();
-		// Revisa formas de pago sfpa
-		$mSQL = "SELECT codbanc, numero, monto FROM bmov WHERE transac='$transac' ";
-		$query = $this->db->query($mSQL);
-		if ( $query->num_rows() > 0 ){
-			$salida .= "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento en Caja o Banco</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Bco</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row)
-			{
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['codbanc']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-				$salida .= "</tr>";
-			}
-			$salida .= "</table>";
-		}
-		echo $salida;
-
 	}
-
 }
-?>
