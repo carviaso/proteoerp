@@ -2943,9 +2943,9 @@ class Scst extends Controller {
 					WHERE c.serial='V' AND b.control=".$this->db->escape($control);
 				$cana = $this->datasis->dameval($SQL);
 				if($cana>0){
-					$SQL="SELECT COUNT(*) AS cana FROM sinvehiculo WHERE id_scst=$id AND (motor IS NULL OR motor='' OR carroceria IS NULL OR carroceria='')";
+					$SQL="SELECT COUNT(*) AS cana FROM sinvehiculo WHERE id_scst=${id} AND (motor IS NULL OR motor='' OR carroceria IS NULL OR carroceria='')";
 					$cana = $this->datasis->dameval($SQL);
-					$SQL="SELECT COUNT(*) AS cana FROM sinvehiculo WHERE id_scst=$id";
+					$SQL="SELECT COUNT(*) AS cana FROM sinvehiculo WHERE id_scst=${id}";
 					$cana2 = $this->datasis->dameval($SQL);
 					if($cana > 0 || $cana2==0){
 						$this->error_string='Debe cargar los seriales de los veh&iacute;culos para poder recibir la compra ';
@@ -2955,8 +2955,6 @@ class Scst extends Controller {
 				}
 			}
 			//Fin de la validacion vehicular
-
-
 
 			$SQL='SELECT tipo_doc,transac,depo,proveed,fecha,vence, nombre,tipo_doc,nfiscal,fafecta,reteiva,
 			cexento,cgenera,civagen,creduci,civared,cadicio,civaadi,cstotal,ctotal,cimpuesto,numero
@@ -2968,6 +2966,7 @@ class Scst extends Controller {
 				$hora    = date('H:i:s');
 				$usuario = $this->session->userdata('usuario');
 				$row     = $query->row_array();
+				$numero  = $row['numero'];
 
 				if($row['tipo_doc']=='FC'){
 					$transac = $row['transac'];
@@ -3207,6 +3206,8 @@ class Scst extends Controller {
 				}elseif($row['tipo_doc']=='NE'){
 					//Falta implementar
 				}
+
+				logusu('scst',"Compra ${numero} control ${control} ACTUALIZADA");
 			}else{
 				$this->error_string='Compra no existe '.$id;
 				return false;
@@ -3271,151 +3272,161 @@ class Scst extends Controller {
 		$anticipo = $scst['anticipo'];
 		$proveed  = $scst['proveed'];
 		$mALMA    = $scst['depo'];
+		$id_scst  = $scst['id'];
 
 		//********************************
 		//
 		//    Busca si tiene abonos
 		//
 		//********************************
-		$abonado = 0;
-		if ($tipo_doc == 'FC'){
-			$mSQL  = "SELECT a.abonos -( b.inicial + b.anticipo + b.reten + b.reteiva) ";
-			$mSQL .= "FROM sprm a JOIN scst b ON a.transac=b.transac ";
-			$mSQL .= "WHERE a.tipo_doc='$tipo_doc' AND a.numero='$numero' AND a.cod_prv=b.proveed AND a.numero=b.numero ";
-			$mSQL .= "AND a.transac='$mTRANSAC' ";
-			$abonado = $this->datasis->dameval($mSQL);
-		};
+		$dbproveed = $this->db->escape($proveed);
+		$dbfafecta = $this->db->escape($fafecta);
+		$dbmTRANSAC= $this->db->escape($mTRANSAC);
+		$dbnumero  = $this->db->escape($numero);
+		$dbtipo_doc= $this->db->escape($tipo_doc);
 
 		// CONDICIONES QUE DEBEN CUMPLIR PARA PODER REVERSAR
-		//Si esta abonada
-		if ($abonado > 0.1 ) {
-			$this->error_string = 'Compra abonada, elimine el pago primero!';
-			return false;
-		}
 		//Si no tiene transaccion
-		if (empty($mTRANSAC)){
+		if(empty($mTRANSAC)){
 			$this->error_string= 'Compra sin nro de transaccion, llame a soporte';
 			return false;
 		}
+
+		//Si esta abonada
+		$abonado = 0;
+		if($tipo_doc == 'FC'){
+			$mSQL  = "SELECT a.abonos -( b.inicial + b.anticipo + b.reten + b.reteiva) ";
+			$mSQL .= "FROM sprm a JOIN scst b ON a.transac=b.transac ";
+			$mSQL .= "WHERE a.tipo_doc=${dbtipo_doc} AND a.numero=${dbnumero} AND a.cod_prv=b.proveed AND a.numero=b.numero ";
+			$mSQL .= "AND a.transac=${dbmTRANSAC}";
+			$abonado = $this->datasis->dameval($mSQL);
+		}
+		if($abonado > 0.1){
+			$this->error_string = 'Compra abonada, elimine el pago primero!';
+			return false;
+		}
 		// Si no esta cargada
-		if ( $mACTUALI < $fecha ){
+		if($mACTUALI < $fecha){
 			$this->error_string= 'Factura no ha sido cargada';
 			return false;
 		}
 
 		//Chequea si tiene vehiculos y estan registrados los seriales
-		$id_scst=$this->datasis->dameval("SELECT id FROM scst WHERE control=$dbcontrol");
 		$SQL="SELECT COUNT(*) AS cana
 			FROM itscst AS b
 			JOIN sinv   AS c ON b.codigo=c.codigo
-			WHERE b.control=$dbcontrol";
+			WHERE b.control=${dbcontrol}";
 		$cana = $this->datasis->dameval($SQL);
 		if($cana>0){
 			$SQL="SELECT COUNT(*) AS cana
 			FROM sinvehiculo AS a
 			JOIN sfac AS b ON a.id_sfac=b.id
-			WHERE a.id_scst=$id_scst AND b.tipo_doc<>'X'";
+			WHERE a.id_scst=${id_scst} AND b.tipo_doc<>'X'";
 			$cana = $this->datasis->dameval($SQL);
 			if($cana > 0){
 				echo 'Compra con venta vehicular, no se puede reversar';
 				return false;
 			}else{
-				$mSQL = "DELETE FROM sinvehicular WHERE id_scst=$id_scst";
+				$mSQL = "DELETE FROM sinvehicular WHERE id_scst=${id_scst}";
 				$this->db->simple_query($mSQL);
 			}
 		}
 		//Fin de la validacion vehicular
 
 		// ******* Borra de a CxC *******\\
-		$mSQL = "DELETE FROM sprm WHERE transac='$mTRANSAC'";
+		$mSQL = "DELETE FROM sprm WHERE transac=${dbmTRANSAC}";
 		$this->db->simple_query($mSQL);
 
-		if ( $tipo_doc == 'NC' ){
-			$mSQL = "UPDATE sprm SET abonos=abonos-$montonet-$reteiva WHERE numero='$fafecta' AND tipo_doc='FC' AND cod_prv='$proveed' ";
+		if($tipo_doc == 'NC'){
+			$mSQL = "UPDATE sprm SET abonos=abonos-${montonet}-${reteiva} WHERE numero=${dbfafecta} AND tipo_doc='FC' AND cod_prv=${dbproveed}";
 			$this->db->simple_query($mSQL);
 		}
 
-		$mSQL = "DELETE FROM itppro WHERE transac='$mTRANSAC'";
+		$mSQL = "DELETE FROM itppro WHERE transac=${dbmTRANSAC}";
 		$this->db->simple_query($mSQL);
 
 		// ANULA LA RETENCION SI TIENE
-		if ( $this->datasis->dameval("SELECT COUNT(*) FROM riva WHERE transac='$mTRANSAC'") > 0 ){
-			$mTRANULA = '_'.substr($this->datasis->prox_sql('rivanula'),1,7);
-			$this->db->simple_query("UPDATE riva SET transac='$mTRANULA' WHERE transac='$mTRANSAC' ");
+		if($this->datasis->dameval("SELECT COUNT(*) FROM riva WHERE transac=${dbmTRANSAC}") > 0){
+			$mTRANULA = '_'.$this->datasis->fprox_numero('rivanula',7);
+			$this->db->simple_query("UPDATE riva SET transac='${mTRANULA}' WHERE transac=${dbmTRANSAC}");
 		}
 
 		// Busca las Ordenes
 		$mORDENES = array();
-		$query = $this->db->query("SELECT orden FROM scstordc WHERE compra='$control'");
-		if ($query->num_rows() > 0 ){
-			foreach( $query->result() as $row ) {
+		$query = $this->db->query("SELECT orden FROM scstordc WHERE compra=${dbcontrol}");
+		if($query->num_rows() > 0){
+			foreach($query->result() as $row){
 				$mORDENES[] = $row->orden;
 			}
 		}
 		//$query->destroy();
 
 		// DESACTUALIZA INVENTARIO
-		$query = $this->db->query("SELECT codigo, cantidad FROM itscst WHERE control='$control'");
-		foreach ( $query->result() as $row ) {
-			$mTIPO = $this->datasis->dameval("SELECT MID(tipo,1,1) FROM sinv WHERE codigo='".$row->codigo."'");
+		$query = $this->db->query("SELECT codigo, cantidad FROM itscst WHERE control=${dbcontrol}");
+		foreach($query->result() as $row){
+			$itdbcodigo= $this->db->escape($row->codigo);
+			$mTIPO = $this->datasis->dameval("SELECT MID(tipo,1,1) FROM sinv WHERE codigo=${itdbcodigo}");
 
-			if ( $tipo_doc == 'FC' || $tipo_doc =='NE' ) {
+			if($tipo_doc == 'FC' || $tipo_doc =='NE'){
 				$this->datasis->sinvcarga($row->codigo,  $mALMA, -$row->cantidad);
 
 				// DEBE ARREGLAR EL PROMEDIO BUSCANDO EN KARDEX
-				$mSQL = "SELECT promedio FROM costos WHERE codigo='".$row->codigo."' ORDER BY fecha DESC LIMIT 1";
+				$mSQL = "SELECT promedio FROM costos WHERE codigo=${itdbcodigo} ORDER BY fecha DESC LIMIT 1";
 				$mPROM = $this->datasis->dameval($mSQL);
-				if ( !empty($mPROM) ) {
-					$mSQL = "UPDATE sinv SET pond=$mPROM WHERE codigo='".$row->codigo."'";
+				if(!empty($mPROM)){
+					$mSQL = "UPDATE sinv SET pond=${mPROM} WHERE codigo=${itdbcodigo}";
 					$this->db->simple_query($mSQL);
 				}
 
-				if (count($mORDENES) > 0 ){
+				if(count($mORDENES) > 0){
 					$mSALDO = $row->cantidad;
 					foreach( $mORDENES as $orden){
+						$dbitorden = $this->db->escape($orden);
 						if ($mSALDO > 0 ) {
-							$mSQL   = "SELECT recibido  FROM itordc WHERE numero='".$mORDENE."' AND codigo='".$row->codigo."'";
+							$mSQL   = "SELECT recibido  FROM itordc WHERE numero=${dbitorden} AND codigo=${itdbcodigo}";
 							$mTEMPO = $this->datasis->dameval($mSQL);
-							if ( $mTEMPO > 0 ){
-								if ($mTEMPO >= $mSALDO ) {
-									$mSQL  = "UPDATE itordc SET recibido=recibido-$mSALDO WHERE numero='$orden' AND codigo='".$row->codigo."'";
+							if($mTEMPO > 0){
+								if($mTEMPO >= $mSALDO){
+									$mSQL = "UPDATE itordc SET recibido=recibido-${mSALDO} WHERE numero=${dbitorden} AND codigo=${itdbcodigo}";
 									$this->db->simple_query($mSQL);
-									$mSQL = "UPDATE sinv SET exord=exord+$mSALDO WHERE codigo='".$row->codigo."' ";
+									$mSQL = "UPDATE sinv SET exord=exord+${mSALDO} WHERE codigo=${itdbcodigo}";
 									$this->db->simple_query($mSQL);
 									$mSALDO = 0;
-								} elseif ($mTEMPO < $mSALDO) {
-									$mSQL   = "UPDATE itordc SET recibido=recibido-$mTEMPO WHERE numero='$orden' AND codigo='"+$row->codigo+"'";
+								}elseif($mTEMPO < $mSALDO){
+									$mSQL = "UPDATE itordc SET recibido=recibido-${mTEMPO} WHERE numero=${dbitorden} AND codigo=${itdbcodigo}";
 									$this->db->simple_query($mSQL);
-									$mSQL = "UPDATE sinv SET exord=exord+$mTEMPO WHERE codigo='".$row->codigo."' ";
+									$mSQL = "UPDATE sinv SET exord=exord+${mTEMPO} WHERE codigo=${itdbcodigo}";
 									$mSALDO -= $mTEMPO;
 								}
 							}
 						}
 					}
 				}
-			} else {
+			}else{
 				$this->datasis->sinvcarga($row->codigo, $mALMA, $row->cantidad);
 			}
 		}
 
-		$mSQL = "UPDATE scst SET actuali=0 WHERE control='$control'";
+		$mSQL = "UPDATE scst SET actuali=0 WHERE control=${dbcontrol}";
 		$this->db->simple_query($mSQL);
 
 		// Carga Ordenes
 		if (count($mORDENES) > 0 ) {
 			// SUMA A VER SI ESTA COMPLETA
 			foreach ( $mORDENES as $orden ) {
-				$mSQL = "UPDATE itordc SET recibido=0 WHERE numero='$orden' AND recibido<0 ";
+				$dbitorden = $this->db->escape($orden);
+				$mSQL = "UPDATE itordc SET recibido=0 WHERE numero=${dbitorden} AND recibido<0 ";
 				$this->db->simple_query($mSQL);
-				$mSQL = "SELECT COUNT(*) FROM itordc WHERE numero='$orden' AND recibido>0";
+				$mSQL = "SELECT COUNT(*) FROM itordc WHERE numero=${dbitorden} AND recibido>0";
 				if($this->datasis->dameval($mSQL) == 0){
-					$mSQL = "UPDATE ordc SET status='PE' WHERE numero='$orden' ";
+					$mSQL = "UPDATE ordc SET status='PE' WHERE numero=${dbitorden}";
 				}else{
-					$mSQL = "UPDATE ordc SET status='BA' WHERE numero='$orden' ";
+					$mSQL = "UPDATE ordc SET status='BA' WHERE numero=${dbitorden}";
 				}
 				$this->db->simple_query($mSQL);
 			}
 		}
+		logusu('scst',"Compra ${numero} control ${control} REVERSADA");
 		return true;
 	}
 
@@ -3650,7 +3661,7 @@ class Scst extends Controller {
 	function _post_update($do){
 		$codigo  = $do->get('numero');
 		$control = $do->get('control');
-		logusu('scst',"Compra $codigo control $control MODIFICADA");
+		logusu('scst',"Compra ${codigo} control ${control} MODIFICADA");
 	}
 
 	function chddate($fecha){

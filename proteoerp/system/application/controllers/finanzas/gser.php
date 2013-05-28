@@ -4479,6 +4479,13 @@ class gser extends Controller {
 		$mSQL='DELETE FROM gereten WHERE idd='.$id;
 		$this->db->simple_query($mSQL);
 
+		//Anula la retencion de IVA
+		if($this->datasis->dameval("SELECT COUNT(*) FROM riva WHERE transac=${dbtransac}") > 0){
+			$mTRANULA = '_'.$this->datasis->fprox_numero('rivanula',7);
+			$this->db->simple_query("UPDATE riva SET transac='${mTRANULA}' WHERE transac=${dbtransac}");
+		}
+		//Fin de la anulacion de iva
+
 
 		//Revisa si fue anulado previamente para borrar el registro y evitar registro duplicado
 		$query     = $this->db->query("SELECT id, transac FROM gser WHERE tipo_doc='XX' AND fecha=${dbfecha} AND numero=${dbnumero} AND proveed=${dbcod_prv}");
@@ -4508,12 +4515,12 @@ class gser extends Controller {
 
 	function _post_update($do){
 		$codigo=$do->get('numero');
-		logusu('gser',"Gasto $codigo Modificado");
+		logusu('gser',"Gasto ${codigo} Modificado");
 	}
 
 	function _post_delete($do){
 		$codigo=$do->get('numero');
-		logusu('gser',"Gasto $codigo ELIMINADO");
+		logusu('gser',"Gasto ${codigo} ELIMINADO");
 	}
 
 	//Chequea que exista un monto cuando se seleccion un banco/caja
@@ -4597,11 +4604,69 @@ class gser extends Controller {
 
 		$row = $mSQL_1->row();
 		$id  = $row->id;
-		redirect("formatos/ver/RIVA/$id");
+		redirect("formatos/ver/RIVA/${id}");
+	}
+
+	function sprvbu(){
+		$control = $this->uri->segment(4);
+		$id = $this->datasis->dameval("SELECT b.id FROM gser a JOIN sprv b ON a.proveed=b.proveed WHERE control='$control'");
+		redirect('compras/sprv/dataedit/show/'.$id);
+	}
+
+	function tabla(){
+		$id       = $this->uri->segment($this->uri->total_segments());
+		$dbid     = $this->db->escape($id);
+		$transac  = $this->datasis->dameval("SELECT transac FROM gser WHERE id=${dbid}");
+		$dbtransac= $this->db->escape($transac );
+		$mSQL = "SELECT cod_prv, MID(CONCAT(TRIM(cod_prv),' ',nombre),1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE transac=${dbtransac} ORDER BY cod_prv";
+		$query = $this->db->query($mSQL);
+		$codprv = 'XXXXXXXXXXXXXXXX';
+		$salida = '';
+		$saldo = 0;
+		if ( $query->num_rows() > 0 ){
+			$salida  = '<br><table width=\'100%\' border=\'1\'>';
+			$salida .= '<tr bgcolor=\'#e7e3e7\'><td>Tp</td><td align=\'center\'>Numero</td><td align=\'center\'>Monto</td></tr>';
+
+			foreach ($query->result_array() as $row){
+				if($codprv != $row['cod_prv']){
+					$codprv = $row['cod_prv'];
+					$salida .= '<tr bgcolor=\'#c7d3c7\'>';
+					$salida .= '<td colspan=\'4\'>'.trim($row['nombre']).'</td>';
+					$salida .= '</tr>';
+				}
+				if($row['tipo_doc']=='FC'){
+					$saldo = $row['monto']-$row['abonos'];
+				}
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['tipo_doc'].'</td>';
+				$salida .= '<td>'.$row['numero'].  '</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
+			}
+			$salida .= '<tr bgcolor=\'#d7c3c7\'><td colspan=\'4\' align=\'center\'>Saldo : '.nformat($saldo).'</td></tr>';
+			$salida .= '</table>';
+		}
+
+		$mSQL = "SELECT codbanc, banco, tipo_op tipo_doc, numero, monto FROM bmov WHERE transac=${dbtransac} ORDER BY codbanc ";
+		$query = $this->db->query($mSQL);
+		$salida .= "\n";
+		if ( $query->num_rows() > 0 ){
+			$salida .= '<br><table width=\'100%\' border=\'1\'>';
+			$salida .= '<tr bgcolor=\'#e7e3e7\'><td>Tp</td><td align=\'center\'>Banco</td><td align=\'center\'>Monto</td></tr>';
+			foreach ($query->result_array() as $row){
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['codbanc'].'</td>';
+				$salida .= '<td>'.$row['banco'].  '</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
+			}
+			$salida .= '</table>';
+		}
+		echo $salida;
 	}
 
 	function instalar(){
-		$query="SHOW INDEX FROM gser";
+		$query='SHOW INDEX FROM gser';
 		$resul=$this->db->query($query);
 		$existe=0;
 		foreach($resul->result() as $ind){
@@ -4724,61 +4789,4 @@ class gser extends Controller {
 
 	}
 
-	function sprvbu(){
-		$control = $this->uri->segment(4);
-		$id = $this->datasis->dameval("SELECT b.id FROM gser a JOIN sprv b ON a.proveed=b.proveed WHERE control='$control'");
-		redirect('compras/sprv/dataedit/show/'.$id);
-	}
-
-	function tabla() {
-		$id = $this->uri->segment($this->uri->total_segments());
-		$transac = $this->datasis->dameval("SELECT transac FROM gser WHERE id='$id'");
-		$mSQL = "SELECT cod_prv, MID(CONCAT(TRIM(cod_prv),' ',nombre),1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE transac='$transac' ORDER BY cod_prv ";
-		$query = $this->db->query($mSQL);
-		$codprv = 'XXXXXXXXXXXXXXXX';
-		$salida = '';
-		$saldo = 0;
-		if ( $query->num_rows() > 0 ){
-			$salida = "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-
-			foreach ($query->result_array() as $row)
-			{
-				if ( $codprv != $row['cod_prv']){
-					$codprv = $row['cod_prv'];
-					$salida .= "<tr bgcolor='#c7d3c7'>";
-					$salida .= "<td colspan=4>".trim($row['nombre']). "</td>";
-					$salida .= "</tr>";
-				}
-				if ( $row['tipo_doc'] == 'FC' ) {
-					$saldo = $row['monto']-$row['abonos'];
-				}
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['tipo_doc']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-				$salida .= "</tr>";
-			}
-			$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
-			$salida .= "</table>";
-		}
-
-		$mSQL = "SELECT codbanc, banco, tipo_op tipo_doc, numero, monto FROM bmov WHERE transac='$transac' ORDER BY codbanc ";
-		$query = $this->db->query($mSQL);
-		$salida .= "\n";
-		if ( $query->num_rows() > 0 ){
-			$salida .= "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Banco</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row)
-			{
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['codbanc']."</td>";
-				$salida .= "<td>".$row['banco'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto'])."</td>";
-				$salida .= "</tr>";
-			}
-			$salida .= "</table>";
-		}
-		echo $salida;
-	}
 }
