@@ -59,6 +59,12 @@ class Rivc extends Controller {
 
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
+		$funciones = '
+		function ltransac(el, val, opts){
+			var link=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return link;
+		};';
+
 		$param['WestPanel']    = $WestPanel;
 		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
 		$param['readyLayout']  = $readyLayout;
@@ -66,6 +72,7 @@ class Rivc extends Controller {
 		$param['listados']     = $this->datasis->listados('RIVC', 'JQ');
 		$param['otros']        = $this->datasis->otros('RIVC', 'JQ');
 		$param['centerpanel']  = $centerpanel;
+		$param['funciones']    = $funciones;
 		$param['temas']        = array('proteo','darkness','anexos1');
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
@@ -79,7 +86,16 @@ class Rivc extends Controller {
 	//Funciones de los Botones
 	//***************************
 	function bodyscript( $grid0, $grid1 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
+
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};';
 
 		$bodyscript .= '
 		function rivcadd() {
@@ -240,7 +256,7 @@ class Rivc extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -605,6 +621,7 @@ class Rivc extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
+			'formatter'     => 'ltransac'
 		));
 
 
