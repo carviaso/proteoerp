@@ -64,6 +64,71 @@ class MY_Validation extends CI_Validation{
 		}
 	}
 
+	function existecaub($cuenta){
+		$cuenta  =trim($cuenta);
+		if(strlen($cuenta)==0) return true;
+		$dbcuenta=$this->CI->db->escape($cuenta);
+		$mSQL = "SELECT COUNT(*) AS cana FROM caub WHERE ubica=${dbcuenta}";
+		$this->set_message('existecaub', 'El almacen introducido en el campo %s no es v&aacute;lido');
+
+		$query = $this->CI->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$row = $query->row();
+			if($row->cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
+
+	function existevend($cuenta){
+		$cuenta  =trim($cuenta);
+		if(strlen($cuenta)==0) return true;
+		$dbcuenta=$this->CI->db->escape($cuenta);
+		$mSQL = "SELECT COUNT(*) AS cana FROM vend WHERE vendedor=${dbcuenta}";
+		$this->set_message('existevend', 'El vendedor introducido en el campo %s no es v&aacute;lido');
+
+		$query = $this->CI->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$row = $query->row();
+			if($row->cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
+
+	function existesucu($cuenta){
+		$cuenta  =trim($cuenta);
+		if(strlen($cuenta)==0) return true;
+		$dbcuenta=$this->CI->db->escape($cuenta);
+		$mSQL = "SELECT COUNT(*) AS cana FROM sucu WHERE codigo=${dbcuenta}";
+		$this->set_message('existesucu', 'La sucursal introducido en el campo %s no es v&aacute;lida');
+
+		$query = $this->CI->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$row = $query->row();
+			if($row->cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
+
+
+	function existescaj($cuenta){
+		$cuenta  =trim($cuenta);
+		if(strlen($cuenta)==0) return true;
+		$dbcuenta=$this->CI->db->escape($cuenta);
+		$mSQL = "SELECT COUNT(*) AS cana FROM scaj WHERE cajero=${dbcuenta}";
+		$this->set_message('existescaj', 'El cajero introducido en el campo %s no es v&aacute;lido');
+
+		$query = $this->CI->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$row = $query->row();
+			if($row->cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
+
 	function existecpla($cuenta){
 		$cuenta  =trim($cuenta);
 		if(strlen($cuenta)==0) return true;

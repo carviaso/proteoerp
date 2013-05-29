@@ -12,16 +12,7 @@ class Usuarios extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('usuario','id') ) {
-			$this->db->simple_query('ALTER TABLE usuario DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE usuario ADD UNIQUE INDEX codigo (codigo)');
-			$this->db->simple_query('ALTER TABLE usuario ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
-
-		if(!$this->datasis->iscampo('usuario','uuid')){
-			$this->db->simple_query("ALTER TABLE `usuario` ADD COLUMN `uuid` VARCHAR(100) NULL DEFAULT NULL COMMENT 'Dispositivo movil para pedidos' AFTER `activo`");
-		}
-		$this->db->simple_query('DELETE FROM sida USING sida LEFT JOIN usuario ON sida.usuario=usuario.us_codigo WHERE usuario.us_codigo IS NULL ');
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -197,7 +188,7 @@ class Usuarios extends Controller {
 
 		$bodyscript .= '
 		$("#fshow").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 300, width: 400, modal: true,
 			buttons: {
 				"Aceptar": function() {
 					$("#fshow").html("");
@@ -264,7 +255,7 @@ class Usuarios extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -527,7 +518,7 @@ class Usuarios extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: usuarioadd, editfunc: usuarioedit, delfunc: usuariodel, viewfunc: usuarioshow");
+		$grid->setBarOptions('addfunc: usuarioadd, editfunc: usuarioedit, delfunc: usuariodel, viewfunc: usuarioshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -560,38 +551,6 @@ class Usuarios extends Controller {
 	* Guarda la Informacion
 	*/
 	function setData(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$this->db->insert('usuario', $data);
-			}
-			echo "Registro Agregado";
-
-		} elseif($oper == 'edit') {
-			unset($data['us_codigo']);
-			$this->db->where('id', $id);
-			$this->db->update('usuario', $data);
-			echo "Registro Modificado";
-
-		} elseif($oper == 'del') {
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM usuario WHERE id='$id' ");
-			$us_codigo = $this->datasis->dameval("SELECT us_codigo FROM usuario WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query('DELETE FROM usuario WHERE id='.$id );
-				$this->db->simple_query('DELETE FROM sida USING sida LEFT JOIN usuario ON sida.usuario=usuario.us_codigo WHERE usuario.us_codigo IS NULL ');
-				logusu('USUARIO','Registro '.$this->db->escape($us_codigo).' ELIMINADO');
-				echo "Registro Eliminado";
-			}
-		}
 	}
 
 	function cambiaclave(){
@@ -644,22 +603,26 @@ class Usuarios extends Controller {
 
 		$edit->almacen = new dropdownField('Almac&eacute;n', 'almacen');
 		$edit->almacen->option('','Ninguno');
-		$edit->almacen->options("SELECT ubica, CONCAT_WS('-',ubica,ubides) AS descrip FROM caub ORDER BY ubica");
+		$edit->almacen->options("SELECT TRIM(ubica) AS ubica, CONCAT_WS('-',ubica,ubides) AS descrip FROM caub ORDER BY ubica");
+		$edit->almacen->rule = 'existecaub';
 		$edit->almacen->style='width:180px';
 
 		$edit->vendedor = new dropdownField('Vendedor', 'vendedor');
 		$edit->vendedor->option('','Ninguno');
 		$edit->vendedor->options("SELECT vendedor, CONCAT(vendedor,'-',nombre) AS nom FROM vend WHERE tipo IN ('V','A') ORDER BY vendedor");
+		$edit->vendedor->rule = 'existevend';
 		$edit->vendedor->style='width:180px';
 
 		$edit->cajero = new dropdownField('Cajero', 'cajero');
 		$edit->cajero->option('','Ninguno');
-		$edit->cajero->options("SELECT trim(cajero) cajero, CONCAT_WS('-',trim(cajero), nombre) AS descri FROM scaj ORDER BY nombre");
+		$edit->cajero->options("SELECT TRIM(cajero) cajero, CONCAT_WS('-',trim(cajero), nombre) AS descri FROM scaj ORDER BY nombre");
+		$edit->cajero->rule = 'existescaj';
 		$edit->cajero->style='width:180px';
 
 		$edit->sucursal = new dropdownField('Sucursal','sucursal');
 		$edit->sucursal->option('','Ninguno');
 		$edit->sucursal->options("SELECT TRIM(codigo) codigo, CONCAT(TRIM(codigo),' ',TRIM(sucursal)) sucursal FROM sucu ORDER BY codigo");
+		$edit->sucursal->rule = 'existesucu';
 		$edit->sucursal->style='width:180px';
 
 		$edit->supervisor = new dropdownField('Es Supervisor', 'supervisor');
@@ -670,10 +633,11 @@ class Usuarios extends Controller {
 		$edit->supervidor->rule='required|enum[S,N]';
 		$edit->supervisor->style='width:80px';
 
-		$edit->uuid = new inputField('Movil UID','uuid');
+		$edit->uuid = new inputField('Movil UUID','uuid');
 		$edit->uuid->rule='';
 		$edit->uuid->size =32;
 		$edit->uuid->maxlength =100;
+		$edit->uuid->append('Solo para dispositivo movil de pedidos');
 
 		$edit->build();
 
@@ -736,9 +700,9 @@ class Usuarios extends Controller {
 		$codigo=$do->get('us_codigo');
 		if ($codigo==$this->session->userdata('usuario')){
 			$do->error_message_ar['pre_del'] = 'No se puede borrar usted mismo';
-			return FALSE;
+			return false;
 		}
-		return TRUE;
+		return true;
 	}
 
 	function _pos_delete($do){
@@ -764,25 +728,6 @@ class Usuarios extends Controller {
 		return true;
 	}
 
-	function instalar(){
-		if ( !$this->datasis->iscampo('usuario','almacen') ) {
-			$mSQL="ALTER TABLE `usuario`  ADD COLUMN `almacen` CHAR(4) NULL";
-			$this->db->simple_query($mSQL);
-			echo 'Agregado campo almacen';
-		}
-		if ( !$this->datasis->iscampo('usuario','sucursal') ) {
-			$mSQL="ALTER TABLE `usuario`  ADD COLUMN `sucursal` CHAR(2) NULL";
-			$this->db->simple_query($mSQL);
-			echo 'Agregado campo sucursal';
-		}
-		if ( !$this->datasis->iscampo('usuario','activo') ) {
-			$mSQL="ALTER TABLE `usuario`  ADD COLUMN `activo` CHAR(1) NULL";
-			$this->db->simple_query($mSQL);
-			echo 'Agregado campo activo';
-		}
-	}
-
-
 	function cclave(){
 		$id     = $this->uri->segment($this->uri->total_segments());
 
@@ -790,30 +735,28 @@ class Usuarios extends Controller {
 		$us_nombre = $this->datasis->dameval("SELECT us_nombre FROM usuario WHERE id=$id");
 
 		$salir = '
-<h2>Cambio de Clave:</h2><center><h1>'.$us_nombre.'</h1></center>
-<p id="error" style="color:red"></p>
-<form action="'.base_url().'supervisor/usuarios/cclaveg" method="post" id="fclave">
-	<table style="margin: 0pt; width: 98%;">
-		<tbody>
-		<tr id="tr_us_codigo">
-			<td style="width: 120px;" >Código</td>
-			<td style="padding: 1px;" id="td_us_codigo">'.$us_codigo.'&nbsp;</td>
-		</tr>
-		<tr id="tr_us_clave">
-			<td style="width: 120px;" >Clave*</td>
-			<td style="padding: 1px;" id="td_us_clave"><input name="us_clave" value="" id="us_clave" size="12" maxlength="15" type="password">&nbsp;</td>
-		</tr>
-		<tr id="tr_us_clave1">
-			<td style="width: 120px;">Confirmar*</td>
-			<td style="padding: 1px;" id="td_us_clave1"><input name="us_clave1" value="" id="us_clave1" size="12" maxlength="15" type="password">&nbsp;</td>
-		</tr>
-		</tbody>
-	</table>
-	<input name="id" value="'.$id.'" id="id" type="hidden">
-</form>
-';
+		<h2>Cambio de Clave:</h2><center><h1>'.$us_nombre.'</h1></center>
+		<p id="error" style="color:red"></p>
+		<form action="'.base_url().'supervisor/usuarios/cclaveg" method="post" id="fclave">
+			<table style="margin: 0pt; width: 98%;">
+				<tbody>
+				<tr id="tr_us_codigo">
+					<td style="width: 120px;" >Código</td>
+					<td style="padding: 1px;" id="td_us_codigo">'.$us_codigo.'&nbsp;</td>
+				</tr>
+				<tr id="tr_us_clave">
+					<td style="width: 120px;" >Clave*</td>
+					<td style="padding: 1px;" id="td_us_clave"><input name="us_clave" value="" id="us_clave" size="12" maxlength="15" type="password">&nbsp;</td>
+				</tr>
+				<tr id="tr_us_clave1">
+					<td style="width: 120px;">Confirmar*</td>
+					<td style="padding: 1px;" id="td_us_clave1"><input name="us_clave1" value="" id="us_clave1" size="12" maxlength="15" type="password">&nbsp;</td>
+				</tr>
+				</tbody>
+			</table>
+			<input name="id" value="'.$id.'" id="id" type="hidden">
+		</form>';
 		echo $salir;
-
 	}
 
 	function cclaveg(){
@@ -839,31 +782,30 @@ class Usuarios extends Controller {
 		$us_nombre = $this->datasis->dameval("SELECT us_nombre FROM usuario WHERE id=$id");
 
 		$salir = '
-<h2>Cambio de Clave:</h2><center><h1>'.$us_nombre.'</h1></center>
-<p id="error" style="color:red"></p>
-<form action="'.site_url('supervisor/usuarios/ccclaveg').'" method="post" id="fclave">
-	<table style="margin: 0pt; width: 98%;">
-		<tbody>
-		<tr id="tr_us_codigo">
-			<td style="width: 120px;" >Código</td>
-			<td style="padding: 1px;" id="td_us_codigo">'.$us_codigo.'&nbsp;</td>
-		</tr>
-		<tr id="tr_us_actual">
-			<td style="width: 120px;" >Clave Actual</td>
-			<td style="padding: 1px;" id="td_us_actual"><input name="us_actual" value="" id="us_actual" size="12" maxlength="15" type="password">&nbsp;</td>
-		</tr>
-		<tr id="tr_us_clave">
-			<td style="width: 120px;" >Clave*</td>
-			<td style="padding: 1px;" id="td_us_clave"><input name="us_clave" value="" id="us_clave" size="12" maxlength="15" type="password">&nbsp;</td>
-		</tr>
-		<tr id="tr_us_clave1">
-			<td style="width: 120px;">Confirmar*</td>
-			<td style="padding: 1px;" id="td_us_clave1"><input name="us_clave1" value="" id="us_clave1" size="12" maxlength="15" type="password">&nbsp;</td>
-		</tr>
-		</tbody>
-	</table>
-</form>
-';
+		<h2>Cambio de Clave:</h2><center><h1>'.$us_nombre.'</h1></center>
+		<p id="error" style="color:red"></p>
+		<form action="'.site_url('supervisor/usuarios/ccclaveg').'" method="post" id="fclave">
+			<table style="margin: 0pt; width: 98%;">
+				<tbody>
+				<tr id="tr_us_codigo">
+					<td style="width: 120px;" >Código</td>
+					<td style="padding: 1px;" id="td_us_codigo">'.$us_codigo.'&nbsp;</td>
+				</tr>
+				<tr id="tr_us_actual">
+					<td style="width: 120px;" >Clave Actual</td>
+					<td style="padding: 1px;" id="td_us_actual"><input name="us_actual" value="" id="us_actual" size="12" maxlength="15" type="password">&nbsp;</td>
+				</tr>
+				<tr id="tr_us_clave">
+					<td style="width: 120px;" >Clave*</td>
+					<td style="padding: 1px;" id="td_us_clave"><input name="us_clave" value="" id="us_clave" size="12" maxlength="15" type="password">&nbsp;</td>
+				</tr>
+				<tr id="tr_us_clave1">
+					<td style="width: 120px;">Confirmar*</td>
+					<td style="padding: 1px;" id="td_us_clave1"><input name="us_clave1" value="" id="us_clave1" size="12" maxlength="15" type="password">&nbsp;</td>
+				</tr>
+				</tbody>
+			</table>
+		</form>';
 		echo $salir;
 
 	}
@@ -881,12 +823,41 @@ class Usuarios extends Controller {
 		if ( $clavea == $us_actual ){
 			if ( $us_clave == $us_clave1) {
 				$clave = $this->db->escape($us_clave);
-				$codigo = $this->datasis->dameval("SELECT us_codigo FROM usuario WHERE id=$id");
-				$this->db->query("UPDATE usuario SET us_clave=".$clave." WHERE id=$id");
-				logusu('USUARIOS',"El Usuario ($codigo) cambio su clave");
+				$codigo = $this->datasis->dameval("SELECT us_codigo FROM usuario WHERE id=${id}");
+				$this->db->query("UPDATE usuario SET us_clave=${clave} WHERE id=${id}");
+				logusu('USUARIOS',"El Usuario (${codigo}) cambio su clave");
 			} else $msg = 'Calves no coinciden!!!';
 		} else $msg = 'Calve actual incorrecta!!!';
 		echo $msg;
 	}
 
+
+	function instalar(){
+		$campos=$this->db->list_fields('usuario');
+		if(!in_array('almacen',$campos)){
+			$mSQL="ALTER TABLE `usuario`  ADD COLUMN `almacen` CHAR(4) NULL";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('sucursal',$campos)){
+			$mSQL="ALTER TABLE `usuario`  ADD COLUMN `sucursal` CHAR(2) NULL";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('activo',$campos)){
+			$mSQL="ALTER TABLE `usuario`  ADD COLUMN `activo` CHAR(1) NULL";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE usuario DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE usuario ADD UNIQUE INDEX codigo (codigo)');
+			$this->db->simple_query('ALTER TABLE usuario ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};
+
+		if(!in_array('uuid',$campos)){
+			$this->db->simple_query("ALTER TABLE `usuario` ADD COLUMN `uuid` VARCHAR(100) NULL DEFAULT NULL COMMENT 'Dispositivo movil para pedidos' AFTER `activo`");
+		}
+		$this->db->simple_query('DELETE FROM sida USING sida LEFT JOIN usuario ON sida.usuario=usuario.us_codigo WHERE usuario.us_codigo IS NULL');
+	}
 }
