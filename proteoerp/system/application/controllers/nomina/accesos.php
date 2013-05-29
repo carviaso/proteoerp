@@ -100,7 +100,7 @@ class Accesos extends validaciones{
 		$grid->db->from('cacc');
 		$grid->db->join('pers','cacc.codigo = pers.codigo');
 
-		$grid->db->orderby('fecha,hora','desc');
+		$grid->db->orderby('fecha','desc');
 		$grid->db->orderby('hora','desc');
 
 		$grid->per_page = 7;
