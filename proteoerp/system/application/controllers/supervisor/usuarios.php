@@ -167,7 +167,7 @@ class Usuarios extends Controller {
 								var json = JSON.parse(r);
 								if (json.status == "A"){
 									$.prompt("<h1>Registro Guardado</h1>",{
-										submit: function(e,v,m,f){  
+										submit: function(e,v,m,f){
 											setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
 										}}
 									);
@@ -625,7 +625,7 @@ class Usuarios extends Controller {
 		$edit->post_process('update','_pos_update');
 
 		$edit->us_codigo = new inputField('C&oacute;digo', 'us_codigo');
-		$edit->us_codigo->rule = 'strtoupper|required';
+		$edit->us_codigo->rule = 'strtoupper|required|unique';
 		$edit->us_codigo->mode = 'autohide';
 		$edit->us_codigo->size = 20;
 		$edit->us_codigo->maxlength = 15;
@@ -639,34 +639,41 @@ class Usuarios extends Controller {
 		$edit->activo->option('S','Si');
 		$edit->activo->option('N','No');
 		$edit->activo->style='width:80px';
+		$edit->activo->insertValue='N';
+		$edit->activo->rule='required|enum[S,N]';
 
 		$edit->almacen = new dropdownField('Almac&eacute;n', 'almacen');
 		$edit->almacen->option('','Ninguno');
 		$edit->almacen->options("SELECT ubica, CONCAT_WS('-',ubica,ubides) AS descrip FROM caub ORDER BY ubica");
+		$edit->almacen->style='width:180px';
 
 		$edit->vendedor = new dropdownField('Vendedor', 'vendedor');
 		$edit->vendedor->option('','Ninguno');
 		$edit->vendedor->options("SELECT vendedor, CONCAT(vendedor,'-',nombre) AS nom FROM vend WHERE tipo IN ('V','A') ORDER BY vendedor");
+		$edit->vendedor->style='width:180px';
 
 		$edit->cajero = new dropdownField('Cajero', 'cajero');
 		$edit->cajero->option('','Ninguno');
 		$edit->cajero->options("SELECT trim(cajero) cajero, CONCAT_WS('-',trim(cajero), nombre) AS descri FROM scaj ORDER BY nombre");
+		$edit->cajero->style='width:180px';
 
 		$edit->sucursal = new dropdownField('Sucursal','sucursal');
 		$edit->sucursal->option('','Ninguno');
 		$edit->sucursal->options("SELECT TRIM(codigo) codigo, CONCAT(TRIM(codigo),' ',TRIM(sucursal)) sucursal FROM sucu ORDER BY codigo");
+		$edit->sucursal->style='width:180px';
 
 		$edit->supervisor = new dropdownField('Es Supervisor', 'supervisor');
 		$edit->supervisor->rule = 'required';
 		$edit->supervisor->option('N','No');
 		$edit->supervisor->option('S','Si');
+		$edit->supervisor->insertValue='N';
+		$edit->supervidor->rule='required|enum[S,N]';
 		$edit->supervisor->style='width:80px';
 
 		$edit->uuid = new inputField('Movil UID','uuid');
 		$edit->uuid->rule='';
 		$edit->uuid->size =32;
 		$edit->uuid->maxlength =100;
-
 
 		$edit->build();
 
@@ -735,48 +742,43 @@ class Usuarios extends Controller {
 	}
 
 	function _pos_delete($do){
-		$codigo=$do->get('us_codigo');
-		$mSQL="DELETE FROM intrasida WHERE usuario='$codigo'";
+		$codigo  =$do->get('us_codigo');
+		$dbcodigo=$this->db->escape($codigo);
+		$mSQL="DELETE FROM intrasida WHERE usuario=${dbcodigo}";
 		$this->db->query($mSQL);
-		logusu('USUARIOS',"BORRADO EL USUARIO $codigo");
-		return TRUE;
+		logusu('USUARIOS',"BORRADO EL USUARIO ${codigo}");
+		return true;
 	}
 
 	function _pos_insert($do){
 		$codigo=$do->get('us_codigo');
 		$superv=$do->get('supervisor');
 		logusu('USUARIOS',"CREADO EL USUARIO $codigo, SUPERVISOR $superv");
-		redirect("supervisor/usuarios/cclave/modify/$codigo");
-		return TRUE;
+		return true;
 	}
 
 	function _pos_update($do){
 		$codigo=$do->get('us_codigo');
 		$superv=$do->get('supervisor');
 		logusu('USUARIOS',"MODIFICADO EL USUARIO $codigo, SUPERVISOR $superv");
-		return TRUE;
-	}
-
-	function soporte(){
-		$mSQL="INSERT INTO `usuario` (`us_codigo`, `us_nombre`, `us_clave`,`supervisor`) VALUES ('SOPORTE', 'PERS. DREMANVA', 'DREMANVA','S');";
-		$this->db->simple_query($mSQL);
+		return true;
 	}
 
 	function instalar(){
 		if ( !$this->datasis->iscampo('usuario','almacen') ) {
 			$mSQL="ALTER TABLE `usuario`  ADD COLUMN `almacen` CHAR(4) NULL";
 			$this->db->simple_query($mSQL);
-			echo "Agregado campo almacen";
+			echo 'Agregado campo almacen';
 		}
 		if ( !$this->datasis->iscampo('usuario','sucursal') ) {
 			$mSQL="ALTER TABLE `usuario`  ADD COLUMN `sucursal` CHAR(2) NULL";
 			$this->db->simple_query($mSQL);
-			echo "Agregado campo sucursal";
+			echo 'Agregado campo sucursal';
 		}
 		if ( !$this->datasis->iscampo('usuario','activo') ) {
 			$mSQL="ALTER TABLE `usuario`  ADD COLUMN `activo` CHAR(1) NULL";
 			$this->db->simple_query($mSQL);
-			echo "Agregado campo activo";
+			echo 'Agregado campo activo';
 		}
 	}
 
@@ -829,7 +831,6 @@ class Usuarios extends Controller {
 		}
 		redirect($this->url.'jqdatag');
 	}
-
 
 
 	function ccclave(){
@@ -885,15 +886,7 @@ class Usuarios extends Controller {
 				logusu('USUARIOS',"El Usuario ($codigo) cambio su clave");
 			} else $msg = 'Calves no coinciden!!!';
 		} else $msg = 'Calve actual incorrecta!!!';
-
 		echo $msg;
 	}
 
-
-	function _pos_updatec($do){
-		$codigo=$do->get('us_codigo');
-		$superv=$do->get('supervisor');
-		logusu('USUARIOS',"CAMBIO DE CLAVE DEL USUARIO $codigo");
-		return true;
-	}
 }
