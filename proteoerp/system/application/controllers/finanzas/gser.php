@@ -4416,7 +4416,7 @@ class gser extends Controller {
 		}
 		//Fin de la cuenta por pagar
 
-		logusu('gser',"Gasto ${numero} ${codprv}  ${fecha} CREADO");
+		logusu('gser',"Gasto ${numero} ${codprv} ${fecha} CREADO");
 		return true;
 	}
 

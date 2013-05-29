@@ -4,7 +4,7 @@ class Accesos extends validaciones{
 	var $_direccion;
 
 	function Accesos(){
-		parent::Controller(); 
+		parent::Controller();
 		$this->load->library('rapyd');
 		$this->db->simple_query('UPDATE pers SET codigo=TRIM(codigo)');
 		$this->instalar();
@@ -37,7 +37,7 @@ class Accesos extends validaciones{
 
 		$filter->codigo = new inputField("C&oacute;digo", "codigo");
 		$filter->codigo->db_name='cacc.codigo';
-		$filter->codigo->size = 15; 
+		$filter->codigo->size = 15;
 
 		$filter->cedula = new inputField("C&eacute;dula","cedula");
 		$filter->cedula->db_name='pers.cedula';
@@ -180,11 +180,12 @@ class Accesos extends validaciones{
 	}
 
 	function cerberus(){
+		$this->load->helper('string');
 		$this->load->library('path');
 		$path=new Path();
 		$path->setPath($this->config->item('uploads_dir'));
 		$path->append('/fnomina');
-		$upload_path ='../'.$path->getPath().'/'; 
+		$upload_path =reduce_double_slashes('../'.$path->getPath().'/');
 
 		$query = $this->db->query('SELECT id,sid,ip,usr,pwd FROM cerberus WHERE activo="S"');
 		foreach ($query->result() as $row){
@@ -201,7 +202,7 @@ class Accesos extends validaciones{
 			if ($num_rows > 0){
 				while ($data = mysql_fetch_assoc($result)) {
 					$fnombre=$data['codigo'].'-'.preg_replace('/[^0-9]+/','', $data['fecha'].$data['hora']).'.jpg';
-					//echo $fnombre.br(); 
+					//echo $fnombre.br();
 					file_put_contents($upload_path.$fnombre,$data['foto']);
 					$sid=$data['id'];
 					unset($data['foto']);
