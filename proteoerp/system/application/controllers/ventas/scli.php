@@ -73,13 +73,17 @@ class Scli extends validaciones {
 		$grid->wbotonadd(array('id'=>'editacr', 'img'=>'images/star.png'    , 'alt' => 'Cr&eacute;dito' , 'label'=>'L&iacute;mite de Cr&eacute;dito'));
 		$WestPanel = $grid->deploywestp();
 
+
+
 		$adic = array(
 		array('id'=>'fedita' , 'title'=>'Agregar/Editar Cliente'),
 		array('id'=>'feditcr', 'title'=>'Cambia Limite de Credito'),
 		array('id'=>'fshow'  , 'title'=>'Mostrar Registro'),
 		array('id'=>'fborra' , 'title'=>'Eliminar Registro')
 		);
-		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
+
+		$SouthPanel = $grid->SouthPanel('<a href="'.site_url($this->url.'getdata').'" class="ayuda1">Ayuda</a>'.$this->datasis->traevalor('TITULO1'), $adic);
+		//$SouthPanel .= '<a href="'.site_url($this->url.'getdata').'" class="ayuda1">Ayuda</a>';
 
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
@@ -142,6 +146,9 @@ class Scli extends validaciones {
 		$ngrid = '#newapi'.$grid0;
 
 		$bodyscript .= '
+        $("a.ayuda1").pageslide();
+
+
 		jQuery("#edocta").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
@@ -706,7 +713,7 @@ class Scli extends validaciones {
 			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:false}',
-			'editoptions'   => '{'.$grid->autocomplete($link, 'cuenta','cucucu','<div id=\"cucucu\"><b>"+ui.item.descrip+"</b></div>').'}',
+			//'editoptions'   => '{'.$grid->autocomplete($link, 'cuenta','cucucu','<div id=\"cucucu\"><b>"+ui.item.descrip+"</b></div>').'}',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
 
@@ -718,7 +725,7 @@ class Scli extends validaciones {
 			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:false}',
-			'editoptions'   => '{'.$grid->autocomplete($link, 'canticipo','cacaca','<div id=\"cacaca\"><b>"+ui.item.descrip+"</b></div>').'}',
+			//'editoptions'   => '{'.$grid->autocomplete($link, 'canticipo','cacaca','<div id=\"cacaca\"><b>"+ui.item.descrip+"</b></div>').'}',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
 

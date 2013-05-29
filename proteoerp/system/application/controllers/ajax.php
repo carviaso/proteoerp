@@ -1181,7 +1181,8 @@ class Ajax extends Controller {
 			$retArray = $retorno = array();
 			$mSQL="SELECT id, fecha,monto, numero, tipo_doc, monto-abonos AS saldo
 			FROM smov
-			WHERE ${ww} AND abonos<monto AND cod_cli=${dbscli}";
+			WHERE ${ww} AND abonos<monto AND cod_cli=${dbscli}
+			ORDER BY fecha DESC";
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){

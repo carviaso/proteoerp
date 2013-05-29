@@ -1601,7 +1601,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 	<table width='100%'>
 		<tr>
 			<td>
-				<?php if($form->_status=='show'){ ?>
+<?php if($form->_status!='show'){ ?>
 				<fieldset style='border: 1px outset #8A0808;background: #FFFBE9;'>
 				<legend class="titulofieldset" >Descuentos</legend>
 				<table border=0 width='100%'>

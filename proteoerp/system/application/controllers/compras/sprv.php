@@ -15,7 +15,6 @@ class Sprv extends Controller {
 
 	function index(){
 		$this->instalar();
-
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -461,7 +460,7 @@ class Sprv extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('reteiva');
-		$grid->label('Retencion %');
+		$grid->label('Reten. %');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -495,7 +494,7 @@ class Sprv extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 50,
+			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:false}',
 			'editoptions'   => '{ size:10, maxlength: 10 }',
@@ -1029,12 +1028,14 @@ class Sprv extends Controller {
 		$edit->proveed->size = 6;
 		$edit->proveed->maxlength =5;
 		$edit->proveed->append($lproveed);
-		//$edit->proveed->group = 'Datos del Proveedor';
+		$edit->proveed->title = "Codigo del Proveedor";
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->rule = 'trim|strtoupper|required';
 		$edit->nombre->size = 35;
 		$edit->nombre->maxlength =40;
+		$edit->nombre->title = "Nombre del Proveedor";
+
 
 		//$lriffis='<a href="javascript:consulrif();" title="Consultar RIF en el SENIAT" onclick="" style="color:red;font-size:9px;border:none;">SENIAT</a>';
 		$edit->rif =  new inputField('RIF', 'rif');
@@ -1042,19 +1043,21 @@ class Sprv extends Controller {
 		//$edit->rif->append($lriffis);
 		$edit->rif->maxlength=13;
 		$edit->rif->size =12;
+		$edit->rif->title = "RIF o Cedula del Proveedor";
 
 		$edit->contacto = new inputField("Contacto", "contacto");
 		$edit->contacto->size =35;
 		$edit->contacto->rule ="trim";
 		$edit->contacto->maxlength =40;
-		//$edit->contacto->group = "Datos del Proveedor";
+		$edit->contacto->title = "Nombre de la persona con quien hablan o son atendidos en el proveedor";
 
 		$edit->grupo = new dropdownField("Grupo", "grupo");
 		$edit->grupo->option("","Seleccionar");
 		$edit->grupo->options("SELECT grupo,gr_desc,grupo FROM grpr ORDER BY gr_desc");
 		$edit->grupo->style = "width:190px";
-		//$edit->grupo->rule = "required";
 		$edit->grupo->group = 'Datos del Proveedor';
+		$edit->grupo->title = "Grupo de Proveedores";
+
 		$edit->gr_desc = new inputField('gr_desc', 'gr_desc');
 
 		$edit->tipo = new dropdownField("Persona", "tipo");
@@ -1063,6 +1066,7 @@ class Sprv extends Controller {
 		$edit->tipo->style = "width:190px";
 		$edit->tipo->rule = "required";
 		$edit->tipo->group = "Datos del Proveedor";
+		$edit->tipo->title = "Tipo de persona Juridico, Natural, etc";
 
 		$edit->tiva  = new dropdownField("Or&iacute;gen", "tiva");
 		$edit->tiva->option("N","Nacional");
@@ -1094,12 +1098,14 @@ class Sprv extends Controller {
 		$edit->email->rule = "trim|valid_email";
 		$edit->email->size =29;
 		$edit->email->maxlength =30;
+		$edit->email->title = "Correo electronico";
 
 		$edit->url = new inputField("URL", "url");
 		$edit->url->group = "Datos del Proveedor";
 		$edit->url->rule = "trim";
 		$edit->url->size =25;
 		$edit->url->maxlength =30;
+		$edit->url->title = "Pagina Web del Proveedor";
 
 		$atts = array(
 				'width'     =>'800',
@@ -1147,6 +1153,7 @@ class Sprv extends Controller {
 		$edit->cliente->rule ="trim";
 		$edit->cliente->readonly=true;
 		$edit->cliente->append($bsclid);
+		$edit->cliente->title = "Codigo como cliente para hacer cruces de cuenta";
 
 		$edit->prefpago = new dropdownField('Preferencia de pago','prefpago');
 		$edit->prefpago->option('T','Transferencia');
@@ -1156,8 +1163,9 @@ class Sprv extends Controller {
 		$edit->prefpago->style = 'width:140px;';
 
 		$edit->codigo  = new inputField("Cod. en Prov", "codigo");
-		$edit->codigo->size =15;
-		$edit->codigo->rule ="trim";
+		$edit->codigo->size  = 15;
+		$edit->codigo->rule  = "trim";
+		$edit->codigo->title = "Codigo en el sistema del proveedor";
 
 		$edit->nomfis = new textareaField('Raz&oacute;n Social', 'nomfis');
 		$edit->nomfis->rule = 'trim';
@@ -1165,18 +1173,21 @@ class Sprv extends Controller {
 		$edit->nomfis->rows =  3;
 		$edit->nomfis->maxlength =200;
 		$edit->nomfis->style = 'width:170;';
+		$edit->nomfis->title = "Nombre como aparecen en el registro ";
 
 		$edit->cuenta = new inputField('Contable', 'cuenta');
 		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->size =17;
 		$edit->cuenta->maxlength =15;
 		$edit->cuenta->append($bcpla);
+		$edit->cuenta->title = "Codigo en el plan de cuentas contable";
 
 		$edit->canticipo = new inputField('Anticipo', 'canticipo');
 		$edit->canticipo->rule='trim|existecpla';
 		$edit->canticipo->size =17;
 		$edit->canticipo->maxlength =15;
 		$edit->canticipo->append($banti);
+		$edit->canticipo->title = "Codigo en el plan de cuentas contable para cargar anticipos si es diferente";
 
 		$edit->reteiva  = new inputField('Retenci&oacute;n','reteiva');
 		$edit->reteiva->size = 6;

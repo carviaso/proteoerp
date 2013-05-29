@@ -108,7 +108,7 @@ $(function() {
 </fieldset>
 
 <div align='center' style='border: 1px outset #EFEFEF;background: #EFEFFF '>
-	<div id='grid1_container' style='width:580px;height:150px'>
+	<div id='grid1_container' style='width:580px;height:150px;overflow:auto'>
 		<table style='width:100%;'>
 			<tr id='__PNPL__'>
 				<th class="littletableheaderdet">N&uacute;mero</th>

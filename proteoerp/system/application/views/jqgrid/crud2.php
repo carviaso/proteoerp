@@ -32,6 +32,7 @@ html, body {margin: 0; padding: 0; overflow: hidden; font-size: 75%;}
 #LeftPane  {padding: 2px; overflow: auto;}
 #RightPane {padding: 2px; overflow: auto;}
 .ui-layout-west .ui-jqgrid tr.jqgrow td { border-bottom: 1px solid;}
+.pane ( display: none;)
 ';
 }
 
@@ -52,16 +53,13 @@ if ( isset($readyLayout) == false ){
 			jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);},
 		center__onresize: centeronre
 	});
-
 	function centeronre ( pane, $Pane, paneState ) {
 		jQuery("#newapi'.$grids[0]['gridname'].'").jqGrid(\'setGridWidth\', $Pane.innerWidth()-6);
 		jQuery("#newapi'.$grids[0]['gridname'].'").jqGrid(\'setGridHeight\',$Pane.innerHeight()-'.$grids[0]['menosalto'].');
 	};
-
 	function westonre (pane, $Pane){
 		jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);
 	};
-
 ';
 }
 
@@ -186,6 +184,10 @@ echo script('plugins/jquery.numeric.pack.js');
 echo script('plugins/jquery.floatnumber.js');
 echo script('plugins/jquery.maskedinput.min.js');
 
+echo script('jquery.pageslide.min.js');
+echo style('jquery.pageslide.css');
+
+
 echo "\n";
 if ( isset($jquerys) ) {
 	foreach( $jquerys as $jq ){ echo script($jq); }
@@ -221,14 +223,12 @@ echo '<script language="javascript" type="text/javascript" src="'.base_url().'sy
 
 ?>
 <script language="javascript" type="text/javascript">
-
 	Calendar._DN = new Array("Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo");
 	Calendar._SMN = new Array("Ene", "Feb", "Mar", "Abr", "Mayo", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic");
 	Calendar._SDN = new Array("Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do");
 	Calendar._MN = new Array("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre");
 	Calendar._TT = {};
 	Calendar._TT["TODAY"] = "Hoy";
-
 </script>
 <?php
 echo "\n<!-- USUARIO -->\n";
@@ -239,12 +239,10 @@ echo "\n";
 echo script('i18n/grid.locale-sp.js');
 echo script('jquery.jqGrid.min.js');
 
-
 ?>
 <style>
 .ui-autocomplete {max-height: 150px;overflow-y: auto;max-width: 600px;}
 html.ui-autocomplete {height: 150px;width: 600px;}
-
 <?php echo $LayoutStyle; ?>
 
 th.ui-th-column div{white-space:normal !important;height:auto !important;padding:2px;}
@@ -305,17 +303,16 @@ function esperar(url){
 };
 
 </script>
-
-
 </head>
-
 <body id="dt_proteo">
+
+<!-- div id='contenido' style='width:90%' -->
 
 <div class="ui-layout-north" ><?php echo $cintu ?></div>
 
-<?php echo (isset($WestPanel) == true)? $WestPanel:''; ?>
+<?php 
+	echo (isset($WestPanel) == true)? $WestPanel:''; 
 
-<?php
 if(isset($centerpanel) == true) {
 	echo $centerpanel;
 } else{?>
@@ -323,11 +320,9 @@ if(isset($centerpanel) == true) {
 	<table id="newapi<?php echo $grids[0]['gridname'];?>"></table>
 	<div   id="pnewapi<?php echo $grids[0]['gridname'];?>"></div>
 </div> <!-- #RightPane -->
-
 <?php } ?>
 
 <?php echo (isset($SouthPanel) == true)? $SouthPanel:''; ?>
-
 
 <div id="dtg_dialog" title="Exporta Datos">
 	<ul>
@@ -342,5 +337,6 @@ if(isset($centerpanel) == true) {
 <?php if(isset($bodyscript)) echo $bodyscript; ?>
 
 <div id="displayBox" style="display:none" ><p>Disculpe por la espere.....</p><img  src="<?php echo base_url() ?>images/doggydig.gif" width="131px" height="79px"/></div>
+<!-- /div -->
 </body>
 </html>

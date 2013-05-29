@@ -45,7 +45,8 @@ class Scst extends Controller {
 		$bodyscript  = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$WpAdic = "
-		<tr><td>\n
+		<tr><td>
+			<div class=\"anexos\">\n
 			<table cellpadding='0' cellspacing='0' style='width:100%;'>
 				<tr>
 					<td style='vertical-align:center;border:1px solid #AFAFAF;'><div class='tema1 botones'>".img(array('src' =>"assets/default/images/print.png",  'height' => 18, 'alt' => 'Imprimir',  'title' => 'Imprimir', 'border'=>'0'))."</div></td>
@@ -53,16 +54,20 @@ class Scst extends Controller {
 					<td style='vertical-align:top;text-align:center;'><div class='tema1 botones'><a class='tema1 botones' style='width:80px;text-align:left;vertical-align:top;' href='#' id='reteprin'>Retenci&oacute;n</a></div></td>
 				</tr>
 			</table>
-		</td></tr>\n
+			</div>
+		</td></tr>
 		";
 
 		$grid->setWpAdicional($WpAdic);
 
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'cprecios','img'=>'images/precio.png'   ,'alt' => 'Ajustar Precios'    ,'label'=>'Cambiar Precios'));
-		$grid->wbotonadd(array('id'=>'reversar','img'=>'images/arrow_up.png' ,'alt' => 'Actualizar/Reversar','label'=>'Actualizar Reversar'));
-		$grid->wbotonadd(array('id'=>'bcmonto' ,'img'=>'images/arrow_up.png' ,'alt' => 'Modificar la CxP'   ,'label'=>'Modificar la CxP'));
+		$grid->wbotonadd(array('id'=>'cprecios','img'=>'images/precio.png'   ,'alt' => 'Ajustar Precios'    ,'label'=>'Cambiar Precios', ));
+		$grid->wbotonadd(array('id'=>'actualizar','img'=>'images/arrow_up.png' ,'alt' => 'Actualizar','label'=>'Actualizar'));
+		$grid->wbotonadd(array('id'=>'reversar',  'img'=>'images/arrow_down.png' ,'alt' => 'Reversar',  'label'=>'Reversar'));
+		$grid->wbotonadd(array('id'=>'bcmonto' ,'img'=>'images/precio.png' ,'alt' => 'Modificar la CxP'   ,'label'=>'Modificar la CxP'));
+
+
 		if ( $this->datasis->traevalor('MOTOS') == 'S' )
 			$grid->wbotonadd(array('id'=>'vehiculo', 'img'=>'images/carro.png',  'alt' => 'Seriales Vehiculares',   'label'=>'Seriales Vehiculares'));
 
@@ -88,6 +93,11 @@ class Scst extends Controller {
 			return link;
 		};';
 
+		$funciones .= '$("#cprecios").hide();'."\n";
+		$funciones .= '$("#actualizar").hide();'."\n";
+		$funciones .= '$("#reversar").hide();'."\n";
+		$funciones .= '$("#bcmonto").hide();'."\n";
+
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
@@ -96,7 +106,7 @@ class Scst extends Controller {
 		$param['otros']        = $this->datasis->otros('SCST', 'JQ');
 		$param['centerpanel']  = $centerpanel;
 		$param['funciones']    = $funciones;
-		$param['temas']        = array('proteo','darkness','anexos1');
+		$param['temas']        = array('proteo','darkness','anexos');
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
 		$param['encabeza']     = $this->titp;
@@ -289,9 +299,21 @@ class Scst extends Controller {
 				}
 			});';
 
+
+		$bodyscript .= '
+			$("#actualizar").click( function(){
+				acturever();
+			});';
+
 		//Actualizar y Reversar
 		$bodyscript .= '
 			$("#reversar").click( function(){
+				acturever();
+			});';
+
+		//Actualizar y Reversar
+		$bodyscript .= '
+			function acturever(){
 				var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
 					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
@@ -302,7 +324,6 @@ class Scst extends Controller {
 					if(ret.actuali<ret.fecha){'."\n";
 
 		if($this->datasis->sidapuede('SCSTOTR','actualizar')){
-
 			//Revisa si puede Actualizar
 			$bodyscript .= '
 						$.post("'.site_url('compras/scst/actualizar').'/"+ret.control,
@@ -360,7 +381,7 @@ class Scst extends Controller {
 				}else{
 					$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
 				}
-			});';
+			};';
 
 		$bodyscript .= '
 			$("#factuali").dialog({
@@ -1294,6 +1315,17 @@ class Scst extends Controller {
 						$("#ladicional").html(msg);
 					}
 				});
+				if ( ret.fecha >  ret.actuali ) {
+					$("#cprecios").show();
+					$("#actualizar").show();
+					$("#reversar").hide();
+					$("#bcmonto").hide();
+				} else {
+					$("#cprecios").hide();
+					$("#actualizar").hide();
+					$("#reversar").show();
+					$("#bcmonto").show();
+				}
 			}},
 			afterInsertRow:
 			function( rid, aData, rowe){
@@ -1305,10 +1337,6 @@ class Scst extends Controller {
 				}
 			}
 		');
-
-//				} else {
-//					$(this).jqGrid( "setCell", rid, "tipo_doc", "", {color:"#FFFFFF", background:"#06276B" });
-
 
 
 //		$grid->setOndblClickRow("");

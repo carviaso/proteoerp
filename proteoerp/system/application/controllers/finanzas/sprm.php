@@ -1,4 +1,5 @@
-<?php require_once('common.php');
+<?php 
+require_once('common.php');]
 class Sprm extends Controller {
 	var $mModulo='SPRM';
 	var $titp='Movimiento de Proveedor';
@@ -9,7 +10,6 @@ class Sprm extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		//$this->datasis->modulo_id(500,1);
 		if (!$this->datasis->sidapuede('SPRM', 'TODOS')) {
 			redirect('/bienvenido/noautorizado');
 		}

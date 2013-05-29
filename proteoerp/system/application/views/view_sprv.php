@@ -1,34 +1,7 @@
 <?php echo $form_scripts; ?>
 <?php echo $form_begin;   ?>
-<?php
-//$container_tr=join("&nbsp;", $form->_button_container["TR"]);
-//$container_bl=join("&nbsp;", $form->_button_container["BL"]);
-//$container_br=join("&nbsp;", $form->_button_container["BR"]);
-?>
-<?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
-
-<?php
-/*
-<table border=0 width="100%">
-	<tr>
-		<td>
-			<?php if($form->_status=='show'){ ?>
-			<a href='<?php echo base_url()."compras/sprv/consulta/".$form->_dataobject->get('id'); ?>' >
-			<?php
-				$propiedad = array('src' => 'images/ojos.png', 'alt' => 'Consultar Movimiento', 'title' => 'Consultar Detalles','border'=>'0','height'=>'25');
-				echo img($propiedad);
-			?>
-			</a>
-			<?php } ?>
-		</td>
-		<td align='center' valign='middle'>
-			<?php  if ($form->tipo->value=='0') echo "<div style='font-size:14px;font-weight:bold;color: #B40404'>***DESACTIVADO***</div>"; ?>&nbsp;
-		</td>
-		<td align='right'><?php echo $container_tr; ?></td>
-	</tr>
-</table>
-*/
-?>
+<?php 
+if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 
 <fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
 <table border=0 width="100%">

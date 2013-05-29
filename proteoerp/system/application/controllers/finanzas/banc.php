@@ -283,8 +283,6 @@ class Banc extends Controller {
 			'edittype'      => "'select'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{value: '.$tbanco.',  style:"width:300px" }',
-			//'editoptions'   => '{dataUrl: "'.site_url("ajax/ddbanco").'",  style:"width:300px" }',
-
 			'editrules'     => '{ required:true}',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
@@ -617,10 +615,6 @@ class Banc extends Controller {
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
 
-		//$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 680, height:420, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
-		//$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 680, height:420, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
-		//$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
-
 		$grid->setOnSelectRow('
 		function(id){
 			if (id){
@@ -646,6 +640,7 @@ class Banc extends Controller {
 		}'
 		);
 */
+
 		#show/hide navigations buttons
 		$grid->setAdd(    $this->datasis->sidapuede('BANC','INCLUIR%' ));
 		$grid->setEdit(   $this->datasis->sidapuede('BANC','MODIFICA%'));

@@ -1357,8 +1357,6 @@ class Cruc extends Controller {
 
 		$do = new DataObject('cruc');
 		$do->rel_one_to_many('itcruc', 'itcruc','numero');
-		//$do->pointer('scli' ,'scli.cliente=sfac.cod_cli','scli.tipo AS sclitipo','left');
-		//$do->rel_pointer('sitems','sinv','sitems.codigoa=sinv.codigo','sinv.descrip AS sinvdescrip');
 
 		$edit = new DataDetails($this->tits, $do);
 		$edit->on_save_redirect=false;
