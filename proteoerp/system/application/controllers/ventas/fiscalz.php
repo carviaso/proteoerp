@@ -83,7 +83,7 @@ class fiscalz extends Controller{
 		$grid->column_orderby('Fecha Final'  ,'<dbdate_to_human><#fecha#></dbdate_to_human>' ,'fecha1','align=\'center\'');
 		$grid->column_orderby('U. Factura','factura','factura');
 		$grid->column('Hora'    ,'hora','align=\'center\'');
-		$grid->column('Total'   ,'<b><number_format><#total#>|2|,|.</number_format></b>','align=\'right\'');
+		$grid->column('Total'   ,'<b><nformat><#total#></nformat></b>','align=\'right\'');
 		$grid->column('Manual','manual' ,'align=\'center\'');
 		$grid->column('Duplicar',$uri_2 ,'align=\'center\'');
 
