@@ -145,10 +145,10 @@ class Scli extends validaciones {
 		$bodyscript = '<script type="text/javascript">';
 		$ngrid = '#newapi'.$grid0;
 
+		//$("a.ayuda1").pageslide();
+
+
 		$bodyscript .= '
-        $("a.ayuda1").pageslide();
-
-
 		jQuery("#edocta").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
