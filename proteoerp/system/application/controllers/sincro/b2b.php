@@ -877,13 +877,24 @@ class b2b extends validaciones {
 								$row = $query->row();
 								$codigolocal=$row->codigo;
 							}
-						}elseif(!empty($ddata['codigo'])){
+						}
+						if(!empty($ddata['codigo']) && $codigolocal==false){
 							$mSQL_p = 'SELECT codigo FROM sinv';
 							$bbus   = array('codigo','barras','alterno');
 							$query=$this->_gconsul($mSQL_p,$ddata['codigo'],$bbus);
 							if($query){
 								$row = $query->row();
 								$codigolocal=$row->codigo;
+								//Relaciona el nuevo codigo de barras
+								if(!empty($barras)){
+									$arr_barraspos=array('codigo'=>$codigolocal,'suplemen'=>$barras);
+									$mSQL=$this->db->insert_string('barraspos',$arr_barraspos);
+									$rt=$this->db->simple_query($mSQL);
+									if(!$rt){
+										memowrite($mSQL,'B2B');
+										$er++;
+									}
+								}
 							}
 						}
 						//if($codigolocal===false AND $this->db->table_exists('sinvprov')){
