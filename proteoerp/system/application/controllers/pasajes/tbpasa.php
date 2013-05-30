@@ -813,9 +813,11 @@ class Tbpasa extends Controller {
 		$mes   = $this->uri->segment(6);
 		$ano   = $this->uri->segment(7);
 
-		$codrut  = $this->datasis->dameval('SELECT codrut    FROM tbdestinos WHERE id='.$id);
-		$origen  = $this->datasis->dameval('SELECT codofiorg FROM tbdestinos WHERE id='.$id);
-		$destino = $this->datasis->dameval('SELECT codofides FROM tbdestinos WHERE id='.$id);
+		$reg  = $this->datasis->damereg('SELECT codrut,codofiorg,codofides FROM tbdestinos WHERE id='.$id);
+
+		$codrut  = $reg['codrut'];
+		$origen  = $reg['codofiorg'];
+		$destino = $reg['codofides'];
 
 		$mSQL = "SELECT orden FROM tbdestinos WHERE codrut = '${codrut}' AND codofiorg = '${origen}' AND codofides='${origen}' ";
 		$inicio = $this->datasis->dameval($mSQL);
@@ -831,13 +833,14 @@ class Tbpasa extends Controller {
 			AND c.fecpas=${ano}${mes}${dia} 
 			AND c.inicio<${fin} AND c.fin>${inicio} 
 		WHERE a.codrut='${codrut}' AND ";
-//echo $mSQL1;
+
 
 		$rs = "No hay Disponibilidad";
 		$bl = "\t\t<td>&nbsp;<td>\n";
 		
 		$rs  = "<table>";
 		//$rs .= "<tr><td colspan='3' align='center'>Ruta: ".$codrut." Fecha: ".$dia."/".$mes."/".$ano."</td></tr>";
+	
 		$rs .= "<tr><td>PLANTA BAJA</td><td>&nbsp;&nbsp;</td><td>PLANTA ALTA</td></tr>";
 		$rs .= "<tr><td><table>\n\t<tr>\n";
 
@@ -870,6 +873,7 @@ class Tbpasa extends Controller {
 		$mSQL = $mSQL1." b.indice > 135 AND b.indice < 148 ORDER BY b.indice ";
 		$rs .= $this->busfila($mSQL, 136);
 
+
 		$rs .= "</table>\n</td></tr></table>";
 
 
@@ -885,8 +889,12 @@ class Tbpasa extends Controller {
 		$libre   = "#9BFF05";
 		$ocupado = "#FFADA0";
 		$reserva = "#F6FF7F";
+		$manual  = "#F4FF2F";
+		$mi = $i;
 		$query = $this->db->query($mSQL);
-		
+
+		memowrite($mSQL,'meco');
+
 		$bl = "\t\t<td>&nbsp;<td>\n";
 		$rs = "";
 		$f = $i+11;
@@ -898,7 +906,12 @@ class Tbpasa extends Controller {
 				if ($row['estatus'] == 'L')	$color = $libre;
 				if ($row['estatus'] == 'R')	$color = $reserva;
 				if ($row['estatus'] == 'V')	$color = $ocupado;
-				while ( $i != $row['indice'] ){ $rs1 = $bl.$rs1; $i++;	}
+				if ($row['estatus'] == 'P')	$color = $manual;
+				while ( $i != $row['indice'] ){ 
+					$rs1 = $bl.$rs1; 
+					$i++;	
+					if ( $i > $mi+12  ) break;
+			}
 				if ( $i == $row['indice'] )
 					$rs1 = "\t\t<td bgcolor='".$color."' ><a href='#' onclick='reserva(".$row['indice'].")' >".utf8_encode($row['valor'])."</a><td>\n".$rs1;
 				$i ++;
