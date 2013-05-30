@@ -579,6 +579,7 @@ class Usuarios extends Controller {
 		$edit->script($script,'modify');
 
 		$edit->pre_process( 'delete','_pre_delete');
+		
 		$edit->post_process('delete','_pos_delete');
 		$edit->post_process('insert','_pos_insert');
 		$edit->post_process('update','_pos_update');
@@ -717,14 +718,14 @@ class Usuarios extends Controller {
 	function _pos_insert($do){
 		$codigo=$do->get('us_codigo');
 		$superv=$do->get('supervisor');
-		logusu('USUARIOS',"CREADO EL USUARIO $codigo, SUPERVISOR $superv");
+		logusu('USUARIOS',"CREADO EL USUARIO ".$this->db->escape($codigo).", SUPERVISOR '$superv'");
 		return true;
 	}
 
 	function _pos_update($do){
 		$codigo=$do->get('us_codigo');
 		$superv=$do->get('supervisor');
-		logusu('USUARIOS',"MODIFICADO EL USUARIO $codigo, SUPERVISOR $superv");
+		logusu('USUARIOS',"MODIFICADO EL USUARIO ".$this->db->escape($codigo).", SUPERVISOR $superv");
 		return true;
 	}
 

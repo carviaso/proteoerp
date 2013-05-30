@@ -1182,17 +1182,17 @@ class Ajax extends Controller {
 			$mSQL="SELECT id, fecha,monto, numero, tipo_doc, monto-abonos AS saldo
 			FROM smov
 			WHERE ${ww} AND abonos<monto AND cod_cli=${dbscli}
-			ORDER BY fecha DESC";
+			ORDER BY fecha ASC";
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $id=>$row ) {
-					$retArray['numero']  = trim($row['numero']);
-					$retArray['tipo_doc']= trim($row['tipo_doc']);
-					$retArray['fecha']   = $row['fecha'];
-					$retArray['monto']   = $row['monto'];
-					$retArray['saldo']   = $row['saldo'];
-					$retArray['id']      = $row['id'];
+					$retArray['numero']   = trim($row['numero']);
+					$retArray['tipo_doc'] = trim($row['tipo_doc']);
+					$retArray['fecha']    = $row['fecha'];
+					$retArray['monto']    = $row['monto'];
+					$retArray['saldo']    = $row['saldo'];
+					$retArray['id']       = $row['id'];
 
 					array_push($retorno, $retArray);
 				}

@@ -12,6 +12,9 @@ class acdatasis extends Controller {
 	}
 
 	function index(){
+		if(!$this->datasis->iscampo('sida','proteo')) {
+			$this->db->simple_query('ALTER TABLE sida ADD COLUMN proteo CHAR(1)');
+		};
 		redirect($this->url.'jqdatag');
 	}
 

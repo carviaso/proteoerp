@@ -649,7 +649,6 @@ class Tbpasa extends Controller {
 		$edit->dtn->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
 		$edit->dtn->style='width:200px;';
 
-
 		$edit->nropasa = new inputField('Nro. Pasaje','nropasa');
 		$edit->nropasa->rule       = '';
 		$edit->nropasa->size       = 10;
