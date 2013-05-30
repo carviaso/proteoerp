@@ -878,7 +878,7 @@ class b2b extends validaciones {
 								$codigolocal=$row->codigo;
 							}
 						}
-						if(!empty($ddata['codigo']) && $codigolocal==false){
+						if($codigolocal==false && !empty($ddata['codigo'])){
 							$mSQL_p = 'SELECT codigo FROM sinv';
 							$bbus   = array('codigo','barras','alterno');
 							$query=$this->_gconsul($mSQL_p,$ddata['codigo'],$bbus);
