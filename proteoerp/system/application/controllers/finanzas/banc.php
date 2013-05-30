@@ -73,9 +73,19 @@ class Banc extends Controller {
 		$bodyscript = '		<script type="text/javascript">';
 		$ngrid      = "#newapi".$grid0;
 
+		$mSQL = "INSERT IGNORE INTO bsal (codbanc,
+		ano,  saldo,   saldo01, saldo02, saldo03, saldo04, saldo05,
+		saldo06, saldo07, saldo08, saldo09, saldo10, saldo11, saldo12)
+		SELECT codbanc, YEAR(curdate()), 0 saldo, 0 saldo01, 0 saldo02, 0 saldo03, 0 saldo04, 0 saldo05,
+		0 saldo06, 0 saldo07, 0 saldo08, 0 saldo09, 0 saldo10, 0 saldo11, 0 saldo12
+		FROM banc WHERE activo='S'";
+		$this->db->query($mSQL);
+
+
 		$mSQL = "SELECT ano, ano nombre FROM bsal WHERE ano <= YEAR(curdate()) GROUP BY ano ORDER BY ano DESC";
 		$mano = $this->datasis->llenaopciones($mSQL, false, 'mmano');
 		$mano = str_replace('"',"'",$mano);
+
 
 		$bodyscript .= '
 		function crecalban() {
