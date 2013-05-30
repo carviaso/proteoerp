@@ -829,8 +829,9 @@ class Tbpasa extends Controller {
 			LEFT JOIN tbpuestos c ON a.codrut=c.codrut 
 			AND b.valor=c.nroasi 
 			AND c.fecpas=${ano}${mes}${dia} 
-			AND c.inicio<${inicio} AND c.fin>${fin} 
+			AND c.inicio<=${inicio} AND c.fin>=${fin} 
 		WHERE a.codrut='${codrut}' AND ";
+//echo $mSQL1;
 
 		$rs = "No hay Disponibilidad";
 		$bl = "\t\t<td>&nbsp;<td>\n";
@@ -917,8 +918,6 @@ class Tbpasa extends Controller {
 		$mid1  = $this->input->post('q1');
 		$mid2  = $this->input->post('q2');
 		$feven = $this->input->post('fecven');
-
-//		echo "<h1>Meco el orejon</h1>";
 
 		$data = '<h1>No se encontraron resultados</h1>';
 		if($mid1 !== false && $mid2 !== false){
