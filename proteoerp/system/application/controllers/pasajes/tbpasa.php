@@ -829,7 +829,7 @@ class Tbpasa extends Controller {
 			LEFT JOIN tbpuestos c ON a.codrut=c.codrut 
 			AND b.valor=c.nroasi 
 			AND c.fecpas=${ano}${mes}${dia} 
-			AND c.inicio<=${inicio} AND c.fin>=${fin} 
+			AND c.inicio<${fin} AND c.fin>${inicio} 
 		WHERE a.codrut='${codrut}' AND ";
 //echo $mSQL1;
 

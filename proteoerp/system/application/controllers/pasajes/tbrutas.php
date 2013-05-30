@@ -979,7 +979,7 @@ class Tbrutas extends Controller {
 		FROM tbdestinos a
 			JOIN tbofici b ON a.codofiorg=b.codofi
 			JOIN tbofici c ON a.codofides=c.codofi
-		WHERE codrut=${codrut}
+		WHERE codrut=${codrut} AND a.mostrar='S'
 		ORDER BY orden, a.codofiorg ";
 
 		$response   = $grid->getDataSimple($mSQL);
