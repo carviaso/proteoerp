@@ -886,10 +886,10 @@ class Tbpasa extends Controller {
 	//
 	//
 	function busfila($mSQL, $i) {
-		$libre   = "#9BFF05";
-		$ocupado = "#FFADA0";
-		$reserva = "#F6FF7F";
-		$manual  = "#F4FF2F";
+		$libre   = "style='background:#0EF72D; font-weight:bold;'";
+		$ocupado = "style='background:#FC0532; color:#FFFFFF';";
+		$reserva = "style='background:#050505; color:#FFFFFF';";
+		$manual  = "bgcolor='#F2A2F2'";
 		$mi = $i;
 		$query = $this->db->query($mSQL);
 
@@ -911,9 +911,15 @@ class Tbpasa extends Controller {
 					$rs1 = $bl.$rs1; 
 					$i++;	
 					if ( $i > $mi+12  ) break;
-			}
-				if ( $i == $row['indice'] )
-					$rs1 = "\t\t<td bgcolor='".$color."' ><a href='#' onclick='reserva(".$row['indice'].")' >".utf8_encode($row['valor'])."</a><td>\n".$rs1;
+				}
+				
+				if ( $i == $row['indice'] ){
+					if ($row['estatus'] == 'L')
+						$rs1 = "\t\t<td ".$color." ><a href='#' onclick='reserva(".$row['indice'].")' >".utf8_encode($row['valor'])."</a><td>\n".$rs1;
+					else
+						$rs1 = "\t\t<td ".$color." >".utf8_encode($row['valor'])."<td>\n".$rs1;
+					
+				}
 				$i ++;
 			}
 			while ( $i <= $f ){ $rs1 = "\t\t<td>&nbsp;<td>\n".$rs1;$i ++;}
