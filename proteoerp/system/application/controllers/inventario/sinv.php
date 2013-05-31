@@ -636,43 +636,71 @@ class Sinv extends Controller {
 				$("#fedita").dialog({
 					autoOpen: false, height: 550, width: 800, modal: true,
 					buttons: {
-					"Guardar y Cerrar": function() {
-						var murl = $("#df1").attr("action");
-						$.ajax({
-							type: "POST", dataType: "html", async: false,
-							url: murl,
-							data: $("#df1").serialize(),
-							success: function(r,s,x){
-								if ( r.length == 0 ) {
-									$( "#fedita" ).dialog( "close" );
-									grid.trigger("reloadGrid");
-									setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
-									return true;
-								} else {
-									$("#fedita").html(r);
-							}}
-						})},
-					"Guardar y Seguir": function() {
-						var bValid = true;
-						var murl = $("#df1").attr("action");
-						//allFields.removeClass( "ui-state-error" );
-						$.ajax({
-							type: "POST", dataType: "html", async: false,
-							url: murl,
-							data: $("#df1").serialize(),
-							success: function(r,s,x){
-								if ( r.length == 0 ) {
-									apprise("Registro Guardado");
-									//$( "#fedita" ).dialog( "close" );
-									grid.trigger("reloadGrid");
-									return true;
-								} else {
-									$("#fedita").html(r);
-							}}
-						})},
-					"Cancelar": function() { $( this ).dialog( "close" ); }
-				},
-				close: function() { }
+						"Guardar y Cerrar": function(){
+							var murl = $("#df1").attr("action");
+							$.ajax({
+								type: "POST", dataType: "html", async: false,
+								url: murl,
+								data: $("#df1").serialize(),
+								success: function(r,s,x){
+									try{
+										var json = JSON.parse(r);
+										if(json.status == "A"){
+											$("#fedita").dialog( "close" );
+											grid.trigger("reloadGrid");
+											$.prompt("<h1>Registro Guardado</h1>",{
+												submit: function(e,v,m,f){
+													setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+												}
+											});
+											idactual = json.pk.id;
+											return true;
+										}else{
+											$.prompt("Error: "+json.mensaje);
+										}
+									}catch(e){
+										$("#fedita").html(r);
+									}
+								}
+							})
+						},
+						"Guardar y Seguir": function(){
+							var bValid = true;
+							var murl = $("#df1").attr("action");
+							$.ajax({
+								type: "POST", dataType: "html", async: false,
+								url: murl,
+								data: $("#df1").serialize(),
+								success: function(r,s,x){
+									try{
+										var json = JSON.parse(r);
+										if(json.status == "A"){
+											$("#fedita").dialog( "close" );
+											grid.trigger("reloadGrid");
+											$.prompt("<h1>Registro Guardado</h1>",{
+												submit: function(e,v,m,f){
+													setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+												}
+											});
+											idactual = json.pk.id;
+											return true;
+										}else{
+											$.prompt("Error: "+json.mensaje);
+										}
+									}catch(e){
+										$("#fedita").html(r);
+									}
+								}
+							})
+						},
+						"Cancelar": function(){
+							$("#fedita").html("");
+							$( this ).dialog( "close" );
+						}
+					},
+					close: function(){
+						$("#fedita").html("");
+					}
 				});
 				$("#fedita").dialog( "open" );
 			})
@@ -687,65 +715,52 @@ class Sinv extends Controller {
 				var ret     = $("'.$ngrid.'").getRowData(id);
 				var mstatus = "E";
 				$.post("'.site_url('inventario/sinv/dataedit/modify').'/"+id, function(data){
-				$("#fedita").html(data);
-				$("#fedita").dialog({
-					autoOpen: false, height: 550, width: 800, modal: true,
-					buttons: {
-						"Guardar": function() {
-							var murl = $("#df1").attr("action");
-							$.ajax({
-								type: "POST", dataType: "html", async: false,
-								url: murl,
-								data: $("#df1").serialize(),
-								success: function(r,s,x){
-								try{
-									var json = JSON.parse(r);
-									if (json.status == "A"){
-										$("#fedita").dialog( "close" );
-										grid.trigger("reloadGrid");
-										$.prompt("<h1>Registro Guardado</h1>",{
-											submit: function(e,v,m,f){
-												setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+					$("#fedita").html(data);
+					$("#fedita").dialog({
+						autoOpen: false, height: 550, width: 800, modal: true,
+						buttons: {
+							"Guardar": function(){
+								var murl = $("#df1").attr("action");
+								$.ajax({
+									type: "POST", dataType: "html", async: false,
+									url: murl,
+									data: $("#df1").serialize(),
+									success: function(r,s,x){
+										try{
+											var json = JSON.parse(r);
+											if (json.status == "A"){
+												$("#fedita").dialog( "close" );
+												grid.trigger("reloadGrid");
+												$.prompt("<h1>Registro Guardado</h1>",{
+													submit: function(e,v,m,f){
+														setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+													}
+												});
+												idactual = json.pk.id;
+												return true;
+											} else {
+												$.prompt("Error: "+json.mensaje);
 											}
-										});
-										idactual = json.pk.id;
-										return true;
-									} else {
-										$.prompt("Error: "+json.mensaje);
+										} catch(e){
+											$("#fedita").html(r);
+										}
 									}
-								} catch(e){
-									$("#fedita").html(r);
-								}
-'.
-/*
-
-
-
-									if ( r.length == 0 ) {
-										$( "#fedita" ).dialog( "close" );
-										grid.trigger("reloadGrid");
-										setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
-										return true;
-									} else {
-										$("#fedita").html(r);
-									}
-*/'
-								}
-							})
+								})
+							},
+							"Cancelar": function(){
+								$("#fedita").html("");
+								$(this).dialog("close");
+							}
 						},
-						"Cancelar": function() {
+						close: function(){
 							$("#fedita").html("");
-							$(this).dialog("close");
 						}
-					},
-					close: function() {
-						$("#fedita").html("");
-					}
-				});
-
+					});
 					$("#fedita").dialog( "open" );
 				});
-			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
 		};
 		';
 
@@ -843,9 +858,7 @@ class Sinv extends Controller {
 				} else {
 					$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 				}
-		})
-		';
-
+		})';
 
 		// Principios Activos
 		$bodyscript .= '
@@ -857,8 +870,8 @@ class Sinv extends Controller {
 					$("#fshow").dialog( { title:"PRINCIPIOS ACTIVOS", width: 350, height: 400, modal: true } );
 					$("#fshow").dialog( "open" );
 				});
-			});
-		';
+			}
+		);';
 
 		// Marcas
 		$bodyscript .= '
@@ -1043,12 +1056,8 @@ class Sinv extends Controller {
 			s = grid.getGridParam(\'selarrrow\');
 			';
 
-
-
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
