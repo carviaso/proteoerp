@@ -3,7 +3,7 @@ class Chat extends Controller {
 	function __construct()
 	{
 		parent::__construct();
-		$this->load->library('session');
+		if(!isset($this->session)) $this->load->library('session');
 		$this->load->helper('url');
 		$this->load->helper('file');
 		if($this->secu->usuario()=='')

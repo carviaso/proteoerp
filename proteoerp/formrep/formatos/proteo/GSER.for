@@ -132,8 +132,8 @@ $pagina = 0;
 $encabezado = "
 	<table style='width:100%;font-size: 9pt;' class='header' cellpadding='0' cellspacing='0'>
 		<tr>
-			<td colspan='4'><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>${documento}</h1></td>
-			<td colspan='2'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>Fecha: ${fecha}</h1></td>
+			<td colspan='4' valign='bottom'><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>${documento}</h1></td>
+			<td colspan='2' valign='bottom'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>Fecha: ${fecha}</h1></td>
 		</tr><tr>
 			<td>Proveedor:</td>
 			<td colspan='5'><b>${nombre} (${proveed})</b></td>

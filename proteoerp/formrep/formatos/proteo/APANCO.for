@@ -108,8 +108,8 @@ $ittot['monto']=$lineas=0;
 $encabezado = "
 	<table style='width:100%;font-size: 9pt;' class='header' cellpadding='0' cellspacing='0'>
 		<tr>
-			<td><h1 style='text-align:left; border-bottom:1px solid;font-size:12pt;'>APLICACI&Oacute;N DE ANTICIPO A ".strtoupper($tit1)." Nro. ${numero}</h1></td>
-			<td style='text-align:right;'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>FECHA: ${hfecha}</h1></td>
+			<td valign='bottom'><h1 style='text-align:left; border-bottom:1px solid;font-size:12pt;'>APLICACI&Oacute;N DE ANTICIPO A ".strtoupper($tit1)." Nro. ${numero}</h1></td>
+			<td valign='bottom' style='text-align:right;'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>FECHA: ${hfecha}</h1></td>
 		</tr><tr>
 			<td><b>${tit1}:</b> (${clipro}) ${nombre}</td>
 			<td><b>Monto: </b> ${monto}</td>

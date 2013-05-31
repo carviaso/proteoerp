@@ -497,7 +497,7 @@ class Sinv extends Controller {
 										$.prompt.getStateContent(\'state1\').find(\'#in_prome1\').text(sino);
 										$.prompt.goToState(\'state1\');
 									},
-									error: function(h,t,e)  { 
+									error: function(h,t,e)  {
 										$.prompt.getStateContent(\'state1\').find(\'#in_prome1\').text("Error..marca="+f.marca+" "+e);
 										$.prompt.goToState(\'state1\');
 								}});
@@ -704,7 +704,7 @@ class Sinv extends Controller {
 										$("#fedita").dialog( "close" );
 										grid.trigger("reloadGrid");
 										$.prompt("<h1>Registro Guardado</h1>",{
-											submit: function(e,v,m,f){  
+											submit: function(e,v,m,f){
 												setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
 											}
 										});
@@ -729,7 +729,7 @@ class Sinv extends Controller {
 									} else {
 										$("#fedita").html(r);
 									}
-*/'								
+*/'
 								}
 							})
 						},
@@ -2835,7 +2835,7 @@ class Sinv extends Controller {
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo');
 		$edit->codigo->size=15;
 		$edit->codigo->maxlength=15;
-		$edit->codigo->rule = 'alpha_numeric|trim|strtoupper|callback_chexiste';
+		$edit->codigo->rule = 'alpha_dash_slash|trim|strtoupper|callback_chexiste';
 		$edit->codigo->mode = 'autohide';
 		$edit->codigo->append($sugerir);
 		$edit->codigo->append($ultimo);

@@ -6,16 +6,16 @@ class vieventascompras extends Controller {
         
 	function vieventascompras(){
 		parent::Controller();
-		$this->load->library("rapyd");
+		$this->load->library('rapyd');
 		$this->datasis->modulo_id('20D',1);
 	}
 	function index(){
-		redirect($this->url."viewinventario");
+		redirect($this->url.'viewinventario');
 	}
 	function filteredgrid($barras='',$farmacia=''){
 		$this->rapyd->load('datafilter','datagrid');
-                                
-                $modbus=array(
+
+		$modbus=array(
 			'tabla'   =>'sinv',
 			'columnas'=>array(
 				'codigo' =>'C&oacute;digo',
@@ -32,7 +32,7 @@ class vieventascompras extends Controller {
 
 		$boton=$this->datasis->modbus($modbus);
 		$barrase=$this->db->escape($barras);   
-		
+
 		$sql="
 		SELECT fecha,fe,fa,descrip,venta,compras,saldo,semanal FROM (
 		select '' fe,farmacia fa,fecha,farmacia,descrip,venta,compras,saldo,(venta/4)  semanal
@@ -51,7 +51,7 @@ class vieventascompras extends Controller {
 		)todo
 		ORDER BY fecha is null,fecha ,fe='',descrip='TOTALES',farmacia
 		";
-		
+
 		$atts = array(
 			'width'      => '800',
 			'height'     => '600',
@@ -60,14 +60,14 @@ class vieventascompras extends Controller {
 			'resizable'  => 'yes',
 			'screenx'    => '0',
 			'screeny'    => '0'
-		      );
-		
+			);
+
 		$descrip=$this->datasis->dameval("SELECT descrip FROM sinv WHERE barras=$barrase LIMIT 10 ");
 		$uri = anchor_popup($this->url."kardex/$barras/<#fa#>/<#fecha#>",'<#fa#>',$atts);
-		
+
 		$sql=$this->db->query($sql);
 		$sql=$sql->result_array();
-		
+
 		function negrita($descrip,$fecha=NULL){
 			if($descrip=='TOTALES' && !(strlen($fecha)>0))
 			return "<span style='font-size:1.5em'><strong>TOTAL GENERAL</strong></span>";
@@ -76,7 +76,7 @@ class vieventascompras extends Controller {
 			else
 			return $descrip;
 		}
-		
+
 		function negrita2($descrip,$monto){
 			if($descrip=='TOTALES')
 			return "<span style='font-size:1.2em'><strong>".nformat($monto)."</strong></span>";
@@ -100,17 +100,16 @@ class vieventascompras extends Controller {
 		$grid->column('Saldo'             ,"<negrita2><#descrip#>|<#saldo#></negrita2>"     ,'align="right"' );
 
 		$grid->build();
-//echo $grid->db->last_query();
+		//echo $grid->db->last_query();
 
 		//$data['filtro']  = $filter->output;
 		$data['content'] = $grid->output;
 		$data['head']    = $this->rapyd->get_head().script('jquery.js');
 		$data['title']   = heading($descrip);
 		$this->load->view('view_ventanas', $data);
-
 	}
-        
-        function viewinventario(){
+
+	function viewinventario(){
 		$this->rapyd->load('datafilter','datagrid');
 		
 		$modbus=array(
@@ -164,7 +163,7 @@ class vieventascompras extends Controller {
 			'resizable'  => 'yes',
 			'screenx'    => '0',
 			'screeny'    => '0'
-		      );
+			);
 
 		$uri = anchor_popup($this->url.'filteredgrid/<#barras#>/','<#barras#>',$atts);
 
@@ -193,9 +192,8 @@ class vieventascompras extends Controller {
 		$data['head']    = $this->rapyd->get_head().script('jquery.js');
 		$data['title']   = $this->titp;
 		$this->load->view('view_ventanas', $data);
-
 	}
-	
+
 	function kardex($barras,$farmacia,$fecha){
 		
 		$f=array(
@@ -216,4 +214,3 @@ class vieventascompras extends Controller {
 		redirect('inventario/kardex/filteredgrid/'.raencode($codigo).'/'.$fecha.'/'.$f[$farmacia]);
 	}
 }
-?>

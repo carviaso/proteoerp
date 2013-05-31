@@ -1,8 +1,8 @@
 <?php
 
-$container_bl=join("&nbsp;", $form->_button_container["BL"]);
-$container_br=join("&nbsp;", $form->_button_container["BR"]);
-$container_tr=join("&nbsp;", $form->_button_container["TR"]);
+$container_bl=join('&nbsp;', $form->_button_container['BL']);
+$container_br=join('&nbsp;', $form->_button_container['BR']);
+$container_tr=join('&nbsp;', $form->_button_container['TR']);
 
 if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	echo $form->output;

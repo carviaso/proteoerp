@@ -3,7 +3,7 @@ class Enlinea extends Controller{
 	
 	function Enlinea(){
 		parent::Controller();
-		$this->load->library("rapyd");
+		$this->load->library('rapyd');
 	}
 
 	function index(){
@@ -12,7 +12,7 @@ class Enlinea extends Controller{
 
 	function pasillo(){
 		//$this->datasis->modulo_id(926,1);
-		$this->rapyd->load("datagrid");
+		$this->rapyd->load('datagrid');
 		$uri = anchor_popup('http://<#url#>/<#proteo#>','<#sucursal#>');
 
 		function linea($url,$proteoerp){
@@ -36,14 +36,14 @@ class Enlinea extends Controller{
 
 		$grid = new DataGrid();
 		$grid->db->from('sucumon');
-		$grid->order_by("codigo","desc");
+		$grid->order_by('codigo','desc');
 		$grid->per_page=15;
 		$grid->use_function('linea','ver');
 
-		$grid->column("Sucursal", $uri                                );
-		$grid->column("En Linea", '<linea><#url#>|<#proteo#></linea>' );
+		$grid->column('Sucursal', $uri                                );
+		$grid->column('En Linea', '<linea><#url#>|<#proteo#></linea>' );
 
-		$grid->column("Actualizar Proteo" ,'<a href="http://<#url#>/<#proteo#>/supervisor/mantenimiento/actualizaproteo" />Actualizar</a>');
+		$grid->column('Actualizar Proteo' ,'<a href="http://<#url#>/<#proteo#>/supervisor/mantenimiento/actualizaproteo" />Actualizar</a>');
 
 		$grid->build();
 
@@ -58,8 +58,7 @@ class Enlinea extends Controller{
 		$ventas =$this->datasis->damerow("SELECT SUM(totals*IF(tipo_doc='D',-1,1)) AS valor,
 						 (SUM(totals*IF(tipo_doc='D',-1,1)*(referen='E'))) efectivo,
 						 (SUM(totals*IF(tipo_doc='D',-1,1)*(referen='C'))) credito FROM sfac WHERE fecha=(SELECT MAX( fecha) FROM sfac) AND tipo_doc<>'X' AND MID(numero,1,1)<>'_' ");
-		
-		
+
 		$fsfac  =$this->datasis->dameval("SELECT MAX( fecha) FROM sfac");
 
 		$conten['vendido' ]  =$ventas['valor'];
@@ -68,9 +67,7 @@ class Enlinea extends Controller{
 		$conten['ukardex' ]  =$ukardex;
 		$conten['fsfac' ]    =$fsfac;
 		$data['content']     = $this->load->view('view_enlinea', $conten,true);
-		$data["head"]        = $this->rapyd->get_head();
+		$data['head']        = $this->rapyd->get_head();
 		$this->load->view('view_ventanas_sola', $data);
 	}
-	
 }
-?>

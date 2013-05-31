@@ -3563,7 +3563,7 @@ class Scst extends Controller {
 						if($cmargen<100){
 							//El producto tiene arreglo
 							$mSQL="UPDATE sinv SET
-								$obj=ROUND(100-((IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(pond,ultimo)))*(100+iva))/$pob),2)
+								${obj}=ROUND(100-((IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(pond,ultimo)))*(100+iva))/${pob}),2)
 								WHERE codigo=".$this->db->escape($itcodigo);
 							$this->db->simple_query($mSQL);
 						}

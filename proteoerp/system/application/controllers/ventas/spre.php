@@ -13,11 +13,7 @@ class Spre extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('spre','id') ) {
-			$this->db->simple_query('ALTER TABLE spre DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE spre ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE spre ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		$this->datasis->modintramenu( 900, 650, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -308,7 +304,7 @@ class Spre extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
+		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
@@ -1214,7 +1210,7 @@ class Spre extends Controller {
 
 		$edit->pond = new hiddenField('', "pond_<#i#>");
 		$edit->pond->db_name='pond';
-		$edit->pond->rel_id   ='itspre';
+		$edit->pond->rel_id ='itspre';
 		//**************************
 		//fin de campos para detalle
 		//**************************
@@ -1328,7 +1324,7 @@ class Spre extends Controller {
 
 	function _post_insert($do){
 		$codigo=$do->get('numero');
-		logusu('spre',"PRESUPUESTO $codigo CREADO");
+		logusu('spre',"PRESUPUESTO ${codigo} CREADO");
 	}
 
 	function chpreca($preca,$ind){
@@ -1347,94 +1343,53 @@ class Spre extends Controller {
 
 	function _post_update($do){
 		$codigo=$do->get('numero');
-		logusu('spre',"PRESUPUESTO $codigo MODIFICADO");
+		logusu('spre',"PRESUPUESTO ${codigo} MODIFICADO");
 	}
 
 	function _post_delete($do){
 		$codigo=$do->get('numero');
-		logusu('spre',"PRESUPUESTO $codigo ELIMINADO");
+		logusu('spre',"PRESUPUESTO ${codigo} ELIMINADO");
 	}
-
-
-
-	//*************************************
-	//
-	//           ANULAR FACTURA
-	//
-	//
-	//*************************************
-	function sfacanu( $tipo_doc, $numero ){
-		//LOCAL i, mRAPIDA := .F., mLLAMA := .F., mDESCU := .T.
-		//LOCAL mMIENT   := {0,0,0}
-		//LOCAL mALMACEN := '0001'
-		//LOCAL mTRANSAC := ''
-		//LOCAL mPEDIDO, mTIPO
-
-		$query=$this->db->query("SELECT * FROM sfac WHERE tipo_doc='$tipo_doc' AND numero'$numero'");
-		$sfac     = $query->row_array();
-
-		$referen =  $this->datasis->dameval();
-
-
-		// SI YA SE BORRO PUES NI MODO
-		if ($tipo_doc  == 'X'){
-			echo 'Ya fue Borrada';
-			return;
-		}
-
-
-		// PENDIENTE LA BORRA SIN PELIGRO
-		if ( $referen == 'P' and SUBSTR($numero,0,1)=='P' ) {
-			$mSQL = "DELETE FROM sfac WHERE numero='$numero' AND tipo_doc='$tipo_doc' ";
-			$this->db->simple_query($mSQL);
-			$mSQL = "DELETE FROM sitems WHERE numa='$numero' AND tipoa='$tipo_doc' ";
-			$this->db->simple_query($mSQL);
-			$mSQL = "UPDATE seri SET venta='', fechav=0 WHERE venta='$numero";
-			$this->db->simple_query($mSQL);
-			echo "Documento Anulado";
-			logusu("FACTURA ANULADA "+XTIPO_DOC+" "+XNUMERO);
-			return;
-		}
-
-		if ( $tipo_doc != 'D' AND $tipo_doc != 'F') {
-			echo "Documento no Anulable";
-			return;
-		}
-
-		// REVISAR SI TIENE ABONOS
-		$mPEDIDO = ("pedido");
-	}
-
 
 	function tabla() {
-		$id   = isset($_REQUEST['id'])  ? $_REQUEST['id']   :  0;
-		$cliente = $this->datasis->dameval("SELECT cod_cli FROM spre WHERE id='$id'");
-		$mSQL = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM smov WHERE cod_cli='$cliente' AND abonos<>monto AND tipo_doc<>'AB' ORDER BY fecha ";
-		$query = $this->db->query($mSQL);
-		$salida = '';
-		$saldo = 0;
-		if ( $query->num_rows() > 0 ){
-			$salida = "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento en Cuentas X Cobrar</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
+		$id       = isset($_REQUEST['id'])  ? $_REQUEST['id']   :  0;
+		$dbid     = $this->db->escape($id);
+		$cliente  = $this->datasis->dameval("SELECT cod_cli FROM spre WHERE id=${dbid}");
+		$dbcliente= $this->db->escape($cliente);
+		$mSQL     = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM smov WHERE cod_cli=${dbcliente} AND abonos<>monto AND tipo_doc<>'AB' ORDER BY fecha";
+		$query    = $this->db->query($mSQL);
+		$salida   = '';
+		$saldo    = 0;
+		if($query->num_rows() > 0){
+			$salida  = '<br><table width=\'100%\' border=\'1\'>';
+			$salida .= '<tr bgcolor=\'#e7e3e7\'><td colspan=\'3\'>Movimiento en Cuentas X Cobrar</td></tr>';
+			$salida .= '<tr bgcolor=\'#e7e3e7\'><td>Tp</td><td align=\'center\'>N&uacute;mero</td><td align=\'center\'>Monto</td></tr>';
 
-			foreach ($query->result_array() as $row)
-			{
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['tipo_doc']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto']-$row['abonos']).   "</td>";
-				$salida .= "</tr>";
+			foreach ($query->result_array() as $row){
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['tipo_doc'].'</td>';
+				$salida .= '<td>'.$row['numero'].'</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']-$row['abonos']).'</td>';
+				$salida .= '</tr>';
 				if ( $row['tipo_doc'] == 'FC' or $row['tipo_doc'] == 'ND' or $row['tipo_doc'] == 'GI' )
 					$saldo += $row['monto']-$row['abonos'];
 				else
 					$saldo -= $row['monto']-$row['abonos'];
 			}
-			$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
-			$salida .= "</table>";
+			$salida .= '<tr bgcolor=\'#d7c3c7\'><td colspan=\'4\' align=\'center\'>Saldo : '.nformat($saldo).'</td></tr>';
+			$salida .= '</table>';
 		}
 		$query->free_result();
 		echo $salida;
+	}
+
+	function instalar(){
+		$campos=$this->db->list_fields('spre');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE spre DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE spre ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE spre ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
 	}
 
 }

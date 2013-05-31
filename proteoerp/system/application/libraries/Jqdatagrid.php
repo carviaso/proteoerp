@@ -196,7 +196,7 @@ class Jqdatagrid
 	function __construct ()
 	{
 		$this->CI =& get_instance();
-		$this->CI->load->library('session');
+		//if(!isset($this->CI->session)) $this->CI->load->library('session');
 		if(empty($this->_gridname)){
 			$this->_gridname = '_' .  rand(1122,99999999);
 		}
