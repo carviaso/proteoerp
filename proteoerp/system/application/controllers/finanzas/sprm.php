@@ -1,5 +1,5 @@
 <?php 
-require_once('common.php');]
+require_once('common.php');
 class Sprm extends Controller {
 	var $mModulo='SPRM';
 	var $titp='Movimiento de Proveedor';
