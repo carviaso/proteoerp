@@ -1354,7 +1354,7 @@ class Jqdatagrid
 	* Genera el codigo java para autocomplete
 	*
 	*/
-	function autocomplete( $link, $name, $id, $html, $despues='' )
+	function autocomplete( $link, $name, $id, $html, $despues='', $append='"body"' )
 	{
 		$salida = '
 		"dataInit":function(el){
@@ -1362,7 +1362,10 @@ class Jqdatagrid
 				if(jQuery.ui) { 
 					if(jQuery.ui.autocomplete){
 						jQuery(el).autocomplete({
-							"appendTo":"body","disabled":false,"delay":300,"minLength":1,
+							"appendTo": '.$append.',
+							"disabled":false,
+							"delay":300,
+							"minLength":1,
 							"select": function(event, ui) {
 								$("#'.$id.'").remove();
 								$("#'.$name.'").after("'.$html.'");'.$despues.'

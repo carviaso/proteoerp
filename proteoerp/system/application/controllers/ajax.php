@@ -1900,8 +1900,10 @@ class Ajax extends Controller {
 			$retArray = $retorno = array();
 			$mSQL="	SELECT codigo, CONCAT(TRIM(apellido),', ',TRIM(nombre),' (',nacional,TRIM(cedula),')') AS label,
 					CONCAT(TRIM(apellido),', ',TRIM(nombre))  nombre, sueldo, enlace
-				FROM pers WHERE nombre LIKE ${qdb} OR apellido LIKE ${qdb} OR codigo LIKE ${qmid} ORDER BY nombre LIMIT 20";
+				FROM pers WHERE nombre LIKE ${qdb} OR apellido LIKE ${qdb} OR codigo LIKE ${qmid}  OR enlace LIKE ${qmid}
+				ORDER BY nombre LIMIT 20";
 			$query = $this->db->query($mSQL);
+
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']   = $row['codigo'];

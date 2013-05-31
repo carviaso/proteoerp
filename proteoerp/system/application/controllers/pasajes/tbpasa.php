@@ -659,19 +659,23 @@ class Tbpasa extends Controller {
 		$edit->codppr->size       = 22;
 		$edit->codppr->maxlength  = 20;
 
-		$edit->nacio = new inputField('Nacionalidad','nacio');
+		$edit->nacio = new dropdownField('Nacionalidad','nacio');
 		$edit->nacio->rule      = '';
-		$edit->nacio->size      = 12;
-		$edit->nacio->maxlength = 10;
+		$edit->nacio->option('V','Venezolano');
+		$edit->nacio->option('E','Extranjero');
+		$edit->nacio->option('P','Pasaporte');
+		$edit->nacio->option('J','Juridico');
+		$edit->nacio->option('G','Gobierno');
+		$edit->nacio->style ='width:100px;';
 
-		$edit->codcli = new inputField('Cod.Cliente','codcli');
+		$edit->codcli = new inputField('C.I.','codcli');
 		$edit->codcli->rule      = '';
-		$edit->codcli->size      = 22;
+		$edit->codcli->size      = 10;
 		$edit->codcli->maxlength = 20;
 
-		$edit->nomcli = new inputField('Nomcli','nomcli');
+		$edit->nomcli = new inputField('Nombre','nomcli');
 		$edit->nomcli->rule      = '';
-		$edit->nomcli->size      = 152;
+		$edit->nomcli->size      = 32;
 		$edit->nomcli->maxlength = 150;
 
 		$edit->codcarnet = new inputField('Codcarnet','codcarnet');

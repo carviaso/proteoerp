@@ -92,22 +92,22 @@ function reserva(indice){
 	<table id="tbrutas"></table>
 </div>
 
-<div id='puestos' name='puestos' ></div>
-
-
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 <table width='100%'>
 	<tr>
-		<td class="littletablerowth"><?php echo $form->org->label;     ?></td>
-		<td class="littletablerowth"><?php echo $form->dtn->label;     ?></td>
-		<td class="littletablerowth"><?php echo $form->fecven->label;  ?></td>
+		<td class="littletablerowth"><?php echo $form->nacio->label;     ?></td>
+		<td class="littletablerowth"><?php echo $form->codcli->label;     ?></td>
+		<td class="littletablerowth"><?php echo $form->nomcli->label;  ?></td>
 	</tr><tr>
-		<td class="littletablerow"  ><?php echo $form->org->output;    ?></td>
-		<td class="littletablerow"  ><?php echo $form->dtn->output;    ?></td>
-		<td class="littletablerow"  ><?php echo $form->fecven->output; ?></td>
+		<td class="littletablerow"  ><?php echo $form->nacio->output;    ?></td>
+		<td class="littletablerow"  ><?php echo $form->codcli->output;    ?></td>
+		<td class="littletablerow"  ><?php echo $form->nomcli->output; ?></td>
 	</tr>
 </table>
 </fieldset>
+
+
+<div id='puestos' name='puestos' ></div>
 
 
 <?php 

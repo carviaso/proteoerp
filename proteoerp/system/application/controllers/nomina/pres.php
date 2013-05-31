@@ -31,19 +31,14 @@ class Pres extends Controller {
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
 
-		$bodyscript = '
-<script type="text/javascript">
-$(function() {
-	$( "input:submit, a, button", ".otros" ).button();
-});
-
-jQuery("#a1").click( function(){
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\''.base_url().'formatos/ver/PRES/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
+		$bodyscript = '<script type="text/javascript">
+		jQuery("#a1").click( function(){
+			var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
+				window.open(\''.base_url().'formatos/ver/PRES/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});
 </script>
 ';
 
@@ -79,14 +74,14 @@ jQuery("#a1").click( function(){
 <p>'.$this->datasis->traevalor('TITULO1').'</p>
 </div> <!-- #BottomPanel -->
 ';
-		$param['WestPanel']  = $WestPanel;
-		//$param['EastPanel']  = $EastPanel;
-		$param['SouthPanel'] = $SouthPanel;
-		$param['listados'] = $this->datasis->listados('PRES', 'JQ');
-		$param['otros']    = $this->datasis->otros('PRES', 'JQ');
-		$param['temas']     = array('proteo','darkness','anexos1');
-		$param['bodyscript'] = $bodyscript;
-		$param['tabs'] = false;
+		$param['WestPanel']   = $WestPanel;
+		//$param['EastPanel'] = $EastPanel;
+		$param['SouthPanel']  = $SouthPanel;
+		$param['listados']    = $this->datasis->listados('PRES', 'JQ');
+		$param['otros']       = $this->datasis->otros('PRES', 'JQ');
+		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['bodyscript']  = $bodyscript;
+		$param['tabs']        = false;
 		$param['encabeza'] = $this->titp;
 		$this->load->view('jqgrid/crud2',$param);
 	}
@@ -115,7 +110,7 @@ jQuery("#a1").click( function(){
 			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{'.$grid->autocomplete($link, 'codigo','aaaaaa','<div id=\"aaaaaa\"></div>',$despues).'}', 
+			'editoptions'   => '{'.$grid->autocomplete($link, 'codigo','aaaaaa','<div id=\"aaaaaa\"></div>',$despues,'\'#editmod\'+gridId1.substring(1)').'}', 
 			'formoptions'   => '{ label:"Codigo del Trabajador" }',
 		));
 
@@ -159,7 +154,7 @@ jQuery("#a1").click( function(){
 			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:10, '.$grid->autocomplete($link1, 'codigo','aaaaaa','<div id=\"aaaaaa\"></div>',$despues1).'}',
+			'editoptions'   => '{ size:10, '.$grid->autocomplete($link1, 'codigo','aaaaaa','<div id=\"aaaaaa\"></div>',$despues1,'\'#editmod\'+gridId1.substring(1)').'}',
 			'formoptions'   => '{ label:"Numero de Efecto" }',
 		));
 
@@ -342,6 +337,17 @@ jQuery("#a1").click( function(){
 			return $grid;
 		}
 	}
+
+/*
+
+#editmodnewapi_14591061.ui-widget.ui-widget-content.ui-corner-all.ui-jqdialog.jqmID2 2
+#edithdnewapi_14591061.ui-jqdialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix 3Modificar registro
+#editcntnewapi_14591061.ui-jqdialog-content.ui-widget-content 4
+ 
+ 
+ 
+*/
+
 
 	/**
 	* Busca la data en el Servidor por json
