@@ -13,11 +13,7 @@ class Pers extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('pers','id') ) {
-			$this->db->simple_query('ALTER TABLE pers DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE pers ADD UNIQUE INDEX codigo (codigo)');
-			$this->db->simple_query('ALTER TABLE pers ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -36,11 +32,13 @@ class Pers extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'a1', 'img'=>'images/pdf_logo.gif',  'alt' => 'Imprimir', 'label'=>'Imprimir'));
+		$grid->wbotonadd(array('id'=>'a1', 'img'=>'assets/default/images/print.png',  'alt' => 'Imprimir', 'label'=>'Imprimir'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro')
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -199,13 +197,13 @@ class Pers extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "true";
+		$editar = 'false';
 		$linea = 1;
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -256,7 +254,7 @@ class Pers extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('cedula');
-		$grid->label('Cedula');
+		$grid->label('C&eacute;dula');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -268,7 +266,7 @@ class Pers extends Controller {
 		));
 
 		$grid->addField('direc1');
-		$grid->label('Direccion 1');
+		$grid->label('Direcci&oacute;n 1');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -294,7 +292,7 @@ class Pers extends Controller {
 		));
 
 		$grid->addField('direc2');
-		$grid->label('Direccion 2');
+		$grid->label('Direcci&oacute;n 2');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -308,7 +306,7 @@ class Pers extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
@@ -321,7 +319,7 @@ class Pers extends Controller {
 
 
 		$grid->addField('direc3');
-		$grid->label('Direccion 3');
+		$grid->label('Direcci&oacute;n 3');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -347,7 +345,7 @@ class Pers extends Controller {
 		));
 
 		$grid->addField('telefono');
-		$grid->label('Telefono');
+		$grid->label('Tel&eacute;fono');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -477,7 +475,7 @@ class Pers extends Controller {
 		$mSQL  = "SELECT codigo, profesion FROM prof ORDER BY profesion ";
 		$aprof = $this->datasis->llenajqselect($mSQL, false );
 		$grid->addField('profes');
-		$grid->label('Profes');
+		$grid->label('Profesi&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -490,7 +488,7 @@ class Pers extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('niveled');
-		$grid->label('Nivel F.');
+		$grid->label('Nivel Formaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -529,7 +527,7 @@ class Pers extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('dialib');
-		$grid->label('Dialib');
+		$grid->label('Dias libres');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -738,6 +736,8 @@ class Pers extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 2 }',
 		));
+		*/
+
 		$grid->addField('carnet');
 		$grid->label('Carnet');
 		$grid->params(array(
@@ -748,7 +748,7 @@ class Pers extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 10 }',
 		));
-*/
+
 
 		$linea = $linea + 1;
 		$grid->addField('enlace');
@@ -912,8 +912,7 @@ class Pers extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -927,20 +926,19 @@ class Pers extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "codigo";
+		$mcodp  = 'codigo';
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
 			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM pers WHERE $mcodp=".$this->db->escape($data[$mcodp]));
+				$check = $this->datasis->dameval("SELECT count(*) FROM pers WHERE ${mcodp}=".$this->db->escape($data[$mcodp]));
 				if ( $check == 0 ){
 					$this->db->insert('pers', $data);
 					echo "Registro Agregado";
@@ -984,25 +982,21 @@ class Pers extends Controller {
 		$mvari5  = $_REQUEST['xvari5'];
 		$mvari6  = $_REQUEST['xvari6'];
 
-		$this->db->where("id", $id);
-		$this->db->update('pers', array( "vari1"=>$mvari1, "vari2"=>$mvari2, "vari3"=>$mvari3, "vari4"=>$mvari4, "vari5"=>$mvari5, "vari6"=>$mvari6 ));
+		$this->db->where('id', $id);
+		$this->db->update('pers', array( 'vari1'=>$mvari1, 'vari2'=>$mvari2, 'vari3'=>$mvari3, 'vari4'=>$mvari4, 'vari5'=>$mvari5, 'vari6'=>$mvari6 ));
 
 		echo "Trabajador Avtualizado";
 		//ELIMINAR DE SCLI
 	}
-
-
-
 
 	//******************************
 	//
 	//  DataEdit
 	//
 	function dataedit(){
+		$this->rapyd->load('dataedit');
 
-		$this->rapyd->load("dataedit");
 		$consulrif=$this->datasis->traevalor('CONSULRIF');
-
 		$script ='
 		function consulrif(){
 				vrif=$("#rif").val();
@@ -1013,16 +1007,14 @@ class Pers extends Controller {
 					$("#rif").val(vrif);
 					window.open("'.$consulrif.'"+"?p_rif="+vrif,"CONSULRIF","height=350,width=410");
 				}
-		}
-		';
+		}';
 
-		$edit = new DataEdit("Personal", 'pers');
+		$edit = new DataEdit('Personal', 'pers');
 		$edit->on_save_redirect=false;
-		//$edit->back_url = site_url("nomina/pers/filteredgrid");
-		$edit->script($script, "create");
-		$edit->script($script, "modify");
+		$edit->script($script, 'create');
+		$edit->script($script, 'modify');
 
-		$edit->pre_process('delete','_pre_del');
+		$edit->pre_process( 'delete','_pre_delete');
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
@@ -1035,7 +1027,6 @@ class Pers extends Controller {
 		'filtro'  =>array('codigo'=>'C&oacute;digo de Sucursal','sucursal'=>'Sucursal'),
 		'retornar'=>array('codigo'=>'sucursal'),
 		'titulo'  =>'Buscar Sucursal');
-
 		$boton=$this->datasis->modbus($sucu);
 
 		$cargo=array(
@@ -1047,7 +1038,6 @@ class Pers extends Controller {
 		'filtro'  =>array('codigo'=>'C&oacute;digo de Cargo','descrip'=>'Descripcion'),
 		'retornar'=>array('cargo'=>'cargo'),
 		'titulo'  =>'Buscar Cargo');
-
 		$boton1=$this->datasis->modbus($cargo);
 
 		$scli=array(
@@ -1060,82 +1050,81 @@ class Pers extends Controller {
 		'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre','rifci'=>'Rif/CI'),
 		'retornar'=>array('cliente'=>'enlace'),
 		'titulo'  =>'Buscar Empleado');
-
 		$cboton=$this->datasis->modbus($scli);
 
-		$edit->codigo =  new inputField("C&oacute;digo", "codigo");
-		$edit->codigo->rule="trim|alpha_numeric|required|callback_chexiste";
-		$edit->codigo->mode="autohide";
+		$edit->codigo = new inputField('C&oacute;digo', 'codigo');
+		$edit->codigo->rule='trim|alpha_numeric|required|callback_chexiste';
+		$edit->codigo->mode='autohide';
 		$edit->codigo->maxlength=15;
 		$edit->codigo->size=10;
 
-		$edit->nacional = new dropdownField("C&eacute;dula", "nacional");
-		$edit->nacional->style = "width:100px;";
-		$edit->nacional->option("V","Venezolano");
-		$edit->nacional->option("E","Extranjero");
-		$edit->nacional->group = "Datos del Trabajador";
+		$edit->nacional = new dropdownField('C&eacute;dula', 'nacional');
+		$edit->nacional->style = 'width:100px;';
+		$edit->nacional->option('V','Venezolano');
+		$edit->nacional->option('E','Extranjero');
+		$edit->nacional->group = 'Datos del Trabajador';
 
-		$edit->tipo = new dropdownField("Frecuencia","tipo");
-		$edit->tipo->options(array("Q"=> "Quincenal","M"=>"Mensual","S"=>"Semanal","B"=>"BiSemanal"));
-		$edit->tipo->group = "Relaci&oacute;n Laboral";
-		$edit->tipo->style = "width:90px;";
+		$edit->tipo = new dropdownField('Frecuencia','tipo');
+		$edit->tipo->options(array('Q'=> 'Quincenal','M'=>'Mensual','S'=>'Semanal','B'=>"BiSemanal"));
+		$edit->tipo->group = 'Relaci&oacute;n Laboral';
+		$edit->tipo->style = 'width:90px;';
 
-		$edit->cedula =  new inputField("", "cedula");
+		$edit->cedula = new inputField('', 'cedula');
 		$edit->cedula->size = 9;
 		$edit->cedula->maxlength= 8;
-		$edit->cedula->in = "nacional";
-		$edit->cedula->rule="trim|required";
+		$edit->cedula->in = 'nacional';
+		$edit->cedula->rule='trim|required';
 		$edit->cedula->css_class='inputnum';
 
-		$edit->rif =  new inputField("RIF", "rif");
-		$edit->rif->rule      = "trim|strtoupper|callback_chrif";
+		$edit->rif = new inputField('RIF', 'rif');
+		$edit->rif->rule      = 'trim|strtoupper|callback_chrif';
 		$edit->rif->maxlength = 13;
 		$edit->rif->size      = 12;
-		$edit->rif->group     = "Datos del Trabajador";
+		$edit->rif->group     = 'Datos del Trabajador';
 
-		$edit->nombre =  new inputField("Nombre", "nombre");
-		$edit->nombre->group = "Datos del Trabajador";
+		$edit->nombre =  new inputField('Nombre', 'nombre');
+		$edit->nombre->group = 'Datos del Trabajador';
 		$edit->nombre->size = 30;
 		$edit->nombre->maxlength=30;
-		$edit->nombre->rule="trim|required|strtoupper";
+		$edit->nombre->rule='trim|required|strtoupper';
 
-		$edit->apellido = new inputField("Apellidos", "apellido");
-		$edit->apellido->group = "Datos del Trabajador";
+		$edit->apellido = new inputField('Apellidos', 'apellido');
+		$edit->apellido->group = 'Datos del Trabajador';
 		$edit->apellido->size = 30;
 		$edit->apellido->maxlength=30;
-		$edit->apellido->rule="trim|required|strtoupper";
+		$edit->apellido->rule='trim|required|strtoupper';
 
-		$edit->sexo = new dropdownField("Sexo", "sexo");
-		$edit->sexo->style = "width:100px;";
-		$edit->sexo->option("F","Femenino");
-		$edit->sexo->option("M","Masculino");
-		$edit->sexo->group = "Datos del Trabajador";
+		$edit->sexo = new dropdownField('Sexo', 'sexo');
+		$edit->sexo->style = 'width:100px;';
+		$edit->sexo->option('F','Femenino');
+		$edit->sexo->option('M','Masculino');
+		$edit->sexo->group = 'Datos del Trabajador';
 
-		$edit->civil = new dropdownField("Estado Civil", "civil");
-		$edit->civil->style = "width:100px;";
-		$edit->civil->option("S","Soltero");
-		$edit->civil->option("C","Casado");
-		$edit->civil->option("D","Divorciado");
-		$edit->civil->option("V","Viudo");
-		$edit->civil->group = "Datos del Trabajador";
+		$edit->civil = new dropdownField('Estado Civil', 'civil');
+		$edit->civil->style = 'width:100px;';
+		$edit->civil->option('S','Soltero');
+		$edit->civil->option('C','Casado');
+		$edit->civil->option('D','Divorciado');
+		$edit->civil->option('V','Viudo');
+		$edit->civil->group = 'Datos del Trabajador';
 
-		$edit->direc1 = new inputField("Direcci&oacute;n", "direc1");
-		$edit->direc1->group = "Datos del Trabajador";
+		$edit->direc1 = new inputField('Direcci&oacute;n', 'direc1');
+		$edit->direc1->group = 'Datos del Trabajador';
 		$edit->direc1->size =30;
 		$edit->direc1->maxlength=30;
-		$edit->direc1->rule="trim|strtoupper";
+		$edit->direc1->rule='trim|strtoupper';
 
-		$edit->direc2 = new inputField("&nbsp;", "direc2");
+		$edit->direc2 = new inputField('&nbsp;', 'direc2');
 		$edit->direc2->size =30;
-		$edit->direc2->group = "Datos del Trabajador";
+		$edit->direc2->group = 'Datos del Trabajador';
 		$edit->direc2->maxlength=30;
-		$edit->direc2->rule="trim|strtoupper";
+		$edit->direc2->rule='trim|strtoupper';
 
-		$edit->direc3 = new inputField("&nbsp;", "direc3");
+		$edit->direc3 = new inputField('&nbsp;', 'direc3');
 		$edit->direc3->size =30;
-		$edit->direc3->group = "Datos del Trabajador";
+		$edit->direc3->group = 'Datos del Trabajador';
 		$edit->direc3->maxlength=30;
-		$edit->direc3->rule="trim|strtoupper";
+		$edit->direc3->rule='trim|strtoupper';
 
 		$edit->telefono = new inputField("Tel&eacute;fono", "telefono");
 		$edit->telefono->size =30;
@@ -1149,59 +1138,52 @@ class Pers extends Controller {
 		$edit->email->maxlength=50;
 		$edit->email->rule="trim";
 
-		$edit->civil = new dropdownField("Estado Civil", "civil");
-		$edit->civil->style = "width:80px;";
-		$edit->civil->option("S","Soltero");
-		$edit->civil->option("C","Casado");
-		$edit->civil->option("D","Divorciado");
-		$edit->civil->option("V","Viudo");
+		$edit->civil = new dropdownField('Estado Civil', 'civil');
+		$edit->civil->style = 'width:80px;';
+		$edit->civil->option('S','Soltero');
+		$edit->civil->option('C','Casado');
+		$edit->civil->option('D','Divorciado');
+		$edit->civil->option('V','Viudo');
 		$edit->civil->group = "Datos del Trabajador";
 
-		$edit->profes = new dropdownField("Profesion","profes");
-		$edit->profes->options("SELECT codigo,profesion FROM prof ORDER BY profesion");
-		$edit->profes->style = "width:200px;";
+		$edit->profes = new dropdownField('Profesi&oacute;n','profes');
+		$edit->profes->options('SELECT TRIM(codigo) AS codigo,profesion FROM prof ORDER BY profesion');
+		$edit->profes->style = 'width:200px;';
 
-		$edit->nacimi = new DateonlyField("Nacimiento", "nacimi","d/m/Y");
-		//$edit->nacimi->insertValue = date('Y-m-d');
-		$edit->nacimi->size = 10;
+		$edit->nacimi = new DateonlyField('Nacimiento', 'nacimi','d/m/Y');
+		$edit->nacimi->size = 12;
 		$edit->nacimi->rule ='required';
 		$edit->nacimi->calendar=false;
+		$edit->nacimi->rule='chfecha';
 
-/*
-		$edit->nacimi->size = 12;
-		$edit->nacimi->group = "Datos del Trabajador";
-		$edit->nacimi->rule="trim|chfecha";
-*/
 
-		$edit->sucursal = new dropdownField("Sucursal", "sucursal");
-		$edit->sucursal->style ="width:120px;";
-		$edit->sucursal->options("SELECT codigo, CONCAT(codigo,' ',sucursal) desrip FROM sucu ORDER BY sucursal");
-		$edit->sucursal->group = "Relaci&oacute;n Laboral";
+		$edit->sucursal = new dropdownField('Sucursal', 'sucursal');
+		$edit->sucursal->style ='width:120px;';
+		$edit->sucursal->options("SELECT TRIM(codigo) AS codigo, CONCAT(codigo,' ',sucursal) desrip FROM sucu ORDER BY sucursal");
+		$edit->sucursal->group = 'Relaci&oacute;n Laboral';
 
-		$edit->divi = new dropdownField("Divisi&oacute;n", "divi");
-		$edit->divi->style ="width:200px;";
-		$edit->divi->option("","");
-		$edit->divi->options("SELECT division,descrip FROM divi ORDER BY division");
-		$edit->divi->onchange = "get_depto();";
-		$edit->divi->group = "Relaci&oacute;n Laboral";
+		$edit->divi = new dropdownField('Divisi&oacute;n', 'divi');
+		$edit->divi->style ='width:200px;';
+		$edit->divi->option('','Seleccionar');
+		$edit->divi->options('SELECT division,descrip FROM divi ORDER BY division');
+		$edit->divi->onchange = 'get_depto();';
+		$edit->divi->group = 'Relaci&oacute;n Laboral';
 
-		$edit->depa = new dropdownField("Departamento", "depto");
+		$edit->depa = new dropdownField('Departamento', 'depto');
 		$edit->depa->style ="width:200px;";
-		$edit->depa->option("","");
-
+		$edit->depa->option('','');
+		$edit->depa->group = 'Relaci&oacute;n Laboral';
 		$divi=$edit->getval('divi');
-
 		if( $divi !== false ){
-			$edit->depa->options("SELECT departa,depadesc FROM depa where division='$divi' ORDER BY division");
+			$dbdivi=$this->db->escape($divi);
+			$edit->depa->options("SELECT departa,depadesc FROM depa where division=${dbdivi} ORDER BY division");
 		}else{
-			$edit->depa->option("","Seleccione un Division");
+			$edit->depa->option('',"Seleccione un Division");
 		}
 
-		$edit->depa->group = "Relaci&oacute;n Laboral";
-
-		$edit->contrato = new dropdownField("Contrato","contrato");
-		$edit->contrato->style ="width:350px;";
-		$edit->contrato->option("","");
+		$edit->contrato = new dropdownField('Contrato','contrato');
+		$edit->contrato->style ='width:350px;';
+		$edit->contrato->option('','');
 		$edit->contrato->options("SELECT codigo,CONCAT('',codigo,nombre)as nombre FROM noco ORDER BY codigo");
 
 		$edit->vencimiento = new DateonlyField('Vencimiento', 'vence','d/m/Y');
@@ -1229,98 +1211,98 @@ class Pers extends Controller {
 		//$edit->sso->rule="trim|numeric";
 		$edit->sso->css_class='inputnum';
 
-		$edit->observa = new textareaField("Observaci&oacute;n", "observa");
-		$edit->observa->rule = "trim";
+		$edit->observa = new textareaField('Observaci&oacute;n', 'observa');
+		$edit->observa->rule = 'trim';
 		$edit->observa->cols = 70;
 		$edit->observa->rows =3;
-		$edit->observa->group = "Relaci&oacute;n Laboral";
+		$edit->observa->group = 'Relaci&oacute;n Laboral';
 
-		$edit->ingreso = new DateonlyField("Fecha de Ingreso", "ingreso","d/m/Y");
+		$edit->ingreso = new DateonlyField('Fecha de Ingreso', 'ingreso','d/m/Y');
 		$edit->ingreso->size = 10;
-		$edit->ingreso->group = "Relaci&oacute;n Laboral";
-		$edit->ingreso->rule="trim|chfecha";
+		$edit->ingreso->group = 'Relaci&oacute;n Laboral';
+		$edit->ingreso->rule='trim|chfecha';
 		$edit->ingreso->calendar = false;
 
-		$edit->label2 = new freeField("Edo. C","edoci","<id class='littletableheader'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fecha de Retiro&nbsp;&nbsp; </id>");
-		$edit->label2->in = "ingreso";
+		$edit->label2 = new freeField('Edo. C','edoci',"<id class='littletableheader'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fecha de Retiro&nbsp;&nbsp; </id>");
+		$edit->label2->in = 'ingreso';
 
-		$edit->retiro =  new DateonlyField("Fecha de Retiro", "retiro","d/m/Y");
+		$edit->retiro =  new DateonlyField('Fecha de Retiro', 'retiro','d/m/Y');
 		$edit->retiro->size = 10;
-		$edit->retiro->in = "ingreso";
-		$edit->retiro->rule="trim|chfecha";
+		$edit->retiro->in = 'ingreso';
+		$edit->retiro->rule='trim|chfecha';
 		$edit->retiro->calendar = false;
 
-		$edit->dialib = new inputField("Dias libres", "dialib");
-		$edit->dialib->group = "Relaci&oacute;n Laboral";
+		$edit->dialib = new inputField('Dias libres', 'dialib');
+		$edit->dialib->group = 'Relaci&oacute;n Laboral';
 		$edit->dialib->size =4;
 		$edit->dialib->maxlength=2;
-		$edit->dialib->rule="trim|numeric";
+		$edit->dialib->rule='trim|numeric';
 		$edit->dialib->css_class='inputnum';
 
-		$edit->label3 = new freeField("DL","DL","<id class='littletableheader'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dias Laborables&nbsp;&nbsp; </id>");
-		$edit->label3->in = "dialib";
+		$edit->label3 = new freeField('DL','DL',"<id class='littletableheader'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dias Laborables&nbsp;&nbsp; </id>");
+		$edit->label3->in = 'dialib';
 
-		$edit->dialab =  new inputField("Dias laborables", "dialab");
-		$edit->dialab->group = "Relaci&oacute;n Laboral";
+		$edit->dialab =  new inputField('Dias laborables', 'dialab');
+		$edit->dialab->group = 'Relaci&oacute;n Laboral';
 		$edit->dialab->size =4;
 		$edit->dialab->maxlength=2;
-		$edit->dialab->in = "dialib";
+		$edit->dialab->in = 'dialib';
 
-		$edit->status = new dropdownField("Estatus", "status");
-		$edit->status->options(array("A"=> "Activo","V"=>"Vacaciones","R"=>"Retirado","I"=>"Inactivo","P"=>"Permiso"));
-		$edit->status->group = "Relaci&oacute;n Laboral";
-		$edit->status->style = "width:100px;";
+		$edit->status = new dropdownField('Estatus', 'status');
+		$edit->status->options(array('A'=> 'Activo','V'=>"Vacaciones","R"=>"Retirado","I"=>"Inactivo","P"=>"Permiso"));
+		$edit->status->group = 'Relaci&oacute;n Laboral';
+		$edit->status->style = 'width:100px;';
 
-		$edit->carnet =  new inputField("Nro. Carnet", "carnet");
+		$edit->carnet =  new inputField('Nro. Carnet', 'carnet');
 		$edit->carnet->size = 13;
 		$edit->carnet->maxlength=10;
-		$edit->carnet->group = "Relaci&oacute;n Laboral";
-		$edit->carnet->rule="trim";
+		$edit->carnet->group = 'Relaci&oacute;n Laboral';
+		$edit->carnet->rule='trim';
 
-		$edit->turno = new dropdownField("Turno", "turno");
-		$edit->turno->option("","");
-		$edit->turno->options(array("D"=> "Diurno","N"=>"Nocturno"));
-		$edit->turno->group = "Relaci&oacute;n Laboral";
-		$edit->turno->style = "width:100px;";
+		$edit->turno = new dropdownField('Turno', 'turno');
+		$edit->turno->option('','');
+		$edit->turno->options(array('D'=> 'Diurno','N'=>'Nocturno'));
+		$edit->turno->group = 'Relaci&oacute;n Laboral';
+		$edit->turno->style = 'width:100px;';
 
-		$edit->horame  = new inputField("Turno Ma�ana","horame");
+		$edit->horame  = new inputField('Turno Ma&ntilde;ana','horame');
 		$edit->horame->maxlength=8;
 		$edit->horame->size=10;
 		$edit->horame->rule='trim|callback_chhora';
 		$edit->horame->append('hh:mm:ss');
-		$edit->horame->group="Relaci&oacute;n Laboral";
+		$edit->horame->group='Relaci&oacute;n Laboral';
 
-		$edit->horams  = new inputField("Turno Ma�ana","horams");
+		$edit->horams  = new inputField('Turno Ma&ntilde;ana',"horams");
 		$edit->horams->maxlength=8;
 		$edit->horams->size=10;
 		$edit->horams->rule='trim|callback_chhora';
 		$edit->horams->append('hh:mm:ss');
-		$edit->horams->in="horame";
-		$edit->horams->group="Relaci&oacute;n Laboral";
+		$edit->horams->in='horame';
+		$edit->horams->group='Relaci&oacute;n Laboral';
 
-		$edit->horate  = new inputField("Turno Tarde","horate");
+		$edit->horate  = new inputField('Turno Tarde','horate');
 		$edit->horate->maxlength=8;
 		$edit->horate->size=10;
 		$edit->horate->rule='trim|callback_chhora';
 		$edit->horate->append('hh:mm:ss');
-		$edit->horate->group="Relaci&oacute;n Laboral";
+		$edit->horate->group='Relaci&oacute;n Laboral';
 
-		$edit->horats  = new inputField("Turno Tarde","horats");
+		$edit->horats  = new inputField('Turno Tarde','horats');
 		$edit->horats->maxlength=8;
 		$edit->horats->size=10;
 		$edit->horats->rule='trim|callback_chhora';
 		$edit->horats->append('hh:mm:ss');
-		$edit->horats->in="horate";
-		$edit->horats->group="Relaci&oacute;n Laboral";
+		$edit->horats->in='horate';
+		$edit->horats->group='Relaci&oacute;n Laboral';
 
-		$edit->sueldo = new inputField("Sueldo","sueldo");
-		$edit->sueldo->group = "Relaci&oacute;n Laboral";
+		$edit->sueldo = new inputField('Sueldo','sueldo');
+		$edit->sueldo->group = 'Relaci&oacute;n Laboral';
 		$edit->sueldo->size =10;
 		$edit->sueldo->maxlength=15;
-		$edit->sueldo->rule="trim|numeric";
+		$edit->sueldo->rule='trim|numeric';
 		$edit->sueldo->css_class='inputnum';
 
-		$edit->tipocuent = new dropdownField("Tipo Cuenta", "tipoe");
+		$edit->tipocuent = new dropdownField('Tipo Cuenta', 'tipoe');
 		$edit->tipocuent->option('','');
 		$edit->tipocuent->options(array('A'=> 'Ahorro','C'=>'Corriente'));
 		$edit->tipocuent->group = 'Datos Cuenta Bancaria';
@@ -1338,45 +1320,45 @@ class Pers extends Controller {
 		$vari5 = $this->datasis->traevalor('NOMVARI5');
 		$vari6 = $this->datasis->traevalor('NOMVARI6');
 
-		$edit->vari1 = new inputField($vari1, "vari1");
-		$edit->vari1->group = "Variables";
+		$edit->vari1 = new inputField($vari1, 'vari1');
+		$edit->vari1->group = 'Variables';
 		$edit->vari1->size =10;
 		$edit->vari1->maxlength=14;
-		$edit->vari1->rule="trim|numeric";
+		$edit->vari1->rule='trim|numeric';
 		$edit->vari1->css_class='inputnum';
 
-		$edit->vari2 = new inputField($vari2, "vari2");
-		$edit->vari2->group = "Variables";
+		$edit->vari2 = new inputField($vari2, 'vari2');
+		$edit->vari2->group = 'Variables';
 		$edit->vari2->size =10;
 		$edit->vari2->maxlength=14;
-		$edit->vari2->rule="trim|numeric";
+		$edit->vari2->rule='trim|numeric';
 		$edit->vari2->css_class='inputnum';
 
-		$edit->vari3 = new inputField($vari3, "vari3");
-		$edit->vari3->group = "Variables";
+		$edit->vari3 = new inputField($vari3, 'vari3');
+		$edit->vari3->group = 'Variables';
 		$edit->vari3->size =10;
 		$edit->vari3->maxlength=14;
-		$edit->vari3->rule="trim|numeric";
+		$edit->vari3->rule='trim|numeric';
 		$edit->vari3->css_class='inputnum';
 
-		$edit->vari4 = new inputField($vari4, "vari4");
-		$edit->vari4->group = "Variables";
+		$edit->vari4 = new inputField($vari4, 'vari4');
+		$edit->vari4->group = 'Variables';
 		$edit->vari4->size =10;
 		$edit->vari4->maxlength=11;
-		$edit->vari4->rule="trim|numeric";
+		$edit->vari4->rule='trim|numeric';
 		$edit->vari4->css_class='inputnum';
 
-		$edit->vari5 = new DateField($vari5, "vari5");
-		$edit->vari5->group = "Variables";
+		$edit->vari5 = new DateField($vari5, 'vari5');
+		$edit->vari5->group = 'Variables';
 		$edit->vari5->size =10;
 		$edit->vari5->maxlength=12;
-		$edit->vari5->rule="trim|chfecha";
+		$edit->vari5->rule='trim|chfecha';
 
-		$edit->vari6 = new inputField($vari6, "vari6");
-		$edit->vari6->group = "Variables";
+		$edit->vari6 = new inputField($vari6, 'vari6');
+		$edit->vari6->group = 'Variables';
 		$edit->vari6->size =10;
 		$edit->vari6->maxlength=14;
-		$edit->vari6->rule="trim|numeric";
+		$edit->vari6->rule='trim|numeric';
 		$edit->vari6->css_class='inputnum';
 
 		$edit->build();
@@ -1392,13 +1374,6 @@ class Pers extends Controller {
 			$conten['form']  =& $edit;
 			$this->load->view('view_pers', $conten);
 		}
-
-		//$data['content'] = $this->load->view('view_pers', $conten,true);
-		//$data['content'] = $edit->output;
-		//$data["head"]    = script("jquery.pack.js").script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").$this->rapyd->get_head();
-		//$data['title']   = '<h1>Personal</h1>';
-		//$this->load->view('view_ventanas', $data);
-
 	}
 
 	function depto($divi=NULL){
@@ -1408,7 +1383,8 @@ class Pers extends Controller {
 		$depa->style  = 'width:200px;';
 		//echo 'de nuevo:'.$tipoa;
 		if ($divi!==false){
-			$depa->options("SELECT departa,depadesc FROM depa where division='$divi' ORDER BY division");
+			$dbdivi=$this->db->escape($divi);
+			$depa->options("SELECT departa,depadesc FROM depa where division=${dbdivi} ORDER BY division");
 		}else{
 			$depa->option('Seleccione un Division');
 		}
@@ -1416,141 +1392,50 @@ class Pers extends Controller {
 		echo $depa->output;
 	}
 
-	function _pre_del($do) {
-		$codigo=$do->get('codigo');
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM nomina WHERE codigo='$codigo'");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM asig   WHERE codigo='$codigo'");
+	function _pre_delete($do) {
+		$codigo  =$do->get('codigo');
+		$dbcodigo=$this->db->escape($codigo);
+		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM nomina WHERE codigo=${dbcodigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM asig   WHERE codigo=${dbcodigo}");
 
-		if ($check > 0){
+		if($check>0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Trabajador con Movimiento no puede ser Borrado';
-			return False;
+			return false;
 		}
-		return True;
+		return true;
 	}
 
 	function _post_insert($do){
 		$codigo=$do->get('codigo');
 		$nombre=$do->get('nombre');
-		logusu('pers',"PERSONAL $codigo NOMBRE  $nombre CREADO");
+		logusu('pers',"PERSONAL ${codigo} NOMBRE ${nombre} CREADO");
 	}
 
 	function _post_update($do){
 		$codigo=$do->get('codigo');
 		$nombre=$do->get('nombre');
-		logusu('pers',"PERSONAL $codigo NOMBRE  $nombre  MODIFICADO");
+		logusu('pers',"PERSONAL ${codigo} NOMBRE ${nombre} MODIFICADO");
 	}
 
 	function _post_delete($do){
 		$codigo=$do->get('codigo');
 		$nombre=$do->get('nombre');
-		logusu('pers',"PERSONAL $codigo NOMBRE  $nombre  ELIMINADO ");
+		logusu('pers',"PERSONAL ${codigo} NOMBRE ${nombre} ELIMINADO ");
 	}
 
 	function chexiste($codigo){
-		$codigo = $this->input->post('codigo');
-		$check  = $this->datasis->dameval("SELECT COUNT(*) FROM pers WHERE codigo='$codigo'");
+		$codigo  = $this->input->post('codigo');
+		$dbcodigo= $this->db->escape($codigo);
+		$check   = $this->datasis->dameval("SELECT COUNT(*) FROM pers WHERE codigo=${dbcodigo}");
 		if ($check > 0){
-			$nombre=$this->datasis->dameval("SELECT nombre FROM pers WHERE codigo='$codigo'");
-			$this->validation->set_message('chexiste',"Personal con el codigo $codigo nombre $nombre ya existe");
-			return FALSE;
+			$nombre=$this->datasis->dameval("SELECT nombre FROM pers WHERE codigo=${dbcodigo}");
+			$this->validation->set_message('chexiste',"Personal con el codigo ${codigo} nombre ${nombre} ya existe");
+			return false;
 		}else {
-			return TRUE;
+			return true;
 		}
 	}
 
-	function instalar(){
-		if ( !$this->datasis->iscampo('pers','email') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `email` VARCHAR(100) NULL");
-
-		if ( !$this->datasis->iscampo('pers','tipoe') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `tipoe` VARCHAR(10)");
-
-		if ( !$this->datasis->iscampo('pers','escritura') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `escritura` VARCHAR(25)");
-
-		if ( !$this->datasis->iscampo('pers','rif') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `rif` VARCHAR(15)");
-
-		if ( !$this->datasis->iscampo('pers','observa') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `observa` TEXT ");
-
-		if ( !$this->datasis->iscampo('pers','turno') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `turno` CHAR(2) NULL");
-
-		if ( !$this->datasis->iscampo('pers','horame') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `horame` VARCHAR(10)");
-
-		if ( !$this->datasis->iscampo('pers','horams') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `horams` VARCHAR(10)");
-
-		if ( !$this->datasis->iscampo('pers','horate') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `horate` VARCHAR(10)");
-
-		if ( !$this->datasis->iscampo('pers','horats') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `horats` VARCHAR(10)");
-
-		if ( !$this->datasis->iscampo('pers','modificado') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `modificado` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP AFTER vence");
-
-		if ( !$this->datasis->iscampo('pers','id') )
-			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `id` INT(11) NULL AUTO_INCREMENT AFTER modificado, DROP PRIMARY KEY, ADD PRIMARY (id), ADD UNIQUE INDEX codigo (codigo)");
-
-		if ( !$this->datasis->istabla('tipot') )
-			$this->db->simple_query("CREATE TABLE tipot (codigo int(10) unsigned NOT NULL AUTO_INCREMENT,tipo varchar(50) DEFAULT NULL,PRIMARY KEY (codigo) )");
-
-		if ( !$this->datasis->istabla('posicion') )
-			$this->db->simple_query("CREATE TABLE `posicion`(`codigo` varchar(10) NOT NULL,`posicion` varchar(30) DEFAULT NULL,PRIMARY KEY (`codigo`))");
-
-		if ( !$this->datasis->istabla('posicion') )
-			$this->db->simple_query("CREATE TABLE tipoe (codigo varchar(10) NOT NULL DEFAULT '', tipo varchar(50) DEFAULT NULL, PRIMARY KEY (codigo))");
-
-		if ( !$this->datasis->istabla('nedu') ){
-			$this->db->simple_query("CREATE TABLE IF NOT EXISTS nedu (codigo varchar(4) NOT NULL, nivel varchar(40) DEFAULT NULL, PRIMARY KEY (`codigo`)) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC");
-			$this->db->simple_query("INSERT INTO nedu (codigo, nivel) VALUES ('00', 'Sin Educacion Formal'),('01', 'Primaria'),('02', 'Secundaria'),('03', 'Tecnico'),	('04', 'T.S.U.'),('05', 'Universitario'),('06', 'Post Universitario'),('07', 'Doctor'),('08', 'Guru')");
-		}
-	}
-
-/*
-
-	function modificar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-
-		$codigo = $data['data']['codigo'];
-		$nombre = trim($data['data']['nombre']).' '.$data['data']['apellido'];;
-
-		unset($campos['nomcont']);
-		unset($campos['codigo']);
-
-		//print_r($campos);
-		$mSQL = $this->db->update_string("pers", $campos,"id='".$data['data']['id']."'" );
-		$this->db->simple_query($mSQL);
-		logusu('pers',"PERSONAL $codigo NOMBRE  $nombre MODIFICADO");
-		echo "{ success: true, message: 'Trabajador Modificado'}";
-	}
-
-	function eliminar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-
-		$codigo = $data['data']['codigo'];
-		$nombre = trim($data['data']['nombre']).' '.$data['data']['apellido'];;
-
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM nomina WHERE codigo='$codigo'");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM asig   WHERE codigo='$codigo'");
-
-		if ($check > 0){
-			echo "{ success: false, message: 'Trabajador con Movimiento no puede ser Borrado'}";
-		} else {
-			$this->db->simple_query("DELETE FROM pers WHERE codigo='$codigo'");
-			logusu('pers',"PERSONAL $codigo NOMBRE  $nombre ELIMINADO");
-			echo "{ success: true, message: 'Trabajador Eliminado'}";
-		}
-	}
-
-*/
 	//Busca Trabajadores
 	function persbusca() {
 		$start   = isset($_REQUEST['start'])  ? $_REQUEST['start']  :  0;
@@ -1572,11 +1457,10 @@ class Pers extends Controller {
 		if ( empty($mSQL)) {
 			echo '{success:true, message:"mSQL vacio, Loaded data", results: 0, data:'.json_encode(array()).'}';
 		} else {
-			$mSQL .= " limit $start, $limit ";
+			$mSQL .= " limit ${start}, ${limit} ";
 			$query = $this->db->query($mSQL);
 			$arr = array();
-			foreach ($query->result_array() as $row)
-			{
+			foreach ($query->result_array() as $row){
 				$meco = array();
 				foreach( $row as $idd=>$campo ) {
 					$meco[$idd] = utf8_encode($campo);
@@ -1587,6 +1471,60 @@ class Pers extends Controller {
 		}
 	}
 
-}
+	function instalar(){
+		$campos=$this->db->list_fields('pers');
+		if(!in_array('email',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `email` VARCHAR(100) NULL");
 
-?>
+		if(!in_array('tipoe',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `tipoe` VARCHAR(10)");
+
+		if(!in_array('escritura',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `escritura` VARCHAR(25)");
+
+		if(!in_array('rif',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `rif` VARCHAR(15)");
+
+		if(!in_array('observa',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `observa` TEXT");
+
+		if(!in_array('turno',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `turno` CHAR(2) NULL");
+
+		if(!in_array('horame',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `horame` VARCHAR(10)");
+
+		if(!in_array('horams',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `horams` VARCHAR(10)");
+
+		if(!in_array('horate',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `horate` VARCHAR(10)");
+
+		if(!in_array('horats',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `horats` VARCHAR(10)");
+
+		if(!in_array('modificado',$campos))
+			$this->db->simple_query("ALTER TABLE pers ADD COLUMN `modificado` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP AFTER vence");
+
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE pers DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE pers ADD UNIQUE INDEX codigo (codigo)');
+			$this->db->simple_query('ALTER TABLE pers ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		$tablas = $this->db->list_tables();
+		if(!in_array('tipot',$tablas))
+			$this->db->simple_query("CREATE TABLE tipot (codigo int(10) unsigned NOT NULL AUTO_INCREMENT,tipo varchar(50) DEFAULT NULL,PRIMARY KEY (codigo) )");
+
+		if(!in_array('posicion',$tablas))
+			$this->db->simple_query("CREATE TABLE `posicion`(`codigo` varchar(10) NOT NULL,`posicion` varchar(30) DEFAULT NULL,PRIMARY KEY (`codigo`))");
+
+		if(!in_array('tipoe',$tablas))
+			$this->db->simple_query("CREATE TABLE tipoe (codigo varchar(10) NOT NULL DEFAULT '', tipo varchar(50) DEFAULT NULL, PRIMARY KEY (codigo))");
+
+		if(!in_array('nedu',$tablas)){
+			$this->db->simple_query("CREATE TABLE IF NOT EXISTS nedu (codigo varchar(4) NOT NULL, nivel varchar(40) DEFAULT NULL, PRIMARY KEY (`codigo`)) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC");
+			$this->db->simple_query("INSERT INTO nedu (codigo, nivel) VALUES ('00', 'Sin Educacion Formal'),('01', 'Primaria'),('02', 'Secundaria'),('03', 'Tecnico'),	('04', 'T.S.U.'),('05', 'Universitario'),('06', 'Post Universitario'),('07', 'Doctor'),('08', 'Guru')");
+		}
+	}
+}

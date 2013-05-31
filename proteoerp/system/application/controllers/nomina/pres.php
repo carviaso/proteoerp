@@ -14,11 +14,8 @@ class Pres extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('pres','id') ) {
-			$this->db->simple_query('ALTER TABLE pres DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE pres ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE pres ADD UNIQUE INDEX cliente (cod_cli, tipo_doc, numero )');
-		}
+		$this->instalar();
+		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
 		redirect($this->url.'jqdatag');
 	}
 
@@ -39,41 +36,42 @@ class Pres extends Controller {
 				window.open(\''.base_url().'formatos/ver/PRES/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});
-</script>
-';
+		</script>';
 
-		#Set url
-		$grid->setUrlput(site_url($this->url.'setdata/'));
+		$adic = array(
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$WestPanel = '
-<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-<div class="anexos">
+		//$param['WestPanel']   = $WestPanel;
+		//$param['EastPanel'] = $EastPanel;
+		$param['SouthPanel']  = $SouthPanel;
+		$param['listados']    = $this->datasis->listados('PRES', 'JQ');
+		$param['otros']       = $this->datasis->otros('PRES', 'JQ');
+		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['bodyscript']  = $bodyscript;
+		$param['tabs']        = false;
+		$param['encabeza']    = $this->titp;
+		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
+		$this->load->view('jqgrid/crud2',$param);
+	}
 
-<table id="west-grid" align="center">
-	<tr>
-		<td><div class="tema1"><table id="listados"></table></div></td>
-	</tr>
-	<tr>
-		<td><div class="tema1"><table id="otros"></table></div></td>
-	</tr>
-</table>
+	function bodyscript( $grid0 ){
+		$bodyscript = '<script type="text/javascript">';
+		$ngrid      = '#newapi'.$grid0;
 
-<table id="west-grid" align="center">
-	<tr>
-		<td></td>
-	</tr>
-</table>
-</div>
-'.
-//		<td><a style="width:190px" href="#" id="a1">Imprimir Copia</a></td>
-'</div> <!-- #LeftPane -->
-';
+		$bodyscript .= $this->jqdatagrid->bsshow('pres', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'pres', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'pres', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('pres', $ngrid, $this->url );
 
 		$SouthPanel = '
-<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
-<p>'.$this->datasis->traevalor('TITULO1').'</p>
-</div> <!-- #BottomPanel -->
-';
+		<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
+		<p>'.$this->datasis->traevalor('TITULO1').'</p>
+		</div>';
+
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
 		$param['SouthPanel']  = $SouthPanel;
@@ -91,26 +89,26 @@ class Pres extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "true";
+		$editar = 'true';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid  = new $this->jqdatagrid;
 		$link = site_url('ajax/buscapers');
 		$despues ='
-								$("input#nombre").val(ui.item.nombre);
-								$("input#cod_cli").val(ui.item.enlace);
-								_cargo = ui.item.enlace;';
+				$("input#nombre").val(ui.item.nombre);
+				$("input#cod_cli").val(ui.item.enlace);
+				_cargo = ui.item.enlace;';
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{'.$grid->autocomplete($link, 'codigo','aaaaaa','<div id=\"aaaaaa\"></div>',$despues,'\'#editmod\'+gridId1.substring(1)').'}', 
+			'editoptions'   => '{'.$grid->autocomplete($link, 'codigo','aaaaaa','<div id=\"aaaaaa\"></div>',$despues,'\'#editmod\'+gridId1.substring(1)').'}',
 			'formoptions'   => '{ label:"Codigo del Trabajador" }',
 		));
 
@@ -141,13 +139,13 @@ class Pres extends Controller {
 
 		$link1 = site_url('ajax/buscasmovep');
 		$despues1 ='
-								$("input#tipo_doc").val(ui.item.tipo_doc);
-								$("input#monto").val(ui.item.monto);
-								';
+				$("input#tipo_doc").val(ui.item.tipo_doc);
+				$("input#monto").val(ui.item.monto);
+				';
 
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -159,7 +157,7 @@ class Pres extends Controller {
 		));
 
 		$grid->addField('tipo_doc');
-		$grid->label('Tipo_doc');
+		$grid->label('Tipo Doc.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -219,7 +217,7 @@ class Pres extends Controller {
 						$("input#cuota").val(cuota);
 					}
 				}]
-	
+
 			}',
 			'formatter'     => "'number'",
 			'formatoptions' => '{label:"Numero de Cuotas", decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
@@ -317,6 +315,9 @@ class Pres extends Controller {
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:450, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
+		//$grid->setBarOptions('addfunc: presadd, editfunc: presedit, delfunc: presdel, viewfunc: presshow');
+
+
 		#show/hide navigations buttons
 		$grid->setAdd(true);
 		$grid->setEdit(true);
@@ -343,17 +344,16 @@ class Pres extends Controller {
 #editmodnewapi_14591061.ui-widget.ui-widget-content.ui-corner-all.ui-jqdialog.jqmID2 2
 #edithdnewapi_14591061.ui-jqdialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix 3Modificar registro
 #editcntnewapi_14591061.ui-jqdialog-content.ui-widget-content 4
- 
- 
- 
+
+
+
 */
 
 
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -367,8 +367,7 @@ class Pres extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -410,7 +409,7 @@ class Pres extends Controller {
 					logusu('PRES',"Registro  INCLUIDO");
 				} else
 				echo "Registro ya Agregado!!!";
-				
+
 			} else
 				echo "Fallo Agregado!!!";
 
@@ -427,11 +426,205 @@ class Pres extends Controller {
 			} else {
 				$this->db->simple_query("DELETE FROM pres WHERE id=$id ");
 				logusu('PRES',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
+				echo 'Registro Eliminado';
 			}
-		};
+		}
 	}
 
+
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+
+			$("#cod_cli").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function(req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscapers').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#nombre").val("");
+									$("#nombre_val").text("");
+
+									$("#rifci").val("");
+									$("#rifci_val").text("");
+									$("#sclitipo").val("1");
+
+									$("#direc").val("");
+									$("#direc_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#cod_cli").attr("readonly", "readonly");
+
+					$("#nombre").val(ui.item.nombre);
+					$("#nombre_val").text(ui.item.nombre);
+
+					$("#rifci").val(ui.item.rifci);
+					$("#rifci_val").text(ui.item.rifci);
+
+					$("#cod_cli").val(ui.item.cod_cli);
+					$("#sclitipo").val(ui.item.tipo);
+
+					$("#direc").val(ui.item.direc);
+					$("#direc_val").text(ui.item.direc);
+					setTimeout(function() {  $("#cod_cli").removeAttr("readonly"); }, 1500);
+				}
+			});
+
+		});';
+
+		$edit = new DataEdit('', 'pres');
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process('insert', '_pre_insert' );
+		$edit->pre_process('update', '_pre_update' );
+		$edit->pre_process('delete', '_pre_delete' );
+
+		$edit->cod_cli = new inputField('C&oacute;digo Cliente','cod_cli');
+		$edit->cod_cli->rule='';
+		$edit->cod_cli->size =7;
+		$edit->cod_cli->maxlength =5;
+
+		$edit->tipo_doc = new inputField('Tipo Doc.','tipo_doc');
+		$edit->tipo_doc->rule='';
+		$edit->tipo_doc->size =4;
+		$edit->tipo_doc->maxlength =2;
+
+		$edit->numero = new inputField('N&uacute;mero de efecto','numero');
+		$edit->numero->rule='';
+		$edit->numero->size =10;
+		$edit->numero->maxlength =8;
+
+		$edit->fecha = new dateonlyField('Fecha','fecha');
+		$edit->fecha->rule='chfecha';
+		$edit->fecha->size =10;
+		$edit->fecha->maxlength =8;
+		$edit->fecha->calendar=false;
+
+		$edit->codigo = new inputField('C&oacute;digo','codigo');
+		$edit->codigo->rule='';
+		$edit->codigo->size =17;
+		$edit->codigo->maxlength =15;
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->rule='';
+		$edit->nombre->size =32;
+		$edit->nombre->maxlength =30;
+		$edit->nombre->in='codigo';
+
+		$edit->monto = new inputField('Monto','monto');
+		$edit->monto->rule='numeric';
+		$edit->monto->css_class='inputnum';
+		$edit->monto->size =16;
+		$edit->monto->maxlength =14;
+
+		$edit->nroctas = new inputField('Nro. Cuotas','nroctas');
+		$edit->nroctas->rule='numeric';
+		$edit->nroctas->css_class='inputnum';
+		$edit->nroctas->size =4;
+		$edit->nroctas->maxlength =2;
+
+		$edit->cuota = new inputField('Cuota','cuota');
+		$edit->cuota->rule='numeric';
+		$edit->cuota->css_class='inputnum';
+		$edit->cuota->size =16;
+		$edit->cuota->maxlength =14;
+
+		$edit->apartir = new dateonlyField('Inicio del cobro','apartir');
+		$edit->apartir->rule='chfecha';
+		$edit->apartir->size =10;
+		$edit->apartir->maxlength =8;
+		$edit->apartir->insertValue = date('Y-m-d');
+		$edit->apartir->calendar=false;
+
+		$edit->cadano = new dropdownField ('Intervalo', 'cadano');
+		$edit->cadano->rule='required|enum[1,2]';
+		$edit->cadano->style='width:120px;';
+		$edit->cadano->options(array(
+			'1'=> 'Cada Nomina',
+			'2'=> 'Cada 2 Nominas'
+		));
+
+		$edit->observ1 = new inputField('Observaciones','observ1');
+		$edit->observ1->rule='';
+		$edit->observ1->size =48;
+		$edit->observ1->maxlength =46;
+
+		$edit->oberv2 = new inputField('Obervaciones 2','oberv2');
+		$edit->oberv2->rule='';
+		$edit->oberv2->size =48;
+		$edit->oberv2->maxlength =46;
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do){
+		$do->error_message_ar['pre_del']='';
+		return false;
+	}
+
+	function _post_insert($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits $primary ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
+	function _post_delete($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Elimino $this->tits $primary ");
+	}
 
 	function grid(){
 		$start   = isset($_REQUEST['start'])  ? $_REQUEST['start']   :  0;
@@ -443,7 +636,7 @@ class Pres extends Controller {
 		$this->db->_protect_identifiers=false;
 		$this->db->select('*');
 		$this->db->from('pres');
-		if (strlen($where)>1) $this->db->where($where, NULL, FALSE); 
+		if (strlen($where)>1) $this->db->where($where, NULL, FALSE);
 
 		$sort = json_decode($sort, true);
 		for ($i=0;$i<count($sort);$i++) {
@@ -458,239 +651,12 @@ class Pres extends Controller {
 		echo '{success:true, message:"Loaded data" ,results:'. $results.', data:'.json_encode($arr).'}';
 	}
 
-	function crear() {
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-		$codigo   = $data['data']['codigo'];
-		$fecha    = $data['data']['fecha'];
-		
-		$campos['nombre']  = $this->datasis->dameval("SELECT CONCAT(TRIM(nombre),' ',TRIM(apellido)) nombre FROM pers WHERE codigo='$codigo'");
-		
-		unset($campos['id']);
-		$mHay = $this->datasis->dameval("SELECT count(*) FROM pres WHERE codigo='$codigo' AND fecha='$fecha' ");
-		if  ( $mHay > 0 ){
-			echo "{ success: false, message: 'Ya existe un registro igual para ese trabajador $codigo fecha $fecha'}";
-		} else {
-			$mSQL = $this->db->insert_string("pres", $campos );
-			$this->db->simple_query($mSQL);
-			logusu('pres',"PRESTAMO DE NOMINA $codigo/$fecha CREADO");
-			echo "{ success: true, message: ".$data['data']['codigo']."}";
+	function instalar(){
+		$campos=$this->db->list_fields('pres');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE pres DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE pres ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE pres ADD UNIQUE INDEX cliente (cod_cli, tipo_doc, numero )');
 		}
-	}
-
-	function modificar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-		$codigo   = $campos['codigo'];
-		$concepto = $campos['concepto'];
-
-		$campos['nombre']  = $this->datasis->dameval("SELECT CONCAT(TRIM(nombre),' ',TRIM(apellido)) nombre FROM pers WHERE codigo='$codigo'");
-		$campos['descrip'] = $this->datasis->dameval("SELECT descrip FROM conc WHERE concepto='$concepto'");
-
-		unset($campos['codigo']);
-		unset($campos['concepto']);
-		unset($campos['id']);
-
-		$mSQL = $this->db->update_string("asig", $campos,"id='".$data['data']['id']."'" );
-		$this->db->simple_query($mSQL);
-		logusu('pres',"PRESTAMO DE NOMINA ".$data['data']['id']." MODIFICADO");
-		echo "{ success: true, message: 'Prestamo de nomina Modificado '}";
-	}
-
-	function eliminar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos= $data['data'];
-
-		$departa = $data['data']['departa'];
-		
-		// VERIFICAR SI PUEDE
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM pers WHERE depto='$departa'");
-
-		if ($check > 0){
-			echo "{ success: false, message: 'Prestamo de nomina, no puede ser Borrado'}";
-		} else {
-			$this->db->simple_query("DELETE FROM depa WHERE departa='$departa'");
-			logusu('pres',"PRESTAMO DE NOMINA $departa ELIMINADO");
-			echo "{ success: true, message: 'Prestamo de nomina Eliminado'}";
-		}
-	}
-
-
-
-//****************************************************************
-//
-//
-//
-//****************************************************************
-	function presextjs(){
-		$encabeza='DESCUENTO DE PRESTAMOS POR NOMINA';
-		$listados= $this->datasis->listados('pres');
-		$otros=$this->datasis->otros('pres', 'pres');
-
-		$urlajax = 'nomina/pres/';
-		$variables = "var mcodigo = '';";
-
-		$funciones = "";
-		
-		$valida = "
-		{ type: 'length', field: 'codigo', min:  1 }
-		";
-
-		$columnas = "
-		{ header: 'Codigo',      width:  60, sortable: true, dataIndex: 'codigo',   field: { type: 'textfield' }, filter: { type: 'string' }}, 
-		{ header: 'Nombre',      width: 220, sortable: true, dataIndex: 'nombre',   field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'Fecha',       width:  70, sortable: true, dataIndex: 'fecha',    field: { type: 'date'      }, filter: { type: 'date'   }},
-		{ header: 'Cliente',     width:  60, sortable: true, dataIndex: 'cod_cli',  field: { type: 'textfield' }, filter: { type: 'string' }}, 
-		{ header: 'Tipo',        width:  40, sortable: true, dataIndex: 'tipo_doc', field: { type: 'textfield' }, filter: { type: 'string' }}, 
-		{ header: 'Numero',      width:  60, sortable: true, dataIndex: 'numero',   field: { type: 'textfield' }, filter: { type: 'string' }}, 
-		{ header: 'Monto',       width: 120, sortable: true, dataIndex: 'monto',    field: { type: 'numeric'   }, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00') },
-		{ header: 'A partir',    width:  70, sortable: true, dataIndex: 'apartir',  field: { type: 'date'      }, filter: { type: 'date'   }},
-		{ header: 'Cuota',       width: 120, sortable: true, dataIndex: 'cuota',    field: { type: 'numeric'   }, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00') },
-		{ header: 'Observacion', width: 220, sortable: true, dataIndex: 'observ1',  field: { type: 'textfield' }, filter: { type: 'string' }},
-	";
-
-		$campos = "'id', 'codigo', 'nombre', 'fecha','cod_cli', 'tipo_doc', 'numero', 'monto','apartir','cuota','nroctas','cadano','observ1', 'oberv2'";
-		$filtros = "var filters = { ftype: 'filters',encode: 'json', local: false }; ";
-		
-		$camposforma = "
-				{
-						frame: false,
-						border: false,
-						labelAlign: 'right',
-						defaults: { xtype:'fieldset', labelWidth:70 },
-						style:'padding:4px',
-						items:[	
-							{
-								xtype: 'combo',
-								fieldLabel: 'Trabajador',
-								name: 'codigo',
-								mode: 'remote',
-								hideTrigger: true,
-								typeAhead: true,
-								forceSelection: true,
-								valueField: 'item',
-								displayField: 'valor',
-								store: persStore,
-								width: 410,
-								id: 'codigo',
-								listeners: { select: function(combo, record, index){
-									var sele   = combo.getValue();
-									var i = 0;
-									var msueldo = 0;
-									for ( i=0; i < combo.store.count();i=i+1 ){
-										if ( combo.store.getAt(i).get('item') == sele ){
-											msueldo=combo.store.getAt(i).get('sueldo');
-										}
-									}
-									Ext.getCmp('sueldoa').setValue(msueldo);
-									Ext.getCmp('sueldo').setValue(msueldo);
-									
-									
-								}}
-							}
-						]
-				},{
-						layout: 'column',
-						frame: false,
-						border: false,
-						labelAlign: 'right',
-						defaults: {xtype:'fieldset', labelWidth: 80  },
-						style:'padding:4px',
-						items: [
-							{ xtype: 'datefield',   fieldLabel: 'Fecha',       name: 'fecha', width:180, format: 'd/m/Y', submitFormat: 'Y-m-d', labelWidth: 40 },
-							{ xtype: 'textfield',   fieldLabel: 'Enlace Administrativo',     name: 'cod_cli',   width:230, allowBlank: true, labelWidth: 140 },
-							{ xtype: 'textfield',   fieldLabel: 'Tipo',        name: 'tipo_doc',  width: 80, allowBlank: true, labelWidth: 40 },
-							{ xtype: 'textfield',   fieldLabel: 'Numero',      name: 'numero',    width:150, allowBlank: true, labelWidth: 60 },
-							{ xtype: 'numberfield', fieldLabel: 'Monto',       name: 'monto',     width:180, hideTrigger: true, fieldStyle: 'text-align: right',  renderer : Ext.util.Format.numberRenderer('0,000.00'), id: 'monto', labelWidth: 60  },
-							{ xtype: 'numberfield', fieldLabel: 'Cuota',       name: 'cuota',     width:140, hideTrigger: true, fieldStyle: 'text-align: right',  renderer : Ext.util.Format.numberRenderer('0,000.00'), labelWidth: 40  },
-							{ xtype: 'datefield',   fieldLabel: 'A partir de', name: 'apartir',   width:160, format: 'd/m/Y', submitFormat: 'Y-m-d', labelWidth: 70 },
-							{ xtype: 'numberfield', fieldLabel: 'Frec.',  name: 'cadano',    width: 90, hideTrigger: false, fieldStyle: 'text-align: right',  renderer : Ext.util.Format.numberRenderer('0,000.00'), labelWidth: 40  },
-							{ xtype: 'textfield',   fieldLabel: 'Observacion', name: 'observ1',   width:410, allowBlank: true }
-						]
-				}
-		";
-
-
-		$stores = "
-var persStore = new Ext.data.Store({
-	fields: [ 'item', 'valor', 'sueldo'],
-	autoLoad: false,
-	autoSync: false,
-	name: 'Pers',
-	pageSize: 50,
-	pruneModifiedRecords: true,
-	totalProperty: 'results',
-	proxy: {
-		type: 'ajax',
-		url : urlApp + 'nomina/pers/persbusca',
-		extraParams: {  'codigo': mcodigo, 'origen': 'store' },
-		reader: {
-			type: 'json',
-			totalProperty: 'results',
-			root: 'data'
-		}
-	},
-	method: 'POST'
-});
-		";
-
-		$titulow = 'Asignaciones de Nomina';
-
-		$dockedItems = "
-				{ iconCls: 'icon-reset', itemId: 'close', text: 'Cerrar',   scope: this, handler: this.onClose },
-				{ iconCls: 'icon-save',  itemId: 'save',  text: 'Guardar',  disabled: false, scope: this, handler: this.onSave }
-		";
-
-		$winwidget = "
-				closable: false,
-				closeAction: 'destroy',
-				width: 450,
-				height: 260,
-				resizable: false,
-				modal: true,
-				items: [writeForm],
-				listeners: {
-					beforeshow: function() {
-						var form = this.down('writerform').getForm();
-						this.activeRecord = registro;
-						if (registro) {
-							mcodigo  = registro.data.codigo;
-							persStore.proxy.extraParams.codigo = mcodigo ;
-							persStore.load({ params: { 'codigo':  registro.data.cliente, 'origen': 'beforeform' } });
-							form.loadRecord(registro);
-							form.findField('codigo').setReadOnly(true);
-						} else {
-							form.findField('codigo').setReadOnly(false);
-							mcodigo  = '';
-						}
-					}
-				}
-";
-		$features = "features: [ filters],";
-
-		$data['encabeza']    = $encabeza;
-		$data['listados']    = $listados;
-		$data['otros']       = $otros;
-		$data['urlajax']     = $urlajax;
-		$data['variables']   = $variables;
-		$data['funciones']   = $funciones;
-		$data['valida']      = $valida;
-		$data['stores']      = $stores;
-		$data['columnas']    = $columnas;
-		$data['campos']      = $campos;
-		$data['camposforma'] = $camposforma;
-		$data['titulow']     = $titulow;
-		$data['dockedItems'] = $dockedItems;
-		$data['winwidget']   = $winwidget;
-		$data['features']    = $features;
-		$data['filtros']     = $filtros;
-		
-		$data['title']  = heading('Departamentos de Nomina');
-		$this->load->view('extjs/extjsven',$data);
 	}
 }
-
-?>
