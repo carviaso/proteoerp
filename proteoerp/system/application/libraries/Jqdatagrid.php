@@ -1,4 +1,4 @@
-<?php 
+<?php
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
@@ -18,7 +18,7 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  * http://www.trirand.com/jqgridwiki/doku.php?id=wiki:common_rules
  *
  * example:
- * 
+ *
  *  $this->load->library('datagrid');
     $grid  = $this->datagrid;
 
@@ -57,7 +57,7 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  *
  * controller
  /**
- * 
+ *
  #Get data result as json
 
 public function getData()
@@ -79,7 +79,7 @@ public function setData()
     $response         = $grid->operations('crud_test','id');
 }
 
- * 
+ *
  */
 
 class Jqdatagrid
@@ -133,7 +133,7 @@ class Jqdatagrid
 
 	#muestra la barra de paginacion
 	private $showpager = true;
-    
+
 	# Ajustar al tamano
 	private $shrinkToFit = 'true';
 
@@ -147,9 +147,9 @@ class Jqdatagrid
 	private $_gridname;
 
 	private $grouping = 'false';
-	
+
 	private $groupingView = '';
-	
+
 	private $filterToolbar = false;
 
 	private $Toolbar = '';
@@ -157,11 +157,11 @@ class Jqdatagrid
 	private $FormOptionsE = '-';
 
 	private $FormOptionsA = '-';
-	
+
 	private $viewrecords = true;
-	
+
 	private $rowList = "[20,30,50,100]";
-	
+
 	private $hiddengrid = false;
 
 	private $afterSubmit = '-';
@@ -169,7 +169,7 @@ class Jqdatagrid
 	private $afterPager  = '';
 
 	private $loadComplete  = '';
-	
+
 	private $gridComplete  = '';
 
 
@@ -181,13 +181,13 @@ class Jqdatagrid
 	private $multiSelect = false;
 
 	private $onSelectRow = '';
-	
-	private $afterInsertRow = '';  
+
+	private $afterInsertRow = '';
 
 	private $ondblClickRow = 'i';
 
 	private $onClick = '';
-	
+
 	private $BarOptions = '';
 
 	private $wpadicional = '';
@@ -196,7 +196,7 @@ class Jqdatagrid
 	function __construct ()
 	{
 		$this->CI =& get_instance();
-		//if(!isset($this->CI->session)) $this->CI->load->library('session');
+		if(!isset($this->CI->session)) $this->CI->load->library('session');
 		if(empty($this->_gridname)){
 			$this->_gridname = '_' .  rand(1122,99999999);
 		}
@@ -219,7 +219,7 @@ class Jqdatagrid
 	* @param string $name nombre clase
 	* @param <type> $args elementos que recibe la clase
 	* @return void
-	* 
+	*
 	*/
 	function __call ($name, $args)
 	{
@@ -257,7 +257,7 @@ class Jqdatagrid
 	{
 		$this->_buttons['edit'] = "'{$element}'";
 	}
-    
+
 	/**
 	*Show or not, the Delete button
 	* @param bool $element
@@ -291,7 +291,7 @@ class Jqdatagrid
 
 	/**
 	* Adiciona al wp
-	* 
+	*
 	*/
 	public function setWpAdicional($element)
 	{
@@ -374,7 +374,7 @@ class Jqdatagrid
 	}
 
 	//******************************************************************
-	// 
+	//
 	public function setBarOptions($element)
 	{
 		$this->BarOptions = $element;
@@ -382,14 +382,14 @@ class Jqdatagrid
 
 
 	//******************************************************************
-	// 
+	//
 	public function setLoadComplete($element)
 	{
 		$this->loadComplete = $element;
 	}
 
 	//******************************************************************
-	// 
+	//
 	public function setGridComplete($element)
 	{
 		$this->gridComplete = $element;
@@ -501,7 +501,7 @@ class Jqdatagrid
 	* @return void
 	*/
 	public function setXml($element)
-	{ 
+	{
 		$this->_export['xml'] = "{$element}";
 	}
 
@@ -622,13 +622,13 @@ class Jqdatagrid
 
 
 	/**
-	* Grouping 
+	* Grouping
 	* @param text $shrink registres
 	*/
 	public function setGrouping($grupo)
 	{
 		$grupo = strtolower($grupo);
-		
+
 		if ( empty($grupo) ){
 			$this->grouping = 'false';
 		} else {
@@ -707,12 +707,12 @@ class Jqdatagrid
 		}else{
 			$html  .= $margen.",autowidth:$this->autowidth\r\n";
 		}
-		
+
 		if(false == empty($this->sortname)){
 			$html .= $margen.",sortname: '$this->sortname'\r\n";
 			$html .= $margen.",sortorder: '$this->sorttype'\r\n";
 		}
-		
+
 		if($this->height){
 			$html  .= $margen.",height:'$this->height'\r\n";
 		} else {
@@ -725,14 +725,14 @@ class Jqdatagrid
 
 		if($this->title){
 			$html .= $margen.",caption:'{$this->title}'\r\n";
-		} 
+		}
 
 		if($this->viewrecords == false ){
 			$html .= $margen.",viewrecords: false\r\n";
 			$html .= $margen.",pgbuttons: false\r\n";
 			$html .= $margen.",rowList: []\r\n";
 			$html .= $margen.",pgtext: null\r\n";
-		} else 
+		} else
 			$html .= $margen.",rowList: ".$this->rowList."\r\n";
 
 		if ($this->onSelectRow)
@@ -741,10 +741,10 @@ class Jqdatagrid
 		if ($this->afterInsertRow)
 			$html .= $margen.",afterInsertRow: ".$this->afterInsertRow."\r\n";
 
-		if ($this->loadComplete) 
+		if ($this->loadComplete)
 			$html .= $margen.",loadComplete: ".$this->loadComplete."\r\n";
 
-		if ($this->gridComplete) 
+		if ($this->gridComplete)
 			$html .= $margen.",gridComplete: ".$this->gridComplete."\r\n";
 
 		if($this->multiSelect == true ){
@@ -760,7 +760,7 @@ class Jqdatagrid
 		if ( strlen($this->Toolbar)>2 ){
 			$html .= $margen.",toolbar: [$this->Toolbar]\r\n";
 		}
-		
+
 		$querydata = array( 'dtgFields' => $this->_field );
 		$this->CI->session->set_userdata($querydata);
 
@@ -857,16 +857,16 @@ class Jqdatagrid
 			return;
 		}';
 	}
-	
+
 	$this->return['ondblClickRow'] = $this->ondblClickRow;
-	
+
 	$this->return['onClick'] = $this->onClick;
 
 
         #paginador
 		if($this->showpager){
 			$bar   = '';
-			$bar  .= "	
+			$bar  .= "
 	$(\"#newapi{$this->_gridname}\").jqGrid('navGrid', '#pnewapi{$this->_gridname}', {
 		view:   {$this->_buttons['view']},
 		edit:   {$this->_buttons['edit']},
@@ -876,7 +876,7 @@ class Jqdatagrid
 
 			$bar  .= $margen.$this->BarOptions;
 
-			$bar  .= "	
+			$bar  .= "
 	} \n";
 
 			if ( $this->FormOptionsE=='' ){
@@ -906,8 +906,8 @@ class Jqdatagrid
 				$bar   .= $this->afterSubmit;
 				$bar   .= "}}\r\n";
 			}
-			
-		
+
+
 			$bar   .= "	,{sopt:['eq','cn','ge','le'], overlay:false,mtype: 'POST', multipleSearch:true }"; //search options
 			if ( $this->afterPager == '' )
 				$bar .= "\r\n";
@@ -928,7 +928,7 @@ class Jqdatagrid
 		if($loadbutton){
 			$bar .= "dtgLoadButton();\r\n";
 		}
-            
+
 		if ($this->filterToolbar){
 			$bar .= "\t$(\"#newapi{$this->_gridname}\").jqGrid('filterToolbar');\r\n";
 			$this->return['menosalto'] = 115;
@@ -979,7 +979,7 @@ class Jqdatagrid
 		$filters    = $this->CI->input->get_post('filters');
 
 		$comodin = $this->CI->datasis->traevalor('COMODIN');
-		
+
 		if ( empty($sortby) )  {
 			$sortby  = $orden;
 			$sortdir = $orddire;
@@ -1071,7 +1071,7 @@ class Jqdatagrid
 			}
 		}
 
-		
+
 		if ( !empty($filters) ) {
 			$mQUERY = $this->constructWhere($filters);
 			foreach($mQUERY as $busca){
@@ -1099,7 +1099,7 @@ class Jqdatagrid
 			$this->CI->db->limit( $limit, $limitstart );
 		}
 		if(false == empty($joinmodel)){
-			if(is_array($joinmodel)){ 
+			if(is_array($joinmodel)){
 				foreach($joinmodel as $model){
 					if(isset($model['table']) && isset($model['join'])){
 						$this->CI->db->join($model['table']/*tablename*/, $model['join']/*join fields*/, (isset($model['type']))?$model['type']:'inner'/*join type*/);
@@ -1111,13 +1111,13 @@ class Jqdatagrid
 							if(isset($model['fields']) && false == empty($model['fields'])){
 								foreach($model['fields'] as $field){
 									$fields2[] = "{$model['table']}.{$field}";
-								} 
+								}
 							}
 						}
 					}
 				}
 			}
-			
+
 			if(empty($fields) && $prefix){
 				$fieldstable = $this->CI->db->list_fields($table);
 				foreach($fieldstable as $field){
@@ -1131,13 +1131,13 @@ class Jqdatagrid
 					}
 				}
 			}
-			
+
 			$fields = array_merge($fields, $fields2);
-			
+
 			$this->CI->db->select($fields);
 			$this->CI->db->from($table);
 			$rs = $this->CI->datasis->codificautf8($this->CI->db->get()->result_array());
-		
+
 		}else{
 			$rs = $this->CI->datasis->codificautf8($this->CI->db->get()->result_array());;
 		}
@@ -1147,15 +1147,15 @@ class Jqdatagrid
 			$lq = str_replace('\%','%',$this->CI->db->last_query());
 			$rs = $this->CI->datasis->codificautf8($this->CI->db->query($lq)->result_array());;
 		}
-		
-		
+
+
 		memowrite("ar".$this->CI->db->last_query(),'JQGETDATA');
 		$queryString = $this->CI->db->last_query();
-		
+
 		$querydata = array( 'dtgQuery' => $this->CI->db->last_query() );
-		
+
 		$this->CI->session->set_userdata($querydata);
-		
+
 		$response['data'] = $rs;
 		return $response;
 	}
@@ -1178,17 +1178,17 @@ class Jqdatagrid
 
 		$page       = $this->CI->input->get_post('page');
 		$filters    = $this->CI->input->get_post('filters');
-		
+
 		$query = $this->CI->db->query($mSQL);
 		$rs = $this->CI->datasis->codificautf8($query->result_array());;
-		
+
 		//echo $this->CI->db->last_query();
 		$queryString = $this->CI->db->last_query();
-	
+
 		$querydata = array( 'dtgQuery'  => $this->CI->db->last_query() );
-		
+
 		$this->CI->session->set_userdata($querydata);
-		
+
 		$response['data'] = $rs;
 		return $response;
 	}
@@ -1268,10 +1268,10 @@ class Jqdatagrid
 						'en'=>" NOT LIKE ",
 						'cn'=>" LIKE " ,
 						'nc'=>" NOT LIKE " );
-						
+
 		$operador = array(" <> "," < "," <= "," > "," >= ");
-						
-						
+
+
 		if ($s) {
 			$jsona = json_decode($s,true);
 			if( is_array($jsona) ){
@@ -1283,7 +1283,7 @@ class Jqdatagrid
 					$op    = $val['op'];
 					$v     = $val['data'];
 					if($v && $op) {
-						if (in_array( $qopers[$op], $operador)) { 
+						if (in_array( $qopers[$op], $operador)) {
 							$mWHERE[] = array( trim($qopers[$op]), $field.$qopers[$op], $v, $gopr );
 						} else {
 							$mWHERE[] = array( trim($qopers[$op]), $field, $v, 'both', $gopr );
@@ -1359,7 +1359,7 @@ class Jqdatagrid
 		$salida = '
 		"dataInit":function(el){
 			setTimeout(function(){
-				if(jQuery.ui) { 
+				if(jQuery.ui) {
 					if(jQuery.ui.autocomplete){
 						jQuery(el).autocomplete({
 							"appendTo": '.$append.',
@@ -1385,7 +1385,7 @@ class Jqdatagrid
 							}
 						});
 						jQuery(el).autocomplete("widget").css("font-size","11px");
-					} 
+					}
 				} else { $.prompt("Falta jQuery UI") }
 			},200);
 		}';
@@ -1408,19 +1408,19 @@ class Jqdatagrid
 						if ( substr($valor,0,1) == '%' || substr($valor,0,1) == '*' ) {
 							$valor = substr($valor,1);
 							$mWhere[] = array('like', $campo->name, $valor, 'both' );
-						} else 
+						} else
 							$mWhere[] = array('like', $campo->name, $valor, 'after' );
-						
+
 					} elseif ( $campo->type == 'date' || $campo->type == 'timestamp' ) {
 						$mWhere[] = array('', $campo->name, $valor, '' );
-						
+
 					} elseif ( $campo->type == 'real' || $campo->type == 'int'  ) {
 						$valor= trim($valor);
 						if ( in_array(substr($valor,0,2), array('>=','<=','<>','!=') ) )  {
 							$mWhere[] = array(substr($valor,0,2), $campo->name, substr($valor,2), '' );
 						} elseif ( in_array(substr($valor,0,1), array('>','<') ) ) {
 							$mWhere[] = array(substr($valor,0,1), $campo->name, substr($valor,1), '' );
-						} else 
+						} else
 							$mWhere[] = array('', $campo->name, $valor, '' );
 
 					} elseif ( $campo->type == 'blob' ) {
@@ -1440,7 +1440,7 @@ class Jqdatagrid
 	*/
 	function geneSqlWhere($tabla, $join ){
 		$campost = $this->CI->db->field_data($tabla);
-		
+
 		$campos = array();
 		foreach( $campost as $ca ){
 			$campos[] = array("tabla"=>$tabla, "name"=>$ca->name, "type"=>$ca->type, "max_length"=> $ca->max_length, "primary_key"=>$ca->primary_key);
@@ -1466,17 +1466,17 @@ class Jqdatagrid
 							$mWhere[] = array('like', $campo['tabla'].'.'.$campo['name'], $valor, 'both' );
 						} else
 							$mWhere[] = array('like', $campo['tabla'].'.'.$campo['name'], $valor, 'after' );
-						
+
 					} elseif ( $campo['type'] == 'date' || $campo['type'] == 'timestamp' ) {
 						$mWhere[] = array('', $campo['tabla'].'.'.$campo['name'], $valor, '' );
-						
+
 					} elseif ( $campo['type'] == 'real' || $campo['type'] == 'int'  ) {
 						$valor= trim($valor);
 						if ( in_array(substr($valor,0,2), array('>=','<=','<>','!=') ) )  {
 							$mWhere[] = array(substr($valor,0,2), $campo['tabla'].'.'.$campo['name'], substr($valor,2), '' );
 						} elseif ( in_array(substr($valor,0,1), array('>','<') ) ) {
 							$mWhere[] = array(substr($valor,0,1), $campo['tabla'].'.'.$campo['name'], substr($valor,1), '' );
-						} else 
+						} else
 							$mWhere[] = array('', $campo['tabla'].'.'.$campo['name'], $valor, '' );
 
 					} elseif ( $campo->type == 'blob' ) {
@@ -1494,7 +1494,7 @@ class Jqdatagrid
 	/***********************************************************************
 	* Export data to pdf or csv
 	* @param String $type pdf/csv
-	* @return <type> 
+	* @return <type>
 	*/
 	function export()
 	{
@@ -1630,8 +1630,8 @@ class Jqdatagrid
 
 		$wbotones = "<table id='west-grid' align='center'>\n";
 		foreach( $this->Wbotones as $bt  ){
-			if ( !isset($bt['height'])) $bt['height'] = 18; 
-			if ( !isset($bt['tema'])) $bt['tema'] = 'tema1'; 
+			if ( !isset($bt['height'])) $bt['height'] = 18;
+			if ( !isset($bt['tema'])) $bt['tema'] = 'tema1';
 			$wbotones .= '
 	<tr>
 		<td style="vertical-align:top;"><div class="'.$bt["tema"].' botones"><a style="width:190px;text-align:left;vertical-align:top;" href="#" id="'.$bt["id"].'">'.img(array('src' => $bt["img"], 'height' => $bt['height'], 'alt' => $bt["alt"], 'title' => $bt["alt"], 'border'=>'0')).'&nbsp;&nbsp;&nbsp;&nbsp;'.$bt["label"].'</a></div></td>
@@ -1693,7 +1693,7 @@ class Jqdatagrid
 			});
 			';
 		}
-		
+
 
 		return $readyLayout;
 	}
@@ -1777,7 +1777,7 @@ class Jqdatagrid
 								var json = JSON.parse(r);
 								if (json.status == "A"){
 									$.prompt("<h1>Registro Guardado</h1>",{
-										submit: function(e,v,m,f){  
+										submit: function(e,v,m,f){
 											setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
 										}}
 									);
@@ -1832,7 +1832,7 @@ class Jqdatagrid
 	//******************************************************************
 	// Dialogo fborra
 	//
-	function bsfborra( $ngrid, $height = "300", $width = "400" ){  
+	function bsfborra( $ngrid, $height = "300", $width = "400" ){
 		$bodyscript = '
 		$("#fborra").dialog({
 			autoOpen: false, height: '.$height.', width: '.$width.', modal: true,
@@ -1856,7 +1856,7 @@ class Jqdatagrid
 	//******************************************************************
 	// Agregar
 	//
-	function bsadd( $modulo, $url ){  
+	function bsadd( $modulo, $url ){
 		$bodyscript = '
 		function '.$modulo.'add(){
 			$.post("'.site_url($url.'dataedit/create').'",
@@ -1871,7 +1871,7 @@ class Jqdatagrid
 	//******************************************************************
 	//Editar
 	//
-	function bsedit( $modulo, $ngrid, $url ){  
+	function bsedit( $modulo, $ngrid, $url ){
 		$bodyscript = '
 		function '.$modulo.'edit(){
 			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -1889,7 +1889,7 @@ class Jqdatagrid
 
 	//******************************************************************
 	// Mostrar
-	function bsshow( $modulo, $ngrid, $url ){  
+	function bsshow( $modulo, $ngrid, $url ){
 		$bodyscript = '
 		function '.$modulo.'show(){
 			var id  = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -1910,7 +1910,7 @@ class Jqdatagrid
 
 	//******************************************************************
 	// Borrar
-	function bsdel( $modulo, $ngrid, $url ){  
+	function bsdel( $modulo, $ngrid, $url ){
 		$bodyscript = '
 		function '.$modulo.'del() {
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -1941,7 +1941,7 @@ class Jqdatagrid
 	}
 
 
-	
+
 }
 /* End of file datagrid.php */
 /* Location: ./system/application/libraries/Datagrid.php */
