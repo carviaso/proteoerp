@@ -397,7 +397,9 @@ class CI_Session {
 			$this->CI->db->delete($this->sess_table_name);
 		}
 
-		header_remove('Set-Cookie');
+		if(function_exists('header_remove')){
+			header_remove('Set-Cookie');
+		}
 
 		// Kill the cookie
 		setcookie(
@@ -653,7 +655,9 @@ class CI_Session {
 			$cookie_data = $cookie_data.md5($cookie_data.$this->encryption_key);
 		}
 
-		header_remove('Set-Cookie');
+		if(function_exists('header_remove')){
+			header_remove('Set-Cookie');
+		}
 
 		// Set the cookie
 		setcookie(

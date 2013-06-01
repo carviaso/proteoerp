@@ -291,10 +291,10 @@ class Reparto extends Controller {
 
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);  //Por Defecto
-		
+
 		// Dialogo fedita
 		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, "300", "550" );  //Por Defecto
-		
+
 		// Dialogo fshow
 		$bodyscript .= $this->jqdatagrid->bsfshow( "250", "500" );  //Por Defecto
 
@@ -363,7 +363,7 @@ class Reparto extends Controller {
 	function factuforma( $id = 0 ){
 		$msalida = '<script type="text/javascript">'."\n";
 		$msalida .= 'var mid='.$id.";\n";
-	
+
 		$msalida .= '
 		$("#bpos1").jqGrid({
 			ajaxGridOptions: { type: "POST"},
@@ -374,7 +374,7 @@ class Reparto extends Controller {
 			datatype: "json",
 			rowNum:12,
 
-			height: 280, 
+			height: 280,
 			pager: \'#pbpos1\',
 			rowList:[],
 			toolbar: [false],
@@ -395,7 +395,7 @@ class Reparto extends Controller {
 		});
 		$("#bpos1").jqGrid(\'navGrid\',"#pbpos1",{edit:false, add:false, del:false, search: true });
 		$("#bpos1").jqGrid(\'filterToolbar\');
-		
+
 		function fsele(el, val, opts){
 			var meco=\'<div><img src="'.base_url().'images/circuloverde.png" border="0" /></div>\';
 			if ( el == "0" ){
@@ -418,16 +418,16 @@ class Reparto extends Controller {
 			}
 		}
 		';
-	
-		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$id"); 
+
+		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$id");
 		if( !$peso ) $peso = "0.00";
 
-		$cana = $this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE peso IS NOT NULL AND reparto=$id"); 
+		$cana = $this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE peso IS NOT NULL AND reparto=$id");
 		if( !$cana ) $cana = "0.00";
 
 		$reg  = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=$id");
 		$msalida .= "\n</script>\n";
-		
+
 		$msalida .= "<table width='100%'><tr><td>
 		<div class=\"tema1\"><table id=\"bpos1\"></table></div>
 		<div id='pbpos1'></div>\n
@@ -462,7 +462,7 @@ class Reparto extends Controller {
 		</table>
 		</td></tr>
 		</table>\n";
-	
+
 		echo $msalida;
 
 	}
@@ -471,25 +471,27 @@ class Reparto extends Controller {
 	// Agrega Factura
 	//
 	function agregaf($reparto, $factura){
-		$actual = $this->datasis->dameval("SELECT reparto FROM sfac WHERE id=$factura");
+		$dbfactura= $this->db->escape($factura);
+		$dbreparto= $this->db->escape($reparto);
+		$actual   = $this->datasis->dameval("SELECT reparto FROM sfac WHERE id=${dbfactura}");
 		if ( $actual == 0 ) {
-			$mSQL = "UPDATE sfac SET reparto=$reparto WHERE id=$factura";
+			$mSQL = "UPDATE sfac SET reparto=${dbreparto} WHERE id=${dbfactura}";
 			$this->db->query($mSQL);
 			$msj = 'Factura Agregada';
 		} else {
-			$mSQL = "UPDATE sfac SET reparto=0 WHERE id=$factura";
+			$mSQL = "UPDATE sfac SET reparto=0 WHERE id=${dbfactura}";
 			$this->db->query($mSQL);
 			$msj = 'Factura Desmarcada';
 		}
-		$row = $this->datasis->damereg("SELECT SUM(peso) peso, count(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=$reparto"); 
+		$row = $this->datasis->damereg("SELECT SUM(peso) peso, COUNT(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=${dbreparto}");
 		$peso = $row['peso'];
 		$cana = $row['cana'];
-		
+
 		$this->db->where('id',$reparto);
-		$this->db->update('reparto',array("peso"=>$row['peso'], "facturas"=>$row['cana']) );
+		$this->db->update('reparto',array('peso'=>$row['peso'], 'facturas'=>$row['cana']) );
 
 		echo '{ "mensaje": "'.$msj.'", "peso": "'.$peso.'", "cantidad": "'.$cana.'"  }';
-		
+
 	}
 
 	//******************************************************************
@@ -520,7 +522,7 @@ class Reparto extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('id');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
@@ -550,7 +552,7 @@ class Reparto extends Controller {
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
+			'formoptions'   => '{ label:"Fecha",size:12 }'
 		));
 
 		$grid->addField('retorno');
@@ -562,7 +564,7 @@ class Reparto extends Controller {
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
+			'formoptions'   => '{ label:"Fecha",size:12 }'
 		));
 
 		$grid->addField('chofer');
@@ -700,7 +702,7 @@ class Reparto extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: repartoadd, editfunc: repartoedit, delfunc: repartodel, viewfunc: repartoshow");
+		$grid->setBarOptions('addfunc: repartoadd, editfunc: repartoedit, delfunc: repartodel, viewfunc: repartoshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -737,7 +739,7 @@ class Reparto extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = '??????';
 		$check  = 0;
 
 		unset($data['oper']);
@@ -948,7 +950,7 @@ class Reparto extends Controller {
 					}
 				} else {
 					$.prompt("Seleccione un Reparto");
-				} 
+				}
 			}
 		');
 
@@ -970,18 +972,20 @@ class Reparto extends Controller {
 
 	function quita($id){
 		// Quita la vaina
-		$reparto = $this->datasis->dameval("SELECT reparto FROM sfac    WHERE id=$id");
-		$tipo    = $this->datasis->dameval("SELECT tipo    FROM reparto WHERE id=$reparto");
+		$dbid=$this->db->escape($id);
+		$reparto  = $this->datasis->dameval("SELECT reparto FROM sfac    WHERE id=${dbid}");
+		$dbreparto= $this->db->escape($reparto);
+		$tipo     = $this->datasis->dameval("SELECT tipo    FROM reparto WHERE id=${dbreparto}");
 		if ( $tipo == 'E'){
 			$this->db->where('id',$id);
-			$this->db->update('sfac',array( "reparto" => 0 ));
-			$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS('',eliminadas,".$reparto.") WHERE id=$reparto");
+			$this->db->update('sfac',array( 'reparto' => 0 ));
+			$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS('',eliminadas,".$reparto.") WHERE id=${dbreparto}");
 
-			$row = $this->datasis->damereg("SELECT SUM(peso) peso, count(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=$reparto"); 
+			$row = $this->datasis->damereg("SELECT SUM(peso) peso, COUNT(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=${dbreparto}");
 			$peso = $row['peso'];
-		
+
 			$this->db->where('id',$reparto);
-			$this->db->update('reparto',array("peso"=>$row['peso'], "facturas"=>$row['cana']) );
+			$this->db->update('reparto',array('peso'=>$row['peso'], 'facturas'=>$row['cana']) );
 
 			echo 'Factura retirada';
 
@@ -995,10 +999,11 @@ class Reparto extends Controller {
 		if ($id === 0 ){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM reparto");
 		}
-		if(empty($id)) return "";
+		if(empty($id)) return '';
+		$dbid = $this->db->escape($id);
 		//$numero   = $this->datasis->dameval("SELECT id FROM reparto WHERE id=$id");
 		$grid     = $this->jqdatagrid;
-		$mSQL     = "SELECT tipo_doc, numero, fecha, zona, peso, cod_cli, nombre, vd, totalg, almacen, id FROM sfac WHERE reparto='$id' ";
+		$mSQL     = "SELECT tipo_doc, numero, fecha, zona, peso, cod_cli, nombre, vd, totalg, almacen, id FROM sfac WHERE reparto=${dbid}";
 		$response = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
@@ -1115,7 +1120,7 @@ class Reparto extends Controller {
 
 	function _pre_insert($do){
 		$do->error_message_ar['pre_ins']='';
-		// Coloca por defecto el tipo 
+		// Coloca por defecto el tipo
 		$do->set('tipo','P');
 		return true;
 	}
@@ -1132,17 +1137,17 @@ class Reparto extends Controller {
 
 	function _post_insert($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits ${primary}");
 	}
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${primary}");
 	}
 
 	function _post_delete($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		logusu($do->table,"Elimino $this->tits ${primary}");
 	}
 
 	function instalar(){
