@@ -397,6 +397,8 @@ class CI_Session {
 			$this->CI->db->delete($this->sess_table_name);
 		}
 
+		header_remove('Set-Cookie');
+
 		// Kill the cookie
 		setcookie(
 					$this->sess_cookie_name,
@@ -650,6 +652,8 @@ class CI_Session {
 			// if encryption is not used, we provide an md5 hash to prevent userside tampering
 			$cookie_data = $cookie_data.md5($cookie_data.$this->encryption_key);
 		}
+
+		header_remove('Set-Cookie');
 
 		// Set the cookie
 		setcookie(

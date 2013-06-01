@@ -198,12 +198,14 @@ border-bottom-right-radius:5px;
 		foreach($this->cols AS $cl=>$cols){
 			echo '<th>'. htmlspecialchars($cols['titulo']).'</th>';
 
-			if($cols['align']=='C'){
-				$aalign[$cols['campo']]='center';
-			}elseif($cols['align']=='R'){
-				$aalign[$cols['campo']]='right';
-			}else{
-				$aalign[$cols['campo']]='left';
+			if(isset($cols['align'])){
+				if($cols['align']=='C'){
+					$aalign[$cols['campo']]='center';
+				}elseif($cols['align']=='R'){
+					$aalign[$cols['campo']]='right';
+				}else{
+					$aalign[$cols['campo']]='left';
+				}
 			}
 		}
 		echo '</tr>';
