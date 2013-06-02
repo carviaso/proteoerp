@@ -2029,21 +2029,29 @@ class Ajax extends Controller {
 	//  CONSULTA LA CEDULA O RIF EN INTERNET
 	//
 	function traerif(){
-		$rifci = $this->input->post('rifci');
 		$t=array(
-			'error' =>1,
-			'msj'   =>'Cedula o rif no valido',
+			'error' =>0,
+			'msj'   =>'',
 			'nombre'=>''
 		);
-
-		if($rifci == false) echo json_encode($t);
-
-		if(preg_match("/(^[VEJG][0-9]{9}[[:blank:]]*$)/", $rifci)>0){
-			$t=$this->_crif($rifci);
-		}elseif(preg_match("/(^[VE][0-9]+[[:blank:]]*$)/", $rifci)>0){
-			$t=$this->_cced($rifci);
-		}
 		echo json_encode($t);
+
+
+		//$rifci = $this->input->post('rifci');
+		//$t=array(
+		//	'error' =>1,
+		//	'msj'   =>'Cedula o rif no valido',
+		//	'nombre'=>''
+		//);
+        //
+		//if($rifci == false) echo json_encode($t);
+        //
+		//if(preg_match("/(^[VEJG][0-9]{9}[[:blank:]]*$)/", $rifci)>0){
+		//	$t=$this->_crif($rifci);
+		//}elseif(preg_match("/(^[VE][0-9]+[[:blank:]]*$)/", $rifci)>0){
+		//	$t=$this->_cced($rifci);
+		//}
+		//echo json_encode($t);
 	}
 
 	function _crif($rif){

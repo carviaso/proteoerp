@@ -589,7 +589,7 @@ class Scli extends validaciones {
 	//***********************************
 	function defgrid( $deployed = false ){
 		$i       = 1;
-		$editar  = "true";
+		$editar  = 'false';
 		$linea   = 1;
 
 		$link   = site_url('ajax/buscacpla');
@@ -660,7 +660,7 @@ class Scli extends validaciones {
 
 		$linea = $linea + 1;
 		$grid->addField('nomfis');
-		$grid->label('Razon Social');
+		$grid->label('Raz&oacute;n Social');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -698,7 +698,7 @@ class Scli extends validaciones {
 		));
 
 		$grid->addField('tiva');
-		$grid->label('Condicion');
+		$grid->label('Condici&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -736,7 +736,7 @@ class Scli extends validaciones {
 
 
 		$grid->addField('dire11');
-		$grid->label('Direccion 1');
+		$grid->label('Direcci&oacute;n 1');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -748,7 +748,7 @@ class Scli extends validaciones {
 		));
 
 		$grid->addField('credito');
-		$grid->label('Credito');
+		$grid->label('Cr&eacute;dito');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -761,7 +761,7 @@ class Scli extends validaciones {
 
 		$linea = $linea + 1;
 		$grid->addField('dire12');
-		$grid->label('Direccion 2');
+		$grid->label('Direcci&oacute;n 2');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -842,7 +842,7 @@ class Scli extends validaciones {
 		));
 
 		$grid->addField('telefono');
-		$grid->label('Telefono 1');
+		$grid->label('Tel&eacute;fono 1');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -855,7 +855,7 @@ class Scli extends validaciones {
 
 		$linea = $linea + 1;
 		$grid->addField('telefon2');
-		$grid->label('Telefono 2');
+		$grid->label('Tel&eacute;fono 2');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -866,7 +866,7 @@ class Scli extends validaciones {
 		));
 
 		$grid->addField('porvend');
-		$grid->label('Comision V %');
+		$grid->label('Comisi&oacute;n V %');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -893,7 +893,7 @@ class Scli extends validaciones {
 
 		$linea = $linea + 1;
 		$grid->addField('pais');
-		$grid->label('Pais');
+		$grid->label('Pa&iacute;s');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -918,7 +918,7 @@ class Scli extends validaciones {
 		));
 
 		$grid->addField('limite');
-		$grid->label('Limite');
+		$grid->label('L&iacute;mite');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'align'         => "'right'",
@@ -970,7 +970,7 @@ class Scli extends validaciones {
 		));
 
 		$grid->addField('porcobr');
-		$grid->label('Comision C %');
+		$grid->label('Comisi&oacute;n C %');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1033,7 +1033,7 @@ class Scli extends validaciones {
 		));
 
 		$grid->addField('fecha1');
-		$grid->label('Fecha1');
+		$grid->label('Fecha 1');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
@@ -1057,7 +1057,7 @@ class Scli extends validaciones {
 		));
 
 		$grid->addField('observa');
-		$grid->label('Observa');
+		$grid->label('Observaci&oacute;n');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1119,7 +1119,7 @@ class Scli extends validaciones {
 		));
 
 		$grid->addField('maxtole');
-		$grid->label('MaxTolera');
+		$grid->label('Tolerancia Max.');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1263,7 +1263,7 @@ class Scli extends validaciones {
 			} else {
 				//$this->db->simple_query("DELETE FROM scli WHERE id=$id ");
 				//logusu('SCLI',"Cliente $cliente ($id) ELIMINADO");
-				echo "Cliente Eliminado";
+				echo 'Cliente Eliminado';
 			}
 		};
 	}
@@ -1278,25 +1278,25 @@ class Scli extends validaciones {
 		$mcliente = '';
 		$mvalor   = 0;
 		$mmeco    = 0;
-		$mrango   = $this->datasis->traevalor("SCLIRANGO");
+		$mrango   = $this->datasis->traevalor('SCLIRANGO');
 		$mpiso    = '00000';
 		$mtecho   = 'ZZZZZ';
 
 		if ( $mrango == 'S' )
-			$mcliente = str_pad($this->_numatri($this->datasis->prox_sql("ncodcli")),5,'0',STR_PAD_LEFT);
+			$mcliente = str_pad($this->_numatri($this->datasis->prox_sql('ncodcli')),5,'0',STR_PAD_LEFT);
 		else {
 			// GENERA POR CONVERSION DE CI
 			if ( $mrifci != ''){
 				$mmeco    = substr($mrifci,2,15);
 				$mcliente = str_pad($this->_numatri($mmeco), 5, '0', STR_PAD_LEFT );
 			}else
-				$mcliente = str_pad($this->_numatri($this->datasis->prox_sql("ncodcli")),5,'0', STR_PAD_LEFT);
+				$mcliente = str_pad($this->_numatri($this->datasis->prox_sql('ncodcli')),5,'0', STR_PAD_LEFT);
 		}
 		// REVISA POR SI ESTA REPETIDO
 		while ( true ) {
 			if ($this->datasis->dameval("SELECT count(*) FROM scli WHERE cliente=".$this->db->escape($mcliente)) == 0 )
 				break;
-			$mcliente = str_pad($this->_numatri($this->datasis->prox_sql("ncodcli")),5,'0',STR_PAD_LEFT);
+			$mcliente = str_pad($this->_numatri($this->datasis->prox_sql('ncodcli')),5,'0',STR_PAD_LEFT);
 		}
 		return $mcliente;
 	}
@@ -1346,12 +1346,12 @@ class Scli extends validaciones {
 		$tipo     = $row['tipo'];
 
 		if( $credito == 'S')
-			$mcredito = "Activo";
+			$mcredito = 'Activo';
 		else
-			$mcredito = "Suspendido";
+			$mcredito = 'Suspendido';
 
 		$saldo  = 0;
-		$saldo  = $this->datasis->dameval("SELECT sum(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM smov WHERE cod_cli=".$this->db->escape($cod_cli));
+		$saldo  = $this->datasis->dameval("SELECT SUM(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM smov WHERE cod_cli=".$this->db->escape($cod_cli));
 
 		$salida = '';
 
@@ -1388,10 +1388,10 @@ class Scli extends validaciones {
 		$mSCLId=array(
 			'tabla'    => 'scli',
 			'columnas' => array(
-			'cliente'  => 'C&oacute;digo Socio',
-			'nombre'   => 'Nombre',
-			'cirepre'  => 'Rif/Cedula',
-			'dire11'   => 'Direcci&oacute;n'),
+				'cliente'  => 'C&oacute;digo Socio',
+				'nombre'   => 'Nombre',
+				'cirepre'  => 'Rif/Cedula',
+				'dire11'   => 'Direcci&oacute;n'),
 			'filtro'   => array('cliente'=>'C&oacute;digo Socio','nombre'=>'Nombre'),
 			'retornar' => array('cliente'=>'socio'),
 			'titulo'   => 'Buscar Socio');
@@ -1401,41 +1401,37 @@ class Scli extends validaciones {
 		$mCPLA=array(
 			'tabla'    => 'cpla',
 			'columnas' => array(
-			'codigo'   => 'C&oacute;digo',
-			'descrip'  => 'Descripci&oacute;n'),
+				'codigo'   => 'C&oacute;digo',
+				'descrip'  => 'Descripci&oacute;n'),
 			'filtro'   => array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
 			'retornar' => array('codigo'=>'cuenta'),
 			'titulo'   => 'Buscar Cuenta',
-			'where'    => "codigo LIKE \"$qformato\"",
-			);
+			'where'    => "codigo LIKE \"$qformato\"");
 
 		$mANTI=array(
 			'tabla'    => 'cpla',
 			'columnas' => array(
-			'codigo'   => 'C&oacute;digo',
-			'descrip'  => 'Descripci&oacute;n'),
+				'codigo'   => 'C&oacute;digo',
+				'descrip'  => 'Descripci&oacute;n'),
 			'filtro'   => array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
 			'retornar' => array('codigo'=>'canticipo'),
 			'titulo'   => 'Buscar Cuenta',
-			'where'    => "codigo LIKE \"$qformato\"",
-			);
+			'where'    => "codigo LIKE \"$qformato\"");
 
 
 		$mTARIFA=array(
 			'tabla'     => 'tarifa',
 			'columnas'  => array(
-			'id'        => 'Codigo',
-			'actividad' => 'Actividad'),
+				'id'        => 'Codigo',
+				'actividad' => 'Actividad'),
 			'filtro'   => array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
 			'retornar' => array('tarifa'=>'id'),
-			'titulo'   => 'Buscar Tarifa',
-			);
+			'titulo'   => 'Buscar Tarifa');
 
 		$boton = $this->datasis->modbus($mSCLId);
 		$bcpla = $this->datasis->modbus($mCPLA);
 		$banti = $this->datasis->modbus($mANTI,'canticipo');
 
-		$smenu['link'] = barra_menu('131');
 		$consulrif     = trim($this->datasis->traevalor('CONSULRIF'));
 		$lcuenta       = site_url('contabilidad/cpla/autocomplete/codigo');
 		$lsocio        = site_url('ventas/scli/autocomplete/cliente');
@@ -1495,7 +1491,8 @@ class Scli extends validaciones {
 				rif=$(this).val().toUpperCase();
 				$(this).val(rif);
 				if(!chrif(rif)){
-					apprise("<b>Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.</b>");
+					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
+					return true;
 				}else{
 					$.ajax({
 						type: "POST",
@@ -1515,7 +1512,6 @@ class Scli extends validaciones {
 					});
 				}
 			});
-
 		});
 
 		function formato(row) {
@@ -1571,18 +1567,15 @@ class Scli extends validaciones {
 		$do->pointer('tarifa' ,'tarifa.id =scli.tarifa' ,'`tarifa`.`actividad`  AS tactividad, `tarifa`.`minimo`  AS tminimo'  ,'left');
 
 		$edit = new DataEdit('Clientes', $do);
-		$edit->back_url = site_url('ventas/scli/filteredgrid');
-
 		$edit->pre_process('delete','_pre_del');
 		$edit->pre_process('insert','_pre_ins');
 		$edit->pre_process('update','_pre_udp');
-
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
 
 		$edit->cliente = new inputField('C&oacute;digo', 'cliente');
-		$edit->cliente->rule = 'trim|strtoupper|alpha_numeric|callback_chexiste';
+		$edit->cliente->rule = 'trim|strtoupper|alpha_dash_slash|callback_chexiste';
 		$edit->cliente->mode = 'autohide';
 		$edit->cliente->size = 9;
 		$edit->cliente->maxlength = 5;
@@ -1608,12 +1601,12 @@ class Scli extends validaciones {
 
 		$edit->grupo = new dropdownField('Grupo', 'grupo');
 		$edit->grupo->option('','Seleccione un grupo');
-		$edit->grupo->options('SELECT grupo, CONCAT(grupo," ",gr_desc) gr_desc FROM grcl ORDER BY gr_desc');
+		$edit->grupo->options('SELECT TRIM(grupo) AS grupo, CONCAT(TRIM(grupo)," ",TRIM(gr_desc)) gr_desc FROM grcl ORDER BY gr_desc');
 		$edit->grupo->rule = 'required';
 		$edit->grupo->size = 6;
 		$edit->grupo->maxlength = 4;
 		$edit->grupo->style = 'width:200px';
-		$edit->grupo->insertValue = $this->datasis->dameval('SELECT grupo FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"');
+		$edit->grupo->insertValue = $this->datasis->dameval('SELECT TRIM(grupo) FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"');
 
 		$edit->rifci = new inputField($this->pi18n->msj('rifci','RIF/CI'), 'rifci');
 		$edit->rifci->rule = 'trim|strtoupper|required|callback_chci';
@@ -1635,11 +1628,11 @@ class Scli extends validaciones {
 		$edit->ciudad1 = new dropdownField('Ciudad','ciudad1');
 		$edit->ciudad1->rule = 'trim';
 		$edit->ciudad1->option('','Seleccionar');
-		$edit->ciudad1->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
+		$edit->ciudad1->options('SELECT TRIM(ciudad) codigo, TRIM(ciudad) AS ciudad FROM ciud ORDER BY ciudad');
 		$edit->ciudad1->style = 'width:200px';
 		$edit->ciudad1->insertValue = $this->datasis->traevalor('CIUDAD');
 
-		$edit->dire21 = new inputField('Envio','dire21');
+		$edit->dire21 = new inputField('Env&iacute;o','dire21');
 		$edit->dire21->rule = 'trim';
 		$edit->dire21->size      = 45;
 		$edit->dire21->maxlength = 40;
@@ -1654,7 +1647,7 @@ class Scli extends validaciones {
 		$edit->ciudad2 = new dropdownField('Ciudad','ciudad2');
 		$edit->ciudad2->rule = 'trim';
 		$edit->ciudad2->option('','Seleccionar');
-		$edit->ciudad2->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
+		$edit->ciudad2->options('SELECT TRIM(ciudad) codigo, TRIM(ciudad) AS ciudad FROM ciud ORDER BY ciudad');
 		$edit->ciudad2->style = 'width:200px';
 
 		$edit->repre  = new inputField('Representante', 'repre');
@@ -1763,7 +1756,7 @@ class Scli extends validaciones {
 
 		$edit->vendedor = new dropdownField('Vendedor', 'vendedor');
 		$edit->vendedor->option('','Ninguno');
-		$edit->vendedor->options("SELECT vendedor, CONCAT(vendedor,'-',nombre) AS nom FROM vend WHERE tipo IN ('V','A') ORDER BY vendedor");
+		$edit->vendedor->options("SELECT TRIM(vendedor) AS vd, CONCAT(vendedor,'-',nombre) AS nom FROM vend WHERE tipo IN ('V','A') ORDER BY vendedor");
 		$edit->vendedor->style = 'width:250px';
 
 		$edit->porvend = new inputField('Comisi&oacute;n%', 'porvend');
@@ -1774,7 +1767,7 @@ class Scli extends validaciones {
 
 		$edit->cobrador = new dropdownField('Cobrador', 'cobrador');
 		$edit->cobrador->option('','Ninguno');
-		$edit->cobrador->options("SELECT vendedor, CONCAT(vendedor,'-',nombre) nombre FROM vend WHERE tipo IN ('C','A') ORDER BY vendedor");
+		$edit->cobrador->options("SELECT TRIM(vendedor) AS vd, CONCAT(vendedor,'-',nombre) nombre FROM vend WHERE tipo IN ('C','A') ORDER BY vendedor");
 		$edit->cobrador->style = 'width:250px';
 
 		$edit->porcobr = new inputField('Comisi&oacute;n%', 'porcobr');
@@ -1823,17 +1816,12 @@ class Scli extends validaciones {
 		$edit->tminimo->showformat  = 'decimal';
 		$edit->tminimo->type='inputhidden';
 
-
 		if($this->genesal){
 			$edit->build();
 
-			$style  = '<style type="text/css">';
-			$style .= 'maintabcontainer {width: 780px; margin: 5px auto;}';
-			$style .= '</style>';
-
-			$conten['form']   =&  $edit;
-			$conten['script'] = $script;
-			$data['content']  = $this->load->view('view_scli', $conten);
+			$conten['form']   =& $edit;
+			$conten['script'] =  $script;
+			$data['content']  =  $this->load->view('view_scli', $conten);
 
 		}else{
 			$edit->on_save_redirect=false;
@@ -1856,7 +1844,8 @@ class Scli extends validaciones {
 			$("#rifci").focusout(function() {
 				rif=$(this).val();
 				if(!chrif(rif)){
-					alert("Al parecer el Rif colocado no es correcto, por favor verifique con el SENIAT.");
+					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
+					return true;
 				}else{
 					$.ajax({
 						type: "POST",

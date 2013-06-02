@@ -34,12 +34,14 @@ class Sprv extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => 'Formato PDF', "label"=>"Estado de Cuenta"));
-		$grid->wbotonadd(array("id"=>"pagweb",   "img"=>"images/html_icon.gif",  "alt" => 'Formato PDF', "label"=>"Pagina Web"));
+		$grid->wbotonadd(array('id'=>'edocta',   'img'=>'images/pdf_logo.gif' ,  'alt' => 'Estado de cuenta' , 'label'=>'Estado de Cuenta'));
+		$grid->wbotonadd(array('id'=>'pagweb',   'img'=>'images/html_icon.gif',  'alt' => 'P&aacute;gina Web', 'label'=>'P&aacute;gina Web'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -63,8 +65,7 @@ class Sprv extends Controller {
 				vurl=vurl.toLowerCase();
 				window.open("http://"+vurl,"PROVEEDOR","height=600,width=800");
 			}
-		}
-		';
+		}';
 
 		// Fusionar Proveedor
 		$funciones .= '
@@ -178,31 +179,6 @@ class Sprv extends Controller {
 		$ngrid = '#newapi'.$grid0;
 
 		$bodyscript .= '
-		jQuery("#edocta").click( function(){
-			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
-				'.$this->datasis->jwinopen(site_url('reportes/ver/SPRMECU/SPRM/').'/\'+ret.proveed').';
-			} else { $.prompt("<h1>Por favor Seleccione un Proveedor</h1>");}
-		});
-		';
-
-		// Pagina Web
-		$bodyscript .= '
-		jQuery("#pagweb").click( function(){
-			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret  = $("'.$ngrid.'").getRowData(id);
-				if ( ret.url.length > 10 )
-					window.open(ret.url);
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Proveedor</h1>");
-			}
-		});
-		';
-
-
-		$bodyscript .= '
 		function sprvadd() {
 			$.post("'.site_url('compras/sprv/dataedit/create').'",
 			function(data){
@@ -224,6 +200,49 @@ class Sprv extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		};';
 
+		$bodyscript .= '
+		function sprvshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+
+		$bodyscript .= '
+		function sprvdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function() {
@@ -237,6 +256,28 @@ class Sprv extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 			';
+
+		$bodyscript .= '
+		jQuery("#edocta").click( function(){
+			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('reportes/ver/SPRMECU/SPRM/').'/\'+ret.proveed').';
+			} else { $.prompt("<h1>Por favor Seleccione un Proveedor</h1>");}
+		});';
+
+		// Pagina Web
+		$bodyscript .= '
+		jQuery("#pagweb").click( function(){
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret  = $("'.$ngrid.'").getRowData(id);
+				if ( ret.url.length > 10 )
+					window.open(ret.url);
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Proveedor</h1>");
+			}
+		});';
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -256,7 +297,7 @@ class Sprv extends Controller {
 								$("#fedita").dialog( "close" );
 								grid.trigger("reloadGrid");
 								$.prompt("<h1>Registro Guardado</h1>",{
-									submit: function(e,v,m,f){  
+									submit: function(e,v,m,f){
 										setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
 									}}
 								);
@@ -271,43 +312,52 @@ class Sprv extends Controller {
 					}
 				})
 			},
-			"Cancelar": function() { $( this ).dialog( "close" ); },
-			"SENIAT":   function() { consulrif("rifci"); },
+			"Cancelar": function(){
+				$("#fedita").html("");
+				$(this).dialog("close");
+			},
+			"SENIAT":   function(){ consulrif("rifci"); },
 			"URL":   function() { iraurl(); },
 			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+			close: function(){
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
 		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+
 		$bodyscript .= '});'."\n";
-
-
-/*
-				var bValid = true;
-				var murl = $("#df1").attr("action");
-				allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						if ( r.length == 0 ) {
-							$( "#fedita" ).dialog( "close" );
-							grid.trigger("reloadGrid");
-							$.prompt("<h1>Registro Guardado</h1>",{
-								submit: function(e,v,m,f){  
-									setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',id);}, 500);
-								}}
-							);
-							return true;
-						} else {
-							$("#fedita").html(r);
-						}
-					}
-			})*/
-
-
-
-		$bodyscript .= "\n\t</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -331,7 +381,7 @@ class Sprv extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('proveed');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -381,7 +431,7 @@ class Sprv extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('nomfis');
-		$grid->label('Razon');
+		$grid->label('Raz&oacute;n social');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -447,7 +497,7 @@ class Sprv extends Controller {
 		));
 
 		$grid->addField('direc1');
-		$grid->label('Direccion 1');
+		$grid->label('Direcci&oacute;n 1');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -460,7 +510,7 @@ class Sprv extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('reteiva');
-		$grid->label('Reten. %');
+		$grid->label('% Ret.IVA');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -476,7 +526,7 @@ class Sprv extends Controller {
 
 
 		$grid->addField('direc2');
-		$grid->label('Direccion 2');
+		$grid->label('Direcci&oacute;n 2');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -503,7 +553,7 @@ class Sprv extends Controller {
 
 
 		$grid->addField('direc3');
-		$grid->label('Direccion 3');
+		$grid->label('Direcci&oacute;n 3');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -516,7 +566,7 @@ class Sprv extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('telefono');
-		$grid->label('Telefono');
+		$grid->label('Tel&eacute;fono');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -651,16 +701,6 @@ class Sprv extends Controller {
 		));
 */
 
-		$grid->addField('id');
-		$grid->label('Id');
-		$grid->params(array(
-			'align'         => "'center'",
-			'editable'      => "'false'",
-			'frozen'        => 'true',
-			'width'         => 40,
-			'editable'      => 'false',
-			'search'        => 'false'
-		));
 
 		$grid->addField('modificado');
 		$grid->label('Modificado');
@@ -672,6 +712,17 @@ class Sprv extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'align'         => "'center'",
+			'editable'      => "'false'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
 		));
 
 		$grid->showpager(true);
@@ -729,7 +780,8 @@ class Sprv extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("\t\taddfunc: sprvadd,\n\t\teditfunc: sprvedit");
+
+		$grid->setBarOptions("addfunc: sprvadd, editfunc: sprvedit, delfunc: sprvdel, viewfunc: sprvshow");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -766,26 +818,14 @@ class Sprv extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "proveed";
+		$mcodp  = 'proveed';
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
 
 		if($oper == 'add'){
-/*
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM sprv WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('sprv', $data);
-					echo "Registro Agregado";
 
-					logusu('SPRV',"Proveedor   INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-*/
 		} elseif($oper == 'edit') {
 			$proveed  = $this->datasis->dameval("SELECT proveed FROM sprv WHERE id=$id");
 			if ( isset($data['proveed']) ) unset($data['proveed']);
@@ -896,7 +936,7 @@ class Sprv extends Controller {
 					rif=$(this).val().toUpperCase();
 					$(this).val(rif);
 					if(!chrif(rif)){
-						apprise("<b>Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.</b>");
+						alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
 					}else{
 						$.ajax({
 							type: "POST",
@@ -1006,106 +1046,101 @@ class Sprv extends Controller {
 					vurl=vurl.toLowerCase();
 					window.open(vurl);
 				}
-			}
-
-			';
+			}';
 
 		$edit = new DataEdit('', 'sprv');
 		$edit->on_save_redirect=false;
 		$edit->script($script, 'create');
 		$edit->script($script, 'modify');
-		//$edit->back_url = site_url('compras/sprv/filteredgrid');
-
-		$edit->pre_process('delete','_pre_del');
+		$edit->pre_process( 'delete','_pre_delete' );
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
 
 		$lproveed='<a href="javascript:ultimo();" title="Ultimo codigo ingresado" onclick="">Ultimo</a>';
 		$edit->proveed  = new inputField('C&oacute;digo', 'proveed');
-		$edit->proveed->rule = 'trim|required|callback_chexiste';
+		$edit->proveed->rule = 'trim|required|callback_chexiste|alpha_dash_slash';
 		$edit->proveed->mode = 'autohide';
 		$edit->proveed->size = 6;
 		$edit->proveed->maxlength =5;
 		$edit->proveed->append($lproveed);
-		$edit->proveed->title = "Codigo del Proveedor";
+		$edit->proveed->title = 'Codigo del Proveedor';
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->rule = 'trim|strtoupper|required';
 		$edit->nombre->size = 35;
 		$edit->nombre->maxlength =40;
-		$edit->nombre->title = "Nombre del Proveedor";
+		$edit->nombre->title = 'Nombre del Proveedor';
 
 
 		//$lriffis='<a href="javascript:consulrif();" title="Consultar RIF en el SENIAT" onclick="" style="color:red;font-size:9px;border:none;">SENIAT</a>';
 		$edit->rif =  new inputField('RIF', 'rif');
-		$edit->rif->rule = "trim|strtoupper|required|callback_chci";
+		$edit->rif->rule = 'trim|strtoupper|required|callback_chci';
 		//$edit->rif->append($lriffis);
 		$edit->rif->maxlength=13;
 		$edit->rif->size =12;
-		$edit->rif->title = "RIF o Cedula del Proveedor";
+		$edit->rif->title = 'RIF o Cedula del Proveedor';
 
 		$edit->contacto = new inputField("Contacto", "contacto");
 		$edit->contacto->size =35;
-		$edit->contacto->rule ="trim";
+		$edit->contacto->rule ='trim';
 		$edit->contacto->maxlength =40;
-		$edit->contacto->title = "Nombre de la persona con quien hablan o son atendidos en el proveedor";
+		$edit->contacto->title = 'Nombre de la persona con quien hablan o son atendidos en el proveedor';
 
-		$edit->grupo = new dropdownField("Grupo", "grupo");
-		$edit->grupo->option("","Seleccionar");
+		$edit->grupo = new dropdownField('Grupo', 'grupo');
+		$edit->grupo->option('','Seleccionar');
 		$edit->grupo->options("SELECT grupo,gr_desc,grupo FROM grpr ORDER BY gr_desc");
-		$edit->grupo->style = "width:190px";
+		$edit->grupo->style = 'width:190px';
 		$edit->grupo->group = 'Datos del Proveedor';
-		$edit->grupo->title = "Grupo de Proveedores";
+		$edit->grupo->title = 'Grupo de Proveedores';
 
 		$edit->gr_desc = new inputField('gr_desc', 'gr_desc');
 
-		$edit->tipo = new dropdownField("Persona", "tipo");
-		$edit->tipo->option("","Seleccionar");
-		$edit->tipo->options(array("1"=> "Jur&iacute;dico Domiciliado","2"=>"Residente", "3"=>"Jur&iacute;dico No Domiciliado","4"=>"No Residente","5"=>"Excluido del Libro de Compras","0"=>"Inactivo"));
-		$edit->tipo->style = "width:190px";
-		$edit->tipo->rule = "required";
-		$edit->tipo->group = "Datos del Proveedor";
-		$edit->tipo->title = "Tipo de persona Juridico, Natural, etc";
+		$edit->tipo = new dropdownField('Persona', 'tipo');
+		$edit->tipo->option('','Seleccionar');
+		$edit->tipo->options(array('1'=> 'Jur&iacute;dico Domiciliado','2'=>'Residente', '3'=>'Jur&iacute;dico No Domiciliado','4'=>'No Residente','5'=>'Excluido del Libro de Compras','0'=>'Inactivo'));
+		$edit->tipo->style = 'width:190px';
+		$edit->tipo->rule  = 'required';
+		$edit->tipo->group = 'Datos del Proveedor';
+		$edit->tipo->title = 'Tipo de persona Jur&iacute;dico, Natural, etc';
 
-		$edit->tiva  = new dropdownField("Or&iacute;gen", "tiva");
-		$edit->tiva->option("N","Nacional");
-		$edit->tiva->options(array("N"=>"Nacional","I"=>"Internacional","O"=>"Otros"));
+		$edit->tiva  = new dropdownField('Or&iacute;gen', 'tiva');
+		$edit->tiva->options(array('N'=>'Nacional','I'=>'Internacional','O'=>'Otros'));
 		$edit->tiva->style='width:190px;';
 
-		$edit->direc1 = new inputField("Direcci&oacute;n ",'direc1');
+		$edit->direc1 = new inputField('Direcci&oacute;n','direc1');
 		$edit->direc1->size =34;
-		$edit->direc1->rule ="trim";
+		$edit->direc1->rule ='trim';
 		$edit->direc1->maxlength =40;
 
-		$edit->direc2 = new inputField(" ",'direc2');
+		$edit->direc2 = new inputField(' ','direc2');
 		$edit->direc2->size =34;
-		$edit->direc2->rule ="trim";
+		$edit->direc2->rule ='trim';
 		$edit->direc2->maxlength =40;
 
-		$edit->direc3 = new inputField(" ",'direc3');
+		$edit->direc3 = new inputField(' ','direc3');
 		$edit->direc3->size =34;
-		$edit->direc3->rule ="trim";
+		$edit->direc3->rule ='trim';
 		$edit->direc3->maxlength =40;
 
-		$edit->telefono = new textareaField("Tel&eacute;fono", "telefono");
-		$edit->telefono->rule = "trim";
+		$edit->telefono = new textareaField('Tel&eacute;fono', 'telefono');
+		$edit->telefono->rule = 'trim';
 		$edit->telefono->cols = 27;
 		$edit->telefono->rows =  2;
 		$edit->telefono->maxlength =200;
 
-		$edit->email  = new inputField("Email", "email");
-		$edit->email->rule = "trim|valid_email";
+		$edit->email  = new inputField('Email', 'email');
+		$edit->email->rule = 'trim|valid_email';
 		$edit->email->size =29;
 		$edit->email->maxlength =30;
-		$edit->email->title = "Correo electronico";
+		$edit->email->title = 'Correo electr&oacute;nico';
 
-		$edit->url = new inputField("URL", "url");
-		$edit->url->group = "Datos del Proveedor";
-		$edit->url->rule = "trim";
-		$edit->url->size =25;
+		$edit->url = new inputField('URL', 'url');
+		$edit->url->group = 'Datos del Proveedor';
+		$edit->url->rule  = 'trim';
+		$edit->url->size  = 25;
 		$edit->url->maxlength =30;
-		$edit->url->title = "Pagina Web del Proveedor";
+		$edit->url->title = 'P&aacute;gina Web del Proveedor';
 
 		$atts = array(
 				'width'     =>'800',
@@ -1116,23 +1151,23 @@ class Sprv extends Controller {
 				'screenx'   =>'5',
 				'screeny'   =>'5');
 
-		$lcli=anchor_popup("/ventas/scli/dataedit/create",image('list_plus.png','Agregar',array("border"=>"0")),$atts);
+		$lcli=anchor_popup('/ventas/scli/dataedit/create',image('list_plus.png','Agregar',array('border'=>'0')),$atts);
 
-		$edit->observa  = new inputField("Observaci&oacute;n", "observa");
-		$edit->observa->group = "Datos del Proveedor";
-		$edit->observa->rule = "trim";
-		$edit->observa->size = 41;
+		$edit->observa  = new inputField('Observaci&oacute;n', 'observa');
+		$edit->observa->group = 'Datos del Proveedor';
+		$edit->observa->rule  = 'trim';
+		$edit->observa->size  = 41;
 
-		$edit->banco1 = new dropdownField("Cuenta en bco. (1)", "banco1");
-		$edit->banco1->option("","Ninguno");
-		$edit->banco1->options("SELECT cod_banc,nomb_banc FROM tban ORDER BY nomb_banc");
+		$edit->banco1 = new dropdownField('Cuenta en bco. (1)', 'banco1');
+		$edit->banco1->option('','Ninguno');
+		$edit->banco1->options('SELECT cod_banc,nomb_banc FROM tban ORDER BY nomb_banc');
 
-		$edit->banco1->group = "Cuentas Bancarias";
-		$edit->banco1->style='width:140px;';
+		$edit->banco1->group = 'Cuentas Bancarias';
+		$edit->banco1->style ='width:140px;';
 
-		$edit->cuenta1 = new inputField("&nbsp;&nbsp;N&uacute;mero (1)","cuenta1");
+		$edit->cuenta1 = new inputField('&nbsp;&nbsp;N&uacute;mero (1)','cuenta1');
 		$edit->cuenta1->size = 28;
-		$edit->cuenta1->rule = "trim";
+		$edit->cuenta1->rule = 'trim';
 		$edit->cuenta1->maxlength = 25;
 		$edit->cuenta1->group = "Cuentas Bancarias";
 
@@ -1142,9 +1177,9 @@ class Sprv extends Controller {
 		$edit->banco2->group = 'Cuentas Bancarias';
 		$edit->banco2->style='width:140px;';
 
-		$edit->cuenta2 = new inputField("&nbsp;&nbsp;N&uacute;mero (2)",'cuenta2');
+		$edit->cuenta2 = new inputField('&nbsp;&nbsp;N&uacute;mero (2)','cuenta2');
 		$edit->cuenta2->size = 28;
-		$edit->cuenta2->rule = "trim";
+		$edit->cuenta2->rule = 'trim';
 		$edit->cuenta2->maxlength = 25;
 		$edit->cuenta2->group = "Cuentas Bancarias";
 
@@ -1153,7 +1188,7 @@ class Sprv extends Controller {
 		$edit->cliente->rule ="trim";
 		$edit->cliente->readonly=true;
 		$edit->cliente->append($bsclid);
-		$edit->cliente->title = "Codigo como cliente para hacer cruces de cuenta";
+		$edit->cliente->title = "C&oacute;digo como cliente para hacer cruces de cuenta";
 
 		$edit->prefpago = new dropdownField('Preferencia de pago','prefpago');
 		$edit->prefpago->option('T','Transferencia');
@@ -1162,10 +1197,10 @@ class Sprv extends Controller {
 		$edit->prefpago->group = 'Cuentas Bancarias';
 		$edit->prefpago->style = 'width:140px;';
 
-		$edit->codigo  = new inputField("Cod. en Prov", "codigo");
+		$edit->codigo  = new inputField('Cod. en Prov', 'codigo');
 		$edit->codigo->size  = 15;
-		$edit->codigo->rule  = "trim";
-		$edit->codigo->title = "Codigo en el sistema del proveedor";
+		$edit->codigo->rule  = 'trim';
+		$edit->codigo->title = 'C&oacute;digo en el sistema del proveedor';
 
 		$edit->nomfis = new textareaField('Raz&oacute;n Social', 'nomfis');
 		$edit->nomfis->rule = 'trim';
@@ -1173,21 +1208,21 @@ class Sprv extends Controller {
 		$edit->nomfis->rows =  3;
 		$edit->nomfis->maxlength =200;
 		$edit->nomfis->style = 'width:170;';
-		$edit->nomfis->title = "Nombre como aparecen en el registro ";
+		$edit->nomfis->title = 'Nombre como aparecen en el registro';
 
 		$edit->cuenta = new inputField('Contable', 'cuenta');
 		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->size =17;
 		$edit->cuenta->maxlength =15;
 		$edit->cuenta->append($bcpla);
-		$edit->cuenta->title = "Codigo en el plan de cuentas contable";
+		$edit->cuenta->title = 'C&oacute;digo en el plan de cuentas contable';
 
 		$edit->canticipo = new inputField('Anticipo', 'canticipo');
 		$edit->canticipo->rule='trim|existecpla';
 		$edit->canticipo->size =17;
 		$edit->canticipo->maxlength =15;
 		$edit->canticipo->append($banti);
-		$edit->canticipo->title = "Codigo en el plan de cuentas contable para cargar anticipos si es diferente";
+		$edit->canticipo->title = "C&oacute;digo en el plan de cuentas contable para cargar anticipos si es diferente";
 
 		$edit->reteiva  = new inputField('Retenci&oacute;n','reteiva');
 		$edit->reteiva->size = 6;
@@ -1211,70 +1246,76 @@ class Sprv extends Controller {
 
 	}
 
-	function _pre_del($do) {
-		$codigo=$do->get('proveed');
-		$check =  $this->datasis->dameval("SELECT count(*) FROM sprm WHERE cod_prv='$codigo'");
-		$check += $this->datasis->dameval("SELECT count(*) FROM scst WHERE proveed='$codigo'");
-		$check += $this->datasis->dameval("SELECT count(*) FROM gser WHERE proveed='$codigo'");
-		$check += $this->datasis->dameval("SELECT count(*) FROM ords WHERE proveed='$codigo'");
-		$check += $this->datasis->dameval("SELECT count(*) FROM bmov WHERE clipro='P' AND codcp='$codigo'");
+	function _pre_delete($do) {
+		$codigo  = $do->get('proveed');
+		$dbcodigo= $this->db->escape($codigo);
+		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sprm WHERE cod_prv=${dbcodigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM scst WHERE proveed=${dbcodigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM gser WHERE proveed=${dbcodigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM ords WHERE proveed=${dbcodigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM bmov WHERE clipro='P' AND codcp=${dbcodigo}");
 		if ($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Cliente con Movimiento no puede ser Borrado';
-			return False;
+			return false;
 		}
-		return True;
+		return true;
 	}
 
 	function _post_insert($do){
 		$codigo=$do->get('proveed');
 		$nombre=$do->get('nombre');
-		logusu('sprv',"PROVEEDOR $codigo NOMBRE $nombre CREADO");
+		logusu('sprv',"PROVEEDOR ${codigo} NOMBRE ${nombre} CREADO");
 	}
 
 	function _post_update($do){
 		$codigo=$do->get('proveed');
 		$nombre=$do->get('nombre');
-		logusu('sprv',"PROVEEDOR $codigo NOMBRE $nombre MODIFICADO");
+		logusu('sprv',"PROVEEDOR ${codigo} NOMBRE ${nombre} MODIFICADO");
 	}
 	function _post_delete($do){
 		$codigo=$do->get('proveed');
 		$nombre=$do->get('nombre');
-		logusu('sprv',"PROVEEDOR $codigo NOMBRE $nombre ELIMINADO");
+		logusu('sprv',"PROVEEDOR ${codigo} NOMBRE ${nombre} ELIMINADO");
 	}
 
 	function chexiste(){
 		$codigo=$this->input->post('proveed');
+		$dbcodigo= $this->db->escape($codigo);
 		$rif=$this->input->post('rif');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE proveed='$codigo'");
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE proveed=${dbcodigo}");
 		if ($check > 0){
-			$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed='$codigo'");
-			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para el proveedor $nombre");
-			return FALSE;
+			$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed=${dbcodigo}");
+			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para el proveedor ${nombre}");
+			return false;
 		}elseif(strlen($rif)>0){
 			$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE rif='$rif'");
 			if ($check > 0){
 				$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE rif='$rif'");
 				$this->validation->set_message('chexiste',"El rif $rif ya existe para el proveedor $nombre");
-				return FALSE;
+				return false;
 			}else {
-				return TRUE;
+				return true;
 			}
 		}else{
-			return TRUE;
+			return true;
 		}
 	}
 
 	function _pre_insert($do){
-		$rif=$do->get('rif');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE rif='$rif'");
-		if($check > 0){
-			//$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE rif='$rif'");
-			$do->error_message_ar['pre_insert'] = $do->error_message_ar['insert']='';
-			return FALSE;
-		}else {
-		return TRUE;
-		}
+		return true;
 	}
+
+	function rifdupli(){
+		$rt=array('status'=>'A','msj'=>'');
+		$rif  =$do->get('rif');
+		$dbrif=$this->db->escape($rif);
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE rif=${dbrif}");
+		if($check > 0){
+			$rt=array('status'=>'B','msj'=>'Ya existe '.$check.' proveedor con el mismo numero de rif');
+		}
+		echo json_encode($rt);
+	}
+
 
 	function update(){
 		$mSQL=$this->db->query('UPDATE sprv SET reteiva=75 WHERE reteiva<>100');
@@ -1287,7 +1328,7 @@ class Sprv extends Controller {
 
 	function consulta(){
 		$this->load->helper('openflash');
-		$this->rapyd->load("datagrid");
+		$this->rapyd->load('datagrid');
 		$fields = $this->db->field_data('sprv');
 		$url_pk = $this->uri->segment_array();
 		$coun=0; $pk=array();
@@ -1311,12 +1352,12 @@ class Sprv extends Controller {
 		$grid->db->where('a.tipo_doc IN ("FC","ND","GI") ' );
 		$grid->db->orderby('a.fecha');
 
-		$grid->column("Fecha"   ,"fecha" );
-		$grid->column("Tipo", "tipo_doc",'align="CENTER"');
-		$grid->column("Numero",  "numero",'align="LEFT"');
-		$grid->column("Monto",    "<nformat><#monto#></nformat>",  'align="RIGHT"');
-		$grid->column("Abonos",  "<nformat><#abonos#></nformat>",'align="RIGHT"');
-		$grid->column("Saldo",  "<nformat><#saldo#></nformat>",'align="RIGHT"');
+		$grid->column("Fecha"  ,'fecha' );
+		$grid->column("Tipo"   ,'tipo_doc','align="CENTER"');
+		$grid->column("Numero" ,"numero",'align="LEFT"');
+		$grid->column("Monto"  ,"<nformat><#monto#></nformat>" ,'align="RIGHT"');
+		$grid->column("Abonos" ,"<nformat><#abonos#></nformat>",'align="RIGHT"');
+		$grid->column("Saldo"  ,"<nformat><#saldo#></nformat>" ,'align="RIGHT"');
 		$grid->build();
 
 		$nombre = $this->datasis->dameval("SELECT nombre FROM sprv WHERE id=".$claves['id']." ");
@@ -1331,102 +1372,11 @@ class Sprv extends Controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
-	function grid(){
-		$start   = isset($_REQUEST['start'])  ? $_REQUEST['start']   :  0;
-		$limit   = isset($_REQUEST['limit'])  ? $_REQUEST['limit']   : 50;
-		$sort    = isset($_REQUEST['sort'])   ? $_REQUEST['sort']    : '[{"property":"nombre","direction":"ASC"}]';
-		$filters = isset($_REQUEST['filter']) ? $_REQUEST['filter']  : null;
-
-		$where = $this->datasis->extjsfiltro($filters,'sprv');
-
-		$this->db->_protect_identifiers=false;
-		$this->db->select('sprv.*, CONCAT("(",sprv.grupo,") ",grpr.gr_desc) nomgrup');
-		$this->db->from('sprv');
-		$this->db->join('grpr', 'sprv.grupo=grpr.grupo');
-
-		if (strlen($where)>1){ $this->db->where($where);}
-
-		$sort = json_decode($sort, true);
-		for ($i=0;$i<count($sort);$i++) {
-			$this->db->order_by($sort[$i]['property'],$sort[$i]['direction']);
-		}
-
-		$this->db->limit($limit, $start);
-
-		$query = $this->db->get();
-		$mSQL = '';
-		if ( $filters ) $mSQL = $this->db->last_query();
-		$results = $this->db->count_all('sprv');
-
-		$arr = $this->datasis->codificautf8($query->result_array());
-		echo '{success:true, message:"Loaded data " ,results:'. $results.', data:'.json_encode($arr).'}';
-	}
-
-	function crear() {
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-
-		$_POST = $this->datasis->extultireg($data);
-		$_POST['btn_submit']= 'Guardar';
-		$this->genesal=false;
-		$rt=$this->dataedit();
-
-		if ( $rt[0] ) {
-			echo "{ success: true, message: '$rt[1]', data: [{id: '0'}]}";
-		} else {
-			echo "{ success: false, message: '$rt[1]', data: [{id: '0'}]}";
-		}
-	}
-
-	function modificar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-
-
-		$campos = $data['data'];
-		$codigo = $campos['proveed'];
-		unset($campos['nomgrup']);
-		unset($campos['proveed']);
-		unset($campos['id']);
-
-		$mSQL = $this->db->update_string("sprv", $campos,"id='".$data['data']['id']."'" );
-		$this->db->simple_query($mSQL);
-		logusu('sprv',"PROVEEDOR ".$data['data']['proveed']." MODIFICADO");
-		echo "{ success: true, message: 'Proveedor Modificado ', data: [] }";
-
-	}
-
-	function eliminar(){
-		$js= file_get_contents('php://input');
-		$data= json_decode($js,true);
-		$campos = $data['data'];
-
-		$proveed = $data['data']['proveed'];
-
-		// VERIFICAR SI PUEDE
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sprm WHERE cod_prv='$proveed'");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM scst WHERE proveed='$proveed'");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM gser WHERE proveed='$proveed'");
-		$check += $this->datasis->dameval("SELECT count(*) FROM ordc WHERE proveed='$proveed'");
-		$check += $this->datasis->dameval("SELECT count(*) FROM bmov WHERE clipro='P' AND codcp='$proveed'");
-		$check += $this->datasis->dameval("SELECT count(*) FROM ords WHERE proveed='$proveed'");
-		//$check += $this->datasis->dameval("SELECT count(*) FROM obco WHERE proveed='$proveed'");
-
-		if ($check > 0){
-			echo "{ success: false, message: 'Proveedor con Movimiento no puede ser Borrado'}";
-		} else {
-			$this->db->simple_query("DELETE FROM sprv WHERE proveed='$proveed'");
-			logusu('sprv',"PROVEEDOR $proveed ELIMINADO");
-			echo "{ success: true, message: 'Proveedor Eliminado'}";
-		}
-	}
-
 	function vcard($id_sprv) {
 		$dbid = $this->db->escape($id_sprv);
 		$sprv = $this->datasis->damerow("SELECT contacto, nombre, telefono, direc1 dire11 FROM sprv WHERE id=$dbid");
 
 		if ( !empty($sprv) ) {
-
 			$this->load->library('Qr');
 			$contacto=trim($sprv['contacto']);
 			$nombre  =trim($sprv['nombre']);
@@ -1450,33 +1400,7 @@ class Sprv extends Controller {
 			$text.= "ADR;WORK:$direc\n";
 			$text.= "END:VCARD";
 			$this->qr->imgcode($text);
-
 		}
- 
-	}
-
-
-	function instalar(){
-		$campos=$this->db->list_fields('sprv');
-		if (!in_array('id',$campos)){
-			$this->db->simple_query('ALTER TABLE sprv DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE sprv ADD UNIQUE INDEX proveed (proveed)');
-			$this->db->simple_query('ALTER TABLE sprv ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		}
-
-		if (!in_array('copre'    ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN copre     VARCHAR(11)  NULL DEFAULT NULL   AFTER cuenta');
-		if (!in_array('ocompra'  ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ocompra   CHAR(1)      NULL DEFAULT NULL   AFTER copre');
-		if (!in_array('dcredito' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN dcredito  DECIMAL(3,0) NULL DEFAULT "0"    AFTER ocompra');
-		if (!in_array('despacho' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN despacho  DECIMAL(3,0) NULL DEFAULT NULL   AFTER dcredito');
-		if (!in_array('visita'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN visita    VARCHAR(9)   NULL DEFAULT NULL   AFTER despacho');
-		if (!in_array('cate'     ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN cate      VARCHAR(20)  NULL DEFAULT NULL   AFTER visita');
-		if (!in_array('reteiva'  ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN reteiva   DECIMAL(7,2) NULL DEFAULT "0.00" AFTER cate');
-		if (!in_array('ncorto'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ncorto    VARCHAR(20)  NULL DEFAULT NULL   AFTER nombre');
-		if (!in_array('prefpago' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN prefpago  CHAR(1)      NULL DEFAULT "T"    COMMENT "Preferencia de pago, Transferencia, Deposito, Caja" AFTER reteiva');
-		if (!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE sprv ADD COLUMN canticipo VARCHAR(15)  NULL DEFAULT NULL   COMMENT 'Cuenta contable de Anticipo'                        AFTER cuenta");
-
-		$this->db->simple_query('ALTER TABLE sprv CHANGE nomfis nomfis VARCHAR(200) DEFAULT NULL NULL');
-		$this->db->simple_query('ALTER TABLE sprv CHANGE COLUMN telefono telefono TEXT NULL DEFAULT NULL');
 	}
 
 	//******************************************************************
@@ -1509,7 +1433,7 @@ class Sprv extends Controller {
 		$mSQL = "UPDATE itppro SET cod_prv=".$this->db->escape($mnuevo)." WHERE cod_prv=".$this->db->escape($mviejo);
 		$this->db->simple_query($mSQL);
 
-		// BMOV CLIPRO='P'  CODCP 
+		// BMOV CLIPRO='P'  CODCP
 		$mSQL = "UPDATE bmov SET codcp=".$this->db->escape($mnuevo)." WHERE codcp=".$this->db->escape($mviejo)." AND clipro='P'";
 		$this->db->simple_query($mSQL);
 
@@ -1585,5 +1509,26 @@ class Sprv extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 	}
+	function instalar(){
+		$campos=$this->db->list_fields('sprv');
+		if (!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE sprv DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE sprv ADD UNIQUE INDEX proveed (proveed)');
+			$this->db->simple_query('ALTER TABLE sprv ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		if(!in_array('copre'    ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN copre     VARCHAR(11)  NULL DEFAULT NULL   AFTER cuenta');
+		if(!in_array('ocompra'  ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ocompra   CHAR(1)      NULL DEFAULT NULL   AFTER copre');
+		if(!in_array('dcredito' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN dcredito  DECIMAL(3,0) NULL DEFAULT "0"    AFTER ocompra');
+		if(!in_array('despacho' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN despacho  DECIMAL(3,0) NULL DEFAULT NULL   AFTER dcredito');
+		if(!in_array('visita'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN visita    VARCHAR(9)   NULL DEFAULT NULL   AFTER despacho');
+		if(!in_array('cate'     ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN cate      VARCHAR(20)  NULL DEFAULT NULL   AFTER visita');
+		if(!in_array('reteiva'  ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN reteiva   DECIMAL(7,2) NULL DEFAULT "0.00" AFTER cate');
+		if(!in_array('ncorto'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ncorto    VARCHAR(20)  NULL DEFAULT NULL   AFTER nombre');
+		if(!in_array('prefpago' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN prefpago  CHAR(1)      NULL DEFAULT "T"    COMMENT "Preferencia de pago, Transferencia, Deposito, Caja" AFTER reteiva');
+		if(!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE sprv ADD COLUMN canticipo VARCHAR(15)  NULL DEFAULT NULL   COMMENT 'Cuenta contable de Anticipo'                        AFTER cuenta");
+
+		$this->db->simple_query('ALTER TABLE sprv CHANGE nomfis nomfis VARCHAR(200) DEFAULT NULL NULL');
+		$this->db->simple_query('ALTER TABLE sprv CHANGE COLUMN telefono telefono TEXT NULL DEFAULT NULL');
+	}
 }
-?>
