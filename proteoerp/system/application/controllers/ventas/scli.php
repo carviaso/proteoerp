@@ -73,16 +73,14 @@ class Scli extends validaciones {
 		$grid->wbotonadd(array('id'=>'editacr', 'img'=>'images/star.png'    , 'alt' => 'Cr&eacute;dito' , 'label'=>'L&iacute;mite de Cr&eacute;dito'));
 		$WestPanel = $grid->deploywestp();
 
-
-
 		$adic = array(
-		array('id'=>'fedita' , 'title'=>'Agregar/Editar Cliente'),
-		array('id'=>'feditcr', 'title'=>'Cambia Limite de Credito'),
-		array('id'=>'fshow'  , 'title'=>'Mostrar Registro'),
-		array('id'=>'fborra' , 'title'=>'Eliminar Registro')
+			array('id'=>'fedita' , 'title'=>'Agregar/Editar Cliente'  ),
+			array('id'=>'feditcr', 'title'=>'Cambia Limite de Credito'),
+			array('id'=>'fshow'  , 'title'=>'Mostrar Registro'        ),
+			array('id'=>'fborra' , 'title'=>'Eliminar Registro'       )
 		);
 
-		$SouthPanel = $grid->SouthPanel('<a href="'.site_url($this->url.'getdata').'" class="ayuda1">Ayuda</a>'.$this->datasis->traevalor('TITULO1'), $adic);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 		//$SouthPanel .= '<a href="'.site_url($this->url.'getdata').'" class="ayuda1">Ayuda</a>';
 
 		$param['WestPanel']   = $WestPanel;
@@ -171,8 +169,7 @@ class Scli extends validaciones {
 					$("#feditcr").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
-		});
-		';
+		});';
 
 		$bodyscript .= '
 		function scliadd() {
@@ -257,64 +254,74 @@ class Scli extends validaciones {
 		$("#fedita").dialog({
 			autoOpen: false, height: 550, width: 800, modal: true,
 			buttons: {
-			"Guardar": function() {
-				var bValid = true;
-				var murl = $("#df1").attr("action");
-				var id  = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
-				allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						if ( r.length == 0 ) {
-							$( "#fedita" ).dialog( "close" );
-							grid.trigger("reloadGrid");
-							$.prompt("<h1>Registro Guardado</h1>",{
-								submit: function(e,v,m,f){  
-									setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',id);}, 500);
-								}}
-							);
-							return true;
-						} else {
-							$("#fedita").html(r);
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					var id  = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							if ( r.length == 0 ) {
+								$( "#fedita" ).dialog("close");
+								grid.trigger("reloadGrid");
+								$.prompt("<h1>Registro Guardado</h1>",{
+									submit: function(e,v,m,f){
+										setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',id);}, 500);
+									}
+								});
+								return true;
+							} else {
+								$("#fedita").html(r);
+							}
 						}
-					}
 
-			})},
-			"Cancelar": function() { $( this ).dialog( "close" ); },
-			"SENIAT":   function() { consulrif("rifci"); },
-			"C.N.E.":   function() { consulcne("rifci"); }
+					}
+				)},
+				"Cancelar": function() { $(this).dialog("close"); },
+				"SENIAT":   function() { consulrif("rifci"); },
+				"C.N.E.":   function() { consulcne("rifci"); }
 			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+			close: function(){
+				allFields.val("").removeClass("ui-state-error");
+				$("#fedita").html("");
+			}
 		});';
 
 		$bodyscript .= '
 		$("#feditcr").dialog({
 			autoOpen: false, height: 400, width: 650, modal: true,
 			buttons: {
-			"Guardar": function() {
-				var bValid = true;
-				var murl = $("#df1").attr("action");
-				//allFields.removeClass( "ui-state-error" );
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						if ( r.length == 0 ) {
-							apprise("Cambio Guardado");
-							$( "#feditcr" ).dialog( "close" );
-							grid.trigger("reloadGrid");
-							return true;
-						} else {
-							$("#feditcr").html(r);
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					//allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							if ( r.length == 0 ) {
+								apprise("Cambio Guardado");
+								$( "#feditcr" ).dialog( "close" );
+								grid.trigger("reloadGrid");
+								return true;
+							} else {
+								$("#feditcr").html(r);
+							}
 						}
-					}
-			})},
-			"Cancelar": function() { $( this ).dialog( "close" ); }
+				})},
+				"Cancelar": function(){
+					$("#feditcr").html("");
+					$(this).dialog("close");
+				}
 			},
-			close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+			close: function(){
+				$("#feditcr").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
 		});';
 
 
@@ -348,10 +355,8 @@ class Scli extends validaciones {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -1156,65 +1161,10 @@ class Scli extends validaciones {
 			}
 		}'
 		);
-/*
-		$grid->setFormOptionsE('
-			closeAfterEdit:false,
-			mtype: "POST",
-			width: 720,
-			height:520,
-			closeOnEscape: true,
-			top: 50,
-			left:20,
-			recreateForm:true,
-			afterSubmit: function(a,b){
-				if (a.responseText.length > 0)
-					$.prompt(a.responseText);
-				return [true, a ];
-				},
-			beforeShowForm: function(frm){
-					$(\'#cliente\').attr(\'readonly\',\'readonly\');
-					$(\'<a href="#">SENIAT<span class="ui-icon ui-icon-disk"></span></a>\').click(function(){
-						consulrif("rifci");
-					}).addClass("fm-button ui-state-default ui-corner-all fm-button-icon-left").prependTo("#Act_Buttons>td.EditButton");
-					$(\'<a href="#">CNE<span class="ui-icon ui-icon-disk"></span></a>\').click(function(){
-						consulcne("rifci");
-					}).addClass("fm-button ui-state-default ui-corner-all fm-button-icon-left").prependTo("#Act_Buttons>td.EditButton");
-				},
-			afterShowForm: function(frm){
-					$("select").selectmenu({style:"popup"});
-				}
-		');
 
-		$grid->setFormOptionsA('
-			closeAfterAdd:true,
-			mtype: "POST",
-			width: 720,
-			height:520,
-			closeOnEscape: true,
-			top: 50,
-			left:20,
-			recreateForm:true,
-			afterSubmit: function(a,b){
-				if (a.responseText.length > 0)
-					$.prompt(a.responseText);
-				return [true, a ];
-			},
-			beforeShowForm: function(frm){
-					$(\'<a href="#">SENIAT<span class="ui-icon ui-icon-disk"></span></a>\').click(function(){
-						consulrif("rifci");
-					}).addClass("fm-button ui-state-default ui-corner-all fm-button-icon-left").prependTo("#Act_Buttons>td.EditButton");
-					$(\'<a href="#">CNE<span class="ui-icon ui-icon-disk"></span></a>\').click(function(){
-						consulcne("rifci");
-					}).addClass("fm-button ui-state-default ui-corner-all fm-button-icon-left").prependTo("#Act_Buttons>td.EditButton");
-				},
-			afterShowForm: function(frm){
-					$("select").selectmenu({style:"popup"});
-				}
-		');
-*/
-		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
+		$grid->setAfterSubmit('$.prompt(\'Respuesta:\'+a.responseText); return [true, a ];');
 
-		#show/hide navigations buttons
+		$grid->setOndblClickRow('');
 		$grid->setAdd(    $this->datasis->sidapuede('SCLI','INCLUIR%' ));
 		$grid->setEdit(   $this->datasis->sidapuede('SCLI','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('SCLI','BORR_REG%'));
@@ -1494,155 +1444,128 @@ class Scli extends validaciones {
 		$link21=site_url('ventas/scli/sclicodigo');
 
 		$script ='
-<script type="text/javascript" >
-$(function() {
+		<script type="text/javascript" >
+		$(function() {
+			//Default Action
+			$("#tiva").change(function () { anomfis(); }).change();
 
-	//Default Action
-	$("#tiva").change(function () { anomfis(); }).change();
-'.
-/*
-	$("#cuenta").autocomplete("'.$lcuenta.'",{
-		delay:10,
-		//minChars:2,
-		matchSubset:1,
-		matchContains:1,
-		cacheLength:10,
-		formatItem:formato,
-		width:350,
-		autoFill:true
-	});
-
-	$("#socio").autocomplete("'.$lsocio.'",{
-		delay:10,
-		matchSubset:1,
-		matchContains:1,
-		cacheLength:10,
-		formatItem:formato,
-		width:350,
-		autoFill:true
-	});
-	//$(":input").enter2tab();
-*/
-'
-
-	$("#tarifa").autocomplete({
-		source: function( req, add){
-			$.ajax({
-				url:  "'.site_url('ajax/buscastarifa').'",
-				type: "POST",
-				dataType: "json",
-				data: "q="+req.term,
-				success:
-					function(data){
-						var sugiere = [];
-						if(data.length==0){
-							$("#tarifa").val("");
-							$("#tactividad").val("");
-							$("#tactividad_val").text("");
-							$("#tminimo").val("");
-							$("#tminimo_val").text("");
-						}else{
-							$.each(data,
-								function(i, val){
-									sugiere.push( val );
+			$("#tarifa").autocomplete({
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscastarifa').'",
+						type: "POST",
+						dataType: "json",
+						data: "q="+req.term,
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#tarifa").val("");
+									$("#tactividad").val("");
+									$("#tactividad_val").text("");
+									$("#tminimo").val("");
+									$("#tminimo_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
 								}
-							);
-						}
-						add(sugiere);
-					},
-			})
-		},
-		minLength: 2,
-		select: function( event, ui ) {
-			$("#tarifa").attr("readonly", "readonly");
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#tarifa").attr("readonly", "readonly");
 
-			$("#tarifa").val(ui.item.value);
-			$("#tactividad").val(ui.item.actividad);
-			$("#tactividad_val").text(ui.item.actividad);
-			$("#tminimo").val(ui.item.minimo);
-			$("#tminimo_val").text(ui.item.minimo);
-			setTimeout(function() {  $("#tarifa").removeAttr("readonly"); }, 1500);
-		}
-	});
-
-	$("#maintabcontainer").tabs();
-
-	$("#rifci").focusout(function(){
-		rif=$(this).val().toUpperCase();
-		$(this).val(rif);
-		if(!chrif(rif)){
-			apprise("<b>Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.</b>");
-		}else{
-			$.ajax({
-				type: "POST",
-				url: "'.site_url('ajax/traerif').'",
-				dataType: "json",
-				data: {rifci: rif},
-				success: function(data){
-					if(data.error==0){
-						if($("#nombre").val()==""){
-							$("#nombre").val(data.nombre);
-						}
-						if($("#nomfis").val()==""){
-							$("#nomfis").val(data.nombre);
-						}
-					}
+					$("#tarifa").val(ui.item.value);
+					$("#tactividad").val(ui.item.actividad);
+					$("#tactividad_val").text(ui.item.actividad);
+					$("#tminimo").val(ui.item.minimo);
+					$("#tminimo_val").text(ui.item.minimo);
+					setTimeout(function() {  $("#tarifa").removeAttr("readonly"); }, 1500);
 				}
 			});
-		}
-	});
 
-});
+			$("#maintabcontainer").tabs();
 
-function formato(row) {
-	return row[0] + "-" + row[1];
-}
+			$("#rifci").focusout(function(){
+				rif=$(this).val().toUpperCase();
+				$(this).val(rif);
+				if(!chrif(rif)){
+					apprise("<b>Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.</b>");
+				}else{
+					$.ajax({
+						type: "POST",
+						url: "'.site_url('ajax/traerif').'",
+						dataType: "json",
+						data: {rifci: rif},
+						success: function(data){
+							if(data.error==0){
+								if($("#nombre").val()==""){
+									$("#nombre").val(data.nombre);
+								}
+								if($("#nomfis").val()==""){
+									$("#nomfis").val(data.nombre);
+								}
+							}
+						}
+					});
+				}
+			});
 
-function anomfis(){
-	vtiva=$("#tiva").val();
-	if(vtiva=="C" || vtiva=="E" || vtiva=="R"){
-		$("#tr_nomfis").show();
-		$("#tr_riffis").show();
-	}else{
-		$("#nomfis").val("");
-		$("#riffis").val("");
-		$("#tr_nomfis").hide();
-		$("#tr_riffis").hide();
-	}
-}
+		});
 
-function chrif(rif){
-	rif.toUpperCase();
-	var patt=/[EJPGV][0-9]{9} */g;
-	if(patt.test(rif)){
-		var factor= new Array(4,3,2,7,6,5,4,3,2);
-		var v=0;
-		if(rif[0]=="V"){
-			v=1;
-		}else if(rif[0]=="E"){
-			v=2;
-		}else if(rif[0]=="J"){
-			v=3;
-		}else if(rif[0]=="P"){
-			v=4;
-		}else if(rif[0]=="G"){
-			v=5;
+		function formato(row) {
+			return row[0] + "-" + row[1];
 		}
-		acum=v*factor[0];
-		for(i=1;i<9;i++){
-			acum=acum+parseInt(rif[i])*factor[i];
+
+		function anomfis(){
+			vtiva=$("#tiva").val();
+			if(vtiva=="C" || vtiva=="E" || vtiva=="R"){
+				$("#tr_nomfis").show();
+				$("#tr_riffis").show();
+			}else{
+				$("#nomfis").val("");
+				$("#riffis").val("");
+				$("#tr_nomfis").hide();
+				$("#tr_riffis").hide();
+			}
 		}
-		acum=11-acum%11;
-		if(acum>=10 || acum<=0){
-			acum=0;
+
+		function chrif(rif){
+			rif.toUpperCase();
+			var patt=/[EJPGV][0-9]{9} */g;
+			if(patt.test(rif)){
+				var factor= new Array(4,3,2,7,6,5,4,3,2);
+				var v=0;
+				if(rif[0]=="V"){
+					v=1;
+				}else if(rif[0]=="E"){
+					v=2;
+				}else if(rif[0]=="J"){
+					v=3;
+				}else if(rif[0]=="P"){
+					v=4;
+				}else if(rif[0]=="G"){
+					v=5;
+				}
+				acum=v*factor[0];
+				for(i=1;i<9;i++){
+					acum=acum+parseInt(rif[i])*factor[i];
+				}
+				acum=11-acum%11;
+				if(acum>=10 || acum<=0){
+					acum=0;
+				}
+				return (acum==parseInt(rif[9]));
+			}else{
+				return true;
+			}
 		}
-		return (acum==parseInt(rif[9]));
-	}else{
-		return true;
-	}
-}
-</script>
-';
+		</script>';
 
 		$do = new DataObject('scli');
 		$do->pointer('tarifa' ,'tarifa.id =scli.tarifa' ,'`tarifa`.`actividad`  AS tactividad, `tarifa`.`minimo`  AS tminimo'  ,'left');
@@ -1904,9 +1827,9 @@ function chrif(rif){
 		if($this->genesal){
 			$edit->build();
 
-			$style  = '<style type="text/css">'."\n";
-			$style .= '\t.maintabcontainer {width: 780px; margin: 5px auto;}'."\n";
-			$style .= '</style>'."\n";
+			$style  = '<style type="text/css">';
+			$style .= 'maintabcontainer {width: 780px; margin: 5px auto;}';
+			$style .= '</style>';
 
 			$conten['form']   =&  $edit;
 			$conten['script'] = $script;
@@ -1928,61 +1851,61 @@ function chrif(rif){
 		$this->rapyd->load('dataedit');
 
 		$script ='
-<script type="text/javascript" >
-$(function() {
-	$("#rifci").focusout(function() {
-		rif=$(this).val();
-		if(!chrif(rif)){
-			alert("Al parecer el Rif colocado no es correcto, por favor verifique con el SENIAT.");
-		}else{
-			$.ajax({
-				type: "POST",
-				url: "'.site_url('ajax/traerif').'",
-				dataType: "json",
-				data: {rifci: rif},
-				success: function(data){
-					if(data.error==0){
-						if($("#nombre").val()==""){
-							$("#nombre").val(data.nombre);
+		<script type="text/javascript" >
+		$(function() {
+			$("#rifci").focusout(function() {
+				rif=$(this).val();
+				if(!chrif(rif)){
+					alert("Al parecer el Rif colocado no es correcto, por favor verifique con el SENIAT.");
+				}else{
+					$.ajax({
+						type: "POST",
+						url: "'.site_url('ajax/traerif').'",
+						dataType: "json",
+						data: {rifci: rif},
+						success: function(data){
+							if(data.error==0){
+								if($("#nombre").val()==""){
+									$("#nombre").val(data.nombre);
+								}
+							}
 						}
-					}
+					});
 				}
 			});
-		}
-	});
-});
+		});
 
-function chrif(rif){
-	rif.toUpperCase();
-	var patt=/[EJPGV][0-9]{9} * /g;
-	if(patt.test(rif)){
-		var factor= new Array(4,3,2,7,6,5,4,3,2);
-		var v=0;
-		if(rif[0]=="V"){
-			v=1;
-		}else if(rif[0]=="E"){
-			v=2;
-		}else if(rif[0]=="J"){
-			v=3;
-		}else if(rif[0]=="P"){
-			v=4;
-		}else if(rif[0]=="G"){
-			v=5;
+		function chrif(rif){
+			rif.toUpperCase();
+			var patt=/[EJPGV][0-9]{9} * /g;
+			if(patt.test(rif)){
+				var factor= new Array(4,3,2,7,6,5,4,3,2);
+				var v=0;
+				if(rif[0]=="V"){
+					v=1;
+				}else if(rif[0]=="E"){
+					v=2;
+				}else if(rif[0]=="J"){
+					v=3;
+				}else if(rif[0]=="P"){
+					v=4;
+				}else if(rif[0]=="G"){
+					v=5;
+				}
+				acum=v*factor[0];
+				for(i=1;i<9;i++){
+					acum=acum+parseInt(rif[i])*factor[i];
+				}
+				acum=11-acum%11;
+				if(acum>=10 || acum<=0){
+					acum=0;
+				}
+				return (acum==parseInt(rif[9]));
+			}else{
+				return true;
+			}
 		}
-		acum=v*factor[0];
-		for(i=1;i<9;i++){
-			acum=acum+parseInt(rif[i])*factor[i];
-		}
-		acum=11-acum%11;
-		if(acum>=10 || acum<=0){
-			acum=0;
-		}
-		return (acum==parseInt(rif[9]));
-	}else{
-		return true;
-	}
-}
-</script>';
+		</script>';
 
 		$do = new DataObject('scli');
 
@@ -2213,20 +2136,19 @@ function chrif(rif){
 		$edit->grupo->style = 'width:200px';
 		$edit->grupo->insertValue = $this->datasis->dameval('SELECT grupo FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"');
 
-		$obj  ="dire11";
-		$edit->$obj = new inputField('Direcci&oacute;n',$obj);
-		$edit->$obj->rule = 'trim|required';
-		$edit->$obj->size      = 45;
-		$edit->$obj->maxlength = 40;
-		$edit->$obj->style = 'width:95%;';
+		$edit->dire11 = new inputField('Direcci&oacute;n','dire11');
+		$edit->dire11->rule = 'trim|required';
+		$edit->dire11->size      = 45;
+		$edit->dire11->maxlength = 40;
+		$edit->dire11->style = 'width:95%;';
 
-		$obj="ciudad1";
-		$edit->$obj = new dropdownField('Ciudad',$obj);
-		$edit->$obj->rule = 'trim';
-		$edit->$obj->option('','Seleccionar');
-		$edit->$obj->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
-		$edit->$obj->style = 'width:200px';
-		$edit->$obj->insertValue = $this->datasis->traevalor("CIUDAD");
+
+		$edit->ciudad1 = new dropdownField('Ciudad','ciudad1');
+		$edit->ciudad1->rule = 'trim';
+		$edit->ciudad1->option('','Seleccionar');
+		$edit->ciudad1->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
+		$edit->ciudad1->style = 'width:200px';
+		$edit->ciudad1->insertValue = $this->datasis->traevalor("CIUDAD");
 
 		$edit->tiva = new dropdownField('Tipo Fiscal', 'tiva');
 		$edit->tiva->option('N','No Contribuyente');

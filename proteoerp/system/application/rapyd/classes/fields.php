@@ -91,7 +91,7 @@ class objField {
 	var $pointer=false; //indica si es un apuntador
 
 	var $ind=-1; //indice al cual pertenece en caso de una relacion 1:n
-	var $showformat=null; //Puede ser numeric;4
+	var $showformat=null; //Puede ser numeric;
 
 	/**
 	* PHP4 constructor.
@@ -212,6 +212,11 @@ class objField {
 				}
 			}
 
+		}
+
+		$enco = mb_detect_encoding($this->value);
+		if($enco!='UTF-8' && $this->ci->config->item('charset')=='UTF-8'){
+			$this->value = utf8_encode($this->value);
 		}
 		$this->_getMode();
 	}

@@ -561,7 +561,12 @@ class CI_DB_mysqli_driver extends CI_DB {
 	{
 		foreach($values as $key => $val)
 		{
-			$valstr[] = $key." = ".$val;
+			$enco = mb_detect_encoding($val);
+			if($enco=='UTF-8' && $this->char_set=='latin1'){
+				$valstr[] = $key." = ".utf8_decode($val);
+			}else{
+				$valstr[] = $key." = ".$val;
+			}
 		}
 
 		$limit = ( ! $limit) ? '' : ' LIMIT '.$limit;

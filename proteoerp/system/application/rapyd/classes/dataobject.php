@@ -155,13 +155,13 @@ class DataObject{
 	* @return   void
 	*/
 	function _exec_post_process_functions($action){
-	if (isset($this->_post_process_functions[$action])){
-		$function = $this->_post_process_functions[$action];
-		$arr_values = $function['arr_values'];
-		(count($arr_values)>0)? array_unshift($arr_values, $this):$arr_values = array($this);
-		$this->post_process_result =  call_user_func_array(array(&$this->ci, $function['name']), $arr_values);
-		return  $this->post_process_result;
-	}
+		if (isset($this->_post_process_functions[$action])){
+			$function = $this->_post_process_functions[$action];
+			$arr_values = $function['arr_values'];
+			(count($arr_values)>0)? array_unshift($arr_values, $this):$arr_values = array($this);
+			$this->post_process_result =  call_user_func_array(array(&$this->ci, $function['name']), $arr_values);
+			return  $this->post_process_result;
+		}
 	}
 
 	/**
