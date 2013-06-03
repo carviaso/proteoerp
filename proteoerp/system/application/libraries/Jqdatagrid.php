@@ -1149,7 +1149,7 @@ class Jqdatagrid
 		}
 
 
-		memowrite("ar".$this->CI->db->last_query(),'JQGETDATA');
+		//memowrite("ar".$this->CI->db->last_query(),'JQGETDATA');
 		$queryString = $this->CI->db->last_query();
 
 		$querydata = array( 'dtgQuery' => $this->CI->db->last_query() );

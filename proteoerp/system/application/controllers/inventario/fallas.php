@@ -99,10 +99,10 @@ class fallas extends Controller {
 	//Recalcula los margenes y las bases respetando el precio
 	function arreglamarbases(){
 		$mSQL="UPDATE sinv SET
-		base1=precio1*100/(100+iva),
-		base2=precio2*100/(100+iva),
-		base3=precio3*100/(100+iva),
-		base4=precio4*100/(100+iva)";
+		base1=ROUND(precio1*100/(100+iva),2),
+		base2=ROUND(precio2*100/(100+iva),2),
+		base3=ROUND(precio3*100/(100+iva),2),
+		base4=ROUND(precio4*100/(100+iva),2)";
 		var_dump($this->db->simple_query($mSQL));
 
 		$mSQL="UPDATE sinv SET

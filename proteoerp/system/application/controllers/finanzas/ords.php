@@ -883,9 +883,11 @@ class Ords extends Controller {
 
 		$edit->proveed = new inputField('Proveedor', 'proveed');
 		$edit->proveed->size = 6;
+		$edit->proveed->rule='required|existesprv';
 		//$edit->proveed->append($boton);
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
+		$edit->nombre->type='inputhidden';
 		$edit->nombre->size = 30;
 		$edit->nombre->maxlength=30;
 
@@ -920,23 +922,25 @@ class Ords extends Controller {
 		$edit->anticipo->css_class='inputnum';
 
 		$edit->totiva  = new inputField('Impuesto', 'totiva');
+		$edit->totiva->type='inputhidden';
 		$edit->totiva->size = 10;
 		$edit->totiva->css_class='inputnum';
 
 		$edit->totbruto  = new inputField('Total', 'totbruto');
+		$edit->totbruto->type='inputhidden';
 		$edit->totbruto->size = 20;
 		$edit->totbruto->css_class='inputnum';
 
-		$edit->totprel  = new inputField('SubTotal', 'totpre');
-		$edit->totprel->size = 10;
-		$edit->totprel->css_class='inputnum';
+		$edit->totpre  = new inputField('SubTotal', 'totpre');
+		$edit->totpre->type='inputhidden';
+		$edit->totpre->size = 10;
+		$edit->totpre->css_class='inputnum';
 
 		//Campos para el detalle
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo_<#i#>');
 		$edit->codigo->size=10;
 		$edit->codigo->db_name='codigo';
 		//$edit->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
-		$edit->codigo->readonly=true;
 		$edit->codigo->rel_id ='itords';
 
 		$edit->descrip = new inputField('Descripci&oacute;n', 'descrip_<#i#>');

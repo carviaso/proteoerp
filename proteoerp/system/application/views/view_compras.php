@@ -58,7 +58,7 @@ $(function(){
 				url:  "<?php echo site_url('ajax/buscasprv'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];

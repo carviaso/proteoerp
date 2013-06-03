@@ -1,5 +1,4 @@
 <?php
-
 $container_bl=join('&nbsp;', $form->_button_container['BL']);
 $container_br=join('&nbsp;', $form->_button_container['BR']);
 $container_tr=join('&nbsp;', $form->_button_container['TR']);
@@ -11,7 +10,123 @@ else:
 if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>';
 
 echo $form_scripts;
-echo $form_begin?>
+echo $form_begin;
+
+if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
+
+if($form->_status!='show'){ ?>
+
+<script language="javascript" type="text/javascript">
+var itordc_cont=<?php echo $form->max_rel_count['itords']; ?>;
+$(function(){
+	$(".inputnum").numeric(".");
+	totalizar();
+
+	$("#fecha").datepicker({    dateFormat: "dd/mm/yy" });
+	for(var i=0;i < <?php echo $form->max_rel_count['itords']; ?>;i++){
+		autocod(i.toString());
+	}
+
+	$('#proveed').autocomplete({
+		delay: 600,
+		autoFocus: true,
+		source: function( req, add){
+			$.ajax({
+				url:  "<?php echo site_url('ajax/buscasprv'); ?>",
+				type: "POST",
+				dataType: "json",
+				data: {"q":req.term},
+				success:
+					function(data){
+						var sugiere = [];
+						$.each(data,
+							function(i, val){
+								sugiere.push( val );
+							}
+						);
+						add(sugiere);
+					},
+			})
+		},
+		minLength: 2,
+		select: function( event, ui ) {
+			$("#proveed").attr("readonly", "readonly");
+			$('#nombre').val(ui.item.nombre);
+			$('#nombre_val').text(ui.item.nombre);
+			$('#proveed').val(ui.item.proveed);
+			setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
+		}
+	});
+});
+
+function totalizar(){
+	tp=tb=ti=ite=0;
+
+	arr=$('input[name^="importe_"]');
+	jQuery.each(arr, function() {
+		nom=this.name
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			ind = this.name.substring(pos+1);
+			tp1=Number($("#precio_"+ind).val());
+			ite=Number(this.value);
+
+			tp=tp+tp1;
+			tb=tb+ite;
+		}
+	});
+
+	$("#totpre").val(roundNumber(tp,2));
+	$("#totpre_val").text(nformat(tp,2));
+	$("#totbruto").val(roundNumber(tb,2));
+	$("#totbruto_val").text(nformat(tb,2));
+	totiva=roundNumber(tb-tp,2);
+	$("#totiva").val(totiva);
+	$("#totiva_val").text(nformat(totiva,2));
+}
+
+//Agrega el autocomplete
+function autocod(id){
+	$('#codigo_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
+		source: function( req, add){
+			$.ajax({
+				url:  "<?php echo site_url('ajax/automgas'); ?>",
+				type: "POST",
+				dataType: "json",
+				data: {"q" :req.term},
+				success:
+					function(data){
+						var sugiere = [];
+
+						if(data.length==0){
+							$('#codigo_'+id).val('');
+							$('#descrip_'+id).val('');
+						}else{
+							$.each(data,
+								function(i, val){
+									sugiere.push( val );
+								}
+							);
+						}
+						add(sugiere);
+					},
+			})
+		},
+		minLength: 1,
+		select: function( event, ui ) {
+			$('#codigo_'+id).attr("readonly", "readonly");
+
+			$('#codigo_'+id).val(ui.item.codigo);
+			$('#descrip_'+id).val(ui.item.descrip);
+			$('#precio_'+id).focus();
+			setTimeout(function() {  $('#codigo_'+id).removeAttr("readonly"); }, 1500);
+		}
+	});
+}
+</script>
+<?php } ?>
 <table align='center' width="100%" >
 	<tr>
 	<td>
@@ -61,12 +176,25 @@ echo $form_begin?>
 			</tr>
 		</table>
 		</div>
+<?php echo $container_bl.$container_br; ?>
+		<legend class="titulofieldset" style='color: #114411;'>Totales</legend>
+			<table width='100%'>
+				<tr>
+					<td class="littletableheader" align='right'><?php echo $form->totpre->label  ?>&nbsp;</td>
+					<td class="littletablerow"    align='right'><?php echo $form->totpre->output; ?>&nbsp;</td>
+				</tr><tr>
+					<td class="littletableheader" align='right'><?php echo $form->totiva->label  ?>&nbsp;</td>
+					<td class="littletablerow"    align='right'><?php echo $form->totiva->output ?>&nbsp;</td>
+				</tr><tr>
+					<td class="littletableheader" align='right'><?php echo $form->totbruto->label  ?>&nbsp;</td>
+					<td class="littletablerow"    align='right'><?php echo $form->totbruto->output ?>&nbsp;</td>
+				</tr>
+			</table>
+		</fieldset>
 
-<?php echo $form_end?>
-<?php echo $container_bl ?>
-<?php echo $container_br ?>
 	  <td>
 	<tr>
 <table>
+<?php echo $form_end; ?>
 <?php endif; ?>
 <p>&nbsp;</p>

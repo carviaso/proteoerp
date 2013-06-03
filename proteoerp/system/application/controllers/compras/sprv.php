@@ -1081,7 +1081,7 @@ class Sprv extends Controller {
 		$edit->rif->size =12;
 		$edit->rif->title = 'RIF o Cedula del Proveedor';
 
-		$edit->contacto = new inputField("Contacto", "contacto");
+		$edit->contacto = new inputField('Contacto', 'contacto');
 		$edit->contacto->size =35;
 		$edit->contacto->rule ='trim';
 		$edit->contacto->maxlength =40;
@@ -1150,7 +1150,6 @@ class Sprv extends Controller {
 				'resizable' =>'yes',
 				'screenx'   =>'5',
 				'screeny'   =>'5');
-
 		$lcli=anchor_popup('/ventas/scli/dataedit/create',image('list_plus.png','Agregar',array('border'=>'0')),$atts);
 
 		$edit->observa  = new inputField('Observaci&oacute;n', 'observa');
@@ -1171,9 +1170,9 @@ class Sprv extends Controller {
 		$edit->cuenta1->maxlength = 25;
 		$edit->cuenta1->group = "Cuentas Bancarias";
 
-		$edit->banco2 = new dropdownField("Cuenta en bco. (2)", 'banco2');
+		$edit->banco2 = new dropdownField('Cuenta en bco. (2)', 'banco2');
 		$edit->banco2->option('','Ninguno');
-		$edit->banco2->options("SELECT cod_banc,nomb_banc FROM tban ORDER BY nomb_banc");
+		$edit->banco2->options('SELECT cod_banc,nomb_banc FROM tban ORDER BY nomb_banc');
 		$edit->banco2->group = 'Cuentas Bancarias';
 		$edit->banco2->style='width:140px;';
 
@@ -1183,12 +1182,12 @@ class Sprv extends Controller {
 		$edit->cuenta2->maxlength = 25;
 		$edit->cuenta2->group = "Cuentas Bancarias";
 
-		$edit->cliente  = new inputField('Como Cliente', "cliente");
+		$edit->cliente  = new inputField('Como Cliente', 'cliente');
 		$edit->cliente->size =7;
-		$edit->cliente->rule ="trim";
+		$edit->cliente->rule ='trim';
 		$edit->cliente->readonly=true;
 		$edit->cliente->append($bsclid);
-		$edit->cliente->title = "C&oacute;digo como cliente para hacer cruces de cuenta";
+		$edit->cliente->title = 'C&oacute;digo como cliente para hacer cruces de cuenta';
 
 		$edit->prefpago = new dropdownField('Preferencia de pago','prefpago');
 		$edit->prefpago->option('T','Transferencia');
@@ -1222,13 +1221,13 @@ class Sprv extends Controller {
 		$edit->canticipo->size =17;
 		$edit->canticipo->maxlength =15;
 		$edit->canticipo->append($banti);
-		$edit->canticipo->title = "C&oacute;digo en el plan de cuentas contable para cargar anticipos si es diferente";
+		$edit->canticipo->title = 'C&oacute;digo en el plan de cuentas contable para cargar anticipos si es diferente';
 
 		$edit->reteiva  = new inputField('Retenci&oacute;n','reteiva');
 		$edit->reteiva->size = 6;
 		$edit->reteiva->css_class='inputnum';
 		$edit->reteiva->insertValue='75.00';
-		$edit->reteiva->append("%");
+		$edit->reteiva->append('%');
 
 		$edit->build();
 
@@ -1243,7 +1242,6 @@ class Sprv extends Controller {
 			$conten['form']  =&  $edit;
 			$data['content']  =  $this->load->view('view_sprv', $conten);
 		}
-
 	}
 
 	function _pre_delete($do) {
