@@ -13,11 +13,6 @@ class Tbenvio extends Controller {
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('tbenvio','id') ) {
-			$this->db->simple_query('ALTER TABLE tbenvio DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE tbenvio ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE tbenvio ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -1157,10 +1152,14 @@ class Tbenvio extends Controller {
 			  KEY `fecenv` (`fecenv`),
 			  KEY `codofi_des` (`codofi_des`),
 			  KEY `orden` (`orden`)
-			) ENGINE=MyISAM AUTO_INCREMENT=1000911 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
+			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->simple_query($mSQL);
 		}
 		//$campos=$this->db->list_fields('tbenvio');
-		//if(!in_array('<#campo#>',$campos)){ }
+		//if(!in_array('id',$campos)){
+		//	$this->db->simple_query('ALTER TABLE tbenvio DROP PRIMARY KEY');
+		//	$this->db->simple_query('ALTER TABLE tbenvio ADD UNIQUE INDEX numero (numero)');
+		//	$this->db->simple_query('ALTER TABLE tbenvio ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		//}
 	}
 }

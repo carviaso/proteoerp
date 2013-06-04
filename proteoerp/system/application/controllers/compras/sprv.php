@@ -357,12 +357,12 @@ class Sprv extends Controller {
 	function defgrid( $deployed = false ){
 		$i       = 1;
 		$linea   = 1;
-		$editar  = "false";
+		$editar  = 'false';
 
-		$mSQL = "SELECT grupo, CONCAT(grupo, ' ', gr_desc) descrip FROM grpr ORDER BY grupo ";
-		$agrupo  = $this->datasis->llenajqselect($mSQL, false );
+		$mSQL  = 'SELECT grupo, CONCAT(grupo, \' \', gr_desc) descrip FROM grpr ORDER BY grupo';
+		$agrupo= $this->datasis->llenajqselect($mSQL, false );
 
-		$mSQL  = "SELECT cod_banc, CONCAT( nomb_banc) nombre FROM tban ORDER BY nomb_banc ";
+		$mSQL  = 'SELECT cod_banc, nomb_banc nombre FROM tban ORDER BY nomb_banc';
 		$banco = $this->datasis->llenajqselect($mSQL, true );
 
 		$link   = site_url('ajax/buscacpla');
@@ -529,7 +529,7 @@ class Sprv extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('codigo');
-		$grid->label('Cod. Prov.');
+		$grid->label('Cod.Prov.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -770,7 +770,7 @@ class Sprv extends Controller {
 		$grid->setShrinkToFit('false');
 
 
-		$grid->setBarOptions("addfunc: sprvadd, editfunc: sprvedit, delfunc: sprvdel, viewfunc: sprvshow");
+		$grid->setBarOptions('addfunc: sprvadd, editfunc: sprvedit, delfunc: sprvdel, viewfunc: sprvshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -843,8 +843,11 @@ class Sprv extends Controller {
 
 	//Resumen rapido
 	function resumen() {
-		$id = $this->uri->segment($this->uri->total_segments());
-		$row = $this->datasis->damereg("SELECT proveed FROM sprv WHERE id=$id");
+		$id  = $this->uri->segment($this->uri->total_segments());
+		$dbid= $this->db->escape($id);
+		$row = $this->datasis->damereg("SELECT proveed FROM sprv WHERE id=${dbid}");
+		if(empty($row))
+		return;
 		$proveed  = $row['proveed'];
 		$salida = '';
 
@@ -1339,12 +1342,12 @@ class Sprv extends Controller {
 		$grid->db->where('a.tipo_doc IN ("FC","ND","GI") ' );
 		$grid->db->orderby('a.fecha');
 
-		$grid->column("Fecha"  ,'fecha' );
-		$grid->column("Tipo"   ,'tipo_doc','align="CENTER"');
-		$grid->column("Numero" ,"numero",'align="LEFT"');
-		$grid->column("Monto"  ,"<nformat><#monto#></nformat>" ,'align="RIGHT"');
-		$grid->column("Abonos" ,"<nformat><#abonos#></nformat>",'align="RIGHT"');
-		$grid->column("Saldo"  ,"<nformat><#saldo#></nformat>" ,'align="RIGHT"');
+		$grid->column('Fecha'  ,'fecha' );
+		$grid->column('Tipo'   ,'tipo_doc','align="CENTER"');
+		$grid->column('Numero' ,'numero','align="LEFT"');
+		$grid->column('Monto'  ,'<nformat><#monto#></nformat>' ,'align="RIGHT"');
+		$grid->column('Abonos' ,'<nformat><#abonos#></nformat>','align="RIGHT"');
+		$grid->column('Saldo'  ,'<nformat><#saldo#></nformat>' ,'align="RIGHT"');
 		$grid->build();
 
 		$nombre = $this->datasis->dameval("SELECT nombre FROM sprv WHERE id=".$claves['id']." ");
@@ -1361,7 +1364,7 @@ class Sprv extends Controller {
 
 	function vcard($id_sprv) {
 		$dbid = $this->db->escape($id_sprv);
-		$sprv = $this->datasis->damerow("SELECT contacto, nombre, telefono, direc1 dire11 FROM sprv WHERE id=$dbid");
+		$sprv = $this->datasis->damerow("SELECT contacto, nombre, telefono, direc1 dire11 FROM sprv WHERE id=${dbid}");
 
 		if ( !empty($sprv) ) {
 			$this->load->library('Qr');

@@ -4,7 +4,7 @@ class sfacpaga extends Controller {
 	var $url='ventas/sfacpaga/';
 
 	function sfacpaga(){
-		parent::Controller(); 
+		parent::Controller();
 		$this->load->library('rapyd');
 		$this->datasis->modulo_id('12C',1);
 	}
@@ -15,35 +15,38 @@ class sfacpaga extends Controller {
 
 	function filteredgrid(){
 		//filteredgrid//
-		$this->rapyd->load("datafilter","datagrid");
+		$this->rapyd->load('datafilter','datagrid');
 		$this->load->library('encrypt');
 		//$this->rapyd->uri->keep_persistence();
 
 		//filter
 		$filter = new DataFilter('Filtro');
-		$select=array("vd","tipo_doc","numero","fecha","vence","pagada","dias","comision","comical","cod_cli","nombre","sepago");
+		$select=array('vd','tipo_doc','numero','fecha','vence','pagada','dias','comision','comical','cod_cli','nombre','sepago');
 		#$select[]="GROUP_CONCAT(e.despacha) LIKE '%S%' AS parcial";
 		$filter->db->select($select);
-		$filter->db->from('sfac'); 
-		$filter->db->where('pagada > 0');
+		$filter->db->from('sfac');
+		$filter->db->where('pagada >'   ,'0');
 		$filter->db->where('tipo_doc !=','X');
 		$filter->db->orderby('fecha');
 		$filter->db->_escape_char='';
 		$filter->db->_protect_identifiers=false;
 
-		$filter->fechad = new dateonlyField("Desde", "fechad");
-		$filter->fechah = new dateonlyField("Hasta", "fechah");
-		$filter->fechad->clause  =$filter->fechah->clause="where";
-		$filter->fechad->db_name =$filter->fechah->db_name="fecha";
-		$filter->fechad->insertValue = date("Y-m-d");
-		$filter->fechah->insertValue = date("Y-m-d");
-		$filter->fechad->operator=">="; 
-		$filter->fechah->operator="<=";
+		$filter->fechad = new dateonlyField('Desde', 'fechad');
+		$filter->fechah = new dateonlyField('Hasta', 'fechah');
+		$filter->fechad->clause  =$filter->fechah->clause='where';
+		$filter->fechad->db_name =$filter->fechah->db_name='fecha';
+		$filter->fechad->insertValue = date('Y-m-d', mktime(0,0,0,date('n')-1,1));
+		$filter->fechah->insertValue = date('Y-m-d', mktime(0,0,0,date('n')  ,0));
+		$filter->fechad->rule='required|chfecha';
+		$filter->fechah->rule='required|chfecha';
+		$filter->fechad->operator='>=';
+		$filter->fechah->operator='<=';
 
-		$filter->vd = new dropdownField("Vendedor", "vd"); 
-		$filter->vd->db_name = 'vd'; 
-		$filter->vd->clause="where";
-		$filter->vd->operator="=";   
+		$filter->vd = new dropdownField('Vendedor', 'vd');
+		$filter->vd->db_name = 'vd';
+		$filter->vd->rule    = 'required';
+		$filter->vd->clause  = 'where';
+		$filter->vd->operator= '=';
 		$filter->vd->options("SELECT vendedor, CONCAT_WS(' ',vendedor,nombre)a FROM vend ORDER BY vendedor");
 
 		$filter->buttons('reset','search');
@@ -59,7 +62,7 @@ class sfacpaga extends Controller {
 			  'name'    => 'sepago[]',
 			  'id'      => $a,
 			  'value'   => $a,
-			  'checked' => $sepago=='S' ? TRUE:FALSE,
+			  'checked' => $sepago=='S' ? true:false,
 			);
 			return form_checkbox($data);
 		}
@@ -86,18 +89,18 @@ class sfacpaga extends Controller {
 		}
 
 		$link=anchor($this->url.'parcial/<#numero#>','<#numero#>');
-		$grid->column("Vendedor",'<#vd#>');
-		$grid->column("Tipo"    ,"<colum><#tipo_doc#></colum>");
-		$grid->column("N&uacute;mero",'<#numero#>');
-		$grid->column("Fecha"   ,"<dbdate_to_human><#fecha#></dbdate_to_human>");
-		$grid->column("Vence"   ,"<dbdate_to_human><#vence#></dbdate_to_human>");
-		$grid->column("Pagada"  ,"<dbdate_to_human><#pagada#></dbdate_to_human>");
-		$grid->column("Dias"    ,'<nformat><#dias#>|0|,|.</nformat>'        ,"align='right'");
-		$grid->column("Comision",'<nformat><#comision#>|2|,|.</nformat>',"align='right'");
-		$grid->column("Comisi&oacute;n Calculada",'<nformat><#comical#>|2|,|.</nformat>'  ,"align='right'");
-		$grid->column("Cliente" ,'<#cod_cli#>');
-		$grid->column("Nombre"  ,'<#nombre#>');
-		$grid->column("Pagado"  ,"<descheck><#numero#>|<#tipo_doc#>|<#sepago#></descheck>","align=center");
+		$grid->column('Vendedor' ,'<#vd#>');
+		$grid->column('Tipo'     ,'<colum><#tipo_doc#></colum>');
+		$grid->column('N&uacute;mero','<#numero#>');
+		$grid->column('Fecha'    ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
+		$grid->column('Vence'    ,'<dbdate_to_human><#vence#></dbdate_to_human>');
+		$grid->column('Pagada'   ,'<dbdate_to_human><#pagada#></dbdate_to_human>');
+		$grid->column('Dias'     ,'<nformat><#dias#>|0|,|.</nformat>'        ,"align='right'");
+		$grid->column('Comisi&oacute;n','<nformat><#comision#>|2|,|.</nformat>',"align='right'");
+		$grid->column('Comisi&oacute;n Calculada','<nformat><#comical#>|2|,|.</nformat>'  ,"align='right'");
+		$grid->column('Cliente'  ,'<#cod_cli#>');
+		$grid->column('Nombre'   ,'<#nombre#>');
+		$grid->column('Pagado'   ,"<descheck><#numero#>|<#tipo_doc#>|<#sepago#></descheck>","align=center");
 		$grid->build();
 		//echo $grid->db->last_query();
 
@@ -110,9 +113,9 @@ class sfacpaga extends Controller {
 		</script>';
 		$consulta =$grid->db->last_query();
 		$mSQL = $this->encrypt->encode($consulta);
-    
+
 		$campo="<form action='/../../proteoerp/xlsauto/repoauto2/'; method='post'>
- 		<input size='100' type='hidden' name='mSQL' value='$mSQL'>
+ 		<input size='100' type='hidden' name='mSQL' value='${mSQL}'>
  		<input type='submit' value='Descargar a Excel' name='boton'/>
  		</form>";
 
@@ -129,7 +132,9 @@ class sfacpaga extends Controller {
 	function procesar(){
 		foreach($_POST['sepago'] as $key){
 			$a=explode('AA',$key);
-			$mSQL="UPDATE sfac SET sepago='S' WHERE numero='".$a[1]."' AND tipo_doc='".$a[0]."' ";
+			$dbumero=$this->db->escape($a[0]);
+			$dbtipo =$this->db->escape($a[1]);
+			$mSQL="UPDATE sfac SET sepago='S' WHERE numero=${dbumero} AND tipo_doc=${dbtipo}";
 			$this->db->simple_query($mSQL);
 		}
 		redirect('ventas/sfacpaga/filteredgrid/search/osp');
@@ -140,11 +145,11 @@ class sfacpaga extends Controller {
 		$codigo  = $this->db->escape($this->input->post('codigoa'));
 		$usuario = $this->db->escape($this->session->userdata('usuario'));
 
-		$mSQL="UPDATE sitems SET despacha=if(despacha='S','N','S'), fdespacha=if(despacha='S',CURDATE(),null), udespacha=$usuario WHERE codigoa=$codigo AND numa=$numero AND tipoa='F' ";
+		$mSQL="UPDATE sitems SET despacha=IF(despacha='S','N','S'), fdespacha=if(despacha='S',CURDATE(),NULL), udespacha=$usuario WHERE codigoa=${codigo} AND numa=${numero} AND tipoa='F' ";
 		$a   = $this->db->simple_query($mSQL);
-		$can = $this->datasis->dameval("SELECT COUNT(*) FROM sitems WHERE numa=$numero AND tipoa='F' AND despacha='N'");
+		$can = $this->datasis->dameval("SELECT COUNT(*) FROM sitems WHERE numa=${numero} AND tipoa='F' AND despacha='N'");
 		if($can==0){
-			$mSQL="UPDATE sfac SET fdespacha=CURDATE(), udespacha=$usuario WHERE numero=$numero AND tipo_doc='F'";
+			$mSQL="UPDATE sfac SET fdespacha=CURDATE(), udespacha=${usuario} WHERE numero=${numero} AND tipo_doc='F'";
 			$this->db->simple_query($mSQL);
 		}
 	}
@@ -175,7 +180,7 @@ class sfacpaga extends Controller {
 		$grid = new DataGrid('Despacho parcial');
 		$grid->db->_escape_char='';
 		$grid->db->_protect_identifiers=false;
-		
+
 		$grid->db->from('sitems');
 		$grid->db->where('tipoa'   ,'F');
 		$grid->db->where('numa'    ,$numero);
@@ -183,14 +188,14 @@ class sfacpaga extends Controller {
 		$grid->use_function('ractivo');
 		$grid->use_function('colum');
 
-		$grid->column("C&oacute;digo"     ,"codigoa");
-		$grid->column("Descripci&oacute;n","desca");
-		$grid->column("Cantidad","cana","align=right");
-		$grid->column("Precio","<nformat><#preca#></nformat>");
-		$grid->column("Total" ,"<nformat><#tota#></nformat>","align=right");
-		$grid->column("Despachado", "<ractivo><#despacha#>|<#numa#>|<#codigoa#></ractivo>",'align="center"');
+		$grid->column('C&oacute;digo'     ,'codigoa');
+		$grid->column('Descripci&oacute;n','desca'  );
+		$grid->column('Cantidad'  ,'cana',"align=right");
+		$grid->column('Precio'    ,'<nformat><#preca#></nformat>');
+		$grid->column('Total'     ,'<nformat><#tota#></nformat>',"align=right");
+		$grid->column('Despachado','<ractivo><#despacha#>|<#numa#>|<#codigoa#></ractivo>','align="center"');
 		$grid->build();
-		$tabla=$grid->output; 
+		$tabla=$grid->output;
 
 		$script='';
 		$url=site_url('ventas/sfac/activar');
