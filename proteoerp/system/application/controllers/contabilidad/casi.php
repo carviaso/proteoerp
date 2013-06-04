@@ -34,7 +34,6 @@ class Casi extends Controller {
 		$grid1   = $this->defgridit();
 		$param['grids'][] = $grid1->deploy();
 
-
 		$readyLayout = $grid->readyLayout2( 212, 220, $param['grids'][0]['gridname'],$param['grids'][1]['gridname']);
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
@@ -48,18 +47,9 @@ class Casi extends Controller {
 			array('id'=>'fshow'  , 'title'=>'Mostrar registro')
 		);
 
+		//Panel Central y Sur
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
-
-		$centerpanel = '
-		<div id="RightPane" class="ui-layout-center">
-			<div class="centro-centro">
-				<table id="newapi'.$param['grids'][0]['gridname'].'"></table>
-				<div id="pnewapi'.$param['grids'][0]['gridname'].'"></div>
-			</div>
-			<div class="centro-sur" id="adicional" style="overflow:auto;">
-				<table id="newapi'.$param['grids'][1]['gridname'].'"></table>
-			</div>
-		</div> <!-- #RightPane -->';
 
 		$funciones = '
 		function ltransac(el, val, opts){
@@ -94,6 +84,7 @@ class Casi extends Controller {
 	//***************************
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
+		$ngrid      = "#newapi".$grid0;
 
 		$bodyscript .= '
 		function tconsulta(transac){
@@ -116,9 +107,9 @@ class Casi extends Controller {
 
 		$bodyscript .= '
 		function casiedit() {
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret    = $("'.$ngrid.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
@@ -129,7 +120,7 @@ class Casi extends Controller {
 
 		$bodyscript .= '
 		function casishow() {
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				$.post("'.site_url($this->url.'dataedit/show').'/"+id,
 					function(data){
@@ -143,29 +134,30 @@ class Casi extends Controller {
 
 		$bodyscript .= '
 		function casidel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				if(confirm(" Seguro desea eliminar el registro?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					var ret    = $("'.$ngrid.'").getRowData(id);
 					mId = id;
 					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
 						$("#fborra").html(data);
 						$("#fborra").dialog( "open" );
 					});
-					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					jQuery("'.$ngrid.'").trigger("reloadGrid");
 				}
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
 
-		$bodyscript .= '$(function() {';
+
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
 		$bodyscript .= '
 		jQuery("#bimp").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
 				window.open(\''.site_url('formatos/ver/CASI').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});';
@@ -178,9 +170,9 @@ class Casi extends Controller {
 
 		$bodyscript .= '
 		jQuery("#boton3").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
 				window.open(\''.site_url('contabilidad/casi/dataedit/modify').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});';
@@ -190,75 +182,10 @@ class Casi extends Controller {
 			window.open(\''.site_url('contabilidad/casi/auditoria/').'\', \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 		});';
 
-		$bodyscript .= '
-		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
-			buttons: {
-				"Guardar": function() {
-					var bValid = true;
-					var murl = $("#df1").attr("action");
-					$.ajax({
-						type: "POST",
-						dataType: "text",
-						async: false,
-						url: murl,
-						data: $("#df1").serialize(),
-						success: function(r,s,x){
-							try{
-								var json = JSON.parse(r);
-								if (json.status == "A"){
-									apprise("Registro Guardado");
-									$( "#fedita" ).dialog( "close" );
-									jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-									//'.$this->datasis->jwinopen(site_url('formatos/ver/CASI').'/\'+res.id+\'/id\'').';
-									return true;
-								} else {
-									apprise(json.mensaje);
-								}
-							}catch(e){
-								$("#fedita").html(r);
-							}
-						}
-					})
-				},
-				"Cancelar": function() {
-					$("#fedita").html("");
-					$( this ).dialog( "close" );
-				}
-			},
-			close: function() {
-				$("#fedita").html("");
-			}
-		});';
 
-		$bodyscript .= '
-		$("#fshow").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				$("#fshow").html("");
-			}
-		});';
-
-		$bodyscript .= '
-		$("#fborra").dialog({
-			autoOpen: false, height: 300, width: 300, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fborra").html("");
-					$( this ).dialog( "close" );
-					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-				}
-			},
-			close: function() {
-				$("#fborra").html("");
-			}
-		});';
-
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "450", $width = "750" );
+		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "500", $width = "700" );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, "300", "300" );
 
 		$bodyscript .= '});';
 		$bodyscript .= "\n</script>\n";

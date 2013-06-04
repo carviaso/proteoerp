@@ -63,13 +63,13 @@ class Scst extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'cprecios','img'=>'images/precio.png'   ,'alt' => 'Ajustar Precios'    ,'label'=>'Cambiar Precios', ));
-		$grid->wbotonadd(array('id'=>'actualizar','img'=>'images/arrow_up.png' ,'alt' => 'Actualizar','label'=>'Actualizar'));
-		$grid->wbotonadd(array('id'=>'reversar',  'img'=>'images/arrow_down.png' ,'alt' => 'Reversar',  'label'=>'Reversar'));
 		$grid->wbotonadd(array('id'=>'bcmonto' ,'img'=>'images/precio.png' ,'alt' => 'Modificar la CxP'   ,'label'=>'Modificar la CxP'));
-
 
 		if ( $this->datasis->traevalor('MOTOS') == 'S' )
 			$grid->wbotonadd(array('id'=>'vehiculo', 'img'=>'images/carro.png',  'alt' => 'Seriales Vehiculares',   'label'=>'Seriales Vehiculares'));
+
+		$grid->wbotonadd(array('id'=>'actualizar','img'=>'images/arrow_up.png' ,'alt' => 'Actualizar','label'=>'Actualizar'));
+		$grid->wbotonadd(array('id'=>'reversar',  'img'=>'images/arrow_down.png' ,'alt' => 'Reversar',  'label'=>'Reversar'));
 
 		$WestPanel = $grid->deploywestp();
 
@@ -121,6 +121,7 @@ class Scst extends Controller {
 	//***************************
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '<script type="text/javascript">';
+		$ngrid      = "#newapi".$grid0;
 
 		$bodyscript .= '
 		function tconsulta(transac){
@@ -133,7 +134,7 @@ class Scst extends Controller {
 
 		$bodyscript .= '
 		function scstshow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
@@ -180,6 +181,9 @@ class Scst extends Controller {
 
 
 		//Wraper de javascript
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
+
+/*
 		$bodyscript .= '
 		$(function() {
 			$("#dialog:ui-dialog").dialog( "destroy" );
@@ -190,7 +194,11 @@ class Scst extends Controller {
 			var s;
 			var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
+
+
 			s = grid.getGridParam(\'selarrrow\');';
+*/
+
 
 		// Imprime Compra
 		$bodyscript .= '
@@ -285,6 +293,9 @@ class Scst extends Controller {
 				}
 			});';
 
+		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "500", $width = "700" );
+
+/*
 		$bodyscript .= '
 			$("#fshow").dialog({
 				autoOpen: false, height: 500, width: 700, modal: true,
@@ -298,7 +309,7 @@ class Scst extends Controller {
 					$("#fshow").html("");
 				}
 			});';
-
+*/
 
 		$bodyscript .= '
 			$("#actualizar").click( function(){
@@ -390,7 +401,6 @@ class Scst extends Controller {
 					"Actualizar": function() {
 						var bValid = true;
 						var murl = $("#df1").attr("action");
-						allFields.removeClass( "ui-state-error" );
 						if ( bValid ) {
 							$.ajax({
 								type: "POST", dataType: "html", async: false,
@@ -422,7 +432,6 @@ class Scst extends Controller {
 					}
 				},
 				close: function() {
-					allFields.val( "" ).removeClass( "ui-state-error" );
 					$( "#factuali" ).html("");
 				}
 			});';
@@ -444,9 +453,12 @@ class Scst extends Controller {
 						});
 					}
 				} else { $.prompt("<h1>Por favor Seleccione una compra no actualizada</h1>");}
-			});';
+			});'."\n";
 
+		$post = $this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+res.id+\'/id\'').';';
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "570", $width = "860", 'fcompra', $post );
 
+/*
 		$bodyscript .= '
 			$("#fcompra").dialog({
 				autoOpen: false, height: 570, width: 860, modal: true,
@@ -454,7 +466,6 @@ class Scst extends Controller {
 					"Guardar": function() {
 						var bValid = true;
 						var murl = $("#df1").attr("action");
-						allFields.removeClass( "ui-state-error" );
 						if ( bValid ) {
 							$.ajax({
 								type: "POST", dataType: "html", async: false,
@@ -483,19 +494,18 @@ class Scst extends Controller {
 					}
 				},
 				close: function() {
-					allFields.val( "" ).removeClass( "ui-state-error" );
 					$( "#fcompra" ).html("");
 				}
 			});';
+*/
 
-		$bodyscript .= '
+		$bodyscript .= "\n".'
 			$( "#fcmonto" ).dialog({
 				autoOpen: false, height: 300, width: 300, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;
 						var murl = $("#df1").attr("action");
-						allFields.removeClass( "ui-state-error" );
 						if ( bValid ) {
 							$.ajax({
 								type: "POST", dataType: "html", async: false,
@@ -526,7 +536,6 @@ class Scst extends Controller {
 					}
 				},
 				close: function() {
-					allFields.val( "" ).removeClass( "ui-state-error" );
 					$( "#fcmonto" ).html("");
 				}
 			});';
@@ -538,7 +547,6 @@ class Scst extends Controller {
 					"Guardar": function() {
 						var bValid = true;
 						var murl = $("#df1").attr("action");
-						allFields.removeClass( "ui-state-error" );
 						if ( bValid ) {
 							$.ajax({
 								type: "POST", dataType: "html", async: false,
@@ -569,7 +577,6 @@ class Scst extends Controller {
 					}
 				},
 				close: function() {
-					allFields.val( "" ).removeClass( "ui-state-error" );
 					$( "#fvehi" ).html("");
 
 				}
@@ -1319,12 +1326,12 @@ class Scst extends Controller {
 					$("#cprecios").show();
 					$("#actualizar").show();
 					$("#reversar").hide();
-					$("#bcmonto").hide();
+					$("#bcmonto").show();
 				} else {
 					$("#cprecios").hide();
 					$("#actualizar").hide();
 					$("#reversar").show();
-					$("#bcmonto").show();
+					$("#bcmonto").hide();
 				}
 			}},
 			afterInsertRow:
@@ -1965,7 +1972,7 @@ class Scst extends Controller {
 		$edit->mdolar->when=array('show');
 
 		$edit->observa1 = new textareaField('Observaci&oacute;n', 'observa1');
-		$edit->observa1->cols=90;
+		$edit->observa1->cols=65;
 		$edit->observa1->rows=3;
 
 		$edit->observa2 = new textareaField('Observaci&oacute;n', 'observa2');
@@ -2110,28 +2117,44 @@ class Scst extends Controller {
 
 	}
 
+	//
 	function solo() {
 		$this->solo = true;
 		$id = $this->uri->segment($this->uri->total_segments());
 
 		//Creando Compra
 		if ( $id == 'create'){
-			$this->dataedit();
+			$edit = $this->dataedit();
 		}elseif( $id == 'insert'){
 			$this->genesal = false;
 			$rt = $this->dataedit();
 			$id = (isset($this->claves['id']))? $this->claves['id'] :0;
-
 			if(strlen($rt) > 0 ){
 				$rtjson=array('id'=> $id,'mensaje'=> utf8_encode(str_replace("\n",'<br />',$rt)));
 				if($rt=='Compra Guardada'){
-					$rtjson['status']='A';
+					$rtjson=array(
+						'status' => 'A',
+						'mensaje'=> utf8_encode(str_replace("\n",'<br />',$rt)),
+						'pk'     => array("id" => "$id")
+					);
+
+					//$rtjson['status']='A';
 				}else{
-					$rtjson['status']='C';
+					$rtjson=array(
+						'status' => 'C',
+						'mensaje'=> utf8_encode(str_replace("\n",'<br />',$rt)),
+						'pk'     => array("id" => "$id")
+					);
+					//$rtjson['status']='C';
 				}
 				echo json_encode($rtjson);
 			}else{
-				$rtjson=array('id'=> 0,'mensaje'=> utf8_encode('Error desconocido'), 'status'=>'C');
+				$rtjson=array(
+					'status' => 'C',
+					'mensaje'=> 'Error Desconocido',
+					'pk'     => array("id" => "$id")
+				);
+				//$rtjson=array('id'=> 0,'mensaje'=> utf8_encode('Error desconocido'), 'status'=>'C');
 				echo json_encode($rtjson);
 			}
 		}elseif( $id == 'process'){
@@ -2155,13 +2178,23 @@ class Scst extends Controller {
 			} else {
 				if ( $modo == 'update' ) $this->genesal = false;
 				$rt = $this->dataedit();
-				if($rt=='Compra Guardada'){
+
+				//if($rt->on_success()){
+				
+				if($rt == 'Compra Guardada'){
 					$p='A';
+
+				$rtjson=array(
+					'status' => $p,
+					'mensaje'=> "$rt",
+					'pk'     => array("id" => "$id")
+				);
+				//$rtjson = array('status'=>$p, 'id'=> $id, 'mensaje'=> $rt);
+				echo json_encode($rtjson);
 				}else{
 					$p='C';
 				}
-				$rtjson = array('status'=>$p, 'id'=> $id, 'mensaje'=> $rt);
-				echo json_encode($rtjson);
+
 			}
 		}
 	}
@@ -2768,7 +2801,7 @@ class Scst extends Controller {
 		$edit->tipo->style='width:140px;';
 
 		$edit->observa1 = new textareaField('Observaci&oacute;n', 'observa1');
-		$edit->observa1->cols=90;
+		$edit->observa1->cols=40;
 		$edit->observa1->rows=3;
 
 		$edit->montotot  = new inputField('Subtotal', 'montotot');

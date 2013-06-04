@@ -31,7 +31,11 @@ class Tbpasa extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"factura",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Facturar"));
+		$grid->wbotonadd(array("id"=>"boletos",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Emitir Boletos"));
+		$grid->wbotonadd(array("id"=>"boletos",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Cambiar Reserva"));
+		$grid->wbotonadd(array("id"=>"boletos",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Eliminar Reserva"));
+
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -59,6 +63,7 @@ class Tbpasa extends Controller {
 	//***************************
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
+		$ngrid      = "#newapi".$grid0;
 
 		$bodyscript .= '
 		function tbpasaadd(){
@@ -125,90 +130,12 @@ class Tbpasa extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+
 		//Wraper de javascript
-		$bodyscript .= '
-		$(function(){
-			$("#dialog:ui-dialog").dialog( "destroy" );
-			var mId = 0;
-			var montotal = 0;
-			var ffecha = $("#ffecha");
-			var grid = jQuery("#newapi'.$grid0.'");
-			var s;
-			var allFields = $( [] ).add( ffecha );
-			var tips = $( ".validateTips" );
-			s = grid.getGridParam(\'selarrrow\');
-			';
-
-		$bodyscript .= '
-		$("#fedita").dialog({
-			autoOpen: false, height: 550, width: 700, modal: true,
-			buttons: {
-				"Guardar": function() {
-					var bValid = true;
-					var murl = $("#df1").attr("action");
-					allFields.removeClass( "ui-state-error" );
-					$.ajax({
-						type: "POST", dataType: "html", async: false,
-						url: murl,
-						data: $("#df1").serialize(),
-						success: function(r,s,x){
-							try{
-								var json = JSON.parse(r);
-								if (json.status == "A"){
-									apprise("Registro Guardado");
-									$( "#fedita" ).dialog( "close" );
-									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/TBPASA').'/\'+res.id+\'/id\'').';
-									return true;
-								} else {
-									apprise(json.mensaje);
-								}
-							}catch(e){
-								$("#fedita").html(r);
-							}
-						}
-					})
-				},
-				"Cancelar": function() {
-					$("#fedita").html("");
-					$( this ).dialog( "close" );
-				}
-			},
-			close: function() {
-				$("#fedita").html("");
-				allFields.val( "" ).removeClass( "ui-state-error" );
-			}
-		});';
-
-		$bodyscript .= '
-		$("#fshow").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fshow").html("");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				$("#fshow").html("");
-			}
-		});';
-
-		$bodyscript .= '
-		$("#fborra").dialog({
-			autoOpen: false, height: 300, width: 400, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fborra").html("");
-					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-				$("#fborra").html("");
-			}
-		});';
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "550", $width = "770" );
+		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "500", $width = "700" );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $height = "450", $width = "750" );
 
 		$bodyscript .= '});'."\n";
 
@@ -641,13 +568,13 @@ class Tbpasa extends Controller {
 		$edit->org->rule = '';
 		$edit->org->option('','Seleccionar');
 		$edit->org->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
-		$edit->org->style ='width:200px;';
+		$edit->org->style ='width:160px;';
 
 		$edit->dtn = new dropdownField('Destino','dtn');
 		$edit->dtn->rule='';
 		$edit->dtn->option('','Seleccionar');
 		$edit->dtn->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
-		$edit->dtn->style='width:200px;';
+		$edit->dtn->style='width:160px;';
 
 		$edit->nropasa = new inputField('Nro. Pasaje','nropasa');
 		$edit->nropasa->rule       = '';
@@ -842,11 +769,11 @@ class Tbpasa extends Controller {
 		$rs = "No hay Disponibilidad";
 		$bl = "\t\t<td>&nbsp;<td>\n";
 		
-		$rs  = "<table>";
+		$rs  = "<table style='border-collapse:collapse;'>";
 		//$rs .= "<tr><td colspan='3' align='center'>Ruta: ".$codrut." Fecha: ".$dia."/".$mes."/".$ano."</td></tr>";
 	
 		$rs .= "<tr><td>PLANTA BAJA</td><td>&nbsp;&nbsp;</td><td>PLANTA ALTA</td></tr>";
-		$rs .= "<tr><td><table>\n\t<tr>\n";
+		$rs .= "<tr><td><table style='border-collapse:collapse;'>\n\t<tr>\n";
 
 		$mSQL = $mSQL1." b.indice < 12 ORDER BY b.indice ";
 		$rs .= $this->busfila($mSQL, 0);
@@ -863,7 +790,7 @@ class Tbpasa extends Controller {
 		$rs .= "</table>\n</td>\n<td>&nbsp;</td>";
 
 		// SEGUNDO PISO
-		$rs .= "<td>\n<table>\n\t<tr>\n";
+		$rs .= "<td>\n<table style='border-collapse:collapse;'>\n\t<tr>\n";
 
 		$mSQL = $mSQL1." b.indice >= 100 AND b.indice < 112 ORDER BY b.indice ";
 		$rs .= $this->busfila($mSQL, 100);
@@ -877,10 +804,7 @@ class Tbpasa extends Controller {
 		$mSQL = $mSQL1." b.indice > 135 AND b.indice < 148 ORDER BY b.indice ";
 		$rs .= $this->busfila($mSQL, 136);
 
-
 		$rs .= "</table>\n</td></tr></table>";
-
-
 
 		echo $rs;
 		
@@ -890,10 +814,10 @@ class Tbpasa extends Controller {
 	//
 	//
 	function busfila($mSQL, $i) {
-		$libre   = "style='background:#0EF72D; font-weight:bold;'";
-		$ocupado = "style='background:#FC0532; color:#FFFFFF';";
-		$reserva = "style='background:#050505; color:#FFFFFF';";
-		$manual  = "bgcolor='#F2A2F2'";
+		$libre   = "style='background:#0EF72D;'";
+		$ocupado = "style='background:#FC0532;'"; //color:#FFFFFF; font-weight:bold;'";
+		$reserva = "style='background:#050505;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
+		$manual  = "style='background:#F2A2F2;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
 		$mi = $i;
 		$query = $this->db->query($mSQL);
 
@@ -916,13 +840,12 @@ class Tbpasa extends Controller {
 					$i++;	
 					if ( $i > $mi+12  ) break;
 				}
-				
 				if ( $i == $row['indice'] ){
 					if ($row['estatus'] == 'L')
-						$rs1 = "\t\t<td ".$color." ><a href='#' onclick='reserva(".$row['indice'].")' >".utf8_encode($row['valor'])."</a><td>\n".$rs1;
+						$rs1 = "\t\t<td ".$color." ><input type='checkbox' id='asiento".$row['indice']."' ><label for='asiento".$row['indice']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
 					else
-						$rs1 = "\t\t<td ".$color." >".utf8_encode($row['valor'])."<td>\n".$rs1;
-					
+						$rs1 = "\t\t<td ".$color." ><input type='checkbox' id='asiento".$row['indice']."' disable='disable' ><label for='asiento".$row['indice']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
+						//$rs1 = "\t\t<td ".$color." >".utf8_encode($row['valor'])."<td>\n".$rs1;
 				}
 				$i ++;
 			}

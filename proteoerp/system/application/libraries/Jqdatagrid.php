@@ -1761,9 +1761,10 @@ class Jqdatagrid
 	//******************************************************************
 	// Dialogo fedita
 	//
-	function bsfedita( $ngrid, $height = "300", $width = "550" ){
+	function bsfedita( $ngrid, $height = "300", $width = "550", $dialogo='fedita', $post='', $botones='' ){
+		if ($dialogo == '') $dialogo='fedita';
 		$bodyscript = '
-		$("#fedita").dialog({
+		$("#'.$dialogo.'").dialog({
 			autoOpen: false, height: '.$height.', width: '.$width.', modal: true,
 			buttons: {
 				"Guardar": function() {
@@ -1781,26 +1782,26 @@ class Jqdatagrid
 											setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
 										}}
 									);
-									$( "#fedita" ).dialog( "close" );
+									$( "#'.$dialogo.'" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									idactual = json.pk.id;
+									idactual = json.pk.id;'.$post.'
 									return true;
 								} else {
 									$.prompt(json.mensaje);
 								}
 							} catch(e) {
-								$("#fedita").html(r);
+								$("#'.$dialogo.'").html(r);
 							}
 						}
 					})
-				},
+				},'.$botones.'
 				"Cancelar": function() {
-					$("#fedita").html("");
+					$("#'.$dialogo.'").html("");
 					$( this ).dialog( "close" );
 				}
 			},
 			close: function() {
-				$("#fedita").html("");
+				$("#'.$dialogo.'").html("");
 			}
 		});';
 

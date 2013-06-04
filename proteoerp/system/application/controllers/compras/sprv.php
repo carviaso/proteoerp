@@ -244,18 +244,7 @@ class Sprv extends Controller {
 		};';
 
 		//Wraper de javascript
-		$bodyscript .= '
-		$(function() {
-			$("#dialog:ui-dialog").dialog( "destroy" );
-			var mId = 0;
-			var montotal = 0;
-			var ffecha = $("#ffecha");
-			var grid = jQuery("'.$ngrid.'");
-			var s;
-			var allFields = $( [] ).add( ffecha );
-			var tips = $( ".validateTips" );
-			s = grid.getGridParam(\'selarrrow\');
-			';
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
 		$bodyscript .= '
 		jQuery("#edocta").click( function(){

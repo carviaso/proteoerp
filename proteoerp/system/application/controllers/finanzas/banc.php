@@ -81,7 +81,6 @@ class Banc extends Controller {
 		FROM banc WHERE activo='S'";
 		$this->db->query($mSQL);
 
-
 		$mSQL = "SELECT ano, ano nombre FROM bsal WHERE ano <= YEAR(curdate()) GROUP BY ano ORDER BY ano DESC";
 		$mano = $this->datasis->llenaopciones($mSQL, false, 'mmano');
 		$mano = str_replace('"',"'",$mano);
@@ -124,8 +123,6 @@ class Banc extends Controller {
 
 		$bodyscript .= '
 		function frecalbanco( id, ano, saldo ){
-			//saldo = Math.round(saldo,0);
-			//alert("ano="+ano);
 			$.blockUI({message: "<h1>Calculando Saldos.....</h1><img  src=\''.base_url().'images/doggydig.gif\' width=\'131px\' height=\'79px\'  /> "});
 			$.post("'.site_url('finanzas/banc/recalban').'/"+id+"/"+ano+"/"+saldo, function(){ $.unblockUI(); })
 		};
@@ -169,76 +166,9 @@ class Banc extends Controller {
 		};';
 
 		//Wraper de javascript
-		$bodyscript .= '
-		$(function() {
-			$("#dialog:ui-dialog").dialog( "destroy" );
-			var mId = 0;
-			var montotal = 0;
-			var ffecha = $("#ffecha");
-			var grid = jQuery("'.$ngrid.'");
-			var s;
-			var allFields = $( [] ).add( ffecha );
-			var tips = $( ".validateTips" );
-			s = grid.getGridParam(\'selarrrow\');
-			';
-
-		$bodyscript .= '
-		$("#fedita").dialog({
-			autoOpen: false, height: 450, width: 750, modal: true,
-			buttons: {
-				"Guardar": function() {
-					var murl = $("#df1").attr("action");
-					allFields.removeClass( "ui-state-error" );
-					$.ajax({
-						type: "POST", dataType: "html", async: false,
-						url: murl,
-						data: $("#df1").serialize(),
-						success: function(r,s,x){
-							try{
-								var json = JSON.parse(r);
-								if (json.status == "A"){
-									$("#fedita").dialog( "close" );
-									grid.trigger("reloadGrid");
-									$.prompt("<h1>Registro Guardado</h1>",{
-										submit: function(e,v,m,f){
-											setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
-										}}
-									);
-									idactual = json.pk.id;
-									return true;
-								} else {
-									$.prompt("Error: "+json.mensaje);
-								}
-							} catch(e){
-								$("#fedita").html(r);
-							}
-						}
-					})
-				},
-				"Cancelar": function() {
-					$("#fedita").html("");
-					$( this ).dialog( "close" );
-				}
-			},
-			close: function() {
-				$("#fedita").html("");
-				allFields.val( "" ).removeClass( "ui-state-error" );
-			}
-		});';
-
-		$bodyscript .= '
-		$("#fshow").dialog({
-			autoOpen: false, height: 450, width: 750, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fshow").html("");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				$("#fshow").html("");
-			}
-		});';
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "450", $width = "750" );
+		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "450", $width = "750" );
 
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
@@ -956,9 +886,6 @@ class Banc extends Controller {
 			$conten['form']  =&  $edit;
 			$data['content']  =  $this->load->view('view_banc', $conten, false);
 		}
-
-		//$conten["form"]  =&  $edit;
-		//$data['content'] = $this->load->view('view_banc', $conten, false );
 
 	}
 

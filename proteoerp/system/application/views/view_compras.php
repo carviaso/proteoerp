@@ -487,36 +487,24 @@ if (!$solo){
 //	</tr>
 ?>
 	<tr>
-		<td width="131" class="littletablerowth" align='right'><?php echo $container_bl ?></td>
+		<td width="131" class="littletablerowth" align='left'><?php echo $container_bl ?></td>
 <?php /*		<td width="131" class="littletablerowth" align='right'><?php echo $form->rislr->label;     ?></td>*/?>
 		<td width="122" class="littletablerow"   align='right'><?php echo $form->rislr->output;    ?></td>
-		<td width="125" class="littletablerowth" align='right'><?php echo $form->anticipo->label;  ?></td>
-		<td width="125" class="littletablerow"   align='right'><?php echo $form->anticipo->output; ?></td>
+		<td class="littletablerowth" align='right'><?php echo $form->riva->label;      ?></td>
+		<td class="littletablerow"   align='left'><?php echo $form->riva->output;     ?></td>
 		<td width="111" class="littletablerowth" align='right'><?php echo $form->montotot->label;  ?></td>
 		<td width="139" class="littletablerow"   align='right'><?php echo $form->montotot->output; ?></td>
 	</tr>
 	<tr>
-		<td class="littletablerowth" align='right'><?php echo $form->riva->label;      ?></td>
-		<td class="littletablerow"   align='right'><?php echo $form->riva->output;     ?></td>
-		<td class="littletablerowth" align='right'><?php echo $form->inicial->label;   ?></td>
-		<td class="littletablerow"   align='right'><?php echo $form->inicial->output;  ?></td>
+		<td class="littletableheader" width="100"  rowspan='2'><?php echo $form->observa1->label;    ?></td>
+		<td colspan='3' rowspan='2'><?php echo $form->observa1->output;   ?><?php echo $form->observa2->output;   ?><?php echo $form->observa3->output;?></td>
+
 		<td class="littletablerowth" align='right'><?php echo $form->montoiva->label;  ?></td>
 		<td class="littletablerow"   align='right'><?php echo $form->montoiva->output; ?></td>
 	</tr>
-
 	<tr>
-		<td class="littletablerowth" align='right'><?php echo $form->mdolar->label;   ?></td>
-		<td class="littletablerow"   align='right'><?php echo $form->mdolar->output;  ?></td>
-		<td class="littletablerowth" align='right'><?php echo $form->credito->label;  ?></td>
-		<td class="littletablerow"   align='right'><?php echo $form->credito->output; ?></td>
 		<td class="littletablerowth" align='right'><?php echo $form->montonet->label; ?></td>
 		<td class="littletablerow"   align='right'><b id='montonet_val' style='font-size:18px;font-weight: bold' ><?php echo nformat($form->montonet->value); ?></b><?php echo $form->montonet->output; ?></td>
-	</tr>
-</table>
-<table width="100%">
-	<tr>
-		<td class="littletableheader" width="100"><?php echo $form->observa1->label;    ?></td>
-		<td><?php echo $form->observa1->output;   ?><?php echo $form->observa2->output;   ?><?php echo $form->observa3->output;?></td>
 	</tr>
 </table>
 
@@ -524,4 +512,30 @@ if (!$solo){
 	<tr>
 <table>
 <?php echo $form_end?>
-<?php endif; ?>
+<?php endif; 
+
+/*
+
+
+		<td width="125" class="littletablerowth" align='right'><?php echo $form->anticipo->label;  ?></td>
+		<td width="125" class="littletablerow"   align='right'><?php echo $form->anticipo->output; ?></td>
+
+		<td class="littletablerowth" align='right'><?php echo $form->inicial->label;   ?></td>
+		<td class="littletablerow"   align='right'><?php echo $form->inicial->output;  ?></td>
+
+		<td class="littletablerowth" align='right'><?php echo $form->mdolar->label;   ?></td>
+		<td class="littletablerow"   align='right'><?php echo $form->mdolar->output;  ?></td>
+		<td class="littletablerowth" align='right'><?php echo $form->credito->label;  ?></td>
+		<td class="littletablerow"   align='right'><?php echo $form->credito->output; ?></td>
+
+
+<table width="100%">
+	<tr>
+		<td class="littletableheader" width="100"><?php echo $form->observa1->label;    ?></td>
+		<td><?php echo $form->observa1->output;   ?><?php echo $form->observa2->output;   ?><?php echo $form->observa3->output;?></td>
+	</tr>
+</table>
+
+*/
+
+?>
