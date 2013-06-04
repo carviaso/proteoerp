@@ -186,6 +186,9 @@ class repomenu extends validaciones {
 		$this->load->view('view_ventanas', $data);
 	}
 
+	//******************************************************************
+	// Edita el Reporte
+	//
 	function reporte(){
 		$this->rapyd->load('dataedit');
 		$this->rapyd->uri->keep_persistence();
@@ -201,23 +204,44 @@ class repomenu extends validaciones {
 
 		$edit = new DataEdit('', 'reportes');
 		$id=$edit->_dataobject->pk['nombre'];
+
 		$uri2=anchor_popup('reportes/ver/'.$id, 'Probar reporte', $atts);
 		$uri3=anchor_popup('supervisor/mantenimiento/centinelas', 'Centinela', $atts);
-		$edit->title($uri2.' '.$uri3);
 
-		$script='$("#df1").submit(function(){
-		//$.post("'.site_url('supervisor/repomenu/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: proteo.getCode()},
-		$.post("'.site_url('supervisor/repomenu/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
+		$edit->title(' ');
+
+		$script='
+		$("#df1").submit(function(){
+			$.post("'.site_url('supervisor/repomenu/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
 			function(data){
 				alert("Reporte guardado" + data);
 			},
 			"application/x-www-form-urlencoded;charset='.$this->config->item('charset').'");
 			return false;
-		});';
+		});
+		
+		function fcargar(){
+			$.post("'.site_url('supervisor/repomenu/cargar/').'", { nombre:"'.$id.'"},
+			function(data){
+				if (data){ $("#proteo").val(data); } else { alert("Archivo vacio");}
+			});
+			return false;
+		};
+
+		function fguardar(){
+			$.post("'.site_url('supervisor/repomenu/guardar/').'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
+			function(data){
+				alert(data);
+			});
+			return false;
+		};
+
+		
+		';
 
 		$edit->script($script,'modify');
-		$edit->back_save  =true;
-		$edit->back_cancel=true;
+		$edit->back_save  = true;
+		$edit->back_cancel= true;
 		$edit->back_cancel_save=true;
 		$edit->back_url = site_url('supervisor/repomenu/filteredgrid');
 
@@ -225,35 +249,45 @@ class repomenu extends validaciones {
 		$edit->proteo->rows =30;
 		$edit->proteo->cols =130;
 		$edit->proteo->css_class='text-indent:100px;';
-		//$edit->proteo->css_class='codepress php linenumbers-on readonly-off';
-		//$edit->proteo->when = array('create','modify');
 
 		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
+
+		$accion=$this->datasis->jwinopen(site_url("reportes/ver/".$id."'"));
+		$edit->button_status('btn_probar','Probar Reporte',$accion,'TL','modify');
+
+		$accion=$this->datasis->jwinopen(site_url("supervisor/mantenimiento/centinelas'"));
+		$edit->button_status('btn_centinela','Centinelas',$accion,'TL','modify');
+
+		$edit->button_status('btn_guardar','Guardar a Archivo','fguardar()','TL','modify');
+		$edit->button_status('btn_cargar','Cargar desde Archivo','fcargar()','TL','modify');
+
 		$edit->build();
 
 		$this->rapyd->jquery[]='$("#proteo").tabby();';
-		$this->rapyd->jquery[]='$("#proteo").linedtextarea();'; // $(".lined").linedtextarea({selectedLine: 1});
+		$this->rapyd->jquery[]='$("#proteo").linedtextarea();'; 
+
 		if($this->genesal){
 			$data['content'] = $edit->output;
-			$data['title']   = '<h1>Reporte Proteo</h1>';
+			$data['title']   = '<h1>Editando Reporte '.$id.'</h1>';
+
 			$data['head']    = $this->rapyd->get_head();
-			$data['head']   .= script('plugins/jquery-linedtextarea.js').script('plugins/jquery.textarea.js').style('jquery-linedtextarea.css');
-			//$data['head']   .= script('codepress/codepress.js');
+			$data['head']   .= script('plugins/jquery-linedtextarea.js');
+			$data['head']   .= script('plugins/jquery.textarea.js');
+			$data['head']   .= style('jquery-linedtextarea.css');
 
 			$this->load->view('view_ventanas_sola', $data);
 		}else{
 			echo $edit->error_string;
 		}
-
 	}
 
 	function gajax_proteo(){
 		header('Content-Type: text/html; '.$this->config->item('charset'));
-		$this->genesal=false;
+		$this->genesal = false;
 		$nombre=$this->input->post('nombre');
 		$proteo=$this->input->post('proteo');
 
-		if($proteo!==false and $nombre!==false){
+		if($proteo !== false and $nombre !== false){
 			if(stripos($this->config->item('charset'), 'utf')===false){
 				$_POST['nombre']=utf8_decode($nombre);
 				$_POST['proteo']=utf8_decode($proteo);
@@ -335,6 +369,34 @@ class repomenu extends validaciones {
 			echo 0;
 		}
 	}
+
+	function guardar(){
+		$rs = false;
+		$nombre=$this->input->post('nombre');
+		$proteo=$this->input->post('proteo');
+		if($proteo !== false and $nombre !== false){
+			if(stripos($this->config->item('charset'), 'utf')===false){
+				$rs = file_put_contents('formrep/reportes/proteo/'.$nombre.'.rep',$proteo);
+			}
+		}
+		if ($rs)
+			echo "Reporte Guardado";
+		else
+			echo "Error al guardar";
+		
+	}
+
+	function cargar(){
+		$nombre=$this->input->post('nombre');
+		if( $nombre ){
+			if ( file_exists('formrep/reportes/proteo/'.$nombre.'.rep') ){
+				$leer = file_get_contents('formrep/reportes/proteo/'.$nombre.'.rep');
+				if ( $leer ) echo $leer;
+			}
+		}
+	}
+
+
 
 	function _post_insert($do){
 		$nombre=$do->get('nombre');

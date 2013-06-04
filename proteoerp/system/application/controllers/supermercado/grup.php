@@ -151,7 +151,6 @@ class Grup extends Controller {
 				"Guardar": function() {
 					var bValid = true;
 					var murl = $("#df1").attr("action");
-					allFields.removeClass( "ui-state-error" );
 					$.ajax({
 						type: "POST", dataType: "html", async: false,
 						url: murl,

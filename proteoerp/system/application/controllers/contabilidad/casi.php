@@ -150,9 +150,6 @@ class Casi extends Controller {
 			}
 		};';
 
-
-		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
-
 		$bodyscript .= '
 		jQuery("#bimp").click( function(){
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -161,7 +158,6 @@ class Casi extends Controller {
 				window.open(\''.site_url('formatos/ver/CASI').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});';
-
 
 		$bodyscript .= '
 		jQuery("#boton2").click( function(){
@@ -183,6 +179,7 @@ class Casi extends Controller {
 		});';
 
 
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "450", $width = "750" );
 		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "500", $width = "700" );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, "300", "300" );

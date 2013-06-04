@@ -143,14 +143,11 @@ class Scli extends validaciones {
 		$bodyscript = '<script type="text/javascript">';
 		$ngrid = '#newapi'.$grid0;
 
-		//$("a.ayuda1").pageslide();
-
-
 		$bodyscript .= '
 		jQuery("#edocta").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var ret = jQuery("#'.$ngrid.'").jqGrid(\'getRowData\',id);
 				'.$this->datasis->jwinopen(site_url('reportes/ver/SMOVECU/SCLI/').'/\'+ret.cliente').';
 			} else { $.prompt("<h1>Por favor Seleccione un Cliente</h1>");}
 		});
@@ -159,9 +156,9 @@ class Scli extends validaciones {
 		// Creditos
 		$bodyscript .= '
 		jQuery("#editacr").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret    = $("'.$ngrid.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url('ventas/scli/creditoedit/modify').'/"+id, function(data){
 					$("#fedita").html("");
@@ -183,9 +180,9 @@ class Scli extends validaciones {
 
 		$bodyscript .= '
 		function scliedit() {
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret    = $("'.$ngrid.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url('ventas/scli/dataedit/modify').'/"+id, function(data){
 					$("#feditcr").html("");
@@ -197,10 +194,10 @@ class Scli extends validaciones {
 
 		$bodyscript .= '
 		function sclidel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				if(confirm(" Seguro desea eliminar el registro?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					var ret    = $("'.$ngrid.'").getRowData(id);
 					mId = id;
 					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
 						try{
@@ -223,9 +220,9 @@ class Scli extends validaciones {
 
 		$bodyscript .= '
 		function sclishow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret    = $("'.$ngrid.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
 					$("#fshow").html(data);
@@ -237,19 +234,17 @@ class Scli extends validaciones {
 		};';
 
 		//Wraper de javascript
-		$bodyscript .= '
-		$(function() {
-			$("#dialog:ui-dialog").dialog( "destroy" );
-			var mId = 0;
-			var montotal = 0;
-			var ffecha = $("#ffecha");
-			var grid = jQuery("#newapi'.$grid0.'");
-			var s;
-			var allFields = $( [] ).add( ffecha );
-			var tips = $( ".validateTips" );
-			s = grid.getGridParam(\'selarrrow\');
-			';
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
+		$botones ='
+				"SENIAT":   function() { consulrif("rifci"); },
+				"C.N.E.":   function() { consulcne("rifci"); },';
+
+
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "550", $width = "800",'','',$botones );
+
+
+/*
 		$bodyscript .= '
 		$("#fedita").dialog({
 			autoOpen: false, height: 550, width: 800, modal: true,
@@ -280,15 +275,16 @@ class Scli extends validaciones {
 
 					}
 				)},
-				"Cancelar": function() { $(this).dialog("close"); },
 				"SENIAT":   function() { consulrif("rifci"); },
 				"C.N.E.":   function() { consulcne("rifci"); }
+				"Cancelar": function() { $(this).dialog("close"); },
 			},
 			close: function(){
 				allFields.val("").removeClass("ui-state-error");
 				$("#fedita").html("");
 			}
 		});';
+*/
 
 		$bodyscript .= '
 		$("#feditcr").dialog({
@@ -297,7 +293,6 @@ class Scli extends validaciones {
 				"Guardar": function() {
 					var bValid = true;
 					var murl = $("#df1").attr("action");
-					//allFields.removeClass( "ui-state-error" );
 					$.ajax({
 						type: "POST", dataType: "html", async: false,
 						url: murl,
@@ -325,35 +320,11 @@ class Scli extends validaciones {
 		});';
 
 
-		$bodyscript .= '
-		$("#fshow").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fshow").html("");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				$("#fshow").html("");
-			}
-		});';
+		
+		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "500", $width = "700" );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, "300", "300" );
 
-		$bodyscript .= '
-		$("#fborra").dialog({
-			autoOpen: false, height: 300, width: 400, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fborra").html("");
-					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-				$("#fborra").html("");
-			}
-		});';
+
 
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
@@ -1567,6 +1538,7 @@ class Scli extends validaciones {
 		$do->pointer('tarifa' ,'tarifa.id =scli.tarifa' ,'`tarifa`.`actividad`  AS tactividad, `tarifa`.`minimo`  AS tminimo'  ,'left');
 
 		$edit = new DataEdit('Clientes', $do);
+		$edit->on_save_redirect=false;
 		$edit->pre_process('delete','_pre_del');
 		$edit->pre_process('insert','_pre_ins');
 		$edit->pre_process('update','_pre_udp');
@@ -1816,9 +1788,24 @@ class Scli extends validaciones {
 		$edit->tminimo->showformat  = 'decimal';
 		$edit->tminimo->type='inputhidden';
 
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form']  =& $edit;
+			$conten['script'] =  $script;
+			$this->load->view('view_scli', $conten);
+		}
+
+/*
 		if($this->genesal){
 			$edit->build();
-
 			$conten['form']   =& $edit;
 			$conten['script'] =  $script;
 			$data['content']  =  $this->load->view('view_scli', $conten);
@@ -1827,12 +1814,20 @@ class Scli extends validaciones {
 			$edit->on_save_redirect=false;
 			$edit->build();
 			if($edit->on_success()){
-				$rt= 'Cliente Guardado';
+				//$rt= 'Cliente Guardado';
+				$rt=array(
+					'status' =>'A',
+					'mensaje'=>'Cliente Guardado',
+					'pk'     =>$edit->_dataobject->pk
+				);
+				$rt = json_encode($rt);
 			}elseif($edit->on_error()){
 				$rt= html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string));
 			}
 			return $rt;
 		}
+*/
+
 	}
 
 	function dataeditexpress(){
