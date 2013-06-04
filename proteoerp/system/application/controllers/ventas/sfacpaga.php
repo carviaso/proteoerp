@@ -135,8 +135,8 @@ class sfacpaga extends Controller {
 
 		foreach($_POST['sepago'] as $key){
 			$a=explode('AA',$key);
-			$dbumero=$this->db->escape($a[0]);
-			$dbtipo =$this->db->escape($a[1]);
+			$dbumero=$this->db->escape($a[1]);
+			$dbtipo =$this->db->escape($a[0]);
 			$mSQL="UPDATE sfac SET sepago='S' WHERE numero=${dbumero} AND tipo_doc=${dbtipo}";
 			$this->db->simple_query($mSQL);
 		}
