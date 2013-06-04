@@ -14,10 +14,9 @@ class sfacpaga extends Controller {
 	}
 
 	function filteredgrid(){
-		//filteredgrid//
 		$this->rapyd->load('datafilter','datagrid');
 		$this->load->library('encrypt');
-		//$this->rapyd->uri->keep_persistence();
+		$this->rapyd->uri->keep_persistence();
 
 		//filter
 		$filter = new DataFilter('Filtro');
@@ -114,10 +113,10 @@ class sfacpaga extends Controller {
 		$consulta =$grid->db->last_query();
 		$mSQL = $this->encrypt->encode($consulta);
 
-		$campo="<form action='/../../proteoerp/xlsauto/repoauto2/'; method='post'>
- 		<input size='100' type='hidden' name='mSQL' value='${mSQL}'>
- 		<input type='submit' value='Descargar a Excel' name='boton'/>
- 		</form>";
+		//$campo="<form action='/../../proteoerp/xlsauto/repoauto2/'; method='post'>
+		//<input size='100' type='hidden' name='mSQL' value='${mSQL}'>
+		//<input type='submit' value='Descargar a Excel' name='boton'/>
+		//</form>";
 
 		$attributes = array('id' => 'asepago');
 		$data['content'] =  $filter->output;//.$campo;
@@ -130,6 +129,10 @@ class sfacpaga extends Controller {
 	}
 
 	function procesar(){
+		$this->rapyd->uri->keep_persistence();
+		$persistence = $this->rapyd->session->get_persistence($this->url.'filteredgrid', $this->rapyd->uri->gfid);
+		$back= (isset($persistence['back_uri'])) ?$persistence['back_uri'] : $this->url.'filteredgrid';
+
 		foreach($_POST['sepago'] as $key){
 			$a=explode('AA',$key);
 			$dbumero=$this->db->escape($a[0]);
@@ -137,7 +140,9 @@ class sfacpaga extends Controller {
 			$mSQL="UPDATE sfac SET sepago='S' WHERE numero=${dbumero} AND tipo_doc=${dbtipo}";
 			$this->db->simple_query($mSQL);
 		}
-		redirect('ventas/sfacpaga/filteredgrid/search/osp');
+
+		//redirect('ventas/sfacpaga/filteredgrid/search/osp');
+		redirect($back);
 	}
 
 	function activar(){
