@@ -129,48 +129,62 @@ function ctarifa(){
 <?php } ?>
 
 	<?php echo $container_tr; ?>
-	<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
+	<fieldset style='border: 1px outset #FEB404;background: #9CF180;'>
 		<legend align="left">Oficinas</legend>
 		<table width="100%" style="margin: 0; width: 100%;">
 			<tr>
-				<td class="littletableheader"><?php echo $form->codofi_org->label;   ?>*&nbsp;</td>
+				<td class="littletablerow"><?php echo $form->codofi_org->label;   ?>*&nbsp;</td>
 				<td class="littletablerow" colspan='2'><?php echo $form->codofi_org->output;  ?>&nbsp; </td>
-				<td class="littletableheader"><?php echo $form->codofi_des->label;   ?>*&nbsp;</td>
+				<td class="littletablerow"><?php echo $form->codofi_des->label;   ?>*&nbsp;</td>
 				<td class="littletablerow" colspan='2'><?php echo $form->codofi_des->output;  ?>&nbsp; </td>
 			</tr>
 		</table>
 	</fieldset>
 
-	<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
-		<legend align="left">Remitente/Destinatario</legend>
-		<table>
-			<tr>
-				<td colspan='4' style='text-align:center;font-size:1.8em;'>Remitente</td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->codcli_org->label;   ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->codcli_org->output;  ?>&nbsp; </td>
-				<td class="littletableheader"><?php echo $form->telf_org->label;     ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->telf_org->output;    ?>&nbsp; </td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->nomcli_org->label;   ?>*&nbsp;</td>
-				<td class="littletablerow" colspan='3'><?php echo $form->nomcli_org->output;  ?>&nbsp; </td>
-			</tr><tr>
-				<td colspan='4' style='text-align:center;font-size:1.8em;'>Destinatario</td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->codcli_des->label;   ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->codcli_des->output;  ?>&nbsp; </td>
-				<td class="littletableheader"><?php echo $form->telf_des->label;     ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->telf_des->output;    ?>&nbsp; </td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->nomcli_des->label;   ?>*&nbsp;</td>
-				<td class="littletablerow" colspan='3'><?php echo $form->nomcli_des->output;  ?>&nbsp; </td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->dirdes->label;   ?>*&nbsp;</td>
-				<td class="littletablerow" colspan='3'> <?php echo $form->dirdes->output;  ?>&nbsp; </td>
-			</tr>
-		</table>
-	</fieldset>
-
+	<table>
+		<tr>
+			<td>
+				<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
+					<legend align="left">Remitente</legend>
+					<table>
+						<tr>
+							<td class="littletableheader"><?php echo $form->codcli_org->label;   ?>*&nbsp;</td>
+							<td class="littletablerow"   ><?php echo $form->codcli_org->output;  ?>&nbsp; </td>
+							<td class="littletableheader"><?php echo $form->telf_org->label;     ?>*&nbsp;</td>
+							<td class="littletablerow"   ><?php echo $form->telf_org->output;    ?>&nbsp; </td>
+						</tr><tr>
+							<td class="littletableheader"><?php echo $form->nomcli_org->label;   ?>*&nbsp;</td>
+							<td class="littletablerow" colspan='3'><?php echo $form->nomcli_org->output;  ?>&nbsp; </td>
+						</tr>
+					</table>
+				</fieldset>
+			</td><td>
+				<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
+					<legend align="left">Destinatario</legend>
+					<table>
+						<tr>
+							<td class="littletableheader"><?php echo $form->codcli_des->label;   ?>*&nbsp;</td>
+							<td class="littletablerow"   ><?php echo $form->codcli_des->output;  ?>&nbsp; </td>
+							<td class="littletableheader"><?php echo $form->telf_des->label;     ?>*&nbsp;</td>
+							<td class="littletablerow"   ><?php echo $form->telf_des->output;    ?>&nbsp; </td>
+						</tr><tr>
+							<td class="littletableheader"><?php echo $form->nomcli_des->label;   ?>*&nbsp;</td>
+							<td class="littletablerow" colspan='3'><?php echo $form->nomcli_des->output;  ?>&nbsp; </td>
+						</tr><tr>
+						</tr>
+					</table>
+				</fieldset>
+			</td>
+		</tr>
+		<tr>
+			<td colspan='2'>
+				<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
+					<legend align="left">Direcci&oacute;n de entrega</legend>
+					<?php echo $form->dirdes->label;   ?>*&nbsp;<?php echo $form->dirdes->output; ?>
+				</fieldset>
+			</td>
+		</tr>
+	</table>
 	<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
 		<legend align="left">Detalles del paquete</legend>
 		<table>
@@ -196,16 +210,42 @@ function ctarifa(){
 				<td class="littletableheader"><?php echo $form->ipostel->label;  ?>*&nbsp;</td>
 				<td class="littletablerow"   ><?php echo $form->ipostel->output; ?>&nbsp; </td>
 			</tr><tr>
-				<td class="littletableheader"><?php echo $form->cant->label;   ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->cant->output;  ?>&nbsp; </td>
-				<td class="littletableheader"><?php echo $form->envio->label;     ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->envio->output;    ?>&nbsp; </td>
+				<td class="littletableheader"><?php echo $form->cant->label;     ?>*&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->cant->output;    ?>&nbsp; </td>
+				<td class="littletableheader"><?php echo $form->envio->label;    ?>*&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->envio->output;   ?>&nbsp; </td>
 			</tr><tr>
 				<td class="littletableheader"><?php echo $form->descrip->label;  ?>*&nbsp;</td>
 				<td class="littletablerow" colspan='3'><?php echo $form->descrip->output; ?>&nbsp; </td>
 			</tr>
 		</table>
 	</fieldset>
+
+		<legend align="left">Monto asegurado</legend>
+		<table>
+			<tr>
+				<td class="littletableheader"><?php echo $form->facturaaseg->label;  ?>*&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->facturaaseg->output; ?>*&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->rifaseg->label;     ?>&nbsp; </td>
+				<td class="littletablerow"   ><?php echo $form->rifaseg->output;    ?>&nbsp; </td>
+				<td class="littletableheader"><?php echo $form->nombreaseg->label;  ?>*&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->nombreaseg->output; ?>*&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->montoaseg->label;   ?>&nbsp; </td>
+				<td class="littletablerow"   ><?php echo $form->montoaseg->output;  ?>&nbsp; </td>
+			</tr>
+		</table>
+		</legend>
+
+
+
+
+
+
+
+
+
+
+
 
 	<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
 		<legend align="left">Totales</legend>

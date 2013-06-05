@@ -3453,6 +3453,7 @@ class Sfac extends Controller {
 			$iva    +=$itimporte*($itiva/100);
 			$totals +=$itimporte;
 
+			$do->set_rel('sitems','despacha','N'     ,$i);
 			$do->set_rel('sitems','numa'    ,$numero ,$i);
 			$do->set_rel('sitems','tipoa'   ,$tipoa  ,$i);
 			$do->set_rel('sitems','transac' ,$transac,$i);

@@ -3,7 +3,7 @@ class Tbenvio extends Controller {
 	var $mModulo = 'TBENVIO';
 	var $titp    = 'Envios';
 	var $tits    = 'Envios';
-	var $url     = 'pasajes/tbenvio/';
+	var $url     = 'encomiendas/tbenvio/';
 
 	function Tbenvio(){
 		parent::Controller();
@@ -759,30 +759,32 @@ class Tbenvio extends Controller {
 
 		$edit->codcli_org = new inputField('Cliente','codcli_org');
 		$edit->codcli_org->rule='';
-		$edit->codcli_org->size =8;
+		$edit->codcli_org->size =6;
 		$edit->codcli_org->maxlength =20;
 
 		$edit->nomcli_org = new inputField('Nombre','nomcli_org');
 		$edit->nomcli_org->rule='';
 		$edit->nomcli_org->maxlength =200;
+		$edit->nomcli_org->size =30;
 
 		$edit->telf_org = new inputField('Tel&eacute;fono','telf_org');
 		$edit->telf_org->rule='';
-		$edit->telf_org->size =24;
+		$edit->telf_org->size =11;
 		$edit->telf_org->maxlength =30;
 
 		$edit->codcli_des = new inputField('Cliente','codcli_des');
 		$edit->codcli_des->rule='';
-		$edit->codcli_des->size =8;
+		$edit->codcli_des->size =6;
 		$edit->codcli_des->maxlength =20;
 
 		$edit->nomcli_des = new inputField('Nombre','nomcli_des');
 		$edit->nomcli_des->rule='';
 		$edit->nomcli_des->maxlength =200;
+		$edit->nomcli_des->size =30;
 
 		$edit->telf_des = new inputField('Tel&eacute;fono','telf_des');
 		$edit->telf_des->rule='';
-		$edit->telf_des->size =24;
+		$edit->telf_des->size =11;
 		$edit->telf_des->maxlength =30;
 
 		$edit->dirdes = new inputField('Direcci&oacute;n','dirdes');
@@ -900,7 +902,6 @@ class Tbenvio extends Controller {
 		$edit->iva->maxlength =10;
 		$edit->iva->type='inputhidden';
 
-
 		$edit->total = new inputField('Total','total');
 		$edit->total->rule='numeric';
 		$edit->total->css_class='inputnum';
@@ -909,6 +910,27 @@ class Tbenvio extends Controller {
 		$edit->total->maxlength =10;
 		$edit->total->type='inputhidden';
 		//Fin de los campos comodines
+
+		//Campos para el seguro
+		$edit->facturaaseg = new inputField('RIF','facturaaseg');
+		$edit->facturaaseg->rule='';
+		$edit->facturaaseg->maxlength =12;
+
+		$edit->rifaseg = new inputField('RIF','rifaseg');
+		$edit->rifaseg->rule='';
+		$edit->rifaseg->maxlength =12;
+
+		$edit->nombreaseg = new inputField('Nombre o Raz&oacute;n Social','nombreaseg');
+		$edit->nombreaseg->rule='';
+		$edit->nombreaseg->maxlength =200;
+
+		$edit->montoaseg = new inputField('Total','montoaseg');
+		$edit->montoaseg->rule='numeric';
+		$edit->montoaseg->css_class='inputnum';
+		$edit->montoaseg->onkeyup='';
+		$edit->montoaseg->size =5;
+		$edit->montoaseg->maxlength =10;
+		//Fin de los campos del seguro
 
 		$edit->seguro = new inputField('Seguro','seguro');
 		$edit->seguro->rule='numeric';

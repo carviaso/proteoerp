@@ -185,7 +185,7 @@ border-bottom-right-radius:5px;
 
 		echo '<h1 style="text-align:center;">'.htmlspecialchars($this->Titulo).'</h1>';
 		if(!empty($this->SubTitulo)){
-			echo '<h2>'.htmlspecialchars($this->SubTitulo).'</h2>';
+			echo '<h2 style="text-align:center;">'.htmlspecialchars($this->SubTitulo).'</h2>';
 		}
 
 		echo '<h3>'.htmlspecialchars($this->SobreTabla).'</h3>';

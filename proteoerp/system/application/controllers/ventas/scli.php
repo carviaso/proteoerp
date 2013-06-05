@@ -320,7 +320,7 @@ class Scli extends validaciones {
 		});';
 
 
-		
+
 		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "500", $width = "700" );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, "300", "300" );
 
@@ -1298,7 +1298,7 @@ class Scli extends validaciones {
 		}else{
 			$conve .= $mtempo;
 		}
-		return $conve;
+		return str_pad($conve, 5, '0', STR_PAD_LEFT);
 	}
 
 	//Resumen rapido
@@ -1602,7 +1602,7 @@ class Scli extends validaciones {
 		$edit->ciudad1->option('','Seleccionar');
 		$edit->ciudad1->options('SELECT TRIM(ciudad) codigo, TRIM(ciudad) AS ciudad FROM ciud ORDER BY ciudad');
 		$edit->ciudad1->style = 'width:200px';
-		$edit->ciudad1->insertValue = $this->datasis->traevalor('CIUDAD');
+		$edit->ciudad1->insertValue = trim($this->datasis->traevalor('CIUDAD'));
 
 		$edit->dire21 = new inputField('Env&iacute;o','dire21');
 		$edit->dire21->rule = 'trim';
@@ -1655,7 +1655,7 @@ class Scli extends validaciones {
 		$edit->zona->option('','Seleccionar');
 		$edit->zona->options('SELECT codigo, CONCAT(codigo," ", nombre) nombre FROM zona ORDER BY nombre');
 		$edit->zona->style = 'width:166px';
-		$edit->zona->insertValue = $this->datasis->traevalor('ZONAXDEFECTO');
+		$edit->zona->insertValue = trim($this->datasis->traevalor('ZONAXDEFECTO'));
 
 		$edit->pais = new inputField('Pa&iacute;s','pais');
 		$edit->pais->rule = 'trim';
