@@ -310,7 +310,7 @@ class Reparto extends Controller {
 	}
 
 	//******************************************************************
-	//
+	// Cambia Tipo de Reparto 
 	//
 	function cambiatipo(){
 		$id    = $this->input->post('mid');
@@ -485,6 +485,9 @@ class Reparto extends Controller {
 			$msj = 'Factura Desmarcada';
 		}
 		$row = $this->datasis->damereg("SELECT SUM(peso) peso, COUNT(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=${dbreparto}");
+
+
+
 		$peso = $row['peso'];
 		$cana = $row['cana'];
 

@@ -18,7 +18,7 @@ echo script('jquery-min.js');
 echo script('jquery-migrate-min.js');
 
 echo script('plugins/jquery.numeric.pack.js');
-echo script('jquery-ui.custom.min.js');
+echo script('jquery-ui-1.8.2.custom.min.js');
 echo script('jquery.ui.selectmenu.js');
 echo script('ui.multiselect.js');
 echo script('jquery.contextmenu.js');

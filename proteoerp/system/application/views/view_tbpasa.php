@@ -8,7 +8,6 @@ if($form->_status <> 'show'){
 $campos='\'\'';
 ?>
 <script language="javascript" type="text/javascript">
-
 $(document).ready(function() {
 	$(".inputnum").numeric(".");
 	$('#org').change(function() { traerutas(); });
@@ -61,8 +60,24 @@ function puestos(){
 		$.post("<?php echo site_url('pasajes/tbpasa/puestos/'); ?>/"+id+"/"+$('#fecven').val(), function(data){
 			$("#puestos").html(data);
 			$('#puestos').buttonset();
-
 		});
+	}
+}
+
+function resepu( ppp, aaa ){ 
+	var monto  = 0;
+	var nropas = 0;
+	var id = $("#tbrutas").jqGrid('getGridParam','selrow');
+
+	nropas = $("input:checked").length;
+
+	if(id){
+		var ret  = $("#tbrutas").getRowData(id);
+		$("#nropas").html(nropas);
+		$('#monto').html(ret.precio*nropas);
+	} else {
+		$("#nropas").html(0.00);
+		$('#monto').html(0.00);
 	}
 }
 
@@ -92,21 +107,19 @@ function reserva(indice){
 <div class="tema1">
 	<table id="tbrutas"></table>
 </div>
-
-<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
-<table width='100%'>
-	<tr>
-		<td class="littletablerowth"><?php echo $form->nacio->label;   ?></td>
-		<td class="littletablerowth"><?php echo $form->codcli->label;  ?></td>
-		<td class="littletablerowth"><?php echo $form->nomcli->label;  ?></td>
-	</tr><tr>
-		<td class="littletablerow"  ><?php echo $form->nacio->output;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->codcli->output; ?></td>
-		<td class="littletablerow"  ><?php echo $form->nomcli->output; ?></td>
-	</tr>
-</table>
-</fieldset>
+<br>
 
 <div id='puestos' name='puestos' style='margin-left:0em;' ></div>
 
-<?php echo $form_end; ?>
+<br>
+<table>
+	<tr>
+		<td>Pasajes:</td><td><div id='nropas'></div></td>
+		<td>Monto:  </td><td><div id='monto'> </div></td>
+	</tr>
+</table>
+
+<?php 
+echo $form_end; 
+
+?>

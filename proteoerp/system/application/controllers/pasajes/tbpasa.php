@@ -842,10 +842,9 @@ class Tbpasa extends Controller {
 				}
 				if ( $i == $row['indice'] ){
 					if ($row['estatus'] == 'L')
-						$rs1 = "\t\t<td ".$color." ><input type='checkbox' id='asiento".$row['indice']."' ><label for='asiento".$row['indice']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
+						$rs1 = "\t\t<td ".$color." ><input type='checkbox' id='asiento".$row['indice']."' name='asiento".$row['indice']."' onclick='resepu(\"".$row['indice']."\",\"".utf8_encode($row['valor'])."\")' ><label for='asiento".$row['indice']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
 					else
 						$rs1 = "\t\t<td ".$color." ><input type='checkbox' id='asiento".$row['indice']."' disable='disable' ><label for='asiento".$row['indice']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
-						//$rs1 = "\t\t<td ".$color." >".utf8_encode($row['valor'])."<td>\n".$rs1;
 				}
 				$i ++;
 			}
