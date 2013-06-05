@@ -691,7 +691,7 @@ class Ajax extends Controller {
 		if(strlen($comodin)==1 && $comodin!='%' && $mid!==false){
 			$mid=str_replace($comodin,'%',$mid);
 		}
-		$qdb    = $this->db->escape($mid.'%');
+		$qdb    = $this->db->escape('%'.$mid.'%');
 		$qba    = $this->db->escape($mid);
 		$tipo   = $this->input->post('tipo');
 
@@ -711,7 +711,7 @@ class Ajax extends Controller {
 
 			$mSQL="SELECT TRIM(a.codigo) AS codigo, a.concepto
 				FROM icon AS a
-				WHERE (a.codigo LIKE $qdb OR a.concepto LIKE  $qdb) AND tipo=$dbtipo
+				WHERE (a.codigo LIKE ${qdb} OR a.concepto LIKE  ${qdb}) AND tipo=${dbtipo}
 				ORDER BY a.concepto LIMIT ".$this->autolimit;
 
 			$query = $this->db->query($mSQL);

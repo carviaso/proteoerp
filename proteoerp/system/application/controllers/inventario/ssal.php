@@ -13,11 +13,7 @@ class Ssal extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('ssal','id') ) {
-			$this->db->simple_query('ALTER TABLE ssal DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE ssal ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE ssal ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		$this->datasis->creaintramenu(array('modulo'=>'326','titulo'=>'Ajustes de Inventario','mensaje'=>'Ajustes de Inventario','panel'=>'TRANSACCIONES','ejecutar'=>'inventario/ssal','target'=>'popu','visible'=>'S','pertenece'=>'3','ancho'=>800,'alto'=>600));
 		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -54,6 +50,12 @@ class Ssal extends Controller {
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
+		$funciones = '
+		function ltransac(el, val, opts){
+			var link=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return link;
+		};';
+
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
@@ -61,7 +63,7 @@ class Ssal extends Controller {
 		$param['listados']     = $this->datasis->listados('SSAL', 'JQ');
 		$param['otros']        = $this->datasis->otros('SSAL', 'JQ');
 		$param['centerpanel']  = $centerpanel;
-		//$param['funciones']    = $funciones;
+		$param['funciones']    = $funciones;
 		$param['temas']        = array('proteo','darkness','anexos1');
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
@@ -76,7 +78,16 @@ class Ssal extends Controller {
 	//Funciones de los Botones
 	//***************************
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
+
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};';
 
 		$bodyscript .= '
 		jQuery("#boton1").click( function(){
@@ -189,10 +200,8 @@ class Ssal extends Controller {
 		});';
 
 
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -201,7 +210,7 @@ class Ssal extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -336,6 +345,7 @@ class Ssal extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
+			'formatter'     => 'ltransac'
 		));
 
 
@@ -403,6 +413,7 @@ class Ssal extends Controller {
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
+		$grid->setOndblClickRow('');
 		$grid->setAdd(    $this->datasis->sidapuede('SSAL','INCLUIR%' ));
 		$grid->setEdit( false );    //  $this->datasis->sidapuede('SSAL','MODIFICA%'));
 		$grid->setDelete( false );  //  $this->datasis->sidapuede('SSAL','BORR_REG%'));
@@ -410,7 +421,7 @@ class Ssal extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: ssaladd,editfunc: ssaledit,viewfunc: ssalshow");
+		$grid->setBarOptions('addfunc: ssaladd,editfunc: ssaledit,viewfunc: ssalshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -428,8 +439,7 @@ class Ssal extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -443,8 +453,7 @@ class Ssal extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -521,15 +530,14 @@ class Ssal extends Controller {
 			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Otros Ingresos</td></tr>";
 			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
 			$i = 1;
-			foreach ($query->result_array() as $row)
-			{
+			foreach ($query->result_array() as $row){
 					$salida .= "<tr>";
 					$salida .= "<td>".$row['tipo_doc']."</td>";
 					$salida .= "<td>".$row['numero'].  "</td>";
 					$salida .= "<td align='right'>".nformat($row['totalg']).   "</td>";
 					$salida .= "</tr>";
 			}
-			$salida .= "</table>";
+			$salida .= '</table>';
 		}
 		$query->free_result();
 
@@ -544,7 +552,7 @@ class Ssal extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -778,8 +786,7 @@ class Ssal extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setDatait()
-	{
+	function setDatait(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -850,12 +857,43 @@ class Ssal extends Controller {
 				'codigo' =>'codigo_<#i#>',
 				'descrip'=>'itdescrip_<#i#>',
 				'ultimo' =>'costo_<#i#>'
-				),
+			),
 			'p_uri'   => array(4=>'<#i#>'),
 			'titulo'  => 'Buscar Art&iacute;culo',
-			'where'   => '`activo` = "S"',
+			'where'   => '`activo` = "S" AND tipo="Articulo"',
 		);
 		$btn=$this->datasis->p_modbus($modbus,'<#i#>');
+
+
+		$modbusic=array(
+			'tabla'   =>'icon',
+			'columnas'=>array(
+				'codigo'   =>'C&oacute;digo',
+				'concepto' =>'Descripci&oacute;n',
+				'tipo'=>'Tipo'
+			),
+			'filtro'  =>array('codigo' =>'C&oacute;digo','concepto'=>'Descripci&oacute;n'),
+			'retornar'=>array('codigo' =>'concepto_<#i#>'),
+			'p_uri'   => array(4=>'<#i#>'),
+			'titulo'  => 'Buscar Art&iacute;culo',
+			'where'   => '`tipo` = "E"',
+		);
+		$btnc1=$this->datasis->p_modbus($modbusic,'<#i#>');
+
+		$modbusic2=array(
+			'tabla'   =>'icon',
+			'columnas'=>array(
+				'codigo'   =>'C&oacute;digo',
+				'concepto' =>'Descripci&oacute;n',
+				'tipo'=>'Tipo'
+			),
+			'filtro'  =>array('codigo' =>'C&oacute;digo','concepto'=>'Descripci&oacute;n'),
+			'retornar'=>array('codigo' =>'concepto_<#i#>'),
+			'p_uri'   => array(4=>'<#i#>'),
+			'titulo'  => 'Buscar Art&iacute;culo',
+			'where'   => '`tipo` = "I"',
+		);
+		$btnc2=$this->datasis->p_modbus($modbusic2,'<#i#>',800,600,'iconI');
 
 		$do = new DataObject('ssal');
 		$do->rel_one_to_many('itssal', 'itssal', 'numero');
@@ -863,11 +901,11 @@ class Ssal extends Controller {
 		$do->rel_pointer('itssal','sinv','itssal.codigo=sinv.codigo','sinv.descrip AS sinvdescrip, sinv.base1 AS sinvprecio1, sinv.base2 AS sinvprecio2, sinv.base3 AS sinvprecio3, sinv.base4 AS sinvprecio4, sinv.iva AS sinviva, sinv.peso AS sinvpeso,sinv.tipo AS sinvtipo');
 
 		$edit = new DataDetails('Entradas y Salidas', $do);
-		//$edit->back_url = $this->back_dataedit;
 		//$edit->set_rel_title('itssal','Producto <#o#>');
 
-		$edit->pre_process('insert' ,'_pre_insert');
-		$edit->pre_process('update' ,'_pre_update');
+		$edit->pre_process('insert' ,'_pre_insert' );
+		$edit->pre_process('update' ,'_pre_update' );
+		$edit->pre_process('delete' ,'_pre_delete' );
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
@@ -890,13 +928,15 @@ class Ssal extends Controller {
 		$edit->tipo = new  dropdownField ('Tipo', 'tipo');
 		$edit->tipo->option('S','Salida');
 		$edit->tipo->option('E','Entrada');
+		$edit->tipo->onchange='chtipo()';
 		$edit->tipo->style='width:80px;';
+		$edit->tipo->rule='enum[S,E]|required';
 		$edit->tipo->size = 5;
 
 		$edit->almacen = new dropdownField('Almacen','almacen');
 		$edit->almacen->option('','Seleccionar');
 		$edit->almacen->options('SELECT ubica, CONCAT(ubica, " ", ubides) descrip FROM caub WHERE invfis="N" ORDER BY ubica');
-		$edit->almacen->rule ='required';
+		$edit->almacen->rule ='required|existecaub';
 		$edit->almacen->style='width:200px;';
 
 		$edit->depto = new dropdownField('Depto.','depto');
@@ -966,6 +1006,7 @@ class Ssal extends Controller {
 		$edit->concepto->rel_id    = 'itssal';
 		$edit->concepto->size      = 10;
 		$edit->concepto->rule      = 'required|callback_chconcepto';
+		$edit->concepto->append('<span id="mbE_<#i#>">'.$btnc1.'</span><span id="mbI_<#i#>">'.$btnc2.'</span>');
 
 		$edit->usuario = new autoUpdateField('usuario',$this->secu->usuario(),$this->secu->usuario());
 
@@ -991,7 +1032,7 @@ class Ssal extends Controller {
 		$dbtipo  = $this->db->escape($tipo);
 		$dbcodigo= $this->db->escape($val);
 
-		$cana= $this->datasis->dameval("SELECT COUNT(*) FROM icon WHERE tipo=$dbtipo AND codigo=$dbcodigo");
+		$cana= $this->datasis->dameval("SELECT COUNT(*) FROM icon WHERE tipo=${dbtipo} AND codigo=${dbcodigo}");
 		if($cana >0){
 			return true;
 		}
@@ -1022,7 +1063,13 @@ class Ssal extends Controller {
 	}
 
 	function _pre_update($do){
-		return true;
+		$do->error_message_ar['pre_upd']='Los ajustes no se pueden modificar.';
+		return false;
+	}
+
+	function _pre_delete($do){
+		$do->error_message_ar['pre_del']='Los ajustes de inventario no se pueden eliminar, debe hacer el reverso.';
+		return false;
 	}
 
 	function _post_insert($do) {
@@ -1108,16 +1155,25 @@ class Ssal extends Controller {
 			$this->db->query($mSQL);
 		}
 
-		logusu('ssal',"Entradas y Salidas $numero CREADO");
+		logusu('ssal',"Entradas y Salidas ${numero} CREADO");
 	}
 
 	function _post_update($do){
 		$codigo=$do->get('numero');
-		logusu('ssal',"Entradas y Salidas $codigo MODIFICADO");
+		logusu('ssal',"Entradas y Salidas ${codigo} MODIFICADO");
 	}
 
 	function _post_delete($do){
 		$codigo=$do->get('numero');
-		logusu('ssal',"Entradas y Salidas $codigo ELIMINADO");
+		logusu('ssal',"Entradas y Salidas ${codigo} ELIMINADO");
+	}
+
+	function instalar(){
+		$campos=$this->db->list_fields('ssal');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE ssal DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE ssal ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE ssal ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};
 	}
 }

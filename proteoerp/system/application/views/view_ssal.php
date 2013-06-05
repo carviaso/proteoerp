@@ -33,8 +33,20 @@ $(function(){
 		autocod(i.toString());
 		autoicon(i.toString());
 	}
+	chtipo();
 
 });
+
+function chtipo(){
+	var tipo=$('#tipo').val();
+	if(tipo=='E'){
+		$('span[id^="mbI_"]').show();
+		$('span[id^="mbE_"]').hide();
+	}else{
+		$('span[id^="mbE_"]').show();
+		$('span[id^="mbI_"]').hide();
+	}
+}
 
 //Agrega el autocomplete para el codigo
 function autocod(id){
@@ -46,7 +58,7 @@ function autocod(id){
 				url:  "<?php echo site_url('ajax/buscasinvart'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -94,11 +106,10 @@ function autoicon(id){
 				url:  "<?php echo site_url('ajax/buscaicon'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term+"&tipo="+$('#tipo').val(),
+				data: {"q":req.term,"tipo":$('#tipo').val()},
 				success:
 					function(data){
 						var sugiere = [];
-
 						if(data.length==0){
 							$('#concepto_'+id).val("");
 						}else{
@@ -112,7 +123,7 @@ function autoicon(id){
 					},
 			})
 		},
-		minLength: 2,
+		minLength: 1,
 		select: function( event, ui ) {
 			$('#concepto_'+id).attr("readonly", "readonly");
 
@@ -130,6 +141,7 @@ function add_itssal(){
 	$("#__UTPL__").before(htm);
 	$("#cantidad_"+can).numeric(".");
 	autocod(can);
+	chtipo();
 	itssal_cont=itssal_cont+1;
 }
 function del_itssal(id){
@@ -139,19 +151,19 @@ function del_itssal(id){
 </script>
 <?php } ?>
 
-<table align='center' width="95%">
+<table align='center' width="100%">
 	<tr>
 		<td>
 		<table width="100%" style="margin: 0; width: 100%;">
 			<tr>
 				<td class="littletableheader"><?php echo $form->tipo->label;   ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->tipo->output;   ?>&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->fecha->label;  ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->tipo->output;  ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->fecha->label;  ?>*&nbsp;</td>
 				<td>
 					<table width="100%" cellpadding="0" cellspacing="0">
 						<tr>
-							<td class="littletablerow">   <?php echo $form->fecha->output; ?></td>
-							<td class="littletableheader"><?php echo $form->almacen->label; ?>&nbsp;</td>
+							<td class="littletablerow">   <?php echo $form->fecha->output;  ?></td>
+							<td class="littletableheader"><?php echo $form->almacen->label; ?>*&nbsp;</td>
 							<td class="littletablerow">   <?php echo $form->almacen->output.$form->caububides->output; ?>&nbsp;</td>
 						</tr>
 					</table>

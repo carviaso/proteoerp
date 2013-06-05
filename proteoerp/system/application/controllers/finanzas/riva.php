@@ -46,7 +46,6 @@ class Riva extends Controller {
 					$.prompt("<h1>Transacci&oacute;n invalida</h1>");
 				}
 			};
-
 		</script>';
 
 		#Set url
@@ -520,6 +519,16 @@ class Riva extends Controller {
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
+		$grid->setOnSelectRow('
+			function(id){ },
+			afterInsertRow:
+			function( rid, aData, rowe){
+				if(aData.transac.substr(0,1)=="_"){
+					$(this).jqGrid( "setCell", rid, "nrocomp","", {color:"#FFFFFF", background:"#C90623" });
+				}
+			}
+		');
+
 		#show/hide navigations buttons
 		$grid->setAdd(false);
 		$grid->setEdit(true);
@@ -578,7 +587,7 @@ class Riva extends Controller {
 			//unset($data['ubica']);
 			$this->db->where('id', $id);
 			$this->db->update('riva', $data);
-			logusu('RIVA',"Registro ????? MODIFICADO");
+			logusu('riva',"Registro id:${id} MODIFICADO");
 			echo 'Registro Modificado';
 
 		} elseif($oper == 'del') {
