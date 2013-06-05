@@ -82,7 +82,7 @@ class Reportes extends Controller{
 			$grid->db->_escape_char='';
 			$grid->db->_protect_identifiers=false;
 
-			$grid->db->select("CONCAT(a.secu,' ',a.titulo) titulo, a.mensaje, REPLACE(MID(a.ejecutar,10,30),"."'".'")'."','')  nombre");
+			$grid->db->select("CONCAT(a.secu,' ',a.titulo) titulo, a.mensaje, TRIM(REPLACE(MID(a.ejecutar,10,30),"."'".'")'."','')) AS nombre");
 			$grid->db->from('tmenus    a');
 			$grid->db->join('sida      b','a.codigo=b.modulo');
 			$grid->db->join('reportes  d',"REPLACE(MID(a.ejecutar,10,30),"."'".'")'."','')=d.nombre");
@@ -104,7 +104,7 @@ class Reportes extends Controller{
 			$grid1->db->_escape_char='';
 			$grid1->db->_protect_identifiers=false;
 
-			$grid1->db->select('a.titulo, a.mensaje, a.nombre');
+			$grid1->db->select('a.titulo, a.mensaje, TRIM(a.nombre) AS nombre');
 			$grid1->db->from('intrarepo a');
 			$grid1->db->join("tmenus    b","CONCAT(a.modulo,'LIS')=b.modulo AND b.ejecutar LIKE CONCAT('%',a.nombre,'%') ","left");
 			$grid1->db->where('b.codigo IS NULL');
