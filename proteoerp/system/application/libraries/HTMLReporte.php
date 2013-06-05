@@ -184,6 +184,10 @@ border-bottom-right-radius:5px;
 		echo '<h2>'.$ifilas.'</h2>';
 
 		echo '<h1 style="text-align:center;">'.htmlspecialchars($this->Titulo).'</h1>';
+		if(!empty($this->SubTitulo)){
+			echo '<h2>'.htmlspecialchars($ifilas).'</h2>';
+		}
+
 		echo '<h3>'.htmlspecialchars($this->SobreTabla).'</h3>';
 	}
 
