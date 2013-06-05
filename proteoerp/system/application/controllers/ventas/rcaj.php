@@ -1064,7 +1064,7 @@ class Rcaj extends validaciones {
 			$this->db->query('ALTER TABLE rcaj ADD COLUMN maqfiscal VARCHAR(17) NULL ');
 		}
 
-		if ( !$this->datasis->iscampo('rcaj','ultimafc') ) {
+		if(!in_array('ultimafc',$campos)){
 			$this->db->query('ALTER TABLE rcaj ADD COLUMN ultimafc VARCHAR(10) NULL ');
 		}
 
