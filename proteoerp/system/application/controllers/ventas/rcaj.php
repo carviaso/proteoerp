@@ -8,29 +8,7 @@ class Rcaj extends validaciones {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('rcaj','xventa') ) {
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN xventa DECIMAL(17,2) NULL DEFAULT 0');
-		};
-		if ( !$this->datasis->iscampo('rcaj','xviva') ) {
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN xviva DECIMAL(17,2) NULL DEFAULT 0');
-		};
-		if ( !$this->datasis->iscampo('rcaj','xdevo') ) {
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN xdevo DECIMAL(17,2) NULL DEFAULT 0');
-		};
-		if ( !$this->datasis->iscampo('rcaj','xdiva') ) {
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN xdiva DECIMAL(17,2) NULL DEFAULT 0');
-		};
-		if ( !$this->datasis->iscampo('rcaj','maqfiscal') ) {
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN maqfiscal VARCHAR(17) NULL ');
-		};
-		if ( !$this->datasis->iscampo('rcaj','ultimafc') ) {
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN ultimafc VARCHAR(10) NULL ');
-		};
-		if ( !$this->datasis->iscampo('rcaj','ultimanc') ) {
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN ultimanc VARCHAR(10) NULL ');
-		};
-
-
+		$this->instalar();
 		redirect('ventas/rcaj/filteredgrid');
 	}
 
@@ -1033,6 +1011,23 @@ class Rcaj extends validaciones {
 	}
 
 	function instalar(){
+
+		if(!$this->db->table_exists('rret')){
+			$mSQL="CREATE TABLE `rret` (
+			`id` int(20) unsigned NOT NULL AUTO_INCREMENT,
+			`cierre` varchar(8) DEFAULT NULL,
+			`cajero` varchar(5) DEFAULT NULL,
+			`tipo` char(2) DEFAULT NULL,
+			`monto` decimal(12,2) DEFAULT NULL,
+			`fecha` date DEFAULT NULL,
+			`estampa` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (`id`),
+			KEY `Index 2` (`tipo`,`cajero`)
+			) ENGINE=MyISAM COMMENT='Retiros de caja'";
+
+			$this->db->simple_query($mSQL);
+		}
+
 		if(!$this->db->table_exists('itrcaj')){
 			$mSQL="CREATE TABLE `itrcaj` (
 				`numero` VARCHAR(8) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
@@ -1048,20 +1043,51 @@ class Rcaj extends validaciones {
 			$this->db->simple_query($mSQL);
 		}
 
-		if($this->db->field_exists('cierre', 'itrcaj')){
+		$campos=$this->db->list_fields('rcaj');
+		if(!in_array('xventa',$campos)){
+			$this->db->query('ALTER TABLE rcaj ADD COLUMN xventa DECIMAL(17,2) NULL DEFAULT 0');
+		}
+
+		if(!in_array('xviva',$campos)){
+			$this->db->query('ALTER TABLE rcaj ADD COLUMN xviva DECIMAL(17,2) NULL DEFAULT 0');
+		}
+
+		if(!in_array('xdevo',$campos)){
+			$this->db->query('ALTER TABLE rcaj ADD COLUMN xdevo DECIMAL(17,2) NULL DEFAULT 0');
+		}
+
+		if(!in_array('xdiva',$campos)){
+			$this->db->query('ALTER TABLE rcaj ADD COLUMN xdiva DECIMAL(17,2) NULL DEFAULT 0');
+		}
+
+		if(!in_array('maqfiscal',$campos)){
+			$this->db->query('ALTER TABLE rcaj ADD COLUMN maqfiscal VARCHAR(17) NULL ');
+		}
+
+		if ( !$this->datasis->iscampo('rcaj','ultimafc') ) {
+			$this->db->query('ALTER TABLE rcaj ADD COLUMN ultimafc VARCHAR(10) NULL ');
+		}
+
+		if(!in_array('ultimanc',$campos)){
+			$this->db->query('ALTER TABLE rcaj ADD COLUMN ultimanc VARCHAR(10) NULL ');
+		}
+
+
+		$itcampos=$this->db->list_fields('itrcaj');
+		if(!in_array('cierre',$itcampos)){
 			$mSQL="ALTER TABLE `itrcaj`  ADD COLUMN `cierre` CHAR(1) NOT NULL DEFAULT 'N' AFTER `tipo`";
 			$this->db->simple_query($mSQL);
 		}
-		$mSQL="ALTER TABLE `itrcaj`  DROP PRIMARY KEY,  ADD PRIMARY KEY (`numero`, `tipo`, `cierre`)";
-		$this->db->simple_query($mSQL);
+
+		//$mSQL="ALTER TABLE `itrcaj`  DROP PRIMARY KEY,  ADD PRIMARY KEY (`numero`, `tipo`, `cierre`)";
+		//$this->db->simple_query($mSQL);
 
 		if($this->db->field_exists('cierre', 'sfpa')){
 			$mSQL="ALTER TABLE `sfpa`  ADD COLUMN `cierre` CHAR(8) DEFAULT '' AFTER `hora`";
 			$this->db->simple_query($mSQL);
 		}
 
-		$mSQL="ALTER TABLE `rcaj` CHANGE COLUMN `estampa` `estampa` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP";
-		$this->db->simple_query($mSQL);
-
+		//$mSQL="ALTER TABLE `rcaj` CHANGE COLUMN `estampa` `estampa` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP";
+		//$this->db->simple_query($mSQL);
 	}
 }
