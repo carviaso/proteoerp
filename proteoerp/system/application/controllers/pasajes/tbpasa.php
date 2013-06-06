@@ -561,7 +561,7 @@ class Tbpasa extends Controller {
 
 		$edit->fecven = new dateField('Fecha','fecven');
 		$edit->fecven->rule        = 'chfecha';
-		$edit->fecven->size        = 10;
+		$edit->fecven->size        = 12;
 		$edit->fecven->maxlength   = 12;
 		$edit->fecven->insertValue = date('Y-m-d');
 		$edit->fecven->calendar = false;
@@ -764,14 +764,13 @@ class Tbpasa extends Controller {
 			AND c.inicio<${fin} AND c.fin>${inicio} 
 		WHERE a.codrut='${codrut}' AND ";
 
-
 		$rs = "No hay Disponibilidad";
 		$bl = "\t\t<td>&nbsp;<td>\n";
 		
 		$rs  = "<table style='border-collapse:collapse;'>";
 		//$rs .= "<tr><td colspan='3' align='center'>Ruta: ".$codrut." Fecha: ".$dia."/".$mes."/".$ano."</td></tr>";
 	
-		$rs .= "<tr><td>PLANTA BAJA</td><td>&nbsp;&nbsp;</td><td>PLANTA ALTA</td></tr>";
+		$rs .= "<tr><td>PLANTA ALTA/UNICA</td><td>&nbsp;&nbsp;</td><td>PLANTA BAJA</td></tr>";
 		$rs .= "<tr><td><table style='border-collapse:collapse;'>\n\t<tr>\n";
 
 		$mSQL = $mSQL1." b.indice < 12 ORDER BY b.indice ";
@@ -814,9 +813,9 @@ class Tbpasa extends Controller {
 	//
 	function busfila($mSQL, $i) {
 		$libre   = "style='background:#0EF72D;'";
-		$ocupado = "style='background:#FC0532;'"; //color:#FFFFFF; font-weight:bold;'";
-		$reserva = "style='background:#050505;color:white;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;'margin-top:0.5em;"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
-		$manual  = "style='background:#F2A2F2;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
+		$ocupado = "style='background:#FC0532;color:white;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;'"; //color:#FFFFFF; font-weight:bold;'";
+		$reserva = "style='background:#050505;color:white;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
+		$manual  = "style='background:#F2A2F2;color:black;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
 		$mi = $i;
 		$query = $this->db->query($mSQL);
 
