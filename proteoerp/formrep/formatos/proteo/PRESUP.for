@@ -184,7 +184,7 @@ foreach ($detalle AS $items){ $i++;
 				</td>
 				<td style="text-align: center;"><?php echo ($clinea)? '': nformat($items->cana,3); ?></td>
 				<td style="text-align: right;" ><?php echo ($clinea)? '': nformat($items->preca);  ?></td>
-				<td class="change_order_total_col"><?php echo ($clinea)? '':nformat($items->preca*$items->cana); ?></td>
+				<td style='font-size:2em;' class="change_order_total_col"><?php echo ($clinea)? '':nformat($items->preca*$items->cana); ?></td>
 			</tr>
 <?php
 		if($npagina){
