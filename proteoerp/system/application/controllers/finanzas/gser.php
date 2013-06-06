@@ -404,7 +404,7 @@ class gser extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -4434,6 +4434,16 @@ class gser extends Controller {
 			return false;
 		}
 
+		if($tipo_doc=='AD'){
+			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='El gasto pertenece a una amotrizacion, solo se puede eliminar reversandola.';
+			return false;
+		}
+
+		if($tipo_doc=='GA'){
+			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='El gasto pertenece a una nomina, solo se puede eliminar reversandola.';
+			return false;
+		}
+
 		$this->db->select(array('cod_prv','tipo_doc','monto','abonos'));
 		$this->db->from('sprm');
 		$this->db->where('transac',$transac);
@@ -4464,7 +4474,8 @@ class gser extends Controller {
 			return false;
 		}
 
-		$this->db->delete('sprm', array('transac' => $transac));
+		$this->db->delete('sprm'  , array('transac' => $transac));
+		$this->db->delete('itppro', array('transac' => $transac));
 		$this->_rm_gserrete($transac);
 		$this->_rm_bmovgser($transac);
 
@@ -4541,7 +4552,7 @@ class gser extends Controller {
 		$iva   = (empty($iva))?   0: $iva  ;
 		$monto = (empty($monto))? 0: $monto;
 		if(!is_numeric($monto)){
-			$this->validation->set_message('chtasa', 'El campo %s general debe contener n&uacutemeros.');
+			$this->validation->set_message('chtasa', 'El campo %s general debe contener n&uacute;meros.');
 			return false;
 		}
 
@@ -4745,7 +4756,7 @@ class gser extends Controller {
 				`hora` varchar(8) DEFAULT NULL,
 				`id` int(11) unsigned NOT NULL AUTO_INCREMENT,
 				PRIMARY KEY (`id`)
-				) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
+				) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->simple_query($query);
 		}
 
@@ -4756,7 +4767,7 @@ class gser extends Controller {
 				`aplica` CHAR(100)  NULL DEFAULT NULL,
 				`tasa` DECIMAL(8,2) NULL DEFAULT NULL,
 				PRIMARY KEY (`codigo`)
-				) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
+				) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->simple_query($query);
 		}
 
@@ -4767,24 +4778,6 @@ class gser extends Controller {
 
 		if (!$this->db->field_exists('aceptado','gserchi')) {
 			$query="ALTER TABLE gserchi ADD COLUMN aceptado CHAR(1) NULL DEFAULT NULL";
-			$this->db->simple_query($query);
-		}
-
-		if (!$this->db->table_exists('gereten')) {
-			$mSQL="CREATE TABLE `gereten` (
-				`id` INT(10) NOT NULL AUTO_INCREMENT,
-				`idd` INT(11) NULL DEFAULT NULL,
-				`origen` CHAR(4) NULL DEFAULT NULL,
-				`numero` VARCHAR(25) NULL DEFAULT NULL,
-				`codigorete` VARCHAR(4) NULL DEFAULT NULL,
-				`actividad` VARCHAR(45) NULL DEFAULT NULL,
-				`base` DECIMAL(10,2) NULL DEFAULT NULL,
-				`porcen` DECIMAL(5,2) NULL DEFAULT NULL,
-				`monto` DECIMAL(10,2) NULL DEFAULT NULL,
-				PRIMARY KEY (`id`)
-			)
-			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM";
 			$this->db->simple_query($query);
 		}
 
