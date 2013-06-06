@@ -274,7 +274,6 @@ class Sprv extends Controller {
 			buttons: {
 			"Guardar": function() {
 				var murl = $("#df1").attr("action");
-				allFields.removeClass( "ui-state-error" );
 				$.ajax({
 					type: "POST", dataType: "html", async: false,
 					url: murl,
@@ -310,7 +309,6 @@ class Sprv extends Controller {
 			},
 			close: function(){
 				$("#fedita").html("");
-				allFields.val( "" ).removeClass( "ui-state-error" );
 			}
 		});';
 

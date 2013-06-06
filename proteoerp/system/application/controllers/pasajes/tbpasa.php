@@ -610,10 +610,7 @@ class Tbpasa extends Controller {
 		$edit->codcarnet->size      = 22;
 		$edit->codcarnet->maxlength = 20;
 
-		$edit->codrut = new dropdownField('Ruta','codrut');
-		$edit->codrut->rule='';
-		$edit->codrut->option('','Seleccionar');
-		$edit->codrut->style ='width:350px;';
+		$edit->codrut = new hiddenField('Ruta','codrut');
 
 		$edit->tippas = new inputField('Tippas','tippas');
 		$edit->tippas->rule='';
@@ -919,8 +916,6 @@ class Tbpasa extends Controller {
 		return true;
 	}
 
-
-
 	function getruta(){
 		session_write_close();
 		$mid1 = $this->input->post('q1');
@@ -996,8 +991,12 @@ class Tbpasa extends Controller {
 	}
 
 	function _pre_insert($do){
+		$codrut  = $do->get('codrut');
+		$ = $do->get('transac');
+
+
 		$do->error_message_ar['pre_ins']='';
-		return true;
+		return false;
 	}
 
 	function _pre_update($do){
