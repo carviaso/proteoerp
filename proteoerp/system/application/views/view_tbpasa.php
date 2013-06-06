@@ -50,20 +50,22 @@ $("#tbrutas").jqGrid({
 		{name:'origen',  index:'origen',  width:110, editable:false, search: true },
 		{name:'destino', index:'destino', width:110, editable:false, search: true },
 		{name:'precio',  index:'precio',  width: 40, editable:false, search: true, editoptions: {size:10,maxlength:10,dataInit:function(elem){$(elem).numeric();}},formatter:'number',formatoptions:{decimalSeparator:".",thousandsSeparator:",",decimalPlaces:2}, align:'right' },
-
 	],
 });
-		
+
 function puestos(){
 	var id = $("#tbrutas").jqGrid('getGridParam','selrow');
 	if(id){
+		var ret  = $("#tbrutas").getRowData(id);
 		$.post("<?php echo site_url('pasajes/tbpasa/puestos/'); ?>/"+id+"/"+$('#fecven').val(), function(data){
 			$("#puestos").html(data);
 			$('#puestos').buttonset();
+			$("#codrut").val(ret.codrut);
 		});
 	}
 }
 
+//Cuenta los puestos seleccionados
 function resepu( ppp, aaa ){ 
 	var monto  = 0;
 	var nropas = 0;
@@ -86,7 +88,10 @@ function reserva(indice){
 }
 
 </script>
-<?php } ?>
+<?php } 
+echo $form->codrut->output;
+?>
+
 
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 <table width='100%'>

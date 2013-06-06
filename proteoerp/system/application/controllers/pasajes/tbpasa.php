@@ -15,6 +15,8 @@ class Tbpasa extends Controller {
 	function index(){
 		$this->datasis->creaintramenu(array('modulo'=>'162','titulo'=>'Reservaciones','mensaje'=>'Reservaciones','panel'=>'PASAJES','ejecutar'=>'pasajes/tbpasa','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+
+
 		redirect($this->url.'jqdatag');
 	}
 
@@ -813,12 +815,12 @@ class Tbpasa extends Controller {
 	function busfila($mSQL, $i) {
 		$libre   = "style='background:#0EF72D;'";
 		$ocupado = "style='background:#FC0532;'"; //color:#FFFFFF; font-weight:bold;'";
-		$reserva = "style='background:#050505;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
+		$reserva = "style='background:#050505;color:white;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;'margin-top:0.5em;"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
 		$manual  = "style='background:#F2A2F2;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
 		$mi = $i;
 		$query = $this->db->query($mSQL);
 
-		memowrite($mSQL,'meco');
+		//memowrite($mSQL,'meco');
 
 		$bl = "\t\t<td>&nbsp;<td>\n";
 		$rs = "";
@@ -839,9 +841,10 @@ class Tbpasa extends Controller {
 				}
 				if ( $i == $row['indice'] ){
 					if ($row['estatus'] == 'L')
-						$rs1 = "\t\t<td ".$color." ><input type='checkbox' id='asiento".$row['indice']."' name='asiento".$row['indice']."' onclick='resepu(\"".$row['indice']."\",\"".utf8_encode($row['valor'])."\")' ><label for='asiento".$row['indice']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
+						$rs1 = "\t\t<td ".$color." ><input type='checkbox' id='asiento".$row['valor']."' name='asiento".$row['valor']."' onclick='resepu(\"".$row['valor']."\",\"".utf8_encode($row['valor'])."\")' ><label for='asiento".$row['valor']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
 					else
-						$rs1 = "\t\t<td ".$color." ><input type='checkbox' id='asiento".$row['indice']."' disable='disable' ><label for='asiento".$row['indice']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
+						$rs1 = "\t\t<td ".$color."><label ".$color." for='asiento".$row['indice']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
+
 				}
 				$i ++;
 			}
@@ -991,10 +994,53 @@ class Tbpasa extends Controller {
 	}
 
 	function _pre_insert($do){
-		$codrut  = $do->get('codrut');
-		$ = $do->get('transac');
+		$codrut  = $_POST['codrut'];
+		$origen  = $_POST['org'];
+		$destino = $_POST['dtn'];
+		$fecven  = $_POST['fecven'];
 
+		$fecven = substr($fecven,6,4).substr($fecven,3,2).substr($fecven,0,2);
 
+//echo $fecven;
+//exit;
+
+		$inicio = $this->datasis->dameval("SELECT orden FROM tbdestinos WHERE codrut='$codrut' AND codofiorg='$origen' AND codofides='$origen'");
+		$fin    = $this->datasis->dameval("SELECT orden FROM tbdestinos WHERE codrut='$codrut' AND codofiorg='$origen' AND codofides='$destino'");
+
+		$puestos = array();
+		foreach( $_POST as $id=>$nombre ){
+		
+			if (substr( $id,0,7) == 'asiento') {
+				$nroasi = str_replace('asiento','',$id);
+				// Guarda los Puestos 
+				$data = array(
+					"codrut" => $codrut,
+					"fecpas" => $fecven,
+					"tipven" => "R",
+					"nroasi" => $nroasi,  
+					"inicio" => $inicio,
+					"fin"    => $fin );
+				$this->db->insert('tbpuestos',$data);
+					
+				/*try {
+					$this->db->insert('tbpuestos',$data);
+					$puestos[] = $this->db->last_insert();
+				} catch (Exception $e) {
+					// No funciono deshace todo
+					foreach( $puestos as $borra ){ 
+						//$this->query("delete from tbpuestos where codptos=$borra"); 
+					}
+				}*/
+
+			}
+		}
+		
+		$do->set('nacio','TTT');
+		$do->set('codcli','-TEMP');
+		$do->set('nomcli','*TEMPORAL SE ELIMINARA');
+		$do->set('usuario', $this->session->userdata('usuario'));
+		$do->set('tipven','R');
+		
 		$do->error_message_ar['pre_ins']='';
 		return false;
 	}
@@ -1010,6 +1056,7 @@ class Tbpasa extends Controller {
 	}
 
 	function _post_insert($do){
+	
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Creo $this->tits $primary ");
 	}
@@ -1062,7 +1109,5 @@ class Tbpasa extends Controller {
 			) ENGINE=MyISAM AUTO_INCREMENT=6863833 DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('tbpasa');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
