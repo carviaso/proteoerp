@@ -18,6 +18,7 @@ class gser extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		$this->datasis->modintramenu( 990, 700, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -1291,7 +1292,7 @@ class gser extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "numero";
+		$mcodp  = 'numero';
 		$check  = 0;
 
 		unset($data['oper']);
@@ -2018,7 +2019,7 @@ class gser extends Controller {
 		} else {
 			echo " NO se guardo ";
 		}
-		logusu('GSER',"Cambia Nro. Serie $id ->  $serie ");
+		logusu('GSER',"Cambia Nro. Serie ${id} ->  ${serie}");
 	}
 
 
