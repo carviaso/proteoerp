@@ -570,13 +570,13 @@ class Tbpasa extends Controller {
 		$edit->org->rule = '';
 		$edit->org->option('','Seleccionar');
 		$edit->org->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
-		$edit->org->style ='width:160px;';
+		$edit->org->style ='width:170px;';
 
 		$edit->dtn = new dropdownField('Destino','dtn');
 		$edit->dtn->rule='';
 		$edit->dtn->option('','Seleccionar');
 		$edit->dtn->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
-		$edit->dtn->style='width:160px;';
+		$edit->dtn->style='width:170px;';
 
 		$edit->nropasa = new inputField('Nro. Pasaje','nropasa');
 		$edit->nropasa->rule       = '';
@@ -718,11 +718,12 @@ class Tbpasa extends Controller {
 		$qmid2 = $this->db->escape($mid2);
 
 		$mSQL = "
-			SELECT a.id, b.codrut, b.horsal, b.tipuni, b.origen, b.destino, a.orden, a.hora, IF(b.tipserv='01', prec_01, prec_02) precio  
+			SELECT a.id, b.codrut, b.horsal, b.tipuni, b.origen, b.destino, a.orden, a.hora, IF(b.tipserv='01', prec_01, prec_02)+e.valsegu+e.vtasa precio  
 			FROM tbdestinos a 
-			JOIN tbrutas b ON a.codrut = b.codrut 
-			JOIN tbprecios c ON c.codofiorg=a.codofiorg AND c.codofides=a.codofides
+			JOIN tbrutas    b ON a.codrut = b.codrut 
+			JOIN tbprecios  c ON c.codofiorg=a.codofiorg AND c.codofides=a.codofides
 			LEFT JOIN tbbloqueo d ON a.codrut=d.codrut AND d.fecblo=${ano}${mes}${dia}   
+			JOIN tbparam    e ON e.codofiori=a.codofiorg
 			WHERE a.codofiorg = ${qmid1} AND a.codofides = ${qmid2} AND a.mostrar='S' AND d.codrut IS NULL
 			ORDER BY b.horsal 
 		";
@@ -914,7 +915,6 @@ class Tbpasa extends Controller {
 			}
 		}
 		echo $data;
-
 		return true;
 	}
 
@@ -999,9 +999,6 @@ class Tbpasa extends Controller {
 		$fecven  = $_POST['fecven'];
 
 		$fecven = substr($fecven,6,4).substr($fecven,3,2).substr($fecven,0,2);
-
-//echo $fecven;
-//exit;
 
 		$inicio = $this->datasis->dameval("SELECT orden FROM tbdestinos WHERE codrut='$codrut' AND codofiorg='$origen' AND codofides='$origen'");
 		$fin    = $this->datasis->dameval("SELECT orden FROM tbdestinos WHERE codrut='$codrut' AND codofiorg='$origen' AND codofides='$destino'");
