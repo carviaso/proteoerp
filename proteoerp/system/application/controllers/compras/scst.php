@@ -1419,13 +1419,13 @@ class Scst extends Controller {
 			//} else
 			echo "Fallo Agregado!!!";
 
-		} elseif($oper == 'edit') {
+		}elseif($oper == 'edit'){
 			$this->db->where('id', $id);
 			$this->db->update('scst', $data);
 			logusu('SCST',"Registro $id MODIFICADO");
 			echo "Registro Modificado";
 
-		} elseif($oper == 'del') {
+		}elseif($oper == 'del'){
 			//Si no esta actualizado permite borrar
 			$check   = $this->datasis->dameval("SELECT COUNT(*) FROM scst WHERE id='$id' AND actuali>=fecha ");
 			if ($check > 0){
@@ -1441,7 +1441,7 @@ class Scst extends Controller {
 				logusu('SCST',"Registro ".$control." marcado como ELIMINADO");
 				echo "Registro Eliminado";
 			}
-		};
+		}
 	}
 
 
@@ -2180,7 +2180,7 @@ class Scst extends Controller {
 				$rt = $this->dataedit();
 
 				//if($rt->on_success()){
-				
+
 				if($rt == 'Compra Guardada'){
 					$p='A';
 

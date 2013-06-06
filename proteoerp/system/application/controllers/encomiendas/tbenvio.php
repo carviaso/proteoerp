@@ -141,7 +141,7 @@ class Tbenvio extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 540, width: 700, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -724,7 +724,14 @@ class Tbenvio extends Controller {
 		});
 		';
 
-		$edit = new DataEdit($this->tits, 'tbenvio');
+		$ivas = $this->datasis->ivaplica();
+		if(empty($ivas)) show_error('Debe carcar la tabla de ivas');
+
+		//$do = new DataObject('tbenvio');
+		//$do->pointer('scli AS org' ,'tbenvio.codcli_org=org.cliente','org.rifci AS scliorgrif','left');
+		//$do->pointer('scli AS des' ,'tbenvio.codcli_des=des.cliente','des.rifci AS sclidesrif','left');
+
+		$edit = new DataEdit('', 'tbenvio');
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -790,6 +797,7 @@ class Tbenvio extends Controller {
 		$edit->dirdes = new inputField('Direcci&oacute;n','dirdes');
 		$edit->dirdes->rule='';
 		$edit->dirdes->maxlength =300;
+		$edit->dirdes->size = 100;
 
 		$edit->exon = new inputField('Exonerado','exon');
 		$edit->exon->rule='';
@@ -801,9 +809,10 @@ class Tbenvio extends Controller {
 		$edit->anula->size =3;
 		$edit->anula->maxlength =1;
 
-		$edit->kilo = new inputField('Recargo por Dist.','kilo');
+		$edit->kilo = new inputField('Recargo por Distancia','kilo');
 		$edit->kilo->rule='numeric';
 		$edit->kilo->css_class='inputnum';
+		$edit->kilo->type='inputhidden';
 		$edit->kilo->size =12;
 		$edit->kilo->maxlength =10;
 
@@ -815,12 +824,15 @@ class Tbenvio extends Controller {
 		$edit->puertap = new inputField('Domicilio','puertap');
 		$edit->puertap->rule='numeric';
 		$edit->puertap->css_class='inputnum';
+		$edit->puertap->insertValue='0';
+		$edit->puertap->onkeyup='totalizar();';
 		$edit->puertap->size =12;
 		$edit->puertap->maxlength =10;
 
-		$edit->fledes = new inputField('Fledes','fledes');
-		$edit->fledes->rule='';
-		$edit->fledes->size =3;
+		$edit->fledes = new dropdownField('Flete destino','fledes');
+		$edit->fledes->option('N','Si');
+		$edit->fledes->option('S','No');
+		$edit->fledes->rule='required|enum[S,N]';
 		$edit->fledes->maxlength =1;
 
 		$edit->tipo = new dropdownField('Tipo','tipo');
@@ -836,13 +848,14 @@ class Tbenvio extends Controller {
 
 		$edit->descrip = new inputField('Descripci&oacute;n','descrip');
 		$edit->descrip->rule='';
-		//$edit->descrip->size =202;
+		$edit->descrip->size =37;
 		$edit->descrip->maxlength =200;
 
-		$edit->cant = new inputField('Cant.','cant');
+		$edit->cant = new inputField('Cantidad','cant');
 		$edit->cant->rule='integer';
 		$edit->cant->css_class='inputonlynum';
-		$edit->cant->size =13;
+		$edit->cant->insertValue='1';
+		$edit->cant->size =12;
 		$edit->cant->maxlength =11;
 
 		$edit->peso = new inputField('Peso Kg.','peso');
@@ -856,6 +869,7 @@ class Tbenvio extends Controller {
 		$edit->envio->rule='numeric';
 		$edit->envio->css_class='inputnum';
 		$edit->envio->size =12;
+		$edit->envio->type='inputhidden';
 		$edit->envio->maxlength =10;
 
 		$edit->volumen = new inputField('Vol&uacute;men','volumen');
@@ -863,6 +877,8 @@ class Tbenvio extends Controller {
 		$edit->volumen->css_class='inputnum';
 		$edit->volumen->size =12;
 		$edit->volumen->maxlength =10;
+		$edit->volumen->inserValue='0';
+		$edit->volumen->type='inputhidden';
 
 		//Campos comdines
 		$edit->v1 = new inputField('','v1');
@@ -886,21 +902,13 @@ class Tbenvio extends Controller {
 		$edit->v3->size =5;
 		$edit->v3->maxlength =10;
 
-		$edit->subtotal = new inputField('subtotal','subtotal');
+		$edit->subtotal = new inputField('Sub-total','subtotal');
 		$edit->subtotal->rule='numeric';
 		$edit->subtotal->css_class='inputnum';
 		$edit->subtotal->onkeyup='';
 		$edit->subtotal->size =5;
 		$edit->subtotal->maxlength =10;
 		$edit->subtotal->type='inputhidden';
-
-		$edit->iva = new inputField('Impuesto','iva');
-		$edit->iva->rule='numeric';
-		$edit->iva->css_class='inputnum';
-		$edit->iva->onkeyup='';
-		$edit->iva->size =5;
-		$edit->iva->maxlength =10;
-		$edit->iva->type='inputhidden';
 
 		$edit->total = new inputField('Total','total');
 		$edit->total->rule='numeric';
@@ -909,26 +917,32 @@ class Tbenvio extends Controller {
 		$edit->total->size =5;
 		$edit->total->maxlength =10;
 		$edit->total->type='inputhidden';
+
+		$edit->tasa = new hiddenField('','tasa');
+		$edit->tasa->rule='numeric';
+		$edit->tada->insertValue=$ivas['tasa'];
 		//Fin de los campos comodines
 
 		//Campos para el seguro
-		$edit->facturaaseg = new inputField('RIF','facturaaseg');
+		$edit->facturaaseg = new inputField('N&uacute;mero de factura','facturaaseg');
 		$edit->facturaaseg->rule='';
 		$edit->facturaaseg->maxlength =12;
+		$edit->facturaaseg->size=10;
 
 		$edit->rifaseg = new inputField('RIF','rifaseg');
 		$edit->rifaseg->rule='';
 		$edit->rifaseg->maxlength =12;
+		$edit->rifaseg->size=11;
 
 		$edit->nombreaseg = new inputField('Nombre o Raz&oacute;n Social','nombreaseg');
 		$edit->nombreaseg->rule='';
-		$edit->nombreaseg->maxlength =200;
+		$edit->nombreaseg->maxlength =205;
 
-		$edit->montoaseg = new inputField('Total','montoaseg');
+		$edit->montoaseg = new inputField('Monto Total','montoaseg');
 		$edit->montoaseg->rule='numeric';
 		$edit->montoaseg->css_class='inputnum';
-		$edit->montoaseg->onkeyup='';
-		$edit->montoaseg->size =5;
+		$edit->montoaseg->onkeyup='fseguro()';
+		$edit->montoaseg->size =15;
 		$edit->montoaseg->maxlength =10;
 		//Fin de los campos del seguro
 
@@ -936,18 +950,21 @@ class Tbenvio extends Controller {
 		$edit->seguro->rule='numeric';
 		$edit->seguro->css_class='inputnum';
 		$edit->seguro->size =12;
+		$edit->seguro->type='inputhidden';
 		$edit->seguro->maxlength =10;
 
-		$edit->iva = new inputField('Iva','iva');
+		$edit->iva = new inputField('Impuesto','iva');
 		$edit->iva->rule='numeric';
 		$edit->iva->css_class='inputnum';
 		$edit->iva->size =12;
 		$edit->iva->maxlength =10;
+		$edit->iva->type='inputhidden';
 
 		$edit->ipostel = new inputField('Ipostel','ipostel');
 		$edit->ipostel->rule='numeric';
 		$edit->ipostel->css_class='inputnum';
 		$edit->ipostel->size =12;
+		$edit->ipostel->type='inputhidden';
 		$edit->ipostel->maxlength =10;
 
 		$edit->ref = new inputField('Ref','ref');
@@ -1060,10 +1077,11 @@ class Tbenvio extends Controller {
 		$mid = $this->input->post('q');
 		$ori = $this->input->post('o'); //Origen
 		$des = $this->input->post('d'); //Destino
-		$rt=array('iposte'=>0,'monto'=>0,'distancia'=>0,'peso'=>0,'iva'=>0,'pdista'=>false);
+		$rt=array('iposte'=>0,'monto'=>0,'distancia'=>0,'peso'=>0,'iva'=>0,'pdista'=>false,'seguro'=>0);
 
 		if((!empty($mid)) && (!empty($ori)) && (!empty($des))){
-			$ivas = $this->datasis->ivaplica();
+			$ivas     = $this->datasis->ivaplica();
+			$rt['iva']= $ivas['tasa'];
 
 			$peso    =floatval($mid);
 			$sobrante=$peso-10;
@@ -1114,13 +1132,14 @@ class Tbenvio extends Controller {
 					$val = $this->datasis->dameval("SELECT valor  FROM tbprecio  WHERE codpre='2' LIMIT 1");
 					$ipt = $this->datasis->dameval("SELECT monipo FROM tbipostel WHERE codipo='7' LIMIT 1");
 				}else{
-					$val = $this->datasis->dameval("SELECT valor FROM tbprecio  WHERE codpre='3' LIMIT 1");
+					$val = $this->datasis->dameval("SELECT valor FROM tbprecio   WHERE codpre='3' LIMIT 1");
 					$ipt = 0;
 				}
 
 				$pad = 0;
 			}
 
+			$rt['seguro']   =2;
 			$rt['distancia']=$dis;
 			$rt['iposte']   =$ipt;
 			$rt['monto']    =$val;

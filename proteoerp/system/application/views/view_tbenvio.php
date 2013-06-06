@@ -12,6 +12,7 @@ if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'<
 echo (isset($form_begin))? $form_begin:'';
 if($form->_status!='show'){ ?>
 <script language="javascript" type="text/javascript">
+var pseguro=0;
 $(function(){
 
 	$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
@@ -53,7 +54,6 @@ $(function(){
 			setTimeout(function() {  $("#codcli_org").removeAttr("readonly"); }, 1500);
 		}
 	});
-
 
 	$('#codcli_des').autocomplete({
 		delay: 600,
@@ -100,13 +100,17 @@ function cvolumen(){
 	var total  = v1+v2+v3;
 	var tarifa = JSON.parse($.ajax({ type: "POST", url: "<?php echo site_url($this->url.'tarifa') ?>", data: {q:total} ,dataType: "json",async: false }).responseText);
 	$('#volumen').val(tarifa);
+	$('#volumen_val').text(nformat(tarifa,2));
+	totalizar();
 }
 
 function ctarifa(){
 	var peso = Number($('#peso').val());
 	var org  = $('#codofi_org').val();
 	var des  = $('#codofi_des').val();
+	var tasa = 12;
 	var total= 0;
+	var iva  = 0;
 
 	var tarifa = JSON.parse($.ajax({
 		type: "POST",
@@ -115,46 +119,81 @@ function ctarifa(){
 		dataType: "json",async: false }).responseText
 		);
 
+	pseguro = tarifa.seguro;
 	$('#kilo').val(tarifa.distancia);
 	$('#ipostel').val(tarifa.iposte);
 	$('#envio').val(tarifa.monto);
+	$('#tasa').val(tarifa.iva);
 
-	total = Number(tarifa.distancia)+Number(tarifa.iposte)+Number(tarifa.monto);
+	$('#kilo_val').text(nformat(tarifa.distancia,2));
+	$('#ipostel_val').text(nformat(tarifa.iposte,2));
+	$('#envio_val').text(nformat(tarifa.monto,2));
 
-	$('#subtotal').val(total);
-	$('#subtotal_val').text(nformat(total,2));
+	fseguro();
+	totalizar();
+}
+
+function fseguro(){
+	var monto  = Number($('#montoaseg').val());
+	var vseguro= roundNumber(monto*pseguro/100,2);
+
+	$('#seguro').val(vseguro);
+	$('#seguro_val').text(nformat(vseguro,2));
+	totalizar();
+}
+
+function totalizar(){
+	var tasa   = Number($('#tasa').val());
+	var envio  = Number($('#envio').val());
+	var ipostel= Number($('#ipostel').val());
+	var kilo   = Number($('#kilo').val());
+	var volumen= Number($('#volumen').val());
+	var puertap= Number($('#puertap').val());
+	var vseguro= Number($('#seguro').val());
+	var base   = volumen+envio+kilo+puertap+vseguro;
+	var iva    = roundNumber(base*tasa/100,2);
+
+	$('#subtotal').val(base);
+	$('#subtotal_val').text(nformat(base,2));
+
+	$('#iva').val(iva);
+	$('#iva_val').text(nformat(iva,2));
+
+	var total = base+iva
+	$('#total').val(total);
+	$('#total_val').text(nformat(total,2));
 
 }
 </script>
 <?php } ?>
 
 	<?php echo $container_tr; ?>
-	<fieldset style='border: 1px outset #FEB404;background: #9CF180;'>
+	<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
 		<legend align="left">Oficinas</legend>
 		<table width="100%" style="margin: 0; width: 100%;">
 			<tr>
-				<td class="littletablerow"><?php echo $form->codofi_org->label;   ?>*&nbsp;</td>
-				<td class="littletablerow" colspan='2'><?php echo $form->codofi_org->output;  ?>&nbsp; </td>
-				<td class="littletablerow"><?php echo $form->codofi_des->label;   ?>*&nbsp;</td>
-				<td class="littletablerow" colspan='2'><?php echo $form->codofi_des->output;  ?>&nbsp; </td>
+				<td class="littletablerow"><?php echo $form->codofi_org->label;   ?>*</td>
+				<td class="littletablerow" colspan='2'><?php echo $form->codofi_org->output;  ?></td>
+				<td class="littletablerow"><?php echo $form->codofi_des->label;   ?>*</td>
+				<td class="littletablerow" colspan='2'><?php echo $form->codofi_des->output;  ?></td>
 			</tr>
 		</table>
 	</fieldset>
 
-	<table>
+	<table width="100%">
 		<tr>
 			<td>
 				<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
 					<legend align="left">Remitente</legend>
 					<table>
 						<tr>
-							<td class="littletableheader"><?php echo $form->codcli_org->label;   ?>*&nbsp;</td>
-							<td class="littletablerow"   ><?php echo $form->codcli_org->output;  ?>&nbsp; </td>
-							<td class="littletableheader"><?php echo $form->telf_org->label;     ?>*&nbsp;</td>
-							<td class="littletablerow"   ><?php echo $form->telf_org->output;    ?>&nbsp; </td>
+							<td class="littletableheader"><?php echo $form->codcli_org->label;   ?>*</td>
+							<td class="littletablerow"   ><?php echo $form->codcli_org->output;  ?></td>
+							<td class="littletableheader"><?php echo $form->telf_org->label;     ?>*</td>
+							<td class="littletablerow"   ><?php echo $form->telf_org->output;    ?></td>
 						</tr><tr>
-							<td class="littletableheader"><?php echo $form->nomcli_org->label;   ?>*&nbsp;</td>
-							<td class="littletablerow" colspan='3'><?php echo $form->nomcli_org->output;  ?>&nbsp; </td>
+							<td class="littletableheader"><?php echo $form->nomcli_org->label;   ?>*</td>
+							<td class="littletablerow" colspan='3'><?php echo $form->nomcli_org->output;  ?> </td>
 						</tr>
 					</table>
 				</fieldset>
@@ -163,13 +202,13 @@ function ctarifa(){
 					<legend align="left">Destinatario</legend>
 					<table>
 						<tr>
-							<td class="littletableheader"><?php echo $form->codcli_des->label;   ?>*&nbsp;</td>
-							<td class="littletablerow"   ><?php echo $form->codcli_des->output;  ?>&nbsp; </td>
-							<td class="littletableheader"><?php echo $form->telf_des->label;     ?>*&nbsp;</td>
-							<td class="littletablerow"   ><?php echo $form->telf_des->output;    ?>&nbsp; </td>
+							<td class="littletableheader"><?php echo $form->codcli_des->label;   ?>*</td>
+							<td class="littletablerow"   ><?php echo $form->codcli_des->output;  ?> </td>
+							<td class="littletableheader"><?php echo $form->telf_des->label;     ?>*</td>
+							<td class="littletablerow"   ><?php echo $form->telf_des->output;    ?> </td>
 						</tr><tr>
-							<td class="littletableheader"><?php echo $form->nomcli_des->label;   ?>*&nbsp;</td>
-							<td class="littletablerow" colspan='3'><?php echo $form->nomcli_des->output;  ?>&nbsp; </td>
+							<td class="littletableheader"><?php echo $form->nomcli_des->label;   ?>*</td>
+							<td class="littletablerow" colspan='3'><?php echo $form->nomcli_des->output;  ?> </td>
 						</tr><tr>
 						</tr>
 					</table>
@@ -185,82 +224,74 @@ function ctarifa(){
 			</td>
 		</tr>
 	</table>
+
 	<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
 		<legend align="left">Detalles del paquete</legend>
-		<table>
+		<table style='margin-left: auto;margin-right: auto;'>
 			<tr>
-				<td class="littletableheader"><?php echo $form->tipo->label;     ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->tipo->output;    ?>&nbsp; </td>
-				<td class="littletableheader"><?php echo $form->peso->label;     ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->peso->output;    ?>&nbsp; </td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->volumen->label;  ?>*&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->tipo->label;     ?>*</td>
+				<td class="littletablerow"   ><?php echo $form->tipo->output;    ?> </td>
+				<td class="littletableheader"><?php echo $form->volumen->label;  ?>*</td>
 				<td class="littletablerow" colspan='3'>
-					<?php echo $form->v1->output.'x'.$form->v2->output.'x'.$form->v3->output.' '; ?>
-					<?php echo $form->volumen->output; ?>&nbsp;
+					<?php echo $form->v1->output.'x'.$form->v2->output.'x'.$form->v3->output.' '.$form->volumen->output; ?>
 				</td>
 			</tr><tr>
-				<td class="littletableheader"><?php echo $form->kilo->label;     ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->kilo->output;    ?>&nbsp; </td>
-				<td class="littletableheader"><?php echo $form->puertap->label;  ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->puertap->output; ?>&nbsp; </td>
+				<td class="littletableheader"><?php echo $form->cant->label;     ?>*</td>
+				<td style='text-align:right' class="littletablerow"   ><?php echo $form->cant->output;    ?> </td>
+				<td class="littletableheader"><?php echo $form->peso->label;     ?>*</td>
+				<td style='text-align:right' class="littletablerow"   ><?php echo $form->peso->output;    ?> </td>
+				<td class="littletableheader"><?php echo $form->envio->label;    ?>*</td>
+				<td style='text-align:right' class="littletablerow"   ><?php echo $form->envio->output;   ?> </td>
 			</tr><tr>
-				<td class="littletableheader"><?php echo $form->seguro->label;   ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->seguro->output;  ?>&nbsp; </td>
-				<td class="littletableheader"><?php echo $form->ipostel->label;  ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->ipostel->output; ?>&nbsp; </td>
+				<td class="littletableheader"><?php echo $form->kilo->label;     ?>*</td>
+				<td style='text-align:right' class="littletablerow"   ><?php echo $form->kilo->output;    ?> </td>
+				<td class="littletableheader"><?php echo $form->ipostel->label;  ?>*</td>
+				<td style='text-align:right' class="littletablerow"   ><?php echo $form->ipostel->output; ?> </td>
+				<td class="littletableheader"><?php echo $form->puertap->label;  ?>*</td>
+				<td style='text-align:right' class="littletablerow"   ><?php echo $form->puertap->output; ?> </td>
 			</tr><tr>
-				<td class="littletableheader"><?php echo $form->cant->label;     ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->cant->output;    ?>&nbsp; </td>
-				<td class="littletableheader"><?php echo $form->envio->label;    ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->envio->output;   ?>&nbsp; </td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->descrip->label;  ?>*&nbsp;</td>
-				<td class="littletablerow" colspan='3'><?php echo $form->descrip->output; ?>&nbsp; </td>
+				<td class="littletableheader"><?php echo $form->descrip->label;  ?>*</td>
+				<td class="littletablerow" colspan='3'><?php echo $form->descrip->output; ?> </td>
+				<td class="littletableheader" style='text-align:right'><?php echo $form->seguro->label;   ?>*</td>
+				<td class="littletablerow"    style='text-align:right'><?php echo $form->seguro->output;  ?> </td>
 			</tr>
 		</table>
 	</fieldset>
 
-		<legend align="left">Monto asegurado</legend>
-		<table>
+
+	<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
+		<legend align="left" >Detalles del seguro</legend>
+		<table style='margin-left: auto;margin-right: auto;'>
 			<tr>
-				<td class="littletableheader"><?php echo $form->facturaaseg->label;  ?>*&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->facturaaseg->output; ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->rifaseg->label;     ?>&nbsp; </td>
-				<td class="littletablerow"   ><?php echo $form->rifaseg->output;    ?>&nbsp; </td>
-				<td class="littletableheader"><?php echo $form->nombreaseg->label;  ?>*&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->nombreaseg->output; ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->montoaseg->label;   ?>&nbsp; </td>
-				<td class="littletablerow"   ><?php echo $form->montoaseg->output;  ?>&nbsp; </td>
+				<td class="littletableheader"><?php echo $form->facturaaseg->label;  ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->facturaaseg->output; ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->rifaseg->label;      ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->rifaseg->output;     ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->montoaseg->label;    ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->montoaseg->output;   ?>&nbsp;</td>
+			</tr><tr>
+				<td class="littletableheader"><?php echo $form->nombreaseg->label;   ?></td>
+				<td class="littletablerow" colspan='5'><?php echo $form->nombreaseg->output;  ?></td>
 			</tr>
 		</table>
-		</legend>
-
-
-
-
-
-
-
-
-
-
+	</fieldset>
 
 
 	<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
 		<legend align="left">Totales</legend>
-		<table>
-			<tr>
-				<td class="littletableheader"><?php echo $form->subtotal->label;  ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->subtotal->output; ?>&nbsp; </td>
-
-				<td class="littletableheader"><?php echo $form->iva->label;  ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->iva->output; ?>&nbsp; </td>
-
-				<td class="littletableheader"><?php echo $form->total->label;  ?>*&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->total->output; ?>&nbsp; </td>
+		<table width="100%">
+			<tr style='font-weight:bold;'>
+				<td class="littletableheader" style='text-align:right'><?php echo $form->subtotal->label;  ?>*&nbsp;</td>
+				<td class="littletablerow"    style='text-align:right'><?php echo $form->subtotal->output; ?>&nbsp; </td>
+				<td class="littletableheader" style='text-align:right'><?php echo $form->iva->label;       ?>*&nbsp;</td>
+				<td class="littletablerow"    style='text-align:right'><?php echo $form->iva->output;      ?>&nbsp; </td>
+				<td class="littletableheader" style='text-align:right'><?php echo $form->total->label;     ?>*&nbsp;</td>
+				<td class="littletablerow"    style='text-align:right;font-size:2em'><?php echo $form->total->output;    ?>&nbsp; </td>
 			</tr>
 		</table>
 	</fieldset>
-<?php echo (isset($form_end))? $form_end:''; ?>
-<?php endif; ?>
+<?php
+echo $form->tasa->output;
+echo (isset($form_end))? $form_end:'';
+endif;
+?>
