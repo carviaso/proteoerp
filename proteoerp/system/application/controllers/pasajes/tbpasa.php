@@ -814,13 +814,11 @@ class Tbpasa extends Controller {
 	//
 	function busfila($mSQL, $i) {
 		$libre   = "style='background:#0EF72D;'";
-		$ocupado = "style='background:#FC0532;color:white;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;'"; //color:#FFFFFF; font-weight:bold;'";
-		$reserva = "style='background:#050505;color:white;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
-		$manual  = "style='background:#F2A2F2;color:black;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
+		$ocupado = "style='background:#FC0532;color:white;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;height:20px;'"; //color:#FFFFFF; font-weight:bold;'";
+		$reserva = "style='background:#026837;color:white;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;height:20px;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
+		$manual  = "style='background:#F2A2F2;color:black;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;height:20px;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
 		$mi = $i;
 		$query = $this->db->query($mSQL);
-
-		//memowrite($mSQL,'meco');
 
 		$bl = "\t\t<td>&nbsp;<td>\n";
 		$rs = "";
@@ -844,7 +842,6 @@ class Tbpasa extends Controller {
 						$rs1 = "\t\t<td ".$color." ><input type='checkbox' id='asiento".$row['valor']."' name='asiento".$row['valor']."' onclick='resepu(\"".$row['valor']."\",\"".utf8_encode($row['valor'])."\")' ><label for='asiento".$row['valor']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
 					else
 						$rs1 = "\t\t<td ".$color."><label ".$color." for='asiento".$row['indice']."'>".utf8_encode($row['valor'])."</label><td>\n".$rs1;
-
 				}
 				$i ++;
 			}
@@ -997,6 +994,8 @@ class Tbpasa extends Controller {
 		$origen  = $_POST['org'];
 		$destino = $_POST['dtn'];
 		$fecven  = $_POST['fecven'];
+		$reto = false;
+		$msj = "";
 
 		$fecven = substr($fecven,6,4).substr($fecven,3,2).substr($fecven,0,2);
 
@@ -1004,30 +1003,35 @@ class Tbpasa extends Controller {
 		$fin    = $this->datasis->dameval("SELECT orden FROM tbdestinos WHERE codrut='$codrut' AND codofiorg='$origen' AND codofides='$destino'");
 
 		$puestos = array();
+		$localiza = $this->datasis->prox_numero('nlocaliza');
+
 		foreach( $_POST as $id=>$nombre ){
-		
 			if (substr( $id,0,7) == 'asiento') {
 				$nroasi = str_replace('asiento','',$id);
 				// Guarda los Puestos 
 				$data = array(
-					"codrut" => $codrut,
-					"fecpas" => $fecven,
-					"tipven" => "R",
-					"nroasi" => $nroasi,  
-					"inicio" => $inicio,
-					"fin"    => $fin );
-				$this->db->insert('tbpuestos',$data);
-					
-				/*try {
-					$this->db->insert('tbpuestos',$data);
-					$puestos[] = $this->db->last_insert();
-				} catch (Exception $e) {
-					// No funciono deshace todo
-					foreach( $puestos as $borra ){ 
-						//$this->query("delete from tbpuestos where codptos=$borra"); 
-					}
-				}*/
+					"codrut"   => $codrut,
+					"fecpas"   => $fecven,
+					"tipven"   => "R",
+					"nroasi"   => $nroasi,  
+					"inicio"   => $inicio,
+					"fin"      => $fin,
+					"localiza" => $localiza );
+			
+				$istring = $this->db->insert_string('tbpuestos',$data);
+				$istring = str_replace("INSERT INTO","INSERT IGNORE INTO",$istring);
+				$this->db->query($istring);
+				
+				$puestos = $this->db->insert_id();
+				$reto = true;
 
+				if  ($puestos == 0 ) {
+					// No funciono deshace todo
+					$this->db->query("delete from tbpuestos where localiza=$localiza"); 
+					$reto = false;
+					$msj = "Asientos Vendidos";
+					break;
+				}
 			}
 		}
 		
@@ -1036,9 +1040,10 @@ class Tbpasa extends Controller {
 		$do->set('nomcli','*TEMPORAL SE ELIMINARA');
 		$do->set('usuario', $this->session->userdata('usuario'));
 		$do->set('tipven','R');
+		$do->set('localiza',$localiza);
 		
-		$do->error_message_ar['pre_ins']='';
-		return false;
+		$do->error_message_ar['pre_ins']=$msj;
+		return $reto;
 	}
 
 	function _pre_update($do){
