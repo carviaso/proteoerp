@@ -381,7 +381,7 @@ class Rcaj extends validaciones {
 						$ingreso   += $monto;
 						$rrecibido += $recibido;
 						$mSQL = $this->db->insert_string('itrcaj', $arr);
-						$this->db->simple_query($mSQL);
+						$this->db->query($mSQL);
 					}
 				}
 				$arr = array(
@@ -398,18 +398,18 @@ class Rcaj extends validaciones {
 					'parcial' => $parcial
 				);
 				$mSQL = $this->db->insert_string('rcaj', $arr);
-				$this->db->simple_query($mSQL);
+				$this->db->query($mSQL);
 
 				$dbnumero=$this->db->escape($numero);
 
 				$mSQL="UPDATE sfpa JOIN sfac ON sfac.numero=sfpa.numero AND sfpa.tipo_doc=CONCAT(sfac.tipo_doc, IF(sfac.referen='M','E',sfac.referen))
 				SET sfpa.cierre=$dbnumero
 				WHERE sfpa.f_factura=$dbfecha    AND SUBSTRING(sfpa.tipo_doc,2,1)!='X' AND sfpa.cobrador=$dbcajero ";
-				$this->db->simple_query($mSQL);
+				$this->db->query($mSQL);
 
 				if($this->db->table_exists('rret')){
 					$mSQL="UPDATE rret SET cierre=$dbnumero WHERE cajero=$dbcajero AND fecha=$dbfecha AND cierre IS NULL";
-					$this->db->simple_query($mSQL);
+					$this->db->query($mSQL);
 				}
 			}
 			logusu('rcaj',"Pre-cerro cajero $cajero de $fecha");
@@ -657,7 +657,7 @@ class Rcaj extends validaciones {
 						$rrecibido   += $recibido;
 						$sistema     += $row->sistema;
 						$mmSQL = $this->db->insert_string('itrcaj', $arr);
-						$this->db->simple_query($mmSQL);
+						$this->db->query($mmSQL);
 					}
 				}$rcajfecha=$this->db->escape($row->fecha);
 				$transac=$row->transac;
@@ -679,7 +679,7 @@ class Rcaj extends validaciones {
 				}
 				$where = 'numero='.$this->db->escape($numero);
 				$mmSQL = $this->db->update_string('rcaj', $arr, $where);
-				$this->db->simple_query($mmSQL);
+				$this->db->query($mmSQL);
 
 				//cierra el cajero
 
@@ -695,7 +695,7 @@ class Rcaj extends validaciones {
 
 					$where = 'cajero='.$this->db->escape($cajero);
 					$mmSQL = $this->db->update_string('scaj', $arr, $where);
-					$ban=$this->db->simple_query($mmSQL);
+					$ban=$this->db->query($mmSQL);
 					if($ban==false) memowrite($mmSQL,'rcaj');
 				}
 
@@ -735,7 +735,7 @@ class Rcaj extends validaciones {
 					$data['hora']     = $hora;
 
 					$mSQL = $this->db->insert_string('smov', $data);
-					$ban=$this->db->simple_query($mSQL);
+					$ban=$this->db->query($mSQL);
 					if($ban==false) memowrite($mSQL,'rcaj');
 				}
 				//Fin de las retenciones ISLR
@@ -773,7 +773,7 @@ class Rcaj extends validaciones {
 				$data['hora']       =$hora;
 
 				$mSQL = $this->db->insert_string('bmov', $data);
-				$ban=$this->db->simple_query($mSQL);
+				$ban=$this->db->query($mSQL);
 				if($ban==false) memowrite($mSQL,'rcaj');
 				//Fin del movimiento en smov
 
@@ -800,7 +800,7 @@ class Rcaj extends validaciones {
 						$data['concepto'] ="SOBRANTE EN CAJERO $cajero DIA ".dbdate_to_human($fecha);
 
 						$mSQL = $this->db->insert_string('banc', $data);
-						$ban=$this->db->simple_query($mSQL);
+						$ban=$this->db->query($mSQL);
 						if($ban==false) memowrite($mSQL,'rcaj');
 					}
 
@@ -830,7 +830,7 @@ class Rcaj extends validaciones {
 						$data['hora']       =$hora;
 
 						$mSQL = $this->db->insert_string('bmov', $data);
-						$ban=$this->db->simple_query($mSQL);
+						$ban=$this->db->query($mSQL);
 						if($ban==false) memowrite($mSQL,'rcaj');
 
 					}else{ //Crea la ND a causa del sobrante de caja
@@ -854,7 +854,7 @@ class Rcaj extends validaciones {
 						$data['hora']       =$hora;
 
 						$mSQL = $this->db->insert_string('bmov', $data);
-						$ban=$this->db->simple_query($mSQL);
+						$ban=$this->db->query($mSQL);
 						if($ban==false) memowrite($mSQL,'rcaj');
 					}
 
@@ -866,7 +866,7 @@ class Rcaj extends validaciones {
 				SELECT a.banco codbanc, a.tipo tipo_op, a.num_ref numero, a.fecha, 'C' clipro, a.cod_cli codcp, b.nombre, a.monto, 'INGRESO POR COBRANZA' concepto, 'P' status, 'S' liable, a.transac, a.usuario, a.estampa, a.hora, 'N' anulado
 				FROM sfpa a JOIN scli b ON a.cod_cli=b.cliente
 				WHERE a.tipo='DE' AND tipo_doc<>'AB'";
-				$ban=$this->db->simple_query($mSQL);
+				$ban=$this->db->query($mSQL);
 				if($ban==false) memowrite($mSQL,'rcaj');
 
 				logusu('rcaj',"Cerro cajero $cajero de $fecha");
@@ -966,21 +966,21 @@ class Rcaj extends validaciones {
 					$er +=$ban;
 				}
 				$mSQL='DELETE FROM bmov WHERE transac='.$dbtransac;
-				$ban =$this->db->simple_query($mSQL);
+				$ban =$this->db->query($mSQL);
 				if($ban==false) memowrite($mSQL,'rcaj');
 				$er +=$ban;
 			}
 
 			$mSQL='DELETE FROM rcaj   WHERE numero='.$dbnumero;
-			$ban =$this->db->simple_query($mSQL);
+			$ban =$this->db->query($mSQL);
 			if($ban==false) memowrite($mSQL,'rcaj');
 			$er +=$ban;
 			$mSQL='DELETE FROM itrcaj WHERE numero='.$dbnumero;
-			$ban =$this->db->simple_query($mSQL);
+			$ban =$this->db->query($mSQL);
 			if($ban==false) memowrite($mSQL,'rcaj');
 			$er +=$ban;
 			$mSQL='UPDATE rret SET cierre=NULL WHERE cierre='.$dbnumero;
-			$ban =$this->db->simple_query($mSQL);
+			$ban =$this->db->query($mSQL);
 			if($ban==false) memowrite($mSQL,'rcaj');
 			$er +=$ban;
 		}
@@ -997,7 +997,7 @@ class Rcaj extends validaciones {
 			$numero  = $this->datasis->fprox_numero($nom,12);
 			$inumero = intval($numero);
 			if($proxch>$inumero){
-				$this->db->simple_query("INSERT INTO ${nom} VALUES(${proxch}, '_USR', NOW())");
+				$this->db->query("INSERT INTO ${nom} VALUES(${proxch}, '_USR', NOW())");
 				continue;
 			}
 			$dbnumero= $this->db->escape($numero);
@@ -1025,7 +1025,7 @@ class Rcaj extends validaciones {
 			KEY `Index 2` (`tipo`,`cajero`)
 			) ENGINE=MyISAM COMMENT='Retiros de caja'";
 
-			$this->db->simple_query($mSQL);
+			$this->db->query($mSQL);
 		}
 
 		if(!$this->db->table_exists('itrcaj')){
@@ -1040,7 +1040,7 @@ class Rcaj extends validaciones {
 			)
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM;";
-			$this->db->simple_query($mSQL);
+			$this->db->query($mSQL);
 		}
 
 		$campos=$this->db->list_fields('rcaj');
@@ -1076,18 +1076,18 @@ class Rcaj extends validaciones {
 		$itcampos=$this->db->list_fields('itrcaj');
 		if(!in_array('cierre',$itcampos)){
 			$mSQL="ALTER TABLE `itrcaj`  ADD COLUMN `cierre` CHAR(1) NOT NULL DEFAULT 'N' AFTER `tipo`";
-			$this->db->simple_query($mSQL);
+			$this->db->query($mSQL);
 		}
 
 		//$mSQL="ALTER TABLE `itrcaj`  DROP PRIMARY KEY,  ADD PRIMARY KEY (`numero`, `tipo`, `cierre`)";
-		//$this->db->simple_query($mSQL);
+		//$this->db->query($mSQL);
 
 		if($this->db->field_exists('cierre', 'sfpa')){
 			$mSQL="ALTER TABLE `sfpa`  ADD COLUMN `cierre` CHAR(8) DEFAULT '' AFTER `hora`";
-			$this->db->simple_query($mSQL);
+			$this->db->query($mSQL);
 		}
 
 		//$mSQL="ALTER TABLE `rcaj` CHANGE COLUMN `estampa` `estampa` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP";
-		//$this->db->simple_query($mSQL);
+		//$this->db->query($mSQL);
 	}
 }
