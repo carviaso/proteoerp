@@ -47,6 +47,32 @@ class Scli extends validaciones {
 			$this->db->simple_query($mSQL);
 		}
 
+		if(!$this->db->table_exists('sclibitalimit')){
+			$mSQL="CREATE TABLE `sclibitalimit` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`cliente`    CHAR(5) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`credito`    CHAR(1) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`creditoant` CHAR(1) NULL DEFAULT NULL,
+				`limite`     BIGINT(20) NULL DEFAULT NULL,
+				`limiteant`  BIGINT(20) NULL DEFAULT NULL,
+				`tolera`     DECIMAL(9,2) NULL DEFAULT NULL,
+				`toleraant`  DECIMAL(9,2) NULL DEFAULT NULL,
+				`maxtol`     DECIMAL(9,2) NULL DEFAULT NULL,
+				`maxtolant`  DECIMAL(9,2) NULL DEFAULT NULL,
+				`motivo`     TEXT NULL,
+				`formap`     DECIMAL(9,0) NULL DEFAULT NULL,
+				`formapsant` DECIMAL(9,0) NULL DEFAULT NULL,
+				`estampa`    TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+				`usuario`    VARCHAR(12) NULL DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				INDEX `cliente` (`cliente`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM
+			AUTO_INCREMENT=1";
+			$this->db->simple_query($mSQL);
+		}
+
 		$this->datasis->modintramenu( 1000, 650, 'ventas/scli' );
 		redirect($this->url.'jqdatag');
 	}

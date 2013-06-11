@@ -20,7 +20,7 @@ function traerutas(){
 	var hasta = $('#dtn').val();
 	var fecha = $('#fecven').val();
 	if(desde!='' && hasta!=''){
-		jQuery("#tbrutas").jqGrid('setGridParam',{url: '<?php echo site_url('pasajes/tbpasa/getbrutas'); ?>/'+desde+'/'+hasta+'/'+fecha }).trigger('reloadGrid');
+		jQuery("#tbrutas").jqGrid('setGridParam',{url: '<?php echo site_url('pasajes/tbreserva/getbrutas'); ?>/'+desde+'/'+hasta+'/'+fecha }).trigger('reloadGrid');
 	}
 }
 
@@ -29,8 +29,8 @@ $("#tbrutas").jqGrid({
 	ajaxGridOptions: { type: "POST"},
 	jsonReader: { root: "data", repeatitems: false},
 	ondblClickRow: puestos,
-	url:     '<?php echo site_url('pasajes/tbpasa/getbrutas').'/0/0/0/0/0';  ?>',
-	editurl: '<?php echo site_url('pasajes/tbpasa/'); ?>',
+	url:     '<?php echo site_url('pasajes/tbreserva/getbrutas').'/0/0/0/0/0';  ?>',
+	editurl: '<?php echo site_url('pasajes/tbreserva/'); ?>',
 	datatype: "json",
 	rowNum:  12,
 	height: 180, 
@@ -57,7 +57,7 @@ function puestos(){
 	var id = $("#tbrutas").jqGrid('getGridParam','selrow');
 	if(id){
 		var ret  = $("#tbrutas").getRowData(id);
-		$.post("<?php echo site_url('pasajes/tbpasa/puestos/'); ?>/"+id+"/"+$('#fecven').val(), function(data){
+		$.post("<?php echo site_url('pasajes/tbreserva/puestos/'); ?>/"+id+"/"+$('#fecven').val(), function(data){
 			$("#puestos").html(data);
 			$('#puestos').buttonset();
 			$("#codrut").val(ret.codrut);

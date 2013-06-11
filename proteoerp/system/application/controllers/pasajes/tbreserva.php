@@ -13,8 +13,8 @@ class Tbreserva extends Controller {
 	}
 
 	function index(){
-		$this->datasis->creaintramenu(array('modulo'=>'162','titulo'=>'Reservaciones','mensaje'=>'Reservaciones','panel'=>'PASAJES','ejecutar'=>'pasajes/tbreserva','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
-		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->datasis->creaintramenu(array('modulo'=>'162','titulo'=>'Reservaciones','mensaje'=>'Reservaciones','panel'=>'PASAJES','ejecutar'=>'pasajes/tbreserva','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>950,'alto'=>700));
+		$this->datasis->modintramenu( 950, 700, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -152,8 +152,8 @@ class Tbreserva extends Controller {
 
 		$grid  = new $this->jqdatagrid;
 
-		$grid->addField('nropasa');
-		$grid->label('Pasaje');
+		$grid->addField('id');
+		$grid->label('Numero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -767,21 +767,20 @@ class Tbreserva extends Controller {
 		$bl = "\t\t<td>&nbsp;<td>\n";
 		
 		$rs  = "<table style='border-collapse:collapse;'>";
-		//$rs .= "<tr><td colspan='3' align='center'>Ruta: ".$codrut." Fecha: ".$dia."/".$mes."/".$ano."</td></tr>";
 	
 		$rs .= "<tr><td>PLANTA ALTA/UNICA</td><td>&nbsp;&nbsp;</td><td>PLANTA BAJA</td></tr>";
 		$rs .= "<tr><td><table style='border-collapse:collapse;'>\n\t<tr>\n";
 
-		$mSQL = $mSQL1." b.indice < 12 ORDER BY b.indice ";
+		$mSQL = $mSQL1." b.indice < 12 GROUP BY b.indice ORDER BY b.indice ";
 		$rs .= $this->busfila($mSQL, 0);
 
-		$mSQL = $mSQL1."b.indice > 11 AND b.indice < 24 ORDER BY b.indice ";
+		$mSQL = $mSQL1."b.indice > 11 AND b.indice < 24 GROUP BY b.indice ORDER BY b.indice ";
 		$rs .= $this->busfila($mSQL, 12);
 
-		$mSQL = $mSQL1." b.indice > 23 AND b.indice < 36 ORDER BY b.indice ";
+		$mSQL = $mSQL1." b.indice > 23 AND b.indice < 36 GROUP BY b.indice ORDER BY b.indice ";
 		$rs .= $this->busfila($mSQL, 24);
 
-		$mSQL = $mSQL1." b.indice > 35 AND b.indice < 48 ORDER BY b.indice ";
+		$mSQL = $mSQL1." b.indice > 35 AND b.indice < 48 GROUP BY b.indice ORDER BY b.indice ";
 		$rs .= $this->busfila($mSQL, 36);
 
 		$rs .= "</table>\n</td>\n<td>&nbsp;</td>";
@@ -818,9 +817,10 @@ class Tbreserva extends Controller {
 		$mi = $i;
 		$query = $this->db->query($mSQL);
 
-		$bl = "\t\t<td>&nbsp;<td>\n";
+		//$bl = "\t\t<td>&nbsp;<td>\n";
 		$rs = "";
-		$f = $i+11;
+		$f = $mi+11;
+
 		if ($query->num_rows() > 0){
 			$rs  = "\t<tr>\n";
 			$rs1 = '';
@@ -830,8 +830,9 @@ class Tbreserva extends Controller {
 				if ($row['estatus'] == 'R')	$color = $reserva;
 				if ($row['estatus'] == 'V')	$color = $ocupado;
 				if ($row['estatus'] == 'P')	$color = $manual;
+
 				while ( $i != $row['indice'] ){ 
-					$rs1 = $bl.$rs1; 
+					$rs1 = "\t\t<td>&nbsp;<td>\n".$rs1; 
 					$i++;	
 					if ( $i > $mi+12  ) break;
 				}
@@ -1014,32 +1015,37 @@ class Tbreserva extends Controller {
 					"nroasi"   => $nroasi,  
 					"inicio"   => $inicio,
 					"fin"      => $fin,
-					"localiza" => $localiza );
+					"localiza" => $localiza 
+				);
 			
-				$istring = $this->db->insert_string('tbpuestos',$data);
-				$istring = str_replace("INSERT INTO","INSERT IGNORE INTO",$istring);
-				$this->db->query($istring);
+				for ( $m = $inicio; $m <= $fin; $m++  ){
+					$data['inicio'] = $m;
+					$istring = $this->db->insert_string('tbpuestos',$data);
+					$istring = str_replace("INSERT INTO","INSERT IGNORE INTO",$istring);
+					$this->db->query($istring);
 				
-				$puestos = $this->db->insert_id();
-				$reto = true;
+					$puestos = $this->db->insert_id();
+					$reto = true;
 
-				if  ($puestos == 0 ) {
-					// No funciono deshace todo
-					$this->db->query("delete from tbpuestos where localiza=$localiza"); 
-					$reto = false;
-					$msj = "Asientos Vendidos";
-					break;
+					if  ($puestos == 0 ) {
+						// No funciono deshace todo
+						$this->db->query("delete from tbpuestos where localiza=$localiza"); 
+						$reto = false;
+						$msj = "Asientos Vendidos";
+						break;
+					}
 				}
+				if  ($puestos == 0 ) break;
 			}
 		}
-		
+/*
 		$do->set('nacio','TTT');
 		$do->set('codcli','-TEMP');
 		$do->set('nomcli','*TEMPORAL SE ELIMINARA');
 		$do->set('usuario', $this->session->userdata('usuario'));
 		$do->set('tipven','R');
 		$do->set('localiza',$localiza);
-		
+*/
 		$do->error_message_ar['pre_ins']=$msj;
 		return $reto;
 	}
