@@ -1082,8 +1082,8 @@ class Rcaj extends validaciones {
 		//$mSQL="ALTER TABLE `itrcaj`  DROP PRIMARY KEY,  ADD PRIMARY KEY (`numero`, `tipo`, `cierre`)";
 		//$this->db->query($mSQL);
 
-		if($this->db->field_exists('cierre', 'sfpa')){
-			$mSQL="ALTER TABLE `sfpa`  ADD COLUMN `cierre` CHAR(8) DEFAULT '' AFTER `hora`";
+		if( !$this->db->field_exists('cierre', 'sfpa')){
+			$mSQL="ALTER TABLE sfpa  ADD COLUMN cierre CHAR(8) DEFAULT '' AFTER hora";
 			$this->db->query($mSQL);
 		}
 
