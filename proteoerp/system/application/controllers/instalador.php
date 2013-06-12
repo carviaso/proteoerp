@@ -326,16 +326,16 @@ class Instalador extends Controller {
 
 
 		//./nomina/notabu.php
-		if ( !$this->datasis->iscampo('notabu','id') ) {
-			$this->db->simple_query('ALTER TABLE notabu DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE notabu ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE notabu ADD UNIQUE INDEX princi (contrato, ano, mes, dia)');
-		}
+		//if ( !$this->datasis->iscampo('notabu','id') ) {
+		//	$this->db->simple_query('ALTER TABLE notabu DROP PRIMARY KEY');
+		//	$this->db->simple_query('ALTER TABLE notabu ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+		//	$this->db->simple_query('ALTER TABLE notabu ADD UNIQUE INDEX princi (contrato, ano, mes, dia)');
+		//}
 
 
 		//./nomina/ausu.php
-		$mSQL="ALTER TABLE ausu ADD PRIMARY KEY (codigo,fecha);";
-		$this->db->simple_query($mSQL);
+		//$mSQL="ALTER TABLE ausu ADD PRIMARY KEY (codigo,fecha);";
+		//$this->db->simple_query($mSQL);
 
 		//./nomina/nomina.php
 		if (!$this->db->table_exists('nomina')) {

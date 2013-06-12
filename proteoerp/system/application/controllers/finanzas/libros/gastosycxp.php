@@ -8,7 +8,7 @@ class gastosycxp{
 
 		//Procesando Compras gser
 		$this->db->simple_query("UPDATE gser SET cajachi='N' WHERE cajachi='' or cajachi IS NULL");
-		$this->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='GS' ");
+		$this->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = ${mes} AND fuente='GS' ");
 
 		// REVISA GSER A VER SI HAY PROBLEMAS
 		$this->db->simple_query("UPDATE gser SET exento=totbruto WHERE exento<>totbruto and totiva=0");
@@ -61,7 +61,7 @@ class gastosycxp{
 			$serie
 			FROM gser AS a
 			LEFT JOIN sprv AS c ON a.proveed=c.proveed
-			WHERE a.fecha BETWEEN $fdesde AND $fhasta
+			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta}
 			AND a.cajachi='N' AND tipo_doc<>'XX'
 			AND (c.tipo NOT IN ('5') OR a.totiva<>0 )
 			ORDER BY a.fecha, a.proveed, a.numero ";
@@ -111,7 +111,7 @@ class gastosycxp{
 			0 AS fafecta
 			FROM gitser AS a JOIN gser AS b ON
 			a.fecha=b.fecha AND a.proveed=b.proveed AND a.numero=b.numero
-			WHERE b.fecha BETWEEN $fdesde AND $fhasta
+			WHERE b.fecha BETWEEN ${fdesde} AND ${fhasta}
 			AND b.tipo_doc='FC' AND b.cajachi='S'
 			ORDER BY a.fecha";
 		$flag=$this->db->simple_query($mSQL);
@@ -140,7 +140,7 @@ class gastosycxp{
 		LEFT JOIN sprv AS b ON a.cod_prv=b.proveed
 		JOIN itppro  AS c ON a.numero=c.numppro AND a.tipo_doc=c.tipoppro AND c.cod_prv=a.cod_prv
 		JOIN scst AS d ON c.tipo_doc=d.tipo_doc AND c.numero=d.numero
-		WHERE a.fecha BETWEEN $fdesde AND $fhasta AND b.tipo<>'5'
+		WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5'
 		AND a.tipo_doc='NC' AND  a.codigo NOT IN ('NOCON','')
 		GROUP BY cod_prv,tipo_doc,numero";
 		$query = $this->db->query($mSQL);
@@ -192,7 +192,7 @@ class gastosycxp{
 		}
 
 		//Carga los descuentos por pronto pago
-		/*$mSQL="SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,
+		$mSQL="SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,
 			ROUND(IF(d.cstotal  >0, d.cgenera*(c.ppago/c.monto),0),2) AS montasa,
 			ROUND(IF(d.montoiva >0, d.civagen*(c.ppago/c.monto),0),2) AS tasa,
 			ROUND(IF(d.cstotal  >0, d.creduci*(c.ppago/c.monto),0),2) AS monredu,
@@ -207,9 +207,53 @@ class gastosycxp{
 			LEFT JOIN sprv AS b ON a.cod_prv=b.proveed
 			JOIN itppro AS c ON a.transac=c.transac
 			JOIN scst AS d ON c.tipo_doc=d.tipo_doc AND c.numero=d.numero
-			WHERE a.fecha BETWEEN $fdesde AND $fhasta AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo='DESPP' AND c.ppago>0";*/
+			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo='DESPP' AND c.ppago>0";
 
-		//Carga los descuentos por pronto pago
+		$query = $this->db->query($mSQL);
+		if ( $query->num_rows() > 0 ){
+			foreach( $query->result() as $row ) {
+				if($row->impuesto == 0 && empty($row->codigo) ) continue;
+				$stotal = $row->monto-$row->impuesto;
+				$fecha  = ($row->fecapl==null) ? $row->fecha : $row->fecapl;
+				$fecha  = preg_replace('/[^0-9]+/', '',$fecha);
+
+				$data=array();
+				$data['libro']    = 'C';
+				$data['tipo']     = $row->tipo_doc;
+				$data['fuente']   = 'MP';
+				$data['sucursal'] = '00';
+				$data['fecha']    = $fecha;
+				$data['numero']   = $row->numero;
+				$data['clipro']   = $row->cod_prv;
+				$data['nombre']   = $row->nomfis;
+				$data['contribu'] = 'CO';
+				$data['rif']      = $row->rif;
+				$data['registro'] = ($fecha<$mFECHAF)? '04':'01';
+				$data['nacional'] =  'S';
+				$data['nfiscal']  = $row->nfiscal;
+				$data['general']  = (empty($row->montasa  ))? 0: $row->montasa  ;
+				$data['geneimpu'] = (empty($row->tasa     ))? 0: $row->tasa     ;
+				$data['reducida'] = (empty($row->monredu  ))? 0: $row->monredu  ;
+				$data['reduimpu'] = (empty($row->reducida ))? 0: $row->reducida ;
+				$data['adicional']= (empty($row->monadic  ))? 0: $row->monadic  ;
+				$data['adicimpu'] = (empty($row->sobretasa))? 0: $row->sobretasa;
+				$data['exento']   = (empty($row->exento   ))? 0: $row->exento   ;
+				$data['impuesto'] = (empty($row->impuesto ))? 0: $row->impuesto ;
+				$data['gtotal']   = (empty($row->monto    ))? 0: $row->monto    ;
+				$data['stotal']   = (empty($stotal        ))? 0: $stotal        ;
+				$data['fechal']   = $mes.'01';
+				$data['referen']  = '';
+				$data['reiva']    = $row->reteiva;
+				$data['afecta']   = $row->afecta;
+				$data['fafecta']  = '';
+
+				$mSQL = $this->db->insert_string('siva', $data);
+				$flag=$this->db->simple_query($mSQL);
+				if(!$flag) memowrite($mSQL,'genecxp');
+			}
+		}
+
+		//Carga los descuentos por pronto pago no aplicados
 		$mSQL="SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,
 			a.montasa,
 			a.tasa,
@@ -223,7 +267,70 @@ class gastosycxp{
 			a.reteiva, a.fecha, a.fecapl, b.rif, b.nomfis ,TRIM(a.afecta) AS afecta,a.codigo
 			FROM sprm AS a
 			LEFT JOIN sprv AS b ON a.cod_prv=b.proveed
-			WHERE a.fecha BETWEEN $fdesde AND $fhasta AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo='DESPP'";
+			LEFT JOIN itppro AS c ON a.transac=c.transac
+			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo='DESPP' AND c.transac IS NULL";
+
+		$query = $this->db->query($mSQL);
+		if ( $query->num_rows() > 0 ){
+			foreach( $query->result() as $row ) {
+				if($row->impuesto == 0 && empty($row->codigo) ) continue;
+				$stotal = $row->monto-$row->impuesto;
+				$fecha  = ($row->fecapl==null) ? $row->fecha : $row->fecapl;
+				$fecha  = preg_replace('/[^0-9]+/', '',$fecha);
+
+				$data=array();
+				$data['libro']    = 'C';
+				$data['tipo']     = $row->tipo_doc;
+				$data['fuente']   = 'MP';
+				$data['sucursal'] = '00';
+				$data['fecha']    = $fecha;
+				$data['numero']   = $row->numero;
+				$data['clipro']   = $row->cod_prv;
+				$data['nombre']   = $row->nomfis;
+				$data['contribu'] = 'CO';
+				$data['rif']      = $row->rif;
+				$data['registro'] = ($fecha<$mFECHAF)? '04':'01';
+				$data['nacional'] =  'S';
+				$data['nfiscal']  = $row->nfiscal;
+				$data['general']  = (empty($row->montasa  ))? 0: $row->montasa  ;
+				$data['geneimpu'] = (empty($row->tasa     ))? 0: $row->tasa     ;
+				$data['reducida'] = (empty($row->monredu  ))? 0: $row->monredu  ;
+				$data['reduimpu'] = (empty($row->reducida ))? 0: $row->reducida ;
+				$data['adicional']= (empty($row->monadic  ))? 0: $row->monadic  ;
+				$data['adicimpu'] = (empty($row->sobretasa))? 0: $row->sobretasa;
+				$data['exento']   = (empty($row->exento   ))? 0: $row->exento   ;
+				$data['impuesto'] = (empty($row->impuesto ))? 0: $row->impuesto ;
+				$data['gtotal']   = (empty($row->monto    ))? 0: $row->monto    ;
+				$data['stotal']   = (empty($stotal        ))? 0: $stotal        ;
+				$data['fechal']   = $mes.'01';
+				$data['referen']  = '';
+				$data['reiva']    = $row->reteiva;
+				$data['afecta']   = $row->afecta;
+				$data['fafecta']  = '';
+
+				$mSQL = $this->db->insert_string('siva', $data);
+				$flag=$this->db->simple_query($mSQL);
+				if(!$flag) memowrite($mSQL,'genecxp');
+			}
+		}
+
+		//Carga las notas de credito por devolucion que no estan en scst
+		/*$mSQL="SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,
+			a.montasa,
+			a.tasa,
+			a.monredu,
+			a.reducida,
+			a.monadic,
+			a.sobretasa,
+			a.exento,
+			a.impuesto,
+			a.monto,
+			a.reteiva, a.fecha, a.fecapl, b.rif, b.nomfis ,TRIM(a.afecta) AS afecta,a.codigo
+			FROM sprm AS a
+			LEFT JOIN sprv   AS b ON a.cod_prv=b.proveed
+			LEFT JOIN itppro AS c ON a.transac=c.transac
+			LEFT JOIN scst   AS d ON c.tipo_doc=d.tipo_doc AND c.numero=d.numero
+			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo='DESPP' AND c.transac IS NULL AND c.numero IS NULL";
 
 		$query = $this->db->query($mSQL);
 
@@ -268,7 +375,7 @@ class gastosycxp{
 				$flag=$this->db->simple_query($mSQL);
 				if(!$flag) memowrite($mSQL,'genecxp');
 			}
-		}
+		}*/
 
 		// Procesando Compras scst
 		$mSQL = "UPDATE siva SET gtotal=exento+general+geneimpu+adicional+reduimpu+reducida+adicimpu
