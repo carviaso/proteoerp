@@ -387,7 +387,7 @@ class Pactivo extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
+		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});		';
@@ -448,10 +448,10 @@ class Pactivo extends Controller {
 		if (!$this->db->table_exists('pactivo')) {
 			$mSQL="CREATE TABLE `pactivo` (
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `nombre` varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
+			  `nombre` varchar(250) DEFAULT NULL,
 			  PRIMARY KEY (`id`),
 			  UNIQUE KEY `nombre` (`nombre`)
-			) ENGINE=MyISAM AUTO_INCREMENT=1687 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Principios Activos'";
+			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Principios Activos'";
 			$this->db->simple_query($mSQL);
 		}
 

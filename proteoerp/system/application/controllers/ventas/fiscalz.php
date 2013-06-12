@@ -329,34 +329,40 @@ class fiscalz extends Controller{
 		logusu('fiscalz',"CIERRE $numero ELIMINADO, FECHA $fecha");
 	}
 	function instalar(){
-		$mSQL="CREATE TABLE IF NOT EXISTS `fiscalz` (
-		  `caja` char(4) default NULL,
-		  `serial` char(12) NOT NULL default '',
-		  `numero` char(4) NOT NULL default '',
-		  `fecha` date default NULL,
-		  `factura` char(8) default NULL,
-		  `fecha1` date default NULL,
-		  `hora` time default NULL,
-		  `exento` decimal(12,2) unsigned default NULL,
-		  `base` decimal(12,2) unsigned default NULL,
-		  `iva` decimal(12,2) unsigned default NULL,
-		  `base1` decimal(12,2) unsigned default NULL,
-		  `iva1` decimal(12,2) unsigned default NULL,
-		  `base2` decimal(12,2) unsigned default NULL,
-		  `iva2` decimal(12,2) unsigned default NULL,
-		  `ncexento` decimal(12,2) unsigned default NULL,
-		  `ncbase` decimal(12,2) unsigned default NULL,
-		  `nciva` decimal(12,2) unsigned default NULL,
-		  `ncbase1` decimal(12,2) unsigned default NULL,
-		  `nciva1` decimal(12,2) unsigned default NULL,
-		  `ncbase2` decimal(12,2) unsigned default NULL,
-		  `nciva2` decimal(12,2) unsigned default NULL,
-		  `ncnumero` char(8) default NULL,
-		  PRIMARY KEY  (`serial`,`numero`)
-		) ENGINE=MyISAM DEFAULT CHARSET=latin1";
-		$this->db->simple_query($mSQL);
-		$mSQL="ALTER TABLE `fiscalz` ADD `manual` CHAR(1)DEFAULT 'N' NULL";
-    $this->db->simple_query($mSQL);
+		if (!$this->db->table_exists('fiscalz')) {
+			$mSQL="CREATE TABLE `fiscalz` (
+			  `caja` char(4) DEFAULT NULL,
+			  `serial` char(12) NOT NULL DEFAULT '',
+			  `numero` char(4) NOT NULL DEFAULT '',
+			  `fecha` date DEFAULT NULL,
+			  `factura` char(8) DEFAULT NULL,
+			  `fecha1` date DEFAULT NULL,
+			  `hora` time DEFAULT NULL,
+			  `exento` decimal(12,2) unsigned DEFAULT NULL,
+			  `base` decimal(12,2) unsigned DEFAULT NULL,
+			  `iva` decimal(12,2) unsigned DEFAULT NULL,
+			  `base1` decimal(12,2) unsigned DEFAULT NULL,
+			  `iva1` decimal(12,2) unsigned DEFAULT NULL,
+			  `base2` decimal(12,2) unsigned DEFAULT NULL,
+			  `iva2` decimal(12,2) unsigned DEFAULT NULL,
+			  `ncexento` decimal(12,2) unsigned DEFAULT NULL,
+			  `ncbase` decimal(12,2) unsigned DEFAULT NULL,
+			  `nciva` decimal(12,2) unsigned DEFAULT NULL,
+			  `ncbase1` decimal(12,2) unsigned DEFAULT NULL,
+			  `nciva1` decimal(12,2) unsigned DEFAULT NULL,
+			  `ncbase2` decimal(12,2) unsigned DEFAULT NULL,
+			  `nciva2` decimal(12,2) unsigned DEFAULT NULL,
+			  `ncnumero` char(8) DEFAULT NULL,
+			  `manual` char(1) DEFAULT 'N',
+			  PRIMARY KEY (`serial`,`numero`)
+			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+			$this->db->simple_query($mSQL);
+		}
+
+		$campos=$this->db->list_fields('fiscalz');
+		if(!in_array('manual',$campos)){
+			$mSQL="ALTER TABLE `fiscalz` ADD `manual` CHAR(1)DEFAULT 'N' NULL";
+			$this->db->simple_query($mSQL);
+		}
 	}
 }
-?>

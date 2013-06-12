@@ -715,6 +715,11 @@ class Tbenvio extends Controller {
 	function setData(){
 	}
 
+	function confirmacion(){
+
+
+	}
+
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 		$script= '
@@ -766,7 +771,7 @@ class Tbenvio extends Controller {
 
 		$edit->codcli_org = new inputField('Cliente','codcli_org');
 		$edit->codcli_org->rule='';
-		$edit->codcli_org->size =6;
+		$edit->codcli_org->size =7;
 		$edit->codcli_org->maxlength =20;
 
 		$edit->nomcli_org = new inputField('Nombre','nomcli_org');
@@ -781,7 +786,7 @@ class Tbenvio extends Controller {
 
 		$edit->codcli_des = new inputField('Cliente','codcli_des');
 		$edit->codcli_des->rule='';
-		$edit->codcli_des->size =6;
+		$edit->codcli_des->size =7;
 		$edit->codcli_des->maxlength =20;
 
 		$edit->nomcli_des = new inputField('Nombre','nomcli_des');
@@ -799,15 +804,10 @@ class Tbenvio extends Controller {
 		$edit->dirdes->maxlength =300;
 		$edit->dirdes->size = 100;
 
-		$edit->exon = new inputField('Exonerado','exon');
-		$edit->exon->rule='';
-		$edit->exon->size =3;
-		$edit->exon->maxlength =1;
-
-		$edit->anula = new inputField('Anula','anula');
-		$edit->anula->rule='';
-		$edit->anula->size =3;
-		$edit->anula->maxlength =1;
+		//$edit->anula = new inputField('Anula','anula');
+		//$edit->anula->rule='';
+		//$edit->anula->size =3;
+		//$edit->anula->maxlength =1;
 
 		$edit->kilo = new inputField('Recargo por Distancia','kilo');
 		$edit->kilo->rule='numeric';
@@ -829,11 +829,13 @@ class Tbenvio extends Controller {
 		$edit->puertap->size =12;
 		$edit->puertap->maxlength =10;
 
-		$edit->fledes = new dropdownField('Flete destino','fledes');
-		$edit->fledes->option('N','Si');
-		$edit->fledes->option('S','No');
-		$edit->fledes->rule='required|enum[S,N]';
-		$edit->fledes->maxlength =1;
+		$edit->exon = new checkboxField('Exonerado','exon', 'S','N');
+		$edit->exon->onchange='fexon()';
+		$edit->exon->rule='enum[S,N]';
+
+		$edit->fledes = new checkboxField('Flete destino','fledes', 'S','N');
+		$edit->fledes->onchange='ffledes()';
+		$edit->fledes->rule='enum[S,N]';
 
 		$edit->tipo = new dropdownField('Tipo','tipo');
 		$edit->tipo->option('Bolsa(s)'  ,'Bolsa(s)'  );
@@ -855,7 +857,7 @@ class Tbenvio extends Controller {
 		$edit->cant->rule='integer';
 		$edit->cant->css_class='inputonlynum';
 		$edit->cant->insertValue='1';
-		$edit->cant->size =12;
+		$edit->cant->size =11;
 		$edit->cant->maxlength =11;
 
 		$edit->peso = new inputField('Peso Kg.','peso');
@@ -885,21 +887,21 @@ class Tbenvio extends Controller {
 		$edit->v1->rule='numeric';
 		$edit->v1->css_class='inputnum';
 		$edit->v1->onkeyup='cvolumen();';
-		$edit->v1->size =5;
+		$edit->v1->size =3;
 		$edit->v1->maxlength =10;
 
 		$edit->v2 = new inputField('','v2');
 		$edit->v2->rule='numeric';
 		$edit->v2->css_class='inputnum';
 		$edit->v2->onkeyup='cvolumen();';
-		$edit->v2->size =5;
+		$edit->v2->size =3;
 		$edit->v2->maxlength =10;
 
 		$edit->v3 = new inputField('','v3');
 		$edit->v3->rule='numeric';
 		$edit->v3->css_class='inputnum';
 		$edit->v3->onkeyup='cvolumen();';
-		$edit->v3->size =5;
+		$edit->v3->size =3;
 		$edit->v3->maxlength =10;
 
 		$edit->subtotal = new inputField('Sub-total','subtotal');
@@ -934,15 +936,16 @@ class Tbenvio extends Controller {
 		$edit->rifaseg->maxlength =12;
 		$edit->rifaseg->size=11;
 
-		$edit->nombreaseg = new inputField('Nombre o Raz&oacute;n Social','nombreaseg');
+		$edit->nombreaseg = new inputField('Raz&oacute;n Social','nombreaseg');
 		$edit->nombreaseg->rule='';
 		$edit->nombreaseg->maxlength =205;
+		$edit->nombreaseg->size =49;
 
-		$edit->montoaseg = new inputField('Monto Total','montoaseg');
+		$edit->montoaseg = new inputField('Monto','montoaseg');
 		$edit->montoaseg->rule='numeric';
 		$edit->montoaseg->css_class='inputnum';
 		$edit->montoaseg->onkeyup='fseguro()';
-		$edit->montoaseg->size =15;
+		$edit->montoaseg->size =12;
 		$edit->montoaseg->maxlength =10;
 		//Fin de los campos del seguro
 
@@ -1077,7 +1080,7 @@ class Tbenvio extends Controller {
 		$mid = $this->input->post('q');
 		$ori = $this->input->post('o'); //Origen
 		$des = $this->input->post('d'); //Destino
-		$rt=array('iposte'=>0,'monto'=>0,'distancia'=>0,'peso'=>0,'iva'=>0,'pdista'=>false,'seguro'=>0);
+		$rt=array('iposte'=>0,'monto'=>0,'distancia'=>0,'peso'=>0,'iva'=>0,'pdista'=>false,'seguro'=>0,'fledes'=>0);
 
 		if((!empty($mid)) && (!empty($ori)) && (!empty($des))){
 			$ivas     = $this->datasis->ivaplica();
@@ -1139,7 +1142,8 @@ class Tbenvio extends Controller {
 				$pad = 0;
 			}
 
-			$rt['seguro']   =2;
+			$rt['fledes']   =10;   //Porcentaje por flete a destino
+			$rt['seguro']   =2;    //Porcentaje por seguro
 			$rt['distancia']=$dis;
 			$rt['iposte']   =$ipt;
 			$rt['monto']    =$val;

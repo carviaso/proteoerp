@@ -6,7 +6,7 @@ class Marc extends Controller{
 	var $tits = 'Marcas';
 
 	function marc(){
-		parent::Controller(); 
+		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
 		//$this->datasis->modulo_id('30B',1);
@@ -14,12 +14,7 @@ class Marc extends Controller{
 
 	function index(){
 		//redirect('inventario/marc/filteredgrid');
-		if ( !$this->datasis->iscampo('marc','id') ) {
-			$this->db->simple_query('ALTER TABLE marc DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE marc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE marc ADD UNIQUE INDEX marca (marca)');
-		}
-
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -39,7 +34,7 @@ class Marc extends Controller{
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('id');
-		$grid->label('ID');
+		$grid->label('Id');
 		$grid->params(array('align' => "'center'",
 							'width' => 20,
 							'editable' => 'false',
@@ -58,7 +53,7 @@ class Marc extends Controller{
 
 		#show paginator
 		$grid->showpager(true);
-		
+
 		$grid->setViewRecords(true);
 
 		#width
@@ -81,20 +76,19 @@ class Marc extends Controller{
 
 		#Set url
 		$grid->setUrlput(site_url($url.'setdata/'));
-            
+
 		if ($deployed) {
 			return $grid->deploy();
 		} else {
 			return $grid;
 		}
-	
+
 	}
 
 	/**
 	* Get data result as json
 	*/
-	function getData()
-	{
+	function getData(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -135,7 +129,7 @@ class Marc extends Controller{
 				echo 'Registro Borrado!!!';
 			} else {
 				echo 'No se puede borrar, existen productos con esta marca';
-			}			
+			}
 		} elseif($oper == 'edit') {
 			$marcant = $this->datasis->dameval("SELECT marca FROM marc WHERE id=$id");
 
@@ -144,7 +138,7 @@ class Marc extends Controller{
 
 			$mSQL = "UPDATE sinv SET marca=".$this->db->escape($data['marca'])." WHERE marca=".$this->db->escape($marcant);
 			$this->db->simple_query($mSQL);
-			
+
 			logusu('MARC',"Registro $id MODIFICADO");
 			//echo "Registro Modificado";
 			echo $mSQL;
@@ -181,7 +175,7 @@ class Marc extends Controller{
 		$sigmaA     = $grid->sigmaDsConfig("marc","marca","inventario/marc/");
 		$dsOption   = $sigmaA["dsOption"];
 		$grupver    = "";
-		
+
 		$colsOption = $sigmaA["colsOption"];
 		$gridOption = $sigmaA["gridOption"];
 		$gridGuarda = "
@@ -189,8 +183,7 @@ function guardar(value, oldValue, record, col, grid) {
 	var murl='';
 	murl = '".base_url()."/inventario/marc/modifica/'+encodeURIComponent(oldValue)+'/'+col.id+'/'+encodeURIComponent(value);
 	if ( value != oldValue ) { $.ajax({url: murl,context: document.body}); }
-};
-";
+};";
 
 	      $gridGo = "
 var mygrid=new Sigma.Grid(gridOption);
@@ -199,8 +192,7 @@ mygrid.saveURL = '".base_url()."inventario/marc/controlador',
 mygrid.width = 360;
 mygrid.height = 400;
 mygrid.toolbarContent = 'nav | pagesize | reload | add del save | print | filter | state';
-Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
-";		
+Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );";
 		$SigmaCont = "<center><div id=\"grid1_container\" style=\"width:400px;height:400px;\"></div></center>";
 		$grid->add("inventario/marc/dataedit/create");
 		$grid->build('datagridSG');
@@ -238,33 +230,33 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 					$sortField = $json->{'sortInfo'}[0]->{'columnId'};
 				} else {
 					$sortField = "marca";
-				}    
-	 
+				}
+
 				if(isset($json->{'sortInfo'}[0]->{'sortOrder'})){
 					$sortOrder = $json->{'sortInfo'}[0]->{'sortOrder'};
 				} else {
 					$sortOrder = "ASC";
-				}    
-	
+				}
+
 				for ($i = 0; $i < count($json->{'filterInfo'}); $i++) {
 					if($json->{'filterInfo'}[$i]->{'logic'} == "equal"){
 						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "='" . $json->{'filterInfo'}[$i]->{'value'} . "' ";
 					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "notEqual"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "!='" . $json->{'filterInfo'}[$i]->{'value'} . "' ";    
+						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "!='" . $json->{'filterInfo'}[$i]->{'value'} . "' ";
 					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "less"){
 						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "<" . $json->{'filterInfo'}[$i]->{'value'} . " ";
 					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "lessEqual"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "<=" . $json->{'filterInfo'}[$i]->{'value'} . " ";    
+						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . "<=" . $json->{'filterInfo'}[$i]->{'value'} . " ";
 					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "great"){
 							$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . ">" . $json->{'filterInfo'}[$i]->{'value'} . " ";
 					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "greatEqual"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . ">=" . $json->{'filterInfo'}[$i]->{'value'} . " ";        
+						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . ">=" . $json->{'filterInfo'}[$i]->{'value'} . " ";
 					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "like"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '%" . $json->{'filterInfo'}[$i]->{'value'} . "%' ";        
+						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '%" . $json->{'filterInfo'}[$i]->{'value'} . "%' ";
 					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "startWith"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '" . $json->{'filterInfo'}[$i]->{'value'} . "%' ";        
+						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '" . $json->{'filterInfo'}[$i]->{'value'} . "%' ";
 					}elseif($json->{'filterInfo'}[$i]->{'logic'} == "endWith"){
-						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '%" . $json->{'filterInfo'}[$i]->{'value'} . "' ";                
+						$filter .= $json->{'filterInfo'}[$i]->{'columnId'} . " LIKE '%" . $json->{'filterInfo'}[$i]->{'value'} . "' ";
 					}
 					$filter .= " AND ";
 				}
@@ -273,13 +265,13 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 				//to get how many total records.
 				$mSQL = "SELECT count(*) FROM marc WHERE $filter marca IS NOT NULL";
 				$totalRec = $this->datasis->dameval($mSQL);
- 
- 
+
+
 				//make sure pageNo is inbound
 				if($pageNo<1||$pageNo>ceil(($totalRec/$pageSize))){
 					$pageNo = 1;
 				}
- 
+
 				$mSQL = "SELECT marca, (SELECT count(*) FROM sinv b WHERE b.marca=a.marca) produ ";
 				$mSQL .= "FROM marc a WHERE $filter marca IS NOT NULL ORDER BY ".$sortField." ".$sortOrder." LIMIT ".($pageNo - 1)*$pageSize.", ".$pageSize;
 
@@ -299,7 +291,7 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 				echo $ret;
 
 			}else if($json->{'action'} == 'save'){
-				
+
 				for ($i = 0; $i < count($json->{'insertedRecords'}); $i++) {
 					$marca = $json->{'insertedRecords'}[$i]->{'marca'};
 					$mSQL = "INSERT IGNORE INTO marc SET marca='".addslashes($marca)."'";
@@ -322,29 +314,24 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 
 
 	function modifica(){
-		$valor = $this->uri->segment($this->uri->total_segments());
-		$campo = $this->uri->segment($this->uri->total_segments()-1);
-		$grupo = $this->uri->segment($this->uri->total_segments()-2);
-		
+		$valor  = $this->uri->segment($this->uri->total_segments());
+		$campo  = $this->uri->segment($this->uri->total_segments()-1);
+		$grupo  = $this->uri->segment($this->uri->total_segments()-2);
+		$dbvalor= $this->db->escape($valor);
+		$dbgrupo= $this->db->escape($grupo);
+
 		// Si ya exsite se borra
-		$mSQL = "SELECT COUNT(*) FROM marc WHERE marca='".addslashes($valor)."' ";
+		$mSQL = "SELECT COUNT(*) FROM marc WHERE marca=${dbvalor} ";
 		if ( $this->datasis->dameval($mSQL) == 0 ) {
-			$mSQL = "UPDATE marc SET ".$campo."='".addslashes($valor)."' WHERE marca='".addslashes($grupo)."' ";
+			$mSQL = "UPDATE marc SET ".$campo."=${dbvalor} WHERE marca=${dbgrupo}";
 			$this->db->simple_query($mSQL);
 		};
-		$mSQL = "UPDATE sinv SET marca='".addslashes($valor)."' WHERE marca='".addslashes($grupo)."' ";
+		$mSQL = "UPDATE sinv SET marca=${dbvalor} WHERE marca=${dbgrupo}";
 		$this->db->simple_query($mSQL);
-		
-		echo "$valor $campo $grupo";
-	}
-	
-	function instala(){
-			$query="ALTER TABLE `marc` ADD COLUMN `margen` DOUBLE(5,2) UNSIGNED NOT NULL DEFAULT '0.00'";
-			$this->db->simple_query();
+
+		echo "${valor} ${campo} ${grupo}";
 	}
 
-
-/*
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 		$edit = new DataEdit('Marcas','marc');
@@ -373,32 +360,34 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );
 		}
 	}
 
-	function test($marca){
-		//$this->validation->set_message('test', "No quiero que pases");
-		//return FALSE;
-		return true;
-	}
-
-	function exterin(){
-		$_POST['marca']='Algunamarca';
-		$this->genesal=false;
-		$this->dataedit();
-	}
-
 	function _post_insert($do){
 		$marca=$do->get('marca');
-		logusu('marc',"MARCA $marca CREADA");
+		logusu('marc',"MARCA ${marca} CREADA");
 	}
 
 	function _post_update($do){
 		$marca=$do->get('marca');
-		logusu('marc',"MARCA $marca MODIFICADA");
+		logusu('marc',"MARCA ${marca} MODIFICADA");
 	}
 
 	function _post_delete($do){
 		$marca=$do->get('marca');
-		logusu('marc',"MARCA $marca ELIMINADA");
+		logusu('marc',"MARCA ${marca} ELIMINADA");
 	}
-*/
+
+	function instalar(){
+		$campos=$this->db->list_fields('marc');
+		if(!in_array('margen',$campos)){
+			$query="ALTER TABLE `marc` ADD COLUMN `margen` DOUBLE(5,2) UNSIGNED NOT NULL DEFAULT '0.00'";
+			$this->db->simple_query();
+		}
+
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE marc DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE marc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE marc ADD UNIQUE INDEX marca (marca)');
+		}
+
+	}
 
 }

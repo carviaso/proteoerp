@@ -95,7 +95,7 @@ if(isset($pdf)){
 				</tbody>
 				<tfoot>
 				<tr>
-					<td style="text-align: right; font-size: 16px;"><strong>TOTAL:</strong></td>
+					<td style="text-align: right; font-size: 16px;"><b>TOTAL:</b></td>
 					<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat($montotal) ?></b></td>
 				</tr>
 				</tfoot>
