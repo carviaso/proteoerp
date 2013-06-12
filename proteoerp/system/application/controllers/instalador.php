@@ -697,10 +697,10 @@ class Instalador extends Controller {
 		//	$this->db->simple_query($mSQL);
 		//}
 
-		if(!$this->db->field_exists('montopago', 'itlrece')){
-			$mSQL = "ALTER TABLE `itlrece` ADD COLUMN `montopago` DECIMAL(12,2) NULL DEFAULT '0' COMMENT 'Monto del pago' AFTER `pago`";
-			$this->db->simple_query($mSQL);
-		}
+		//if(!$this->db->field_exists('montopago', 'itlrece')){
+		//	$mSQL = "ALTER TABLE `itlrece` ADD COLUMN `montopago` DECIMAL(12,2) NULL DEFAULT '0' COMMENT 'Monto del pago' AFTER `pago`";
+		//	$this->db->simple_query($mSQL);
+		//}
 
 		if(!$this->db->field_exists('alcohol', 'lanal')){
 			$mSQL = "ALTER TABLE lanal ADD COLUMN `alcohol` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'alcohol' AFTER `dtoagua`";
