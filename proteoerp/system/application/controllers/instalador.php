@@ -702,10 +702,10 @@ class Instalador extends Controller {
 		//	$this->db->simple_query($mSQL);
 		//}
 
-		if(!$this->db->field_exists('alcohol', 'lanal')){
-			$mSQL = "ALTER TABLE lanal ADD COLUMN `alcohol` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'alcohol' AFTER `dtoagua`";
-			$this->db->simple_query($mSQL);
-		}
+		//if(!$this->db->field_exists('alcohol', 'lanal')){
+		//	$mSQL = "ALTER TABLE lanal ADD COLUMN `alcohol` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'alcohol' AFTER `dtoagua`";
+		//	$this->db->simple_query($mSQL);
+		//}
 
 		if(!$this->db->table_exists('itlrece')){
 			$mSQL="CREATE TABLE `itlrece` (
@@ -1090,55 +1090,55 @@ class Instalador extends Controller {
 
 
 		//./inventario/sinvactu.php
-		$mSQL='
-			CREATE TABLE /*!32312 IF NOT EXISTS*/ `sinvactu` (
-		  `codigo` varchar(15) NOT NULL default "",
-		  `descrip` varchar(45) default NULL,
-		  `clave` varchar(8) default NULL,
-		  `descrip2` varchar(45) default NULL,
-		  `antdescrip2` varchar(45) default NULL,
-		  `grupo` varchar(4) default NULL,
-		  `costo` decimal(13,2) unsigned default NULL,
-		  `precio1` decimal(13,2) unsigned default NULL,
-		  `antcosto` decimal(13,2) unsigned default NULL,
-		  `antprecio1` decimal(13,2) unsigned default NULL,
-		  `iva` decimal(6,2) unsigned default NULL,
-		  `antiva` decimal(6,2) unsigned default NULL,
-		  `precio2` decimal(13,2) default NULL,
-		  `precio3` decimal(13,2) default NULL,
-		  `precio4` decimal(13,2) unsigned default NULL,
-		  `base1` decimal(13,2) unsigned default NULL,
-		  `base2` decimal(13,2) default NULL,
-		  `base3` decimal(13,2) unsigned default NULL,
-		  `base4` decimal(13,2) unsigned default NULL,
-		  `margen1` decimal(13,2) unsigned default NULL,
-		  `margen2` decimal(13,2) unsigned default NULL,
-		  `margen3` decimal(13,2) unsigned default NULL,
-		  `margen4` decimal(13,2) unsigned default NULL,
-		  `antdescrip` varchar(45) default NULL,
-		  `antclave` varchar(8) default NULL,
-		  `antgrupo` varchar(4) default NULL,
-		  `antprecio2` decimal(13,2) unsigned default NULL,
-		  `antprecio3` decimal(13,2) unsigned default NULL,
-		  `antprecio4` decimal(13,2) unsigned default NULL,
-		  `antbase1` decimal(13,2) unsigned default NULL,
-		  `antbase2` decimal(13,2) unsigned default NULL,
-		  `antbase3` decimal(13,2) unsigned default NULL,
-		  `antbase4` decimal(13,2) unsigned default NULL,
-		  `antmargen1` decimal(13,2) unsigned default NULL,
-		  `antmargen2` decimal(13,2) unsigned default NULL,
-		  `antmargen3` decimal(13,2) unsigned default NULL,
-		  `antmargen4` decimal(13,2) unsigned default NULL,
-		  PRIMARY KEY  (`codigo`)
-		)';
-		$this->db->simple_query($mSQL);
+		//$mSQL='
+		//	CREATE TABLE /*!32312 IF NOT EXISTS*/ `sinvactu` (
+		//  `codigo` varchar(15) NOT NULL default "",
+		//  `descrip` varchar(45) default NULL,
+		//  `clave` varchar(8) default NULL,
+		//  `descrip2` varchar(45) default NULL,
+		//  `antdescrip2` varchar(45) default NULL,
+		//  `grupo` varchar(4) default NULL,
+		//  `costo` decimal(13,2) unsigned default NULL,
+		//  `precio1` decimal(13,2) unsigned default NULL,
+		//  `antcosto` decimal(13,2) unsigned default NULL,
+		//  `antprecio1` decimal(13,2) unsigned default NULL,
+		//  `iva` decimal(6,2) unsigned default NULL,
+		//  `antiva` decimal(6,2) unsigned default NULL,
+		//  `precio2` decimal(13,2) default NULL,
+		//  `precio3` decimal(13,2) default NULL,
+		//  `precio4` decimal(13,2) unsigned default NULL,
+		//  `base1` decimal(13,2) unsigned default NULL,
+		//  `base2` decimal(13,2) default NULL,
+		//  `base3` decimal(13,2) unsigned default NULL,
+		//  `base4` decimal(13,2) unsigned default NULL,
+		//  `margen1` decimal(13,2) unsigned default NULL,
+		//  `margen2` decimal(13,2) unsigned default NULL,
+		//  `margen3` decimal(13,2) unsigned default NULL,
+		//  `margen4` decimal(13,2) unsigned default NULL,
+		//  `antdescrip` varchar(45) default NULL,
+		//  `antclave` varchar(8) default NULL,
+		//  `antgrupo` varchar(4) default NULL,
+		//  `antprecio2` decimal(13,2) unsigned default NULL,
+		//  `antprecio3` decimal(13,2) unsigned default NULL,
+		//  `antprecio4` decimal(13,2) unsigned default NULL,
+		//  `antbase1` decimal(13,2) unsigned default NULL,
+		//  `antbase2` decimal(13,2) unsigned default NULL,
+		//  `antbase3` decimal(13,2) unsigned default NULL,
+		//  `antbase4` decimal(13,2) unsigned default NULL,
+		//  `antmargen1` decimal(13,2) unsigned default NULL,
+		//  `antmargen2` decimal(13,2) unsigned default NULL,
+		//  `antmargen3` decimal(13,2) unsigned default NULL,
+		//  `antmargen4` decimal(13,2) unsigned default NULL,
+		//  PRIMARY KEY  (`codigo`)
+		//)';
+		//$this->db->simple_query($mSQL);
 
 
 		//./inventario/marc.php
 		$campos=$this->db->list_fields('marc');
 		if(!in_array('margen',$campos)){
 			$query="ALTER TABLE `marc` ADD COLUMN `margen` DOUBLE(5,2) UNSIGNED NOT NULL DEFAULT '0.00'";
-			$this->db->simple_query();
+			$this->db->simple_query($query);
 		}
 
 		if(!in_array('id',$campos)){

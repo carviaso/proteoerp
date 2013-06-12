@@ -379,7 +379,7 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );";
 		$campos=$this->db->list_fields('marc');
 		if(!in_array('margen',$campos)){
 			$query="ALTER TABLE `marc` ADD COLUMN `margen` DOUBLE(5,2) UNSIGNED NOT NULL DEFAULT '0.00'";
-			$this->db->simple_query();
+			$this->db->simple_query($query);
 		}
 
 		if(!in_array('id',$campos)){
