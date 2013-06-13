@@ -1635,6 +1635,7 @@ class Rivc extends Controller {
 	//Metodos para autocomplete
 	//*****************************
 	function buscasfac(){
+		session_write_close();
 		$mid   = $this->input->post('q');
 		$scli  = $this->input->post('scli');
 		$qdb   = $this->db->escape('%'.$mid.'%');
@@ -1663,26 +1664,24 @@ class Rivc extends Controller {
 				WHERE a.cod_cli=$sclidb AND CONCAT(a.tipo_doc,'-',a.numero) LIKE $qdb AND b.numero IS NULL AND a.tipo_doc <> 'X' AND a.iva>0
 				ORDER BY numero DESC LIMIT 10";*/
 
-			$mSQL = "(SELECT a.tipo_doc, a.numero, a.totalg, a.fecha,a.iva, a.iva*$rete AS reiva
+			$mSQL = "SELECT a.tipo_doc, a.numero, a.totalg, a.fecha,a.iva, a.iva*$rete AS reiva
 				FROM  rivc AS c
 				JOIN itrivc AS b ON c.id=b.idrivc AND c.anulado='N'
 				RIGHT JOIN sfac AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
-				WHERE a.cod_cli=$sclidb AND CONCAT(a.tipo_doc,'-',a.numero) LIKE $qdb AND b.numero IS NULL AND a.tipo_doc <> 'X' AND a.iva>0
-				ORDER BY numero DESC LIMIT 10)";
+				WHERE a.cod_cli=${sclidb} AND CONCAT(a.tipo_doc,'-',a.numero) LIKE ${qdb} AND b.numero IS NULL AND a.tipo_doc <> 'X' AND a.iva>0";
 
-
-			$mSQL.= "UNION ALL (SELECT a.tipo_doc, a.numero, a.monto AS totalg, a.fecha, a.impuesto AS iva,a.impuesto*$rete AS reiva
+			$mSQL.= "UNION ALL SELECT a.tipo_doc, a.numero, a.monto AS totalg, a.fecha, a.impuesto AS iva,a.impuesto*$rete AS reiva
 				FROM  rivc AS c
 				JOIN itrivc AS b ON c.id=b.idrivc AND c.anulado='N'
 				RIGHT JOIN smov AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
 				LEFT  JOIN sfac AS d ON a.transac=d.transac
-				WHERE a.cod_cli=$sclidb AND CONCAT(a.tipo_doc,'-',a.numero) LIKE $qdb
+				WHERE a.cod_cli=${sclidb} AND CONCAT(a.tipo_doc,'-',a.numero) LIKE ${qdb}
 					AND b.numero IS NULL
 					AND d.numero IS NULL
 					AND a.tipo_doc = 'NC'
 					AND a.observa1 NOT LIKE 'RET%'
 					AND a.impuesto>0
-				ORDER BY numero DESC LIMIT 10)";
+				ORDER BY numero DESC LIMIT 10";
 
 
 			$query = $this->db->query($mSQL);
