@@ -1670,7 +1670,7 @@ class Rivc extends Controller {
 				RIGHT JOIN sfac AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
 				WHERE a.cod_cli=${sclidb} AND CONCAT(a.tipo_doc,'-',a.numero) LIKE ${qdb} AND b.numero IS NULL AND a.tipo_doc <> 'X' AND a.iva>0";
 
-			$mSQL.= "UNION ALL SELECT a.tipo_doc, a.numero, a.monto AS totalg, a.fecha, a.impuesto AS iva,a.impuesto*$rete AS reiva
+			$mSQL.= " UNION ALL SELECT a.tipo_doc, a.numero, a.monto AS totalg, a.fecha, a.impuesto AS iva,a.impuesto*$rete AS reiva
 				FROM  rivc AS c
 				JOIN itrivc AS b ON c.id=b.idrivc AND c.anulado='N'
 				RIGHT JOIN smov AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
