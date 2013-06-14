@@ -160,7 +160,7 @@ if(isset($pdf)){
 						<table class="change_order_items">
 							<thead>
 								<tr>
-									<th colspan='2'><h1><?php echo $titulo[$id]; ?></h1></th>
+									<th colspan='2'><h1>Detalle de la recepci&oacute;n</h1></th>
 								</tr>
 								<tr>
 									<th style="font-size: 16px;">Forma de pago</th>
@@ -169,8 +169,10 @@ if(isset($pdf)){
 							</thead>
 							<tbody>
 								<?php
+								$observa=str_replace('-'   , ' ', $observa);
+								$observa=str_replace("\r\n", ' ', $observa);
 								$observa=preg_replace('/\s\s+/', ' ', $observa);
-								$sfpa   =explode(' ',$observa);
+								$sfpa   =explode(' ',trim($observa));
 								$count_sfpa=count($sfpa);
 								$mod=true;
 								for($i=0;$i<$count_sfpa;$i=$i+2){
@@ -179,11 +181,11 @@ if(isset($pdf)){
 									$class=($i%2) ? 'even_row' :  'odd_row';
 									echo "<tr class='${class}' style='font-size: 12pt'>";
 									echo '<td>('.$sfpa[$i].') '.$sfpades.'</td>';
-									echo '<td style="text-align: right">'.nformat($sfpa[$i+1]).'</td>';
+									echo '<td style="text-align: right">'.$sfpa[$i+1].'</td>';
 									echo '</tr>';
 								}
 								$recibido =$row->recibido;
-								$ingreso  =$row->sistema;
+								$ingreso  =$row->ingreso;
 								?>
 								</tbody>
 								<tfoot>
