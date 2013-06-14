@@ -198,7 +198,7 @@ function autocod(id){
 					},
 			})
 		},
-		minLength: 0,
+		minLength: 4,
 		select: function( event, ui ) {
 			$('#numero_'+id).attr("readonly", "readonly");
 

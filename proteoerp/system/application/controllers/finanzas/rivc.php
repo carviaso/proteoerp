@@ -49,7 +49,7 @@ class Rivc extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
 			array('id'=>'fedita', 'title'=>'Agregar/Editar registro'),
@@ -66,7 +66,7 @@ class Rivc extends Controller {
 		};';
 
 		$param['WestPanel']    = $WestPanel;
-		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		//$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
 		$param['listados']     = $this->datasis->listados('RIVC', 'JQ');
@@ -1423,6 +1423,7 @@ class Rivc extends Controller {
 		$edit->it_numero->rule='max_length[12]|required|callback_chrepetidos|callback_chfac[<#i#>]|callback_chriva[<#i#>]';
 		$edit->it_numero->size =14;
 		$edit->it_numero->maxlength =12;
+		$edit->it_numero->title = 'Coloque el tipo de documento seguido del n&uacute;mero, Ej D000001 si es una devoluci&oacute;n, F12345 si es una factura o NC0001 si una nota de cre&dacute;ito';
 		$edit->it_numero->rel_id ='itrivc';
 		$edit->it_numero->autocomplete = false;
 
@@ -1636,13 +1637,13 @@ class Rivc extends Controller {
 	//*****************************
 	function buscasfac(){
 		session_write_close();
-		$mid   = $this->input->post('q');
+		$mid   = trim($this->input->post('q'));
+
 		$scli  = $this->input->post('scli');
-		$qdb   = $this->db->escape('%'.$mid.'%');
 		$sclidb= $this->db->escape($scli);
 
 		$rete=0.75;
-		$data = '{[ ]}';
+		$data = '{}';
 		if(empty($scli)){
 			$retArray[0]['label']   = 'Debe seleccionar un cliente primero';
 			$retArray[0]['value']   = '';
@@ -1655,61 +1656,85 @@ class Rivc extends Controller {
 			echo $data;
 			return;
 		}
+		if(!preg_match('/(?P<tipo>[a-zA-Z]+)?(?P<numero>\d+)/', $mid, $match)){
+			$retArray[0]['label']   = 'Parametro de busqueda no valido';
+			$retArray[0]['value']   = '';
+			$retArray[0]['gtotal']  = 0;
+			$retArray[0]['reiva']   = 0;
+			$retArray[0]['impuesto']= 0;
+			$retArray[0]['fecha']   = '';
+			$retArray[0]['tipo_doc']= '';
+			$data = json_encode($retArray);
+			echo $data;
+			return;
+		}
+
 		if($mid !== false){
 			$retArray = $retorno = array();
 
-			/*$mSQL="SELECT a.tipo_doc, a.numero, a.totalg, a.fecha,a.iva, a.iva*$rete AS reiva
-				FROM sfac AS a
-				LEFT JOIN itrivc AS b ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
-				WHERE a.cod_cli=$sclidb AND CONCAT(a.tipo_doc,'-',a.numero) LIKE $qdb AND b.numero IS NULL AND a.tipo_doc <> 'X' AND a.iva>0
-				ORDER BY numero DESC LIMIT 10";*/
+			if(!empty($match['tipo'])){
+				$match['tipo'] = strtoupper($match['tipo']);
+				if(strlen($match['tipo'])>1 && substr($match['tipo'],-1)=='M'){
+					//Es una factura manual
+					$match['tipo'] = substr($match['tipo'],0,-1);
+				}
+				$wwtipo = ' AND a.tipo_doc='.$this->db->escape($match['tipo']);
+			}else{
+				$wwtipo = '';
+			}
 
-			$mSQL = "SELECT a.tipo_doc, a.numero, a.totalg, a.fecha,a.iva, a.iva*$rete AS reiva
+			$dbnumero = $this->db->escape('%'.$match['numero'].'%');
+
+			$mSQLs=array();
+			if(empty($match['tipo']) || $match['tipo']=='F' || $match['tipo']=='D' || $match['tipo']=='T'){
+				$mSQLs[] = "SELECT a.tipo_doc, a.numero, a.totalg, a.fecha,a.iva, a.iva*$rete AS reiva
 				FROM  rivc AS c
 				JOIN itrivc AS b ON c.id=b.idrivc AND c.anulado='N'
 				RIGHT JOIN sfac AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
-				WHERE a.cod_cli=${sclidb} AND CONCAT(a.tipo_doc,'-',a.numero) LIKE ${qdb} AND b.numero IS NULL AND a.tipo_doc <> 'X' AND a.iva>0";
-
-			$mSQL.= " UNION ALL SELECT a.tipo_doc, a.numero, a.monto AS totalg, a.fecha, a.impuesto AS iva,a.impuesto*$rete AS reiva
+				WHERE a.cod_cli=${sclidb} AND a.numero LIKE ${dbnumero} ${wwtipo} AND b.numero IS NULL AND a.tipo_doc <> 'X' AND a.iva>0";
+			}
+			if(empty($match['tipo']) || $match['tipo']=='NC'){
+				$mSQLs[] = "SELECT a.tipo_doc, a.numero, a.monto AS totalg, a.fecha, a.impuesto AS iva,a.impuesto*$rete AS reiva
 				FROM  rivc AS c
 				JOIN itrivc AS b ON c.id=b.idrivc AND c.anulado='N'
 				RIGHT JOIN smov AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
 				LEFT  JOIN sfac AS d ON a.transac=d.transac
-				WHERE a.cod_cli=${sclidb} AND CONCAT(a.tipo_doc,'-',a.numero) LIKE ${qdb}
+				WHERE a.cod_cli=${sclidb} AND a.numero LIKE ${dbnumero} ${wwtipo}
 					AND b.numero IS NULL
 					AND d.numero IS NULL
 					AND a.tipo_doc = 'NC'
 					AND a.observa1 NOT LIKE 'RET%'
-					AND a.impuesto>0
-				ORDER BY numero DESC LIMIT 10";
+					AND a.impuesto>0";
+			}
+			if(count($mSQLs)>0){
+				$mSQL = implode(' UNION ALL ',$mSQLs).' ORDER BY numero DESC LIMIT 10';
+				$query = $this->db->query($mSQL);
+				if ($query->num_rows() > 0){
+					foreach( $query->result_array() as  $row ) {
+						$retArray['label']   = $row['tipo_doc'].'-'.$row['numero'].' '.$row['totalg'].' Bs.';
+						$retArray['value']   = $row['numero'];
+						$retArray['gtotal']  = $row['totalg'];
+						$retArray['reiva']   = (($row['tipo_doc']=='D')? -1: 1)*round($row['reiva'],2);
+						$retArray['impuesto']= $row['iva'];
+						$retArray['fecha']   = dbdate_to_human($row['fecha']);
+						$retArray['tipo_doc']= $row['tipo_doc'];
 
+						array_push($retorno, $retArray);
+					}
+					$data = json_encode($retorno);
+				}else{
+					$retArray[0]['label']   = 'No se consiguieron facturas para aplicar';
+					$retArray[0]['value']   = '';
+					$retArray[0]['cod_cli'] = '';
+					$retArray[0]['nombre']  = '';
+					$retArray[0]['gtotal']  = 0;
+					$retArray[0]['reiva']   = 0;
+					$retArray[0]['impuesto']= 0;
+					$retArray[0]['fecha']   = '';
+					$retArray[0]['tipo_doc']= '';
 
-			$query = $this->db->query($mSQL);
-			if ($query->num_rows() > 0){
-				foreach( $query->result_array() as  $row ) {
-					$retArray['label']   = $row['tipo_doc'].'-'.$row['numero'].' '.$row['totalg'].' Bs.';
-					$retArray['value']   = $row['numero'];
-					$retArray['gtotal']  = $row['totalg'];
-					$retArray['reiva']   = (($row['tipo_doc']=='D')? -1: 1)*round($row['reiva'],2);
-					$retArray['impuesto']= $row['iva'];
-					$retArray['fecha']   = dbdate_to_human($row['fecha']);
-					$retArray['tipo_doc']= $row['tipo_doc'];
-
-					array_push($retorno, $retArray);
+					$data = json_encode($retArray);
 				}
-				$data = json_encode($retorno);
-			}else{
-				$retArray[0]['label']   = 'No se consiguieron facturas para aplicar';
-				$retArray[0]['value']   = '';
-				$retArray[0]['cod_cli'] = '';
-				$retArray[0]['nombre']  = '';
-				$retArray[0]['gtotal']  = 0;
-				$retArray[0]['reiva']   = 0;
-				$retArray[0]['impuesto']= 0;
-				$retArray[0]['fecha']   = '';
-				$retArray[0]['tipo_doc']= '';
-
-				$data = json_encode($retArray);
 			}
 		}
 		echo $data;
