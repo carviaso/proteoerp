@@ -93,12 +93,7 @@ class Rcaj extends validaciones {
 			$grid->db->from('sfpa AS c');
 			$grid->db->join('scaj AS d','c.cobrador=d.cajero');
 			$grid->db->join('rcaj AS a','a.cajero=c.cobrador AND a.fecha=c.f_factura','left');
-
-			//$grid->db->from('rcaj AS a');
-			//$grid->db->join('sfpa AS c','a.cajero=c.cobrador AND a.fecha=c.f_factura','RIGHT');
-			//$grid->db->join('scaj AS d','c.cobrador=d.cajero','LEFT');
-
-			$grid->db->groupby('c.cobrador');
+			$grid->db->group('c.cobrador');
 			$grid->use_function('iconcaja');
 
 			$reve=$this->secu->puede('12A0');

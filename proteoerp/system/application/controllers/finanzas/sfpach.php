@@ -137,12 +137,12 @@ class sfpach extends Controller {
 			efbanco = $( "#efbanco" ),
 			efmonto = $( "#efmonto" ),
 			allFields = $( [] ).add( envia ).add( recibe ).add(efcaja).add(efbanco).add(efmonto);
-
 			var grid = jQuery("#newapi'.$grid.'");
 			var s = grid.getGridParam(\'selarrrow\'); ';
 
 		$bodyscript .= '
 			$( "#depositar" ).click(function() {
+				var s = grid.getGridParam(\'selarrrow\'); 
 				if(s.length){
 					sumamonto();
 					$( "#deposito-form" ).dialog( "open" );
