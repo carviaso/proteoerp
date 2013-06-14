@@ -78,7 +78,6 @@ $encabeza1p = '
 				</table>
 ';
 
-
 $encatabla = '
 			<tr style="background-color:black;border-style:solid;color:white;font-weight:bold">
 				<th>C&oacute;digo</th>
@@ -90,11 +89,11 @@ $encatabla = '
 			</tr>
 ';
 
-
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Compra <?php echo $numero ?></title>
-<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
+<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body>
 <script type="text/php">

@@ -32,15 +32,15 @@ $fecha    = dbdate_to_human($row->fecha);
 $numero   = $row->numero;
 $cod_cli  = htmlspecialchars(trim($row->cod_cli));
 $rifci    = htmlspecialchars(trim($row->rifci));
-$nombre   = htmlspecialchars(trim($row->nombre));
+$nombre   = $this->us_ascii2html($row->nombre);
 $stotal   = nformat($row->totals);
 $gtotal   = nformat($row->totalg);
 $iva      = nformat($row->iva);
-$observa  = htmlspecialchars(trim($row->observa));
+$observa  = $this->us_ascii2html($row->observa);
 
 $peso     = nformat($row->peso);
 $impuesto = nformat($row->iva);
-$direc    = htmlspecialchars(trim($row->direccion));
+$direc    = $this->us_ascii2html($row->direccion);
 $telefono = htmlspecialchars(trim($row->telefono));
 $nomvend  = htmlspecialchars(trim($row->nomvend));
 
@@ -52,12 +52,13 @@ $uline  = array();
 $mSQL="SELECT a.codigo,b.descrip AS desca,a.cana,a.precio AS preca,a.importe,a.iva
 FROM itsnte AS a
 JOIN sinv AS b ON a.codigo=b.codigo
-WHERE a.numero=$dbnumero";
+WHERE a.numero=${dbnumero}";
 
 $mSQL_2 = $this->db->query($mSQL);
 $detalle  = $mSQL_2->result();
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>NOTA DE ENTREGA <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

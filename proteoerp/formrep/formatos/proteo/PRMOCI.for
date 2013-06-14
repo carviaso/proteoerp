@@ -35,6 +35,7 @@ $transac  = $row->transac;
 $lineas=0;
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Registro de nota de d&eacute;bito en banco por reclamar <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

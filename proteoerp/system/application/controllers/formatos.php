@@ -296,6 +296,20 @@ class Formatos extends Controller{
 		return $salida;
 	}
 
+	function us_ascii2html($str){
+		$rt =trim($str);
+
+		//Convierte los caracteres de us-ascii
+		$rt =str_replace(chr(165),'Ñ',$rt);
+		$rt =str_replace(chr(164),'ñ',$rt);
+		$rt =str_replace(chr(166),'º',$rt);
+
+		$rt =htmlspecialchars($rt,ENT_COMPAT,'UTF-8');
+		if($this->config->item('charset')!='UTF-8'){
+			$rt= utf8_decode($rt);
+		}
+		return $rt;
+	}
 
 	function instalar(){
 		$campos=$this->db->list_fields('formatos');

@@ -41,6 +41,7 @@ $semana=array('DOMINGO','LUNES','MARTES','MIERCOLES','JUEVES','VIERNES');
 $ittot = array('totmon'=>0,'litros'=>0);
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Pago a proveedor <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

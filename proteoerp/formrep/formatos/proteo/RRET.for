@@ -9,7 +9,7 @@ if($mSQL->num_rows()==0) show_error('Registro no encontrado');
 $row      = $mSQL->row();
 $fecha    = dbdate_to_human($row->estampa,'d/m/Y H:i:s');
 $cajero   = htmlspecialchars(trim($row->cajero));
-$ncajero  = htmlspecialchars(trim($row->nombre));
+$ncajero  = $this->us_ascii2html($row->nombre);
 $dbcajero = $this->db->escape($row->cajero);
 $dbestampa= $this->db->escape($row->estampa);
 
@@ -18,8 +18,9 @@ $mSQL_2="SELECT a.tipo,a.monto,b.nombre FROM rret AS a JOIN tarjeta AS b ON a.ti
 ?>
 <html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Retiro de Cajero</title>
-<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
+<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
 </head>
 <body>
 <script type="text/php">

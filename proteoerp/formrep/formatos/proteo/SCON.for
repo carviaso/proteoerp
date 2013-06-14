@@ -47,12 +47,13 @@ $uline  = array();
 $mSQL="SELECT a.codigo,b.descrip AS desca,a.cana,a.precio AS preca,a.importe,a.iva
 FROM itscon AS a
 JOIN sinv AS b ON a.codigo=b.codigo
-WHERE a.numero=$dbnumero";
+WHERE a.numero=${dbnumero}";
 
 $mSQL_2 = $this->db->query($mSQL);
 $detalle  = $mSQL_2->result();
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>NOTA DE CONSIGNACI&Oacute;N <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

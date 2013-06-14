@@ -64,6 +64,7 @@ $det2encab = 5; //Tamanio del encadezado de la segunda tabla
 $nsitems=$mSQL_2->num_rows();
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Reparto <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

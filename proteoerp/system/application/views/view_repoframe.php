@@ -1,6 +1,6 @@
 <html>
 <head>
-<meta http-equiv="Content-type" content="text/html; charset=<?=$this->config->item('charset'); ?> " />
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?> " />
 <title>	<?=$titu; ?></title>
 </head>
 <body marginheight="0" marginheight="0" topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0" >
@@ -9,4 +9,4 @@
 		El navegador no soporta iFrames o esta desactivado <A href="<?php echo site_url('reportes/enlistar/sfac') ?> ">Alternativa</A>]
 	</IFRAME>
 </body>
-</html> 
+</html>

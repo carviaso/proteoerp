@@ -38,6 +38,7 @@ $prmobanco= htmlspecialchars(trim($row->prmobanco));
 $lineas=0;
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Registro de cheque devuelto por cliente y otros<?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

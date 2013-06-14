@@ -36,6 +36,7 @@ $mSQL_2   = $this->db->query('SELECT codigo,descrip AS desca,precio AS preca,iva
 $detalle  = $mSQL_2->result();
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Orden de Servicio <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

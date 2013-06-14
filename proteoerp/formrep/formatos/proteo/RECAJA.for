@@ -1,38 +1,38 @@
 <?php
-if(count($parametros)==0)
-	show_error('Faltan parametros ');
+if(count($parametros)==0) show_error('Faltan parametros ');
 $numero=$parametros[0];
 $dbnumero=$this->db->escape($numero);
-$mSQL=$this->db->query("SELECT a.tipo, a.fecha,a.cajero,b.nombre, a.caja,a.recibido, a.ingreso,a.observa, a.usuario FROM rcaj AS a  JOIN scaj AS b  ON a.cajero=b.cajero WHERE numero=$dbnumero");
+$mSQL=$this->db->query("SELECT a.tipo, a.fecha,a.cajero,b.nombre, a.caja,a.recibido, a.ingreso,a.observa, a.usuario FROM rcaj AS a  JOIN scaj AS b  ON a.cajero=b.cajero WHERE numero=${dbnumero}");
+if($mSQL->num_rows()==0) show_error('Registro no encontrado');
 $row = $mSQL->row();
 
 $fecha    = dbdate_to_human($row->fecha);
 $cajero   = $row->cajero;
 $caja     = $row->caja;
-$observa  = $row->observa;
-$usuario  = $row->usuario;
-$scajdes  = $row->nombre;
+$observa  = trim($row->observa);
+$usuario  = $this->us_ascii2html($row->usuario);
+$scajdes  = $this->us_ascii2html($row->nombre);
 
-$titulo= $this->datasis->traevalor('TITULO1');
+$c_itrcaj = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM itrcaj WHERE numero='.$dbnumero);
 
+//Devoluciones
 $this->db->select(array('a.numero','a.nombre','a.totalg',));
 $this->db->from('sfac AS a');
 $this->db->where('a.cajero',$row->cajero);
-$this->db->where('a.fecha',$row->fecha);
+$this->db->where('a.fecha' ,$row->fecha );
 $this->db->where('a.tipo_doc','D');
 $qdev = $this->db->get();
-?>
-<html>
+?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Arqueo de Caja<?php echo $numero ?></title>
-<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
+<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body>
 <script type="text/php">
+if(isset($pdf)){
 
-if ( isset($pdf) ) {
-
-	$font = Font_Metrics::get_font("verdana");;
+	$font = Font_Metrics::get_font('verdana');
 	$size = 6;
 	$color = array(0,0,0);
 	$text_height = Font_Metrics::get_font_height($font, $size);
@@ -47,7 +47,7 @@ if ( isset($pdf) ) {
 	$pdf->line(16, $y, $w - 16, $y, $color, 0.5);
 
 	$pdf->close_object();
-	$pdf->add_object($foot, "all");
+	$pdf->add_object($foot, 'all');
 
 	$text = "PP {PAGE_NUM} de {PAGE_COUNT}";
 
@@ -60,23 +60,8 @@ if ( isset($pdf) ) {
 	<table style="width: 100%;">
 		<thead>
 			<tr>
-				<td><div id="section_header">
-						<table style="width: 100%;" class="header">
-							<tr>
-								<td width=140 rowspan="2"><img src="<?php echo $this->_direccion ?>/images/logo.jpg" alt='<?php echo str_replace ("'","/'",$titulo); ?>'></td>
-								<td><h1 style="text-align: right"><?php echo $titulo; ?></h1>
-									</td>
-							</tr>
-							<tr>
-								<td>
-									<div class="page" style="font-size: 7pt">
-										<?php echo $this->datasis->traevalor('TITULO2').' '.$this->datasis->traevalor('TITULO3'); ?> <br>
-										<RIF: <?php echo $this->datasis->traevalor('RIF'); ?></
-									</div>
-								</td>
-							</tr>
-						</table>
-					</div>
+				<td>
+					<?php $this->incluir('X_CINTILLO'); ?>
 					<div class="page" style="font-size: 7pt">
 						<table style="width: 100%;" class="header">
 							<tr>
@@ -86,12 +71,12 @@ if ( isset($pdf) ) {
 						</table>
 						<table style="width: 100%; font-size: 14pt;">
 							<tr>
-								<td>Caja:<strong><?php echo $caja;    ?></strong></td>
-								<td>Fecha: <strong><?php echo $fecha; ?></strong></td>
+								<td>Caja:  <b><?php echo $caja;  ?></b></td>
+								<td>Fecha: <b><?php echo $fecha; ?></b></td>
 							</tr>
 							<tr>
-								<td>Cajero: <strong><?php echo $cajero; ?></strong></td>
-								<td>Nombre: <strong><?php echo $scajdes; ?></strong></td>
+								<td>Cajero: <b><?php echo $cajero;  ?></b></td>
+								<td>Nombre: <b><?php echo $scajdes; ?></b></td>
 							</tr>
 						</table>
 					</div>
@@ -103,81 +88,127 @@ if ( isset($pdf) ) {
 				<div id="content">
 					<div class="page" style="font-size: 14pt">
 					<?php
-					$mSQLs=array();
-					$mSQLs[]="SELECT a.tipo, b.nombre,a.recibido, a.sistema, a.diferencia
-						 FROM itrcaj AS a
-						 JOIN tarjeta AS b ON a.tipo=b.tipo
-						 WHERE a.numero=$dbnumero AND cierre='N'";
+					if($c_itrcaj>0){
+						$mSQLs=array();
+						$mSQLs[]="SELECT a.tipo, b.nombre,a.recibido, a.sistema, a.diferencia
+							FROM itrcaj AS a
+							JOIN tarjeta AS b ON a.tipo=b.tipo
+							WHERE a.numero=${dbnumero} AND cierre='N'";
 
-					$mSQLs[]="SELECT a.tipo, b.nombre,a.recibido, a.sistema, a.diferencia
-						 FROM itrcaj AS a
-						 JOIN tarjeta AS b ON a.tipo=b.tipo
-						 WHERE a.numero=$dbnumero AND cierre='S'";
-							$titulo=array('Seg&uacute;n Pre-cierre',' Seg&uacute;n Cierre');
+						$mSQLs[]="SELECT a.tipo, b.nombre,a.recibido, a.sistema, a.diferencia
+							FROM itrcaj AS a
+							JOIN tarjeta AS b ON a.tipo=b.tipo
+							WHERE a.numero=${dbnumero} AND cierre='S'";
+						$titulo=array('Seg&uacute;n Pre-cierre',' Seg&uacute;n Cierre');
 
-					foreach($mSQLs AS $id=>$mSQL){
-						$recibido =$ingreso =0;
-						$qquery = $this->db->query($mSQL);
-						if ($qquery->num_rows() > 0){
-					?>
+						foreach($mSQLs as $id=>$mSQL){
+							$recibido =$ingreso =0;
+							$qquery = $this->db->query($mSQL);
+							if($qquery->num_rows() > 0){ ?>
+								<table class="change_order_items">
+									<thead>
+										<tr>
+											<th colspan='4'><h1><?php echo $titulo[$id]; ?></h1></th>
+										</tr>
+										<tr>
+											<th style="font-size: 16px;">Forma de pago</th>
+											<th style="font-size: 16px;">Monto recibido</th>
+											<th style="font-size: 16px;">Monto sistema</th>
+											<th style="font-size: 16px;">Diferencia</th>
+										</tr>
+									</thead>
+									<tbody>
+										<?php
+										foreach ($qquery->result() as $i=>$rrow){
+											$class=($i%2) ? 'even_row' :  'odd_row';
+											echo "<tr class='${class}'  style='font-size: 12pt'>";
+											echo '<td>('.$rrow->tipo.') '.$rrow->nombre.'</td>';
+											echo '<td style="text-align: right">'.nformat($rrow->recibido).'</td>';
+											echo '<td style="text-align: right">'.nformat($rrow->sistema).'</td>';
+											echo '<td style="text-align: right">'.nformat($rrow->recibido-$rrow->sistema).'</td>';
+											echo '</tr>';
+											$recibido +=$rrow->recibido;
+											$ingreso  +=$rrow->sistema;
+										}
+										?>
+									</tbody>
+									<tfoot>
+										<tr>
+											<td ></td>
+											<td ></td>
+											<td style="text-align: right; font-size: 16px;"><b>TOTAL:</b></td>
+											<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat($ingreso) ?></b></td>
+										</tr>
+										<tr>
+											<td ></td>
+											<td ></td>
+											<td style="text-align: right; font-size: 16px;"><b>RECIBIDO:</b></td>
+											<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat($recibido) ?></b></td>
+										</tr>
+										<tr>
+											<td ></td>
+											<td ></td>
+											<td style="text-align: right; font-size: 16px;"><b>DIFERENCIA:</b></td>
+											<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat(-$ingreso+$recibido) ?></b></td>
+										</tr>
+									</tfoot>
+								</table>
+								<?php
+							}
+						}
+					}else{ ?>
 						<table class="change_order_items">
 							<thead>
-								 <tr>
-									<th colspan='4'><h1><?php echo $titulo[$id]; ?></h1></th>
-								 </tr>
+								<tr>
+									<th colspan='2'><h1><?php echo $titulo[$id]; ?></h1></th>
+								</tr>
 								<tr>
 									<th style="font-size: 16px;">Forma de pago</th>
 									<th style="font-size: 16px;">Monto recibido</th>
-									<th style="font-size: 16px;">Monto sistema</th>
-									<th style="font-size: 16px;">Diferencia</th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php
-								foreach ($qquery->result() as $i=>$rrow){
+								$observa=preg_replace('/\s\s+/', ' ', $observa);
+								$sfpa   =explode(' ',$observa);
+								$count_sfpa=count($sfpa);
+								$mod=true;
+								for($i=0;$i<$count_sfpa;$i=$i+2){
+									$ttipo  =$this->db->escape($sfpa[$i]);
+									$sfpades=$this->datasis->dameval("SELECT nombre FROM tarjeta WHERE tipo=${ttipo}");
 									$class=($i%2) ? 'even_row' :  'odd_row';
-									echo "<tr class='$class'  style='font-size: 12pt' >";
-									echo '<td>('.$rrow->tipo.') '.$rrow->nombre.'</td>';
-									echo '<td style="text-align: right">'.nformat($rrow->recibido).'</td>';
-									echo '<td style="text-align: right">'.nformat($rrow->sistema).'</td>';
-									echo '<td style="text-align: right">'.nformat($rrow->recibido-$rrow->sistema).'</td>';
+									echo "<tr class='${class}' style='font-size: 12pt'>";
+									echo '<td>('.$sfpa[$i].') '.$sfpades.'</td>';
+									echo '<td style="text-align: right">'.nformat($sfpa[$i+1]).'</td>';
 									echo '</tr>';
-									$recibido +=$rrow->recibido;
-									$ingreso +=$rrow->sistema;
 								}
+								$recibido =$row->recibido;
+								$ingreso  =$row->sistema;
 								?>
-							</tbody>
-							<tfoot>
-								<tr>
-									<td ></td>
-									<td ></td>
-									<td style="text-align: right; font-size: 16px;"><b>TOTAL:</b></td>
-									<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat($ingreso) ?></b></td>
-								</tr>
-								<tr>
-									<td ></td>
-									<td ></td>
-									<td style="text-align: right; font-size: 16px;"><b>RECIBIDO:</b></td>
-									<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat($recibido) ?></b></td>
-								</tr>
-								<tr>
-									<td ></td>
-									<td ></td>
-									<td style="text-align: right; font-size: 16px;"><b>DIFERENCIA:</b></td>
-									<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat(-$ingreso+$recibido) ?></b></td>
-								</tr>
-							</tfoot>
-						</table>
-					<?php
-						}
-					}
-					?>
+								</tbody>
+								<tfoot>
+									<tr>
+										<td style="text-align: right; font-size: 16px;"><b>TOTAL:</b></td>
+										<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat($ingreso) ?></b></td>
+									</tr>
+									<tr>
+										<td style="text-align: right; font-size: 16px;"><b>RECIBIDO:</b></td>
+										<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat($recibido) ?></b></td>
+									</tr>
+									<tr>
+										<td style="text-align: right; font-size: 16px;"><b>DIFERENCIA:</b></td>
+										<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat(-$ingreso+$recibido) ?></b></td>
+									</tr>
+								</tfoot>
+							</table>
+					<?php } ?>
 					</div>
 				</div>
 			</td>
 		</tr>
 	</table>
 
+	<?php if($qdev->num_rows() > 0){ ?>
 	<div class="page" style="font-size: 14pt">
 	<table class="change_order_items">
 		<thead>
@@ -213,6 +244,7 @@ if ( isset($pdf) ) {
 		</tfoot>
 	</table>
 	</div>
+	<?php } ?>
 </div>
 </body>
 </html>

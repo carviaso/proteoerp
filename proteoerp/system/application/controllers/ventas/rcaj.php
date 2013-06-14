@@ -68,15 +68,15 @@ class Rcaj extends validaciones {
 			}else{
 				$reversar=($reve==1) ? anchor('ventas/rcaj/reversar/'.$numero, 'Reversar'):'';
 				if($tipo=='T'){
-					return image('caja_precerrada.gif',"Cajero Pre-Cerrado: $cajero",$atts).'<h3>'.anchor("ventas/rcaj/forcierre/${numero}/", 'Cerrar cajero').'</h3><center>'.anchor('formatos/ver/RECAJA/'.$numero, ' Ver cuadre de caja').br().$reversar.'</center>';
+					return image('caja_precerrada.gif',"Cajero Pre-Cerrado: ${cajero}",$atts).'<h3>'.anchor("ventas/rcaj/forcierre/${numero}/", 'Cerrar cajero').'</h3><center>'.anchor('formatos/ver/RECAJA/'.$numero, ' Ver cuadre de caja').br().$reversar.'</center>';
 				}else{
-					return image('caja_cerrada.gif',"Cajero Cerrado: $cajero",$atts).'<h3>Cerrado</h3><center>'.anchor('formatos/ver/RECAJA/'.$numero, ' Ver cuadre de caja').br().$reversar.'</center>';
+					return image('caja_cerrada.gif',"Cajero Cerrado: ${cajero}",$atts).'<h3>Cerrado</h3><center>'.anchor('formatos/ver/RECAJA/'.$numero, ' Ver cuadre de caja').br().$reversar.'</center>';
 				}
 			}
 		}
 
 		$data['forma'] ='';
-		if($this->rapyd->uri->is_set('search') AND !empty($filter->fecha->value)){
+		if($this->rapyd->uri->is_set('search') && !empty($filter->fecha->value)){
 			$fecha=$filter->fecha->value;
 
 			$urip = anchor('formatos/ver/RECAJA/<#numero#>','Descargar html');
@@ -93,7 +93,7 @@ class Rcaj extends validaciones {
 			$grid->db->from('sfpa AS c');
 			$grid->db->join('scaj AS d','c.cobrador=d.cajero');
 			$grid->db->join('rcaj AS a','a.cajero=c.cobrador AND a.fecha=c.f_factura','left');
-			$grid->db->group('c.cobrador');
+			$grid->db->groupby('c.cobrador');
 			$grid->use_function('iconcaja');
 
 			$reve=$this->secu->puede('12A0');
@@ -558,7 +558,7 @@ class Rcaj extends validaciones {
 			$form->x_diva->maxlength =17;
 			$form->x_diva->autocomplete=false;
 
-			$form->x_maqfiscal = new inputField('Serial Maquina Fiscal','maqfiscal');
+			$form->x_maqfiscal = new inputField('Serial M&aacute;quina F&iacute;scal','maqfiscal');
 			$form->x_maqfiscal->rule      ='max_length[17]|strtoupper|required';
 			$form->x_maqfiscal->size      =19;
 			$form->x_maqfiscal->maxlength =17;
@@ -761,7 +761,7 @@ class Rcaj extends validaciones {
 				$data['codcp']      ='VENT';
 				$data['nombre']     ='INGRESOS DIARIOS';
 				$data['monto']      =$rrecibido;
-				$data['concepto']   ="ENTREGA FINAL CAJERO $cajero DIA ".dbdate_to_human($fecha);
+				$data['concepto']   ="ENTREGA FINAL CAJERO ${cajero} DIA ".dbdate_to_human($fecha);
 				$data['transac']    =$transac;
 				$data['usuario']    =$usuario;
 				$data['estampa']    =$estampa;
@@ -792,7 +792,7 @@ class Rcaj extends validaciones {
 						$data['tipocta'] ='C';
 						$data['monto']   = 0;
 						$data['saldo']   = 0;
-						$data['concepto'] ="SOBRANTE EN CAJERO $cajero DIA ".dbdate_to_human($fecha);
+						$data['concepto'] ="SOBRANTE EN CAJERO ${cajero} DIA ".dbdate_to_human($fecha);
 
 						$mSQL = $this->db->insert_string('banc', $data);
 						$ban=$this->db->query($mSQL);

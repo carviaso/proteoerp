@@ -38,6 +38,7 @@ if($mSQL_2->num_rows()==0) show_error('Error en registro');
 $detalle  = $mSQL_2->result();
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>ASIENTO CONTABLE <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

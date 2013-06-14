@@ -26,10 +26,10 @@ $hfecha   = dbdate_to_human($row->fecha);
 $monto    = nformat($row->monto);
 $montole  = strtoupper(numletra($row->monto));
 $abonos   = $row->abonos;
-$nombre   = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
+$nombre   = (empty($row->nomfis))? $this->us_ascii2html($row->nombre) : $this->us_ascii2html($row->nomfis);
 $rifci    = trim($row->rifci);
-$direc    = htmlspecialchars(trim($row->direc));
-$observa  = wordwrap(trim(str_replace(',',', ',$row->observa)), 100, '<br>');
+$direc    = $this->us_ascii2html($row->direc);
+$observa  = wordwrap($this->us_ascii2html(str_replace(',',', ',$row->observa)), 100, '<br>');
 $transac  = $row->transac;
 
 
@@ -47,6 +47,7 @@ $npagos=$mSQL_3->num_rows()+$det3encab;
 $lineas=0;
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Anticipo recibido de cliente <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

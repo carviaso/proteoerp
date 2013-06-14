@@ -14,6 +14,7 @@ $cintillo_titulo3= htmlspecialchars(preg_replace('/[Rr][Ii][Ff] *:? *[VJPGvjpg][
 
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Recibo de Nomina</title>
 </head>
 <body style="margin-left: 30px; margin-right: 30px; margin-top: 20px; margin-bottom: 20px;">

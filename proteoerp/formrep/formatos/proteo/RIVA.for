@@ -29,9 +29,9 @@ $fecha     = dbdate_to_human($row->fecha);
 $numero    = htmlspecialchars(trim($row->serie1.$row->serie2)) ;
 $nfiscal   = htmlspecialchars(trim($row->nfiscal));
 $afecta    = htmlspecialchars(trim($row->afecta)) ;
-$clipro    = htmlspecialchars(trim($row->clipro)) ;
-$nombre    = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars(trim($row->nomfis));
-$direc     = htmlspecialchars(trim($row->direc));
+$clipro    = $this->us_ascii2html($row->clipro) ;
+$nombre    = (empty($row->nomfis))? $this->us_ascii2html($row->nombre) : $this->us_ascii2html($row->nomfis);
+$direc     = $this->us_ascii2html($row->direc);
 
 $rif       = htmlspecialchars(trim($row->rif));
 $exento    = $row->exento   ;
@@ -51,6 +51,7 @@ $reiva     = $row->reiva    ;
 $tipotra   = '01';
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Comprobante de retenci&oacute;n de IVA <?php echo $numero ?></title>
 <link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

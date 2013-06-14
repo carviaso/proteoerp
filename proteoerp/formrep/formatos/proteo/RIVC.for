@@ -1,10 +1,11 @@
 <?php
-if(count($parametros)==0)show_error('Faltan parametros ');
+if(count($parametros)==0) show_error('Faltan parametros ');
 $id=$parametros[0];
 $dbid=$this->db->escape($id);
 $dbid=$id;
-$mSQL_1 = $this->db->query("SELECT LPAD(id,8,'0') numero, nrocomp, emision, periodo, fecha, cod_cli, nombre, rif, exento, tasa, general, geneimpu, tasaadic, adicional, adicimpu, tasaredu, reducida, reduimpu, stotal, impuesto, gtotal, reiva, estampa, hora, usuario, modificado, transac, sprmreinte, operacion,codbanc FROM rivc WHERE id=$dbid");
-$mSQL_2 = $this->db->query("SELECT tipo_doc,fecha,numero,nfiscal,exento,tasa,general,geneimpu,tasaadic,adicional,adicimpu,tasaredu,reducida,reduimpu,stotal,impuesto,gtotal,reiva,transac,estampa,hora,usuario,ffactura,modificado FROM itrivc WHERE idrivc=$dbid");
+$mSQL_1 = $this->db->query("SELECT LPAD(id,8,'0') numero, nrocomp, emision, periodo, fecha, cod_cli, nombre, rif, exento, tasa, general, geneimpu, tasaadic, adicional, adicimpu, tasaredu, reducida, reduimpu, stotal, impuesto, gtotal, reiva, estampa, hora, usuario, modificado, transac, sprmreinte, operacion,codbanc FROM rivc WHERE id=${dbid}");
+if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
+$mSQL_2 = $this->db->query("SELECT tipo_doc,fecha,numero,nfiscal,exento,tasa,general,geneimpu,tasaadic,adicional,adicimpu,tasaredu,reducida,reduimpu,stotal,impuesto,gtotal,reiva,transac,estampa,hora,usuario,ffactura,modificado FROM itrivc WHERE idrivc=${dbid}");
 
 /*$mSQL = "SELECT b.numero, b.monto, CONCAT('(',b.codbanc,') ', TRIM(d.banco),' ', d.numcuent) codbanc,    CONCAT('(',b.usuario,') ', c.us_nombre) usuario
 FROM rivc a JOIN bmov b ON a.codbanc=b.codbanc AND a.numche=b.numero JOIN usuario c ON b.usuario=c.us_codigo JOIN banc d ON b.codbanc=d.codbanc
@@ -14,11 +15,11 @@ $row = $mSQL_1->row();
 $fecha      = dbdate_to_human($row->fecha);
 $emision    = dbdate_to_human($row->emision);
 $nrocomp    = $row->nrocomp;
-$nombre     = $row->nombre;
-$cod_cli    = $row->cod_cli;
-$codbanc    = $row->codbanc;
-$rif        = $row->rif;
-$periodo    = $row->periodo;
+$nombre     = $this->us_ascii2html($row->nombre);
+$cod_cli    = $this->us_ascii2html($row->cod_cli);
+$codbanc    = $this->us_ascii2html($row->codbanc);
+$rif        = $this->us_ascii2html($row->rif);
+$periodo    = $this->us_ascii2html($row->periodo);
 $stotal     = $row->stotal;
 $gtotal     = $row->gtotal;
 $reiva      = $row->reiva;
@@ -71,9 +72,9 @@ $anticnum =$rrow->numero;
 ?>
 <html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Comprobante <?php echo $nrocomp ?></title>
-<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
-
+<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body>
 <script type="text/php">
@@ -94,7 +95,7 @@ if ( isset($pdf) ) {
 	$pdf->line(16, $y, $w - 16, $y, $color, 0.5);
 
 	$pdf->close_object();
-	$pdf->add_object($foot, "all");
+	$pdf->add_object($foot, 'all');
 
 	$text = "PP {PAGE_NUM} de {PAGE_COUNT}";
 
@@ -107,38 +108,22 @@ if ( isset($pdf) ) {
 <table style="width: 100%;">
 	<thead>
 	<tr>
-		<td><div id="section_header">
-			<table style="width: 100%;" class="header">
-			<tr>
-				<td width=140 rowspan="2"><img src="<?php echo $this->_direccion ?>/images/logo.jpg" width="127"></td>
-				<td><h1 style="text-align: center"><?php echo $this->datasis->traevalor('TITULO1'); ?></h1></td>
-			</tr>
-			<tr>
-				<td>
-				<div class="page" style="font-size: 7pt">
-				<?php echo $this->datasis->traevalor('TITULO2').' '.$this->datasis->traevalor('TITULO3'); ?> <br>
-				<b>RIF: <?php echo $this->datasis->traevalor('RIF'); ?></b>
-				</div>
-				</td>
-			</tr>
-			</table>
-			</div>
-		</td>
+		<td><?php $this->incluir('X_CINTILLO'); ?></td>
 	</tr>
 	<tr>
 		<td><div id="section_header">
 			<div class="page" style="font-size: 7pt">
 			<table style="width: 100%;" class="header">
 			<tr>
-				<td><h1 style="text-align: left" >Consignacion de Retenci&oacute;n de IVA</h1></td>
-				<td><h1 style="text-align: right">Número: <?php echo $numero ?></h1></td>
+				<td><h1 style="text-align: left" >Consignaci&oacute;n de Retenci&oacute;n de IVA</h1></td>
+				<td><h1 style="text-align: right">N&uacute;mero: <?php echo $numero ?></h1></td>
 			</tr>
 			</table>
 			</div>
 		</div></td>
 	</tr>
 	<tr>
-		<td style="text-align:center;">Hemos recibido del Agente de Retencion de IVA el documento especificado a continuacion</td>
+		<td style="text-align:center;">Hemos recibido del Agente de Retencion de IVA el documento especificado a continuaci&oacute;n</td>
 	</tr>
 	<tr>
 		<td>
@@ -146,12 +131,12 @@ if ( isset($pdf) ) {
 			<tr>
 				<td width='60'>Comprobante: </td><td width='60' ><b><?php echo $periodo.$nrocomp; ?></b></td>
 				<td width='50'>Agente: </td><td><b><?php echo htmlspecialchars($nombre); ?></b></td>
-				<td width='90'>Fecha de Recepcion: </td><td width='60'><b><?php echo $fecha; ?></b></td>
+				<td width='90'>Fecha de Recepci&oacute;n: </td><td width='60'><b><?php echo $fecha; ?></b></td>
 			</tr>
 			<tr>
 				<td>RIF: </td><td><b><?php echo $rif; ?></b></td>
 				<td></td><td></td>
-				<td>Fecha de Emisi&oacute;n: </td><td><strong><?php echo $emision; ?></strong></td>
+				<td>Fecha de Emisi&oacute;n: </td><td><b><?php echo $emision; ?></b></td>
 			</tr>
 			</table>
 		</td>
@@ -163,11 +148,11 @@ if ( isset($pdf) ) {
 		<table class="change_order_items">
 		<thead>
 		<tr>
-			<th style='border-style:solid; border-width:1px;'>N&uacute;mero</th>
-			<th style='border-style:solid;border-width:1px'>Fecha</th>
-			<th style='border-style:solid;border-width:1px'>Monto</th>
-			<th style='border-style:solid;border-width:1px'>Impuesto</th>
-			<th style='border-style:solid;border-width:1px'>Retenido</th>
+			<th style='border-style:solid;border-width:1px;'>N&uacute;mero</th>
+			<th style='border-style:solid;border-width:1px;'>Fecha</th>
+			<th style='border-style:solid;border-width:1px;'>Monto</th>
+			<th style='border-style:solid;border-width:1px;'>Impuesto</th>
+			<th style='border-style:solid;border-width:1px;'>Retenido</th>
 		</tr>
 		</thead>
 		<tbody>
@@ -185,15 +170,15 @@ if ( isset($pdf) ) {
 		</tbody>
 		<tfoot>
 		<tr>
-			<td colspan="4" style='font-size:14pt;border-style:solid; border-width:1px;text-align: right;'><strong>TOTAL MONTO RETENIDO:</strong></td>
-			<td class="change_order_total_col" style="font-size:14pt;border-style:solid;"><strong><?php echo nformat($reiva) ?></strong></td>
+			<td colspan="4" style='font-size:14pt;border-style:solid; border-width:1px;text-align: right;'><b>TOTAL MONTO RETENIDO:</b></td>
+			<td class="change_order_total_col" style="font-size:14pt;border-style:solid;"><b><?php echo nformat($reiva) ?></b></td>
 		</tr>
 		<tr>
-			<td colspan="5" style='font-size:10pt;border-style:solid; border-width:0.5px;text-align: center;'><strong>
+			<td colspan="5" style='font-size:10pt;border-style:solid; border-width:0.5px;text-align: center;'><b>
 			<?php if($anticipo>0){ ?>
 				SALDO REINTEGRABLE O APLICABLE A OTRA COMPRA: <?php echo nformat($anticipo) ?>
 			<?php }else{ echo '&nbsp;'; } ?>
-			</strong></td>
+			</b></td>
 		</tr>
 		</tfoot>
 		</table>
@@ -256,22 +241,22 @@ echo $tabla;
 ?>
 	<table width='100%' border="0" cellspacing="0" cellpadding="0" class="header">
 	<tr>
-		<td width='40%'><strong><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br>Recibido por:</div></strong></td>
-		<td width='30%'><strong><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br>CI:</div></strong></td>
-		<td width='20%'><strong><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br>Fecha:</div></strong></td>
+		<td width='40%'><b><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br>Recibido por:</div></b></td>
+		<td width='30%'><b><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br>CI:</div></b></td>
+		<td width='20%'><b><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br>Fecha:</div></b></td>
 	</tr>
 	</table>
 
 	<br><br>
 	<table width='100%' border="0" cellspacing="0" cellpadding="0" class="header">
 	<tr>
-		<td width='33%'><strong><div align="center" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br><br><br>&nbsp;</div></strong></td>
-		<td width='33%'><strong><div align="center" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br><br><br>&nbsp;</div></strong></td>
-		<td width='33%'><strong><div align="center" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br><br><br>&nbsp;</div></strong></td>
+		<td width='33%'><b><div align="center" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br><br><br>&nbsp;</div></b></td>
+		<td width='33%'><b><div align="center" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br><br><br>&nbsp;</div></b></td>
+		<td width='33%'><b><div align="center" style="font-size:8pt;border-style:solid; border-width:1px;"><br><br><br><br>&nbsp;</div></b></td>
 	</tr><tr>
-		<td><strong><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;">Elaborado por:</div></strong></td>
-		<td><strong><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;">Autorizado por:</div></strong></td>
-		<td><strong><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;">Aprobado por:</div></strong></td>
+		<td><b><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;">Elaborado por:</div></b></td>
+		<td><b><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;">Autorizado por:</div></b></td>
+		<td><b><div align="left" style="font-size:8pt;border-style:solid; border-width:1px;">Aprobado por:</div></b></td>
 	</tr>
 	</table>
 </div>

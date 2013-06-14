@@ -47,6 +47,7 @@ $detalle  = $mSQL_2->result();
 $ittot['monto']=$lineas=0;
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Aplicaci&oacute;n de anticipo <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

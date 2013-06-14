@@ -16,18 +16,18 @@ $fecha    = dbdate_to_human($row->fecha);
 $ffecha   = dbdate_to_human($row->ffactura);
 
 $numero   = trim($row->numero);
-$proveed  = htmlspecialchars(trim($row->proveed));
+$proveed  = $this->us_ascii2html($row->proveed);
 $tipo_doc = trim($row->tipo_doc);
 $breten   = $row->breten;
 $reten    = $row->reten;
 $creten   = trim($row->creten);
-$nombre   = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
-$direc1   = htmlspecialchars(trim($row->direc1));
-$direc2   = htmlspecialchars(trim($row->direc2));
-$direc3   = htmlspecialchars(trim($row->direc3));
+$nombre   = (empty($row->nomfis))? $this->us_ascii2html($row->nombre) : $this->us_ascii2html($row->nomfis);
+$direc1   = $this->us_ascii2html($row->direc1);
+$direc2   = $this->us_ascii2html($row->direc2);
+$direc3   = $this->us_ascii2html($row->direc3);
 $telefono = htmlspecialchars(trim($row->telefono));
 $rif      = htmlspecialchars(trim($row->rif));
-$activida = htmlspecialchars(trim($row->activida));
+$activida = $this->us_ascii2html($row->activida);
 $nfiscal  = htmlspecialchars(trim($row->nfiscal));
 $base1    = $row->base1;
 $tari1    = $row->tari1;
@@ -46,6 +46,7 @@ if(!empty($nfiscal)){
 ?>
 <html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>DATOS DEL CONTRIBUYENTE SUJETO A RETENCION DE I.S.L.R. <?php echo $numero ?></title>
 <link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

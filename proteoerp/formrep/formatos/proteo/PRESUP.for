@@ -5,7 +5,7 @@ if(count($parametros)==0) show_error('Faltan parametros');
 $id = $parametros[0];
 $dbid=$this->db->escape($id);
 
-$mSQL_1 = $this->db->query("SELECT fecha,numero,cod_cli,rifci,peso,CONCAT_WS(' ',direc,dire1) AS direccion,nombre,iva,totalg,totals FROM spre  WHERE id=$dbid");
+$mSQL_1 = $this->db->query("SELECT fecha,numero,cod_cli,rifci,peso,CONCAT_WS(' ',direc,dire1) AS direccion,nombre,iva,totalg,totals FROM spre  WHERE id=${dbid}");
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row = $mSQL_1->row();
 
@@ -13,20 +13,21 @@ $fecha    = dbdate_to_human($row->fecha);
 $numero   = htmlspecialchars(trim($row->numero));
 $cod_cli  = htmlspecialchars(trim($row->cod_cli));
 $rifci    = htmlspecialchars(trim($row->rifci));
-$nombre   = htmlspecialchars(trim($row->nombre));
+$nombre   = $this->us_ascii2html($row->nombre);
 $stotal   = nformat($row->totals);
 $gtotal   = nformat($row->totalg);
 $peso     = nformat($row->peso);
 $impuesto = nformat($row->iva);
-$direccion= htmlspecialchars(trim($row->direccion));
+$direccion= $this->us_ascii2html($row->direccion);
 
 $dbnumero = $this->db->escape($numero);
-$lineas = 0;
-$uline  = array();
-$mSQL_2 = $this->db->query('SELECT codigo,desca,cana,preca,importe,totaorg,iva,detalle FROM itspre WHERE numero='.$dbnumero);
+$lineas   = 0;
+$uline    = array();
+$mSQL_2   = $this->db->query('SELECT codigo,desca,cana,preca,importe,totaorg,iva,detalle FROM itspre WHERE numero='.$dbnumero);
 $detalle  = $mSQL_2->result();
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Presupuesto <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

@@ -26,13 +26,13 @@ $hfecha   = dbdate_to_human($row->fecha);
 $monto    = nformat($row->monto);
 $montole  = strtoupper(numletra($row->monto));
 $abonos   = $row->abonos;
-$nombre   = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
+$nombre   = (empty($row->nomfis))? $this->us_ascii2html($row->nombre)) : $this->us_ascii2html($row->nomfis);
 $rifci    = trim($row->rifci);
-$direc    = trim($row->direc);
-$observa  = wordwrap(trim(str_replace(',',', ',$row->observa)), 100, '<br>');
+$direc    = $this->us_ascii2html($row->direc);
+$observa  = wordwrap($this->us_ascii2html(str_replace(',',', ',$row->observa)), 100, '<br>');
 $transac  = $row->transac;
 $codigo   = htmlspecialchars(trim($row->codigo));
-$descrip  = htmlspecialchars(trim($row->descrip));
+$descrip  = $this->us_ascii2html(($row->descrip);
 $telefono = htmlspecialchars(trim($row->telefono));
 $exento   = nformat($row->exento);
 $montasa  = nformat($row->montasa);
@@ -54,6 +54,7 @@ $detalle2  = $mSQL_2->result();
 $lineas=0;
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Nota de cr&eacute;dito <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

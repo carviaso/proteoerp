@@ -35,6 +35,7 @@ $mSQL_2 = $this->db->query('SELECT a.codigo,a.descrip,a.cant,a.saldo,a.entrega F
 $detalle  = $mSQL_2->result();
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>Nota de entrega <?php echo $numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>

@@ -22,13 +22,13 @@ $row = $mSQL_1->row();
 $fecha    = dbdate_to_human($row->fecha);
 $vence    = dbdate_to_human($row->vence);
 $numero   = $row->numero;
-$cod_cli  = htmlspecialchars(trim($row->cod_cli));
+$cod_cli  = $this->us_ascii2html($row->cod_cli);
 $rifci    = htmlspecialchars(trim($row->rifci));
-$nombre   = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
+$nombre   = (empty($row->nomfis))? $this->us_ascii2html($row->nombre) : $this->us_ascii2html($row->nomfis);
 $stotal   = nformat($row->totals);
 $gtotal   = nformat($row->totalg);
 $exento   = nformat($row->exento);
-$observa  = htmlspecialchars(trim($row->observa).trim($row->observ1));
+$observa  = $this->us_ascii2html(trim($row->observa).trim($row->observ1));
 
 $tasa      = nformat($row->tasa);
 $montasa   = nformat($row->montasa);
@@ -39,12 +39,12 @@ $monadic   = nformat($row->monadic);
 
 $peso     = nformat($row->peso);
 $impuesto = nformat($row->iva);
-$direc    = htmlspecialchars(trim($row->direccion));
+$direc    = $this->us_ascii2html($row->direccion);
 $tipo_doc = trim($row->tipo_doc);
 $referen  = trim($row->referen);
 $nfiscal  = htmlspecialchars(trim($row->nfiscal));
 $telefono = htmlspecialchars(trim($row->telefono));
-$nomvend  = htmlspecialchars(trim($row->nomvend));
+$nomvend  = $this->us_ascii2html($row->nomvend);
 $factura  = ($tipo_doc=='D')? $row->factura :'';
 
 $dbtipo_doc = $this->db->escape($tipo_doc);
@@ -73,6 +73,7 @@ $mSQL_2 = $this->db->query($mSQL);
 $detalle  = $mSQL_2->result();
 ?><html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title><?php echo $documento.' '.$numero ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
