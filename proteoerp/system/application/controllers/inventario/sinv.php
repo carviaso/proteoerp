@@ -71,6 +71,15 @@ class Sinv extends Controller {
 		$this->db->query("UPDATE tmenus SET proteo='verfotos'    WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVFOTO%' ");
 		$this->db->query("UPDATE tmenus SET proteo='etiquetas'   WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVETIQ%' ");
 
+		
+		if ( $this->datasis->dameval('SELECT COUNT(*) FROM tmenus WHERE modulo="SINVOTR" AND proteo="cambiva" ') == 0 ){
+			//crea elmodulo en tmenus
+			$mSQL  = "INSERT INTO tmenus SET modulo='SINVOTR',  secu=17, titulo='Cambiar IVA', mensaje='Cambiar el IVA', ejecutar='', proteo='cambiva' ";
+			$this->db->query($mSQL);
+		}
+
+
+
 		if ( !$this->datasis->istabla('sinvalub') ) {
 			$mSQL = "CREATE TABLE sinvalub (
 					codigo VARCHAR(15) NOT NULL DEFAULT '',
@@ -263,7 +272,6 @@ class Sinv extends Controller {
 		};
 		';
 
-
 		//Recalcular Precios
 		$funciones .= '
 		function recalcular(){
@@ -283,7 +291,6 @@ class Sinv extends Controller {
 			})
 		}
 		';
-
 
 		// Consulta de Movimiento
 		$funciones .= '
@@ -328,7 +335,7 @@ class Sinv extends Controller {
 					if (v) {
 						if( f.porcen != 0 ) {
 							$.ajax({ url: "'.site_url('inventario/sinv/auprec').'/"+f.porcen,
-							success: function(data){ alert(("AF "+data)) }
+							success: function(data){ alert((data)) }
 							});
 						} else {
 							alert("Debe colocar un porcentaje diferente a 0");
@@ -353,6 +360,34 @@ class Sinv extends Controller {
 						} else {
 							alert("Debe colocar un porcentaje mayor que 0");
 						}
+					}
+				}
+			});
+		};
+		';
+
+		//Cambio de IVA
+		$mfecha = $this->datasis->dameval('SELECT MAX(fecha) FROM civa');
+		$mSQL = "
+		SELECT 0 exento,  'EXCENTO 0' nombre 
+		UNION ALL
+		SELECT tasa,      CONCAT('TASA ',tasa)      nombre FROM civa WHERE fecha='$mfecha'
+		UNION ALL
+		SELECT redutasa,  CONCAT('REDUCIDA ',redutasa)  nombre FROM civa WHERE fecha='$mfecha'
+		UNION ALL
+		SELECT sobretasa, CONCAT('SOBRETASA ',sobretasa) nombre FROM civa WHERE fecha='$mfecha'
+		";
+		$ivas = $this->datasis->llenaopciones($mSQL, true, 'mivas');
+		$ivas = str_replace('"',"'",$ivas);
+		$funciones .= '
+		function cambiva(){
+			$.prompt( "<h1>Cambio de I.V.A.:</h1><br/><center>'.$ivas.'</center><br/>", {
+				buttons: { Aplicar: true, Cancelar: false },
+				submit: function(e,v,m,f){
+					if (v) {
+						$.ajax({ url: "'.site_url('inventario/sinv/cambiva').'/"+f.mivas,
+							success: function(data){ alert((data)) }
+						});
 					}
 				}
 			});
@@ -3737,7 +3772,6 @@ class Sinv extends Controller {
 	//
 	// -- Aumento de Precios -- //
 	//
-	// **************************************
 	function auprec( $porcent= 0) {
 		$data = $this->datasis->damesesion();
 		$where = $data['data1'];
@@ -3775,7 +3809,6 @@ class Sinv extends Controller {
 	//
 	//  -- Aumento de Precios al Mayor --  //
 	//
-	// **************************************
 	function auprecm($porcent = 0) {
 		$data = $this->datasis->damesesion();
 		$where = $data['data1'];
@@ -3789,6 +3822,30 @@ class Sinv extends Controller {
 			echo " Descuento  Concluido";
 		}
 	}
+
+
+	// **************************************
+	//
+	// -- Cambio de IVA                 -- //
+	//
+	function cambiva( $iva ) {
+		$data = $this->datasis->damesesion();
+		$where = $data['data1'];
+		$tasa = $this->datasis->damereg("SELECT tasa, redutasa, sobretasa FROM civa ORDER BY fecha DESC LIMIT 1");
+		$mSQL = "SET
+			a.precio1=ROUND(a.base1*(100+$iva)/100,2),
+			a.precio2=ROUND(a.base2*(100+$iva)/100,2),
+			a.precio3=ROUND(a.base3*(100+$iva)/100,2),
+			a.precio4=ROUND(a.base4*(100+$iva)/100,2),
+			a.iva=$iva";
+
+		$this->db->query("UPDATE sinv a ".$mSQL." ".$where);
+		$this->datasis->sinvrecalcular("M");
+		$this->datasis->sinvredondear();
+
+		echo "Cambio Concluido ($iva) ";
+	}
+
 
 
 	// **************************************

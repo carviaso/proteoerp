@@ -333,8 +333,6 @@ class Datasis {
 			$CI->db->query($mSQL);
 		}
 
-
-
 		// Si no existe lo crea
 		$mSQL   = "SELECT COUNT(*) FROM tmenus WHERE modulo = '$modulo' ";
 		if ( $this->dameval($mSQL) == 0 ) {

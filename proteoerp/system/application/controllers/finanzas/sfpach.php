@@ -138,7 +138,7 @@ class sfpach extends Controller {
 			efmonto = $( "#efmonto" ),
 			allFields = $( [] ).add( envia ).add( recibe ).add(efcaja).add(efbanco).add(efmonto);
 			var grid = jQuery("#newapi'.$grid.'");
-			var s = grid.getGridParam(\'selarrrow\'); ';
+			//var s = grid.getGridParam(\'selarrrow\'); ';
 
 		$bodyscript .= '
 			$( "#depositar" ).click(function() {
@@ -240,11 +240,10 @@ class sfpach extends Controller {
 		
 		$bodyscript .= '
 		function sumamonto(){ 
-			var grid = jQuery("#newapi'.$grid.'");
-			var s;
-			var total = 0;
-			var rowcells=new Array();
-			s = grid.getGridParam(\'selarrrow\'); 
+			var grid     = jQuery("#newapi'.$grid.'");
+			var total    = 0;
+			var rowcells = new Array();
+			var s = grid.getGridParam(\'selarrrow\'); 
 			$("#ladicional").html("");
 			if(s.length)
 			{
