@@ -25,20 +25,20 @@ class Libros extends Controller {
 				$genera[]=array('accion'=>$row->metodo, 'nombre' => $row->nombre,'estampa'=>$row->estampa,'fgenera'=>$row->fgenera);
 		}
 
-		$mk=mktime(0, 0 , 0, date("n")-1,date("j"), date("Y"));
-		$checkbox="<input type='checkbox' name='generar[]' value='<#accion#>' /> ";
+		$mk=mktime(0, 0 , 0, date('n')-1,date('j'), date('Y'));
+		$checkbox="<input type='checkbox' name='generar[]' value='<#accion#>' title='<#accion#>' /> ";
 		$submit= form_submit('<#accion#>', 'Generar');
 		$sanio = form_dropdown('year',$anhos,date('Y',$mk));
 		$smes  = form_dropdown('mes' ,$mmes ,date('m',$mk));
 
 		function obser($gene,$estampa,$metodo){
-			if (empty($gene) or empty($estampa)) return "<span id='obs_$metodo'>Niguna</span>";
+			if (empty($gene) or empty($estampa)) return "<span id='obs_${metodo}'>Niguna</span>";
 			$hestampa=dbdate_to_human($estampa,'d/m/Y h:i a');
 			$hgene=substr($gene,4).'/'.substr($gene,0,4);
-			return "<span id='obs_$metodo'>Generado el <b>$hestampa</b> para el mes <b>$hgene</b></span>";
+			return "<span id='obs_${metodo}'>Generado el <b>${hestampa}</b> para el mes <b>${hgene}</b></span>";
 		}
 
-		$gene = new DataGrid("Documento para el mes $smes del a&ntilde;o $sanio",$genera);
+		$gene = new DataGrid("Documento para el mes ${smes} del a&ntilde;o ${sanio}",$genera);
 		$gene->use_function('obser');
 		$gene->per_page = count($genera);
 		$gene->column('Generar'  ,$checkbox);
@@ -47,7 +47,7 @@ class Libros extends Controller {
 		$gene->submit('enviar', 'Generar');
 		$gene->build();
 
-		$link='<a href="javascript:void(0);" title="Descargar" onclick="descarga(\'<#accion#>\');">Descargar</a>';
+		$link='<a href="javascript:void(0);" title="<#accion#>" onclick="descarga(\'<#accion#>\');">Descargar</a>';
 		$desca = new DataGrid("Descarga de documentos",$descarga);
 		$desca->per_page = count($descarga);
 		$desca->column('Descargar'  ,$link);
@@ -365,15 +365,15 @@ class Libros extends Controller {
 	//***********************************************
 	function depura($par=null){
 		$libro=$gene=array();
-		$par=(empty($par)) ? date('Ym') : $par;
+		$par=(empty($par)) ? date('Ym',mktime(0, 0 , 0, date('n')-1,date('j'), date('Y'))) : $par;
 		$reflection = new ReflectionClass('Libros');
 		$aMethods = $reflection->getMethods();
 		foreach($aMethods as $method){
 			if($method->name=='generar') continue;
 			if (preg_match("/^wl.*$/i",$method->name)) {
-				$libro[]=anchor("finanzas/libros/$method->name/$par",$method->name);
+				$libro[]=anchor("finanzas/libros/$method->name/${par}",$method->name);
 			}elseif(preg_match("/^gene.*$/i",$method->name)) {
-				$gene[]=anchor("finanzas/libros/$method->name/$par",$method->name);
+				$gene[]=anchor("finanzas/libros/$method->name/${par}",$method->name);
 			}
 
 		}
@@ -390,7 +390,8 @@ class Libros extends Controller {
 	function scstarretasa($mCONTROL) {
 		$m         = 1;
 		$mTASA     = $mREDUCIDA = $mSOBRETASA=$mMONTASA = $mMONREDU = $mMONADIC = $mATASAS= $mIVA= $mEXENTO = 0;
-		$query = $this->db->query("SELECT * FROM itscst WHERE control='$mCONTROL' ");
+		$dbcontrol = $this->db->escape($mCONTROL);
+		$query = $this->db->query("SELECT * FROM itscst WHERE control=${dbcontrol}");
 		foreach ( $query->result() as $row ){
 			if($mATASAS==0) $mATASAS = $this->datasis->ivaplica($row->fecha);
 			$mIVA  = $row->iva;
@@ -408,7 +409,7 @@ class Libros extends Controller {
 				$mEXENTO += $mTOTA;
 			}
 		}
-		$mSQL = "UPDATE scst SET exento=$mEXENTO, tasa=$mTASA,montasa=$mMONTASA,reducida=$mREDUCIDA,monredu=$mMONREDU,sobretasa=$mSOBRETASA,monadic=$mMONADIC WHERE control=$mCONTROL ";
+		$mSQL = "UPDATE scst SET exento=${mEXENTO}, tasa=${mTASA},montasa=${mMONTASA},reducida=${mREDUCIDA},monredu=${mMONREDU},sobretasa=${mSOBRETASA},monadic=${mMONADIC} WHERE control=${dbcontrol}";
 		$this->db->simple_query($mSQL);
 	}
 
@@ -422,7 +423,7 @@ class Libros extends Controller {
 	}
 
 	function _tasas($mes) {
-		$msql  = "SELECT tasa, redutasa, sobretasa FROM civa WHERE fecha<=".$mes."01 ORDER BY fecha DESC limit 1";
+		$msql  = "SELECT tasa, redutasa, sobretasa FROM civa WHERE fecha<=".$mes."01 ORDER BY fecha DESC LIMIT 1";
 		$mivas = $this->db->query($msql);
 		$mt    = $mivas->row();
 		$mtasa['general']   = $mt->tasa;
@@ -434,8 +435,9 @@ class Libros extends Controller {
 	function _arreglatasa($mTRANSAC){
 		$mTASA =$mREDUCIDA=$mSOBRETASA = $mMONTASA =$mMONREDU = $mMONADIC = $mEXENTO= $mIVA= 0;
 		$mATASAS    = '';
+		$dbtransac  = $this->db->escape($mTRANSAC);
 
-		$query = $this->db->query("SELECT * FROM sitems WHERE transac='$mTRANSAC' AND tipoa<>'X'");
+		$query = $this->db->query("SELECT * FROM sitems WHERE transac=${dbtransac} AND tipoa<>'X'");
 		foreach ( $query->result() as $row ){
 			if (empty($mATASAS)) $mATASAS = $this->datasis->ivaplica($row->fecha);
 			$mIVA    = $row->iva;
@@ -453,20 +455,20 @@ class Libros extends Controller {
 				$mEXENTO += $mTOTA;
 			}
 		}
-		$mSQL = "UPDATE sfac SET exento=$mEXENTO, tasa=$mTASA, montasa=$mMONTASA,reducida=$mREDUCIDA, monredu=$mMONREDU, sobretasa=$mSOBRETASA, monadic=$mMONADIC WHERE transac='$mTRANSAC' ";
+		$mSQL = "UPDATE sfac SET exento=${mEXENTO}, tasa=${mTASA}, montasa=${mMONTASA},reducida=${mREDUCIDA}, monredu=${mMONREDU}, sobretasa=${mSOBRETASA}, monadic=${mMONADIC} WHERE transac=${dbtransac}";
 		$this->db->simple_query($mSQL);
 	}
 
 	// Ajusta al valor
 	function _ajustainv($mes, $cambia){
-		$cambia = str_replace(",","", $cambia );
-		$mSQL = "SELECT sum(minicial), sum(mcompras), sum(mventas), sum(mfinal) FROM invresu WHERE mes=$mes ";
+		$cambia = str_replace(',','', $cambia );
+		$mSQL = "SELECT SUM(minicial), SUM(mcompras), SUM(mventas), SUM(mfinal) FROM invresu WHERE mes=${mes}";
 		$mC   = damecur($mSQL);
 		$row  = mysql_fetch_row($mC);
 		$difer = $row[3]-$cambia;
 		$factor = ( $row[2] + $difer ) / $row[2];
 		//echo "$cambia  $difer  $factor";
-		ejecutasql("UPDATE invresu SET mventas=mventas*".$factor." WHERE mes=$mes");
+		ejecutasql("UPDATE invresu SET mventas=mventas*".$factor." WHERE mes=${mes}");
 		saldofinal($mes);
 	}
 
@@ -499,39 +501,39 @@ class Libros extends Controller {
 			SELECT
 			EXTRACT(YEAR_MONTH FROM a.fecha) AS mes,
 			a.codigo, b.descrip, 0 AS inicial,
-			sum(a.cantidad*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1)) AS compras,
-			sum(a.cantidad*(a.origen IN ('3I','3M') )) AS ventas,
-			sum(a.cantidad*(a.origen='1T')) AS trans,
-			sum((a.cantidad-a.anteri)*(a.origen IN ('0F','8F'))) AS fisico,
-			sum(a.cantidad*(a.origen='4N')) AS notas,
+			SUM(a.cantidad*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1)) AS compras,
+			SUM(a.cantidad*(a.origen IN ('3I','3M') )) AS ventas,
+			SUM(a.cantidad*(a.origen='1T')) AS trans,
+			SUM((a.cantidad-a.anteri)*(a.origen IN ('0F','8F'))) AS fisico,
+			SUM(a.cantidad*(a.origen='4N')) AS notas,
 			0 AS final,  0 AS minicial,
-			sum(a.monto*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1)) AS mcompras,
-			sum(a.cantidad*a.promedio*(a.origen IN ('3I','3M'))) AS mventas,
-			sum(a.cantidad*a.promedio*(a.origen='1T')) AS mtrans,
-			sum((a.cantidad-a.anteri)*a.promedio*(a.origen IN ('0F','8F'))) AS mfisico,
-			sum(a.cantidad*a.promedio*(a.origen='4N')) AS mnotas,
-			0 AS mfinal, sum(venta)
+			SUM(a.monto*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1)) AS mcompras,
+			SUM(a.cantidad*a.promedio*(a.origen IN ('3I','3M'))) AS mventas,
+			SUM(a.cantidad*a.promedio*(a.origen='1T')) AS mtrans,
+			SUM((a.cantidad-a.anteri)*a.promedio*(a.origen IN ('0F','8F'))) AS mfisico,
+			SUM(a.cantidad*a.promedio*(a.origen='4N')) AS mnotas,
+			0 AS mfinal, SUM(venta)
 			FROM costos AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo
-			WHERE a.fecha BETWEEN $fdesde AND $fhasta  AND MID(b.tipo,1,1)!='S'
-			GROUP BY mes,a.codigo ";
+			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta}  AND MID(b.tipo,1,1)!='S'
+			GROUP BY mes,a.codigo";
 		$this->db->simple_query($mSQL);
 
 		//Insertamos los del mes pasado que no tienen movimiento este mes
 		$this->db->simple_query("INSERT IGNORE INTO invresu (mes, codigo,descrip, inicial, compras,ventas, trans, fisico,notas,final, minicial, mcompras, mventas, mtrans, mfisico, mnotas, mfinal ) SELECT $mes, codigo, descrip, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0 FROM invresu WHERE mes=$mesa");
 
 		//Eliminar notas y transferencias
-		$this->db->simple_query("UPDATE invresu SET ventas=ventas+notas, mventas=mventas+mnotas, notas=0, mnotas=0 WHERE mes=$mes ");
-		$this->db->simple_query("UPDATE invresu SET ventas=ventas-trans, mventas=mventas-mtrans, trans=0, mtrans=0 WHERE mes=$mes ");
-		$this->db->simple_query("UPDATE invresu SET fisico=0, mfisico=0 WHERE mes=$mes ");
+		$this->db->simple_query("UPDATE invresu SET ventas=ventas+notas, mventas=mventas+mnotas, notas=0, mnotas=0 WHERE mes=${mes} ");
+		$this->db->simple_query("UPDATE invresu SET ventas=ventas-trans, mventas=mventas-mtrans, trans=0, mtrans=0 WHERE mes=${mes} ");
+		$this->db->simple_query("UPDATE invresu SET fisico=0, mfisico=0 WHERE mes=${mes} ");
 
 		// Busca Saldo Inicial
-		$this->db->simple_query("UPDATE invresu a JOIN invresu b ON a.codigo=b.codigo AND a.mes=$mesa AND b.mes=$mes SET b.minicial=a.mfinal, b.inicial=a.final ");
+		$this->db->simple_query("UPDATE invresu a JOIN invresu b ON a.codigo=b.codigo AND a.mes=${mesa} AND b.mes=$mes SET b.minicial=a.mfinal, b.inicial=a.final ");
 
 		// Calcula Saldo Final
 		$this->_saldofinal($mes);
 
 		// Elimina Negativos  quita la venta en exeso
-		$this->db->simple_query("UPDATE invresu SET ventas=inicial+compras, mventas=minicial+mcompras WHERE mes=$mes AND final<0 ");
+		$this->db->simple_query("UPDATE invresu SET ventas=inicial+compras, mventas=minicial+mcompras WHERE mes=${mes} AND final<0 ");
 		$this->_saldofinal($mes);
 		$calcular='Consultar';
 	}
