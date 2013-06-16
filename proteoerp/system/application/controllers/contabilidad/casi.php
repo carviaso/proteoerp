@@ -1768,19 +1768,19 @@ class Casi extends Controller {
 
 			$tables = $this->db->list_tables();
 			foreach ($tables as $table){
-				if (preg_match("/^view_.*$|^sp_.*$|^viemovinxventas$/i",$table)) continue;
+				if (preg_match("/^view_.*$|^sp_.*$|^viemovinxventas$|^vietodife$/i",$table)) continue;
 
 				$fields = $this->db->list_fields($table);
 				if (in_array($cc, $fields)){
-					$mSQL="SELECT COUNT(*) AS cana FROM `$table` WHERE $cc = $valor";
+					$mSQL="SELECT COUNT(*) AS cana FROM `${table}` WHERE ${cc} = ${valor}";
 
 					$cana=$this->datasis->dameval($mSQL);
 					if($cana>0){
 
-						$grid = new DataGrid("$table: $cana");
+						$grid = new DataGrid("${table}: ${cana}");
 						//$grid->per_page = $cana;
 						$grid->db->from($table);
-						$grid->db->where("$cc = $valor");
+						$grid->db->where("${cc} = ${valor}");
 						$grid->db->limit(200);
 						if(in_array('id', $fields)){
 							$grid->db->orderby('id','desc');

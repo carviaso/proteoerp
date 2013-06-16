@@ -1423,7 +1423,7 @@ class Rivc extends Controller {
 		$edit->it_numero->rule='max_length[12]|required|callback_chrepetidos|callback_chfac[<#i#>]|callback_chriva[<#i#>]';
 		$edit->it_numero->size =14;
 		$edit->it_numero->maxlength =12;
-		$edit->it_numero->title = 'Coloque el tipo de documento seguido del n&uacute;mero, Ej D000001 si es una devoluci&oacute;n, F12345 si es una factura o NC0001 si una nota de cre&dacute;ito';
+		$edit->it_numero->title = 'Para mejorar la b&uacute;squeda coloque el tipo de documento seguido del n&uacute;mero, Ej D000001 si es una devoluci&oacute;n, F12345 si es una factura o NC0001 si una nota de cre&dacute;ito';
 		$edit->it_numero->rel_id ='itrivc';
 		$edit->it_numero->autocomplete = false;
 
