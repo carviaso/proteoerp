@@ -85,11 +85,11 @@ class Dispmoviles extends Controller {
 
 		$query = $this->db->query($sql);
 
-		$itdata['sql'] = $sqlite[$tabla];
+		//$itdata['sql'] = $sqlite[$tabla];
 		foreach ($query->result_array() as $row){
-			$itdata['data']    = array_map($escape,array_values($row));
-
-			$data[] = $itdata;
+			$data[] = array_map($escape,array_values($row));
+			//$itdata['data'] = array_map($escape,array_values($row));
+			//$data[] = $itdata;
 		}
 
 		echo json_encode($data);
