@@ -2147,7 +2147,7 @@ class ventassuper{
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
 
-		$this->db->simple_query("DELETE FROM siva WHERE fechal = $fdesde AND fuente='FP'");
+		$this->db->simple_query("DELETE FROM siva WHERE fechal = ${fdesde} AND fuente='FP'");
 
 		$tasas = $this->_tasas($mes);
 		$mivag = $tasas['general'];
@@ -2180,7 +2180,7 @@ class ventassuper{
 			SUM(ncbase2)  AS ncbase2,
 			SUM(nciva2)   AS nciva2,
 			MAX(ncnumero) AS ncnumero
-		FROM fiscalz WHERE fecha BETWEEN $fdesde AND $fhasta GROUP BY caja,fecha,serial";
+		FROM fiscalz WHERE fecha BETWEEN ${fdesde} AND ${fhasta} GROUP BY caja,fecha,serial";
 
 		$query = $this->db->query($mSQL);
 
@@ -2217,7 +2217,7 @@ class ventassuper{
 						$ncdesde ='00000001';
 						$ffdesde ='00000001';
 					}
-					$frealnum=$this->datasis->dameval("SELECT MIN(numero) AS numero FROM viefac WHERE fecha BETWEEN '$row->fecha1' AND '$row->fecha' AND caja='$row->caja' AND hora>='$hdesde' AND hora<'$hhasta'");
+					$frealnum=$this->datasis->dameval("SELECT MIN(numero) AS numero FROM viefac WHERE fecha BETWEEN '$row->fecha1' AND '$row->fecha' AND caja='$row->caja' AND hora>='${hdesde}' AND hora<'${hhasta}'");
 					$factor=$ffdesde-$frealnum;
 					$ddesde[$row->caja]['factor']=$factor;
 				}else{
@@ -2320,12 +2320,12 @@ class ventassuper{
 					LEFT JOIN club c ON b.cliente=c.cod_tar
 					LEFT JOIN dine d ON a.fecha=d.fecha AND a.caja=d.caja AND a.cajero=d.cajero
 					WHERE a.fecha BETWEEN '$row->fecha1' AND '$row->fecha' AND c.cedula REGEXP '^[VEJG][0-9]{9}$'
-					AND a.caja='$row->caja' AND b.hora>='$hdesde' AND b.hora<'$hhasta'
+					AND a.caja='$row->caja' AND b.hora>='${hdesde}' AND b.hora<'${hhasta}'
 					GROUP BY a.fecha, a.caja";
 				}
 
 				$flag=$this->db->simple_query($mSQL_1);
-				memowrite($mSQL_1,'geneventasfiscal');
+				if($flag==false){ memowrite($mSQL_1,'geneventasfiscal'); }
 
 				$mSQL_2="SELECT tipo,
 					SUM(exento)    AS exento,
@@ -2434,7 +2434,7 @@ class ventassuper{
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
 
-		$this->db->simple_query("DELETE FROM siva WHERE fechal = $fdesde AND fuente='FP'");
+		$this->db->simple_query("DELETE FROM siva WHERE fechal = ${fdesde} AND fuente='FP'");
 
 		$tasas = $this->_tasas($mes);
 		$mivag = $tasas['general'];
@@ -2473,7 +2473,7 @@ class ventassuper{
 			a.ncnumero AS ncnumero
 		FROM fiscalz AS a
 		LEFT JOIN fiscalz AS b ON a.numero-1 = b.numero AND a.serial=b.serial
-		WHERE a.fecha BETWEEN $fdesde AND $fhasta
+		WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta}
 		";
 
 		$query = $this->db->query($mSQL);
@@ -2537,13 +2537,13 @@ class ventassuper{
 							c.rifci,
 							'01' AS registro,
 							'S' AS nacional,
-							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=0     ,1,0)*a.importe)           AS exento,
-							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=$mivag,1,0)*a.importe)           AS general,
-							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=$mivag,1,0)*a.importe*a.iva/100) AS geneimpu,
-							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=$mivaa,1,0)*a.importe)           AS adicional,
-							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=$mivaa,1,0)*a.importe*a.iva/100) AS adicimpu,
-							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=$mivar,1,0)*a.importe)           AS reducida,
-							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=$mivar,1,0)*a.importe*a.iva/100) AS reduimpu,
+							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=0       ,1,0)*a.importe)           AS exento,
+							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=${mivag},1,0)*a.importe)           AS general,
+							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=${mivag},1,0)*a.importe*a.iva/100) AS geneimpu,
+							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=${mivaa},1,0)*a.importe)           AS adicional,
+							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=${mivaa},1,0)*a.importe*a.iva/100) AS adicimpu,
+							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=${mivar},1,0)*a.importe)           AS reducida,
+							IF(b.tipo='D',-1,1)*SUM(IF(a.iva=${mivar},1,0)*a.importe*a.iva/100) AS reduimpu,
 							IF(b.tipo='D',-1,1)*SUM(a.importe) AS stotal,
 							IF(b.tipo='D',-1,1)*SUM(a.importe*a.iva/100) AS impuesto,
 							IF(b.tipo='D',-1,1)*SUM(a.importe*(1+(iva/100))) AS gtotal,
@@ -2555,7 +2555,7 @@ class ventassuper{
 							FROM itfmay AS a
 							JOIN fmay AS b ON a.numero=b.numero AND a.fecha=b.fecha
 							LEFT JOIN scli AS c ON b.cod_cli=c.cliente
-							WHERE b.nfiscal>$ffdesde AND b.nfiscal<=$ffhasta
+							WHERE b.nfiscal>${ffdesde} AND b.nfiscal<=${ffhasta}
 							AND b.fecha BETWEEN '$row->fecha1' AND '$row->fecha'
 							AND  b.tipo IN ('E','C') AND c.tiva='C'
 							GROUP BY a.fecha,a.numero";
@@ -2652,12 +2652,12 @@ class ventassuper{
 							${mes}01     AS fechal,
 							0            AS fafecta,
 							a.hora,
-							$dbcierrez AS cierrez
+							${dbcierrez} AS cierrez
 						FROM sfacfis AS a
 						LEFT JOIN viefac AS b ON a.fecha=b.fecha AND a.cajero=b.cajero AND a.referencia=b.numero
 						LEFT JOIN club c ON b.cliente = c.cod_tar
 						WHERE
-						a.numero>$dbffdesde AND a.numero<=$dbffhasta AND a.serial=${dbserial}
+						a.numero>${dbffdesde} AND a.numero<=${dbffhasta} AND a.serial=${dbserial}
 						AND a.rifci REGEXP '^[VEJG][0-9]{9}$'
 						AND a.tipo_doc='FC'";
 						$flag=$this->db->simple_query($mSQL_1);
@@ -2701,13 +2701,15 @@ class ventassuper{
 							${mes}01     AS fechal,
 							0            AS fafecta,
 							a.hora,
-							$dbcierrez AS cierrez
+							${dbcierrez} AS cierrez
 						FROM sfacfis AS a
-						LEFT JOIN club c ON a.rifci = c.cedula
+						LEFT JOIN viefac AS b ON a.fecha=b.fecha AND a.cajero=b.cajero AND a.referencia=b.numero
+						LEFT JOIN club c ON b.cliente = c.cod_tar
+						#LEFT JOIN club c ON a.rifci = c.cedula
 						WHERE
-						a.numero>$dbncdesde AND a.numero<=$dbnchasta AND a.serial=${dbserial}
+						a.numero>${dbncdesde} AND a.numero<=${dbnchasta} AND a.serial=${dbserial}
 						AND c.cedula REGEXP '^[VEJG][0-9]{9}$'
-						AND a.tipo_doc='NC'";
+						AND a.tipo_doc='NC' GROUP BY c.cedula";
 						$flag=$this->db->simple_query($mSQL_1);
 						if($flag==false){
 							memowrite('3'.$mSQL_1,'genesfacfiscalpdv');
