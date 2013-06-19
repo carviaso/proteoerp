@@ -1262,6 +1262,7 @@ class Snte extends Controller {
 			$stotal +=$itimporte;
 		}
 		$gtotal=$stotal+$iva;
+		$do->set('tipo'     ,'E');
 		$do->set('transac' ,$transac);
 		$do->set('stotal'  ,round($stotal,2));
 		$do->set('gtotal'  ,round($gtotal,2));
