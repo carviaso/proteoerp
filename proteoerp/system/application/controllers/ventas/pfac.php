@@ -14,20 +14,7 @@ class Pfac extends Controller {
 	}
 
 	function index(){
-		if(!$this->db->field_exists('fenvia','pfac'))
-		$this->db->query("ALTER TABLE `pfac`  ADD COLUMN `fenvia` DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que el vendedor termino el pedido'");
-
-		if(!$this->db->field_exists('faplica','pfac'))
-		$this->db->query("ALTER TABLE `pfac`  ADD COLUMN `faplica` DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que se aplicaron los descuentos'");
-
-		if(!$this->db->field_exists('faplica','pfac'))
-		$this->db->query("ALTER TABLE `pfac`  ADD COLUMN `reserva` CHAR(1) NOT NULL DEFAULT 'N'");
-
-		if ( !$this->datasis->iscampo('pfac','id') ) {
-			$this->db->simple_query('ALTER TABLE pfac DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE pfac ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE pfac ADD UNIQUE INDEX numero (numero)');
-		}
+		$this->instalar();
 		$this->datasis->modintramenu( 900, 650, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -1339,10 +1326,23 @@ class Pfac extends Controller {
 		$edit->fecha->size = 12;
 		$edit->fecha->calendar=false;
 
+		$edit->status= new dropdownField ('Estatus', 'status');
+		$edit->status->options(array(
+			'P'=>'Pendiente',
+			'C'=>'Cerrado',
+			'I'=>'Internet',
+			'B'=>'BackOrder',
+			'A'=>'Anulado',
+			'T'=>'Temporal',
+			'V'=>'V.Externo',//Estatus locales de vendores ambulantes (Enviado)
+			'U'=>'V.Externo',//Estatus locales de vendores ambulantes (Por enviar)
+		));
+		$edit->status->style = 'width:200px;';
+		$edit->status->when = array('show');
+
 		$edit->vd = new dropdownField ('Vendedor', 'vd');
 		$edit->vd->options('SELECT vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend ORDER BY vendedor');
 		$edit->vd->style = 'width:200px;';
-		$edit->vd->size = 5;
 
 		$edit->mmargen = new inputField('mmargen', 'mmargen');
 
@@ -1555,209 +1555,23 @@ class Pfac extends Controller {
 			);
 			echo json_encode($rt);
 		}else{
-			$conten['form']    =& $edit;
-			$conten['hoy']     = $hoy;
-			$conten['fenvia']  = $fenvia;
-			$conten['faplica'] = $faplica;
-			$data['content']   = $this->load->view('view_pfac', $conten);
-		}
-
-
-		/*if($this->genesal){
-			$edit->build();
-
-			$conten['inven']   = $jinven;
-			$conten['form']    = & $edit;
-			$conten['hoy']     = $hoy;
-			$conten['fenvia']  = $fenvia;
-			$conten['faplica'] = $faplica;
-			$data['content']   = $this->load->view('view_pfac', $conten, false);
-			//$data['title']   = heading('Pedidos No. '.$edit->numero->value);
-
-			//$data['style']  = style('redmond/jquery-ui.css');
-			//$data['head']   = script('jquery.js');
-			//$data['head']  .= script('jquery-ui.js');
-			//$data['head']  .= script('plugins/jquery.numeric.pack.js');
-			//$data['head']  .= script('plugins/jquery.floatnumber.js');
-			//$data['head']  .= script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
-			//$data['head']  .= phpscript('nformat.js');
-			//$data['head']  .= $this->rapyd->get_head();
-
-			//$this->load->view('view_ventanas', $data);
-		}else{
-			$edit->on_save_redirect=false;
-			$edit->build();
-
-			if($edit->on_success()){
-				return true;
-				$this->msj='Pedido Guardado';
-			}elseif($edit->on_error()){
-				return false;
-				$this->msj=html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string));
-			}
-		}*/
-
-	}
-
-	function pos(){
-		$this->rapyd->load('dataobject','datadetails');
-
-		$mSCLId=array(
-		'tabla'   =>'scli',
-		'columnas'=>array(
-			'cliente' =>'C&oacute;digo Cliente',
-			'nombre'=>'Nombre',
-			'cirepre'=>'Rif/Cedula',
-			'dire11'=>'Direcci&oacute;n',
-			'tipo'=>'Tipo'),
-		'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre'),
-		'retornar'=>array('cliente'=>'cod_cli','nombre'=>'nombre','rifci'=>'rifci',
-					'dire11'=>'direc'),
-		'titulo'  =>'Buscar Cliente',
-		'script'  => array('post_modbus_scli()'));
-		$boton =$this->datasis->modbus($mSCLId);
-
-		$query = $this->db->query("SELECT tipo,nombre FROM tarjeta ORDER BY tipo");
-		foreach ($query->result() as $row){
-			$sfpa[$row->tipo]=$row->nombre;
-		}
-
-		$tban['']='Banco';
-		$query = $this->db->query("SELECT cod_banc,nomb_banc FROM tban WHERE cod_banc<>'CAJ' ORDER BY nomb_banc");
-		foreach ($query->result() as $row){
-			$tban[$row->cod_banc]=$row->nomb_banc;
-		}
-
-		$conten=array();
-		$conten['sfpa']  = $sfpa;
-		$conten['tban']  = $tban;
-		$data['content'] = $this->load->view('view_pos_pfac', $conten,true);
-		$data['title']   = '';
-		$data['head']    = style('redmond/jquery-ui-1.8.1.custom.css');
-		$data['head']   .= style('ui.jqgrid.css');
-		$data['head']   .= style('ui.multiselect.css');
-		$data['head']   .= script('jquery.js');
-		$data['head']   .= script('interface.js');
-		$data['head']   .= script('jquery-ui.js');
-		$data['head']   .= script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
-		$data['head']   .= script('jquery.layout.js');
-		$data['head']   .= script('i18n/grid.locale-sp.js');
-		$data['head']   .= script('ui.multiselect.js');
-		$data['head']   .= script('jquery.jqGrid.min.js');
-		$data['head']   .= script('jquery.tablednd.js');
-		$data['head']   .= script('jquery.contextmenu.js');
-		$data['head']   .= script('plugins/jquery.numeric.pack.js');
-		$data['head']   .= script('plugins/jquery.floatnumber.js');
-		$data['head']   .= phpscript('nformat.js');
-
-		$this->load->view('view_ventanas_sola', $data);
-	}
-
-	function posmayor(){
-		$this->rapyd->load('dataobject','datadetails');
-
-		$mSCLId=array(
-		'tabla'   =>'scli',
-		'columnas'=>array(
-			'cliente' =>'C&oacute;digo Cliente',
-			'nombre'=>'Nombre',
-			'cirepre'=>'Rif/Cedula',
-			'dire11'=>'Direcci&oacute;n',
-			'tipo'=>'Tipo'),
-		'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre'),
-		'retornar'=>array('cliente'=>'cod_cli','nombre'=>'nombre','rifci'=>'rifci',
-					'dire11'=>'direc'),
-		'titulo'  =>'Buscar Cliente',
-		'script'  => array('post_modbus_scli()'));
-		$boton =$this->datasis->modbus($mSCLId);
-
-		$query = $this->db->query("SELECT tipo,nombre FROM tarjeta ORDER BY tipo");
-		foreach ($query->result() as $row){
-			$sfpa[$row->tipo]=$row->nombre;
-		}
-
-		$tban['']='Banco';
-		$query = $this->db->query("SELECT cod_banc,nomb_banc FROM tban WHERE cod_banc<>'CAJ' ORDER BY nomb_banc");
-		foreach ($query->result() as $row){
-			$tban[$row->cod_banc]=$row->nomb_banc;
-		}
-
-		$conten=array();
-		$conten['sfpa']  = $sfpa;
-		$conten['tban']  = $tban;
-		$data['content'] = $this->load->view('view_pos_pfac_mayor', $conten,true);
-		$data['title']   = '';
-		$data['head']    = style('redmond/jquery-ui-1.8.1.custom.css');
-		$data['head']   .= style('ui.jqgrid.css');
-		$data['head']   .= style('ui.multiselect.css');
-		$data['head']   .= script('jquery.js');
-		$data['head']   .= script('interface.js');
-		$data['head']   .= script('jquery-ui.js');
-		$data['head']   .= script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
-		$data['head']   .= script('jquery.layout.js');
-		$data['head']   .= script('i18n/grid.locale-sp.js');
-		$data['head']   .= script('ui.multiselect.js');
-		$data['head']   .= script('jquery.jqGrid.min.js');
-		$data['head']   .= script('jquery.tablednd.js');
-		$data['head']   .= script('jquery.contextmenu.js');
-		$data['head']   .= script('plugins/jquery.numeric.pack.js');
-		$data['head']   .= script('plugins/jquery.floatnumber.js');
-		$data['head']   .= phpscript('nformat.js');
-
-		$this->load->view('view_ventanas_sola', $data);
-	}
-
-	// Busca Productos para autocomplete
-	function buscasinv(){
-		$data = '{[ ]}';
-		$mid  = $this->input->post('q');
-		$cod  = $this->input->post('codigo');
-		$scli = $this->input->post('cod_cli');
-		if(strlen($scli)==0){ echo $data; return; }
-
-		$sql='SELECT mmargen FROM scli WHERE cliente='.$this->db->escape($scli);
-		$scli_margen=$this->datasis->dameval($sql);
-		$scli_margen=$scli_margen/100;
-
-		$qdb  = $this->db->escape('%'.$mid.'%');
-		$qba  = $this->db->escape($mid);
-		$coddb= $this->db->escape($cod);
-
-		$pp='precio1*(1-(mmargen/100))*(1-'.$scli_margen.')';
-
-		if($mid !== false){
-			$retArray = $retorno = array();
-
-			if(preg_match('/\+(?P<cana>\d+)/', $mid, $matches)>0 && $cod!==false){
-				$mSQL="SELECT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.$pp AS precio, a.iva,a.existen
-				FROM sinv AS  a
-				WHERE a.codigo=$coddb LIMIT 1";
-				$cana=$matches['cana'];
+			if($this->genesal){
+				$conten['form']    =& $edit;
+				$conten['hoy']     = $hoy;
+				$conten['fenvia']  = $fenvia;
+				$conten['faplica'] = $faplica;
+				$data['content']   = $this->load->view('view_pfac', $conten);
 			}else{
-				$mSQL="SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.$pp AS precio, a.iva,a.existen
-				FROM sinv AS a
-				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
-				WHERE (a.codigo LIKE $qdb OR a.descrip LIKE  $qdb OR a.barras LIKE $qdb OR b.suplemen=$qba) AND a.activo='S'
-				ORDER BY a.descrip LIMIT 10";
-				$cana=1;
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=> utf8_encode(html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string))),
+					'pk'     =>''
+				);
+				echo json_encode($rt);
 			}
 
-			$query = $this->db->query($mSQL);
-			if ($query->num_rows() > 0){
-				foreach( $query->result_array() as  $row ) {
-					$retArray['label']   = '('.$row['codigo'].') '.$row['descrip'].' '.$row['precio'].' Bs. - '.$row['existen'];
-					$retArray['codigo']  = $row['codigo'];
-					$retArray['cana']    = $cana;
-					$retArray['precio']  = round($row['precio'],2);
-					$retArray['descrip'] = $row['descrip'];
-					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
-					$retArray['iva']     = $row['iva'];
-					array_push($retorno, $retArray);
-				}
-				$data = json_encode($retorno);
 		}
-		}
-		echo $data;
+
 	}
 
 	function creapfac(){
@@ -1781,7 +1595,6 @@ class Pfac extends Controller {
 	function _pre_insert($do){
 		$numero = $this->datasis->fprox_numero('npfac');
 		$do->set('numero', $numero);
-
 
 		//$transac = $this->datasis->fprox_numero('ntransa');
 		//$do->set('transac', $transac);
@@ -1871,35 +1684,6 @@ class Pfac extends Controller {
 			$do->error_message_ar['pre_upd']=$error;
 			return false;
 		}
-		return true;
-	}
-
-	// Busca Clientes para autocomplete
-	function buscascli(){
-		$mid  = $this->input->post('q');
-		$qdb  = $this->db->escape('%'.$mid.'%');
-
-		$data = '{[ ]}';
-		if($mid !== false){
-			$retArray = $retorno = array();
-			$mSQL="SELECT TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo
-				FROM scli WHERE cliente LIKE ${qdb} OR rifci LIKE ${qdb}
-				ORDER BY rifci LIMIT 10";
-
-			$query = $this->db->query($mSQL);
-			if ($query->num_rows() > 0){
-				foreach( $query->result_array() as  $row ) {
-					$retArray['value']   = $row['rifci'];
-					$retArray['label']   = '('.$row['rifci'].') '.$row['nombre'];
-					$retArray['nombre']  = $row['nombre'];
-					$retArray['cod_cli'] = $row['cliente'];
-					$retArray['tipo']    = $row['tipo'];
-					array_push($retorno, $retArray);
-				}
-				$data = json_encode($retorno);
-			}
-		}
-		echo $data;
 		return true;
 	}
 
@@ -2009,99 +1793,40 @@ class Pfac extends Controller {
 
 	function _post_delete($do){
 		$codigo = $do->get('numero');
-		logusu('pfac', "Pedido $codigo ELIMINADO");
-	}
-
-	function instalar(){
-		if (!$this->db->field_exists('dxapli','itpfac'))
-		$this->db->query("ALTER TABLE `itpfac`  ADD COLUMN `dxapli` VARCHAR(20) NOT NULL COMMENT 'descuento por aplicar'");
-		$this->db->query("ALTER TABLE `itpfac`  CHANGE COLUMN `dxapli` `dxapli` VARCHAR(20) NULL COMMENT 'descuento por aplicar'");
-
-	}
-
-	function grid(){
-		$start   = isset($_REQUEST['start'])  ? $_REQUEST['start']   :  0;
-		$limit   = isset($_REQUEST['limit'])  ? $_REQUEST['limit']   : 50;
-		$sort    = isset($_REQUEST['sort'])   ? $_REQUEST['sort']    : '';
-		$filters = isset($_REQUEST['filter']) ? $_REQUEST['filter']  : null;
-
-		$where = $this->datasis->extjsfiltro($filters,'pfac');
-
-		$this->db->_protect_identifiers=false;
-		$this->db->select('*');
-		$this->db->from('pfac');
-
-		if (strlen($where)>1){
-			$this->db->where($where);
-		}
-
-		if ( $sort == '') $this->db->order_by( 'numero', 'desc' );
-
-		$sort = json_decode($sort, true);
-		for ($i=0;$i<count($sort);$i++) {
-			$this->db->order_by($sort[$i]['property'],$sort[$i]['direction']);
-		}
-		$sql = $this->db->_compile_select($this->db->_count_string . $this->db->_protect_identifiers('numrows'));
-		$results = $this->datasis->dameval($sql);
-		$this->db->limit($limit, $start);
-		$query = $this->db->get();
-		$arr = $this->datasis->codificautf8($query->result_array());
-
-		echo '{success:true, message:"Loaded data" ,results:'. $results.', data:'.json_encode($arr).'}';
-	}
-
-	function tabla() {
-		$id   = isset($_REQUEST['id'])  ? $_REQUEST['id']   :  0;
-		$cliente = $this->datasis->dameval("SELECT cod_cli FROM pfac WHERE id='$id'");
-		$mSQL = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM smov WHERE cod_cli='$cliente' AND abonos<>monto AND tipo_doc<>'AB' ORDER BY fecha ";
-		$query = $this->db->query($mSQL);
-		$salida = '';
-		$saldo = 0;
-		if ( $query->num_rows() > 0 ){
-			$salida = "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento en Cuentas X Cobrar</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-
-			foreach ($query->result_array() as $row){
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['tipo_doc']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto']-$row['abonos']).   "</td>";
-				$salida .= "</tr>";
-				if ( $row['tipo_doc'] == 'FC' or $row['tipo_doc'] == 'ND' or $row['tipo_doc'] == 'GI' )
-					$saldo += $row['monto']-$row['abonos'];
-				else
-					$saldo -= $row['monto']-$row['abonos'];
-			}
-			$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
-			$salida .= "</table>";
-		}
-		$query->free_result();
-		echo $salida;
-	}
-
-	function griditpfac(){
-		$numero   = isset($_REQUEST['numero'])  ? $_REQUEST['numero']   :  0;
-		if ($numero == 0 ) $numero = $this->datasis->dameval("SELECT MAX(numero) FROM pfac")  ;
-
-		$mSQL = "SELECT * FROM itpfac a JOIN sinv b ON a.codigoa=b.codigo WHERE a.numa='$numero' ORDER BY a.codigoa";
-		$query = $this->db->query($mSQL);
-		$results =  0;
-		$arr = array();
-		foreach ($query->result_array() as $row){
-			$meco = array();
-			foreach( $row as $idd=>$campo ) {
-				$meco[$idd] = utf8_encode($campo);
-			}
-			$arr[] = $meco;
-		}
-		echo '{success:true, message:"Loaded data" ,results:'. $results.', data:'.json_encode($arr).'}';
+		logusu('pfac', "Pedido ${codigo} ELIMINADO");
 	}
 
 	function sclibu(){
-		$numero = $this->uri->segment(4);
-		$id = $this->datasis->dameval("SELECT b.id FROM pfac a JOIN scli b ON a.cod_cli=b.cliente WHERE numero='$numero'");
+		$numero  = $this->uri->segment(4);
+		$dbnumero= $this->db->escape($numero);
+		$id = $this->datasis->dameval("SELECT b.id FROM pfac a JOIN scli b ON a.cod_cli=b.cliente WHERE numero=${dbnumero}");
 		redirect('ventas/scli/dataedit/show/'.$id);
 	}
 
+	function instalar(){
+		$campos=$this->db->list_fields('pfac');
+
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE pfac DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE pfac ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE pfac ADD UNIQUE INDEX numero (numero)');
+		}
+
+		if(!in_array('fenvia',$campos)){
+			$this->db->query("ALTER TABLE `pfac`  ADD COLUMN `fenvia` DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que el vendedor termino el pedido'");
+		}
+
+		if(!in_array('faplica',$campos)){
+			$this->db->query("ALTER TABLE `pfac`  ADD COLUMN `faplica` DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que se aplicaron los descuentos'");
+		}
+
+		if(!in_array('reserva',$campos)){
+			$this->db->query("ALTER TABLE `pfac`  ADD COLUMN `reserva` CHAR(1) NOT NULL DEFAULT 'N'");
+		}
+
+		$itcampos=$this->db->list_fields('itpfac');
+		if(!in_array('dxapli',$itcampos)){
+			$this->db->query("ALTER TABLE `itpfac`  ADD COLUMN `dxapli` VARCHAR(20) NOT NULL COMMENT 'descuento por aplicar'");
+		}
+	}
 }

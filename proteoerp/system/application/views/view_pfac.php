@@ -12,7 +12,7 @@ $scampos  ='<tr id="tr_itpfac_<#i#>">';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['codigoa']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['desca']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['cana']['field'].  '</td>';
-$scampos .='<td class="littletablerow" align="right">'.$campos['preca']['field'].$campos['dxapli']['field']. '</td>';
+$scampos .='<td class="littletablerow" align="right">'.$campos['preca']['field']. '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['tota']['field'];
 for($o=1;$o<5;$o++){
 	$it_obj   = "precio${o}";
@@ -46,6 +46,7 @@ $(function(){
 		if (e.which == 13) return false;
 	});*/
 	$("#mmargen").hide();
+	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
 
 	$(".inputnum").numeric(".");
 	totalizar();
@@ -428,12 +429,14 @@ function autocod(id){
 		<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
 			<table width='100%'>
 				<tr>
-					<td class="littletableheader"><?php echo $form->fecha->label;   ?>*&nbsp;</td>
-					<td class="littletablerow"   ><?php echo $form->fecha->output;  ?>&nbsp;</td>
-					<td class="littletableheader"><?php echo $form->vd->label       ?>&nbsp;</td>
-					<td class="littletablerow"   ><?php echo $form->vd->output      ?>&nbsp;</td>
-					<td class="littletableheader"><?php echo $form->peso->label     ?>&nbsp;</td>
-					<td class="littletablerow"   ><?php echo $form->peso->output    ?>&nbsp;</td>
+					<td class="littletableheader"><?php echo $form->cliente->label;  ?>*&nbsp;</td>
+					<td class="littletablerow">   <?php echo $form->cliente->output,$form->sclitipo->output; ?>&nbsp;</td>
+					<td class="littletablerow">   <?php echo $form->nombre->output;  ?>&nbsp;</td>
+				</tr><tr>
+					<td class="littletableheader"><?php echo $form->rifci->label;  ?>&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->rifci->output; ?>&nbsp;</td>
+					<td class="littletableheader"><?php echo $form->direc->label;  ?>&nbsp;
+					<span class="littletablerow" ><?php echo $form->direc->output; ?>&nbsp;</span></td>
 				</tr>
 			</table>
 		</fieldset>
@@ -443,14 +446,16 @@ function autocod(id){
 		<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
 			<table width='100%'>
 				<tr>
-					<td class="littletableheader"><?php echo $form->cliente->label;  ?>*&nbsp;</td>
-					<td class="littletablerow">   <?php echo $form->cliente->output,$form->sclitipo->output; ?>&nbsp;</td>
-					<td class="littletablerow">   <?php echo $form->nombre->output;  ?>&nbsp;</td>
-				</tr><tr>
-					<td class="littletableheader"><?php echo $form->rifci->label;  ?>&nbsp;</td>
-					<td class="littletablerow"   ><?php echo $form->rifci->output; ?>&nbsp;</td>
-					<td class="littletableheader"><?php echo $form->direc->label;  ?>&nbsp;
-					<span class="littletablerow" ><?php echo $form->direc->output; ?>&nbsp;</span></td>
+					<?php if($form->_status=='show'){ ?>
+					<td class="littletableheader"><?php echo $form->status->label   ?>&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->status->output  ?>&nbsp;</td>
+					<?php } ?>
+					<td class="littletableheader"><?php echo $form->fecha->label;   ?>*&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->fecha->output;  ?>&nbsp;</td>
+					<td class="littletableheader"><?php echo $form->vd->label       ?>&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->vd->output      ?>&nbsp;</td>
+					<td class="littletableheader"><?php echo $form->peso->label     ?>&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->peso->output    ?>&nbsp;</td>
 				</tr>
 			</table>
 		</fieldset>
@@ -482,7 +487,7 @@ function autocod(id){
 					$it_costo    = "itcosto_${i}";
 					$it_pvp      = "itpvp_${i}";
 					$it_mmargen  = "itmmargen_${i}";
-					$it_dxapli   = "dxapli_${i}";
+					//$it_dxapli   = "dxapli_${i}";
 					$it_pond     = "itpond_${i}";
 					$it_ultimo   = "itultimo_${i}";
 					$it_formcal  = "itformcal_${i}";

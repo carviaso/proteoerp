@@ -177,15 +177,21 @@ class Dispmoviles extends Controller {
 			$i++;
 		}
 
+
 		$this->genesal=false;
-		$rt=pfac::dataedit();
+		ob_start();
+			pfac::dataedit();
+			$_result=ob_get_contents();
+		@ob_end_clean();
+		$res = json_decode($_result);
+
 		$sal=array('error','op','numero');
-		if($rt){
+		if($res['status']=='A'){
 			$sal['error'] = '';
 			$sal['op']    = true;
 			$sal['numero']= $this->insert_numero;
 		}else{
-			$sal['error'] = $this->msj;
+			$sal['error'] = $res['mensaje'];
 			$sal['op']    = true;
 			$sal['numero']= '';
 		}

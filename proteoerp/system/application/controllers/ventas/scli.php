@@ -16,63 +16,7 @@ class Scli extends validaciones {
 	}
 
 	function index(){
-		$campos = $this->db->list_fields('scli');
-		if (!in_array('id',$campos)){
-			$mSQL='ALTER TABLE `scli` DROP PRIMARY KEY, ADD UNIQUE `cliente` (`cliente`)';
-			$this->db->simple_query($mSQL);
-			$mSQL='ALTER TABLE `scli` ADD `id` INT AUTO_INCREMENT PRIMARY KEY';
-			$this->db->simple_query($mSQL);
-		}
-		if (!in_array('url',      $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN url VARCHAR(120) NULL ');
-		if (!in_array('pin',      $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN pin VARCHAR(10) NULL ');
-		if (!in_array('fb',       $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN fb VARCHAR(120) NULL ');
-		if (!in_array('twitter',  $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN twitter VARCHAR(120) NULL ');
-		if (!in_array('upago',    $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN upago  VARCHAR(6) NULL ');
-		if (!in_array('tarifa',   $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN tarifa VARCHAR(15) NULL ');
-		if (!in_array('tarimonto',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN tarimonto FLOAT UNSIGNED NULL DEFAULT NULL COMMENT 'unidades tributarias a cobrar por servicio'");
-		if (!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN canticipo VARCHAR(15) NULL DEFAULT NULL COMMENT 'Cuenta contable de Anticipo' AFTER cuenta");
-
-
-		if(!$this->db->table_exists('tarifa')){
-			$mSQL="CREATE TABLE `tarifa` (
-				`tipo` VARCHAR(1) NULL DEFAULT NULL,
-				`actividad` VARCHAR(150) NULL DEFAULT NULL,
-				`minimo` DECIMAL(10,3) NULL DEFAULT NULL,
-				`maximo` DECIMAL(10,3) NULL DEFAULT NULL,
-				`id` INT(10) NOT NULL AUTO_INCREMENT,
-				PRIMARY KEY (`id`)
-			)
-			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM";
-			$this->db->simple_query($mSQL);
-		}
-
-		if(!$this->db->table_exists('sclibitalimit')){
-			$mSQL="CREATE TABLE `sclibitalimit` (
-				`id` INT(11) NOT NULL AUTO_INCREMENT,
-				`cliente`    CHAR(5) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-				`credito`    CHAR(1) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-				`creditoant` CHAR(1) NULL DEFAULT NULL,
-				`limite`     BIGINT(20) NULL DEFAULT NULL,
-				`limiteant`  BIGINT(20) NULL DEFAULT NULL,
-				`tolera`     DECIMAL(9,2) NULL DEFAULT NULL,
-				`toleraant`  DECIMAL(9,2) NULL DEFAULT NULL,
-				`maxtol`     DECIMAL(9,2) NULL DEFAULT NULL,
-				`maxtolant`  DECIMAL(9,2) NULL DEFAULT NULL,
-				`motivo`     TEXT NULL,
-				`formap`     DECIMAL(9,0) NULL DEFAULT NULL,
-				`formapsant` DECIMAL(9,0) NULL DEFAULT NULL,
-				`estampa`    TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-				`usuario`    VARCHAR(12) NULL DEFAULT NULL,
-				PRIMARY KEY (`id`),
-				INDEX `cliente` (`cliente`)
-			)
-			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM
-			AUTO_INCREMENT=1";
-			$this->db->simple_query($mSQL);
-		}
-
+		$this->instalar();
 		$this->datasis->modintramenu( 1000, 650, 'ventas/scli' );
 		redirect($this->url.'jqdatag');
 	}
@@ -2970,6 +2914,7 @@ function chrif(rif){
 			$campos[]=$field->name;
 		}
 
+
 		if (!in_array('id',$campos)){
 			$mSQL='ALTER TABLE `scli` DROP PRIMARY KEY, ADD UNIQUE `cliente` (`cliente`)';
 			$this->db->simple_query($mSQL);
@@ -3013,11 +2958,61 @@ function chrif(rif){
 			$this->db->simple_query($mSQL);
 		}
 
-		if(!in_array('modifi'  ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `modifi` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL AFTER `mensaje`");
-		if(!in_array('credito' ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `credito` CHAR(1) NOT NULL DEFAULT 'N' AFTER `limite`");
-		if(!in_array('sucursal',$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `sucursal` CHAR(2) NULL DEFAULT NULL");
-		if(!in_array('mmargen' ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `mmargen` DECIMAL(7,2) NULL DEFAULT 0 COMMENT 'Margen al Mayor'");
-		if(!in_array('tolera'  ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `tolera` DECIMAL(9,2) NULL DEFAULT '0' AFTER `credito`");
-		if(!in_array('maxtole' ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `maxtole` DECIMAL(9,2) NULL DEFAULT '0' AFTER `tolera`");
+		if(!in_array('modifi'   ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `modifi` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL AFTER `mensaje`");
+		if(!in_array('credito'  ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `credito` CHAR(1) NOT NULL DEFAULT 'N' AFTER `limite`");
+		if(!in_array('sucursal' ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `sucursal` CHAR(2) NULL DEFAULT NULL");
+		if(!in_array('mmargen'  ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `mmargen` DECIMAL(7,2) NULL DEFAULT 0 COMMENT 'Margen al Mayor'");
+		if(!in_array('tolera'   ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `tolera` DECIMAL(9,2) NULL DEFAULT '0' AFTER `credito`");
+		if(!in_array('maxtole'  ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `maxtole` DECIMAL(9,2) NULL DEFAULT '0' AFTER `tolera`");
+		if(!in_array('url'      ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN url VARCHAR(120) NULL ');
+		if(!in_array('pin'      ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN pin VARCHAR(10) NULL ');
+		if(!in_array('fb'       ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN fb VARCHAR(120) NULL ');
+		if(!in_array('twitter'  ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN twitter VARCHAR(120) NULL ');
+		if(!in_array('upago'    ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN upago  VARCHAR(6) NULL ');
+		if(!in_array('tarifa'   ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN tarifa VARCHAR(15) NULL ');
+		if(!in_array('tarimonto',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN tarimonto FLOAT UNSIGNED NULL DEFAULT NULL COMMENT 'unidades tributarias a cobrar por servicio'");
+		if(!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN canticipo VARCHAR(15) NULL DEFAULT NULL COMMENT 'Cuenta contable de Anticipo' AFTER cuenta");
+
+		if(!$this->db->table_exists('tarifa')){
+			$mSQL="CREATE TABLE `tarifa` (
+				`tipo` VARCHAR(1) NULL DEFAULT NULL,
+				`actividad` VARCHAR(150) NULL DEFAULT NULL,
+				`minimo` DECIMAL(10,3) NULL DEFAULT NULL,
+				`maximo` DECIMAL(10,3) NULL DEFAULT NULL,
+				`id` INT(10) NOT NULL AUTO_INCREMENT,
+				PRIMARY KEY (`id`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!$this->db->table_exists('sclibitalimit')){
+			$mSQL="CREATE TABLE `sclibitalimit` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`cliente`    CHAR(5) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`credito`    CHAR(1) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`creditoant` CHAR(1) NULL DEFAULT NULL,
+				`limite`     BIGINT(20) NULL DEFAULT NULL,
+				`limiteant`  BIGINT(20) NULL DEFAULT NULL,
+				`tolera`     DECIMAL(9,2) NULL DEFAULT NULL,
+				`toleraant`  DECIMAL(9,2) NULL DEFAULT NULL,
+				`maxtol`     DECIMAL(9,2) NULL DEFAULT NULL,
+				`maxtolant`  DECIMAL(9,2) NULL DEFAULT NULL,
+				`motivo`     TEXT NULL,
+				`formap`     DECIMAL(9,0) NULL DEFAULT NULL,
+				`formapsant` DECIMAL(9,0) NULL DEFAULT NULL,
+				`estampa`    TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+				`usuario`    VARCHAR(12) NULL DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				INDEX `cliente` (`cliente`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM
+			AUTO_INCREMENT=1";
+			$this->db->simple_query($mSQL);
+		}
+
+
 	}
 }
