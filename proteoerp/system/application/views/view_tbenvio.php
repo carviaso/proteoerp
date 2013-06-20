@@ -150,21 +150,60 @@ function fseguro(){
 function fexon(){
 	if($('#exon').is(':checked')){
 		var forma = $.prompt("<span id='pventana'>Cargando...</span>", {
-			title: "Are you Ready?",
+			title: "Confirmación de exoneración",
 			buttons: { "Verificar": true, "Salir": false },
-			submit: function(e,v,m,f){
-				// use e.preventDefault() to prevent closing when needed or return false.
-				// e.preventDefault();
+			close:  function(e,v,m,f){
+					var autoriza = $('#autoriza').val();
 
-				console.log("Value clicked was: "+ v);
+					//if(autoriza.length == 0){
+					//	$('#exon').removeAttr("checked");
+					//}
+				},
+			submit: function(e,v,m,f){
+				var autoriza = $('#autoriza').val();
+				alert(autoriza);
+				if(autoriza.length > 0){
+					var verif = JSON.parse($.ajax({
+						type: "POST",
+						url: "<?php echo site_url($this->url.'verifica') ?>",
+						data: {'q':peso,'o':org,'d':des} ,
+						dataType: "json",async: false }).responseText
+					);
+
+					if(verif){
+						return true;
+					}else{
+						$('#_resul').text('no verificado');
+					}
+				}else{
+					return false;
+				}
+
+				//console.log("Value clicked was: "+ v);
 			}
 		});
 		forma.bind('promptloaded', function(e){
+			var oficina = $("#codofi_org").val();
 			var msj = 'Por favor espere mientras se genera el numero de confirmaci&oacute;n.';
 			$('#pventana').html(msj);
 
+			if(oficina.length>0){
+				$.ajax({
+					dataType: "json",
+					type: 'POST',
+					url : '<?php echo site_url($this->url.'autoriza') ?>',
+					data: {'oficina' : oficina },
+					success: function (data){
+						$('#autoriza').val(data.numero);
+						msj= 'Generado '+data.numero+'<span id="_resul"></span>';
+						$('#pventana').html(msj);
+					}
+				});
+			}else{
+				//no tiene oficina de origen
+			}
 
-			msj = 'Llame a los telefonos de informatica';
+			//msj = 'Llame a los telefonos de informatica';
 		});
 	}else{
 
@@ -325,7 +364,7 @@ echo $container_tr;
 			<table style='margin-left: auto;margin-right: auto;'>
 				<tr>
 					<td class="littletableheader"><?php echo $form->exon->label;    ?></td>
-					<td class="littletablerow"   ><?php echo $form->exon->output;   ?></td>
+					<td class="littletablerow"   ><?php echo $form->exon->output.$form->autoriza->output;   ?></td>
 				</tr><tr>
 					<td class="littletableheader"><?php echo $form->fledes->label;  ?></td>
 					<td class="littletablerow"   ><?php echo $form->fledes->output; ?></td>

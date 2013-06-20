@@ -13,6 +13,7 @@ class Tbenvio extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -715,11 +716,6 @@ class Tbenvio extends Controller {
 	function setData(){
 	}
 
-	function confirmacion(){
-
-
-	}
-
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 		$script= '
@@ -745,9 +741,9 @@ class Tbenvio extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process( 'insert', '_pre_insert' );
-		$edit->pre_process( 'update', '_pre_update' );
-		$edit->pre_process( 'delete', '_pre_delete' );
+		$edit->pre_process( 'insert', '_pre_insert');
+		$edit->pre_process( 'update', '_pre_update');
+		$edit->pre_process( 'delete', '_pre_delete');
 
 		$edit->nrofact = new inputField('Nro. Fact','nrofact');
 		$edit->nrofact->rule='';
@@ -923,6 +919,9 @@ class Tbenvio extends Controller {
 		$edit->tasa = new hiddenField('','tasa');
 		$edit->tasa->rule='numeric';
 		$edit->tada->insertValue=$ivas['tasa'];
+
+		$edit->autoriza = new hiddenField('','autoriza');
+		$edit->autoriza->rule='';
 		//Fin de los campos comodines
 
 		//Campos para el seguro
@@ -990,10 +989,9 @@ class Tbenvio extends Controller {
 		$edit->orden->size =22;
 		$edit->orden->maxlength =20;
 
-		$edit->codstat = new inputField('Codstat','codstat');
+		$edit->codstat = new dropdownField('Estatus','codstat');
+		$edit->codstat->options('SELECT codstat,desstat FROM tbstatus ORDER BY desstat');
 		$edit->codstat->rule='';
-		$edit->codstat->size =4;
-		$edit->codstat->maxlength =2;
 
 		$edit->fecent = new dateonlyField('Fecent','fecent');
 		$edit->fecent->rule='chfecha';
@@ -1021,6 +1019,7 @@ class Tbenvio extends Controller {
 	}
 
 	function _pre_insert($do){
+		$do->set('codstat','OO');
 		$do->error_message_ar['pre_ins']='';
 		return true;
 	}
@@ -1037,17 +1036,17 @@ class Tbenvio extends Controller {
 
 	function _post_insert($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits ${primary} ");
 	}
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${primary} ");
 	}
 
 	function _post_delete($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		logusu($do->table,"Elimino $this->tits ${primary} ");
 	}
 
 	//Tarifa por volumen
@@ -1072,6 +1071,51 @@ class Tbenvio extends Controller {
 		}else{
 			echo 0;
 		}
+	}
+
+	function verifica(){
+		$numero   = $this->input->post('numero');
+		$oficina  = $this->input->post('oficina');
+		$dbnumero = $this->db->escape($numero );
+		$dboficina= $this->db->escape($oficina);
+
+		$confirma= $this->datasis->dameval("SELECT opc FROM tbacepta WHERE registro=${dbnumero}");
+
+		if(!empty($confirma)){
+			echo 'false';
+		}else{
+			echo 'true';
+		}
+	}
+
+	function autoriza(){
+		$rt=array(
+			'status'=>'',
+			'msj'   =>'',
+			'numero'=>''
+		);
+		$oficina = $this->input->post('oficina');
+		if(!empty($oficina)){
+			$data=array(
+				'codigo'=> '',
+				'codofi'=> $oficina,
+				'fecha' => date('Y-m-d')
+			);
+			$mSQL = $this->db->insert_string('tbacepta', $data);
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){
+				$rt['status']='B';
+				$rt['msj']   ='Hubo un problema generando la confirmacion, por favor intente mas tarde.';
+				memowrite($sql,'tbenvio');
+			}else{
+				$rt['status']='A';
+				$rt['numero']=$this->db->insert_id();
+			}
+		}else{
+			$rt['status']='B';
+			$rt['msj']   ='Debe seleccionar una oficina';
+		}
+		echo json_encode($rt);
 	}
 
 	//Tarifa por por peso
@@ -1200,11 +1244,42 @@ class Tbenvio extends Controller {
 			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('tbenvio');
-		//if(!in_array('id',$campos)){
-		//	$this->db->simple_query('ALTER TABLE tbenvio DROP PRIMARY KEY');
-		//	$this->db->simple_query('ALTER TABLE tbenvio ADD UNIQUE INDEX numero (numero)');
-		//	$this->db->simple_query('ALTER TABLE tbenvio ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		//}
+
+		$campos=$this->db->list_fields('tbenvio');
+		if(!in_array('facturaaseg',$campos)){
+			$this->db->simple_query('ALTER TABLE `tbenvio` ADD COLUMN `facturaaseg` VARCHAR(50) NULL DEFAULT NULL AFTER `fecrec`');
+		}
+
+		if(!in_array('rifaseg',$campos)){
+			$this->db->simple_query('ALTER TABLE `tbenvio` ADD COLUMN `rifaseg` VARCHAR(15) NULL DEFAULT NULL AFTER `facturaaseg`');
+		}
+
+		if(!in_array('nombreaseg',$campos)){
+			$this->db->simple_query('ALTER TABLE `tbenvio` ADD COLUMN `nombreaseg` VARCHAR(200) NULL DEFAULT NULL AFTER `rifaseg`');
+		}
+
+		if(!in_array('montoaseg',$campos)){
+			$this->db->simple_query('ALTER TABLE `tbenvio` ADD COLUMN `montoaseg` DECIMAL(12,2) NULL DEFAULT NULL AFTER `nombreaseg`');
+		}
+
+		if(!in_array('total',$campos)){
+			$this->db->simple_query('ALTER TABLE `tbenvio` ADD COLUMN `total` DECIMAL(12,2) NULL DEFAULT NULL AFTER `montoaseg`;');
+		}
+
+		if(!in_array('subtotal',$campos)){
+			$this->db->simple_query('ALTER TABLE `tbenvio` ADD COLUMN `subtotal` DECIMAL(12,2) NULL DEFAULT NULL AFTER `total`;');
+		}
+
+		if(!in_array('v1',$campos)){
+			$this->db->simple_query('ALTER TABLE `tbenvio` ADD COLUMN `v1` DECIMAL(12,2) NULL DEFAULT NULL AFTER `subtotal`');
+		}
+
+		if(!in_array('v2',$campos)){
+			$this->db->simple_query('ALTER TABLE `tbenvio` ADD COLUMN `v2` DECIMAL(12,2) NULL DEFAULT NULL AFTER `subtotal`');
+		}
+
+		if(!in_array('v3',$campos)){
+			$this->db->simple_query('ALTER TABLE `tbenvio` ADD COLUMN `v3` DECIMAL(12,2) NULL DEFAULT NULL AFTER `subtotal`');
+		}
 	}
 }
