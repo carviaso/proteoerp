@@ -275,7 +275,7 @@ class Smov extends Controller {
 		$grid->label('Monto');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => 'true',
+			'editable'      => 'false',
 			'align'         => "'right'",
 			'edittype'      => "'text'",
 			'width'         => 100,
