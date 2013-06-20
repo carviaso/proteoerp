@@ -1106,7 +1106,7 @@ class Tbenvio extends Controller {
 			if($ban==false){
 				$rt['status']='B';
 				$rt['msj']   ='Hubo un problema generando la confirmacion, por favor intente mas tarde.';
-				memowrite($sql,'tbenvio');
+				memowrite($mSQL,'tbenvio');
 			}else{
 				$rt['status']='A';
 				$rt['numero']=$this->db->insert_id();
@@ -1247,9 +1247,10 @@ class Tbenvio extends Controller {
 
 		$campos=$this->db->list_fields('tbenvio');
 		if(!in_array('id',$campos)){
-			$this->db->simple_query('ALTER TABLE tbenvio DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE tbenvio ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE tbenvio ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+			$this->db->simple_query('ALTER TABLE `tbenvio` CHANGE COLUMN `nroenv` `id` INT(11) NOT NULL AUTO_INCREMENT FIRST');
+			//$this->db->simple_query('ALTER TABLE tbenvio DROP PRIMARY KEY');
+			//$this->db->simple_query('ALTER TABLE tbenvio ADD UNIQUE INDEX nroenv (nroenv)');
+			//$this->db->simple_query('ALTER TABLE tbenvio ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 
 		if(!in_array('facturaaseg',$campos)){
