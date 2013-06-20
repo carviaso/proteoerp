@@ -1269,20 +1269,20 @@ class Rivc extends Controller {
 
 		$edit->emision = new dateField('Fecha de Emisi&oacute;n','emision');
 		$edit->emision->rule='chfecha|required';
-		$edit->emision->size =10;
+		$edit->emision->size =12;
 		$edit->emision->maxlength =8;
 		$edit->emision->calendar=false;
 
 		$edit->periodo = new inputField('Per&iacute;odo','periodo');
 		$edit->periodo->rule='max_length[6]|required';
-		$edit->periodo->size =6;
+		$edit->periodo->size =7;
 		$edit->periodo->insertValue=date('Ym');
 		$edit->periodo->maxlength =6;
 
 		$edit->fecha = new dateField('Fecha de Recepci&oacute;n','fecha');
 		$edit->fecha->rule='chfecha|required';
 		$edit->fecha->insertValue = date('Y-m-d');
-		$edit->fecha->size =10;
+		$edit->fecha->size =12;
 		$edit->fecha->maxlength =8;
 		$edit->fecha->calendar=false;
 
