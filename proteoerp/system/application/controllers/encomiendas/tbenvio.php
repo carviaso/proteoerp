@@ -1246,6 +1246,12 @@ class Tbenvio extends Controller {
 		}
 
 		$campos=$this->db->list_fields('tbenvio');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE tbenvio DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE tbenvio ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE tbenvio ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
 		if(!in_array('facturaaseg',$campos)){
 			$this->db->simple_query('ALTER TABLE `tbenvio` ADD COLUMN `facturaaseg` VARCHAR(50) NULL DEFAULT NULL AFTER `fecrec`');
 		}
