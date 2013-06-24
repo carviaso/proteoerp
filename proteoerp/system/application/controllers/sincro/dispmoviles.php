@@ -107,13 +107,13 @@ class Dispmoviles extends Controller {
 		$this->load->library('rapyd');
 
 		//Para probar
-		$_POST = array(
-			'idscli'  => 486,
-			'observa' => '',
-			'idsinv0' => 5198,
-			'cana_0'  => 5,
-			'preca_0' => 141.07
-		);
+		//$_POST = array(
+		//	'idscli'  => 486,
+		//	'observa' => '',
+		//	'idsinv0' => 5198,
+		//	'cana_0'  => 5,
+		//	'preca_0' => 141.07
+		//);
 		//***********
 
 		$sal=array('error'=>'','op'=>false,'numero'=>'');
