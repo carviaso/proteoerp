@@ -579,7 +579,7 @@ class Usuarios extends Controller {
 		$edit->script($script,'modify');
 
 		$edit->pre_process( 'delete','_pre_delete');
-		
+
 		$edit->post_process('delete','_pos_delete');
 		$edit->post_process('insert','_pos_insert');
 		$edit->post_process('update','_pos_update');
@@ -635,7 +635,7 @@ class Usuarios extends Controller {
 		$edit->supervisor->style='width:80px';
 
 		$edit->uuid = new inputField('Movil UUID','uuid');
-		$edit->uuid->rule='';
+		$edit->uuid->rule ='unique';
 		$edit->uuid->size =32;
 		$edit->uuid->maxlength =100;
 		$edit->uuid->append('Solo para dispositivo movil de pedidos');

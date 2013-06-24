@@ -2730,6 +2730,11 @@ class Sfac extends Controller {
 		$edit->estampa   = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora      = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 
+		//Campos comodines
+		$edit->pendiente = new checkboxField('Colocar pendiente', 'pendiente', 'S','N');
+		$edit->pendiente->insertValue = 'N';
+		//Fin de los campos comidines
+
 		$edit->buttons('add_rel');
 		if(!empty($this->_url)) $edit->_process_uri=$this->_url; //Necesario cuando se crea desde presupuesto o pedido
 
@@ -3169,6 +3174,10 @@ class Sfac extends Controller {
 		$manual = $do->get('manual');
 		$fecha  = $do->get('fecha');
 		$estampa= $do->get('estampa');
+
+		//Determina si deja la factura pendiente
+		$pendiente= $do->get('pendiente');
+		$do->rm_get('pendiente');
 
 
 		$con=$this->db->query("SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1");

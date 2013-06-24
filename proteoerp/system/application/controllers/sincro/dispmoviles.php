@@ -25,8 +25,9 @@ class Dispmoviles extends Controller {
 		session_write_close();
 		header('Cache-Control: no-cache, must-revalidate');
 		header('Content-type: application/json');
+		$dbuuid = $this->db->escape($uuid);
 
-		$vend=$this->datasis->dameval("SELECT vendedor FROM usuario WHERE uuid=".$this->db->escape($uuid));
+		$vend=$this->datasis->dameval('SELECT vendedor FROM usuario WHERE uuid='.$dbuuid);
 
 		if(empty($vend)){
 			echo '[]';
@@ -44,23 +45,44 @@ class Dispmoviles extends Controller {
 			}elseif(is_null($val)){
 				return '';
 			}else{
+				//Convierte los caracteres de us-ascii
+				$val =str_replace(chr(165),'Ñ',$val);
+				$val =str_replace(chr(164),'ñ',$val);
+				$val =str_replace(chr(166),'º',$val);
 				return $val;
 			}
 		};
+		$almacen = $this->datasis->dameval('SELECT almacen FROM usuario WHERE uuid='.$dbuuid);
+		if(empty($almacen)){
+			$existen='a.existen';
+			$join   ='';
+		}else{
+			$existen='COALESCE(b.existen,0)';
+			$join   ='LEFT JOIN itsinv AS b ON a.codigo=b.codigo AND b.alma='.$this->db->escape($almacen);
+		}
 
 		$mSQL = array();
-
-		$mSQL['sinv'] = "SELECT id,
-			TRIM(codigo) AS codigo, TRIM(descrip) AS descrip,
-			base1,
-			base2,
-			base3,
-			base4,
-			ultimo AS costo, iva,1 AS bonifica,10 AS bonicant,
-			UNIX_TIMESTAMP(fdesde) AS fdesde ,UNIX_TIMESTAMP(fhasta) AS fhasta,
-			existen,TRIM(clave) AS clave,tdecimal,activo,0 AS pedido
-			FROM sinv
-			WHERE tipo='Articulo' AND base1>0 AND base2>0 AND base3>0 AND base3>0 AND ultimo>0";
+		$mSQL['sinv'] = "SELECT
+			id,
+			TRIM(a.codigo)  AS codigo,
+			TRIM(a.descrip) AS descrip,
+			a.base1,
+			a.base2,
+			a.base3,
+			a.base4,
+			a.ultimo AS costo,
+			a.iva    AS iva,
+			a.bonifica,
+			a.bonicant,
+			UNIX_TIMESTAMP(a.fdesde) AS fdesde,
+			UNIX_TIMESTAMP(a.fhasta) AS fhasta,
+			${existen} AS existen,
+			TRIM(a.clave) AS clave,
+			a.tdecimal,
+			a.activo,
+			a.exdes AS pedido
+			FROM sinv AS a ${join}
+			WHERE a.tipo='Articulo' AND a.base1>0 AND a.base2>0 AND a.base3>0 AND a.base3>0 AND a.ultimo>0";
 
 		$mSQL['scli'] = "SELECT a.id,
 			TRIM(a.cliente) AS cliente, TRIM(a.nombre) AS nombre,CONCAT_WS('-',TRIM(a.dire11),TRIM(a.dire12)) AS direc,
