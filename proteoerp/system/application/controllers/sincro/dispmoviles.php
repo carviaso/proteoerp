@@ -21,7 +21,7 @@ class Dispmoviles extends Controller {
 		//$this->$obj($vend);
 	}
 
-	function sincro($tabla,$uuid,$matriz){
+	function sincro($tabla,$uuid){
 		session_write_close();
 		header('Cache-Control: no-cache, must-revalidate');
 		header('Content-type: application/json');
@@ -58,9 +58,10 @@ class Dispmoviles extends Controller {
 			base4,
 			ultimo AS costo, iva,1 AS bonifica,10 AS bonicant,
 			UNIX_TIMESTAMP(fdesde) AS fdesde ,UNIX_TIMESTAMP(fhasta) AS fhasta,
-			existen,TRIM(clave) AS clave,tdecimal
+			existen,TRIM(clave) AS clave,tdecimal,activo,0 AS pedido
 			FROM sinv
-			WHERE activo='S' AND tipo='Articulo' AND base1>0 AND base2>0 AND base3>0 AND base3>0 AND ultimo>0";
+			WHERE tipo='Articulo' AND base1>0 AND base2>0 AND base3>0 AND base3>0 AND ultimo>0";
+
 		$mSQL['scli'] = "SELECT a.id,
 			TRIM(a.cliente) AS cliente, TRIM(a.nombre) AS nombre,CONCAT_WS('-',TRIM(a.dire11),TRIM(a.dire12)) AS direc,
 			TRIM(a.ciudad) AS ciudad,TRIM(a.telefono) AS telefono,TRIM(a.rifci) AS rifci,TRIM(a.email) AS email,
@@ -69,16 +70,13 @@ class Dispmoviles extends Controller {
 			0 AS csaldo,formap
 			FROM scli AS a
 			LEFT JOIN smov AS b ON a.cliente=b.cod_cli AND b.tipo_doc NOT IN ('AB','NC','AN') AND b.monto>b.abonos
-			WHERE a.vendedor=$dbvend
+			WHERE a.vendedor=${dbvend}
 			GROUP BY a.cliente
 			ORDER BY a.nombre LIMIT 1000";
-		$mSQL['tarjeta'] = "SELECT id, TRIM(tipo) AS tipo,TRIM(nombre) AS nombre,tipo IN ('CH','DE') AS pideban FROM tarjeta";
-		$mSQL['tban']    = "SELECT a.id,TRIM(cod_banc) AS cod_banc,TRIM(nomb_banc) AS nom_banc FROM tban";
 
-		$sqlite['sinv']    = 'INSERT OR REPLACE INTO sinv_'.$matriz.'    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);';
-		$sqlite['scli']    = 'INSERT OR REPLACE INTO scli_'.$matriz.'    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);';
-		$sqlite['tarjeta'] = 'INSERT OR REPLACE INTO tarjeta_'.$matriz.' VALUES (?,?,?,?);';
-		$sqlite['tban']    = 'INSERT OR REPLACE INTO tban_'.$matriz.'    VALUES (?,?,?,?);';
+		$mSQL['tarjeta'] = "SELECT id, TRIM(tipo) AS tipo,TRIM(nombre) AS nombre,tipo IN ('CH','DE') AS pideban FROM tarjeta";
+
+		$mSQL['tban']    = "SELECT a.id,TRIM(cod_banc) AS cod_banc,TRIM(nomb_banc) AS nom_banc FROM tban";
 
 		$sql  = $mSQL[$tabla];
 		$data = $itdata = array();
@@ -105,18 +103,52 @@ class Dispmoviles extends Controller {
 	}
 
 	//Recibe y guarda los pedidos de Cerix
-	function pfac($uuid,$matri){
+	function pfac($uuid){
 		$this->load->library('rapyd');
+
+		//Para probar
+		$_POST = array(
+			'idscli'  => 486,
+			'observa' => '',
+			'idsinv0' => 5198,
+			'cana_0'  => 5,
+			'preca_0' => 141.07
+		);
+		//***********
+
+		$sal=array('error'=>'','op'=>false,'numero'=>'');
+		$i = 0;
 		$rt=$this->secu->login_uuid($uuid);
 		if($rt===false){
-			echo 0;
+			$sal['error'] = 'Error de autentificacion.';
+			$sal['op']    = false;
+			$sal['numero']= '';
+			json_encode($sal);
 			return false;
 		}
 
-		$idscli=$this->db->escape($_POST['idscli']);
-		$mSQL="SELECT cliente,nombre,rifci,dire11,tipo FROM scli WHERE id=$idscli";
+		//$var=print_r($_POST,true);
+		//memowrite($var,'averrr');
+
+		$idscli  = $this->input->post('idscli');
+		if(empty($idscli)){
+			$sal['error'] = 'Error en la data.';
+			$sal['op']    = false;
+			$sal['numero']= '';
+			json_encode($sal);
+			return false;
+		}
+
+		$dbidscli= $this->db->escape($idscli);
+		$mSQL="SELECT cliente,nombre,rifci,dire11,tipo FROM scli WHERE id=${dbidscli}";
 		$sclirow = $this->datasis->damerow($mSQL);
-		if(count($sclirow)!=5) return false;
+		if(count($sclirow)!=5){
+			$sal['error'] = 'Cliente no existe';
+			$sal['op']    = false;
+			$sal['numero']= '';
+			json_encode($sal);
+			return false;
+		}
 		unset($_POST['idscli']);
 
 		if(isset($_POST['observa'])){
@@ -143,7 +175,7 @@ class Dispmoviles extends Controller {
 			if(!isset($_POST['idsinv'.$i])) break;
 			$idsinv=$this->db->escape($_POST['idsinv'.$i]);
 			unset($_POST['idsinv'.$i]);
-			$mSQL="SELECT codigo,descrip,precio1,precio2,precio3,precio4,iva,peso,tipo,ultimo,pond,formcal FROM sinv WHERE id=$idsinv";
+			$mSQL="SELECT codigo,descrip,precio1,precio2,precio3,precio4,iva,peso,tipo,ultimo,pond,formcal FROM sinv WHERE id=${idsinv}";
 			$sinvrow = $this->datasis->damerow($mSQL);
 			if(count($sinvrow)!=12) continue;
 
@@ -176,16 +208,21 @@ class Dispmoviles extends Controller {
 
 			$i++;
 		}
-
+		if($i==0){
+			$sal['error'] = 'Pedido sin articulos';
+			$sal['op']    = false;
+			$sal['numero']= '';
+			json_encode($sal);
+			return false;
+		}
 
 		$this->genesal=false;
 		ob_start();
 			pfac::dataedit();
 			$_result=ob_get_contents();
 		@ob_end_clean();
-		$res = json_decode($_result);
+		$res = json_decode($_result,true);
 
-		$sal=array('error','op','numero');
 		if($res['status']=='A'){
 			$sal['error'] = '';
 			$sal['op']    = true;

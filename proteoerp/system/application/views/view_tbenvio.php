@@ -15,6 +15,7 @@ if($form->_status!='show'){ ?>
 var pseguro=0;
 var pfledes=0;
 var venvio =0;
+var vautoriza=0;
 $(function(){
 
 	$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
@@ -152,31 +153,40 @@ function fexon(){
 		var forma = $.prompt("<span id='pventana'>Cargando...</span>", {
 			title: "Confirmación de exoneración",
 			buttons: { "Verificar": true, "Salir": false },
-			close:  function(e,v,m,f){
-					var autoriza = $('#autoriza').val();
-
-					//if(autoriza.length == 0){
-					//	$('#exon').removeAttr("checked");
-					//}
-				},
+			/*close: function(e,v,m,f){
+					alert('cierra');
+					var autoriza = $("#autoriza").val();
+					if(autoriza.length == 0){
+						$('#exon').removeAttr("checked");
+					}
+				},*/
 			submit: function(e,v,m,f){
-				var autoriza = $('#autoriza').val();
-				alert(autoriza);
-				if(autoriza.length > 0){
-					var verif = JSON.parse($.ajax({
-						type: "POST",
-						url: "<?php echo site_url($this->url.'verifica') ?>",
-						data: {'q':peso,'o':org,'d':des} ,
-						dataType: "json",async: false }).responseText
-					);
+				if(v){
+					var oficina = $("#codofi_org").val();
+					if(vautoriza > 0){
+						var verif = JSON.parse($.ajax({
+							type: "POST",
+							url: "<?php echo site_url($this->url.'verifica') ?>",
+							data: {'oficina':oficina,'numero':vautoriza} ,
+							dataType: "json",async: false }).responseText
+						);
 
-					if(verif){
-						return true;
+						if(verif){
+							$('#autoriza').val(vautoriza);
+							return true;
+						}else{
+							$('#_resul').text('no verificado');
+							return false;
+						}
 					}else{
-						$('#_resul').text('no verificado');
+						return false;
 					}
 				}else{
-					return false;
+					var autoriza = $("#autoriza").val();
+					if(autoriza.length == 0){
+						$('#exon').removeAttr("checked");
+					}
+					return true;
 				}
 
 				//console.log("Value clicked was: "+ v);
@@ -194,8 +204,8 @@ function fexon(){
 					url : '<?php echo site_url($this->url.'autoriza') ?>',
 					data: {'oficina' : oficina },
 					success: function (data){
-						$('#autoriza').val(data.numero);
-						msj= 'Generado '+data.numero+'<span id="_resul"></span>';
+						vautoriza=data.numero;
+						msj= 'Generado '+data.numero+' <span id="_resul">no verificado</span>';
 						$('#pventana').html(msj);
 					}
 				});
@@ -203,11 +213,11 @@ function fexon(){
 				//no tiene oficina de origen
 			}
 
-			//msj = 'Llame a los telefonos de informatica';
 		});
 	}else{
-
+		$('#autoriza').val('');
 	}
+	return false;
 	totalizar();
 }
 

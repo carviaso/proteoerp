@@ -826,7 +826,8 @@ class Tbenvio extends Controller {
 		$edit->puertap->maxlength =10;
 
 		$edit->exon = new checkboxField('Exonerado','exon', 'S','N');
-		$edit->exon->onchange='fexon()';
+		//$edit->exon->onchange='fexon()';
+		$edit->exon->onclick='fexon()';
 		$edit->exon->rule='enum[S,N]';
 
 		$edit->fledes = new checkboxField('Flete destino','fledes', 'S','N');
@@ -1081,7 +1082,7 @@ class Tbenvio extends Controller {
 
 		$confirma= $this->datasis->dameval("SELECT opc FROM tbacepta WHERE registro=${dbnumero}");
 
-		if(!empty($confirma)){
+		if(empty($confirma)){
 			echo 'false';
 		}else{
 			echo 'true';
@@ -1248,9 +1249,6 @@ class Tbenvio extends Controller {
 		$campos=$this->db->list_fields('tbenvio');
 		if(!in_array('id',$campos)){
 			$this->db->simple_query('ALTER TABLE `tbenvio` CHANGE COLUMN `nroenv` `id` INT(11) NOT NULL AUTO_INCREMENT FIRST');
-			//$this->db->simple_query('ALTER TABLE tbenvio DROP PRIMARY KEY');
-			//$this->db->simple_query('ALTER TABLE tbenvio ADD UNIQUE INDEX nroenv (nroenv)');
-			//$this->db->simple_query('ALTER TABLE tbenvio ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 
 		if(!in_array('facturaaseg',$campos)){

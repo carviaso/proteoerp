@@ -2624,9 +2624,8 @@ class Scst extends Controller {
 		$form->cprecio->option('D','Dejar el precio mayor');
 		$form->cprecio->option('N','No');
 		$form->cprecio->option('S','Si');
-		$form->cprecio->rule  = 'enum[D,N,S]';
 		$form->cprecio->style = 'width:150px;';
-		$form->cprecio->rule  = 'required';
+		$form->cprecio->rule  = 'required|enum[D,N,S]';
 
 		//$form->ffecha = new dateonlyField('Fecha de la compra', 'fecha','d/m/Y');
 		//$form->ffecha->insertValue = date('Y-m-d');
