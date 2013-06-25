@@ -13,6 +13,7 @@ class Chofer extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		$this->datasis->creaintramenu(array('modulo'=>'149','titulo'=>'Choferes','mensaje'=>'Choferes','panel'=>'DESPACHO','ejecutar'=>'ventas/chofer','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -227,7 +228,7 @@ class Chofer extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -239,7 +240,7 @@ class Chofer extends Controller {
 
 
 		$grid->addField('cedula');
-		$grid->label('Cedula');
+		$grid->label('C&eacute;dula');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -263,7 +264,7 @@ class Chofer extends Controller {
 
 
 		$grid->addField('direc1');
-		$grid->label('Direc1');
+		$grid->label('Direcci&oacute;n 1');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -275,7 +276,7 @@ class Chofer extends Controller {
 
 
 		$grid->addField('direc2');
-		$grid->label('Direc2');
+		$grid->label('Direci&oacute;n 2');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -287,7 +288,7 @@ class Chofer extends Controller {
 
 
 		$grid->addField('telefono');
-		$grid->label('Telefono');
+		$grid->label('Tel&eacute;fono');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -328,7 +329,7 @@ class Chofer extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: choferadd, editfunc: choferedit, delfunc: choferdel, viewfunc: chofershow");
+		$grid->setBarOptions('addfunc: choferadd, editfunc: choferedit, delfunc: choferdel, viewfunc: chofershow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -442,20 +443,20 @@ class Chofer extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
+		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});		';
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
 
-		$edit->codigo = new inputField('Codigo','codigo');
+		$edit->codigo = new inputField('C&oacute;digo','codigo');
 		$edit->codigo->rule='';
 		$edit->codigo->size =7;
 		$edit->codigo->maxlength =5;
 
-		$edit->cedula = new inputField('Cedula','cedula');
-		$edit->cedula->rule='';
+		$edit->cedula = new inputField('C&eacute;dula','cedula');
+		$edit->cedula->rule='chci';
 		$edit->cedula->size =17;
 		$edit->cedula->maxlength =15;
 
@@ -464,17 +465,17 @@ class Chofer extends Controller {
 		$edit->nombre->size =32;
 		$edit->nombre->maxlength =30;
 
-		$edit->direc1 = new inputField('Direc1','direc1');
+		$edit->direc1 = new inputField('Direcci&oacute;n 1','direc1');
 		$edit->direc1->rule='';
 		$edit->direc1->size =37;
 		$edit->direc1->maxlength =35;
 
-		$edit->direc2 = new inputField('Direc2','direc2');
+		$edit->direc2 = new inputField('Direcci&oacute;n 2','direc2');
 		$edit->direc2->rule='';
 		$edit->direc2->size =37;
 		$edit->direc2->maxlength =35;
 
-		$edit->telefono = new inputField('Telefono','telefono');
+		$edit->telefono = new inputField('Tel&eacute;fono','telefono');
 		$edit->telefono->rule='';
 		$edit->telefono->size =15;
 		$edit->telefono->maxlength =13;
@@ -542,5 +543,3 @@ class Chofer extends Controller {
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
-
-?>

@@ -121,6 +121,8 @@ $(function(){
 
 			$('#direc').val(ui.item.direc);
 			$('#direc_val').text(ui.item.direc);
+
+			post_modbus_scli();
 			setTimeout(function() {  $("#cod_cli").removeAttr("readonly"); }, 1500);
 		}
 	});
@@ -250,6 +252,8 @@ $(function(){
 			return false;
 		}
 	});
+
+	chreferen();
 });
 
 function scliadd() {
@@ -406,6 +410,23 @@ function post_modbus_scli(){
 		}
 	});
 	totalizar();
+
+	$.ajax({
+		url: "<?php echo site_url('ajax/ajaxsaldoscliven'); ?>",
+		dataType: 'json',
+		type: 'POST',
+		data: {'clipro' : $('#cod_cli').val()},
+		success: function(data){
+				if(data>0){
+					$.prompt("<span style='font-size:1.5em'>Cliente presenta saldo vencido de <b>"+nformat(data,2)+" Bs.</b> debe ponerse al d&iacute;a.</span>", {
+						title: "Saldo vencido",
+						buttons: { "Continuar": true }
+					});
+				}
+			},
+	});
+
+
 }
 
 function post_modbus_sinv(nind){
@@ -645,6 +666,14 @@ function sfpatipo(id){
 	$("#banco_"+id).val(banco);
 	return true;
 }
+
+function chreferen(){
+	if($('#referen').is(':checked')){
+		$('#sfpatable').hide();
+	}else{
+		$('#sfpatable').show();
+	}
+}
 </script>
 <?php } ?>
 <table align='center' width="95%" cellpadding='0' cellspacing='0'>
@@ -680,7 +709,7 @@ function sfpatipo(id){
 					<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
 					<table><tr>
 						<td>
-							<table widthi='100%'>
+							<table width='100%'>
 								<tr>
 									<td class="littletableheader"><?php echo $form->tipo_doc->label;  ?></td>
 									<td class="littletablerow"   ><?php echo $form->tipo_doc->output; ?></td>
@@ -691,7 +720,7 @@ function sfpatipo(id){
 							</table>
 						</td>
 						<td>
-							<table widthi='100%'>
+							<table width='100%'>
 								<tr>
 									<td class="littletableheader"><?php echo $form->cajero->label;    ?>*</td>
 									<td class="littletablerow">   <?php echo $form->cajero->output;   ?></td>
@@ -702,7 +731,7 @@ function sfpatipo(id){
 							</table>
 						</td>
 						<td>
-							<table widthi='100%'>
+							<table width='100%'>
 								<tr>
 									<td class="littletableheader"><?php echo $form->fecha->label;     ?>*</td>
 									<td class="littletablerow">   <?php echo $form->fecha->output;    ?></td>
@@ -754,17 +783,17 @@ function sfpatipo(id){
 			</tr>
 
 			<?php for($i=0;$i<$form->max_rel_count['sitems'];$i++) {
-				$it_codigo  = "codigoa_$i";
-				$it_desca   = "desca_$i";
-				$it_cana    = "cana_$i";
-				$it_preca   = "preca_$i";
-				$it_importe = "tota_$i";
-				$it_iva     = "itiva_$i";
-				$it_peso    = "sinvpeso_$i";
-				$it_tipo    = "sinvtipo_$i";
-				$it_ultimo  = "ultimo_$i";
-				$it_detalle = "detalle_$i";
-				$it_pond    = "pond_$i";
+				$it_codigo  = "codigoa_${i}";
+				$it_desca   = "desca_${i}";
+				$it_cana    = "cana_${i}";
+				$it_preca   = "preca_${i}";
+				$it_importe = "tota_${i}";
+				$it_iva     = "itiva_${i}";
+				$it_peso    = "sinvpeso_${i}";
+				$it_tipo    = "sinvtipo_${i}";
+				$it_ultimo  = "ultimo_${i}";
+				$it_detalle = "detalle_${i}";
+				$it_pond    = "pond_${i}";
 				$pprecios='';
 				for($o=1;$o<5;$o++){
 					$it_obj   = "precio${o}_${i}";
@@ -801,11 +830,13 @@ function sfpatipo(id){
 			</tr>
 		</table>
 		</div>
-		<?php echo $container_bl ?>
-		<?php echo $container_br ?>
+		<?php
+			echo $container_bl.$container_br;
+			echo $form->referen->output.'<b>'.$form->referen->label.'</b>';
+		?>
 		</td>
 	</tr><tr>
-		<table width='100%'>
+		<table width='100%' id='sfpatable'>
 			<tr id='__ITPL__sfpa'>
 				<td class="littletableheaderdet">Tipo</td>
 				<td class="littletableheaderdet">Fecha</td>
@@ -902,6 +933,5 @@ if($form->_status=='show'){
 <?php
 	}
 }
-?>
 
-<?php endif; ?>
+endif; ?>

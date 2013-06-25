@@ -120,7 +120,7 @@ $pie_final=<<<piefinal
 			<tr style='border-top: 1px solid;background:#AAAAAA;'>
 				<td style="text-align: right;"></td>
 				<td colspan="2" style="text-align: right;"><b>MONTO TOTAL:</b></td>
-				<td colspan="3" style="text-align: right;font-size:20px;font-weight:bold;">${gtotal}</td>
+				<td colspan="3" style="text-align: right;font-size:2em;font-weight:bold;">${gtotal}</td>
 			</tr>
 		</tfoot>
 

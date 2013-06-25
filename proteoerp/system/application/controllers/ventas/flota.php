@@ -13,6 +13,7 @@ class Flota extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		$this->datasis->creaintramenu(array('modulo'=>'150','titulo'=>'Flota','mensaje'=>'Flota','panel'=>'DESPACHO','ejecutar'=>'ventas/flota','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -210,10 +211,8 @@ class Flota extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -222,12 +221,12 @@ class Flota extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -239,7 +238,7 @@ class Flota extends Controller {
 
 
 		$grid->addField('descrip');
-		$grid->label('Descrip');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -299,7 +298,7 @@ class Flota extends Controller {
 
 
 		$grid->addField('ano');
-		$grid->label('Ano');
+		$grid->label('A&ntilde;o');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -329,7 +328,7 @@ class Flota extends Controller {
 
 
 		$grid->addField('serialc');
-		$grid->label('Serialc');
+		$grid->label('Serial Carroc.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -341,7 +340,7 @@ class Flota extends Controller {
 
 
 		$grid->addField('serialm');
-		$grid->label('Serialm');
+		$grid->label('Serial Motor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -377,7 +376,7 @@ class Flota extends Controller {
 
 
 		$grid->addField('cedula');
-		$grid->label('Cedula');
+		$grid->label('C&eacute;dula');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -418,7 +417,7 @@ class Flota extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: flotaadd, editfunc: flotaedit, delfunc: flotadel, viewfunc: flotashow");
+		$grid->setBarOptions('addfunc: flotaadd, editfunc: flotaedit, delfunc: flotadel, viewfunc: flotashow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -532,19 +531,19 @@ class Flota extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
+		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});		';
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
 
-		$edit->codigo = new inputField('Codigo','codigo');
+		$edit->codigo = new inputField('C&oacute;digo','codigo');
 		$edit->codigo->rule='';
 		$edit->codigo->size =12;
 		$edit->codigo->maxlength =10;
 
-		$edit->descrip = new inputField('Descrip','descrip');
+		$edit->descrip = new inputField('Descripci&oacute;n','descrip');
 		$edit->descrip->rule='';
 		$edit->descrip->size =32;
 		$edit->descrip->maxlength =30;
@@ -567,7 +566,7 @@ class Flota extends Controller {
 		$edit->modelo->size =42;
 		$edit->modelo->maxlength =40;
 
-		$edit->ano = new inputField('Anno','ano');
+		$edit->ano = new inputField('A&ntilde;o','ano');
 		$edit->ano->rule='integer';
 		$edit->ano->css_class='inputonlynum';
 		$edit->ano->size =13;
@@ -599,7 +598,7 @@ class Flota extends Controller {
 		$edit->propietario->size =52;
 		$edit->propietario->maxlength =50;
 
-		$edit->cedula = new inputField('Cedula','cedula');
+		$edit->cedula = new inputField('C&eacute;dula','cedula');
 		$edit->cedula->rule='';
 		$edit->cedula->size =17;
 		$edit->cedula->maxlength =15;
@@ -674,5 +673,3 @@ class Flota extends Controller {
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
-
-?>

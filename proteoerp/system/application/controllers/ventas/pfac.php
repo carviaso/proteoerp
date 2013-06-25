@@ -1268,7 +1268,7 @@ class Pfac extends Controller {
 				'iva'     => 'itiva_<#i#>',
 				'tipo'    => 'sinvtipo_<#i#>',
 				'peso'    => 'sinvpeso_<#i#>',
-				'precio1' => 'itpvp_<#i#>',
+				'base1' => 'itpvp_<#i#>',
 				'pond'    => 'itcosto_<#i#>',
 				'pond'    => 'pond_<#i#>',
 				'mmargen' => 'mmargen_<#i#>',
@@ -1614,7 +1614,7 @@ class Pfac extends Controller {
 
 			$iva    += $ittota * ($itiva / 100);
 			$totals += $ittota;
-			$do->set_rel('itpfac', 'mostrado', $iva + $ittota, $i);
+			$do->set_rel('itpfac', 'mostrado', round($itpreca*(100+$itiva)/100,2), $i);
 		}
 		$totalg = $totals + $iva;
 

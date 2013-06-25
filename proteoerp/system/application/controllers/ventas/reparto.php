@@ -13,6 +13,7 @@ class Reparto extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		$this->datasis->creaintramenu(array('modulo'=>'151','titulo'=>'Reparto','mensaje'=>'Reparto a Domicilio','panel'=>'DESPACHO','ejecutar'=>'ventas/reparto','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		$this->db->query('UPDATE sfac SET reparto=0 WHERE reparto IS NULL');
@@ -310,7 +311,7 @@ class Reparto extends Controller {
 	}
 
 	//******************************************************************
-	// Cambia Tipo de Reparto 
+	// Cambia Tipo de Reparto
 	//
 	function cambiatipo(){
 		$id    = $this->input->post('mid');
@@ -900,7 +901,7 @@ class Reparto extends Controller {
 		));
 
 		$grid->addField('vd');
-		$grid->label('Vende');
+		$grid->label('Vendedor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -911,7 +912,7 @@ class Reparto extends Controller {
 		));
 
 		$grid->addField('almacen');
-		$grid->label('Almacen');
+		$grid->label('Almac&eacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -973,7 +974,6 @@ class Reparto extends Controller {
 
 
 	function quita($id){
-		// Quita la vaina
 		$dbid=$this->db->escape($id);
 		$reparto  = $this->datasis->dameval("SELECT reparto FROM sfac    WHERE id=${dbid}");
 		$dbreparto= $this->db->escape($reparto);
@@ -1171,5 +1171,7 @@ class Reparto extends Controller {
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
+
+		//ALTER TABLE `sfac` ADD COLUMN `reparto` INT(11) NULL DEFAULT '0' AFTER `manual`;
 	}
 }

@@ -63,7 +63,7 @@ class Sfac extends Controller {
 		};';
 
 		$param['WestPanel']    = $WestPanel;
-		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		//$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
@@ -2731,8 +2731,9 @@ class Sfac extends Controller {
 		$edit->hora      = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 
 		//Campos comodines
-		$edit->pendiente = new checkboxField('Colocar pendiente', 'pendiente', 'S','N');
-		$edit->pendiente->insertValue = 'N';
+		$edit->referen = new checkboxField('Dejar pendiente', 'referen', 'P','');
+		$edit->referen->insertValue = 'N';
+		$edit->referen->onchange='chreferen()';
 		//Fin de los campos comidines
 
 		$edit->buttons('add_rel');
@@ -2875,6 +2876,11 @@ class Sfac extends Controller {
 	}
 
 	function dataprint($st,$uid){
+		$referen = $this->datasis->dameval('SELECT referen FROM sfac WHERE id='.$this->db->escape($uid));
+		if($referen=='P'){
+			redirect('formatos/descargar/FACTURA/'.$uid);
+		}
+
 		$this->rapyd->load('dataedit');
 
 		$edit = new DataEdit('Imprimir factura', 'sfac');
@@ -2928,7 +2934,7 @@ class Sfac extends Controller {
 
 			$numfis= trim($edit->get_from_dataobjetct('nfiscal'));
 			if(empty($numfis)){
-				$num      = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=$dbcajero AND tipo_doc=$dbtipo");
+				$num      = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo}");
 				$nn       = $num+1;
 				$edit->nfiscal->updateValue=str_pad($nn,8,'0',STR_PAD_LEFT);
 			}
@@ -2953,7 +2959,7 @@ class Sfac extends Controller {
 				$dmaqfiscal=trim($edit->get_from_dataobjetct('dmaqfiscal'));
 				if(empty($dmaqfiscal)){
 					$dbnumero=$this->db->escape($edit->get_from_dataobjetct('factura'));
-					$mfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE numero=$dbnumero AND tipo_doc='F'");
+					$mfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE numero=${dbnumero} AND tipo_doc='F'");
 					$edit->dmaqfiscal->updateValue=$mfiscal;
 				}
 			}
@@ -3174,6 +3180,17 @@ class Sfac extends Controller {
 		$manual = $do->get('manual');
 		$fecha  = $do->get('fecha');
 		$estampa= $do->get('estampa');
+		$referen= $do->get('referen');
+
+		$dbcliente=$this->db->escape($cliente);
+
+		if($referen=='P'){
+			if($manual=='S'){
+				$do->error_message_ar['pre_ins']='No se puede dejar una factura pendiente manual';
+				return false;
+			}
+			$do->truncate_rel('sfpa');
+		}
 
 		//Determina si deja la factura pendiente
 		$pendiente= $do->get('pendiente');
@@ -3216,7 +3233,7 @@ class Sfac extends Controller {
 		//Fin de la totalizacion de facturas
 
 		//Validaciones del pago
-		if(abs($sfpa-$totalg)>0.02){
+		if(abs($sfpa-$totalg)>0.02 && $referen!='P'){
 			$do->error_message_ar['pre_ins']='El monto del pago no coincide con el monto de la factura (Pago:'.$sfpa.', Factura:'.$totalg.')';
 			return false;
 		}
@@ -3229,7 +3246,7 @@ class Sfac extends Controller {
 		for($i=0;$i<$cana;$i++){
 
 			//Aplica el corte segun maxlin
-			if($maxlin>0 && $i>=$maxlin && $manual!='S'){
+			if($maxlin>0 && $i>=$maxlin && $manual!='S' && $referen!='P'){
 				$this->_creanfac=true;
 				$do->rel_rm('sitems',$i);
 				continue;
@@ -3294,7 +3311,7 @@ class Sfac extends Controller {
 		}
 		//Fin del calculo a credito
 
-		if($manual=='S' && $fecha!=$estampa && $credito-$sfpa_monto!=0){
+		if($manual=='S' && $fecha!=$estampa && $credito-$sfpa_monto!=0 ){
 			$do->error_message_ar['pre_ins']='Una factura manual solo se puede pagar en efectivo si es el mismo d&iacute;a, en caso contrario se debe cargar a cr&eacute;dito y luego hacer la cobranza.';
 			return false;
 		}
@@ -3312,9 +3329,8 @@ class Sfac extends Controller {
 
 		$fecha  = $do->get('fecha');
 		//Validacion del limite de credito del cliente
-		if($credito>0 && $tipoa=='F' && $manual!='S'){
-			$dbcliente=$this->db->escape($cliente);
-			$rrow    = $this->datasis->damerow("SELECT limite,formap,credito,tolera,TRIM(socio) AS socio FROM scli WHERE cliente=$dbcliente");
+		if($credito>0 && $tipoa=='F' && $manual!='S' && $referen!='P'){
+			$rrow     =$this->datasis->damerow("SELECT limite,formap,credito,tolera,TRIM(socio) AS socio FROM scli WHERE cliente=${dbcliente}");
 			if($rrow!=false){
 				if(empty($rrow['tolera']))  $rrow['tolera'] =0;
 				if(empty($rrow['limite']))  $rrow['limite'] =0;
@@ -3332,7 +3348,7 @@ class Sfac extends Controller {
 			}
 
 			//Chequea la cuenta propia
-			$mSQL="SELECT SUM(monto*(tipo_doc IN ('FC','GI','ND'))) AS debe, SUM(monto*(tipo_doc IN ('NC','AB','AN'))) AS haber FROM smov WHERE cod_cli=$dbcliente";
+			$mSQL="SELECT SUM(monto*(tipo_doc IN ('FC','GI','ND'))) AS debe, SUM(monto*(tipo_doc IN ('NC','AB','AN'))) AS haber FROM smov WHERE cod_cli=${dbcliente}";
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				$row = $query->row();
@@ -3350,7 +3366,7 @@ class Sfac extends Controller {
 			$mSQL="SELECT SUM(a.monto*(a.tipo_doc IN ('FC','GI','ND'))) AS debe, SUM(a.monto*(a.tipo_doc IN ('NC','AB','AN'))) AS haber
 				FROM smov AS a
 				JOIN scli AS b ON a.cod_cli=b.socio
-				WHERE b.socio=$dbcliente";
+				WHERE b.socio=${dbcliente}";
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				$row = $query->row();
@@ -3367,7 +3383,7 @@ class Sfac extends Controller {
 			//Chequea el credito de su maestro (si es subordinado)
 			if(!empty($socio)){
 				$dbsocio= $this->db->escape($socio);
-				$rrow   = $this->datasis->damerow("SELECT limite,formap,credito,tolera,socio FROM scli WHERE cliente=$dbsocio");
+				$rrow   = $this->datasis->damerow("SELECT limite,formap,credito,tolera,socio FROM scli WHERE cliente=${dbsocio}");
 				if($rrow!=false){
 					if(empty($rrow['tolera']))  $rrow['tolera'] =0;
 					if(empty($rrow['limite']))  $rrow['limite'] =0;
@@ -3387,7 +3403,7 @@ class Sfac extends Controller {
 				$mSQL="SELECT SUM(a.monto*(a.tipo_doc IN ('FC','GI','ND'))) AS debe, SUM(a.monto*(a.tipo_doc IN ('NC','AB','AN'))) AS haber
 				FROM smov AS a
 				JOIN scli AS b ON a.cod_cli=b.socio
-				WHERE b.socio=$dbsocio";
+				WHERE b.socio=${dbsocio}";
 				$query = $this->db->query($mSQL);
 				if ($query->num_rows() > 0){
 					$row = $query->row();
@@ -3410,30 +3426,38 @@ class Sfac extends Controller {
 		}
 		//Fin de las validaciones
 
-		$rrow    = $this->datasis->damerow('SELECT nombre,rifci,dire11,dire12 FROM scli WHERE cliente='.$this->db->escape($cliente));
+		$rrow    = $this->datasis->damerow('SELECT nombre,rifci,dire11,dire12 FROM scli WHERE cliente='.$dbcliente);
 		if($rrow!=false){
 			$do->set('nombre',$rrow['nombre']);
 			$do->set('direc' ,$rrow['dire11']);
 			$do->set('dire1' ,$rrow['dire12']);
 		}
 
-		if($tipoa=='F'){
-			if($manual!='S'){
-				$numero = $this->datasis->fprox_numero('nsfac');
-			}else{
-				$numero = 'M'.$this->datasis->fprox_numero('nsfacman',7);
-			}
+		if($referen=='P'){
+			$numero = '_'.$this->datasis->fprox_numero('nsfacp',7);
 		}else{
-			if($manual!='S'){
-				$numero = $this->datasis->fprox_numero('nccli');
+			if($tipoa=='F'){
+				if($manual!='S'){
+					$numero = $this->datasis->fprox_numero('nsfac');
+				}else{
+					$numero = 'M'.$this->datasis->fprox_numero('nsfacman',7);
+				}
 			}else{
-				$numero = 'M'.$this->datasis->fprox_numero('nccliman',7);
+				if($manual!='S'){
+					$numero = $this->datasis->fprox_numero('nccli');
+				}else{
+					$numero = 'M'.$this->datasis->fprox_numero('nccliman',7);
+				}
 			}
 		}
-		$transac = $this->datasis->fprox_numero('ntransa');
+		if($referen=='P'){
+			$transac = $this->datasis->fprox_numero('ntransap');
+		}else{
+			$transac = $this->datasis->fprox_numero('ntransa');
+			$do->set('referen',($credito>0)? 'C': 'E');
+		}
 		$do->set('numero' ,$numero);
 		$do->set('transac',$transac);
-		$do->set('referen',($credito>0)? 'C': 'E');
 		$vd     = $do->get('vd');
 		$cajero = $do->get('cajero');
 		$almacen= $do->get('almacen');
@@ -3576,28 +3600,28 @@ class Sfac extends Controller {
 			$itcodigoa = $do->get_rel('sitems','codigoa',$i);
 			$dbcodigoa = $this->db->escape($itcodigoa);
 
-			$sql="INSERT IGNORE INTO itsinv (alma,codigo,existen) VALUES ($dbalma,$dbcodigoa,0)";
+			$sql="INSERT IGNORE INTO itsinv (alma,codigo,existen) VALUES (${dbalma},${dbcodigoa},0)";
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}
 
-			$sql="UPDATE itsinv SET existen=existen+($factor)*$itcana WHERE codigo=$dbcodigoa AND alma=$dbalma";
+			$sql="UPDATE itsinv SET existen=existen+(${factor})*${itcana} WHERE codigo=${dbcodigoa} AND alma=${dbalma}";
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}
 
-			$sql="UPDATE sinv   SET existen=existen+($factor)*$itcana WHERE codigo=$dbcodigoa";
+			$sql="UPDATE sinv   SET existen=existen+(${factor})*${itcana} WHERE codigo=${dbcodigoa}";
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}
 		}
 
-		$mSQL="DELETE FROM sfpa WHERE tipo_doc=$dbtipo_doc AND numero=$dbnumero";
+		$mSQL="DELETE FROM sfpa WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero}";
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 
-		$mSQL="UPDATE sfac SET tipo_doc='X' WHERE tipo_doc=$dbtipo_doc AND numero=$dbnumero";
+		$mSQL="UPDATE sfac SET tipo_doc='X' WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero}";
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 
-		$mSQL="UPDATE sitems SET tipoa='X' WHERE tipoa=$dbtipo_doc AND numa=$dbnumero";
+		$mSQL="UPDATE sitems SET tipoa='X' WHERE tipoa=${dbtipo_doc} AND numa=${dbnumero}";
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 
@@ -3641,7 +3665,10 @@ class Sfac extends Controller {
 		$direc   = $do->get('direc');
 		$dire1   = $do->get('dire1');
 
-		if($referen=='C'){
+		if($referen=='P'){
+			logusu($do->table,"Creo pre-factura ${tipo_doc}${numero}");
+			return true;
+		}elseif($referen=='C'){
 			$error   = 0;
 
 			if($tipo_doc=='F'){

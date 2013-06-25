@@ -399,7 +399,7 @@ function autocod(id){
 			$('#sinvtipo_'+id).val(ui.item.tipo);
 			$('#sinvpeso_'+id).val(ui.item.peso);
 			$('#itcosto_'+id).val(ui.item.pond);
-			$('#itpvp_'+id).val(ui.item.ultimo);
+			$('#itpvp_'+id).val(ui.item.base1);
 			$('#cana_'+id).val('1');
 			$('#cana_'+id).focus();
 			$('#cana_'+id).select();

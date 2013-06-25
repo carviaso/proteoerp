@@ -129,8 +129,8 @@ $pie_final=<<<piefinal
 				<td class="change_order_total_col"><b>${impuesto}</b></td>
 			</tr><tr  style='border-top: 1px solid;background:#AAAAAA;'>
 				<td colspan="2" style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;"><b>TOTAL:</b></td>
-				<td class="change_order_total_col"><b>${gtotal}</b></td>
+				<td colspan="2" style="text-align: right;font-size:2em;"><b>TOTAL:</b></td>
+				<td class="change_order_total_col" style="font-size:2em;" ><b>${gtotal}</b></td>
 			</tr>
 		</tfoot>
 	</table>
