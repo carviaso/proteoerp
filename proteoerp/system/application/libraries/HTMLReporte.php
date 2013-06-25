@@ -5,6 +5,7 @@ class HTMLReporte {
 	var $DBfieldsName;
 	var $DBfieldsType;
 	var $DBfieldsMax_lengt;
+	var $DBcharset;
 	var $workbook;
 	var $worksheet;
 	var $fname;
@@ -41,6 +42,7 @@ class HTMLReporte {
 		if(!empty($mSQL)){
 			$CI = & get_instance();
 			$this->DBquery  = $CI->db->query($mSQL);
+			$this->DBcharset= $CI->db->char_set;
 			$data=$this->DBquery->field_data();
 			foreach ($data as $field){
 				$this->DBfieldsName[]                 =$field->name;
@@ -72,9 +74,11 @@ class HTMLReporte {
 
 	function Header(){
 		$this->ii = 6;
+		$charset = ($this->DBcharset=='utf8')?'utf-8':'ISO-8859-1';
 
 		echo '<html>';
 		echo '<head>';
+		echo "<meta http-equiv='Content-Type' content='text/html; charset=${charset}' >";
 		echo '<title>'.htmlspecialchars($this->Titulo).'</title>';
 		echo '<style type="text/css">';
 		echo "
