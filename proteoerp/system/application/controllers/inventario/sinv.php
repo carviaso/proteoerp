@@ -2908,9 +2908,9 @@ class Sinv extends Controller {
 		//$edit->aumento->append('Solo si es fracci&oacute;n');
 
 		$edit->maxven = new inputField('Venta m&aacute;xima', 'maxven');
-		$edit->maxven->css_class='inputnum';
-		$edit->maxven->insertValue='0';
-		$edit->maxven->size=6;
+		$edit->maxven->css_class   = 'inputnum';
+		$edit->maxven->insertValue = '0';
+		$edit->maxven->size        = 6;
 		$edit->maxven->rule='numeric';
 		$edit->maxven->autocomplete = false;
 

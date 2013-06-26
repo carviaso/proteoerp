@@ -76,7 +76,8 @@ function resepu( ppp, aaa ){
 	if(id){
 		var ret  = $("#tbrutas").getRowData(id);
 		$("#nropas").html(nropas);
-		$('#monto').html(ret.precio*nropas);
+		$('#monto').html( moneyformat(ret.precio*nropas) );
+		$('#resumen').show();
 	} else {
 		$("#nropas").html(0.00);
 		$('#monto').html(0.00);
@@ -92,7 +93,6 @@ function reserva(indice){
 echo $form->codrut->output;
 ?>
 
-
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 <table width='100%'>
 	<tr>
@@ -107,24 +107,37 @@ echo $form->codrut->output;
 	</tr>
 </table>
 </fieldset>
-
 <br>
 <div class="tema1">
 	<table id="tbrutas"></table>
 </div>
 <br>
-
 <div id='puestos' name='puestos' style='margin-left:0em;' ></div>
-
 <br>
-<table>
+
+<table id='resumen' style='font-size:1.5em;display:none;'>
 	<tr>
-		<td>Pasajes:</td><td><div id='nropas'></div></td>
-		<td>Monto:  </td><td><div id='monto'> </div></td>
+		<td class="littletablerowth">Pasajes:    </td><td><div id='nropas'  ><> </div></td>
+
+		<td class="littletablerowth"><?php echo $form->menores->label;     ?></td>
+		<td class="littletablerow"  ><?php echo $form->menores->output;    ?></td>
+
+
+		<td class="littletablerowth"><?php echo $form->ancianos->label;     ?></td>
+		<td class="littletablerow"  ><?php echo $form->ancianos->output;    ?></td>
+
+
+		<td class="littletablerowth">Total Precio</td><td class="littletablerow"><div id='monto'> </div></td>
+	<tr></tr>
+		<td class="littletablerowth">Adultos: </td><td><div id='madulto' ></div></td>
+		<td class="littletablerowth">Menores: </td><td><div id='mmenor'  ></div></td>
+		<td class="littletablerowth">Ancianos:</td><td><div id='manci'   ></div></td>
+		<td class="littletablerowth"><?php echo $form->nomcli->label;     ?></td>
+		<td class="littletablerow"  ><?php echo $form->nomcli->output;    ?></td>
 	</tr>
+
 </table>
 
 <?php 
 echo $form_end; 
-
 ?>

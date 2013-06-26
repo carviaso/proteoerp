@@ -665,7 +665,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 	//
 	//   Genera Reporte
 	//
-	//******************************************************************
 	function generepo($tabla=null){
 		if (empty($tabla) OR (!$this->db->table_exists($tabla))) show_error('Tabla no existe o faltan parametros');
 		$this->genefilter($tabla, true, true );
@@ -675,8 +674,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 	//
 	//   Genera la seccion de filtro para el Crud
 	//
-	//
-	//******************************************************************
 	function genefilter($tabla=null,$s=true, $repo=false ){
 		if (empty($tabla) OR (!$this->db->table_exists($tabla))) show_error('Tabla no existe o faltan parametros');
 		$mt1 = "\n\t";
@@ -892,8 +889,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 	//
 	//   Genera la seccion de funciones PRE del Crud
 	//
-	//
-	//******************************************************************
 	function genepre($tabla=null,$s=true){
 		if (empty($tabla) OR (!$this->db->table_exists($tabla))) show_error('Tabla no existe o faltan parametros');
 
@@ -1070,6 +1065,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		}
 	}
 
+/*
 	//******************************************************************
 	//
 	//  Genera Crud para jqGrid
@@ -1327,9 +1323,10 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $tab2.'return $bodyscript;'."\n";
 			$str .= $tab1."}\n\n";
 
-			$str .= $tab1.'//***************************'."\n";
-			$str .= $tab1.'//Definicion del Grid y la Forma'."\n";
-			$str .= $tab1.'//***************************'."\n";
+
+			$str .= $tab1.'//******************************************************************'."\n";
+			$str .= $tab1.'// Definicion del Grid o Tabla '."\n";
+			$str .= $tab1.'//'."\n";
 			$str .= $tab1.'function defgrid( $deployed = false ){'."\n";
 			$str .= $tab2.'$i      = 1;'."\n";
 			$str .= $tab2.'$editar = "false";'."\n\n";
@@ -1414,8 +1411,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $tab2.'$grid->setFormOptionsE(\'closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} \');'."\n";
 			$str .= $tab2.'$grid->setFormOptionsA(\'closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} \');'."\n";
 
-			//$str .= $tab2.'$grid->setAfterSubmit("$.prompt(\'Respuesta:\'+a.responseText); return [true, a ];");'."\n\n";
-
 			$str .= $tab2.'$grid->setAfterSubmit("$(\'#respuesta\').html(\'&lt;span style='."\\'font-weight:bold; color:red;\\'&gt;'+a.responseText+'&lt;/span&gt;'); return [true, a ];".'");'."\n\n";
 			$str .= $tab2.'$grid->setOndblClickRow(\'\');';
 
@@ -1425,17 +1420,12 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $tab2.'$grid->setDelete( $this->datasis->sidapuede(\''.strtoupper($db).'\',\'BORR_REG%\'));'."\n";
 			$str .= $tab2.'$grid->setSearch( $this->datasis->sidapuede(\''.strtoupper($db).'\',\'BUSQUEDA%\'));'."\n";
 			$str .= $tab2.'$grid->setRowNum(30);'."\n";
-
 			$str .= $tab2.'$grid->setShrinkToFit(\'false\');'."\n\n";
-
 			$str .= $tab2.'$grid->setBarOptions("addfunc: '.strtolower($db).'add, editfunc: '.strtolower($db).'edit, delfunc: '.strtolower($db).'del, viewfunc: '.strtolower($db).'show");'."\n\n";
-
 			$str .= $tab2.'#Set url'."\n";
 			$str .= $tab2.'$grid->setUrlput(site_url($this->url.\'setdata/\'));'."\n\n";
-
 			$str .= $tab2.'#GET url'."\n";
 			$str .= $tab2.'$grid->setUrlget(site_url($this->url.\'getdata/\'));'."\n\n";
-
 			$str .= $tab2.'if ($deployed) {'."\n";
 			$str .= $tab2.'	return $grid->deploy();'."\n";
 			$str .= $tab2.'} else {'."\n";
@@ -1443,27 +1433,21 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $tab2.'}'."\n";
 			$str .= $tab1.'}'."\n\n";
 
-			$str .= $tab1.'/**'."\n";
-			$str .= $tab1.'* Busca la data en el Servidor por json'."\n";
-			$str .= $tab1.'*/'."\n";
+			$str .= $tab1.'//******************************************************************'."\n";
+			$str .= $tab1.'// Busca la data en el Servidor por json'."\n";
+			$str .= $tab1.'//'."\n";
 			$str .= $tab1.'function getdata(){'."\n";
-
-			//$str .= $tab2.'$filters = $this->input->get_post(\'filters\');'."\n";
-
 			$str .= $tab2.'$grid       = $this->jqdatagrid;'."\n\n";
-
 			$str .= $tab2.'// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO'."\n";
 			$str .= $tab2.'$mWHERE = $grid->geneTopWhere(\''.$db.'\');'."\n\n";
-
 			$str .= $tab2.'$response   = $grid->getData(\''.$db.'\', array(array()), array(), false, $mWHERE );'."\n";
 			$str .= $tab2.'$rs = $grid->jsonresult( $response);'."\n";
 			$str .= $tab2.'echo $rs;'."\n";
-
 			$str .= $tab1.'}'."\n\n";
 
-			$str .= $tab1.'/**'."\n";
-			$str .= $tab1.'* Guarda la Informacion'."\n";
-			$str .= $tab1.'*/'."\n";
+			$str .= $tab1.'//******************************************************************'."\n";
+			$str .= $tab1.'// Guarda la Informacion del Grid o Tabla'."\n";
+			$str .= $tab1.'//'."\n";
 			$str .= $tab1.'function setData(){'."\n";
 			$str .= $tab2.'$this->load->library(\'jqdatagrid\');'."\n";
 			$str .= $tab2.'$oper   = $this->input->post(\'oper\');'."\n";
@@ -1540,7 +1524,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 		}
 	}
-
+*/
 
 	//******************************************************************
 	//

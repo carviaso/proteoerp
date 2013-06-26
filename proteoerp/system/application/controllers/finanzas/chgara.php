@@ -633,9 +633,6 @@ class Chgara extends Controller {
 		$afterhtml = '<div id=\"aaaaaa\">Nombre <strong>"+ui.item.nombre+" </strong>RIF/CI <strong>"+ui.item.rifci+" </strong><br>Direccion <strong>"+ui.item.direc+"</strong></div>';
 		$auto = $grid->autocomplete( $link, 'cod_cli', 'aaaaa', $afterhtml, '', '\'#editmod\'+gridId1.substring(1)' );
 
-//   $grid->autocomplete($link1, 'codigo','aaaaaa','<div id=\"aaaaaa\"></div>',$despues1,'\'#editmod\'+gridId1.substring(1)').'}',
-
-
 		$grid->addField('status');
 		$grid->label('Status');
 		$grid->params(array(

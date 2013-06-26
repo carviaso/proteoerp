@@ -13,7 +13,7 @@ class Aran extends Controller {
 	}
 
 	function index(){
-		$this->nstalar();
+		$this->instalar();
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -329,7 +329,5 @@ class Aran extends Controller {
 			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('aran');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }

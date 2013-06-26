@@ -61,6 +61,7 @@ class Tbofici extends Controller {
 		//Botones Panel Izq
 		$grid->wbotonadd(array("id"=>"precios", "img"=>"images/recalcular.png", "alt" => "Precios",    "label"=>"Precios",    "tema"=>'anexos'));
 		$grid->wbotonadd(array("id"=>"descue1", "img"=>"images/recalcular.png", "alt" => "Descuentos", "label"=>"Descuentos", "tema"=>'anexos'));
+		$grid->wbotonadd(array("id"=>"asignao", "img"=>"images/recalcular.png", "alt" => "Asignar Oficina a usuario", "label"=>"Asignar Of.", "tema"=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -135,6 +136,50 @@ class Tbofici extends Controller {
 			}
 		});';
 
+		$usu = $this->datasis->llenaopciones("SELECT us_codigo, CONCAT_WS(' ',us_nombre, us_codigo, '(',pasaje,')') nombre FROM usuario ORDER BY us_nombre", false, 'musuario');
+		$usu = str_replace('"',"'",$usu);
+
+		$bodyscript .= '
+		$("#asignao").click(function(){
+			var id  = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var mcome1 = "<h1>Asignar usuario a la Oficina "+ret.codofi+" "+ret.desofi+"</h1>"+
+					"<table align=\'center\'>"+
+					"<tr><td>Usuario :</tdtd><td colspan=\'3\'>"+"'.$usu.'</td></tr>"+
+					"</table>";
+				var masigna = 
+				{
+					state0: {
+						html: mcome1,
+						buttons: { Guardar: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							moficina = f.moficina;
+							if (v) {
+								$.post("'.site_url('pasajes/tbofici/asignau').'/", { usuario: f.musuario, mid: id, codofi: ret.codofi }, 
+									function(data){
+										$.prompt.getStateContent(\'state1\').find(\'#us_prome2\').text(data);
+										$.prompt.goToState(\'state1\');
+										$("#newapi'.$grid1.'").trigger("reloadGrid");
+								});
+								return false;
+							} 
+						}
+					},
+					state1: { 
+						html: "<h1>Resultado</h1><span id=\'us_prome2\'></span>",
+						focus: 1,
+						buttons: { Ok:true }
+					}		
+				};
+				$.prompt(masigna);
+
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
+
+
 		$bodyscript .= '
 		$("#descue1").click(function(){
 			$.post("'.site_url($this->url.'descueforma').'/", function(data){
@@ -187,13 +232,13 @@ class Tbofici extends Controller {
 			}
 		};';
 
-		// Eliminar Destino
+		// Eliminar Gasto
 		$bodyscript .= '
 		$("#eliming").click( function(){
 			var id = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid1.'").jqGrid(\'getRowData\',id);
-				$.prompt("<h1>Eliminar Destino Seleccionado</h1>", {
+				$.prompt("<h1>Eliminar Gasto Seleccionado</h1>", {
 					buttons: { Eliminar: true, Salir: false },
 					callback: function(e,v,m,f){
 						if (v) {
@@ -511,6 +556,28 @@ class Tbofici extends Controller {
 		}
 		
 	}
+
+	//******************************************************************
+	// Lista de Precios
+	//
+	function asignau( $id = 0 ){
+		$this->load->library('jqdatagrid');
+
+		$usuario = $this->input->post('usuario');
+		$mid     = $this->input->post('mid');
+		$codofi  = $this->input->post('codofi');
+
+		$data    = array( 'pasaje' => $codofi );
+
+		$this->db->where("us_codigo", $usuario);
+		$this->db->update('usuario', $data);
+		logusu('TBOFICI',"Usuario ".$usuario." Asignado a la oficina ".$codofi." ASIGNADO");
+		echo "Usuario ".$usuario." asignado a la oficina ".$codofi;
+
+		
+	}
+
+
 
 	//******************************************************************
 	// Descuentos

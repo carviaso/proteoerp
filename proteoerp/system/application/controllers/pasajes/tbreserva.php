@@ -13,15 +13,21 @@ class Tbreserva extends Controller {
 	}
 
 	function index(){
-		$this->datasis->creaintramenu(array('modulo'=>'162','titulo'=>'Reservaciones','mensaje'=>'Reservaciones','panel'=>'PASAJES','ejecutar'=>'pasajes/tbreserva','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>950,'alto'=>700));
-		$this->datasis->modintramenu( 950, 700, substr($this->url,0,-1) );
+		if(!$this->datasis->iscampo('usuario','pasaje')){
+			$this->db->query('ALTER TABLE usuario ADD COLUMN pasaje VARCHAR(4) NULL DEFAULT NULL COMMENT "Oficina de Pasajes"     AFTER uuid');
+		};
+		if(!$this->datasis->iscampo('usuario','encomi')){
+			$this->db->query('ALTER TABLE usuario ADD COLUMN encomi VARCHAR(4) NULL DEFAULT NULL COMMENT "Oficina de Encomiendas" AFTER pasaje');
+		};
+		$this->datasis->creaintramenu(array('modulo'=>'162','titulo'=>'Reservaciones','mensaje'=>'Reservaciones','panel'=>'PASAJES','ejecutar'=>'pasajes/tbreserva','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>950,'alto'=>650));
+		$this->datasis->modintramenu( 950, 650, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
+
 	}
 
-	//***************************
-	//Layout en la Ventana
+	//******************************************************************
+	// Layout en la Ventana  
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -31,10 +37,10 @@ class Tbreserva extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"factura",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Facturar"));
-		$grid->wbotonadd(array("id"=>"boletos",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Emitir Boletos"));
-		$grid->wbotonadd(array("id"=>"boletos",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Cambiar Reserva"));
-		$grid->wbotonadd(array("id"=>"boletos",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Eliminar Reserva"));
+		$grid->wbotonadd(array("id"=>"factura", "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Facturar"));
+		$grid->wbotonadd(array("id"=>"boletos", "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Emitir Boletos"));
+		$grid->wbotonadd(array("id"=>"cambiar", "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Cambiar Reserva"));
+		$grid->wbotonadd(array("id"=>"elimina", "img"=>"images/delete.png",  "alt" => "Formato PDF", "label"=>"Eliminar Reserva"));
 
 		$WestPanel = $grid->deploywestp();
 
@@ -58,12 +64,29 @@ class Tbreserva extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	// Funciones de los Botones
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
 		$ngrid      = "#newapi".$grid0;
+
+		// Anticipo a Cliente
+		$bodyscript .= '
+		$("#factura").click( function() {
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				$.post("'.site_url($this->url.'factura').'/"+id,
+				function(data){
+					$("#fedita").dialog( {height: 450, width: 750, title: "Facturacion"} );
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+				
+		});';
 
 		$bodyscript .= '
 		function tbreservaadd(){
@@ -143,9 +166,9 @@ class Tbreserva extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid o Tabla 
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -161,7 +184,6 @@ class Tbreserva extends Controller {
 			'edittype'      => "'text'",
 		));
 
-
 		$grid->addField('codppr');
 		$grid->label('Codppr');
 		$grid->params(array(
@@ -172,7 +194,6 @@ class Tbreserva extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
-
 
 		$grid->addField('nacio');
 		$grid->label('Nac.');
@@ -185,7 +206,6 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:10, maxlength: 10 }',
 		));
 
-
 		$grid->addField('codcli');
 		$grid->label('Cliente');
 		$grid->params(array(
@@ -196,7 +216,6 @@ class Tbreserva extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
-
 
 		$grid->addField('nomcli');
 		$grid->label('Nombre');
@@ -209,7 +228,6 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:150, maxlength: 150 }',
 		));
 
-
 		$grid->addField('codcarnet');
 		$grid->label('Carnet');
 		$grid->params(array(
@@ -220,7 +238,6 @@ class Tbreserva extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
-
 
 		$grid->addField('dtn');
 		$grid->label('Destino');
@@ -233,7 +250,6 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:100, maxlength: 100 }',
 		));
 
-
 		$grid->addField('fecven');
 		$grid->label('Fec.Ven');
 		$grid->params(array(
@@ -244,7 +260,6 @@ class Tbreserva extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:15, maxlength: 15 }',
 		));
-
 
 		$grid->addField('tippas');
 		$grid->label('Tippas');
@@ -257,7 +272,6 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-
 		$grid->addField('anula');
 		$grid->label('Anulado');
 		$grid->params(array(
@@ -269,7 +283,6 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
 
-
 		$grid->addField('prepas');
 		$grid->label('Prepas');
 		$grid->params(array(
@@ -278,7 +291,6 @@ class Tbreserva extends Controller {
 			'width'         => 140,
 			'edittype'      => "'text'",
 		));
-
 
 		$grid->addField('seguro');
 		$grid->label('Seguro');
@@ -289,7 +301,6 @@ class Tbreserva extends Controller {
 			'edittype'      => "'text'",
 		));
 
-
 		$grid->addField('mondes');
 		$grid->label('Mondes');
 		$grid->params(array(
@@ -299,7 +310,6 @@ class Tbreserva extends Controller {
 			'edittype'      => "'text'",
 		));
 
-
 		$grid->addField('moncomi');
 		$grid->label('Moncomi');
 		$grid->params(array(
@@ -308,7 +318,6 @@ class Tbreserva extends Controller {
 			'width'         => 140,
 			'edittype'      => "'text'",
 		));
-
 
 		$grid->addField('codofi');
 		$grid->label('Codofi');
@@ -321,7 +330,6 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-
 		$grid->addField('tipven');
 		$grid->label('Tipven');
 		$grid->params(array(
@@ -332,7 +340,6 @@ class Tbreserva extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:10, maxlength: 10 }',
 		));
-
 
 		$grid->addField('horpas');
 		$grid->label('Horpas');
@@ -345,7 +352,6 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
 
-
 		$grid->addField('codptos');
 		$grid->label('Codptos');
 		$grid->params(array(
@@ -354,7 +360,6 @@ class Tbreserva extends Controller {
 			'width'         => 140,
 			'edittype'      => "'text'",
 		));
-
 
 		$grid->addField('coddes');
 		$grid->label('Coddes');
@@ -367,7 +372,6 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:15, maxlength: 15 }',
 		));
 
-
 		$grid->addField('usuario');
 		$grid->label('Usuario');
 		$grid->params(array(
@@ -378,7 +382,6 @@ class Tbreserva extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:50, maxlength: 50 }',
 		));
-
 
 		$grid->addField('tippag');
 		$grid->label('Tippag');
@@ -391,7 +394,6 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:10, maxlength: 10 }',
 		));
 
-
 		$grid->addField('tasa');
 		$grid->label('Tasa');
 		$grid->params(array(
@@ -400,7 +402,6 @@ class Tbreserva extends Controller {
 			'width'         => 140,
 			'edittype'      => "'text'",
 		));
-
 
 		$grid->addField('codrut');
 		$grid->label('Codrut');
@@ -413,7 +414,6 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:10, maxlength: 10 }',
 		));
 
-
 		$grid->addField('fecpas');
 		$grid->label('Fecpas');
 		$grid->params(array(
@@ -425,15 +425,12 @@ class Tbreserva extends Controller {
 			'editoptions'   => '{ size:15, maxlength: 15 }',
 		));
 
-
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('290');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
-
-
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
@@ -462,9 +459,9 @@ class Tbreserva extends Controller {
 		}
 	}
 
-	/**
-	* Busca la data en el Servidor por json
-	*/
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
 	function getdata(){
 		$grid       = $this->jqdatagrid;
 
@@ -476,9 +473,9 @@ class Tbreserva extends Controller {
 		echo $rs;
 	}
 
-	/**
-	* Guarda la Informacion
-	*/
+	//******************************************************************
+	// Guarda la Informacion del Grid o Tabla
+	//
 	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
@@ -534,6 +531,17 @@ class Tbreserva extends Controller {
 		};
 	}
 
+	//******************************************************************
+	// Factura la Reervacion
+	//
+	function factura($id){
+		echo $id;
+	}
+
+
+	//******************************************************************
+	// Ventana de Edicion 
+	//
 	function dataedit(){
 		//$this->rapyd->load('dataobject','datadetails');
 		$this->rapyd->load('dataedit');
@@ -562,18 +570,30 @@ class Tbreserva extends Controller {
 		$edit->fecven->size        = 12;
 		$edit->fecven->maxlength   = 12;
 		$edit->fecven->insertValue = date('Y-m-d');
-		$edit->fecven->calendar = false;
+		$edit->fecven->calendar    = false;
+
+		$codofi = $this->datasis->dameval('SELECT pasaje FROM usuario WHERE us_codigo='.$this->db->escape($this->session->userdata('usuario')));
+		$nomofi = $this->datasis->dameval('SELECT CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a WHERE a.codofi='.$this->db->escape($codofi));
 
 		$edit->org = new dropdownField('Origen','org');
 		$edit->org->rule = '';
-		$edit->org->option('','Seleccionar');
+
+		if (!empty($codofi)) 
+			$edit->org->option( $codofi, $nomofi );
+		else
+			$edit->org->option('','Seleccionar');
 		$edit->org->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
 		$edit->org->style ='width:170px;';
 
 		$edit->dtn = new dropdownField('Destino','dtn');
 		$edit->dtn->rule='';
 		$edit->dtn->option('','Seleccionar');
-		$edit->dtn->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
+
+		if (!empty($codofi)) 
+			$edit->dtn->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a WHERE a.codofi<>'.$this->db->escape($codofi).' ORDER BY a.codofi');
+		else
+			$edit->dtn->options('SELECT a.codofi, CONCAT(a.codofi," ", a.desofi) desofi FROM tbofici AS a ORDER BY a.codofi');
+
 		$edit->dtn->style='width:170px;';
 
 		$edit->nropasa = new inputField('Nro. Pasaje','nropasa');
@@ -683,6 +703,35 @@ class Tbreserva extends Controller {
 		$edit->fecpas->rule='';
 		$edit->fecpas->size =17;
 		$edit->fecpas->maxlength =15;
+
+		$edit->pasajes = new inputField('Pasajes','pasajes');
+		$edit->pasajes->rule      = 'numeric';
+		$edit->pasajes->insertValue='0';
+		$edit->pasajes->size      = 6;
+		$edit->pasajes->maxlength = 8;
+		$edit->pasajes->css_class='inputnum';
+
+		$edit->menores = new inputField('Menores','menores');
+		$edit->menores->rule      = 'numeric';
+		$edit->menores->insertValue='0';
+		$edit->menores->size      =  6;
+		$edit->menores->maxlength =  8;
+		$edit->menores->css_class='inputnum';
+
+		$edit->ancianos = new inputField('Ancianos','ancianos');
+		$edit->ancianos->rule      = 'numeric';
+		$edit->ancianos->insertValue='0';
+		$edit->ancianos->size      =  6;
+		$edit->ancianos->maxlength =  8;
+		$edit->ancianos->css_class='inputnum';
+
+		$edit->descuento = new inputField('Descuento','descuento');
+		$edit->descuento->rule      = 'numeric';
+		$edit->descuento->insertValue='0';
+		$edit->descuento->size      =  6;
+		$edit->descuento->maxlength =  8;
+		$edit->descuento->css_class='inputnum';
+
 
 		$edit->build();
 
