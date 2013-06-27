@@ -223,7 +223,7 @@ class Rcaj extends validaciones {
 
 		//Inicio otras formas de pago
 		$c_otrp=0;
-		$mSQL='SELECT a.tipo,a.nombre FROM tarjeta a WHERE a.tipo NOT IN (\'EF\',\'RP\',\'NC\',\'ND\', \'DE\',\'DP\') AND a.activo=\'S\'';
+		$mSQL='SELECT a.tipo,a.nombre FROM tarjeta a WHERE a.tipo NOT IN (\'EF\',\'RP\',\'NC\',\'ND\') AND a.activo=\'S\'';
 		$query = $this->db->query($mSQL);
 		foreach ($query->result() as $i=>$row){
 			$c_otrp++;
@@ -398,12 +398,12 @@ class Rcaj extends validaciones {
 				$dbnumero=$this->db->escape($numero);
 
 				$mSQL="UPDATE sfpa JOIN sfac ON sfac.numero=sfpa.numero AND sfpa.tipo_doc=CONCAT(sfac.tipo_doc, IF(sfac.referen='M','E',sfac.referen))
-				SET sfpa.cierre=$dbnumero
-				WHERE sfpa.f_factura=$dbfecha    AND SUBSTRING(sfpa.tipo_doc,2,1)!='X' AND sfpa.cobrador=$dbcajero ";
+				SET sfpa.cierre=${dbnumero}
+				WHERE sfpa.f_factura=${dbfecha}    AND SUBSTRING(sfpa.tipo_doc,2,1)!='X' AND sfpa.cobrador=${dbcajero} ";
 				$this->db->query($mSQL);
 
 				if($this->db->table_exists('rret')){
-					$mSQL="UPDATE rret SET cierre=$dbnumero WHERE cajero=$dbcajero AND fecha=$dbfecha AND cierre IS NULL";
+					$mSQL="UPDATE rret SET cierre=$dbnumero WHERE cajero=${dbcajero} AND fecha=${dbfecha} AND cierre IS NULL";
 					$this->db->query($mSQL);
 				}
 			}
@@ -564,13 +564,13 @@ class Rcaj extends validaciones {
 			$form->x_maqfiscal->maxlength =17;
 			$form->x_maqfiscal->autocomplete=false;
 
-			$form->x_ultimafc = new inputField('N&uacute;mero ultima Factura','ultimafc');
+			$form->x_ultimafc = new inputField('N&uacute;mero &uacute;ltima Factura','ultimafc');
 			$form->x_ultimafc->rule      ='max_length[10]|required';
 			$form->x_ultimafc->size      =12;
 			$form->x_ultimafc->maxlength =10;
 			$form->x_ultimafc->autocomplete=false;
 
-			$form->x_ultimanc = new inputField('N&uacute;mero ultima NC','ultimanc');
+			$form->x_ultimanc = new inputField('N&uacute;mero &uacute;ltima NC','ultimanc');
 			$form->x_ultimanc->rule      ='max_length[10]|required';
 			$form->x_ultimanc->size      =12;
 			$form->x_ultimanc->maxlength =10;
@@ -630,13 +630,13 @@ class Rcaj extends validaciones {
 			FROM rcaj    AS a
 			JOIN itrcaj  AS b ON a.numero=b.numero
 			JOIN tarjeta AS c ON c.tipo=b.tipo
-			WHERE a.numero=${dbnumero} AND c.tipo<>'DE' ";
+			WHERE a.numero=${dbnumero}";
 
 			$query = $this->db->query($mSQL);
 			if($query->num_rows()>0){
 				$str='';
 				$arr=array();
-				$rrecibido=$sistema=0;
+				$rrecibido=$sistema=$depositos=0;
 				foreach ($query->result() as $i=>$row){
 					$nobj='recibido'.$row->tipo;
 					$recibido = (isset($form->$nobj))? (empty($form->$nobj->newValue))? 0.00 :floatval($form->$nobj->newValue) : 0.00;
@@ -649,17 +649,23 @@ class Rcaj extends validaciones {
 						$arr['cierre']     = 'S';
 						$arr['tipo']       = $row->tipo;
 
-						$rrecibido   += $recibido;
-						$sistema     += $row->sistema;
+						if($row->tipo=='DE'){
+							$depositos += $recibido;
+						}else{
+							$rrecibido += $recibido;
+						}
+						$sistema += $row->sistema;
+
 						$mmSQL = $this->db->insert_string('itrcaj', $arr);
 						$this->db->query($mmSQL);
 					}
-				}$rcajfecha=$this->db->escape($row->fecha);
+				}
+				$rcajfecha=$this->db->escape($row->fecha);
 				$transac=$row->transac;
 
 				$arr = array(
 					'tipo'     => 'F',
-					'recibido' => $rrecibido,
+					'recibido' => $rrecibido+$depositos,
 					'observa'  => $str,
 				);
 
@@ -679,14 +685,14 @@ class Rcaj extends validaciones {
 				//cierra el cajero
 
 				$cajero=$this->datasis->dameval('SELECT cajero FROM rcaj WHERE numero='.$dbnumero);
-				$sifact=$this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE cajero=".$this->db->escape($cajero)." AND fecha > $rcajfecha");
+				$sifact=$this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE cajero=".$this->db->escape($cajero)." AND fecha > ${rcajfecha}");
 				if($sifact==0){
 					$arr= array('status'=>'C',
 						'fechac'=>date('Ymd'),
 						'horac' =>date('h:i:s'),
-						'cierre'=>$rrecibido,
+						'cierre'=>$rrecibido+$depositos,
 						'caja'  =>$caja
-						);
+					);
 
 					$where = 'cajero='.$this->db->escape($cajero);
 					$mmSQL = $this->db->update_string('scaj', $arr, $where);
@@ -735,7 +741,7 @@ class Rcaj extends validaciones {
 				}
 				//Fin de las retenciones ISLR
 
-				//Crea el movimiento en smov
+				//Crea el movimiento en bmov
 				$mSQL  = 'SELECT fecha, cajero FROM rcaj WHERE numero='.$dbnumero;
 				$query = $this->db->query($mSQL);
 				$row   = $query->first_row();
@@ -770,13 +776,41 @@ class Rcaj extends validaciones {
 				$mSQL = $this->db->insert_string('bmov', $data);
 				$ban=$this->db->query($mSQL);
 				if($ban==false) memowrite($mSQL,'rcaj');
-				//Fin del movimiento en smov
+				//Fin del movimiento en bmov
+
+				//Monto por depositos
+				if($depositos>0){
+					$nbmov=$this->_banprox($caja);
+					$data = array();
+					$data['codbanc']    =$caja;
+					$data['moneda']     =$row->moneda;
+					$data['numcuent']   =$row->numcuent;
+					$data['banco']      =$row->banco;
+					$data['saldo']      =$row->saldo;
+					$data['tipo_op']    ='NC';
+					$data['numero']     =$nbmov;
+					$data['fecha']      =$fecha;
+					$data['clipro']     ='O';
+					$data['codcp']      ='VENT';
+					$data['nombre']     ='INGRESOS DIARIOS';
+					$data['monto']      =$depositos;
+					$data['concepto']   ="DEPOSITOS RECIBIDOS CAJERO ${cajero} DIA ".dbdate_to_human($fecha);
+					$data['transac']    =$transac;
+					$data['usuario']    =$usuario;
+					$data['estampa']    =$estampa;
+					$data['hora']       =$hora;
+
+					$mSQL = $this->db->insert_string('bmov', $data);
+					$ban=$this->db->query($mSQL);
+					if($ban==false) memowrite($mSQL,'rcaj');
+				}
+				//Fin del monto por deposito
 
 				//Actualiza el saldo en la caja
-				$this->datasis->actusal($caja, $sfecha, $rrecibido);
+				$this->datasis->actusal($caja, $sfecha, $rrecibido+$depositos);
 
 				//Crea la diferencia en caja si la hay
-				$dif=$rrecibido-$sistema;
+				$dif=$rrecibido+$depositos-$sistema;
 				if($dif!=0.00){
 					$mSQL = 'SELECT COUNT(*) AS n  FROM banc WHERE codbanc="DF"';
 					$query= $this->db->query($mSQL);
@@ -818,7 +852,7 @@ class Rcaj extends validaciones {
 						$data['codcp']      ='VENT';
 						$data['nombre']     ='INGRESOS DIARIOS';
 						$data['monto']      =abs($dif);
-						$data['concepto']   ="FALTANTE EN CAJA $caja CAJERO $cajero DIA ".dbdate_to_human($fecha);
+						$data['concepto']   ="FALTANTE EN CAJA ${caja} CAJERO ${cajero} DIA ".dbdate_to_human($fecha);
 						$data['transac']    =$transac;
 						$data['usuario']    =$usuario;
 						$data['estampa']    =$estampa;
@@ -842,7 +876,7 @@ class Rcaj extends validaciones {
 						$data['codcp']      ='VENT';
 						$data['nombre']     ='INGRESOS DIARIOS';
 						$data['monto']      =abs($dif);
-						$data['concepto']   ="SOBRANTE EN CAJA $caja CAJERO $cajero DIA ".dbdate_to_human($fecha);
+						$data['concepto']   ="SOBRANTE EN CAJA ${caja} CAJERO ${cajero} DIA ".dbdate_to_human($fecha);
 						$data['transac']    =$transac;
 						$data['usuario']    =$usuario;
 						$data['estampa']    =$estampa;
@@ -857,14 +891,14 @@ class Rcaj extends validaciones {
 				}
 
 				//Crea los movimientos bmov a consecuencia de los pagos con depositos
-				$mSQL="INSERT IGNORE INTO bmov ( codbanc, tipo_op, numero, fecha, clipro, codcp, nombre, monto, concepto, status, liable, transac, usuario, estampa, hora, anulado)
-				SELECT a.banco codbanc, a.tipo tipo_op, a.num_ref numero, a.fecha, 'C' clipro, a.cod_cli codcp, b.nombre, a.monto, 'INGRESO POR COBRANZA' concepto, 'P' status, 'S' liable, a.transac, a.usuario, a.estampa, a.hora, 'N' anulado
-				FROM sfpa a JOIN scli b ON a.cod_cli=b.cliente
-				WHERE a.tipo='DE' AND tipo_doc<>'AB'";
-				$ban=$this->db->query($mSQL);
-				if($ban==false) memowrite($mSQL,'rcaj');
+				//$mSQL="INSERT IGNORE INTO bmov ( codbanc, tipo_op, numero, fecha, clipro, codcp, nombre, monto, concepto, status, liable, transac, usuario, estampa, hora, anulado)
+				//SELECT a.banco codbanc, a.tipo tipo_op, a.num_ref numero, a.fecha, 'C' clipro, a.cod_cli codcp, b.nombre, a.monto, 'INGRESO POR COBRANZA' concepto, 'P' status, 'S' liable, a.transac, a.usuario, a.estampa, a.hora, 'N' anulado
+				//FROM sfpa a JOIN scli b ON a.cod_cli=b.cliente
+				//WHERE a.tipo='DE' AND tipo_doc='FE' AND fecha=${dbfecha}";
+				//$ban=$this->db->query($mSQL);
+				//if($ban==false) memowrite($mSQL,'rcaj');
 
-				logusu('rcaj',"Cerro cajero $cajero de $fecha");
+				logusu('rcaj',"Cerro cajero ${cajero} de ${fecha}");
 
 				redirect('ventas/rcaj/filteredgrid/search');
 			}

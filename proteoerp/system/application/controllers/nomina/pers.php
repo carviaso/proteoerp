@@ -37,8 +37,8 @@ class Pers extends Controller {
 
 		$adic = array(
 			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
-			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
-			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+			array('id'=>'fshow' , 'title'=>'Mostrar Registro'),
+			array('id'=>'fborra', 'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -1132,11 +1132,11 @@ class Pers extends Controller {
 		$edit->telefono->maxlength=30;
 		$edit->telefono->rule="trim|strtoupper";
 
-		$edit->email = new inputField("Email","email");
+		$edit->email = new inputField('Email','email');
 		$edit->email->size =30;
-		$edit->email->group = "Datos del Trabajador";
+		$edit->email->group = 'Datos del Trabajador';
 		$edit->email->maxlength=50;
-		$edit->email->rule="trim";
+		$edit->email->rule='trim';
 
 		$edit->civil = new dropdownField('Estado Civil', 'civil');
 		$edit->civil->style = 'width:80px;';
@@ -1232,7 +1232,7 @@ class Pers extends Controller {
 		$edit->retiro->rule='trim|chfecha';
 		$edit->retiro->calendar = false;
 
-		$edit->dialib = new inputField('Dias libres', 'dialib');
+		$edit->dialib = new inputField('D&iacute;as libres', 'dialib');
 		$edit->dialib->group = 'Relaci&oacute;n Laboral';
 		$edit->dialib->size =4;
 		$edit->dialib->maxlength=2;
@@ -1249,7 +1249,7 @@ class Pers extends Controller {
 		$edit->dialab->in = 'dialib';
 
 		$edit->status = new dropdownField('Estatus', 'status');
-		$edit->status->options(array('A'=> 'Activo','V'=>"Vacaciones","R"=>"Retirado","I"=>"Inactivo","P"=>"Permiso"));
+		$edit->status->options(array('A'=> 'Activo','V'=>'Vacaciones','R'=>'Retirado','I'=>'Inactivo','P'=>'Permiso'));
 		$edit->status->group = 'Relaci&oacute;n Laboral';
 		$edit->status->style = 'width:100px;';
 
@@ -1353,6 +1353,7 @@ class Pers extends Controller {
 		$edit->vari5->size =10;
 		$edit->vari5->maxlength=12;
 		$edit->vari5->rule='trim|chfecha';
+		$edit->var5->calendar=false;
 
 		$edit->vari6 = new inputField($vari6, 'vari6');
 		$edit->vari6->group = 'Variables';
