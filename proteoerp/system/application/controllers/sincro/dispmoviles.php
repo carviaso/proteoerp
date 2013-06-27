@@ -49,6 +49,7 @@ class Dispmoviles extends Controller {
 				$val =str_replace(chr(165),'Ñ',$val);
 				$val =str_replace(chr(164),'ñ',$val);
 				$val =str_replace(chr(166),'º',$val);
+				$val =str_replace(chr(167),'º',$val);
 				return $val;
 			}
 		};
@@ -126,6 +127,7 @@ class Dispmoviles extends Controller {
 
 	//Recibe y guarda los pedidos de Cerix
 	function pfac($uuid){
+		session_write_close();
 		$this->load->library('rapyd');
 
 		//Para probar
@@ -138,6 +140,9 @@ class Dispmoviles extends Controller {
 		//);
 		//***********
 
+		$var=print_r($_POST,true);
+		memowrite($var, rand(5, 15));
+
 		$sal=array('error'=>'','op'=>false,'numero'=>'');
 		$i = 0;
 		$rt=$this->secu->login_uuid($uuid);
@@ -145,19 +150,16 @@ class Dispmoviles extends Controller {
 			$sal['error'] = 'Error de autentificacion.';
 			$sal['op']    = false;
 			$sal['numero']= '';
-			json_encode($sal);
+			echo json_encode($sal);
 			return false;
 		}
-
-		//$var=print_r($_POST,true);
-		//memowrite($var,'averrr');
 
 		$idscli  = $this->input->post('idscli');
 		if(empty($idscli)){
 			$sal['error'] = 'Error en la data.';
 			$sal['op']    = false;
 			$sal['numero']= '';
-			json_encode($sal);
+			echo json_encode($sal);
 			return false;
 		}
 
@@ -168,7 +170,7 @@ class Dispmoviles extends Controller {
 			$sal['error'] = 'Cliente no existe';
 			$sal['op']    = false;
 			$sal['numero']= '';
-			json_encode($sal);
+			echo json_encode($sal);
 			return false;
 		}
 		unset($_POST['idscli']);
@@ -234,7 +236,7 @@ class Dispmoviles extends Controller {
 			$sal['error'] = 'Pedido sin articulos';
 			$sal['op']    = false;
 			$sal['numero']= '';
-			json_encode($sal);
+			echo json_encode($sal);
 			return false;
 		}
 
