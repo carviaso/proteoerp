@@ -140,9 +140,6 @@ class Dispmoviles extends Controller {
 		//);
 		//***********
 
-		$var=print_r($_POST,true);
-		memowrite($var, rand(5, 15));
-
 		$sal=array('error'=>'','op'=>false,'numero'=>'');
 		$i = 0;
 		$rt=$this->secu->login_uuid($uuid);
