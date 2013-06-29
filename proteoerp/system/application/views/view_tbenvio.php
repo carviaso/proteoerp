@@ -116,16 +116,25 @@ function ctarifa(){
 	var total= 0;
 	var iva  = 0;
 
-	var tarifa = JSON.parse($.ajax({
-		type: "POST",
-		url: "<?php echo site_url($this->url.'tarifape') ?>",
-		data: {'q':peso,'o':org,'d':des} ,
-		dataType: "json",async: false }).responseText
-		);
+	var autoriza= Number($('#autoriza').val());
 
-	pseguro = tarifa.seguro;
-	pfledes = tarifa.fledes;
-	venvio  = tarifa.monto;
+	if(autoriza>0){
+		var tarifa = {seguro:0,fledes:0,monto:0};
+		pseguro = 0;
+		pfledes = 0;
+		venvio  = 0;
+	}else{
+		var tarifa = JSON.parse($.ajax({
+			type: "POST",
+			url: "<?php echo site_url($this->url.'tarifape') ?>",
+			data: {'q':peso,'o':org,'d':des} ,
+			dataType: "json",async: false }).responseText
+			);
+
+		pseguro = tarifa.seguro;
+		pfledes = tarifa.fledes;
+		venvio  = tarifa.monto;
+	}
 	$('#kilo').val(tarifa.distancia);
 	$('#ipostel').val(tarifa.iposte);
 	$('#envio').val(tarifa.monto);
@@ -173,6 +182,8 @@ function fexon(){
 
 						if(verif){
 							$('#autoriza').val(vautoriza);
+							ctarifa();
+							totalizar();
 							return true;
 						}else{
 							$('#_resul').text('no verificado');
@@ -199,7 +210,7 @@ function fexon(){
 
 			if(oficina.length>0){
 				$.ajax({
-					dataType: "json",
+					dataType: 'json',
 					type: 'POST',
 					url : '<?php echo site_url($this->url.'autoriza') ?>',
 					data: {'oficina' : oficina },
@@ -218,7 +229,6 @@ function fexon(){
 		$('#autoriza').val('');
 	}
 	return false;
-	totalizar();
 }
 
 function ffledes(){
@@ -234,15 +244,29 @@ function ffledes(){
 }
 
 function totalizar(){
-	var tasa   = Number($('#tasa').val());
-	var envio  = Number($('#envio').val());
-	var ipostel= Number($('#ipostel').val());
-	var kilo   = Number($('#kilo').val());
-	var volumen= Number($('#volumen').val());
-	var puertap= Number($('#puertap').val());
-	var vseguro= Number($('#seguro').val());
-	var base   = volumen+envio+kilo+puertap;
-	var iva    = roundNumber(base*tasa/100,2);
+	var autoriza= Number($('#autoriza').val());
+
+	if(autoriza>0){
+		var tasa    = 0;
+		var envio   = 0;
+		var ipostel = 0;
+		var kilo    = 0;
+		var volumen = 0;
+		var puertap = 0;
+		var vseguro = 0;
+		var base    = 0;
+		var iva     = 0;
+	}else{
+		var tasa    = Number($('#tasa').val());
+		var envio   = Number($('#envio').val());
+		var ipostel = Number($('#ipostel').val());
+		var kilo    = Number($('#kilo').val());
+		var volumen = Number($('#volumen').val());
+		var puertap = Number($('#puertap').val());
+		var vseguro = Number($('#seguro').val());
+		var base    = volumen+envio+kilo+puertap;
+		var iva     = roundNumber(base*tasa/100,2);
+	}
 
 	$('#subtotal').val(base);
 	$('#subtotal_val').text(nformat(base,2));

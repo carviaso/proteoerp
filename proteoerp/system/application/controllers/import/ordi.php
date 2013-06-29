@@ -144,6 +144,20 @@ class Ordi extends Controller {
 		$do = new DataObject('ordi');
 		$do->rel_one_to_many('itordi', 'itordi', 'numero');
 
+		$_status  = $do->get('status');
+		$_control = $do->get('control');
+		if($_status=='C' && !empty($_control)){
+			$dbcontrol= $this->db->escape($control);
+			$scstcana = $this->datasis->dameval('SELECT COUNT(*) FROM scst WHERE control='.$dbcontrol);
+			if(empty($scstcana)){
+				$_id =  $do->get('id');
+				$this->db->simple_query('UPDATE ordi SET status="A", control=NULL WHERE id='.$_id);
+				$do->set('control','');
+				$do->set('status','A');
+			}
+
+		}
+
 		$edit = new DataDetails('ordi', $do);
 		$edit->back_url = site_url('import/ordi/filteredgrid');
 		$edit->set_rel_title('itstra','Producto <#o#>');

@@ -1083,7 +1083,8 @@ class Tbenvio extends Controller {
 		$confirma= $this->datasis->dameval("SELECT opc FROM tbacepta WHERE registro=${dbnumero}");
 
 		if(empty($confirma)){
-			echo 'false';
+			//echo 'false';
+			echo 'true';
 		}else{
 			echo 'true';
 		}

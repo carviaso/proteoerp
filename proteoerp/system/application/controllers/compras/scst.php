@@ -3814,6 +3814,10 @@ class Scst extends Controller {
 		//Borra los vehiculos
 		$this->db->simple_query('DELETE FROM sinvehiculo WHERE id_scst='.$dbid);
 
+		//if($this->db->table_exists('ordi')){
+		//	$dbcontrol=$this->db->escape($control);
+		//	$this->db->simple_query('UPDATE ordi SET status="A", control=NULL WHERE control='.$dbcontrol);
+		//}
 
 		logusu('scst',"Compra ${codigo} Control ${control} ELIMINADA");
 	}
