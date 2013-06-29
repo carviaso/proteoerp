@@ -1117,10 +1117,11 @@ class Ssal extends Controller {
 
 			$mSQL = "INSERT INTO gitser ( fecha, numero, proveed, codigo, descrip, precio, iva, importe, departa, sucursal, transac, usuario, estampa, hora )
 					  SELECT c.fecha fecha, c.numero, 'AJUSI' proveed,
-						b.gasto, a.descrip, sum(a.costo*a.cantidad) precio, 0 iva, sum(a.costo*a.cantidad) importe,
+						b.gasto, a.descrip, SUM(a.costo*a.cantidad) precio, 0 iva, SUM(a.costo*a.cantidad) importe,
 						d.depto departa, d.sucursal, a.transac, a.usuario, a.estampa, a.hora
 						FROM itssal a JOIN icon b ON a.concepto=b.codigo
-						JOIN ssal c ON a.numero=c.numero LEFT JOIN usol d ON c.cargo=d.codigo
+						JOIN ssal c ON a.numero=c.numero
+						LEFT JOIN usol d ON c.cargo=d.codigo
 						WHERE a.numero='".$numero."' GROUP BY a.concepto ";
 			$this->db->query($mSQL);
 
@@ -1149,7 +1150,7 @@ class Ssal extends Controller {
 
 			$this->db->insert('otin', $data);
 			$mSQL="	INSERT INTO itotin (tipo_doc, numero, codigo, descrip, precio, impuesto, importe, usuario, estampa, hora, transac )
-					SELECT 'OT' tipo_doc, '".$mNUMERO."' numero,   b.ingreso codigo, 'AJUSTES DE INVENTARIO' descrip, sum(a.costo) precio, 0 impuesto, sum(a.costo) importe, a.usuario, a.estampa, a.hora, a.transac
+					SELECT 'OT' AS tipo_doc, '".$mNUMERO."' AS numero,   b.ingreso codigo, 'AJUSTES DE INVENTARIO' descrip, SUM(a.costo*a.cantidad) precio, 0 impuesto, SUM(a.costo*a.cantidad) importe, a.usuario, a.estampa, a.hora, a.transac
 					FROM itssal a JOIN icon b ON a.concepto=b.codigo WHERE a.numero='".$numero."' GROUP BY a.concepto";
 
 			$this->db->query($mSQL);
