@@ -39,15 +39,17 @@ class Scli extends validaciones {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'edocta' , 'img'=>'images/pdf_logo.gif', 'alt' => 'Formato PDF'    , 'label'=>'Estado de Cuenta' ));
-		$grid->wbotonadd(array('id'=>'editacr', 'img'=>'images/star.png'    , 'alt' => 'Cr&eacute;dito' , 'label'=>'L&iacute;mite de Cr&eacute;dito'));
+		$grid->wbotonadd(array('id'=>'edocta' , 'img'=>'images/pdf_logo.gif', 'alt' => 'Formato PDF'       , 'label'=>'Estado de Cuenta' ));
+		$grid->wbotonadd(array('id'=>'editacr', 'img'=>'images/check.png'    , 'alt' => 'Cr&eacute;dito'    , 'label'=>'L&iacute;mite de Cr&eacute;dito'));
+		$grid->wbotonadd(array('id'=>'gciud'  , 'img'=>'images/star.png'    , 'alt' => 'Gestionar ciudades', 'label'=>'Ciudades'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
 			array('id'=>'fedita' , 'title'=>'Agregar/Editar Cliente'  ),
 			array('id'=>'feditcr', 'title'=>'Cambia Limite de Credito'),
 			array('id'=>'fshow'  , 'title'=>'Mostrar Registro'        ),
-			array('id'=>'fborra' , 'title'=>'Eliminar Registro'       )
+			array('id'=>'fborra' , 'title'=>'Eliminar Registro'       ),
+			array('id'=>'fciud'  , 'title'=>'Gestionar ciudades'      )
 		);
 
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
@@ -210,6 +212,15 @@ class Scli extends validaciones {
 				"SENIAT":   function() { consulrif("rifci"); },
 				"C.N.E.":   function() { consulcne("rifci"); },';
 
+		// Marcas
+		$bodyscript .= '
+		$("#gciud").click(function(){
+			$.post("'.site_url($this->url.'marcaform').'",
+			function(data){
+				$("#fciud").html(data);
+				$("#fciud").dialog( "open" );
+			});
+		});';
 
 		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "550", $width = "800",'','',$botones );
 
@@ -289,7 +300,13 @@ class Scli extends validaciones {
 			}
 		});';
 
-
+		$bodyscript .= '
+		$("#fciud").dialog({
+			autoOpen: false, height: 400, width: 320, modal: true,
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
 
 		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "500", $width = "700" );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, "300", "300" );
@@ -2434,6 +2451,66 @@ function chrif(rif){
 		echo $rt;
 	}
 
+	//******************************************************************
+	// Forma de Ciudades
+	//
+	function marcaform(){
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'      => 'true',
+			'align'       => "'center'",
+			'width'       => 20,
+			'editable'    => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+			)
+		);
+
+		$grid->addField('ciudad');
+		$grid->label('Ciudad');
+		$grid->params(array(
+			'width'     => 180,
+			'editable'  => 'true',
+			'edittype'  => "'text'",
+			'editrules' => '{required:true}'
+			)
+		);
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('300');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url('ventas/ciud/getdata/'));
+		$grid->setUrlput(site_url('ventas/ciud/setdata/'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+
+	}
+
+
 	//Crea un cliente desde pers
 	function creafrompers($status=null,$id_pers=null){
 		if($status=='insert' && !empty($id_pers)){
@@ -3013,6 +3090,12 @@ function chrif(rif){
 			$this->db->simple_query($mSQL);
 		}
 
+		$campos=$this->db->list_fields('ciud');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE `ciud` DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE `ciud` ADD UNIQUE INDEX `ciudad` (`ciudad`)');
+			$this->db->simple_query('ALTER TABLE `ciud` ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
 
 	}
 }
