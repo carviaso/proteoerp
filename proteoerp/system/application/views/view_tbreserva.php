@@ -70,6 +70,8 @@ function resepu( ppp, aaa ){
 	var monto  = 0;
 	var nropas = 0;
 	var id = $("#tbrutas").jqGrid('getGridParam','selrow');
+	var menores  = $("#menores").val();
+	var ancianos = $("#ancianos").val();
 
 	nropas = $("input:checked").length;
 
@@ -84,10 +86,53 @@ function resepu( ppp, aaa ){
 	}
 }
 
+
 function reserva(indice){
 	alert("Indice="+indice);
 }
 
+function fmenores(mtipo){
+	var mm  = +$("#menores").val();
+	var aa  = +$("#ancianos").val();
+	var id  = $("#tbrutas").jqGrid('getGridParam','selrow');
+	var ret = $("#tbrutas").getRowData(id);
+	var nropas = 0;
+	var cc = mm+aa;
+
+	nropas = $("input:checked").length;
+
+	// Si tiene demasiados ninos
+	if ( cc > nropas ){
+		if ( aa == 0 ){ 
+			mm = nropas;
+			$("#menores" ).val(mm); 
+		} else if ( mm == 0 ){ 
+			aa = nropas;
+			$("#ancianos" ).val(aa); 
+		} else {
+			$("#menores" ).val(0); 
+			$("#ancianos" ).val(0); 
+			alert('No pueden haber mas menores y ancianos que puestos');
+		}
+	}
+	
+	//No pueden viajar ninos solos
+	if ( mm == nropas ){
+		alert('Viajan solo Menores');
+	}
+	
+	//if ( mtipo == 'M'){
+		$('#monto').html( moneyformat(ret.precio*nropas) );
+		$('#madulto').html(moneyformat(ret.precio*(nropas-mm-aa))); 
+		$('#mmenor').html(moneyformat(ret.precio*mm));
+		$('#manci').html(moneyformat(ret.precio*aa));
+/*
+	} else {
+		$('#madulto').html(); 
+		$('#mmenor').html();
+		$('#manci').html();
+	}*/
+}
 </script>
 <?php } 
 echo $form->codrut->output;
@@ -114,7 +159,21 @@ echo $form->codrut->output;
 <br>
 <div id='puestos' name='puestos' style='margin-left:0em;' ></div>
 <br>
+<table id='resumen' style='font-size:1.5em;display:none;'>
+	<tr>
+		<td class="littletablerowth">Pasajes:</td>
+		<td><div id='nropas'  ></div></td>
+		<td class="littletablerowth">Precio</td>
+		<td class="littletablerow"><div id='monto'></div></td>
+		<td class="littletablerowth"><?php echo $form->nomcli->label;     ?></td>
+		<td class="littletablerow" ><?php echo $form->nomcli->output;    ?></td>
+	</tr>
 
+</table>
+
+<?php 
+echo $form_end; 
+/*
 <table id='resumen' style='font-size:1.5em;display:none;'>
 	<tr>
 		<td class="littletablerowth">Pasajes:    </td><td><div id='nropas'  ><> </div></td>
@@ -137,7 +196,5 @@ echo $form->codrut->output;
 	</tr>
 
 </table>
-
-<?php 
-echo $form_end; 
+*/
 ?>

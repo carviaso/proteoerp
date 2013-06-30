@@ -716,7 +716,8 @@ class Tbreserva extends Controller {
 		$edit->menores->insertValue='0';
 		$edit->menores->size      =  6;
 		$edit->menores->maxlength =  8;
-		$edit->menores->css_class='inputnum';
+		$edit->menores->css_class = 'inputnum';
+		$edit->menores->onchange  = 'fmenores(\'M\')';
 
 		$edit->ancianos = new inputField('Ancianos','ancianos');
 		$edit->ancianos->rule      = 'numeric';
@@ -724,6 +725,7 @@ class Tbreserva extends Controller {
 		$edit->ancianos->size      =  6;
 		$edit->ancianos->maxlength =  8;
 		$edit->ancianos->css_class='inputnum';
+		$edit->ancianos->onchange  = 'fmenores(\'A\')';
 
 		$edit->descuento = new inputField('Descuento','descuento');
 		$edit->descuento->rule      = 'numeric';
@@ -731,6 +733,14 @@ class Tbreserva extends Controller {
 		$edit->descuento->size      =  6;
 		$edit->descuento->maxlength =  8;
 		$edit->descuento->css_class='inputnum';
+
+		
+		if ($edit->_status == 'modify' ){
+			$id  = $this->uri->segment($this->uri->total_segments());
+			
+			$localiza = $this->datasis->dameval("SELECT localiza FROM tbreserva WHERE id=$id"); 
+		
+		}
 
 
 		$edit->build();
@@ -745,8 +755,10 @@ class Tbreserva extends Controller {
 		}else{
 			$conten['form']  =& $edit;
 			$this->load->view('view_tbreserva', $conten);
+
 		}
 	}
+
 
 
 	//******************************************************************
@@ -1087,14 +1099,6 @@ class Tbreserva extends Controller {
 				if  ($puestos == 0 ) break;
 			}
 		}
-/*
-		$do->set('nacio','TTT');
-		$do->set('codcli','-TEMP');
-		$do->set('nomcli','*TEMPORAL SE ELIMINARA');
-		$do->set('usuario', $this->session->userdata('usuario'));
-		$do->set('tipven','R');
-		$do->set('localiza',$localiza);
-*/
 		$do->error_message_ar['pre_ins']=$msj;
 		return $reto;
 	}
@@ -1165,3 +1169,4 @@ class Tbreserva extends Controller {
 		}
 	}
 }
+?>

@@ -463,21 +463,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		
 		$this->load->view('view_ventanas_lite',$data);
 
-/*
-
-	function camposdb(){
-	}
-
-	function lcamposdb(){
-	}
-
-	function acamposdb(){
-	}
-
-	function ccamposdb(){
-	}
-*/
-
 	}
 
 	function camposdb(){
@@ -1065,7 +1050,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		}
 	}
 
-/*
+
 	//******************************************************************
 	//
 	//  Genera Crud para jqGrid
@@ -1524,7 +1509,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 		}
 	}
-*/
+
 
 	//******************************************************************
 	//
