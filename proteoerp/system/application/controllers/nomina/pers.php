@@ -32,8 +32,31 @@ class Pers extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'a1', 'img'=>'assets/default/images/print.png',  'alt' => 'Imprimir', 'label'=>'Imprimir'));
+		//$grid->wbotonadd(array('id'=>'a1', 'img'=>'assets/default/images/print.png',  'alt' => 'Imprimir', 'label'=>'Imprimir'));
+
+		$WpAdic = "
+		<tr><td><div class=\"anexos\">
+			<table cellpadding='0' cellspacing='0'>
+				<tr>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gprofe'>Profesiones</a></div></td>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gcargo'>Cargos</a></div></td>
+				</tr>
+				<tr>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gdivi' >Divisiones</a></div></td>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gdepa'>Deptos.</a></div></td>
+				</tr>
+			</table>
+			</div>
+		</td></tr>\n
+		";
+
+/*
+*/
+
+
+		$grid->setWpAdicional($WpAdic);
 		$WestPanel = $grid->deploywestp();
+
 
 		$adic = array(
 			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
@@ -69,6 +92,60 @@ class Pers extends Controller {
 				window.open(\''.base_url().'formatos/ver/PERS/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});';
+
+
+		// Profesiones
+		$bodyscript .= '
+		$("#gprofe").click(
+			function(){
+				$.post("'.site_url('nomina/pers/profeform').'",
+				function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"PROFESIONES", width: 410, height: 400, modal: true } );
+					$("#fshow").dialog( "open" );
+				});
+			});
+		';
+
+		// Cargos
+		$bodyscript .= '
+		$("#gcargo").click(
+			function(){
+				$.post("'.site_url('nomina/pers/cargoform').'",
+				function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"CARGOS", width: 410, height: 400, modal: true } );
+					$("#fshow").dialog( "open" );
+				});
+			});
+		';
+
+		// Divisiones
+		$bodyscript .= '
+		$("#gdivi").click(
+			function(){
+				$.post("'.site_url('nomina/pers/diviform').'",
+				function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"DIVISIONES", width: 410, height: 400, modal: true } );
+					$("#fshow").dialog( "open" );
+				});
+			});
+		';
+
+		// DEPARTAMENTOS
+		$bodyscript .= '
+		$("#gdepa").click(
+			function(){
+				$.post("'.site_url('nomina/pers/depaform').'",
+				function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( { title:"DEPARTAMENTOS", width: 690, height: 400, modal: true } );
+					$("#fshow").dialog( "open" );
+				});
+			});
+		';
+
 
 		$fvari = '"<h1>Variables del Trabajador</h1>Cliente: <b>"+ret.nombre+"</b><br><br><table align=center><tr><td>';
 		$fvari .= $this->datasis->traevalor('NOMVARI1').':</td><td> <input type=\'text\' id=\'xvari1\' name=\'xvari1\' size=\'6\' maxlength=\'5\' value=\""+ret.vari1+"\"></td></tr><tr><td>';
@@ -1437,7 +1514,361 @@ class Pers extends Controller {
 		}
 	}
 
-	//Busca Trabajadores
+	//******************************************************************
+	// Forma de Profesiones
+	//
+	function profeform(){
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'   => 'true',
+			'align'    => "'center'",
+			'frozen'   => 'true',
+			'width'    => 60,
+			'editable' => 'false',
+			'search'   => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+		$grid->addField('codigo');
+		$grid->label('Codigo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 100,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+		));
+
+		$grid->addField('profesion');
+		$grid->label('Profesion');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 350,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+		));
+
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('390');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url('nomina/prof/getdata/'));
+		$grid->setUrlput(site_url('nomina/prof/setdata/'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+
+	}
+
+
+	//******************************************************************
+	// Forma de Cargos
+	//
+	function cargoform(){
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'   => 'true',
+			'align'    => "'center'",
+			'frozen'   => 'true',
+			'width'    => 60,
+			'editable' => 'false',
+			'search'   => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+		$grid->addField('cargo');
+		$grid->label('Cargo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:10, maxlength: 8 }',
+		));
+
+
+		$grid->addField('descrip');
+		$grid->label('Descripcion');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 300,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+		));
+
+
+		$grid->addField('sueldo');
+		$grid->label('Sueldo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+		));
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('390');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url('nomina/carg/getdata/'));
+		$grid->setUrlput(site_url('nomina/carg/setdata/'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+
+	}
+
+
+	//******************************************************************
+	// Forma de Divisiones
+	//
+	function diviform(){
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'   => 'true',
+			'align'    => "'center'",
+			'frozen'   => 'true',
+			'width'    => 60,
+			'editable' => 'false',
+			'search'   => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+		$grid->addField('division');
+		$grid->label('Codigo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:10, maxlength: 8 }',
+		));
+
+
+		$grid->addField('descrip');
+		$grid->label('Descripcion');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 300,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:30, maxlength: 30 }',
+		));
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('390');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url('nomina/divi/getdata/'));
+		$grid->setUrlput(site_url('nomina/divi/setdata/'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+
+	}
+
+	//******************************************************************
+	// Forma de Departamento
+	//
+	function depaform(){
+		$editar = "true";
+
+		$mSQL = "SELECT division, CONCAT(division, ' ', descrip) descrip FROM divi ORDER BY division ";
+		$adivision = $this->datasis->llenajqselect($mSQL, false );
+
+		$mSQL  = "SELECT depto, CONCAT( depto, ' ', descrip) nombre FROM dpto WHERE tipo='G' ORDER BY depto ";
+		$aenlace   = $this->datasis->llenajqselect($mSQL, false );
+
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'   => 'true',
+			'align'    => "'center'",
+			'frozen'   => 'true',
+			'width'    => 60,
+			'editable' => 'false',
+			'search'   => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+
+		$grid->addField('departa');
+		$grid->label('Codigo');
+		$grid->params(array(
+			'align'    => "'center'",
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 60,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:8, maxlength: 8 }',
+		));
+
+		$grid->addField('depadesc');
+		$grid->label('Departamento');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 180,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:30, maxlength: 30 }',
+		));
+
+		$grid->addField('division');
+		$grid->label('Division');
+		$grid->params(array(
+			'align'         => "'center'",
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 240,
+			'edittype'      => "'select'",
+			'editoptions'   => '{ value: '.$adivision.',  style:"width:250px"}',
+			'stype'         => "'text'",
+		));
+/*
+		$grid->addField('descrip');
+		$grid->label('Descripcion');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'false',
+			'width'         => 200,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:30, maxlength: 30 }',
+		));
+*/
+		$grid->addField('enlace');
+		$grid->label('Enlace');
+		$grid->params(array(
+			'align'         => "'center'",
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 240,
+			'edittype'      => "'select'",
+			'editoptions'   => '{ value: '.$aenlace.',  style:"width:250px"}',
+			'stype'         => "'text'"
+		));
+
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('670');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url('nomina/depa/getdata/'));
+		$grid->setUrlput(site_url('nomina/depa/setdata/'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+
+	}
+
+
+
+	//******************************************************************
+	// Busca Trabajadores
+	//
 	function persbusca() {
 		$start   = isset($_REQUEST['start'])  ? $_REQUEST['start']  :  0;
 		$limit   = isset($_REQUEST['limit'])  ? $_REQUEST['limit']  : 15;
@@ -1472,6 +1903,11 @@ class Pers extends Controller {
 		}
 	}
 
+
+
+	//******************************************************************
+	// Instalar
+	//
 	function instalar(){
 		$campos=$this->db->list_fields('pers');
 		if(!in_array('email',$campos))
