@@ -531,6 +531,7 @@ class pfaclite extends validaciones{
 		$usuario = $do->get('usuario');
 		$estampa = $do->get('estampa');
 		$hora    = $do->get('hora');
+		$modoiva = $this->datasis->traevalor('MODOIVA');
 
 		if(empty($numero)){
 			$numero = $this->datasis->fprox_numero('npfac');
@@ -564,7 +565,12 @@ class pfaclite extends validaciones{
 				$itiva   = $do->get_rel('itpfac','iva'    ,$i)/100;
 
 				$ittota  = $itpreca*$itcana;
-				$mostrado= $itpreca*(1+$itiva);
+
+				if($modoiva=='N'){
+					$mostrado= $itpreca;
+				}else{
+					$mostrado= round($itpreca*(1+$itiva),2);
+				}
 
 				$do->set_rel('itpfac', 'tota'    , $ittota  , $i);
 				$do->set_rel('itpfac', 'fecha'   , $fecha   , $i);

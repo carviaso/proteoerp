@@ -1593,6 +1593,7 @@ class Pfac extends Controller {
 	}
 
 	function _pre_insert($do){
+		$modoiva = $this->datasis->traevalor('MODOIVA');
 		$numero = $this->datasis->fprox_numero('npfac');
 		$do->set('numero', $numero);
 
@@ -1614,7 +1615,14 @@ class Pfac extends Controller {
 
 			$iva    += $ittota * ($itiva / 100);
 			$totals += $ittota;
-			$do->set_rel('itpfac', 'mostrado', round($itpreca*(100+$itiva)/100,2), $i);
+
+			if($modoiva=='N'){
+				$mostrado= $itpreca;
+			}else{
+				$mostrado= round($itpreca*(100+$itiva)/100,2);
+			}
+
+			$do->set_rel('itpfac', 'mostrado', $mostrado, $i);
 		}
 		$totalg = $totals + $iva;
 
