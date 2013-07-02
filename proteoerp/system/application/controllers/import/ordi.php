@@ -150,7 +150,7 @@ class Ordi extends Controller {
 		$_control = $do->get('control');
 		if($_status=='C'){
 			$dbcontrol= $this->db->escape($_control);
-			$scstcana = $this->datasis->dameval('SELECT COUNT(*) FROM scst WHERE control='.$dbcontrol);
+			$scstcana = $this->datasis->dameval('SELECT COUNT(*) FROM scst WHERE tipo_doc<>\'XX\' AND control='.$dbcontrol);
 			if(empty($scstcana)){
 				$_id =  $do->get('id');
 				$this->db->simple_query('UPDATE ordi SET status="A", control=NULL WHERE id='.$_id);
