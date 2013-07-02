@@ -1,8 +1,8 @@
 <?php	//ordenservicio
 class Ords extends Controller {
 	var $mModulo = 'ORDS';
-	var $titp    = 'ORDENES DE SERVICIO';
-	var $tits    = 'ORDENES DE SERVICIO';
+	var $titp    = 'Ordenes de servicio';
+	var $tits    = 'Ordenes de servicio';
 	var $url     = 'finanzas/ords/';
 
 	function Ords(){
@@ -52,6 +52,12 @@ class Ords extends Controller {
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
+		$funciones = '
+		function ltransac(el, val, opts){
+			var link=\'<div><a href="#" onclick="tconsulta(\'+"\'"+el+"\'"+\');">\' +el+ \'</a></div>\';
+			return link;
+		};';
+
 		$param['WestPanel']    = $WestPanel;
 		$param['script']       = '';
 		//$param['EastPanel']  = $EastPanel;
@@ -60,7 +66,7 @@ class Ords extends Controller {
 		$param['listados']     = $this->datasis->listados('ORDS', 'JQ');
 		$param['otros']        = $this->datasis->otros('ORDS', 'JQ');
 		$param['centerpanel']  = $centerpanel;
-		//$param['funciones']    = $funciones;
+		$param['funciones']    = $funciones;
 		$param['temas']        = array('proteo','darkness','anexos1');
 		$param['bodyscript']   = $bodyscript;
 		$param['tabs']         = false;
@@ -75,6 +81,15 @@ class Ords extends Controller {
 	//***************************
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
+
+		$bodyscript .= '
+		function tconsulta(transac){
+			if (transac)	{
+				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+			} else {
+				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};';
 
 		$bodyscript .= '
 		function ordsadd(){
@@ -168,7 +183,7 @@ class Ords extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 500, width: 900, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -465,6 +480,7 @@ class Ords extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
+			'formatter'     => 'ltransac'
 		));
 
 		$grid->addField('usuario');
@@ -862,6 +878,7 @@ class Ords extends Controller {
 		$do->rel_one_to_many('itords' ,'itords' ,array('numero'));
 
 		$edit = new DataDetails('', $do);
+		$edit->on_save_redirect=false;
 
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
@@ -878,8 +895,8 @@ class Ords extends Controller {
 
 		$edit->numero = new inputField('N&uacute;mero', 'numero');
 		$edit->numero->size = 10;
-		$edit->numero->rule='required';
 		$edit->numero->mode='autohide';
+		$edit->numero->when=array('show','modify');
 
 		$edit->proveed = new inputField('Proveedor', 'proveed');
 		$edit->proveed->size = 6;
@@ -891,10 +908,12 @@ class Ords extends Controller {
 		$edit->nombre->size = 30;
 		$edit->nombre->maxlength=30;
 
+
+		//Campos para el anticipo
 		$edit->codban = new dropdownField('Banco','codban');
 		$edit->codban->option('','Seleccionar');
 		$edit->codban->options("SELECT codbanc, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE activo='S' ORDER BY codbanc");
-		$edit->codban->rule='max_length[5]|required';
+		$edit->codban->rule='max_length[5]';
 		$edit->codban->style='width:200px;';
 
 		$edit->tipo = new dropdownField('Tipo', 'tipo_op');
@@ -905,7 +924,7 @@ class Ords extends Controller {
 
 		$edit->cheque = new inputField('N&uacute;mero', 'cheque');
 		$edit->cheque->size = 10;
-		$edit->cheque->rule='required';
+		//$edit->cheque->rule='required';
 		$edit->cheque->mode='autohide';
 
 		$edit->comprob  = new inputField2('Comprobante', 'comprob');
@@ -913,8 +932,11 @@ class Ords extends Controller {
 
 		$edit->benefi  = new inputField('Beneficiario', 'benefi');
 		$edit->benefi->size = 30;
+		//Fin de los campos anticipos
 
-		$edit->condi  = new inputField('Condiciones', 'condi');
+		$edit->condi  = new textareaField('Condiciones', 'condi');
+		$edit->condi->cols = 70;
+		$edit->condi->rows = 2;
 		$edit->condi->size = 35;
 
 		$edit->anticipo  = new inputField('Anticipo', 'anticipo');
@@ -938,37 +960,74 @@ class Ords extends Controller {
 
 		//Campos para el detalle
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo_<#i#>');
-		$edit->codigo->size=10;
+		$edit->codigo->size=7;
 		$edit->codigo->db_name='codigo';
 		//$edit->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
 		$edit->codigo->rel_id ='itords';
 
 		$edit->descrip = new inputField('Descripci&oacute;n', 'descrip_<#i#>');
-		$edit->descrip->size=30;
+		$edit->descrip->size=25;
 		$edit->descrip->db_name='descrip';
 		$edit->descrip->maxlength=12;
 		$edit->descrip->rel_id ='itords';
 
+		$ivas=$this->datasis->ivaplica();
+		$edit->tasaiva =  new dropdownField('IVA <#o#>', 'tasaiva_<#i#>');
+		$edit->tasaiva->option($ivas['tasa']     ,$ivas['tasa'].'%');
+		$edit->tasaiva->option($ivas['redutasa'] ,$ivas['redutasa'].'%');
+		$edit->tasaiva->option($ivas['sobretasa'],$ivas['sobretasa'].'%');
+		$edit->tasaiva->option('0','0.00%');
+		$edit->tasaiva->db_name='tasaiva';
+		$edit->tasaiva->rule='positive';
+		$edit->tasaiva->style="30px";
+		$edit->tasaiva->rel_id   ='itords';
+		$edit->tasaiva->onchange ='importe(<#i#>)';
+
 		$edit->iva = new inputField('Impuesto', 'iva_<#i#>');
 		$edit->iva->size=10;
 		$edit->iva->db_name='iva';
-		$edit->iva->maxlength=10;
+		$edit->iva->maxlength=8;
 		$edit->iva->css_class='inputnum';
         $edit->iva->rel_id ='itords';
+        $edit->iva->showformat ='decimal';
+        $edit->iva->type='inputhidden';
 
 		$edit->precio = new inputField('Precio', 'precio_<#i#>');
 		$edit->precio->css_class='inputnum';
-		$edit->precio->onchange='totalizar()';
-		$edit->precio->size=10;
+		$edit->precio->onkeyup='importe(<#i#>)';
+		$edit->precio->size=9;
 		$edit->precio->db_name='precio';
         $edit->precio->rel_id ='itords';
 
-		$edit->importe = new inputField2('Importe', 'importe_<#i#>');
+		$edit->importe = new inputField('Importe', 'importe_<#i#>');
 		$edit->importe->db_name='importe';
 		$edit->importe->css_class='inputnum';
-		$edit->importe->size=10;
+		$edit->importe->size=9;
 		$edit->importe->rel_id ='itords';
+		$edit->importe->showformat ='decimal';
+		$edit->importe->type='inputhidden';
+
+		$edit->departa =  new dropdownField('Departamento <#o#>', 'departa_<#i#>');
+		$edit->departa->option('','Seleccionar');
+		$edit->departa->options("SELECT TRIM(depto) AS codigo, CONCAT_WS('-',depto,TRIM(descrip)) AS label FROM dpto WHERE tipo='G' ORDER BY depto");
+		$edit->departa->db_name= 'departa';
+		$edit->departa->rule   = 'required';
+		$edit->departa->style  = 'width:100px';
+		$edit->departa->rel_id = 'itords';
+		$edit->departa->onchange="gdeparta(this.value)";
+
+		$edit->sucursal =  new dropdownField('Sucursal <#o#>', 'sucursal_<#i#>');
+		$edit->sucursal->options("SELECT codigo,CONCAT(codigo,'-', sucursal) AS sucursal FROM sucu ORDER BY codigo");
+		$edit->sucursal->db_name= 'sucursal';
+		$edit->sucursal->rule   = 'required';
+		$edit->sucursal->style  = 'width:100px';
+		$edit->sucursal->rel_id = 'itords';
+		$edit->sucursal->onchange="gsucursal(this.value)";
 		//fin de campos para detalle
+
+		$edit->usuario = new autoUpdateField('usuario',$this->secu->usuario(),$this->secu->usuario());
+		$edit->estampa = new autoUpdateField('estampa',date('Ymd'), date('Ymd'));
+		$edit->hora    = new autoUpdateField('hora'   ,date('H:i:s'), date('H:i:s'));
 
 		$edit->buttons('add_rel');
 		$edit->build();
@@ -986,94 +1045,68 @@ class Ords extends Controller {
 		}
 	}
 
-	function dpto() {
-		$this->rapyd->load('dataform');
-		$campo='ccosto'.$this->uri->segment(4);
- 		$script='
- 		function pasar(){
-			if($F("departa")!="-!-"){
-				window.opener.document.getElementById("'.$campo.'").value = $F("departa");
-				window.close();
-			}else{
-				alert("Debe elegir un departamento");
-			}
-		}';
 
-		$form = new DataForm('');
-		$form->script($script);
-		$form->fdepar = new dropdownField("Departamento", "departa");
-		$form->fdepar->option('-!-','Seleccion un departamento');
-		$form->fdepar->options("SELECT depto,descrip FROM dpto WHERE tipo='G' ORDER BY descrip");
-		$form->fdepar->onchange='pasar()';
-		$form->build_form();
-
-		$data['content'] =$form->output;
-		$data['head']    =script('prototype.js').$this->rapyd->get_head();
-		$data['title']   ='<h1>Seleccione un departamento</h1>';
-		$this->load->view('view_detalle', $data);
-	}
-
-	function _guarda_detalle($do) {
-		$cant=$this->input->post('cant_0');
-		$i=$o=0;
-		while($o<$cant){
-			if (isset($_POST["codigo$i"])){
-				if($this->input->post("codigo$i")){
-
-					$sql = "INSERT INTO itords (fecha,numero,proveed,codigo,descrip,precio,importe,unidades,fraccion,almacen,sucursal,departa) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
-					//$haber=($this->input->post("monto$i") < 0)? $this->input->post("monto$i")*(-1) : 0;
-					$llena=array(
-							0=>$do->get('fecha'),
-							1=>$do->get('numero'),
-							2=>$do->get('proveed'),
-							3=>$this->input->post("codigo$i"),
-							4=>$this->input->post("descrip$i"),
-							5=>$this->input->post("precio$i"),
-							6=>$this->input->post("importe$i"),
-							7=>$this->input->post("unidades$i"),
-							8=>$this->input->post("fraccion$i"),
-							9=>$this->input->post("almacen$i"),
-						 10=>$this->input->post("sucursal$i"),
-						 11=>$this->input->post("departa$i"),
-							);
-					$this->db->query($sql,$llena);
-				}
-				$o++;
-			}
-			$i++;
-		}
-	}
-	function _actualiza_detalle($do){
-		$this->_borra_detalle($do);
-		$this->_guarda_detalle($do);
-	}
-	function _borra_detalle($do){
-		$numero=$do->get('numero');
-		$sql = "DELETE FROM itords WHERE numero='$numero'";
-		$this->db->query($sql);
-	}
 	function _pre_insert($do){
-		$sql    = 'INSERT INTO ntransa (usuario,fecha) VALUES ("'.$this->session->userdata('usuario').'",NOW())';
-		$query  =$this->db->query($sql);
-		$transac=$this->db->insert_id();
 
-		$sql    = 'INSERT INTO nrds (usuario,fecha) VALUES ("'.$this->session->userdata('usuario').'",NOW())';
-		$query  =$this->db->query($sql);
-		$control =str_pad($this->db->insert_id(),8, "0", STR_PAD_LEFT);
+		$proveed = $do->get('proveed');
+		$fecha   = $do->get('fecha');
+		$numero  = $this->datasis->fprox_numero('nords');
+		$transac = $this->datasis->fprox_numero('ntransa');
+		$total=$ivat=$subt=0;
 
-		$do->set('numero', $numero);
+		$cana=$do->count_rel('itords');
+		for($i=0;$i<$cana;$i++){
+			$codigo = $do->get_rel('itords','codigo' ,$i);
+			$auxt   = $do->get_rel('itords','tasaiva',$i);
+			$precio = $do->get_rel('itords','precio' ,$i);
+			$iva    = $precio*($auxt/100);
+
+			$importe=$iva+$precio;
+			$total+=$importe;
+			$ivat +=$iva;
+			$subt +=$precio;
+
+			$do->set_rel('itords','iva'    ,$iva    ,$i);
+			$do->set_rel('itords','importe',$importe,$i);
+			$do->set_rel('itords','proveed',$proveed,$i);
+			$do->set_rel('itords','numero' ,$numero ,$i);
+			$do->set_rel('itords','fecha'  ,$fecha  ,$i);
+
+			$do->rel_rm_field('itords','tasaiva',$i);//elimina el campo comodin
+		}
+
+
+		$do->set('numero' , $numero);
 		$do->set('transac', $transac);
-		$do->set('estampa', 'CURDATE()', FALSE);
-		$do->set('hora'   , 'CURRENT_TIME()', FALSE);
+		$do->set('estampa', 'CURDATE()', false);
+		$do->set('hora'   , 'CURRENT_TIME()', false);
 		$do->set('usuario', $this->session->userdata('usuario'));
 	}
 
-	function sprvbu(){
-		$control = $this->uri->segment(4);
-		$id = $this->datasis->dameval("SELECT b.id FROM ords a JOIN sprv b ON a.proveed=b.proveed WHERE control='$control'");
-		redirect('compras/sprv/dataedit/show/'.$id);
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='No se puede modificar una orden de servicio';
+		return false;
 	}
 
+	function _pre_delete($do){
+		$do->error_message_ar['pre_del']='No se puede eliminar una orden de servicio';
+		return false;
+	}
+
+	function _post_insert($do){
+		$numero = $do->get('numero');
+		logusu($do->table,"ORDEN DE SERVICIO ${numero} CREADA");
+	}
+
+	function _post_update($do){
+		$numero = $do->get('numero');
+		logusu($do->table,"ORDEN DE SERVICIO ${numero} MODIFICADA");
+	}
+
+	function _post_delete($do){
+		$numero = $do->get('numero');
+		logusu($do->table,"ORDEN DE SERVICIO ${numero} ELIMINADA");
+	}
 
 	function instalar(){
 		$campos=$this->db->list_fields('ords');

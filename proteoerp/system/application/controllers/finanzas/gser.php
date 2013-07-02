@@ -394,8 +394,7 @@ class gser extends Controller {
 		});';
 
 		$bodyscript .= '});';
-
-		$bodyscript .= "\n</script>\n";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 

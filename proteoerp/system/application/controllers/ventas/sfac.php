@@ -37,11 +37,24 @@ class Sfac extends Controller {
 		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir'      ,'label'=>'Reimprimir Documento'));
 		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png'              ,'alt' => 'Cierre de Caja'  ,'label'=>'Cierre de Caja'));
 		$grid->wbotonadd(array('id'=>'fmanual'  ,'img'=>'images/mano.png'                ,'alt' => 'Factura Manual'  ,'label'=>'Factura Manual'));
+
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
-			$grid->wbotonadd(array('id'=>'bcierrex','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre X','label'=>'Cierre X'));
-			$grid->wbotonadd(array('id'=>'bcierrez','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre Z','label'=>'Cierre Z'));
+			$WpAdic = "<tr><td>
+				<div class=\"anexos\">
+					<table cellpadding='0' cellspacing='0'>
+						<tr>
+							<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='sundecop'>".img(array('src'=>'assets/default/images/print.png', 'height'=>15, 'alt'=>'Realizar cierre X', 'title'=>'Cierre X', 'border'=>'0'))." Cierre X</a></div></td>
+							<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='bpactivo'>".img(array('src'=>'assets/default/images/print.png', 'height'=>15, 'alt'=>'Realizar cierre Z', 'title'=>'Cierre Z', 'border'=>'0'))." Cierre Z</a></div></td>
+						</tr>
+					</table>
+				</div>
+			</td></tr>";
+			$grid->setWpAdicional($WpAdic);
+			//$grid->wbotonadd(array('id'=>'bcierrex','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre X','label'=>'Cierre X'));
+			//$grid->wbotonadd(array('id'=>'bcierrez','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre Z','label'=>'Cierre Z'));
 		}
+
 
 		$WestPanel = $grid->deploywestp();
 
@@ -50,8 +63,9 @@ class Sfac extends Controller {
 
 		$adic = array(
 			array('id'=>'fedita' , 'title'=>'Agregar/Editar Registro'),
-			array('id'=>'scliexp', 'title'=>'Ficha de Cliente' ),
-			array('id'=>'fshow'  , 'title'=>'Mostrar registro')
+			array('id'=>'scliexp', 'title'=>'Ficha de Cliente'),
+			array('id'=>'fshow'  , 'title'=>'Mostrar registro'),
+			array('id'=>'fborra' , 'title'=>'Anula Factura' ),
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -127,7 +141,6 @@ class Sfac extends Controller {
 			return link;
 		};';
 
-
 		$param['WestPanel']    = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
@@ -143,7 +156,6 @@ class Sfac extends Controller {
 		$param['tamano']       = $this->datasis->getintramenu( substr($this->url,0,-1) );
 
 		$this->load->view('jqgrid/crud2',$param);
-
 	}
 
 	//******************************************************************
@@ -170,19 +182,7 @@ class Sfac extends Controller {
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
-		};
-		';
-
-		$bodyscript .= '
-		$("#fmanual").click( function() {
-			$.post("'.site_url($this->url.'dataedit/S/create').'",
-			function(data){
-				$("#fimpser").html("");
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});
-		';
+		};';
 
 		$bodyscript .= '
 		function sfacshow() {
@@ -196,22 +196,24 @@ class Sfac extends Controller {
 			} else {
 				$.prompt("<h1>Por favor Seleccione un registro</h1>");
 			}
-		};
-		';
+		};';
 
 		$bodyscript .= '
 		function sfacedit() {
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
-					$("#fborra").html("");
-					$("#fimpser").html("");
-					$("#fedita").html(data);
-					$("#fedita").dialog({ buttons: { Ok: function() { $( this ).dialog( "close" ); } } });
-					$("#fedita").dialog("open");
-				});
+				if(ret.referen=="P"){
+					$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
+						$("#fborra").html("");
+						$("#fimpser").html("");
+						$("#fedita").html(data);
+						//$("#fedita").dialog({ buttons: { Ok: function() { $( this ).dialog( "close" ); } } });
+						$("#fedita").dialog("open");
+					});
+				}else{
+					$.prompt("<h1>Solo se pueden modificar las facturas pendientes</h1>");
+				}
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
@@ -221,7 +223,7 @@ class Sfac extends Controller {
 		$bodyscript .= '
 		function sfacdel() {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				if(confirm(" Seguro desea anular el registro?")){
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
 					mId = id;
@@ -229,7 +231,8 @@ class Sfac extends Controller {
 						$("#fedita").html("");
 						$("#fimpser").html("");
 						$("#fborra").html(data);
-						$("#fborra").dialog( "open" );
+						$("#fborra").dialog("open");
+						jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 					});
 				}
 			}else{
@@ -238,6 +241,16 @@ class Sfac extends Controller {
 		};';
 
 		$bodyscript .= '$(function() { ';
+
+		$bodyscript .= '
+			$("#fmanual").click( function() {
+				$.post("'.site_url($this->url.'dataedit/S/create').'",
+				function(data){
+					$("#fimpser").html("");
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				})
+			});';
 
 		$bodyscript .= '
 			$("#boton1").click( function(){
@@ -358,12 +371,10 @@ class Sfac extends Controller {
 				buttons: {
 					"Aceptar": function() {
 						$("#fborra").html("");
-						jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 						$( this ).dialog( "close" );
 					},
 				},
 				close: function() {
-					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 					$("#fborra").html("");
 				}
 			});';
@@ -459,8 +470,7 @@ class Sfac extends Controller {
 			});';
 
 		$bodyscript .= '});';
-
-		$bodyscript .= "\n</script>\n";
+		$bodyscript .= '</script>';
 
 		return $bodyscript;
 	}
@@ -1113,7 +1123,8 @@ class Sfac extends Controller {
 
 		#show/hide navigations buttons
 
-		$grid->setEdit(false);
+		//$grid->setEdit(  true);
+		$grid->setEdit(  $this->datasis->sidapuede('SFAC','MODIFICA%'));
 		$grid->setAdd(   $this->datasis->sidapuede('SFAC','INCLUIR%' ));
 		$grid->setDelete($this->datasis->sidapuede('SFAC','3'));
 		$grid->setSearch($this->datasis->sidapuede('SFAC','BUSQUEDA%'));
@@ -1917,7 +1928,7 @@ class Sfac extends Controller {
 		$fecha  = $this->uri->segment($this->uri->total_segments()-2);
 		$numero = $this->uri->segment($this->uri->total_segments()-3);
 		$id     = $this->uri->segment($this->uri->total_segments()-4);
-		$mdevo  = "Exito";
+		$mdevo  = 'Exito';
 
 		//memowrite("efecha=$efecha, fecha=$fecha, numero=$numero, id=$id, reinte=$reinte","sfacreiva");
 
@@ -1935,8 +1946,8 @@ class Sfac extends Controller {
 		$anterior = $this->datasis->dameval("SELECT reiva FROM sfac WHERE id=$id");
 		$usuario = addslashes($this->session->userdata('usuario'));
 
-		if ( strlen($numero) == 14 ){
-			if (  $anterior == 0 )  {
+		if(strlen($numero) == 14){
+			if($anterior == 0){
 				$mSQL = "UPDATE sfac SET reiva=round(iva*0.75,2), creiva='$numero', freiva='$fecha', ereiva='$efecha' WHERE id=$id";
 				$this->db->simple_query($mSQL);
 				//memowrite($mSQL,"sfacreivaSFAC");
@@ -2108,7 +2119,7 @@ class Sfac extends Controller {
 
 		$mdevo  = "Exito";
 
-		memowrite("efecha=$efecha, fecha=$fecha, numero=$numero, id=$id, caja=$caja, cheque=$cheque, benefi=$benefi ","sfacreivaef");
+		memowrite("efecha=${efecha}, fecha=${fecha}, numero=${numero}, id=${id}, caja=${caja}, cheque=${cheque}, benefi=${benefi}",'sfacreivaef');
 
 		// status de la factura
 		$fecha  = substr($fecha, 6,4).substr($fecha, 3,2).substr($fecha, 0,2);
@@ -2132,12 +2143,12 @@ class Sfac extends Controller {
 			$tbanco  = $this->datasis->dameval("SELECT tbanco FROM banc WHERE codbanc='$codbanc'");
 			$cheque  = str_pad($cheque, 12, "0", STR_PAD_LEFT);
 			$query   = "SELECT count(*) FROM bmov WHERE tipo_op='CH' AND codbanc='$codbanc' AND numero='$cheque' ";
-			if ( $tbanco != 'CAJ' ) {
+			if($tbanco != 'CAJ'){
 				$verla = $this->datasis->dameval($query);
 			}
 		}
 
-		if ( $verla == 0 ) {
+		if($verla == 0){
 			if ( strlen($numero) == 14 ){
 				if (  $anterior == 0 )  {
 					$mSQL = "UPDATE sfac SET reiva=round(iva*0.75,2), creiva='$numero', freiva='$fecha', ereiva='$efecha' WHERE id=$id";
@@ -2282,7 +2293,7 @@ class Sfac extends Controller {
 
 		$data['content'] = $form->output;
 		$data['title']   = heading("Convertir Pedido en Factura");
-		$data["head"]    = $this->rapyd->get_head();
+		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -2308,8 +2319,7 @@ class Sfac extends Controller {
 		ROUND(SUM(d.tota)*(d.iva=(SELECT sobretasa FROM civa e ORDER BY fecha desc LIMIT 1))) monadic
 		FROM pfac a
 		JOIN itpfac d ON a.numero=d.numa
-		WHERE a.numero=$numeroe
-		";
+		WHERE a.numero=${numeroe}";
 
 		$this->db->query($query);
 		$id_sfac=$this->db->insert_id();
@@ -2322,8 +2332,7 @@ class Sfac extends Controller {
 		FROM pfac a
 		JOIN itpfac d ON a.numero=d.numa
 		JOIN sinv c ON d.codigoa=c.codigo
-		WHERE a.numero=$numeroe
-		";
+		WHERE a.numero=${numeroe}";
 
 		$this->db->query($query);
 
@@ -2331,9 +2340,8 @@ class Sfac extends Controller {
 		INSERT IGNORE INTO smov ( cod_cli, nombre, dire1, dire2, tipo_doc, numero, fecha, monto, impuesto, abonos, vence, observa1, estampa, usuario, hora, transac, tasa, montasa, reducida, monredu, sobretasa, monadic, exento )
 		SELECT cod_cli, nombre, direc, dire1, tipo_doc, numero, fecha, totalg, iva,   0 abonos, vence,
 		if(tipo_doc='D', 'DEVOLUCION EN VENTAS', 'FACTURA DE CREDITO' ) observa1, estampa, usuario, hora, transac, tasa, montasa, reducida, monredu, sobretasa, monadic, exento
-		FROM sfac WHERE transac='$transac' and referen='C'
-		LIMIT 1
-		";
+		FROM sfac WHERE transac='$transac' AND referen='C'
+		LIMIT 1";
 
 		$this->db->query($query);
 
@@ -2352,25 +2360,11 @@ class Sfac extends Controller {
 		redirect("ventas/sfac/dataedit/show/$id_sfac");
 	}
 
-	function modificar(){
-		$js= file_get_contents('php://input');
-		$campos = json_decode($js,true);
-		//$campos = $data['data'];
-		$id        = $campos['id'];
-		$nfiscal   = $campos['nfiscal'];
-		$maqfiscal = $campos['maqfiscal'];
-
-		//print_r($campos);
-		$mSQL = $this->db->update_string("sfac", array('nfiscal'=>$campos['nfiscal'],'maqfiscal'=>$campos['maqfiscal']),"id='$id'" );
-		$this->db->simple_query($mSQL);
-		logusu('sfac',"FACTURACION ".$campos['id']." MODIFICADO");
-		echo "{ success: true, message: 'Factura Modificado '}";
-	}
-
 	function tabla() {
-		$id = $this->uri->segment($this->uri->total_segments());
-		$cliente = $this->datasis->dameval("SELECT cod_cli FROM sfac WHERE id='$id'");
-		$transac = $this->datasis->dameval("SELECT transac FROM sfac WHERE id='$id'");
+		$id  = $this->uri->segment($this->uri->total_segments());
+		$dbid= $this->db->escape($id);
+		$cliente = $this->datasis->dameval("SELECT cod_cli FROM sfac WHERE id=${dbid}");
+		$transac = $this->datasis->dameval("SELECT transac FROM sfac WHERE id=${dbid}");
 		$salida = '';
 
 		// Revisa formas de pago sfpa
@@ -2379,15 +2373,15 @@ class Sfac extends Controller {
 		if ( $query->num_rows() > 0 ){
 			$salida .= "<br><table width='100%' border=1>";
 			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Forma de Pago</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tipo</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Tipo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
 			foreach ($query->result_array() as $row){
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['tipo']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-				$salida .= "</tr>";
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['tipo'].'</td>';
+				$salida .= '<td>'.$row['numero'].'</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
 			}
-			$salida .= "</table>";
+			$salida .= '</table>';
 		}
 
 		// Cuentas por Cobrar
@@ -2401,16 +2395,16 @@ class Sfac extends Controller {
 			$i = 1;
 			foreach ($query->result_array() as $row){
 				if ( $i < 6 ) {
-					$salida .= "<tr>";
-					$salida .= "<td>".$row['tipo_doc']."</td>";
-					$salida .= "<td>".$row['numero'].  "</td>";
-					$salida .= "<td align='right'>".nformat($row['monto']-$row['abonos']).   "</td>";
-					$salida .= "</tr>";
+					$salida .= '<tr>';
+					$salida .= '<td>'.$row['tipo_doc'].'</td>';
+					$salida .= '<td>'.$row['numero'].  '</td>';
+					$salida .= "<td align='right'>".nformat($row['monto']-$row['abonos']).'</td>';
+					$salida .= '</tr>';
 				}
 				if ( $i == 6 ) {
-					$salida .= "<tr>";
+					$salida .= '<tr>';
 					$salida .= "<td colspan=3>Mas......</td>";
-					$salida .= "</tr>";
+					$salida .= '</tr>';
 				}
 				if ( $row['tipo_doc'] == 'FC' or $row['tipo_doc'] == 'ND' or $row['tipo_doc'] == 'GI' )
 					$saldo += $row['monto']-$row['abonos'];
@@ -2430,13 +2424,12 @@ class Sfac extends Controller {
 			$salida .= "<br><table width='100%' border=1>";
 			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento en Caja o Banco</td></tr>";
 			$salida .= "<tr bgcolor='#e7e3e7'><td>Bco</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row)
-			{
-				$salida .= "<tr>";
+			foreach ($query->result_array() as $row){
+				$salida .= '<tr>';
 				$salida .= "<td>".$row['codbanc']."</td>";
 				$salida .= "<td>".$row['numero'].  "</td>";
 				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-				$salida .= "</tr>";
+				$salida .= '</tr>';
 			}
 			$salida .= "</table>";
 		}
@@ -2465,7 +2458,7 @@ class Sfac extends Controller {
 		$do->pointer('scli' ,'scli.cliente=sfac.cod_cli','scli.tipo AS sclitipo','left');
 		$do->rel_pointer('sitems','sinv','sitems.codigoa=sinv.codigo','sinv.descrip AS sinvdescrip, sinv.base1 AS sinvprecio1, sinv.base2 AS sinvprecio2, sinv.base3 AS sinvprecio3, sinv.base4 AS sinvprecio4, sinv.iva AS sinviva, sinv.peso AS sinvpeso,sinv.tipo AS sinvtipo');
 
-		$edit = new DataDetails('Facturas', $do);
+		$edit = new DataDetails('', $do);
 		$edit->on_save_redirect=false;
 
 		$edit->set_rel_title('sitems','Producto <#o#>');
@@ -2734,7 +2727,12 @@ class Sfac extends Controller {
 		$edit->referen = new checkboxField('Dejar pendiente', 'referen', 'P','');
 		$edit->referen->insertValue = 'N';
 		$edit->referen->onchange='chreferen()';
-		//Fin de los campos comidines
+		if($manual=='S'){
+			$edit->referen->when=array('');
+		}else{
+			$edit->referen->when=array('create','modify');
+		}
+		//Fin de los campos comodines
 
 		$edit->buttons('add_rel');
 		if(!empty($this->_url)) $edit->_process_uri=$this->_url; //Necesario cuando se crea desde presupuesto o pedido
@@ -3174,7 +3172,7 @@ class Sfac extends Controller {
 		return true;
 	}
 
-	function _pre_insert($do){
+	function _pre_insert($do,$action='I'){
 		$cliente= $do->get('cod_cli');
 		$tipoa  = $do->get('tipo_doc');
 		$manual = $do->get('manual');
@@ -3186,7 +3184,7 @@ class Sfac extends Controller {
 
 		if($referen=='P'){
 			if($manual=='S'){
-				$do->error_message_ar['pre_ins']='No se puede dejar una factura pendiente manual';
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='No se puede dejar una factura pendiente manual';
 				return false;
 			}
 			$do->truncate_rel('sfpa');
@@ -3201,7 +3199,7 @@ class Sfac extends Controller {
 		if($con->num_rows() > 0){
 			$t=$con->row('tasa');$rt=$con->row('redutasa');$st=$con->row('sobretasa');
 		}else{
-			$do->error_message_ar['pre_ins']='Debe cargar la tabla de IVA.';
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Debe cargar la tabla de IVA.';
 			return false;
 		}
 
@@ -3234,7 +3232,7 @@ class Sfac extends Controller {
 
 		//Validaciones del pago
 		if(abs($sfpa-$totalg)>0.02 && $referen!='P'){
-			$do->error_message_ar['pre_ins']='El monto del pago no coincide con el monto de la factura (Pago:'.$sfpa.', Factura:'.$totalg.')';
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El monto del pago no coincide con el monto de la factura (Pago:'.$sfpa.', Factura:'.$totalg.')';
 			return false;
 		}
 		//Fin de la validacion de pago
@@ -3312,7 +3310,7 @@ class Sfac extends Controller {
 		//Fin del calculo a credito
 
 		if($manual=='S' && $fecha!=$estampa && $credito-$sfpa_monto!=0 ){
-			$do->error_message_ar['pre_ins']='Una factura manual solo se puede pagar en efectivo si es el mismo d&iacute;a, en caso contrario se debe cargar a cr&eacute;dito y luego hacer la cobranza.';
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Una factura manual solo se puede pagar en efectivo si es el mismo d&iacute;a, en caso contrario se debe cargar a cr&eacute;dito y luego hacer la cobranza.';
 			return false;
 		}
 
@@ -3358,7 +3356,7 @@ class Sfac extends Controller {
 			}
 
 			if($credito > ($limite-$saldo) || $cdias<=0 || $pcredito=='N'){
-				$do->error_message_ar['pre_ins']='El cliente no tiene suficiente cr&eacute;dito propio';
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El cliente no tiene suficiente cr&eacute;dito propio';
 				return false;
 			}
 
@@ -3376,7 +3374,7 @@ class Sfac extends Controller {
 			}
 
 			if($credito > ($limite-$saldo-$asaldo) || $cdias<=0 || $pcredito=='N'){
-				$do->error_message_ar['pre_ins']='El cliente no tiene suficiente cr&eacute;dito de grupo';
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El cliente no tiene suficiente cr&eacute;dito de grupo';
 				return false;
 			}
 
@@ -3413,7 +3411,7 @@ class Sfac extends Controller {
 				}
 
 				if($credito > ($masterlimite-$saldo-$mastersaldo) || $mastercdias<=0 || $mastercredito=='N'){
-					$do->error_message_ar['pre_ins']='El fiador del cliente no tiene suficiente saldo';
+					$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El fiador del cliente no tiene suficiente saldo';
 					return false;
 				}
 			}
@@ -3433,8 +3431,13 @@ class Sfac extends Controller {
 			$do->set('dire1' ,$rrow['dire12']);
 		}
 
+		//Determina el numero de factura
 		if($referen=='P'){
-			$numero = '_'.$this->datasis->fprox_numero('nsfacp',7);
+			if($action=='U'){
+				$numero  = $do->get('numero');
+			}else{
+				$numero = '_'.$this->datasis->fprox_numero('nsfacp',7);
+			}
 		}else{
 			if($tipoa=='F'){
 				if($manual!='S'){
@@ -3450,14 +3453,23 @@ class Sfac extends Controller {
 				}
 			}
 		}
+		$do->set('numero' ,$numero);
+		//Fin del numero de factura
+
+		//Determina la transaccion
 		if($referen=='P'){
-			$transac = $this->datasis->fprox_numero('ntransap');
+			if($action=='U'){
+				$transac = $do->get('transac');
+			}else{
+				$transac = $this->datasis->fprox_numero('ntransap');
+			}
 		}else{
 			$transac = $this->datasis->fprox_numero('ntransa');
 			$do->set('referen',($credito>0)? 'C': 'E');
 		}
-		$do->set('numero' ,$numero);
 		$do->set('transac',$transac);
+		//Fin de la transaccion
+
 		$vd     = $do->get('vd');
 		$cajero = $do->get('cajero');
 		$almacen= $do->get('almacen');
@@ -3547,8 +3559,16 @@ class Sfac extends Controller {
 	}
 
 	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='No se pueden modificar facturas guardadas';
-		return false;
+		$numero   = $do->get('numero');
+		$dbid     = $this->db->escape($do->get('id'));
+		$referendb= $this->datasis->dameval('SELECT referen FROM sfac WHERE id='.$dbid);
+
+		if(substr($numero,0,1)=='_' && $referendb=='P'){
+			return $this->_pre_insert($do,'U');
+		}else{
+			$do->error_message_ar['pre_upd']='No se pueden modificar facturas guardadas';
+			return false;
+		}
 	}
 
 
@@ -3560,6 +3580,9 @@ class Sfac extends Controller {
 
 		$tipo_doc = $do->get('tipo_doc');
 		$numero   = $do->get('numero');
+		$transac  = $do->get('transac');
+		$referen  = $do->get('referen');
+
 
 		//Pasa si es una prefactura
 		if($numero[0]=='_' && $tipo_doc=='F'){
@@ -3569,8 +3592,9 @@ class Sfac extends Controller {
 		$fecha    = $do->get('fecha');
 		$referen  = $do->get('referen');
 		$cajero   = $do->get('cajero');
-		$inicial  = $do->get('inicial');
+		$inicial  = floatval($do->get('inicial'));
 
+		$dbtransac  = $this->db->escape($transac);
 		$dbtipo_doc = $this->db->escape($tipo_doc);
 		$dbnumero   = $this->db->escape($numero);
 		$dbfecha    = $this->db->escape($fecha);
@@ -3582,9 +3606,12 @@ class Sfac extends Controller {
 		}
 
 		if($fecha != $hoy){
-			$mSQL ="SELECT abonos FROM smov WHERE tipo_doc=$dbtipo_doc AND numero=$dbnumero AND fecha=$dbfecha";
-			$abono=$this->datasis->dameval($mSQL);
-			if($referen!='C' && $inicial!=0 && $abono>0){
+			$mSQL ="SELECT abonos FROM smov WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
+			$abono=floatval($this->datasis->dameval($mSQL));
+			if($referen!='C'){
+				$do->error_message_ar['pre_del']='No se puede anular de dias pasados.';
+				return false;
+			}elseif($inicial>0 || $abono>0){
 				$do->error_message_ar['pre_del']='No se puede anular la factura por tener abonos.';
 				return false;
 			}
@@ -3612,6 +3639,10 @@ class Sfac extends Controller {
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}
 		}
+
+		$mSQL ="DELETE FROM smov WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){ memowrite($mSQL,'sfac'); }
 
 		$mSQL="DELETE FROM sfpa WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero}";
 		$ban=$this->db->simple_query($mSQL);
@@ -3957,7 +3988,8 @@ class Sfac extends Controller {
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		//logusu($do->table,"Modifico $this->tits ${primary} ");
+		$this->_post_insert($do);
 	}
 
 	function _post_delete($do){

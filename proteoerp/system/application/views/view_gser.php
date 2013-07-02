@@ -617,7 +617,7 @@ function toggle() {
 			}?>
 			</tr>
 			<tr id='__UTPL__gereten'>
-				<td colspan='9'>&nbsp;</td>
+				<td colspan='<?php echo ($form->_status!='show')? 8 : 9; ?>'>&nbsp;</td>
 			</tr>
 		</table>
 		</div>

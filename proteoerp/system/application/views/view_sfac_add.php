@@ -425,8 +425,6 @@ function post_modbus_scli(){
 				}
 			},
 	});
-
-
 }
 
 function post_modbus_sinv(nind){
@@ -669,9 +667,15 @@ function sfpatipo(id){
 
 function chreferen(){
 	if($('#referen').is(':checked')){
+		$('input[name="btn_add_sfpa"]').hide();
 		$('#sfpatable').hide();
 	}else{
+		$('input[name="btn_add_sfpa"]').show();
 		$('#sfpatable').show();
+		if($('input[id^="monto_"]').length==0){
+			var can = add_sfpa();
+			$("#tipo_"+can).val('EF');
+		}
 	}
 }
 </script>
