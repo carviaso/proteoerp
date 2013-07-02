@@ -29,94 +29,11 @@ class Tiket extends Controller {
 		$grid1   = $this->defgridIt();
 		$param['grids'][] = $grid1->deploy();
 
-		$readyLayout = '
-	$(\'body\').layout({
-		minSize: 30,
-		north__size: 60,
-		resizerClass: \'ui-state-default\',
-		west__size: 212,
-		west__onresize: function (pane, $Pane){jQuery("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);},
-	});
-	
-	$(\'div.ui-layout-center\').layout({
-		minSize: 30,
-		resizerClass: "ui-state-default",
-		center__paneSelector: ".centro-centro",
-		south__paneSelector:  ".centro-sur",
-		south__size: 142,
-		center__onresize: function (pane, $Pane) {
-			jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'setGridWidth\', $Pane.innerWidth()-6);
-			jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'setGridHeight\',$Pane.innerHeight()-100);
-			jQuery("#newapi'.$param['grids'][1]['gridname'].'").jqGrid(\'setGridWidth\', $Pane.innerWidth()-6);
-		}
-	});
-	
-	function masterval() { return master; };
-	';
+		// Configura los Paneles
+		$readyLayout = $grid->readyLayout2( 212, 120, $param['grids'][0]['gridname'],$param['grids'][1]['gridname']);
 
-
-		$bodyscript = '
-<script type="text/javascript">
-$(function() {
-	$( "input:submit, a, button", ".otros" ).button();
-});
-
-$( "#subep" ).click(function() {
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-		$.get("'.base_url().'supervisor/tiket/subep/"+id,
-		function(data){
-			alert(data);
-			jQuery("#newapi'. $param['grids'][0]['gridname'].'").trigger("reloadGrid");
-		});
-
-	} else { $.prompt("<h1>Por favor Seleccione un Ticket</h1>");}
-});
-
-$( "#bajap" ).click(function() {
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-		$.get("'.base_url().'supervisor/tiket/bajap/"+id,
-		function(data){
-			alert(data);
-			jQuery("#newapi'. $param['grids'][0]['gridname'].'").trigger("reloadGrid");
-		});
-
-	} else { $.prompt("<h1>Por favor Seleccione un Ticket</h1>");}
-});
-
-jQuery("#cestado").click( function(){
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][1]['gridname'].'").jqGrid(\'getRowData\',id);
-		$.prompt(
-			"<h1>Cambiar Estado del Tiket "+id+"</h1>",
-			{
-				buttons: { "Cerrado":1,  "Resuelto":2, "Pendiente":3, "Cancelar": 0 }, focus: 1,
-				callback: function(e,v,m,f){
-					if (v != 0) {
-						$.get("'.base_url().'supervisor/tiket/cestado/"+id+"/"+v,
-						function(data){ alert(data); });
-					}
-				}
-			}
-		);
-	} else { $.prompt("<h1>Por favor Seleccione un Ticket</h1>");}
-});
-
-
-
-jQuery("#a1").click( function(){
-	var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-	if (id)	{
-		var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-		window.open(\''.base_url().'formatos/ver/TIKET/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-	} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-});
-</script>
-';
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -166,33 +83,22 @@ jQuery("#a1").click( function(){
 		<td><img src="'.base_url().'images/face-cool.png" width="20" height="18" border="0" />Cerrado</td>
 		<td><img src="'.base_url().'images/face-smile.png" width="20" height="18" border="0" />Resuelto</td>
 	</tr>
-
 </table>
 </div>
 </div> <!-- #LeftPane -->
 ';
 
 
+		//Panel Central
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
+		$adic = array(
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar conversacion'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$centerpanel = '
-<div id="RightPane" class="ui-layout-center">
-	<div class="centro-centro">
-		<table id="newapi'.$param['grids'][0]['gridname'].'"></table>
-		<div id="pnewapi'.$param['grids'][0]['gridname'].'"></div>
-	</div>
-	<div class="centro-sur" id="adicional" style="overflow:auto;">
-		<table id="newapi'.$param['grids'][1]['gridname'].'"></table>
-		<div id="pnewapi'.$param['grids'][1]['gridname'].'"></div>
-	</div>
-</div> <!-- #RightPane -->
-';
-
-		$SouthPanel = '
-<div id="BottomPane" class="ui-layout-south ui-widget ui-widget-content">
-<p>'.$this->datasis->traevalor('TITULO1').'</p>
-</div> <!-- #BottomPanel -->
-';
 		$readyscript = "\tvar master = -1;\n";
 
 		$funciones = '
@@ -237,21 +143,255 @@ jQuery("#a1").click( function(){
 		$param['otros']      = $this->datasis->otros('BCAJ', 'JQ');
 		//$param['funciones']  = $funciones;
 
-		$param['centerpanel']  = $centerpanel;
-		$param['SouthPanel'] = $SouthPanel;
-		$param['temas']     = array('proteo','darkness','anexos1');
+		$param['centerpanel'] = $centerpanel;
+		$param['SouthPanel']  = $SouthPanel;
+		$param['temas']       = array('proteo','darkness','anexos1');
 
-		//$param['tema']  = 'bootstrap';
+		//$param['tema']     = 'bootstrap';
 		$param['bodyscript'] = $bodyscript;
-		$param['tabs'] = false;
+		$param['tabs']       = false;
 		$param['encabeza']   = $this->titp;
 
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+
+	//******************************************************************
+	//Funciones de los Botones
+	//
+	function bodyscript( $grid0, $grid1 ){
+		$bodyscript = '<script type="text/javascript">';
+
+		$bodyscript .= '
+		function masterval() { return master; };
+
+		$(function() {
+			$( "input:submit, a, button", ".otros" ).button();
+		});
+		';
+
+		$bodyscript .= '
+		$( "#subep" ).click(function() {
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				$.get("'.base_url().'supervisor/tiket/subep/"+id,
+				function(data){
+					alert(data);
+					jQuery("#newapi'. $grid0.'").trigger("reloadGrid");
+				});
+			} else { $.prompt("<h1>Por favor Seleccione un Ticket</h1>");}
+		});
+		';
+
+		$bodyscript .= '
+		$( "#bajap" ).click(function() {
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				$.get("'.base_url().'supervisor/tiket/bajap/"+id,
+				function(data){
+					alert(data);
+					jQuery("#newapi'. $grid0.'").trigger("reloadGrid");
+				});
+			} else { $.prompt("<h1>Por favor Seleccione un Ticket</h1>");}
+		});
+		';
+
+		$bodyscript .= '
+		jQuery("#cestado").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $grid1.'").jqGrid(\'getRowData\',id);
+				$.prompt(
+					"<h1>Cambiar Estado del Tiket "+id+"</h1>",
+					{
+						buttons: { "Cerrado":1,  "Resuelto":2, "Pendiente":3, "Cancelar": 0 }, focus: 1,
+						callback: function(e,v,m,f){
+							if (v != 0) {
+								$.get("'.base_url().'supervisor/tiket/cestado/"+id+"/"+v,
+								function(data){ alert(data); });
+							}
+						}
+					}
+				);
+			} else { $.prompt("<h1>Por favor Seleccione un Ticket</h1>");}
+		});
+		';
+
+		$bodyscript .= '
+		jQuery("#a1").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.base_url().'formatos/ver/TIKET/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});
+		';
+
+
+		$bodyscript .= '
+		function tiketadd(){
+			$.post("'.site_url($this->url.'dataedit/create').'",
+			function(data){
+				$("#fedita").dialog({title:"Agregar un nuevo ticket"});
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		};';
+
+		$bodyscript .= '
+		function tiketedit(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'datadeta/create').'/"+id, function(data){
+				$("#fedita").dialog({title:"Agregar resuesta a ticket "+id});
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function tiketshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'mostrar').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function tiketdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+		//Wraper de javascript
+		$bodyscript .= '
+		$(function(){
+			$("#dialog:ui-dialog").dialog( "destroy" );
+			var mId = 0;
+			var montotal = 0;
+			var ffecha = $("#ffecha");
+			var grid = jQuery("#newapi'.$grid0.'");
+			var s;
+			var allFields = $( [] ).add( ffecha );
+			var tips = $( ".validateTips" );
+			s = grid.getGridParam(\'selarrrow\');
+			';
+
+		$bodyscript .= '
+		$("#fedita").dialog({
+			autoOpen: false, height: 350, width: 600, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/TIKET').'/\'+res.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fedita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fedita").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 450, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
+
+		$bodyscript .= '});'."\n";
+		$bodyscript .= "\n</script>\n";
+
+		return $bodyscript;
+	}
+
+
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "true";
@@ -317,7 +457,7 @@ jQuery("#a1").click( function(){
 			'editable'      => 'true',
 			'width'         => 400,
 			'edittype'      => "'textarea'",
-			'editoptions'   => "{ rows:25, cols:80}",
+			'editoptions'   => "{ rows:24, cols:80}",
 			'formoptions'   => '{ label:"Cont." }'
 		));
 
@@ -371,7 +511,7 @@ jQuery("#a1").click( function(){
 
 		$grid->showpager(true);
 		$grid->setWidth('');
-		$grid->setHeight('141');
+		$grid->setHeight('170');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
@@ -387,12 +527,27 @@ jQuery("#a1").click( function(){
 			}'
 		);
 
-		//$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 680, height:500, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
+		$grid->setFormOptionsE('
+			closeAfterEdit:true, 
+			mtype: "POST", 
+			width: 620, 
+			height:400, 
+			closeOnEscape: true, 
+			top: 50, 
+			left:20, 
+			recreateForm:true, 
+			afterSubmit: function(a,b){
+				if (a.responseText.length > 0) 
+					$.prompt(a.responseText); 
+					return [true, a ];
+				} 
+		');
+
 		$grid->setFormOptionsA('
 			closeAfterAdd:true,
 			mtype: "POST",
-			width: 680,
-			height:500,
+			width: 620,
+			height:400,
 			closeOnEscape: true,
 			top: 50,
 			left:20,
@@ -431,16 +586,18 @@ jQuery("#a1").click( function(){
 
 			});
 			},
-                width: 700}');
+			width: 700}');
 
 
 		#show/hide navigations buttons   td.DataTD
 		$grid->setAdd(true);
-		$grid->setEdit(false);
+		$grid->setEdit(true);
 		$grid->setDelete(false);
 		$grid->setSearch(false);
 		$grid->setRowNum(20);
 		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions("addfunc: tiketadd, editfunc: tiketedit, delfunc: tiketdel, viewfunc: tiketshow");
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -455,9 +612,9 @@ jQuery("#a1").click( function(){
 		}
 	}
 
-	/**
-	* Busca la data en el Servidor por json
-	*/
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
 	function getdata()
 	{
 		$grid       = $this->jqdatagrid;
@@ -471,9 +628,9 @@ jQuery("#a1").click( function(){
 		echo $rs;
 	}
 
-	/**
-	* Guarda la Informacion
-	*/
+	//******************************************************************
+	// Guarda la Informacion
+	//
 	function setData()
 	{
 		$this->load->library('jqdatagrid');
@@ -499,11 +656,7 @@ jQuery("#a1").click( function(){
 			echo "Fallo Agregado!!!";
 
 		} elseif($oper == 'edit') {
-			//unset($data['ubica']);
-			//$this->db->where('id', $id);
-			//$this->db->update('tiket', $data);
-			//logusu('TIKET',"Registro ????? MODIFICADO");
-			echo "Registro No Modificable";
+			//echo "Registro No Modificable";
 
 		} elseif($oper == 'del') {
 			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM tiket WHERE id='$id' ");
@@ -517,9 +670,9 @@ jQuery("#a1").click( function(){
 		};
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgridIt( $deployed = false ){
 		$i      = 1;
 		$editar = "true";
@@ -528,7 +681,6 @@ jQuery("#a1").click( function(){
 		$prioridad = array("1"=>"Muy Alta","2"=>"Alta","3"=>"Media","4"=>"Baja","5"=>"Muy baja");
 
 		$grid  = new $this->jqdatagrid;
-
 
 		$grid->addField('id');
 		$grid->label('Numero');
@@ -553,7 +705,6 @@ jQuery("#a1").click( function(){
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
 		$grid->addField('pertenece');
 		$grid->label('Pertenece');
 		$grid->params(array(
@@ -565,7 +716,6 @@ jQuery("#a1").click( function(){
 			'editrules'     => "{ edithidden:true,  }",
 			'editoptions'   => '{ readonly: "readonly", size:8, value: masterval }'
 		));
-
 
 /*
 		$grid->addField('actualizado');
@@ -649,7 +799,7 @@ jQuery("#a1").click( function(){
 					return false;
 				}
 			}
-		       ');
+       ');
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
 		$grid->setAfterPager(
@@ -699,9 +849,9 @@ jQuery("#a1").click( function(){
 		}
 	}
 
-	/**
-	* Busca la data en el Servidor por json
-	*/
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
 	function getdataIt() {
 		$id = $this->uri->segment(4);
 		if ($id == false ){
@@ -720,9 +870,9 @@ jQuery("#a1").click( function(){
 		echo $rs;
 	}
 
-	/**
-	* Guarda la Informacion
-	*/
+	//******************************************************************
+	// Guarda la Informacion
+	//
 	function setDataIt()
 	{
 		$this->load->library('jqdatagrid');
@@ -771,8 +921,7 @@ jQuery("#a1").click( function(){
 
 
 
-	//*******************************************
-	//
+	//******************************************************************
 	// Baja la Prioridad
 	//
 	function bajap(){
@@ -793,8 +942,7 @@ jQuery("#a1").click( function(){
 	}
 
 
-	//*******************************************
-	//
+	//******************************************************************
 	// Baja la Prioridad
 	//
 	function subep(){
@@ -814,8 +962,7 @@ jQuery("#a1").click( function(){
 		}
 	}
 
-	//*******************************************
-	//
+	//******************************************************************
 	// Baja la Prioridad
 	//
 	function cestado(){
@@ -837,6 +984,228 @@ jQuery("#a1").click( function(){
 		}
 	}
 
+
+
+	//******************************************************************
+	// DataEdit
+	//
+	function dataedit(){
+
+		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+		});
+		';
+
+		$edit = new DataEdit('', 'tiket');
+
+		$edit->on_save_redirect=false;
+		$edit->back_url = site_url($this->url.'filteredgrid');
+
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
+
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process('insert', '_pre_insert' );
+		$edit->pre_process('update', '_pre_update' );
+		$edit->pre_process('delete', '_pre_delete' );
+
+
+		$edit->contenido = new textareaField('Contenido','contenido');
+		$edit->contenido->rule = '';
+		$edit->contenido->cols = 60;
+		$edit->contenido->rows = 11;
+
+		$edit->prioridad = new dropdownField("Prioridad", "prioridad");
+		$edit->prioridad->options(array("1"=>"Muy Alta","2"=>"Alta","3"=>"Media","4"=>"Baja","5"=>"Muy baja"));
+		$edit->prioridad->insertValue=5;
+
+/*
+		$edit->actualizado = new inputField('Actualizado','actualizado');
+		$edit->actualizado->rule      = '';
+		$edit->actualizado->size      = 10;
+		$edit->actualizado->maxlength = 8;
+
+		$edit->estado = new inputField('Estado','estado');
+		$edit->estado->rule  = '';
+		$edit->estado->size  = 3;
+		$edit->estado->maxlength =1;
+*/
+		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
+		//$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+
+		$edit->estado = new autoUpdateField('estado','N', 'N');
+		$edit->padre  = new autoUpdateField('padre' ,'S', 'S');
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+
+	//******************************************************************
+	// DataEdit
+	//
+	function datadeta(){
+
+		$id  = $this->uri->segment($this->uri->total_segments());
+
+		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+		});
+		';
+
+		$edit = new DataEdit('', 'tiket');
+
+		$edit->on_save_redirect=false;
+		$edit->back_url = site_url($this->url.'filteredgrid');
+
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
+
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process('insert', '_pre_insert' );
+		$edit->pre_process('update', '_pre_update' );
+		$edit->pre_process('delete', '_pre_delete' );
+
+		$edit->pertenece = new inputField('Pertenece','pertenece');
+		$edit->pertenece->rule='integer';
+		$edit->pertenece->css_class='inputonlynum';
+		$edit->pertenece->size =12;
+		$edit->pertenece->maxlength =20;
+		$edit->pertenece->insertValue = $id;
+		$edit->pertenece->readonly = true;
+
+		$edit->prioridad = new dropdownField("Prioridad", "prioridad");
+		$edit->prioridad->options(array("1"=>"Muy Alta","2"=>"Alta","3"=>"Media","4"=>"Baja","5"=>"Muy baja"));
+		$edit->prioridad->insertValue=5;
+
+		$edit->contenido = new textareaField('Contenido','contenido');
+		$edit->contenido->rule = '';
+		$edit->contenido->cols = 60;
+		$edit->contenido->rows = 11;
+
+		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
+		//$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+
+		$edit->estado = new autoUpdateField('estado','N', 'N');
+		$edit->padre  = new autoUpdateField('padre' ,'N', 'N');
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+	//******************************************************************
+	// Muestra la conversacion
+	//
+	function mostrar(){
+		$id  = $this->uri->segment($this->uri->total_segments());
+		$msalida = '';
+		
+		$mSQL = 'SELECT date(a.estampa) fecha, time(a.estampa) hora , a.usuario, b.us_nombre, a.contenido FROM tiket a JOIN usuario b ON a.usuario=b.us_codigo WHERE a.id='.$id ;
+		$trae = $this->datasis->damereg($mSQL);
+
+		//$msalida .= '<h2>Planteamiento</h2>';
+		$msalida .= '<table width="98%" align="center" cellspacing="0" cellpadding="0">';
+		
+		$msalida .= '<tr style="font-size:1.5em;background:#AAAAAA;border-bottom:1px solid;"><td>Fecha: '.$trae['fecha'].'</td><td>Hora: '.$trae['hora'].'</td><td> Usuario: '.$trae['us_nombre'].'</td></tr>';
+		$contenido = str_replace("\n","<br>",$trae['contenido']);
+		$msalida .= '<tr><td colspan="3">'.$contenido.'</tdtd></tr>';
+
+		$mSQL = 'SELECT date(a.estampa) fecha, time(a.estampa) hora , a.usuario, b.us_nombre, a.contenido FROM tiket a JOIN usuario b ON a.usuario=b.us_codigo WHERE a.pertenece='.$id.' ORDER BY estampa';
+
+		$query = $this->db->query($mSQL);
+
+		if ($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+				$msalida .= '<tr style="font-size:1.5em;background:#AAAAAA;border-bottom:1px solid;"><td>Fecha: '.$row->fecha.'</td><td>Hora: '.$row->hora.'</td><td> Usuario: '.$row->us_nombre.'</td></tr>';
+				$contenido = str_replace("\n","<br>",$row->contenido );
+				$msalida .= '<tr><td colspan="3">'.$contenido.'</tdtd></tr>';
+			}
+		}
+		$msalida .= '</table>';
+		
+		echo $msalida;
+	
+	}
+
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do){
+		$do->error_message_ar['pre_del']='';
+		return false;
+	}
+
+	function _post_insert($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits $primary ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
+	function _post_delete($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Elimino $this->tits $primary ");
+	}
+
+	function instalar(){
+		if (!$this->db->table_exists('tiket')) {
+			$mSQL="CREATE TABLE `tiket` (
+			  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			  `padre` char(1) DEFAULT NULL,
+			  `pertenece` bigint(20) unsigned DEFAULT NULL,
+			  `prioridad` smallint(5) unsigned DEFAULT NULL,
+			  `usuario` varchar(50) DEFAULT NULL,
+			  `contenido` text,
+			  `estampa` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			  `actualizado` timestamp NULL DEFAULT NULL,
+			  `estado` char(1) DEFAULT 'N',
+			  PRIMARY KEY (`id`),
+			  KEY `id` (`id`)
+			) ENGINE=MyISAM AUTO_INCREMENT=51 DEFAULT CHARSET=latin1";
+			$this->db->simple_query($mSQL);
+		}
+	}
 
 }
 
@@ -1153,10 +1522,6 @@ class Tiket extends Controller {
 		$filter = new DataForm('supervisor/tiketrpc/tiket/process');
 		$filter->title('Filtro de fecha');
 
-		//$filter->fechad = new dateonlyField("Fecha Desde", "fechad",'Ymd');
-		//$filter->fechad->insertValue = date("Y-m-d");
-		//$filter->fechad->size=12;
-
 		$filter->cliente = new inputField("Cliente", "cliente");
 		$filter->cliente->size = 15;
 		$filter->cliente->append($boton);
@@ -1239,10 +1604,5 @@ class Tiket extends Controller {
 	}
 }
 
-// sebastian 4000
-// elcarmen 4000
-// BOTICA 4000
-// ESTACION 6000
-// GEMA 7000
 */
 ?>

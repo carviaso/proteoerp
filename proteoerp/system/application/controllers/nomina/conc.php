@@ -58,50 +58,6 @@ class Conc extends Controller {
 		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
 		$this->load->view('jqgrid/crud2',$param);
 
-
-/*
-		$grid = $this->defgrid();
-		$param['grids'][] = $grid->deploy();
-
-		$readyscript = '
-		var linkdeudor = "'.site_url('ajax/buscasprv').'";
-		var linkacreed = "'.site_url('ajax/buscamgas').'";
-		';
-
-		$bodyscript = '
-		<script type="text/javascript">
-		jQuery("#a1").click( function(){
-			var id = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'. $param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
-				window.open(\''.base_url().'formatos/ver/CONC/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});
-		</script>
-		';
-
-		#Set url
-		$grid->setUrlput(site_url($this->url.'setdata/'));
-	
-		//$grid->wbotonadd(array("id" => "boton1", "img" => 'images/agrega4.png', "alt" => 'Agregar', "label" => 'Agregar Venta'));
-		$WestPanel = $grid->deploywestp();
-
-		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'));
-
-		$param['WestPanel']    = $WestPanel;
-		//$param['EastPanel']    = $EastPanel;
-		$param['readyscript']  = $readyscript;
-		$param['SouthPanel']   = $SouthPanel;
-		$param['listados']     = $this->datasis->listados('CONC', 'JQ');
-		$param['otros']        = $this->datasis->otros('CONC', 'JQ');
-		$param['temas']        = array('proteo','darkness','anexos1');
-		$param['bodyscript']   = $bodyscript;
-		
-		$param['tabs'] = false;
-		$param['encabeza'] = $this->titp;
-		
-		$this->load->view('jqgrid/crud2',$param);
-*/
 	}
 
 
