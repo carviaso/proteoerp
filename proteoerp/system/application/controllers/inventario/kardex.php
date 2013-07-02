@@ -182,6 +182,7 @@ class Kardex extends Controller {
 		$almacen=radecode($this->uri->segment(7));
 		if($fecha===FALSE or $codigo===FALSE or $tipo===FALSE or $almacen===FALSE) redirect('inventario/kardex');
 		$this->rapyd->load('datagrid','fields');
+		$gridout='';
 
 		$attsp = array(
 			'width'      => '200',
@@ -193,7 +194,7 @@ class Kardex extends Controller {
 
 		$grid = new DataGrid();
 		$grid->order_by('numero','desc');
-		$grid->per_page = 20;
+		$grid->per_page = 50;
 
 		//img(array('src' =>'images/pdf_logo.gif','height' => 18, 'alt' => 'Imprimir', 'title' => 'Imprimir', 'border'=>'0'))
 		if($tipo=='3I' || $tipo=='3M'){  //ventas de caja
@@ -227,6 +228,8 @@ class Kardex extends Controller {
 			$grid->db->where('a.codigoa',$codigo);
 			$grid->db->where('a.tipoa !=','X');
 			$grid->db->where('b.almacen',$almacen);
+			$grid->build();
+			$gridout=$grid->output;
 		}elseif($tipo=='3R'){ //ventas de Restaurante
 			$grid->title('Facturas');
 			//$link=anchor('inventario/kardex/rfac/'.$this->_unionuri().'/show/'.implode('/',$ppk),'<#tipoa#><#numa#>');
@@ -243,6 +246,8 @@ class Kardex extends Controller {
 			$grid->db->join('itrece c','c.menu=a.codigo');
 			$grid->db->where('a.fecha' ,$fecha );
 			$grid->db->where('c.codigo',$codigo);
+			$grid->build();
+			$gridout=$grid->output;
 		}elseif($tipo=='1T' || $tipo=='0F' || $tipo=='9F'){ //Transferencias
 			$fields = $this->db->field_data('stra');
 			$ppk=array();
@@ -271,6 +276,30 @@ class Kardex extends Controller {
 			$grid->db->join('stra b','a.numero=b.numero');
 			$grid->db->where('b.fecha' ,$fecha );
 			$grid->db->where('a.codigo',$codigo);
+			$grid->build();
+			if($grid->recordCount>0){
+				$gridout = $grid->output;
+			}
+
+			$grid2 = new DataGrid();
+			//$grid2->order_by('numero','desc');
+			$grid2->per_page = 50;
+			$grid2->title('Tranferencias por consumo detallado');
+			$grid2->column('C&oacute;digo'     ,'codigo');
+			$grid2->column('Consumido'         ,'cantidad','align=\'right\'');
+			$grid2->column('Enlace'            ,'enlace');
+			$grid2->column('Entrada'           ,'fraccion','align=\'right\'');
+			$grid2->db->select(array('a.codigo','b.descrip','a.cantidad','a.fraccion','a.enlace','c.descrip'));
+			$grid2->db->from('trafrac AS a');
+			$grid2->db->join('sinv AS b','a.codigo=b.codigo');
+			$grid2->db->join('sinv AS c','a.enlace=c.codigo');
+			$grid2->db->where('a.fecha' ,$fecha );
+			$grid2->db->where($this->db->escape($codigo).' IN (`a`.`codigo`,`a`.`enlace`)',null,false);
+			$grid2->build();
+			if($grid2->recordCount>0){
+				$gridout .= $grid2->output;
+			}
+
 		}elseif($tipo=='2C'){ //compras
 			$fields = $this->db->field_data('scst');
 			$ppk=array();
@@ -301,6 +330,8 @@ class Kardex extends Controller {
 			$grid->db->where('a.codigo',$codigo);
 			$grid->db->where('b.recep',$fecha);
 			$grid->db->where('b.actuali >= b.fecha');
+			$grid->build();
+			$gridout=$grid->output;
 		}elseif($tipo=='4N'){ //Nota de entrega
 			$fields = $this->db->field_data('snte');
 			$ppk=array();
@@ -329,6 +360,8 @@ class Kardex extends Controller {
 			$grid->db->join('itsnte b','a.numero=b.numero');
 			$grid->db->where('b.codigo',$codigo);
 			$grid->db->where('a.fecha' ,$fecha);
+			$grid->build();
+			$gridout=$grid->output;
 		}elseif($tipo=='6C'){ //Conversiones
 			$fields = $this->db->field_data('conv');
 			$ppk=array();
@@ -354,6 +387,8 @@ class Kardex extends Controller {
 			$grid->db->join('itconv AS b','a.numero=b.numero');
 			$grid->db->where('b.codigo' ,$codigo);
 			$grid->db->where('a.estampa',$fecha);
+			$grid->build();
+			$gridout=$grid->output;
 		}elseif($tipo=='5C'){ //Ajustes de inventario
 			$fields = $this->db->field_data('ssal');
 			$ppk=array();
@@ -381,6 +416,8 @@ class Kardex extends Controller {
 			$grid->db->join('itssal AS b','a.numero=b.numero');
 			$grid->db->where('b.codigo' ,$codigo);
 			$grid->db->where('a.fecha',$fecha);
+			$grid->build();
+			$gridout=$grid->output;
 		}elseif($tipo=='5D'){ //Consignacion
 			$fields = $this->db->field_data('scon');
 			$ppk=array();
@@ -409,15 +446,16 @@ class Kardex extends Controller {
 			$grid->db->join('itscon AS b','a.numero=b.numero');
 			$grid->db->where('b.codigo' ,$codigo);
 			$grid->db->where('a.fecha',$fecha);
+			$grid->build();
+			$gridout=$grid->output;
 		}
-		$grid->build();
 		//echo $grid->db->last_query();
 
-		$iframe = new iframeField("showefect", 'inventario/kardex/showefect' ,"400");
+		$iframe = new iframeField('showefect', 'inventario/kardex/showefect' ,"400");
 		$iframe->status='show';
 		$iframe->build();
 
-		$data['content'] = $grid->output.$iframe->output;
+		$data['content'] = $gridout.$iframe->output;
 		$data['title']   = heading('Transacciones del producto '.$codigo);
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
@@ -427,7 +465,7 @@ class Kardex extends Controller {
 		echo '';
 	}
 
-	function stra($tipo,$fecha,$codigo,$almacen){
+	/*function stra($tipo,$fecha,$codigo,$almacen){
 		$this->back_dataedit='inventario/kardex/grid/'.raencode($tipo).'/'.raencode($fecha).'/'.raencode($codigo).'/'.raencode($almacen);
 		stra::dataedit();
 	}
@@ -460,7 +498,7 @@ class Kardex extends Controller {
 	function scon($tipo,$fecha,$codigo,$almacen){
 		$this->back_dataedit='inventario/kardex/grid/'.raencode($tipo).'/'.raencode($fecha).'/'.raencode($codigo).'/'.raencode($almacen);
 		scon::dataedit();
-	}
+	}*/
 
 	function _unionuri(){
 		$tipo   =$this->uri->segment(4);
@@ -471,6 +509,7 @@ class Kardex extends Controller {
 	}
 }
 
+/*
 require_once(APPPATH.'/controllers/inventario/stra.php');
 require_once(APPPATH.'/controllers/inventario/conv.php');
 require_once(APPPATH.'/controllers/inventario/ssal.php');
@@ -478,3 +517,4 @@ require_once(APPPATH.'/controllers/inventario/scon.php');
 require_once(APPPATH.'/controllers/ventas/sfac.php');
 require_once(APPPATH.'/controllers/ventas/snte.php');
 require_once(APPPATH.'/controllers/compras/scst.php');
+*/
