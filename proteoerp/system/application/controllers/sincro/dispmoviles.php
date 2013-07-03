@@ -53,6 +53,30 @@ class Dispmoviles extends Controller {
 				return $val;
 			}
 		};
+
+		if($tabla=='config'){
+			$nombre  = $escape($this->datasis->dameval('SELECT nombre FROM vend WHERE vendedor='.$dbvend));
+			$clave   = sha1($this->datasis->traevalor('CLAVESFAC'));
+			$minpre  = intval($this->datasis->traevalor('SFACPRECIOMINIMO'));
+			if($this->datasis->traevalor('CERIXCAMBIAPRECIO','Permite cambiar los precios en Cerix (S,N)')=='N'){
+				$cprecio = 0;
+			}else{
+				$cprecio = 1;
+			}
+
+			$perpre  = 0;
+			$rt=array(
+				$clave  ,// v_pclave
+				$cprecio,// v_cprecio
+				$nombre ,// v_nvende
+				$minpre ,// v_minpre
+				$perpre  // v_perpre
+			);
+
+			echo json_encode(array($rt));
+			return '';
+		}
+
 		$almacen = $this->datasis->dameval('SELECT almacen FROM usuario WHERE uuid='.$dbuuid);
 		if(empty($almacen)){
 			$existen='a.existen';
