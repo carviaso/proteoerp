@@ -13,11 +13,7 @@ class Bmov extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('bmov','id') ) {
-			$this->db->simple_query('ALTER TABLE bmov DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE bmov ADD UNIQUE INDEX idunico (codbanc, tipo_op, numero)');
-			$this->db->simple_query('ALTER TABLE bmov ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -618,7 +614,6 @@ class Bmov extends Controller {
 			}
 		');
 
-
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
@@ -650,37 +645,37 @@ class Bmov extends Controller {
 	* Guarda la Informacion
 	*/
 	function setData(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				//$this->db->insert('bmov', $data);
-			}
-			return "Registro Agregado";
-
-		} elseif($oper == 'edit') {
-			$this->db->where("id", $id);
-			$this->db->update('bmov', $data);
-			logusu('BMOV',"Movimiento de bancos  ".$id." MODIFICADO");
-			echo "Movimiento Modificado";
-			//return "Registro Modificado";
-
-		} elseif($oper == 'del') {
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM bmov WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				//$this->db->simple_query("DELETE FROM bmov WHERE id=$id ");
-				logusu('bmov',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+		//$this->load->library('jqdatagrid');
+		//$oper   = $this->input->post('oper');
+		//$id     = $this->input->post('id');
+		//$data   = $_POST;
+		//$check  = 0;
+        //
+		//unset($data['oper']);
+		//unset($data['id']);
+		//if($oper == 'add'){
+		//	if(false == empty($data)){
+		//		//$this->db->insert('bmov', $data);
+		//	}
+		//	return "Registro Agregado";
+        //
+		//} elseif($oper == 'edit') {
+		//	$this->db->where("id", $id);
+		//	$this->db->update('bmov', $data);
+		//	logusu('BMOV',"Movimiento de bancos  ".$id." MODIFICADO");
+		//	echo "Movimiento Modificado";
+		//	//return "Registro Modificado";
+        //
+		//} elseif($oper == 'del') {
+		//	//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM bmov WHERE id='$id' ");
+		//	if ($check > 0){
+		//		echo " El registro no puede ser eliminado; tiene movimiento ";
+		//	} else {
+		//		//$this->db->simple_query("DELETE FROM bmov WHERE id=$id ");
+		//		logusu('bmov',"Registro ????? ELIMINADO");
+		//		echo "Registro Eliminado";
+		//	}
+		//};
 	}
 
 	function tabla() {
@@ -703,12 +698,11 @@ class Bmov extends Controller {
 		$codcli = 'XXXXXXXXXXXXXXXX';
 		$salida = '<table width="100%"><tr>';
 		$saldo  = 0;
-		if ( $query->num_rows() > 0 ){
+		if($query->num_rows() > 0){
 			$salida .= $td1;
 			$salida .= "Movimiento en Proveedores</caption>";
 			$salida .= "<tr bgcolor='#E7E3E7'><td>Nombre</td><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row)
-			{
+			foreach ($query->result_array() as $row){
 				if ( $row['tipo_doc'] == 'FC' ) {
 					$saldo = $row['monto']-$row['abonos'];
 				}
@@ -732,8 +726,7 @@ class Bmov extends Controller {
 			$salida .= $td1;
 			$salida .= "Movimiento en Clientes</caption>";
 			$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row)
-			{
+			foreach ($query->result_array() as $row){
 				if ( $row['tipo_doc'] == 'FC' ) {
 					$saldo = $row['monto']-$row['abonos'];
 				}
@@ -744,12 +737,23 @@ class Bmov extends Controller {
 				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
 				$salida .= "</tr>";
 			}
-//			$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
+			//$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
 			$salida .= "</table></td>";
 		}
 
 
 		echo $salida.'</tr></table>';
+	}
+
+	function instalar(){
+		$campos=$this->db->list_fields('bmov');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE bmov DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE bmov ADD UNIQUE INDEX idunico (codbanc, tipo_op, numero)');
+			$this->db->simple_query('ALTER TABLE bmov ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+		$this->datasis->creaintramenu(array('modulo'=>'51E','titulo'=>'Movimientos de Bancos','mensaje'=>'Movimientos de Bancos','panel'=>'TESORERIA','ejecutar'=>'finanzas/bmov','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>900,'alto'=>600));
+
 	}
 
 }
