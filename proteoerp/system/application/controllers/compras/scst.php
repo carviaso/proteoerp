@@ -2125,6 +2125,7 @@ class Scst extends Controller {
 		//Creando Compra
 		if ( $id == 'create'){
 			$edit = $this->dataedit();
+
 		}elseif( $id == 'insert'){
 			$this->genesal = false;
 			$rt = $this->dataedit();
@@ -2148,6 +2149,7 @@ class Scst extends Controller {
 					//$rtjson['status']='C';
 				}
 				echo json_encode($rtjson);
+
 			}else{
 				$rtjson=array(
 					'status' => 'C',
@@ -2178,8 +2180,6 @@ class Scst extends Controller {
 			} else {
 				if ( $modo == 'update' ) $this->genesal = false;
 				$rt = $this->dataedit();
-
-				//if($rt->on_success()){
 
 				if($rt == 'Compra Guardada'){
 					$p='A';
@@ -2245,7 +2245,6 @@ class Scst extends Controller {
 			$ggrid =form_open('/compras/scst/solo/cprecios/'.$control, array("id" => "df1"));
 		else
 			$ggrid =form_open('/compras/scst/cprecios/'.$control);
-
 
 		function costo($formcal,$pond,$ultimo,$standard,$existen,$itcana){
 			$CI =& get_instance();
@@ -2317,6 +2316,7 @@ class Scst extends Controller {
 			$grid->column('Marg.'.($id+1) , $campo,'align=\'center\'');
 		}
 		$grid->column('Costo' , '<tcosto><#id#>|<#iva#>|<#formcal#>|<#pond#>|<#costo#>|<#standard#>|<#existen#>|<#cantidad#></tcosto>','align=\'right\'');
+
 		if ( !$this->solo ){
 			$action = "javascript:window.location='".site_url('compras/scst/dataedit/show/'.$control)."'";
 			$grid->button('btn_regresa', 'Regresar', $action, 'TR');
@@ -2504,7 +2504,6 @@ class Scst extends Controller {
 			$conten['priva']   = $conten['priva']/100;
 			$data['content']   = $this->load->view('view_compras_cmontos', $conten);
 		}
-
 	}
 
 	//Chequea que los registros no esten repatidos en los datos vehiculares
@@ -3911,6 +3910,10 @@ class Scst extends Controller {
 			$this->db->simple_query("update tmenus set secu=8 where titulo='Lista'");
 			$this->db->simple_query("update tmenus set secu=9 where titulo='Otros'");
 		};
+
+		if ( !$this->datasis->iscampo('itscst','id') ) {
+			$this->db->query('ALTER TABLE itscst ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
 
 	}
 }

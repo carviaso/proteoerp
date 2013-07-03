@@ -30,8 +30,6 @@ class sfpach extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-//		$readyLayout = $grid->readyLayout2( 212, 100, $param['grids'][0]['gridname']);
-
 
 	//***************************
 	//
@@ -706,7 +704,7 @@ class sfpach extends Controller {
 			$data['numeror']    = $numeror;
 			$data['concepto']   = "TRANSITO DESDE CAJA $envia A BANCO $recibe ";
 			$data['concep2']    = "CHEQUES";
-			$data['status']     = 'C';  // Pendiente/Cerrado/Anulado
+			$data['status']     = 'P';  // Pendiente/Cerrado/Anulado
 			$data['usuario']    = $this->secu->usuario();
 			$data['estampa']    = $fecha;
 			$data['hora']       = date('H:i:s');
