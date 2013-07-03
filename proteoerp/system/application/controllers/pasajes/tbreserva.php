@@ -535,7 +535,49 @@ class Tbreserva extends Controller {
 	// Factura la Reervacion
 	//
 	function factura($id){
-		echo $id;
+		$mSQL  = "SELECT nomcli, codrut, fecven, localiza FROM tbreserva WHERE id=$id"; 
+
+		$ret   = $this->datasis->damereg($mSQL);
+		
+		$ruta = $this->datasis->dameval("SELECT CONCAT_WS(' ',horsal, origen, destino) ruta FROM tbrutas WHERE codrut=".$this->db->escape($ret['codrut']));
+		
+		$salida  = '<table width="95%" style="background:#DDDDDD;" align="center" ><tr>';
+		$salida .= '<td>NOMBRE: '.$ret['nomcli'].'</td>';
+		$salida .= '<td>RUTA:   '.$ret['codrut'].$ruta.'</td>';
+		$salida .= '<td>FECHA:  '.$ret['fecven'].'</td>';
+		$salida .= '</td>';
+		$salida .= '</tr></table>';
+
+		$salida .= '<table width="95%" align="center">';
+		$mSQL  = "SELECT * FROM tbpuestos WHERE localiza=".$ret['localiza']." GROUP BY nroasi"; 
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$salida .= '<tr>' ;
+			$salida .= '<td>Puesto</td>';
+			$salida .= '<td>Cedula</td>';
+			$salida .= '<td>Nombre</td>';
+			$salida .= '<td>Nacio</td>';
+			$salida .= '<td>Direccion</td>';
+			$salida .= '<td>Tipo</td>';
+			$salida .= '</tr>' ;
+
+			foreach ($query->result() as $row){
+				$salida .= '<tr>' ;
+				$salida .= '<td>'.$row->nroasi.'</td>';
+				$salida .= '<td>'.$row->nroasi.'</td>';
+				$salida .= '<td>'.$row->nroasi.'</td>';
+				$salida .= '<td>'.$row->nroasi.'</td>';
+				$salida .= '<td>'.$row->nroasi.'</td>';
+				$salida .= '<td>'.$row->nroasi.'</td>';
+				$salida .= '</tr>' ;
+
+			}
+		}
+		$salida .= '</table>';
+
+		echo $salida;
+
+
 	}
 
 
@@ -737,9 +779,7 @@ class Tbreserva extends Controller {
 		
 		if ($edit->_status == 'modify' ){
 			$id  = $this->uri->segment($this->uri->total_segments());
-			
 			$localiza = $this->datasis->dameval("SELECT localiza FROM tbreserva WHERE id=$id"); 
-		
 		}
 
 
@@ -1064,6 +1104,12 @@ class Tbreserva extends Controller {
 
 		$puestos = array();
 		$localiza = $this->datasis->prox_numero('nlocaliza');
+
+		$do->set('localiza',$localiza);
+		$do->set('fecpas',  $fecven);
+		$do->set('fecven',  date('Y-m-d'));
+
+
 
 		foreach( $_POST as $id=>$nombre ){
 			if (substr( $id,0,7) == 'asiento') {

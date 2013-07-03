@@ -159,7 +159,7 @@ echo $form->codrut->output;
 <br>
 <div id='puestos' name='puestos' style='margin-left:0em;' ></div>
 <br>
-<table id='resumen' style='font-size:1.5em;display:none;'>
+<table id='resumen' style='font-size:1.5em;display:none;' width='95%'>
 	<tr>
 		<td class="littletablerowth">Pasajes:</td>
 		<td><div id='nropas'  ></div></td>

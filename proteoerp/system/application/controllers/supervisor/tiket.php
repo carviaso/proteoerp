@@ -1130,23 +1130,23 @@ class Tiket extends Controller {
 		$id  = $this->uri->segment($this->uri->total_segments());
 		$msalida = '';
 		
-		$mSQL = 'SELECT date(a.estampa) fecha, time(a.estampa) hora , a.usuario, b.us_nombre, a.contenido FROM tiket a JOIN usuario b ON a.usuario=b.us_codigo WHERE a.id='.$id ;
+		$mSQL = 'SELECT date(a.estampa) fecha, time(a.estampa) hora , a.usuario, b.us_nombre, a.contenido FROM tiket a LEFT JOIN usuario b ON a.usuario=b.us_codigo WHERE a.id='.$id ;
 		$trae = $this->datasis->damereg($mSQL);
 
 		//$msalida .= '<h2>Planteamiento</h2>';
 		$msalida .= '<table width="98%" align="center" cellspacing="0" cellpadding="0">';
 		
-		$msalida .= '<tr style="font-size:1.5em;background:#AAAAAA;border-bottom:1px solid;"><td>Fecha: '.$trae['fecha'].'</td><td>Hora: '.$trae['hora'].'</td><td> Usuario: '.$trae['us_nombre'].'</td></tr>';
+		$msalida .= '<tr style="font-size:1.5em;background:#CCCCCC;border-bottom:1px solid;"><td>Fecha: '.$trae['fecha'].'</td><td>Hora: '.$trae['hora'].'</td><td> Usuario: '.$trae['us_nombre'].'</td></tr>';
 		$contenido = str_replace("\n","<br>",$trae['contenido']);
 		$msalida .= '<tr><td colspan="3">'.$contenido.'</tdtd></tr>';
 
-		$mSQL = 'SELECT date(a.estampa) fecha, time(a.estampa) hora , a.usuario, b.us_nombre, a.contenido FROM tiket a JOIN usuario b ON a.usuario=b.us_codigo WHERE a.pertenece='.$id.' ORDER BY estampa';
+		$mSQL = 'SELECT date(a.estampa) fecha, time(a.estampa) hora , a.usuario, b.us_nombre, a.contenido FROM tiket a LEFT JOIN usuario b ON a.usuario=b.us_codigo WHERE a.pertenece='.$id.' ORDER BY estampa';
 
 		$query = $this->db->query($mSQL);
 
 		if ($query->num_rows() > 0){
 			foreach ($query->result() as $row){
-				$msalida .= '<tr style="font-size:1.5em;background:#AAAAAA;border-bottom:1px solid;"><td>Fecha: '.$row->fecha.'</td><td>Hora: '.$row->hora.'</td><td> Usuario: '.$row->us_nombre.'</td></tr>';
+				$msalida .= '<tr style="font-size:1.5em;background:#CCCCCC;border-bottom:1px solid;"><td>Fecha: '.$row->fecha.'</td><td>Hora: '.$row->hora.'</td><td> Usuario: '.$row->us_nombre.'</td></tr>';
 				$contenido = str_replace("\n","<br>",$row->contenido );
 				$msalida .= '<tr><td colspan="3">'.$contenido.'</tdtd></tr>';
 			}
