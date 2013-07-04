@@ -21,41 +21,41 @@ class Invfis extends Controller {
 
 		$form0 = new DataForm('inventario/invfis/define/process/crear');
 		$form0->title('Crear Inventario');
-		$form0->explica1 = new containerField("","<p style='color:blue;background-color:C6DAF6;align:center'>Esta seccion crea una tabla de inventario vacia de el Almac&eacute;n seleccionado donde se ingresa los valores resultantes del conteo de Inventario.<BR><BR></p> ");
-		$form0->alma = new dropdownField("Almac&eacute;n", "alma");
+		$form0->explica1 = new containerField('',"<p style='color:blue;background-color:C6DAF6;align:center'>Esta seccion crea una tabla de inventario vacia de el Almac&eacute;n seleccionado donde se ingresa los valores resultantes del conteo de Inventario.<BR><BR></p> ");
+		$form0->alma = new dropdownField('Almac&eacute;n', 'alma');
 		$form0->alma->options("SELECT TRIM(ubica),CONCAT_WS('-',TRIM(ubides),TRIM(ubica)) AS desca FROM caub WHERE gasto='N' AND invfis='N' ORDER BY ubides");
 		$form0->alma->rule='required';
 		$form0->explica2 = new containerField("","<p style='color:blue;background-color:C6DAF6;align:center'>La fecha es muy importante, si el conteo fisico se realizo en la ma&ntilde;ana antes de abrir debe colocar la fecha de ayer, de lo contrario si el conteo se hizo en la tarde al final de la jornada debe colocar la fecha de Hoy.</p>");
 
 		$form0->fecha = new dateonlyField('Fecha', 'fecha');
 		$form0->fecha->rule='required|chfecha';
-		$form0->fecha->insertValue = date("Y-m-d");
+		$form0->fecha->insertValue = date('Y-m-d');
 		$form0->fecha->size=12;
-		$form0->explica3 = new containerField("","<p style='color:blue;background-color:C6DAF6;align:center'>Finalmente si observo las indicaciones anteriores presione el siguiente bot&oacute;n:</p> ");
-		$form0->submit("btnsubmit","Crear Inventario F&iacute;sico");
+		$form0->explica3 = new containerField('',"<p style='color:blue;background-color:C6DAF6;align:center'>Finalmente si observo las indicaciones anteriores presione el siguiente bot&oacute;n:</p> ");
+		$form0->submit('btnsubmit','Crear Inventario F&iacute;sico');
 
 		$form1 = new DataForm('inventario/invfis/define/process/contar');
 		$form1->explica1 = new containerField("","<p style='color:blue;background-color:C6DAF6;align:center'>En esta secci&oacute;n podra transcribir el resultado del conteo f&iacute;sico al sistema.</p>");
 		$form1->title("Introducir Resultados del Conteo de Inventario F&iacute;sico");
-		$form1->inv = new dropdownField("Inventario F&iacute;sico", "inv");
+		$form1->inv = new dropdownField('Inventario F&iacute;sico', 'inv');
 		$form1->inv->rule = 'required';
 		$form1->inv->style = 'width:400px';
-		$form1->submit("btnsubmit","Introducir Conteo F&iacute;sico");
+		$form1->submit('btnsubmit','Introducir Conteo F&iacute;sico');
 
 		$form2 = new DataForm('inventario/invfis/define/process/cerrar');
-		$form2->title("Cierre de Inventario");
-		$form2->explica1 = new containerField("","<p style='color:blue;background-color:F6DAC6;align:center'>Finalmente si todo el inventario esta pasado puede cerrar con el siguiente bot&oacute;n y asi los montos introducidos se cargar&aacute;n en el almac&eacute;n respectivo.</p>");
-		$form2->inv = new dropdownField("Inventario F&iacute;sico", "inv2");
+		$form2->title('Cierre de Inventario');
+		$form2->explica1 = new containerField('',"<p style='color:blue;background-color:F6DAC6;align:center'>Finalmente si todo el inventario esta pasado puede cerrar con el siguiente bot&oacute;n y asi los montos introducidos se cargar&aacute;n en el almac&eacute;n respectivo.</p>");
+		$form2->inv = new dropdownField('Inventario F&iacute;sico', 'inv2');
 		$form2->inv->rule = 'required';
 		$form2->inv->style = 'width:400px';
 
 		$form3 = new DataForm('inventario/invfis/define/process/descartar');
-		$form3->title("Descarte de Inventario");
-		$form3->explica1 = new containerField("","<p style='color:red;background-color:F6DAC6;align:center'>Esta opci&oacute;n eliminara el inventario f&iacute;sico seleccionado, se perder&aacute;n los conteos realizados sobre ese inventario y no se cargar&aacute;n en los almacenes.</p>");
-		$form3->inv = new dropdownField("Inventario F&iacute;sico", "inv3");
+		$form3->title('Descarte de Inventario');
+		$form3->explica1 = new containerField('',"<p style='color:red;background-color:F6DAC6;align:center'>Esta opci&oacute;n eliminara el inventario f&iacute;sico seleccionado, se perder&aacute;n los conteos realizados sobre ese inventario y no se cargar&aacute;n en los almacenes.</p>");
+		$form3->inv = new dropdownField('Inventario F&iacute;sico', 'inv3');
 		$form3->inv->rule = 'required';
 		$form3->inv->style = 'width:400px';
-		$form3->submit("btnDELETE" ,"Descartar Inventario");
+		$form3->submit('btnDELETE' ,'Descartar Inventario');
 
 		$mSQL=$this->db->query("SHOW TABLES LIKE 'INV%________'");
 		foreach($mSQL->result_array() AS $row){

@@ -132,7 +132,24 @@ class Dispmoviles extends Controller {
 
 		//$itdata['sql'] = $sqlite[$tabla];
 		foreach ($query->result_array() as $row){
-			$data[] = array_map($escape,array_values($row));
+			$itdata = array_map($escape,array_values($row));
+			if($tabla=='scli'){
+				if($row['vsaldo']>0){
+					$dbscli = $this->db->escape($row['cliente']);
+					$mSQL="SELECT tipo_doc AS Tipo, TRIM(numero) AS Numero, monto AS Monto,monto-abonos AS Saldo FROM smov WHERE tipo_doc NOT IN ('AB','NC','AN') AND monto>abonos AND vence<=CURDATE() AND cod_cli=${dbscli} ORDER BY fecha DESC";
+					$qq = $this->db->query($mSQL);
+					if($qq->num_rows() > 0){
+						$itdata[]=json_encode($qq->result());
+					}else{
+						$itdata[]='';
+					}
+
+				}else{
+					$itdata[]='';
+				}
+			}
+
+			$data[] = $itdata;
 			//$itdata['data'] = array_map($escape,array_values($row));
 			//$data[] = $itdata;
 		}
