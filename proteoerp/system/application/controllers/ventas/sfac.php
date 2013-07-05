@@ -19,7 +19,9 @@ class Sfac extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
+	//******************************************************************
 	//Ventana principal de facturacion
+	//
 	function jqdatag(){
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
@@ -93,7 +95,9 @@ class Sfac extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//Ventana principal de facturacion de servicios
+	//******************************************************************
+	// Ventana principal de facturacion de servicios
+	//
 	function jqmes(){
 		$mModulo='SFAC';
 
@@ -159,7 +163,6 @@ class Sfac extends Controller {
 	}
 
 	//******************************************************************
-	//
 	//Funciones de los Botones
 	//
 	function bodyscript( $grid0, $grid1 ){
@@ -475,7 +478,9 @@ class Sfac extends Controller {
 		return $bodyscript;
 	}
 
-	//Definicion del Grid y la Forma
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false, $xmes = 'true' ){
 		$i      = 1;
 		$editar = 'false';
@@ -1146,6 +1151,7 @@ class Sfac extends Controller {
 		}
 	}
 
+	//******************************************************************
 	//Busca la data en el Servidor por json
 	function getdata(){
 		$grid       = $this->jqdatagrid;
@@ -1158,6 +1164,7 @@ class Sfac extends Controller {
 		echo $rs;
 	}
 
+	//******************************************************************
 	//Busca la data en el Servidor por json
 	function getdatam(){
 		$grid       = $this->jqdatagrid;
@@ -1172,6 +1179,7 @@ class Sfac extends Controller {
 		echo $rs;
 	}
 
+	//******************************************************************
 	//Guarda la Informacion
 	function setData(){
 		$this->load->library('jqdatagrid');
@@ -1204,6 +1212,7 @@ class Sfac extends Controller {
 		};
 	}
 
+	//******************************************************************
 	//Guarda la Informacion
 	function setDatam(){
 		$this->load->library('jqdatagrid');
@@ -1239,37 +1248,13 @@ class Sfac extends Controller {
 		};
 	}
 
+	//******************************************************************
 	//Definicion del Grid y la Forma
 	function defgridit( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
-
-/*
-		$grid->addField('tipoa');
-		$grid->label('Tipoa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 1 }',
-		));
-
-
-		$grid->addField('numa');
-		$grid->label('Numa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 8 }',
-		));
-*/
 
 		$grid->addField('codigoa');
 		$grid->label('C&oacute;digo');
@@ -1421,70 +1406,6 @@ class Sfac extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 5 }',
 		));
 
-/*
-		$grid->addField('mostrado');
-		$grid->label('Mostrado');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('usuario');
-		$grid->label('Usuario');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 12 }',
-		));
-
-
-		$grid->addField('estampa');
-		$grid->label('Estampa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('hora');
-		$grid->label('Hora');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 50,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 5 }',
-		));
-
-
-		$grid->addField('transac');
-		$grid->label('Transac');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 8 }',
-		));
-*/
 
 		$grid->addField('despacha');
 		$grid->label('Despacha');
@@ -1497,19 +1418,6 @@ class Sfac extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 1 }',
 		));
 
-/*
-		$grid->addField('flote');
-		$grid->label('Flote');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-*/
 
 		$grid->addField('pvp');
 		$grid->label('Precio 1');
@@ -1575,58 +1483,6 @@ class Sfac extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 12 }',
 		));
 
-/*
-		$grid->addField('combo');
-		$grid->label('Combo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 150,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 15 }',
-		));
-
-
-		$grid->addField('descuento');
-		$grid->label('Descuento');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 12 }',
-		));
-
-
-		$grid->addField('bonifica');
-		$grid->label('Bonifica');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('modificado');
-		$grid->label('Modificado');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-*/
 
 		$grid->addField('id');
 		$grid->label('Id');
@@ -1637,22 +1493,6 @@ class Sfac extends Controller {
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
-
-/*
-		$grid->addField('id_sfac');
-		$grid->label('Id_sfac');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
-		));
-*/
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -1681,6 +1521,7 @@ class Sfac extends Controller {
 		}
 	}
 
+	//******************************************************************
 	//Busca la data en el Servidor por json
 	function getdatait(){
 		$id = $this->uri->segment(4);
@@ -1702,6 +1543,7 @@ class Sfac extends Controller {
 		echo $rs;
 	}
 
+	//******************************************************************
 	//Guarda la Informacion
 	function setdatait(){
 		$this->load->library('jqdatagrid');
@@ -1711,6 +1553,7 @@ class Sfac extends Controller {
 		$check  = 0;
 	}
 
+	//******************************************************************
 	//Forma de Cobro de Servicio
 	function fcobroser(){
 		$mSQL    = "SELECT tipo, CONCAT(tipo, ' ', nombre) descrip FROM tarjeta WHERE tipo NOT IN ('DE','NC','IR') ORDER BY tipo ";
@@ -1896,6 +1739,7 @@ class Sfac extends Controller {
 		echo $salida;
 	}
 
+	//******************************************************************
 	//Json para llena la tabla de inventario
 	function sfacsitems() {
 		$numa  = $this->uri->segment($this->uri->total_segments());
@@ -1921,6 +1765,7 @@ class Sfac extends Controller {
 		echo $ret;
 	}
 
+	//******************************************************************
 	//Recibir retencion de IVA
 	function sfacreiva(){
 		$reinte = $this->uri->segment($this->uri->total_segments());
@@ -2106,6 +1951,7 @@ class Sfac extends Controller {
 		echo $mdevo;
 	}
 
+	//******************************************************************
 	// Reintegrar retencion de IVA
 	function sfacreivaef(){
 		$id     = $this->uri->segment($this->uri->total_segments());
@@ -2254,6 +2100,7 @@ class Sfac extends Controller {
 		echo $mdevo;
 	}
 
+	//******************************************************************
 	// json para llena la tabla de inventario
 	function sfacsig() {
 		$numa  = $this->uri->segment($this->uri->total_segments());

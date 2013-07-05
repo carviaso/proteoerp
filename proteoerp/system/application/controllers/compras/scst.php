@@ -2056,9 +2056,9 @@ class Scst extends Controller {
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
-		$recep  =strtotime($edit->get_from_dataobjetct('recep'));
-		$fecha  =strtotime($edit->get_from_dataobjetct('fecha'));
-		$actuali=strtotime($edit->get_from_dataobjetct('actuali'));
+		$recep  = strtotime($edit->get_from_dataobjetct('recep'));
+		$fecha  = strtotime($edit->get_from_dataobjetct('fecha'));
+		$actuali= strtotime($edit->get_from_dataobjetct('actuali'));
 
 		if($actuali < $fecha){
 			$control=$this->rapyd->uri->get_edited_id();
@@ -2114,9 +2114,10 @@ class Scst extends Controller {
 			}
 			return $rt;
 		}
-
 	}
 
+	//******************************************************************
+	// 
 	//
 	function solo() {
 		$this->solo = true;
@@ -2189,17 +2190,15 @@ class Scst extends Controller {
 					'mensaje'=> "$rt",
 					'pk'     => array("id" => "$id")
 				);
-				//$rtjson = array('status'=>$p, 'id'=> $id, 'mensaje'=> $rt);
 				echo json_encode($rtjson);
 				}else{
 					$p='C';
 				}
-
 			}
 		}
 	}
 
-	//***************************************
+	//******************************************************************
 	// Precios
 	//
 	function cprecios($control){
@@ -2209,7 +2208,6 @@ class Scst extends Controller {
 		$error='';
 		$msj='';
 
-		//if($this->input->post('pros') !== false){
 		if($this->input->post('scstp_1') !== false){
 			$precio1=$this->input->post('scstp_1');
 			$precio2=$this->input->post('scstp_2');
@@ -2289,13 +2287,13 @@ class Scst extends Controller {
 			$ind = $val;
 
 			$campo = new inputField('Campo', $ind);
-			$campo->grid_name=$ind.'[<#id#>]';
-			$campo->status   ='modify';
-			$campo->size     =8;
-			$campo->autocomplete=false;
-			$campo->css_class='inputnum';
+			$campo->grid_name = $ind.'[<#id#>]';
+			$campo->status    = 'modify';
+			$campo->size      = 8;
+			$campo->autocomplete = false;
+			$campo->css_class = 'inputnum';
 			$campo->append('<#'.$ittt[$id].'#>');
-			$campo->disable_paste=true;
+			$campo->disable_paste = true;
 
 			$grid->column('Precio '.($id+1) , $campo,'align=\'center\'');
 		}
@@ -2325,8 +2323,8 @@ class Scst extends Controller {
 
 		$grid->build();
 
-		$ggrid.=$grid->output;
-		$ggrid.=form_close();
+		$ggrid .= $grid->output;
+		$ggrid .= form_close();
 
 		$script='<script language="javascript" type="text/javascript">
 		$(function(){

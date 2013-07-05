@@ -173,28 +173,4 @@ echo $form->codrut->output;
 
 <?php 
 echo $form_end; 
-/*
-<table id='resumen' style='font-size:1.5em;display:none;'>
-	<tr>
-		<td class="littletablerowth">Pasajes:    </td><td><div id='nropas'  ><> </div></td>
-
-		<td class="littletablerowth"><?php echo $form->menores->label;     ?></td>
-		<td class="littletablerow"  ><?php echo $form->menores->output;    ?></td>
-
-
-		<td class="littletablerowth"><?php echo $form->ancianos->label;     ?></td>
-		<td class="littletablerow"  ><?php echo $form->ancianos->output;    ?></td>
-
-
-		<td class="littletablerowth">Total Precio</td><td class="littletablerow"><div id='monto'> </div></td>
-	<tr></tr>
-		<td class="littletablerowth">Adultos: </td><td><div id='madulto' ></div></td>
-		<td class="littletablerowth">Menores: </td><td><div id='mmenor'  ></div></td>
-		<td class="littletablerowth">Ancianos:</td><td><div id='manci'   ></div></td>
-		<td class="littletablerowth"><?php echo $form->nomcli->label;     ?></td>
-		<td class="littletablerow"  ><?php echo $form->nomcli->output;    ?></td>
-	</tr>
-
-</table>
-*/
 ?>

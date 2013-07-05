@@ -535,10 +535,80 @@ class Tbreserva extends Controller {
 	// Factura la Reervacion
 	//
 	function factura($id){
-		$mSQL  = "SELECT nomcli, codrut, fecven, localiza FROM tbreserva WHERE id=$id"; 
+		$this->rapyd->load("dataform");
 
+		$mSQL  = "SELECT nomcli, codrut, fecven, localiza FROM tbreserva WHERE id=$id"; 
 		$ret   = $this->datasis->damereg($mSQL);
+
+		$form = new DataForm('');
+		//$form->script($script);
+
+		// Cliente
+		$form->cliente = new hiddenField('Cliente','cod_cli');
+		$form->cliente->size = 8;
+		$form->cliente->autocomplete=false;
+		//$form->cliente->rule='required|existescli';
+
+		$form->rifci   = new inputField('RIF/CI','rifci');
+		$form->rifci->autocomplete=false;
+		//$form->rifci->readonly =true;
+		$form->rifci->size = 15;
 		
+		$form->nombre = new inputField('Nombre', 'nombre');
+		$form->nombre->size = 25;
+		$form->nombre->maxlength=40;
+		$form->nombre->readonly =true;
+		$form->nombre->autocomplete=false;
+		$form->nombre->rule= 'required';
+		
+		
+		$mSQL  = "SELECT * FROM tbpuestos WHERE localiza=".$ret['localiza']." GROUP BY nroasi"; 
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$i = 1;
+			foreach ($query->result() as $row){
+
+				$obj = 'asiento_'.$i;
+				$form->$obj = new inputField('Nro.','asiento_'.$i);
+				$form->$obj->rule      = '';
+				$form->$obj->size      = 5;
+				$form->$obj->maxlength = 5;
+				$form->$obj->insertValue= $row->nroasi;
+				$form->$obj->readonly  = true;
+
+				$obj = 'cedula_'.$i;
+				$form->$obj = new inputField('Cedula','cedula_'.$i);
+				$form->$obj->rule      = '';
+				$form->$obj->size      = 13;
+				$form->$obj->maxlength =13;
+
+				$obj = 'nombre_'.$i;
+				$form->$obj = new inputField('Nombre','nombre_'.$i);
+				$form->$obj->rule      = '';
+				$form->$obj->size      = 30;
+				$form->$obj->maxlength = 40;
+
+				$obj = 'nacio_'.$i;
+				$form->$obj = new dateonlyField('Nacimiento','nacio_'.$i);
+				$form->$obj->rule      = 'chfecha';
+				$form->$obj->size      = 10;
+				$form->$obj->maxlength = 8;
+				$form->$obj->calendar  = false;
+
+				$obj = 'telefono_'.$i;
+				$form->$obj = new inputField('Telefono','telefono_'.$i);
+				$form->$obj->rule      = '';
+				$form->$obj->size      = 13;
+				$form->$obj->maxlength =13;
+				
+				$i++;
+
+			}
+		}
+
+		$form->build_form();
+
+	
 		$ruta = $this->datasis->dameval("SELECT CONCAT_WS(' ',horsal, origen, destino) ruta FROM tbrutas WHERE codrut=".$this->db->escape($ret['codrut']));
 		
 		$salida  = '<table width="95%" style="background:#DDDDDD;" align="center" ><tr>';
@@ -570,13 +640,12 @@ class Tbreserva extends Controller {
 				$salida .= '<td>'.$row->nroasi.'</td>';
 				$salida .= '<td>'.$row->nroasi.'</td>';
 				$salida .= '</tr>' ;
-
 			}
 		}
 		$salida .= '</table>';
 
-		echo $salida;
-
+		$conten['form'] =&  $form;
+		$this->load->view('view_tbresfact', $conten);
 
 	}
 

@@ -1391,9 +1391,9 @@ class Apan extends Controller {
 
 	function instalar(){
 		if(!$this->datasis->iscampo('apan','id')){
-			$this->db->simple_query('ALTER TABLE apan DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE apan ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE apan ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+			$this->db->query('ALTER TABLE apan DROP PRIMARY KEY');
+			$this->db->query('ALTER TABLE apan ADD UNIQUE INDEX numero (numero)');
+			$this->db->query('ALTER TABLE apan ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};
 	}
 }

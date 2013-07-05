@@ -13,21 +13,7 @@ class Chgara extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('chgara','enviado') ) {
-			$this->db->query('ALTER TABLE chgara ADD COLUMN enviado DATE NULL AFTER deposito');
-		};
-		if ( !$this->datasis->iscampo('chgara','codbanc') ) {
-			$this->db->query('ALTER TABLE chgara ADD COLUMN codbanc CHAR(2) NULL AFTER enviado');
-		};
-		if ( !$this->datasis->iscampo('chgara','fdeposito') ) {
-			$this->db->query('ALTER TABLE chgara ADD COLUMN fdeposito DATE NULL AFTER codbanc');
-		};
-		if ( !$this->datasis->iscampo('chgara','transac') ) {
-			$this->db->query('ALTER TABLE chgara ADD COLUMN transac VARCHAR(8) NULL AFTER fdeposito');
-		};
-		if ( $this->datasis->isindice('bmov','idunico') ){
-			$this->db->query('ALTER TABLE bmov DROP INDEX idunico, ADD INDEX principal (codbanc, tipo_op, numero)');
-		}
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -1042,5 +1028,57 @@ class Chgara extends Controller {
 	';
 		echo $salida;
 	}
+
+	function instalar(){
+		if (!$this->db->table_exists('chgara')) {
+			$mSQL='
+				CREATE TABLE `chgara` (
+					`cod_cli`    VARCHAR(5)    NULL DEFAULT NULL,
+					`fecha`      DATE          NULL DEFAULT NULL,
+					`numero`     VARCHAR(16)   NULL DEFAULT NULL,
+					`cuentach`   VARCHAR(22)   NULL DEFAULT NULL,
+					`banco`      CHAR(3)       NULL DEFAULT NULL,
+					`monto`      DECIMAL(18,2) NULL DEFAULT NULL,
+					`vendedor`   VARCHAR(5)    NULL DEFAULT NULL,
+					`observa`    VARCHAR(250)  NULL DEFAULT NULL,
+					`status`     CHAR(1)       NULL DEFAULT NULL,
+					`usuario`    VARCHAR(12)   NULL DEFAULT NULL,
+					`estampa`    DATE          NULL DEFAULT NULL,
+					`hora`       VARCHAR(8)    NULL DEFAULT NULL,
+					`modificado` TIMESTAMP     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+					`deposito`   CHAR(12)      NULL DEFAULT NULL,
+					`enviado`    DATE          NULL DEFAULT NULL,
+					`codbanc`    CHAR(2)       NULL DEFAULT NULL,
+					`fdeposito`  DATE          NULL DEFAULT NULL,
+					`transac`    VARCHAR(8)    NULL DEFAULT NULL,
+					`id`         INT(11)   NOT NULL AUTO_INCREMENT,
+					PRIMARY KEY (`id`),
+					INDEX `modificado` (`modificado`),
+					INDEX `fecha` (`fecha`)
+				)
+				COLLATE="latin1_swedish_ci"
+				ENGINE=MyISAM;';
+				
+			$this->db->query($mSQL);
+		}
+		if ( !$this->datasis->iscampo('chgara','enviado') ) {
+			$this->db->query('ALTER TABLE chgara ADD COLUMN enviado DATE NULL AFTER deposito');
+		};
+		if ( !$this->datasis->iscampo('chgara','codbanc') ) {
+			$this->db->query('ALTER TABLE chgara ADD COLUMN codbanc CHAR(2) NULL AFTER enviado');
+		};
+		if ( !$this->datasis->iscampo('chgara','fdeposito') ) {
+			$this->db->query('ALTER TABLE chgara ADD COLUMN fdeposito DATE NULL AFTER codbanc');
+		};
+		if ( !$this->datasis->iscampo('chgara','transac') ) {
+			$this->db->query('ALTER TABLE chgara ADD COLUMN transac VARCHAR(8) NULL AFTER fdeposito');
+		};
+		if ( $this->datasis->isindice('bmov','idunico') ){
+			$this->db->query('ALTER TABLE bmov DROP INDEX idunico, ADD INDEX principal (codbanc, tipo_op, numero)');
+		}
+
+
+	}
+
 }
 ?>
