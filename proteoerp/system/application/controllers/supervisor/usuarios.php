@@ -390,11 +390,11 @@ class Usuarios extends Controller {
 		));
 
 		$grid->addField('uuid');
-		$grid->label('Movil');
+		$grid->label('Movil UUID');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 120,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:false}'

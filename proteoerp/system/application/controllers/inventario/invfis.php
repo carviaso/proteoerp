@@ -25,7 +25,7 @@ class Invfis extends Controller {
 		$form0->alma = new dropdownField('Almac&eacute;n', 'alma');
 		$form0->alma->options("SELECT TRIM(ubica),CONCAT_WS('-',TRIM(ubides),TRIM(ubica)) AS desca FROM caub WHERE gasto='N' AND invfis='N' ORDER BY ubides");
 		$form0->alma->rule='required';
-		$form0->explica2 = new containerField("","<p style='color:blue;background-color:C6DAF6;align:center'>La fecha es muy importante, si el conteo fisico se realizo en la ma&ntilde;ana antes de abrir debe colocar la fecha de ayer, de lo contrario si el conteo se hizo en la tarde al final de la jornada debe colocar la fecha de Hoy.</p>");
+		$form0->explica2 = new containerField("","<p style='color:blue;background-color:C6DAF6;align:center'>La fecha es muy importante, si el conteo f&iacute;sico se realizo en la ma&ntilde;ana antes de abrir debe colocar la fecha de hoy, de lo contrario si el conteo se hizo en la tarde al final de la jornada debe colocar la fecha de Ma&ntilde;ana.</p>");
 
 		$form0->fecha = new dateonlyField('Fecha', 'fecha');
 		$form0->fecha->rule='required|chfecha';
