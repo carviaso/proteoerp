@@ -961,6 +961,38 @@ class Ccont extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
+		if(!$this->db->table_exists('itccont')){
+			$mSQL="CREATE TABLE `itccont` (
+				`partida` VARCHAR(50) NULL DEFAULT NULL,
+				`descrip` VARCHAR(150) NULL DEFAULT NULL,
+				`unidad` VARCHAR(15) NULL DEFAULT NULL,
+				`cantidad` DECIMAL(10,2) NULL DEFAULT NULL,
+				`monto` DECIMAL(10,2) NULL DEFAULT NULL,
+				`precio` DECIMAL(10,2) NULL DEFAULT NULL,
+				`numero` INT(10) NULL DEFAULT NULL,
+				`id` INT(10) NOT NULL AUTO_INCREMENT,
+				PRIMARY KEY (`id`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM
+			AUTO_INCREMENT=1";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!$this->db->table_exists('itccontb')){
+			$mSQL="CREATE TABLE `itccontb` (
+				`id` INT(10) NOT NULL AUTO_INCREMENT,
+				`numero` INT(10) NULL DEFAULT NULL,
+				`contenido` VARCHAR(100) NULL DEFAULT NULL,
+				`usuario` VARCHAR(20) NULL DEFAULT NULL,
+				`fecha` DATE NULL DEFAULT NULL,
+				PRIMARY KEY (`id`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM
+			AUTO_INCREMENT=1";
+		}
+
 		if(!$this->db->table_exists('obpa')){
 			$mSQL="CREATE TABLE `obpa` (
 			  `codigo` char(4) NOT NULL DEFAULT '',
