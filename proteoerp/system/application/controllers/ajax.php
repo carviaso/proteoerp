@@ -204,7 +204,7 @@ class Ajax extends Controller {
 			$retArray = $retorno = array();
 
 			//Mira si existe el codigo
-			$mSQL="SELECT id,TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo, dire11 AS direc
+			$mSQL="SELECT id,TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo, dire11 AS direc,telefono
 				FROM scli WHERE cliente=${qmid} AND tipo<>0  LIMIT 1";
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() == 1){
@@ -215,6 +215,7 @@ class Ajax extends Controller {
 				$retArray['nombre']  = utf8_encode($row['nombre']);
 				$retArray['cod_cli'] = $row['cliente'];
 				$retArray['tipo']    = $row['tipo'];
+				$retArray['telef']   = trim($row['telefono']);
 				$retArray['direc']   = utf8_encode($row['direc']);
 				$retArray['id']      = $row['id'];
 				array_push($retorno, $retArray);
@@ -223,7 +224,7 @@ class Ajax extends Controller {
 				$ww='';
 			}
 
-			$mSQL="SELECT id,TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo , dire11 AS direc
+			$mSQL="SELECT id,TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo , dire11 AS direc,telefono
 				FROM scli WHERE (cliente LIKE ${qdb} OR rifci LIKE ${qdb} OR nombre LIKE ${qdb}) AND tipo<>0 $ww
 				ORDER BY rifci LIMIT ".$this->autolimit;
 
@@ -236,6 +237,7 @@ class Ajax extends Controller {
 					$retArray['nombre']  = utf8_encode($row['nombre']);
 					$retArray['cod_cli'] = $row['cliente'];
 					$retArray['tipo']    = $row['tipo'];
+					$retArray['telef']   = trim($row['telefono']);
 					$retArray['direc']   = utf8_encode($row['direc']);
 					$retArray['id']      = $row['id'];
 					array_push($retorno, $retArray);

@@ -34,9 +34,9 @@ $(function(){
 					function(data){
 						var sugiere = [];
 						if(data.length==0){
-							$('#nomcli_des').val('');
-							//$('#nomclides_val').text('');
-
+							$('#nomcli_org').val('');
+							$('#scliorgrif').val('');
+							$('#telf_org').val('');
 						}else{
 							$.each(data,
 								function(i, val){
@@ -53,6 +53,8 @@ $(function(){
 			$('#codcli_org').attr("readonly", "readonly");
 
 			$('#nomcli_org').val(ui.item.nombre);
+			$('#scliorgrif').val(ui.item.rifci);
+			$('#telf_org').val(ui.item.telf);
 
 			setTimeout(function() {  $("#codcli_org").removeAttr("readonly"); }, 1500);
 		}
@@ -72,6 +74,8 @@ $(function(){
 						var sugiere = [];
 						if(data.length==0){
 							$('#nomcli_des').val('');
+							$('#sclidesrif').val('');
+							$('#telf_des').val('');
 
 						}else{
 							$.each(data,
@@ -89,6 +93,8 @@ $(function(){
 			$('#codcli_des').attr("readonly", "readonly");
 
 			$('#nomcli_des').val(ui.item.nombre);
+			$('#sclidesrif').val(ui.item.rifci);
+			$('#telf_des').val(ui.item.telf);
 
 			setTimeout(function() {  $("#codcli_des").removeAttr("readonly"); }, 1500);
 		}
@@ -308,6 +314,9 @@ echo $container_tr;
 						<td class="littletableheader"><?php echo $form->telf_org->label;     ?>*</td>
 						<td class="littletablerow"   ><?php echo $form->telf_org->output;    ?></td>
 					</tr><tr>
+						<td class="littletableheader"><?php          echo $form->scliorgrif->label;   ?>*</td>
+						<td class="littletablerow" colspan='3'><?php echo $form->scliorgrif->output;  ?> </td>
+					</tr><tr>
 						<td class="littletableheader"><?php echo $form->nomcli_org->label;   ?>*</td>
 						<td class="littletablerow" colspan='3'><?php echo $form->nomcli_org->output;  ?> </td>
 					</tr>
@@ -322,6 +331,9 @@ echo $container_tr;
 						<td class="littletablerow"   ><?php echo $form->codcli_des->output;  ?> </td>
 						<td class="littletableheader"><?php echo $form->telf_des->label;     ?>*</td>
 						<td class="littletablerow"   ><?php echo $form->telf_des->output;    ?> </td>
+					</tr><tr>
+						<td class="littletableheader"><?php          echo $form->sclidesrif->label;   ?>*</td>
+						<td class="littletablerow" colspan='3'><?php echo $form->sclidesrif->output;  ?> </td>
 					</tr><tr>
 						<td class="littletableheader"><?php echo $form->nomcli_des->label;   ?>*</td>
 						<td class="littletablerow" colspan='3'><?php echo $form->nomcli_des->output;  ?> </td>

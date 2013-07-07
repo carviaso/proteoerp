@@ -81,6 +81,11 @@ class repomenu extends validaciones {
 		$filter->harbourd->db_name='b.harbour';
 		$filter->harbourd->group = 'Dos';
 
+		$filter->mensaje = new inputField('Mensaje','mensaje');
+		$filter->mensaje->size=40;
+		$filter->mensaje->db_name='a.mensaje';
+		$filter->mensaje->group = 'Dos';
+
 		/*$filter->tcpdf = new inputField('Contenido TCPDF','tcpdf');
 		$filter->tcpdf->size=40;
 		$filter->tcpdf->db_name='b.tcpdf';*/
@@ -219,7 +224,7 @@ class repomenu extends validaciones {
 			"application/x-www-form-urlencoded;charset='.$this->config->item('charset').'");
 			return false;
 		});
-		
+
 		function fcargar(){
 			$.post("'.site_url('supervisor/repomenu/cargar/').'", { nombre:"'.$id.'"},
 			function(data){
@@ -236,7 +241,7 @@ class repomenu extends validaciones {
 			return false;
 		};
 
-		
+
 		';
 
 		$edit->script($script,'modify');
@@ -264,7 +269,7 @@ class repomenu extends validaciones {
 		$edit->build();
 
 		$this->rapyd->jquery[]='$("#proteo").tabby();';
-		$this->rapyd->jquery[]='$("#proteo").linedtextarea();'; 
+		$this->rapyd->jquery[]='$("#proteo").linedtextarea();';
 
 		if($this->genesal){
 			$data['content'] = $edit->output;
@@ -383,7 +388,7 @@ class repomenu extends validaciones {
 			echo "Reporte Guardado";
 		else
 			echo "Error al guardar";
-		
+
 	}
 
 	function cargar(){

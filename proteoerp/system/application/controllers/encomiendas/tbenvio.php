@@ -717,7 +717,7 @@ class Tbenvio extends Controller {
 	}
 
 	function dataedit(){
-		$this->rapyd->load('dataedit');
+		$this->rapyd->load('dataedit','dataobject');
 		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
@@ -728,11 +728,11 @@ class Tbenvio extends Controller {
 		$ivas = $this->datasis->ivaplica();
 		if(empty($ivas)) show_error('Debe carcar la tabla de ivas');
 
-		//$do = new DataObject('tbenvio');
-		//$do->pointer('scli AS org' ,'tbenvio.codcli_org=org.cliente','org.rifci AS scliorgrif','left');
-		//$do->pointer('scli AS des' ,'tbenvio.codcli_des=des.cliente','des.rifci AS sclidesrif','left');
+		$do = new DataObject('tbenvio');
+		$do->pointer('scli AS org' ,'tbenvio.codcli_org=org.cliente','org.rifci AS scliorgrif','left');
+		$do->pointer('scli AS des' ,'tbenvio.codcli_des=des.cliente','des.rifci AS sclidesrif','left');
 
-		$edit = new DataEdit('', 'tbenvio');
+		$edit = new DataEdit('', $do);
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -766,7 +766,7 @@ class Tbenvio extends Controller {
 		$edit->codofi_des->style= 'width:180px;';
 
 		$edit->codcli_org = new inputField('Cliente','codcli_org');
-		$edit->codcli_org->rule='';
+		$edit->codcli_org->rule='required';
 		$edit->codcli_org->size =7;
 		$edit->codcli_org->maxlength =20;
 
@@ -780,8 +780,16 @@ class Tbenvio extends Controller {
 		$edit->telf_org->size =11;
 		$edit->telf_org->maxlength =30;
 
+		$edit->scliorgrif = new inputField('RIF/CI','scliorgrif');
+		$edit->scliorgrif->pointer=true;
+		$edit->scliorgrif->size =30;
+
+		$edit->sclidesrif = new inputField('RIF/CI','sclidesrif');
+		$edit->sclidesrif->pointer=true;
+		$edit->sclidesrif->size =30;
+
 		$edit->codcli_des = new inputField('Cliente','codcli_des');
-		$edit->codcli_des->rule='';
+		$edit->codcli_des->rule='required';
 		$edit->codcli_des->size =7;
 		$edit->codcli_des->maxlength =20;
 
@@ -796,9 +804,9 @@ class Tbenvio extends Controller {
 		$edit->telf_des->maxlength =30;
 
 		$edit->dirdes = new inputField('Direcci&oacute;n','dirdes');
-		$edit->dirdes->rule='';
+		$edit->dirdes->rule='required';
 		$edit->dirdes->maxlength =300;
-		$edit->dirdes->size = 100;
+		$edit->dirdes->size = 104;
 
 		//$edit->anula = new inputField('Anula','anula');
 		//$edit->anula->rule='';
@@ -832,7 +840,7 @@ class Tbenvio extends Controller {
 
 		$edit->fledes = new checkboxField('Flete destino','fledes', 'S','N');
 		$edit->fledes->onchange='ffledes()';
-		$edit->fledes->rule='enum[S,N]';
+		$edit->fledes->rule='enum[S,N]|required';
 
 		$edit->tipo = new dropdownField('Tipo','tipo');
 		$edit->tipo->option('Bolsa(s)'  ,'Bolsa(s)'  );
@@ -861,6 +869,7 @@ class Tbenvio extends Controller {
 		$edit->peso->rule='numeric';
 		$edit->peso->css_class = 'inputnum';
 		$edit->peso->size =12;
+		$edit->peso->rule = 'required';
 		$edit->peso->onkeyup = 'ctarifa()';
 		$edit->peso->maxlength =10;
 
@@ -970,7 +979,7 @@ class Tbenvio extends Controller {
 		$edit->ipostel->type='inputhidden';
 		$edit->ipostel->maxlength =10;
 
-		$edit->ref = new inputField('Ref','ref');
+		$edit->ref = new inputField('Ref.','ref');
 		$edit->ref->rule='';
 		$edit->ref->size =22;
 		$edit->ref->maxlength =20;
@@ -980,7 +989,7 @@ class Tbenvio extends Controller {
 		$edit->fom_pag->size =22;
 		$edit->fom_pag->maxlength =20;
 
-		$edit->nro_post = new inputField('Nro_post','nro_post');
+		$edit->nro_post = new inputField('Nro Post','nro_post');
 		$edit->nro_post->rule='';
 		$edit->nro_post->size =22;
 		$edit->nro_post->maxlength =20;
