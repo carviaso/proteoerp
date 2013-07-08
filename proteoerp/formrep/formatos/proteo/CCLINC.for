@@ -40,13 +40,13 @@ $tasa     = nformat($row->tasa);
 $gtotal   = nformat($row->monto);
 
 
-$sel=array('b.tipoccli','b.numccli','b.fecha','b.monto','b.abono','b.reten','b.ppago','b.cambio','b.mora','b.reteiva');
+$sel=array('b.tipo_doc','b.numero','b.fecha','b.monto','b.abono','b.reten','b.ppago','b.cambio','b.mora','b.reteiva');
 $this->db->select($sel);
 $this->db->from('smov AS a');
 $this->db->join('itccli AS b','a.tipo_doc = b.tipoccli AND a.numero=b.numccli AND a.cod_cli=b.cod_cli');
-$this->db->where('a.cod_cli' ,$cliente);
-$this->db->where('a.tipo_doc',$tipo_doc);
-$this->db->where('a.numero'  ,$numero);
+$this->db->where('a.cod_cli' ,$row->cod_cli);
+$this->db->where('a.tipo_doc',$row->tipo_doc);
+$this->db->where('a.numero'  ,$row->numero);
 $this->db->where('a.fecha'   ,$row->fecha);
 $mSQL_2 = $this->db->get();
 $detalle2  = $mSQL_2->result();
@@ -163,7 +163,7 @@ foreach ($detalle2 AS $items2){ $i++;
 ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 
-				<td style="text-align: center"><?php echo $items2->tipoccli.$items2->numccli;?></td>
+				<td style="text-align: center"><?php echo $items2->tipo_doc.$items2->numero;?></td>
 				<td style="text-align: center"><?php echo dbdate_to_human($items2->fecha);   ?></td>
 				<td style="text-align: right" ><?php echo nformat($items2->abono);           ?></td>
 				<?php

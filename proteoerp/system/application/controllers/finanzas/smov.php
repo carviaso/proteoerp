@@ -219,20 +219,20 @@ class Smov extends Controller {
 		$grid->addField('cod_cli');
 		$grid->label('Cliente');
 		$grid->params(array(
-			'align'    => "'center'",
+			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => 'false',
-			'width'         => 50
+			'width'         => 60
 		));
 
 
 		$grid->addField('nombre');
 		$grid->label('Nombre');
 		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => 'false',
-			'width'         => 200,
-			'edittype'      => "'text'",
+			'search'       => 'true',
+			'editable'     => 'false',
+			'width'        => 200,
+			'edittype'     => "'text'",
 		));
 
 
