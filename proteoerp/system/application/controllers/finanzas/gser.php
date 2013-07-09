@@ -4732,7 +4732,7 @@ class gser extends Controller {
 			SET a.idgser=b.id WHERE a.idgser IS NULL";
 		$this->db->simple_query($query);
 
-		if (!$this->db->table_exists('gereten')) {
+		if (!$this->db->table_exists('gereten')){
 			$mSQL="CREATE TABLE `gereten` (
 				`id` INT(10) NOT NULL AUTO_INCREMENT,
 				`idd` INT(11) NULL DEFAULT NULL,
@@ -4747,7 +4747,7 @@ class gser extends Controller {
 			)
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
-			$this->db->simple_query($query);
+			$this->db->simple_query($mSQL);
 		}
 
 		if (!$this->db->table_exists('gserchi')) {
