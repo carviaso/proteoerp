@@ -4703,8 +4703,6 @@ class gser extends Controller {
 		}
 
 		if(!in_array('id',$campos)){
-			$itcampos=$this->db->list_fields('gitser');
-
 			$query="ALTER TABLE `gser` DROP PRIMARY KEY";
 			$this->db->simple_query($query);
 			$query="ALTER TABLE `gser` ADD UNIQUE INDEX `gser` (`fecha`, `numero`, `proveed`)";
@@ -4712,16 +4710,20 @@ class gser extends Controller {
 			$query="ALTER TABLE `gser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`)";
 			$this->db->simple_query($query);
 
-			if(!in_array('id',$itcampos)){
-				$query="ALTER TABLE `gitser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`);";
-				$this->db->simple_query($query);
-				$query="ALTER TABLE `gitser` ADD COLUMN `idgser` INT(15) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`, ADD INDEX `idgser` (`idgser`)";
-				$this->db->simple_query($query);
-			}
-
 			$query="UPDATE gitser AS a
 				JOIN gser AS b on a.numero=b.numero and a.fecha = b.fecha and a.proveed = b.proveed
 				SET a.idgser=b.id  WHERE a.idgser IS NULL";
+			$this->db->simple_query($query);
+		}
+
+		$itcampos=$this->db->list_fields('gitser');
+		if(!in_array('id',$itcampos)){
+			$query="ALTER TABLE `gitser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`);";
+			$this->db->simple_query($query);
+		}
+
+		if(!in_array('idgser',$itcampos)){
+			$query="ALTER TABLE `gitser` ADD COLUMN `idgser` INT(15) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`, ADD INDEX `idgser` (`idgser`)";
 			$this->db->simple_query($query);
 		}
 
