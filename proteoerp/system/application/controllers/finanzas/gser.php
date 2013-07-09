@@ -1238,8 +1238,14 @@ class gser extends Controller {
 						}
 					});
 				}
+			},afterInsertRow:
+			function( rid, aData, rowe){
+				if ( aData.tipo_doc == "XX" ){
+					$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#C90623" });
+				}
 			}'
 		);
+
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 400, height:250, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 400, height:250, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
@@ -4677,28 +4683,41 @@ class gser extends Controller {
 	}
 
 	function instalar(){
-		$query='SHOW INDEX FROM gser';
-		$resul=$this->db->query($query);
-		$existe=0;
-		foreach($resul->result() as $ind){
-			$nom= $ind->Column_name;
-			if ($nom == 'id'){
-				$existe=1;
-				break;
-			}
+
+		$campos=$this->db->list_fields('gser');
+
+		if(!in_array('reteica',$campos)){
+			$this->db->simple_query("ALTER TABLE `gser` ADD COLUMN `reteica` DECIMAL(12,2) NULL DEFAULT NULL");
 		}
 
-		if($existe != 1) {
+		if(!in_array('retesimple',$campos)){
+			$this->db->simple_query("ALTER TABLE `gser` ADD COLUMN `retesimple` DECIMAL(12,2) NULL DEFAULT NULL");
+		}
+
+		if(!in_array('negreso',$campos)){
+			$this->db->simple_query("ALTER TABLE `gser` ADD COLUMN `negreso` CHAR(8) NULL DEFAULT NULL");
+		}
+
+		if(!in_array('ncausado',$campos)){
+			$this->db->simple_query("ALTER TABLE `gser` ADD COLUMN `ncausado` CHAR(8) NULL DEFAULT NULL");
+		}
+
+		if(!in_array('id',$campos)){
+			$itcampos=$this->db->list_fields('gitser');
+
 			$query="ALTER TABLE `gser` DROP PRIMARY KEY";
-			var_dump($this->db->simple_query($query));
+			$this->db->simple_query($query);
 			$query="ALTER TABLE `gser` ADD UNIQUE INDEX `gser` (`fecha`, `numero`, `proveed`)";
-			var_dump($this->db->simple_query($query));
-			$query="ALTER TABLE `gser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT AFTER `ncausado`,  ADD PRIMARY KEY (`id`)";
-			var_dump($this->db->simple_query($query));
-			$query="ALTER TABLE `gitser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT AFTER `reteica`,  ADD PRIMARY KEY (`id`);";
 			$this->db->simple_query($query);
-			$query="ALTER TABLE `gitser` ADD COLUMN `idgser` INT(15) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`, ADD INDEX `idgser` (`idgser`)";
+			$query="ALTER TABLE `gser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`)";
 			$this->db->simple_query($query);
+
+			if(!in_array('id',$itcampos)){
+				$query="ALTER TABLE `gitser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`);";
+				$this->db->simple_query($query);
+				$query="ALTER TABLE `gitser` ADD COLUMN `idgser` INT(15) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`, ADD INDEX `idgser` (`idgser`)";
+				$this->db->simple_query($query);
+			}
 
 			$query="UPDATE gitser AS a
 				JOIN gser AS b on a.numero=b.numero and a.fecha = b.fecha and a.proveed = b.proveed
