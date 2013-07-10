@@ -1404,10 +1404,17 @@ class Apan extends Controller {
 	}
 
 	function instalar(){
-		if(!$this->datasis->iscampo('apan','id')){
+		$campos=$this->db->list_fields('apan');
+		if(!in_array('id',$campos)){
 			$this->db->query('ALTER TABLE apan DROP PRIMARY KEY');
 			$this->db->query('ALTER TABLE apan ADD UNIQUE INDEX numero (numero)');
 			$this->db->query('ALTER TABLE apan ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		}
+
+		$itcampos=$this->db->list_fields('itccli');
+		if(!in_array('id',$itcampos)){
+			$mSQL="ALTER TABLE `itccli` ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT AFTER `recriva`, ADD PRIMARY KEY (`id`)";
+			$this->db->simple_query($mSQL);
+		}
 	}
 }

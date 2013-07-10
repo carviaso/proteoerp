@@ -2122,10 +2122,16 @@ class Smov extends Controller {
 
 	function instalar(){
 		$campos=$this->db->list_fields('smov');
-		if (!in_array('id',$campos)){
-			$this->db->simple_query('ALTER TABLE smov DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE `otin` ADD UNIQUE INDEX `unico` (`cod_cli`, `tipo_doc`, `numero`, `fecha`)');
-			$this->db->simple_query('ALTER TABLE smov ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE `smov` DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE `smov` ADD UNIQUE INDEX `unico` (`cod_cli`, `tipo_doc`, `numero`, `fecha`)');
+			$this->db->simple_query('ALTER TABLE `smov` ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		$itcampos=$this->db->list_fields('itccli');
+		if(!in_array('id',$itcampos)){
+			$mSQL="ALTER TABLE `itccli` ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT AFTER `recriva`, ADD PRIMARY KEY (`id`)";
+			$this->db->simple_query($mSQL);
 		}
 	}
 }
