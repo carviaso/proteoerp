@@ -366,7 +366,7 @@ class Rcaj extends validaciones {
 
 					$recibido = (isset($form->$nobj))? (empty($form->$nobj->newValue))? 0.00 :floatval($form->$nobj->newValue) : 0.00;
 					if(array_key_exists($row->tipo, $rret)) $recibido += $rret[$row->tipo];
-					if($row->monto>0 || $recibido>0){
+					if($row->monto!=0 || $recibido!=0){
 						$monto = ($row->tipo=='EF')? $row->monto-$ccheq : $row->monto;
 						$str.= $row->tipo.' '.$recibido.'  ';
 						$arr['tipo']       = $row->tipo;
@@ -403,11 +403,11 @@ class Rcaj extends validaciones {
 				$this->db->query($mSQL);
 
 				if($this->db->table_exists('rret')){
-					$mSQL="UPDATE rret SET cierre=$dbnumero WHERE cajero=${dbcajero} AND fecha=${dbfecha} AND cierre IS NULL";
+					$mSQL="UPDATE rret SET cierre=${dbnumero} WHERE cajero=${dbcajero} AND fecha=${dbfecha} AND cierre IS NULL";
 					$this->db->query($mSQL);
 				}
 			}
-			logusu('rcaj',"Pre-cerro cajero $cajero de $fecha");
+			logusu('rcaj',"Pre-cerro cajero ${cajero} de ${fecha}");
 			if($redir){
 				redirect('ventas/rcaj/filteredgrid/search');
 			}else{
