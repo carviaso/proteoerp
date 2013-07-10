@@ -319,15 +319,15 @@ class Rcaj extends validaciones {
 				(SELECT b.tipo, b.monto AS monto
 				FROM sfac AS a
 				JOIN sfpa AS b ON a.transac=b.transac
-				WHERE a.fecha=$dbfecha AND a.referen='E' AND b.cobrador=$dbcajero AND a.tipo_doc<>'X' AND MID(a.numero,1,1)<>'_' AND b.tipo<>'RP'
+				WHERE a.fecha=${dbfecha} AND a.referen='E' AND b.cobrador=${dbcajero} AND a.tipo_doc<>'X' AND MID(a.numero,1,1)<>'_' AND b.tipo<>'RP'
 				UNION ALL
 				SELECT e.tipo,e.monto AS monto
 				FROM sfpa AS e
-				WHERE e.f_factura=$dbfecha AND e.cobrador=$dbcajero AND e.tipo_doc IN ('AB','AN')
+				WHERE e.f_factura=${dbfecha} AND e.cobrador=${dbcajero} AND e.tipo_doc IN ('AB','AN')
 				UNION ALL
 				SELECT d.tipo,d.monto AS monto
 				FROM sfpa AS d
-				WHERE d.f_factura=$dbfecha AND d.cobrador=$dbcajero AND d.tipo_doc = 'CC'
+				WHERE d.f_factura=${dbfecha} AND d.cobrador=${dbcajero} AND d.tipo_doc = 'CC'
 				) AS aa
 				RIGHT JOIN tarjeta AS c ON aa.tipo=c.tipo GROUP BY c.tipo";
 			//echo $mSQL;
@@ -336,7 +336,7 @@ class Rcaj extends validaciones {
 			//Toma en cuenta los retiros
 			$rret=array();
 			if ($this->db->table_exists('rret')){
-				$retiquery = $this->db->query("SELECT tipo,SUM(monto) AS monto FROM rret WHERE cajero=$dbcajero AND fecha=$dbfecha AND cierre IS NULL GROUP BY tipo");
+				$retiquery = $this->db->query("SELECT tipo,SUM(monto) AS monto FROM rret WHERE cajero=${dbcajero} AND fecha=${dbfecha} AND cierre IS NULL GROUP BY tipo");
 				foreach ($retiquery->result() as $rreti){
 					$rret[$rreti->tipo] = $rreti->monto;
 				}
@@ -344,7 +344,7 @@ class Rcaj extends validaciones {
 
 			//Toma en cuenta los cambios de cheque
 			$ccheq=0;
-			$ccquery = $this->db->query("SELECT SUM(d.monto) AS monto FROM sfpa AS d WHERE d.f_factura=$dbfecha AND d.cobrador=$dbcajero AND d.tipo_doc = 'CC'");
+			$ccquery = $this->db->query("SELECT SUM(d.monto) AS monto FROM sfpa AS d WHERE d.f_factura=${dbfecha} AND d.cobrador=${dbcajero} AND d.tipo_doc = 'CC'");
 			foreach ($ccquery->result() as $ccrow){
 				$ccheq += $ccrow->monto;
 			}
