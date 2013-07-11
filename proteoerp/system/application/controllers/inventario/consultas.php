@@ -204,6 +204,9 @@ class Consultas extends Controller {
 					$descufijo  = $row->descufijo;
 					$descurazon = 'Descuento por producto';
 				}
+			}else{
+				$descufijo  = 0;
+				$descurazon = '';
 			}
 		}else{
 			$descufijo  = 0;
