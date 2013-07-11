@@ -180,12 +180,16 @@ class Consultas extends Controller {
 	function _desc_precio($codigo,$aplica='sinv'){
 		$dbcodigo =$this->db->escape($codigo);
 		if($aplica=='sinv'){
-			$this->db->select(array('a.descufijo','b.margen'));
-			$this->db->from('sinv AS a');
-			$this->db->join('grup AS b','a.grupo=b.grupo','left');
-			$this->db->where('codigo',$codigo);
+			//$this->db->select(array('a.descufijo','b.margen'));
+			//$this->db->from('sinv AS a');
+			//$this->db->join('grup AS b','a.grupo=b.grupo','left');
+			//$this->db->where('codigo',$codigo);
+			//$query = $this->db->get();
 
-			$query = $this->db->get();
+			$dbcodigo=$this->db->escape($codigo);
+			$sql   = "SELECT a.descufijo , b.margen FROM sinv AS a LEFT JOIN grup AS b ON a.grupo=b.grupo WHERE codigo=${dbcodigo}";
+			$query = $this->db->query($sql);
+
 			if ($query->num_rows() > 0){
 				$row = $query->row();
 				if(empty($row->descufijo) || $row->descufijo==0.0){

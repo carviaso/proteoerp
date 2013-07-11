@@ -875,30 +875,29 @@ class Smov extends Controller {
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
+		$dbid   = $this->db->escape($id);
 		$data   = $_POST;
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				//$this->db->insert('smov', $data);
-			}
-			return "Registro Agregado";
-
-		} elseif($oper == 'edit') {
+			echo '';
+			return '';
+		}elseif($oper == 'edit') {
 			//unset($data['ubica']);
-			$monto =  $this->datasis->dameval("SELECT monto FROM smov WHERE id='$id' ");
+			$monto =  $this->datasis->dameval("SELECT monto FROM smov WHERE id=${dbid}");
 			$data['abonos'] = abs($data['abonos']);
-			if ( $data['abonos'] > $monto  ) $data['abonos'] = $monto;
+			if($data['abonos'] > $monto ) $data['abonos'] = $monto;
 			$this->db->where('id', $id);
 			$this->db->update('smov', $data);
-			return "Movimiento Modificado";
-
-		} elseif($oper == 'del') {
-			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM smov WHERE id='$id' ");
+			return 'Movimiento Modificado';
+		}elseif($oper == 'del'){
+			echo '';
+			return '';
+			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM smov WHERE id=${dbid}");
 			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
+				echo "El registro no puede ser eliminado; tiene movimiento";
 			} else {
 				//$this->db->simple_query("DELETE FROM smov WHERE id=$id ");
 				//logusu('smov',"Registro ????? ELIMINADO");

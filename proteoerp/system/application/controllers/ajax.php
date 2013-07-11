@@ -805,16 +805,17 @@ class Ajax extends Controller {
 			$mSQL="SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo
 				,a.peso, a.ultimo, a.pond FROM sinv AS a
 				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
-				WHERE (a.codigo LIKE $qdb OR a.descrip LIKE  $qdb OR a.barras LIKE $qdb OR b.suplemen=$qba OR a.alterno LIKE $qba) AND a.activo='S' AND a.tipo='Articulo'
+				WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba} OR a.alterno LIKE ${qba})
+					AND a.activo='S' AND a.tipo='Articulo'
 				ORDER BY a.descrip LIMIT ".$this->autolimit;
 			$cana=1;
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']   = '('.$row['codigo'].') '.$row['descrip'].' '.$row['precio1'].' Bs. - '.$row['existen'];
-					$retArray['value']   = $row['codigo'];
-					$retArray['codigo']  = $row['codigo'];
+					$retArray['label']   = '('.$row['codigo'].') '.utf8_encode($row['descrip']).' '.$row['precio1'].' Bs. - '.$row['existen'];
+					$retArray['value']   = utf8_encode($row['codigo']);
+					$retArray['codigo']  = utf8_encode($row['codigo']);
 					$retArray['cana']    = $cana;
 					$retArray['tipo']    = $row['tipo'];
 					$retArray['peso']    = $row['peso'];
@@ -850,7 +851,7 @@ class Ajax extends Controller {
 				FROM stra AS a
 				JOIN itstra AS b ON a.numero=b.numero
 				RIGHT JOIN ordpitem AS c ON a.ordp=c.numero AND b.codigo=c.codigo
-				WHERE c.numero=$dbnumero
+				WHERE c.numero=${dbnumero}
 				GROUP BY c.codigo";
 
 				$retArray=$retorno=array();
