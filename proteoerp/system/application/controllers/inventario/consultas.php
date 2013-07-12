@@ -187,7 +187,10 @@ class Consultas extends Controller {
 			//$query = $this->db->get();
 
 			$dbcodigo=$this->db->escape($codigo);
-			$sql   = "SELECT a.descufijo , b.margen FROM sinv AS a LEFT JOIN grup AS b ON a.grupo=b.grupo WHERE codigo=${dbcodigo}";
+			$sql   = "SELECT a.descufijo , b.margen
+			FROM sinv AS a
+			LEFT JOIN grup AS b ON a.grupo=b.grupo
+			WHERE a.codigo=${dbcodigo}";
 			$query = $this->db->query($sql);
 
 			if ($query->num_rows() > 0){

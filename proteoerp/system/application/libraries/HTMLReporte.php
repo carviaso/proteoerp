@@ -591,7 +591,7 @@ border-bottom-right-radius:5px;
 			}
 			if ($correcto){
 				$nname='__cC'.$this->fcount;
-				$this->cols[]=array( 'campo'=>$nname, 'titulo'=>$caption,'tipo'=>$tipo);//,'w'=>$width, 'a'=>$align,'s'=>$fontsize
+				$this->cols[]=array( 'campo'=>$nname, 'titulo'=>$caption,'tipo'=>$tipo,'align'=>$align);
 				$this->rows[]=$nname;
 				$this->fCols[$nname]=$field;
 				$this->fcount++;
