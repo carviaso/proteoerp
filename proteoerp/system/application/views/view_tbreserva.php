@@ -143,7 +143,6 @@ echo $form->codrut->output;
 	<tr>
 		<td class="littletablerowth"><?php echo $form->org->label;     ?></td>
 		<td class="littletablerow"  ><?php echo $form->org->output;    ?></td>
-
 		<td class="littletablerowth"><?php echo $form->dtn->label;     ?></td>
 		<td class="littletablerow"  ><?php echo $form->dtn->output;    ?></td>
 

@@ -37,7 +37,6 @@ html, body {margin: 0; padding: 0; overflow: hidden; font-size: 75%;}
 }
 
 if ( isset($readyscript) == false ) $readyscript = '';
-
 if( isset($WestSize) == false)  $WestSize = 212;
 if( isset($onclick)  == false)  $onclick = '';
 
@@ -246,6 +245,7 @@ html.ui-autocomplete {height: 150px;width: 600px;}
 <?php echo $LayoutStyle; ?>
 
 th.ui-th-column div{white-space:normal !important;height:auto !important;padding:2px;}
+
 </style>
 
 <script type="text/javascript">

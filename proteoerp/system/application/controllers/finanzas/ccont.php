@@ -1013,7 +1013,5 @@ class Ccont extends Controller {
 			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('ccont');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }

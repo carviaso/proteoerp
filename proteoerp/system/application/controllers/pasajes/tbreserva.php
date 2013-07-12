@@ -544,10 +544,10 @@ class Tbreserva extends Controller {
 		//$form->script($script);
 
 		// Cliente
-		$form->cliente = new hiddenField('Cliente','cod_cli');
-		$form->cliente->size = 8;
-		$form->cliente->autocomplete=false;
-		//$form->cliente->rule='required|existescli';
+		$form->cod_cli = new hiddenField('Cliente','cod_cli');
+		$form->cod_cli->size = 8;
+		$form->cod_cli->autocomplete=false;
+		//$form->cod_cli->rule='required|existescli';
 
 		$form->rifci   = new inputField('RIF/CI','rifci');
 		$form->rifci->autocomplete=false;
@@ -555,13 +555,13 @@ class Tbreserva extends Controller {
 		$form->rifci->size = 15;
 		
 		$form->nombre = new inputField('Nombre', 'nombre');
-		$form->nombre->size = 25;
-		$form->nombre->maxlength=40;
+		$form->nombre->size = 60;
+		$form->nombre->maxlength=60;
 		$form->nombre->readonly =true;
 		$form->nombre->autocomplete=false;
 		$form->nombre->rule= 'required';
-		
-		
+
+
 		$mSQL  = "SELECT * FROM tbpuestos WHERE localiza=".$ret['localiza']." GROUP BY nroasi"; 
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){

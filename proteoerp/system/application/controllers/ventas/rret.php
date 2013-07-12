@@ -43,6 +43,7 @@ class Rret extends validaciones {
 
 		$filter->cajero = new dropdownField('Cajero', 'cajero');
 		$filter->cajero->option('','Todos');
+		$filter->cajero->db_name = 'a.cajero';
 		$filter->cajero->options('SELECT TRIM(cajero) AS cajero, nombre FROM scaj ORDER BY nombre');
 
 		$filter->buttons('reset','search');

@@ -417,13 +417,13 @@ function post_modbus_scli(){
 		type: 'POST',
 		data: {'clipro' : $('#cod_cli').val()},
 		success: function(data){
-				if(data>0){
-					$.prompt("<span style='font-size:1.5em'>Cliente presenta saldo vencido de <b>"+nformat(data,2)+" Bs.</b> debe ponerse al d&iacute;a.</span>", {
-						title: "Saldo vencido",
-						buttons: { "Continuar": true }
-					});
-				}
-			},
+			if(data>0){
+				$.prompt("<span style='font-size:1.5em'>Cliente presenta saldo vencido de <b>"+nformat(data,2)+" Bs.</b> debe ponerse al d&iacute;a.</span>", {
+					title: "Saldo vencido",
+					buttons: { "Continuar": true }
+				});
+			}
+		},
 	});
 }
 
