@@ -1152,7 +1152,7 @@ class Ppro extends Controller {
 			$data['impuesto'] = round($ppago*$impuesto/$totalab,2) ;
 
 			$data['vence']    = $fecha;
-			$data['observa1'] = 'DESC. P.PAGO A '.$tipo_doc.$numero;
+			$data['observa1'] = 'DESC. P.PAGO A '.$tipo_doc.$xnumero;
 			$data['codigo']   = 'DESPP';
 			$data['descrip']  = 'DESCUENTO PRONTO PAGO';
 			$data['abonos']   = $ppago;

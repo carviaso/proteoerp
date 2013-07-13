@@ -13,6 +13,9 @@ class Tmenus extends Controller {
 	}
 
 	function index(){
+		if ( !$this->datasis->iscampo('tmenus','proteo') ) {
+			$this->db->simple_query('ALTER TABLE tmenus ADD COLUMN proteo VARCHAR(250) NULL ');
+		};
 		redirect($this->url.'jqdatag');
 	}
 

@@ -18,13 +18,17 @@ class Valores extends Controller {
 			$this->db->simple_query('ALTER TABLE valores ADD UNIQUE INDEX nombre (nombre)');
 			$this->db->simple_query('ALTER TABLE valores ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};
+		if ( !$this->datasis->iscampo('tmenus','proteo') ) {
+			$this->db->simple_query('ALTER TABLE tmenus ADD COLUMN proteo VARCHAR(250) NULL ');
+		};
+
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
-	//Layout en la Ventana
+	//******************************************************************
+	// Layout en la Ventana
 	//
-	//***************************
+	//
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -181,6 +185,7 @@ class Valores extends Controller {
 
 		} elseif($oper == 'edit') {
 			$nombre = $this->datasis->dameval("SELECT nombre FROM valores WHERE id=$id");
+			unset($data['nombre']);
 			$this->db->where('id', $id);
 			$this->db->update('valores', $data);
 			echo "Registro Modificado";
