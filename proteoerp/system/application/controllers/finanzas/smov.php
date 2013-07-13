@@ -42,11 +42,12 @@ class Smov extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central y Sur
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'] );
 
 		$adic = array(
 			array('id'=>'fedita'  , 'title'=>'Agregar Registro'),
-			array('id'=>'fsclisel', 'title'=>'Seleccionar cliente')
+			array('id'=>'fsclisel', 'title'=>'Seleccionar cliente'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -74,7 +75,6 @@ class Smov extends Controller {
 
 	//******************************************************************
 	//Funciones de los Botones
-	//fuera del doc ready
 	//
 	function bodyscript( $grid0 ){
 
@@ -86,6 +86,33 @@ class Smov extends Controller {
 				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
 			} else {
 				$.prompt("<h1>Transaccion invalida</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function smovdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
 
@@ -199,6 +226,22 @@ class Smov extends Controller {
 					$("#fsclisel").html("");
 				}
 			});';
+
+		$bodyscript .= '
+		$("#fborra").dialog({
+			autoOpen: false, height: 300, width: 400, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fborra").html("");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+				$("#fborra").html("");
+			}
+		});';
 
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
@@ -824,10 +867,12 @@ class Smov extends Controller {
 		#show/hide navigations buttons
 		$grid->setAdd(false);
 		$grid->setEdit(false);
-		$grid->setDelete(true);
+		//$grid->setDelete(true);
+		$grid->setDelete( $this->datasis->sidapuede('SMOV','BORR_REG%'));
 		$grid->setSearch(true);
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+		$grid->setBarOptions('delfunc: smovdel');
 
 		$grid->setonSelectRow('
 			function(id){
@@ -893,18 +938,265 @@ class Smov extends Controller {
 			$this->db->update('smov', $data);
 			return 'Movimiento Modificado';
 		}elseif($oper == 'del'){
-			echo '';
-			return '';
-			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM smov WHERE id=${dbid}");
-			if ($check > 0){
-				echo "El registro no puede ser eliminado; tiene movimiento";
-			} else {
-				//$this->db->simple_query("DELETE FROM smov WHERE id=$id ");
-				//logusu('smov',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
+			return 'Deshabilidado';
 		};
 	}
+
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+
+		$edit = new DataEdit('', 'smov');
+		$edit->on_save_redirect=false;
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
+
+		/*$edit->tipo_doc = new inputField('Tipo doc.','tipo_doc');
+		$edit->tipo_doc->rule='';
+		$edit->tipo_doc->size =4;
+		$edit->tipo_doc->maxlength =2;
+
+		$edit->numero = new inputField('N&uacute;mero','numero');
+		$edit->numero->rule='';
+		$edit->numero->size =10;
+		$edit->numero->maxlength =8;*/
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='Accion no permitida';
+		return false;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='Accion no permitida';
+		return false;
+	}
+
+	function _pre_delete($do){
+		$id         = $do->get('id');
+		$transac    = $do->get('transac');
+		$tipo_doc   = $do->get('tipo_doc');
+		$cod_cli    = $do->get('cod_cli');
+		$numero     = $do->get('numero');
+		$reteiva    = $do->get('reteiva');
+		$abonos     = floatval($do->get('abonos'));
+
+		$dbid       = $this->db->escape($id);
+		$dbtransac  = $this->db->escape($transac);
+		$dbtipo_doc = $this->db->escape($tipo_doc);
+		$dbcod_cli  = $this->db->escape($cod_cli);
+		$dbnumero   = $this->db->escape($numero);
+		$dbfecha    = $this->db->escape($do->get('fecha'));
+
+		$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM casi WHERE comprob=${dbtransac}"));
+		if($cana>0){
+			$do->error_message_ar['pre_del']='El efecto ya esta en contabilidad, no puede ser modificado ni eliminado.';
+			return false;
+		}
+
+		$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfac WHERE transac=${dbtransac}"));
+		if($cana>0){
+			$do->error_message_ar['pre_del']='Movimiento originado en facturacion, debe eliminarlo por el modulo respectivo.';
+			return false;
+		}
+
+		/*if($tipo_doc=='FC'){
+			$do->error_message_ar['pre_del']='Las facturas solo se pueden anular desde el modulo de facturacion.';
+			return false;
+		}*/
+
+		if($tipo_doc=='GI'){
+			$do->error_message_ar['pre_del']='Los giros no se pueden anular desde este modulo .';
+			return false;
+		}
+
+		if($tipo_doc=='ND' || $tipo_doc=='NC'){
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM cruc WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Movimiento originado a partir de un cruce, debe eliminarlo por el modulo respectivo.';
+				return false;
+			}
+
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM otin WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Movimiento originado en otros ingresos, debe eliminarlo por el modulo respectivo.';
+				return false;
+			}
+
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM rivc WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Movimiento originado en retenciones de clientes, debe eliminarlo por el modulo respectivo.';
+				return false;
+			}
+		}
+
+		if($tipo_doc=='AN' && $abonos>0){
+			$do->error_message_ar['pre_del']='Anticipo ya esta aplicado, debe reversar su aplicacion primero.';
+			return false;
+		}
+
+		if($tipo_doc=='AN'){
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM ordc WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Movimiento originado en orden de compra, debe eliminarlo por el modulo respectivo.';
+				return false;
+			}
+
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM ords WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Movimiento originado en orden de servicio, debe eliminarlo por el modulo respectivo.';
+				return false;
+			}
+		}
+
+		//Chequea movimientos principales
+		$mSQL = "SELECT tipo_doc,cod_cli,monto,abonos,reteiva,numero,fecha FROM smov WHERE transac=${dbtransac} AND id<>${dbid}";
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			$it_tipo_doc= $row->tipo_doc;
+			$it_cod_cli = $row->cod_cli;
+			$it_numero  = $row->numero;
+			$it_monto   = floatval($row->monto);
+			$it_abonos  = floatval($row->abonos);
+			$it_reteiva = floatval($row->reteiva);
+
+			if($it_tipo_doc=='AB'){
+				$do->error_message_ar['pre_del']="Este movimiento fue originado por el abono ${it_numero}, no se puede eliminar a menos que elimine el abono.";
+				return false;
+			}
+
+			if(($it_cod_cli=='REIVA' || $it_cod_cli=='RETEN') && $it_abonos>0){
+				$do->error_message_ar['pre_del']="Este movimiento no puede ser eliminado debido a que la ${it_tipo_doc}${it_numero} ya fue cruzada.";
+				return false;
+			}
+		}
+		//Fin de los movimientos principales
+
+		//Chequea las formas de pago
+		$mSQL = "SELECT cobrador,tipo FROM sfpa WHERE transac=${dbtransac}";
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			$it_tipo     = $row->tipo;
+			$it_cobrador = $row->cobrador;
+			$dbcobrador  = $this->db->escape($it_cobrador);
+
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM rcaj WHERE cajero=${dbcobrador} AND fecha=${dbfecha}"));
+			if($cana > 0){
+				$do->error_message_ar['pre_del']="Este cajero al que cobro este movimiento ya fue cerrado para la fecha del efecto.";
+				return false;
+			}
+
+			//Debe chequear si esta conciliado
+			//if($it_tipo=='DE'){
+			//	$do->error_message_ar['pre_del']="El efecto ya fue conciliado, no se puede elimnar";
+			//	return false;
+			//}
+
+		}
+		//Fin de las formas de pago
+
+		//Chequea las aplicaciones al movimiento que se va a borrar
+		$mSQL = "SELECT numccli,tipoccli FROM itccli WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND cod_cli=${dbcod_cli} AND fecha=${dbfecha}";
+		$query = $this->db->query($mSQL);
+		if($query->num_rows()>0){
+			$efeafec=array();
+			foreach($query->result() as $row){
+				$efeafec[]=$row->tipoccli.$row->numccli;
+			}
+			$do->error_message_ar['pre_del']='El efecto esta siendo afectado por: '.implode(',',$efeafec);
+			return false;
+		}
+		//Fin
+
+		return true;
+	}
+
+	function _post_delete($do){
+		$transac    = $do->get('transac');
+		$tipo_doc   = $do->get('tipo_doc');
+		$numero     = $do->get('numero');
+
+		$dbtransac  = $this->db->escape($transac);
+		$dbtipo_doc = $this->db->escape($tipo_doc);
+		$dbnumero   = $this->db->escape($numero);
+
+		//Deshace las aplicaciones del efecto a eliminar
+		$mSQL = "SELECT tipo_doc,numero,numccli,tipoccli,monto,abono,cod_cli,fecha FROM itccli WHERE transac=${dbtransac}";
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			$it_tipo_doc= $this->db->escape($row->tipo_doc);
+			$it_cod_cli = $this->db->escape($row->cod_cli);
+			$it_numero  = $this->db->escape($row->numero);
+			$it_fecha   = $this->db->escape($row->fecha);
+			$it_abono   = floatval($row->abono);
+
+			$mSQL="UPDATE smov SET abonos=abonos-(${it_abono}) WHERE tipo_doc=${it_tipo_doc} AND numero=${it_numero} AND cod_cli=${it_cod_cli} AND fecha=${it_fecha}";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'smov'); }
+		}
+		//Fin
+
+		//Elimina los movimientos de banco
+		$mSQL = "SELECT codbanc,fecha,monto,tipo_op,numero,id FROM bmov WHERE transac=${dbtransac}";
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			$it_id       = $row->id;
+			$it_fecha    = $row->fecha;
+			$it_monto    = floatval($row->monto);
+
+			$sfecha = str_replace('-','',$it_fecha);
+			$this->datasis->actusal($row->codbanc, $sfecha, (-1)*$it_monto);
+			//$mSQL  = "UPDATE bmov SET liable='N', anulado='S' ";
+			$mSQL  = 'DELETE FROM  bmov ';
+			$mSQL .= "WHERE id=${it_id}";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'smov'); }
+		}
+		//Fin de la eliminacion de los movimientos de banco
+
+		$mSQL = "DELETE FROM sfpa WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND transac=${dbtransac}";
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){ memowrite($mSQL,'smov'); }
+
+		$mSQL="DELETE FROM smov WHERE transac=${dbtransac}";
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){ memowrite($mSQL,'smov'); }
+
+		$mSQL="DELETE FROM itccli WHERE transac=${dbtransac}";
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){ memowrite($mSQL,'smov'); }
+
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"EFECTO ${tipo_doc}${numero} ELIMINADO");
+	}
+
+	function _post_insert($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits $primary ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
 
 	function selscli(){
 		$this->rapyd->load('dataform');
