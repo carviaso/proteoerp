@@ -914,7 +914,7 @@ class Sprv extends Controller {
 		$smenu['link']=barra_menu('131');
 		$consulrif=$this->datasis->traevalor('CONSULRIF');
 		$link=site_url('compras/sprv/uproveed');
-		
+
 		$script ='
 			$(function() {
 				$("#tr_gr_desc").hide();
@@ -1034,7 +1034,7 @@ class Sprv extends Controller {
 
 		//$lriffis='<a href="javascript:consulrif();" title="Consultar RIF en el SENIAT" onclick="" style="color:red;font-size:9px;border:none;">SENIAT</a>';
 		$edit->rif =  new inputField('RIF', 'rif');
-		$edit->rif->rule = 'trim|strtoupper|required|callback_chci';
+		$edit->rif->rule = 'trim|strtoupper|required|callback_chsprvrif';
 		//$edit->rif->append($lriffis);
 		$edit->rif->maxlength=13;
 		$edit->rif->size =12;
@@ -1235,8 +1235,20 @@ class Sprv extends Controller {
 		logusu('sprv',"PROVEEDOR ${codigo} NOMBRE ${nombre} ELIMINADO");
 	}
 
-	function chexiste(){
-		$codigo=$this->input->post('proveed');
+	function chsprvrif($rif){
+		$tiva=$this->input->post('tiva');
+		if($tiva=='O' || $tiva=='I'){
+			return true;
+		}
+		if (preg_match("/(^[VEJG][0-9]{9}[[:blank:]]*$)|(^[[:blank:]]*$)/", $rif)>0){
+			return true;
+		}else {
+			$this->validation->set_message('chsprvrif', "El campo <b>%s</b> debe tener el siguiente formato V=Venezolano(a), G=Gobierno, J=Juridico Como primer caracter seguido del n&uacute;mero de documento. Ej: V123456789, J123456789");
+			return false;
+		}
+	}
+
+	function chexiste($codigo){
 		$dbcodigo= $this->db->escape($codigo);
 		$rif=$this->input->post('rif');
 		$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE proveed=${dbcodigo}");

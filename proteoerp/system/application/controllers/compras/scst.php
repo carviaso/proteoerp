@@ -62,7 +62,7 @@ class Scst extends Controller {
 
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'cprecios','img'=>'images/precio.png'   ,'alt' => 'Ajustar Precios'    ,'label'=>'Cambiar Precios', ));
+		$grid->wbotonadd(array('id'=>'cprecios','img'=>'images/precio.png' ,'alt' => 'Ajustar Precios'    ,'label'=>'Cambiar Precios', ));
 		$grid->wbotonadd(array('id'=>'bcmonto' ,'img'=>'images/precio.png' ,'alt' => 'Modificar la CxP'   ,'label'=>'Modificar la CxP'));
 
 		if ( $this->datasis->traevalor('MOTOS') == 'S' )
@@ -111,7 +111,6 @@ class Scst extends Controller {
 		$param['tabs']         = false;
 		$param['encabeza']     = $this->titp;
 		$param['tamano']       = $this->datasis->getintramenu( substr($this->url,0,-1) );
-
 
 		$this->load->view('jqgrid/crud2',$param);
 	}
@@ -583,7 +582,6 @@ class Scst extends Controller {
 			});';
 
 		$bodyscript .= '});';
-
 		$bodyscript .= '</script>';
 
 		return $bodyscript;
@@ -1455,7 +1453,7 @@ class Scst extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -2117,7 +2115,7 @@ class Scst extends Controller {
 	}
 
 	//******************************************************************
-	// 
+	//
 	//
 	function solo() {
 		$this->solo = true;
