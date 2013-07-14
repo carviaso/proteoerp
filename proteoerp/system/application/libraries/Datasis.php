@@ -1429,6 +1429,9 @@ class Datasis {
 		return $campos;
 	}
 
+	//******************************************************************
+	//
+	//
 	function jqgcampos($mSQL){
 		$CI =& get_instance();
 		$query = $CI->db->query($mSQL);
@@ -1448,8 +1451,7 @@ class Datasis {
 	}
 
 	//**************************************************
-	//
-	//       Modifica Intramenu
+	// Modifica Intramenu
 	//
 	function modintramenu( $ancho, $alto, $ejecutar ){
 		$CI =& get_instance();
@@ -1460,8 +1462,7 @@ class Datasis {
 
 
 	//**************************************************
-	//
-	//       Inserta Intramenu
+	// Inserta Intramenu
 	//
 	// creaintramenu( $data = array('modulo'=>'148','titulo'=>'Punto de Ventas','mensaje'=>'Punto de Ventas','panel'=>'TRANSACCIONES','ejecutar'=>'ventas/pos','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>800,'alto'=>600)
 	function creaintramenu( $data = array() ) {
@@ -1474,8 +1475,7 @@ class Datasis {
 
 
 	//**************************************************
-	//
-	//       Lee Intramenu
+	// Lee Intramenu
 	//
 	function getintramenu( $ejecutar ){
 		$CI =& get_instance();
@@ -1491,16 +1491,14 @@ class Datasis {
 
 
 	//**************************************************
-	//
-	//   Pop up Ventana de javascript
+	// Pop up Ventana de javascript
 	//
 	function jwinopen($url, $ancho=800, $alto=600){
 		return  'window.open(\''.$url.', \'_blank\', \'width='.$ancho.',height='.$alto.',scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-'.($ancho/2).'), screeny=((screen.availWidth/2)-'.($alto/2).')\')';
 	}
 
 	//**************************************************
-	//
-	//       Modifica Intramenu
+	// Modifica Intramenu
 	//
 	function sinvrecalcular( $mTIPO = 'P' ){
 		$CI =& get_instance();
@@ -1603,7 +1601,9 @@ class Datasis {
 
 	}
 
-
+	//******************************************************************
+	// Redondear Precios en SINV
+	//
 	function sinvredondear(){
 		$CI =& get_instance();
 
@@ -1687,8 +1687,46 @@ class Datasis {
 		WHERE formcal='S' ;";
 		$CI->db->simple_query($mSQL);
 
-
 	}
 
+
+	//******************************************************************
+	// Script para revisar RIF y CI
+	//
+	function validarif( $funcion='chrif'){
+		$mandale = '
+			function chrif(rif){
+				rif.toUpperCase();
+				var patt=/[EJPGV][0-9]{9} */g;
+				if(patt.test(rif)){
+					var factor= new Array(4,3,2,7,6,5,4,3,2);
+					var v=0;
+					if(rif[0]=="V"){
+						v=1;
+					}else if(rif[0]=="E"){
+						v=2;
+					}else if(rif[0]=="J"){
+						v=3;
+					}else if(rif[0]=="P"){
+						v=4;
+					}else if(rif[0]=="G"){
+						v=5;
+					}
+					acum=v*factor[0];
+					for(i=1;i<9;i++){
+						acum=acum+parseInt(rif[i])*factor[i];
+					}
+					acum=11-acum%11;
+					if(acum>=10 || acum<=0){
+						acum=0;
+					}
+					return (acum==parseInt(rif[9]));
+				}else{
+					return true;
+				}
+			}
+		';
+		return $mandale;
+	}
 
 }

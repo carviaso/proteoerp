@@ -1206,7 +1206,7 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
-	//Busca los efectos que pueden aplicarse a proveedor
+	// Busca los efectos que pueden aplicarse a proveedor
 	//
 	function buscasprmapan($tipo=null){
 		$mid = $this->input->post('sprv');
@@ -1889,7 +1889,7 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
-	//          BUSCA GASTO o PROVEEDOR
+	// BUSCA GASTO o PROVEEDOR
 	//
 	function buscasprvmgas(){
 		$tipo  = $this->input->post('cargo');
@@ -1907,7 +1907,7 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
-	//          BUSCA TRABAJADOR
+	// BUSCA TRABAJADOR
 	//
 	function buscapers(){
 		$mid  = $this->input->post('q');

@@ -5,6 +5,64 @@ $container_tr=join('&nbsp;', $form->_button_container['TR']);
 $container_bl=join('&nbsp;', $form->_button_container['BL']);
 $container_br=join('&nbsp;', $form->_button_container['BR']);
 ?>
+<script language="javascript" type="text/javascript">
+// Agrega Proveedor
+function add_proveed(){
+	var mtbanco = encodeURIComponent($("#tbanco").val());
+	var mcodprv = encodeURIComponent($("#codprv").val());
+	var mnombre = encodeURIComponent($("#nombre").val());
+//$("#fedita").dialog("option" , "modal", false );
+
+	var estados = {
+		state0: {
+			html : "<h1>Crear Banco como Proveedores</h1><br/><center>R.I.F. del Banco: <input name='mrif' value='' id='mrif' class='input' size='15' style='' maxlength='13' type='text'></center><br/>",
+			buttons: { "Crear Proveedor": true, "Cancelar": false },
+			focus: "input[name='mrif']",
+			//zindex: 999999,
+			submit: function(e,v,m,f){
+//$("#fedita").dialog("option" , "modal", true );
+
+				if (v) {
+					if( f.mrif==null ){
+						alert("Cancelado por el usuario"); // No se da
+					} else if( f.mrif=="" ) {
+						$.prompt.goToState("state0");
+					} else {
+						e.preventDefault();
+						$.ajax({
+							url: "<?php echo site_url("finanzas/banc/agreprv/"); ?>",
+							global: false,
+							type: "POST",
+							data: ({ rif : encodeURIComponent(f.mrif), nombre : mnombre, tbanco : mtbanco, codprv : mcodprv }),
+							dataType: "text",
+							async: false,
+							success: function(sino) {
+								$.prompt.getStateContent('state1').find('#in_prome1').text(sino);
+								$.prompt.goToState('state1');
+							},
+							error: function(h,t,e)  {
+								$.prompt.getStateContent('state1').find('#in_prome1').text("Error..RIF="+f.mrif+" "+e);
+								$.prompt.goToState('state1');
+						}});
+					}
+				}
+			}
+		},
+		state1: {
+			html: "<h1><div id='in_prome1'></div></h1>",
+			buttons: { Volver: -1, Salir: 0  },
+			submit: function(e,v,m,f){
+				if ( v == 0) $.prompt.close()
+				else $.prompt.goToState("state0");
+				e.preventDefault();
+			}
+		}};
+		$.prompt(estados);
+};
+
+</script>
+
+
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 <table width="100%">
 	<tr>
