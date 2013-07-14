@@ -1,9 +1,9 @@
 <?php echo $form_scripts?>
 <?php echo $form_begin?>
-<?php 
-$container_tr=join("&nbsp;", $form->_button_container["TR"]);
-$container_bl=join("&nbsp;", $form->_button_container["BL"]);
-$container_br=join("&nbsp;", $form->_button_container["BR"]);
+<?php
+$container_tr=join('&nbsp;', $form->_button_container['TR']);
+$container_bl=join('&nbsp;', $form->_button_container['BL']);
+$container_br=join('&nbsp;', $form->_button_container['BR']);
 ?>
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 <table width="100%">
@@ -16,10 +16,10 @@ $container_br=join("&nbsp;", $form->_button_container["BR"]);
 				<td width="80"    class="littletablerow"    ><?php echo $form->codbanc->output;?></td>
 				<td align='right' class="littletableheaderc"><?php echo $form->activo->label; ?></td>
 				<td align='left'  class="littletablerow"    ><?php echo $form->activo->output;?></td>
-			</tr>	
+			</tr>
 			<tr>
 				<td class="littletableheaderc"><?php echo $form->tbanco->label; ?></td>
-				<td colspan='3' class="littletablerow"    ><?php echo $form->tbanco->output;?></td>
+				<td colspan='3' class="littletablerow"   ><?php echo $form->tbanco->output;?></td>
 			</tr>
 			<tr>
 				<td class="littletableheaderc"           ><?php echo $form->banco->label; ?></td>
@@ -34,7 +34,7 @@ $container_br=join("&nbsp;", $form->_button_container["BR"]);
 			<tr>
 				<td class="littletableheaderc"><?php echo $form->sucur->label; ?></td>
 				<td class="littletablerow"    ><?php echo $form->sucur->output;?></td>
-			</tr>	
+			</tr>
 			<tr>
 				<td class="littletableheaderc"><?php echo $form->depto->label; ?> </td>
 				<td class="littletablerow"    ><?php echo $form->depto->output;?> </td>
@@ -72,9 +72,9 @@ $container_br=join("&nbsp;", $form->_button_container["BR"]);
 			</table>
 			</fieldset>
 		</td>
-	
-	
-		<td  valign="top">	
+
+
+		<td  valign="top">
 			<fieldset style='border: 1px outset #9AC8DA;background: #E0ECF8;'>
 			<table style="height: 100%;width: 100%">
 				<tr>
@@ -106,13 +106,12 @@ $container_br=join("&nbsp;", $form->_button_container["BR"]);
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->codprv->label; ?></td>
 					<td class="littletablerow"    ><?php echo $form->codprv->output;?>
-				<?php
-					if ( !empty( $form->codprv->value ) ) {
-						$mSQL = "SELECT nombre FROM sprv WHERE proveed=".$this->db->escape(trim($form->codprv->value))."";
+					<?php
+					if(!empty($form->codprv->value)){
+						$mSQL = 'SELECT nombre FROM sprv WHERE proveed='.$this->db->escape(trim($form->codprv->value));
 						echo $this->datasis->dameval($mSQL);
 					}
-				?>
-					
+					?>
 					</td>
 				</tr>
 
@@ -123,13 +122,14 @@ $container_br=join("&nbsp;", $form->_button_container["BR"]);
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->gastoidb->label; ?></td>
 					<td class="littletablerow"    ><?php echo $form->gastoidb->output;?></td>
-				</tr>				
+				</tr>
 				<tr>
 				<td class="littletableheaderc"><?php echo $form->cuenta->label ?></td>
 				<td  class="littletablerow"   ><?php echo $form->cuenta->output;?>
 				<?php
-					if ( !empty( $form->cuenta->value ) ) {
-						$mSQL = "SELECT descrip FROM cpla WHERE codigo='".trim($form->cuenta->value)."'";
+					if(!empty($form->cuenta->value)){
+						$dbcuenta=$this->db->escape(trim($form->cuenta->value));
+						$mSQL = "SELECT descrip FROM cpla WHERE codigo=${dbcuenta}";
 						echo $this->datasis->dameval($mSQL);
 					}
 				?>
@@ -175,8 +175,3 @@ $container_br=join("&nbsp;", $form->_button_container["BR"]);
 </table>
 <?php echo $container_bl.$container_br; ?>
 <?php echo $form_end?>
-<?php 
-	//foreach (get_object_vars($form) as $label=>$tiene)
-	//	echo "$label => $tiene <br>";
-	//echo '<pre>';print_r($form->grupo->request);echo '</pre>'
-?>

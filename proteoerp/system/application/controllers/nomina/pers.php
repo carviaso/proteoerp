@@ -1120,10 +1120,10 @@ class Pers extends Controller {
 		$scli=array(
 		'tabla'   =>'scli',
 		'columnas'=>array(
-		'cliente' =>'C&oacute;digo Cliente',
-		'nombre'  =>'Nombre',
-		'rifci'   =>'Rif/CI',
-		'contacto'=>'Contacto'),
+			'cliente' =>'C&oacute;digo Cliente',
+			'nombre'  =>'Nombre',
+			'rifci'   =>'Rif/CI',
+			'contacto'=>'Contacto'),
 		'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre','rifci'=>'Rif/CI'),
 		'retornar'=>array('cliente'=>'enlace'),
 		'titulo'  =>'Buscar Empleado');
@@ -1161,7 +1161,7 @@ class Pers extends Controller {
 
 		$edit->nombre =  new inputField('Nombre', 'nombre');
 		$edit->nombre->group = 'Datos del Trabajador';
-		$edit->nombre->size = 30;
+		$edit->nombre->size  = 30;
 		$edit->nombre->maxlength=30;
 		$edit->nombre->rule='trim|required|strtoupper';
 
@@ -1233,7 +1233,6 @@ class Pers extends Controller {
 		$edit->nacimi->calendar=false;
 		$edit->nacimi->rule='chfecha';
 
-
 		$edit->sucursal = new dropdownField('Sucursal', 'sucursal');
 		$edit->sucursal->style ='width:120px;';
 		$edit->sucursal->options("SELECT TRIM(codigo) AS codigo, CONCAT(codigo,' ',sucursal) desrip FROM sucu ORDER BY sucursal");
@@ -1251,7 +1250,7 @@ class Pers extends Controller {
 		$edit->depa->option('','');
 		$edit->depa->group = 'Relaci&oacute;n Laboral';
 		$divi=$edit->getval('divi');
-		if( $divi !== false ){
+		if($divi !== false){
 			$dbdivi=$this->db->escape($divi);
 			$edit->depa->options("SELECT departa,depadesc FROM depa where division=${dbdivi} ORDER BY division");
 		}else{
@@ -1285,19 +1284,19 @@ class Pers extends Controller {
 		$edit->sso->size =13;
 		$edit->sso->maxlength=11;
 		$edit->sso->group = 'Relaci&oacute;n Laboral';
-		//$edit->sso->rule="trim|numeric";
+		//$edit->sso->rule='trim|numeric';
 		$edit->sso->css_class='inputnum';
 
 		$edit->observa = new textareaField('Observaci&oacute;n', 'observa');
-		$edit->observa->rule = 'trim';
-		$edit->observa->cols = 70;
-		$edit->observa->rows =3;
+		$edit->observa->rule  = 'trim';
+		$edit->observa->cols  = 70;
+		$edit->observa->rows  = 3;
 		$edit->observa->group = 'Relaci&oacute;n Laboral';
 
 		$edit->ingreso = new DateonlyField('Fecha de Ingreso', 'ingreso','d/m/Y');
-		$edit->ingreso->size = 10;
+		$edit->ingreso->size  = 10;
 		$edit->ingreso->group = 'Relaci&oacute;n Laboral';
-		$edit->ingreso->rule='trim|chfecha';
+		$edit->ingreso->rule  = 'trim|chfecha';
 		$edit->ingreso->calendar = false;
 
 		$edit->label2 = new freeField('Edo. C','edoci',"<id class='littletableheader'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fecha de Retiro&nbsp;&nbsp; </id>");
@@ -1396,6 +1395,13 @@ class Pers extends Controller {
 		$vari4 = $this->datasis->traevalor('NOMVARI4');
 		$vari5 = $this->datasis->traevalor('NOMVARI5');
 		$vari6 = $this->datasis->traevalor('NOMVARI6');
+
+		$vari1 = (empty($vari1))? 'No asignada' : $vari1;
+		$vari2 = (empty($vari2))? 'No asignada' : $vari2;
+		$vari3 = (empty($vari3))? 'No asignada' : $vari3;
+		$vari4 = (empty($vari4))? 'No asignada' : $vari4;
+		$vari5 = (empty($vari5))? 'No asignada' : $vari5;
+		$vari6 = (empty($vari6))? 'No asignada' : $vari6;
 
 		$edit->vari1 = new inputField($vari1, 'vari1');
 		$edit->vari1->group = 'Variables';

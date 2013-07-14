@@ -760,13 +760,12 @@ class Sprv extends Controller {
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(true);
+		$grid->setAdd(    $this->datasis->sidapuede('SPRV','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('SPRV','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('SPRV','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('SPRV','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
-
 
 		$grid->setBarOptions('addfunc: sprvadd, editfunc: sprvedit, delfunc: sprvdel, viewfunc: sprvshow');
 
@@ -787,7 +786,7 @@ class Sprv extends Controller {
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
-		$grid       = $this->jqdatagrid;
+		$grid   = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('sprv');
@@ -804,6 +803,7 @@ class Sprv extends Controller {
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
+		$dbid   = $this->db->escape('id');
 		$data   = $_POST;
 		$mcodp  = 'proveed';
 		$check  = 0;
@@ -812,29 +812,17 @@ class Sprv extends Controller {
 		unset($data['id']);
 
 		if($oper == 'add'){
-
-		} elseif($oper == 'edit') {
-			$proveed  = $this->datasis->dameval("SELECT proveed FROM sprv WHERE id=$id");
-			if ( isset($data['proveed']) ) unset($data['proveed']);
-			$this->db->where("id", $id);
+			echo 'Opcion deshabilitada';
+		} elseif($oper=='edit'){
+			$proveed  = $this->datasis->dameval("SELECT proveed FROM sprv WHERE id=${dbid}");
+			if(isset($data['proveed'])) unset($data['proveed']);
+			$this->db->where('id', $id);
 			$this->db->update('sprv', $data);
-			logusu('SPRV',"Proveedor  ".$proveed." MODIFICADO");
-			echo "Proveedor Modificado";
+			logusu('SPRV','Proveedor  '.$proveed.' MODIFICADO');
+			echo 'Proveedor Modificado';
 
-		} elseif($oper == 'del') {
-			$codigo = $this->datasis->dameval("SELECT $mcodp FROM sprv WHERE id=$id");
-			$check =  $this->datasis->dameval("SELECT count(*) FROM sprm WHERE cod_prv='$codigo'");
-			$check += $this->datasis->dameval("SELECT count(*) FROM scst WHERE proveed='$codigo'");
-			$check += $this->datasis->dameval("SELECT count(*) FROM gser WHERE proveed='$codigo'");
-			$check += $this->datasis->dameval("SELECT count(*) FROM ords WHERE proveed='$codigo'");
-			$check += $this->datasis->dameval("SELECT count(*) FROM bmov WHERE clipro='P' AND codcp='$codigo'");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM sprv WHERE proveed=".$this->db->escape($codigo));
-				logusu('SPRV',"Proveedor ".$codigo." ELIMINADO");
-				echo "Proveedor Eliminado";
-			}
+		} elseif($oper=='del'){
+			echo 'Opcion deshabilitada';
 		};
 	}
 
@@ -874,13 +862,15 @@ class Sprv extends Controller {
 		$mSCLId=array(
 			'tabla'   =>'scli',
 			'columnas'=>array(
-			'cliente' =>'C&oacute;digo Cliente',
-			'nombre'  =>'Nombre',
-			'contacto'=>'Contacto',
-			'nomfis'  =>'Nom. Fiscal'),
+				'cliente' =>'C&oacute;digo Cliente',
+				'nombre'  =>'Nombre',
+				'contacto'=>'Contacto',
+				'nomfis'  =>'Nom. Fiscal'
+			),
 			'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre'),
 			'retornar'=>array('cliente'=>'cliente','nomfis'=>'nomfis'),
-			'titulo'  =>'Buscar Cliente');
+			'titulo'  =>'Buscar Cliente'
+		);
 
 		$qformato=$this->qformato=$this->datasis->formato_cpla();
 
@@ -904,7 +894,7 @@ class Sprv extends Controller {
 			'retornar'=>array('codigo'=>'canticipo'),
 			'titulo'  =>'Buscar Cuenta',
 			'where'=>"codigo LIKE \"$qformato\"",
-			);
+		);
 
 
 		$bsclid =$this->datasis->modbus($mSCLId);
@@ -978,7 +968,6 @@ class Sprv extends Controller {
 					return true;
 				}
 			}
-
 
 			function grupo(){
 				t=$("#grupo").val();
@@ -1061,7 +1050,6 @@ class Sprv extends Controller {
 		$edit->nombre->size = 35;
 		$edit->nombre->maxlength =40;
 		$edit->nombre->title = 'Nombre del Proveedor';
-
 
 		//$lriffis='<a href="javascript:consulrif();" title="Consultar RIF en el SENIAT" onclick="" style="color:red;font-size:9px;border:none;">SENIAT</a>';
 		$edit->rif =  new inputField('RIF', 'rif');
@@ -1267,19 +1255,20 @@ class Sprv extends Controller {
 	}
 
 	function chexiste(){
-		$codigo=$this->input->post('proveed');
+		$codigo  = $this->input->post('proveed');
 		$dbcodigo= $this->db->escape($codigo);
-		$rif=$this->input->post('rif');
+		$rif     = $this->input->post('rif');
+		$dbrif   = $this->db->escape($rif);
 		$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE proveed=${dbcodigo}");
 		if ($check > 0){
 			$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed=${dbcodigo}");
 			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para el proveedor ${nombre}");
 			return false;
 		}elseif(strlen($rif)>0){
-			$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE rif='$rif'");
+			$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE rif=${dbrif}");
 			if ($check > 0){
-				$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE rif='$rif'");
-				$this->validation->set_message('chexiste',"El rif $rif ya existe para el proveedor $nombre");
+				$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE rif=${dbrif}");
+				$this->validation->set_message('chexiste',"El rif ${rif} ya existe para el proveedor ${nombre}");
 				return false;
 			}else {
 				return true;

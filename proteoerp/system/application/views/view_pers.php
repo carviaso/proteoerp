@@ -37,9 +37,9 @@ echo $form_begin
 			}else{
 				$('#enlace').val(enlace);
 			}
-			apprise("<h1>Cliente guardado</h1>");
+			$.prompt("<h1>Cliente guardado</h1>");
 		}else{
-			apprise("<h1>"+rt+"</h1>");
+			$.prompt("<h1>"+rt+"</h1>");
 		}
 		<?php } ?>
 	}
@@ -162,7 +162,7 @@ echo $form_begin
 				if($form->_status!='show' && $form->_status!='create'){
 					$id=$form->get_from_dataobjetct('id');
 				?>
-				<a href="#" onClick="creascli(<?php echo $id ?>); return false" title="Crear empleado como cliente"><?php echo image('add1-.png'); ?></a></td>
+				<a href="javascript:creascli(<?php echo $id ?>);" title="Crear empleado como cliente"><?php echo image('list_plus.png','Crear empleado como cliente',array('border'=>'0')); ?></a></td>
 				<?php } ?>
 
 				</td>

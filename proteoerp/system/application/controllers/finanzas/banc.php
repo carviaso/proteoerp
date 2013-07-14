@@ -212,7 +212,7 @@ class Banc extends Controller {
 		));
 
 		$mSQL = "SELECT cod_banc, CONCAT(cod_banc, ' ', nomb_banc) descrip FROM tban ORDER BY cod_banc ";
-		$tbanco  = $this->datasis->llenajqselect($mSQL, false );
+		$tbanco = $this->datasis->llenajqselect($mSQL, false );
 
 		$grid->addField('tbanco');
 		$grid->label('Banco');
@@ -351,7 +351,7 @@ class Banc extends Controller {
 
 
 		$grid->addField('proxch');
-		$grid->label('Proximo cheque');
+		$grid->label('Pr&oacute;ximo cheque');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -402,7 +402,7 @@ class Banc extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('gastocom');
-		$grid->label('Comisones');
+		$grid->label('Comisiones');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -493,7 +493,7 @@ class Banc extends Controller {
 		$mSQL = "SELECT depto, CONCAT( depto,' ', descrip ) FROM dpto  WHERE tipo='G' ORDER BY depto ";
 		$dpto  = $this->datasis->llenajqselect($mSQL, false );
 		$grid->addField('depto');
-		$grid->label('Depto');
+		$grid->label('Depto.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -625,41 +625,29 @@ class Banc extends Controller {
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
+		$dbid   = $this->db->escape($id);
 		$data   = $_POST;
-		$mcodp  = "codbanc";
+		$mcodp  = 'codbanc';
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM banc WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('banc', $data);
-					echo "Registro Agregado";
-
-					logusu('BANC',"Registro  INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM banc WHERE id=$id");
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM banc WHERE id=$id");
+		if($oper=='add'){
+			echo 'Opcion deshabilitada';
+		}elseif($oper == 'edit') {
+			$nuevo    = $data[$mcodp];
+			$anterior = $this->datasis->dameval("SELECT ${mcodp} FROM banc WHERE id=${dbid}");
+			$meco     = $this->datasis->dameval("SELECT ${mcodp} FROM banc WHERE id=${dbid}");
 			unset($data[$mcodp]);
-			$this->db->where("id", $id);
+			$this->db->where('id', $id);
 			$this->db->update('banc', $data);
-			logusu('BANC',"Banco o Caja  ".$meco." MODIFICADO");
-			echo "Banco o Caja ".$meco." Modificado";
-
-		} elseif($oper == 'del') {
-			$codbanc = $this->datasis->dameval("SELECT codbanc FROM banc WHERE id=$id");
-			$this->db->query("UPDATE banc SET activo = IF(activo='S','N','S') WHERE id=$id");
-
-			logusu('BANC',"Registro $codbanc DESACTIVADO/ACTIVADO");
-			echo "Registro Desactivado/Avtivado";
+			logusu('BANC','Banco o Caja  '.$meco.' MODIFICADO');
+			echo 'Banco o Caja '.$meco.' Modificado';
+		}elseif($oper == 'del'){
+			$codbanc = $this->datasis->dameval("SELECT codbanc FROM banc WHERE id=${dbid}");
+			$this->db->query("UPDATE banc SET activo = IF(activo='S','N','S') WHERE id=${dbid}");
+			logusu('BANC',"Registro ${codbanc} DESACTIVADO/ACTIVADO");
+			echo 'Registro Desactivado/Avtivado';
 		};
 	}
 
@@ -721,6 +709,10 @@ class Banc extends Controller {
 
 		$link=site_url('finanzas/banc/ubanc');
 		$script ='
+		function  add_proveed(){
+			$.prompt("<h1>Opci&oacute;n no habilitada</h1>");
+		}
+
 		function gasto(){
 			a=parseInt(dbporcen.value);
 			if(a>0 && a<100){
@@ -764,12 +756,13 @@ class Banc extends Controller {
 
 		$edit->activo = new dropdownField('Activo', 'activo');
 		$edit->activo->style ='width:50px;';
-		$edit->activo->rule='required';
+		$edit->activo->rule='required|enum[S,N]';
 		$edit->activo->options(array('S'=>'Si','N'=>'No' ));
 
 		$edit->tbanco = new dropdownField('Caja/Banco', 'tbanco');
 		$edit->tbanco->option('','Seleccione');
 		$edit->tbanco->options("SELECT cod_banc, concat(cod_banc, ' ',nomb_banc) descrip FROM tban ORDER BY nomb_banc");
+		$edit->tbanco->rule='required';
 		$edit->tbanco->style = "width:200px";
 
 		$edit->banco = new inputField('Nombre', 'banco');
@@ -837,9 +830,7 @@ class Banc extends Controller {
 		$edit->cuenta->append($bcpla);
 		//$edit->cuenta->append($lcuent);
 
-		$lsprv=anchor_popup('/compras/sprv/dataedit/create','Agregar',$atts);
-		$lsprv='<a href="javascript:add_proveed();" title="Agregar un proveedor para este banco">'.image('list_plus.png','Agregar',array("border"=>"0")).'</a>';
-
+		$lsprv='<a href="javascript:add_proveed();" title="Agregar un proveedor para este banco">'.image('list_plus.png','Agregar',array('border'=>'0')).'</a>';
 		$edit->codprv = new inputField('Proveedor', 'codprv');
 		$edit->codprv->rule= 'condi_required|callback_chiscaja|trim';
 		$edit->codprv->append($boton);
@@ -886,61 +877,69 @@ class Banc extends Controller {
 			$conten['form']  =&  $edit;
 			$data['content']  =  $this->load->view('view_banc', $conten, false);
 		}
-
 	}
 
 	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
-		return false;
+		$codigo  =$do->get('codbanc');
+		$dbcodigo=$this->db->escape($codigo);
+
+		$check=$this->datasis->dameval("SELECT COUNT(*) AS cana FROM bmov WHERE codbanc=${dbcodigo}");
+		if($check > 0){
+			$do->error_message_ar['pre_del']='El banco presenta movimientos no puede ser eliminado';
+			return false;
+		}
+
+		return true;
 	}
 
 	function _post_insert($do){
 		$codigo=$do->get('codbanc');
 		$nombre=$do->get('banco');
-		logusu('banc',"BANCO $codigo NOMBRE  $nombre CREADO");
+		logusu('banc',"BANCO ${codigo} NOMBRE  ${nombre} CREADO");
 	}
 
 	function _post_update($do){
 		$codigo=$do->get('codbanc');
 		$nombre=$do->get('banco');
-		logusu('banc',"BANCO $codigo NOMBRE  $nombre  MODIFICADO");
+		logusu('banc',"BANCO ${codigo} NOMBRE  ${nombre}  MODIFICADO");
 	}
 
 	function _post_delete($do){
 		$codigo=$do->get('codbanc');
 		$nombre=$do->get('banco');
-		logusu('banc',"BANCO $codigo NOMBRE  $nombre  ELIMINADO ");
+		logusu('banc',"BANCO ${codigo} NOMBRE  ${nombre}  ELIMINADO ");
 	}
 
 	function chexiste($codigo){
 		//$codigo=$this->input->post('codbanc');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM banc WHERE codbanc='$codigo'");
+		$dbcodigo=$this->db->escape($codigo);
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM banc WHERE codbanc=${dbcodigo}");
 		if ($check > 0){
-			$banco=$this->datasis->dameval("SELECT banco FROM grup WHERE codbanc='$codigo'");
-			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para el banco $banco");
-			return FALSE;
+			$banco=$this->datasis->dameval("SELECT banco FROM grup WHERE codbanc=${dbcodigo}");
+			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para el banco ${banco}");
+			return false;
 		}else {
-			return TRUE;
+			return true;
 		}
 	}
 
 	function chiscaja($proveed){
 		$tbanco=$this->input->post('tbanco');
-		if ($tbanco!='CAJ' AND strlen(trim($proveed))==0){
+		if ($tbanco!='CAJ' && strlen(trim($proveed))==0){
 			$this->validation->set_message('chiscaja',"El campo '%s' es obligatorio cuando el registro no es una caja");
-			return FALSE;
+			return false;
 		}else {
-			return TRUE;
+			return true;
 		}
 	}
 
 	function chisidb($gastoidb){
 		$dbporcen=$this->input->post('dbporcen');
-		if ($dbporcen>0 AND strlen(trim($gastoidb))==0){
+		if ($dbporcen>0 && strlen(trim($gastoidb))==0){
 			$this->validation->set_message('chisidb',"El campo '%s' es obligatorio cuando existe porcentaje de d&eacute;bito");
-			return FALSE;
+			return false;
 		}else {
-			return TRUE;
+			return true;
 		}
 	}
 
