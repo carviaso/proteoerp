@@ -2174,7 +2174,11 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		if (empty($tabla) OR (!$this->db->table_exists($tabla)))
 			show_error('Tabla no existe o faltan parametros');
 
-		$crud ="\n\t".'function dataedit(){'."\n";
+
+		$crud ="\n\t".'//******************************************************************'."\n";
+		$crud.="\t".  '// Edicion '."\n";
+
+		$crud.="\n\t".'function dataedit(){'."\n";
 		$crud.="\t\t".'$this->rapyd->load(\'dataedit\');'."\n";
 
 		$crud.="\t\t".'$script= \''."\n";
@@ -2189,9 +2193,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$crud.="\t\t".'$edit->script($script,\'create\');'."\n";
 		$crud.="\t\t".'$edit->on_save_redirect=false;'."\n\n";
 		$crud.="\t\t".'$edit->back_url = site_url($this->url.\'filteredgrid\');'."\n\n";
-
-		$crud.="\t\t".'$edit->script($script,\'create\');'."\n\n";
-		$crud.="\t\t".'$edit->script($script,\'modify\');'."\n\n";
 
 		$crud.="\t\t".'$edit->post_process(\'insert\',\'_post_insert\');'."\n";
 		$crud.="\t\t".'$edit->post_process(\'update\',\'_post_update\');'."\n";

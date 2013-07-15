@@ -1130,6 +1130,13 @@ class Banc extends Controller {
 			$this->db->simple_query('ALTER TABLE banc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
 			$this->db->simple_query('ALTER TABLE banc ADD UNIQUE INDEX codbanc (codbanc)');
 		}
+		
+		if (!$this->db->field_exists('rif','tban')) {
+			$mSQL="ALTER TABLE `tban` ADD COLUMN `rif` VARCHAR(15) NULL DEFAULT NULL COMMENT 'RIF del Banco';";
+			$this->db->query($mSQL);
+		}
+
+
 	}
 
 }

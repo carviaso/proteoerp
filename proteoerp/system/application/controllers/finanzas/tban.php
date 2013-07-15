@@ -142,7 +142,7 @@ class Tban extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 410, width: 600, modal: true,
+			autoOpen: false, height: 405, width: 550, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -489,6 +489,17 @@ class Tban extends Controller {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 			$(".inputnum").numeric(".");
 		});
+
+		$("#rif").blur(function(){
+			rif = $(this).val().toUpperCase();
+			$(this).val(rif);
+			patt = /[EJPGV][0-9]{4,9} */g;
+			if(!patt.test(rif)){
+				alert("El RIF o Cedula introducida no es correcta, por favor verifique e intente de nuevo.");
+				$("#rif").trigger("focus");
+				return false;
+			}
+		});
 		';
 
 		$edit = new DataEdit('', 'tban');
@@ -498,9 +509,6 @@ class Tban extends Controller {
 		$edit->on_save_redirect=false;
 
 		$edit->back_url = site_url($this->url.'filteredgrid');
-
-		$edit->script($script,'create');
-		$edit->script($script,'modify');
 
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
@@ -524,10 +532,16 @@ class Tban extends Controller {
 		$edit->rif->size =17;
 		$edit->rif->maxlength =15;
 
+		$edit->tipotra = new dropdownField('Transaccion','tipotra');
+		$edit->tipotra->options(array('NC'=>'NOTA DE CREDITO','DE'=>'DEPOSITO' ));
+
+		$edit->formaca = new dropdownField('Forma de Calculo','formaca');
+		$edit->formaca->options(array('NETO'=>'NETO','BRUTO'=>'BRUTO' ));
+
 		$edit->url = new inputField('Sitio Web','url');
 		$edit->url->rule='';
-		$edit->url->size =32;
-		$edit->url->maxlength =30;
+		$edit->url->size =40;
+		$edit->url->maxlength =40;
 
 		$edit->debito = new inputField('I.D.B. %','debito');
 		$edit->debito->rule='numeric';
@@ -557,17 +571,10 @@ class Tban extends Controller {
 		$edit->impuesto->maxlength =6;
 		$edit->impuesto->insertValue = "0.00";
 
-		$edit->tipotra = new dropdownField('Transaccion','tipotra');
-		$edit->tipotra->options(array('NC'=>'NOTA DE CREDITO','DE'=>'DEPOSITO' ));
-
-		$edit->formaca = new dropdownField('Forma de Calculo','formaca');
-		$edit->formaca->options(array('NETO'=>'NETO','BRUTO'=>'BRUTO' ));
-
-
 		$edit->formato = new inputField('Formato de Cheque','formato');
 		$edit->formato->rule='';
-		$edit->formato->size =52;
-		$edit->formato->maxlength =50;
+		$edit->formato->size =40;
+		$edit->formato->maxlength =40;
 
 		$edit->build();
 

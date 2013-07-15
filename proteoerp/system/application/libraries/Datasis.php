@@ -1698,10 +1698,11 @@ class Datasis {
 			function chrif(rif){
 				rif.toUpperCase();
 				var patt=/[EJPGV][0-9]{9} */g;
+
 				if(patt.test(rif)){
-					var factor= new Array(4,3,2,7,6,5,4,3,2);
-					var v=0;
-					if(rif[0]=="V"){
+					var factor = new Array(4,3,2,7,6,5,4,3,2);
+					var v = 0;
+					if( rif[0] == "V"){
 						v=1;
 					}else if(rif[0]=="E"){
 						v=2;
@@ -1714,18 +1715,20 @@ class Datasis {
 					}
 					acum=v*factor[0];
 					for(i=1;i<9;i++){
-						acum=acum+parseInt(rif[i])*factor[i];
+						acum = acum+parseInt(rif[i])*factor[i];
 					}
 					acum=11-acum%11;
-					if(acum>=10 || acum<=0){
-						acum=0;
+					if(acum >= 10 || acum <= 0){
+						acum = 0;
 					}
+					alert( "devo "+(acum==parseInt(rif[9])))
 					return (acum==parseInt(rif[9]));
 				}else{
 					return true;
 				}
 			}
 		';
+	
 		return $mandale;
 	}
 

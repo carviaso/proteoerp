@@ -56,7 +56,10 @@ class Sprv extends Controller {
 				window.open("'.$consulrif.'"+"?p_rif="+vrif,"CONSULRIF","height=350,width=410");
 			}
 		}
+		';
 
+		// Abre sitio Web
+		$funciones .= '
 		function iraurl(){
 			vurl=$("#url").val();
 			if(vrif.length==0){
@@ -924,27 +927,33 @@ class Sprv extends Controller {
 				$("#banco2").change(function () { acuenta(); }).change();
 
 				$("#rif").focusout(function(){
-					rif=$(this).val().toUpperCase();
+					rif = $(this).val().toUpperCase();
 					$(this).val(rif);
-					if(!chrif(rif)){
-						alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
-					}else{
-						$.ajax({
-							type: "POST",
-							url: "'.site_url('ajax/traerif').'",
-							dataType: "json",
-							data: {rifci: rif},
-							success: function(data){
-								if(data.error==0){
-									if($("#nombre").val()==""){
-										$("#nombre").val(data.nombre);
-									}
-									if($("#nomfis").val()==""){
-										$("#nomfis").val(data.nombre);
+					patt = /[EJPGV][0-9]{4,9} */g;
+					if(patt.test(rif)){
+						if(!chrif(rif)){
+							alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
+						}else{
+							$.ajax({
+								type: "POST",
+								url: "'.site_url('ajax/traerif').'",
+								dataType: "json",
+								data: {rifci: rif},
+								success: function(data){
+									if(data.error==0){
+										if($("#nombre").val()==""){
+											$("#nombre").val(data.nombre);
+										}
+										if($("#nomfis").val()==""){
+											$("#nomfis").val(data.nombre);
+										}
 									}
 								}
-							}
-						});
+							});
+						}
+					} else {
+						alert("El RIF o Cedula introducida no es correcta, por favor verifique e intente de nuevo.");
+						return false;
 					}
 				});
 			});
@@ -1481,9 +1490,9 @@ class Sprv extends Controller {
 	function instalar(){
 		$campos=$this->db->list_fields('sprv');
 		if (!in_array('id',$campos)){
-			$this->db->simple_query('ALTER TABLE sprv DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE sprv ADD UNIQUE INDEX proveed (proveed)');
-			$this->db->simple_query('ALTER TABLE sprv ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+			$this->db->query('ALTER TABLE sprv DROP PRIMARY KEY');
+			$this->db->query('ALTER TABLE sprv ADD UNIQUE INDEX proveed (proveed)');
+			$this->db->query('ALTER TABLE sprv ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 
 		if(!in_array('copre'    ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN copre     VARCHAR(11)  NULL DEFAULT NULL   AFTER cuenta');
@@ -1497,7 +1506,7 @@ class Sprv extends Controller {
 		if(!in_array('prefpago' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN prefpago  CHAR(1)      NULL DEFAULT "T"    COMMENT "Preferencia de pago, Transferencia, Deposito, Caja" AFTER reteiva');
 		if(!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE sprv ADD COLUMN canticipo VARCHAR(15)  NULL DEFAULT NULL   COMMENT 'Cuenta contable de Anticipo'                        AFTER cuenta");
 
-		$this->db->simple_query('ALTER TABLE sprv CHANGE nomfis nomfis VARCHAR(200) DEFAULT NULL NULL');
-		$this->db->simple_query('ALTER TABLE sprv CHANGE COLUMN telefono telefono TEXT NULL DEFAULT NULL');
+		$this->db->query('ALTER TABLE sprv CHANGE nomfis nomfis VARCHAR(200) DEFAULT NULL NULL');
+		$this->db->query('ALTER TABLE sprv CHANGE COLUMN telefono telefono TEXT NULL DEFAULT NULL');
 	}
 }

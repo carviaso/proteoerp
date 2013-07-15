@@ -4687,50 +4687,50 @@ class gser extends Controller {
 		$campos=$this->db->list_fields('gser');
 
 		if(!in_array('reteica',$campos)){
-			$this->db->simple_query("ALTER TABLE `gser` ADD COLUMN `reteica` DECIMAL(12,2) NULL DEFAULT NULL");
+			$this->db->query("ALTER TABLE `gser` ADD COLUMN `reteica` DECIMAL(12,2) NULL DEFAULT NULL");
 		}
 
 		if(!in_array('retesimple',$campos)){
-			$this->db->simple_query("ALTER TABLE `gser` ADD COLUMN `retesimple` DECIMAL(12,2) NULL DEFAULT NULL");
+			$this->db->query("ALTER TABLE `gser` ADD COLUMN `retesimple` DECIMAL(12,2) NULL DEFAULT NULL");
 		}
 
 		if(!in_array('negreso',$campos)){
-			$this->db->simple_query("ALTER TABLE `gser` ADD COLUMN `negreso` CHAR(8) NULL DEFAULT NULL");
+			$this->db->query("ALTER TABLE `gser` ADD COLUMN `negreso` CHAR(8) NULL DEFAULT NULL");
 		}
 
 		if(!in_array('ncausado',$campos)){
-			$this->db->simple_query("ALTER TABLE `gser` ADD COLUMN `ncausado` CHAR(8) NULL DEFAULT NULL");
+			$this->db->query("ALTER TABLE `gser` ADD COLUMN `ncausado` CHAR(8) NULL DEFAULT NULL");
 		}
 
 		if(!in_array('id',$campos)){
 			$query="ALTER TABLE `gser` DROP PRIMARY KEY";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 			$query="ALTER TABLE `gser` ADD UNIQUE INDEX `gser` (`fecha`, `numero`, `proveed`)";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 			$query="ALTER TABLE `gser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`)";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 
 			$query="UPDATE gitser AS a
 				JOIN gser AS b on a.numero=b.numero and a.fecha = b.fecha and a.proveed = b.proveed
 				SET a.idgser=b.id  WHERE a.idgser IS NULL";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 		}
 
 		$itcampos=$this->db->list_fields('gitser');
 		if(!in_array('id',$itcampos)){
 			$query="ALTER TABLE `gitser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`);";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 		}
 
 		if(!in_array('idgser',$itcampos)){
 			$query="ALTER TABLE `gitser` ADD COLUMN `idgser` INT(15) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`, ADD INDEX `idgser` (`idgser`)";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 		}
 
 		$query="UPDATE gitser AS a
 			JOIN gser AS b on a.numero=b.numero AND a.fecha = b.fecha AND a.proveed = b.proveed
 			SET a.idgser=b.id WHERE a.idgser IS NULL";
-		$this->db->simple_query($query);
+		$this->db->query($query);
 
 		if (!$this->db->table_exists('gereten')){
 			$mSQL="CREATE TABLE `gereten` (
@@ -4747,7 +4747,7 @@ class gser extends Controller {
 			)
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
-			$this->db->simple_query($mSQL);
+			$this->db->query($mSQL);
 		}
 
 		if (!$this->db->table_exists('gserchi')) {
@@ -4777,7 +4777,7 @@ class gser extends Controller {
 				`id` int(11) unsigned NOT NULL AUTO_INCREMENT,
 				PRIMARY KEY (`id`)
 				) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 		}
 
 		if (!$this->db->table_exists('rica')) {
@@ -4788,17 +4788,17 @@ class gser extends Controller {
 				`tasa` DECIMAL(8,2) NULL DEFAULT NULL,
 				PRIMARY KEY (`codigo`)
 				) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 		}
 
 		if (!$this->db->field_exists('ngasto','gserchi')) {
 			$query="ALTER TABLE `gserchi` ADD COLUMN `ngasto` VARCHAR(8) NULL DEFAULT NULL AFTER `departa`";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 		}
 
 		if (!$this->db->field_exists('aceptado','gserchi')) {
 			$query="ALTER TABLE gserchi ADD COLUMN aceptado CHAR(1) NULL DEFAULT NULL";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 		}
 
 	}
