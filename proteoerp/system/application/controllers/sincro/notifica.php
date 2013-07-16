@@ -682,6 +682,27 @@ class notifica extends controller {
 		$body   = $this->input->post('fbody');
 		$texto  = $this->input->post('ftexto');
 
+
+		if(preg_match_all('/(?P<correos>[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,6})/i', $to, $matches)){
+			$to = $matches['correos'];
+		}else{
+			$rt['status']='B';
+			$rt['msj']   ='Correos no validos';
+			echo json_encode($rt);
+			return '';
+		}
+
+		if(empty($body) && empty($texto)){
+			$rt['status']='B';
+			$rt['msj']   ='Correos sin contenido';
+			echo json_encode($rt);
+			return '';
+		}
+
+		if(empty($subject)){
+			$subject = 'Sin asunto';
+		}
+
 		$rt=array();
 		if($type='html'){
 			$this->load->library('cisimplehtmldom');
@@ -696,8 +717,8 @@ class notifica extends controller {
 				echo $phtml;
 				$_html=ob_get_contents();
 			@ob_end_clean();
-			//$rt['prog']= $_html;
-			$rt['prog']= '';
+			$rt['prog']= $_html;
+			//$rt['prog']= '';
 		}
 
 		$ban = $this->_sendmail($to,$subject,$_html,$type);
