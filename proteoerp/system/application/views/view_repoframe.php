@@ -70,7 +70,7 @@ echo style('impromptu/default.css');
 		$("#contenido").load(function (){
 			var surl=String($("#contenido").get(0).contentWindow.location);
 			if(surl.search("search")>0){
-				emailsend();
+				//emailsend();
 			}
 		});
 	});
