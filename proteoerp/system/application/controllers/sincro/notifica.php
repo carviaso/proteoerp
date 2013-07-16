@@ -3,6 +3,7 @@
 // pear install Mail
 // pear install Net_SMTP
 // pear install Mail_mime
+// pear install Auth_SASL
 
 date_default_timezone_set('America/Caracas');
 class notifica extends controller {
@@ -602,6 +603,183 @@ class notifica extends controller {
 		return !$rt;
 	}
 
+	function enviamail(){
+		$url=site_url('formatos/verhtml/PRESUP/83043/id');
+		$script= "<script type='text/javascript'>
+
+		$(function() {
+
+			document.getElementById('envcorreo').src='${url}';
+
+			$.prompt(
+			'<label>Correo: <input type=\"text\" size=\"40\" name=\"fcorreo\" value=\"\"></label><br />'+
+			'<label>Asunto: <input type=\"text\" size=\"40\" name=\"fasunto\" value=\"Sin asunto\"></label><br />'+
+			'<p>Texto adicional:<br />  <textarea name=\"ftexto\" rows=\"2\" cols=\"47\"></textarea></p>'+
+			'<p id=\"mmsj\" style=\"color:red\"></p>', {
+				title: 'Env&iacute;o de documento por correo',
+				buttons: {'Enviar': true, 'Cancelar': false },
+				submit: function(e,v,m,f){
+					if(v){
+						var correo = $('input[name=\"fcorreo\"]').val();
+						var asunto = $('input[name=\"fasunto\"]').val();
+						var texto  = $('textarea[name=\"ftexto\"]').val();
+
+						var hcss = $('#envcorreo').contents().find('link').attr('href');
+						var cssContent = $.ajax({url: hcss,async: false }).responseText;
+						createAndAppendStylesheet(cssContent);
+						var htmlContent = $('#envcorreo').contents().find('html').html();
+						var tmpOutput   = jQuery('<html></html>').html(htmlContent.replace(/\t/g, ''));
+						tmpOutput.find('script').remove();
+						tmpOutput.find('link').remove();
+						tmpOutput.find('title').remove();
+						tmpOutput.find('head').remove();
+						tmpOutput.find('meta').remove();
+						tmpOutput.find('body').prepend();
+						interpritAppendedStylesheet(tmpOutput);
+
+						if(texto.length>0){
+							body = '<p>'+texto+'</p><hr>'+tmpOutput.html();
+						}else{
+							var body = tmpOutput.html();
+						}
+
+						$.ajax({
+							dataType: 'json',
+							type: 'POST',
+							url: '".site_url('sincro/notifica/sendmail/html')."',
+							data: {fcorreo: correo  , fasunto:asunto , ftexto:texto ,fbody:body},
+							success: function(data){
+								if(data.status!='A'){
+									$('#mmsj').text(data.msj);
+								}
+								$.prompt.close();
+								//console.log(data.prog);
+							}
+						});
+						return false;
+					}
+				}
+			});
+		});
+		</script>";
+
+		$data['script']  = script('jquery-2.0.0.min.js');
+		$data['script'] .= script('jquery-impromptu.js');
+		$data['script'] .= script('plugins/css_inline_transform.js');
+		$data['script'] .= style('impromptu/default.css');
+
+		$data['script'] .= $script;
+		$data['content'] = '<iframe id="envcorreo" width="100%" height="400"></iframe>';
+		$data['title']   = '<h1>Env&iacute;os por correo</h1>';
+		$data['head']    = '';
+		$this->load->view('view_ventanas', $data);
+	}
+
+	//Para enviar formatos y reportes.
+	function sendmail($type='text'){
+		$to     = $this->input->post('fcorreo');
+		$subject= $this->input->post('fasunto');
+		$body   = $this->input->post('fbody');
+		$texto  = $this->input->post('ftexto');
+
+		$rt=array();
+		if($type='html'){
+			$this->load->library('cisimplehtmldom');
+			$phtml=$this->cisimplehtmldom->getstr($body);
+			ob_start();
+				foreach($phtml->find('img') as $element){
+					$file= file_get_contents('http://localhost'.$element->src);
+					$content_id = md5(uniqid(time()));
+					$this->mailimage($file,$element->alt,'application/octet-stream',basename($element->src),false,$content_id);
+					$element->src = 'cid:'.$content_id;
+				}
+				echo $phtml;
+				$_html=ob_get_contents();
+			@ob_end_clean();
+			//$rt['prog']= $_html;
+			$rt['prog']= '';
+		}
+
+		$ban = $this->_sendmail($to,$subject,$_html,$type);
+		if($ban){
+			$rt['status']='A';
+			$rt['msj']   ='Correo enviado';
+		}else{
+			$rt['status']='B';
+			$rt['msj']   =$this->error;
+		}
+
+		echo json_encode($rt);
+	}
+
+
+	function _sendmail($to,$subject,$body,$type='text'){
+		if(!@include_once 'Mail.php'){
+			$this->error='Problemas al cargar la clase Mail, probablemente sea necesario instalarla desde PEAR, comuniquese con soporte t&eacute;cnico';
+			return false;
+		}
+		if(!@include_once 'Mail/mime.php'){
+			$this->error='Problemas al cargar la clase Mail_mime, probablemente sea necesario instalarla desde PEAR, comuniquese con soporte t&eacute;cnico';
+			return false;
+		}
+
+		$message = new Mail_mime();
+
+		$from = $this->config->item('mail_smtp_from');
+		$host = $this->config->item('mail_smtp_host');
+		$port = $this->config->item('mail_smtp_port');
+		$user = $this->config->item('mail_smtp_usr');
+		$pass = $this->config->item('mail_smtp_pwd');
+
+		$extraheaders =  array (
+			'From'    => $from,
+			'To'      => $to,
+			'Subject' => $subject,
+			'Content-type' => "text/html; charset=UTF-8\r\n\r\n",
+		);
+
+		foreach($this->embededimage AS $adj){
+			$message->addHTMLImage($adj[0],$adj[1],$adj[2],$adj[3],$adj[4]);
+		}
+
+		if(is_array($this->adjuntos)){
+			foreach($this->adjuntos AS $adj){
+				$message->addAttachment($adj);
+			}
+		}
+
+		$parr=array (
+			'host'     => $host,
+			'port'     => $port,
+			'auth'     => true,
+			'username' => $user,
+			'password' => $pass
+		);
+
+		if($type=='html'){
+			$message->setHTMLBody($body);
+		}else{
+			$message->setTXTBody($body);
+		}
+		$mimeparams=array();
+		$mimeparams['text_encoding']='8bit';
+		$mimeparams['text_charset'] ='UTF-8';
+		$mimeparams['html_charset'] ='UTF-8';
+		$mimeparams['head_charset'] ='UTF-8';
+
+		$sbody   = $message->get($mimeparams);
+		$headers = $message->headers($extraheaders);
+return true;
+		$smtp = Mail::factory('smtp',$parr);
+		$mail = $smtp->send($to, $headers, $sbody);
+		if (PEAR::isError($mail)) {
+			$this->error=$mail->getMessage();
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	function instalar(){
 		if (!$this->db->table_exists('cacatua')) {
 			$mSQL="CREATE TABLE `cacatua` (
@@ -611,7 +789,7 @@ class notifica extends controller {
 			PRIMARY KEY (`nombre`)
 			)
 			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM;";
+			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
 

@@ -1,15 +1,24 @@
 <html>
 <head>
-	<meta http-equiv="Content-type" content="text/html; charset=<?=$this->config->item('charset'); ?>" />
-<?=style("reportes.css");?>
-<?=$head ?>
+	<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" />
+	<?php echo style('reportes.css');?>
+	<?php echo $head; ?>
 <script type="text/javascript" language="javascript"></script>
 </head>
-<body onload='descarga()'>
+<body>
 	<div id='home'>
-	<p><?=$titulo ?></p>
-	<p><?=$forma ?></p>
+		<p><?php echo $titulo ?></p>
+		<p><?php echo $forma  ?></p>
+		<?php foreach($opts as $opt){ ?>
+		<div class='<?php echo ($opt['siste']=='D')? 'rconte' : 'pconte'; ?>' tile='Averr'>
+			<a href="<?php echo site_url('reportes/ver/'.$opt['nombre'].'/'.$repo); ?>" title="<?php echo 'Nombre: '.$opt['nombre']; ?>">
+			<h3 style="padding:2px;margin:0px;font-size:0.9em"><?php
+			echo $opt['titulo'];
+			?></h3>
+			<p  style="padding:2px;margin:0px;font-size:0.7em"><?php echo $opt['mensaje']; ?></p>
+			</a>
+		</div>
+		<?php } ?>
 	</div>
-	
 </body>
 </html>

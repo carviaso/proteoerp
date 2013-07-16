@@ -10,27 +10,27 @@ class Reportes extends Controller{
 		$this->opciones=array('PDF'=>'pdf','XLS'=>'xls','plano'=>'xls (plano)','HTML'=>'html');
 	}
 
-	function index(){
-		$repo = $this->uri->segment(3);
-		$data['pre']  = $repo;
-		$data['titu'] = "Listados ${repo} ".$this->session->userdata('usuario');
-		$data['repo'] = $repo;
-		if ( $this->session->userdata('usuario')=='' )
-		    redirect('/ajax/reccierraventana');
+	function index($repo=false){
+		if($this->session->userdata('usuario')=='') redirect('/ajax/reccierraventana');
+		$dbrepo = $this->db->escape('%'.$repo);
+
+		$data['pre']   = $repo;
+		$data['titu']  = "Listados ${repo} ".$this->session->userdata('usuario');
+		$data['repo']  = $repo;
+		$data['titulo']= $this->datasis->dameval("SELECT titulo FROM intramenu a WHERE a.panel='REPORTES' AND a.ejecutar LIKE ${dbrepo}");
 		$this->load->view('view_repoframe',$data);
 	}
 
-	function ver(){
-		//$this->load->library('XLSReporte');
+	function ver($repo,$esta=null){
 		$this->rapyd->load('datafilter2');
-		$repo =$this->uri->segment(3);
-		$esta =$this->uri->segment(4);
+
 		$mSQL= 'SELECT proteo FROM reportes WHERE nombre='.$this->db->escape($repo);
 		$mc  = $this->datasis->dameval($mSQL);
 		$nombre =strtolower($repo).'.pdf';
 
 		if(empty($mc)) $mc=$this->_crearep($repo,'proteo');
 		if(!empty($mc)){
+			if(empty($esta)) $esta=$this->datasis->dameval('SELECT modulo FROM intramenu WHERE nombre='.$this->db->escape($repo));
 			$data['regresar']='<a href='.site_url("/reportes/enlistar/$esta").'>'.image('go-previous.png','Regresar',array('border'=>0)).'Regresar'.'</a>';
 
 			$_formato=$this->input->post('salformat');
@@ -63,9 +63,9 @@ class Reportes extends Controller{
 		}
 	}
 
-	function enlistar(){
-		//echo '<pre>';print_r($this->session->userdata);echo '</pre>';
-		$repo =$this->uri->segment(3);
+	function enlistar($repo){
+		$repo=strtoupper($repo);
+
 		$this->rapyd->load('datatable');
 		$this->rapyd->config->set_item('theme','clean');
 
@@ -76,8 +76,41 @@ class Reportes extends Controller{
 		$this->db->simple_query($mSQL);
 
 		if($repo){
-			$repo=strtoupper($repo);
+			$opts=array();
 
+			$this->db->_escape_char='';
+			$this->db->_protect_identifiers=false;
+
+			$sel = array("CONCAT(a.secu,' ',a.titulo) AS titulo",'TRIM(a.mensaje) AS mensaje', "TRIM(REPLACE(MID(a.ejecutar,10,30),"."'".'")'."','')) AS nombre",'"D" AS siste');
+			$this->db->select($sel);
+			$this->db->from('tmenus   AS a');
+			$this->db->join('sida     AS b','a.codigo=b.modulo');
+			$this->db->join('reportes AS d',"REPLACE(MID(a.ejecutar,10,30),"."'".'")'."','')=d.nombre");
+			$this->db->where('b.acceso','S');
+			$this->db->where('b.usuario',$this->session->userdata('usuario') );
+			$this->db->like('a.ejecutar','REPOSQL', 'after');
+			$this->db->where('a.modulo',$repo.'LIS');
+			$this->db->orderby('a.secu');
+
+			$query = $this->db->get();
+			foreach ($query->result_array() as $row){
+				$opts[]=$row;
+			}
+
+			$this->db->select(array('a.titulo','a.mensaje','TRIM(a.nombre) AS nombre','"P" AS siste'));
+			$this->db->from('intrarepo AS a');
+			$this->db->join('tmenus    AS b',"CONCAT(a.modulo,'LIS')=b.modulo AND b.ejecutar LIKE CONCAT('%',a.nombre,'%')",'left');
+			$this->db->where('b.codigo IS NULL');
+			$this->db->where('a.modulo',$repo );
+			$this->db->where('a.activo','S');
+			$this->db->orderby('a.titulo');
+
+			$query = $this->db->get();
+			foreach ($query->result_array() as $row){
+				$opts[]=$row;
+			}
+
+			/*
 			$grid = new DataTable();
 			$grid->db->_escape_char='';
 			$grid->db->_protect_identifiers=false;
@@ -118,26 +151,25 @@ class Reportes extends Controller{
 			</div><div style="color:#112211; font-weight:normal; font-size:12px;padding:4px;border-left: 1px solid;">
 			<htmlspecialchars><#mensaje#></htmlspecialchars></div>';
 			$grid1->build();
+			*/
 		}
 		$data['forma'] = '';
-		if($repo AND $grid->recordCount>0) {
-			$data['forma']  = '<div style="color:#111911; font-weight:bold; font-size:10px;background-color:#F1FFF1">SISTEMA</div>';
-			$data['forma'] .= $grid->output;
-		} else {
-			$data['forma'] = '<p class="mainheader">No hay reportes disponibles del SISTEMA.</p>';
-		}
+		//if($repo AND $grid->recordCount>0) {
+		//	$data['forma']  = '<div style="color:#111911; font-weight:bold; font-size:10px;background-color:#F1FFF1">SISTEMA</div>';
+		//	$data['forma'] .= $grid->output;
+		//} else {
+		//	$data['forma'] = '<p class="mainheader">No hay reportes disponibles del SISTEMA.</p>';
+		//}
+		//if($repo AND $grid1->recordCount>0) {
+		//	$data['forma'] .= '<div style="color:#111911; font-weight:bold; font-size:10px;background-color:#F1FFF1">PROTEO</div>';
+		//	$data['forma'] .=$grid1->output;
+		//};
 
-		if($repo AND $grid1->recordCount>0) {
-			$data['forma'] .= '<div style="color:#111911; font-weight:bold; font-size:10px;background-color:#F1FFF1">PROTEO</div>';
-			$data['forma'] .=$grid1->output;
-		};
-
-		$meco = $this->datasis->dameval("SELECT titulo FROM intramenu a WHERE a.panel='REPORTES' AND a.ejecutar LIKE '%$repo' ");
-		$data['head']   ='';
-		$data['titulo'] ='';
-		$data['repo']=$repo;
+		$data['opts']   = $opts;
+		$data['head']   = '';
+		$data['titulo'] = '';
+		$data['repo']   = $repo;
 		$this->load->view('view_reportes', $data);
-
 	}
 
 	function cabeza(){

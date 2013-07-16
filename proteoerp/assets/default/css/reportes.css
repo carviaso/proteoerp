@@ -8,9 +8,9 @@
 	background-color:#2067B5;
 }
 #cerrar{
-  position:absolute; 
-  right:10px; 
-  top:10px;
+	position:absolute; 
+	right:10px; 
+	top:10px;
 }
 body{
 	background:url(reporte.jpg) center 40px no-repeat;
@@ -18,12 +18,46 @@ body{
 	padding:0;
 }
 a:link, a:visited{
-	color:#2067B5;
 	text-decoration:none;
-	font-weight:bold;
+	color:#000000;
 }
 a:hover{
 	text-decoration:none;
-	font-weight:bold;
-	color:#999999;
+	color:#E4E4E4;
+}
+
+.rconte {
+	float: left;
+	color:#000000;
+	font-size=0.9em;
+	background-color:#A091FF;
+	border-radius:5px;
+	margin:2px;
+	opacity:0.8;
+	filter:alpha(opacity=80);
+	width:255px;
+}
+
+.rconte:hover {
+	color:#FFFFFF;
+	opacity:1;
+	filter:alpha(opacity=100);
+}
+
+.pconte {
+	float: left;
+	color:#000000;
+	font-size=0.9em;
+	background-color:#FFBA5A;
+	border-radius:5px;
+	margin:2px;
+	opacity:0.8;
+	filter:alpha(opacity=80);
+	width:255px;
+}
+
+.pconte:hover {
+	color:#FFFFFF;
+	opacity:1;
+	filter:alpha(opacity=100);
 }
