@@ -13,9 +13,20 @@
 		<div class='<?php echo ($opt['siste']=='D')? 'rconte' : 'pconte'; ?>' tile='Averr'>
 			<a href="<?php echo site_url('reportes/ver/'.$opt['nombre'].'/'.$repo); ?>" title="<?php echo 'Nombre: '.$opt['nombre']; ?>">
 			<h3 style="padding:2px;margin:0px;font-size:0.9em"><?php
-			echo $opt['titulo'];
+			$ban = stripos($this->db->char_set,'latin')!==false && $this->config->item('charset')=='UTF-8';
+			if($ban){
+				echo utf8_encode($opt['titulo']);
+			}else{
+				echo $opt['titulo'];
+			}
 			?></h3>
-			<p  style="padding:2px;margin:0px;font-size:0.7em"><?php echo $opt['mensaje']; ?></p>
+			<p style="padding:2px;margin:0px;font-size:0.7em"><?php
+			if($ban){
+				echo utf8_encode($opt['mensaje']);
+			}else{
+				echo $opt['mensaje'];
+			}
+			?></p>
 			</a>
 		</div>
 		<?php } ?>
