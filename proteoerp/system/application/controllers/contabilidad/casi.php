@@ -1795,14 +1795,11 @@ class Casi extends Controller {
 				}
 			}
 		}
-
 		$data['content'] = $filter->output.$sal;
 		$data['title']   = heading('Localizador de Transacciones');
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
-
-
 
 	function chvalidt($transac){
 		if (preg_match("/^[0-9]{1,8}$/i",$transac)) return true;
@@ -1812,7 +1809,6 @@ class Casi extends Controller {
 	}
 
 	function _pre_insert($do){
-
 		$comprob=$do->get('comprob');
 		$fecha  =$do->get('fecha');
 		$monto=$debe=$haber=0;
@@ -1823,7 +1819,6 @@ class Casi extends Controller {
 			$ahaber=$do->get_rel('itcasi','haber',$i);
 			$do->set_rel('itcasi','comprob',$comprob,$i);
 			$do->set_rel('itcasi','fecha'  ,$fecha  ,$i);
-
 
 			if ($adebe!=0 && $ahaber!=0){
 				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert']='No puede tener debe y haber en el asiento '.$o;

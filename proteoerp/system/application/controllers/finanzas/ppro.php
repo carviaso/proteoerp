@@ -37,7 +37,7 @@ class Ppro extends Controller {
 	}
 
 	//******************************************************************
-	//Layout en la Ventana
+	// Layout en la Ventana
 	//
 	function jqdatag(){
 
@@ -52,12 +52,14 @@ class Ppro extends Controller {
 		$grid->wbotonadd(array("id"=>"preabono", "img"=>"images/checklist.png", "alt" => 'Pre Abonar',      "label"=>"Preparar Pago"));
 		$grid->wbotonadd(array("id"=>"abonos",   "img"=>"images/check.png",     "alt" => 'Abonos',          "label"=>"Pago o Abono"));
 		$grid->wbotonadd(array("id"=>"ncredito", "img"=>"images/star.png",      "alt" => 'Nota de Credito', "label"=>"Notas de Credito"));
+		$grid->wbotonadd(array("id"=>"addprv",   "img"=>"images/star.png",      "alt" => 'Agrega Proveedor', "label"=>"Agrega Proveedor"));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel de pie de forma
 		$adic = array(
 			array("id"=>"fpreabono", "title"=>"Autorizar Abonos"),
 			array("id"=>"fabono",    "title"=>"Pagos y Abonos"),
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
 			array("id"=>"fncredito", "title"=>"Notas de Creditos")
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
@@ -76,16 +78,25 @@ class Ppro extends Controller {
 
 
 	//******************************************************************
-	//
 	// Funciones de botones en javascript
 	//
 	function bodyscript($grid){
 
 		$bodyscript = '<script type="text/javascript">';
 
+		// Agrega Proveedor
+		$bodyscript .= '
+		$("#addprv").click( function() {
+			$.post("'.site_url('compras/sprv/dataedit/create').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			})
+		});';
+
 		//Imprimir Estado de Cuenta
 		$bodyscript .= '
-		jQuery("#edocta").click( function(){
+		$("#edocta").click( function(){
 			var id = jQuery("#newapi'. $grid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'. $grid.'").jqGrid(\'getRowData\',id);
@@ -283,13 +294,58 @@ class Ppro extends Controller {
 				close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
 			});
 		});';
+
+		$bodyscript .= '
+		$("#fedita").dialog({
+			autoOpen: false, height: 520, width: 720, modal: true,
+			buttons: {
+			"Guardar": function() {
+				var murl = $("#df1").attr("action");
+				$.ajax({
+					type: "POST", dataType: "html", async: false,
+					url: murl,
+					data: $("#df1").serialize(),
+					success: function(r,s,x){
+						try{
+							var json = JSON.parse(r);
+							if (json.status == "A"){
+								$("#fedita").dialog( "close" );
+								grid.trigger("reloadGrid");
+								$.prompt("<h1>Registro Guardado</h1>",{
+									submit: function(e,v,m,f){
+									}}
+								);
+								idactual = json.pk.id;
+								return true;
+							} else {
+								$.prompt("Error: "+json.mensaje);
+							}
+						} catch(e){
+							$("#fedita").html(r);
+						}
+					}
+				})
+			},
+			"Cancelar": function(){
+				$("#fedita").html("");
+				$(this).dialog("close");
+			},
+			"SENIAT":   function(){ consulrif("rifci"); },
+			"URL":   function() { iraurl(); },
+			},
+			close: function(){
+				$("#fedita").html("");
+			}
+		});';
+
+
 		$bodyscript .= "\n</script>\n";
 		return $bodyscript;
 
 	}
 
 	//******************************************************************
-	//Definicion del Grid y la Forma
+	// Definicion del Grid y la Forma
 	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
@@ -405,10 +461,6 @@ class Ppro extends Controller {
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
 
-		//$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
-		//$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
-		//$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
-
 		#show/hide navigations buttons
 		$grid->setAdd(false);
 		$grid->setEdit(false);
@@ -446,7 +498,7 @@ class Ppro extends Controller {
 	//******************************************************************
 	// Guarda la Informacion
 	//
-	function setData(){
+	function setdata(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -759,7 +811,14 @@ class Ppro extends Controller {
 	sumabo();
 
 </script>
-	<div style="background-color:#D0D0D0;font-weight:bold;font-size:14px;text-align:center"><table width="100%"><tr><td>Codigo: '.$reg['proveed'].'</td><td>'.$reg['nombre'].'</td><td>RIF: '.$reg['rif'].'</td></tr></table></div>
+	<div style="background-color:#D0D0D0;font-weight:bold;font-size:14px;text-align:center">
+	<table width="100%">
+		<tr><
+			td>Codigo: '.$reg['proveed'].'</td>
+			<td>'.$reg['nombre'].'</td>
+			<td>RIF: '.$reg['rif'].'</td>
+		</tr>
+	</table></div>
 	<p class="validateTips"></p>
 	<form id="abonoforma">
 	<table width="90%" align="center" border="0">

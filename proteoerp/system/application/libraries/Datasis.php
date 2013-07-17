@@ -1697,7 +1697,7 @@ class Datasis {
 		$mandale = '
 			function chrif(rif){
 				rif.toUpperCase();
-				var patt=/[EJPGV][0-9]{9} */g;
+				var patt=/[EJPGV][0-9]{10} */g;
 
 				if(patt.test(rif)){
 					var factor = new Array(4,3,2,7,6,5,4,3,2);
@@ -1721,7 +1721,6 @@ class Datasis {
 					if(acum >= 10 || acum <= 0){
 						acum = 0;
 					}
-					alert( "devo "+(acum==parseInt(rif[9])))
 					return (acum==parseInt(rif[9]));
 				}else{
 					return true;

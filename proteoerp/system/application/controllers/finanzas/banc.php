@@ -211,7 +211,7 @@ class Banc extends Controller {
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
 
-		$mSQL = "SELECT cod_banc, CONCAT(cod_banc, ' ', nomb_banc) descrip FROM tban ORDER BY cod_banc ";
+		$mSQL = "SELECT cod_banc, CONCAT(cod_banc, ' ', nomb_banc) descrip FROM tban WHERE activo='S' ORDER BY cod_banc ";
 		$tbanco = $this->datasis->llenajqselect($mSQL, false );
 
 		$grid->addField('tbanco');
@@ -733,7 +733,32 @@ class Banc extends Controller {
 		$(function() {
 			gasto();
 			$(".inputnum").numeric(".");
-		});';
+		});
+		
+		$("#rif").focusout(function(){
+			if ( $(this).val() != "CAJ"  ){
+				rif = $(this).val().toUpperCase();
+				$(this).val(rif);
+				patt = /[EJPGV][0-9]{4,9} */g;
+				if(!patt.test(rif)){
+					alert("El RIF o Cedula introducida no es correcta, por favor verifique e intente de nuevo.");
+					$(this).val("");
+				}
+			}
+		});
+
+		$("#tbanco").change(function(){
+			tbanco = $(this).val();
+			if ( tbanco != "CAJ" ){
+				$.post("'.site_url('finanzas/banc/traerif').'/"+tbanco,
+				function(data){
+					$("#rif").val(data);
+				})
+			} else {
+				$("#rif").val("");
+			}
+		});
+		';
 
 		$edit = new DataEdit('', 'banc');
 		$edit->on_save_redirect=false;
@@ -741,6 +766,8 @@ class Banc extends Controller {
 		$edit->script($script, 'create');
 		$edit->script($script, 'modify');
 
+		$edit->pre_process( 'insert','_pre_insert');
+		$edit->pre_process( 'update','_pre_update');
 		$edit->pre_process( 'delete','_pre_delete' );
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
@@ -828,7 +855,6 @@ class Banc extends Controller {
 		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->size =12;
 		$edit->cuenta->append($bcpla);
-		//$edit->cuenta->append($lcuent);
 
 		$lsprv='<a href="javascript:add_proveed();" title="Agregar un proveedor para este banco">'.image('list_plus.png','Agregar',array('border'=>'0')).'</a>';
 		$edit->codprv = new inputField('Proveedor', 'codprv');
@@ -842,12 +868,12 @@ class Banc extends Controller {
 		$edit->depto->option('','Seleccionar');
 		$edit->depto->options("SELECT depto, descrip FROM dpto ORDER BY descrip");
 		$edit->depto->rule='required';
-		$edit->depto->style ='width:210px;';
+		$edit->depto->style ='width:220px;';
 
 		$edit->sucur = new dropdownField('Sucursal', 'sucur');
 		$edit->sucur->option('','Ninguna');
 		$edit->sucur->options('SELECT codigo, TRIM(sucursal) FROM sucu ORDER BY sucursal');
-		$edit->sucur->style ='width:80px;';
+		$edit->sucur->style ='width:150px;';
 
 		$mSQL="SELECT codigo, CONCAT_WS('-',TRIM(descrip),TRIM(codigo)) AS descrip FROM mgas ORDER BY descrip";
 		$edit->gastoidb = new dropdownField('Gasto I.D.B.','gastoidb');
@@ -863,7 +889,17 @@ class Banc extends Controller {
 		$edit->gastocom->style ='width:300px;';
 		//$edit->gastocom->append('Solo bancos');
 
-		//$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
+		$rif = '';
+		if ( $edit->getval('tbanco') && $edit->getval('tbanco') <> 'CAJ' )
+			$rif = $this->datasis->dameval('SELECT rif FROM tban WHERE cod_banc="'.$edit->getval('tbanco').'"');
+		
+		$edit->rif = new inputField('RIF del Banco', 'rif');
+		$edit->rif->rule='trim';
+		$edit->rif->size =12;
+		$edit->rif->maxlength=12;
+		$edit->rif->updateValue = $rif;
+		$edit->rif->showValue = $rif;
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -879,6 +915,12 @@ class Banc extends Controller {
 		}
 	}
 
+	function traerif($tbanco){
+		$rif = $this->datasis->dameval("SELECT rif FROM tban WHERE cod_banc='".$tbanco."'");
+		echo $rif;
+	}
+	
+
 	function _pre_delete($do){
 		$codigo  =$do->get('codbanc');
 		$dbcodigo=$this->db->escape($codigo);
@@ -891,6 +933,83 @@ class Banc extends Controller {
 
 		return true;
 	}
+
+	function _pre_insert($do){
+		
+		$this->bacsprv($do);
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$rif    = trim($this->input->post('rif'));
+		$tbanco = $do->get('tbanco');
+		if ( $rif == '' && $tbanco <> 'CAJ' ){
+			$do->error_message_ar['pre_upd']="Favor coloque el RIF del banco";
+			return false;
+		} else {
+			$this->bacsprv($do);
+			$do->error_message_ar['pre_upd']="";
+			return true;
+		}
+	}
+
+	//******************************************************************
+	// Crea el proveedor
+	//
+	function bacsprv($do){
+		$rif    = $this->input->post('rif');
+		$tbanco = $do->get('tbanco');
+		$do->rm_get('rif');
+		// Si es banco revisa si existe el Proveedor
+		if ( $tbanco <> 'CAJ' ){
+			$tbrif = $this->datasis->dameval('SELECT rif FROM tban WHERE cod_banc="'.$tbanco.'"');
+			if ( empty($tbrif) ){
+				$this->db->query("UPDATE tban SET rif='".$rif."' WHERE cod_banc='".$tbanco."'");
+			}
+			// Busca el Proveedor
+			$codprv = $this->datasis->dameval("SELECT proveed FROM sprv WHERE rif='".$rif."' LIMIT 1");
+			if (empty($codprv)) {
+				//Crea el Proveedor
+				$grpr = $this->datasis->dameval('SELECT grupo FROM grpr WHERE gr_desc LIKE "BANCO%"');
+				$codprv = '3B'.$tbanco;
+				$hay = $this->datasis->dameval("SELECT count(*) FROM sprv WHERE proveed='".$codprv."'");
+				$letras = array('C'.'D','E','F','E','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
+				$i = 0;
+				while ( $hay > 0 ){
+					$codprv = '3'.$letras[$i].$tbanco;
+					$hay = $this->datasis->dameval("SELECT count(*) FROM sprv WHERE proveed='".$codprv."'");
+					$i++;
+				}
+				$data = array();
+				$data['proveed']  = $codprv;
+				$data['rif']      = $rif;
+				
+				$data['nombre']   = $do->get('banco');
+				$data['nomfis']   = $do->get('banco');
+				$data['contacto'] = $do->get('nombre');
+				$data['direc1']   = $do->get('dire1');
+				$data['direc2']   = $do->get('dire2');
+				$data['telefono'] = $do->get('telefono');
+
+				$data['grupo']    = $grpr;
+				$data['prefpago'] = 'T';
+				$data['reteiva']  = 0.00;
+				$data['tipo']     = '5';
+				$data['tiva']     = 'N';
+				
+				$this->db->insert('sprv',$data);
+			}
+			$do->set('codprv',$codprv);
+		} else {
+			$do->set('rif', '');
+		
+		}
+		return true;
+	}
+
+
+
 
 	function _post_insert($do){
 		$codigo=$do->get('codbanc');

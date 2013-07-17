@@ -3697,9 +3697,6 @@ class Scst extends Controller {
 		}
 		//fin de la retencion
 
-		//$do->set('estampa', 'CURDATE()', FALSE);
-		//$do->set('hora'   , 'CURRENT_TIME()', FALSE);
-
 		//Para picar la observacion en varios campos
 		$obs=$do->get('observa1');
 		$ff = strlen($obs);

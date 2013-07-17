@@ -1085,10 +1085,10 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 			$str .= $this->jqgridclase($db, $contro);
 
-			$str .= $tab1.'//***************************'."\n";
+			$str .= $tab1.'//******************************************************************'."\n";
 			$str .= $tab1.'//Layout en la Ventana'."\n";
 			$str .= $tab1.'//'."\n";
-			$str .= $tab1.'//***************************'."\n";
+
 			$str .= $tab1.'function jqdatag(){'."\n\n";
 			$str .= $tab2.'$grid = $this->defgrid();'."\n";
 			$str .= $tab2.'$param[\'grids\'][] = $grid->deploy();'."\n\n";
@@ -1128,9 +1128,9 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			//  Funcion de Java del Body
 			//
 			//
-			$str .= $tab1.'//***************************'."\n";
+			$str .= $tab1.'//******************************************************************'."\n";
 			$str .= $tab1.'//Funciones de los Botones'."\n";
-			$str .= $tab1.'//***************************'."\n";
+			$str .= $tab1.'//'."\n";
 			$str .= $tab1.'function bodyscript( $grid0 ){'."\n";
 			$str .= $tab2.'$bodyscript = \'';
 			$str .= $tab2.'&lt;script type="text/javascript"&gt;\';'."\n\n";

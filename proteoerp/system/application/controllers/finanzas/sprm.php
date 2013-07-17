@@ -45,11 +45,13 @@ class Sprm extends Controller {
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprime',   'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir',      'label'=>'Reimprimir Documento', 'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'princheque','img'=>'images/check.png',                'alt' => 'Emitir Cheque', 'label'=>'Imprimir cheque',      'tema'=>'anexos'));
+		$grid->wbotonadd(array("id"=>"abonos",   "img"=>"images/check.png",     "alt" => 'Abonos',          "label"=>"Pago o Abono"));
 		$WestPanel = $grid->deploywestp();
 
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro')
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fabono',  'title'=>'Abonar a Proveedor')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -118,7 +120,6 @@ class Sprm extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});';
 
-
 		$bodyscript .= '
 		function sprmadd(){
 			$.post("'.site_url($this->url.'dataedit/create').'",
@@ -184,6 +185,65 @@ class Sprm extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+
+
+
+		//Abonos
+		$bodyscript .= '
+			$( "#abonos" ).click(function() {
+				var id  = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url('finanzas/ppro/formaabono').'/"+id, function(data){
+						$("#fpreabono").html("");
+						$("#fabono").html(data);
+					});
+					$( "#fabono" ).dialog( "open" );
+				} else { $.prompt("<h1>Por favor Seleccione un Proveedor</h1>");}
+			});
+
+			$( "#fabono" ).dialog({
+				autoOpen: false, height: 470, width: 790, modal: true,
+				buttons: {
+					"Abonar": function() {
+						var bValid = true;
+						var rows = $("#abonados").jqGrid("getGridParam","data");
+						var paras = new Array();
+						for(var i=0;i < rows.length; i++){
+							var row=rows[i];
+							paras.push($.param(row));
+						}
+						allFields.removeClass( "ui-state-error" );
+						if ( bValid ) {
+							// Coloca el Grid en un input
+							$("#fgrid").val(JSON.stringify(paras));
+							$.ajax({
+								type: "POST", dataType: "html", async: false,
+								url:"'.site_url("finanzas/ppro/abono").'",
+								data: $("#abonoforma").serialize(),
+								success: function(r,s,x){
+									var res = $.parseJSON(r);
+									if ( res.status == "A"){
+										apprise(res.mensaje);
+										grid.trigger("reloadGrid");
+										'.$this->datasis->jwinopen(site_url('formatos/ver/PPROABC').'/\'+res.id').';
+										$( "#fabono" ).dialog( "close" );
+										return [true, a ];
+									} else {
+										apprise("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
+									}
+								}
+							});
+						}
+					},
+					Cancel: function() { $( this ).dialog( "close" ); }
+				},
+				close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
+			});';
+
+
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function(){

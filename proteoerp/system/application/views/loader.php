@@ -77,7 +77,7 @@ $(document).ready(function() {
 					<?php $this->load->view($data['settings']['default'].'/'.$data['settings']['content'].$view,  $data); ?>
 				</td>
 				<td valign='top' width='300' align='right'>
-				<table cellpadding='0' cellspacing='0' >
+				<table cellpadding='0' cellspacing='0' border='0'>
 					<tr>
 						<td>
 						<?php
@@ -92,6 +92,10 @@ $(document).ready(function() {
 							if ( $this->secu->es_logeado() )
 								$this->load->view('ultlog');
 						?>
+						</td>
+					</tr>
+					<tr>
+						<td><div id='menup_repo' name='menup_repo'></div>
 						</td>
 					</tr>
 				</table>

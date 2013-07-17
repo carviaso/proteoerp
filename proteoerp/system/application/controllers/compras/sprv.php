@@ -929,7 +929,7 @@ class Sprv extends Controller {
 				$("#rif").focusout(function(){
 					rif = $(this).val().toUpperCase();
 					$(this).val(rif);
-					patt = /[EJPGV][0-9]{4,9} */g;
+					patt = /[EJPGV][0-9]{4,10} */g;
 					if(patt.test(rif)){
 						if(!chrif(rif)){
 							alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");

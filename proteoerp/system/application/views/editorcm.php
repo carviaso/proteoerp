@@ -1,7 +1,3 @@
-<?php
-//$tablas = $this->datasis->llenaopciones('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA="datasis" AND TABLE_TYPE="BASE TABLE" AND BINARY TABLE_NAME=LOWER(TABLE_NAME) ', $todos=false, $id='bd'); 
-
-?>
 <!doctype html>
 <html>
 	<head>
@@ -124,6 +120,5 @@ $('#cargar').click(function(){
 
 
 </script>
-
 </body>
 </html>

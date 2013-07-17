@@ -11,17 +11,13 @@ function add_proveed(){
 	var mtbanco = encodeURIComponent($("#tbanco").val());
 	var mcodprv = encodeURIComponent($("#codprv").val());
 	var mnombre = encodeURIComponent($("#nombre").val());
-//$("#fedita").dialog("option" , "modal", false );
 
 	var estados = {
 		state0: {
 			html : "<h1>Crear Banco como Proveedores</h1><br/><center>R.I.F. del Banco: <input name='mrif' value='' id='mrif' class='input' size='15' style='' maxlength='13' type='text'></center><br/>",
 			buttons: { "Crear Proveedor": true, "Cancelar": false },
 			focus: "input[name='mrif']",
-			//zindex: 999999,
 			submit: function(e,v,m,f){
-//$("#fedita").dialog("option" , "modal", true );
-
 				if (v) {
 					if( f.mrif==null ){
 						alert("Cancelado por el usuario"); // No se da
@@ -161,7 +157,7 @@ function add_proveed(){
 		<td>
 			<fieldset style='border: 1px outset #8A0808;background: #FFFBE9;'>
 			<table width= '100%' >
-				<tr>
+				<!-- tr>
 					<td class="littletableheaderc"><?php echo $form->codprv->label; ?></td>
 					<td class="littletablerow"    ><?php echo $form->codprv->output;?>
 					<?php
@@ -171,19 +167,26 @@ function add_proveed(){
 					}
 					?>
 					</td>
-				</tr>
+				</tr -->
 
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->gastocom->label; ?></td>
 					<td class="littletablerow"    ><?php echo $form->gastocom->output;?></td>
+
+					<td class="littletableheaderc"><?php echo $form->rif->label; ?></td>
+					<td class="littletablerow"    ><?php echo $form->rif->output;?></td>
+
 				</tr>
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->gastoidb->label; ?></td>
 					<td class="littletablerow"    ><?php echo $form->gastoidb->output;?></td>
+
+					<td class="littletableheaderc">&nbsp;</td>
+					<td class="littletablerow"    >&nbsp;</td>
 				</tr>
 				<tr>
 				<td class="littletableheaderc"><?php echo $form->cuenta->label ?></td>
-				<td  class="littletablerow"   ><?php echo $form->cuenta->output;?>
+				<td class="littletablerow" colspan='3'  ><?php echo $form->cuenta->output;?>
 				<?php
 					if(!empty($form->cuenta->value)){
 						$dbcuenta=$this->db->escape(trim($form->cuenta->value));

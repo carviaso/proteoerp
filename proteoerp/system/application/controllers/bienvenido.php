@@ -138,24 +138,31 @@ class Bienvenido extends Controller {
 			foreach($arreglo as $panel => $opciones )
 			{
 				$i++;
+/*
 				if ( $panel == 'REPORTES' )
 					$out .= '<div class=\'box col1\' style="color:#FAFAFA;background:#254117;"><span style="font-size:16px;font-weight:900;margin-bottom:20px">'.htmlentities($panel).'</span>';
 				elseif ( $panel == 'CONSULTAS' )
 					$out .= '<div class=\'box col1\' style="color:#FAFAFA;background:#823205;"><span style="font-size:16px;font-weight:900;margin-bottom:20px">'.htmlentities($panel).'</span>';
 				else
+*/
+
+				if ( $panel != 'REPORTES' && $panel != 'CONSULTAS'){
+
 					if ($dbpertenece == "'9'")
 						$out .= '<div class=\'box col1\' style="color:#FAFAFA;background:#C11B17;"><span style="font-size:16px;font-weight:900;margin-bottom:20px">'.htmlentities($panel).'</span>';
 					else
 						$out .= '<div class=\'box col1\' style="color:#030C3F;background:#COCOCO;"><span style="font-size:16px;font-weight:900;margin-bottom:20px">'.htmlentities($panel).'</span>';
 
-				$out .= '<table width=\'100%\' cellspacing=\'1\' border=\'0\'>';
-				foreach ($opciones as $id=>$opcion) {
-					$color = ($id%2==0)? 'F8F8F8':'FFFFFF';
-					$out .= "<tr bgcolor='#$color'><td>";
-					$out .= arr2link($opcion);
-					$out .= '</td></tr>';
+					$out .= '<table width=\'100%\' cellspacing=\'1\' border=\'0\'>';
+					foreach ($opciones as $id=>$opcion) {
+						$color = ($id%2==0)? 'F8F8F8':'FFFFFF';
+						$out .= "<tr bgcolor='#$color'><td>";
+						$out .= arr2link($opcion);
+						$out .= '</td></tr>';
+					}
+					$out .='</table></div>';
 				}
-				$out .='</table></div>';
+
 			}
 			$out .= '</div>';
 		}
