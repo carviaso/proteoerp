@@ -20,6 +20,7 @@ $checkmail=$this->config->load('notifica',false,true);
 
 	<?php if($checkmail){ ?>
 	function emailsend(){
+
 		$.prompt(
 		'<label>Correo: <input type=\"text\" size=\"40\" name=\"fcorreo\" value=\"\"></label><br />'+
 		'<label>Asunto: <input type=\"text\" size=\"40\" name=\"fasunto\" value=\"Sin asunto\"></label><br />'+
@@ -74,6 +75,11 @@ $checkmail=$this->config->load('notifica',false,true);
 
 					return false;
 				}
+			}
+		}).bind('promptloaded', function(e){
+			var asunto = $('#contenido').contents().find('title').text();
+			if(asunto.length>0){
+				$('input[name=\"fasunto\"]').val(asunto);
 			}
 		});
 	}
