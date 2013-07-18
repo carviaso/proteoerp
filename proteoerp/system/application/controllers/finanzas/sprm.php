@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once('common.php');
 class Sprm extends Controller {
 	var $mModulo='SPRM';
@@ -146,9 +146,9 @@ class Sprm extends Controller {
 
 		$bodyscript .= '
 		function sprmshow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
 					$("#fshow").html(data);
@@ -329,10 +329,9 @@ class Sprm extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
 		return $bodyscript;
 	}
 
@@ -344,7 +343,7 @@ class Sprm extends Controller {
 	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -877,7 +876,7 @@ class Sprm extends Controller {
 		));
 
 		$grid->addField('serie');
-		$grid->label('Numero Completo');
+		$grid->label('N&uacute;mero Completo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'true',
@@ -1004,11 +1003,13 @@ class Sprm extends Controller {
 
 		#show/hide navigations buttons
 		$grid->setAdd(false);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
+		$grid->setEdit(   $this->datasis->sidapuede('SPRM','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('SPRM','BORR_REG%'));
 		$grid->setSearch(true);
+
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+		$grid->setBarOptions('delfunc: sprmdel');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -1061,23 +1062,15 @@ class Sprm extends Controller {
 			$this->db->update('sprm', $data);
 			return "Registro $id Modificado";
 
-		} elseif($oper == 'del') {
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sprm WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				//$this->db->simple_query("DELETE FROM sprm WHERE id=$id ");
-				//logusu('sprm',"Registro ????? ELIMINADO");
-				echo "Registro no Eliminado";
-			}
-		};
+		} elseif($oper == 'del'){
+			echo "Accion no disponible";
+		}
 	}
 
 
 	function tabla() {
-		$id = $this->uri->segment($this->uri->total_segments());
-
-		$row = $this->datasis->damereg("SELECT cod_prv, tipo_doc, numero, estampa, transac FROM sprm WHERE id=$id");
+		$id  = intval($this->uri->segment($this->uri->total_segments()));
+		$row = $this->datasis->damereg("SELECT cod_prv, tipo_doc, numero, estampa, transac FROM sprm WHERE id=${id}");
 
 		$transac  = $row['transac'];
 		$cod_prv  = $row['cod_prv'];
@@ -1086,201 +1079,192 @@ class Sprm extends Controller {
 		$estampa  = $row['estampa'];
 		$salida   = '';
 
-		if (!empty($transac)){
+		if(!empty($transac)){
+			$dbtransac = $this->db->escape($transac);
+			$dbcod_prv = $this->db->escape($cod_prv);
 			$td1  = "<td style='border-style:solid;border-width:1px;border-color:#78FFFF;' valign='top' align='center'>\n";
 			$td1 .= "<table width='98%'>\n<caption style='background-color:#5E352B;color:#FFFFFF;font-style:bold'>";
 
 			// Movimientos Relacionados en Proveedores SPRM
 			$mSQL = "SELECT cod_prv, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos
-				FROM sprm WHERE transac='$transac' AND id<>$id ORDER BY cod_prv ";
+				FROM sprm WHERE transac=${dbtransac} AND id<>${id} ORDER BY cod_prv ";
 			$query = $this->db->query($mSQL);
 			$salida = '<table width="100%"><tr>';
 			$saldo  = 0;
 			if ( $query->num_rows() > 0 ){
 				$salida .= $td1;
 				$salida .= "Movimiento en Proveedores</caption>";
-				$salida .= "<tr bgcolor='#E7E3E7'><td>Nombre</td><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-				foreach ($query->result_array() as $row)
-				{
+				$salida .= "<tr bgcolor='#E7E3E7'><td>Nombre</td><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+				foreach ($query->result_array() as $row){
 					if ( $row['tipo_doc'] == 'FC' ) {
 						$saldo = $row['monto']-$row['abonos'];
 					}
-					$salida .= "<tr>";
-					$salida .= "<td>".$row['cod_prv'].'-'.$row['nombre']."</td>";
-					$salida .= "<td>".$row['tipo_doc']."</td>";
-					$salida .= "<td>".$row['numero'].  "</td>";
-					$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-					$salida .= "</tr>";
+					$salida .= '<tr>';
+					$salida .= '<td>'.$row['cod_prv'].'-'.$row['nombre'].'</td>';
+					$salida .= '<td>'.$row['tipo_doc'].'</td>';
+					$salida .= '<td>'.$row['numero'].  '</td>';
+					$salida .= "<td align='right'>".nformat($row['monto']).'</td>';
+					$salida .= '</tr>';
 				}
 				if ($saldo <> 0)
-					$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
-				$salida .= "</table></td>";
+					$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo).'</td></tr>';
+				$salida .= '</table></td>';
 			}
 
 			// Movimientos Relacionados en SMOV
 			$mSQL = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos
-				FROM smov WHERE transac='$transac' ORDER BY cod_cli ";
+				FROM smov WHERE transac=${dbtransac} ORDER BY cod_cli ";
 			$query = $this->db->query($mSQL);
 			$saldo = 0;
 			if ( $query->num_rows() > 0 ){
 				$salida .= $td1;
-				$salida .= "Movimiento en Clientes</caption>";
-				$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-				foreach ($query->result_array() as $row)
-				{
-					if ( $row['tipo_doc'] == 'FC' ) {
+				$salida .= 'Movimiento en Clientes</caption>';
+				$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+				foreach ($query->result_array() as $row){
+					if($row['tipo_doc'] == 'FC'){
 						$saldo = $row['monto']-$row['abonos'];
 					}
-					$salida .= "<tr>";
-					$salida .= "<td>".$row['cod_cli'].'-'.$row['nombre']."</td>";
-					$salida .= "<td>".$row['tipo_doc']."</td>";
-					$salida .= "<td>".$row['numero'].  "</td>";
-					$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-					$salida .= "</tr>";
+					$salida .= '<tr>';
+					$salida .= '<td>'.$row['cod_cli'].'-'.$row['nombre'].'</td>';
+					$salida .= '<td>'.$row['tipo_doc'].'</td>';
+					$salida .= '<td>'.$row['numero'].  '</td>';
+					$salida .= "<td align='right'>".nformat($row['monto']).'</td>';
+					$salida .= '</tr>';
 				}
-				$salida .= "</table></td>";
+				$salida .= '</table></td>';
 			}
 
 			//Retencion de IVA RIVA
 			$mSQL = "
 				SELECT periodo, nrocomp, reiva FROM riva WHERE tipo_doc='$tipo_doc' AND numero='$numero' AND MID(transac,1,1)<>'_'";
 				"UNION ALL
-				SELECT periodo, nrocomp, reiva FROM riva WHERE transac='$transac' AND MID(transac,1,1)<>'_'
+				SELECT periodo, nrocomp, reiva FROM riva WHERE transac=${dbtransac} AND MID(transac,1,1)<>'_'
 				";
 			$query = $this->db->query($mSQL);
-			if ( $query->num_rows() > 0 ){
+			if($query->num_rows() > 0){
 				$salida .= $td1;
 				$salida .= "Retenciones de IVA</caption>";
-				$salida .= "<tr bgcolor='#e7e3e7'><td>Periodo</td><td align='center'>Numero</td><td align='center'>Monto</tr>";
-				foreach ($query->result_array() as $row)
-				{
-					$salida .= "<tr>";
-					$salida .= "<td>".$row['periodo']."</td>";
-					$salida .= "<td>".$row['nrocomp'].  "</td>";
-					$salida .= "<td align='right'>".nformat($row['reiva']).   "</td>";
-					$salida .= "</tr>";
+				$salida .= "<tr bgcolor='#e7e3e7'><td>Periodo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</tr>";
+				foreach ($query->result_array() as $row){
+					$salida .= '<tr>';
+					$salida .= '<td>'.$row['periodo'].'</td>';
+					$salida .= '<td>'.$row['nrocomp'].'</td>';
+					$salida .= "<td align='right'>".nformat($row['reiva']).'</td>';
+					$salida .= '</tr>';
 				}
-				$salida .= "</table></td>";
+				$salida .= '</table></td>';
 			}
 
-
-			//if ( $tipo_doc <> 'FC' ){
-				$mSQL = "
-					SELECT tipo_doc, numero, montonet FROM scst a WHERE a.transac='$transac'
-					UNION ALL
-					SELECT tipo_doc, numero, totneto  FROM gser a WHERE a.transac='$transac'
-					";
-				$query = $this->db->query($mSQL);
-				if ( $query->num_rows() > 0 ){
-					$salida .= $td1;
-					$salida .= "Gasto/Compra</caption>";
-					$salida .= "<tr bgcolor='#e7e3e7'><td>Tipo</td><td align='center'>Numero</td><td align='center'>Monto</tr>";
-					foreach ($query->result_array() as $row)
-					{
-						$salida .= "<tr>";
-						$salida .= "<td>".$row['tipo_doc']."</td>";
-						$salida .= "<td>".$row['numero'].  "</td>";
-						$salida .= "<td align='right'>".nformat($row['montonet']).   "</td>";
-						$salida .= "</tr>";
-					}
-					$salida .= "</table></td>";
+			$mSQL = "
+				SELECT tipo_doc, numero, montonet FROM scst a WHERE a.transac=${dbtransac}
+				UNION ALL
+				SELECT tipo_doc, numero, totneto  FROM gser a WHERE a.transac=${dbtransac}
+				";
+			$query = $this->db->query($mSQL);
+			if($query->num_rows() > 0){
+				$salida .= $td1;
+				$salida .= "Gasto/Compra</caption>";
+				$salida .= "<tr bgcolor='#e7e3e7'><td>Tipo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</tr>";
+				foreach ($query->result_array() as $row){
+					$salida .= '<tr>';
+					$salida .= '<td>'.$row['tipo_doc'].'</td>';
+					$salida .= '<td>'.$row['numero'].  '</td>';
+					$salida .= '<td align=\'right\'>'.nformat($row['montonet']).'</td>';
+					$salida .= '</tr>';
 				}
-			//}
+				$salida .= '</table></td>';
+			}
 
 			// Movimientos Relacionados ITPPRO
-			$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itppro WHERE transac='$transac' ";
+			$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itppro WHERE transac=${dbtransac}";
 			$query = $this->db->query($mSQL);
 			if ( $query->num_rows() == 0 ){
-				$mSQL = "SELECT tipoppro tipo_doc, numppro numero, monto, abono FROM itppro WHERE tipo_doc='$tipo_doc' AND numero='$numero'";
+				$mSQL = "SELECT tipoppro tipo_doc, numppro numero, monto, abono FROM itppro WHERE tipo_doc='${tipo_doc}' AND numero='{$numero}'";
 				$query = $this->db->query($mSQL);
 			}
 
-			if ( $query->num_rows() > 0 ){
+			if($query->num_rows() > 0){
 				$saldo = 0;
 				$salida .= $td1;
-				$salida .= "Movimientos Relacionados</caption>";
-				$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td><td align='center'>Abono</td></tr>";
-				foreach ($query->result_array() as $row)
-				{
+				$salida .= 'Movimientos Relacionados</caption>';
+				$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td><td align='center'>Abono</td></tr>";
+				foreach ($query->result_array() as $row){
 					$saldo += $row['abono'];
-					$salida .= "<tr>";
-					$salida .= "<td>".$row['tipo_doc']."</td>";
-					$salida .= "<td>".$row['numero'].  "</td>";
-					$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-					$salida .= "<td align='right'>".nformat($row['abono']).   "</td>";
-					$salida .= "</tr>";
+					$salida .= '<tr>';
+					$salida .= '<td>'.$row['tipo_doc'].'</td>';
+					$salida .= '<td>'.$row['numero'].  '</td>';
+					$salida .= "<td align='right'>".nformat($row['monto']).'</td>';
+					$salida .= "<td align='right'>".nformat($row['abono']).'</td>';
+					$salida .= '</tr>';
 				}
-				$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'><b>Saldo : ".nformat($saldo). "</b></td></tr>";
-				$salida .= "</table></td>";
+				$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'><b>Saldo : ".nformat($saldo).'</b></td></tr>';
+				$salida .= '</table></td>';
 			}
 
 			// Movimiento en Caja/Bancos
-			$mSQL = "SELECT codbanc, tipo_op, numero, monto FROM bmov WHERE transac='$transac' AND monto<>0";
+			$mSQL = "SELECT codbanc, tipo_op, numero, monto FROM bmov WHERE transac=${dbtransac} AND monto<>0";
 			$query = $this->db->query($mSQL);
 			$saldo = 0;
-			if ( $query->num_rows() > 0 ){
+			if($query->num_rows() > 0){
 				$salida .= $td1;
-				$salida .= "Movimiento en Caja y/o Bancos</caption>";
-				$salida .= "<tr bgcolor='#e7e3e7'><td>Bco</td><td>Tipo</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-				foreach ($query->result_array() as $row)
-				{
-					$salida .= "<tr>";
-					$salida .= "<td>".$row['codbanc']. "</td>";
-					$salida .= "<td>".$row['tipo_op']."</td>";
-					$salida .= "<td>".$row['numero']."</td>";
-					$salida .= "<td align='right'>".nformat($row['monto'])."</td>";
-					$salida .= "</tr>";
+				$salida .= 'Movimiento en Caja y/o Bancos</caption>';
+				$salida .= "<tr bgcolor='#e7e3e7'><td>Bco</td><td>Tipo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+				foreach ($query->result_array() as $row){
+					$salida .= '<tr>';
+					$salida .= "<td>".$row['codbanc'].'</td>';
+					$salida .= "<td>".$row['tipo_op'].'</td>';
+					$salida .= "<td>".$row['numero'].'</td>';
+					$salida .= "<td align='right'>".nformat($row['monto']).'</td>';
+					$salida .= '</tr>';
 				}
-				$salida .= "</table></td>";
+				$salida .= '</table></td>';
 			}
 
 			// Prestamos PRMO
-			$mSQL = "SELECT tipop, codban, if(observa2='',observa1,observa2) observa, monto FROM prmo WHERE transac='$transac' AND clipro='$cod_prv' AND monto<>0";
+			$mSQL = "SELECT tipop, codban, if(observa2='',observa1,observa2) observa, monto FROM prmo WHERE transac=${dbtransac} AND clipro=${dbcod_prv} AND monto<>0";
 			$query = $this->db->query($mSQL);
 			$saldo = 0;
-			if ( $query->num_rows() > 0 ){
+			if($query->num_rows() > 0){
 				$salida .= $td1;
-				$salida .= "Prestamos</caption>";
-				$salida .= "<tr bgcolor='#e7e3e7'><td></td><td>Bco</td><td>Observacion</td><td align='center'>Monto</td></tr>";
-				foreach ($query->result_array() as $row)
-				{
-					$salida .= "<tr>";
-					$salida .= "<td>".$row['tipop']."</td>";
-					$salida .= "<td>".$row['codban']."</td>";
-					$salida .= "<td>".$row['observa']."</td>";
+				$salida .= 'Prestamos</caption>';
+				$salida .= "<tr bgcolor='#e7e3e7'><td></td><td>Bco</td><td>Observaci&oacute;n</td><td align='center'>Monto</td></tr>";
+				foreach ($query->result_array() as $row){
+					$salida .= '<tr>';
+					$salida .= "<td>".$row['tipop'].'</td>';
+					$salida .= "<td>".$row['codban'].'</td>';
+					$salida .= "<td>".$row['observa'].'</td>';
 					$salida .= "<td align='right'>".nformat($row['monto'])."</td>";
-					$salida .= "</tr>";
+					$salida .= '</tr>';
 				}
-				$salida .= "</table></td>";
+				$salida .= '</table></td>';
 			}
 
 			//Cruce de Cuentas
 			$mSQL = "
 				SELECT b.tipo tipo, b.proveed codcp, MID(b.nombre,1,25) nombre, a.onumero, a.monto, b.numero, b.fecha
 				FROM itcruc AS a JOIN cruc AS b ON a.numero=b.numero
-				WHERE b.proveed='$cod_prv' AND b.transac='$transac' AND a.onumero!='$tipo_doc$numero'
+				WHERE b.proveed='${cod_prv}' AND b.transac=${dbtransac} AND a.onumero!='${tipo_doc}${numero}'
 				UNION ALL
 				SELECT b.tipo tipo, b.cliente codcp, MID(b.nomcli,1,25) nombre, a.onumero, a.monto, b.numero, b.fecha
 				FROM itcruc AS a JOIN cruc AS b ON a.numero=b.numero
-				WHERE b.cliente='$cod_prv' AND b.transac='$transac' ORDER BY onumero
+				WHERE b.cliente='${cod_prv}' AND b.transac=${dbtransac} ORDER BY onumero
 				";
 
 			$query = $this->db->query($mSQL);
 			$saldo = 0;
-			if ( $query->num_rows() > 0 ){
+			if( $query->num_rows() > 0 ){
 				$salida .= $td1;
-				$salida .= "Cruce de Cuentas</caption>";
-				$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Codigo</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-				foreach ($query->result_array() as $row)
-				{
-					$salida .= "<tr>";
-					$salida .= "<td>(".$row['tipo'].') '.$row['nombre']."</td>";
-					$salida .= "<td>".$row['codcp']."</td>";
-					$salida .= "<td>".$row['onumero'].  "</td>";
-					$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-					$salida .= "</tr>";
+				$salida .= 'Cruce de Cuentas</caption>';
+				$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Codigo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+				foreach ($query->result_array() as $row){
+					$salida .= '<tr>';
+					$salida .= '<td>('.$row['tipo'].') '.$row['nombre'].'</td>';
+					$salida .= '<td>'.$row['codcp'].'</td>';
+					$salida .= '<td>'.$row['onumero'].'</td>';
+					$salida .= "<td align='right'>".nformat($row['monto']).'</td>';
+					$salida .= '</tr>';
 				}
-				$salida .= "</table></td>";
+				$salida .= '</table></td>';
 			}
 		}
 		echo $salida.'</tr></table>';
@@ -1375,6 +1359,209 @@ class Sprm extends Controller {
 			echo 'Egreso no fue pagado con cheque de banco';
 		}
 	}
+
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+
+		$edit = new DataEdit('', 'sprm');
+		$edit->on_save_redirect=false;
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='Accion no permitida';
+		return false;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='Accion no permitida';
+		return false;
+	}
+
+	function _pre_delete($do){
+		$id         = $do->get('id');
+		$transac    = $do->get('transac');
+		$tipo_doc   = $do->get('tipo_doc');
+		$cod_cli    = $do->get('cod_cli');
+		$numero     = $do->get('numero');
+		$reteiva    = $do->get('reteiva');
+		$abonos     = floatval($do->get('abonos'));
+
+		$dbid       = $this->db->escape($id);
+		$dbtransac  = $this->db->escape($transac);
+		$dbtipo_doc = $this->db->escape($tipo_doc);
+		$dbcod_cli  = $this->db->escape($cod_cli);
+		$dbnumero   = $this->db->escape($numero);
+		$dbfecha    = $this->db->escape($do->get('fecha'));
+
+		if(empty($transac)){ return true; }
+
+		$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM casi WHERE comprob=${dbtransac}"));
+		if($cana>0){
+			$do->error_message_ar['pre_del']='El efecto ya esta en contabilidad, no puede ser modificado ni eliminado.';
+			return false;
+		}
+
+
+		if($tipo_doc=='ND' || $tipo_doc=='NC'){
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM cruc WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Movimiento originado a partir de un cruce, debe eliminarlo por el modulo respectivo.';
+				return false;
+			}
+
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM rivc WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Movimiento originado en retenciones de clientes, debe eliminarlo por el modulo respectivo.';
+				return false;
+			}
+		}
+
+		if($tipo_doc=='AN'){
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM ords WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Anticipo proveniente de una orden de servicio, debe eliminarla por el modulo respectivo.';
+				return false;
+			}
+
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM ordc WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Anticipo proveniente de una orden de compra, debe eliminarla por el modulo respectivo.';
+				return false;
+			}
+
+			if($abonos>0){
+				$do->error_message_ar['pre_del']='Anticipo aplicado, no puede ser eliminado';
+				return false;
+			}
+		}
+
+		if($tipo_doc=='FC'){
+			$do->error_message_ar['pre_del']='Factura proveniente de una compra o gasto, debe eliminarla del modulo respectivo.';
+			return false;
+		}
+
+		if($tipo_doc=='ND'){
+			$do->error_message_ar['pre_del']='Debe eliminarlo desde el modulo originario.';
+			return false;
+		}
+
+		if($tipo_doc=='NC'){
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM scst WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Movimiento proveniente de compra, debe reversarlo por el modulo respectivo.';
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	function _post_delete($do){
+		$transac    = $do->get('transac');
+		$tipo_doc   = $do->get('tipo_doc');
+		$numero     = $do->get('numero');
+
+		$dbtransac  = $this->db->escape($transac);
+		$dbtipo_doc = $this->db->escape($tipo_doc);
+		$dbnumero   = $this->db->escape($numero);
+
+		//Deshace las aplicaciones del efecto a eliminar
+		$mSQL = "SELECT tipo_doc,numero,numppro,tipoppro,monto,abono,cod_prv,fecha,reteiva FROM itppro WHERE transac=${dbtransac}";
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			$it_tipo_doc= $this->db->escape($row->tipo_doc);
+			$it_cod_prv = $this->db->escape($row->cod_prv);
+			$it_numero  = $this->db->escape($row->numero);
+			$it_fecha   = $this->db->escape($row->fecha);
+			$it_reteiva = floatval($row->reteiva);
+			$it_abono   = floatval($row->abono);
+
+			if($tipo_doc='NC'){
+				$monto=$it_abono-$it_reteiva;
+			}else{
+				$monto=$it_abono;
+			}
+			$mSQL="UPDATE sprm SET abonos=abonos-(${monto}) WHERE tipo_doc=${it_tipo_doc} AND numero=${it_numero} AND cod_cli=${it_cod_cli} AND fecha=${it_fecha}";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'sprm'); }
+		}
+		//Fin
+
+		//Elimina los movimientos de banco
+		$mSQL = "SELECT codbanc,fecha,monto,tipo_op,numero,id FROM bmov WHERE transac=${dbtransac}";
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			$it_id       = $row->id;
+			$it_fecha    = $row->fecha;
+			$it_monto    = floatval($row->monto);
+
+			$sfecha = str_replace('-','',$it_fecha);
+			$this->datasis->actusal($row->codbanc, $sfecha, $it_monto);
+			//$mSQL  = "UPDATE bmov SET liable='N', anulado='S' ";
+			$mSQL  = 'DELETE FROM  bmov ';
+			$mSQL .= "WHERE id=${it_id}";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'sprm'); }
+		}
+		//Fin de la eliminacion de los movimientos de banco
+
+		//Anula la retencion de IVA
+		if($this->datasis->dameval("SELECT COUNT(*) FROM riva WHERE transac=${dbtransac}") > 0){
+			$mTRANULA = '_'.$this->datasis->fprox_numero('rivanula',7);
+			$this->db->simple_query("UPDATE riva SET transac='${mTRANULA}' WHERE transac=${dbtransac}");
+		}
+		//Fin de la anulacion de iva
+
+		$mSQL="DELETE FROM itppro WHERE transac=${dbtransac}";
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){ memowrite($mSQL,'sprm'); }
+
+		$mSQL="DELETE FROM sprm WHERE transac=${dbtransac} AND tipo_doc IN ('AB','ND','NC')";
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){ memowrite($mSQL,'sprm'); }
+
+		//Elimina el gasto asociado
+		$mSQL="DELETE FROM gser WHERE transac=${dbtransac}";
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){ memowrite($mSQL,'sprm'); }
+
+		$mSQL="DELETE FROM gitser WHERE transac=${dbtransac}";
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){ memowrite($mSQL,'sprm'); }
+		//Fin de la eliminacion del gasto asociado
+
+		logusu($do->table,"EFECTO ${tipo_doc}${numero} ELIMINADO");
+	}
+
+	function _post_insert($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits $primary ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
 
 	function instalar(){
 		$campos=$this->db->list_fields('sprm');

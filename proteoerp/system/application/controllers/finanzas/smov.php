@@ -47,7 +47,7 @@ class Smov extends Controller {
 		$adic = array(
 			array('id'=>'fedita'  , 'title'=>'Agregar Registro'),
 			array('id'=>'fsclisel', 'title'=>'Seleccionar cliente'),
-			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+			array('id'=>'fborra'  ,  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -954,16 +954,6 @@ class Smov extends Controller {
 		$edit->pre_process( 'update','_pre_update' );
 		$edit->pre_process( 'delete','_pre_delete' );
 
-		/*$edit->tipo_doc = new inputField('Tipo doc.','tipo_doc');
-		$edit->tipo_doc->rule='';
-		$edit->tipo_doc->size =4;
-		$edit->tipo_doc->maxlength =2;
-
-		$edit->numero = new inputField('N&uacute;mero','numero');
-		$edit->numero->rule='';
-		$edit->numero->size =10;
-		$edit->numero->maxlength =8;*/
-
 		$edit->build();
 
 		if($edit->on_success()){
@@ -1004,6 +994,8 @@ class Smov extends Controller {
 		$dbcod_cli  = $this->db->escape($cod_cli);
 		$dbnumero   = $this->db->escape($numero);
 		$dbfecha    = $this->db->escape($do->get('fecha'));
+
+		if(empty($transac)){ return true; }
 
 		$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM casi WHERE comprob=${dbtransac}"));
 		if($cana>0){
