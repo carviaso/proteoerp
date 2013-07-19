@@ -315,6 +315,9 @@ border-bottom-right-radius:5px;
 					 	}
 					}
 				}
+				if($this->DBfieldsType[$campo]=='real') $row[$campo]=nformat($row[$campo]);
+				elseif($this->DBfieldsType[$campo]=='date') $row[$campo]=dbdate_to_human($row[$campo]);
+				elseif($this->DBfieldsType[$campo]=='int' ) $row[$campo]=intval($row[$campo]);
 				//------se escribe los datos----------------------------
 				$l=$this->ii;
 
