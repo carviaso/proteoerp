@@ -315,9 +315,10 @@ border-bottom-right-radius:5px;
 					 	}
 					}
 				}
-				if($this->DBfieldsType[$campo]=='real') $row[$campo]=nformat($row[$campo]);
-				elseif($this->DBfieldsType[$campo]=='date') $row[$campo]=dbdate_to_human($row[$campo]);
-				elseif($this->DBfieldsType[$campo]=='int' ) $row[$campo]=intval($row[$campo]);
+
+				if(    $this->DBfieldsType[$campo]=='real' || in_array($this->DBfieldsType[$campo], array(4,5,246))  ) { $row[$campo]=nformat($row[$campo]); }
+				elseif($this->DBfieldsType[$campo]=='date' || in_array($this->DBfieldsType[$campo], array(10,12,7))  ) { $row[$campo]=dbdate_to_human($row[$campo]); echo 'Fecha'; }
+				elseif($this->DBfieldsType[$campo]=='int'  || in_array($this->DBfieldsType[$campo], array(1,2,9,3,8))) { $row[$campo]=intval($row[$campo]); }
 				//------se escribe los datos----------------------------
 				$l=$this->ii;
 
@@ -357,7 +358,7 @@ border-bottom-right-radius:5px;
 			foreach($this->cols AS $h=>$cols){
 				$campo=$cols['campo'];
 				if(in_array($campo,$this->totalizar)){
-					echo '<td>'.$rgtotal[$campo].'</td>';
+					echo '<td style="text-align:right;">'.$rgtotal[$campo].'</td>';
 				}else{
 					echo '<td></td>';
 				}

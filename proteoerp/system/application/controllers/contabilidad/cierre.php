@@ -7,11 +7,12 @@ class Cierre extends Controller {
 		$this->datasis->modulo_id(606,1);
 	}
 
-	function index() {
-		$this->rapyd->load("datagrid","dataform");
+	function index(){
+		$this->instalar();
+		$this->rapyd->load('datagrid','dataform');
 
 		$fecha=$this->uri->segment(4);
-		$form = new DataForm();  
+		$form = new DataForm();
 		$form->title('Fecha para la ejecuci&oacute;n');
 		$form->fecha = new dateonlyField('Fecha de Cierre', 'fecha','d/m/Y');
 		$form->fecha->size = 10;
@@ -58,69 +59,68 @@ class Cierre extends Controller {
 	}
 
 	function ejecutar(){
-		$error=FALSE;
+		$error=false;
 		$mfinal  =$this->input->post('fecha');
 		//echo $mfinal;
 		//$mfinal='31/12/2009';
-		if($mfinal==FALSE) redirect('contabilidad/cierre');
+		if($mfinal==false) redirect('contabilidad/cierre');
 
 		$mfinal  = date('Ymd',timestampFromInputDate($mfinal));
 		$anio    = substr($mfinal,2,2);
 		$annio   = substr($mfinal,0,4);
-		$comprob = "ZIERRE$anio";
+		$comprob = "ZIERRE${anio}";
 
-		$this->db->simple_query("DELETE FROM itcasi WHERE comprob='$comprob'");
-		$this->db->simple_query("DELETE FROM casi   WHERE comprob='$comprob'");
+		$this->db->simple_query("DELETE FROM itcasi WHERE comprob='${comprob}'");
+		$this->db->simple_query("DELETE FROM casi   WHERE comprob='${comprob}'");
 
-		$mSQL = "INSERT INTO casi SET comprob='$comprob', fecha=$mfinal, descrip='ASIENTO DE CIERRE DEL EJERCICIO', total = 0, debe=0, haber=0, estampa=now(),tipo='INDETERMIN',status='A',origen='MANUAL'";
+		$mSQL = "INSERT INTO casi SET comprob='${comprob}', fecha=${mfinal}, descrip='ASIENTO DE CIERRE DEL EJERCICIO', total = 0, debe=0, haber=0, estampa=NOW(),tipo='INDETERMIN',status='A',origen='MANUAL'";
 		$centinela=$this->db->simple_query($mSQL);
-		if($centinela==FALSE){ memowrite($mSQL,'casi'); $error=TRUE; }
+		if($centinela==false){ memowrite($mSQL,'casi'); $error=true; }
 
 		$mSQL = "INSERT INTO itcasi (fecha,comprob,origen,cuenta,referen,concepto,debe,haber,ccosto,sucursal)
-		    SELECT $mfinal fecha, 
-		    '$comprob' comp, 'MANUAL' origen,
-		    cuenta, 'CIERRE ".$anio."' referen, 
+		    SELECT $mfinal fecha,
+		    '${comprob}' comp, 'MANUAL' origen,
+		    cuenta, 'CIERRE ".$anio."' referen,
 		    'CIERRE DE CUENTAS DE RESULTADO EJERCICIO ".$anio."' concepto,
-		    sum(haber) debe, sum(debe) haber, 0 ccosto, 0 sucu
-		    FROM itcasi WHERE cuenta>='4' AND fecha<=$mfinal AND fecha>=${annio}0101
-		    GROUP BY cuenta ";
+		    SUM(haber) debe, SUM(debe) haber, 0 ccosto, 0 sucu
+		    FROM itcasi WHERE cuenta>='4' AND fecha<=${mfinal} AND fecha>=${annio}0101
+		    GROUP BY cuenta";
 		$centinela=$this->db->simple_query($mSQL);
-		if($centinela==FALSE){ memowrite($mSQL,'itcasi'); $error=TRUE; }
+		if($centinela==false){ memowrite($mSQL,'itcasi'); $error=true; }
 
 		$mSQL = "INSERT INTO itcasi (fecha,comprob,origen,cuenta,referen,concepto,debe,haber,ccosto,sucursal)
-		 SELECT fecha, comprob, origen, 
-		    (SELECT resultado FROM cemp limit 1) cuenta, 
-		    referen, 
-		    concepto, 
-		    if(sum(debe-haber)>0,0,sum(haber-debe)) debe, 
-		    if(sum(debe-haber)>0,sum(debe-haber),0) haber, 0 ccosto, 0 sucu
-		    FROM itcasi WHERE comprob='$comprob' group by comprob ";
+		SELECT fecha, comprob, origen,
+		    (SELECT resultado FROM cemp limit 1) AS cuenta,
+		    referen,concepto,
+		    IF(SUM(debe-haber)>0,0,SUM(haber-debe)) AS debe,
+		    IF(SUM(debe-haber)>0,SUM(debe-haber),0) AS haber, 0 AS ccosto, 0 AS sucu
+		    FROM itcasi WHERE comprob='${comprob}' GROUP BY comprob ";
 		$centinela=$this->db->simple_query($mSQL);
-		if($centinela==FALSE){ memowrite($mSQL,'itcasi'); $error=TRUE; }
-		$centinela=$this->db->simple_query("DELETE FROM itcasi WHERE debe=haber AND comprob='$comprob'");
-		if($centinela==FALSE){ memowrite($mSQL,'itcasi'); $error=TRUE; }
-		$centinela=$this->db->simple_query("UPDATE casi SET 
-		    debe=(SELECT SUM(debe) FROM itcasi WHERE comprob='$comprob'),
-		    haber=(SELECT SUM(haber) FROM itcasi WHERE comprob='$comprob')
-		    WHERE comprob='$comprob'");
-		if($centinela==FALSE){ memowrite($mSQL,'itcasi'); $error=TRUE; }
+		if($centinela==false){ memowrite($mSQL,'itcasi'); $error=true; }
+		$centinela=$this->db->simple_query("DELETE FROM itcasi WHERE debe=haber AND comprob='${comprob}'");
+		if($centinela==false){ memowrite($mSQL,'itcasi'); $error=true; }
+		$centinela=$this->db->simple_query("UPDATE casi SET
+		    debe =(SELECT SUM(debe)  FROM itcasi WHERE comprob='${comprob}'),
+		    haber=(SELECT SUM(haber) FROM itcasi WHERE comprob='${comprob}')
+		    WHERE comprob='${comprob}'");
+		if($centinela==false){ memowrite($mSQL,'itcasi'); $error=true; }
 
 		if($error)
-			echo "Hubo algunos errores, se generaron centinelas, favor comunicarse con servicio tecnico";
+			echo 'Hubo algunos errores, se generaron centinelas, favor comunicarse con servicio tecnico';
 		else
-			echo "Cierre realizado $comprob";
-		}
+			echo "Cierre realizado ${comprob}";
+	}
 
-		function instalar(){
-			$mSQL="CREATE TABLE IF NOT EXISTS `cplacierre` (
-			  `id` int(20) unsigned NOT NULL AUTO_INCREMENT,
-			  `anno` int(10) DEFAULT NULL,
-			  `cuenta` varchar(250) DEFAULT NULL,
-			  `descrip` varchar(250) DEFAULT NULL,
-			  `monto` decimal(15,2) DEFAULT NULL,
-			  PRIMARY KEY (`id`),
-			  UNIQUE KEY `ac` (`anno`,`cuenta`)
-			) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Cierres contables'";
-			$this->db->simple_query($mSQL);
-		}
+	function instalar(){
+		$mSQL="CREATE TABLE IF NOT EXISTS `cplacierre` (
+		  `id` int(20) unsigned NOT NULL AUTO_INCREMENT,
+		  `anno` int(10) DEFAULT NULL,
+		  `cuenta` varchar(250) DEFAULT NULL,
+		  `descrip` varchar(250) DEFAULT NULL,
+		  `monto` decimal(15,2) DEFAULT NULL,
+		  PRIMARY KEY (`id`),
+		  UNIQUE KEY `ac` (`anno`,`cuenta`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Cierres contables'";
+		$this->db->simple_query($mSQL);
+	}
 }
