@@ -1,0 +1,42 @@
+	$codbanc='03';
+	$fecha  ='201307';
+
+	$dbcodbanc= $this->db->escape($codbanc);
+	$nbanco   = $this->datasis->dameval('SELECT banco FROM banc WHERE codbanc='.$dbcodbanc);
+
+	$mSQL="SELECT a.tipo_op,a.numero,a.fecha,
+	IF(LENGTH(TRIM(a.benefi))>0,TRIM(a.benefi),a.nombre) AS concepto,
+	IF(a.tipo_op IN     ('ND','CH'),a.monto,0) AS debitos,
+	IF(a.tipo_op NOT IN ('ND','CH'),a.monto,0) AS creditos,
+	IF(a.tipo_op='CH','Cheques en Transito',IF(a.tipo_op='NC','Nota de Credito', IF(tipo_op='DE','Depositos no Registrados','Nota de Debito'))) AS tipogrup,
+	b.banco,b.numcuent
+	FROM bmov AS a
+	JOIN banc AS b ON a.codbanc=b.codbanc WHERE a.codbanc=${codbanc}
+	AND concilia=0 AND EXTRACT(YEAR_MONTH FROM fecha)<=${fecha}
+	ORDER BY a.tipo_op, a.fecha";
+
+	$sobretabla='';
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setType('fecha','date');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Conciliacion Bancaria (${codbanc}) ${nbanco}");
+	$pdf->setSobreTabla($sobretabla,9);
+	$pdf->setSubTitulo('Para la fecha: '.$fecha);
+	//$pdf->seType('fecha','date');
+	$pdf->AddPage();
+
+	$pdf->setTableTitu(10,'Times');
+	$pdf->AddCol('fecha'   ,20,'Fecha'   ,'L',9);
+	$pdf->AddCol('numero'  ,30,'Numero'  ,'L',9);
+	$pdf->AddCol('concepto',78,'Concepto','L',9);
+	$pdf->AddCol('debitos' ,25,'Debitos' ,'R',9);
+	$pdf->AddCol('creditos',25,'Creditos','R',9);
+	$pdf->setGrupoLabel('Transaccion: <#tipogrup#>');
+	$pdf->setGrupo('tipo_op');
+	$pdf->setTotalizar('debitos','creditos');
+	//$pdf->setAcumulador('saldo');
+	$pdf->Table();
+	//$pdf->add_fila('','','','Saldo actual','100');
+	$pdf->Output();
