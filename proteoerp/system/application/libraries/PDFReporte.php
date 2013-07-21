@@ -613,4 +613,3 @@ class PDFReporte extends Fpdf {
 		$this->Row($fila,'T',0);
 	}
 }
-?>
