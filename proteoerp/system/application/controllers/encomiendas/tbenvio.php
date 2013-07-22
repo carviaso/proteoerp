@@ -1244,6 +1244,7 @@ class Tbenvio extends Controller {
 			)
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
+			$this->db->simple_query($mSQL);
 		}
 
 		if (!$this->db->table_exists('tbenvio')) {
