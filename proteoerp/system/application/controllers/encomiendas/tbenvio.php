@@ -157,9 +157,9 @@ class Tbenvio extends Controller {
 								var json = JSON.parse(r);
 								if (json.status == "A"){
 									apprise("Registro Guardado");
-									$( "#fedita" ).dialog( "close" );
+
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+res.id+\'/id\'').';
+									//'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+json.id+\'/id\'').';
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -866,7 +866,7 @@ class Tbenvio extends Controller {
 
 		$edit->fledes = new checkboxField('Flete destino','fledes', 'S','N');
 		$edit->fledes->onchange='ffledes()';
-		$edit->fledes->rule='enum[S,N]|required';
+		$edit->fledes->rule='enum[S,N]';
 
 		$edit->tipo = new dropdownField('Tipo','tipo');
 		$edit->tipo->option('Bolsa(s)'  ,'Bolsa(s)'  );
