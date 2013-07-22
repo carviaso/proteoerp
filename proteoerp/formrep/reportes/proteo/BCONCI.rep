@@ -1,18 +1,45 @@
+$filter = new DataFilter("Filtro del Reporte");
+
+//$filter->db->select(array("nombre","tipo_doc","numero","fecha","vence","monto*IF(TIPO_DOC='AN',-1,1) as importe", "(monto-abonos)*IF(TIPO_DOC='AN',-1,1) as saldo","DATEDIFF(NOW(),vence) dias"));
+//$filter->db->from('sprm');
+//$filter->db->where("abonos<monto AND tipo_doc IN ('FC','GI','ND','AN' )");
+//$filter->db->orderby("cod_prv,vence");
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
+
 	$codbanc='03';
-	$fecha  ='201307';
+	$fecha  ='201306';
+
+	$fdesde =substr($fecha,0,6).'01';
+	$fhasta =substr($fecha,0,6).days_in_month(substr($fecha,4,2),substr($fecha,0,4));
 
 	$dbcodbanc= $this->db->escape($codbanc);
-	$nbanco   = $this->datasis->dameval('SELECT banco FROM banc WHERE codbanc='.$dbcodbanc);
+	$rowval   = $this->datasis->damerow('SELECT banco,numcuent FROM banc WHERE codbanc='.$dbcodbanc);
+	if(!empty($rowval)){
+		$nbanco   = trim($rowval['banco']);
+		$ncuenta  = trim($rowval['numcuent']);
+	}else{
+		$nbanco   = '';
+		$ncuenta  = '';
+	}
 
 	$mSQL="SELECT a.tipo_op,a.numero,a.fecha,
 	IF(LENGTH(TRIM(a.benefi))>0,TRIM(a.benefi),a.nombre) AS concepto,
 	IF(a.tipo_op IN     ('ND','CH'),a.monto,0) AS debitos,
 	IF(a.tipo_op NOT IN ('ND','CH'),a.monto,0) AS creditos,
-	IF(a.tipo_op='CH','Cheques en Transito',IF(a.tipo_op='NC','Nota de Credito', IF(tipo_op='DE','Depositos no Registrados','Nota de Debito'))) AS tipogrup,
-	b.banco,b.numcuent
+	IF(a.tipo_op='CH','Cheques en Transito',IF(a.tipo_op='NC','Nota de Credito', IF(tipo_op='DE','Depositos no Registrados','Nota de Debito'))) AS tipogrup
 	FROM bmov AS a
-	JOIN banc AS b ON a.codbanc=b.codbanc WHERE a.codbanc=${codbanc}
-	AND concilia=0 AND EXTRACT(YEAR_MONTH FROM fecha)<=${fecha}
+	JOIN banc AS b ON a.codbanc=b.codbanc
+	WHERE a.codbanc=${codbanc}
+	AND a.concilia=0 AND EXTRACT(YEAR_MONTH FROM a.fecha)<=${fecha}
 	ORDER BY a.tipo_op, a.fecha";
 
 	$sobretabla='';
@@ -21,22 +48,55 @@
 	$pdf->setType('fecha','date');
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
-	$pdf->setTitulo("Conciliacion Bancaria (${codbanc}) ${nbanco}");
+	$pdf->setTitulo('Conciliacion Bancaria');
 	$pdf->setSobreTabla($sobretabla,9);
-	$pdf->setSubTitulo('Para la fecha: '.$fecha);
+	$pdf->setSubTitulo("(${codbanc}) ${nbanco} ${ncuenta} Fecha: ".substr($fecha,4,2).'/'.substr($fecha,0,4));
 	//$pdf->seType('fecha','date');
 	$pdf->AddPage();
 
 	$pdf->setTableTitu(10,'Times');
 	$pdf->AddCol('fecha'   ,20,'Fecha'   ,'L',9);
 	$pdf->AddCol('numero'  ,30,'Numero'  ,'L',9);
-	$pdf->AddCol('concepto',78,'Concepto','L',9);
+	$pdf->AddCol('concepto',78,'Concepto','R',9);
 	$pdf->AddCol('debitos' ,25,'Debitos' ,'R',9);
 	$pdf->AddCol('creditos',25,'Creditos','R',9);
 	$pdf->setGrupoLabel('Transaccion: <#tipogrup#>');
 	$pdf->setGrupo('tipo_op');
 	$pdf->setTotalizar('debitos','creditos');
 	//$pdf->setAcumulador('saldo');
+
 	$pdf->Table();
-	//$pdf->add_fila('','','','Saldo actual','100');
+
+	$mmSQL="SELECT credito,deposito,cheque,debito,saldoi,saldof FROM bconci WHERE codbanc=${dbcodbanc} AND fecha=${fhasta}";
+	$rrow = $this->datasis->damerow($mmSQL);
+	if(!empty($rrow)){
+		$mSQL="SELECT SUM(monto) AS monto
+		FROM bmov AS a
+		WHERE a.codbanc=${codbanc}
+		AND a.concilia=0 AND a.fecha <= ${fhasta}";
+		$de = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'DE\''));
+		$ch = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'CH\''));
+		$nc = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'NC\''));
+		$nd = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'ND\''));
+
+		$ttotal =$rrow['saldof'];
+		$tbtotal=$de+$nc+$nc+$nd;
+		$pdf->add_fila('' ,'',''     ,' ',' ');
+		$pdf->add_fila(''           ,'','S/BANCOS'       ,'S/LIBROS','DIFERENCIA');
+		$pdf->add_fila('TOTALES:'   ,'',$ttotal          ,$tbtotal,$ttotal-$tbtotal);
+		$pdf->add_fila('----------' ,'','----------'     ,'----------','----------');
+		$pdf->add_fila('CHEQUES:'   ,'',$rrow['cheque']  ,$ch     ,$rrow['cheque']  -$ch);
+		$pdf->add_fila('DEPOSITOS:' ,'',$rrow['deposito'],$de     ,$rrow['deposito']-$de);
+		$pdf->add_fila('N. CREDITOS','',$rrow['credito'] ,$nc     ,$rrow['credito'] -$nc);
+		$pdf->add_fila('N. DEBITOS' ,'',$rrow['debito']  ,$nd     ,$rrow['debito']  -$nd);
+		$pdf->add_fila(''           ,'','' ,'DIFERENCIA',$rrow['debito']+$rrow['deposito']+$rrow['credito']+$rrow['debito']-$nd-$de-$nc-$nd);
+	}
 	$pdf->Output();
+
+}else{
+	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Conciliacion Bancaria</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

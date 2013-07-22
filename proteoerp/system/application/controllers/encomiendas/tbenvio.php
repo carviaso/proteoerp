@@ -144,6 +144,32 @@ class Tbenvio extends Controller {
 		$("#fedita").dialog({
 			autoOpen: false, height: 540, width: 700, modal: true,
 			buttons: {
+				"Guardar y seguir": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+res.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					});
+				},
 				"Guardar": function() {
 					var bValid = true;
 					var murl = $("#df1").attr("action");
@@ -168,7 +194,7 @@ class Tbenvio extends Controller {
 								$("#fedita").html(r);
 							}
 						}
-					})
+					});
 				},
 				"Cancelar": function() {
 					$("#fedita").html("");
@@ -1209,6 +1235,17 @@ class Tbenvio extends Controller {
 	}
 
 	function instalar(){
+
+		if(!$this->db->table_exists('tbstatus')) {
+			$mSQL="CREATE TABLE `tbstatus` (
+				`codstat` VARCHAR(2) NULL DEFAULT NULL,
+				`desstat` VARCHAR(50) NULL DEFAULT NULL,
+				UNIQUE INDEX `codstat` (`codstat`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM";
+		}
+
 		if (!$this->db->table_exists('tbenvio')) {
 			$mSQL="CREATE TABLE `tbenvio` (
 			  `id` int(10) NOT NULL AUTO_INCREMENT,

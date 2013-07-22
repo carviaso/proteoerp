@@ -404,6 +404,16 @@ class XLSReporte extends writeexcel_workbookbig  {
 	}
 
 	function add_fila($param){
+		$data= func_get_args();
+		$fila= array();
+		foreach($this->rows as $i=>$key ){
+			if(array_key_exists($i,$data))
+				$fila[$key]=$data[$i];
+			else
+				$fila[$key]=' ';
+			//$this->worksheet->write($this->ii, $i, $fila[$key]);
+		}
+		$this->ii++;
 	}
 
 	function AddPage(){
