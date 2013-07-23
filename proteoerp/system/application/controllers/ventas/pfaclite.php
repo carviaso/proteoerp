@@ -403,7 +403,7 @@ class pfaclite extends validaciones{
 		$this->db->where('a.tipo'  ,'Articulo');
 		$this->db->group_by('a.codigo');
 		$this->db->order_by('a.marca , a.descrip , a.peso');
-		$this->db->limit(100);
+		$this->db->limit(300);
 
 		$act_meta=false;
 		if($status=='create' || $status=='insert'){
@@ -926,7 +926,7 @@ my \$dbh = DBI->connect("DBI:mysql:database=$db;host=$host","$usr", "$pwd",{'Rai
 my \$mSQL="SELECT TRIM(cliente) AS cliente, TRIM(nombre) AS nombre ,TRIM(rifci) AS rifci,tipo
 FROM scli
 WHERE vendedor=$dbvd
-ORDER BY cliente  LIMIT 200";
+ORDER BY cliente  LIMIT 300";
 
 my \$mfil= 2;
 my \$scli;
