@@ -1038,7 +1038,7 @@ class Sinv extends Controller {
 				submit: function(e,v,m,f){
 					if (v == 1) {
 						if ( s.length == 0 ){
-							apprise("<h1>Debe seleccionar al menos un Producto</h1>");
+							$.prompt("<h1>Debe seleccionar al menos un Producto</h1>");
 						} else {
 							ventana = window.open("'.site_url("formatos/ver").'/"+f.mforma+"/"+f.mcantidad+"/"+s.toString().replace(/,/g,"_"),"Etiquetas","width=800,height=600");
 						}
@@ -1055,20 +1055,30 @@ class Sinv extends Controller {
 		function sinvdel() {
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				if(confirm(" Seguro desea anular el registro?")){
+				if(confirm("Seguro desea eliminar el registro?")){
 					var ret    = $("'.$ngrid.'").getRowData(id);
 					mId = id;
 					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
 						$("#fedita").html("");
-						$("#fborra").html(data);
-						$("#fborra").dialog({
-							autoOpen: false, height: 350, width: 300, modal: true,
-							buttons: {"Aceptar": function() {
-								$( this ).dialog( "close" );
-								jQuery("'.$ngrid.'").trigger("reloadGrid");
-							}}
-						});
-						$("#fborra").dialog( "open" );
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								$.prompt("<h1>Registro eliminado</h1>");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								$.prompt("<h1>Registro no se puede eliminado</h1>");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog({
+								autoOpen: false, height: 350, width: 450, modal: true,
+								buttons: {"Aceptar": function() {
+										$(this).dialog("close");
+										jQuery("'.$ngrid.'").trigger("reloadGrid");
+									}
+								}
+							});
+						}
 					});
 				}
 			}else{
@@ -2859,7 +2869,7 @@ class Sinv extends Controller {
 			$do->set('alterno', '');
 		}
 
-		$edit = new DataDetails('Maestro de Inventario', $do);
+		$edit = new DataDetails('', $do);
 		$edit->on_save_redirect=false;
 
 		$edit->pre_process( 'insert','_pre_insert');
@@ -3654,6 +3664,7 @@ class Sinv extends Controller {
 
 	function _pre_insert($do){
 		$codigo=$do->get('codigo');
+		$do->set('existen',0);
 		if(empty($codigo)){
 			$size='6';
 			$mSQL="SELECT LPAD(a.hexa,${size},0) AS val FROM serie AS a LEFT JOIN sinv AS b ON b.codigo=LPAD(a.hexa,${size},0) WHERE valor<16777215 AND b.codigo IS NULL LIMIT 1";
@@ -4788,18 +4799,18 @@ class Sinv extends Controller {
 
 	function _pre_del($do){
 		$codigo=$this->db->escape($do->get('codigo'));
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sitems WHERE codigoa=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itscst WHERE codigo=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itstra WHERE codigo=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itspre WHERE codigo=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itsnot WHERE codigo=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itsnte WHERE codigo=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itsinv WHERE codigo=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM sinvpitem WHERE codigo=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM sinvcombo WHERE codigo=$codigo");
+		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sitems WHERE codigoa=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itscst WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itstra WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itspre WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itsnot WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itsnte WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itsinv WHERE codigo=${codigo} AND existen>0");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM sinvpitem WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) FROM sinvcombo WHERE codigo=${codigo}");
 
 		if ($this->db->table_exists('ordpitem'))
-			$check += $this->datasis->dameval("SELECT COUNT(*) FROM ordpitem WHERE codigo=$codigo");
+			$check += $this->datasis->dameval("SELECT COUNT(*) FROM ordpitem WHERE codigo=${codigo}");
 
 		if ($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Producto con Movimiento no puede ser Borrado, solo se puede inactivar';
@@ -5057,7 +5068,14 @@ class Sinv extends Controller {
 		$precio2=$do->get('precio2');
 		$precio3=$do->get('precio3');
 		$precio4=$do->get('precio4');
-		logusu('sinv',"Creo  $codigo precios: $precio1,$precio2,$precio3, $precio4");
+
+		$query = $this->db->query('SELECT ubica FROM caub WHERE gasto=\'N\' AND invfis=\'N\'');
+		foreach ($query->result() as $row){
+			$sql = $this->db->insert_string('itsinv', array('codigo' => $codigo,'alma'=>$row->ubica, 'existen'=>0));
+			$this->db->simple_query($sql);
+		}
+
+		logusu('sinv',"Creo  ${codigo} precios: ${precio1}, ${precio2}, ${precio3}, ${precio4}");
 	}
 
 	function _post_update($do){
@@ -5071,8 +5089,12 @@ class Sinv extends Controller {
 	}
 
 	function _post_delete($do){
-		$codigo=$do->get('codigo');
-		logusu('sinv',"Elimino $codigo");
+		$codigo   = $do->get('codigo');
+		$dbcodigo = $this->db->escape($codigo);
+		$mSQL="DELETE FROM itsinv WHERE codigo=${dbcodigo}";
+		$this->db->simple_query($mSQL);
+
+		logusu('sinv',"Elimino ${codigo}");
 	}
 
 	function consulta_logusu() {

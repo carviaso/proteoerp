@@ -159,7 +159,7 @@ class Tbenvio extends Controller {
 									apprise("Registro Guardado");
 
 									grid.trigger("reloadGrid");
-									//'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+json.id+\'/id\'').';
+									//'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+json.pk.id+\'/id\'').';
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -185,7 +185,7 @@ class Tbenvio extends Controller {
 									apprise("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+res.id+\'/id\'').';
+									'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+json.pk.id+\'/id\'').';
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -731,7 +731,7 @@ class Tbenvio extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('tbenvio');
 
-		$response   = $grid->getData('tbenvio', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('tbenvio', array(array()), array(), false, $mWHERE,'id', 'desc');
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -1039,6 +1039,8 @@ class Tbenvio extends Controller {
 		$edit->fecrec->size =10;
 		$edit->fecrec->maxlength =8;
 
+		$edit->usuario = new autoUpdateField('usuario',$this->secu->usuario(),$this->secu->usuario());
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -1056,6 +1058,7 @@ class Tbenvio extends Controller {
 
 	function _pre_insert($do){
 		$do->set('codstat','OO');
+		$do->set('fecenv' ,date('Y-m-d'));
 		$do->error_message_ar['pre_ins']='';
 		return true;
 	}
