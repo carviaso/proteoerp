@@ -2307,7 +2307,7 @@ class Ajax extends Controller {
 
 		//$salida .= $mSQL;
 
-		$salida .= 	" $codofiorg == 0 && $codofides";
+		$salida .= 	"Seleccione un Origen y/o Destino ";
 
 
 		$salida .= '</body>';
