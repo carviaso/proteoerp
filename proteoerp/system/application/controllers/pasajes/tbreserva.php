@@ -964,10 +964,10 @@ class Tbreserva extends Controller {
 
 
 			$mSQL .='d.valsegu seguro, d.vtasa tasa, round(a.prec_02+d.valsegu+d.vtasa,2) total_buscama,  round(a.prec_01+d.valsegu+d.vtasa,2) total_ejecutivo  
-					FROM tbprecios a
-					JOIN tbofici b ON a.codofiorg=b.codofi
-					JOIN tbofici c ON a.codofides=c.codofi
-					JOIN tbparam d ON a.codofiorg=d.codofiori 
+					FROM pllanos_pasaje.tbprecios a
+					JOIN pllanos_pasaje.tbofici b ON a.codofiorg=b.codofi
+					JOIN pllanos_pasaje.tbofici c ON a.codofides=c.codofi
+					JOIN pllanos_pasaje.tbparam d ON a.codofiorg=d.codofiori 
 			        WHERE a.codofiorg > 0 AND a.codofides >0 ';
 
 			if ( $codofiorg > 0 )
