@@ -316,9 +316,9 @@ border-bottom-right-radius:5px;
 					}
 				}
 
-				if(    $this->DBfieldsType[$campo]=='real' || in_array($this->DBfieldsType[$campo], array(4,5,246))  ) { $row[$campo]=nformat($row[$campo]); }
-				elseif($this->DBfieldsType[$campo]=='date' || in_array($this->DBfieldsType[$campo], array(10,12,7))  ) { $row[$campo]=dbdate_to_human($row[$campo]); echo 'Fecha'; }
-				elseif($this->DBfieldsType[$campo]=='int'  || in_array($this->DBfieldsType[$campo], array(1,2,9,3,8))) { $row[$campo]=intval($row[$campo]); }
+				if(    in_array($this->DBfieldsType[$campo], array('real',4,5,246))  ) { $row[$campo]=nformat($row[$campo]); }
+				elseif(in_array($this->DBfieldsType[$campo], array('date',10,12,7))  ) { $row[$campo]=dbdate_to_human($row[$campo]); }
+				elseif(in_array($this->DBfieldsType[$campo], array('int' ,1,2,9,3,8))) { $row[$campo]=intval($row[$campo]); }
 				//------se escribe los datos----------------------------
 				$l=$this->ii;
 
@@ -556,22 +556,7 @@ border-bottom-right-radius:5px;
 		}
 
 		echo '<td style=\'text-align:'.$align.';\'>';
-		if(in_array($tipo,$this->wnumber)){
-			if(function_exists('nformat')){
-				echo nformat($campo);
-			}else{
-				echo htmlspecialchars($campo);
-			}
-		}elseif(in_array($tipo,$this->wstring)){
-			echo htmlspecialchars(trim($campo));
-		}elseif(in_array($tipo,$this->wdate)){
-			if(function_exists('dbdate_to_human')){
-				$campo=dbdate_to_human(trim($campo));
-			}
-			echo htmlspecialchars($campo);
-		}else{
-			echo htmlspecialchars(trim($campo));
-		}
+		echo htmlspecialchars(trim($campo));
 		echo '</td>';
 	}
 

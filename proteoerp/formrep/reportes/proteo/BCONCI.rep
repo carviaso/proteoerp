@@ -91,21 +91,21 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 		//$nc = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'NC\''));
 		//$nd = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'ND\''));
 
-		$de = floatval($rrow['ccheque']  );
-		$ch = floatval($rrow['cdeposito']);
+		$de = floatval($rrow['cdeposito']);
+		$ch = floatval($rrow['ccheque']  );
 		$nc = floatval($rrow['ccredito'] );
 		$nd = floatval($rrow['cdebito']  );
 
 		$ttotal =$rrow['saldof'];
 		$tbtotal=$de+$nc+$nc+$nd;
 		$pdf->add_fila('' ,'',''     ,' ',' ');
-		$pdf->add_fila(''           ,'','S/BANCOS'       ,'S/LIBROS','DIFERENCIA');
-		$pdf->add_fila('TOTALES:'   ,'',$ttotal          ,$tbtotal,$ttotal-$tbtotal);
-		$pdf->add_fila('----------' ,'','----------'     ,'----------','----------');
-		$pdf->add_fila('CHEQUES:'   ,'',$rrow['cheque']  ,$ch     ,$rrow['cheque']  -$ch);
-		$pdf->add_fila('DEPOSITOS:' ,'',$rrow['deposito'],$de     ,$rrow['deposito']-$de);
-		$pdf->add_fila('N. CREDITOS','',$rrow['credito'] ,$nc     ,$rrow['credito'] -$nc);
-		$pdf->add_fila('N. DEBITOS' ,'',$rrow['debito']  ,$nd     ,$rrow['debito']  -$nd);
+		$pdf->add_fila(''           ,'','S/BANCOS'   ,'S/LIBROS','DIFERENCIA');
+		$pdf->add_fila('TOTALES:'   ,'',$ttotal      ,$tbtotal,$ttotal-$tbtotal);
+		$pdf->add_fila('----------' ,'','----------' ,'----------','----------');
+		$pdf->add_fila('CHEQUES:'   ,'',$ch          ,$rrow['cheque']  ,$rrow['cheque']  -$ch);
+		$pdf->add_fila('DEPOSITOS:' ,'',$de          ,$rrow['deposito'],$rrow['deposito']-$de);
+		$pdf->add_fila('N. CREDITOS','',$nc          ,$rrow['credito'] ,$rrow['credito'] -$nc);
+		$pdf->add_fila('N. DEBITOS' ,'',$nd          ,$rrow['debito']  ,$rrow['debito']  -$nd);
 		$pdf->add_fila(''           ,'','' ,'DIFERENCIA',$rrow['debito']+$rrow['deposito']+$rrow['credito']+$rrow['debito']-$nd-$de-$nc-$nd);
 	}
 	$pdf->Output();
