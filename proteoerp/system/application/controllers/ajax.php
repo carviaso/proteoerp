@@ -2292,7 +2292,7 @@ class Ajax extends Controller {
 				width:"600", 
 				height:"250",
 				colModel: [
-				{name: "'.$titu.'",   id: "'.$titu.'",   width: 150 },
+				{name: "'.$titu.'",   id: "'.$titu.'",   width: 200 },
 				{name: "Seguro",    id: "Seguro",    width:  50, align:"center" },  
 				{name: "Tasa",      id: "Tasa",      width:  50, align:"center" },
 				{name: "Ejecutivo", id: "Ejecutivo", width:  70, align:"right" },
