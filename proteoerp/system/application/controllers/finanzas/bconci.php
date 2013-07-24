@@ -690,9 +690,11 @@ class Bconci extends Controller {
 				$factor     = 1;
 				$concilia   = $ffecha;
 				$dbconcilia = $this->db->escape($concilia);
+				$dbstatus   = '\'û\'';
 			}else{
 				$factor     = -1;
 				$dbconcilia = 'NULL';
+				$dbstatus   = '\'P\'';
 			}
 
 			$row = $this->datasis->damerow("SELECT tipo_op,codbanc,monto FROM bmov WHERE id = ${dbid}");
@@ -733,7 +735,7 @@ class Bconci extends Controller {
 				}
 			}
 
-			$mSQL = "UPDATE bmov SET concilia=${dbconcilia} WHERE id = ${dbid}";
+			$mSQL = "UPDATE bmov SET concilia=${dbconcilia}, status=${dbstatus} WHERE id = ${dbid}";
 			$ban=$this->db->simple_query($mSQL);
 			if($ban){
 				$rt['msj']    = '';
@@ -750,7 +752,6 @@ class Bconci extends Controller {
 	}
 
 	function _pre_insert($do){
-		$do->set('status','A');
 		$codbanc  = $do->get('codbanc');
 		$dbcodbanc= $this->db->escape($codbanc);
 		$fecha    = $do->get('fecha');
@@ -779,6 +780,7 @@ class Bconci extends Controller {
 	}
 
 	function _pre_inserup($do){
+		$do->set('status','A');
 		$codbanc  = $do->get('codbanc');
 		$fecha    = $do->get('fecha');
 
@@ -874,7 +876,7 @@ class Bconci extends Controller {
 		$dbfecha  = $this->db->escape($fecha);
 		$dbcodbanc= $this->db->escape($codbanc);
 
-		$mSQL= 'UPDATE bmov SET concilia=\'0000-00-00\' WHERE concilia='.$dbfecha.' AND codbanc='.$dbcodbanc;
+		$mSQL= 'UPDATE bmov SET concilia=\'0000-00-00\', status=\'P\' WHERE concilia='.$dbfecha.' AND codbanc='.$dbcodbanc;
 		$this->db->simple_query($mSQL);
 
 		$primary =implode(',',$do->pk);
@@ -908,7 +910,7 @@ class Bconci extends Controller {
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('bconci')) {
+		if(!$this->db->table_exists('bconci')){
 			$mSQL="CREATE TABLE `bconci` (
 				`fecha` DATE NULL DEFAULT NULL,
 				`codbanc` CHAR(2) NULL DEFAULT NULL,
