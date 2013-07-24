@@ -1233,12 +1233,11 @@ class Datasis {
 	}
 
 
-	//******************************************
-	//
-	//  Convierte un SElect a Data JqGrid
+	//******************************************************************
+	//  Convierte un Select a Data JqGrid
 	//  mSQL : SQL SELECT
 	//  data : Variable para colocar local data
-	//******************************************
+	//
 	function jqdata($mSQL,$data) {
 		$CI =& get_instance();
 
@@ -1280,11 +1279,9 @@ class Datasis {
 	}
 
 
-	//******************************************
+	//******************************************************************
+	//      Convierte un Select a Data JqGrid
 	//
-	//      Convierte un SElect a Data JqGrid
-	//
-	//******************************************
 	function jqtablawest($nombre, $caption, $colModel,  $mSQL, $alto=200, $ancho=190) {
 
 		//colNames:[\'\',\'Reporte\',\'Nombre\'],
@@ -1310,6 +1307,7 @@ class Datasis {
 		return $Salida;
 	}
 
+/*
 	function extjsfiltro($filtros, $tabla = ''){
 		if ( !empty($tabla)) $tabla = trim($tabla).".";
 		$where = "";
@@ -1367,7 +1365,7 @@ class Datasis {
 		}
 		return LTRIM(substr($where,4,1000));
 	}
-
+*/
 	function codificautf8($query){
 		$CI =& get_instance();
 		if ( $CI->db->char_set == 'utf8' ) {
@@ -1401,7 +1399,7 @@ class Datasis {
 			}
 		return $meco;
 	}
-
+/*
 	function extjscampos($tabla){
 		$CI =& get_instance();
 		$query = $CI->db->query("DESCRIBE $tabla");
@@ -1428,7 +1426,7 @@ class Datasis {
 		}
 		return $campos;
 	}
-
+*/
 	//******************************************************************
 	//
 	//
@@ -1453,11 +1451,18 @@ class Datasis {
 	//**************************************************
 	// Modifica Intramenu
 	//
-	function modintramenu( $ancho, $alto, $ejecutar ){
+	function modintramenu( $ancho, $alto, $ejecutar, $modulo = '', $nombre = '' ){
 		$CI =& get_instance();
 		$mSQL = 'UPDATE intramenu SET ancho='.$ancho.', alto='.$alto.' WHERE ejecutar="'.$ejecutar.'" OR ejecutar="/'.$ejecutar.'"';
-		//memowrite($mSQL,"intramenu");
-		$CI->db->simple_query($mSQL);
+		$CI->db->query($mSQL);
+		if ( $modulo != '' ){
+			$tablas = $CI->db->list_tables();
+			if(!in_array('modulos',$tablas))
+			$CI->db->query("CREATE TABLE modulos (modulo varchar(20) NULL ,nombre varchar(50) NULL, PRIMARY KEY (modulo) ) ENGINE=MyISAM DEFAULT CHARSET=latin1");
+			$mSQL = 'REPLACE INTO modulos SET modulo='.$CI->db->escape($modulo).', nombre='.$CI->db->escape($nombre);
+			$CI->db->query($mSQL);
+			
+		}
 	}
 
 

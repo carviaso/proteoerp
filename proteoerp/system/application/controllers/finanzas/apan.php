@@ -1,5 +1,4 @@
-<?php require_once(BASEPATH.'application/controllers/validaciones.php');
-class Apan extends Controller {
+<?php require_once( Controller {
 	var $mModulo='APAN';
 	var $titp='Aplicacion de Anticipos y NC';
 	var $tits='Aplicacion de Anticipos y NC';
@@ -786,7 +785,7 @@ class Apan extends Controller {
 		$edit->script($script,'create');
 		$edit->on_save_redirect=false;
 
-		$edit->back_url = site_url($this->url.'filteredgrid');
+		//$edit->back_url = site_url($this->url.'filteredgrid');
 
 		$edit->script($script,'create');
 		$edit->script($script,'modify');

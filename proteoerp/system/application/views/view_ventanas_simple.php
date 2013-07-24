@@ -13,7 +13,12 @@
 
 </head>
 <body>
+<?php
+echo $form_scripts;
+echo $form_begin;
+?>
 <?php if (isset($content)) echo $content; ?>
 </div>
+<?php echo $form_end; ?>
 </body>
 </html>

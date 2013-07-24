@@ -121,17 +121,11 @@ function fmenores(mtipo){
 		alert('Viajan solo Menores');
 	}
 	
-	//if ( mtipo == 'M'){
-		$('#monto').html( moneyformat(ret.precio*nropas) );
-		$('#madulto').html(moneyformat(ret.precio*(nropas-mm-aa))); 
-		$('#mmenor').html(moneyformat(ret.precio*mm));
-		$('#manci').html(moneyformat(ret.precio*aa));
-/*
-	} else {
-		$('#madulto').html(); 
-		$('#mmenor').html();
-		$('#manci').html();
-	}*/
+	$('#monto').html( moneyformat(ret.precio*nropas) );
+	$('#madulto').html(moneyformat(ret.precio*(nropas-mm-aa))); 
+	$('#mmenor').html(moneyformat(ret.precio*mm));
+	$('#manci').html(moneyformat(ret.precio*aa));
+
 }
 </script>
 <?php } 
@@ -145,7 +139,6 @@ echo $form->codrut->output;
 		<td class="littletablerow"  ><?php echo $form->org->output;    ?></td>
 		<td class="littletablerowth"><?php echo $form->dtn->label;     ?></td>
 		<td class="littletablerow"  ><?php echo $form->dtn->output;    ?></td>
-
 		<td class="littletablerowth"><?php echo $form->fecven->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->fecven->output; ?></td>
 	</tr>

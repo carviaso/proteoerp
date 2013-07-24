@@ -541,17 +541,14 @@ class Tbreserva extends Controller {
 		$ret   = $this->datasis->damereg($mSQL);
 
 		$form = new DataForm('');
-		//$form->script($script);
 
 		// Cliente
 		$form->cod_cli = new hiddenField('Cliente','cod_cli');
 		$form->cod_cli->size = 8;
 		$form->cod_cli->autocomplete=false;
-		//$form->cod_cli->rule='required|existescli';
 
-		$form->rifci   = new inputField('RIF/CI','rifci');
+		$form->rifci = new inputField('RIF/CI','rifci');
 		$form->rifci->autocomplete=false;
-		//$form->rifci->readonly =true;
 		$form->rifci->size = 15;
 		
 		$form->nombre = new inputField('Nombre', 'nombre');
@@ -600,6 +597,12 @@ class Tbreserva extends Controller {
 				$form->$obj->rule      = '';
 				$form->$obj->size      = 13;
 				$form->$obj->maxlength =13;
+
+				$obj = 'descuento_'.$i;
+				$form->$obj = new dropdownField('Desc.','descuento_'.$i);
+				$form->$obj->option('00','Sin Descuento');
+				$form->$obj->options("SELECT coddes, CONCAT(desdes, ' ', mont,'%') descrip FROM tbdescu ORDER BY coddes");
+				$form->$obj->style = 'width:100px;';
 				
 				$i++;
 
@@ -608,7 +611,6 @@ class Tbreserva extends Controller {
 
 		$form->build_form();
 
-	
 		$ruta = $this->datasis->dameval("SELECT CONCAT_WS(' ',horsal, origen, destino) ruta FROM tbrutas WHERE codrut=".$this->db->escape($ret['codrut']));
 		
 		$salida  = '<table width="95%" style="background:#DDDDDD;" align="center" ><tr>';
@@ -868,8 +870,6 @@ class Tbreserva extends Controller {
 		}
 	}
 
-
-
 	//******************************************************************
 	// Get data para las rutas
 	//
@@ -900,6 +900,169 @@ class Tbreserva extends Controller {
 		$response = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
+		
+	}
+
+	//******************************************************************
+	// Busca los puestos disponibles
+	//
+	function consultaprecio(){
+		$this->rapyd->load("dataform");
+
+		$codofiorg = $this->input->post('codofiorg');
+		$codofides = $this->input->post('codofides');
+
+		$form = new DataForm($this->url.'consultaprecio/process');
+
+		// Origen 
+		$form->codofiorg = new dropdownField('Origen','codofiorg');
+		$form->codofiorg->option('00','Seleccione');
+		$form->codofiorg->options("SELECT codofi, desofi FROM tbofici WHERE codofi>0 ORDER BY desofi");
+		$form->codofiorg->style = 'width:180px;';
+
+		// Destino 
+		$form->codofides = new dropdownField('Destino.','codofides');
+		$form->codofides->option('00','Seleccione');
+		$form->codofides->options("SELECT codofi, desofi FROM tbofici WHERE codofi>0 ORDER BY desofi ");
+		$form->codofides->style = 'width:180px;';
+
+		$form->submit = new submitField("Buscar","btn_submit");    
+
+		$form->build_form();
+
+		$salida  = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
+		$salida .= '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'."\n";
+		$salida .= '<head>'."\n";
+		$salida .= '<meta http-equiv="Content-type" content="text/html; charset=<?=$this->config->item(\'charset\'); ?>" >'."\n";
+		$salida .= '<title>ProteoERP<?php if(isset($title)) echo \':\'.preg_replace(\'/<[^>]*>/\', \'\', $title); ?></title>'."\n";
+		$salida .= style("ventanas.css");
+
+		$salida .= script('jquery-min.js');
+		$salida .= script('jquery-migrate-min.js'); //SOLO PARA JQUERY 1.9 - 2.0
+		$salida .= phpscript('nformat.js');
+		$salida .= script('jquery-ui.custom.min.js');
+
+		$salida .= style('themes/ui.jqgrid.css');
+		$salida .= script('i18n/grid.locale-sp.js');
+		$salida .= script('jquery.jqGrid.min.js');
+
+		$salida .= style('themes/proteo/proteo.css');		
+		$salida .= '</head>'."\n";
+		$salida .= '<body>'."\n";
+		$salida .= '<form action="'.site_url('pasajes/tbreserva/consultaprecio/process').'" method="post" id="df1"><div class="alert"></div>'."\n";
+		$titu = "Destino";
+
+		if($form->on_success()){
+			
+			$titu = "Destino";
+			if ( $codofiorg == 0 && $codofides > 0 ) {
+				$mSQL ='SELECT a.codofiorg, b.desofi desorg, a.codofides, b.desofi desdes, a.prec_02 buscama, a.prec_01 ejecutivo,';  
+				$titu = "Origen";
+			} else {
+				$mSQL ='SELECT a.codofiorg, b.desofi desorg, a.codofides, c.desofi desdes, a.prec_02 buscama, a.prec_01 ejecutivo,';  
+			}
+
+
+			$mSQL .='d.valsegu seguro, d.vtasa tasa, round(a.prec_02+d.valsegu+d.vtasa,2) total_buscama,  round(a.prec_01+d.valsegu+d.vtasa,2) total_ejecutivo  
+					FROM tbprecios a
+					JOIN tbofici b ON a.codofiorg=b.codofi
+					JOIN tbofici c ON a.codofides=c.codofi
+					JOIN tbparam d ON a.codofiorg=d.codofiori 
+			        WHERE a.codofiorg > 0 AND a.codofides >0 ';
+
+			if ( $codofiorg > 0 )
+				$mSQL .=' AND a.codofiorg = '.$this->db->escape($codofiorg);
+
+			if ( $codofides > 0 )
+				$mSQL .=' AND a.codofides = '.$this->db->escape($codofides);
+
+			$mSQL .=' ORDER by a.codofiorg, a.codofides';
+			$mSQL .=' LIMIT 40';
+
+			$query = $this->db->query($mSQL);
+			$rs = "";
+
+			if ($query->num_rows() > 0){
+				$rs .= "\n<div style='width:500px;'>\n";
+				$rs  = "<table id='bprecios'>\n";
+				$rs .= "<thead>\n";
+				$rs .= "\t<tr>\n";
+				$rs .= "<th>$titu</th>\n";
+				$rs .= "<th>Seguro</th>\n";
+				$rs .= "<th>Tasa</th>\n";
+				$rs .= "<th>Ejecutivo</th>\n";
+				$rs .= "<th>Total_E</th>\n";
+				$rs .= "<th>Buscama</th>\n";
+				$rs .= "<th>Total_B</th>\n";
+
+				$rs .= "\t</tr>\n";
+				$rs .= "</thead>\n";
+				$rs .= "<tbody>\n";
+				foreach( $query->result() as  $row ){
+					$rs .= "\t<tr>\n";
+					$rs .= "<td>".$row->desdes."</td>\n";
+					$rs .= "<td style='text-align:right'>".$row->seguro."</td>\n";
+					$rs .= "<td align='right'>".$row->tasa."</td>\n";
+					$rs .= "<td align='right'>".$row->buscama."</td>\n";
+					$rs .= "<td align='right'>".$row->total_buscama."</td>\n";
+					$rs .= "<td align='right'>".$row->ejecutivo."</td>\n";
+					$rs .= "<td align='right'>".$row->total_ejecutivo."</td>\n";
+					$rs .= "\t</tr>\n";
+				}
+				$rs .= "</tbody>\n";
+				$rs .= "</table>\n";
+				$rs .= "</div>\n";
+			}
+		}else{
+			$rs ='';
+		}
+
+		$salida .= "\n<table><tr>";
+		$salida .= "<td>Origen: ".$form->codofiorg->output."</td><td>Destino: ".$form->codofides->output."</td>";
+		$salida .=  "<td>".$form->submit->output."</td>";
+		$salida .= "</tr></table>";
+		$salida .= '</form>'; 
+
+		$salida .= $rs;
+
+		$salida .= '
+<script type="text/javascript">
+		$(document).ready(function() { 
+			tableToGrid("#bprecios",{ 
+				width:"600", 
+				height:"250",
+				colModel: [
+				{name: "'.$titu.'",   id: "'.$titu.'",   width: 150 },
+				{name: "Seguro",    id: "Seguro",    width:  50, align:"center" },  
+				{name: "Tasa",      id: "Tasa",      width:  50, align:"center" },
+				{name: "Ejecutivo", id: "Ejecutivo", width:  70, align:"right" },
+				{name: "Total_E",    id: "Total_E",    width:  70, align:"right", title: "Total" },
+				{name: "Buscama",   id: "Buscama",   width:  70, align:"right" }, 
+				{name: "Total_B",    id: "Total_B",    width:  70, align:"right", title: "Total" }, 
+				]
+				
+			 }); 
+		})
+</script>';
+
+		//$salida .= $mSQL;
+
+		$salida .= '</body>';
+		$salida .= '</html>';
+		
+		echo $salida;
+
+
+/*
+////////////////////////////////////////////////////////////////////////
+ 
+REUNION DE RUTAS Y MONITOREO 23/07/2013
+ 
+Tabla de choferes (Regulares y Emergentes)
+Buses asignados a 2 choferes 
+Cada ruta se asignan 2 choferes
+
+*/	
 		
 	}
 
@@ -985,9 +1148,8 @@ class Tbreserva extends Controller {
 		$reserva = "style='background:#026837;color:white;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;height:20px;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
 		$manual  = "style='background:#F2A2F2;color:black;font-weight:bold;font-size:12px;margin-left:0.5em;margin-right:0.5em;height:20px;'"; //color:#FFFFFF; margin-left:10em; font-weight:bold;'";
 		$mi = $i;
-		$query = $this->db->query($mSQL);
 
-		//$bl = "\t\t<td>&nbsp;<td>\n";
+		$query = $this->db->query($mSQL);
 		$rs = "";
 		$f = $mi+11;
 

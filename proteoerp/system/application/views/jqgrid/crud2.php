@@ -183,10 +183,6 @@ echo script('plugins/jquery.numeric.pack.js');
 echo script('plugins/jquery.floatnumber.js');
 echo script('plugins/jquery.maskedinput.min.js');
 
-//echo script('jquery.pageslide.min.js');
-//echo style('jquery.pageslide.css');
-
-
 echo "\n";
 if ( isset($jquerys) ) {
 	foreach( $jquerys as $jq ){ echo script($jq); }

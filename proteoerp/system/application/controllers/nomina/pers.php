@@ -14,7 +14,7 @@ class Pers extends Controller {
 
 	function index(){
 		$this->instalar();
-		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1) );
+		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1), 'PERS', 'PERSONAL TRABAJADOR' );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -1278,7 +1278,8 @@ class Pers extends Controller {
 		$edit->enlace->maxlength=5;
 		$edit->enlace->group = 'Relaci&oacute;n Laboral';
 		$edit->enlace->append($cboton);
-		$edit->enlace->rule='trim|strtoupper|existescli';
+		$edit->enlace->rule='trim|strtoupper';
+		//$edit->enlace->rule='trim|strtoupper|existescli';
 
 		$edit->sso = new inputField('Nro. SSO', 'sso');
 		$edit->sso->size =13;
@@ -1492,12 +1493,51 @@ class Pers extends Controller {
 	function _post_insert($do){
 		$codigo=$do->get('codigo');
 		$nombre=$do->get('nombre');
+		$enlace=$do->get('enlace');
+		// Revisa si tiene cliente creado
+		$rifci = $do->get('nacional').$do->get('cedula');
+
+
 		logusu('pers',"PERSONAL ${codigo} NOMBRE ${nombre} CREADO");
+
 	}
 
 	function _post_update($do){
-		$codigo=$do->get('codigo');
-		$nombre=$do->get('nombre');
+		$codigo = $do->get('codigo');
+		$nombre = $do->get('nombre');
+		$enlace = $do->get('enlace');
+		// Revisa si tiene cliente creado
+		$rifci = $do->get('nacional').$do->get('cedula');
+		$cod_cli = $this->datasis->dameval('SELECT cliente FROM scli WHERE rifci="'.$rifci.'" LIMIT 1');
+		if ( $cod_cli ) {
+			//Asocia el Cliente al Trabajador
+			$do->set('enlace',$cod_cli);
+		} else {
+			// Si coloco un enlace crea el Cliente
+			if ( !empty($enlace) ){
+				$esta = $this->datasis->dameval('SELECT count(*) FROM scli WHERE cliente="'.$enlace.'"');
+				if ( $esta == 0 ){
+
+					$nombre = trim($do->get('nombre')).' '.trim($do->get('apellido'));
+					$data = array (
+						'cliente'    => $enlace,
+						'rifci'      => $rifci,
+						'nombre'     => $nombre,
+						'nomfis'     => $nombre,
+						'tipo'       => '1',
+						'tiva'       => 'N',
+						'zona'       => $this->datasis->traevalor('ZONAXDEFECTO'),
+						'grupo'      => $this->datasis->dameval('SELECT grupo FROM grcl WHERE gr_desc like "%EMPLEADO%" OR gr_desc like "%TRABAJADOR%"'),
+						'dire11'     => $do->get('direc1'),
+						'dire12'     => $do->get('direc2'),
+						'ciudad1'    => $this->datasis->traevalor('CIUDAD'),
+						'telefono'   => $do->get('telefono')
+					);
+					$this->db->insert('scli', $data);
+				}
+			}
+		}
+		
 		logusu('pers',"PERSONAL ${codigo} NOMBRE ${nombre} MODIFICADO");
 	}
 
@@ -1837,7 +1877,6 @@ class Pers extends Controller {
 			'stype'         => "'text'"
 		));
 
-
 		$grid->showpager(true);
 		$grid->setViewRecords(false);
 		$grid->setWidth('670');
@@ -1865,11 +1904,8 @@ class Pers extends Controller {
 		$msalida .= "\n</script>\n";
 		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
 		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
-
 		echo $msalida;
-
 	}
-
 
 
 	//******************************************************************
@@ -1908,7 +1944,6 @@ class Pers extends Controller {
 			echo '{success:true, message:"Todo bien", results:'. $results.', data:'.json_encode($arr).'}';
 		}
 	}
-
 
 
 	//******************************************************************
@@ -1957,7 +1992,7 @@ class Pers extends Controller {
 
 		$tablas = $this->db->list_tables();
 		if(!in_array('tipot',$tablas))
-			$this->db->simple_query("CREATE TABLE tipot (codigo int(10) unsigned NOT NULL AUTO_INCREMENT,tipo varchar(50) DEFAULT NULL,PRIMARY KEY (codigo) )");
+			$this->db->query("CREATE TABLE tipot (codigo int(10) unsigned NOT NULL AUTO_INCREMENT,tipo varchar(50) DEFAULT NULL,PRIMARY KEY (codigo) ) ENGINE=MyISAM DEFAULT CHARSET=latin1");
 
 		if(!in_array('posicion',$tablas))
 			$this->db->simple_query("CREATE TABLE `posicion`(`codigo` varchar(10) NOT NULL,`posicion` varchar(30) DEFAULT NULL,PRIMARY KEY (`codigo`))");
@@ -1969,5 +2004,30 @@ class Pers extends Controller {
 			$this->db->simple_query("CREATE TABLE IF NOT EXISTS nedu (codigo varchar(4) NOT NULL, nivel varchar(40) DEFAULT NULL, PRIMARY KEY (`codigo`)) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC");
 			$this->db->simple_query("INSERT INTO nedu (codigo, nivel) VALUES ('00', 'Sin Educacion Formal'),('01', 'Primaria'),('02', 'Secundaria'),('03', 'Tecnico'),	('04', 'T.S.U.'),('05', 'Universitario'),('06', 'Post Universitario'),('07', 'Doctor'),('08', 'Guru')");
 		}
+		
+		if ( !$this->datasis->iscampo('prof','id') ) {
+			$this->db->simple_query('ALTER TABLE prof DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE prof ADD UNIQUE INDEX codigo (codigo)');
+			$this->db->simple_query('ALTER TABLE prof ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};
+
+		if ( !$this->datasis->iscampo('carg','id') ) {
+			$this->db->simple_query('ALTER TABLE carg DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE carg ADD UNIQUE INDEX cargo (cargo)');
+			$this->db->simple_query('ALTER TABLE carg ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};
+
+		if ( !$this->datasis->iscampo('depa','id') ) {
+			$this->db->simple_query('ALTER TABLE depa DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE depa ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE depa ADD UNIQUE INDEX dividepa (division, departa)');
+		};
+
+		if ( !$this->datasis->iscampo('divi','id') ) {
+			$this->db->simple_query('ALTER TABLE divi DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE divi ADD UNIQUE INDEX division (division)');
+			$this->db->simple_query('ALTER TABLE divi ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};
+
 	}
 }

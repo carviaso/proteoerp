@@ -2511,12 +2511,13 @@ function chrif(rif){
 	}
 
 
-	//Crea un cliente desde pers
-	function creafrompers($status=null,$id_pers=null){
+	//Crea un cliente desde Pers AJAX
+	function creafrompers( $status=null, $id_pers=null ){
 		if($status=='insert' && !empty($id_pers)){
-			$codigo=$this->input->post('codigo');
-			$dbid_pers=$this->db->escape($id_pers);
-			$query=$this->db->query("SELECT nacional,cedula,codigo,nombre,apellido,direc1,direc2 FROM pers WHERE id=".$dbid_pers);
+			$codigo    = $this->input->post('codigo');
+			$dbid_pers = $this->db->escape($id_pers);
+			
+			$query = $this->db->query("SELECT nacional,cedula,codigo,nombre,apellido,direc1,direc2 FROM pers WHERE id=".$dbid_pers);
 			if($query->num_rows()>0){
 				$row = $query->row();
 
@@ -2550,7 +2551,7 @@ function chrif(rif){
 					'dire21'     => '',
 					'dire22'     => '',
 					'ciudad2'    => '',
-					'telefono'   => '',
+					'telefono'   => $row->telefono,
 					'url'        => '',
 					'telefon2'   => '',
 					'fb'         => '',
@@ -2574,7 +2575,8 @@ function chrif(rif){
 				);
 
 				$this->genesal=false;
-				$rt=$this->dataedit();
+
+				$rt = $this->dataedit();
 				if(stripos($rt, 'guardado')!== false){
 					echo '';
 				}else{
@@ -2585,6 +2587,7 @@ function chrif(rif){
 			}
 		}
 	}
+
 
 	// Revisa si existe el codigo
 	function scliexiste(){
