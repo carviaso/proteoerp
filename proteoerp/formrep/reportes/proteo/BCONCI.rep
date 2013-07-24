@@ -79,17 +79,22 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 
 	$pdf->Table();
 
-	$mmSQL="SELECT credito,deposito,cheque,debito,saldoi,saldof FROM bconci WHERE codbanc=${dbcodbanc} AND fecha=${fhasta}";
+	$mmSQL="SELECT credito,deposito,cheque,debito,ccredito,cdeposito,ccheque,cdebito,saldoi,saldof FROM bconci WHERE codbanc=${dbcodbanc} AND fecha=${fhasta}";
 	$rrow = $this->datasis->damerow($mmSQL);
 	if(!empty($rrow)){
-		$mSQL="SELECT SUM(monto) AS monto
-		FROM bmov AS a
-		WHERE a.codbanc=${codbanc}
-		AND a.concilia=0 AND a.fecha <= ${fhasta}";
-		$de = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'DE\''));
-		$ch = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'CH\''));
-		$nc = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'NC\''));
-		$nd = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'ND\''));
+		//$mSQL="SELECT SUM(monto) AS monto
+		//FROM bmov AS a
+		//WHERE a.codbanc=${codbanc}
+		//AND a.concilia=0 AND a.fecha <= ${fhasta}";
+		//$de = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'DE\''));
+		//$ch = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'CH\''));
+		//$nc = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'NC\''));
+		//$nd = floatval($this->datasis->dameval($mSQL.' AND a.tipo_op=\'ND\''));
+
+		$de = floatval($rrow['ccheque']  );
+		$ch = floatval($rrow['cdeposito']);
+		$nc = floatval($rrow['ccredito'] );
+		$nd = floatval($rrow['cdebito']  );
 
 		$ttotal =$rrow['saldof'];
 		$tbtotal=$de+$nc+$nc+$nd;

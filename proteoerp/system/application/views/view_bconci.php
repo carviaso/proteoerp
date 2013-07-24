@@ -76,6 +76,17 @@ $(function(){
 		multiselect: false,
 		caption: "Efectos liables",
 		rowNum:9000000000,
+		onSelectRow:
+			function(id){
+				if (id){
+					//var ret = $(gridId1).getRowData(id);
+					$.get('<?php echo site_url('finanzas/bconci/localizador'); ?>'+'/'+id,
+						function(data){
+							$("#traconsul").html(data);
+					});
+				}
+			}
+
 		//multiselect: true
 	});
 
@@ -216,50 +227,87 @@ function totalizar(){
 	$("#cheque_val"  ).text(nformat((-1)*ch,2));
 	$("#debito_val"  ).text(nformat((-1)*nd,2));
 	$("#credito_val" ).text(nformat(nc,2));
+
+	var cdeposito= Number($("#cdeposito").val());
+	var ccheque  = Number($("#ccheque"  ).val());
+	var cdebito  = Number($("#cdebito"  ).val());
+	var ccredito = Number($("#ccredito" ).val());
+
+	$("#ddeposito").text(nformat(cdeposito-de,2));
+	$("#dcheque"  ).text(nformat(ccheque  +ch,2));
+	$("#ddebito"  ).text(nformat(cdebito  +nd,2));
+	$("#dcredito" ).text(nformat(ccredito -nc,2));
 }
 
 </script>
 <?php } ?>
 
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
-<table width='100%' style='font-size:11pt;background:#F2E69D;'>
+<table style='width:100%'>
 	<tr>
-		<td><b><?php echo $form->codbanc->label;     ?></b></td>
-		<td colspan='3'><?php echo $form->codbanc->output;  ?><!-- <a href='#' onclick='actualizalist();return false;'>Actualizar</a> --></td>
+		<td colspan='2'>
+			<table style='width:100%;font-size:11pt;background:#F2E69D;'>
+				<tr>
+					<td><b><?php echo $form->codbanc->label;?>*</b></td>
+					<td colspan='3'><?php echo $form->codbanc->output;  ?></td>
+				</tr><tr>
+					<td style='width:25%'><b><?php echo $form->deposito->label;  ?></b></td>
+					<td style='width:25%' align="right"><?php echo $form->deposito->output;  ?></td>
+					<td style='width:25%' align="right"><?php echo $form->cdeposito->output; ?></td>
+					<td style='width:25%' align="right"><span id='ddeposito'><?php echo ($form->_status=='show')? nformat($form->deposito->value-$form->cdeposito->value):nformat(0); ?></span></td>
+				</tr><tr>
+					<td><b><?php echo $form->credito->label;   ?></b></td>
+					<td align="right"><?php echo $form->credito->output;   ?></td>
+					<td align="right"><?php echo $form->ccredito->output;  ?></td>
+					<td align="right"><span id='dcredito'><?php echo ($form->_status=='show')? nformat($form->credito->value-$form->ccredito->value):nformat(0); ?></span></td>
+				</tr><tr>
+					<td><b><?php echo $form->cheque->label;    ?></b></td>
+					<td align="right"><?php echo $form->cheque->output;   ?></td>
+					<td align="right"><?php echo $form->ccheque->output;  ?></td>
+					<td align="right"><span id='dcheque'><?php echo ($form->_status=='show')? nformat($form->cheque->value-$form->ccheque->value):nformat(0); ?></span></td>
+				</tr><tr>
+					<td><b><?php echo $form->debito->label;    ?></b></td>
+					<td align="right"><?php echo $form->debito->output;   ?></td>
+					<td align="right"><?php echo $form->cdebito->output;  ?></td>
+					<td align="right"><span id='ddebito'><?php echo ($form->_status=='show')? nformat($form->debito->value-$form->cdebito->value):nformat(0); ?></span></td>
+				</tr>
+			</table>
+		</td>
 	</tr>
 	<tr>
-		<td><b><?php echo $form->fecha->label;     ?></b></td>
-		<td>   <?php echo $form->fecha->output;    ?></td>
-		<td><b><?php echo $form->deposito->label;  ?></b></td>
-		<td align="right">   <?php echo $form->deposito->output; ?></td>
-	</tr>
-	<tr>
-		<td><b><?php echo $form->saldoi->label;    ?></b></td>
-		<td>   <?php echo $form->saldoi->output;   ?></td>
-		<td><b><?php echo $form->credito->label;   ?></b></td>
-		<td align="right">   <?php echo $form->credito->output;  ?></td>
-	</tr>
-	<tr>
-		<td><b><?php echo $form->saldof->label;    ?></b></td>
-		<td>   <?php echo $form->saldof->output;   ?></td>
-		<td><b><?php echo $form->cheque->label;    ?></b></td>
-		<td align="right">   <?php echo $form->cheque->output;   ?></td>
-	</tr>
-	<tr>
-		<td><b>Conciliado</b></td>
-		<td><span id='conciliado'></span></td>
-		<td><b><?php echo $form->debito->label;    ?></b></td>
-		<td align="right">   <?php echo $form->debito->output;   ?></td>
+		<td>
+		<?php if($form->_status!='show'){ ?>
+			<table id="tliable"></table>
+		<?php } ?>
+		</td>
+		<td style='vertical-align:text-top;width:100%;'>
+			<table style='font-size:11pt;width:100%;background:#C4C6FF;vertical-align:text-top;'>
+				<tr>
+					<td><b><?php echo $form->fecha->label;   ?>*</b></td>
+					<td align="right"><?php echo $form->fecha->output;  ?></td>
+				</tr><tr>
+					<td><b><?php echo $form->saldoi->label;  ?>*</b></td>
+					<td align="right"><?php echo $form->saldoi->output; ?></td>
+				</tr><tr>
+					<td><b><?php echo $form->saldof->label;  ?>*</b></td>
+					<td align="right"><?php echo $form->saldof->output; ?></td>
+				</tr>
+			</table>
+
+			<p style='text-align:center;font-size:2em'>
+				<span style='font-size:2em;' id='conciliado'><?php
+				$tota = $form->deposito->value+$form->credito->value-$form->cheque->value-$form->debito->value;
+				echo ($form->_status=='show')? nformat($tota):nformat(0); ?></span>
+				<br><span style='font-size:0.5em;'>Monto conciliado</span>
+			</p>
+			<?php if($form->_status!='show'){ ?>
+			<div id='traconsul' style='border: 1px solid #9AC8DA;background: #FAFAFA;overflow-y: auto;max-height:100px;'>
+				<p style="text-align:center">Seleccione cualquier efecto liable para ver los detalles.</p>
+			</div>
+			<?php } ?>
+		</td>
 	</tr>
 </table>
-<div style='border: 1px solid #9AC8DA;background: #FAFAFA'>
-<table>
-	<tr>
-		<td><table id="tliable"></table></td>
-		<td><p style='text-align:center;font-size:2.2em'>Seleccione el banco y la fecha a conciliar, luego marque en la tabla las transacciones conciliadas.</p></td>
-	</tr>
-</table>
-</div>
 
 <?php echo $container_bl.$container_br; ?>
 <?php echo $form_end; ?>

@@ -204,7 +204,7 @@ class Bconci extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 510, width: 700, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -245,7 +245,7 @@ class Bconci extends Controller {
 
 		$bodyscript .= '
 		$("#fshow").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 400, width: 500, modal: true,
 			buttons: {
 				"Aceptar": function() {
 					$("#fshow").html("");
@@ -582,20 +582,20 @@ class Bconci extends Controller {
 		$edit->codbanc->mode = 'autohide';
 		$edit->codbanc->rule = 'required';
 		$edit->codbanc->option('','Seleccionar');
-		$edit->codbanc->options("SELECT TRIM(codbanc) AS codbanc,CONCAT_WS('-',codbanc,banco,numcuent) AS desca FROM banc WHERE tbanco<>'CAJ'");
+		$edit->codbanc->options("SELECT TRIM(codbanc) AS codbanc,CONCAT_WS(' ',codbanc,banco,numcuent) AS desca FROM banc WHERE tbanco<>'CAJ'");
 
 		$edit->saldoi = new inputField('Saldo Inicial','saldoi');
 		$edit->saldoi->rule='numeric|required';
 		$edit->saldoi->insertValue='0.0';
 		$edit->saldoi->css_class='inputnum';
-		$edit->saldoi->size =20;
+		$edit->saldoi->size =15;
 		$edit->saldoi->maxlength =18;
 
 		$edit->saldof = new inputField('Saldo Final','saldof');
 		$edit->saldof->insertValue='0.0';
 		$edit->saldof->rule='numeric|required';
 		$edit->saldof->css_class='inputnum';
-		$edit->saldof->size =20;
+		$edit->saldof->size =15;
 		$edit->saldof->maxlength =18;
 
 		$edit->deposito = new inputField('Dep&oacute;sitos','deposito');
@@ -605,7 +605,6 @@ class Bconci extends Controller {
 		$edit->deposito->css_class='inputnum';
 		$edit->deposito->size =20;
 		$edit->deposito->maxlength =18;
-		$edit->deposito->type='inputhidden';
 
 		$edit->credito = new inputField('Notas de Cr&eacute;dito','credito');
 		$edit->credito->rule='numeric';
@@ -614,7 +613,6 @@ class Bconci extends Controller {
 		$edit->credito->css_class='inputnum';
 		$edit->credito->size =20;
 		$edit->credito->maxlength =18;
-		$edit->credito->type='inputhidden';
 
 		$edit->cheque = new inputField('Cheques','cheque');
 		$edit->cheque->rule='numeric';
@@ -623,7 +621,6 @@ class Bconci extends Controller {
 		$edit->cheque->css_class='inputnum';
 		$edit->cheque->size =20;
 		$edit->cheque->maxlength =18;
-		$edit->cheque->type='inputhidden';
 
 		$edit->debito = new inputField('Notas de D&eacute;bito','debito');
 		$edit->debito->rule='numeric';
@@ -632,7 +629,38 @@ class Bconci extends Controller {
 		$edit->debito->css_class='inputnum';
 		$edit->debito->size =20;
 		$edit->debito->maxlength =18;
-		$edit->debito->type='inputhidden';
+
+		$edit->cdeposito = new inputField('Dep&oacute;sitos','cdeposito');
+		$edit->cdeposito->rule = 'numeric';
+		$edit->cdeposito->insertValue='0.0';
+		$edit->cdeposito->css_class='inputnum';
+		$edit->cdeposito->onkeyup='totalizar()';
+		$edit->cdeposito->size =12;
+		$edit->cdeposito->maxlength =18;
+
+		$edit->ccredito = new inputField('Notas de Cr&eacute;dito','ccredito');
+		$edit->ccredito->rule='numeric';
+		$edit->ccredito->insertValue='0.0';
+		$edit->ccredito->css_class='inputnum';
+		$edit->ccredito->onkeyup='totalizar()';
+		$edit->ccredito->size =12;
+		$edit->ccredito->maxlength =18;
+
+		$edit->ccheque = new inputField('Cheques','ccheque');
+		$edit->ccheque->rule='numeric';
+		$edit->ccheque->insertValue='0.0';
+		$edit->ccheque->css_class='inputnum';
+		$edit->ccheque->onkeyup='totalizar()';
+		$edit->ccheque->size =12;
+		$edit->ccheque->maxlength =18;
+
+		$edit->cdebito = new inputField('Notas de D&eacute;bito','cdebito');
+		$edit->cdebito->rule='numeric';
+		$edit->cdebito->insertValue='0.0';
+		$edit->cdebito->css_class='inputnum';
+		$edit->cdebito->onkeyup='totalizar()';
+		$edit->cdebito->size =12;
+		$edit->cdebito->maxlength =18;
 
 		//$edit->status = new inputField('Estatus','status');
 		//$edit->status->rule='';
@@ -669,6 +697,60 @@ class Bconci extends Controller {
 		if($edit->on_show()){
 			$conten['form'] =&  $edit;
 			$this->load->view('view_bconci', $conten);
+		}
+	}
+
+	function localizador($id=null){
+		if(!empty($id)){
+			$dbid      = $this->db->escape($id);
+			$transac   = $this->datasis->dameval("SELECT transac FROM bmov WHERE id=${dbid}");
+			$dbtransac = $this->db->escape($transac);
+
+			$mSQL='SELECT cod_cli, nombre,tipo_doc,numero FROM smov WHERE transac='.$dbtransac;
+			$query = $this->db->query($mSQL);
+			foreach ($query->result() as $i=>$row){
+				if($i==0){
+					echo 'Movimiento de cliente ('.$row->cod_cli.') '.$row->nombre.'<br>';
+				}
+				echo ' <b>'.trim($row->tipo_doc).'</b>-'.trim($row->numero).'<br>';
+			}
+
+			$mSQL='SELECT cod_cli, nombre,tipo_doc,numero FROM sfac WHERE transac='.$dbtransac;
+			$query = $this->db->query($mSQL);
+			foreach ($query->result() as $i=>$row){
+				if($i==0){
+					echo 'Facturaci&oacute;n ('.$row->cod_cli.') '.$row->nombre.'<br>';
+				}
+				echo ' <b>'.trim($row->tipo_doc).'</b>-'.trim($row->numero).'<br>';
+			}
+
+			$mSQL='SELECT cod_prv, nombre,tipo_doc,numero FROM sprm WHERE transac='.$dbtransac;
+			$query = $this->db->query($mSQL);
+			foreach ($query->result() as $i=>$row){
+				if($i==0){
+					echo 'Movimiento de proveedor ('.$row->cod_prv.') '.$row->nombre.'<br>';
+				}
+				echo ' <b>'.trim($row->tipo_doc).'</b>-'.trim($row->numero).'<br>';
+			}
+
+			$mSQL='SELECT cod_cli, nombre,tipo_doc,numero FROM otin WHERE transac='.$dbtransac;
+			$query = $this->db->query($mSQL);
+			foreach ($query->result() as $i=>$row){
+				if($i==0){
+					echo 'Otro ingreso ('.$row->cod_prv.') '.$row->nombre.'<br>';
+				}
+				echo ' <b>'.trim($row->tipo_doc).'</b>-'.trim($row->numero).'<br>';
+			}
+
+			$mSQL='SELECT tipo,numero FROM bcaj WHERE transac='.$dbtransac;
+			$query = $this->db->query($mSQL);
+			foreach ($query->result() as $i=>$row){
+				if($i==0){
+					echo 'Movimiento de caja<br>';
+				}
+				echo ' <b>'.trim($row->tipo).'</b>-'.trim($row->numero).'<br>';
+			}
+			echo '<p style="text-align:center;font-size:0.9em">Transacci&oacute;n: '.$transac.'</p>';
 		}
 	}
 
@@ -916,26 +998,39 @@ class Bconci extends Controller {
 				`codbanc` CHAR(2) NULL DEFAULT NULL,
 				`numcuent` VARCHAR(18) NULL DEFAULT NULL,
 				`banco` VARCHAR(30) NULL DEFAULT NULL,
-				`saldoi` DECIMAL(18,2) NULL DEFAULT NULL,
-				`saldof` DECIMAL(18,2) NULL DEFAULT NULL,
-				`deposito` DECIMAL(18,2) NULL DEFAULT NULL,
-				`credito` DECIMAL(18,2) NULL DEFAULT NULL,
-				`cheque` DECIMAL(18,2) NULL DEFAULT NULL,
-				`debito` DECIMAL(18,2) NULL DEFAULT NULL,
-				`status` CHAR(1) NULL DEFAULT NULL,
+				`saldoi` DECIMAL(18,2) NULL DEFAULT '0',
+				`saldof` DECIMAL(18,2) NULL DEFAULT '0',
+				`deposito` DECIMAL(18,2) NULL DEFAULT '0',
+				`credito` DECIMAL(18,2) NULL DEFAULT '0',
+				`cheque` DECIMAL(18,2) NULL DEFAULT '0',
+				`debito` DECIMAL(18,2) NULL DEFAULT '0',
+				`cdeposito` DECIMAL(18,2) NULL DEFAULT '0',
+				`ccredito` DECIMAL(18,2) NULL DEFAULT '0',
+				`ccheque` DECIMAL(18,2) NULL DEFAULT '0',
+				`cdebito` DECIMAL(18,2) NULL DEFAULT '0',
+				`status` CHAR(1) NULL DEFAULT 'A',
 				`usuario` VARCHAR(4) NULL DEFAULT NULL,
 				`estampa` DATE NULL DEFAULT NULL,
 				`hora` VARCHAR(8) NULL DEFAULT NULL,
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
 				PRIMARY KEY (`id`),
-				INDEX `fecha` (`fecha`),
-				UNIQUE INDEX `fecha_codbanc` (`fecha`, `codbanc`)
+				UNIQUE INDEX `fecha_codbanc` (`fecha`, `codbanc`),
+				INDEX `fecha` (`fecha`)
 			)
 			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM";
+			ENGINE=MyISAM
+			AUTO_INCREMENT=1";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('bconci');
-		//if(!in_array('<#campo#>',$campos)){ }
+
+		$campos=$this->db->list_fields('bconci');
+		if(!in_array('cdeposito',$campos)){
+			$mSQL="ALTER TABLE `bconci`
+			ADD COLUMN `cdeposito` DECIMAL(18,2) NULL DEFAULT NULL AFTER `debito`,
+			ADD COLUMN `ccredito` DECIMAL(18,2) NULL DEFAULT NULL AFTER `cdeposito`,
+			ADD COLUMN `ccheque` DECIMAL(18,2) NULL DEFAULT NULL AFTER `ccredito`,
+			ADD COLUMN `cdebito` DECIMAL(18,2) NULL DEFAULT NULL AFTER `ccheque`";
+			$this->db->simple_query($mSQL);
+		}
 	}
 }
