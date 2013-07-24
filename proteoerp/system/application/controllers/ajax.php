@@ -2209,7 +2209,7 @@ class Ajax extends Controller {
 
 		$salida .= style('themes/proteo/proteo.css');		
 		$salida .= '</head>'."\n";
-		$salida .= '<body>'."\n";
+		$salida .= '<body><center>'."\n";
 		$salida .= '<form action="'.site_url('ajax/consultaprecio/process').'" method="post" id="df1"><div class="alert"></div>'."\n";
 		$titu = "Destino";
 
@@ -2310,7 +2310,7 @@ class Ajax extends Controller {
 		$salida .= 	"Seleccione un Origen y/o Destino ";
 
 
-		$salida .= '</body>';
+		$salida .= '</center></body>';
 		$salida .= '</html>';
 		
 		echo $salida;
