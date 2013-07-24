@@ -2171,7 +2171,7 @@ class Ajax extends Controller {
 		$mSQL = "todavia";
 
 		$codofiorg = $this->input->post('codofiorg');
-		$codofides = $this->input->post('codofides');
+		$codofides = '00'; //$this->input->post('codofides');
 
 		$form = new DataForm(site_url('ajax/consultaprecio/process'));
 
@@ -2278,8 +2278,9 @@ class Ajax extends Controller {
 		}
 
 		$salida .= "\n<table><tr>";
-		$salida .= "<td>Origen: ".$form->codofiorg->output."</td><td>Destino: ".$form->codofides->output."</td>";
-		$salida .=  "<td>".$form->submit->output."</td>";
+		//$salida .= "<td>Origen: ".$form->codofiorg->output."</td><td>Destino: ".$form->codofides->output."</td>";
+		$salida .= "<td>Origen: ".$form->codofiorg->output."</td>";
+		$salida .= "<td>".$form->submit->output."</td>";
 		$salida .= "</tr></table>";
 		$salida .= '</form>'; 
 
@@ -2304,8 +2305,6 @@ class Ajax extends Controller {
 			 }); 
 		})
 </script>';
-
-		//$salida .= $mSQL;
 
 		$salida .= 	"Seleccione un Origen y/o Destino ";
 

@@ -904,7 +904,7 @@ class Tbreserva extends Controller {
 	}
 
 	//******************************************************************
-	// Busca los puestos disponibles
+	// Busca precios de pasajes
 	//
 	function consultaprecio(){
 		$this->rapyd->load("dataform");
@@ -1052,7 +1052,7 @@ class Tbreserva extends Controller {
 		
 		echo $salida;
 
-
+	}
 /*
 ////////////////////////////////////////////////////////////////////////
  
@@ -1064,7 +1064,7 @@ Cada ruta se asignan 2 choferes
 
 */	
 		
-	}
+
 
 	//******************************************************************
 	// Busca los puestos disponibles

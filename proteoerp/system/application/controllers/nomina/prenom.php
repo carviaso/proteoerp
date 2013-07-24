@@ -27,7 +27,6 @@ class Prenom extends Controller {
 		$form->contrato->rule='required';
 
 		$form->fechac = new dateonlyField('Fecha de corte', 'fechac');
-		//$form->fechac->rule='required|chfecha|callback_chcfecha';
 		$form->fechac->rule='required|chfecha';
 		$form->fechac->insertValue = date('Y-m-d');
 		$form->fechac->size     = 12;
@@ -179,7 +178,6 @@ class Prenom extends Controller {
 			'pk'      => $contrato
 		);
 		echo json_encode($rt);
-	
 
 	}
 
@@ -339,7 +337,6 @@ class Prenom extends Controller {
 			}
 		}
 	}
-
 
 
 	function montos(){

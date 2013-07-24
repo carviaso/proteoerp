@@ -177,6 +177,8 @@ class Pnomina extends fnomina {
 	function _traduce($formula){
 		$CODIGO=$this->ci->db->escape($this->CODIGO);
 
+		$ut = $datasis->utri();
+		
 		//para los if
 		$long=strlen($formula);
 		$pos=$long+1;
@@ -238,6 +240,8 @@ class Pnomina extends fnomina {
 		$formula=str_replace('XVARI4','$VARI4',$formula);
 		$formula=str_replace('XVARI5','$VARI5',$formula);
 		$formula=str_replace('XVARI6','$VARI6',$formula);
+
+		$formula=str_replace('XUT',$ut,$formula);
 
 		$formula=str_replace('VAL(','floatval(',$formula);
 

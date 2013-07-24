@@ -1736,4 +1736,13 @@ class Datasis {
 		return $mandale;
 	}
 
+
+	//******************************************************************
+	// Unidad Tributaria
+	//
+	function utri(){
+		$valor = $this->dameval("SELECT valor FROM utributa ORDER BY fecha DESC LIMIT 1");
+		return $valor;
+	}
+
 }
