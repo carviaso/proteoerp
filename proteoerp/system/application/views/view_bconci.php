@@ -41,7 +41,8 @@ $(function(){
 			{
 				name: "tipo",
 				index:"tipo",
-				width:40,
+				align:"center",
+				width:45,
 				formatter: function (cellvalue, options, rowObject) {
 					return cellvalue+'<input type="hidden" name="ittipo_'+rowObject.id+'" id="ittipo_'+rowObject.id+'" value="'+cellvalue+'">';
 				}
@@ -80,8 +81,6 @@ $(function(){
 
 	cambiaban();
 });
-
-
 
 
 function cambiaban(){
@@ -164,6 +163,7 @@ function tilda(id){
 					jQuery("#tliable").jqGrid('getLocalRow', id).concilia = ! jQuery("#tliable").jqGrid('getLocalRow', id).concilia;
 				}else{
 					$('#itid_'+id).attr("checked", !$('#itid_'+id).attr("checked"));
+					$.prompt(data.msj);
 				}
 				totalizar();
 			}
@@ -253,7 +253,12 @@ function totalizar(){
 	</tr>
 </table>
 <div style='border: 1px solid #9AC8DA;background: #FAFAFA'>
-<table id="tliable"></table>
+<table>
+	<tr>
+		<td><table id="tliable"></table></td>
+		<td><p style='text-align:center;font-size:2.2em'>Seleccione el banco y la fecha a conciliar, luego marque en la tabla las transacciones conciliadas.</p></td>
+	</tr>
+</table>
 </div>
 
 <?php echo $container_bl.$container_br; ?>

@@ -1009,8 +1009,8 @@ class Sinv extends Controller {
 			mSalida += "</td><td>";
 
 			mSalida += mTabla+" width=\'250\'>";
-			mSalida += "<tr class=\'tableheaderm\'><th colspan=\'3\'>Ultimas Compras</th></tr>";
-			mSalida += "<tr class=\'tableheader\'><th>Prov.</th><th>Fecha</th><th>Precio</th></tr>";
+			mSalida += "<tr class=\'tableheaderm\'><th colspan=\'3\'>&Uacute;ltimas Compras</th></tr>";
+			mSalida += "<tr class=\'tableheader\'><th>Prov.</th><th>Fecha</th><th>Costo</th></tr>";
 			mSalida += mClaser+"<td>"+ret.prov1+"</td><td>"+ret.pfecha1.substring(8,10)+"/"+ret.pfecha1.substring(5,7)+"/"+ret.pfecha1.substring(0,4)+"</td><td align=\'right\'>"+nformat(ret.prepro1)+"</td></tr>";
 			mSalida += mClaser+"<td>"+ret.prov2+"</td><td>"+ret.pfecha2.substring(8,10)+"/"+ret.pfecha2.substring(5,7)+"/"+ret.pfecha2.substring(0,4)+"</td><td align=\'right\'>"+nformat(ret.prepro2)+"</td></tr>";
 			mSalida += mClaser+"<td>"+ret.prov3+"</td><td>"+ret.pfecha3.substring(8,10)+"/"+ret.pfecha3.substring(5,7)+"/"+ret.pfecha3.substring(0,4)+"</td><td align=\'right\'>"+nformat(ret.prepro3)+"</td></tr>";

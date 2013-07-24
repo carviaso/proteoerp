@@ -2045,7 +2045,11 @@ class gser extends Controller {
 			$banco  = $banco;
 			$this->cheques->genera($nombre,$monto,$banco,$fecha,true);
 		}else{
-			echo 'Egreso no fue pagado con cheque de banco';
+			if($tipo=='D'){
+				echo 'Egreso fue pagado por transferencia bancaria';
+			}else{
+				echo 'Egreso no fue pagado con cheque de banco';
+			}
 		}
 	}
 

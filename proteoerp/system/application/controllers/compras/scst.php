@@ -65,7 +65,7 @@ class Scst extends Controller {
 		$grid->wbotonadd(array('id'=>'cprecios','img'=>'images/precio.png' ,'alt' => 'Ajustar Precios'    ,'label'=>'Cambiar Precios', ));
 		$grid->wbotonadd(array('id'=>'bcmonto' ,'img'=>'images/precio.png' ,'alt' => 'Modificar la CxP'   ,'label'=>'Modificar la CxP'));
 
-		if ( $this->datasis->traevalor('MOTOS') == 'S' )
+		if($this->datasis->traevalor('MOTOS')=='S')
 			$grid->wbotonadd(array('id'=>'vehiculo', 'img'=>'images/carro.png',  'alt' => 'Seriales Vehiculares',   'label'=>'Seriales Vehiculares'));
 
 		$grid->wbotonadd(array('id'=>'actualizar','img'=>'images/arrow_up.png' ,'alt' => 'Actualizar','label'=>'Actualizar'));
@@ -162,7 +162,7 @@ class Scst extends Controller {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				if ( ret.actuali >= ret.fecha ) {
+				if(ret.actuali >= ret.fecha){
 					$.prompt("<h1>Compra ya Actualizada</h1>Debe reversarla si desea hacer modificaciones");
 				} else {
 					mId = id;
@@ -173,7 +173,7 @@ class Scst extends Controller {
 						$("#fcompra" ).dialog( "open" );
 					});
 				}
-			} else {
+			}else{
 				$.prompt("<h1>Por favor Seleccione una compra</h1>");
 			}
 		};';
@@ -341,7 +341,7 @@ class Scst extends Controller {
 							$("#fcompra").html("");
 							$("#factuali").html(data);
 							$("#factuali").dialog("open");
-						})
+						});
 					';
 		} else {
 			$bodyscript .= '
@@ -395,7 +395,7 @@ class Scst extends Controller {
 
 		$bodyscript .= '
 			$("#factuali").dialog({
-				autoOpen: false, height: 300, width: 450, modal: true,
+				autoOpen: false, height: 360, width: 450, modal: true,
 				buttons: {
 					"Actualizar": function() {
 						var bValid = true;
@@ -438,7 +438,7 @@ class Scst extends Controller {
 		//Cambiar Precios
 		$bodyscript .= '
 			$("#cprecios").click(function() {
-				var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
 					if ( ret.actuali >= ret.fecha ) {
@@ -452,7 +452,7 @@ class Scst extends Controller {
 						});
 					}
 				} else { $.prompt("<h1>Por favor Seleccione una compra no actualizada</h1>");}
-			});'."\n";
+			});';
 
 		$post = $this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+res.id+\'/id\'').';';
 		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "570", $width = "860", 'fcompra', $post );
@@ -513,7 +513,7 @@ class Scst extends Controller {
 								success: function(r,s,x){
 									try{
 										var json = JSON.parse(r);
-										if ( json.status == "A" ) {
+										if(json.status == "A"){
 											$( "#fcmonto" ).dialog( "close" );
 											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 											$("#fcmonto").html("");
@@ -540,7 +540,7 @@ class Scst extends Controller {
 			});';
 
 		$bodyscript .= '
-			$( "#fvehi" ).dialog({
+			$("#fvehi").dialog({
 				autoOpen: false, height: 570, width: 860, modal: true,
 				buttons: {
 					"Guardar": function() {
@@ -2585,7 +2585,7 @@ class Scst extends Controller {
 
 		$script = '$(function(){ $("#fecha").datepicker({ dateFormat: "dd/mm/yy" }); })';
 
-		$form = new DataForm("compras/scst/actualizar/$control/process");
+		$form = new DataForm("compras/scst/actualizar/${control}/process");
 		$form->script($script);
 
 		$scstrow = $this->datasis->damerow("SELECT proveed,nombre,fecha,montotot, montoiva,montonet,serie,vence FROM scst WHERE control=$dbcontrol");
@@ -2619,7 +2619,9 @@ class Scst extends Controller {
 		$form->cprecio->option('D','Dejar el precio mayor');
 		$form->cprecio->option('N','No');
 		$form->cprecio->option('S','Si');
-		$form->cprecio->style = 'width:150px;';
+		$form->cprecio->append(' <sup>1</sup>');
+		$form->cprecio->title ='Ver nota 1';
+		$form->cprecio->style = 'width:170px;';
 		$form->cprecio->rule  = 'required|enum[D,N,S]';
 
 		//$form->ffecha = new dateonlyField('Fecha de la compra', 'fecha','d/m/Y');
@@ -2632,7 +2634,18 @@ class Scst extends Controller {
 		$form->fecha->insertValue = date('Y-m-d');
 		$form->fecha->rule='required|callback_chddate';
 		$form->fecha->calendar = false;
+		$form->fecha->title='El sistema asume que esta es la fecha en que la mercanc&iacute;a entra en inventario y de la retenci&oacute;n de IVA si aplica al presente caso';
 		$form->fecha->size=10;
+		$htmltabla='
+		<div  style="background-color:#9D9FFF;font-size:1.2em">
+		<span style="font-size:1.2em"><sup>1</sup> Opciones para <b>cambio de precios</b>:</span>
+		<ul style="padding: 0px;margin: 0px 0px 0px 20px;">
+			<li><b>Dejar mayor</b>: Coloca el precio mayor entre el precio en inventario y el nuevo precio seg&uacute;n compra.</li>
+			<li><b>No</b>:Respeta los precios de los productos en inventario e ignora los provenientes de la compra.</li>
+			<li><b>Si</b>:Coloca los precios provenientes de la compra reemplazando los del inventario.</li>
+		</ul>
+		</div>';
+		$form->container = new containerField('tabafo2',$htmltabla);
 
 		$form->build_form();
 

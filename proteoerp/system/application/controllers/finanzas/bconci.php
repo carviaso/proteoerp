@@ -32,7 +32,8 @@ class Bconci extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array('id'=>'impbtn', 'img' =>'assets/default/images/print.png', 'alt' => 'Imprimir Conciliaci&oacute;n','label'=>'Imprimir Conciliaci&oacute;n'));
+		$grid->wbotonadd(array('id'=>'cabtn' , 'img'=>'images/precio.png'               , 'alt' => 'Abrir o cerrar consignaci&oacute;n', 'label'=>'Abrir/Cerrar conciliaci&oacute;n'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -59,7 +60,7 @@ class Bconci extends Controller {
 	//Funciones de los Botones
 	//***************************
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
 		function bconciadd(){
@@ -74,12 +75,16 @@ class Bconci extends Controller {
 		function bconciedit(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
-				});
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				if(ret.status=="C"){
+					$.prompt("<h1>No se puede modificar una conciliaci&oacute;n cerrada.</h1>");
+				}else{
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
+						$("#fedita").html(data);
+						$("#fedita").dialog( "open" );
+					});
+				}
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
@@ -141,6 +146,63 @@ class Bconci extends Controller {
 			';
 
 		$bodyscript .= '
+			$("#impbtn").click( function(){
+				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if(id){
+					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+
+					var form = document.createElement("form");
+					form.setAttribute("method", "post");
+					form.setAttribute("action", "'.site_url('reportes/ver/BCONCI/search/osp').'");
+
+					form.setAttribute("target", "repoconci");
+
+					var fecha = document.createElement("input");
+					fecha.setAttribute("name" , "fecha");
+					fecha.setAttribute("value", ret.fecha.substr(0,7));
+
+					var banco = document.createElement("input");
+					banco.setAttribute("name" , "codbanc");
+					banco.setAttribute("value", ret.codbanc);
+
+					form.appendChild(fecha);
+					form.appendChild(banco);
+					document.body.appendChild(form);
+
+					window.open(\''.site_url('reportes/ver/BCONCI').'\', \'repoconci\', \'scrollbars=yes,menubar=no,height=600,width=800,resizable=yes,toolbar=no,status=yes\');
+
+					form.submit();
+				}else{
+					$.prompt("<h1>Por favor Seleccione una Conciliaci&oacute;n.</h1>");
+				}
+			});';
+
+		$bodyscript .= '
+			$("#cabtn").click( function(){
+				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if(id){
+					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+					$.post("'.site_url($this->url.'cstatus').'/"+ret.id,
+						function(data){
+							try{
+								var json = JSON.parse(data);
+								if(json.status == "A"){
+									jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+								}else{
+									$.prompt(json.msj);
+								}
+							}catch(e){
+								$.prompt("Problemas al actualizar, favor intente mas tarde");
+							}
+
+						}
+					);
+				}else{
+					$.prompt("<h1>Por favor Seleccione una Conciliaci&oacute;n</h1>");
+				}
+			});';
+
+		$bodyscript .= '
 		$("#fedita").dialog({
 			autoOpen: false, height: 500, width: 700, modal: true,
 			buttons: {
@@ -156,13 +218,13 @@ class Bconci extends Controller {
 							try{
 								var json = JSON.parse(r);
 								if (json.status == "A"){
-									apprise("Registro Guardado");
+									$.prompt("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
 									'.$this->datasis->jwinopen(site_url('formatos/ver/BCONCI').'/\'+res.id+\'/id\'').';
 									return true;
 								} else {
-									apprise(json.mensaje);
+									$.prompt(json.mensaje);
 								}
 							}catch(e){
 								$("#fedita").html(r);
@@ -212,8 +274,7 @@ class Bconci extends Controller {
 		});';
 
 		$bodyscript .= '});';
-
-		$bodyscript .= "\n</script>\n";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -240,11 +301,11 @@ class Bconci extends Controller {
 
 
 		$grid->addField('codbanc');
-		$grid->label('Cod.Banc');
+		$grid->label('Banco');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 40,
+			'width'         => 50,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:2, maxlength: 2 }',
@@ -252,7 +313,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('numcuent');
-		$grid->label('# Cuenta');
+		$grid->label('Nro.Cuenta');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -264,7 +325,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('banco');
-		$grid->label('Banco');
+		$grid->label('Nombre Banco');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -321,7 +382,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('credito');
-		$grid->label('Cr&eacute;dito');
+		$grid->label('N.Cr&eacute;ditos');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -336,7 +397,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('cheque');
-		$grid->label('Cheque');
+		$grid->label('Cheques');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -351,7 +412,7 @@ class Bconci extends Controller {
 
 
 		$grid->addField('debito');
-		$grid->label('D&eacute;bito');
+		$grid->label('N.D&eacute;bitos');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -366,12 +427,13 @@ class Bconci extends Controller {
 
 
 		$grid->addField('status');
-		$grid->label('Status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 40,
+			'width'         => 45,
 			'edittype'      => "'text'",
+			'align'         => "'center'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
@@ -382,7 +444,7 @@ class Bconci extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 40,
+			'width'         => 45,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:4, maxlength: 4 }',
@@ -409,6 +471,7 @@ class Bconci extends Controller {
 			'editable'      => $editar,
 			'width'         => 80,
 			'edittype'      => "'text'",
+			'align'         => "'center'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
@@ -435,6 +498,19 @@ class Bconci extends Controller {
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
+
+		$grid->setOnSelectRow('
+			function(id){ },
+			afterInsertRow:
+			function(rid, aData, rowe){
+				if(aData.status=="A"){
+					$(this).jqGrid( "setCell", rid, "fecha","", {color:"#OOOOOO", background:"#FFDD00" });
+				}
+				if(aData.status=="C" || aData.status==""){
+					$(this).jqGrid( "setCell", rid, "fecha","", {color:"#FFFFFF", background:"#337AC8" });
+				}
+			}
+		');
 
 		#show/hide navigations buttons
 		$grid->setAdd(    $this->datasis->sidapuede('BCONCI','INCLUIR%' ));
@@ -477,58 +553,7 @@ class Bconci extends Controller {
 	* Guarda la Informacion
 	*/
 	function setData(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = "??????";
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM bconci WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('bconci', $data);
-					echo "Registro Agregado";
-
-					logusu('BCONCI',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM bconci WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM bconci WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE bconci SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("bconci", $data);
-				logusu('BCONCI',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('bconci', $data);
-				logusu('BCONCI',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM bconci WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM bconci WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM bconci WHERE id=$id ");
-				logusu('BCONCI',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+		echo 'Deshabilitado';
 	}
 
 	function dataedit(){
@@ -540,9 +565,9 @@ class Bconci extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->pre_process( 'insert', '_pre_insert');
+		$edit->pre_process( 'update', '_pre_update');
+		$edit->pre_process( 'delete', '_pre_delete');
 
 		$edit->fecha = new dateonlyField('Fecha','fecha','m/Y');
 		$edit->fecha->mode = 'autohide';
@@ -609,10 +634,10 @@ class Bconci extends Controller {
 		$edit->debito->maxlength =18;
 		$edit->debito->type='inputhidden';
 
-		$edit->status = new inputField('Estatus','status');
-		$edit->status->rule='';
-		$edit->status->size =3;
-		$edit->status->maxlength =1;
+		//$edit->status = new inputField('Estatus','status');
+		//$edit->status->rule='';
+		//$edit->status->size =3;
+		//$edit->status->maxlength =1;
 
 		$edit->usuario = new autoUpdateField('usuario',$this->secu->usuario(),$this->secu->usuario());
 		$edit->estampa = new autoUpdateField('estampa',date('Ymd')  , date('Ymd'));
@@ -651,27 +676,73 @@ class Bconci extends Controller {
 		$id    = $this->input->post('id');
 		$fecha = $this->input->post('fecha');
 		$act   = $this->input->post('act');
+		$afectados=0;
 
-		$rt=array('status'=>'B');
+		$rt=array('status'=>'B', 'msj' => 'Problema al conciliar el efecto, intente mas tarde.' );
 
 		if($fecha !==false && $id !==false && $act !== false){
-			$dbid = $this->db->escape($id);
-			$act  = (bool) $act;
+			$dbid    = $this->db->escape($id);
+			$act     = ($act=='false')? false : true;
+			$arr_fec = explode('/',$fecha);
+			$ffecha  = date('Y-m-d', mktime(0, 0, 0,$arr_fec[0]+1, 0,$arr_fec[1]));
 
 			if($act){
-				$arr_fec  = explode('/',$fecha);
-				$concilia = date('Y-m-d', mktime(0, 0, 0,$arr_fec[0]+1, 0,$arr_fec[1]));
+				$factor     = 1;
+				$concilia   = $ffecha;
 				$dbconcilia = $this->db->escape($concilia);
 			}else{
+				$factor     = -1;
 				$dbconcilia = 'NULL';
 			}
 
-			//$fconci = $this->datasis->dameval("SELECT concilia FROM bmov WHERE id = ${dbid}");
+			$row = $this->datasis->damerow("SELECT tipo_op,codbanc,monto FROM bmov WHERE id = ${dbid}");
+			if(!empty($row)){
+				$ittipo   = $row['tipo_op'];
+				$dbcodbanc= $this->db->escape($row['codbanc']);
+				$dbffecha = $this->db->escape($ffecha);
+				$monto    = $factor*$row['monto'];
+
+				$status = $this->datasis->dameval("SELECT status FROM bconci WHERE fecha=${dbffecha} AND codbanc=${dbcodbanc}");
+				if($status!='C'){
+					if($ittipo=='NC'){
+						$campo ='credito' ;
+					}elseif($ittipo=='ND'){
+						$campo ='debito'  ;
+					}elseif($ittipo=='CH'){
+						$campo ='cheque'  ;
+					}elseif($ittipo=='DE'){
+						$campo ='deposito';
+					}else{
+						$rt['status'] = 'B';
+						echo json_encode($rt);
+						return false;
+					}
+					$mSQL = "UPDATE bconci SET ${campo}=${campo}+(${monto}) WHERE fecha=${dbffecha} AND codbanc=${dbcodbanc}";
+					$ban=$this->db->simple_query($mSQL);
+					if(!$ban){
+						$rt['msj'] = 'Problema al actualizar la conciliacion, intente mas tarde.';
+						echo json_encode($rt);
+						return false;
+					}else{
+						$afectados=$this->db->affected_rows();
+					}
+				}else{
+					$rt['msj'] = 'Conciliacion cerrada.';
+					echo json_encode($rt);
+					return false;
+				}
+			}
 
 			$mSQL = "UPDATE bmov SET concilia=${dbconcilia} WHERE id = ${dbid}";
 			$ban=$this->db->simple_query($mSQL);
 			if($ban){
+				$rt['msj']    = '';
 				$rt['status'] = 'A';
+			}else{
+				if($afectados>0){
+					$mSQL = "UPDATE bconci SET ${campo}=${campo}-(${monto}) WHERE fecha=${dbffecha} AND codbanc=${dbcodbanc}";
+					$ban=$this->db->simple_query($mSQL);
+				}
 			}
 		}
 
@@ -679,6 +750,7 @@ class Bconci extends Controller {
 	}
 
 	function _pre_insert($do){
+		$do->set('status','A');
 		$codbanc  = $do->get('codbanc');
 		$dbcodbanc= $this->db->escape($codbanc);
 		$fecha    = $do->get('fecha');
@@ -686,16 +758,27 @@ class Bconci extends Controller {
 		$do->set('fecha',$fecha);
 
 		$dbfecha  = $this->db->escape($fecha);
-		$ant = intval($this->datasis->dameval('SELECT COUNT(*) FROM bconci WHERE codbanc='.$dbcodbanc.' AND fecha='.$dbfecha));
+		$ant = intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM bconci WHERE codbanc='.$dbcodbanc.' AND fecha='.$dbfecha));
 		if($ant>0){
 			$do->error_message_ar['pre_ins']='Ya existe una conciliacion con esa fecha para el mismo banco.';
 			return false;
 		}
 
-		return $this->_pre_update($do);
+		return $this->_pre_inserup($do);
 	}
 
 	function _pre_update($do){
+		$id    = $do->get('id');
+		$status= $this->datasis->dameval('SELECT status FROM bconci WHERE id='.$id);
+		if($status!='C'){
+			return $this->_pre_inserup($do);
+		}else{
+			$do->error_message_ar['pre_upd']='Conciliacion ya fue cerrada, no se puede modificar.';
+			return false;
+		}
+	}
+
+	function _pre_inserup($do){
 		$codbanc  = $do->get('codbanc');
 		$fecha    = $do->get('fecha');
 
@@ -705,7 +788,7 @@ class Bconci extends Controller {
 			$do->set('numcuent',$row['numcuent']);
 			$do->set('banco'   ,$row['banco']);
 		}else{
-			$do->error_message_ar['pre_ins']='Banco no valido';
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Banco no valido';
 			return false;
 		}
 
@@ -761,7 +844,11 @@ class Bconci extends Controller {
 	}
 
 	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
+		$status=$do->get('status');
+		if($status=='C'){
+			$do->error_message_ar['pre_del']='No se puede eliminar una conciliacion cerrada.';
+			return false;
+		}
 		return true;
 	}
 
@@ -782,14 +869,42 @@ class Bconci extends Controller {
 	}
 
 	function _post_delete($do){
-		$fecha  = $do->get('fecha');
-		$dbfecha= $this->db->escape($fecha);
+		$fecha    = $do->get('fecha');
+		$codbanc  = $do->get('codbanc');
+		$dbfecha  = $this->db->escape($fecha);
+		$dbcodbanc= $this->db->escape($codbanc);
 
-		$mSQL= 'UPDATE bmov SET concilia=\'0000-00-00\' WHERE concilia='.$dbfecha;
+		$mSQL= 'UPDATE bmov SET concilia=\'0000-00-00\' WHERE concilia='.$dbfecha.' AND codbanc='.$dbcodbanc;
 		$this->db->simple_query($mSQL);
 
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits ${primary} fecha ${fecha}");
+	}
+
+	function cstatus($id){
+		$dbid  = $this->db->escape($id);
+		$status= $this->datasis->dameval('SELECT status FROM bconci WHERE id='.$dbid);
+		if($status=='A'){
+			$dbcstatus='\'C\'';
+		}else{
+			$dbcstatus='\'A\'';
+		}
+
+		$mSQL = "UPDATE bconci SET status=${dbcstatus} WHERE id = ${dbid}";
+		$ban=$this->db->simple_query($mSQL);
+		if($ban){
+			$rt['msj']    = '';
+			$rt['status'] = 'A';
+
+			$accion = ($status=='A')? 'CERRADA' : 'ABIERTA';
+			logusu('bconci',"CONCILIACION ${id} ${accion}");
+		}else{
+			$rt['msj']    = '';
+			$rt['status'] = 'B';
+		}
+		echo json_encode($rt);
+		return true;
+
 	}
 
 	function instalar(){
