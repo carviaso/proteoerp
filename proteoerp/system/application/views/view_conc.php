@@ -64,7 +64,23 @@ if($form->_status <> 'show'){ ?>
 	<tr>
 		<td class="littletablerowth"><?php echo $form->liquida->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->liquida->output; ?></td>
+		<td class="littletablerowth"><?php echo $form->psueldo->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->psueldo->output; ?></td>
 	</tr>
 </table>
 </fieldset>
+
+<fieldset  style='border: 1px outset #FEB404;background: #FCFFFC;'>
+<table width='100%'>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->liquida->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->liquida->output; ?></td>
+		<td class="littletablerowth"><?php echo $form->psueldo->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->psueldo->output; ?></td>
+		<td class="littletablerowth"><?php echo $form->dias->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->dias->output; ?></td>
+	</tr>
+</table>
+</fieldset>
+
 <?php echo $form_end; ?>

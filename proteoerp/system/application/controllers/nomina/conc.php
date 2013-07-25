@@ -15,10 +15,17 @@ class Conc extends Controller {
 
 	function index(){
 		if ( !$this->datasis->iscampo('conc','id') ) {
-			$this->db->simple_query('ALTER TABLE conc DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE conc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE conc ADD UNIQUE INDEX concepto (concepto)');
+			$this->db->query('ALTER TABLE conc DROP PRIMARY KEY');
+			$this->db->query('ALTER TABLE conc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->query('ALTER TABLE conc ADD UNIQUE INDEX concepto (concepto)');
 		}
+
+		if ( !$this->datasis->iscampo('conc','dias') ) 
+			$this->db->query('ALTER TABLE conc ADD COLUMN dias INT NULL DEFAULT 0 COMMENT "Dias que afecta" AFTER liquida');
+	
+		if ( !$this->datasis->iscampo('conc','psueldo') ) 
+			$this->db->query('ALTER TABLE conc ADD COLUMN psueldo CHAR(1) NULL DEFAULT "N" COMMENT "Forma Parte del Sueldo" AFTER dias');
+
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -477,6 +484,31 @@ class Conc extends Controller {
 			'formoptions'   => '{label:"Liquidaciones", rowpos:'.$linea.', colpos:2 }'
 		));
 
+		$grid->addField('psueldo');
+		$grid->label('Sueldo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'editrules'     => '{ required:true}',
+			'edittype'      => "'select'",
+			'editoptions'   => '{value: {"S":"Si", "N":"No"}, style:"width:80px" }',
+			'formoptions'   => '{label:"Liquidaciones", rowpos:'.$linea.', colpos:2 }'
+		));
+
+		$grid->addField('dias');
+		$grid->label('Dias');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 40,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+		));
 
 		$linea = $linea + 1;
 		$grid->addField('encab1');
@@ -550,7 +582,6 @@ class Conc extends Controller {
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
 
-
 		$linea = $linea + 1;
 		$grid->addField('tipoa');
 		$grid->label('Acreedor');
@@ -588,6 +619,7 @@ class Conc extends Controller {
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
+			'hidden'        => 'true',
 			'align'         => "'center'",
 			'frozen'        => 'true',
 			'width'         => 40,
@@ -1032,10 +1064,21 @@ script;
 		$edit->liquida->option("N","N"); 
 
 		$edit->aplica = new inputField('Aplica','aplica');
-		$edit->aplica->rule='';
-		$edit->aplica->size =3;
-		$edit->aplica->maxlength =1;
+		$edit->aplica->rule      = '';
+		$edit->aplica->size      =  3;
+		$edit->aplica->maxlength =  1;
 
+		$edit->dias = new inputField('Afecta Dias trabajados','dias');
+		$edit->dias->rule='integer';
+		$edit->dias->css_class='inputonlynum';
+		$edit->dias->insertValue = 0;
+		$edit->dias->size        = 6;
+		$edit->dias->maxlength   = 5;
+
+		$edit->psueldo = new dropdownField('Forma parte del Sueldo','psueldo');
+		$edit->psueldo->option("S","S");
+		$edit->psueldo->option("N","N"); 
+		$edit->psueldo->style ="width:50px;";     
 
 		$edit->build();
 
