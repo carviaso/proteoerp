@@ -592,7 +592,7 @@ border-bottom-right-radius:5px;
 				$this->rows[]=$nname;
 				$this->fCols[$nname]=$field;
 				$this->fcount++;
-				//$this->setType($nname,'real');
+				$this->setType($nname,'real');
 			}
 		}
 	}
