@@ -794,9 +794,22 @@ class Sinv extends Controller {
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-		};
-		';
+		};';
 
+		$bodyscript .= '
+		function sinvshow(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
 
 		// Fotos
 		$bodyscript .= '
@@ -1019,8 +1032,7 @@ class Sinv extends Controller {
 			mSalida += "</td></tr>";
 			mSalida += "</table>";
 			return mSalida;
-		}
-		';
+		}';
 
 		$mSQL = 'SELECT nombre, nombre descrip FROM formatos WHERE nombre LIKE "ETIQUETA%" AND (proteo IS NOT NULL OR tcpdf IS NOT NULL) AND (proteo!="" OR tcpdf!="") ORDER BY nombre';
 		$etiq = $this->datasis->llenaopciones($mSQL, false, 'mforma');
@@ -1099,6 +1111,20 @@ class Sinv extends Controller {
 			s = grid.getGridParam(\'selarrrow\');
 			';
 
+		$bodyscript .= '
+		$("#fshow").dialog({
+			autoOpen: false, height: 450, width: 700, modal: true,
+			buttons: {
+				"Aceptar": function() {
+					$("#fshow").html("");
+					$( this ).dialog( "close" );
+				},
+			},
+			close: function() {
+				$("#fshow").html("");
+			}
+		});';
+
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 		return $bodyscript;
@@ -1110,7 +1136,7 @@ class Sinv extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -2658,7 +2684,7 @@ class Sinv extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: sinvadd, editfunc: sinvedit, delfunc: sinvdel");
+		$grid->setBarOptions('addfunc: sinvadd, editfunc: sinvedit, delfunc: sinvdel, viewfunc: sinvshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -2676,8 +2702,7 @@ class Sinv extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid  = $this->jqdatagrid;
 		$iactivo = $this->input->post('verinactivos');
 
