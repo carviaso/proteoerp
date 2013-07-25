@@ -26,6 +26,8 @@ class Buscar extends Controller
 	//parametro que define el grupo de base de datos a usar
 	var $dbgroup='';
 	var $order_by='';
+	//asc o desc
+	var $direction='asc';
 
 	function Buscar(){
 		parent::Controller();
@@ -49,8 +51,8 @@ class Buscar extends Controller
 				$uris[$nombre]=$valor;
 			}
 		}
-		
-		$tablas=$this->db->query("show tables");
+
+		$tablas=$this->db->query('show tables');
 		$tablas=$tablas->result_array();
 		$tables=array();
 		foreach($tablas as $row)
@@ -68,7 +70,7 @@ class Buscar extends Controller
 			else
 			$filtros[$this->tabla][$k]=$v;
 		}
-		
+
 		$campos=array();
 		foreach($filtros as $k=>$v){
 			$mSQL="SHOW FIELDS FROM $k WHERE Field IN ('".implode('\',\'',array_keys($v)).'\')';
@@ -80,7 +82,7 @@ class Buscar extends Controller
 			}
 			$campos=array_merge($campos,$temp);
 		}
-		
+
 		$r=array();
 		$rk=array();
 		if(!isset($this->retornar[0])){
@@ -92,25 +94,24 @@ class Buscar extends Controller
 			$r=$this->retornar;
 			foreach($this->retornar as $k=>$v)
 				foreach($v as $kk=>$vv)
-					$rk[]=$kk;	
+					$rk[]=$kk;
 		}
 		$prev=array_keys($this->columnas);
 		foreach($r as $k=>$v)
 			$prev= array_merge($prev, array_keys($v));
-		
+
 		$prev2= array_unique($prev);
 		foreach($prev2 AS $ddata){
 				$ddata=$ddata;
 				$select[]=$ddata;
 		}
-		
+
 		$filter = new DataFilter2('Par&aacute;metros de B&uacute;squeda');
 		$filter->db->select($select);
 		$filter->db->from($this->tabla);
 
 		if (!empty($this->groupby)) $filter->db->groupby($this->groupby);
-		//$filter->db->order_by('scli.nombre');
-		
+
 		foreach($this->join as $row){
 			if(count($row)==3){
 				$join=true;
@@ -121,7 +122,7 @@ class Buscar extends Controller
 			$join=true;
 			$filter->db->join($this->join[0],$this->join[1],$this->join[2]);
 		}
-		
+
 		foreach($campos as $fila){
 			$campo  =$fila['Field'];
 			$campodb=$fila['db_name'];
@@ -210,20 +211,20 @@ class Buscar extends Controller
 				$rk[$k]=$v;
 			}
 		}
-		
+
 		$link='<j_escape><#'.implode("#></j_escape>,<j_escape><#",$rk).'#></j_escape>';
 		//$link='\'<#'.implode("#>','<#",array_keys($this->retornar)).'#>\'';
 		$link = "javascript:pasar($link);";
 		$grid = new DataGrid("Resultados");
 		$grid->use_function('j_escape');
 		$grid->per_page = 10;
-		if (!empty($this->order_by)) $grid->order_by($this->order_by);
+		if (!empty($this->order_by)) $grid->order_by($this->order_by,$this->direction);
 		$i=0;
 		foreach ($this->columnas as $campo => $titulo){
 			if ($i==0){
 				$cp1=strrchr($campo, '.');
 				if ($cp1)$campo=str_replace('.','',$cp1);
-				
+
 				if (empty($this->order_by))
 				$grid->column_orderby($titulo,"<a href=\"$link\"><#".substr($campo,strpos($campo,'.'))."#></a>", $campo);
 			}else{
@@ -248,7 +249,7 @@ class Buscar extends Controller
 				if($i==0) $pjs1.="p$i";
 				else
 				$pjs1.=",p$i";
-				
+
 				$pjs2.="
 				if(window.opener.document.getElementById('$id').nodeName=='SPAN')
 				window.opener.document.getElementById('$id').innerHTML = p$i;
@@ -258,7 +259,7 @@ class Buscar extends Controller
 				$i++;
 			}
 		}
-		
+
 		$jscript ="<SCRIPT LANGUAGE=\"JavaScript\">\n";
 		$jscript.="function pasar($pjs1){\n";
 		$jscript.=" if (window.opener && !window.opener.closed){\n";
@@ -290,7 +291,7 @@ class Buscar extends Controller
 		$arreglo=$this->session->flashdata('modbus');
 		//echo '<pre>';print_r($this->session->userdata);echo '</pre>';
 		//echo 'ARREGLO <pre>';print_r($arreglo);echo '</pre>';
-		
+
 
 		if($arreglo==FALSE or !array_key_exists($id, $arreglo)){
 			echo '<pre>';print_r($this->session->userdata);echo '</pre>';
@@ -303,12 +304,13 @@ class Buscar extends Controller
 		$this->filtro  =$modbus['filtro'];
 		$this->retornar=$modbus['retornar'];
 		$this->titulo  =$modbus['titulo'];
-		
+
 	}
 
 	function _db2prop(){
-		$id = $this->uri->segment(3);
-		$query = $this->db->query("SELECT parametros FROM modbus WHERE id='$id'");
+		$id  = $this->uri->segment(3);
+		$dbid= $this->db->escape($id);
+		$query = $this->db->query("SELECT parametros FROM modbus WHERE id=${dbid}");
 
 		if ($query->num_rows() > 0){
 			$row = $query->row();
@@ -318,12 +320,15 @@ class Buscar extends Controller
 			$this->filtro  =$modbus['filtro'];
 			$this->retornar=$modbus['retornar'];
 			$this->titulo  =$modbus['titulo'];
-			if (isset($modbus['p_uri']))   $this->p_uri  =$modbus['p_uri'];
-			if (isset($modbus['where']))   $this->where  =$modbus['where'];
-			if (isset($modbus['script']))  $this->script =$modbus['script'];
-			if (isset($modbus['join']))    $this->join   =$modbus['join'];
-			if (isset($modbus['groupby'])) $this->groupby =$modbus['groupby'];
-			if (isset($modbus['dbgroup'])) $this->dbgroup =$modbus['dbgroup'];
+			if(isset($modbus['p_uri']))   $this->p_uri  =$modbus['p_uri'];
+			if(isset($modbus['where']))   $this->where  =$modbus['where'];
+			if(isset($modbus['script']))  $this->script =$modbus['script'];
+			if(isset($modbus['join']))    $this->join   =$modbus['join'];
+			if(isset($modbus['groupby'])) $this->groupby=$modbus['groupby'];
+			if(isset($modbus['dbgroup'])) $this->dbgroup=$modbus['dbgroup'];
+			if(isset($modbus['orderby']))   $this->order_by  =$modbus['orderby'];
+			if(isset($modbus['direction'])) $this->direction =$modbus['direction'];
+
 		}
 		//echo '<pre>';print_r($this->session->userdata);echo '</pre>';
 	}
@@ -335,7 +340,7 @@ class Buscar extends Controller
 		  `idm` varchar(50) NOT NULL default '',
 		  `parametros` text,
 		  PRIMARY KEY  (`id`)
-		) ENGINE=MyISAM AUTO_INCREMENT=1745 DEFAULT CHARSET=latin1";
+		) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1";
 
 		$this->db->simple_query($mSQL);
 		$query="ALTER TABLE `stal`  CHANGE COLUMN `nombre` `nombre` TEXT NULL DEFAULT NULL";
