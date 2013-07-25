@@ -316,9 +316,11 @@ border-bottom-right-radius:5px;
 					}
 				}
 
-				if(    in_array($this->DBfieldsType[$campo], array('real',4,5,246))  ) { $row[$campo]=nformat($row[$campo]); }
-				elseif(in_array($this->DBfieldsType[$campo], array('date',10,12,7))  ) { $row[$campo]=dbdate_to_human($row[$campo]); }
-				elseif(in_array($this->DBfieldsType[$campo], array('int' ,1,2,9,3,8))) { $row[$campo]=intval($row[$campo]); }
+				if(in_array($campo,$this->DBfieldsType)){
+					if(    in_array($this->DBfieldsType[$campo], array('real',4,5,246))  ) { $row[$campo]=nformat($row[$campo]); }
+					elseif(in_array($this->DBfieldsType[$campo], array('date',10,12,7))  ) { $row[$campo]=dbdate_to_human($row[$campo]); }
+					elseif(in_array($this->DBfieldsType[$campo], array('int' ,1,2,9,3,8))) { $row[$campo]=intval($row[$campo]); }
+				}
 				//------se escribe los datos----------------------------
 				$l=$this->ii;
 
@@ -592,7 +594,7 @@ border-bottom-right-radius:5px;
 				$this->rows[]=$nname;
 				$this->fCols[$nname]=$field;
 				$this->fcount++;
-				$this->setType($nname,'real');
+				//$this->setType($nname,'real');
 			}
 		}
 	}
