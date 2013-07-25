@@ -1,4 +1,5 @@
-<?php require_once( Controller {
+<?php require_once(BASEPATH.'application/controllers/validaciones.php');
+class Apan extends Controller {
 	var $mModulo='APAN';
 	var $titp='Aplicacion de Anticipos y NC';
 	var $tits='Aplicacion de Anticipos y NC';

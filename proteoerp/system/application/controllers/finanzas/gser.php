@@ -1252,10 +1252,15 @@ class gser extends Controller {
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(true);
-		$grid->setEdit(true);
-		$grid->setDelete(true);
-		$grid->setSearch(true);
+		$grid->setAdd(    $this->datasis->sidapuede('GSER','INCLUIR%' ));
+		$grid->setEdit(   false);
+		$grid->setDelete( $this->datasis->sidapuede('GSER','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('GSER','BUSQUEDA%'));
+
+		//$grid->setAdd(true);
+		//$grid->setEdit(false);
+		//$grid->setDelete(true);
+		//$grid->setSearch(true);
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
@@ -1295,51 +1300,103 @@ class gser extends Controller {
 	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
+		$id     = intval($this->input->post('id'));
 		$data   = $_POST;
-		$mcodp  = 'numero';
-		$check  = 0;
 
-		unset($data['oper']);
-		unset($data['id']);
+		if(isset($data['oper'])) unset($data['oper']);
+		if(isset($data['id']))   unset($data['id']);
+
 		if($oper == 'add'){
-			/*
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM gser WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('gser', $data);
-					echo "Registro Agregado";
-					logusu('GSER',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-			*/
+			echo 'Deshabilitado.';
+			return false;
+		}elseif($oper == 'edit'){
+			if($this->datasis->sidapuede('GSER','MODIFICA%')){
+				echo 'No tiene acceso a modificar';
+				return false;
+			}
 
-		} elseif($oper == 'edit') {
-			unset($data[$mcodp]);
-			$info    = $this->datasis->dameval("SELECT CONCAT(fecha, ' ',tipo_doc,' ', numero, ' ', proveed) aaa FROM gser WHERE id=$id");
-			$transac = $this->datasis->dameval("SELECT transac FROM gser WHERE id=$id");
-			$this->db->where("id", $id);
-			$this->db->update('gser', $data);
-			//SI TIENE retencion debe cambiar ahi tambien
-			$mSQL = 'UPDATE gser a JOIN riva b ON a.transac = b.transac SET b.nfiscal=a.nfiscal WHERE a.id='.$this->db->escape($id);
-			$this->db->simple_query($mSQL);
+			$posibles=array('nfiscal','serie');
+			foreach($data as $ind=>$val){
+				if(!in_array($ind,$posibles)){
+					echo 'Campo no permitido ('.$ind.')';
+					return false;
+				}
+			}
 
-			logusu('GSER',"Gasto/Egreso ".$info." MODIFICADO");
-			echo "Gasto Modificado";
+			$dbid=$this->db->escape($id);
+
+			$row = $this->datasis->damerow("SELECT fecha,tipo_doc, numero, proveed,transac,cajachi FROM gser WHERE id=${dbid}");
+			if(!empty($row)){
+				$data['numero'] = substr($data['serie'],-8);
+				$transac = $row['transac'];
+				if($row['cajachi']=='S'){
+					echo 'No se puede modificar un gasto de cajachica';
+					return false;
+				}
+
+				if($row['tipo_doc']!='FC'){
+					echo 'Solo se le pueden cambiar los valores a las facturas';
+					return false;
+				}
+
+				if($data['numero'] != $row['numero']){
+					//Chequea si puede cambiar los valores
+					$this->db->from('gser');
+					$this->db->where('id <>'   ,$id);
+					$this->db->where('fecha'   ,$row['fecha']);
+					$this->db->where('tipo_doc',$row['tipo_doc']);
+					$this->db->where('numero'  ,$data['numero']);
+					$this->db->where('proveed' ,$row['proveed']);
+					$cana = $this->db->count_all_results();
+					if(!empty($cana)){
+						echo 'Ya existe un registro con el mismo numero.';
+						return false;
+					}
+				}
+
+				//Cambia el gasto
+				$this->db->where('id'   ,$id);
+				$this->db->update('gser',$data);
+
+				//Cambia el detalle
+				$this->db->where('idgser' ,$id);
+				$this->db->update('gitser',array('numero'=>$data['numero']));
+
+				if($data['numero'] != $row['numero']){
+					//Cambia la retencion ISLR
+					$this->db->where('idd'     ,$id);
+					$this->db->update('gereten',array('numero'=>$data['numero']));
+
+					//Cambia las aplicaciones
+					$this->db->where('numero'  ,$row['numero']);
+					$this->db->where('tipo_doc',$row['tipo_doc']);
+					$this->db->where('cod_prv' ,$row['proveed']);
+					$this->db->update('itppro' ,array('numero'=>$data['numero']));
+				}
+
+				//Cambia la retencion de IVA
+				$this->db->where('transac',$transac);
+				$this->db->update('riva'  ,array('numero'=>$data['numero'],'nfiscal'=>$data['nfiscal']));
+
+				//Cambia la CxC
+				$this->db->where('transac' ,$transac);
+				$this->db->where('tipo_doc',$row['tipo_doc']);
+				$this->db->where('fecha'   ,$row['fecha']);
+				$this->db->where('cod_prv' ,$row['proveed']);
+				$this->db->update('sprm'   ,array('numero'=>$data['numero'],'nfiscal'=>$data['nfiscal']));
+
+				logusu('GSER','Gasto/Egreso '.$row['fecha'].'-'.$row['tipo_doc'].'-'.$row['numero'].'-'.$row['proveed'].' MODIFICADO');
+				echo 'Gasto Modificado';
+				return true;
+			}else{
+				echo 'Registro no encontrado';
+				return false;
+			}
 
 		} elseif($oper == 'del') {
-		$meco = $this->datasis->dameval("SELECT $mcodp FROM gser WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM gser WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				//$this->db->simple_query("DELETE FROM gser WHERE id=$id ");
-				//logusu('GSER',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+			echo 'Deshabilitado.';
+			return false;
+		}
 	}
 
 
@@ -3940,8 +3997,7 @@ class gser extends Controller {
 				$monto   = $do->get_rel('gereten','monto' ,$i);
 				$porcen  = $do->get_rel('gereten','porcen',$i);
 
-				//$do->set_rel('gereten','monto'    ,$monto           ,$i);
-				//$do->set_rel('gereten','porcen'   ,$rete['tari1']   ,$i);
+				$do->set_rel('gereten','numero' ,$serie,$i);
 				$retemonto += $monto;
 			}else{
 				$rete_cana_vacio++;
@@ -4219,6 +4275,7 @@ class gser extends Controller {
 			$data['hora']       = $hora;
 			$data['usuario']    = $usuario;
 			$data['reteiva']    = $reiva;
+			$data['reten']      = $reten;
 			$data['montasa']    = $montasa;
 			$data['monredu']    = $monredu;
 			$data['monadic']    = $monadic;

@@ -1143,8 +1143,8 @@ class Sprm extends Controller {
 			$query = $this->db->query($mSQL);
 			if($query->num_rows() > 0){
 				$salida .= $td1;
-				$salida .= "Retenciones de IVA</caption>";
-				$salida .= "<tr bgcolor='#e7e3e7'><td>Periodo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</tr>";
+				$salida .= 'Retenciones de IVA</caption>';
+				$salida .= "<tr bgcolor='#e7e3e7'><td>Per&iacute;odo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
 				foreach ($query->result_array() as $row){
 					$salida .= '<tr>';
 					$salida .= '<td>'.$row['periodo'].'</td>';
@@ -1156,19 +1156,19 @@ class Sprm extends Controller {
 			}
 
 			$mSQL = "
-				SELECT tipo_doc, numero, montonet FROM scst a WHERE a.transac=${dbtransac}
+				SELECT tipo_doc, numero, montonet,fecha FROM scst a WHERE a.transac=${dbtransac}
 				UNION ALL
-				SELECT tipo_doc, numero, totneto  FROM gser a WHERE a.transac=${dbtransac}
-				";
+				SELECT tipo_doc, numero, totneto,fecha  FROM gser a WHERE a.transac=${dbtransac}";
 			$query = $this->db->query($mSQL);
 			if($query->num_rows() > 0){
 				$salida .= $td1;
-				$salida .= "Gasto/Compra</caption>";
-				$salida .= "<tr bgcolor='#e7e3e7'><td>Tipo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</tr>";
+				$salida .= 'Gasto/Compra</caption>';
+				$salida .= "<tr bgcolor='#e7e3e7'><td>Tipo</td><td align='center'>N&uacute;mero</td><td align='center'>Fecha</td><td align='center'>Monto</td></tr>";
 				foreach ($query->result_array() as $row){
 					$salida .= '<tr>';
 					$salida .= '<td>'.$row['tipo_doc'].'</td>';
 					$salida .= '<td>'.$row['numero'].  '</td>';
+					$salida .= '<td align=\'center\'>'.dbdate_to_human($row['fecha']).   '</td>';
 					$salida .= '<td align=\'right\'>'.nformat($row['montonet']).'</td>';
 					$salida .= '</tr>';
 				}

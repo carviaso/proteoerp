@@ -38,7 +38,7 @@ class repomenu extends validaciones {
 		$select=array('b.nombre AS alternativo','a.nombre','a.modulo','a.titulo','a.mensaje','a.activo','b.reporte','b.proteo','b.harbour');
 		$filter->db->select($select);
 		$filter->db->from('intrarepo AS a');
-		$filter->db->join('reportes AS b','a.nombre=b.nombre','RIGHT');
+		$filter->db->join('reportes AS b','a.nombre=b.nombre','right');
 
 		$filter->nombre = new inputField('Nombre', 'nombre');
 		$filter->nombre->db_name='b.nombre';
