@@ -223,9 +223,9 @@ class Buscar extends Controller
 		foreach ($this->columnas as $campo => $titulo){
 			if ($i==0){
 				$cp1=strrchr($campo, '.');
-				if ($cp1)$campo=str_replace('.','',$cp1);
+				if($cp1)$campo=str_replace('.','',$cp1);
 
-				if (empty($this->order_by))
+				//if(empty($this->order_by))
 				$grid->column_orderby($titulo,"<a href=\"$link\"><#".substr($campo,strpos($campo,'.'))."#></a>", $campo);
 			}else{
 				if(count(explode('.',$campo))==2)
