@@ -2178,13 +2178,13 @@ class Ajax extends Controller {
 		// Origen 
 		$form->codofiorg = new dropdownField('Origen','codofiorg');
 		$form->codofiorg->option('00','Seleccione');
-		$form->codofiorg->options("SELECT codofi, desofi FROM tbofici WHERE codofi>0 ORDER BY desofi");
+		$form->codofiorg->options("SELECT codofi, desofi FROM pllanos_pasaje.tbofici WHERE codofi>0 ORDER BY desofi");
 		$form->codofiorg->style = 'width:180px;';
 
 		// Destino 
 		$form->codofides = new dropdownField('Destino.','codofides');
 		$form->codofides->option('00','Seleccione');
-		$form->codofides->options("SELECT codofi, desofi FROM tbofici WHERE codofi>0 ORDER BY desofi ");
+		$form->codofides->options("SELECT codofi, desofi FROM pllanos_pasaje.tbofici WHERE codofi>0 ORDER BY desofi ");
 		$form->codofides->style = 'width:180px;';
 
 		$form->submit = new submitField("Buscar","btn_submit");    
@@ -2306,7 +2306,7 @@ class Ajax extends Controller {
 		})
 </script>';
 
-		$salida .= 	"Seleccione un Origen y/o Destino ";
+		$salida .= 	"Seleccione un Origen";
 
 
 		$salida .= '</center></body>';

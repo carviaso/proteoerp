@@ -525,9 +525,9 @@ Para <b>ELIMINAR</b> un concepto del contrato, seleccione uno y haga doble click
 
 
 
-	//***************************
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgridcon( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -593,9 +593,9 @@ Para <b>ELIMINAR</b> un concepto del contrato, seleccione uno y haga doble click
 			,ondblClickRow: function(id){
 				if (id){
 					$.prompt( "Agregar Concepto al Contrato? ",{
-						buttons: { Agregar:true, Cancelar:false},
-						callback: function(e,v,m,f){
-							if (v == true) {
+						buttons: { Agregar:1, Cancelar:0 },
+						submit: function(e,v,m,f){
+							if ( v == 1) {
 								$.get("'.base_url().$this->url.'agrega/"+id+"/"+idnoco,
 								function(data){
 									//alert(data);

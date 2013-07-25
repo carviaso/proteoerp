@@ -177,7 +177,11 @@ class Pnomina extends fnomina {
 	function _traduce($formula){
 		$CODIGO=$this->ci->db->escape($this->CODIGO);
 
-		$ut = $datasis->utri();
+		$qq = $this->ci->db->query("SELECT valor FROM utributa ORDER BY fecha DESC LIMIT 1");
+		$rr = $qq->row_array();
+		$aa = each($rr);
+		$ut = $aa[1];
+
 		
 		//para los if
 		$long=strlen($formula);

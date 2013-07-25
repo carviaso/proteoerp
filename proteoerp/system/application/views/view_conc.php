@@ -61,12 +61,6 @@ if($form->_status <> 'show'){ ?>
 		<td class="littletablerowth"><?php echo $form->ctaac->label;  ?></td>
 		<td class="littletablerow" id="td_ctaac" ><?php echo $form->ctaac->output; ?></td>
 	</tr>
-	<tr>
-		<td class="littletablerowth"><?php echo $form->liquida->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->liquida->output; ?></td>
-		<td class="littletablerowth"><?php echo $form->psueldo->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->psueldo->output; ?></td>
-	</tr>
 </table>
 </fieldset>
 
