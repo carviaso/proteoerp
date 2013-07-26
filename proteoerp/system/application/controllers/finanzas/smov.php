@@ -47,7 +47,7 @@ class Smov extends Controller {
 		$adic = array(
 			array('id'=>'fedita'  , 'title'=>'Agregar Registro'),
 			array('id'=>'fsclisel', 'title'=>'Seleccionar cliente'),
-			array('id'=>'fborra'  ,  'title'=>'Eliminar Registro')
+			array('id'=>'fborra'  , 'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -146,6 +146,14 @@ class Smov extends Controller {
 				function(data){
 					$("#fsclisel").html(data);
 					$("#fsclisel").dialog("open");
+					var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+					if(id){
+						var ret    = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+						var cod_cli= ret.cod_cli;
+						$("#cod_cli").val(cod_cli);
+						$("#cod_cli").focus();
+						$("#cod_cli").autocomplete("search", cod_cli);
+					}
 				}
 			);
 		});';
@@ -164,7 +172,7 @@ class Smov extends Controller {
 			$("#fedita").dialog({
 				autoOpen: false, height: 500, width: 800, modal: true,
 				buttons: {
-					"Guardar": function() {
+					"Guardar": function(){
 						var bValid = true;
 						var murl = $("#df1").attr("action");
 						$.ajax({
@@ -176,12 +184,12 @@ class Smov extends Controller {
 							success: function(r,s,x){
 								try{
 									var json = JSON.parse(r);
-									if ( json.status == "A" ) {
-										$( "#fedita" ).dialog( "close" );
+									if(json.status == "A"){
+										$("#fedita").dialog("close");
 										jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 										window.open(\''.site_url($this->url.'smovprint').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 										return true;
-									} else {
+									}else{
 										apprise(json.mensaje);
 									}
 								}catch(e){
@@ -195,7 +203,7 @@ class Smov extends Controller {
 						$( this ).dialog( "close" );
 					}
 				},
-				close: function() {
+				close: function(){
 					$("#fedita").html("");
 				}
 			});';
@@ -1199,7 +1207,7 @@ class Smov extends Controller {
 					url:  '".site_url('ajax/buscascli')."',
 					type: 'POST',
 					dataType: 'json',
-					data: 'q='+req.term,
+					data: {'q':req.term},
 					success:
 						function(data){
 							var sugiere = [];
@@ -1383,11 +1391,16 @@ class Smov extends Controller {
 	}
 
 	function ccli($id_scli){
-		$cliente  = $this->datasis->dameval("SELECT cliente FROM scli WHERE id=$id_scli");
-		if(!$this->_exitescli($cliente)) redirect($this->url.'filteredgrid');
-		$dbcliente=$this->db->escape($cliente);
-		$scli_nombre=$this->datasis->dameval("SELECT nombre FROM scli WHERE cliente=$dbcliente");
-		$scli_rif   =$this->datasis->dameval("SELECT rifci FROM scli WHERE cliente=$dbcliente");
+		$id_scli=intval($id_scli);
+		$row = $this->datasis->damerow("SELECT cliente,nombre,rifci FROM scli WHERE id=${id_scli}");
+		if(empty($row)){
+			echo 'Cliente inexistente';
+			return '';
+		}
+			$cliente     = $row['cliente'];
+			$dbcliente   = $this->db->escape($cliente);
+			$scli_nombre = $row['nombre'];
+			$scli_rif    = $row['rifci'];
 
 
 		$cajero=$this->secu->getcajero();
@@ -1417,7 +1430,7 @@ class Smov extends Controller {
 		$edit = new DataDetails('Cobro a cliente', $do);
 		$edit->on_save_redirect=false;
 		$edit->back_url = site_url('finanzas/ccli/filteredgrid');
-		$edit->set_rel_title('itccli', 'Producto <#o#>');
+		$edit->set_rel_title('itccli', 'Efecto <#o#>');
 		$edit->set_rel_title('sfpa'  , 'Forma de pago <#o#>');
 
 		$edit->pre_process('insert' , '_pre_ccli_insert');
@@ -1456,7 +1469,7 @@ class Smov extends Controller {
 		$edit->numero->maxlength =8;
 
 		$edit->fecdoc = new dateonlyField('Fecha','fecdoc');
-		$edit->fecdoc->size =10;
+		$edit->fecdoc->size =12;
 		$edit->fecdoc->maxlength =8;
 		$edit->fecdoc->insertValue=date('Y-m-d');
 		$edit->fecdoc->calendar = false;
@@ -1593,6 +1606,7 @@ class Smov extends Controller {
 
 			$i++;
 		}
+		if($i==0) $edit->tipo_doc->insertValue='AN';
 		//************************************************
 		//fin de campos para detalle,inicio detalle2 sfpa
 		//************************************************
@@ -1609,13 +1623,13 @@ class Smov extends Controller {
 		$edit->sfpafecha = new dateonlyField('Fecha','sfpafecha_<#i#>');
 		$edit->sfpafecha->rel_id   = 'sfpa';
 		$edit->sfpafecha->db_name  = 'fecha';
-		$edit->sfpafecha->size     = 10;
+		$edit->sfpafecha->size     = 12;
 		$edit->sfpafecha->maxlength= 8;
 		$edit->sfpafecha->calendar = false;
 		$edit->sfpafecha->rule ='condi_required|chitfecha|callback_chtipo[<#i#>]';
 
 		$edit->numref = new inputField('Numero <#o#>', 'num_ref_<#i#>');
-		$edit->numref->size     = 12;
+		$edit->numref->size     = 15;
 		$edit->numref->db_name  = 'num_ref';
 		$edit->numref->rel_id   = 'sfpa';
 		$edit->numref->rule     = 'condi_required|callback_chtipo[<#i#>]';
@@ -1638,7 +1652,7 @@ class Smov extends Controller {
 		$edit->itmonto->db_name     = 'monto';
 		$edit->itmonto->css_class   = 'inputnum';
 		$edit->itmonto->rel_id      = 'sfpa';
-		$edit->itmonto->size        = 10;
+		$edit->itmonto->size        = 14;
 		$edit->itmonto->rule        = 'condi_required|positive|callback_chmontosfpa[<#i#>]';
 		$edit->itmonto->showformat  = 'decimal';
 		$edit->itmonto->autocomplete= false;
@@ -1660,7 +1674,7 @@ class Smov extends Controller {
 		}else{
 			$conten['cana']  = $i;
 			$conten['form']  = & $edit;
-			$conten['title'] = heading("Cobro a cliente: ($cliente) $scli_nombre $scli_rif");
+			$conten['title'] = heading("Cobro a cliente: (${cliente}) ${scli_nombre} ${scli_rif}");
 
 			$data['content'] = $this->load->view('view_ccli.php', $conten);
 		}

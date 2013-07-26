@@ -12,21 +12,21 @@ else:
 if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
 
 echo $form_begin;
-$dbcliente=$this->db->escape($form->cod_cli->value);
-$nomcli=$this->datasis->dameval("SELECT nombre FROM scli WHERE cliente=${dbcliente}");
+$dbproveed=$this->db->escape($form->cod_prv->value);
+$nomprv=$this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed=${dbproveed}");
 
 if($form->getstatus()!='show'){
 
-	$sfpa_campos=$form->template_details('sfpa');
-	$sfpa_scampos  ='<tr id="tr_sfpa_<#i#>">';
-	$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['tipo']['field'].  '</td>';
-	$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['sfpafecha']['field'].  '</td>';
-	$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['numref']['field'].'</td>';
-	$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['banco']['field']. '</td>';
-	$sfpa_scampos .='<td class="littletablerow" align="right">'.$sfpa_campos['itmonto']['field'].'</td>';
-	$sfpa_scampos .='<td class="littletablerow"><a href=# onclick="del_sfpa(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
-	$sfpa_campos=$form->js_escape($sfpa_scampos);
-
+	//$sfpa_campos=$form->template_details('sfpa');
+	//$sfpa_scampos  ='<tr id="tr_sfpa_<#i#>">';
+	//$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['tipo']['field'].  '</td>';
+	//$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['sfpafecha']['field'].  '</td>';
+	//$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['numref']['field'].'</td>';
+	//$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['banco']['field']. '</td>';
+	//$sfpa_scampos .='<td class="littletablerow" align="right">'.$sfpa_campos['itmonto']['field'].'</td>';
+	//$sfpa_scampos .='<td class="littletablerow"><a href=# onclick="del_sfpa(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
+	//$sfpa_campos=$form->js_escape($sfpa_scampos);
+    //
 	$sfpade=$sfpach="<option value=''>Ninguno</option>";
 	$mSQL="SELECT cod_banc,nomb_banc FROM tban WHERE cod_banc<>'CAJ'";
 	$query = $this->db->query($mSQL);
@@ -40,7 +40,7 @@ if($form->getstatus()!='show'){
 	}
 ?>
 <script type="text/javascript">
-var sfpa_cont=<?php echo $form->max_rel_count['sfpa'];?>;
+var sfpa_cont=0<?php //echo $form->max_rel_count['sfpa'];?>;
 $(function() {
 	$(".inputnum").numeric(".");
 	$('input[name^="abono_"]').keyup(function(){
@@ -93,7 +93,7 @@ function totaliza(){
 }
 
 function add_sfpa(){
-	var htm = <?php echo $sfpa_campos; ?>;
+	var htm = ''<?php //echo $sfpa_campos; ?>;
 	can = sfpa_cont.toString();
 	con = (sfpa_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
@@ -181,14 +181,7 @@ echo $title;
 ?>
 <table align='center' width="100%">
 	<tr>
-		<td colspan='3'><?php echo $form->numero->value.$form->cod_cli->output ?>
-		<?php if($form->getstatus()=='show'){ ?>
-			<a href="#" onclick="window.open('<?php echo base_url() ?>formatos/verhtml/CCLIAB/<?php echo raencode($form->_dataobject->pk['id']) ?>', '_blank', 'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');" heigth="600" >
-			<img src='<?php echo base_url() ?>images/html_logo.gif'></a>
-			<a href="#" onclick="window.open('<?php echo base_url() ?>formatos/descargar/CCLIAB/<?php echo raencode($form->_dataobject->pk['id']) ?>', '_blank', 'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');" heigth="600" >
-			<img src='<?php echo base_url() ?>images/pdf_logo.gif'></a>
-		<?php } ?>
-		</td>
+		<td colspan='3'><?php echo $form->numero->value.$form->cod_prv->output ?></td>
 		<td align=right><?php echo $container_tr;?></td>
 	</tr>
 	<tr>
@@ -247,40 +240,24 @@ echo $title;
 <?php } ?>
 
 <?php echo $container_br.$container_bl;?>
-<table width='100%'>
-	<tr id='__ITPL__sfpa'>
-		<td class="littletableheaderdet">Tipo<ds/td>
-		<td class="littletableheaderdet">Fecha</td>
-		<td class="littletableheaderdet">N&uacute;mero</td>
-		<td class="littletableheaderdet">Banco</td>
-		<td class="littletableheaderdet">Monto</td>
-		<?php if($form->_status!='show') {?>
-			<td class="littletableheaderdet"></td>
-		<?php } ?>
-	</tr>
-	<?php
 
-	for($i=0; $i < $form->max_rel_count['sfpa']; $i++) {
-		$tipo      = "tipo_$i";
-		$sfpafecha = "sfpafecha_$i";
-		$numref    = "numref_$i";
-		$monto     = "itmonto_$i";
-		$banco     = "banco_$i";
-	?>
-	<tr id='tr_sfpa_<?php echo $i; ?>'>
-		<td class="littletablerow" nowrap><?php echo $form->$tipo->output      ?></td>
-		<td class="littletablerow" nowrap><?php echo $form->$sfpafecha->output ?></td>
-		<td class="littletablerow">       <?php echo $form->$numref->output    ?></td>
-		<td class="littletablerow">       <?php echo $form->$banco->output     ?></td>
-		<td class="littletablerow" align="right"><?php echo $form->$monto->output ?></td>
-		<?php if($form->_status!='show') {?>
-			<td class="littletablerow"><a href=# onclick="del_sfpa(<?php echo $i; ?>);return false;"><?php echo img("images/delete.jpg"); ?></a></td></tr>
-		<?php } ?>
+<table align='center' width="100%">
+	<tr>
+		<td><?php echo $form->banco->label;    ?></td>
+		<td><?php echo $form->banco->output;   ?></td>
+		<td><?php echo $form->tipo_op->label;  ?></td>
+		<td><?php echo $form->tipo_op->output; ?></td>
+		<td><?php echo $form->numche->label;   ?></td>
+		<td><?php echo $form->numche->output;  ?></td>
+		<td><?php echo $form->fecha->label;    ?></td>
+		<td><?php echo $form->fecha->output;   ?></td>
 	</tr>
-	<?php } ?>
-	<tr id='__UTPL__sfpa'>
-		<td colspan='9' class="littletableheaderdet">&nbsp;</td>
+	<tr>
+		<td><?php echo $form->benefi->label ?></td>
+		<td colspan='3'><?php echo $form->benefi->output ?></td>
 	</tr>
+</table>
+<table width='100%'>
 	<tr>
 		<td colspan='9' align='center'><b>Concepto:</b><br><?php echo $form->observa1->output.$form->observa2->output; ?></td>
 	</tr>

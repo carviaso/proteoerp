@@ -43,15 +43,17 @@ class Sprm extends Controller {
 
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'imprime',   'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir',      'label'=>'Reimprimir Documento', 'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'princheque','img'=>'images/check.png',                'alt' => 'Emitir Cheque', 'label'=>'Imprimir cheque',      'tema'=>'anexos'));
-		$grid->wbotonadd(array("id"=>"abonos",   "img"=>"images/check.png",     "alt" => 'Abonos',          "label"=>"Pago o Abono"));
+		$grid->wbotonadd(array('id'=>'imprime'   ,'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir',      'label'=>'Reimprimir Documento', 'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'princheque','img'=>'images/check.png'  , 'alt' => 'Emitir Cheque'   , 'label'=>'Imprimir cheque',      'tema'=>'anexos'));
+		//$grid->wbotonadd(array('id'=>'pago'      ,'img'=>'images/dinero.png' , 'alt' => 'Pago a proveedor', 'label'=>'Pago a proveedor'));
+		$grid->wbotonadd(array('id'=>'abonos'    ,'img'=>'images/check.png'  , 'alt' => 'Abonos'          , 'label'=>'Pago o Abono'));
 		$WestPanel = $grid->deploywestp();
 
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
-			array('id'=>'fabono',  'title'=>'Abonar a Proveedor')
+			array('id'=>'fedita'  , 'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fabono'  , 'title'=>'Abonar a Proveedor'),
+			array('id'=>'fsprvsel', 'title'=>'Seleccionar proveedor'),
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -95,30 +97,6 @@ class Sprm extends Controller {
 				$.prompt("<h1>Transaccion invalida</h1>");
 			}
 		};';
-
-		$bodyscript .= '
-		jQuery("#princheque").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				if(ret.tipo_op=="CH"){
-					window.open(\''.site_url($this->url.'/impcheque').'/\'+id, \'_blank\', \'width=300,height=400,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-200), screeny=((screen.availWidth/2)-150)\');
-				}else{
-					$.prompt("<h1>El efecto seleccionado no possee cheques</h1>");
-				}
-			} else {
-				$.prompt("<h1>Por favor Seleccione una Egreso</h1>");
-			}
-		});';
-
-		$bodyscript .= '
-		jQuery("#imprime").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url($this->url.'sprmprint').'/\'+id, \'_blank\', \'width=300,height=300,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});';
 
 		$bodyscript .= '
 		function sprmadd(){
@@ -186,11 +164,48 @@ class Sprm extends Controller {
 			}
 		};';
 
+		//Wraper de javascript
+		$bodyscript .= '
+		$(function(){
+			$("#dialog:ui-dialog").dialog( "destroy" );
+			var mId = 0;
+			var montotal = 0;
+			var ffecha = $("#ffecha");
+			var grid = jQuery("#newapi'.$grid0.'");
+			var s;
+			var allFields = $( [] ).add( ffecha );
+			var tips = $( ".validateTips" );
+			s = grid.getGridParam(\'selarrrow\');
+			';
+
+		$bodyscript .= '
+		jQuery("#princheque").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if(ret.tipo_op=="CH"){
+					window.open(\''.site_url($this->url.'/impcheque').'/\'+id, \'_blank\', \'width=300,height=400,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-200), screeny=((screen.availWidth/2)-150)\');
+				}else{
+					$.prompt("<h1>El efecto seleccionado no possee cheques</h1>");
+				}
+			} else {
+				$.prompt("<h1>Por favor Seleccione una Egreso</h1>");
+			}
+		});';
+
+		$bodyscript .= '
+		jQuery("#imprime").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url($this->url.'sprmprint').'/\'+id, \'_blank\', \'width=300,height=300,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});';
 
 
 		//Abonos
 		$bodyscript .= '
-			$( "#abonos" ).click(function() {
+			$("#abonos").click(function() {
 				var id  = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
@@ -203,7 +218,7 @@ class Sprm extends Controller {
 				} else { $.prompt("<h1>Por favor Seleccione un Proveedor</h1>");}
 			});
 
-			$( "#fabono" ).dialog({
+			$("#fabono").dialog({
 				autoOpen: false, height: 470, width: 790, modal: true,
 				buttons: {
 					"Abonar": function() {
@@ -231,7 +246,7 @@ class Sprm extends Controller {
 										$( "#fabono" ).dialog( "close" );
 										return [true, a ];
 									} else {
-										apprise("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
+										$.prompt("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
 									}
 								}
 							});
@@ -242,21 +257,50 @@ class Sprm extends Controller {
 				close: function() { allFields.val( "" ).removeClass( "ui-state-error" );}
 			});';
 
-
-
-		//Wraper de javascript
 		$bodyscript .= '
-		$(function(){
-			$("#dialog:ui-dialog").dialog( "destroy" );
-			var mId = 0;
-			var montotal = 0;
-			var ffecha = $("#ffecha");
-			var grid = jQuery("#newapi'.$grid0.'");
-			var s;
-			var allFields = $( [] ).add( ffecha );
-			var tips = $( ".validateTips" );
-			s = grid.getGridParam(\'selarrrow\');
-			';
+		jQuery("#pago").click( function(){
+			$.post("'.site_url($this->url.'selsprv/').'",
+				function(data){
+					$("#fsprvsel").html(data);
+					$("#fsprvsel").dialog("open");
+					var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+					if(id){
+						var ret    = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+						var cod_prv= ret.cod_prv;
+						$("#cod_prv").val(cod_cli);
+						$("#cod_prv").focus();
+						$("#cod_prv").autocomplete("search", cod_cli);
+					}
+				}
+			);
+		});';
+
+		$bodyscript .= '
+			$("#fsprvsel").dialog({
+				autoOpen: false, height: 430, width: 540, modal: true,
+				buttons: {
+					"Seleccionar": function() {
+						var id_sprv=$("#id_sprv").val();
+						if(id_sprv){
+							$.get("'.site_url($this->url.'cprov').'"+"/"+id_sprv+"/create", function(data) {
+								$("#fedita").html(data);
+								$("#fedita").dialog("open");
+								$("#fsclisel").html("");
+								$("#fsclisel").dialog("close");
+							});
+						}else{
+							$.prompt("<b>Debe seleccionar un proveedor primero.</b>");
+						}
+					},
+					Cancel: function() {
+						$("#fcobroser").html("");
+						$("#fsprvsel").dialog( "close" );
+					}
+				},
+				close: function() {
+					$("#fsprvsel").html("");
+				}
+			});';
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -274,13 +318,13 @@ class Sprm extends Controller {
 							try{
 								var json = JSON.parse(r);
 								if (json.status == "A"){
-									apprise("Registro Guardado");
-									$( "#fedita" ).dialog( "close" );
+									$.prompt("Registro Guardado");
+									$("#fedita").dialog( "close" );
 									grid.trigger("reloadGrid");
 									'.$this->datasis->jwinopen(site_url('formatos/ver/SPRM').'/\'+res.id+\'/id\'').';
 									return true;
 								} else {
-									apprise(json.mensaje);
+									$.prompt(json.mensaje);
 								}
 							}catch(e){
 								$("#fedita").html(r);
@@ -295,7 +339,7 @@ class Sprm extends Controller {
 			},
 			close: function() {
 				$("#fedita").html("");
-				allFields.val( "" ).removeClass( "ui-state-error" );
+				allFields.val("").removeClass( "ui-state-error" );
 			}
 		});';
 
@@ -1091,7 +1135,7 @@ class Sprm extends Controller {
 			$query = $this->db->query($mSQL);
 			$salida = '<table width="100%"><tr>';
 			$saldo  = 0;
-			if ( $query->num_rows() > 0 ){
+			if($query->num_rows() > 0){
 				$salida .= $td1;
 				$salida .= "Movimiento en Proveedores</caption>";
 				$salida .= "<tr bgcolor='#E7E3E7'><td>Nombre</td><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
@@ -1116,7 +1160,7 @@ class Sprm extends Controller {
 				FROM smov WHERE transac=${dbtransac} ORDER BY cod_cli ";
 			$query = $this->db->query($mSQL);
 			$saldo = 0;
-			if ( $query->num_rows() > 0 ){
+			if($query->num_rows() > 0){
 				$salida .= $td1;
 				$salida .= 'Movimiento en Clientes</caption>';
 				$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
@@ -1178,7 +1222,7 @@ class Sprm extends Controller {
 			// Movimientos Relacionados ITPPRO
 			$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itppro WHERE transac=${dbtransac}";
 			$query = $this->db->query($mSQL);
-			if ( $query->num_rows() == 0 ){
+			if($query->num_rows() == 0 ){
 				$mSQL = "SELECT tipoppro tipo_doc, numppro numero, monto, abono FROM itppro WHERE tipo_doc='${tipo_doc}' AND numero='{$numero}'";
 				$query = $this->db->query($mSQL);
 			}
@@ -1193,8 +1237,8 @@ class Sprm extends Controller {
 					$salida .= '<tr>';
 					$salida .= '<td>'.$row['tipo_doc'].'</td>';
 					$salida .= '<td>'.$row['numero'].  '</td>';
-					$salida .= "<td align='right'>".nformat($row['monto']).'</td>';
-					$salida .= "<td align='right'>".nformat($row['abono']).'</td>';
+					$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+					$salida .= '<td align=\'right\'>'.nformat($row['abono']).'</td>';
 					$salida .= '</tr>';
 				}
 				$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'><b>Saldo : ".nformat($saldo).'</b></td></tr>';
@@ -1211,10 +1255,10 @@ class Sprm extends Controller {
 				$salida .= "<tr bgcolor='#e7e3e7'><td>Bco</td><td>Tipo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
 				foreach ($query->result_array() as $row){
 					$salida .= '<tr>';
-					$salida .= "<td>".$row['codbanc'].'</td>';
-					$salida .= "<td>".$row['tipo_op'].'</td>';
-					$salida .= "<td>".$row['numero'].'</td>';
-					$salida .= "<td align='right'>".nformat($row['monto']).'</td>';
+					$salida .= '<td>'.$row['codbanc'].'</td>';
+					$salida .= '<td>'.$row['tipo_op'].'</td>';
+					$salida .= '<td>'.$row['numero'].'</td>';
+					$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
 					$salida .= '</tr>';
 				}
 				$salida .= '</table></td>';
@@ -1230,10 +1274,10 @@ class Sprm extends Controller {
 				$salida .= "<tr bgcolor='#e7e3e7'><td></td><td>Bco</td><td>Observaci&oacute;n</td><td align='center'>Monto</td></tr>";
 				foreach ($query->result_array() as $row){
 					$salida .= '<tr>';
-					$salida .= "<td>".$row['tipop'].'</td>';
-					$salida .= "<td>".$row['codban'].'</td>';
-					$salida .= "<td>".$row['observa'].'</td>';
-					$salida .= "<td align='right'>".nformat($row['monto'])."</td>";
+					$salida .= '<td>'.$row['tipop'].'</td>';
+					$salida .= '<td>'.$row['codban'].'</td>';
+					$salida .= '<td>'.$row['observa'].'</td>';
+					$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
 					$salida .= '</tr>';
 				}
 				$salida .= '</table></td>';
@@ -1247,21 +1291,20 @@ class Sprm extends Controller {
 				UNION ALL
 				SELECT b.tipo tipo, b.cliente codcp, MID(b.nomcli,1,25) nombre, a.onumero, a.monto, b.numero, b.fecha
 				FROM itcruc AS a JOIN cruc AS b ON a.numero=b.numero
-				WHERE b.cliente='${cod_prv}' AND b.transac=${dbtransac} ORDER BY onumero
-				";
+				WHERE b.cliente='${cod_prv}' AND b.transac=${dbtransac} ORDER BY onumero";
 
 			$query = $this->db->query($mSQL);
 			$saldo = 0;
 			if( $query->num_rows() > 0 ){
 				$salida .= $td1;
 				$salida .= 'Cruce de Cuentas</caption>';
-				$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Codigo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+				$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>C&oacute;digo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
 				foreach ($query->result_array() as $row){
 					$salida .= '<tr>';
 					$salida .= '<td>('.$row['tipo'].') '.$row['nombre'].'</td>';
 					$salida .= '<td>'.$row['codcp'].'</td>';
 					$salida .= '<td>'.$row['onumero'].'</td>';
-					$salida .= "<td align='right'>".nformat($row['monto']).'</td>';
+					$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
 					$salida .= '</tr>';
 				}
 				$salida .= '</table></td>';
@@ -1562,6 +1605,373 @@ class Sprm extends Controller {
 		logusu($do->table,"Modifico $this->tits $primary ");
 	}
 
+	function selsprv(){
+		$this->rapyd->load('dataform');
+
+		$script="$('#cod_prv').autocomplete({
+			source: function( req, add){
+				$.ajax({
+					url:  '".site_url('ajax/buscasprv')."',
+					type: 'POST',
+					dataType: 'json',
+					data: {'q':req.term},
+					success:
+						function(data){
+							var sugiere = [];
+							if(data.length==0){
+								$('#id_sprv').val('');
+
+								$('#nombre').val('');
+								$('#nombre_val').text('');
+
+								$('#rifci').val('');
+								$('#rifci_val').text('');
+
+								$('#direc').val('');
+								$('#direc_val').text('');
+
+								$('#saldo_val').text('');
+							}else{
+								$.each(data,
+									function(i, val){
+										sugiere.push( val );
+									}
+								);
+							}
+							add(sugiere);
+						},
+				})
+			},
+			minLength: 2,
+			select: function( event, ui ) {
+				$('#cod_prv').attr('readonly', 'readonly');
+
+				$('#id_sprv').val(ui.item.id);
+
+				$('#nombre').val(ui.item.nombre);
+				$('#nombre_val').text(ui.item.nombre);
+
+				$('#rifci').val(ui.item.rif);
+				$('#rifci_val').text(ui.item.rif);
+
+				$('#cod_prv').val(ui.item.proveed);
+
+				$('#direc').val(ui.item.direc);
+				$('#direc_val').text(ui.item.direc);
+				setTimeout(function() {  $('#cod_prv').removeAttr('readonly'); }, 1500);
+
+				var saldo= $.ajax({ type: 'POST', url: '".site_url($this->url.'ajaxsaldo')."', async: false, data: {cod_prv: ui.item.proveed} }).responseText;
+				$('#saldo_val').text(nformat(saldo,2));
+			}
+		});";
+
+		$form = new DataForm($this->url.'sclise/process');
+		$form->script($script);
+
+		$form->proveed = new inputField('Proveedor', 'cod_prv');
+
+		$form->id = new hiddenField('', 'id_sprv');
+		$form->id->in='proveed';
+
+		$form->nombre = new freeField('Nombre','nombre','<b id=\'nombre_val\'></b>');
+
+		$form->rif    = new freeField('RIF','rif','<b id=\'rifci_val\'></b>');
+
+		$form->direc  = new freeField('Direcci&oacute;n','direc','<b id=\'direc_val\'></b>');
+
+		$form->saldo  = new freeField('Saldo','saldo','<b style="font-size:2em" id=\'saldo_val\'></b>');
+
+		$form->build_form();
+
+		echo $form->output;
+	}
+
+	function ajaxsaldo(){
+		$cod_prv = $this->input->post('cod_prv');
+		if($cod_prv!==false){
+			$this->db->select_sum('a.monto - a.abonos','saldo');
+			$this->db->from('sprm AS a');
+			$this->db->where('a.cod_prv',$cod_prv);
+			$this->db->where('a.monto > a.abonos');
+			$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
+			$q=$this->db->get();
+			$row = $q->row_array();
+			echo (empty($row['saldo']))? 0: $row['saldo'];
+		}else{
+			echo 0;
+		}
+	}
+
+	function cprov($id_sprv){
+		$id_sprv=intval($id_sprv);
+		$row = $this->datasis->damerow('SELECT proveed,nombre,rif FROM sprv WHERE id='.$id_sprv);
+		if(empty($row)){
+			echo 'El usuario debe tener registrado un cajero para poder usar este modulo';
+			return '';
+		}
+		$proveed     = $row['proveed'];
+		$sprv_nombre = $row['nombre'];
+		$sprv_rif    = $row['rif'];
+
+		$this->rapyd->load('dataobject','datadetails');
+
+		$do = new DataObject('sprm');
+		$do->rel_one_to_many('itppro', 'itppro', array(
+			'tipo_doc'=>'tipoppro',
+			'numero'  =>'numppro',
+			'cod_cli' =>'cod_prv',
+			'fecha'   =>'fecha')
+		);
+		//$do->rel_one_to_many('sfpa'  , 'sfpa'  , array(
+		//	'transac' =>'transac',
+		//	'numero'  =>'numero',
+		//	'tipo_doc'=>'tipo_doc',
+		//	'fecha'   =>'fecha')
+		//);
+		$do->order_by('itppro','itppro.fecha');
+
+		$edit = new DataDetails('Pago a proveedor', $do);
+		$edit->on_save_redirect=false;
+		$edit->set_rel_title('itppro', 'Efecto <#o#>');
+		//$edit->set_rel_title('sfpa'  , 'Forma de pago <#o#>');
+
+		$edit->pre_process('insert' , '_pre_cprv_insert');
+		$edit->pre_process('update' , '_pre_cprv_update');
+		$edit->pre_process('delete' , '_pre_cprv_delete');
+		$edit->post_process('insert','_post_cprv_insert');
+		//$edit->post_process('delete', '_post_delete');
+
+		$edit->cod_prv = new hiddenField('Proveedor','cod_prv');
+		$edit->cod_prv->rule ='max_length[5]';
+		$edit->cod_prv->size =7;
+		$edit->cod_prv->insertValue=$proveed;
+		$edit->cod_prv->maxlength =5;
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->rule='max_length[40]';
+		$edit->nombre->size =42;
+		$edit->nombre->maxlength =40;
+
+		$edit->tipo_doc = new  dropdownField('Tipo doc.', 'tipo_doc');
+		$edit->tipo_doc->option('AB','Abono');
+		$edit->tipo_doc->option('NC','Nota de credito');
+		$edit->tipo_doc->option('AN','Anticipo');
+		$edit->tipo_doc->style='width:140px;';
+		$edit->tipo_doc->rule ='enum[AB,NC,AN]|required';
+
+		$edit->codigo = new  dropdownField('Motivo', 'codigo');
+		$edit->codigo->option('','Ninguno');
+		$edit->codigo->options('SELECT TRIM(codigo) AS cod, nombre FROM botr WHERE tipo=\'C\' ORDER BY nombre');
+		$edit->codigo->style='width:200px;';
+		$edit->codigo->rule ='';
+
+		$edit->numero = new inputField('N&uacute;mero','numero');
+		$edit->numero->rule='max_length[8]';
+		$edit->numero->size =10;
+		$edit->numero->maxlength =8;
+
+		$edit->fecdoc = new dateonlyField('Fecha','fecdoc');
+		$edit->fecdoc->size =12;
+		$edit->fecdoc->maxlength =8;
+		$edit->fecdoc->insertValue=date('Y-m-d');
+		$edit->fecdoc->calendar = false;
+		$edit->fecdoc->rule ='chfecha|required';
+
+		$edit->monto = new inputField('Total','monto');
+		$edit->monto->rule='max_length[17]|numeric';
+		$edit->monto->css_class='inputnum';
+		$edit->monto->size =19;
+		$edit->monto->maxlength =17;
+		$edit->monto->type='inputhidden';
+
+		$edit->observa1 = new  textareaField('Concepto:','observa1');
+		$edit->observa1->cols = 70;
+		$edit->observa1->rows = 2;
+		$edit->observa1->style='width:100%;';
+
+		$edit->observa2 = new  textareaField('','observa2');
+		$edit->observa2->cols = 70;
+		$edit->observa2->rows = 2;
+		$edit->observa2->style='width:100%;';
+		$edit->observa2->when=array('show');
+
+		$edit->usuario = new autoUpdateField('usuario' ,$this->secu->usuario(),$this->secu->usuario());
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
+		$edit->fecha   = new autoUpdateField('fecha'   ,date('Ymd'), date('Ymd'));
+
+		$edit->banco = new dropdownField('Banco', 'banco');
+		$edit->banco->option('','Ninguno');
+		$edit->banco->options('SELECT codbanc,CONCAT_WS(\' \',TRIM(banco),numcuent) FROM banc WHERE tbanco <> \'CAJ\' ORDER BY banco');
+		$edit->banco->style  = 'width:200px;';
+		$edit->banco->rule   = 'condi_required|callback_chtipo';
+
+		$edit->tipo_op = new  dropdownField('Tipo', 'tipo_op');
+		$edit->tipo_op->option('CH','Cheque');
+		$edit->tipo_op->option('ND','Nota de debito');
+		$edit->tipo_op->style='width:150px;';
+		$edit->tipo_op->rule = 'condi_required|callback_chtipo';
+
+		$edit->numche = new inputField('N&uacute;mero', 'numche');
+		$edit->numche->size     = 12;
+		$edit->numche->rule     = 'condi_required|callback_chtipo';
+
+		$edit->benefi = new inputField('Beneficiario', 'benefi');
+		$edit->benefi->size     = 12;
+		$edit->benefi->rule     = 'condi_required|callback_chtipo';
+
+		$edit->fecha = new dateonlyField('Fecha','fecha');
+		$edit->fecha->size     = 12;
+		$edit->fecha->maxlength= 8;
+		$edit->fecha->calendar = false;
+		$edit->fecha->rule ='condi_required|chitfecha|callback_chtipo';
+
+		//************************************************
+		//inicio detalle itppro
+		//************************************************
+		$i=0;
+		$edit->detail_expand_except('itppro');
+		$sel=array('a.tipo_doc','a.numero','a.fecha','a.monto','a.abonos','a.monto - a.abonos AS saldo');
+		$this->db->select($sel);
+		$this->db->from('sprm AS a');
+		$this->db->where('a.cod_prv',$proveed);
+		$transac=$edit->get_from_dataobjetct('transac');
+		if($transac!==false){
+			$tipo_doc =$edit->get_from_dataobjetct('tipo_doc');
+			$dbtransac=$this->db->escape($transac);
+			$this->db->join('itccli AS b','a.tipo_doc = b.tipoccli AND a.numero=b.numccli AND a.transac='.$dbtransac);
+			$this->db->where('a.tipo_doc',$tipo_doc);
+		}else{
+			$this->db->where('a.monto > a.abonos');
+			$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
+		}
+		$this->db->order_by('a.fecha');
+		$query = $this->db->get();
+		//echo $this->db->last_query();
+		foreach ($query->result() as $row){
+			$obj='cod_prv_'.$i;
+			$edit->$obj = new autoUpdateField('cod_prv',$proveed,$proveed);
+			$edit->$obj->rel_id  = 'itppro';
+			$edit->$obj->ind     = $i;
+
+			$obj='tipo_doc_'.$i;
+			$edit->$obj = new inputField('Tipo_doc',$obj);
+			$edit->$obj->db_name='tipo_doc';
+			$edit->$obj->rel_id = 'itccli';
+			$edit->$obj->rule='max_length[2]';
+			$edit->$obj->insertValue=$row->tipo_doc;
+			$edit->$obj->size =4;
+			$edit->$obj->maxlength =2;
+			$edit->$obj->ind       = $i;
+			$edit->$obj->type='inputhidden';
+
+			$obj='numero_'.$i;
+			$edit->$obj = new inputField('Numero',$obj);
+			$edit->$obj->db_name='numero';
+			$edit->$obj->rel_id = 'itppro';
+			$edit->$obj->rule='max_length[8]';
+			$edit->$obj->insertValue=$row->numero;
+			$edit->$obj->size =10;
+			$edit->$obj->maxlength =8;
+			$edit->$obj->ind       = $i;
+			$edit->$obj->type='inputhidden';
+
+			$obj='fecha_'.$i;
+			$edit->$obj = new dateonlyField('Fecha',$obj);
+			$edit->$obj->db_name='fecha';
+			$edit->$obj->rel_id = 'itppro';
+			$edit->$obj->rule='chfecha';
+			$edit->$obj->insertValue=$row->fecha;
+			$edit->$obj->size =10;
+			$edit->$obj->maxlength =8;
+			$edit->$obj->ind       = $i;
+			$edit->$obj->type='inputhidden';
+
+			$obj='monto_'.$i;
+			$edit->$obj = new inputField('Monto',$obj);
+			$edit->$obj->db_name='monto';
+			$edit->$obj->rel_id = 'itppro';
+			$edit->$obj->rule='max_length[18]|numeric';
+			$edit->$obj->css_class='inputnum';
+			$edit->$obj->size =20;
+			$edit->$obj->insertValue=$row->monto;
+			$edit->$obj->maxlength =18;
+			$edit->$obj->ind       = $i;
+			$edit->$obj->showformat='decimal';
+			$edit->$obj->type='inputhidden';
+
+			$obj='saldo_'.$i;
+			$edit->$obj = new freeField($obj,$obj,nformat($row->saldo));
+			$edit->$obj->ind = $i;
+
+	        $obj='abono_'.$i;
+			$edit->$obj = new inputField('Abono',$obj);
+			$edit->$obj->db_name      = 'abono';
+			$edit->$obj->rel_id       = 'itppro';
+			$edit->$obj->rule         = "max_length[18]|numeric|positive|callback_chabono[$i]";
+			$edit->$obj->css_class    = 'inputnum';
+			$edit->$obj->showformat   = 'decimal';
+			$edit->$obj->autocomplete = false;
+			$edit->$obj->disable_paste= true;
+			$edit->$obj->size         = 15;
+			$edit->$obj->maxlength    = 18;
+			$edit->$obj->ind          = $i;
+			$edit->$obj->onfocus      = 'itsaldo(this,'.round($row->saldo,2).');';
+
+	        $obj='ppago_'.$i;
+			$edit->$obj = new inputField('Pronto Pago',$obj);
+			$edit->$obj->db_name      = 'ppago';
+			$edit->$obj->rel_id       = 'itppro';
+			$edit->$obj->rule         = "max_length[18]|numeric|positive|callback_chppago[$i]";
+			$edit->$obj->css_class    = 'inputnum';
+			$edit->$obj->showformat   = 'decimal';
+			$edit->$obj->autocomplete = false;
+			$edit->$obj->disable_paste= true;
+			$edit->$obj->size         = 15;
+			$edit->$obj->maxlength    = 18;
+			$edit->$obj->ind          = $i;
+			$edit->$obj->onchange     = "itppago(this,'$i');";
+
+			$i++;
+		}
+		//************************************************
+		//fin de campos para detalle
+		//************************************************
+
+		$edit->buttons('add_rel');
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+
+			echo json_encode($rt);
+		}else{
+			$conten['cana']  = $i;
+			$conten['form']  = & $edit;
+			$conten['title'] = heading("Cobro a proveedor: (${proveed}) ${sprv_nombre} ${sprv_rif}");
+
+			$data['content'] = $this->load->view('view_cprv.php', $conten);
+		}
+	}
+
+
+	function _pre_cprv_insert($do){
+	}
+
+	function _pre_cprv_update($do){
+	}
+
+	function _pre_cprv_delete($do){
+
+	}
+
+	function _post_cprv_insert($do){
+
+	}
 
 	function instalar(){
 		$campos=$this->db->list_fields('sprm');

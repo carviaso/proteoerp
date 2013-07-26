@@ -52,7 +52,7 @@ class Ajax extends Controller {
 			$retArray = $retorno = array();
 
 			//Cheque si existe el codigo
-			$mSQL="SELECT TRIM(nombre) AS nombre, TRIM(rif) AS rif, proveed, direc1 AS direc, reteiva
+			$mSQL="SELECT id,TRIM(nombre) AS nombre, TRIM(rif) AS rif, proveed, direc1 AS direc, reteiva
 				FROM sprv WHERE proveed=${qmid} LIMIT 1";
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() == 1){
@@ -64,13 +64,14 @@ class Ajax extends Controller {
 				$retArray['proveed'] = $row['proveed'];
 				$retArray['direc']   = utf8_encode($row['direc']);
 				$retArray['reteiva'] = $row['reteiva'];
+				$retArray['id']      = $row['id'];
 				array_push($retorno, $retArray);
 				$ww=" AND proveed<>${qmid}";
 			}else{
 				$ww='';
 			}
 
-			$mSQL="SELECT TRIM(nombre) AS nombre, TRIM(rif) AS rif, proveed, direc1 AS direc, reteiva
+			$mSQL="SELECT id,TRIM(nombre) AS nombre, TRIM(rif) AS rif, proveed, direc1 AS direc, reteiva
 				FROM sprv WHERE (rif LIKE ${qdb} OR nombre LIKE ${qdb} OR proveed=${qdbi}) ${ww}
 				ORDER BY rif LIMIT ".$this->autolimit;
 			$query = $this->db->query($mSQL);
@@ -83,6 +84,7 @@ class Ajax extends Controller {
 					$retArray['proveed'] = $row['proveed'];
 					$retArray['direc']   = utf8_encode($row['direc']);
 					$retArray['reteiva'] = $row['reteiva'];
+					$retArray['id']      = $row['id'];
 					array_push($retorno, $retArray);
 				}
 			}
@@ -2175,19 +2177,19 @@ class Ajax extends Controller {
 
 		$form = new DataForm(site_url('ajax/consultaprecio/process'));
 
-		// Origen 
+		// Origen
 		$form->codofiorg = new dropdownField('Origen','codofiorg');
 		$form->codofiorg->option('00','Seleccione');
 		$form->codofiorg->options("SELECT codofi, desofi FROM pllanos_pasaje.tbofici WHERE codofi>0 ORDER BY desofi");
 		$form->codofiorg->style = 'width:180px;';
 
-		// Destino 
+		// Destino
 		$form->codofides = new dropdownField('Destino.','codofides');
 		$form->codofides->option('00','Seleccione');
 		$form->codofides->options("SELECT codofi, desofi FROM pllanos_pasaje.tbofici WHERE codofi>0 ORDER BY desofi ");
 		$form->codofides->style = 'width:180px;';
 
-		$form->submit = new submitField("Buscar","btn_submit");    
+		$form->submit = new submitField("Buscar","btn_submit");
 
 		$form->build_form();
 
@@ -2207,7 +2209,7 @@ class Ajax extends Controller {
 		$salida .= script('i18n/grid.locale-sp.js');
 		$salida .= script('jquery.jqGrid.min.js');
 
-		$salida .= style('themes/proteo/proteo.css');		
+		$salida .= style('themes/proteo/proteo.css');
 		$salida .= '</head>'."\n";
 		$salida .= '<body><center>'."\n";
 		$salida .= '<form action="'.site_url('ajax/consultaprecio/process').'" method="post" id="df1"><div class="alert"></div>'."\n";
@@ -2215,19 +2217,19 @@ class Ajax extends Controller {
 
 		//if($form->on_success()){
 		if ( $codofiorg > 0 || $codofides > 0 ) {
-			
+
 			$titu = "Destino";
 			if ( $codofiorg == 0 && $codofides > 0 ) {
-				$mSQL ='SELECT a.codofiorg, b.desofi desorg, a.codofides, b.desofi desdes, a.prec_02 buscama, a.prec_01 ejecutivo,';  
+				$mSQL ='SELECT a.codofiorg, b.desofi desorg, a.codofides, b.desofi desdes, a.prec_02 buscama, a.prec_01 ejecutivo,';
 				$titu = "Origen";
-			} else 
-				$mSQL ='SELECT a.codofiorg, b.desofi desorg, a.codofides, c.desofi desdes, a.prec_02 buscama, a.prec_01 ejecutivo,';  
+			} else
+				$mSQL ='SELECT a.codofiorg, b.desofi desorg, a.codofides, c.desofi desdes, a.prec_02 buscama, a.prec_01 ejecutivo,';
 
-			$mSQL .='d.valsegu seguro, d.vtasa tasa, round(a.prec_02+d.valsegu+d.vtasa,2) total_buscama,  round(a.prec_01+d.valsegu+d.vtasa,2) total_ejecutivo  
+			$mSQL .='d.valsegu seguro, d.vtasa tasa, round(a.prec_02+d.valsegu+d.vtasa,2) total_buscama,  round(a.prec_01+d.valsegu+d.vtasa,2) total_ejecutivo
 					FROM pllanos_pasaje.tbprecios a
 					JOIN pllanos_pasaje.tbofici b ON a.codofiorg=b.codofi
 					JOIN pllanos_pasaje.tbofici c ON a.codofides=c.codofi
-					JOIN pllanos_pasaje.tbparam d ON a.codofiorg=d.codofiori 
+					JOIN pllanos_pasaje.tbparam d ON a.codofiorg=d.codofiori
 			        WHERE a.codofiorg>0 AND a.codofides>0 AND a.prec_01>0 AND a.prec_02>0 ';
 
 			if ( $codofiorg > 0 )
@@ -2282,27 +2284,27 @@ class Ajax extends Controller {
 		$salida .= "<td>Origen: ".$form->codofiorg->output."</td>";
 		$salida .= "<td>".$form->submit->output."</td>";
 		$salida .= "</tr></table>";
-		$salida .= '</form>'; 
+		$salida .= '</form>';
 
 		$salida .= $rs;
 
 		$salida .= '
 <script type="text/javascript">
-		$(document).ready(function() { 
-			tableToGrid("#bprecios",{ 
-				width:"600", 
+		$(document).ready(function() {
+			tableToGrid("#bprecios",{
+				width:"600",
 				height:"250",
 				colModel: [
 				{name: "'.$titu.'",   id: "'.$titu.'",   width: 200 },
-				{name: "Seguro",    id: "Seguro",    width:  50, align:"center" },  
+				{name: "Seguro",    id: "Seguro",    width:  50, align:"center" },
 				{name: "Tasa",      id: "Tasa",      width:  50, align:"center" },
 				{name: "Ejecutivo", id: "Ejecutivo", width:  70, align:"right" },
 				{name: "Total_E",    id: "Total_E",    width:  70, align:"right", title: "Total" },
-				{name: "Buscama",   id: "Buscama",   width:  70, align:"right" }, 
-				{name: "Total_B",    id: "Total_B",    width:  70, align:"right", title: "Total" }, 
+				{name: "Buscama",   id: "Buscama",   width:  70, align:"right" },
+				{name: "Total_B",    id: "Total_B",    width:  70, align:"right", title: "Total" },
 				]
-				
-			 }); 
+
+			 });
 		})
 </script>';
 
@@ -2311,7 +2313,7 @@ class Ajax extends Controller {
 
 		$salida .= '</center></body>';
 		$salida .= '</html>';
-		
+
 		echo $salida;
 
 	}
