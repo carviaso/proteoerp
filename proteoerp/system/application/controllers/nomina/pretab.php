@@ -37,6 +37,7 @@ class Pretab extends Controller {
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'genepre',  'img'=>'images/engrana.png',       'alt'=>'Genera Prenomina',      'label'=>'Genera Prenomina',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'respalda', 'img'=>'images/database_link.png', 'alt'=>'Respaldar Prenominas',  'label'=>'Respaldar/Recuperar',   'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'irecibos', 'img'=>'assets/default/images/print.png',       'alt'=>'Imprimir Recibos',      'label'=>'Imprimir Recibos',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'genenom',  'img'=>'images/databaseadd.png',   'alt'=>'Guardar la Pre-Nomina', 'label'=>'Guardar la Pre-Nomina', 'tema'=>'anexos'));
 		$grid->wbotonadd(array("id"=>"regene",   "img"=>"images/repara.png",        'alt'=>'Regenerar Pre Nomina',  'label'=>'Regenerar Pre Nomina',  'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
@@ -105,6 +106,9 @@ class Pretab extends Controller {
 				buttons: { Ok:true }
 			}		
 		};
+		';
+
+		$bodyscript .= '
 		$("#genepre").click( function() 
 		{
 			$.prompt(mprepanom);
@@ -250,6 +254,14 @@ class Pretab extends Controller {
 		$("#respalda").click( function() 
 		{
 			$.prompt(mcontenido);
+		});
+		';
+
+
+		$bodyscript .= '
+		$("#irecibos").click( function() {
+			alert("recibo");
+			'.$this->datasis->jwinopen(site_url('formatos/ver/RECIBO')."'").';
 		});
 		';
 
@@ -431,9 +443,9 @@ class Pretab extends Controller {
 
 
 	//******************************************************************
-	//  Resumen rapido
+	//  Recibo de Nomina
 	//
-	function recibo( $id ) {
+	function recibo( $id) {
 
 		$row = $this->datasis->damereg("SELECT a.codigo, a.nombre, CONCAT(b.nacional,b.cedula) ci, b.enlace FROM pretab a JOIN pers b ON a.codigo=b.codigo WHERE a.id=$id");
 		$codigo  = $row['codigo'];
@@ -495,11 +507,6 @@ class Pretab extends Controller {
 		}
 
 
-		//$salida .= '<table width="90%" border="0" align="center" style="border:1px solid; background:#E4E4E4;"><tr>';
-		//$salida .= '<td align="center"><a href="#" onclick="fresumen('.$id.','.$anterior.')"> '.img('images/arrow_left.png').'</a></td>';
-		//$salida .= '<td align="center"><a href="#" onclick="crecalban()" >RECALCULAR</a></td>';
-		//$salida .= '<td align="center"><a href="#" onclick="fresumen('.$id.','.$proximo.')">'.img('images/arrow_right.png').'</a>';
-		//$salida .= "</td></tr></table>\n";
 
 		echo $salida;
 	}
