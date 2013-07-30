@@ -79,8 +79,8 @@ class Pretab extends Controller {
 			"<table align=\'center\'>"+
 			"<tr><td>Fecha de Corte: </td><td><input id=\'mfechac\' name=\'mfechac\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
 			"<tr><td>Fecha de Pago:  </td><td><input id=\'mfechap\' name=\'mfechap\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
-			"</table>"
-		;
+			"</table>";
+			
 		var mprepanom = 
 		{
 			state0: {
@@ -366,10 +366,8 @@ class Pretab extends Controller {
 								var json = JSON.parse(r);
 								if (json.status == "A"){
 									$.post("'.base_url().'nomina/prenom/calcula/"+json.pk);
-									apprise("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/PRETAB').'/\'+res.id+\'/id\'').';
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -390,6 +388,9 @@ class Pretab extends Controller {
 				allFields.val( "" ).removeClass( "ui-state-error" );
 			}
 		});';
+
+//									'.$this->datasis->jwinopen(site_url('formatos/ver/PRETAB').'/\'+res.id+\'/id\'').';
+
 
 		$bodyscript .= '
 		$("#fshow").dialog({
@@ -746,6 +747,9 @@ class Pretab extends Controller {
 		};
 	}
 
+	//******************************************************************
+	//
+	//
 	function dataedit(){
 		$this->rapyd->load('dataform');
 
@@ -835,9 +839,7 @@ class Pretab extends Controller {
 		$edit->build_form();
 
 		if($edit->on_success()){
-
 			$codigo = $edit->codigo->newValue;
-
 			$query = $this->db->query("DESCRIBE pretab");
 			$i = 0;
 			if ($query->num_rows() > 0){
@@ -850,7 +852,7 @@ class Pretab extends Controller {
 						if ( strpos($formula, 'MONTO') ) {
 							$obj = $row->Field;
 							$this->db->query('UPDATE prenom SET monto='.$edit->$obj->newValue.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"');
-							memowrite('UPDATE prenom SET monto='.$edit->$obj->newValue.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"','meco');
+							//memowrite('UPDATE prenom SET monto='.$edit->$obj->newValue.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"','meco');
 						}
 					}
 				}

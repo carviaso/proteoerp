@@ -64,7 +64,6 @@ class Conc extends Controller {
 		$param['encabeza']    = $this->titp;
 		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
 		$this->load->view('jqgrid/crud2',$param);
-
 	}
 
 
@@ -719,7 +718,7 @@ class Conc extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('conc');
 
-		$response   = $grid->getData('conc', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('conc', array(array()), array(), false, $mWHERE, 'concepto' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -1290,8 +1289,5 @@ script;
 		}
 	}
 
-/*
-
-*/
 }
 ?>

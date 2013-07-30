@@ -56,11 +56,13 @@ class fnomina {
 		return $SUELDOA;
 	}
 
+	// CALCULA EL SUELDO POR DIA
 	function SUELDO_DIA(){
 		$CODIGO=$this->ci->db->escape($this->CODIGO);
 		$SUELDOA = 0;
 		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=$CODIGO");
-		$mMONTO  = $this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=$CODIGO");
+		$mMONTO  = $this->SUELDO;
+		//$this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=$CODIGO");
 
 		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
 		if($mFRECU == 'S') $SUELDOA = $mMONTO/7 ;
@@ -69,6 +71,23 @@ class fnomina {
 		if($mFRECU == 'M') $SUELDOA = $mMONTO/30 ;
 		return $SUELDOA;
 	}
+
+	// CALCULA EL SUELDO PROMEDIO POR DIA 
+	function SUELDO_DIA_PROM(){
+		$CODIGO=$this->ci->db->escape($this->CODIGO);
+		$SUELDOA = 0;
+		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=$CODIGO");
+		$mMONTO  = $this->SPROME;
+		//$this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=$CODIGO");
+
+		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
+		if($mFRECU == 'S') $SUELDOA = $mMONTO/7 ;
+		if($mFRECU == 'B') $SUELDOA = $mMONTO/14;
+		if($mFRECU == 'Q') $SUELDOA = $mMONTO/15;
+		if($mFRECU == 'M') $SUELDOA = $mMONTO/30 ;
+		return $SUELDOA;
+	}
+
 
 	function SUELDO_HOR(){
 		$SUELDOA = $this->SUELDO_DIA()/8;
@@ -134,10 +153,15 @@ class fnomina {
 
 }
 
+//**********************************************************************
+//
+//
 class Pnomina extends fnomina {
 
 	var $MONTO  = 0;
 	var $SUELDO = 0;
+	var $SPROME = 0;
+	var $DIAS   = 0;
 
 	var $VARI1 = 0;
 	var $VARI2 = 0;
@@ -155,6 +179,8 @@ class Pnomina extends fnomina {
 	function evalform($formula){
 		$MONTO  = $this->MONTO;
 		$SUELDO = $this->SUELDO;
+		$SPROME = $this->SPROME;
+		$DIAS   = $this->DIAS;
 
 		$VARI1 = $this->VARI1;
 		$VARI2 = $this->VARI2;
@@ -165,8 +191,8 @@ class Pnomina extends fnomina {
 
 		$fformula = $this->_traduce($formula);
 
-		//if ( strpos($formula,'SEMANAS') )
-		memowrite($formula.' == >> '.$fformula,'formula');
+		//if ( strpos($formula,'SUELDO_PROMEDIO') )
+			memowrite($formula.' == >> '.$fformula, 'Formula');
 
 		$retorna='$rt='.$fformula.';';
 
@@ -175,7 +201,7 @@ class Pnomina extends fnomina {
 	}
 
 	function _traduce($formula){
-		$CODIGO=$this->ci->db->escape($this->CODIGO);
+		$CODIGO = $this->ci->db->escape($this->CODIGO);
 
 		$qq = $this->ci->db->query("SELECT valor FROM utributa ORDER BY fecha DESC LIMIT 1");
 		$rr = $qq->row_array();
@@ -183,9 +209,9 @@ class Pnomina extends fnomina {
 		$ut = $aa[1];
 
 		
-		//para los if
-		$long=strlen($formula);
-		$pos=$long+1;
+		// Transforma los if
+		$long = strlen($formula);
+		$pos  = $long+1;
 		while(1){
 			$desp=$pos-$long-1;
 			if(abs($desp)>=$long-1) break;
@@ -235,8 +261,11 @@ class Pnomina extends fnomina {
 				}
 			}
 		}
-		$formula=str_replace('XMONTO', '$MONTO', $formula);
-		$formula=str_replace('XSUELDO','$SUELDO',$formula);
+		$formula=str_replace('SUELDO_PROMEDIO', '$SPROME', $formula);
+		$formula=str_replace('XMONTO',           '$MONTO', $formula);
+		$formula=str_replace('XSUELDO',          '$SUELDO',$formula);
+		$formula=str_replace('XDIAS',            '$DIAS',  $formula);
+		$formula=str_replace('DIAS_TRABAJADOS', '$DIAS', $formula);
 
 		$formula=str_replace('XVARI1','$VARI1',$formula);
 		$formula=str_replace('XVARI2','$VARI2',$formula);

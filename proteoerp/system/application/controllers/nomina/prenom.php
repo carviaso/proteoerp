@@ -231,7 +231,7 @@ class Prenom extends Controller {
 			$this->db->query("TRUNCATE ${prenom}");
 		
 
-		// ---- CONCEPTOS FIJOS ---- //
+		// ---- CONCEPTOS PARTICULARES ---- //
 		$mSQL  = "INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
 		$mSQL .= "SELECT ".$contdb." contrato, b.codigo, CONCAT(RTRIM(b.apellido),', ',b.nombre) nombre,";
 		$mSQL .= "a.concepto, c.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fechap."' ";
@@ -301,12 +301,55 @@ class Prenom extends Controller {
 			$this->pnomina->fdesde = $d->format('Y-m-d');
 		}
 
-		$query = $this->db->query('SELECT * FROM prenom a JOIN pers b ON a.codigo=b.codigo WHERE a.codigo='.$this->db->escape($codigo).' ORDER BY a.tipo, a.concepto');
+
+		$query = $this->db->query('SELECT a.*, b.*, c.dias, c.psueldo FROM prenom a JOIN pers b ON a.codigo=b.codigo JOIN conc c ON a.concepto=c.concepto WHERE a.codigo='.$this->db->escape($codigo).' ORDER BY a.tipo, a.concepto');
 		if ($query->num_rows() > 0) {
 			$this->db->query("UPDATE pretab SET total=0 WHERE codigo=".$this->db->escape($codigo) );
+			$SPROME = 0;
+			$DIAS   = 0;
 			foreach ($query->result() as $row){
 				$this->pnomina->MONTO   = $row->monto;
 				$this->pnomina->SUELDO  = $row->sueldo;
+				$this->pnomina->SPROME  = $row->sueldo;
+				$this->pnomina->DIAS    = 1;
+
+				$this->pnomina->VARI1  = $row->vari1;
+				$this->pnomina->VARI2  = $row->vari2;
+				$this->pnomina->VARI3  = $row->vari3;
+				$this->pnomina->VARI4  = $row->vari4;
+				$this->pnomina->VARI5  = $row->vari5;
+				$this->pnomina->VARI6  = $row->vari6;
+
+				$valor = $this->pnomina->evalform($row->formula);
+				$this->db->query("UPDATE prenom SET valor=${valor} WHERE concepto='".$row->concepto."' AND codigo=".$this->db->escape($codigo) );
+
+				$this->db->query("UPDATE pretab SET c".$row->concepto."=${valor} WHERE codigo=".$this->db->escape($codigo) );
+
+				if ( substr($row->concepto,0,1) != '9' )
+					$this->db->query("UPDATE pretab SET total=total+${valor} WHERE codigo=".$this->db->escape($codigo) );
+
+				// Calcula los dias Trabajados
+				$mSQL = "SELECT dias FROM conc WHERE concepto=".$this->db->escape($row->concepto);
+				if ( $valor <> 0 ){
+					if ($row->monto <> 0)
+						$DIAS += $this->datasis->dameval($mSQL)*$row->monto;
+					else
+						$DIAS += $this->datasis->dameval($mSQL);
+				}
+				// Calcula Sueldo Promedio
+				if ( $row->psueldo == 'S' )
+					$SPROME += $valor;
+
+			}
+
+			memowrite($SPROME.' == >> '.$DIAS, $codigo);
+
+
+			foreach ($query->result() as $row){
+				$this->pnomina->MONTO   = $row->monto;
+				$this->pnomina->SUELDO  = $row->sueldo;
+				$this->pnomina->SPROME  = $SPROME;
+				$this->pnomina->DIAS    = $DIAS;
 
 				$this->pnomina->VARI1  = $row->vari1;
 				$this->pnomina->VARI2  = $row->vari2;
