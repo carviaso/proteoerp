@@ -189,6 +189,8 @@ class Pnomina extends fnomina {
 		$VARI5 = $this->VARI5;
 		$VARI6 = $this->VARI6;
 
+		$SMINIMO = $this->ci->datasis->traevalor('SUELDOMINIMO');
+		
 		$fformula = $this->_traduce($formula);
 
 		//if ( strpos($formula,'SUELDO_PROMEDIO') )
@@ -261,11 +263,12 @@ class Pnomina extends fnomina {
 				}
 			}
 		}
-		$formula=str_replace('SUELDO_PROMEDIO', '$SPROME', $formula);
-		$formula=str_replace('XMONTO',           '$MONTO', $formula);
-		$formula=str_replace('XSUELDO',          '$SUELDO',$formula);
-		$formula=str_replace('XDIAS',            '$DIAS',  $formula);
-		$formula=str_replace('DIAS_TRABAJADOS', '$DIAS', $formula);
+		$formula=str_replace('SUELDO_PROMEDIO', '$SPROME',  $formula);
+		$formula=str_replace('XMONTO',          '$MONTO',   $formula);
+		$formula=str_replace('XSUELDO',         '$SUELDO',  $formula);
+		$formula=str_replace('XDIAS',           '$DIAS',    $formula);
+		$formula=str_replace('DIAS_TRABAJADOS', '$DIAS',    $formula);
+		$formula=str_replace('SUELDO_MINIMO',   '$SMINIMO', $formula);
 
 		$formula=str_replace('XVARI1','$VARI1',$formula);
 		$formula=str_replace('XVARI2','$VARI2',$formula);

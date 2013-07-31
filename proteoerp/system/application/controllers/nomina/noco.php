@@ -446,9 +446,9 @@ Para <b>ELIMINAR</b> un concepto del contrato, seleccione uno y haga doble click
 		$grid->setOndblClickRow('
 			,ondblClickRow: function(id){
 				if (id){
-					$.prompt( "Eliminar Concepto al Contrato? ",{
+					$.prompt( "Eliminar Concepto del Contrato? ",{
 						buttons: { Eliminar:true, Cancelar:false},
-						callback: function(e,v,m,f){
+						submit: function(e,v,m,f){
 							if (v == true) {
 								$.get("'.base_url().$this->url.'elimina/"+id,
 								function(data){

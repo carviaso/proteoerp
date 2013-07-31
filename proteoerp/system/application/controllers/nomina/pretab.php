@@ -260,7 +260,6 @@ class Pretab extends Controller {
 
 		$bodyscript .= '
 		$("#irecibos").click( function() {
-			alert("recibo");
 			'.$this->datasis->jwinopen(site_url('formatos/ver/RECIBO')."'").';
 		});
 		';

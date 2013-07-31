@@ -283,7 +283,7 @@ class Prenom extends Controller {
 		// Busca la fecha inical
 		if ( $mFREC == 'Q' ){        // Quincenal
 			if ( substr($fhasta,8,2) > 15 ) {
-				$this->pnomina->fdesde = substr($fhasta,0,8).'15' ;
+				$this->pnomina->fdesde = substr($fhasta,0,8).'16' ;
 			} else
 				$this->pnomina->fdesde = substr($fhasta,0,8).'01' ;
 
