@@ -117,9 +117,28 @@ class fnomina {
 		return 1;
 	}
 
+	//******************************************************************
+	// Suma por Grupo
+	//
 	function GRUPO($parr){
-		return 1;
+		$mSQL  = "SELECT sum(a.valor) cuenta FROM prenom a WHERE a.codigo='".$this->CODIGO."' AND a.grupo regexp '[".$parr."]+' AND MID(a.concepto,1,1)<9 ";
+		$query = $this->ci->db->query($mSQL);
+		$row   = $query->row();
+		$suma  = $row->cuenta;
+		return $suma;
 	}
+
+	//******************************************************************
+	// Trae un concepto
+	//
+	function TRAE($parr){
+		$mSQL  = "SELECT a.valor FROM prenom a WHERE a.codigo='".$this->CODIGO."' AND a.concepto=".$this->ci->db->escape($parr);
+		$query = $this->ci->db->query($mSQL);
+		$row   = $query->row();
+		$suma  = $row->valor;
+		return $suma;
+	}
+
 
 	//******************************************************************
 	// Suma de todas las asignaciones
@@ -283,6 +302,7 @@ class Pnomina extends fnomina {
 
 		$formula=str_replace('TRAEVALOR','$this->ci->datasis->traevalor',$formula);
 
+
 		$formula=str_replace('.AND.','&&',$formula);
 		$formula=str_replace('.OR.','||',$formula);
 		$formula=str_replace('.NOT.','!',$formula);
@@ -342,8 +362,5 @@ class Pnomina extends fnomina {
 			}
 		}
 	}
-
-
-
 }
 ?>
