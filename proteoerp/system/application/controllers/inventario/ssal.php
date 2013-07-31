@@ -923,7 +923,7 @@ class Ssal extends Controller {
 		$edit->fecha->mode = 'autohide';
 		$edit->fecha->readonly = true;
 		$edit->fecha->calendar = false;
-		$edit->fecha->size = 10;
+		$edit->fecha->size = 12;
 
 		$edit->tipo = new  dropdownField ('Tipo', 'tipo');
 		$edit->tipo->option('S','Salida');

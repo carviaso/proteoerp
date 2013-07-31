@@ -852,8 +852,7 @@ class Sprv extends Controller {
 		$proveed  = $row['proveed'];
 		$salida = '';
 
-		$saldo  = 0;
-		$saldo  = $this->datasis->dameval("SELECT sum(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM sprm WHERE cod_prv=".$this->db->escape($proveed));
+		$saldo  = $this->datasis->dameval("SELECT SUM(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM sprm WHERE cod_prv=".$this->db->escape($proveed));
 
 		$salida  = '<table width="90%" cellspacing="0" align="center">';
 		if ( $saldo > 0 )

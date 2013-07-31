@@ -91,6 +91,30 @@ $(document).ready(function() {
 	codb1=$('#codb1').val();
 	desactivacampo(codb1);
 	autocod(0);
+
+	$('#serie').change(function (){
+		var proveed = $('#proveed').val();
+		var numero  = $('#serie').val();
+		var tipo    = $('#tipo_doc').val();
+
+		if(numero!='' && proveed!='' && tipo!=''){
+			$.ajax({
+				url: "<?php echo site_url('ajax/gserdupli'); ?>",
+				dataType: 'json',
+				type: 'POST',
+				data: {'proveed' : proveed, 'numero': numero, 'tipo_doc':tipo},
+				success: function(data){
+					if(data.status=='A'){
+						$.prompt("<span style='font-size:1.5em'>Ya existe un gasto registrado con el mismo n&uacute;mero y el mismo proveedor de fecha <b>"+data.fecha+"</b>, contro <b>"+data.nfiscal+"</b> y monto <b>"+nformat(data.monto,2)+"</b></span>", {
+							title: "Posible gasto duplicado",
+							buttons: { "Continuar": true }
+						});
+					}
+				},
+			});
+		}
+	});
+
 	$('#proveed').autocomplete({
 		delay: 600,
 		autoFocus: true,
@@ -127,6 +151,7 @@ $(document).ready(function() {
 			$('#proveed').val(ui.item.proveed);
 
 			setTimeout(function(){ $('#proveed').removeAttr("readonly"); }, 1500);
+			$('#serie').change();
 		}
 	});
 });
@@ -221,6 +246,28 @@ function reteiva(){
 		return 0.0;
 	<?php } ?>
 }
+
+$('#numero').change(function (){
+	var proveed = $('#proveed').val();
+	var numero  = $('#proveed').val();
+
+	if(numero!='' && proveed!=''){
+		$.ajax({
+			url: "<?php echo site_url('ajax/gserdupli'); ?>",
+			dataType: 'json',
+			type: 'POST',
+			data: {'proveed' : proveed, 'numero': numero},
+			success: function(data){
+				if(data){
+					$.prompt("<span style='font-size:1.5em'>Ya existe un gasto registrado con el mismo n&uacute;mero y el mismo proveedor </span>", {
+						title: "Gasto duplicado",
+						buttons: { "Continuar": true }
+					});
+				}
+			},
+		});
+	}
+});
 
 function importe(i){
 	ind    = i.toString();
@@ -458,7 +505,7 @@ function toggle() {
 		<table width="100%" style="margin: 0; width: 100%;">
 			<tr>
 				<td width='90' class="littletableheader"><?php echo $form->tipo_doc->label  ?>*&nbsp;</td>
-				<td width='115' class="littletablerow">   <?php echo $form->tipo_doc->output ?>&nbsp; </td>
+				<td width='115' class="littletablerow">  <?php echo $form->tipo_doc->output ?>&nbsp; </td>
 				<td width='90' class="littletableheader"><?php echo $form->proveed->label   ?>*&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->proveed->output.$form->sprvtipo->output.$form->sprvreteiva->output  ?>&nbsp; </td>
 				<td width='70'  class="littletableheader"><?php echo $form->ffactura->label  ?>*&nbsp;</td>

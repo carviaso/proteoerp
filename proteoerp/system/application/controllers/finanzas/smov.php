@@ -787,7 +787,7 @@ class Smov extends Controller {
 
 
 		$grid->addField('codcp');
-		$grid->label('Codcp');
+		$grid->label('Cod.CP');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
@@ -1390,6 +1390,10 @@ class Smov extends Controller {
 		}
 	}
 
+	//************************************
+	// Cobro a clientes
+	//************************************
+
 	function ccli($id_scli){
 		$id_scli=intval($id_scli);
 		$row = $this->datasis->damerow("SELECT cliente,nombre,rifci FROM scli WHERE id=${id_scli}");
@@ -1455,6 +1459,7 @@ class Smov extends Controller {
 		$edit->tipo_doc->option('NC','Nota de credito');
 		$edit->tipo_doc->option('AN','Anticipo');
 		$edit->tipo_doc->style='width:140px;';
+		$edit->tipo_doc->onchange='chtipodoc()';
 		$edit->tipo_doc->rule ='enum[AB,NC,AN]|required';
 
 		$edit->codigo = new  dropdownField('Motivo', 'codigo');
@@ -1680,221 +1685,6 @@ class Smov extends Controller {
 		}
 	}
 
-	function _exitescli($cliente){
-		$dbscli= $this->db->escape($cliente);
-		$mSQL  = "SELECT COUNT(*) AS cana FROM scli WHERE cliente=${dbscli}";
-		$query = $this->db->query($mSQL);
-		if ($query->num_rows() > 0){
-			$row = $query->row();
-			if( $row->cana>0) return true; else return false;
-		}else{
-			return false;
-		}
-	}
-
-	function tabla() {
-		$id  = $this->uri->segment($this->uri->total_segments());
-		$dbid= $this->db->escape($id);
-
-		$row = $this->datasis->damereg("SELECT cod_cli, tipo_doc, numero, estampa, transac FROM smov WHERE id=${dbid}");
-
-		$transac   = $row['transac'];
-		$cod_cli   = $row['cod_cli'];
-		$numero    = $row['numero'];
-		$tipo_doc  = $row['tipo_doc'];
-		$estampa   = $row['estampa'];
-		$dbtipo_doc= $this->db->escape($tipo_doc);
-		$dbnumero  = $this->db->escape($numero);
-		$dbtiponum = $this->db->escape($tipo_doc.$numero);
-		$dbestampa = $this->db->escape($estampa);
-		$dbtransac = $this->db->escape($transac);
-		$dbcod_cli = $this->db->escape($cod_cli);
-
-
-		$td1  = "<td style='border-style:solid;border-width:1px;border-color:#78FFFF;' valign='top' align='center'>\n";
-		$td1 .= "<table width='98%'>\n<caption style='background-color:#5E352B;color:#FFFFFF;font-style:bold'>";
-
-		// Movimientos Relacionados en Proveedores SPRM
-		$mSQL = "SELECT cod_prv, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos
-			FROM sprm WHERE transac=${dbtransac} ORDER BY cod_prv ";
-		$query = $this->db->query($mSQL);
-		$salida = '<table width="100%"><tr>';
-		$saldo  = 0;
-		if ( $query->num_rows() > 0 ){
-			$salida .= $td1;
-			$salida .= 'Movimiento en Proveedores</caption>';
-			$salida .= "<tr bgcolor='#E7E3E7'><td>Nombre</td><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row){
-				if ( $row['tipo_doc'] == 'FC' ) {
-					$saldo = $row['monto']-$row['abonos'];
-				}
-				$salida .= '<tr>';
-				$salida .= '<td>'.trim($row['cod_prv']).'-'.$row['nombre'].'</td>';
-				$salida .= '<td>'.$row['tipo_doc'].'</td>';
-				$salida .= '<td>'.$row['numero'].  '</td>';
-				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
-				$salida .= '</tr>';
-			}
-			if ($saldo <> 0)
-				$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo).'</td></tr>';
-			$salida .= '</table></td>';
-		}
-
-		// Movimientos Relacionados en SMOV
-		$mSQL = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos
-			FROM smov WHERE transac=${dbtransac} AND id<>${dbid} ORDER BY cod_cli ";
-		$query = $this->db->query($mSQL);
-		$saldo = 0;
-		if ( $query->num_rows() > 0 ){
-			$salida .= $td1;
-			$salida .= 'Movimiento en Clientes</caption>';
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row){
-				if ( $row['tipo_doc'] == 'FC' ) {
-					$saldo = $row['monto']-$row['abonos'];
-				}
-				$salida .= '<tr>';
-				$salida .= '<td>'.$row['cod_cli'].'-'.$row['nombre'].'</td>';
-				$salida .= '<td>'.$row['tipo_doc'].'</td>';
-				$salida .= '<td>'.$row['numero'].  '</td>';
-				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
-				$salida .= '</tr>';
-			}
-			$salida .= '</table></td>';
-		}
-
-		//Retencion de IVA RIVC
-		$mSQL = "
-			SELECT b.periodo, b.nrocomp, a.reiva
-			FROM itrivc a JOIN rivc b ON a.idrivc=b.id WHERE a.tipo_doc=IF('$tipo_doc'='FC','F','D') AND a.numero=${dbnumero}
-			UNION ALL
-			SELECT b.periodo, b.nrocomp, a.reiva
-			FROM itrivc a JOIN rivc b ON a.idrivc=b.id WHERE a.transac=${dbtransac}";
-		$query = $this->db->query($mSQL);
-		if ( $query->num_rows() > 0 ){
-			$salida .= $td1;
-			$salida .= 'Retenciones de IVA</caption>';
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Per&iacute;odo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</tr>";
-			foreach ($query->result_array() as $row){
-				$salida .= '<tr>';
-				$salida .= '<td>'.$row['periodo'].'</td>';
-				$salida .= '<td>'.$row['nrocomp'].'</td>';
-				$salida .= '<td align=\'right\'>'.nformat($row['reiva']).'</td>';
-				$salida .= '</tr>';
-			}
-			$salida .= '</table></td>';
-		}
-
-		// Factura Relacionada SFAC
-		if ( $tipo_doc <> 'FC' ){
-			$mSQL = "SELECT tipo_doc, numero, totalg FROM sfac a WHERE a.transac=${dbtransac}";
-			$query = $this->db->query($mSQL);
-			if ( $query->num_rows() > 0 ){
-				$salida .= $td1;
-				$salida .= 'Factura Relacionada</caption>';
-				$salida .= "<tr bgcolor='#e7e3e7'><td>Tipo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</tr>";
-				foreach ($query->result_array() as $row){
-					$salida .= '<tr>';
-					$salida .= '<td>'.$row['tipo_doc'].'</td>';
-					$salida .= '<td>'.$row['numero'].'</td>';
-					$salida .= '<td align=\'right\'>'.nformat($row['totalg']).'</td>';
-					$salida .= '</tr>';
-				}
-				$salida .= '</table></td>';
-			}
-		}
-
-		// Movimientos Relacionados ITCCLI
-		$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itccli WHERE transac=${dbtransac} AND estampa=${dbestampa}";
-		$query = $this->db->query($mSQL);
-		if ( $query->num_rows() == 0 ){
-			$mSQL = "SELECT tipoccli tipo_doc, numccli numero, monto, abono FROM itccli WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} ";
-			$query = $this->db->query($mSQL);
-		}
-		if($query->num_rows() > 0){
-			$saldo = 0;
-			$salida .= $td1;
-			$salida .= 'Movimientos Relacionados</caption>';
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td><td align='center'>Abono</td></tr>";
-			foreach ($query->result_array() as $row){
-				$saldo += $row['abono'];
-				$salida .= '<tr>';
-				$salida .= '<td>'.$row['tipo_doc'].'</td>';
-				$salida .= '<td>'.$row['numero'].'</td>';
-				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
-				$salida .= '<td align=\'right\'>'.nformat($row['abono']).'</td>';
-				$salida .= '</tr>';
-			}
-			if ($saldo <> 0)
-				$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'><b>Saldo : ".nformat($saldo). "</b></td></tr>";
-			$salida .= '</table></td>';
-		}
-
-		// FORMA DE PAGO SFPA
-		$mSQL = "SELECT CONCAT(a.tipo,' ', b.nombre) tipo, a.num_ref, a.banco, a.monto
-			FROM sfpa a JOIN tarjeta b ON a.tipo=b.tipo WHERE a.transac=${dbtransac} AND a.monto<>0";
-		$query = $this->db->query($mSQL);
-		$codcli = 'XXXXXXXXXXXXXXXX';
-		$saldo = 0;
-		if ($query->num_rows() > 0){
-			$salida .= $td1;
-			$salida .= 'Formas de Pago</caption>';
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Forma de Pago</td><td align='center'>N&uacute;mero</td><td align='center'>Banco</td> <td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row){
-				$salida .= '<tr>';
-				$salida .= '<td>'.$row['tipo'].'</td>';
-				$salida .= '<td>'.$row['num_ref'].'</td>';
-				$salida .= '<td>'.$row['banco'].'</td>';
-				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
-				$salida .= '</tr>';
-			}
-			$salida .= '</table></td>';
-		}
-
-		// Prestamos PRMO
-		$mSQL = "SELECT if(observa2='',observa1,observa2) observa, monto FROM prmo WHERE transac=${dbtransac} AND clipro=${dbcod_cli} AND monto<>0";
-		$query = $this->db->query($mSQL);
-		$saldo = 0;
-		if ($query->num_rows() > 0){
-			$salida .= $td1;
-			$salida .= 'Prestamos</caption>';
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Observaci&oacute;n</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row){
-				$salida .= '<tr>';
-				$salida .= '<td>'.$row['observa'].'</td>';
-				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
-				$salida .= '</tr>';
-			}
-			$salida .= '</table></td>';
-		}
-
-		//Cruce de Cuentas ITCRUC
-		$mSQL = "
-			SELECT b.tipo tipo, b.proveed codcp, MID(b.nombre,1,25) nombre, a.onumero, a.monto, b.numero, b.fecha
-			FROM itcruc AS a JOIN cruc AS b ON a.numero=b.numero
-			WHERE b.proveed=${dbcod_cli} AND b.transac=${dbtransac} AND a.onumero!=${dbtiponum}
-			UNION ALL
-			SELECT b.tipo tipo, b.cliente codcp, MID(b.nomcli,1,25) nombre, a.onumero, a.monto, b.numero, b.fecha
-			FROM itcruc AS a JOIN cruc AS b ON a.numero=b.numero
-			WHERE b.cliente=${dbcod_cli} AND b.transac=${dbtransac} ORDER BY onumero";
-		$query = $this->db->query($mSQL);
-		$saldo = 0;
-		if($query->num_rows() > 0){
-			$salida .= $td1;
-			$salida .= 'Cruce de Cuentas</caption>';
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>C&oacute;digo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row){
-				$salida .= '<tr>';
-				$salida .= '<td>('.trim($row['tipo']).') '.$row['nombre']."</td>";
-				$salida .= '<td>'.$row['codcp'].'</td>';
-				$salida .= '<td>'.$row['onumero'].'</td>';
-				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
-				$salida .= '</tr>';
-			}
-			$salida .= '</table></td>';
-		}
-		echo $salida.'</tr></table>';
-	}
 
 	function _pre_ccli_insert($do){
 		$cliente  =$do->get('cod_cli');
@@ -1905,7 +1695,7 @@ class Smov extends Controller {
 		$tipo_doc= $do->get('tipo_doc');
 		$fecha   = $do->get('fecha');
 		$concepto= $do->get('observa1');
-		$itabono=$sfpamonto=$ppagomonto=0;
+		$itabono=$sfpamonto=$ppagomonto=$impuesto=$ppimpuesto=0;
 
 		$rrow    = $this->datasis->damerow('SELECT nombre,rifci,dire11,dire12 FROM scli WHERE cliente='.$this->db->escape($cliente));
 		if($rrow!=false){
@@ -1997,12 +1787,19 @@ class Smov extends Controller {
 		$observa=array();
 		$cana = $do->count_rel($rel);
 		for($i = 0;$i < $cana;$i++){
-			$itabono = $do->get_rel($rel, 'abono'   , $i);
+			$itabono = floatval($do->get_rel($rel, 'abono'   , $i));
 			$ittipo  = $do->get_rel($rel, 'tipo_doc', $i);
 			$itnumero= $do->get_rel($rel, 'numero'  , $i);
+			$itmonto = floatval($do->get_rel($rel, 'monto'  , $i));
+
 			if(empty($itabono) || $itabono==0){
 				$do->rel_rm($rel,$i);
 			}else{
+				$dbittipo   = $this->db->escape($ittipo);
+				$dbitnumero = $this->db->escape($itnumero);
+				$itimpuesto = floatval($this->datasis->dameval("SELECT impuesto FROM smov WHERE cod_prv=${dbcod_prv} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}"));
+				$impuesto  += $itabono*$itimpuesto/$itmonto;
+
 				$observa[]=$ittipo.$itnumero;
 				$do->set_rel($rel, 'tipoccli', $tipo_doc, $i);
 				$do->set_rel($rel, 'cod_cli' , $cod_cli , $i);
@@ -2014,7 +1811,14 @@ class Smov extends Controller {
 				$do->set_rel($rel, 'reten'   , 0, $i);
 				$do->set_rel($rel, 'cambio'  , 0, $i);
 				$do->set_rel($rel, 'reteiva' , 0, $i);
+
+				$pppago = $do->get_rel($rel, 'ppago', $i);
+				if($pppago>0){
+					$ppimpuesto += $pppago*$itimpuesto/$itmonto;
+				}
 			}
+
+
 		}
 
 		if(empty($concepto)){
@@ -2046,11 +1850,13 @@ class Smov extends Controller {
 			$do->set_rel($rel,'almacen'  ,$this->secu->getalmacen() ,$i);
 		}
 		$this->ppagomonto=$ppagomonto;
+		$this->ppimpuesto=$ppimpuesto;
 
 		$do->set('mora'    ,0);
 		$do->set('reten'   ,0);
 		$do->set('cambio'  ,0);
 		$do->set('reteiva' ,0);
+		$do->set('impuesto',$impuesto);
 		$do->set('ppago'   ,$ppagomonto);
 		$do->set('codigo'  ,'NOCON');
 		$do->set('descrip' ,'NOTA DE CONTABILIDAD');
@@ -2062,6 +1868,7 @@ class Smov extends Controller {
 		$numero   =$do->get('numero');
 		$cliente  =$do->get('cod_cli');
 		$dbcliente=$this->db->escape($cliente);
+		$impuesto =$do->get('impuesto');
 
 		$rel_id='itccli';
 		$cana = $do->count_rel($rel_id);
@@ -2079,7 +1886,7 @@ class Smov extends Controller {
 				$dbdata['numero']     = $mnumnc;
 				$dbdata['fecha']      = $do->get('fecha');
 				$dbdata['monto']      = $this->ppagomonto;
-				$dbdata['impuesto']   = 0;
+				$dbdata['impuesto']   = $this->ppimpuesto;
 				$dbdata['abonos']     = $this->ppagomonto;
 				$dbdata['vence']      = $do->get('fecha');
 				$dbdata['tipo_ref']   = 'AB';
@@ -2188,9 +1995,6 @@ class Smov extends Controller {
 
 				$sfecha=str_replace('-','',$ffecha);
 				$this->datasis->actusal($codbanc, $sfecha, $monto);
-				//$mSQL="CALL sp_actusal($dbcodbanc,'$sfecha',$monto)";
-				//$ban=$this->db->simple_query($mSQL);
-				//if($ban==false) memowrite($mSQL,'ccli');
 			}
 		}
 		logusu('smov',"Cobro a cliente ${numero} creado");
@@ -2204,8 +2008,319 @@ class Smov extends Controller {
 		return false;
 	}
 
+	function chsfpatipo($val){
+		$tipo=$this->input->post('tipo_doc');
+		if($tipo=='NC') {
+			return true;
+		}
+		$this->validation->set_message('chsfpatipo', 'El campo %s es obligatorio');
+		if(empty($val)){
+			return false;
+		}else{
+			return true;
+		}
+	}
 
+	function chfuturo($fecha){
+		$fdoc=timestampFromInputDate($fecha);
+		$fact=mktime();
+
+		if($fdoc > $fact){
+			$this->validation->set_message('chfuturo', 'No puede meter un efecto a futuro');
+			return false;
+		}
+		return true;
+	}
+
+	function chtipo($val,$i){
+		$tipo=$this->input->post('tipo_'.$i);
+		if(empty($tipo)) return true;
+		$this->validation->set_message('chtipo', 'El campo %s es obligatorio');
+
+		if(empty($val) && ($tipo=='NC' || $tipo=='DP' || $tipo=='DE'))
+			return false;
+		else
+			return true;
+	}
+
+	function chmontosfpa($monto){
+		$tipo   = $this->input->post('tipo_doc');
+		if($tipo=='NC'){
+			return true;
+		}
+		if(empty($monto) || $monto==0){
+			$this->validation->set_message('chmontosfpa', "El campo %s es obligatorio");
+			return false;
+		}
+		return true;
+	}
+
+	function chppago($monto,$i){
+		$tipo   = $this->input->post('tipo_doc');
+		$itmonto= floatval($this->input->post('abono_'.$i));
+		if($tipo=='NC' && $monto>0){
+			$this->validation->set_message('chppago', "No se puede hacer pronto pago cuando el tipo de documento es una nota de cr&eacute;dito");
+			return false;
+		}
+
+		if($itmonto<=0 && floatval($monto)>0){
+			$this->validation->set_message('chppago', "No se puede hacer pronto pago cuando a un efecto que no esta abonado.");
+			return false;
+		}
+		return true;
+	}
+
+	function chabono($monto,$i){
+		$tipo   = $this->input->post('tipo_doc_'.$i);
+		$ppago  = $this->input->post('ppago_'.$i);
+		$numero = $this->input->post('numero_'.$i);
+		$cod_cli= $this->input->post('cod_cli');
+		$fecha  = human_to_dbdate($this->input->post('fecha_'.$i));
+
+		$this->db->select(array('monto - abonos AS saldo'));
+		$this->db->from('smov');
+		$this->db->where('tipo_doc',$tipo);
+		$this->db->where('numero'  ,$numero);
+		$this->db->where('fecha'   ,$fecha);
+		$this->db->where('cod_cli' ,$cod_cli);
+
+		$query = $this->db->get();
+		$row   = $query->row();
+
+		if ($query->num_rows() == 0) return false;
+		$saldo = $row->saldo;
+
+		if(($monto+$ppago)<=$saldo){
+			return true;
+		}else{
+			$this->validation->set_message('chabono', "No se le puede abonar al efecto $tipo-$numero un monto mayor al saldo");
+			return false;
+		}
+	}
+
+	//************************************
+	// Fin cobro a clientes
+	//************************************
+
+	function _exitescli($cliente){
+		$dbscli= $this->db->escape($cliente);
+		$mSQL  = "SELECT COUNT(*) AS cana FROM scli WHERE cliente=${dbscli}";
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$row = $query->row();
+			if( $row->cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
+
+	function tabla() {
+		$id  = $this->uri->segment($this->uri->total_segments());
+		$dbid= $this->db->escape($id);
+
+		$row = $this->datasis->damereg("SELECT cod_cli, tipo_doc, numero, estampa, transac FROM smov WHERE id=${dbid}");
+
+		$transac   = $row['transac'];
+		$cod_cli   = $row['cod_cli'];
+		$numero    = $row['numero'];
+		$tipo_doc  = $row['tipo_doc'];
+		$estampa   = $row['estampa'];
+		$dbtipo_doc= $this->db->escape($tipo_doc);
+		$dbnumero  = $this->db->escape($numero);
+		$dbtiponum = $this->db->escape($tipo_doc.$numero);
+		$dbestampa = $this->db->escape($estampa);
+		$dbtransac = $this->db->escape($transac);
+		$dbcod_cli = $this->db->escape($cod_cli);
+
+
+		$td1  = "<td style='border-style:solid;border-width:1px;border-color:#78FFFF;' valign='top' align='center'>\n";
+		$td1 .= "<table width='98%'>\n<caption style='background-color:#5E352B;color:#FFFFFF;font-style:bold'>";
+
+		// Movimientos Relacionados en Proveedores SPRM
+		$mSQL = "SELECT cod_prv, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos
+			FROM sprm WHERE transac=${dbtransac} ORDER BY cod_prv ";
+		$query = $this->db->query($mSQL);
+		$salida = '<table width="100%"><tr>';
+		$saldo  = 0;
+		if($query->num_rows() > 0 ){
+			$salida .= $td1;
+			$salida .= 'Movimiento en Proveedores</caption>';
+			$salida .= "<tr bgcolor='#E7E3E7'><td>Nombre</td><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+			foreach ($query->result_array() as $row){
+				if ( $row['tipo_doc'] == 'FC' ) {
+					$saldo = $row['monto']-$row['abonos'];
+				}
+				$salida .= '<tr>';
+				$salida .= '<td>'.trim($row['cod_prv']).'-'.$row['nombre'].'</td>';
+				$salida .= '<td>'.$row['tipo_doc'].'</td>';
+				$salida .= '<td>'.$row['numero'].  '</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
+			}
+			if ($saldo <> 0)
+				$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo).'</td></tr>';
+			$salida .= '</table></td>';
+		}
+
+		// Movimientos Relacionados en SMOV
+		$mSQL = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos
+			FROM smov WHERE transac=${dbtransac} AND id<>${dbid} ORDER BY cod_cli ";
+		$query = $this->db->query($mSQL);
+		$saldo = 0;
+		if($query->num_rows() > 0){
+			$salida .= $td1;
+			$salida .= 'Movimiento en Clientes</caption>';
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+			foreach ($query->result_array() as $row){
+				if ( $row['tipo_doc'] == 'FC' ) {
+					$saldo = $row['monto']-$row['abonos'];
+				}
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['cod_cli'].'-'.$row['nombre'].'</td>';
+				$salida .= '<td>'.$row['tipo_doc'].'</td>';
+				$salida .= '<td>'.$row['numero'].  '</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
+			}
+			$salida .= '</table></td>';
+		}
+
+		//Retencion de IVA RIVC
+		$mSQL = "
+			SELECT b.periodo, b.nrocomp, a.reiva
+			FROM itrivc a JOIN rivc b ON a.idrivc=b.id WHERE a.tipo_doc=IF('$tipo_doc'='FC','F','D') AND a.numero=${dbnumero}
+			UNION ALL
+			SELECT b.periodo, b.nrocomp, a.reiva
+			FROM itrivc a JOIN rivc b ON a.idrivc=b.id WHERE a.transac=${dbtransac}";
+		$query = $this->db->query($mSQL);
+		if($query->num_rows() > 0){
+			$salida .= $td1;
+			$salida .= 'Retenciones de IVA</caption>';
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Per&iacute;odo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</tr>";
+			foreach ($query->result_array() as $row){
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['periodo'].'</td>';
+				$salida .= '<td>'.$row['nrocomp'].'</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['reiva']).'</td>';
+				$salida .= '</tr>';
+			}
+			$salida .= '</table></td>';
+		}
+
+		// Factura Relacionada SFAC
+		if($tipo_doc <> 'FC'){
+			$mSQL = "SELECT tipo_doc, numero, totalg FROM sfac a WHERE a.transac=${dbtransac}";
+			$query = $this->db->query($mSQL);
+			if ( $query->num_rows() > 0 ){
+				$salida .= $td1;
+				$salida .= 'Factura Relacionada</caption>';
+				$salida .= "<tr bgcolor='#e7e3e7'><td>Tipo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</tr>";
+				foreach ($query->result_array() as $row){
+					$salida .= '<tr>';
+					$salida .= '<td>'.$row['tipo_doc'].'</td>';
+					$salida .= '<td>'.$row['numero'].'</td>';
+					$salida .= '<td align=\'right\'>'.nformat($row['totalg']).'</td>';
+					$salida .= '</tr>';
+				}
+				$salida .= '</table></td>';
+			}
+		}
+
+		// Movimientos Relacionados ITCCLI
+		$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itccli WHERE transac=${dbtransac} AND estampa=${dbestampa}";
+		$query = $this->db->query($mSQL);
+		if($query->num_rows() == 0){
+			$mSQL = "SELECT tipoccli tipo_doc, numccli numero, monto, abono FROM itccli WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} ";
+			$query = $this->db->query($mSQL);
+		}
+		if($query->num_rows() > 0){
+			$saldo = 0;
+			$salida .= $td1;
+			$salida .= 'Movimientos Relacionados</caption>';
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td><td align='center'>Abono</td></tr>";
+			foreach ($query->result_array() as $row){
+				$saldo += $row['abono'];
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['tipo_doc'].'</td>';
+				$salida .= '<td>'.$row['numero'].'</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['abono']).'</td>';
+				$salida .= '</tr>';
+			}
+			if ($saldo <> 0)
+				$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'><b>Saldo : ".nformat($saldo). "</b></td></tr>";
+			$salida .= '</table></td>';
+		}
+
+		// FORMA DE PAGO SFPA
+		$mSQL = "SELECT CONCAT(a.tipo,' ', b.nombre) tipo, a.num_ref, a.banco, a.monto
+			FROM sfpa a JOIN tarjeta b ON a.tipo=b.tipo WHERE a.transac=${dbtransac} AND a.monto<>0";
+		$query = $this->db->query($mSQL);
+		$codcli = 'XXXXXXXXXXXXXXXX';
+		$saldo = 0;
+		if($query->num_rows() > 0){
+			$salida .= $td1;
+			$salida .= 'Formas de Pago</caption>';
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Forma de Pago</td><td align='center'>N&uacute;mero</td><td align='center'>Banco</td> <td align='center'>Monto</td></tr>";
+			foreach ($query->result_array() as $row){
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['tipo'].'</td>';
+				$salida .= '<td>'.$row['num_ref'].'</td>';
+				$salida .= '<td>'.$row['banco'].'</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
+			}
+			$salida .= '</table></td>';
+		}
+
+		// Prestamos PRMO
+		$mSQL = "SELECT if(observa2='',observa1,observa2) observa, monto FROM prmo WHERE transac=${dbtransac} AND clipro=${dbcod_cli} AND monto<>0";
+		$query = $this->db->query($mSQL);
+		$saldo = 0;
+		if($query->num_rows() > 0){
+			$salida .= $td1;
+			$salida .= 'Prestamos</caption>';
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Observaci&oacute;n</td><td align='center'>Monto</td></tr>";
+			foreach ($query->result_array() as $row){
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['observa'].'</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
+			}
+			$salida .= '</table></td>';
+		}
+
+		//Cruce de Cuentas ITCRUC
+		$mSQL = "
+			SELECT b.tipo tipo, b.proveed codcp, MID(b.nombre,1,25) nombre, a.onumero, a.monto, b.numero, b.fecha
+			FROM itcruc AS a JOIN cruc AS b ON a.numero=b.numero
+			WHERE b.proveed=${dbcod_cli} AND b.transac=${dbtransac} AND a.onumero!=${dbtiponum}
+			UNION ALL
+			SELECT b.tipo tipo, b.cliente codcp, MID(b.nomcli,1,25) nombre, a.onumero, a.monto, b.numero, b.fecha
+			FROM itcruc AS a JOIN cruc AS b ON a.numero=b.numero
+			WHERE b.cliente=${dbcod_cli} AND b.transac=${dbtransac} ORDER BY onumero";
+		$query = $this->db->query($mSQL);
+		$saldo = 0;
+		if($query->num_rows() > 0){
+			$salida .= $td1;
+			$salida .= 'Cruce de Cuentas</caption>';
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>C&oacute;digo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+			foreach ($query->result_array() as $row){
+				$salida .= '<tr>';
+				$salida .= '<td>('.trim($row['tipo']).') '.$row['nombre']."</td>";
+				$salida .= '<td>'.$row['codcp'].'</td>';
+				$salida .= '<td>'.$row['onumero'].'</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
+			}
+			$salida .= '</table></td>';
+		}
+		echo $salida.'</tr></table>';
+	}
+
+	//*********************************
 	//Nota de credito a factura pagada
+	//*********************************
 	function ncfac(){
 		$this->rapyd->load('dataedit');
 		$script= '
@@ -2234,6 +2349,9 @@ class Smov extends Controller {
 									$("#cod_cli").val("");
 									$("#cod_cli_val").text("");
 
+									$("#sfacmonto").val("");
+									$("#sfacmonto_val").text("");
+
 								}else{
 									$.each(data,
 										function(i, val){
@@ -2255,6 +2373,9 @@ class Smov extends Controller {
 
 					$("#cod_cli").val(ui.item.cod_cli);
 					$("#cod_cli_val").text(ui.item.cod_cli);
+
+					$("#sfacmonto").val(nformat(ui.item.totalg,2));
+					$("#sfacmonto_val").text(nformat(ui.item.totalg,2));
 
 					setTimeout(function() {  $("#factura").removeAttr("readonly"); }, 1500);
 				}
@@ -2278,29 +2399,31 @@ class Smov extends Controller {
 		$edit->num_ref->rule='required|existesfac';
 		$edit->num_ref->size =10;
 		$edit->num_ref->maxlength =8;
+		$edit->num_ref->group='Detalles de la factura afectada';
+
+		$edit->cod_cli = new inputField('Cliente','cod_cli');
+		$edit->cod_cli->rule='required|existescli';
+		$edit->cod_cli->type = 'inputhidden';
+		$edit->cod_cli->group='Detalles de la factura afectada';
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->rule= '';
+		$edit->nombre->type= 'inputhidden';
+		$edit->nombre->in  = 'cod_cli';
+		$edit->nombre->group='Detalles de la factura afectada';
+
+		$edit->sfacmonto = new inputField('Monto de la factura','sfacmonto');
+		$edit->sfacmonto->type = 'inputhidden';
+		$edit->sfacmonto->group='Detalles de la factura afectada';
 
 		$edit->fecha = new dateonlyField('Fecha','fecha');
-		$edit->fecha->rule='chfecha|required';
+		$edit->fecha->rule='chfecha|callback_chfuturo|required';
 		$edit->fecha->insertValue=date('Y-m-d');
 		$edit->fecha->size =12;
 		$edit->fecha->maxlength =8;
 		$edit->fecha->calendar=false;
 
-		$edit->cod_cli = new inputField('Cliente','cod_cli');
-		$edit->cod_cli->rule='required|existescli';
-		$edit->cod_cli->size =7;
-		$edit->cod_cli->type = 'inputhidden';
-		$edit->cod_cli->maxlength =5;
-
-		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='';
-		$edit->nombre->size =42;
-		$edit->nombre->type      = 'inputhidden';
-		$edit->nombre->in='cod_cli';
-		$edit->nombre->maxlength =40;
-
-
-		$edit->monto = new inputField('Monto','monto');
+		$edit->monto = new inputField('Monto de la NC','monto');
 		$edit->monto->rule='numeric|mayorcero|required';
 		$edit->monto->css_class='inputnum';
 		$edit->monto->size =19;
@@ -2319,7 +2442,7 @@ class Smov extends Controller {
 		$edit->tipo_ref = new autoUpdateField('tipo_ref','F','F');
 		$edit->tipo_doc = new autoUpdateField('tipo_doc' ,'NC', 'NC');
 		$edit->usuario  = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-		$edit->estampa  = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+		$edit->estampa  = new autoUpdateField('estampa',date('Ymd'), date('Ymd'));
 		$edit->hora     = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 
 		$edit->build();
@@ -2352,10 +2475,17 @@ class Smov extends Controller {
 	}
 
 	function _pre_ncfac_insert($do){
-		$monto  = floatval($do->get('monto'));
 		$fecha  = $do->get('fecha');
 		$factura= $do->get('num_ref');
 		$dbfactura=$this->db->escape($factura);
+		$do->rm_get('sfacmonto');
+
+		$monto  = floatval($do->get('monto'));
+		$sfacmon= floatval($this->datasis->dameval("SELECT totalg FROM sfac WHERE tipo_doc='F' AND numero=${dbfactura}"));
+		if($monto > $sfacmon){
+			$do->error_message_ar['pre_ins']='El monto de la nota de credito no puede ser mayor al de la factura';
+			return false;
+		}
 
 		$mSQL= 'SELECT transac,totalg,iva,exento,tasa,reducida,sobretasa,montasa,monredu,monadic,numero FROM sfac WHERE tipo_doc=\'F\' AND numero='.$dbfactura;
 		$row = $this->datasis->damerow($mSQL);
@@ -2409,8 +2539,9 @@ class Smov extends Controller {
 		$do->error_message_ar['pre_del']='';
 		return false;
 	}
-
-
+	//*********************************
+	//Fin Nota de credito a factura pagada
+	//*********************************
 
 
 	function giro(){

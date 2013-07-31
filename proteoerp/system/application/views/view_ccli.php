@@ -57,7 +57,33 @@ $(function() {
 
 	$('#fecdoc').datepicker({ dateFormat: "dd/mm/yy" });
 	$('input[name^="sfpafecha_"]').datepicker({ dateFormat: "dd/mm/yy" });
+
+	chtipodoc();
 });
+
+function chtipodoc(){
+	var tipo=$('#tipo_doc').val();
+
+	if(tipo=='NC'){
+		$('#aplefectos').show();
+		$('#aplpago').hide();
+		$('input[name^="ppago_"]').val('');
+		$('input[name^="ppago_"]').hide('');
+		$('#ppagotit').hide();
+
+	}else if(tipo=='AN'){
+		$('#aplefectos').hide();
+		$('input[name^="abono_"]').val("");
+		$('input[name^="ppago_"]').val("");
+		 totaliza();
+		$('#aplpago').show();
+	}else{
+		$('#aplefectos').show();
+		$('#aplpago').show();
+		$('input[name^="ppago_"]').show('');
+		$('#ppagotit').show();
+	}
+}
 
 function totaliza(){
 	var stota =0;
@@ -199,7 +225,7 @@ echo $title;
 	</tr>
 </table>
 <?php if($cana>0){ ?>
-<table width='100%' align='center'>
+<table width='100%' align='center' id='aplefectos'>
 	<col>
 	<col class="colbg1">
 	<col class="colbg1">
@@ -212,7 +238,7 @@ echo $title;
 			<td align="right"  class="littletableheaderdet"><b>Monto</b></td>
 			<td align="center" class="littletableheaderdet"><b>Saldo</b></td>
 			<td align="right"  class="littletableheaderdet"><b>Abonar</b></td>
-			<td align="right"  class="littletableheaderdet"><b>P.Pago</b></td>
+			<td align="right"  class="littletableheaderdet"><b id='ppagotit'>P.Pago</b></td>
 		</tr>
 	</thead>
 	<tbody>
@@ -239,15 +265,16 @@ echo $title;
 	</tbody>
 	<tfoot>
 	<tr>
-		<td colspan=4 align="right"><b><?php echo $form->monto->label; ?></b></td>
+		<td colspan='4' align="right"><b><?php echo $form->monto->label; ?></b></td>
 		<td align="right"><?php echo $form->monto->output; ?></td>
+		<td align="right"></td>
 	</tr>
 	</tfoot>
 </table>
 <?php } ?>
 
 <?php echo $container_br.$container_bl;?>
-<table width='100%'>
+<table width='100%' id='aplpago'>
 	<tr id='__ITPL__sfpa'>
 		<td class="littletableheaderdet">Tipo<ds/td>
 		<td class="littletableheaderdet">Fecha</td>
@@ -279,10 +306,13 @@ echo $title;
 	</tr>
 	<?php } ?>
 	<tr id='__UTPL__sfpa'>
-		<td colspan='9' class="littletableheaderdet">&nbsp;</td>
+		<td colspan='<?php echo ($form->_status!='show')? 6:5; ?>' class="littletableheaderdet">&nbsp;</td>
 	</tr>
+</table>
+
+<table width='100%'>
 	<tr>
-		<td colspan='9' align='center'><b>Concepto:</b><br><?php echo $form->observa1->output.$form->observa2->output; ?></td>
+		<td align='center'><b>Concepto:</b><br><?php echo $form->observa1->output.$form->observa2->output; ?></td>
 	</tr>
 </table>
 <?php echo $form_end; ?>

@@ -964,8 +964,7 @@ class Jqdatagrid
 	* @param bool $prefix indicate si put prefix at recordset fields
 	* @return Array $response
 	*/
-	public function getData($table, $joinmodel = array(), $fields = array(), $prefix = true, $mwhere='', $orden='', $orddire='')
-	{
+	public function getData($table, $joinmodel = array(), $fields = array(), $prefix = true, $mwhere='', $orden='', $orddire=''){
 		$limit      = $this->CI->input->get_post('rows');
 		$limitstart = $this->CI->input->get_post('limitstart');
 		$filter     = $this->CI->input->get_post('searchField');
@@ -1002,10 +1001,10 @@ class Jqdatagrid
 				$this->CI->db->where( $table .'.' . $filter , $filtertext );
 				break;
 			case 'ge':
-				$this->CI->db->where( "$table .{$filter} >=", $filtertext );
+				$this->CI->db->where( "${table}.{$filter} >=", $filtertext );
 				break;
 			case 'le':
-				$this->CI->db->where( "$table .{$filter} <=", $filtertext );
+				$this->CI->db->where( "${table}.{$filter} <=", $filtertext );
 				break;
 			default:
 				$this->CI->db->like( $table .'.' . $filter, $filtertext );
@@ -1024,7 +1023,7 @@ class Jqdatagrid
 		$response['records']  = $count;
 		$response['total']    = $total_pages;
 		$response['page']     = $page;
-		if ($page > $total_pages){
+		if($page > $total_pages){
 			$page=$total_pages;
 		}
 		$limitstart = $limit*$page - $limit; // do not put $limit*($page - 1)
@@ -1050,21 +1049,24 @@ class Jqdatagrid
 			}
 		}
 
-		if ( !empty($mwhere) ) {
+		if(!empty($mwhere)){
+
 			foreach($mwhere as $busca){
-				if ( trim(strtoupper($busca[0])) == 'LIKE') {
+				if(trim(strtoupper($busca[0]))== 'LIKE'){
 					$this->CI->db->like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
-				} else {
-					if ( in_array($busca[0], array('>','<')) || in_array($busca[0],array('<>','>=','<=','!=')) ){
+				}else{
+					if (in_array($busca[0], array('>','<')) || in_array($busca[0],array('<>','>=','<=','!=')) ){
 						$this->CI->db->where( $busca[1].' '.$busca[0], $busca[2] );
-					} else {
-						if ( empty($busca[2]) )
-							$this->CI->db->where( $busca[1] );
-						else {
-							if ( is_array($busca[2]) )
-								$this->CI->db->where_in( $busca[1], $busca[2] );
-							else
+					}else{
+						//Eliminado para poder buscar campos numericos en cero
+						if($busca[2]==='' || is_null($busca[2])){
+							$this->CI->db->where($busca[1]);
+						}else {
+							if(is_array($busca[2])){
+								$this->CI->db->where_in($busca[1], $busca[2]);
+							}else{
 								$this->CI->db->where( $busca[1], $busca[2] );
+							}
 						}
 					}
 				}
@@ -1072,10 +1074,10 @@ class Jqdatagrid
 		}
 
 
-		if ( !empty($filters) ) {
+		if(!empty($filters)){
 			$mQUERY = $this->constructWhere($filters);
 			foreach($mQUERY as $busca){
-				if ( trim(strtoupper($busca[0])) == 'LIKE') {
+				if(trim(strtoupper($busca[0])) == 'LIKE'){
 					$this->CI->db->like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
 				} else {
 					$this->CI->db->where( $busca[1], $busca[2] );
@@ -1143,7 +1145,7 @@ class Jqdatagrid
 		}
 
 		//INTENTA ver si el Problema es el escape de %
-		if ( empty($rs) ) {
+		if(empty($rs)){
 			$lq = str_replace('\%','%',$this->CI->db->last_query());
 			$rs = $this->CI->datasis->codificautf8($this->CI->db->query($lq)->result_array());;
 		}
@@ -1400,32 +1402,31 @@ class Jqdatagrid
 		$mWhere = array();
 		if ($this->CI->input->get_post('_search')==true){
 			$campos = $this->CI->db->field_data($db);
-			foreach ( $campos as $campo)
-			{
+			foreach ( $campos as $campo){
 				$valor = $this->CI->input->get_post($campo->name);
-				if ($valor) {
-					if ( $campo->type == 'string' ){
-						if ( substr($valor,0,1) == '%' || substr($valor,0,1) == '*' ) {
+				if ($valor!==false){
+
+					if(in_array($campo->type,array('string',254,253))){
+						if(substr($valor,0,1) == '%' || substr($valor,0,1) == '*'){
 							$valor = substr($valor,1);
 							$mWhere[] = array('like', $campo->name, $valor, 'both' );
-						} else
-							$mWhere[] = array('like', $campo->name, $valor, 'after' );
-
-					} elseif ( $campo->type == 'date' || $campo->type == 'timestamp' ) {
+						}else{
+							$mWhere[] = array('like', $campo->name, $valor, 'after');
+						}
+					}elseif(in_array($campo->type,array('date','timestamp',10,12,7))){
 						$mWhere[] = array('', $campo->name, $valor, '' );
-
-					} elseif ( $campo->type == 'real' || $campo->type == 'int'  ) {
+					}elseif(in_array($campo->type,array('real','int',1,2,9,3,8,4,5,246))) {
 						$valor= trim($valor);
-						if ( in_array(substr($valor,0,2), array('>=','<=','<>','!=') ) )  {
-							$mWhere[] = array(substr($valor,0,2), $campo->name, substr($valor,2), '' );
-						} elseif ( in_array(substr($valor,0,1), array('>','<') ) ) {
-							$mWhere[] = array(substr($valor,0,1), $campo->name, substr($valor,1), '' );
-						} else
-							$mWhere[] = array('', $campo->name, $valor, '' );
-
-					} elseif ( $campo->type == 'blob' ) {
+						if ( in_array(substr($valor,0,2), array('>=','<=','<>','!='))){
+							$mWhere[] = array(substr($valor,0,2), $campo->name, floatval(substr($valor,2)), '' );
+						}elseif( in_array(substr($valor,0,1), array('>','<') ) ) {
+							$mWhere[] = array(substr($valor,0,1), $campo->name, floatval(substr($valor,1)), '' );
+						}else{
+							$mWhere[] = array('', $campo->name, floatval($valor), '' );
+						}
+					}elseif( $campo->type == 'blob'){
 						$mWhere[] = array('like', $campo->name, $valor, 'both' );
-					} else {
+					}else{
 						$mWhere[] = array('like', $campo->name, $valor, 'both' );
 					}
 				}

@@ -45,8 +45,7 @@ class Sprm extends Controller {
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprime'   ,'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir',      'label'=>'Reimprimir Documento', 'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'princheque','img'=>'images/check.png'  , 'alt' => 'Emitir Cheque'   , 'label'=>'Imprimir cheque',      'tema'=>'anexos'));
-		//$grid->wbotonadd(array('id'=>'pago'      ,'img'=>'images/dinero.png' , 'alt' => 'Pago a proveedor', 'label'=>'Pago a proveedor'));
-		$grid->wbotonadd(array('id'=>'abonos'    ,'img'=>'images/check.png'  , 'alt' => 'Abonos'          , 'label'=>'Pago o Abono'));
+		$grid->wbotonadd(array('id'=>'pago'      ,'img'=>'images/dinero.png' , 'alt' => 'Pago a proveedor', 'label'=>'Pago a proveedor'));
 		$WestPanel = $grid->deploywestp();
 
 
@@ -267,9 +266,9 @@ class Sprm extends Controller {
 					if(id){
 						var ret    = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 						var cod_prv= ret.cod_prv;
-						$("#cod_prv").val(cod_cli);
+						$("#cod_prv").val(cod_prv);
 						$("#cod_prv").focus();
-						$("#cod_prv").autocomplete("search", cod_cli);
+						$("#cod_prv").autocomplete("search", cod_prv);
 					}
 				}
 			);
@@ -282,11 +281,11 @@ class Sprm extends Controller {
 					"Seleccionar": function() {
 						var id_sprv=$("#id_sprv").val();
 						if(id_sprv){
-							$.get("'.site_url($this->url.'cprov').'"+"/"+id_sprv+"/create", function(data) {
+							$.get("'.site_url($this->url.'pprov').'"+"/"+id_sprv+"/create", function(data) {
 								$("#fedita").html(data);
 								$("#fedita").dialog("open");
-								$("#fsclisel").html("");
-								$("#fsclisel").dialog("close");
+								$("#fsprvsel").html("");
+								$("#fsprvsel").dialog("close");
 							});
 						}else{
 							$.prompt("<b>Debe seleccionar un proveedor primero.</b>");
@@ -1098,7 +1097,7 @@ class Sprm extends Controller {
 			if(false == empty($data)){
 				//$this->db->insert('sprm', $data);
 			}
-			return "Registro Agregado";
+			return 'Registro Agregado';
 
 		} elseif($oper == 'edit') {
 			//unset($data['ubica']);
@@ -1114,14 +1113,20 @@ class Sprm extends Controller {
 
 	function tabla() {
 		$id  = intval($this->uri->segment($this->uri->total_segments()));
-		$row = $this->datasis->damereg("SELECT cod_prv, tipo_doc, numero, estampa, transac FROM sprm WHERE id=${id}");
 
-		$transac  = $row['transac'];
-		$cod_prv  = $row['cod_prv'];
-		$numero   = $row['numero'];
-		$tipo_doc = $row['tipo_doc'];
-		$estampa  = $row['estampa'];
-		$salida   = '';
+		$row = $this->datasis->damerow("SELECT cod_prv, tipo_doc, numero, estampa, transac FROM sprm WHERE id=${id}");
+		if(!empty($row)){
+			$transac  = $row['transac'];
+			$cod_prv  = $row['cod_prv'];
+			$numero   = $row['numero'];
+			$tipo_doc = $row['tipo_doc'];
+			$estampa  = $row['estampa'];
+			$salida   = '';
+		}else{
+			echo 'Registro no encontrado ('.$id.')';
+			return '';
+		}
+
 
 		if(!empty($transac)){
 			$dbtransac = $this->db->escape($transac);
@@ -1287,11 +1292,11 @@ class Sprm extends Controller {
 			$mSQL = "
 				SELECT b.tipo tipo, b.proveed codcp, MID(b.nombre,1,25) nombre, a.onumero, a.monto, b.numero, b.fecha
 				FROM itcruc AS a JOIN cruc AS b ON a.numero=b.numero
-				WHERE b.proveed='${cod_prv}' AND b.transac=${dbtransac} AND a.onumero!='${tipo_doc}${numero}'
+				WHERE b.proveed=${dbcod_prv} AND b.transac=${dbtransac} AND a.onumero!='${tipo_doc}${numero}'
 				UNION ALL
 				SELECT b.tipo tipo, b.cliente codcp, MID(b.nomcli,1,25) nombre, a.onumero, a.monto, b.numero, b.fecha
 				FROM itcruc AS a JOIN cruc AS b ON a.numero=b.numero
-				WHERE b.cliente='${cod_prv}' AND b.transac=${dbtransac} ORDER BY onumero";
+				WHERE b.cliente=${dbcod_prv} AND b.transac=${dbtransac} ORDER BY onumero";
 
 			$query = $this->db->query($mSQL);
 			$saldo = 0;
@@ -1443,7 +1448,7 @@ class Sprm extends Controller {
 		$id         = $do->get('id');
 		$transac    = $do->get('transac');
 		$tipo_doc   = $do->get('tipo_doc');
-		$cod_cli    = $do->get('cod_cli');
+		$cod_prv    = $do->get('cod_prv');
 		$numero     = $do->get('numero');
 		$reteiva    = $do->get('reteiva');
 		$abonos     = floatval($do->get('abonos'));
@@ -1451,7 +1456,7 @@ class Sprm extends Controller {
 		$dbid       = $this->db->escape($id);
 		$dbtransac  = $this->db->escape($transac);
 		$dbtipo_doc = $this->db->escape($tipo_doc);
-		$dbcod_cli  = $this->db->escape($cod_cli);
+		$dbcod_prv  = $this->db->escape($cod_prv);
 		$dbnumero   = $this->db->escape($numero);
 		$dbfecha    = $this->db->escape($do->get('fecha'));
 
@@ -1543,7 +1548,7 @@ class Sprm extends Controller {
 			}else{
 				$monto=$it_abono;
 			}
-			$mSQL="UPDATE sprm SET abonos=abonos-(${monto}) WHERE tipo_doc=${it_tipo_doc} AND numero=${it_numero} AND cod_cli=${it_cod_cli} AND fecha=${it_fecha}";
+			$mSQL="UPDATE sprm SET abonos=abonos-(${monto}) WHERE tipo_doc=${it_tipo_doc} AND numero=${it_numero} AND cod_prv=${it_cod_prv} AND fecha=${it_fecha}";
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'sprm'); }
 		}
@@ -1702,7 +1707,10 @@ class Sprm extends Controller {
 		}
 	}
 
-	function cprov($id_sprv){
+	//*****************************************
+	// Inicio pago a proveedor
+	//*****************************************
+	function pprov($id_sprv){
 		$id_sprv=intval($id_sprv);
 		$row = $this->datasis->damerow('SELECT proveed,nombre,rif FROM sprv WHERE id='.$id_sprv);
 		if(empty($row)){
@@ -1719,7 +1727,7 @@ class Sprm extends Controller {
 		$do->rel_one_to_many('itppro', 'itppro', array(
 			'tipo_doc'=>'tipoppro',
 			'numero'  =>'numppro',
-			'cod_cli' =>'cod_prv',
+			'cod_prv' =>'cod_prv',
 			'fecha'   =>'fecha')
 		);
 		//$do->rel_one_to_many('sfpa'  , 'sfpa'  , array(
@@ -1735,11 +1743,11 @@ class Sprm extends Controller {
 		$edit->set_rel_title('itppro', 'Efecto <#o#>');
 		//$edit->set_rel_title('sfpa'  , 'Forma de pago <#o#>');
 
-		$edit->pre_process('insert' , '_pre_cprv_insert');
-		$edit->pre_process('update' , '_pre_cprv_update');
-		$edit->pre_process('delete' , '_pre_cprv_delete');
-		$edit->post_process('insert','_post_cprv_insert');
-		//$edit->post_process('delete', '_post_delete');
+		$edit->pre_process('insert' , '_pre_pprv_insert');
+		$edit->pre_process('update' , '_pre_pprv_update');
+		$edit->pre_process('delete' , '_pre_pprv_delete');
+		$edit->post_process('insert','_post_pprv_insert');
+		//$edit->post_process('delete', '_post_pprv_delete');
 
 		$edit->cod_prv = new hiddenField('Proveedor','cod_prv');
 		$edit->cod_prv->rule ='max_length[5]';
@@ -1756,6 +1764,7 @@ class Sprm extends Controller {
 		$edit->tipo_doc->option('AB','Abono');
 		$edit->tipo_doc->option('NC','Nota de credito');
 		$edit->tipo_doc->option('AN','Anticipo');
+		$edit->tipo_doc->onchange='chtipodoc()';
 		$edit->tipo_doc->style='width:140px;';
 		$edit->tipo_doc->rule ='enum[AB,NC,AN]|required';
 
@@ -1770,14 +1779,14 @@ class Sprm extends Controller {
 		$edit->numero->size =10;
 		$edit->numero->maxlength =8;
 
-		$edit->fecdoc = new dateonlyField('Fecha','fecdoc');
-		$edit->fecdoc->size =12;
-		$edit->fecdoc->maxlength =8;
-		$edit->fecdoc->insertValue=date('Y-m-d');
-		$edit->fecdoc->calendar = false;
-		$edit->fecdoc->rule ='chfecha|required';
+		$edit->fecha = new dateonlyField('Fecha','fecha');
+		$edit->fecha->size =12;
+		$edit->fecha->maxlength =8;
+		$edit->fecha->insertValue=date('Y-m-d');
+		$edit->fecha->calendar = false;
+		$edit->fecha->rule ='chfecha|required';
 
-		$edit->monto = new inputField('Total','monto');
+		$edit->monto = new inputField('Total a pagar','monto');
 		$edit->monto->rule='max_length[17]|numeric';
 		$edit->monto->css_class='inputnum';
 		$edit->monto->size =19;
@@ -1798,40 +1807,44 @@ class Sprm extends Controller {
 		$edit->usuario = new autoUpdateField('usuario' ,$this->secu->usuario(),$this->secu->usuario());
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
-		$edit->fecha   = new autoUpdateField('fecha'   ,date('Ymd'), date('Ymd'));
 
+		//Detalle del pago
 		$edit->banco = new dropdownField('Banco', 'banco');
-		$edit->banco->option('','Ninguno');
-		$edit->banco->options('SELECT codbanc,CONCAT_WS(\' \',TRIM(banco),numcuent) FROM banc WHERE tbanco <> \'CAJ\' ORDER BY banco');
+		$edit->banco->option('','Seleccionar');
+		$edit->banco->options('SELECT TRIM(codbanc) AS codbanc,CONCAT_WS(\' \',TRIM(banco),numcuent) FROM banc ORDER BY banco');
 		$edit->banco->style  = 'width:200px;';
-		$edit->banco->rule   = 'condi_required|callback_chtipo';
+		$edit->banco->rule   = 'condi_required';
 
 		$edit->tipo_op = new  dropdownField('Tipo', 'tipo_op');
 		$edit->tipo_op->option('CH','Cheque');
 		$edit->tipo_op->option('ND','Nota de debito');
 		$edit->tipo_op->style='width:150px;';
-		$edit->tipo_op->rule = 'condi_required|callback_chtipo';
+		$edit->tipo_op->rule ='condi_required|enum[CH,ND]|callback_chtipoop';
 
 		$edit->numche = new inputField('N&uacute;mero', 'numche');
 		$edit->numche->size     = 12;
 		$edit->numche->rule     = 'condi_required|callback_chtipo';
 
 		$edit->benefi = new inputField('Beneficiario', 'benefi');
-		$edit->benefi->size     = 12;
-		$edit->benefi->rule     = 'condi_required|callback_chtipo';
+		$edit->benefi->size       = 12;
+		$edit->benefi->rule       = 'condi_required|callback_chtipo';
+		$edit->benefi->style      = 'width:90%;';
+		$edit->benefi->insertValue= $sprv_nombre;
 
-		$edit->fecha = new dateonlyField('Fecha','fecha');
-		$edit->fecha->size     = 12;
-		$edit->fecha->maxlength= 8;
-		$edit->fecha->calendar = false;
-		$edit->fecha->rule ='condi_required|chitfecha|callback_chtipo';
+		$edit->posdata = new dateonlyField('Fecha','posdata');
+		$edit->posdata->size =12;
+		$edit->posdata->maxlength =8;
+		$edit->posdata->insertValue=date('Y-m-d');
+		$edit->posdata->calendar = false;
+		$edit->posdata->rule ='condi_required|chfecha';
+		//Fin del detalle del pago
 
 		//************************************************
 		//inicio detalle itppro
 		//************************************************
 		$i=0;
 		$edit->detail_expand_except('itppro');
-		$sel=array('a.tipo_doc','a.numero','a.fecha','a.monto','a.abonos','a.monto - a.abonos AS saldo');
+		$sel=array('a.tipo_doc','a.numero','a.fecha','a.vence','a.monto','a.abonos','a.monto - a.abonos AS saldo');
 		$this->db->select($sel);
 		$this->db->from('sprm AS a');
 		$this->db->where('a.cod_prv',$proveed);
@@ -1839,7 +1852,7 @@ class Sprm extends Controller {
 		if($transac!==false){
 			$tipo_doc =$edit->get_from_dataobjetct('tipo_doc');
 			$dbtransac=$this->db->escape($transac);
-			$this->db->join('itccli AS b','a.tipo_doc = b.tipoccli AND a.numero=b.numccli AND a.transac='.$dbtransac);
+			$this->db->join('itppro AS b','a.tipo_doc = b.tipoccli AND a.numero=b.numccli AND a.transac='.$dbtransac);
 			$this->db->where('a.tipo_doc',$tipo_doc);
 		}else{
 			$this->db->where('a.monto > a.abonos');
@@ -1857,7 +1870,7 @@ class Sprm extends Controller {
 			$obj='tipo_doc_'.$i;
 			$edit->$obj = new inputField('Tipo_doc',$obj);
 			$edit->$obj->db_name='tipo_doc';
-			$edit->$obj->rel_id = 'itccli';
+			$edit->$obj->rel_id = 'itppro';
 			$edit->$obj->rule='max_length[2]';
 			$edit->$obj->insertValue=$row->tipo_doc;
 			$edit->$obj->size =4;
@@ -1904,6 +1917,10 @@ class Sprm extends Controller {
 			$edit->$obj = new freeField($obj,$obj,nformat($row->saldo));
 			$edit->$obj->ind = $i;
 
+			$obj='vence_'.$i;
+			$edit->$obj = new freeField($obj,$obj,dbdate_to_human($row->vence));
+			$edit->$obj->ind = $i;
+
 	        $obj='abono_'.$i;
 			$edit->$obj = new inputField('Abono',$obj);
 			$edit->$obj->db_name      = 'abono';
@@ -1937,7 +1954,6 @@ class Sprm extends Controller {
 		//************************************************
 		//fin de campos para detalle
 		//************************************************
-
 		$edit->buttons('add_rel');
 		$edit->build();
 
@@ -1952,25 +1968,306 @@ class Sprm extends Controller {
 		}else{
 			$conten['cana']  = $i;
 			$conten['form']  = & $edit;
-			$conten['title'] = heading("Cobro a proveedor: (${proveed}) ${sprv_nombre} ${sprv_rif}");
+			$conten['title'] = heading("Pago a proveedor: (${proveed}) ${sprv_nombre} ${sprv_rif}");
 
-			$data['content'] = $this->load->view('view_cprv.php', $conten);
+			$data['content'] = $this->load->view('view_pprv.php', $conten);
 		}
 	}
 
+	function chtipoop($val){
+		$banco  = $this->input->post('banco');
+		$dbbanco= $this->db->escape($banco);
+		$tbanco = $this->datasis->dameval("SELECT tbanco FROM banc WHERE banco=${dbbanco}");
 
-	function _pre_cprv_insert($do){
+		if($tbanco=='CAJ' && $val=='CH'){
+			$this->validation->set_message('chtipoop', 'El campo %s no puede ser cheque cuando se paga por caja.');
+			return false;
+		}
+		return true;
 	}
 
-	function _pre_cprv_update($do){
+	function chppago($monto,$i){
+		$tipo   = $this->input->post('tipo_doc');
+		$monto  = floatval($monto);
+		$itmonto= floatval($this->input->post('abono_'.$i));
+		if($tipo=='NC' && $monto>0){
+			$this->validation->set_message('chppago', "No se puede hacer pronto pago cuando el tipo de documento es una nota de cr&eacute;dito.");
+			return false;
+		}
+
+		if($itmonto<=0 && $monto>0){
+			$this->validation->set_message('chppago', "No se puede hacer pronto pago cuando a un efecto que no esta abonado.");
+			return false;
+		}
+		return true;
 	}
 
-	function _pre_cprv_delete($do){
+	function _pre_pprv_insert($do){
+		$tipo_doc = $do->get('tipo_doc');
+		$estampa  = $do->get('estampa');
+		$usuario  = $do->get('usuario');
+		$hora     = $do->get('hora');
+		$transac  = $do->get('transac');
+		$cod_prv  = $do->get('cod_prv');
+		$banco    = $do->get('banco');
+		$dbcod_prv= $this->db->escape($cod_prv);
+		$tipo_op  = $do->get('tipo_op');
+		$fecha    = $do->get('fecha');
 
+		$ppago=$totalab=$impuesto=$ppimpuesto=0;
+		//Totaliza el abonado
+		$rel='itppro';
+		$cana = $do->count_rel($rel);
+		for($i = 0;$i < $cana;$i++){
+			$itabono  = floatval($do->get_rel($rel, 'abono', $i));
+			$itpppago = floatval($do->get_rel($rel, 'ppago', $i));
+			$ittipo   = $do->get_rel($rel, 'tipo_doc', $i);
+			$itnumero = $do->get_rel($rel, 'numero'  , $i);
+
+			if(empty($itabono) || $itabono==0){
+				$do->rel_rm($rel,$i);
+			}else{
+				$totalab   += $itabono;
+				$dbittipo   = $this->db->escape($ittipo);
+				$dbitnumero = $this->db->escape($itnumero);
+
+				$rrow=$this->datasis->damerow("SELECT impuesto,monto FROM sprm WHERE cod_prv=${dbcod_prv} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}");
+				if(empty($rrow)){
+					$do->error_message_ar['pre_ins']='Efecto inexistente '.$ittipo.$itnumero;
+					return false;
+				}
+				$itimpuesto = floatval($rrow['impuesto']);
+				$itmonto    = floatval($rrow['monto']);
+
+				if(empty($itpppago)){
+					$do->set_rel($rel,'ppago',0,$i);
+					$itpppago=0;
+				}else{
+					$ppago     += $do->get_rel($rel, 'ppago', $i);
+					$ppimpuesto+= round($itpppago*$itimpuesto/$itmonto,2);
+				}
+
+				$impuesto  += round(($itabono-$itpppago)*$itimpuesto/$itmonto,2);
+			}
+		}
+		$totalab=round($totalab,2);
+		$this->ppimpuesto=$ppimpuesto;
+
+		//Inicio Validaciones
+		if($tipo_doc=='NC' && $ppago>0){
+			$do->error_message_ar['pre_ins']='No puede tener una nota de credito con pronto pago.';
+			return false;
+		}
+		if($tipo_doc=='NC' || $tipo_doc=='AB'){
+			//Debe borrar los detalles del pago
+			if($totalab==0){
+				$do->error_message_ar['pre_ins']='Debe relacionar el pago con algun movimiento';
+				return false;
+			}
+		}elseif($tipo_doc=='AN'){
+			$do->truncate_rel('itppro');
+			if($totalab!=0){
+				$do->error_message_ar['pre_ins']='Un anticipo no puede estar relacionado con algun efecto, en tal caso seria un abono';
+				return false;
+			}
+		}
+		//Fin de las validaciones
+
+
+		$transac  = $this->datasis->prox_sql('ntransa',8);
+		$mcontrol = $this->datasis->prox_sql('nsprm'  ,8);
+		$mnroegre = $this->datasis->prox_sql('negreso',8);
+		$bdata = Common::_traebandata($banco);
+		$tbanco   = $bdata['tbanco'];
+		$mndebito = ($tipo_op == 'ND' && $tbanco != 'CAJ')? $this->datasis->prox_sql('ndebito',8) : '';
+
+
+		if($tipo_doc == 'AB'){
+			$xnumero = $this->datasis->prox_sql('num_ab',8);
+		}elseif($tipo_doc == 'AN'){
+			$xnumero = $this->datasis->prox_sql('num_an',8);
+		}else{
+			$xnumero = $this->datasis->prox_sql('num_nc',8);
+		}
+		$do->set('numero',$xnumero);
+
+		$row=$this->datasis->damerow("SELECT nombre FROM sprv WHERE proveed=".$this->db->escape($cod_prv));
+		if(!empty($row)){
+			$do->set('nombre' ,$row['nombre']);
+		}
+
+		$rel='itppro';
+		$observa=array();
+		$cana = $do->count_rel($rel);
+		for($i = 0;$i < $cana;$i++){
+			$ittipo  = $do->get_rel($rel, 'tipo_doc', $i);
+			$itnumero= $do->get_rel($rel, 'numero'  , $i);
+
+			$observa[]=$ittipo.$itnumero;
+			$do->set_rel($rel, 'tipoppro', $tipo_doc, $i);
+			$do->set_rel($rel, 'cod_prv' , $cod_prv , $i);
+			$do->set_rel($rel, 'estampa' , $estampa , $i);
+			$do->set_rel($rel, 'hora'    , $hora    , $i);
+			$do->set_rel($rel, 'usuario' , $usuario , $i);
+			$do->set_rel($rel, 'transac' , $transac , $i);
+			$do->set_rel($rel, 'mora'    , 0, $i);
+			$do->set_rel($rel, 'reten'   , 0, $i);
+			$do->set_rel($rel, 'cambio'  , 0, $i);
+			$do->set_rel($rel, 'reteiva' , 0, $i);
+		}
+
+		$observa=$do->get('observa1');
+		$do->set('observa1',substr($observa,0 ,50));
+		$obs2 =  substr($observa,50,50);
+		if($obs2!==false){
+			$do->set('observa2',$obs2);
+		}
+
+		$do->set('vence'   , $fecha);
+		$do->set('posdata' , $fecha);
+		$do->set('negreso' , $mnroegre);
+		$do->set('ndebito' , $mndebito);
+		$do->set('monto'   , $totalab-$ppago);
+		$do->set('impuesto', $impuesto);
+		$do->set('reten'   , 0);
+		$do->set('reteiva' , 0);
+		$do->set('ppago'   , $ppago);
+		$do->set('control' , $mcontrol);
+		$do->set('cambio'  , 0 );
+		$do->set('nfiscal' , '') ;
+		$do->set('mora'    , 0 );
+		$do->set('comprob' , '');
+		$do->set('abonos'  , $totalab-$ppago);
+		$do->set('transac' , $transac);
+
+		return true;
 	}
 
-	function _post_cprv_insert($do){
+	function _pre_pprv_update($do){
+		return false;
+	}
 
+	function _pre_pprv_delete($do){
+		return false;
+	}
+
+	function _post_pprv_insert($do){
+		$cod_prv = $do->get('cod_prv');
+		$numero  = $do->get('numero');
+		$tipo_doc= $do->get('tipo_doc');
+		$ppago   = $do->get('ppago');
+		$fecha   = $do->get('fecha');
+		$mnumero = $do->get('numero');
+		$nombre  = $do->get('nombre');
+		$estampa = $do->get('estampa');
+		$usuario = $do->get('usuario');
+		$hora    = $do->get('hora');
+		$transac = $do->get('transac');
+		$tipo_op = $do->get('tipo_op');
+		$banco   = $do->get('banco');
+		$benefi  = $do->get('benefi');
+		$totalab = $do->get('abonos');
+		$impuesto= $do->get('impuesto');
+		$numche  = $do->get('numche');
+		$observa1= $do->get('observa1');
+		$observa2= $do->get('observa2');
+		$mnroegre= $do->get('negreso');
+		$mndebito= $do->get('ndebito');
+		$posdata = $do->get('posdata');
+
+		$do->set('vence',$fecha);
+
+		//Aplica el abono
+		$ppobserva=array();
+		$rel='itppro';
+		$cana = $do->count_rel($rel);
+		for($i = 0;$i < $cana;$i++){
+			$itabono  = floatval($do->get_rel($rel, 'abono'   , $i));
+			$ittipo   = $do->get_rel($rel, 'tipo_doc', $i);
+			$itnumero = $do->get_rel($rel, 'numero'  , $i);
+			$itfecha  = $do->get_rel($rel, 'fecha'   , $i);
+			$itpppago = $do->get_rel($rel, 'ppago', $i);
+			if($itpppago>0){
+				$ppobserva[] = $ittipo.$itnumero;
+			}
+
+			$mSQL = "UPDATE sprm SET abonos=abonos+?, preabono=0, preppago=0 WHERE tipo_doc=? AND numero=? AND cod_prv=? AND fecha=?";
+			$this->db->query($mSQL, array($itabono,$ittipo,$itnumero,$cod_prv,$itfecha));
+		}
+
+		//Crea Movimiento en Bancos
+		$bdata = Common::_traebandata($banco);
+
+		$data = array();
+		$data['codbanc']  = $banco;
+		$data['numcuent'] = trim($bdata['numcuent']);
+		$data['banco']    = trim($bdata['banco']);
+		$data['saldo']    = $bdata['saldo'];
+		$data['fecha']    = $fecha;
+		$data['tipo_op']  = $tipo_op;
+		$data['numero']   = $numche;
+		$data['concepto'] = $observa1;
+		$data['concep2']  = $observa2;
+		$data['monto']    = $totalab;
+		$data['clipro']   = 'P' ;
+		$data['codcp']    = $cod_prv;
+		$data['nombre']   = $nombre;
+		$data['benefi']   = $benefi;
+		$data['posdata']  = $posdata;
+		$data['negreso']  = $mnroegre;
+		$data['ndebito']  = $mndebito;
+		$data['usuario']  = $usuario;
+		$data['estampa']  = $estampa;
+		$data['hora']     = $hora;
+		$data['transac']  = $transac;
+		$this->db->insert('bmov',$data);
+		$this->datasis->actusal($banco, $fecha, (-1)*$totalab);
+
+		// Si tiene pronto pago genera la NC
+		if($ppago > 0){
+			$mnumero   = $this->datasis->prox_sql('num_nc',8);
+			$mcontrol  = $this->datasis->prox_sql('nsprm' ,8);
+			$mcdppago  = $mcontrol;
+
+			$data = array();
+			$data['tipo_doc'] = 'NC';
+			$data['numero']   = $mnumero;
+			$data['cod_prv']  = $cod_prv;
+			$data['nombre']   = $nombre;
+			$data['fecha']    = $fecha;
+			$data['monto']    = $ppago;
+			$data['impuesto'] = round($this->ppimpuesto,2) ;
+			$data['vence']    = $fecha;
+			$data['observa1'] = 'DESC. P.PAGO A '.$tipo_doc.$numero; //implode(',',$ppobserva);
+			$data['codigo']   = 'DESPP';
+			$data['descrip']  = 'DESCUENTO PRONTO PAGO';
+			$data['abonos']   = $ppago;
+			$data['control']  = $mcontrol;
+			$data['usuario']  = $usuario;
+			$data['estampa']  = $estampa;
+			$data['hora']     = $hora;
+			$data['transac']  = $transac;
+
+			$this->db->insert('sprm',$data);
+		}
+
+		logusu('PPRO',"Abono a proveedor CREADO Prov=${cod_prv}  Numero=${numero}");
+	}
+	//**********************************************
+	// Fin de pago a proveedor
+	//***********************************************
+
+	//Chequea los campos de numero y fecha en las formas de pago
+	//cuando deban corresponder
+	function chtipo($val){
+		$tipo=$this->input->post('tipo_op');
+		if(empty($tipo)) return true;
+		$this->validation->set_message('chtipo', 'El campo %s es obligatorio');
+
+		if(empty($val) && ($tipo=='CH'))
+			return false;
+		else
+			return true;
 	}
 
 	function instalar(){

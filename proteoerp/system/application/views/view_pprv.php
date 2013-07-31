@@ -55,56 +55,69 @@ $(function() {
 		return r;
 	});
 
-	$('#fecdoc').datepicker({ dateFormat: "dd/mm/yy" });
+	$('#fecha').datepicker({ dateFormat: "dd/mm/yy" });
 	$('input[name^="sfpafecha_"]').datepicker({ dateFormat: "dd/mm/yy" });
+	chtipodoc();
 });
+
+function chtipodoc(){
+	var tipo=$('#tipo_doc').val();
+
+	if(tipo=='NC'){
+		$('#aplefectos').show();
+		$('#aplpago').hide();
+		$('input[name^="ppago_"]').val('');
+		$('input[name^="ppago_"]').hide('');
+		$('#ppagotit').hide();
+
+	}else if(tipo=='AN'){
+		$('#aplefectos').hide();
+		$('input[name^="abono_"]').val("");
+		$('input[name^="ppago_"]').val("");
+		 totaliza();
+		$('#aplpago').show();
+	}else{
+		$('#aplefectos').show();
+		$('#aplpago').show();
+		$('input[name^="ppago_"]').show('');
+		$('#ppagotit').show();
+	}
+}
 
 function totaliza(){
 	var stota =0;
+	var sppago=0;
 	var arr  = $('input[name^="abono_"]');
+	var mascara= "PAGA ";
 
 	jQuery.each(arr, function(){
 		nom=this.name;
 		pos=this.name.lastIndexOf('_');
 		if(pos>0){
-			ind    = this.name.substring(pos+1);
-			num    = Number(this.value);
-			if(!isNaN(num)){
+			ind     = this.name.substring(pos+1);
+			num     = Number(this.value);
+			ppago   = Number($('#ppago_'+ind).val());
+			tipo_doc= $('#tipo_doc_'+ind).val();
+			numero  = $('#numero_'+ind).val();
+			if(!isNaN(num) && num>0){
+				mascara= mascara+tipo_doc+numero+', ';
+
 				stota += num;
+				if(!isNaN(ppago)){
+					sppago += ppago;
+				}
 			}else{
-				this.value='0';
+				this.value='';
 			}
 		}
 	});
-	$('#monto').val(roundNumber(stota,2));
-	$('#monto_val').text(nformat(stota,2));
-
-	resto=faltante();
-	utmo =$('input[id^="itmonto_"]').first();
-	num  =Number(utmo.val());
-	if(!isNaN(num)){
-		hay = num
-	}else{
-		hay = 0;
-		utmo.val('0');
+	$('#monto').val(roundNumber(stota-sppago ,2));
+	$('#monto_val').text(nformat(stota-sppago ,2));
+	if(stota>0){
+		$("#observa1").val(mascara);
 	}
-
-	utmo.val(roundNumber(hay+resto,2));
 }
 
-function add_sfpa(){
-	var htm = ''<?php //echo $sfpa_campos; ?>;
-	can = sfpa_cont.toString();
-	con = (sfpa_cont+1).toString();
-	htm = htm.replace(/<#i#>/g,can);
-	htm = htm.replace(/<#o#>/g,con);
-	$("#__ITPL__sfpa").after(htm);
-	falta = faltante();
-	$("#itmonto_"+can).val(falta);
-	$("#sfpafecha_"+can).datepicker({ dateFormat: "dd/mm/yy" });
-	sfpa_cont=sfpa_cont+1;
-	return can;
-}
 
 function itsaldo(obj,saldo){
 	if(obj.value.length==0){
@@ -121,59 +134,13 @@ function itppago(obj,ind){
 	if(valor==NaN){
 		obj.value='0';
 	}else if(valor<0){
-		monto=Number($('#abono_'+ind).val());
+		monto=Number($('#monto_'+ind).val());
 		nval=monto*valor*-1/100;
 		obj.value=roundNumber(nval,2);
-		$('#abono_'+ind).val(roundNumber(monto-nval,2));
 		totaliza();
 	}
 }
 
-function del_sfpa(id){
-	id = id.toString();
-	$('#tr_sfpa_'+id).remove();
-	totaliza();
-	var arr = $('input[id^="itmonto_"]');
-	if(arr.length<=0){
-		add_sfpa();
-	}
-}
-
-//Totaliza el monto por pagar
-function apagar(){
-	var pago=0;
-	jQuery.each($('input[id^="itmonto_"]'), function() {
-		pago+=Number($(this).val());
-	});
-	if(isNaN(pago)) return 0; else return pago;
-}
-
-//Determina lo que falta por pagar
-function faltante(){
-	totalg=Number($("#monto").val());
-	if(isNaN(totalg)){
-		$("#monto").val('0');
-		totalg=0;
-	}
-	paga  = apagar();
-	resto = totalg-paga;
-	return resto;
-}
-
-function sfpatipo(id){
-	id     = id.toString();
-	tipo   = $("#tipo_"+id).val();
-	sfpade = <?php echo $form->js_escape($sfpade); ?>;
-	sfpach = <?php echo $form->js_escape($sfpach); ?>;
-	banco  = $("#banco_"+id).val();
-	if(tipo=='DE' || tipo=='NC'){
-		$("#banco_"+id).html(sfpade);
-	}else{
-		$("#banco_"+id).html(sfpach);
-	}
-	$("#banco_"+id).val(banco);
-	return true;
-}
 </script>
 <?php } ?>
 <?php
@@ -187,12 +154,12 @@ echo $title;
 	<tr>
 		<td><?php echo $form->tipo_doc->label;  ?></td>
 		<td><?php echo $form->tipo_doc->output; ?></td>
-		<td><?php echo $form->fecdoc->label;    ?></td>
-		<td><?php echo $form->fecdoc->output;   ?></td>
+		<td><?php echo $form->fecha->label;    ?></td>
+		<td><?php echo $form->fecha->output;   ?></td>
 	</tr>
 </table>
 <?php if($cana>0){ ?>
-<table width='100%' align='center'>
+<table width='100%' align='center' id='aplefectos'>
 	<col>
 	<col class="colbg1">
 	<col class="colbg1">
@@ -202,38 +169,42 @@ echo $title;
 		<tr>
 			<td class="littletableheaderdet"><b>Documento</b></td>
 			<td align="center" class="littletableheaderdet"><b>Fecha</b></td>
+			<td align="center" class="littletableheaderdet"><b>Vence</b></td>
 			<td align="right"  class="littletableheaderdet"><b>Monto</b></td>
 			<td align="center" class="littletableheaderdet"><b>Saldo</b></td>
 			<td align="right"  class="littletableheaderdet"><b>Abonar</b></td>
-			<td align="right"  class="littletableheaderdet"><b>P.Pago</b></td>
+			<td align="right"  class="littletableheaderdet"><b id='ppagotit'>P.Pago</b></td>
 		</tr>
 	</thead>
 	<tbody>
 	<?php
 	$pmarcat='';
 	for($i=0;$i<$cana;$i++) {
-		$it_tipo_doc = "tipo_doc_$i";
-		$it_numero   = "numero_$i";
-		$it_fecha    = "fecha_$i";
-		$it_monto    = "monto_$i";
-		$it_abono    = "abono_$i";
-		$it_saldo    = "saldo_$i";
-		$it_ppago    = "ppago_$i";
+		$it_tipo_doc = "tipo_doc_${i}";
+		$it_numero   = "numero_${i}";
+		$it_fecha    = "fecha_${i}";
+		$it_monto    = "monto_${i}";
+		$it_abono    = "abono_${i}";
+		$it_saldo    = "saldo_${i}";
+		$it_ppago    = "ppago_${i}";
+		$it_vence    = "vence_${i}";
 	?>
 	<tr id='tr_itccli_<?php echo $i; ?>' <?php echo ($i%2 == 0) ? 'class="odd"' : '';?> >
 		<td><?php echo $form->$it_tipo_doc->output;?>-<?php echo $form->$it_numero->output;?></td>
 		<td align="center"><?php echo $form->$it_fecha->output; ?></td>
-		<td align="right"><?php echo $form->$it_monto->output; ?></td>
-		<td align="right"><?php echo $form->$it_saldo->output; ?></td>
-		<td align="right"><?php echo $form->$it_abono->output; ?></td>
-		<td align="right"><?php echo $form->$it_ppago->output; ?></td>
+		<td align="center"><?php echo $form->$it_vence->output; ?></td>
+		<td align="right" ><?php echo $form->$it_monto->output; ?></td>
+		<td align="right" ><?php echo $form->$it_saldo->output; ?></td>
+		<td align="right" ><?php echo $form->$it_abono->output; ?></td>
+		<td align="right" ><?php echo $form->$it_ppago->output; ?></td>
 	</tr>
 	<?php } ?>
 	</tbody>
 	<tfoot>
 	<tr>
-		<td colspan=4 align="right"><b><?php echo $form->monto->label; ?></b></td>
-		<td align="right"><?php echo $form->monto->output; ?></td>
+		<td colspan='6' align="right" style='font-size: 1.6em;'><b><?php echo $form->monto->label; ?></b></td>
+		<td align="right" style='font-size: 1.6em;font-weight: bold;'><?php echo $form->monto->output; ?></td>
+		<td align="right"></td>
 	</tr>
 	</tfoot>
 </table>
@@ -241,25 +212,25 @@ echo $title;
 
 <?php echo $container_br.$container_bl;?>
 
-<table align='center' width="100%">
+<table align='center' style='width:100%;font-size:10pt;background:#F2E69D;'>
 	<tr>
-		<td><?php echo $form->banco->label;    ?></td>
+		<td><?php echo $form->banco->label;    ?>*</td>
 		<td><?php echo $form->banco->output;   ?></td>
-		<td><?php echo $form->tipo_op->label;  ?></td>
+		<td><?php echo $form->tipo_op->label;  ?>*</td>
 		<td><?php echo $form->tipo_op->output; ?></td>
+	</tr><tr>
 		<td><?php echo $form->numche->label;   ?></td>
 		<td><?php echo $form->numche->output;  ?></td>
-		<td><?php echo $form->fecha->label;    ?></td>
-		<td><?php echo $form->fecha->output;   ?></td>
-	</tr>
-	<tr>
+		<td><?php echo $form->posdata->label;  ?></td>
+		<td><?php echo $form->posdata->output; ?></td>
+	</tr><tr>
 		<td><?php echo $form->benefi->label ?></td>
 		<td colspan='3'><?php echo $form->benefi->output ?></td>
 	</tr>
 </table>
 <table width='100%'>
 	<tr>
-		<td colspan='9' align='center'><b>Concepto:</b><br><?php echo $form->observa1->output.$form->observa2->output; ?></td>
+		<td align='center'><b>Concepto:</b><br><?php echo $form->observa1->output.$form->observa2->output; ?></td>
 	</tr>
 </table>
 <?php echo $form_end; ?>

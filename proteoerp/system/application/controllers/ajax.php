@@ -902,6 +902,34 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
+	// Chequea que el gasto no este duplicado
+	//
+	function gserdupli(){
+		$proveed = $this->input->post('proveed');
+		$tipo_doc= $this->input->post('tipo_doc');
+		$numero  = $this->input->post('numero');
+		//$rt=array('status'=>'B','control'=>'','fecha'=>'','serie'=>'','monto'=>0,'nfiscal'=>'','tipo_doc'=>'');
+		$rt=array('status'=>'B');
+
+		if($proveed!==false && $numero !== false && $tipo_doc!== false){
+			$dbproveed = $this->db->escape(trim($proveed));
+			$dbnumero  = $this->db->escape(trim($numero ));
+			$dbtipo_doc= $this->db->escape(trim($tipo_doc));
+			$row = $this->datasis->damerow("SELECT totbruto AS monto,tipo_doc,fecha,serie,nfiscal FROM gser WHERE tipo_doc<>'XX' AND tipo_doc=${dbtipo_doc} AND proveed=${dbproveed} AND (numero=${dbnumero}  OR serie=${dbnumero})");
+			if(!empty($row)){
+				$rt['status']   = 'A';
+				$rt['control']  = $row['nfiscal'];
+				$rt['fecha']    = $this->_datehuman($row['fecha']);
+				$rt['serie']    = $row['serie'];
+				$rt['monto']    = $row['monto'];
+				$rt['nfiscal']  = $row['nfiscal'];
+				//$rt['tipo_doc'] = $row['tipo_doc'];
+			}
+		}
+		echo json_encode($rt);
+	}
+
+	//******************************************************************
 	//Busca facturas para aplicarles devolucion o nota de despacho
 	//
 	function buscasfacdev(){
@@ -932,6 +960,7 @@ class Ajax extends Controller {
 					$retArray['tipo']    = $row['tipo'];
 					$retArray['direc']   = utf8_encode($row['direc']);
 					$retArray['nombre']  = utf8_encode($row['nombre']);
+					$retArray['totalg']  = $row['totalg'];
 
 					array_push($retorno, $retArray);
 				}
