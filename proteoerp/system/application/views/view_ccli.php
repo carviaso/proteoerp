@@ -70,6 +70,7 @@ function chtipodoc(){
 		$('input[name^="ppago_"]').val('');
 		$('input[name^="ppago_"]').hide('');
 		$('#ppagotit').hide();
+		$('#trcodigo').show();
 
 	}else if(tipo=='AN'){
 		$('#aplefectos').hide();
@@ -77,17 +78,22 @@ function chtipodoc(){
 		$('input[name^="ppago_"]').val("");
 		 totaliza();
 		$('#aplpago').show();
+		$('#trcodigo').hide();
 	}else{
 		$('#aplefectos').show();
 		$('#aplpago').show();
 		$('input[name^="ppago_"]').show('');
 		$('#ppagotit').show();
+		$('#trcodigo').hide();
 	}
+	$("#observa1").val('');
+	totaliza();
 }
 
 function totaliza(){
 	var stota =0;
 	var arr  = $('input[name^="abono_"]');
+	var mascara= "PAGA ";
 
 	jQuery.each(arr, function(){
 		nom=this.name;
@@ -95,10 +101,14 @@ function totaliza(){
 		if(pos>0){
 			ind    = this.name.substring(pos+1);
 			num    = Number(this.value);
-			if(!isNaN(num)){
+			tipo_doc= $('#tipo_doc_'+ind).val();
+			numero  = $('#numero_'+ind).val();
+
+			if(!isNaN(num) && num>0){
 				stota += num;
+				mascara= mascara+tipo_doc+numero+', ';
 			}else{
-				this.value='0';
+				this.value='';
 			}
 		}
 	});
@@ -116,6 +126,11 @@ function totaliza(){
 	}
 
 	utmo.val(roundNumber(hay+resto,2));
+	if(stota>0){
+		$("#observa1").val(mascara);
+	}else{
+		$("#observa1").val('');
+	}
 }
 
 function add_sfpa(){
@@ -147,10 +162,11 @@ function itppago(obj,ind){
 	if(valor==NaN){
 		obj.value='0';
 	}else if(valor<0){
-		monto=Number($('#abono_'+ind).val());
-		nval=monto*valor*-1/100;
+		monto=Number($('#monto_'+ind).val());
+		abono=Number($('#abono_'+ind).val());
+		nval=monto*valor*(-1)/100;
 		obj.value=roundNumber(nval,2);
-		$('#abono_'+ind).val(roundNumber(monto-nval,2));
+		$('#abono_'+ind).val(roundNumber(abono-nval,2));
 		totaliza();
 	}
 }
@@ -207,19 +223,13 @@ echo $title;
 ?>
 <table align='center' width="100%">
 	<tr>
-		<td colspan='3'><?php echo $form->numero->value.$form->cod_cli->output ?>
-		<?php if($form->getstatus()=='show'){ ?>
-			<a href="#" onclick="window.open('<?php echo base_url() ?>formatos/verhtml/CCLIAB/<?php echo raencode($form->_dataobject->pk['id']) ?>', '_blank', 'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');" heigth="600" >
-			<img src='<?php echo base_url() ?>images/html_logo.gif'></a>
-			<a href="#" onclick="window.open('<?php echo base_url() ?>formatos/descargar/CCLIAB/<?php echo raencode($form->_dataobject->pk['id']) ?>', '_blank', 'width=800, height=600, scrollbars=Yes, status=Yes, resizable=Yes, screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');" heigth="600" >
-			<img src='<?php echo base_url() ?>images/pdf_logo.gif'></a>
-		<?php } ?>
-		</td>
+		<td colspan='4'><?php echo $form->numero->value.$form->cod_cli->output ?></td>
 		<td align=right><?php echo $container_tr;?></td>
 	</tr>
 	<tr>
 		<td><?php echo $form->tipo_doc->label;  ?></td>
 		<td><?php echo $form->tipo_doc->output; ?></td>
+		<td><span id='trcodigo'><?php echo $form->codigo->label; ?> <?php echo $form->codigo->output; ?></span></td>
 		<td><?php echo $form->fecdoc->label;    ?></td>
 		<td><?php echo $form->fecdoc->output;   ?></td>
 	</tr>
@@ -245,13 +255,13 @@ echo $title;
 	<?php
 	$pmarcat='';
 	for($i=0;$i<$cana;$i++) {
-		$it_tipo_doc = "tipo_doc_$i";
-		$it_numero   = "numero_$i";
-		$it_fecha    = "fecha_$i";
-		$it_monto    = "monto_$i";
-		$it_abono    = "abono_$i";
-		$it_saldo    = "saldo_$i";
-		$it_ppago    = "ppago_$i";
+		$it_tipo_doc = "tipo_doc_${i}";
+		$it_numero   = "numero_${i}";
+		$it_fecha    = "fecha_${i}";
+		$it_monto    = "monto_${i}";
+		$it_abono    = "abono_${i}";
+		$it_saldo    = "saldo_${i}";
+		$it_ppago    = "ppago_${i}";
 	?>
 	<tr id='tr_itccli_<?php echo $i; ?>' <?php echo ($i%2 == 0) ? 'class="odd"' : '';?> >
 		<td><?php echo $form->$it_tipo_doc->output;?>-<?php echo $form->$it_numero->output;?></td>
@@ -265,8 +275,8 @@ echo $title;
 	</tbody>
 	<tfoot>
 	<tr>
-		<td colspan='4' align="right"><b><?php echo $form->monto->label; ?></b></td>
-		<td align="right"><?php echo $form->monto->output; ?></td>
+		<td colspan='4' align="right" style='font-size: 1.6em;'><b><?php echo $form->monto->label; ?></b></td>
+		<td align="right" style='font-size: 1.6em;font-weight: bold;'><?php echo $form->monto->output; ?></td>
 		<td align="right"></td>
 	</tr>
 	</tfoot>
@@ -288,11 +298,11 @@ echo $title;
 	<?php
 
 	for($i=0; $i < $form->max_rel_count['sfpa']; $i++) {
-		$tipo      = "tipo_$i";
-		$sfpafecha = "sfpafecha_$i";
-		$numref    = "numref_$i";
-		$monto     = "itmonto_$i";
-		$banco     = "banco_$i";
+		$tipo      = "tipo_${i}";
+		$sfpafecha = "sfpafecha_${i}";
+		$numref    = "numref_${i}";
+		$monto     = "itmonto_${i}";
+		$banco     = "banco_${i}";
 	?>
 	<tr id='tr_sfpa_<?php echo $i; ?>'>
 		<td class="littletablerow" nowrap><?php echo $form->$tipo->output      ?></td>

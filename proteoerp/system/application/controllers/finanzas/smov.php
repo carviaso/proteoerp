@@ -1463,7 +1463,7 @@ class Smov extends Controller {
 		$edit->tipo_doc->rule ='enum[AB,NC,AN]|required';
 
 		$edit->codigo = new  dropdownField('Motivo', 'codigo');
-		$edit->codigo->option('','Ninguno');
+		$edit->codigo->option('','Seleccionar');
 		$edit->codigo->options('SELECT TRIM(codigo) AS cod, nombre FROM botr WHERE tipo=\'C\' ORDER BY nombre');
 		$edit->codigo->style='width:200px;';
 		$edit->codigo->rule ='';
@@ -1497,6 +1497,12 @@ class Smov extends Controller {
 		$edit->observa2->rows = 2;
 		$edit->observa2->style='width:100%;';
 		$edit->observa2->when=array('show');
+
+		$edit->codigo = new  dropdownField('Motivo', 'codigo');
+		$edit->codigo->option('','Ninguno');
+		$edit->codigo->options('SELECT TRIM(codigo) AS cod, nombre FROM botr WHERE tipo=\'C\' ORDER BY nombre');
+		$edit->codigo->style='width:200px;';
+		$edit->codigo->rule ='condi_required|callback_chobligatipo[NC]';
 
 		$edit->usuario = new autoUpdateField('usuario' ,$this->secu->usuario(),$this->secu->usuario());
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
@@ -1685,7 +1691,6 @@ class Smov extends Controller {
 		}
 	}
 
-
 	function _pre_ccli_insert($do){
 		$cliente  =$do->get('cod_cli');
 		$estampa = $do->get('estampa');
@@ -1695,7 +1700,18 @@ class Smov extends Controller {
 		$tipo_doc= $do->get('tipo_doc');
 		$fecha   = $do->get('fecha');
 		$concepto= $do->get('observa1');
+		$codigo  = $do->get('codigo');
 		$itabono=$sfpamonto=$ppagomonto=$impuesto=$ppimpuesto=0;
+		$dbcod_cli=$this->db->escape($cod_cli);
+		$this->ppagodata=$ivadata=array(
+			'montasa'  =>0,
+			'monredu'  =>0,
+			'monadic'  =>0,
+			'tasa'     =>0,
+			'reducida' =>0,
+			'sobretasa'=>0,
+			'exento'   =>0
+		);
 
 		$rrow    = $this->datasis->damerow('SELECT nombre,rifci,dire11,dire12 FROM scli WHERE cliente='.$this->db->escape($cliente));
 		if($rrow!=false){
@@ -1769,6 +1785,12 @@ class Smov extends Controller {
 		$do->set('dire2' , $rowscli['dire12']);
 
 		$transac  = $this->datasis->fprox_numero('ntransa');
+		$ningreso = $this->datasis->fprox_numero('ningreso');
+		if($tipo_doc!='AN'){
+			$control  = $this->datasis->fprox_numero('nsmov');
+		}else{
+			$control = '';
+		}
 
 		if($tipo_doc=='AB'){
 			$mnum = $this->datasis->fprox_numero('nabcli');
@@ -1782,6 +1804,7 @@ class Smov extends Controller {
 		$do->set('vence'  , $fecha);
 		$do->set('numero' , $mnum);
 		$do->set('transac', $transac);
+		$do->set('control', $control);
 
 		$rel='itccli';
 		$observa=array();
@@ -1790,14 +1813,22 @@ class Smov extends Controller {
 			$itabono = floatval($do->get_rel($rel, 'abono'   , $i));
 			$ittipo  = $do->get_rel($rel, 'tipo_doc', $i);
 			$itnumero= $do->get_rel($rel, 'numero'  , $i);
-			$itmonto = floatval($do->get_rel($rel, 'monto'  , $i));
+			//$itmonto = floatval($do->get_rel($rel, 'monto'  , $i));
 
 			if(empty($itabono) || $itabono==0){
 				$do->rel_rm($rel,$i);
 			}else{
 				$dbittipo   = $this->db->escape($ittipo);
 				$dbitnumero = $this->db->escape($itnumero);
-				$itimpuesto = floatval($this->datasis->dameval("SELECT impuesto FROM smov WHERE cod_prv=${dbcod_prv} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}"));
+
+				$rrow=$this->datasis->damerow("SELECT impuesto,monto,montasa,monredu,monadic,tasa,reducida,sobretasa,exento  FROM smov WHERE cod_cli=${dbcod_cli} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}");
+				if(empty($rrow)){
+					$do->error_message_ar['pre_ins']='Efecto inexistente '.$ittipo.$itnumero;
+					return false;
+				}
+				$itimpuesto = floatval($rrow['impuesto']);
+				$itmonto    = floatval($rrow['monto']);
+
 				$impuesto  += $itabono*$itimpuesto/$itmonto;
 
 				$observa[]=$ittipo.$itnumero;
@@ -1807,18 +1838,45 @@ class Smov extends Controller {
 				$do->set_rel($rel, 'hora'    , $hora    , $i);
 				$do->set_rel($rel, 'usuario' , $usuario , $i);
 				$do->set_rel($rel, 'transac' , $transac , $i);
+				$do->set_rel($rel, 'monto'   , $itmonto , $i);
 				$do->set_rel($rel, 'mora'    , 0, $i);
 				$do->set_rel($rel, 'reten'   , 0, $i);
 				$do->set_rel($rel, 'cambio'  , 0, $i);
 				$do->set_rel($rel, 'reteiva' , 0, $i);
 
+				if($tipo_doc=='NC'){
+					$ivadata['montasa'  ]= floatval($rrow['montasa'  ])*$itabono/$itmonto;
+					$ivadata['monredu'  ]= floatval($rrow['monredu'  ])*$itabono/$itmonto;
+					$ivadata['monadic'  ]= floatval($rrow['monadic'  ])*$itabono/$itmonto;
+					$ivadata['tasa'     ]= floatval($rrow['tasa'     ])*$itabono/$itmonto;
+					$ivadata['reducida' ]= floatval($rrow['reducida' ])*$itabono/$itmonto;
+					$ivadata['sobretasa']= floatval($rrow['sobretasa'])*$itabono/$itmonto;
+					$ivadata['exento'   ]= floatval($rrow['exento'   ])*$itabono/$itmonto;
+				}
+
 				$pppago = $do->get_rel($rel, 'ppago', $i);
 				if($pppago>0){
 					$ppimpuesto += $pppago*$itimpuesto/$itmonto;
+
+					$this->ppagodata['montasa'  ]= floatval($rrow['montasa'  ])*$pppago/$itmonto;
+					$this->ppagodata['monredu'  ]= floatval($rrow['monredu'  ])*$pppago/$itmonto;
+					$this->ppagodata['monadic'  ]= floatval($rrow['monadic'  ])*$pppago/$itmonto;
+					$this->ppagodata['tasa'     ]= floatval($rrow['tasa'     ])*$pppago/$itmonto;
+					$this->ppagodata['reducida' ]= floatval($rrow['reducida' ])*$pppago/$itmonto;
+					$this->ppagodata['sobretasa']= floatval($rrow['sobretasa'])*$pppago/$itmonto;
+					$this->ppagodata['exento'   ]= floatval($rrow['exento'   ])*$pppago/$itmonto;
 				}
 			}
+		}
 
-
+		if($tipo_doc=='NC'){
+			$do->set('montasa'  ,$ivadata['montasa'  ]);
+			$do->set('monredu'  ,$ivadata['monredu'  ]);
+			$do->set('monadic'  ,$ivadata['monadic'  ]);
+			$do->set('tasa'     ,$ivadata['tasa'     ]);
+			$do->set('reducida' ,$ivadata['reducida' ]);
+			$do->set('sobretasa',$ivadata['sobretasa']);
+			$do->set('exento'   ,$ivadata['exento'   ]);
 		}
 
 		if(empty($concepto)){
@@ -1858,9 +1916,14 @@ class Smov extends Controller {
 		$do->set('reteiva' ,0);
 		$do->set('impuesto',$impuesto);
 		$do->set('ppago'   ,$ppagomonto);
-		$do->set('codigo'  ,'NOCON');
-		$do->set('descrip' ,'NOTA DE CONTABILIDAD');
+		$do->set('ningreso',$ningreso);
 		$do->set('vendedor', $this->secu->getvendedor());
+
+		if(!empty($codigo)){
+			$dbcodigo = $this->db->escape($codigo);
+			$do->set('descrip' ,$this->datasis->dameval("SELECT TRIM(nombre) AS val FROM botr WHERE codigo=${dbcodigo}"));
+		}
+
 		return true;
 	}
 
@@ -1869,13 +1932,17 @@ class Smov extends Controller {
 		$cliente  =$do->get('cod_cli');
 		$dbcliente=$this->db->escape($cliente);
 		$impuesto =$do->get('impuesto');
+		$tipo_doc =$do->get('tipo_doc');
+		$concepto =$do->get('observa1');
+		$ningreso =$do->get('ningreso');
 
 		$rel_id='itccli';
 		$cana = $do->count_rel($rel_id);
 		if($cana>0){
 			if($this->ppagomonto>0){
 				//Crea la NC por Pronto pago
-				$mnumnc = $this->datasis->fprox_numero('nccli');
+				$mnumnc  = $this->datasis->fprox_numero('nccli');
+				$control = $this->datasis->fprox_numero('nsmov');
 
 				$dbdata=array();
 				$dbdata['cod_cli']    = $cliente;
@@ -1891,7 +1958,7 @@ class Smov extends Controller {
 				$dbdata['vence']      = $do->get('fecha');
 				$dbdata['tipo_ref']   = 'AB';
 				$dbdata['num_ref']    = $do->get('numero');
-				$dbdata['observa1']   = 'DESCUENTO POR PRONTO PAGO';
+				$dbdata['observa1']   = 'DESC. P.PAGO EN ABONO QUE '.$concepto;
 				$dbdata['estampa']    = $do->get('estampa');
 				$dbdata['hora']       = $do->get('hora');
 				$dbdata['transac']    = $do->get('transac');
@@ -1899,11 +1966,19 @@ class Smov extends Controller {
 				$dbdata['codigo']     = 'DEPPC';
 				$dbdata['descrip']    = 'DESCUENTO PRONTO PAGO';
 				$dbdata['fecdoc']     = $do->get('fecha');
+				$dbdata['control']    = $control;
 				$dbdata['nroriva']    = '';
 				$dbdata['emiriva']    = '';
 				$dbdata['reten']      = 0;
 				$dbdata['cambio']     = 0;
 				$dbdata['mora']       = 0;
+				$dbdata['montasa']    = $this->ppagodata['montasa'  ];
+				$dbdata['monredu']    = $this->ppagodata['monredu'  ];
+				$dbdata['monadic']    = $this->ppagodata['monadic'  ];
+				$dbdata['tasa']       = $this->ppagodata['tasa'     ];
+				$dbdata['reducida']   = $this->ppagodata['reducida' ];
+				$dbdata['sobretasa']  = $this->ppagodata['sobretasa'];
+				$dbdata['exento']     = $this->ppagodata['exento'   ];
 
 				$mSQL = $this->db->insert_string('smov', $dbdata);
 				$ban=$this->db->simple_query($mSQL);
@@ -1918,7 +1993,6 @@ class Smov extends Controller {
 				$itdbdata['transac']  = $do->get('transac');
 				$itdbdata['usuario']  = $do->get('usuario');
 				$itdbdata['fecha']    = $do->get('fecha');
-				$itdbdata['monto']    = $this->ppagomonto;
 				$itdbdata['reten']    = 0;
 				$itdbdata['cambio']   = 0;
 				$itdbdata['mora']     = 0;
@@ -1931,6 +2005,7 @@ class Smov extends Controller {
 				$numero   = $data['numero'];
 				$fecha    = $data['fecha'];
 				$monto    = $data['abono'];
+				$aplmonto = $data['monto'];
 				$ppago    = (empty($data['ppago']))? 0: $data['ppago'];
 
 				$dbtipo_doc = $this->db->escape($tipo_doc);
@@ -1943,10 +2018,12 @@ class Smov extends Controller {
 				$ban=$this->db->simple_query($mSQL);
 				if($ban==false){ memowrite($mSQL,'ccli'); }
 
-				if($ppago > 0 ){
+				if($ppago > 0){
 					$itdbdata['tipo_doc'] = $tipo_doc;
 					$itdbdata['numero']   = $numero;
 					$itdbdata['abono']    = $ppago;
+					$itdbdata['ppago']    = $ppago;
+					$itdbdata['monto']    = $aplmonto;
 
 					$mSQL = $this->db->insert_string('itccli', $itdbdata);
 					$ban=$this->db->simple_query($mSQL);
@@ -1962,6 +2039,7 @@ class Smov extends Controller {
 			$codbanc  = $do->get_rel($rel,'banco',$i);
 			$dbcodbanc= $this->db->escape($codbanc);
 			$monto    = $do->get_rel($rel,'monto',$i);
+
 			//Si es deposito en banco o transferencia crea el movimiento
 			if($sfpatipo=='DE' || $sfpatipo=='NC'){
 				$sql ='SELECT tbanco,moneda,banco,saldo,depto,numcuent FROM banc WHERE codbanc='.$dbcodbanc;
@@ -1975,19 +2053,22 @@ class Smov extends Controller {
 				$itdbdata['banco']    = $fila['banco'];
 				$itdbdata['saldo']    = $fila['saldo']+$monto;
 				$itdbdata['tipo_op']  = $do->get_rel($rel,'tipo',$i);
-				$itdbdata['numero']   = $do->get_rel($rel,'num_ref',$i);
+				$itdbdata['numero']   = str_pad($do->get_rel($rel,'num_ref',$i), 12,'0', STR_PAD_LEFT);
 				$itdbdata['fecha']    = $ffecha;
 				$itdbdata['clipro']   = 'C';
 				$itdbdata['codcp']    = $cliente;
 				$itdbdata['nombre']   = $do->get('nombre');
 				$itdbdata['monto']    = $monto;
+				$itdbdata['bruto']    = $monto;
 				$itdbdata['concepto'] = 'INGRESO POR COBRANZA';
+				$itdbdata['concep2']  = $concepto;
 				$itdbdata['status']   = 'P';
 				$itdbdata['liable']   = 'S';
 				$itdbdata['transac']  = $do->get('transac');
 				$itdbdata['usuario']  = $do->get('usuario');
 				$itdbdata['estampa']  = $do->get('estampa');
 				$itdbdata['hora']     = $do->get('hora');
+				$itdbdata['negreso']  = $ningreso;
 				$itdbdata['anulado']  = 'N';
 				$mSQL = $this->db->insert_string('bmov', $itdbdata);
 				$ban=$this->db->simple_query($mSQL);
@@ -1997,7 +2078,7 @@ class Smov extends Controller {
 				$this->datasis->actusal($codbanc, $sfecha, $monto);
 			}
 		}
-		logusu('smov',"Cobro a cliente ${numero} creado");
+		logusu('smov',"Cobro a cliente ${tipo_doc}${numero} creado");
 	}
 
 	function _pre_ccli_update($do){
@@ -2070,6 +2151,16 @@ class Smov extends Controller {
 		return true;
 	}
 
+	//Obliga el campo segun el tipo
+	function chobligatipo($val,$tipo){
+		$tipo_doc = $this->input->post('tipo_doc');
+		if($tipo_doc==$tipo && empty($val)){
+			$this->validation->set_message('chobligatipo', "El campo %s es necesario cuando el tipo es ${tipo}");
+			return false;
+		}
+		return true;
+	}
+
 	function chabono($monto,$i){
 		$tipo   = $this->input->post('tipo_doc_'.$i);
 		$ppago  = $this->input->post('ppago_'.$i);
@@ -2118,13 +2209,23 @@ class Smov extends Controller {
 		$id  = $this->uri->segment($this->uri->total_segments());
 		$dbid= $this->db->escape($id);
 
-		$row = $this->datasis->damereg("SELECT cod_cli, tipo_doc, numero, estampa, transac FROM smov WHERE id=${dbid}");
+		$row = $this->datasis->damerow("SELECT cod_cli, tipo_doc, numero, estampa, transac FROM smov WHERE id=${dbid}");
+		if(empty($row)){
+			echo 'Registro no encontrado';
+			return '';
+		}
 
 		$transac   = $row['transac'];
 		$cod_cli   = $row['cod_cli'];
 		$numero    = $row['numero'];
 		$tipo_doc  = $row['tipo_doc'];
 		$estampa   = $row['estampa'];
+
+		if(empty($transac)){
+			echo 'Movimiento sin relaciones.';
+			return '';
+		}
+
 		$dbtipo_doc= $this->db->escape($tipo_doc);
 		$dbnumero  = $this->db->escape($numero);
 		$dbtiponum = $this->db->escape($tipo_doc.$numero);

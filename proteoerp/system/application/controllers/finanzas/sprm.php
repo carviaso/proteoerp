@@ -1804,6 +1804,12 @@ class Sprm extends Controller {
 		$edit->observa2->style='width:100%;';
 		$edit->observa2->when=array('show');
 
+		$edit->depto = new  dropdownField('Asignar a departamento', 'depto');
+		$edit->depto->option('','Seleccionar');
+		$edit->depto->options('SELECT depto,CONCAT_WS(\'-\',depto,TRIM(descrip)) AS descrip FROM dpto WHERE tipo=\'G\' ORDER BY descrip');
+		$edit->depto->style='width:180px;';
+		$edit->depto->rule ='condi_required|callback_chdepto';
+
 		$edit->usuario = new autoUpdateField('usuario' ,$this->secu->usuario(),$this->secu->usuario());
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
@@ -1974,6 +1980,15 @@ class Sprm extends Controller {
 		}
 	}
 
+	function chdepto($dpto){
+		$tipo  = $this->input->post('tipo_doc');
+		if($tipo=='NC' && empty($dpto)){
+			$this->validation->set_message('chdepto', 'El campo %s es necesario para las notas de credito.');
+			return false;
+		}
+		return true;
+	}
+
 	function chtipoop($val){
 		$banco  = $this->input->post('banco');
 		$dbbanco= $this->db->escape($banco);
@@ -2013,6 +2028,17 @@ class Sprm extends Controller {
 		$dbcod_prv= $this->db->escape($cod_prv);
 		$tipo_op  = $do->get('tipo_op');
 		$fecha    = $do->get('fecha');
+		$codigo   = $do->get('codigo');
+		$this->ppagodata=$ivadata=array(
+			'montasa'  =>0,
+			'monredu'  =>0,
+			'monadic'  =>0,
+			'tasa'     =>0,
+			'reducida' =>0,
+			'sobretasa'=>0,
+			'exento'   =>0
+		);
+
 
 		$ppago=$totalab=$impuesto=$ppimpuesto=0;
 		//Totaliza el abonado
@@ -2031,7 +2057,7 @@ class Sprm extends Controller {
 				$dbittipo   = $this->db->escape($ittipo);
 				$dbitnumero = $this->db->escape($itnumero);
 
-				$rrow=$this->datasis->damerow("SELECT impuesto,monto FROM sprm WHERE cod_prv=${dbcod_prv} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}");
+				$rrow=$this->datasis->damerow("SELECT impuesto,monto,montasa,monredu,monadic,tasa,reducida,sobretasa,exento FROM sprm WHERE cod_prv=${dbcod_prv} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}");
 				if(empty($rrow)){
 					$do->error_message_ar['pre_ins']='Efecto inexistente '.$ittipo.$itnumero;
 					return false;
@@ -2039,12 +2065,30 @@ class Sprm extends Controller {
 				$itimpuesto = floatval($rrow['impuesto']);
 				$itmonto    = floatval($rrow['monto']);
 
+				if($tipo_doc=='NC'){
+					$ivadata['montasa'  ]= floatval($rrow['montasa'  ])*$itabono/$itmonto;
+					$ivadata['monredu'  ]= floatval($rrow['monredu'  ])*$itabono/$itmonto;
+					$ivadata['monadic'  ]= floatval($rrow['monadic'  ])*$itabono/$itmonto;
+					$ivadata['tasa'     ]= floatval($rrow['tasa'     ])*$itabono/$itmonto;
+					$ivadata['reducida' ]= floatval($rrow['reducida' ])*$itabono/$itmonto;
+					$ivadata['sobretasa']= floatval($rrow['sobretasa'])*$itabono/$itmonto;
+					$ivadata['exento'   ]= floatval($rrow['exento'   ])*$itabono/$itmonto;
+				}
+
 				if(empty($itpppago)){
 					$do->set_rel($rel,'ppago',0,$i);
 					$itpppago=0;
 				}else{
 					$ppago     += $do->get_rel($rel, 'ppago', $i);
 					$ppimpuesto+= round($itpppago*$itimpuesto/$itmonto,2);
+
+					$this->ppagodata['montasa'  ]= floatval($rrow['montasa'  ])*$itpppago/$itmonto;
+					$this->ppagodata['monredu'  ]= floatval($rrow['monredu'  ])*$itpppago/$itmonto;
+					$this->ppagodata['monadic'  ]= floatval($rrow['monadic'  ])*$itpppago/$itmonto;
+					$this->ppagodata['tasa'     ]= floatval($rrow['tasa'     ])*$itpppago/$itmonto;
+					$this->ppagodata['reducida' ]= floatval($rrow['reducida' ])*$itpppago/$itmonto;
+					$this->ppagodata['sobretasa']= floatval($rrow['sobretasa'])*$itpppago/$itmonto;
+					$this->ppagodata['exento'   ]= floatval($rrow['exento'   ])*$itpppago/$itmonto;
 				}
 
 				$impuesto  += round(($itabono-$itpppago)*$itimpuesto/$itmonto,2);
@@ -2070,6 +2114,8 @@ class Sprm extends Controller {
 				$do->error_message_ar['pre_ins']='Un anticipo no puede estar relacionado con algun efecto, en tal caso seria un abono';
 				return false;
 			}
+			$totalab= $do->get('monto');
+			$ppago  = 0;
 		}
 		//Fin de las validaciones
 
@@ -2124,7 +2170,6 @@ class Sprm extends Controller {
 		}
 
 		$do->set('vence'   , $fecha);
-		$do->set('posdata' , $fecha);
 		$do->set('negreso' , $mnroegre);
 		$do->set('ndebito' , $mndebito);
 		$do->set('monto'   , $totalab-$ppago);
@@ -2137,8 +2182,17 @@ class Sprm extends Controller {
 		$do->set('nfiscal' , '') ;
 		$do->set('mora'    , 0 );
 		$do->set('comprob' , '');
-		$do->set('abonos'  , $totalab-$ppago);
-		$do->set('transac' , $transac);
+		if($tipo_doc=='AB' || $tipo_doc='NC'){
+			$do->set('abonos'  , $totalab-$ppago);
+		}else{
+			$do->set('abonos'  , 0);
+		}
+		$do->set('transac', $transac);
+		$do->set('numche' , str_pad($do->get('numche'), 12,'0', STR_PAD_LEFT));
+		if(!empty($codigo)){
+			$dbcodigo = $this->db->escape($codigo);
+			$do->set('descrip' ,$this->datasis->dameval("SELECT TRIM(nombre) AS val FROM botr WHERE codigo=${dbcodigo}"));
+		}
 
 		return true;
 	}
@@ -2166,7 +2220,7 @@ class Sprm extends Controller {
 		$tipo_op = $do->get('tipo_op');
 		$banco   = $do->get('banco');
 		$benefi  = $do->get('benefi');
-		$totalab = $do->get('abonos');
+		$totalab = $do->get('monto');
 		$impuesto= $do->get('impuesto');
 		$numche  = $do->get('numche');
 		$observa1= $do->get('observa1');
@@ -2202,7 +2256,7 @@ class Sprm extends Controller {
 		$data['codbanc']  = $banco;
 		$data['numcuent'] = trim($bdata['numcuent']);
 		$data['banco']    = trim($bdata['banco']);
-		$data['saldo']    = $bdata['saldo'];
+		$data['saldo']    = $bdata['saldo']-$totalab;
 		$data['fecha']    = $fecha;
 		$data['tipo_op']  = $tipo_op;
 		$data['numero']   = $numche;

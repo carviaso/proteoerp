@@ -16,31 +16,9 @@ $dbproveed=$this->db->escape($form->cod_prv->value);
 $nomprv=$this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed=${dbproveed}");
 
 if($form->getstatus()!='show'){
-
-	//$sfpa_campos=$form->template_details('sfpa');
-	//$sfpa_scampos  ='<tr id="tr_sfpa_<#i#>">';
-	//$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['tipo']['field'].  '</td>';
-	//$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['sfpafecha']['field'].  '</td>';
-	//$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['numref']['field'].'</td>';
-	//$sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['banco']['field']. '</td>';
-	//$sfpa_scampos .='<td class="littletablerow" align="right">'.$sfpa_campos['itmonto']['field'].'</td>';
-	//$sfpa_scampos .='<td class="littletablerow"><a href=# onclick="del_sfpa(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
-	//$sfpa_campos=$form->js_escape($sfpa_scampos);
-    //
-	$sfpade=$sfpach="<option value=''>Ninguno</option>";
-	$mSQL="SELECT cod_banc,nomb_banc FROM tban WHERE cod_banc<>'CAJ'";
-	$query = $this->db->query($mSQL);
-	foreach ($query->result() as $row){
-		$sfpach.="<option value='".trim($row->cod_banc)."'>".trim($row->nomb_banc)."</option>";
-	}
-	$mSQL="SELECT codbanc AS cod_banc,CONCAT_WS(' ',TRIM(banco),numcuent) AS nomb_banc FROM banc WHERE tbanco <> 'CAJ' ORDER BY nomb_banc";
-	$query = $this->db->query($mSQL);
-	foreach ($query->result() as $row){
-		$sfpade.="<option value='".trim($row->cod_banc)."'>".trim($row->nomb_banc)."</option>";
-	}
 ?>
 <script type="text/javascript">
-var sfpa_cont=0<?php //echo $form->max_rel_count['sfpa'];?>;
+
 $(function() {
 	$(".inputnum").numeric(".");
 	$('input[name^="abono_"]').keyup(function(){
@@ -56,7 +34,7 @@ $(function() {
 	});
 
 	$('#fecha').datepicker({ dateFormat: "dd/mm/yy" });
-	$('input[name^="sfpafecha_"]').datepicker({ dateFormat: "dd/mm/yy" });
+	$('#posdata').datepicker({ dateFormat: "dd/mm/yy" });
 	chtipodoc();
 });
 
@@ -69,18 +47,26 @@ function chtipodoc(){
 		$('input[name^="ppago_"]').val('');
 		$('input[name^="ppago_"]').hide('');
 		$('#ppagotit').hide();
-
+		$('#monto_val').show();
+		$('#monto').attr('type','hidden');
+		$('#trdpto').hide();
 	}else if(tipo=='AN'){
 		$('#aplefectos').hide();
 		$('input[name^="abono_"]').val("");
 		$('input[name^="ppago_"]').val("");
-		 totaliza();
+		totaliza();
 		$('#aplpago').show();
+		$('#monto_val').hide();
+		$('#monto').attr('type','text');
+		$('#trdpto').show();
 	}else{
 		$('#aplefectos').show();
 		$('#aplpago').show();
 		$('input[name^="ppago_"]').show('');
 		$('#ppagotit').show();
+		$('#monto_val').show();
+		$('#monto').attr('type','hidden');
+		$('#trdpto').hide();
 	}
 }
 
@@ -115,6 +101,8 @@ function totaliza(){
 	$('#monto_val').text(nformat(stota-sppago ,2));
 	if(stota>0){
 		$("#observa1").val(mascara);
+	}else{
+		$("#observa1").val('');
 	}
 }
 
@@ -148,12 +136,13 @@ echo $title;
 ?>
 <table align='center' width="100%">
 	<tr>
-		<td colspan='3'><?php echo $form->numero->value.$form->cod_prv->output ?></td>
+		<td colspan='4'><?php echo $form->numero->value.$form->cod_prv->output ?></td>
 		<td align=right><?php echo $container_tr;?></td>
 	</tr>
 	<tr>
 		<td><?php echo $form->tipo_doc->label;  ?></td>
 		<td><?php echo $form->tipo_doc->output; ?></td>
+		<td><span id='trdpto'><b><?php echo $form->depto->label; ?></b> <?php echo $form->depto->output; ?></span></td>
 		<td><?php echo $form->fecha->label;    ?></td>
 		<td><?php echo $form->fecha->output;   ?></td>
 	</tr>
@@ -200,11 +189,12 @@ echo $title;
 	</tr>
 	<?php } ?>
 	</tbody>
+</table>
+<table width="100%">
 	<tfoot>
 	<tr>
-		<td colspan='6' align="right" style='font-size: 1.6em;'><b><?php echo $form->monto->label; ?></b></td>
+		<td align="right" style='font-size: 1.6em;'><b><?php echo $form->monto->label; ?></b></td>
 		<td align="right" style='font-size: 1.6em;font-weight: bold;'><?php echo $form->monto->output; ?></td>
-		<td align="right"></td>
 	</tr>
 	</tfoot>
 </table>
