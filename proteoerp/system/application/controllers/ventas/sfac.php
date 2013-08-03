@@ -4025,6 +4025,10 @@ class Sfac extends Controller {
 	function instalar(){
 		$campos = $this->db->list_fields('sfac');
 
+		if(!in_array('freiva'  ,$campos)){
+			$this->db->query("ALTER TABLE sfac ADD freiva DATE AFTER freiva");
+		}
+
 		if(!in_array('ereiva'  ,$campos)){
 			$this->db->query("ALTER TABLE sfac ADD ereiva DATE AFTER freiva");
 		}
