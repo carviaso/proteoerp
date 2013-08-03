@@ -14,110 +14,7 @@ class Sinv extends Controller {
 	}
 
 	function index(){
-		$campos=$this->db->list_fields('sinv');
-		if(!$this->datasis->iscampo('barraspos','id') ){
-			$this->db->simple_query('ALTER TABLE barraspos DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE barraspos ADD UNIQUE INDEX codigo (codigo, suplemen)');
-			$this->db->simple_query('ALTER TABLE barraspos ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
-
-		if(!$this->datasis->iscampo('formatos','tcpdf') ) {
-			$this->db->simple_query('ALTER TABLE formatos ADD COLUMN tcpdf TEXT NULL COMMENT "Formas TCPDF"');
-		};
-
-		if(!in_array('url',$campos)) {
-			$this->db->simple_query('ALTER TABLE sinv ADD COLUMN url VARCHAR(200) NULL COMMENT "Pagina Web"');
-		};
-
-		if(!in_array('ficha',$campos)) {
-			$this->db->simple_query('ALTER TABLE sinv ADD COLUMN ficha TEXT NULL COMMENT "Ficha Tecnica"');
-		};
-
-		if(!in_array('maxven',$campos)) {
-			$this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `maxven` INT(10) NULL DEFAULT '0' COMMENT 'Maximo de venta', ADD COLUMN `minven` INT(10) NULL DEFAULT '0' COMMENT 'Minimo de venta' AFTER `maxven`");
-		};
-
-		if(!in_array('premin',$campos)) {
-			$mSQL="ALTER TABLE sinv ADD COLUMN premin CHAR(1) NULL DEFAULT '0' COMMENT 'Precio Minimo de Venta' ";
-			$this->db->query($mSQL);
-		}
-
-		if(!in_array('vnega',$campos)) {
-			$mSQL="ALTER TABLE sinv ADD COLUMN vnega CHAR(1) NULL DEFAULT 'S' COMMENT 'Permitir Venta Negativa' ";
-			$this->db->query($mSQL);
-		}
-
-
-		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
-			if (!in_array('mpps',       $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `mpps`        VARCHAR(20) NULL  COMMENT 'Numero de Ministerior de Salud'");
-			if (!in_array('cpe',        $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpe`         VARCHAR(20) NULL  COMMENT 'Registro de CPE'");
-			if (!in_array('dcomercial', $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `dcomercial`  INT(6)     NULL  COMMENT 'Destino Comercial'");
-			if (!in_array('rubro',      $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `rubro`       INT(6)     NULL  COMMENT 'Rubro'");
-			if (!in_array('subrubro',   $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `subrubro`    INT(6)     NULL  COMMENT 'Sub Rubro'");
-			if (!in_array('cunidad',    $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cunidad`     INT(6)     NULL  COMMENT 'Unidad de Medida'");
-			if (!in_array('cmarca',     $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cmarca`      INT(6)     NULL  COMMENT 'Marca'");
-			if (!in_array('cmaterial',  $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cmaterial`   INT(6)     NULL  COMMENT 'Material'");
-			if (!in_array('cpresenta',  $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cforma`      INT(6)     NULL  COMMENT 'Forma o Presentacion'");
-			if (!in_array('cpactivo',   $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpactivo`    INT(6)     NULL  COMMENT 'Principio Activo'");
-		}
-
-		// Arregla Otros Menus
-		$this->db->query("UPDATE tmenus SET proteo='consulta'    WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVANAL%' ");
-		$this->db->query("UPDATE tmenus SET proteo='recalcular'  WHERE modulo='SINVOTR' AND ejecutar LIKE 'RECALCU%' ");
-		$this->db->query("UPDATE tmenus SET proteo='redondear'   WHERE modulo='SINVOTR' AND ejecutar LIKE 'REDOPRES%' ");
-		$this->db->query("UPDATE tmenus SET proteo='sinvcodigo'  WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVCODIGO%' ");
-		$this->db->query("UPDATE tmenus SET proteo='cambiaubica' WHERE modulo='SINVOTR' AND ejecutar LIKE 'CAMBIAUBICA%' ");
-		$this->db->query("UPDATE tmenus SET proteo='auprec'      WHERE modulo='SINVOTR' AND ejecutar LIKE 'AUPREC%' ");
-		$this->db->query("UPDATE tmenus SET proteo='verfotos'    WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVFOTO%' ");
-		$this->db->query("UPDATE tmenus SET proteo='etiquetas'   WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVETIQ%' ");
-
-
-		if ( $this->datasis->dameval('SELECT COUNT(*) FROM tmenus WHERE modulo="SINVOTR" AND proteo="cambiva" ') == 0 ){
-			//crea elmodulo en tmenus
-			$mSQL  = "INSERT INTO tmenus SET modulo='SINVOTR',  secu=17, titulo='Cambiar IVA', mensaje='Cambiar el IVA', ejecutar='', proteo='cambiva' ";
-			$this->db->query($mSQL);
-		}
-
-		if ( !$this->datasis->istabla('sinvalub') ) {
-			$mSQL = "CREATE TABLE sinvalub (
-					codigo VARCHAR(15) NOT NULL DEFAULT '',
-					alma   VARCHAR(4)  NOT NULL DEFAULT '',
-					ubica  VARCHAR(12) NULL DEFAULT NULL,
-					PRIMARY KEY (codigo, alma)
-					)
-					COLLATE='latin1_swedish_ci' ENGINE=MyISAM";
-			$this->db->query($mSQL);
-		}
-
-		if ( !$this->datasis->istabla('sinvpa') ) {
-			$mSQL = "CREATE TABLE sinvpa (
-					codigo CHAR(15) NOT NULL DEFAULT '',
-					pactivo INT(11) NOT NULL,
-					id INT(11) NOT NULL AUTO_INCREMENT,
-					PRIMARY KEY (`id`),
-					UNIQUE INDEX `codigo` (`codigo`, `pactivo`)
-					)
-					COLLATE='latin1_swedish_ci'
-					ENGINE=MyISAM";
-			$this->db->query($mSQL);
-		}
-
-
-		if ( !$this->datasis->istabla('pactivo') ) {
-			$mSQL = "CREATE TABLE pactivo (
-					id INT(11) NOT NULL AUTO_INCREMENT,
-					nombre VARCHAR(250) NULL DEFAULT NULL,
-					PRIMARY KEY (`id`),
-					UNIQUE INDEX `nombre` (`nombre`)
-					)
-					COMMENT='Principios Activos'
-					COLLATE='latin1_swedish_ci'
-					ENGINE=MyISAM";
-			$this->db->query($mSQL);
-		}
-
-
-		$this->db->query("INSERT IGNORE INTO sinvalub SELECT a.codigo, b.ubica, a.ubica FROM sinv a JOIN caub b WHERE MID(a.tipo,1,1) <> 'S' AND b.gasto='N' ");
+		$this->instalar()[
 		$this->datasis->modintramenu( 950, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -5834,6 +5731,104 @@ class Sinv extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
+		if(!$this->datasis->iscampo('formatos','tcpdf') ) {
+			$this->db->simple_query('ALTER TABLE formatos ADD COLUMN tcpdf TEXT NULL COMMENT "Formas TCPDF"');
+		};
+
+		if(!in_array('url',$campos)) {
+			$this->db->simple_query('ALTER TABLE sinv ADD COLUMN url VARCHAR(200) NULL COMMENT "Pagina Web"');
+		};
+
+		if(!in_array('ficha',$campos)) {
+			$this->db->simple_query('ALTER TABLE sinv ADD COLUMN ficha TEXT NULL COMMENT "Ficha Tecnica"');
+		};
+
+		if(!in_array('maxven',$campos)) {
+			$this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `maxven` INT(10) NULL DEFAULT '0' COMMENT 'Maximo de venta', ADD COLUMN `minven` INT(10) NULL DEFAULT '0' COMMENT 'Minimo de venta' AFTER `maxven`");
+		};
+
+		if(!in_array('premin',$campos)) {
+			$mSQL="ALTER TABLE sinv ADD COLUMN premin CHAR(1) NULL DEFAULT '0' COMMENT 'Precio Minimo de Venta' ";
+			$this->db->query($mSQL);
+		}
+
+		if(!in_array('vnega',$campos)) {
+			$mSQL="ALTER TABLE sinv ADD COLUMN vnega CHAR(1) NULL DEFAULT 'S' COMMENT 'Permitir Venta Negativa' ";
+			$this->db->query($mSQL);
+		}
+
+
+		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
+			if (!in_array('mpps',       $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `mpps`        VARCHAR(20) NULL  COMMENT 'Numero de Ministerior de Salud'");
+			if (!in_array('cpe',        $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpe`         VARCHAR(20) NULL  COMMENT 'Registro de CPE'");
+			if (!in_array('dcomercial', $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `dcomercial`  INT(6)     NULL  COMMENT 'Destino Comercial'");
+			if (!in_array('rubro',      $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `rubro`       INT(6)     NULL  COMMENT 'Rubro'");
+			if (!in_array('subrubro',   $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `subrubro`    INT(6)     NULL  COMMENT 'Sub Rubro'");
+			if (!in_array('cunidad',    $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cunidad`     INT(6)     NULL  COMMENT 'Unidad de Medida'");
+			if (!in_array('cmarca',     $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cmarca`      INT(6)     NULL  COMMENT 'Marca'");
+			if (!in_array('cmaterial',  $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cmaterial`   INT(6)     NULL  COMMENT 'Material'");
+			if (!in_array('cpresenta',  $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cforma`      INT(6)     NULL  COMMENT 'Forma o Presentacion'");
+			if (!in_array('cpactivo',   $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpactivo`    INT(6)     NULL  COMMENT 'Principio Activo'");
+		}
+
+		// Arregla Otros Menus
+		$this->db->query("UPDATE tmenus SET proteo='consulta'    WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVANAL%' ");
+		$this->db->query("UPDATE tmenus SET proteo='recalcular'  WHERE modulo='SINVOTR' AND ejecutar LIKE 'RECALCU%' ");
+		$this->db->query("UPDATE tmenus SET proteo='redondear'   WHERE modulo='SINVOTR' AND ejecutar LIKE 'REDOPRES%' ");
+		$this->db->query("UPDATE tmenus SET proteo='sinvcodigo'  WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVCODIGO%' ");
+		$this->db->query("UPDATE tmenus SET proteo='cambiaubica' WHERE modulo='SINVOTR' AND ejecutar LIKE 'CAMBIAUBICA%' ");
+		$this->db->query("UPDATE tmenus SET proteo='auprec'      WHERE modulo='SINVOTR' AND ejecutar LIKE 'AUPREC%' ");
+		$this->db->query("UPDATE tmenus SET proteo='verfotos'    WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVFOTO%' ");
+		$this->db->query("UPDATE tmenus SET proteo='etiquetas'   WHERE modulo='SINVOTR' AND ejecutar LIKE 'SINVETIQ%' ");
+
+
+		if ( $this->datasis->dameval('SELECT COUNT(*) FROM tmenus WHERE modulo="SINVOTR" AND proteo="cambiva" ') == 0 ){
+			//crea elmodulo en tmenus
+			$mSQL  = "INSERT INTO tmenus SET modulo='SINVOTR',  secu=17, titulo='Cambiar IVA', mensaje='Cambiar el IVA', ejecutar='', proteo='cambiva' ";
+			$this->db->query($mSQL);
+		}
+
+		if ( !$this->datasis->istabla('sinvalub') ) {
+			$mSQL = "CREATE TABLE sinvalub (
+					codigo VARCHAR(15) NOT NULL DEFAULT '',
+					alma   VARCHAR(4)  NOT NULL DEFAULT '',
+					ubica  VARCHAR(12) NULL DEFAULT NULL,
+					PRIMARY KEY (codigo, alma)
+					)
+					COLLATE='latin1_swedish_ci' ENGINE=MyISAM";
+			$this->db->query($mSQL);
+		}
+
+		if ( !$this->datasis->istabla('sinvpa') ) {
+			$mSQL = "CREATE TABLE sinvpa (
+					codigo CHAR(15) NOT NULL DEFAULT '',
+					pactivo INT(11) NOT NULL,
+					id INT(11) NOT NULL AUTO_INCREMENT,
+					PRIMARY KEY (`id`),
+					UNIQUE INDEX `codigo` (`codigo`, `pactivo`)
+					)
+					COLLATE='latin1_swedish_ci'
+					ENGINE=MyISAM";
+			$this->db->query($mSQL);
+		}
+
+
+		if ( !$this->datasis->istabla('pactivo') ) {
+			$mSQL = "CREATE TABLE pactivo (
+					id INT(11) NOT NULL AUTO_INCREMENT,
+					nombre VARCHAR(250) NULL DEFAULT NULL,
+					PRIMARY KEY (`id`),
+					UNIQUE INDEX `nombre` (`nombre`)
+					)
+					COMMENT='Principios Activos'
+					COLLATE='latin1_swedish_ci'
+					ENGINE=MyISAM";
+			$this->db->query($mSQL);
+		}
+
+		$this->db->query("INSERT IGNORE INTO sinvalub SELECT a.codigo, b.ubica, a.ubica FROM sinv a JOIN caub b WHERE MID(a.tipo,1,1) <> 'S' AND b.gasto='N' ");
+
+
 		if (!in_array('alto'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN alto          DECIMAL(10,2)");
 		if (!in_array('ancho'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN ancho         DECIMAL(10,2)");
 		if (!in_array('largo'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN largo         DECIMAL(10,2)");
@@ -5963,27 +5958,27 @@ class Sinv extends Controller {
 		}
 
 		if(!$this->db->table_exists('sinvprov')){
-			$mSQL="CREATE TABLE `sinvprov` (
-				`proveed` CHAR(5) NOT NULL DEFAULT '',
-				`codigop` CHAR(15) NOT NULL DEFAULT '',
-				`codigo` CHAR(15) NOT NULL DEFAULT '',
-				PRIMARY KEY (`proveed`, `codigop`, `codigo`)
-			)
-			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM";
+			$mSQL="
+			CREATE TABLE sinvprov (proveed CHAR(5) NOT NULL DEFAULT '',
+				codigop CHAR(15) NOT NULL DEFAULT '', codigo CHAR(15) NOT NULL DEFAULT '',
+				PRIMARY KEY (`proveed`, `codigop`, `codigo`))
+			COLLATE='latin1_swedish_ci' ENGINE=MyISAM";
 		}
 
 		if(!$this->db->table_exists('barraspos')){
-			$query="CREATE TABLE `barraspos` (
-				`codigo` CHAR(15) NOT NULL DEFAULT '',
-				`suplemen` CHAR(15) NOT NULL DEFAULT '',
-				PRIMARY KEY (`codigo`, `suplemen`)
-			)
-			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM
-			ROW_FORMAT=DEFAULT";
+			$query="
+			CREATE TABLE barraspos (codigo CHAR(15) NOT NULL DEFAULT '',
+				suplemen CHAR(15) NOT NULL DEFAULT '', id INT(11) NOT NULL AUTOINCREMENT,
+				PRIMARY KEY (id),UNIQUE INDEX codigo (codigo, suplemen)	)
+			COLLATE='latin1_swedish_ci' ENGINE=MyISAM ROW_FORMAT=DEFAULT";
 			$this->db->simple_query($query);
 		}
+
+		if(!$this->datasis->iscampo('barraspos','id') ){
+			$this->db->query('ALTER TABLE barraspos DROP PRIMARY KEY');
+			$this->db->query('ALTER TABLE barraspos ADD UNIQUE INDEX codigo (codigo, suplemen)');
+			$this->db->query('ALTER TABLE barraspos ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};
 
 		if(!$this->db->table_exists('invfelr')){
 			$query="CREATE TABLE `invfelr` (
@@ -6004,6 +5999,8 @@ class Sinv extends Controller {
 			ROW_FORMAT=DEFAULT";
 			$this->db->simple_query($query);
 		}
+
+
 	}
 
 }
