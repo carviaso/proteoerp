@@ -14,7 +14,7 @@ class Sinv extends Controller {
 	}
 
 	function index(){
-		$this->instalar()[
+		$this->instalar();
 		$this->datasis->modintramenu( 950, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
