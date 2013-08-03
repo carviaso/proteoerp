@@ -5969,9 +5969,9 @@ class Sinv extends Controller {
 			$query="
 			CREATE TABLE barraspos (codigo CHAR(15) NOT NULL DEFAULT '',
 				suplemen CHAR(15) NOT NULL DEFAULT '', id INT(11) NOT NULL AUTOINCREMENT,
-				PRIMARY KEY (id),UNIQUE INDEX codigo (codigo, suplemen)	)
+				PRIMARY KEY (id), UNIQUE INDEX codigo (codigo, suplemen))
 			COLLATE='latin1_swedish_ci' ENGINE=MyISAM ROW_FORMAT=DEFAULT";
-			$this->db->simple_query($query);
+			$this->db->query($query);
 		}
 
 		if(!$this->datasis->iscampo('barraspos','id') ){
