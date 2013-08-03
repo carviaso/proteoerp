@@ -5926,8 +5926,7 @@ class Sinv extends Controller {
 			)
 			COMMENT='Acciones de la Orden de Produccion'
 			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM
-			AUTO_INCREMENT=1";
+			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
 
@@ -5952,8 +5951,7 @@ class Sinv extends Controller {
 				UNIQUE INDEX `vendedor` (`estacion`)
 			)
 			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM
-			AUTO_INCREMENT=1";
+			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
 
@@ -5962,7 +5960,8 @@ class Sinv extends Controller {
 			CREATE TABLE sinvprov (proveed CHAR(5) NOT NULL DEFAULT '',
 				codigop CHAR(15) NOT NULL DEFAULT '', codigo CHAR(15) NOT NULL DEFAULT '',
 				PRIMARY KEY (`proveed`, `codigop`, `codigo`))
-			COLLATE='latin1_swedish_ci' ENGINE=MyISAM";
+			COLLATE='latin1_swedish_ci' 
+			ENGINE=MyISAM";
 		}
 
 		if(!$this->db->table_exists('barraspos')){
@@ -5970,7 +5969,8 @@ class Sinv extends Controller {
 			CREATE TABLE barraspos (codigo CHAR(15) NOT NULL DEFAULT '',
 				suplemen CHAR(15) NOT NULL DEFAULT '', id INT(11) NOT NULL AUTOINCREMENT,
 				PRIMARY KEY (id), UNIQUE INDEX codigo (codigo, suplemen))
-			COLLATE='latin1_swedish_ci' ENGINE=MyISAM ROW_FORMAT=DEFAULT";
+			COLLATE='latin1_swedish_ci' 
+			ENGINE=MyISAM ";
 			$this->db->query($query);
 		}
 
