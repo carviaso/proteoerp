@@ -35,11 +35,11 @@ class Pretab extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'genepre',  'img'=>'images/engrana.png',       'alt'=>'Genera Prenomina',      'label'=>'Genera Prenomina',      'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'respalda', 'img'=>'images/database_link.png', 'alt'=>'Respaldar Prenominas',  'label'=>'Respaldar/Recuperar',   'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'irecibos', 'img'=>'assets/default/images/print.png',       'alt'=>'Imprimir Recibos',      'label'=>'Imprimir Recibos',      'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'genenom',  'img'=>'images/databaseadd.png',   'alt'=>'Guardar la Pre-Nomina', 'label'=>'Guardar la Pre-Nomina', 'tema'=>'anexos'));
-		$grid->wbotonadd(array("id"=>"regene",   "img"=>"images/repara.png",        'alt'=>'Regenerar Pre Nomina',  'label'=>'Regenerar Pre Nomina',  'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'genepre',  'img'=>'images/engrana.png',              'alt'=>'Genera Prenomina',      'label'=>'Genera Prenomina',      'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'respalda', 'img'=>'images/database_link.png',        'alt'=>'Respaldar Prenominas',  'label'=>'Respaldar/Recuperar',   'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'irecibos', 'img'=>'assets/default/images/print.png', 'alt'=>'Imprimir Recibos',      'label'=>'Imprimir Recibos',      'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'genenom',  'img'=>'images/databaseadd.png',          'alt'=>'Guardar la Pre-Nomina', 'label'=>'Guardar la Pre-Nomina', 'tema'=>'anexos'));
+		$grid->wbotonadd(array("id"=>"regene",   "img"=>"images/repara.png",               'alt'=>'Regenerar Pre Nomina',  'label'=>'Regenerar Pre Nomina',  'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -68,9 +68,7 @@ class Pretab extends Controller {
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
 
-
 		// Prepara Prenomina
-
 		$noco = $this->datasis->llenaopciones("SELECT codigo, CONCAT(codigo,' ', tipo, ' ', nombre) FROM noco ORDER BY codigo", false, 'mcontrato');
 		$noco = str_replace('"',"'",$noco);
 
@@ -156,9 +154,6 @@ class Pretab extends Controller {
 			$.prompt(mrege);
 			
 		});';
-
-
-
 
 		// Guarda Nomina
 		$bodyscript .= '
@@ -445,6 +440,7 @@ class Pretab extends Controller {
 	//  Recibo de Nomina
 	//
 	function recibo( $id) {
+		$this->load->library('pnomina');
 
 		$row = $this->datasis->damereg("SELECT a.codigo, a.nombre, CONCAT(b.nacional,b.cedula) ci, b.enlace FROM pretab a JOIN pers b ON a.codigo=b.codigo WHERE a.id=$id");
 		$codigo  = $row['codigo'];
@@ -500,12 +496,11 @@ class Pretab extends Controller {
 				}
 				$salida .= "<tr style='background:#BAF202;'><td>Neto a Pagar</td><td align='right' colspan='2'>".nformat($total-$mSALDO)."</td></tr>\n";
 				$salida .= "</table>\n";
-
 			}
-
 		}
-
-
+		$this->pnomina->CODIGO = $codigo;
+		$anti = $this->pnomina->ANTIGUEDAD();
+		$salida .= "<center>Atiguedad ".$anti[0].' A&ntilde;os '.$anti[1].' Meses '.$anti[2]." Dias</center>";
 
 		echo $salida;
 	}

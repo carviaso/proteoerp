@@ -94,11 +94,17 @@ class fnomina {
 		return $SUELDOA;
 	}
 
-	function ANTIGUEDAD($mHASTA){
-		$CODIGO=$this->ci->db->escape($this->CODIGO);
-		$mDESDE  = $this->ci->datasis->dameval("SELECT inicio FROM pers WHERE codigo=$CODIGO");
-		//if (empty($mHASTA)) $mHASTA = date();
-		//return { mANOS, mMES, mDIAS };
+	function ANTIGUEDAD( $mHASTA = '' ){
+		$CODIGO = $this->ci->db->escape($this->CODIGO);
+		$mDESDE = $this->ci->datasis->dameval("SELECT ingreso FROM pers WHERE codigo=$CODIGO");
+		if ( $mHASTA == '' ) $mHASTA = date('Y-m-d');
+
+		$desde = new DateTime($mDESDE);
+		$hasta = new DateTime($mHASTA);
+		$anti  = $desde->diff($hasta);
+		memowrite('Antiguedad: Ano='.$anti->format('%y').' Mes='.$anti->format('%m').' dia='.$anti->format('%d'),'Antiguedad');
+		
+		return array( $anti->format('%y'), $anti->format('%m'), $anti->format('%d') );
 	}
 
 	function TRAESALDO($mmCONC){
@@ -110,7 +116,32 @@ class fnomina {
 	}
 
 	function TABUSCA($par){
-		return 1;
+		$CODIGO   = $this->ci->db->escape($this->CODIGO);
+		$mREG     = $this->ANTIGUEDAD();
+		$XTRABAJA = $this->ci->datasis->dameval("SELECT trabaja FROM prenom LIMIT 1");
+		$mTABLA   = $this->NOTABU( $XTRABAJA, $mREG[0], $mREG[1], $mREG[2] );
+
+		if ( strtoupper($par) == "PREAVISO"   ) $mVALOR = $mTABLA[0];
+		if ( strtoupper($par) == "VACACIONES" ) $mVALOR = $mTABLA[1];
+		if ( strtoupper($par) == "BONOVACA"   ) $mVALOR = $mTABLA[2];
+		if ( strtoupper($par) == "ANTIGUEDAD" ) $mVALOR = $mTABLA[3];
+		if ( strtoupper($par) == "UTILIDADES" ) $mVALOR = $mTABLA[4];
+
+		return $mVALOR;
+	}
+
+	//************************************
+	//  BUSCA EN TABLA
+	//
+	function NOTABU( $mCONTRATO, $mANO, $mMES, $mDIA ){
+		//                1          2         3           4          5
+		$mSQL  = "SELECT preaviso, vacacion, bonovaca, antiguedad, utilidades ";
+		$mSQL .= "FROM notabu WHERE ano<=".$mANO." AND mes<=".$mMES." AND dia<=".$mDIA;
+		$mSQL .= " AND contrato='".$mCONTRATO."' ";
+		$mSQL .= "ORDER BY ano DESC, mes DESC, dia DESC ";
+		$mSQL .= "LIMIT 1 ";
+		$mREG  = $this->ci->datasis->damereg($mSQL);
+		return  $mREG;
 	}
 
 	function SUELDO_INT(){
@@ -192,9 +223,11 @@ class Pnomina extends fnomina {
 
 	function pnomina(){
 		parent::fnomina();
-		//$this->CODIGO = $codigo;
 	}
 
+	//******************************************************************
+	// Evalua la Formula del concepto 
+	//
 	function evalform($formula){
 		$MONTO  = $this->MONTO;
 		$SUELDO = $this->SUELDO;
@@ -228,7 +261,6 @@ class Pnomina extends fnomina {
 		$rr = $qq->row_array();
 		$aa = each($rr);
 		$ut = $aa[1];
-
 		
 		// Transforma los if
 		$long = strlen($formula);
@@ -302,11 +334,9 @@ class Pnomina extends fnomina {
 
 		$formula=str_replace('TRAEVALOR','$this->ci->datasis->traevalor',$formula);
 
-
 		$formula=str_replace('.AND.','&&',$formula);
 		$formula=str_replace('.OR.','||',$formula);
 		$formula=str_replace('.NOT.','!',$formula);
-
 
 		return $formula;
 	}

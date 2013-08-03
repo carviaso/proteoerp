@@ -4026,15 +4026,15 @@ class Sfac extends Controller {
 		$campos = $this->db->list_fields('sfac');
 
 		if(!in_array('ereiva'  ,$campos)){
-			$this->db->simple_query("ALTER TABLE sfac ADD ereiva DATE AFTER freiva");
+			$this->db->query("ALTER TABLE sfac ADD ereiva DATE AFTER freiva");
 		}
 		if(!in_array('entregado'  ,$campos)){
-			$this->db->simple_query("ALTER TABLE sfac ADD entregado DATE ");
-			$this->db->simple_query("UPDATE sfac SET entregado=fecha");
+			$this->db->query("ALTER TABLE sfac ADD entregado DATE ");
+			$this->db->query("UPDATE sfac SET entregado=fecha");
 		}
 
 		if(!in_array('comiadi'  ,$campos)){
-			$this->db->simple_query("ALTER TABLE sfac ADD comiadi DECIMAL(10,2) DEFAULT 0 ");
+			$this->db->query("ALTER TABLE sfac ADD comiadi DECIMAL(10,2) DEFAULT 0 ");
 		}
 
 		if(!in_array('upago'  ,$campos)){
@@ -4044,5 +4044,12 @@ class Sfac extends Controller {
 		if(!in_array('manual'  ,$campos)){
 			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `manual` CHAR(50) NULL DEFAULT 'N'");
 		}
+
+		if ( !in_array('id'  ,$campos) ) {
+			$this->db->simple_query('ALTER TABLE sfac DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE sfac ADD UNIQUE INDEX tipo_doc, numero (numero)');
+			$this->db->simple_query('ALTER TABLE sfac ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		};
+
 	}
 }

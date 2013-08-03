@@ -1,4 +1,5 @@
-<?php require_once(BASEPATH.'application/controllers/validaciones.php');
+<?php 
+require_once(BASEPATH.'application/controllers/validaciones.php');
 class Pers extends Controller {
 	var $mModulo='PERS';
 	var $titp='Personal Trabajador';
@@ -18,10 +19,9 @@ class Pers extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
-	//Layout en la Ventana
+	//******************************************************************
+	// Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -50,10 +50,6 @@ class Pers extends Controller {
 		</td></tr>\n
 		";
 
-/*
-*/
-
-
 		$grid->setWpAdicional($WpAdic);
 		$WestPanel = $grid->deploywestp();
 
@@ -78,9 +74,9 @@ class Pers extends Controller {
 	}
 
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	// Funciones de los Botones
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
 
@@ -269,9 +265,9 @@ class Pers extends Controller {
 	}
 
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -986,7 +982,7 @@ class Pers extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -1000,7 +996,7 @@ class Pers extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -1066,8 +1062,7 @@ class Pers extends Controller {
 		//ELIMINAR DE SCLI
 	}
 
-	//******************************
-	//
+	//******************************************************************
 	//  DataEdit
 	//
 	function dataedit(){
