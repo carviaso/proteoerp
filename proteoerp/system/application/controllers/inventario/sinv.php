@@ -5966,11 +5966,16 @@ class Sinv extends Controller {
 
 		if(!$this->db->table_exists('barraspos')){
 			$query="
-			CREATE TABLE barraspos (codigo CHAR(15) NOT NULL DEFAULT '',
-				suplemen CHAR(15) NOT NULL DEFAULT '', id INT(11) NOT NULL AUTOINCREMENT,
-				PRIMARY KEY (id), UNIQUE INDEX codigo (codigo, suplemen))
-			COLLATE='latin1_swedish_ci' 
-			ENGINE=MyISAM ";
+			CREATE TABLE `barraspos` (
+				`codigo` CHAR(15) NOT NULL DEFAULT '',
+				`suplemen` CHAR(15) NOT NULL DEFAULT '',
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				PRIMARY KEY (`id`),
+				UNIQUE INDEX `codigo` (`codigo`, `suplemen`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM;
+			";
 			$this->db->query($query);
 		}
 
