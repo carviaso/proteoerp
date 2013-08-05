@@ -1522,13 +1522,13 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			<table id='simpletabla' width='100%' border=0 >
 				<tbody>
 				<tr>
-					<td class="simplehead">Almacen</td>
-					<td class="simplehead">Ubica</td>
+					<td class="simplehead">Almac&eacute;n</td>
+					<td class="simplehead">Ubicaci&oacute;n</td>
 				</tr>
 
 <?php
 		//Ubicaciones
-		$query=$this->db->query('SELECT alma, ubica FROM sinvalub WHERE codigo='.$this->db->escape($form->_dataobject->get('codigo')).' order by alma');
+		$query=$this->db->query('SELECT alma, ubica FROM sinvalub WHERE codigo='.$this->db->escape($form->_dataobject->get('codigo')).' ORDER BY alma');
 		if ($query->num_rows() > 0){
 			foreach ($query->result() as $row){
 				echo "\t\t\t\t<tr><td><a href='javascript:almubica(".$form->_dataobject->get('id').", \"".$row->alma."\")'>".$row->alma."</a></td><td>".$row->ubica."</td></tr>\n";

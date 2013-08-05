@@ -2791,7 +2791,7 @@ class Sfac extends Controller {
 
 			$smaqfiscal=trim($edit->get_from_dataobjetct('maqfiscal'));
 			if(empty($smaqfiscal)){
-				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=$dbcajero ORDER BY id DESC LIMIT 1,1");
+				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=${dbcajero} ORDER BY id DESC LIMIT 1,1");
 				$edit->maqfiscal->updateValue=$maqfiscal;
 			}
 

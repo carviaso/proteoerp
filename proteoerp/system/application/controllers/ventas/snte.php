@@ -1333,7 +1333,7 @@ class Snte extends Controller {
 			if($ban==false){ memowrite($mSQL,'snte'); }
 		}
 
-		logusu('snte',"Nota entrega $numero CREADO");
+		logusu('snte',"Nota entrega ${numero} CREADO");
 	}
 
 	function chpreca($preca,$ind){

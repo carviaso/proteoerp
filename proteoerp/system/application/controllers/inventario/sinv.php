@@ -4647,7 +4647,7 @@ class Sinv extends Controller {
 		$estilo='';
 		if(!empty($codigo)){
 			$this->rapyd->load('dataedit','datagrid');
-			$grid = new DataGrid('Existencias por Almacen');
+			$grid = new DataGrid('Existencias por Almac&eacute;n');
 			$grid->db->select(array('b.ubides','a.codigo','a.alma','a.existen',"IF(b.ubides IS NULL,'SIN ALMACEN',b.ubides) AS nombre"));
 			$grid->db->from('itsinv AS a');
 			$grid->db->join('caub as b','a.alma=b.ubica','LEFT');
@@ -4658,8 +4658,8 @@ class Sinv extends Controller {
 			$link .= "inventario/caub', '_blank', 'width=800,height=600,scrollbars=Yes,status=Yes,resizable=Yes,screenx='+((screen.availWidth/2)-400)+',screeny='+((screen.availHeight/2)-300)+'');\" heigth=\"600\"><#alma#></a>";
 
 			$grid->column('Almacen' ,$link, "style='font-size:12px;font-weight:bold;'");
-			$grid->column('Nombre'         ,'nombre',"style='font-size: 10px'");
-			$grid->column('Cantidad'       ,'existen','align="right" '."style='font-size: 10px'");
+			$grid->column('Nombre'  ,'nombre',"style='font-size: 10px'");
+			$grid->column('Cantidad','existen','align="right" '."style='font-size: 10px'");
 
 			$grid->build('datagridsimple');
 

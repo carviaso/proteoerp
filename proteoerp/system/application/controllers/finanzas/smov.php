@@ -1323,7 +1323,7 @@ class Smov extends Controller {
 					break;
 				}
 
-				redirect('formatos/descargar/CCLINC/'.$id);
+				redirect($this->url.'dataprint/modify/'.$id);
 				break;
 			case 'AN':
 				redirect('formatos/descargar/CCLIAN/'.$id);
@@ -1454,14 +1454,6 @@ class Smov extends Controller {
 		$edit->nombre->size =42;
 		$edit->nombre->maxlength =40;
 
-		$edit->tipo_doc = new  dropdownField('Tipo doc.', 'tipo_doc');
-		$edit->tipo_doc->option('AB','Abono');
-		$edit->tipo_doc->option('NC','Nota de credito');
-		$edit->tipo_doc->option('AN','Anticipo');
-		$edit->tipo_doc->style='width:140px;';
-		$edit->tipo_doc->onchange='chtipodoc()';
-		$edit->tipo_doc->rule ='enum[AB,NC,AN]|required';
-
 		$edit->codigo = new  dropdownField('Motivo', 'codigo');
 		$edit->codigo->option('','Seleccionar');
 		$edit->codigo->options('SELECT TRIM(codigo) AS cod, nombre FROM botr WHERE tipo=\'C\' ORDER BY nombre');
@@ -1513,6 +1505,7 @@ class Smov extends Controller {
 		//inicio detalle itccli
 		//************************************************
 		$i=0;
+		$arr_ivas=array();
 		$edit->detail_expand_except('itccli');
 		$sel=array('a.tipo_doc','a.numero','a.fecha','a.monto','a.abonos','a.monto - a.abonos AS saldo');
 		$this->db->select($sel);
@@ -1532,6 +1525,8 @@ class Smov extends Controller {
 		$query = $this->db->get();
 		//echo $this->db->last_query();
 		foreach ($query->result() as $row){
+			//$arr_ivas[$i]=array('');
+
 			$obj='cod_cli_'.$i;
 			$edit->$obj = new autoUpdateField('cod_cli',$cliente,$cliente);
 			$edit->$obj->rel_id  = 'itccli';
@@ -1617,7 +1612,18 @@ class Smov extends Controller {
 
 			$i++;
 		}
-		if($i==0) $edit->tipo_doc->insertValue='AN';
+		$edit->tipo_doc = new  dropdownField('Tipo doc.', 'tipo_doc');
+		if($i>0){
+			$edit->tipo_doc->option('AB','Abono');
+			$edit->tipo_doc->option('NC','Nota de credito');
+		}else{
+			$edit->tipo_doc->insertValue='AN';
+		}
+		$edit->tipo_doc->option('AN','Anticipo');
+		$edit->tipo_doc->style='width:140px;';
+		$edit->tipo_doc->onchange='chtipodoc()';
+		$edit->tipo_doc->rule ='enum[AB,NC,AN]|required';
+
 		//************************************************
 		//fin de campos para detalle,inicio detalle2 sfpa
 		//************************************************
@@ -1780,6 +1786,10 @@ class Smov extends Controller {
 
 		$dbcliente= $this->db->escape($cliente);
 		$rowscli  = $this->datasis->damerow('SELECT nombre,dire11,dire12 FROM scli WHERE cliente='.$dbcliente);
+		if(empty($rowscli)){
+			$do->error_message_ar['pre_ins']='Cliente inexistente.';
+			return false;
+		}
 		$do->set('nombre', $rowscli['nombre']);
 		$do->set('dire1' , $rowscli['dire11']);
 		$do->set('dire2' , $rowscli['dire12']);
@@ -2492,9 +2502,9 @@ class Smov extends Controller {
 		$edit->post_process('insert','_post_ncfac_insert');
 		$edit->post_process('update','_post_ncfac_update');
 		$edit->post_process('delete','_post_ncfac_delete');
-		$edit->pre_process( 'insert', '_pre_ncfac_insert' );
-		$edit->pre_process( 'update', '_pre_ncfac_update' );
-		$edit->pre_process( 'delete', '_pre_ncfac_delete' );
+		$edit->pre_process( 'insert', '_pre_ncfac_insert');
+		$edit->pre_process( 'update', '_pre_ncfac_update');
+		$edit->pre_process( 'delete', '_pre_ncfac_delete');
 
 		$edit->num_ref = new inputField('Factura','num_ref');
 		$edit->num_ref->rule='required|existesfac';
@@ -2522,6 +2532,7 @@ class Smov extends Controller {
 		$edit->fecha->insertValue=date('Y-m-d');
 		$edit->fecha->size =12;
 		$edit->fecha->maxlength =8;
+		$edit->fecha->readonly=true;
 		$edit->fecha->calendar=false;
 
 		$edit->monto = new inputField('Monto de la NC','monto');
@@ -2529,6 +2540,12 @@ class Smov extends Controller {
 		$edit->monto->css_class='inputnum';
 		$edit->monto->size =19;
 		$edit->monto->maxlength =17;
+
+		$edit->codigo = new  dropdownField('Motivo', 'codigo');
+		$edit->codigo->option('','Seleccionar');
+		$edit->codigo->options('SELECT TRIM(codigo) AS cod, nombre FROM botr WHERE tipo=\'C\' ORDER BY nombre');
+		$edit->codigo->style='width:280px;';
+		$edit->codigo->rule ='required';
 
 		$edit->observa1 = new inputField('Observaci&oacute;n','observa1');
 		$edit->observa1->rule='required|trim|strtoupper';
@@ -2576,24 +2593,32 @@ class Smov extends Controller {
 	}
 
 	function _pre_ncfac_insert($do){
-		$fecha  = $do->get('fecha');
-		$factura= $do->get('num_ref');
-		$dbfactura=$this->db->escape($factura);
+		$fecha    = $do->get('fecha');
+		$factura  = $do->get('num_ref');
+		$dbfactura= $this->db->escape($factura);
+		$codigo   = $do->get('codigo');
+		$fecha    = date('Y-m-d');
 		$do->rm_get('sfacmonto');
+		$do->set('fecha'   ,$fecha);
+		$do->set('fecha_op',$fecha);
 
 		$monto  = floatval($do->get('monto'));
-		$sfacmon= floatval($this->datasis->dameval("SELECT totalg FROM sfac WHERE tipo_doc='F' AND numero=${dbfactura}"));
-		if($monto > $sfacmon){
-			$do->error_message_ar['pre_ins']='El monto de la nota de credito no puede ser mayor al de la factura';
+
+		$mSQL= 'SELECT transac,cod_cli,nombre,direc,dire1,totalg,iva,exento,tasa,reducida,sobretasa,montasa,monredu,monadic,numero FROM sfac WHERE tipo_doc=\'F\' AND numero='.$dbfactura;
+		$row = $this->datasis->damerow($mSQL);
+		if(empty($row)){
+			$do->error_message_ar['pre_ins']='Factura inexistente.';
 			return false;
 		}
-
-		$mSQL= 'SELECT transac,totalg,iva,exento,tasa,reducida,sobretasa,montasa,monredu,monadic,numero FROM sfac WHERE tipo_doc=\'F\' AND numero='.$dbfactura;
-		$row = $this->datasis->damerow($mSQL);
 		if($monto>floatval($row['totalg'])){
 			$do->error_message_ar['pre_ins']='No puede  hacer una nota de credito por un monto mayor al de la factura '.nformat($monto);
 			return false;
 		}
+		$do->set('cod_cli', $row['cod_cli']);
+		$do->set('nombre' , $row['nombre']);
+		$do->set('dire1'  , $row['direc']);
+		$do->set('dire2'  , $row['dire1']);
+
 		$exento    =floatval($row['exento']);
 		$tasa      =floatval($row['tasa']);
 		$reducida  =floatval($row['reducida']);
@@ -2623,10 +2648,21 @@ class Smov extends Controller {
 		$do->set('monadic'  ,round($factor*$monadic  ,2));
 		$do->set('impuesto' ,round($factor*$iva      ,2));
 
-		$transac= $this->datasis->fprox_numero('ntransa');
-		$do->set('transac',$transac);
-		$mnumnc = $this->datasis->fprox_numero('nccli');
-		$do->set('numero',$mnumnc);
+		$transac  = $this->datasis->fprox_numero('ntransa');
+		$control  = $this->datasis->fprox_numero('nsmov');
+		$mnumnc   = $this->datasis->fprox_numero('nccli');
+		$ningreso = $this->datasis->fprox_numero('ningreso');
+		$do->set('transac' , $transac);
+		$do->set('numero'  , $mnumnc);
+		$do->set('vence'   , $fecha);
+		$do->set('control' , $control);
+		$do->set('ningreso', $ningreso);
+		$do->set('ppago'   , 0);
+		$do->set('reten'   , 0);
+		$do->set('mora'    , 0);
+
+		$dbcodigo = $this->db->escape($codigo);
+		$do->set('descrip' ,$this->datasis->dameval("SELECT TRIM(nombre) AS val FROM botr WHERE codigo=${dbcodigo}"));
 
 		return true;
 	}
@@ -2644,6 +2680,94 @@ class Smov extends Controller {
 	//Fin Nota de credito a factura pagada
 	//*********************************
 
+	function dataprint($st,$uid){
+		$this->rapyd->load('dataedit');
+
+		$url=site_url('formatos/descargar/CCLINC/'.$uid);
+		$edit = new DataEdit('Imprimir Nota de Cr&eacute;dito', 'smov');
+		//$id=$edit->get_from_dataobjetct('id');
+
+
+		$edit->back_url = site_url('ajax/reccierraventana/N');
+
+		$edit->back_save   = true;
+		$edit->back_delete = true;
+		$edit->back_cancel = true;
+		$edit->back_cancel_save   = true;
+		$edit->back_cancel_delete = true;
+		//$edit->on_save_redirect   = false;
+
+		$edit->post_process('update','_post_print_update');
+		$edit->pre_process( 'insert','_pre_print_insert');
+		$edit->pre_process( 'delete','_pre_print_delete');
+
+		$edit->container = new containerField('impresion','La descarga se realizara en algunos segundos, en caso de no hacerlo haga click '.anchor('formatos/descargar/CCLINC/'.$uid,'aqui'));
+
+		$edit->tipo_doc = new inputField('Nota de Cr&eacute;dito','tipo_doc');
+		$edit->tipo_doc->mode='autohide';
+
+		$edit->numero = new inputField('N&uacute;mero','numero');
+		$edit->numero->mode='autohide';
+		$edit->numero->in='tipo_doc';
+
+		$edit->fecha = new dateField('Fecha','fecha');
+		$edit->fecha->mode = 'autohide';
+
+		$edit->cod_cli = new inputField('Cliente','cod_cli');
+		$edit->cod_cli->mode='autohide';
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->mode='autohide';
+		$edit->nombre->in='cod_cli';
+
+		//$edit->rifci = new inputField('Rif/Ci','rifci');
+		//$edit->rifci->mode='autohide';
+
+		$edit->nfiscal = new inputField('Nro. Control','nfiscal');
+		$edit->nfiscal->rule='max_length[15]|strtoupper|required';
+		$edit->nfiscal->size=16;
+		$edit->nfiscal->maxlength =15;
+
+		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
+		if($fiscal=='S'){
+			$edit->maqfiscal = new inputField('Serial m&aacute;quina f&iacute;scal','maqfiscal');
+			$edit->maqfiscal->rule='max_length[15]|strtoupper|required';
+			$edit->maqfiscal->size =16;
+			$edit->maqfiscal->maxlength =15;
+		}
+
+		$edit->buttons('save', 'undo');
+		$edit->build();
+
+		if($st=='modify'){
+			$script= '<script type="text/javascript" >
+			$(function() {
+				setTimeout(\'window.location="'.$url.'"\',100);
+			});
+			</script>';
+		}else{
+			$script='';
+		}
+
+		$data['content'] = $edit->output;
+		$data['head']    = $this->rapyd->get_head();
+		$data['script']  = script('jquery.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js');
+		$data['script'] .= $script;
+		$data['title']   = heading($this->tits);
+		$this->load->view('view_ventanas_sola', $data);
+	}
+
+	function _post_print_update(){
+		return false;
+	}
+
+	function _pre_print_insert(){
+		return false;
+	}
+
+	function _pre_print_delete(){
+		return false;
+	}
 
 	function giro(){
 

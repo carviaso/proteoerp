@@ -1814,6 +1814,102 @@ class Sprm extends Controller {
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
 
+		//Campos propios de las NC
+
+		//Campos comodines
+
+		$arr_ptasa = array();
+		$edit->apltasa = new dropdownField('', 'apltasa');
+		$mSQL='SELECT fecha,tasa,redutasa,sobretasa FROM civa ORDER BY fecha DESC LIMIT 3';
+		$query = $this->db->query($mSQL);
+		foreach ($query->result() as $row){
+			$arr_ptasa[] = array(floatval($row->tasa),floatval($row->redutasa),floatval($row->sobretasa));
+			$edit->apltasa->option($row->fecha,dbdate_to_human($row->fecha));
+		}
+		$edit->apltasa->onchange='chapltasa()';
+		$edit->apltasa->style='width:100px;';
+		$edit->apltasa->rule='condi_required|callback_chobligatipo[NC]';
+
+		$ivas = $this->datasis->ivaplica();
+		$edit->ptasa = new inputField('','ptasa');
+		$edit->ptasa->rule='numeric';
+		$edit->ptasa->type='inputhidden';
+		$edit->ptasa->insertValue=$ivas['tasa'];
+		$edit->ptasa->showformat='decimal';
+
+		$edit->preducida = new inputField('','preducida');
+		$edit->preducida->rule='numeric';
+		$edit->preducida->type='inputhidden';
+		$edit->preducida->insertValue=$ivas['redutasa'];
+		$edit->preducida->showformat='decimal';
+
+		$edit->padicional = new inputField('','padicional');
+		$edit->padicional->rule='numeric';
+		$edit->padicional->type='inputhidden';
+		$edit->padicional->insertValue=$ivas['sobretasa'];
+		$edit->padicional->showformat='decimal';
+		//Fin de los comodines
+
+		$edit->serie = new inputField('N&uacute;mero','serie');
+		$edit->serie->rule='condi_required|callback_chobligatipo[NC]';
+		$edit->serie->size =15;
+		$edit->serie->maxlength =17;
+
+		$edit->nfiscal = new inputField('Control F&iacute;scal','nfiscal');
+		$edit->nfiscal->rule='condi_required|callback_chobligatipo[NC]';
+		$edit->nfiscal->size =15;
+		$edit->nfiscal->maxlength =17;
+
+		$edit->montasa = new inputField('Montasa','montasa');
+		$edit->montasa->rule      ='max_length[17]|numeric';
+		$edit->montasa->css_class ='inputnum';
+		$edit->montasa->size      =19;
+		$edit->montasa->maxlength =17;
+		$edit->montasa->rule='condi_required|callback_chobligatipo[NC]';
+
+		$edit->monredu = new inputField('Monredu','monredu');
+		$edit->monredu->rule      ='max_length[17]|numeric';
+		$edit->monredu->css_class ='inputnum';
+		$edit->monredu->size      =19;
+		$edit->monredu->maxlength =17;
+		$edit->monredu->rule='condi_required|callback_chobligatipo[NC]';
+
+		$edit->monadic = new inputField('Monadic','monadic');
+		$edit->monadic->rule      ='max_length[17]|numeric';
+		$edit->monadic->css_class ='inputnum';
+		$edit->monadic->size      =19;
+		$edit->monadic->maxlength =17;
+		$edit->monadic->rule='condi_required|callback_chobligatipo[NC]';
+
+		$edit->tasa = new inputField('general','tasa');
+		$edit->tasa->rule      ='max_length[17]|numeric';
+		$edit->tasa->css_class ='inputnum';
+		$edit->tasa->size      =12;
+		$edit->tasa->maxlength =17;
+		$edit->tasa->rule='condi_required|callback_chobligatipo[NC]|callback_chmontasa[G]';
+
+		$edit->reducida = new inputField('reducida','reducida');
+		$edit->reducida->rule      ='max_length[17]|numeric';
+		$edit->reducida->css_class ='inputnum';
+		$edit->reducida->size      =12;
+		$edit->reducida->maxlength =17;
+		$edit->reducida->rule='condi_required|callback_chobligatipo[NC]|callback_chmontasa[R]';
+
+		$edit->sobretasa = new inputField('adicional','sobretasa');
+		$edit->sobretasa->rule      ='max_length[17]|numeric';
+		$edit->sobretasa->css_class ='inputnum';
+		$edit->sobretasa->size      =12;
+		$edit->sobretasa->maxlength =17;
+		$edit->sobretasa->rule='condi_required|callback_chobligatipo[NC]|callback_chmontasa[A]';
+
+		$edit->exento = new inputField('exento','exento');
+		$edit->exento->rule      ='max_length[17]|numeric';
+		$edit->exento->css_class ='inputnum';
+		$edit->exento->size      =19;
+		$edit->exento->maxlength =17;
+		$edit->exento->rule='condi_required|callback_chobligatipo[NC]';
+		//Fin de los campos para la nc
+
 		//Detalle del pago
 		$edit->banco = new dropdownField('Banco', 'banco');
 		$edit->banco->option('','Seleccionar');
@@ -1849,8 +1945,9 @@ class Sprm extends Controller {
 		//inicio detalle itppro
 		//************************************************
 		$i=0;
+		$arr_ivas=array();
 		$edit->detail_expand_except('itppro');
-		$sel=array('a.tipo_doc','a.numero','a.fecha','a.vence','a.monto','a.abonos','a.monto - a.abonos AS saldo');
+		$sel=array('a.tipo_doc','a.numero','a.fecha','a.vence','a.monto','a.abonos','a.monto - a.abonos AS saldo','impuesto','montasa','monredu','monadic','tasa','reducida','sobretasa','exento');
 		$this->db->select($sel);
 		$this->db->from('sprm AS a');
 		$this->db->where('a.cod_prv',$proveed);
@@ -1868,6 +1965,37 @@ class Sprm extends Controller {
 		$query = $this->db->get();
 		//echo $this->db->last_query();
 		foreach ($query->result() as $row){
+
+			$row->montasa   = floatval($row->montasa);
+			$row->monredu   = floatval($row->monredu);
+			$row->monadic   = floatval($row->monadic);
+			$row->tasa      = floatval($row->tasa);
+			$row->reducida  = floatval($row->reducida);
+			$row->sobretasa = floatval($row->sobretasa);
+			$row->exento    = floatval($row->exento);
+
+			if($row->montasa+$row->monredu+$row->monadic+$row->tasa+$row->reducida+$row->sobretasa+$row->exento > 0){
+				$arr_ivas[$i]=array(
+					'montasa'  =>$row->montasa  ,
+					'monredu'  =>$row->monredu  ,
+					'monadic'  =>$row->monadic  ,
+					'tasa'     =>$row->tasa     ,
+					'reducida' =>$row->reducida ,
+					'sobretasa'=>$row->sobretasa,
+					'exento'   =>$row->exento
+				);
+			}else{
+				$arr_ivas[$i]=array(
+					'montasa'  =>$row->monto-$row->impuesto,
+					'monredu'  =>0,
+					'monadic'  =>0,
+					'tasa'     =>floatval($row->impuesto),
+					'reducida' =>0,
+					'sobretasa'=>0,
+					'exento'   =>$row->exento
+				);
+			}
+
 			$obj='cod_prv_'.$i;
 			$edit->$obj = new autoUpdateField('cod_prv',$proveed,$proveed);
 			$edit->$obj->rel_id  = 'itppro';
@@ -1960,6 +2088,19 @@ class Sprm extends Controller {
 		//************************************************
 		//fin de campos para detalle
 		//************************************************
+
+		$edit->tipo_doc = new  dropdownField('Tipo doc.', 'tipo_doc');
+		if($i>0){
+			$edit->tipo_doc->option('AB','Abono');
+			$edit->tipo_doc->option('NC','Nota de credito');
+		}else{
+			$edit->tipo_doc->insertValue='AN';
+		}
+		$edit->tipo_doc->option('AN','Anticipo');
+		$edit->tipo_doc->onchange='chtipodoc()';
+		$edit->tipo_doc->style='width:140px;';
+		$edit->tipo_doc->rule ='enum[AB,NC,AN]|required';
+
 		$edit->buttons('add_rel');
 		$edit->build();
 
@@ -1972,6 +2113,8 @@ class Sprm extends Controller {
 
 			echo json_encode($rt);
 		}else{
+			$conten['json_ptasa']= json_encode($arr_ptasa);
+			$conten['json_ivas'] = json_encode($arr_ivas);
 			$conten['cana']  = $i;
 			$conten['form']  = & $edit;
 			$conten['title'] = heading("Pago a proveedor: (${proveed}) ${sprv_nombre} ${sprv_rif}");
@@ -2006,12 +2149,32 @@ class Sprm extends Controller {
 		$monto  = floatval($monto);
 		$itmonto= floatval($this->input->post('abono_'.$i));
 		if($tipo=='NC' && $monto>0){
-			$this->validation->set_message('chppago', "No se puede hacer pronto pago cuando el tipo de documento es una nota de cr&eacute;dito.");
+			$this->validation->set_message('chppago', 'No se puede hacer pronto pago cuando el tipo de documento es una nota de cr&eacute;dito.');
 			return false;
 		}
 
 		if($itmonto<=0 && $monto>0){
-			$this->validation->set_message('chppago', "No se puede hacer pronto pago cuando a un efecto que no esta abonado.");
+			$this->validation->set_message('chppago', 'No se puede hacer pronto pago cuando a un efecto que no esta abonado.');
+			return false;
+		}
+		return true;
+	}
+
+	function chmontasa($impuesto,$tipo){
+		if($tipo=='R'){
+			$base  = floatval($this->input->post('monredu'));
+			$ptasa = floatval($this->input->post('preducida'));
+		}elseif($tipo=='A'){
+			$base  = floatval($this->input->post('monadic'));
+			$ptasa = floatval($this->input->post('psobretasa'));
+		}else{
+			$base  = floatval($this->input->post('montasa'));
+			$ptasa = floatval($this->input->post('ptasa'));
+		}
+		$ptasa = $ptasa/100;
+		$impuesto=floatval($impuesto);
+		if(abs($impuesto-($base*$ptasa))>0.2){
+			$this->validation->set_message('chmontasa', 'El monto del impuesto %s no coincide con la tasa.');
 			return false;
 		}
 		return true;
@@ -2029,6 +2192,7 @@ class Sprm extends Controller {
 		$tipo_op  = $do->get('tipo_op');
 		$fecha    = $do->get('fecha');
 		$codigo   = $do->get('codigo');
+
 		$this->ppagodata=$ivadata=array(
 			'montasa'  =>0,
 			'monredu'  =>0,
@@ -2039,6 +2203,11 @@ class Sprm extends Controller {
 			'exento'   =>0
 		);
 
+		//Elimina los comodines
+		$do->rm_get('ptasa');
+		$do->rm_get('preducida');
+		$do->rm_get('padicional');
+		$do->rm_get('apltasa');
 
 		$ppago=$totalab=$impuesto=$ppimpuesto=0;
 		//Totaliza el abonado
@@ -2066,13 +2235,14 @@ class Sprm extends Controller {
 				$itmonto    = floatval($rrow['monto']);
 
 				if($tipo_doc=='NC'){
-					$ivadata['montasa'  ]= floatval($rrow['montasa'  ])*$itabono/$itmonto;
-					$ivadata['monredu'  ]= floatval($rrow['monredu'  ])*$itabono/$itmonto;
-					$ivadata['monadic'  ]= floatval($rrow['monadic'  ])*$itabono/$itmonto;
-					$ivadata['tasa'     ]= floatval($rrow['tasa'     ])*$itabono/$itmonto;
-					$ivadata['reducida' ]= floatval($rrow['reducida' ])*$itabono/$itmonto;
-					$ivadata['sobretasa']= floatval($rrow['sobretasa'])*$itabono/$itmonto;
-					$ivadata['exento'   ]= floatval($rrow['exento'   ])*$itabono/$itmonto;
+
+					$ivadata['montasa'  ] += floatval($rrow['montasa'  ])*$itabono/$itmonto;
+					$ivadata['monredu'  ] += floatval($rrow['monredu'  ])*$itabono/$itmonto;
+					$ivadata['monadic'  ] += floatval($rrow['monadic'  ])*$itabono/$itmonto;
+					$ivadata['tasa'     ] += floatval($rrow['tasa'     ])*$itabono/$itmonto;
+					$ivadata['reducida' ] += floatval($rrow['reducida' ])*$itabono/$itmonto;
+					$ivadata['sobretasa'] += floatval($rrow['sobretasa'])*$itabono/$itmonto;
+					$ivadata['exento'   ] += floatval($rrow['exento'   ])*$itabono/$itmonto;
 				}
 
 				if(empty($itpppago)){
@@ -2096,6 +2266,43 @@ class Sprm extends Controller {
 		}
 		$totalab=round($totalab,2);
 		$this->ppimpuesto=$ppimpuesto;
+
+		if($tipo_doc=='NC'){
+			$montasa   = $do->get('montasa'  );
+			$monredu   = $do->get('monredu'  );
+			$monadic   = $do->get('monadic'  );
+			$tasa      = $do->get('tasa'     );
+			$reducida  = $do->get('reducida' );
+			$sobretasa = $do->get('sobretasa');
+			$exento    = $do->get('exento'   );
+
+			$iivast = $montasa+$monredu+$monadic+$tasa+$reducida+$sobretasa+$exento;
+
+			if(abs($iivast-$totalab)>0.2){
+				$do->error_message_ar['pre_ins']='El monto detallado de los impuestos no coincide con el monto total.';
+				return false;
+			}
+
+			if($montasa<=0 && $ivadata['montasa']>0){
+				$do->error_message_ar['pre_ins']='No puede realizar una NC con impuesto general si los documentos afectados no tienen este impuesto.';
+				return false;
+			}
+
+			if($monredu<=0 && $ivadata['monredu']>0){
+				$do->error_message_ar['pre_ins']='No puede realizar una NC con impuesto reducido si los documentos afectados no tienen este impuesto.';
+				return false;
+			}
+
+			if($sobretasa<=0 && $ivadata['sobretasa']>0){
+				$do->error_message_ar['pre_ins']='No puede realizar una NC con impuesto adicional si los documentos afectados no tienen este impuesto.';
+				return false;
+			}
+
+			if($exento<=0 && $ivadata['exento']>0){
+				$do->error_message_ar['pre_ins']='No puede realizar una NC con monto exento si los documentos afectados no tienen este monto.';
+				return false;
+			}
+		}
 
 		//Inicio Validaciones
 		if($tipo_doc=='NC' && $ppago>0){
@@ -2310,6 +2517,16 @@ class Sprm extends Controller {
 	//**********************************************
 	// Fin de pago a proveedor
 	//***********************************************
+
+	//Obliga el campo segun el tipo
+	function chobligatipo($val,$tipo){
+		$tipo_doc = $this->input->post('tipo_doc');
+		if($tipo_doc==$tipo && $val==''){
+			$this->validation->set_message('chobligatipo', "El campo %s es necesario cuando el tipo es ${tipo}");
+			return false;
+		}
+		return true;
+	}
 
 	//Chequea los campos de numero y fecha en las formas de pago
 	//cuando deban corresponder
