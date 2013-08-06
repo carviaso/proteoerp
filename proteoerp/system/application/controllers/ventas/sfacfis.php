@@ -13,6 +13,7 @@ class Sfacfis extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		$this->datasis->creaintramenu(array('modulo'=>'14A','titulo'=>'Doc. en impresoras fiscal','mensaje'=>'Fact. y Dev. para auditoria fiscal','panel'=>'REGISTROS','ejecutar'=>'ventas/sfacfis','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -523,7 +524,7 @@ class Sfacfis extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: sfacfisadd, editfunc: sfacfisedit, delfunc: sfacfisdel, viewfunc: sfacfisshow");
+		$grid->setBarOptions('addfunc: sfacfisadd, editfunc: sfacfisedit, delfunc: sfacfisdel, viewfunc: sfacfisshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -633,14 +634,16 @@ class Sfacfis extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->pre_process( 'insert', '_pre_insert');
+		$edit->pre_process( 'update', '_pre_update');
+		$edit->pre_process( 'delete', '_pre_delete');
 
-		$edit->tipo_doc = new inputField('Tipo doc.','tipo_doc');
-		$edit->tipo_doc->rule='';
-		$edit->tipo_doc->size =4;
-		$edit->tipo_doc->maxlength =2;
+		$edit->tipo_doc = new  dropdownField('Tipo Doc.', 'tipo_doc');
+		$edit->tipo_doc->option('FC','Factura');
+		$edit->tipo_doc->option('ND','Devoluci&oacute;n');
+		$edit->tipo_doc->style='width:140px;';
+		$edit->tipo_doc->size = 5;
+		$edit->tipo_doc->rule='required';
 
 		$edit->referencia = new inputField('Referencia','referencia');
 		$edit->referencia->rule='';
@@ -658,7 +661,7 @@ class Sfacfis extends Controller {
 		$edit->serial->maxlength =15;
 
 
-		$edit->rifci = new inputField('Rif/CI','rifci');
+		$edit->rifci = new inputField('RIF/CI','rifci');
 		$edit->rifci->rule='';
 		$edit->rifci->size =17;
 		$edit->rifci->maxlength =15;
@@ -680,7 +683,10 @@ class Sfacfis extends Controller {
 		$edit->fecha->insertValue=date('Y-m-d');
 		$edit->fecha->calendar = false;
 
-		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
+		$edit->hora = new dateonlyField('Hora','hora');
+		$edit->hora->rule='chora';
+		$edit->hora->size =10;
+		$edit->hora->maxlength =8;
 
 		$edit->baseg = new inputField('Base G.','baseg');
 		$edit->baseg->rule='numeric';
