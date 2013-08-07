@@ -5960,7 +5960,7 @@ class Sinv extends Controller {
 			CREATE TABLE sinvprov (proveed CHAR(5) NOT NULL DEFAULT '',
 				codigop CHAR(15) NOT NULL DEFAULT '', codigo CHAR(15) NOT NULL DEFAULT '',
 				PRIMARY KEY (`proveed`, `codigop`, `codigo`))
-			COLLATE='latin1_swedish_ci' 
+			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
 		}
 
@@ -6003,6 +6003,23 @@ class Sinv extends Controller {
 			ENGINE=MyISAM
 			ROW_FORMAT=DEFAULT";
 			$this->db->simple_query($query);
+		}
+
+		if(!$this->db->table_exists('sinvlote')){
+			$mSQL="CREATE TABLE `sinvlote` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`codigo` VARCHAR(15) NULL,
+				`cantidad` DECIMAL(10,2) NULL,
+				`precio1` DECIMAL(12,2) NULL,
+				`costo` DECIMAL(12,2) NULL,
+				`vence` DATE NULL,
+				`estampa` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+				PRIMARY KEY (`id`),
+				INDEX `codigo` (`codigo`),
+				UNIQUE INDEX `codigo_costo_vence` (`codigo`, `costo`, `vence`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM";
 		}
 
 
