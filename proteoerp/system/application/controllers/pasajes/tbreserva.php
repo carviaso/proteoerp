@@ -879,9 +879,7 @@ class Tbreserva extends Controller {
 		$dia   = $this->uri->segment(6);
 		$mes   = $this->uri->segment(7);
 		$ano   = $this->uri->segment(8);
-		
-		$grid     = $this->jqdatagrid;
-
+		$grid  = $this->jqdatagrid;
 		$qmid1 = $this->db->escape($mid1);
 		$qmid2 = $this->db->escape($mid2);
 
@@ -896,11 +894,9 @@ class Tbreserva extends Controller {
 			ORDER BY b.horsal 
 		";
 
-
 		$response = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
-		
 	}
 
 	//******************************************************************
@@ -917,13 +913,13 @@ class Tbreserva extends Controller {
 		// Origen 
 		$form->codofiorg = new dropdownField('Origen','codofiorg');
 		$form->codofiorg->option('00','Seleccione');
-		$form->codofiorg->options("SELECT codofi, desofi FROM tbofici WHERE codofi>0 ORDER BY desofi");
+		$form->codofiorg->options("SELECT codofi, desofi FROM tbofici WHERE codofi>0 AND activo='S' ORDER BY desofi");
 		$form->codofiorg->style = 'width:180px;';
 
 		// Destino 
 		$form->codofides = new dropdownField('Destino.','codofides');
 		$form->codofides->option('00','Seleccione');
-		$form->codofides->options("SELECT codofi, desofi FROM tbofici WHERE codofi>0 ORDER BY desofi ");
+		$form->codofides->options("SELECT codofi, desofi FROM tbofici WHERE codofi>0 AND activo='S' ORDER BY desofi ");
 		$form->codofides->style = 'width:180px;';
 
 		$form->submit = new submitField("Buscar","btn_submit");    

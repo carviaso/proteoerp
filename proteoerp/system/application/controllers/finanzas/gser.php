@@ -1124,7 +1124,7 @@ class gser extends Controller {
 			'width'         => 120,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:12, maxlength: 12 }',
+			'editoptions'   => '{ size:20, maxlength: 30 }',
 			'formoptions'   => '{ label:"Nro. de Factura" }'
 		));
 
