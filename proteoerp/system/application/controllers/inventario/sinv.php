@@ -6010,7 +6010,7 @@ class Sinv extends Controller {
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
 				`codigo` VARCHAR(15) NULL,
 				`cantidad` DECIMAL(10,2) NULL,
-				`precio1` DECIMAL(12,2) NULL,
+				`precio` DECIMAL(12,2) NULL,
 				`costo` DECIMAL(12,2) NULL,
 				`vence` DATE NULL,
 				`estampa` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
