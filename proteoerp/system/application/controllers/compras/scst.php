@@ -3760,7 +3760,7 @@ class Scst extends Controller {
 
 		$row = $mSQL_1->row();
 		$id  = $row->id;
-		redirect("formatos/ver/RIVA/$id");
+		redirect("formatos/ver/RIVA/${id}");
 	}
 
 	function _pond($existen,$itcana,$pond,$ultimo){

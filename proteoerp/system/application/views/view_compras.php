@@ -15,7 +15,7 @@ $scampos .='<td class="littletablerow" align="right">'.$campos['cantidad']['fiel
 $scampos .='<td class="littletablerow" align="right">'.$campos['costo']['field']. '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['importe']['field'];
 $scampos .= $campos['sinvpeso']['field'].$campos['iva']['field'].'</td>';
-$scampos .='<td class="littletablerow" align="right">'.$campos['precio1']['field'].'</td>';
+//$scampos .='<td class="littletablerow" align="right">'.$campos['precio1']['field'].'</td>';
 $scampos .='<td class="littletablerow"><a href=# onclick="del_itscst(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
 $campos=$form->js_escape($scampos);
 
@@ -427,115 +427,70 @@ if (!$solo){
 	<tr>
 </table>
 
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
-		<table width='100%'>
-			<tr id='__INPL__'>
-				<th bgcolor='#7098D0'>C&oacute;digo     </th>
-				<th bgcolor='#7098D0'>Descripci&oacute;n</th>
-				<th bgcolor='#7098D0'>Cantidad          </th>
-				<th bgcolor='#7098D0'>Precio            </th>
-				<th bgcolor='#7098D0'>Importe           </th>
-				<th bgcolor='#7098D0'>PVP               </th>
-				<?php if($form->_status!='show') {?>
-					<th bgcolor='#7098D0'>&nbsp;</th>
-				<?php } ?>
-			</tr>
+<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
+<table width='100%'>
+	<tr id='__INPL__'>
+		<th bgcolor='#7098D0'>C&oacute;digo     </th>
+		<th bgcolor='#7098D0'>Descripci&oacute;n</th>
+		<th bgcolor='#7098D0'>Cantidad          </th>
+		<th bgcolor='#7098D0'>Precio            </th>
+		<th bgcolor='#7098D0'>Importe           </th>
+		<!-- <th bgcolor='#7098D0'>PVP               </th> -->
+		<?php if($form->_status!='show') {?>
+			<th bgcolor='#7098D0'>&nbsp;</th>
+		<?php } ?>
+	</tr>
 
-			<?php for($i=0;$i<$form->max_rel_count['itscst'];$i++) {
-				$it_codigo  = "codigo_$i";
-				$it_desca   = "descrip_$i";
-				$it_cana    = "cantidad_$i";
-				$it_precio  = "costo_$i";
-				$it_importe = "importe_$i";
-				$it_peso    = "sinvpeso_$i";
-				$it_iva     = "iva_$i";
-				$it_pvp    = "precio1_$i";
-			?>
+	<?php for($i=0;$i<$form->max_rel_count['itscst'];$i++) {
+		$it_codigo  = "codigo_${i}";
+		$it_desca   = "descrip_${i}";
+		$it_cana    = "cantidad_${i}";
+		$it_precio  = "costo_${i}";
+		$it_importe = "importe_${i}";
+		$it_peso    = "sinvpeso_${i}";
+		$it_iva     = "iva_${i}";
+		$it_pvp     = "precio1_${i}";
+	?>
 
-			<tr id='tr_itscst_<?php echo $i; ?>'>
-				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
-				<td class="littletablerow" align="left" ><b id='it_descrip_val_<?php echo $i; ?>'><?php echo $form->$it_desca->value; ?></b>
-				<?php echo $form->$it_desca->output;  ?>
-				</td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_cana->output;   ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_precio->output; ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_importe->output; ?>
-				<?php echo $form->$it_peso->output.$form->$it_iva->output; ?>
-				</td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_pvp->output; ?></td>
-				<?php if($form->_status!='show') {?>
-				<td class="littletablerow">
-					<a href='#' onclick='del_itscst(<?php echo $i ?>);return false;'><?php echo img("images/delete.jpg");?></a>
-				</td>
-				<?php } ?>
-			</tr>
-			<?php } ?>
-		</table>
-		</div>
-<?php
-/*
-		<?php echo $container_bl ?>
-		<?php echo $container_br ?>
-		<br>
-*/
-?>
+	<tr id='tr_itscst_<?php echo $i; ?>'>
+		<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
+		<td class="littletablerow" align="left" ><b id='it_descrip_val_<?php echo $i; ?>'><?php echo $form->$it_desca->value; ?></b>
+		<?php echo $form->$it_desca->output;  ?>
+		</td>
+		<td class="littletablerow" align="right"><?php echo $form->$it_cana->output;   ?></td>
+		<td class="littletablerow" align="right"><?php echo $form->$it_precio->output; ?></td>
+		<td class="littletablerow" align="right"><?php echo $form->$it_importe->output; ?>
+		<?php echo $form->$it_peso->output.$form->$it_iva->output; ?>
+		</td>
+		<?php if($form->_status!='show') {?>
+		<td class="littletablerow">
+			<a href='#' onclick='del_itscst(<?php echo $i ?>);return false;'><?php echo img('images/delete.jpg');?></a>
+		</td>
+		<?php } ?>
+	</tr>
+	<?php } ?>
+</table>
+</div>
 
 <table  width="100%" style="margin:0;width:100%;" border='0'>
-<?php
-//	<tr>
-//		<td colspan=10 class="littletableheader">Totales</td>
-//	</tr>
-?>
 	<tr>
 		<td width="131" class="littletablerowth" align='left'><?php echo $container_bl ?></td>
-<?php /*		<td width="131" class="littletablerowth" align='right'><?php echo $form->rislr->label;     ?></td>*/?>
+		<?php /*<td width="131" class="littletablerowth" align='right'><?php echo $form->rislr->label;     ?></td>*/?>
 		<td width="122" class="littletablerow"   align='right'><?php echo $form->rislr->output;    ?></td>
-		<td class="littletablerowth" align='right'><?php echo $form->riva->label;      ?></td>
-		<td class="littletablerow"   align='left'><?php echo $form->riva->output;     ?></td>
+		<td class="littletablerowth" align='right'><?php echo $form->riva->label;     ?></td>
+		<td class="littletablerow"   align='left' ><?php echo $form->riva->output;     ?></td>
 		<td width="111" class="littletablerowth" align='right'><?php echo $form->montotot->label;  ?></td>
 		<td width="139" class="littletablerow"   align='right'><?php echo $form->montotot->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletableheader" width="100"  rowspan='2'><?php echo $form->observa1->label;    ?></td>
 		<td colspan='3' rowspan='2'><?php echo $form->observa1->output;   ?><?php echo $form->observa2->output;   ?><?php echo $form->observa3->output;?></td>
-
 		<td class="littletablerowth" align='right'><?php echo $form->montoiva->label;  ?></td>
 		<td class="littletablerow"   align='right'><?php echo $form->montoiva->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth" align='right'><?php echo $form->montonet->label; ?></td>
 		<td class="littletablerow"   align='right'><b id='montonet_val' style='font-size:18px;font-weight: bold' ><?php echo nformat($form->montonet->value); ?></b><?php echo $form->montonet->output; ?></td>
 	</tr>
 </table>
 
-		<td>
-	<tr>
-<table>
 <?php echo $form_end?>
-<?php endif; 
-
-/*
-
-
-		<td width="125" class="littletablerowth" align='right'><?php echo $form->anticipo->label;  ?></td>
-		<td width="125" class="littletablerow"   align='right'><?php echo $form->anticipo->output; ?></td>
-
-		<td class="littletablerowth" align='right'><?php echo $form->inicial->label;   ?></td>
-		<td class="littletablerow"   align='right'><?php echo $form->inicial->output;  ?></td>
-
-		<td class="littletablerowth" align='right'><?php echo $form->mdolar->label;   ?></td>
-		<td class="littletablerow"   align='right'><?php echo $form->mdolar->output;  ?></td>
-		<td class="littletablerowth" align='right'><?php echo $form->credito->label;  ?></td>
-		<td class="littletablerow"   align='right'><?php echo $form->credito->output; ?></td>
-
-
-<table width="100%">
-	<tr>
-		<td class="littletableheader" width="100"><?php echo $form->observa1->label;    ?></td>
-		<td><?php echo $form->observa1->output;   ?><?php echo $form->observa2->output;   ?><?php echo $form->observa3->output;?></td>
-	</tr>
-</table>
-
-*/
-
-?>
+<?php endif; ?>

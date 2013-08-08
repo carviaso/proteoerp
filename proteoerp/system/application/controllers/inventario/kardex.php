@@ -98,14 +98,15 @@ class Kardex extends Controller {
 		$data['filtro'] =  $filter->output;
 
 		$code=$this->input->post('codigo');
-
 		if($code){
-			$mSQL="SELECT CONCAT_WS(' ',TRIM(descrip),TRIM(descrip2)) descrip FROM sinv WHERE codigo='$code'";
+			$dbcode = $this->db->escape($code);
+			$mSQL="SELECT CONCAT_WS(' ',TRIM(descrip),TRIM(descrip2)) descrip,activo FROM sinv WHERE codigo=${dbcode}";
 			$query = $this->db->query($mSQL);
 			$descrip='';
 			if ($query->num_rows() > 0){
 				$row = $query->row();
 				$descrip=$row->descrip;
+				$activo =$row->activo;
 			}
 
 			$link="/inventario/kardex/grid/<#origen#>/<dbdate_to_human><#fecha#>|Ymd</dbdate_to_human>/<raencode><#codigo#></raencode>/<raencode><#ubica#></raencode>";
@@ -149,12 +150,45 @@ class Kardex extends Controller {
 
 			$grid->build();
 			$data['content'] = $grid->output;
+
+			$ffinal  = $this->datasis->dameval("SELECT MAX(fecha) AS fecha FROM costos WHERE codigo=${dbcode}");
+			if(!empty($ffinal)){
+				$dbfinal = $this->db->escape($ffinal);
+				$ventas  = $this->datasis->dameval("SELECT SUM(IF(tipoa='D',-1,1)*cana) AS cana FROM sitems WHERE codigoa=${dbcode} AND fecha>${dbfinal}");
+				$compras = $this->datasis->dameval("SELECT SUM(IF(b.tipo_doc='ND',-1,1)*a.cantidad) AS cana FROM itscst AS a JOIN scst AS b ON a.control=b.control WHERE a.codigo=${dbcode} AND b.actuali>=b.fecha AND a.estampa>${dbfinal}");
+				$nentreg = $this->datasis->dameval("SELECT SUM(a.cana) AS cana FROM itsnte AS a JOIN snte AS b ON a.numero=b.numero WHERE a.codigo=${dbcode} AND estampa>${dbfinal}");
+				$actual  = $this->datasis->dameval("SELECT SUM(existen) AS cana FROM itsinv WHERE codigo=${dbcode}");
+
+				$ventas  = (empty($ventas ))? htmlnformat(0) : htmlnformat($ventas );
+                $compras = (empty($compras))? htmlnformat(0) : htmlnformat($compras);
+                $nentreg = (empty($nentreg))? htmlnformat(0) : htmlnformat($nentreg);
+				$actual  = (empty($actual ))? htmlnformat(0) : htmlnformat($actual );
+
+				if($activo=='S'){
+					$sactivo='<span style=\'font-size:0.5em;color:green;\'>ACTIVO</span>';
+				}else{
+					$sactivo='<span style=\'font-size:0.5em;color:red;\'>INACTIVO</span>';
+				}
+
+				$optadd = '<div style="">';
+				$optadd.= ' <table>';
+				$optadd.= '  <tr><td colspan=\'3\'><b style="text-size:1.4em;font-weight:bold;">Movimientos posteriores a la fecha '.dbdate_to_human($ffinal).' para todos los almacenes</b></td></tr>';
+				$optadd.= "  <tr><td>Ventas   </td><td><b>${ventas} </b></td><td rowspan='3' style='text-align:center'>Existencia actual <p style='font-size:2em;padding:0 0 0 0;margin: 0 0 0 0;font-weight:bold;'>${actual}</p>${sactivo}</td></tr>";
+				$optadd.= "  <tr><td>Compras  </td><td><b>${compras}</b></td></tr>";
+				$optadd.= "  <tr><td>N.Entrega</td><td><b>${nentreg}</b></td></tr>";
+				$optadd.= ' </table>';
+				$optadd.= '</div>';
+			}else{
+				$optadd='';
+			}
+			$data['content'] .= $optadd;
 			//echo $grid->db->last_query();
 		}
-		$data['forma'] ='';
 
-		$data['script']  = script('jquery.js');
 
+
+		$data['forma'] = '';
+		$data['script']= script('jquery.js');
 		$data['title'] = heading('Kardex de Inventario');
 		$data['head']  = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
