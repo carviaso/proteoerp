@@ -48,8 +48,9 @@ class sfpach extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"depositar", "img"=>"assets/default/images/cheque.png",  "alt" => 'Enviar Cheques',  "label"=>"Enviar a Depositar"));
-		$grid->wbotonadd(array("id"=>"efectivo",  "img"=>"assets/default/images/monedas.png", "alt" => 'Enviar Efectivo', "label"=>"Enviar Efectivo"));
+		$grid->wbotonadd(array("id"=>"depositar", "img"=>"assets/default/images/cheque.png",  "alt" => 'Enviar Cheques',  "label"=>"Enviar a Depositar", 'tema'=>'anexos'));
+		$grid->wbotonadd(array("id"=>"efectivo",  "img"=>"assets/default/images/monedas.png", "alt" => 'Enviar Efectivo', "label"=>"Enviar Efectivo",    'tema'=>'anexos'));
+		$grid->wbotonadd(array("id"=>"ocultar",   "img"=>"images/delete.png",  "alt" => 'No Depositar',    "label"=>"No Depositar"));
 		$WestPanel = $grid->deploywestp();
 
 		$mSQL  = "SELECT codbanc, CONCAT(codbanc, ' ', TRIM(banco), IF(tbanco='CAJ',' ',numcuent) ) banco FROM banc WHERE tbanco='CAJ' AND activo='S' AND codbanc<>'00' ORDER BY codbanc ";
@@ -91,6 +92,17 @@ class sfpach extends Controller {
 			</form>
 		</div>
 		';
+
+		$SouthPanel .= '
+		<div id="nodeposito-form" title="Marcar Cheques como ya depositados">
+			<form>
+			<fieldset style="border:none;font-size:12px;">
+				<h1>Seguro que desea marcar estos cheques como ya depositados?</h1>
+			</fieldset>
+			</form>
+		</div>';
+
+
 
 		$param['WestPanel']   = $WestPanel;
 		//$param['funciones']   = $funciones;
@@ -232,6 +244,60 @@ class sfpach extends Controller {
 				},
 				close: function() {allFields.val( "" ).removeClass( "ui-state-error" );}
 			});';
+
+
+		$bodyscript .= '
+			// No Depositar	
+			$( "#ocultar" ).click(function() {
+				var s = grid.getGridParam(\'selarrrow\'); 
+				if(s.length){
+					sumamonto();
+					$( "#nodeposito-form" ).dialog( "open" );
+				} else {
+					$.prompt("<h1>Seleccione uno o mas Cheques</h1>");
+				}
+			});
+
+			$( "#nodeposito-form" ).dialog({
+				autoOpen: false,
+				height: 200,
+				width: 400,
+				modal: true,
+				buttons: {
+					"Guardar": function() {
+						var bValid = true;
+						s = grid.getGridParam(\'selarrrow\'); 
+						allFields.removeClass( "ui-state-error" );
+						bValid = bValid && probar( envia,  "Caja" );
+						bValid = bValid && probar( recibe, "Banco" );
+						if ( bValid ) {
+							$.ajax({
+								type: "POST",
+								url:"'.site_url("finanzas/sfpach/nodeposito").'",
+								processData: true,
+								data: "envia="+escape(envia.val())+"&recibe="+escape(recibe.val())+"&monto="+escape(montotal)+"&ids="+escape(s),
+								success: function(a){
+									var res = $.parseJSON(a);
+									$.prompt(res.mensaje,
+										{ submit: function(e,v,m,f){
+											//window.open(\''.base_url().'formatos/ver/BANCAJA/\'+res.numero, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+										}}
+									);
+									grid.trigger("reloadGrid");
+									sumamonto();
+									return [true, a ];
+								}
+							})
+							$( this ).dialog( "close" );
+						}
+					},
+					Cancelar: function() {$( this ).dialog( "close" );}
+				},
+				close: function() {allFields.val( "" ).removeClass( "ui-state-error" );}
+			});
+			';
+
+
 
 		$bodyscript .= '
 		});';
@@ -648,6 +714,28 @@ class sfpach extends Controller {
 	}
 
 
+	//******************************************************************
+	//
+	//  Guarda los deposios pendientes
+	//
+	function nodeposito(){
+		$cheques = $this->input->get_post('ids');
+		$fecha   = date('Ymd');
+	
+		// Revisamos si el monto coincide con la suma
+		
+		$mSQL = "UPDATE sfpa SET deposito='', status='C' WHERE id IN ($cheques)";
+		$this->db->simple_query($mSQL);
+		
+		logusu('BCAJ',"Cheques marcados para no Depositar");
+		echo "{\"numero\":\"\",\"mensaje\":\"Cheques Marcados\"}";
+	}
+
+
+	//******************************************************************
+	//
+	//  Depositar Efectivo
+	//
 	function efectivo(){
 		// Genera el deposito pendiente
 		$envia   = $this->input->get_post('caja');

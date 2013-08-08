@@ -33,8 +33,6 @@ class Sinv extends Controller {
 
 		$readyLayout = $grid->readyLayout2( 216	, 135, $param['grids'][0]['gridname']);
 
-		//$grid->wbotonadd(array("id"=>"hinactivo","img"=>"images/basura.png",   "alt" => 'Oculta/Muestra Inactivos', "label"=>"Mostrar Inactivos", "tema"=>"anexos"));
-
 		$WpAdic = "
 		<tr><td><div class=\"anexos\">
 			<table cellpadding='0' cellspacing='0'>
