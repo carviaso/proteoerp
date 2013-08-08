@@ -155,7 +155,7 @@ class Kardex extends Controller {
 			if(!empty($ffinal)){
 				$dbfinal = $this->db->escape($ffinal);
 				$ventas  = $this->datasis->dameval("SELECT SUM(IF(tipoa='D',-1,1)*cana) AS cana FROM sitems WHERE codigoa=${dbcode} AND fecha>${dbfinal}");
-				$compras = $this->datasis->dameval("SELECT SUM(IF(b.tipo_doc='ND',-1,1)*a.cantidad) AS cana FROM itscst AS a JOIN scst AS b ON a.control=b.control WHERE a.codigo=${dbcode} AND b.actuali>=b.fecha AND a.estampa>${dbfinal}");
+				$compras = $this->datasis->dameval("SELECT SUM(IF(b.tipo_doc='ND',-1,1)*a.cantidad) AS cana FROM itscst AS a JOIN scst AS b ON a.control=b.control WHERE a.codigo=${dbcode} AND b.actuali>=b.fecha AND a.actuali>${dbfinal}");
 				$nentreg = $this->datasis->dameval("SELECT SUM(a.cana) AS cana FROM itsnte AS a JOIN snte AS b ON a.numero=b.numero WHERE a.codigo=${dbcode} AND estampa>${dbfinal}");
 				$actual  = $this->datasis->dameval("SELECT SUM(existen) AS cana FROM itsinv WHERE codigo=${dbcode}");
 

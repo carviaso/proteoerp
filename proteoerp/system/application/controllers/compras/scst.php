@@ -3265,7 +3265,7 @@ class Scst extends Controller {
 					if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 					//Fin de la carga de la CxP
 
-					$mSQL='UPDATE scst SET `actuali`='.$actuali.', `recep`='.$actuali.' WHERE `control`='.$this->db->escape($control);
+					$mSQL='UPDATE scst SET `actuali`=CURDATE() , `recep`='.$actuali.' WHERE `control`='.$this->db->escape($control);
 					$ban=$this->db->simple_query($mSQL);
 					if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 

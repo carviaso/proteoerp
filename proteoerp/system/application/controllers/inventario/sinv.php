@@ -793,7 +793,7 @@ class Sinv extends Controller {
 					$.post("'.site_url('inventario/sinv/barrasform')."/".'"+id,
 					function(data){
 						$("#fshow").html(data);
-						$("#fshow").dialog( { title:"BARRAS ADICIONALES", width: 220, height: 300, modal: true } );
+						$("#fshow").dialog( { title:"BARRAS ADICIONALES", width: 235, height: 320, modal: true } );
 						$("#fshow").dialog( "open" );
 					});
 				} else {
