@@ -113,12 +113,19 @@ class Datasis {
 	function traevalor($nombre,$descrip=''){
 		$CI =& get_instance();
 		$dbnombre=$CI->db->escape($nombre);
-		$dbdescri=$CI->db->escape($descrip);
-		$CI->db->query("INSERT IGNORE INTO valores SET nombre=$dbnombre, descrip=$dbdescri");
-		$qq = $CI->db->query("SELECT valor FROM valores WHERE nombre=$dbnombre");
-		$rr = $qq->row_array();
-		$aa = each($rr);
-		return $aa[1];
+
+		$qq = $CI->db->query("SELECT valor FROM valores WHERE nombre=${dbnombre}");
+		if($qq->num_rows() > 0){
+			$rr = $qq->row_array();
+			$aa = each($rr);
+			$rt = $aa[1];
+		}else{
+			$dbdescri=$CI->db->escape($descrip);
+			$CI->db->simple_query("INSERT INTO valores SET nombre=${dbnombre}, descrip=${dbdescri}");
+			$rt = '';
+		}
+
+		return $rt;
 	}
 
 	// Pone un valor en la tabla Valores
@@ -1461,7 +1468,7 @@ class Datasis {
 			$CI->db->query("CREATE TABLE modulos (modulo varchar(20) NULL ,nombre varchar(50) NULL, PRIMARY KEY (modulo) ) ENGINE=MyISAM DEFAULT CHARSET=latin1");
 			$mSQL = 'REPLACE INTO modulos SET modulo='.$CI->db->escape($modulo).', nombre='.$CI->db->escape($nombre);
 			$CI->db->query($mSQL);
-			
+
 		}
 	}
 
@@ -1732,7 +1739,7 @@ class Datasis {
 				}
 			}
 		';
-	
+
 		return $mandale;
 	}
 
