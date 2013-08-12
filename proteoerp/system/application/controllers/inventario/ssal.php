@@ -1170,6 +1170,53 @@ class Ssal extends Controller {
 	}
 
 	function instalar(){
+		
+		if (!$this->db->table_exists('ssal')) {
+			$mSQL="CREATE TABLE `ssal` (
+			  `numero` char(8) NOT NULL DEFAULT '',
+			  `fecha` date DEFAULT NULL,
+			  `tipo` char(1) DEFAULT NULL,
+			  `almacen` char(4) DEFAULT NULL,
+			  `cargo` char(6) DEFAULT NULL,
+			  `descrip` char(30) DEFAULT NULL,
+			  `motivo` char(40) DEFAULT NULL,
+			  `estampa` date DEFAULT NULL,
+			  `usuario` char(12) DEFAULT NULL,
+			  `hora` char(8) DEFAULT NULL,
+			  `transac` char(8) DEFAULT NULL,
+			  `modificado` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			  `depto` char(3) DEFAULT NULL,
+			  `id` int(11) NOT NULL AUTO_INCREMENT,
+			  PRIMARY KEY (`id`),
+			  UNIQUE KEY `numero` (`numero`),
+			  KEY `modificado` (`modificado`)
+			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+			$this->db->simple_query($mSQL);
+		}
+
+		if (!$this->db->table_exists('itssal')) {
+			$mSQL="CREATE TABLE `itssal` (
+			  `numero` char(8) DEFAULT NULL,
+			  `codigo` char(15) DEFAULT NULL,
+			  `descrip` char(40) DEFAULT NULL,
+			  `cantidad` decimal(12,3) DEFAULT NULL,
+			  `costo` decimal(17,2) DEFAULT '0.00',
+			  `estampa` date DEFAULT NULL,
+			  `usuario` char(12) DEFAULT NULL,
+			  `hora` char(8) DEFAULT NULL,
+			  `transac` char(8) DEFAULT NULL,
+			  `gasto` char(6) DEFAULT NULL,
+			  `concepto` char(6) DEFAULT NULL,
+			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `modificado` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			  PRIMARY KEY (`id`),
+			  KEY `numero` (`numero`),
+			  KEY `codigo` (`codigo`),
+			  KEY `modificado` (`modificado`)
+			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+			$this->db->simple_query($mSQL);
+		}
+
 		$campos=$this->db->list_fields('ssal');
 		if(!in_array('id',$campos)){
 			$this->db->simple_query('ALTER TABLE ssal DROP PRIMARY KEY');

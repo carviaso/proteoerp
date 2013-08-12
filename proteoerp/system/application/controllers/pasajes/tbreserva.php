@@ -961,8 +961,8 @@ class Tbreserva extends Controller {
 
 			$mSQL .='d.valsegu seguro, d.vtasa tasa, round(a.prec_02+d.valsegu+d.vtasa,2) total_buscama,  round(a.prec_01+d.valsegu+d.vtasa,2) total_ejecutivo  
 					FROM pllanos_pasaje.tbprecios a
-					JOIN pllanos_pasaje.tbofici b ON a.codofiorg=b.codofi
-					JOIN pllanos_pasaje.tbofici c ON a.codofides=c.codofi
+					JOIN pllanos_pasaje.tbofici b ON a.codofiorg=b.codofi AND b.activo="S"
+					JOIN pllanos_pasaje.tbofici c ON a.codofides=c.codofi AND c.activo="S"
 					JOIN pllanos_pasaje.tbparam d ON a.codofiorg=d.codofiori 
 			        WHERE a.codofiorg > 0 AND a.codofides >0 ';
 
@@ -1028,13 +1028,13 @@ class Tbreserva extends Controller {
 				width:"600", 
 				height:"250",
 				colModel: [
-				{name: "'.$titu.'",   id: "'.$titu.'",   width: 150 },
+				{name: "'.$titu.'", id: "'.$titu.'",   width: 150 },
 				{name: "Seguro",    id: "Seguro",    width:  50, align:"center" },  
 				{name: "Tasa",      id: "Tasa",      width:  50, align:"center" },
 				{name: "Ejecutivo", id: "Ejecutivo", width:  70, align:"right" },
-				{name: "Total_E",    id: "Total_E",    width:  70, align:"right", title: "Total" },
+				{name: "Total_E",   id: "Total_E",    width:  70, align:"right", title: "Total" },
 				{name: "Buscama",   id: "Buscama",   width:  70, align:"right" }, 
-				{name: "Total_B",    id: "Total_B",    width:  70, align:"right", title: "Total" }, 
+				{name: "Total_B",   id: "Total_B",    width:  70, align:"right", title: "Total" }, 
 				]
 				
 			 }); 

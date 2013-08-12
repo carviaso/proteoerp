@@ -1255,6 +1255,11 @@ class Banc extends Controller {
 			$this->db->query($mSQL);
 		}
 
+		if (!$this->db->field_exists('activo','banc')) {
+			$mSQL="ALTER TABLE `tban` ADD COLUMN `activo` CHAR(1) NULL DEFAULT 'S' COMMENT 'Activar/Desactivar';";
+			$this->db->query($mSQL);
+		}
+
 
 	}
 

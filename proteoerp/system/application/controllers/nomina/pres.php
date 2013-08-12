@@ -58,6 +58,14 @@ class Pres extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
+/*
+Estatus:
+	Reposo:     33% del sueldo ()
+	Vacaciones: 15 dias  Bono Vacacional 15+annos calcula segun ultimo mes
+	Todos aplican los descuentos
+*/
+
+
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
 		$ngrid      = '#newapi'.$grid0;
