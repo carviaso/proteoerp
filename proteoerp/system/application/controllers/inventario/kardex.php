@@ -100,17 +100,25 @@ class Kardex extends Controller {
 		$code=$this->input->post('codigo');
 		if($code){
 			$dbcode = $this->db->escape($code);
-			$mSQL="SELECT CONCAT_WS(' ',TRIM(descrip),TRIM(descrip2)) descrip,activo FROM sinv WHERE codigo=${dbcode}";
+			$mSQL="SELECT CONCAT_WS(' ',TRIM(descrip),TRIM(descrip2)) descrip,existen,activo FROM sinv WHERE codigo=${dbcode}";
 			$query = $this->db->query($mSQL);
-			$descrip='';
-			if ($query->num_rows() > 0){
+
+			if($query->num_rows() > 0){
 				$row = $query->row();
 				$descrip=$row->descrip;
 				$activo =$row->activo;
+				$existen=floatval($row->existen);
+
+				$actual  = $this->datasis->dameval("SELECT SUM(existen) AS cana FROM itsinv WHERE codigo=${dbcode}");
+				if(floatval($actual) != $existen){
+					$this->db->simple_query("UPDATE sinv SET existen=${actual} WHERE codigo=${dbcode}");
+				}
+			}else{
+				$descrip='No encontrado.';
 			}
 
 			$link="/inventario/kardex/grid/<#origen#>/<dbdate_to_human><#fecha#>|Ymd</dbdate_to_human>/<raencode><#codigo#></raencode>/<raencode><#ubica#></raencode>";
-			$grid = new DataGrid2("Producto: ($code) $descrip");
+			$grid = new DataGrid2("Producto: (${code}) ${descrip}");
 			$grid->agrupar(' ', 'almacen');
 			$grid->use_function('convierte','str_replace');
 			$grid->db->select(array(
@@ -157,25 +165,30 @@ class Kardex extends Controller {
 				$ventas  = $this->datasis->dameval("SELECT SUM(IF(tipoa='D',-1,1)*cana) AS cana FROM sitems WHERE codigoa=${dbcode} AND fecha>${dbfinal}");
 				$compras = $this->datasis->dameval("SELECT SUM(IF(b.tipo_doc='ND',-1,1)*a.cantidad) AS cana FROM itscst AS a JOIN scst AS b ON a.control=b.control WHERE a.codigo=${dbcode} AND b.actuali>=b.fecha AND b.actuali>${dbfinal}");
 				$nentreg = $this->datasis->dameval("SELECT SUM(a.cana) AS cana FROM itsnte AS a JOIN snte AS b ON a.numero=b.numero WHERE a.codigo=${dbcode} AND estampa>${dbfinal}");
-				$actual  = $this->datasis->dameval("SELECT SUM(existen) AS cana FROM itsinv WHERE codigo=${dbcode}");
+				$ajustes = $this->datasis->dameval("SELECT SUM(IF(b.tipo='E',1,-1)*cantidad) AS cana FROM itssal AS a JOIN ssal AS b ON a.numero = b.numero WHERE a.codigo = ${dbcode} AND b.fecha>${dbfinal}");
+				$conver  = $this->datasis->dameval("SELECT SUM(a.entrada-a.salida) AS cana FROM itconv AS a JOIN conv AS b ON a.numero = b.numero WHERE a.codigo = ${dbcode} AND b.fecha>${dbfinal}");
+				$consi   = $this->datasis->dameval("SELECT SUM(IF(tipod='E',-1,1)*a.cana) AS cana FROM itscon AS a JOIN scon AS b ON a.id_scon=b.id WHERE a.codigo = ${dbcode} AND b.fecha>${dbfinal}");
 
 				$ventas  = (empty($ventas ))? htmlnformat(0) : htmlnformat($ventas );
                 $compras = (empty($compras))? htmlnformat(0) : htmlnformat($compras);
                 $nentreg = (empty($nentreg))? htmlnformat(0) : htmlnformat($nentreg);
 				$actual  = (empty($actual ))? htmlnformat(0) : htmlnformat($actual );
+				$ajustes = (empty($ajustes))? htmlnformat(0) : htmlnformat($ajustes);
+				$conver  = (empty($conver ))? htmlnformat(0) : htmlnformat($conver );
+				$consi   = (empty($consi  ))? htmlnformat(0) : htmlnformat($consi  );
 
 				if($activo=='S'){
-					$sactivo='<span style=\'font-size:0.5em;color:green;\'>ACTIVO</span>';
+					$sactivo='<span style=\'font-size:0.7em;color:green;\'>ACTIVO</span>';
 				}else{
-					$sactivo='<span style=\'font-size:0.5em;color:red;\'>INACTIVO</span>';
+					$sactivo='<span style=\'font-size:0.7em;color:red;\'>INACTIVO</span>';
 				}
 
 				$optadd = '<div style="">';
 				$optadd.= ' <table>';
-				$optadd.= '  <tr><td colspan=\'3\'><b style="text-size:1.4em;font-weight:bold;">Movimientos posteriores a la fecha '.dbdate_to_human($ffinal).' para todos los almacenes</b></td></tr>';
-				$optadd.= "  <tr><td>Ventas   </td><td><b>${ventas} </b></td><td rowspan='3' style='text-align:center'>Existencia actual <p style='font-size:2em;padding:0 0 0 0;margin: 0 0 0 0;font-weight:bold;'>${actual}</p>${sactivo}</td></tr>";
-				$optadd.= "  <tr><td>Compras  </td><td><b>${compras}</b></td></tr>";
-				$optadd.= "  <tr><td>N.Entrega</td><td><b>${nentreg}</b></td></tr>";
+				$optadd.= '  <tr><td colspan=\'5\'><b style="text-size:1.4em;font-weight:bold;">Movimientos posteriores a la fecha '.dbdate_to_human($ffinal).' para todos los almacenes</b></td></tr>';
+				$optadd.= "  <tr><td>Ventas   </td><td style='text-align:right' ><b> ${ventas}</b></td><td style='padding-left:50px;'>Ajustes       </td><td style='text-align:right' ><b>${ajustes}</b></td><td rowspan='3' style='text-align:center'>Existencia actual <p style='font-size:2em;padding:0 0 0 0;margin: 0 0 0 0;font-weight:bold;'>${actual}</p>${sactivo}</td></tr>";
+				$optadd.= "  <tr><td>Compras  </td><td style='text-align:right' ><b>${compras}</b></td><td style='padding-left:50px;'>Conversiones  </td><td style='text-align:right' ><b> ${conver}</b></td></tr>";
+				$optadd.= "  <tr><td>N.Entrega</td><td style='text-align:right' ><b>${nentreg}</b></td><td style='padding-left:50px;'>Consignaciones</td><td style='text-align:right' ><b>  ${consi}</b></td></tr>";
 				$optadd.= ' </table>';
 				$optadd.= '</div>';
 			}else{

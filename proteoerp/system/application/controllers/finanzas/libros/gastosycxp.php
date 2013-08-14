@@ -253,7 +253,7 @@ class gastosycxp{
 			}
 		}
 
-		//Carga los descuentos por pronto pago no aplicados
+		//Carga las NC no aplicadas
 		$mSQL="SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,
 			a.montasa,
 			a.tasa,
@@ -268,7 +268,7 @@ class gastosycxp{
 			FROM sprm AS a
 			LEFT JOIN sprv AS b ON a.cod_prv=b.proveed
 			LEFT JOIN itppro AS c ON a.transac=c.transac
-			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo='DESPP' AND c.transac IS NULL";
+			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo<>'NOCON' AND c.transac IS NULL";
 
 		$query = $this->db->query($mSQL);
 		if ( $query->num_rows() > 0 ){
@@ -313,6 +313,7 @@ class gastosycxp{
 				if(!$flag) memowrite($mSQL,'genecxp');
 			}
 		}
+		//Fin de la carga de NC no aplicadas
 
 		//Carga las notas de credito por devolucion que no estan en scst
 		/*$mSQL="SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,
