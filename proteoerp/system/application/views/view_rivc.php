@@ -115,7 +115,7 @@ function totalizar(){
 			itreiva   = Number(Math.abs(this.value));
 			itimpuesto= Number(Math.abs($("#impuesto_"+ind).val()));
 			itgtotal  = Number(Math.abs($("#gtotal_"+ind).val()));
-			if(ittipo_doc=='D'){
+			if(ittipo_doc=='D' || ittipo_doc=='NC' ){
 				itreiva   = (-1)*itreiva;
 				itimpuesto= (-1)*itimpuesto;
 				itgtotal  = (-1)*itgtotal;
@@ -285,7 +285,7 @@ function autocod(id){
 				<th bgcolor='#7098D0'>Tipo    </th>
 				<th bgcolor='#7098D0'>N&uacute;mero</th>
 				<th bgcolor='#7098D0'>Fecha</th>
-				<th bgcolor='#7098D0'>Monto Factura</th>
+				<th bgcolor='#7098D0'>Monto del Efecto</th>
 				<th bgcolor='#7098D0'>Impuesto</th>
 				<th bgcolor='#7098D0'>Monto retenido</th>
 				<?php if($form->_status!='show') {?>

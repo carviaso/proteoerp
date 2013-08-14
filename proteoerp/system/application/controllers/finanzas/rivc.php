@@ -1405,14 +1405,14 @@ class Rivc extends Controller {
 		//****************************
 		$edit->it_tipo_doc = new hiddenField('tipo_doc','tipo_doc_<#i#>');
 		$edit->it_tipo_doc->db_name='tipo_doc';
-		$edit->it_tipo_doc->rule='max_length[2]|required';
+		$edit->it_tipo_doc->rule='max_length[2]|enum[NC,ND,F,D]|required';
 		$edit->it_tipo_doc->size =4;
 		$edit->it_tipo_doc->maxlength =1;
 		$edit->it_tipo_doc->rel_id ='itrivc';
 
 		$edit->it_fecha = new dateonlyField('fecha','fecha_<#i#>');
 		$edit->it_fecha->db_name='fecha';
-		$edit->it_fecha->rule='required';
+		$edit->it_fecha->rule='required|chfecha';
 		$edit->it_fecha->size =11;
 		$edit->it_fecha->maxlength =10;
 		$edit->it_fecha->rel_id ='itrivc';
@@ -1545,7 +1545,7 @@ class Rivc extends Controller {
 		$tipo_doc= $this->input->post('tipo_doc_'.$ind);
 		$fecha   = $this->input->post('fecha');
 
-		if($tipo_doc=='NC'){
+		if($tipo_doc=='NC' || $tipo_doc=='ND'){
 			$ww=' WHERE numero='.$this->db->escape($numero).' AND cod_cli='.$this->db->escape($cod_cli).' AND tipo_doc='.$this->db->escape($tipo_doc);
 			$mSQL='SELECT COUNT(*) FROM smov '.$ww;
 		}else{
@@ -1687,14 +1687,15 @@ class Rivc extends Controller {
 
 			$mSQLs=array();
 			if(empty($match['tipo']) || $match['tipo']=='F' || $match['tipo']=='D' || $match['tipo']=='T'){
-				$mSQLs[] = "SELECT a.tipo_doc, a.numero, a.totalg, a.fecha,a.iva, a.iva*$rete AS reiva
+				$mSQLs[] = "SELECT a.tipo_doc, a.numero, a.totalg, a.fecha,a.iva, a.iva*${rete} AS reiva
 				FROM  rivc AS c
 				JOIN itrivc AS b ON c.id=b.idrivc AND c.anulado='N'
 				RIGHT JOIN sfac AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
 				WHERE a.cod_cli=${sclidb} AND a.numero LIKE ${dbnumero} ${wwtipo} AND b.numero IS NULL AND a.tipo_doc <> 'X' AND a.iva>0";
 			}
-			if(empty($match['tipo']) || $match['tipo']=='NC'){
-				$mSQLs[] = "SELECT a.tipo_doc, a.numero, a.monto AS totalg, a.fecha, a.impuesto AS iva,a.impuesto*$rete AS reiva
+
+			if(empty($match['tipo']) || $match['tipo']=='NC' || $match['tipo']=='ND'){
+				$mSQLs[] = "SELECT a.tipo_doc, a.numero, a.monto AS totalg, a.fecha, a.impuesto AS iva,a.impuesto*${rete} AS reiva
 				FROM  rivc AS c
 				JOIN itrivc AS b ON c.id=b.idrivc AND c.anulado='N'
 				RIGHT JOIN smov AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
@@ -1702,7 +1703,6 @@ class Rivc extends Controller {
 				WHERE a.cod_cli=${sclidb} AND a.numero LIKE ${dbnumero} ${wwtipo}
 					AND b.numero IS NULL
 					AND d.numero IS NULL
-					AND a.tipo_doc = 'NC'
 					AND a.observa1 NOT LIKE 'RET%'
 					AND a.impuesto>0";
 			}
@@ -1714,7 +1714,7 @@ class Rivc extends Controller {
 						$retArray['label']   = $row['tipo_doc'].'-'.$row['numero'].' '.$row['totalg'].' Bs.';
 						$retArray['value']   = $row['numero'];
 						$retArray['gtotal']  = $row['totalg'];
-						$retArray['reiva']   = (($row['tipo_doc']=='D')? -1: 1)*round($row['reiva'],2);
+						$retArray['reiva']   = (($row['tipo_doc']=='D' || $row['tipo_doc']=='NC')? -1: 1)*round($row['reiva'],2);
 						$retArray['impuesto']= $row['iva'];
 						$retArray['fecha']   = dbdate_to_human($row['fecha']);
 						$retArray['tipo_doc']= $row['tipo_doc'];
@@ -1723,7 +1723,7 @@ class Rivc extends Controller {
 					}
 					$data = json_encode($retorno);
 				}else{
-					$retArray[0]['label']   = 'No se consiguieron facturas para aplicar';
+					$retArray[0]['label']   = 'No se consiguieron efectos para aplicar';
 					$retArray[0]['value']   = '';
 					$retArray[0]['cod_cli'] = '';
 					$retArray[0]['nombre']  = '';
@@ -1834,7 +1834,7 @@ class Rivc extends Controller {
 			$dbittipo_doc = $this->db->escape($ittipo_doc);
 
 			if($ittipo_doc=='F' || $ittipo_doc=='D'){
-				$sql="SELECT exento,tasa,reducida,sobretasa,montasa,monredu,monadic,nfiscal,totals,totalg,iva FROM sfac WHERE numero=$dbitnumero AND tipo_doc=$dbittipo_doc";
+				$sql="SELECT exento,tasa,reducida,sobretasa,montasa,monredu,monadic,nfiscal,totals,totalg,iva FROM sfac WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
 				$query = $this->db->query($sql);
 				if ($query->num_rows() > 0){
 					$row = $query->row();
@@ -1875,7 +1875,7 @@ class Rivc extends Controller {
 					$reiva    =$reiva+($fac*$itreiva);
 				}
 			}else{ //Para el caso en que sean notas de credito por algun otro concepto fuera de sfac
-				$sql="SELECT exento,tasa,reducida,sobretasa,montasa,monredu,monadic,nfiscal,monto AS totals, monto AS totalg,impuesto AS iva FROM smov WHERE numero=$dbitnumero AND tipo_doc=$dbittipo_doc";
+				$sql="SELECT exento,tasa,reducida,sobretasa,montasa,monredu,monadic,nfiscal,monto AS totals, monto AS totalg,impuesto AS iva FROM smov WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
 				$query = $this->db->query($sql);
 				if ($query->num_rows() > 0){
 					$row = $query->row();
@@ -1909,7 +1909,7 @@ class Rivc extends Controller {
 					$reduimpu =$reduimpu+$row->reducida;
 
 					//Totales del encabezado
-					$fac= -1; //Para restar las devoluciones
+					$fac=($ittipo_doc=='NC')? -1:1; //Para restar las devoluciones
 					$stotal   =$stotal+($fac*$row->totals);
 					$impuesto =$impuesto+($fac*$row->iva);
 					$gtotal   =$gtotal+($fac*$row->totalg);
@@ -1969,10 +1969,10 @@ class Rivc extends Controller {
 			$dbtipo_doc= $this->db->escape($row->tipo_doc);
 			$dbnumero  = $this->db->escape($row->numero);
 			$dbfecha   = $this->db->escape($row->fecha);
-			$ww = "cod_cli=$dbcod_cli AND tipo_doc=$dbtipo_doc AND numero=$dbnumero AND fecha=$dbfecha AND transac=$dbtransac";
+			$ww = "cod_cli=${dbcod_cli} AND tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
 
 			if($row->tipo_doc=='NC'){
-				$mmSQL="SELECT numccli,tipoccli,monto FROM itccli WHERE numero=$dbnumero AND  fecha=$dbfecha AND tipo_doc='NC' AND cod_cli=${dbcod_cli} AND tipoccli='FC'";
+				$mmSQL="SELECT numccli,tipoccli,monto FROM itccli WHERE numero=$dbnumero AND  fecha=${dbfecha} AND tipo_doc='NC' AND cod_cli=${dbcod_cli} AND tipoccli='FC'";
 				$qquery = $this->db->query($mmSQL);
 
 				if ($qquery->num_rows() > 0){
@@ -1990,7 +1990,7 @@ class Rivc extends Controller {
 
 
 							$sqls[] = "UPDATE sfac SET reiva=0, creiva=NULL, freiva=NULL, ereiva=NULL WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
-							$sqls[] = "UPDATE smov SET abonos=abonos-($itmonto) WHERE numero=${dbitnumero}  AND cod_cli=${dbcod_cli} AND tipo_doc='${tiposfac}' AND fecha=${dbfecha}";
+							$sqls[] = "UPDATE smov SET abonos=abonos-(${itmonto}) WHERE numero=${dbitnumero}  AND cod_cli=${dbcod_cli} AND tipo_doc='${tiposfac}' AND fecha=${dbfecha}";
 						}else{
 							$error++;
 						}
@@ -2009,7 +2009,7 @@ class Rivc extends Controller {
 					return false;
 				}
 			}
-			$sqls[]="DELETE FROM smov WHERE $ww";
+			$sqls[]="DELETE FROM smov WHERE ${ww}";
 		}
 
 		//Reversa la cuenta por pagar (Si la hubo)
@@ -2036,7 +2036,7 @@ class Rivc extends Controller {
 				$monto      = $rrow->monto;
 				$saldo     += $monto;
 			}
-			$sqls[]="DELETE FROM bmov WHERE transac=$dbtransac AND clipro='C'";
+			$sqls[]="DELETE FROM bmov WHERE transac=${dbtransac} AND clipro='C'";
 		}
 		$sqls[]="UPDATE rivc SET anulado='S' WHERE id=".$this->db->escape($id);
 
@@ -2072,6 +2072,7 @@ class Rivc extends Controller {
 		$error   = 0;
 		$montan  = 0; //Monto para anticipar
 		$sobrante= 0; //Monto sobrante para anticipar, reitegrar o pagar
+		$rp      = false; //Bandera para indicar retencion pendiente
 
 		$transac   = $do->get('transac');
 		$estampa   = $do->get('estampa');
@@ -2096,7 +2097,7 @@ class Rivc extends Controller {
 		$numero   = $do->get('nrocomp');
 		$vence    = $ex_fecha[0].$ex_fecha[1].days_in_month($ex_fecha[1],$ex_fecha[0]);
 
-		$mSQL = "DELETE FROM smov WHERE transac='$transac'";
+		$mSQL = "DELETE FROM smov WHERE transac='${transac}'";
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'RIVC'); }
 
@@ -2114,7 +2115,7 @@ class Rivc extends Controller {
 
 			//Chequea que su origen sea sfac
 			if($ittipo_doc=='F' || $ittipo_doc=='D'){
-				$sql="SELECT referen,reiva,factura,cod_cli,nombre FROM sfac WHERE numero=$dbitnumero AND tipo_doc=$dbittipo_doc";
+				$sql="SELECT referen,reiva,factura,cod_cli,nombre FROM sfac WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
 				$query = $this->db->query($sql);
 				if ($query->num_rows() > 0){
 					$row = $query->row();
@@ -2129,16 +2130,20 @@ class Rivc extends Controller {
 					$ban=$this->db->simple_query($mSQL);
 					if($ban==false){ memowrite($mSQL,'rivc'); }
 				}
-			}else{//En caso de ser una NC proveniente de smov
-				$mSQL = "UPDATE smov SET reteiva=${itmonto}, nroriva='${periodo}${numero}', emiriva='${efecha}' WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc} AND cod_cli=${dbcod_cli} LIMIT 1";
-				$ban=$this->db->simple_query($mSQL);
-				if($ban==false){ memowrite($mSQL,'rivc'); }
-				$itreferen = 'E';
+			}else{//En caso de provenir de smov
+				if($ittipo_doc=='NC'){
+					$mSQL = "UPDATE smov SET reteiva=${itmonto}, nroriva='${periodo}${numero}', emiriva='${efecha}' WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc} AND cod_cli=${dbcod_cli} LIMIT 1";
+					$ban=$this->db->simple_query($mSQL);
+					if($ban==false){ memowrite($mSQL,'rivc'); }
+					$itreferen = 'E';
+				}else{
+					$itreferen = 'C';
+				}
 			}
 
 			//Chequea si es credito y si tiene saldo
 			if($itreferen=='C'){
-				$saldo =  $this->datasis->dameval("SELECT monto-abonos FROM smov WHERE tipo_doc='FC' AND numero='$itnumero'");
+				$saldo =  $this->datasis->dameval("SELECT monto-abonos FROM smov WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero}");
 			}else{
 
 				if($ittipo_doc=='F'){
@@ -2159,6 +2164,7 @@ class Rivc extends Controller {
 						$itnumero   = $row->numero;
 
 						$saldo=$row->saldo;
+						$rp=true;
 					}else{
 						$saldo = 0;
 					}
@@ -2167,7 +2173,7 @@ class Rivc extends Controller {
 				}
 			}
 
-			//Si es una factura o una nota de debito a causa de una RP
+			//Si es una factura o una nota de debito por causa o no causa de una RP
 			if($ittipo_doc == 'F' || $ittipo_doc=='ND'){
 				//Si el saldo es 0  o menor que el monto retenido
 				if($saldo==0 || $itmonto>$saldo){
@@ -2186,7 +2192,7 @@ class Rivc extends Controller {
 					$data['impuesto']   = 0;
 					$data['abonos']     = $itmonto;
 					$data['vence']      = $fecha;
-					$data['tipo_ref']   = 'FC';
+					$data['tipo_ref']   = ($rp || $ittipo_doc == 'F')? 'FC' : $ittipo_doc;
 					$data['num_ref']    = $do->get_rel($rel,'numero',$i);
 					$data['observa1']   = 'APLICACION DE RET/IVA A FC'.$do->get_rel($rel,'numero',$i);
 					$data['estampa']    = $estampa;
