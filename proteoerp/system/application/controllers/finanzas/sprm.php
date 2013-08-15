@@ -1908,6 +1908,30 @@ class Sprm extends Controller {
 		$edit->exento->size      =19;
 		$edit->exento->maxlength =17;
 		$edit->exento->rule='condi_required|callback_chobligatipo[NC]';
+
+		$edit->reteiva = new inputField('Ret. IVA','reteiva');
+		$edit->reteiva->rule      ='max_length[17]|numeric';
+		$edit->reteiva->css_class ='inputnum';
+		$edit->reteiva->size      =19;
+		$edit->reteiva->maxlength =17;
+		$edit->reteiva->insertValue='0';
+		$edit->reteiva->rule='condi_required|callback_chobligatipo[NC]';
+
+		//Para la retencion de iva si aplica
+		$contribu= trim($this->datasis->traevalor('CONTRIBUYENTE'));
+		$rif     = trim($this->datasis->traevalor('RIF'));
+		if($contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
+			$por_rete=$this->datasis->dameval('SELECT reteiva FROM sprv WHERE proveed='.$this->db->escape($proveed));
+			if($por_rete!=100){
+				$por_rete=0.75;
+			}else{
+				$por_rete=$por_rete/100;
+			}
+		}else{
+			$por_rete=-1;
+		}
+		//fin de la retencion
+
 		//Fin de los campos para la nc
 
 		//Detalle del pago
@@ -2055,7 +2079,7 @@ class Sprm extends Controller {
 			$edit->$obj = new freeField($obj,$obj,dbdate_to_human($row->vence));
 			$edit->$obj->ind = $i;
 
-	        $obj='abono_'.$i;
+			$obj='abono_'.$i;
 			$edit->$obj = new inputField('Abono',$obj);
 			$edit->$obj->db_name      = 'abono';
 			$edit->$obj->rel_id       = 'itppro';
@@ -2069,19 +2093,19 @@ class Sprm extends Controller {
 			$edit->$obj->ind          = $i;
 			$edit->$obj->onfocus      = 'itsaldo(this,'.round($row->saldo,2).');';
 
-	        $obj='ppago_'.$i;
-			$edit->$obj = new inputField('Pronto Pago',$obj);
-			$edit->$obj->db_name      = 'ppago';
-			$edit->$obj->rel_id       = 'itppro';
-			$edit->$obj->rule         = "max_length[18]|numeric|positive|callback_chppago[$i]";
-			$edit->$obj->css_class    = 'inputnum';
-			$edit->$obj->showformat   = 'decimal';
-			$edit->$obj->autocomplete = false;
-			$edit->$obj->disable_paste= true;
-			$edit->$obj->size         = 15;
-			$edit->$obj->maxlength    = 18;
-			$edit->$obj->ind          = $i;
-			$edit->$obj->onchange     = "itppago(this,'$i');";
+			//$obj='ppago_'.$i;
+			//$edit->$obj = new inputField('Pronto Pago',$obj);
+			//$edit->$obj->db_name      = 'ppago';
+			//$edit->$obj->rel_id       = 'itppro';
+			//$edit->$obj->rule         = "max_length[18]|numeric|positive|callback_chppago[$i]";
+			//$edit->$obj->css_class    = 'inputnum';
+			//$edit->$obj->showformat   = 'decimal';
+			//$edit->$obj->autocomplete = false;
+			//$edit->$obj->disable_paste= true;
+			//$edit->$obj->size         = 15;
+			//$edit->$obj->maxlength    = 18;
+			//$edit->$obj->ind          = $i;
+			//$edit->$obj->onchange     = "itppago(this,'$i');";
 
 			$i++;
 		}
@@ -2115,9 +2139,10 @@ class Sprm extends Controller {
 		}else{
 			$conten['json_ptasa']= json_encode($arr_ptasa);
 			$conten['json_ivas'] = json_encode($arr_ivas);
-			$conten['cana']  = $i;
-			$conten['form']  = & $edit;
-			$conten['title'] = heading("Pago a proveedor: (${proveed}) ${sprv_nombre} ${sprv_rif}");
+			$conten['cana']      = $i;
+			$conten['form']      = & $edit;
+			$conten['title']     = heading("Pago a proveedor: (${proveed}) ${sprv_nombre} ${sprv_rif}");
+			$conten['por_rete']  = $por_rete;
 
 			$data['content'] = $this->load->view('view_pprv.php', $conten);
 		}
@@ -2192,6 +2217,7 @@ class Sprm extends Controller {
 		$tipo_op  = $do->get('tipo_op');
 		$fecha    = $do->get('fecha');
 		$codigo   = $do->get('codigo');
+		$reteiva  = floatval($do->get('reteiva'));
 
 		$this->ppagodata=$ivadata=array(
 			'montasa'  =>0,
@@ -2511,6 +2537,97 @@ class Sprm extends Controller {
 
 			$this->db->insert('sprm',$data);
 		}
+
+		if($tipo_doc=='NC' && $reteiva>0){
+			//Crea la nota de debito
+			$mnumnd = $this->datasis->fprox_numero('num_nd');
+			$sprm=array();
+			$sprm['cod_prv']    = $cod_prv;
+			$sprm['nombre']     = $nombre;
+			$sprm['tipo_doc']   = 'ND';
+			$sprm['numero']     = $mnumnd;
+			$sprm['fecha']      = $fecha;
+			$sprm['monto']      = $reteiva;
+			$sprm['impuesto']   = 0;
+			$sprm['abonos']     = $reteiva;
+			$sprm['vence']      = $fecha;
+			$sprm['tipo_ref']   = $tipo_doc;
+			$sprm['num_ref']    = $do->get('numero');
+			$sprm['observa1']   = 'RET/IVA CAUSADA A FC'.$numero;
+			$sprm['estampa']    = $estampa;
+			$sprm['hora']       = $hora;
+			$sprm['transac']    = $transac;
+			$sprm['usuario']    = $usuario;
+			$sprm['codigo']     = '';
+			$sprm['descrip']    = '';
+			$mSQL = $this->db->insert_string('sprm', $sprm);
+			$ban=$this->db->simple_query($mSQL);
+			if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
+
+			//Crea la nota de credito
+			$mnumnc = $this->datasis->fprox_numero('num_nc');
+			$sprm=array();
+			$sprm['cod_prv']   = 'REIVA';
+			$sprm['nombre']    = 'RETENCION DE I.V.A. POR COMPENSAR';
+			$sprm['tipo_doc']  = 'NC';
+			$sprm['numero']    = $mnumnc;
+			$sprm['fecha']     = $fecha;
+			$sprm['monto']     = $reteiva;
+			$sprm['impuesto']  = 0;
+			$sprm['abonos']    = 0;
+			$sprm['vence']     = $fecha;
+			$sprm['tipo_ref']  = '';
+			$sprm['num_ref']   = '';
+			$sprm['observa1']  = 'RET/IVA A DOC. '.$tipo_doc.$numero;
+			$sprm['estampa']   = $estampa;
+			$sprm['hora']      = $hora;
+			$sprm['transac']   = $transac;
+			$sprm['usuario']   = $usuario;
+			$sprm['codigo']    = 'NOCON';
+			$sprm['descrip']   = 'NOTA DE CONTABILIDAD';
+			$mSQL = $this->db->insert_string('sprm', $sprm);
+			$ban=$this->db->simple_query($mSQL);
+			if(!$ban){ memowrite($mSQL,'scst'); $error++;}
+
+			//Crea la retencion
+			$niva    = $this->datasis->fprox_numero('niva');
+			$ivaplica= $this->datasis->ivaplica($fecha);
+
+			$riva['nrocomp']    = $niva;
+			$riva['emision']    = $fecha;
+			$riva['periodo']    = substr($fecha,0,6) ;
+			$riva['tipo_doc']   = $tipo_doc;
+			$riva['fecha']      = $fecha;
+			$riva['numero']     = $numero;
+			$riva['nfiscal']    = '';
+			$riva['afecta']     = $itnumero;
+			$riva['clipro']     = $proveed;
+			$riva['nombre']     = $nombre;
+			$riva['rif']        = $this->datasis->dameval('SELECT rif FROM sprv WHERE proveed='.$this->db->escape($cod_prv));
+			$riva['exento']     = $exento ;
+			$riva['tasa']       = $ivaplica['tasa'];
+			$riva['tasaadic']   = $ivaplica['sobretasa'];
+			$riva['tasaredu']   = $ivaplica['redutasa'];
+			$riva['general']    = $montasa;
+			$riva['geneimpu']   = $tasa ;
+			$riva['adicional']  = $monadic;
+			$riva['adicimpu']   = $sobretasa;
+			$riva['reducida']   = $monredu;
+			$riva['reduimpu']   = $reducida;
+			$riva['stotal']     = $totalab-$impuesto;
+			$riva['impuesto']   = $impuesto;
+			$riva['gtotal']     = $totalab;
+			$riva['reiva']      = $reteiva;
+			$riva['transac']    = $transac;
+			$riva['estampa']    = $estampa;
+			$riva['hora']       = $hora;
+			$riva['usuario']    = $usuario;
+			$mSQL=$this->db->insert_string('riva', $riva);
+			$ban =$this->db->simple_query($mSQL);
+			if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+		}//Fin de la retencion
+
+
 
 		logusu('PPRO',"Abono a proveedor CREADO Prov=${cod_prv}  Numero=${numero}");
 	}

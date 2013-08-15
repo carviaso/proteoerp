@@ -1949,7 +1949,7 @@ class Rivc extends Controller {
 		$error=0;
 
 		$dbtransac= $this->db->escape($transac);
-		$mSQL="SELECT a.cod_cli,a.nombre,a.tipo_doc,a.numero,a.fecha,a.monto,a.impuesto,a.abonos,a.vence,a.tipo_ref,a.num_ref,a.fecdoc,a.nroriva,a.ningreso FROM smov AS a WHERE transac=$dbtransac";
+		$mSQL="SELECT a.cod_cli,a.nombre,a.tipo_doc,a.numero,a.fecha,a.monto,a.impuesto,a.abonos,a.vence,a.tipo_ref,a.num_ref,a.fecdoc,a.nroriva,a.ningreso FROM smov AS a WHERE transac=${dbtransac}";
 		$query = $this->db->query($mSQL);
 
 		$rel='itrivc';
@@ -1972,7 +1972,7 @@ class Rivc extends Controller {
 			$ww = "cod_cli=${dbcod_cli} AND tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
 
 			if($row->tipo_doc=='NC'){
-				$mmSQL="SELECT numccli,tipoccli,monto FROM itccli WHERE numero=$dbnumero AND  fecha=${dbfecha} AND tipo_doc='NC' AND cod_cli=${dbcod_cli} AND tipoccli='FC'";
+				$mmSQL="SELECT numccli,tipoccli,monto FROM itccli WHERE numero=${dbnumero} AND  fecha=${dbfecha} AND tipo_doc='NC' AND cod_cli=${dbcod_cli} AND tipoccli='FC'";
 				$qquery = $this->db->query($mmSQL);
 
 				if ($qquery->num_rows() > 0){
@@ -2112,12 +2112,11 @@ class Rivc extends Controller {
 			$dbitnumero   = $this->db->escape($itnumero);
 			$dbittipo_doc = $this->db->escape($ittipo_doc);
 
-
 			//Chequea que su origen sea sfac
 			if($ittipo_doc=='F' || $ittipo_doc=='D'){
 				$sql="SELECT referen,reiva,factura,cod_cli,nombre FROM sfac WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
 				$query = $this->db->query($sql);
-				if ($query->num_rows() > 0){
+				if($query->num_rows() > 0){
 					$row = $query->row();
 
 					$anterior  = $row->reiva;
@@ -2125,7 +2124,7 @@ class Rivc extends Controller {
 					$itfactura = $row->factura;
 				}
 
-				if($anterior == 0) {
+				if($anterior == 0){
 					$mSQL = "UPDATE sfac SET reiva=${itmonto}, creiva='${periodo}${numero}', freiva='${fecha}', ereiva='${efecha}' WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
 					$ban=$this->db->simple_query($mSQL);
 					if($ban==false){ memowrite($mSQL,'rivc'); }
@@ -2143,7 +2142,9 @@ class Rivc extends Controller {
 
 			//Chequea si es credito y si tiene saldo
 			if($itreferen=='C'){
-				$saldo =  $this->datasis->dameval("SELECT monto-abonos FROM smov WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero}");
+				$iittipo_doc   = ($ittipo_doc=='F')? 'FC' : $ittipo_doc;
+				$dbiittipo_doc = $this->db->escape($iittipo_doc);
+				$saldo = floatval($this->datasis->dameval("SELECT monto-abonos FROM smov WHERE tipo_doc=${dbiittipo_doc} AND numero=${dbitnumero}"));
 			}else{
 
 				if($ittipo_doc=='F'){
@@ -2369,12 +2370,12 @@ class Rivc extends Controller {
 							//Abona la ND
 							$dbfecha =$this->db->escape($rrrow->fecha);
 							$dbnumero=$this->db->escape($rrrow->numero);
-							$mSQL="UPDATE smov SET abonos=abonos+$itmonto
+							$mSQL="UPDATE smov SET abonos=abonos+${itmonto}
 							WHERE
 							cod_cli ='REIVA' AND
 							tipo_doc='ND' AND
-							numero  = $dbnumero AND
-							fecha   = $dbfecha";
+							numero  = ${dbnumero} AND
+							fecha   = ${dbfecha}";
 							$ban=$this->db->simple_query($mSQL);
 							if($ban==false){ memowrite($mSQL,'rivc');}
 
@@ -2385,8 +2386,8 @@ class Rivc extends Controller {
 							WHERE
 							cod_cli ='REIVA' AND
 							tipo_doc='NC' AND
-							numero  = $dbnumero AND
-							fecha   = $dbfecha";
+							numero  = ${dbnumero} AND
+							fecha   = ${dbfecha}";
 							$ban=$this->db->simple_query($mSQL);
 							if($ban==false){ memowrite($mSQL,'rivc');}
 						}

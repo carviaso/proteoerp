@@ -121,9 +121,9 @@ function chtipodoc(){
 	if(tipo=='NC'){
 		$('#aplefectos').show();
 		$('#aplpago').hide();
-		$('input[name^="ppago_"]').val('');
+		/*$('input[name^="ppago_"]').val('');
 		$('input[name^="ppago_"]').hide('');
-		$('#ppagotit').hide();
+		$('#ppagotit').hide(); */
 		$('#monto_val').show();
 		$('#monto').attr('type','hidden');
 		$('#trdpto').hide();
@@ -132,7 +132,7 @@ function chtipodoc(){
 	}else if(tipo=='AN'){
 		$('#aplefectos').hide();
 		$('input[name^="abono_"]').val("");
-		$('input[name^="ppago_"]').val("");
+		/*$('input[name^="ppago_"]').val("");*/
 		totaliza();
 		$('#aplpago').show();
 		$('#monto_val').hide();
@@ -143,8 +143,8 @@ function chtipodoc(){
 	}else{
 		$('#aplefectos').show();
 		$('#aplpago').show();
-		$('input[name^="ppago_"]').show('');
-		$('#ppagotit').show();
+		/*$('input[name^="ppago_"]').show('');
+		$('#ppagotit').show();*/
 		$('#monto_val').show();
 		$('#monto').attr('type','hidden');
 		$('#trdpto').hide();
@@ -166,6 +166,7 @@ function totaliza(){
 	var exento   =0;
 	var arr  = $('input[name^="abono_"]');
 	var mascara= "PAGA ";
+	var tipo=$('#tipo_doc').val();
 
 	jQuery.each(arr, function(){
 		nom=this.name;
@@ -174,7 +175,8 @@ function totaliza(){
 			ind     = this.name.substring(pos+1);
 			i       = parseInt(ind);
 			num     = Number(this.value);
-			ppago   = Number($('#ppago_'+ind).val());
+			/*ppago   = Number($('#ppago_'+ind).val());*/
+			ppago   = 0;
 			monto   = Number($('#monto_'+ind).val());
 			tipo_doc= $('#tipo_doc_'+ind).val();
 			numero  = $('#numero_'+ind).val();
@@ -199,13 +201,28 @@ function totaliza(){
 		}
 	});
 
-	$('#montasa'  ).val(roundNumber(montasa  ,2));
-	$('#monredu'  ).val(roundNumber(monredu  ,2));
-	$('#monadic'  ).val(roundNumber(monadic  ,2));
-	$('#tasa'     ).val(roundNumber(tasa     ,2));
-	$('#reducida' ).val(roundNumber(reducida ,2));
-	$('#sobretasa').val(roundNumber(sobretasa,2));
-	$('#exento'   ).val(roundNumber(exento   ,2));
+	montasa  =roundNumber(montasa  ,2);
+	monredu  =roundNumber(monredu  ,2);
+	monadic  =roundNumber(monadic  ,2);
+	tasa     =roundNumber(tasa     ,2);
+	reducida =roundNumber(reducida ,2);
+	sobretasa=roundNumber(sobretasa,2);
+	exento   =roundNumber(exento   ,2);
+
+	$('#montasa'  ).val(montasa  );
+	$('#monredu'  ).val(monredu  );
+	$('#monadic'  ).val(monadic  );
+	$('#tasa'     ).val(tasa     );
+	$('#reducida' ).val(reducida );
+	$('#sobretasa').val(sobretasa);
+	$('#exento'   ).val(exento   );
+
+	<?php if($por_rete>=0){ ?>
+	if(tipo=='NC'){
+		$('#reteiva').val(roundNumber((tasa+reducida+sobretasa)*<?php echo $por_rete; ?>,2));
+	}
+	<?php } ?>
+
 
 	$('#monto').val(roundNumber(stota-sppago ,2));
 	$('#monto_val').text(nformat(stota-sppago ,2));
@@ -265,7 +282,6 @@ function chapltasa(){
 	$('#monadic').val(base);
 	$('#sobretasa').val(roundNumber(adicional-base,2));
 
-	//totaliza();
 }
 
 </script>
@@ -308,7 +324,7 @@ echo $title;
 			<td align="right"  class="littletableheaderdet"><b>Monto</b></td>
 			<td align="center" class="littletableheaderdet"><b>Saldo</b></td>
 			<td align="right"  class="littletableheaderdet"><b>Abonar</b></td>
-			<td align="right"  class="littletableheaderdet"><b id='ppagotit'>P.Pago</b></td>
+			<!-- <td align="right"  class="littletableheaderdet"><b id='ppagotit'>P.Pago</b></td> -->
 		</tr>
 	</thead>
 	<tbody>
@@ -321,7 +337,7 @@ echo $title;
 		$it_monto    = "monto_${i}";
 		$it_abono    = "abono_${i}";
 		$it_saldo    = "saldo_${i}";
-		$it_ppago    = "ppago_${i}";
+		//$it_ppago    = "ppago_${i}";
 		$it_vence    = "vence_${i}";
 	?>
 	<tr id='tr_itccli_<?php echo $i; ?>' <?php echo ($i%2 == 0) ? 'class="odd"' : '';?> >
@@ -331,7 +347,6 @@ echo $title;
 		<td align="right" ><?php echo $form->$it_monto->output; ?></td>
 		<td align="right" ><?php echo $form->$it_saldo->output; ?></td>
 		<td align="right" ><?php echo $form->$it_abono->output; ?></td>
-		<td align="right" ><?php echo $form->$it_ppago->output; ?></td>
 	</tr>
 	<?php } ?>
 	</tbody>
@@ -369,7 +384,11 @@ echo $title;
 		<td align="right">Exento</td>
 		<td align="right"><?php echo $form->exento->output;  ?></td>
 		<td align="right"></td>
+	</tr><?php if($por_rete>=0){ ?>
+	<tr>
+		<td align="center" colspan='3'><?php echo  $form->reteiva->label.' '.$form->reteiva->output;?></td>
 	</tr>
+	<?php } ?>
 </table>
 </p>
 <?php echo $container_br.$container_bl;?>

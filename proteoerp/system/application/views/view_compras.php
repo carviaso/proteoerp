@@ -37,7 +37,6 @@ $(function(){
 	$("#vence").datepicker({   dateFormat: "dd/mm/yy" });
 	$("#actuali").datepicker({ dateFormat: "dd/mm/yy" });
 
-
 	totalizar();
 	for(var i=0;i < <?php echo $form->max_rel_count['itscst']; ?>;i++){
 		autocod(i.toString());
@@ -79,6 +78,30 @@ $(function(){
 			$('#proveed').val(ui.item.proveed);
 			$('#sprvreteiva').val(ui.item.reteiva);
 			setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
+			$('#serie').change();
+		}
+	});
+
+	$('#serie').change(function (){
+		var proveed = $('#proveed').val();
+		var numero  = $('#serie').val();
+		var tipo    = $('#tipo_doc').val();
+
+		if(numero!='' && proveed!='' && tipo!=''){
+			$.ajax({
+				url: "<?php echo site_url('ajax/scstdupli'); ?>",
+				dataType: 'json',
+				type: 'POST',
+				data: {'proveed' : proveed, 'numero': numero, 'tipo_doc':tipo},
+				success: function(data){
+					if(data.status=='A'){
+						$.prompt("<span style='font-size:1.5em'>Ya existe un registro con el mismo n&uacute;mero y el mismo proveedor de fecha <b>"+data.fecha+"</b>, contro <b>"+data.nfiscal+"</b> y monto <b>"+nformat(data.monto,2)+"</b></span>", {
+							title: "Posible registro duplicado",
+							buttons: { "Continuar": true }
+						});
+					}
+				},
+			});
 		}
 	});
 });

@@ -930,6 +930,34 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
+	// Chequea que el gasto no este duplicado
+	//
+	function scstdupli(){
+		$proveed = $this->input->post('proveed');
+		$tipo_doc= $this->input->post('tipo_doc');
+		$numero  = $this->input->post('numero');
+		$rt=array('status'=>'B');
+
+		if($proveed!==false && $numero !== false && $tipo_doc!== false){
+			$dbproveed = $this->db->escape(trim($proveed));
+			$dbnumero  = $this->db->escape(trim($numero ));
+			$dbtipo_doc= $this->db->escape(trim($tipo_doc));
+			$row = $this->datasis->damerow("SELECT montonet AS monto,tipo_doc,fecha,serie,nfiscal FROM scst WHERE tipo_doc<>'XX' AND tipo_doc=${dbtipo_doc} AND proveed=${dbproveed} AND (numero=${dbnumero}  OR serie=${dbnumero})");
+			if(!empty($row)){
+				$rt['status']   = 'A';
+				$rt['control']  = $row['nfiscal'];
+				$rt['fecha']    = $this->_datehuman($row['fecha']);
+				$rt['serie']    = $row['serie'];
+				$rt['monto']    = $row['monto'];
+				$rt['nfiscal']  = $row['nfiscal'];
+				//$rt['tipo_doc'] = $row['tipo_doc'];
+			}
+		}
+		echo json_encode($rt);
+	}
+
+
+	//******************************************************************
 	//Busca facturas para aplicarles devolucion o nota de despacho
 	//
 	function buscasfacdev(){
