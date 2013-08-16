@@ -15,7 +15,7 @@ class fallas extends Controller {
 		$this->falla[]=array('sql' =>'margen1 > 100 OR margen2 > 100 OR margen3 > 100 OR margen4 > 100', 'nombre'             => 'Productos con margenes altos');
 		$this->falla[]=array('sql' =>'margen1 < 10 OR margen2 < 10 OR margen3 < 10 OR margen4 < 10', 'nombre'                 => 'Productos con margenes bajos');
 		$this->falla[]=array('sql' =>'existen < 0', 'nombre'                                                                  => 'Productos con existencia negativa');
-		$this->falla[]=array('sql' =>'( precio1 < precio2 OR precio2 < precio3 OR precio3 < precio4 )', 'nombre'              => 'Precios con orden no secuenciales decreciente');
+		$this->falla[]=array('sql' =>'( precio2>precio1 OR precio3>precio2 OR precio3>precio1 OR precio4>precio3 OR precio4>precio2 OR precio4>precio1)', 'nombre'              => 'Precios con orden no secuenciales decreciente');
 	}
 
 	function index(){
@@ -69,6 +69,7 @@ class fallas extends Controller {
 			$grid->build();
 			//echo $grid->db->last_query();
 			$salida.=$grid->output;
+			$salida.=$grid->recordCount.' Registros encontrados';
 		}
 		$data['content'] = $salida;
 		$data['title']   = '<h1>Productos con fallas</h1>';
@@ -86,7 +87,7 @@ class fallas extends Controller {
 		var_dump($this->db->simple_query($mSQL));
 	}
 
-	//Arregla la secuencia de precios
+	//Arregla la secuencia de precios respetando el precio jerarquico superior
 	function arreglasecu(){
 		$mSQL='UPDATE sinv SET precio2=precio1, base2=base1, margen2=margen1 WHERE margen2>margen1';
 		var_dump($this->db->simple_query($mSQL));
@@ -96,6 +97,28 @@ class fallas extends Controller {
 		var_dump($this->db->simple_query($mSQL));
 	}
 
+	//Arregla la secuencia reordenando los precios
+	function arreglasecuord(){
+		$mSQL='SELECT codigo,precio1,precio2,precio3,precio4 FROM sinv WHERE precio2>precio1 OR precio3>precio2 OR precio3>precio1 OR precio4>precio3 OR precio4>precio2 OR precio4>precio1';
+		$query = $this->db->query($mSQL);
+		foreach ($query->result() as $row){
+			$dbcodigo= $this->db->escape($row->codigo);
+			$precios = array($row->precio1,$row->precio2,$row->precio3,$row->precio4);
+			sort($precios);
+			$precios=array_reverse($precios);
+
+			$data=array();
+			foreach($precios as $i=>$prec){
+				$ind='precio'.$i;
+				$data[$ind] = $prec;
+			}
+
+			$where = "codigo = ${dbcodigo}";
+			$sql = $this->db->update_string('sinv', $data, $where);
+		}
+		$this->arreglamarbases();
+	}
+
 	//Recalcula los margenes y las bases respetando el precio
 	function arreglamarbases(){
 		$mSQL="UPDATE sinv SET
@@ -103,14 +126,14 @@ class fallas extends Controller {
 		base2=ROUND(precio2*100/(100+iva),2),
 		base3=ROUND(precio3*100/(100+iva),2),
 		base4=ROUND(precio4*100/(100+iva),2)";
-		var_dump($this->db->simple_query($mSQL));
+		$this->db->query($mSQL);
 
 		$mSQL="UPDATE sinv SET
 		margen1=ROUND(100-((IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(pond,ultimo)))*100)/base1),2),
 		margen2=ROUND(100-((IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(pond,ultimo)))*100)/base2),2),
 		margen3=ROUND(100-((IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(pond,ultimo)))*100)/base3),2),
 		margen4=ROUND(100-((IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(pond,ultimo)))*100)/base4),2)";
-		var_dump($this->db->simple_query($mSQL));
+		$this->db->query($mSQL);
 	}
 
 	//Arregla los margenes negativos
