@@ -45,6 +45,11 @@ class Pers extends Controller {
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gdivi' >Divisiones</a></div></td>
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gdepa'>Deptos.</a></div></td>
 				</tr>
+				<tr>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='reposo'  >Reposo</a></div></td>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='vacacion'>Vacacion</a></div></td>
+				</tr>
+
 			</table>
 			</div>
 		</td></tr>\n
@@ -141,6 +146,23 @@ class Pers extends Controller {
 				});
 			});
 		';
+
+		// REPOSO
+		$bodyscript .= '
+		$("#reposo").click(
+			function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					$.post("'.site_url('nomina/pers/reposoform').'/"+id,
+					function(data){
+						$("#fshow").html(data);
+						$("#fshow").dialog( { title:"ASIGNACION DE REPOSO", width: 690, height: 400, modal: true } );
+						$("#fshow").dialog( "open" );
+					});
+				} else { $.prompt("<h1>Por favor Seleccione una Persona</h1>");}
+			});
+		';
+
 
 
 		$fvari = '"<h1>Variables del Trabajador</h1>Cliente: <b>"+ret.nombre+"</b><br><br><table align=center><tr><td>';
@@ -1274,13 +1296,11 @@ class Pers extends Controller {
 		$edit->enlace->group = 'Relaci&oacute;n Laboral';
 		$edit->enlace->append($cboton);
 		$edit->enlace->rule='trim|strtoupper';
-		//$edit->enlace->rule='trim|strtoupper|existescli';
 
 		$edit->sso = new inputField('Nro. SSO', 'sso');
 		$edit->sso->size =13;
 		$edit->sso->maxlength=11;
 		$edit->sso->group = 'Relaci&oacute;n Laboral';
-		//$edit->sso->rule='trim|numeric';
 		$edit->sso->css_class='inputnum';
 
 		$edit->observa = new textareaField('Observaci&oacute;n', 'observa');
@@ -1848,18 +1868,7 @@ class Pers extends Controller {
 			'editoptions'   => '{ value: '.$adivision.',  style:"width:250px"}',
 			'stype'         => "'text'",
 		));
-/*
-		$grid->addField('descrip');
-		$grid->label('Descripcion');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => 'false',
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 30 }',
-		));
-*/
+
 		$grid->addField('enlace');
 		$grid->label('Enlace');
 		$grid->params(array(
@@ -1901,6 +1910,239 @@ class Pers extends Controller {
 		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
 		echo $msalida;
 	}
+
+
+	//******************************************************************
+	// Forma de Departamento
+	//
+	function reposoform( $id=0){
+		$editar = "true";
+
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('Numero');
+		$grid->params(array(
+//			'hidden'   => 'true',
+			'align'    => "'center'",
+			'frozen'   => 'true',
+			'width'    => 60,
+			'editable' => 'false',
+			'search'   => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+
+		$grid->addField('codigo');
+		$grid->label('Codigo');
+		$grid->params(array(
+			'hidden'        => 'true',
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 100,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:false}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
+		));
+
+
+		$grid->addField('fecha');
+		$grid->label('Fecha');
+		$grid->params(array(
+			'hidden'        => 'true',
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+
+		$grid->addField('inicio');
+		$grid->label('Inicio');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 70,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+
+		$grid->addField('final');
+		$grid->label('Final');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 70,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+
+		$grid->addField('observa');
+		$grid->label('Observa');
+		$grid->params(array(
+			'search'        => 'false',
+			'editable'      => $editar,
+			//'width'         => 250,
+			'edittype'      => "'textarea'",
+			'editoptions'   => "{rows:2, cols:80}",
+		));
+
+/*
+		$grid->addField('estampa');
+		$grid->label('Estampa');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+
+		$grid->addField('usuario');
+		$grid->label('Usuario');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 120,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:12, maxlength: 12 }',
+		));
+
+		$grid->addField('hora');
+		$grid->label('Hora');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:8, maxlength: 8 }',
+		));
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
+*/
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('670');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url('nomina/pers/repoget/'.$id));
+		$grid->setUrlput(site_url('nomina/pers/reposet/'.$id));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+		echo $msalida;
+	}
+
+
+	//******************************************************************
+	// Traer Data
+	//
+	function repoget( $id = 0 ){
+		$grid       = $this->jqdatagrid;
+
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('preposo');
+		$codigo = $this->datasis->dameval("SELECT codigo FROM pers WHERE id=$id");
+
+		$mWHERE[] = array('=', 'codigo', $codigo, '' );
+
+		$response   = $grid->getData('preposo', array(array()), array(), false, $mWHERE );
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+	}
+
+	//******************************************************************
+	// Guarda la Informacion del Grid o Tabla
+	//
+	function reposet( $idper = 0 ){
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = $this->input->post('id');
+		$data   = $_POST;
+		$check  = 0;
+		$codigo = $this->datasis->dameval("SELECT codigo FROM pers WHERE id=$idper");
+
+		$data['codigo'] = $codigo;
+		$data['fecha']  = date('Ymd');
+		
+		unset($data['oper']);
+		unset($data['id']);
+
+		if($oper == 'add'){
+			if(false == empty($data)){
+				$check = $this->datasis->dameval("SELECT count(*) FROM preposo WHERE final<=".$this->db->escape($data['inicio']) );
+				if ( $check == 0 ){
+					$data['usuario']  = $this->secu->usuario();
+					$data['estampa']  = date('Ymd');
+					$data['hora']     = date('H:i:s');
+					$this->db->insert('preposo', $data);
+					echo "Registro Agregado";
+
+					logusu('PREPOSO',"Registro ????? INCLUIDO");
+				} else
+					echo "Ya existe un registro con ese $mcodp";
+			} else
+				echo "Fallo Agregado!!!";
+
+		} elseif($oper == 'edit') {
+			$this->db->where("id", $id);
+			$this->db->update('preposo', $data);
+			logusu('PREPOSO',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+			echo "$mcodp Modificado";
+
+		} elseif($oper == 'del') {
+			$meco = $this->datasis->dameval("SELECT $mcodp FROM preposo WHERE id=$id");
+			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM preposo WHERE id='$id' ");
+			if ($check > 0){
+				echo " El registro no puede ser eliminado; tiene movimiento ";
+			} else {
+				//$this->db->simple_query("DELETE FROM preposo WHERE id=$id ");
+				//logusu('PREPOSO',"Registro ????? ELIMINADO");
+				echo "Registro Eliminado";
+			}
+		};
+	}
+
 
 
 	//******************************************************************
@@ -2023,6 +2265,24 @@ class Pers extends Controller {
 			$this->db->simple_query('ALTER TABLE divi ADD UNIQUE INDEX division (division)');
 			$this->db->simple_query('ALTER TABLE divi ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		};
+
+		if (!$this->db->table_exists('preposo')) {
+			$mSQL="CREATE TABLE preposo (
+			  codigo   varchar(15) NOT NULL,
+			  fecha    date        NOT NULL,
+			  inicio   date        NOT NULL,
+			  final    date        NOT NULL,
+			  observa  text,
+			  estampa  date        DEFAULT NULL,
+			  usuario  varchar(12) DEFAULT NULL,
+			  hora     varchar(8)  DEFAULT NULL,
+			  id       int(11)     NOT NULL AUTO_INCREMENT,
+			  PRIMARY KEY (`id`),
+			  UNIQUE KEY `codigo` (`codigo`)
+			) ENGINE=MyISAM  DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
+			$this->db->simple_query($mSQL);
+		}
+
 
 	}
 }

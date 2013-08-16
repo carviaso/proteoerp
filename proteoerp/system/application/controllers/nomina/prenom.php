@@ -78,7 +78,6 @@ class Prenom extends Controller {
 			}else{
 
 			}
-
 			$this->_creaprenom($contrato, $fechac, $fechap );
 			$this->_creapretab();  // Crea Pretabla
 			$this->calcuto();      // Calcula todos
@@ -135,7 +134,6 @@ class Prenom extends Controller {
 		}else{
 
 		}
-
 		$this->_creaprenom($contrato, $fechac, $fechap );
 		$this->_creapretab();  // Crea Pretabla
 		$this->calcuto();      // Calcula todos
@@ -342,7 +340,7 @@ class Prenom extends Controller {
 
 			}
 
-			memowrite($SPROME.' == >> '.$DIAS, $codigo);
+			//memowrite($SPROME.' == >> '.$DIAS, $codigo);
 
 
 			foreach ($query->result() as $row){

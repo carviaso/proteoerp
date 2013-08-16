@@ -249,6 +249,17 @@ class Sueldomin extends Controller {
 			'editoptions'   => '{ size:50, maxlength: 50 }',
 		));
 
+		$grid->addField('aplica');
+		$grid->label('Aplicacion');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Aplicacion" }'
+		));
 
 		$grid->addField('valor');
 		$grid->label('Valor');
@@ -419,6 +430,11 @@ class Sueldomin extends Controller {
 		$edit->gaceta->size =52;
 		$edit->gaceta->maxlength =50;
 
+		$edit->fecha = new dateonlyField('Aplicacion','aplica');
+		$edit->fecha->rule='chfecha';
+		$edit->fecha->size =10;
+		$edit->fecha->maxlength =8;
+
 		$edit->valor = new inputField('Valor','valor');
 		$edit->valor->rule='numeric';
 		$edit->valor->css_class='inputnum';
@@ -471,13 +487,18 @@ class Sueldomin extends Controller {
 
 	function instalar(){
 		if (!$this->db->table_exists('sueldomin')) {
-			$mSQL="CREATE TABLE `sueldomin` (
-			  `fecha` date DEFAULT NULL,
-			  `gaceta` varchar(50) DEFAULT NULL,
-			  `valor` decimal(12,2) DEFAULT NULL,
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  PRIMARY KEY (`id`)
-			) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
+			$mSQL="
+			CREATE TABLE sueldomin (
+				fecha  DATE          NULL DEFAULT NULL COMMENT 'Fecha de la Gaceta',
+				gaceta VARCHAR(50)   NULL DEFAULT NULL COMMENT 'Numero de Gaceta',
+				aplica DATE          NULL DEFAULT NULL COMMENT 'Fecha de Aplicacion',
+				valor  DECIMAL(12,2) NULL DEFAULT NULL COMMENT 'Sueldo Minimo Mensual',
+				id     INT(11)   NOT NULL AUTO_INCREMENT,
+			PRIMARY KEY (id)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM;
+			";
 			$this->db->simple_query($mSQL);
 		}
 		//$campos=$this->db->list_fields('sueldomin');

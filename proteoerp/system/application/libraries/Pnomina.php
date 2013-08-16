@@ -51,7 +51,7 @@ class fnomina {
 		if($mFRECU == 'B') $SUELDOA = $mMONTO/2;
 		if($mFRECU == 'Q') $SUELDOA = $mMONTO*24/52;
 		if($mFRECU == 'M') $SUELDOA = $mMONTO*12/52 ;
-		memowrite($SUELDOA,"SUELDO_SEM");
+		//memowrite($SUELDOA,"SUELDO_SEM");
 
 		return $SUELDOA;
 	}
@@ -102,7 +102,7 @@ class fnomina {
 		$desde = new DateTime($mDESDE);
 		$hasta = new DateTime($mHASTA);
 		$anti  = $desde->diff($hasta);
-		memowrite('Antiguedad: Ano='.$anti->format('%y').' Mes='.$anti->format('%m').' dia='.$anti->format('%d'),'Antiguedad');
+		//memowrite('Antiguedad: Ano='.$anti->format('%y').' Mes='.$anti->format('%m').' dia='.$anti->format('%d'),'Antiguedad');
 		
 		return array( $anti->format('%y'), $anti->format('%m'), $anti->format('%d') );
 	}
@@ -181,6 +181,40 @@ class fnomina {
 		$suma  = $row->cuenta;
 		return $suma;
 	}
+
+	//******************************************************************
+	// Reposo 
+	//
+	function REPOSO(){
+		// VER SI ESTA EN REPOSO
+		$mSQL  = "SELECT inicio, final FROM preposo WHERE codigo=".$this->ci->db->escape($this->CODIGO)." AND inicio<='".$this->fhasta."'";
+		memowrite($mSQL, 'Reposo');
+		$query = $this->ci->db->query($mSQL);
+		$diasefect = 0; 
+		
+		$reposos = $query->num_rows();
+		if ( $query->num_rows() > 0 ){
+			if ( $reposos == 1 ) {
+				// Busca cuantos dias hay entre el periodo
+				$row     = $query->row();
+				$inicial = $row->inicio;
+				$final   = min( $row->final, $this->fhasta);
+				
+				$d = new DateTime($inicial);
+				$h = new DateTime($final);
+				$diasantes = $d->diff($h)->format('%a');
+				
+				$d = new DateTime($this->fdesde);
+				$h = new DateTime($final);
+				$diasduran = $d->diff($h)->format('%a');
+				
+				$diasefect = min($diasantes-3, $diasduran);
+				if ( $diasefect < 0 ) $diasefect = 0;
+			}
+		}
+
+		return $diasefect;
+	}
 	
 	//******************************************************************
 	// Calcula los lunes del periodo
@@ -245,7 +279,7 @@ class Pnomina extends fnomina {
 		
 		$fformula = $this->_traduce($formula);
 
-		//if ( strpos($formula,'SUELDO_PROMEDIO') )
+		if ( strpos($formula,'REPOSO') )
 			memowrite($formula.' == >> '.$fformula, 'Formula');
 
 		$retorna='$rt='.$fformula.';';
