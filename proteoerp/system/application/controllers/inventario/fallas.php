@@ -115,6 +115,7 @@ class fallas extends Controller {
 
 			$where = "codigo = ${dbcodigo}";
 			$sql = $this->db->update_string('sinv', $data, $where);
+			$this->db->query($sql);
 		}
 		$this->arreglamarbases();
 	}
