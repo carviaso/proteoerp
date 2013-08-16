@@ -109,7 +109,8 @@ class fallas extends Controller {
 
 			$data=array();
 			foreach($precios as $i=>$prec){
-				$ind='precio'.$i;
+				$o=$i+1;
+				$ind='precio'.$o;
 				$data[$ind] = $prec;
 			}
 
