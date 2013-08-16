@@ -780,20 +780,20 @@ function bobo(url){'."
 
 	function _contadores($num=null){
 		$rt='';
-		if(!empty($num) AND is_numeric($num)){
+		if(!empty($num) && is_numeric($num)){
 			$tables = $this->db->list_tables();
 
 			foreach ($tables as $table){
 				$fields = $this->db->list_fields($table);
 				if(count($fields)==3){
-					if($fields[0]=='numero' AND $fields[1]=='usuario' AND $fields[2]=='fecha'){
-						$mSQL="DELETE FROM `$table` WHERE numero>=$num";
+					if($fields[0]=='numero' && $fields[1]=='usuario' && $fields[2]=='fecha'){
+						$mSQL="DELETE FROM `${table}` WHERE numero>=${num}";
 						if($this->db->simple_query($mSQL)){
-							$mSQL="ALTER TABLE `$table` AUTO_INCREMENT=$num";
+							$mSQL="ALTER TABLE `$table` AUTO_INCREMENT=${num}";
 							if (!$this->db->simple_query($mSQL)){
-								$rt.= "Error cambiando el contador en $table \n";
+								$rt.= "Error cambiando el contador en ${table} \n";
 							}else{
-								$rt.= "$table cambiado \n";
+								$rt.= "${table} cambiado \n";
 							}
 						}
 					}
@@ -801,6 +801,25 @@ function bobo(url){'."
 			}
 		}
 		return $rt;
+	}
+
+
+	function statuscont(){
+		$tables = $this->db->list_tables();
+
+		foreach ($tables as $table){
+			$fields = $this->db->list_fields($table);
+			if(count($fields)==3){
+				if($fields[0]=='numero' && $fields[1]=='usuario' && $fields[2]=='fecha'){
+					$mSQL="SHOW TABLE STATUS LIKE '${table}'";
+					 $query = $this->db->query($mSQL);
+					if($query->num_rows() >0){
+						$row = $query->row();
+						echo '<b>'.$table.'</b>: '.$row->Auto_increment.br();
+					}
+				}
+			}
+		}
 	}
 
 	function confirma($par){

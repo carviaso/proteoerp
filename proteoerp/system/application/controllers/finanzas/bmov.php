@@ -611,8 +611,13 @@ class Bmov extends Controller {
 						$("#adicional").html(msg);
 					}
 				});
-			}
-		');
+			},afterInsertRow:
+			function( rid, aData, rowe){
+				if(aData.anulado == "S" ){
+					$(this).jqGrid( "setCell", rid, "id","", {color:"#FFFFFF", background:"#C90623" });
+				}
+			}'
+		);
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));

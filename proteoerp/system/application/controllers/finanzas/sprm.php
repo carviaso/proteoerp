@@ -1770,9 +1770,9 @@ class Sprm extends Controller {
 
 		$edit->codigo = new  dropdownField('Motivo', 'codigo');
 		$edit->codigo->option('','Ninguno');
-		$edit->codigo->options('SELECT TRIM(codigo) AS cod, nombre FROM botr WHERE tipo=\'C\' ORDER BY nombre');
+		$edit->codigo->options('SELECT TRIM(codigo) AS cod, nombre FROM botr WHERE tipo=\'P\' ORDER BY nombre');
 		$edit->codigo->style='width:200px;';
-		$edit->codigo->rule ='';
+		$edit->codigo->rule ='condi_required|callback_chobligatipo[NC]';
 
 		$edit->numero = new inputField('N&uacute;mero','numero');
 		$edit->numero->rule='max_length[8]';
@@ -2150,7 +2150,7 @@ class Sprm extends Controller {
 
 	function chdepto($dpto){
 		$tipo  = $this->input->post('tipo_doc');
-		if($tipo=='NC' && empty($dpto)){
+		if($tipo=='AN' && empty($dpto)){
 			$this->validation->set_message('chdepto', 'El campo %s es necesario para las notas de credito.');
 			return false;
 		}
@@ -2302,6 +2302,13 @@ class Sprm extends Controller {
 			$sobretasa = $do->get('sobretasa');
 			$exento    = $do->get('exento'   );
 
+			//Limpia la forma de pago ya que no se necesita para una NC
+			$do->set('banco'  ,'');
+			$do->set('tipo_op','');
+			$do->set('numche' ,'');
+			$do->set('benefi' ,'');
+			$do->set('posdata','');
+
 			$iivast = $montasa+$monredu+$monadic+$tasa+$reducida+$sobretasa+$exento;
 
 			if(abs($iivast-$totalab)>0.2){
@@ -2355,18 +2362,24 @@ class Sprm extends Controller {
 
 		$transac  = $this->datasis->prox_sql('ntransa',8);
 		$mcontrol = $this->datasis->prox_sql('nsprm'  ,8);
-		$mnroegre = $this->datasis->prox_sql('negreso',8);
-		$bdata = Common::_traebandata($banco);
-		$tbanco   = $bdata['tbanco'];
-		$mndebito = ($tipo_op == 'ND' && $tbanco != 'CAJ')? $this->datasis->prox_sql('ndebito',8) : '';
-
+		if($tipo_doc!='NC'){
+			$mnroegre  = $this->datasis->prox_sql('negreso',8);
+			$bdata     = Common::_traebandata($banco);
+			$tbanco    = $bdata['tbanco'];
+			$mndebito  = ($tipo_op == 'ND' && $tbanco != 'CAJ')? $this->datasis->prox_sql('ndebito',8) : '';
+			$mncausado = '';
+		}else{
+			$mnroegre  = '';
+			$mndebito  = '';
+			$mncausado = $this->datasis->prox_sql('ncausado',8);
+		}
 
 		if($tipo_doc == 'AB'){
 			$xnumero = $this->datasis->prox_sql('num_ab',8);
 		}elseif($tipo_doc == 'AN'){
 			$xnumero = $this->datasis->prox_sql('num_an',8);
 		}else{
-			$xnumero = $this->datasis->prox_sql('num_nc',8);
+			$xnumero = substr($do->get('serie'),-8);
 		}
 		$do->set('numero',$xnumero);
 
@@ -2381,6 +2394,7 @@ class Sprm extends Controller {
 		for($i = 0;$i < $cana;$i++){
 			$ittipo  = $do->get_rel($rel, 'tipo_doc', $i);
 			$itnumero= $do->get_rel($rel, 'numero'  , $i);
+			$itfecha = $do->get_rel($rel, 'fecha'   , $i);
 
 			$observa[]=$ittipo.$itnumero;
 			$do->set_rel($rel, 'tipoppro', $tipo_doc, $i);
@@ -2403,12 +2417,12 @@ class Sprm extends Controller {
 		}
 
 		$do->set('vence'   , $fecha);
+		$do->set('causado' , $mncausado);
 		$do->set('negreso' , $mnroegre);
 		$do->set('ndebito' , $mndebito);
 		$do->set('monto'   , $totalab-$ppago);
 		$do->set('impuesto', $impuesto);
 		$do->set('reten'   , 0);
-		$do->set('reteiva' , 0);
 		$do->set('ppago'   , $ppago);
 		$do->set('control' , $mcontrol);
 		$do->set('cambio'  , 0 );
@@ -2417,11 +2431,15 @@ class Sprm extends Controller {
 		$do->set('comprob' , '');
 		if($tipo_doc=='AB' || $tipo_doc='NC'){
 			$do->set('abonos'  , $totalab-$ppago);
+			$do->set('fecapl',$fecha);
+			$do->set('fecdoc',$itfecha);
 		}else{
 			$do->set('abonos'  , 0);
 		}
 		$do->set('transac', $transac);
-		$do->set('numche' , str_pad($do->get('numche'), 12,'0', STR_PAD_LEFT));
+		if($tipo_doc!='NC'){
+			$do->set('numche' , str_pad($do->get('numche'), 12,'0', STR_PAD_LEFT));
+		}
 		if(!empty($codigo)){
 			$dbcodigo = $this->db->escape($codigo);
 			$do->set('descrip' ,$this->datasis->dameval("SELECT TRIM(nombre) AS val FROM botr WHERE codigo=${dbcodigo}"));
@@ -2461,6 +2479,7 @@ class Sprm extends Controller {
 		$mnroegre= $do->get('negreso');
 		$mndebito= $do->get('ndebito');
 		$posdata = $do->get('posdata');
+		$reteiva = $do->get('reteiva');
 
 		$do->set('vence',$fecha);
 
@@ -2473,7 +2492,7 @@ class Sprm extends Controller {
 			$ittipo   = $do->get_rel($rel, 'tipo_doc', $i);
 			$itnumero = $do->get_rel($rel, 'numero'  , $i);
 			$itfecha  = $do->get_rel($rel, 'fecha'   , $i);
-			$itpppago = $do->get_rel($rel, 'ppago', $i);
+			$itpppago = $do->get_rel($rel, 'ppago'   , $i);
 			if($itpppago>0){
 				$ppobserva[] = $ittipo.$itnumero;
 			}
@@ -2483,38 +2502,39 @@ class Sprm extends Controller {
 		}
 
 		//Crea Movimiento en Bancos
-		$bdata = Common::_traebandata($banco);
+		if($tipo_doc!='NC'){
+			$bdata = Common::_traebandata($banco);
 
-		$data = array();
-		$data['codbanc']  = $banco;
-		$data['numcuent'] = trim($bdata['numcuent']);
-		$data['banco']    = trim($bdata['banco']);
-		$data['saldo']    = $bdata['saldo']-$totalab;
-		$data['fecha']    = $fecha;
-		$data['tipo_op']  = $tipo_op;
-		$data['numero']   = $numche;
-		$data['concepto'] = $observa1;
-		$data['concep2']  = $observa2;
-		$data['monto']    = $totalab;
-		$data['clipro']   = 'P' ;
-		$data['codcp']    = $cod_prv;
-		$data['nombre']   = $nombre;
-		$data['benefi']   = $benefi;
-		$data['posdata']  = $posdata;
-		$data['negreso']  = $mnroegre;
-		$data['ndebito']  = $mndebito;
-		$data['usuario']  = $usuario;
-		$data['estampa']  = $estampa;
-		$data['hora']     = $hora;
-		$data['transac']  = $transac;
-		$this->db->insert('bmov',$data);
-		$this->datasis->actusal($banco, $fecha, (-1)*$totalab);
+			$data = array();
+			$data['codbanc']  = $banco;
+			$data['numcuent'] = trim($bdata['numcuent']);
+			$data['banco']    = trim($bdata['banco']);
+			$data['saldo']    = $bdata['saldo']-$totalab;
+			$data['fecha']    = $fecha;
+			$data['tipo_op']  = $tipo_op;
+			$data['numero']   = $numche;
+			$data['concepto'] = $observa1;
+			$data['concep2']  = $observa2;
+			$data['monto']    = $totalab;
+			$data['clipro']   = 'P' ;
+			$data['codcp']    = $cod_prv;
+			$data['nombre']   = $nombre;
+			$data['benefi']   = $benefi;
+			$data['posdata']  = $posdata;
+			$data['negreso']  = $mnroegre;
+			$data['ndebito']  = $mndebito;
+			$data['usuario']  = $usuario;
+			$data['estampa']  = $estampa;
+			$data['hora']     = $hora;
+			$data['transac']  = $transac;
+			$this->db->insert('bmov',$data);
+			$this->datasis->actusal($banco, $fecha, (-1)*$totalab);
+		}
 
 		// Si tiene pronto pago genera la NC
 		if($ppago > 0){
 			$mnumero   = $this->datasis->prox_sql('num_nc',8);
 			$mcontrol  = $this->datasis->prox_sql('nsprm' ,8);
-			$mcdppago  = $mcontrol;
 
 			$data = array();
 			$data['tipo_doc'] = 'NC';
@@ -2539,6 +2559,15 @@ class Sprm extends Controller {
 		}
 
 		if($tipo_doc=='NC' && $reteiva>0){
+			$montasa   = $do->get('montasa'  );
+			$monredu   = $do->get('monredu'  );
+			$monadic   = $do->get('monadic'  );
+			$tasa      = $do->get('tasa'     );
+			$reducida  = $do->get('reducida' );
+			$sobretasa = $do->get('sobretasa');
+			$exento    = $do->get('exento'   );
+			$mcontrol  = $this->datasis->prox_sql('nsprm' ,8);
+
 			//Crea la nota de debito
 			$mnumnd = $this->datasis->fprox_numero('num_nd');
 			$sprm=array();
@@ -2552,12 +2581,13 @@ class Sprm extends Controller {
 			$sprm['abonos']     = $reteiva;
 			$sprm['vence']      = $fecha;
 			$sprm['tipo_ref']   = $tipo_doc;
-			$sprm['num_ref']    = $do->get('numero');
-			$sprm['observa1']   = 'RET/IVA CAUSADA A FC'.$numero;
+			$sprm['num_ref']    = $mnumero;
+			$sprm['observa1']   = 'RET/IVA A '.$tipo_doc.$mnumero;
 			$sprm['estampa']    = $estampa;
 			$sprm['hora']       = $hora;
 			$sprm['transac']    = $transac;
 			$sprm['usuario']    = $usuario;
+			$sprm['control']    = $mcontrol;
 			$sprm['codigo']     = '';
 			$sprm['descrip']    = '';
 			$mSQL = $this->db->insert_string('sprm', $sprm);
@@ -2565,7 +2595,8 @@ class Sprm extends Controller {
 			if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
 
 			//Crea la nota de credito
-			$mnumnc = $this->datasis->fprox_numero('num_nc');
+			$mnumnc  = $this->datasis->fprox_numero('num_nc');
+			$mcontrol= $this->datasis->prox_sql('nsprm' ,8);
 			$sprm=array();
 			$sprm['cod_prv']   = 'REIVA';
 			$sprm['nombre']    = 'RETENCION DE I.V.A. POR COMPENSAR';
@@ -2578,11 +2609,12 @@ class Sprm extends Controller {
 			$sprm['vence']     = $fecha;
 			$sprm['tipo_ref']  = '';
 			$sprm['num_ref']   = '';
-			$sprm['observa1']  = 'RET/IVA A DOC. '.$tipo_doc.$numero;
+			$sprm['observa1']  = 'RET/IVA A '.$tipo_doc.$mnumero;
 			$sprm['estampa']   = $estampa;
 			$sprm['hora']      = $hora;
 			$sprm['transac']   = $transac;
 			$sprm['usuario']   = $usuario;
+			$sprm['control']   = $mcontrol;
 			$sprm['codigo']    = 'NOCON';
 			$sprm['descrip']   = 'NOTA DE CONTABILIDAD';
 			$mSQL = $this->db->insert_string('sprm', $sprm);
@@ -2591,7 +2623,6 @@ class Sprm extends Controller {
 
 			//Crea la retencion
 			$niva    = $this->datasis->fprox_numero('niva');
-			$ivaplica= $this->datasis->ivaplica($fecha);
 
 			$riva['nrocomp']    = $niva;
 			$riva['emision']    = $fecha;
@@ -2601,13 +2632,13 @@ class Sprm extends Controller {
 			$riva['numero']     = $numero;
 			$riva['nfiscal']    = '';
 			$riva['afecta']     = $itnumero;
-			$riva['clipro']     = $proveed;
+			$riva['clipro']     = $cod_prv;
 			$riva['nombre']     = $nombre;
 			$riva['rif']        = $this->datasis->dameval('SELECT rif FROM sprv WHERE proveed='.$this->db->escape($cod_prv));
 			$riva['exento']     = $exento ;
-			$riva['tasa']       = $ivaplica['tasa'];
-			$riva['tasaadic']   = $ivaplica['sobretasa'];
-			$riva['tasaredu']   = $ivaplica['redutasa'];
+			$riva['tasa']       = $this->input->post('ptasa');
+			$riva['tasaadic']   = $this->input->post('padicional');
+			$riva['tasaredu']   = $this->input->post('preducida');
 			$riva['general']    = $montasa;
 			$riva['geneimpu']   = $tasa ;
 			$riva['adicional']  = $monadic;
@@ -2648,6 +2679,9 @@ class Sprm extends Controller {
 	//Chequea los campos de numero y fecha en las formas de pago
 	//cuando deban corresponder
 	function chtipo($val){
+		$tipo_doc = $this->input->post('tipo_doc');
+		if($tipo_doc=='NC') return true;
+
 		$tipo=$this->input->post('tipo_op');
 		if(empty($tipo)) return true;
 		$this->validation->set_message('chtipo', 'El campo %s es obligatorio');

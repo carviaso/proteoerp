@@ -129,6 +129,8 @@ function chtipodoc(){
 		$('#trdpto').hide();
 		$('#trnd').show();
 		$('#ncadic').show();
+		$('#fpago').hide();
+		$('#trnd2').show();
 	}else if(tipo=='AN'){
 		$('#aplefectos').hide();
 		$('input[name^="abono_"]').val("");
@@ -140,6 +142,8 @@ function chtipodoc(){
 		$('#trdpto').show();
 		$('#trnd').hide();
 		$('#ncadic').hide();
+		$('#fpago').show();
+		$('#trnd2').hide();
 	}else{
 		$('#aplefectos').show();
 		$('#aplpago').show();
@@ -150,6 +154,8 @@ function chtipodoc(){
 		$('#trdpto').hide();
 		$('#trnd').hide();
 		$('#ncadic').hide();
+		$('#fpago').show();
+		$('#trnd2').hide();
 	}
 }
 
@@ -308,6 +314,9 @@ echo $title;
 		<td><?php echo $form->nfiscal->label;  ?>*</td>
 		<td><?php echo $form->nfiscal->output; ?></td>
 	</tr>
+	<tr id='trnd2'>
+		<td colspan='5' align='center'><?php echo $form->codigo->label.'* '. $form->codigo->output;  ?></td>
+	</tr>
 </table>
 <?php if($cana>0){ ?>
 <table width='100%' align='center' id='aplefectos'>
@@ -393,7 +402,7 @@ echo $title;
 </p>
 <?php echo $container_br.$container_bl;?>
 
-<table align='center' style='width:100%;font-size:10pt;background:#F2E69D;'>
+<table align='center' style='width:100%;font-size:10pt;background:#F2E69D;' id='fpago'>
 	<tr>
 		<td><?php echo $form->banco->label;    ?>*</td>
 		<td><?php echo $form->banco->output;   ?></td>
