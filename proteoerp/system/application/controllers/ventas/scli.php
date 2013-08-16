@@ -175,9 +175,10 @@ class Scli extends validaciones {
 						try{
 							var json = JSON.parse(data);
 							if (json.status == "A"){
-								apprise("Registro eliminado");
+								$.prompt("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 							}else{
-								apprise("Registro no se puede eliminado");
+								$.prompt("Registro no se puede eliminado");
 							}
 						}catch(e){
 							$("#fborra").html(data);
@@ -2516,7 +2517,7 @@ function chrif(rif){
 		if($status=='insert' && !empty($id_pers)){
 			$codigo    = $this->input->post('codigo');
 			$dbid_pers = $this->db->escape($id_pers);
-			
+
 			$query = $this->db->query("SELECT nacional,cedula,codigo,nombre,apellido,direc1,direc2 FROM pers WHERE id=".$dbid_pers);
 			if($query->num_rows()>0){
 				$row = $query->row();

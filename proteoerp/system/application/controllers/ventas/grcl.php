@@ -13,11 +13,7 @@ class Grcl extends Controller {
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('grcl','id') ) {
-			$this->db->simple_query('ALTER TABLE grcl DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE grcl ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE grcl ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
+		$this->instalar();
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -76,7 +72,7 @@ class Grcl extends Controller {
 
 		$bodyscript .= '
 		function grcledit(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
@@ -115,10 +111,10 @@ class Grcl extends Controller {
 						try{
 							var json = JSON.parse(data);
 							if (json.status == "A"){
-								apprise("Registro eliminado");
+								$.prompt("Registro eliminado");
 								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 							}else{
-								apprise("Registro no se puede eliminado");
+								$.prompt("Registro no se puede eliminado");
 							}
 						}catch(e){
 							$("#fborra").html(data);
