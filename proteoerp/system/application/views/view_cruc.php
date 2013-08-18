@@ -61,6 +61,7 @@ function truncate(id){
 
 $(function() {
 	$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+	$(".inputnum").numeric(".");
 });
 </script>
 <?php } ?>

@@ -236,7 +236,7 @@ class Cruc extends Controller {
 									apprise("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/CRUC').'/\'+res.id+\'/id\'').';
+									'.$this->datasis->jwinopen(site_url('formatos/ver/CRUC').'/\'+json.pk.id+\'/id\'').';
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -286,8 +286,7 @@ class Cruc extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
-
+		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
@@ -1544,23 +1543,23 @@ class Cruc extends Controller {
 			// PROVEEDOR ----> CLIENTE
 			$mNUMERO = $this->datasis->fprox_numero("nccli");
 			$data = array();
-			$data["cod_cli"]  = $cliente;
-			$data["nombre"]   = $do->get('nomcli');
-			$data["tipo_doc"] = "NC";
-			$data["numero"]   = $mNUMERO;
-			$data["fecha"]    = $do->get('fecha');
-			$data["monto"]    = $do->get('monto');
-			$data["abonos"]   = $do->get('monto');
-			$data["vence"]    = $do->get('fecha');
-			$data["observa1"] = $do->get('concept1');
-			$data["observa2"] = $do->get('concept2');
-			$data["tipo_ref"] = 'CR';
-			$data["num_ref"]  = $do->get('numero');
+			$data['cod_cli']  = $cliente;
+			$data['nombre']   = $do->get('nomcli');
+			$data['tipo_doc'] = 'NC';
+			$data['numero']   = $mNUMERO;
+			$data['fecha']    = $do->get('fecha');
+			$data['monto']    = $do->get('monto');
+			$data['abonos']   = $do->get('monto');
+			$data['vence']    = $do->get('fecha');
+			$data['observa1'] = $do->get('concept1');
+			$data['observa2'] = $do->get('concept2');
+			$data['tipo_ref'] = 'CR';
+			$data['num_ref']  = $do->get('numero');
 
-			$data["estampa"] = $do->get('estampa');
-			$data["hora"]    = $do->get('hora');
-			$data["transac"] = $do->get('transac');
-			$data["usuario"] = $do->get('usuario');
+			$data['estampa'] = $do->get('estampa');
+			$data['hora']    = $do->get('hora');
+			$data['transac'] = $do->get('transac');
+			$data['usuario'] = $do->get('usuario');
 
 			$this->db->insert('smov', $data);
 
@@ -1573,8 +1572,8 @@ class Cruc extends Controller {
 				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
 
 				if ( $tipoit == 'APA'){
-					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
-					         AND numero='".substr($onumero,2,8)."' 
+					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
 					         AND fecha=".$fechait." AND cod_cli='".$cliente."' ";
 					$this->db->query($mSQL);
 				}
@@ -1583,24 +1582,24 @@ class Cruc extends Controller {
 			$mNUMERO = $this->datasis->fprox_numero("num_nc");
 
 			$data = array();
-			$data["cod_prv"]  = $proveed;
-			$data["nombre"]   = $do->get('nombre');
-			$data["tipo_doc"] = "NC";
-			$data["numero"]   = $mNUMERO;
-			$data["fecha"]    = $do->get('fecha');
-			$data["monto"]    = $do->get('monto');
-			$data["impuesto"] = 0;
-			$data["abonos"]   = $do->get('monto');
-			$data["vence"]    = $do->get('fecha');
-			$data["observa1"] = $do->get('concept1');
-			$data["observa2"] = $do->get('concept2');
-			$data["tipo_ref"] = 'CR';
-			$data["num_ref"]  = $do->get('numero');
+			$data['cod_prv']  = $proveed;
+			$data['nombre']   = $do->get('nombre');
+			$data['tipo_doc'] = 'NC';
+			$data['numero']   = $mNUMERO;
+			$data['fecha']    = $do->get('fecha');
+			$data['monto']    = $do->get('monto');
+			$data['impuesto'] = 0;
+			$data['abonos']   = $do->get('monto');
+			$data['vence']    = $do->get('fecha');
+			$data['observa1'] = $do->get('concept1');
+			$data['observa2'] = $do->get('concept2');
+			$data['tipo_ref'] = 'CR';
+			$data['num_ref']  = $do->get('numero');
 
-			$data["estampa"] = $do->get('estampa');
-			$data["hora"]    = $do->get('hora');
-			$data["transac"] = $do->get('transac');
-			$data["usuario"] = $do->get('usuario');
+			$data['estampa'] = $do->get('estampa');
+			$data['hora']    = $do->get('hora');
+			$data['transac'] = $do->get('transac');
+			$data['usuario'] = $do->get('usuario');
 
 			$this->db->insert('sprm', $data);
 
@@ -1613,35 +1612,35 @@ class Cruc extends Controller {
 				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
 
 				if ( $tipoit == 'ADE'){
-					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
-					         AND numero='".substr($onumero,2,8)."' 
+					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
 					         AND cod_prv='".$proveed."' ";
 					$this->db->query($mSQL);
-//					         AND fecha=".$fechait." 
+//					         AND fecha=".$fechait."
 				}
 			}
 
 		} elseif ( $tipo == 'C-P' ) {
 			// CLIENTE ----> PROVEEDOR
 			$mNUMERO = $this->datasis->fprox_numero("num_nc");
-			$data["cod_prv"]  = $cliente;
-			$data["nombre"]   = $do->get('nomcli');
-			$data["tipo_doc"] = "NC";
-			$data["numero"]   = $mNUMERO;
-			$data["fecha"]    = $do->get('fecha');
-			$data["monto"]    = $do->get('monto');
-			$data["impuesto"] = 0;
-			$data["abonos"]   = $do->get('monto');
-			$data["vence"]    = $do->get('fecha');
-			$data["observa1"] = $do->get('concept1');
-			$data["observa2"] = $do->get('concept2');
-			$data["tipo_ref"] = 'CR';
-			$data["num_ref"]  = $do->get('numero');
+			$data['cod_prv']  = $cliente;
+			$data['nombre']   = $do->get('nomcli');
+			$data['tipo_doc'] = "NC";
+			$data['numero']   = $mNUMERO;
+			$data['fecha']    = $do->get('fecha');
+			$data['monto']    = $do->get('monto');
+			$data['impuesto'] = 0;
+			$data['abonos']   = $do->get('monto');
+			$data['vence']    = $do->get('fecha');
+			$data['observa1'] = $do->get('concept1');
+			$data['observa2'] = $do->get('concept2');
+			$data['tipo_ref'] = 'CR';
+			$data['num_ref']  = $do->get('numero');
 
-			$data["estampa"] = $do->get('estampa');
-			$data["hora"]    = $do->get('hora');
-			$data["transac"] = $do->get('transac');
-			$data["usuario"] = $do->get('usuario');
+			$data['estampa'] = $do->get('estampa');
+			$data['hora']    = $do->get('hora');
+			$data['transac'] = $do->get('transac');
+			$data['usuario'] = $do->get('usuario');
 
 			$this->db->insert('sprm', $data);
 
@@ -1653,33 +1652,33 @@ class Cruc extends Controller {
 				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
 				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
 				if ( $tipoit == 'APA'){
-					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
-					         AND numero='".substr($onumero,2,8)."' 
+					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
 					         AND cod_prv='".$cliente."' ";
 					$this->db->query($mSQL);
-//					         AND fecha=".$fechait." 
+//					         AND fecha=".$fechait."
 				}
 			}
 
 			$mNUMERO = $this->datasis->fprox_numero("nccli");
 			$data = array();
-			$data["cod_cli"]  = $proveed;
-			$data["nombre"]   = $do->get('nombre');
-			$data["tipo_doc"] = "NC";
-			$data["numero"]   = $mNUMERO;
-			$data["fecha"]    = $do->get('fecha');
-			$data["monto"]    = $do->get('monto');
-			$data["abonos"]   = $do->get('monto');
-			$data["vence"]    = $do->get('fecha');
-			$data["observa1"] = $do->get('concept1');
-			$data["observa2"] = $do->get('concept2');
-			$data["tipo_ref"] = 'CR';
-			$data["num_ref"]  = $do->get('numero');
+			$data['cod_cli']  = $proveed;
+			$data['nombre']   = $do->get('nombre');
+			$data['tipo_doc'] = 'NC';
+			$data['numero']   = $mNUMERO;
+			$data['fecha']    = $do->get('fecha');
+			$data['monto']    = $do->get('monto');
+			$data['abonos']   = $do->get('monto');
+			$data['vence']    = $do->get('fecha');
+			$data['observa1'] = $do->get('concept1');
+			$data['observa2'] = $do->get('concept2');
+			$data['tipo_ref'] = 'CR';
+			$data['num_ref']  = $do->get('numero');
 
-			$data["estampa"]  = $do->get('estampa');
-			$data["hora"]     = $do->get('hora');
-			$data["transac"]  = $do->get('transac');
-			$data["usuario"]  = $do->get('usuario');
+			$data['estampa']  = $do->get('estampa');
+			$data['hora']     = $do->get('hora');
+			$data['transac']  = $do->get('transac');
+			$data['usuario']  = $do->get('usuario');
 
 			$this->db->insert('smov', $data);
 
@@ -1692,11 +1691,11 @@ class Cruc extends Controller {
 				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
 
 				if ( $tipoit == 'ADE'){
-					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
-					         AND numero='".substr($onumero,2,8)."' 
+					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
 					         AND cod_cli='".$proveed."' ";
 					$this->db->query($mSQL);
-//					         AND fecha=".$fechait." 
+//					         AND fecha=".$fechait."
 				}
 			}
 
@@ -1704,23 +1703,23 @@ class Cruc extends Controller {
 			// CLIENTE ----> CLIENTE
 			$mNUMERO = $this->datasis->fprox_numero("nccli");
 			$data = array();
-			$data["cod_cli"]  = $proveed;
-			$data["nombre"]   = $do->get('nombre');
-			$data["tipo_doc"] = "NC";
-			$data["numero"]   = $mNUMERO;
-			$data["fecha"]    = $do->get('fecha');
-			$data["monto"]    = $do->get('monto');
-			$data["abonos"]   = $do->get('monto');
-			$data["vence"]    = $do->get('fecha');
-			$data["observa1"] = $do->get('concept1');
-			$data["observa2"] = $do->get('concept2');
-			$data["tipo_ref"] = 'CR';
-			$data["num_ref"]  = $do->get('numero');
+			$data['cod_cli']  = $proveed;
+			$data['nombre']   = $do->get('nombre');
+			$data['tipo_doc'] = "NC";
+			$data['numero']   = $mNUMERO;
+			$data['fecha']    = $do->get('fecha');
+			$data['monto']    = $do->get('monto');
+			$data['abonos']   = $do->get('monto');
+			$data['vence']    = $do->get('fecha');
+			$data['observa1'] = $do->get('concept1');
+			$data['observa2'] = $do->get('concept2');
+			$data['tipo_ref'] = 'CR';
+			$data['num_ref']  = $do->get('numero');
 
-			$data["estampa"]  = $do->get('estampa');
-			$data["hora"]     = $do->get('hora');
-			$data["transac"]  = $do->get('transac');
-			$data["usuario"]  = $do->get('usuario');
+			$data['estampa']  = $do->get('estampa');
+			$data['hora']     = $do->get('hora');
+			$data['transac']  = $do->get('transac');
+			$data['usuario']  = $do->get('usuario');
 
 			$this->db->insert('smov', $data);
 
@@ -1733,11 +1732,11 @@ class Cruc extends Controller {
 				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
 
 				if ( $tipoit == 'ADE'){
-					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
-					         AND numero='".substr($onumero,2,8)."' 
+					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
 					         AND cod_cli='".$proveed."' ";
 
-//					         AND fecha=".$fechait." 
+//					         AND fecha=".$fechait."
 
 					$this->db->query($mSQL);
 				}
@@ -1746,48 +1745,48 @@ class Cruc extends Controller {
 			$mNUMERO = $this->datasis->fprox_numero("ndcli");
 			$data = array();
 
-			$data["cod_cli"]  = $cliente;
-			$data["nombre"]   = $do->get('nomcli');
-			$data["tipo_doc"] = "ND";
-			$data["numero"]   = $mNUMERO;
-			$data["fecha"]    = $do->get('fecha');
-			$data["monto"]    = $do->get('monto');
-			$data["abonos"]   =   0;
-			$data["vence"]    = $do->get('fecha');
-			$data["observa1"] = $do->get('concept1');
-			$data["observa2"] = $do->get('concept1');
-			$data["impuesto"] = 0;
-			$data["tipo_ref"] = 'CR';
-			$data["num_ref"]  = $do->get('numero');
+			$data['cod_cli']  = $cliente;
+			$data['nombre']   = $do->get('nomcli');
+			$data['tipo_doc'] = 'ND';
+			$data['numero']   = $mNUMERO;
+			$data['fecha']    = $do->get('fecha');
+			$data['monto']    = $do->get('monto');
+			$data['abonos']   =   0;
+			$data['vence']    = $do->get('fecha');
+			$data['observa1'] = $do->get('concept1');
+			$data['observa2'] = $do->get('concept1');
+			$data['impuesto'] = 0;
+			$data['tipo_ref'] = 'CR';
+			$data['num_ref']  = $do->get('numero');
 
-			$data["estampa"]  = $do->get('estampa');
-			$data["hora"]     = $do->get('hora');
-			$data["transac"]  = $do->get('transac');
-			$data["usuario"]  = $do->get('usuario');
+			$data['estampa']  = $do->get('estampa');
+			$data['hora']     = $do->get('hora');
+			$data['transac']  = $do->get('transac');
+			$data['usuario']  = $do->get('usuario');
 
 			$this->db->insert('smov', $data);
 
 		} elseif ( $tipo == 'P-P' ) {
 			// PROVEEDOR ----> PROVEEDOR
 			$mNUMERO = $this->datasis->fprox_numero("num_nc");
-			$data["cod_prv"]  = $proveed;
-			$data["nombre"]   = $do->get('nombre');
-			$data["tipo_doc"] = "NC";
-			$data["numero"]   = $mNUMERO;
-			$data["fecha"]    = $do->get('fecha');
-			$data["monto"]    = $do->get('monto');
-			$data["impuesto"] = 0;
-			$data["abonos"]   = $do->get('monto');
-			$data["vence"]    = $do->get('fecha');
-			$data["observa1"] = $do->get('concept1');
-			$data["observa2"] = $do->get('concept2');
-			$data["tipo_ref"] = 'CR';
-			$data["num_ref"]  = $do->get('numero');
+			$data['cod_prv']  = $proveed;
+			$data['nombre']   = $do->get('nombre');
+			$data['tipo_doc'] = 'NC';
+			$data['numero']   = $mNUMERO;
+			$data['fecha']    = $do->get('fecha');
+			$data['monto']    = $do->get('monto');
+			$data['impuesto'] = 0;
+			$data['abonos']   = $do->get('monto');
+			$data['vence']    = $do->get('fecha');
+			$data['observa1'] = $do->get('concept1');
+			$data['observa2'] = $do->get('concept2');
+			$data['tipo_ref'] = 'CR';
+			$data['num_ref']  = $do->get('numero');
 
-			$data["estampa"] = $do->get('estampa');
-			$data["hora"]    = $do->get('hora');
-			$data["transac"] = $do->get('transac');
-			$data["usuario"] = $do->get('usuario');
+			$data['estampa'] = $do->get('estampa');
+			$data['hora']    = $do->get('hora');
+			$data['transac'] = $do->get('transac');
+			$data['usuario'] = $do->get('usuario');
 
 			$this->db->insert('sprm', $data);
 
@@ -1799,35 +1798,35 @@ class Cruc extends Controller {
 				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
 				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
 				if ( $tipoit == 'ADE'){
-					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."' 
-					         AND numero='".substr($onumero,2,8)."' 
+					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
 					         AND cod_prv='".$proveed."' ";
 					$this->db->query($mSQL);
-//					         AND fecha=".$fechait." 
+//					         AND fecha=".$fechait."
 				}
 			}
 
-   
+
 			$mNUMERO = $this->datasis->fprox_numero("num_nd");
 			$data = array();
-			$data["cod_prv"]  = $cliente;
-			$data["nombre"]   = $do->get('nomcli');
-			$data["tipo_doc"] = "ND";
-			$data["numero"]   = $mNUMERO;
-			$data["fecha"]    = $do->get('fecha');
-			$data["monto"]    = $do->get('monto');
-			$data["impuesto"] = 0;
-			$data["abonos"]   = $do->get('monto');
-			$data["vence"]    = $do->get('fecha');
-			$data["observa1"] = $do->get('concept1');
-			$data["observa2"] = $do->get('concept2');
-			$data["tipo_ref"] = 'CR';
-			$data["num_ref"]  = $do->get('numero');
+			$data['cod_prv']  = $cliente;
+			$data['nombre']   = $do->get('nomcli');
+			$data['tipo_doc'] = 'ND';
+			$data['numero']   = $mNUMERO;
+			$data['fecha']    = $do->get('fecha');
+			$data['monto']    = $do->get('monto');
+			$data['impuesto'] = 0;
+			$data['abonos']   = $do->get('monto');
+			$data['vence']    = $do->get('fecha');
+			$data['observa1'] = $do->get('concept1');
+			$data['observa2'] = $do->get('concept2');
+			$data['tipo_ref'] = 'CR';
+			$data['num_ref']  = $do->get('numero');
 
-			$data["estampa"] = $do->get('estampa');
-			$data["hora"]    = $do->get('hora');
-			$data["transac"] = $do->get('transac');
-			$data["usuario"] = $do->get('usuario');
+			$data['estampa'] = $do->get('estampa');
+			$data['hora']    = $do->get('hora');
+			$data['transac'] = $do->get('transac');
+			$data['usuario'] = $do->get('usuario');
 
 			$this->db->insert('sprm', $data);
 
@@ -1874,6 +1873,4 @@ class Cruc extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 	}
-
-
 }

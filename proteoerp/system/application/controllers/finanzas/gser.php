@@ -3988,7 +3988,7 @@ class gser extends Controller {
 		}
 
 		//Totalizamos la retenciones (exepto la de iva)
-		$retemonto=$rete_cana_vacio=0;
+		$retemonto=$rete_cana_vacio=$retebase=0;
 		$rete_cana=$do->count_rel('gereten');
 		for($i=0;$i<$rete_cana;$i++){
 			$codigorete = $do->get_rel('gereten','codigorete',$i);
@@ -3999,10 +3999,12 @@ class gser extends Controller {
 
 				$do->set_rel('gereten','numero' ,$serie,$i);
 				$retemonto += $monto;
+				$retebase  += $importe;
 			}else{
 				$rete_cana_vacio++;
 			}
 		}
+
 		$do->set('reten',$retemonto);
 		if($rete_cana_vacio==$rete_cana){
 			$do->unset_rel('gereten'); //si no hay retencion elimina la relacion
@@ -4033,6 +4035,11 @@ class gser extends Controller {
 
 			$do->set_rel('gitser','iva'    ,$iva    ,$i);
 			$do->set_rel('gitser','importe',$importe,$i);
+		}
+
+		if($retebase>$subt){
+			$do->error_message_ar['pre_ins'] ='El monto base de la retencion es no puede ser mayor que la base de la factura';
+			return false;
 		}
 
 		//Calcula la retencion del iva si aplica
@@ -4109,10 +4116,10 @@ class gser extends Controller {
 
 		if ($monto1>0){
 			$negreso  = $this->datasis->fprox_numero('negreso');
-			$ncausado = "";
+			$ncausado = '';
 		}else{
 			$ncausado = $this->datasis->fprox_numero('ncausado');
-			$negreso  = "";
+			$negreso  = '';
 		}
 		$do->set('negreso' ,$negreso );
 		$do->set('ncausado',$ncausado);
@@ -4725,7 +4732,7 @@ class gser extends Controller {
 			$salida .= '</table>';
 		}
 
-		$mSQL = "SELECT codbanc, banco, tipo_op tipo_doc, numero, monto FROM bmov WHERE transac=${dbtransac} ORDER BY codbanc ";
+		$mSQL = "SELECT codbanc, banco, tipo_op tipo_doc, numero, monto FROM bmov WHERE transac=${dbtransac} ORDER BY codbanc";
 		$query = $this->db->query($mSQL);
 		$salida .= "\n";
 		if ( $query->num_rows() > 0 ){
@@ -4861,7 +4868,5 @@ class gser extends Controller {
 			$query="ALTER TABLE gserchi ADD COLUMN aceptado CHAR(1) NULL DEFAULT NULL";
 			$this->db->query($query);
 		}
-
 	}
-
 }
