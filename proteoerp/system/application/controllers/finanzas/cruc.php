@@ -155,16 +155,14 @@ class Cruc extends Controller {
 			s = grid.getGridParam(\'selarrrow\');
 			';
 
-
 		$bodyscript .= '
 		jQuery("#imprime").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/CRUCDE').'/\'+id, \'_blank\', \'width=300,height=200,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+				window.open(\''.site_url('formatos/descargar/CRUCDE').'/\'+id, \'_blank\', \'width=300,height=200,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
 			} else { $.prompt("<h1>Por favor Seleccione una Factura</h1>");}
 		});';
-
 
 		// Cruce Cliente Cliente
 		$bodyscript .= '
@@ -175,9 +173,7 @@ class Cruc extends Controller {
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
-		});
-		';
-
+		});';
 
 		// Cruce Cliente Proveedor
 		$bodyscript .= '
@@ -188,9 +184,7 @@ class Cruc extends Controller {
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
-		});
-		';
-
+		});';
 
 		// Cruce Proveedor Proveedor
 		$bodyscript .= '
@@ -201,8 +195,7 @@ class Cruc extends Controller {
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
-		});
-		';
+		});';
 
 
 		// Cruce Proveedor Cliente
@@ -214,8 +207,7 @@ class Cruc extends Controller {
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
-		});
-		';
+		});';
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -236,10 +228,10 @@ class Cruc extends Controller {
 									apprise("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/CRUC').'/\'+json.pk.id+\'/id\'').';
+									'.$this->datasis->jwinopen(site_url('formatos/descargar/CRUCDE').'/\'+json.pk.id+\'/id\'').';
 									return true;
 								} else {
-									apprise(json.mensaje);
+									$.prompt(json.mensaje);
 								}
 							}catch(e){
 								$("#fedita").html(r);
@@ -504,7 +496,7 @@ class Cruc extends Controller {
 		));
 
 		$grid->addField('id');
-		$grid->label('ID');
+		$grid->label('Id');
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',

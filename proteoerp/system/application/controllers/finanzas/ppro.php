@@ -1400,53 +1400,53 @@ class Ppro extends Controller {
 		}
 
 		//Crea la NC
-		$transac  = $this->datasis->prox_sql("ntransa",8);
-		$mnroegre = ""; //$this->datasis->prox_sql("nroegre",8);
+		$transac  = $this->datasis->prox_sql('ntransa',8);
+		$mnroegre = ''; //$this->datasis->prox_sql("nroegre",8);
 		$tipo_doc = 'NC';
 		$xnumero  = $numero;
 		$mcontrol = $this->datasis->prox_sql("nsprm",8);
 
 		$data = array();
-		$data["tipo_doc"]  = $tipo_doc;
-		$data["numero"]    = $numero;
-		$data["cod_prv"]   = $cod_prv;
-		$data["nombre"]    = $nombre;
-		$data["fecha"]     = $fecha;
-		$data["monto"]     = $totalab;
-		$data["impuesto"]  = $impuesto;
-		$data["vence"]     = $fecha;
-		$data["observa1"]  = $observa1;
-		$data["observa2"]  = $observa2;
+		$data['tipo_doc']  = $tipo_doc;
+		$data['numero']    = $numero;
+		$data['cod_prv']   = $cod_prv;
+		$data['nombre']    = $nombre;
+		$data['fecha']     = $fecha;
+		$data['monto']     = $totalab;
+		$data['impuesto']  = $impuesto;
+		$data['vence']     = $fecha;
+		$data['observa1']  = $observa1;
+		$data['observa2']  = $observa2;
 
-		$data["banco"]     = "";
-		$data["tipo_op"]   = "";
-		$data["numche"]    = "";
-		$data["benefi"]    = "";
-		$data["reten"]     = 0;
-		$data["reteiva"]   = 0;
-		$data["ppago"]     = 0;
-		$data["control"]   = $mcontrol ;
-		$data["cambio"]    = 0 ;
-		$data["nfiscal"]   = $nfiscal ;
-		$data["mora"]      = 0 ;
+		$data['banco']     = "";
+		$data['tipo_op']   = "";
+		$data['numche']    = "";
+		$data['benefi']    = "";
+		$data['reten']     = 0;
+		$data['reteiva']   = 0;
+		$data['ppago']     = 0;
+		$data['control']   = $mcontrol ;
+		$data['cambio']    = 0 ;
+		$data['nfiscal']   = $nfiscal ;
+		$data['mora']      = 0 ;
 
-		$data["comprob"]   = '' ;
-		$data["abonos"]    = $totalab;
+		$data['comprob']   = '' ;
+		$data['abonos']    = $totalab;
 
-		$data["codigo"]    = $codigo ;
-		$data["descrip"]   = $this->datasis->dameval("SELECT nombre FROM botr WHERE codigo='$codigo'");
-		$data["fecapl"]    = $fecha;
+		$data['codigo']    = $codigo ;
+		$data['descrip']   = $this->datasis->dameval("SELECT nombre FROM botr WHERE codigo='$codigo'");
+		$data['fecapl']    = $fecha;
 
-		$data["fecdoc"]    = $fecdoc;
-		$data["fecapl"]    = $femision;
-		$data["montasa"]   = $totalab-$iva-$exento;
-		$data["monredu"]   = 0;
-		$data["monadic"]   = 0;
-		$data["tasa"]      = $iva;
-		$data["reducida"]  = 0;
-		$data["sobretasa"] = 0;
-		$data["exento"]    = $exento;
-		$data["causado"]   = $this->datasis->prox_sql("ncausado",8);
+		$data['fecdoc']    = $fecdoc;
+		$data['fecapl']    = $femision;
+		$data['montasa']   = $totalab-$iva-$exento;
+		$data['monredu']   = 0;
+		$data['monadic']   = 0;
+		$data['tasa']      = $iva;
+		$data['reducida']  = 0;
+		$data['sobretasa'] = 0;
+		$data['exento']    = $exento;
+		$data['causado']   = $this->datasis->prox_sql("ncausado",8);
 
 		$data['usuario']   = $this->secu->usuario();
 		$data['estampa']   = date('Ymd');

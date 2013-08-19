@@ -935,7 +935,7 @@ class Ccont extends Controller {
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('ccont')) {
+		if(!$this->db->table_exists('ccont')){
 			$mSQL="CREATE TABLE `ccont` (
 			  `numero` int(10) NOT NULL AUTO_INCREMENT,
 			  `obrap` varchar(20) DEFAULT NULL,

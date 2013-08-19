@@ -2236,6 +2236,7 @@ class Sprm extends Controller {
 		$do->rm_get('apltasa');
 
 		$ppago=$totalab=$impuesto=$ppimpuesto=0;
+		$arr_itimpuestos=array();
 		//Totaliza el abonado
 		$rel='itppro';
 		$cana = $do->count_rel($rel);
@@ -2259,6 +2260,7 @@ class Sprm extends Controller {
 				}
 				$itimpuesto = floatval($rrow['impuesto']);
 				$itmonto    = floatval($rrow['monto']);
+				$arr_itimpuestos[$i]=round($itabono*$itimpuesto/$itmonto,2);
 
 				if($tipo_doc=='NC'){
 
@@ -2335,6 +2337,8 @@ class Sprm extends Controller {
 				$do->error_message_ar['pre_ins']='No puede realizar una NC con monto exento si los documentos afectados no tienen este monto.';
 				return false;
 			}
+		}else{
+			$reteiva=0;
 		}
 
 		//Inicio Validaciones
@@ -2392,9 +2396,10 @@ class Sprm extends Controller {
 		$observa=array();
 		$cana = $do->count_rel($rel);
 		for($i = 0;$i < $cana;$i++){
-			$ittipo  = $do->get_rel($rel, 'tipo_doc', $i);
-			$itnumero= $do->get_rel($rel, 'numero'  , $i);
-			$itfecha = $do->get_rel($rel, 'fecha'   , $i);
+			$ittipo    = $do->get_rel($rel, 'tipo_doc', $i);
+			$itnumero  = $do->get_rel($rel, 'numero'  , $i);
+			$itfecha   = $do->get_rel($rel, 'fecha'   , $i);
+			$itimpuesto= $arr_itimpuestos[$i];
 
 			$observa[]=$ittipo.$itnumero;
 			$do->set_rel($rel, 'tipoppro', $tipo_doc, $i);
@@ -2404,9 +2409,10 @@ class Sprm extends Controller {
 			$do->set_rel($rel, 'usuario' , $usuario , $i);
 			$do->set_rel($rel, 'transac' , $transac , $i);
 			$do->set_rel($rel, 'mora'    , 0, $i);
+			$do->set_rel($rel, 'reteiva'   , $reteiva*$itimpuesto/$impuesto, $i);
 			$do->set_rel($rel, 'reten'   , 0, $i);
 			$do->set_rel($rel, 'cambio'  , 0, $i);
-			$do->set_rel($rel, 'reteiva' , 0, $i);
+			//$do->set_rel($rel, 'reteiva' , 0, $i);
 		}
 
 		$observa=$do->get('observa1');
@@ -2605,7 +2611,7 @@ class Sprm extends Controller {
 			$sprm['fecha']     = $fecha;
 			$sprm['monto']     = $reteiva;
 			$sprm['impuesto']  = 0;
-			$sprm['abonos']    = 0;
+			$sprm['abonos']    = $reteiva;
 			$sprm['vence']     = $fecha;
 			$sprm['tipo_ref']  = '';
 			$sprm['num_ref']   = '';
@@ -2635,7 +2641,7 @@ class Sprm extends Controller {
 			$riva['clipro']     = $cod_prv;
 			$riva['nombre']     = $nombre;
 			$riva['rif']        = $this->datasis->dameval('SELECT rif FROM sprv WHERE proveed='.$this->db->escape($cod_prv));
-			$riva['exento']     = $exento ;
+			$riva['exento']     = $exento;
 			$riva['tasa']       = $this->input->post('ptasa');
 			$riva['tasaadic']   = $this->input->post('padicional');
 			$riva['tasaredu']   = $this->input->post('preducida');
@@ -2657,8 +2663,6 @@ class Sprm extends Controller {
 			$ban =$this->db->simple_query($mSQL);
 			if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 		}//Fin de la retencion
-
-
 
 		logusu('PPRO',"Abono a proveedor CREADO Prov=${cod_prv}  Numero=${numero}");
 	}
