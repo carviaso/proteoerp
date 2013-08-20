@@ -631,7 +631,7 @@ class Conc extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: concadd, editfunc: concedit, delfunc: concdel, viewfunc: concshow");
+		$grid->setBarOptions('addfunc: concadd, editfunc: concedit, delfunc: concdel, viewfunc: concshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -704,28 +704,27 @@ class Conc extends Controller {
 	}
 
 	function getctade($tipoa=NULL){
-		$this->rapyd->load("fields");
-		$uadministra = new dropdownField("ctade", "ctade");
-		$uadministra->status = "modify";
-		$uadministra->style ="width:210px;";
-		//echo 'de nuevo:'.$tipoa;
+		$this->rapyd->load('fields');
+		$uadministra = new dropdownField('ctade', 'ctade');
+		$uadministra->status = 'modify';
+		$uadministra->style  = 'width:210px;';
+
 		if ($tipoa!==false){
-		if($tipoa=='P'){
-					$uadministra->options("SELECT proveed, CONCAT_WS(' ',proveed,nombre) nombre FROM sprv ORDER BY proveed");
+			if($tipoa=='P'){
+				$uadministra->options("SELECT proveed, CONCAT_WS(' ',proveed,nombre) AS nombre  FROM sprv ORDER BY proveed");
 			}else{
 				if($tipoa=='G'){
-					$uadministra->options("SELECT codigo, CONCAT_WS(' ',codigo,descrip) descrip FROM mgas ORDER BY codigo");
+					$uadministra->options("SELECT codigo,  CONCAT_WS(' ',codigo,descrip) AS descrip FROM mgas ORDER BY codigo");
 				}else{
-					$uadministra->options("SELECT cliente, CONCAT_WS(' ',cliente,nombre) nombre FROM sprv ORDER BY cliente");
+					$uadministra->options("SELECT cliente, CONCAT_WS(' ',cliente,nombre) AS nombre  FROM sprv WHERE cliente REGEXP '[A-Za-z0-9_\-]+' ORDER BY cliente");
 				}
 			}
 		}else{
- 				$uadministra->option("Seleccione un opcion");
+ 				$uadministra->option('Seleccione una opcion');
 		}
 		$uadministra->build();
 		echo $uadministra->output;
 	}
-
 
 	//******************************************************************
 	//
@@ -742,27 +741,24 @@ class Conc extends Controller {
 		$link2=site_url('nomina/conc/getctade');
 		$script  .=<<<script
 		function get_ctade(){
-				var tipo=$("#tipod").val();
-				$.ajax({
-					url: "$link"+'/'+tipo,
-					success: function(msg){
-						$("#td_ctade").html(msg);
-					}
-				});
-				//alert(tipo);
-			}
+			var tipo=$("#tipod").val();
+			$.ajax({
+				url: "$link"+'/'+tipo,
+				success: function(msg){
+					$("#td_ctade").html(msg);
+				}
+			});
+		}
 		function get_ctaac(){
-				var tipo=$("#tipoa").val();
-				$.ajax({
-					url: "$link2"+'/'+tipo,
-					success: function(msg){
-						$("#td_ctaac").html(msg);
-					}
-				});
-			}
+			var tipo=$("#tipoa").val();
+			$.ajax({
+				url: "$link2"+'/'+tipo,
+				success: function(msg){
+					$("#td_ctaac").html(msg);
+				}
+			});
+		}
 script;
-
-
 
 		$qformato=$this->qformato=$this->datasis->formato_cpla();
 
@@ -774,7 +770,7 @@ script;
 			'filtro'  =>array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
 			'retornar'=>array('codigo'=>'<#i#>'),
 			'titulo'  =>'Buscar Cuenta',
-			'where'=>"codigo LIKE \"$qformato\"",
+			'where'=>"codigo LIKE \"${qformato}\"",
 			'p_uri'=>array(4=>'<#i#>')
 		);
 
@@ -858,12 +854,12 @@ script;
 
 		$tipod  =$edit->getval('tipod');
 		if($tipod=='P'){
-				$edit->ctade->options("SELECT proveed,CONCAT_WS(' ',proveed,nombre)a FROM sprv ORDER BY proveed");
+			$edit->ctade->options("SELECT proveed,CONCAT_WS(' ',proveed,nombre) AS descrip FROM sprv ORDER BY proveed");
 		}else{
 			if($tipod=='G'){
-				$edit->ctade->options("SELECT codigo,CONCAT_WS(' ',codigo,descrip)a FROM mgas ORDER BY codigo");
+				$edit->ctade->options("SELECT codigo,CONCAT_WS(' ',codigo,descrip) AS descrip FROM mgas ORDER BY codigo");
 			}else{
-				$edit->ctade->options("SELECT cliente,CONCAT_WS(' ',proveed,nombre)a FROM sprv ORDER BY cliente");
+				$edit->ctade->options("SELECT cliente,CONCAT_WS(' ',proveed,nombre) AS descrip FROM sprv WHERE cliente REGEXP '[A-Za-z0-9_\-]+' ORDER BY cliente");
 			}
 		}
 
@@ -883,12 +879,12 @@ script;
 		$edit->ctaac->style='width:210px;';
 		$tipod  =$edit->getval('tipoa');
 		if($tipod=='P'){
-				$edit->ctaac->options("SELECT proveed,CONCAT_WS(' ',proveed,nombre)a FROM sprv ORDER BY proveed");
+			$edit->ctaac->options("SELECT proveed,CONCAT_WS(' ',proveed,nombre) AS descrip FROM sprv ORDER BY proveed");
 		}else{
 			if($tipod=='G'){
-				$edit->ctaac->options("SELECT codigo,CONCAT_WS(' ',codigo,descrip)a FROM mgas ORDER BY codigo");
+				$edit->ctaac->options("SELECT codigo,CONCAT_WS(' ',codigo,descrip) AS descrip FROM mgas ORDER BY codigo");
 			}else{
-				$edit->ctaac->options("SELECT cliente,CONCAT_WS(' ',proveed,nombre)a FROM sprv ORDER BY cliente");
+				$edit->ctaac->options("SELECT cliente,CONCAT_WS(' ',proveed,nombre) AS descrip FROM sprv ORDER BY cliente");
 			}
 		}
 

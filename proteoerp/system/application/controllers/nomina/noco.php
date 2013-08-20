@@ -767,13 +767,18 @@ class Noco extends Controller {
 	}
 
 	function dconc($id){
+		session_write_close();
 		$id  = intval($id);
 		if($id>0){
-			$mSQL= "SELECT concepto,descrip,aplica,formula FROM conc WHERE id=${id}";
+			$mSQL= "SELECT concepto,descrip,aplica,formula,tipod,tipoa,ctade,ctaac FROM conc WHERE id=${id}";
 			$row = $this->datasis->damerow($mSQL);
 			if(!empty($row)){
-				echo '<p><b>C&oacute;digo:</b> '.$row['concepto'].' - '.trim($row['descrip']).'<br>';
-				echo '<b>formula:</b> '.$row['formula'].'</p>';
+				echo '<p>';
+				echo '<b>C&oacute;digo:</b> '.trim($row['concepto']).' - '.trim($row['descrip']).br();
+				echo '<b>Formula:</b> '.trim($row['formula']).br();
+				echo '<b>Deudor:</b>'.$row['tipod'].' '.trim($row['ctade']).br();
+				echo '<b>Acreedor:</b>'.$row['tipoa'].' '.trim($row['ctaac']).br();
+				echo '</p>';
 			}
 		}
 	}

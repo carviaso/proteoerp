@@ -16,19 +16,19 @@ class Nomina extends Controller {
 
 		if ( !$this->db->table_exists('view_nomina') ) {
 			$mSQL = "
-			CREATE ALGORITHM = UNDEFINED VIEW view_nomina AS 
-			SELECT a.contrato, a.trabaja, b.nombre, a.numero, a.frecuencia, a.fecha, a.fechap, 
-				a.estampa, a.usuario, a.transac, 
-				sum(a.valor*(MID(concepto,1,1)<>'9' AND valor>0 AND concepto<>'PRES')) asigna, 
-				sum(a.valor*(MID(concepto,1,1)<>'9' AND valor<0 AND concepto<>'PRES')) deduc, 
-				sum(a.valor*(MID(concepto,1,1)<>'9')) total, 
-				sum(a.valor*(concepto='PRES')) presta, 
-				sum(a.valor*(MID(concepto,1,1)='9')) patronal 
-			FROM nomina a join noco b on a.contrato = b.codigo 
+			CREATE ALGORITHM = UNDEFINED VIEW view_nomina AS
+			SELECT a.contrato, a.trabaja, b.nombre, a.numero, a.frecuencia, a.fecha, a.fechap,
+				a.estampa, a.usuario, a.transac,
+				SUM(a.valor*(MID(concepto,1,1)<>'9' AND valor>0 AND concepto<>'PRES')) asigna,
+				SUM(a.valor*(MID(concepto,1,1)<>'9' AND valor<0 AND concepto<>'PRES')) deduc,
+				SUM(a.valor*(MID(concepto,1,1)<>'9')) total,
+				SUM(a.valor*(concepto='PRES')) presta,
+				SUM(a.valor*(MID(concepto,1,1)='9')) patronal
+			FROM nomina a join noco b on a.contrato = b.codigo
 			GROUP BY a.numero";
 			$this->db->query($mSQL);
 		}
-	
+
 		if ( !$this->datasis->iscampo('nomina','id') ) {
 			$this->db->simple_query('ALTER TABLE nomina DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE nomina ADD INDEX numero (numero)');
@@ -88,7 +88,7 @@ class Nomina extends Controller {
 	//Funciones de los Botones
 	//***************************
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
 		function tconsulta(transac){
@@ -146,7 +146,7 @@ class Nomina extends Controller {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				var mrege = 
+				var mrege =
 				{
 					state0: {
 						html: "<h1>Regenerar Nomina "+ret.numero+"</h1>Util para asegurar que todos los movimientos relacionados estan efectivamente cargados en el sistema administrativo.",
@@ -171,14 +171,14 @@ class Nomina extends Controller {
 									}
 								});
 								return false;
-							} 
+							}
 						}
 					},
-					state1: { 
+					state1: {
 						html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
 						focus: 1,
 						buttons: { Ok:true }
-					}		
+					}
 				};
 
 				$.prompt(mrege);
@@ -192,7 +192,7 @@ class Nomina extends Controller {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				var mrever = 
+				var mrever =
 				{
 					state0: {
 						html: "<h1>Reverar Pre-Nomina "+ret.numero+"</h1>",
@@ -218,14 +218,14 @@ class Nomina extends Controller {
 									}
 								});
 								return false;
-							} 
+							}
 						}
 					},
-					state1: { 
+					state1: {
 						html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
 						focus: 1,
 						buttons: { Ok:true }
-					}		
+					}
 				};
 
 				$.prompt(mrever);
@@ -259,9 +259,9 @@ class Nomina extends Controller {
 						}
 					});
 				}
-	
-				
-				
+
+
+
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
@@ -676,7 +676,7 @@ class Nomina extends Controller {
 	function nomirev( $nomina = 0 ) {
 		if ( $nomina == 0)
 			$nomina = $this->uri->segment($this->uri->total_segments());
-		
+
 		if ( $nomina == 0) {
 			$rt=array(
 				'status' =>'B',
@@ -727,7 +727,7 @@ class Nomina extends Controller {
 			return true;
 		}
 
-		// ELIMINA POR TRANSACCION GENERAR ITEMS 
+		// ELIMINA POR TRANSACCION GENERAR ITEMS
 		$this->db->query("DELETE FROM gser   WHERE transac='".$transac."'");
 		$this->db->query("DELETE FROM gitser WHERE transac='".$transac."'");
 
@@ -747,27 +747,27 @@ class Nomina extends Controller {
 				$FECHA    = $row->fecha;
 				$MONTO    = $row->monto;
 
-				$mSQL= "DELETE FROM smov 
-						WHERE cod_cli='".$COD_CLI."' AND 
+				$mSQL= "DELETE FROM smov
+						WHERE cod_cli='".$COD_CLI."' AND
 							tipo_doc='".$TIPO_DOC."' AND fecha='".$FECHA."'
 							AND numero='".$NUMERO."' AND transac='".$transac."' ";
 				$this->db->query($mSQL);
 
 				// DESCARGA EL MOVIMIENTO EN ITCCLI
-				$mSQL= "SELECT abono, tipo_doc, numero, cod_cli, fecha FROM itccli 
-						WHERE numccli='".$NUMERO."' AND tipoccli='".$TIPO_DOC."' 
+				$mSQL= "SELECT abono, tipo_doc, numero, cod_cli, fecha FROM itccli
+						WHERE numccli='".$NUMERO."' AND tipoccli='".$TIPO_DOC."'
 						AND cod_cli='".$COD_CLI."' AND transac='".$transac."' ";
 				$mREG = $this->datasis->damereg($mSQL);
 
-				$mSQL= "DELETE FROM itccli 
-						WHERE numccli='".$NUMERO."' AND tipoccli='".$TIPO_DOC."' 
+				$mSQL= "DELETE FROM itccli
+						WHERE numccli='".$NUMERO."' AND tipoccli='".$TIPO_DOC."'
 						AND cod_cli='".$COD_CLI."' AND transac='".$transac."' ";
 				$this->db->query($mSQL);
 
 				// ACTUALIZA EL DOCUMENTO ORIGEN
-				$mSQL = "UPDATE smov SET abonos=abonos-".$mREG['abono']." 
-				WHERE tipo_doc='".$mREG['tipo_doc']."' AND 
-				numero='".$mREG['numero']."' AND 
+				$mSQL = "UPDATE smov SET abonos=abonos-".$mREG['abono']."
+				WHERE tipo_doc='".$mREG['tipo_doc']."' AND
+				numero='".$mREG['numero']."' AND
 				cod_cli='".$mREG['cod_cli']."' AND fecha='".$mREG['fecha']."'";
 
 				$this->db->query($mSQL);
@@ -809,25 +809,25 @@ class Nomina extends Controller {
 		$mSQL = "TRUNCATE prenom ";
 		$this->db->query($mSQL);
 
-		$mSQL ="INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, tipo, descrip, grupo, formula, monto, fecha, valor,fechap, trabaja ) 
-				SELECT contrato, codigo, nombre, concepto, tipo, descrip, grupo, formula, monto, fecha, valor, fechap, trabaja FROM nomina 
+		$mSQL ="INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, tipo, descrip, grupo, formula, monto, fecha, valor,fechap, trabaja )
+				SELECT contrato, codigo, nombre, concepto, tipo, descrip, grupo, formula, monto, fecha, valor, fechap, trabaja FROM nomina
 				WHERE numero='".$nomina."' AND concepto<>'PRES' ";
 		$this->db->query($mSQL);
 
 		$mSQL = "
-			INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) 
+			INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap )
 			SELECT '".$contrato."', b.codigo, CONCAT(RTRIM(b.apellido),'/',b.nombre) nombre,
-			a.concepto, c.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fechap."' 
-			FROM asig a JOIN pers b ON a.codigo=b.codigo 
-			JOIN conc c ON a.concepto=c.concepto 
+			a.concepto, c.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fechap."'
+			FROM asig a JOIN pers b ON a.codigo=b.codigo
+			JOIN conc c ON a.concepto=c.concepto
 			WHERE b.tipo='".$frec."' AND b.contrato='".$contrato."' AND b.status='A' ";
 		$this->db->query($mSQL);
 
 		$mSQL = "
-			INSERT IGNORE INTO prenom (contrato, codigo,nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) 
-			SELECT '".$contrato."', b.codigo, CONCAT(RTRIM(b.apellido),'/',b.nombre) nombre, 
-				a.concepto, a.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fecha."' 
-			FROM conc a JOIN itnoco c ON a.concepto=c.concepto 
+			INSERT IGNORE INTO prenom (contrato, codigo,nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap )
+			SELECT '".$contrato."', b.codigo, CONCAT(RTRIM(b.apellido),'/',b.nombre) nombre,
+				a.concepto, a.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fecha."'
+			FROM conc a JOIN itnoco c ON a.concepto=c.concepto
 			JOIN pers b ON b.contrato=c.codigo WHERE c.codigo='".$contrato."' AND b.status='A' ";
 		$this->db->query($mSQL);
 
@@ -871,9 +871,9 @@ class Nomina extends Controller {
 		$mSQL = "DELETE FROM gitser WHERE transac='".$mTRANSAC."' ";
 		$this->db->query($mSQL);
 
-		$mSQL= "INSERT INTO gitser (fecha, numero, proveed, codigo, descrip, precio, iva, importe, unidades, fraccion, almacen, departa, sucursal, usuario, estampa, transac) 
-				SELECT a.fechap fecha, a.numero, b.ctaac proveed, b.ctade codigo,   CONCAT(RTRIM(b.descrip),' ',d.depadesc) descrip, SUM(a.valor), 0, SUM(a.valor), 0, 0, '', d.enlace, c.sucursal, a.usuario, a.estampa, a.transac  
-				FROM nomina a JOIN conc b ON a.concepto=b.concepto JOIN pers c ON a.codigo=c.codigo JOIN depa d ON c.depto=d.departa 
+		$mSQL= "INSERT INTO gitser (fecha, numero, proveed, codigo, descrip, precio, iva, importe, unidades, fraccion, almacen, departa, sucursal, usuario, estampa, transac)
+				SELECT a.fechap fecha, a.numero, b.ctaac proveed, b.ctade codigo,   CONCAT(RTRIM(b.descrip),' ',d.depadesc) descrip, SUM(a.valor), 0, SUM(a.valor), 0, 0, '', d.enlace, c.sucursal, a.usuario, a.estampa, a.transac
+				FROM nomina a JOIN conc b ON a.concepto=b.concepto JOIN pers c ON a.codigo=c.codigo JOIN depa d ON c.depto=d.departa
 				WHERE valor<>0 AND tipod='G' AND a.numero='".$nomina."' GROUP BY ctade, d.enlace ";
 		$this->db->query($mSQL);
 
@@ -881,19 +881,19 @@ class Nomina extends Controller {
 		$mSQL = "DELETE FROM gser WHERE  transac='".$mTRANSAC."' ";
 		$this->db->query($mSQL);
 
-		$mSQL= "INSERT INTO gser (fecha, numero, proveed, nombre, vence, totpre,  totiva, totbruto, reten, totneto, codb1, tipo1, cheque1, monto1, credito, anticipo, orden, tipo_doc, usuario, estampa, transac) 
-				SELECT a.fechap fecha, a.numero numero, b.ctaac proveed, d.nombre, a.fechap vence, SUM(a.valor) totpre, 0 totiva, SUM(a.valor) totbruto, 0 reten, SUM(a.valor) totneto, '' codb1, '' tipo1, '' cheque1, 
+		$mSQL= "INSERT INTO gser (fecha, numero, proveed, nombre, vence, totpre,  totiva, totbruto, reten, totneto, codb1, tipo1, cheque1, monto1, credito, anticipo, orden, tipo_doc, usuario, estampa, transac)
+				SELECT a.fechap fecha, a.numero numero, b.ctaac proveed, d.nombre, a.fechap vence, SUM(a.valor) totpre, 0 totiva, SUM(a.valor) totbruto, 0 reten, SUM(a.valor) totneto, '' codb1, '' tipo1, '' cheque1,
 					(
-						SELECT ABS(SUM(bbb.monto)) FROM (SELECT sum(d.valor) monto FROM nomina d JOIN conc e ON d.concepto=e.concepto JOIN pers f ON d.codigo=f.codigo WHERE d.valor<>0 AND e.tipod!='G' AND d.numero='".$nomina."' 
-						UNION ALL 
+						SELECT ABS(SUM(bbb.monto)) FROM (SELECT sum(d.valor) monto FROM nomina d JOIN conc e ON d.concepto=e.concepto JOIN pers f ON d.codigo=f.codigo WHERE d.valor<>0 AND e.tipod!='G' AND d.numero='".$nomina."'
+						UNION ALL
 						SELECT SUM(valor) monto FROM nomina g WHERE g.numero='".$nomina."' AND g.concepto='PRES' ) bbb)*(b.ctaac='".$mNOMI."'
-					) monto1, 
+					) monto1,
 					sum(a.valor)+(
-						SELECT SUM(valor) FROM (SELECT sum(valor) valor FROM nomina a JOIN conc b ON a.concepto=b.concepto JOIN pers c ON a.codigo=c.codigo WHERE valor<>0 AND tipod!='G' AND a.numero='".$nomina."' 
-						UNION ALL 
-						SELECT SUM(valor) FROM nomina a WHERE a.numero='".$nomina."' AND concepto='PRES' ) aaa)*(b.ctaac='".$mNOMI."') credito, 
-					0 anticipo, '', 'GA', a.usuario, a.estampa, a.transac FROM nomina a JOIN conc b ON a.concepto=b.concepto 
-				JOIN pers c ON a.codigo=c.codigo JOIN sprv d ON ctaac=d.proveed 
+						SELECT SUM(valor) FROM (SELECT sum(valor) valor FROM nomina a JOIN conc b ON a.concepto=b.concepto JOIN pers c ON a.codigo=c.codigo WHERE valor<>0 AND tipod!='G' AND a.numero='".$nomina."'
+						UNION ALL
+						SELECT SUM(valor) FROM nomina a WHERE a.numero='".$nomina."' AND concepto='PRES' ) aaa)*(b.ctaac='".$mNOMI."') credito,
+					0 anticipo, '', 'GA', a.usuario, a.estampa, a.transac FROM nomina a JOIN conc b ON a.concepto=b.concepto
+				JOIN pers c ON a.codigo=c.codigo JOIN sprv d ON ctaac=d.proveed
 				WHERE valor<>0 AND tipod='G' AND a.numero='".$nomina."' GROUP BY ctaac ";
 		$this->db->query($mSQL);
 
@@ -903,10 +903,10 @@ class Nomina extends Controller {
 
 		// GENERA LAS ND EN PROVEEDORES SPRM
 		// debe revisar cuales esta
-		$mSQL= "SELECT b.ctaac, a.fechap fecha, sum(valor) valor, d.nombre, b.descrip 
-				FROM nomina a JOIN conc b ON a.concepto=b.concepto 
-				JOIN pers c ON a.codigo=c.codigo 
-				JOIN sprv d ON b.ctaac=d.proveed 
+		$mSQL= "SELECT b.ctaac, a.fechap fecha, sum(valor) valor, d.nombre, b.descrip
+				FROM nomina a JOIN conc b ON a.concepto=b.concepto
+				JOIN pers c ON a.codigo=c.codigo
+				JOIN sprv d ON b.ctaac=d.proveed
 				WHERE a.valor<>0 AND b.tipod='P' AND b.tipoa='P' AND a.numero='".$nomina."'
 				GROUP BY b.ctaac ";
 
@@ -917,7 +917,7 @@ class Nomina extends Controller {
 
 				$data = array();
 				$data["cod_prv"]  = $row->ctaac;
-				$data["nombre"]   = $row->nombre; 
+				$data["nombre"]   = $row->nombre;
 				$data["tipo_doc"] = 'ND';
 				$data["fecha"]    = $row->fecha;
 				$data["monto"]    = abs($row->valor);
@@ -936,7 +936,7 @@ class Nomina extends Controller {
 					//SI NO ESTA
 					$mCONTROL = $this->datasis->fprox_numero("nsprm");
 					$mNOTADEB = $this->datasis->fprox_numero("num_nd");
-					
+
 					$data["NUMERO"]  = $mNOTADEB;
 					$data["ABONOS"]  = 0;
 					$data["CONTROL"] = $mCONTROL;
@@ -951,7 +951,7 @@ class Nomina extends Controller {
 					$data["NUMERO"]  = $mREG['numero'];
 					$data["ABONOS"]  = $mREG['abonos'];
 					$data["CONTROL"] = $mREG['control'];
-					
+
 					$this->db->update('sprm', $data, "id=".$mREG['id']);
 				}
 				$this->db->query($mSQL);
@@ -962,8 +962,8 @@ class Nomina extends Controller {
 		$mSQL = "DELETE FROM sprm WHERE transac='".$mTRANSAC."' AND numero='".$nomina."'";
 		$this->db->query($mSQL);
 
-		$mSQL= "INSERT IGNORE INTO sprm (tipo_doc, fecha, numero, cod_prv, nombre, vence, monto, impuesto, tipo_ref, num_ref, codigo, descrip, usuario, estampa, transac, observa1 ) 
-				SELECT 'ND' tipo_doc, fecha, '".$nomina."'  numero, proveed, nombre, vence, credito, 0, 'GA', '' ,'NOCON', 'NOMINA', usuario, estampa, transac, 'NOMINA ' 
+		$mSQL= "INSERT IGNORE INTO sprm (tipo_doc, fecha, numero, cod_prv, nombre, vence, monto, impuesto, tipo_ref, num_ref, codigo, descrip, usuario, estampa, transac, observa1 )
+				SELECT 'ND' tipo_doc, fecha, '".$nomina."'  numero, proveed, nombre, vence, credito, 0, 'GA', '' ,'NOCON', 'NOMINA', usuario, estampa, transac, 'NOMINA '
 				FROM gser WHERE tipo_doc='GA' AND numero='".$nomina."' ";
 		$this->db->query($mSQL);
 
@@ -987,7 +987,7 @@ DO WHILE !mC:EoF()
 	mNOTACRE := PROX_SQL("nccli")
 	aLISTA := {}
 	AADD(aLISTA, { "COD_CLI",  mC:FieldGet('COD_CLI') } )
-	AADD(aLISTA, { "NOMBRE",   mC:FieldGet('NOMBRE') } ) 
+	AADD(aLISTA, { "NOMBRE",   mC:FieldGet('NOMBRE') } )
 	AADD(aLISTA, { "TIPO_DOC", 'NC' } )
 	AADD(aLISTA, { "NUMERO",   mNOTACRE } )
 	AADD(aLISTA, { "FECHA",    XFECHAP } )
@@ -1009,7 +1009,7 @@ DO WHILE !mC:EoF()
 	EJECUTASQL(mSQL,aVALORES)
 
 	// ACTUALIZA EL DOCUMENTO ORIGEN
-   
+
 	mSQL := "UPDATE smov SET abonos=abonos+"+STR(ABS(mC:FieldGet('CUOTA')))
 	mSQL += " WHERE tipo_doc='"+mC:FieldGet('TIPO_DOC')+"' "
 	mSQL += " AND numero='"+mC:FieldGet('NUMERO')+"' "
@@ -1071,7 +1071,7 @@ mC:Destroy()
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
+		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});		';
@@ -1275,28 +1275,28 @@ mC:Destroy()
 		$edit->back_url = site_url("nomina/nomina/filteredgrid");
 		//$edit->script($script, "create");
 		//$edit->script($script, "modify");
-		
+
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		
+
 		$script ='
 		$(function() {
 			$(".inputnum").numeric(".");
 		});
 		';
-		
+
 		$edit->numero =  new inputField("N&uacute;mero", "numero");
 		$edit->numero->mode="autohide";
 		$edit->numero->maxlength=8;
 		$edit->numero->size =10;
 		$edit->numero->rule ="required";
-		
+
 		$edit->frecuencia = new dropdownField("Tipo de N&oacute;mina", "frecuencia");
 		$edit->frecuencia->option("","");
 		$edit->frecuencia->options(array("Q"=> "Quincenal","M"=>"Mensual","S"=>"Semanal"));
 		$edit->frecuencia->style = "width:100px;";
-		
+
 		$edit->contrato = new dropdownField("Contrato", "contrato");
 		$edit->contrato->option("","");
 		$edit->contrato->options('SELECT codigo, nombre FROM noco');
@@ -1307,72 +1307,72 @@ mC:Destroy()
 		$edit->depto->options('SELECT departa,descrip FROM depa');
 		$edit->depto->style = "width:200px;";
 
-		$edit->codigo = new dropdownField("C&oacute;digo", "codigo"); 
-		//$edit->codigo->_dataobject->db_name="trim(codigo)";  
+		$edit->codigo = new dropdownField("C&oacute;digo", "codigo");
+		//$edit->codigo->_dataobject->db_name="trim(codigo)";
 		$edit->codigo->option("","");
 		$edit->codigo->options("SELECT codigo,concat(trim(apellido),' ',trim(nombre)) nombre FROM pers ORDER BY apellido");
 		$edit->codigo->style = "width:100px;";
 		$edit->codigo->mode="autohide";
-		
+
 		$edit->nombre =  new inputField("Nombre", "nombre");
 		$edit->nombre->mode="autohide";
 		$edit->nombre->maxlength=30;
 		$edit->nombre->size=40;
-		
+
 		$edit->concepto = new dropdownField("Concepto", "concepto");
 		$edit->concepto->option("","");
 		$edit->concepto->options('SELECT concepto,descrip FROM conc ORDER BY descrip');
 		$edit->concepto->style = "width:200px;";
-		
+
 		$edit->tipo =  new inputField("Tipo","tipo");
 		$edit->tipo->option("A","A");
 		$edit->tipo->option("D","D");
 		$edit->tipo->mode="autohide";
 		$edit->tipo->style = "width:50px;";
-  
+
 		$edit->descrip =  new inputField("T. Descripci&oacute;n", "descrip");
 		$edit->descrip->mode="autohide";
 		$edit->descrip->maxlength=35;
 		$edit->descrip->size =45;
-		
+
 		$edit->grupo =  new inputField("Grupo", "grupo");
 		$edit->grupo->maxlength=4;
 		$edit->grupo->size =6;
-		
+
 		$edit->formula =  new inputField("Formula", "formula");
 		$edit->formula->maxlength=120;
 		$edit->formula->size =80;
-		
+
 		$edit->monto = new inputField("Monto","monto");
 		$edit->monto->size =17;
 		$edit->monto->maxlength=14;
 		$edit->monto->css_class='inputnum';
 		$edit->monto->rule='numeric';
-			
+
 		$edit->fecha =  new DateonlyField("fecha", "fecha","d/m/Y");
 		$edit->fecha->size = 12;
-	
+
 		$edit->cuota =  new inputField("Cuota", "cuota");
 		$edit->cuota->maxlength=11;
 		$edit->cuota->size =13;
 		$edit->cuota->css_class='inputnum';
 		$edit->cuota->rule='integer';
-		
+
 		$edit->cuotat =  new inputField("Cuota Total", "cuotat");
 		$edit->cuotat->maxlength=11;
 		$edit->cuotat->size =13;
 		$edit->cuotat->css_class='inputnum';
 		$edit->cuotat->rule='integer';
-		
+
 		$edit->valor =  new inputField("Valor", "valor");
 		$edit->valor->maxlength=17;
 		$edit->valor->size =20;
 		$edit->valor->css_class='inputnum';
 		$edit->valor->rule='numeric';
-		
+
 		$edit->buttons("modify", "save", "undo", "delete", "back");
 		$edit->build();
-		
+
 		$data['content'] = $edit->output;
 		$data['title']   = "<h1>Nomina</h1>";
 		$data["head"]    = script("jquery.pack.js").script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").$this->rapyd->get_head();
@@ -1384,7 +1384,7 @@ mC:Destroy()
 		$limit   = isset($_REQUEST['limit'])  ? $_REQUEST['limit']   : 50;
 		$sort    = isset($_REQUEST['sort'])   ? $_REQUEST['sort']    : '[{"property":"fecha","direction":"DESC"}]';
 		$filters = isset($_REQUEST['filter']) ? $_REQUEST['filter']  : null;
-		
+
 		$where = $this->datasis->extjsfiltro($filters);
 
 		$this->db->_protect_identifiers=false;
@@ -1479,31 +1479,31 @@ var tipos = new Ext.data.SimpleStore({
 });
 
 //Column Model
-var NomiCol = 
+var NomiCol =
 	[
-		{ header: 'Numero',       width:  60, sortable: true,  dataIndex: 'numero',   field: { type: 'textfield' }, filter: { type: 'string' }}, 
-		{ header: 'Fecha',        width:  70, sortable: true,  dataIndex: 'fecha',    field: { type: 'datefield' }, filter: { type: 'date' }}, 
-		{ header: 'Contrato',     width:  70, sortable: true,  dataIndex: 'contrato', field: { type: 'textfield' }, filter: { type: 'string' }}, 
+		{ header: 'Numero',       width:  60, sortable: true,  dataIndex: 'numero',   field: { type: 'textfield' }, filter: { type: 'string' }},
+		{ header: 'Fecha',        width:  70, sortable: true,  dataIndex: 'fecha',    field: { type: 'datefield' }, filter: { type: 'date' }},
+		{ header: 'Contrato',     width:  70, sortable: true,  dataIndex: 'contrato', field: { type: 'textfield' }, filter: { type: 'string' }},
 		{ header: 'Asignaciones', width:  80, sortable: true,  dataIndex: 'asigna',   field: { type: 'textfield' }, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')},
 		{ header: 'Deducciones',  width:  80, sortable: true,  dataIndex: 'deduc',    field: { type: 'textfield' }, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')},
 		{ header: 'Nombre',       width: 250, sortable: true,  dataIndex: 'noconom',  field: { type: 'textfield' }, filter: { type: 'string' }}
 	];
 
 //Column Model
-var TrabaCol = 
+var TrabaCol =
 	[
-		{ header: 'Codigo',     width:  50, sortable: true,  dataIndex: 'codigo',   field: { type: 'textfield' }, filter: { type: 'string' }}, 
-		{ header: 'Nombre',     width: 170, sortable: true,  dataIndex: 'nombre',   field: { type: 'textfield' }, filter: { type: 'string' }}, 
+		{ header: 'Codigo',     width:  50, sortable: true,  dataIndex: 'codigo',   field: { type: 'textfield' }, filter: { type: 'string' }},
+		{ header: 'Nombre',     width: 170, sortable: true,  dataIndex: 'nombre',   field: { type: 'textfield' }, filter: { type: 'string' }},
 		{ header: 'Asignacion', width:  80, sortable: true,  dataIndex: 'asigna',   field: { type: 'textfield' }, filter: { type: 'string' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')},
 		{ header: 'Deduccion',  width:  60, sortable: true,  dataIndex: 'deduc',    field: { type: 'textfield' }, filter: { type: 'string' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')},
 		{ header: 'Saldo',      width:  80, sortable: true,  dataIndex: 'saldo',    field: { type: 'textfield' }, filter: { type: 'string' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')}
 	];
 
 //Column Model
-var ConcCol = 
+var ConcCol =
 	[
-		{ header: 'Conc.',       width:  40, sortable: true,  dataIndex: 'concepto', field: { type: 'textfield' }, filter: { type: 'string' }}, 
-		{ header: 'Descripcion', width: 150, sortable: true,  dataIndex: 'descrip',  field: { type: 'textfield' }, filter: { type: 'string' }}, 
+		{ header: 'Conc.',       width:  40, sortable: true,  dataIndex: 'concepto', field: { type: 'textfield' }, filter: { type: 'string' }},
+		{ header: 'Descripcion', width: 150, sortable: true,  dataIndex: 'descrip',  field: { type: 'textfield' }, filter: { type: 'string' }},
 		{ header: 'Asignacion',  width:  80, sortable: true,  dataIndex: 'asigna',   field: { type: 'textfield' }, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')},
 		{ header: 'Deduccion',   width:  60, sortable: true,  dataIndex: 'deduc',    field: { type: 'textfield' }, filter: { type: 'numeric' }, align: 'right',renderer : Ext.util.Format.numberRenderer('0,000.00')}
 	];
@@ -1531,7 +1531,7 @@ Ext.onReady(function(){
 				totalProperty: 'results'
 			}
 		}
-	});	
+	});
 
 	//////////////////////////////////////////////////////////
 	// create the Data Store
@@ -1608,7 +1608,7 @@ Ext.onReady(function(){
 				totalProperty: 'results'
 			}
 		}
-	});	
+	});
 
 	//////////////////////////////////////////////////////////
 	// create the Data Store
@@ -1660,19 +1660,19 @@ Ext.onReady(function(){
 		onDeleteClick: function() {
 			var selection = this.getView().getSelectionModel().getSelection()[0];
 			Ext.MessageBox.show({
-				title: 'Confirme', 
-				msg: 'Esta seguro?', 
-				buttons: Ext.MessageBox.YESNO, 
-				fn: function(btn){ 
-					if (btn == 'yes') { 
+				title: 'Confirme',
+				msg: 'Esta seguro?',
+				buttons: Ext.MessageBox.YESNO,
+				fn: function(btn){
+					if (btn == 'yes') {
 						if (selection) {
 							//storeNomi.remove(selection);
 						}
 						storeNomi.load();
-					} 
-				}, 
-				icon: Ext.MessageBox.QUESTION 
-			});  
+					}
+				},
+				icon: Ext.MessageBox.QUESTION
+			});
 		},
 	});
 
@@ -1709,7 +1709,7 @@ Ext.onReady(function(){
 
 </script>
 ";
-		return $script;	
+		return $script;
 
 	}
 
@@ -1740,8 +1740,8 @@ Ext.onReady(function(){
 			return FALSE;
 		}else {
   		return TRUE;
-		}	
+		}
 	}
-*/ 
+*/
 }
 ?>
