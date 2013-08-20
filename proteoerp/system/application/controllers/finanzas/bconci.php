@@ -116,10 +116,10 @@ class Bconci extends Controller {
 						try{
 							var json = JSON.parse(data);
 							if (json.status == "A"){
-								apprise("Registro eliminado");
+								$.prompt("Registro eliminado");
 								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 							}else{
-								apprise("Registro no se puede eliminado");
+								$.prompt("Registro no se puede eliminado");
 							}
 						}catch(e){
 							$("#fborra").html(data);
