@@ -1,5 +1,5 @@
     </td></tr></table></div>
-    <div id="pie"><?=$copyright ?><?= image('codeigniter.gif'); ?></div>
+    <div id="pie"><?php echo $copyright ?><?php echo  image('codeigniter.gif'); ?></div>
 </div>
 </body>
 </html>

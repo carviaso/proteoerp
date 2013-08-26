@@ -119,7 +119,7 @@ $(document).ready(function() {
 
 						if ( $this->secu->es_logeado() ){
 							echo "\t\t\t\t\t\t\t\t</tr><tr>\n";
-							echo "\t\t\t\t\t\t\t\t\t<td><div onclick='camclave()'><b>Cambio de Clave</b></div></td>";
+							echo "\t\t\t\t\t\t\t\t\t<td><div><b onclick='camclave()' style='cursor:pointer;'>Cambio de Clave</b></div></td>";
 						}
 					?>
 							</tr><tr>

@@ -95,6 +95,8 @@ $(function(){
 
 							$('#direc').val('');
 							$('#direc_val').text('');
+
+							$('#descuento').val('0');
 						}else{
 							$.each(data,
 								function(i, val){
@@ -121,6 +123,13 @@ $(function(){
 
 			$('#direc').val(ui.item.direc);
 			$('#direc_val').text(ui.item.direc);
+
+			var manual = $("#manual").val();
+			if(manual=='S'){
+				$('#descuento').val('0');
+			}else{
+				$('#descuento').val(ui.item.desc);
+			}
 
 			post_modbus_scli();
 			setTimeout(function() {  $("#cod_cli").removeAttr("readonly"); }, 1500);
@@ -182,6 +191,8 @@ $(function(){
 
 			$('#direc').val(ui.item.direc);
 			$('#direc_val').text(ui.item.direc);
+
+			$('#descuento').val('0');
 
 			truncate();
 			$("#tipo_doc").val('D');
@@ -256,6 +267,11 @@ $(function(){
 	chreferen();
 });
 
+function aplicadesc(){
+	var descu = Number($('#descuento').val());
+	return descu;
+}
+
 function scliadd() {
 	$.post('<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>',
 	function(data){
@@ -309,6 +325,8 @@ function totalizar(){
 	var importe=0;
 	var peso   =0;
 	var cana   =0;
+	var descu  =aplicadesc()/100;
+	var descuento=0;
 	var arr=$('input[name^="tota_"]');
 	jQuery.each(arr, function() {
 		nom=this.name;
@@ -318,13 +336,26 @@ function totalizar(){
 			cana    = Number($("#cana_"+ind).val());
 			itiva   = Number($("#itiva_"+ind).val());
 			itpeso  = Number($("#sinvpeso_"+ind).val());
+			itpreca = Number($("#preca_"+ind).val());
 			importe = Number(this.value);
+
+			if(descu>0){
+				importe   = roundNumber(itpreca*(1-descu),2)
+				descuento = descuento+(itpreca-importe)*cana;
+			}
 
 			peso    = peso+(itpeso*cana);
 			iva     = iva+importe*(itiva/100);
 			totals  = totals+importe;
 		}
 	});
+
+	if(descuento>0){
+		//descuento = roundNumber(descuento,2);
+		$("#descuentomon_val").text(nformat(descuento,2));
+	}else{
+		$("#descuentomon_val").text(nformat(0,2));
+	}
 	totalg=totals+iva;
 	$("#peso").val(roundNumber(peso,2));
 	$("#totalg").val(roundNumber(totals+iva,2));
@@ -854,11 +885,11 @@ function chreferen(){
 			<?php
 
 			for($i=0; $i < $form->max_rel_count['sfpa']; $i++) {
-				$tipo     = "tipo_$i";
-				$sfpafecha= "sfpafecha_$i";
-				$numref   = "numref_$i";
-				$monto    = "monto_$i";
-				$banco    = "banco_$i";
+				$tipo     = "tipo_${i}";
+				$sfpafecha= "sfpafecha_${i}";
+				$numref   = "numref_${i}";
+				$monto    = "monto_${i}";
+				$banco    = "banco_${i}";
 			?>
 			<tr id='tr_sfpa_<?php echo $i; ?>'>
 				<td class="littletablerow" nowrap><?php echo $form->$tipo->output      ?></td>
@@ -880,6 +911,8 @@ function chreferen(){
 		<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
 		<table width='100%'>
 			<tr>
+				<td class="littletableheader" align='right'><?php echo $form->descuento->label;  ?></td>
+				<td class="littletablerow"    align='right'><b id='descuentomon_val'></b><?php echo $form->descuento->output; ?></td>
 				<td class="littletableheader" align='right'><?php echo $form->totals->label;  ?></td>
 				<td class="littletablerow"    align='right'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
 				<td class="littletableheader" align='right'><?php echo $form->ivat->label;    ?></td>
@@ -888,8 +921,8 @@ function chreferen(){
 				<td class="littletablerow"    align='right' style='font-size:18px;font-weight: bold'><b id='totalg_val'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
 			</tr>
 			<tr>
-				<td colspan='4'><?php echo  $form->observ1->label.$form->observ1->output; ?> </td>
-				<td  colspan='2' align='center'>
+				<td colspan='6'><?php echo  $form->observ1->label.$form->observ1->output; ?> </td>
+				<td colspan='2' align='center'>
 				<?php
 					if ($form->manual->value == 'S')
 						echo "<span style='font-size:11pt;font-weight: bold;background:#087C0E;color:white;' >&nbsp;&nbsp;FACTURACION MANUAL&nbsp;&nbsp;</span>";

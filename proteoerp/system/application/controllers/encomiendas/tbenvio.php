@@ -32,7 +32,7 @@ class Tbenvio extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array('id'=>'ffactura',   'img'=>'images/pdf_logo.gif',  'alt' => 'Facturar', 'label'=>'Facturar'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -87,9 +87,9 @@ class Tbenvio extends Controller {
 
 		$bodyscript .= '
 		function tbenvioshow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
 					$("#fshow").html(data);
@@ -111,10 +111,10 @@ class Tbenvio extends Controller {
 						try{
 							var json = JSON.parse(data);
 							if (json.status == "A"){
-								apprise("Registro eliminado");
+								$.prompt("Registro eliminado");
 								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 							}else{
-								apprise("Registro no se puede eliminado");
+								$.prompt("Registro no se puede eliminado");
 							}
 						}catch(e){
 							$("#fborra").html(data);
@@ -141,6 +141,21 @@ class Tbenvio extends Controller {
 			';
 
 		$bodyscript .= '
+		$("#ffactura").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if(ret.nrofact == ""){
+					alert("factura");
+				}else{
+					$.prompt("Debe seleccionar un documento sin factura");
+				}
+			}else{
+				$.prompt("Debe seleccionar un documento");
+			}
+		});';
+
+		$bodyscript .= '
 		$("#fedita").dialog({
 			autoOpen: false, height: 540, width: 700, modal: true,
 			buttons: {
@@ -156,13 +171,19 @@ class Tbenvio extends Controller {
 							try{
 								var json = JSON.parse(r);
 								if (json.status == "A"){
-									apprise("Registro Guardado");
+									$.prompt("Registro Guardado");
+									$(".alert").html("");
+									$("#peso").val("");
+									$("#v1").val("");
+									$("#v2").val("");
+									$("#v3").val("");
 
+									ctarifa();
 									grid.trigger("reloadGrid");
 									//'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+json.pk.id+\'/id\'').';
 									return true;
 								} else {
-									apprise(json.mensaje);
+									$.prompt(json.mensaje);
 								}
 							}catch(e){
 								$("#fedita").html(r);
@@ -182,13 +203,13 @@ class Tbenvio extends Controller {
 							try{
 								var json = JSON.parse(r);
 								if (json.status == "A"){
-									apprise("Registro Guardado");
+									$.prompt("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+json.pk.id+\'/id\'').';
+									//'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+json.pk.id+\'/id\'').';
 									return true;
 								} else {
-									apprise(json.mensaje);
+									$.prompt(json.mensaje);
 								}
 							}catch(e){
 								$("#fedita").html(r);
@@ -256,7 +277,7 @@ class Tbenvio extends Controller {
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
-			'width'         => 40,
+			'width'         => 50,
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
@@ -890,6 +911,7 @@ class Tbenvio extends Controller {
 		$edit->cant->insertValue='1';
 		$edit->cant->size =11;
 		$edit->cant->maxlength =11;
+		$edit->cant->type='inputhidden';
 
 		$edit->peso = new inputField('Peso Kg.','peso');
 		$edit->peso->rule='numeric';

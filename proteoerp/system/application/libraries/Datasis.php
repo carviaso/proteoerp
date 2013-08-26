@@ -114,11 +114,16 @@ class Datasis {
 		$CI =& get_instance();
 		$dbnombre=$CI->db->escape($nombre);
 
-		$qq = $CI->db->query("SELECT valor FROM valores WHERE nombre=${dbnombre}");
+		$qq = $CI->db->query("SELECT valor,descrip FROM valores WHERE nombre=${dbnombre}");
 		if($qq->num_rows() > 0){
 			$rr = $qq->row_array();
-			$aa = each($rr);
-			$rt = $aa[1];
+			$rt = $rr['valor'];
+			if(!empty($descrip)){
+				if($rr['valor']!=$descrip){
+					$dbdescrip = $CI->db->escape($descrip);
+					$CI->db->simple_query("UPDATE valores SET descrip=${dbdescrip} WHERE nombre=${dbnombre}");
+				}
+			}
 		}else{
 			$dbdescri=$CI->db->escape($descrip);
 			$CI->db->simple_query("INSERT INTO valores SET nombre=${dbnombre}, descrip=${dbdescri}");
@@ -131,7 +136,8 @@ class Datasis {
 	// Pone un valor en la tabla Valores
 	function ponevalor($nombre, $mvalor){
 		$CI =& get_instance();
-		$CI->db->simple_query("REPLACE INTO valores SET nombre='$nombre', valor=".$CI->db->escape($mvalor));
+		$dbnombre=$CI->db->escape($nombre);
+		$CI->db->simple_query("REPLACE INTO valores SET nombre=${dbnombre}, valor=".$CI->db->escape($mvalor));
 	}
 
 	// DEVUELVE EL SIGUIENTE NUMERO DEL CONTADOR

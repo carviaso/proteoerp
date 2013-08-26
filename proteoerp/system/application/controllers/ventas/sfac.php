@@ -1602,7 +1602,7 @@ class Sfac extends Controller {
 					url:  "'.site_url('ajax/buscascliser').'",
 					type: "POST",
 					dataType: "json",
-					data: "q="+req.term,
+					data: {"q":req.term},
 					success:
 						function(data){
 							var sugiere = [];
@@ -2408,6 +2408,10 @@ class Sfac extends Controller {
 		$edit->cajero->style='width:150px;';
 		$edit->cajero->insertValue=$this->secu->getcajero();
 
+		$edit->descuento = new hiddenField('Desc.','descuento');
+		$edit->descuento->insertValue = '0';
+		//$edit->descuento->when=array('modify','create');
+
 		//***********************************
 		//  Campos para el detalle 1 sitems
 		//***********************************
@@ -3026,6 +3030,8 @@ class Sfac extends Controller {
 		$fecha  = $do->get('fecha');
 		$estampa= $do->get('estampa');
 		$referen= $do->get('referen');
+		$descuento=floatval($do->get('descuento'));
+		$globaldes=$descuento/100;
 
 		$dbcliente=$this->db->escape($cliente);
 
@@ -3068,6 +3074,10 @@ class Sfac extends Controller {
 		for($i=0;$i<$cana;$i++){
 			$itcana    = $do->get_rel('sitems','cana' ,$i);
 			$itpreca   = $do->get_rel('sitems','preca',$i);
+			if($descuento>0){
+				$itpreca = round($itpreca*(1-$globaldes),2);
+				$do->set_rel('sitems','preca',$itpreca,$i);
+			}
 			$itiva     = $do->get_rel('sitems','iva'  ,$i);
 			$itimporte = $itpreca*$itcana;
 			$iva       = $itimporte*($itiva/100);
@@ -3079,7 +3089,7 @@ class Sfac extends Controller {
 
 		//Validaciones del pago
 		if(abs($sfpa-$totalg)>0.02 && $referen!='P'){
-			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El monto del pago no coincide con el monto de la factura (Pago:'.$sfpa.', Factura:'.$totalg.')';
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El monto del pago no coincide con el monto de la factura (Pago:'.$sfpa.', Factura:'.$totalg.') ';
 			return false;
 		}
 		//Fin de la validacion de pago
@@ -4025,31 +4035,36 @@ class Sfac extends Controller {
 	function instalar(){
 		$campos = $this->db->list_fields('sfac');
 
-		if(!in_array('freiva'  ,$campos)){
+		if(!in_array('freiva',$campos)){
 			$this->db->query("ALTER TABLE sfac ADD freiva DATE ");
 		}
 
-		if(!in_array('ereiva'  ,$campos)){
+		if(!in_array('ereiva',$campos)){
 			$this->db->query("ALTER TABLE sfac ADD ereiva DATE AFTER freiva");
 		}
-		if(!in_array('entregado'  ,$campos)){
+
+		if(!in_array('entregado',$campos)){
 			$this->db->query("ALTER TABLE sfac ADD entregado DATE ");
 			$this->db->query("UPDATE sfac SET entregado=fecha");
 		}
 
-		if(!in_array('comiadi'  ,$campos)){
+		if(!in_array('comiadi',$campos)){
 			$this->db->query("ALTER TABLE sfac ADD comiadi DECIMAL(10,2) DEFAULT 0 ");
 		}
 
-		if(!in_array('upago'  ,$campos)){
+		if(!in_array('upago',$campos)){
 			$this->db->query("ALTER TABLE sfac ADD upago INT(10)");
 		}
 
-		if(!in_array('manual'  ,$campos)){
+		if(!in_array('manual',$campos)){
 			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `manual` CHAR(50) NULL DEFAULT 'N'");
 		}
 
-		if ( !in_array('id'  ,$campos) ) {
+		if(!in_array('descuento',$campos)){
+			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `descuento` DECIMAL(10,2) NULL DEFAULT '0'");
+		}
+
+		if(!in_array('id'  ,$campos)){
 			$this->db->simple_query('ALTER TABLE sfac DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE sfac ADD UNIQUE INDEX tipo_doc, numero (numero)');
 			$this->db->simple_query('ALTER TABLE sfac ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
