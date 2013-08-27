@@ -6,8 +6,6 @@ class Monitoreo extends Controller{
 		parent::Controller();
 		$this->config->load('monitoreo');
 		$this->datasis->modulo_id('922',1);
-		//$this->ser[]=array('host'=>'http://localhost/phpsysinfo' ,'titu'=>'Servidor 99');
-		//$this->ser[]=array('host'=>'http://192.168.1.143/phpsysinfo','titu'=>'Servidor 11');
 		$this->ser=$this->config->item('m_server');
 	}
 
@@ -40,8 +38,18 @@ class Monitoreo extends Controller{
 	function xml($ind=0){
 		$host=$this->ser[$ind]['host'];
 		header('content-type: text/xml');
-		$pag = file_get_contents($host.'/xml.php');
-		echo $pag;
+		$pag = @file_get_contents($host.'/xml.php');
+		if($pag == false){
+			echo '<?xml version=\'1.0\'?>
+<phpsysinfo>
+  <Error>
+    <Function>checkForExtensions</Function>
+    <Message>Equipo no disponible.</Message>
+  </Error>
+</phpsysinfo>';
+		}else{
+			echo $pag;
+		}
 	}
 
 	function wol(){
@@ -113,7 +121,7 @@ class Monitoreo extends Controller{
 	}
 
 	function language(){
-		header('content-type: text/xml'); 
+		header('content-type: text/xml');
 		echo '<?xml version="1.0" encoding="utf-8"?>';
 		?>
 <tns:translation language="spanish" charset="utf-8"
@@ -215,4 +223,3 @@ class Monitoreo extends Controller{
 </tns:translation>
 <?php }
 }
-?>
