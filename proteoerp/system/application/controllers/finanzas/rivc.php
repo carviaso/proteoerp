@@ -1642,8 +1642,6 @@ class Rivc extends Controller {
 		$scli  = $this->input->post('scli');
 		$sclidb= $this->db->escape($scli);
 
-echo $mid.' '.$scli;exit();
-
 		$rete=0.75;
 		$data = '{}';
 		if(empty($scli)){
