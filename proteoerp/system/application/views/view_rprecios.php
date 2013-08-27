@@ -15,14 +15,14 @@
 		<td width='100%' >
 			<table width='100%' border='0'>
 				<tr><td align='center'><b STYLE="font-size:24pt;color:blue">Precio al P&uacute;blico: <?php echo $precio1 ?></b> <b><?php echo $moneda  ?></b></td></tr>
-				<?php $descufijo=(isset($descufijo)?$descufijo:0); 
+				<?php $descufijo=(isset($descufijo)?$descufijo:0);
 				if($descufijo>0){?>
 				<tr><td align='center'><b STYLE="font-size:24pt;color:red">Descuento <?php echo $descufijo; ?>%:</b> &nbsp;<b STYLE="font-size:30pt;color:red"><?php echo $pdescu; ?></b><b STYLE="font-size:16pt;color:red"> <?php echo $moneda;?></b></td></tr>
 				<tr><td align='center'><b STYLE="font-size:8pt;color:red"> <?php echo $descurazon;?></td></tr>
 				<?php }else{ ?>
 				<tr><td align='center'><b STYLE="font-size:32pt;color:red">Precio de venta : <?php echo $precio2; ?></b><b><?php echo $moneda;  ?></b></td></tr>
 				<?php } ?>
-				<?php if(isset($dvolum1)){ ?>
+				<?php if(isset($dvolum1) && $dvolum1>0){ ?>
 				<tr><td align='right' colspan=2 ><b STYLE="font-size:20pt;color:green">+ de <?php echo $dvolum1 ?> unidades: <?php echo $precio3 ?></b> <b><?php echo $moneda  ?></b></td></tr>
 				<tr><td align='right' colspan=2 ><b STYLE="font-size:20pt;color:green">+ de <?php echo $dvolum2 ?> unidades: <?php echo $precio4 ?></b> <b><?php echo $moneda  ?></b></td></tr>
 				<?php } ?>

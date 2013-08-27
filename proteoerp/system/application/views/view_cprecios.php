@@ -20,7 +20,7 @@ $jqtheme='le-frog';
 					$.ajax({
 						type: "POST",
 						url: "<?php echo site_url("inventario/consultas/ssprecios/$format") ?>",
-						data: 'barras='+c,
+						data: {'barras':c},
 						success: function(msg){
 							$("#ent").html(msg);
 							$("#ent").fadeIn("slow");
@@ -47,9 +47,9 @@ $jqtheme='le-frog';
 
 		function cargapub(){
 			actual=$("#_ppro").attr('src');
-			if(actual==undefined) 
+			if(actual==undefined)
 				actual='';
-			else 
+			else
 				actual=basename(actual);
 
 			$("#cpropa").hide();
@@ -72,7 +72,7 @@ $jqtheme='le-frog';
 			h1  {color:#ffffff; }
 		</style>
 	</head>
-	<body background='<?php echo $conf['styles']; ?>le-frog/images/ui-bg_diagonals-thick_15_444444_40x40.png'> 
+	<body background='<?php echo $conf['styles']; ?>le-frog/images/ui-bg_diagonals-thick_15_444444_40x40.png'>
 
 			<h1 class="demoHeaders">Consulta de precios</h1>
 				<p style="text-align:center;" id='cpropa'>

@@ -154,12 +154,15 @@ class Consultas extends Controller {
 			$data['moneda']    = 'Bs.F.';
 
 			if($aplica=='maes'){
+				$posdescu = $this->datasis->traevalor('POSDESCU','DESCUENTOS EN LOS PUNTOS DE VENTA Si o No');
+				if($posdescu=='S'){
+					$data['dvolum1']   = $row->dvolum1;
+					$data['dvolum2']   = $row->dvolum2;
+				}
 				$data['precio4']   = nformat($row->precio4);
-				$data['dvolum1']   = $row->dvolum1;
-				$data['dvolum2']   = $row->dvolum2;
 				$data['corta']     = $row->corta;
 				$data['referen']   = $row->referen;
-				$data['existen']   = $this->datasis->dameval("SELECT sum(a.cantidad*b.fracxuni+a.fraccion) FROM ubic a JOIN maes b ON a.codigo=b.codigo WHERE a.codigo='".$row->codigo."' AND a.ubica IN ('DE00','DE01')");
+				$data['existen']   = $this->datasis->dameval("SELECT SUM(a.cantidad*b.fracxuni+a.fraccion) FROM ubic a JOIN maes b ON a.codigo=b.codigo WHERE a.codigo='".$row->codigo."' AND a.ubica IN ('DE00','DE01')");
 			}else{
 				$data['alterno']   = $row->alterno;
 				$data['base1']     = nformat($row->base1);
@@ -223,9 +226,10 @@ class Consultas extends Controller {
 	//
 	//***********************************
 	function sprecios($formato='CPRECIOS'){
+		$dbformato = $this->db->escape($formato);
 		$data['conf']=$this->layout->settings;
 
-		$query = $this->db->query("SELECT proteo FROM formatos WHERE nombre='$formato'");
+		$query = $this->db->query("SELECT proteo FROM formatos WHERE nombre=${dbformato}");
 		if ($query->num_rows() > 0){
 			$row = $query->row();
 			extract($data);
@@ -242,7 +246,8 @@ class Consultas extends Controller {
 	}
 
 	function ssprecios($formato='CIPRECIOS',$cod_bar=NULL){
-		$query = $this->db->query("SELECT proteo FROM formatos WHERE nombre='$formato'");
+		$dbformato = $this->db->escape($formato);
+		$query = $this->db->query("SELECT proteo FROM formatos WHERE nombre=${dbformato}");
 		if ($query->num_rows() > 0){
 			$row = $query->row();
 			ob_start();
@@ -251,7 +256,7 @@ class Consultas extends Controller {
 			@ob_end_clean();
 			echo $_html;
 		}else{
-			echo 'Formato $formato no definido';
+			echo 'Formato ${formato} no definido';
 		}
 	}
 
