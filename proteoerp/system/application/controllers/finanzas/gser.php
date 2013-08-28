@@ -2016,7 +2016,7 @@ class gser extends Controller {
 
 				$this->db->where('id', $id);
 				$this->db->update('gitser', $data);
-				logusu('GITSER',"Item Modificado ".$id." MODIFICADO");
+				logusu('GITSER','Item Modificado '.$id.' MODIFICADO');
 				echo "${id} Modificado";
 				return true;
 

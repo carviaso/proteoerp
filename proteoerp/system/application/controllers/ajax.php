@@ -58,11 +58,11 @@ class Ajax extends Controller {
 			if ($query->num_rows() == 1){
 				$row = $query->row_array();
 				$retArray['value']   = $row['proveed'];
-				$retArray['label']   = '('.$row['rif'].') '.utf8_encode($row['nombre']);
+				$retArray['label']   = '('.$row['rif'].') '.$this->en_utf8($row['nombre']);
 				$retArray['rif']     = $row['rif'];
-				$retArray['nombre']  = utf8_encode($row['nombre']);
+				$retArray['nombre']  = $this->en_utf8($row['nombre']);
 				$retArray['proveed'] = $row['proveed'];
-				$retArray['direc']   = utf8_encode($row['direc']);
+				$retArray['direc']   = $this->en_utf8($row['direc']);
 				$retArray['reteiva'] = $row['reteiva'];
 				$retArray['id']      = $row['id'];
 				array_push($retorno, $retArray);
@@ -78,11 +78,11 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']   = $row['proveed'];
-					$retArray['label']   = '('.$row['rif'].') '.utf8_encode($row['nombre']);
+					$retArray['label']   = '('.$row['rif'].') '.$this->en_utf8($row['nombre']);
 					$retArray['rif']     = $row['rif'];
-					$retArray['nombre']  = utf8_encode($row['nombre']);
+					$retArray['nombre']  = $this->en_utf8($row['nombre']);
 					$retArray['proveed'] = $row['proveed'];
-					$retArray['direc']   = utf8_encode($row['direc']);
+					$retArray['direc']   = $this->en_utf8($row['direc']);
 					$retArray['reteiva'] = $row['reteiva'];
 					$retArray['id']      = $row['id'];
 					array_push($retorno, $retArray);
@@ -124,9 +124,9 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']   = $row['num_ref'];
-					$retArray['label']   = $row['fecha'].' '.utf8_encode($row['num_ref'].' '.number_format($row['monto'],2));
+					$retArray['label']   = $row['fecha'].' '.$this->en_utf8($row['num_ref'].' '.number_format($row['monto'],2));
 					$retArray['fecha']   = $row['fecha'];
-					$retArray['num_ref'] = utf8_encode($row['num_ref']);
+					$retArray['num_ref'] = $this->en_utf8($row['num_ref']);
 					$retArray['monto']   = $row['monto'];
 					$retArray['id']      = $row['id'];
 					array_push($retorno, $retArray);
@@ -171,9 +171,9 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']   = $row['numero'];
-					$retArray['label']   = $row['fecha'].' '.utf8_encode($row['numero'].' '.number_format($row['monto'],2));
+					$retArray['label']   = $row['fecha'].' '.$this->en_utf8($row['numero'].' '.number_format($row['monto'],2));
 					$retArray['fecha']   = $row['fecha'];
-					$retArray['numero'] = utf8_encode($row['numero']);
+					$retArray['numero'] = $this->en_utf8($row['numero']);
 					$retArray['monto']   = $row['monto'];
 					$retArray['id']      = $row['id'];
 					array_push($retorno, $retArray);
@@ -213,13 +213,13 @@ class Ajax extends Controller {
 			if ($query->num_rows() == 1){
 				$row = $query->row_array();
 				$retArray['value']   = $row['cliente'];
-				$retArray['label']   = '('.$row['rifci'].') '.utf8_encode($row['nombre']);
+				$retArray['label']   = '('.$row['rifci'].') '.$this->en_utf8($row['nombre']);
 				$retArray['rifci']   = $row['rifci'];
-				$retArray['nombre']  = utf8_encode($row['nombre']);
+				$retArray['nombre']  = $this->en_utf8($row['nombre']);
 				$retArray['cod_cli'] = $row['cliente'];
 				$retArray['tipo']    = $row['tipo'];
 				$retArray['telef']   = trim($row['telefono']);
-				$retArray['direc']   = utf8_encode($row['direc']);
+				$retArray['direc']   = $this->en_utf8($row['direc']);
 				$retArray['desc']    = floatval($row['mmargen']);
 				$retArray['id']      = $row['id'];
 				array_push($retorno, $retArray);
@@ -236,13 +236,13 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']   = $row['cliente'];
-					$retArray['label']   = '('.$row['rifci'].') '.utf8_encode($row['nombre']);
+					$retArray['label']   = '('.$row['rifci'].') '.$this->en_utf8($row['nombre']);
 					$retArray['rifci']   = $row['rifci'];
-					$retArray['nombre']  = utf8_encode($row['nombre']);
+					$retArray['nombre']  = $this->en_utf8($row['nombre']);
 					$retArray['cod_cli'] = $row['cliente'];
 					$retArray['tipo']    = $row['tipo'];
 					$retArray['telef']   = trim($row['telefono']);
-					$retArray['direc']   = utf8_encode($row['direc']);
+					$retArray['direc']   = $this->en_utf8($row['direc']);
 					$retArray['desc']    = floatval($row['mmargen']);
 					$retArray['id']      = $row['id'];
 					array_push($retorno, $retArray);
@@ -277,8 +277,8 @@ class Ajax extends Controller {
 				if ($query->num_rows() > 0){
 					foreach( $query->result_array() as  $row ) {
 						$retArray['value']    = $row['codigo'];
-						$retArray['label']    = '('.$row['codigo'].') '.utf8_encode($row['descrip']);
-						$retArray['descrip']  = utf8_encode($row['descrip']);
+						$retArray['label']    = '('.$row['codigo'].') '.$this->en_utf8($row['descrip']);
+						$retArray['descrip']  = $this->en_utf8($row['descrip']);
 						array_push($retorno, $retArray);
 					}
 				}
@@ -306,8 +306,8 @@ class Ajax extends Controller {
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']    = $row['id'];
 					$retArray['minimo']   = $row['minimo'];
-					$retArray['actividad']= utf8_encode($row['actividad']);
-					$retArray['label']    = utf8_encode($row['actividad'].' ( '.$row['minimo'].')');
+					$retArray['actividad']= $this->en_utf8($row['actividad']);
+					$retArray['label']    = $this->en_utf8($row['actividad'].' ( '.$row['minimo'].')');
 					array_push($retorno, $retArray);
 				}
 			}
@@ -350,10 +350,10 @@ class Ajax extends Controller {
 					$interval = $dt1->diff($dt2);
 
 					$retArray['value']    = $row['cliente'];
-					$retArray['label']    = '('.$row['rifci'].') '.utf8_encode($row['nombre']);
+					$retArray['label']    = '('.$row['rifci'].') '.$this->en_utf8($row['nombre']);
 					$retArray['rifci']    = $row['rifci'];
-					$retArray['nombre']   = utf8_encode($row['nombre']);
-					$retArray['cod_cli']  = utf8_encode($row['cliente']);
+					$retArray['nombre']   = $this->en_utf8($row['nombre']);
+					$retArray['cod_cli']  = $this->en_utf8($row['cliente']);
 					$retArray['codigo']   = $row['codigo'];
 					$retArray['tipo']     = $row['tipo'];
 					$retArray['precio1']  = $row['precio1'];
@@ -361,7 +361,7 @@ class Ajax extends Controller {
 					$retArray['upago']    = $row['upago'];
 					$retArray['utribu']   = $row['utribu'];
 					$retArray['taritipo'] = $row['taritipo'];
-					$retArray['direc']    = utf8_encode($row['direc']);
+					$retArray['direc']    = $this->en_utf8($row['direc']);
 					$retArray['cana']     = $interval->format('%m')+$interval->format('%Y')*12;
 					array_push($retorno, $retArray);
 				}
@@ -405,9 +405,9 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['value']    = utf8_encode($row['codigo']);
-					$retArray['label']    = utf8_encode('('.$row['codigo'].') '.$row['nombre']);
-					$retArray['nombre']   = utf8_encode($row['nombre']);
+					$retArray['value']    = $this->en_utf8($row['codigo']);
+					$retArray['label']    = $this->en_utf8('('.$row['codigo'].') '.$row['nombre']);
+					$retArray['nombre']   = $this->en_utf8($row['nombre']);
 					array_push($retorno, $retArray);
 				}
 			}
@@ -440,9 +440,9 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['value']    = utf8_encode($row['codigo']);
-					$retArray['label']    = utf8_encode('('.$row['codigo'].') '.$row['nombre']);
-					$retArray['nombre']   = utf8_encode($row['nombre']);
+					$retArray['value']    = $this->en_utf8($row['codigo']);
+					$retArray['label']    = $this->en_utf8('('.$row['codigo'].') '.$row['nombre']);
+					$retArray['nombre']   = $this->en_utf8($row['nombre']);
 					$retArray['id']       = $row['id'];
 					array_push($retorno, $retArray);
 				}
@@ -518,7 +518,7 @@ class Ajax extends Controller {
 					}
 					if($descufijo>1) $descufijo = 0;
 
-					$retArray['label']   = '('.$row['codigo'].')'.utf8_encode($row['descrip']).' Bs.'.$row['precio1'].'  '.$row['existen'].'';
+					$retArray['label']   = '('.$row['codigo'].')'.$this->en_utf8($row['descrip']).' Bs.'.$row['precio1'].'  '.$row['existen'].'';
 					$retArray['value']   = $row['codigo'];
 					$retArray['codigo']  = $row['codigo'];
 					$retArray['cana']    = $cana;
@@ -530,7 +530,7 @@ class Ajax extends Controller {
 					$retArray['base2']   = round($row['precio2']*100/(100+$row['iva']),2);
 					$retArray['base3']   = round($row['precio3']*100/(100+$row['iva']),2);
 					$retArray['base4']   = round($row['precio4']*100/(100+$row['iva']),2);
-					$retArray['descrip'] = utf8_encode($row['descrip']);
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
 					$retArray['barras']  = $row['barras'];
 					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
 					$retArray['iva']     = $row['iva'];
@@ -573,7 +573,7 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']   = '('.$row['codigo'].')'.utf8_encode($row['descrip']).' Bs.'.$row['precio1'].'  '.$row['existen'].'';
+					$retArray['label']   = '('.$row['codigo'].')'.$this->en_utf8($row['descrip']).' Bs.'.$row['precio1'].'  '.$row['existen'].'';
 					$retArray['value']   = $row['codigo'];
 					$retArray['codigo']  = $row['codigo'];
 					$retArray['cana']    = $cana;
@@ -585,7 +585,7 @@ class Ajax extends Controller {
 					$retArray['base2']   = round($row['precio2']*100/(100+$row['iva']),2);
 					$retArray['base3']   = round($row['precio3']*100/(100+$row['iva']),2);
 					$retArray['base4']   = round($row['precio4']*100/(100+$row['iva']),2);
-					$retArray['descrip'] = utf8_encode($row['descrip']);
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
 					$retArray['barras']  = $row['barras'];
 					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
 					$retArray['iva']     = $row['iva'];
@@ -636,7 +636,7 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']    = utf8_encode(trim($row['val']));
+					$retArray['label']    = $this->en_utf8(trim($row['val']));
 					$retArray['value']    = $row['id'];
 
 					array_push($retorno, $retArray);
@@ -724,9 +724,9 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']    = utf8_encode('('.$row['codigo'].') '.trim($row['concepto']));
+					$retArray['label']    = $this->en_utf8('('.$row['codigo'].') '.trim($row['concepto']));
 					$retArray['value']    = $row['codigo'];
-					$retArray['concepto'] = utf8_encode(trim($row['concepto']));
+					$retArray['concepto'] = $this->en_utf8(trim($row['concepto']));
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
@@ -780,7 +780,7 @@ class Ajax extends Controller {
 					$retArray['base2']   = $row['precio2']*100/(100+$row['iva']);
 					$retArray['base3']   = $row['precio3']*100/(100+$row['iva']);
 					$retArray['base4']   = $row['precio4']*100/(100+$row['iva']);
-					$retArray['descrip'] = utf8_encode($row['descrip']);
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
 					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
 					$retArray['iva']     = $row['iva'];
 					array_push($retorno, $retArray);
@@ -818,9 +818,9 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']   = '('.$row['codigo'].') '.utf8_encode($row['descrip']).' '.$row['precio1'].' Bs. - '.$row['existen'];
-					$retArray['value']   = utf8_encode($row['codigo']);
-					$retArray['codigo']  = utf8_encode($row['codigo']);
+					$retArray['label']   = '('.$row['codigo'].') '.$this->en_utf8($row['descrip']).' '.$row['precio1'].' Bs. - '.$row['existen'];
+					$retArray['value']   = $this->en_utf8($row['codigo']);
+					$retArray['codigo']  = $this->en_utf8($row['codigo']);
 					$retArray['cana']    = $cana;
 					$retArray['tipo']    = $row['tipo'];
 					$retArray['peso']    = $row['peso'];
@@ -830,7 +830,7 @@ class Ajax extends Controller {
 					$retArray['base2']   = $row['precio2']*100/(100+$row['iva']);
 					$retArray['base3']   = $row['precio3']*100/(100+$row['iva']);
 					$retArray['base4']   = $row['precio4']*100/(100+$row['iva']);
-					$retArray['descrip'] = utf8_encode($row['descrip']);
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
 					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
 					$retArray['iva']     = $row['iva'];
 					array_push($retorno, $retArray);
@@ -867,7 +867,7 @@ class Ajax extends Controller {
 						if($cana>0){
 							$retArray['codigo']   = $row['codigo'];
 							$retArray['cantidad'] = $cana;
-							$retArray['descrip']  = utf8_encode($row['descrip']);
+							$retArray['descrip']  = $this->en_utf8($row['descrip']);
 
 							array_push($retorno, $retArray);
 						}
@@ -891,7 +891,7 @@ class Ajax extends Controller {
 						if($cana>0){
 							$retArray['codigo']   = $row['codigo'];
 							$retArray['cantidad'] = $cana;
-							$retArray['descrip']  = utf8_encode($row['descrip']);
+							$retArray['descrip']  = $this->en_utf8($row['descrip']);
 
 							array_push($retorno, $retArray);
 						}
@@ -983,14 +983,14 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']   = utf8_encode($row['numero'].'-'.$row['nombre'].' '.$row['totalg'].' Bs.');
+					$retArray['label']   = $this->en_utf8($row['numero'].'-'.$row['nombre'].' '.$row['totalg'].' Bs.');
 					$retArray['value']   = $row['numero'];
 					$retArray['cod_cli'] = $row['cod_cli'];
 					$retArray['rifci']   = $row['rifci'];
 					$retArray['fecha']   = $this->_datehuman($row['fecha']);
 					$retArray['tipo']    = $row['tipo'];
-					$retArray['direc']   = utf8_encode($row['direc']);
-					$retArray['nombre']  = utf8_encode($row['nombre']);
+					$retArray['direc']   = $this->en_utf8($row['direc']);
+					$retArray['nombre']  = $this->en_utf8($row['nombre']);
 					$retArray['totalg']  = $row['totalg'];
 
 					array_push($retorno, $retArray);
@@ -1081,8 +1081,8 @@ class Ajax extends Controller {
 					if(empty($row['dev']))  $row['dev'] =0;
 					$saldo = $row['cana']-$row['dev'];
 					if($saldo <=0) continue;
-					$retArray['codigo']  = utf8_encode($row['codigo']);
-					$retArray['detalle'] = utf8_encode(trim($row['detalle']));
+					$retArray['codigo']  = $this->en_utf8($row['codigo']);
+					$retArray['detalle'] = $this->en_utf8(trim($row['detalle']));
 					$retArray['cana']    = $saldo;
 					$retArray['tipo']    = $row['tipo'];
 					$retArray['peso']    = $row['peso'];
@@ -1093,7 +1093,7 @@ class Ajax extends Controller {
 					$retArray['base2']   = round($row['precio2']*100/(100+$row['iva']),2);
 					$retArray['base3']   = round($row['precio3']*100/(100+$row['iva']),2);
 					$retArray['base4']   = round($row['precio4']*100/(100+$row['iva']),2);
-					$retArray['descrip'] = utf8_encode($row['descrip']);
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
 					$retArray['iva']     = $row['iva'];
 					array_push($retorno, $retArray);
 				}
@@ -1150,8 +1150,8 @@ class Ajax extends Controller {
 					$saldo = $row['cana']-$row['entregado'];
 					if($saldo <=0) continue;
 
-					$retArray['codigo']  = utf8_encode(trim($row['codigoa']));
-					$retArray['descrip'] = utf8_encode(trim($row['desca']));
+					$retArray['codigo']  = $this->en_utf8(trim($row['codigoa']));
+					$retArray['descrip'] = $this->en_utf8(trim($row['desca']));
 					$retArray['saldo']   = $saldo;
 					$retArray['cant']    = $row['cana'];
 					array_push($retorno, $retArray);
@@ -1185,8 +1185,8 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $id=>$row ) {
-					$retArray['codigo']  = utf8_encode($row['codigo']);
-					$retArray['descrip'] = utf8_encode($row['descrip']);
+					$retArray['codigo']  = $this->en_utf8($row['codigo']);
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
 					$retArray['cantidad']= $row['cantidad'];
 					array_push($retorno, $retArray);
 				}
@@ -1449,9 +1449,9 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']    = $row['codigo'].'-'.utf8_encode($row['descrip']);
+					$retArray['label']    = $row['codigo'].'-'.$this->en_utf8($row['descrip']);
 					$retArray['value']    = $row['codigo'];
-					$retArray['descrip']  = utf8_encode($row['descrip']);
+					$retArray['descrip']  = $this->en_utf8($row['descrip']);
 					$retArray['departa']  = $row['departa'];
 					$retArray['ccosto']   = $row['ccosto'];
 
@@ -1465,9 +1465,9 @@ class Ajax extends Controller {
 				$query = $this->db->query($mSQL);
 				if ($query->num_rows() > 0){
 					foreach( $query->result_array() as  $row ) {
-						$retArray['label']    = $row['codigo'].'-'.utf8_encode($row['descrip']);
+						$retArray['label']    = $row['codigo'].'-'.$this->en_utf8($row['descrip']);
 						$retArray['value']    = $row['codigo'];
-						$retArray['descrip']  = utf8_encode($row['descrip']);
+						$retArray['descrip']  = $this->en_utf8($row['descrip']);
 						$retArray['departa']  = $row['departa'];
 						$retArray['ccosto']   = $row['ccosto'];
 
@@ -1510,9 +1510,9 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']    = $row['numero'].'-'.utf8_encode($row['nombre']);
+					$retArray['label']    = $row['numero'].'-'.$this->en_utf8($row['nombre']);
 					$retArray['value']    = $row['numero'];
-					$retArray['nombre']   = utf8_encode($row['nombre']);
+					$retArray['nombre']   = $this->en_utf8($row['nombre']);
 					$retArray['edifi']    = $row['edificacion'];
 					$retArray['inmue']    = $row['inmueble'];
 					$retArray['rifci']    = $row['rifci'];
@@ -1561,9 +1561,9 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']      = $row['codigo'];
-					$retArray['label']      = trim($row['codigo']).' - '.utf8_encode(trim($row['descrip']));
-					$retArray['codigo']     = utf8_encode(trim($row['codigo']));
-					$retArray['descrip']    = utf8_encode(trim($row['descrip']));
+					$retArray['label']      = trim($row['codigo']).' - '.$this->en_utf8(trim($row['descrip']));
+					$retArray['codigo']     = $this->en_utf8(trim($row['codigo']));
+					$retArray['descrip']    = $this->en_utf8(trim($row['descrip']));
 
 					array_push($retorno, $retArray);
 				}
@@ -1597,9 +1597,9 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']      = $row['codigo'];
-					$retArray['label']      = trim($row['codigo']).' - '.utf8_encode(trim($row['descrip']));
-					$retArray['codigo']     = utf8_encode(trim($row['codigo']));
-					$retArray['descrip']    = utf8_encode(trim($row['descrip']));
+					$retArray['label']      = trim($row['codigo']).' - '.$this->en_utf8(trim($row['descrip']));
+					$retArray['codigo']     = $this->en_utf8(trim($row['codigo']));
+					$retArray['descrip']    = $this->en_utf8(trim($row['descrip']));
 
 					array_push($retorno, $retArray);
 				}
@@ -1626,7 +1626,7 @@ class Ajax extends Controller {
 			$retorno = array();
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['nombre']   = utf8_encode(trim($row['nombre']));
+					$retArray['nombre']   = $this->en_utf8(trim($row['nombre']));
 					$retArray['actividad']= $row['actividad'];
 					$retArray['tunidad']  = $row['tunidad'];
 					$retArray['tiempo']   = $row['tiempo'];
@@ -1656,8 +1656,8 @@ class Ajax extends Controller {
 			$retorno = array();
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['codigo']  = utf8_encode(trim($row['codigo']));
-					$retArray['descrip'] = utf8_encode(trim($row['descrip']));
+					$retArray['codigo']  = $this->en_utf8(trim($row['codigo']));
+					$retArray['descrip'] = $this->en_utf8(trim($row['descrip']));
 					$retArray['merma']   = (empty($row['merma']))? 0 : $row['merma'];
 					$retArray['cantidad']= $row['cantidad'];
 					$retArray['ultimo']  = $row['ultimo'];
@@ -1759,7 +1759,7 @@ class Ajax extends Controller {
 					$retArray['base2']   = $row['precio2']*100/(100+$row['iva']);
 					$retArray['base3']   = $row['precio3']*100/(100+$row['iva']);
 					$retArray['base4']   = $row['precio4']*100/(100+$row['iva']);
-					$retArray['descrip'] = utf8_encode($row['descrip']);
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
 					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
 					$retArray['iva']     = $row['iva'];
 					array_push($retorno, $retArray);
@@ -1827,7 +1827,7 @@ class Ajax extends Controller {
 				$row = $query->row_array();
 
 				$retArray['rifci']   = $row['rifci'];
-				$retArray['nombre']  = utf8_encode($row['nombre']);
+				$retArray['nombre']  = $this->en_utf8($row['nombre']);
 				$retArray['cod_cli'] = $row['cliente'];
 				array_push($retorno, $retArray);
 				$ww=" AND cliente<>${qba}";
@@ -1843,7 +1843,7 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['rifci']   = $row['rifci'];
-					$retArray['nombre']  = utf8_encode($row['nombre']);
+					$retArray['nombre']  = $this->en_utf8($row['nombre']);
 					$retArray['cod_cli'] = $row['cliente'];
 					array_push($retorno, $retArray);
 				}
@@ -1941,7 +1941,7 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']   = $row['codigo'];
-					$retArray['label']   = utf8_encode($row['nombre']).'('.$row['codigo'].') ';
+					$retArray['label']   = $this->en_utf8($row['nombre']).'('.$row['codigo'].') ';
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
@@ -1991,10 +1991,10 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']   = $row['codigo'];
-					$retArray['label']   = utf8_encode($row['label']);
-					$retArray['nombre']  = utf8_encode($row['nombre']);
+					$retArray['label']   = $this->en_utf8($row['label']);
+					$retArray['nombre']  = $this->en_utf8($row['nombre']);
 					$retArray['sueldo']  = $row['sueldo'];
-					$retArray['enlace']  = utf8_encode($row['enlace']);
+					$retArray['enlace']  = $this->en_utf8($row['enlace']);
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
@@ -2025,10 +2025,10 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']   = $row['concepto'];
-					$retArray['label']   = utf8_encode($row['label']);
-					$retArray['tipo']    = utf8_encode($row['tipo']);
-					$retArray['descrip'] = utf8_encode($row['descrip']);
-					$retArray['formula'] = utf8_encode($row['formula']);
+					$retArray['label']   = $this->en_utf8($row['label']);
+					$retArray['tipo']    = $this->en_utf8($row['tipo']);
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
+					$retArray['formula'] = $this->en_utf8($row['formula']);
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
@@ -2060,7 +2060,7 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 					$retArray['value']    = $row['numero'];
-					$retArray['label']    = utf8_encode($row['label']);
+					$retArray['label']    = $this->en_utf8($row['label']);
 					$retArray['tipo_doc'] = $row['tipo_doc'];
 					$retArray['monto']    = $row['monto'];
 					$retArray['abonos']   = $row['abonos'];
@@ -2170,7 +2170,7 @@ class Ajax extends Controller {
 			$linea = preg_replace('/\(.*\)/', '', $linea);
 			$nombre= trim(str_ireplace($rif,'',$linea));
 			if(stripos($nombre,'No existe')===false){
-				$rt['nombre'] =utf8_encode($nombre);
+				$rt['nombre'] = utf8_encode($nombre);
 			}else{
 				$rt['error']=1;
 				$rt['msj']  ='Contribuyente no encontrado';
@@ -2377,6 +2377,14 @@ class Ajax extends Controller {
 
 		echo $salida;
 
+	}
+
+	function en_utf8($str){
+		if($this->config->item('charset')=='UTF-8' && $this->db->char_set=='latin1'){
+			return utf8_encode($str);
+		}else{
+			return $str;
+		}
 	}
 
 }

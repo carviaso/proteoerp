@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" />
-<?php echo style("reportes.css");?>
+<?php echo style('reportes.css');?>
 <?php echo $head; ?>
 <script type="text/javascript" language="javascript">
 	function prueba(){
@@ -35,7 +35,7 @@
 
 </script>
 </head>
-<body onload='window.parent.descarga():'>
+<body>
 
 	<div id='home'>
 	<p><?php echo $titulo; ?></p>

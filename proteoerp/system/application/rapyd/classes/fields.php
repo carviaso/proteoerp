@@ -226,8 +226,6 @@ class objField {
 
 		}
 
-		//$enco = mb_detect_encoding($this->value);
-		//if($enco!='UTF-8' && $this->ci->config->item('charset')=='UTF-8'){
 		if($this->ci->config->item('charset')=='UTF-8' && !detectUTF8($this->value)){
 			$this->value = utf8_encode($this->value);
 		}
@@ -356,6 +354,9 @@ class objField {
 
 
 	function option($value,$description){
+		if($this->ci->config->item('charset')=='UTF-8' && !detectUTF8($description)){
+			$description = utf8_encode($description);
+		}
 		$this->options[$value] = $description;
 	}
 
