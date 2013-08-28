@@ -1,7 +1,7 @@
 <?php
-$container_bl=join('&nbsp;', $form->_button_container['BL']);
-$container_br=join('&nbsp;', $form->_button_container['BR']);
-$container_tr=join('&nbsp;', $form->_button_container['TR']);
+//$container_bl=join('&nbsp;', $form->_button_container['BL']);
+//$container_br=join('&nbsp;', $form->_button_container['BR']);
+//$container_tr=join('&nbsp;', $form->_button_container['TR']);
 
 if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	echo $form->output;
@@ -114,12 +114,7 @@ function del_itstra(id){
 	$('#tr_itstra_'+id).remove();
 }
 </script>
-<?php }
-//	<tr>
-//		<td align=right><?php echo $container_tr ? ></td>
-//	</tr>
-
-?>
+<?php } ?>
 
 <table align='center' width='100%'>
 	<tr>

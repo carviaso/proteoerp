@@ -95,7 +95,7 @@ class Datasis {
 		return $aa[1];
 	}
 	// TRAE EL REGISTRO COMPLETO EN UN ARREGLO
-	function damerow($mSQL,$data=array()){
+	function damerow( $mSQL, $data=array() ){
 		$CI =& get_instance();
 		$query = $CI->db->query($mSQL,$data);
 		$row=array();

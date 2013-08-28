@@ -1776,6 +1776,12 @@ class Scli extends validaciones {
 		$edit->tminimo->showformat  = 'decimal';
 		$edit->tminimo->type='inputhidden';
 
+		$edit->entidad = new dropdownField('Estado','entidad');
+		$edit->entidad->rule ='required';
+		$edit->entidad->style='width:250px;';
+		$edit->entidad->option('','Seleccione un Estado');
+		$edit->entidad->options('SELECT codigo, entidad FROM estados ORDER BY entidad');
+
 		$edit->build();
 
 		if($edit->on_success()){

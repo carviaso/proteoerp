@@ -838,11 +838,8 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 	}
 
 	//******************************************************************
-	//
 	//   Genera la seccion de funciones post del Crud
 	//
-	//
-	//******************************************************************
 	function genepost($tabla=null,$s=true){
 		if (empty($tabla) OR (!$this->db->table_exists($tabla))) show_error('Tabla no existe o faltan parametros');
 
@@ -1512,10 +1509,8 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 
 	//******************************************************************
-	//
 	//  Genera Crud Maestro Detalle para jqGrid
 	//
-	//******************************************************************
 	function jqgridmd(){
 		$db = $this->uri->segment(3);
 		if($db===false){
@@ -1523,7 +1518,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		}
 
 		$dbit = $this->uri->segment(4);
-		if($db===false){
+		if($dbit===false){
 			exit('Debe especificar en la uri la tabla Detalle "/maestro/detalle/directorio"');
 		}
 
@@ -1550,7 +1545,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$tab8 = $this->mtab(8);
 
 			$str .= $this->jqgridclase($db, $contro);
-
 
 			$str .= $tab1.'//***************************'."\n";
 			$str .= $tab1.'//Layout en la Ventana'."\n";
@@ -1999,26 +1993,35 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $tab1.'// DataEdit  '."\n";
 			$str .= $tab1.'//***********************************'."\n";
 
-			$str .= $this->genecrudjq($db, false);
+			$str .= $this->genecrudjqmd($db, $dbit, false);
 
 			$str .= $this->genepre( $db, false);
 			$str .= $this->genepost($db, false);
+
 			$str .= $this->geneinstalar($db, false);
+			$str .= $this->geneinstalar($dbit, false);
 
 			$str .= '}'."\n";
 
 			$columna .= $str."\n";
 
+			// Genera view
+			$columna .= "\n\n".'//******************************************************************'."\n";
+			$columna .= '// View'."\n";
+			$columna .= "\n/*";
+			$columna .= $this->geneviewjqmd($db, $dbit,true);
+			$columna .= "*/\n";
+
+
 			echo $columna."</pre>";
 
 		}
-
 	}
 
 
-	//********************************
+	//******************************************************************
 	// Genera la clase
-	//********************************
+	//
 	function jqgridclase($db, $contro){
 		$tab1 = $this->mtab(1);
 		$tab2 = $this->mtab(2);
@@ -2168,8 +2171,10 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 	function mtab($n = 1){ return str_repeat("\t",$n); }
 
+
 	//******************************************************************
-	// Gener Crud
+	// Generar Crud
+	//
 	function genecrudjq($tabla=null,$s=true){
 		if (empty($tabla) OR (!$this->db->table_exists($tabla)))
 			show_error('Tabla no existe o faltan parametros');
@@ -2242,6 +2247,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 				}elseif(preg_match("/date/i",$field->Type)){
 					$crud.="\t\t".'$edit->'.$field->Field."->rule='chfecha';\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->calendar=false;\n";
 
 				}else{
 					$crud.="\t\t".'$edit->'.$field->Field."->rule='';\n";
@@ -2285,6 +2291,199 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 	}
 
 	//******************************************************************
+	// Generar Crud para md
+	//
+	function genecrudjqmd($tabla=null, $tablait=null, $s=true){
+		if (empty($tabla) OR (!$this->db->table_exists($tabla)))
+			show_error('Tabla no existe o faltan parametros');
+
+
+		//$crud ="\n\t".'//******************************************************************'."\n";
+		//$crud.="\t".  '// Edicion '."\n";
+
+		$crud ="\n\t".'function dataedit(){'."\n";
+		$crud.="\t\t".'$this->rapyd->load(\'dataobject\',\'datadetails\');'."\n";
+
+		$crud.="\t\t".'$script= \''."\n";
+		$crud.="\t\t".'$(function() {'."\n";
+		$crud.="\t\t\t".'$("#fecha").datepicker({dateFormat:"dd/mm/yy"});'."\n";
+		$crud.="\t\t\t".'$(".inputnum").numeric(".");'."\n";
+		$crud.="\t\t".'});'."\n";
+		$crud.="\t\t".'\';'."\n\n";
+
+		$crud.="\t\t".'$do = new DataObject(\''.$tabla.'\');'."\n\n";
+		$crud.="\t\t".'$do->rel_one_to_many(\''.$tablait.'\',\''.$tablait.'\',\'numero\');'."\n";
+
+
+		$crud.="\t\t".'$edit = new DataDetails($this->tits, $do );'."\n\n";
+		$crud.="\t\t".'$edit->script($script,\'modify\');'."\n";
+		$crud.="\t\t".'$edit->script($script,\'create\');'."\n";
+		$crud.="\t\t".'$edit->on_save_redirect=false;'."\n\n";
+		$crud.="\t\t".'$edit->back_url = site_url($this->url.\'filteredgrid\');'."\n\n";
+
+		$crud.="\t\t".'$edit->post_process(\'insert\',\'_post_insert\');'."\n";
+		$crud.="\t\t".'$edit->post_process(\'update\',\'_post_update\');'."\n";
+		$crud.="\t\t".'$edit->post_process(\'delete\',\'_post_delete\');'."\n";
+		$crud.="\t\t".'$edit->pre_process(\'insert\', \'_pre_insert\' );'."\n";
+		$crud.="\t\t".'$edit->pre_process(\'update\', \'_pre_update\' );'."\n";
+		$crud.="\t\t".'$edit->pre_process(\'delete\', \'_pre_delete\' );'."\n";
+		$crud.="\n";
+
+		$mSQL="DESCRIBE $tabla";
+		$query = $this->db->query("DESCRIBE $tabla");
+		foreach ($query->result() as $field){
+
+			if($field->Field=='usuario'){
+				$crud.="\t\t".'$edit->usuario = new autoUpdateField(\'usuario\',$this->session->userdata(\'usuario\'),$this->session->userdata(\'usuario\'));'."\n\n";
+			}elseif($field->Field=='estampa'){
+				$crud.="\t\t".'$edit->estampa = new autoUpdateField(\'estampa\' ,date(\'Ymd\'), date(\'Ymd\'));'."\n\n";
+			}elseif($field->Field=='hora'){
+				$crud.="\t\t".'$edit->hora    = new autoUpdateField(\'hora\',date(\'H:i:s\'), date(\'H:i:s\'));'."\n\n";
+			}elseif($field->Field=='id'){
+				continue;
+			}else{
+				preg_match('/(?P<tipo>\w+)(\((?P<length>[0-9\,]+)\)){0,1}/', $field->Type, $matches);
+				if(isset($matches['length'])){
+					$def=explode(',',$matches['length']);
+				}else{
+					$def[0]=8;
+				}
+
+				if(strrpos($field->Type,'date')!==false){
+					$input='dateonly';
+				}elseif(strrpos($field->Type,'text')!==false){
+					$input= 'textarea';
+				}else{
+					$input='input';
+				}
+
+				$crud.="\t\t".'$edit->'.$field->Field.' = new '.$input."Field('".ucfirst($field->Field)."','$field->Field');\n";
+
+				if(preg_match("/decimal/i",$field->Type)){
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='numeric';\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->css_class='inputnum';\n";
+
+				}elseif(preg_match("/integer|int/i",$field->Type)){
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='integer';\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->css_class='inputonlynum';\n";
+
+				}elseif(preg_match("/date/i",$field->Type)){
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='chfecha';\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->calendar=false;\n";
+
+				}else{
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='';\n";
+				}
+
+				if(strrpos($field->Type,'text')===false){
+					$crud.="\t\t".'$edit->'.$field->Field.'->size ='.($def[0]+2).";\n";
+					$crud.="\t\t".'$edit->'.$field->Field.'->maxlength ='.($def[0]).";\n";
+				}else{
+					$crud.="\t\t".'$edit->'.$field->Field."->cols = 70;\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->rows = 4;\n";
+				}
+				$crud.="\n";
+			}
+		}
+
+		$crud.="\n\t\t".'//******************************************************************'."\n";
+		$crud.="\t\t".  '// Detalle '."\n";
+
+
+		$mSQL="DESCRIBE $tablait";
+		$query = $this->db->query($mSQL);
+		foreach ($query->result() as $field){
+
+			if($field->Field=='usuario'){
+				//$crud.="\t\t".'$edit->usuario = new autoUpdateField(\'usuario\',$this->session->userdata(\'usuario\'),$this->session->userdata(\'usuario\'));'."\n\n";
+			}elseif($field->Field=='estampa'){
+				//$crud.="\t\t".'$edit->estampa = new autoUpdateField(\'estampa\' ,date(\'Ymd\'), date(\'Ymd\'));'."\n\n";
+			}elseif($field->Field=='hora'){
+				//$crud.="\t\t".'$edit->hora    = new autoUpdateField(\'hora\',date(\'H:i:s\'), date(\'H:i:s\'));'."\n\n";
+			}elseif($field->Field=='id'){
+				continue;
+			}else{
+				preg_match('/(?P<tipo>\w+)(\((?P<length>[0-9\,]+)\)){0,1}/', $field->Type, $matches);
+				if(isset($matches['length'])){
+					$def=explode(',',$matches['length']);
+				}else{
+					$def[0]=8;
+				}
+
+				if(strrpos($field->Type,'date')!==false){
+					$input='dateonly';
+				}elseif(strrpos($field->Type,'text')!==false){
+					$input= 'textarea';
+				}else{
+					$input='input';
+				}
+
+				$crud.="\t\t".'$edit->'.$field->Field.' = new '.$input."Field('".ucfirst($field->Field)."','".$field->Field."_<#i#>');\n";
+
+				if(preg_match("/decimal/i",$field->Type)){
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='numeric';\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->css_class='inputnum';\n";
+
+				}elseif(preg_match("/integer|int/i",$field->Type)){
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='integer';\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->css_class='inputonlynum';\n";
+
+				}elseif(preg_match("/date/i",$field->Type)){
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='chfecha';\n";
+
+				}else{
+					$crud.="\t\t".'$edit->'.$field->Field."->rule='';\n";
+				}
+
+				if(strrpos($field->Type,'text')===false){
+					$crud.="\t\t".'$edit->'.$field->Field.'->size ='.($def[0]+2).";\n";
+					$crud.="\t\t".'$edit->'.$field->Field.'->maxlength ='.($def[0]).";\n";
+				}else{
+					$crud.="\t\t".'$edit->'.$field->Field."->cols = 70;\n";
+					$crud.="\t\t".'$edit->'.$field->Field."->rows = 4;\n";
+				}
+				$crud.="\t\t".'$edit->'.$field->Field."->rel_id ='$tablait';\n";
+
+				$crud.="\n";
+			}
+		}
+
+		$crud .="\t\t".'//******************************************************************'."\n\n";
+
+		$crud.="\t\t".'$edit->buttons(\'add_rel\');'."\n\n";
+		$crud.="\t\t".'$edit->build();'."\n\n";
+
+		$crud.="\t\t".'if($edit->on_success()){'."\n";
+		$crud.="\t\t".'	$rt=array('."\n";
+		$crud.="\t\t".'		\'status\' =>\'A\','."\n";
+		$crud.="\t\t".'		\'mensaje\'=>\'Registro guardado\','."\n";
+		$crud.="\t\t".'		\'pk\'     =>$edit->_dataobject->pk'."\n";
+		$crud.="\t\t".'	);'."\n";
+		$crud.="\t\t".'	echo json_encode($rt);'."\n";
+		$crud.="\t\t".'}else{'."\n";
+
+
+		$crud.="\t\t\t".'$conten[\'form\']  =& $edit;'."\n";
+		$crud.="\t\t\t".'$this->load->view(\'view_'.$tabla.'\', $conten);'."\n";
+
+		$crud.="\t\t".'}'."\n";
+
+		$crud.="\t".'}'."\n";
+
+		if($s){
+			$data['programa'] ='<pre>'.$crud.'</pre>';
+			$data['head']    = '';
+			$data['title']   =heading('Generador de crud');
+			$this->load->view('editorcm', $data);
+			//$this->load->view('jqgrid/ventanajq', $data);
+		}else{
+			return $crud;
+		}
+	}
+
+
+
+	//******************************************************************
 	//    Genera el View a partir de la Tabla
 	//******************************************************************
 	function geneviewjq($tabla=null,$s=true){
@@ -2316,6 +2515,215 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$crud .="\t".'<?php echo $form_end; ?>'."\n";
 
 		echo '<html><body><pre>'.htmlentities( $crud).'</pre></body></html>';
+
+	}
+
+
+	//******************************************************************
+	//    Genera el View a partir de la Tabla
+	//******************************************************************
+	function geneviewjqmd($tabla=null, $tablait=null, $s=true){
+		if (empty($tabla) OR (!$this->db->table_exists($tabla)))
+			show_error('Tabla no existe o faltan parametros');
+
+		$crud  ='<?php'."\n";
+
+		$crud .= 'if ($form->_status==\'delete\' || $form->_action==\'delete\' || $form->_status==\'unknow_record\'){'."\n";
+		$crud .= "\t".'echo $form->output;'."\n";
+		$crud .= '} else {'."\n";
+
+		$crud .= "\t".'$html=\'<tr id="tr_itstra_<#i#>">\';'."\n";
+		$crud .= "\t".'$campos=$form->template_details(\''.$tablait.'\');'."\n";
+		$crud .= "\t".'foreach($campos as $nom=>$nan){'."\n";
+		$crud .= "\t\t".'$pivot=$nan[\'field\'];'."\n";
+		$crud .= "\t\t".'$align = (strpos($pivot,\'inputnum\')) ? \'align="right"\' : \'\';'."\n";
+		$crud .= "\t\t".'$html.=\'<td class="littletablerow" \'.$align.\'>\'.$pivot.\'</td>\';'."\n";
+		$crud .= "\t".'}'."\n";
+		$crud .= '}'."\n";
+
+		$crud .= 'if($form->_status!=\'show\') {'."\n";
+		$crud .= "\t".'$html.=\'<td class="littletablerow"><a href=# onclick=\\\'del_'.$tablait.'(<#i#>);return false;\\\'>\'.img(\'images/delete.jpg\').\'</a></td>\';'."\n";
+		$crud .= '}'."\n";
+
+		$crud .= '$html.=\'</tr>\';'."\n";
+
+		$crud .= '$campos=$form->js_escape($html);'."\n";
+		$crud .= 'if(isset($form->error_string)) echo \'<div class="alert">\'.$form->error_string.\'</div>\';'."\n";
+		$crud .= 'echo $form_begin;'."\n";
+		$crud .= 'if($form->_status!=\'show\'){'."\n";
+		$crud .= '?>'."\n\n";
+
+
+		$crud .= '<script language="javascript" type="text/javascript">'."\n";
+		$crud .= 'itstra_cont=<?php echo $form->max_rel_count[\''.$tablait.'\'] ?>;'."\n";
+
+		$crud .= '$(function(){'."\n";
+
+		$crud .= '	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });'."\n";
+		$crud .= '	$(".inputnum").numeric(".");'."\n";
+		$crud .= '	for(var i=0;i < <?php echo $form->max_rel_count[\''.$tablait.'\']; ?>;i++){'."\n";
+		$crud .= '		autocod(i.toString());'."\n";
+		$crud .= '	}'."\n";
+
+		$crud .= '	$(\'input[name^="cantidad_"]\').keypress(function(e) {'."\n";
+		$crud .= '		if(e.keyCode == 13) {'."\n";
+		$crud .= '		    add_'.$tablait.'();'."\n";
+		$crud .= '			return false;'."\n";
+		$crud .= '		}'."\n";
+		$crud .= '	});'."\n";
+		$crud .= '});'."\n";
+
+		$crud .= 'function post_modbus(id){'."\n";
+		$crud .= '	//var id      = i.toString();'."\n";
+		$crud .= '	var descrip = $(\'#descrip_\'+id).val();'."\n";
+		$crud .= '	$(\'#descrip_\'+id+\'_val\').text(descrip);'."\n";
+		$crud .= '	$(\'#cantidad_\'+id).focus();'."\n";
+		$crud .= '}'."\n";
+
+		$crud .= '//Agrega el autocomplete'."\n";
+		$crud .= 'function autocod(id){'."\n";
+		$crud .= '	$(\'#codigo_\'+id).autocomplete({'."\n";
+		$crud .= '		source: function( req, add){'."\n";
+		$crud .= '			$.ajax({'."\n";
+		$crud .= '				url:  "<?php echo site_url(\'ajax/buscasinvart\'); ?>",'."\n";
+		$crud .= '				type: \'POST\','."\n";
+		$crud .= '				dataType: \'json\','."\n";
+		$crud .= '				data: "q="+req.term,'."\n";
+		$crud .= '				success:'."\n";
+		$crud .= '					function(data){'."\n";
+		$crud .= '						var sugiere = [];'."\n";
+		$crud .= '						$.each(data,'."\n";
+		$crud .= '							function(i, val){'."\n";
+		$crud .= '								sugiere.push( val );'."\n";
+		$crud .= '							}'."\n";
+		$crud .= '						);'."\n";
+		$crud .= '						add(sugiere);'."\n";
+		$crud .= '					},'."\n";
+		$crud .= '			})'."\n";
+		$crud .= '		},'."\n";
+		$crud .= '		minLength: 2,'."\n";
+		$crud .= '		select: function( event, ui ) {'."\n";
+		$crud .= '			$(\'#codigo_\'+id).attr(\'readonly\',\'readonly\');'."\n";
+
+		$crud .= '			$(\'#codigo_\'+id).val(ui.item.codigo);'."\n";
+		$crud .= '			$(\'#descrip_\'+id).val(ui.item.descrip);'."\n";
+		$crud .= '			post_modbus(id);'."\n";
+
+		$crud .= '			setTimeout(function(){ $(\'#codigo_\'+id).removeAttr(\'readonly\'); }, 1500);'."\n";
+		$crud .= '		}'."\n";
+		$crud .= '	});'."\n";
+		$crud .= '}'."\n\n";
+
+		$crud .= 'function add_'.$tablait.'(){'."\n";
+		$crud .= '	var htm = <?php echo $campos; ?>;'."\n";
+		$crud .= '	can = '.$tablait.'_cont.toString();'."\n";
+		$crud .= '	con = ('.$tablait.'_cont+1).toString();'."\n";
+		$crud .= '	htm = htm.replace(/<#i#>/g,can);'."\n";
+		$crud .= '	htm = htm.replace(/<#o#>/g,con);'."\n";
+		$crud .= '	$("#__UTPL__").before(htm);'."\n";
+		$crud .= '	$("#cantidad_"+can).numeric(".");'."\n";
+		$crud .= '	$("#codigo_"+can).focus();'."\n";
+		$crud .= '	autocod(can);'."\n";
+		$crud .= '	$("#cantidad_"+can).keypress(function(e) {'."\n";
+		$crud .= '		if(e.keyCode == 13) {'."\n";
+		$crud .= '		    add_'.$tablait.'();'."\n";
+		$crud .= '			return false;'."\n";
+		$crud .= '		}'."\n";
+		$crud .= '	});'."\n";
+
+		$crud .= '	itstra_cont='.$tablait.'_cont+1;'."\n";
+		$crud .= '}'."\n";
+
+		$crud .= 'function del_'.$tablait.'(id){'."\n";
+		$crud .= '	id = id.toString();'."\n";
+		$crud .= '	$(\'#tr_'.$tablait.'_\'+id).remove();'."\n";
+		$crud .= '}'."\n";
+		$crud .= '</script>'."\n";
+		$crud .= '<?php } ?>'."\n";
+
+
+		//$crud .="\t".'echo $form_scripts;'."\n";
+		//$crud .="\t".'echo $form_begin;'."\n\n";
+		
+		$crud .="\t".'<fieldset  style=\'border: 1px outset #FEB404;background: #FFFCE8;\'>'."\n";
+		$crud .="\t".'<table width=\'100%\'>'."\n";
+
+		$mSQL ="DESCRIBE $tabla";
+		$query = $this->db->query($mSQL);
+		foreach ($query->result() as $field){
+			$crud .="\t".'	<tr>'."\n";
+			$crud .="\t".'		<td class="littletablerowth"><?php echo $form->'.$field->Field.'->label;  ?></td>'."\n";
+			$crud .="\t".'		<td class="littletablerow"  ><?php echo $form->'.$field->Field.'->output; ?></td>'."\n";
+			$crud .="\t".'	</tr>'."\n";
+		}
+
+		$mSQL ="DESCRIBE $tablait";
+		$query = $this->db->query($mSQL);
+
+
+		$crud .= "\t\t".'<tr><td>&nbsp;</td></tr>'."\n";
+		$crud .= "\t\t".'<tr>'."\n";
+		$crud .= "\t\t\t".'<td>'."\n";
+		$crud .= "\t\t\t".'<div style=\'overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px\'>'."\n";
+		$crud .= "\t\t\t".'<table width=\'100%\'>'."\n";
+		$crud .= "\t\t\t\t".'<tr>'."\n";
+
+
+		foreach ($query->result() as $field){
+			$crud .= "\t\t\t\t\t".'<td bgcolor=\'#7098D0\' width="80">'.$field->Field.'</td>'."\n";
+		}
+
+
+		$crud .= "\t\t\t\t".'</tr>'."\n";
+		$crud .= "\t\t\t\t".'<?php for($i=0;$i<$form->max_rel_count[\''.$tablait.'\'];$i++) {'."\n";
+
+		$i = 1;
+		foreach ($query->result() as $field){
+			$crud .= "\t\t\t\t\t".'$obj'.$i.' = "'.$field->Field.'_$i";'."\n";
+			$i++;
+		}
+		$crud .= "\n\t\t\t\t".'?>'."\n";
+
+		$crud .= "\n\t\t\t\t".'<tr id=\'tr_'.$tablait.'_<?php echo $i; ?>\'>'."\n";
+
+		$i = 1;
+		foreach ($query->result() as $field){
+			$crud .= "\t\t\t\t\t".'<td class="littletablerow"><?php echo $form->$obj'.$i.'->output ?></td>'."\n";
+			$i++;
+		}
+	
+		$crud .= "\t\t\t\t\t".'<?php if($form->_status!=\'show\') {?>'."\n";
+		$crud .= "\t\t\t\t\t".'	<td class="littletablerow"><a href="#" onclick=\'del_'.$tablait.'(<?php echo $i; ?>);return false;\'><?php echo img("images/delete.jpg"); ?></a></td>'."\n";
+		$crud .= "\t\t\t\t\t".'<?php } ?>'."\n";
+
+		$crud .= "\t\t\t\t".'</tr>'."\n";
+		$crud .= "\t\t\t\t".'<?php } ?>'."\n";
+		$crud .= "\t\t\t\t".'<tr id=\'__UTPL__\'>'."\n";
+		
+		foreach ($query->result() as $field){
+			$crud .= "\t\t\t\t\t".'<td class="littletablefooterb" align="right">&nbsp;</td>'."\n";
+		}
+
+
+		$crud .= "\t\t\t\t\t".'<?php if($form->_status!=\'show\') {?>'."\n";
+		$crud .= "\t\t\t\t\t".'<td class="littletablefooterb" align="right">&nbsp;</td>'."\n";
+		$crud .= "\t\t\t\t\t".'<?php } ?>'."\n";
+
+		$crud .= "\t\t\t\t".'</tr>'."\n";
+		$crud .= "\t\t\t".'</table>'."\n";
+		$crud .= "\t\t\t".'</div>'."\n";
+//		$crud .= "\t\t\t".'< ?php echo $form_end ? > <?php echo $container_bl ? > < ?php echo $container_br ? >'."\n";
+		$crud .= "\t\t\t".'</td>'."\n";
+		$crud .= "\t\t".'</tr>'."\n";
+
+		$crud .="\t".'</table>'."\n";
+		$crud .="\t".'</fieldset>'."\n";
+
+		$crud .='<?php echo $form_end; ?>'."\n";
+
+
+
+		return '<html><body><pre>'.htmlentities( $crud).'</pre></body></html>';
 
 	}
 

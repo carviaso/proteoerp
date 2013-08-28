@@ -1,6 +1,4 @@
 <?php
-//require_once(BASEPATH.'application/controllers/validaciones.php');
-//include_once(BASEPATH.'application/controllers/inventario/line.php');
 class Grup extends Controller {
 	var $mModulo = 'GRUP';
 	var $titp    = 'Grupos de Inventario';
@@ -144,7 +142,7 @@ class Grup extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 450, width: 700, modal: true,
+			autoOpen: false, height: 500, width: 700, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -623,21 +621,19 @@ class Grup extends Controller {
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
 		$edit->pre_process( 'delete','_pre_delete' );
-		//$edit->pre_process('update','_pre_update');
-		//$edit->pre_process('delete','_pre_delete');
 
 		$edit->depto = new dropdownField('Departamento', 'dpto');
 		$edit->depto->db_name='depto';
 		$edit->depto->rule ='required';
 		$edit->depto->onchange = 'get_linea();';
 		$edit->depto->option('','Seleccionar');
-		$edit->depto->options("SELECT depto, descrip FROM dpto WHERE tipo='I' ORDER BY depto");
+		$edit->depto->options("SELECT depto, CONCAT( depto, '-',descrip) descrip FROM dpto WHERE tipo='I' ORDER BY depto");
 
 		$edit->linea = new dropdownField("L&iacute;nea","linea");
 		$edit->linea->rule ='required';
 		if($edit->_status=='modify' or $edit->_status=='show' or $edit->_status=='idle' or $edit->_status=='create'){
 			$depto = ($this->input->post('dpto')===false) ? $edit->_dataobject->get("depto") : $this->input->post('dpto');
-			$edit->linea->options("SELECT linea, descrip FROM line WHERE depto='$depto' ORDER BY descrip");
+			$edit->linea->options("SELECT linea, CONCAT( linea, '-', descrip) descrip FROM line WHERE depto='$depto' ORDER BY descrip");
 		}else{
 			$edit->linea->option('','Seleccione un Departamento');
 		}
@@ -742,8 +738,12 @@ class Grup extends Controller {
 	}
 
 	function _post_update($do){
-		$codigo=$do->get('grupo');
-		$nombre=$do->get('nom_grup');
+		$codigo = $do->get('grupo');
+		$nombre = $do->get('nom_grup');
+		$linea  = $this->db->escape($do->get('linea'));
+		$depto  = $this->db->escape($do->get('depto'));
+		// Cambia todos los productos de inv
+		$this->db->query('UPDATE sinv SET linea='.$linea.', depto='.$depto.' WHERE grupo='.$this->db->escape($codigo));
 		logusu('grup',"GRUPO DE INVENTARIO ${codigo} NOMBRE  ${nombre}  MODIFICADO");
 	}
 

@@ -1138,6 +1138,7 @@ class Jqdatagrid
 
 			$this->CI->db->select($fields);
 			$this->CI->db->from($table);
+			
 			$rs = $this->CI->datasis->codificautf8($this->CI->db->get()->result_array());
 
 		}else{

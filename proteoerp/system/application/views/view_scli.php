@@ -55,7 +55,11 @@ else:
 								<td class="littletableheaderc"><?php echo $form->mmargen->label; ?></td>
 								<td class="littletablerow"    ><?php echo $form->mmargen->output; ?></td>
 							</tr><tr>
-								<td colspan="2">&nbsp;</td>
+								<td colspan="2" class="littletableheaderc">
+									<?php echo $form->estado->label;  ?>
+									<?php echo $form->estado->output;  ?>
+								
+								</td>
 							</tr><tr>
 								<td colspan="2" class="littletableheaderc"><?php echo $form->zona->label  ?></td>
 							</tr><tr>
