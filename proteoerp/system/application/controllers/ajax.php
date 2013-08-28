@@ -1546,6 +1546,7 @@ class Ajax extends Controller {
 	//Autocomplete para mgas
 	function automgas(){
 		$q   = $this->input->post('q');
+		if($q === false) $q  = $this->input->post('term');
 
 		$data = '[{ }]';
 		if($q!==false){

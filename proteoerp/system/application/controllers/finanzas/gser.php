@@ -1303,98 +1303,103 @@ class gser extends Controller {
 		$id     = intval($this->input->post('id'));
 		$data   = $_POST;
 
-		if(isset($data['oper'])) unset($data['oper']);
-		if(isset($data['id']))   unset($data['id']);
+		if($id>0){
+			if(isset($data['oper'])) unset($data['oper']);
+			if(isset($data['id']))   unset($data['id']);
 
-		if($oper == 'add'){
-			echo 'Deshabilitado.';
-			return false;
-		}elseif($oper == 'edit'){
-			if($this->datasis->sidapuede('GSER','MODIFICA%')){
-				echo 'No tiene acceso a modificar';
+			if($oper == 'add'){
+				echo 'Deshabilitado.';
 				return false;
-			}
-
-			$posibles=array('nfiscal','serie');
-			foreach($data as $ind=>$val){
-				if(!in_array($ind,$posibles)){
-					echo 'Campo no permitido ('.$ind.')';
-					return false;
-				}
-			}
-
-			$dbid=$this->db->escape($id);
-
-			$row = $this->datasis->damerow("SELECT fecha,tipo_doc, numero, proveed,transac,cajachi FROM gser WHERE id=${dbid}");
-			if(!empty($row)){
-				$data['numero'] = substr($data['serie'],-8);
-				$transac = $row['transac'];
-				if($row['cajachi']=='S'){
-					echo 'No se puede modificar un gasto de cajachica';
+			}elseif($oper == 'edit'){
+				if($this->datasis->sidapuede('GSER','MODIFICA%')){
+					echo 'No tiene acceso a modificar';
 					return false;
 				}
 
-				if($row['tipo_doc']!='FC'){
-					echo 'Solo se le pueden cambiar los valores a las facturas';
-					return false;
-				}
-
-				if($data['numero'] != $row['numero']){
-					//Chequea si puede cambiar los valores
-					$this->db->from('gser');
-					$this->db->where('id <>'   ,$id);
-					$this->db->where('fecha'   ,$row['fecha']);
-					$this->db->where('tipo_doc',$row['tipo_doc']);
-					$this->db->where('numero'  ,$data['numero']);
-					$this->db->where('proveed' ,$row['proveed']);
-					$cana = $this->db->count_all_results();
-					if(!empty($cana)){
-						echo 'Ya existe un registro con el mismo numero.';
+				$posibles=array('nfiscal','serie');
+				foreach($data as $ind=>$val){
+					if(!in_array($ind,$posibles)){
+						echo 'Campo no permitido ('.$ind.')';
 						return false;
 					}
 				}
 
-				//Cambia el gasto
-				$this->db->where('id'   ,$id);
-				$this->db->update('gser',$data);
+				$dbid=$this->db->escape($id);
 
-				//Cambia el detalle
-				$this->db->where('idgser' ,$id);
-				$this->db->update('gitser',array('numero'=>$data['numero']));
+				$row = $this->datasis->damerow("SELECT fecha,tipo_doc, numero, proveed,transac,cajachi FROM gser WHERE id=${dbid}");
+				if(!empty($row)){
+					$data['numero'] = substr($data['serie'],-8);
+					$transac = $row['transac'];
+					if($row['cajachi']=='S'){
+						echo 'No se puede modificar un gasto de cajachica';
+						return false;
+					}
 
-				if($data['numero'] != $row['numero']){
-					//Cambia la retencion ISLR
-					$this->db->where('idd'     ,$id);
-					$this->db->update('gereten',array('numero'=>$data['numero']));
+					if($row['tipo_doc']!='FC'){
+						echo 'Solo se le pueden cambiar los valores a las facturas';
+						return false;
+					}
 
-					//Cambia las aplicaciones
-					$this->db->where('numero'  ,$row['numero']);
+					if($data['numero'] != $row['numero']){
+						//Chequea si puede cambiar los valores
+						$this->db->from('gser');
+						$this->db->where('id <>'   ,$id);
+						$this->db->where('fecha'   ,$row['fecha']);
+						$this->db->where('tipo_doc',$row['tipo_doc']);
+						$this->db->where('numero'  ,$data['numero']);
+						$this->db->where('proveed' ,$row['proveed']);
+						$cana = $this->db->count_all_results();
+						if(!empty($cana)){
+							echo 'Ya existe un registro con el mismo numero.';
+							return false;
+						}
+					}
+
+					//Cambia el gasto
+					$this->db->where('id'   ,$id);
+					$this->db->update('gser',$data);
+
+					//Cambia el detalle
+					$this->db->where('idgser' ,$id);
+					$this->db->update('gitser',array('numero'=>$data['numero']));
+
+					if($data['numero'] != $row['numero']){
+						//Cambia la retencion ISLR
+						$this->db->where('idd'     ,$id);
+						$this->db->update('gereten',array('numero'=>$data['numero']));
+
+						//Cambia las aplicaciones
+						$this->db->where('numero'  ,$row['numero']);
+						$this->db->where('tipo_doc',$row['tipo_doc']);
+						$this->db->where('cod_prv' ,$row['proveed']);
+						$this->db->update('itppro' ,array('numero'=>$data['numero']));
+					}
+
+					//Cambia la retencion de IVA
+					$this->db->where('transac',$transac);
+					$this->db->update('riva'  ,array('numero'=>$data['numero'],'nfiscal'=>$data['nfiscal']));
+
+					//Cambia la CxC
+					$this->db->where('transac' ,$transac);
 					$this->db->where('tipo_doc',$row['tipo_doc']);
+					$this->db->where('fecha'   ,$row['fecha']);
 					$this->db->where('cod_prv' ,$row['proveed']);
-					$this->db->update('itppro' ,array('numero'=>$data['numero']));
+					$this->db->update('sprm'   ,array('numero'=>$data['numero'],'nfiscal'=>$data['nfiscal']));
+
+					logusu('GSER','Gasto/Egreso '.$row['fecha'].'-'.$row['tipo_doc'].'-'.$row['numero'].'-'.$row['proveed'].' MODIFICADO');
+					echo 'Gasto Modificado';
+					return true;
+				}else{
+					echo 'Registro no encontrado';
+					return false;
 				}
 
-				//Cambia la retencion de IVA
-				$this->db->where('transac',$transac);
-				$this->db->update('riva'  ,array('numero'=>$data['numero'],'nfiscal'=>$data['nfiscal']));
-
-				//Cambia la CxC
-				$this->db->where('transac' ,$transac);
-				$this->db->where('tipo_doc',$row['tipo_doc']);
-				$this->db->where('fecha'   ,$row['fecha']);
-				$this->db->where('cod_prv' ,$row['proveed']);
-				$this->db->update('sprm'   ,array('numero'=>$data['numero'],'nfiscal'=>$data['nfiscal']));
-
-				logusu('GSER','Gasto/Egreso '.$row['fecha'].'-'.$row['tipo_doc'].'-'.$row['numero'].'-'.$row['proveed'].' MODIFICADO');
-				echo 'Gasto Modificado';
-				return true;
-			}else{
-				echo 'Registro no encontrado';
+			} elseif($oper == 'del') {
+				echo 'Deshabilitado.';
 				return false;
 			}
-
-		} elseif($oper == 'del') {
-			echo 'Deshabilitado.';
+		}else{
+			echo 'Id no valido';
 			return false;
 		}
 	}
@@ -1453,11 +1458,12 @@ class gser extends Controller {
 		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => $editar,
+			'editable'      => 'true',
 			'width'         => 60,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 6 }',
+			'editoptions'   => '{'.$grid->autocomplete(site_url('ajax/automgas'), 'codigo','ncodigo','<div id=\"ncodigo\"><b>"+ui.item.label+"</b></div>').', size:10}',
+			//'editoptions'   => '{ size:30, maxlength: 6 }',
 		));
 
 
@@ -1976,44 +1982,52 @@ class gser extends Controller {
 	*/
 	function setDatait(){
 		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = "??????";
-		$check  = 0;
+		$oper = $this->input->post('oper');
+		$id   = intval($this->input->post('id'));
+		$data = $_POST;
 
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM gitser WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('gitser', $data);
-					echo "Registro Agregado";
+		if($id>0){
+			if(isset($data['oper'])) unset($data['oper']);
+			if(isset($data['id']))   unset($data['id']);
 
-					logusu('GITSER',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
+			if($oper == 'add'){
+				echo 'Deshabilitado';
+			}elseif($oper == 'edit'){
+				if($this->datasis->sidapuede('GSER','MODIFICA%')){
+					echo 'No tiene acceso a modificar';
+					return false;
+				}
 
-		} elseif($oper == 'edit') {
-			$this->db->where("id", $id);
-			$this->db->update('gitser', $data);
-			logusu('GITSER',"Item Modificado ".$id." MODIFICADO");
-			echo "$id Modificado";
+				$posibles=array('descrip','codigo');
+				foreach($data as $ind=>$val){
+					if(!in_array($ind,$posibles)){
+						echo 'Campo no permitido ('.$ind.')';
+						return false;
+					}
+				}
+				if(isset($data['codigo'])){
+					$dbcodigo = $this->db->escape($data['codigo']);
+					$cana = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM mgas WHERE codigo=${dbcodigo}");
+					if($cana==0){
+						echo 'Codigo no valido';
+						return false;
+					}
+				}
 
-		} elseif($oper == 'del') {
-			//$meco = $this->datasis->dameval("SELECT $mcodp FROM gitser WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM gitser WHERE id='$id' ");
-			//if ($check > 0){
-				echo " No esta previsto eliminar items individuales ";
-			//} else {
-			//	$this->db->simple_query("DELETE FROM gitser WHERE id=$id ");
-			//	logusu('GITSER',"Registro ????? ELIMINADO");
-			//	echo "Registro Eliminado";
-			//}
-		};
+				$this->db->where('id', $id);
+				$this->db->update('gitser', $data);
+				logusu('GITSER',"Item Modificado ".$id." MODIFICADO");
+				echo "${id} Modificado";
+				return true;
+
+			} elseif($oper == 'del') {
+				echo 'No esta previsto eliminar items individuales';
+				return false;
+			}
+		}else{
+			echo 'Id no valido';
+			return false;
+		}
 	}
 
 	function solo(){

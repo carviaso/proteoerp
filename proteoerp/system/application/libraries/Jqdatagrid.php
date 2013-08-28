@@ -1386,7 +1386,8 @@ class Jqdatagrid
 								});
 							}
 						});
-						jQuery(el).autocomplete("widget").css("font-size","11px");
+						//jQuery(el).autocomplete("widget").css("font-size","11px");
+						jQuery(el).autocomplete("widget").css("z-index", 3000);
 					}
 				} else { $.prompt("Falta jQuery UI") }
 			},200);
