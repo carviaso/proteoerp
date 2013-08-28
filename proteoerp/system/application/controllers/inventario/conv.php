@@ -13,11 +13,7 @@ class Conv extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('conv','id') ) {
-			$this->db->simple_query('ALTER TABLE conv DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE conv ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
-			$this->db->simple_query('ALTER TABLE conv ADD UNIQUE INDEX numero (numero)');
-		}
+		$this->instalar();
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -364,8 +360,9 @@ class Conv extends Controller {
 		$grid->setSearch( $this->datasis->sidapuede('CONV','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+		$grid->setOndblClickRow('');
 
-		$grid->setBarOptions("\t\taddfunc: convadd,\n\t\teditfunc: convedit, viewfunc: convshow");
+		$grid->setBarOptions('addfunc: convadd,editfunc: convedit,viewfunc: convshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -452,7 +449,7 @@ class Conv extends Controller {
 */
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -464,7 +461,7 @@ class Conv extends Controller {
 
 
 		$grid->addField('descrip');
-		$grid->label('Descrip');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -600,7 +597,7 @@ class Conv extends Controller {
 		$grid->setSearch(false ); // $this->datasis->sidapuede('ITCONV','BUSQUEDA%'));
 		$grid->setRowNum(60);
 		$grid->setShrinkToFit('false');
-
+		$grid->setOndblClickRow('');
 
 		#Set url
 		//$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -619,14 +616,16 @@ class Conv extends Controller {
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait($id = 0){
-		if ($id === 0 ){
+		if($id === 0){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM conv");
 		}
-		if( empty($id) ) return '';
-		$numero   = $this->datasis->dameval("SELECT numero FROM conv WHERE id=$id");
+		$id = intval($id);
+		if(empty($id)) return '';
+		$numero   = $this->datasis->dameval("SELECT numero FROM conv WHERE id=${id}");
+		$dbnumero = $this->db->escape($numero);
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itconv WHERE numero='$numero' ORDER BY descrip ";
+		$mSQL    = "SELECT * FROM itconv WHERE numero=${dbnumero} ORDER BY descrip ";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
@@ -756,17 +755,7 @@ class Conv extends Controller {
 		$edit->build();
 
 		$conten['form']  =& $edit;
-		//$data['script']   = script('jquery.js');
-		//$data['script']  .= script('jquery-ui.js');
-		//$data['script']  .= script('plugins/jquery.numeric.pack.js');
-		//$data['script']  .= script('plugins/jquery.floatnumber.js');
-		//$data['script']  .= script('plugins/jquery.meiomask.js');
-		//$data['script']  .= phpscript('nformat.js');
-		//$data['style']    = style('redmond/jquery-ui-1.8.1.custom.css');
 		$data['content']  = $this->load->view('view_conv', $conten, false);
-		//$data['title']    = heading('Conversiones de inventario');
-		//$data['head']     = $this->rapyd->get_head();
-		//$this->load->view('view_ventanas', $data);
 	}
 
 	function chpeso($codigo,$id){
@@ -876,6 +865,7 @@ class Conv extends Controller {
 	}
 
 	function _pre_update($do){
+		$do->error_message_ar['pre_upd'] = 'No se puede modificar una conversion, debe eliminarla y volverla a hacer';
 		return false;
 	}
 
@@ -917,23 +907,18 @@ class Conv extends Controller {
 					$ban=$this->db->simple_query($mSQL);
 					if(!$ban){ memowrite($mSQL,'conv');}
 			}else{
-				$mSQL="UPDATE sinv SET existen=existen+($monto) WHERE codigo=$dbcodigo";
+				$mSQL="UPDATE sinv SET existen=existen+($monto) WHERE codigo=${dbcodigo}";
 				$ban=$this->db->simple_query($mSQL);
 				if(!$ban){ memowrite($mSQL,'conv');}
 			}
 		}
 
 		//trafrac ittrafrac
-		logusu('conv',"Conversion $codigo CREADO");
+		logusu('conv',"Conversion ${codigo} CREADO");
 	}
 
 	function _pre_delete($do){
 		return false;
-	}
-
-	function instalar(){
-		$mSQL = "ALTER TABLE conv ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ";;
-		$this->db->simple_query($mSQL);
 	}
 
 	function tabla() {
@@ -990,5 +975,17 @@ class Conv extends Controller {
 		echo $salida;
 	}
 
+	function instalar(){
+		$campos=$this->db->list_fields('conv');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE conv DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE conv ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE conv ADD UNIQUE INDEX numero (numero)');
+		}
 
+		$itcampos=$this->db->list_fields('itconv');
+		if(!in_array('costo',$campos)){
+			$this->db->simple_query('ALTER TABLE `itconv` ADD COLUMN `costo` DECIMAL(10,2) NULL DEFAULT NULL');
+		}
+	}
 }
