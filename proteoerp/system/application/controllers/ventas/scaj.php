@@ -76,9 +76,9 @@ class Scaj extends Controller {
 
 		$bodyscript .= '
 		function scajedit(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
@@ -91,9 +91,9 @@ class Scaj extends Controller {
 
 		$bodyscript .= '
 		function scajshow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
 					$("#fshow").html(data);
@@ -115,10 +115,10 @@ class Scaj extends Controller {
 						try{
 							var json = JSON.parse(data);
 							if (json.status == "A"){
-								apprise("Registro eliminado");
+								$.prompt("Registro eliminado");
 								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 							}else{
-								apprise("Registro no se puede eliminado");
+								$.prompt("Registro no se puede eliminado");
 							}
 						}catch(e){
 							$("#fborra").html(data);
@@ -160,14 +160,13 @@ class Scaj extends Controller {
 						success: function(r,s,x){
 							try{
 								var json = JSON.parse(r);
-								if (json.status == "A"){
-									apprise("Registro Guardado");
+								if(json.status == "A"){
+									$.prompt("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/SCAJ').'/\'+res.id+\'/id\'').';
 									return true;
-								} else {
-									apprise(json.mensaje);
+								}else{
+									$.prompt(json.mensaje);
 								}
 							}catch(e){
 								$("#fedita").html(r);
@@ -175,9 +174,9 @@ class Scaj extends Controller {
 						}
 					})
 				},
-				"Cancelar": function() {
+				"Cancelar": function(){
 					$("#fedita").html("");
-					$( this ).dialog( "close" );
+					$( this ).dialog("close");
 				}
 			},
 			close: function() {
@@ -224,7 +223,7 @@ class Scaj extends Controller {
 	//***************************
 	//Definicion del Grid y la Forma
 	//***************************
-	function defgrid( $deployed = false ){
+	function defgrid($deployed = false){
 		$i      = 1;
 		$editar = 'false';
 
@@ -518,58 +517,7 @@ class Scaj extends Controller {
 	* Guarda la Informacion
 	*/
 	function setData(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = '??????';
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM scaj WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('scaj', $data);
-					echo "Registro Agregado";
-
-					logusu('SCAJ',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM scaj WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM scaj WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE scaj SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("scaj", $data);
-				logusu('SCAJ',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('scaj', $data);
-				logusu('SCAJ',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM scaj WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM scaj WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM scaj WHERE id=$id ");
-				logusu('SCAJ',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+		echo 'Deshabilitado';
 	}
 
 	function dataedit(){
@@ -586,6 +534,8 @@ class Scaj extends Controller {
 		$edit->script($script, 'create');
 		$edit->script($script, 'modify');
 
+		$edit->pre_process( 'insert','_pre_inserup');
+		$edit->pre_process( 'update','_pre_inserup');
 		$edit->pre_process( 'delete','_pre_delete' );
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
@@ -723,6 +673,23 @@ class Scaj extends Controller {
 		}
 	}
 
+	function _pre_inserup($do){
+		$status = $do->get('status');
+		$cajero = $do->get('cajero');
+
+		if($status=='A'){
+			$dbcajero = $this->db->escape($cajero);
+			$dbfecha  = $this->db->escape(date('Y-m-d'));
+			$cant     = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM rcaj WHERE cajero=${dbcajero} AND fecha=${dbfecha}"));
+
+			if($cant>0){
+				$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Este cajero tiene un procedimiento de cierre, no puede abrirse a menos que se reverse el cierre primero.';
+				return false;
+			}
+		}
+		return true;
+	}
+
 	function _pre_delete($do) {
 		$codigo=$this->db->escape($do->get('cajero'));
 		$tables = $this->db->list_tables();
@@ -775,7 +742,7 @@ class Scaj extends Controller {
 
 	function ccaja($caja){
 		$dbcaja=$this->db->escape($caja);
-		$cant  =$this->datasis->dameval("SELECT COUNT(*) FROM banc WHERE codbanc=${dbcaja}");
+		$cant  =$this->datasis->dameval("SELECT COUNT(*) AS cana FROM banc WHERE codbanc=${dbcaja}");
 		if($cant==0){
 			$this->validation->set_message('ccaja',"El codigo de caja '${caja}' no existe");
 			return false;
