@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>
-	<meta http-equiv="Content-type" content="text/html; charset=<?=$this->config->item('charset'); ?>" />
-<?=style("reportes.css");?>
-<?=$head ?>
+	<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" />
+<?php echo style("reportes.css");?>
+<?php echo $head; ?>
 <script type="text/javascript" language="javascript">
 	function prueba(){
 		var opt = {
@@ -26,21 +26,21 @@
 		}
 		new Ajax.Request('<?php echo site_url('reportes/consulstatus') ?>', opt);
 	}
-	function is_loaded(){ 
+	function is_loaded(){
 		//parent.navegador.arepo();
 		window.parent.carga();
-		
+
 	}
-	
-	
+
+
 </script>
 </head>
 <body onload='window.parent.descarga():'>
 
 	<div id='home'>
-	<p><?=$titulo ?></p>
+	<p><?php echo $titulo; ?></p>
 	<div class="alert"><?php if(isset($error)) echo $error; ?></div>
-	<p><?=$filtro ?></p>
+	<p><?php echo $filtro; ?></p>
 	<p><br><?php if(isset($regresar)) echo $regresar; ?></p>
 	</div>
 </body>
