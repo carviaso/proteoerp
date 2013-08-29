@@ -435,7 +435,8 @@ function post_modbus_scli(){
 			id  = Number(ind);
 			tipo=Number($('#sinvtipo_'+ind).val()); if(tipo>0) tipo=tipo-1;
 			if(tipo!='Servicio'){
-				this.selectedIndex=tipo;
+				//this.selectedIndex=tipo;
+				$('#'+this.id).prop('selectedIndex', tipo);
 				importe(id);
 			}
 		}
@@ -469,7 +470,8 @@ function post_modbus_sinv(nind){
 		var arr=$('#preca_'+ind);
 		cdropdown(nind);
 		jQuery.each(arr, function(){
-			this.selectedIndex=tipo;
+			//this.selectedIndex=tipo;
+			$('#'+this.id).prop('selectedIndex', tipo);
 		});
 	}else{
 		var prec = $('#precio'+ctipo+'_'+ind).val();
