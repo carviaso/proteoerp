@@ -1780,7 +1780,7 @@ class Scli extends validaciones {
 		$edit->entidad->rule ='required';
 		$edit->entidad->style='width:250px;';
 		$edit->entidad->option('','Seleccione un Estado');
-		$edit->entidad->options('SELECT codigo, entidad FROM estados ORDER BY entidad');
+		$edit->entidad->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
 
 		$edit->build();
 
@@ -2995,7 +2995,7 @@ function chrif(rif){
 		$campos = array();
 		$fields = $this->db->field_data('scli');
 		foreach ($fields as $field){
-			if    ($field->name=='formap' && $field->type!='int')     $this->db->simple_query('ALTER TABLE `scli`  CHANGE COLUMN `formap` `formap` INT(6) NULL DEFAULT 0');
+			if  ($field->name=='formap' && $field->type!='int')     $this->db->simple_query('ALTER TABLE `scli`  CHANGE COLUMN `formap` `formap` INT(6) NULL DEFAULT 0');
 			elseif($field->name=='email'  && $field->max_length!=100) $this->db->simple_query('ALTER TABLE `scli`  CHANGE COLUMN `email` `email` VARCHAR(100) NULL DEFAULT NULL');
 			elseif($field->name=='clave'  && $field->max_length!=50)  $this->db->simple_query('ALTER TABLE `scli`  CHANGE COLUMN `clave` `clave` VARCHAR(50) NULL DEFAULT NULL');
 			$campos[]=$field->name;
@@ -3011,23 +3011,23 @@ function chrif(rif){
 
 		if(!$this->db->table_exists('sclibitalimit')){
 			$mSQL="CREATE TABLE `sclibitalimit` (
-				`id` INT(11) NOT NULL AUTO_INCREMENT,
-				`cliente`    CHAR(5) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-				`credito`    CHAR(1) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
-				`creditoant` CHAR(1) NULL DEFAULT NULL,
-				`limite`     BIGINT(20) NULL DEFAULT NULL,
-				`limiteant`  BIGINT(20) NULL DEFAULT NULL,
-				`tolera`     DECIMAL(9,2) NULL DEFAULT NULL,
-				`toleraant`  DECIMAL(9,2) NULL DEFAULT NULL,
-				`maxtol`     DECIMAL(9,2) NULL DEFAULT NULL,
-				`maxtolant`  DECIMAL(9,2) NULL DEFAULT NULL,
-				`motivo`     TEXT NULL,
-				`formap`     DECIMAL(9,0) NULL DEFAULT NULL,
-				`formapsant` DECIMAL(9,0) NULL DEFAULT NULL,
-				`estampa`    TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-				`usuario`    VARCHAR(12) NULL DEFAULT NULL,
-				PRIMARY KEY (`id`),
-				INDEX `cliente` (`cliente`)
+				id         INT(11) NOT NULL AUTO_INCREMENT,
+				cliente    CHAR(5) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				credito    CHAR(1) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				creditoant CHAR(1) NULL DEFAULT NULL,
+				limite     BIGINT(20) NULL DEFAULT NULL,
+				limiteant  BIGINT(20) NULL DEFAULT NULL,
+				tolera     DECIMAL(9,2) NULL DEFAULT NULL,
+				toleraant  DECIMAL(9,2) NULL DEFAULT NULL,
+				maxtol     DECIMAL(9,2) NULL DEFAULT NULL,
+				maxtolant  DECIMAL(9,2) NULL DEFAULT NULL,
+				motivo     TEXT NULL,
+				formap     DECIMAL(9,0) NULL DEFAULT NULL,
+				formapsant DECIMAL(9,0) NULL DEFAULT NULL,
+				estampa    TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+				usuario    VARCHAR(12) NULL DEFAULT NULL,
+				PRIMARY KEY (id),
+				INDEX cliente (cliente)
 			)
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM
@@ -3059,6 +3059,7 @@ function chrif(rif){
 		if(!in_array('tarifa'   ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN tarifa VARCHAR(15) NULL ');
 		if(!in_array('tarimonto',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN tarimonto FLOAT UNSIGNED NULL DEFAULT NULL COMMENT 'unidades tributarias a cobrar por servicio'");
 		if(!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN canticipo VARCHAR(15) NULL DEFAULT NULL COMMENT 'Cuenta contable de Anticipo' AFTER cuenta");
+		if(!in_array('estado',   $campos)) $this->db->query("ALTER TABLE scli ADD COLUMN estado INT() NULL DEFAULT 0 COMMENT 'Estados o Entidades' AFTER zona");
 
 		if(!$this->db->table_exists('tarifa')){
 			$mSQL="CREATE TABLE `tarifa` (
@@ -3106,6 +3107,53 @@ function chrif(rif){
 			$this->db->simple_query('ALTER TABLE `ciud` ADD UNIQUE INDEX `ciudad` (`ciudad`)');
 			$this->db->simple_query('ALTER TABLE `ciud` ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
+
+		if (!$this->db->table_exists('estado')) {
+			$mSQL="
+			CREATE TABLE IF NOT EXISTS `estado` (
+				id          int(10) NOT NULL AUTO_INCREMENT,
+				codigo      int(10) NOT NULL DEFAULT '0',
+				entidad     varchar(80) DEFAULT NULL,
+				capital     varchar(80) DEFAULT NULL,
+				superficie  decimal(10,2) DEFAULT NULL,
+				poblacion   int(11) DEFAULT NULL,
+				municipios  int(11) DEFAULT NULL,
+				parroquias  int(11) DEFAULT NULL,
+				PRIMARY KEY (id),
+				UNIQUE KEY `codigo` (`codigo`)
+			) ENGINE=MyISAM  DEFAULT CHARSET=utf8;";
+			$this->db->query($mSQL);
+
+			$mSQL="
+			INSERT INTO `estado` (`id`, `codigo`, `entidad`, `capital`, `superficie`, `poblacion`, `municipios`, `parroquias`) VALUES
+				( 1, 22, 'AMAZONAS ', 'Puerto Ayacucho', 180145.00, 144398, 7, 23),
+				( 2,  2, 'ANZOÁTEGUI', 'Barcelona', 43000.00, 1464578, 21, 49),
+				( 3,  3, 'APURE', 'San Fernando de Apure', 76500.00, 458369, 7, 26),
+				( 4,  4, 'ARAGUA', 'Maracay', 7014.00, 1627141, 18, 44),
+				( 5,  5, 'BARINAS', 'Barinas', 35200.00, 814288, 12, 52),
+				( 6,  6, 'BOLÍVAR ', 'Bolívar ', 238000.00, 1405064, 11, 44),
+				( 7,  7, 'CARABOBO', 'Valencia ', 4650.00, 2239222, 14, 38),
+				( 8,  8, 'COJEDES', 'San Carlos', 14800.00, 322843, 9, 15),
+				( 9, 23, 'DELTA AMACURO ', 'Tucupita', 40200.00, 167522, 4, 21),
+				(26, 99, 'EMBAJADAS', '', 0.00, 0, 0, 0),
+				(11,  1, 'DISTRITO CAPITAL ', 'Caracas', 433.00, 1933186, 1, 22),
+				(12,  9, 'FALCÓN ', 'Coro ', 24800.00, 900211, 25, 78),
+				(13, 10, 'GUÁRICO', 'San Juan de los Morros ', 64986.00, 746174, 15, 38),
+				(14, 11, 'LARA ', 'Barquisimeto', 19800.00, 1769763, 9, 58),
+				(15, 12, 'MÉRIDA', 'Mérida', 11300.00, 826720, 23, 55),
+				(16, 13, 'MIRANDA', 'Los Teques', 7950.00, 2665596, 21, 31),
+				(17, 14, 'MONAGAS ', 'Maturín ', 28900.00, 901161, 13, 67),
+				(18, 15, 'NUEVA ESPARTA ', 'La Asunción', 1150.00, 490494, 11, 11),
+				(19, 16, 'PORTUGUESA', 'Guanare ', 15200.00, 875000, 14, 27),
+				(20, 17, 'SUCRE ', 'Cumaná ', 11800.00, 892990, 15, 55),
+				(21, 18, 'TÁCHIRA ', 'San Cristóbal', 11100.00, 1163593, 29, 93),
+				(22, 19, 'TRUJILLO ', 'Trujillo ', 7400.00, 684555, 20, 38),
+				(23, 24, 'VARGAS ', 'La Guaira ', 1496.00, 352087, 1, 11),
+				(24, 20, 'YARACUY ', 'San Felipe ', 7100.00, 599345, 14, 7),
+				(25, 21, 'ZULIA ', 'Maracaibo ', 63100.00, 3703640, 21, 106),
+				(27, 98, 'FRONTERA', '', 0.00, 0, 0, 0);";
+			$this->db->query($mSQL);
+
 
 	}
 }
