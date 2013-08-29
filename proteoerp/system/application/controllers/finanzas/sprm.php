@@ -241,7 +241,7 @@ class Sprm extends Controller {
 									if ( res.status == "A"){
 										apprise(res.mensaje);
 										grid.trigger("reloadGrid");
-										'.$this->datasis->jwinopen(site_url('formatos/ver/PPROABC').'/\'+res.id').';
+										'.$this->datasis->jwinopen(site_url($this->url.'sprmprint').'/\'+res.pk.id').';
 										$( "#fabono" ).dialog( "close" );
 										return [true, a ];
 									} else {
@@ -320,7 +320,7 @@ class Sprm extends Controller {
 									$.prompt("Registro Guardado");
 									$("#fedita").dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/SPRM').'/\'+res.id+\'/id\'').';
+									'.$this->datasis->jwinopen(site_url('formatos/ver/SPRM').'/\'+res.pk.id+\'/id\'').';
 									return true;
 								} else {
 									$.prompt(json.mensaje);
@@ -1787,7 +1787,7 @@ class Sprm extends Controller {
 		$edit->fecha->rule ='chfecha|required';
 
 		$edit->monto = new inputField('Total a pagar','monto');
-		$edit->monto->rule='max_length[17]|numeric';
+		$edit->monto->rule='required|max_length[17]|numeric';
 		$edit->monto->css_class='inputnum';
 		$edit->monto->size =19;
 		$edit->monto->maxlength =17;
@@ -1817,7 +1817,6 @@ class Sprm extends Controller {
 		//Campos propios de las NC
 
 		//Campos comodines
-
 		$arr_ptasa = array();
 		$edit->apltasa = new dropdownField('', 'apltasa');
 		$mSQL='SELECT fecha,tasa,redutasa,sobretasa FROM civa ORDER BY fecha DESC LIMIT 3';
@@ -2158,9 +2157,11 @@ class Sprm extends Controller {
 	}
 
 	function chtipoop($val){
+		$tipo  = $this->input->post('tipo_doc');
+		if($tipo=='NC') return true;
 		$banco  = $this->input->post('banco');
 		$dbbanco= $this->db->escape($banco);
-		$tbanco = $this->datasis->dameval("SELECT tbanco FROM banc WHERE banco=${dbbanco}");
+		$tbanco = trim($this->datasis->dameval("SELECT tbanco FROM banc WHERE codbanc=${dbbanco}"));
 
 		if($tbanco=='CAJ' && $val=='CH'){
 			$this->validation->set_message('chtipoop', 'El campo %s no puede ser cheque cuando se paga por caja.');
@@ -2353,12 +2354,17 @@ class Sprm extends Controller {
 				return false;
 			}
 		}elseif($tipo_doc=='AN'){
+
 			$do->truncate_rel('itppro');
 			if($totalab!=0){
 				$do->error_message_ar['pre_ins']='Un anticipo no puede estar relacionado con algun efecto, en tal caso seria un abono';
 				return false;
 			}
-			$totalab= $do->get('monto');
+			$totalab= floatval($do->get('monto'));
+			if($totalab<=0){
+				$do->error_message_ar['pre_ins']='Debe colocar el monto del anticipo.';
+				return false;
+			}
 			$ppago  = 0;
 		}
 		//Fin de las validaciones
@@ -2435,10 +2441,14 @@ class Sprm extends Controller {
 		$do->set('nfiscal' , '') ;
 		$do->set('mora'    , 0 );
 		$do->set('comprob' , '');
-		if($tipo_doc=='AB' || $tipo_doc='NC'){
+		if($tipo_doc=='AB' || $tipo_doc=='NC'){
 			$do->set('abonos'  , $totalab-$ppago);
 			$do->set('fecapl',$fecha);
-			$do->set('fecdoc',$itfecha);
+			if($tipo_doc=='NC'){
+				$do->set('fecdoc',$itfecha);
+			}else{
+				$do->set('fecdoc',$fecha);
+			}
 		}else{
 			$do->set('abonos'  , 0);
 		}

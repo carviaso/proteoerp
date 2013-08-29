@@ -39,8 +39,6 @@ $(function(){
 
 	$('#fecha').datepicker({ dateFormat: "dd/mm/yy" });
 	$('#posdata').datepicker({ dateFormat: "dd/mm/yy" });
-	chtipodoc();
-	totaliza();
 
 	$('#montasa'  ).focus(function (){ invasdif('montasa','tasa'     ,Number($("#ptasa"     ).val())/100); });
 	$('#monredu'  ).focus(function (){ invasdif('monredu','reducida' ,Number($("#preducida" ).val())/100); });
@@ -91,6 +89,8 @@ $(function(){
 		invasdif('exento','E',0);
 	});
 
+	chtipodoc();
+	totaliza();
 });
 
 function invasdif(base,iva,ptasa){
@@ -135,7 +135,6 @@ function chtipodoc(){
 		$('#aplefectos').hide();
 		$('input[name^="abono_"]').val("");
 		/*$('input[name^="ppago_"]').val("");*/
-		totaliza();
 		$('#aplpago').show();
 		$('#monto_val').hide();
 		$('#monto').attr('type','text');
@@ -144,6 +143,7 @@ function chtipodoc(){
 		$('#ncadic').hide();
 		$('#fpago').show();
 		$('#trnd2').hide();
+		totaliza();
 	}else{
 		$('#aplefectos').show();
 		$('#aplpago').show();
@@ -360,6 +360,8 @@ echo $title;
 	<?php } ?>
 	</tbody>
 </table>
+<?php } ?>
+
 <table width="100%">
 	<tfoot>
 	<tr>
@@ -368,7 +370,7 @@ echo $title;
 	</tr>
 	</tfoot>
 </table>
-<?php } ?>
+
 <p style='text-align:center'>
 <table id='ncadic' style='background:#F2E69D;margin-left:auto;margin-right:auto;'>
 	<tr>

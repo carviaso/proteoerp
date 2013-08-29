@@ -1766,7 +1766,7 @@ class Scst extends Controller {
 		$saldo = 0;
 		if ( $query->num_rows() > 0 ){
 			$salida .= "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento Pendientes en CxC</td></tr>";
+			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento Pendientes en CxP</td></tr>";
 			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
 			$i = 1;
 			foreach ($query->result_array() as $row)
