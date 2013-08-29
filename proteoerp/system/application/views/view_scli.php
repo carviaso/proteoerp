@@ -56,14 +56,14 @@ else:
 								<td class="littletablerow"    ><?php echo $form->mmargen->output; ?></td>
 							</tr><tr>
 								<td colspan="2" class="littletableheaderc">
-									<?php echo $form->estado->label;  ?>
-									<?php echo $form->estado->output;  ?>
+									<?php echo $form->entidad->label;  ?>
+									<?php echo $form->entidad->output;  ?>
 								
 								</td>
 							</tr><tr>
-								<td colspan="2" class="littletableheaderc"><?php echo $form->zona->label  ?></td>
-							</tr><tr>
-								<td colspan="2" class="littletablerow"><?php echo $form->zona->output ?></td>
+								<td colspan="2" class="littletableheaderc">
+									<?php echo $form->zona->label  ?>
+									<?php echo $form->zona->output ?></td>
 							</tr>
 						</table>
 					</fieldset>

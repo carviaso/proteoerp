@@ -1777,8 +1777,7 @@ class Scli extends validaciones {
 		$edit->tminimo->type='inputhidden';
 
 		$edit->entidad = new dropdownField('Estado','entidad');
-		$edit->entidad->rule ='required';
-		$edit->entidad->style='width:250px;';
+		$edit->entidad->style='width:220px;';
 		$edit->entidad->option('','Seleccione un Estado');
 		$edit->entidad->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
 
@@ -3059,7 +3058,7 @@ function chrif(rif){
 		if(!in_array('tarifa'   ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN tarifa VARCHAR(15) NULL ');
 		if(!in_array('tarimonto',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN tarimonto FLOAT UNSIGNED NULL DEFAULT NULL COMMENT 'unidades tributarias a cobrar por servicio'");
 		if(!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN canticipo VARCHAR(15) NULL DEFAULT NULL COMMENT 'Cuenta contable de Anticipo' AFTER cuenta");
-		if(!in_array('estado',   $campos)) $this->db->query("ALTER TABLE scli ADD COLUMN estado INT() NULL DEFAULT 0 COMMENT 'Estados o Entidades' AFTER zona");
+		if(!in_array('estado',   $campos)) $this->db->query("ALTER TABLE scli ADD COLUMN estado INT(11) NULL DEFAULT 0 COMMENT 'Estados o Entidades' AFTER zona");
 
 		if(!$this->db->table_exists('tarifa')){
 			$mSQL="CREATE TABLE `tarifa` (
@@ -3153,7 +3152,7 @@ function chrif(rif){
 				(25, 21, 'ZULIA ', 'Maracaibo ', 63100.00, 3703640, 21, 106),
 				(27, 98, 'FRONTERA', '', 0.00, 0, 0, 0);";
 			$this->db->query($mSQL);
-
+		}
 
 	}
 }
