@@ -17,7 +17,7 @@ class HTMLReporte {
 	var $SubTitulo;
 	var $SobreTabla;
 	var $tituHeader;
-	var $tituSubHeader;
+	var $tituSubHeader=array();
 	var $centrar=array();
 	var $wstring=array('string','char');
 	var $wnumber=array('real','int','decimal');
