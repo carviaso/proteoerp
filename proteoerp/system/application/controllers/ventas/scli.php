@@ -2988,7 +2988,7 @@ function chrif(rif){
 
 	function instalar(){
 		$seniat=$this->db->escape('http://contribuyente.seniat.gob.ve/BuscaRif/BuscaRif.jsp');
-		$mSQL  ="REPLACE INTO valores (nombre,valor,descrip) VALUES ('CONSULRIF',$seniat,'Pagina de consulta de rif del seniat') ON DUPLICATE KEY UPDATE valor=$seniat";
+		$mSQL  ="REPLACE INTO valores (nombre,valor,descrip) VALUES ('CONSULRIF',$seniat,'Pagina de consulta de rif del seniat')";
 		$this->db->simple_query($mSQL);
 
 		$campos = array();

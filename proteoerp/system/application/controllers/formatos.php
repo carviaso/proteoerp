@@ -299,6 +299,9 @@ class Formatos extends Controller{
 	function us_ascii2html($str){
 		$rt =trim($str);
 
+		if($this->db->char_set=='latin1'){
+			$str=utf8_encode($str);
+		}
 		//Convierte los caracteres de us-ascii
 		$rt =str_replace(chr(165),'Ñ',$rt);
 		$rt =str_replace(chr(164),'ñ',$rt);
