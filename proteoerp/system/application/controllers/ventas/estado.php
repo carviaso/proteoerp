@@ -609,8 +609,6 @@ class Estado extends Controller {
 				(27, 98, 'FRONTERA', '', 0.00, 0, 0, 0);";
 			$this->db->query($mSQL);
 
-
-
 		}
 		//$campos=$this->db->list_fields('estados');
 		//if(!in_array('<#campo#>',$campos)){ }

@@ -2110,7 +2110,7 @@ class Pers extends Controller {
 
 		if($oper == 'add'){
 			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM preposo WHERE final<=".$this->db->escape($data['inicio']) );
+				$check = $this->datasis->dameval("SELECT count(*) FROM preposo WHERE codigo=".$this->db->escape($codigo)." AND final>".$this->db->escape($data['inicio']) );
 				if ( $check == 0 ){
 					$data['usuario']  = $this->secu->usuario();
 					$data['estampa']  = date('Ymd');
@@ -2118,9 +2118,9 @@ class Pers extends Controller {
 					$this->db->insert('preposo', $data);
 					echo "Registro Agregado";
 
-					logusu('PREPOSO',"Registro ????? INCLUIDO");
+					logusu('PREPOSO',"Registro  INCLUIDO");
 				} else
-					echo "Ya existe un registro con ese $mcodp";
+					echo "Ya existe un registro con esa fecha";
 			} else
 				echo "Fallo Agregado!!!";
 
@@ -2128,10 +2128,10 @@ class Pers extends Controller {
 			$this->db->where("id", $id);
 			$this->db->update('preposo', $data);
 			logusu('PREPOSO',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-			echo "$mcodp Modificado";
+			echo "Registro Modificado";
 
 		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM preposo WHERE id=$id");
+			//$meco = $this->datasis->dameval("SELECT  FROM preposo WHERE id=$id");
 			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM preposo WHERE id='$id' ");
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";

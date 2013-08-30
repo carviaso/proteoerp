@@ -187,10 +187,10 @@ class fnomina {
 	//
 	function REPOSO(){
 		// VER SI ESTA EN REPOSO
-		$mSQL  = "SELECT inicio, final FROM preposo WHERE codigo=".$this->ci->db->escape($this->CODIGO)." AND inicio<='".$this->fhasta."'";
+		$mSQL  = "SELECT inicio, final FROM preposo WHERE codigo=".$this->ci->db->escape($this->CODIGO)." AND inicio<='".$this->fhasta."' AND final>".$this->fdesde;
 		memowrite($mSQL, 'Reposo');
 		$query = $this->ci->db->query($mSQL);
-		$diasefect = 0; 
+		$diasefect = 0;
 		
 		$reposos = $query->num_rows();
 		if ( $query->num_rows() > 0 ){
@@ -222,7 +222,7 @@ class fnomina {
 	function SEMANAS(){ 
 		$desde = $this->fdesde;
 		$hasta = $this->fhasta;
-		
+
 		$first_date = strtotime($desde." -1 days");
 		$first_date = strtotime(date("M d Y",$first_date)." next ".'Monday');
 

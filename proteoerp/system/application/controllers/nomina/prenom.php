@@ -114,7 +114,7 @@ class Prenom extends Controller {
 		$tipo = $this->datasis->dameval('SELECT tipo FROM noco WHERE codigo='.$dbcont);
 		if( $tipo == 'Q' ){
 			if($dia != $ultdia || $dia != 15){
-				if($dia<15){
+				if($dia<=15){
 					$fechac = substr($fechac,0,6).'15';
 				}else{
 					$fechac = substr($fechac,0,6).$ultdia;
