@@ -300,7 +300,7 @@ class Formatos extends Controller{
 		$rt =trim($str);
 
 		if($this->db->char_set=='latin1'){
-			$str=utf8_encode($str);
+			$rt=utf8_encode($rt);
 		}
 		//Convierte los caracteres de us-ascii
 		$rt =str_replace(chr(165),'Ñ',$rt);
