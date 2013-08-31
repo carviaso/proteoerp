@@ -1119,6 +1119,11 @@ class Sfac extends Controller {
 						}
 					});
 				}
+			},afterInsertRow:
+			function( rid, aData, rowe){
+				if ( aData.tipo_doc == "X"){
+					$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#C90623" });
+				}
 			}'
 		);
 
@@ -1742,11 +1747,14 @@ class Sfac extends Controller {
 	//******************************************************************
 	//Json para llena la tabla de inventario
 	function sfacsitems() {
-		$numa  = $this->uri->segment($this->uri->total_segments());
-		$tipoa = $this->uri->segment($this->uri->total_segments()-1);
+		$numa    = $this->uri->segment($this->uri->total_segments());
+		$tipoa   = $this->uri->segment($this->uri->total_segments()-1);
+		$dbnuma  = $this->db->escape($numa);
+		$dbtipoa = $this->db->escape($tipoa );
+
 
 		$mSQL  = 'SELECT a.codigoa, a.desca, a.cana, a.preca, a.tota, a.iva, IF(a.pvp < a.preca, a.preca, a.pvp)  pvp, ROUND(100-a.preca*100/IF(a.pvp<a.preca,a.preca, a.pvp),2) descuento, ROUND(100-ROUND(a.precio4*100/(100+a.iva),2)*100/a.preca,2) precio4, a.detalle, a.fdespacha, a.udespacha, a.bonifica, b.id url ';
-		$mSQL .= "FROM sitems a LEFT JOIN sinv b ON a.codigoa=b.codigo WHERE a.tipoa='$tipoa' AND a.numa='$numa' ";
+		$mSQL .= "FROM sitems a LEFT JOIN sinv b ON a.codigoa=b.codigo WHERE a.tipoa=${dbtipoa} AND a.numa=${dbnuma} ";
 		$mSQL .= "ORDER BY a.codigoa";
 
 		$query = $this->db->query($mSQL);
@@ -1772,7 +1780,7 @@ class Sfac extends Controller {
 		$efecha = $this->uri->segment($this->uri->total_segments()-1);
 		$fecha  = $this->uri->segment($this->uri->total_segments()-2);
 		$numero = $this->uri->segment($this->uri->total_segments()-3);
-		$id     = $this->uri->segment($this->uri->total_segments()-4);
+		$id     = intval($this->uri->segment($this->uri->total_segments()-4));
 		$mdevo  = 'Exito';
 
 		//memowrite("efecha=$efecha, fecha=$fecha, numero=$numero, id=$id, reinte=$reinte","sfacreiva");
@@ -1781,27 +1789,27 @@ class Sfac extends Controller {
 		$fecha  = substr($fecha, 6,4).substr($fecha, 3,2).substr($fecha, 0,2);
 		$efecha = substr($efecha,6,4).substr($efecha,3,2).substr($efecha,0,2);
 
-		$tipo_doc = $this->datasis->dameval("SELECT tipo_doc FROM sfac WHERE id=$id");
-		$referen  = $this->datasis->dameval("SELECT referen  FROM sfac WHERE id=$id");
-		$numfac   = $this->datasis->dameval("SELECT numero   FROM sfac WHERE id=$id");
-		$cod_cli  = $this->datasis->dameval("SELECT cod_cli  FROM sfac WHERE id=$id");
-		$monto    = $this->datasis->dameval("SELECT ROUND(iva*0.75,2)  FROM sfac WHERE id=$id");
-		$factura  = $this->datasis->dameval("SELECT factura  FROM sfac WHERE id=$id");
+		$tipo_doc = $this->datasis->dameval("SELECT tipo_doc FROM sfac WHERE id=${id}");
+		$referen  = $this->datasis->dameval("SELECT referen  FROM sfac WHERE id=${id}");
+		$numfac   = $this->datasis->dameval("SELECT numero   FROM sfac WHERE id=${id}");
+		$cod_cli  = $this->datasis->dameval("SELECT cod_cli  FROM sfac WHERE id=${id}");
+		$monto    = $this->datasis->dameval("SELECT ROUND(iva*0.75,2)  FROM sfac WHERE id=${id}");
+		$factura  = $this->datasis->dameval("SELECT factura  FROM sfac WHERE id=${id}");
 
-		$anterior = $this->datasis->dameval("SELECT reiva FROM sfac WHERE id=$id");
+		$anterior = $this->datasis->dameval("SELECT reiva FROM sfac WHERE id=${id}");
 		$usuario = addslashes($this->session->userdata('usuario'));
 
 		if(strlen($numero) == 14){
 			if($anterior == 0){
-				$mSQL = "UPDATE sfac SET reiva=round(iva*0.75,2), creiva='$numero', freiva='$fecha', ereiva='$efecha' WHERE id=$id";
+				$mSQL = "UPDATE sfac SET reiva=round(iva*0.75,2), creiva='${numero}', freiva='${fecha}', ereiva='${efecha}' WHERE id=${id}";
 				$this->db->simple_query($mSQL);
 				//memowrite($mSQL,"sfacreivaSFAC");
 
-				$transac = $this->datasis->prox_sql("ntransa");
+				$transac = $this->datasis->prox_sql('ntransa');
 				$transac = str_pad($transac, 8, "0", STR_PAD_LEFT);
 
 				if ($referen == 'C') {
-					$saldo =  $this->datasis->dameval("SELECT monto-abonos FROM smov WHERE tipo_doc='FC' AND numero='$numfac'");
+					$saldo =  $this->datasis->dameval("SELECT monto-abonos FROM smov WHERE tipo_doc='FC' AND numero='${numfac}'");
 				}
 
 				if ( $tipo_doc == 'F') {
@@ -1814,14 +1822,14 @@ class Sfac extends Controller {
 						SELECT cod_cli, nombre, 'AN' tipo_doc, '$mnumant' numero, freiva fecha, reiva monto, 0 impuesto, freiva vence,
 							CONCAT('RET/IVA DE ',cod_cli,' A DOC. ',tipo_doc,numero) observa1, IF(tipo_doc='F','FC', 'DV' ) tipo_ref, numero num_ref,
 							curdate() estampa, curtime() hora, '$transac' transac, '".$usuario."' usuario, creiva, ereiva
-						FROM sfac WHERE id=$id";
+						FROM sfac WHERE id=${id}";
 						$this->db->simple_query($mSQL);
-						$mdevo = "<h1 style='color:green;'>EXITO</h1>Retencion Guardada, Anticipo Generado por factura pagada al contado";
+						$mdevo = "<h1 style='color:green;'>EXITO</h1>Retenci&oacute;n Guardada, Anticipo Generado por factura pagada al contado";
 					} elseif ($referen == 'C') {
 						// Busca si esta cancelada
 						$tiposfac = 'FC';
 						if ( $tipo_doc == 'D') $tiposfac = 'NC';
-						$mSQL = "SELECT monto-abonos saldo FROM smov WHERE numero='$numfac' AND cod_cli='$cod_cli' AND tipo_doc='$tiposfac'";
+						$mSQL = "SELECT monto-abonos saldo FROM smov WHERE numero='${numfac}' AND cod_cli='${cod_cli}' AND tipo_doc='${tiposfac}'";
 						$saldo = $this->datasis->dameval($mSQL);
 						if ( $saldo < $monto ) {  // crea anticipo
 							$mnumant = $this->datasis->prox_sql("nancli");
@@ -1846,7 +1854,7 @@ class Sfac extends Controller {
 							$this->db->simple_query($mSQL);
 
 							// ABONA A LA FACTURA
-							$mSQL = "UPDATE smov SET abonos=abonos+$monto WHERE numero='$numfac' AND cod_cli='$cod_cli' AND tipo_doc='$tiposfac'";
+							$mSQL = "UPDATE smov SET abonos=abonos+$monto WHERE numero='${numfac}' AND cod_cli='${cod_cli}' AND tipo_doc='$tiposfac'";
 							$this->db->simple_query($mSQL);
 
 							//Crea la relacion en ccli
@@ -1872,10 +1880,10 @@ class Sfac extends Controller {
 					$mSQL = "INSERT INTO smov  (cod_cli, nombre, tipo_doc, numero, fecha, monto, impuesto, vence, observa1, tipo_ref, num_ref, estampa, hora, transac, usuario, nroriva, emiriva )
 					SELECT cod_cli, nombre, 'ND' tipo_doc, '$mnumant' numero, freiva fecha, reiva monto, 0 impuesto, freiva vence,
 						CONCAT('RET/IVA DE ',cod_cli,' A DOC. ',tipo_doc,numero) observa1, IF(tipo_doc='F','FC', 'DV' ) tipo_ref, numero num_ref,
-						curdate() estampa, curtime() hora, '$transac' transac, '".$usuario."' usuario, creiva, ereiva
-					FROM sfac WHERE id=$id";
+						CURDATE() estampa, CURTIME() hora, '${transac}' transac, '".$usuario."' usuario, creiva, ereiva
+					FROM sfac WHERE id=${id}";
 					$this->db->simple_query($mSQL);
-					$mdevo = "<h1 style='color:green;'>EXITO</h1>Retencion Guardada, Anticipo Generado por factura pagada al contado";
+					$mdevo = "<h1 style='color:green;'>EXITO</h1>Retenci&oacute;n Guardada, Anticipo Generado por factura pagada al contado";
 
 					// Debe abonar la ND si existe un AN
 					/*
@@ -1944,7 +1952,7 @@ class Sfac extends Controller {
 
 				}
 			}else{
-				$mdevo = "<h1 style='color:red;'>ERROR</h1>Retencion ya aplicada";
+				$mdevo = "<h1 style='color:red;'>ERROR</h1>Retenci&oacute;n ya aplicada";
 			}
 		}else
 			$mdevo = "<h1 style='color:red;'>ERROR</h1>Longitud del comprobante menor a 14 caracteres, corrijalo y vuelva a intentar";
