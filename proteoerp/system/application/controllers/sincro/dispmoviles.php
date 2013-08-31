@@ -35,24 +35,47 @@ class Dispmoviles extends Controller {
 		}
 		$dbvend = $this->db->escape($vend);
 
-		$escape = function($val){
-			if(is_numeric($val)){
-				$val=$val+0;
-				if(is_infinite($val))
-					return 0;
-				else
+		if($this->db->char_set=='latin1'){
+			$escape = function($val){
+				if(is_numeric($val)){
+					$val=$val+0;
+					if(is_infinite($val))
+						return 0;
+					else
+						return $val;
+				}elseif(is_null($val)){
+					return '';
+				}else{
+
+					//Convierte los caracteres de us-ascii
+					$val =str_replace(chr(165),utf8_decode('Ñ'),$val);
+					$val =str_replace(chr(164),utf8_decode('ñ'),$val);
+					$val =str_replace(chr(166),utf8_decode('º'),$val);
+					$val =str_replace(chr(167),utf8_decode('º'),$val);
+					$val=utf8_encode($val);
 					return $val;
-			}elseif(is_null($val)){
-				return '';
-			}else{
-				//Convierte los caracteres de us-ascii
-				$val =str_replace(chr(165),'Ñ',$val);
-				$val =str_replace(chr(164),'ñ',$val);
-				$val =str_replace(chr(166),'º',$val);
-				$val =str_replace(chr(167),'º',$val);
-				return $val;
-			}
-		};
+				}
+			};
+		}else{
+			$escape = function($val){
+				if(is_numeric($val)){
+					$val=$val+0;
+					if(is_infinite($val))
+						return 0;
+					else
+						return $val;
+				}elseif(is_null($val)){
+					return '';
+				}else{
+					//Convierte los caracteres de us-ascii
+					$val =str_replace(chr(165),'Ñ',$val);
+					$val =str_replace(chr(164),'ñ',$val);
+					$val =str_replace(chr(166),'º',$val);
+					$val =str_replace(chr(167),'º',$val);
+					return $val;
+				}
+			};
+		}
 
 		if($tabla=='config'){
 			$nombre  = $escape($this->datasis->dameval('SELECT nombre FROM vend WHERE vendedor='.$dbvend));
