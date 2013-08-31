@@ -52,7 +52,8 @@ class Nomina extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"regene",   "img"=>"images/repara.png",  "alt" => "Regenerar Nomina", "label"=>"Regenerar Nomina", "tema"=>"anexos"));
+		$grid->wbotonadd(array('id'=>'regene' , 'img'=>'images/repara.png',  'alt' => 'Regenerar Nomina', 'label'=>'Regenerar Nomina', 'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Imprimir recibos', 'label'=>'Imprimir Prenomina'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -97,9 +98,7 @@ class Nomina extends Controller {
 			} else {
 				$.prompt("<h1>Transaccion invalida</h1>");
 			}
-		};
-		';
-
+		};';
 
 		$bodyscript .= '
 		function nominaadd(){
@@ -283,6 +282,11 @@ class Nomina extends Controller {
 			';
 
 		$bodyscript .= '
+		jQuery("#imprime").click( function(){
+			window.open(\''.site_url('formatos/descargar/RECIBO/').'/\', \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes\');
+		});';
+
+		$bodyscript .= '
 		$("#fedita").dialog({
 			autoOpen: false, height: 500, width: 700, modal: true,
 			buttons: {
@@ -353,10 +357,9 @@ class Nomina extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
 		return $bodyscript;
 	}
 
@@ -365,7 +368,7 @@ class Nomina extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -623,52 +626,13 @@ class Nomina extends Controller {
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM nomina WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('nomina', $data);
-					echo "Registro Agregado";
-
-					logusu('NOMI',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-/*
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM nomina WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM nomina WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE nomina SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("nomina", $data);
-				logusu('NOMINA',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('nomina', $data);
-				logusu('NOMINA',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-*/
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM nomina WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM nomina WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM nomina WHERE id=$id ");
-				logusu('NOMINA',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
-
+			echo 'Deshabilitado';
+		}elseif($oper == 'edit'){
+			echo 'Deshabilitado';
+		}elseif($oper == 'del'){
+			echo 'Deshabilitado';
+		}
 	}
-
 
 	//******************************
 	//      REVERSAR NOMINA
@@ -1744,4 +1708,3 @@ Ext.onReady(function(){
 	}
 */
 }
-?>
