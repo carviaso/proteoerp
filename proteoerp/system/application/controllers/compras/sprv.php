@@ -946,6 +946,7 @@ class Sprv extends Controller {
 										if($("#nomfis").val()==""){
 											$("#nomfis").val(data.nombre);
 										}
+										$("#reteiva").val(data.tasa);
 									}
 								}
 							});

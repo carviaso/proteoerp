@@ -2113,64 +2113,54 @@ class Ajax extends Controller {
 	//  CONSULTA LA CEDULA O RIF EN INTERNET
 	//
 	function traerif(){
-		$t=array(
-			'error' =>0,
-			'msj'   =>'',
-			'nombre'=>''
-		);
-		echo json_encode($t);
-
-
-		//$rifci = $this->input->post('rifci');
 		//$t=array(
-		//	'error' =>1,
-		//	'msj'   =>'Cedula o rif no valido',
+		//	'error' =>0,
+		//	'msj'   =>'',
 		//	'nombre'=>''
 		//);
-        //
-		//if($rifci == false) echo json_encode($t);
-        //
-		//if(preg_match("/(^[VEJG][0-9]{9}[[:blank:]]*$)/", $rifci)>0){
-		//	$t=$this->_crif($rifci);
-		//}elseif(preg_match("/(^[VE][0-9]+[[:blank:]]*$)/", $rifci)>0){
-		//	$t=$this->_cced($rifci);
-		//}
 		//echo json_encode($t);
+
+
+		$rifci = $this->input->post('rifci');
+		$t=array(
+			'error' =>1,
+			'msj'   =>'Cedula o rif no valido',
+			'nombre'=>'',
+			'tasa'  =>75
+		);
+
+		if($rifci == false) echo json_encode($t);
+
+		if(preg_match("/(^[VEJG][0-9]{9}[[:blank:]]*$)/", $rifci)>0){
+			$t=$this->_crif($rifci);
+		}elseif(preg_match("/(^[VE][0-9]+[[:blank:]]*$)/", $rifci)>0){
+			$t=$this->_cced($rifci);
+		}
+		echo json_encode($t);
 	}
 
 	function _crif($rif){
 		$rt=array(
 			'error' =>0,
 			'msj'   =>'',
-			'nombre'=>''
+			'nombre'=>'',
+			'tasa'  =>75
 		);
 
-		$postdata = http_build_query(array('p_rif' => strtoupper($rif)));
-		$opts = array('http' =>array(
-				'method'  => 'POST',
-				'timeout' => 7,
-				'header'  => 'Content-type: application/x-www-form-urlencoded',
-				'content' => $postdata
-			)
-		);
-		$url=trim($this->datasis->traevalor('CONSULRIF'));
-		$context = stream_context_create($opts);
-		$result = @file($url, false, $context);
+		$url='http://contribuyente.seniat.gob.ve/getContribuyente/getrif?rif='.urlencode(strtoupper($rif));
+		$result = @file_get_contents($url);
 		if($result===false){
 			$rt['error']=1;
 			$rt['msj']  ='Recurso no disponible';
 		}else{
-			foreach($result as $line){
-				if(stripos($line,$rif)!==false){
-					$linea=str_replace('&nbsp;','',$line);
-					$linea=html_entity_decode(strip_tags($linea));
-					break;
-				}
-			}
-			$linea = preg_replace('/\(.*\)/', '', $linea);
-			$nombre= trim(str_ireplace($rif,'',$linea));
-			if(stripos($nombre,'No existe')===false){
-				$rt['nombre'] = utf8_encode($nombre);
+			$result=str_replace('<rif:' ,'<' ,$result);
+			$result=str_replace('</rif:','</',$result);
+
+			if(stripos($result,'450 El Rif del Contribuyente No es')===false){
+				$xml=simplexml_load_string($result);
+				$linea = preg_replace('/\(.*\)/', '', $xml->Nombre);
+				$rt['nombre'] = utf8_encode($linea);
+				$rt['tasa']   = floatval($xml->Tasa);
 			}else{
 				$rt['error']=1;
 				$rt['msj']  ='Contribuyente no encontrado';
@@ -2183,7 +2173,8 @@ class Ajax extends Controller {
 		$rt=array(
 			'error' =>0,
 			'msj'   =>'',
-			'nombre'=>''
+			'nombre'=>'',
+			'tasa'  =>75
 		);
 
 		$postdata = http_build_query(array(
