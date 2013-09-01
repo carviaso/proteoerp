@@ -631,7 +631,7 @@ class Usuarios extends Controller {
 		$edit->supervisor->option('N','No');
 		$edit->supervisor->option('S','Si');
 		$edit->supervisor->insertValue='N';
-		$edit->supervidor->rule='required|enum[S,N]';
+		$edit->supervisor->rule='required|enum[S,N]';
 		$edit->supervisor->style='width:80px';
 
 		$edit->uuid = new inputField('Movil UUID','uuid');
