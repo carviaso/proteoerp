@@ -163,12 +163,13 @@ class Sprv extends Controller {
 
 	// Revisa si existe el codigo
 	function sprvexiste(){
-		$cliente = rawurldecode($this->input->post('codigo'));
-		$existe  = $this->datasis->dameval("SELECT count(*) FROM sprv WHERE proveed=".$this->db->escape($cliente));
-		$devo    = 'N ';
+		$cliente  = rawurldecode($this->input->post('codigo'));
+		$dbcliente= $this->db->escape($cliente);
+		$existe   = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM sprv WHERE proveed='.$dbcliente);
+		$devo     = 'N ';
 		if ($existe > 0 ) {
 			$devo  ='S';
-			$devo .= $this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed=".$this->db->escape($cliente));
+			$devo .= $this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$dbcliente);
 		}
 		echo $devo;
 	}
@@ -530,7 +531,7 @@ class Sprv extends Controller {
 
 		$linea = $linea + 1;
 		$grid->addField('codigo');
-		$grid->label('Cod.Prov.');
+		$grid->label('C&oacute;d.Prov.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -806,7 +807,7 @@ class Sprv extends Controller {
 	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
+		$id     = intval($this->input->post('id'));
 		$data   = $_POST;
 		$mcodp  = 'proveed';
 		$check  = 0;
@@ -816,27 +817,28 @@ class Sprv extends Controller {
 
 		if($oper == 'add'){
 
-		} elseif($oper == 'edit') {
-			$proveed  = $this->datasis->dameval("SELECT proveed FROM sprv WHERE id=$id");
+		}elseif($oper == 'edit'){
+			$proveed  = $this->datasis->dameval("SELECT proveed FROM sprv WHERE id=${id}");
 			if ( isset($data['proveed']) ) unset($data['proveed']);
-			$this->db->where("id", $id);
+			$this->db->where('id', $id);
 			$this->db->update('sprv', $data);
-			logusu('SPRV',"Proveedor  ".$proveed." MODIFICADO");
-			echo "Proveedor Modificado";
+			logusu('SPRV','Proveedor  '.$proveed.' MODIFICADO');
+			echo 'Proveedor Modificado';
 
-		} elseif($oper == 'del') {
-			$codigo = $this->datasis->dameval("SELECT $mcodp FROM sprv WHERE id=$id");
-			$check =  $this->datasis->dameval("SELECT count(*) FROM sprm WHERE cod_prv='$codigo'");
-			$check += $this->datasis->dameval("SELECT count(*) FROM scst WHERE proveed='$codigo'");
-			$check += $this->datasis->dameval("SELECT count(*) FROM gser WHERE proveed='$codigo'");
-			$check += $this->datasis->dameval("SELECT count(*) FROM ords WHERE proveed='$codigo'");
-			$check += $this->datasis->dameval("SELECT count(*) FROM bmov WHERE clipro='P' AND codcp='$codigo'");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM sprv WHERE proveed=".$this->db->escape($codigo));
-				logusu('SPRV',"Proveedor ".$codigo." ELIMINADO");
-				echo "Proveedor Eliminado";
+		}elseif($oper == 'del'){
+			$codigo  = $this->datasis->dameval("SELECT ${mcodp} FROM sprv WHERE id=${id}");
+			$dbcodigo= $this->db->escape($codigo);
+			$check =  $this->datasis->dameval("SELECT COUNT(*) AS cana FROM sprm WHERE cod_prv=${dbcodigo}");
+			$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM scst WHERE proveed=${dbcodigo}");
+			$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM gser WHERE proveed=${dbcodigo}");
+			$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM ords WHERE proveed=${dbcodigo}");
+			$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM bmov WHERE clipro='P' AND codcp=${dbcodigo}");
+			if($check > 0){
+				echo 'El registro no puede ser eliminado; tiene movimiento ';
+			}else{
+				$this->db->simple_query('DELETE FROM sprv WHERE proveed='.$dbcodigo);
+				logusu('SPRV','Proveedor '.$codigo.' ELIMINADO');
+				echo 'Proveedor Eliminado';
 			}
 		};
 	}
@@ -844,7 +846,7 @@ class Sprv extends Controller {
 
 	//Resumen rapido
 	function resumen() {
-		$id  = $this->uri->segment($this->uri->total_segments());
+		$id  = intval($this->uri->segment($this->uri->total_segments()));
 		$dbid= $this->db->escape($id);
 		$row = $this->datasis->damereg("SELECT proveed FROM sprv WHERE id=${dbid}");
 		if(empty($row))
@@ -855,9 +857,9 @@ class Sprv extends Controller {
 		$saldo  = $this->datasis->dameval("SELECT SUM(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM sprm WHERE cod_prv=".$this->db->escape($proveed));
 
 		$salida  = '<table width="90%" cellspacing="0" align="center">';
-		if ( $saldo > 0 )
+		if($saldo > 0)
 			$salida .= "<tr style='background-color:#8BB381;font-size:14px;' align='right'><td><b>Saldo: </b> </td><td align='left'><b>".nformat($saldo)."</b></td></tr>\n";
-		elseif ( $saldo < 0 )
+		elseif($saldo < 0)
 			$salida .= "<tr style='background-color:#C11B17;font-size:14px;color:white;' align='right'><td><b>Saldo: </b> </td><td align='left'><b>".nformat($saldo)."</b></td></tr>\n";
 		else
 			$salida .= "<tr style='background-color:#8BB381;font-size:14px;' align='right'><td><b>Saldo: </b> </td><td align='left'><b>0.00</b></td></tr>\n";
@@ -1265,15 +1267,15 @@ class Sprv extends Controller {
 			$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed=${dbcodigo}");
 			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para el proveedor ${nombre}");
 			return false;
-		}elseif(strlen($rif)>0){
-			$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE rif='$rif'");
-			if ($check > 0){
-				$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE rif='$rif'");
-				$this->validation->set_message('chexiste',"El rif $rif ya existe para el proveedor $nombre");
-				return false;
-			}else {
-				return true;
-			}
+		//}elseif(strlen($rif)>0){
+		//	$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE rif='$rif'");
+		//	if ($check > 0){
+		//		$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE rif='$rif'");
+		//		$this->validation->set_message('chexiste',"El rif $rif ya existe para el proveedor $nombre");
+		//		return false;
+		//	}else {
+		//		return true;
+		//	}
 		}else{
 			return true;
 		}
