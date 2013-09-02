@@ -9,7 +9,7 @@ if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unk
 else:
 
 $campos=$form->template_details('sitems');
-$scampos  ='<tr id="tr_sitems_<#i#>">';
+$scampos  ='<tr id="tr_sitems_<#i#>" ondblclick="marcar(this)">';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['codigoa']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['desca']['field'].$campos['detalle']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['cana']['field'].  '</td>';
@@ -266,6 +266,18 @@ $(function(){
 
 	chreferen();
 });
+
+function marcar(obj){
+	var color = $(obj).css("background-color");
+	if(color=='transparent'){
+		$(obj).css("background-color", "#FFFF28");
+	}else{
+		$(obj).css("background-color", 'transparent');
+	}
+	//alert(color);
+	//#FFFF28
+	//$(obj).css("background-color", "#FFFF28");
+}
 
 function aplicadesc(){
 	var descu = Number($('#descuento').val());
@@ -844,7 +856,7 @@ function chreferen(){
 				$pprecios .= $form->$it_tipo->output;
 			?>
 
-			<tr id='tr_sitems_<?php echo $i; ?>'>
+			<tr id='tr_sitems_<?php echo $i; ?>' ondblclick="marcar(this)">
 				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
 				<td class="littletablerow" align="left" ><?php
 					if($form->_status=='show' && strlen($form->$it_detalle->value)>0){
