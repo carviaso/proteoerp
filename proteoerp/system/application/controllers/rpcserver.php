@@ -86,7 +86,7 @@ class Rpcserver extends Controller {
 
 		$compras=array();
 		if($this->secu->cliente($usr,$pwd)){
-			$mSQL="SELECT numero,fecha,vence,TRIM(nfiscal) AS nfiscal,totals,totalg,iva,exento,tasa,reducida,sobretasa,montasa,monredu,monadic FROM sfac WHERE cod_cli=? AND numero $op ? AND tipo_doc=${tipo_doc} LIMIT ${cant}";
+			$mSQL="SELECT numero,fecha,vence,TRIM(nfiscal) AS nfiscal,totals,totalg,iva,exento,tasa,reducida,sobretasa,montasa,monredu,monadic FROM sfac WHERE cod_cli=? AND numero $op ? AND tipo_doc=${dbtipo_doc} LIMIT ${cant}";
 			$query = $this->db->query($mSQL,array($usr,$ult_ref));
 			$barr_exis=$this->db->table_exists('barraspos');
 			//memowrite($this->db->last_query(),'B2B');
@@ -107,7 +107,7 @@ class Rpcserver extends Controller {
 					b.unidad, b.tipo, b.tdecimal
 						FROM sitems AS a
 						JOIN sinv AS b ON a.codigoa=b.codigo
-						WHERE numa=? AND tipoa=${tipo_doc}";
+						WHERE numa=? AND tipoa=${dbtipo_doc}";
 					$qquery = $this->db->query($mmSQL,array($numero));
 					foreach ($qquery->result_array() as $rrow){
 						foreach($rrow AS $ind=>$val){
