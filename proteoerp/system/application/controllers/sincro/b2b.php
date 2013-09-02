@@ -70,6 +70,7 @@ class b2b extends validaciones {
 		$filter->build();
 
 		$acti =anchor_popup('/sincro/b2b/traecompra/<#id#>'  ,'Compras'       ,$atts);
+		$acti3=anchor_popup('/sincro/b2b/traedevolu/<#id#>'  ,'Devoluciones'  ,$atts);
 		$acti2=anchor_popup('/sincro/b2b/traeconsigna/<#id#>','Consignaciones',$atts);
 		$link=anchor('/sincro/b2b/dataedit/show/<#id#>','<#id#>');
 		$grid = new DataGrid('lista de conexiones definidas');
@@ -83,7 +84,7 @@ class b2b extends validaciones {
 		$grid->column_orderby('Tipo'          ,'tipo'   ,'tipo');
 		$grid->column_orderby('Almac&eacute;n','ubides' ,'depo');
 		$grid->column_orderby('Grupo'         ,'grupo'  ,'grupo');
-		$grid->column('Traer' ,$acti.' | '.$acti2);
+		$grid->column('Traer' ,$acti.' | '.$acti3.' | '.$acti2);
 		$grid->add('sincro/b2b/dataedit/create');
 		$action = "javascript:window.location='".site_url('sincro/b2b/traecomprauniq')."'";
 		$grid->button('btn_uniq', 'Descarga Unitaria', $action, 'TR');
@@ -669,6 +670,19 @@ class b2b extends validaciones {
 //****************************************************
 // Metodos para gestionar transacciones como compras
 //****************************************************
+	function traedevolu($par,$ultimo=null){
+		$rt = $this->_trae_devolu($par,$ultimo);
+		if($rt==0){
+			$str=$this->comprasCargadas.' transacciones descargadas';
+		}else{
+			$str='Hubo problemas durante la  descarga, se generar&oacute;n centinelas';
+		}
+		$data['content'] = $str;
+		$data['head']    = $this->rapyd->get_head();
+		$data['title']   = heading('Devoluciones Descargadas');
+		$this->load->view('view_ventanas_sola', $data);
+	}
+
 	function traecompra($par,$ultimo=null){
 		$rt = $this->_trae_compra($par,$ultimo);
 		if($rt==0){
@@ -694,6 +708,7 @@ class b2b extends validaciones {
 
 		$form->tipo = new dropdownField('Tipo de transacci&oacute;n', 'tipo');
 		$form->tipo->option('scst','Compra');
+		$form->tipo->option('devo','Devolucion');
 		$form->tipo->option('scon','Consignacion');
 		$form->tipo->rule='required';
 
@@ -714,6 +729,9 @@ class b2b extends validaciones {
 			if($form->tipo->newValue=='scst'){
 				$this->_trae_compra($id,$ultimo,true);
 				$msj=$this->comprasCargadas.' transacciones descargadas';
+			}elseif($form->tipo->newValue=='devol'){
+				$this->_trae_devolu($id,$ultimo,true);
+				$msj=$this->comprasCargadas.' transacciones descargadas';
 			}else{
 				$msj='M&eacute;todo aun no definido';
 			}
@@ -725,13 +743,13 @@ class b2b extends validaciones {
 		$this->load->view('view_ventanas', $data);
 	}
 
-	function _trae_compra($id=null,$ultimo=null,$uniq=false){
+	function _trae_compra_devolu($id,$ultimo,$uniq,$metodo){
 		$this->comprasCargadas=0;
 		if(is_null($id)) return false; else $id=$this->db->escape($id);
 		$contribu=$this->datasis->traevalor('CONTRIBUYENTE');
 		$rif     =$this->datasis->traevalor('RIF');
 
-		$config=$this->datasis->damerow("SELECT proveed,grupo,puerto,proteo,url,usuario,clave,tipo,depo,margen1,margen2,margen3,margen4,margen5,prefijo FROM b2b_config WHERE id=$id");
+		$config=$this->datasis->damerow("SELECT proveed,grupo,puerto,proteo,url,usuario,clave,tipo,depo,margen1,margen2,margen3,margen4,margen5,prefijo FROM b2b_config WHERE id=${id}");
 		if(count($config)==0) return false;
 		$prefijo= (empty($config['prefijo']))? '':$config['prefijo'];
 
@@ -745,10 +763,11 @@ class b2b extends validaciones {
 		$puerto= (empty($config['puerto'])) ? 80 : $config['puerto'];
 
 		$this->xmlrpc->server($server_url , $puerto);
-		$this->xmlrpc->method('cea');
+		$this->xmlrpc->method($metodo);
 
 		if(is_null($ultimo)){
-			$ufac=$this->datasis->dameval('SELECT MAX(numero) FROM b2b_scst WHERE proveed='.$this->db->escape($config['proveed']));
+			$dbtipo = ($metodo=='cea')? "'FC'" : "'NC'";
+			$ufac=$this->datasis->dameval('SELECT MAX(numero) FROM b2b_scst WHERE proveed='.$this->db->escape($config['proveed']).' AND tipo_doc='.$dbtipo );
 			if(empty($ufac)) $ufac=0;
 		}elseif(is_numeric($ultimo)){
 			$ufac=$ultimo;
@@ -780,7 +799,7 @@ class b2b extends validaciones {
 
 				$data['proveed']  = $proveed;
 				$data['nombre']   = $pnombre;
-				$data['tipo_doc'] = 'FC';
+				$data['tipo_doc'] = ($metodo=='cea')? 'FC' : 'NC';
 				$data['depo']     = $config['depo'];
 				$data['fecha']    = $arr['fecha'];
 				$data['vence']    = $arr['vence'];
@@ -1005,6 +1024,14 @@ class b2b extends validaciones {
 		return $er;
 	}
 
+	function _trae_devolu($id=null,$ultimo=null,$uniq=false){
+		return $this->_trae_compra_devolu($id,$ultimo,$uniq,'dea');
+	}
+
+	function _trae_compra($id=null,$ultimo=null,$uniq=false){
+		return $this->_trae_compra_devolu($id,$ultimo,$uniq,'cea');
+	}
+
 	function cargacompra($id){
 		$rt=$this->_cargacompra($id);
 		redirect('sincro/b2b/scstedit/show/'.$id);
@@ -1147,7 +1174,7 @@ class b2b extends validaciones {
 				if(!$rt){memowrite($mSQL,'B2B'); $error++;}
 			}
 
-			$mSQL="UPDATE b2b_scst SET pcontrol='$control' WHERE id=".$this->db->escape($id);
+			$mSQL="UPDATE b2b_scst SET pcontrol='${control}' WHERE id=".$this->db->escape($id);
 			$rt=$this->db->simple_query($mSQL);
 			if(!$rt){memowrite($mSQL,'B2B'); $error++; }
 		}

@@ -7,13 +7,14 @@ class Rpcserver extends Controller {
 		$this->load->library('xmlrpcs');
 		$this->xmlrpcs->xmlrpc_defencoding=$this->config->item('charset');
 
-		$config['functions']['sprecios'] = array('function' => 'Rpcserver.precio_supermer');
-		$config['functions']['ttiket']   = array('function' => 'Rpcserver.traer_tiket');
-		$config['functions']['cea']      = array('function' => 'Rpcserver.ComprasEmpresasAsociadas');
-		$config['functions']['consiea']  = array('function' => 'Rpcserver.ConsignacionesEmpresasAsociadas');
-		$config['functions']['consinu']  = array('function' => 'Rpcserver.NumConsignacionesEmpresasAsociadas');
-		$config['functions']['montven']  = array('function' => 'Rpcserver.MontosVentas');
-		$config['functions']['ventanainf']  = array('function' => 'Rpcserver.ventanainf');
+		$config['functions']['sprecios']  = array('function' => 'Rpcserver.precio_supermer');
+		$config['functions']['ttiket']    = array('function' => 'Rpcserver.traer_tiket');
+		$config['functions']['cea']       = array('function' => 'Rpcserver.ComprasEmpresasAsociadas');
+		$config['functions']['dea']       = array('function' => 'Rpcserver.DevolucionesEmpresasAsociadas');
+		$config['functions']['consiea']   = array('function' => 'Rpcserver.ConsignacionesEmpresasAsociadas');
+		$config['functions']['consinu']   = array('function' => 'Rpcserver.NumConsignacionesEmpresasAsociadas');
+		$config['functions']['montven']   = array('function' => 'Rpcserver.MontosVentas');
+		$config['functions']['ventanainf']= array('function' => 'Rpcserver.ventanainf');
 
 		$this->xmlrpcs->initialize($config);
 		$this->xmlrpcs->serve();
@@ -67,7 +68,8 @@ class Rpcserver extends Controller {
 		return $this->xmlrpc->send_response($response);
 	}
 
-	function ComprasEmpresasAsociadas($request){
+	function _comprasdev($request,$tipo_doc){
+		$dbtipo_doc = $this->db->escape($tipo_doc);
 		$parameters = $request->output_parameters();
 
 		$ult_ref=intval($parameters['0']);
@@ -84,7 +86,7 @@ class Rpcserver extends Controller {
 
 		$compras=array();
 		if($this->secu->cliente($usr,$pwd)){
-			$mSQL="SELECT numero,fecha,vence,TRIM(nfiscal) AS nfiscal,totals,totalg,iva,exento,tasa,reducida,sobretasa,montasa,monredu,monadic FROM sfac WHERE cod_cli=? AND numero $op ? AND tipo_doc='F' LIMIT $cant";
+			$mSQL="SELECT numero,fecha,vence,TRIM(nfiscal) AS nfiscal,totals,totalg,iva,exento,tasa,reducida,sobretasa,montasa,monredu,monadic FROM sfac WHERE cod_cli=? AND numero $op ? AND tipo_doc=${tipo_doc} LIMIT ${cant}";
 			$query = $this->db->query($mSQL,array($usr,$ult_ref));
 			$barr_exis=$this->db->table_exists('barraspos');
 			//memowrite($this->db->last_query(),'B2B');
@@ -105,7 +107,7 @@ class Rpcserver extends Controller {
 					b.unidad, b.tipo, b.tdecimal
 						FROM sitems AS a
 						JOIN sinv AS b ON a.codigoa=b.codigo
-						WHERE numa=? AND tipoa='F'";
+						WHERE numa=? AND tipoa=${tipo_doc}";
 					$qquery = $this->db->query($mmSQL,array($numero));
 					foreach ($qquery->result_array() as $rrow){
 						foreach($rrow AS $ind=>$val){
@@ -130,6 +132,15 @@ class Rpcserver extends Controller {
 
 		$response = array($compras,'struct');
 		return $this->xmlrpc->send_response($response);
+	}
+
+
+	function ComprasEmpresasAsociadas($request){
+		return $this->_comprasdev($request,'F');
+	}
+
+	function DevolucionesEmpresasAsociadas($request){
+		return $this->_comprasdev($request,'D');
 	}
 
 	function ConsignacionesEmpresasAsociadas($request){
