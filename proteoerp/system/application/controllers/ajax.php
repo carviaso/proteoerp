@@ -965,13 +965,19 @@ class Ajax extends Controller {
 	//
 	function buscasfacdev(){
 		$mid   = $this->input->post('q');
-		$scli  = $this->input->post('scli');
-		$qdb   = $this->db->escape('%'.$mid.'%');
-		$sclidb= $this->db->escape($scli);
-
 		$data = '[{ }]';
-
 		if($mid !== false){
+			//$scli  = $this->input->post('scli');
+			//$sclidb= $this->db->escape($scli);
+			if($mid[0]!='0'){
+				$mid=str_pad($mid, 8, '0', STR_PAD_LEFT);
+			}
+
+			if(strlen($mid)<8){
+				$mid=$mid.'%';
+			}
+			$qdb   = $this->db->escape($mid);
+
 			$retArray = $retorno = array();
 
 			$mSQL="SELECT a.numero, a.totalg, a.cod_cli, a.nombre,b.rifci, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.tipo, b.dire11 AS direc,a.fecha

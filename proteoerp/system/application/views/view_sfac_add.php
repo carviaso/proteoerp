@@ -274,9 +274,6 @@ function marcar(obj){
 	}else{
 		$(obj).css("background-color", 'transparent');
 	}
-	//alert(color);
-	//#FFFF28
-	//$(obj).css("background-color", "#FFFF28");
 }
 
 function aplicadesc(){
