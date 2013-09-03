@@ -965,7 +965,7 @@ class Jqdatagrid
 	* @return Array $response
 	*/
 	public function getData($table, $joinmodel = array(), $fields = array(), $prefix = true, $mwhere='', $orden='', $orddire=''){
-		$limit      = $this->CI->input->get_post('rows');
+		$limit      = intval($this->CI->input->get_post('rows'));
 		$limitstart = $this->CI->input->get_post('limitstart');
 		$filter     = $this->CI->input->get_post('searchField');
 		$filtertext = $this->CI->input->get_post('searchString');
@@ -974,7 +974,7 @@ class Jqdatagrid
 		$sortby     = $this->CI->input->get_post('sidx');
 		$sortdir    = $this->CI->input->get_post('sord');
 
-		$page       = $this->CI->input->get_post('page');
+		$page       = intval($this->CI->input->get_post('page'));
 		$filters    = $this->CI->input->get_post('filters');
 
 		$comodin = $this->CI->datasis->traevalor('COMODIN');
@@ -989,43 +989,44 @@ class Jqdatagrid
 		$fields2    = array();
 
 		$response = array();
-		$this->CI->db->select('count(1) as rows');
-		$this->CI->db->from($table);
+		//$this->CI->db->select('count(1) as rows');
+		//$this->CI->db->from($table);
+        //
+		//if( false == empty($filter) ) {
+		//	switch ($oper) {
+		//	case 'cn':
+		//		$this->CI->db->like( $table .'.' . $filter, $filtertext );
+		//		break;
+		//	case 'eq':
+		//		$this->CI->db->where( $table .'.' . $filter , $filtertext );
+		//		break;
+		//	case 'ge':
+		//		$this->CI->db->where( "${table}.{$filter} >=", $filtertext );
+		//		break;
+		//	case 'le':
+		//		$this->CI->db->where( "${table}.{$filter} <=", $filtertext );
+		//		break;
+		//	default:
+		//		$this->CI->db->like( $table .'.' . $filter, $filtertext );
+		//		break;
+		//	}
+		//}
+        //
+		//$total = $this->CI->db->get()->row();
+		//$count = $total->rows;
+		//if( $count >0 ) {
+		//	$total_pages = ceil($count/$limit);
+		//} else {
+		//	$total_pages = 0;
+		//}
+        //
+		//$response['records']  = $count;
+		//$response['total']    = $total_pages;
+		//$response['page']     = $page;
+		//if($page > $total_pages){
+		//	$page=$total_pages;
+		//}
 
-		if( false == empty($filter) ) {
-			switch ($oper) {
-			case 'cn':
-				$this->CI->db->like( $table .'.' . $filter, $filtertext );
-				break;
-			case 'eq':
-				$this->CI->db->where( $table .'.' . $filter , $filtertext );
-				break;
-			case 'ge':
-				$this->CI->db->where( "${table}.{$filter} >=", $filtertext );
-				break;
-			case 'le':
-				$this->CI->db->where( "${table}.{$filter} <=", $filtertext );
-				break;
-			default:
-				$this->CI->db->like( $table .'.' . $filter, $filtertext );
-				break;
-			}
-		}
-
-		$total = $this->CI->db->get()->row();
-		$count           = $total->rows;
-		if( $count >0 ) {
-			$total_pages = ceil($count/$limit);
-		} else {
-			$total_pages = 0;
-		}
-
-		$response['records']  = $count;
-		$response['total']    = $total_pages;
-		$response['page']     = $page;
-		if($page > $total_pages){
-			$page=$total_pages;
-		}
 		$limitstart = $limit*$page - $limit; // do not put $limit*($page - 1)
 		$limitstart = ($limitstart < 0)?0:$limitstart;
 
@@ -1097,8 +1098,8 @@ class Jqdatagrid
 			$limitstart = 0;
 		}
 
-		if( isset($limitstart) && !empty($limit) ) {
-			$this->CI->db->limit( $limit, $limitstart );
+		if(isset($limitstart) && !empty($limit)){
+			$this->CI->db->limit( $limit, $limitstart);
 		}
 		if(false == empty($joinmodel)){
 			if(is_array($joinmodel)){
@@ -1138,22 +1139,53 @@ class Jqdatagrid
 
 			$this->CI->db->select($fields);
 			$this->CI->db->from($table);
-			
-			$rs = $this->CI->datasis->codificautf8($this->CI->db->get()->result_array());
-
-		}else{
-			$rs = $this->CI->datasis->codificautf8($this->CI->db->get()->result_array());;
 		}
+		$qq = $this->CI->db->get();
+		$rs = $this->CI->datasis->codificautf8($qq->result_array());
+		$queryString = $this->CI->db->last_query();
+
+		$mSQL = preg_replace('/SELECT((.*)\n*)FROM/i', 'SELECT  COUNT(*) AS cana FROM', $queryString);
+		$pos = stripos($mSQL, 'ORDER BY');
+		if($pos !== false){
+			$mSQL=substr($mSQL,0,$pos);
+		}else{
+			$pos = stripos($mSQL, 'LIMIT');
+			if($pos !== false){
+				$mSQL=substr($mSQL,0,$pos);
+			}else{
+
+			}
+		}
+
+		$response['records']  = intval($this->CI->datasis->dameval($mSQL));
+		$response['total']    = ceil($response['records']/$limit);
+		$response['page']     = $page;
+
+		//if($qq->num_rows()<$limit){
+		//	if($qq->num_rows()>0 ) {
+		//		$total_pages = ceil($qq->num_rows()/$limit);
+		//	} else {
+		//		$total_pages = 0;
+		//	}
+        //
+		//	if($page > $total_pages){
+		//		$page=$total_pages;
+		//	}
+        //
+		//	$response['records']  = $qq->num_rows();
+		//	$response['total']    = $total_pages;
+		//	$response['page']     = $page;
+        //
+		//	$limitstart = $limit*$page - $limit; // do not put $limit*($page - 1)
+		//	$limitstart = ($limitstart < 0)?0:$limitstart;
+		//}
+
 
 		//INTENTA ver si el Problema es el escape de %
 		if(empty($rs)){
 			$lq = str_replace('\%','%',$this->CI->db->last_query());
-			$rs = $this->CI->datasis->codificautf8($this->CI->db->query($lq)->result_array());;
+			$rs = $this->CI->datasis->codificautf8($this->CI->db->query($lq)->result_array());
 		}
-
-
-		//memowrite("ar".$this->CI->db->last_query(),'JQGETDATA');
-		$queryString = $this->CI->db->last_query();
 
 		$querydata = array( 'dtgQuery' => $this->CI->db->last_query() );
 

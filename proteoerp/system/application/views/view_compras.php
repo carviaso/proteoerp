@@ -8,7 +8,7 @@ if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unk
 else:
 
 $campos=$form->template_details('itscst');
-$scampos  ='<tr id="tr_itscst_<#i#>">';
+$scampos  ='<tr id="tr_itscst_<#i#>"  ondblclick="marcar(this)">';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['codigo']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="left" ><b id="it_descrip_val_<#i#>"></b>'.$campos['descrip']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['cantidad']['field'].'</td>';
@@ -104,7 +104,31 @@ $(function(){
 			});
 		}
 	});
+	chtipodoc();
 });
+
+function marcar(obj){
+	var color = $(obj).css("background-color");
+	if(color=='transparent'){
+		$(obj).css("background-color", "#FFFF28");
+	}else{
+		$(obj).css("background-color", 'transparent');
+	}
+}
+
+function chtipodoc(){
+	var tipo=$('#tipo_doc').val();
+	if(tipo=='NC'){
+		$('#td_fafecta').show();
+		$('#fafecta').attr('type','text');
+	}else if(tipo=='FC'){
+		$('#td_fafecta').hide();
+		$('#fafecta').attr('type','hidden');
+	}else{
+
+	}
+}
+
 
 function importe(id){
 	var ind     = id.toString();
@@ -400,8 +424,11 @@ if (!$solo){
 						<table width="100%">
 							<tr>
 								<td class="littletablerowth" width='40'><?php echo $form->tipo->label  ?></td>
-								<td class="littletablerow"   align='left' width='150'>  <?php echo $form->tipo->output ?></td>
-								<td class="littletablerowth" align='right' width='100'><?php echo $form->proveed->label  ?>*</td>
+								<td class="littletablerow"   align='left'  width='150'><?php echo $form->tipo->output   ?></td>
+								<td class="littletablerowth" align='right' id='td_fafecta'><?php echo $form->fafecta->label ?>*</td>
+								<td class="littletablerow"   align='right'><?php echo $form->fafecta->output ?></td>
+								<td class="littletablerowth" align='right' width='100'><?php echo $form->proveed->label ?>*</td>
+
 								<td class="littletablerow">
 									<?php echo $form->proveed->output ?>
 									<b id='nombre_val'><?php echo $form->nombre->value ?></b>
@@ -475,7 +502,7 @@ if (!$solo){
 		$it_pvp     = "precio1_${i}";
 	?>
 
-	<tr id='tr_itscst_<?php echo $i; ?>'>
+	<tr id='tr_itscst_<?php echo $i; ?>'  ondblclick="marcar(this)">
 		<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
 		<td class="littletablerow" align="left" ><b id='it_descrip_val_<?php echo $i; ?>'><?php echo $form->$it_desca->value; ?></b>
 		<?php echo $form->$it_desca->output;  ?>

@@ -1884,6 +1884,12 @@ class Scst extends Controller {
 		$edit->serie->mode = 'autohide';
 		$edit->serie->maxlength=12;
 
+		$edit->fafecta = new inputField('Fact.Afectada', 'fafecta');
+		$edit->fafecta->size = 15;
+		$edit->fafecta->autocomplete=false;
+		$edit->fafecta->rule = 'condi_required|callback_chobligatipo[NC]';
+		$edit->fafecta->maxlength=10;
+
 		$edit->proveed = new inputField('Proveedor', 'proveed');
 		$edit->proveed->size     = 7;
 		$edit->proveed->autocomplete=false;
@@ -1914,6 +1920,7 @@ class Scst extends Controller {
 		//$edit->tipo->option('NE','Nota de Entrega');        //Falta implementar los metodos post para este caso
 		$edit->tipo->rule = 'required';
 		$edit->tipo->style='width:140px;';
+		$edit->tipo->onchange='chtipodoc()';
 
 		$edit->peso  = new hiddenField('Peso', 'peso');
 		$edit->peso->size = 20;
@@ -2112,6 +2119,16 @@ class Scst extends Controller {
 			}
 			return $rt;
 		}
+	}
+
+	//Obliga el campo segun el tipo
+	function chobligatipo($val,$tipo){
+		$tipo_doc = $this->input->post('tipo_doc');
+		if($tipo_doc==$tipo && $val==''){
+			$this->validation->set_message('chobligatipo', "El campo %s es necesario cuando el tipo es ${tipo}");
+			return false;
+		}
+		return true;
 	}
 
 	//******************************************************************
@@ -2588,93 +2605,98 @@ class Scst extends Controller {
 		$form = new DataForm("compras/scst/actualizar/${control}/process");
 		$form->script($script);
 
-		$scstrow = $this->datasis->damerow("SELECT proveed,nombre,fecha,montotot, montoiva,montonet,serie,vence FROM scst WHERE control=$dbcontrol");
+		$scstrow = $this->datasis->damerow("SELECT proveed,nombre,fecha,montotot, montoiva,montonet,serie,vence,tipo_doc FROM scst WHERE control=${dbcontrol}");
+		if(!empty($scstrow)){
+			$htmltabla="<table width='100%' style='background-color:#FBEC88;text-align:center;font-size:12px'>
+				<tr>
+					<td>Proveedor:</td>
+					<td><b>(".htmlspecialchars($scstrow['proveed']).")</b></td>
+					<td colspan='4'><b>".htmlspecialchars($scstrow['nombre'])."</b></td>
+				</tr><tr>
+					<td>Documento:</td>
+					<td>".htmlspecialchars($scstrow['tipo_doc'].$scstrow['serie'])."</b></td>
+					<td>Fecha: </td>
+					<td><b>".dbdate_to_human($scstrow['fecha'])."</b></td>
+					<td>Vence:</td>
+					<td><b>".dbdate_to_human($scstrow['vence'])."</b></td>
+				</tr><tr>
+					<td>Sub Total:</td>
+					<td><b>".nformat($scstrow['montotot'])."</b></td>
+					<td> I.V.A.: </td>
+					<td><b>".nformat($scstrow['montoiva'])."</b></td>
+					<td>Monto: </td>
+					<td><b>".nformat($scstrow['montonet'])."</b></td>
+				</tr>
+			</table>";
 
+			$form->tablafo = new containerField('tablafo',$htmltabla);
 
-		$htmltabla="<table width='100%' style='background-color:#FBEC88;text-align:center;font-size:12px'>
-			<tr>
-				<td>Proveedor:</td>
-				<td><b>(".htmlspecialchars($scstrow['proveed']).")</b></td>
-				<td colspan='4'><b>".htmlspecialchars($scstrow['nombre'])."</b></td>
-			</tr><tr>
-				<td>Compra:</td>
-				<td>".htmlspecialchars($scstrow['serie'])."</b></td>
-				<td>Fecha: </td>
-				<td><b>".dbdate_to_human($scstrow['fecha'])."</b></td>
-				<td>Vence:</td>
-				<td><b>".dbdate_to_human($scstrow['vence'])."</b></td>
-			</tr><tr>
-				<td>Sub Total:</td>
-				<td><b>".nformat($scstrow['montotot'])."</b></td>
-				<td> I.V.A.: </td>
-				<td><b>".nformat($scstrow['montoiva'])."</b></td>
-				<td>Monto: </td>
-				<td><b>".nformat($scstrow['montonet'])."</b></td>
-			</tr>
-		</table>";
+			if($scstrow['tipo_doc']=='FC'){
+				$form->cprecio = new  dropdownField ('Cambiar precios', 'cprecio');
+				$form->cprecio->option('D','Dejar el precio mayor');
+				$form->cprecio->option('N','No');
+				$form->cprecio->option('S','Si');
+				$form->cprecio->append(' <sup>1</sup>');
+				$form->cprecio->title ='Ver nota 1';
+				$form->cprecio->style = 'width:170px;';
+				$form->cprecio->rule  = 'required|enum[D,N,S]';
 
-		$form->tablafo = new containerField('tablafo',$htmltabla);
-
-		$form->cprecio = new  dropdownField ('Cambiar precios', 'cprecio');
-		$form->cprecio->option('D','Dejar el precio mayor');
-		$form->cprecio->option('N','No');
-		$form->cprecio->option('S','Si');
-		$form->cprecio->append(' <sup>1</sup>');
-		$form->cprecio->title ='Ver nota 1';
-		$form->cprecio->style = 'width:170px;';
-		$form->cprecio->rule  = 'required|enum[D,N,S]';
-
-		//$form->ffecha = new dateonlyField('Fecha de la compra', 'fecha','d/m/Y');
-		//$form->ffecha->insertValue = date('Y-m-d');
-		//$form->ffecha->rule='required|callback_chddate';
-		//$form->ffecha->calendar = false;
-		//$form->ffecha->size=10;
-
-		$form->fecha = new dateonlyField('Fecha de recepci&oacute;n de la compra', 'fecha','d/m/Y');
-		$form->fecha->insertValue = date('Y-m-d');
-		$form->fecha->rule='required|callback_chddate';
-		$form->fecha->calendar = false;
-		$form->fecha->title='El sistema asume que esta es la fecha en que la mercanc&iacute;a entra en inventario y de la retenci&oacute;n de IVA si aplica al presente caso';
-		$form->fecha->size=10;
-		$htmltabla='
-		<div  style="background-color:#9D9FFF;font-size:1.2em">
-		<span style="font-size:1.2em"><sup>1</sup> Opciones para <b>cambio de precios</b>:</span>
-		<ul style="padding: 0px;margin: 0px 0px 0px 20px;">
-			<li><b>Dejar mayor</b>: Coloca el precio mayor entre el precio en inventario y el nuevo precio seg&uacute;n compra.</li>
-			<li><b>No</b>:Respeta los precios de los productos en inventario e ignora los provenientes de la compra.</li>
-			<li><b>Si</b>:Coloca los precios provenientes de la compra reemplazando los del inventario.</li>
-		</ul>
-		</div>';
-		$form->container = new containerField('tabafo2',$htmltabla);
-
-		$form->build_form();
-
-		if($form->on_success()){
-			$cprecio   = $form->cprecio->newValue;
-			$actualiza = $form->fecha->newValue;
-			$cambio    = $cprecio;
-			$dbcontrol = $this->db->escape($control);
-
-			$id = $this->datasis->dameval("SELECT id FROM scst WHERE control=$dbcontrol");
-			$rt = $this->_actualizar($id,$cambio,$actualiza);
-			if($rt === false){
-				$rt=array(
-					'status' =>'B',
-					'mensaje'=>utf8_encode($this->error_string),
-					'pk'     =>array('id'=>$id)
-				);
-				echo json_encode($rt);
+				$htmltabla='
+				<div  style="background-color:#9D9FFF;font-size:1.2em">
+				<span style="font-size:1.2em"><sup>1</sup> Opciones para <b>cambio de precios</b>:</span>
+				<ul style="padding: 0px;margin: 0px 0px 0px 20px;">
+					<li><b>Dejar mayor</b>: Coloca el precio mayor entre el precio en inventario y el nuevo precio seg&uacute;n compra.</li>
+					<li><b>No</b>:Respeta los precios de los productos en inventario e ignora los provenientes de la compra.</li>
+					<li><b>Si</b>:Coloca los precios provenientes de la compra reemplazando los del inventario.</li>
+				</ul>
+				</div>';
 			}else{
-				$data['content']  = 'Compra actualizada'.br();
-				$rt=array(
-					'status' =>'A',
-					'mensaje'=>'Registro guardado',
-					'pk'     =>array('id'=>$id)
-				);
-				echo json_encode($rt);
+				$form->cprecio = new hiddenField('Fecha de recepci&oacute;n del documento', 'cprecio');
+				$form->cprecio->insertValue = 'N';
+				$form->cprecio->in = 'fecha';
+				$htmltabla='';
+			}
+
+			$form->fecha = new dateonlyField('Fecha de recepci&oacute;n del documento', 'fecha','d/m/Y');
+			$form->fecha->insertValue = date('Y-m-d');
+			$form->fecha->rule='required|callback_chddate';
+			$form->fecha->calendar = false;
+			$form->fecha->title='El sistema asume que esta es la fecha en que la mercanc&iacute;a entra en inventario y de la retenci&oacute;n de IVA si aplica al presente caso';
+			$form->fecha->size=10;
+
+			$form->container = new containerField('tabafo2',$htmltabla);
+
+			$form->build_form();
+
+			if($form->on_success()){
+				$cprecio   = $form->cprecio->newValue;
+				$actualiza = $form->fecha->newValue;
+				$cambio    = $cprecio;
+				$dbcontrol = $this->db->escape($control);
+
+				$id = $this->datasis->dameval("SELECT id FROM scst WHERE control=${dbcontrol}");
+				$rt = $this->_actualizar($id,$cambio,$actualiza);
+				if($rt === false){
+					$rt=array(
+						'status' =>'B',
+						'mensaje'=>utf8_encode($this->error_string),
+						'pk'     =>array('id'=>$id)
+					);
+					echo json_encode($rt);
+				}else{
+					$data['content']  = 'Compra actualizada'.br();
+					$rt=array(
+						'status' =>'A',
+						'mensaje'=>'Registro guardado',
+						'pk'     =>array('id'=>$id)
+					);
+					echo json_encode($rt);
+				}
+			}else{
+				echo $form->output;
 			}
 		}else{
-			echo $form->output;
+			show_error('Registro inexistente');
 		}
 	}
 
@@ -3000,7 +3022,7 @@ class Scst extends Controller {
 		$error = 0;
 		$pasa  = $this->datasis->dameval('SELECT COUNT(*) FROM scst WHERE actuali>=fecha AND id= '.$id);
 
-		if( $pasa==0 ){
+		if($pasa==0){
 			$control=$this->datasis->dameval('SELECT control FROM scst WHERE  id='.$id);
 
 			//Chequea si tiene vehiculos y estan registrados los seriales
@@ -3025,7 +3047,7 @@ class Scst extends Controller {
 			//Fin de la validacion vehicular
 
 			$SQL='SELECT tipo_doc,transac,depo,proveed,fecha,vence, nombre,tipo_doc,nfiscal,fafecta,reteiva,
-			cexento,cgenera,civagen,creduci,civared,cadicio,civaadi,cstotal,ctotal,cimpuesto,numero
+			cexento,cgenera,civagen,creduci,civared,cadicio,civaadi,cstotal,ctotal,cimpuesto,numero,fafecta
 			FROM scst WHERE control=?';
 			$query=$this->db->query($SQL,array($control));
 
@@ -3270,7 +3292,196 @@ class Scst extends Controller {
 					if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 
 				}elseif($row['tipo_doc']=='NC'){
-					//Falta implementar
+					//Carga de devoluciones de mercancia
+					$transac = $row['transac'];
+					$depo    = $row['depo'];
+					$proveed = $row['proveed'];
+					$fafecta = $row['fafecta'];
+					$fecha   = str_replace('-','',$row['fecha']);
+					$vence   = $row['vence'];
+					if(empty($row['reteiva'])){
+						$reteiva = 0;
+					}else{
+						$reteiva = $row['reteiva'];
+					}
+					if(empty($actuali)) $actuali=date('Ymd');
+
+					//Modifica las cantidades
+					$sql='SELECT a.codigo,a.cantidad
+						FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE a.control=?';
+					$qquery=$this->db->query($sql,array($control));
+					if($qquery->num_rows()>0){
+						foreach ($qquery->result() as $itrow){
+							$this->datasis->sinvcarga($itrow->codigo,$depo,(-1)*$itrow->cantidad);
+						}
+					}
+					//Fin de las cantidades
+
+					//Limpia primero la data
+					$mSQL='DELETE FROM sprm WHERE transac='.$this->db->escape($transac);
+					$ban=$this->db->simple_query($mSQL);
+					if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+
+					//Inicio de la retencion
+					if($reteiva>0){
+						//Crea la nota de debito
+						$mnumnd = $this->datasis->fprox_numero('num_nd');
+						$sprm=array();
+						$sprm['cod_prv']    = $proveed;
+						$sprm['nombre']     = $row['nombre'];
+						$sprm['tipo_doc']   = 'ND';
+						$sprm['numero']     = $mnumnd;
+						$sprm['fecha']      = $actuali;
+						$sprm['monto']      = $reteiva;
+						$sprm['impuesto']   = 0;
+						$sprm['abonos']     = $reteiva;
+						$sprm['vence']      = $actuali;
+						$sprm['tipo_ref']   = $row['tipo_doc'];
+						$sprm['num_ref']    = $row['numero'];
+						$sprm['observa1']   = 'RET/IVA CAUSADA A NC'.$row['numero'];
+						$sprm['estampa']    = $estampa;
+						$sprm['hora']       = $hora;
+						$sprm['transac']    = $transac;
+						$sprm['usuario']    = $usuario;
+						$sprm['codigo']     = 'NOCON';
+						$sprm['descrip']    = 'NOTA DE CONTABILIDAD';
+						$mSQL = $this->db->insert_string('sprm', $sprm);
+						$ban=$this->db->simple_query($mSQL);
+						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+
+						//Aplica la ND a la NC
+						$itppro=array();
+						$itppro['numppro']    = $mnumnd;
+						$itppro['tipoppro']   = 'ND';
+						$itppro['cod_prv']    = $proveed;
+						$itppro['tipo_doc']   = 'NC';
+						$itppro['numero']     = $row['numero'];
+						$itppro['fecha']      = $actuali;
+						$itppro['monto']      = $reteiva;
+						$itppro['abono']      = $reteiva;
+						$itppro['ppago']      = 0;
+						$itppro['reten']      = 0;
+						$itppro['cambio']     = 0;
+						$itppro['mora']       = 0;
+						$itppro['transac']    = $transac;
+						$itppro['estampa']    = $estampa;
+						$itppro['hora']       = $hora;
+						$itppro['usuario']    = $usuario;
+						$itppro['preten']     = 0;
+						$itppro['creten']     = 0;
+						$itppro['breten']     = 0;
+						$itppro['reteiva']    = 0;
+						$mSQL = $this->db->insert_string('itppro', $itppro);
+						$ban=$this->db->simple_query($mSQL);
+						if(!$ban){ memowrite($mSQL,'scst'); $error++;}
+
+						//Crea la nota de credito
+						$mnumnc = $this->datasis->fprox_numero('num_nc');
+						$sprm=array();
+						$sprm['cod_prv']   = 'REIVA';
+						$sprm['nombre']    = 'RETENCION DE I.V.A. POR COMPENSAR';
+						$sprm['tipo_doc']  = 'NC';
+						$sprm['numero']    = $mnumnc;
+						$sprm['fecha']     = $actuali;
+						$sprm['monto']     = $reteiva;
+						$sprm['impuesto']  = 0;
+						$sprm['abonos']    = 0;
+						$sprm['vence']     = $actuali;
+						$sprm['tipo_ref']  = 'NC';
+						$sprm['num_ref']   = $row['numero'];
+						$sprm['observa1']  = 'RET/IVA DE '.$proveed.' A DOC. NC'.$row['numero'];
+						$sprm['estampa']   = $estampa;
+						$sprm['hora']      = $hora;
+						$sprm['transac']   = $transac;
+						$sprm['usuario']   = $usuario;
+						$sprm['codigo']    = 'NOCON';
+						$sprm['descrip']   = 'NOTA DE CONTABILIDAD';
+						$mSQL = $this->db->insert_string('sprm', $sprm);
+						$ban=$this->db->simple_query($mSQL);
+						if(!$ban){ memowrite($mSQL,'scst'); $error++;}
+
+						//Crea la retencion
+						$niva    = $this->datasis->fprox_numero('niva');
+						$ivaplica= $this->datasis->ivaplica($fecha);
+
+						$riva['nrocomp']    = $niva;
+						$riva['emision']    = ($fecha > $actuali) ? $fecha : $actuali;
+						$riva['periodo']    = substr($riva['emision'],0,6) ;
+						$riva['tipo_doc']   = $row['tipo_doc'];
+						$riva['fecha']      = $fecha;
+						$riva['numero']     = $row['numero'];
+						$riva['nfiscal']    = $row['nfiscal'];
+						$riva['afecta']     = $row['fafecta'];
+						$riva['clipro']     = $proveed;
+						$riva['nombre']     = $row['nombre'];
+						$riva['rif']        = $this->datasis->dameval('SELECT rif FROM sprv WHERE proveed='.$this->db->escape($proveed));
+						$riva['exento']     = $row['cexento'];
+						$riva['tasa']       = $ivaplica['tasa'];
+						$riva['tasaadic']   = $ivaplica['sobretasa'];
+						$riva['tasaredu']   = $ivaplica['redutasa'];
+						$riva['general']    = $row['cgenera'];
+						$riva['geneimpu']   = $row['civagen'];
+						$riva['adicional']  = $row['cadicio'];
+						$riva['adicimpu']   = $row['civaadi'];
+						$riva['reducida']   = $row['creduci'];
+						$riva['reduimpu']   = $row['civared'];
+						$riva['stotal']     = $row['cstotal'];
+						$riva['impuesto']   = $row['cimpuesto'];
+						$riva['gtotal']     = $row['ctotal'];
+						$riva['reiva']      = $reteiva;
+						$riva['transac']    = $transac;
+						$riva['estampa']    = $estampa;
+						$riva['hora']       = $hora;
+						$riva['usuario']    = $usuario;
+						$mSQL=$this->db->insert_string('riva', $riva);
+						$ban =$this->db->simple_query($mSQL);
+						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+					}//Fin de la retencion
+
+					//Carga la CxP
+					$sprm=array();
+					$causado = $this->datasis->fprox_numero('ncausado');
+					$sprm['cod_prv']  = $proveed;
+					$sprm['nombre']   = $row['nombre'];
+					$sprm['tipo_doc'] = $row['tipo_doc'];
+					$sprm['numero']   = $row['numero'];
+					$sprm['fecha']    = $actuali;
+					$sprm['vence']    = $vence;
+					$sprm['monto']    = $row['ctotal'];
+					$sprm['impuesto'] = $row['cimpuesto'];
+					$sprm['abonos']   = $reteiva;
+					$sprm['observa1'] = 'DEVOLUCION A FACTURA '.$fafecta;
+					$sprm['reteiva']  = $reteiva;
+					$sprm['causado']  = $causado;
+					$sprm['estampa']  = $estampa;
+					$sprm['usuario']  = $usuario;
+					$sprm['hora']     = $hora;
+					$sprm['transac']  = $transac;
+					//$sprm['montasa']  = $row['cimpuesto'];
+					//$sprm['impuesto'] = $row['cimpuesto'];
+
+					$mSQL=$this->db->insert_string('sprm', $sprm);
+					$ban =$this->db->simple_query($mSQL);
+					if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+					//Fin de la carga de la CxP
+
+					$mSQL='UPDATE scst SET `actuali`=CURDATE() , `recep`='.$actuali.' WHERE `control`='.$this->db->escape($control);
+					$ban=$this->db->simple_query($mSQL);
+					if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 				}elseif($row['tipo_doc']=='NE'){
 					//Falta implementar
 				}
@@ -3726,7 +3937,10 @@ class Scst extends Controller {
 	function _post_update($do){
 		$codigo  = $do->get('numero');
 		$control = $do->get('control');
-		logusu('scst',"Compra ${codigo} control ${control} MODIFICADA");
+		$tipo_doc= $do->get('tipo_doc');
+
+		$opera   = ($tipo_doc=='FC')? 'Compra':'Devolucion';
+		logusu('scst',"${opera} ${codigo} control ${control} MODIFICADA");
 	}
 
 	function chddate($fecha){
@@ -3788,7 +4002,10 @@ class Scst extends Controller {
 	function _post_insert($do){
 		$codigo  = $do->get('numero');
 		$control = $do->get('control');
-		logusu('scst',"Compra $codigo control $control CREADA");
+		$tipo_doc= $do->get('tipo_doc');
+
+		$opera   = ($tipo_doc=='FC')? 'Compra':'Devolucion';
+		logusu('scst',"${opera} ${codigo} control ${control} CREADA");
 	}
 
 	function _post_cxp_update($do){
@@ -3811,10 +4028,11 @@ class Scst extends Controller {
 	}
 
 	function _post_delete($do){
-		$codigo =$do->get('numero');
-		$control=$do->get('control');
-		$id     =$do->get('id');
-		$dbid   =$this->db->escape($id);
+		$codigo  = $do->get('numero');
+		$control = $do->get('control');
+		$id      = $do->get('id');
+		$dbid    = $this->db->escape($id);
+		$tipo_doc= $do->get('tipo_doc');
 
 		//Borra los vehiculos
 		$this->db->simple_query('DELETE FROM sinvehiculo WHERE id_scst='.$dbid);
@@ -3824,7 +4042,8 @@ class Scst extends Controller {
 		//	$this->db->simple_query('UPDATE ordi SET status="A", control=NULL WHERE control='.$dbcontrol);
 		//}
 
-		logusu('scst',"Compra ${codigo} Control ${control} ELIMINADA");
+		$opera   = ($tipo_doc=='FC')? 'Compra':'Devolucion';
+		logusu('scst',"${opera} ${codigo} Control ${control} ELIMINADA");
 	}
 
 	function _pre_vehi_insert($do){ return false;}
