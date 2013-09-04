@@ -299,7 +299,6 @@ class Prenom extends Controller {
 			$this->pnomina->fdesde = $d->format('Y-m-d');
 		}
 
-
 		$query = $this->db->query('SELECT a.*, b.*, c.dias, c.psueldo FROM prenom a JOIN pers b ON a.codigo=b.codigo JOIN conc c ON a.concepto=c.concepto WHERE a.codigo='.$this->db->escape($codigo).' ORDER BY a.tipo, a.concepto');
 		if ($query->num_rows() > 0) {
 			$this->db->query("UPDATE pretab SET total=0 WHERE codigo=".$this->db->escape($codigo) );
@@ -339,9 +338,6 @@ class Prenom extends Controller {
 					$SPROME += $valor;
 
 			}
-
-			//memowrite($SPROME.' == >> '.$DIAS, $codigo);
-
 
 			foreach ($query->result() as $row){
 				$this->pnomina->MONTO   = $row->monto;

@@ -2278,7 +2278,7 @@ class Pers extends Controller {
 			  hora     varchar(8)  DEFAULT NULL,
 			  id       int(11)     NOT NULL AUTO_INCREMENT,
 			  PRIMARY KEY (`id`),
-			  UNIQUE KEY `codigo` (`codigo`)
+			  KEY `codigo` (`codigo`)
 			) ENGINE=MyISAM  DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->simple_query($mSQL);
 		}

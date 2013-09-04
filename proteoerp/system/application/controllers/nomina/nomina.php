@@ -1706,5 +1706,24 @@ Ext.onReady(function(){
   		return TRUE;
 		}
 	}
+
+Vacaciones
+Periodo correspondiente al Ano 2011
+Dias habiles vacaciones 15 + anos de servicio hasta 30  
+Dias de Descanso 6
+Dias Feriados    1
+
+Paga sobre la ultima nomina 
+ 
+sueldo integral * 15+anos
+sueldo integral * descanso
+sueldo integral * feriados
+
+
+
+ 
+dias 
+ 
+ 
 */
 }
