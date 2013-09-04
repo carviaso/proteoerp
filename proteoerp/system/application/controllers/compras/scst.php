@@ -1401,44 +1401,60 @@ class Scst extends Controller {
 	* Guarda la Informacion
 	*/
 	function setData(){
-		$this->load->library('jqdatagrid');
+		//$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
+		$id     = intval($this->input->post('id'));
 		$data   = $_POST;
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
-		if($oper == 'add'){
-			//if(false == empty($data)){
-			//	$this->db->insert('scst', $data);
-			//	echo "Registro Agregado";
-			//	logusu('SCST',"Registro ????? INCLUIDO");
-			//} else
-			echo "Fallo Agregado!!!";
 
+		if($oper == 'add'){
+			echo 'Deshabilitado';
 		}elseif($oper == 'edit'){
-			$this->db->where('id', $id);
+
+			$posibles=array('serie','fafecta','vence','nfiscal');
+			foreach($data as $ind=>$val){
+				if(!in_array($ind,$posibles)){
+					echo 'Campo no permitido ('.$ind.')';
+					return false;
+				}
+			}
+
+			$row = $this->datasis->damerow("SELECT fecha,tipo_doc, numero,proveed,transac,control FROM scst WHERE id=${id}");
+			if(empty($row)){
+				echo 'Registro no encontrado';
+				return false;
+			}
+
+			//if(isset($data['serie'])){
+			//	$data['numero'] = substr($data['serie'],-8);
+			//	$transac = $row['transac'];
+			//	if($data['numero'] != $row['numero']){
+			//		//Chequea si puede cambiar los valores
+			//		$this->db->from('scst');
+			//		$this->db->where('id <>'   ,$id);
+			//		$this->db->where('fecha'   ,$row['fecha']);
+			//		$this->db->where('tipo_doc',$row['tipo_doc']);
+			//		$this->db->where('numero'  ,$data['numero']);
+			//		$this->db->where('proveed' ,$row['proveed']);
+			//		$cana = $this->db->count_all_results();
+			//		if(!empty($cana)){
+			//			echo 'Ya existe un registro con el mismo numero.';
+			//			return false;
+			//		}
+			//	}
+			//}
+
+			$this->db->where('id'   , $id);
 			$this->db->update('scst', $data);
-			logusu('SCST',"Registro $id MODIFICADO");
-			echo "Registro Modificado";
+
+			logusu('SCST',"Registro control:${row[control]} MODIFICADO");
+			echo 'Registro Modificado';
 
 		}elseif($oper == 'del'){
-			//Si no esta actualizado permite borrar
-			$check   = $this->datasis->dameval("SELECT COUNT(*) FROM scst WHERE id='$id' AND actuali>=fecha ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; debe reversarlo ";
-			} else {
-				$control =  $this->datasis->dameval("SELECT control FROM scst WHERE id='$id' ");
-				$this->db->query("UPDATE scst   SET tipo_doc='XX' WHERE id=$id ");
-
-				//$this->db->query("UPDATE itscst SET WHERE control=".$this->db->escape($control) );
-				//$this->db->query("DELETE FROM scst WHERE id=$id ");
-				//$this->db->query("DELETE FROM itscst WHERE control=".$this->db->escape($control) );
-
-				logusu('SCST',"Registro ".$control." marcado como ELIMINADO");
-				echo "Registro Eliminado";
-			}
+			echo 'Deshabilitado';
 		}
 	}
 
