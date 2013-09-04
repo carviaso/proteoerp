@@ -114,7 +114,7 @@ $(function(){
 				url:  "<?php echo site_url('ajax/buscascstdev'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: {"q":req.term, "sprv":$('#sprv').val()},
+				data: {"q":req.term, "sprv":$('#proveed').val()},
 				success:
 					function(data){
 						var sugiere = [];
@@ -137,33 +137,39 @@ $(function(){
 			$('#fafecta').attr("readonly", "readonly");
 			$('#fafecta').val(ui.item.value);
 
-			truncate();
-			$("#tipo_doc").val('NC');
-			$.ajax({
-				url: "<?php echo site_url('ajax/buscaitscstdev'); ?>",
-				dataType: 'json',
-				type: 'POST',
-				data: {"q":ui.item.control},
-				success: function(data){
-					$.each(data,
-						function(id, val){
-							add_itscst();
-							$('#codigo_'+id).val(val.codigo);
-							$('#descrip_'+id).val(val.descrip);
-							$('#it_descrip_val_'+id).text(val.descrip);
-							$('#iva_'+id).val(val.iva);
-							$('#sinvpeso_'+id).val(val.peso);
-							$('#costo_'+id).val(val.pond);
-							$('#precio1_'+id).val(val.precio1);
-							$("#cantidad_"+id).val(val.cantidad);
+			if(ui.item.control!=''){
+				$('#sprvreteiva').val(ui.item.reteiva);
+				truncate();
+				$("#tipo_doc").val('NC');
+				$.ajax({
+					url: "<?php echo site_url('ajax/buscaitscstdev'); ?>",
+					dataType: 'json',
+					type: 'POST',
+					data: {'q':ui.item.control},
+					success: function(data){
+						$.each(data,
+							function(id, val){
+								add_itscst();
+								$('#codigo_'+id).val(val.codigo);
+								$('#descrip_'+id).val(val.descrip);
+								$('#it_descrip_val_'+id).text(val.descrip);
+								$('#iva_'+id).val(val.iva);
+								$('#sinvpeso_'+id).val(val.peso);
+								$('#costo_'+id).val(val.pond);
+								$('#precio1_'+id).val(val.precio1);
+								$("#cantidad_"+id).val(val.cana);
 
-							nind=Number(id);
-							post_modbus_sinv(nind);
-						}
-					);
-				},
-			});
+								nind=Number(id);
+								post_modbus_sinv(nind);
+							}
+						);
+					},
+				});
 
+				if(ui.item.msj != null){
+					$.prompt(ui.item.msj);
+				}
+			}
 			setTimeout(function() {  $("#fafecta").removeAttr("readonly"); }, 1500);
 		}
 	});
@@ -191,7 +197,6 @@ function chtipodoc(){
 
 	}
 }
-
 
 function importe(id){
 	var ind     = id.toString();

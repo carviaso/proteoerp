@@ -1023,38 +1023,71 @@ class Ajax extends Controller {
 	function buscascstdev(){
 		$mid   = $this->input->post('q');
 		$sprv  = $this->input->post('sprv');
-		$data = '[{ }]';
-		if($mid !== false && $sprv !== false){
+		$data = '[ ]';
+		if($mid !== false && !empty($sprv)){
 
 			$dbsprv= $this->db->escape($sprv);
-			$qdb   = $this->db->escape($mid);
+			$qdb   = $this->db->escape($mid.'%');
 
 			$retArray = $retorno = array();
 
-			$mSQL="SELECT a.numero, a.montonet AS totalg,a.nombre, TRIM(b.nombre) AS nombre, TRIM(b.rif) AS rif,a.fecha
+			$mSQL="SELECT a.numero, a.montonet AS totalg,a.nombre, TRIM(b.nombre) AS nombre, TRIM(b.rif) AS rif,a.fecha,control,b.reteiva
 				FROM  scst AS a
 				JOIN sprv AS b ON a.proveed=b.proveed
 				WHERE a.serie LIKE ${qdb} AND a.tipo_doc='FC' AND a.proveed=${dbsprv}
 				ORDER BY numero DESC LIMIT ".$this->autolimit;
 
 			$query = $this->db->query($mSQL);
-			if ($query->num_rows() > 0){
+			if($query->num_rows() > 0){
+				if(date('d')<=15){
+					$pdia  ='01';
+					$dia   ='15';
+				}else{
+					$pdia  ='16';
+					$dia   =date('d', mktime(0, 0, 0, date('n'), 0));
+				}
+				$fechai =date('Ym'.$pdia);
+				$fechac =date('Ym'.$dia );
+
 				foreach( $query->result_array() as  $row ) {
+					$fecha  = str_replace('-','',$row['fecha']);
+					$aplrete= $fecha>=$fechai && $fecha<=$fechac;
+
 					$retArray['label']   = $this->en_utf8($row['numero'].'-'.$row['nombre'].' '.$this->_datehuman($row['fecha']).' '.$row['totalg'].' Bs.');
 					$retArray['value']   = $row['numero'];
+					$retArray['control'] = $row['control'];
 					$retArray['rif']     = $row['rif'];
+					$retArray['reteiva'] = ($aplrete)? floatval($row['reteiva']) : 0;
 					$retArray['fecha']   = $this->_datehuman($row['fecha']);
+
+					$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
+					$rif     = $this->datasis->traevalor('RIF');
+					if($contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
+						$retArray['msj'] = ($aplrete)? null :'No se realizara la retención de impuesto por estar fuera de período '.date($pdia.'/m/Y').' - '.date($dia.'/m/Y');
+					}else{
+						$retArray['msj'] = null;
+					}
 
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
 			}else{
-				$retArray[0]['label']   = 'No se consiguieron facturas para aplicar';
+				$retArray[0]['label']   = 'No se consiguieron facturas';
 				$retArray[0]['value']   = '';
+				$retArray[0]['control'] = '';
 				$retArray[0]['rif']     = '';
 				$retArray[0]['fecha']   = '';
+				$retArray[0]['msj']     = null;
 				$data = json_encode($retArray);
 			}
+		}else{
+			$retArray[0]['label']   = 'Por favor seleccione un proveedor primero';
+			$retArray[0]['value']   = '';
+			$retArray[0]['control'] = '';
+			$retArray[0]['rif']     = '';
+			$retArray[0]['fecha']   = '';
+			$retArray[0]['msj']     = null;
+			$data = json_encode($retArray);
 		}
 		echo $data;
 	}
@@ -1142,6 +1175,40 @@ class Ajax extends Controller {
 					$retArray['base4']   = round($row['precio4']*100/(100+$row['iva']),2);
 					$retArray['descrip'] = $this->en_utf8($row['descrip']);
 					$retArray['iva']     = $row['iva'];
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
+	//******************************************************************
+	//Buscar los articulos para devolver compras
+	//
+	function buscaitscstdev(){
+		$mid = $this->input->post('q');
+
+		$data = '[ ]';
+		if($mid !== false){
+			$dbcontrol= $this->db->escape($mid);
+			$retArray = $retorno = array();
+
+			$mSQL="SELECT a.codigo,b.descrip,a.iva,b.peso,b.pond,b.precio1,a.cantidad
+				FROM itscst AS a
+				JOIN sinv AS b ON a.codigo=b.codigo
+				WHERE a.control=${dbcontrol}";
+
+			$query = $this->db->query($mSQL);
+			if($query->num_rows() > 0){
+				foreach($query->result_array() as  $id=>$row){
+					$retArray['codigo']  = $this->en_utf8($row['codigo']);
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
+					$retArray['iva']     = $row['iva'];
+					$retArray['peso']    = $row['peso'];
+					$retArray['pond']    = $row['pond'];
+					$retArray['cana']    = $row['cantidad'];
+					$retArray['precio1'] = round($row['precio1'],2);
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);

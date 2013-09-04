@@ -366,14 +366,14 @@ class Scst extends Controller {
 										try{
 											var json = JSON.parse(r);
 											if (json.status == "A"){
-												apprise("Compra reversada");
+												$.prompt("Compra reversada");
 												grid.trigger("reloadGrid");
 												return true;
 											}else{
-												apprise("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
+												$.prompt("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
 											}
 										}catch(e){
-											apprise("Error en respuesta");
+											$.prompt("Error en respuesta");
 										}
 									});
 								}
@@ -410,13 +410,13 @@ class Scst extends Controller {
 									try{
 										var json = JSON.parse(r);
 										if (json.status == "A"){
-											apprise("Registro Guardado");
+											$.prompt("Registro Guardado");
 											$( "#factuali" ).dialog("close");
 											grid.trigger("reloadGrid");
 											'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+mid+"/id"').';
 											return true;
 										}else{
-											apprise("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
+											$.prompt("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
 										}
 									}catch(e){
 										$("#factuali").html(r);
@@ -473,15 +473,15 @@ class Scst extends Controller {
 								success: function(r,s,x){
 									var res = $.parseJSON(r);
 									if ( res.status == "A"){
-										apprise(res.mensaje);
+										$.prompt(res.mensaje);
 										$( "#fcompra" ).dialog( "close" );
 										grid.trigger("reloadGrid");
 										'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+res.id+\'/id\'').';
 										return true;
 									} else if ( res.status == "C"){
-										apprise("<div style=\"font-size:16px;font-weight:bold;background:green;color:white\">Mensaje:</div> <h1>"+res.mensaje);
+										$.prompt("<div style=\"font-size:16px;font-weight:bold;background:green;color:white\">Mensaje:</div> <h1>"+res.mensaje);
 									} else {
-										apprise("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
+										$.prompt("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
 									}
 								}
 							});
@@ -517,10 +517,10 @@ class Scst extends Controller {
 											$( "#fcmonto" ).dialog( "close" );
 											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 											$("#fcmonto").html("");
-											apprise("Montos Guardado");
+											$.prompt("Montos Guardado");
 											return true;
 										} else {
-											apprise(json.mensaje);
+											$.prompt(json.mensaje);
 										}
 									}catch(e){
 										$("#fcmonto").html(r);
@@ -558,10 +558,10 @@ class Scst extends Controller {
 											$( "#fvehi" ).dialog( "close" );
 											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 											$("#fvehi").html("");
-											apprise("Seriales Guardado");
+											$.prompt("Seriales Guardado");
 											return true;
 										} else {
-											apprise(json.mensaje);
+											$.prompt(json.mensaje);
 										}
 									}catch(e){
 										$("#fvehi").html(r);
@@ -1887,7 +1887,7 @@ class Scst extends Controller {
 		$edit->fafecta = new inputField('Fact.Afectada', 'fafecta');
 		$edit->fafecta->size = 15;
 		$edit->fafecta->autocomplete=false;
-		$edit->fafecta->rule = 'condi_required|callback_chobligatipo[NC]';
+		$edit->fafecta->rule = 'condi_required|callback_chproveeddev';
 		$edit->fafecta->maxlength=10;
 
 		$edit->proveed = new inputField('Proveedor', 'proveed');
@@ -1909,15 +1909,15 @@ class Scst extends Controller {
 		//$edit->cfis->rule = 'required';
 		$edit->cfis->maxlength=12;
 
-		$edit->almacen = new  dropdownField ('Almacen', 'depo');
+		$edit->almacen = new  dropdownField ('Almac&eacute;n', 'depo');
 		$edit->almacen->options('SELECT ubica, CONCAT(ubica,\' \',ubides) nombre FROM caub ORDER BY ubica');
 		$edit->almacen->rule = 'required';
 		$edit->almacen->style='width:145px;';
 
 		$edit->tipo = new dropdownField('Tipo', 'tipo_doc');
 		$edit->tipo->option('FC','Factura a Cr&eacute;dito');
-		$edit->tipo->option('NC','Nota de Cr&eacute;dito'); //Falta implementar los metodos post para este caso
-		//$edit->tipo->option('NE','Nota de Entrega');        //Falta implementar los metodos post para este caso
+		$edit->tipo->option('NC','Nota de Cr&eacute;dito');
+		//$edit->tipo->option('NE','Nota de Entrega'); //Falta implementar los metodos post para este caso
 		$edit->tipo->rule = 'required';
 		$edit->tipo->style='width:140px;';
 		$edit->tipo->onchange='chtipodoc()';
@@ -2056,7 +2056,6 @@ class Scst extends Controller {
 		$edit->iva->db_name           = 'iva';
 		$edit->iva->rel_id            = 'itscst';
 		$edit->iva->showformat        = 'decimal';
-
 		//fin de campos para detalle
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
@@ -2090,7 +2089,7 @@ class Scst extends Controller {
 			$conten['solo'] = $this->solo;
 			$ffecha=$edit->get_from_dataobjetct('fecha');
 			$conten['alicuota']=$this->datasis->ivaplica(($ffecha==false)? null : $ffecha);
-			if (  $this->solo ){
+			if($this->solo){
 				$this->load->view('view_compras', $conten);
 			} else {
 				$data['script']  = script('jquery.js');
@@ -2531,10 +2530,39 @@ class Scst extends Controller {
 	}
 
 	function chcodigoa($codigo){
-		$cana=$this->datasis->dameval('SELECT COUNT(*) FROM sinv WHERE activo=\'S\' AND codigo='.$this->db->escape($codigo));
+		$cana=$this->datasis->dameval('SELECT COUNT(*) FROM sinv WHERE codigo='.$this->db->escape($codigo));
 		if(empty($cana) || $cana==0){
 			$this->validation->set_message('chcodigoa', 'El campo %s contiene un codigo no v&aacute;lido o inactivo');
 			return false;
+		}
+		return true;
+	}
+
+	function chproveeddev($serie){
+		$tipo_doc = $this->input->post('tipo_doc');
+		if($tipo_doc=='NC'){
+			$rt=$this->chobligatipo($serie,'NC');
+			if(!$rt){
+				$this->validation->set_message('chproveeddev', 'El campo %s es necesario si el documento es una NC');
+				return false;
+			}
+
+			$sprv=$this->input->post('proveed');
+			$this->validation->set_message('chproveeddev', 'La factura afectada no parece pertenecer al proveedor '.$sprv);
+
+			if(!empty($sprv)){
+				$dbsprv  = $this->db->escape(trim($sprv ));
+				$dbserie = $this->db->escape(trim($serie));
+				$cana=$this->datasis->dameval('SELECT COUNT(*) AS cana FROM scst WHERE tipo_doc=\'FC\' AND proveed='.$dbsprv.' AND serie='.$dbserie);
+				if(empty($cana)){
+					$cana=$this->datasis->dameval('SELECT COUNT(*) AS cana FROM scst WHERE tipo_doc=\'FC\' AND proveed='.$dbsprv.' AND numero='.$dbserie);
+					if(empty($cana)){
+						return false;
+					}else{
+						return true;
+					}
+				}
+			}
 		}
 		return true;
 	}
@@ -3469,19 +3497,6 @@ class Scst extends Controller {
 					$ban=$this->db->simple_query($mSQL);
 					if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 				}elseif($row['tipo_doc']=='NE'){
 					//Falta implementar
 				}
@@ -3748,9 +3763,14 @@ class Scst extends Controller {
 
 	function _pre_insert($do){
 
-		$control=$do->get('control');
-		$transac=$do->get('transac');
+		$control = $do->get('control');
+		$transac = $do->get('transac');
+		$tipo_doc= $do->get('tipo_doc');
 		$tolera =0.07; //Tolerancia entre los items y el encabezado
+
+		if($tipo_doc=='NC'){
+			$do->set('fafecta','');
+		}
 
 		if(substr($control,7,1)=='_') $control = $this->datasis->fprox_numero('nscst');
 		if(empty($control)) $control = $this->datasis->fprox_numero('nscst');

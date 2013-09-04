@@ -180,13 +180,13 @@ class Rivc extends Controller {
 						try{
 							var json = JSON.parse(r);
 							if (json.status == "A"){
-								apprise("Registro Guardado");
+								$.prompt("Registro Guardado");
 								$( "#fedita" ).dialog( "close" );
 								grid.trigger("reloadGrid");
-								'.$this->datasis->jwinopen(site_url('formatos/ver/RIVC').'/\'+res.id+\'/id\'').';
+								'.$this->datasis->jwinopen(site_url('formatos/ver/RIVC').'/\'+json.pk.id+\'/id\'').';
 								return true;
 							} else {
-								apprise(json.mensaje);
+								$.prompt(json.mensaje);
 							}
 						}catch(e){
 							$("#fedita").html(r);
@@ -790,53 +790,16 @@ class Rivc extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = '??????';
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM rivc WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('rivc', $data);
-					echo "Registro Agregado";
-
-					logusu('RIVC',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
+			echo 'Deshabilitado';
 		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM rivc WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM rivc WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE rivc SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("rivc", $data);
-				logusu('RIVC',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('rivc', $data);
-				logusu('RIVC',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
+			echo 'Deshabilitado';
 		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM rivc WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM rivc WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM rivc WHERE id=$id ");
-				logusu('RIVC',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
+			echo 'Deshabilitado';
 		};
 	}
 
@@ -1224,7 +1187,7 @@ class Rivc extends Controller {
 		if(empty($id)) return "";
 		$dbid = $this->db->escape($id);
 		$grid = $this->jqdatagrid;
-		$mSQL = "SELECT * FROM itrivc WHERE idrivc=$dbid";
+		$mSQL = "SELECT * FROM itrivc WHERE idrivc=${dbid}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
@@ -1612,7 +1575,7 @@ class Rivc extends Controller {
 		if(empty($cajero) || $op!='R'){
 			return true;
 		}
-		$ch    = $this->datasis->dameval("SELECT COUNT(*) FROM scaj WHERE cajero=$dbcajero AND clave=$dbclave");
+		$ch    = $this->datasis->dameval("SELECT COUNT(*) FROM scaj WHERE cajero=${dbcajero} AND clave=${dbclave}");
 		if($ch>0){
 			return true;
 		}
@@ -1894,7 +1857,7 @@ class Rivc extends Controller {
 					$do->set_rel($rel, 'reduimpu' , $row->reducida, $i);
 
 					$do->set_rel($rel, 'nfiscal' , $row->nfiscal, $i);
-					$do->set_rel($rel, 'reiva'    , $itreiva     , $i);
+					$do->set_rel($rel, 'reiva'    , $itreiva    , $i);
 
 					$exento   =$exento+$row->exento;
 
@@ -2020,11 +1983,11 @@ class Rivc extends Controller {
 				$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Algunos de los movimientos asociados han sido aplicados, debe reversarlos antes de proceder';
 				return false;
 			}
-			$sqls[]="DELETE FROM sprm WHERE numero=${dbsprmreinte} AND transac=$dbtransac";
+			$sqls[]="DELETE FROM sprm WHERE numero=${dbsprmreinte} AND transac=${dbtransac}";
 		}
 
 		//Reversa el reintegro (Si lo hubo)
-		$mmSQL="SELECT codbanc,monto FROM bmov WHERE transac=$dbtransac AND clipro='C'";
+		$mmSQL="SELECT codbanc,monto FROM bmov WHERE transac=${dbtransac} AND clipro='C'";
 		$qquery = $this->db->query($mmSQL);
 
 		$saldo=0;
@@ -2060,7 +2023,7 @@ class Rivc extends Controller {
 			$nrocomp = $do->get('nrocomp');
 
 			$primary =implode(',',$do->pk);
-			logusu($do->table,"Anulo Retencion de cliente id: $primary  ${periodo }${nrocomp}");
+			logusu($do->table,"Anulo Retencion de cliente id: ${primary}  ${periodo }${nrocomp}");
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Retencion anulada';
 		}
 		return false;
