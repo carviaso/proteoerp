@@ -1055,17 +1055,19 @@ class Jqdatagrid
 			foreach($mwhere as $busca){
 				if(trim(strtoupper($busca[0]))== 'LIKE'){
 					$this->CI->db->like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
-				}else{
+				} elseif(trim(strtoupper($busca[0]))== 'IN'){
+					$this->CI->db->where_in( $busca[1], $busca[2] );
+				} else {
 					if (in_array($busca[0], array('>','<')) || in_array($busca[0],array('<>','>=','<=','!=')) ){
 						$this->CI->db->where( $busca[1].' '.$busca[0], $busca[2] );
-					}else{
+					} else {
 						//Eliminado para poder buscar campos numericos en cero
 						if($busca[2]==='' || is_null($busca[2])){
 							$this->CI->db->where($busca[1]);
-						}else {
+						} else {
 							if(is_array($busca[2])){
 								$this->CI->db->where_in($busca[1], $busca[2]);
-							}else{
+							} else {
 								$this->CI->db->where( $busca[1], $busca[2] );
 							}
 						}
