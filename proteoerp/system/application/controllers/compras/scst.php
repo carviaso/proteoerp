@@ -1906,7 +1906,7 @@ class Scst extends Controller {
 		$edit->cfis = new inputField('N&uacute;mero fiscal', 'nfiscal');
 		$edit->cfis->size = 15;
 		$edit->cfis->autocomplete=false;
-		$edit->cfis->rule = 'required';
+		//$edit->cfis->rule = 'required';
 		$edit->cfis->maxlength=12;
 
 		$edit->almacen = new  dropdownField ('Almacen', 'depo');

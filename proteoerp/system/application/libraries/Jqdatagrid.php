@@ -1051,7 +1051,6 @@ class Jqdatagrid
 		}
 
 		if(!empty($mwhere)){
-
 			foreach($mwhere as $busca){
 				if(trim(strtoupper($busca[0]))== 'LIKE'){
 					$this->CI->db->like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
