@@ -980,7 +980,7 @@ class Ajax extends Controller {
 
 			$retArray = $retorno = array();
 
-			$mSQL="SELECT a.numero, a.totalg, a.cod_cli, a.nombre,b.rifci, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.tipo, b.dire11 AS direc,a.fecha
+			$mSQL="SELECT a.numero, a.totalg, a.cod_cli, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.tipo, b.dire11 AS direc,a.fecha
 				FROM  sfac AS a
 				JOIN scli AS b ON a.cod_cli=b.cliente
 				WHERE a.numero LIKE ${qdb} AND a.tipo_doc='F' AND MID(a.numero,1,1)<>'_'
@@ -1017,6 +1017,47 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+	//******************************************************************
+	//Buscar factura de compra para devolver
+	//
+	function buscascstdev(){
+		$mid   = $this->input->post('q');
+		$sprv  = $this->input->post('sprv');
+		$data = '[{ }]';
+		if($mid !== false && $sprv !== false){
+
+			$dbsprv= $this->db->escape($sprv);
+			$qdb   = $this->db->escape($mid);
+
+			$retArray = $retorno = array();
+
+			$mSQL="SELECT a.numero, a.montonet AS totalg,a.nombre, TRIM(b.nombre) AS nombre, TRIM(b.rif) AS rif,a.fecha
+				FROM  scst AS a
+				JOIN sprv AS b ON a.proveed=b.proveed
+				WHERE a.serie LIKE ${qdb} AND a.tipo_doc='FC' AND a.proveed=${dbsprv}
+				ORDER BY numero DESC LIMIT ".$this->autolimit;
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$retArray['label']   = $this->en_utf8($row['numero'].'-'.$row['nombre'].' '.$this->_datehuman($row['fecha']).' '.$row['totalg'].' Bs.');
+					$retArray['value']   = $row['numero'];
+					$retArray['rif']     = $row['rif'];
+					$retArray['fecha']   = $this->_datehuman($row['fecha']);
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+			}else{
+				$retArray[0]['label']   = 'No se consiguieron facturas para aplicar';
+				$retArray[0]['value']   = '';
+				$retArray[0]['rif']     = '';
+				$retArray[0]['fecha']   = '';
+				$data = json_encode($retArray);
+			}
+		}
+		echo $data;
+	}
 
 	//******************************************************************
 	//Busca las formas de pago de una factura para devolverlos

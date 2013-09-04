@@ -889,7 +889,7 @@ class Pfac extends Controller {
 */
 
 		$grid->addField('numa');
-		$grid->label('Numa');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1228,7 +1228,8 @@ class Pfac extends Controller {
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM pfac");
 		}
 		if(empty($id)) return '';
-		$numero   = $this->datasis->dameval("SELECT numero FROM pfac WHERE id=$id");
+		$id = intval($id);
+		$numero   = $this->datasis->dameval("SELECT numero FROM pfac WHERE id=${id}");
 
 		$grid    = $this->jqdatagrid;
 		$mSQL    = "SELECT * FROM itpfac WHERE numa='$numero' ";

@@ -244,10 +244,9 @@ class Rivc extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
 		return $bodyscript;
 	}
 

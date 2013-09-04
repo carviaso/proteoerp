@@ -105,6 +105,69 @@ $(function(){
 		}
 	});
 	chtipodoc();
+
+	$('#fafecta').autocomplete({
+		delay: 600,
+		autoFocus: true,
+		source: function( req, add){
+			$.ajax({
+				url:  "<?php echo site_url('ajax/buscascstdev'); ?>",
+				type: "POST",
+				dataType: "json",
+				data: {"q":req.term, "sprv":$('#sprv').val()},
+				success:
+					function(data){
+						var sugiere = [];
+						if(data.length==0){
+							$('#fafecta').val('');
+							truncate();
+						}else{
+							$.each(data,
+								function(i, val){
+									sugiere.push( val );
+								}
+							);
+							add(sugiere);
+						}
+					},
+			})
+		},
+		minLength: 2,
+		select: function( event, ui ) {
+			$('#fafecta').attr("readonly", "readonly");
+			$('#fafecta').val(ui.item.value);
+
+			truncate();
+			$("#tipo_doc").val('NC');
+			$.ajax({
+				url: "<?php echo site_url('ajax/buscaitscstdev'); ?>",
+				dataType: 'json',
+				type: 'POST',
+				data: {"q":ui.item.control},
+				success: function(data){
+					$.each(data,
+						function(id, val){
+							add_itscst();
+							$('#codigo_'+id).val(val.codigo);
+							$('#descrip_'+id).val(val.descrip);
+							$('#it_descrip_val_'+id).text(val.descrip);
+							$('#iva_'+id).val(val.iva);
+							$('#sinvpeso_'+id).val(val.peso);
+							$('#costo_'+id).val(val.pond);
+							$('#precio1_'+id).val(val.precio1);
+							$("#cantidad_"+id).val(val.cantidad);
+
+							nind=Number(id);
+							post_modbus_sinv(nind);
+						}
+					);
+				},
+			});
+
+			setTimeout(function() {  $("#fafecta").removeAttr("readonly"); }, 1500);
+		}
+	});
+
 });
 
 function marcar(obj){
@@ -398,6 +461,11 @@ function autocod(id){
 			setTimeout(function() {  $('#codigo_'+id).removeAttr("readonly"); }, 1500);
 		}
 	});
+}
+
+function truncate(){
+	$('tr[id^="tr_itscst_"]').remove();
+	itscst_cont=0;
 }
 </script>
 <?php } ?>

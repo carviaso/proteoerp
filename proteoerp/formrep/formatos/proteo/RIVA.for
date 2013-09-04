@@ -94,9 +94,9 @@ if ( isset($pdf) ) {
 								<td colspan='2'><h1 style="text-align: center">COMPROBANTE DE RETENCI&Oacute;N DEL IMPUESTO AL VALOR AGREGADO</h1></td>
 							</tr>
 							<tr>
-								<td align='center' colspan='2'>(Ley IVA - Art. 11: Seran responsables del pago del Impuesto en calidad de agentes de retenci&oacute;n
-								los compradores o adquirientes de determinados bienes muebles y los receptores de
-								ciertos servicios, a quienes la administraci&oacute;n designe como tal o cual.)</td>
+								<td align='center' colspan='2'>(Ley IVA - Art. 11: La Administraci&oacute;n Tributaria podr&aacute; designar como responsables del pago del impuesto, en calidad de agentes de
+								retenci&oacute;n, a quienes por sus funciones p&uacute;blicas o por raz&oacute;n de sus actividades privadas
+								intervengan en operaciones gravadas con el impuesto establecido en esta Ley.)</td>
 							</tr>
 						</table>
 						<br />
