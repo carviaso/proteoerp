@@ -351,7 +351,7 @@ class Reparto extends Controller {
 			if ($tipo != 'F') {
 				$this->db->where("id", $id);
 				$this->db->update('reparto', array( "tipo" => 'A' ) );
-				$this->db->query("UPDATE sfac SET entregado='0' WHERE reparto=$id");
+				$this->db->query("UPDATE sfac SET entregado='0', reparto=0 WHERE reparto=$id");
 				echo "Reparto Eliminado ";
 			} else
 				echo "Reparto ya finaliado no se puede anular";
