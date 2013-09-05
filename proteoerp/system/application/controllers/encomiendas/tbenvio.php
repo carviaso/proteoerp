@@ -32,7 +32,7 @@ class Tbenvio extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'ffactura',   'img'=>'images/pdf_logo.gif',  'alt' => 'Facturar', 'label'=>'Facturar'));
+		$grid->wbotonadd(array('id'=>'ffactura',   'img'=>'images/star.png',  'alt' => 'Facturar', 'label'=>'Facturar'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(

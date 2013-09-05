@@ -1165,66 +1165,33 @@ class Scli extends validaciones {
 	* Guarda la Informacion
 	*/
 	function setData(){
-		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
+		$id     = intval($this->input->post('id'));
 		$data   = $_POST;
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				$data['cliente'] = trim($data['cliente']);
-				$data['riffis'] = $data['rifci'];
-				// SI EL CODIGO ESTA VACIO GENERA UNO
-				if ( strlen($data['cliente']) > 0 )
-					$mcodigo = $data['cliente'];
-				else {
-					$mcodigo = $this->proxcli();
-					$data['cliente'] = $mcodigo;
-				}
-				//Busca a ver si esta repetido
-				if ( $this->datasis->dameval("SELECT count(*) FROM scli WHERE cliente=".$this->db->escape($mcodigo)) > 0 ){
-					echo "Codigo ya existe ";
-					return;
-				}
-				$data['credito'] = 'S';
-				$this->db->insert('scli', $data);
-				echo "Registro Agregado ".$mcodigo;
-				logusu('SCLI',"Cliente $mcodigo INCLUIDO");
-			} else
-			echo "Fallo Agregado!!! ".$mcodigo;
+			echo 'Deshabilitado';
+		}elseif($oper == 'edit'){
 
-		} elseif($oper == 'edit') {
-			$mcodigo = $data['cliente'];
-			$data['riffis'] = $data['rifci'];
-			unset($data['cliente']);
+			$posibles=array('clave');
+			foreach($data as $ind=>$val){
+				if(!in_array($ind,$posibles)){
+					echo 'Campo no permitido ('.$ind.')';
+					return false;
+				}
+			}
+
 			$this->db->where('id', $id);
 			$this->db->update('scli', $data);
-			logusu('SCLI',"Cliente $mcodigo MODIFICADO");
+			logusu('SCLI',"Cliente id:${id} MODIFICADO");
 			echo "Cliente Modificado";
 
 		} elseif($oper == 'del') {
-			$cliente = $this->datasis->dameval("SELECT cliente FROM scli WHERE id=$id");
-			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM smov WHERE cod_cli=".$this->db->escape($cliente));
-			$check += $this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE cod_cli=".$this->db->escape($cliente));
-			$check += $this->datasis->dameval("SELECT COUNT(*) FROM spre WHERE cod_cli=".$this->db->escape($cliente));
-			$check += $this->datasis->dameval("SELECT count(*) FROM pfac WHERE cod_cli=".$this->db->escape($cliente));
-			$check += $this->datasis->dameval("SELECT count(*) FROM bmov WHERE clipro='C' AND codcp=".$this->db->escape($cliente));
-			$check += $this->datasis->dameval("SELECT count(*) FROM otin WHERE cod_cli=".$this->db->escape($cliente));
-			$check += $this->datasis->dameval("SELECT count(*) FROM snte WHERE cod_cli=".$this->db->escape($cliente));
-			$check += $this->datasis->dameval("SELECT count(*) FROM snot WHERE cod_cli=".$this->db->escape($cliente));
-			if ( $this->datasis->istabla('fmay'))
-				$check += $this->datasis->dameval("SELECT count(*) FROM fmay WHERE cod_cli=".$this->db->escape($cliente));
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				//$this->db->simple_query("DELETE FROM scli WHERE id=$id ");
-				//logusu('SCLI',"Cliente $cliente ($id) ELIMINADO");
-				echo 'Cliente Eliminado';
-			}
-		};
+			echo 'Deshabilitado';
+		}
 	}
 
 
@@ -1252,8 +1219,8 @@ class Scli extends validaciones {
 				$mcliente = str_pad($this->_numatri($this->datasis->prox_sql('ncodcli')),5,'0', STR_PAD_LEFT);
 		}
 		// REVISA POR SI ESTA REPETIDO
-		while ( true ) {
-			if ($this->datasis->dameval("SELECT count(*) FROM scli WHERE cliente=".$this->db->escape($mcliente)) == 0 )
+		while(true){
+			if ($this->datasis->dameval("SELECT COUNT(*) FROM scli WHERE cliente=".$this->db->escape($mcliente)) == 0 )
 				break;
 			$mcliente = str_pad($this->_numatri($this->datasis->prox_sql('ncodcli')),5,'0',STR_PAD_LEFT);
 		}
@@ -1955,7 +1922,6 @@ class Scli extends validaciones {
 		$edit->email->rule = 'trim|valid_email';
 		$edit->email->size =22;
 		$edit->email->maxlength =100;
-
 
 		$edit->tipo = new autoUpdateField('tipo','1', '1');
 		$edit->buttons('save', 'undo');

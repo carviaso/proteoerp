@@ -173,7 +173,7 @@ class Sfac extends Controller {
 			if (transac)	{
 				window.open(\''.site_url('contabilidad/casi/localizador/transac/procesar').'/\'+transac, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
 			} else {
-				$.prompt("<h1>Transaccion invalida</h1>");
+				$.prompt("<h1>Transacci&oacute;n invalida</h1>");
 			}
 		};';
 
@@ -546,7 +546,7 @@ class Sfac extends Controller {
 			'width'         => 50,
 			'edittype'      => "'select'",
 			'editrules'     => '{ required:false}',
-			'editoptions'   => '{ value: '.$avende.',  style:"width:220px"}',
+			'editoptions'   => '{ value: '.$avende.',  style:"width:200px"}',
 			'stype'         => "'text'",
 		));
 
@@ -899,7 +899,7 @@ class Sfac extends Controller {
 
 
 		$grid->addField('nfiscal');
-		$grid->label('No Fiscal');
+		$grid->label('No.Fiscal');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'true',
@@ -1029,7 +1029,7 @@ class Sfac extends Controller {
 		));
 
 		$grid->addField('maqfiscal');
-		$grid->label('Maq. Fiscal');
+		$grid->label('Maq.Fiscal');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $xmes,
@@ -1076,18 +1076,6 @@ class Sfac extends Controller {
 			'formoptions'   => '{ label:"Observacion 2" }'
 		));
 
-		$grid->addField('id');
-		$grid->label('Id');
-		$grid->params(array(
-			'hidden'        => 'true',
-			'align'         => "'center'",
-			'frozen'        => 'true',
-			'width'         => 40,
-			'editable'      => 'false',
-			'search'        => 'false'
-		));
-
-
 		$grid->addField('maestra');
 		$grid->label('Maestra');
 		$grid->params(array(
@@ -1099,6 +1087,16 @@ class Sfac extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 8 }',
 		));
 
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'        => 'true',
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -1159,7 +1157,7 @@ class Sfac extends Controller {
 	//******************************************************************
 	//Busca la data en el Servidor por json
 	function getdata(){
-		$grid       = $this->jqdatagrid;
+		$grid = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('sfac');
@@ -1187,70 +1185,40 @@ class Sfac extends Controller {
 	//******************************************************************
 	//Guarda la Informacion
 	function setData(){
-		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
+		$id     = intval($this->input->post('id'));
 		$data   = $_POST;
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
-		if($oper == 'edit') {
-			if ( empty($data['entregado']) )
-				unset($data['entregado']);
-			$this->db->where('id', $id);
-			$this->db->update('sfac', $data);
-			logusu('SFAC',"Factura $id MODIFICADO");
-			echo "Registro Modificado";
+		if($id>0){
+			if($oper == 'edit') {
+				if(empty($data['entregado'])) unset($data['entregado']);
 
-		} elseif($oper == 'del') {
-			/*
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM sfac WHERE id=$id ");
-				logusu('SFAC',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
+				$posibles=array('entregado','nfiscal','maqfiscal','comiadi','observa','observ1','dmaqfiscal','vd');
+				foreach($data as $ind=>$val){
+					if(!in_array($ind,$posibles)){
+						echo 'Campo no permitido ('.$ind.')';
+						return false;
+					}
+				}
+
+				$this->db->where('id', $id);
+				$this->db->update('sfac', $data);
+				logusu('SFAC',"Factura ${id} MODIFICADO");
+				echo 'Registro Modificado';
+
+			} elseif($oper == 'del') {
+				echo 'Deshabilitado';
 			}
-			*/
-		};
+		}
 	}
 
 	//******************************************************************
 	//Guarda la Informacion
 	function setDatam(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			if ( empty($data['entregado']) )
-				unset($data['entregado']);
-			$this->db->where('id', $id);
-			$this->db->update('sfac', $data);
-			logusu('SFAC',"Registro $id MODIFICADO");
-			echo "Registro Modificado";
-
-		} elseif($oper == 'del') {
-			$transac = $this->datasis->dameval("SELECT transac FROM sfac WHERE id=$id");
-			$upago   = $this->datasis->dameval("SELECT upago   FROM sfac WHERE id=$id");
-			$cliente = $this->datasis->dameval("SELECT cod_cli FROM sfac WHERE id=$id");
-
-			$this->db->query("UPDATE sfac   SET tipo_doc='X' WHERE transac='$transac' ");
-			$this->db->query("UPDATE sitems SET tipoa='X'    WHERE transac=$id AND fecha=curdate()");
-			$this->db->query("UPDATE scli   SET upago=$upago WHERE cliente=".$this->db->escape($cliente));
-			logusu('SFAC',"Factura $id ANULADA");
-
-			echo "Factura Anulada";
-		};
+		echo 'Deshabilitado';
 	}
 
 	//******************************************************************
@@ -1512,6 +1480,7 @@ class Sfac extends Controller {
 		$grid->setSearch(true);
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+		$grid->setOndblClickRow('');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdatait/'));
@@ -1962,7 +1931,7 @@ class Sfac extends Controller {
 	//******************************************************************
 	// Reintegrar retencion de IVA
 	function sfacreivaef(){
-		$id     = $this->uri->segment($this->uri->total_segments());
+		$id     = intval($this->uri->segment($this->uri->total_segments()));
 		$reinte = 0;
 		$numero = rawurldecode($this->input->post('numero'));
 		$fecha  = rawurldecode($this->input->post('fecha'));
@@ -1971,32 +1940,43 @@ class Sfac extends Controller {
 		$cheque = rawurldecode($this->input->post('cheque'));
 		$benefi = rawurldecode($this->input->post('benefi'));
 
-		$mdevo  = "Exito";
+		$mdevo  = 'Exito';
 
-		memowrite("efecha=${efecha}, fecha=${fecha}, numero=${numero}, id=${id}, caja=${caja}, cheque=${cheque}, benefi=${benefi}",'sfacreivaef');
+		//memowrite("efecha=${efecha}, fecha=${fecha}, numero=${numero}, id=${id}, caja=${caja}, cheque=${cheque}, benefi=${benefi}",'sfacreivaef');
 
 		// status de la factura
 		$fecha  = substr($fecha, 6,4).substr($fecha, 3,2).substr($fecha, 0,2);
 		$efecha = substr($efecha,6,4).substr($efecha,3,2).substr($efecha,0,2);
 
-		$tipo_doc = $this->datasis->dameval("SELECT tipo_doc FROM sfac WHERE id=$id");
-		$referen  = $this->datasis->dameval("SELECT referen  FROM sfac WHERE id=$id");
-		$numfac   = $this->datasis->dameval("SELECT numero   FROM sfac WHERE id=$id");
-		$cod_cli  = $this->datasis->dameval("SELECT cod_cli  FROM sfac WHERE id=$id");
-		$monto    = $this->datasis->dameval("SELECT ROUND(iva*0.75,2)  FROM sfac WHERE id=$id");
-		$anterior = $this->datasis->dameval("SELECT reiva FROM sfac WHERE id=$id");
+		$tipo_doc = $this->datasis->dameval("SELECT tipo_doc FROM sfac WHERE id=${id}");
+		$referen  = $this->datasis->dameval("SELECT referen  FROM sfac WHERE id=${id}");
+		$numfac   = $this->datasis->dameval("SELECT numero   FROM sfac WHERE id=${id}");
+		$cod_cli  = $this->datasis->dameval("SELECT cod_cli  FROM sfac WHERE id=${id}");
+		$monto    = $this->datasis->dameval("SELECT ROUND(iva*0.75,2)  FROM sfac WHERE id=${id}");
+		$anterior = $this->datasis->dameval("SELECT reiva FROM sfac WHERE id=${id}");
 
 		$usuario  = addslashes($this->session->userdata('usuario'));
-		$codbanc = substr($caja,0,2);
+		$codbanc  = substr($caja,0,2);
+
+		$dbcodbanc= $this->db->escape($codbanc);
+		$dbcheque = $this->db->escape($cheque);
+		$dbfecha  = $this->db->escape($fecha);
+		$dbnumero = $this->db->escape($numero);
+		$dbefecha = $this->db->escape($efecha);
+		$dbcaja   = $this->db->escape($caja  );
+		$dbcheque = $this->db->escape($cheque);
+		$dbbenefi = $this->db->escape($benefi);
+		$dbnumfac = $this->db->escape($numfac);
+
 		$verla = 0;
 
 		if ($codbanc == '__') {
 			$tbanco  = '';
 			$cheque  = '';
 		} else {
-			$tbanco  = $this->datasis->dameval("SELECT tbanco FROM banc WHERE codbanc='$codbanc'");
-			$cheque  = str_pad($cheque, 12, "0", STR_PAD_LEFT);
-			$query   = "SELECT count(*) FROM bmov WHERE tipo_op='CH' AND codbanc='$codbanc' AND numero='$cheque' ";
+			$tbanco  = $this->datasis->dameval("SELECT tbanco FROM banc WHERE codbanc=${dbcodbanc}");
+			$cheque  = str_pad($cheque, 12, '0', STR_PAD_LEFT);
+			$query   = "SELECT COUNT(*) AS cana FROM bmov WHERE tipo_op='CH' AND codbanc=${dbcodbanc} AND numero=${dbcheque}";
 			if($tbanco != 'CAJ'){
 				$verla = $this->datasis->dameval($query);
 			}
@@ -2004,118 +1984,110 @@ class Sfac extends Controller {
 
 		if($verla == 0){
 			if ( strlen($numero) == 14 ){
-				if (  $anterior == 0 )  {
-					$mSQL = "UPDATE sfac SET reiva=round(iva*0.75,2), creiva='$numero', freiva='$fecha', ereiva='$efecha' WHERE id=$id";
+				if($anterior == 0){
+					$mSQL = "UPDATE sfac SET reiva=ROUND(iva*0.75,2), creiva=${dbnumero}, freiva=${dbfecha}, ereiva=${dbefecha} WHERE id=${id}";
 					$this->db->simple_query($mSQL);
-					memowrite($mSQL,"sfacreivaSFAC");
+					//memowrite($mSQL,"sfacreivaSFAC");
 
-					$transac = $this->datasis->prox_sql("ntransa");
+					$transac = $this->datasis->prox_sql('ntransa');
 					$transac = str_pad($transac, 8, "0", STR_PAD_LEFT);
 
-					if ( $codbanc == '__' ) {   // manda a cxp
+					if($codbanc == '__'){  // manda a cxp
 						if ( $tipo_doc == 'F' ) {
 							// crea un registro en sprm
 							$this->db->simple_query($mSQL);
-							$mnumant = $this->datasis->prox_sql("num_nd");
-							$mnumant = str_pad($mnumant, 8, "0", STR_PAD_LEFT);
+							$mnumant  = $this->datasis->prox_sql('num_nd');
+							$mnumant  = str_pad($mnumant, 8, '0', STR_PAD_LEFT);
+							$dbobserva= $this->db->escape("REINTEGRO POR RETENCION A DOCUMENTO ${numfac}");
 							$mSQL = "INSERT INTO sprm (cod_prv, nombre, tipo_doc, numero, fecha, monto, impuesto, abonos, vence, observa1, tipo_ref, num_ref, estampa, hora, usuario, transac, codigo, descrip )
-								SELECT 'REINT' cod_prv, 'REINTEGRO A CLIENTE' nombre, 'ND' tipo_doc, '$mnumant' numero, freiva fecha,
-								reiva monto, 0 impuesto, 0 abonos, freiva vence, 'REINTEGRO POR RETENCION A DOCUMENTO $numfac' observa1,
-									IF(tipo_doc='F','FC', 'DV' ) tipo_ref, numero num_ref, curdate() estampa,
-								curtime() hora, '".$usuario."' usuario, '$transac' transac, 'NOCON 'codigo,
+								SELECT 'REINT' cod_prv, 'REINTEGRO A CLIENTE' nombre, 'ND' tipo_doc, '${mnumant}' numero, freiva fecha,
+								reiva monto, 0 impuesto, 0 abonos, freiva vence, ${dbobserva} observa1,
+									IF(tipo_doc='F','FC', 'DV') tipo_ref, numero num_ref, CURDATE() estampa,
+								CURTIME() hora, '".$usuario."' usuario, '${transac}' transac, 'NOCON' codigo,
 								'NOTA DE CONTABILIDAD' descrip
-							FROM sfac WHERE id=$id";
+							FROM sfac WHERE id=${id}";
 							$this->db->simple_query($mSQL);
-							memowrite($mSQL,"sfacreivaCXP");
 
-/*
-							$mSQL  = "INSERT INTO bmov ( codbanc, moneda, numcuent, banco, saldo, tipo_op, numero,fecha, clipro, codcp, nombre, monto, concepto, benefi, posdata, liable, transac, usuario, estampa, hora, negreso ) ";
-							$mSQL .= "SELECT '$codbanc' codbanc, b.moneda, b.numcuent, ";
-							$mSQL .= "b.banco, b.saldo, IF(b.tbanco='CAJ','ND','CH') tipo_op, '$cheque' numero, ";
-							$mSQL .= "a.freiva, 'C' clipro, a.cod_cli codcp, a.nombre, a.reiva monto, ";
-							$mSQL .= "'REINTEGRO DE RETENCION APLICADA A FC $numfac' concepto, ";
-							$mSQL .= "'$benefi' benefi, a.freiva posdata, 'S' liable, '$transac' transac, ";
-							$mSQL .= "'$usuario' usuario, curdate() estampa, curtime() hora, '$negreso' negreso ";
-							$mSQL .= "FROM sfac a JOIN banc b ON b.codbanc='$codbanc' ";
-							$mSQL .= "WHERE a.id=$id ";
-							memowrite($mSQL,"sfacreivaCH");
-*/
-							$mdevo = "<h1 style='color:green;'>EXITO</h1>Cambios Guardados, Nota de Credito generada y ND en CxP por Reintero (REINT) ";
+							$mdevo = "<h1 style='color:green;'>EXITO</h1>Cambios Guardados, Nota de Cr&eacute;dito generada y ND en CxP por Reintero (REINT) ";
 						} else {
 							//Devoluciones
 						}
 
 
-					} else {
-						if ( $tbanco == 'CAJ' ) {
+					}else{
+						if($tbanco == 'CAJ'){
 							$m = 1;
 							while ( $m > 0 ) {
-								$cheque = $this->datasis->prox_sql("ncaja$codbanc");
-								$cheque = str_pad($cheque, 12, "0", STR_PAD_LEFT);
-								$m = $this->datasis->dameval("SELECT COUNT(*) FROM bmov WHERE codbanc='$codbanc' AND tipo_op='ND' AND numero='$cheque' ");
+								$cheque = $this->datasis->prox_sql("ncaja${codbanc}");
+								$cheque = str_pad($cheque, 12, '0', STR_PAD_LEFT);
+								$m = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM bmov WHERE codbanc=${dbcodbanc} AND tipo_op='ND' AND numero=${dbcheque}");
 							}
 						}
 
-						$negreso = $this->datasis->prox_sql("negreso");
-						$negreso = str_pad($negreso, 8, "0", STR_PAD_LEFT);
+						$negreso = $this->datasis->prox_sql('negreso');
+						$negreso = str_pad($negreso, 8, '0', STR_PAD_LEFT);
 
-						//$numero = str_pad($numero, 8, "0", STR_PAD_LEFT);
 						$saldo = 0;
 						if ($referen == 'C') {
-							$saldo =  $this->datasis->dameval("SELECT monto-abonos FROM smov WHERE tipo_doc='FC' AND numero='$numfac'");
+							$saldo =  $this->datasis->dameval("SELECT monto-abonos FROM smov WHERE tipo_doc='FC' AND numero=${dbnumfac}");
 						}
 						if ( $tipo_doc == 'F' ) {
 							// crea un registro en bmov
+							$dbconcepto="REINTEGRO DE RETENCION APLICADA A FC ${numfac}";
 							$mSQL  = "INSERT INTO bmov ( codbanc, moneda, numcuent, banco, saldo, tipo_op, numero,fecha, clipro, codcp, nombre, monto, concepto, benefi, posdata, liable, transac, usuario, estampa, hora, negreso ) ";
-							$mSQL .= "SELECT '$codbanc' codbanc, b.moneda, b.numcuent, ";
-							$mSQL .= "b.banco, b.saldo, IF(b.tbanco='CAJ','ND','CH') tipo_op, '$cheque' numero, ";
+							$mSQL .= "SELECT ${dbcodbanc} codbanc, b.moneda, b.numcuent, ";
+							$mSQL .= "b.banco, b.saldo, IF(b.tbanco='CAJ','ND','CH') tipo_op, ${dbcheque} numero, ";
 							$mSQL .= "a.freiva, 'C' clipro, a.cod_cli codcp, a.nombre, a.reiva monto, ";
-							$mSQL .= "'REINTEGRO DE RETENCION APLICADA A FC $numfac' concepto, ";
-							$mSQL .= "'$benefi' benefi, a.freiva posdata, 'S' liable, '$transac' transac, ";
-							$mSQL .= "'$usuario' usuario, curdate() estampa, curtime() hora, '$negreso' negreso ";
-							$mSQL .= "FROM sfac a JOIN banc b ON b.codbanc='$codbanc' ";
-							$mSQL .= "WHERE a.id=$id ";
-							memowrite($mSQL,"sfacreivaCH");
+							$mSQL .= "${dbconcepto} concepto, ";
+							$mSQL .= "${dbbenefi} benefi, a.freiva posdata, 'S' liable, '${transac}' transac, ";
+							$mSQL .= "'${usuario}' usuario, CURDATE() estampa, CURTIME() hora, '${negreso}' negreso ";
+							$mSQL .= "FROM sfac a JOIN banc b ON b.codbanc=${dbcodbanc}";
+							$mSQL .= "WHERE a.id=${id}";
 							$this->db->simple_query($mSQL);
 
-							$mdevo = "<h1 style='color:green;'>EXITO</h1>Cambios Guardados, Nota de Credito generada y cargo en caja generado";
+							$mdevo = "<h1 style='color:green;'>EXITO</h1>Cambios Guardados, Nota de Cr&eacute;dito generada y cargo en caja generado";
 						} else {
 							//Devoluciones
 						}
 					}
-					if ( $tipo_doc == 'F' ) {
+					if($tipo_doc == 'F'){
 						$this->db->simple_query($mSQL);
-						$mnumant = $this->datasis->prox_sql("ndcli");
-						$mnumant = str_pad($mnumant, 8, "0", STR_PAD_LEFT);
+						$mnumant  = $this->datasis->prox_sql('ndcli');
+						$mnumant  = str_pad($mnumant, 8, '0', STR_PAD_LEFT);
+						$dbobserva= $this->db->escape("APLICACION DE RETENCION A DOCUMENTO ${numfac}");
 						$mSQL = "INSERT INTO smov (cod_cli, nombre, tipo_doc, numero, fecha, monto, impuesto, abonos, vence, observa1, tipo_ref, num_ref, estampa, hora, usuario, transac, codigo, descrip, nroriva, emiriva )
-							SELECT 'REIVA' cod_cli, 'RETENCION DE IVA POR COMPENSAR' nombre, 'ND' tipo_doc, '$mnumant' numero, freiva fecha,
-							reiva monto, 0 impuesto, 0 abonos, freiva vence, 'APLICACION DE RETENCION A DOCUMENTO $numfac' observa1,
-								IF(tipo_doc='F','FC', 'DV' ) tipo_ref, numero num_ref, curdate() estampa,
-							curtime() hora, '".$usuario."' usuario, '$transac' transac, 'NOCON 'codigo,
+							SELECT 'REIVA' cod_cli, 'RETENCION DE IVA POR COMPENSAR' nombre, 'ND' tipo_doc, '${mnumant}' numero, freiva fecha,
+							reiva monto, 0 impuesto, 0 abonos, freiva vence, ${dbobserva} observa1,
+								IF(tipo_doc='F','FC', 'DV' ) tipo_ref, numero num_ref, CURDATE() estampa,
+							CURTIME() hora, '".$usuario."' usuario, '${transac}' transac, 'NOCON' codigo,
 							'NOTA DE CONTABILIDAD' descrip, creiva, ereiva
-						FROM sfac WHERE id=$id";
+						FROM sfac WHERE id=${id}";
 						$this->db->simple_query($mSQL);
-						memowrite($mSQL,"sfacreivaND");
 					} else {
 						//Devoluciones
 					}
-
-				} else {
-					$mdevo = "<h1 style='color:red;'>ERROR</h1>Retencion ya aplicada";
+				}else{
+					$mdevo = "<h1 style='color:red;'>ERROR</h1>Retenci&oacute;n ya aplicada";
 				}
-			} else $mdevo = "<h1 style='color:red;'>ERROR</h1>Longitud del comprobante menor a 14 caracteres, corrijalo y vuelva a intentar";
-		} else $mdevo = "<h1 style='color:red;'>ERROR</h1>Un cheque con ese numero ya existe ($cheque) ";
+			}else{
+				$mdevo = "<h1 style='color:red;'>ERROR</h1>Longitud del comprobante menor a 14 caracteres, corrijalo y vuelva a intentar";
+			}
+		}else{
+			$mdevo = "<h1 style='color:red;'>ERROR</h1>Un cheque con ese n&uacute;mero ya existe (${cheque}) ";
+		}
 		echo $mdevo;
 	}
 
 	//******************************************************************
 	// json para llena la tabla de inventario
 	function sfacsig() {
-		$numa  = $this->uri->segment($this->uri->total_segments());
-		$tipoa = $this->uri->segment($this->uri->total_segments()-1);
+		$numa    = $this->uri->segment($this->uri->total_segments());
+		$tipoa   = $this->uri->segment($this->uri->total_segments()-1);
+		$dbnuma  = $this->db->escape($numa);
+        $dbtipoa = $this->db->escape($tipoa);
 
 		$mSQL  = 'SELECT a.codigoa, a.desca, a.cana, a.preca, a.tota, a.iva, IF(a.pvp < a.preca, a.preca, a.pvp)  pvp, ROUND(100-a.preca*100/IF(a.pvp<a.preca,a.preca, a.pvp),2) descuento, ROUND(100-ROUND(a.precio4*100/(100+a.iva),2)*100/a.preca,2) precio4, a.detalle, a.fdespacha, a.udespacha, a.bonifica, b.id url ';
-		$mSQL .= "FROM sitems a LEFT JOIN sinv b ON a.codigoa=b.codigo WHERE a.tipoa='$tipoa' AND a.numa='$numa' ";
+		$mSQL .= "FROM sitems a LEFT JOIN sinv b ON a.codigoa=b.codigo WHERE a.tipoa=${dbtipoa} AND a.numa=${dbnuma} ";
 		$mSQL .= "ORDER BY a.codigoa";
 
 		$query = $this->db->query($mSQL);
@@ -2147,7 +2119,7 @@ class Sfac extends Controller {
 		$form->build_form();
 
 		$data['content'] = $form->output;
-		$data['title']   = heading("Convertir Pedido en Factura");
+		$data['title']   = heading('Convertir Pedido en Factura');
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
@@ -2218,12 +2190,16 @@ class Sfac extends Controller {
 	function tabla() {
 		$id  = $this->uri->segment($this->uri->total_segments());
 		$dbid= $this->db->escape($id);
-		$cliente = $this->datasis->dameval("SELECT cod_cli FROM sfac WHERE id=${dbid}");
-		$transac = $this->datasis->dameval("SELECT transac FROM sfac WHERE id=${dbid}");
+		$cliente   = $this->datasis->dameval("SELECT cod_cli FROM sfac WHERE id=${dbid}");
+		$transac   = $this->datasis->dameval("SELECT transac FROM sfac WHERE id=${dbid}");
+		$dbcliente = $this->db->escape($cliente);
+		$dbtransac = $this->db->escape($transac);
+
+
 		$salida = '';
 
 		// Revisa formas de pago sfpa
-		$mSQL = "SELECT tipo, numero, monto FROM sfpa WHERE transac='$transac' AND monto<>0";
+		$mSQL = "SELECT tipo, numero, monto FROM sfpa WHERE transac=${dbtransac} AND monto<>0";
 		$query = $this->db->query($mSQL);
 		if ( $query->num_rows() > 0 ){
 			$salida .= "<br><table width='100%' border=1>";
@@ -2240,13 +2216,13 @@ class Sfac extends Controller {
 		}
 
 		// Cuentas por Cobrar
-		$mSQL = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM smov WHERE cod_cli='$cliente' AND abonos<>monto AND tipo_doc<>'AB' ORDER BY fecha DESC ";
+		$mSQL = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM smov WHERE cod_cli=${dbcliente} AND abonos<>monto AND tipo_doc<>'AB' ORDER BY fecha DESC ";
 		$query = $this->db->query($mSQL);
 		$saldo = 0;
 		if ( $query->num_rows() > 0 ){
 			$salida .= "<br><table width='100%' border=1>";
 			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento Pendientes en CxC</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
 			$i = 1;
 			foreach ($query->result_array() as $row){
 				if ( $i < 6 ) {
@@ -2273,28 +2249,29 @@ class Sfac extends Controller {
 		$query->free_result();
 
 		// Revisa movimiento de bancos
-		$mSQL = "SELECT codbanc, numero, monto FROM bmov WHERE transac='$transac' ";
+		$mSQL = "SELECT codbanc, numero, monto FROM bmov WHERE transac=${dbtransac} ";
 		$query = $this->db->query($mSQL);
 		if ( $query->num_rows() > 0 ){
-			$salida .= "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento en Caja o Banco</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Bco</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
+			$salida .= '<br><table width=\'100%\' border=\'1\'>';
+			$salida .= '<tr bgcolor=\'#e7e3e7\'><td colspan=\'3\'>Movimiento en Caja o Banco</td></tr>';
+			$salida .= '<tr bgcolor=\'#e7e3e7\'><td>Bco.</td><td align=\'center\'>N&uacute;mero</td><td align=\'center\'>Monto</td></tr>';
 			foreach ($query->result_array() as $row){
 				$salida .= '<tr>';
-				$salida .= "<td>".$row['codbanc']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
+				$salida .= '<td>'.$row['codbanc'].'</td>';
+				$salida .= '<td>'.$row['numero']. '</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
 				$salida .= '</tr>';
 			}
-			$salida .= "</table>";
+			$salida .= '</table>';
 		}
 
 		echo $salida;
 	}
 
 	function sclibu(){
-		$numero = $this->uri->segment(4);
-		$id = $this->datasis->dameval("SELECT b.id FROM sfac a JOIN scli b ON a.cod_cli=b.cliente WHERE numero='$numero'");
+		$numero   = $this->uri->segment(4);
+		$dbnumero = $this->db->escape($numero);
+		$id = $this->datasis->dameval("SELECT b.id FROM sfac a JOIN scli b ON a.cod_cli=b.cliente WHERE numero=${dbnumero}");
 		redirect('ventas/scli/dataedit/show/'.$id);
 	}
 
@@ -2855,9 +2832,9 @@ class Sfac extends Controller {
 			$dbnumero = $this->db->escape($numero);
 			$dbmaestra= $this->db->escape($maestra );
 			if(!empty($maestra) && $maestra!=$numero){
-				$ww= "numero=$dbmaestra OR maestra=$dbmaestra";
+				$ww= "numero=${dbmaestra} OR maestra=${dbmaestra}";
 			}else{
-				$ww= "maestra=$dbnumero";
+				$ww= "maestra=${dbnumero}";
 			}
 
 			$mSQL="SELECT id,numero,nfiscal FROM sfac WHERE ${ww} ORDER BY numero LIMIT 100";
@@ -2980,7 +2957,7 @@ class Sfac extends Controller {
 				FROM (SELECT SUM(b.cana) AS cana,TRIM(a.codigo) AS codigo,b.preca,b.numa
 				FROM sinv AS a
 				JOIN sitems AS b ON a.codigo=b.codigoa
-				WHERE b.numa=$dbfactura AND b.tipoa='F'
+				WHERE b.numa=${dbfactura} AND b.tipoa='F'
 				GROUP BY b.codigoa,b.preca) AS aa
 				LEFT JOIN sfac   AS c  ON aa.numa=c.factura AND c.tipo_doc='D'
 				LEFT JOIN sitems AS d ON c.numero=d.numa AND c.tipo_doc=d.tipoa AND aa.codigo=d.codigoa AND aa.preca=d.preca
@@ -4076,7 +4053,7 @@ class Sfac extends Controller {
 			$this->db->simple_query('ALTER TABLE sfac DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE sfac ADD UNIQUE INDEX tipo_doc, numero (numero)');
 			$this->db->simple_query('ALTER TABLE sfac ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		}
 
 	}
 }
