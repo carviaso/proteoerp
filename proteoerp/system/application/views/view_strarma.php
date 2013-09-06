@@ -139,7 +139,7 @@ function autocod(id){
 		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('ajax/buscasinvart'); ?>",
+				url:  "<?php echo site_url('ajax/buscasinvart/N'); ?>",
 				type: 'POST',
 				dataType: 'json',
 				data: "q="+req.term,

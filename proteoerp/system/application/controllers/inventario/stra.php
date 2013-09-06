@@ -196,9 +196,8 @@ class Stra extends Controller {
 			});';
 
 
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -207,7 +206,7 @@ class Stra extends Controller {
 	//******************************************************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 

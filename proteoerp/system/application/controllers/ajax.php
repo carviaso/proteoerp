@@ -792,7 +792,13 @@ class Ajax extends Controller {
 	}
 
 	//Busca sinv solo articulos
-	function buscasinvart(){
+	function buscasinvart($activo='S'){
+		if($activo=='S'){
+			$activo=' AND a.activo=\'S\'';
+		}else{
+			$activo='';
+		}
+
 		$comodin= $this->datasis->traevalor('COMODIN');
 		$mid    = $this->input->post('q');
 		if($mid == false) $mid  = $this->input->post('term');
@@ -811,14 +817,14 @@ class Ajax extends Controller {
 				,a.peso, a.ultimo, a.pond FROM sinv AS a
 				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
 				WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba} OR a.alterno LIKE ${qba})
-					AND a.activo='S' AND a.tipo='Articulo'
+					${activo} AND a.tipo='Articulo'
 				ORDER BY a.descrip LIMIT ".$this->autolimit;
 			$cana=1;
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']   = '('.$row['codigo'].') '.$this->en_utf8($row['descrip']).' '.$row['precio1'].' Bs. - '.$row['existen'];
+					$retArray['label']   = '('.$this->en_utf8($row['codigo']).') '.$this->en_utf8($row['descrip']).' '.$row['precio1'].' Bs. - '.$row['existen'];
 					$retArray['value']   = $this->en_utf8($row['codigo']);
 					$retArray['codigo']  = $this->en_utf8($row['codigo']);
 					$retArray['cana']    = $cana;
