@@ -3823,22 +3823,23 @@ class Sinv extends Controller {
 	//
 	//  Recalcula segun dolares
 	//
-	function recaldolar( $cambio = 0  ) {
-		$cambio  = rawurldecode($this->input->post('cambio'));
-		$data = $this->datasis->damesesion();
+	function recaldolar($cambio = 0){
+		$cambio = rawurldecode($this->input->post('cambio'));
+		$data   = $this->datasis->damesesion();
 		if ( isset($data['data1']) ){
 			$where = $data['data1'];
 			if (!empty($where)){
-				if ( $cambio > 0 ){
-					$mSQL = "UPDATE sinv SET standard=ultimo WHERE dolar>0 AND formcal='S'";
+				$cambio = floatval($cambio);
+				if( $cambio > 0 ){
+					$mSQL = "UPDATE sinv SET standard=ultimo WHERE dolar>0 AND formcal='S' AND standard=0";
 					$this->db->query($mSQL);
 
 					$mSQL = "SET
-					precio1=ROUND((dolar*$cambio)*(100+iva)/(100-margen1),2),
-					precio2=ROUND((dolar*$cambio)*(100+iva)/(100-margen2),2),
-					precio3=ROUND((dolar*$cambio)*(100+iva)/(100-margen3),2),
-					precio4=ROUND((dolar*$cambio)*(100+iva)/(100-margen4),2),
-					standard=ROUND(dolar*$cambio,2) ";
+					precio1=ROUND((dolar*${cambio})*(100+iva)/(100-margen1),2),
+					precio2=ROUND((dolar*${cambio})*(100+iva)/(100-margen2),2),
+					precio3=ROUND((dolar*${cambio})*(100+iva)/(100-margen3),2),
+					precio4=ROUND((dolar*${cambio})*(100+iva)/(100-margen4),2),
+					standard=ROUND(dolar*${cambio},2) ";
 					$this->db->simple_query("UPDATE sinv a ".$mSQL." ".$where." AND dolar > 0 AND formcal='S'");
 					$this->datasis->sinvrecalcular("M");
 					$this->datasis->sinvredondear();

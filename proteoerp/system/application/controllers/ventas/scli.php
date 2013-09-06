@@ -1579,8 +1579,8 @@ class Scli extends validaciones {
 
 		$edit->repre  = new inputField('Representante', 'repre');
 		$edit->repre->rule = 'trim';
-		$edit->repre->maxlength =30;
-		$edit->repre->size = 30;
+		$edit->repre->maxlength =40;
+		$edit->repre->size = 40;
 
 		$edit->cirepre = new inputField('C&eacute;dula de Rep.', 'cirepre');
 		$edit->cirepre->rule = 'trim|strtoupper|callback_chci';
@@ -1611,6 +1611,12 @@ class Scli extends validaciones {
 		$edit->zona->options('SELECT codigo, CONCAT(codigo," ", nombre) nombre FROM zona ORDER BY nombre');
 		$edit->zona->style = 'width:166px';
 		$edit->zona->insertValue = trim($this->datasis->traevalor('ZONAXDEFECTO'));
+
+		$edit->entidad = new dropdownField('Estado','estado');
+		$edit->entidad->style='width:166px;';
+		$edit->entidad->option('','Seleccione un Estado');
+		$edit->entidad->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
+
 
 		$edit->pais = new inputField('Pa&iacute;s','pais');
 		$edit->pais->rule = 'trim';
@@ -1652,7 +1658,7 @@ class Scli extends validaciones {
 
 		$edit->url = new inputField('Url', 'url');
 		$edit->url->rule = 'trim';
-		$edit->url->size=40;
+		$edit->url->size=65;
 		$edit->url->maxlength =120;
 
 		$edit->fb = new inputField('facebook', 'fb');
@@ -1743,10 +1749,6 @@ class Scli extends validaciones {
 		$edit->tminimo->showformat  = 'decimal';
 		$edit->tminimo->type='inputhidden';
 
-		$edit->entidad = new dropdownField('Estado','estado');
-		$edit->entidad->style='width:220px;';
-		$edit->entidad->option('','Seleccione un Estado');
-		$edit->entidad->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
 
 		$edit->build();
 
@@ -1885,7 +1887,7 @@ class Scli extends validaciones {
 		$edit->grupo->rule = 'required';
 		$edit->grupo->size = 6;
 		$edit->grupo->maxlength = 4;
-		$edit->grupo->style = 'width:200px';
+		$edit->grupo->style = 'width:220px';
 		$edit->grupo->insertValue = $this->datasis->dameval('SELECT grupo FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"');
 
 		$edit->dire11 = new inputField('Direcci&oacute;n','dire11');

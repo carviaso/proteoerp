@@ -157,8 +157,8 @@ else:
 			<td class="littletableheaderc">C.I.</td>
 			<td class="littletablerow"><?php echo $form->cirepre->output ?></td>
 		</tr>
-		</table>
-		<table width="100%">
+		<!-- /table>
+		<table width="100%" -->
 		<tr>
 			<td class="littletableheaderc"><?php echo $form->vendedor->label  ?></td>
 			<td class="littletablerow"><?php echo $form->vendedor->output ?></td>
