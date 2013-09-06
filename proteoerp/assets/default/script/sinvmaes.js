@@ -44,7 +44,6 @@ function cost(pertenece){
 
 	if(fcalc=="P"){
 		ccosto=costo;
-
 	}else if(fcalc=="U"){
 		ccosto=ultimo;
 	}else if(fcalc=="S"){

@@ -142,7 +142,7 @@ function autocod(id){
 				url:  "<?php echo site_url('ajax/buscasinvart/N'); ?>",
 				type: 'POST',
 				dataType: 'json',
-				data: "q="+req.term,
+				data: { q :req.term},
 				success:
 					function(data){
 						var sugiere = [];

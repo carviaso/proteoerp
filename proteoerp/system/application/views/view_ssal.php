@@ -200,11 +200,11 @@ function del_itssal(id){
 			</tr>
 
 			<?php for($i=0;$i<$form->max_rel_count['itssal'];$i++) {
-				$it_codigo   = "codigo_$i";
-				$it_descrip  = "itdescrip_$i";
-				$it_cant     = "cantidad_$i";
-				$it_costo    = "costo_$i";
-				$it_concepto = "concepto_$i";
+				$it_codigo   = "codigo_${i}";
+				$it_descrip  = "itdescrip_${i}";
+				$it_cant     = "cantidad_${i}";
+				$it_costo    = "costo_${i}";
+				$it_concepto = "concepto_${i}";
 			?>
 
 			<tr id='tr_itssal_<?php echo $i; ?>'>

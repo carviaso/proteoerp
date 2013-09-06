@@ -3634,8 +3634,11 @@ class Sinv extends Controller {
 
 		if($precio1>=$precio2 && $precio2>=$precio3 && $precio3>=$precio4){
 			$formcal= $do->get('formcal');
-			$iva= $do->get('iva');
-			$costo=($formcal=='U')? $do->get('ultimo'):($formcal=='P')? $do->get('pond'):($do->get('pond')>$do->get('ultimo'))? $do->get('pond') : $do->get('ultimo');
+			$iva    = $do->get('iva');
+			$ultimo = floatval($do->get('ultimo'));
+			$pond   = floatval($do->get('pond'));
+			$standar= floatval($do->get('standard'));
+			$costo  = ($formcal=='U')? $ultimo:($formcal=='P')? $pond:($formcal=='S')? $standar:($pond>$ultimo)? $pond:$ultimo;
 
 			for($i=1;$i<5;$i++){
 				$prec='precio'.$i;
