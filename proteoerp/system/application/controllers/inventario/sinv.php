@@ -3841,7 +3841,7 @@ class Sinv extends Controller {
 					precio4=ROUND((dolar*${cambio})*(100+iva)/(100-margen4),2),
 					standard=ROUND(dolar*${cambio},2) ";
 					$this->db->simple_query("UPDATE sinv a ".$mSQL." ".$where." AND dolar > 0 AND formcal='S'");
-					$this->datasis->sinvrecalcular("M");
+					$this->datasis->sinvrecalcular("P");
 					$this->datasis->sinvredondear();
 					echo " Cambio Concluido ";
 				} else
