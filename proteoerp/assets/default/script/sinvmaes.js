@@ -47,6 +47,8 @@ function cost(pertenece){
 
 	}else if(fcalc=="U"){
 		ccosto=ultimo;
+	}else if(fcalc=="S"){
+		ccosto=parseFloat($("#standard").val());
 	}else{
 		if (ultimo>costo)
 			ccosto=ultimo;
