@@ -2946,7 +2946,7 @@ class Sinv extends Controller {
 
 		$edit->premin = new dropdownField('Precio Minimo', 'premin');
 		$edit->premin->style='width:100px;';
-		$edit->premin->option('0','Inactivo');
+		$edit->premin->option('0','Todos');
 		$edit->premin->option('2','Precio 2');
 		$edit->premin->option('3','Precio 3');
 		$edit->premin->option('4','Precio 4');
@@ -3200,7 +3200,7 @@ class Sinv extends Controller {
 		$edit->bonifica->css_class='inputonlynum';
 		$edit->bonifica->rule='numeric|callback_positivo|trim';
 
-		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
+		if($this->datasis->traevalor('SUNDECOP') == 'S'){
 			$edit->mpps = new inputField('MPPS','mpps');
 			$edit->mpps->rule='max_length[20]';
 			$edit->mpps->size =22;
@@ -3577,9 +3577,7 @@ class Sinv extends Controller {
 			echo "Ubicacion del almacen".$alma." cambiada a ".$ubica.$mSQL;
 		else
 			echo "Fallo al intentar hacer el cambio ".$mSQL;
-
 	}
-
 
 
 	function _pre_insert($do){
@@ -3638,7 +3636,16 @@ class Sinv extends Controller {
 			$ultimo = floatval($do->get('ultimo'));
 			$pond   = floatval($do->get('pond'));
 			$standar= floatval($do->get('standard'));
-			$costo  = ($formcal=='U')? $ultimo:($formcal=='P')? $pond:($formcal=='S')? $standar:($pond>$ultimo)? $pond:$ultimo;
+			if($formcal=='U'){
+				$costo = $ultimo;
+			}elseif($formcal=='P'){
+				$costo = $pond;
+			}elseif($formcal=='S'){
+				$costo = $standar;
+			}else{
+				//Toma el mayor
+				$costo = ($pond>$ultimo)? $pond : $ultimo;
+			}
 
 			for($i=1;$i<5;$i++){
 				$prec='precio'.$i;
