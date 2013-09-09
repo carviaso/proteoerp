@@ -3009,6 +3009,7 @@ class Sfac extends Controller {
 	}
 
 	function _pre_insert($do,$action='I'){
+
 		$cliente= $do->get('cod_cli');
 		$tipoa  = $do->get('tipo_doc');
 		$manual = $do->get('manual');

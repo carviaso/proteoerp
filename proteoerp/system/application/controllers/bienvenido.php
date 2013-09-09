@@ -22,7 +22,7 @@ class Bienvenido extends Controller {
 	function autentificar(){
 		$usr=sha1($_POST['user']);
 		$pws=sha1($_POST['pws']);
-		
+
 		$esta = $this->datasis->dameval( "SHOW columns FROM usuario WHERE Field='activo'" );
 		if ( empty($esta) ) $this->db->simple_query("ALTER TABLE usuario ADD activo CHAR(1) ");
 		$this->db->simple_query("UPDATE usuario SET activo='S' WHERE activo <> 'N' ");
@@ -33,8 +33,8 @@ class Bienvenido extends Controller {
 			$this->session->set_userdata($sess_data);
 			redirect($this->session->userdata('estaba'));
 		}
-		
-		$cursor=$this->db->query("SELECT us_nombre FROM usuario WHERE SHA(us_codigo)='$usr' AND SHA(us_clave)='$pws' AND activo='S'");
+
+		$cursor=$this->db->query("SELECT us_nombre FROM usuario WHERE SHA(us_codigo)='${usr}' AND SHA(us_clave)='${pws}' AND activo='S'");
 		if($cursor->num_rows() > 0){
 			$rr = $cursor->row_array();
 			$sal = each($rr);
@@ -88,9 +88,10 @@ class Bienvenido extends Controller {
 	function accordion($pertenece=NULL){
 		if(empty($pertenece)) return;
 		$out='';
+		$utf8c=($this->db->char_set=='latin1') && ($this->config->item('charset')=='UTF-8');
 		$arreglo=arr_menu(2,$pertenece);
 		$arreglo=arr2panel($arreglo);
-		
+
 		if (count($arreglo)>0){
 			//$out ='<div id=\'accordion\'>';
 			foreach($arreglo as $panel => $opciones ){
@@ -99,7 +100,7 @@ class Bienvenido extends Controller {
 				$color = "#FFFFFF";
 				foreach ($opciones as $opcion) {
 					$out .= "<tr bgcolor='$color'><td>";
-					$out .= arr2link($opcion);
+					$out .= arr2link($opcion,$utf8c);
 					$out .= "</td></tr>\n";
 					if ( $color == "#FFFFFF" ) $color = "#F4F4F4"; else  $color = "#FFFFFF";
 				}$out .="</table></div>\n";
@@ -114,41 +115,35 @@ class Bienvenido extends Controller {
 
 	function cargapanel($pertenece=NULL) {
 		if(empty($pertenece)) return;
+		$utf8c=($this->db->char_set=='latin1') && ($this->config->item('charset')=='UTF-8');
 		$dbpertenece = $this->db->escape($pertenece);
 		$out         = '';
 		$arreglo     = arr_menu(2,$pertenece);
 		$arreglo     = arr2panel($arreglo);
 		if (count($arreglo)>0){
 			$out    = '';
-			$desca  = $this->datasis->dameval("SELECT mensaje FROM intramenu WHERE modulo=$dbpertenece");
-			$imagen = $this->datasis->dameval("SELECT TRIM(imagen) imagen  FROM intramenu WHERE modulo=$dbpertenece");
+			$desca  = $this->datasis->dameval("SELECT mensaje FROM intramenu WHERE modulo=${dbpertenece}");
+			$imagen = $this->datasis->dameval("SELECT TRIM(imagen) imagen  FROM intramenu WHERE modulo=${dbpertenece}");
+			if($utf8c) $desca= utf8_encode($desca);
 			$desca  = htmlentities($desca);
 			$out   .= '<div>';
 			$out   .= '<table width="100%" border="0"><tr>';
 			if ( strlen($imagen) == 0  )
 				$out .= '<td>&nbsp;</td>';
 			else
-				$out .= '<td width="90">'.img(array("src"=>"images/".$imagen,"height"=>60)).'</td>';
+				$out .= '<td width="90">'.img(array('src'=>'images/'.$imagen,'height'=>60)).'</td>';
 			$out .= '<td><h2>'.$desca.'</h2></td>';
 			$out .= '</tr></table>';
 			$out .= '</div>';
 			$out .= '<div id="maso">';
 			$i=0;
 
-			foreach($arreglo as $panel => $opciones )
-			{
+			foreach($arreglo as $panel => $opciones){
 				$i++;
-/*
-				if ( $panel == 'REPORTES' )
-					$out .= '<div class=\'box col1\' style="color:#FAFAFA;background:#254117;"><span style="font-size:16px;font-weight:900;margin-bottom:20px">'.htmlentities($panel).'</span>';
-				elseif ( $panel == 'CONSULTAS' )
-					$out .= '<div class=\'box col1\' style="color:#FAFAFA;background:#823205;"><span style="font-size:16px;font-weight:900;margin-bottom:20px">'.htmlentities($panel).'</span>';
-				else
-*/
 
-				if ( $panel != 'REPORTES' && $panel != 'CONSULTAS'){
+				if($panel != 'REPORTES' && $panel != 'CONSULTAS'){
 
-					if ($dbpertenece == "'9'")
+					if($pertenece == '9')
 						$out .= '<div class=\'box col1\' style="color:#FAFAFA;background:#C11B17;"><span style="font-size:16px;font-weight:900;margin-bottom:20px">'.htmlentities($panel).'</span>';
 					else
 						$out .= '<div class=\'box col1\' style="color:#030C3F;background:#COCOCO;"><span style="font-size:16px;font-weight:900;margin-bottom:20px">'.htmlentities($panel).'</span>';
@@ -156,8 +151,8 @@ class Bienvenido extends Controller {
 					$out .= '<table width=\'100%\' cellspacing=\'1\' border=\'0\'>';
 					foreach ($opciones as $id=>$opcion) {
 						$color = ($id%2==0)? 'F8F8F8':'FFFFFF';
-						$out .= "<tr bgcolor='#$color'><td>";
-						$out .= arr2link($opcion);
+						$out .= "<tr bgcolor='#${color}'><td>";
+						$out .= arr2link($opcion,$utf8c);
 						$out .= '</td></tr>';
 					}
 					$out .='</table></div>';

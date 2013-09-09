@@ -20,7 +20,7 @@ function arr_menu($nivel=1,$pertenece=NULL){
 		else
 			$mSQL .= "JOIN intrasida AS b ON a.modulo=b.modulo WHERE b.usuario='$usr' AND b.acceso='S' AND ";
 
-		$mSQL .="visible='S' AND CHAR_LENGTH(a.modulo)=$modulo $esde ORDER BY a.panel, a.orden, a.modulo";
+		$mSQL .="visible='S' AND CHAR_LENGTH(a.modulo)=${modulo} $esde ORDER BY a.panel, a.orden, a.modulo";
 
 		$query = $CI->db->query($mSQL);
 		$retorna=$query->result_array();
@@ -30,7 +30,7 @@ function arr_menu($nivel=1,$pertenece=NULL){
 	return $retorna;
 }
 
-function arr2link($arr){
+function arr2link($arr,$utf8c=false){
 	$att = array(
 		'width'      => $arr['ancho'],
 		'height'     => $arr['alto'],
@@ -43,12 +43,25 @@ function arr2link($arr){
 
 	if($arr['target']=='popu'){
 		$ejecutar=anchor_popup($indi, $arr['titulo'], $att);
-		$arr['titulo'] =htmlentities($arr['titulo']);
-		$arr['mensaje']=htmlentities($arr['mensaje']);
+		if($utf8c){
+			$arr['titulo'] =htmlentities(utf8_encode($arr['titulo']));
+			$arr['mensaje']=htmlentities(utf8_encode($arr['mensaje']));
+		}else{
+			$arr['titulo'] =htmlentities($arr['titulo']);
+			$arr['mensaje']=htmlentities($arr['mensaje']);
+		}
 	}elseif($arr['target']=='javascript'){
-		$ejecutar="<a href='javascript:".str_replace("'","\\'",$indi)."' title='$arr[mensaje]'>$arr[titulo]</a> ";
+		if($utf8c){
+			$ejecutar="<a href='javascript:".str_replace("'","\\'",$indi)."' title='".utf8_encode($arr['mensaje'])."'>".utf8_encode($arr['titulo'])."</a> ";
+		}else{
+			$ejecutar="<a href='javascript:".str_replace("'","\\'",$indi)."' title='$arr[mensaje]'>$arr[titulo]</a> ";
+		}
 	}else{
-		$ejecutar=anchor($indi, $arr['titulo']);
+		if($utf8c){
+			$ejecutar=anchor($indi, utf8_encode($arr['titulo']));
+		}else{
+			$ejecutar=anchor($indi, $arr['titulo']);
+		}
 	}
 	return $ejecutar;
 }
@@ -85,17 +98,15 @@ function barra_menu($modulo=NULL){
 }
 
 function parsePattern($pattern){
-  $template = $pattern;
-  $parsedcount = 0;
-  $salida=array();
-  while (strpos($template,"#>")>0) {
-    $parsedcount++;
-    $parsedfield = substr($template,strpos($template,"<#")+2,strpos($template,"#>")-strpos($template,"<#")-2);
-    $CI =& get_instance();
+	$template = $pattern;
+	$parsedcount = 0;
+	$salida=array();
+	while (strpos($template,'#>')>0) {
+		$parsedcount++;
+		$parsedfield = substr($template,strpos($template,'<#')+2,strpos($template,'#>')-strpos($template,'<#')-2);
+		$CI =& get_instance();
 		$remp=$CI->uri->segment($parsedfield);
-    $template = str_replace("<#".$parsedfield ."#>",$remp,$template);
-  }
-  return $template;
+		$template = str_replace("<#".$parsedfield ."#>",$remp,$template);
+	}
+	return $template;
 }
-
-?>
