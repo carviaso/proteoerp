@@ -125,7 +125,7 @@ class Bienvenido extends Controller {
 			$desca  = $this->datasis->dameval("SELECT mensaje FROM intramenu WHERE modulo=${dbpertenece}");
 			$imagen = $this->datasis->dameval("SELECT TRIM(imagen) imagen  FROM intramenu WHERE modulo=${dbpertenece}");
 			if($utf8c) $desca= utf8_encode($desca);
-			$desca  = htmlentities($desca);
+			$desca  = htmlentities($desca,ENT_COMPAT,'UTF-8');
 			$out   .= '<div>';
 			$out   .= '<table width="100%" border="0"><tr>';
 			if ( strlen($imagen) == 0  )

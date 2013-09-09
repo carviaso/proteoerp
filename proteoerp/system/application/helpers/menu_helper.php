@@ -41,27 +41,17 @@ function arr2link($arr,$utf8c=false){
 		'screeny'    => "'+((screen.availHeight/2)-".intval($arr['alto']/2).")+'" );
 	$indi=parsePattern($arr['ejecutar']);
 
+	if($utf8c){
+		$arr['titulo'] =utf8_encode($arr['titulo']) ;
+		$arr['mensaje']=utf8_encode($arr['mensaje']);
+	}
+
 	if($arr['target']=='popu'){
 		$ejecutar=anchor_popup($indi, $arr['titulo'], $att);
-		if($utf8c){
-			$arr['titulo'] =htmlentities(utf8_encode($arr['titulo']));
-			$arr['mensaje']=htmlentities(utf8_encode($arr['mensaje']));
-		}else{
-			$arr['titulo'] =htmlentities($arr['titulo']);
-			$arr['mensaje']=htmlentities($arr['mensaje']);
-		}
 	}elseif($arr['target']=='javascript'){
-		if($utf8c){
-			$ejecutar="<a href='javascript:".str_replace("'","\\'",$indi)."' title='".utf8_encode($arr['mensaje'])."'>".utf8_encode($arr['titulo'])."</a> ";
-		}else{
-			$ejecutar="<a href='javascript:".str_replace("'","\\'",$indi)."' title='$arr[mensaje]'>$arr[titulo]</a> ";
-		}
+		$ejecutar="<a href='javascript:".str_replace('\'',"\\'",$indi)."' title='".htmlentities($arr['mensaje'],ENT_COMPAT,'UTF-8')."'>".htmlentities($arr['titulo'],ENT_COMPAT,'UTF-8')."</a>";
 	}else{
-		if($utf8c){
-			$ejecutar=anchor($indi, utf8_encode($arr['titulo']));
-		}else{
-			$ejecutar=anchor($indi, $arr['titulo']);
-		}
+		$ejecutar=anchor($indi, $arr['titulo']);
 	}
 	return $ejecutar;
 }
