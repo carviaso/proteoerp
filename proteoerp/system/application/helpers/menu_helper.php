@@ -42,14 +42,14 @@ function arr2link($arr,$utf8c=false){
 	$indi=parsePattern($arr['ejecutar']);
 
 	if($utf8c){
-		$arr['titulo'] =utf8_encode($arr['titulo']) ;
+		$arr['titulo'] =utf8_encode($arr['titulo']);
 		$arr['mensaje']=utf8_encode($arr['mensaje']);
 	}
 
 	if($arr['target']=='popu'){
 		$ejecutar=anchor_popup($indi, $arr['titulo'], $att);
 	}elseif($arr['target']=='javascript'){
-		$ejecutar="<a href='javascript:".str_replace('\'',"\\'",$indi)."' title='".htmlentities($arr['mensaje'],ENT_COMPAT,'UTF-8')."'>".htmlentities($arr['titulo'],ENT_COMPAT,'UTF-8')."</a>";
+		$ejecutar="<a href='javascript:".str_replace('\'',"\\'",$indi)."' title='".$arr['mensaje']."'>".$arr['titulo']."</a>";
 	}else{
 		$ejecutar=anchor($indi, $arr['titulo']);
 	}
@@ -59,7 +59,7 @@ function arr2link($arr,$utf8c=false){
 function arr2panel($arr){
 	$retorna=array();
 	foreach($arr as $op ){
-		$retorna[$op['panel']][]= array('titulo'=>htmlentities($op['titulo']),'mensaje'=>htmlentities($op['mensaje']),'ejecutar'=>$op['ejecutar'],'target'=>$op['target'],'ancho'=>$op['ancho'],'alto'=>$op['alto']);
+		$retorna[$op['panel']][]= array('titulo'=>$op['titulo'],'mensaje'=>$op['mensaje'],'ejecutar'=>$op['ejecutar'],'target'=>$op['target'],'ancho'=>$op['ancho'],'alto'=>$op['alto']);
 	}
 	return $retorna;
 }
