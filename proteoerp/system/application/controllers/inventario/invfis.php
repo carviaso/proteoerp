@@ -18,16 +18,18 @@ class Invfis extends Controller {
 
 	function define(){
 		$this->rapyd->load('dataform');
+		$this->rapyd->config->set_item('theme','clean');
 
+		$titusize=1.5;
 		$form0 = new DataForm('inventario/invfis/define/process/crear');
-		$form0->title('Crear Inventario');
-		$form0->explica1 = new containerField('',"<p style='color:blue;background-color:C6DAF6;align:center'>Esta seccion crea una tabla de inventario vacia de el Almac&eacute;n seleccionado donde se ingresa los valores resultantes del conteo de Inventario.<BR><BR></p> ");
-		$form0->alma = new dropdownField('Almac&eacute;n', 'alma');
+		$form0->title('<span style="font-size:'.$titusize.'em;">1-Crear un nuevo Inventario F&iacute;sico</span>');
+		$form0->explica1 = new containerField('',"<p style='color:blue;background-color:C6DAF6;align:center'>Esta secci&oacute;n crea una tabla de inventario vacia de el Almac&eacute;n seleccionado donde se ingresa los valores resultantes del conteo de Inventario, en caso de haber creado un inventario f&iacute;sico previamente puede saltarse al paso 2.</p>");
+		$form0->alma = new dropdownField('<span style="font-size:1.2em;color:#000000">Almac&eacute;n</span>', 'alma');
 		$form0->alma->options("SELECT TRIM(ubica),CONCAT_WS('-',TRIM(ubides),TRIM(ubica)) AS desca FROM caub WHERE gasto='N' AND invfis='N' ORDER BY ubides");
 		$form0->alma->rule='required';
-		$form0->explica2 = new containerField("","<p style='color:blue;background-color:C6DAF6;align:center'>La fecha es muy importante, si el conteo f&iacute;sico se realizo en la ma&ntilde;ana antes de abrir debe colocar la fecha de hoy, de lo contrario si el conteo se hizo en la tarde al final de la jornada debe colocar la fecha de Ma&ntilde;ana.</p>");
+		$form0->explica2 = new containerField('',"<p style='color:blue;background-color:C6DAF6;align:center'>La fecha es <b>muy importante</b>, si el conteo f&iacute;sico se realizo en la ma&ntilde;ana antes de abrir debe colocar la fecha de hoy, de lo contrario si el conteo se hizo en la tarde al final de la jornada debe colocar la fecha de Ma&ntilde;ana.</p>");
 
-		$form0->fecha = new dateonlyField('Fecha', 'fecha');
+		$form0->fecha = new dateonlyField('<span style="font-size:1.2em;color:#000000">Fecha</span>', 'fecha');
 		$form0->fecha->rule='required|chfecha';
 		$form0->fecha->insertValue = date('Y-m-d');
 		$form0->fecha->size=12;
@@ -35,24 +37,25 @@ class Invfis extends Controller {
 		$form0->submit('btnsubmit','Crear Inventario F&iacute;sico');
 
 		$form1 = new DataForm('inventario/invfis/define/process/contar');
-		$form1->explica1 = new containerField("","<p style='color:blue;background-color:C6DAF6;align:center'>En esta secci&oacute;n podra transcribir el resultado del conteo f&iacute;sico al sistema.</p>");
-		$form1->title("Introducir Resultados del Conteo de Inventario F&iacute;sico");
-		$form1->inv = new dropdownField('Inventario F&iacute;sico', 'inv');
+		$form1->explica1 = new containerField('',"<p style='color:blue;background-color:C6DAF6;align:center'>Luego de haber creado un inventario f&iacute;sico nuevo en el paso anterior, en esta secci&oacute;n podra transcribir el resultado del conteo f&iacute;sico al sistema.</p>");
+		$form1->title('<span style="font-size:'.$titusize.'em;">2-Introducir Resultados del Conteo de Inventario F&iacute;sico</span>');
+		$form1->inv = new dropdownField('<span style="font-size:1.2em;color:#000000">Inventario F&iacute;sico</span>', 'inv');
 		$form1->inv->rule = 'required';
 		$form1->inv->style = 'width:400px';
 		$form1->submit('btnsubmit','Introducir Conteo F&iacute;sico');
 
+		$titusize=1.3;
 		$form2 = new DataForm('inventario/invfis/define/process/cerrar');
-		$form2->title('Cierre de Inventario');
-		$form2->explica1 = new containerField('',"<p style='color:blue;background-color:F6DAC6;align:center'>Finalmente si todo el inventario esta pasado puede cerrar con el siguiente bot&oacute;n y asi los montos introducidos se cargar&aacute;n en el almac&eacute;n respectivo.</p>");
-		$form2->inv = new dropdownField('Inventario F&iacute;sico', 'inv2');
+		$form2->title('<span style="font-size:'.$titusize.'em;">3A-Cierre del Inventario F&iacute;sico</span>');
+		$form2->explica1 = new containerField('',"<p style='color:blue;background-color:F6DAC6;align:center'>Finalmente si todo el inventario esta pasado puede cerrar con el siguiente bot&oacute;n y asi los montos introducidos se cargar&aacute;n en el almac&eacute;n respectivo. Tenga en cuenta que <b>Luego de cerrarlo no se podr&aacute; modificar</b>.</p>");
+		$form2->inv = new dropdownField('<span style="font-size:1.2em;color:#000000">Inventario F&iacute;sico</span>', 'inv2');
 		$form2->inv->rule = 'required';
 		$form2->inv->style = 'width:400px';
 
 		$form3 = new DataForm('inventario/invfis/define/process/descartar');
-		$form3->title('Descarte de Inventario');
-		$form3->explica1 = new containerField('',"<p style='color:red;background-color:F6DAC6;align:center'>Esta opci&oacute;n eliminara el inventario f&iacute;sico seleccionado, se perder&aacute;n los conteos realizados sobre ese inventario y no se cargar&aacute;n en los almacenes.</p>");
-		$form3->inv = new dropdownField('Inventario F&iacute;sico', 'inv3');
+		$form3->title('<span style="font-size:'.$titusize.'em;">3B-Descarte del Inventario F&iacute;sico</span>');
+		$form3->explica1 = new containerField('',"<p style='color:red;background-color:F6DAC6;align:center'>Esta opci&oacute;n eliminara el inventario f&iacute;sico seleccionado, se perder&aacute;n los conteos realizados sobre ese inventario y no se cargar&aacute;n en los almacenes. Luego de descartarlo <b>no se podr&aacute; recuperar</b>.</p>");
+		$form3->inv = new dropdownField('<span style="font-size:1.2em;color:#000000">Inventario F&iacute;sico</span>', 'inv3');
 		$form3->inv->rule = 'required';
 		$form3->inv->style = 'width:400px';
 		$form3->submit('btnDELETE' ,'Descartar Inventario');
@@ -68,8 +71,8 @@ class Invfis extends Controller {
 				}
 			}
 		}
-		$form2->submit('btnSiCero' ,'Cierre de Inventario (Asume existencia cero para los no contados)');
-		$form2->submit('btnNoCero' ,'Cierre de Inventario (Pasa solo los contados)');
+		$form2->submit('btnSiCero' ,'Cerrar asumiendo existencia cero para los no contados');
+		$form2->submit('btnNoCero' ,'Cerrar (Pasa solo los contados)');
 
 		$form0->build_form();
 		$form1->build_form();
@@ -113,8 +116,15 @@ class Invfis extends Controller {
 				redirect($this->url.'define');
 		}
 
-		$data['content'] = "<div class='alert'>$error</div>";
-		$data['content'] .= $form0->output.'</br>'.$form1->output.'</br>'.$form2->output.'</br>'.$form3->output;
+		$titusize=1.5;
+		$data['content']  = "<div class='alert'>${error}</div>";
+		$data['content'] .= '<span style="font-size:1.3em;">Para realizar un inventario f&iacute;sico siga los siguientes pasos. ponga atenci&oacute;n a las notas.</span>';
+		$data['content'] .= '<div style="background-color:#DED3FF;">'.$form0->output.'</div>';
+		$data['content'] .= '<div>'.$form1->output.'</div>';
+		$data['content'] .= '<div style="background-color:#FFFF6D;padding:10px"><span class="mainheader" style="font-size:'.$titusize.'em;">3-Cierre o descarte de Inventario F&iacute;sico</span>';
+		$data['content'] .= '<div style="background-color:#A9FF8C;">'.$form2->output.'</div>';
+		$data['content'] .= '<div style="background-color:#FFD582;">'.$form3->output.'</div>';
+		$data['content'] .= '</div>';
 		$data['title']   = '<h1>Inventario F&iacute;sico</h1>';
 		$data['head']    = $this->rapyd->get_head().script('jquery.js').script("plugins/jquery.numeric.pack.js").script("plugins/jquery.json.min.js");
 		$this->load->view('view_ventanas', $data);
@@ -192,7 +202,7 @@ class Invfis extends Controller {
 
 		$filter = new DataFilter2('Filtro por Producto');
 		$filter->db->select("e.existen,e.modificado,e.contado,e.agregar,e.quitar,e.sustituir,a.tipo AS tipo,a.id,e.codigo,a.descrip,precio1,precio2,precio3,precio4,b.nom_grup AS nom_grup,b.grupo AS grupoid,c.descrip AS nom_linea,c.linea AS linea,d.descrip AS nom_depto,d.depto AS depto,e.id AS idfis,e.despacha");
-		$filter->db->from("$tabla AS e");
+		$filter->db->from("${tabla} AS e");
 		$filter->db->join('sinv AS a','a.codigo=e.codigo');
 		$filter->db->join('grup AS b','a.grupo=b.grupo');
 		$filter->db->join('line AS c','b.linea=c.linea');
@@ -253,7 +263,7 @@ class Invfis extends Controller {
 		$filter->linea2->option('','Seleccione un Departamento primero');
 		$filter->linea2->in='linea';
 		$depto=$filter->getval('depto');
-		if($depto!==FALSE){
+		if($depto !== false){
 			$filter->linea2->options("SELECT linea, descrip FROM line WHERE depto='$depto' ORDER BY descrip");
 		}else{
 			$filter->linea2->option('','Seleccione un Departamento primero');
@@ -268,7 +278,7 @@ class Invfis extends Controller {
 		$filter->grupo->option('','Seleccione una L&iacute;nea primero');
 		$filter->grupo->in='grupo2';
 		$linea=$filter->getval('linea2');
-		if($linea!==FALSE){
+		if($linea !== false){
 			$filter->grupo->options("SELECT grupo, nom_grup FROM grup WHERE linea='$linea' ORDER BY nom_grup");
 		}else{
 			$filter->grupo->option('','Seleccione un Departamento primero');
@@ -317,21 +327,22 @@ class Invfis extends Controller {
 			'screenx'    => '0',
 			'screeny'    => '0');
 
-		$titulo = anchor_popup("reportes/ver/INVFIS/$tabla",'Imprimir',$atts);
+		$titulo1 = anchor_popup("reportes/ver/INVFIS/${tabla}",'Conteo',$atts);
+		$titulo2 = anchor_popup('reportes/ver/SINVFIS','Hoja de trabajo',$atts);
 
 		$cana=15;
-		$grid = new DataGrid('Inventario Fisico -->'.$titulo);
+		$grid = new DataGrid('Reportes -->'.$titulo1.' '.$titulo2 );
 		$grid->per_page  = $cana;
 		$grid->use_function('caja','pinta');
 		$action = "javascript:window.location='".site_url($this->url)."'";
 		$grid->button('btn_regresa', 'Regresar', $action, 'TR');
 
-		$grid->column_orderby('Dpto'              ,'depto'                                                 ,'d.depto'  ,'align=center');
-		$grid->column_orderby('Linea'             ,'linea'                                                 ,'c.linea'  ,'align=center');
-		$grid->column_orderby('Grupo'             ,'grupoid'                                               ,'b.grupo'  ,'align=center');
+		$grid->column_orderby('Dpto'              ,'depto'                                                 ,'d.depto' ,'align=center');
+		$grid->column_orderby('Linea'             ,'linea'                                                 ,'c.linea' ,'align=center');
+		$grid->column_orderby('Grupo'             ,'grupoid'                                               ,'b.grupo' ,'align=center');
 		$grid->column_orderby('Codigo'            ,'<pinta><#modificado#>|<#codigo#>|<#idfis#>|a</pinta>'  ,'codigo'  ,'align=center');
 		$grid->column_orderby('Descripci&oacute;n','<pinta><#modificado#>|<#descrip#>|<#idfis#>|b</pinta>' ,'descrip' );
-		$grid->column_orderby('P.Desp,'           ,'<pinta><#modificado#>|<#despacha#>|<#idfis#>|d</pinta>','despacha','align=right');
+		$grid->column_orderby('P.Desp.'           ,'<pinta><#modificado#>|<#despacha#>|<#idfis#>|d</pinta>','despacha','align=right');
 		$grid->column_orderby('Anterior'          ,'<pinta><#modificado#>|<#existen#>|<#idfis#>|d</pinta>' ,'existen' ,'align=right');
 		$grid->column_orderby('Contado'           ,'<caja>c|<#contado#>|<#idfis#>|true|<#dg_row_id#>|0|'.$cana.'</caja>','contado','align=right');
 		$grid->column('Agregar'                   ,'<caja>a|<#agregar#>|<#idfis#>|false|<#dg_row_id#>|1|'.$cana.'</caja>');

@@ -1,0 +1,58 @@
+$base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+$table=$this->uri->segment(4);
+
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, "search"));
+$filter->title('Elija un formato de salida');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit','Descargar');
+$filter->build_form();
+
+if($this->rapyd->uri->is_set('search',$table)){
+
+	$fecha=$this->datasis->dameval("SELECT DATE_FORMAT(fecha, '%d/%m/%Y') as fecha  FROM  $table LIMIT 1");
+
+	$mSQL="SELECT a.codigo,a.alma,a.existen,a.contado, DATE_FORMAT(a.fecha, '%d/%m/%Y')as fecha,a.pond,e.descrip pdescrip, b.linea, c.depto,   d.descrip,c.descrip dlinea, b.grupo,b.nom_grup
+	FROM  $table AS a
+	JOIN sinv e ON a.codigo=e.codigo
+	LEFT JOIN grup b ON a.grupo=b.grupo
+	LEFT JOIN line c ON b.linea=c.linea
+	LEFT JOIN dpto d ON d.depto=c.depto
+	WHERE d.tipo='I' and a.modificado is not null  ORDER BY c.depto, b.linea, a.grupo";
+	//echo $mSQL;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+
+	$pdf->setTitulo('Listado de Inventario Fisico');
+	$pdf->setSubTitulo('Para la Fecha:'.$fecha);
+	//$pdf->setSobreTabla();
+
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+
+	$pdf->AddCol('codigo'   ,20 ,'Codigo'       ,'C',8);
+	$pdf->AddCol('pdescrip' ,100,'Descripcion'  ,'L',8);
+	$pdf->AddCol('existen'  ,17 ,'Existen'      ,'C',8);
+	$pdf->AddCol('contado'  ,17 ,'Contado'      ,'C',8);
+	//$pdf->AddCol('fecha'  ,25 ,'Fecha'        ,'C',8);
+	$pdf->AddCol('pond'     ,20 ,'Costo'        ,'R',8);
+
+	//$pdf->setTotalizar('');
+	$pdf->setGrupoLabel('Departamento: (<#depto#>) <#descrip#> ','Linea: (<#linea#>) <#dlinea#>','Grupo (<#grupo#>) <#nom_grup#>');
+	$pdf->setGrupo('depto','linea','grupo');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Listado de Inventario Fisico</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

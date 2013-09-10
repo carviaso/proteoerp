@@ -146,8 +146,6 @@ class Tbenvio extends Controller {
 			if(id){
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				if(ret.nrofact == ""){
-					//alert("factura");
-
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
 					mId = id;
 					$.post("'.site_url('encomiendas/sfac/sfacenco').'/"+id+"/create", function(data){
