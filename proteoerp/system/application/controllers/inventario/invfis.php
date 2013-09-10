@@ -209,7 +209,7 @@ class Invfis extends Controller {
 		$filter->db->join('dpto AS d','c.depto=d.depto');
 		$filter->db->where('activo','S');
 		$filter->db->where('actualizado IS NULL','',false);
-		$filter->db->order_by("d.depto,c.linea,b.grupo,a.descrip");
+		//$filter->db->order_by("d.depto,c.linea,b.grupo,a.descrip");
 		$filter->script($script);
 
 		$filter->codigo = new inputField('C&oacute;digo', 'codigo');
