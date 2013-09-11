@@ -198,6 +198,14 @@ class Scst extends Controller {
 			);
 
 			$llink=anchor_popup('farmacia/scst/asignardataedit/scst/modify/'.$id, nformat($por).'%' , $atts);
+
+			if($por>65){
+				$llink = '<span style="color:green">'.$llink.'</span>';
+			}elseif($por<35){
+				$llink = '<span style="color:red">'.$llink.'</span>';
+			}else{
+				$llink = '<span style="color:blue">'.$llink.'</span>';
+			}
 			return $llink;
 		}
 
@@ -243,7 +251,7 @@ class Scst extends Controller {
 		$detalle->db->from('itscst AS a');
 		$detalle->db->where('a.control',$numero);
 		$detalle->db->join($tabla.'.sinv AS b','a.codigo=b.codigo','LEFT');
-		$detalle->db->join($tabla.'.farmaxasig AS c',"a.codigo=c.barras AND c.proveed=$proveed",'LEFT');
+		$detalle->db->join($tabla.'.farmaxasig AS c',"a.codigo=c.barras AND c.proveed=${proveed}",'LEFT');
 		$detalle->db->join($tabla.'.sinv AS d','d.codigo=c.abarras','LEFT');
 		$detalle->db->join($tabla.'.grup AS e','e.grupo=COALESCE(b.grupo,d.grupo)','LEFT');
 		$detalle->db->order_by('a.id');

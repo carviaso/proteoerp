@@ -38,6 +38,7 @@ class Tbenvio extends Controller {
 		$adic = array(
 			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
 			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'ffact' ,  'title'=>'Facturar envio'),
 			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
@@ -233,6 +234,52 @@ class Tbenvio extends Controller {
 				allFields.val( "" ).removeClass( "ui-state-error" );
 			}
 		});';
+
+		$bodyscript .= '
+			$("#ffact").dialog({
+				autoOpen: false, height: 600, width: 800, modal: true,
+				buttons: {
+					"Guardar": function() {
+						var bValid = true;
+						var murl = $("#df1").attr("action");
+						$.ajax({
+							type: "POST",
+							dataType: "html",
+							async: false,
+							url: murl,
+							data: $("#df1").serialize(),
+							success: function(r,s,x){
+								try{
+									var json = JSON.parse(r);
+									if(json.status == "A"){
+										$.post("'.site_url($this->url.'dataedit/S/create').'",
+										function(data){
+											$("#fedita").html(data);
+										})
+
+										//jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+										//alert("Factura guardada");
+										window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+										return true;
+									} else {
+										apprise(json.mensaje);
+									}
+								}catch(e){
+									$("#fedita").html(r);
+								}
+							}
+						})
+					},
+					"Cancelar": function() {
+						$("#fedita").html("");
+						$( this ).dialog( "close" );
+						$("#newapi'.$grid0.'").trigger("reloadGrid");
+					}
+				},
+				close: function() {
+					$("#fedita").html("");
+				}
+			});';
 
 		$bodyscript .= '
 		$("#fshow").dialog({

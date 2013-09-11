@@ -1246,7 +1246,7 @@ class Sprm extends Controller {
 					$salida .= '<td align=\'right\'>'.nformat($row['abono']).'</td>';
 					$salida .= '</tr>';
 				}
-				$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'><b>Saldo : ".nformat($saldo).'</b></td></tr>';
+				$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'><b>Monto Aplicado : ".nformat($saldo).'</b></td></tr>';
 				$salida .= '</table></td>';
 			}
 

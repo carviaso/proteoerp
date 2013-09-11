@@ -6,7 +6,7 @@ $id=$parametros[0];
 
 $sel=array('a.tipo_doc','a.numero','a.cod_cli','a.fecha','a.monto','a.abonos','a.exento','a.montasa','a.tasa'
 ,'b.nombre','TRIM(b.nomfis) AS nomfis','CONCAT_WS(\'\',TRIM(b.dire11),b.dire12) AS direc','b.rifci','b.telefono'
-,'CONCAT_WS(\' \',observa1,observa2) AS observa','b.rifci','a.transac','a.codigo','a.descrip');
+,'CONCAT_WS(\' \',observa1,observa2) AS observa','b.rifci','a.transac','a.codigo','a.descrip','a.num_ref','a.tipo_ref');
 $this->db->select($sel);
 $this->db->from('smov AS a');
 $this->db->join('scli AS b'  ,'a.cod_cli=b.cliente');
@@ -49,7 +49,19 @@ $this->db->where('a.tipo_doc',$row->tipo_doc);
 $this->db->where('a.numero'  ,$row->numero);
 $this->db->where('a.fecha'   ,$row->fecha);
 $mSQL_2 = $this->db->get();
-$detalle2  = $mSQL_2->result();
+
+if($mSQL_2->num_rows()==0 && $tipo_doc=='NC'){
+	$dbnumero=$this->db->escape($row->num_ref);
+	$obj  = new stdClass();
+	$obj->tipo_doc=$row->tipo_ref;
+	$obj->numero  =$row->num_ref;
+	$obj->fecha   =$this->datasis->dameval("SELECT fecha FROM sfac WHERE tipo_doc='F' AND numero=${dbnumero}");
+	$obj->abono   =$row->monto;
+
+	$detalle2= array($obj);
+}else{
+	$detalle2  = $mSQL_2->result();
+}
 
 $lineas=0;
 ?><html>
