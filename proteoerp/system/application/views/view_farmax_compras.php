@@ -23,8 +23,8 @@ $atts = array(
 
 ?>
 <style>
-	.bien:link, .bien:visited,.bien:hover,.bien:active {color:#21CF00;}
-	.regu:link, .regu:visited,.bien:hover,.regu:active {color:#FFDD00;}
+	.bien:link, .bien:visited,.bien:hover,.bien:active {color:#1E890A;}
+	.regu:link, .regu:visited,.bien:hover,.regu:active {color:#DFBD00;}
 	.malo:link, .malo:visited,.bien:hover,.malo:active {color:#CF0000;}
 </style>
 <table align='center'>
