@@ -186,12 +186,21 @@ class Scst extends Controller {
 
 			$rt=similar_text($st1,$st2,$por);
 
+			if($por>65){
+				$class = 'bien';
+			}elseif($por<35){
+				$class = 'malo';
+			}else{
+				$class = 'regu';
+			}
+
 			$atts = array(
 				'width'     => '550',
 				'height'    => '300',
 				'scrollbars'=> 'no',
 				'status'    => 'no',
 				'resizable' => 'no',
+				'class'     => $class,
 				'title'     => 'Cambiar Asociaci&oacute;n',
 				'screenx'   => "'+((screen.availWidth/2)-275)+'",
 				'screeny'   => "'+((screen.availHeight/2)-150)+'"
@@ -199,13 +208,6 @@ class Scst extends Controller {
 
 			$llink=anchor_popup('farmacia/scst/asignardataedit/scst/modify/'.$id, nformat($por).'%' , $atts);
 
-			if($por>65){
-				$llink = '<span style="color:green">'.$llink.'</span>';
-			}elseif($por<35){
-				$llink = '<span style="color:red">'.$llink.'</span>';
-			}else{
-				$llink = '<span style="color:blue">'.$llink.'</span>';
-			}
 			return $llink;
 		}
 
