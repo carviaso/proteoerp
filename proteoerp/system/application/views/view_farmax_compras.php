@@ -22,6 +22,11 @@ $atts = array(
 );
 
 ?>
+<style>
+	.bien:link, .bien:visited,.bien:hover,.bien:active {color:green;}
+	.regu:link, .regu:visited,.bien:hover,.regu:active {color:yellow;}
+	.malo:link, .malo:visited,.bien:hover,.malo:active {color:red;}
+</style>
 <table align='center'>
 	<tr>
 		<td align=right>
