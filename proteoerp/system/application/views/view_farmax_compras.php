@@ -23,9 +23,9 @@ $atts = array(
 
 ?>
 <style>
-	.bien:link, .bien:visited,.bien:hover,.bien:active {color:#1E890A;}
-	.regu:link, .regu:visited,.bien:hover,.regu:active {color:#DFBD00;}
-	.malo:link, .malo:visited,.bien:hover,.malo:active {color:#CF0000;}
+	.bien:link,.bien:visited,.bien:hover,.bien:active {color:#1E890A;}
+	.regu:link,.regu:visited,.regu:hover,.regu:active {color:#DFBD00;}
+	.malo:link,.malo:visited,.malo:hover,.malo:active {color:#CF0000;}
 </style>
 <table align='center'>
 	<tr>
@@ -47,7 +47,7 @@ $atts = array(
 						}else{
 							$id_scst=$this->datasis->dameval('SELECT id FROM scst WHERE control='.$this->db->escape($form->pcontrol->value));
 
-							if(!empty($id_scst)){
+							if(empty($id_scst)){
 								echo 'Eliminada';
 							}else{
 								echo anchor_popup('compras/scst/dataedit/show/'.$id_scst,$form->pcontrol->value, $atts);
