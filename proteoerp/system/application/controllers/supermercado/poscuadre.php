@@ -37,7 +37,7 @@ class Poscuadre extends Controller {
 		if($cupon>0) {
 			$select[] = "SUM(TRUNCATE(a.gtotal/${cupon},0)) AS  cupones";
 		}else{
-			$select[] = '"0" AS  cupones';
+			$select[] = 'a.gtotal*0 AS  cupones';
 		}
 		$grid->db->select($select);
 		$grid->db->from('posfact AS a');
