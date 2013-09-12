@@ -150,8 +150,8 @@ class Tbenvio extends Controller {
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
 					mId = id;
 					$.post("'.site_url('encomiendas/sfac/sfacenco').'/"+id+"/create", function(data){
-						$("#fedita").html(data);
-						$("#fedita").dialog( "open" );
+						$("#ffact").html(data);
+						$("#ffact").dialog( "open" );
 					});
 
 				}else{
@@ -252,32 +252,28 @@ class Tbenvio extends Controller {
 								try{
 									var json = JSON.parse(r);
 									if(json.status == "A"){
-										$.post("'.site_url($this->url.'dataedit/S/create').'",
-										function(data){
-											$("#fedita").html(data);
-										})
-
-										//jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-										//alert("Factura guardada");
-										window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+										$.prompt("Registro Guardado");
+										$("#ffact").dialog( "close" );
+										grid.trigger("reloadGrid");
+										//'.$this->datasis->jwinopen(site_url('formatos/ver/TBENVIO').'/\'+json.pk.id+\'/id\'').';
 										return true;
 									} else {
-										apprise(json.mensaje);
+										$.prompt(json.mensaje);
 									}
 								}catch(e){
-									$("#fedita").html(r);
+									$("#ffact").html(r);
 								}
 							}
 						})
 					},
 					"Cancelar": function() {
-						$("#fedita").html("");
+						$("#ffact").html("");
 						$( this ).dialog( "close" );
 						$("#newapi'.$grid0.'").trigger("reloadGrid");
 					}
 				},
 				close: function() {
-					$("#fedita").html("");
+					$("#ffact").html("");
 				}
 			});';
 

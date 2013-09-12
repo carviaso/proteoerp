@@ -316,7 +316,7 @@ border-bottom-right-radius:5px;
 					}
 				}
 
-				if(in_array($campo,$this->DBfieldsType)){
+				if(isset($this->DBfieldsType[$campo])){
 					if(    in_array($this->DBfieldsType[$campo], array('real',4,5,246))  ) { $row[$campo]=nformat($row[$campo]); }
 					elseif(in_array($this->DBfieldsType[$campo], array('date',10,12,7))  ) { $row[$campo]=dbdate_to_human($row[$campo]); }
 					elseif(in_array($this->DBfieldsType[$campo], array('int' ,1,2,9,3,8))) { $row[$campo]=intval($row[$campo]); }

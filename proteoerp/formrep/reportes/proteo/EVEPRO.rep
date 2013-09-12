@@ -1,0 +1,413 @@
+$this->rapyd->load('datafilter2');
+$this->rapyd->load('datatable');
+$mSPRV=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código',
+		'nombre'  =>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('proveed'=>'Código','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'proveed'),
+	'titulo'  =>'Buscar Proveedor');
+
+$scli=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'  =>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_cli'),
+	'titulo'  =>'Buscar Cliente');
+
+$sinvd=array(
+	'tabla'   =>'sinv',
+	'columnas'=>array(
+		'codigo' =>'Código',
+		'descrip'=>'descrip'),
+	'filtro'  =>array('codigo' =>'Código','descrip'=>'descrip'),
+	'retornar'=>array('codigo'=>'codigod'),
+	'titulo'  =>'Buscar Artículo');
+
+$sinvh=array(
+	'tabla'   =>'sinv',
+	'columnas'=>array(
+		'codigo' =>'Código',
+		'descrip'=>'descrip'),
+	'filtro'  =>array('codigo' =>'Código','descrip'=>'descrip'),
+	'retornar'=>array('codigo'=>'codigoh'),
+	'titulo'  =>'Buscar Artículo');
+
+$mSOCIO=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Socio',
+		'nombre'  =>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Socio','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'socio'),
+	'titulo'  =>'Buscar Socio',
+	'join'    =>array('scli AS a','scli.cliente=a.socio',''),
+	'groupby' =>'cliente'
+);
+
+$cboton = $this->datasis->modbus($scli);
+$bSINVd = $this->datasis->modbus($sinvd,'sinvd');
+$bSINVh = $this->datasis->modbus($sinvh,'sinvh');
+$bSPRV  = $this->datasis->modbus($mSPRV);
+$bsocio = $this->datasis->modbus($mSOCIO,'socio');
+
+if(!empty($_POST['socio'])) $_POST['cod_cli']='';
+
+$filter = new DataFilter2('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+rapydlib('prototype');
+$ajax_onchange = '
+	function get_linea(){
+		var url = "'.site_url('reportes/sinvlineas').'";
+		var pars = "dpto="+$F("depto");
+		var myAjax = new Ajax.Updater("td_linea", url, { method: "post", parameters: pars });
+		get_grupo();
+	}
+
+	function get_grupo(){
+		var url = "'.site_url('reportes/sinvgrupos').'";
+		var pars = "dpto="+$F("depto")+"&linea="+$F("linea");
+		var myAjax = new Ajax.Updater("td_grupo", url, { method: "post", parameters: pars });
+	}';
+
+$filter = new DataFilter2('Filtro del Reporte');
+$filter->script($ajax_onchange);
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+$filter->db->from('eventas AS a');
+$filter->db->join('sinv AS s' ,'a.codigo=s.codigo','LEFT');
+
+$t=21;
+$mCOLU='';
+if(isset($_POST['opcion']))
+switch($_POST['opcion']){
+	case 1:
+		$mCABE=array('Código','Descripción');
+		$mTITU='Código';
+		$mCODI='codigo';
+		$mNOM ='descrip';
+		$mCOLU='';
+		$mFRO ='';
+		$filter->db->groupby('a.codigo');
+	break;
+
+	case 2:
+		$mCABE=array('Grupo','Descripción');
+		$mTITU='Grupo';
+		$mCODI='grupo';
+		$mNOM ='dgrupo';
+		$mCOLU=', b.nom_grup as dgrupo ';
+		$mFRO ='';
+		$filter->db->groupby('a.grupo');
+		$filter->db->join("grup as b" ,"a.grupo=b.grupo",'LEFT');
+	break;
+
+	case 3:
+		$mCABE=array('Linea','Descripción');
+		$mTITU='Línea';
+		$mCODI='linea';
+		$mNOM ='dlinea';
+		$mCOLU=', b.descrip AS dlinea ';
+		$mFRO ='';
+		$filter->db->groupby('a.linea');
+		$filter->db->join('line AS b' ,'a.linea=b.linea','LEFT');
+	break;
+
+	case 4:
+		$mCABE=array('Departa','Descripción');
+		$mTITU='Departamento';
+		$mCODI='depto';
+		$mNOM ='ddepto';
+		$mCOLU=', b.descrip as ddepto';
+		$mFRO ='';
+		$filter->db->groupby('a.depto');
+		$filter->db->join("dpto as b" ,"a.depto=b.depto",'LEFT');
+	break;
+
+	case 5:
+		$mCABE=array('Cliente','Nombre');
+		$mTITU='Cliente';
+		$mCODI='cod_cli';
+		$mNOM ='dcod_cli';
+		$mCOLU=', b.nombre as dcod_cli';
+		$mFRO ='';
+		$filter->db->groupby('a.cod_cli');
+		$filter->db->join("scli as b" ,"a.cod_cli=b.cliente",'LEFT');
+	break;
+
+	case 6:
+		$mCABE=array('Grupo','Grupo de Cliente');
+		$mTITU='Grupos de Clientes';
+		$mCODI='grupocli';
+		$mNOM ='dgrupocli';
+		$mCOLU=', b.gr_desc as dgrupocli';
+		$mFRO ='';
+		$filter->db->groupby('a.grupocli');
+		$filter->db->join("grcl AS b" ,"a.grupocli=b.grupo",'LEFT');
+	break;
+
+	case 7:
+		$mCABE=array('Zona','Descripción');
+		$mTITU='Zona';
+		$mCODI='zona';
+		$mNOM ='dzona';
+		$mCOLU=', b.nombre as dzona';
+		$mFRO ='';
+		$filter->db->groupby('a.zona');
+		$filter->db->join('zona AS b' ,'a.zona=b.codigo','LEFT');
+	break;
+
+	case 8:
+		$mCABE=array('Vendedor','Nombre');
+		$mTITU='Vendedor';
+		$mCODI='vendedor';
+		$mNOM ='dvendedor';
+		$mCOLU=', b.nombre AS dvendedor';
+		$mFRO ='';
+		$filter->db->groupby('a.vendedor');
+		$filter->db->join('vend AS b' ,'a.vendedor=b.vendedor','LEFT');
+	break;
+
+	case 9:
+		$mCABE=array('Ciudad',NULL);
+		$t=65;
+		$mTITU='Ciudad';
+		$mCODI='ciudad';
+		$mNOM =NULL;
+		$mCOLU='';
+		$mFRO ='';
+		$filter->db->groupby('a.ciudad');
+	break;
+
+	case 'A':
+		$mCABE=array('Proveedor','Nombre');
+		$mTITU='Proveedor';
+		$mCODI='prov1';
+		$mNOM ='dprov1';
+		$mCOLU=', b.nombre as dprov1';
+		$mFRO ='';
+		$filter->db->groupby('s.prov1');
+		$filter->db->join('sprv AS b' ,'b.proveed=s.prov1','LEFT');
+	break;
+};
+$mCABE[]='Cantidad';
+$mCABE[]='Monto';
+$mCABE[]='Costo';
+$mCABE[]='%';
+$mCABE[]='Peso Kgr.';
+$mCABE[]='Part%';
+
+$select=array('a.codigo', 'a.descrip', 'a.grupo', 'a.linea', 'a.cod_cli' , 'a.vendedor', 'a.zona', 'a.grupocli',
+	'a.ciudad', 'a.depto', 's.prov1', '==++==' ,'s.clase',
+	'SUM(a.tota)  AS tota',
+	'IF(SUM(a.cana)=0, s.margen1 ,100-SUM(a.costo)*100/IF(SUM(a.tota)=0,1,SUM(a.tota))) AS totap',
+	//'100-SUM(a.costo)*100/IF(SUM(a.tota)=0,1,SUM(a.tota)) AS totap',
+	'SUM(a.cana)  AS cana',
+	'SUM(a.costo) AS costo',
+	"SUM(a.peso)  AS peso ${mCOLU}");
+
+$filter->db->select($select);
+$filter->db->orderby('tota','DESC');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause ='where';
+$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n')-1,1));
+$filter->fechah->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n')  ,0));
+$filter->fechad->operator='>=';
+$filter->fechah->operator='<=';
+$filter->fechah->group = 'Fecha';
+$filter->fechad->group = 'Fecha';
+
+$filter->codigod = new inputField('Desde el C&oacute;digo', 'codigod');
+$filter->codigod->db_name =$filter->codigod->db_name='a.codigo';
+$filter->codigod->clause  =$filter->codigod->clause='where';
+$filter->codigod->operator='>=';
+$filter->codigod->append($bSINVd);
+$filter->codigod->group='Producto';
+
+$filter->codigoh = new inputField('Hasta', 'codigoh');
+$filter->codigoh->db_name =$filter->codigoh->db_name='a.codigo';
+$filter->codigoh->clause  =$filter->codigoh->clause='where';
+$filter->codigoh->operator='<=';
+$filter->codigoh->append($bSINVh);
+$filter->codigoh->group='Producto';
+
+$filter->depto = new dropdownField('Departamento', 'depto');
+$filter->depto->db_name='a.depto';
+$filter->depto->option('','Todos');
+$filter->depto->options('SELECT TRIM(depto) AS depto, descrip FROM dpto WHERE tipo=\'I\' ORDER BY depto');
+$filter->depto->onchange = 'get_linea();';
+$filter->depto->group = 'Producto';
+
+$filter->linea = new dropdownField('L&iacute;nea', 'linea');
+$filter->linea->db_name='a.linea';
+$filter->linea->option('','Seleccione un Departamento');
+$filter->linea->onchange = 'get_grupo();';
+$filter->linea->group    = 'Producto';
+
+$filter->grupo = new dropdownField('Grupo', 'grupo');
+$filter->grupo->option('','Seleccione una Línea');
+$filter->grupo->group = 'Producto';
+$filter->grupo->db_name='a.grupo';
+
+$filter->vendedor = new dropdownField('Vendedor', 'vendedor');
+$filter->vendedor->clause='where';
+$filter->vendedor->db_name='vendedor';
+$filter->vendedor->operator='=';
+$filter->vendedor->option('','Todos');
+$filter->vendedor->options("SELECT vendedor, concat('(',vendedor,')',nombre) FROM vend ORDER BY vendedor");
+$filter->vendedor->group = 'Producto';
+
+$filter->cod_cli = new inputField('Cliente', 'cod_cli');
+$filter->cod_cli->clause='where';
+$filter->cod_cli->db_name='cod_cli';
+$filter->cod_cli->operator='=';
+$filter->cod_cli->append($cboton);
+
+$filter->socio = new inputField('Socio', 'socio');
+$filter->socio->clause ='in';
+$filter->socio->db_name='(socio,cod_cli) ';
+$filter->socio->append($bsocio.' No se tomar&aacute; en cuenta el cliente');
+
+$filter->grupocli = new dropdownField('Grupo de Cliente', 'grupocli');
+$filter->grupocli->clause='where';
+$filter->grupocli->db_name='grupocli';
+$filter->grupocli->operator='=';
+$filter->grupocli->option('','Todos');
+$filter->grupocli->options("SELECT TRIM(grupo) AS grupo, gr_desc FROM grcl ORDER BY gr_desc");
+
+$filter->ciudad = new dropdownField('Ciudad', 'ciudad');
+$filter->ciudad->clause='where';
+$filter->ciudad->db_name='ciudad';
+$filter->ciudad->operator='=';
+$filter->ciudad->option('','Todos');
+$filter->ciudad->options("SELECT TRIM(ciudad) AS codigo, ciudad FROM ciud ORDER BY ciudad");
+
+$filter->zona = new dropdownField('Zona', 'zona');
+$filter->zona->clause='where';
+$filter->zona->db_name='zona';
+$filter->zona->operator='=';
+$filter->zona->option('','Todos');
+$filter->zona->options('SELECT TRIM(codigo) AS codigo, nombre FROM zona ORDER BY nombre');
+
+$filter->proveed = new inputField('Proveedor', 'proveed');
+$filter->proveed->append($bSPRV);
+$filter->proveed->clause ='in';
+$filter->proveed->db_name='( s.prov1, s.prov2, s.prov3 )';
+
+$filter->marca = new dropdownField('Marca', 'marca');
+$filter->marca->clause ='where';
+$filter->marca->db_name='marca';
+$filter->marca->operator='=';
+$filter->marca->option('','Todas');
+$filter->marca->options('SELECT TRIM(marca) AS codigo, marca FROM marc ORDER BY marca');
+
+$opciones=array(
+	array('opc' => form_radio('opcion', '1', true ).'Producto'     ),
+	array('opc' => form_radio('opcion', '2', false).'Grupo'        ),
+	array('opc' => form_radio('opcion', '3', false).'L&iacute;nea' ),
+	array('opc' => form_radio('opcion', '4', false).'Departamento' ),
+	array('opc' => form_radio('opcion', '5', false).'Cliente'      ),
+	array('opc' => form_radio('opcion', '6', false).'Grupo de cliente'),
+	array('opc' => form_radio('opcion', '7', false).'Zona'         ),
+	array('opc' => form_radio('opcion', '8', false).'Vendedor'     ),
+	array('opc' => form_radio('opcion', '9', false).'Ciudad'       ),
+	array('opc' => form_radio('opcion', 'A', false).'Proveedor'    ),
+	//array('opc' => form_radio('opcion', 'B', false).'Marca'      )
+);
+
+$grid = new DataTable(null,$opciones);
+$grid->per_row = 3;
+$grid->per_page = count($opciones);
+$grid->cell_template = '<div class="littletablerow"><#opc#></div>';
+$grid->build();
+
+$filter->opciones = new containerField(null,$grid->output);
+$filter->opciones->group = 'Opciones';
+$filter->opciones->clause ='';
+
+$filter->clase= new dropdownField('Clase','clase');
+$filter->clase->db_name='s.clase';
+$filter->clase->clause='where';
+$filter->clase->operator='=';
+$filter->clase->option('','Todos');
+$filter->clase->option('A','A');
+$filter->clase->option('B','B');
+$filter->clase->option('C','C');
+$filter->clase->option('I','I');
+
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+$filter->salformat->group = 'Opciones';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+
+	$mSQL=$this->rapyd->db->_compile_select();
+	$mSQL_p="SELECT SUM(a.tota*(a.tipo='F')) - SUM(a.tota*(a.tipo='D')) devuelto ".substr($mSQL,strpos($mSQL, 'FROM'), strpos($mSQL, 'GROUP')-strpos($mSQL, 'FROM'));
+	$row = $this->datasis->dameval($mSQL_p);
+
+	if(is_null($row)) $row=1;
+	$mSQL=str_replace('==++==','SUM(a.tota)*100/'.$row.' totad', $mSQL);
+	//echo $mSQL;
+
+	$sobretabla='';
+	if(!empty($filter->depto->newValue))    $sobretabla.=' Dpto: '.$filter->depto->description;
+	if(!empty($filter->grupo->newValue))    $sobretabla.=' Grupo: ('.$filter->grupo->newValue.') '.$this->datasis->dameval('SELECT nom_grup FROM grup WHERE grupo="'.$filter->grupo->newValue.'"');
+	if(!empty($filter->linea->newValue))    $sobretabla.=' Línea: ('.$filter->linea->newValue.') '.$this->datasis->dameval('SELECT descrip FROM line WHERE linea="'.$filter->linea->newValue.'"');
+	if(!empty($filter->vendedor->newValue)) $sobretabla.=' Vendedor: '.$filter->vendedor->description;
+	if(!empty($filter->grupocli->newValue)) $sobretabla.=' Grupo Clte: '.$filter->grupocli->description;
+	if(!empty($filter->ciudad->newValue))   $sobretabla.=' Ciudad: '.$filter->ciudad->description;
+	if(!empty($filter->zona->newValue))     $sobretabla.=' Zona: '.$filter->zona->description;
+	if(!empty($filter->marca->newValue))    $sobretabla.=' Marca: '.$filter->marca->description;
+	if(!empty($filter->codigod->newValue))  $sobretabla.='  Código Desde: ('.$filter->codigod->newValue.') '.$this->datasis->dameval('SELECT descrip FROM sinv WHERE codigo="'.$filter->codigod->newValue.'"');
+	if(!empty($filter->codigoh->newValue))  $sobretabla.='  Código Hasta: ('.$filter->codigoh->newValue.') '.$this->datasis->dameval('SELECT descrip FROM sinv WHERE codigo="'.$filter->codigoh->newValue.'"');
+	if(!empty($filter->cod_cli->newValue))  $sobretabla.='  Cliente: ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli  WHERE cliente="'.$filter->cod_cli->newValue.'"');
+	if(!empty($filter->proveed->newValue))  $sobretabla.='  Proveedor: ('.$filter->proveed->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprm WHERE cod_prv="'.$filter->proveed->newValue.'"');
+	if(!empty($filter->socio->newValue))    $sobretabla.='  Socio: ('.$filter->socio->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->socio->newValue.'"');
+
+	$subtitu='';
+	if(!empty($_POST['fechad'])) $subtitu.=' Desde la fecha '.$_POST['fechad'];
+	if(!empty($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Listado de Ventas por $mTITU");
+	$pdf->setSubTitulo($subtitu);
+	$pdf->setSobreTabla($sobretabla,2);
+	$pdf->AddPage();
+	$pdf->setTableTitu(7,'Times');
+
+	$pdf->AddCol($mCODI ,$t, $mCABE[0] ,'L',5);
+	$pdf->AddCol($mNOM  ,60 ,$mCABE[1] ,'L',5);
+	$pdf->AddCol('cana' ,20 ,$mCABE[2] ,'R',5);
+	$pdf->AddCol('tota' ,20 ,$mCABE[3] ,'R',5);
+	$pdf->AddCol('costo',20 ,$mCABE[4] ,'R',5);
+	$pdf->AddCol('totap',15 ,$mCABE[5] ,'R',5);
+	$pdf->AddCol('peso' ,18 ,$mCABE[6] ,'R',5);
+	$pdf->AddCol('totad',14 ,$mCABE[7] ,'R',5);
+	$pdf->AddCol('clase',14 ,'Clase' ,'R',5);
+	$pdf->setTotalizar('tota','peso','costo','totad');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Ventas Por Producto</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

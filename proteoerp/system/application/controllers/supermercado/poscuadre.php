@@ -87,7 +87,7 @@ class Poscuadre extends Controller {
 		$data['content'] .= "<td align='center'><A href='".base_url()."supermercado/poscuadre/detfact/${menvia}'>Facturas</a></td>\n";
 		$data['content'] .= "<td align='center'><A href='".base_url()."supermercado/poscuadre/detsfpa/${menvia}'>Pagos</a></td>\n";
 		$data['content'] .= "<td align='center'><A href='".base_url()."supermercado/poscuadre/detitfact/${menvia}'>Art&iacute;culo</a></td>";
-		$data['content'] .= "<td align='center'>".anchor('supermercado/poscuadre','regresar')."</td>";
+		$data['content'] .= "<td align='center'>".anchor('supermercado/poscuadre','Regresar')."</td>";
 		$data['content'] .= "</tr>\n</table>\n";
 
 		$q1="SELECT COUNT(*)        FROM positfact WHERE cantidad<0 AND fecha=${dbfecha} AND cajero=${dbcajero} AND caja=${dbcaja}";
@@ -181,11 +181,12 @@ class Poscuadre extends Controller {
 	}
 
 	function detfact() {
-		$this->rapyd->load("datagrid");
-		$caja   = $this->uri->segment(4) ;
-		$cajero = $this->uri->segment(5);
-		$fecha  = $this->uri->segment(6);
-		$menvia=site_url("supermercado/poscuadre/factura/$caja/$cajero/$fecha/<#numero#>");
+		$this->rapyd->load('datagrid');
+		$caja     = $this->uri->segment(4);
+		$cajero   = $this->uri->segment(5);
+		$fecha    = $this->uri->segment(6);
+
+		$menvia=site_url("supermercado/poscuadre/factura/${caja}/${cajero}/${fecha}/<#numero#>");
 		function colum($numero,$gtotal) {
 			if ($gtotal < 0)
 				return ('<b style="color:red;">'.$numero.'</b>');
@@ -196,20 +197,21 @@ class Poscuadre extends Controller {
 		$grid->use_function('colum');
 		$grid->per_page = 20;
 
-		$select=array("a.tipo","a.numero","DATE_FORMAT(a.fecha, '%d/%m/%Y') fecha","if(b.nombres IS NULL","a.nombres","concat(b.nombres,' ',b.apellidos)) nombres","FORMAT(a.impuesto,2) impuesto", "FORMAT(a.gtotal,2) gtotal", "a.hora");
+		$select=array('a.tipo','a.numero',"DATE_FORMAT(a.fecha, '%d/%m/%Y') fecha","IF(b.nombres IS NULL,a.nombres,CONCAT(b.nombres,' ',b.apellidos)) nombres",'a.impuesto','a.gtotal','a.hora');
 		$grid->db->select($select);
-		$grid->db->from("posfact a");
-		$grid->db->join("club b","a.cliente=b.cod_tar","LEFT");
-		$grid->db->where("fecha",$fecha);
-		$grid->db->where("cajero",$cajero);
-		$grid->db->where("caja",$caja);
+		$grid->db->from('posfact a');
+		$grid->db->join('club b' ,'a.cliente=b.cod_tar','LEFT');
+		$grid->db->where('fecha' ,$fecha);
+		$grid->db->where('cajero',$cajero);
+		$grid->db->where('caja'  ,$caja);
 		$grid->db->orderby('numero');
-		$grid->column("Tipo"    ,"tipo"    );
-		$grid->column("Numero"  ,"<a href='$menvia'><colum><#numero#>|<#gtotal#></colum></a>"  );
-		$grid->column("Fecha"   ,"fecha"   );
-		$grid->column("Nombres" ,"nombres" );
-		$grid->column("Impuesto","impuesto",'align="right"');
-		$grid->column("Total"   ,"gtotal"  ,'align="right"');
+		$grid->column('Tipo'    ,'tipo'    );
+		$grid->column('N&uacute;mero'  ,"<a href='${menvia}'><colum><#numero#>|<#gtotal#></colum></a>"  );
+		$grid->column('Fecha'   ,'fecha'   );
+		$grid->column('Nombres' ,'nombres' );
+		$grid->column('Impuesto','<nformat><#impuesto#></nformat>','align="right"');
+		$grid->column('Total'   ,'<nformat><#gtotal#></nformat>'  ,'align="right"');
+
 		$grid->button('btn_reg', 'Regresar',"javascript:window.location='".site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}")."'", 'TR');
 		$grid->build();
 
@@ -220,22 +222,26 @@ class Poscuadre extends Controller {
 			$data['content'].= "<a href='".site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}")."'>Regresar</a>";
 		}
 
-		$data['title']   = "<h1>Facturas cajero ".$cajero." caja ".$caja." fecha ".dbdate_to_human($fecha)."</h1>";
-		$data["head"]    = $this->rapyd->get_head();
+		$data['title']   = '<h1>Facturas cajero '.$cajero.' caja '.$caja.' fecha '.dbdate_to_human($fecha).'</h1>';
+		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
 	function factura() {
-		$this->rapyd->load("datagrid");
-		$caja   = $this->uri->segment(4);
-		$cajero = $this->uri->segment(5);
-		$fecha  = $this->uri->segment(6);
-		$numero = $this->uri->segment(7);
-		$menvia=site_url("supermercado/poscuadre/detfact/$caja/$cajero/$fecha");
+		$this->rapyd->load('datagrid');
+		$caja     = $this->uri->segment(4);
+		$cajero   = $this->uri->segment(5);
+		$fecha    = $this->uri->segment(6);
+		$numero   = $this->uri->segment(7);
+		$dbcaja   = $this->db->escape($caja  );
+		$dbcajero = $this->db->escape($cajero);
+		$dbfecha  = $this->db->escape($fecha );
+		$dbnumero = $this->db->escape($numero);
+		$menvia=site_url("supermercado/poscuadre/detfact/${caja}/${cajero}/${fecha}");
 
 		$mSQL = "SELECT cliente, cedula, nombres, direc1, direc2
 		         FROM posfact
-		         WHERE fecha=$fecha AND cajero='$cajero' AND caja='$caja' AND numero='$numero'";
+		         WHERE fecha=${dbfecha} AND cajero=${dbcajero} AND caja=${dbcaja} AND numero=${dbnumero}";
 		$query = $this->db->query($mSQL);
 		//echo $mSQL;
 		$row = $query->row();
@@ -244,9 +250,9 @@ class Poscuadre extends Controller {
 		$data['content'] .= "TARJETA: ".$row->cliente."<BR>";
 		$data['content'] .= "DIRECCION: ".$row->direc1." ". $row->direc2."<br>";
 
-		$mSQL = "SELECT if(referen='',codigo,referen) codigo, descrip, cantidad, precio, monto, impuesto
+		$mSQL = "SELECT IF(referen='',codigo,referen) codigo, descrip, cantidad, precio, monto, impuesto
 		         FROM positfact
-		         WHERE fecha=$fecha AND cajero='$cajero' AND caja='$caja' AND numero='$numero'";
+		         WHERE fecha=${dbfecha} AND cajero=${dbcajero} AND caja=${dbcaja} AND numero=${dbnumero}";
 
 		$query = $this->db->query($mSQL);
 
@@ -276,7 +282,7 @@ class Poscuadre extends Controller {
 
 		$mSQL = "SELECT a.tipo, a.fecha, a.monto, b.descrip
 		         FROM possfpa AS a LEFT JOIN tardet AS b ON a.banco=b.concepto AND a.tipo=b.tarjeta
-		         WHERE a.fecha=$fecha AND a.cajero='$cajero' AND a.caja='$caja' AND a.numero='$numero'
+		         WHERE a.fecha=${dbfecha} AND a.cajero=${dbcajero} AND a.caja=${dbcaja} AND a.numero=${dbnumero}
 		         ORDER BY a.tipo";
 
 		$query = $this->db->query($mSQL);
@@ -299,18 +305,18 @@ class Poscuadre extends Controller {
 			$data['content'] .= "</tr>\n";
 		}
 
-		$data['content'] .= "<a href='".site_url("supermercado/poscuadre/concaja/$caja/$cajero/$fecha")."'>Regresar</a>";
+		$data['content'] .= "<a href='".site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}")."'>Regresar</a>";
 		$data['title']   = "<h1>Factura ".$numero." caja ".$caja." fecha ".dbdate_to_human($fecha)."</h1>";
 		$data["head"]    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
 	function detsfpa() {
-		$this->rapyd->load("datagrid");
+		$this->rapyd->load('datagrid');
 		$caja   = $this->uri->segment(4);
 		$cajero = $this->uri->segment(5);
 		$fecha  = $this->uri->segment(6);
-		$menvia=site_url("supermercado/poscuadre/concaja/$caja/$cajero/$fecha");
+		$menvia=site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}");
 
 		function colum($numero,$gtotal) {
 			if ($gtotal < 0)
@@ -327,51 +333,52 @@ class Poscuadre extends Controller {
 		$grid->db->select($select);
 		$grid->db->from('possfpa a');
 		$grid->db->join('tardet b',"a.banco=b.concepto AND a.tipo=b.tarjeta","LEFT");
-		$grid->db->where('fecha',$fecha);
+		$grid->db->where('fecha' ,$fecha);
 		$grid->db->where('cajero',$cajero);
-		$grid->db->where('caja',$caja);
+		$grid->db->where('caja'  ,$caja);
 		$grid->db->orderby('a.tipo');
-		$grid->column("Tipo"     ,"tipo"    );
-		$grid->column("Numero"   ,"<colum><#numero#>|<#monto#></colum>"  );
-		$grid->column("Fecha"    ,"fecha"   );
-		$grid->column("Monto"    ,"monto"   ,'align="right"');
-		$grid->column("Referencia","descrip");
+		$grid->column('Tipo'      ,'tipo'    );
+		$grid->column('Numero'    ,'<colum><#numero#>|<#monto#></colum>' );
+		$grid->column('Fecha'     ,'fecha'   );
+		$grid->column('Monto'     ,'monto'   ,'align="right"');
+		$grid->column('Referencia','descrip' );
 		$grid->button('btn_reg', 'Regresar',"javascript:window.location='".site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}")."'", 'TR');
 		$grid->build();
 
 		if($grid->recordCount>0){
 			$data['content'] = $grid->output;
 		}else{
-			$data['content'] ='<p class="mainheader">No se encontrar&oacute;n resultados.</p>';
-			$data['content'] .= "<a href='$menvia'>Regresar</a>";
+			$data['content']  = '<p class="mainheader">No se encontrar&oacute;n resultados.</p>';
+			$data['content'] .= "<a href='${menvia}'>Regresar</a>";
 		}
 
-		$data['title']   = "<h1>Pagos a cajero ".$cajero." caja ".$caja." fecha ".dbdate_to_human($fecha)."</h1>";
+		$data['title']   = '<h1>Pagos a cajero '.$cajero.' caja '.$caja.' fecha '.dbdate_to_human($fecha).'</h1>';
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
-	function detitfact() {
-		$this->rapyd->load("datagrid");
+	function detitfact(){
+		$this->rapyd->load('datagrid');
 		$caja   = $this->uri->segment(4);
 		$cajero = $this->uri->segment(5);
 		$fecha  = $this->uri->segment(6);
-		$menvia=site_url("supermercado/poscuadre/concaja/$caja/$cajero/$fecha");
+		$menvia=site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}");
 
 		$grid = new DataGrid('Ventas por art&iacute;culos');
 		$grid->per_page = 20;
-		$select=array("codigo","descrip","SUM(cantidad) cantidad","FORMAT(sum(monto),2) monto","FORMAT(sum(impuesto),2) impuesto","referen");
+		$select=array('codigo','descrip','SUM(cantidad) cantidad','SUM(monto) monto','SUM(impuesto) impuesto','referen');
 		$grid->db->select($select);
-		$grid->db->from("positfact");
-		$grid->db->where("fecha",$fecha);
-		$grid->db->where("cajero",$cajero);
-		$grid->db->where("caja",$caja);
+		$grid->db->from('positfact');
+		$grid->db->where('fecha' ,$fecha);
+		$grid->db->where('cajero',$cajero);
+		$grid->db->where('caja'  ,$caja);
 		$grid->db->groupby('codigo');
-		$grid->column("C&oacute;digo"     ,"codigo"  );
-		$grid->column("Descripci&oacute;n","descrip" );
-		$grid->column("Cantidad"          ,"cantidad",'align="right"');
-		$grid->column("Monto"             ,"monto"   ,'align="right"');
-		$grid->column("Referencia"        ,"referen" );
+		$grid->column('C&oacute;digo'     ,'codigo'  );
+		$grid->column('Descripci&oacute;n','descrip' );
+		$grid->column('Cantidad'          ,'cantidad','align="right"');
+		$grid->column('Monto'             ,'<nformat><#monto#></nformat>'   ,'align="right"');
+		$grid->column('Referencia'        ,'referen' );
+
 		$grid->button('btn_reg', 'Regresar',"javascript:window.location='".site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}")."'", 'TR');
 		$grid->build();
 
@@ -379,10 +386,10 @@ class Poscuadre extends Controller {
 			$data['content'] = $grid->output;
 		}else{
 			$data['content'] = '<p class="mainheader">No se encontrar&oacute;n resultados.</p>';
-			$data['content'].= "<a href='$menvia'>Regresar</a>";
+			$data['content'].= "<a href='${menvia}'>Regresar</a>";
 		}
 
-		$data['title']   = "<h1>Ventas por articulo ".$cajero." caja ".$caja." fecha ".dbdate_to_human($fecha)."</h1>";
+		$data['title']   = '<h1>Ventas por art&iacute;culo '.$cajero.' caja '.$caja.' fecha '.dbdate_to_human($fecha).'</h1>';
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
