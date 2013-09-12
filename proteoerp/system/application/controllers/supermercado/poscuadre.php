@@ -74,44 +74,51 @@ class Poscuadre extends Controller {
 	}
 
 	function concaja() {
-		$this->rapyd->load("datagrid");
-		$caja   = $this->uri->segment(4);
-		$cajero = $this->uri->segment(5);
-		$fecha  = $this->uri->segment(6);
-		$menvia="$caja/$cajero/$fecha";
+		$this->rapyd->load('datagrid');
+		$caja     = $this->uri->segment(4);
+		$cajero   = $this->uri->segment(5);
+		$fecha    = $this->uri->segment(6);
+		$menvia   = "${caja}/${cajero}/${fecha}";
+		$dbcaja   = $this->db->escape($caja  );
+		$dbcajero = $this->db->escape($cajero);
+		$dbfecha  = $this->db->escape($fecha );
 
 		$data['content']  = "<table class='bordetabla' width='40%' align='center'>\n<tr>\n";
-		$data['content'] .= "<td><A href='".base_url()."supermercado/poscuadre/detfact/$menvia'>Facturas</a></td>\n";
-		$data['content'] .= "<td><A href='".base_url()."supermercado/poscuadre/detsfpa/$menvia'>Pagos</a></td>\n";
-		$data['content'] .= "<td><A href='".base_url()."supermercado/poscuadre/detitfact/$menvia'>Articulo</a></td></tr>\n</table>\n";
+		$data['content'] .= "<td align='center'><A href='".base_url()."supermercado/poscuadre/detfact/${menvia}'>Facturas</a></td>\n";
+		$data['content'] .= "<td align='center'><A href='".base_url()."supermercado/poscuadre/detsfpa/${menvia}'>Pagos</a></td>\n";
+		$data['content'] .= "<td align='center'><A href='".base_url()."supermercado/poscuadre/detitfact/${menvia}'>Art&iacute;culo</a></td>";
+		$data['content'] .= "<td align='center'>".anchor('supermercado/poscuadre','regresar')."</td>";
+		$data['content'] .= "</tr>\n</table>\n";
 
-    $q1="SELECT COUNT(*) FROM positfact WHERE cantidad<0 AND fecha=$fecha AND cajero='$cajero' AND caja='$caja'";
-    $q2="SELECT abs(sum(monto)) FROM positfact WHERE cantidad<0 AND fecha=$fecha AND cajero='$cajero' AND caja='$caja'";
+		$q1="SELECT COUNT(*)        FROM positfact WHERE cantidad<0 AND fecha=${dbfecha} AND cajero=${dbcajero} AND caja=${dbcaja}";
+		$q2="SELECT ABS(SUM(monto)) FROM positfact WHERE cantidad<0 AND fecha=${dbfecha} AND cajero=${dbcajero} AND caja=${dbcaja}";
 
 		$grid = new DataGrid('Resumen de caja');
 
-		$select=array("FORMAT(sum((gtotal-impuesto)*(SUBSTRING(numero,1,1)<>'X')),2) base",
-		                   "FORMAT(sum(impuesto*(SUBSTRING(numero,1,1)<>'X')),2) impuesto",
-		                   "FORMAT(sum(gtotal*(SUBSTRING(numero,1,1)<>'X')),2) total", "($q1) dv1", "FORMAT(($q2),2) dv2",
-		                   "sum(gtotal*(SUBSTRING(numero,1,1)<>'X' AND gtotal<0) ) devol",
-		                   "sum(1*(SUBSTRING(numero,1,1)='X')) nulos",
-		                   "FORMAT(sum(gtotal*(SUBSTRING(numero,1,1)='X')),2) nulas",
-		                   "count(*) trans",
-		                   "sum((SUBSTRING(numero,1,1)<>'X' AND gtotal<0)) nose",
-		                   "max(SUBSTRING(numero,2,7)) final",
-		                   "min(SUBSTRING(numero,2,7)) inicial");
+		$select=array(
+			"SUM((gtotal-impuesto)*(SUBSTRING(numero,1,1)<>'X')) base",
+			"SUM(impuesto*(SUBSTRING(numero,1,1)<>'X')) impuesto",
+			"SUM(gtotal*(SUBSTRING(numero,1,1)<>'X')) total", "(${q1}) dv1", "(${q2}) dv2",
+			"SUM(gtotal*(SUBSTRING(numero,1,1)<>'X' AND gtotal<0)) AS devol",
+			"SUM(1*(SUBSTRING(numero,1,1)='X')) AS nulos",
+			"SUM(gtotal*(SUBSTRING(numero,1,1)='X')) AS nulas",
+			'COUNT(*) AS trans',
+			"SUM((SUBSTRING(numero,1,1)<>'X' AND gtotal<0)) nose",
+			'MAX(SUBSTRING(numero,2,7)) AS final',
+			'MIN(SUBSTRING(numero,2,7)) AS inicial'
+		);
 		$grid->db->select($select);
-		$grid->db->from("posfact");
-		$grid->db->where("fecha",$fecha);
-		$grid->db->where("cajero",$cajero);
-		$grid->db->where("caja",$caja);
+		$grid->db->from('posfact');
+		$grid->db->where('fecha' ,$fecha);
+		$grid->db->where('cajero',$cajero);
+		$grid->db->where('caja'  ,$caja);
 		$grid->db->groupby('caja');
-		$grid->column("Sub Total","base"     ,'align="right"');
-		$grid->column("Impuesto" ,"impuesto" ,'align="right"');
-		$grid->column("Total"    ,"total"    ,'align="right"');
-		$grid->column("Devuelto" ,"<#dv1#> x <#dv2#>" ,'align="right"');
-		$grid->column("Nulo"     ,"<#nulos#> x <#nulas#>"    ,'align="right"');
-		$grid->column("Transferencia"   ,"trans"    ,'align="center"');
+		$grid->column('Sub Total'    ,'<nformat><#base#></nformat>'     ,'align="right"');
+		$grid->column('Impuesto'     ,'<nformat><#impuesto#></nformat>' ,'align="right"');
+		$grid->column('Total'        ,'<nformat><#total#></nformat>'    ,'align="right"');
+		$grid->column('Devuelto'     ,'<#dv1#> x <#dv2#>'        ,'align="right"');
+		$grid->column('Nulo'         ,'<#nulos#> x <#nulas#>'    ,'align="right"');
+		$grid->column('Transferencia','trans'    ,'align="center"');
 		$grid->build();
 		$arreglo=$grid->recordSet[0];
 		$data['content'] .= $grid->output.'<b class="mainheader">Factura Inicial: '.$arreglo['inicial'].' Factura Final: '.$arreglo['final'].'</b>';
@@ -119,52 +126,52 @@ class Poscuadre extends Controller {
 
 		$grid2 = new DataGrid('Detalles del impuesto');
 
-		$select=array("impuesto tasa","FORMAT(sum(ROUND(monto*100/(impuesto+100),2)),2) AS base","FORMAT(sum(monto-ROUND(monto*100/(impuesto+100),2)),2) AS iva","FORMAT(sum(monto),2) AS total");
+		$select=array('impuesto tasa',"SUM(ROUND(monto*100/(impuesto+100),2)) AS base","SUM(monto-ROUND(monto*100/(impuesto+100),2)) AS iva",'SUM(monto) AS total');
 		$grid2->db->select($select);
-		$grid2->db->from("positfact");
-		$grid2->db->where("fecha",$fecha);
-		$grid2->db->where("cajero",$cajero);
-		$grid2->db->where("caja",$caja);
-		$grid2->db->where("SUBSTRING(numero,1,1)!=",'X');
+		$grid2->db->from('positfact');
+		$grid2->db->where('fecha' , $fecha);
+		$grid2->db->where('cajero', $cajero);
+		$grid2->db->where('caja'  , $caja);
+		$grid2->db->where('SUBSTRING(numero,1,1)!=','X');
 		$grid2->db->groupby('impuesto');
-		$grid2->column("Tasa %"         ,"tasa" ,'align="right"');
-		$grid2->column("Base Imponible" ,"base" ,'align="right"');
-		$grid2->column("Impuesto"       ,"iva"  ,'align="right"');
-		$grid2->column("Total"          ,"total",'align="right"');
+		$grid2->column('Tasa %'         ,'<nformat><#tasa#></nformat>' ,'align="right"');
+		$grid2->column('Base Imponible' ,'<nformat><#base#></nformat>' ,'align="right"');
+		$grid2->column('Impuesto'       ,'<nformat><#iva#></nformat>'  ,'align="right"');
+		$grid2->column('Total'          ,'<nformat><#total#></nformat>','align="right"');
 		$grid2->build();
 
 		$data['content'] .= $grid2->output;
 
-		$select=array("a.tipo","a.banco","count(*) tran","FORMAT(sum((a.monto)*(SUBSTRING(a.numero,1,1)<>'X')),2) monto","b.nombre","c.descrip");
+		$select=array('a.tipo','a.banco','COUNT(*) tran',"SUM((a.monto)*(SUBSTRING(a.numero,1,1)<>'X')) monto",'b.nombre','c.descrip');
 		$grid3 = new DataGrid('Res&uacute;men de formas de Pago');
 		$grid3->db->select($select);
-		$grid3->db->from("possfpa a");
-		$grid3->db->join("tarjeta b","a.tipo=b.tipo");
-		$grid3->db->join("tardet c","a.banco=c.concepto AND a.tipo=c.tarjeta","LEFT");
-		$grid3->db->where("fecha",$fecha);
-		$grid3->db->where("cajero",$cajero);
-		$grid3->db->where("a.caja",$caja);
+		$grid3->db->from('possfpa a');
+		$grid3->db->join('tarjeta b','a.tipo=b.tipo');
+		$grid3->db->join('tardet c','a.banco=c.concepto AND a.tipo=c.tarjeta','LEFT');
+		$grid3->db->where('fecha' ,$fecha);
+		$grid3->db->where('cajero',$cajero);
+		$grid3->db->where('a.caja',$caja);
 		$grid3->db->groupby('a.tipo');
-		$grid3->column("Tipo"    ,"<#tipo#> <#nombre#>");
-		$grid3->column("Cantidad","tran"  ,'align="center"');
-		$grid3->column("Monto"   ,"monto" ,'align="right"');
+		$grid3->column('Tipo'    ,'<#tipo#> <#nombre#>');
+		$grid3->column('Cantidad','tran'  ,'align="center"');
+		$grid3->column('Monto'   ,'<nformat><#monto#></nformat>' ,'align="right"');
 		$grid3->build();
 
 		if($grid3->recordCount>0) $data['content'] .= $grid3->output; else $data['content'] .='<p class="mainheader">No se encontrar&oacute;n resultados.</p>';
 
 		$grid4 = new DataGrid('Detalle de caja');
 		$grid4->db->select($select);
-		$grid4->db->from("possfpa a");
-		$grid4->db->join("tarjeta b","a.tipo=b.tipo");
-		$grid4->db->join("tardet c","a.banco=c.concepto AND a.tipo=c.tarjeta","LEFT");
-		$grid4->db->where("fecha",$fecha);
-		$grid4->db->where("cajero",$cajero);
-		$grid4->db->where("a.caja",$caja);
+		$grid4->db->from('possfpa a');
+		$grid4->db->join('tarjeta b',"a.tipo=b.tipo");
+		$grid4->db->join('tardet c',"a.banco=c.concepto AND a.tipo=c.tarjeta","LEFT");
+		$grid4->db->where('fecha' ,$fecha);
+		$grid4->db->where('cajero',$cajero);
+		$grid4->db->where('a.caja',$caja);
 		$grid4->db->groupby('a.tipo,a.banco');
-		$grid4->column("Tipo"    ,"<#tipo#> <#nombre#>");
-		$grid4->column("Concepto","<#banco#> <#descrip#>"  );
-		$grid4->column("Cantidad","tran"  ,'align="center"');
-		$grid4->column("Monto"   ,"monto" ,'align="right"');
+		$grid4->column('Tipo'    ,'<#tipo#> <#nombre#>');
+		$grid4->column('Concepto','<#banco#> <#descrip#>'  );
+		$grid4->column('Cantidad','tran'  ,'align="center"');
+		$grid4->column('Monto'   ,'<nformat><#monto#></nformat>' ,'align="right"');
 		$grid4->build();
 
 		$data['content'] .= $grid4->output;
@@ -203,14 +210,16 @@ class Poscuadre extends Controller {
 		$grid->column("Nombres" ,"nombres" );
 		$grid->column("Impuesto","impuesto",'align="right"');
 		$grid->column("Total"   ,"gtotal"  ,'align="right"');
+		$grid->button('btn_reg', 'Regresar',"javascript:window.location='".site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}")."'", 'TR');
 		$grid->build();
 
-		if($grid->recordCount>0)
+		if($grid->recordCount>0){
 			$data['content'] = $grid->output;
-		else
-			$data['content'] ='<p class="mainheader">No se encontrar&oacute;n resultados.</p>';
+		}else{
+			$data['content'] = '<p class="mainheader">No se encontrar&oacute;n resultados.</p>';
+			$data['content'].= "<a href='".site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}")."'>Regresar</a>";
+		}
 
-		$data['content'] .= "<a href='".site_url("supermercado/poscuadre/concaja/$caja/$cajero/$fecha")."'>Regresar</a>";
 		$data['title']   = "<h1>Facturas cajero ".$cajero." caja ".$caja." fecha ".dbdate_to_human($fecha)."</h1>";
 		$data["head"]    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
@@ -316,27 +325,29 @@ class Poscuadre extends Controller {
 
 		$select=array("a.tipo","a.numero","DATE_FORMAT(a.fecha, '%d/%m/%Y') fecha","a.num_ref","FORMAT(a.monto,2) monto","b.descrip");
 		$grid->db->select($select);
-		$grid->db->from("possfpa a");
-		$grid->db->join("tardet b","a.banco=b.concepto AND a.tipo=b.tarjeta","LEFT");
-		$grid->db->where("fecha",$fecha);
-		$grid->db->where("cajero",$cajero);
-		$grid->db->where("caja",$caja);
+		$grid->db->from('possfpa a');
+		$grid->db->join('tardet b',"a.banco=b.concepto AND a.tipo=b.tarjeta","LEFT");
+		$grid->db->where('fecha',$fecha);
+		$grid->db->where('cajero',$cajero);
+		$grid->db->where('caja',$caja);
 		$grid->db->orderby('a.tipo');
 		$grid->column("Tipo"     ,"tipo"    );
 		$grid->column("Numero"   ,"<colum><#numero#>|<#monto#></colum>"  );
 		$grid->column("Fecha"    ,"fecha"   );
 		$grid->column("Monto"    ,"monto"   ,'align="right"');
 		$grid->column("Referencia","descrip");
+		$grid->button('btn_reg', 'Regresar',"javascript:window.location='".site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}")."'", 'TR');
 		$grid->build();
 
-		if($grid->recordCount>0)
+		if($grid->recordCount>0){
 			$data['content'] = $grid->output;
-		else
+		}else{
 			$data['content'] ='<p class="mainheader">No se encontrar&oacute;n resultados.</p>';
+			$data['content'] .= "<a href='$menvia'>Regresar</a>";
+		}
 
-		$data['content'] .= "<a href='$menvia'>Regresar</a>";
 		$data['title']   = "<h1>Pagos a cajero ".$cajero." caja ".$caja." fecha ".dbdate_to_human($fecha)."</h1>";
-		$data["head"]    = $this->rapyd->get_head();
+		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -361,16 +372,18 @@ class Poscuadre extends Controller {
 		$grid->column("Cantidad"          ,"cantidad",'align="right"');
 		$grid->column("Monto"             ,"monto"   ,'align="right"');
 		$grid->column("Referencia"        ,"referen" );
+		$grid->button('btn_reg', 'Regresar',"javascript:window.location='".site_url("supermercado/poscuadre/concaja/${caja}/${cajero}/${fecha}")."'", 'TR');
 		$grid->build();
 
-		if($grid->recordCount>0)
+		if($grid->recordCount>0){
 			$data['content'] = $grid->output;
-		else
-			$data['content'] ='<p class="mainheader">No se encontrar&oacute;n resultados.</p>';
+		}else{
+			$data['content'] = '<p class="mainheader">No se encontrar&oacute;n resultados.</p>';
+			$data['content'].= "<a href='$menvia'>Regresar</a>";
+		}
 
-		$data['content'] .= "<a href='$menvia'>Regresar</a>";
 		$data['title']   = "<h1>Ventas por articulo ".$cajero." caja ".$caja." fecha ".dbdate_to_human($fecha)."</h1>";
-		$data["head"]    = $this->rapyd->get_head();
+		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 }
