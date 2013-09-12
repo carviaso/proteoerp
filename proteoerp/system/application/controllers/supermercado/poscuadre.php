@@ -37,7 +37,7 @@ class Poscuadre extends Controller {
 		if($cupon>0) {
 			$select[] = "SUM(TRUNCATE(a.gtotal/${cupon},0)) AS  cupones";
 		}else{
-			$select[] = '0 AS  cupones';
+			$select[] = '"0" AS  cupones';
 		}
 		$grid->db->select($select);
 		$grid->db->from('posfact AS a');
@@ -68,7 +68,7 @@ class Poscuadre extends Controller {
 
 		$data['content'] = $filter->output.$grid->output.$consul->output;
 		$data['title']   = '<h1>Consulta de Cajas</h1>';
-		$data["head"]    = $this->rapyd->get_head();
+		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
