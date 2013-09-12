@@ -31,13 +31,13 @@ class Poscuadre extends Controller {
 		$filter->build_form();
 
 		$grid = new DataGrid2();
-		$select=array('a.caja caja',"IFNULL(b.nombre,'N/A') nombre",'a.cajero AS cajero','FORMAT(SUM(a.gtotal),2) monto');
+		$select=array('a.caja caja',"IFNULL(b.nombre,'N/A') nombre",'a.cajero AS cajero','SUM(a.gtotal) AS monto');
 
 		$cupon = floatval($this->datasis->traevalor('FMAYCUPON'));
 		if($cupon>0) {
-			$select[] = "SUM(TRUNCATE(a.gtotal/${cupon},0)) AS  cupones";
+			$select[] = "SUM(TRUNCATE(a.gtotal/${cupon},0)) AS cupones";
 		}else{
-			$select[] = 'a.gtotal*0 AS  cupones';
+			$select[] = '(0) AS  cupones';
 		}
 		$grid->db->select($select);
 		$grid->db->from('posfact AS a');
@@ -46,11 +46,12 @@ class Poscuadre extends Controller {
 		$grid->db->join('scaj b','a.cajero=b.cajero','LEFT');
 		$grid->db->groupby('a.caja,a.cajero');
 
-		$grid->column_detail('Caja','caja', site_url("supermercado/poscuadre/concaja/<#caja#>/<#cajero#>/$qfechai"));
+		$link=anchor("supermercado/poscuadre/concaja/<#caja#>/<#cajero#>/$qfechai",'<#caja#>');
+		$grid->column('Caja'   , $link);
 		$grid->column('Nombre' , 'nombre' );
 		$grid->column('Cajero' , 'cajero' ,'align="center"');
 		$grid->column('Cupones', 'cupones','align="center"');
-		$grid->column('Monto'  , 'monto'  ,'align="right"');
+		$grid->column('Monto'  , '<nformat>monto</nformat>'  ,'align="right"');
 		$grid->totalizar('monto');
 		$grid->build();
 		//echo $grid->db->last_query();
