@@ -1,5 +1,5 @@
 $base_process_uri   = $this->rapyd->uri->implode_uri("base_uri","gfid","orderby");
-$filter = new DataForm("");
+$filter = new DataForm('');
 $filter->_process_uri = $this->rapyd->uri->add_clause($base_process_uri,"search");
 
 $filter->container = new containerField("alert","<b style='color:red;'>Si necesita sacar la existencia al d&iacute;a de hoy este no es el reporte correcto, utilice un reporte general de inventario, este reporte es solo para consultas de d&iacute;as pasados, ya que no se toman en cuenta las transacciones del d&iacute;a actual.</b>");
@@ -15,7 +15,7 @@ $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->submit("btnsubmit",RAPYD_BUTTON_SEARCH);
+$filter->submit('btnsubmit',RAPYD_BUTTON_SEARCH);
 $filter->build_form();
 
 if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){

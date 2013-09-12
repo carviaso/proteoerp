@@ -165,15 +165,15 @@ class Reportes extends Controller{
 		$this->rapyd->load('fields');
 		$where = 'WHERE ';
 
-		$grupo = new dropdownField("Subcategoria", "grupo");
+		$grupo = new dropdownField('Subcategoria', 'grupo');
 		if (!empty($_POST["linea"]) AND !empty($_POST["dpto"])) {
 			if($_POST["dpto"]!='T')$where .= "depto = ".$this->db->escape($_POST["dpto"]).' AND ';
 			$where .= "linea = ".$this->db->escape($_POST["linea"]);
-			$sql = "SELECT grupo,CONCAT_WS('-',grupo,nom_grup) FROM grup $where";
+			$sql = "SELECT grupo,CONCAT_WS('-',grupo,nom_grup) FROM grup ${where}";
 			$grupo->option("","");
 			$grupo->options($sql);
 		}else{
-			$grupo->option("","Seleccione una l&iacute;nea");
+			$grupo->option('','Seleccione una l&iacute;nea');
 		}
 		$grupo->status = "modify";
 		$grupo->build();

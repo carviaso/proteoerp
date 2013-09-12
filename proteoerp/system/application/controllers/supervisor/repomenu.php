@@ -137,7 +137,7 @@ class repomenu extends validaciones {
 				$.ajax({
 					type: "POST",
 					url: "'.$url.'",
-					data: "codigo="+this.name,
+					data: {"codigo" : this.name},
 					success: function(msg){
 						if (msg==0)
 							alert("Ocurrio un problema");
@@ -195,6 +195,8 @@ class repomenu extends validaciones {
 	// Edita el Reporte
 	//
 	function reporte(){
+		header('Content-Type: text/html; charset='.$this->config->item('charset'));
+
 		$this->rapyd->load('dataedit');
 		$this->rapyd->uri->keep_persistence();
 		$atts = array(
@@ -218,10 +220,10 @@ class repomenu extends validaciones {
 		$script='
 		$("#df1").submit(function(){
 			$.post("'.site_url('supervisor/repomenu/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
-			function(data){
-				alert("Reporte guardado" + data);
-			},
-			"application/x-www-form-urlencoded;charset='.$this->config->item('charset').'");
+				function(data){
+					//alert("Reporte guardado" + data);
+				}
+			);
 			return false;
 		});
 
@@ -240,8 +242,6 @@ class repomenu extends validaciones {
 			});
 			return false;
 		};
-
-
 		';
 
 		$edit->script($script,'modify');
@@ -257,14 +257,13 @@ class repomenu extends validaciones {
 
 		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 
-		$accion=$this->datasis->jwinopen(site_url("reportes/ver/".$id."'"));
+		$accion=$this->datasis->jwinopen(site_url('reportes/ver/'.$id."'"));
 		$edit->button_status('btn_probar','Probar Reporte',$accion,'TL','modify');
 
-		$accion=$this->datasis->jwinopen(site_url("supervisor/mantenimiento/centinelas'"));
+		$accion=$this->datasis->jwinopen(site_url('supervisor/mantenimiento/centinelas'));
 		$edit->button_status('btn_centinela','Centinelas',$accion,'TL','modify');
-
-		$edit->button_status('btn_guardar','Guardar a Archivo','fguardar()','TL','modify');
-		$edit->button_status('btn_cargar','Cargar desde Archivo','fcargar()','TL','modify');
+		$edit->button_status('btn_guardar'  ,'Guardar a Archivo'   ,'fguardar()','TL','modify');
+		$edit->button_status('btn_cargar'   ,'Cargar desde Archivo','fcargar()' ,'TL','modify');
 
 		$edit->build();
 
@@ -272,7 +271,7 @@ class repomenu extends validaciones {
 		$this->rapyd->jquery[]='$("#proteo").linedtextarea();';
 
 		if($this->genesal){
-			$data['content'] = $edit->output;
+			$data['content'] = $edit->output.$edit->proteo->value;
 			$data['title']   = '<h1>Editando Reporte '.$id.'</h1>';
 
 			$data['head']    = $this->rapyd->get_head();
@@ -287,16 +286,16 @@ class repomenu extends validaciones {
 	}
 
 	function gajax_proteo(){
-		header('Content-Type: text/html; '.$this->config->item('charset'));
 		$this->genesal = false;
 		$nombre=$this->input->post('nombre');
 		$proteo=$this->input->post('proteo');
 
-		if($proteo !== false and $nombre !== false){
-			if(stripos($this->config->item('charset'), 'utf')===false){
-				$_POST['nombre']=utf8_decode($nombre);
-				$_POST['proteo']=utf8_decode($proteo);
-			}
+		if($proteo !== false && $nombre !== false){
+			//if(stripos($this->config->item('charset'), 'utf')===false){
+			//	$_POST['nombre']=utf8_decode($nombre);
+			//	$_POST['proteo']=utf8_decode($proteo);
+			//}
+
 			$this->reporte();
 		}
 	}
@@ -335,7 +334,7 @@ class repomenu extends validaciones {
 		$edit->reporte->cols=130;
 		$edit->reporte->rule = 'callback_eollw';
 
-		$edit->buttons("modify", "save", "undo", "delete", "back");
+		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 		$edit->build();
 
 		$data['content'] = $edit->output;
@@ -385,9 +384,9 @@ class repomenu extends validaciones {
 			}
 		}
 		if ($rs)
-			echo "Reporte Guardado";
+			echo 'Reporte Guardado';
 		else
-			echo "Error al guardar";
+			echo 'Error al guardar';
 
 	}
 

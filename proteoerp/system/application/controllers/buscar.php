@@ -272,14 +272,15 @@ class Buscar extends Controller
 		$jscript.="}\n}\n</SCRIPT>";
 
 		//echo $grid->db->last_query();
-		$data['crud']   = $filter->output . $grid->output;
-		$data['titulo'] = '';
-		$data['encab']=$this->titulo;
+		$data['crud']         = $filter->output . $grid->output;
+		$data['titulo']       = '';
+		$data['encab']        = $this->titulo;
 		$content['content']   = $this->load->view('rapyd/crud', $data, true);
 		$content['rapyd_head']= $jscript.$this->rapyd->get_head();
-		$content['code']  = '';
-		//$content["titulo"]=$this->titulo;
-		$content['lista'] = "";
+		$content['code']      = '';
+		//$content['titulo']  = $this->titulo;
+		$content['lista']     = '';
+		$content['charset']   = (stripos($this->db->char_set,'latin')!==false)? 'ISO-8859-1': null;
 
 		$this->load->view('rapyd/modbus', $content);
 

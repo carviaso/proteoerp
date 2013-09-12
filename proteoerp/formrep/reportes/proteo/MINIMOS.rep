@@ -89,88 +89,99 @@ $filter->db->select('c.descrip as dlinea');
 $filter->db->select('d.depto');
 $filter->db->select('d.descrip AS dptodescrip');
 $filter->db->from('eventas AS a');
-$filter->db->join('sinv   AS s' ,'a.codigo=s.codigo');
-$filter->db->join("grup AS b","s.grupo=b.grupo ");
-$filter->db->join("line   AS c","b.linea=c.linea");
-$filter->db->join("dpto AS d","d.depto=c.depto");
+$filter->db->join('sinv AS s','a.codigo=s.codigo');
+$filter->db->join('grup AS b','s.grupo=b.grupo');
+$filter->db->join('line AS c','b.linea=c.linea');
+$filter->db->join('dpto AS d','d.depto=c.depto');
 $filter->db->groupby('a.codigo');
 $filter->db->orderby('d.depto,c.linea,b.grupo');
 
-$filter->fechad = new dateonlyField("Desde", "fechad",'m/Y');
-$filter->fechah = new dateonlyField("Hasta", "fechah",'m/Y');
+$estFecha = $this->datasis->dameval('SELECT MAX(fecha) AS fecha FROM costos');
+if(empty($estFecha)){
+	$estMsj='No existen estad&iacute;sticas generadas, debe generarse primero para usar este reporte.';
+}else{
+	$estMsj='Por favor tenga en cuenta de que este es un reporte estad&iacute;stico, la informaci&oacute;n que se mostrar&aacute; ser&aacute; hasta el '.dbdate_to_human($estFecha).'.';
+}
+$filter->container = new containerField('alert',"<b style='color:#E50E0E;'>${estMsj}</b>");
+$filter->container->clause='';
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','m/Y');
+$filter->fechah = new dateonlyField('Hasta', 'fechah','m/Y');
 $filter->fechad->dbformat='Y-m-';
 $filter->fechah->dbformat='Y-m-';
-$filter->fechah->rule = "required";
-$filter->fechad->rule = "required";
-$filter->fechad->clause  =$filter->fechah->clause='';
-$filter->fechad->insertValue = date("Y-m-d",mktime(0,0,0,date('m')-11,date('j'),date('Y')));
-$filter->fechah->insertValue = date("Y-m-d");
+$filter->fechah->rule   = 'required';
+$filter->fechad->rule   = 'required';
+$filter->fechad->clause = $filter->fechah->clause='';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0,0,0,date('m')-11,date('j'),date('Y')));
+$filter->fechah->insertValue = date('Y-m-d');
 
-$filter->codigo = new inputField("C&oacute;digo", "codigo");
-$filter->codigo->db_name=("a.codigo");
+$filter->codigo = new inputField('C&oacute;digo', 'codigo');
+$filter->codigo->db_name=('a.codigo');
 $filter->codigo-> size=25;
 
-$filter->tipo = new dropdownField("Tipo", "tipo");
-$filter->tipo->db_name=("s.tipo");
-$filter->tipo->option("","Todos");
-$filter->tipo->option("Articulo","Art&iacute;culo");
-$filter->tipo->option("Servicio","Servicio");
-$filter->tipo->option("Descartar","Descartar");
-$filter->tipo->option("Consumo","Consumo");
-$filter->tipo->option("Fraccion","Fracci&oacute;n");
+$filter->tipo = new dropdownField('Tipo', 'tipo');
+$filter->tipo->db_name='s.tipo';
+$filter->tipo->option('','Todos');
+$filter->tipo->option('Articulo' ,'Art&iacute;culo');
+$filter->tipo->option('Servicio' ,'Servicio');
+$filter->tipo->option('Descartar','Descartar');
+$filter->tipo->option('Consumo'  ,'Consumo');
+$filter->tipo->option('Fraccion' ,'Fracci&oacute;n');
 $filter->tipo->style='width:220px;';
 
-$filter->clave = new inputField("Clave", "clave");
-$filter->clave->db_name="s.clave";
-$filter->clave -> size=25;
+$filter->clave = new inputField('Clave', 'clave');
+$filter->clave->db_name='s.clave';
+$filter->clave->size=25;
 
-$filter->activo = new dropdownField("Activo", "activo");
+$filter->activo = new dropdownField('Activo', 'activo');
 $filter->activo->option('','Todos');
-$filter->activo->option("S","Si");
-$filter->activo->option("N","No");
-$filter->activo->db_name="s.activo";
+$filter->activo->option('S','Si');
+$filter->activo->option('N','No');
+$filter->activo->db_name='s.activo';
 $filter->activo->style='width:220px;';
 
-$filter->depto = new dropdownField("Departamento","depto");
-$filter->depto->db_name="d.depto";
+$filter->depto = new dropdownField('Departamento','depto');
+$filter->depto->db_name='d.depto';
 $filter->depto->option('','Seleccione un Departamento');
 $filter->depto->options("SELECT depto, descrip FROM dpto WHERE tipo='I' ORDER BY depto");
 
-$filter->linea = new dropdownField("L&iacute;nea","linea");
-$filter->linea->db_name="c.linea";
-$filter->linea->option("","Seleccione un Departamento primero");
+$filter->linea = new dropdownField('L&iacute;nea','linea');
+$filter->linea->db_name='c.linea';
+$filter->linea->option('','Seleccione un Departamento primero');
 $depto=$filter->getval('depto');
 if($depto!==FALSE){
-        $filter->linea->options("SELECT linea, descrip FROM line WHERE depto='$depto' ORDER BY descrip");
+	$dbdepto=$this->db->escape($depto);
+	$filter->linea->options("SELECT linea, descrip FROM line WHERE depto=${dbdepto} ORDER BY descrip");
 }else{
-        $filter->linea->option("","Seleccione un Departamento primero");
+	$filter->linea->option('','Seleccione un Departamento primero');
 }
 
-$filter->grupo = new dropdownField("Grupo", "grupo");
-$filter->grupo->db_name="b.grupo";
-$filter->grupo->option("","Seleccione una L&iacute;nea primero");
+$filter->grupo = new dropdownField('Grupo', 'grupo');
+$filter->grupo->db_name='b.grupo';
+$filter->grupo->option('','Seleccione una L&iacute;nea primero');
 $linea=$filter->getval('linea');
 if($linea!==FALSE){
-        $filter->grupo->options("SELECT grupo, nom_grup FROM grup WHERE linea='$linea' ORDER BY nom_grup");
+	$dblinea=$this->db->escape($linea);
+	$filter->grupo->options("SELECT grupo, nom_grup FROM grup WHERE linea=${dblinea} ORDER BY nom_grup");
 }else{
-        $filter->grupo->option("","Seleccione un Departamento primero");
+	$filter->grupo->option('','Seleccione un Departamento primero');
 }
 
-$filter->marca = new dropdownField("Marca", "marca");
+$filter->marca = new dropdownField('Marca', 'marca');
 $filter->marca->option('','Todas');
-$filter->marca->options("SELECT TRIM(marca) AS clave, TRIM(marca) AS valor FROM marc ORDER BY marca");
+$filter->marca->options('SELECT TRIM(marca) AS clave, TRIM(marca) AS valor FROM marc ORDER BY marca');
 $filter->marca->style='width:220px;';
-$filter->marca->db_name="s.marca";
+$filter->marca->db_name='s.marca';
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='XLS';
 $filter->salformat->clause = '';
 
-$filter->buttons("search");
+$filter->buttons('search');
 $filter->build();
 
-if($this->rapyd->uri->is_set("search") AND $filter->is_valid()){
+if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 	$fechad=$filter->fechad->newValue.'01';
 	$ffechad=explode('-',$fechad);
 
@@ -260,7 +271,7 @@ if($this->rapyd->uri->is_set("search") AND $filter->is_valid()){
 }else{
 	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
 	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Comparativo Minimos</h2>';
+	$data["titulo"] = '<h2 class="mainheader">Comparativo M&iacute;nimos</h2>';
 	$data["head"]    = script("jquery.pack.js").$this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

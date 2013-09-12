@@ -11,12 +11,12 @@ $filter->fecha->dbformat = 'Ym';
 $filter->fecha->insertValue=date('Y-m-d',mktime(0, 0, 0, date('n'),0));
 
 $filter->banco = new dropdownField('Banco', 'codbanc');
-$filter->banco->db_name="a.codbanc";
-$filter->banco->option("","");
+$filter->banco->db_name='a.codbanc';
+$filter->banco->option('','Todos');
 $filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc WHERE tbanco<>'CAJ' ORDER BY codbanc");
 $filter->banco->rule = 'required';
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
