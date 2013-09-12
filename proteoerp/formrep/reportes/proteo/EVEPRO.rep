@@ -206,7 +206,7 @@ $mCABE[]='Part%';
 $select=array('a.codigo', 'a.descrip', 'a.grupo', 'a.linea', 'a.cod_cli' , 'a.vendedor', 'a.zona', 'a.grupocli',
 	'a.ciudad', 'a.depto', 's.prov1', '==++==' ,'s.clase',
 	'SUM(a.tota)  AS tota',
-	'IF(SUM(a.cana)=0, s.margen1 ,100-SUM(a.costo)*100/IF(SUM(a.tota)=0,1,SUM(a.tota))) AS totap',
+	"IF(SUM(a.cana)=0 AND SUM(a.costo)=0, 100-SUM(a.costo*(a.tipo='F'))*100/IF(SUM(a.tota*(a.tipo='F'))=0,1,SUM(a.tota*(a.tipo='F'))) ,100-SUM(a.costo)*100/IF(SUM(a.tota)=0,1,SUM(a.tota))) AS totap",
 	//'100-SUM(a.costo)*100/IF(SUM(a.tota)=0,1,SUM(a.tota)) AS totap',
 	'SUM(a.cana)  AS cana',
 	'SUM(a.costo) AS costo',

@@ -634,16 +634,20 @@ class notifica extends controller {
 		if($type='html'){
 			$this->load->library('cisimplehtmldom');
 			$phtml=$this->cisimplehtmldom->getstr($body);
-			ob_start();
-				foreach($phtml->find('img') as $element){
-					$file= file_get_contents('http://localhost'.$element->src);
-					$content_id = md5(uniqid(time()));
-					$this->mailimage($file,$element->alt,'application/octet-stream',basename($element->src),false,$content_id);
-					$element->src = 'cid:'.$content_id;
-				}
-				echo $phtml;
-				$_html=ob_get_contents();
-			@ob_end_clean();
+			if($phtml!==false){
+				ob_start();
+					foreach($phtml->find('img') as $element){
+						$file= file_get_contents('http://localhost'.$element->src);
+						$content_id = md5(uniqid(time()));
+						$this->mailimage($file,$element->alt,'application/octet-stream',basename($element->src),false,$content_id);
+						$element->src = 'cid:'.$content_id;
+					}
+					echo $phtml;
+					$_html=ob_get_contents();
+				@ob_end_clean();
+			}else{
+				$_html=$body;
+			}
 			//$rt['prog']= $_html;
 			$rt['prog']= '';
 		}
