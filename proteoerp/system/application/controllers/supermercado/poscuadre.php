@@ -51,7 +51,7 @@ class Poscuadre extends Controller {
 		$grid->column('Nombre' , 'nombre' );
 		$grid->column('Cajero' , 'cajero' ,'align="center"');
 		$grid->column('Cupones', 'cupones','align="center"');
-		$grid->column('Monto'  , '<nformat>monto</nformat>'  ,'align="right"');
+		$grid->column('Monto'  , '<nformat><#monto#></nformat>'  ,'align="right"');
 		$grid->totalizar('monto');
 		$grid->build();
 		//echo $grid->db->last_query();
