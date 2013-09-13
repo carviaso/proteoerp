@@ -1581,11 +1581,11 @@ class Datasis {
 
 			$mSQL = "
 			UPDATE sinv SET
-				margen1=100-ROUND(pond*100/base1,2),
-				margen2=100-ROUND(pond*100/base2,2),
-				margen3=100-ROUND(pond*100/base3,2),
-				margen4=100-ROUND(pond*100/base4,2)
-			WHERE formcal='P' ;";
+				margen1 = 100-ROUND(pond*100/base1,2),
+				margen2 = 100-ROUND(pond*100/base2,2),
+				margen3 = 100-ROUND(pond*100/base3,2),
+				margen4 = 100-ROUND(pond*100/base4,2)
+			WHERE formcal = 'P' ;";
 			$CI->db->simple_query($mSQL);
 
 			$mSQL = "
@@ -1608,7 +1608,7 @@ class Datasis {
 
 			$mSQL = "
 			UPDATE sinv SET
-				margen1=100-ROUND(standard*100/base1,2),
+				margen1 = 100-ROUND(standard*100/base1,2),
 				margen2=100-ROUND(standard*100/base2,2),
 				margen3=100-ROUND(standard*100/base3,2),
 				margen4=100-ROUND(standard*100/base4,2)

@@ -78,7 +78,6 @@ class fnomina {
 		$SUELDOA = 0;
 		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=$CODIGO");
 		$mMONTO  = $this->SPROME;
-		//$this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=$CODIGO");
 
 		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
 		if($mFRECU == 'S') $SUELDOA = $mMONTO/7 ;
@@ -188,7 +187,7 @@ class fnomina {
 	function REPOSO(){
 		// VER SI ESTA EN REPOSO
 		$mSQL  = "SELECT inicio, final FROM preposo WHERE codigo=".$this->ci->db->escape($this->CODIGO)." AND inicio<='".$this->fhasta."' AND final>".$this->fdesde;
-		memowrite($mSQL, 'Reposo');
+//		memowrite($mSQL, 'Reposo');
 		$query = $this->ci->db->query($mSQL);
 		$diasefect = 0;
 		
@@ -210,6 +209,11 @@ class fnomina {
 				
 				$diasefect = min($diasantes-3, $diasduran);
 				if ( $diasefect < 0 ) $diasefect = 0;
+
+				if ( $row->final > $this->fhasta ){
+					$diasefect+1
+				}
+				
 			}
 		}
 
@@ -363,9 +367,7 @@ class Pnomina extends fnomina {
 		$formula=str_replace('XVARI6','$VARI6',$formula);
 
 		$formula=str_replace('XUT',$ut,$formula);
-
 		$formula=str_replace('VAL(','floatval(',$formula);
-
 		$formula=str_replace('TRAEVALOR','$this->ci->datasis->traevalor',$formula);
 
 		$formula=str_replace('.AND.','&&',$formula);

@@ -13,6 +13,13 @@ class Tbautobus extends Controller {
 	}
 
 	function index(){
+		if ( !$this->datasis->istabla('view_tbautobus') ) {
+
+			$mSQL = "CREATE ALGORITHM = UNDEFINED VIEW view_tbautobus AS select a.codbus, a.codacc, b.nomacc, a.capasidad, a.tipbus, a.placa, a.marca, a.modelo, a.ano, a.serialc, a.serialm, a.color, a.id 
+					FROM tbautobus a JOIN tbaccio b ON a.codacc=b.codacc";
+			$this->db->query($mSQL);
+		}
+
 		$this->datasis->creaintramenu(array('modulo'=>'168','titulo'=>'Autobuses','mensaje'=>'AUTOBUSES','panel'=>'PASAJES','ejecutar'=>'pasajes/tbautobus','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -347,9 +354,9 @@ class Tbautobus extends Controller {
 	}
 
 
-	//***************************
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -370,28 +377,39 @@ class Tbautobus extends Controller {
 
 
 		$grid->addField('codacc');
-		$grid->label('Accionista');
+		$grid->label('CosAcc.');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 70,
+			'width'         => 50,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:10, maxlength: 10 }',
 		));
 
 
+		$grid->addField('nomacc');
+		$grid->label('Nombre del Accionista');
+		$grid->params(array(
+			//'align'         => "'center'",
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 200,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:10, maxlength: 10 }',
+		));
+
 		$grid->addField('capasidad');
-		$grid->label('Capacidad');
+		$grid->label('Cap.');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 70,
+			'width'         => 50,
 			'edittype'      => "'text'",
 		));
-
 
 		$grid->addField('tipbus');
 		$grid->label('Tipo');
@@ -404,7 +422,6 @@ class Tbautobus extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:10, maxlength: 10 }',
 		));
-
 
 		$grid->addField('placa');
 		$grid->label('Placa');
@@ -552,9 +569,9 @@ class Tbautobus extends Controller {
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
-		$mWHERE = $grid->geneTopWhere('tbautobus');
+		$mWHERE = $grid->geneTopWhere('view_tbautobus');
 
-		$response   = $grid->getData('tbautobus', array(array()), array(), false, $mWHERE, "codbus" );
+		$response   = $grid->getData('view_tbautobus', array(array()), array(), false, $mWHERE, "codbus" );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
