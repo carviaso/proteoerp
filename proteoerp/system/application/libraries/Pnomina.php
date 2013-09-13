@@ -211,7 +211,7 @@ class fnomina {
 				if ( $diasefect < 0 ) $diasefect = 0;
 
 				if ( $row->final > $this->fhasta ){
-					$diasefect++1;
+					$diasefect++;
 				}
 				
 			}
