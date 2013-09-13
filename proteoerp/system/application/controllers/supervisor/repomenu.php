@@ -241,8 +241,7 @@ class repomenu extends validaciones {
 				alert(data);
 			});
 			return false;
-		};
-		';
+		};';
 
 		$edit->script($script,'modify');
 		$edit->back_save  = true;

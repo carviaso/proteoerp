@@ -280,12 +280,12 @@ class Scli extends validaciones {
 						url: murl,
 						data: $("#df1").serialize(),
 						success: function(r,s,x){
-							if ( r.length == 0 ) {
-								apprise("Cambio Guardado");
+							if(r.length == 0){
+								$.prompt("Cambio Guardado");
 								$( "#feditcr" ).dialog( "close" );
 								grid.trigger("reloadGrid");
 								return true;
-							} else {
+							}else{
 								$("#feditcr").html(r);
 							}
 						}
@@ -297,7 +297,6 @@ class Scli extends validaciones {
 			},
 			close: function(){
 				$("#feditcr").html("");
-				allFields.val( "" ).removeClass( "ui-state-error" );
 			}
 		});';
 
@@ -309,8 +308,8 @@ class Scli extends validaciones {
 			}
 		});';
 
-		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "500", $width = "700" );
-		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, "300", "300" );
+		$bodyscript .= $this->jqdatagrid->bsfshow( $height = '500', $width = '700' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '300' );
 
 
 
@@ -340,7 +339,7 @@ class Scli extends validaciones {
 				} else {
 					$forma .= "<table align=\'center\' width=\'95%\'>";
 					$forma .= "<tr><td>Tiene Credito:</td><td> <select name=\'credito\' id=\'credito\' title=\'Asignar o suspender Credito\' value=\'\"+ret.credito+\"\'><option value=\'S\'>Activo</option><option value=\'N\'>Suspender</option></select></td></tr>";
-					$forma .= "<tr><td>Dias de Credito: </td><td><input class=\'inputnum\' type=\'text\' id=\'formap\' name=\'formap\' value=\'\"+ret.formap+\"\' size=\'3\' style=\'text-align:right;\'></td></tr>";
+					$forma .= "<tr><td>D&iacute;as de Cr&eacute;dito: </td><td><input class=\'inputnum\' type=\'text\' id=\'formap\' name=\'formap\' value=\'\"+ret.formap+\"\' size=\'3\' style=\'text-align:right;\'></td></tr>";
 					$forma .= "<tr><td>Monto Limite: </td><td><span style=\'text-align:right;\'>\"+ret.limite+\"</span></td></tr>";
 					$forma .= "<tr><td>Margen de Tolerancia:</td><td><input class=\'inputnum\' type=\'text\' id=\'tolera\' name=\'tolera\' value=\'\"+ret.tolera+\"\' size=\'7\' style=\'text-align:right;\'>%</td></tr>";
 					$forma .= "<tr><td>Maxima Tolerancia:</td><td><span style=\'text-align:right;font-size:130%;\'>\"+ret.maxtole+\"%</td></tr>";
@@ -1208,9 +1207,9 @@ class Scli extends validaciones {
 		$mpiso    = '00000';
 		$mtecho   = 'ZZZZZ';
 
-		if ( $mrango == 'S' )
+		if($mrango == 'S'){
 			$mcliente = str_pad($this->_numatri($this->datasis->prox_sql('ncodcli')),5,'0',STR_PAD_LEFT);
-		else {
+		}else{
 			// GENERA POR CONVERSION DE CI
 			if ( $mrifci != ''){
 				$mmeco    = substr($mrifci,2,15);

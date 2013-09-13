@@ -234,6 +234,8 @@ $filter->fechad->operator='>=';
 $filter->fechah->operator='<=';
 $filter->fechah->group = 'Fecha';
 $filter->fechad->group = 'Fecha';
+$filter->fechad->rule  = 'required';
+$filter->fechah->rule  = 'required';
 
 $filter->codigod = new inputField('Desde el C&oacute;digo', 'codigod');
 $filter->codigod->db_name =$filter->codigod->db_name='a.codigo';
@@ -363,7 +365,7 @@ $filter->salformat->group  = 'Opciones';
 $filter->buttons('search');
 $filter->build();
 
-if($this->rapyd->uri->is_set('search')){
+if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
 
 	$mSQL=$this->rapyd->db->_compile_select();
 	$mSQL_p="SELECT SUM(a.tota*(a.tipo='F')) - SUM(a.tota*(a.tipo='D')) devuelto ".substr($mSQL,strpos($mSQL, 'FROM'), strpos($mSQL, 'GROUP')-strpos($mSQL, 'FROM'));
@@ -415,6 +417,7 @@ if($this->rapyd->uri->is_set('search')){
 	$pdf->Output();
 
 }else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
 	$data['titulo'] = '<h2 class="mainheader">Ventas Por Producto</h2>';
 	$data['head']   = $this->rapyd->get_head();

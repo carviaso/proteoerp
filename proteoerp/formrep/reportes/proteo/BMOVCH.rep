@@ -1,0 +1,99 @@
+$modbus=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código Proveedor',
+		'nombre'=>'Nombre',
+		'rif'=>'RIF'),
+	'filtro'  =>array('proveed'=>'Código Proveedor','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'cod_prv'),
+	'titulo'  =>'Buscar Proveedor');
+
+$boton=$this->datasis->modbus($modbus);
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('a.codbanc','codcp',"CONCAT_WS(' ',codcp,a.nombre) AS benefi",'benefi AS benefi2','numero','fecha','monto','b.codbanc','b.banco AS nombanc','a.tipo_op');
+$filter->db->select($select);
+$filter->db->from('bmov AS a');
+$filter->db->join('banc AS b','a.codbanc=b.codbanc');
+$filter->db->where("tipo_op IN ('CH','ND')");
+$filter->db->orderby('b.codbanc,fecha');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechad->clause     = 'where';
+$filter->fechad->db_name    = 'a.fecha';
+$filter->fechad->operator   = '>=';
+$filter->fechad->insertValue= date('Y-m-d',mktime(0, 0, 0, date('m')-1, 1));
+$filter->fechad->group      = 'Fecha';
+$filter->fechad->rule       = 'required';
+
+$filter->fechah = new dateField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->clause     = 'where';
+$filter->fechah->insertValue= date('Y-m-d',mktime(0, 0, 0, date('m')  , 0));
+$filter->fechah->db_name    = 'a.fecha';
+$filter->fechah->operator   = '<=';
+$filter->fechah->group      = 'Fecha';
+$filter->fechah->rule       = 'required';
+
+$filter->banco = new dropdownField('Caja/Banco', 'codbanc');
+$filter->banco->db_name='a.codbanc';
+$filter->banco->option('','Todos');
+$filter->banco->options("SELECT codbanc,CONCAT_WS(' ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");
+
+$filter->cod_prv = new inputField('Proveedor', 'cod_prv');
+$filter->cod_prv->db_name = 'b.codprv';
+$filter->cod_prv->clause  = 'where';
+$filter->cod_prv->operator= '=';
+$filter->cod_prv->append($boton);
+
+$filter->tipo_op= new dropdownField ('Tipo Operaci&oacute;n', 'tipo_op');
+$filter->tipo_op->option('','Todos los Egresos');
+$filter->tipo_op->options(array('CH'=>'Cheques','ND'=>'Notas de Débito'));
+$filter->tipo_op->style = 'width:200px;';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$sobretabla='';
+	if (!empty($filter->banco->newValue))   $sobretabla.='             Banco: '.$filter->banco->description;
+	if (!empty($filter->cod_prv->newValue)) $sobretabla.='             Proveedor: ('.$filter->cod_prv->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprm WHERE cod_prv="'.$filter->cod_prv->newValue.'"');
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Listado de Pagos');
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->setSubTitulo('Desde la fecha: '.$filter->fechad->value.' Hasta '.$filter->fechah->value);
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+
+	$pdf->AddCol('numero' ,35,'Número'   ,'L',9);
+	$pdf->AddCol('tipo_op',10,'Op.' ,'L',9);
+	$pdf->AddCol('fecha'  ,18,'Fecha'    ,'R',9);
+	$pdf->AddCol('monto'  ,25,'Monto'    ,'R',9);
+	$pdf->AddCol('benefi' ,70,'Nombre del Beneficiario','L',7);
+	$pdf->AddCol('benefi2',50,'A Nombre' ,'L',7);
+
+	$pdf->setGrupoLabel('Banco/Caja: (<#codbanc#>) <#nombanc#> ');
+	$pdf->setGrupo('codbanc');
+	$pdf->setTotalizar('monto');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Listado de Cheques Clientes</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
