@@ -1,11 +1,12 @@
 <html>
 <head>
+<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>">
 <title>ProteoERP <?php if(isset($title)) echo ':'.preg_replace('/<[^>]*>/', '', $title); ?></title>
 <?php echo style('ventanas.css');?>
 <?php if (isset($head))   echo $head;   ?>
 <?php if (isset($script)) echo $script; ?>
 </head>
-<body>	
+<body>
 <div id='contenido'>
 	<table width="95%" border=0 align="center">
 		<tr>

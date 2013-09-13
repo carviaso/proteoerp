@@ -652,7 +652,9 @@ class notifica extends controller {
 			$rt['prog']= '';
 		}
 
+		session_write_close();
 		$ban = $this->_sendmail($to,$subject,$_html,$type);
+
 		if($ban){
 			$rt['status']='A';
 			$rt['msj']   ='Correo enviado';

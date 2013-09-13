@@ -271,7 +271,7 @@ class repomenu extends validaciones {
 		$this->rapyd->jquery[]='$("#proteo").linedtextarea();';
 
 		if($this->genesal){
-			$data['content'] = $edit->output.$edit->proteo->value;
+			$data['content'] = $edit->output;
 			$data['title']   = '<h1>Editando Reporte '.$id.'</h1>';
 
 			$data['head']    = $this->rapyd->get_head();
