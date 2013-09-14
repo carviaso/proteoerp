@@ -3487,7 +3487,7 @@ class Sfac extends Controller {
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 
-		$mSQL="DELETE FROM sfpa WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero}";
+		$mSQL="DELETE FROM sfpa WHERE transac=${dbtransac} AND numero=${dbnumero}";
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 

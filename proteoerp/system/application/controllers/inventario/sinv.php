@@ -2897,7 +2897,7 @@ class Sinv extends Controller {
 		$edit->linea->db_name='linelinea';
 		$edit->linea->pointer=true;
 		$depto=$edit->getval('depto');
-		if($depto!==FALSE){
+		if($depto!==false){
 			$dbdepto=$this->db->escape($depto);
 			$edit->linea->options("SELECT linea, CONCAT(LINEA,'-',descrip) descrip FROM line WHERE depto=$dbdepto ORDER BY descrip");
 		}else{
