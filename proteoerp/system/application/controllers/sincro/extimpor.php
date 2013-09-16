@@ -203,6 +203,12 @@ class extimpor extends Controller {
 
 			$mSQL="UPDATE sinv AS a JOIN ${ttabla} AS b ON a.codigo=b.codigo SET ".implode(',',$set);
 			$ban=$this->db->simple_query($mSQL);
+
+			if(in_array('marca',$def)){
+				$mSQL= "INSERT IGNORE INTO marc (marca,margen) SELECT TRIM(marca),0 FROM sinv GROUP BY marca";
+				$ban=$this->db->simple_query($mSQL);
+			}
+
 			return $ban;
 		}else{
 			$this->pros_error='Tabla no valida.';
