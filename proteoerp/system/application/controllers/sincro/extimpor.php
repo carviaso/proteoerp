@@ -11,12 +11,17 @@ class extimpor extends Controller {
 	}
 
 	function index(){
-		redirect($this->url.'procesar');
+		$this->instalar();
+		redirect($this->url.'load');
 	}
 
-	function procesar(){
+	function procesar($id_tabla=null){
 		$this->rapyd->load('dataedit','datagrid','fields');
-		$id_tabla = 1;
+		//$id_tabla = 1;
+		if(empty($id_tabla))  { show_error('Faltan parametros');   }
+		$id_tabla = intval($id_tabla);
+		if($id_tabla<=0){ show_error('Error en parametros'); }
+
 		$tabla    = $this->tabla;
 		$select   = $titu=array();
 
@@ -67,7 +72,7 @@ class extimpor extends Controller {
 		$grid->per_page = 25;
 
 		$select[]='(fila+1) AS fila';
-		$grid->column('Fila','<b><#fila#></b>','align="rigth"');
+		$grid->column('Fila','<b><#fila#></b>','align="right"');
 		for($i=0;$i<$ccolum;$i++){
 			$select[]="GROUP_CONCAT(IF(columna=${i},valor,NULL)) AS c${i}";
 			//$titulo=(isset($titu[$i]))? $titu[$i]: 'Columna '.($i+1);
@@ -78,10 +83,13 @@ class extimpor extends Controller {
 			$grid->column_orderby($titulo,"c${i}","c${i}");
 		}
 		$grid->db->select($select);
+
+		$action = "javascript:window.location='".site_url($this->url.'load')."'";
+		$grid->button('btn_regresa', 'Cargar otro archivo', $action, 'TR');
 		$grid->build();
 		//echo $grid->db->last_query();
 
-		$form = new DataForm($this->url.'procesar/process');
+		$form = new DataForm($this->url.'procesar/'.$id_tabla.'/process');
 
 		$form->tabla = new dropdownField('Tabla', 'tabla');
 		$form->tabla->option('sinv','Inventario');
@@ -165,13 +173,26 @@ class extimpor extends Controller {
 
 			//Pasa la data
 			$set=array();
+			$costo='IF(a.formcal=\'U\',a.ultimo,IF(a.formcal=\'P\',a.pond,IF(a.formcal=\'S\',a.standard,GREATEST(a.pond,a.ultimo))))';
 			foreach($def as $campo){
 				$set[]="a.${campo} = b.${campo}";
 			}
 
-			$mSQL="UPDATE sinv AS a JOIN ${ttabla} AS b ON a.codigo=b.codigo SET "implode(',',$set);
-			$this->db->simple_query($mSQL);
+			if(in_array('ultimo',$def) || in_array('pond',$def)){
+				$set[]="a.base1=ROUND(${costo}*100/(100-a.margen1),2)";
+				$set[]="a.base2=ROUND(${costo}*100/(100-a.margen2),2)";
+				$set[]="a.base3=ROUND(${costo}*100/(100-a.margen3),2)";
+				$set[]="a.base4=ROUND(${costo}*100/(100-a.margen4),2)";
+				$set[]="a.precio1=ROUND(a.base1*(1+(a.iva/100)),2)";
+				$set[]="a.precio2=ROUND(a.base2*(1+(a.iva/100)),2)";
+				$set[]="a.precio3=ROUND(a.base3*(1+(a.iva/100)),2)";
+				$set[]="a.precio4=ROUND(a.base4*(1+(a.iva/100)),2)";
+			}
 
+			$mSQL="UPDATE sinv AS a JOIN ${ttabla} AS b ON a.codigo=b.codigo SET ".implode(',',$set);
+			$this->db->simple_query($mSQL);
+			echo $mSQL;
+			return true;
 		}else{
 			$this->pros_error='Tabla no valida.';
 			return false;
@@ -200,7 +221,7 @@ class extimpor extends Controller {
 			$content_id = md5(uniqid(time()));
 			$ttabla = $tabla.'_'.$content_id;
 			$this->ttabla = $ttabla;
-			$mSQL  = "CREATE TEMPORARY TABLE ${ttabla} (codigo VARCHAR(15)  NOT NULL) ";
+			$mSQL  = "CREATE /*TEMPORARY*/ TABLE ${ttabla} (codigo VARCHAR(15)  NOT NULL) ";
 			$mSQL .= 'SELECT '.implode(',',$select).',fila FROM '.$this->tabla." WHERE id_tabla=${idtabla} ${ww} GROUP BY fila ORDER BY fila";
 			$this->db->simple_query($mSQL);
 
@@ -221,7 +242,8 @@ class extimpor extends Controller {
 				}
 			}
 
-			foreach(array('ultimo','pond','standard') as $colum){
+			$cnumero = array('ultimo','pond','standard');
+			foreach($cnumero as $colum){
 				if(in_array($colum,$def)){
 					$mSQL="SELECT codigo  FROM ${ttabla} WHERE ${colum} NOT REGEXP '^[0-9\.]+$'";
 					$query = $this->db->query($mSQL);
@@ -241,6 +263,13 @@ class extimpor extends Controller {
 			if(!$error){
 				$mSQL="ALTER TABLE `${ttabla}` ADD PRIMARY KEY (`codigo`)";
 				$this->db->simple_query($mSQL);
+
+				foreach($cnumero as $colum){
+					if(in_array($colum,$def)){
+						//
+					}
+				}
+
 			}else{
 				return false;
 			}
@@ -271,12 +300,11 @@ class extimpor extends Controller {
 		$this->upload_path =$path->getPath().'/';
 
 		$this->rapyd->load('dataform');
-		$form = new DataForm('sincro/extimpor/load/process');
+		$form = new DataForm($this->url.'load/process');
 		$form->title('Importar Archivos');
-
-		$form->container = new containerField('adver','');
-
-		$form->archivo = new uploadField('Archivo','archivo');
+		$form->explica1  = new containerField('',"<p style='color:blue;background-color:C6DAF6;align:center'>Para cargar un nuevo archivo de data seleccionelo en el el bot&oacute;n Examinar y luego presione enviar.</p>");
+		$form->container = new containerField('adver','Solo archivos en formato EXCEL 97, asegurese de que la informacion que desea importar este en la hoja 1.');
+		$form->archivo   = new uploadField('Archivo','archivo');
 		$form->archivo->upload_path   = '';
 		$form->archivo->allowed_types = 'xls';
 		$form->archivo->delete_file   = false;
@@ -291,7 +319,7 @@ class extimpor extends Controller {
 		$form->build_form();
 
 		$rti='';
-		if ($form->on_success()){
+		if($form->on_success()){
 			$idtabla = intval($this->datasis->dameval('SELECT MAX(id_tabla) AS maxid FROM '.$this->tabla));
 			$idtabla++;
 
@@ -300,7 +328,19 @@ class extimpor extends Controller {
 			$rti="<p>${rt}</p>";
 		}
 
-		$data['content'] = $rti.$form->output;
+		$lista=array();
+		$mSQL='SELECT id_tabla,COUNT(*) AS cana  FROM '.$this->tabla .' GROUP BY id_tabla ORDER BY id_tabla DESC LIMIT 10';
+		$query = $this->db->query($mSQL);
+		if($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+				$lista[]=anchor($this->url.'procesar/'.$row->id_tabla,'Tabla: '.$row->id_tabla.' ('.$row->cana.' registros).');
+			}
+			$listaul= '<h2>Tablas importadas</h2>'.ul($lista);
+		}else{
+			$listaul='';
+		}
+
+		$data['content'] = $rti.$form->output.$listaul;
 		$data['title']   = heading('Importaci&oacute;n de data desde archivos');
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
@@ -341,18 +381,25 @@ class extimpor extends Controller {
 
 
 	function instalar(){
-		$mSQL="CREATE TABLE IF NOT EXISTS `impor_data` (
-			`id` int(10) NOT NULL AUTO_INCREMENT,
-			`id_tabla` int(10) DEFAULT '0',
-			`fila` int(10) DEFAULT NULL,
-			`columna` int(10) DEFAULT NULL,
-			`valor` varchar(200) DEFAULT NULL,
-			`tipo` varchar(20) DEFAULT NULL,
-			`destino` varchar(100) DEFAULT NULL,
-			PRIMARY KEY (`id`),
-			UNIQUE KEY `id_tabla` (`id_tabla`,`fila`,`columna`)
-		) ENGINE=MyISAM CHARSET=latin1 COMMENT='Contenido de las tablas importadas'";
-
-		var_dump($this->db->simple_query($mSQL));
+		if(!$this->db->table_exists($this->tabla)){
+			$mSQL="CREATE TABLE IF NOT EXISTS  `".$this->tabla."` (
+				`id` INT(10) NOT NULL AUTO_INCREMENT,
+				`id_tabla` INT(10) NULL DEFAULT '0',
+				`fila` INT(10) NULL DEFAULT NULL,
+				`columna` INT(10) NULL DEFAULT NULL,
+				`valor` VARCHAR(200) NULL DEFAULT NULL,
+				`tipo` VARCHAR(20) NULL DEFAULT NULL,
+				`destino` VARCHAR(100) NULL DEFAULT NULL,
+				`anterior` VARCHAR(200) NULL DEFAULT NULL,
+				`valida` CHAR(1) NULL DEFAULT NULL,
+				`msj` VARCHAR(100) NULL DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				UNIQUE INDEX `id_tabla` (`id_tabla`, `fila`, `columna`)
+			)
+			COMMENT='Contenido de las tablas importadas'
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM";
+			$this->db->simple_query($mSQL);
+		}
 	}
 }

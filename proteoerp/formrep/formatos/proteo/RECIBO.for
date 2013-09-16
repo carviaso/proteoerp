@@ -315,7 +315,7 @@ echo $pie_final;
 				</tr>
 				<tr style='font-weight:bold;font-size:1.05em;'>
 					<td>TOTAL NOMINA</td>
-					<td style="text-align: right;"><?php echo nformat($totales['asigna']-$totales['deduc']); ?>&nbsp;</td>
+					<td style="text-align: right;"><?php echo nformat($totales['asigna']-abs($totales['deduc'])); ?>&nbsp;</td>
 				</tr>
 				<tr>
 					<td>Desc. de Pr&eacute;stamos</td>
@@ -323,7 +323,7 @@ echo $pie_final;
 				</tr>
 				<tr style='font-weight:bold;font-size:1.8em;'>
 					<td>TOTAL A PAGAR&nbsp;&nbsp;</td>
-					<td style="text-align: right;"><?php echo nformat($totales['asigna']-$totales['deduc']-$totales['pres']); ?>&nbsp;</td>
+					<td style="text-align: right;"><?php echo nformat($totales['asigna']-abs($totales['deduc'])-abs($totales['pres'])); ?>&nbsp;</td>
 				</tr>
 			</table>
 		</td>
