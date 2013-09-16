@@ -8,7 +8,7 @@ class Bienvenido extends Controller {
 		$this->session->set_userdata('panel', $this->uri->segment(3));
 		$data['titulo1']  = '<center>';
 		$data['titulo1'] .= '<div id="tumblelog">';
-		$data['titulo1'] .= image('portada.jpg','Sistema PoteoERP');
+		$data['titulo1'] .= image('portada.png','Sistema PoteoERP');
 		$data['titulo1'] .= '<h2>Sistemas Administrativos</h2>';
 		$data['titulo1'] .= '<p></p>';
 		$data['titulo1'] .= '</div>';

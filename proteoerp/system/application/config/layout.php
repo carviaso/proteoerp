@@ -60,6 +60,6 @@ $config['layout_elements'] = array(
 $config['app_title']	     = "Proteo ERP";
 $config['app_keywords']    = "ERP, contabilidad, administracion";
 $config['app_description'] = "Sistema Administrativo contable con interface Web";
-$config['app_copyright']   = "(c) 2006-2007 Inversiones DREMANVA, C.A..";
+$config['app_copyright']   = "(c) 2012-2013 Inversiones DREMANVA, C.A.";
 
 ?>

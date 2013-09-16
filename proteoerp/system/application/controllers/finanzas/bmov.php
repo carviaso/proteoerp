@@ -731,7 +731,7 @@ class Bmov extends Controller {
 		if ( $query->num_rows() > 0 ){
 			$salida .= $td1;
 			$salida .= "Movimiento en Clientes</caption>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Nombre</td><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
 			foreach ($query->result_array() as $row){
 				if ( $row['tipo_doc'] == 'FC' ) {
 					$saldo = $row['monto']-$row['abonos'];

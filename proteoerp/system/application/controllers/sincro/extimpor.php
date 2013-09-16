@@ -1,15 +1,21 @@
 <?php
 class extimpor extends Controller {
+	var $url ='sincro/extimpor/';
 
 	function extimpor(){
 		parent::Controller();
 		$this->load->library('rapyd');
-		$this->titulo = 'Tabla importada';
-		$this->tabla  = 'impor_data';
+		$this->titulo   = 'Tabla importada';
+		$this->tabla    = 'impor_data';
+		$this->val_error= '';
 	}
 
 	function index(){
-		$this->rapyd->load('datafilter','datagrid');
+		redirect($this->url.'procesar');
+	}
+
+	function procesar(){
+		$this->rapyd->load('dataedit','datagrid','fields');
 		$id_tabla = 1;
 		$tabla    = $this->tabla;
 		$select   = $titu=array();
@@ -29,42 +35,232 @@ class extimpor extends Controller {
 		$options = array(
 			''        => 'Ignorar',
 			'codigo'  => 'Código',
-			'descrip' => 'Descipción',
-			'precio1' => 'Precio 1',
-			'precio2' => 'Precio 2',
-			'precio3' => 'Precio 3',
-			'precio4' => 'Precio 4',
-			'base1'   => 'Base 1',
-			'base2'   => 'Base 2',
-			'base3'   => 'Base 3',
-			'base4'   => 'Base 4',
+			'descrip' => 'Descripción',
+			'ultimo'  => 'Costo Último',
+			'pond'    => 'Costo Promedio',
+			'standard'=> 'Costo Estandar',
+			'exmin'   => 'Mínimo',
+			'exmax'   => 'Máximo',
+			//'precio1' => 'Precio 1', //Desarrollar validaciones
+			//'precio2' => 'Precio 2', //Desarrollar validaciones
+			//'precio3' => 'Precio 3', //Desarrollar validaciones
+			//'precio4' => 'Precio 4', //Desarrollar validaciones
+			//'base1'   => 'Base 1',   //Desarrollar validaciones
+			//'base2'   => 'Base 2',   //Desarrollar validaciones
+			//'base3'   => 'Base 3',   //Desarrollar validaciones
+			//'base4'   => 'Base 4',   //Desarrollar validaciones
 
 		);
 
-		$uri = anchor('finanzas/bmov/dataedit/show/<#codbanc#>/<#tipo_op#>/<#numero#>','<#numero#>');
+		$colunma = new dropdownField('Tabla', 'tabla');
+		$colunma->options($options );
+		$colunma->status= 'create';
+		$colunma->style = 'width:100%;';
+		$colunma->rule  = 'required';
+
 		$grid = new DataGrid('Tabla importada');
 		$grid->db->from($tabla);
 		$grid->db->where('id_tabla',$id_tabla);
 		//$grid->db->where('fila >',0);
 		$grid->db->groupby('fila');
 		$grid->db->orderby('fila');
-		$grid->per_page = 15;
+		$grid->per_page = 25;
 
+		$select[]='(fila+1) AS fila';
+		$grid->column('Fila','<b><#fila#></b>','align="rigth"');
 		for($i=0;$i<$ccolum;$i++){
 			$select[]="GROUP_CONCAT(IF(columna=${i},valor,NULL)) AS c${i}";
-			$titulo=(isset($titu[$i]))? $titu[$i]: 'Columna '.($i+1);
-			$titulo=form_dropdown("c${i}", $options, '');
+			//$titulo=(isset($titu[$i]))? $titu[$i]: 'Columna '.($i+1);
+
+			$colunma->name=$colunma->id="c${i}";
+			$colunma->build();
+			$titulo='Columna '.($i+1).$colunma->output;
 			$grid->column_orderby($titulo,"c${i}","c${i}");
 		}
 		$grid->db->select($select);
 		$grid->build();
+		//echo $grid->db->last_query();
 
-		$data['content'] = $grid->output;
-		$data['title']   = heading('Tabla importada');
+		$form = new DataForm($this->url.'procesar/process');
+
+		$form->tabla = new dropdownField('Tabla', 'tabla');
+		$form->tabla->option('sinv','Inventario');
+		$form->tabla->rule = 'required|enum[sinv]';
+
+		$form->fila = new inputField('Procesar a partir de la fila', 'fila');
+		$form->fila->append(' Incluyente.');
+		$form->fila->size = 5;
+		$form->fila->insertValue = '1';
+		$form->fila->rule = 'numeric|positive';
+
+		$form->errores = new checkboxField('Ignorar Errores', 'errores', 'S','N');
+		$form->errores->insertValue = 'N';
+		$form->errores->rule = 'enum[S,N]';
+
+		$form->container = new containerField('tabla',$grid->output);
+
+		$form->submit('btnsubmit','Procesar');
+		$form->build_form();
+
+		if($form->on_success()){
+			$def = array();
+			$val = false;
+			for($o=0;$o<$i;$o++){
+				$itdef=$this->input->post('c'.$o);
+				if(!empty($itdef)){
+					if(!in_array($itdef,$def)){
+						$def[$o]=$itdef;
+					}else{
+						$val = true;
+						$form->error_string ='Columna '.($o+1).' tiene la defición repetida.';
+						$form->build_form();
+						break;
+					}
+				}
+			}
+
+			if(!$val){
+				$rt = $this->_validar($form->tabla->newValue,$id_tabla,$def,intval($form->fila->newValue),$form->errores->newValue);
+				if(!$rt){
+					$form->error_string =$this->val_error;
+					$form->build_form();
+				}else{
+					$this->_procesar($form->tabla->newValue,$id_tabla,$def);
+				}
+			}
+		}
+
+		$data['content'] = $form->output;
+		$data['title']   = heading('Tabla Importada');
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
+	function _procesar($tabla,$idtabla,$def){
+		$ttabla = $this->ttabla;
+		$pos    = array_flip($def);
+
+		if($tabla=='sinv'){
+			unset($def[$pos['codigo']]);
+
+			//Guarda los valores anteriores
+			$sel=array('a.fila');
+			foreach($def as $campo){
+				$sel[]="a.${campo}";
+				$sel[]="b.${campo} AS sinv${campo}";
+			}
+			$this->db->select($sel);
+			$this->db->from($ttabla.' AS a');
+			$this->db->join('sinv AS b','a.codigo=b.codigo');
+			$query = $this->db->get();
+			foreach ($query->result() as $row){
+				foreach($def as $columna=>$campo){
+					$obj   = 'sinv'.$campo;
+					$where = "columna = ${columna} AND fila = ".$row->fila." AND id_tabla = ${idtabla}";
+					$mSQL  = $this->db->update_string($this->tabla, array('anterior' => $row->$obj), $where);
+					$this->db->simple_query($mSQL);
+				}
+			}
+			//Fin del respaldo de los valores anteriores
+
+			//Pasa la data
+			$set=array();
+			foreach($def as $campo){
+				$set[]="a.${campo} = b.${campo}";
+			}
+
+			$mSQL="UPDATE sinv AS a JOIN ${ttabla} AS b ON a.codigo=b.codigo SET "implode(',',$set);
+			$this->db->simple_query($mSQL);
+
+		}else{
+			$this->pros_error='Tabla no valida.';
+			return false;
+		}
+
+	}
+
+	function _validar($tabla,$idtabla,$def,$apartir,$ignorar){
+		if($tabla=='sinv'){
+			if(!in_array('codigo',$def)){
+				$this->val_error='Debe tener al menos una columna de codigo.';
+				return false;
+			}
+
+			if(count($def)<2){
+				$this->val_error='Debe tener al menos una columna de data.';
+				return false;
+			}
+
+			$select=array();
+			foreach($def as $i=>$nombre){
+				$select[]="GROUP_CONCAT(IF(columna=${i},TRIM(valor),NULL)) AS ${nombre}";
+			}
+
+			if($apartir>0) $ww='AND fila > '.($apartir-1); else $ww='';
+			$content_id = md5(uniqid(time()));
+			$ttabla = $tabla.'_'.$content_id;
+			$this->ttabla = $ttabla;
+			$mSQL  = "CREATE TEMPORARY TABLE ${ttabla} (codigo VARCHAR(15)  NOT NULL) ";
+			$mSQL .= 'SELECT '.implode(',',$select).',fila FROM '.$this->tabla." WHERE id_tabla=${idtabla} ${ww} GROUP BY fila ORDER BY fila";
+			$this->db->simple_query($mSQL);
+
+			$mSQL = "DELETE FROM ${ttabla} WHERE codigo IS NULL OR LENGTH(codigo)=0";
+			$query = $this->db->query($mSQL);
+
+			$error=false;
+			$mSQL="SELECT codigo, COUNT(*) AS cana FROM ${ttabla} GROUP BY codigo HAVING cana>1";
+			$query = $this->db->query($mSQL);
+			foreach($query->result() as $row){
+				if($ignorar=='S'){
+					$dbcodigo=$this->db->escape($row->codigo);
+					$mSQL="DELETE FROM ${ttabla} WHERE codigo=${dbcodigo}";
+					$ban=$this->db->simple_query($mSQL);
+				}else{
+					$this->val_error .= 'El código '.$row->codigo.' esta repetido '.$row->cana.".<br>";
+					$error=true;
+				}
+			}
+
+			foreach(array('ultimo','pond','standard') as $colum){
+				if(in_array($colum,$def)){
+					$mSQL="SELECT codigo  FROM ${ttabla} WHERE ${colum} NOT REGEXP '^[0-9\.]+$'";
+					$query = $this->db->query($mSQL);
+					foreach($query->result() as $row){
+						if($ignorar=='S'){
+							$dbcodigo=$this->db->escape($row->codigo);
+							$mSQL="DELETE FROM ${ttabla} WHERE codigo=${dbcodigo}";
+							$ban=$this->db->simple_query($mSQL);
+						}else{
+							$this->val_error .= 'El código '.$row->codigo.' tiene un valor no apto para el costo.<br>';
+							$error=true;
+						}
+					}
+				}
+			}
+
+			if(!$error){
+				$mSQL="ALTER TABLE `${ttabla}` ADD PRIMARY KEY (`codigo`)";
+				$this->db->simple_query($mSQL);
+			}else{
+				return false;
+			}
+
+			if($ignorar=='S'){
+				return true;
+			}else{
+				$mSQL="SELECT GROUP_CONCAT(a.codigo) AS codigo FROM ${ttabla} AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo WHERE b.codigo IS NULL";
+				$query = $this->db->query($mSQL);
+				foreach($query->result() as $row){
+					$this->val_error .= 'Código(s) no registrado(s) en el inventario '.$row->codigo."<br>";
+					$error=false;
+				}
+			}
+
+		}else{
+			$this->val_error='Tabla no valida.';
+			return false;
+		}
+	}
 
 	function load(){
 		$this->load->library('path');

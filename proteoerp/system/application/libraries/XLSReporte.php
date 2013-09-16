@@ -22,8 +22,8 @@ class XLSReporte extends writeexcel_workbookbig  {
 	var $tituSubHeader=array();
 	var $centrar=array();
 	var $wstring=array('string','char');
-	var $wnumber=array('real','int','decimal');
-	var $wdate=array('date');
+	var $wnumber=array('real','int','decimal',4,5,246,1,2,9,3,8);
+	var $wdate=array('date',10,12,7);
 	var $fc=5;
 	var $cc=0;
 	var $ii=0;
@@ -465,7 +465,8 @@ class XLSReporte extends writeexcel_workbookbig  {
 			}
 			$this->worksheet->write_string($f, $c, $campo);
 		}else{
-			$this->worksheet->write($f, $c, $campo);
+			$this->worksheet->write_string($f, $c, $campo);
+			//$this->worksheet->write($f, $c, $campo);
 		}
 	}
 

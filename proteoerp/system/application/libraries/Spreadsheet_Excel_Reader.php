@@ -106,11 +106,11 @@ class OLERead {
 		if (!$this->data) {
 			$this->error = 1;
 			return false;
-   		}
-   		if (substr($this->data, 0, 8) != IDENTIFIER_OLE) {
+		}
+		if (substr($this->data, 0, 8) != IDENTIFIER_OLE) {
 			$this->error = 1;
 			return false;
-   		}
+		}
 		$this->numBigBlockDepotBlocks = GetInt4d($this->data, NUM_BIG_BLOCK_DEPOT_BLOCKS_POS);
 		$this->sbdStartBlock = GetInt4d($this->data, SMALL_BLOCK_DEPOT_BLOCK_POS);
 		$this->rootStartBlock = GetInt4d($this->data, ROOT_START_BLOCK_POS);
@@ -167,15 +167,14 @@ class OLERead {
 		$this->smallBlockChain = array();
 
 		while ($sbdBlock != -2) {
-		  $pos = ($sbdBlock + 1) * BIG_BLOCK_SIZE;
-		  for ($j = 0; $j < BIG_BLOCK_SIZE / 4; $j++) {
-			$this->smallBlockChain[$index] = GetInt4d($this->data, $pos);
-			$pos += 4;
-			$index++;
-		  }
-		  $sbdBlock = $this->bigBlockChain[$sbdBlock];
+			$pos = ($sbdBlock + 1) * BIG_BLOCK_SIZE;
+			for ($j = 0; $j < BIG_BLOCK_SIZE / 4; $j++) {
+				$this->smallBlockChain[$index] = GetInt4d($this->data, $pos);
+				$pos += 4;
+				$index++;
+			}
+			$sbdBlock = $this->bigBlockChain[$sbdBlock];
 		}
-
 
 		// readData(rootStartBlock)
 		$block = $this->rootStartBlock;
@@ -208,16 +207,16 @@ class OLERead {
 			for ($i = 0; $i < $nameSize ; $i++) {
 				$name .= $d[$i];
 			}
-			$name = str_replace("\x00", "", $name);
+			$name = str_replace("\x00", '', $name);
 			$this->props[] = array (
 				'name' => $name,
 				'type' => $type,
 				'startBlock' => $startBlock,
 				'size' => $size);
-			if ((strtolower($name) == "workbook") || ( strtolower($name) == "book")) {
+			if ((strtolower($name) == 'workbook') || ( strtolower($name) == 'book')) {
 				$this->wrkbook = count($this->props) - 1;
 			}
-			if ($name == "Root Entry") {
+			if ($name == 'Root Entry') {
 				$this->rootentry = count($this->props) - 1;
 			}
 			$offset += PROPERTY_STORAGE_BLOCK_SIZE;
@@ -914,7 +913,8 @@ class Spreadsheet_Excel_Reader {
 	 */
 	function Spreadsheet_Excel_Reader($file='',$store_extended_info=true,$outputEncoding='') {
 		$this->_ole = new OLERead();
-		$this->setUTFEncoder('iconv');
+		//$this->setUTFEncoder('iconv');
+		$this->setUTFEncoder('mb');
 		if ($outputEncoding != '') {
 			$this->setOutputEncoding($outputEncoding);
 		}
@@ -1210,9 +1210,10 @@ class Spreadsheet_Excel_Reader {
 						$xf['fillPattern'] = $fillPattern;
 
 						$border = ord($data[$pos+14]) | (ord($data[$pos+15]) << 8) | (ord($data[$pos+16]) << 16) | (ord($data[$pos+17]) << 24);
-						$xf['borderLeft'] = $this->lineStyles[($border & 0xF)];
-						$xf['borderRight'] = $this->lineStyles[($border & 0xF0) >> 4];
-						$xf['borderTop'] = $this->lineStyles[($border & 0xF00) >> 8];
+						$xf['borderLeft']   = $this->lineStyles[($border & 0xF)];
+						$xf['borderRight']  = $this->lineStyles[($border & 0xF0) >> 4];
+						if(isset($this->lineStyles[($border & 0xF00) >> 8]))
+							$xf['borderTop']    = $this->lineStyles[($border & 0xF00) >> 8];
 						$xf['borderBottom'] = $this->lineStyles[($border & 0xF000) >> 12];
 
 						$xf['borderLeftColor'] = ($border & 0x7F0000) >> 16;
@@ -1713,10 +1714,12 @@ class Spreadsheet_Excel_Reader {
 		$result = $string;
 		if ($this->_defaultEncoding){
 			switch ($this->_encoderFunction){
-				case 'iconv' :	 $result = iconv('UTF-16LE', $this->_defaultEncoding, $string);
-								break;
-				case 'mb_convert_encoding' :	 $result = mb_convert_encoding($string, $this->_defaultEncoding, 'UTF-16LE' );
-								break;
+				case 'iconv' :
+					$result = iconv('UTF-16LE', $this->_defaultEncoding, $string);
+					break;
+				case 'mb_convert_encoding' :
+					$result = mb_convert_encoding($string, $this->_defaultEncoding, 'UTF-16LE' );
+					break;
 			}
 		}
 		return $result;
