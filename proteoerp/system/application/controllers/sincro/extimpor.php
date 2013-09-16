@@ -9,7 +9,6 @@ class extimpor extends Controller {
 		$this->titulo   = 'Tabla importada';
 		$this->tabla    = 'impor_data';
 		$this->val_error= '';
-
 	}
 
 	function index(){
@@ -47,6 +46,7 @@ class extimpor extends Controller {
 			'standard'=> 'Costo Estandar',
 			'exmin'   => 'Mínimo',
 			'exmax'   => 'Máximo',
+			'marca'   => 'Marca',
 			//'precio1' => 'Precio 1', //Desarrollar validaciones
 			//'precio2' => 'Precio 2', //Desarrollar validaciones
 			//'precio3' => 'Precio 3', //Desarrollar validaciones
@@ -307,7 +307,7 @@ class extimpor extends Controller {
 			if($ignorar=='S'){
 				return true;
 			}else{
-				$mSQL="SELECT GROUP_CONCAT(a.codigo) AS codigo FROM ${ttabla} AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo WHERE b.codigo IS NULL";
+				$mSQL="SELECT GROUP_CONCAT(a.codigo SEPARATOR ', ') AS codigo FROM ${ttabla} AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo WHERE b.codigo IS NULL";
 				echo $mSQL;
 				$query = $this->db->query($mSQL);
 				foreach($query->result() as $row){
