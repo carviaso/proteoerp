@@ -9,6 +9,7 @@ class extimpor extends Controller {
 		$this->titulo   = 'Tabla importada';
 		$this->tabla    = 'impor_data';
 		$this->val_error= '';
+		$this->afecta = 0;
 	}
 
 	function index(){
@@ -136,8 +137,7 @@ class extimpor extends Controller {
 				}else{
 					$rt=$this->_procesar($form->tabla->newValue,$id_tabla,$def);
 					if($rt){
-						$afecta=$this->db->affected_rows();
-						redirect($this->url.'resultado/'.$afecta);
+						redirect($this->url.'resultado/'.$this->afecta);
 					}else{
 						$form->error_string = 'Hubo problemas para cagar la data.';
 						$form->build_form();
@@ -203,6 +203,7 @@ class extimpor extends Controller {
 
 			$mSQL="UPDATE sinv AS a JOIN ${ttabla} AS b ON a.codigo=b.codigo SET ".implode(',',$set);
 			$ban=$this->db->simple_query($mSQL);
+			$this->afecta=$this->db->affected_rows();
 
 			if(in_array('marca',$def)){
 				$mSQL= "INSERT IGNORE INTO marc (marca,margen) SELECT TRIM(marca),0 FROM sinv GROUP BY marca";
