@@ -93,7 +93,7 @@ class Layout_model extends Model {
 	}
 
 	function copyright(){
-		$data['copyright'] = "Copyright (c) 2006-2007 Inversiones DREMANVA, C.A.<br>Telf: 58 (274) 2711922 MERIDA - VENEZUELA";
+		$data['copyright'] = "Copyright (c) 2013-2014 Inversiones DREMANVA, C.A.<br>Telf: 58 (274) 2711922 MERIDA - VENEZUELA";
 		return $this->layout->load->view($this->common . "copyright", $data, true);
 	}
 }

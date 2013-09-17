@@ -17,10 +17,10 @@ $row = $mSQL_1->row();
 $fecha    = dbdate_to_human($row->fecha);
 $numero   = htmlspecialchars(trim($row->numero));
 $factura  = htmlspecialchars(trim($row->factura));
-$cod_cli  = htmlspecialchars(trim($row->cod_cli));
+$cod_cli  = $this->us_ascii2html(trim($row->cod_cli));
 $rifci    = htmlspecialchars(trim($row->rifci));
-$nombre   = htmlspecialchars(trim($row->nombre));
-$observa  = htmlspecialchars(trim($row->observa1).' '.trim($row->observa2));
+$nombre   = $this->us_ascii2html(trim($row->nombre));
+$observa  = $this->us_ascii2html(trim($row->observa1).' '.trim($row->observa2));
 
 $fechafa  = dbdate_to_human($row->fechafa);
 $fechaac  = date('d/m/Y');

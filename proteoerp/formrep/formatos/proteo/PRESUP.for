@@ -11,7 +11,7 @@ $row = $mSQL_1->row();
 
 $fecha    = dbdate_to_human($row->fecha);
 $numero   = htmlspecialchars(trim($row->numero));
-$cod_cli  = htmlspecialchars(trim($row->cod_cli));
+$cod_cli  = $this->us_ascii2html(trim($row->cod_cli));
 $rifci    = htmlspecialchars(trim($row->rifci));
 $nombre   = $this->us_ascii2html($row->nombre);
 $stotal   = nformat($row->totals);
@@ -156,8 +156,8 @@ foreach ($detalle AS $items){ $i++;
 				<td>
 					<?php
 					if(!$clinea){
-						$ddetall = trim($items->detalle);
-						$descrip = trim($items->desca);
+						$ddetall = $this->us_ascii2html(trim($items->detalle));
+						$descrip = $this->us_ascii2html(trim($items->desca));
 						if(strlen($ddetall) > 0) $descrip .= "\n".$ddetall;
 						$descrip = str_replace("\r",'',$descrip);
 						$descrip = str_replace(array("\t"),' ',$descrip);

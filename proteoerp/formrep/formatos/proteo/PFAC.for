@@ -14,20 +14,20 @@ $row = $mSQL_1->row();
 
 $fecha    = dbdate_to_human($row->fecha);
 $numero   = htmlspecialchars(trim($row->numero));
-$cod_cli  = htmlspecialchars(trim($row->cod_cli));
+$cod_cli  = $this->us_ascii2html(trim($row->cod_cli));
 $rifci    = htmlspecialchars(trim($row->rifci));
-$nombre   = htmlspecialchars(trim($row->nombre));
+$nombre   = $this->us_ascii2html(trim($row->nombre));
 $stotal   = $row->totals;
 $gtotal   = $row->totalg;
 $peso     = $row->peso;
 $impuesto = $row->iva;
-$direccion= htmlspecialchars(trim($row->direccion));
+$direccion= $this->us_ascii2html(trim($row->direccion));
 $dbnumero = $this->db->escape($row->numero);
 
 $lineas = 0;
 $uline  = array();
 $mSQL_2 = $this->db->query("SELECT codigoa AS codigo,desca,cana,preca,tota,iva FROM itpfac WHERE numa=${dbnumero}");
-$detalle  = $mSQL_2->result();
+$detalle= $mSQL_2->result();
 ?><html>
 <head>
 <meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >

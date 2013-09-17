@@ -19,8 +19,8 @@ $tipo    = trim($row->tipo);
 $fecha   = $row->fecha;
 $hfecha  = dbdate_to_human($row->fecha);
 $monto   = nformat($row->monto);
-$nombre  = htmlspecialchars(trim($row->nombre));
-$observa = wordwrap(trim(str_replace(',',', ',trim($row->observa1).trim($row->observa2))), 100, '<br>');
+$nombre  = $this->us_ascii2html(trim($row->nombre));
+$observa = wordwrap(trim(str_replace(',',', ',$this->us_ascii2html(trim($row->observa1).trim($row->observa2)))), 100, '<br>');
 $transac = $row->transac;
 
 if($tipo=='P'){

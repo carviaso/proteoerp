@@ -41,7 +41,7 @@ $peso     = nformat($row->peso);
 $impuesto = nformat($row->iva);
 $direc    = $this->us_ascii2html($row->direccion);
 $tipo_doc = trim($row->tipo_doc);
-$referen  = trim($row->referen);
+$referen  = $this->us_ascii2html(trim($row->referen));
 $nfiscal  = htmlspecialchars(trim($row->nfiscal));
 $telefono = htmlspecialchars(trim($row->telefono));
 $nomvend  = $this->us_ascii2html($row->nomvend);
@@ -67,7 +67,7 @@ $uline  = array();
 
 $mSQL="SELECT codigoa AS codigo,desca,cana,preca,tota AS importe,iva,detalle
 FROM sitems
-WHERE numa=$dbnumero AND tipoa=$dbtipo_doc";
+WHERE numa=${dbnumero} AND tipoa=${dbtipo_doc}";
 
 $mSQL_2 = $this->db->query($mSQL);
 $detalle  = $mSQL_2->result();
@@ -254,8 +254,8 @@ foreach ($detalle AS $items){ $i++;
 				<td>
 					<?php
 					if(!$clinea){
-						$ddetall = trim($items->detalle);
-						$descrip = trim($items->desca);
+						$ddetall = $this->us_ascii2html(trim($items->detalle));
+						$descrip = $this->us_ascii2html(trim($items->desca));
 						if(strlen($ddetall) > 0 ) {
 							if(strpos($ddetall,$descrip)!==false){
 								$descrip = $ddetall;

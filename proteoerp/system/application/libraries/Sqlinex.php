@@ -13,7 +13,7 @@ class Sqlinex{
 		$this->ci =& get_instance();
 		$this->ci->load->helper('xml');
 		$this->ci->db->_escape_char='';
-		$this->ci->db->_protect_identifiers=false; 
+		$this->ci->db->_protect_identifiers=false;
 		$this->separador='-#-';
 		$this->ignore   =false;
 		$this->limpiar  =true;
@@ -145,7 +145,13 @@ class Sqlinex{
 			$this->ci->db->_reset_select();
 			//$query = $this->ci->db->get();
 			//memowrite($mSQL);
-			$query=mysql_unbuffered_query($mSQL,$this->ci->db->conn_id);
+			if($this->ci->db->dbdriver=='mysqli'){
+				$query= mysqli_query($this->ci->db->conn_id, $mSQL, MYSQLI_USE_RESULT);
+				$ff   = 'mysqli_fetch_assoc';
+			}else{
+				$query= mysql_unbuffered_query($mSQL,$this->ci->db->conn_id);
+				$ff   = 'mysql_fetch_assoc';
+			}
 
 			if ($query!==false){
 				if(isset($data['dupli'])) $data['limpiar']=false;
@@ -156,7 +162,7 @@ class Sqlinex{
 					fwrite($handle, $mSQL);
 				}
 
-				while ($row = mysql_fetch_assoc($query)) {
+				while($row = $ff($query)){
 				$mSQL = $this->ci->db->insert_string($data['table'], $row);
 					if(isset($data['dupli'])){
 						$data['ignore']   = false;

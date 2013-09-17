@@ -5,9 +5,9 @@ $cana = $this->datasis->dameval('SELECT COUNT(*) FROM prenom');
 if(empty($cana)) show_error('No existe ninguna prenomina');
 
 $rif             = htmlspecialchars(trim($this->datasis->traevalor('RIF')));
-$cintillo_titulo1= trim($this->datasis->traevalor('TITULO1'));
-$cintillo_titulo2= trim($this->datasis->traevalor('TITULO2'));
-$cintillo_titulo3= trim($this->datasis->traevalor('TITULO3'));
+$cintillo_titulo1= $this->us_ascii2html(trim($this->datasis->traevalor('TITULO1')));
+$cintillo_titulo2= $this->us_ascii2html(trim($this->datasis->traevalor('TITULO2')));
+$cintillo_titulo3= $this->us_ascii2html(trim($this->datasis->traevalor('TITULO3')));
 
 $cintillo_titulo2= htmlspecialchars(preg_replace('/[Rr][Ii][Ff] *:? *[VJPGvjpg][0-9\-]+/', ' ', $cintillo_titulo2));
 $cintillo_titulo3= htmlspecialchars(preg_replace('/[Rr][Ii][Ff] *:? *[VJPGvjpg][0-9\-]+/', ' ', $cintillo_titulo3));
