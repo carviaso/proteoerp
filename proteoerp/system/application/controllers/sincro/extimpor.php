@@ -422,6 +422,14 @@ class extimpor extends Controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
+	function eliminar($id_table=null){
+		$id_table=intval($id_table);
+		if($id_table>0){
+			$mSQL = 'DELETE FROM '.$this->tabla.' WHERE id_tabla='.$id_table;
+			$this->db->simple_query($mSQL);
+		}
+		redirect($this->url.'load');
+	}
 
 	function instalar(){
 		$this->datasis->creaintramenu(array('modulo'=>'927','titulo'=>'Importar archivo','mensaje'=>'Importar archivo xls, csv...','panel'=>'EXPORT/IMPORT','ejecutar'=>'sincro/extimpor','target'=>'popu','visible'=>'S','pertenece'=>'9','ancho'=>960,'alto'=>600));

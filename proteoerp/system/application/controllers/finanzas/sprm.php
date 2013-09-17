@@ -2717,5 +2717,16 @@ class Sprm extends Controller {
 		if(!in_array('tbanco',$campos)){
 			$this->db->simple_query('ALTER TABLE sprm ADD COLUMN `tbanco` CHAR(3)');
 		}
+
+		$itcampos=$this->db->list_fields('itppro');
+		if(!in_array('id',$itcampos)){
+			$mSQL="ALTER TABLE `itppro` ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT AFTER `reteiva`, ADD PRIMARY KEY (`id`)";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('modificado',$itcampos)){
+			$mSQL="ALTER TABLE `itppro` ADD COLUMN `modificado` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `id`, ADD INDEX `modificado` (`modificado`)";
+			$this->db->simple_query($mSQL);
+		}
 	}
 }
