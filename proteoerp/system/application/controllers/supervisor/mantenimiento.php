@@ -52,7 +52,7 @@ class Mantenimiento extends Controller{
 			<table width="100%">
 				<tr>
 					<td>'.anchor('supervisor/mantenimiento/puertosdir',img(array('src'=>'assets/default/images/download.png','border'=>'0','alt'=>'Actualizar'))).'</td>
-					<td>Descargar PUERTOS.DIR para DataSIS</td>
+					<td>Descargar PUERTOS.DIR para DataSIS '.anchor('supervisor/mantenimiento/puertosdir/LPT1','LPT1').', '.anchor('supervisor/mantenimiento/puertosdir/LPT2','LPT2').', ' .anchor('supervisor/mantenimiento/puertosdir/OBJETO','OBJ').'</td>
 				</tr>
 			</table>
 		</div>
