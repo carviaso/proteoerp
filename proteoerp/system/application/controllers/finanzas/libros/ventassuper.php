@@ -1795,7 +1795,7 @@ class ventassuper{
 		'    ',
 		'    ',
 		'RI',
-		a.numero,
+		COALESCE(c.nfiscal,'NO ENCONTRADO'),
 		0,
 		0,
 		0,
@@ -1818,8 +1818,10 @@ class ventassuper{
 		' ' AS serial,
 		0 AS hora,
 		'' AS cierrez
-		FROM itccli as a JOIN scli as b on a.cod_cli=b.cliente LEFT JOIN fmay c ON a.numero=c.numero AND c.tipo='C'
-		WHERE a.recriva BETWEEN $fdesde AND $fhasta";
+		FROM itccli AS a
+		JOIN scli   AS b on a.cod_cli=b.cliente
+		LEFT JOIN fmay c ON a.numero=c.numero AND c.tipo='C'
+		WHERE a.recriva BETWEEN ${fdesde} AND ${fhasta}";
 
 		$SQL[]="SELECT
 		 a.fecha,

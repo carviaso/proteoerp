@@ -3451,7 +3451,6 @@ class gser extends Controller {
 
 		$edit->proveed = new inputField('Proveedor','proveed');
 		$edit->proveed->size = 6;
-		$edit->proveed->maxlength=5;
 		$edit->proveed->append($bSPRV);
 		$edit->proveed->rule= 'required';
 
