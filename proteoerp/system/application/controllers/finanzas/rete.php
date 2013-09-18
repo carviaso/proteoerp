@@ -120,7 +120,7 @@ class Rete extends Controller {
 			'width'         => 40,
 			'editrules'     => '{ required:true}',
 			'edittype'      => "'select'",
-			'search'        => 'false',
+			'search'        => 'true',
 			'editoptions'   => '{value: {"JD":"Juridico Domiciliado", "JN":"Juridico No Domiciliado", "NR":"Natural Residente","NN":"Natural No Residente"} }'
 
 		));
@@ -266,13 +266,12 @@ class Rete extends Controller {
 		  if(tipo='JN','Juridico No Domiciliado',
 		    if(tipo='NR','Natural Domiciliado','Natural No Domiciliado')
 		  )
-		)) tipodesc
-		FROM rete
-		ORDER BY tipo, codigo
+		)) tipodesc FROM rete ORDER BY tipo, codigo
 		";
+		
 
-		//$response   = $grid->getData('rete', array(array()), array(), false, $mWHERE, 'tipo, codigo' );
-		$response   = $grid->getDataSimple($mSQL);
+		$response   = $grid->getData('view_rete', array(array()), array(), false, $mWHERE, 'tipo, codigo' );
+		//$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -470,13 +469,26 @@ class Rete extends Controller {
 		if(!in_array('id',$campos)){
 			$this->db->simple_query('ALTER TABLE rete DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE rete ADD UNIQUE INDEX codigo (codigo)');
-			$this->db->simple_query('ALTER TABLE rete ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+			$this->db->query('ALTER TABLE rete ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 
 		if(!in_array('ut',$campos)){
-			$mSQL="ALTER TABLE ADD COLUMN ut DECIMAL(12,2) NULL DEFAULT NULL";
-			$this->db->simple_query($mSQL);
+			$mSQL="ALTER TABLE rete ADD COLUMN ut DECIMAL(12,2) NULL DEFAULT NULL";
+			$this->db->query($mSQL);
 		}
+
+		// Crea el View
+		if (!$this->db->table_exists('view_rete')) {
+			$mSQL = "
+			CREATE ALGORITHM = UNDEFINED 
+			VIEW `view_rete` AS SELECT codigo, activida, base1, tari1, pama1, tipo, cuenta, concepto, id, CONCAT(tipo,' ',if(tipo='JD','Juridico Domiciliado',
+			if(tipo='JN','Juridico No Domiciliado',	if(tipo='NR','Natural Domiciliado','Natural No Domiciliado')))) tipodesc
+			FROM rete ;
+			";
+			$this->db->query($mSQL);
+		}
+
+
 	}
 }
 

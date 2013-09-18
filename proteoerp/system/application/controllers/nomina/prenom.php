@@ -337,6 +337,7 @@ class Prenom extends Controller {
 				if ( $row->psueldo == 'S' )
 					$SPROME += $valor;
 
+
 			}
 
 			foreach ($query->result() as $row){

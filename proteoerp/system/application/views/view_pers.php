@@ -62,7 +62,7 @@ echo $form_begin
 			<tr>
 				<td class="littletableheaderc"><?php echo $form->codigo->label  ?></td>
 				<td class="littletablerow"    ><?php echo $form->codigo->output ?></td>
-				<td class="littletablerow"    ><?php echo $form->tipo->label .' '.$form->tipo->output  ?></td>
+				<td class="littletablerow"    ><!-- ?php echo $form->tipo->label .' '.$form->tipo->output  ?--></td>
 				<td class="littletableheaderc"><?php echo $form->nombre->label  ?></td>
 				<td class="littletablerow"    ><?php echo $form->nombre->output ?></td>
 			</tr>

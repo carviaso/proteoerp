@@ -13,7 +13,6 @@ class Nomina extends Controller {
 	}
 
 	function index(){
-
 		if ( !$this->db->table_exists('view_nomina') ) {
 			$mSQL = "
 			CREATE ALGORITHM = UNDEFINED VIEW view_nomina AS
@@ -39,10 +38,9 @@ class Nomina extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
-	//Layout en la Ventana
+	//******************************************************************
+	// Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();

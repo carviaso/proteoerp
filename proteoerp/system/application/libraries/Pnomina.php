@@ -213,8 +213,7 @@ class fnomina {
 				if ( $row->final > $this->fhasta ){
 					$diasefect = $diasefect+1 ;
 				}
-				memowrite($row->final.' > '.$this->fhasta, 'Reposo');
-				
+				memowrite($row->final.' > '.$this->fhasta.' '.$diasefect, 'Reposo');
 			}
 		}
 
