@@ -259,17 +259,22 @@ class Exportar extends Controller {
 
 		$ttables=array('grup','line','dpto');
 		foreach($ttables AS $ttable){
-			$mSQL="SELECT * FROM $ttable";
-			$query=mysql_unbuffered_query($mSQL,$this->db->conn_id);
+			$mSQL="SELECT * FROM ${ttable}";
+			if($this->db->dbdriver=='mysqli'){
+				$query= mysqli_query($this->db->conn_id, $mSQL, MYSQLI_USE_RESULT);
+			}else{
+				$query= mysql_unbuffered_query($mSQL,$this->db->conn_id);
+			}
+
 			if ($query!==false){
-				while ($row = mysql_fetch_assoc($query)) {
+				while ($row = $ff($query)) {
 					$sql = $this->db->insert_string($ttable, $row);
 					$sql = str_replace('INSERT ','INSERT IGNORE ',$sql);
 					$sql.="\n";
 
 					fwrite($handle, $sql);
 				}
-				mysql_free_result($query);
+				$fl($query);
 			}
 		}
 
