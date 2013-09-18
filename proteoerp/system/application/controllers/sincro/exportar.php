@@ -208,9 +208,18 @@ class Exportar extends Controller {
 		$handle = fopen($nombre, 'w');
 		$sql    = '';
 
-		$query=mysql_unbuffered_query($mSQL,$this->db->conn_id);
+		if($this->db->dbdriver=='mysqli'){
+			$query= mysqli_query($this->db->conn_id, $mSQL, MYSQLI_USE_RESULT);
+			$ff   = 'mysqli_fetch_assoc';
+			$fl   = 'mysqli_free_result';
+		}else{
+			$query= mysql_unbuffered_query($mSQL,$this->db->conn_id);
+			$ff   = 'mysql_fetch_assoc';
+			$fl   = 'mysql_free_result';
+		}
+
 		if ($query!==false){
-			while ($row = mysql_fetch_assoc($query)) {
+			while ($row = $ff($query)) {
 
 				$base1=(empty($row['base1']))? 1 : $row['base1'];
 				$base2=(empty($row['base2']))? 1 : $row['base2'];
@@ -245,7 +254,7 @@ class Exportar extends Controller {
 				$sql.="\n";
 				fwrite($handle, $sql);
 			}
-			mysql_free_result($query);
+			$fl($query);
 		}
 
 		$ttables=array('grup','line','dpto');
