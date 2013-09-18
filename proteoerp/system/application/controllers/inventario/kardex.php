@@ -167,8 +167,11 @@ class Kardex extends Controller {
 				$nentreg = $this->datasis->dameval("SELECT SUM(a.cana) AS cana FROM itsnte AS a JOIN snte AS b ON a.numero=b.numero WHERE a.codigo=${dbcode} AND estampa>${dbfinal}");
 				$ajustes = $this->datasis->dameval("SELECT SUM(IF(b.tipo='E',1,-1)*cantidad) AS cana FROM itssal AS a JOIN ssal AS b ON a.numero = b.numero WHERE a.codigo = ${dbcode} AND b.fecha>${dbfinal}");
 				$conver  = $this->datasis->dameval("SELECT SUM(a.entrada-a.salida) AS cana FROM itconv AS a JOIN conv AS b ON a.numero = b.numero WHERE a.codigo = ${dbcode} AND b.fecha>${dbfinal}");
-				$consi   = $this->datasis->dameval("SELECT SUM(IF(tipod='E',-1,1)*a.cana) AS cana FROM itscon AS a JOIN scon AS b ON a.id_scon=b.id WHERE a.codigo = ${dbcode} AND b.fecha>${dbfinal}");
-
+				if($this->db->table_exists('itscon')){
+					$consi   = $this->datasis->dameval("SELECT SUM(IF(tipod='E',-1,1)*a.cana) AS cana FROM itscon AS a JOIN scon AS b ON a.id_scon=b.id WHERE a.codigo = ${dbcode} AND b.fecha>${dbfinal}");
+				}else{
+					$consi   = 0;
+				}
 				$ventas  = (empty($ventas ))? htmlnformat(0) : htmlnformat($ventas );
                 $compras = (empty($compras))? htmlnformat(0) : htmlnformat($compras);
                 $nentreg = (empty($nentreg))? htmlnformat(0) : htmlnformat($nentreg);
