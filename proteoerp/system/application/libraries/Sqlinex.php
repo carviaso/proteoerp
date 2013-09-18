@@ -148,9 +148,11 @@ class Sqlinex{
 			if($this->ci->db->dbdriver=='mysqli'){
 				$query= mysqli_query($this->ci->db->conn_id, $mSQL, MYSQLI_USE_RESULT);
 				$ff   = 'mysqli_fetch_assoc';
+				$fl   = 'mysqli_free_result';
 			}else{
 				$query= mysql_unbuffered_query($mSQL,$this->ci->db->conn_id);
 				$ff   = 'mysql_fetch_assoc';
+				$fl   = 'mysql_free_result';
 			}
 
 			if ($query!==false){
@@ -184,7 +186,7 @@ class Sqlinex{
 					fwrite($handle, $mSQL);
 
 				}
-				mysql_free_result($query);
+				$fl($query);
 			}
 		}
 		fclose($handle);

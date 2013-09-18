@@ -1795,7 +1795,7 @@ class ventassuper{
 		'    ',
 		'    ',
 		'RI',
-		COALESCE(c.nfiscal,'NO ENCONTRADO'),
+		COALESCE(c.nfiscal,'NO ENCONTRADO') AS afecta,
 		0,
 		0,
 		0,
