@@ -1158,7 +1158,7 @@ class Pfac extends Controller {
 		));
 */
 		$grid->addField('id');
-		$grid->label('ID');
+		$grid->label('Id');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'align'         => "'center'",
