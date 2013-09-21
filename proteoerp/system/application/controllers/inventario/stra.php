@@ -15,15 +15,13 @@ class Stra extends Controller {
 
 	function index(){
 		$this->instalar();
-		//$mSQL = "UPDATE itstra AS a JOIN stra AS b ON a.numero=b.numero SET a.idstra=b.id";
-		//$this->db->simple_query($mSQL);
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
 	//******************************************************************
-	//Layout en la Ventana
-	//******************************************************************
+	// Layout en la Ventana
+	//
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -49,7 +47,6 @@ class Stra extends Controller {
 		//Panel Central
 		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
-
 		$adic = array(
 			array('id'=>'fedita',  'title'=>'Agregar Transferencia'),
 			array('id'=>'fshow' ,  'title'=>'Ver Transferencia')
@@ -74,8 +71,8 @@ class Stra extends Controller {
 	}
 
 	//******************************************************************
-	//Funciones de los Botones
-	//******************************************************************
+	// Funciones de los Botones
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
 
@@ -202,8 +199,8 @@ class Stra extends Controller {
 	}
 
 	//******************************************************************
-	//Definicion del Grid y la Forma
-	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -466,9 +463,8 @@ class Stra extends Controller {
 
 		#show/hide navigations buttons
 		$grid->setAdd(    $this->datasis->sidapuede('STRA','INCLUIR%' ));
-		$grid->setEdit( false );  //  $this->datasis->sidapuede('STRA','MODIFICA%'));
-		$grid->setDelete(false);
-		//$grid->setDelete( $this->datasis->sidapuede('STRA','BORR_REG%'));
+		$grid->setEdit(   false );  //  $this->datasis->sidapuede('STRA','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('STRA','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('STRA','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
@@ -490,7 +486,7 @@ class Stra extends Controller {
 
 	//******************************************************************
 	// Busca la data en el Servidor por json
-	//******************************************************************
+	//
 	function getdata(){
 		$grid       = $this->jqdatagrid;
 
@@ -504,7 +500,7 @@ class Stra extends Controller {
 
 	//******************************************************************
 	// Guarda la Informacion
-	//******************************************************************
+	//
 	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
@@ -523,13 +519,23 @@ class Stra extends Controller {
 			$this->db->update('stra', $data);
 			logusu('STRA',"Transferencias  ".$numero." MODIFICADO");
 			echo "Transferencia Modificada";
+		} elseif ($oper == 'del'){
+			$numero = $this->datasis->dameval('SELECT numero FROM stra WHERE id='.$id);
+			//Borra la Transferencia
+			$this->db->where("id", $id);
+			$this->db->delete('stra');
+			//Borra los Items
+			$this->db->query("DELETE FROM itstra WHERE numero=".$this->db->escape($numero));
+			
+			
+			echo "Transferencia Eliminada";
 		};
 
 	}
 
 	//******************************************************************
-	//Definicion del Grid y la Forma
-	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgridit( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -1682,30 +1688,38 @@ class Stra extends Controller {
 		$campos=$this->db->list_fields('stra');
 
 		if(!in_array('id',$campos)){
-			$this->db->simple_query('ALTER TABLE stra DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE stra ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE stra ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+			$this->db->query('ALTER TABLE stra DROP PRIMARY KEY');
+			$this->db->query('ALTER TABLE stra ADD UNIQUE INDEX numero (numero)');
+			$this->db->query('ALTER TABLE stra ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 
 		if(!in_array('proveed',$campos)){
-			$this->db->simple_query('ALTER TABLE `stra` ADD COLUMN `proveed` CHAR(5) NULL DEFAULT NULL COMMENT \'Para el caso de las transferencias por RMS\'');
+			$this->db->query('ALTER TABLE `stra` ADD COLUMN `proveed` CHAR(5) NULL DEFAULT NULL COMMENT \'Para el caso de las transferencias por RMS\'');
 		}
 
 		if(!in_array('ordp',$campos)){
 			$mSQL="ALTER TABLE `stra`
 			ADD COLUMN `ordp` VARCHAR(8) NULL DEFAULT NULL,
 			ADD COLUMN `esta` VARCHAR(5) NULL DEFAULT NULL ";
-			$this->db->simple_query($mSQL);
+			$this->db->query($mSQL);
 		}
 
 		if(!in_array('tipoordp',$campos)){
 			$mSQL="ALTER TABLE `stra` ADD COLUMN `tipoordp` CHAR(1) NULL DEFAULT NULL COMMENT 'Si es entrega a estacion o retiro de estacion'";
-			$this->db->simple_query($mSQL);
+			$this->db->query($mSQL);
 		}
 
 		if(!in_array('condiciones',$campos)){
 			$mSQL="ALTER TABLE `stra` ADD COLUMN `condiciones` TEXT NULL DEFAULT NULL";
-			$this->db->simple_query($mSQL);
+			$this->db->query($mSQL);
 		}
+
+		$esta = $this->datasis->dameval('SELECT count(*) FROM tmenus WHERE modulo="STRA" AND secu=5 ');
+		if( $esta == 0 ){
+			$mSQL="INSERT INTO tmenus (modulo, secu, titulo, mensaje, ejecutar) VALUES ('STRA',5,'Eliminar','Eliminar Registro', 'BORR_REG()')";
+			$this->db->query($mSQL);
+		}
+
+
 	}
 }
