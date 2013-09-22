@@ -43,8 +43,10 @@ class Reportes extends Controller{
 					$_mclase='PDFReporte';
 					break;
 				case 'plano':
-					$_mclase='XLSReporteplano';
-					$mc=str_replace('new PDFReporte(','new XLSReporteplano(',$mc);
+					//$_mclase='XLSReporteplano';
+					//$mc=str_replace('new PDFReporte(','new XLSReporteplano(',$mc);
+					$_mclase='XLSXReporte';
+					$mc=str_replace('new PDFReporte(','new XLSXReporte(',$mc);
 					break;
 				case 'HTML':
 					$_mclase='HTMLReporte';

@@ -14,7 +14,7 @@ class repomenu extends validaciones {
 
 	function filteredgrid(){
 		$this->rapyd->load('datafilter','datagrid');
-		$this->rapyd->uri->keep_persistence();
+		//$this->rapyd->uri->keep_persistence();
 
 		function llink($nombre,$alternativo,$modulo){
 			if(!empty($nombre))
@@ -34,11 +34,11 @@ class repomenu extends validaciones {
 			return $retorna ;
 		}
 
+		$sel=array('b.nombre AS alternativo','a.nombre','a.modulo','a.titulo','a.mensaje','a.activo','b.reporte','b.proteo','b.harbour');
 		$filter = new DataFilter('Filtro por Menu de Reportes');
-		$select=array('b.nombre AS alternativo','a.nombre','a.modulo','a.titulo','a.mensaje','a.activo','b.reporte','b.proteo','b.harbour');
-		$filter->db->select($select);
+		$filter->db->select($sel);
 		$filter->db->from('intrarepo AS a');
-		$filter->db->join('reportes AS b','a.nombre=b.nombre','right');
+		$filter->db->join('reportes  AS b','a.nombre=b.nombre','right');
 
 		$filter->nombre = new inputField('Nombre', 'nombre');
 		$filter->nombre->db_name='b.nombre';
@@ -96,16 +96,16 @@ class repomenu extends validaciones {
 		$uri1 = anchor('supervisor/repomenu/reporte/modify/<#alternativo#>/' ,'Editar');
 		$uri2 = anchor('supervisor/repomenu/rdatasis/modify/<#alternativo#>/','Editar');
 		$uri3 = anchor('supervisor/repomenu/rharbour/modify/<#alternativo#>/','Editar');
-		$uri5 = anchor('supervisor/repomenu/rtcpdf/modify/<#alternativo#>/','Editar');
+		$uri5 = anchor('supervisor/repomenu/rtcpdf/modify/<#alternativo#>/'  ,'Editar');
 
 		$atts = array(
-		  'width'      => '800',
-		  'height'     => '600',
-		  'scrollbars' => 'yes',
-		  'status'     => 'yes',
-		  'resizable'  => 'yes',
-		  'screenx'    => '0',
-		  'screeny'    => '0'
+			'width'      => '800',
+			'height'     => '600',
+			'scrollbars' => 'yes',
+			'status'     => 'yes',
+			'resizable'  => 'yes',
+			'screenx'    => '0',
+			'screeny'    => '0'
 		);
 
 		$uri4=anchor_popup('reportes/ver/<#alternativo#>/<#modulo#>', 'Probar', $atts);
@@ -148,13 +148,14 @@ class repomenu extends validaciones {
 		</script>';
 		$data['content'] = '<form>'.$grid->output.'</form>';
 		$data['filtro']  = $filter->output;
-		$data['title']   = '<h1>Gestor de Reportes</h1>';
-		$data['head']    = script("jquery.pack.js").$this->rapyd->get_head();
+		$data['title']   = heading('Gestor de Reportes');
+		$data['head']    = script('jquery.pack.js').$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
 	function dataedit($nombre){
 		$this->rapyd->load('dataedit');
+		//$this->rapyd->uri->keep_persistence();
 
 		$edit = new DataEdit('Menu de Reportes', 'intrarepo');
 		$edit->back_url = site_url('supervisor/repomenu/filteredgrid');
@@ -162,31 +163,31 @@ class repomenu extends validaciones {
 		//$edit->post_process('delete','_post_delete');
 
 		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->mode="autohide";
-		$edit->nombre->rule= "strtoupper|required";
+		$edit->nombre->mode= 'autohide';
+		$edit->nombre->rule= 'strtoupper|required';
 		$edit->nombre->size = 20;
 		if($nombre!='create') $edit->nombre->insertValue = $nombre;
 
-		$edit->modulo = new inputField("modulo","modulo");
+		$edit->modulo = new inputField('M&oacute;dulo','modulo');
 		$edit->modulo->size =20;
-		$edit->modulo->rule= "strtoupper|required";
+		$edit->modulo->rule= 'strtoupper|required';
 
-		$edit->titulo=new inputField("Titulo","titulo");
+		$edit->titulo=new inputField('T&iacute;tulo','titulo');
 		$edit->titulo->size =40;
 
-		$edit->mensaje =new inputField("Mensaje", "mensaje");
+		$edit->mensaje =new inputField('Mensaje', 'mensaje');
 		$edit->mensaje->size = 50;
 
-		$edit->activo = new dropdownField("Activo","activo");
-		$edit->activo->option("S","Si");
-		$edit->activo->option("N","No");
+		$edit->activo = new dropdownField('Activo','activo');
+		$edit->activo->option('S','Si');
+		$edit->activo->option('N','No');
 		$edit->activo->style='width:60px';
 
-		$edit->buttons("modify", "save", "undo", "delete", "back");
+		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 		$edit->build();
 
 		$data['content'] = $edit->output;
-		$data['title']   = '<h1>Repomenu</h1>';
+		$data['title']   = heading('Repomenu');
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
@@ -271,8 +272,7 @@ class repomenu extends validaciones {
 
 		if($this->genesal){
 			$data['content'] = $edit->output;
-			$data['title']   = '<h1>Editando Reporte '.$id.'</h1>';
-
+			$data['title']   = heading('Editando Reporte '.$id);
 			$data['head']    = $this->rapyd->get_head();
 			$data['head']   .= script('plugins/jquery-linedtextarea.js');
 			$data['head']   .= script('plugins/jquery.textarea.js');
@@ -317,7 +317,7 @@ class repomenu extends validaciones {
 		$edit->build();
 
 		$data['content'] = $edit->output;
-		$data['title']   = '<h1>Reporte TCPDF</h1>';
+		$data['title']   = heading('Reporte TCPDF');
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas_sola', $data);
 	}
