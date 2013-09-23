@@ -1640,9 +1640,11 @@ class Rivc extends Controller {
 					//Es una factura manual
 					$match['tipo'] = substr($match['tipo'],0,-1);
 				}
-				$wwtipo = ' AND a.tipo_doc='.$this->db->escape($match['tipo']);
+				$wwtipo  = ' AND a.tipo_doc='.$this->db->escape($match['tipo']);
+				$smovtipo= '';
 			}else{
-				$wwtipo = '';
+				$wwtipo  = '';
+				$smovtipo= ' AND a.tipo_doc IN (\'NC\',\'ND\')';
 			}
 
 			$dbnumero = $this->db->escape('%'.$match['numero'].'%');
@@ -1666,7 +1668,7 @@ class Rivc extends Controller {
 					AND b.numero IS NULL
 					AND d.numero IS NULL
 					AND a.observa1 NOT LIKE 'RET%'
-					AND a.impuesto>0";
+					AND a.impuesto>0 ${smovtipo}";
 			}
 			if(count($mSQLs)>0){
 				$mSQL = implode(' UNION ALL ',$mSQLs).' ORDER BY numero DESC LIMIT 10';
