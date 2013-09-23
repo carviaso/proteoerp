@@ -737,7 +737,7 @@ class Bconci extends Controller {
 			$query = $this->db->query($mSQL);
 			foreach ($query->result() as $i=>$row){
 				if($i==0){
-					echo 'Otro ingreso ('.$row->cod_prv.') '.$row->nombre.'<br>';
+					echo 'Otro ingreso ('.$row->cod_cli.') '.$row->nombre.'<br>';
 				}
 				echo ' <b>'.trim($row->tipo_doc).'</b>-'.trim($row->numero).'<br>';
 			}

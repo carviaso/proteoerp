@@ -58,10 +58,10 @@ $bsocio=$this->datasis->modbus($mSOCIO,'socio');
 
 if (!empty($_POST['socio'])) $_POST['cod_cli']='';
 
-$filter = new DataFilter2("Filtro del Reporte");
+$filter = new DataFilter2('Filtro del Reporte');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$select=array("tipoa","CONCAT(tipoa, numa) AS nnumero", "codigoa", "a.fecha", "desca" , "CONCAT_WS(' ',cod_cli,b.nombre) cliente","cod_cli", "a.vendedor", "b.nombre", "f.nombre as vendedor" ,"g.linea", "CONCAT_WS(' ',g.grupo, g.nom_grup) ggrupo", "b.numero",
+$select=array('tipoa','CONCAT(tipoa, numa) AS nnumero', "codigoa", "a.fecha", "desca" , "CONCAT_WS(' ',cod_cli,b.nombre) cliente","cod_cli", "a.vendedor", "b.nombre", "f.nombre as vendedor" ,"g.linea", "CONCAT_WS(' ',g.grupo, g.nom_grup) ggrupo", "b.numero",
 "if(tipoa='X',0,cana)*if(tipoa='F',1,-1) as cana", "preca",
 "if(tipoa='X',0,tota)*if(tipoa='F',1,-1) as tota", "costo",
 "if(tipoa='D',tota,0) AS tdevo",
@@ -70,41 +70,41 @@ $select=array("tipoa","CONCAT(tipoa, numa) AS nnumero", "codigoa", "a.fecha", "d
 
 $filter->db->select($select);
 $filter->db->from('sitems AS a');
-$filter->db->join("sfac AS b" ,"numero=numa"         ,'left');
-$filter->db->join("sinv AS c" ,"a.codigoa=c.codigo"  ,'left');
-$filter->db->join("scli AS d" ,"b.cod_cli=d.cliente" ,'left');
-$filter->db->join("grcl AS e" ,"d.gr_desc=e.gr_desc" ,'left');
-$filter->db->join("vend AS f" ,"a.vendedor=f.vendedor",'left');
-$filter->db->join("grup AS g" ,"c.grupo=g.grupo",'left');
-$filter->db->where("tipoa=tipo_doc");
+$filter->db->join('sfac AS b' ,'numero=numa'          ,'left');
+$filter->db->join('sinv AS c' ,'a.codigoa=c.codigo'   ,'left');
+$filter->db->join('scli AS d' ,'b.cod_cli=d.cliente'  ,'left');
+$filter->db->join('grcl AS e' ,'d.gr_desc=e.gr_desc'  ,'left');
+$filter->db->join('vend AS f' ,'a.vendedor=f.vendedor','left');
+$filter->db->join('grup AS g' ,'c.grupo=g.grupo'      ,'left');
+$filter->db->where('tipoa=tipo_doc');
 $filter->db->orderby('g.linea, g.grupo, c.codigo, a.fecha');
 
-$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
-$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
-$filter->fechad->clause  =$filter->fechah->clause="where";
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause='where';
 $filter->fechad->db_name =$filter->fechah->db_name="a.fecha";
-$filter->fechad->insertValue = date("Y-m-d");
-$filter->fechah->insertValue = date("Y-m-d");
-$filter->fechad->operator=">=";
-$filter->fechah->operator="<=";
-$filter->fechad->group="Fecha";
-$filter->fechah->group="Fecha";
+$filter->fechad->insertValue = date('Y-m-d');
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechad->operator='>=';
+$filter->fechah->operator='<=';
+$filter->fechad->group='Fecha';
+$filter->fechah->group='Fecha';
 
-$filter->codigo = new inputField("Código", "codigoa");
-$filter->codigo->db_name="codigoa";
-$filter->codigo->clause="where";
-$filter->codigo->operator="=";
+$filter->codigo = new inputField('Código', 'codigoa');
+$filter->codigo->db_name='codigoa';
+$filter->codigo->clause='where';
+$filter->codigo->operator='=';
 $filter->codigo->append($iboton);
 $filter->codigo->group="Producto";
 
-$filter->cod_cli = new inputField("Cliente", "cod_cli");
-$filter->cod_cli->db_name="cod_cli";
-$filter->cod_cli->clause="where";
-$filter->cod_cli->operator="=";
+$filter->cod_cli = new inputField('Cliente', 'cod_cli');
+$filter->cod_cli->db_name='cod_cli';
+$filter->cod_cli->clause='where';
+$filter->cod_cli->operator='=';
 $filter->cod_cli->append($cboton);
 
-$filter->socio = new inputField("Socio", "socio");
-$filter->socio->clause ="in";
+$filter->socio = new inputField('Socio', 'socio');
+$filter->socio->clause ='in';
 $filter->socio->db_name='(socio,cod_cli) ';
 $filter->socio->append($bsocio.' No se tomará en cuenta el cliente');
 
@@ -112,32 +112,32 @@ $filter->grupo = new dropdownField("Grupo de Cliente", "grupo");
 $filter->grupo->db_name = 'e.grupo';
 $filter->grupo->clause="where";
 $filter->grupo->operator="=";
-$filter->grupo->option("","");
+$filter->grupo->option('','Todos');
 $filter->grupo->options("SELECT grupo, gr_desc FROM grcl ORDER BY grupo");
 
-$filter->sinvgru = new inputField("Grupo de Artículo", "sinvgru");
-$filter->sinvgru->db_name ='nom_grup';
-$filter->sinvgru->clause="where";
-$filter->sinvgru->operator="=";
+$filter->sinvgru = new inputField('Grupo de Artículo', 'sinvgru');
+$filter->sinvgru->db_name ='g.nom_grup';
+$filter->sinvgru->clause='where';
+$filter->sinvgru->operator='=';
 $filter->sinvgru->append($bGrup);
 
-$filter->proveed = new inputField("Proveedor", "prov1");
+$filter->proveed = new inputField('Proveedor', 'prov1');
 $filter->proveed->db_name ='prov1';
-$filter->proveed->clause="where";
-$filter->proveed->operator="=";
+$filter->proveed->clause='where';
+$filter->proveed->operator='=';
 $filter->proveed->append($bPrv);
 
-$filter->marca = new dropdownField("Marca", "marca");
+$filter->marca = new dropdownField('Marca', 'marca');
 $filter->marca->db_name ='c.marca';
 $filter->marca->clause="where";
-$filter->marca->option("","");
+$filter->marca->option('','Todas');
 $filter->marca->options("SELECT marca as codigo, marca FROM marc ORDER BY marca");
 $filter->marca->operator="=";
 
 $filter->vd = new dropdownField("Vendedor", "vd");
 $filter->vd->db_name='vd';
-$filter->vd->clause="where";
-$filter->vd->option("","");
+$filter->vd->clause='where';
+$filter->vd->option('','Todos');
 $filter->vd->options("SELECT vendedor, nombre FROM vend ORDER BY vendedor");
 $filter->vd->operator="=";
 
@@ -169,7 +169,7 @@ if($this->rapyd->uri->is_set("search")){
 	$pdf = new PDFReporte($mSQL,'L');
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
-	$pdf->setTitulo("Detalle de Factura");
+	$pdf->setTitulo('Detalle de Factura');
 	$pdf->setSubTitulo($subtitu);
 	$pdf->setSobreTabla($sobretabla,6);
 	$pdf->AddPage();
@@ -193,8 +193,8 @@ if($this->rapyd->uri->is_set("search")){
 	$pdf->Output();
 
 }else{
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Ventas Por Artículo<h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Ventas Por Artículo</h2>';
+	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

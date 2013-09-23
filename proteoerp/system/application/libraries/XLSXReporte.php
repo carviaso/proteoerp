@@ -452,9 +452,14 @@ class XLSXReporte {
 			$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
 			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$this->utf8($campo),$xtypo);
 		}elseif(in_array($tipo,$this->wdate)){
-			$campo=strtotime($campo);
+			//$campo= new DateTime($campo);
 			//$xtypo=PHPExcel_Cell_DataType::TYPE_DATE;
-			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($c,$f,$campo);
+			//$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($c,$f,PHPExcel_Shared_Date::PHPToExcel($campo));
+			$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
+			if(function_exists('dbdate_to_human')){
+				$campo=dbdate_to_human($campo);
+			}
+			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$campo,$xtypo);
 		}else{
 			$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
 			$campo=trim($campo);

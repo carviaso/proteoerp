@@ -202,7 +202,7 @@ class Sinv extends Controller {
 		// Redondear Precios
 		$funciones .= '
 		function redondear(){
-			$.prompt( "<h1>Redondear solo cuando el precio sea mayor a:</h1><center><input class=\'inputnum\' type=\'text\' id=\'mayor\' name=\'mayor\' value=\'0.00\' maxlengh=\'10\' size=\'10\' ></center><br/>", {
+			var fredo=$.prompt("<h1>Redondear solo cuando el precio sea mayor a:</h1><center><input class=\'inputnum\' type=\'text\' id=\'fredo_mayor\' name=\'mayor\' value=\'0.00\' maxlengh=\'10\' size=\'10\' > <br>Tenga en cuenta de que esta operacion es irreversible.</center><br/>", {
 				buttons: { Redondear: true, Cancelar: false },
 				submit: function(e,v,m,f){
 					if (v) {
@@ -216,8 +216,8 @@ class Sinv extends Controller {
 					}
 				}
 			});
-		};
-		';
+			fredo.bind("promptloaded", function(e){ $("#fredo_mayor").numeric("."); });
+		};';
 
 		//Aumento de Precios
 		$funciones .= '
@@ -3541,8 +3541,6 @@ class Sinv extends Controller {
 
 	}
 
-
-
 	function chminven($val){
 		$min=intval($val);
 		$max=intval($this->input->post('maxven'));
@@ -3679,20 +3677,21 @@ class Sinv extends Controller {
 	}
 
 	/* REDONDEA LOS PRECIOS DE TODOS LOS PRODUCTOS */
-	function redondear($maximo) {
-		$maximo = $this->uri->segment($this->uri->total_segments());
-		$manterior = $this->datasis->traevalor("SINVREDONDEO");
-		if (!empty($manterior)) {
-			if ($manterior > $maximo ) {
-				$this->db->simple_query("UPDATE sinv SET redecen='F' WHERE precio1<=$anterior");
+	function redondear($maximo=null){
+		if(empty($maximo)) return null;
+		$maximo    = floatval($this->uri->segment($this->uri->total_segments()));
+		$manterior = floatval($this->datasis->traevalor('SINVREDONDEO'));
+		if(!empty($manterior)){
+			if($manterior > $maximo){
+				$this->db->simple_query("UPDATE sinv SET redecen='F' WHERE precio1<=${manterior}");
 			}
 		}
-		$this->datasis->ponevalor("SINVREDONDEO",$maximo);
-		$this->db->update_string("sinv", array("redecen"=>'N'), "precio1<=$maximo");
+		$this->datasis->ponevalor('SINVREDONDEO',$maximo);
+		$mSQL = $this->db->update_string('sinv', array('redecen'=>'N'), "precio1<=${maximo}");
+		$this->db->simple_query($mSQL);
 		$this->datasis->sinvredondear();
 
-		//$this->db->call_function("sp_sinv_redondea");
-		logusu('SINV',"Redondea Precios $maximo");
+		logusu('SINV',"Redondea Precios ${maximo}");
 	}
 
 	/* RECALCULA LOS PRECIOS DE TODOS LOS PRODUCTOS */
@@ -5598,7 +5597,7 @@ class Sinv extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('id');
-		$grid->label('ID');
+		$grid->label('Id');
 		$grid->params(array(
 			'hidden'      => 'true',
 			'align'       => "'center'",
