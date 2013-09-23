@@ -409,8 +409,15 @@ class XLSXReporte {
 	}
 
 	function Output(){
+
+		$nomb='';//ucwords($this->Titulo);
+		if(empty($nomb)){
+			$nomb=date('d-m-Y');
+		}
+		$fname=preg_replace('/[\/:*?"<>| ]/','',$nomb);
+
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="01simple.xlsx"');
+		header('Content-Disposition: attachment;filename="'.$fname.'.xlsx"');
 		header('Cache-Control: max-age=0');
 
 		$objWriter = PHPExcel_IOFactory::createWriter($this->ci->phpexcel, 'Excel2007');
