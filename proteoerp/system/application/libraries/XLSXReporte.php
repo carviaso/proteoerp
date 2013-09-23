@@ -446,17 +446,20 @@ class XLSXReporte {
 
 		if(in_array($tipo,$this->wnumber)){
 			$xtypo = PHPExcel_Cell_DataType::TYPE_NUMERIC;
+			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$campo,$xtypo);
 		}elseif(in_array($tipo,$this->wstring)){
 			$campo=trim($campo);
 			$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
+			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$this->utf8($campo),$xtypo);
 		}elseif(in_array($tipo,$this->wdate)){
 			$campo=strtotime($campo);
-			$xtypo=PHPExcel_Cell_DataType::TYPE_DATE;
+			//$xtypo=PHPExcel_Cell_DataType::TYPE_DATE;
+			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($c,$f,$campo);
 		}else{
 			$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
 			$campo=trim($campo);
+			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$this->utf8($campo),$xtypo);
 		}
-		$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$this->utf8($campo),$xtypo);
 	}
 
 	function grupoCambio($bache,$row){
