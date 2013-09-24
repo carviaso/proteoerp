@@ -43,6 +43,7 @@ class HTMLReporte {
 			$CI = & get_instance();
 			$this->DBquery  = $CI->db->query($mSQL);
 			$this->DBcharset= $CI->db->char_set;
+			$this->charset = ($this->DBcharset=='utf8')? 'UTF-8' : 'ISO-8859-1';
 			$data=$this->DBquery->field_data();
 			foreach ($data as $field){
 				$this->DBfieldsName[]                 =$field->name;
@@ -74,12 +75,12 @@ class HTMLReporte {
 
 	function Header(){
 		$this->ii = 6;
-		$charset = ($this->DBcharset=='utf8')?'utf-8':'ISO-8859-1';
+		$charset = $this->charset;
 
 		echo '<html>';
 		echo '<head>';
 		echo "<meta http-equiv='Content-Type' content='text/html; charset=${charset}' >";
-		echo '<title>'.htmlspecialchars($this->Titulo).'</title>';
+		echo '<title>'.$this->us_ascii2html($this->Titulo).'</title>';
 		echo '<style type="text/css">';
 		echo "
 body{
@@ -182,17 +183,17 @@ border-bottom-right-radius:5px;
 		echo '<body>';
 
 		$ifilas=implode(' ',$this->tituHeader);
-		echo '<h1>'.htmlspecialchars($ifilas).'</h1>';
+		echo '<h1>'.$this->us_ascii2html($ifilas).'</h1>';
 
 		$ifilas = implode(' ',$this->tituSubHeader);
 		echo '<h2>'.$ifilas.'</h2>';
 
-		echo '<h1 style="text-align:center;">'.htmlspecialchars($this->Titulo).'</h1>';
+		echo '<h1 style="text-align:center;">'.$this->us_ascii2html($this->Titulo).'</h1>';
 		if(!empty($this->SubTitulo)){
-			echo '<h2 style="text-align:center;">'.htmlspecialchars($this->SubTitulo).'</h2>';
+			echo '<h2 style="text-align:center;">'.$this->us_ascii2html($this->SubTitulo).'</h2>';
 		}
 
-		echo '<h3>'.htmlspecialchars($this->SobreTabla).'</h3>';
+		echo '<h3>'.$this->us_ascii2html($this->SobreTabla).'</h3>';
 	}
 
 	function Table() {
@@ -204,7 +205,7 @@ border-bottom-right-radius:5px;
 		//------------campos tabla-------------------------------
 		$aalign=array();
 		foreach($this->cols AS $cl=>$cols){
-			echo '<th>'. htmlspecialchars($cols['titulo']).'</th>';
+			echo '<th>'.$this->us_ascii2html($cols['titulo']).'</th>';
 
 			if(isset($cols['align'])){
 				if($cols['align']=='C'){
@@ -502,7 +503,7 @@ border-bottom-right-radius:5px;
 				$label=$this->grupo[$i].' '.$row[$this->grupo[$i]];
 			}
 
-			echo '<tr><td colspan=\''.$this->colum.'\' style="background:#FFFFFF;font-weight:bold;">'.$label.'</td></tr>';
+			echo '<tr><td colspan=\''.$this->colum.'\' style="background:#FFFFFF;font-weight:bold;">'.$this->us_ascii2html($label).'</td></tr>';
 			$this->ii++;
 		}
 	}
@@ -558,7 +559,7 @@ border-bottom-right-radius:5px;
 		}
 
 		echo '<td style=\'text-align:'.$align.';\'>';
-		echo htmlspecialchars(trim($campo));
+		echo $this->us_ascii2html(trim($campo));
 		echo '</td>';
 	}
 
@@ -597,6 +598,24 @@ border-bottom-right-radius:5px;
 				//$this->setType($nname,'real');
 			}
 		}
+	}
+
+	function us_ascii2html($str){
+		$rt =trim($str);
+
+		//if($this->DBcharset=='latin1'){
+		//	$rt=utf8_encode($rt);
+		//}
+		//Convierte los caracteres de us-ascii
+		$rt =str_replace(utf8_encode(chr(165)),'Ñ',$rt);
+		$rt =str_replace(utf8_encode(chr(164)),'ñ',$rt);
+		$rt =str_replace(utf8_encode(chr(166)),'º',$rt);
+
+		$rt =htmlspecialchars($rt,ENT_COMPAT,'UTF-8');
+		if($this->DBcharset=='latin1'){
+			$rt= utf8_decode($rt);
+		}
+		return $rt;
 	}
 }
 
