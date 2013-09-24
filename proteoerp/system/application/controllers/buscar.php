@@ -280,7 +280,8 @@ class Buscar extends Controller
 		$content['code']      = '';
 		//$content['titulo']  = $this->titulo;
 		$content['lista']     = '';
-		$content['charset']   = (stripos($this->db->char_set,'latin')!==false)? 'ISO-8859-1': null;
+		//$content['charset']   = (stripos($this->db->char_set,'latin')!==false)? 'ISO-8859-1': null;
+		$content['charset']   = null;
 
 		$this->load->view('rapyd/modbus', $content);
 
