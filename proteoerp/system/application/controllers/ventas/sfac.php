@@ -1499,19 +1499,34 @@ class Sfac extends Controller {
 	//Busca la data en el Servidor por json
 	function getdatait(){
 		$id = $this->uri->segment(4);
-		if ($id === false ){
+		if($id === false){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM sfac");
 		}
 		if(empty($id)) return '';
 		$dbid     = $this->db->escape($id);
-		$tipo_doc = $this->datasis->dameval("SELECT tipo_doc FROM sfac WHERE id=${dbid}");
-		$numero   = $this->datasis->dameval("SELECT numero   FROM sfac WHERE id=${dbid}");
+		$row      = $this->datasis->damerow("SELECT tipo_doc,numero FROM sfac WHERE id=${dbid}");
+		if(empty($row)){
+			return null;
+		}
 
+		$tipo_doc = $row['tipo_doc'];
+		$numero   = $row['numero'];
 		$dbtipo_doc = $this->db->escape($tipo_doc);
 		$dbnumero   = $this->db->escape($numero);
 
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('sitems');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
+
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM sitems WHERE tipoa=${dbtipo_doc} AND numa=${dbnumero}";
+		$mSQL    = "SELECT * FROM sitems WHERE tipoa=${dbtipo_doc} AND numa=${dbnumero} ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;

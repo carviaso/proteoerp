@@ -1722,9 +1722,11 @@ class Jqdatagrid
 				south__paneSelector:  ".centro-sur",
 				south__size: '.$south.',
 				center__onresize: function (pane, $Pane) {
+					winHeight = window.innerHeight;
 					jQuery("#newapi'.$grid0.'").jqGrid(\'setGridWidth\', $Pane.innerWidth()-6);
 					jQuery("#newapi'.$grid0.'").jqGrid(\'setGridHeight\',$Pane.innerHeight()-100);
 					jQuery("#newapi'.$grid1.'").jqGrid(\'setGridWidth\', $Pane.innerWidth()-6);
+					jQuery("#newapi'.$grid1.'").jqGrid(\'setGridHeight\',winHeight-($Pane.innerHeight()+150));
 				}
 			});
 			';
