@@ -1,11 +1,11 @@
 $sinv=array(
 	'tabla'   =>'sinv',
 	'columnas'=>array(
-		'codigo' =>'Código',
+		'codigo' =>'CÃ³digo',
 		'descrip'=>'descrip'),
-	'filtro'  =>array('codigo' =>'Código','descrip'=>'descrip'),
+	'filtro'  =>array('codigo' =>'CÃ³digo','descrip'=>'descrip'),
 	'retornar'=>array('codigo'=>'codigo'),
-	'titulo'  =>'Buscar Artículo');
+	'titulo'  =>'Buscar ArtÃ­culo');
 $iboton=$this->datasis->modbus($sinv);
 
 rapydlib("prototype");
@@ -76,7 +76,7 @@ if($this->rapyd->uri->is_set("search")){
 	//echo $mSQL;
 
 	$sobretabla='';
-	if (!empty($filter->ubica->newValue))  $sobretabla.=' Almacen: '.$filter->ubica->newValue;
+	if (!empty($filter->ubica->newValue))  $sobretabla.=' AlmacÃ©n: '.$filter->ubica->newValue;
 
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
@@ -87,7 +87,7 @@ if($this->rapyd->uri->is_set("search")){
 	$pdf->AddPage();
 	$pdf->setTableTitu(8,'Times');
 
-	$pdf->AddCol('codigo'  ,20,'Código'   ,'L',8);
+	$pdf->AddCol('codigo'  ,20,'CÃ³digo'   ,'L',8);
 	$pdf->AddCol('fecha'   ,20,'Fecha'    ,'L',8);
 	$pdf->AddCol('origen'  ,20,'Origen'   ,'C',8);
 	$pdf->AddCol('cantidad',20,'Cantidad' ,'R',8);

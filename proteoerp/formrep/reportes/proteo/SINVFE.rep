@@ -4,13 +4,13 @@ $filter->_process_uri = $this->rapyd->uri->add_clause($base_process_uri,"search"
 
 $filter->container = new containerField("alert","<b style='color:red;'>Si necesita sacar la existencia al d&iacute;a de hoy este no es el reporte correcto, utilice un reporte general de inventario, este reporte es solo para consultas de d&iacute;as pasados, ya que no se toman en cuenta las transacciones del d&iacute;a actual.</b>");
 
-$filter->fechad = new dateonlyField("Fecha", "fechad",'d/m/Y');
-$filter->fechad->insertValue = date("Y-m-d",mktime(0, 0, 0, date("m"), 0, date("Y")));
+$filter->fechad = new dateonlyField('Fecha', 'fechad','d/m/Y');
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), 0, date('Y')));
 $filter->fechad->rule='required';
 
 $filter->agrupado = new checkboxField('Agrupado por producto','xubica','S','N');
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
@@ -18,7 +18,7 @@ $filter->salformat->clause = '';
 $filter->submit('btnsubmit',RAPYD_BUTTON_SEARCH);
 $filter->build_form();
 
-if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
+if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
 	$xubica=$filter->agrupado->newValue;
 	$fecha =$filter->fechad->newValue;
 
@@ -51,8 +51,8 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 	$pdf->AddPage();
 	$pdf->setTableTitu(10,'Times');
 
-	$pdf->AddCol('codigo' ,25,'Código'     ,'L',8);
-	$pdf->AddCol('descrip',75,'Descripción','L',8);
+	$pdf->AddCol('codigo' ,25,'CÃ³digo'     ,'L',8);
+	$pdf->AddCol('descrip',75,'DescripciÃ³n','L',8);
 	$pdf->AddCol('fecha'  ,20,'Fecha','L',8);
 	$pdf->AddCol('salcant',25,'Cantidad'   ,'R',8);
 	$pdf->AddCol('saldo'  ,25,'Costo Total','R',8);
@@ -64,8 +64,8 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 	$pdf->Output();
 
 }else{
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Inventario a Fecha<h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Inventario a Fecha</h2>';
+	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

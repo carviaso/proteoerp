@@ -252,7 +252,7 @@ class Formatos extends Controller{
 		$mhtml .= '</script>'."\n";
 		$mhtml .= '<!-- FIN SCRIPTPHP -->'."\n";
 
-		if ( $this->datasis->dameval('SELECT COUNT(*) FROM formatos WHERE nombre="X_'.$script.'"') == 0 ){
+		if($this->datasis->dameval('SELECT COUNT(*) FROM formatos WHERE nombre="X_'.$script.'"') == 0 ){
 			$this->db->query('INSERT INTO formatos SET proteo=?, nombre="X_'.$script.'"', array($mhtml));
 		}
 		return $this->traeyeva($script);

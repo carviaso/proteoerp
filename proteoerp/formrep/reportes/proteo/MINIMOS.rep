@@ -1,19 +1,19 @@
 $scli=array(
 	'tabla'   =>'scli',
 	'columnas'=>array(
-		'cliente' =>'C骴igo Cliente',
+		'cliente' =>'C贸digo Cliente',
 		'nombre'=>'Nombre',
 		'contacto'=>'Contacto'),
-	'filtro'  =>array('cliente'=>'C骴igo Cliente','nombre'=>'Nombre'),
+	'filtro'  =>array('cliente'=>'C贸digo Cliente','nombre'=>'Nombre'),
 	'retornar'=>array('cliente'=>'cod_cli'),
 	'titulo'  =>'Buscar Cliente');
 
 $sinv=array(
 	'tabla'   =>'sinv',
 	'columnas'=>array(
-		'codigo' =>'C骴igo',
+		'codigo' =>'C贸digo',
 		'descrip'=>'descrip'),
-	'filtro'  =>array('codigo' =>'C骴igo','descrip'=>'descrip'),
+	'filtro'  =>array('codigo' =>'C贸digo','descrip'=>'descrip'),
 	'retornar'=>array('codigo'=>'codigo'),
 	'titulo'  =>'Buscar Articulo');
 
@@ -223,13 +223,13 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 
 		if (!empty($filter->depto->newValue))  $sobretabla.=' Dpto: '.$filter->depto->newValue;
 		if (!empty($filter->grupo->newValue))  $sobretabla.=' Grupo: ('.$filter->grupo->newValue.') '.$this->datasis->dameval('SELECT nom_grup FROM grup WHERE grupo="'.$filter->grupo->newValue.'"');
-		if (!empty($filter->linea->newValue))  $sobretabla.=' L韓ea: ('.$filter->linea->newValue.') '.$this->datasis->dameval('SELECT descrip FROM line WHERE linea="'.$filter->linea->newValue.'"');
+		if (!empty($filter->linea->newValue))  $sobretabla.=' L铆nea: ('.$filter->linea->newValue.') '.$this->datasis->dameval('SELECT descrip FROM line WHERE linea="'.$filter->linea->newValue.'"');
 		if (!empty($filter->marca->newValue))  $sobretabla.=' Marca: '.$filter->marca->description;
 
 		$pdf = new PDFReporte($mSQL,'L');
 		$pdf->setHeadValores('TITULO1');
 		$pdf->setSubHeadValores('TITULO2','TITULO3');
-		$pdf->setTitulo("Listado de Ventas por C骴igo");
+		$pdf->setTitulo("Listado de Ventas por C贸digo");
 		$pdf->setSubTitulo("Desde la fecha: ".$_POST['fechad']." Hasta ".$_POST['fechah']);
 		$pdf->setSobreTabla($sobretabla,5);
 		$pdf->AddPage();
@@ -238,8 +238,8 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 		$pdf->AddCol('depto'  , 9,'Dpto.'      ,'L',6);
 		$pdf->AddCol('linea'  , 9,'Linea'      ,'L',6);
 		$pdf->AddCol('grupo'  , 9,'Grupo'      ,'L',6);
-		$pdf->AddCol('codigo' ,15,'C骴igo'     ,'L',6);
-		$pdf->AddCol('descrip',40,'Descripci髇','L',6);
+		$pdf->AddCol('codigo' ,15,'C贸digo'     ,'L',6);
+		$pdf->AddCol('descrip',40,'Descripci贸n','L',6);
 		$pdf->AddCol('existen',12,'Exist.'     ,'L',6);
 
 		foreach($columncal AS $col){

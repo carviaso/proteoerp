@@ -1,0 +1,99 @@
+$filter = new DataFilter2("Filtro del Reporte");
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('b.nombre','b.rifci','a.nroriva','a.emiriva','a.numero',
+'a.monto AS gtotal', 'c.exento', 'a.reteiva', 'a.recriva AS frecep',
+'a.estampa', '"CREDITO" AS caja',"COALESCE(c.nfiscal,'NO ENCONTRADO') AS nfiscal");
+$filter->db->select($select);
+$filter->db->from('itccli AS a');
+$filter->db->join('scli AS b','a.cod_cli=b.cliente');
+$filter->db->join('fmay AS c','a.numero=c.numero AND c.tipo="C"','left');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechad->rule='required';
+$filter->fechad->clause  ='where';
+$filter->fechad->db_name ="a.recriva";
+$filter->fechad->insertValue = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
+$filter->fechad->operator=">=";
+
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->rule='required';
+$filter->fechah->clause='where';
+$filter->fechah->db_name='a.fecha';
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechah->operator='<=';
+
+$filter->agrupa = new dropdownField('Agrupado por', 'agupa');
+$filter->agrupa->clause='';
+$filter->agrupa->option('I','F.Registro');
+$filter->agrupa->option('T','Tienda');
+$filter->agrupa->rule = 'required';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+	$mSQL1=$this->rapyd->db->_compile_select();
+
+	$mSQL2  = "SELECT CONCAT(c.nombres,' ',c.apellidos), c.cedula, CONCAT('20',a.num_ref),a.fecha,a.numero, b.gtotal, 0, a.monto, a.f_factura , a.f_factura AS estampa,a.caja, COALESCE(d.numero,'NO ENCONTRADO') AS nfiscal";
+	$mSQL2 .= " FROM viepag a ";
+	$mSQL2 .= " JOIN viefac b ON a.numero=b.numero AND a.f_factura=b.fecha AND a.caja=b.caja ";
+	$mSQL2 .= " LEFT JOIN club c ON b.cliente=c.cod_tar  ";
+	$mSQL2 .= " LEFT JOIN sfacfis AS d ON a.fecha=d.fecha AND a.cajero=d.cajero AND d.referencia=a.numero";
+	$mSQL2 .= " WHERE a.tipo='RI' AND a.f_factura BETWEEN ".$filter->fechad->newValue." AND ".$filter->fechah->newValue;
+	$mSQL2 .= ' ORDER BY emiriva ';
+
+        $mSQL = "SELECT aa.*,MID(COALESCE(bb.almacen,'DE01'),3) AS almacen FROM (${mSQL1} UNION ALL ${mSQL2}) AS aa ";
+	$mSQL.= " LEFT JOIN caja AS bb ON aa.caja=bb.caja";
+	if($filter->agrupa->newValue=='I'){
+		$mSQL.= ' ORDER BY aa.estampa,bb.almacen,aa.caja';
+	}else{
+		$mSQL.= ' ORDER BY bb.almacen';
+	}
+
+	//echo $mSQL;
+	$sobretabla='';
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setType('vence','date');
+	$pdf->setTitulo('Relación de retenciones recibidas');
+	$pdf->setSubTitulo('Desde la fecha: '.$_POST['fechad'].' Hasta '.$_POST['fechah']);
+	$pdf->setSobreTabla($sobretabla,7);
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+
+	$pdf->AddCol('nombre' ,40,'Agente de retención' , 'L',5);
+	$pdf->AddCol('rifci'  ,18,'RIF'                 , 'L',7);
+	$pdf->AddCol('nroriva',22,'Comprobate'          , 'L',7);
+	$pdf->AddCol('emiriva',18,'Emision'             , 'C',7);
+	$pdf->AddCol('frecep' ,18,'Recibido'            , 'C',7);
+	$pdf->AddCol('numero' ,18,'Afecta'              , 'C',7);
+	$pdf->AddCol('nfiscal',18,'N.Fiscal'            , 'C',7);
+	$pdf->AddCol('gtotal' ,15,'Comp/Total'          , 'R',7);
+	$pdf->AddCol('exento' ,15,'Exento'              , 'R',6);
+	$pdf->AddCol('reteiva',15,'Retenido'            , 'R',6);
+	$pdf->AddCol('caja'   ,10,'Caja'                , 'C',6);
+	$pdf->setTotalizar('gtotal','exento','reteiva');
+	if($filter->agrupa->newValue=='I'){
+		$pdf->setGrupoLabel('Fecha de Registro <#estampa#>:');
+		$pdf->setGrupo('estampa');
+ 	}else{
+		$pdf->setGrupoLabel('Sucursal <#almacen#>:');
+		$pdf->setGrupo('almacen');
+	}
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Relación de retenciones recibidas</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

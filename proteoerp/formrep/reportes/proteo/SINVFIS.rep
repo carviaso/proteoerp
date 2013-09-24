@@ -1,10 +1,10 @@
 $mSPRV=array(
 	'tabla'   =>'sprv',
 	'columnas'=>array(
-		'proveed' =>'C骴igo',
+		'proveed' =>'C贸digo',
 		'nombre'=>'Nombre',
 		'contacto'=>'Contacto'),
-	'filtro'  =>array('proveed'=>'C骴igo','nombre'=>'Nombre'),
+	'filtro'  =>array('proveed'=>'C贸digo','nombre'=>'Nombre'),
 	'retornar'=>array('proveed'=>'proveed'),
 	'titulo'  =>'Buscar Proveedor');
 $bSPRV=$this->datasis->modbus($mSPRV);
@@ -48,26 +48,26 @@ $filter->clase->db_name='clase';
 $filter->clase->clause ='where';
 $filter->clase->operator='=';
 $filter->clase->option('','Todas');
-$filter->clase->option("A","A");
-$filter->clase->option("B","B");
-$filter->clase->option("C","C");
-$filter->clase->option("I","I");
+$filter->clase->option('A','A');
+$filter->clase->option('B','B');
+$filter->clase->option('C','C');
+$filter->clase->option('I','I');
 
 $filter->depto = new dropdownField("Departamento", "depto");
 $filter->depto->db_name='b.depto';
-$filter->depto->option("","");
+$filter->depto->option('','Todos');
 $filter->depto->options("SELECT depto, descrip FROM dpto WHERE tipo='I' ORDER BY depto");
 $filter->depto->onchange = "get_linea();";
 $filter->depto->group = "Producto";
 
-$filter->linea = new dropdownField("L韓ea", "linea");
+$filter->linea = new dropdownField('L铆nea', 'linea');
 $filter->linea->db_name='b.linea';
 $filter->linea->option("","Seleccione un Departamento");
 $filter->linea->onchange = "get_grupo();";
 $filter->linea->group    = "Producto";
 
 $filter->grupo = new dropdownField("Grupo", "grupo");
-$filter->grupo->option("","Seleccione una L韓ea");
+$filter->grupo->option("","Seleccione una L铆nea");
 $filter->grupo->group = "Producto";
 $filter->grupo->db_name='b.grupo';
 
@@ -83,11 +83,11 @@ $filter->tipo->clause="where";
 $filter->tipo->db_name='a.tipo';
 $filter->tipo->operator="=";
 $filter->tipo->option("","Todos");
-$filter->tipo->option("Articulo","Art韈ulo");
+$filter->tipo->option("Articulo","Art铆culo");
 $filter->tipo->option("Servicio","Servicio");
 $filter->tipo->option("Consumo","Consumo");
 $filter->tipo->option("Descartar","Descartar");
-$filter->tipo->option("Fraccion","Fracci髇");
+$filter->tipo->option("Fraccion","Fracci贸n");
 
 $filter->activo = new dropdownField("Activo", "activo");
 $filter->activo->db_name="a.activo";
@@ -99,15 +99,15 @@ $filter->activo->option("N","No");
 
 $filter->ordenpor = new dropdownField("Ordenado por", "orden");
 $filter->ordenpor->option("G"  ,"Grupo");
-$filter->ordenpor->option("D","Descripci髇");
-$filter->ordenpor->option("C" ,"C骴igo");
+$filter->ordenpor->option("D","Descripci贸n");
+$filter->ordenpor->option("C" ,"C贸digo");
 $filter->ordenpor->clause ='';
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
-$filter->salformat->group = "Opciones";
+$filter->salformat->group  = 'Opciones';
 
 $filter->buttons("search");
 $filter->build();
@@ -124,7 +124,7 @@ if($filter->ordenpor->newValue=='G'){
 	$orden='a.descrip';
 	$grupo='dletra';
 }else{
-	$grupolabel='C骴igo  <#cletra#>';
+	$grupolabel='C贸digo  <#cletra#>';
 	$orden='a.codigo';
 	$grupo='cletra';
 }
@@ -135,7 +135,7 @@ $mSQL=$this->rapyd->db->_compile_select();
 
 $sobretabla='';
 if (!empty($filter->proveed->newValue))  $sobretabla.='  Proveedor: ('.$filter->proveed->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed="'.$filter->proveed->newValue.'"');
- if (!empty($filter->clase->newValue))    $sobretabla.='  Clase: '.$filter->clase->description;
+if (!empty($filter->clase->newValue))    $sobretabla.='  Clase: '.$filter->clase->description;
 if (!empty($filter->marca->newValue))    $sobretabla.='  Marca: '.$filter->marca->description;
 if (!empty($filter->tipo->newValue))     $sobretabla.='  Tipo: '.$filter->tipo->description;
 if (!empty($filter->activo->newValue))   $sobretabla.='  Activo: '.$filter->activo->description;
@@ -144,13 +144,13 @@ if (!empty($filter->ordenpor->newValue)) $sobretabla.='  Ordenado por: '.$filter
 $pdf = new PDFReporte($mSQL);
 $pdf->setHeadValores('TITULO1');
 $pdf->setSubHeadValores('TITULO2','TITULO3');
-$pdf->setTitulo("Hoja de Trabajo para la Toma de Inventario F韘ico");
+$pdf->setTitulo('Hoja de Trabajo para la Toma de Inventario F铆sico');
 $pdf->setSobreTabla($sobretabla,5);
 $pdf->AddPage();
 $pdf->setTableTitu(9,'Times');
 
-$pdf->AddCol('codigo' ,28,'C骴igo'     ,'L',6);
-$pdf->AddCol('sinvdescrip',85,'Descripci髇','L',6);
+$pdf->AddCol('codigo' ,28,'C贸digo'     ,'L',6);
+$pdf->AddCol('sinvdescrip',85,'Descripci贸n','L',6);
 $pdf->AddCol('marca'  ,25,'Marca'      ,'L',7);
 $pdf->AddCol('alterno',22,'Alterno'    ,'L',7);
 $pdf->AddCol('precio1',22,'Precio'     ,'R',7);
@@ -165,8 +165,8 @@ $pdf->Table();
 $pdf->Output();
 
 }else{
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Hoja de Trabajo para la Toma de Inventario F韘ico<h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Hoja de Trabajo para la Toma de Inventario F铆sico</h2>';
+	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

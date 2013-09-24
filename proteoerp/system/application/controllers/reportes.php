@@ -28,7 +28,13 @@ class Reportes extends Controller{
 		$mc  = $this->datasis->dameval($mSQL);
 		$nombre =strtolower($repo).'.pdf';
 
-		if(empty($mc)) $mc=$this->_crearep($repo,'proteo');
+		if(empty($mc)){
+			$mc=$this->_crearep($repo,'proteo');
+		}else{
+			if(($this->db->char_set=='latin1') && ($this->config->item('charset')=='UTF-8')){
+				$mc=utf8_encode($mc);
+			}
+		}
 		if(!empty($mc)){
 			if(empty($esta)) $esta=$this->datasis->dameval('SELECT modulo FROM intrarepo WHERE nombre='.$this->db->escape($repo));
 			$data['regresar']='<a href='.site_url('/reportes/enlistar/'.$esta).'>'.image('go-previous.png','Regresar',array('border'=>0)).'Regresar'.'</a>';
