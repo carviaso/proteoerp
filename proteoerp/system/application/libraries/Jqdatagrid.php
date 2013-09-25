@@ -192,6 +192,7 @@ class Jqdatagrid
 
 	private $wpadicional = '';
 
+	public $footerrow=false;
 
 	function __construct ()
 	{
@@ -696,6 +697,8 @@ class Jqdatagrid
 		$html     .=  $margen.",rowNum:'{$this->rowNum}'\r\n";
 		$html     .=  $margen.",shrinkToFit: $this->shrinkToFit \r\n";
 		$html     .=  $margen.",scrollrows: true \r\n";
+		if($this->footerrow)
+			$html     .=  $margen.",footerrow: true \r\n";
 
 		if ( $this->grouping == 'true' ) {
 			$html  .=  $margen.",grouping: true \r\n";

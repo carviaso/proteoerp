@@ -37,7 +37,8 @@ class Reportes extends Controller{
 		}
 		if(!empty($mc)){
 			if(empty($esta)) $esta=$this->datasis->dameval('SELECT modulo FROM intrarepo WHERE nombre='.$this->db->escape($repo));
-			$data['regresar']='<a href='.site_url('/reportes/enlistar/'.$esta).'>'.image('go-previous.png','Regresar',array('border'=>0)).'Regresar'.'</a>';
+			$data['regresar'] = '<a href='.site_url('/reportes/enlistar/'.$esta).'>'.image('go-previous.png','Regresar',array('border'=>0)).'Regresar'.'</a>';
+			$data['regresar'].= ' &nbsp;&nbsp;&nbsp; <span style="font-size:0.6em">..::'.$repo.'::..</span>'.br();
 
 			$_formato=$this->input->post('salformat');
 

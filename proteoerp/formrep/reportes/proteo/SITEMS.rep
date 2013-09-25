@@ -26,7 +26,7 @@ $sinv=array(
 	'columnas'=>array(
 		'codigo' =>'Código',
 		'descrip'=>'descrip'),
-	'filtro'  =>array('codigo' =>'Código','descrip'=>'descrip'),
+	'filtro'  =>array('codigo' =>'Código','descrip'=>'Descripción'),
 	'retornar'=>array('codigo'=>'codigoa'),
 	'titulo'  =>'Buscar Articulo');
 
@@ -81,8 +81,8 @@ $filter->db->orderby('g.linea, g.grupo, c.codigo, a.fecha');
 
 $filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
 $filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
-$filter->fechad->clause  =$filter->fechah->clause='where';
-$filter->fechad->db_name =$filter->fechah->db_name="a.fecha";
+$filter->fechad->clause  =$filter->fechah->clause  = 'where';
+$filter->fechad->db_name =$filter->fechah->db_name = 'a.fecha';
 $filter->fechad->insertValue = date('Y-m-d');
 $filter->fechah->insertValue = date('Y-m-d');
 $filter->fechad->operator= '>=';
@@ -90,24 +90,24 @@ $filter->fechah->operator= '<=';
 $filter->fechad->group   = 'Fecha';
 $filter->fechah->group   = 'Fecha';
 $filter->fechad->rule    = 'required';
-$filter->fechad->rule    = 'required';
+$filter->fechah->rule    = 'required';
 
 $filter->codigo = new inputField('Código', 'codigoa');
-$filter->codigo->db_name='codigoa';
+$filter->codigo->db_name='a.codigoa';
 $filter->codigo->clause='where';
 $filter->codigo->operator='=';
 $filter->codigo->append($iboton);
 $filter->codigo->group="Producto";
 
 $filter->cod_cli = new inputField('Cliente', 'cod_cli');
-$filter->cod_cli->db_name='cod_cli';
+$filter->cod_cli->db_name='a.cod_cli';
 $filter->cod_cli->clause='where';
 $filter->cod_cli->operator='=';
 $filter->cod_cli->append($cboton);
 
 $filter->socio = new inputField('Socio', 'socio');
 $filter->socio->clause ='in';
-$filter->socio->db_name='(socio,cod_cli) ';
+$filter->socio->db_name='(d.socio,d.cliente) ';
 $filter->socio->append($bsocio.' No se tomará en cuenta el cliente');
 
 $filter->grupo = new dropdownField('Grupo de Cliente', 'grupo');
@@ -118,13 +118,13 @@ $filter->grupo->option('','Todos');
 $filter->grupo->options('SELECT grupo, gr_desc FROM grcl ORDER BY grupo');
 
 $filter->sinvgru = new inputField('Grupo de Artículo', 'sinvgru');
-$filter->sinvgru->db_name = 'g.nom_grup';
+$filter->sinvgru->db_name = 'c.grupo';
 $filter->sinvgru->clause  = 'where';
 $filter->sinvgru->operator= '=';
 $filter->sinvgru->append($bGrup);
 
 $filter->proveed = new inputField('Proveedor', 'prov1');
-$filter->proveed->db_name ='prov1';
+$filter->proveed->db_name ='c.prov1';
 $filter->proveed->clause  ='where';
 $filter->proveed->operator='=';
 $filter->proveed->append($bPrv);
@@ -137,7 +137,7 @@ $filter->marca->options('SELECT marca as codigo, marca FROM marc ORDER BY marca'
 $filter->marca->operator='=';
 
 $filter->vd = new dropdownField('Vendedor', 'vd');
-$filter->vd->db_name='vd';
+$filter->vd->db_name='a.vendedor';
 $filter->vd->clause='where';
 $filter->vd->option('','Todos');
 $filter->vd->options('SELECT vendedor, nombre FROM vend ORDER BY vendedor');

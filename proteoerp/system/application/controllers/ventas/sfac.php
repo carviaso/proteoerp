@@ -1234,7 +1234,7 @@ class Sfac extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 100,
+			'width'         => 90,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 15 }',
@@ -1260,7 +1260,7 @@ class Sfac extends Controller {
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 70,
+			'width'         => 60,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -1275,7 +1275,7 @@ class Sfac extends Controller {
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 90,
+			'width'         => 85,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -1297,45 +1297,29 @@ class Sfac extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
-		$grid->addField('iva');
-		$grid->label('IVA');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 60,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
+		//$grid->addField('fecha');
+		//$grid->label('Fecha');
+		//$grid->params(array(
+		//	'search'        => 'true',
+		//	'editable'      => $editar,
+		//	'width'         => 70,
+		//	'align'         => "'center'",
+		//	'edittype'      => "'text'",
+		//	'editrules'     => '{ required:true,date:true}',
+		//	'formoptions'   => '{ label:"Fecha" }'
+		//));
 
 
-		$grid->addField('fecha');
-		$grid->label('Fecha');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 70,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('vendedor');
-		$grid->label('Vendedor');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 50,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 5 }',
-		));
+		//$grid->addField('vendedor');
+		//$grid->label('Vendedor');
+		//$grid->params(array(
+		//	'search'        => 'true',
+		//	'editable'      => $editar,
+		//	'width'         => 50,
+		//	'edittype'      => "'text'",
+		//	'editrules'     => '{ required:true}',
+		//	'editoptions'   => '{ size:30, maxlength: 5 }',
+		//));
 
 
 		$grid->addField('costo');
@@ -1345,39 +1329,80 @@ class Sfac extends Controller {
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 90,
+			'width'         => 80,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		$grid->addField('utilidad');
+		$grid->label('Utilidad');
+		$grid->params(array(
+			'search'        => 'false',
+			'editable'      => 'false',
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 80,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
 
-		$grid->addField('comision');
-		$grid->label('Comisi&oacute;n');
+		$grid->addField('porcen');
+		$grid->label('Margen%');
+		$grid->params(array(
+			'search'        => 'false',
+			'editable'      => 'false',
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 50,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('iva');
+		$grid->label('IVA');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 100,
+			'width'         => 40,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		//$grid->addField('comision');
+		//$grid->label('Comisi&oacute;n');
+		//$grid->params(array(
+		//	'search'        => 'true',
+		//	'editable'      => $editar,
+		//	'align'         => "'right'",
+		//	'edittype'      => "'text'",
+		//	'width'         => 100,
+		//	'editrules'     => '{ required:true }',
+		//	'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+		//	'formatter'     => "'number'",
+		//	'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		//));
 
-		$grid->addField('cajero');
-		$grid->label('Cajero');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 50,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 5 }',
-		));
+
+		//$grid->addField('cajero');
+		//$grid->label('Cajero');
+		//$grid->params(array(
+		//	'search'        => 'true',
+		//	'editable'      => $editar,
+		//	'width'         => 50,
+		//	'edittype'      => "'text'",
+		//	'editrules'     => '{ required:true}',
+		//	'editoptions'   => '{ size:30, maxlength: 5 }',
+		//));
 
 
 		$grid->addField('despacha');
@@ -1482,15 +1507,29 @@ class Sfac extends Controller {
 		$grid->setShrinkToFit('false');
 		$grid->setOndblClickRow('');
 
+		//$grid->footerrow=true;
+		//$grid->setGridComplete('
+		//	function(){
+		//		//var cana = $(this).jqGrid("getGridParam", "records")+1;
+		//		//$(this).jqGrid("addRowData", cana, {codigoa:"Total:",desca:"",cana:"",costo:"averr"});
+        //
+		//		var totalutil = $(this).jqGrid("getCol", "utilidad", false, "sum");
+		//		var totalsub  = $(this).jqGrid("getCol", "tota"    , false, "sum");
+		//		var totalcosto= $(this).jqGrid("getCol", "costo"   , false, "sum");
+		//		//	grid.jqGrid("footerData", "set", { DriverEn: "Total FTE:", FTEValue: sum });
+		//		$(this).jqGrid("footerData", "set", { codigoa: "TOTALES:",tota:totalsub,costo:totalcosto,utilidad: totalutil});
+		//	}'
+		//);
+
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdatait/'));
 
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdatait/'));
 
-		if ($deployed) {
+		if($deployed){
 			return $grid->deploy();
-		} else {
+		}else{
 			return $grid;
 		}
 	}
@@ -1526,7 +1565,7 @@ class Sfac extends Controller {
 		}
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM sitems WHERE tipoa=${dbtipo_doc} AND numa=${dbnumero} ${orderby}";
+		$mSQL    = "SELECT *,(preca-costo)*cana AS utilidad,((preca*100/costo)-100) AS porcen FROM sitems WHERE tipoa=${dbtipo_doc} AND numa=${dbnumero} ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;

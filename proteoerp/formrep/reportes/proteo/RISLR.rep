@@ -1,0 +1,103 @@
+$mPrv=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código Proveedor',
+		'nombre'=>'Nombre',
+		'rif'=>'RIF'),
+	'filtro'  =>array('proveed'=>'Código Proveedor','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'prov1'),
+	'titulo'  =>'Buscar Grupo');
+
+$bPrv =$this->datasis->modbus($mPrv);
+
+$this->rapyd->load('datafilter');
+
+$base_process_uri   = $this->rapyd->uri->implode_uri("base_uri","gfid","orderby");
+
+$filter = new DataForm('');
+$filter->_process_uri  = $this->rapyd->uri->add_clause($base_process_uri, 'search');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause='where';
+$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d');
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechad->operator='>=';
+$filter->fechah->operator='<=';
+$filter->fechah->group = 'Fecha';
+$filter->fechad->group = 'Fecha';
+$filter->fechad->rule  = 'required';
+$filter->fechah->rule  = 'required';
+
+$filter->proveed = new inputField('Proveedor', 'sprv');
+$filter->proveed->db_name ='c.prov1';
+$filter->proveed->clause  ='where';
+$filter->proveed->operator='=';
+$filter->proveed->append($bPrv);
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit',RAPYD_BUTTON_SEARCH);
+$filter->build_form();
+
+if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
+
+	$dbsprv   = $this->db->escape($filter->proveed->newValue);
+	$dbfechad = $this->db->escape($filter->fechad->newValue);
+	$dbfechah = $this->db->escape($filter->fechah->newValue);
+
+	$mSQL = 'SELECT  d.nombre, d.rif, b.proveed ,b.fecha, b.numero, b.breten,  (b.breten/c.tari1)  AS   basere ,  b.reten,  b.creten, c.codigo, c.tari1 ';
+	$mSQL.= ' FROM  gser AS b   LEFT JOIN  rete AS c  ON  b.creten=c.codigo LEFT JOIN sprv as d   ON b.proveed=d.proveed ';
+	$mSQL.= " WHERE b.fecha BETWEEN ${dbfechad} AND ${dbfechah} AND b.reten > 0 ";
+	if(!empty($dbsprv))
+		$mSQL.= " AND b.proveed=${dbsprv}";
+	$mSQL.= ' UNION ';
+	$mSQL.= "SELECT  d.nombre, d.rif, b.proveed ,b.fecha, b.numero, b.flete,  (b.flete/c.tari1)  AS   basere ,  b.reten,  c.codigo, c.codigo, c.tari1  ";
+	$mSQL.= " FROM  scst AS b  LEFT JOIN sprv AS d   ON b.proveed=d.proveed  LEFT JOIN  rete AS c  ON  c.codigo=IF(d.tipo='1','115','215' ) ";
+	$mSQL.= " WHERE b.fecha BETWEEN ${dbfechad} AND ${dbfechah} AND b.reten > 0 ";
+	if(!empty($dbsprv))
+		$mSQL.= " AND b.proveed=${dbsprv}";
+	$mSQL.= ' UNION ';
+	$mSQL.= 'SELECT  d.nombre, d.rif, d.proveed , e.fecha, a.numero, a.monto,  a.breten  AS   basere ,  a.reten,  b.codigo, b.codigo, b.tari1 ';
+	$mSQL.= "FROM itppro a JOIN rete b ON b.codigo=a.creten LEFT JOIN sprv d ON a.cod_prv=d.proveed LEFT JOIN sprm AS e ON a.transac=e.transac AND e.tipo_doc='AB' AND e.numero=a.numppro ";
+	$mSQL.= "WHERE a.tipoppro='AB'  AND a.reten>0 AND e.fecha BETWEEN ${dbfechad} AND ${dbfechah}";
+	if(!empty($dbsprv))
+		$mSQL.= " AND d.proveed=${dbsprv}";
+
+	$mSQL.= 'ORDER BY proveed,fecha ';
+
+	$sobretabla='AG. DE RETENCIÓN: '.$this->datasis->traevalor('TITULO1').' RIF: '.$this->datasis->traevalor('TITULO1');
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setSubHead('RIF: '.$this->datasis->traevalor('RIF'));
+	$pdf->setTitulo('Comprobantes de retenciones varias I.S.L.R. Decreto 1808');
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->setSubTitulo("Desde la fecha: ".$_POST['fechad']." Hasta ".$_POST['fechah']);
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+
+	$pdf->AddCol('fecha'  ,30,'Fecha'     ,'L',8);
+	$pdf->AddCol('numero' ,65,'Número'    ,'L',8);
+	$pdf->AddCol('breten' ,25,'Monto'     ,'R',8);
+	$pdf->AddCol('basere' ,25,'Base'      ,'R',8);
+	$pdf->AddCol('tari1'  ,25,'Tasa'      ,'R',8);
+	$pdf->AddCol('reten'  ,25,'Impuesto'  ,'R',8);
+	$pdf->setGrupoLabel('Contribuyente sujeto a retención: <#nombre#>  R.I.F: <#rif#>');
+	$pdf->setGrupo('proveed');
+	$pdf->Table();
+	$//pdf->add_fila('','',$f_RESU[0],$f_RESU[1],$f_RESU[2],$f_RESU[3]);
+	$pdf->Output();
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Comprobantes de retenciones varias I.S.L.R. Decreto 1808</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
