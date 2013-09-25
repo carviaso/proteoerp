@@ -767,8 +767,27 @@ class Jqdatagrid
 		$querydata = array( 'dtgFields' => $this->_field );
 		$this->CI->session->set_userdata($querydata);
 
-		#calendario
-		$calendar = "size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: 'yy-mm-dd',changeMonth: true,changeYear: true,yearRange: '" . (date('Y',time()) - 30) .":" .(date('Y',time()) + 10) ."'})}";
+		//calendario
+		$calendar = "
+			size: 10,
+			maxlengh: 10,
+			dataInit: function(element) {
+				$(element).datepicker({
+					dateFormat: 'yy-mm-dd',
+					changeMonth: true,
+					changeYear: true,
+					yearRange: '" . (date('Y',time()) - 30) .":" .(date('Y',time()) + 10) ."',
+					onSelect: function(){
+						if(this.id.substr(0, 3) === 'gs_'){
+							//in case of searching toolbar
+							setTimeout(function(){ jQuery('#newapi".$this->_gridname."')[0].triggerToolbar(); },50);
+						}else{
+							//refresh the filter in case of searching dialog
+							//$(this).trigger('change');
+						}
+					}
+				});
+			}";
 
 		$html     .=  $margen.',colModel:[' . "\r";
 		$fieldname = '';
