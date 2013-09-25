@@ -1119,8 +1119,11 @@ class Sfac extends Controller {
 				}
 			},afterInsertRow:
 			function( rid, aData, rowe){
-				if ( aData.tipo_doc == "X"){
+				if(aData.tipo_doc == "X"){
 					$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#C90623" });
+				}
+				if(aData.numero.substr(0, 1) == "_"){
+					$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#FFDD00" });
 				}
 			}'
 		);
