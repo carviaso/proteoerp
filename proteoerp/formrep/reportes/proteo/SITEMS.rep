@@ -1,10 +1,10 @@
 $mSOCIO=array(
 	'tabla'   =>'scli',
 	'columnas'=>array(
-		'cliente' =>'Código Socio',
+		'cliente' =>'CÃ³digo Socio',
 		'nombre'=>'Nombre',
 		'contacto'=>'Contacto'),
-	'filtro'  =>array('cliente'=>'Código Socio','nombre'=>'Nombre'),
+	'filtro'  =>array('cliente'=>'CÃ³digo Socio','nombre'=>'Nombre'),
 	'retornar'=>array('cliente'=>'socio'),
 	'titulo'  =>'Buscar Socio',
 	'join'    =>array('scli AS a','scli.cliente=a.socio',''),
@@ -14,39 +14,39 @@ $mSOCIO=array(
 $scli=array(
 	'tabla'   =>'scli',
 	'columnas'=>array(
-		'cliente' =>'Código Cliente',
+		'cliente' =>'CÃ³digo Cliente',
 		'nombre'=>'Nombre',
 		'contacto'=>'Contacto'),
-	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'filtro'  =>array('cliente'=>'CÃ³digo Cliente','nombre'=>'Nombre'),
 	'retornar'=>array('cliente'=>'cod_cli'),
 	'titulo'  =>'Buscar Cliente');
 
 $sinv=array(
 	'tabla'   =>'sinv',
 	'columnas'=>array(
-		'codigo' =>'Código',
+		'codigo' =>'CÃ³digo',
 		'descrip'=>'descrip'),
-	'filtro'  =>array('codigo' =>'Código','descrip'=>'Descripción'),
+	'filtro'  =>array('codigo' =>'CÃ³digo','descrip'=>'DescripciÃ³n'),
 	'retornar'=>array('codigo'=>'codigoa'),
 	'titulo'  =>'Buscar Articulo');
 
 $mPrv=array(
 	'tabla'   =>'sprv',
 	'columnas'=>array(
-		'proveed' =>'Código Proveedor',
+		'proveed' =>'CÃ³digo Proveedor',
 		'nombre'=>'Nombre',
 		'rif'=>'RIF'),
-	'filtro'  =>array('proveed'=>'Código Proveedor','nombre'=>'Nombre'),
+	'filtro'  =>array('proveed'=>'CÃ³digo Proveedor','nombre'=>'Nombre'),
 	'retornar'=>array('proveed'=>'prov1'),
 	'titulo'  =>'Buscar Grupo');
 
 $mGrup=array(
 	'tabla'   =>'grup',
 	'columnas'=>array(
-		'grupo' =>'Código de Grupo',
-		'linea'=>'Línea',
-		'nom_grup'=>'Descripción'),
-	'filtro'  =>array('grupo'=>'Código de Grupo','linea'=>'Línea','nom_grup'=>'Descripción'),
+		'grupo' =>'CÃ³digo de Grupo',
+		'linea'=>'LÃ­nea',
+		'nom_grup'=>'DescripciÃ³n'),
+	'filtro'  =>array('grupo'=>'CÃ³digo de Grupo','linea'=>'LÃ­nea','nom_grup'=>'DescripciÃ³n'),
 	'retornar'=>array('grupo'=>'sinvgru'),
 	'titulo'  =>'Buscar Proveedor');
 
@@ -92,7 +92,7 @@ $filter->fechah->group   = 'Fecha';
 $filter->fechad->rule    = 'required|chfecha';
 $filter->fechah->rule    = 'required|chfecha';
 
-$filter->codigo = new inputField('Código', 'codigoa');
+$filter->codigo = new inputField('CÃ³digo', 'codigoa');
 $filter->codigo->db_name='a.codigoa';
 $filter->codigo->clause='where';
 $filter->codigo->operator='=';
@@ -111,7 +111,7 @@ $filter->socio = new inputField('Socio', 'socio');
 $filter->socio->clause ='in';
 $filter->socio->db_name='(d.socio,d.cliente) ';
 $filter->socio->rule = 'existescli';
-$filter->socio->append($bsocio.' No se tomará en cuenta el cliente');
+$filter->socio->append($bsocio.' No se tomarÃ¡ en cuenta el cliente');
 
 $filter->grupo = new dropdownField('Grupo de Cliente', 'grupo');
 $filter->grupo->db_name = 'e.grupo';
@@ -120,7 +120,7 @@ $filter->grupo->operator='=';
 $filter->grupo->option('','Todos');
 $filter->grupo->options('SELECT grupo, gr_desc FROM grcl ORDER BY grupo');
 
-$filter->sinvgru = new inputField('Grupo de Artículo', 'sinvgru');
+$filter->sinvgru = new inputField('Grupo de ArtÃ­culo', 'sinvgru');
 $filter->sinvgru->db_name = 'c.grupo';
 $filter->sinvgru->clause  = 'where';
 $filter->sinvgru->operator= '=';
@@ -165,9 +165,9 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	if(!empty($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
 
 	$sobretabla='';
-	if (!empty($filter->codigo->newValue))  $sobretabla.=' Código: ('.$filter->codigo->newValue.') '.$this->datasis->dameval('SELECT descrip FROM sinv WHERE codigo="'.$filter->codigo->newValue.'"');
+	if (!empty($filter->codigo->newValue))  $sobretabla.=' CÃ³digo: ('.$filter->codigo->newValue.') '.$this->datasis->dameval('SELECT descrip FROM sinv WHERE codigo="'.$filter->codigo->newValue.'"');
 	if (!empty($filter->socio->newValue))   $sobretabla.=' Socio: ('.$filter->socio->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->socio->newValue.'"');
-	if (!empty($filter->sinvgru->newValue)) $sobretabla.=' Grupo Artículo: ('.$filter->sinvgru->newValue.') '.$this->datasis->dameval('SELECT nom_grup FROM grup WHERE grupo="'.$filter->sinvgru->newValue.'"');
+	if (!empty($filter->sinvgru->newValue)) $sobretabla.=' Grupo ArtÃ­culo: ('.$filter->sinvgru->newValue.') '.$this->datasis->dameval('SELECT nom_grup FROM grup WHERE grupo="'.$filter->sinvgru->newValue.'"');
 	if (!empty($filter->cod_cli->newValue)) $sobretabla.=' Cliente: ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_cli->newValue.'"');
 	if (!empty($filter->grupo->newValue))   $sobretabla.=' Grupo Cliente: '.$filter->grupo->description;
 	if (!empty($filter->marca->newValue))   $sobretabla.=' Marca: '.$filter->marca->description;
@@ -182,10 +182,10 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$pdf->AddPage();
 	$pdf->setTableTitu(6,'Times');
 
-	$pdf->AddCol('nnumero' ,12,'Número'     ,'L',5);
+	$pdf->AddCol('nnumero' ,12,'NÃºmero'     ,'L',5);
 	$pdf->AddCol('fecha'   ,12,'Fecha'      ,'L',5);
-	$pdf->AddCol('codigoa' ,15,'Código'     ,'L',5);
-	$pdf->AddCol('desca'   ,50,'Descripción','L',5);
+	$pdf->AddCol('codigoa' ,15,'CÃ³digo'     ,'L',5);
+	$pdf->AddCol('desca'   ,50,'DescripciÃ³n','L',5);
 	$pdf->AddCol('cana'    ,15,'Cant.'      ,'R',5);
 	$pdf->AddCol('preca'   ,15,'Base'       ,'R',5);
 	$pdf->AddCol('tota'    ,15,'Importe'    ,'R',5);
@@ -202,7 +202,7 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 }else{
 	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Ventas Por Artículo</h2>';
+	$data['titulo'] = '<h2 class="mainheader">Ventas Por ArtÃ­culo</h2>';
 	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }
