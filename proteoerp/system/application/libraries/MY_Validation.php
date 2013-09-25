@@ -206,12 +206,12 @@ class MY_Validation extends CI_Validation{
 	function existegrupo($codigo){
 		$dbcod= $this->CI->db->escape($codigo);
 		$mSQL  = "SELECT COUNT(*) AS cana FROM grup WHERE grupo=${dbcod}";
-		$this->set_message('existebotr', 'El grupo propuesto en el campo %s no existe');
+		$this->set_message('existegrupo', 'El grupo propuesto en el campo %s no existe');
 
 		$query = $this->CI->db->query($mSQL);
-		if ($query->num_rows() > 0){
+		if($query->num_rows()>0){
 			$row = $query->row();
-			if( $row->cana>0) return true; else return false;
+			if($row->cana>0) return true; else return false;
 		}else{
 			return false;
 		}
