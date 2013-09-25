@@ -1360,7 +1360,7 @@ class Sfac extends Controller {
 			'editable'      => 'false',
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 50,
+			'width'         => 77,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -1524,6 +1524,12 @@ class Sfac extends Controller {
 		//	}'
 		//);
 
+		//$grid->setGridComplete('
+		//	function(){
+		//		$(this).setGridParam({datatype: "local"});
+		//	}
+		//');
+
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdatait/'));
 
@@ -1559,7 +1565,9 @@ class Sfac extends Controller {
 		$orderby= '';
 		$sidx=$this->input->post('sidx');
 		if($sidx){
-			$campos = $this->db->list_fields('sitems');
+			$campos   = $this->db->list_fields('sitems');
+			$campos[] = 'utilidad';
+			$campos[] = 'porcen';
 			if(in_array($sidx,$campos)){
 				$sidx = trim($sidx);
 				$sord   = $this->input->post('sord');
