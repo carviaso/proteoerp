@@ -1181,13 +1181,25 @@ class Rivc extends Controller {
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait( $id = 0 ){
-		if ($id === 0 ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM rivc");
+		if($id == 0){
+			$id = $this->datasis->dameval('SELECT MAX(id) FROM rivc');
 		}
-		if(empty($id)) return "";
+		if(empty($id)) return '';
 		$dbid = $this->db->escape($id);
+
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itrivc');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
+
 		$grid = $this->jqdatagrid;
-		$mSQL = "SELECT * FROM itrivc WHERE idrivc=${dbid}";
+		$mSQL = "SELECT * FROM itrivc WHERE idrivc=${dbid} ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;

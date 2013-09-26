@@ -1958,20 +1958,35 @@ class gser extends Controller {
 	function getdatait(){
 		$id = $this->uri->segment(4);
 		if ($id === false ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM gser");
+			$id = $this->datasis->dameval('SELECT MAX(id) AS id FROM gser');
 		}
 		if(empty($id)) return '';
-		$dbid = $this->db->escape($id);
+		$dbid = $this->db->escape(intval($id));
 
 		$row = $this->datasis->damerow('SELECT proveed,numero,fecha,transac FROM gser WHERE id='.$dbid);
 
-		$proveed = $this->db->escape($row['proveed']);
-		$numero  = $this->db->escape($row['numero']);
-		$fecha   = $this->db->escape($row['fecha']);
-		$transac = $this->db->escape($row['transac']);
+		if(!empty($row)){
+			$proveed = $this->db->escape($row['proveed']);
+			$numero  = $this->db->escape($row['numero']);
+			$fecha   = $this->db->escape($row['fecha']);
+			$transac = $this->db->escape($row['transac']);
+		}else{
+			return '';
+		}
+
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('gitser');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM gitser WHERE numero=${numero} AND proveed={$proveed} AND fecha=${fecha} AND transac=${transac}";
+		$mSQL    = "SELECT * FROM gitser WHERE numero=${numero} AND proveed={$proveed} AND fecha=${fecha} AND transac=${transac} ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
@@ -3772,7 +3787,7 @@ class gser extends Controller {
 			$precio = $cgas['monto'];
 			$mmsql="SELECT b.codigo ,a.descrip, b.base1,b.tari1,b.activida,b.pama1
 						FROM mgas AS a
-						LEFT JOIN rete AS b ON a.$campo=b.codigo
+						LEFT JOIN rete AS b ON a.${campo}=b.codigo
 					WHERE a.codigo=".$this->db->escape($codigo)." LIMIT 1";
 
 			$fila=$this->datasis->damerow($mmsql);

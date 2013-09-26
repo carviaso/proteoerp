@@ -759,28 +759,31 @@ class Ssal extends Controller {
 	*/
 	function getdatait($id = 0){
 
-		if ($id === 0 ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM ssal");
+		if($id == 0){
+			$id = $this->datasis->dameval("SELECT MAX(id) AS id FROM ssal");
 		}
-		if( empty($id) ) return '';
-		$numero   = $this->datasis->dameval("SELECT numero FROM ssal WHERE id=$id");
+		$dbid = intval($id);
+		if(empty($dbid)) return '';
+
+		$numero   = $this->datasis->dameval("SELECT numero FROM ssal WHERE id=${dbid}");
+		$dbnumero = $this->db->escape($numero);
+
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itssal');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itssal WHERE numero='$numero' ORDER BY descrip ";
+		$mSQL    = "SELECT * FROM itssal WHERE numero=${dbnumero} ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
-
-/*
-		$grid       = $this->jqdatagrid;
-
-		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
-		$mWHERE = $grid->geneTopWhere('itssal');
-
-		$response   = $grid->getData('itssal', array(array()), array(), false, $mWHERE );
-		$rs = $grid->jsonresult( $response);
-		echo $rs;\
-*/
 	}
 
 	/**
@@ -1170,7 +1173,7 @@ class Ssal extends Controller {
 	}
 
 	function instalar(){
-		
+
 		if (!$this->db->table_exists('ssal')) {
 			$mSQL="CREATE TABLE `ssal` (
 			  `numero` char(8) NOT NULL DEFAULT '',

@@ -1230,9 +1230,21 @@ class Pfac extends Controller {
 		if(empty($id)) return '';
 		$id = intval($id);
 		$numero   = $this->datasis->dameval("SELECT numero FROM pfac WHERE id=${id}");
+		$dbnumero = $this->db->escape($numero);
+
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itpfac');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itpfac WHERE numa='$numero' ";
+		$mSQL    = "SELECT * FROM itpfac WHERE numa=${dbnumero} ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;

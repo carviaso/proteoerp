@@ -613,11 +613,22 @@ class Noco extends Controller {
 		if($id == false){
 			$id = $this->datasis->dameval("SELECT MIN(id) FROM noco");
 		}
-		$dbid  = $this->db->escape($id);
+		$dbid   = $this->db->escape($id);
 		$codigo = $this->datasis->dameval("SELECT codigo FROM noco WHERE id=${dbid}");
 
+		$orderby= 'ORDER BY concepto';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itnoco');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
+
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itnoco WHERE codigo=".$this->db->escape($codigo)." ORDER BY concepto ";
+		$mSQL    = "SELECT * FROM itnoco WHERE codigo=".$this->db->escape($codigo)."  ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;

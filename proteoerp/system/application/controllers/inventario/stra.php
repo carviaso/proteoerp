@@ -488,8 +488,8 @@ class Stra extends Controller {
 			$this->db->delete('stra');
 			//Borra los Items
 			$this->db->query("DELETE FROM itstra WHERE numero=".$this->db->escape($numero));
-			
-			
+
+
 			echo "Transferencia Eliminada";
 		};
 
@@ -577,18 +577,30 @@ class Stra extends Controller {
 	// Busca la data en el Servidor por json
 	//******************************************************************
 	function getdatait($id = 0){
-		if ($id === 0 ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM stra");
+		if($id == 0){
+			$id = $this->datasis->dameval("SELECT MAX(id) AS id FROM stra");
 		}
+		$dbid = intval($id);
 		if(empty($id)) return '';
-		$numero   = $this->datasis->dameval("SELECT numero FROM stra WHERE id=$id");
+		$numero   = $this->datasis->dameval("SELECT numero FROM stra WHERE id=${dbid}");
+		$dbnumero = $this->db->escape($numero);
+
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itstra');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itstra WHERE numero='$numero' ORDER BY descrip ";
-		$response   = $grid->getDataSimple($mSQL);
+		$mSQL    = "SELECT * FROM itstra WHERE numero=${dbnumero} ${orderby}";
+		$response= $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
-
 	}
 
 	//******************************************************************
@@ -605,18 +617,7 @@ class Stra extends Controller {
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM itstra WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('itstra', $data);
-					echo "Registro Agregado";
-
-					logusu('ITSTRA',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
+			echo 'Deshabilitado';
 		} elseif($oper == 'edit') {
 			$nuevo  = $data[$mcodp];
 			$anterior = $this->datasis->dameval("SELECT $mcodp FROM itstra WHERE id=$id");

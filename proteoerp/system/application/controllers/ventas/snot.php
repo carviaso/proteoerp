@@ -785,7 +785,7 @@ class Snot extends Controller {
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait( $id = 0 ){
-		if ($id === 0 ){
+		if($id == 0){
 			$id = $this->datasis->dameval('SELECT MAX(id) FROM snot');
 		}
 		if(empty($id)) return '';
@@ -793,8 +793,19 @@ class Snot extends Controller {
 		$numero = $this->datasis->dameval('SELECT numero FROM snot WHERE id='.$dbid);
 		$dbnumero= $this->db->escape($numero);
 
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itsnot');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
+
 		$grid    = $this->jqdatagrid;
-		$mSQL    = 'SELECT * FROM itsnot WHERE numero='.$dbnumero;
+		$mSQL    = 'SELECT * FROM itsnot WHERE numero='.$dbnumero.' '.$orderby;
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;

@@ -982,14 +982,27 @@ class Spre extends Controller {
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait( $id = 0 ){
-		if ($id === 0 ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM spre");
+		if($id == 0){
+			$id = $this->datasis->dameval('SELECT MAX(id) AS id FROM spre');
 		}
+		$dbid = intval($id);
 		if(empty($id)) return '';
-		$numero   = $this->datasis->dameval("SELECT numero FROM spre WHERE id=$id");
+		$numero   = $this->datasis->dameval("SELECT numero FROM spre WHERE id=${dbid}");
+		$dbnumero = $this->db->escape($numero);
+
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itspre');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itspre WHERE numero='$numero' ";
+		$mSQL    = "SELECT * FROM itspre WHERE numero=${dbnumero} ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;

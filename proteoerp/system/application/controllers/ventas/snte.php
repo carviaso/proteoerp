@@ -882,13 +882,27 @@ class Snte extends Controller {
 	function getdatait(){
 		$id = $this->uri->segment(4);
 		if ($id == false ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM snte");
+			$id = $this->datasis->dameval('SELECT MAX(id) AS id FROM snte');
 		}
 		if(empty($id)) return '';
+		$dbid = intval($id);
 
-		$numero   = $this->datasis->dameval("SELECT numero FROM snte WHERE id=$id");
+		$numero   = $this->datasis->dameval("SELECT numero FROM snte WHERE id=${dbid}");
+		$dbnumero = $this->db->escape($numero);
+
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itsnte');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
+
 		$grid     = $this->jqdatagrid;
-		$mSQL     = "SELECT * FROM itsnte WHERE numero='$numero' ORDER BY codigo ";
+		$mSQL     = "SELECT * FROM itsnte WHERE numero=${dbnumero} ${orderby}";
 		$response = $grid->getDataSimple($mSQL);
 
 		$rs = $grid->jsonresult( $response);

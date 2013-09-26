@@ -258,10 +258,11 @@ class sfacdesp extends Controller {
 	function procesar(){
 		//print_r($_POST);
 		foreach($_POST['despacha'] as $fila){
-			$usuario = $this->session->userdata('usuario');
-			$mSQL="UPDATE sitems SET despacha='S', fdespacha=CURDATE(), udespacha='$usuario' WHERE numa='$fila' AND tipoa='F' ";
+			$dbusuario = $this->db->escape($this->session->userdata('usuario'));
+			$dbfila    = $this->db->escape($fila);
+			$mSQL="UPDATE sitems SET despacha='S', fdespacha=CURDATE(), udespacha=${dbusuario} WHERE numa=${dbfila} AND tipoa='F' ";
 			$this->db->simple_query($mSQL);
-			$mSQL="UPDATE sfac SET fdespacha=CURDATE(), udespacha='$usuario' WHERE numero='$fila' AND tipo_doc='F' ";
+			$mSQL="UPDATE sfac SET fdespacha=CURDATE(), udespacha=${dbusuario} WHERE numero=${dbfila} AND tipo_doc='F' ";
 			$this->db->simple_query($mSQL);
 		}
 		redirect('ventas/sfacdesp/filteredgrid/search/osp');

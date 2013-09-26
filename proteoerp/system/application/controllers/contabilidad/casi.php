@@ -723,14 +723,29 @@ class Casi extends Controller {
 	*/
 	function getdatait(){
 		$id = $this->uri->segment(4);
-		if ($id){
-			$comprob = $this->datasis->dameval("SELECT comprob FROM casi WHERE id=$id");
+		if($id){
+			$dbid = intval($id);
+			$comprob  = $this->datasis->dameval("SELECT comprob FROM casi WHERE id=${dbid}");
+			$dbcomprob= $this->db->escape($comprob);
+
+			$orderby= '';
+			$sidx=$this->input->post('sidx');
+			if($sidx){
+				$campos = $this->db->list_fields('itcasi');
+				if(in_array($sidx,$campos)){
+					$sidx = trim($sidx);
+					$sord   = $this->input->post('sord');
+					$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+				}
+			}
+
 			$grid    = $this->jqdatagrid;
-			$mSQL = "SELECT origen, cuenta, referen, concepto, debe, haber, ccosto, sucursal, id, comprob FROM itcasi WHERE comprob='$comprob' ORDER BY cuenta ";
+			$mSQL = "SELECT origen, cuenta, referen, concepto, debe, haber, ccosto, sucursal, id, comprob FROM itcasi WHERE comprob=${dbcomprob} ${orderby}";
 			$response   = $grid->getDataSimple($mSQL);
 			$rs = $grid->jsonresult( $response);
-		} else
+		}else{
 			$rs ='';
+		}
 		echo $rs;
 	}
 

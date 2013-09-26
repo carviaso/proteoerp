@@ -497,6 +497,19 @@ class Sfac extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:3, maxlength: 1 }',
+			'cellattr'      => 'function(rowId, tv, aData, cm, rdata){
+				var tips = "";
+				if(aData.numero !== undefined){
+					if(aData.tipo_doc=="X"){
+						tips = "Factura Anulada";
+					}else if(aData.numero.substr(0, 1) == "_"){
+						tips = "Factura Pendiente";
+					}else{
+						tips = "Factura Guardada";
+					}
+				}
+				return \'title="\'+tips+\'"\';
+			}'
 		));
 
 		$grid->addField('numero');
@@ -595,6 +608,21 @@ class Sfac extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 1 }',
+			'cellattr'      => 'function(rowId, tv, aData, cm, rdata){
+				var tips = "";
+				if(aData.referen !== undefined){
+					if(aData.referen=="P"){
+						tips = "Pendiente";
+					}else if(aData.referen=="E"){
+						tips = "Contado en Efectivo";
+					}else if(aData.referen=="M"){
+						tips = "Mixto";
+					}else{
+						tips = aData.referen;
+					}
+				}
+				return \'title="\'+tips+\'"\';
+			}'
 		));
 
 		$grid->addField('totals');
@@ -1108,6 +1136,7 @@ class Sfac extends Controller {
 		$grid->setOnSelectRow('
 			function(id){
 				if (id){
+					//jQuery(gridId2).setGridParam({datatype: "json"});
 					jQuery(gridId2).jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
 					jQuery(gridId2).trigger("reloadGrid");
 					$.ajax({
@@ -1117,16 +1146,20 @@ class Sfac extends Controller {
 						}
 					});
 				}
-			},afterInsertRow:
+			}
+		');
+
+		$grid->setAfterInsertRow('
 			function( rid, aData, rowe){
-				if(aData.tipo_doc == "X"){
-					$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#C90623" });
+				if(aData.numero !== undefined){
+					if(aData.tipo_doc == "X"){
+						$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#C90623" });
+					}else if(aData.numero.substr(0, 1) == "_"){
+						$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#FFDD00" });
+					}
 				}
-				if(aData.numero.substr(0, 1) == "_"){
-					$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#FFDD00" });
-				}
-			}'
-		);
+			}
+		');
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 450, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 450, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
@@ -1526,6 +1559,7 @@ class Sfac extends Controller {
 
 		//$grid->setGridComplete('
 		//	function(){
+		//		//alert($(this).getGridParam("datatype"));
 		//		$(this).setGridParam({datatype: "local"});
 		//	}
 		//');

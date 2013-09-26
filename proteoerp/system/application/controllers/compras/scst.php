@@ -1713,14 +1713,27 @@ class Scst extends Controller {
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait(){
-		$id = $this->uri->segment(4);
+		$id = intval($this->uri->segment(4));
 		if ($id == false ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM scst");
+			$id = $this->datasis->dameval('SELECT MAX(id) FROM scst');
 		}
 		if(empty($id)) return '';
-		$control = $this->datasis->dameval("SELECT control FROM scst WHERE id=$id");
+		$control = $this->datasis->dameval("SELECT control FROM scst WHERE id=${id}");
+
+		$dbcontrol = $this->db->escape($control);
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itscst');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
+
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itscst WHERE control='$control' ";
+		$mSQL    = "SELECT * FROM itscst WHERE control=${dbcontrol}  ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
@@ -1732,35 +1745,37 @@ class Scst extends Controller {
 	function setdatait(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
+		$id     = intval($this->input->post('id'));
 		$data   = $_POST;
 		$check  = 0;
+
+		if(empty($id)) return false;
 
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			//if(false == empty($data)){
-			//	$this->db->insert('scst', $data);
-			//	echo "Registro Agregado";
-			//	logusu('SCST',"Registro ????? INCLUIDO");
-			//} else
-			echo "Fallo Agregado!!!";
+			echo 'Deshabilitado';
+		}elseif($oper == 'edit'){
+			if($this->datasis->sidapuede('SCST','2')){
+				echo 'No tiene acceso a modificar';
+				return false;
+			}
 
-		} elseif($oper == 'edit') {
+			$posibles=array('nfiscal','fafecta','vence','serie');
+			foreach($data as $ind=>$val){
+				if(!in_array($ind,$posibles)){
+					echo 'Campo no permitido ('.$ind.')';
+					return false;
+				}
+			}
+
 			$this->db->where('id', $id);
 			$this->db->update('itscst', $data);
-			logusu('SCST',"Registro $id MODIFICADO");
-			echo "Registro Modificado";
+			logusu('SCST',"Registro ${id} MODIFICADO");
+			echo 'Registro Modificado';
 
 		} elseif($oper == 'del') {
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM scst WHERE id='$id' ");
-			//if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			//} else {
-			//	$this->db->simple_query("DELETE FROM scst WHERE id=$id ");
-			//	logusu('SCST',"Registro ????? ELIMINADO");
-			//	echo "Registro Eliminado";
-			//}
+			echo 'Deshabilitado';
 		};
 
 	}

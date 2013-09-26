@@ -854,8 +854,19 @@ class Ords extends Controller {
 		$numero  = $this->datasis->dameval("SELECT numero FROM ords WHERE id=${dbid}");
 		$dbnumero= $this->db->escape($numero);
 
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itords');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
+
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itords WHERE numero=${dbnumero}";
+		$mSQL    = "SELECT * FROM itords WHERE numero=${dbnumero} ${orderby}";
 		$response= $grid->getDataSimple($mSQL);
 		$rs      = $grid->jsonresult( $response);
 		echo $rs;

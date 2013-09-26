@@ -6,7 +6,6 @@ class Ordc extends Controller {
 	var $tits    = 'Orden de Compras';
 	var $url     = 'compras/ordc/';
 
-
 	function Ordc(){
 		parent::Controller();
 		$this->load->library('rapyd');
@@ -15,11 +14,7 @@ class Ordc extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('ordc','id') ) {
-			$this->db->simple_query('ALTER TABLE ordc DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE ordc ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE ordc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		$this->datasis->modintramenu( 950, 650, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -1133,12 +1128,26 @@ class Ordc extends Controller {
 	*/
 	function getdatait(){
 		$id = $this->uri->segment(4);
-		if ($id == false ){
+		if($id == false){
 			$id = $this->datasis->dameval("SELECT MAX(id) FROM ordc");
 		}
-		$numero = $this->datasis->dameval("SELECT numero FROM ordc WHERE id=$id");
+		$dbid=intval($id);
+		$numero  = $this->datasis->dameval("SELECT numero FROM ordc WHERE id=${dbid}");
+		$dbnumero= $this->db->escape($numero);
+
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itordc');
+			if(in_array($sidx,$campos)){
+				$sidx = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
+
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itordc WHERE numero='$numero' ORDER BY codigo ";
+		$mSQL    = "SELECT * FROM itordc WHERE numero=${dbnumero} ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
@@ -1644,5 +1653,14 @@ class Ordc extends Controller {
 			$salida .= "</table>";
 		}
 		echo $salida;
+	}
+
+	function instalar(){
+		$campos=$this->db->list_fields('ordc');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE ordc DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE ordc ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE ordc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
 	}
 }

@@ -1133,13 +1133,27 @@ class Otin extends Controller {
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait( $id = 0 ){
-		if ($id === 0 ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM otin");
+		if($id == 0 ){
+			$id = $this->datasis->dameval('SELECT MAX(id) AS id FROM otin');
 		}
-		if(empty($id)) return "";
-		$numero   = $this->datasis->dameval("SELECT numero FROM otin WHERE id=$id");
+		$dbid = intval($id);
+		if(empty($dbid)) return '';
+		$numero   = $this->datasis->dameval("SELECT numero FROM otin WHERE id=${dbid}");
+		$dbnumero = $this->db->escape($numero);
+
+		$orderby= '';
+		$sidx=$this->input->post('sidx');
+		if($sidx){
+			$campos = $this->db->list_fields('itotin');
+			if(in_array($sidx,$campos)){
+				$sidx   = trim($sidx);
+				$sord   = $this->input->post('sord');
+				$orderby= "ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
+			}
+		}
+
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itotin WHERE numero='$numero' ";
+		$mSQL    = "SELECT * FROM itotin WHERE numero=${dbnumero} ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
