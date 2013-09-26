@@ -21,10 +21,9 @@ class Scli extends validaciones {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
+	//******************************************************************
 	//Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -39,9 +38,11 @@ class Scli extends validaciones {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'edocta' , 'img'=>'images/pdf_logo.gif', 'alt' => 'Formato PDF'       , 'label'=>'Estado de Cuenta' ));
-		$grid->wbotonadd(array('id'=>'editacr', 'img'=>'images/check.png'    , 'alt' => 'Cr&eacute;dito'    , 'label'=>'L&iacute;mite de Cr&eacute;dito'));
-		$grid->wbotonadd(array('id'=>'gciud'  , 'img'=>'images/star.png'    , 'alt' => 'Gestionar ciudades', 'label'=>'Ciudades'));
+		$grid->wbotonadd(array('id'=>'edocta',  'img'=>'images/pdf_logo.gif', 'alt' => 'Formato PDF',        'label'=>'Estado de Cuenta' ));
+		$grid->wbotonadd(array('id'=>'editacr', 'img'=>'images/check.png',    'alt' => 'Cr&eacute;dito',     'label'=>'L&iacute;mite de Cr&eacute;dito'));
+		$grid->wbotonadd(array('id'=>'gciud',   'img'=>'images/star.png',     'alt' => 'Gestionar ciudades', 'label'=>'Ciudades'));
+		$grid->wbotonadd(array('id'=>'gclave',  'img'=>'images/candado.png',  'alt' => 'Clave para acceso',  'label'=>'Clave'));
+
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -119,7 +120,7 @@ class Scli extends validaciones {
 		jQuery("#edocta").click( function(){
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("#'.$ngrid.'").jqGrid(\'getRowData\',id);
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
 				'.$this->datasis->jwinopen(site_url('reportes/ver/SMOVECU/SCLI/').'/\'+ret.cliente').';
 			} else { $.prompt("<h1>Por favor Seleccione un Cliente</h1>");}
 		});
@@ -135,10 +136,29 @@ class Scli extends validaciones {
 				$.post("'.site_url('ventas/scli/creditoedit/modify').'/"+id, function(data){
 					$("#fedita").html("");
 					$("#feditcr").html(data);
+					$("#feditcr").dialog({height: 400, width: 650}); 
 					$("#feditcr").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		});';
+
+		// Clave de Acceso
+		$bodyscript .= '
+		jQuery("#gclave").click( function(){
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret    = $("'.$ngrid.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url('ventas/scli/claveedit/modify').'/"+id, function(data){
+					$("#fedita").html("");
+					$("#feditcr").html(data);
+					$("#feditcr").dialog({height: 250, width: 400}); 
+					$("#feditcr").dialog( "open" );
+				});
+			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+		});';
+
+
 
 		$bodyscript .= '
 		function scliadd() {
@@ -1106,7 +1126,7 @@ class Scli extends validaciones {
 				$.ajax({
 					url: "'.base_url().$this->url.'resumen/"+id,
 					success: function(msg){
-						msg += "<img src=\''.site_url($this->url.'vcard').'/'.'"+id+"\' alt=\'vCard\' height=\'200\' width=\'200\'> ";
+						msg += "<center><img src=\''.site_url($this->url.'vcard').'/'.'"+id+"\' alt=\'vCard\' height=\'160\' width=\'160\'></center>";
 						$("#ladicional").html(msg);
 					}
 				});
@@ -2353,22 +2373,16 @@ function chrif(rif){
 		//$this->pi18n->cargar('scli','dataedit');
 		$this->rapyd->load('dataedit');
 		$this->rapyd->uri->keep_persistence();
-		$persistence = $this->rapyd->session->get_persistence('ventas/scli/filteredgrid', $this->rapyd->uri->gfid);
-		$back= (isset($persistence['back_uri'])) ? $persistence['back_uri'] : site_url('ventas/scli/filteredgrid');
 
-		$edit = new DataEdit('Clientes', 'scli');
+		$edit = new DataEdit('Cambio/Asignacion de Clave de Acceso', 'scli');
 		$id=$edit->_dataobject->pk['id'];
-		$edit->back_url    = $back;
-		$edit->back_save   = true;
-		$edit->back_cancel = true;
-		$edit->back_cancel_save=true;
 
 		$edit->cliente = new inputField('Cliente', 'cliente');
 		$edit->cliente->mode = 'autohide';
 		$edit->cliente->when=array('show','modify');
+		
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->mode = 'autohide';
-		$edit->nombre->in='cliente';
 		$edit->nombre->when=array('show','modify');
 
 		$edit->clave = new inputField('Clave', 'clave');
@@ -2376,15 +2390,14 @@ function chrif(rif){
 		$edit->clave->rule = 'matches[clave1]';
 		$edit->clave->when = array('modify');
 
-		$edit->clave1 = new inputField('Confirmaci&oacute;n de clave', 'clave1');
+		$edit->clave1 = new inputField('Confirmaci&oacute;n', 'clave1');
 		$edit->clave1->type    = 'password';
 		$edit->clave1->db_name = 'clave';
 		$edit->clave1->when    = array('modify');
 
-		$edit->clave->size      = $edit->clave1->size = 8;
+		$edit->clave->size      = $edit->clave1->size = 10;
 		$edit->clave->maxlength = $edit->clave1->maxlength = 12;
 
-		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 		$edit->build();
 
 		$this->rapyd->jquery[]="$('#df1').submit(function(){
@@ -2403,15 +2416,14 @@ function chrif(rif){
 			}
 			return true;
 		});";
+
 		$data['content'] = $edit->output;
-		$data['title']   = heading('Asignaci&oacute;n de contrase&ntilde;a a cliente');
-		$data['head']    = $this->rapyd->get_head().script('plugins/jquery.crypt.js');
-		$this->load->view('view_ventanas', $data);
+		$this->load->view('jqgrid/ventanajq', $data);
+
 	}
 
 	//Permite crear un clientes desde otras interfaces
 	function creascli(){
-		//print_r($_POST);
 		$rifci=$this->input->post('rifci');
 		if(preg_match('/[VEJG][0-9]{9}$/',$rifci)>0){
 			$_POST['tiva']='C';
