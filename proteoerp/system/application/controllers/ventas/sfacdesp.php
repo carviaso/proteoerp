@@ -69,11 +69,12 @@ class sfacdesp extends Controller {
 		$filter->fechad->db_name = 'a.fecha';
 		$filter->fechad->size = 12;
 		$filter->fechad->operator = '=';
-		$filter->fechad->rule='required';
+		$filter->fechad->rule='required|chfecha';
 		$filter->fechad->insertValue=date('Y-m-d');
 
 		$filter->numero = new inputField('N&uacute;mero de factura', 'numero');
 		$filter->numero->db_name = 'a.numero';
+		$filter->numero->rule = 'existefac|callback_chnodesp';
 		$filter->numero->size = 20;
 
 		$action = "javascript:window.location='".site_url('ventas/sfacdesp/index')."'";
@@ -91,7 +92,7 @@ class sfacdesp extends Controller {
 				'name'    => 'despacha[]',
 				'id'      => $numero,
 				'value'   => $numero,
-				'title' => 'Tildar para marcar como despachada la factura y presionar el boton de "Despachar Facturas"',
+				'title' => 'Tildar para marcar como despachada la factura y presionar el boton de "Despachar Facturas Marcadas"',
 				'checked' => false);
 			return form_checkbox($data);
 		}
@@ -125,7 +126,7 @@ class sfacdesp extends Controller {
 			$grid->column('Nombre'       ,'nombre');
 			$grid->column('Total'        ,'<nformat><#total#></nformat>'   ,"align='right'");
 			$grid->column('Vendedor'     ,'(<#vd#>) <#vendedor#>'          ,"align='center'");
-			$grid->column('Despachado'   ,'<descheck><#numero#></descheck>',"align='center'");
+			$grid->column('Despachar'    ,'<descheck><#numero#></descheck>',"align='center'");
 
 			$action = "javascript:if(confirm('Seguro que deseas marcar despachadas las facturas seleccionadas?')){ $('#adespacha').submit(); }";
 			$grid->button('btn_submit', 'Despachar Facturas Marcadas', $action, 'BR');
@@ -133,7 +134,10 @@ class sfacdesp extends Controller {
 			$grid->build();
 
 			$cana=$grid->recordCount;
+			$js='';
 		}else{
+			if($this->rapyd->uri->is_set('search'))
+				$filter->build_form();
 			$cana=0;
 		}
 
@@ -155,6 +159,7 @@ class sfacdesp extends Controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
+	//Verifica si la factura fue despachada
 	function chdespacha($numero){
 		$dbnumero = $this->db->escape($numero);
 		$fdespacha= $this->datasis->dameval("SELECT fdespacha FROM sfac WHERE numero=${dbnumero}");
@@ -163,6 +168,17 @@ class sfacdesp extends Controller {
 			return false;
 		}
 		return true;
+	}
+
+	//Verifica si la factura no fue despachada
+	function chnodesp($numero){
+		$dbnumero = $this->db->escape($numero);
+		$fdespacha= $this->datasis->dameval("SELECT fdespacha FROM sfac WHERE numero=${dbnumero}");
+		if(empty($fdespacha)){
+			return true;
+		}
+		$this->validation->set_message('chnodesp', "La factura ${numero} ya esta marcada como despachada el día ".dbdate_to_human($fdespacha).".");
+		return false;
 	}
 
 	function filteredrev(){
@@ -231,7 +247,7 @@ class sfacdesp extends Controller {
 			$mSQL="UPDATE sfac SET fdespacha=NULL, udespacha=NULL WHERE numero=${dbnumero} AND tipo_doc='F'";
 			$this->db->simple_query($mSQL);
 			logusu('SFACDESP',"REVERSO DE DESPACHO EXPRESS FACTURA ${numero}");
-			$rt='Despacho de factura '.$numero.' reversado.';
+			$rt='<p style="text-align:center;color:green;font-weight:bold;">Despacho Express de factura '.$numero.' reversado.</p>';
 		}
 
 		$data['content'] =  '<table width="100%"><tr><td>'.img(array('src'=>'images/despachoexp3.png','align'=>'left')).'</td><td>'.$filter->output.$rt.'</td></tr></table>';
@@ -267,7 +283,7 @@ class sfacdesp extends Controller {
 		$filter->db->where('MID(a.numero,1,1) <> "_"');
 		$filter->db->where('a.referen <> "P"');
 
-		$filter->db->orderby("a.fecha DESC, a.numero");
+		$filter->db->orderby('a.fecha DESC, a.numero');
 		$filter->db->_escape_char='';
 		$filter->db->_protect_identifiers=false;
 
@@ -286,9 +302,9 @@ class sfacdesp extends Controller {
 		$filter->fechah->group = $filter->fechad->group ='Rango de fecha';
 		$filter->fechah->size  = $filter->fechad->size = 12;
 
-		$filter->numero = new inputField('N&uacute;mero de factura', 'numero');
-		$filter->numero->db_name='a.numero';
-		$filter->numero->size = 20;
+		//$filter->numero = new inputField('N&uacute;mero de factura', 'numero');
+		//$filter->numero->db_name='a.numero';
+		//$filter->numero->size = 20;
 
 		$action = "javascript:window.location='".site_url('ventas/sfacdesp/index')."'";
 		$filter->button('btn_regresa', 'Regresar', $action, 'BR');
@@ -305,7 +321,7 @@ class sfacdesp extends Controller {
 			  'name'    => 'despacha[]',
 			  'id'      => $numero,
 			  'value'   => $numero,
-			  'title' => 'Tildar para marcar como despachada la factura y presionar el boton de "Despachar Facturas"',
+			  'title' => 'Tildar para marcar como despachada la factura y presionar el boton de "Despachar Facturas Marcadas"',
 			  'checked' => false);
 			return form_checkbox($data);
 		}
@@ -323,7 +339,7 @@ class sfacdesp extends Controller {
 			$grid->column('Nombre'       ,'nombre');
 			$grid->column('Total'        ,'<nformat><#total#></nformat>',"align=right");
 			$grid->column('Vendedor'     ,'vd',"align=center");
-			$grid->column('Despachado'   ,'<descheck><#numero#></descheck>',"align=center");
+			$grid->column('Despachar'    ,'<descheck><#numero#></descheck>',"align=center");
 
 			$action = "javascript:$('#aexcel').submit();";
 			$grid->button('btn_excel', 'Descargar a Excel', $action, 'BL');
@@ -339,6 +355,8 @@ class sfacdesp extends Controller {
 			$mSQL     = $this->encrypt->encode($consulta);
 			$campo="<form id='aexcel' action='/../../proteoerp/xlsauto/repoauto2/' method='post'><input size='100' type='hidden' name='mSQL' value='${mSQL}'></form>";
 		}else{
+			if($this->rapyd->uri->is_set('search'))
+				$filter->build_form();
 			$campos='';
 			$cana=0;
 		}
