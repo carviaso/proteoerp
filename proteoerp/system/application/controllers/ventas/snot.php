@@ -1064,6 +1064,7 @@ class Snot extends Controller {
 			$dbfactura=$this->db->escape($factura);
 
 			$facturado= $this->datasis->dameval("SELECT SUM(cana) AS cana FROM sitems WHERE tipoa='F' AND numa=${dbfactura} AND codigoa=${dbcodigo}");
+			$dexpress = $this->datasis->dameval("SELECT SUM(cana) AS cana FROM sitems WHERE tipoa='F' AND numa=${dbfactura} AND codigoa=${dbcodigo} AND  despacha='S'");
 			$entregado= $this->datasis->dameval("SELECT SUM(IF(b.tipo='D',-1,1)*a.entrega) AS cana FROM itsnot AS a JOIN snot AS b ON a.numero=b.numero WHERE b.factura=${dbfactura} AND a.codigo=${dbcodigo}");
 			$devuelto = $this->datasis->dameval("SELECT SUM(a.cana) AS cana FROM sitems AS a JOIN sfac AS b ON a.numa=b.numero AND a.tipoa=b.tipo_doc WHERE b.tipo_doc='D' AND b.factura=${dbfactura} AND a.codigoa=${dbcodigo}");
 
@@ -1071,11 +1072,13 @@ class Snot extends Controller {
 				$this->validation->set_message('chitems', 'El articulo '.$codigo.' no pertenece a la factura '.$factura.'.');
 				return false;
 			}
+
+			if(empty($dexpress)) { $dexpress=0;  }
 			if(empty($entregado)){ $entregado=0; }
 			if(empty($devuelto)) { $devuelto =0; }
 			if(empty($val))      { $val=0;       }
 
-			$saldo    = $facturado-$entregado-$devuelto;
+			$saldo    = $facturado-$entregado-$devuelto-$dexpress;
 			if($val > $saldo){
 				$this->validation->set_message('chitems', 'Esta intentado entregar mas unidades de articulo '.$codigo.' de las que corresponde ( Max. '.($saldo).').');
 				return false;

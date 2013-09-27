@@ -256,7 +256,7 @@ border-bottom-right-radius:5px;
 							$campo=$cols['campo'];
 							if(in_array($campo,$this->totalizar)){ //se verifica si la columna fue mandada a totalizar
 								//----se escribe los totales de grupos----------------------------
-								echo '<td style=\'text-align:'.$aalign[$campo].';border-top-style: solid;border-width:1px;border-color:#000000;\'>'.$stotal[$u][$campo].'</td>';
+								echo '<td style=\'text-align:'.$aalign[$campo].';border-top-style: solid;border-width:1px;border-color:#000000;\'>'.nformat($stotal[$u][$campo]).'</td>';
 							}else{
 								echo '<td>&nbsp;</td>';
 							}
@@ -344,7 +344,7 @@ border-bottom-right-radius:5px;
 							$campo=$cols['campo'];
 							if(in_array($campo,$this->totalizar))
 								//--------escritura totales finales--------------
-								echo '<td>'.$rstotal[$u][$campo].'</td>';
+								echo '<td>'.nformat($rstotal[$u][$campo]).'</td>';
 							else
 								echo '<td></td>';
 						}
@@ -361,7 +361,7 @@ border-bottom-right-radius:5px;
 			foreach($this->cols AS $h=>$cols){
 				$campo=$cols['campo'];
 				if(in_array($campo,$this->totalizar)){
-					echo '<td style="text-align:right;">'.$rgtotal[$campo].'</td>';
+					echo '<td style="text-align:right;">'.nformat($rgtotal[$campo]).'</td>';
 				}else{
 					echo '<td></td>';
 				}
