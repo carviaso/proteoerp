@@ -128,7 +128,7 @@ class sfacdesp extends Controller {
 			$grid->column('Despachado'   ,'<descheck><#numero#></descheck>',"align='center'");
 
 			$action = "javascript:if(confirm('Seguro que deseas marcar despachadas las facturas seleccionadas?')){ $('#adespacha').submit(); }";
-			$grid->button('btn_submit', 'Despachar Facturas', $action, 'BR');
+			$grid->button('btn_submit', 'Despachar Facturas Marcadas', $action, 'BR');
 
 			$grid->build();
 
@@ -329,7 +329,7 @@ class sfacdesp extends Controller {
 			$grid->button('btn_excel', 'Descargar a Excel', $action, 'BL');
 
 			$action = "javascript:if(confirm('Seguro que deseas marcar despachadas las facturas seleccionadas?')){ $('#adespacha').submit(); }";
-			$grid->button('btn_submit', 'Despachar Facturas', $action, 'BR');
+			$grid->button('btn_submit', 'Despachar Facturas  Marcadas', $action, 'BR');
 
 			$grid->build();
 			//echo $grid->db->last_query();
