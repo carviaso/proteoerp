@@ -460,7 +460,7 @@ class XLSReporte extends writeexcel_workbookbig  {
 			$this->worksheet->write_number($f, $c, $campo);
 		}elseif(in_array($tipo,$this->wstring)){
 			//echo "\n\n${tipo} es una cadena\n\n";
-			$this->worksheet->write_string($f, $c, $campo);
+			$this->worksheet->write_string($f, $c, trim($campo));
 		}elseif(in_array($tipo,$this->wdate)){
 			//echo "\n\n${tipo} es una fecha\n\n";
 			if(function_exists('dbdate_to_human')){
@@ -469,7 +469,11 @@ class XLSReporte extends writeexcel_workbookbig  {
 			$this->worksheet->write_string($f, $c, $campo);
 		}else{
 			//echo "\n\n${tipo} no se que es\n\n";
-			$this->worksheet->write_string($f, $c, $campo);
+			if(preg_match('@(^[1-9][0-9]*(\.[0-9]+)?$)|(^0?\.[0-9]+$)@i',$campo)>0){
+				$this->worksheet->write_number($f, $c, $campo);
+			}else{
+				$this->worksheet->write_string($f, $c, trim($campo));
+			}
 			//$this->worksheet->write($f, $c, $campo);
 		}
 	}

@@ -148,7 +148,7 @@ class XLSXReporte {
 			$this->Header();//Encabezado
 		//------------campos tabla-------------------------------
 		foreach($this->cols AS $cl=>$cols){
-			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($cl,$this->ii,$this->utf8($cols['titulo']));
+			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($cl,$this->ii,$cols['titulo']);
 		}
 		$this->ii=$this->ii+2;
 		//----------fin campos tabla-----------------------------
@@ -441,7 +441,7 @@ class XLSXReporte {
 		if(isset($this->DBfieldsType[$dbcampo])){
 			$tipo=$this->DBfieldsType[$dbcampo];
 		}else{
-			$tipo='string';
+			$tipo='';
 		}
 
 		if(in_array($tipo,$this->wnumber)){
@@ -461,9 +461,14 @@ class XLSXReporte {
 			}
 			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$campo,$xtypo);
 		}else{
-			$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
-			$campo=trim($campo);
-			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$this->utf8($campo),$xtypo);
+			if(preg_match('@(^[1-9][0-9]*(\.[0-9]+)?$)|(^0?\.[0-9]+$)@i',$campo)>0){
+				$xtypo = PHPExcel_Cell_DataType::TYPE_NUMERIC;
+				$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$campo,$xtypo);
+			}else{
+				$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
+				$campo=trim($campo);
+				$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$this->utf8($campo),$xtypo);
+			}
 		}
 	}
 
