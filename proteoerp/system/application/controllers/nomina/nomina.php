@@ -805,7 +805,7 @@ class Nomina extends Controller {
 
 
 	//******************************************************************
-	//  REGENRA LA NOMINA SIN BORRARLA
+	//  REGENERA LA NOMINA SIN BORRARLA
 	//
 	function nomirege( $nomina ) {
 
@@ -887,10 +887,10 @@ class Nomina extends Controller {
 				$data["tipo_ref"] = 'GA';
 				$data["num_ref"]  = $nomina;
 				$data["observa1"] = $row->descrip;
-				$data["observa2"] = $row->nomina;
+				$data["observa2"] = 'NOMINA';
 				$data["reteiva"]  = 0;
-				$data["codigo"]   = $row->nocon;
-				$data["descrip"]  = $row->nomina;
+				$data["codigo"]   = 'NOCON';
+				$data["descrip"]  = 'NOMINA';
 				$data["impuesto"] = 0;
 
 				$mSQL = "SELECT COUNT(*) FROM sprm WHERE transac='".$mTRANSAC."' AND cod_prv='".$row->ctaac."' AND tipo_doc='ND' AND fecha='".$row->fecha."' AND numero<>'".$nomina."'";
@@ -899,27 +899,23 @@ class Nomina extends Controller {
 					$mCONTROL = $this->datasis->fprox_numero("nsprm");
 					$mNOTADEB = $this->datasis->fprox_numero("num_nd");
 
-					$data["NUMERO"]  = $mNOTADEB;
-					$data["ABONOS"]  = 0;
-					$data["CONTROL"] = $mCONTROL;
+					$data["numero"]  = $mNOTADEB;
+					$data["abonos"]  = 0;
+					$data["control"] = $mCONTROL;
 
 					$this->db->insert('sprm', $data);
-					//mSQL := "INSERT INTO sprm SET "
-					//aVALORES := {}
-					//LLENASQL(@mSQL, @aVALORESs, aLISTA, mTRANSAC )
 				} else {
 					$mSQL = "SELECT numero, abonos, control, id FROM sprm WHERE transac='".$mTRANSAC."' AND cod_prv='".$row->ctaac."' AND tipo_doc='ND' AND fecha='".$row->fecha."'";
 					$mREG = $this->datasis->damereg($mSQL);
-					$data["NUMERO"]  = $mREG['numero'];
-					$data["ABONOS"]  = $mREG['abonos'];
-					$data["CONTROL"] = $mREG['control'];
+					$data["numero"]  = $mREG['numero'];
+					$data["abonos"]  = $mREG['abonos'];
+					$data["control"] = $mREG['control'];
 
 					$this->db->update('sprm', $data, "id=".$mREG['id']);
 				}
 				$this->db->query($mSQL);
 			}
 		}
-
 
 		$mSQL = "DELETE FROM sprm WHERE transac='".$mTRANSAC."' AND numero='".$nomina."'";
 		$this->db->query($mSQL);
@@ -929,308 +925,91 @@ class Nomina extends Controller {
 				FROM gser WHERE tipo_doc='GA' AND numero='".$nomina."' ";
 		$this->db->query($mSQL);
 
+		// PRESTAMOS
+		$mSQL= "SELECT 
+					c.cod_cli, c.nombre, c.tipo_doc, c.numero, c.fecha, a.fechap, 
+					a.codigo, b.cuota, a.valor, a.estampa, a.usuario, a.hora, a.transac,
+					IF(c.monto-c.abonos-b.cuota>0,b.cuota,c.monto-c.abonos) cuotac, c.monto 
+				FROM nomina a
+				JOIN pres   b ON a.codigo=b.codigo
+				JOIN smov   c ON b.cod_cli=c.cod_cli AND b.tipo_doc=c.tipo_doc AND b.numero=c.numero 
+				AND c.monto<>c.abonos
+				WHERE a.concepto='PRES' AND a.numero='".$nomina."' AND b.cuota = abs(a.valor)";
+		
+		$query = $this->db->query($mSQL);
+		
+		if ($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+				//Busca si ya existe
+				$mSQL = "SELECT COUNT(*) FROM smov WHERE cod_cli='".$row->cod_cli."' AND tipo_doc='NC' AND transac='".$mTRANSAC."' AND monto=".abs($row->valor);
+				
+				if ( $this->datasis->dameval($mSQL) == 0 ) { 
+					$mCONTROL = $this->datasis->fprox_numero("nsmov");
+					$mNOTACRE = $this->datasis->fprox_numero("nccli");
+					
+					$data = array();
+					$data["cod_cli"]  = $row->cod_cli;
+					$data["nombre"]   = $row->nombre;
+					$data["tipo_doc"] = 'NC';
+					$data["numero"]   = $mNOTACRE;
+					$data["fecha"]    = $row->fechap;
+					$data["monto"]    = abs($row->valor);
+					$data["impuesto"] = 0;
+					$data["vence"]    = $row->fechap;
+					$data["abonos"]   = abs($row->valor);
+					$data["tipo_ref"] = 'GA';
+					$data["num_ref"]  = $nomina;
+					$data["observa1"] = 'PAGO A '.$row->tipo_doc.$row->numero;
+					$data["observa2"] = 'POR DESCUENTO DE NOMINA';
+					$data["control"]  = $mCONTROL;
+					$data["codigo"]   = 'NOCON';
+					$data["descrip"]  = 'NOMINA';
+					$data["transac"]  = $mTRANSAC;
+					$data["estampa"]  = $row->estampa;
+					$data["hora"]     = $row->hora;
+					$data["usuario"]  = $row->usuario;
+					$this->db->insert('smov', $data );
+	
+					// ACTUALIZA EL DOCUMENTO ORIGEN
+					$mSQL = "
+						UPDATE smov SET abonos=abonos+".abs($row->valor)."
+						WHERE tipo_doc='$row->tipo_doc' AND numero='".$row->numero."' 
+						AND cod_cli='".$row->cod_cli."' AND fecha=".$row->fecha." LIMIT 1";
+					$this->db->query($mSQL);
 
-/*
-mPRESTAMO := {}
-
-// PRESTAMOS
-mSQL := "SELECT b.cod_cli, b.nombre, b.tipo_doc, b.numero, b.fecha, a.codigo, a.nombre, "
-mSQL += "IF(b.monto-b.abonos-a.cuota>0,a.cuota,b.monto-b.abonos) cuota, b.monto "
-mSQL += "FROM pres a JOIN smov b ON a.cod_cli=b.cod_cli AND a.tipo_doc=b.tipo_doc AND a.numero=b.numero "
-mSQL += "WHERE a.codigo IN (SELECT codigo FROM prenom GROUP BY codigo) "
-mSQL += "AND b.monto>b.abonos AND a.apartir<="+DTOS(XFECHA)+" "
-
-mSQL := "SELECT * FROM nomina a JOIN pers b ON a.codigo=b.codigo LEFT JOIN smov c ON a.transac=c.transac AND b.enlace=c.cod_cli AND ABS(a.valor)=c.monto "
-mSQL += "WHERE a.concepto='PRES' AND a.numero='"+mNOMINA+"' AND a.valor<>0 AND c.cod_cli IS NULL"
-
-mC := DAMECUR(mSQL)
-DO WHILE !mC:EoF()
-	mCONTROL := PROX_SQL("nsmov")
-	mNOTACRE := PROX_SQL("nccli")
-	aLISTA := {}
-	AADD(aLISTA, { "COD_CLI",  mC:FieldGet('COD_CLI') } )
-	AADD(aLISTA, { "NOMBRE",   mC:FieldGet('NOMBRE') } )
-	AADD(aLISTA, { "TIPO_DOC", 'NC' } )
-	AADD(aLISTA, { "NUMERO",   mNOTACRE } )
-	AADD(aLISTA, { "FECHA",    XFECHAP } )
-	AADD(aLISTA, { "MONTO",    ABS(mC:FieldGet('CUOTA')) } )
-	AADD(aLISTA, { "IMPUESTO", 0 } )
-	AADD(aLISTA, { "VENCE",    XFECHAP } )
-	AADD(aLISTA, { "ABONOS",   ABS(mC:FieldGet('CUOTA')) } )
-	AADD(aLISTA, { "TIPO_REF", 'GA' } )
-	AADD(aLISTA, { "NUM_REF",  mNOMINA } )
-	AADD(aLISTA, { "OBSERVA1", 'PAGO A '+mC:FieldGet('TIPO_DOC')+mC:FieldGet('NUMERO') } )
-	AADD(aLISTA, { "OBSERVA2", 'POR DESCUENTO DE NOMINA' } )
-	AADD(aLISTA, { "CONTROL",  mCONTROL } )
-	AADD(aLISTA, { "CODIGO",   'NOCON' } )
-	AADD(aLISTA, { "DESCRIP",  'NOMINA' } )
-
-	mSQL := "INSERT INTO smov SET "
-	aVALORES := {}
-	LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-	EJECUTASQL(mSQL,aVALORES)
-
-	// ACTUALIZA EL DOCUMENTO ORIGEN
-
-	mSQL := "UPDATE smov SET abonos=abonos+"+STR(ABS(mC:FieldGet('CUOTA')))
-	mSQL += " WHERE tipo_doc='"+mC:FieldGet('TIPO_DOC')+"' "
-	mSQL += " AND numero='"+mC:FieldGet('NUMERO')+"' "
-	mSQL += " AND cod_cli='"+mC:FieldGet('COD_CLI')+"' AND fecha="+DTOS(mC:FieldGet('FECHA'))+" LIMIT 1"
-
-	EJECUTASQL(mSQL) //, { ABS(mC:FieldGet('CUOTA')),mC:FieldGet('TIPO_DOC'), mC:FieldGet('NUMERO'), mC:FieldGet('COD_CLI'), mC:FieldGet('FECHA')  })
-
-	// CARGA EL MOVIMIENTO EN ITCCLI
-	mSQL := "INSERT INTO itccli (numccli, tipoccli, cod_cli, tipo_doc, numero, fecha, monto, abono, transac, estampa, hora, usuario ) "
-	mSQL += "VALUES             (  ?,       'NC',    ?,       ?,        ?,      ?,     ?,     ?,      ?,     now(),     ?,     ?     )"
-	EJECUTASQL(mSQL, { mNOTACRE, mC:FieldGet('COD_CLI'), mC:FieldGet('TIPO_DOC'), mC:FieldGet('NUMERO'), mC:FieldGet('FECHA'),  mC:FieldGet('MONTO'), ABS(mC:FieldGet('CUOTA')), mTRANSAC, TIME(), ms_CODIGO })
-	AADD(mPRESTAMO, { mC:FieldGet('CODIGO'), mC:FieldGet('NOMBRE'), mC:FieldGet('CUOTA')  } )
-
-	mC:Skip()
-ENDDO
-mC:Destroy()
-*/
-
-			logusu('NOMI',"NOMINA $nomina REGENERADA");
-
-			$rt=array(
-				'status' =>'A',
-				'mensaje'=>'NOMINA REGENERADA '.$nomina,
-				'pk'     => $nomina
-			);
-			echo json_encode($rt);
-
-
-	}
-
-
-
-
-/*
-	function dataedit(){
-		$this->rapyd->load('dataedit');
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});
-		';
-
-		$edit = new DataEdit($this->tits, 'nomina');
-
-		$edit->script($script,'modify');
-		$edit->script($script,'create');
-		$edit->on_save_redirect=false;
-
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
-		$edit->script($script,'create');
-
-		$edit->script($script,'modify');
-
-		$edit->post_process('insert','_post_insert');
-		$edit->post_process('update','_post_update');
-		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
-
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-		});		';
-		$edit->script($script,'create');
-		$edit->script($script,'modify');
-
-		$edit->numero = new inputField('Numero','numero');
-		$edit->numero->rule          = '';
-		$edit->numero->size          = 10;
-		$edit->numero->maxlength     =  8;
-
-		$edit->frecuencia = new inputField('Frecuencia','frecuencia');
-		$edit->frecuencia->rule      = '';
-		$edit->frecuencia->size      =  3;
-		$edit->frecuencia->maxlength =  1;
-
-		$edit->contrato = new inputField('Contrato','contrato');
-		$edit->contrato->rule        = '';
-		$edit->contrato->size        = 10;
-		$edit->contrato->maxlength   =  8;
-
-		$edit->depto = new inputField('Depto','depto');
-		$edit->depto->rule           = '';
-		$edit->depto->size           = 10;
-		$edit->depto->maxlength      =  8;
-
-		$edit->codigo = new inputField('Codigo','codigo');
-		$edit->codigo->rule          = '';
-		$edit->codigo->size          = 17;
-		$edit->codigo->maxlength     = 15;
-
-		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule          = '';
-		$edit->nombre->size          = 32;
-		$edit->nombre->maxlength     = 30;
-
-		$edit->concepto = new inputField('Concepto','concepto');
-		$edit->concepto->rule        = '';
-		$edit->concepto->size        =  6;
-		$edit->concepto->maxlength   =  4;
-
-		$edit->tipo = new inputField('Tipo','tipo');
-		$edit->tipo->rule            = '';
-		$edit->tipo->size            =  3;
-		$edit->tipo->maxlength       =  1;
-
-		$edit->descrip = new inputField('Descrip','descrip');
-		$edit->descrip->rule         = '';
-		$edit->descrip->size         = 37;
-		$edit->descrip->maxlength    = 35;
-
-		$edit->grupo = new inputField('Grupo','grupo');
-		$edit->grupo->rule='';
-		$edit->grupo->size =6;
-		$edit->grupo->maxlength =4;
-
-		$edit->formula = new inputField('Formula','formula');
-		$edit->formula->rule='';
-		$edit->formula->size =122;
-		$edit->formula->maxlength =120;
-
-		$edit->monto = new inputField('Monto','monto');
-		$edit->monto->rule='';
-		$edit->monto->size =10;
-		$edit->monto->maxlength =8;
-
-		$edit->fecha = new dateonlyField('Fecha','fecha');
-		$edit->fecha->rule='chfecha';
-		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
-
-		$edit->cuota = new inputField('Cuota','cuota');
-		$edit->cuota->rule='integer';
-		$edit->cuota->css_class='inputonlynum';
-		$edit->cuota->size =13;
-		$edit->cuota->maxlength =11;
-
-		$edit->cuotat = new inputField('Cuotat','cuotat');
-		$edit->cuotat->rule='integer';
-		$edit->cuotat->css_class='inputonlynum';
-		$edit->cuotat->size =13;
-		$edit->cuotat->maxlength =11;
-
-		$edit->valor = new inputField('Valor','valor');
-		$edit->valor->rule='numeric';
-		$edit->valor->css_class='inputnum';
-		$edit->valor->size =19;
-		$edit->valor->maxlength =17;
-
-		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
-
-		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-
-		$edit->transac = new inputField('Transac','transac');
-		$edit->transac->rule='';
-		$edit->transac->size =10;
-		$edit->transac->maxlength =8;
-
-		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
-
-		$edit->fechap = new dateonlyField('Fechap','fechap');
-		$edit->fechap->rule='chfecha';
-		$edit->fechap->size =10;
-		$edit->fechap->maxlength =8;
-
-		$edit->trabaja = new inputField('Trabaja','trabaja');
-		$edit->trabaja->rule='';
-		$edit->trabaja->size =10;
-		$edit->trabaja->maxlength =8;
-
-		$edit->build();
-
-		if($edit->on_success()){
-			$rt=array(
-				'status' =>'A',
-				'mensaje'=>'Registro guardado',
-				'pk'     =>$edit->_dataobject->pk
-			);
-			echo json_encode($rt);
-		}else{
-			echo $edit->output;
+					// CARGA EL MOVIMIENTO EN ITCCLI
+					$data = array();
+					$data["numccli"]  = $mNOTACRE;
+					$data["tipoccli"] = 'NC'; 
+					$data["cod_cli"]  = $row->cod_cli; 
+					$data["tipo_doc"] = $row->tipo_doc; 
+					$data["numero"]   = $row->numero; 
+					$data["fecha"]    = $row->fecha;
+					$data["monto"]    = $row->monto; 
+					$data["abono"]    = abs($row->valor);
+					$data["transac"]  = $mTRANSAC;
+					$data["estampa"]  = $row->estampa;
+					$data["hora"]     = $row->hora;
+					$data["usuario"]  = $row->usuario;
+					$this->db->insert('itccli', $data );
+				}
+			}
 		}
+
+		logusu('NOMI',"NOMINA $nomina REGENERADA");
+
+		$rt=array(
+			'status' =>'A',
+			'mensaje'=>'NOMINA REGENERADA '.$nomina,
+			'pk'     => $nomina
+		);
+		echo json_encode($rt);
+
+
 	}
-
-
-	function _pre_insert($do){
-		$do->error_message_ar['pre_ins']='';
-		return true;
-	}
-
-	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='';
-		return true;
-	}
-
-	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
-		return false;
-	}
-
-	function _post_insert($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
-	}
-
-	function _post_update($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
-	}
-
-	function _post_delete($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
-	}
-
-	function instalar(){
-		if (!$this->db->table_exists('nomina')) {
-			$mSQL="CREATE TABLE `nomina` (
-			  `numero` char(8) DEFAULT NULL,
-			  `frecuencia` char(1) DEFAULT NULL,
-			  `contrato` char(8) DEFAULT NULL,
-			  `depto` char(8) DEFAULT NULL,
-			  `codigo` char(15) NOT NULL DEFAULT '',
-			  `nombre` char(30) DEFAULT NULL,
-			  `concepto` char(4) NOT NULL DEFAULT '',
-			  `tipo` char(1) DEFAULT NULL,
-			  `descrip` char(35) DEFAULT NULL,
-			  `grupo` char(4) DEFAULT NULL,
-			  `formula` char(120) DEFAULT NULL,
-			  `monto` double DEFAULT NULL,
-			  `fecha` date DEFAULT NULL,
-			  `cuota` int(11) DEFAULT NULL,
-			  `cuotat` int(11) DEFAULT NULL,
-			  `valor` decimal(17,2) DEFAULT '0.00',
-			  `estampa` date DEFAULT NULL,
-			  `usuario` char(12) DEFAULT NULL,
-			  `transac` char(8) DEFAULT NULL,
-			  `hora` char(8) DEFAULT NULL,
-			  `fechap` date DEFAULT NULL,
-			  `trabaja` char(8) DEFAULT NULL,
-			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-			  PRIMARY KEY (`id`),
-			  KEY `numero` (`numero`),
-			  KEY `codigo` (`codigo`),
-			  KEY `concepto` (`concepto`),
-			  KEY `fecha` (`fecha`)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
-			$this->db->simple_query($mSQL);
-		}
-		//$campos=$this->db->list_fields('nomina');
-		//if(!in_array('<#campo#>',$campos)){ }
-	}
-
 
 
 /*
-
 	function dataedit(){
 		$this->rapyd->load("dataedit");
 		$edit = new DataEdit("clientes", "nomina");

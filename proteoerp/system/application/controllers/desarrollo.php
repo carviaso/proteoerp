@@ -659,7 +659,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 	//
 	//   Genera la seccion de filtro para el Crud
 	//
-	function genefilter($tabla=null,$s=true, $repo=false ){
+	function genefilter( $tabla=null, $s=true, $repo=false ){
 		if (empty($tabla) OR (!$this->db->table_exists($tabla))) show_error('Tabla no existe o faltan parametros');
 		$mt1 = "\n\t";
 		$mt2 = "\n\t\t";
@@ -1049,10 +1049,8 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 
 	//******************************************************************
+	// Genera Crud para jqGrid
 	//
-	//  Genera Crud para jqGrid
-	//
-	//******************************************************************
 	function jqgrid(){
 		$db = $this->uri->segment(3);
 		if($db===false){
@@ -1060,9 +1058,43 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		}
 		$contro =$this->uri->segment(4);
 		if($contro===false){
-			$contro = 'CONTROLADOR';
+			$contro = '';
 		}
 
+		// Programa
+		$path = 'system/application/controllers/';
+		if ( is_file($path.$contro.'/'.$db.'.php') ) 
+			$columna = file_get_contents('system/application/controllers/'.$contro.'/'.$db.'.php');
+		else
+			$columna = $this->programa($db,$contro);
+
+		// Vistas
+		$path = 'system/application/views/';
+		if ( is_file($path.'view_'.$db.'.php') ) 
+			$vista = file_get_contents('system/application/views/view_'.$db.'.php');
+		else
+			$vista = $this->vista($db);
+
+		// Reportes
+		$reporte = $this->genefilter( $db, $s=false, $repo=false );
+
+		$data['programa'] = $columna.'?>';
+		$data['vista']    = $vista;
+		$data['reporte']  = $reporte;
+
+		$data['bd']       = $db;
+		$data['vbd']      = "view_".$db;
+		$data['rbd']      = $db;
+
+		$data['controlador'] = $contro;
+		$this->load->view('editorcm', $data);
+
+	}
+	
+	//******************************************************************
+	//
+	//
+	function programa( $db, $contro ){
 		$query = $this->db->query("DESCRIBE $db");
 		$i = 0;
 		if ($query->num_rows() > 0){
@@ -1083,7 +1115,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $this->jqgridclase($db, $contro);
 
 			$str .= $tab1.'//******************************************************************'."\n";
-			$str .= $tab1.'//Layout en la Ventana'."\n";
+			$str .= $tab1.'// Layout en la Ventana'."\n";
 			$str .= $tab1.'//'."\n";
 
 			$str .= $tab1.'function jqdatag(){'."\n\n";
@@ -1104,15 +1136,12 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $tab2.');'."\n";
 			$str .= $tab2.'$SouthPanel = $grid->SouthPanel($this->datasis->traevalor(\'TITULO1\'), $adic);'."\n\n";
 
-			//$str .= $tab2.'$SouthPanel = $grid->SouthPanel($this->datasis->traevalor("TITULO1"));'."\n\n";
-
 			$str .= $tab2.'$param[\'WestPanel\']   = $WestPanel;'."\n";
 			$str .= $tab2.'//$param[\'EastPanel\'] = $EastPanel;'."\n";
 			$str .= $tab2.'$param[\'SouthPanel\']  = $SouthPanel;'."\n";
 			$str .= $tab2.'$param[\'listados\']    = $this->datasis->listados(\''.strtoupper($db).'\', \'JQ\');'."\n";
 			$str .= $tab2.'$param[\'otros\']       = $this->datasis->otros(\''.strtoupper($db).'\', \'JQ\');'."\n";
 			$str .= $tab2.'$param[\'temas\']       = array(\'proteo\',\'darkness\',\'anexos1\');'."\n";
-			//$str .= $tab2.'$param[\'anexos\']    = \'anexos1\';'."\n";
 			$str .= $tab2.'$param[\'bodyscript\']  = $bodyscript;'."\n";
 			$str .= $tab2.'$param[\'tabs\']        = false;'."\n";
 			$str .= $tab2.'$param[\'encabeza\']    = $this->titp;'."\n";
@@ -1124,9 +1153,8 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			//**************************************
 			//  Funcion de Java del Body
 			//
-			//
 			$str .= $tab1.'//******************************************************************'."\n";
-			$str .= $tab1.'//Funciones de los Botones'."\n";
+			$str .= $tab1.'// Funciones de los Botones'."\n";
 			$str .= $tab1.'//'."\n";
 			$str .= $tab1.'function bodyscript( $grid0 ){'."\n";
 			$str .= $tab2.'$bodyscript = \'';
@@ -1242,18 +1270,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $tab7.'	$("#fedita").html(r);'."\n";
 			$str .= $tab7.'}'."\n";
 
-			//$str .= $tab6.'if ( r.length == 0 ) {'."\n";
-			//$str .= $tab7.'apprise("Registro Guardado");'."\n";
-			//$str .= $tab7.'$( "#fedita" ).dialog( "close" );'."\n";
-			//$str .= $tab7.'grid.trigger("reloadGrid");'."\n";
-			//$str .= $tab7.'\'.$this->datasis->jwinopen(site_url(\'formatos/ver/'.strtoupper($db).'\').\'/\\\'+res.id+\\\'/id\\\'\').\';'."\n";
-			//$str .= $tab7.'return true;'."\n";
-			//$str .= $tab6.'} else { '."\n";
-			//$str .= $tab7.'$("#fedita").html(r);'."\n";
-			//$str .= $tab6.'}'."\n";
-
 			$str .= $tab6.'}'."\n";
-			//$str .= $tab4.'}'."\n";
 			$str .= $tab5.'})'."\n";
 			$str .= $tab4.'},'."\n";
 			$str .= $tab4.'"Cancelar": function() {'."\n";
@@ -1452,7 +1469,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $tab5.'echo "Ya existe un registro con ese $mcodp";'."\n";
 
 			$str .= $tab3.'} else'."\n";
-			//$str .= $tab2.'echo \'\';'."\n";
 			$str .= $tab4.'echo "Fallo Agregado!!!";'."\n\n";
 
 			$str .= $tab2.'} elseif($oper == \'edit\') {'."\n";
@@ -1498,11 +1514,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= '}'."\n";
 
 			$columna .= $str."\n";
-
-			$data['programa']    = $columna.'?>';
-			$data['bd']          = $db;
-			$data['controlador'] = $contro;
-			$this->load->view('editorcm', $data);
+			return $columna;
 
 		}
 	}
@@ -2297,10 +2309,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		if (empty($tabla) OR (!$this->db->table_exists($tabla)))
 			show_error('Tabla no existe o faltan parametros');
 
-
-		//$crud ="\n\t".'//******************************************************************'."\n";
-		//$crud.="\t".  '// Edicion '."\n";
-
 		$crud ="\n\t".'function dataedit(){'."\n";
 		$crud.="\t\t".'$this->rapyd->load(\'dataobject\',\'datadetails\');'."\n";
 
@@ -2313,7 +2321,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 		$crud.="\t\t".'$do = new DataObject(\''.$tabla.'\');'."\n\n";
 		$crud.="\t\t".'$do->rel_one_to_many(\''.$tablait.'\',\''.$tablait.'\',\'numero\');'."\n";
-
 
 		$crud.="\t\t".'$edit = new DataDetails($this->tits, $do );'."\n\n";
 		$crud.="\t\t".'$edit->script($script,\'modify\');'."\n";
@@ -2388,7 +2395,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 		$crud.="\n\t\t".'//******************************************************************'."\n";
 		$crud.="\t\t".  '// Detalle '."\n";
-
 
 		$mSQL="DESCRIBE $tablait";
 		$query = $this->db->query($mSQL);
@@ -2484,38 +2490,46 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 
 	//******************************************************************
-	//    Genera el View a partir de la Tabla
-	//******************************************************************
-	function geneviewjq($tabla=null,$s=true){
+	// Genera el View a partir de la Tabla
+	//
+	function geneviewjq( $tabla=null, $s=true ){
 		if (empty($tabla) OR (!$this->db->table_exists($tabla)))
 			show_error('Tabla no existe o faltan parametros');
 
-		$crud  ="\t".'<?php'."\n";
-		$crud .="\t".'echo $form_scripts;'."\n";
-		$crud .="\t".'echo $form_begin;'."\n\n";
-		$crud .="\t".'if(isset($form->error_string)) echo \'<div class="alert">\'.$form->error_string.\'</div>\';'."\n";
-		$crud .="\t".'if($form->_status <> \'show\'){ ?>'."\n\n";
-		$crud .="\t".'<script language="javascript" type="text/javascript">'."\n";
-		$crud .="\t".'</script>'."\n";
-		$crud .="\t".'<?php } ?>'."\n\n";
-		$crud .="\t".'<fieldset  style=\'border: 1px outset #FEB404;background: #FFFCE8;\'>'."\n";
-		$crud .="\t".'<table width=\'100%\'>'."\n";
+		$crud = $this->vista($tabla);
+		echo '<html><body><pre>'.htmlentities( $crud).'</pre></body></html>';
+
+	}
+
+	//******************************************************************
+	// Genera vistas
+	//
+	function vista( $tabla ){
+		$crud  = '<?php'."\n";
+		$crud .= 'echo $form_scripts;'."\n";
+		$crud .= 'echo $form_begin;'."\n\n";
+		$crud .= 'if(isset($form->error_string)) echo \'<div class="alert">\'.$form->error_string.\'</div>\';'."\n";
+		$crud .= 'if($form->_status <> \'show\'){ ?>'."\n\n";
+		$crud .= '<script language="javascript" type="text/javascript">'."\n";
+		$crud .= '</script>'."\n";
+		$crud .= '<?php } ?>'."\n\n";
+		$crud .= '<fieldset  style=\'border: 1px outset #FEB404;background: #FFFCE8;\'>'."\n";
+		$crud .= '<table width=\'100%\'>'."\n";
 
 		$mSQL ="DESCRIBE $tabla";
 		$query = $this->db->query("DESCRIBE $tabla");
 		foreach ($query->result() as $field){
-			$crud .="\t".'	<tr>'."\n";
-			$crud .="\t".'		<td class="littletablerowth"><?php echo $form->'.$field->Field.'->label;  ?></td>'."\n";
-			$crud .="\t".'		<td class="littletablerow"  ><?php echo $form->'.$field->Field.'->output; ?></td>'."\n";
-			$crud .="\t".'	</tr>'."\n";
+			$crud .= '	<tr>'."\n";
+			$crud .= '		<td class="littletablerowth"><?php echo $form->'.$field->Field.'->label;  ?></td>'."\n";
+			$crud .= '		<td class="littletablerow"  ><?php echo $form->'.$field->Field.'->output; ?></td>'."\n";
+			$crud .= '	</tr>'."\n";
 		}
 
-		$crud .="\t".'</table>'."\n";
-		$crud .="\t".'</fieldset>'."\n";
-		$crud .="\t".'<?php echo $form_end; ?>'."\n";
+		$crud .= '</table>'."\n";
+		$crud .= '</fieldset>'."\n";
+		$crud .= '<?php echo $form_end; ?>'."\n";
 
-		echo '<html><body><pre>'.htmlentities( $crud).'</pre></body></html>';
-
+		return $crud;
 	}
 
 
@@ -2552,7 +2566,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$crud .= 'echo $form_begin;'."\n";
 		$crud .= 'if($form->_status!=\'show\'){'."\n";
 		$crud .= '?>'."\n\n";
-
 
 		$crud .= '<script language="javascript" type="text/javascript">'."\n";
 		$crud .= 'itstra_cont=<?php echo $form->max_rel_count[\''.$tablait.'\'] ?>;'."\n";
@@ -2642,9 +2655,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$crud .= '<?php } ?>'."\n";
 
 
-		//$crud .="\t".'echo $form_scripts;'."\n";
-		//$crud .="\t".'echo $form_begin;'."\n\n";
-		
 		$crud .="\t".'<fieldset  style=\'border: 1px outset #FEB404;background: #FFFCE8;\'>'."\n";
 		$crud .="\t".'<table width=\'100%\'>'."\n";
 
@@ -2660,7 +2670,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$mSQL ="DESCRIBE $tablait";
 		$query = $this->db->query($mSQL);
 
-
 		$crud .= "\t\t".'<tr><td>&nbsp;</td></tr>'."\n";
 		$crud .= "\t\t".'<tr>'."\n";
 		$crud .= "\t\t\t".'<td>'."\n";
@@ -2668,11 +2677,9 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$crud .= "\t\t\t".'<table width=\'100%\'>'."\n";
 		$crud .= "\t\t\t\t".'<tr>'."\n";
 
-
 		foreach ($query->result() as $field){
 			$crud .= "\t\t\t\t\t".'<td bgcolor=\'#7098D0\' width="80">'.$field->Field.'</td>'."\n";
 		}
-
 
 		$crud .= "\t\t\t\t".'</tr>'."\n";
 		$crud .= "\t\t\t\t".'<?php for($i=0;$i<$form->max_rel_count[\''.$tablait.'\'];$i++) {'."\n";
@@ -2704,7 +2711,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$crud .= "\t\t\t\t\t".'<td class="littletablefooterb" align="right">&nbsp;</td>'."\n";
 		}
 
-
 		$crud .= "\t\t\t\t\t".'<?php if($form->_status!=\'show\') {?>'."\n";
 		$crud .= "\t\t\t\t\t".'<td class="littletablefooterb" align="right">&nbsp;</td>'."\n";
 		$crud .= "\t\t\t\t\t".'<?php } ?>'."\n";
@@ -2712,7 +2718,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$crud .= "\t\t\t\t".'</tr>'."\n";
 		$crud .= "\t\t\t".'</table>'."\n";
 		$crud .= "\t\t\t".'</div>'."\n";
-//		$crud .= "\t\t\t".'< ?php echo $form_end ? > <?php echo $container_bl ? > < ?php echo $container_br ? >'."\n";
 		$crud .= "\t\t\t".'</td>'."\n";
 		$crud .= "\t\t".'</tr>'."\n";
 
@@ -2720,8 +2725,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$crud .="\t".'</fieldset>'."\n";
 
 		$crud .='<?php echo $form_end; ?>'."\n";
-
-
 
 		return '<html><body><pre>'.htmlentities( $crud).'</pre></body></html>';
 
@@ -2738,6 +2741,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$contro = $this->input->post('contro');
 		file_put_contents('system/application/controllers/'.$contro.'/'.$db.'.php',$code);
 		//redirect(base_url.'desarrollo/jqcargar/'.$db.'/'.$contro);
+		echo 'Guardado';
 	}
 
 	function jqcargar(){
