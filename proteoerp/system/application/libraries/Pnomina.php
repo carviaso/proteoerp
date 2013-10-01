@@ -186,8 +186,8 @@ class fnomina {
 	//
 	function REPOSO(){
 		// VER SI ESTA EN REPOSO
-		$mSQL  = "SELECT inicio, final FROM preposo WHERE codigo=".$this->ci->db->escape($this->CODIGO)." AND inicio<='".$this->fhasta."' AND final>".$this->fdesde;
-//		memowrite($mSQL, 'Reposo');
+		$mSQL  = "SELECT inicio, final FROM preposo WHERE codigo=".$this->ci->db->escape($this->CODIGO)." AND inicio<='".$this->fhasta."' AND final>'".$this->fdesde."'";
+		//memowrite($mSQL, 'Reposo');
 		$query = $this->ci->db->query($mSQL);
 		$diasefect = 0;
 		
