@@ -131,7 +131,7 @@ class Rcaj extends validaciones {
 			$url_submit='ventas/rcaj/precierre/process';
 			if(empty($cajero)) return;
 		}else{
-			$url_submit="ventas/rcaj/precierre/$caja/$cajero/$fecha/process";
+			$url_submit="ventas/rcaj/precierre/${caja}/${cajero}/${fecha}/process";
 			$redir=true;
 		}
 
@@ -387,7 +387,7 @@ class Rcaj extends validaciones {
 					'caja'    => $caja,
 					'observa' => $str,
 					'usuario' => $this->secu->usuario(),
-					'tipo'    => 'T',
+					'tipo'    => ($rrecibido+$ingreso == 0)? 'F':'T',
 					'recibido'=> $rrecibido,
 					'ingreso' => $ingreso,
 					'parcial' => $parcial
@@ -459,7 +459,7 @@ class Rcaj extends validaciones {
 
 		$nomcajero = $this->datasis->dameval('SELECT CONCAT(TRIM(a.cajero),b.nombre) cajero FROM rcaj a JOIN scaj b ON a.cajero=b.cajero WHERE a.tipo="T" AND a.numero='.$dbnumero);
 
-		$form = new DataForm("ventas/rcaj/forcierre/$numero/process");
+		$form = new DataForm("ventas/rcaj/forcierre/${numero}/process");
 
 		$attr=array(
 			'class'  => 'ui-state-default ui-corner-all',
@@ -576,7 +576,6 @@ class Rcaj extends validaciones {
 			$form->x_ultimanc->maxlength =10;
 			$form->x_ultimanc->autocomplete=false;
 		}
-
 
 		$form->button('btn_reg', 'Regresar',"javascript:window.location='".site_url('ventas/rcaj/filteredgrid/search')."'", 'BL');
 		$form->submit('btnsubmit','Cerrar cajero');
