@@ -1806,13 +1806,13 @@ class ventas{
 				$ws->write_string( $mm,20, $fecharece, $cuerpo );	// FECHA COMPROB
 
 				$ws->write_string( $mm,21, $row->afecta , $numero );
-				$ws->write_string( $mm,22, $row->serial , $numero );
 				/*if($row->tipo=='CR'){
 
 					$ws->write_string( $mm,21, $row->afecta , $numero ); //NRO FACT AFECTA
 				}else{
 					$ws->write_string( $mm,21, $row->nfiscal, $numero ); //NRO FACT AFECTA
 				}*/
+				$ws->write_string( $mm,23, $row->serial , $numero );
 
 				$mm++;
 			}
@@ -1852,23 +1852,19 @@ class ventas{
 		$ws->write_formula( $mm, 8, "=SUM(I$ii:I$mm)", $Tnumero );   //"VENTAS + IVA"
 		$ws->write_formula( $mm, 9, "=SUM(J$ii:J$mm)", $Tnumero );   //"VENTAS EXENTAS"
 		$ws->write_formula( $mm,10, "=SUM(K$ii:K$mm)", $Tnumero );   //"BASE IMPONIBLE"
-
 		$ws->write_formula( $mm,11, "=SUM(L$ii:L$mm)", $Tnumero );   //"VENTAS + IVA"
 		$ws->write_formula( $mm,12, "=SUM(M$ii:M$mm)", $Tnumero );   //"VENTAS EXENTAS"
 		$ws->write_formula( $mm,13, "=SUM(N$ii:N$mm)", $Tnumero );   //"BASE IMPONIBLE"
-
 		$ws->write_formula( $mm,14, "=SUM(O$ii:O$mm)", $Tnumero );   //"VENTAS + IVA"
 		$ws->write_formula( $mm,15, "=SUM(P$ii:P$mm)", $Tnumero );   //"VENTAS EXENTAS"
 		$ws->write_formula( $mm,16, "=SUM(Q$ii:Q$mm)", $Tnumero );   //"BASE IMPONIBLE"
-
 		$ws->write_formula( $mm,17, "=SUM(R$ii:R$mm)", $Tnumero );   //"BASE IMPONIBLE"
 		$ws->write_formula( $mm,18, "=SUM(S$ii:S$mm)", $Tnumero );   //"BASE IMPONIBLE"
 
-		//$ws->write_blank( $mm, 18,  $Tnumero );
 		$ws->write_blank( $mm, 19,  $Tnumero );
 		$ws->write_blank( $mm, 20,  $Tnumero );
-		//$ws->write_formula( $mm,20, "=SUM(U$ii:U$mm)", $Tnumero );   //IMPUESTO PERCIBIDO
 		$ws->write_blank( $mm, 21,  $titulo );
+		$ws->write_blank( $mm, 22,  $titulo );
 		$ws->write_blank( $mm, 22,  $titulo );
 
 		$mm ++;
@@ -1876,20 +1872,15 @@ class ventas{
 
 		$ws->write($mm, 1, 'RESUMEN DE VENTAS Y DEBITOS:', $titulo );
 		$ws->write_blank( $mm+1, 1,  $titulo );
-
-		$ws->write_blank( $mm, 2,  $titulo );
+		$ws->write_blank( $mm  , 2,  $titulo );
 		$ws->write_blank( $mm+1, 2,  $titulo );
-
-		$ws->write_blank( $mm, 3,  $titulo );
+		$ws->write_blank( $mm  , 3,  $titulo );
 		$ws->write_blank( $mm+1, 3,  $titulo );
-
-		$ws->write_blank( $mm, 4,  $titulo );
+		$ws->write_blank( $mm  , 4,  $titulo );
 		$ws->write_blank( $mm+1, 4,  $titulo );
-
-		$ws->write_blank( $mm, 5,  $titulo );
+		$ws->write_blank( $mm  , 5,  $titulo );
 		$ws->write_blank( $mm+1, 5,  $titulo );
-
-		$ws->write_blank( $mm, 6,  $titulo );
+		$ws->write_blank( $mm  , 6,  $titulo );
 		$ws->write_blank( $mm+1, 6,  $titulo );
 
 		$ws->write($mm, 7, 'Items', $titulo );
@@ -1898,7 +1889,7 @@ class ventas{
 		$ws->write($mm,   8, 'Base', $titulo );
 		$ws->write($mm+1, 8, 'Imponible', $titulo );
 
-		$ws->write($mm, 9, 'Items', $titulo );
+		$ws->write($mm   , 9, 'Items', $titulo );
 		$ws->write( $mm+1, 9, "  ", $titulo );
 
 		$ws->write($mm,  10, 'Debito', $titulo );
@@ -1925,7 +1916,7 @@ class ventas{
 		$ws->write_blank( $mm, 4,  $h1 );
 		$ws->write_blank( $mm, 5,  $h1 );
 		$ws->write_blank( $mm, 6,  $h1 );
-		$ws->write($mm, 7, "40" , $cuerpoc );
+		$ws->write($mm, 7, '40' , $cuerpoc );
 		$ws->write_formula($mm, 8, "=J$celda" , $Rnumero );
 		$ws->write($mm, 16, 'Tipo de Documento', $cuerpob );
 		$ws->write_blank( $mm, 17,  $cuerpob );
@@ -1938,7 +1929,7 @@ class ventas{
 		$ws->write_blank( $mm, 4,  $h1 );
 		$ws->write_blank( $mm, 5,  $h1 );
 		$ws->write_blank( $mm, 6,  $h1 );
-		$ws->write($mm, 7, "41" , $cuerpoc );
+		$ws->write($mm, 7, '41' , $cuerpoc );
 		$ws->write_formula($mm, 8, "=K$celda" , $Rnumero );
 		$ws->write($mm, 16, 'FC -Factura', $cuerpo );
 		$ws->write_blank( $mm+1, 16,  $cuerpo );
