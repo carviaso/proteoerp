@@ -172,7 +172,7 @@ class Libros extends Controller {
 		ventas::_wlvexcel($mes,true);
 	}
 
-
+	//Libro de ventas no agrupados
 	function wlvexcel2($mes=null){
 		if(!$this->_checkfecha($mes)) show_error('Parametro inv&aacute;lido');
 		$this->_telefono('ventas');

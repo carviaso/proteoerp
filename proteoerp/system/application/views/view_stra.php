@@ -60,10 +60,10 @@ function autocod(id){
 	$('#codigo_'+id).autocomplete({
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('ajax/buscasinvart'); ?>",
+				url:  "<?php echo site_url('ajax/buscasinvart/N'); ?>",
 				type: 'POST',
 				dataType: 'json',
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];

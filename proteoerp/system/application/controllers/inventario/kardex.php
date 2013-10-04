@@ -33,13 +33,11 @@ class Kardex extends Controller {
 				case '1T': return(anchor_popup($link,'Transferencias'      ,$atts)); break;
 				case '2C': return(anchor_popup($link,'Compras'             ,$atts)); break;
 				case '4N': return(anchor_popup($link,'Nota/Entrega'        ,$atts)); break;
-				case '6C': return(anchor_popup($link,'Conversion'          ,$atts)); break;
+				case '6C': return(anchor_popup($link,'Conversión'          ,$atts)); break;
 				case '5C': return(anchor_popup($link,'Ajuste de inventario',$atts)); break;
-				case '5D': return(anchor_popup($link,'Consignacion'        ,$atts)); break;
+				case '5D': return(anchor_popup($link,'Consignación'        ,$atts)); break;
 				case '0F': return(anchor_popup($link,'Inventario'          ,$atts)); break;
 				case '9F': return(anchor_popup($link,'Inventario'          ,$atts)); break;
-				//case '0F': return('Inventario'); break;
-				//case '9F': return('Inventario'); break;
 			default:   return($par); };
 		}
 
@@ -76,21 +74,36 @@ class Kardex extends Controller {
 		$filter->ubica->clause  ='where';
 		$filter->ubica->group   = 'UNO';
 
+		$filter->origen = new dropdownField('Or&iacute;gen','origen');
+		$filter->origen->option('' ,'Todos');
+		$filter->origen->option('3I','Ventas Caja'         );
+		$filter->origen->option('3R','Ventas Restaurante'  );
+		$filter->origen->option('3M','Ventas Mayor'        );
+		$filter->origen->option('1T','Transferencias'      );
+		$filter->origen->option('2C','Compras'             );
+		$filter->origen->option('4N','Nota/Entrega'        );
+		$filter->origen->option('6C','Conversión'          );
+		$filter->origen->option('5C','Ajuste de inventario');
+		$filter->origen->option('5D','Consignación'        );
+		$filter->origen->option('0F','Inv. Físico comienzo del día');
+		$filter->origen->option('9F','Inv. Físico final del día');
+		//$filter->origen->style = 'width:120px';
+		$filter->origen->group   = 'UNO';
+
 		$filter->fechad = new dateonlyField('Desde', 'fecha','d/m/Y');
 		$filter->fechad->operator='>=';
 		$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30,   date('Y')));
-
 		$filter->fechad->group = 'DOS';
 
 		$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
 		$filter->fechah->db_name='fecha';
 		$filter->fechah->operator='<=';
 		$filter->fechah->insertValue = date('Y-m-d');
-
 		$filter->fechah->group = 'DOS';
-
 		$filter->fechah->clause=$filter->fechad->clause=$filter->codigo->clause='where';
 		$filter->fechah->size=$filter->fechad->size=10;
+		$filter->fechah->rule=$filter->fechad->rule='required|chfecha';
+
 
 		$filter->buttons('reset','search');
 		$filter->build('dataformfiltro');

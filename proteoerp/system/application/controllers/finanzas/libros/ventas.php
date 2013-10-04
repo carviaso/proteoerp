@@ -1559,7 +1559,7 @@ class ventas{
 				a.adicimpu*IF(a.tipo='NC',-1,1)  adicimpu,
 				a.reducida*IF(a.tipo='NC',-1,1)  reducida,
 				a.reduimpu*IF(a.tipo='NC',-1,1)  reduimpu,
-				a.contribu, a.registro, a.comprobante, a.fecharece
+				a.contribu, a.registro, a.comprobante, a.fecharece,a.serial
 			FROM siva a LEFT JOIN scli b ON a.clipro=b.cliente
 			WHERE a.fechal BETWEEN $fdesde AND $fhasta AND a.libro='V' AND a.tipo<>'FA'
 			ORDER BY a.fecha, IF(a.tipo IN ('FE','FC','XE','XC'),1,2), a.numero ";
@@ -1577,19 +1577,19 @@ class ventas{
 		$ws->set_column('H:U',11);
 
 		// FORMATOS
-		$h      =& $wb->addformat(array( "bold" => 1, "size" => 16, "merge" => 1));
-		$h1     =& $wb->addformat(array( "bold" => 1, "size" => 11, "align" => 'left'));
+		$h      =& $wb->addformat(array( 'bold' => 1, 'size' => 16, 'merge' => 1));
+		$h1     =& $wb->addformat(array( 'bold' => 1, 'size' => 11, 'align' => 'left'));
 
-		$titulo =& $wb->addformat(array( "bold" => 1, "size" => 9, "merge" => 0, "fg_color" => 'silver' ));
-		$tt =& $wb->addformat(array( "size" => 9, "merge" => 1, "fg_color" => 'silver' ));
+		$titulo =& $wb->addformat(array( 'bold' => 1, 'size' => 9, 'merge' => 0, 'fg_color' => 'silver' ));
+		$tt =& $wb->addformat(array( 'size' => 9, 'merge' => 1, 'fg_color' => 'silver' ));
 
-		$cuerpo  =& $wb->addformat(array( "size" => 9 ));
-		$cuerpoc =& $wb->addformat(array( "size" => 9, "align" => 'center', "merge" => 1 ));
-		$cuerpob =& $wb->addformat(array( "size" => 9, "align" => 'center', "bold" => 1, "merge" => 1 ));
+		$cuerpo  =& $wb->addformat(array( 'size' => 9 ));
+		$cuerpoc =& $wb->addformat(array( 'size' => 9, "align" => 'center', 'merge' => 1 ));
+		$cuerpob =& $wb->addformat(array( 'size' => 9, "align" => 'center', 'bold' => 1, 'merge' => 1 ));
 
-		$numero  =& $wb->addformat(array( "num_format" => '#,##0.00' , "size" => 9 ));
-		$Tnumero =& $wb->addformat(array( "num_format" => '#,##0.00' , "size" => 9, "bold" => 1, "fg_color" => 'silver' ));
-		$Rnumero =& $wb->addformat(array( "num_format" => '#,##0.00' , "size" => 9, "bold" => 1, "align" => 'right' ));
+		$numero  =& $wb->addformat(array( 'num_format' => '#,##0.00' , "size" => 9 ));
+		$Tnumero =& $wb->addformat(array( 'num_format' => '#,##0.00' , "size" => 9, "bold" => 1, "fg_color" => 'silver' ));
+		$Rnumero =& $wb->addformat(array( 'num_format' => '#,##0.00' , "size" => 9, "bold" => 1, "align" => 'right' ));
 
 
 		// COMIENZA A ESCRIBIR
@@ -1611,29 +1611,29 @@ class ventas{
 		$mcel = 0;
 		// TITULOS
 
-		$ws->write_string( $mm,   $mcel, "", $titulo );
-		$ws->write_string( $mm+1, $mcel, "Fecha", $titulo );
-		$ws->write_string( $mm+2, $mcel, "", $titulo );
+		$ws->write_string( $mm,   $mcel, '', $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Fecha', $titulo );
+		$ws->write_string( $mm+2, $mcel, '', $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,   $mcel, "Identificacion del Documento", $titulo );
-		$ws->write_string( $mm+1, $mcel, "Nro.", $titulo );
-		$ws->write_string( $mm+2, $mcel, "Caja", $titulo );
+		$ws->write_string( $mm,   $mcel, 'Identificacion del Documento', $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Nro.', $titulo );
+		$ws->write_string( $mm+2, $mcel, 'Caja', $titulo );
 		$mcel++;
 
 		$ws->write_blank( $mm,   $mcel,  $titulo );
-		$ws->write_string( $mm+1, $mcel, "Tipo", $titulo );
-		$ws->write_string( $mm+2, $mcel, "Doc.", $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Tipo', $titulo );
+		$ws->write_string( $mm+2, $mcel, 'Doc.', $titulo );
 		$mcel++;
 
 		$ws->write_blank( $mm,   $mcel, $titulo );
-		$ws->write_string( $mm+1, $mcel, "Contribuyentes", $titulo );
-		$ws->write_string( $mm+2, $mcel, "Numero", $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Contribuyentes', $titulo );
+		$ws->write_string( $mm+2, $mcel, 'Numero', $titulo );
 		$mcel++;
 
 		$ws->write_blank( $mm,   $mcel, $titulo );
-		$ws->write_string( $mm+1, $mcel, "No Contribuyentes", $titulo );
-		$ws->write_string( $mm+2, $mcel, "Inicial", $titulo );
+		$ws->write_string( $mm+1, $mcel, 'No Contribuyentes', $titulo );
+		$ws->write_string( $mm+2, $mcel, 'Inicial', $titulo );
 		$mcel++;
 
 		$ws->write_blank( $mm,   $mcel, $titulo );
@@ -1673,57 +1673,62 @@ class ventas{
 
 		$ws->write_blank(  $mm,  $mcel, $titulo );
 		$ws->write_blank(  $mm+1,$mcel, $titulo );
-		$ws->write_string( $mm+2,$mcel, "Impuesto", $titulo );
+		$ws->write_string( $mm+2,$mcel, 'Impuesto', $titulo );
 		$mcel++;
 
 		$ws->write_blank(  $mm,  $mcel, $titulo );
 		$ws->write_string( $mm+1,$mcel, "ALICUOTA ADICIONAL $sobretasa%", $titulo );
-		$ws->write_string( $mm+2,$mcel, "Base", $titulo );
+		$ws->write_string( $mm+2,$mcel, 'Base', $titulo );
 		$mcel++;
 
 		$ws->write_blank(  $mm,  $mcel, $titulo );
 		$ws->write_blank(  $mm+1,$mcel, $titulo );
-		$ws->write_string( $mm+2,$mcel, "Impuesto", $titulo );
+		$ws->write_string( $mm+2,$mcel, 'Impuesto', $titulo );
 		$mcel++;
 
 		$ws->write_blank(  $mm,  $mcel, $titulo );
 		$ws->write_string( $mm+1,$mcel, "ALICUOTA REDUCIDA $redutasa%", $titulo );
-		$ws->write_string( $mm+2,$mcel, "Base", $titulo );
+		$ws->write_string( $mm+2,$mcel, 'Base', $titulo );
 		$mcel++;
 
 		$ws->write_blank(  $mm,  $mcel, $titulo );
 		$ws->write_blank(  $mm+1,$mcel, $titulo );
-		$ws->write_string( $mm+2,$mcel, "Impuesto", $titulo );
+		$ws->write_string( $mm+2,$mcel, 'Impuesto', $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,  $mcel, "Ajuste a los", $titulo );
-		$ws->write_string( $mm+1,$mcel, "DB Fiscales", $titulo );
-		$ws->write_string( $mm+2,$mcel, "Per. Anterior", $titulo );
+		$ws->write_string( $mm,  $mcel, 'Ajuste a los', $titulo );
+		$ws->write_string( $mm+1,$mcel, 'DB Fiscales', $titulo );
+		$ws->write_string( $mm+2,$mcel, 'Per. Anterior', $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,  $mcel, "I.V.A. ", $titulo );
-		$ws->write_string( $mm+1,$mcel, "Retenido", $titulo );
-		$ws->write_string( $mm+2,$mcel, "Comprador", $titulo );
+		$ws->write_string( $mm,  $mcel, 'I.V.A.', $titulo );
+		$ws->write_string( $mm+1,$mcel, 'Retenido', $titulo );
+		$ws->write_string( $mm+2,$mcel, 'Comprador', $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,  $mcel, "Numero ", $titulo );
-		$ws->write_string( $mm+1,$mcel, "de", $titulo );
-		$ws->write_string( $mm+2,$mcel, "Comp.", $titulo );
+		$ws->write_string( $mm,  $mcel, 'Numero', $titulo );
+		$ws->write_string( $mm+1,$mcel, 'de', $titulo );
+		$ws->write_string( $mm+2,$mcel, 'Comp.', $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,  $mcel, "Fecha ", $titulo );
-		$ws->write_string( $mm+1,$mcel, "de", $titulo );
+		$ws->write_string( $mm,  $mcel, 'Fecha', $titulo );
+		$ws->write_string( $mm+1,$mcel, 'de', $titulo );
 		$ws->write_string( $mm+2,$mcel, "Recepcion", $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,   $mcel, "", $titulo );
-		$ws->write_string( $mm+1, $mcel, "N� Fiscal", $titulo );
-		$ws->write_string( $mm+2, $mcel, "", $titulo );
+		$ws->write_string( $mm,   $mcel, '', $titulo );
+		$ws->write_string( $mm+1, $mcel, 'N. Fiscal', $titulo );
+		$ws->write_string( $mm+2, $mcel, '', $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,   $mcel, "", $titulo );
-		$ws->write_string( $mm+1, $mcel, "Afecta", $titulo );
-		$ws->write_string( $mm+2, $mcel, "", $titulo );
+		$ws->write_string( $mm,   $mcel, '', $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Afecta', $titulo );
+		$ws->write_string( $mm+2, $mcel, '', $titulo );
+		$mcel++;
+
+		$ws->write_string( $mm,   $mcel, '', $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Serial', $titulo );
+		$ws->write_string( $mm+2, $mcel, '', $titulo );
 		$mcel++;
 
 		$mm +=3;
@@ -1801,6 +1806,7 @@ class ventas{
 				$ws->write_string( $mm,20, $fecharece, $cuerpo );	// FECHA COMPROB
 
 				$ws->write_string( $mm,21, $row->afecta , $numero );
+				$ws->write_string( $mm,22, $row->serial , $numero );
 				/*if($row->tipo=='CR'){
 
 					$ws->write_string( $mm,21, $row->afecta , $numero ); //NRO FACT AFECTA
@@ -1834,7 +1840,7 @@ class ventas{
 
 		$fivajuste = "=S$celda";   // general
 
-		$ws->write( $mm, 0,"Totales...",  $titulo );
+		$ws->write( $mm, 0,'Totales...',  $titulo );
 		$ws->write_blank( $mm, 1,  $titulo );
 		$ws->write_blank( $mm, 2,  $titulo );
 		$ws->write_blank( $mm, 3,  $titulo );
@@ -1862,6 +1868,8 @@ class ventas{
 		$ws->write_blank( $mm, 19,  $Tnumero );
 		$ws->write_blank( $mm, 20,  $Tnumero );
 		//$ws->write_formula( $mm,20, "=SUM(U$ii:U$mm)", $Tnumero );   //IMPUESTO PERCIBIDO
+		$ws->write_blank( $mm, 21,  $titulo );
+		$ws->write_blank( $mm, 22,  $titulo );
 
 		$mm ++;
 		$mm ++;
