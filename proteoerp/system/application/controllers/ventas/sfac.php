@@ -4,7 +4,8 @@ class Sfac extends Controller {
 	var $titp='Facturaci&oacute;n ';
 	var $tits='Facturaci&oacute;n';
 	var $url ='ventas/sfac/';
-	var $genesal=true;
+	var $genesal  = true;
+	var $_creanfac= false;
 
 	function Sfac(){
 		parent::Controller();
@@ -191,7 +192,7 @@ class Sfac extends Controller {
 		function sfacshow() {
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				$.post("'.site_url($this->url.'dataedit/show').'/"+id,
+				$.post("'.site_url($this->url.'N/dataedit/show').'/"+id,
 					function(data){
 						$("#fshow").html(data);
 						$("#fshow").dialog( "open" );
@@ -2380,6 +2381,12 @@ class Sfac extends Controller {
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
 
+		if(isset($this->_creanfac) && $this->_creanfac){
+			//Para hacer el corte por maxlin en las facturas pendientes
+			$this->rapyd->uri->un_set('update');
+			$this->rapyd->uri->set('insert');
+		}
+
 		$manual = $this->uri->segment(4);
 		if($manual <> 'S') $manual = 'N';
 
@@ -3495,8 +3502,9 @@ class Sfac extends Controller {
 
 		if(isset($this->_sfacmaestra)){
 			$do->set('maestra',$this->_sfacmaestra);
+		}else{
+			$do->set('maestra',$numero);
 		}
-
 		return true;
 	}
 
@@ -3505,7 +3513,13 @@ class Sfac extends Controller {
 		$dbid     = $this->db->escape($do->get('id'));
 		$referendb= $this->datasis->dameval('SELECT referen FROM sfac WHERE id='.$dbid);
 
-		if(substr($numero,0,1)=='_' && $referendb=='P'){
+		if($this->_creanfac){
+			//Para hacer el corte por maxlin en las facturas pendientes
+			$do->loaded=false;
+			$this->rapyd->uri->un_set('modify');
+			$this->rapyd->uri->set('create');
+			return $this->_pre_insert($do,'I');
+		}elseif((substr($numero,0,1)=='_' && $referendb=='P')){
 			return $this->_pre_insert($do,'U');
 		}else{
 			$do->error_message_ar['pre_upd']='No se pueden modificar facturas guardadas';

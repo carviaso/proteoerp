@@ -136,7 +136,7 @@ class Scli extends validaciones {
 				$.post("'.site_url('ventas/scli/creditoedit/modify').'/"+id, function(data){
 					$("#fedita").html("");
 					$("#feditcr").html(data);
-					$("#feditcr").dialog({height: 400, width: 650}); 
+					$("#feditcr").dialog({height: 400, width: 650});
 					$("#feditcr").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
@@ -152,7 +152,7 @@ class Scli extends validaciones {
 				$.post("'.site_url('ventas/scli/claveedit/modify').'/"+id, function(data){
 					$("#fedita").html("");
 					$("#feditcr").html(data);
-					$("#feditcr").dialog({height: 250, width: 400}); 
+					$("#feditcr").dialog({height: 250, width: 400});
 					$("#feditcr").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
@@ -1067,7 +1067,7 @@ class Scli extends validaciones {
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
 		));
-
+*/
 
 		$grid->addField('sucursal');
 		$grid->label('Sucursal');
@@ -1079,7 +1079,7 @@ class Scli extends validaciones {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 2 }',
 		));
-*/
+
 
 		$grid->addField('tolera');
 		$grid->label('Toleracia');
@@ -1387,6 +1387,7 @@ class Scli extends validaciones {
 		$script ='
 		<script type="text/javascript" >
 		$(function() {
+			$("#aniversario").datepicker({ dateFormat: "dd/mm/yy" });
 			//Default Action
 			$("#tiva").change(function () { anomfis(); }).change();
 
@@ -1532,7 +1533,7 @@ class Scli extends validaciones {
 		$edit->nombre->maxlength = 45;
 		$edit->nombre->style = 'width:100%;';
 
-		$edit->nomfis = new textareaField('Razon Social', 'nomfis');
+		$edit->nomfis = new textareaField('Raz&oacute;n Social', 'nomfis');
 		$edit->nomfis->rule = 'trim';
 		$edit->nomfis->cols = 53;
 		$edit->nomfis->rows =  2;
@@ -1627,7 +1628,7 @@ class Scli extends validaciones {
 		$edit->zona = new dropdownField('Zona', 'zona');
 		$edit->zona->rule = 'trim|required';
 		$edit->zona->option('','Seleccionar');
-		$edit->zona->options('SELECT codigo, CONCAT(codigo," ", nombre) nombre FROM zona ORDER BY nombre');
+		$edit->zona->options('SELECT TRIM(codigo) AS codigo, CONCAT(codigo," ", nombre) nombre FROM zona ORDER BY nombre');
 		$edit->zona->style = 'width:166px';
 		$edit->zona->insertValue = trim($this->datasis->traevalor('ZONAXDEFECTO'));
 
@@ -1677,7 +1678,7 @@ class Scli extends validaciones {
 
 		$edit->url = new inputField('Url', 'url');
 		$edit->url->rule = 'trim';
-		$edit->url->size=65;
+		$edit->url->size=60;
 		$edit->url->maxlength =120;
 
 		$edit->fb = new inputField('facebook', 'fb');
@@ -1738,7 +1739,7 @@ class Scli extends validaciones {
 		$edit->mensaje->size = 50;
 		$edit->mensaje->maxlength =40;
 
-		$edit->mmargen = new inputField("Des. Mayor%",'mmargen');
+		$edit->mmargen = new inputField('Des. Mayor%','mmargen');
 		$edit->mmargen->css_class='inputnum';
 		$edit->mmargen->size=5;
 		$edit->mmargen->maxlength=5;
@@ -1768,6 +1769,17 @@ class Scli extends validaciones {
 		$edit->tminimo->showformat  = 'decimal';
 		$edit->tminimo->type='inputhidden';
 
+		$edit->sucursal = new dropdownField('Sucursal', 'sucursal');
+		$edit->sucursal->rule = 'required';
+		$edit->sucursal->style= 'width:150px;';
+		$edit->sucursal->option('','Ninguna');
+		$edit->sucursal->options('SELECT TRIM(codigo) AS codigo,sucursal FROM sucu WHERE codigo IS NOT NULL ORDER BY sucursal');
+
+		$edit->aniversario = new dateonlyfield('F.Aniversario', 'aniversario');
+		$edit->aniversario->maxlength=10;
+		$edit->aniversario->size=14;
+		$edit->aniversario->rule='chfecha';
+		$edit->aniversario->calendar=false;
 
 		$edit->build();
 
@@ -2380,7 +2392,7 @@ function chrif(rif){
 		$edit->cliente = new inputField('Cliente', 'cliente');
 		$edit->cliente->mode = 'autohide';
 		$edit->cliente->when=array('show','modify');
-		
+
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->mode = 'autohide';
 		$edit->nombre->when=array('show','modify');
@@ -2680,7 +2692,7 @@ function chrif(rif){
 		);
 
 		$this->db->insert('sclibitalimit', $data);
-		logusu('scli',"CLIENTE $codigo MODIFICADO, LIMITE ".$this->limitsant.'-->'.$limite);
+		logusu('scli',"CLIENTE ${codigo} MODIFICADO, LIMITE ".$this->limitsant.'-->'.$limite);
 	}
 
 	function _pre_credi_insert($do){ return false; }
@@ -2688,14 +2700,14 @@ function chrif(rif){
 
 	function _pre_del($do) {
 		$codigo=$this->db->escape($do->get('cliente'));
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE cod_cli=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM smov WHERE cod_cli=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM snot WHERE cod_cli=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM snte WHERE cod_cli=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM otin WHERE cod_cli=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM pfac WHERE cod_cli=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM pers WHERE enlace=$codigo");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM bmov WHERE clipro='C' AND codcp=$codigo");
+		$check =  intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfac WHERE cod_cli=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM smov WHERE cod_cli=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM snot WHERE cod_cli=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM snte WHERE cod_cli=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM otin WHERE cod_cli=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM pfac WHERE cod_cli=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM pers WHERE enlace=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM bmov WHERE clipro='C' AND codcp=${codigo}"));
 
 		if ($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Cliente con Movimiento no puede ser Borrado';
@@ -2739,7 +2751,7 @@ function chrif(rif){
 	function _post_update($do){
 		$codigo=$do->get('cliente');
 		$limite=$do->get('limite');
-		logusu('scli',"CLIENTE $codigo MODIFICADO, LIMITE ".$this->limitsant.'-->'.$limite);
+		logusu('scli',"CLIENTE ${codigo} MODIFICADO, LIMITE ".$this->limitsant.'-->'.$limite);
 	}
 
 	function _post_delete($do){
@@ -2749,17 +2761,18 @@ function chrif(rif){
 	}
 
 	function chexiste($codigo){
-		$codigo=$this->input->post('cliente');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM scli WHERE cliente='$codigo'");
+		$codigo  =$this->input->post('cliente');
+		$dbcodigo=$this->db->escape($codigo);
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM scli WHERE cliente=${dbcodigo}");
 		if ($check > 0){
-			$mSQL_1=$this->db->query("SELECT nombre, rifci FROM scli WHERE cliente='$codigo'");
+			$mSQL_1=$this->db->query("SELECT nombre, rifci FROM scli WHERE cliente=${dbcodigo}");
 			$row = $mSQL_1->row();
 			$nombre =$row->nombre;
 			$rifci  =$row->rifci;
-			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para el cliente $nombre  $rifci ");
-			return FALSE;
+			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para el cliente ${nombre}  ${rifci}");
+			return false;
 		}else {
-			return TRUE;
+			return true;
 		}
 	}
 
@@ -2780,7 +2793,7 @@ function chrif(rif){
 
 	function consulta(){
 		$this->load->helper('openflash');
-		$this->rapyd->load("datagrid");
+		$this->rapyd->load('datagrid');
 		$fields = $this->db->field_data('scli');
 		$url_pk = $this->uri->segment_array();
 		$coun=0; $pk=array();
@@ -2804,12 +2817,12 @@ function chrif(rif){
 		$grid->db->where('a.tipo_doc IN ("FC","ND","GI") ' );
 		$grid->db->orderby('a.fecha');
 
-		$grid->column("Fecha",  "fecha" );
-		$grid->column("Tipo",   "tipo_doc", 'align="CENTER"');
-		$grid->column("Numero", "numero",   'align="LEFT"');
-		$grid->column("Monto",  "<nformat><#monto#></nformat>",  'align="RIGHT"');
-		$grid->column("Abonos", "<nformat><#abonos#></nformat>", 'align="RIGHT"');
-		$grid->column("Saldo",  "<nformat><#saldo#></nformat>",  'align="RIGHT"');
+		$grid->column('Fecha',  'fecha' );
+		$grid->column('Tipo',   "tipo_doc", 'align="CENTER"');
+		$grid->column('Numero', "numero",   'align="LEFT"');
+		$grid->column('Monto',  "<nformat><#monto#></nformat>",  'align="RIGHT"');
+		$grid->column('Abonos', "<nformat><#abonos#></nformat>", 'align="RIGHT"');
+		$grid->column('Saldo',  "<nformat><#saldo#></nformat>",  'align="RIGHT"');
 		$grid->build();
 
 		$nombre = $this->datasis->dameval("SELECT nombre FROM scli WHERE id=".$claves['id']." ");
@@ -3023,21 +3036,22 @@ function chrif(rif){
 			$this->db->simple_query($mSQL);
 		}
 
-		if(!in_array('modifi'   ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `modifi` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL AFTER `mensaje`");
-		if(!in_array('credito'  ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `credito` CHAR(1) NOT NULL DEFAULT 'N' AFTER `limite`");
-		if(!in_array('sucursal' ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `sucursal` CHAR(2) NULL DEFAULT NULL");
-		if(!in_array('mmargen'  ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `mmargen` DECIMAL(7,2) NULL DEFAULT 0 COMMENT 'Margen al Mayor'");
-		if(!in_array('tolera'   ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `tolera` DECIMAL(9,2) NULL DEFAULT '0' AFTER `credito`");
-		if(!in_array('maxtole'  ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `maxtole` DECIMAL(9,2) NULL DEFAULT '0' AFTER `tolera`");
-		if(!in_array('url'      ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN url VARCHAR(120) NULL ');
-		if(!in_array('pin'      ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN pin VARCHAR(10) NULL ');
-		if(!in_array('fb'       ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN fb VARCHAR(120) NULL ');
-		if(!in_array('twitter'  ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN twitter VARCHAR(120) NULL ');
-		if(!in_array('upago'    ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN upago  VARCHAR(6) NULL ');
-		if(!in_array('tarifa'   ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN tarifa VARCHAR(15) NULL ');
-		if(!in_array('tarimonto',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN tarimonto FLOAT UNSIGNED NULL DEFAULT NULL COMMENT 'unidades tributarias a cobrar por servicio'");
-		if(!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN canticipo VARCHAR(15) NULL DEFAULT NULL COMMENT 'Cuenta contable de Anticipo' AFTER cuenta");
-		if(!in_array('estado',   $campos)) $this->db->query("ALTER TABLE scli ADD COLUMN estado INT(11) NULL DEFAULT 0 COMMENT 'Estados o Entidades' AFTER zona");
+		if(!in_array('modifi'     ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `modifi` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL");
+		if(!in_array('credito'    ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `credito` CHAR(1) NOT NULL DEFAULT 'N' AFTER `limite`");
+		if(!in_array('sucursal'   ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `sucursal` CHAR(2) NULL DEFAULT NULL");
+		if(!in_array('mmargen'    ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `mmargen` DECIMAL(7,2) NULL DEFAULT 0 COMMENT 'Margen al Mayor'");
+		if(!in_array('tolera'     ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `tolera` DECIMAL(9,2) NULL DEFAULT '0'");
+		if(!in_array('maxtole'    ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `maxtole` DECIMAL(9,2) NULL DEFAULT '0'");
+		if(!in_array('url'        ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN url VARCHAR(120) NULL');
+		if(!in_array('pin'        ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN pin VARCHAR(10) NULL');
+		if(!in_array('fb'         ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN fb VARCHAR(120) NULL');
+		if(!in_array('twitter'    ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN twitter VARCHAR(120) NULL');
+		if(!in_array('upago'      ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN upago  VARCHAR(6) NULL');
+		if(!in_array('tarifa'     ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN tarifa VARCHAR(15) NULL');
+		if(!in_array('tarimonto'  ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN tarimonto FLOAT UNSIGNED NULL DEFAULT NULL COMMENT 'unidades tributarias a cobrar por servicio'");
+		if(!in_array('canticipo'  ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN canticipo VARCHAR(15) NULL DEFAULT NULL COMMENT 'Cuenta contable de Anticipo'");
+		if(!in_array('estado'     ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN estado INT(11) NULL DEFAULT 0 COMMENT 'Estados o Entidades'");
+		if(!in_array('aniversario',$campos)) $this->db->query('ALTER TABLE `scli` ADD COLUMN `aniversario` DATE NULL DEFAULT NULL');
 
 		if(!$this->db->table_exists('tarifa')){
 			$mSQL="CREATE TABLE `tarifa` (

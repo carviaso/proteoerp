@@ -521,11 +521,11 @@ class Scst extends Controller {
 				COALESCE(b.margen3,d.margen3) AS margen3,
 				COALESCE(b.margen4,d.margen4) AS margen4,
 				a.costo,a.iva,a.id
-				FROM ($tabla.`itscst`  AS a)
+				FROM (${tabla}.`itscst`  AS a)
 				LEFT JOIN `sinv`       AS b ON `a`.`codigo`=`b`.`codigo`
-				LEFT JOIN `farmaxasig` AS c ON `a`.`codigo`=`c`.`barras` AND c.proveed=$dbproveed
+				LEFT JOIN `farmaxasig` AS c ON `a`.`codigo`=`c`.`barras` AND c.proveed=${dbproveed}
 				LEFT JOIN `sinv`       AS d ON `d`.`codigo`=`c`.`abarras`
-				WHERE `a`.`control` = $dbcontrol AND `a`.`pmanual`='N'";
+				WHERE `a`.`control` = ${dbcontrol} AND `a`.`pmanual`='N'";
 
 				$query = $this->db->query($mSQL);
 				if ($query->num_rows() > 0){

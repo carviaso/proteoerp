@@ -431,7 +431,7 @@ class DataObject{
 					$this->data[$key] = $this->pk[$key];
 					$this->loaded = true;
 					//$this->bind_rel();
-				 }
+				}
 
 				if($this->save_rel){
 					//guarda detalles

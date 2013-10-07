@@ -208,7 +208,7 @@ class Sucu extends Controller {
 		));
 
 
-		$grid->addField('DB');
+		$grid->addField('db_nombre');
 		$grid->label('DB');
 		$grid->params(array(
 			'search'        => 'true',
@@ -288,19 +288,12 @@ class Sucu extends Controller {
 		$edit->script($script,'create');
 		$edit->on_save_redirect=false;
 
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
-		$edit->script($script,'create');
-
-		$edit->script($script,'modify');
-
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
-
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
 
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo');
 		$edit->codigo->rule = 'required|max_length[4]|alpha_numeric';
@@ -349,10 +342,15 @@ class Sucu extends Controller {
 		$edit->puerto->size =8;
 		$edit->puerto->maxlength =6;
 
-		$edit->DB = new inputField('DB','DB');
-		$edit->DB->rule='';
-		$edit->DB->size =40;
-		$edit->DB->maxlength =100;
+		$edit->db_nombre = new inputField('Nombre DB','db_nombre');
+		$edit->db_nombre->rule='';
+		$edit->db_nombre->size =40;
+		$edit->db_nombre->maxlength =100;
+
+		$edit->identifi = new inputField('Identificaci&oacute;n','identifi');
+		$edit->identifi->rule='';
+		$edit->identifi->size =40;
+		$edit->identifi->maxlength =100;
 
 		$edit->build();
 
@@ -482,7 +480,12 @@ class Sucu extends Controller {
 		}
 
 		if(!in_array('db_nombre',$campos)){
-			$mSQL="ALTER TABLE `sucu`  ADD COLUMN `db_nombre` VARCHAR(50) NULL DEFAULT NULL AFTER `proteo`";
+			$mSQL="ALTER TABLE `sucu`  ADD COLUMN `db_nombre` VARCHAR(50) NULL DEFAULT NULL";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('identifi',$campos)){
+			$mSQL="ALTER TABLE `sucu` ADD COLUMN `identifi` VARCHAR(50) NULL DEFAULT NULL";
 			$this->db->simple_query($mSQL);
 		}
 	}

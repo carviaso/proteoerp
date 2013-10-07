@@ -58,7 +58,7 @@ else:
 								<td colspan="2" class="littletableheaderc">
 									<?php echo $form->entidad->label;  ?>
 									<?php echo $form->entidad->output;  ?>
-								
+
 								</td>
 							</tr><tr>
 								<td colspan="2" class="littletableheaderc">
@@ -157,41 +157,45 @@ else:
 			<td class="littletableheaderc">C.I.</td>
 			<td class="littletablerow"><?php echo $form->cirepre->output ?></td>
 		</tr>
-		<!-- /table>
-		<table width="100%" -->
 		<tr>
 			<td class="littletableheaderc"><?php echo $form->vendedor->label  ?></td>
 			<td class="littletablerow"><?php echo $form->vendedor->output ?></td>
-			<td class="littletableheaderc">Comision %</td>
+			<td class="littletableheaderc">Comisi&oacute;n %</td>
 			<td class="littletablerow"><?php echo $form->porvend->output ?></td>
 		</tr>
 		<tr>
 			<td class="littletableheaderc"><?php echo $form->cobrador->label  ?></td>
 			<td class="littletablerow"><?php echo $form->cobrador->output ?></td>
-			<td class="littletableheaderc">Comision %</td>
+			<td class="littletableheaderc">Comisi&oacute;n %</td>
 			<td class="littletablerow"><?php echo $form->porcobr->output ?></td>
 		</tr>
 		<tr>
 			<td class="littletableheaderc">Cuenta Contable</td>
 			<td class="littletablerow"    ><?php echo $form->cuenta->output; ?>
 			<?php
-			if  ( !empty($form->cuenta->value) ) {
-				$mSQL = "SELECT descrip FROM cpla WHERE codigo='".trim($form->cuenta->value)."' limit 1";
+			if(!empty($form->cuenta->value)){
+				$dbcuenta=$this->db->escape(trim($form->cuenta->value));
+				$mSQL = "SELECT descrip FROM cpla WHERE codigo=${dbcuenta} limit 1";
 				echo $this->datasis->dameval($mSQL);
 			}
 			?>
 			</td>
+			<td class="littletableheaderc"><?php echo $form->sucursal->label;    ?></td>
+			<td class="littletablerow"    ><?php echo $form->sucursal->output;   ?></td>
 		</tr>
 		<tr>
 			<td class="littletableheaderc">Cuenta Anticipo</td>
 			<td class="littletablerow"    ><?php echo $form->canticipo->output; ?>
 			<?php
-			if  ( !empty($form->canticipo->value) ) {
-				$mSQL = "SELECT descrip FROM cpla WHERE codigo='".trim($form->canticipo->value)."' limit 1";
+			if(!empty($form->canticipo->value)){
+				$dbcanticipo=$this->db->escape(trim($form->canticipo->value));
+				$mSQL = "SELECT descrip FROM cpla WHERE codigo=${dbcanticipo} LIMIT 1";
 				echo $this->datasis->dameval($mSQL);
 			}
 			?>
 			</td>
+			<td class="littletableheaderc"><?php echo $form->aniversario->label;    ?></td>
+			<td class="littletablerow"    ><?php echo $form->aniversario->output;   ?></td>
 		</tr>
 		</table>
 	</tr>
