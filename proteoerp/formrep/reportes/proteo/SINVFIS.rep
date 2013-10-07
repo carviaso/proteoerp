@@ -60,14 +60,14 @@ $filter->depto->options("SELECT depto, descrip FROM dpto WHERE tipo='I' ORDER BY
 $filter->depto->onchange = "get_linea();";
 $filter->depto->group = "Producto";
 
-$filter->linea = new dropdownField('Línea', 'linea');
+$filter->linea = new dropdownField('LÃ­nea', 'linea');
 $filter->linea->db_name='b.linea';
 $filter->linea->option("","Seleccione un Departamento");
 $filter->linea->onchange = "get_grupo();";
 $filter->linea->group    = "Producto";
 
 $filter->grupo = new dropdownField("Grupo", "grupo");
-$filter->grupo->option("","Seleccione una Línea");
+$filter->grupo->option("","Seleccione una LÃ­nea");
 $filter->grupo->group = "Producto";
 $filter->grupo->db_name='b.grupo';
 
@@ -83,11 +83,11 @@ $filter->tipo->clause="where";
 $filter->tipo->db_name='a.tipo';
 $filter->tipo->operator="=";
 $filter->tipo->option("","Todos");
-$filter->tipo->option("Articulo","Artículo");
+$filter->tipo->option("Articulo","ArtÃ­culo");
 $filter->tipo->option("Servicio","Servicio");
 $filter->tipo->option("Consumo","Consumo");
 $filter->tipo->option("Descartar","Descartar");
-$filter->tipo->option("Fraccion","Fracción");
+$filter->tipo->option("Fraccion","FracciÃ³n");
 
 $filter->activo = new dropdownField("Activo", "activo");
 $filter->activo->db_name="a.activo";
@@ -99,8 +99,8 @@ $filter->activo->option("N","No");
 
 $filter->ordenpor = new dropdownField("Ordenado por", "orden");
 $filter->ordenpor->option("G"  ,"Grupo");
-$filter->ordenpor->option("D","Descripción");
-$filter->ordenpor->option("C" ,"Código");
+$filter->ordenpor->option("D","DescripciÃ³n");
+$filter->ordenpor->option("C" ,"CÃ³digo");
 $filter->ordenpor->clause ='';
 
 $filter->salformat = new radiogroupField('Formato de salida','salformat');
@@ -124,7 +124,7 @@ if($filter->ordenpor->newValue=='G'){
 	$orden='a.descrip';
 	$grupo='dletra';
 }else{
-	$grupolabel='Código  <#cletra#>';
+	$grupolabel='CÃ³digo  <#cletra#>';
 	$orden='a.codigo';
 	$grupo='cletra';
 }
@@ -144,7 +144,7 @@ if (!empty($filter->ordenpor->newValue)) $sobretabla.='  Ordenado por: '.$filter
 $pdf = new PDFReporte($mSQL);
 $pdf->setHeadValores('TITULO1');
 $pdf->setSubHeadValores('TITULO2','TITULO3');
-$pdf->setTitulo('Hoja de Trabajo para la Toma de Inventario Físico');
+$pdf->setTitulo('Hoja de Trabajo para la Toma de Inventario FÃ­sico');
 $pdf->setSobreTabla($sobretabla,5);
 $pdf->AddPage();
 $pdf->setTableTitu(9,'Times');
@@ -166,7 +166,7 @@ $pdf->Output();
 
 }else{
 	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Hoja de Trabajo para la Toma de Inventario Físico</h2>';
+	$data['titulo'] = '<h2 class="mainheader">Hoja de Trabajo para la Toma de Inventario FÃ­sico</h2>';
 	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

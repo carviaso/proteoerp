@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once(BASEPATH.'application/controllers/validaciones.php');
 class Pers extends Controller {
 	var $mModulo='PERS';
@@ -478,9 +478,8 @@ class Pers extends Controller {
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1, label: "Sexo" }'
 		));
 
-		$mSQL  = "SELECT division, CONCAT(division, ' ', descrip) descrip FROM divi ORDER BY division ";
-		$adivi = $this->datasis->llenajqselect($mSQL, false );
-
+		//$mSQL  = "SELECT division, CONCAT(division, ' ', descrip) descrip FROM divi ORDER BY division ";
+		//$adivi = $this->datasis->llenajqselect($mSQL, false );
 		$grid->addField('divi');
 		$grid->label('Divi');
 		$grid->params(array(
@@ -488,7 +487,7 @@ class Pers extends Controller {
 			'editable'      => $editar,
 			'width'         => 40,
 			'edittype'      => "'select'",
-			'editoptions'   => '{ value: '.$adivi.',  style:"width:250px"}',
+			//'editoptions'   => '{ value: '.$adivi.',  style:"width:250px"}',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2, label: "Division" }'
 		));
 
@@ -505,9 +504,8 @@ class Pers extends Controller {
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1, label: "Estado Civil" }'
 		));
 
-		$mSQL  = "SELECT departa, CONCAT(departa, ' ', depadesc) descrip FROM depa ORDER BY departa ";
-		$adepa = $this->datasis->llenajqselect($mSQL, false );
-
+		//$mSQL  = "SELECT departa, CONCAT(departa, ' ', depadesc) descrip FROM depa ORDER BY departa ";
+		//$adepa = $this->datasis->llenajqselect($mSQL, false );
 		$grid->addField('depto');
 		$grid->label('Depto.');
 		$grid->params(array(
@@ -516,13 +514,10 @@ class Pers extends Controller {
 			'editable'      => $editar,
 			'width'         => 50,
 			'edittype'      => "'select'",
-			'editoptions'   => '{ value: '.$adepa.',  style:"width:250px"}',
+			//'editoptions'   => '{ value: '.$adepa.',  style:"width:250px"}',
 			'stype'         => "'text'",
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2, label:"Departamento" }'
 		));
-
-		$mSQL  = "SELECT cargo, CONCAT(cargo, ' ', descrip) descrip FROM carg ORDER BY cargo ";
-		$acargo = $this->datasis->llenajqselect($mSQL, false );
 
 		$linea = $linea + 1;
 		$grid->addField('ingreso');
@@ -537,6 +532,8 @@ class Pers extends Controller {
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1, label:"Fecha Ingreso" }'
 		));
 
+		//$mSQL  = "SELECT cargo, CONCAT(cargo, ' ', descrip) descrip FROM carg ORDER BY cargo ";
+		//$acargo = $this->datasis->llenajqselect($mSQL, false );
 		$grid->addField('cargo');
 		$grid->label('Cargo');
 		$grid->params(array(
@@ -545,7 +542,7 @@ class Pers extends Controller {
 			'editable'      => $editar,
 			'width'         => 50,
 			'edittype'      => "'select'",
-			'editoptions'   => '{ value: '.$acargo.',  style:"width:250px"}',
+			//'editoptions'   => '{ value: '.$acargo.',  style:"width:250px"}',
 			'stype'         => "'text'",
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2, label:"Cargo" }'
 		));
@@ -567,8 +564,8 @@ class Pers extends Controller {
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1, label:"Sueldo" }'
 		));
 
-		$mSQL  = "SELECT codigo, profesion FROM prof ORDER BY profesion ";
-		$aprof = $this->datasis->llenajqselect($mSQL, false );
+		//$mSQL  = "SELECT codigo, profesion FROM prof ORDER BY profesion ";
+		//$aprof = $this->datasis->llenajqselect($mSQL, false );
 		$grid->addField('profes');
 		$grid->label('Profesi&oacute;n');
 		$grid->params(array(
@@ -576,9 +573,9 @@ class Pers extends Controller {
 			'editable'      => $editar,
 			'width'         => 80,
 			'edittype'      => "'select'",
-			'editoptions'   => '{ value: '.$aprof.',  style:"width:250px"}',
+			//'editoptions'   => '{ value: '.$aprof.',  style:"width:250px"}',
 			'stype'         => "'text'",
-			'formoptions'   => '{ rowpos:'.$linea.', colpos:2, label:"Profesion" }'
+			//'formoptions'   => '{ rowpos:'.$linea.', colpos:2, label:"Profesion" }'
 		));
 
 		$linea = $linea + 1;
@@ -634,8 +631,8 @@ class Pers extends Controller {
 		));
 
 
-		$mSQL  = "SELECT codigo, CONCAT(codigo, ' ', nombre) nombre FROM noco ORDER BY codigo ";
-		$anoco = $this->datasis->llenajqselect($mSQL, false );
+		//$mSQL  = "SELECT codigo, CONCAT(codigo, ' ', nombre) nombre FROM noco ORDER BY codigo ";
+		//$anoco = $this->datasis->llenajqselect($mSQL, false );
 		$grid->addField('contrato');
 		$grid->label('Contrato');
 		$grid->params(array(
@@ -643,10 +640,11 @@ class Pers extends Controller {
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 50,
-			'edittype'      => "'select'",
-			'editoptions'   => '{ value: '.$anoco.',  style:"width:250px"}',
+			'edittype'      => "'text'",
+			//'edittype'      => "'select'",
+			//'editoptions'   => '{ value: '.$anoco.',  style:"width:250px"}',
 			'stype'         => "'text'",
-			'formoptions'   => '{ rowpos:'.$linea.', colpos:2, label:"Contrato" }'
+			//'formoptions'   => '{ rowpos:'.$linea.', colpos:2, label:"Contrato" }'
 		));
 
 
@@ -1552,7 +1550,7 @@ class Pers extends Controller {
 				}
 			}
 		}
-		
+
 		logusu('pers',"PERSONAL ${codigo} NOMBRE ${nombre} MODIFICADO");
 	}
 
@@ -1811,7 +1809,7 @@ class Pers extends Controller {
 	// Forma de Departamento
 	//
 	function depaform(){
-		$editar = "true";
+		$editar = 'true';
 
 		$mSQL = "SELECT division, CONCAT(division, ' ', descrip) descrip FROM divi ORDER BY division ";
 		$adivision = $this->datasis->llenajqselect($mSQL, false );
@@ -1835,7 +1833,7 @@ class Pers extends Controller {
 
 
 		$grid->addField('departa');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'align'    => "'center'",
 			'search'        => 'true',
@@ -1858,7 +1856,7 @@ class Pers extends Controller {
 		));
 
 		$grid->addField('division');
-		$grid->label('Division');
+		$grid->label('Divisi&oacute;n');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
@@ -2104,7 +2102,7 @@ class Pers extends Controller {
 
 		$data['codigo'] = $codigo;
 		$data['fecha']  = date('Ymd');
-		
+
 		unset($data['oper']);
 		unset($data['id']);
 
@@ -2241,7 +2239,7 @@ class Pers extends Controller {
 			$this->db->simple_query("CREATE TABLE IF NOT EXISTS nedu (codigo varchar(4) NOT NULL, nivel varchar(40) DEFAULT NULL, PRIMARY KEY (`codigo`)) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC");
 			$this->db->simple_query("INSERT INTO nedu (codigo, nivel) VALUES ('00', 'Sin Educacion Formal'),('01', 'Primaria'),('02', 'Secundaria'),('03', 'Tecnico'),	('04', 'T.S.U.'),('05', 'Universitario'),('06', 'Post Universitario'),('07', 'Doctor'),('08', 'Guru')");
 		}
-		
+
 		if ( !$this->datasis->iscampo('prof','id') ) {
 			$this->db->simple_query('ALTER TABLE prof DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE prof ADD UNIQUE INDEX codigo (codigo)');
