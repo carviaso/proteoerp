@@ -881,6 +881,7 @@ class Noco extends Controller {
 		$edit->tipo->option('','Seleccionar');
 		$edit->tipo->option('S','Semanal');
 		$edit->tipo->option('Q','Quincenal');
+		$edit->tipo->option('B','Bisemanal');
 		$edit->tipo->option('M','Mensual');
 		$edit->tipo->option('O','Otro');
 		$edit->tipo->rule='required|enum[S,Q,M,O]';

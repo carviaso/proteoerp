@@ -3834,8 +3834,10 @@ class Scst extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				$row = $query->row();
-
-				$costo_pond=(($row->pond*$row->existen)+($itcana*$itprecio))/($itcana+$row->existen);
+				if ( ($itcana+$row->existen) <> 0 )
+					$costo_pond=(($row->pond*$row->existen)+($itcana*$itprecio))/($itcana+$row->existen);
+				else
+					$costo_pond=$itprecio;
 				$costo_ulti=$itprecio;
 
 				$costo=$this->_costos($row->formcal,$costo_pond,$costo_ulti,$row->standard);
