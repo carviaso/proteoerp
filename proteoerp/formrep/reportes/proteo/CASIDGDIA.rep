@@ -2,7 +2,9 @@ $this->rapyd->load("datafilter");
 $this->rapyd->load("datatable");
 $mCPLAD=array(
 	'tabla'   =>'cpla',
-	'columnas'=>array(		'codigo' =>'Código',
+	'columnas'=>array(
+	
+	'codigo' =>'Código',
 	'descrip'=>'Descripción'),
 	'filtro'  =>array('codigo'=>'Código','descrip'=>'Descripción'),
 	'retornar'=>array('codigo'=>'codigod'),
@@ -67,11 +69,9 @@ if($this->rapyd->uri->is_set("search")){
 	$mSQL=$this->rapyd->db->_compile_select();
 	//echo $mSQL;
 
-
-	$sobretabla='';   
+	$sobretabla='';
 	if (!empty($filter->fechad->newValue)) $sobretabla.=' Desde: '.dbdate_to_human($filter->fechad->newValue);
 	if (!empty($filter->fechah->newValue)) $sobretabla.=' Hasta: '.dbdate_to_human($filter->fechah->newValue);
-	
 	if (!empty($filter->cuentad->newValue))  $sobretabla.='  Cuenta Desde: ('.$filter->cuentad->newValue.') '.$this->datasis->dameval('SELECT descrip FROM cpla WHERE codigo="'.$filter->cuentad->newValue.'"');
 	if (!empty($filter->cuentah->newValue))  $sobretabla.='  Cuenta Hasta: ('.$filter->cuentah->newValue.') '.$this->datasis->dameval('SELECT descrip FROM cpla WHERE codigo="'.$filter->cuentah->newValue.'"');
 
@@ -95,9 +95,8 @@ if($this->rapyd->uri->is_set("search")){
 	$pdf->Table();
 	$pdf->Output();
 }else{
-
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Libro Diario General<h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Libro Diario General</h2>';
+	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

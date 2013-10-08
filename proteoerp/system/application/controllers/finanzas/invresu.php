@@ -855,7 +855,16 @@ class Invresu extends Controller {
 
 		$filter = new DataFilter('','view_invresutotal');
 
-		$mes = $this->datasis->dameval("SELECT MID(MAX(mes),1,4) FROM invresu");
+		$mes = $this->datasis->dameval('SELECT MID(MAX(mes),1,4) FROM invresu');
+
+		$estFecha = $this->datasis->dameval('SELECT MAX(fecha) AS fecha FROM costos');
+		if(empty($estFecha)){
+			$estMsj='No existen estad&iacute;sticas generadas, debe generarse primero para usar este modulo.';
+		}else{
+			$estMsj='Por favor tenga en cuenta que este modulo utiliza las estad&iacute;sticas del sistema, por lo tanto los movimientos se podr&aacute;n generar solo hasta el '.dbdate_to_human($estFecha).'.';
+		}
+		$filter->container = new containerField('alert',"<b style='color:#E50E0E;'>${estMsj}</b>");
+		$filter->container->clause='';
 
 		$filter->fecha = new inputField('A&ntilde;o', 'anno');
 		$filter->fecha->size     = 4;
@@ -1144,9 +1153,6 @@ class Invresu extends Controller {
 
 		}
 
-		#memowrite($mSQL);
-
-
 		$mSQL = "
 SELECT mes INTO @mPAPA FROM invresu WHERE mes < mFECHA ORDER BY mes DESC LIMIT 1;
 IF @mPAPA > 0 THEN
@@ -1180,8 +1186,6 @@ DROP TABLE IF EXISTS INVRESUTEM;
 UPDATE invresu SET final=inicial+compras-ventas-notas+trans+fisico,mfinal=minicial+mcompras-mventas-mnotas+mtrans+mfisico WHERE mes=mFECHA;";
 
 	}
-
-
 
 	function recalcula(){
 		$meco = $this->uri->segment(4);

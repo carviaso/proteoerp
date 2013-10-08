@@ -7,7 +7,7 @@ $mCPLAD=array(
 	'filtro'  =>array('codigo'=>'Código','descrip'=>'Descripción'),
 	'retornar'=>array('codigo'=>'codigod'),
 	'titulo'  =>'Buscar Cuenta');
-  
+
 $mCPLAH=array(
 	'tabla'   =>'cpla',
 	'columnas'=>array(
@@ -43,7 +43,7 @@ $filter->fechad->group = "Fecha";
 $filter->cuentad = new inputField("Desde la  Cuenta", "codigod");
 $filter->cuentad->db_name ="a.cuenta";
 $filter->cuentad->clause  ="where";
-$filter->cuentad->operator=">="; 
+$filter->cuentad->operator=">=";
 $filter->cuentad->append($bCPLAD);
 $filter->cuentad->group = "Cuenta";
 
@@ -57,28 +57,28 @@ $filter->cuentah->group = "Cuenta";
 $filter->comprobd = new inputField("Desde", "comprobd");
 $filter->comprobd->db_name ="a.comprob";
 $filter->comprobd->clause  ="where";
-$filter->comprobd->operator=">="; 
+$filter->comprobd->operator=">=";
 $filter->comprobd->db_name="a.comprob";
 $filter->comprobd->group="Comprobante";
 $filter->comprobh = new inputField("Hasta", "comprobh");
 $filter->comprobh->db_name="a.comprob";
-$filter->comprobh->clause="where";
-$filter->comprobh->db_name ="a.comprob";
-$filter->comprobh->operator="<=";
-$filter->comprobh->group="Comprobante";
+$filter->comprobh->clause='where';
+$filter->comprobh->db_name ='a.comprob';
+$filter->comprobh->operator='<=';
+$filter->comprobh->group='Comprobante';
 
 $filter->salformat = new radiogroupField("Formato de salida","salformat");
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons("search");
+$filter->buttons('search');
 $filter->build();
-if($this->rapyd->uri->is_set("search")){
+if($this->rapyd->uri->is_set('search')){
 	$mSQL=$this->rapyd->db->_compile_select();
 	//echo $mSQL;
-  	
-	$sobretabla='';   
+
+	$sobretabla='';
 	if (!empty($filter->cuentad->newValue))  $sobretabla.='  Cuenta Desde: ('.$filter->cuentad->newValue.') '.$this->datasis->dameval('SELECT descrip FROM cpla WHERE codigo="'.$filter->cuentad->newValue.'"');
 	if (!empty($filter->cuentah->newValue))  $sobretabla.='  Cuenta Hasta: ('.$filter->cuentah->newValue.') '.$this->datasis->dameval('SELECT descrip FROM cpla WHERE codigo="'.$filter->cuentah->newValue.'"');
 	if (!empty($filter->comprobd->newValue)) $sobretabla.=' Comprobante Desde: '.$filter->comprobd->newValue;
@@ -107,7 +107,7 @@ if($this->rapyd->uri->is_set("search")){
 
 }else{
 	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Diario General<h2>';
+	$data["titulo"] = '<h2 class="mainheader">Diario General</h2>';
 	$data["head"] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

@@ -1,9 +1,11 @@
 $filter = new DataFilter2("Filtro del Reporte");
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$select=array('b.nombre','b.rifci','a.nroriva','a.emiriva','a.numero',
-'a.monto AS gtotal', 'c.exento', 'a.reteiva', 'a.recriva AS frecep',
-'a.estampa', '"CREDITO" AS caja',"COALESCE(c.nfiscal,'NO ENCONTRADO') AS nfiscal");
+$select=array(
+	'b.nombre','b.rifci','a.nroriva','a.emiriva','a.numero',
+	'a.monto AS gtotal', 'c.exento', 'a.reteiva', 'a.recriva AS frecep',
+	'a.estampa', '"CREDITO" AS caja',"COALESCE(c.nfiscal,'NO ENCONTRADO') AS nfiscal"
+);
 $filter->db->select($select);
 $filter->db->from('itccli AS a');
 $filter->db->join('scli AS b','a.cod_cli=b.cliente');
@@ -48,7 +50,7 @@ if($this->rapyd->uri->is_set('search')){
 	$mSQL2 .= " WHERE a.tipo='RI' AND a.f_factura BETWEEN ".$filter->fechad->newValue." AND ".$filter->fechah->newValue;
 	$mSQL2 .= ' ORDER BY emiriva ';
 
-        $mSQL = "SELECT aa.*,MID(COALESCE(bb.almacen,'DE01'),3) AS almacen FROM (${mSQL1} UNION ALL ${mSQL2}) AS aa ";
+	$mSQL = "SELECT aa.*,MID(COALESCE(bb.almacen,'DE01'),3) AS almacen FROM (${mSQL1} UNION ALL ${mSQL2}) AS aa ";
 	$mSQL.= " LEFT JOIN caja AS bb ON aa.caja=bb.caja";
 	if($filter->agrupa->newValue=='I'){
 		$mSQL.= ' ORDER BY aa.estampa,bb.almacen,aa.caja';
@@ -84,13 +86,12 @@ if($this->rapyd->uri->is_set('search')){
 	if($filter->agrupa->newValue=='I'){
 		$pdf->setGrupoLabel('Fecha de Registro <#estampa#>:');
 		$pdf->setGrupo('estampa');
- 	}else{
+	}else{
 		$pdf->setGrupoLabel('Sucursal <#almacen#>:');
 		$pdf->setGrupo('almacen');
 	}
 	$pdf->Table();
 	$pdf->Output();
-
 }else{
 	$data['filtro'] = $filter->output;
 	$data['titulo'] = '<h2 class="mainheader">Relación de retenciones recibidas</h2>';

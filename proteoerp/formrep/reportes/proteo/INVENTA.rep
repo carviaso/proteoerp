@@ -1,0 +1,93 @@
+$filter = new DataFilter2('');
+//$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->db->from('invresu AS a');
+$filter->db->join('sinv AS b','a.codigo=b.codigo','LEFT');
+$filter->db->groupby('a.codigo');
+$filter->db->orderby('b.descrip');
+
+$estMsj='Por favor tenga en cuenta de que este reporte debe ser primero generado por el m&oacute;dulo de <b title=\'Finanzas - Libro de inventario\'>Libro de inventario</b> para la fecha solicitada antes de ser emitido.';
+$filter->container = new containerField('info',"<span style='color:#E50E0E;'>${estMsj}</span>");
+$filter->container->clause='';
+
+$filter->fechad = new dateonlyField('Mes', 'fechad','m/Y');
+$filter->fechad->clause  ='where';
+$filter->fechad->db_name ='mes';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30, date('Y')));
+$filter->fechad->operator='=';
+$filter->fechad->dbformat='Ym';
+$filter->fechad->size=9;
+$filter->fechad->maxsize=7;
+$filter->fechad->append(' mes/año');
+$filter->fechad->rule = 'required|chfecha[m/Y]';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
+	$select=array(
+		'a.mes',
+		'a.codigo',
+		'IF(b.descrip IS NULL,CONCAT(a.codigo,\' Articulo fusionado\') ,b.descrip) AS descrip',
+		'SUM(a.inicial*(a.inicial>0)) AS inicial',
+		'SUM(a.compras) AS compras',
+		'SUM(a.ventas)  AS ventas',
+		'SUM(a.notas)   AS retiros',
+		'SUM(a.trans+a.fisico-(final*(final<0)-inicial*(inicial<0))) AS autoc',
+		'ABS(SUM(a.final*(a.final<0))) AS pend',
+		'SUM(a.final*(a.final>0)) AS final',
+		'SUM(a.minicial*(a.minicial>0)) AS minicial',
+		'SUM(a.mcompras) AS mcompras',
+		'SUM(a.mventas)  AS mventas',
+		'SUM(a.mnotas)   AS mretiros',
+		'SUM(a.mtrans+a.mfisico-(mfinal*(mfinal<0)-minicial*(minicial<0))) AS mautoc',
+		'ABS(SUM(a.mfinal*(a.mfinal<0))) AS mpend',
+		'SUM(a.mfinal*(a.mfinal>0)) AS mfinal'
+	);
+
+	$filter->db->select($select);
+	$mSQL=$filter->db->_compile_select();
+	//echo $mSQL;
+
+	$sobretabla='';
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3','RIF');
+	$pdf->setTitulo('Libro de Movimiento de Inventario');
+	$pdf->setSobreTabla($sobretabla,4);
+	$pdf->setSubTitulo('Para la fecha: '.$_POST['fechad']);
+	$pdf->AddPage();
+	$pdf->setTableTitu(7,'Times');
+
+	$pdf->AddCol('codigo'  ,15,'Código'      ,'L',4);
+	$pdf->AddCol('descrip' ,40,'Descripción' ,'L',4);
+	$pdf->AddCol('inicial' ,12,'Inicial'     ,'R',4);
+	$pdf->AddCol('compras' ,12,'Entradas'    ,'R',4);
+	$pdf->AddCol('ventas'  ,12,'Salidas'     ,'R',4);
+	$pdf->AddCol('retiros' ,12,'Retiros'     ,'R',4);
+	$pdf->AddCol('autoc'   ,12,'Autoc.'      ,'R',4);
+	$pdf->AddCol('pend'    ,12,'Pend.'       ,'R',4);
+	$pdf->AddCol('final'   ,12,'Final'       ,'R',4);
+	$pdf->AddCol('minicial',12,'Inicial'     ,'R',4);
+	$pdf->AddCol('mcompras',12,'Entradas'    ,'R',4);
+	$pdf->AddCol('mventas' ,12,'Salidas'     ,'R',4);
+	$pdf->AddCol('mretiros',12,'Retiros'     ,'R',4);
+	$pdf->AddCol('mautoc'  ,12,'Autoc.'      ,'R',4);
+	$pdf->AddCol('mpend'   ,12,'Pend.'       ,'R',4);
+	$pdf->AddCol('mfinal'  ,12,'Final'       ,'R',4);
+	$pdf->setTotalizar('inicial','compras','ventas','retiros','autoc','pend','final','minicial','mcompras','mventas','mretiros','mautoc','mpend','mfinal');
+	$pdf->Table();
+	$pdf->Output();
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Libro de Movimientos de Inventario</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

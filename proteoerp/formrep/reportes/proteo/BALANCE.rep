@@ -24,7 +24,7 @@ $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->submit("btnsubmit","Buscar");
+$filter->submit('btnsubmit','Buscar');
 $filter->build_form();
 
 if($this->rapyd->uri->is_set('search') AND $filter->is_valid() AND $pasamos){
@@ -116,8 +116,7 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid() AND $pasamos){
 	ORDER BY nivel
 	';
 
-
-//echo $mSQL;
+	//echo $mSQL;
 
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
@@ -129,10 +128,10 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid() AND $pasamos){
 	$pdf->setTableTitu(10,'Times');
 
 	$pdf->AddCol('descrip',  80,' ','L',8);
-	$pdf->AddCol('nivel1',   22,' ','R',8);
-	$pdf->AddCol('nivel2',   22,' ','R',8);
-	$pdf->AddCol('nivel3',   22,' ','R',8);
-	$pdf->AddCol('nivel4',   22,' ','R',8);
+	$pdf->AddCol('nivel1' ,  22,' ','R',8);
+	$pdf->AddCol('nivel2' ,  22,' ','R',8);
+	$pdf->AddCol('nivel3' ,  22,' ','R',8);
+	$pdf->AddCol('nivel4' ,  22,' ','R',8);
 
 	$pdf->Table();
 	$pdf->Output();

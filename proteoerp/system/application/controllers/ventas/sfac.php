@@ -166,7 +166,7 @@ class Sfac extends Controller {
 	//******************************************************************
 	//Funciones de los Botones
 	//
-	function bodyscript( $grid0, $grid1 ){
+	function bodyscript($grid0, $grid1){
 		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
@@ -205,10 +205,10 @@ class Sfac extends Controller {
 		$bodyscript .= '
 		function sfacedit() {
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				if(ret.referen=="P"){
-					$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
+					$.post("'.site_url($this->url.'dataedit').'/"+ret.manual+"/modify/"+id, function(data){
 						$("#fborra").html("");
 						$("#fimpser").html("");
 						$("#fedita").html(data);
@@ -1017,6 +1017,17 @@ class Sfac extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
+
+		$grid->addField('manual');
+		$grid->label('Manual');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:30, maxlength: 8 }',
+		));
 
 		$grid->addField('modificado');
 		$grid->label('Modificado');
@@ -2415,14 +2426,14 @@ class Sfac extends Controller {
 		$edit->sclitipo->insertValue = 1;
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
-		$edit->fecha->mode = 'autohide';
+		//$edit->fecha->mode = 'autohide';
 		//$edit->fecha->when = array('show');
 		if($manual <> 'S'){
 			$edit->fecha->insertValue=date('Y-m-d');
 		}
 		$edit->fecha->rule = 'required|chfecha';
 		$edit->fecha->calendar = false;
-		$edit->fecha->size = 10;
+		$edit->fecha->size = 12;
 
 		$edit->tipo_doc = new  dropdownField('Documento', 'tipo_doc');
 		$edit->tipo_doc->option('F','Factura');

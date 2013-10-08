@@ -122,7 +122,7 @@ if($this->rapyd->uri->is_set("search") AND $filter->is_valid() AND $pasamos){
 	$pdf->Output();
 }else{
 	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Balance General<h2>';
+	$data["titulo"] = '<h2 class="mainheader">Balance General</h2>';
 	$data["head"] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

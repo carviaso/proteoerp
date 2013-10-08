@@ -21,23 +21,15 @@ $mSOCIO=array(
 	'groupby' =>'cliente'
 );
 
-
-
 $bsclid=$this->datasis->modbus($mSCLId);
 $bsocio=$this->datasis->modbus($mSOCIO,'socio');
 
 if (!empty($_POST['socio'])) $_POST['cod_clid']='';
 
-
 $filter = new DataFilter2("Filtro del Reporte");
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$select="a.tipo_doc, a.numero, a.fecha, a.vence,a.monto, a.abonos,a.cod_cli,a.vendedor, a.nombre,   
- DATEDIFF(NOW(),a.vence) as dv,
-(monto)*IF(a.tipo_doc='AN',-1,1)as monto,
-(monto-abonos)*IF(a.tipo_doc='AN',-1,1) as saldo,a.transac,c.vd";
- 
-$select=array("cod_cli,numero, max(fecha) fecha, observa1, b.nombre as nombre, sum(monto*IF(tipo_doc IN ('AN', 'NC', 'AB'),-1,1)) as saldo, sum(monto*IF(tipo_doc IN ('AN', 'NC', 'AB'),1,0)) as debe, sum(monto*IF(tipo_doc IN ('AN', 'NC', 'AB'),0,1)) as haber");
+$select=array("cod_cli,numero, max(fecha) fecha, observa1, b.nombre AS nombre, SUM(monto*IF(tipo_doc IN ('AN', 'NC', 'AB'),-1,1)) AS saldo, SUM(monto*IF(tipo_doc IN ('AN', 'NC', 'AB'),1,0)) AS debe, SUM(monto*IF(tipo_doc IN ('AN', 'NC', 'AB'),0,1)) AS haber");
 
 $filter->db->select($select );
 $filter->db->from('smov as a');
@@ -57,56 +49,54 @@ $filter->cod_clid = new inputField("Cliente", "cod_clid");
 $filter->cod_clid->clause="where";
 $filter->cod_clid->db_name="a.cod_cli";
 $filter->cod_clid->append($bsclid);
-$filter->cod_clid->operator="="; 
+$filter->cod_clid->operator="=";
 
 $filter->socio = new inputField("Socio", "socio");
 $filter->socio->clause ="in";
 $filter->socio->db_name='(socio,a.cod_cli)';
-$filter->socio->append($bsocio.' No se tomará en cuenta el cliente'); 
+$filter->socio->append($bsocio.' No se tomará en cuenta el cliente');
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons("search");
+$filter->buttons('search');
 $filter->build();
 
 if($this->rapyd->uri->is_set("search")){
-	
 	$mSQL=$this->rapyd->db->_compile_select();
 	//echo $mSQL;
 
- 	$sobretabla='';
- 	if (!empty($filter->cod_clid->newValue)) $sobretabla.=' Cliente: ('.$filter->cod_clid->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_clid->newValue.'"');
- 	if (!empty($filter->socio->newValue))    $sobretabla.=' Socio: ('.$filter->socio->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->socio->newValue.'"');
-                 
+	$sobretabla='';
+	if(!empty($filter->cod_clid->newValue)) $sobretabla.=' Cliente: ('.$filter->cod_clid->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_clid->newValue.'"');
+	if(!empty($filter->socio->newValue))    $sobretabla.=' Socio: ('.$filter->socio->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->socio->newValue.'"');
+
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
 	$pdf->setTitulo("Saldos por Cobrar al ".dbdate_to_human($filter->fechah->newValue));
-  	$pdf->setSobreTabla($sobretabla);
+	$pdf->setSobreTabla($sobretabla);
 	$pdf->AddPage();
 	$pdf->setTableTitu(8,'Times');
 
-	$pdf->AddCol('fecha',    20,'Fecha',      'L',7);
-	$pdf->AddCol('cod_cli',  16,'Código',     'L',7);
-	$pdf->AddCol('nombre',   60,'Cliente',    'L',7);
-	$pdf->AddCol('debe',     20,'Debitos',    'R',7);
-	$pdf->AddCol('haber',    20,'Creditos',   'R',7);
-	$pdf->AddCol('saldo',    20,'Saldo',      'R',7);
+	$pdf->AddCol('fecha'    ,20,'Fecha'    ,'L',7);
+	$pdf->AddCol('cod_cli'  ,16,'Código'   ,'L',7);
+	$pdf->AddCol('nombre'   ,60,'Cliente'  ,'L',7);
+	$pdf->AddCol('debe'     ,20,'Debitos'  ,'R',7);
+	$pdf->AddCol('haber'    ,20,'Creditos' ,'R',7);
+	$pdf->AddCol('saldo'    ,20,'Saldo'    ,'R',7);
 
- 	$pdf->setTotalizar('saldo'); 
+	$pdf->setTotalizar('saldo');
 
- 	//$pdf->setGrupoLabel('Cliente <#cod_cli#> Nombre (<#nombre#>)  ');
+	//$pdf->setGrupoLabel('Cliente <#cod_cli#> Nombre (<#nombre#>)  ');
 	//$pdf->setGrupo('cod_cli');
- 	
+
 	$pdf->Table();
 	$pdf->Output();
-			
 }else{
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Efectos Pendientes<h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Efectos Pendientes</h2>';
+	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

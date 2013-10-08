@@ -47,7 +47,7 @@ $filter->salformat->clause = '';
 $filter->buttons('search');
 $filter->build();
 
-if($this->rapyd->uri->is_set("search")){
+if($this->rapyd->uri->is_set('search')){
 	$mSQL=$filter->db->_compile_select();
 	//echo $mSQL;
 
@@ -56,8 +56,8 @@ if($this->rapyd->uri->is_set("search")){
 	if(!empty($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
 
 	$sobretabla='';
-	if (!empty($filter->vd->newValue))      $sobretabla.=' Vendedor: ('.$filter->vd->newValue.') '.$filter->vd->description;
-	if (!empty($filter->chofer->newValue))  $sobretabla.=' Chofer: ('.$filter->chofer->newValue.') '.$filter->chofer->description;
+	if(!empty($filter->vd->newValue))      $sobretabla.=' Vendedor: ('.$filter->vd->newValue.') '.$filter->vd->description;
+	if(!empty($filter->chofer->newValue))  $sobretabla.=' Chofer: ('.$filter->chofer->newValue.') '.$filter->chofer->description;
 
 	$pdf = new PDFReporte($mSQL,'L');
 	$pdf->setType('id','string');
@@ -88,8 +88,8 @@ if($this->rapyd->uri->is_set("search")){
 	$pdf->Output();
 
 }else{
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Ventas Por Artículo<h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Detalle de Reparto</h2>';
+	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }
