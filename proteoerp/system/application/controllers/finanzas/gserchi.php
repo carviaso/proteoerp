@@ -15,6 +15,7 @@ class Gserchi extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		$this->datasis->creaintramenu( $data = array('modulo'=>'52B','titulo'=>'Caja Chica','mensaje'=>'Caja Chica','panel'=>'GASTOS','ejecutar'=>'finanzas/gserchi','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>900,'alto'=>600));
 		redirect($this->url.'jqdatag');
@@ -29,12 +30,20 @@ class Gserchi extends Controller {
 			$dbcodbanc= $this->db->escape($codbanc);
 			$error    = 0;
 			$cr       = $this->mcred; //Marca para el credito
+			$estampa  = date('Y-m-d');
+			$hora     = date('H:i:s');
 
-			$databan  = common::_traebandata($codbanc);
-			$datacar  = common::_traebandata($cargo);
-			if(!is_null($datacar)){
-				$tipo  = $datacar['tbanco'];
-				$moneda= $datacar['moneda'];
+			if($codbanc!=$cr){
+				$databan  = common::_traebandata($codbanc);
+				$datacar  = common::_traebandata($cargo);
+				if(!empty($datacar)){
+					$tipo  = $datacar['tbanco'];
+					$moneda= $datacar['moneda'];
+				}else{
+					return false;
+				}
+			}else{
+				$tipo = $moneda = '';
 			}
 
 			$mSQL='SELECT codbanc,fechafac,numfac,nfiscal,rif,proveedor,codigo,descrip,
@@ -42,14 +51,12 @@ class Gserchi extends Controller {
 			FROM gserchi WHERE ngasto IS NULL AND aceptado="S" AND codbanc='.$dbcodbanc;
 
 			$query = $this->db->query($mSQL);
-			if ($query->num_rows() > 0){
+			if($query->num_rows() > 0){
 				$transac  = $this->datasis->fprox_numero('ntransa');
 				$numero   = $this->datasis->fprox_numero('ngser');
-				$cheque   = ($tipo=='CAJ')? $this->datasis->banprox($codbanc): $numeroch ;
-
 
 				$montasa=$monredu=$monadic=$tasa=$reducida=$sobretasa=$exento=$totpre=$totiva=0;
-				foreach ($query->result() as $row){
+				foreach($query->result() as $row){
 
 					$data = array();
 					$data['fecha']      = $fecha;
@@ -67,8 +74,8 @@ class Gserchi extends Controller {
 					$data['departa']    = $row->departa ;
 					$data['transac']    = $transac;
 					$data['usuario']    = $this->session->userdata('usuario');
-					$data['estampa']    = date('Y-m-d');
-					$data['hora']       = date('H:i:s');
+					$data['estampa']    = $estampa;
+					$data['hora']       = $hora;
 					$data['huerfano']   = '';
 					$data['rif']        = $row->rif      ;
 					$data['proveedor']  = $row->proveedor;
@@ -110,21 +117,37 @@ class Gserchi extends Controller {
 					$tipo1   = '';
 					$credito = $totneto;
 					$causado = $this->datasis->fprox_numero('ncausado');
+					$control = $this->datasis->fprox_numero('nsprm');
 
 					$data=array();
 					$data['cod_prv']    = $codprv;
 					$data['nombre']     = $nombre;
 					$data['tipo_doc']   = 'FC';
-					$data['numero']     = $numero ;
-					$data['fecha']      = $fecha ;
+					$data['numero']     = $numero;
+					$data['fecha']      = $fecha;
 					$data['monto']      = $totneto;
 					$data['impuesto']   = $totiva ;
 					$data['abonos']     = 0;
 					$data['vence']      = $fecha;
+					$data['observa1']   = 'REPOSICION DE CAJA CHICA '.$codbanc;
+					$data['reten']      = 0;
+					$data['transac']    = $transac;
+					$data['estampa']    = $estampa;
+					$data['hora']       = $hora;
+					$data['usuario']    = $this->session->userdata('usuario');
+					$data['reteiva']    = 0;
+					$data['montasa']    = $montasa;
+					$data['monredu']    = $monredu;
+					$data['monadic']    = $monadic;
+					$data['tasa']       = $tasa;
+					$data['reducida']   = $reducida;
+					$data['sobretasa']  = $sobretasa;
+					$data['exento']     = $exento;
+					$data['causado']    = $causado;
+					$data['control']    = $control;
+
 					//$data['tipo_ref']   = '';
 					//$data['num_ref']    = '';
-					$data['observa1']   = 'REPOSICION DE CAJA CHICA '.$codbanc;
-
 					//$data['observa2']   = '';
 					//$data['banco']      = '';
 					//$data['tipo_op']    = '';
@@ -134,27 +157,14 @@ class Gserchi extends Controller {
 					//$data['descrip']    = '';
 					//$data['ppago']      = '';
 					//$data['nppago']     = '';
-					//$data['reten']      = '';
 					//$data['nreten']     = '';
 					//$data['mora']       = '';
 					//$data['posdata']    = '';
 					//$data['benefi']     = '';
 					//$data['control']    = '';
-					$data['transac']    = $transac;
-					$data['estampa']    = date('Y-m-d');
-					$data['hora']       = date('H:i:s');
-					$data['usuario']    = $this->session->userdata('usuario');
-					//$data['cambio']     ='';
-					//$data['pmora']      ='';
-					$data['reteiva']    = 0;
-					//$data['nfiscal']    ='';
-					$data['montasa']    = $montasa;
-					$data['monredu']    = $monredu;
-					$data['monadic']    = $monadic;
-					$data['tasa']       = $tasa;
-					$data['reducida']   = $reducida;
-					$data['sobretasa']  = $sobretasa;
-					$data['exento']     = $exento;
+					//$data['cambio']     = '';
+					//$data['pmora']      = '';
+					//$data['nfiscal']    = '';
 					//$data['fecdoc']     = '';
 					//$data['afecta']     = '';
 					//$data['fecapl']     = '';
@@ -162,7 +172,6 @@ class Gserchi extends Controller {
 					//$data['depto']      = '';
 					//$data['negreso']    = '';
 					//$data['ndebito']    = '';
-					$data['causado']    = $causado;
 
 					$sql=$this->db->insert_string('sprm', $data);
 					$ban=$this->db->simple_query($sql);
@@ -171,8 +180,8 @@ class Gserchi extends Controller {
 					$cheque  = '';
 					$negreso = '';
 				}else{
-					$ttipo  = $datacar['tbanco'];
-					$tipo1  = ($ttipo=='CAJ') ? 'D': 'C';
+					$tipo1  = ($tipo=='CAJ')? 'D': 'C';
+					$cheque = ($tipo=='CAJ')? $this->datasis->banprox($codbanc): $numeroch ;
 					$negreso= $this->datasis->fprox_numero('negreso');
 					$credito= 0;
 					$causado='';
@@ -183,7 +192,7 @@ class Gserchi extends Controller {
 					$data['numcuent']   = $datacar['numcuent'];
 					$data['banco']      = $datacar['banco'];
 					$data['saldo']      = $datacar['saldo'];
-					$data['tipo_op']    = ($ttipo=='CAJ') ? 'ND': 'CH';
+					$data['tipo_op']    = ($tipo=='CAJ') ? 'ND': 'CH';
 					$data['numero']     = $cheque;
 					$data['fecha']      = $fecha;
 					$data['clipro']     = 'P';
@@ -206,11 +215,11 @@ class Gserchi extends Controller {
 					$data['benefi']     = $benefi;
 					$data['posdata']    = '';
 					$data['abanco']     = '';
-					$data['liable']     = ($ttipo=='CAJ') ? 'S': 'N';;
+					$data['liable']     = ($tipo=='CAJ') ? 'S': 'N';;
 					$data['transac']    = $transac;
 					$data['usuario']    = $this->session->userdata('usuario');
-					$data['estampa']    = date('Y-m-d');
-					$data['hora']       = date('H:i:s');
+					$data['estampa']    = $estampa;
+					$data['hora']       = $hora;
 					$data['anulado']    = 'N';
 					$data['susti']      = '';
 					$data['negreso']    = $negreso;
@@ -239,18 +248,6 @@ class Gserchi extends Controller {
 				$data['codb1']      = $cargo;
 				$data['tipo1']      = $tipo1;
 				$data['cheque1']    = $cheque;
-				//$data['comprob1']   = '';
-				//$data['monto1']     = '';
-				//$data['codb2']      = '';
-				//$data['tipo2']      = '';
-				//$data['cheque2']    = '';
-				//$data['comprob2']   = '';
-				//$data['monto2']     = '';
-				//$data['codb3']      = '';
-				//$data['tipo3']      = '';
-				//$data['cheque3']    = '';
-				//$data['comprob3']   = '';
-				//$data['monto3']     = '';
 				$data['credito']    = $credito;
 				$data['tipo_doc']   = 'FC';
 				$data['orden']      = '';
@@ -258,8 +255,8 @@ class Gserchi extends Controller {
 				$data['benefi']     = $benefi;
 				$data['mdolar']     = '';
 				$data['usuario']    = $this->session->userdata('usuario');
-				$data['estampa']    = date('Y-m-d');
-				$data['hora']       = date('H:i:s');
+				$data['estampa']    = $estampa;
+				$data['hora']       = $hora;
 				$data['transac']    = $transac;
 				$data['preten']     = '';
 				$data['creten']     = '';
@@ -285,6 +282,18 @@ class Gserchi extends Controller {
 				$data['negreso']    = $negreso;
 				$data['ncausado']   = $causado;
 				$data['tipo_or']    = '';
+				//$data['comprob1']   = '';
+				//$data['monto1']     = '';
+				//$data['codb2']      = '';
+				//$data['tipo2']      = '';
+				//$data['cheque2']    = '';
+				//$data['comprob2']   = '';
+				//$data['monto2']     = '';
+				//$data['codb3']      = '';
+				//$data['tipo3']      = '';
+				//$data['cheque3']    = '';
+				//$data['comprob3']   = '';
+				//$data['monto3']     = '';
 
 				$sql=$this->db->insert_string('gser', $data);
 				$ban=$this->db->simple_query($sql);
@@ -295,13 +304,13 @@ class Gserchi extends Controller {
 				$dbfecha  = $this->db->escape($fecha);
 				$dbnumero = $this->db->escape($numero);
 				$dbcodprv = $this->db->escape($codprv);
-				$where = "fecha=$dbfecha AND proveed=$dbcodprv AND  numero=$dbnumero";
+				$where = "fecha=${dbfecha} AND proveed=${dbcodprv} AND  numero=${dbnumero}";
 				$mSQL = $this->db->update_string('gitser', $data, $where);
 				$ban=$this->db->simple_query($mSQL);
 				if($ban==false){ memowrite($mSQL,'gser'); $error++; }
 
 				$data = array('ngasto' => $numero);
-				$where = "ngasto IS NULL AND  codbanc=$dbcodbanc AND aceptado='S'";
+				$where = "ngasto IS NULL AND  codbanc=${dbcodbanc} AND aceptado='S'";
 				$mSQL = $this->db->update_string('gserchi', $data, $where);
 				$ban=$this->db->simple_query($mSQL);
 				if($ban==false){ memowrite($mSQL,'gser'); $error++; }
@@ -327,7 +336,7 @@ class Gserchi extends Controller {
 
 		//Botones Panel Izq
 		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
-		$grid->wbotonadd(array('id'=>'baprov','img'=>'images/arrow_up.png', 'alt' => 'Aprobar o rechazar para el pago' ,'label'=>'Aprobar/Rechazar' ));
+		$grid->wbotonadd(array('id'=>'baprov','img'=>'images/arrow_up.png', 'alt' => 'Aprobar o rechazar gasto para el pago' ,'label'=>'Aprobar/Rechazar' ));
 		$grid->wbotonadd(array('id'=>'brepon','img'=>'images/star.png'    , 'alt' => 'Reposici&oacute;n de caja Chica' ,'label'=>'Reponer Caja Chica' ));
 		$WestPanel = $grid->deploywestp();
 
@@ -418,11 +427,11 @@ class Gserchi extends Controller {
 							try{
 								var json = JSON.parse(r);
 								if (json.status == "A"){
-									apprise("Registro Eliminado");
+									$.prompt("Registro Eliminado");
 									jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 									return true;
 								} else {
-									apprise(json.mensaje);
+									$.prompt(json.mensaje);
 								}
 							}catch(e){
 								$("#fborra").html(r);
@@ -488,12 +497,12 @@ class Gserchi extends Controller {
 							try{
 								var json = JSON.parse(r);
 								if (json.status == "A"){
-									apprise("Registro Guardado");
+									$.prompt("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
 									return true;
 								} else {
-									apprise(json.mensaje);
+									$.prompt(json.mensaje);
 								}
 							}catch(e){
 								$("#fedita").html(r);
@@ -527,14 +536,14 @@ class Gserchi extends Controller {
 						success: function(r,s,x){
 							try{
 								var json = JSON.parse(r);
-								if (json.status == "A"){
-									apprise("Pago procesado");
+								if(json.status == "A"){
+									$.prompt("Pago procesado");
 									$( "#frepon" ).dialog( "close" );
 									grid.trigger("reloadGrid");
 									'.$this->datasis->jwinopen(site_url('formatos/ver/GSER').'/\'+json.pk.id+\'/id\'').';
 									return true;
-								} else {
-									apprise(json.mensaje);
+								}else{
+									$.prompt(json.mensaje);
 								}
 							}catch(e){
 								$("#frepon").html(r);
@@ -587,8 +596,7 @@ class Gserchi extends Controller {
 			}
 		};';
 
-		$bodyscript .= "\n</script>\n";
-
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -597,7 +605,7 @@ class Gserchi extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -606,10 +614,22 @@ class Gserchi extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 50,
+			'width'         => 55,
+			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:1, maxlength: 1 }',
+			'cellattr'      => 'function(rowId, tv, aData, cm, rdata){
+				var tips = "";
+				if(aData.aceptado == "S"){
+					tips = "Gasto Aceptado";
+				}else if(aData.aceptado == "N"){
+					tips = "Gasto Rechazado";
+				}else{
+					tips = "Gasto nuevo";
+				}
+				return \'title="\'+tips+\'"\';
+			}'
 		));
 
 		$grid->addField('codbanc');
@@ -638,7 +658,7 @@ class Gserchi extends Controller {
 
 
 		$grid->addField('numfac');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -650,7 +670,7 @@ class Gserchi extends Controller {
 
 
 		$grid->addField('nfiscal');
-		$grid->label('N.Fiscal');
+		$grid->label('N.F&iacute;scal');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -843,7 +863,7 @@ class Gserchi extends Controller {
 		));
 
 		$grid->addField('departa');
-		$grid->label('Departa');
+		$grid->label('Departamento');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -945,8 +965,8 @@ class Gserchi extends Controller {
 			}
 		');
 
-		$grid->setBarOptions("addfunc: gserchiadd, editfunc: gserchiedit,delfunc: gserchidel");
-		$grid->setOndblClickRow("");
+		$grid->setBarOptions('addfunc: gserchiadd, editfunc: gserchiedit,delfunc: gserchidel');
+		$grid->setOndblClickRow('');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -1005,13 +1025,13 @@ class Gserchi extends Controller {
 		$mSQL='SELECT COUNT(*) AS cana, SUM(exento+montasa+monadic+monredu+tasa+sobretasa+reducida) AS monto FROM gserchi WHERE ngasto IS NULL AND aceptado="S" AND codbanc='.$dbcodbanc;
 		$r   =$this->datasis->damerow($mSQL);
 		if($r['cana']==0){
-			echo heading('Caja sin gastos');
+			echo heading("Caja ${codbanc} no tiene gastos aprobados, debe primero aprobar algun gasto y luego si puede reponerla");
 			return false;
 		}
 
-		$mSQL="SELECT a.codprv, b.nombre FROM banc AS a JOIN sprv AS b ON a.codprv=b.proveed WHERE a.codbanc=$dbcodbanc";
+		$mSQL="SELECT a.codprv, b.nombre FROM banc AS a JOIN sprv AS b ON a.codprv=b.proveed WHERE a.codbanc=${dbcodbanc}";
 		$query = $this->db->query($mSQL);
-		if ($query->num_rows() > 0){
+		if($query->num_rows()>0){
 			$row    = $query->row();
 			$nombre = $row->nombre;
 			$codprv = $row->codprv;
@@ -1025,12 +1045,12 @@ class Gserchi extends Controller {
 		if ($query->num_rows() > 0){
 			foreach ($query->result() as $row){
 				$ind='_'.$row->codbanc;
-				$comis[$ind]['tbanco']  =$row->tbanco;
+				$comis[$ind]['tbanco']=$row->tbanco;
 			}
 		}
 		$json_comis=json_encode($comis);
 
-		$this->rapyd->load('dataform','datagrid');
+		$this->rapyd->load('dataform','datagrid2');
 
 		$modbus=array(
 			'tabla'   =>'sprv',
@@ -1055,7 +1075,7 @@ class Gserchi extends Controller {
 						url:  "'.site_url('ajax/buscasprv').'",
 						type: "POST",
 						dataType: "json",
-						data: "q="+req.term,
+						data: {"q":req.term},
 						success:
 							function(data){
 								var sugiere = [];
@@ -1133,8 +1153,8 @@ class Gserchi extends Controller {
 		$dbcodban=$this->db->escape($codbanc);
 		$form->cargo = new dropdownField('Reponer desde','cargo');
 		$form->cargo->option('','Seleccionar');
-		//$form->cargo->option($this->mcred,'Credito');
 		$form->cargo->options("SELECT codbanc, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE activo='S' AND tipocta<>'Q' AND codbanc<>$dbcodban ORDER BY codbanc");
+		$form->cargo->option($this->mcred,'CREDITO');
 		$form->cargo->onchange='desactivacampo(this.value)';
 		$form->cargo->rule='max_length[5]|required';
 
@@ -1152,22 +1172,24 @@ class Gserchi extends Controller {
 
 		$form->build_form();
 
-		$grid = new DataGrid('Lista de facturas a pagar','gserchi');
-		$select=array('exento + montasa + monadic + monredu + tasa + sobretasa + reducida AS totneto',
+		$grid = new DataGrid2("Lista de facturas aceptadas para pagar de la caja ${codbanc}",'gserchi');
+		$select=array('exento + montasa + monadic + monredu + tasa + sobretasa + reducida AS totneto','descrip',
 					  'tasa + sobretasa + reducida AS totiva','proveedor','fechafac','numfac','codbanc' );
+		$grid->totalizar('totneto','totiva');
 		$grid->db->select($select);
 		$grid->db->where('aceptado','S');
 		$grid->db->where('ngasto IS NULL');
 		$grid->db->where('codbanc',$codbanc);
 
-		$grid->order_by('numfac','desc');
+		$grid->order_by('fechafac','desc');
 		$grid->per_page = 15;
-		$grid->column('Caja','codbanc');
-		$grid->column('Numero','numfac');
+		//$grid->column('Caja','codbanc');
+		$grid->column('N&uacute;mero','numfac');
 		$grid->column('Fecha' ,'<dbdate_to_human><#fechafac#></dbdate_to_human>','align=\'center\'');
 		$grid->column('Proveedor','proveedor');
-		$grid->column('IVA'   ,'totiva'    ,'align=\'right\'');
-		$grid->column('Monto' ,'totneto'   ,'align=\'right\'');
+		$grid->column('Descripci&oacute;n','descrip');
+		$grid->column('IVA'   ,'<nformat><#totiva#></nformat>'  ,'align=\'right\'');
+		$grid->column('Monto' ,'<b><nformat><#totneto#></nformat></b>' ,'align=\'right\'');
 
 		//$grid->add('finanzas/gser/datagserchi/create','Agregar nueva factura');
 		$grid->build();
@@ -1224,7 +1246,7 @@ class Gserchi extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = '??????';
 		$check  = 0;
 
 		//unset($data['oper']);
@@ -1319,7 +1341,7 @@ class Gserchi extends Controller {
 			}else{
 				vrif=vrif.toUpperCase();
 				$('#rif').val(vrif);
-				window.open('$consulrif'+'?p_rif='+vrif,'CONSULRIF','height=350,width=410');
+				window.open('${consulrif}'+'?p_rif='+vrif,'CONSULRIF','height=350,width=410');
 			}
 		}
 
@@ -1434,9 +1456,9 @@ class Gserchi extends Controller {
 
 		$edit->codbanc = new dropdownField('Caja','codbanc');
 		$edit->codbanc->option('','Seleccionar');
-		$edit->codbanc->options("SELECT codbanc, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE tbanco='CAJ' AND codbanc!='00' AND tipocta='Q' ORDER BY codbanc");
+		$edit->codbanc->options("SELECT TRIM(codbanc) AS codbanc, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE tbanco IN ('CAJ','CHI') AND codbanc!='00' AND tipocta='Q' ORDER BY codbanc");
 		$edit->codbanc->rule='max_length[2]|required';
-		$edit->codbanc->style = "width:180px";
+		$edit->codbanc->style = 'width:180px';
 
 		$edit->fechafac = new dateField('Fecha','fechafac');
 		$edit->fechafac->rule='max_length[10]|required';
@@ -1487,12 +1509,12 @@ class Gserchi extends Controller {
 
 		$arr=array(
 			'exento'   =>'Monto <b>Exento</b>|Monto exento',
-			'montasa'  =>'Base Tasa '.  $ivas['tasa'].'%|Base imponible',
-			'tasa'     =>'IVA '.  $ivas['tasa'].'%|Monto del IVA',
-			'monredu'  =>'Base Tasa '. $ivas['redutasa'].'%|Base imponible',
-			'reducida' =>'IVA '. $ivas['redutasa'].'%|Monto del IVA',
-			'monadic'  =>'Base Tasa '.$ivas['sobretasa'].'%|Base imponible',
-			'sobretasa'=>'IVA '.$ivas['sobretasa'].'%|Monto del IVA',
+			'montasa'  =>'Base Tasa '.htmlnformat($ivas['tasa']).'%|Base imponible',
+			'tasa'     =>'IVA '.htmlnformat($ivas['tasa']).'%|Monto del IVA',
+			'monredu'  =>'Base Tasa '.htmlnformat($ivas['redutasa']).'%|Base imponible',
+			'reducida' =>'IVA '.htmlnformat($ivas['redutasa']).'%|Monto del IVA',
+			'monadic'  =>'Base Tasa '.htmlnformat($ivas['sobretasa']).'%|Base imponible',
+			'sobretasa'=>'IVA '.htmlnformat($ivas['sobretasa']).'%|Monto del IVA',
 			'importe'  =>'Importe total');
 
 		foreach($arr AS $obj=>$label){
@@ -1564,7 +1586,7 @@ class Gserchi extends Controller {
 		$dbrif = $this->db->escape($rif);
 		$nombre=$do->get('proveedor');
 		$fecha =date('Y-m-d');
-		$csprv =$this->datasis->dameval('SELECT COUNT(*) FROM sprv WHERE rif='.$dbrif);
+		$csprv =$this->datasis->dameval('SELECT COUNT(*) AS cana FROM sprv WHERE rif='.$dbrif);
 		if($csprv==0){
 			$mSQL ='INSERT IGNORE INTO provoca (rif,nombre,fecha) VALUES ('.$dbrif.','.$this->db->escape($nombre).','.$this->db->escape($fecha).')';
 			$this->db->simple_query($mSQL);
@@ -1626,26 +1648,59 @@ class Gserchi extends Controller {
 	function _post_insert($do){
 		$primary =implode(',',$do->pk);
 		$numero  = $do->get('numero');
-		logusu($do->table,"Creo factura caja chica numero $numero id $primary ");
+		logusu($do->table,"Creo factura caja chica numero ${numero} id $primary ");
 	}
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
 		$numero  = $do->get('numero');
-		logusu($do->table,"Modifico factura caja chica numero $numero $primary ");
+		logusu($do->table,"Modifico factura caja chica numero ${numero} $primary ");
 	}
 
 	function _post_delete($do){
 		$primary = implode(',',$do->pk);
 		$numero  = $do->get('numfac');
-		logusu($do->table,"Elimino factura caja chica numero $numero $primary ");
+		logusu($do->table,"Elimino factura caja chica numero ${numero} $primary ");
 	}
 
-	function vista()
-	{
+	function vista(){
 
 	}
 
-
+	function instalar(){
+		if (!$this->db->table_exists('gserchi')) {
+			$mSQL="CREATE TABLE `gserchi` (
+			  `codbanc` varchar(5) NOT NULL DEFAULT '',
+			  `fechafac` date DEFAULT NULL,
+			  `numfac` varchar(8) DEFAULT NULL,
+			  `nfiscal` varchar(12) DEFAULT NULL,
+			  `rif` varchar(13) DEFAULT NULL,
+			  `proveedor` varchar(40) DEFAULT NULL,
+			  `codigo` varchar(6) DEFAULT NULL,
+			  `descrip` varchar(50) DEFAULT NULL,
+			  `moneda` char(2) DEFAULT NULL,
+			  `montasa` decimal(17,2) DEFAULT '0.00',
+			  `tasa` decimal(17,2) DEFAULT NULL,
+			  `monredu` decimal(17,2) DEFAULT '0.00',
+			  `reducida` decimal(17,2) DEFAULT NULL,
+			  `monadic` decimal(17,2) DEFAULT '0.00',
+			  `sobretasa` decimal(17,2) DEFAULT NULL,
+			  `exento` decimal(17,2) DEFAULT '0.00',
+			  `importe` decimal(12,2) DEFAULT NULL,
+			  `sucursal` char(2) DEFAULT NULL,
+			  `departa` char(2) DEFAULT NULL,
+			  `ngasto` varchar(8) DEFAULT NULL,
+			  `usuario` varchar(12) DEFAULT NULL,
+			  `estampa` date DEFAULT NULL,
+			  `hora` varchar(8) DEFAULT NULL,
+			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+			  `aceptado` char(1) DEFAULT NULL,
+			  PRIMARY KEY (`id`)
+			) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
+			$this->db->simple_query($mSQL);
+		}
+		//$campos=$this->db->list_fields('gserchi');
+		//if(!in_array('<#campo#>',$campos)){ }
+	}
 
 }

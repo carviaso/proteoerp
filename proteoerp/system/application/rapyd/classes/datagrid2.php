@@ -37,7 +37,7 @@ class DataGrid2 extends DataGrid{
   * @param string $title
   * @param mixed $data
   */
-	
+
 	function DataGrid2($title=null, $data=null){
 		parent::DataGrid($title, $data);
 	}
@@ -45,7 +45,7 @@ class DataGrid2 extends DataGrid{
 	function agrupar($tgrupo=null, $agrupar=null){
 		if(!empty($agrupar)){
 			$this->agrupar=$agrupar;
-			if (!is_array($this->data))
+			if(!is_array($this->data))
 				$this->db->orderby($agrupar);
 		}
 
@@ -54,7 +54,7 @@ class DataGrid2 extends DataGrid{
 		else
 			$this->tgrupo=$agrupar;
 	}
-  
+
 	function _buildGrid($mivista='datagrid'){
 
 		$mypointer = 0;
@@ -70,7 +70,7 @@ class DataGrid2 extends DataGrid{
 		$this->rapyd->set_view_path();
 
 		//title
-		$data["title"] = $this->_title;
+		$data['title'] = $this->_title;
 
 		//buttons
 		if (count($this->_button_container["TR"])>0){
@@ -99,12 +99,12 @@ class DataGrid2 extends DataGrid{
 		$this->_row_id=(int)$offset;
 		$this->gvalor='';
 		foreach ( $this->data as $tablerow){
-		  unset($row);
-      $this->_row_id++;
+			unset($row);
+			$this->_row_id++;
 
-      $llena=array();
+			$llena=array();
 			foreach ( $this->columns as $column ) {
-				
+
 				//##########
 				if(!empty($this->agrupar) AND $this->gvalor!=$tablerow[$this->agrupar]){
 					$expande=count($this->columns);
@@ -114,37 +114,33 @@ class DataGrid2 extends DataGrid{
 					$this->gvalor=$tablerow[$this->agrupar];
 				}
 				//##########
-				
+
 				$column->_row_id = $this->_row_id;
 				$column->resetPattern();
-				
-				$column->setDataRow($tablerow);	
-
+				$column->setDataRow($tablerow);
 
 				$cell["link"] = $column->link;
 				$cell["field"] = $column->getValue();
 				$cell["attributes"] = $column->attributes;
 				$cell["type"] = $column->columnType;
-				
+
 				$row[] = $cell;
-				
 			}
 			$data["rows"][] = $row;
 		}
 
 		//pager
 		if ($this->paged){
-		 $data["pager"] = $this->navigator;
+			$data["pager"] = $this->navigator;
 		}
-		
-    $data["total_rows"] = $this->recordCount;
-    
+
+		$data["total_rows"] = $this->recordCount;
 		$output = $this->ci->load->view($mivista, $data, true);
 
 		$this->rapyd->reset_view_path();
 
 		return $output;
-  }
+	}
 
 	function totalizar($param){
 		$this->totales= func_get_args();

@@ -2200,9 +2200,9 @@ class Ajax extends Controller {
 		$rif=$this->input->post('rif');
 		if($rif!==false){
 			$dbrif=$this->db->escape($rif);
-			$nombre=$this->datasis->dameval("SELECT nombre FROM provoca WHERE rif=$dbrif");
+			$nombre=$this->datasis->dameval("SELECT nombre FROM provoca WHERE rif=${dbrif}");
 			if(empty($nombre)){
-				$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE rif=$dbrif");
+				$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE rif=${dbrif}");
 			}
 			if(empty($nombre)){
 				if(preg_match("/(^[VEJG][0-9]{9}[[:blank:]]*$)/", $rif)>0){
@@ -2213,7 +2213,7 @@ class Ajax extends Controller {
 					$nombre=$t['nombre'];
 				}
 			}
-			echo $nombre;
+			echo trim($nombre);
 		}
 	}
 
