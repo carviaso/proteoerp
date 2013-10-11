@@ -1375,7 +1375,7 @@ class Gserchi extends Controller {
 
 			total=roundNumber(montasa+tasa+monredu+reducida+monadic+sobretasa+exento,2);
 			$('#importe').val(total);
-			$('#importe_val').text(nformat(total));
+			$('#importe_val').text(nformat(total,2));
 		}
 
 		$(function(){
@@ -1438,8 +1438,9 @@ class Gserchi extends Controller {
 					alert('Debe introducir un rif');
 				}
 			});
-		});
-		";
+
+			totaliza();
+		});";
 
 		$edit = new DataEdit('', 'gserchi');
 		$edit->back_url = site_url('finanzas/gser/gserchi');
@@ -1469,7 +1470,7 @@ class Gserchi extends Controller {
 
 		$edit->numfac = new inputField('Factura','numfac');
 		$edit->numfac->rule='max_length[8]|required';
-		$edit->numfac->size =10;
+		$edit->numfac->size =12;
 		$edit->numfac->maxlength =8;
 		$edit->numfac->autocomplete =false;
 
@@ -1509,12 +1510,12 @@ class Gserchi extends Controller {
 
 		$arr=array(
 			'exento'   =>'Monto <b>Exento</b>|Monto exento',
-			'montasa'  =>'Base Tasa '.htmlnformat($ivas['tasa']).'%|Base imponible',
-			'tasa'     =>'IVA '.htmlnformat($ivas['tasa']).'%|Monto del IVA',
-			'monredu'  =>'Base Tasa '.htmlnformat($ivas['redutasa']).'%|Base imponible',
-			'reducida' =>'IVA '.htmlnformat($ivas['redutasa']).'%|Monto del IVA',
-			'monadic'  =>'Base Tasa '.htmlnformat($ivas['sobretasa']).'%|Base imponible',
-			'sobretasa'=>'IVA '.htmlnformat($ivas['sobretasa']).'%|Monto del IVA',
+			'montasa'  =>'Base Tasa G. '.htmlnformat($ivas['tasa']).'%|Base imponible',
+			'tasa'     =>'IVA G. '.htmlnformat($ivas['tasa']).'%|Monto del IVA',
+			'monredu'  =>'Base Tasa R. '.htmlnformat($ivas['redutasa']).'%|Base imponible',
+			'reducida' =>'IVA R. '.htmlnformat($ivas['redutasa']).'%|Monto del IVA',
+			'monadic'  =>'Base Tasa A. '.htmlnformat($ivas['sobretasa']).'%|Base imponible',
+			'sobretasa'=>'IVA A. '.htmlnformat($ivas['sobretasa']).'%|Monto del IVA',
 			'importe'  =>'Importe total');
 
 		foreach($arr AS $obj=>$label){
@@ -1543,6 +1544,7 @@ class Gserchi extends Controller {
 		$edit->importe->rule  ='max_length[17]|numeric|positive';
 		$edit->importe->type  ='inputhidden';
 		$edit->importe->label ='<b style="font-size:2em">Total</b>';
+		$edit->importe->showformat ='decimal';
 
 		$edit->sucursal = new dropdownField('Sucursal','sucursal');
 		$edit->sucursal->options('SELECT codigo,sucursal FROM sucu ORDER BY sucursal');
@@ -1586,7 +1588,8 @@ class Gserchi extends Controller {
 		$dbrif = $this->db->escape($rif);
 		$nombre=$do->get('proveedor');
 		$fecha =date('Y-m-d');
-		$csprv =$this->datasis->dameval('SELECT COUNT(*) AS cana FROM sprv WHERE rif='.$dbrif);
+		$csprv  =intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM sprv WHERE rif='.$dbrif));
+		$csprv +=intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM provoca WHERE rif='.$dbrif));
 		if($csprv==0){
 			$mSQL ='INSERT IGNORE INTO provoca (rif,nombre,fecha) VALUES ('.$dbrif.','.$this->db->escape($nombre).','.$this->db->escape($fecha).')';
 			$this->db->simple_query($mSQL);

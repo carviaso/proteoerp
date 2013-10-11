@@ -14,7 +14,7 @@ class Bconci extends Controller {
 
 	function index(){
 		$this->instalar();
-		$this->datasis->creaintramenu(array('modulo'=>'52B','titulo'=>'Conciliacion Bancaria','mensaje'=>'Conciliacion Bancaria','panel'=>'TESORERIA','ejecutar'=>'finanzas/bconci','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>900,'alto'=>600));
+		$this->datasis->creaintramenu(array('modulo'=>'52D','titulo'=>'Conciliacion Bancaria','mensaje'=>'Conciliacion Bancaria','panel'=>'TESORERIA','ejecutar'=>'finanzas/bconci','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
