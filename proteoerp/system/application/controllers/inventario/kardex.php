@@ -444,7 +444,7 @@ class Kardex extends Controller {
 			$grid->column('N&uacute;mero',$link);
 			$grid->column('Fecha'    ,'<dbdate_to_human><#estampa#></dbdate_to_human>','align=center');
 			$grid->column('Entrada'  ,'<nformat><#entrada#></nformat>','align=right');
-			$grid->column('Salida'   ,'<nformat><#salida#> </nformat>','align=right');
+			$grid->column('Salida'   ,'<nformat><#salida#></nformat>','align=right');
 			$grid->db->select($select);
 			$grid->db->from('conv AS a');
 			$grid->db->join('itconv AS b','a.numero=b.numero');
