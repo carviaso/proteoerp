@@ -1756,23 +1756,7 @@ class Scst extends Controller {
 		if($oper == 'add'){
 			echo 'Deshabilitado';
 		}elseif($oper == 'edit'){
-			if($this->datasis->sidapuede('SCST','2')){
-				echo 'No tiene acceso a modificar';
-				return false;
-			}
-
-			$posibles=array('nfiscal','fafecta','vence','serie');
-			foreach($data as $ind=>$val){
-				if(!in_array($ind,$posibles)){
-					echo 'Campo no permitido ('.$ind.')';
-					return false;
-				}
-			}
-
-			$this->db->where('id', $id);
-			$this->db->update('itscst', $data);
-			logusu('SCST',"Registro ${id} MODIFICADO");
-			echo 'Registro Modificado';
+			echo 'Deshabilitado';
 
 		} elseif($oper == 'del') {
 			echo 'Deshabilitado';

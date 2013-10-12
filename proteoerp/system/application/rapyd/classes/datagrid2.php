@@ -131,10 +131,11 @@ class DataGrid2 extends DataGrid{
 
 		//pager
 		if ($this->paged){
-			$data["pager"] = $this->navigator;
+			$data['pager'] = $this->navigator;
 		}
 
-		$data["total_rows"] = $this->recordCount;
+		$data['total_rows'] = $this->recordCount;
+		if(!empty($this->table_id)) $data['table_id']=$this->table_id;
 		$output = $this->ci->load->view($mivista, $data, true);
 
 		$this->rapyd->reset_view_path();

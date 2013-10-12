@@ -12,13 +12,13 @@
 <?php endif;?>
       <div class="mainbackground" style="padding:2px;clear:both">
       <div class="alert"><?php echo $error_string?></div>
-      <table style="margin:0;width:98%;">      
+      <table style="margin:0;width:98%;" <?php echo (isset($table_id))? 'id="'.$table_id.'"' : ''; ?>>
 <?php if (isset($groups)):?>
 <?php foreach ($groups as $group)://groups?>
-  <?php if ($group["group_name"] != "ungrouped"):?>
-      <tr <?php echo $group["group_tr"]?>>
+  <?php if ($group['group_name'] != "ungrouped"):?>
+      <tr <?php echo $group['group_tr']?>>
         <td colspan="2" style="padding:0;">
-        
+
         <table style="margin:0;width:100%;">
           <tr>
             <td colspan="2" class="micro"><?php echo $group["group_name"]?></td>
@@ -27,11 +27,11 @@
   <?php foreach ($group["series"] as $field_series)://field_series?>
 
     <?php if($field_series["is_hidden"]):?>
-    
+
       <?php foreach ($field_series["fields"] as $field):?>
        <?php echo $field["field"]?>
       <?php endforeach;?>
-      
+
     <?php else://non hidden?>
           <tr <?php echo $field_series["series_tr"]?>>
   

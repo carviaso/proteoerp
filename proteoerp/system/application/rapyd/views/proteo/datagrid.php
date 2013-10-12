@@ -11,7 +11,7 @@
       <?php }?> 
 
       <div class="mainbackground" style="padding:2px;clear:both;">
-      <table width="100%" cellpadding="1">
+      <table width="100%" cellpadding="1" <?php echo (isset($table_id))? 'id="'.$table_id.'"': ''; ?>>
         <tr>
 <?php foreach ($headers as $column)://table-header?>
 <?php if (in_array($column["type"], array("orderby","detail"))):?>

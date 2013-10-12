@@ -27,6 +27,7 @@ require_once('dataset.php');
 class DataGrid extends DataSet{
 
 	var $cid         = 'dg';
+	var $table_id    = '';
 	var $systemError = '';
 	var $rapyd;
 	var $_title = null;
@@ -321,6 +322,7 @@ class DataGrid extends DataSet{
 
 		$data['total_rows'] = $this->recordCount;
 		$data['columnas'] = $this->columns ;
+		if(!empty($this->table_id)) $data['table_id']=$this->table_id;
 
 		$output = $this->ci->load->view($mivista, $data, true);
 

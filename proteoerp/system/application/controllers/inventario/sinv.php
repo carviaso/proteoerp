@@ -1064,11 +1064,11 @@ class Sinv extends Controller {
 		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => $editar,
+			'editable'      => 'true',
 			'width'         => 260,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:45, maxlength: 45 }',
+			'editoptions'   => '{ size:30, maxlength: 45 }',
 		));
 
 		$grid->addField('tipo');
@@ -1512,7 +1512,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('exord');
-		$grid->label('Ordenada');
+		$grid->label('Ordenado');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1577,7 +1577,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('fracci');
-		$grid->label('Fracci');
+		$grid->label('Fracci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1806,7 +1806,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('formcal');
-		$grid->label('FormaCal');
+		$grid->label('Forma calculo');
 		$grid->params(array(
 			'hidden'        => 'true',
 			'search'        => 'true',
@@ -1972,7 +1972,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('fdesde');
-		$grid->label('Fdesde');
+		$grid->label('F.Desde');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1982,7 +1982,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('fhasta');
-		$grid->label('Fhasta');
+		$grid->label('F.Hasta');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -2530,7 +2530,7 @@ class Sinv extends Controller {
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
 		$grid->setMultiSelect(true);
-		$grid->setOndblClickRow('');
+		//$grid->setOndblClickRow('');
 
 		$grid->setOnSelectRow('
 			function(id){
@@ -2587,9 +2587,9 @@ class Sinv extends Controller {
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdata/'));
 
-		if ($deployed) {
+		if($deployed){
 			return $grid->deploy();
-		} else {
+		}else{
 			return $grid;
 		}
 	}
@@ -2598,32 +2598,32 @@ class Sinv extends Controller {
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
-		$grid  = $this->jqdatagrid;
-		$iactivo = $this->input->post('verinactivos');
+		$grid   = $this->jqdatagrid;
+		$iactivo= $this->input->post('verinactivos');
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('sinv');
 
-		if ( $iactivo == 0 )
+		if($iactivo == 0){
 			$mWHERE[] = array('=', 'activo', 'S', '' );
+		}
 
-		$response   = $grid->getData('sinv', array(array()), array(), false, $mWHERE, 'codigo' );
-		$rs = $grid->jsonresult( $response);
-
-		memowrite(print_r($mWHERE,true),'VVV');
+		$response   = $grid->getData('sinv', array(array()), array(), false, $mWHERE, 'codigo');
+		$rs = $grid->jsonresult($response);
 
 		//Guarda en la BD el Where para usarlo luego
-		$querydata = array( 'data1' => $this->session->userdata('dtgQuery') );
+		$querydata = array('data1' => $this->session->userdata('dtgQuery'));
 		$emp = strpos($querydata['data1'],'WHERE ');
 
-		if ( $emp > 0  ){
+		if($emp > 0){
 			$querydata['data1'] = substr( $querydata['data1'], $emp );
 			$emp = strpos($querydata['data1'],'ORDER BY ');
-			if ( $emp > 0  ){
+			if($emp > 0){
 				$querydata['data1'] = substr( $querydata['data1'], 0, $emp );
 			}
-		} else
+		}else{
 			$querydata['data1'] = '';
+		}
 
 		$ids = $this->datasis->guardasesion($querydata);
 		echo $rs;
@@ -2632,14 +2632,46 @@ class Sinv extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "codigo";
+		$mcodp  = 'codigo';
 		$check  = 0;
+
+		unset($data['oper']);
+		unset($data['id']);
+
+		if($oper == 'add'){
+			echo 'Deshabilitado';
+		}elseif($oper == 'edit'){
+
+			$posibles=array('descrip');
+			foreach($data as $ind=>$val){
+				if(!in_array($ind,$posibles)){
+					echo 'Campo no permitido ('.$ind.')';
+					return false;
+				}
+			}
+
+			$row = $this->datasis->damerow("SELECT codigo FROM sinv WHERE id=${id}");
+			if(empty($row)){
+				echo 'Registro no encontrado';
+				return false;
+			}
+
+			$this->db->where('id'   , $id);
+			$this->db->update('sinv', $data);
+
+			logusu('SINV',"Registro ${row[codigo]} MODIFICADO");
+			echo 'Registro Modificado';
+
+		}elseif($oper == 'del'){
+			echo 'Deshabilitado';
+		}
+
+
 	}
 
 
@@ -2647,8 +2679,7 @@ class Sinv extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function bpos1()
-	{
+	function bpos1(){
 		$oper   = $this->input->post('oper');
 		if ($oper == 'del'){
 			// Borra

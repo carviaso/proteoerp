@@ -57,6 +57,8 @@ class Kardex extends Controller {
 		$boton=$this->datasis->modbus($modbus);
 
 		$filter = new DataFilter('Kardex de Inventario');
+		//$script= '$(function(){ $("#kardextabla").columnHover(); });';
+		//$filter->script($script);
 		$filter->codigo = new inputField('C&oacute;digo ', 'codigo');
 		$filter->codigo->db_name ='a.codigo';
 		$filter->codigo->rule = 'required';
@@ -132,6 +134,7 @@ class Kardex extends Controller {
 
 			$link="/inventario/kardex/grid/<#origen#>/<dbdate_to_human><#fecha#>|Ymd</dbdate_to_human>/<raencode><#codigo#></raencode>/<raencode><#ubica#></raencode>";
 			$grid = new DataGrid2("Producto: (${code}) ${descrip}");
+			$grid->table_id = 'kardextabla';
 			$grid->agrupar(' ', 'almacen');
 			$grid->use_function('convierte','str_replace');
 			$grid->db->select(array(
@@ -214,10 +217,9 @@ class Kardex extends Controller {
 			//echo $grid->db->last_query();
 		}
 
-
-
 		$data['forma'] = '';
-		$data['script']= script('jquery.js');
+		$data['script'] = script('jquery.js');
+		//$data['script'].= script('plugins/jquery.columnhover.pack.js');
 		$data['title'] = heading('Kardex de Inventario');
 		$data['head']  = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
