@@ -1400,7 +1400,7 @@ class Scst extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData(){
+	function setdata(){
 		//$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = intval($this->input->post('id'));
@@ -1413,6 +1413,11 @@ class Scst extends Controller {
 		if($oper == 'add'){
 			echo 'Deshabilitado';
 		}elseif($oper == 'edit'){
+
+			if($this->datasis->sidapuede('SCST','2')){
+				echo 'No tiene acceso a modificar';
+				return false;
+			}
 
 			$posibles=array('serie','fafecta','vence','nfiscal');
 			foreach($data as $ind=>$val){

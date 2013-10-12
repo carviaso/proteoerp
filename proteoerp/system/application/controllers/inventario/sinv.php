@@ -2647,6 +2647,11 @@ class Sinv extends Controller {
 			echo 'Deshabilitado';
 		}elseif($oper == 'edit'){
 
+			if(!$this->datasis->sidapuede('SINV','MODIFICA%')){
+				echo 'No tiene acceso a modificar';
+				return false;
+			}
+
 			$posibles=array('descrip');
 			foreach($data as $ind=>$val){
 				if(!in_array($ind,$posibles)){
