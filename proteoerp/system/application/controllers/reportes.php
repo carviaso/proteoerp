@@ -112,7 +112,7 @@ class Reportes extends Controller{
 
 			$this->db->select(array('a.titulo','a.mensaje','TRIM(a.nombre) AS nombre','"P" AS siste'));
 			$this->db->from('intrarepo AS a');
-			$this->db->join('tmenus    AS b',"CONCAT(a.modulo,'LIS')=b.modulo AND b.ejecutar LIKE CONCAT('%',a.nombre,'%')",'left');
+			$this->db->join('tmenus    AS b',"CONCAT(a.modulo,'LIS')=b.modulo AND b.ejecutar LIKE CONCAT('%(_',a.nombre,'_)%')",'left');
 			$this->db->where('b.codigo IS NULL');
 			$this->db->where('a.modulo',$repo );
 			$this->db->where('a.activo','S');
