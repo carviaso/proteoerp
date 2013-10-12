@@ -1102,9 +1102,17 @@ class Jqdatagrid
 			$mQUERY = $this->constructWhere($filters);
 			foreach($mQUERY as $busca){
 				if(trim(strtoupper($busca[0])) == 'LIKE'){
-					$this->CI->db->like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
-				} else {
-					$this->CI->db->where( $busca[1], $busca[2] );
+					if(strtoupper($busca[4])=='OR'){
+						$this->CI->db->or_like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
+					}else{
+						$this->CI->db->like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
+					}
+				}else{
+					if(strtoupper($busca[4])=='OR'){
+						$this->CI->db->or_where( $busca[1], $busca[2]);
+					}else{
+						$this->CI->db->where( $busca[1], $busca[2]);
+					}
 				}
 			}
 		}
@@ -1330,32 +1338,35 @@ class Jqdatagrid
 		$operador = array(" <> "," < "," <= "," > "," >= ");
 
 
-		if ($s) {
+		if($s){
 			$jsona = json_decode($s,true);
-			if( is_array($jsona) ){
-				$gopr = $jsona['groupOp'];
+			if(is_array($jsona)){
+				$gopr  = $jsona['groupOp'];
 				$rules = $jsona['rules'];
 				$i =0;
 				foreach($rules as $key=>$val) {
 					$field = $val['field'];
 					$op    = $val['op'];
 					$v     = $val['data'];
-					if($v && $op) {
-						if (in_array( $qopers[$op], $operador)) {
+					if($v && $op){
+						if(in_array( $qopers[$op], $operador)){
 							$mWHERE[] = array( trim($qopers[$op]), $field.$qopers[$op], $v, $gopr );
-						} else {
+						}else{
 							$mWHERE[] = array( trim($qopers[$op]), $field, $v, 'both', $gopr );
 						}
 						$i++;
 						// ToSql in this case is absolutley needed
 						$v = $this->ToSql($field,$op,$v);
-						if ($i == 1) $qwery = " AND ";
-						else $qwery .= " " .$gopr." ";
+						if($i == 1){
+							$qwery = ' AND ';
+						}else{
+							$qwery .= " ${gopr} ";
+						}
 						switch ($op) {
 							// in need other thing
 							case 'in' :
 							case 'ni' :
-								$qwery .= $field.$qopers[$op]." (".$v.")";
+								$qwery .= $field.$qopers[$op]." (${v})";
 								break;
 							default:
 								$qwery .= $field.$qopers[$op].$v;
