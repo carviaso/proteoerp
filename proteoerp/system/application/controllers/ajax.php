@@ -571,7 +571,7 @@ class Ajax extends Controller {
 			$mSQL="
 			SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
 			a.precio1, precio2, precio3, precio4, a.iva, if(a.existen>=0,a.existen,0) existen,
-			a.tipo,a.peso, a.ultimo, a.pond, a.barras
+			a.tipo,a.peso, a.ultimo, a.pond, a.barras, a.marca
 			FROM sinv AS a
 			WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb}) AND a.activo='S'
 			ORDER BY if(a.existen>0,0,1), a.descrip LIMIT 30";
@@ -599,6 +599,7 @@ class Ajax extends Controller {
 					$retArray['barras']  = $row['barras'];
 					$retArray['iva']     = $row['iva'];
 					$retArray['existen'] = $row['existen'];
+					$retArray['marca']   = $row['marca'];
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
