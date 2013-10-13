@@ -47,7 +47,7 @@ class Pers extends Controller {
 				</tr>
 				<tr>
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='reposo'  >Reposo</a></div></td>
-					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='vacacion'>Vacacion</a></div></td>
+					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='vacacion'>Vacaciones</a></div></td>
 				</tr>
 
 			</table>

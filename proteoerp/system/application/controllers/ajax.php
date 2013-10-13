@@ -542,6 +542,74 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+
+	/**************************************************************
+	 *
+	 *  BUSCA LOS INVENTARIO DESDE AFUERA
+	 *
+	*/
+	function buscasinvex(){
+		$comodin= $this->datasis->traevalor('COMODIN');
+
+		$mid    = $this->uri->segment($this->uri->total_segments());
+
+		if($mid == false) {
+			echo 'Consulta Vacia';
+			return;
+		}
+
+		if(strlen($comodin)==1 && $comodin!='%' && $mid!==false){
+			$mid=str_replace($comodin,'%',$mid);
+		}
+		$qdb  = $this->db->escape($mid.'%');
+		$qba  = $this->db->escape($mid);
+
+		$data = '[]';
+		if($mid !== false){
+
+			//Vemos si aplica descuento solo promocional
+			$mSQL="
+			SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
+			a.precio1, precio2, precio3, precio4, a.iva, if(a.existen>=0,a.existen,0) existen,
+			a.tipo,a.peso, a.ultimo, a.pond, a.barras
+			FROM sinv AS a
+			WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb}) AND a.activo='S'
+			ORDER BY if(a.existen>0,0,1), a.descrip LIMIT 30";
+
+			$retArray = $retorno = array();
+
+			$cana=1;
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+
+					//$retArray['label']   = '('.$row['codigo'].')'.$this->en_utf8($row['descrip']).' Bs.'.$row['precio1'].'  '.$row['existen'].'';
+					//$retArray['value']   = $row['codigo'];
+					$retArray['codigo']  = $row['codigo'];
+					$retArray['tipo']    = $row['tipo'];
+					$retArray['peso']    = $row['peso'];
+					$retArray['ultimo']  = $row['ultimo'];
+					$retArray['pond']    = $row['pond'];
+					$retArray['base1']   = round($row['precio1']*100/(100+$row['iva']),2);
+					$retArray['base2']   = round($row['precio2']*100/(100+$row['iva']),2);
+					$retArray['base3']   = round($row['precio3']*100/(100+$row['iva']),2);
+					$retArray['base4']   = round($row['precio4']*100/(100+$row['iva']),2);
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
+					$retArray['barras']  = $row['barras'];
+					$retArray['iva']     = $row['iva'];
+					$retArray['existen'] = $row['existen'];
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
+
+
+
 	/**************************************************************
 	 *
 	 *  BUSCA LOS INVENTARIO

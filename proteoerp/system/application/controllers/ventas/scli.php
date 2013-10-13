@@ -1775,7 +1775,7 @@ class Scli extends validaciones {
 		$edit->sucursal->option('','Ninguna');
 		$edit->sucursal->options('SELECT TRIM(codigo) AS codigo,sucursal FROM sucu WHERE codigo IS NOT NULL ORDER BY sucursal');
 
-		$edit->aniversario = new dateonlyfield('F.Aniversario', 'aniversario');
+		$edit->aniversario = new dateonlyfield('Aniversario', 'aniversario');
 		$edit->aniversario->maxlength=10;
 		$edit->aniversario->size=14;
 		$edit->aniversario->rule='chfecha';
@@ -3036,22 +3036,22 @@ function chrif(rif){
 			$this->db->simple_query($mSQL);
 		}
 
-		if(!in_array('modifi'     ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `modifi` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL");
-		if(!in_array('credito'    ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `credito` CHAR(1) NOT NULL DEFAULT 'N' AFTER `limite`");
-		if(!in_array('sucursal'   ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `sucursal` CHAR(2) NULL DEFAULT NULL");
-		if(!in_array('mmargen'    ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `mmargen` DECIMAL(7,2) NULL DEFAULT 0 COMMENT 'Margen al Mayor'");
-		if(!in_array('tolera'     ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `tolera` DECIMAL(9,2) NULL DEFAULT '0'");
-		if(!in_array('maxtole'    ,$campos)) $this->db->simple_query("ALTER TABLE `scli` ADD COLUMN `maxtole` DECIMAL(9,2) NULL DEFAULT '0'");
-		if(!in_array('url'        ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN url VARCHAR(120) NULL');
-		if(!in_array('pin'        ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN pin VARCHAR(10) NULL');
-		if(!in_array('fb'         ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN fb VARCHAR(120) NULL');
-		if(!in_array('twitter'    ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN twitter VARCHAR(120) NULL');
-		if(!in_array('upago'      ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN upago  VARCHAR(6) NULL');
-		if(!in_array('tarifa'     ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN tarifa VARCHAR(15) NULL');
-		if(!in_array('tarimonto'  ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN tarimonto FLOAT UNSIGNED NULL DEFAULT NULL COMMENT 'unidades tributarias a cobrar por servicio'");
-		if(!in_array('canticipo'  ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN canticipo VARCHAR(15) NULL DEFAULT NULL COMMENT 'Cuenta contable de Anticipo'");
-		if(!in_array('estado'     ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN estado INT(11) NULL DEFAULT 0 COMMENT 'Estados o Entidades'");
-		if(!in_array('aniversario',$campos)) $this->db->query('ALTER TABLE `scli` ADD COLUMN `aniversario` DATE NULL DEFAULT NULL');
+		if(!in_array('modifi'     ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN modifi      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL");
+		if(!in_array('credito'    ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN credito     CHAR(1) NOT NULL DEFAULT 'N' AFTER `limite`");
+		if(!in_array('sucursal'   ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN sucursal    CHAR(2) NULL DEFAULT NULL");
+		if(!in_array('mmargen'    ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN mmargen     DECIMAL(7,2) NULL DEFAULT 0 COMMENT 'Margen al Mayor'");
+		if(!in_array('tolera'     ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN tolera      DECIMAL(9,2) NULL DEFAULT '0'");
+		if(!in_array('maxtole'    ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN maxtole     DECIMAL(9,2) NULL DEFAULT '0'");
+		if(!in_array('url'        ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN url         VARCHAR(120) NULL');
+		if(!in_array('pin'        ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN pin         VARCHAR(10) NULL');
+		if(!in_array('fb'         ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN fb          VARCHAR(120) NULL');
+		if(!in_array('twitter'    ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN twitter     VARCHAR(120) NULL');
+		if(!in_array('upago'      ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN upago       VARCHAR(6) NULL');
+		if(!in_array('tarifa'     ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN tarifa      VARCHAR(15) NULL');
+		if(!in_array('tarimonto'  ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN tarimonto   FLOAT UNSIGNED NULL DEFAULT NULL COMMENT 'unidades tributarias a cobrar por servicio'");
+		if(!in_array('canticipo'  ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN canticipo   VARCHAR(15) NULL DEFAULT NULL COMMENT 'Cuenta contable de Anticipo'");
+		if(!in_array('estado'     ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN estado      INT(11) NULL DEFAULT 0 COMMENT 'Estados o Entidades'");
+		if(!in_array('aniversario',$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN aniversario DATE NULL DEFAULT NULL');
 
 		if(!$this->db->table_exists('tarifa')){
 			$mSQL="CREATE TABLE `tarifa` (
