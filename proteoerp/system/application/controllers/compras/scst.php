@@ -3788,7 +3788,7 @@ class Scst extends Controller {
 		$tipo_doc= $do->get('tipo_doc');
 		$tolera =0.07; //Tolerancia entre los items y el encabezado
 
-		if($tipo_doc=='FC' || $tipo_doc=='NE')){
+		if($tipo_doc=='FC' || $tipo_doc=='NE'){
 			$do->set('fafecta','');
 		}
 
