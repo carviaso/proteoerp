@@ -3682,7 +3682,7 @@ class Scst extends Controller {
 			$mTIPO = $this->datasis->dameval("SELECT MID(tipo,1,1) FROM sinv WHERE codigo=${itdbcodigo}");
 
 			if($tipo_doc == 'FC' || $tipo_doc =='NE'){
-				$this->datasis->sinvcarga($row->codigo,  $mALMA, -$row->cantidad);
+				$this->datasis->sinvcarga($row->codigo,  $mALMA, (-1)*$row->cantidad);
 
 				// DEBE ARREGLAR EL PROMEDIO BUSCANDO EN KARDEX
 				$mSQL = "SELECT promedio FROM costos WHERE codigo=${itdbcodigo} ORDER BY fecha DESC LIMIT 1";
@@ -3788,7 +3788,7 @@ class Scst extends Controller {
 		$tipo_doc= $do->get('tipo_doc');
 		$tolera =0.07; //Tolerancia entre los items y el encabezado
 
-		if($tipo_doc=='NC'){
+		if($tipo_doc=='FC' || $tipo_doc=='NE')){
 			$do->set('fafecta','');
 		}
 
@@ -3959,7 +3959,9 @@ class Scst extends Controller {
 			}else{
 				$por_rete=$por_rete/100;
 			}
-			$do->set('reteiva', round($iva*$por_rete,2));
+			if($tipo_doc=='FC'){
+				$do->set('reteiva', round($iva*$por_rete,2));
+			}
 		}
 		//fin de la retencion
 

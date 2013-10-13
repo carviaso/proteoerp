@@ -6,7 +6,7 @@ $dbid= $this->db->escape($id);
 //ENCABEZADO
 $moneda = $this->datasis->traevalor('MONEDA');
 $mSQL_1 = $this->db->query("SELECT
-a.numero,a.fecha,a.vence,a.control,a.actuali,a.depo,a.proveed,b.nombre,TRIM(b.nomfis) AS nomfis,a.montotot,a.montoiva,a.montonet,a.peso,
+a.tipo_doc,a.numero,a.fecha,a.vence,a.control,a.actuali,a.depo,a.proveed,b.nombre,TRIM(b.nomfis) AS nomfis,a.montotot,a.montoiva,a.montonet,a.peso,
 if(a.actuali>=a.fecha,'CARGADA','PENDIENTE') cargada, a.control
 FROM scst AS a
 JOIN sprv AS b ON a.proveed=b.proveed
@@ -29,6 +29,15 @@ $control  =$row->control;
 $vence    =dbdate_to_human($row->vence);
 $actuali  =dbdate_to_human($row->actuali);
 
+if($row->tipo_doc=='FC'){
+	$tit1 = 'Compra';
+}elseif($row->tipo_doc=='NC'){
+	$tit1 = 'Nota de Cr&eacute;dito';
+}elseif($row->tipo_doc=='NE'){
+	$tit1 = 'Nota de Entrega';
+}else{
+	$tit1 = 'Documento';
+}
 $dbcontrol=$this->db->escape($control);
 //ARTICULOS
 $mSQL_2 = $this->db->query("SELECT numero,codigo,descrip,cantidad,costo,importe, precio2, if(costo>=precio2,'===>>','     ') alerta FROM itscst WHERE control=${dbcontrol}");
@@ -56,7 +65,7 @@ $encabeza = '
 <div class="page" style="font-size: 7pt">
 		<table style="width:100%;font-size:7pt;" class="header">
 		<tr>
-			<td><h1 style="text-align: left">Compra '.$cargada.'</h1></td>
+			<td><h1 style="text-align: left">'.$tit1.' '.$cargada.'</h1></td>
 			<td><h1 style="text-align: right">N&uacute;mero: '.$numero.'</h1></td>
 		</tr>
 	</table>
@@ -92,7 +101,7 @@ $encatabla = '
 ?><html>
 <head>
 <meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
-<title>Compra <?php echo $numero ?></title>
+<title><?php echo $tit1.' '.$numero; ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body>
