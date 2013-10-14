@@ -921,7 +921,7 @@ class Ajax extends Controller {
 		$esta  = $this->input->post('esta');
 		$tipo  = $this->input->post('tipo');
 
-		$data = '[{ }]';
+		$data = '[]';
 		if($ordp !== false &&  $esta !== false &&  $tipo!== false){
 			$dbnumero=$this->db->escape($ordp);
 			if($tipo=='E'){
@@ -936,13 +936,13 @@ class Ajax extends Controller {
 
 				$retArray=$retorno=array();
 				$query = $this->db->query($mSQL);
-				if ($query->num_rows() > 0){
+				if($query->num_rows() > 0){
 					foreach( $query->result_array() as  $row ) {
 						$cana=$row['cantidad']+$row['tracana'];
 						if($cana>0){
-							$retArray['codigo']   = $row['codigo'];
+							$retArray['codigo']   = trim($row['codigo']);
 							$retArray['cantidad'] = $cana;
-							$retArray['descrip']  = $this->en_utf8($row['descrip']);
+							$retArray['descrip']  = $this->en_utf8(trim($row['descrip']));
 
 							array_push($retorno, $retArray);
 						}
@@ -955,7 +955,7 @@ class Ajax extends Controller {
 				SUM(b.cantidad*IF(a.tipoordp='E',1,-1)) AS cantidad
 				FROM stra AS a
 				JOIN itstra AS b ON a.numero=b.numero
-				WHERE a.ordp=$dbnumero AND a.esta=$dbesta
+				WHERE a.ordp=${dbnumero} AND a.esta=${dbesta}
 				GROUP BY b.codigo";
 
 				$retArray=$retorno=array();
@@ -964,9 +964,9 @@ class Ajax extends Controller {
 					foreach( $query->result_array() as  $row ) {
 						$cana=$row['cantidad'];
 						if($cana>0){
-							$retArray['codigo']   = $row['codigo'];
+							$retArray['codigo']   = trim($row['codigo']);
 							$retArray['cantidad'] = $cana;
-							$retArray['descrip']  = $this->en_utf8($row['descrip']);
+							$retArray['descrip']  = $this->en_utf8(trim($row['descrip']));
 
 							array_push($retorno, $retArray);
 						}
@@ -1134,13 +1134,12 @@ class Ajax extends Controller {
 					$retArray['rif']     = $row['rif'];
 					$retArray['reteiva'] = ($aplrete)? floatval($row['reteiva']) : 0;
 					$retArray['fecha']   = $this->_datehuman($row['fecha']);
+					$retArray['msj']     = null;
 
 					$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
 					$rif     = $this->datasis->traevalor('RIF');
 					if($contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
 						$retArray['msj'] = ($aplrete)? null :'No se realizara la retención de impuesto por estar fuera de período '.date($pdia.'/m/Y').' - '.date($dia.'/m/Y');
-					}else{
-						$retArray['msj'] = null;
 					}
 
 					array_push($retorno, $retArray);
@@ -1277,8 +1276,8 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if($query->num_rows() > 0){
 				foreach($query->result_array() as  $id=>$row){
-					$retArray['codigo']  = $this->en_utf8($row['codigo']);
-					$retArray['descrip'] = $this->en_utf8($row['descrip']);
+					$retArray['codigo']  = $this->en_utf8(trim($row['codigo']));
+					$retArray['descrip'] = $this->en_utf8(trim($row['descrip']));
 					$retArray['iva']     = $row['iva'];
 					$retArray['peso']    = $row['peso'];
 					$retArray['pond']    = $row['pond'];

@@ -167,10 +167,11 @@ $(function(){
 				});
 
 				if(ui.item.msj != null){
-					$.prompt(ui.item.msj);
+					//$.prompt(ui.item.msj);
+					alert(ui.item.msj);
 				}
 			}
-			setTimeout(function() {  $("#fafecta").removeAttr("readonly"); }, 1500);
+			setTimeout(function(){ $("#fafecta").removeAttr("readonly"); }, 1500);
 		}
 	});
 
@@ -277,6 +278,7 @@ function totalizar(){
 	montotot = Number($("#montotot").val());
 	montoiva = Number($("#montoiva").val());
 	porreten = Number($("#sprvreteiva").val());
+	tipodoc  = $("#tipo_doc").val();
 
 	$("#peso").val(roundNumber(peso,2));
 
@@ -296,7 +298,9 @@ function totalizar(){
 	$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
 	$rif     = $this->datasis->traevalor('RIF');
 	if($contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
-		echo "\t".'$("#reteiva").val(roundNumber(montoiva*porreten/100,2));';
+		echo "\tif(tipodoc=='FC'){";
+		echo '$("#reteiva").val(roundNumber(montoiva*porreten/100,2));';
+		echo '}';
 	}
 	?>
 

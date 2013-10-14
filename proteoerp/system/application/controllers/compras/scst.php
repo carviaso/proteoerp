@@ -163,7 +163,7 @@ class Scst extends Controller {
 			if (id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				if(ret.actuali >= ret.fecha){
-					$.prompt("<h1>Compra ya Actualizada</h1>Debe reversarla si desea hacer modificaciones");
+					$.prompt("<h1>Documento ya actualizado</h1>Debe reversarlo primero si desea hacer modificaciones");
 				} else {
 					mId = id;
 					$.post("'.site_url('compras/scst/solo/modify').'/"+id, function(data){
@@ -174,7 +174,7 @@ class Scst extends Controller {
 					});
 				}
 			}else{
-				$.prompt("<h1>Por favor Seleccione una compra</h1>");
+				$.prompt("<h1>Por favor Seleccione un documento primero</h1>");
 			}
 		};';
 
@@ -203,10 +203,10 @@ class Scst extends Controller {
 		$bodyscript .= '
 			jQuery("#imprimir").click( function(){
 				var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-				if (id)	{
+				if(id){
 					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 					'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+id+"/id"').';
-				} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+				} else { $.prompt("<h1>Por favor Seleccione un documento primero</h1>");}
 			});';
 
 		//Imprimir retencion
@@ -219,10 +219,10 @@ class Scst extends Controller {
 					if ( ret.actuali >= ret.fecha ) {
 						'.$this->datasis->jwinopen(site_url($this->url.'printrete').'/\'+id+"/id"').';
 					}else{
-						$.prompt("<h1>Debe actualizar la compra para imprimir la retenci&oacute;n.</h1>");
+						$.prompt("<h1>Debe actualizar el documento para imprimir la retenci&oacute;n.</h1>");
 					}
 				} else {
-					$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
+					$.prompt("<h1>Por favor Seleccione un documento primero</h1>");
 				}
 			});';
 
@@ -244,7 +244,7 @@ class Scst extends Controller {
 						reloadAfterSubmit:false
 					});
 				}else{
-					$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
+					$.prompt("<h1>Por favor Seleccione un documento</h1>");
 				}
 			});';
 
@@ -266,7 +266,7 @@ class Scst extends Controller {
 						$.prompt("<h1>La compra seleccionada no posee veh&iacute;culos</h1>");
 					}
 				}else{
-					$.prompt("<h1>Por favor Seleccione una compra</h1>");
+					$.prompt("<h1>Por favor seleccione un documento primero</h1>");
 				}
 			});';
 
@@ -288,7 +288,7 @@ class Scst extends Controller {
 						});
 					}
 				}else{
-					$.prompt("<h1>Por favor Seleccione una compra</h1>");
+					$.prompt("<h1>Por favor Seleccione un documento primero</h1>");
 				}
 			});';
 
@@ -357,7 +357,7 @@ class Scst extends Controller {
 
 		//Revisa si puede Reversar
 		$bodyscript .= '
-						$.prompt( "<h1>Reversar Compra Nro. "+ret.control+" ?</h1>", {
+						$.prompt( "<h1>Reversar documento Nro. "+ret.tipo_doc+ret.control+" ?</h1>", {
 							buttons: { Reversar: true, Cancelar: false },
 							submit: function(e,v,m,f){
 								if(v){
@@ -366,7 +366,7 @@ class Scst extends Controller {
 										try{
 											var json = JSON.parse(r);
 											if (json.status == "A"){
-												$.prompt("Compra reversada");
+												$.prompt("Documento reversado");
 												grid.trigger("reloadGrid");
 												return true;
 											}else{
@@ -389,7 +389,7 @@ class Scst extends Controller {
 		$bodyscript .= '
 					}}
 				}else{
-					$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
+					$.prompt("<h1>Por favor Seleccione un documento primero</h1>");
 				}
 			};';
 
@@ -406,14 +406,13 @@ class Scst extends Controller {
 								url: murl,
 								data: $("#df1").serialize(),
 								success: function(r,s,x){
-
 									try{
 										var json = JSON.parse(r);
 										if (json.status == "A"){
 											$.prompt("Registro Guardado");
 											$( "#factuali" ).dialog("close");
 											grid.trigger("reloadGrid");
-											'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+mid+"/id"').';
+											'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+json.pk.id+"/id"').';
 											return true;
 										}else{
 											$.prompt("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
@@ -442,7 +441,7 @@ class Scst extends Controller {
 				if (id)	{
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
 					if ( ret.actuali >= ret.fecha ) {
-						$.prompt("<h1>Compra ya Actualizada</h1>Debe reversarla si desea hacer modificaciones");
+						$.prompt("<h1>Documento ya Actualizado</h1>Debe reversarlo si desea hacer modificaciones");
 					} else {
 						mId = id;
 						$.post("'.site_url('compras/scst/solo/cprecios').'/"+ret.control, function(data){
@@ -451,7 +450,9 @@ class Scst extends Controller {
 							$( "#fcompra" ).dialog( "open" );
 						});
 					}
-				} else { $.prompt("<h1>Por favor Seleccione una compra no actualizada</h1>");}
+				}else{
+					$.prompt("<h1>Por favor seleccione un documento no actualizado primero</h1>");
+				}
 			});';
 
 		$post = $this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+res.id+\'/id\'').';';
@@ -1334,17 +1335,17 @@ class Scst extends Controller {
 			}},
 			afterInsertRow:
 			function( rid, aData, rowe){
-				if ( aData.fecha >  aData.actuali ){
+				if(aData.fecha >  aData.actuali){
 					$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#166D05" });
 				}
-				if ( aData.tipo_doc == "XX" ){
+				if(aData.tipo_doc == "XX"){
 					$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#C90623" });
 				}
 			}
 		');
 
 
-//		$grid->setOndblClickRow("");
+		//$grid->setOndblClickRow('');
 
 		$grid->setFormOptionsE('
 				       closeAfterEdit:true,
@@ -1775,42 +1776,48 @@ class Scst extends Controller {
 	//
 	//*************************************************
 	function tabla() {
-		$id = $this->uri->segment($this->uri->total_segments());
-		$proveed = $this->datasis->dameval("SELECT proveed FROM scst WHERE id='$id'");
-		$transac = $this->datasis->dameval("SELECT transac FROM scst WHERE id='$id'");
+		$id  = intval($this->uri->segment($this->uri->total_segments()));
+		$mSQL= "SELECT proveed,transac FROM scst WHERE id=${id}";
+		$row = $this->datasis->damerow($mSQL);
+		if(!empty($row)){
+			$proveed = $row['proveed'];
+			$transac = $row['transac'];
+		}else{
+			return false;
+		}
 		$salida = '';
+		$dbproveed = $this->db->escape($proveed);
 
 		// Cuentas por Cobrar
-		$mSQL = "SELECT cod_prv, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE cod_prv = '$proveed' AND abonos <> monto AND tipo_doc <> 'AB' ORDER BY fecha DESC LIMIT 5";
+		$mSQL = "SELECT cod_prv, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE cod_prv = ${dbproveed} AND abonos <> monto AND tipo_doc <> 'AB' ORDER BY fecha DESC LIMIT 5";
 		$query = $this->db->query($mSQL);
 		$saldo = 0;
-		if ( $query->num_rows() > 0 ){
-			$salida .= "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento Pendientes en CxP</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
+		if($query->num_rows() > 0){
+			$salida .= '<br><table width=\'100%\' border=1>';
+			$salida .= '<tr bgcolor=\'#E7E3E7\'><td colspan=\'3\'>Movimiento Pendientes en CxP</td></tr>';
+			$salida .= '<tr bgcolor=\'#E7E3E7\'><td>Tp</td><td align=\'center\'>N&uacute;mero</td><td align=\'center\'>Monto</td></tr>';
 			$i = 1;
-			foreach ($query->result_array() as $row)
-			{
-				if ( $i < 6 ) {
-					$salida .= "<tr>";
-					$salida .= "<td>".$row['tipo_doc']."</td>";
-					$salida .= "<td>".$row['numero'].  "</td>";
-					$salida .= "<td align='right'>".nformat($row['monto']-$row['abonos']).   "</td>";
-					$salida .= "</tr>";
+			foreach ($query->result_array() as $row){
+				if($i < 6){
+					$salida .= '<tr>';
+					$salida .= '<td>'.$row['tipo_doc'].'</td>';
+					$salida .= '<td>'.$row['numero'].  '</td>';
+					$salida .= '<td align=\'right\'>'.nformat($row['monto']-$row['abonos']).'</td>';
+					$salida .= '</tr>';
 				}
-				if ( $i == 6 ) {
-					$salida .= "<tr>";
-					$salida .= "<td colspan=3>Mas......</td>";
-					$salida .= "</tr>";
+				if($i == 6){
+					$salida .= '<tr>';
+					$salida .= '<td colspan=\'3\'>Mas......</td>';
+					$salida .= '</tr>';
 				}
-				if ( $row['tipo_doc'] == 'FC' or $row['tipo_doc'] == 'ND' or $row['tipo_doc'] == 'GI' )
+				if($row['tipo_doc'] == 'FC' or $row['tipo_doc'] == 'ND' or $row['tipo_doc'] == 'GI')
 					$saldo += $row['monto']-$row['abonos'];
 				else
 					$saldo -= $row['monto']-$row['abonos'];
 				$i ++;
 			}
-			$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
-			$salida .= "</table>";
+			$salida .= '<tr bgcolor=\'#D7C3C7\'><td colspan=\'4\' align=\'center\'>Saldo : '.nformat($saldo).'</td></tr>';
+			$salida .= '</table>';
 		}
 		$query->free_result();
 		echo $salida;
@@ -3821,9 +3828,9 @@ class Scst extends Controller {
 
 			$mSQL='SELECT ultimo,existen,pond,standard,formcal,margen1,margen2,margen3,margen4,precio1,precio2,precio3,precio4,iva FROM sinv WHERE codigo='.$this->db->escape($itcodigo);
 			$query = $this->db->query($mSQL);
-			if ($query->num_rows() > 0){
+			if($query->num_rows() > 0){
 				$row = $query->row();
-				if ( ($itcana+$row->existen) <> 0 )
+				if(($itcana+$row->existen) <> 0)
 					$costo_pond=(($row->pond*$row->existen)+($itcana*$itprecio))/($itcana+$row->existen);
 				else
 					$costo_pond=$itprecio;
@@ -3912,6 +3919,7 @@ class Scst extends Controller {
 			$iva    += $iiva;
 			$stotal += $itimporte;
 		}
+
 		$gtotal=$stotal+$iva;
 		$do->set('numero'   , $numero);
 		$do->set('control'  , $control);
@@ -3935,9 +3943,9 @@ class Scst extends Controller {
 			$gtotal=$stotal+$iva;
 		}
 
-		$do->set('montotot' , round($stotal,2));
-		$do->set('montonet' , round($gtotal,2));
-		$do->set('montoiva' , round($iva   ,2));
+		$do->set('montotot' , round($stotal ,2));
+		$do->set('montonet' , round($gtotal ,2));
+		$do->set('montoiva' , round($iva    ,2));
 		$do->set('cgenera'  , round($cgenera,2));
 		$do->set('civagen'  , round($civagen,2));
 		$do->set('creduci'  , round($creduci,2));
@@ -3948,6 +3956,11 @@ class Scst extends Controller {
 		$do->set('ctotal'   , round($gtotal ,2));
 		$do->set('cstotal'  , round($stotal ,2));
 		$do->set('cimpuesto', round($iva    ,2));
+
+		//Bases
+		$do->set('montasa'  , round($cgenera,2));
+		$do->set('monredu'  , round($creduci,2));
+		$do->set('monadic'  , round($cadicio,2));
 
 		//Para la retencion de iva si aplica
 		$contribu= trim($this->datasis->traevalor('CONTRIBUYENTE'));
