@@ -1935,7 +1935,7 @@ class Sinv extends Controller {
 		$grid->label('Modelo');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => $editar,
+			'editable'      => 'true',
 			'width'         => 200,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
@@ -2632,7 +2632,7 @@ class Sinv extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData(){
+	function setdata(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -2652,7 +2652,7 @@ class Sinv extends Controller {
 				return false;
 			}
 
-			$posibles=array('descrip');
+			$posibles=array('descrip','modelo','marca');
 			foreach($data as $ind=>$val){
 				if(!in_array($ind,$posibles)){
 					echo 'Campo no permitido ('.$ind.')';

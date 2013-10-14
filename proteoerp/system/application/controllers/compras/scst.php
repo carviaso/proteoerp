@@ -81,6 +81,7 @@ class Scst extends Controller {
 			array('id'=>'fcompra' , 'title'=>'Modificar Compra'),
 			array('id'=>'factuali', 'title'=>'Actualizar'),
 			array('id'=>'fvehi'   , 'title'=>'Seriales Vehiculares'),
+			array('id'=>'fborra'  , 'title'=>'Eliminar Registro'),
 			array('id'=>'fcmonto' , 'title'=>'Cambiar los montos que van a CxP'),
 			array('id'=>'fshow'   , 'title'=>'Mostrar Compra'),
 		);
@@ -147,6 +148,37 @@ class Scst extends Controller {
 		};';
 
 		$bodyscript .= '
+		function scstdel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'solo/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if(json.status == "A"){
+								$.prompt("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								if(json.mensaje === undefined){
+									$.prompt("Registro no se puede eliminado");
+								}else{
+									$.prompt(json.mensaje);
+								}
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
 		function scstadd(){
 			$.post("'.site_url('compras/scst/solo/create').'",
 			function(data){
@@ -182,8 +214,7 @@ class Scst extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-/*
-		$bodyscript .= '
+		/*$bodyscript .= '
 		$(function() {
 			$("#dialog:ui-dialog").dialog( "destroy" );
 			var mId = 0;
@@ -195,8 +226,7 @@ class Scst extends Controller {
 			var tips = $( ".validateTips" );
 
 
-			s = grid.getGridParam(\'selarrrow\');';
-*/
+			s = grid.getGridParam(\'selarrrow\');';*/
 
 
 		// Imprime Compra
@@ -294,8 +324,8 @@ class Scst extends Controller {
 
 		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "500", $width = "700" );
 
-/*
-		$bodyscript .= '
+
+		/*$bodyscript .= '
 			$("#fshow").dialog({
 				autoOpen: false, height: 500, width: 700, modal: true,
 				buttons: {
@@ -307,8 +337,8 @@ class Scst extends Controller {
 				close: function() {
 					$("#fshow").html("");
 				}
-			});';
-*/
+			});';*/
+
 
 		$bodyscript .= '
 			$("#actualizar").click( function(){
@@ -343,17 +373,15 @@ class Scst extends Controller {
 							$("#factuali").dialog("open");
 						});
 					';
-		} else {
-			$bodyscript .= '
-						$.prompt( "<h1>Opci&oacute;n no Autorizada, comuniquese con el supervisor.</h1>");
-					';
+		}else{
+			$bodyscript .= '$.prompt( "<h1>Opci&oacute;n no Autorizada, comuniquese con el supervisor.</h1>");';
 		}
 
 		$bodyscript .= '
 					} else {
 					';
 
-		if ( $this->datasis->sidapuede('SCSTOTR', 'reversar' ) ) {
+		if($this->datasis->sidapuede('SCSTOTR', 'reversar' )){
 
 		//Revisa si puede Reversar
 		$bodyscript .= '
@@ -1371,7 +1399,7 @@ class Scst extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions('addfunc: scstadd, editfunc: scstedit, viewfunc: scstshow');
+		$grid->setBarOptions('addfunc: scstadd, editfunc: scstedit, viewfunc: scstshow, delfunc: scstdel');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -1415,7 +1443,7 @@ class Scst extends Controller {
 			echo 'Deshabilitado';
 		}elseif($oper == 'edit'){
 
-			if($this->datasis->sidapuede('SCST','2')){
+			if(!$this->datasis->sidapuede('SCST','2')){
 				echo 'No tiene acceso a modificar';
 				return false;
 			}
@@ -1688,7 +1716,7 @@ class Scst extends Controller {
 				cellsubmit: "remote",
 				cellurl: "'.site_url($this->url.'setdatait/').'"
 		');
-		$grid->setOndblClickRow("");
+		$grid->setOndblClickRow('');
 
 		$grid->setFormOptionsE('');
 		$grid->setFormOptionsA('');
@@ -2159,14 +2187,14 @@ class Scst extends Controller {
 	//******************************************************************
 	//
 	//
-	function solo() {
+	function solo(){
 		$this->solo = true;
 		$id = $this->uri->segment($this->uri->total_segments());
 
 		//Creando Compra
 		if($this->rapyd->uri->is_set('create') || $this->rapyd->uri->is_set('modify')){
 			$edit = $this->dataedit();
-		}elseif($this->rapyd->uri->is_set('insert') || $this->rapyd->uri->is_set('update')){
+		}elseif($this->rapyd->uri->is_set('insert') || $this->rapyd->uri->is_set('update') || $this->rapyd->uri->is_set('do_delete')){
 			$this->genesal = false;
 			$rt = $this->dataedit();
 			$id = (isset($this->claves['id']))? $this->claves['id'] :0;
@@ -2176,13 +2204,13 @@ class Scst extends Controller {
 					$rtjson=array(
 						'status' => 'A',
 						'mensaje'=> utf8_encode(str_replace("\n",'<br />',$rt)),
-						'pk'     => array("id" => "$id")
+						'pk'     => array('id' => $id)
 					);
 				}else{
 					$rtjson=array(
 						'status' => 'C',
 						'mensaje'=> utf8_encode(str_replace("\n",'<br />',$rt)),
-						'pk'     => array("id" => "$id")
+						'pk'     => array('id' => $id)
 					);
 				}
 				echo json_encode($rtjson);
@@ -3726,7 +3754,7 @@ class Scst extends Controller {
 		$this->db->simple_query($mSQL);
 
 		// Carga Ordenes
-		if (count($mORDENES) > 0 ) {
+		if(count($mORDENES) > 0 ){
 			// SUMA A VER SI ESTA COMPLETA
 			foreach ( $mORDENES as $orden ) {
 				$dbitorden = $this->db->escape($orden);

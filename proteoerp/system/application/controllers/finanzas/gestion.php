@@ -1,7 +1,7 @@
 <?php
 class gestion extends Controller {
-	var $titp='Titulo Principal';
-	var $tits='Sub-titulo';
+	var $titp='Indicadores de Gesti&oacute;n';
+	var $tits='Indicadores de Gesti&oacute;n';
 	var $url ='finanzas/gestion/';
 
 	function gestion(){
@@ -20,17 +20,12 @@ class gestion extends Controller {
 
 		$filter = new DataFilter($this->titp, 'gestion_indicador');
 
-		$filter->id_gestion_grupo = new inputField('Id_gestion_grupo','id_gestion_grupo');
-		$filter->id_gestion_grupo->rule      ='max_length[10]';
-		$filter->id_gestion_grupo->size      =12;
-		$filter->id_gestion_grupo->maxlength =10;
-
 		$filter->unidad = new inputField('Unidad','unidad');
 		$filter->unidad->rule      ='max_length[8]';
 		$filter->unidad->size      =10;
 		$filter->unidad->maxlength =8;
 
-		$filter->descrip = new inputField('Descrip','descrip');
+		$filter->descrip = new inputField('Descripci&oacute;n','descrip');
 		$filter->descrip->rule      ='max_length[100]';
 		$filter->descrip->maxlength =100;
 
@@ -49,10 +44,10 @@ class gestion extends Controller {
 		$filter->objetivo->size      =14;
 		$filter->objetivo->maxlength =12;
 
-		$filter->ejecuta = new textareaField('Ejecuta','ejecuta');
-		$filter->ejecuta->rule      ='max_length[8]';
-		$filter->ejecuta->cols = 70;
-		$filter->ejecuta->rows = 4;
+		$filter->ejecuta = new inputField('Ejecuta','ejecuta');
+		$filter->ejecuta->css_class ='inputnum';
+		$filter->ejecuta->size      =14;
+		$filter->ejecuta->maxlength =12;
 
 		$filter->buttons('reset', 'search');
 		$filter->build();
@@ -63,14 +58,14 @@ class gestion extends Controller {
 		$grid->order_by('id');
 		$grid->per_page = 40;
 
-		$grid->column_orderby('Id',$uri,'id','align="left"');
-		$grid->column_orderby('Id_gestion_grupo','<nformat><#id_gestion_grupo#></nformat>','id_gestion_grupo','align="right"');
-		$grid->column_orderby('Unidad','unidad','unidad','align="left"');
-		$grid->column_orderby('Descrip','descrip','descrip','align="left"');
-		$grid->column_orderby('Indicador','indicador','indicador','align="left"');
-		$grid->column_orderby('Puntos','<nformat><#puntos#></nformat>','puntos','align="right"');
-		$grid->column_orderby('Objetivo','<nformat><#objetivo#></nformat>','objetivo','align="right"');
-		$grid->column_orderby('Ejecuta','ejecuta','ejecuta','align="left"');
+		$grid->column_orderby('Id'         ,$uri,'id','align="left"');
+		$grid->column_orderby('Grupo'      ,'<nformat><#id_gestion_grupo#></nformat>','id_gestion_grupo','align="right"');
+		$grid->column_orderby('Unidad'     ,'unidad'   ,'unidad','align="left"');
+		$grid->column_orderby('Descripción','descrip'  ,'descrip','align="left"');
+		$grid->column_orderby('Indicador'  ,'indicador','indicador','align="left"');
+		$grid->column_orderby('Puntos'     ,'<nformat><#puntos#></nformat>','puntos','align="right"');
+		$grid->column_orderby('Objetivo'   ,'<nformat><#objetivo#></nformat>','objetivo','align="right"');
+		$grid->column_orderby('Ejecuta'    ,'ejecuta'  ,'ejecuta','align="left"');
 
 		$grid->add($this->url.'dataedit/create');
 		$grid->build();
@@ -93,11 +88,11 @@ class gestion extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert','_pre_insert');
-		$edit->pre_process('update','_pre_update');
-		$edit->pre_process('delete','_pre_delete');
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
 
-		$edit->id_gestion_grupo = new inputField('Id_gestion_grupo','id_gestion_grupo');
+		$edit->id_gestion_grupo = new inputField('Grupo','id_gestion_grupo');
 		$edit->id_gestion_grupo->rule='max_length[10]|integer';
 		$edit->id_gestion_grupo->css_class='inputonlynum';
 		$edit->id_gestion_grupo->size =12;
@@ -108,7 +103,7 @@ class gestion extends Controller {
 		$edit->unidad->size =10;
 		$edit->unidad->maxlength =8;
 
-		$edit->descrip = new inputField('Descrip','descrip');
+		$edit->descrip = new inputField('Descripción','descrip');
 		$edit->descrip->rule='max_length[100]';
 		$edit->descrip->size =102;
 		$edit->descrip->maxlength =100;
@@ -117,12 +112,6 @@ class gestion extends Controller {
 		$edit->indicador->rule='max_length[100]';
 		$edit->indicador->size =102;
 		$edit->indicador->maxlength =100;
-
-		$edit->puntos = new inputField('Puntos','puntos');
-		$edit->puntos->rule='max_length[11]|integer';
-		$edit->puntos->css_class='inputonlynum';
-		$edit->puntos->size =13;
-		$edit->puntos->maxlength =11;
 
 		$edit->objetivo = new inputField('Objetivo','objetivo');
 		$edit->objetivo->rule='max_length[12]|numeric';
@@ -151,9 +140,7 @@ class gestion extends Controller {
 		$data['script'] .= $script;
 		$data['title']   = heading($this->tits);
 		$this->load->view('view_ventanas', $data);
-
 	}
-
 
 	function cdatos(){
 		$this->rapyd->uri->keep_persistence();
