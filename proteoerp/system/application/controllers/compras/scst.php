@@ -1829,7 +1829,6 @@ class Scst extends Controller {
 	//
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
-		$this->rapyd->uri->keep_persistence();
 
 		$modbus=array(
 			'tabla'   =>'sinv',
@@ -2165,10 +2164,9 @@ class Scst extends Controller {
 		$id = $this->uri->segment($this->uri->total_segments());
 
 		//Creando Compra
-		if ( $id == 'create'){
+		if($this->rapyd->uri->is_set('create') || $this->rapyd->uri->is_set('modify')){
 			$edit = $this->dataedit();
-
-		}elseif( $id == 'insert'){
+		}elseif($this->rapyd->uri->is_set('insert') || $this->rapyd->uri->is_set('update')){
 			$this->genesal = false;
 			$rt = $this->dataedit();
 			$id = (isset($this->claves['id']))? $this->claves['id'] :0;
@@ -2180,58 +2178,54 @@ class Scst extends Controller {
 						'mensaje'=> utf8_encode(str_replace("\n",'<br />',$rt)),
 						'pk'     => array("id" => "$id")
 					);
-
-					//$rtjson['status']='A';
 				}else{
 					$rtjson=array(
 						'status' => 'C',
 						'mensaje'=> utf8_encode(str_replace("\n",'<br />',$rt)),
 						'pk'     => array("id" => "$id")
 					);
-					//$rtjson['status']='C';
 				}
 				echo json_encode($rtjson);
-
 			}else{
 				$rtjson=array(
 					'status' => 'C',
 					'mensaje'=> 'Error Desconocido',
-					'pk'     => array("id" => "$id")
+					'pk'     => array('id' => $id)
 				);
 				//$rtjson=array('id'=> 0,'mensaje'=> utf8_encode('Error desconocido'), 'status'=>'C');
 				echo json_encode($rtjson);
 			}
-		}elseif( $id == 'process'){
+		}elseif($id == 'process'){
 			$control = $this->uri->segment($this->uri->total_segments()-1);
 			$rt = $this->actualizar($control);
-			if ( strlen($rt[1]) > 0 )
-				if ( $rt[0] === false ) $p = 'E'; else $p='A';
+			if(strlen($rt[1]) > 0)
+				if($rt[0] === false) $p = 'E'; else $p='A';
 				$rtjson = array('status'=>$p, 'id'=> $control, 'mensaje'=> $rt[1]);
 				echo json_encode($rtjson);
-		} else {
+		}else{
 			$modo = $this->uri->segment($this->uri->total_segments()-1);
 
-			if ( $modo == 'actualizar' ){
+			if($modo == 'actualizar'){
 				$this->actualizar($id);
-			} elseif ( $modo == 'reversar' ){
+			}elseif( $modo == 'reversar'){
 				$rt = $this->reversar($id);
 				echo $rt;
-			} elseif ( $modo == 'cprecios' ){
+			}elseif( $modo == 'cprecios'){
 				$rt = $this->cprecios($id);
 				echo $rt;
-			} else {
-				if ( $modo == 'update' ) $this->genesal = false;
+			}else{
+				if($modo == 'update') $this->genesal = false;
 				$rt = $this->dataedit();
 
 				if($rt == 'Compra Guardada'){
 					$p='A';
 
-				$rtjson=array(
-					'status' => $p,
-					'mensaje'=> "$rt",
-					'pk'     => array("id" => "$id")
-				);
-				echo json_encode($rtjson);
+					$rtjson=array(
+						'status' => $p,
+						'mensaje'=> $rt,
+						'pk'     => array('id' => $id)
+					);
+					echo json_encode($rtjson);
 				}else{
 					$p='C';
 				}
@@ -2247,7 +2241,7 @@ class Scst extends Controller {
 		$this->rapyd->load('datagrid','fields');
 
 		$error='';
-		$msj='';
+		$msj  ='';
 
 		if($this->input->post('scstp_1') !== false){
 			$precio1=$this->input->post('scstp_1');
@@ -3956,11 +3950,12 @@ class Scst extends Controller {
 		$do->set('ctotal'   , round($gtotal ,2));
 		$do->set('cstotal'  , round($stotal ,2));
 		$do->set('cimpuesto', round($iva    ,2));
-
-		//Bases
 		$do->set('montasa'  , round($cgenera,2));
 		$do->set('monredu'  , round($creduci,2));
 		$do->set('monadic'  , round($cadicio,2));
+		$do->set('tasa'     , round($civagen,2));
+		$do->set('reducida' , round($civared,2));
+		$do->set('sobretasa', round($civaadi,2));
 
 		//Para la retencion de iva si aplica
 		$contribu= trim($this->datasis->traevalor('CONTRIBUYENTE'));
