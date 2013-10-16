@@ -81,33 +81,33 @@ class Pfac extends Controller {
 		$bodyscript = '<script type="text/javascript">'."\n";
 
 		$bodyscript .= '
-		function pfacadd() {
+		function pfacadd(){
 			$.post("'.site_url('ventas/pfac/dataedit/create').'",
 			function(data){
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
-			})
-		};';
+			});
+		}';
 
 		$bodyscript .= '
 		function pfacedit() {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				if ( ret.status == "A" ) {
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				if(ret.status == "A"){
 					mId = id;
 					$.post("'.site_url('ventas/pfac/dataedit/modify').'/"+id, function(data){
 						$("#fedita").html(data);
 						$("#fedita").dialog( "open" );
 					});
-				} else {
+				}else{
 					$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 				}
-			};
-		};';
+			}
+		}';
 
 		$bodyscript .= '
-		function pfacdel() {
+		function pfacdel(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				if(confirm(" Seguro desea eliminar el registro?")){
@@ -116,7 +116,7 @@ class Pfac extends Controller {
 					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
 						try{
 							var json = JSON.parse(data);
-							if (json.status == "A"){
+							if(json.status == "A"){
 								apprise("Registro eliminado");
 								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 							}else{
@@ -124,14 +124,14 @@ class Pfac extends Controller {
 							}
 						}catch(e){
 							$("#fborra").html(data);
-							$("#fborra").dialog( "open" );
+							$("#fborra").dialog("open");
 						}
 					});
 				}
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-		};';
+		}';
 
 		$bodyscript .= '
 		function pfacshow(){
@@ -146,7 +146,7 @@ class Pfac extends Controller {
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-		};';
+		}';
 
 		//Wraper de javascript
 		$bodyscript .= '
@@ -248,8 +248,7 @@ class Pfac extends Controller {
 											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 											return true;
-										} else {
-
+										}else{
 											$.post("'.site_url($this->url.'dataedit/S/create').'",
 											function(data){
 												$("#ffact").html(data);
@@ -257,15 +256,14 @@ class Pfac extends Controller {
 											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 											return true;
 										}
-
-									} else {
+									}else{
 										apprise(json.mensaje);
 									}
 								}catch(e){
 									$("#ffact").html(r);
 								}
 							}
-						})
+						});
 					},
 					"Cancelar": function() {
 						$("#ffact").html("");
@@ -308,8 +306,7 @@ class Pfac extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
-
+		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 
 		return $bodyscript;
@@ -740,7 +737,7 @@ class Pfac extends Controller {
 
 
 		$grid->addField('id');
-		$grid->label('ID');
+		$grid->label('Id');
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
@@ -777,6 +774,7 @@ class Pfac extends Controller {
 		$grid->setSearch( $this->datasis->sidapuede('PFAC','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+		$grid->setOndblClickRow('');
 
 		$grid->setBarOptions('addfunc: pfacadd, editfunc: pfacedit, delfunc: pfacdel, viewfunc: pfacshow');
 
@@ -815,54 +813,18 @@ class Pfac extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = 'numero';
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM pfac WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('pfac', $data);
-					echo "Registro Agregado";
-
-					logusu('PFAC',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM pfac WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM pfac WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE pfac SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("pfac", $data);
-				logusu('PFAC',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('pfac', $data);
-				logusu('PFAC',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
+			echo 'Deshabilitado';
+		}elseif($oper == 'edit'){
+			echo 'Deshabilitado';
 		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM pfac WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM pfac WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM pfac WHERE id=$id ");
-				logusu('PFAC',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+			echo 'Deshabilitado';
+		}
 	}
 
 
@@ -1223,9 +1185,9 @@ class Pfac extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdatait( $id = 0 ){
-		if ($id === 0 ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM pfac");
+	function getdatait($id=0){
+		if($id === 0 ){
+			$id = $this->datasis->dameval("SELECT MAX(id) AS val FROM pfac");
 		}
 		if(empty($id)) return '';
 		$id = intval($id);
@@ -1245,7 +1207,7 @@ class Pfac extends Controller {
 
 		$grid    = $this->jqdatagrid;
 		$mSQL    = "SELECT * FROM itpfac WHERE numa=${dbnumero} ${orderby}";
-		$response   = $grid->getDataSimple($mSQL);
+		$response= $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -1695,7 +1657,7 @@ class Pfac extends Controller {
 		$dbnuma=$this->db->escape($codigo);
 		$mSQL  ="UPDATE itpfac AS c JOIN sinv   AS d ON d.codigo=c.codigoa
 			SET d.exdes=IF(d.exdes>c.cana,d.exdes-c.cana,0)
-			WHERE c.numa = $dbnuma";
+			WHERE c.numa = ${dbnuma}";
 
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'pfac'); }
@@ -1709,7 +1671,7 @@ class Pfac extends Controller {
 	}
 
 	function chcodigoa($codigo){
-		$cana=$this->datasis->dameval('SELECT COUNT(*) FROM sinv WHERE activo=\'S\' AND codigo='.$this->db->escape($codigo));
+		$cana=$this->datasis->dameval('SELECT COUNT(*) AS val FROM sinv WHERE activo=\'S\' AND codigo='.$this->db->escape($codigo));
 		if(empty($cana) || $cana==0){
 			$this->validation->set_message('chcodigoa', 'El campo %s contiene un codigo no v&aacute;lido o inactivo');
 			return false;
@@ -1749,7 +1711,7 @@ class Pfac extends Controller {
 	function enviar($id,$dir='pfac'){
 		$ide=$this->db->escape($id);
 		$this->db->query("UPDATE pfac SET fenvia=CURDATE() WHERE id=${ide}");
-		redirect("ventas/$dir/dataedit/show/$id");
+		redirect("ventas/${dir}/dataedit/show/${id}");
 	}
 
 	function aplicar($numero){

@@ -1129,7 +1129,7 @@ class Ordc extends Controller {
 	function getdatait(){
 		$id = $this->uri->segment(4);
 		if($id == false){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM ordc");
+			$id = $this->datasis->dameval("SELECT MAX(id) AS id FROM ordc");
 		}
 		$dbid=intval($id);
 		$numero  = $this->datasis->dameval("SELECT numero FROM ordc WHERE id=${dbid}");
@@ -1208,7 +1208,7 @@ class Ordc extends Controller {
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->rule = 'required';
 		$edit->fecha->mode = 'autohide';
-		$edit->fecha->size = 10;
+		$edit->fecha->size = 12;
 		$edit->fecha->calendar = false;
 
 		$edit->numero = new inputField('N&uacute;mero', 'numero');
@@ -1249,14 +1249,14 @@ class Ordc extends Controller {
 		$edit->arribo->insertValue = date('Y-m-d');
 		$edit->arribo->rule = 'required';
 		$edit->arribo->mode = 'autohide';
-		$edit->arribo->size = 10;
+		$edit->arribo->size = 12;
 		$edit->arribo->calendar = false;
 
 		$edit->fechafac = new DateonlyField('Fecha Factura', 'fechafac','d/m/Y');
 		$edit->fechafac->insertValue = date('Y-m-d');
 		$edit->fechafac->rule = 'required';
 		$edit->fechafac->mode = 'autohide';
-		$edit->fechafac->size = 10;
+		$edit->fechafac->size = 12;
 		$edit->fechafac->calendar = false;
 		$edit->fechafac->when=array('show');
 
@@ -1337,10 +1337,10 @@ class Ordc extends Controller {
 		$edit->ultimo->rel_id    = 'itordc';
 		$edit->ultimo->pointer   = true;
 
-		$edit->pond = new hiddenField('', "pond_<#i#>");
+		$edit->pond = new hiddenField('', 'pond_<#i#>');
 		$edit->pond->db_name='pond';
-		$edit->pond->rel_id   ='itordc';
-		$edit->pond->pointer   = true;
+		$edit->pond->rel_id ='itordc';
+		$edit->pond->pointer= true;
 
 		//**************************
 		//fin de campos para detalle

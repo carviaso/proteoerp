@@ -1,0 +1,156 @@
+$mSPRV=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('proveed'=>'Código','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'proveed'),
+	'titulo'  =>'Buscar Proveedor');
+
+$bSPRV=$this->datasis->modbus($mSPRV);
+
+rapydlib('prototype');
+$ajax_onchange = '
+	  function get_linea(){
+	    var url = "'.site_url('reportes/sinvlineas').'";
+	    var pars = "dpto="+$F("depto");
+	    var myAjax = new Ajax.Updater("td_linea", url, { method: "post", parameters: pars });
+	    get_grupo();
+	  }
+
+	  function get_grupo(){
+	    var url = "'.site_url('reportes/sinvgrupos').'";
+	    var pars = "dpto="+$F("depto")+"&linea="+$F("linea");
+	    var myAjax = new Ajax.Updater("td_grupo", url, { method: "post", parameters: pars });
+	  }
+	  ';
+
+$select=array('a.codigo', 'a.descrip', 'a.unidad', 'a.peso', 'a.fracci', 'SUM(d.existen) AS existen', 'a.precio1', 'a.precio2', 'a.precio3',
+'a.grupo', 'b.nom_grup', 'a.base1', 'a.pond', 'c.descrip AS nomlinea',
+'SUM(d.existen*base1) AS pi',
+'SUM(d.existen*pond)  AS ci');
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->script($ajax_onchange);
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->db->select($select);
+$filter->db->from('sinv   AS a');
+$filter->db->join('grup   AS b','a.grupo=b.grupo');
+$filter->db->join('line   AS c','b.linea=c.linea');
+$filter->db->join('itsinv AS d','d.codigo=a.codigo');
+$filter->db->where('a.grupo=b.grupo');
+$filter->db->where('b.linea=c.linea');
+$filter->db->where('SUBSTRING(a.tipo,1,1)=\'A\'');
+$filter->db->orderby('b.nom_grup');
+$filter->db->groupby('a.codigo');
+
+$filter->proveed = new inputField('Proveedor', 'proveed');
+$filter->proveed->rule = 'trim';
+$filter->proveed->db_name='(a.prov1,a.prov2,a.prov3)';
+$filter->proveed->append($bSPRV);
+$filter->proveed->clause='in';
+
+$filter->depto = new dropdownField('Departamento', 'depto');
+$filter->depto->db_name='b.depto';
+$filter->depto->option('','Todos');
+$filter->depto->options('SELECT TRIM(depto) AS depto, descrip FROM dpto WHERE tipo=\'I\' ORDER BY depto');
+$filter->depto->onchange = 'get_linea();';
+$filter->depto->group = 'Producto';
+
+$filter->linea = new dropdownField('Línea', 'linea');
+$filter->linea->db_name='b.linea';
+$filter->linea->option('','Seleccione un Departamento');
+$filter->linea->onchange = 'get_grupo();';
+$filter->linea->group    = 'Producto';
+
+$filter->grupo = new dropdownField('Grupo', 'grupo');
+$filter->grupo->option('','Seleccione una Línea');
+$filter->grupo->group = 'Producto';
+$filter->grupo->db_name='b.grupo';
+
+$filter->marca = new dropdownField('Marca', 'marca');
+$filter->marca->option('','Todas');
+$filter->marca->options('SELECT TRIM(marca) AS cod, marca nombre FROM marc ORDER BY marca');
+$filter->marca->db_name='a.marca';
+
+$filter->almacen = new dropdownField('Almac&eacute;n', 'almacen');
+$filter->almacen->option('','Todos');
+$filter->almacen->options('SELECT TRIM(ubica) AS cod,ubides FROM caub ORDER BY ubica');
+$filter->almacen->db_name='d.alma';
+
+$filter->tipo = new dropdownField('Tipo', 'tipo');
+$filter->tipo->db_name='a.tipo';
+$filter->tipo->option('','Todos');
+$filter->tipo->option('Articulo' ,'Artículo' );
+$filter->tipo->option('Servicio' ,'Servicio' );
+$filter->tipo->option('Consumo'  ,'Consumo'  );
+$filter->tipo->option('Descartar','Descartar');
+$filter->tipo->option('Fraccion' ,'Fracción' );
+
+$filter->activo = new dropdownField('Activo', 'activo');
+$filter->activo->option( '','Todos');
+$filter->activo->option('S','Si');
+$filter->activo->option('N','No');
+
+$filter->ordenpor = new dropdownField('Ordenado por', 'orden');
+$filter->ordenpor->option('a.descrip','Descripción');
+$filter->ordenpor->option('a.codigo' ,'Código');
+$filter->ordenpor->clause ='';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+$filter->salformat->group  = 'Opciones';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+
+	$this->rapyd->db->orderby($filter->ordenpor->newValue);
+
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$sobretabla='';
+	if(!empty($filter->proveed->newValue))  $sobretabla.='Proveedor: '.$filter->proveed->newValue;
+	if(!empty($filter->depto->newValue))    $sobretabla.=' Dpto: '.$filter->depto->newValue;
+	if(!empty($filter->linea->newValue))    $sobretabla.=' Línea: '.$filter->linea->newValue;
+	if(!empty($filter->grupo->newValue))    $sobretabla.=' Grupo: '.$filter->grupo->newValue;
+	if(!empty($filter->marca->newValue))    $sobretabla.=' Marca: '.$filter->marca->newValue;
+	if(!empty($filter->tipo->newValue))     $sobretabla.=' Tipo: '.$filter->tipo->newValue;
+	if(!empty($filter->activo->newValue))   $sobretabla.=' Activo: '.$filter->activo->newValue;
+	if(!empty($filter->almacen->newValue))  $sobretabla.=' Almacen: '.$filter->almacen->newValue;
+	if(!empty($filter->ordenpor->newValue)) $sobretabla.=' Orden por: '.$filter->ordenpor->newValue;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Lista de Existencias');
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+
+	$pdf->AddCol('codigo' ,20,'Código'     ,'L',8);
+	$pdf->AddCol('descrip',60,'Descripción','L',8);
+	$pdf->AddCol('unidad' ,20,'Unidad'     ,'R',8);
+	$pdf->AddCol('base1'  ,20,'Precio'     ,'R',8);
+	$pdf->AddCol('pond'   ,20,'Costo'      ,'R',8);
+	$pdf->AddCol('existen',20,'Existencia' ,'R',8);
+	$pdf->AddCol('pi'     ,20,'Precio Inv' ,'R',8);
+	$pdf->AddCol('ci'     ,20,'Costo Inv'  ,'R',8);
+	$pdf->setTotalizar('pi','ci');
+	$pdf->setGrupoLabel(' (<#nom_grup#>)  ');
+	$pdf->setGrupo('grupo');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Listado de existencias</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

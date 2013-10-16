@@ -1,0 +1,70 @@
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('a.numero','a.fecha','a.envia','a.recibe','b.codigo','b.descrip','b.cantidad','c.proveed','c.nombre');
+$filter->db->select($select);
+$filter->db->from('stra AS a');
+$filter->db->join('itstra AS b' ,'a.numero=b.numero');
+$filter->db->join('sprv AS c','a.proveed=c.proveed','left');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause='where';
+$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n'),date('d')-7));
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechad->operator='>=';
+$filter->fechah->operator='<=';
+
+$filter->tipo = new dropdownField('Tipo', 'opt');
+$filter->tipo->clause='';
+$filter->tipo->option('','Todas');
+$filter->tipo->option('S','Solo RMA');
+$filter->tipo->option('N','Sin RMA');
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+
+	$tipo=$filter->tipo->newValue;
+	if($tipo=='S'){
+		//$this->rapyd->db->join('sprv AS c','a.proveed=c.proveed');
+		$this->rapyd->db->where('c.proveed IS NOT NULL');
+	}elseif($tipo=='N'){
+		$this->rapyd->db->where('c.proveed IS NULL');
+	}
+
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Transferencias  por Fecha");
+	$pdf->setSubTitulo('Desde la fecha: '.$_POST['fechad'].' Hasta '.$_POST['fechah']);
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+
+	$pdf->AddCol('envia'    ,25,'Envia'      ,'C',8);
+	$pdf->AddCol('recibe'   ,25,'Recibe'     ,'C',8);
+	$pdf->AddCol('codigo'   ,30,'Codigo'     ,'L',8);
+	$pdf->AddCol('descrip'  ,70,'Descripcion','L',8);
+	$pdf->AddCol('cantidad' ,25,'Cantidad'   ,'R',8);
+
+	$pdf->setGrupoLabel(' Numero: <#numero#> <#proveed#> <#nombre#>');
+	$pdf->setGrupo('numero');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2  class="mainheader">Transferencias por Fecha</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

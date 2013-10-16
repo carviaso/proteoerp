@@ -1391,7 +1391,7 @@ class Scst extends Controller {
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(    $this->datasis->sidapuede('SCST','1' ));
+		$grid->setAdd(    $this->datasis->sidapuede('SCST','1'));
 		$grid->setEdit(   $this->datasis->sidapuede('SCST','2'));
 		$grid->setDelete( $this->datasis->sidapuede('SCST','5'));
 		$grid->setSearch( $this->datasis->sidapuede('SCST','6'));
@@ -1407,7 +1407,7 @@ class Scst extends Controller {
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdata/'));
 
-		if ($deployed) {
+		if($deployed){
 			return $grid->deploy();
 		} else {
 			return $grid;

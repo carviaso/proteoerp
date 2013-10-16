@@ -60,22 +60,22 @@ $filter->depto->options("SELECT depto, descrip FROM dpto WHERE tipo='I' ORDER BY
 $filter->depto->onchange = "get_linea();";
 $filter->depto->group = "Producto";
 
-$filter->linea = new dropdownField('LÃ­nea', 'linea');
+$filter->linea = new dropdownField('Línea', 'linea');
 $filter->linea->db_name='b.linea';
-$filter->linea->option("","Seleccione un Departamento");
+$filter->linea->option('',"Seleccione un Departamento");
 $filter->linea->onchange = "get_grupo();";
 $filter->linea->group    = "Producto";
 
-$filter->grupo = new dropdownField("Grupo", "grupo");
-$filter->grupo->option("","Seleccione una LÃ­nea");
-$filter->grupo->group = "Producto";
+$filter->grupo = new dropdownField('Grupo', 'grupo');
+$filter->grupo->option('','Seleccione una Línea');
+$filter->grupo->group = 'Producto';
 $filter->grupo->db_name='b.grupo';
 
-$filter->marca = new dropdownField("Marca", "marca");
-$filter->marca->clause="where";
+$filter->marca = new dropdownField('Marca', 'marca');
+$filter->marca->clause='where';
 $filter->marca->db_name='marca';
-$filter->marca->operator="=";
-$filter->marca->option("","");
+$filter->marca->operator='=';
+$filter->marca->option('','Todas');
 $filter->marca->options("SELECT marca, marca nombre FROM marc ORDER BY marca");
 
 $filter->tipo = new dropdownField("Tipo", "tipo");
@@ -97,10 +97,10 @@ $filter->activo->option("","Todos");
 $filter->activo->option("S","Si");
 $filter->activo->option("N","No");
 
-$filter->ordenpor = new dropdownField("Ordenado por", "orden");
-$filter->ordenpor->option("G"  ,"Grupo");
-$filter->ordenpor->option("D","DescripciÃ³n");
-$filter->ordenpor->option("C" ,"CÃ³digo");
+$filter->ordenpor = new dropdownField('Ordenado por', 'orden');
+$filter->ordenpor->option('G','Grupo');
+$filter->ordenpor->option('D','Descripción');
+$filter->ordenpor->option('C','Código');
 $filter->ordenpor->clause ='';
 
 $filter->salformat = new radiogroupField('Formato de salida','salformat');
@@ -109,7 +109,7 @@ $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 $filter->salformat->group  = 'Opciones';
 
-$filter->buttons("search");
+$filter->buttons('search');
 $filter->build();
 
 if($this->rapyd->uri->is_set('search')){
@@ -124,7 +124,7 @@ if($filter->ordenpor->newValue=='G'){
 	$orden='a.descrip';
 	$grupo='dletra';
 }else{
-	$grupolabel='CÃ³digo  <#cletra#>';
+	$grupolabel='Código  <#cletra#>';
 	$orden='a.codigo';
 	$grupo='cletra';
 }
@@ -144,17 +144,17 @@ if (!empty($filter->ordenpor->newValue)) $sobretabla.='  Ordenado por: '.$filter
 $pdf = new PDFReporte($mSQL);
 $pdf->setHeadValores('TITULO1');
 $pdf->setSubHeadValores('TITULO2','TITULO3');
-$pdf->setTitulo('Hoja de Trabajo para la Toma de Inventario FÃ­sico');
+$pdf->setTitulo('Hoja de Trabajo para la Toma de Inventario Físico');
 $pdf->setSobreTabla($sobretabla,5);
 $pdf->AddPage();
 $pdf->setTableTitu(9,'Times');
 
-$pdf->AddCol('codigo' ,28,'Código'     ,'L',6);
+$pdf->AddCol('codigo'     ,28,'Código'     ,'L',6);
 $pdf->AddCol('sinvdescrip',85,'Descripción','L',6);
-$pdf->AddCol('marca'  ,25,'Marca'      ,'L',7);
-$pdf->AddCol('alterno',22,'Alterno'    ,'L',7);
-$pdf->AddCol('precio1',22,'Precio'     ,'R',7);
-$pdf->AddCol('conteo' ,15,'Exist'      ,'R',7);
+$pdf->AddCol('marca'      ,25,'Marca'      ,'L',7);
+$pdf->AddCol('alterno'    ,22,'Alterno'    ,'L',7);
+$pdf->AddCol('precio1'    ,22,'Precio'     ,'R',7);
+$pdf->AddCol('conteo'     ,15,'Exist'      ,'R',7);
 
 //$pdf->setTotalizar('precio1');
 
@@ -166,7 +166,7 @@ $pdf->Output();
 
 }else{
 	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Hoja de Trabajo para la Toma de Inventario FÃ­sico</h2>';
+	$data['titulo'] = '<h2 class="mainheader">Hoja de Trabajo para la Toma de Inventario Físico</h2>';
 	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

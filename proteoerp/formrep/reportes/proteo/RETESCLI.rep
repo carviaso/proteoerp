@@ -1,0 +1,60 @@
+$this->load->helper('fecha');
+$base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, "search"));
+$filter->title('Elija un formato de salida');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$estMsj='Por favor tenga en cuenta de que este reporte sale de los <b title=\'Finanzas - Tributos\'>Libro de ventas</b>, por lo que este debe ser generado antes para la fecha solicitada antes de ser emitido.';
+$filter->container = new containerField('info',"<span style='color:#E50E0E;'>${estMsj}</span>");
+$filter->container->clause='';
+
+$filter->fecha = new dateonlyField('Mes', 'fechad','m/Y');
+$filter->fecha->dbformat='Ym';
+$filter->fecha->rule = 'required';
+$filter->fecha->insertValue=date('Y-m-d');
+$filter->fecha->size=10;
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit','Descargar');
+$filter->build_form();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$anomes=$filter->fecha->newValue;
+        $mSQL ="SELECT a.fecha, a.fecharece,a.numero,a.clipro,a.nombre,a.rif,'FC' AS tp,a.afecta,a.fafecta,reiva
+	FROM siva AS a
+	WHERE a.tipo='CR' AND a.fechal=${anomes}01 AND a.libro='V'
+	ORDER BY a.fecha,a.clipro,a.numero,a.afecta ";
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Retenciones de IVA de Clientes Mes de '.mesLetra(substr($anomes,4)).' de '.substr($anomes,0,4));
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+	$pdf->AddCol('fecha'    ,15,'Fecha'      ,'C',8);
+	$pdf->AddCol('fecharece',15,'Recepción'  ,'C',8);
+	$pdf->AddCol('numero'   ,25,'Numero'     ,'C',8);
+	$pdf->AddCol('clipro'   ,13,'Cod.'       ,'C',8);
+	$pdf->AddCol('nombre'   ,50,'Nombre'     ,'L',6);
+	$pdf->AddCol('rif'      ,18,'RIF'        ,'L',8);
+	$pdf->AddCol('tp'       , 6,'Tp'         ,'C',8);
+	$pdf->AddCol('afecta'   ,18,'Nro.Afec'   ,'L',8);
+	$pdf->AddCol('fafecta'  ,15,'Fecha Afec' ,'C',8);
+	$pdf->AddCol('reiva'    ,20,'Monto Ret.' ,'R',8);
+
+	$pdf->setTotalizar('reiva');
+
+      	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Listado de Reteciones de IVA a cliente por mes</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

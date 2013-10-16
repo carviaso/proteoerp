@@ -98,6 +98,12 @@ class gestion extends Controller {
 		$edit->id_gestion_grupo->size =12;
 		$edit->id_gestion_grupo->maxlength =10;
 
+		$edit->activo = new dropdownField('Activo', 'activo');
+		$edit->activo->style='width:100px;';
+		$edit->activo->option('S' ,'Si');
+		$edit->activo->option('N' ,'No');
+		$edit->activo->rule='enum[S,N]';
+
 		$edit->unidad = new inputField('Unidad','unidad');
 		$edit->unidad->rule='max_length[8]';
 		$edit->unidad->size =10;
@@ -120,7 +126,7 @@ class gestion extends Controller {
 		$edit->objetivo->maxlength =12;
 
 		$edit->ejecuta = new textareaField('Ejecuta','ejecuta');
-		$edit->ejecuta->rule='max_length[8]';
+		$edit->ejecuta->rule='required';
 		$edit->ejecuta->cols = 70;
 		$edit->ejecuta->rows = 4;
 
@@ -242,13 +248,14 @@ class gestion extends Controller {
 		$ggrid .= br().'<b>'.$fcorte1->label.'</b>'.$fcorte1->output;
 		$ggrid .= '</p>';
 
-		$grid = new DataGrid2('Seleccion de indicadores');
+		$grid = new DataGrid2('Selecci&oacute;n de indicadores');
 		$grid->agrupar(' ', 'nomgrup');
 		$grid->use_function('ctipo');
 		$select=array('a.descrip','a.indicador','a.tipo','a.puntos','a.id','a.objetivo','a.ejecuta','b.nombre AS nomgrup','unidad');
 		$grid->db->select($select);
 		$grid->db->from('gestion_indicador AS a');
 		$grid->db->join('gestion_grupo AS b','a.id_gestion_grupo=b.id');
+		$grid->db->where('a.activo','S');
 		$grid->order_by('nomgrup');
 
 		$campo = new inputField('Campo', 'puntos');
@@ -328,7 +335,7 @@ class gestion extends Controller {
 		$query = $this->db->query("SELECT b.nombre AS grupo,a.unidad,a.descrip,a.indicador,a.puntos,a.objetivo,a.ejecuta
 		FROM gestion_indicador AS a
 		JOIN gestion_grupo AS b ON a.id_gestion_grupo=b.id
-		WHERE a.puntos > 0
+		WHERE a.puntos > 0 AND a.activo='S'
 		ORDER BY b.nombre");
 
 		$content  = '<table  width=100%>';
@@ -382,24 +389,32 @@ class gestion extends Controller {
 			$content .= '<td align="right">'.htmlnformat($objetivo).' '.$unidad.'</td>';
 
 			foreach($resul as $pos=>$val){
-				$pp=$val*100/$objetivo;
-				$acumulado = ceil($this->_escalas($pp)*$puntos);
+				if(!is_array($val)){
+					$pp=$val*100/$objetivo;
+					$acumulado = ceil($this->_escalas($pp)*$puntos);
 
-				$content .= '<td align="right">'.htmlnformat($val).' '.$unidad.'</td>';
-				$content .= '<td align="right">'.htmlnformat($pp).'%</td>';
-				$content .= '<td align="right">'.$acumulado.'</td>';
+					$content .= '<td align="right">'.htmlnformat($val).' '.$unidad.'</td>';
+					$content .= '<td align="right">'.htmlnformat($pp).'%</td>';
+					$content .= '<td align="right">'.$acumulado.'</td>';
 
-				if(!isset($puntos_total[$pos])) $puntos_total[$pos]=0;
-				$puntos_total[$pos] += $acumulado;
-				if($pos==($ccana-1)){
+					if(!isset($puntos_total[$pos])) $puntos_total[$pos]=0;
+					$puntos_total[$pos] += $acumulado;
+					if($pos==($ccana-1)){
 						$content .= '<td align="center">'.img($this->url.'gauge/'.round($pp,1)).'</td>';
+					}
+				}else{
+					foreach($val as $detalle){
+
+
+
+					}
 				}
 			}
 			$content .= '</tr>';
 		}
 
 		$content .= '<tr style="font-size: 28pt;background-color:#5846FF;">';
-		$content .= '<td><b >Totales</b></td>';
+		$content .= '<td><b>Totales</b></td>';
 		$content .= '<td align="center">'.$puntos_porce.'</td>';
 		$content .= '<td></td>';
 		for($i=0;$i<$ccana;$i++){
@@ -468,10 +483,11 @@ class gestion extends Controller {
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('gestion_indicador')) {
+		if(!$this->db->table_exists('gestion_indicador')) {
 			$mSQL="CREATE TABLE `gestion_indicador` (
 			  `id` int(10) NOT NULL AUTO_INCREMENT,
 			  `id_gestion_grupo` int(10) DEFAULT '0',
+			  `activo` CHAR(1) NULL DEFAULT 'S',
 			  `unidad` char(8) COLLATE utf8_unicode_ci DEFAULT NULL,
 			  `descrip` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
 			  `indicador` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -479,10 +495,15 @@ class gestion extends Controller {
 			  `objetivo` decimal(12,2) DEFAULT NULL,
 			  `ejecuta` longtext COLLATE utf8_unicode_ci,
 			  PRIMARY KEY (`id`)
-			) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Guarda los indicadores de gestion'";
+			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Guarda los indicadores de gestion'";
+			$this->db->simple_query($mSQL);
+		}
+
+		$campos=$this->db->list_fields('gestion_indicador');
+		if(!in_array('id',$campos)){
+			$mSQL="ALTER TABLE `gestion_indicador` ADD COLUMN `activo` CHAR(1) NULL DEFAULT 'S' AFTER `id_gestion_grupo`";
 			$this->db->simple_query($mSQL);
 		}
 	}
 
 }
-?>

@@ -44,8 +44,8 @@ $filter->cod_prvh->operator="<=";
 $filter->cod_prvh->append($bPrvh);
 $filter->cod_prvh->group="Proveedor";
 
-$filter->grupo = new dropdownField("Grupo", "grupo");
-$filter->grupo->option("","");
+$filter->grupo = new dropdownField('Grupo', 'grupo');
+$filter->grupo->option('','');
 $filter->grupo->options("SELECT grupo, gr_desc FROM grpr ORDER BY gr_desc");
 $filter->grupo->db_name='b.grupo';
 
@@ -54,10 +54,10 @@ $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons("search");
+$filter->buttons('search');
 $filter->build();
 
-if($this->rapyd->uri->is_set("search")){
+if($this->rapyd->uri->is_set('search')){
 	$mSQL=$this->rapyd->db->_compile_select();
 	$subtitu='';
 	if(!empty($_POST['cod_prvd'])) $subtitu.=' Desde el proveedor '.$_POST['cod_prvd'];
@@ -89,8 +89,8 @@ if($this->rapyd->uri->is_set("search")){
 	$pdf->Output();
 
 }else{
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Saldos por Pagar</h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Saldos por Pagar</h2>';
+	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

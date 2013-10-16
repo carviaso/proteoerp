@@ -1056,7 +1056,7 @@ class Scli extends validaciones {
 		));
 
 /*
-		$grid->addField('modificado');
+		$grid->addField('modifi');
 		$grid->label('Modificado');
 		$grid->params(array(
 			'search'        => 'true',
@@ -2588,19 +2588,20 @@ function chrif(rif){
 
 	// Revisa si existe el codigo
 	function scliexiste(){
-		$cliente = rawurldecode($this->input->post('codigo'));
-		$existe  = $this->datasis->dameval("SELECT count(*) FROM scli WHERE cliente=".$this->db->escape($cliente));
+		$cliente  = rawurldecode($this->input->post('codigo'));
+		$dbcliente= $this->db->escape($cliente);
+		$existe  = $this->datasis->dameval("SELECT COUNT(*) FROM scli WHERE cliente=${dbcliente}");
 		$devo    = 'N ';
-		if ($existe > 0 ) {
+		if($existe > 0){
 			$devo  ='S';
-			$devo .= $this->datasis->dameval("SELECT nombre FROM scli WHERE cliente=".$this->db->escape($cliente));
+			$devo .= $this->datasis->dameval("SELECT nombre FROM scli WHERE cliente=${dbcliente}");
 		}
 		echo $devo;
 	}
 
 	function chtarifa($id){
 		$dbid = $this->db->escape($id);
-		$cana=$this->datasis->dameval("SELECT COUNT(*) FROM tarifa WHERE id=$dbid");
+		$cana=$this->datasis->dameval("SELECT COUNT(*) FROM tarifa WHERE id=${dbid}");
 		if($cana>0){
 			return true;
 		}else{

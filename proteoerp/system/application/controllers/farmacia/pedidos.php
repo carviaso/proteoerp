@@ -21,7 +21,13 @@ class Pedidos extends Controller {
 		$this->rapyd->load('datagrid','datafilter');
 		$this->rapyd->uri->keep_persistence();
 
-		$columnas = array("a.codigoa", "d.barras", "b.descrip AS desca", "b.existen", "b.exmin", "b.exmax", "d.proveed", "sum(c.cantidad * (c.origen = '3I')) AS trimestral", "round((sum(c.cantidad * (c.origen = '3I'))/3),0) AS mensual", "round((sum(c.cantidad*(c.origen = '3I'))/6),0) AS quincenal", "round((sum(c.cantidad * (c.origen = '3I'))/12),0) AS semanal, exmax-if(existen<0,0,existen) AS pedir");
+		$columnas = array('a.codigoa', 'd.barras', 'b.descrip AS desca', 'b.existen', 'b.exmin', 'b.exmax', 'd.proveed',
+			'SUM(c.cantidad*(c.origen=\'3I\')) AS trimestral',
+			'ROUND((SUM(c.cantidad*(c.origen=\'3I\'))/3) ,0) AS mensual',
+			'ROUND((SUM(c.cantidad*(c.origen=\'3I\'))/6) ,0) AS quincenal',
+			'ROUND((SUM(c.cantidad*(c.origen=\'3I\'))/12),0) AS semanal',
+			'b.exmax-IF(existen<0,0,b.existen) AS pedir'
+		);
 		$filter = new DataFilter('Productos vendidos en el d&iacute;a');
 
 		$filter->db->select($columnas);
@@ -31,19 +37,19 @@ class Pedidos extends Controller {
 		$filter->db->join('costos     AS c','a.codigoa=c.codigo AND a.fecha=c.fecha');
 		$filter->db->join('farmaxasig AS d','a.codigoa=d.abarras');
 
-		$filter->db->where('b.existen <= b.exmin ');
-		$filter->db->where('c.fecha >= DATE_ADD( CURDATE(), INTERVAL -90 DAY)');
+		$filter->db->where('b.existen <= b.exmin');
+		$filter->db->where('c.fecha >= DATE_ADD(CURDATE(), INTERVAL -90 DAY)');
 
 		$filter->db->groupby('a.codigoa');
 		$filter->db->having('pedir > 0');
 		if(!$this->rapyd->uri->is_set('search')){
-			 $filter->db->where('a.fecha',date('Y-m-d'));
+			$filter->db->where('a.fecha',date('Y-m-d'));
 		}
 
 		$filter->fecha = new dateonlyField('Fecha', 'fecha');
 		$filter->fecha->clause  ='where';
 		$filter->fecha->db_name ='a.fecha';
-		$filter->fecha->size    =10;
+		$filter->fecha->size    =12;
 		$filter->fecha->operator='=';
 		$filter->fecha->rule='required';
 		$filter->fecha->insertValue=date('Y-m-d');

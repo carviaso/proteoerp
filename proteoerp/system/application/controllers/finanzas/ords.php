@@ -102,9 +102,9 @@ class Ords extends Controller {
 
 		$bodyscript .= '
 		function ordsedit(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
@@ -117,9 +117,9 @@ class Ords extends Controller {
 
 		$bodyscript .= '
 		function ordsshow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
 					$("#fshow").html(data);
@@ -253,7 +253,6 @@ class Ords extends Controller {
 		});';
 
 		$bodyscript .= '});';
-
 		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
@@ -912,13 +911,11 @@ class Ords extends Controller {
 		$edit->proveed = new inputField('Proveedor', 'proveed');
 		$edit->proveed->size = 6;
 		$edit->proveed->rule='required|existesprv';
-		//$edit->proveed->append($boton);
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->type='inputhidden';
 		$edit->nombre->size = 30;
 		$edit->nombre->maxlength=30;
-
 
 		//Campos para el anticipo
 		$edit->codban = new dropdownField('Banco','codban');

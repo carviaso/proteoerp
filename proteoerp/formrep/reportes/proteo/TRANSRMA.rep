@@ -1,0 +1,96 @@
+$mSPRV=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('proveed'=>'Código','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'proveed'),
+	'titulo'  =>'Buscar Proveedor');
+$bSPRV=$this->datasis->modbus($mSPRV);
+
+$mSINV=array(
+	'tabla'   =>'sinv',
+	'columnas'=>array(
+		'codigo' =>'Código',
+		'descrip'=>'descrip'),
+	'filtro'  =>array('codigo' =>'Código','descrip'=>'descrip'),
+	'retornar'=>array('codigo'=>'codigo'),
+	'titulo'  =>'Buscar Artículo');
+$bSINV=$this->datasis->modbus($mSINV);
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('c.codigo','c.descrip','d.proveed','d.nombre');
+$filter->db->from('stra   AS a');
+$filter->db->join('itstra AS b','a.numero=b.numero');
+$filter->db->join('sinv   AS c','b.codigo=c.codigo');
+$filter->db->join('sprv   AS d','a.proveed=d.proveed');
+$filter->db->groupby('d.proveed,c.codigo');
+$filter->db->orderby('d.proveed,c.codigo');
+
+$filter->codigo = new inputField('Código', 'codigo');
+$filter->codigo->db_name='b.codigo';
+$filter->codigo->clause='where';
+$filter->codigo->operator='=';
+$filter->codigo->rule = 'existesinv';
+$filter->codigo->append($bSINV);
+$filter->codigo->group='Producto';
+$filter->codigo->size='10';
+
+$filter->proveed = new inputField('Proveedor', 'proveed');
+$filter->proveed->db_name='a.proveed';
+$filter->proveed->clause='where';
+$filter->proveed->operator='=';
+$filter->proveed->append($bSPRV);
+$filter->proveed->size='10';
+
+$filter->almacen = new dropdownField('Almac&eacute;n', 'almacen');
+$filter->almacen->option('','Seleccionar');
+$filter->almacen->options('SELECT TRIM(ubica) AS cod,ubides FROM caub WHERE tipo=\'N\' AND gasto<>\'S\' AND invfis<>\'S\' ORDER BY ubica');
+$filter->almacen->clause='in';
+$filter->almacen->db_name='(a.envia,a.recibe)';
+$filter->almacen->rule='required';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+
+	$dbalmacen=$this->db->escape($filter->almacen->newValue);
+	$select[]="SUM(b.cantidad*IF(a.recibe=${dbalmacen},1,-1)) AS cana";
+	$this->rapyd->db->select($select);
+
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Inventario en RMA');
+	$pdf->setSubTitulo('Para el almacen: '.$filter->almacen->newValue);
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+
+	$pdf->AddCol('codigo'   ,30,'Codigo'     ,'L',8);
+	$pdf->AddCol('descrip'  ,70,'Descripcion','L',8);
+	$pdf->AddCol('cana'     ,25,'Cantidad'   ,'R',8);
+
+	$pdf->setGrupoLabel('Proveedor: (<#proveed#>) <#nombre#>');
+	$pdf->setGrupo('proveed');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Inventario en RMA</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
