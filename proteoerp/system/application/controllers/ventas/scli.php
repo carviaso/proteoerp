@@ -3037,7 +3037,7 @@ function chrif(rif){
 			$this->db->simple_query($mSQL);
 		}
 
-		if(!in_array('modifi'     ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN modifi      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL");
+		//if(!in_array('modifi'     ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN modifi      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NULL");
 		if(!in_array('credito'    ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN credito     CHAR(1) NOT NULL DEFAULT 'N' AFTER `limite`");
 		if(!in_array('sucursal'   ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN sucursal    CHAR(2) NULL DEFAULT NULL");
 		if(!in_array('mmargen'    ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN mmargen     DECIMAL(7,2) NULL DEFAULT 0 COMMENT 'Margen al Mayor'");

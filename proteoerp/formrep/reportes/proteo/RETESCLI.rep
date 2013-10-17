@@ -28,7 +28,7 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
         $mSQL ="SELECT a.fecha, a.fecharece,a.numero,a.clipro,a.nombre,a.rif,'FC' AS tp,a.afecta,a.fafecta,reiva
 	FROM siva AS a
 	WHERE a.tipo='CR' AND a.fechal=${anomes}01 AND a.libro='V'
-	ORDER BY a.fecha,a.clipro,a.numero,a.afecta ";
+	ORDER BY a.fecha,a.clipro,a.numero,a.afecta";
 
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
@@ -53,6 +53,7 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$pdf->Output();
 
 }else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
 	$data['titulo'] = '<h2 class="mainheader">Listado de Reteciones de IVA a cliente por mes</h2>';
 	$data['head'] = $this->rapyd->get_head();
