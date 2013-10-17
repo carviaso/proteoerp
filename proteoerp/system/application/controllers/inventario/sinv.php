@@ -1138,15 +1138,20 @@ class Sinv extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		$mSQL   = "SELECT marca, marca FROM marc ORDER BY marca ";
+		$amarca = $this->datasis->llenajqselect($mSQL, true );
+
+
 		$grid->addField('marca');
 		$grid->label('Marca');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => $editar,
+			'editable'      => 'true',
 			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:22, maxlength: 22 }',
+			'edittype'      => "'select'",
+			'editrules'     => '{ required:false}',
+			'editoptions'   => '{ value: '.$amarca.',  style:"width:200px"}',
+			'stype'         => "'text'",
 		));
 
 		$grid->addField('descrip2');
@@ -3864,37 +3869,44 @@ class Sinv extends Controller {
 	}
 
 
-	//*****************************
-	//
+	//******************************************************************
 	//  Recalcula segun dolares
 	//
 	function recaldolar($cambio = 0){
 		$cambio = rawurldecode($this->input->post('cambio'));
 		$data   = $this->datasis->damesesion();
-		if ( isset($data['data1']) ){
-			$where = $data['data1'];
-			if (!empty($where)){
-				$cambio = floatval($cambio);
-				if( $cambio > 0 ){
-					$mSQL = "UPDATE sinv SET standard=ultimo WHERE dolar>0 AND formcal='S' AND standard=0";
-					$this->db->query($mSQL);
 
-					$mSQL = "SET
-					precio1=ROUND((dolar*${cambio})*(100+iva)/(100-margen1),2),
-					precio2=ROUND((dolar*${cambio})*(100+iva)/(100-margen2),2),
-					precio3=ROUND((dolar*${cambio})*(100+iva)/(100-margen3),2),
-					precio4=ROUND((dolar*${cambio})*(100+iva)/(100-margen4),2),
-					standard=ROUND(dolar*${cambio},2) ";
-					$this->db->simple_query("UPDATE sinv a ".$mSQL." ".$where." AND dolar > 0 AND formcal='S'");
-					$this->datasis->sinvrecalcular("P");
-					$this->datasis->sinvredondear();
-					echo " Cambio Concluido ";
-				} else
-					echo " Cambio debe ser mayor que 0 ";
-			} else
-				echo " Debe filtrar los productos!  ";
+		$where = ' WHERE standard>0 ';
+		if ( isset($data['data1']) ) $where = $data['data1'].' AND standard>0 ';
+	
+
+		$cambio = floatval($cambio);
+		if( $cambio > 0 ){
+			$mSQL = "UPDATE sinv SET standard=ultimo WHERE dolar>0 AND formcal='S' AND standard=0";
+			$this->db->query($mSQL);
+
+			$mSQL = "SET
+			precio1=ROUND(precio1*dolar*${cambio}/standard,2),
+			precio2=ROUND(precio1*dolar*${cambio}/standard,2),
+			precio3=ROUND(precio1*dolar*${cambio}/standard,2),
+			precio4=ROUND(precio1*dolar*${cambio}/standard,2) ";
+			$this->db->query("UPDATE sinv a ".$mSQL." ".$where." AND dolar > 0 AND formcal='S'");
+
+
+			$mSQL = "SET standard=ROUND( dolar*${cambio},2) ";
+			$this->db->query("UPDATE sinv a ".$mSQL." ".$where." AND dolar > 0 AND formcal='S'");
+
+
+			$this->datasis->sinvrecalcular("P");
+			$this->datasis->sinvredondear();
+			echo " Cambio Concluido ";
 		} else
-			echo " Debe filtrar los productos!  ";
+			echo " Cambio debe ser mayor que 0 ";
+
+
+		//} else echo " Debe filtrar los productos!  ";
+		//} else	echo " Debe filtrar los productos!  ";
+
 	}
 
 

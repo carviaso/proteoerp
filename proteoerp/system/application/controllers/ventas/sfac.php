@@ -212,7 +212,6 @@ class Sfac extends Controller {
 						$("#fborra").html("");
 						$("#fimpser").html("");
 						$("#fedita").html(data);
-						//$("#fedita").dialog({ buttons: { Ok: function() { $( this ).dialog( "close" ); } } });
 						$("#fedita").dialog("open");
 					});
 				}else{
@@ -260,7 +259,6 @@ class Sfac extends Controller {
 			$("#boton1").click( function(){
 				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
-					//alert(Math.ceil((screen.availHeight))+\'x\'+Math.ceil((screen.availWidth)));
 					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 					window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 				} else { $.prompt("<h1>Por favor Seleccione una Factura</h1>");}

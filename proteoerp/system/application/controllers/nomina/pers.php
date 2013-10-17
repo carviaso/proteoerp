@@ -1911,7 +1911,7 @@ class Pers extends Controller {
 
 
 	//******************************************************************
-	// Forma de Departamento
+	// Forma de Reposo
 	//
 	function reposoform( $id=0){
 		$editar = "true";
@@ -1972,7 +1972,7 @@ class Pers extends Controller {
 
 
 		$grid->addField('final');
-		$grid->label('Final');
+		$grid->label('Reincorporacion');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
