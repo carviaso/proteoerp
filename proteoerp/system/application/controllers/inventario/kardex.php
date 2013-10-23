@@ -418,7 +418,7 @@ class Kardex extends Controller {
 				$CI =& get_instance();
 				$dbcodigo  = $CI->db->escape($codigo);
 				$dbfactura = $CI->db->escape($factura);
-				$mSQL="SELECT GROUP_CONCAT( DISTINCT CONCAT(id,':',numero)) AS fact
+				$mSQL="SELECT GROUP_CONCAT( DISTINCT CONCAT(a.id,':',numero)) AS fact
 					FROM sfac AS a 
 					JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
 					WHERE b.codigo=${dbcodigo} AND ${dbfactura} IN ('a.numero',a.maestra) AND a.tipo_doc='F'";
