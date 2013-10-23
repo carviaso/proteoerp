@@ -412,6 +412,7 @@ class Kardex extends Controller {
 			}
 
 			function bfacts($factura,$codigo){
+				return '';
 				if(empty($factura)){
 					return 'Sin factura';
 				}
@@ -421,14 +422,14 @@ class Kardex extends Controller {
 				$mSQL="SELECT GROUP_CONCAT( DISTINCT CONCAT(a.id,':',numero)) AS fact
 					FROM sfac AS a 
 					JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
-					WHERE b.codigoa=${dbcodigo} AND ${dbfactura} IN ('a.numero',a.maestra) AND a.tipo_doc='F'";
+					WHERE b.codigoa=${dbcodigo} AND ${dbfactura} IN (a.numero,a.maestra) AND a.tipo_doc='F'";
 				$facts=$CI->datasis->dameval($mSQL);
 				$rt ='';
 				$lls=array();
 				$arr=explode(',',$facts);
 				foreach($arr AS $fact){
 					$parr  = explode(':',$fact);
-					$lls[] = anchor_popup('formatos/verhtml/FACTURA/'.$parr[0], $parr[1], $attsp);
+					$lls[] = anchor_popup('formatos/verhtml/FACTURA/'.$parr[0], $parr[1],array('target'=>'showefect')));
 				}
 				return implode(',',$lls);
 			}
