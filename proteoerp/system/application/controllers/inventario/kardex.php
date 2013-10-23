@@ -421,7 +421,7 @@ class Kardex extends Controller {
 				$mSQL="SELECT GROUP_CONCAT( DISTINCT CONCAT(a.id,':',numero)) AS fact
 					FROM sfac AS a 
 					JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
-					WHERE b.codigo=${dbcodigo} AND ${dbfactura} IN ('a.numero',a.maestra) AND a.tipo_doc='F'";
+					WHERE b.codigoa=${dbcodigo} AND ${dbfactura} IN ('a.numero',a.maestra) AND a.tipo_doc='F'";
 				$facts=$CI->datasis->dameval($mSQL);
 				$rt ='';
 				$lls=array();
