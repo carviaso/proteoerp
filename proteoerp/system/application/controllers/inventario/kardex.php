@@ -401,7 +401,7 @@ class Kardex extends Controller {
 			$fields = $this->db->field_data('snte');
 			$ppk=array();
 			$select=array('a.numero','a.fecha','a.nombre','b.cana','b.precio','b.importe','a.factura');
-			foreach ($fields as $field){
+			foreach($fields as $field){
 				if($field->primary_key==1){
 					$ppk[]='<#'.$field->name.'#>';
 					$pknombre='a.'.$field->name;
@@ -412,9 +412,10 @@ class Kardex extends Controller {
 			}
 
 			function bfacts($factura,$codigo){
-				return '';
+				//return '';
+				$factura=trim($factura);
 				if(empty($factura)){
-					return 'Sin factura';
+					return 'No encontrado';
 				}
 				$CI =& get_instance();
 				$dbcodigo  = $CI->db->escape($codigo);
@@ -427,11 +428,11 @@ class Kardex extends Controller {
 				$rt ='';
 				$lls=array();
 				$arr=explode(',',$facts);
-				foreach($arr AS $fact){
+				foreach($arr as $fact){
 					$parr  = explode(':',$fact);
-					$lls[] = anchor_popup('formatos/verhtml/FACTURA/'.$parr[0], $parr[1],array('target'=>'showefect')));
+					$lls[] = anchor('formatos/verhtml/FACTURA/'.$parr[0], $parr[1],array('target'=>'showefect'));
 				}
-				return implode(',',$lls);
+				return implode(', ',$lls);
 			}
 
 			$ll=anchor_popup('formatos/descargar/SNTE/'.implode('/',$ppk), '(pdf)', $attsp);
@@ -440,7 +441,7 @@ class Kardex extends Controller {
 			$grid->title('Notas de Entrega');
 			$grid->column('N&uacute;mero',$link);
 			$grid->column('Fecha'    ,'<dbdate_to_human><#fecha#></dbdate_to_human>','align=center');
-			$grid->column('Cliente'  ,'Nombre');
+			$grid->column('Cliente'  ,'nombre');
 			$grid->column('Cantidad' ,'<nformat><#cana#></nformat>'   ,'align=\'right\'');
 			$grid->column('Costo'    ,'<nformat><#precio#></nformat>' ,'align=\'right\'');
 			$grid->column('Importe'  ,'<nformat><#importe#></nformat>','align=\'right\'');
