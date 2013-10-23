@@ -400,7 +400,7 @@ class Kardex extends Controller {
 		}elseif($tipo=='4N'){ //Nota de entrega
 			$fields = $this->db->field_data('snte');
 			$ppk=array();
-			$select=array('a.numero','a.fecha','a.nombre','b.cana','b.precio','b.importe');
+			$select=array('a.numero','a.fecha','a.nombre','b.cana','b.precio','b.importe','a.factura');
 			foreach ($fields as $field){
 				if($field->primary_key==1){
 					$ppk[]='<#'.$field->name.'#>';
@@ -411,15 +411,38 @@ class Kardex extends Controller {
 				}
 			}
 
+			function bfacts($factura,$codigo){
+				if(empty($factura)){
+					return 'Sin factura';
+				}
+				$dbcodigo  = $this->db->escape($codigo);
+				$dbfactura = $this->db->escape($factura);
+				$mSQL="SELECT GROUP_CONCAT( DISTINCT CONCAT(id,':',numero)) AS fact
+					FROM sfac AS a 
+					JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
+					WHERE b.codigo=${dbcodigo} AND ${dbfactura} IN ('a.numero',a.maestra) AND a.tipo_doc='F'";
+				$facts=$this->datasis->dameval($mSQL);
+				$rt ='';
+				$lls=array();
+				$arr=explode(',',$facts);
+				foreach($arr AS $fact){
+					$parr  = explode(':',$fact);
+					$lls[] = anchor_popup('formatos/verhtml/FACTURA/'.$parr[0], $parr[1], $attsp);
+				}
+				return implode(',',$lls);
+			}
+
 			$ll=anchor_popup('formatos/descargar/SNTE/'.implode('/',$ppk), '(pdf)', $attsp);
 			$link=anchor('formatos/verhtml/SNTE/'.implode('/',$ppk),'<#numero#> '.$ll,array('target'=>'showefect'));
+			$grid->use_function('bfacts');
 			$grid->title('Notas de Entrega');
 			$grid->column('N&uacute;mero',$link);
 			$grid->column('Fecha'    ,'<dbdate_to_human><#fecha#></dbdate_to_human>','align=center');
-			$grid->column('Cliente','Nombre');
+			$grid->column('Cliente'  ,'Nombre');
 			$grid->column('Cantidad' ,'<nformat><#cana#></nformat>'   ,'align=\'right\'');
 			$grid->column('Costo'    ,'<nformat><#precio#></nformat>' ,'align=\'right\'');
 			$grid->column('Importe'  ,'<nformat><#importe#></nformat>','align=\'right\'');
+			$grid->column('Fact.(s)' ,"<bfacts><#factura#>|${codigo}</bfacts>");
 			$grid->db->select($select);
 			$grid->db->from('snte a');
 			$grid->db->join('itsnte b','a.numero=b.numero');
