@@ -129,7 +129,9 @@ class Kardex extends Controller {
 					$this->db->simple_query("UPDATE sinv SET existen=${actual} WHERE codigo=${dbcode}");
 				}
 			}else{
+				$activo ='N';
 				$descrip='No encontrado.';
+				$existen=0;
 			}
 
 			$link="/inventario/kardex/grid/<#origen#>/<dbdate_to_human><#fecha#>|Ymd</dbdate_to_human>/<raencode><#codigo#></raencode>/<raencode><#ubica#></raencode>";
