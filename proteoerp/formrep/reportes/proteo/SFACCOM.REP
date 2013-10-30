@@ -1,0 +1,128 @@
+$modbus=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_cli'),
+	'titulo'  =>'Buscar Clíente');
+
+$boton=$this->datasis->modbus($modbus);
+$select=array("tipo_doc", "numero", "fecha", "CONCAT_WS(' ',tipo_doc,numero) as num","nombre", "vence", "pagada", "vd", "dias", "cod_cli", "comical",
+"totals*IF(tipo_doc='D',-1,1) as subtotal",
+"iva*IF(tipo_doc='D',-1,1) as impuesto",
+"totalg*IF(tipo_doc='D',-1,1) as grantotal",
+"totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1) as contado",
+"totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1) as credito",
+"(totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1)+totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1)) as monto",
+"(comical*100/totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1)+totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1)) as porc", "comision","sepago");
+
+$filter = new DataFilter("Filtro del Reporte");
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->db->select($select);
+$filter->db->from('sfac AS a');
+$filter->db->where('tipo_doc <>','X');
+$filter->db->where('pagada IS NOT NULL');
+$filter->db->where('pagada <>','0000-00-00');
+$filter->db->orderby('vd,fecha');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause='where';
+$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n')-1,1));
+$filter->fechah->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n'),0));
+$filter->fechad->rule=$filter->fechah->rule='required';
+$filter->fechad->clause='';
+$filter->fechah->clause='';
+
+$filter->cajero = new dropdownField('Cajero', 'cajero');
+$filter->cajero->db_name = 'a.cajero';
+$filter->cajero->clause='where';
+$filter->cajero->operator='=';
+$filter->cajero->option('','Todos');
+$filter->cajero->options("SELECT cajero, nombre FROM scaj ORDER BY cajero ");
+
+$filter->vd = new dropdownField('Vendedor', 'vd');
+$filter->vd->db_name = 'vd';
+$filter->vd->clause='where';
+$filter->vd->operator='=';
+$filter->vd->option('','Todos');
+$filter->vd->options("SELECT vendedor, CONCAT_WS(' ',vendedor,nombre)a FROM vend ORDER BY vendedor");
+
+$filter->cod_cli = new inputField('Cliente', 'cod_cli');
+$filter->cod_cli->db_name = 'cod_cli';
+$filter->cod_cli->clause='where';
+$filter->cod_cli->operator='=';
+$filter->cod_cli->append($boton);
+
+$filter->fechaemision = new dropdownField("Por Fecha de Emisión", 'fechaemision');
+$filter->fechaemision->option('S','Si');
+$filter->fechaemision->option('N','No');
+$filter->fechaemision->clause='';
+
+$filter->sepago = new dropdownField("Solo Comisiones Pendientes?", 'sepago');
+$filter->sepago->option('' ,'Si');
+$filter->sepago->option('N','No');
+$filter->sepago->clause  ='where';
+$filter->sepago->operator='=';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons("search");
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+
+	if($this->input->post('fechaemision')=='S')
+		$filter->db->where('fecha BETWEEN '.$filter->fechad->newValue.' AND '.$filter->fechah->newValue);
+	else
+		$filter->db->where('pagada BETWEEN '.$filter->fechad->newValue.' AND '.$filter->fechah->newValue);
+
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$sobretabla='';
+	if(!empty($filter->cajero->newValue))    $sobretabla.=' Cajero: '.$filter->cajero->description;
+	if(!empty($filter->vd->newValue))        $sobretabla.=' Vendedor: '.$filter->vd->description;
+	if(!empty($filter->cod_cli->newValue))   $sobretabla.=' Cliente: ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_cli->newValue.'"');
+	//if(!empty($filter->cod_cli->newValue)) $sobretabla.=' Cliente: '.$filter->cod_cli->newValue;
+
+	memowrite($mSQL);
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Comisiones');
+	$pdf->setSubTitulo('Desde la fecha: '.$_POST['fechad'].' Hasta '.$_POST['fechah']);
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol('num'     ,20,'Factura'  ,'L',8);
+	$pdf->AddCol('cod_cli' ,15,'Cliente'  ,'L',8);
+	$pdf->AddCol('fecha'   ,20,'Fecha'    ,'R',8);
+	$pdf->AddCol('vence'   ,20,'Vence'    ,'R',8);
+	$pdf->AddCol('pagada'  ,20,'U. Pago'  ,'R',8);
+	$pdf->AddCol('dias'    ,20,'Dias P'   ,'R',8);
+	$pdf->AddCol('monto'   ,20,'Monto'    ,'R',8);
+	$pdf->AddCol('comision',20,'Comisión' ,'R',8);
+	$pdf->AddCol('comical' ,20,'Com. Ajus','R',8);
+	$pdf->AddCol('porc'    ,20,'%'        ,'R',8);
+	$pdf->AddCol('sepago'  ,5 ,'Se Pago '        ,'R',8);
+	$pdf->setTotalizar('monto','comision','comical');
+	$pdf->setGrupoLabel(' (Vendedor <#vd#>)  ');
+	$pdf->setGrupo('vd');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Comisiones</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
