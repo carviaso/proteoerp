@@ -41,6 +41,11 @@ class Ordc extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png', 'alt' => 'Reimprimir Documento', 'label'=>'Reimprimir Documento'));
+		$farma=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
+
+		if(0){
+			$grid->wbotonadd(array('id'=>'efarmasis', 'img'=>'images/star.png', 'alt' => 'Enviar orden a FarmaSIS', 'label'=>'Enviar a FarmaSIS'));
+		}
 		//$grid->wbotonadd(array('id'=>'agregar',  'img'=>'images/agrega4.png' , 'alt' => 'Agregar'    , 'label'=>'Agregar Orden'       ));
 		//$grid->wbotonadd(array('id'=>'modifica', 'img'=>'images/editar.png'  , 'alt' => 'Modificar'  , 'label'=>'Modificar Orden'    ));
 		$WestPanel = $grid->deploywestp();
@@ -155,6 +160,17 @@ class Ordc extends Controller {
 			var allFields = $( [] ).add( ffecha );
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
+		';
+
+		$bodyscript .='
+		jQuery("#efarmasis").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				var url = "'.site_url($this->url.'enviafarmasis').'/"+ret.numero;
+				alert(url);
+			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+		});
 		';
 
 		$bodyscript .='
@@ -1620,39 +1636,64 @@ class Ordc extends Controller {
 	}
 
 	function tabla() {
-		$id = $this->uri->segment($this->uri->total_segments());
-		$numero  = $this->datasis->dameval("SELECT numero  FROM ordc WHERE id='$id'");
-		$transac = $this->datasis->dameval("SELECT transac FROM ordc WHERE id='$id'");
+		$id   = $this->uri->segment($this->uri->total_segments());
+		$dburi= intval($id);
+		$numero  = $this->datasis->dameval("SELECT numero  FROM ordc WHERE id=${dbid}");
+		$transac = $this->datasis->dameval("SELECT transac FROM ordc WHERE id=${dbid}");
 
 		$mSQL = "SELECT cod_prv, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE transac='$transac' ORDER BY cod_prv ";
 		$query = $this->db->query($mSQL);
 		$codprv = 'XXXXXXXXXXXXXXXX';
 		$salida = '';
 		$saldo = 0;
-		if ( $query->num_rows() > 0 ){
-			$salida = "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>Numero</td><td align='center'>Monto</td></tr>";
-			foreach ($query->result_array() as $row)
-			{
-				if ( $codprv != $row['cod_prv']){
+		if($query->num_rows() > 0 ){
+			$salida = '<br><table width=\'100%\' border=\'1\'>';
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+			foreach($query->result_array() as $row){
+				if($codprv != $row['cod_prv']){
 					$codprv = $row['cod_prv'];
-					$salida .= "<tr bgcolor='#c7d3c7'>";
-					$salida .= "<td colspan=4>".trim($row['nombre']). "</td>";
-					$salida .= "</tr>";
+					$salida .= '<tr bgcolor=\'#c7d3c7\'>';
+					$salida .= '<td colspan=\'4\'>'.trim($row['nombre']).'</td>';
+					$salida .= '</tr>';
 				}
-				if ( $row['tipo_doc'] == 'FC' ) {
+				if($row['tipo_doc'] == 'FC'){
 					$saldo = $row['monto']-$row['abonos'];
 				}
-				$salida .= "<tr>";
-				$salida .= "<td>".$row['tipo_doc']."</td>";
-				$salida .= "<td>".$row['numero'].  "</td>";
-				$salida .= "<td align='right'>".nformat($row['monto']).   "</td>";
-				$salida .= "</tr>";
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['tipo_doc'].'</td>';
+				$salida .= '<td>'.$row['numero'].  '</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
 			}
-			$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
-			$salida .= "</table>";
+			$salida .= '<tr bgcolor=\'#d7c3c7\'><td colspan=\'4\' align=\'center\'>Saldo : '.nformat($saldo).'</td></tr>';
+			$salida .= '</table>';
 		}
 		echo $salida;
+	}
+
+	function enviafarmasis($numero){
+		$dbnumero=str_pad($numero, 8, '0', STR_PAD_LEFT);
+		require_once(APPPATH.'/controllers/farmacia/pedidos.php');
+		
+		$columnas = array('a.codigo', 'd.barras', 'b.descrip AS desca','a.cantidad AS pedir');
+		$this->db->select($columnas);
+		$this->db->from('itordc     AS a');
+		$this->db->join('sinv       AS b','a.codigo=b.codigo');
+		$this->db->join('farmaxasig AS d','a.codigo=d.abarras');
+		$this->db->where('a.numero =',$dbnumero);
+		$sql = $this->db->get();
+		
+		$apedir=array();
+		if($sql->num_rows() > 0){
+			foreach ($sql->result() as $row){
+				$apedir[]=$row->barras.'#'.ceil($row->pedir);
+			}
+		}else{
+			echo 'No existen productos';
+		}
+	
+		Pedidos::guardapedido();
+		//print_r($apedir);
 	}
 
 	function instalar(){

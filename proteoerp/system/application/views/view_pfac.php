@@ -51,9 +51,9 @@ $(function(){
 	$(".inputnum").numeric(".");
 	totalizar();
 	for(var i=0;i < <?php echo $form->max_rel_count['itpfac']; ?>;i++){
-		<? if(!($faplica < $fenvia)){ ?>
+		<?php if(!($faplica < $fenvia)){ ?>
 		cdropdown(i);
-		<? }?>
+		<?php }?>
 		autocod(i.toString());
 	}
 
