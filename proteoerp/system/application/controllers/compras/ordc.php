@@ -1505,7 +1505,11 @@ class Ordc extends Controller {
 		}
 
 		function divi($dividendo,$divisor){
-			return ceil($dividendo/$divisor);
+			if($divisor>0){
+				return ceil($dividendo/$divisor);
+			}else{
+				return 0;
+			}
 		}
 
 		$filter = new DataFilter('');
@@ -1513,22 +1517,25 @@ class Ordc extends Controller {
 
 		$filter->db->select(array('a.id','SUM(b.cana) AS venta',
 			'a.codigo','a.descrip','a.exmax','a.exmin','a.existen','a.ultimo',
-			'CEIL(a.exmax-a.existen) AS sug','a.pfecha1','a.prov1','a.peso','a.iva')
+			'IF(a.exmax>a.existen,CEIL(a.exmax-IF(a.existen>0,a.existen,0)),0) AS sug',
+			'a.pfecha1','a.prov1','a.peso','a.iva')
 		);
 		$filter->db->from('sinv AS a');
 		$filter->db->join('sitems AS b','a.codigo=b.codigoa AND b.tipoa="F" AND b.fecha <= DATE_SUB(CURDATE(),INTERVAL 30 DAY)','left');
-		$filter->db->where('a.existen <= a.exmin');
+		//$filter->db->where('a.existen <= a.exmin');
 		$filter->db->where('a.activo','S');
 		$filter->db->where('a.tipo','Articulo');
 		$filter->db->groupby('a.codigo');
 
 		$filter->codigo = new inputField('C&oacute;digo','codigo');
+		$filter->codigo->db_name   ='a.codigo';
 		$filter->codigo->rule      ='max_length[15]';
 		$filter->codigo->size      =10;
 		$filter->codigo->maxlength =15;
 
 		$filter->descrip = new inputField('Descripci&oacute;n','descrip');
 		$filter->descrip->rule      ='max_length[45]';
+		$filter->descrip->db_name   ='a.descrip';
 		$filter->descrip->size      =47;
 		$filter->descrip->maxlength =45;
 		$filter->descrip->in = 'codigo';
@@ -1552,7 +1559,7 @@ class Ordc extends Controller {
 
 		$grid->column_orderby('C&oacute;digo',$uri ,'codigo');
 		$grid->column_orderby('Descripci&oacute;n' ,'descrip' ,'descrip');
-		$grid->column('M&aacute;x -- Min'          ,'<nformat><#exmax#>|0</nformat><b>-</b><nformat><#exmin#>|0</nformat>', "align='center'");
+		$grid->column('M&aacute;x-Min'          ,'<nformat><#exmax#>|0</nformat><b>-</b><nformat><#exmin#>|0</nformat>', "align='center'");
 		$grid->column_orderby('Existencia'         ,'<nformat><#existen#></nformat>' ,'existen' , "align='right'");
 		//$grid->column('Sugerido'            ,'<b><nformat><#sug#>|0</nformat></b>'   , "align='right'");
 		$grid->column('Sugerido'            ,$campo , "align='right'");
@@ -1762,6 +1769,10 @@ class Ordc extends Controller {
 		echo $salida;
 	}
 
+	function _farmaurl($opt='farmax'){
+		return Pedidos::_farmaurl($opt);
+	}
+
 	function enviafarmasis($numero){
 		$dbnumero=str_pad($numero, 8, '0', STR_PAD_LEFT);
 		require_once(APPPATH.'/controllers/farmacia/pedidos.php');
@@ -1772,12 +1783,14 @@ class Ordc extends Controller {
 		$this->db->join('sinv       AS b','a.codigo=b.codigo');
 		$this->db->join('farmaxasig AS d','a.codigo=d.abarras');
 		$this->db->where('a.numero =',$dbnumero);
+		$this->db->groupby('a.codigo');
+		$this->db->distinct();
 		$sql = $this->db->get();
 
-		$apedir=array();
+		$_POST['apedir']=array();
 		if($sql->num_rows() > 0){
 			foreach ($sql->result() as $row){
-				$apedir[]=$row->barras.'#'.ceil($row->pedir);
+				$_POST['apedir'][]=$row->barras.'#'.ceil($row->pedir);
 			}
 		}else{
 			echo 'No existen productos';
@@ -1785,9 +1798,9 @@ class Ordc extends Controller {
 
 		$rt=Pedidos::_guardapedido();
 		if($rt['error']==0){
-			echo 'Pedido enviado';
-		}else{
 			echo $rt['msj'];
+		}else{
+			echo $rt['msj'].' '.$rt['error'];
 		}
 	}
 
