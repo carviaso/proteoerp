@@ -5,6 +5,7 @@ class Ordc extends Controller {
 	var $titp    = 'Orden de Compras';
 	var $tits    = 'Orden de Compras';
 	var $url     = 'compras/ordc/';
+	var $chrepetidos = array();
 
 	function Ordc(){
 		parent::Controller();
@@ -1319,7 +1320,7 @@ class Ordc extends Controller {
 		$edit->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
 		$edit->codigo->autocomplete=false;
 		$edit->codigo->db_name  = 'codigo';
-		$edit->codigo->rule     = 'required|callback_chcodigoa';
+		$edit->codigo->rule     = 'required|callback_chcodigoa|callback_chrepetidos';
 		$edit->codigo->rel_id   = 'itordc';
 
 		$edit->descrip = new inputField('Descripci&oacute;n <#o#>', 'descrip_<#i#>');
@@ -1451,6 +1452,16 @@ class Ordc extends Controller {
 			return false;
 		}
 		return true;
+	}
+
+	function chrepetidos($cod){
+		if(array_search($cod, $this->chrepetidos)===false){
+			$this->chrepetidos[]=$cod;
+			return true;
+		}else{
+			$this->validation->set_message('chrepetidos', 'El producto '.$cod.' esta repetido');
+			return false;
+		}
 	}
 
 	function bussug(){
