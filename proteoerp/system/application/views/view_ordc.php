@@ -319,22 +319,22 @@ function del_itordc(id){
 		<fieldset style='border: 2px outset #9AC8DA;background: #EFEFFF;'>
 		<table width='100%'>
 			<tr>
-				<td>
-				<?php echo $container_bl.$container_br.br();
-				if($form->_status!='show'){ ?>
-					<a href="javascript:void(0);" onclick="bus_sug=window.open('/proteoerp/compras/ordc/bussug', 'bussug', 'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=0,screeny=0');">Buscar Sugerencias</a>
-				<?php } ?>
+				<td rowspan='3' align='center'>
+					<?php echo $container_bl.$container_br; ?>
+					<p>
+					<?php if($form->_status!='show'){ ?>
+						<a href="javascript:void(0);" style='font-size:1.2em;text-decoration:none;font-weight:bold;color:#166D05' onclick="bus_sug=window.open('/proteoerp/compras/ordc/bussug', 'bussug', 'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=0,screeny=0');">Buscar Sugerencias</a>
+					<?php } ?>
+					</p>
 				</td>
 				<td class="littletablerow"   align='center'><?php echo $form->condi1->output;  ?>&nbsp;</td>
 				<td class="littletablerowth" align="right" ><?php echo $form->montotot->label; ?></td>
 				<td class="littletablerow"   align="right" style='font-size:1.2em;font-weight:bold;'><?php echo $form->montotot->output; ?></td>
 			</tr><tr>
-				<td></td>
 				<td class="littletablerow"   align='center'><?php echo $form->condi2->output;  ?>&nbsp;</td>
 				<td class="littletablerowth" align="right" ><?php echo $form->montoiva->label; ?></td>
 				<td class="littletablerow"   align="right" style='font-size:1.2em;font-weight:bold;'><?php echo $form->montoiva->output;   ?></td>
 			</tr><tr>
-				<td></td>
 				<td class="littletablerow"   align='center'><?php echo $form->condi3->output;  ?>&nbsp;</td>
 				<td class="littletablerowth" align="right" ><?php echo $form->montonet->label; ?></td>
 				<td class="littletablerow"   align="right" style='font-size:1.5em;font-weight:bold;'><?php echo $form->montonet->output; ?></td>

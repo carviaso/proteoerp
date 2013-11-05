@@ -388,15 +388,15 @@ class Datasis {
 	 *   Integracion con tmenus
 	 *
 	*/
-	function sidapuede( $modulo, $opcion ){
-		if ($this->essuper())
+	function sidapuede($modulo, $opcion){
+		if($this->essuper())
 			return true;
 
 		//Si Esta Vacio no da opcion
-		if ( empty($modulo) )
+		if(empty($modulo))
 			return false;
 
-		if ( empty($opcion) )
+		if(empty($opcion))
 			return false;
 
 		$CI =& get_instance();
@@ -429,38 +429,36 @@ class Datasis {
 		if($CI->session->userdata('logged_in')){
 			$usuario = $CI->db->escape($CI->session->userdata('usuario'));
 			$modulo  = $CI->db->escape( $modulo );
-			if ( strlen( $opcion ) > 1 ) {
-				if ( $opcion == 'TODOS' ){
-					$mSQL  = "SELECT count(*) ";
-					$mSQL .= "FROM sida a JOIN tmenus b ON b.codigo=a.modulo ";
-					$mSQL .= "WHERE a.acceso='S' AND a.usuario=$usuario AND b.modulo=$modulo ";
-					if ( $CI->datasis->dameval( $mSQL ) > 0 )
+			if(strlen($opcion) > 1){
+				if($opcion == 'TODOS' ){
+					$mSQL  = "SELECT COUNT(*) ";
+					$mSQL .= "FROM sida AS a JOIN tmenus AS b ON b.codigo=a.modulo ";
+					$mSQL .= "WHERE a.acceso='S' AND a.usuario=${usuario} AND b.modulo=${modulo}";
+					if($CI->datasis->dameval($mSQL) > 0)
 						return true;
 					else
 						return false;
-				} else {
+				}else{
 					$opcion  = $CI->db->escape( $opcion );
-					$mSQL  = "SELECT count(*) ";
-					$mSQL .= "FROM sida a JOIN tmenus b ON b.codigo=a.modulo ";
-					$mSQL .= "WHERE a.acceso='S' AND a.usuario=$usuario AND b.modulo=$modulo ";
-					$mSQL .= "AND (trim(b.proteo) LIKE $opcion OR trim(b.ejecutar) LIKE $opcion)  ";
-					memowrite($mSQL);
-					if ( $CI->datasis->dameval( $mSQL ) > 0 )
+					$mSQL  = "SELECT COUNT(*) ";
+					$mSQL .= "FROM sida AS a JOIN tmenus AS b ON b.codigo=a.modulo ";
+					$mSQL .= "WHERE a.acceso='S' AND a.usuario=${usuario} AND b.modulo=$modulo ";
+					$mSQL .= "AND (TRIM(b.proteo) LIKE ${opcion} OR TRIM(b.ejecutar) LIKE ${opcion})";
+					if($CI->datasis->dameval( $mSQL ) > 0)
 						return true;
 					else
 						return false;
 				}
-			} else {
+			}else{
 				$opcion  = $CI->db->escape($opcion);
-				$mSQL  = "SELECT count(*) ";
-				$mSQL .= "FROM sida a JOIN tmenus b ON b.codigo=a.modulo ";
-				$mSQL .= "WHERE a.acceso='S' AND a.usuario=$usuario AND b.modulo=$modulo ";
-				$mSQL .= "AND b.secu = $opcion ";
-				if ( $CI->datasis->dameval($mSQL) > 0 )
+				$mSQL  = "SELECT COUNT(*) ";
+				$mSQL .= "FROM sida AS a JOIN tmenus AS b ON b.codigo=a.modulo ";
+				$mSQL .= "WHERE a.acceso='S' AND a.usuario=${usuario} AND b.modulo=${modulo} ";
+				$mSQL .= "AND b.secu = ${opcion}";
+				if($CI->datasis->dameval($mSQL) > 0)
 					return true;
 				else
 					return false;
-
 			}
 		}
 	}

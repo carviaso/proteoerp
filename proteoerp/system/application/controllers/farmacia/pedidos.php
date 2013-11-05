@@ -130,7 +130,7 @@ class Pedidos extends Controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
-	function guardapedido(){
+	function _guardapedido(){
 		$error=$cana=0;
 		$farmaxDB=$this->load->database('farmax',true);
 		$farmaxDB->simple_query('INSERT INTO npfac VALUES(null, now())');
@@ -158,8 +158,13 @@ class Pedidos extends Controller {
 		}else{
 			$msj='Hubo un error guardando el pedido, se generar&oacute;n centinelas';
 		}
+		$rt=array('error'=>$error,'msj'=>$msj);
+		return $rt;
+	}
 
-		$data['content'] = $msj;
+	function guardapedido(){
+		$rt = $this->_guardapedido();
+		$data['content'] = $rt['msj'];
 		$data['title']   = heading('Enviar pedido a la drogueria');
 		$this->load->view('view_ventanas', $data);
 	}

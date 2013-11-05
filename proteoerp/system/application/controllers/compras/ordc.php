@@ -43,7 +43,9 @@ class Ordc extends Controller {
 		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png', 'alt' => 'Reimprimir Documento', 'label'=>'Reimprimir Documento'));
 		$farma=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 
-		if(0){
+
+		include(APPPATH.'config/database'.EXT);
+		if(isset($db['farmax'])){
 			$grid->wbotonadd(array('id'=>'efarmasis', 'img'=>'images/star.png', 'alt' => 'Enviar orden a FarmaSIS', 'label'=>'Enviar a FarmaSIS'));
 		}
 		//$grid->wbotonadd(array('id'=>'agregar',  'img'=>'images/agrega4.png' , 'alt' => 'Agregar'    , 'label'=>'Agregar Orden'       ));
@@ -51,7 +53,7 @@ class Ordc extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central y Sur
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
 			//array('id'=>'fne'   ,  'title'=>'Agregar/Editar Orden de Compra'),
@@ -93,9 +95,9 @@ class Ordc extends Controller {
 
 		$bodyscript .= '
 		function ordcedit(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
@@ -120,6 +122,21 @@ class Ordc extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+
+		if($this->datasis->sidapuede('SCST','TODOS')){
+			$bodyscript .= '
+			function scstshow(id){
+				$.post("'.site_url('compras/scst/solo/show').'/"+id, function(data){
+					$("#fshow").html(data);
+					$("#fshow").dialog("open");
+				});
+			};';
+		}else{
+			$bodyscript .= '
+			function scstshow(id){
+				$.prompt("<h1>No tiene acceso a compras</h1>");
+			};';
+		}
 
 		$bodyscript .= '
 		function ordcdel() {
@@ -150,7 +167,7 @@ class Ordc extends Controller {
 
 		//Wraper de javascript
 		$bodyscript .= '
-		$(function() {
+		$(function(){
 			$("#dialog:ui-dialog").dialog( "destroy" );
 			var mId = 0;
 			var montotal = 0;
@@ -163,23 +180,26 @@ class Ordc extends Controller {
 		';
 
 		$bodyscript .='
-		jQuery("#efarmasis").click( function(){
+		jQuery("#efarmasis").click(function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
 				var url = "'.site_url($this->url.'enviafarmasis').'/"+ret.numero;
-				alert(url);
-			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
-		});
-		';
+				$.get(url, function(data){
+					$.prompt("<h1>"+data+"</h1>");
+				});
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
 
 		$bodyscript .='
 		jQuery("#imprime").click( function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
 				window.open(\''.site_url('formatos/ver/ORDC').'/\'+id+"/id", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+			}else{ $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});';
 
 		$bodyscript .= '
@@ -197,7 +217,7 @@ class Ordc extends Controller {
 						success: function(r,s,x){
 							try{
 								var json = JSON.parse(r);
-								if (json.status == "A"){
+								if(json.status == "A"){
 									apprise("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
@@ -256,7 +276,7 @@ class Ordc extends Controller {
 			}
 		});';
 
-		$bodyscript .= '	});';
+		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 
 		return $bodyscript;
@@ -281,6 +301,21 @@ class Ordc extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 2 }',
+			'cellattr'      => 'function(rowId, tv, aData, cm, rdata){
+				var tips = "";
+				if(aData.status !== undefined){
+					if(aData.status=="PE"){
+						tips = "Pendiente";
+					}else if(aData.status=="CE"){
+						tips = "Cerrado";
+					}else if(aData.status=="BA"){
+						tips = "BackOrder";
+					}else{
+						tips = "Factura Guardada";
+					}
+				}
+				return \'title="\'+tips+\'"\';
+			}'
 		));
 
 		$grid->addField('fecha');
@@ -1117,11 +1152,9 @@ class Ordc extends Controller {
 		');
 		$grid->setOndblClickRow('');
 
-
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
-
 
 		$grid->setRowNum(100);
 		$grid->setShrinkToFit('false');
@@ -1132,7 +1165,7 @@ class Ordc extends Controller {
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdatait/'));
 
-		if ($deployed) {
+		if($deployed){
 			return $grid->deploy();
 		} else {
 			return $grid;
@@ -1208,7 +1241,7 @@ class Ordc extends Controller {
 		$do->pointer('sprv' ,'sprv.proveed=ordc.proveed','sprv.nombre AS sprvnombre','left');
 		$do->rel_pointer('itordc','sinv','itordc.codigo=sinv.codigo','sinv.descrip AS sinvdescrip, sinv.base1 AS sinvprecio1, sinv.base2 AS sinvprecio2, sinv.base3 AS sinvprecio3, sinv.base4 AS sinvprecio4, sinv.iva AS sinviva, sinv.peso AS sinvpeso,sinv.tipo AS sinvtipo');
 
-		$edit = new DataDetails('Orden De Comnpra', $do);
+		$edit = new DataDetails('Orden de Compra', $do);
 		$edit->on_save_redirect=false;
 		$edit->back_url = site_url('compras/ordc/filteredgrid');
 		$edit->set_rel_title('itordc','Producto <#o#>');
@@ -1257,7 +1290,7 @@ class Ordc extends Controller {
 		$edit->status->option('','');
 		$edit->status->option('PE','Pendiente');
 		$edit->status->option('CE','Cerrado');
-		$edit->status->option('BA','BackOrde');
+		$edit->status->option('BA','BackOrder');
 		$edit->status->style='width:100px;';
 		$edit->status->when=array('show');
 
@@ -1421,26 +1454,39 @@ class Ordc extends Controller {
 	}
 
 	function bussug(){
-		$this->rapyd->load('datagrid','datafilter');
+		$this->rapyd->load('datagrid','datafilter','fields');
 		//$uri   = anchor('compras/ordc/dataedit/show/<#codigo#>','<#codigo#>');
-		$uri   = '<a href="#" onclick="oselect(<jse><#codigo#></jse>,<jse><#descrip#></jse>,<jse><#iva#></jse>,<jse><#peso#></jse>,<jse><#ultimo#></jse>,<jse><#sug#></jse>)"><#codigo#></a>';
+		$uri   = '<a href="#" onclick="oselect(<jse><#codigo#></jse>,<jse><#descrip#></jse>,<jse><#iva#></jse>,<jse><#peso#></jse>,<jse><#ultimo#></jse>,<jse><#sug#></jse>,<#id#>)"><#codigo#></a>';
 
 		$script = '
-		function oselect(codigo,descrip,iva,peso,costo,cantidad){
-			if(window.opener !== null){
-				var id=window.opener.add_itordc();
+		$(function(){
+			$(".inputnum").numeric(".");
+			$(\'input[name^="campo"]\').focus(function() {
+				obj  = $(this);
+				obj.select();
+			});
+		});
 
-				window.opener.document.getElementById("codigo_"+id).value  =codigo;
-				window.opener.document.getElementById("descrip_"+id).value =descrip;
-				window.opener.document.getElementById("iva_"+id).valuel    =iva;
-				window.opener.document.getElementById("sinvpeso_"+id).value=peso;
-				window.opener.document.getElementById("costo_"+id).value   =costo;
-				window.opener.document.getElementById("cantidad_"+id).value=cantidad;
-				window.opener.post_modbus_sinv(id);
-				window.opener.importe(id);
-				window.opener.totalizar();
+		function oselect(codigo,descrip,iva,peso,costo,cantidad,idd){
+			var sug = Number($("#campo_"+idd).val());
+			if(sug>0){
+				if(window.opener !== null){
+					var id=window.opener.add_itordc();
+
+					window.opener.document.getElementById("codigo_"+id).value  =codigo;
+					window.opener.document.getElementById("descrip_"+id).value =descrip;
+					window.opener.document.getElementById("iva_"+id).valuel    =iva;
+					window.opener.document.getElementById("sinvpeso_"+id).value=peso;
+					window.opener.document.getElementById("costo_"+id).value   =costo;
+					window.opener.document.getElementById("cantidad_"+id).value=sug;
+					window.opener.post_modbus_sinv(id);
+					window.opener.importe(id);
+					window.opener.totalizar();
+				}else{
+					alert("Ventana de destino no existe");
+				}
 			}else{
-				alert("Ventana de destino no existe");
+				alert("La cantidad sugerida debe ser mayor a cero");
 			}
 		}';
 
@@ -1458,14 +1504,23 @@ class Ordc extends Controller {
 			return $string;
 		}
 
+		function divi($dividendo,$divisor){
+			return ceil($dividendo/$divisor);
+		}
+
 		$filter = new DataFilter('');
 		$filter->script($script);
 
-		$filter->db->select(array('codigo','descrip','exmax','exmin','existen','ultimo','CEIL(exmax-existen) AS sug','pfecha1','prov1','peso','iva'));
-		$filter->db->from('sinv');
-		$filter->db->where('existen <= exmin');
-		$filter->db->where('activo','S');
-		$filter->db->where('tipo','Articulo');
+		$filter->db->select(array('a.id','SUM(b.cana) AS venta',
+			'a.codigo','a.descrip','a.exmax','a.exmin','a.existen','a.ultimo',
+			'CEIL(a.exmax-a.existen) AS sug','a.pfecha1','a.prov1','a.peso','a.iva')
+		);
+		$filter->db->from('sinv AS a');
+		$filter->db->join('sitems AS b','a.codigo=b.codigoa AND b.tipoa="F" AND b.fecha <= DATE_SUB(CURDATE(),INTERVAL 30 DAY)','left');
+		$filter->db->where('a.existen <= a.exmin');
+		$filter->db->where('a.activo','S');
+		$filter->db->where('a.tipo','Articulo');
+		$filter->db->groupby('a.codigo');
 
 		$filter->codigo = new inputField('C&oacute;digo','codigo');
 		$filter->codigo->rule      ='max_length[15]';
@@ -1482,18 +1537,30 @@ class Ordc extends Controller {
 		$filter->build();
 
 		$grid = new DataGrid();
-		$grid->use_function('jse');
+		$grid->use_function('jse','divi');
 
 		$grid->order_by('codigo','desc');
 		$grid->per_page = 40;
 
+		$campo = new inputField('Campo', 'sug');
+		$campo->grid_name='campo_<#id#>';
+		$campo->status   ='modify';
+		$campo->size     =6;
+		$campo->autocomplete=false;
+		$campo->css_class   ='inputnum';
+		$campo->disable_paste=true;
+
 		$grid->column_orderby('C&oacute;digo',$uri ,'codigo');
 		$grid->column_orderby('Descripci&oacute;n' ,'descrip' ,'descrip');
-		$grid->column('M&aacute;x -- Min'          ,'<nformat><#exmax#>|0</nformat> - <nformat><#exmin#>|0</nformat>', "align='center'");
+		$grid->column('M&aacute;x -- Min'          ,'<nformat><#exmax#>|0</nformat><b>-</b><nformat><#exmin#>|0</nformat>', "align='center'");
 		$grid->column_orderby('Existencia'         ,'<nformat><#existen#></nformat>' ,'existen' , "align='right'");
-		$grid->column('Sugerido'            ,'<b><nformat><#sug#>|0</nformat></b>'   , "align='right'");
+		//$grid->column('Sugerido'            ,'<b><nformat><#sug#>|0</nformat></b>'   , "align='right'");
+		$grid->column('Sugerido'            ,$campo , "align='right'");
 		$grid->column('&Uacute;ltimo costo' ,'<nformat><#ultimo#></nformat>', "align='right'");
 		$grid->column('&Uacute;ltima compra','<dbdate_to_human><#pfecha1#></dbdate_to_human> <#prov1#>');
+		$grid->column('Ventas S.','<nformat><divi><#venta#>|4</divi>|0</nformat>', "align='right'");
+		$grid->column('Ventas Q.','<nformat><divi><#venta#>|2</divi>|0</nformat>', "align='right'");
+		$grid->column('Ventas M.','<nformat><#venta#>|0</nformat>', "align='right'");
 		$grid->build();
 
 		$data['content'] = $filter->output.$grid->output;
@@ -1635,15 +1702,21 @@ class Ordc extends Controller {
 		logusu('ordc',"O.Compra ${codigo} CREADO");
 	}
 
-	function tabla() {
-		$id   = $this->uri->segment($this->uri->total_segments());
-		$dburi= intval($id);
-		$numero  = $this->datasis->dameval("SELECT numero  FROM ordc WHERE id=${dbid}");
-		$transac = $this->datasis->dameval("SELECT transac FROM ordc WHERE id=${dbid}");
+	function tabla(){
+		$id      = $this->uri->segment($this->uri->total_segments());
+		$dbid    = intval($id);
+		$row     = $this->datasis->damerow("SELECT numero,transac  FROM ordc WHERE id=${dbid}");
+		if(empty($row)){
+			echo 'Registro no encontrado';
+			return '';
+		}
+		$numero   = $row['numero'];
+		$transac  = $row['transac'];
+		$dbtransac= $this->db->escape($transac);
 
-		$mSQL = "SELECT cod_prv, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE transac='$transac' ORDER BY cod_prv ";
+		$mSQL = "SELECT cod_prv, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM sprm WHERE transac=${dbtransac} ORDER BY cod_prv";
 		$query = $this->db->query($mSQL);
-		$codprv = 'XXXXXXXXXXXXXXXX';
+		$codprv = '';
 		$salida = '';
 		$saldo = 0;
 		if($query->num_rows() > 0 ){
@@ -1665,16 +1738,34 @@ class Ordc extends Controller {
 				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
 				$salida .= '</tr>';
 			}
-			$salida .= '<tr bgcolor=\'#d7c3c7\'><td colspan=\'4\' align=\'center\'>Saldo : '.nformat($saldo).'</td></tr>';
+			$salida .= '<tr bgcolor=\'#D7C3C7\'><td colspan=\'4\' align=\'center\'>Saldo : '.nformat($saldo).'</td></tr>';
 			$salida .= '</table>';
 		}
+
+		$dbnumero = $this->db->escape($numero);
+		$mSQL = "SELECT b.serie,b.fecha,b.tipo_doc,b.montonet AS monto,b.id FROM scstordc AS a JOIN scst AS b ON a.compra=b.control WHERE a.orden=${dbnumero} ORDER BY b.numero";
+		$query = $this->db->query($mSQL);
+		if($query->num_rows()>0){
+			$salida  = '<br><table width=\'100%\' border=\'1\'>';
+			$salida .= '<tr bgcolor=\'#E7E3E7\'><td align=\'center\' colspan=\'3\'><b>Compras relacionadas</b></td></tr>';
+			$salida .= '<tr bgcolor=\'#E7E3E7\'><td>N&uacute;mero</td><td align=\'center\'>Fecha</td><td align=\'right\'>Monto</td></tr>';
+			foreach($query->result_array() as $row){
+				$salida .= '<tr>';
+				$salida .= '<td><a href="javascript:scstshow(\''.$row['id'].'\')">'.$row['tipo_doc'].$row['serie'].'</a></td>';
+				$salida .= '<td align=\'center\'>'.dbdate_to_human($row['fecha']).'</td>';
+				$salida .= '<td align=\'right\' >'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
+			}
+			$salida .= '</table>';
+		}
+
 		echo $salida;
 	}
 
 	function enviafarmasis($numero){
 		$dbnumero=str_pad($numero, 8, '0', STR_PAD_LEFT);
 		require_once(APPPATH.'/controllers/farmacia/pedidos.php');
-		
+
 		$columnas = array('a.codigo', 'd.barras', 'b.descrip AS desca','a.cantidad AS pedir');
 		$this->db->select($columnas);
 		$this->db->from('itordc     AS a');
@@ -1682,7 +1773,7 @@ class Ordc extends Controller {
 		$this->db->join('farmaxasig AS d','a.codigo=d.abarras');
 		$this->db->where('a.numero =',$dbnumero);
 		$sql = $this->db->get();
-		
+
 		$apedir=array();
 		if($sql->num_rows() > 0){
 			foreach ($sql->result() as $row){
@@ -1691,9 +1782,13 @@ class Ordc extends Controller {
 		}else{
 			echo 'No existen productos';
 		}
-	
-		Pedidos::guardapedido();
-		//print_r($apedir);
+
+		$rt=Pedidos::_guardapedido();
+		if($rt['error']==0){
+			echo 'Pedido enviado';
+		}else{
+			echo $rt['msj'];
+		}
 	}
 
 	function instalar(){
