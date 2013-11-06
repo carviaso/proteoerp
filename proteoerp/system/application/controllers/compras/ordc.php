@@ -1285,8 +1285,6 @@ class Ordc extends Controller {
 		$edit->nombre->size = 50;
 		$edit->nombre->maxlength=40;
 
-		$edit->status = new  autoupdateField( 'status','PE','PE');
-
 		$edit->status = new  dropdownField ('Estatus', 'status');
 		$edit->status->option('','');
 		$edit->status->option('PE','Pendiente');
@@ -1532,7 +1530,7 @@ class Ordc extends Controller {
 			'a.pfecha1','a.prov1','a.peso','a.iva')
 		);
 		$filter->db->from('sinv AS a');
-		$filter->db->join('sitems AS b','a.codigo=b.codigoa AND b.tipoa="F" AND b.fecha <= DATE_SUB(CURDATE(),INTERVAL 30 DAY)','left');
+		$filter->db->join('sitems AS b','a.codigo=b.codigoa AND b.tipoa="F" AND b.fecha >= DATE_SUB(CURDATE(),INTERVAL 30 DAY)','left');
 		//$filter->db->where('a.existen <= a.exmin');
 		$filter->db->where('a.activo','S');
 		$filter->db->where('a.tipo','Articulo');
