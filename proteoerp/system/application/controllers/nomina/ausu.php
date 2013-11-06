@@ -550,7 +550,7 @@ class Ausu extends Controller {
 		if($cana>0){
 			$do->error_message_ar['pre_ins']='Ya existe un ajuste de suelto para la fecha seleccionada.';
 			return false;
-		}else
+		}else{
 			return true;
 		}
 	}

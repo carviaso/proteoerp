@@ -1465,16 +1465,38 @@ class Ordc extends Controller {
 	function bussug(){
 		$this->rapyd->load('datagrid','datafilter','fields');
 		//$uri   = anchor('compras/ordc/dataedit/show/<#codigo#>','<#codigo#>');
-		$uri   = '<a href="#" onclick="oselect(<jse><#codigo#></jse>,<jse><#descrip#></jse>,<jse><#iva#></jse>,<jse><#peso#></jse>,<jse><#ultimo#></jse>,<jse><#sug#></jse>,<#id#>)"><#codigo#></a>';
+		$uri = '<a href="javascript:void(0);" class="articulo" onclick="oselect(<jse><#codigo#></jse>,<jse><#descrip#></jse>,<jse><#iva#></jse>,<jse><#peso#></jse>,<jse><#ultimo#></jse>,<jse><#sug#></jse>,<#id#>)"><#codigo#></a>';
 
 		$script = '
+		var vals = new Array();
+
 		$(function(){
 			$(".inputnum").numeric(".");
 			$(\'input[name^="campo"]\').focus(function() {
 				obj  = $(this);
 				obj.select();
 			});
+			marcacod();
 		});
+
+		function marcacod(){
+			vals = window.opener.$(\'input[name^="codigo_"]\').map(function(){return $(this).val().replace(/^\s+/g,\'\').replace(/\s+$/g,\'\'); }).get();
+
+			var arr=$(".articulo");
+			jQuery.each(arr, function(){
+				codigo=$(this).text();
+				$(this).css("color" ,"");
+				$(this).attr("title","Haga click para agregarlo a la lista.");
+				for (key in vals){
+					if(vals[key] == codigo){
+						$(this).css("color","red");
+						$(this).attr("title", "Producto ya esta en la lista.");
+						break;
+					}
+				}
+			});
+
+		}
 
 		function oselect(codigo,descrip,iva,peso,costo,cantidad,idd){
 			var sug = Number($("#campo_"+idd).val());
@@ -1491,12 +1513,14 @@ class Ordc extends Controller {
 					window.opener.post_modbus_sinv(id);
 					window.opener.importe(id);
 					window.opener.totalizar();
+					marcacod();
 				}else{
 					alert("Ventana de destino no existe");
 				}
 			}else{
 				alert("La cantidad sugerida debe ser mayor a cero");
 			}
+			return false;
 		}';
 
 		function jse($string){
@@ -1525,7 +1549,7 @@ class Ordc extends Controller {
 		$filter->script($script);
 
 		$filter->db->select(array('a.id','SUM(b.cana) AS venta',
-			'a.codigo','a.descrip','a.exmax','a.exmin','a.existen','a.ultimo',
+			'TRIM(a.codigo) AS codigo','a.descrip','a.exmax','a.exmin','a.existen','a.ultimo',
 			'IF(a.exmax>a.existen,CEIL(a.exmax-IF(a.existen>0,a.existen,0)),0) AS sug',
 			'a.pfecha1','a.prov1','a.peso','a.iva')
 		);
@@ -1783,7 +1807,12 @@ class Ordc extends Controller {
 	}
 
 	function enviafarmasis($numero){
-		$dbnumero=str_pad($numero, 8, '0', STR_PAD_LEFT);
+		$dbnumero=str_pad(intval($numero), 8, '0', STR_PAD_LEFT);
+		$status  = $this->datasis->dameval("SELECT status FROM ordc WHERE numero =${dbnumero}");
+		//if($status!='PE'){
+		//	echo 'La orden ya fue procesada.';
+		//	return;
+		//}
 		require_once(APPPATH.'/controllers/farmacia/pedidos.php');
 
 		$columnas = array('a.codigo', 'd.barras', 'b.descrip AS desca','a.cantidad AS pedir');
@@ -1807,6 +1836,7 @@ class Ordc extends Controller {
 
 		$rt=Pedidos::_guardapedido();
 		if($rt['error']==0){
+			$this->db->simple_query("UPDATE ordc SET status='CE' WHERE numero =${dbnumero}");
 			echo $rt['msj'];
 		}else{
 			echo $rt['msj'].' '.$rt['error'];
