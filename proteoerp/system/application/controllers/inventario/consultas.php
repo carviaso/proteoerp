@@ -311,9 +311,9 @@ class Consultas extends Controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
-	function _gconsul($mSQL_p,$cod_bar,$busca,$suple=null,$tipo=null){
+	function _gconsul($mSQL_p,$cod_bar,$busca,$suple=null,$tipo=null,$activo=true){
 		$tabla=trim(substr($mSQL_p,(strripos($mSQL_p, 'FROM')+4)));
-		$activo=$this->db->field_exists('activo',$tabla)? 'AND activo=\'S\'' : '';
+		if($activo) $activo=$this->db->field_exists('activo',$tabla)? 'AND activo=\'S\'' : '';
 		if(!empty($tipo)){
 			$wtipo = ' AND tipo='.$this->db->escape($tipo);
 		}else{

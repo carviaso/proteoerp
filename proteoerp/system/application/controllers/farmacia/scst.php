@@ -569,17 +569,17 @@ class Scst extends Controller {
 			$dbfarmax = $this->load->database('farmax', TRUE);
 
 			$query = $dbfarmax->query('SELECT proveed FROM scst WHERE control='.$dbcontrol);
-			if ($query->num_rows() > 0){
+			if($query->num_rows() > 0){
 				$row = $query->row_array();
 				$proveed=$row['proveed'];
 			}
 			$dbproveed=$this->db->escape($proveed);
 
-			$mSQL="SELECT `a`.`codigo` AS barras FROM (`itscst` AS a) WHERE `a`.`control` = $dbcontrol";
+			$mSQL="SELECT `a`.`codigo` AS barras FROM (`itscst` AS a) WHERE `a`.`control` = ${dbcontrol}";
 			$query = $dbfarmax->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach ($query->result() as $row){
-					$qquery=consultas::_gconsul('SELECT codigo  FROM sinv',$row->barras,array('codigo','barras','alterno'),null,'Articulo');
+					$qquery=consultas::_gconsul('SELECT codigo  FROM sinv',$row->barras,array('codigo','barras','alterno'),null,'Articulo',false);
 					if($qquery!==false){
 						$rrow   = $qquery->row_array();
 						$codigo = $rrow['codigo'];
