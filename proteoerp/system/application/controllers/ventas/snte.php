@@ -1113,7 +1113,7 @@ class Snte extends Controller {
 		$edit->desca->maxlength=40;
 		$edit->desca->readonly  = true;
 		$edit->desca->rel_id='itsnte';
-		$edit->desca->style    = 'width:98%';
+		$edit->desca->style ='width:98%';
 
 		$edit->cana = new inputField('Cantidad <#o#>', 'cana_<#i#>');
 		$edit->cana->db_name  = 'cana';
@@ -1197,9 +1197,11 @@ class Snte extends Controller {
 	}
 
 	function tabla() {
-		$id   = isset($_REQUEST['id'])  ? $_REQUEST['id']   :  0;
-		$cliente = $this->datasis->dameval("SELECT cod_cli FROM snte WHERE id='$id'");
-		$mSQL = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM smov WHERE cod_cli='$cliente' AND abonos<>monto AND tipo_doc<>'AB' ORDER BY fecha ";
+		$id = isset($_REQUEST['id'])  ? $_REQUEST['id']   :  0;
+		$id = intval($id);
+		$cliente  = $this->datasis->dameval("SELECT cod_cli FROM snte WHERE id='$id'");
+		$dbcliente= $this->db->escape($cliente);
+		$mSQL = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM smov WHERE cod_cli=${dbcliente} AND abonos<>monto AND tipo_doc<>'AB' ORDER BY fecha ";
 		$query = $this->db->query($mSQL);
 		$salida = '';
 		$saldo = 0;

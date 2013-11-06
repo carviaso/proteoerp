@@ -47,7 +47,7 @@ class Ordc extends Controller {
 
 		include(APPPATH.'config/database'.EXT);
 		if(isset($db['farmax'])){
-			$grid->wbotonadd(array('id'=>'efarmasis', 'img'=>'images/star.png', 'alt' => 'Enviar orden a FarmaSIS', 'label'=>'Enviar a FarmaSIS'));
+			$grid->wbotonadd(array('id'=>'efarmasis', 'img'=>'images/arrow_up.png', 'alt' => 'Enviar orden a FarmaSIS', 'label'=>'Enviar a FarmaSIS'));
 		}
 		//$grid->wbotonadd(array('id'=>'agregar',  'img'=>'images/agrega4.png' , 'alt' => 'Agregar'    , 'label'=>'Agregar Orden'       ));
 		//$grid->wbotonadd(array('id'=>'modifica', 'img'=>'images/editar.png'  , 'alt' => 'Modificar'  , 'label'=>'Modificar Orden'    ));
