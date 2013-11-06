@@ -130,8 +130,13 @@ class notifica extends controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
-	function bashmail($to,$subject,$body){
+	function bashmail($to,$subject=null,$body=null){
 		session_write_close();
+		if(empty($subject) ||empty($body)){
+			echo 'Faltan parametros';
+			return true;
+		}
+
 		$to      = urldecode($to);
 		$subject = urldecode($subject);
 		$body    = urldecode($body);
@@ -141,8 +146,10 @@ class notifica extends controller {
 			$rt=$this->_mail($to,$subject,$body);
 			if(!$rt){
 				echo $this->error;
+				return true;
 			}else{
 				echo 'Tu mensaje ha sido enviado satisfactoriamente';
+				return false;
 			}
 		}else{
 			echo 'Este metodo solo se puede ejecutar por bash';
