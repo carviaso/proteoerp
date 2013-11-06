@@ -846,9 +846,9 @@ class Datasis {
 		if (empty($mALMA)) $mALMA = $this->traevalor('ALMACEN');
 		if (empty($mALMA)) $mALMA = $this->dameval("SELECT ubica FROM caub WHERE gasto='N' ORDER BY ubica");
 		$dbmALMA=$CI->db->escape($mALMA);
-		$mGASTO  = $this->dameval("SELECT gasto FROM caub WHERE ubica=$dbmALMA",1);
+		$mGASTO  = $this->dameval("SELECT gasto FROM caub WHERE ubica=${dbmALMA}",1);
 		if ($mGASTO == 'S') {
-			$mSQL = "DELETE  FROM itsinv WHERE alma=$dbmALMA";
+			$mSQL = "DELETE  FROM itsinv WHERE alma=${dbmALMA}";
 			$CI->db->simple_query($mSQL);
 			return;
 		};
@@ -858,6 +858,7 @@ class Datasis {
 		// VERIFICA SI EL ARTICULO ES SERVICIO
 		$mSQL = "SELECT SUBSTRING(tipo,1,1) tipo, enlace, fracci, derivado FROM sinv WHERE codigo=".$codigoesc;
 		$query     = $CI->db->query($mSQL);
+		if($query->num_rows() <= 0) return;
 		$mREG      = $query->row_array();
 		$mTIPO     = $mREG['tipo'];
 		$mENLACE   = $mREG['enlace'];
@@ -865,7 +866,7 @@ class Datasis {
 		$mDERIVADO = $mREG['derivado'];
 
 		// SERVICIO NO DESCUENTA
-		if ($mTIPO == 'S' ) return;
+		if($mTIPO == 'S' ) return;
 
 		$mSQL = "UPDATE sinv SET existen=existen+$mCANTIDAD WHERE codigo=".$codigoesc;
 		$CI->db->simple_query($mSQL);

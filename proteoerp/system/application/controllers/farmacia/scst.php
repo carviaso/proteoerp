@@ -463,6 +463,7 @@ class Scst extends Controller {
 	}
 
 	function _autoprecios($control){
+
 		$esstd=$this->datasis->traevalor('SCSTSD','Precios en carga de compras por droguerias S P.standard, I margenes de inventario, D sugerido por drogueria ');
 
 		if(!empty($control)){
@@ -895,7 +896,7 @@ class Scst extends Controller {
 			$row=$query->row_array();
 			if($row['cana']==0){
 				//$query=$farmaxDB->query("SELECT * FROM scst WHERE control=$control AND pcontrol IS NULL");
-				$query=$farmaxDB->query("SELECT * FROM scst WHERE control=$control");
+				$query=$farmaxDB->query("SELECT * FROM scst WHERE control=${control}");
 
 				if ($query->num_rows()==1){
 
@@ -927,7 +928,7 @@ class Scst extends Controller {
 						$cd             =strtotime($row['fecha']);
 						$row['vence']   =date('Y-m-d', mktime(0,0,0,date('m',$cd),date('d',$cd)+$dias,date('Y',$cd)));
 
-						$mmsql="SELECT iva,SUM(montoiva) AS monto,SUM(importe) AS base FROM itscst WHERE control=$control GROUP BY iva";
+						$mmsql="SELECT iva,SUM(montoiva) AS monto,SUM(importe) AS base FROM itscst WHERE control=${control} GROUP BY iva";
 						$m_iva=$farmaxDB->query($mmsql);
 						$ivas=$this->datasis->ivaplica($row['fecha']);
 						$tasa=$redutasa=$sobretasa=$exento=$basetasa=$baseredu=$baseadicio=0;
@@ -977,7 +978,7 @@ class Scst extends Controller {
 
 						$mSQL[]=$this->db->insert_string('scst', $row);
 
-						$itquery = $farmaxDB->query("SELECT * FROM itscst WHERE control=$control");
+						$itquery = $farmaxDB->query("SELECT * FROM itscst WHERE control=${control}");
 						//echo "SELECT * FROM itscst WHERE control=$control";
 						foreach ($itquery->result_array() as $itrow){
 							$codigo=$this->datasis->dameval('SELECT abarras FROM farmaxasig WHERE barras='.$this->db->escape($itrow['codigo']).' AND proveed='.$this->db->escape($proveed));
@@ -996,7 +997,7 @@ class Scst extends Controller {
 							$rt=$this->db->simple_query($sql);
 							if(!$rt){ memowrite($sql,'scstfarma');}
 						}
-						$sql="UPDATE scst SET pcontrol='${lcontrol}' WHERE control=$control";
+						$sql="UPDATE scst SET pcontrol='${lcontrol}' WHERE control=${control}";
 						$rt=$farmaxDB->simple_query($sql);
 						if(!$rt) memowrite($sql,'farmaejec');
 
@@ -1008,7 +1009,7 @@ class Scst extends Controller {
 						$rt=$this->db->simple_query($mSQL);
 						if(!$rt){ memowrite('farmaejec1',$sql);}*/
 
-						$retorna='Compra guardada con el control '.anchor("compras/scst/dataedit/show/$lcontrol",$lcontrol);
+						$retorna='Compra guardada con el control '.anchor("compras/scst/dataedit/show/${lcontrol}",$lcontrol);
 					}else{
 						$retorna='Al parecer la factura fue ya pasada';
 					}
