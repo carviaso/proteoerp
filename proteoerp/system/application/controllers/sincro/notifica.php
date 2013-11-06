@@ -130,6 +130,25 @@ class notifica extends controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
+	function bashmail($to,$subject,$body){
+		session_write_close();
+		$to      = urldecode($to);
+		$subject = urldecode($subject);
+		$body    = urldecode($body);
+		//echo "Para: ${to}. Sujeto: ${subject}. Cuerpo: ${body}";
+
+		if($this->secu->es_shell()){
+			$rt=$this->_mail($to,$subject,$body);
+			if(!$rt){
+				echo $this->error;
+			}else{
+				echo 'Tu mensaje ha sido enviado satisfactoriamente';
+			}
+		}else{
+			echo 'Este metodo solo se puede ejecutar por bash';
+		}
+	}
+
 	function _enviar($cod,$num,$msg){
 		if($cod=='414' or $cod=='424'){
 			$rt=$this->_movistar($cod,$num,$msg);
