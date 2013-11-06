@@ -2634,9 +2634,9 @@ class Sinv extends Controller {
 		echo $rs;
 	}
 
-	/**
-	* Guarda la Informacion
-	*/
+	//******************************************************************
+	// Guarda la Informacion
+	//
 	function setdata(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');

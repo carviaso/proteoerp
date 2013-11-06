@@ -279,14 +279,14 @@ class acdatasis extends Controller {
 			if($modulo == 'MENUDTS'){
 				$mSQL  = "SELECT a.codigo id, a.modulo, a.secu, a.titulo nombre, b.acceso, b.usuario ";
 				$mSQL .= "FROM tmenus a LEFT JOIN sida b ON a.codigo = b.modulo ";
-				$mSQL .= "WHERE a.modulo <> 'MENUINT' AND a.modulo REGEXP '[0-9]'  ";
 				$mSQL .= "AND b.usuario=${dbusuario} ";
+				$mSQL .= "WHERE a.modulo <> 'MENUINT' AND a.modulo REGEXP '^[1-9][0-9]*$'  ";
 				$mSQL .= "ORDER BY modulo,secu";
 			}else{
 				$mSQL  = "SELECT a.codigo id, a.modulo, a.secu, a.titulo nombre, b.acceso, b.usuario ";
 				$mSQL .= "FROM tmenus a LEFT JOIN sida b ON a.codigo = b.modulo ";
-				$mSQL .= "WHERE a.modulo <> 'MENUINT' AND NOT a.modulo REGEXP '[0-9]' ";
 				$mSQL .= "AND b.usuario=${dbusuario} ";
+				$mSQL .= "WHERE a.modulo <> 'MENUINT' AND NOT a.modulo REGEXP '^[1-9][0-9]*$' ";
 				$mSQL .= "AND a.modulo LIKE ".$this->db->escape($modulo."%");
 				$mSQL .= "ORDER BY modulo,secu";
 			}

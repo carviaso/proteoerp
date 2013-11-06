@@ -1223,7 +1223,7 @@ class Datasis {
 	//*******************************
 	function menuMod(){
 		$CI =& get_instance();
-		$mSQL = "SELECT (`a`.`codigo` + 10000) AS `id`, concat(substr(`a`.`modulo`,1,4), replace(replace(substr(`a`.`modulo`,5,16),'OTR',''),'LIS',''))  `modulo`, -(1) AS `secu`, (select `b`.`mensaje` from `tmenus` `b` where ((`b`.`modulo` regexp '[0-9]') and (`b`.`ejecutar` like concat('%',substr(`a`.`modulo`,1,4),replace(replace(substr(`a`.`modulo`,5,16),'OTR',''),'LIS',''),'%'))) limit 1) AS `nombre` from `tmenus` `a` where ((`a`.`modulo` <> 'MENUINT') and (not((`a`.`modulo` regexp '[0-9]')))) group by concat(substr(`a`.`modulo`,1,4),replace(replace(substr(`a`.`modulo`,5,16),'OTR',''),'LIS',''))  order by `modulo`,`secu`";
+		$mSQL = "SELECT (`a`.`codigo` + 10000) AS `id`, concat(substr(`a`.`modulo`,1,4), replace(replace(substr(`a`.`modulo`,5,16),'OTR',''),'LIS',''))  `modulo`, -(1) AS `secu`, (select `b`.`mensaje` from `tmenus` `b` where ((`b`.`modulo` regexp '^[1-9][0-9]*$') and (`b`.`ejecutar` like concat('%',substr(`a`.`modulo`,1,4),replace(replace(substr(`a`.`modulo`,5,16),'OTR',''),'LIS',''),'%'))) limit 1) AS `nombre` from `tmenus` `a` where ((`a`.`modulo` <> 'MENUINT') and (not((`a`.`modulo` regexp '^[1-9][0-9]*$')))) group by concat(substr(`a`.`modulo`,1,4),replace(replace(substr(`a`.`modulo`,5,16),'OTR',''),'LIS',''))  order by `modulo`,`secu`";
 		$query = $CI->db->query($mSQL);
 		$Salida  = '';
 		$Salida .= "\t\t{ id:'10000', modulo:'MENUDTS', nombre:'MENUS PRINCIPAL DATASIS' },\n";
