@@ -188,6 +188,7 @@ class Ordc extends Controller {
 				var url = "'.site_url($this->url.'enviafarmasis').'/"+ret.numero;
 				$.get(url, function(data){
 					$.prompt("<h1>"+data+"</h1>");
+					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 				});
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");

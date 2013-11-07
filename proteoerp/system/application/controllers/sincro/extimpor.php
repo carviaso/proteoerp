@@ -180,17 +180,34 @@ class extimpor extends Controller {
 			//Fin del respaldo de los valores anteriores
 
 			//Pasa la data
+			$cprecio=false;
 			$set=array();
 			foreach($def as $campo){
 				if('ultimo'==$campo || 'pond'==$campo || 'standard'==$campo){
 					$set[]="a.${campo} = ROUND(b.${campo},2)";
+					$cprecio=true;
 				}else{
 					$set[]="a.${campo} = b.${campo}";
 				}
 			}
 
-			if(in_array('ultimo',$def) || in_array('pond',$def) || in_array('standard',$def)){
-				$costo='IF(a.formcal=\'U\',a.ultimo,IF(a.formcal=\'P\',a.pond,IF(a.formcal=\'S\',a.standard,GREATEST(a.pond,a.ultimo))))';
+			if($cprecio){
+				$cultimo  = 'a.ultimo';
+				$cpond    = 'a.pond';
+				$cstandard= 'a.standard';
+				if(in_array('ultimo',$def)){
+					$cultimo  = 'b.ultimo';
+				}
+
+				if(in_array('pond',$def)){
+					$cpond    = 'b.pond';
+				}
+
+				if(in_array('standard',$def)){
+					$cstandard= 'b.standard';
+				}
+
+				$costo="ROUND(IF(a.formcal='U',${cultimo},IF(a.formcal='P',${cpond},IF(a.formcal='S',${cstandard},GREATEST(${cpond},${cultimo})))),2)";
 				$set[]="a.base1=ROUND(${costo}*100/(100-a.margen1),2)";
 				$set[]="a.base2=ROUND(${costo}*100/(100-a.margen2),2)";
 				$set[]="a.base3=ROUND(${costo}*100/(100-a.margen3),2)";
