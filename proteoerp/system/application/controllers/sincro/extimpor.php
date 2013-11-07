@@ -198,24 +198,27 @@ class extimpor extends Controller {
 				if(in_array('ultimo',$def)){
 					$cultimo  = 'b.ultimo';
 				}
-
 				if(in_array('pond',$def)){
 					$cpond    = 'b.pond';
 				}
-
 				if(in_array('standard',$def)){
 					$cstandard= 'b.standard';
 				}
 
-				$costo="ROUND(IF(a.formcal='U',${cultimo},IF(a.formcal='P',${cpond},IF(a.formcal='S',${cstandard},GREATEST(${cpond},${cultimo})))),2)";
-				$set[]="a.base1=ROUND(${costo}*100/(100-a.margen1),2)";
-				$set[]="a.base2=ROUND(${costo}*100/(100-a.margen2),2)";
-				$set[]="a.base3=ROUND(${costo}*100/(100-a.margen3),2)";
-				$set[]="a.base4=ROUND(${costo}*100/(100-a.margen4),2)";
-				$set[]="a.precio1=ROUND(a.base1*(1+(a.iva/100)),2)";
-				$set[]="a.precio2=ROUND(a.base2*(1+(a.iva/100)),2)";
-				$set[]="a.precio3=ROUND(a.base3*(1+(a.iva/100)),2)";
-				$set[]="a.precio4=ROUND(a.base4*(1+(a.iva/100)),2)";
+				$costo = "ROUND(IF(a.formcal='U',${cultimo},IF(a.formcal='P',${cpond},IF(a.formcal='S',${cstandard},GREATEST(${cpond},${cultimo})))),2)";
+				$base1 = "ROUND(${costo}*100/(100-a.margen1),2)";
+				$base2 = "ROUND(${costo}*100/(100-a.margen2),2)";
+				$base3 = "ROUND(${costo}*100/(100-a.margen3),2)";
+				$base4 = "ROUND(${costo}*100/(100-a.margen4),2)";
+
+				$set[]="a.base1=${base1}";
+				$set[]="a.base2=${base2}";
+				$set[]="a.base3=${base3}";
+				$set[]="a.base4=${base4}";
+				$set[]="a.precio1=ROUND(${base1}*(1+(a.iva/100)),2)";
+				$set[]="a.precio2=ROUND(${base2}*(1+(a.iva/100)),2)";
+				$set[]="a.precio3=ROUND(${base3}*(1+(a.iva/100)),2)";
+				$set[]="a.precio4=ROUND(${base4}*(1+(a.iva/100)),2)";
 			}
 
 			$mSQL="UPDATE sinv AS a JOIN ${ttabla} AS b ON a.codigo=b.codigo SET ".implode(',',$set);
