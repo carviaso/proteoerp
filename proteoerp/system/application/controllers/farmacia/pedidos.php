@@ -21,33 +21,26 @@ class Pedidos extends Controller {
 		$this->rapyd->load('datagrid','datafilter');
 		$this->rapyd->uri->keep_persistence();
 
-		$columnas = array('a.codigoa', 'd.barras', 'b.descrip AS desca', 'b.existen', 'b.exmin', 'b.exmax', 'd.proveed',
-			'SUM(c.cantidad*(c.origen=\'3I\')) AS trimestral',
-			'ROUND((SUM(c.cantidad*(c.origen=\'3I\'))/3) ,0) AS mensual',
-			'ROUND((SUM(c.cantidad*(c.origen=\'3I\'))/6) ,0) AS quincenal',
-			'ROUND((SUM(c.cantidad*(c.origen=\'3I\'))/12),0) AS semanal',
+		$content_id = md5(uniqid(time()));
+		$ttabla = 'fsisu_'.$content_id;
+
+		$columnas = array('b.codigo AS codigoa', 'd.barras', 'b.descrip AS desca', 'b.existen', 'b.exmin', 'b.exmax', 
+			'SUM(c.cana*(IF(c.tipoa=\'F\',1,-1))) AS trimestral',
 			'b.exmax-IF(existen<0,0,b.existen) AS pedir'
 		);
-		$filter = new DataFilter('Productos vendidos en el d&iacute;a');
+		$filter = new DataFilter('Fallas de productos vendidos en el d&iacute;a');
 
 		$filter->db->select($columnas);
-
-		$filter->db->from('sitems     AS a');
-		$filter->db->join('sinv       AS b','a.codigoa=b.codigo');
-		$filter->db->join('costos     AS c','a.codigoa=c.codigo AND a.fecha=c.fecha');
-		$filter->db->join('farmaxasig AS d','a.codigoa=d.abarras');
-
+		$filter->db->from('sinv      AS b');
+		$filter->db->join('sitems    AS c','b.codigo=c.codigoa AND c.tipoa="F" AND c.fecha >= DATE_ADD(CURDATE(), INTERVAL -90 DAY)','left');
+		$filter->db->join($ttabla.'  AS d','b.codigo=d.abarras');
 		$filter->db->where('b.existen <= b.exmin');
-		$filter->db->where('c.fecha >= DATE_ADD(CURDATE(), INTERVAL -90 DAY)');
 
-		$filter->db->groupby('a.codigoa');
+		$filter->db->groupby('b.codigo');
 		$filter->db->having('pedir > 0');
-		if(!$this->rapyd->uri->is_set('search')){
-			$filter->db->where('a.fecha',date('Y-m-d'));
-		}
 
 		$filter->fecha = new dateonlyField('Fecha', 'fecha');
-		$filter->fecha->clause  ='where';
+		$filter->fecha->clause  ='';
 		$filter->fecha->db_name ='a.fecha';
 		$filter->fecha->size    =12;
 		$filter->fecha->operator='=';
@@ -76,29 +69,43 @@ class Pedidos extends Controller {
 			return ($cana<0)? "<b style='color:red'>$ncana</b>": $ncana;
 		}
 
+		function divi($dividendo,$divisor){
+			if($divisor>0){
+				return ceil($dividendo/$divisor);
+			}else{
+				return 0;
+			}
+		}
+
 		$seltod='Seleccionar <a id="todos" href=# >Todos</a> <a id="nada" href=# >Ninguno</a> <a id="alter" href=# >Invertir</a>';
 
+		$bfecha=$filter->fecha->newValue;
+		if(!empty($bfecha)) $dbbfecha=$this->db->escape($bfecha); else $dbbfecha='CURDATE()';
+
+		$mSQL  = "CREATE TEMPORARY TABLE ${ttabla} (abarras VARCHAR(15)  NOT NULL, PRIMARY KEY (abarras))
+		SELECT a.barras,a.abarras 
+		FROM farmaxasig AS a
+		JOIN sitems AS b ON a.abarras=b.codigoa
+		WHERE  b.fecha=${dbbfecha}
+		GROUP BY abarras";
+		$this->db->simple_query($mSQL);
+
 		$grid = new DataGrid($seltod);
-		$grid->use_function('descheck','pinta');
+		$grid->use_function('descheck','pinta','divi');
 		$grid->order_by('desca','asc');
 		$grid->per_page = 400;
 
-		//$grid->column_orderby('C&oacute;digo','codigoa','control');
 		$grid->column('Pedir' ,'<descheck><#barras#>|<#pedir#></descheck>');
-		$grid->column('C&oacute;digo'  ,'codigoa');
-		$grid->column_orderby('Barras'  ,'barras','barras');
+		$grid->column('C&oacute;digo'  ,'<span title="<#barras#>"><#codigoa#></span');
 		$grid->column_orderby('Descripci&oacute;n'   ,'desca','desca');
-		$grid->column('Trimestral','<nformat><#trimestral#>|0</nformat>','align=\'right\'' );
-		$grid->column('Mensual',   '<nformat><#mensual#>|0</nformat>',   'align=\'right\'' );
-		$grid->column('Quincenal', '<nformat><#quincenal#>|0</nformat>', 'align=\'right\'' );
-		$grid->column('Semanal',   '<nformat><#semanal#>|0</nformat>',   'align=\'right\'' );
-		$grid->column('Actual',    '<pinta><#existen#>|0</pinta>',       'align=\'right\'' );
-		$grid->column('Min' ,      '<nformat><#exmin#>|0</nformat>',     'align=\'center\'');
-		$grid->column('Max' ,      '<nformat><#exmax#>|0</nformat>',     'align=\'center\'');
-		$grid->column('Sugerido','pedir','align=\'right\'');
-
+		$grid->column('Trim.'   , '<nformat><#trimestral#>|0</nformat>','align=\'right\'' );
+		$grid->column('Mens.'   , '<nformat><divi><#trimestral#>|3</divi>|0</nformat>' , 'align=\'right\'' );
+		$grid->column('Quin.'   , '<nformat><divi><#trimestral#>|6</divi>|0</nformat>' , 'align=\'right\'' );
+		$grid->column('Sema.'   , '<b><nformat><divi><#trimestral#>|12</divi>|0</nformat></b>', 'align=\'right\'' );
+		$grid->column('Actual'  , '<pinta><#existen#>|0</pinta>',       'align=\'right\'' );
+		$grid->column('Min-Max' , '<nformat><#exmin#>|0</nformat>-<nformat><#exmax#>|0</nformat>',     'align=\'center\'');
+		$grid->column('<b>Sugerido</b>', '<b style="color:green"><nformat><#pedir#>|0</nformat></b>','align=\'right\'');
 		$grid->build();
-
 		//$grid->column('Rango' ,'[<nformat><#exmin#></nformat>-<nformat><#exmax#></nformat>]' ,'align=\'center\'');
 
 		if($grid->recordCount>0){
