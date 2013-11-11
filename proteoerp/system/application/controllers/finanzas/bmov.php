@@ -435,7 +435,7 @@ class Bmov extends Controller {
 		$grid->label('Conciliado');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => 'true',
+			'editable'      => 'false',
 			'width'         => 80,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
@@ -652,19 +652,30 @@ class Bmov extends Controller {
 	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
+		$id     = intval($this->input->post('id'));
 		$data   = $_POST;
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				//$this->db->insert('bmov', $data);
-			}
-			return 'Registro Agregado';
+			return 'Deshabilitado';
 
-		} elseif($oper == 'edit') {
+		}elseif($oper == 'edit'){
+
+			if($this->datasis->sidapuede('BMOV','MODIFICA%')){
+				echo 'No tiene acceso a modificar';
+				return false;
+			}
+
+			$posibles=array('concilia','liable');
+			foreach($data as $ind=>$val){
+				if(!in_array($ind,$posibles)){
+					echo 'Campo no permitido ('.$ind.')';
+					return false;
+				}
+			}
+
 			$this->db->where('id', $id);
 			$this->db->update('bmov', $data);
 			logusu('BMOV',"Movimiento de bancos  ".$id." MODIFICADO");
@@ -672,16 +683,8 @@ class Bmov extends Controller {
 			//return "Registro Modificado";
 
 		} elseif($oper == 'del') {
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM bmov WHERE id='$id' ");
-			$check = 1;
-			if ($check > 0){
-				echo ' El registro no puede ser eliminado; tiene movimiento ';
-			} else {
-				//$this->db->simple_query("DELETE FROM bmov WHERE id=$id ");
-				logusu('bmov',"Registro ${id} ELIMINADO");
-				echo 'Registro Eliminado';
-			}
-		};
+			echo 'Deshabilitado';
+		}
 	}
 
 	function tabla() {

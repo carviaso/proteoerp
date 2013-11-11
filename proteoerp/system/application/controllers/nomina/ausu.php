@@ -32,7 +32,9 @@ class Ausu extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'ausucol',   'img'=>'images/circulogris.png',  'alt' => '-', 'label'=>'Ajuste colectivo'));
+		if($this->datasis->sidapuede('AUSU','INCLUIR%')){
+			$grid->wbotonadd(array('id'=>'ausucol',   'img'=>'images/circulogris.png',  'alt' => '-', 'label'=>'Ajuste colectivo'));
+		}
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -237,7 +239,7 @@ class Ausu extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 150,
+			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:15, maxlength: 15 }',
@@ -346,7 +348,7 @@ class Ausu extends Controller {
 
 		$grid->setOndblClickRow('');
 		$grid->setAdd(    $this->datasis->sidapuede('AUSU','INCLUIR%' ));
-		$grid->setEdit(   $this->datasis->sidapuede('AUSU','MODIFICA%'));
+		$grid->setEdit(false);
 		$grid->setDelete( $this->datasis->sidapuede('AUSU','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('AUSU','BUSQUEDA%'));
 		$grid->setRowNum(30);
@@ -479,13 +481,21 @@ class Ausu extends Controller {
 		$edit->codigo->mode='autohide';
 		$edit->codigo->maxlength=15;
 		$edit->codigo->rule='required|callback_chexiste';
-		$edit->codigo->group='Trabajador';
+		$edit->codigo->group='Datos del Trabajador';
 
 		$edit->nombre =  new inputField('Nombre', 'nombre');
 		$edit->nombre->size =40;
 		$edit->nombre->maxlength=30;
 		$edit->nombre->type='inputhidden';
-		$edit->nombre->group='Trabajador';
+		$edit->nombre->group='Datos del Trabajador';
+
+		$edit->sueldoa = new inputField('Sueldo actual', 'sueldoa');
+		$edit->sueldoa->size = 14;
+		$edit->sueldoa->type='inputhidden';
+		$edit->sueldoa->css_class='inputnum';
+		$edit->sueldoa->rule='positive';
+		$edit->sueldoa->maxlength=11;
+		$edit->sueldoa->group='Datos del Trabajador';
 
 		$edit->fecha = new dateField('Apartir de la nomina', 'fecha');
 		$edit->fecha->mode='autohide';
@@ -494,20 +504,13 @@ class Ausu extends Controller {
 		$edit->fecha->rule ='required|callback_fpositiva';
 		$edit->fecha->calendar=false;
 
-		$edit->sueldoa = new inputField('Sueldo anterior', 'sueldoa');
-		$edit->sueldoa->size = 14;
-		$edit->sueldoa->type='inputhidden';
-		$edit->sueldoa->css_class='inputnum';
-		$edit->sueldoa->rule='positive';
-		$edit->sueldoa->maxlength=11;
-
 		$edit->sueldo = new inputField('Sueldo nuevo', 'sueldo');
 		$edit->sueldo->size = 14;
 		$edit->sueldo->css_class='inputnum';
 		$edit->sueldo->rule='positive';
 		$edit->sueldo->maxlength=11;
 
-		$edit->observ1 = new inputField('Raz&oacute;n', 'observ1');
+		$edit->observ1 = new inputField('Raz&oacute;n del ajuste', 'observ1');
 		$edit->observ1->size = 51;
 		$edit->observ1->maxlength=46;
 		$edit->observ1->rule='required|strtoupper';
@@ -540,15 +543,18 @@ class Ausu extends Controller {
 	}
 
 	function _pre_insert($do){
-		$codigo=$do->get('codigo');
-		$fecha =$do->get('fecha');
+		$codigo  = $do->get('codigo');
+		$fecha   = $do->get('fecha');
+		$dbcodigo= $this->db->escape($codigo);
+		$dbfecha = $this->db->escape($fecha);
+		$sueldoa = $this->datasis->dameval("SELECT sueldo FROM pers  WHERE codigo=${dbcodigo}");
+		$sueldob = $this->datasis->dameval("SELECT sueldo FROM ausu  WHERE fecha<=${dbfecha} ORDER BY fecha DESC LIMIT 1");
 
-		$dbcodigo=$this->db->escape($codigo);
-		$dbfecha =$this->db->escape($fecha);
+		$do->set('sueldoa',empty($sueldob)? $sueldoa: $sueldob);
 
 		$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM ausu WHERE codigo=${dbcodigo} AND fecha=${dbfecha}"));
 		if($cana>0){
-			$do->error_message_ar['pre_ins']='Ya existe un ajuste de suelto para la fecha seleccionada.';
+			$do->error_message_ar['pre_ins']='Ya existe un ajuste de sueldo para la fecha seleccionada.';
 			return false;
 		}else{
 			return true;
@@ -556,25 +562,36 @@ class Ausu extends Controller {
 	}
 
 	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='No se puede modificar este tipo de registro.';
+		$do->error_message_ar['pre_upd']='No se puede modificar este tipo de registro, debe eliminarlo y volverlo a crear.';
 		return false;
 	}
 
 	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
-		return false;
+		$fecha = $do->get('fecha');
+		$codigo= $do->get('codigo');
+
+		$dbfecha  = $this->db->escape($fecha );
+		$dbcodigo = $this->db->escape($codigo);
+
+		$cana = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM ausu WHERE fecha>${dbfecha} AND codigo=${dbcodigo}"));
+		if($cana>0){
+			$do->error_message_ar['pre_del']='No se puede revesar un pago cuando existe un aumento con fecha posterior';
+			return false;
+		}
+		return true;
 	}
 
 	function _post_insert($do){
-		$codigo=$do->get('codigo');
-		$nombre=$do->get('nombre');
-		$fecha =$do->get('fecha');
-
+		$codigo  = $do->get('codigo');
+		$nombre  = $do->get('nombre');
+		$fecha   = $do->get('fecha');
 		$sueldo  = $do->get('sueldo');
 		$dbcodigo= $this->db->escape($codigo);
 
-		$mSQL = "UPDATE pers SET sueldo=${sueldo} WHERE codigo=${dbcodigo}";
-		$this->db->simple_query($mSQL);
+		if(intval(date('Ymd'))>=intval(str_replace('-','',$fecha))){
+			$mSQL = "UPDATE pers SET sueldo=${sueldo} WHERE codigo=${dbcodigo}";
+			$this->db->simple_query($mSQL);
+		}
 
 		logusu('ausu',"AUMENTO DE SUELDO A ${codigo} NOMBRE  ${nombre} FECHA ${fecha} CREADO");
 	}
@@ -587,9 +604,17 @@ class Ausu extends Controller {
 	}
 
 	function _post_delete($do){
-		$codigo=$do->get('codigo');
-		$nombre=$do->get('nombre');
-		$fecha =$do->get('fecha');
+		$codigo = $do->get('codigo');
+		$nombre = $do->get('nombre');
+		$fecha  = $do->get('fecha');
+		$sueldoa= $do->get('sueldoa');
+		$dbcodigo= $this->db->escape($codigo);
+
+		if(intval(date('Ymd'))>=intval(str_replace('-','',$fecha))){
+			$mSQL = "UPDATE pers SET sueldo=${sueldoa} WHERE codigo=${dbcodigo}";
+			$this->db->simple_query($mSQL);
+		}
+
 		logusu('ausu',"AUMENTO DE SUELDO A ${codigo} NOMBRE  ${nombre} FECHA ${fecha} ELIMINADO ");
 	}
 
@@ -611,7 +636,7 @@ class Ausu extends Controller {
 		$edit->porcen->size = 12;
 		$edit->porcen->css_class='inputnum';
 		$edit->porcen->rule='numeric|required|floatval|nocero';
-		$edit->porcen->append('%');
+		$edit->porcen->append('% Coloque una cantidad positiva para aumentar y negativa para disminuir.');
 		$edit->porcen->maxlength=11;
 
 		$edit->fecha = new dateField('Apartir de la nómina', 'fecha');
@@ -619,15 +644,19 @@ class Ausu extends Controller {
 		$edit->fecha->size = 12;
 		$edit->fecha->insertValue=date('Y-m-d',mktime(0, 0, 0, date('n'), 1));
 		$edit->fecha->dbformat = 'Ymd';
-		$edit->fecha->rule ='required|callback_fpositiva';
+		$edit->fecha->rule ='required|chfecha';
 		$edit->fecha->calendar=false;
+
+		$edit->tipo = new dropdownField('Frecuencia de pago','tipo');
+		$edit->tipo->options(array(''=>'Todas','Q'=> 'Quincenal','M'=>'Mensual','S'=>'Semanal','B'=>'BiSemanal'));
+		$edit->tipo->style = 'width:100px;';
 
 		$edit->observ1 = new inputField('Raz&oacute;n', 'observ1');
 		$edit->observ1->size = 51;
 		$edit->observ1->maxlength=46;
 		$edit->observ1->rule='required|strtoupper';
 
-		$edit->container = new containerField('info','Esta opción aumentará o disminurá el sueldo segun sea el caso a los trabajadores de manera líneal.');
+		$edit->container = new containerField('info','Esta opción aumentará o disminurá el sueldo según sea el caso a los trabajadores de manera líneal.');
 
 		$edit->build_form();
 
@@ -637,16 +666,27 @@ class Ausu extends Controller {
 			$observ1= $edit->observ1->newValue;
 			$this->genesal=false;
 
+			if(empty($edit->tipo->newValue)){
+				$tipo='';
+			}else{
+				$tipo='AND tipo='.$this->db->escape($edit->tipo->newValue);
+			}
+
 			$msj='';
 			$error=0;
-			$mSQL="SELECT codigo,nombre,sueldo FROM pers WHERE status='A'";
+			$mSQL="SELECT codigo,nombre,sueldo FROM pers WHERE status='A' ${tipo}";
 			$query = $this->db->query($mSQL);
 			foreach ($query->result() as $row){
+				if($porcen>0){
+					$nsueldo=round($row->sueldo*(100+$porcen)/100,2);
+				}else{
+					$nsueldo=round($row->sueldo/(1+abs($porce/100)),2);
+				}
 				$_POST['codigo']  =	$row->codigo;
 				$_POST['nombre']  = $row->nombre;
 				$_POST['fecha']   =	$fecha;
 				$_POST['sueldoa'] = $row->sueldo;
-				$_POST['sueldo']  = round($row->sueldo*(100+$porcen)/100,2);
+				$_POST['sueldo']  = $nsueldo;
 				$_POST['observ1'] = $observ1;
 				$_POST['oberv2']  = 'CAMBIO COLECTIVO';
 
@@ -686,9 +726,14 @@ class Ausu extends Controller {
 	}
 
 	function fpositiva($valor){
-		return true;
-		if($valor<date('Ymd')){
-			$this->validation->set_message('fpositiva',"El campo Apartir de la nomina, Debe ser una nomina futura");
+		$codigo   = $this->input->post('codigo');
+		$dbcodigo = $this->db->escape($codigo);
+
+		$maxfecha = intval(str_replace('-','',$this->datasis->dameval("SELECT MAX(fecha) FROM nomina WHERE codigo=${dbcodigo}")));
+		$valor    = intval(str_replace('-','',substr(human_to_dbdate($valor),0,10)));
+
+		if($maxfecha>=$valor){
+			$this->validation->set_message('fpositiva',"No puede aumentarle el sueldo con una fecha posterior a una nomina ya pagada");
 			return false;
 		}
 		return true;

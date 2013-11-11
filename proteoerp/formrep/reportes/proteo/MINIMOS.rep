@@ -229,8 +229,8 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 		$pdf = new PDFReporte($mSQL,'L');
 		$pdf->setHeadValores('TITULO1');
 		$pdf->setSubHeadValores('TITULO2','TITULO3');
-		$pdf->setTitulo("Listado de Ventas por Código");
-		$pdf->setSubTitulo("Desde la fecha: ".$_POST['fechad']." Hasta ".$_POST['fechah']);
+		$pdf->setTitulo('Listado de Ventas por Código');
+		$pdf->setSubTitulo('Desde la fecha: '.$_POST['fechad']." Hasta ".$_POST['fechah']);
 		$pdf->setSobreTabla($sobretabla,5);
 		$pdf->AddPage();
 		$pdf->setTableTitu(9,'Times');
@@ -262,16 +262,16 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 		$pdf->Table();
 		$pdf->Output();
 	}else{
-		$data["error"]  = 'Debe seleccionar un rango de fechas de al menos 3 meses';
-		$data["filtro"] = $filter->output;
-		$data["titulo"] = '<h2 class="mainheader">Comparativo Minimos</h2>';
-		$data["head"]    = script("jquery.pack.js").$this->rapyd->get_head();
+		$data['error']  = 'Debe seleccionar un rango de fechas de al menos 3 meses';
+		$data['filtro'] = $filter->output;
+		$data['titulo'] = '<h2 class="mainheader">Comparativo Minimos</h2>';
+		$data['head']    = script("jquery.pack.js").$this->rapyd->get_head();
 		$this->load->view('view_freportes', $data);
 	}
 }else{
-	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Comparativo M&iacute;nimos</h2>';
-	$data["head"]    = script("jquery.pack.js").$this->rapyd->get_head();
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Comparativo M&iacute;nimos</h2>';
+	$data['head']    = script("jquery.pack.js").$this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }
