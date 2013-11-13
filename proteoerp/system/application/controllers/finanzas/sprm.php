@@ -2092,20 +2092,6 @@ class Sprm extends Controller {
 			$edit->$obj->ind          = $i;
 			$edit->$obj->onfocus      = 'itsaldo(this,'.round($row->saldo,2).');';
 
-			//$obj='ppago_'.$i;
-			//$edit->$obj = new inputField('Pronto Pago',$obj);
-			//$edit->$obj->db_name      = 'ppago';
-			//$edit->$obj->rel_id       = 'itppro';
-			//$edit->$obj->rule         = "max_length[18]|numeric|positive|callback_chppago[$i]";
-			//$edit->$obj->css_class    = 'inputnum';
-			//$edit->$obj->showformat   = 'decimal';
-			//$edit->$obj->autocomplete = false;
-			//$edit->$obj->disable_paste= true;
-			//$edit->$obj->size         = 15;
-			//$edit->$obj->maxlength    = 18;
-			//$edit->$obj->ind          = $i;
-			//$edit->$obj->onchange     = "itppago(this,'$i');";
-
 			$i++;
 		}
 		//************************************************

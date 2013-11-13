@@ -239,6 +239,30 @@ class Sinv extends Controller {
 		};
 		';
 
+		// Fija Margenes 
+		$funciones .= '
+		function fijamarg(){
+			$margen1 = 35;
+			$margen2 = 30
+			$margen3 = 25
+			$margen4 = 20;
+			$.prompt( "<h1>Fijar Porcentaje:</h1><br><center><table width=\'100%\'><tr><td>Margen 1</td><td><input class=\'inputnum\' type=\'text\' id=\'margen1\' name=\'margen1\' value=\'35.00\' maxlengh=\'10\' size=\'10\' ></tb></tr><tr><td>Margen 2</td><td><input class=\'inputnum\' type=\'text\' id=\'margen2\' name=\'margen2\' value=\'30.00\' maxlengh=\'10\' size=\'10\' ></tb></tr><tr><td>Margen 3</td><td><input class=\'inputnum\' type=\'text\' id=\'margen3\' name=\'margen3\' value=\'25.00\' maxlengh=\'10\' size=\'10\' ></tb></tr><tr><td>Margen 4</td><td><input class=\'inputnum\' type=\'text\' id=\'margen4\' name=\'margen4\' value=\'20.00\' maxlengh=\'10\' size=\'10\' ></tb></tr></table></center><br/>", {
+				buttons: { Aplicar: true, Cancelar: false },
+				submit: function(e,v,m,f){
+					if (v) {
+						if( f.margen1>0  && f.margen2>0 && f.margen3>0 && f.margen4>0 ) {
+							$.ajax({ url: "'.site_url('inventario/sinv/fijamarg').'/"+f.margen1+"/"+f.margen2+"/"+f.margen3+"/"+f.margen4,
+							success: function(data){ alert((data)) }
+							});
+						} else {
+							alert("Debe colocar porcentajes mayores a 0");
+						}
+					}
+				}
+			});
+		}
+		';
+
 		//Aumento de Precios al Mayor
 		$funciones .= '
 		function auprecm(){
@@ -3740,9 +3764,6 @@ class Sinv extends Controller {
 		$mtipo = $this->uri->segment($this->uri->total_segments());
 		$this->datasis->sinvrecalcular($mtipo);
 		$this->datasis->sinvredondear();
-
-		//$this->db->call_function("sp_sinv_recalcular", $mtipo );
-		//$this->db->call_function("sp_sinv_redondea");
 		logusu('SINV',"Recalcula Precios $mtipo");
 	}
 
@@ -3783,6 +3804,34 @@ class Sinv extends Controller {
 
 		echo "Aumento Concluido ($porcent) ";
 	}
+
+	// **************************************
+	//
+	// -- Fija Margenes -- //
+	//
+	function fijamarg( $margen1=0, $margen2=0, $margen3=0, $margen4=0 ) {
+		$data = $this->datasis->damesesion();
+		$where = $data['data1'];
+
+		// Respalda los precios anteriores
+		$mN = $this->datasis->prox_sql('nsinvplog');
+		$ms_codigo = $this->session->userdata('usuario');
+
+		$mSQL = "INSERT INTO sinvplog ";
+		$mSQL .= "SELECT '".$mN."', '".addslashes($ms_codigo)."', now(), curtime(), a.codigo, a.precio1, a.precio2, a.precio3, a.precio4 ";
+		$mSQL .= "FROM sinv a ".$where;
+		$this->db->query($mSQL);
+
+		$mSQL = " SET a.margen1=$margen1, a.margen2=$margen2, a.margen3=$margen3, a.margen4=$margen4 ";
+
+		$this->db->query("UPDATE sinv a ".$mSQL." ".$where);
+
+		$this->datasis->sinvrecalcular("P");
+		$this->datasis->sinvredondear();
+
+		echo "Cambio Concluido  ";
+	}
+
 
 	// **************************************
 	//

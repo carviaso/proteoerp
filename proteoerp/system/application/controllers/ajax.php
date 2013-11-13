@@ -545,7 +545,7 @@ class Ajax extends Controller {
 
 	/**************************************************************
 	 *
-	 *  BUSCA LOS INVENTARIO DESDE AFUERA
+	 *  BUSCA LOS INVENTARIO DESDE AFUERA DE WP
 	 *
 	*/
 	function buscasinvex(){
@@ -567,11 +567,11 @@ class Ajax extends Controller {
 		$data = '[]';
 		if($mid !== false){
 
-			//Vemos si aplica descuento solo promocional
+			// Busca
 			$mSQL="
 			SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
 			a.precio1, precio2, precio3, precio4, a.iva, if(a.existen>=0,a.existen,0) existen,
-			a.tipo,a.peso, a.ultimo, a.pond, a.barras, a.marca
+			a.tipo,a.peso, a.ultimo, a.pond, a.barras, a.marca, a.modelo
 			FROM sinv AS a
 			WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb}) AND a.activo='S'
 			ORDER BY if(a.existen>0,0,1), a.descrip LIMIT 30";
@@ -584,8 +584,6 @@ class Ajax extends Controller {
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
 
-					//$retArray['label']   = '('.$row['codigo'].')'.$this->en_utf8($row['descrip']).' Bs.'.$row['precio1'].'  '.$row['existen'].'';
-					//$retArray['value']   = $row['codigo'];
 					$retArray['codigo']  = $row['codigo'];
 					$retArray['tipo']    = $row['tipo'];
 					$retArray['peso']    = $row['peso'];
@@ -600,6 +598,7 @@ class Ajax extends Controller {
 					$retArray['iva']     = $row['iva'];
 					$retArray['existen'] = $row['existen'];
 					$retArray['marca']   = $row['marca'];
+					$retArray['modelo']  = $row['modelo'];
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
