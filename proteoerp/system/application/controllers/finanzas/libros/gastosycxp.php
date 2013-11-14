@@ -264,10 +264,12 @@ class gastosycxp{
 			a.exento,
 			a.impuesto,
 			a.monto,
-			a.reteiva, a.fecha, a.fecapl, b.rif, b.nomfis ,TRIM(a.afecta) AS afecta,a.codigo
+			a.reteiva, a.fecha, a.fecapl, b.rif, b.nomfis,
+			TRIM(a.afecta) AS afecta,a.codigo,
+			a.serie
 			FROM sprm AS a
 			LEFT JOIN sprv AS b ON a.cod_prv=b.proveed
-			LEFT JOIN itppro AS c ON a.transac=c.transac
+			LEFT JOIN itppro AS c ON a.numero=c.numppro AND a.tipo_doc=c.tipoppro AND a.cod_prv=c.cod_prv
 			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo<>'NOCON' AND c.transac IS NULL";
 
 		$query = $this->db->query($mSQL);
@@ -307,6 +309,7 @@ class gastosycxp{
 				$data['reiva']    = $row->reteiva;
 				$data['afecta']   = $row->afecta;
 				$data['fafecta']  = '';
+				$data['serie']    = $row->serie;
 
 				$mSQL = $this->db->insert_string('siva', $data);
 				$flag=$this->db->simple_query($mSQL);
