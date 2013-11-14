@@ -47,8 +47,8 @@ class Sfac extends Controller {
 				<div class=\"anexos\">
 					<table cellpadding='0' cellspacing='0'>
 						<tr>
-							<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='sundecop'>".img(array('src'=>'assets/default/images/print.png', 'height'=>15, 'alt'=>'Realizar cierre X', 'title'=>'Cierre X', 'border'=>'0'))." Cierre X</a></div></td>
-							<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='bpactivo'>".img(array('src'=>'assets/default/images/print.png', 'height'=>15, 'alt'=>'Realizar cierre Z', 'title'=>'Cierre Z', 'border'=>'0'))." Cierre Z</a></div></td>
+							<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='bcierrex'>".img(array('src'=>'assets/default/images/print.png', 'height'=>15, 'alt'=>'Realizar cierre X', 'title'=>'Cierre X', 'border'=>'0'))." Cierre X</a></div></td>
+							<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='bcierrez'>".img(array('src'=>'assets/default/images/print.png', 'height'=>15, 'alt'=>'Realizar cierre Z', 'title'=>'Cierre Z', 'border'=>'0'))." Cierre Z</a></div></td>
 						</tr>
 					</table>
 				</div>
