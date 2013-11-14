@@ -29,7 +29,7 @@ $filter->salformat->clause = '';
 $filter->buttons('search');
 $filter->build();
 
-if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$select=array(
 		'a.mes',
 		'a.codigo',
