@@ -273,6 +273,17 @@ class Zona extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		$grid->addField('area');
+		$grid->label('&Aacute;rea');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:40, maxlength: 40 }',
+		));
+
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
@@ -431,6 +442,11 @@ class Zona extends Controller {
 		$edit->margen->insertValue='0';
 		$edit->margen->maxlength =5;
 
+		$edit->area = new inputField('C&oacute;digo de &aacute;rea','area');
+		$edit->area->rule='';
+		$edit->area->size =40;
+		$edit->area->maxlength =40;
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -493,6 +509,10 @@ class Zona extends Controller {
 
 		if (!in_array('margen',$campos)){
 			$this->db->simple_query("ALTER TABLE `zona` ADD COLUMN `margen` DECIMAL(5,2) UNSIGNED NOT NULL DEFAULT '0.00'");
+		}
+
+		if (!in_array('area',$campos)){
+			$this->db->simple_query("ALTER TABLE `zona` ADD COLUMN `area` VARCHAR(20) NULL DEFAULT NULL COMMENT 'Codigo de area'");
 		}
 	}
 }
