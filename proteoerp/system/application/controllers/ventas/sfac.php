@@ -2318,9 +2318,10 @@ class Sfac extends Controller {
 
 
 		$salida = '<br><table width=\'100%\' border=\'1\'>';
+		$pago  = 0;
 		$encab = false;
 		//Revisa formas de pago sfpa
-		$mSQL = "SELECT tipo, numero, monto FROM sfpa WHERE transac=${dbtransac} AND monto<>0";
+		$mSQL = "SELECT tipo, numero, monto FROM sfpa WHERE transac=${dbtransac} AND numero=${dbnumero} AND monto<>0";
 		$query = $this->db->query($mSQL);
 		if($query->num_rows() > 0){
 			$encab = true;
@@ -2332,6 +2333,7 @@ class Sfac extends Controller {
 				$salida .= '<td>'.$row['numero'].'</td>';
 				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
 				$salida .= '</tr>';
+				$pago += $row['monto'];
 			}
 		}
 
@@ -2342,13 +2344,17 @@ class Sfac extends Controller {
 				$salida .= '<tr bgcolor=\'#E7E3E7\'><td colspan=\'3\'>Forma de Pago</td></tr>';
 				$salida .= '<tr bgcolor=\'#E7E3E7\'><td>Tipo</td><td align=\'center\'>N&uacute;mero</td><td align=\'center\'>Monto</td></tr>';
 			}
-			foreach ($qquery->result_array() as $row){
+			foreach($qquery->result_array() as $row){
 				$salida .= '<tr bgcolor=\'#D3D3FF\'>';
 				$salida .= '<td>'.$row['tipo'].'</td>';
 				$salida .= '<td>'.$row['numero'].'</td>';
 				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
 				$salida .= '</tr>';
+				$pago += $row['monto'];
 			}
+		}
+		if($pago>0){
+			$salida .= '<tr bgcolor=\'#E7E3E7\'><td colspan=\'3\' align=\'right\'>Total: <b>'.nformat($pago).'</b></td></tr>';
 		}
 		$salida .= '</table>';
 
