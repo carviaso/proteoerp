@@ -394,8 +394,10 @@ class XLSXReporte {
 	function Footer(){
 
 		foreach($this->totalizar as $tot){
-			$pos = PHPExcel_Cell::stringFromColumnIndex($this->colspos[$tot]);
-			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValue($pos.($this->ii-1), "=SUM(${pos}7:${pos}".($this->ii-2).")");
+			if(isset($this->DBfieldsType[$tot])){
+				$pos = PHPExcel_Cell::stringFromColumnIndex($this->colspos[$tot]);
+				$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValue($pos.($this->ii-1), "=SUM(${pos}7:${pos}".($this->ii-2).")");
+			}
 		}
 
 		$this->ci->phpexcel->setActiveSheetIndex(0)
