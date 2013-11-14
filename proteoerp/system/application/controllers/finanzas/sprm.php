@@ -1127,6 +1127,9 @@ class Sprm extends Controller {
 			return '';
 		}
 
+		$dbtipo_doc= $this->db->escape($tipo_doc);
+		$dbnumero  = $this->db->escape($numero);
+		$dbcod_prv = $this->db->escape($cod_prv);
 
 		if(!empty($transac)){
 			$dbtransac = $this->db->escape($transac);
@@ -1142,10 +1145,10 @@ class Sprm extends Controller {
 			$saldo  = 0;
 			if($query->num_rows() > 0){
 				$salida .= $td1;
-				$salida .= "Movimiento en Proveedores</caption>";
+				$salida .= 'Movimiento en Proveedores</caption>';
 				$salida .= "<tr bgcolor='#E7E3E7'><td>Nombre</td><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
 				foreach ($query->result_array() as $row){
-					if ( $row['tipo_doc'] == 'FC' ) {
+					if($row['tipo_doc'] == 'FC' ) {
 						$saldo = $row['monto']-$row['abonos'];
 					}
 					$salida .= '<tr>';
@@ -1185,7 +1188,7 @@ class Sprm extends Controller {
 
 			//Retencion de IVA RIVA
 			$mSQL = "
-				SELECT periodo, nrocomp, reiva FROM riva WHERE tipo_doc='$tipo_doc' AND numero='$numero' AND MID(transac,1,1)<>'_'";
+				SELECT periodo, nrocomp, reiva FROM riva WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND MID(transac,1,1)<>'_'";
 				"UNION ALL
 				SELECT periodo, nrocomp, reiva FROM riva WHERE transac=${dbtransac} AND MID(transac,1,1)<>'_'
 				";
@@ -1228,7 +1231,11 @@ class Sprm extends Controller {
 			$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itppro WHERE transac=${dbtransac}";
 			$query = $this->db->query($mSQL);
 			if($query->num_rows() == 0 ){
-				$mSQL = "SELECT tipoppro tipo_doc, numppro numero, monto, abono FROM itppro WHERE tipo_doc='${tipo_doc}' AND numero='{$numero}'";
+				if($tipo_doc=='AB' || $tipo_doc=='AN' || $tipo_doc=='NC'){
+					$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itppro WHERE tipoppro=${dbtipo_doc} AND numppro=${dbnumero} AND cod_prv=${dbcod_prv}";
+				}else{
+					$mSQL = "SELECT tipoppro tipo_doc, numppro numero, monto, abono FROM itppro WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND cod_prv=${dbcod_prv}";
+				}
 				$query = $this->db->query($mSQL);
 			}
 
