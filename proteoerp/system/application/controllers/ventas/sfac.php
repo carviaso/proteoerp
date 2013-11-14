@@ -2299,21 +2299,33 @@ class Sfac extends Controller {
 	function tabla() {
 		$id  = $this->uri->segment($this->uri->total_segments());
 		$dbid= $this->db->escape($id);
-		$cliente   = $this->datasis->dameval("SELECT cod_cli FROM sfac WHERE id=${dbid}");
-		$transac   = $this->datasis->dameval("SELECT transac FROM sfac WHERE id=${dbid}");
+		$row = $this->datasis->damerow("SELECT cod_cli,transac,referen,tipo_doc,numero FROM sfac WHERE id=${dbid}");
+		if(!empty($row)){
+			$cliente   = $row['cod_cli'];
+			$transac   = $row['transac'];
+			$referen   = $row['referen'];
+			$tipo_doc  = $row['tipo_doc'].'C';
+			$numero    = $row['numero'];
+		}else{
+			return false;
+		}
+
 		$dbcliente = $this->db->escape($cliente);
 		$dbtransac = $this->db->escape($transac);
+		$dbtipo_doc= $this->db->escape($tipo_doc);
+		$dbnumero  = $this->db->escape($numero);
 
 
-		$salida = '';
 
-		// Revisa formas de pago sfpa
+		$salida = '<br><table width=\'100%\' border=\'1\'>';
+		$encab = false;
+		//Revisa formas de pago sfpa
 		$mSQL = "SELECT tipo, numero, monto FROM sfpa WHERE transac=${dbtransac} AND monto<>0";
 		$query = $this->db->query($mSQL);
-		if ( $query->num_rows() > 0 ){
-			$salida .= "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Forma de Pago</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tipo</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+		if($query->num_rows() > 0){
+			$encab = true;
+			$salida .= '<tr bgcolor=\'#E7E3E7\'><td colspan=\'3\'>Forma de Pago</td></tr>';
+			$salida .= '<tr bgcolor=\'#E7E3E7\'><td>Tipo</td><td align=\'center\'>N&uacute;mero</td><td align=\'center\'>Monto</td></tr>';
 			foreach ($query->result_array() as $row){
 				$salida .= '<tr>';
 				$salida .= '<td>'.$row['tipo'].'</td>';
@@ -2321,46 +2333,63 @@ class Sfac extends Controller {
 				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
 				$salida .= '</tr>';
 			}
-			$salida .= '</table>';
 		}
 
-		// Cuentas por Cobrar
+		$mSQL = "SELECT tipoccli AS tipo, numccli AS numero,abono AS monto,reteiva,reten,mora,ppago,cambio FROM itccli WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero}";
+		$qquery = $this->db->query($mSQL);
+		if($qquery->num_rows() > 0){
+			if(!$encab){
+				$salida .= '<tr bgcolor=\'#E7E3E7\'><td colspan=\'3\'>Forma de Pago</td></tr>';
+				$salida .= '<tr bgcolor=\'#E7E3E7\'><td>Tipo</td><td align=\'center\'>N&uacute;mero</td><td align=\'center\'>Monto</td></tr>';
+			}
+			foreach ($qquery->result_array() as $row){
+				$salida .= '<tr bgcolor=\'#D3D3FF\'>';
+				$salida .= '<td>'.$row['tipo'].'</td>';
+				$salida .= '<td>'.$row['numero'].'</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+				$salida .= '</tr>';
+			}
+		}
+		$salida .= '</table>';
+
+		//Cuentas por Cobrar
 		$mSQL = "SELECT cod_cli, MID(nombre,1,25) nombre, tipo_doc, numero, monto, abonos FROM smov WHERE cod_cli=${dbcliente} AND abonos<>monto AND tipo_doc<>'AB' ORDER BY fecha DESC ";
 		$query = $this->db->query($mSQL);
 		$saldo = 0;
-		if ( $query->num_rows() > 0 ){
-			$salida .= "<br><table width='100%' border=1>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td colspan=3>Movimiento Pendientes en CxC</td></tr>";
-			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+		if($query->num_rows() > 0){
+			$salida .= '<br><table width=\'100%\' border=\'1\'>';
+			$salida .= '<tr bgcolor=\'#E7E3E7\'><td colspan=\'3\'>Movimiento Pendientes en CxC</td></tr>';
+			$salida .= '<tr bgcolor=\'#E7E3E7\'><td>Tp</td><td align=\'center\'>N&uacute;mero</td><td align=\'center\'>Monto</td></tr>';
 			$i = 1;
-			foreach ($query->result_array() as $row){
-				if ( $i < 6 ) {
+			foreach($query->result_array() as $row){
+				if($i < 6){
 					$salida .= '<tr>';
 					$salida .= '<td>'.$row['tipo_doc'].'</td>';
 					$salida .= '<td>'.$row['numero'].  '</td>';
-					$salida .= "<td align='right'>".nformat($row['monto']-$row['abonos']).'</td>';
+					$salida .= '<td align=\'right\'>'.nformat($row['monto']-$row['abonos']).'</td>';
 					$salida .= '</tr>';
 				}
-				if ( $i == 6 ) {
+				if($i == 6){
 					$salida .= '<tr>';
-					$salida .= "<td colspan=3>Mas......</td>";
+					$salida .= '<td colspan=\'3\'>Mas......</td>';
 					$salida .= '</tr>';
 				}
-				if ( $row['tipo_doc'] == 'FC' or $row['tipo_doc'] == 'ND' or $row['tipo_doc'] == 'GI' )
+				if($row['tipo_doc'] == 'FC' or $row['tipo_doc'] == 'ND' or $row['tipo_doc'] == 'GI'){
 					$saldo += $row['monto']-$row['abonos'];
-				else
+				}else{
 					$saldo -= $row['monto']-$row['abonos'];
+				}
 				$i ++;
 			}
-			$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
-			$salida .= "</table>";
+			$salida .= '<tr bgcolor=\'#D7C3C7\'><td colspan=\'4\' align=\'center\'>Saldo : '.nformat($saldo).'</td></tr>';
+			$salida .= '</table>';
 		}
 		$query->free_result();
 
 		// Revisa movimiento de bancos
-		$mSQL = "SELECT codbanc, numero, monto FROM bmov WHERE transac=${dbtransac} ";
+		$mSQL  = "SELECT codbanc, numero, monto FROM bmov WHERE transac=${dbtransac}";
 		$query = $this->db->query($mSQL);
-		if ( $query->num_rows() > 0 ){
+		if($query->num_rows() > 0){
 			$salida .= '<br><table width=\'100%\' border=\'1\'>';
 			$salida .= '<tr bgcolor=\'#e7e3e7\'><td colspan=\'3\'>Movimiento en Caja o Banco</td></tr>';
 			$salida .= '<tr bgcolor=\'#e7e3e7\'><td>Bco.</td><td align=\'center\'>N&uacute;mero</td><td align=\'center\'>Monto</td></tr>';
@@ -3566,7 +3595,7 @@ class Sfac extends Controller {
 		$hoy        = date('Y-m-d');
 
 		if($tipo_doc=='X'){
-			$do->error_message_ar['pre_del']='La factura ya esta anulada.';
+			$do->error_message_ar['pre_del']='El documento ya esta anulada.';
 			return false;
 		}
 
@@ -3577,7 +3606,16 @@ class Sfac extends Controller {
 				$do->error_message_ar['pre_del']='No se puede anular de dias pasados.';
 				return false;
 			}elseif($inicial>0 || $abono>0){
-				$do->error_message_ar['pre_del']='No se puede anular la factura por tener abonos.';
+				$do->error_message_ar['pre_del']='No se puede anular el documento por tener abonos.';
+				return false;
+			}
+		}
+
+		if($tipo_doc=='F'){
+			$mSQL = "SELECT COUNT(*) AS cana FROM sfac WHERE tipo_doc='D' AND factura=${dbnumero}";
+			$cana = $this->datasis->dameval($mSQL);
+			if($cana>0){
+				$do->error_message_ar['pre_del'] = 'No se puede anular una factura con devolucion.';
 				return false;
 			}
 		}
@@ -3605,6 +3643,12 @@ class Sfac extends Controller {
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}
 		}
 
+		if($tipo_doc=='D'){
+			$dbnnumero= $this->db->escape('N'.substr($numero,1));
+		}else{
+			$dbnnumero= $dbnumero;
+		}
+
 		$mSQL ="DELETE FROM smov WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
@@ -3613,17 +3657,16 @@ class Sfac extends Controller {
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 
-		$mSQL="UPDATE sfac SET tipo_doc='X' WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero}";
+		$mSQL="UPDATE sfac SET tipo_doc='X', numero=${dbnnumero} WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero}";
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 
-		$mSQL="UPDATE sitems SET tipoa='X' WHERE tipoa=${dbtipo_doc} AND numa=${dbnumero}";
+		$mSQL="UPDATE sitems SET tipoa='X', numero=${dbnnumero} WHERE tipoa=${dbtipo_doc} AND numa=${dbnumero}";
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 
 		logusu('sfac',"Anulo factura ${tipo_doc}${numero}");
 		$do->error_message_ar['pre_del']='Factura '.$numero.' anulada';
-
 
 		$upago   = trim($do->get('upago'));
 		$cliente = trim($do->get('cod_cli'));

@@ -267,7 +267,7 @@ class Kardex extends Controller {
 		if($tipo=='3I' || $tipo=='3M'){  //ventas de caja
 			$fields = $this->db->field_data('sfac');
 			$ppk=array();
-			$select=array('a.numa','a.tipoa','a.numa','CONCAT("(",b.cod_cli,") ",b.nombre) cliente','a.cana','a.fecha','a.vendedor','a.preca','a.tota','b.tipo_doc');
+			$select=array('a.numa','a.tipoa','a.numa','CONCAT("(",b.cod_cli,") ",b.nombre) cliente','a.cana*IF(a.tipoa="D",-1,1) AS cana','a.fecha','a.vendedor','a.preca','a.tota','b.tipo_doc');
 			foreach ($fields as $field){
 				if($field->primary_key==1){
 					$ppk[]='<#'.$field->name.'#>';
@@ -289,11 +289,12 @@ class Kardex extends Controller {
 			$grid->column('Precio'       ,'<nformat><#preca#></nformat>','align=\'right\'');
 			$grid->column('Total'        ,'<nformat><#tota#></nformat>' ,'align=\'right\'');
 			$grid->db->select($select);
-			$grid->db->from('sitems a');
-			$grid->db->join('sfac b','b.numero=a.numa  AND b.tipo_doc=a.tipoa');
+			$grid->db->from('sitems AS a');
+			$grid->db->join('sfac   AS b','b.numero=a.numa AND b.tipo_doc=a.tipoa');
 			$grid->db->where('a.fecha',$fecha);
 			$grid->db->where('a.codigoa',$codigo);
 			$grid->db->where('a.tipoa !=','X');
+			$grid->db->not_like('a.numa','_','after');
 			$grid->db->where('b.almacen',$almacen);
 			$grid->build();
 			$gridout=$grid->output;
@@ -423,7 +424,7 @@ class Kardex extends Controller {
 				$dbcodigo  = $CI->db->escape($codigo);
 				$dbfactura = $CI->db->escape($factura);
 				$mSQL="SELECT GROUP_CONCAT( DISTINCT CONCAT(a.id,':',numero)) AS fact
-					FROM sfac AS a 
+					FROM sfac AS a
 					JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
 					WHERE b.codigoa=${dbcodigo} AND ${dbfactura} IN (a.numero,a.maestra) AND a.tipo_doc='F'";
 				$facts=$CI->datasis->dameval($mSQL);

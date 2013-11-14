@@ -1,0 +1,80 @@
+$base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, "search"));
+$filter->title('Elija un formato de salida');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechad->group = 'Fecha de Ingreso';
+$filter->fechad->rule='required';
+$filter->fechad->size='12';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30,   date('Y')));
+
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->group = 'Fecha de Ingreso';
+$filter->fechah->rule  = 'required';
+$filter->fechah->size  = '12';
+$filter->fechah->insertValue = date('Y-m-d');
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit','Descargar');
+$filter->build_form();
+
+if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
+
+	$dbfechad=$this->db->escape($filter->fechad->newValue);
+	$dbfechah=$this->db->escape($filter->fechah->newValue);
+
+	$mSQL="SELECT @row := @row + 1 AS Row,' ' as cedula,b.rif, a.numero as numfac, a.nfiscal as numcont,a.creten as concep,totpre as monto,c.tari1 AS reten
+	FROM gser AS a
+	JOIN sprv AS b ON a.proveed=b.proveed
+	JOIN rete AS c ON a.creten=c.codigo
+	WHERE a.reten>0 AND a.tipo_doc<>'XX'
+	AND fecha >= ${dbfechad} AND fecha <= ${dbfechah}
+	UNION
+	SELECT @row := @row + 1 AS Row,b.cedula,b.rif,'N/A' as numfac,'N/A' as numcont,'001' as concep,
+	SUM(a.valor) AS monto, vari3 as reten
+	FROM (nomina AS a)
+	JOIN pers AS b ON a.codigo=b.codigo
+	JOIN conc AS c ON a.concepto=c.concepto
+	LEFT JOIN noco AS d ON a.contrato=d.codigo
+	WHERE a.valor<>0 AND MID(a.concepto,1,1)<>'9'
+	AND a.tipo='A' AND a.fecha >= ${dbfechad} AND a.fecha <= ${dbfechah}
+	GROUP BY a.codigo";
+
+
+	//echo $mSQL;
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setSubTitulo('Desde la fecha: '.$_POST['fechad'].' Hasta '.$_POST['fechah']);
+
+	$pdf->setTitulo('Listado de Montos sujetos a Retencion de ISLR');
+	//$pdf->setSubTitulo('');
+	//$pdf->setSobreTabla('');
+
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+
+	$pdf->AddCol('Row'    ,10,'ID-Sec '              ,'C',8);
+	$pdf->AddCol('cedula' ,28,'Cedula'               ,'C',8);
+	$pdf->AddCol('rif'    ,28,'Rif Retenido'         ,'C',8);
+	$pdf->AddCol('numfac' ,30,'Número de Factura'    ,'C',8);
+	$pdf->AddCol('numcont',30,'Número de Control'    ,'C',8);
+	$pdf->AddCol('concep' ,30,'Codigo Concepto'      ,'C',8);
+	$pdf->AddCol('monto'  ,30,'Monto Operacion'      ,'R',8);
+	$pdf->AddCol('reten'  ,30,'Porcentaje Retencion' ,'R',8);
+
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Montos sujetos a Retencion de ISLR</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

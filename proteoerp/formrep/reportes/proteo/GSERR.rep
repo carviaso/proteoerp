@@ -1,0 +1,65 @@
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('a.fecha','a.numero', 'a.nombre','a.totpre','a.totiva','a.reten','a.totneto');
+$filter->db->select($select);
+$filter->db->from('gser AS a');
+$filter->db->where('a.reten > 0');
+$filter->db->where('a.tipo_doc <>','XX');
+$filter->db->orderby('a.fecha');
+
+$filter->fechad = new dateField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause='where';
+$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30, date('Y')));
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechad->operator='>=';
+$filter->fechah->operator='<=';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$sobretabla='';
+	if(!empty($filter->almacen->newValue))  $sobretabla.=' Almacen:'.$filter->almacen->description;
+	if(!empty($filter->sucursal->newValue)) $sobretabla.=' Sucursal: '.$filter->sucursal->description;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Listado de Retenciones');
+	$pdf->setSubTitulo('Desde la fecha: '.$_POST['fechad'].' Hasta '.$_POST['fechah']);
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+
+	$pdf->AddCol('fecha'  ,20,'Fecha'      ,'L',8);
+	$pdf->AddCol('numero' ,20,'Número'     ,'L',8);
+	$pdf->AddCol('nombre' ,70,'Nombre '    ,'L',7);
+	$pdf->AddCol('totpre' ,23,'Subtotal'   ,'R',8);
+	$pdf->AddCol('totiva' ,23,'Impuesto'   ,'R',8);
+	$pdf->AddCol('reten'  ,23,'Retenciones','R',8);
+	$pdf->AddCol('totneto',23,'Total'      ,'R',8);
+
+	$pdf->setGrupoLabel('(<#mgascu#>), <#mgasdesc#>');
+	$pdf->setGrupo('mgascu');
+	$pdf->setTotalizar('totpre','totiva','reten','totneto');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Retenciones en Gastos</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

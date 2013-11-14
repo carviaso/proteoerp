@@ -1,89 +1,89 @@
-$filter = new DataFilter("Filtro del Reporte");
+$filter = new DataFilter('Filtro del Reporte');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$filter->db->select(array("fecha","tipo_op","numero", "concepto", "(tipo_op NOT IN ('CH','ND'))*monto as debitos", "(tipo_op IN ('CH','ND'))*monto as creditos", "(tipo_op IN ('CH','ND'))*monto as saldo, month(fecha) mes"));
-$filter->db->from('bmov as a');
-$filter->db->join('banc as b','a.codbanc=b.codbanc');
+$filter->db->select(array('fecha','tipo_op','numero', 'concepto', "(tipo_op NOT IN ('CH','ND'))*monto as debitos", "(tipo_op IN ('CH','ND'))*monto as creditos", "(tipo_op IN ('CH','ND'))*monto as saldo, month(fecha) mes"));
+$filter->db->from('bmov AS a');
+$filter->db->join('banc AS b','a.codbanc=b.codbanc');
 //$filter->db->orderby('fecha');
-/*
-$filter->fecha = new dateonlyField("Desde", "fechad",'m/Y');
+
+/*$filter->fecha = new dateonlyField('Desde', 'fechad','m/Y');
 $filter->fecha->clause  ='where';
 $filter->fecha->db_name ="EXTRACT(YEAR_MONTH FROM fecha)";
-$filter->fecha->insertValue = date("Y-m-d");
-$filter->fecha->operator="=";
+$filter->fecha->insertValue = date('Y-m-d');
+$filter->fecha->operator='=';
 $filter->fecha->dbformat='Ym';
 $filter->fecha->size=7;
 $filter->fecha->append(' mes/año');
-$filter->fecha->rule = "required";
-*/
-$filter->ano = new dropdownField("Año", "ano");
+$filter->fecha->rule = "required";*/
+
+$filter->ano = new dropdownField('Año', 'ano');
 $filter->ano->db_name="YEAR(a.fecha)";
-//$filter->ano->option("","");
-$filter->ano->options("SELECT YEAR(fecha) id, YEAR(fecha) ano FROM bmov WHERE YEAR(fecha) <= YEAR(curdate()) GROUP BY YEAR(fecha) ORDER BY ano DESC ");  
-$filter->ano->rule = "required";
+//$filter->ano->option('','');
+$filter->ano->options("SELECT YEAR(fecha) id, YEAR(fecha) ano FROM bmov WHERE YEAR(fecha) <= YEAR(curdate()) GROUP BY YEAR(fecha) ORDER BY ano DESC ");
+$filter->ano->rule = 'required';
 
 
-$filter->desde = new dropdownField("Desde el mes", "desde");
-$filter->desde->db_name="MONTH(a.fecha)";
-$filter->desde->operator=">=";
-$filter->desde->option("01","01");
-$filter->desde->option("02","02");
-$filter->desde->option("03","03");
-$filter->desde->option("04","04");
-$filter->desde->option("05","05");
-$filter->desde->option("06","06");
-$filter->desde->option("07","07");
-$filter->desde->option("08","08");
-$filter->desde->option("09","09");
-$filter->desde->option("10","10");
-$filter->desde->option("11","11");
-$filter->desde->option("12","12");
-$filter->desde->rule = "required";
+$filter->desde = new dropdownField('Desde el mes', 'desde');
+$filter->desde->db_name='MONTH(a.fecha)';
+$filter->desde->operator='>=';
+$filter->desde->option('01','01');
+$filter->desde->option('02','02');
+$filter->desde->option('03','03');
+$filter->desde->option('04','04');
+$filter->desde->option('05','05');
+$filter->desde->option('06','06');
+$filter->desde->option('07','07');
+$filter->desde->option('08','08');
+$filter->desde->option('09','09');
+$filter->desde->option('10','10');
+$filter->desde->option('11','11');
+$filter->desde->option('12','12');
+$filter->desde->rule = 'required';
 
-$filter->hasta = new dropdownField("Hasta el mes", "hasta");
+$filter->hasta = new dropdownField('Hasta el mes', 'hasta');
 $filter->hasta->db_name="MONTH(a.fecha)";
-$filter->hasta->operator="<=";
+$filter->hasta->operator='<=';
 
-$filter->hasta->option("01","01");
-$filter->hasta->option("02","02");
-$filter->hasta->option("03","03");
-$filter->hasta->option("04","04");
-$filter->hasta->option("05","05");
-$filter->hasta->option("06","06");
-$filter->hasta->option("07","07");
-$filter->hasta->option("08","08");
-$filter->hasta->option("09","09");
-$filter->hasta->option("10","10");
-$filter->hasta->option("11","11");
-$filter->hasta->option("12","12");
-$filter->hasta->rule = "required";
+$filter->hasta->option('01','01');
+$filter->hasta->option('02','02');
+$filter->hasta->option('03','03');
+$filter->hasta->option('04','04');
+$filter->hasta->option('05','05');
+$filter->hasta->option('06','06');
+$filter->hasta->option('07','07');
+$filter->hasta->option('08','08');
+$filter->hasta->option('09','09');
+$filter->hasta->option('10','10');
+$filter->hasta->option('11','11');
+$filter->hasta->option('12','12');
+$filter->hasta->rule = 'required';
 
 
-$filter->banco = new dropdownField("Caja/Banco", "codbanc");
-$filter->banco->db_name="a.codbanc";
-$filter->banco->option("","");
-$filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");  
-$filter->banco->rule = "required";
+$filter->banco = new dropdownField('Caja/Banco', 'codbanc');
+$filter->banco->db_name='a.codbanc';
+$filter->banco->option('','Todas');
+$filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");
+$filter->banco->rule = 'required';
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons("search");
+$filter->buttons('search');
 $filter->build();
-if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$mSQL=$filter->db->_compile_select();
 	$mfdesde = $filter->ano->newValue.$filter->desde->newValue;
 	$mfhasta = $filter->ano->newValue.$filter->hasta->newValue;
 
 	$mSQL=$mSQL." UNION ALL
-	SELECT DATE_ADD('".$mfdesde."01',INTERVAL -1 DAY) AS fecha, NULL, 'SI', 'SALDO ANTERIOR', 
-	((tipo_op NOT IN ('CH', 'D'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))>0) as debitos, 
+	SELECT DATE_ADD('".$mfdesde."01',INTERVAL -1 DAY) AS fecha, NULL, 'SI', 'SALDO ANTERIOR',
+	((tipo_op NOT IN ('CH', 'D'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))>0) as debitos,
 	((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))<0)*(-1) as creditos, 0 as saldo,
 	".$filter->desde->newValue." mes
-	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc 
-	WHERE EXTRACT(YEAR_MONTH FROM fecha) < ' ".$mfdesde." ' AND a.codbanc = ' ".$filter->banco->newValue."' 
+	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc
+	WHERE EXTRACT(YEAR_MONTH FROM fecha) < ' ".$mfdesde." ' AND a.codbanc = ' ".$filter->banco->newValue."'
 	GROUP BY a.codbanc
 	ORDER BY fecha";
 
@@ -92,7 +92,7 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 	//echo $mSQL;
 
 	$sobretabla='';
-	if (!empty($filter->banco->newValue))   $sobretabla.='     Caja o Banco: '.$filter->banco->description; 
+	if (!empty($filter->banco->newValue))   $sobretabla.='     Caja o Banco: '.$filter->banco->description;
 	//if (!empty($filter->banco->newValue)) $sobretabla.='    Banco: '.$this->datasis->dameval('SELECT banco FROM banc WHERE codbanc="'.$filter->banco->newValue.'"');
 	//if (!empty($filter->fecha->newValue)) $sobretabla.=' Saldo Anterior: '.saldo;
 
@@ -100,14 +100,14 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 	$pdf->setType('fecha','date');
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
-	$pdf->setTitulo("Estado de Cuenta");
+	$pdf->setTitulo('Estado de Cuenta');
 	$pdf->setSobreTabla($sobretabla,9);
 	$pdf->setSubTitulo("Desde el mes ".$this->input->post('desde'). " hasta ".$this->input->post('hasta')." del ".$this->input->post('ano'));
 	//$pdf->seType('fecha','date');
 	$pdf->AddPage();
 
 	$pdf->setTableTitu(10,'Times');
-	$pdf->AddCol('fecha',20,'Fecha'   ,'L',9);
+	$pdf->AddCol('fecha'   ,20,'Fecha'   ,'L',9);
 	$pdf->AddCol('numero'  ,30,'Número'  ,'L',9);
 	$pdf->AddCol('concepto',78,'Concepto','L',9);
 	$pdf->AddCol('debitos' ,30,'Débitos' ,'R',9);
@@ -123,9 +123,9 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 	//$pdf->add_fila('','','','Saldo actual','100');
 	$pdf->Output();
 }else{
-	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Estado de Cuenta<h2>';
-	$data["head"] = $this->rapyd->get_head();
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Estado de Cuenta</h2>';
+	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }
