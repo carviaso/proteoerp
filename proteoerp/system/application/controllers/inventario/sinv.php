@@ -3813,23 +3813,37 @@ class Sinv extends Controller {
 		$data = $this->datasis->damesesion();
 		$where = $data['data1'];
 
-		// Respalda los precios anteriores
-		$mN = $this->datasis->prox_sql('nsinvplog');
-		$ms_codigo = $this->session->userdata('usuario');
+		$margen1 = floatval($margen1);
+		$margen2 = floatval($margen2);
+		$margen3 = floatval($margen3);
+		$margen4 = floatval($margen4);
+		
+		if ( $margen1*$margen2*$margen3*$margen4 > 0 ){
+		
+			if ( $margen1>=$margen2 && $margen2>=$margen3 && $margen3>=$margen4 ){ 
+				// Respalda los precios anteriores
+				$mN = $this->datasis->prox_sql('nsinvplog');
+				$ms_codigo = $this->session->userdata('usuario');
 
-		$mSQL = "INSERT INTO sinvplog ";
-		$mSQL .= "SELECT '".$mN."', '".addslashes($ms_codigo)."', now(), curtime(), a.codigo, a.precio1, a.precio2, a.precio3, a.precio4 ";
-		$mSQL .= "FROM sinv a ".$where;
-		$this->db->query($mSQL);
+				$mSQL = "INSERT INTO sinvplog ";
+				$mSQL .= "SELECT '".$mN."', '".addslashes($ms_codigo)."', now(), curtime(), a.codigo, a.precio1, a.precio2, a.precio3, a.precio4 ";
+				$mSQL .= "FROM sinv a ".$where;
+				$this->db->query($mSQL);
 
-		$mSQL = " SET a.margen1=$margen1, a.margen2=$margen2, a.margen3=$margen3, a.margen4=$margen4 ";
+				$mSQL = " SET a.margen1=$margen1, a.margen2=$margen2, a.margen3=$margen3, a.margen4=$margen4 ";
 
-		$this->db->query("UPDATE sinv a ".$mSQL." ".$where);
+				$this->db->query("UPDATE sinv a ".$mSQL." ".$where);
 
-		$this->datasis->sinvrecalcular("P");
-		$this->datasis->sinvredondear();
+				$this->datasis->sinvrecalcular("P");
+				$this->datasis->sinvredondear();
 
-		echo "Cambio Concluido  ";
+				echo "Cambio Concluido  ";
+			} else {
+				echo "Los margenes deben ir de Mayor (1) a Menor (4)";
+			}			
+		} else {
+			echo "Los Margenes deben ser mayores qie 0";
+		}
 	}
 
 
