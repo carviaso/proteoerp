@@ -1,9 +1,10 @@
 $filter = new DataFilter('Filtro del Reporte');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$filter->db->select(array('fecha','tipo_op','numero', 'concepto', "(tipo_op NOT IN ('CH','ND'))*monto as debitos", "(tipo_op IN ('CH','ND'))*monto as creditos", "(tipo_op IN ('CH','ND'))*monto as saldo, month(fecha) mes"));
+$filter->db->select(array('fecha','tipo_op','numero', 'concepto', "(tipo_op NOT IN ('CH','ND'))*monto as debitos", "(tipo_op IN ('CH','ND'))*monto as creditos", "if(tipo_op IN ('CH','ND'),-1,1)*monto as saldo, month(fecha) mes"));
 $filter->db->from('bmov AS a');
 $filter->db->join('banc AS b','a.codbanc=b.codbanc');
+$filter->db->where('a.anulado <>','S');
 //$filter->db->orderby('fecha');
 
 /*$filter->fecha = new dateonlyField('Desde', 'fechad','m/Y');
@@ -26,37 +27,36 @@ $filter->ano->rule = 'required';
 $filter->desde = new dropdownField('Desde el mes', 'desde');
 $filter->desde->db_name='MONTH(a.fecha)';
 $filter->desde->operator='>=';
-$filter->desde->option('01','01');
-$filter->desde->option('02','02');
-$filter->desde->option('03','03');
-$filter->desde->option('04','04');
-$filter->desde->option('05','05');
-$filter->desde->option('06','06');
-$filter->desde->option('07','07');
-$filter->desde->option('08','08');
-$filter->desde->option('09','09');
-$filter->desde->option('10','10');
-$filter->desde->option('11','11');
-$filter->desde->option('12','12');
+$filter->desde->option('01','01 Enero');
+$filter->desde->option('02','02 Febrero');
+$filter->desde->option('03','03 Marzo');
+$filter->desde->option('04','04 Abril');
+$filter->desde->option('05','05 Mayo');
+$filter->desde->option('06','06 Junio');
+$filter->desde->option('07','07 Julio');
+$filter->desde->option('08','08 Agosto');
+$filter->desde->option('09','09 Septiembre');
+$filter->desde->option('10','10 Octubre');
+$filter->desde->option('11','11 Noviembre');
+$filter->desde->option('12','12 Diciembre');
 $filter->desde->rule = 'required';
 
 $filter->hasta = new dropdownField('Hasta el mes', 'hasta');
 $filter->hasta->db_name="MONTH(a.fecha)";
 $filter->hasta->operator='<=';
 
-$filter->hasta->option('01','01');
-$filter->hasta->option('02','02');
-$filter->hasta->option('03','03');
-$filter->hasta->option('04','04');
-$filter->hasta->option('05','05');
-$filter->hasta->option('06','06');
-$filter->hasta->option('07','07');
-$filter->hasta->option('08','08');
-$filter->hasta->option('09','09');
-$filter->hasta->option('10','10');
-$filter->hasta->option('11','11');
-$filter->hasta->option('12','12');
-$filter->hasta->rule = 'required';
+$filter->hasta->option('01','01 Enero');
+$filter->hasta->option('02','02 Febrero');
+$filter->hasta->option('03','03 Marzo');
+$filter->hasta->option('04','04 Abril');
+$filter->hasta->option('05','05 Mayo');
+$filter->hasta->option('06','06 Junio');
+$filter->hasta->option('07','07 Julio');
+$filter->hasta->option('08','08 Agosto');
+$filter->hasta->option('09','09 Septiembre');
+$filter->hasta->option('10','10 Octubre');
+$filter->hasta->option('11','11 Noviembre');
+$filter->hasta->option('12','12 Diciembre');
 
 
 $filter->banco = new dropdownField('Caja/Banco', 'codbanc');
@@ -73,17 +73,19 @@ $filter->salformat->clause = '';
 $filter->buttons('search');
 $filter->build();
 if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+
 	$mSQL=$filter->db->_compile_select();
 	$mfdesde = $filter->ano->newValue.$filter->desde->newValue;
 	$mfhasta = $filter->ano->newValue.$filter->hasta->newValue;
 
 	$mSQL=$mSQL." UNION ALL
-	SELECT DATE_ADD('".$mfdesde."01',INTERVAL -1 DAY) AS fecha, NULL, 'SI', 'SALDO ANTERIOR',
-	((tipo_op NOT IN ('CH', 'D'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))>0) as debitos,
-	((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))<0)*(-1) as creditos, 0 as saldo,
+	SELECT DATE_ADD('".$mfdesde."01',INTERVAL -1 DAY) AS fecha, NULL, '00', 'SALDO ANTERIOR',
+	if(sum(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,sum(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as debitos,
+	if(sum(if(tipo_op IN ('CH','ND'),-1,1)*monto)<0,sum(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as creditos, 
+	sum(if(tipo_op IN ('CH','ND'),-1,1)*monto) as saldo,
 	".$filter->desde->newValue." mes
 	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc
-	WHERE EXTRACT(YEAR_MONTH FROM fecha) < ' ".$mfdesde." ' AND a.codbanc = ' ".$filter->banco->newValue."'
+	WHERE EXTRACT(YEAR_MONTH FROM fecha) < '".$mfdesde."' AND a.codbanc = '".$filter->banco->newValue."' AND a.anulado<>'S'
 	GROUP BY a.codbanc
 	ORDER BY fecha";
 
@@ -108,11 +110,13 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 
 	$pdf->setTableTitu(10,'Times');
 	$pdf->AddCol('fecha'   ,20,'Fecha'   ,'L',9);
-	$pdf->AddCol('numero'  ,30,'Número'  ,'L',9);
-	$pdf->AddCol('concepto',78,'Concepto','L',9);
-	$pdf->AddCol('debitos' ,30,'Débitos' ,'R',9);
-	$pdf->AddCol('creditos',30,'Créditos','R',9);
-	$pdf->setTotalizar('debitos','creditos');
+	$pdf->AddCol('numero'  ,28,'Número'  ,'L',9);
+	$pdf->AddCol('concepto',75,'Concepto','L',8);
+	$pdf->AddCol('debitos' ,25,'Débitos' ,'R',9);
+	$pdf->AddCol('creditos',25,'Créditos','R',9);
+	$pdf->AddCol('saldo',   25,'Saldo','R',9);
+
+	$pdf->setTotalizar('debitos','creditos','saldo');
 
 	$pdf->setGrupoLabel('Mes: <#mes#> ');
 	$pdf->setGrupo('mes');
