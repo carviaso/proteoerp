@@ -32,7 +32,7 @@ $filter->attributes=array('onsubmit'=>'is_loaded()');
 $select=array('a.codigo', 'a.descrip', 'a.unidad', 'a.peso', 'a.fracci', 'a.existen',
 	'a.precio1','a.precio2', 'a.precio3', 'a.grupo',
 	'GREATEST(a.prepro1,a.prepro2,a.prepro3) AS costo','a.pfecha1', 'a.ultimo' ,'d.proveed', 'd.nombre',
-	'b.nom_grup', 'a.pond', 'c.descrip AS nomlinea',
+	'a.pond',
 	'((a.base1*100/GREATEST(a.prepro1,a.prepro2,a.prepro3))-100) AS m1',
 	'((a.base2*100/GREATEST(a.prepro1,a.prepro2,a.prepro3))-100) AS m2',
 	'((a.base3*100/GREATEST(a.prepro1,a.prepro2,a.prepro3))-100) AS m3',
@@ -42,7 +42,8 @@ $select=array('a.codigo', 'a.descrip', 'a.unidad', 'a.peso', 'a.fracci', 'a.exis
 	'a.base3',
 	'a.base4',
 	'c.linea',
-	'c.descrip AS dlinea','c.depto',
+	'c.descrip AS nomlinea',
+	'c.depto',
 	'b.nom_grup','e.depto','margen1'
 );
 
@@ -117,7 +118,7 @@ $filter->activo->option('N','No');
 $filter->ordenpor = new dropdownField('Ordenado por', 'orden');
 $filter->ordenpor->option('a.codigo' ,'Código');
 $filter->ordenpor->option('a.descrip','Descripción');
-$filter->ordenpor->rule='enum[a.codigo,a.descrip]';
+$filter->ordenpor->rule='enum[a.codigo,a.descrip]|required';
 $filter->ordenpor->clause ='';
 
 $filter->salformat = new radiogroupField("Formato de salida","salformat");

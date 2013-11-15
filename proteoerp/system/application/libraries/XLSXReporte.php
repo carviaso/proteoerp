@@ -20,7 +20,7 @@ class XLSXReporte {
 	var $centrar=array();
 	var $wstring=array('string','char',252,253,254);
 	var $wnumber=array('real','int','decimal',1,2,3,4,5,8,9,16,246);
-	var $wdate  =array('date',7,10,11,12);
+	var $wdate  =array('date','datetime',7,10,11,12);
 	var $fc=5;
 	var $cc=0;
 	var $ii=0;
