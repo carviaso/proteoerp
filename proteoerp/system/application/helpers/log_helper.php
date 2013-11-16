@@ -4,22 +4,25 @@ function logusu($modulo,$comentario){
 	if(empty($modulo) OR empty($comentario))return FALSE;
 	$CI =& get_instance();
 	$usr=$CI->session->userdata('usuario');
-	$mSQL="INSERT INTO logusu (usuario,fecha,hora,modulo,comenta) VALUES ('$usr',CURDATE(),CURTIME(),'$modulo','$comentario')";
-	return $CI->db->simple_query($mSQL);
+	if(empty($usr)) $usr='#AU#';
+	$dbusr       = $CI->db->escape($usr);
+	$dbcomentario= $CI->db->escape($comentario);
+	$dbmodulo    = $CI->db->escape($modulo);
 
+	$mSQL="INSERT INTO logusu (usuario,fecha,hora,modulo,comenta) VALUES (${dbusr},CURDATE(),CURTIME(),${dbmodulo},${dbcomentario})";
+	return $CI->db->simple_query($mSQL);
 }
 
 function memowrite($comentario=NULL,$nfile='salida',$modo='wb'){
 	if(empty($comentario)) return FALSE;
 	$CI =& get_instance();
 	$CI->load->helper('file');
-	if (!write_file("./system/logs/$nfile.log", $comentario,$modo)){
-		return FALSE;
+	if (!write_file("./system/logs/${nfile}.log", $comentario,$modo)){
+		return false;
 	}
-	return TRUE;
+	return true;
 }
 
 function memoborra($nfile='salida'){
-	return unlink("./system/logs/$nfile.log");
+	return unlink("./system/logs/${nfile}.log");
 }
-?>
