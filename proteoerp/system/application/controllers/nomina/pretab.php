@@ -710,7 +710,7 @@ class Pretab extends Controller {
 		unset($data['id']);
 		if($oper == 'add'){
 			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM pretab WHERE $mcodp=".$this->db->escape($data[$mcodp]));
+				$check = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM pretab WHERE $mcodp=".$this->db->escape($data[$mcodp]));
 				if ( $check == 0 ){
 					$this->db->insert('pretab', $data);
 					echo "Registro Agregado";

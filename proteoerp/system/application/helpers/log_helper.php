@@ -1,7 +1,7 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 function logusu($modulo,$comentario){
-	if(empty($modulo) OR empty($comentario))return FALSE;
+	if(empty($modulo) || empty($comentario)) return false;
 	$CI =& get_instance();
 	$usr=$CI->session->userdata('usuario');
 	if(empty($usr)) $usr='#AU#';
@@ -14,7 +14,7 @@ function logusu($modulo,$comentario){
 }
 
 function memowrite($comentario=NULL,$nfile='salida',$modo='wb'){
-	if(empty($comentario)) return FALSE;
+	if(empty($comentario)) return false;
 	$CI =& get_instance();
 	$CI->load->helper('file');
 	if (!write_file("./system/logs/${nfile}.log", $comentario,$modo)){
