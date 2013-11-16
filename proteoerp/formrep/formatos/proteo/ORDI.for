@@ -88,8 +88,8 @@ $ittot['monto']=$ittot['reten']=$ittot['ppago']=$ittot['cambio']=$ittot['mora']=
 $encabezado = <<<encabezado
 			<table style="width: 100%;" class="header">
 				<tr>
-					<td><h1 style="text-align: left">ORDEN DE IMPORTACI&Oacute;N No. ${numero}</h1></td>
-					<td><h1 style="text-align: right">Fecha: ${hfecha}</h1></td>
+					<td valign='bottom'><h1 style="text-align: left">ORDEN DE IMPORTACI&Oacute;N No. ${numero}</h1></td>
+					<td valign='bottom'><h1 style="text-align: right">Fecha: ${hfecha}</h1></td>
 				</tr>
 			</table>
 			<table style="width: 100%; font-size: 8pt;" >

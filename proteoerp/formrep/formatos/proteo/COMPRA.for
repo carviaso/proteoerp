@@ -65,8 +65,8 @@ $encabeza = '
 <div class="page" style="font-size: 7pt">
 		<table style="width:100%;font-size:7pt;" class="header">
 		<tr>
-			<td><h1 style="text-align: left">'.$tit1.' '.$cargada.'</h1></td>
-			<td><h1 style="text-align: right">N&uacute;mero: '.$numero.'</h1></td>
+			<td valign=\'bottom\'><h1 style="text-align: left">'.$tit1.' '.$cargada.'</h1></td>
+			<td valign=\'bottom\'><h1 style="text-align: right">N&uacute;mero: '.$numero.'</h1></td>
 		</tr>
 	</table>
 </div>

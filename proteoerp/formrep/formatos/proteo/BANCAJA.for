@@ -56,8 +56,8 @@ $cnumcuent= htmlspecialchars(trim($row->cnumcuent));
 <div style="width: 100%; text-align:center;">
 	<table  class="header">
 		<tr>
-			<td><h1 style="text-align: left">COMPROBANTE DE DEPOSITO No. <?php echo $numero; ?></h1></td>
-			<td><h1 style="text-align: right">Fecha: <?php echo $hfecha; ?></h1></td>
+			<td valign='bottom'><h1 style="text-align: left">COMPROBANTE DE DEPOSITO No. <?php echo $numero; ?></h1></td>
+			<td valign='bottom'><h1 style="text-align: right">Fecha: <?php echo $hfecha; ?></h1></td>
 		</tr>
 	</table>
 </div>

@@ -75,8 +75,8 @@ $detalle  = $mSQL_2->result();
 $encabezado = <<<encabezado
 	<table style="width: 100%;" class="header">
 		<tr>
-			<td><h1 style="text-align: left ;border-bottom:1px solid;">Nota de entrega </h1></td>
-			<td><h1 style="text-align: right;border-bottom:1px solid;">N&uacute;mero: ${numero}</h1></td>
+			<td valign='bottom'><h1 style="text-align: left ;border-bottom:1px solid;">Nota de entrega </h1></td>
+			<td valign='bottom'><h1 style="text-align: right;border-bottom:1px solid;">N&uacute;mero: ${numero}</h1></td>
 		</tr><tr>
 			<td>Cliente:<b>${cod_cli}</b></td>
 			<td>Fecha:  <b>${fecha}</b></td>

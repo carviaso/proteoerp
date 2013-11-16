@@ -106,8 +106,8 @@ $ittot = array('totmon'=>0,'litros'=>0);
 $encabezado = <<<encabezado
 						<table style="width: 100%;" class="header">
 							<tr>
-								<td><h1 style="text-align: left">RECIBO DE PAGO No. ${numero}</h1></td>
-								<td><h1 style="text-align: right">Fecha: ${fecha}</h1></td>
+								<td valign='bottom'><h1 style="text-align: left">RECIBO DE PAGO No. ${numero}</h1></td>
+								<td valign='bottom'><h1 style="text-align: right">Fecha: ${fecha}</h1></td>
 							</tr><tr>
 								<td colspan='2'><h1 style="text-align: center">Por Bs.: ***${monto}***</h1></td>
 							</tr>

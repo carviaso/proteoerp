@@ -22,21 +22,21 @@ $row = $mSQL_1->row();
 
 $fecha    = dbdate_to_human($row->fecha);
 $numero   = $row->numero;
-$clipro   = htmlspecialchars(trim($row->clipro));
-$rifci    = htmlspecialchars(trim($row->rifci));
-$nombre   = htmlspecialchars(trim($row->nombre));
+$clipro   = htmlspecialchars($row->clipro);
+$rifci    = $this->us_ascii2html($row->rifci);
+$nombre   = $this->us_ascii2html($row->nombre);
 $stotal   = nformat($row->totals);
 $gtotal   = nformat($row->totalg);
 $iva      = nformat($row->iva);
-$observa  = htmlspecialchars(trim($row->observa));
+$observa  = $this->us_ascii2html($row->observa);
 $status   = trim($row->status);
 $tipo     = trim($row->tipo);
 $tipod    = trim($row->tipod);
 
 $peso     = nformat($row->peso);
 $impuesto = nformat($row->iva);
-$direc    = htmlspecialchars(trim($row->direccion));
-$telefono = htmlspecialchars(trim($row->telefono));
+$direc    = $this->us_ascii2html($row->direccion);
+$telefono = $this->us_ascii2html($row->telefono);
 $ttitu    = ($tipo=='C') ? 'Cliente':'Proveedor';
 $ttitu2   = ($tipod=='R') ? 'RECIBIDA':'ENVIADA';
 $dbnumero   = $this->db->escape($numero);
@@ -66,8 +66,8 @@ $detalle  = $mSQL_2->result();
 $encabezado = "
 	<table style='width:100%;font-size: 9pt;' class='header' cellpadding='0' cellspacing='0'>
 		<tr>
-			<td><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>CONSIGNACI&Oacute;N ${ttitu2} DE ".strtoupper($ttitu)." Nro. ${numero}</h1></td>
-			<td><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>FECHA: ${fecha}</h1></td>
+			<td valign='bottom'><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>CONSIGNACI&Oacute;N ${ttitu2} DE ".strtoupper($ttitu)." Nro. ${numero}</h1></td>
+			<td valign='bottom'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>FECHA: ${fecha}</h1></td>
 		</tr><tr>
 			<td>${ttitu}: <b>(${clipro}) ${nombre}</b></td>
 			<td>RIF/CI: <b>${rifci}</b></td>
@@ -167,7 +167,7 @@ foreach ($detalle AS $items){ $i++;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo htmlspecialchars($uline).'<br />';
+						echo $this->us_ascii2html($uline).'<br />';
 						$lineas++;
 						if($lineas >= $maxlin){
 							$lineas =0;

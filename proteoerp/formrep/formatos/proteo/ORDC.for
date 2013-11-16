@@ -78,8 +78,8 @@ $detalle  = $mSQL_2->result();
 $encabezado = <<<encabezado
 	<table style="width: 100%;" class="header">
 		<tr>
-			<td><h1 style="text-align: left">Orden de compra</h1></td>
-			<td><h1 style="text-align: right">N&uacute;mero: ${numero}</h1></td>
+			<td valign='bottom'><h1 style="text-align: left">Orden de compra</h1></td>
+			<td valign='bottom'><h1 style="text-align: right">N&uacute;mero: ${numero}</h1></td>
 		</tr><tr>
 			<td>Proveedor:<b>${proveed}</b></td>
 			<td>Fecha:  <b>${fecha}</b></td>

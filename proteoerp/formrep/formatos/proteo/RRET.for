@@ -59,8 +59,8 @@ if(isset($pdf)){
 			<div class="page" style="font-size: 7pt">
 			<table style="width: 100%;" class="header">
 				<tr>
-					<td><h1 style="text-align: left">Retiro de cajero <?php echo $cajero.' - '.$ncajero ?></h1></td>
-					<td><h1 style="text-align: right">Fecha: <?php echo $fecha ?></h1></td>
+					<td valign='bottom'><h1 style="text-align: left">Retiro de cajero <?php echo $cajero.' - '.$ncajero ?></h1></td>
+					<td valign='bottom'><h1 style="text-align: right">Fecha: <?php echo $fecha ?></h1></td>
 				</tr>
 			</table>
 			</div>

@@ -77,8 +77,8 @@ $nsitems=$mSQL_2->num_rows();
 $encabezado = <<<encabezado
 	<table style="width: 100%;" class="header">
 		<tr>
-			<td><h1 style="text-align: left">Reparto a cliente</h1></td>
-			<td><h1 style="text-align: right">N&uacute;mero: ${numero}</h1></td>
+			<td valign='bottom'><h1 style="text-align: left">Reparto a cliente</h1></td>
+			<td valign='bottom'><h1 style="text-align: right">N&uacute;mero: ${numero}</h1></td>
 		</tr><tr>
 			<td>Chofer:<b>(${chofer}) ${cnombre}</b></td>
 			<td>Fecha: <b>${fecha}</b></td>

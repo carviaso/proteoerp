@@ -632,7 +632,7 @@ class Pretab extends Controller {
 		$titulo='';
 		$row = $this->datasis->damerow("SELECT b.codigo, b.nombre, a.fecha FROM prenom a JOIN noco b ON a.contrato=b.codigo LIMIT 1");
 		if(!empty($row)){
-			$titulo .= htmlentities($row['codigo']).' '.htmlentities($row['nombre']).' Fecha: '.dbdate_to_human($row['fecha']);
+			$titulo .= '('.htmlentities(trim($row['codigo'])).') '.htmlentities(trim($row['nombre'])).' Fecha: '.dbdate_to_human($row['fecha']);
 		}
 
 		$cana   = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM pretab");

@@ -51,8 +51,8 @@ $detalle  = $mSQL_2->result();
 $encabezado = "
 	<table style='width:100%;font-size: 9pt;' class='header' cellpadding='0' cellspacing='0'>
 		<tr>
-			<td><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>ASIENTO Nro. ${numero}</h1></td>
-			<td><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>FECHA: ${fecha}</h1></td>
+			<td valign='bottom'><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>ASIENTO Nro. ${numero}</h1></td>
+			<td valign='bottom'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>FECHA: ${fecha}</h1></td>
 		</tr><tr>
 			<td>Estatus: <b>${status}</b></td>
 			<td>Descripci&oacute;n: <b>${descrip}</b></td>

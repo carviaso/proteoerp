@@ -46,8 +46,8 @@ $lineas=0;
 <div style="width: 100%; text-align:center;">
 	<table  class="header" style="width: 100%;">
 		<tr>
-			<td><h1 style="text-align: left">REGISTRO DE CHEQUE DEVUELTO GIRADO A PROVEEDORES No. <?php echo $numero; ?></h1></td>
-			<td><h1 style="text-align: right">Fecha: <?php echo $hfecha; ?></h1></td>
+			<td valign='bottom'><h1 style="text-align: left">REGISTRO DE CHEQUE DEVUELTO GIRADO A PROVEEDORES No. <?php echo $numero; ?></h1></td>
+			<td valign='bottom'><h1 style="text-align: right">Fecha: <?php echo $hfecha; ?></h1></td>
 		</tr>
 	</table>
 </div>

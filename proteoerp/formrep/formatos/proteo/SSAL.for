@@ -52,8 +52,8 @@ $detalle  = $mSQL_2->result();
 $encabezado = "
 	<table style='width:100%;font-size: 9pt;' class='header' cellpadding='0' cellspacing='0'>
 		<tr>
-			<td><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>AJUSTE DE INVENTARIO Nro. ${numero}</h1></td>
-			<td><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>Fecha: ${fecha}</h1></td>
+			<td valign='bottom'><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>AJUSTE DE INVENTARIO Nro. ${numero}</h1></td>
+			<td valign='bottom'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>Fecha: ${fecha}</h1></td>
 		</tr><tr>
 			<td>Almac&eacute;n:<b>(${almacen}) ${almacendes}</b></td>
 			<td>Recibe:<b>(${cargo}) ${cargodes}</b></td>

@@ -122,8 +122,8 @@ if($tipo_op=='CH'){
 $encabezado = <<<encabezado
 			<table style="width: 100%;" class="header">
 				<tr>
-					<td><h1 style="text-align: left">${titu} No. ${numero}</h1></td>
-					<td><h1 style="text-align: right">Fecha: ${hfecha}</h1></td>
+					<td valign='bottom'><h1 style="text-align: left">${titu} No. ${numero}</h1></td>
+					<td valign='bottom'><h1 style="text-align: right">Fecha: ${hfecha}</h1></td>
 				</tr><tr>
 					<td colspan='2'><h1 style="text-align: center">Por Bs.: ***${monto}***</h1></td>
 				</tr>

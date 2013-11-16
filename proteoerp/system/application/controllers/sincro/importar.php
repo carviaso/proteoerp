@@ -327,6 +327,7 @@ class Importar extends Controller {
 			if(empty($fecha)) $fecha = date('Ymd');
 			$rt=$this->_sinvprec($principal,null);
 			echo $rt;
+			logusu('exportar','Importacion sinvprec realizada por shell');
 		}
 	}
 
@@ -454,8 +455,10 @@ class Importar extends Controller {
 		set_time_limit($this->timeout);
 		$rt='';
 		$rt.= $this->__traerzip($sucu,'sincro/exportar/uri/'.$this->clave.'/sinvprec/'.$fecha,'sinvpre');
-		if ($this->db->table_exists('sinvcontrol'))
+		if ($this->db->table_exists('sinvcontrol')){
 			$rt.= $this->__traerzip($sucu,'sincro/exportar/uri/'.$this->clave.'/sinvcontrol/'.$fecha,'sinvpre');
+			logusu('exportar','Importacion sinvprec realizada');
+		}
 		return $rt;
 	}
 

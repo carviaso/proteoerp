@@ -65,8 +65,8 @@ if(isset($pdf)){
 					<div class="page" style="font-size: 7pt">
 						<table style="width: 100%;" class="header">
 							<tr>
-								<td><h1 style="text-align: left">Cierre de caja </h1></td>
-								<td><h1 style="text-align: right">N&uacute;mero: <?php echo $numero ?></h1></td>
+								<td valign='bottom'><h1 style="text-align: left">Cierre de caja </h1></td>
+								<td valign='bottom'><h1 style="text-align: right">N&uacute;mero: <?php echo $numero ?></h1></td>
 							</tr>
 						</table>
 						<table style="width: 100%; font-size: 14pt;">
