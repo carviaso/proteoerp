@@ -1,5 +1,6 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed'); ?>
-<?php // <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> ?>
+<!doctype html>
+<?php //UBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> ?>
 <html>
 <head>
 <meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" />
@@ -14,19 +15,25 @@
 <?php echo style('menutab.css');  ?>
 <?php echo style('acordeon.css'); ?>
 <?php echo style('masonry.css'); ?>
+<?php echo style("themes/proteo/proteo.css"); ?>
 
 <?php echo script('jquery-min.js'); ?>
 <?php echo script('jquery-migrate-min.js'); ?>
 <?php echo script('jquery-ui.custom.min.js'); ?>
 <?php echo script('plugins/myAccordion.js'); ?>
-<?php //echo script('plugins/interface.js'); ?>
 <?php echo script('plugins/jquery.masonry.min.js'); ?>
+<?php echo script("jquery.dialogextend.min.js"); ?>
 
 <?php echo "\n<!-- Impromptu -->\n"; ?>
 <?php echo script('jquery-impromptu.js'); ?>
 <?php echo style('impromptu/default.css'); ?>
 
 <style>
+html { height: 100%; }
+.ui-dialog .ui-dialog-titlebar{
+	height: 18px;
+	font-size:0.8em;
+}
 <?php $this->load->view('loadstyle'); ?>
 </style>
 

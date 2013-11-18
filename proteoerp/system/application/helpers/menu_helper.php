@@ -1,6 +1,6 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-function arr_menu($nivel=1,$pertenece=NULL){
+function arr_menu( $nivel=1, $pertenece=NULL){
 	if($nivel!=1 AND $pertenece===NULL) $nivel=1;
 	if($nivel>1){
 		$mmodulo=opciones_nivel($nivel-1);
@@ -21,7 +21,6 @@ function arr_menu($nivel=1,$pertenece=NULL){
 			$mSQL .= "JOIN intrasida AS b ON a.modulo=b.modulo WHERE b.usuario='$usr' AND b.acceso='S' AND ";
 
 		$mSQL .="visible='S' AND CHAR_LENGTH(a.modulo)=${modulo} $esde ORDER BY a.panel, a.orden, a.modulo";
-
 		$query = $CI->db->query($mSQL);
 		$retorna=$query->result_array();
 	}else{
@@ -31,6 +30,9 @@ function arr_menu($nivel=1,$pertenece=NULL){
 }
 
 function arr2link($arr,$utf8c=false){
+//print_r($arr);
+	$dialogos = '';
+	$divis = '';
 	$att = array(
 		'width'      => $arr['ancho'],
 		'height'     => $arr['alto'],
@@ -50,16 +52,48 @@ function arr2link($arr,$utf8c=false){
 		$ejecutar=anchor_popup($indi, $arr['titulo'], $att);
 	}elseif($arr['target']=='javascript'){
 		$ejecutar="<a href='javascript:".str_replace('\'',"\\'",$indi)."' title='".$arr['mensaje']."'>".$arr['titulo']."</a>";
+	}elseif($arr['target']=='dialogo'){
+		$ejecutar="<a href='javascript:void(0);' title='".$arr['mensaje']."' onclick='f".$arr['modulo']."();'>".$arr['titulo']."</a> ";
+		$dialogos .= '<script>';
+		$dalto  = $arr['alto']-100;
+		$dancho = $arr['ancho'];
+		$ialto  = $arr['alto']-180;
+		$iancho = $arr['ancho']-50;
+
+		$dialogos .= '
+		$(function(){
+			$("#d'.$arr['modulo'].'").dialog({
+				autoOpen:false, modal:false, width:'.$dancho.', height:'.$dalto.',
+				minimize: "#toolbar",
+				open: function(ev, ui){
+					$(\'#d'.$arr['modulo'].'\').html(\'<iframe src="'.base_url().$indi.'" width="100%", height="100%"  seamless></iframe></iframe>\');
+				}
+			})
+			.dialogExtend({
+				"maximizable" : true,
+				"minimizable" : true,
+				"dblclick" : "maximize",
+				"icons" : { "maximize" : "ui-icon-arrow-4-diag" },
+				"icons" : { "minimize" : "ui-icon-circle-minus" }
+			});
+		});
+
+		function f'.$arr['modulo'].'(){
+			$("#d'.$arr['modulo'].'").dialog("open");
+		}
+		';
+		$dialogos .= '</script>';
+		$divis .= '<div id="d'.$arr['modulo'].'" title="'.$arr['titulo'].'"></div>';
 	}else{
 		$ejecutar=anchor($indi, $arr['titulo']);
 	}
-	return $ejecutar;
+	return $ejecutar.$divis.$dialogos;
 }
 
 function arr2panel($arr){
 	$retorna=array();
 	foreach($arr as $op ){
-		$retorna[$op['panel']][]= array('titulo'=>$op['titulo'],'mensaje'=>$op['mensaje'],'ejecutar'=>$op['ejecutar'],'target'=>$op['target'],'ancho'=>$op['ancho'],'alto'=>$op['alto']);
+		$retorna[$op['panel']][]= array('titulo'=>$op['titulo'],'mensaje'=>$op['mensaje'],'ejecutar'=>$op['ejecutar'],'target'=>$op['target'],'ancho'=>$op['ancho'],'alto'=>$op['alto'],'modulo'=>$op['modulo']);
 	}
 	return $retorna;
 }

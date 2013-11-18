@@ -8,12 +8,17 @@
 *  $LayoutStyle  => Scripts de Style adicionales
 *
 *
-*
 **********************************************************************/
 
 //Por compatibilidad con version anterior
-if( isset($tema)  == false) $tema    = 'proteo';
-if( isset($temas) == false) $temas[] = $tema;
+if( isset($tema)   == false) $tema    = 'proteo';
+if( isset($temas)  == false) $temas[] = $tema;
+if( isset($target) == false) {
+	// Trata de adivinar
+	$ejecutar = $this->uri->segment(1).'/'.$this->uri->segment(2);
+	$mSQL = 'SELECT target FROM intramenu WHERE ejecutar="'.$ejecutar.'" OR ejecutar="/'.$ejecutar.'"';
+	$target  = $this->datasis->dameval($mSQL);
+}
 if( isset($tema1))  $temas[] = $tema1;
 if( isset($anexos)) $temas[] = $anexos;
 
@@ -75,7 +80,6 @@ if ( count($grids) > 0 ){
 	var grid'.$i.'   = jQuery(gridId'.$i.').jqGrid({
 		ajaxGridOptions : {type:"POST"}
 		,jsonReader : {root:"data", repeatitems: false}';
-			
 		if ($gridi['onClick']) $depgrids .= "\n\t\t".$gridi['onClick'];
 		if ($gridi['ondblClickRow']) $depgrids .= "\n\t\t".$gridi['ondblClickRow'];
 
@@ -302,11 +306,9 @@ function esperar(url){
 </head>
 <body id="dt_proteo">
 
-<!-- div id='contenido' style='width:90%' -->
-
-<div class="ui-layout-north" ><?php echo $cintu ?></div>
-
 <?php 
+if ( $target <> 'dialogo')
+	echo '<div class="ui-layout-north" >'.$cintu.'</div>'; 
 	echo (isset($WestPanel) == true)? $WestPanel:''; 
 
 if(isset($centerpanel) == true) {
@@ -316,9 +318,15 @@ if(isset($centerpanel) == true) {
 	<table id="newapi<?php echo $grids[0]['gridname'];?>"></table>
 	<div   id="pnewapi<?php echo $grids[0]['gridname'];?>"></div>
 </div> <!-- #RightPane -->
-<?php } ?>
+<?php } 
 
-<?php echo (isset($SouthPanel) == true)? $SouthPanel:''; ?>
+if (isset($SouthPanel) == true ){
+	if ( $target == 'dialogo'){
+		echo substr($SouthPanel,strpos($SouthPanel,'-->')+3);
+	} else
+		echo $SouthPanel; 
+	}
+?>
 
 <div id="dtg_dialog" title="Exporta Datos">
 	<ul>
@@ -333,6 +341,5 @@ if(isset($centerpanel) == true) {
 <?php if(isset($bodyscript)) echo $bodyscript; ?>
 
 <div id="displayBox" style="display:none" ><p>Disculpe por la espere.....</p><img  src="<?php echo base_url() ?>images/doggydig.gif" width="131px" height="79px"/></div>
-<!-- /div -->
 </body>
 </html>

@@ -130,6 +130,7 @@ class Menu extends Controller{
 		$edit->target->option("popu"     ,"Link en Popup");
 		$edit->target->option("self"     ,"Link en ventana actual");
 		$edit->target->option("javascript","Proceso Javascript"); 
+		$edit->target->option("dialogo","Abre en un Dialogo"); 
 
 		$edit->ejecutar = new inputField("Ejecutar", "ejecutar");
 		$edit->ejecutar->rule='callback_ejecutar';
