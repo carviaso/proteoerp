@@ -1945,7 +1945,7 @@ class Sprm extends Controller {
 		$edit->banco->option('','Seleccionar');
 		$edit->banco->options('SELECT TRIM(codbanc) AS codbanc,CONCAT_WS(\' \',TRIM(banco),numcuent) FROM banc ORDER BY banco');
 		$edit->banco->style  = 'width:200px;';
-		$edit->banco->rule   = 'condi_required';
+		$edit->banco->rule   = 'condi_required|callback_chbanc';
 
 		$edit->tipo_op = new  dropdownField('Tipo', 'tipo_op');
 		$edit->tipo_op->option('CH','Cheque');
@@ -2149,6 +2149,21 @@ class Sprm extends Controller {
 		return true;
 	}
 
+	function chbanc($val){
+		$tipo  = $this->input->post('tipo_doc');
+		if($tipo=='NC') return true;
+		if(empty($val)){
+			$this->validation->set_message('chbanc', 'El campo %s es obligatorio.');
+			return false;
+		}else{
+			if(!$this->validation->existeban($val)){
+				$this->validation->set_message('chbanc', 'El banco propuesto en el campo %s no existe.');
+				return false;
+			}
+		}
+		return true;
+	}
+
 	function chtipoop($val){
 		$tipo  = $this->input->post('tipo_doc');
 		if($tipo=='NC') return true;
@@ -2241,7 +2256,7 @@ class Sprm extends Controller {
 			$itnumero = $do->get_rel($rel, 'numero'  , $i);
 
 			if(empty($itabono) || $itabono==0){
-				$do->rel_rm($rel,$i);
+				continue;
 			}else{
 				$totalab   += $itabono;
 				$dbittipo   = $this->db->escape($ittipo);
@@ -2392,26 +2407,29 @@ class Sprm extends Controller {
 		}
 
 		$rel='itppro';
-		$observa=array();
 		$cana = $do->count_rel($rel);
 		for($i = 0;$i < $cana;$i++){
-			$ittipo    = $do->get_rel($rel, 'tipo_doc', $i);
-			$itnumero  = $do->get_rel($rel, 'numero'  , $i);
-			$itfecha   = $do->get_rel($rel, 'fecha'   , $i);
-			$itimpuesto= $arr_itimpuestos[$i];
+			$itabono  = floatval($do->get_rel($rel, 'abono', $i));
+			if(empty($itabono) || $itabono==0){
+				$do->rel_rm($rel,$i);
+			}else{
+				$ittipo    = $do->get_rel($rel, 'tipo_doc', $i);
+				$itnumero  = $do->get_rel($rel, 'numero'  , $i);
+				$itfecha   = $do->get_rel($rel, 'fecha'   , $i);
+				$itimpuesto= $arr_itimpuestos[$i];
 
-			$observa[]=$ittipo.$itnumero;
-			$do->set_rel($rel, 'tipoppro', $tipo_doc, $i);
-			$do->set_rel($rel, 'cod_prv' , $cod_prv , $i);
-			$do->set_rel($rel, 'estampa' , $estampa , $i);
-			$do->set_rel($rel, 'hora'    , $hora    , $i);
-			$do->set_rel($rel, 'usuario' , $usuario , $i);
-			$do->set_rel($rel, 'transac' , $transac , $i);
-			$do->set_rel($rel, 'mora'    , 0, $i);
-			$do->set_rel($rel, 'reteiva'   , $reteiva*$itimpuesto/$impuesto, $i);
-			$do->set_rel($rel, 'reten'   , 0, $i);
-			$do->set_rel($rel, 'cambio'  , 0, $i);
-			//$do->set_rel($rel, 'reteiva' , 0, $i);
+				$do->set_rel($rel, 'tipoppro', $tipo_doc, $i);
+				$do->set_rel($rel, 'cod_prv' , $cod_prv , $i);
+				$do->set_rel($rel, 'estampa' , $estampa , $i);
+				$do->set_rel($rel, 'hora'    , $hora    , $i);
+				$do->set_rel($rel, 'usuario' , $usuario , $i);
+				$do->set_rel($rel, 'transac' , $transac , $i);
+				$do->set_rel($rel, 'mora'    , 0, $i);
+				$do->set_rel($rel, 'reteiva'   , $reteiva*$itimpuesto/$impuesto, $i);
+				$do->set_rel($rel, 'reten'   , 0, $i);
+				$do->set_rel($rel, 'cambio'  , 0, $i);
+				//$do->set_rel($rel, 'reteiva' , 0, $i);
+			}
 		}
 
 		$observa=$do->get('observa1');

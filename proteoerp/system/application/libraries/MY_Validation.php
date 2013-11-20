@@ -175,6 +175,20 @@ class MY_Validation extends CI_Validation{
 		}
 	}
 
+	function existeban($ban){
+		$dbban= $this->CI->db->escape($ban);
+		$mSQL  = "SELECT COUNT(*) AS cana FROM banc WHERE codbanc=${dbban}";
+		$this->set_message('existeban', 'El banco propuesto en el campo %s no existe');
+
+		$query = $this->CI->db->query($mSQL);
+		if($query->num_rows() > 0){
+			$row = $query->row();
+			if( $row->cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
+
 	function existesinv($codigo){
 		$dbcod= $this->CI->db->escape($codigo);
 		$mSQL  = "SELECT COUNT(*) AS cana FROM sinv WHERE codigo=${dbcod}";
