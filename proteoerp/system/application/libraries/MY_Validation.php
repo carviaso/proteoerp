@@ -96,6 +96,20 @@ class MY_Validation extends CI_Validation{
 		}
 	}
 
+	function existepers($pers){
+		$dbpers=$this->CI->db->escape($pers);
+		$mSQL = "SELECT COUNT(*) AS cana FROM pers WHERE codigo=${dbpers}";
+		$this->set_message('existepers', 'El trabajador introducido en el campo %s no es v&aacute;lido');
+
+		$query = $this->CI->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$row = $query->row();
+			if($row->cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
+
 	function existesucu($cuenta){
 		$cuenta  =trim($cuenta);
 		if(strlen($cuenta)==0) return true;
