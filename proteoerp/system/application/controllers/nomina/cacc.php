@@ -232,7 +232,7 @@ class Cacc extends Controller {
 			'editable'      => 'false',
 			'width'         => 110,
 			'fixed'         => 'true',
-            'formatter'     => 'function (){ return "<img src=\''.site_url($this->url.'foto').'/1/1.jpg\' alt=\'Entrada del trabajador\' />"; }'
+			'formatter'     => 'function (cellvalue){ return "<img src=\''.site_url($this->url.'foto').'/"+cellvalue+"/"+cellvalue+".jpg\' alt=\'Entrada del trabajador\' />"; }'
 		));
 
 		$grid->addField('codigo');
@@ -554,11 +554,11 @@ class Cacc extends Controller {
 		$fecha = human_to_dbdate($this->input->post('fecha'));
 		$hora  = $this->input->post('hora');
 		$dbcodigo= $this->db->escape($codigo);
-        $dbfecha = $this->db->escape($fecha );
-        $dbhora  = $this->db->escape($hora  );
+		$bfecha = $this->db->escape($fecha );
+		$bhora  = $this->db->escape($hora  );
 
 		$chek=$this->datasis->dameval("SELECT COUNT(*) AS cana FROM cacc WHERE codigo=${dbcodigo} AND fecha=${dbfecha} AND hora=${dbhora}");
-		if ($chek > 0){
+		if($chek > 0){
 			$nombre=$this->datasis->dameval("SELECT cedula FROM cacc WHERE codigo=${dbcodigo} AND fecha=${dbfecha} AND hora=${dbhora}");
 			$this->validation->set_message('chexiste',"Acceso para $nombre CODIGO ${codigo} FECHA ${fecha} HORA ${hora} ya existe");
 			return false;
@@ -570,7 +570,7 @@ class Cacc extends Controller {
 	function foto($id){
 		$dbid = intval($id);
 		$arch = $this->datasis->dameval("SELECT CONCAT(TRIM(cacc.codigo),DATE_FORMAT(fecha,'-%Y%m%d'),DATE_FORMAT(cacc.hora,'%H%i%s'),'.jpg') AS archivo FROM cacc WHERE id=${dbid}");
-		$imag = base_url().'uploads/fnomina/'.$arch;
+		$imag = 'uploads/fnomina/'.$arch;
 
 		if(file_exists($imag)){
 			Header("Content-type: image/jpeg");
