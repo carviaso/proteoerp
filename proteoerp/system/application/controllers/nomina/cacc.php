@@ -349,7 +349,7 @@ class Cacc extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('cacc');
 
-		$response   = $grid->getData('cacc', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('cacc', array(array()), array(), false, $mWHERE , 'id', 'desc');
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -554,8 +554,8 @@ class Cacc extends Controller {
 		$fecha = human_to_dbdate($this->input->post('fecha'));
 		$hora  = $this->input->post('hora');
 		$dbcodigo= $this->db->escape($codigo);
-		$bfecha = $this->db->escape($fecha );
-		$bhora  = $this->db->escape($hora  );
+		$dbfecha = $this->db->escape($fecha );
+		$dbhora  = $this->db->escape($hora  );
 
 		$chek=$this->datasis->dameval("SELECT COUNT(*) AS cana FROM cacc WHERE codigo=${dbcodigo} AND fecha=${dbfecha} AND hora=${dbhora}");
 		if($chek > 0){
