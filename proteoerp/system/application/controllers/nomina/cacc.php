@@ -230,9 +230,9 @@ class Cacc extends Controller {
 		$grid->params(array(
 			'search'        => 'false',
 			'editable'      => 'false',
-			'width'         => 110,
+			'width'         => 100,
 			'fixed'         => 'true',
-			'formatter'     => 'function (cellvalue){ return "<img src=\''.site_url($this->url.'foto').'/"+cellvalue+"/"+cellvalue+".jpg\' alt=\'Entrada del trabajador\' />"; }'
+			'formatter'     => 'function (cellvalue){ return "<img width=\'100\' border=\'0\' src=\''.site_url($this->url.'foto').'/"+cellvalue+"/"+cellvalue+".jpg\' alt=\'Entrada del trabajador\' />"; }'
 		));
 
 		$grid->addField('codigo');
@@ -317,7 +317,7 @@ class Cacc extends Controller {
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
-		$grid->setOndblClickRow('');		#show/hide navigations buttons
+		$grid->setOndblClickRow(',ondblClickRow: function(id){ caccshow(); return; }');
 		$grid->setAdd(    $this->datasis->sidapuede('CACC','INCLUIR%' ));
 		$grid->setEdit(   $this->datasis->sidapuede('CACC','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('CACC','BORR_REG%'));
@@ -491,6 +491,14 @@ class Cacc extends Controller {
 		$edit->hora->insertValue=date('H:i:s');
 		$edit->hora->append('hh:mm:ss');
 		$edit->hora->style = 'font-size: 2.5em;font-weight:bold;';
+
+		$id=$edit->getval('id');
+		if($id!==false){
+			$id = intval($id);
+			$furl=site_url($this->url.'foto/'.$id.'/'.$id.'.jpg');
+			$edit->foto = new  containerField('Foto',"<p style='text-align:center'><img border='0' src='${furl}' alt='Entrada del trabajador' /></p>");
+			$edit->foto->when=array('show');
+		}
 
 		$edit->build();
 
