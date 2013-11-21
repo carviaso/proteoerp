@@ -405,6 +405,7 @@ class sinv extends Controller {
 		$edit->back_url = site_url('ajax/reccierraventana');
 
 		$edit->pre_process('insert' ,'_pre_insert');
+		$edit->post_process('insert','_post_insert');
 
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
@@ -432,13 +433,12 @@ class sinv extends Controller {
 
 		$edit->tipo = new dropdownField('Tipo', 'tipo');
 		$edit->tipo->style='width:180px;';
-		//$edit->tipo->option("Standar","Standar" );
-		$edit->tipo->option("Articulo","Art&iacute;culo" );
-		//$edit->tipo->option("Servicio","Servicio");
-		//$edit->tipo->option("Descartar","Descartar");
-		//$edit->tipo->option("Consumo","Consumo");
-		//$edit->tipo->option("Fraccion","Fracci&oacute;n");
-		//$edit->tipo->option("Lote","Lote");
+		$edit->tipo->option('Articulo','Art&iacute;culo' );
+		//$edit->tipo->option('Servicio','Servicio');
+		//$edit->tipo->option('Descartar','Descartar');
+		//$edit->tipo->option('Consumo','Consumo');
+		//$edit->tipo->option('Fraccion','Fracci&oacute;n');
+		//$edit->tipo->option('Lote','Lote');
 
 		$AddUnidad='<a href="javascript:add_unidad();" title="Haz clic para Agregar una unidad nueva">Agregar Unidad</a>';
 		$edit->unidad = new dropdownField("Unidad","unidad");
@@ -447,28 +447,29 @@ class sinv extends Controller {
 		$edit->unidad->options("SELECT unidades, unidades as valor FROM unidad ORDER BY unidades");
 		$edit->unidad->append($AddUnidad);
 
-		$edit->clave = new inputField("Clave", "clave");
+		$edit->clave = new inputField('Clave', 'clave');
 		$edit->clave->size=10;
 		$edit->clave->maxlength=8;
-		$edit->clave->rule = "trim|strtoupper";
+		$edit->clave->rule = 'trim|strtoupper';
 
 		$AddDepto='<a href="javascript:add_depto();" title="Haz clic para Agregar un nuevo Departamento">Agregar Departamento</a>';
-		$edit->depto = new dropdownField("Departamento", "depto");
-		$edit->depto->rule ="required";
+		$edit->depto = new dropdownField('Departamento', 'depto');
+		$edit->depto->rule ='required';
 		//$edit->depto->onchange = "get_linea();";
-		$edit->depto->option("","Seleccione un Departamento");
+		$edit->depto->option('','Seleccione un Departamento');
 		$edit->depto->options("SELECT depto, descrip FROM dpto WHERE tipo='I' ORDER BY depto");
 		$edit->depto->append($AddDepto);
 
 		$AddLinea='<a href="javascript:add_linea();" title="Haz clic para Agregar una nueva Linea;">Agregar Linea</a>';
-		$edit->linea = new dropdownField("L&iacute;nea","linea");
-		$edit->linea->rule ="required";
+		$edit->linea = new dropdownField('L&iacute;nea','linea');
+		$edit->linea->rule ='required';
 		$edit->linea->append($AddLinea);
 		$depto=$edit->getval('depto');
-		if($depto!==FALSE){
-			$edit->linea->options("SELECT linea, descrip FROM line WHERE depto='$depto' ORDER BY descrip");
+		if($depto!==false){
+			$dbdepto=$this->db->escape($depto);
+			$edit->linea->options("SELECT linea, descrip FROM line WHERE depto=${dbdepto} ORDER BY descrip");
 		}else{
-			$edit->linea->option("","Seleccione un Departamento primero");
+			$edit->linea->option('','Seleccione un Departamento primero');
 		}
 
 		$AddGrupo='<a href="javascript:add_grupo();" title="Haz clic para Agregar un nuevo Grupo;">Agregar Grupo</a>';
@@ -476,45 +477,46 @@ class sinv extends Controller {
 		$edit->grupo->rule="required";
 		$edit->grupo->append($AddGrupo);
 		$linea=$edit->getval('linea');
-		if($linea!==FALSE){
-			$edit->grupo->options("SELECT grupo, nom_grup FROM grup WHERE linea='$linea' ORDER BY nom_grup");
+		if($linea!==false){
+			$dblinea = $this->db->escape($linea);
+			$edit->grupo->options("SELECT grupo, nom_grup FROM grup WHERE linea=${dblinea} ORDER BY nom_grup");
 		}else{
-			$edit->grupo->option("","Seleccione un Departamento primero");
+			$edit->grupo->option('','Seleccione un Departamento primero');
 		}
 
-		$edit->fracci  = new inputField("Unidad por Caja", "fracci");
+		$edit->fracci  = new inputField('Unidad por Caja', 'fracci');
 		$edit->fracci ->size=10;
 		$edit->fracci->maxlength=4;
 		$edit->fracci->css_class='inputnum';
 		$edit->fracci->rule='numeric|callback_positivo|trim';
 
-		$edit->activo = new dropdownField("Activo", "activo");
+		$edit->activo = new dropdownField('Activo', 'activo');
 		$edit->activo->style='width:100px;';
-		$edit->activo->option("S","Si" );
-		$edit->activo->option("N","No" );
+		$edit->activo->option('S','Si' );
+		$edit->activo->option('N','No' );
 
-		$edit->serial2 = new freeField("","free","Serial");
-		$edit->serial2->in="activo";
+		$edit->serial2 = new freeField('','free','Serial');
+		$edit->serial2->in='activo';
 
 		$edit->serial = new dropdownField ('Serial', 'serial');
 		$edit->serial->style='width:100px;';
-		$edit->serial->option("N","No" );
-		$edit->serial->option("S","Si" );
+		$edit->serial->option('N','No' );
+		$edit->serial->option('S','Si' );
 		$edit->serial->in="activo";
 
-		$edit->tdecimal2 = new freeField("","free","Unidad Decimal");
-		$edit->tdecimal2->in="activo";
+		$edit->tdecimal2 = new freeField('','free','Unidad Decimal');
+		$edit->tdecimal2->in='activo';
 
-		$edit->tdecimal = new dropdownField("Unidad Decimal", "tdecimal");
+		$edit->tdecimal = new dropdownField('Unidad Decimal', 'tdecimal');
 		$edit->tdecimal->style='width:100px;';
 		$edit->tdecimal->option('N','No' );
 		$edit->tdecimal->option('S','Si' );
 		$edit->tdecimal->in="activo";
 
-		$edit->descrip = new inputField("Descripci&oacute;n", "descrip");
+		$edit->descrip = new inputField('Descripci&oacute;n', 'descrip');
 		$edit->descrip->size=50;
 		$edit->descrip->maxlength=45;
-		$edit->descrip->rule = "trim|required|strtoupper";
+		$edit->descrip->rule = 'trim|required|strtoupper';
 
 		$edit->descrip2 = new inputField("Descripci&oacute;n", "descrip2");
 		$edit->descrip2->size=50;
@@ -524,7 +526,7 @@ class sinv extends Controller {
 		$AddMarca='<a href="javascript:add_marca();" title="Haz clic para Agregar una marca nueva">Agregar Marca</a>';
 		$edit->marca = new dropdownField('Marca', 'marca');
 		$edit->marca->style='width:180px;';
-		$edit->marca->option('','');
+		$edit->marca->option('','Seleccionar');
 		$edit->marca->rule='required';
 		$edit->marca->options("SELECT marca AS codigo, marca FROM marc ORDER BY marca");
 		$edit->marca->append($AddMarca);
@@ -534,54 +536,53 @@ class sinv extends Controller {
 		$edit->modelo->maxlength=20;
 		$edit->modelo->rule = "trim|strtoupper";*/
 
-		$edit->clase= new dropdownField("Clase", "clase");
+		$edit->clase= new dropdownField('Clase', 'clase');
 		$edit->clase->style='width:180px;';
-		$edit->clase->option("A","Alta Rotacion");
-		$edit->clase->option("B","Media Rotacion");
-		$edit->clase->option("C","Baja Rotacion");
-		$edit->clase->option("I","Importacion Propia");
+		$edit->clase->option('A','Alta Rotacion');
+		$edit->clase->option('B','Media Rotacion');
+		$edit->clase->option('C','Baja Rotacion');
+		$edit->clase->option('I','Importacion Propia');
 
 		$edit->iva = new inputField('IVA', 'iva');
 		$edit->iva->css_class='inputnum';
 		$edit->iva->size=10;
 		$edit->iva->maxlength=6;
-		$edit->iva->onchange = "requeridos();";
-		$edit->iva->append("%");
+		$edit->iva->onchange = 'requeridos();';
+		$edit->iva->append('%');
 		if($edit->_status=='create'){
 			$iva=$this->datasis->dameval("SELECT valor FROM valores WHERE nombre='IVA'");
 			$edit->iva->insertValue=($iva);
 		}
 
-		$edit->ultimo = new inputField("Ultimo", "ultimo");
+		$edit->ultimo = new inputField('Ultimo', 'ultimo');
 		$edit->ultimo->css_class='inputnum';
 		$edit->ultimo->size=10;
 		$edit->ultimo->maxlength=13;
-		$edit->ultimo->onchange = "requeridos();";
-		$edit->ultimo->rule="required";
+		$edit->ultimo->onchange = 'requeridos();';
+		$edit->ultimo->rule='required';
 
-		$edit->pond = new inputField("Promedio", "pond");
+		$edit->pond = new inputField('Promedio', 'pond');
 		$edit->pond->css_class='inputnum';
 		$edit->pond->size=10;
 		$edit->pond->maxlength=13;
-		$edit->pond->onchange = "requeridos();";
-		$edit->pond->rule="required";
+		$edit->pond->onchange = 'requeridos();';
+		$edit->pond->rule='required';
 
 		$edit->formcal = new dropdownField("Base C&aacute;lculo", "formcal");
 		$edit->formcal->style='width:100px;';
-		//$edit->formcal->rule="required";
-		//$edit->formcal->option("","Seleccione" );
-		$edit->formcal->option('S','Standar');
-		$edit->formcal->option('U','Ultimo' );
-		$edit->formcal->option('P','Promedio' );
-		$edit->formcal->option('M','Mayor' );
+		//$edit->formcal->rule='required';
+		//$edit->formcal->option('','Seleccione' );
+		$edit->formcal->option('U','Ultimo'  );
+		$edit->formcal->option('P','Promedio');
+		$edit->formcal->option('M','Mayor'   );
 		$edit->formcal->onchange = "requeridos();calculos('I');";
 
-		$edit->redecen = new dropdownField("Redondear", "redecen");
+		$edit->redecen = new dropdownField('Redondear', 'redecen');
 		$edit->redecen->style='width:100px;';
-		$edit->redecen->option("N","No");
-		$edit->redecen->option("F","Fracci&oacute;n");
-		$edit->redecen->option("D","Decena" );
-		$edit->redecen->option("C","Centena"  );
+		$edit->redecen->option('N','No');
+		$edit->redecen->option('F','Fracci&oacute;n');
+		$edit->redecen->option('D','Decena' );
+		$edit->redecen->option('C','Centena'  );
 		//$edit->redecen->onchange = "redon();";
 
 		for($i=1;$i<=4;$i++){
@@ -591,10 +592,10 @@ class sinv extends Controller {
 			$edit->$objeto->size=10;
 			$edit->$objeto->maxlength=6;
 			$edit->$objeto->onchange = "calculos('I');";
-			$edit->$objeto->rule="required";
+			$edit->$objeto->rule='required';
 
 			$objeto="Ebase$i";
-			$edit->$objeto = new freeField("","","Precio $i");
+			$edit->$objeto = new freeField('','',"Precio $i");
 			$edit->$objeto->in="margen$i";
 
 			$objeto="base$i";
@@ -607,7 +608,7 @@ class sinv extends Controller {
 			$edit->$objeto->rule="required";
 
 			$objeto="Eprecio$i";
-			$edit->$objeto = new freeField("","","Precio + I.V.A. $i");
+			$edit->$objeto = new freeField('','',"Precio + I.V.A. $i");
 			$edit->$objeto->in="margen$i";
 
 			$objeto="precio$i";
@@ -632,17 +633,17 @@ class sinv extends Controller {
 		$edit->exmin->css_class='inputonlynum';
 		$edit->exmin->rule='numeric|callback_positivo|trim';
 
-		$edit->exmax = new inputField("Existencia Maxima", "exmax");
+		$edit->exmax = new inputField('Existencia Maxima', 'exmax');
 		$edit->exmax->size=10;
 		$edit->exmax->maxlength=12;
 		$edit->exmax->css_class='inputonlynum';
 		$edit->exmax->rule='numeric|callback_positivo|trim';
 
-		$edit->exord = new inputField("Existencia Ordenada","exord");
+		$edit->exord = new inputField('Existencia Ordenada','exord');
 		$edit->exord->when =array("show");
 
 		$edit->exdes = new inputField("Pedido","exdes");
-		$edit->exdes->when =array("show");
+		$edit->exdes->when =array('show');
 
 		$edit->existen = new inputField("Existencia Actual","existen");
 		$edit->existen->when =array("show");
@@ -650,46 +651,47 @@ class sinv extends Controller {
 		for($i=1;$i<=3;$i++){
 			$objeto="pfecha$i";
 			$edit->$objeto = new dateField("Fecha $i",$objeto,'d/m/Y');
-			$edit->$objeto->when =array("show");
+			$edit->$objeto->when =array('show');
 			$edit->$objeto->size=10;
 
 			$objeto="Eprepro$i";
-			$edit->$objeto = new freeField("","","Precio");
+			$edit->$objeto = new freeField('','','Precio');
 			$edit->$objeto->in="pfecha$i";
-			$edit->$objeto->when =array("show");
+			$edit->$objeto->when =array('show');
 
 			$objeto="prepro$i";
-			$edit->$objeto = new inputField("",$objeto);
-			$edit->$objeto->when =array("show");
+			$edit->$objeto = new inputField('',$objeto);
+			$edit->$objeto->when =array('show');
 			$edit->$objeto->size=10;
 			$edit->$objeto->in="pfecha$i";
 
 			$objeto="Eprov$i";
-			$edit->$objeto = new freeField("","","Proveedor");
+			$edit->$objeto = new freeField('','','Proveedor');
 			$edit->$objeto->in="pfecha$i";
-			$edit->$objeto->when =array("show");
+			$edit->$objeto->when =array('show');
 
-			if($edit->_status=="show"){
-				$prov=$edit->_dataobject->get("prov".$i);
-				$proveed=$this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed='$prov' LIMIT 1");
+			if($edit->_status=='show'){
+				$prov  =$edit->_dataobject->get('prov'.$i);
+				$dbprov=$this->db->escape($prov);
+				$proveed=$this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed=${dbprov} LIMIT 1");
 				$objeto="proveed$i";
-				$edit->$objeto= new freeField("","",$proveed);
+				$edit->$objeto= new freeField('','',$proveed);
 				$edit->$objeto->in="pfecha$i";
 			}
 		}
 
-		$codigo=$edit->_dataobject->get("codigo");
+		$codigo=$edit->_dataobject->get('codigo');
 		$edit->almacenes = new containerField('almacenes',$this->_detalle($codigo));
-		$edit->almacenes->when = array("show","modify");
+		$edit->almacenes->when = array('show','modify');
 
-		$edit->buttons("modify", "save", "undo", "delete", "back");
+		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 		$edit->build();
 
 		$this->rapyd->jquery[]='$(window).unload(function() { window.opener.location.reload(); });';
 
 		$data['content'] = $edit->output;
 		$data['title']   = heading('Inventario de Farmacia');
-		$data['head']    = script("jquery.pack.js").script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").script("sinvmaes.js").$this->rapyd->get_head();
+		$data['head']    = script('jquery.pack.js').script('plugins/jquery.numeric.pack.js').script("plugins/jquery.floatnumber.js").script("sinvmaes.js").$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -704,6 +706,23 @@ class sinv extends Controller {
 		}
 		$do->set('codigo',$codigo);
 		return true;
+	}
+
+	function _post_insert($do){
+		$codigo=$do->get('codigo');
+
+		$precio1=$do->get('precio1');
+		$precio2=$do->get('precio2');
+		$precio3=$do->get('precio3');
+		$precio4=$do->get('precio4');
+
+		$query = $this->db->query('SELECT ubica FROM caub WHERE gasto=\'N\' AND invfis=\'N\'');
+		foreach ($query->result() as $row){
+			$sql = $this->db->insert_string('itsinv', array('codigo' => $codigo,'alma'=>$row->ubica, 'existen'=>0));
+			$this->db->simple_query($sql);
+		}
+
+		logusu('sinv',"Creo ${codigo} farmacia precios: ${precio1}, ${precio2}, ${precio3}, ${precio4}");
 	}
 
 	function sug($tabla=''){

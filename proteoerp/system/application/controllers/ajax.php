@@ -2166,11 +2166,11 @@ class Ajax extends Controller {
 		$qdb  = $this->db->escape('%'.$mid.'%');
 		$qmid = $this->db->escape($mid.'%');
 
-		$data = '[{ }]';
+		$data = '[]';
 		if($mid !== false){
 			$retArray = $retorno = array();
 			$mSQL="	SELECT codigo, CONCAT(TRIM(apellido),', ',TRIM(nombre),' (',nacional,TRIM(cedula),')') AS label,
-					CONCAT(TRIM(apellido),', ',TRIM(nombre))  nombre, sueldo, enlace
+					CONCAT(TRIM(apellido),', ',TRIM(nombre))  nombre, sueldo, enlace,TRIM(cedula) AS cedula, nacional
 				FROM pers WHERE nombre LIKE ${qdb} OR apellido LIKE ${qdb} OR codigo LIKE ${qmid}  OR enlace LIKE ${qmid}
 				ORDER BY nombre LIMIT 20";
 			$query = $this->db->query($mSQL);
@@ -2181,6 +2181,8 @@ class Ajax extends Controller {
 					$retArray['label']   = $this->en_utf8($row['label']);
 					$retArray['nombre']  = $this->en_utf8($row['nombre']);
 					$retArray['sueldo']  = $row['sueldo'];
+					$retArray['cedula']  = $row['cedula'];
+					$retArray['nacional']= $row['nacional'];
 					$retArray['enlace']  = $this->en_utf8($row['enlace']);
 					array_push($retorno, $retArray);
 				}

@@ -122,8 +122,58 @@ class Accesos extends validaciones{
 	}
 
 	function dataedit(){
-		$this->rapyd->load('dataedit');
+		$this->rapyd->load('dataedit','dataobject');
+
+		$script= '
+		$(function() {
+			//$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			//$(".inputnum").numeric(".");
+			$("#hora").mask("99:99:99");
+
+			$("#codigo").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function(req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscapers').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#nombre").val("");
+									$("#nombre_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					})
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#codigo").attr("readonly", "readonly");
+
+					$("#nombre").val(ui.item.nombre);
+					$("#nombre_val").text(ui.item.nombre);
+
+					setTimeout(function() {  $("#codigo").removeAttr("readonly"); }, 1500);
+				}
+			});
+		});';
+
+		$do = new DataObject('cacc');
+		$do->pointer('pers' ,'cacc.codigo=pers.codigo','pers.nombre AS persnombre','left');
+
 		$edit = new DataEdit('Accesos', 'cacc');
+		$edit->script($script, 'create');
+		$edit->script($script, 'modify');
 		$edit->back_url = site_url('nomina/accesos/filteredgrid');
 
 		$edit->post_process('insert','_post_insert');
@@ -133,41 +183,51 @@ class Accesos extends validaciones{
 		$edit->post_process('update','_pre_update');
 
 		$pers=array(
-		'tabla'   =>'pers',
-		'columnas'=>array(
-		'codigo'  =>'Codigo',
-		'cedula'  =>'Cedula',
-		'nombre'  =>'Nombre',
-		'apellido' =>'Apellido'),
-		'filtro'  =>array('codigo'=>'C&oacute;digo','cedula'=>'Cedula'),
-		'retornar'=>array('codigo'=>'codigo'),
-		'titulo'  =>'Buscar Personal');
+			'tabla'   =>'pers',
+			'columnas'=>array(
+				'codigo'  =>'Codigo',
+				'cedula'  =>'Cedula',
+				'nombre'  =>'Nombre',
+				'apellido' =>'Apellido'
+			),
+			'filtro'  =>array('codigo'=>'C&oacute;digo','cedula'=>'Cedula'),
+			'retornar'=>array('codigo'=>'codigo'),
+			'titulo'  =>'Buscar Personal'
+		);
 
 		$boton=$this->datasis->modbus($pers);
 
-		$edit->codigo   = new inputField('C&oacute;digo', 'codigo');
+		$edit->codigo = new inputField('C&oacute;digo del trabajador', 'codigo');
 		$edit->codigo->rule='trim';
 		$edit->codigo->mode='autohide';
-		$edit->codigo->maxlength =15;
-		$edit->codigo->size =15;
+		$edit->codigo->maxlength = 15;
+		$edit->codigo->size = 15;
 		$edit->codigo->append($boton);
 		$edit->codigo->rule = 'required|callback_chexiste';
 
-		$edit->nacional = new dropdownField('Nacionalidad', 'nacional');
+		$edit->persnombre = new inputField('Nombre', 'persnombre');
+		$edit->persnombre->pointer='true';
+		$edit->persnombre->in = 'codigo';
+		$edit->persnombre->db_name = 'persnombre';
+		$edit->persnombre->type = 'inputhidden';
+
+		/*$edit->nacional = new dropdownField('Nacionalidad', 'nacional');
 		$edit->nacional->style = "width:110px;";
 		$edit->nacional->option("V","Venezolano");
-		$edit->nacional->option("E","Extranjero");
+		$edit->nacional->option("E","Extranjero");*/
 
-		$edit->fecha    = new DateonlyField("Fecha","fecha");
-		$edit->fecha->mode="autohide";
+		$edit->fecha    = new DateonlyField('Fecha','fecha');
+		$edit->fecha->mode='autohide';
 		$edit->fecha->size =12;
-		$edit->fecha->rule = "required";
+		$edit->fecha->rule ='required';
+		$edit->fecha->insertValue=date('Y-m-d');
 
 		$edit->hora  = new inputField('Hora', 'hora');
 		$edit->hora->maxlength=8;
 		$edit->hora->size=10;
 		$edit->hora->mode='autohide';
 		$edit->hora->rule='required|callback_chhora';
+		$edit->hora->insertValue=date('H:i:s');
 		$edit->hora->append('hh:mm:ss');
 
 		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
@@ -176,6 +236,10 @@ class Accesos extends validaciones{
 		$data['content'] = $edit->output;
 		$data['title']   = heading('Control de Accesos');
 		$data['head']    = $this->rapyd->get_head();
+		$data['head']   .= script('jquery.js');
+		$data['head']   .= script('jquery-ui.js');
+		$data['head']   .= script('plugins/jquery.maskedinput.min.js');
+		$data['head']   .= style('redmond/jquery-ui.css');
 		$this->load->view('view_ventanas', $data);
 	}
 
