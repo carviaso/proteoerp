@@ -1,14 +1,14 @@
 <html>
 <head>
 <title>Servicio no Autorizado</title>
-<?=$estilos ?>
+<?php echo $estilos; ?>
 </head>
 <body>
 <div id='home'>
 <br><br><br><br><br><br>
 <center>
 <h1>Servicio no Autorizado</h1>
-<?=$cuerpo ?>
+<?php echo $cuerpo; ?>
 </center>
 </div>
 </body>
