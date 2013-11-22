@@ -456,12 +456,18 @@ class XLSXReporte {
 			$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
 			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$this->utf8($campo),$xtypo);
 		}elseif(in_array($tipo,$this->wdate)){
-			PHPExcel_Cell::setValueBinder( new PHPExcel_Cell_AdvancedValueBinder() );
-			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($c,$f,$campo);
-			$this->ci->phpexcel->setActiveSheetIndex(0)
-				->getStyleByColumnAndRow($c,$f)
-				->getNumberFormat()
-				->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_DATE_DDMMYYYY);
+			//PHPExcel_Cell::setValueBinder( new PHPExcel_Cell_AdvancedValueBinder() );
+			//$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($c,$f,$campo);
+			//$this->ci->phpexcel->setActiveSheetIndex(0)
+			//	->getStyleByColumnAndRow($c,$f)
+			//	->getNumberFormat()
+			//	->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_DATE_DDMMYYYY);
+
+			$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
+			if(function_exists('dbdate_to_human')){
+				$campo=dbdate_to_human($campo);
+			}
+			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$campo,$xtypo);
 		}else{
 			if(preg_match('@(^[1-9][0-9]*(\.[0-9]+)?$)|(^0?\.[0-9]+$)@i',$campo)>0){
 				$xtypo = PHPExcel_Cell_DataType::TYPE_NUMERIC;
