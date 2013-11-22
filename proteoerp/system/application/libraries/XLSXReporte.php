@@ -396,7 +396,9 @@ class XLSXReporte {
 		foreach($this->totalizar as $tot){
 			if(isset($this->colspos[$tot])){
 				$pos = PHPExcel_Cell::stringFromColumnIndex($this->colspos[$tot]);
-				$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValue($pos.($this->ii-1), "=SUM(${pos}7:${pos}".($this->ii-2).")");
+				if($this->ii-2 > 7){
+					$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValue($pos.($this->ii-1), "=SUM(${pos}7:${pos}".($this->ii-2).")");
+				}
 			}
 		}
 
@@ -454,14 +456,12 @@ class XLSXReporte {
 			$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
 			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$this->utf8($campo),$xtypo);
 		}elseif(in_array($tipo,$this->wdate)){
-			//$campo= new DateTime($campo);
-			//$xtypo=PHPExcel_Cell_DataType::TYPE_DATE;
-			//$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($c,$f,PHPExcel_Shared_Date::PHPToExcel($campo));
-			$xtypo = PHPExcel_Cell_DataType::TYPE_STRING;
-			if(function_exists('dbdate_to_human')){
-				$campo=dbdate_to_human($campo);
-			}
-			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueExplicitByColumnAndRow($c,$f,$campo,$xtypo);
+			PHPExcel_Cell::setValueBinder( new PHPExcel_Cell_AdvancedValueBinder() );
+			$this->ci->phpexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($c,$f,$campo);
+			$this->ci->phpexcel->setActiveSheetIndex(0)
+				->getStyleByColumnAndRow($c,$f)
+				->getNumberFormat()
+				->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_DATE_DDMMYYYY);
 		}else{
 			if(preg_match('@(^[1-9][0-9]*(\.[0-9]+)?$)|(^0?\.[0-9]+$)@i',$campo)>0){
 				$xtypo = PHPExcel_Cell_DataType::TYPE_NUMERIC;
