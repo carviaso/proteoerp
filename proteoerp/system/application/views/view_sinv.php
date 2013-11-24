@@ -98,7 +98,7 @@ function ocultatab(){
 	tipo=$("#tipo").val();
 	if(tipo=='Combo'){
 		$("#litab7").show();
-		$("#tab7").show();
+		//$("#tab7").show();
 	}else{
 		$("#litab7").hide();
 		$("#tab7").hide();
@@ -115,15 +115,16 @@ $(function(){
 		$(this).select();
 	});
 
-
 	ocultatab();
 	$("#fdesde").datepicker({ dateFormat: "dd/mm/yy" });
 	$("#fhasta").datepicker({ dateFormat: "dd/mm/yy" });
 	$('#maintabcontainer').tabs();
 	$(".inputnum").numeric(".");
-	//totalizarcombo();
-	for(var i=0;i < <?php echo $form->max_rel_count['sinvcombo']; ?>;i++){
+	for(var i=0;i < sinvcombo_cont;i++){
 		autocod(i.toString());
+	}
+	if(sinvcombo_cont>0){
+		totalizarcombo();
 	}
 	for(var i=0;i < <?php echo $form->max_rel_count['sinvpitem']; ?>;i++){
 		autocodpitem(i.toString());
@@ -178,7 +179,7 @@ $(function(){
 				url:  "<?php echo site_url('ajax/buscasinvart'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":+req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -253,9 +254,9 @@ function totalizarcombo(){
 			tota=tota+t;
 		}
 	});
-	$("#pond").val(tota);
-	$("#ultimo").val(tota);
-	requeridos();
+	$("#pond").val(roundNumber(tota,2));
+	$("#ultimo").val(roundNumber(tota,2));
+	//requeridos();
 }
 
 function add_sinvcombo(){
@@ -301,30 +302,43 @@ function del_sinvcombo(id){
 	totalizarcombo();
 }
 
-//Agrega el autocomplete
+//Agrega el autocomplete del combo
 function autocod(id){
 	$('#itcodigo_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasinv2'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
-						$.each(data,
-							function(i, val){
-								sugiere.push( val );
-							}
-						);
+						if(data.length==0){
+							$('#itcodigo_'+id).val('');
+							$('#itdescrip_'+id).val('');
+							$('#itprecio1_'+id).val('');
+							$('#itpond_'+id).val('');
+							$('#itultimo_'+id).val('');
+							$('#itformcal_'+id).val('');
+							$('#itcantidad_'+id).val('');
+						}else{
+							$.each(data,
+								function(i, val){
+									sugiere.push( val );
+								}
+							);
+						}
 						add(sugiere);
 					},
 			})
 		},
-		minLength: 2,
-		autoFocus: true,
+		minLength: 1,
 		select: function( event, ui ) {
+			$('#itcodigo_'+id).attr("readonly", "readonly");
+
 			$('#itcodigo_'+id).val(ui.item.codigo);
 			$('#itdescrip_'+id).val(ui.item.descrip);
 			$('#itprecio1_'+id).val(ui.item.base1);
@@ -334,9 +348,10 @@ function autocod(id){
 			$('#itcantidad_'+id).val('1');
 			$('#itcantidad_'+id).focus();
 			$('#itcantidad_'+id).select();
-			var arr  = $('#itprecio_'+id);
 			post_modbus_sinv(id);
 			totalizarcombo();
+
+			setTimeout(function(){  $('#itcodigo_'+id).removeAttr("readonly"); }, 1500);
 		}
 	});
 }
@@ -494,7 +509,7 @@ function add_marca(){
 			type: "POST",
 			processData:false,
 			url: '<?php echo $link ?>',
-			data: "valor="+marca,
+			data: "valor="+encodeURIComponent(marca),
 			success: function(msg){
 				if(msg=="s.i"){
 					marca=marca.substr(0,30);
@@ -515,7 +530,7 @@ function add_unidad(){
 		 type: "POST",
 		 processData:false,
 			url: '<?php echo $link5 ?>',
-			data: "valor="+unidad,
+			data: "valor="+encodeURIComponent(unidad),
 			success: function(msg){
 				if(msg=="s.i"){
 					unidad=unidad.substr(0,8);
@@ -537,7 +552,7 @@ function add_depto(){
 		 type: "POST",
 		 processData:false,
 			url: '<?php echo $link9 ?>',
-			data: "valor="+depto,
+			data: "valor="+encodeURIComponent(depto),
 			success: function(msg){
 				if(msg=="Y.a-Existe"){
 					alert("Ya existe un Departamento con esa Descripcion");
@@ -566,7 +581,7 @@ function add_linea(){
 			type: "POST",
 			processData:false,
 				url: '<?php echo $link11 ?>',
-				data: "valor="+linea+"&&valor2="+deptoval,
+				data: "valor="+encodeURIComponent(linea)+"&&valor2="+encodeURIComponent(deptoval),
 				success: function(msg){
 					if(msg=="Y.a-Existe"){
 						alert("Ya existe una Linea con esa Descripcion");
@@ -596,7 +611,7 @@ function add_grupo(){
 				type: "POST",
 				processData:false,
 				url: '<?php echo $link13 ?>',
-				data: "valor="+grupo+"&&valor2="+lineaval+"&&valor3="+deptoval,
+				data: "valor="+encodeURIComponent(grupo)+"&&valor2="+encodeURIComponent(lineaval)+"&&valor3="+encodeURIComponent(deptoval),
 				success: function(msg){
 					if(msg=="Y.a-Existe"){
 						alert("Ya existe una Linea con esa Descripcion");
@@ -793,7 +808,7 @@ $(document).ready(function() {
 				url: '<?php echo $link28 ?>',
 				type: "POST",
 				dataType: "json",
-				data: "tecla="+req.term,
+				data: {"tecla":req.term},
 				success:
 					function(data) {
 						var sugiere = [];
@@ -818,7 +833,7 @@ $(document).ready(function() {
 				url: '<?php echo $link41 ?>',
 				type: "POST",
 				dataType: "json",
-				data: "tecla="+req.term,
+				data: {"tecla":req.term},
 				success:
 					function(data) {
 						var sugiere = [];
@@ -875,7 +890,7 @@ function checkLength( o, n, min, max ) {
 }
 
 function checkRegexp( o, regexp, n ) {
-	if ( !( regexp.test( o.val() ) ) ) {
+	if(!( regexp.test( o.val() ) ) ) {
 		o.addClass( "ui-state-error" );
 		updateTips( n );
 		return false;
@@ -898,7 +913,7 @@ function sinvcodigo(mviejo){
 				url: '<?php echo site_url('inventario/sinv/sinvcodigoexiste'); ?>',
 				global: false,
 				type: "POST",
-				data: ({ codigo : encodeURIComponent(mcodigo) }),
+				data: ({ codigo : mcodigo }),
 				dataType: "text",
 				async: false,
 				success: function(sino) {
@@ -907,20 +922,26 @@ function sinvcodigo(mviejo){
 							"Ya existe el codigo <div style=\"font-size: 200%;font-weight: bold \">"+mcodigo+"</"+"div>"+sino.substring(1)+"<p>si prosigue se eliminara el producto anterior y<br/> todo el movimiento de este, pasara al codigo "+mcodigo+"</"+"p> <p style=\"align: center;\">Desea <strong>Fusionarlos?</"+"strong></"+"p>",
 							"Confirmar Fusion",
 							function(r){
-							if (r) { sinvcodigocambia("S", mviejo, mcodigo); }
+								if(r){
+									sinvcodigocambia("S", mviejo, mcodigo);
+								}
 							}
 						);
 					} else {
 						jConfirm(
 							"Sustitur el codigo actual  por: <center><h2 style=\"background: #ddeedd\">"+mcodigo+"</"+"h2></"+"center> <p>Al cambiar de codigo el producto, todos los<br/> movimientos y estadisticas se cambiaran<br/> correspondientemente.</"+"p> ",
 							"Confirmar cambio de codigo",
-							function(r) {
-								if (r) { sinvcodigocambia("N", mviejo, mcodigo); }
+							function(r){
+								if(r){
+									sinvcodigocambia("N", mviejo, mcodigo);
+								}
 							}
 						)
 					}
 				},
-				error: function(h,t,e) { jAlert("Error..codigo="+yurl+" ",e) }
+				error: function(h,t,e){
+					jAlert("Error..codigo="+yurl+" ",e);
+				}
 			});
 		}
 	})
@@ -937,9 +958,10 @@ function sinvcodigocambia( mtipo, mviejo, mcodigo ) {
 		dataType: "text",
 		async: false,
 		success: function(sino) {
-			jAlert("Cambio finalizado "+sino,"Finalizado Exitosamente")
+			jAlert("Cambio finalizado "+sino,"Finalizado Exitosamente");
 		},
-		error: function(h,t,e) {jAlert("Error..","Finalizado con Error" )
+		error: function(h,t,e) {
+			jAlert("Error..","Finalizado con Error" );
 		}
 	});
 
@@ -955,9 +977,9 @@ function sinvbarras(mcodigo){
 	jPrompt("Nuevo Codigo de Barras","" ,"Codigo Barras", function(mbarras){
 		if( mbarras==null ){
 			jAlert("Cancelado por el usuario","Informacion");
-		} else if( mbarras=="" ) {
+		}else if( mbarras=="" ){
 			jAlert("Cancelado,  Codigo vacio","Informacion");
-		} else {
+		}else{
 			$.ajax({
 				url: '<?php echo $link25 ?>',
 				global: false,
@@ -965,8 +987,8 @@ function sinvbarras(mcodigo){
 				data: ({ id : mcodigo, codigo : encodeURIComponent(mbarras) }),
 				dataType: "text",
 				async: false,
-				success: function(sino)  { jAlert( sino,"Informacion")},
-				error:   function(h,t,e) { jAlert("Error..codigo="+mbarras+" <p>"+e+"</"+"p>","Error") }
+				success: function(sino)  { jAlert( sino,"Informacion"); },
+				error:   function(h,t,e) { jAlert("Error..codigo="+mbarras+" <p>"+e+"</"+"p>","Error"); }
 			});
 		}
 	})
@@ -976,10 +998,10 @@ function sinvpromo(mcodigo){
 	jPrompt("Descuento Promocional","" ,"Descuento", function(margen){
 		if( margen==null ){
 			jAlert("Cancelado por el usuario","Informacion");
-		} else if( margen=="" ) {
+		}else if( margen=="" ){
 			jAlert("Cancelado,  Codigo vacio","Informacion");
-		} else {
-			if (isNumeric(margen)) {
+		}else{
+			if(isNumeric(margen)){
 				$.ajax({
 					url: '<?php echo $link27 ?>',
 					global: false,
@@ -987,59 +1009,60 @@ function sinvpromo(mcodigo){
 					data: ({ id : mcodigo, margen : margen }),
 					dataType: "text",
 					async: false,
-					success: function(sino)  { jAlert( sino,"Informacion")},
-					error:   function(h,t,e) { jAlert("Error..codigo="+margen+" <p>"+e+"</"+"p>","Error") }
+					success: function(sino)  { jAlert( sino,"Informacion"); },
+					error:   function(h,t,e) { jAlert("Error..codigo="+margen+" <p>"+e+"</"+"p>","Error"); }
 				});
 			} else { jAlert("Entrada no numerica","Alerta") }
 		}
-	})
-};
+	});
+}
+
 // Descuento por Cliente
 function sinvdescu(mcodigo){
 	$( "#sinvdescu" ).dialog( "open" );
-};
+}
 // Codigo de producto en el Proveedor
 function sinvproveed(mcodigo){
 	$( "#sinvprv" ).dialog( "open" );
-};
+}
 
 function sinvborrasuple(mcodigo){
 	jConfirm(
 		"Desea eliminar este codigo suplementario?<p><strong>"+mcodigo+"</"+"strong></"+"p>",
 		"Confirmar Borrado",
 		function(r){
-			if (r) {
-			$.ajax({
-				url: '<?php echo $link30 ?>',
-				global: false,
-				type: "POST",
-				data: ({ codigo : mcodigo }),
-				dataType: "text",
-				async: false,
-				success: function(sino)  { jAlert( sino,"Informacion")},
-				error:   function(h,t,e) { jAlert("Error..codigo="+mcodigo+" <p>"+e+"</"+"p>","Error") }
-			});
+			if(r){
+				$.ajax({
+					url: '<?php echo $link30 ?>',
+					global: false,
+					type: "POST",
+					data: ({ codigo : mcodigo }),
+					dataType: "text",
+					async: false,
+					success: function(sino)  { jAlert( sino,"Informacion"); },
+					error:   function(h,t,e) { jAlert("Error..codigo="+mcodigo+" <p>"+e+"</"+"p>","Error"); }
+				});
 			}
 		}
 	);
-};
+}
 
 function sinvborraprv(mproveed, mcodigo){
 	jConfirm(
 		"Desea eliminar este codigo de proveedor?<p><strong>"+mcodigo+"</"+"strong></"+"p>",
 		"Confirmar Borrado",
 		function(r){
-			if (r) {
-			$.ajax({
-				url: '<?php echo $link35 ?>',
-				global: false,
-				type: "POST",
-				data: ({ proveed : mproveed, codigo : mcodigo }),
-				dataType: "text",
-				async: false,
-				success: function(sino)  { jAlert( sino,"Informacion")},
-				error:   function(h,t,e) { jAlert("Error..codigo="+mcodigo+" <p>"+e+"</"+"p>","Error") }
-			});
+			if(r){
+				$.ajax({
+					url: '<?php echo $link35 ?>',
+					global: false,
+					type: "POST",
+					data: ({ proveed : mproveed, codigo : mcodigo }),
+					dataType: "text",
+					async: false,
+					success: function(sino)  { jAlert( sino,"Informacion"); },
+					error:   function(h,t,e) { jAlert("Error..codigo="+mcodigo+" <p>"+e+"</"+"p>","Error"); }
+				});
 			}
 		}
 	);
@@ -1358,7 +1381,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				<td bgcolor='#7098D0'><b>C&oacute;digo</b></td>
 				<td bgcolor='#7098D0'><b>Descripci&oacute;n</b></td>
 				<td bgcolor='#7098D0'><b>Cantidad</b></td>
-				<td bgcolor='#7098D0'><b>Ultimo</b></td>
+				<td bgcolor='#7098D0'><b>&Uacute;ltimo</b></td>
 				<td bgcolor='#7098D0'><b>Ponderado</b></td>
 				<?php if($form->_status!='show') {?>
 				<td  bgcolor='#7098D0' align='center'><b>&nbsp;</b></td>
@@ -1392,8 +1415,6 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				<?php } ?>
 			</tr>
 			<?php } ?>
-			<tr id='__UTPL_SINVCOMBO__'>
-			</tr>
 		</table>
 		</div>
 		<?php echo $container_co ?>
@@ -1745,9 +1766,6 @@ if ($query->num_rows()>0 ) {
 	</table>
 </div>
 
-
-
-
 <?php echo $container_bl.$container_br; ?>
 <?php echo $form_end?>
 
@@ -1807,5 +1825,4 @@ if ($query->num_rows()>0 ) {
 	</form>
 </div>
 <?php } ?>
-<?php endif;
-?>
+<?php endif; ?>

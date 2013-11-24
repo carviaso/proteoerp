@@ -239,7 +239,7 @@ class Sinv extends Controller {
 		};
 		';
 
-		// Fija Margenes 
+		// Fija Margenes
 		$funciones .= '
 		function fijamarg(){
 			$margen1 = 35;
@@ -3319,7 +3319,7 @@ class Sinv extends Controller {
 			$edit->cpactivo->maxlength =6;
 		}
 
-		//descuentos por escala
+		//Descuentos por escala
 		for($i=1;$i<=3;$i++){
 			$objeto="pescala$i";
 			$edit->$objeto = new inputField('Descuento por escala '.$i,$objeto);
@@ -3817,10 +3817,10 @@ class Sinv extends Controller {
 		$margen2 = floatval($margen2);
 		$margen3 = floatval($margen3);
 		$margen4 = floatval($margen4);
-		
+
 		if ( $margen1*$margen2*$margen3*$margen4 > 0 ){
-		
-			if ( $margen1>=$margen2 && $margen2>=$margen3 && $margen3>=$margen4 ){ 
+
+			if ( $margen1>=$margen2 && $margen2>=$margen3 && $margen3>=$margen4 ){
 				// Respalda los precios anteriores
 				$mN = $this->datasis->prox_sql('nsinvplog');
 				$ms_codigo = $this->session->userdata('usuario');
@@ -3840,7 +3840,7 @@ class Sinv extends Controller {
 				echo "Cambio Concluido  ";
 			} else {
 				echo "Los margenes deben ir de Mayor (1) a Menor (4)";
-			}			
+			}
 		} else {
 			echo "Los Margenes deben ser mayores qie 0";
 		}
@@ -3941,7 +3941,7 @@ class Sinv extends Controller {
 
 		$where = ' WHERE standard>0 ';
 		if ( isset($data['data1']) ) $where = $data['data1'].' AND standard>0 ';
-	
+
 
 		$cambio = floatval($cambio);
 		if( $cambio > 0 ){
@@ -5997,6 +5997,18 @@ class Sinv extends Controller {
 			)
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
+			$this->db->simple_query($mSQL);
+		}
+
+
+		$camposcomb = $this->db->list_fields('sinvcombo');
+		if(!in_array('ultimo',$camposcomb)){
+			$mSQL="ALTER TABLE `sinvcombo` ADD COLUMN `ultimo` DECIMAL(19,2) NULL DEFAULT '0.00' AFTER `costo`";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('pond',$camposcomb)){
+			$mSQL="ALTER TABLE `sinvcombo` ADD COLUMN `pond` DECIMAL(19,2) NULL DEFAULT '0.00' AFTER `ultimo`";
 			$this->db->simple_query($mSQL);
 		}
 

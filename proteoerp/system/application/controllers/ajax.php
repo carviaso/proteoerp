@@ -1890,7 +1890,7 @@ class Ajax extends Controller {
 			$mid=str_replace($comodin,'%',$mid);
 		}
 
-		$data = '[{ }]';
+		$data = '[]';
 		if($mid !== false){
 			$retArray = $retorno = array();
 
