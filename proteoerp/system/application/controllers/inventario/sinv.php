@@ -2742,8 +2742,7 @@ class Sinv extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function pactivo()
-	{
+	function pactivo(){
 		$oper   = $this->input->post('oper');
 		if ($oper == 'del'){
 			// Borra
@@ -2805,7 +2804,7 @@ class Sinv extends Controller {
 			'p_uri' => array(4 => '<#i#>'),
 			'titulo' => 'Buscar Articulo',
 			'where' => '`activo` = "S"',
-			'script' => array('totalizar()')
+			'script' => array('totalizarcombo()')
 		);
 		$bSINV_C = $this->datasis->p_modbus($modbus, '<#i#>');
 
@@ -3426,7 +3425,7 @@ class Sinv extends Controller {
 		$edit->itcantidad->size         = 5;
 		$edit->itcantidad->rule         = 'condi_required|positive';
 		$edit->itcantidad->autocomplete = false;
-		$edit->itcantidad->onkeyup      = 'totalizar();';
+		$edit->itcantidad->onkeyup      = 'totalizarcombo();';
 		$edit->itcantidad->insertValue  = '1';
 
 		$edit->itultimo = new inputField('Ultimo <#o#>', 'itultimo_<#i#>');

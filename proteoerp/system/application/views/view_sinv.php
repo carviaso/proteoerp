@@ -225,7 +225,7 @@ $(function(){
 });
 
 function totalizarcombo(){
-	var tota   =0;
+	var tpond=tultimo=0;
 	var arr=$('input[name^="itcantidad_"]');
 	jQuery.each(arr, function() {
 		nom=this.name;
@@ -235,27 +235,12 @@ function totalizarcombo(){
 			cana    = Number($("#itcantidad_"+ind).val());
 			pond    = Number($("#itpond_"+ind).val());
 			ultimo  = Number($("#itultimo_"+ind).val());
-			formcal = $("#itformcal_"+ind).val();
-			tp      =Math.round(cana * pond  *100)/100;
-			tu      =Math.round(cana * ultimo*100)/100;
-			switch(formcal){
-			case 'P': t=tp;
-			break;
-			case 'U': t=tu;
-			break;
-			case 'M':{if(tp>tu)
-				t=tp
-				else
-				t=tu;}
-			break;
-			default: t=tu;
-			}
-
-			tota=tota+t;
+			tpond    = tpond   +cana*pond;
+			tultimo  = tultimo +cana*ultimo;
 		}
 	});
-	$("#pond").val(roundNumber(tota,2));
-	$("#ultimo").val(roundNumber(tota,2));
+	$("#pond").val(roundNumber(tpond,2));
+	$("#ultimo").val(roundNumber(tultimo,2));
 	//requeridos();
 }
 
@@ -375,6 +360,7 @@ function add_sinvpitem(){
 	});
 	sinvpitem_cont=sinvpitem_cont+1;
 }
+
 function del_sinvpitem(id){
 	id = id.toString();
 	$('#tr_sinvpitem_'+id).remove();
@@ -724,7 +710,7 @@ $link41=site_url('inventario/sinv/sinvcliente/');
 function isNumeric(value) {
   if (value == null || !value.toString().match(/^[-]?\d*\.?\d*$/)) return false;
   return true;
-};
+}
 
 $(document).ready(function() {
 	requeridos(true);
@@ -861,13 +847,13 @@ $(document).ready(function() {
         resizeable: true,
         title: "Unidades"
     });
-    $("#goToMyPage").click(
-        function() {
-            url = "/proteoerp/inventario/unidad";
-            $("#modalDiv").dialog("open");
-            $("#modalIFrame").attr("src",url);
-            return false;
-    });
+
+	$("#goToMyPage").click(function() {
+		url = "/proteoerp/inventario/unidad";
+		$("#modalDiv").dialog("open");
+		$("#modalIFrame").attr("src",url);
+		return false;
+	});
 	$( "#maintabcontainer" ).tabs();
 });
 
@@ -952,9 +938,7 @@ function sinvcodigocambia( mtipo, mviejo, mcodigo ) {
 		url: '<?php echo site_url('inventario/sinv/sinvcodigo'); ?>',
 		global: false,
 		type: "POST",
-		data: ({ tipo:  mtipo,
-			 viejo: mviejo,
-			 codigo: encodeURIComponent(mcodigo) }),
+		data: ({ tipo:  mtipo,viejo: mviejo, codigo: mcodigo }),
 		dataType: "text",
 		async: false,
 		success: function(sino) {
@@ -984,7 +968,7 @@ function sinvbarras(mcodigo){
 				url: '<?php echo $link25 ?>',
 				global: false,
 				type: "POST",
-				data: ({ id : mcodigo, codigo : encodeURIComponent(mbarras) }),
+				data: ({ id : mcodigo, codigo : mbarras }),
 				dataType: "text",
 				async: false,
 				success: function(sino)  { jAlert( sino,"Informacion"); },
@@ -1028,7 +1012,7 @@ function sinvproveed(mcodigo){
 
 function sinvborrasuple(mcodigo){
 	jConfirm(
-		"Desea eliminar este codigo suplementario?<p><strong>"+mcodigo+"</"+"strong></"+"p>",
+		"Desea eliminar este codigo suplementario?<p><b>"+mcodigo+"</"+"b></"+"p>",
 		"Confirmar Borrado",
 		function(r){
 			if(r){
@@ -1779,6 +1763,7 @@ if ($query->num_rows()>0 ) {
 		<input type="submit" />
 	</form>
 </div>
+
 <div id="sinvprv" title="Agregar c&oacute;digo de Proveedor">
 	<p class="validateTips">Codigo del proveedor para este producto</p>
 	<form>
@@ -1799,6 +1784,7 @@ if ($query->num_rows()>0 ) {
 	</fieldset>
 	</form>
 </div>
+
 <div id="sinvdescu" title="Agregar Descuento">
 	<p class="validateTips">Descuento para este producto</p>
 	<form>
