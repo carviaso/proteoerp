@@ -523,7 +523,7 @@ class DataDetails extends DataForm{
 			}
 			$this->button('btn_undo', $caption, $action, 'TR');
 		} elseif($this->_status == 'delete') {
-			if(($this->back_cancel_delete === FALSE) || ($this->back_cancel === FALSE)){
+			if(($this->back_cancel_delete === false) || ($this->back_cancel === false)){
 				$undo_uri = site_url($this->_undo_uri);
 				$action = "javascript:window.location='$undo_uri'";
 			} else{
@@ -624,10 +624,10 @@ class DataDetails extends DataForm{
 		$this->_fields = array();
 		$max_count=0;
 		$object   =(get_object_vars($this));
-		foreach ($object as $property_name=>$property){
-			if (is_object($property)){
+		foreach($object as $property_name=>$property){
+			if(is_object($property)){
 				if (is_subclass_of($property, 'objField')){
-					if (isset($property->rel_id) AND isset($this->_dataobject->_rel_type[$property->rel_id])){
+					if (isset($property->rel_id) && isset($this->_dataobject->_rel_type[$property->rel_id])){
 						if($this->_dataobject->_rel_type[$property->rel_id][0]==1 && !in_array($property->rel_id,$this->_except)){
 
 							if($this->details_expand){
@@ -682,7 +682,7 @@ class DataDetails extends DataForm{
 							$this->$property_name->apply_rules=false;
 						}
 
-						if($this->_status!='idle' AND $this->$property_name->ind<0){
+						if($this->_status!='idle' && $this->$property_name->ind<0){
 							$this->$property_name->status  = $this->_status;
 							$this->$property_name->db_name ='';
 							$this->$property_name->build();
@@ -774,7 +774,7 @@ class DataDetails extends DataForm{
 				$dipon=$puesto=array();
 				$cant=0;
 				$pattern='/^'.str_replace('<#i#>','(?<indices>[0-9]+)',$name).'$/';
-				foreach($ind AS $val){
+				foreach($ind as $val){
 					if(preg_match($pattern, $val,$matches)>0){
 						$cant++;
 

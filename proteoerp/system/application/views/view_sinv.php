@@ -1166,7 +1166,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 		<li id="litab7"><a href="#tab7">Articulos del Combo</a></li>
 		<?php }?>
 
-		<?php if ( $this->datasis->traevalor('SINVPRODUCCION') == 'S') { ?>
+		<?php if ( $this->datasis->traevalor('SINVPRODUCCION','Activa el modo de produccion') == 'S') { ?>
 		<li><a href="#tab8">Ingredientes</a></li>
 		<li><a href="#tab9">Labores     </a></li>
 		<?php } ?>
@@ -1754,7 +1754,7 @@ if ($query->num_rows()>0 ) {
 		<tr>
 			<td>
 				<fieldset style='border: 1px outset #8A0808;background: #FFFBE9;'>
-				<legend class="titulofieldset" >Ficha tenica</legend>
+				<legend class="titulofieldset" >Ficha t&eacute;nica</legend>
 				<table width='100%'>
 				<tr>
 					<td class="littletablerow"><?php echo $form->ficha->output ?></td>

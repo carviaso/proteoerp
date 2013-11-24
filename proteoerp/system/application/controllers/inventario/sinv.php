@@ -2864,10 +2864,8 @@ class Sinv extends Controller {
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
 
-		$edit->back_url = site_url('inventario/sinv/filteredgrid');
-
-		$ultimo ='<a href="javascript:ultimo();" title="Consultar ultimo c&oacute;digo ingresado"> Consultar ultimo c&oacute;digo</a>';
-		$sugerir='<a href="javascript:sugerir();" title="Sugerir un c&oacute;digo aleatorio">Sugerir C&oacute;digo </a>';
+		$ultimo ='<a href="javascript:ultimo();" title="Consultar ultimo c&oacute;digo ingresado">&Uacute;ltimo</a>';
+		$sugerir='<a href="javascript:sugerir();" title="Sugerir un c&oacute;digo aleatorio">Sugerir</a>';
 
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo');
 		$edit->codigo->size=15;
@@ -2875,7 +2873,7 @@ class Sinv extends Controller {
 		$edit->codigo->rule = 'alpha_dash_slash|trim|strtoupper|callback_chexiste';
 		$edit->codigo->mode = 'autohide';
 		$edit->codigo->append($sugerir);
-		$edit->codigo->append($ultimo);
+		//$edit->codigo->append($ultimo);
 
 		$edit->alterno = new inputField('Alterno', 'alterno');
 		$edit->alterno->size=15;
@@ -2975,7 +2973,7 @@ class Sinv extends Controller {
 		$edit->grupo->style='width:250px;';
 
 		$linea=$edit->getval('linea');
-		if($linea!==FALSE){
+		if($linea!==false){
 			$dblinea=$this->db->escape($linea);
 			$edit->grupo->options("SELECT grupo, CONCAT(grupo,'-',nom_grup) nom_grup FROM grup WHERE linea=$dblinea ORDER BY nom_grup");
 		}else{
@@ -3009,7 +3007,7 @@ class Sinv extends Controller {
 		$edit->serial->option('V','Vehicular');
 		$edit->serial->in='activo';
 
-		$edit->premin = new dropdownField('Precio Minimo', 'premin');
+		$edit->premin = new dropdownField('Precio M&iacute;nimo', 'premin');
 		$edit->premin->style='width:100px;';
 		$edit->premin->option('0','Todos');
 		$edit->premin->option('2','Precio 2');
@@ -3020,7 +3018,6 @@ class Sinv extends Controller {
 		$edit->vnega->style='width:60px;';
 		$edit->vnega->option('S','Si');
 		$edit->vnega->option('N','No');
-
 
 		$edit->tdecimal2 = new freeField('','free','Usa Decimales');
 		$edit->tdecimal2->in='activo';
@@ -3410,6 +3407,7 @@ class Sinv extends Controller {
 		$edit->itcodigo->size    = 12;
 		$edit->itcodigo->db_name = 'codigo';
 		$edit->itcodigo->rel_id  = 'sinvcombo';
+		$edit->itcodigo->rule    = 'callback_chtiposinv';
 		$edit->itcodigo->append($bSINV_C);
 
 		$edit->itdescrip = new inputField('Descripci&oacute;n <#o#>', 'itdescrip_<#i#>');
@@ -3429,7 +3427,7 @@ class Sinv extends Controller {
 		$edit->itcantidad->rule         = 'condi_required|positive';
 		$edit->itcantidad->autocomplete = false;
 		$edit->itcantidad->onkeyup      = 'totalizar();';
-		$edit->itcantidad->value        = '1';
+		$edit->itcantidad->insertValue  = '1';
 
 		$edit->itultimo = new inputField('Ultimo <#o#>', 'itultimo_<#i#>');
 		$edit->itultimo->size       = 32;
@@ -3455,18 +3453,7 @@ class Sinv extends Controller {
 			$edit->$obj2->rel_id  = 'sinvcombo';
 			$edit->$obj2->pointer = true;
 		}
-
-		$edit->itestampa = new autoUpdateField('itestampa' ,date('Ymd'), date('Ymd'));
-		$edit->itestampa->db_name = 'estampa';
-		$edit->itestampa->rel_id  = 'sinvcombo';
-
-		$edit->ithora    = new autoUpdateField('ithora',date('H:i:s'), date('H:i:s'));
-		$edit->ithora->db_name = 'hora';
-		$edit->ithora->rel_id  = 'sinvcombo';
-
-		$edit->itusuario = new autoUpdateField('itusuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-		$edit->itusuario->db_name = 'usuario';
-		$edit->itusuario->rel_id  = 'sinvcombo';
+		/*FIN SINV COMBO*/
 
 		/*INICIO SINV ITEM RECETAS*/
 		$edit->it2codigo = new inputField('C&oacute;digo <#o#>', 'it2codigo_<#i#>');
@@ -3511,18 +3498,6 @@ class Sinv extends Controller {
 			$edit->$obj2->rel_id  = 'sinvpitem';
 		}
 
-		$edit->it2estampa = new autoUpdateField('it2estampa' ,date('Ymd'), date('Ymd'));
-		$edit->it2estampa->db_name = 'estampa';
-		$edit->it2estampa->rel_id = 'sinvpitem';
-
-		$edit->it2hora    = new autoUpdateField('it2hora',date('H:i:s'), date('H:i:s'));
-		$edit->it2hora->db_name = 'hora';
-		$edit->it2hora->rel_id = 'sinvpitem';
-
-		$edit->it2usuario = new autoUpdateField('it2usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-		$edit->it2usuario->db_name = 'usuario';
-		$edit->it2usuario->rel_id = 'sinvpitem';
-
 		/*INICIO SINV LABOR  ESTACIONES*/
 		$edit->it3estacion = new  dropdownField('Estacion <#o#>', 'it3estacion_<#i#>');
 		$edit->it3estacion->option('','Seleccionar');
@@ -3557,18 +3532,6 @@ class Sinv extends Controller {
 		$edit->it3tiempo->rule         = 'positive';
 		$edit->it3tiempo->autocomplete = false;
 		$edit->it3tiempo->insertValue  = 1;
-
-		$edit->it3estampa = new autoUpdateField('it3estampa' ,date('Ymd'), date('Ymd'));
-		$edit->it3estampa->db_name = 'estampa';
-		$edit->it3estampa->rel_id  = 'sinvpitem';
-
-		$edit->it3hora    = new autoUpdateField('it3hora',date('H:i:s'), date('H:i:s'));
-		$edit->it3hora->db_name = 'hora';
-		$edit->it3hora->rel_id  = 'sinvpitem';
-
-		$edit->it3usuario = new autoUpdateField('it3usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-		$edit->it3usuario->db_name = 'usuario';
-		$edit->it3usuario->rel_id  = 'sinvpitem';
 
 		$inven=array();
 		$query=$this->db->query('SELECT TRIM(codigo) AS codigo ,TRIM(descrip) AS descrip,tipo,base1,base2,base3,base4,iva,peso,precio1,pond,ultimo FROM sinv WHERE activo=\'S\' AND tipo=\'Articulo\'');
@@ -3621,13 +3584,26 @@ class Sinv extends Controller {
 		if($tipo[0]=='F'){
 			$caja=$this->input->post('caja');
 			if(empty($caja)){
-				$this->validation->set_message('chfraccion',"El campo %s es requerido cuando el tipo de producto es fracci&oacute;n.");
+				$this->validation->set_message('chfraccion','El campo %s es requerido cuando el tipo de producto es fracci&oacute;n.');
 				return false;
 			}
 		}
 		return true;
 	}
 
+	function chtiposinv($codigo){
+		$dbcodigo = $this->db->escape($codigo);
+		$tipo     = $this->datasis->dameval("SELECT tipo FROM sinv WHERE codigo=${dbcodigo}");
+		if(empty($tipo )){
+			$this->validation->set_message('chtiposinv','El producto colocado en el campo %s no existe.');
+			return false;
+		}
+		if($tipo[0]!='A'){
+			$this->validation->set_message('chtiposinv','No puede colocar producto tipo '.$tipo.' en el campo %s.');
+			return false;
+		}
+		return true;
+	}
 
 	function almubica(){
 		$alma   = $this->input->post('alma');
@@ -3660,31 +3636,67 @@ class Sinv extends Controller {
 	}
 
 	function _pre_inserup($do){
-		$tipo=$do->get('tipo');
+		$tipo   = $do->get('tipo');
+		$estampa= date('Ymd');
+		$hora   = date('H:i:s');
+		$usuario= $this->secu->usuario();
 
 		//SINVCOMBO
-		foreach($do->data_rel['sinvcombo'] as $k=>$v){
-			if(empty($v['codigo'])) $do->rel_rm('sinvcombo',$k);
+		if($tipo[0]!='C'){
+			$do->truncate_rel('sinvcombo');
+			//if($tipo[0]!='C' && count($do->data_rel['sinvcombo']) >0){
+			//	$error='ERROR. el tipo de Art&acute;iculo debe ser Combo, debido a que tiene varios Art&iacute;culos relacionados';
+			//	$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']=$error;
+			//	return false;
+			//}
+		}else{
+			//Limpia los vacios
+			foreach($do->data_rel['sinvcombo'] as $k=>$v){
+				if(empty($v['codigo'])) $do->rel_rm('sinvcombo',$k);
+			}
+
+			$cana=$do->count_rel('sinvcombo');
+			if($cana <= 0){
+				$error='ERROR. El Combo debe tener almenos un art&iacute;culo';
+				$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']=$error;
+				return false;
+			}
+
+			for($i=0;$i<$cana;$i++){
+				$do->set_rel('sinvcombo','estampa',$estampa,$i);
+				$do->set_rel('sinvcombo','hora'   ,$hora   ,$i);
+				$do->set_rel('sinvcombo','usuario',$usuario,$i);
+			}
 		}
-		if($tipo!='Combo' && count($do->data_rel['sinvcombo']) >0){
-			$error='ERROR. el tipo de Art&acute;iculo debe ser Combo, debido a que tiene varios Art&iacute;culos relacionados';
-			$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']=$error;
-			return false;
-		}
-		if($tipo=='Combo' && count($do->data_rel['sinvcombo']) <=0){
-			$error='ERROR. El Combo debe tener almenos un art&iacute;culo';
-			$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']=$error;
-			return false;
-		}
+
 		//SINVPITEM
-		$borrar=array();
 		foreach($do->data_rel['sinvpitem'] as $k=>$v){
 			if(empty($v['codigo'])) $do->rel_rm('sinvpitem',$k);
 		}
+		$cana=$do->count_rel('sinvpitem');
+		for($i=0;$i<$cana;$i++){
+			$do->set_rel('sinvpitem','estampa',$estampa,$i);
+			$do->set_rel('sinvpitem','hora'   ,$hora   ,$i);
+			$do->set_rel('sinvpitem','usuario',$usuario,$i);
+		}
+
 		//SINVPLABOR
-		$borrar=array();
 		foreach($do->data_rel['sinvplabor'] as $k=>$v){
 			if(empty($v['estacion'])) $do->rel_rm('sinvplabor',$k);
+		}
+		$cana=$do->count_rel('sinvplabor');
+		for($i=0;$i<$cana;$i++){
+			$do->set_rel('sinvplabor','estampa',$estampa,$i);
+			$do->set_rel('sinvplabor','hora'   ,$hora   ,$i);
+			$do->set_rel('sinvplabor','usuario',$usuario,$i);
+		}
+
+		//Llena los valores de los detalles
+		$cana=$do->count_rel('sinvcombo');
+		for($i=0;$i<$cana;$i++){
+			$do->set_rel('sinvcombo','estampa',$estampa,$i);
+			$do->set_rel('sinvcombo','hora'   ,$hora   ,$i);
+			$do->set_rel('sinvcombo','usuario',$usuario,$i);
 		}
 
 		//Valida los precios

@@ -13,14 +13,15 @@ class Valores extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('valores','id') ) {
+		if(!$this->datasis->iscampo('valores','id') ) {
 			$this->db->simple_query('ALTER TABLE valores DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE valores ADD UNIQUE INDEX nombre (nombre)');
 			$this->db->simple_query('ALTER TABLE valores ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
-		if ( !$this->datasis->iscampo('tmenus','proteo') ) {
+		}
+
+		if(!$this->datasis->iscampo('tmenus','proteo')){
 			$this->db->simple_query('ALTER TABLE tmenus ADD COLUMN proteo VARCHAR(250) NULL ');
-		};
+		}
 
 		redirect($this->url.'jqdatag');
 	}
@@ -60,7 +61,7 @@ class Valores extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "true";
+		$editar = 'true';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -91,17 +92,17 @@ class Valores extends Controller {
 			'editable'      => $editar,
 			'width'         => 280,
 			'edittype'      => "'text'",
-			'editoptions'   => '{ size:50, maxlength: 200 }',
+			'editoptions'   => '{ size:30, maxlength: 200 }',
 		));
 
 		$grid->addField('descrip');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 300,
 			'edittype'      => "'text'",
-			'editoptions'   => '{ size:50, maxlength: 200 }',
+			'editoptions'   => '{ size:30, maxlength: 200 }',
 		));
 
 		$grid->showpager(true);
@@ -112,21 +113,21 @@ class Valores extends Controller {
 		$grid->setToolbar('false', '"top"');
 
 		$grid->setFormOptionsE('
-			closeAfterEdit:true, mtype: "POST", width: 520, height:200, closeOnEscape: true, top: 50, left:20, recreateForm:true, 
+			closeAfterEdit:true, mtype: "POST", width: 520, height:200, closeOnEscape: true, top: 50, left:20, recreateForm:true,
 			afterSubmit: function(a,b) {
-				if (a.responseText.length > 0) 
-					$.prompt(a.responseText); 
+				if (a.responseText.length > 0)
+					$.prompt(a.responseText);
 				return [true, a ];
-			}, 
+			},
 			beforeShowForm: function(frm) {
 					$(\'#nombre\').attr(\'readonly\',\'readonly\');
-			}		
+			}
 		');
 
-		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:200, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];} ');
+		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:200, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];}');
 
 
-		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a ];");
+		$grid->setAfterSubmit('$.prompt(\'Respuesta:\'+a.responseText); return [true, a ];');
 
 		#show/hide navigations buttons
 		$grid->setAdd(true);
@@ -152,8 +153,7 @@ class Valores extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -167,8 +167,7 @@ class Valores extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -202,7 +201,7 @@ class Valores extends Controller {
 /*
 class valores extends Controller {
 	function valores(){
-		parent::Controller(); 
+		parent::Controller();
 		$this->load->library("rapyd");
 		$this->datasis->modulo_id('902',1);
 	}
@@ -274,4 +273,3 @@ class valores extends Controller {
 	}
 }
 */
-?>
