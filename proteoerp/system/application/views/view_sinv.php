@@ -239,7 +239,7 @@ function totalizarcombo(){
 	$("#base1").val(roundNumber(tprecio,2));
 	$("#base2").val(roundNumber(tprecio,2));
 	$("#base3").val(roundNumber(tprecio,2));
-	$("#base4").val(roundNumber(tprecio*0.99,2));
+	$("#base4").val(roundNumber(tprecio,2));
 	$("#pond").val(roundNumber(tpond,2));
 	$("#ultimo").val(roundNumber(tultimo,2));
 	cambiobase('S');
