@@ -3429,6 +3429,7 @@ class Sinv extends Controller {
 		$edit->itprecio->db_name    = 'precio';
 		$edit->itprecio->maxlength  = 50;
 		$edit->itprecio->rel_id     = 'sinvcombo';
+		$edit->itprecio->onkeyup    = 'totalizarcombo();';
 		$edit->itprecio->css_class  = 'inputnum';
 
 		$edit->itultimo = new inputField('Ultimo <#o#>', 'itultimo_<#i#>');
@@ -3646,6 +3647,8 @@ class Sinv extends Controller {
 		$base2  = $do->get('base2');
 		$base3  = $do->get('base3');
 		$base4  = $do->get('base4');
+		$ultimo = $do->get('ultimo');
+		$pond   = $do->get('pond');
 
 		//SINVCOMBO
 		if($tipo[0]!='C'){
@@ -3657,22 +3660,26 @@ class Sinv extends Controller {
 			//}
 		}else{
 			//Limpia los vacios y totaliza las bases
-			$combobase=0;
+			$combobase=$combopond=$comboultimo=0;
 			foreach($do->data_rel['sinvcombo'] as $k=>$v){
 				if(empty($v['codigo'])){
 					$do->rel_rm('sinvcombo',$k);
 				}else{
-					$combobase+=floatval($do->get_rel('sinvcombo','precio' ,$k));
+					$combobase  +=floatval($do->get_rel('sinvcombo','precio' ,$k));
+					$combopond  +=floatval($do->get_rel('sinvcombo','pond' ,$k));
+					$comboultimo+=floatval($do->get_rel('sinvcombo','ultimo' ,$k));
 				}
 			}
-
 
 			if(abs($combobase-$base1)!=0 || abs($combobase-$base2)!=0 || abs($combobase-$base3)!=0 || abs($combobase-$base4)!=0){
 				$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Cuando el articulo es un combo los 4 precios deben ser iguales a '.nformat($combobase);
 				return false;
 			}
 
-
+			if(abs($ultimo-$combopond) || abs($pond-$comboultimo)){
+				$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Los costos deben ser '.nformat($combopond).' para el ponderado y '.format($comboultimo).'para el ultimo.';
+				return false;
+			}
 
 			$cana=$do->count_rel('sinvcombo');
 			if($cana <= 0){
@@ -3812,7 +3819,7 @@ class Sinv extends Controller {
 		$ms_codigo = $this->session->userdata('usuario');
 
 		$mSQL = "INSERT INTO sinvplog ";
-		$mSQL .= "SELECT '".$mN."', '".addslashes($ms_codigo)."', now(), curtime(), a.codigo, a.precio1, a.precio2, a.precio3, a.precio4 ";
+		$mSQL .= "SELECT '".$mN."', '".addslashes($ms_codigo)."', NOW(), CURTIME(), a.codigo, a.precio1, a.precio2, a.precio3, a.precio4 ";
 		$mSQL .= "FROM sinv a ".$where;
 		$this->db->query($mSQL);
 
@@ -3901,8 +3908,9 @@ class Sinv extends Controller {
 	//
 	// -- Cambio de IVA                 -- //
 	//
-	function cambiva( $iva ) {
-		$data = $this->datasis->damesesion();
+	function cambiva($iva) {
+		$dbiva = floatval($iva);
+		$data  = $this->datasis->damesesion();
 		$where = $data['data1'];
 		$tasa = $this->datasis->damereg("SELECT tasa, redutasa, sobretasa FROM civa ORDER BY fecha DESC LIMIT 1");
 		$mSQL = "SET
@@ -3910,7 +3918,7 @@ class Sinv extends Controller {
 			a.precio2=ROUND(a.base2*(100+$iva)/100,2),
 			a.precio3=ROUND(a.base3*(100+$iva)/100,2),
 			a.precio4=ROUND(a.base4*(100+$iva)/100,2),
-			a.iva=$iva";
+			a.iva=${dbiva}";
 
 		$this->db->query("UPDATE sinv a ".$mSQL." ".$where);
 		$this->datasis->sinvrecalcular("M");
