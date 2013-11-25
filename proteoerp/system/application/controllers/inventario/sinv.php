@@ -3676,10 +3676,10 @@ class Sinv extends Controller {
 				return false;
 			}
 
-			if(abs($ultimo-$combopond) || abs($pond-$comboultimo)){
-				$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Los costos deben ser '.nformat($combopond).' para el ponderado y '.format($comboultimo).'para el ultimo.';
-				return false;
-			}
+			//if(abs($ultimo-$comboultimo)!=0 || abs($pond-$combopond)!=0){
+			//	$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Los costos deben ser '.nformat($combopond).' para el ponderado y '.nformat($comboultimo).' para el ultimo.';
+			//	return false;
+			//}
 
 			$cana=$do->count_rel('sinvcombo');
 			if($cana <= 0){
