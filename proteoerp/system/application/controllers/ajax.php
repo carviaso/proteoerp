@@ -1942,10 +1942,10 @@ class Ajax extends Controller {
 					$retArray['pond']    = $row['pond'];
 					$retArray['formcal'] = $row['formcal'];
 					$retArray['id']      = $row['id'];
-					$retArray['base1']   = $row['precio1']*100/(100+$row['iva']);
-					$retArray['base2']   = $row['precio2']*100/(100+$row['iva']);
-					$retArray['base3']   = $row['precio3']*100/(100+$row['iva']);
-					$retArray['base4']   = $row['precio4']*100/(100+$row['iva']);
+					$retArray['base1']   = round($row['precio1']*100/(100+$row['iva']),2);
+					$retArray['base2']   = round($row['precio2']*100/(100+$row['iva']),2);
+					$retArray['base3']   = round($row['precio3']*100/(100+$row['iva']),2);
+					$retArray['base4']   = round($row['precio4']*100/(100+$row['iva']),2);
 					$retArray['descrip'] = $this->en_utf8($row['descrip']);
 					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
 					$retArray['iva']     = $row['iva'];

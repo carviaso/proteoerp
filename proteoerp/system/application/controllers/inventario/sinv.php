@@ -2704,11 +2704,7 @@ class Sinv extends Controller {
 		}elseif($oper == 'del'){
 			echo 'Deshabilitado';
 		}
-
-
 	}
-
-
 
 	/**
 	* Busca la data en el Servidor por json
@@ -3428,6 +3424,13 @@ class Sinv extends Controller {
 		$edit->itcantidad->onkeyup      = 'totalizarcombo();';
 		$edit->itcantidad->insertValue  = '1';
 
+		$edit->itprecio = new inputField('Precio <#o#>', 'itprecio_<#i#>');
+		$edit->itprecio->size       = 15;
+		$edit->itprecio->db_name    = 'precio';
+		$edit->itprecio->maxlength  = 50;
+		$edit->itprecio->rel_id     = 'sinvcombo';
+		$edit->itprecio->css_class  = 'inputnum';
+
 		$edit->itultimo = new inputField('Ultimo <#o#>', 'itultimo_<#i#>');
 		$edit->itultimo->size       = 32;
 		$edit->itultimo->db_name    = 'ultimo';
@@ -3639,6 +3642,10 @@ class Sinv extends Controller {
 		$estampa= date('Ymd');
 		$hora   = date('H:i:s');
 		$usuario= $this->secu->usuario();
+		$base1  = $do->get('base1');
+		$base2  = $do->get('base2');
+		$base3  = $do->get('base3');
+		$base4  = $do->get('base4');
 
 		//SINVCOMBO
 		if($tipo[0]!='C'){
@@ -3649,10 +3656,23 @@ class Sinv extends Controller {
 			//	return false;
 			//}
 		}else{
-			//Limpia los vacios
+			//Limpia los vacios y totaliza las bases
+			$combobase=0;
 			foreach($do->data_rel['sinvcombo'] as $k=>$v){
-				if(empty($v['codigo'])) $do->rel_rm('sinvcombo',$k);
+				if(empty($v['codigo'])){
+					$do->rel_rm('sinvcombo',$k);
+				}else{
+					$combobase+=floatval($do->get_rel('sinvcombo','precio' ,$k));
+				}
 			}
+
+
+			if(abs($combobase-$base1)!=0 || abs($combobase-$base2)!=0 || abs($combobase-$base3)!=0 || abs($combobase-$base4)!=0){
+				$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Cuando el articulo es un combo los 4 precios deben ser iguales a '.nformat($combobase);
+				return false;
+			}
+
+
 
 			$cana=$do->count_rel('sinvcombo');
 			if($cana <= 0){
@@ -4808,11 +4828,11 @@ class Sinv extends Controller {
 
 	//Manda una tabla para la consulta
 	function sinvitems($id = 0){
+		$dbid=intval($id);
 		$salida = "No hay Existencias";
-		$codigo = $this->datasis->dameval("SELECT codigo FROM sinv WHERE id=$id");
+		$codigo = $this->datasis->dameval("SELECT codigo FROM sinv WHERE id=${dbid}");
 
 		if(!empty($codigo)){
-
 			$mSQL  = "SELECT a.codigo, a.alma, a.existen, IF(b.ubides IS NULL,'SIN ALMACEN',b.ubides) AS nombre ";
 			$mSQL .= "FROM itsinv AS a LEFT JOIN caub as b ON a.alma=b.ubica ";
 			$mSQL .= "WHERE codigo=".$this->db->escape($codigo);
@@ -4823,17 +4843,17 @@ class Sinv extends Controller {
 			    $salida  = "<table class='bordetabla' cellpadding=1 cellspacing=0 width='200'>";
 			    $salida .= "<tr class='tableheader'><th colspan='3'>Almacenes</th></tr>";
 				$i = 0;
-				foreach( $query->result() as $row ){
+				foreach($query->result() as $row){
 						$salida .= "<tr class='littletablerow'><td>";
 						$salida .= $row->alma;
-						$salida .= "</td><td>";
+						$salida .= '</td><td>';
 						$salida .= $row->nombre;
-						$salida .= "</td><td>";
+						$salida .= '</td><td>';
 						$salida .= $row->existen;
 						$salida .= "</td></tr>\n";
 						$i++;
 				}
-				while ( $i<5){
+				while($i<5){
 						$salida .= "<tr class='littletablerow'><td>";
 						$salida .= "&nbsp;</td><td>";
 						$salida .= "&nbsp;</td><td>";
@@ -4851,15 +4871,15 @@ class Sinv extends Controller {
 
 	function _pre_del($do){
 		$codigo=$this->db->escape($do->get('codigo'));
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sitems WHERE codigoa=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itscst WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itstra WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itspre WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itsnot WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itsnte WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM itsinv WHERE codigo=${codigo} AND existen>0");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM sinvpitem WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM sinvcombo WHERE codigo=${codigo}");
+		$check =  $this->datasis->dameval("SELECT COUNT(*) AS cana FROM sitems WHERE codigoa=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itscst WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itstra WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itspre WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itsnot WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itsnte WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itsinv WHERE codigo=${codigo} AND existen>0");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinvpitem WHERE codigo=${codigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinvcombo WHERE codigo=${codigo}");
 
 		if ($this->db->table_exists('ordpitem'))
 			$check += $this->datasis->dameval("SELECT COUNT(*) FROM ordpitem WHERE codigo=${codigo}");

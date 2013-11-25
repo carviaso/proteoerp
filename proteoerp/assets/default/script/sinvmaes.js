@@ -1,7 +1,7 @@
-function roundNumber(num, dec) {
-	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
-	return result;
-}
+//function roundNumber(num, dec) {
+//	var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
+//	return result;
+//}
 
 //****************************************************
 //dec: 0=decimal, 1 = unidades, 2 =decenas, 3=centenas

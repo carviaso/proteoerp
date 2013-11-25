@@ -29,7 +29,8 @@ $scampos  ='<tr id="tr_sinvcombo_<#i#>">';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['itcodigo']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['itdescrip']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['itcantidad']['field'].'</td>';
-$scampos .='<td class="littletablerow" align="right">'.$campos['itultimo']['field'].  '</td>';
+$scampos .='<td class="littletablerow" align="right">'.$campos['itprecio']['field'].'</td>';
+$scampos .='<td class="littletablerow" align="right">'.$campos['itultimo']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['itpond']['field'];
 $ocultos=array('precio1','formcal');
 foreach($ocultos as $obj){
@@ -98,31 +99,22 @@ function ocultatab(){
 	tipo=$("#tipo").val();
 	if(tipo=='Combo'){
 		$("#litab7").show();
-		//$("#tab7").show();
 	}else{
 		$("#litab7").hide();
 		$("#tab7").hide();
 	}
 }
 
-
 $(function(){
 
-	$('.inputnum').focus(function (){
-		$(this).select();
-	});
-	$('.inputnum').click(function (){
-		$(this).select();
-	});
+	$('.inputnum').focus(function (){ $(this).select(); });
+	$('.inputnum').click(function (){ $(this).select(); });
 
-	ocultatab();
 	$("#fdesde").datepicker({ dateFormat: "dd/mm/yy" });
 	$("#fhasta").datepicker({ dateFormat: "dd/mm/yy" });
 	$('#maintabcontainer').tabs();
 	$(".inputnum").numeric(".");
-	for(var i=0;i < sinvcombo_cont;i++){
-		autocod(i.toString());
-	}
+
 	if(sinvcombo_cont>0){
 		totalizarcombo();
 	}
@@ -156,7 +148,6 @@ $(function(){
 
 	$("#tipo").change(function(){
 		ocultatab();
-
 	});
 
 	$("#depto").change(function(){dpto_change(); });
@@ -221,26 +212,37 @@ $(function(){
 			setTimeout(function() {  $("#enlace").removeAttr("readonly"); }, 1500);
 		}
 	});
-
+	for(var i=0;i < sinvcombo_cont;i++){
+		autocod(i.toString());
+	}
+	ocultatab();
 });
 
 function totalizarcombo(){
-	var tpond=tultimo=0;
+	var tpond=tultimo=tprecio=0;
 	var arr=$('input[name^="itcantidad_"]');
 	jQuery.each(arr, function() {
 		nom=this.name;
 		pos=this.name.lastIndexOf('_');
 		if(pos>0){
 			ind     = this.name.substring(pos+1);
+			precio  = Number($("#itprecio_"+ind).val());
 			cana    = Number($("#itcantidad_"+ind).val());
 			pond    = Number($("#itpond_"+ind).val());
 			ultimo  = Number($("#itultimo_"+ind).val());
-			tpond    = tpond   +cana*pond;
-			tultimo  = tultimo +cana*ultimo;
+			tpond   = tpond   +cana*pond;
+			tultimo = tultimo +cana*ultimo;
+			tprecio = tprecio +cana*precio;
 		}
 	});
+
+	$("#base1").val(roundNumber(tprecio,2));
+	$("#base2").val(roundNumber(tprecio,2));
+	$("#base3").val(roundNumber(tprecio,2));
+	$("#base4").val(roundNumber(tprecio*0.99,2));
 	$("#pond").val(roundNumber(tpond,2));
 	$("#ultimo").val(roundNumber(tultimo,2));
+	cambiobase('S');
 	//requeridos();
 }
 
@@ -255,7 +257,7 @@ function add_sinvcombo(){
 	autocod(can);
 	$('#itcodigo_'+can).focus();
 	$("#itcantidad_"+can).keypress(function(e) {
-		if(e.keyCode == 13) {
+		if(e.keyCode == 13){
 		    add_sinvcombo();
 			return false;
 		}
@@ -304,7 +306,7 @@ function autocod(id){
 						if(data.length==0){
 							$('#itcodigo_'+id).val('');
 							$('#itdescrip_'+id).val('');
-							$('#itprecio1_'+id).val('');
+							$('#itprecio_'+id).val('');
 							$('#itpond_'+id).val('');
 							$('#itultimo_'+id).val('');
 							$('#itformcal_'+id).val('');
@@ -326,7 +328,7 @@ function autocod(id){
 
 			$('#itcodigo_'+id).val(ui.item.codigo);
 			$('#itdescrip_'+id).val(ui.item.descrip);
-			$('#itprecio1_'+id).val(ui.item.base1);
+			$('#itprecio_'+id).val(ui.item.base1);
 			$('#itpond_'+id).val(ui.item.pond);
 			$('#itultimo_'+id).val(ui.item.ultimo);
 			$('#itformcal_'+id).val(ui.item.formcal);
@@ -412,7 +414,7 @@ function autocodpitem(id){
 				url:  "<?php echo site_url('ajax/buscasinv2'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -463,6 +465,11 @@ function post_modbus_sinvpitem(nind){
 	$("#it2formcal_"+ind+'_val').text(descrip);
 
 	totalizarpitem();
+}
+
+function truncatecombo(){
+	$('tr[id^="tr_sinvcombo_"]').remove();
+	sinvcombo_cont=0;
 }
 
 function add_sinvplabor(){
@@ -1365,6 +1372,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				<td bgcolor='#7098D0'><b>C&oacute;digo</b></td>
 				<td bgcolor='#7098D0'><b>Descripci&oacute;n</b></td>
 				<td bgcolor='#7098D0'><b>Cantidad</b></td>
+				<td bgcolor='#7098D0'><b>Precio</b></td>
 				<td bgcolor='#7098D0'><b>&Uacute;ltimo</b></td>
 				<td bgcolor='#7098D0'><b>Ponderado</b></td>
 				<?php if($form->_status!='show') {?>
@@ -1376,6 +1384,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				$itcodigo   = "itcodigo_$i";
 				$itdescrip  = "itdescrip_$i";
 				$itcantidad = "itcantidad_$i";
+				$itprecio   = "itprecio_$i";
 				$itultimo   = "itultimo_$i";
 				$itpond     = "itpond_$i";
 
@@ -1389,6 +1398,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				<td class="littletablerow" align="left" nowrap><?php echo $form->$itcodigo->output;       ?></td>
 				<td class="littletablerow" align="left"       ><?php echo $form->$itdescrip->output;      ?></td>
 				<td class="littletablerow" align="right"      ><?php echo $form->$itcantidad->output;     ?></td>
+				<td class="littletablerow" align="right"      ><?php echo $form->$itprecio->output;      ?></td>
 				<td class="littletablerow" align="right"      ><?php echo $form->$itultimo->output;       ?></td>
 				<td class="littletablerow" align="right"      ><?php echo $form->$itpond->output.$oculto; ?></td>
 
