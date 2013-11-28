@@ -1256,6 +1256,56 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+
+	//******************************************************************
+	//Busca los articulos de un combo
+	//
+	function buscasinvcombo(){
+		$mid = $this->input->post('q');
+
+		$data = '[ ]';
+		if($mid !== false){
+			$dbcombo = $this->db->escape($mid);
+			$retArray = $retorno = array();
+			$mSQL="SELECT a.codigo,a.descrip,b.tipo,b.ultimo,b.pond,
+			a.precio,b.peso,b.precio1,
+			b.iva,a.cantidad
+			FROM sinvcombo AS a
+			JOIN sinv AS b ON a.codigo=b.codigo
+			WHERE a.combo=${dbcombo}";
+
+			$query = $this->db->query($mSQL);
+			if($query->num_rows() > 0){
+				foreach( $query->result_array() as $id=>$row ){
+
+					if($row['precio']>0){
+						$precio=round($row['precio'],2);
+					}else{
+						$precio=round($row['precio1']*100/(100+$row['iva']),2);
+					}
+
+					$retArray['codigo']  = $this->en_utf8($row['codigo']);
+					$retArray['cana']    = $row['cantidad'];
+					$retArray['tipo']    = $row['tipo'];
+					$retArray['peso']    = $row['peso'];
+					$retArray['ultimo']  = $row['ultimo'];
+					$retArray['pond']    = $row['pond'];
+					$retArray['preca']   = $precio;
+					$retArray['base1']   = $precio;
+					$retArray['base2']   = $precio;
+					$retArray['base3']   = $precio;
+					$retArray['base4']   = $precio;
+					$retArray['descrip'] = $this->en_utf8($row['descrip']);
+					$retArray['iva']     = $row['iva'];
+					$retArray['combo']   = $mid;
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
 	//******************************************************************
 	//Buscar los articulos para devolver compras
 	//

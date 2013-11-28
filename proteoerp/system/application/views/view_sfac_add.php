@@ -21,6 +21,7 @@ for($o=1;$o<5;$o++){
 }
 $scampos .= $campos['itiva']['field'];
 $scampos .= $campos['sinvtipo']['field'];
+$scampos .= $campos['combo']['field'];
 $scampos .= $campos['sinvpeso']['field'].'</td>';
 $scampos .= '<td class="littletablerow"><a href=# onclick="del_sitems(<#i#>);return false;">'.img('images/delete.jpg').'</a></td></tr>';
 $campos=$form->js_escape($scampos);
@@ -64,8 +65,15 @@ $(function(){
 
 	totalizar();
 	for(var i=0;i < <?php echo $form->max_rel_count['sitems']; ?>;i++){
-		cdropdown(i);
-		cdescrip(i);
+		ind = i.toString();
+		codigoa = $("#codigoa_"+ind).val();
+		if(codigoa!=''){
+			var combo  = $("#combo_"+ind).val();
+			if(combo==''){
+				cdropdown(i);
+			}
+			cdescrip(i);
+		}
 		autocod(i.toString());
 		importe(i);
 	}
@@ -290,6 +298,21 @@ function scliadd() {
 	})
 };
 
+function limpiavacio(){
+	//Limpia sitems
+	var arr=$('input[name^="codigoa_"]');
+	jQuery.each(arr, function() {
+		nom=this.name;
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			ind  = this.name.substring(pos+1);
+			if(this.value==''){
+				del_sitems(parseInt(ind));
+			}
+		}
+	});
+}
+
 function truncate(){
 	$('tr[id^="tr_sitems_"]').remove();
 	$('tr[id^="tr_sfpa_"]').remove();
@@ -473,21 +496,24 @@ function post_modbus_sinv(nind){
 	var manual = $("#manual").val();
 	var ctipo  = $("#sclitipo").val()
 	var tipo   = Number(ctipo); if(tipo>0) tipo=tipo-1;
-	$("#preca_"+ind).empty();
+	var combo  = $("#combo_"+ind).val();
+	if(combo==''){
+		$("#preca_"+ind).empty();
 
-	if(manual!='S'){
-		var arr=$('#preca_'+ind);
-		cdropdown(nind);
-		jQuery.each(arr, function(){
-			//this.selectedIndex=tipo;
-			$('#'+this.id).prop('selectedIndex', tipo);
-		});
-	}else{
-		var prec = $('#precio'+ctipo+'_'+ind).val();
-		if(prec!=undefined){
-			$("#preca_"+ind).val(roundNumber(prec,2));
+		if(manual!='S'){
+			var arr=$('#preca_'+ind);
+			cdropdown(nind);
+			jQuery.each(arr, function(){
+				//this.selectedIndex=tipo;
+				$('#'+this.id).prop('selectedIndex', tipo);
+			});
 		}else{
-			$("#preca_"+ind).val($('#precio1_'+ind).val());
+			var prec = $('#precio'+ctipo+'_'+ind).val();
+			if(prec!=undefined){
+				$("#preca_"+ind).val(roundNumber(prec,2));
+			}else{
+				$("#preca_"+ind).val($('#precio1_'+ind).val());
+			}
 		}
 	}
 	cdescrip(nind);
@@ -644,32 +670,59 @@ function autocod(id){
 		minLength: 2,
 		select: function( event, ui ) {
 			$('#codigoa_'+id).attr("readonly", "readonly");
+			if(ui.item.tipo.substr(0,1)=='C'){
 
-			$('#codigoa_'+id).val(ui.item.codigo);
-			$('#desca_'+id).val(ui.item.descrip);
-			$('#precio1_'+id).val(ui.item.base1);
-			$('#precio2_'+id).val(ui.item.base2);
-			$('#precio3_'+id).val(ui.item.base3);
-			$('#precio4_'+id).val(ui.item.base4);
-			$('#itiva_'+id).val(ui.item.iva);
-			$('#sinvtipo_'+id).val(ui.item.tipo);
-			$('#sinvpeso_'+id).val(ui.item.peso);
-			$('#pond_'+id).val(ui.item.pond);
-			$('#ultimo_'+id).val(ui.item.ultimo);
-			$('#cana_'+id).val('1');
-			$('#cana_'+id).focus();
-			$('#cana_'+id).select();
+				$.ajax({
+					url: "<?php echo site_url('ajax/buscasinvcombo'); ?>",
+					dataType: 'json',
+					type: 'POST',
+					data: {"q":ui.item.codigo},
+					success: function(data){
+							$.each(data,
+								function(iid, val){
+									$('#codigoa_'+id).val(val.codigo);
+									$('#desca_'+id).val(val.descrip);
+									$('#preca_'+id).val(val.preca);
+									$('#precio1_'+id).val(val.base1);
+									$('#precio2_'+id).val(val.base2);
+									$('#precio3_'+id).val(val.base3);
+									$('#precio4_'+id).val(val.base4);
+									$('#itiva_'+id).val(val.iva);
+									$('#sinvtipo_'+id).val(val.tipo);
+									$('#sinvpeso_'+id).val(val.peso);
+									$('#pond_'+id).val(val.pond);
+									$('#ultimo_'+id).val(val.ultimo);
+									$('#cana_'+id).val(val.cana);
+									$('#combo_'+id).val(val.combo);
 
-			post_modbus_sinv(Number(id));
+									$('#cana_'+id).attr('readonly','readonly');
+									$('#codigoa_'+id).attr('readonly','readonly');
+									$('#desca_'+id).attr('readonly','readonly');
+									$('#preca_'+id).attr('readonly','readonly');
+									post_modbus_sinv(id);
+									id=add_sitems();
+								}
+							);
+						},
+				});
+			}else{
+				$('#codigoa_'+id).val(ui.item.codigo);
+				$('#desca_'+id).val(ui.item.descrip);
+				$('#precio1_'+id).val(ui.item.base1);
+				$('#precio2_'+id).val(ui.item.base2);
+				$('#precio3_'+id).val(ui.item.base3);
+				$('#precio4_'+id).val(ui.item.base4);
+				$('#itiva_'+id).val(ui.item.iva);
+				$('#sinvtipo_'+id).val(ui.item.tipo);
+				$('#sinvpeso_'+id).val(ui.item.peso);
+				$('#pond_'+id).val(ui.item.pond);
+				$('#ultimo_'+id).val(ui.item.ultimo);
+				$('#cana_'+id).val('1');
+				$('#cana_'+id).focus();
+				$('#cana_'+id).select();
 
-			//var arr  = $('#preca_'+id);
-			//var tipo = Number($("#sclitipo").val()); if(tipo>0) tipo=tipo-1;
-			//cdropdown(id);
-			//cdescrip(id);
-			//jQuery.each(arr, function() { this.selectedIndex=tipo; });
-			//importe(id);
-			//totalizar();
-
+				post_modbus_sinv(Number(id));
+			}
 			setTimeout(function() {  $('#codigoa_'+id).removeAttr("readonly"); }, 1500);
 		}
 	});
@@ -677,7 +730,21 @@ function autocod(id){
 
 function del_sitems(id){
 	id = id.toString();
+	var combo = $('#combo_'+id).val().trim();
 	$('#tr_sitems_'+id).remove();
+	if(combo!=""){
+		var arr=$('input[name^="combo_"]');
+		jQuery.each(arr, function() {
+			nom=this.name;
+			pos=this.name.lastIndexOf('_');
+			if(pos>0){
+				if(combo == this.value.trim()){
+					ind = this.name.substring(pos+1);
+					$('#tr_sitems_'+ind).remove();
+				}
+			}
+		});
+	}
 	totalizar();
 	var arr = $('input[id^="codigoa_"]');
 	if(arr.length<=0){
@@ -842,6 +909,7 @@ function chreferen(){
 				$it_ultimo  = "ultimo_${i}";
 				$it_detalle = "detalle_${i}";
 				$it_pond    = "pond_${i}";
+				$it_combo   = "combo_${i}";
 				$pprecios='';
 				for($o=1;$o<5;$o++){
 					$it_obj   = "precio${o}_${i}";
@@ -851,6 +919,7 @@ function chreferen(){
 				$pprecios .= $form->$it_iva->output;
 				$pprecios .= $form->$it_peso->output;
 				$pprecios .= $form->$it_tipo->output;
+				$pprecios .= $form->$it_combo->output;
 			?>
 
 			<tr id='tr_sitems_<?php echo $i; ?>' ondblclick="marcar(this)">

@@ -2966,8 +2966,7 @@ function chrif(rif){
 			$mSQL .= " limit $start, $limit ";
 			$query = $this->db->query($mSQL);
 			$arr = array();
-			foreach ($query->result_array() as $row)
-			{
+			foreach ($query->result_array() as $row){
 				$meco = array();
 				foreach( $row as $idd=>$campo ) {
 					$meco[$idd] = utf8_encode($campo);
@@ -2977,6 +2976,72 @@ function chrif(rif){
 			echo '{success:true, message:"'.$mSQL.'", results:'. $results.', data:'.json_encode($arr).'}';
 		}
 	}
+
+	function scliventa($desp=0,$rifci=null){
+		if(empty($rifci)){
+			$rifci = $this->db->escape($rifci);
+		}else{
+			$rifci = $this->input->post('rifci');
+		}
+
+		$dbrifci  = $this->db->escape($rifci);
+		$cod_cli  = $this->datasis->dameval("SELECT cliente FROM scli WHERE rifci=${dbrifci} LIMIT 1");
+		$dbcod_cli= $this->db->escape($cod_cli);
+
+		$arr_numas=array();
+		$mSQL = "SELECT numero FROM sfac WHERE cod_cli=${dbcod_cli} ORDER BY numero DESC LIMIT ${desp},3";
+		$query = $this->db->query($mSQL);
+		if($query->num_rows() > 0){
+			foreach($query->result() as $row){
+				$arr_numas[]=$row->numero;
+			}
+		}
+
+		if(count($arr_numas)>0){
+			$this->load->helper('date');
+			$in  = '\''.implode('\',\'',$arr_numas).'\'';
+			$mSQL= "SELECT numa,tipoa,codigoa,numa,desca,fecha,cana FROM sitems WHERE numa IN (${in}) ORDER BY numa DESC,desca";
+			$query = $this->db->query($mSQL);
+
+			if($query->num_rows() > 0){
+				echo '<table><tr>';
+				echo '<th>Fecha - D&iacute;as</th>';
+				echo '<th>N&uacute;mero</th>';
+				echo '<th>C&oacute;digo</th>';
+				echo '<th>Descripci&oacute;n</th>';
+				echo '</tr>';
+
+				$datetime2 = new DateTime();
+				foreach($query->result() as $row){
+					$datetime1 = new DateTime($row->fecha);
+					$interval  = $datetime1->diff($datetime2);
+
+					if($row->tipoa=='D'){
+						$cana=(-1)*$row->cana;
+					}else{
+						$cana=$row->cana;
+					}
+					$dias = $interval->format('%a');
+					if($dias<=7){
+						$color = '#FFA66F';
+					}elseif($dias<=30){
+						$color = '#FFFF4D';
+					}else{
+						$color = '#73F373';
+					}
+
+					echo '<tr style="background: '.$color.'; border-radius:25px;">';
+					echo '<td>'.$datetime1->format('d/m/Y ').' - <b>'.$dias.'</b></td>';
+					echo '<td>'.$row->numa.'</td>';
+					echo '<td>'.$row->codigoa.'</td>';
+					echo '<td>'.$row->desca.'</td>';
+					echo '</tr>';
+				}
+				echo '</table>';
+			}
+		}
+	}
+
 
 	function instalar(){
 		$seniat=$this->db->escape('http://contribuyente.seniat.gob.ve/BuscaRif/BuscaRif.jsp');

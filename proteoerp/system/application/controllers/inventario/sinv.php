@@ -3674,7 +3674,7 @@ class Sinv extends Controller {
 			}
 
 			if(abs($combobase-$base1)!=0 || abs($combobase-$base2)!=0 || abs($combobase-$base3)!=0 || abs($combobase-$base4)!=0){
-				$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Cuando el articulo es un combo los 4 precios deben ser iguales a '.nformat($combobase);
+				$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Cuando el articulo es un combo las 4 bases deben ser iguales a '.nformat($combobase);
 				return false;
 			}
 

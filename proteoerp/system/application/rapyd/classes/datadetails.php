@@ -506,10 +506,10 @@ class DataDetails extends DataForm{
 	*/
 	function _build_undo_button($caption=RAPYD_BUTTON_UNDO){
 		if ($this->_status == 'create'){
-			 $action = "javascript:window.location='{$this->back_url}'";
+			$action = "javascript:window.location='{$this->back_url}'";
 			$this->button('btn_undo', $caption, $action, 'TR');
 		} elseif($this->_status == 'modify') {
-			if (($this->back_cancel_save === FALSE) || ($this->back_cancel === FALSE)){
+			if (($this->back_cancel_save === false) || ($this->back_cancel === false)){
 				//is modify
 				if ($this->rapyd->uri->is_set('modify')){
 					$undo_uri = $this->rapyd->uri->change_clause($this->rapyd->uri->uri_array, 'modify', 'show');
@@ -854,7 +854,7 @@ class DataDetails extends DataForm{
 
 	function _rel_script(){
 		$script='';
-		foreach($this->_dataobject->_rel_type AS $id_rel=>$type){
+		foreach($this->_dataobject->_rel_type as $id_rel=>$type){
 			if($type[0]==1 && !in_array($id_rel,$this->_except)){
 				$html=$this->details_view($id_rel);
 				$html=$this->js_escape($html);
@@ -904,17 +904,17 @@ class DataDetails extends DataForm{
 	}
 
 	function getval($obj){
-		if(isset($this->$obj) AND is_subclass_of($this->$obj, 'objField')){
+		if(isset($this->$obj) && is_subclass_of($this->$obj, 'objField')){
 			$name=$this->$obj->name;
 			if(empty($this->$obj->rel_id)){
 				$requestValue = $this->ci->input->post($name);
-				if($requestValue === FALSE AND $this->_dataobject->loaded){
+				if($requestValue === false && $this->_dataobject->loaded){
 					if($this->$obj->pointer){
 						$requestValue =$this->_dataobject->get_pointer($this->$obj->db_name);
 					}else{
 						$requestValue =$this->_dataobject->get($this->$obj->db_name);
 					}
-					if(empty($requestValue)) $requestValue=FALSE;
+					if(empty($requestValue)) $requestValue=false;
 				}
 				return $requestValue;
 			}else{

@@ -109,7 +109,6 @@ $(function(){
 
 	$('.inputnum').focus(function (){ $(this).select(); });
 	$('.inputnum').click(function (){ $(this).select(); });
-
 	$("#fdesde").datepicker({ dateFormat: "dd/mm/yy" });
 	$("#fhasta").datepicker({ dateFormat: "dd/mm/yy" });
 	$('#maintabcontainer').tabs();
@@ -294,6 +293,9 @@ function autocod(id){
 	$('#itcodigo_'+id).autocomplete({
 		delay: 600,
 		autoFocus: true,
+		open: function(){
+			setTimeout(function() {$('.ui-autocomplete').css('z-index', 99999999999999); }, 0);
+		},
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasinv2'); ?>",

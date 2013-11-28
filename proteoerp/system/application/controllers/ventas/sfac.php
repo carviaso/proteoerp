@@ -389,6 +389,7 @@ class Sfac extends Controller {
 					"Guardar": function() {
 						var bValid = true;
 						var murl = $("#df1").attr("action");
+						limpiavacio();
 						$.ajax({
 							type: "POST",
 							dataType: "html",
@@ -398,13 +399,13 @@ class Sfac extends Controller {
 							success: function(r,s,x){
 								try{
 									var json = JSON.parse(r);
-									if ( json.status == "A" ) {
+									if(json.status == "A" ) {
 										if ( json.manual == "N" ) {
 											$( "#fedita" ).dialog( "close" );
 											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 											return true;
-										} else {
+										}else{
 											//$( "#fedita" ).dialog( "close" );
 
 											$.post("'.site_url($this->url.'dataedit/S/create').'",
@@ -1528,6 +1529,18 @@ class Sfac extends Controller {
 		));
 
 
+		$grid->addField('combo');
+		$grid->label('Combo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'false',
+			'width'         => 90,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:30, maxlength: 15 }',
+		));
+
+
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
@@ -2609,6 +2622,10 @@ class Sfac extends Controller {
 		$edit->precio4->db_name   = 'precio4';
 		$edit->precio4->rel_id    = 'sitems';
 
+		$edit->combo = new hiddenField('', 'combo_<#i#>');
+		$edit->combo->db_name   = 'combo';
+		$edit->combo->rel_id    = 'sitems';
+
 		$edit->itiva = new hiddenField('', 'itiva_<#i#>');
 		$edit->itiva->db_name  = 'iva';
 		$edit->itiva->rel_id   = 'sitems';
@@ -3039,6 +3056,7 @@ class Sfac extends Controller {
 		$codigo   = $this->input->post('codigoa_'.$i);
 		$manual   = $this->input->post('manual');
 		if($manual=='S') return true;
+		$dbcodigo = $this->db->escape($codigo);
 
 		if($tipo_doc == 'D'){
 			$factura  = $this->input->post('factura');
@@ -3071,19 +3089,35 @@ class Sfac extends Controller {
 				return false;
 			}
 		}elseif($tipo_doc == 'F'){
-			if(!isset($this->sclitipo)){
-				$cliente  = $this->input->post('cod_cli');
-				$this->sclitipo = $this->datasis->dameval('SELECT tipo FROM scli WHERE cliente='.$this->db->escape($cliente));
-			}
-			if($this->sclitipo=='5'){
-				$precio4 = $this->datasis->dameval('SELECT ultimo FROM sinv WHERE codigo='.$this->db->escape($codigo));
-			}else{
-				$precio4 = $this->datasis->dameval('SELECT precio4*100/(100+iva) FROM sinv WHERE codigo='.$this->db->escape($codigo));
-			}
-			$this->validation->set_message('chpreca', 'El art&iacute;culo "'.$codigo.'" debe contener un precio de al menos '.nformat($precio4));
-			if(empty($precio4)) $precio4=0; else $precio4=round($precio4,2);
-			if($val>=$precio4){
+			$combo = $this->input->post('combo_'.$i);
+
+			if(!empty($combo)){
+				$dbcombo = $this->db->escape($combo);
+				$precio  = $this->datasis->dameval("SELECT a.precio FROM sinvcombo AS a WHERE a.combo=${dbcombo} AND a.codigo=${dbcodigo}");
+				if(empty($precio)){
+					$this->validation->set_message('chpreca', 'El art&iacute;culo "'.$codigo.'" no parece ser del combo "'.$combo.'" o presenta problema con el precio');
+					return false;
+				}
+				if(abs($val-$precio)!=0){
+					$this->validation->set_message('chpreca', 'El art&iacute;culo "'.$codigo.'" del combo "'.$combo.'" debe contener un precio igual a '.nformat($precio));
+					return false;
+				}
 				return true;
+			}else{
+				if(!isset($this->sclitipo)){
+					$cliente  = $this->input->post('cod_cli');
+					$this->sclitipo = $this->datasis->dameval('SELECT tipo FROM scli WHERE cliente='.$this->db->escape($cliente));
+				}
+				if($this->sclitipo=='5'){
+					$precio4 = $this->datasis->dameval('SELECT ultimo FROM sinv WHERE codigo='.$dbcodigo);
+				}else{
+					$precio4 = $this->datasis->dameval('SELECT precio4*100/(100+iva) FROM sinv WHERE codigo='.$dbcodigo);
+				}
+				$this->validation->set_message('chpreca', 'El art&iacute;culo "'.$codigo.'" debe contener un precio de al menos '.nformat($precio4));
+				if(empty($precio4)) $precio4=0; else $precio4=round($precio4,2);
+				if($val>=$precio4){
+					return true;
+				}
 			}
 		}
 		return false;
@@ -3207,6 +3241,10 @@ class Sfac extends Controller {
 		$totalg=0;
 		$maxlin=intval($this->datasis->traevalor('MAXLIN'));
 		$cana=$do->count_rel('sitems');
+		if($cana<=0){
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Debe tener al menos un producto';
+			return false;
+		}
 		for($i=0;$i<$cana;$i++){
 			$itcana    = $do->get_rel('sitems','cana' ,$i);
 			$itpreca   = $do->get_rel('sitems','preca',$i);
@@ -3484,8 +3522,12 @@ class Sfac extends Controller {
 
 
 			$rowval = $this->datasis->damerow('SELECT pond, base1,precio4 FROM sinv WHERE codigo='.$this->db->escape($itcodigo));
+			if(empty($rowval)){
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Producto no encontrado ('.$itcodigo.')';
+				return false;
+			}
 			$do->set_rel('sitems','costo'  , $rowval['pond']   ,$i);
-			$do->set_rel('sitems','pvp'    , $rowval['base1'],$i);
+			$do->set_rel('sitems','pvp'    , $rowval['base1']  ,$i);
 			$do->set_rel('sitems','precio4', $rowval['precio4'],$i);
 
 			$iva    +=$itimporte*($itiva/100);
@@ -3885,15 +3927,15 @@ class Sfac extends Controller {
 			$dbcodigoa = $this->db->escape($itcodigoa);
 
 			$factor=($tipo_doc=='F')? -1:1;
-			$sql="INSERT IGNORE INTO itsinv (alma,codigo,existen) VALUES ($dbalma,$dbcodigoa,0)";
+			$sql="INSERT IGNORE INTO itsinv (alma,codigo,existen) VALUES (${dbalma},${dbcodigoa},0)";
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}
 
-			$sql="UPDATE itsinv SET existen=existen+$factor*$itcana WHERE codigo=$dbcodigoa AND alma=$dbalma";
+			$sql="UPDATE itsinv SET existen=existen+${factor}*${itcana} WHERE codigo=${dbcodigoa} AND alma=${dbalma}";
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}
 
-			$sql="UPDATE sinv   SET existen=existen+$factor*$itcana WHERE codigo=$dbcodigoa";
+			$sql="UPDATE sinv   SET existen=existen+${factor}*${itcana} WHERE codigo=${dbcodigoa}";
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}
 
@@ -3942,8 +3984,10 @@ class Sfac extends Controller {
 				unset($_POST["itiva_$i"]);
 				unset($_POST["sinvpeso_$i"]);
 				unset($_POST["sinvtipo_$i"]);
+				unset($_POST["combo_$i"]);
 			}
 			//Fin del corte por maxlin
+
 
 			//Realiza el corte de pago por maxlin
 			$cana = $do->count_rel('sfpa');
@@ -4187,7 +4231,6 @@ class Sfac extends Controller {
 			echo 'Presupuesto no existe';
 		}
 	}
-
 
 	function instalar(){
 		$campos = $this->db->list_fields('sfac');
