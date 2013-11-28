@@ -335,10 +335,11 @@ class Sinv extends Controller {
 			if (id)	{
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				var yurl = "";
-				$.prompt("<h1>Cambiar el codigo ("+ret.codigo+") por:</h1><center><input type=\'text\' id=\'mcodigo\' name=\'mcodigo\' value=\'"+$.trim(ret.codigo)+"\' maxlengh=\'10\' size=\'15\' ></center><br/>", {
+				$.prompt("<h1>Cambiar el codigo ("+ret.codigo+") por:</h1><center><input type=\'text\' id=\'mcodigo\' name=\'mcodigo\' value=\'"+$.trim(ret.codigo)+"\' maxlengh=\'10\' size=\'15\' ><br/>Mantener producto anterior <input type=\'checkbox\' id=\'mdeja\' name=\'mdeja\' value=\'1\' ><br/></center>", {
 					buttons: { Cambiar: true, Cancelar: false },
 					submit: function(e,v,m,f){
 						if (v) {
+							if ( f.mdeja != 1 ) { f.mdeja = 0;}
 							if( f.mcodigo == null ){
 								alert("Cancelado por el usuario");
 							} else if( f.mcodigo == "" ) {
@@ -351,16 +352,16 @@ class Sinv extends Controller {
 									url: \''.site_url('inventario/sinv/sinvcodigoexiste').'\',
 									global: false,
 									type: "POST",
-									data: ({ codigo : encodeURIComponent(mcodigo) }),
+									data: ({ codigo : encodeURIComponent(f.mcodigo) }),
 									dataType: "text",
 									async: false,
 									success: function(sino) {
 										if (sino.substring(0,1)=="S"){
-											confirm(
-												"Ya existe el codigo <div style=\"font-size: 200%;font-weight: bold \">"+mcodigo+"</"+"div>"+sino.substring(1)+"<p>si prosigue se eliminara el producto anterior y<br/> todo el movimiento de este, pasara al codigo "+mcodigo+"</"+"p> <p style=\"align: center;\">Desea <strong>Fusionarlos?</"+"strong></"+"p>",
-												"Confirmar Fusion",
+											apprise(
+												"Ya existe el codigo <div style=\"font-size: 200%;font-weight: bold \">"+f.mcodigo+"</"+"div><p>si prosigue se eliminara el producto anterior y<br/> todo el movimiento de este, pasara al codigo "+mcodigo+"</"+"p> <p style=\"align: center;\">Desea <strong>Fusionarlos?</"+"strong></"+"p>",
+												{"verify":true,"textYes":"Confirmar Fusion","textNo":"Cancelar"},
 												function(r){
-													if (r) { sinvcodigocambia("S", $.trim(ret.codigo), f.mcodigo ); }
+													if (r) { sinvcodigocambia("S", $.trim(ret.codigo), f.mcodigo, f.mdeja ); }
 												}
 											);
 										} else {
@@ -368,7 +369,7 @@ class Sinv extends Controller {
 												"<h1>Sustitur el codigo actual Por:</h1> <center><h2 style=\"background: #ddeedd\">"+f.mcodigo+"</"+"h2></"+"center> <p>Al cambiar de codigo el producto, todos los<br/> movimientos y estadisticas se cambiaran<br/> correspondientemente.</"+"p> ",
 												{"verify":true,"textYes":"Aceptar","textNo":"Cancelar"},
 												function(r) {
-													if (r) { sinvcodigocambia("N", $.trim(ret.codigo), f.mcodigo); }
+													if (r) { sinvcodigocambia("N", $.trim(ret.codigo), f.mcodigo, f.mdeja); }
 												}
 											)
 										}
@@ -388,7 +389,7 @@ class Sinv extends Controller {
 
 		//Cambia y fusiona codigo
 		$funciones .= '
-		function sinvcodigocambia( mtipo, mviejo, mcodigo ) {
+		function sinvcodigocambia( mtipo, mviejo, mcodigo, mdeja ) {
 			var id   = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			var ret  = $("#newapi'.$grid0.'").getRowData(id);
 			$.ajax({
@@ -397,7 +398,8 @@ class Sinv extends Controller {
 				type: "POST",
 				data: ({ tipo:  mtipo,
 					viejo: encodeURIComponent(mviejo),
-					codigo: encodeURIComponent(mcodigo) }),
+					codigo: encodeURIComponent(mcodigo),
+					deja: mdeja }),
 				dataType: "text",
 				async: false,
 				success: function(sino) {
@@ -4054,15 +4056,25 @@ class Sinv extends Controller {
 		$mexiste  = $this->input->post('tipo');
 		$mmcodigo = rawurldecode($this->input->post('codigo'));
 		$mviejoid = rawurldecode($this->input->post('viejo'));
+		$mdeja    = rawurldecode($this->input->post('deja'));
 
 		$mmviejo  = $mviejoid;
 		$mviejoid = $this->datasis->dameval('SELECT id FROM sinv WHERE codigo='.$this->db->escape($mviejoid));
 		$mviejo   = $this->db->escape($mmviejo);
 		$mcodigo  = $this->db->escape($mmcodigo);
 
-		if($mexiste=='S'){
-			$mSQL = "DELETE FROM sinv WHERE codigo=".$mviejo;
+		$vpond    = $this->datasis->dameval('SELECT pond   FROM sinv WHERE id='.$this->db->escape($mviejoid));
+		$vultimo  = $this->datasis->dameval('SELECT ultimo FROM sinv WHERE id='.$this->db->escape($mviejoid));
+		$vexisten = $this->datasis->dameval('SELECT COALESCE(sum(existen),0) FROM itsinv WHERE codigo='.$this->db->escape($mviejo));
+
+		if( $mexiste == 'S' ){
+			// Elimina anterior
+			$mSQL = "UPDATE sinv SET existen = 0 WHERE codigo=".$mviejo;
 			$this->db->query($mSQL);
+			if ( $mdeja == 0 ){
+				$mSQL = "DELETE FROM sinv WHERE codigo=".$mviejo;
+				$this->db->query($mSQL);
+			}
 		} else {
 			$mSQL = "UPDATE sinv SET codigo=".$mcodigo." WHERE codigo=".$mviejo;
 			$this->db->query($mSQL);
@@ -4075,6 +4087,8 @@ class Sinv extends Controller {
 			if ($query->num_rows() > 0 ) {
 				foreach ($query->result() as $row ) {
 					$dbalma = $this->db->escape($row->alma);
+					$mSQL = "INSERT IGNORE INTO itsinv SET codigo=".$mcodigo.", alma=$dbalma, existen=0";
+					$this->db->query($mSQL);
 					$mSQL   = "UPDATE itsinv SET existen=existen+".$row->existen."
 						WHERE codigo=$mcodigo AND alma=$dbalma";
 					$this->db->query($mSQL);
@@ -4083,7 +4097,14 @@ class Sinv extends Controller {
 			}
 
 			//Actualiza sinv
-			$mSQL = "UPDATE sinv SET existen=exiten+".$mexisten." WHERE codigo=".$mcodigo;
+			$mSQL = "UPDATE sinv SET 
+						pond   = (pond*existen   +".$mexisten."*".$vpond."  )/(existen +".$mexisten."), 
+						ultimo = (ultimo*existen +".$mexisten."*".$vultimo.")/(existen +".$mexisten.")
+			WHERE codigo=".$mcodigo;
+			$this->db->query($mSQL);
+
+			$mSQL = "UPDATE sinv SET existen=existen+".$mexisten." WHERE codigo=".$mcodigo;
+			$this->db->query($mSQL);
 
 			// Borra los items
 			$mSQL = "DELETE FROM itsinv WHERE codigo=".$mviejo;

@@ -14,7 +14,8 @@ class Bienvenido extends Controller {
 		$data['titulo1'] .= '</div>';
 
 		if ($this->datasis->login())
-		$data['titulo1']  .= '<p>&nbsp;</p>';
+			$data['titulo1']  .= '<p>&nbsp;</p>';
+			
 		$data['titulo1']  .= '</center>';
 		$this->layout->buildPage('bienvenido/home', $data);
 	}
@@ -51,6 +52,7 @@ class Bienvenido extends Controller {
 		$this->session->sess_destroy();
 		redirect();
 	}
+
 	function ingresar(){
 		$viene=$this->session->userdata('estaba');
 		$attributes       = array('name' => 'ingresar_form');
@@ -85,7 +87,6 @@ class Bienvenido extends Controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
-
 	function accordion($pertenece=NULL){
 		if(empty($pertenece)) return;
 		$out='';
@@ -110,12 +111,39 @@ class Bienvenido extends Controller {
 		echo $out;
 	}
 
+	function submenup($pertenece=NULL){
+		if(empty($pertenece)) return;
+		$out='';
+		$utf8c=($this->db->char_set=='latin1') && ($this->config->item('charset')=='UTF-8');
+		$arreglo=arr_menu(2,$pertenece);
+		$arreglo=arr2panel($arreglo);
+
+		if (count($arreglo)>0){
+			//$out ='<div id=\'accordion\'>';
+			foreach($arreglo as $panel => $opciones ){
+				$out .="<div class='myAccordion-declencheur'><h1>".htmlentities($panel)."</h1></div>\n";
+				$out .= "<div class='myAccordion-content'><table width='100%' cellspacing='0' border='0'>\n";
+				$color = "#FFFFFF";
+				foreach ($opciones as $opcion) {
+					$out .= "<tr bgcolor='$color'><td>";
+					$out .= arr2link($opcion,$utf8c);
+					$out .= "</td></tr>\n";
+					if ( $color == "#FFFFFF" ) $color = "#F4F4F4"; else  $color = "#FFFFFF";
+				}$out .="</table></div>\n";
+			}//$out .='</div>';
+		}
+		echo $out;
+	}
+
+
+
 	function error(){
 		$this->layout->buildPage('bienvenido/error');
 	}
 
 	function cargapanel($pertenece=NULL) {
 		if(empty($pertenece)) return;
+
 		$utf8c=($this->db->char_set=='latin1') && ($this->config->item('charset')=='UTF-8');
 		$dbpertenece = $this->db->escape($pertenece);
 		$out         = '';
@@ -127,13 +155,13 @@ class Bienvenido extends Controller {
 			$imagen = $this->datasis->dameval("SELECT TRIM(imagen) imagen  FROM intramenu WHERE modulo=${dbpertenece}");
 			if($utf8c) $desca= utf8_encode($desca);
 			$desca  = htmlentities($desca,ENT_COMPAT,'UTF-8');
-			$out   .= '<div>';
+			$out   .= '<div style="margin:0px 0px;">';
 			$out   .= '<table width="100%" border="0"><tr>';
 			if ( strlen($imagen) == 0  )
 				$out .= '<td>&nbsp;</td>';
 			else
-				$out .= '<td width="90">'.img(array('src'=>'images/'.$imagen,'height'=>60)).'</td>';
-			$out .= '<td><h2>'.$desca.'</h2></td>';
+				$out .= '<td width="70">'.img(array('src'=>'images/'.$imagen,'height'=>30)).'</td>';
+			$out .= '<td style="font-size:1.4em;font-weigth:bold">'.$desca.'</td>';
 			$out .= '</tr></table>';
 			$out .= '</div>';
 			$out .= '<div id="maso">';
@@ -141,13 +169,12 @@ class Bienvenido extends Controller {
 
 			foreach($arreglo as $panel => $opciones){
 				$i++;
-
 				if($panel != 'REPORTES' && $panel != 'CONSULTAS'){
 
 					if($pertenece == '9')
-						$out .= '<div class=\'box col1\' style="color:#FAFAFA;background:#C11B17;"><span style="font-size:16px;font-weight:900;margin-bottom:20px">'.htmlentities($panel).'</span>';
+						$out .= '<div class=\'box col1\' style="color:#FAFAFA;background:#C11B17;"><span style="font-size:1.1em;font-weight:900;margin-bottom:18px">'.htmlentities($panel).'</span>';
 					else
-						$out .= '<div class=\'box col1\' style="color:#030C3F;background:#COCOCO;"><span style="font-size:16px;font-weight:900;margin-bottom:20px">'.htmlentities($panel).'</span>';
+						$out .= '<div class=\'box col1\' style="color:#030C3F;background:#COCOCO;"><span style="font-size:1.1em;font-weight:900;margin-bottom:18px">'.htmlentities($panel).'</span>';
 
 					$out .= '<table width=\'100%\' cellspacing=\'1\' border=\'0\'>';
 					foreach ($opciones as $id=>$opcion) {
@@ -158,7 +185,6 @@ class Bienvenido extends Controller {
 					}
 					$out .='</table></div>';
 				}
-
 			}
 			$out .= '</div>';
 		}

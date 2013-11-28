@@ -871,7 +871,7 @@ class Conv extends Controller {
 
 	function _post_insert($do){
 		$alma   = $do->get('almacen');
-		$codigo = $do->get('numero');
+		$numero = $do->get('numero');
 		$cana   = $do->count_rel('itconv');
 		for($i=0;$i<$cana;$i++){
 			$codigo = $do->get_rel('itconv','codigo' ,$i);
@@ -886,7 +886,7 @@ class Conv extends Controller {
 			$ban=$this->db->simple_query($mSQL);
 			if(!$ban){ memowrite($mSQL,'conv');}
 
-			if($monto<0){
+			if( $monto < 0 ) {   // Salida 
 				$peso=$this->pesos[$codigo]*$monto;
 				$participa=$peso/$this->peso_salida;
 				$ncosto   =round($this->costo_entrada*$participa/$monto,2);
@@ -906,12 +906,13 @@ class Conv extends Controller {
 					WHERE codigo='.$dbcodigo;
 					$ban=$this->db->simple_query($mSQL);
 					if(!$ban){ memowrite($mSQL,'conv');}
-			}else{
-				$mSQL="UPDATE sinv SET existen=existen+($monto) WHERE codigo=${dbcodigo}";
+			} else { // Entrada
+				$mSQL= "UPDATE sinv SET existen = existen+($monto) WHERE codigo=${dbcodigo}";
 				$ban=$this->db->simple_query($mSQL);
 				if(!$ban){ memowrite($mSQL,'conv');}
 			}
 		}
+	
 
 		//trafrac ittrafrac
 		logusu('conv',"Conversion ${codigo} CREADO");

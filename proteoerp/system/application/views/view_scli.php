@@ -8,19 +8,21 @@ if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unk
 	$meco = str_replace('class="tablerow"','class="tablerow" style="font-size:20px; align:center;" ',$meco);
 	echo $meco."</td><td align='center'>".img("images/borrar.jpg");
 else:
+	echo $script; 
+	echo $form_scripts;
+	echo "\n<div id='diveditor' style='font-size:'10px;'>\n"; 
+	echo $form_begin; 
 ?>
-<?php echo $script; ?>
-
-<?php echo $form_scripts; ?>
-
-<?php echo $form_begin; ?>
+<style>
+#maintabcontainer ul { font-size: 9px; }
+</style>
 
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 <fieldset style='border: 1px outset #9AC8DA;background: #F6F8FF;'>
-<table border='0' width="100%">
+<table border='0' width="100%"  >
 	<tr>
 		<td>
-			<table border='0' width="100%">
+			<table border='0' width="100%" cellspacing='0' cellpadding='0' >
 				<tr>
 					<td width="100" class="littletableheaderc"><?php echo $form->cliente->label  ?></td>
 					<td width="100" class="littletablerow" ><?php    echo $form->cliente->output ?></td>
@@ -43,18 +45,15 @@ else:
 			</table>
 		</td>
 		<td valign='top' width='25%'>
-			<table border=0 width="100%">
+			<table border=0 width="100%"  cellspacing='0' cellpadding='0'>
 				<tr>
 					<td class="littletableheaderc"> <?php echo $form->tipo->label ?></td>
 					<td class="littletablerow"><?php     echo $form->tipo->output ?></td>
 				</tr><tr>
 					<td colspan='2'>
 					<fieldset style='border: 1px dotted #8AF8F8;background: #FAFAFF;'>
-						<table width= '100%' >
+						<table width= '100%'  cellspacing='0' cellpadding='0'>
 							<tr>
-								<td class="littletableheaderc"><?php echo $form->mmargen->label; ?></td>
-								<td class="littletablerow"    ><?php echo $form->mmargen->output; ?></td>
-							</tr><tr>
 								<td colspan="2" class="littletableheaderc">
 									<?php echo $form->entidad->label;  ?>
 									<?php echo $form->entidad->output;  ?>
@@ -96,7 +95,7 @@ else:
 	<table border='0' width="100%">
 	<tr>
 		<td valign='top' width='50%'>
-			<table border='0' width='100%' >
+			<table border='0' width='100%'  cellspacing='0' cellpadding='0'>
 				<tr>
 					<td colspan='2' class="littletableheaderc">Direcci&oacute;n de Oficina</td>
 				</tr><tr>
@@ -110,7 +109,7 @@ else:
 			</table>
 		</td>
 		<td valign='top' width='50%'>
-			<table border='0'  width='100%'>
+			<table border='0'  width='100%' cellspacing='0' cellpadding='0'>
 				<tr>
 					<td colspan='2' class="littletableheaderc">Direcci&oacute;n de Env&iacute;o</td>
 				</tr><tr>
@@ -126,7 +125,7 @@ else:
 	</tr>
 	</table>
 	<br />
-	<table style='height: 100%;width: 100%;border: 1px dotted;'>
+	<table style='height: 100%;width: 100%;border: 1px dotted; cellspacing:0, cellpadding:0' >
 	<tr>
 		<td width="70" class="littletableheaderc"><?php echo $form->telefono->label  ?></td>
 		<td class="littletablerow"    ><?php echo $form->telefono->output ?></td>
@@ -151,53 +150,60 @@ else:
 	</div>
         <div id="tab2" style='background:#EEFFFF'>
 		<table width="100%" border='0' >
-		<tr>
-			<td class="littletableheaderc">Representante Legal</td>
-			<td class="littletablerow"><?php echo $form->repre->output ?></td>
-			<td class="littletableheaderc">C.I.</td>
-			<td class="littletablerow"><?php echo $form->cirepre->output ?></td>
-		</tr>
-		<tr>
-			<td class="littletableheaderc"><?php echo $form->vendedor->label  ?></td>
-			<td class="littletablerow"><?php echo $form->vendedor->output ?></td>
-			<td class="littletableheaderc">Comisi&oacute;n %</td>
-			<td class="littletablerow"><?php echo $form->porvend->output ?></td>
-		</tr>
-		<tr>
-			<td class="littletableheaderc"><?php echo $form->cobrador->label  ?></td>
-			<td class="littletablerow"><?php echo $form->cobrador->output ?></td>
-			<td class="littletableheaderc">Comisi&oacute;n %</td>
-			<td class="littletablerow"><?php echo $form->porcobr->output ?></td>
-		</tr>
-		<tr>
-			<td class="littletableheaderc">Cuenta Contable</td>
-			<td class="littletablerow"    ><?php echo $form->cuenta->output; ?>
-			<?php
-			if(!empty($form->cuenta->value)){
-				$dbcuenta=$this->db->escape(trim($form->cuenta->value));
-				$mSQL = "SELECT descrip FROM cpla WHERE codigo=${dbcuenta} limit 1";
-				echo $this->datasis->dameval($mSQL);
-			}
-			?>
-			</td>
-			<td class="littletableheaderc"><?php echo $form->sucursal->label;    ?></td>
-			<td class="littletablerow"    ><?php echo $form->sucursal->output;   ?></td>
-		</tr>
-		<tr>
-			<td class="littletableheaderc">Cuenta Anticipo</td>
-			<td class="littletablerow"    ><?php echo $form->canticipo->output; ?>
-			<?php
-			if(!empty($form->canticipo->value)){
-				$dbcanticipo=$this->db->escape(trim($form->canticipo->value));
-				$mSQL = "SELECT descrip FROM cpla WHERE codigo=${dbcanticipo} LIMIT 1";
-				echo $this->datasis->dameval($mSQL);
-			}
-			?>
-			</td>
-			<td class="littletableheaderc"><?php echo $form->aniversario->label;    ?></td>
-			<td class="littletablerow"    ><?php echo $form->aniversario->output;   ?></td>
-		</tr>
+			<tr>
+				<td class="littletableheaderc">Representante Legal</td>
+				<td class="littletablerow"><?php echo $form->repre->output ?></td>
+				<td class="littletableheaderc">C.I.</td>
+				<td class="littletablerow"><?php echo $form->cirepre->output ?></td>
+			</tr>
+			<tr>
+				<td class="littletableheaderc"><?php echo $form->vendedor->label  ?></td>
+				<td class="littletablerow"><?php echo $form->vendedor->output ?></td>
+				<td class="littletableheaderc">Comisi&oacute;n %</td>
+				<td class="littletablerow"><?php echo $form->porvend->output ?></td>
+			</tr>
+			<tr>
+				<td class="littletableheaderc"><?php echo $form->cobrador->label  ?></td>
+				<td class="littletablerow"><?php echo $form->cobrador->output ?></td>
+				<td class="littletableheaderc">Comisi&oacute;n %</td>
+				<td class="littletablerow"><?php echo $form->porcobr->output ?></td>
+			</tr>
+			<tr>
+				<td class="littletableheaderc">Cuenta Contable</td>
+				<td class="littletablerow"    ><?php echo $form->cuenta->output; ?>
+				<?php
+				if(!empty($form->cuenta->value)){
+					$dbcuenta=$this->db->escape(trim($form->cuenta->value));
+					$mSQL = "SELECT descrip FROM cpla WHERE codigo=${dbcuenta} limit 1";
+					echo $this->datasis->dameval($mSQL);
+				}
+				?>
+				</td>
+				<td class="littletableheaderc"><?php echo $form->sucursal->label;    ?></td>
+				<td class="littletablerow"    ><?php echo $form->sucursal->output;   ?></td>
+			</tr>
+			<tr>
+				<td class="littletableheaderc">Cuenta Anticipo</td>
+				<td class="littletablerow"    ><?php echo $form->canticipo->output; ?>
+				<?php
+				if(!empty($form->canticipo->value)){
+					$dbcanticipo=$this->db->escape(trim($form->canticipo->value));
+					$mSQL = "SELECT descrip FROM cpla WHERE codigo=${dbcanticipo} LIMIT 1";
+					echo $this->datasis->dameval($mSQL);
+				}
+				?>
+				</td>
+				<td class="littletableheaderc"><?php echo $form->aniversario->label;    ?></td>
+				<td class="littletablerow"    ><?php echo $form->aniversario->output;   ?></td>
+			</tr>
 		</table>
+		<table>
+			<tr>
+				<td class="littletableheaderc"><?php echo $form->mmargen->label; ?></td>
+				<td class="littletablerow"    ><?php echo $form->mmargen->output; ?></td>
+			</tr>
+		</table>
+
 	</tr>
 	</table>
 	</fieldset>
@@ -234,4 +240,5 @@ else:
 
 <?php echo $container_bl.$container_br; ?>
 <?php echo $form_end?>
+</div>
 <?php endif; ?>

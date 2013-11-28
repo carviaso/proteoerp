@@ -1,3 +1,3 @@
-<div id='home'>
+<!--div id='home' -->
 	<?php echo $titulo1 ?>
-</div>
+<!--/div -->

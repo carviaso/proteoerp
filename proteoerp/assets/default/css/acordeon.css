@@ -1,5 +1,5 @@
 /* -------------------------------------------------------- */
-div#accordion {
+div #accordion {
 	border: 0px solid #1F669B;
 	width: 175px;
 	font-family: 'Helvetica', sans-serif;
@@ -7,15 +7,15 @@ div#accordion {
 	padding-left: 2px;
 }
 
-div#accordion h1 {
+div #accordion h1 {
 	padding: 4px 6px 4px 6px;
 	margin: 0;
-	font-size: 12px;
+	font-size: 0.75em;
 	color: #4F1010;
 	background: url(accor_tbg.gif);
 }
 
-div#accordion h1 #visible {
+div #accordion h1 #visible {
 	color: #CED7EF;
 	background-color: #63699C;
 }
@@ -34,7 +34,7 @@ div#accordion div.myAccordion-content {
 
 #accordion a:link,#accordion a:visited {
 	color: #5D6C81;
-	font-size: 12px;
+	font-size: 0.7em;
 	font-weight: bold;
 	text-decoration: none;
 }

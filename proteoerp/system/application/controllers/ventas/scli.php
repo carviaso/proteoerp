@@ -230,7 +230,6 @@ class Scli extends validaciones {
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
 		$botones ='
-				"SENIAT":   function() { consulrif("rifci"); },
 				"C.N.E.":   function() { consulcne("rifci"); },';
 
 		// Marcas
@@ -243,7 +242,7 @@ class Scli extends validaciones {
 			});
 		});';
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "550", $width = "800",'','',$botones );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "470", $width = "800",'','',$botones );
 
 
 /*

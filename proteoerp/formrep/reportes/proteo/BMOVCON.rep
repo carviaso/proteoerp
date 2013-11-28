@@ -1,0 +1,103 @@
+$filter = new DataFilter("Filtro del Reporte");
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->desde = new dropdownField("Desde", "desde"); 
+$filter->desde->clause="";
+$filter->desde->options("SELECT ano codigo, ano FROM bsal WHERE ano<=YEAR(curdate()) GROUP BY ano ORDER BY ano DESC ");  
+
+$filter->hasta = new dropdownField("Hasta", "hasta"); 
+$filter->hasta->clause="";
+$filter->hasta->options("SELECT ano codigo, ano FROM bsal WHERE ano<=YEAR(curdate()) GROUP BY ano ORDER BY ano DESC ");  
+
+$filter->banco = new dropdownField("Caja/Banco", "codbanc"); 
+$filter->banco->db_name="codbanc"; 
+$filter->banco->clause="";
+$filter->banco->option("","");  
+$filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");  
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons("search");
+$filter->build();
+if($this->rapyd->uri->is_set("search")){
+
+	$mdesde = $filter->desde->newValue;
+	$mhasta = $filter->hasta->newValue;
+	$mbanco = $filter->banco->newValue;
+
+	$mSQL = '
+SELECT ano, mes, debe, haber, libros, banco, nocon, transito, @sl := @sl + libros slibros, @sb := @sb + banco sbanco
+FROM (
+SELECT ano, mes, SUM(debe)   debe, SUM(haber)  haber, SUM(libros) libros,SUM(banco)  banco,SUM(nocon) nocon,SUM(transito) transito
+FROM (
+SELECT YEAR(fecha) ano, MONTH(fecha) mes, 
+SUM(if(tipo_op IN ("DE","NC"),monto, 0 ))                 debe, 
+SUM(if(tipo_op IN ("DE","NC"),0,monto ))                  haber, 
+SUM(if(tipo_op IN ("DE","NC"),1,-1 )*monto)               libros,
+0  banco,
+SUM(if(tipo_op IN ("DE","NC"),1,-1 )*monto*(liable!="S")) nocon,
+SUM(if(tipo_op IN ("DE","NC"),1,-1 )*monto*(liable ="S" AND MONTH(concilia)<>MONTH(fecha))) transito
+FROM bmov 
+WHERE codbanc="'.$mbanco.'" AND YEAR(fecha) >= '.$mdesde.' AND  YEAR(fecha)<='.$mhasta.' AND anulado<>"S"
+GROUP BY ano, mes 
+UNION  ALL
+SELECT YEAR(concilia) ano, MONTH(concilia) mes, 0 debe, 0 haber, 0 libros,SUM(if(tipo_op IN ("DE","NC"),1,-1 )*monto*(liable ="S")) banco,0 nocon,0 transito
+FROM bmov 
+WHERE codbanc="'.$mbanco.'" AND YEAR(concilia) >= '.$mdesde.' AND  YEAR(concilia)<='.$mhasta.' AND anulado<>"S"
+GROUP BY ano, mes 
+) ggg
+GROUP BY ano, mes 
+UNION ALL
+SELECT ano, mes, debe, haber, sum(libros) libros, sum(banco) banco, nocon, transito FROM ( 
+SELECT ano, 0 mes, 0 debe, 0 haber, saldo libros, saldo banco, 0 nocon, 0 transito FROM bsal 
+WHERE codbanc="'.$mbanco.'" AND ano = '.$mdesde.'
+UNION ALL
+SELECT '.$mdesde.' ano, 0, 0, 0, 0, SUM(if(tipo_op IN ("DE","NC"),-1,1 )*monto) banco, 0, 0
+FROM bmov 
+WHERE YEAR(fecha) < '.$mdesde.' 
+AND YEAR(concilia)>='.$mdesde.' 
+AND liable="S" AND codbanc="'.$mbanco.'"
+) hhh
+GROUP BY ano
+ORDER BY ano, mes
+) aaa, (SELECT @sl := 0) b, (SELECT @sb := 0) c
+';
+
+	//echo $mSQL;
+	
+	$sobretabla='';
+	if (!empty($filter->banco->newValue)) $sobretabla.=' Banco: '.$filter->banco->description;
+ 
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Analisis de Conciliaciones");
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->setSubTitulo("Desde: ".$mdesde);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+	$pdf->AddCol('mes',      15, 'Mes',         'C',8);
+	$pdf->AddCol('debe',     22, 'Debe',        'R',8);
+	$pdf->AddCol('haber',    22, 'Haber',       'R',8);
+	$pdf->AddCol('libros',   22, 'Libros',      'R',8);
+	$pdf->AddCol('banco',    22, 'Banco',       'R',8);
+	$pdf->AddCol('nocon',    22, 'No Concil',   'R',8);
+	$pdf->AddCol('transito', 22, 'Transito',    'R',8);
+	$pdf->AddCol('slibros',  22, 'Saldo Libro', 'R',8);
+	$pdf->AddCol('sbanco',   22, 'Saldo Banco', 'R',8);
+
+	$pdf->setTotalizar('debe','haber','libros','banco','nocon');
+	$pdf->setGrupoLabel(' <#ano#> ');
+	$pdf->setGrupo('ano');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data["filtro"] = $filter->output;
+	$data["titulo"] = '<h2 class="mainheader">Análisis de Conciliaciones<h2>';
+	$data["head"] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

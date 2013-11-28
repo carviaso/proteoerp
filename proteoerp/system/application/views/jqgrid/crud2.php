@@ -32,7 +32,7 @@ $cintu = '
 
 if ( isset($LayoutStyle) == false ){
 	$LayoutStyle = '
-html, body {margin: 0; padding: 0; overflow: hidden; font-size: 75%;}
+html, body {margin: 0; padding: 0; overflow: hidden; font-size: 12px; }
 /*Splitter style */
 #LeftPane  {padding: 2px; overflow: auto;}
 #RightPane {padding: 2px; overflow: auto;}
@@ -167,10 +167,10 @@ if (isset($otros)) {
 echo style('rapyd.css');
 echo style('ventanas.css');
 ?>
-<link rel="stylesheet" href="<?php echo site_url("system/application/rapyd/libraries/jscalendar/calendar.css") ?>" type="text/css" />
-<link rel="stylesheet" href="<?php echo site_url("system/application/rapyd/elements/proteo/css/rapyd_components.css") ?>" type="text/css" />
 <?php
+//<link rel="stylesheet" href="<?php echo site_url("system/application/rapyd/libraries/jscalendar/calendar.css") ? >" type="text/css" />
 //Array de Temas Adicionales
+//<link rel="stylesheet" href="<?php echo site_url("system/application/rapyd/elements/proteo/css/rapyd_components.css") ? >" type="text/css" />
 if ( isset($temas) ) {
 	foreach( $temas as $temaco ){echo style('themes/'.$temaco.'/'.$temaco.'.css');}
 }
@@ -207,10 +207,6 @@ echo style('themes/ui.jqgrid.css');
 echo script('i18n/grid.locale-sp.js');
 echo script('jquery.jqGrid.min.js');
 
-echo "\n<!-- DATAGRID -->\n";
-echo script('datagrid/datagrid.js');
-echo style('../datagrid/datagrid.css');
-
 echo "\n<!-- LAYOUT -->\n";
 echo script('jquery.layout.js');
 
@@ -244,7 +240,8 @@ echo script('jquery.jqGrid.min.js');
 html.ui-autocomplete {height: 150px;width: 600px;}
 <?php echo $LayoutStyle; ?>
 
-th.ui-th-column div{white-space:normal !important;height:auto !important;padding:2px;}
+/*th.ui-th-column div{white-space:normal !important;height:auto !important;padding:2px;}*/
+
 
 </style>
 
@@ -304,7 +301,7 @@ function esperar(url){
 
 </script>
 </head>
-<body id="dt_proteo">
+<body  id="dt_proteo">
 
 <?php 
 if ( $target <> 'dialogo')

@@ -81,13 +81,16 @@ class Layout_model extends Model {
 		if ($this->session->userdata('logged_in')){
 			$retval['idus']='Usuario: '.$this->session->userdata('nombre');
 		}else{
-			$attributes  = array('name' => 'user_form','autocomplete'=>'off');
-			$retval['idus'] = form_open('bienvenido/autentificar',$attributes);
-			$attributes  = array('name' => 'user','size' => '6','autocomplete'=>'off');
-			$retval['idus'] .='<label>Usuario: </label>'.form_input($attributes);
-			$attributes  = array('name' => 'pws','size' => '6','type' => 'password','autocomplete'=>'off');
-			$retval['idus'] .='<label> Clave:  </label>'.form_input($attributes);
-			$retval['idus'] .=form_submit('usr_submit', 'Enviar').form_close();
+			$attributes      = array('name' => 'user_form','autocomplete'=>'off');
+			$retval['idus']  = form_open('bienvenido/autentificar',$attributes);
+			
+			$attributes      = array('name' => 'user','size' => '9','autocomplete'=>'off');
+			$retval['idus'] .='<table><tr><td><label>Usuario: </label></td><td>'.form_input($attributes).'</td></tr>';
+			
+			$attributes      = array('name' => 'pws','size' => '9','type' => 'password','autocomplete'=>'off');
+			$retval['idus'] .='<tr><td><label> Clave: </label></td><td>'.form_input($attributes).'</td></tr>';
+			
+			$retval['idus'] .='<tr><td></td><td>'.form_submit('usr_submit', 'Entrar').'</td></tr></table>'.form_close();
 		}
 		return $this->layout->load->view($this->common . "idus", $retval, true);
 	}
@@ -97,5 +100,4 @@ class Layout_model extends Model {
 		return $this->layout->load->view($this->common . "copyright", $data, true);
 	}
 }
-
 ?>
