@@ -1517,7 +1517,7 @@ class Datasis {
 	//**************************************************
 	// Modifica Intramenu
 	//
-	function sinvrecalcular( $mTIPO = 'P' ){
+	function sinvrecalcular( $mTIPO = 'P', $mcodigo='' ){
 		$CI =& get_instance();
 
 		if ( $mTIPO == 'P' ){
@@ -1532,8 +1532,10 @@ class Datasis {
 				base2=ROUND(pond*100/(100-margen2),2),
 				base3=ROUND(pond*100/(100-margen3),2),
 				base4=ROUND(pond*100/(100-margen4),2)
-			WHERE formcal='P' ;";
-			$CI->db->simple_query($mSQL);
+			WHERE formcal='P' ";
+			
+			if ( $mcodigo != '' ) $mSQL .= " AND codigo = ".$mcodigo." " ;
+			$CI->db->query($mSQL);
 
 
 			$mSQL = "
@@ -1546,8 +1548,9 @@ class Datasis {
 				base2=ROUND(ultimo*100/(100-margen2),2),
 				base3=ROUND(ultimo*100/(100-margen3),2),
 				base4=ROUND(ultimo*100/(100-margen4),2)
-			WHERE formcal='U' ;";
-			$CI->db->simple_query($mSQL);
+			WHERE formcal='U' ";
+			if ( $mcodigo != '' ) $mSQL .= " AND codigo = ".$mcodigo." " ;
+			$CI->db->query($mSQL);
 
 
 			$mSQL = "
@@ -1560,8 +1563,9 @@ class Datasis {
 				base2=ROUND(GREATEST(ultimo,pond)*100/(100-margen2),2),
 				base3=ROUND(GREATEST(ultimo,pond)*100/(100-margen3),2),
 				base4=ROUND(GREATEST(ultimo,pond)*100/(100-margen4),2)
-			WHERE formcal='M' ;";
-			$CI->db->simple_query($mSQL);
+			WHERE formcal='M' ";
+			if ( $mcodigo != '' ) $mSQL .= " AND codigo = ".$mcodigo." " ;
+			$CI->db->query($mSQL);
 
 			$mSQL = "
 			UPDATE sinv SET
@@ -1573,8 +1577,9 @@ class Datasis {
 				base2=ROUND(standard*100/(100-margen2),2),
 				base3=ROUND(standard*100/(100-margen3),2),
 				base4=ROUND(standard*100/(100-margen4),2)
-			WHERE formcal='S' ;";
-			$CI->db->simple_query($mSQL);
+			WHERE formcal='S' ";
+			if ( $mcodigo != '' ) $mSQL .= " AND codigo = ".$mcodigo." " ;
+			$CI->db->query($mSQL);
 
 		} else if ($mTIPO == 'M') {
 
@@ -1584,8 +1589,9 @@ class Datasis {
 				margen2 = 100-ROUND(pond*100/base2,2),
 				margen3 = 100-ROUND(pond*100/base3,2),
 				margen4 = 100-ROUND(pond*100/base4,2)
-			WHERE formcal = 'P' ;";
-			$CI->db->simple_query($mSQL);
+			WHERE formcal = 'P' ";
+			if ( $mcodigo != '' ) $mSQL .= " AND codigo = ".$mcodigo." " ;
+			$CI->db->query($mSQL);
 
 			$mSQL = "
 			UPDATE sinv SET
@@ -1593,8 +1599,9 @@ class Datasis {
 				margen2=100-ROUND(ultimo*100/base2,2),
 				margen3=100-ROUND(ultimo*100/base3,2),
 				margen4=100-ROUND(ultimo*100/base4,2)
-			WHERE formcal='U' ;";
-			$CI->db->simple_query($mSQL);
+			WHERE formcal='U' ";
+			if ( $mcodigo != '' ) $mSQL .= " AND codigo = ".$mcodigo." " ;
+			$CI->db->query($mSQL);
 
 			$mSQL = "
 			UPDATE sinv SET
@@ -1602,8 +1609,9 @@ class Datasis {
 				margen2=100-ROUND(GREATEST(ultimo,pond)*100/base2,2),
 				margen3=100-ROUND(GREATEST(ultimo,pond)*100/base3,2),
 				margen4=100-ROUND(GREATEST(ultimo,pond)*100/base4,2)
-			WHERE formcal='M' ;";
-			$CI->db->simple_query($mSQL);
+			WHERE formcal='M' ";
+			if ( $mcodigo != '' ) $mSQL .= " AND codigo = ".$mcodigo." " ;
+			$CI->db->query($mSQL);
 
 			$mSQL = "
 			UPDATE sinv SET
@@ -1611,8 +1619,9 @@ class Datasis {
 				margen2=100-ROUND(standard*100/base2,2),
 				margen3=100-ROUND(standard*100/base3,2),
 				margen4=100-ROUND(standard*100/base4,2)
-			WHERE formcal='S' ;";
-			$CI->db->simple_query($mSQL);
+			WHERE formcal='S' ";
+			if ( $mcodigo != '' ) $mSQL .= " AND codigo = ".$mcodigo." " ;
+			$CI->db->query($mSQL);
 
 		}
 

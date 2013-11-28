@@ -4203,6 +4203,8 @@ class Sinv extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
+		$this->datasis->sinvrecalcular("P",$mcodigo);
+
 		$mSQL = "INSERT INTO sinvfusion SET anterior=".$mviejo.", nuevo=".$mcodigo.", usuario=".$this->db->escape($this->session->userdata('usuario'));
 		$this->db->simple_query($mSQL);
 
@@ -6197,7 +6199,7 @@ class Sinv extends Controller {
 		}
 
 		if(!$this->db->table_exists('sinvlote')){
-			$mSQL="CREATE TABLE `sinvlote` (
+			$mSQL="CREATE TABLE sinvlote (
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
 				`codigo` VARCHAR(15) NULL,
 				`cantidad` DECIMAL(10,2) NULL,
