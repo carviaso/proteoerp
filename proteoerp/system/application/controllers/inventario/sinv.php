@@ -671,7 +671,7 @@ class Sinv extends Controller {
 				$.post("'.site_url('inventario/sinv/dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog({
-						autoOpen: false, height: 450, width: 800, modal: true,
+						autoOpen: false, height: 450, width: 700, modal: true,
 						buttons: {
 							"Guardar": function(){
 								var murl = $("#df1").attr("action");
@@ -2556,7 +2556,7 @@ class Sinv extends Controller {
 
 		$grid->showpager(true);
 		$grid->setWidth('');
-		$grid->setHeight('250');
+		$grid->setHeight('200');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');

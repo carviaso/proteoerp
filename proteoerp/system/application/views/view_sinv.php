@@ -82,7 +82,7 @@ $link14=site_url('inventario/common/get_grupo');
 <style >
 .ui-autocomplete {max-height: 150px;overflow-y: auto;max-width: 600px;}
 html.ui-autocomplete {height: 150px;width: 600px;}
-#maintabcontainer ul { font-size: 8px; }
+#maintabcontainer ul { font-size: 9px; }
 </style>
 
 <?php if($form->_status!='show'){ ?>
@@ -1358,7 +1358,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 
 <?php if(($form->_dataobject->get('tipo')=='Combo' && $form->_status=='show') || $form->_status!='show'){?>
 <div id="tab7" style='background:#EFEFFF'>
-	<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
+	<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:150px'>
 		<table width='100%' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL_SINVCOMBO__'>
 				<td bgcolor='#7098D0'><b>C&oacute;digo</b></td>
