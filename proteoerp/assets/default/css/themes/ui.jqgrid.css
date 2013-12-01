@@ -1,5 +1,5 @@
 /*Grid*/
-.ui-jqgrid {position: relative; font-size:.8em;}
+.ui-jqgrid {position: relative; font-size:.95em;}
 .ui-jqgrid .ui-jqgrid-view {position: relative;left:0px; top: 0px; padding: .0em;}
 /* caption*/
 .ui-jqgrid .ui-jqgrid-titlebar {padding: .3em .2em .2em .3em; position: relative; border-left: 0px none;border-right: 0px none; border-top: 0px none;}
@@ -94,7 +94,7 @@ tr.ui-search-toolbar select {margin: 1px 0px 0px 0px}
 /* Form edit */
 .ui-jqdialog-content .FormGrid {margin: 0px;}
 .ui-jqdialog-content .EditTable { width: 100%; margin-bottom:0em;}
-.ui-jqdialog-content .DelTable { width: 100%; margin-bottom:0em;}
+.ui-jqdialog-content .DelTable  { width: 100%; margin-bottom:0em;}
 .EditTable td input, .EditTable td select, .EditTable td textarea {margin: 0em;}
 .EditTable td textarea { width:auto; height:auto;}
 .ui-jqdialog-content td.EditButton {text-align: right;border-top: 0px none;border-left: 0px none;border-right: 0px none; padding-bottom:5px; padding-top:5px;}

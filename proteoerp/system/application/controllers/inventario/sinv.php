@@ -588,7 +588,7 @@ class Sinv extends Controller {
 				$("#fborra").html("");
 				$("#fedita").html(data);
 				$("#fedita").dialog({
-					autoOpen: false, height: 550, width: 800, modal: true,
+					autoOpen: false, height: 450, width: 700, modal: true,
 					buttons: {
 						"Guardar y Cerrar": function(){
 							var murl = $("#df1").attr("action");
@@ -671,7 +671,7 @@ class Sinv extends Controller {
 				$.post("'.site_url('inventario/sinv/dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog({
-						autoOpen: false, height: 550, width: 800, modal: true,
+						autoOpen: false, height: 450, width: 800, modal: true,
 						buttons: {
 							"Guardar": function(){
 								var murl = $("#df1").attr("action");
@@ -1179,7 +1179,7 @@ class Sinv extends Controller {
 			'editoptions'   => '{ value: '.$amarca.',  style:"width:200px"}',
 			'stype'         => "'text'",
 		));
-
+/*
 		$grid->addField('descrip2');
 		$grid->label('Descripci&oacute;n 2');
 		$grid->params(array(
@@ -1190,7 +1190,7 @@ class Sinv extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:45, maxlength: 45 }',
 		));
-
+*/
 
 		$grid->addField('unidad');
 		$grid->label('Unidad');
@@ -1582,7 +1582,7 @@ class Sinv extends Controller {
 		));
 
 
-		$grid->addField('fechac');
+		$grid->addField('pfecha1');
 		$grid->label('F. Compra');
 		$grid->params(array(
 			'search'        => 'true',
@@ -3042,7 +3042,7 @@ class Sinv extends Controller {
 		$edit->ficha = new textareaField('Ficha Tecnica', 'ficha');
 		$edit->ficha->rule = 'trim';
 		$edit->ficha->cols = 85;
-		$edit->ficha->rows = 11;
+		$edit->ficha->rows = 9;
 
 		$edit->peso  = new inputField('Peso', 'peso');
 		$edit->peso->size=10;

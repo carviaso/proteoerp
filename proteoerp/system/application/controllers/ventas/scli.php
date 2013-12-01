@@ -54,7 +54,6 @@ class Scli extends validaciones {
 		);
 
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
-		//$SouthPanel .= '<a href="'.site_url($this->url.'getdata').'" class="ayuda1">Ayuda</a>';
 
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
@@ -229,8 +228,7 @@ class Scli extends validaciones {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$botones ='
-				"C.N.E.":   function() { consulcne("rifci"); },';
+		$botones ='"C.N.E.": function() { consulcne("rifci"); },';
 
 		// Marcas
 		$bodyscript .= '
@@ -242,50 +240,7 @@ class Scli extends validaciones {
 			});
 		});';
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "470", $width = "800",'','',$botones );
-
-
-/*
-		$bodyscript .= '
-		$("#fedita").dialog({
-			autoOpen: false, height: 550, width: 800, modal: true,
-			buttons: {
-				"Guardar": function() {
-					var bValid = true;
-					var murl = $("#df1").attr("action");
-					var id  = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
-					allFields.removeClass( "ui-state-error" );
-					$.ajax({
-						type: "POST", dataType: "html", async: false,
-						url: murl,
-						data: $("#df1").serialize(),
-						success: function(r,s,x){
-							if ( r.length == 0 ) {
-								$( "#fedita" ).dialog("close");
-								grid.trigger("reloadGrid");
-								$.prompt("<h1>Registro Guardado</h1>",{
-									submit: function(e,v,m,f){
-										setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',id);}, 500);
-									}
-								});
-								return true;
-							} else {
-								$("#fedita").html(r);
-							}
-						}
-
-					}
-				)},
-				"SENIAT":   function() { consulrif("rifci"); },
-				"C.N.E.":   function() { consulcne("rifci"); }
-				"Cancelar": function() { $(this).dialog("close"); },
-			},
-			close: function(){
-				allFields.val("").removeClass("ui-state-error");
-				$("#fedita").html("");
-			}
-		});';
-*/
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "450", $width = "700",'','',$botones );
 
 		$bodyscript .= '
 		$("#feditcr").dialog({
@@ -327,7 +282,7 @@ class Scli extends validaciones {
 			}
 		});';
 
-		$bodyscript .= $this->jqdatagrid->bsfshow( $height = '500', $width = '700' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( $height = '370', $width = '700' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '300' );
 
 
@@ -602,6 +557,7 @@ class Scli extends validaciones {
 		$grid->label('Grupo');
 		$grid->params(array(
 			'search'        => 'true',
+			'align'         => "'center'",
 			'editable'      => $editar,
 			'width'         => 40,
 			'edittype'      => "'select'",

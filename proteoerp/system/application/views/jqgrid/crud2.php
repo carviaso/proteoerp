@@ -32,7 +32,9 @@ $cintu = '
 
 if ( isset($LayoutStyle) == false ){
 	$LayoutStyle = '
-html, body {margin: 0; padding: 0; overflow: hidden; font-size: 12px; }
+.ui-autocomplete {max-height: 150px;overflow-y: auto;max-width: 600px;}
+html.ui-autocomplete {height: 150px;width: 600px;}
+html, body {margin: 0; padding: 0; overflow: hidden; font-size: 10px; }
 /*Splitter style */
 #LeftPane  {padding: 2px; overflow: auto;}
 #RightPane {padding: 2px; overflow: auto;}
@@ -100,7 +102,7 @@ if (isset($listados)) {
 	jQuery("#listados").jqGrid({
 		datatype: "local",
 		height: \'200\',
-		colNames:["","Reporte", "Nombre"],
+		colNames:["","", ""],
 		colModel:[
 			{name:"id",    index:"id",     width: 15},
 			{name:"titulo",index:"titulo", width:165},
@@ -117,6 +119,7 @@ if (isset($listados)) {
 	});
 	'.$listados.'
 	for(var i=0;i<=datalis.length;i++) jQuery("#listados").jqGrid(\'addRowData\',i+1,datalis[i]);
+	$("#gview_listados > .ui-jqgrid-hdiv").hide();
 ';
 	} else $ListGrid = '';
 } else $ListGrid = '';
@@ -128,7 +131,7 @@ if (isset($otros)) {
 	jQuery("#otros").jqGrid({
 		datatype: "local",
 		height: \'200\',
-		colNames:["","Funciones","Nombre"],
+		colNames:["","",""],
 		colModel:[
 			{name:"id",    index:"id",     width:15},
 			{name:"titulo",index:"titulo", width:165},
@@ -236,13 +239,7 @@ echo script('jquery.jqGrid.min.js');
 
 ?>
 <style>
-.ui-autocomplete {max-height: 150px;overflow-y: auto;max-width: 600px;}
-html.ui-autocomplete {height: 150px;width: 600px;}
 <?php echo $LayoutStyle; ?>
-
-/*th.ui-th-column div{white-space:normal !important;height:auto !important;padding:2px;}*/
-
-
 </style>
 
 <script type="text/javascript">
@@ -276,7 +273,9 @@ if (isset($funciones))  echo $funciones;
 if ( isset($tamano) )
 	if ( count($tamano) == 2 )
 		echo "\n\twindow.resizeTo(".$tamano[0].",".$tamano[1].");\n";
+
 ?>
+
 
 });
 
