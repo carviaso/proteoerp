@@ -82,6 +82,7 @@ $link14=site_url('inventario/common/get_grupo');
 <style >
 .ui-autocomplete {max-height: 150px;overflow-y: auto;max-width: 600px;}
 html.ui-autocomplete {height: 150px;width: 600px;}
+#maintabcontainer ul { font-size: 8px; }
 </style>
 
 <?php if($form->_status!='show'){ ?>
@@ -109,6 +110,7 @@ $(function(){
 
 	$('.inputnum').focus(function (){ $(this).select(); });
 	$('.inputnum').click(function (){ $(this).select(); });
+
 	$("#fdesde").datepicker({ dateFormat: "dd/mm/yy" });
 	$("#fhasta").datepicker({ dateFormat: "dd/mm/yy" });
 	$('#maintabcontainer').tabs();
@@ -293,9 +295,6 @@ function autocod(id){
 	$('#itcodigo_'+id).autocomplete({
 		delay: 600,
 		autoFocus: true,
-		open: function(){
-			setTimeout(function() {$('.ui-autocomplete').css('z-index', 99999999999999); }, 0);
-		},
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasinv2'); ?>",
@@ -663,15 +662,6 @@ function almubica( id, almacen){
 			async: false,
 			success: function(msg){
 				alert("Mensaje="+msg);
-/*
-				if(msg=="s.i"){
-					unidad=unidad.substr(0,8);
-					$.post('<?php echo $link6 ?>',{ x:"" },function(data){$("#unidad").html(data);$("#unidad").val(unidad);})
-				}
-				else{
-					alert("Disculpe. En este momento no se ha podido agregar la unidad, por favor intente mas tarde");
-				}
-*/
 			}
 		});
 	}
@@ -698,7 +688,8 @@ $link40=site_url('inventario/sinv/sinvdescu/'.$id);
 $link41=site_url('inventario/sinv/sinvcliente/');
 ?>
 <style type="text/css">
-	.maintabcontainer {width: 780px; margin: 5px auto;}
+	#maintabcontainer {width: 780px; margin: 5px auto; }
+	#maintabcontainer ul { font-size: 8px; }
 	div#sinvprv label { display:block; }
 	div#sinvprv input { display:block; }
 	div#sinvprv input.text { margin-bottom:12px; width:95%; padding: .4em; }
@@ -1069,7 +1060,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 <table border='0' width="100%">
 	<tr>
 		<td colspan='2' valign='top'>
-			<table border=0 width="100%">
+			<table border='0' width="100%" cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->codigo->label; ?></td>
 					<td class="littletablerow"><?php echo $form->codigo->output; ?></td>
@@ -1101,7 +1092,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			</table>
 		</td>
 		<td colspan='2' valign='top'>
-			<table border=0 width="100%">
+			<table border='0' width="100%" cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->descrip->label  ?></td>
 					<td colspan="3" class="littletablerow"> <?php echo $form->descrip->output; ?></td>
@@ -1169,7 +1160,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 	<table width="100%" border='0'>
 	<tr>
 		<td colspan='2' valign='top'>
-			<table border='0' width="100%" style='border-collapse;border: 1px dotted'>
+			<table border='0' width="100%" style='border-collapse;border: 1px dotted;' cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->tdecimal->label ?></td>
 					<td class="littletablerow"><?php echo $form->tdecimal->output   ?></td>
@@ -1185,7 +1176,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			</table>
 		</td>
 		<td valign='top' align='center'>
-			<table border='0'  width='100%'>
+			<table border='0'  width='100%' cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->peso->label ?></td>
 					<td class="littletablerow"><?php echo $form->peso->output   ?></td>
@@ -1202,7 +1193,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			</table>
 		</td>
 		<td valign='top' align='center'>
-			<table border='0' width='100%' style='border-collapse;border: 1px dotted'>
+			<table border='0' width='100%' style='border-collapse;border: 1px dotted' cellpadding='0' cellspacing='0'>
 				<tr>
 					<td width='50' class='littletableheaderc'><?php echo $form->alto->label ?></td>
 					<td class="littletablerow"><?php echo $form->alto->output?></td>
@@ -1225,7 +1216,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 	<table width="100%" border='0'>
 	<tr>
 		<td valign='top' align='left'>
-			<table border='0' >
+			<table border='0' cellpadding='0' cellspacing='0'>
 				<tr>
 					<td width='100' class='littletableheaderc'><?php echo $form->depto->label ?></td>
 					<td nowrap class="littletablerow"><?php echo $form->depto->output   ?></td>
@@ -1241,7 +1232,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			</table>
 		</td>
 		<td>
-			<table border='0' style='border-collapse;border: 1px dotted' >
+			<table border='0' style='border-collapse;border: 1px dotted' cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->maxven->label ?></td>
 					<td class="littletablerow"><?php  echo $form->maxven->output   ?></td>
@@ -1256,7 +1247,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			</table>
 		</td>
 		<td valign='top'  align='left'>
-			<table border='0' width="100%" >
+			<table border='0' width="100%" cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->clase->label ?></td>
 					<td class="littletablerow">    <?php echo $form->clase->output   ?></td>
@@ -1286,7 +1277,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 		<td valign='top'>
 			<fieldset style='border: 1px outset #B45F04;background: #FFEFFF;'>
 			<legend class="titulofieldset" >Costos</legend>
-			<table width='100%' border="0">
+			<table width='100%' border="0" cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->ultimo->label   ?></td>
 					<td class="littletablerow"    ><?php echo $form->ultimo->output.$form->cultimo->output ?></td>
@@ -1317,7 +1308,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 		<td valign='top'>
 			<fieldset style='border: 1px outset #B45F04;background: #FFEFFF;'>
 			<legend class="titulofieldset" style='font-size:16' >Precios</legend>
-			<table width='100%' cellspacing='0'>
+			<table width='100%' cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class="littletableheader" style='background: #3B240B;color: #FFEEFF;font-weight: bold;text-align:center;'>&nbsp;</td>
 					<td class="littletableheader" style='background: #3B240B;color: #FFEEFF;font-weight: bold;text-align:center;'>Margen</td>
@@ -1350,7 +1341,6 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				</tr>
 			</table>
 			</fieldset>
-			<br />
 			<fieldset style='border: 1px outset #B45F04;background: #FFEFFF;'>
 			<table width='100%' cellspacing='0'>
 				<tr>
@@ -1369,7 +1359,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 <?php if(($form->_dataobject->get('tipo')=='Combo' && $form->_status=='show') || $form->_status!='show'){?>
 <div id="tab7" style='background:#EFEFFF'>
 	<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
-		<table width='100%'>
+		<table width='100%' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL_SINVCOMBO__'>
 				<td bgcolor='#7098D0'><b>C&oacute;digo</b></td>
 				<td bgcolor='#7098D0'><b>Descripci&oacute;n</b></td>
@@ -1420,7 +1410,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 <?php if ( $this->datasis->traevalor('SINVPRODUCCION') == 'S') { ?>
 <div id="tab8" style='background:#EFEFFF'>
 	<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:170px'>
-		<table width='100%'>
+		<table width='100%' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL_SINVPITEM__'>
 				<td bgcolor='#7098D0'            ><b>C&oacute;digo     </b></td>
 				<td bgcolor='#7098D0'            ><b>Descripci&oacute;n</b></td>
@@ -1505,7 +1495,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
   		<td valign="top">
 			<fieldset  style='border: 2px outset #FEB404;background: #FFFCE8;'>
 			<legend class="titulofieldset" >Existencias</legend>
-			<table width='100%' border=0 >
+			<table width='100%' border='0' cellpadding='0' cellspacing='0' >
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->existen->label  ?></td>
 					<td class="littletablerow"    ><?php echo $form->existen->output ?></td>
@@ -1535,8 +1525,9 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 		</td>
   		<td valign="top">
 			<fieldset  style='border: 2px outset #FEB404;background: #FFFCE8;'>
-			<legend class="titulofieldset" >Ubicaciones</legend>
-			<table id='simpletabla' width='100%' border=0 >
+			<legend class="titulofieldset">Ubicaciones</legend>
+			<div  style='height:110px;overflow:auto;'>
+			<table id='simpletabla' width='100%' border='0' cellpadding='0' cellspacing='0' >
 				<tbody>
 				<tr>
 					<td class="simplehead">Almac&eacute;n</td>
@@ -1554,6 +1545,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 ?>
 				</tbody>
 			</table>
+			</div>
 			</fieldset>
 		</td>
 
@@ -1561,7 +1553,9 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 		<td valign="top">
 			<fieldset style='border: 1px outset #FEB404;background: #FFFCE8;'>
 			<legend class="titulofieldset" >Almacenes</legend>
+			<div  style='height:110px;overflow:auto;'>
 			<?php echo $form->almacenes->output ?>
+			</div>
 			</fieldset>
 		</td>
 		<?php } ?>
