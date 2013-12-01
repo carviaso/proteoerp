@@ -2880,7 +2880,7 @@ class Sinv extends Controller {
 		$edit->enlace  = new inputField('Caja', 'enlace');
 		$edit->enlace ->size=15;
 		$edit->enlace->maxlength=15;
-		$edit->enlace->rule = 'trim';
+		$edit->enlace->rule = 'condi_required|callback_chenlace|callback_chobligafraccion|trim';
 
 		$edit->cdescrip = new inputField('', 'cdescrip');
 		$edit->cdescrip->pointer=true;
@@ -3697,6 +3697,11 @@ class Sinv extends Controller {
 			}
 		}
 
+		if($tipo[0]!='A'){
+			$do->set('enlace','');
+		}
+
+
 		//SINVPITEM
 		foreach($do->data_rel['sinvpitem'] as $k=>$v){
 			if(empty($v['codigo'])) $do->rel_rm('sinvpitem',$k);
@@ -4097,8 +4102,8 @@ class Sinv extends Controller {
 			}
 
 			//Actualiza sinv
-			$mSQL = "UPDATE sinv SET 
-						pond   = (pond*existen   +".$mexisten."*".$vpond."  )/(existen +".$mexisten."), 
+			$mSQL = "UPDATE sinv SET
+						pond   = (pond*existen   +".$mexisten."*".$vpond."  )/(existen +".$mexisten."),
 						ultimo = (ultimo*existen +".$mexisten."*".$vultimo.")/(existen +".$mexisten.")
 			WHERE codigo=".$mcodigo;
 			$this->db->query($mSQL);
@@ -4595,7 +4600,7 @@ class Sinv extends Controller {
 
 		$filter->tipo = new dropdownField("Tipo", "tipo");
 		$filter->tipo->db_name=("a.tipo");
-		$filter->tipo->option("","Todos");
+		$filter->tipo->option('',"Todos");
 		$filter->tipo->option("Articulo","Art&iacute;culo");
 		$filter->tipo->option("Servicio","Servicio");
 		$filter->tipo->option("Descartar","Descartar");
@@ -4640,7 +4645,7 @@ class Sinv extends Controller {
 		$filter->linea2->style='width:190px;';
 
 		$depto=$filter->getval('depto');
-		if($depto!==FALSE){
+		if($depto!==false){
 			$filter->linea2->options("SELECT linea, CONCAT(linea,'-',descrip) descrip FROM line WHERE depto='$depto' ORDER BY descrip");
 		}else{
 			$filter->linea2->option("","Seleccione un Departamento primero");
@@ -4659,7 +4664,7 @@ class Sinv extends Controller {
 		$filter->grupo->style='width:190px;';
 
 		$linea=$filter->getval('linea2');
-		if($linea!==FALSE){
+		if($linea!==false){
 			$filter->grupo->options("SELECT grupo, CONCAT(grupo,'-',nom_grup) nom_grup FROM grup WHERE linea='$linea' ORDER BY nom_grup");
 		}else{
 			$filter->grupo->option("","Seleccione un Departamento primero");
@@ -4794,13 +4799,34 @@ class Sinv extends Controller {
 	function chexiste($codigo){
 		$dbcodigo=$this->db->escape($codigo);
 		$check=$this->datasis->dameval("SELECT COUNT(*) FROM sinv WHERE codigo=$dbcodigo");
-		if ($check > 0){
+		if($check > 0){
 			$descrip=$this->datasis->dameval("SELECT descrip FROM sinv WHERE codigo=$dbcodigo");
-			$this->validation->set_message('chexiste',"El codigo $codigo ya existe para el producto $descrip");
+			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para el producto ${descrip}");
 			return false;
 		}else{
 		 return true;
 		}
+	}
+
+	function chobligafraccion($enlace){
+		$tipo=$this->input->post('tipo');
+		if($tipo[0]=='F' && empty($enlace)){
+			$this->validation->set_message('chobligafraccion',"Cuando en producto es fraccion es obligatorio el campo %s");
+			return false;
+		}
+		return true;
+	}
+
+	function chenlace($enlace){
+		if(empty($enlace)) return true;
+
+		$dbcodigo=$this->db->escape($enlace);
+		$tipo = $this->datasis->dameval('SELECT tipo FROM sinv WHERE codigo='.$dbcodigo);
+		if($tipo[0]!='A'){
+			$this->validation->set_message('chenlace','El producto en el campo %s debe obligartoriamente tipo Articulo');
+			return false;
+		}
+		return true;
 	}
 
 	// Si existe el codigo Alterno
@@ -4899,18 +4925,17 @@ class Sinv extends Controller {
 	}
 
 
-
 	function _pre_del($do){
 		$codigo=$this->db->escape($do->get('codigo'));
-		$check =  $this->datasis->dameval("SELECT COUNT(*) AS cana FROM sitems WHERE codigoa=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itscst WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itstra WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itspre WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itsnot WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itsnte WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM itsinv WHERE codigo=${codigo} AND existen>0");
-		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinvpitem WHERE codigo=${codigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinvcombo WHERE codigo=${codigo}");
+		$check =  intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sitems WHERE codigoa=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM itscst WHERE codigo=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM itstra WHERE codigo=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM itspre WHERE codigo=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM itsnot WHERE codigo=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM itsnte WHERE codigo=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM itsinv WHERE codigo=${codigo} AND existen>0"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinvpitem WHERE codigo=${codigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinvcombo WHERE codigo=${codigo}"));
 
 		if ($this->db->table_exists('ordpitem'))
 			$check += $this->datasis->dameval("SELECT COUNT(*) FROM ordpitem WHERE codigo=${codigo}");
@@ -4919,6 +4944,13 @@ class Sinv extends Controller {
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Producto con Movimiento no puede ser Borrado, solo se puede inactivar';
 			return false;
 		}
+
+		$check  = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinv WHERE enlace=${codigo}"));
+		if($check>0){
+			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='El producto esta enlazado a otros producto';
+			return false;
+		}
+
 		return true;
 	}
 

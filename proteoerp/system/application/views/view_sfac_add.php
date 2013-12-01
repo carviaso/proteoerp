@@ -497,6 +497,7 @@ function post_modbus_sinv(nind){
 	var ctipo  = $("#sclitipo").val()
 	var tipo   = Number(ctipo); if(tipo>0) tipo=tipo-1;
 	var combo  = $("#combo_"+ind).val();
+	//var codigo = $("#codigoa_"+ind).val();
 	if(combo==''){
 		$("#preca_"+ind).empty();
 
@@ -523,16 +524,17 @@ function post_modbus_sinv(nind){
 
 //Saca el dropdown de los precios
 function cdropdown(nind){
-	var manual = $("#manual").val(); if(manual=='S') return true;
+	var manual  = $("#manual").val(); if(manual=='S') return true;
 	var tipo_doc= $("#tipo_doc").val();
 	var ind     = nind.toString();
+	var combo   = $("#combo_"+ind).val();  if(combo!='') return true;
 	var preca   = $("#preca_"+ind).val();
+	var codigo  = $("#codigoa_"+ind).val(); if(codigo=='') return true;
 	var itiva   = Number($('#itiva_'+ind).val());
 	var pprecio = document.createElement("select");
-	var manual   = $("#manual").val()
 	if(tipo_doc=='D') return false;
 
-	if($("#manual").val() == 'S' ) {
+	if(manual=== 'S' ) {
 		$("#preca_"+ind).attr('readonly',false);
 		$("#preca_"+ind).attr("onchange" , "post_precioselec("+ind+",this)");
 		return true;

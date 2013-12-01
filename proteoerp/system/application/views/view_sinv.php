@@ -171,7 +171,7 @@ $(function(){
 				url:  "<?php echo site_url('ajax/buscasinvart'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: {"q":+req.term},
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -295,6 +295,9 @@ function autocod(id){
 	$('#itcodigo_'+id).autocomplete({
 		delay: 600,
 		autoFocus: true,
+		open: function(){
+			setTimeout(function() {$('.ui-autocomplete').css('z-index', 99999999999999); }, 0);
+		},
 		source: function( req, add){
 			$.ajax({
 				url:  "<?php echo site_url('ajax/buscasinv2'); ?>",
