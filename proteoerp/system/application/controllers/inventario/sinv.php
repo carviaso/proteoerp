@@ -2839,7 +2839,7 @@ class Sinv extends Controller {
 		$do->pointer('grup' , 'grup.grupo=sinv.grupo' , 'grup.grupo AS grupgrupo' , 'left');
 		$do->pointer('line' , 'line.linea=grup.linea' , 'line.linea AS linelinea' , 'left');
 		$do->pointer('dpto' , 'dpto.depto=line.depto' , 'dpto.depto AS dptodepto' , 'left');
-		$do->pointer('sinv AS csinv', 'csinv.codigo=sinv.enlace','csinv.formcal AS cformcal,csinv.pond AS cpond,csinv.ultimo AS cultimo,csinv.descrip AS cdescrip,csinv.base1,csinv.base2,csinv.base3,csinv.base4','left');
+		$do->pointer('sinv AS csinv', 'csinv.codigo=sinv.enlace','csinv.formcal AS cformcal,csinv.pond AS cpond,csinv.ultimo AS cultimo,csinv.descrip AS cdescrip,csinv.base1 AS cbase1,csinv.base2 AS cbase2,csinv.base3 AS cbase3,csinv.base4 AS cbase4','left');
 		$do->rel_one_to_many('sinvcombo' , 'sinvcombo' , array('codigo' => 'combo'));
 		$do->rel_one_to_many('sinvpitem' , 'sinvpitem' , array('codigo' => 'producto'));
 		$do->rel_one_to_many('sinvplabor', 'sinvplabor', array('codigo' => 'producto'));
@@ -2891,7 +2891,7 @@ class Sinv extends Controller {
 		$edit->aumento->css_class='inputnum';
 		$edit->aumento->size=5;
 		$edit->aumento->maxlength=6;
-		$edit->aumento->rule='numeric|callback_chfraccion';
+		$edit->aumento->rule='numeric|callback_chobligafraccion';
 		$edit->aumento->autocomplete = false;
 		//$edit->aumento->append('Solo si es fracci&oacute;n');
 
@@ -2919,7 +2919,7 @@ class Sinv extends Controller {
 		$edit->tipo->option('Articulo' ,'Art&iacute;culo');
 		$edit->tipo->option('Servicio' ,'Servicio');
 		$edit->tipo->option('Descartar','Descartar');
-		$edit->tipo->option('Fraccion' ,'Fraccion');
+		$edit->tipo->option('Fraccion' ,'Fracci&oacute;n');
 		$edit->tipo->option('Lote'     ,'Lote');
 		$edit->tipo->option('Combo'    ,'Combo');
 		$edit->tipo->rule='callback_chtipo';
@@ -4070,7 +4070,7 @@ class Sinv extends Controller {
 
 		$vpond    = $this->datasis->dameval('SELECT pond   FROM sinv WHERE id='.$this->db->escape($mviejoid));
 		$vultimo  = $this->datasis->dameval('SELECT ultimo FROM sinv WHERE id='.$this->db->escape($mviejoid));
-		$vexisten = $this->datasis->dameval('SELECT COALESCE(sum(existen),0) FROM itsinv WHERE codigo='.$this->db->escape($mviejo));
+		$vexisten = $this->datasis->dameval('SELECT COALESCE(SUM(existen),0) FROM itsinv WHERE codigo='.$this->db->escape($mviejo));
 
 		if( $mexiste == 'S' ){
 			// Elimina anterior
@@ -4092,10 +4092,10 @@ class Sinv extends Controller {
 			if ($query->num_rows() > 0 ) {
 				foreach ($query->result() as $row ) {
 					$dbalma = $this->db->escape($row->alma);
-					$mSQL = "INSERT IGNORE INTO itsinv SET codigo=".$mcodigo.", alma=$dbalma, existen=0";
+					$mSQL = "INSERT IGNORE INTO itsinv SET codigo=".$mcodigo.", alma=${dbalma}, existen=0";
 					$this->db->query($mSQL);
-					$mSQL   = "UPDATE itsinv SET existen=existen+".$row->existen."
-						WHERE codigo=$mcodigo AND alma=$dbalma";
+					$mSQL = "UPDATE itsinv SET existen=existen+".$row->existen."
+						WHERE codigo=${mcodigo} AND alma=${dbalma}";
 					$this->db->query($mSQL);
 					$mexisten += $row->existen;
 				}
@@ -4164,7 +4164,6 @@ class Sinv extends Controller {
 		$mSQL = "UPDATE IGNORE sinvpa SET codigo=".$mcodigo." WHERE codigo=".$mviejo;
 		$this->db->query($mSQL);
 
-
 		$mSQL = "UPDATE IGNORE sinvfot SET codigo=".$mcodigo." WHERE codigo=".$mviejo;
 		$this->db->query($mSQL);
 
@@ -4175,6 +4174,9 @@ class Sinv extends Controller {
 		$this->db->query($mSQL);
 
 		$mSQL = "UPDATE IGNORE costos SET codigo=".$mcodigo." WHERE codigo=".$mviejo;
+		$this->db->query($mSQL);
+
+		$mSQL = "UPDATE sinv SET enlace=".$mcodigo." WHERE enlace=".$mviejo;
 		$this->db->query($mSQL);
 
 		// Inventario invfel
@@ -4191,8 +4193,6 @@ class Sinv extends Controller {
 				$mubica = $mubica -1;
 			}
 		}
-
-		logusu("SINV","Cambio codigo ".$mmviejo."-->".$mmcodigo);
 
 		if ( $this->db->table_exists('sinvfusion') == false ) {
 			$mSQL  = "CREATE TABLE sinvfusion ( ";
@@ -4213,6 +4213,7 @@ class Sinv extends Controller {
 		$mSQL = "INSERT INTO sinvfusion SET anterior=".$mviejo.", nuevo=".$mcodigo.", usuario=".$this->db->escape($this->session->userdata('usuario'));
 		$this->db->simple_query($mSQL);
 
+		logusu("SINV","Cambio codigo ".$mmviejo."-->".$mmcodigo);
 	}
 
 	//*****************************
@@ -4632,16 +4633,16 @@ class Sinv extends Controller {
 		$filter->depto->group = "Dos";
 		$filter->depto->style='width:190px;';
 
-		$filter->linea = new inputField("Linea", "nom_linea");
-		$filter->linea->db_name="c.descrip";
+		$filter->linea = new inputField('Linea', 'nom_linea');
+		$filter->linea->db_name='c.descrip';
 		$filter->linea -> size=5;
-		$filter->linea->group = "Dos";
+		$filter->linea->group = 'Dos';
 
-		$filter->linea2 = new dropdownField("L&iacute;nea","linea");
-		$filter->linea2->db_name="c.linea";
-		$filter->linea2->option("","Seleccione un Departamento primero");
-		$filter->linea2->in="linea";
-		$filter->linea2->group = "Dos";
+		$filter->linea2 = new dropdownField('L&iacute;nea','linea');
+		$filter->linea2->db_name='c.linea';
+		$filter->linea2->option('',"Seleccione un Departamento primero");
+		$filter->linea2->in='linea';
+		$filter->linea2->group = 'Dos';
 		$filter->linea2->style='width:190px;';
 
 		$depto=$filter->getval('depto');
@@ -4651,16 +4652,16 @@ class Sinv extends Controller {
 			$filter->linea2->option("","Seleccione un Departamento primero");
 		}
 
-		$filter->grupo2 = new inputField("Grupo", "nom_grupo");
-		$filter->grupo2->db_name="b.nom_grup";
+		$filter->grupo2 = new inputField('Grupo', 'nom_grupo');
+		$filter->grupo2->db_name='b.nom_grup';
 		$filter->grupo2 -> size=5;
-		$filter->grupo2->group = "Dos";
+		$filter->grupo2->group = 'Dos';
 
-		$filter->grupo = new dropdownField("Grupo", "grupo");
-		$filter->grupo->db_name="b.grupo";
-		$filter->grupo->option("","Seleccione una L&iacute;nea primero");
-		$filter->grupo->in="grupo2";
-		$filter->grupo->group = "Dos";
+		$filter->grupo = new dropdownField('Grupo', 'grupo');
+		$filter->grupo->db_name='b.grupo';
+		$filter->grupo->option('','Seleccione una L&iacute;nea primero');
+		$filter->grupo->in='grupo2';
+		$filter->grupo->group = 'Dos';
 		$filter->grupo->style='width:190px;';
 
 		$linea=$filter->getval('linea2');
@@ -4676,8 +4677,8 @@ class Sinv extends Controller {
 		$filter->marca->style='width:220px;';
 		$filter->marca->group = "Dos";
 
-		$filter->buttons("reset","search");
-		$filter->build("dataformfiltro");
+		$filter->buttons('reset','search');
+		$filter->build('dataformfiltro');
 
 		$ggrid='';
 		if($filter->is_valid()){
@@ -4687,8 +4688,8 @@ class Sinv extends Controller {
 				$ggrid.= form_hidden($field_copy->id, $field_copy->value);
 			}
 
-			$grid = new DataGrid("Art&iacute;culos de Inventario");
-			$grid->order_by("codigo","asc");
+			$grid = new DataGrid('Art&iacute;culos de Inventario');
+			$grid->order_by('codigo','asc');
 			$grid->per_page = 15;
 			$link  = anchor('inventario/sinv/dataedit/show/<#id#>','<#codigo#>');
 			$uri_2 = anchor('inventario/sinv/dataedit/create/<#id#>','Duplicar');

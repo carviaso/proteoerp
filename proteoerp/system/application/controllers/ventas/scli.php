@@ -1029,7 +1029,7 @@ class Scli extends validaciones {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 40,
+			'width'         => 50,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 2 }',

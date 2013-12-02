@@ -718,13 +718,13 @@ class Stra extends Controller {
 		$edit->envia = new dropdownField('Env&iacute;a', 'envia');
 		$edit->envia->option('','Seleccionar');
 		$edit->envia->options('SELECT ubica, CONCAT(ubides," (",ubica,")") FROM caub WHERE invfis<>"S" ORDER BY ubides');
-		$edit->envia->rule ='required';
+		$edit->envia->rule ='required|callback_chalma';
 		$edit->envia->style='width:200px;';
 
 		$edit->recibe = new dropdownField('Recibe', 'recibe');
 		$edit->recibe->option('','Seleccionar');
 		$edit->recibe->options('SELECT ubica, CONCAT(ubides," (",ubica,")") FROM caub WHERE invfis<>"S" ORDER BY ubides');
-		$edit->recibe->rule ='required|callback_chrecibe';
+		$edit->recibe->rule ='required|callback_chrecibe|callback_chalma';
 		$edit->recibe->style='width:200px;';
 
 		$edit->observ1 = new inputField('Observaci&oacute;n','observ1');
@@ -1436,6 +1436,16 @@ class Stra extends Controller {
 		}
 	}
 
+	function chalma($val){
+		$dbalma=$this->db->escape($val);
+		$invfis=$this->datasis->dameval('SELECT invfis FROM caub WHERE ubica='.$dbalma);
+		if($invfis=='S'){
+			$this->validation->set_message('chalma','El almac&eacute;n en el campo %s no puede ser tipo inventario');
+			return false;
+		}
+		return true;
+	}
+
 	function chrecibe($recibe){
 		$envia=$this->input->post('envia');
 		if($recibe!=$envia){
@@ -1492,17 +1502,23 @@ class Stra extends Controller {
 			$itcodigo  = $do->get_rel('itstra', 'codigo'  ,$i);
 			$dbitcodigo=$this->db->escape($itcodigo);
 
-			$mSQL="INSERT INTO itsinv (codigo,alma,existen) VALUES (${dbitcodigo},${dbenvia},-${itcana}) ON DUPLICATE KEY UPDATE existen=existen-${itcana}";
-			$ban=$this->db->simple_query($mSQL);
-			if(!$ban){ memowrite($mSQL,'stra'); $error++;}
+			$gasto=$this->datasis->dameval('SELECT gasto FROM caub WHERE ubica='.$dbenvia);
+			if($gasto!='S'){
+				$mSQL="INSERT INTO itsinv (codigo,alma,existen) VALUES (${dbitcodigo},${dbenvia},-${itcana}) ON DUPLICATE KEY UPDATE existen=existen-${itcana}";
+				$ban=$this->db->simple_query($mSQL);
+				if(!$ban){ memowrite($mSQL,'stra'); $error++;}
+			}
 
-			$mSQL="INSERT INTO itsinv (codigo,alma,existen) VALUES (${dbitcodigo},${dbrecibe},${itcana}) ON DUPLICATE KEY UPDATE existen=existen+${itcana}";
-			$ban=$this->db->simple_query($mSQL);
-			if(!$ban){ memowrite($mSQL,'stra'); $error++;}
+			$gasto=$this->datasis->dameval('SELECT gasto FROM caub WHERE ubica='.$dbrecibe);
+			if($gasto!='S'){
+				$mSQL="INSERT INTO itsinv (codigo,alma,existen) VALUES (${dbitcodigo},${dbrecibe},${itcana}) ON DUPLICATE KEY UPDATE existen=existen+${itcana}";
+				$ban=$this->db->simple_query($mSQL);
+				if(!$ban){ memowrite($mSQL,'stra'); $error++;}
+			}
 		}
 
 		$codigo=$do->get('numero');
-		logusu('stra',"TRANSFERENCIA $codigo CREADO");
+		logusu('stra',"TRANSFERENCIA ${codigo} CREADO");
 		return true;
 	}
 

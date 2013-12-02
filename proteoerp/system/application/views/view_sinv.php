@@ -96,13 +96,46 @@ function submitkardex() {
 	document.kardex.submit();
 }
 
-function ocultatab(){
-	tipo=$("#tipo").val();
-	if(tipo=='Combo'){
+function chtipo(){
+	tipo=$("#tipo").val().substr(0,1);
+
+	if(tipo=='C'){
 		$("#litab7").show();
 	}else{
 		$("#litab7").hide();
 		$("#tab7").hide();
+	}
+
+	if(tipo=='F'){
+		$("#base1").attr("readonly", "readonly");
+		$("#base2").attr("readonly", "readonly");
+		$("#base3").attr("readonly", "readonly");
+		$("#base4").attr("readonly", "readonly");
+		$("#margen1").attr("readonly", "readonly");
+		$("#margen2").attr("readonly", "readonly");
+		$("#margen3").attr("readonly", "readonly");
+		$("#margen4").attr("readonly", "readonly");
+		$("#precio1").attr("readonly", "readonly");
+		$("#precio2").attr("readonly", "readonly");
+		$("#precio3").attr("readonly", "readonly");
+		$("#precio4").attr("readonly", "readonly");
+		$("#pond").attr("readonly", "readonly");
+		$("#ultimo").attr("readonly", "readonly");
+	}else{
+		$("#base1").removeAttr("readonly");
+		$("#base2").removeAttr("readonly");
+		$("#base3").removeAttr("readonly");
+		$("#base4").removeAttr("readonly");
+		$("#margen1").removeAttr("readonly");
+		$("#margen2").removeAttr("readonly");
+		$("#margen3").removeAttr("readonly");
+		$("#margen4").removeAttr("readonly");
+		$("#precio1").removeAttr("readonly");
+		$("#precio2").removeAttr("readonly");
+		$("#precio3").removeAttr("readonly");
+		$("#precio4").removeAttr("readonly");
+		$("#pond").removeAttr("readonly");
+		$("#ultimo").removeAttr("readonly");
 	}
 }
 
@@ -148,7 +181,15 @@ $(function(){
 	});
 
 	$("#tipo").change(function(){
-		ocultatab();
+		chtipo();
+	});
+
+	$("#aumento").keyup(function(){
+		post_enlace();
+	});
+
+	$("#fracci").keyup(function(){
+		post_enlace();
 	});
 
 	$("#depto").change(function(){dpto_change(); });
@@ -210,14 +251,40 @@ $(function(){
 			$('#cpond').val(ui.item.pond);
 			$('#cformcal').val(ui.item.formcal);
 			$('#iva').val(ui.item.iva);
+
+			post_enlace();
 			setTimeout(function() {  $("#enlace").removeAttr("readonly"); }, 1500);
 		}
 	});
 	for(var i=0;i < sinvcombo_cont;i++){
 		autocod(i.toString());
 	}
-	ocultatab();
+	chtipo();
 });
+
+function post_enlace(){
+	var aumento = Number($('#aumento').val());
+	var fracci  = Number($('#fracci').val());
+	var pond    = Number($('#cpond').val());
+	var ultimo  = Number($('#cultimo').val());
+	var base1   = Number($('#cbase1').val());
+	var base2   = Number($('#cbase2').val());
+	var base3   = Number($('#cbase3').val());
+	var base4   = Number($('#cbase4').val());
+
+	if(fracci<=0){
+		fracci=1;
+		$('#fracci').val('1');
+	}
+
+	$('#base1').val(roundNumber(base1*(1+(aumento/100))/fracci,2));
+	$('#base2').val(roundNumber(base2*(1+(aumento/100))/fracci,2));
+	$('#base3').val(roundNumber(base3*(1+(aumento/100))/fracci,2));
+	$('#base4').val(roundNumber(base4*(1+(aumento/100))/fracci,2));
+	$('#pond').val(roundNumber(pond/fracci,2));
+    $('#ultimo').val(roundNumber(ultimo/fracci,2));
+	cambiobase('S');
+}
 
 function totalizarcombo(){
 	var tpond=tultimo=tprecio=0;
@@ -1081,9 +1148,9 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class="littletablerow">
 						<?php
 						if($form->_status=='show'){
-							if( !empty($form->enlace->value)){
+							if(!empty($form->enlace->value)){
 								$dbenlace=$this->db->escape($form->enlace->value);
-								$mID = $this->datasis->dameval("SELECT id FROM sinv WHERE codigo=$dbenlace");
+								$mID = $this->datasis->dameval('SELECT id FROM sinv WHERE codigo='.$dbenlace);
 								echo anchor('inventario/sinv/dataedit/show/'.$mID,$form->enlace->value);
 							}
 						}else{
@@ -1098,7 +1165,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			<table border='0' width="100%" cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->descrip->label  ?></td>
-					<td colspan="3" class="littletablerow"> <?php echo $form->descrip->output; ?></td>
+					<td colspan="3" class="littletablerow"><?php echo $form->descrip->output; ?></td>
 				</tr>
 				<tr>
 					<td class='littletableheaderc'>Adicional</td>

@@ -421,6 +421,7 @@ class Zona extends Controller {
 		$edit->pre_process( 'delete','_pre_delete' );
 
 		$edit->codigo = new inputField('C&oacute;digo','codigo');
+		$edit->codigo->mode='autohide';
 		$edit->codigo->rule='required|unique';
 		$edit->codigo->size =10;
 		$edit->codigo->maxlength =8;
@@ -472,7 +473,7 @@ class Zona extends Controller {
 
 	function _pre_delete($do){
 		$codigo=$this->db->escape($do->get('codigo'));
-		$check = $this->datasis->dameval("SELECT COUNT(*) FROM scli WHERE zona=${codigo}");
+		$check = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM scli WHERE zona=${codigo}");
 		if(empty($check)){
 			return true;
 		}else{
