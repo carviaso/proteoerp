@@ -1,0 +1,172 @@
+$mSPRV=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('proveed'=>'Código','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'proveed'),
+	'titulo'  =>'Buscar Proveedor');
+$bSPRV=$this->datasis->modbus($mSPRV);
+
+$sinv=array(
+	'tabla'   =>'sinv',
+	'columnas'=>array(
+		'codigo' =>'Código',
+		'descrip'=>'descrip'),
+	'filtro'  =>array('codigo' =>'Código','descrip'=>'descrip'),
+	'retornar'=>array('codigo'=>'codigoa'),
+	'titulo'  =>'Buscar Artículo');
+$iboton=$this->datasis->modbus($sinv);
+
+rapydlib('prototype');
+$ajax_onchange = '
+ function get_grupo(){
+		var url = "'.site_url('reportes/sinvgrupos').'";
+		var pars = "dpto=T"+"&linea="+$F("linea");
+		var myAjax = new Ajax.Updater("td_grupo", url, { method: "post", parameters: pars });
+	}
+';
+
+$filter = new DataFilter2('Filtro del Reporte');
+$filter->script($ajax_onchange);
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('b.codigo AS codigoa', 'b.descrip', 'b.exdes', 'b.exord', 'b.existen', 'b.grupo', 'b.pond', 'b.pfecha3', 'b.pfecha1', 'c.linea',
+'c.depto', 'b.tipo', 'b.activo','a.tota', 'a.cana',
+'c.nom_grup', 'd.descrip AS nomline','e.descrip AS nomdepto',
+'SUM(a.costo*a.cana*IF(a.tipoa=\'F\',1,-1)) AS costo',
+'SUM(a.cana)      AS ventau',
+'SUM(a.tota)      AS ventas',
+'SUM(a.cana)/6    AS pvu',
+'SUM(a.tota)/6    AS ven',
+'b.pond*b.existen AS porc',
+'b.pond*b.existen/(SUM(a.tota)/6)*100 AS di',
+'b.pond*b.existen/(SUM(a.tota)/6)*30  AS mi',
+'b.prov1', 'b.prov2', 'b.prov3', 'b.grupo',
+"IF(SUM(a.costo*a.cana*IF(a.tipoa='F',1,-1))=0,0,SUM(a.tota)/6-SUM(a.costo*a.cana*IF(a.tipoa='F',1,-1))/6/SUM(a.costo*a.cana*IF(a.tipoa='F',1,-1))/6*100) AS marg",
+"IF(SUM(a.costo*a.cana*IF(a.tipoa='F',1,-1))=0,0,SUM(a.tota)/6-SUM(a.costo*a.cana*IF(a.tipoa='F',1,-1))/6) AS gan");
+
+$filter->db->select($select);
+$filter->db->from('sitems AS a ');
+$filter->db->join('sinv   AS b','a.codigoa=b.codigo','LEFT');
+$filter->db->join('grup   AS c','b.grupo=c.grupo'   ,'LEFT');
+$filter->db->join('line   AS d','c.linea=d.linea'   ,'LEFT');
+$filter->db->join('dpto   AS e','d.depto=e.depto'   ,'LEFT');
+$filter->db->where('a.tipoa','F');
+$filter->db->groupby('c.depto, c.linea, b.grupo, b.codigo ');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechad->clause  ='where';
+$filter->fechad->db_name ='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30, date('Y')));
+$filter->fechad->operator='>=';
+$filter->fechad->rule='required|chfecha';
+
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->clause='where';
+$filter->fechah->db_name='a.fecha';
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechah->operator='<=';
+$filter->fechah->rule='required|chfecha';
+
+$filter->proveed = new inputField('Proveedor', 'proveed');
+$filter->proveed->clause ='in';
+$filter->proveed->db_name='( b.prov1, b.prov2, b.prov3)';
+$filter->proveed->append($bSPRV);
+
+$filter->linea = new dropdownField('Línea', 'linea');
+$filter->linea->db_name='c.linea';
+$filter->linea->onchange = 'get_grupo();';
+$filter->linea->option('','Todas');
+$filter->linea->options('SELECT linea, CONCAT_WS("-",linea,descrip) FROM line ORDER BY descrip');
+
+$filter->grupo = new dropdownField("Grupo", "grupo");
+$filter->grupo->db_name='c.grupo';
+$filter->grupo->option('',"Seleccione una línea");
+
+$filter->codigo = new inputField('Código', 'codigoa');
+$filter->codigo->clause='where';
+$filter->codigo->db_name='codigoa';
+$filter->codigo->operator='=';
+$filter->codigo ->append($iboton);
+
+$filter->marca = new dropdownField('Marca', 'marca');
+$filter->marca->clause='where';
+$filter->marca->db_name='marca';
+$filter->marca->operator='=';
+$filter->marca->option('','Todas');
+$filter->marca->options('SELECT TRIM(marca) AS mar, marca nombre FROM marc ORDER BY marca');
+
+$filter->activo = new dropdownField('Activo', 'activo');
+$filter->activo->db_name='b.activo';
+$filter->activo->clause  ='where';
+$filter->activo->operator='=';
+$filter->activo->option('','Todos');
+$filter->activo->option('S','Si');
+$filter->activo->option('N','No');
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$sobretabla='';
+	if(!empty($filter->proveed->newValue))  $sobretabla.=' Proveedor: ('.$filter->proveed->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$this->db->escape($filter->proveed->newValue));
+ 	if(!empty($filter->grupo->newValue))    $sobretabla.=' Grupo: '.$filter->grupo->description;
+	if(!empty($filter->linea->newValue))    $sobretabla.=' Línea: '.$filter->linea->description;
+	if(!empty($filter->codigo->newValue))   $sobretabla.=' Código: ('.$filter->codigo->newValue.') '.$this->datasis->dameval('SELECT descrip FROM sinv WHERE codigo='.$this->db->escape($filter->codigo->newValue));
+	if(!empty($filter->marca->newValue))    $sobretabla.=' Marca: '.$filter->marca->description;
+	if(!empty($filter->depto->newValue))    $sobretabla.=' Dpto: '.$filter->depto->description;
+	if(!empty($filter->tipo->newValue))     $sobretabla.=' Tipo: '.$filter->tipo->description;
+	if(!empty($filter->activo->newValue))   $sobretabla.=' Activo: '.$filter->activo->description;
+	if(!empty($filter->ordenpor->newValue)) $sobretabla.='   Ordenado por: '.$filter->ordenpor->description;
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Listado de Movimiento de Inventario');
+	$pdf->setSubTitulo('Desde la fecha: '.$_POST['fechad'].' Hasta '.$_POST['fechah']);
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol('depto'   ,5,array('','Dp')                 ,'L',5);
+	$pdf->AddCol('nomdepto',12,array('','Nombre')            ,'L',5);
+	$pdf->AddCol('linea'   ,5,array('','Ln')                 ,'L',5);
+	$pdf->AddCol('nomline' ,12,array('','Nombre')            ,'L',5);
+	$pdf->AddCol('grupo'   ,7,array('','Gr')                 ,'L',5);
+	$pdf->AddCol('nom_grup',12,array('','Nombre')            ,'L',5);
+	$pdf->AddCol('codigoa' ,20,array('','Código')            ,'L',5);
+	$pdf->AddCol('descrip' ,30,array('','Descripción')       ,'L',5);
+	$pdf->AddCol('pvu'     ,15,array('Promedio','Ventas U')  ,'R',5);
+	$pdf->AddCol('ven'     ,15,array('Promedio','Ventas Bs') ,'R',5);
+	$pdf->AddCol('existen' ,15,array('Exis','Unidad')        ,'R',5);
+	$pdf->AddCol('porc'    ,15,array('Inv','Bs')             ,'R',5);
+	$pdf->AddCol('di'      ,15,array('Inv','/Ven %')         ,'R',5);
+	$pdf->AddCol('mi'      ,15,array('Dias','Inv')           ,'R',5);
+	$pdf->AddCol('marg'    ,15,array('Margen','%')           ,'R',5);
+	$pdf->AddCol('gan'     ,17,array('Ganancia','Bs')        ,'R',5);
+	$pdf->AddCol('pfecha3' ,15,array('Fecha P','Compra')     ,'R',5);
+	$pdf->AddCol('pfecha1' ,15,array('Fecha U','Compra')     ,'R',5);
+	$pdf->AddCol('exord'   ,10,array('','Prov')              ,'R',5);
+	$pdf->AddCol('exdes'   ,10,array('','Clte')              ,'R',5);
+
+	$pdf->setTotalizar('pvu','porc','di','mi','gan');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Lista de Movimiento de Inventario</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

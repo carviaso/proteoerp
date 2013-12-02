@@ -1,0 +1,91 @@
+$mSPRV=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('proveed'=>'Código','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'proveed'),
+	'titulo'  =>'Buscar Proveedor');
+$bSPRV=$this->datasis->modbus($mSPRV);
+
+$filter = new DataFilter('Filtro de listado de Inventario');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$sel=array(
+	'a.codigo','a.existen','a.pond', 'a.descrip pdescrip',
+	'a.grupo', 'b.linea','c.depto',
+	'a.precio1','a.precio2','a.precio3',
+	'a.precio4,'d.descrip','a.ultimo',
+	'c.descrip dlinea','b.nom_grup', 'e.alma');
+
+$filter->db->select($sel);
+$filter->db->from('sinv AS a');
+$filter->db->join('grup AS b','a.grupo=b.grupo' ,'LEFT');
+$filter->db->join('line AS c','b.linea=c.linea' ,'LEFT');
+$filter->db->join('dpto AS d','d.depto=c.depto' ,'LEFT');
+$filter->db->join('itsinv e' ,'a.codigo=e.codigo');
+$filter->db->where('d.tipo','I');
+//filter->db->groupbyby('a.codigo');
+$filter->db->orderby('c.depto, b.linea,a.grupo');
+
+$filter->descrip = new inputField('Descripci&oacute;n', 'descrip');
+$filter->descrip->db_name='a.descrip';
+
+$filter->grupo = new dropdownField('Grupo', 'grupo');
+$filter->grupo->db_name='a.grupo';
+$filter->grupo->option('','Todos');
+$filter->grupo->options("SELECT grupo,nom_grup FROM grup  WHERE tipo='I' ORDER BY grupo");
+
+$filter->proveed = new inputField('Proveedor', 'proveed');
+$filter->proveed->clause='in';
+$filter->proveed->db_name='(a.prov1,a.prov2,a.prov3)';
+$filter->proveed->append($bSPRV);
+
+$filter->almacen = new dropdownField('Almac&eacute;n', 'almacen');
+$filter->almacen->option('','Todos');
+$filter->almacen->options('SELECT ubica,ubides FROM caub WHERE invfis=\'N\' AND gasto=\'N\' ORDER BY ubica');
+$filter->almacen->db_name='e.alma';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+	$mSQL=$this->rapyd->db->_compile_select();
+
+	//echo $mSQL;
+	$pdf = new PDFReporte($mSQL);
+
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Listado de Inventario');
+	$pdf->setSubTitulo($_POST['descrip']);
+	$pdf->setHeadGrupo('Departamento: ');
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol('codigo'  ,20,'Cod.'        ,'L',7);
+	$pdf->AddCol('pdescrip',80,'Descripción' ,'L',7);
+	$pdf->AddCol('existen' ,15,'Cantidad'    ,'R',8);
+	$pdf->AddCol('pond'    ,15,'Costo'       ,'R',8);
+	$pdf->AddCol('ultimo'  ,15,'Ultimo'      ,'R',8);
+	$pdf->AddCol('precio1' ,15,'Precio 1'    ,'R',8);
+	$pdf->AddCol('precio2' ,15,'Precio 2'    ,'R',8);
+	$pdf->AddCol('precio3' ,15,'Precio 3'    ,'R',8);
+	$pdf->AddCol('precio4' ,15,'Precio 4'    ,'R',8);
+	$pdf->setTotalizar('precio1','precio2','precio3','precio4');
+	$pdf->setGrupoLabel('Departamento: (<#depto#>) <#descrip#> ','Linea: (<#linea#>) <#dlinea#>','Grupo (<#grupo#>) <#nom_grup#>');
+	$pdf->setGrupo('depto','linea','grupo');
+	$pdf->Table();
+	$pdf->Output();
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

@@ -1,0 +1,111 @@
+$mSPRV=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('proveed'=>'Código','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'proveed'),
+	'titulo'  =>'Buscar Proveedor');
+
+$bSPRV=$this->datasis->modbus($mSPRV);
+
+$mGRUP=array(
+	'tabla'   =>'grup',
+	'columnas'=>array(
+		'grupo' =>'Código',
+		'nom_grup'=>'Nombre'),
+		'filtro'  =>array('grupo'=>'Código','nom_grup'=>'Nombre'),
+	'retornar'=>array('grupo'=>'grupo'),
+	'titulo'  =>'Buscar Grupo');
+
+$bGRUP=$this->datasis->modbus($mGRUP);
+
+$filter = new DataFilter2('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('a.codigo','a.descrip', 'a.fechav',
+'IF(a.pfecha1>a.pfecha2,IF(a.pfecha1>a.pfecha3,a.pfecha1,a.pfecha3),IF(a.pfecha2>a.pfecha3,a.pfecha2,a.pfecha3)) AS cfecha',
+'a.existen','a.ultimo*a.existen AS monto','a.grupo','b.nom_grup','a.activo');
+$filter->db->select($select);
+$filter->db->from('sinv AS a');
+$filter->db->join('grup AS b','a.grupo=b.grupo','LEFT');
+$filter->db->where('a.existen >0');
+$filter->db->orderby('a.codigo');
+
+$filter->dias = new inputField('Estancados desde los &uacute;ltimos', 'dias');
+$filter->dias->clause  ='';
+$filter->dias->append('días');
+$filter->dias->rule = 'required|integer';
+$filter->dias->insertValue=150;
+$filter->dias->size=5;
+
+$filter->proveed = new inputField('Proveedor', 'proveed');
+$filter->proveed->clause  ='where';
+$filter->proveed->db_name='(a.prov1,a.prov2,a.prov3)';
+$filter->proveed->append($bSPRV);
+$filter->proveed->size=15;
+$filter->proveed->clause='in';
+
+$filter->grupo = new inputField('Grupo','grupo');
+$filter->grupo->db_name='grupo';
+$filter->grupo->append($bGRUP);
+$filter->grupo->clause  ='where';
+$filter->grupo->size=15;
+$filter->grupo->operator='=';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$dias=$filter->dias->value;
+	$fecha=date('Ymd',mktime(0,0,0,date('n'),date('j')-$dias,date('Y')));
+	$filter->db->where("(fechav < ${fecha} OR fechav IS NULL)");
+	$mSQL=$filter->db->_compile_select();
+	//echo $mSQL;
+
+	$dbproveed= $this->db->escape($filter->proveed->newValue);
+	$dbgrupo  = $this->db->escape($filter->grupo->newValue);
+
+	$sobretabla='';
+	if (!empty($filter->proveed->newValue))  $sobretabla.='    Proveedor: ('.$filter->proveed->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$dbproveed);
+	if (!empty($filter->grupo->newValue))    $sobretabla.='    Grupo: ('.$filter->grupo->newValue.') '.$this->datasis->dameval('SELECT nom_grup FROM grup WHERE grupo='.$dbgrupo);
+
+	$mfecha=dbdate_to_human($fecha);
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setType('cfecha','date');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Artículos sin Movimientos en lo últimos ${dias} días (${mfecha})");
+	$pdf->setSobreTabla($sobretabla,10);
+	$pdf->AddPage();
+	$pdf->setTableTitu(12,'Times');
+
+	$pdf->AddCol('codigo'  ,35,array('Código'      ,'') ,'L',10);
+	$pdf->AddCol('descrip' ,90,array('Descripción' ,'') ,'L',10);
+	$pdf->AddCol('existen' ,25,array('Existencia'  ,'') ,'C',10);
+	$pdf->AddCol('fechav'  ,25,array('Ultima' ,'Venta') ,'C',10);
+	$pdf->AddCol('cfecha'  ,25,array('Ultima','Compra') ,'C',10);
+	$pdf->AddCol('existen' ,25,array('Cantidad'    ,'') ,'R',10);
+	$pdf->AddCol('monto'   ,30,array('Monto'       ,'') ,'R',10);
+	$pdf->AddCol('activo'  ,30,array('Activo'      ,'') ,'R',10);
+
+	$pdf->setTotalizar('monto');
+	$pdf->setGrupoLabel('Grupo: (<#grupo#>) <#nom_grup#> ');
+	$pdf->setGrupo('grupo');
+
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Articulos sin Ventas</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
