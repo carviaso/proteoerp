@@ -35,6 +35,7 @@
 	height: 16px;
 	font-size:0.8em;
 }
+tumblelog { font-size: 10px;}
 <?php $this->load->view('loadstyle'); ?>
 </style>
 
