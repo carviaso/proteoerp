@@ -653,8 +653,11 @@ class b2b extends validaciones {
 		$edit->gtotal->mode='autohide';
 		$edit->gtotal->css_class='inputnum';
 
-		$action = "javascript:window.location='".site_url('sincro/b2b/cargascon/'.$edit->_dataobject->pk['id'])."'";
-		$edit->button_status('btn_conci', 'Cargar Consignaci&oacute;n', $action, 'TR','show');
+		$pid=$edit->get_from_dataobjetct('pid');
+		if(empty($pid)){
+			$action = "javascript:window.location='".site_url('sincro/b2b/cargascon/'.$edit->_dataobject->pk['id'])."'";
+			$edit->button_status('btn_conci', 'Cargar Consignaci&oacute;n', $action, 'TR','show');
+		}
 
 		$edit->buttons('save', 'undo', 'delete', 'back');
 		$edit->build();
@@ -1192,7 +1195,7 @@ class b2b extends validaciones {
 		}
 		$data['content'] = $str;
 		$data['head']    = $this->rapyd->get_head();
-		$data['title']   = heading('Consginaciones Descargadas');
+		$data['title']   = heading('Consignaciones Descargadas');
 		$this->load->view('view_ventanas_sola', $data);
 	}
 
