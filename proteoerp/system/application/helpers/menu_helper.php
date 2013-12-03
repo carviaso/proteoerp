@@ -83,7 +83,7 @@ function arr2link($arr,$utf8c=false){
 		}
 		';
 		$dialogos .= '</script>';
-		$divis .= '<div id="d'.$arr['modulo'].'" title="'.$arr['titulo'].'"></div>';
+		$divis .= '<div id="d'.$arr['modulo'].'" title="'.$arr['titulo'].' ('.$arr['modulo'].')"></div>';
 	}else{
 		$ejecutar=anchor($indi, $arr['titulo']);
 	}

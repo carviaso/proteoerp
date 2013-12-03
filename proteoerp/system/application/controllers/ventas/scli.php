@@ -240,7 +240,7 @@ class Scli extends validaciones {
 			});
 		});';
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "450", $width = "700",'','',$botones );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "430", $width = "700",'','',$botones );
 
 		$bodyscript .= '
 		$("#feditcr").dialog({
@@ -1479,7 +1479,7 @@ class Scli extends validaciones {
 		$edit->cliente = new inputField('C&oacute;digo', 'cliente');
 		$edit->cliente->rule = 'trim|strtoupper|alpha_dash_slash|callback_chexiste';
 		$edit->cliente->mode = 'autohide';
-		$edit->cliente->size = 9;
+		$edit->cliente->size = 8;
 		$edit->cliente->maxlength = 5;
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
@@ -1571,7 +1571,7 @@ class Scli extends validaciones {
 		$arr_tiva=$this->pi18n->arr_msj('tivaarr','N=No Contribuyente,C=Contribuyente,E=Especial,R=Regimen Exento,O=Otro');
 		$edit->tiva = new dropdownField('Tipo Fiscal', 'tiva');
 		$edit->tiva->options($arr_tiva);
-		$edit->tiva->style = 'width:130px';
+		$edit->tiva->style = 'width:110px';
 		$edit->tiva->insertValue = 'N';
 
 		$lriffis='<a href="javascript:consulrif(\'riffis\');" title="Consultar RIF en el SENIAT" onclick=""> SENIAT</a>';
@@ -1667,7 +1667,7 @@ class Scli extends validaciones {
 		$edit->vendedor->options("SELECT TRIM(vendedor) AS vd, CONCAT(vendedor,'-',nombre) AS nom FROM vend WHERE tipo IN ('V','A') ORDER BY vendedor");
 		$edit->vendedor->style = 'width:250px';
 
-		$edit->porvend = new inputField('Comisi&oacute;n%', 'porvend');
+		$edit->porvend = new inputField('Comisi&oacute;n', 'porvend');
 		$edit->porvend->css_class='inputnum';
 		$edit->porvend->rule='trim|numeric';
 		$edit->porvend->size=4;
@@ -1678,7 +1678,7 @@ class Scli extends validaciones {
 		$edit->cobrador->options("SELECT TRIM(vendedor) AS vd, CONCAT(vendedor,'-',nombre) nombre FROM vend WHERE tipo IN ('C','A') ORDER BY vendedor");
 		$edit->cobrador->style = 'width:250px';
 
-		$edit->porcobr = new inputField('Comisi&oacute;n%', 'porcobr');
+		$edit->porcobr = new inputField('Comisi&oacute;n', 'porcobr');
 		$edit->porcobr->css_class='inputnum';
 		$edit->porcobr->rule='trim|numeric';
 		$edit->porcobr->size=4;
@@ -1694,7 +1694,7 @@ class Scli extends validaciones {
 		$edit->mensaje->size = 50;
 		$edit->mensaje->maxlength =40;
 
-		$edit->mmargen = new inputField('Des. Mayor%','mmargen');
+		$edit->mmargen = new inputField('Descuento Mayor','mmargen');
 		$edit->mmargen->css_class='inputnum';
 		$edit->mmargen->size=5;
 		$edit->mmargen->maxlength=5;
@@ -1895,7 +1895,7 @@ class Scli extends validaciones {
 		$edit->tiva->option('E','Especial');
 		$edit->tiva->option('R','Regimen Exento');
 		$edit->tiva->option('O','Otro');
-		$edit->tiva->style = 'width:130px';
+		$edit->tiva->style = 'width:110px';
 		$edit->tiva->insertValue = 'N';
 		$edit->tiva->rule='required|enum[N,C,E,R,O]';
 
@@ -1923,7 +1923,8 @@ class Scli extends validaciones {
 		$this->load->view('view_ventanas_sola', $data);
 	}
 
-	//Dataedit express para servicio
+	//******************************************************************
+	// Dataedit express para servicio
 	function dataeditexpresser(){
 		$this->rapyd->load('dataedit');
 
@@ -2087,7 +2088,7 @@ function chrif(rif){
 		$edit->tiva->option('E','Especial');
 		$edit->tiva->option('R','Regimen Exento');
 		$edit->tiva->option('O','Otro');
-		$edit->tiva->style = 'width:130px';
+		$edit->tiva->style = 'width:110px';
 		$edit->tiva->insertValue = 'N';
 		$edit->tiva->rule='required|enum[N,C,E,R,O]';
 
@@ -2588,10 +2589,6 @@ function chrif(rif){
 				$this->validation->set_message('chdfiscal', "Debe introducir el nombre fiscal cuando el cliente es contribuyente");
 				return false;
 			}
-			//elseif (empty($riffis)) {
-			//	$this->validation->set_message('chdfiscal', "Debe introducir rif fiscal");
-			//	return FALSE;
-			//}
 		return TRUE;
 	}
 

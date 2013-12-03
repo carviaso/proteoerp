@@ -25,10 +25,10 @@ else:
 			<table border='0' width="100%" cellspacing='0' cellpadding='0' >
 				<tr>
 					<td width="100" class="littletableheaderc"><?php echo $form->cliente->label  ?></td>
-					<td width="100" class="littletablerow" ><?php    echo $form->cliente->output ?></td>
-					<td class="littletableheaderc"><?php             echo $form->rifci->label    ?></td>
+					<td width="60" class="littletablerow" ><?php    echo $form->cliente->output ?></td>
+					<td width="40" class="littletableheaderc"><?php             echo $form->rifci->label    ?> </td>
 					<td class="littletablerow"><?php                 echo $form->rifci->output   ?></td>
-					<td class="littletablerow" align="right"><?php   echo $form->tiva->output    ?></td>
+					<td class="littletablerow" align="right">Tipo &nbsp;<?php   echo $form->tiva->output    ?></td>
 				</tr>
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->nombre->label ?></td>
@@ -95,7 +95,7 @@ else:
 	<table border='0' width="100%">
 	<tr>
 		<td valign='top' width='50%'>
-			<table border='0' width='100%'  cellspacing='0' cellpadding='0'>
+			<table border='0' width='100%' cellspacing='0' cellpadding='0'>
 				<tr>
 					<td colspan='2' class="littletableheaderc">Direcci&oacute;n de Oficina</td>
 				</tr><tr>
@@ -125,7 +125,7 @@ else:
 	</tr>
 	</table>
 	<br />
-	<table style='height: 100%;width: 100%;border: 1px dotted; cellspacing:0, cellpadding:0' >
+	<table style='height: 100%;width: 100%;border: 1px dotted;' cellspacing='0' cellpadding='0' >
 	<tr>
 		<td width="70" class="littletableheaderc"><?php echo $form->telefono->label  ?></td>
 		<td class="littletablerow"    ><?php echo $form->telefono->output ?></td>
@@ -146,10 +146,11 @@ else:
 		<td class="littletableheaderc"><?php echo $form->twitter->label  ?></td>
 		<td class="littletablerow"    ><?php echo $form->twitter->output ?></td>
 	</tr>
+
 	</table>
 	</div>
         <div id="tab2" style='background:#EEFFFF'>
-		<table width="100%" border='0' >
+		<table width="100%" border='0' cellspacing='0' cellpadding='0'>
 			<tr>
 				<td class="littletableheaderc">Representante Legal</td>
 				<td class="littletablerow"><?php echo $form->repre->output ?></td>
@@ -159,14 +160,14 @@ else:
 			<tr>
 				<td class="littletableheaderc"><?php echo $form->vendedor->label  ?></td>
 				<td class="littletablerow"><?php echo $form->vendedor->output ?></td>
-				<td class="littletableheaderc">Comisi&oacute;n %</td>
-				<td class="littletablerow"><?php echo $form->porvend->output ?></td>
+				<td class="littletableheaderc">Comisi&oacute;n </td>
+				<td class="littletablerow"><?php echo $form->porvend->output ?>%</td>
 			</tr>
 			<tr>
 				<td class="littletableheaderc"><?php echo $form->cobrador->label  ?></td>
 				<td class="littletablerow"><?php echo $form->cobrador->output ?></td>
-				<td class="littletableheaderc">Comisi&oacute;n %</td>
-				<td class="littletablerow"><?php echo $form->porcobr->output ?></td>
+				<td class="littletableheaderc">Comisi&oacute;n </td>
+				<td class="littletablerow"><?php echo $form->porcobr->output ?>%</td>
 			</tr>
 			<tr>
 				<td class="littletableheaderc">Cuenta Contable</td>
@@ -179,8 +180,8 @@ else:
 				}
 				?>
 				</td>
-				<td class="littletableheaderc"><?php echo $form->sucursal->label;    ?></td>
-				<td class="littletablerow"    ><?php echo $form->sucursal->output;   ?></td>
+				<td class="littletableheaderc"><?php echo $form->sucursal->label;  ?></td>
+				<td class="littletablerow"    ><?php echo $form->sucursal->output; ?></td>
 			</tr>
 			<tr>
 				<td class="littletableheaderc">Cuenta Anticipo</td>
@@ -193,19 +194,17 @@ else:
 				}
 				?>
 				</td>
-				<td class="littletableheaderc"><?php echo $form->aniversario->label;    ?></td>
-				<td class="littletablerow"    ><?php echo $form->aniversario->output;   ?></td>
+				<td class="littletableheaderc"><?php echo $form->aniversario->label;  ?></td>
+				<td class="littletablerow"    ><?php echo $form->aniversario->output; ?></td>
 			</tr>
-		</table>
-		<table>
 			<tr>
-				<td class="littletableheaderc"><?php echo $form->mmargen->label; ?></td>
-				<td class="littletablerow"    ><?php echo $form->mmargen->output; ?></td>
+				<td class="littletableheaderc"><?php echo $form->mmargen->label;  ?></td>
+				<td class="littletablerow"    ><?php echo $form->mmargen->output; ?>%</td>
 			</tr>
 		</table>
-
 	</tr>
 	</table>
+
 	</fieldset>
         </div>
         <div id="tab3" style='background:#EEFFFF'>
