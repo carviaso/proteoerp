@@ -494,14 +494,14 @@ class parqueador extends Sfac {
 		$form->cana = new inputField('Cantidad','ttcana_0');
 		$form->cana->rule      = 'required|numeric';
 		$form->cana->size      = 4;
-		$edit->cana->css_class = 'inputnum';
+		$form->cana->css_class = 'inputnum';
 		$form->cana->onkeyup   = 'tarifa()';
 		$form->cana->maxlength = 5;
 
 		$form->cana2 = new inputField('fraccion','ttcana_1');
 		$form->cana2->rule      = 'required|numeric';
 		$form->cana2->size      = 3;
-		$edit->cana2->css_class = 'inputnum';
+		$form->cana2->css_class = 'inputnum';
 		$form->cana2->in        = 'cana';
 		$form->cana2->onkeyup   = 'tarifa()';
 		$form->cana2->maxlength = 5;
@@ -635,8 +635,7 @@ class parqueador extends Sfac {
 			$_POST['num_ref_0']    = '';
 			$_POST['banco_0']      = '';
 			$_POST['monto_0']      = $monto*(1+($sinvr['iva']/100)) ;
-//echo '<pre>'; print_r($_POST); echo '</ppre>';
-//exit();
+
 			if($monto<=0){
 				$rt=array(
 					'status' =>'B',
@@ -656,7 +655,7 @@ class parqueador extends Sfac {
 			echo $form->output;
 		}
 
-		if ($form->on_error()){
+		if($form->on_error()){
 
 		}
 	}
