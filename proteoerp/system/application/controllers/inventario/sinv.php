@@ -3697,10 +3697,10 @@ class Sinv extends Controller {
 			}
 		}
 
-		if($tipo[0]!='A'){
-			$do->set('enlace','');
+		if($tipo[0]!='F'){
+			$do->set('enlace' ,'');
+			$do->set('aumento',0);
 		}
-
 
 		//SINVPITEM
 		foreach($do->data_rel['sinvpitem'] as $k=>$v){
