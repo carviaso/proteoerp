@@ -3702,7 +3702,8 @@ class Sinv extends Controller {
 			$do->set('aumento',0);
 		}
 
-		if(empty($do->get('comision'))) $do->set('comision',0);
+		$comision = $do->get('comision');
+		if(empty($comision)) $do->set('comision',0);
 
 		//SINVPITEM
 		foreach($do->data_rel['sinvpitem'] as $k=>$v){
