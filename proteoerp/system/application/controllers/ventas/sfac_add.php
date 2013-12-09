@@ -355,6 +355,9 @@ class sfac_add extends sfac {
 		$edit->cajero->style='width:120px;';
 		$edit->cajero->insertValue=$this->secu->getcajero();
 
+		$edit->descuento = new hiddenField('Desc.','descuento');
+		$edit->descuento->insertValue = '0';
+
 		//***********************************
 		//  Campos para el detalle 1 sitems
 		//***********************************
@@ -415,6 +418,10 @@ class sfac_add extends sfac {
 		$edit->precio4 = new hiddenField('', 'precio4_<#i#>');
 		$edit->precio4->db_name   = 'precio4';
 		$edit->precio4->rel_id    = 'sitems';
+
+		$edit->combo = new hiddenField('', 'combo_<#i#>');
+		$edit->combo->db_name   = 'combo';
+		$edit->combo->rel_id    = 'sitems';
 
 		$edit->itiva = new hiddenField('', 'itiva_<#i#>');
 		$edit->itiva->db_name  = 'iva';

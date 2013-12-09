@@ -3177,22 +3177,38 @@ class Scst extends Controller {
 
 							if($itrow->precio1>0 && $itrow->precio2>0 && $itrow->precio3>0 && $itrow->precio4>0){
 								//Cambio de precios
-								if($cprecio=='S'){
-									$mSQL='UPDATE sinv SET
-									precio1='.round(floatval($itrow->precio1),2).',
-									precio2='.round(floatval($itrow->precio2),2).',
-									precio3='.round(floatval($itrow->precio3),2).',
-									precio4='.round(floatval($itrow->precio4),2).'
-									WHERE codigo='.$dbcodigo;
-									$ban=$this->db->simple_query($mSQL);
-									if(!$ban){ memowrite($mSQL,'scst'); $error++; }
-								}elseif($cprecio=='D'){
-									$pps=array('precio1','precio2','precio3','precio4');
-									foreach($pps as $obj){
-										$pp  =round(floatval($itrow->$obj),2);
-										$mSQL="UPDATE sinv SET ${obj}=${pp} WHERE ${pp}>${obj} AND codigo=${dbcodigo}";
-										$ban =$this->db->simple_query($mSQL);
+								$icontrol=true;
+
+								//Chequea las politicas de sinvcontrol
+								$ccpre = $this->datasis->traevalor('SCSTCAMBIAPRECIO','Evita cambiar el precio de los articulos por medio de sinvcontrol (S/N)');
+								if($ccpre=='N'){
+									$sucursal    = $this->datasis->traevalor('SUCURSAL');
+									$dbsucursal  = $this->db->escape($sucursal);
+									$sinvcontrol = $this->datasis->dameval("SELECT precio FROM sinvcontrol WHERE sucursal=${dbsucu} AND codigo=${dbcodigo}");
+									if($sinvcontrol!='S'){
+										$icontrol=false;
+									}
+								}
+								//Fin de las politicas de sinvcontrol
+
+								if($icontrol){
+									if($cprecio=='S'){
+										$mSQL='UPDATE sinv SET
+										precio1='.round(floatval($itrow->precio1),2).',
+										precio2='.round(floatval($itrow->precio2),2).',
+										precio3='.round(floatval($itrow->precio3),2).',
+										precio4='.round(floatval($itrow->precio4),2).'
+										WHERE codigo='.$dbcodigo;
+										$ban=$this->db->simple_query($mSQL);
 										if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+									}elseif($cprecio=='D'){
+										$pps=array('precio1','precio2','precio3','precio4');
+										foreach($pps as $obj){
+											$pp  =round(floatval($itrow->$obj),2);
+											$mSQL="UPDATE sinv SET ${obj}=${pp} WHERE ${pp}>${obj} AND codigo=${dbcodigo}";
+											$ban =$this->db->simple_query($mSQL);
+											if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+										}
 									}
 								}
 								//Fin del cambio de precios

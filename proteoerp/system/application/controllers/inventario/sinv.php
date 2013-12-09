@@ -2785,7 +2785,7 @@ class Sinv extends Controller {
 				'precio2' =>'Precio 2',
 				'precio3' =>'Precio 3',
 				'existen' =>'Existencia',
-				),
+			),
 			'filtro' => array('codigo' => 'C&oacute;digo'
 			,'descrip' => 'Descripci&oacute;n')
 			,'retornar'  => array(
@@ -2854,8 +2854,8 @@ class Sinv extends Controller {
 		$edit = new DataDetails('', $do);
 		$edit->on_save_redirect=false;
 
-		$edit->pre_process( 'insert','_pre_insert');
-		$edit->pre_process( 'update','_pre_inserup');
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
 		$edit->pre_process( 'delete','_pre_del'    );
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
@@ -3614,15 +3614,41 @@ class Sinv extends Controller {
 		$alma   = $this->input->post('alma');
 		$mid    = $this->input->post('mid');
 		$ubica  = $this->input->post('ubica');
-		$codigo = $this->datasis->dameval("SELECT codigo FROM sinv WHERE id=$mid");
+		$codigo = $this->datasis->dameval('SELECT codigo FROM sinv WHERE id='.$mid);
 
-		$mSQL = "UPDATE sinvalub SET ubica=".$this->db->escape($ubica)." WHERE codigo=".$this->db->escape($codigo)." AND alma=".$this->db->escape($alma);
-		if ( $this->db->query($mSQL) )
-			echo "Ubicacion del almacen".$alma." cambiada a ".$ubica.$mSQL;
-		else
-			echo "Fallo al intentar hacer el cambio ".$mSQL;
+		$mSQL = 'UPDATE sinvalub SET ubica='.$this->db->escape($ubica).' WHERE codigo='.$this->db->escape($codigo).' AND alma='.$this->db->escape($alma);
+		if($this->db->query($mSQL)){
+			echo 'Ubicacion del almacen '.$alma.' cambiada a '.$ubica.$mSQL;
+		}else{
+			echo 'Fallo al intentar hacer el cambio '.$mSQL;
+		}
 	}
 
+	function _pre_update($do){
+		//Chequea las politicas de sinvcontrol
+		$codigo  = $do->get('codigo');
+		$dbcodigo= $this->db->escape($codigo);
+		$ccpre   = $this->datasis->traevalor('SCSTCAMBIAPRECIO');
+		if($ccpre=='N'){
+			$sucursal    = $this->datasis->traevalor('SUCURSAL');
+			$dbsucursal  = $this->db->escape($sucursal);
+			$sinvcontrol = $this->datasis->dameval("SELECT precio FROM sinvcontrol WHERE sucursal=${dbsucu} AND codigo=${dbcodigo}");
+			if($sinvcontrol!='S'){
+				$rowprec = $this->datasis->damerow('SELECT precio1,precio2,precio3,precio4 FROM sinv WHERE codigo='.$dbcodigo);
+				if(!empty($rowprec)){
+					$do->set('precio1',$rowprec['precio1']);
+					$do->set('precio2',$rowprec['precio2']);
+					$do->set('precio3',$rowprec['precio3']);
+					$do->set('precio4',$rowprec['precio4']);
+				}else{
+					$do->error_message_ar['pre_upd']='Producto inexistente';
+				}
+			}
+		}
+		//Fin de las politicas de sinvcontrol
+
+		return $this->_pre_inserup($do);
+	}
 
 	function _pre_insert($do){
 		$codigo=$do->get('codigo');
@@ -4942,15 +4968,16 @@ class Sinv extends Controller {
 		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinvpitem WHERE codigo=${codigo}"));
 		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinvcombo WHERE codigo=${codigo}"));
 
-		if ($this->db->table_exists('ordpitem'))
-			$check += $this->datasis->dameval("SELECT COUNT(*) FROM ordpitem WHERE codigo=${codigo}");
+		if($this->db->table_exists('ordpitem')){
+			$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM ordpitem WHERE codigo=${codigo}");
+		}
 
-		if ($check > 0){
+		if($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Producto con Movimiento no puede ser Borrado, solo se puede inactivar';
 			return false;
 		}
 
-		$check  = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinv WHERE enlace=${codigo}"));
+		$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sinv WHERE enlace=${codigo}"));
 		if($check>0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='El producto esta enlazado a otros producto';
 			return false;
