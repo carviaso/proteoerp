@@ -4125,6 +4125,7 @@ class Sfac extends Controller {
 					$_POST["sinvpeso_${i}"] = $itrow->peso;
 					$_POST["sinvtipo_${i}"] = $itrow->tipo;
 					$_POST["detalle_${i}"]  = '';
+					$_POST["combo_$i"]      = '';
 					$i++;
 				}
 
@@ -4203,6 +4204,7 @@ class Sfac extends Controller {
 				$_POST["sinvpeso_${i}"] = $itrow->peso;
 				$_POST["sinvtipo_${i}"] = $itrow->tipo;
 				$_POST["detalle_${i}"]  = '';
+				$_POST["combo_$i"]      = '';
 				$i++;
 			}
 
