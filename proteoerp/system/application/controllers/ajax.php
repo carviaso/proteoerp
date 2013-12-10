@@ -204,7 +204,7 @@ class Ajax extends Controller {
 		$data = '[ ]';
 		if($mid !== false){
 			$retArray = $retorno = array();
-			$sel ='id,TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo, TRIM(dire11) AS direc,telefono,mmargen';
+			$sel ='id,TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo, CONCAT(TRIM(dire11)," ",dire12) AS direc, CONCAT(TRIM(telefono)," ",telefon2) telefono, mmargen, ciudad1, estado';
 
 			//Mira si existe el codigo
 			$mSQL="SELECT ${sel}
@@ -221,6 +221,9 @@ class Ajax extends Controller {
 				$retArray['telef']   = trim($row['telefono']);
 				$retArray['direc']   = $this->en_utf8($row['direc']);
 				$retArray['desc']    = floatval($row['mmargen']);
+				$retArray['telefono']= $this->en_utf8($row['telefono']);
+				$retArray['ciudad']  = $this->en_utf8($row['ciudad1']);
+				$retArray['estado']  = $this->en_utf8($row['estado']);
 				$retArray['id']      = $row['id'];
 				array_push($retorno, $retArray);
 				$ww=" AND cliente<>${qmid}";
@@ -244,6 +247,9 @@ class Ajax extends Controller {
 					$retArray['telef']   = trim($row['telefono']);
 					$retArray['direc']   = $this->en_utf8($row['direc']);
 					$retArray['desc']    = floatval($row['mmargen']);
+					$retArray['telefono']= $this->en_utf8($row['telefono']);
+					$retArray['ciudad']  = $this->en_utf8($row['ciudad1']);
+					$retArray['estado']  = $this->en_utf8($row['estado']);
 					$retArray['id']      = $row['id'];
 					array_push($retorno, $retArray);
 				}

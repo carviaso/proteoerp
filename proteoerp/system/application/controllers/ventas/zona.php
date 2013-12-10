@@ -15,7 +15,7 @@ class Zona extends Controller {
 	function index(){
 		$this->instalar();
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
-		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->datasis->modintramenu( 700, 500, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -58,160 +58,24 @@ class Zona extends Controller {
 	//Funciones de los Botones
 	//
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
+		$ngrid = '#newapi'.$grid0;
 
-		$bodyscript .= '
-		function zonaadd(){
-			$.post("'.site_url($this->url.'dataedit/create').'",
-			function(data){
-				$("#fedita").html(data);
-				$("#fedita").dialog("open");
-			})
-		};';
+		$bodyscript .= $this->jqdatagrid->bsshow('zona', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'zona', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'zona', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('zona', $ngrid, $this->url );
 
-		$bodyscript .= '
-		function zonaedit(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
-				});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
-
-		$bodyscript .= '
-		function zonashow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
-					$("#fshow").html(data);
-					$("#fshow").dialog( "open" );
-				});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
-
-		$bodyscript .= '
-		function zonadel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				if(confirm(" Seguro desea eliminar el registro?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
-					mId = id;
-					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
-						try{
-							var json = JSON.parse(data);
-							if (json.status == "A"){
-								$.prompt("Registro eliminado");
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-							}else{
-								$.prompt("Registro no se puede eliminado");
-							}
-						}catch(e){
-							$("#fborra").html(data);
-							$("#fborra").dialog( "open" );
-						}
-					});
-				}
-			}else{
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
 		//Wraper de javascript
-		$bodyscript .= '
-		$(function(){
-			$("#dialog:ui-dialog").dialog( "destroy" );
-			var mId = 0;
-			var montotal = 0;
-			var ffecha = $("#ffecha");
-			var grid = jQuery("#newapi'.$grid0.'");
-			var s;
-			var allFields = $( [] ).add( ffecha );
-			var tips = $( ".validateTips" );
-			s = grid.getGridParam(\'selarrrow\');
-			';
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= '
-		$("#fedita").dialog({
-			autoOpen: false, height: 350, width: 450, modal: true,
-			buttons: {
-				"Guardar": function() {
-					var bValid = true;
-					var murl = $("#df1").attr("action");
-					allFields.removeClass( "ui-state-error" );
-					$.ajax({
-						type: "POST", dataType: "html", async: false,
-						url: murl,
-						data: $("#df1").serialize(),
-						success: function(r,s,x){
-							try{
-								var json = JSON.parse(r);
-								if (json.status == "A"){
-									apprise("Registro Guardado");
-									$( "#fedita" ).dialog( "close" );
-									grid.trigger("reloadGrid");
-									return true;
-								} else {
-									apprise(json.mensaje);
-								}
-							}catch(e){
-								$("#fedita").html(r);
-							}
-						}
-					})
-				},
-				"Cancelar": function() {
-					$("#fedita").html("");
-					$( this ).dialog( "close" );
-				}
-			},
-			close: function() {
-				$("#fedita").html("");
-				allFields.val( "" ).removeClass( "ui-state-error" );
-			}
-		});';
-
-		$bodyscript .= '
-		$("#fshow").dialog({
-			autoOpen: false, height: 350, width: 450, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fshow").html("");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				$("#fshow").html("");
-			}
-		});';
-
-		$bodyscript .= '
-		$("#fborra").dialog({
-			autoOpen: false, height: 300, width: 400, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fborra").html("");
-					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-				$("#fborra").html("");
-			}
-		});';
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '230', '410' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '230', '400' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
 		$bodyscript .= '});';
-
 		$bodyscript .= '</script>';
+
 		return $bodyscript;
 	}
 
@@ -287,6 +151,7 @@ class Zona extends Controller {
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
+			'hidden'        => 'true',
 			'align'         => "'center'",
 			'frozen'        => 'true',
 			'width'         => 40,
@@ -297,7 +162,7 @@ class Zona extends Controller {
 
 		$grid->showpager(true);
 		$grid->setWidth('');
-		$grid->setHeight('290');
+		$grid->setHeight('240');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
@@ -405,7 +270,7 @@ class Zona extends Controller {
 		});
 		';
 
-		$edit = new DataEdit($this->tits, 'zona');
+		$edit = new DataEdit('', 'zona');
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -442,10 +307,11 @@ class Zona extends Controller {
 		$edit->margen->size =7;
 		$edit->margen->insertValue='0';
 		$edit->margen->maxlength =5;
+		$edit->margen->append('%');
 
 		$edit->area = new inputField('C&oacute;digo de &aacute;rea','area');
 		$edit->area->rule='';
-		$edit->area->size =40;
+		$edit->area->size =38;
 		$edit->area->maxlength =40;
 
 		$edit->build();

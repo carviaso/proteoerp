@@ -16,7 +16,7 @@ class Scaj extends Controller {
 
 	function index(){
 		$this->instalar();
-		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->datasis->modintramenu( 700, 550, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -64,159 +64,23 @@ class Scaj extends Controller {
 	//***************************
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
+		$ngrid = '#newapi'.$grid0;
 
-		$bodyscript .= '
-		function scajadd(){
-			$.post("'.site_url($this->url.'dataedit/create').'",
-			function(data){
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		};';
-
-		$bodyscript .= '
-		function scajedit(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
-				});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
-
-		$bodyscript .= '
-		function scajshow(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
-					$("#fshow").html(data);
-					$("#fshow").dialog( "open" );
-				});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
-
-		$bodyscript .= '
-		function scajdel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				if(confirm(" Seguro desea eliminar el registro?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
-					mId = id;
-					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
-						try{
-							var json = JSON.parse(data);
-							if (json.status == "A"){
-								$.prompt("Registro eliminado");
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-							}else{
-								$.prompt("Registro no se puede eliminado");
-							}
-						}catch(e){
-							$("#fborra").html(data);
-							$("#fborra").dialog( "open" );
-						}
-					});
-				}
-			}else{
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
+		$bodyscript .= $this->jqdatagrid->bsshow('scaj', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'scaj', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'scaj', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('scaj', $ngrid, $this->url );
 
 		//Wraper de javascript
-		$bodyscript .= '
-		$(function() {
-			$("#dialog:ui-dialog").dialog( "destroy" );
-			var mId = 0;
-			var montotal = 0;
-			var ffecha = $("#ffecha");
-			var grid = jQuery("#newapi'.$grid0.'");
-			var s;
-			var allFields = $( [] ).add( ffecha );
-			var tips = $( ".validateTips" );
-			s = grid.getGridParam(\'selarrrow\');
-			';
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= '
-		$("#fedita").dialog({
-			autoOpen: false, height: 450, width: 700, modal: true,
-			buttons: {
-				"Guardar": function() {
-					var bValid = true;
-					var murl = $("#df1").attr("action");
-					allFields.removeClass( "ui-state-error" );
-					$.ajax({
-						type: "POST", dataType: "html", async: false,
-						url: murl,
-						data: $("#df1").serialize(),
-						success: function(r,s,x){
-							try{
-								var json = JSON.parse(r);
-								if(json.status == "A"){
-									$.prompt("Registro Guardado");
-									$( "#fedita" ).dialog( "close" );
-									grid.trigger("reloadGrid");
-									return true;
-								}else{
-									$.prompt(json.mensaje);
-								}
-							}catch(e){
-								$("#fedita").html(r);
-							}
-						}
-					})
-				},
-				"Cancelar": function(){
-					$("#fedita").html("");
-					$( this ).dialog("close");
-				}
-			},
-			close: function() {
-				$("#fedita").html("");
-				allFields.val( "" ).removeClass( "ui-state-error" );
-			}
-		});';
-
-		$bodyscript .= '
-		$("#fshow").dialog({
-			autoOpen: false, height: 450, width: 700, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fshow").html("");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				$("#fshow").html("");
-			}
-		});';
-
-		$bodyscript .= '
-		$("#fborra").dialog({
-			autoOpen: false, height: 300, width: 400, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fborra").html("");
-					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-				$("#fborra").html("");
-			}
-		});';
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '360', '580' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '450', '700' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '600' );
 
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
+
 		return $bodyscript;
 	}
 
@@ -456,6 +320,7 @@ class Scaj extends Controller {
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
+			'hidden'        => 'true',
 			'align'         => "'center'",
 			'frozen'        => 'true',
 			'width'         => 40,
@@ -575,13 +440,8 @@ class Scaj extends Controller {
 		$edit->caja->option('','Seleccionar');
 		$edit->caja->options("SELECT codbanc, concat(codbanc,' ',banco) banco FROM banc WHERE tbanco='CAJ' ORDER BY codbanc");
 		$edit->caja->rule ='required';
-		$edit->caja->style='width:250px';
+		$edit->caja->style='width:190px';
 
-/*
-		$edit->caja->size=4;
-		$edit->caja->maxlength=2;
-		$edit->caja->rule='trim|callback_ccaja';
-*/
 
 		$edit->directo = new inputField('Directorio','directo');
 		$edit->directo->size=55;
@@ -616,28 +476,28 @@ class Scaj extends Controller {
 
 		$edit->fechaa = new dateonlyfield('Fecha', 'fechaa');
 		$edit->fechaa->maxlength=12;
-		$edit->fechaa->size=12;
+		$edit->fechaa->size=11;
 		$edit->fechaa->rule='chfecha';
 		$edit->fechaa->group='Apertura';
 		$edit->fechaa->calendar=false;
 
 		$edit->horaa  = new inputField('Hora', 'horaa');
 		$edit->horaa->maxlength=12;
-		$edit->horaa->size=12;
+		$edit->horaa->size=11;
 		$edit->horaa->rule='trim|callback_chhora';
 		$edit->horaa->append('hh:mm:ss');
 		$edit->horaa->group='Apertura';
 
 		$edit->apertura =new inputField('Monto', 'apertura');
 		$edit->apertura->maxlength=12;
-		$edit->apertura->size=12;
+		$edit->apertura->size=11;
 		$edit->apertura->group='Apertura';
 		$edit->apertura->css_class='inputnum';
 		$edit->apertura->rule='numeric';
 
 		$edit->fechac = new dateonlyfield('Fecha', 'fechac');
 		$edit->fechac->maxlength=12;
-		$edit->fechac->size=12;
+		$edit->fechac->size=11;
 		$edit->fechac->rule='chfecha';
 		$edit->fechac->group='Apertura';
 		$edit->fechac->calendar=false;
@@ -645,14 +505,14 @@ class Scaj extends Controller {
 
 		$edit->horac  = new inputField('Hora', 'horac');
 		$edit->horac->maxlength=8;
-		$edit->horac->size=12;
+		$edit->horac->size=11;
 		$edit->horac->rule='trim|callback_chhora';
 		$edit->horac->append('hh:mm:ss');
 		$edit->horac->group='Apertura';
 
 		$edit->cierre   =new inputField('Monto', 'cierre');
 		$edit->cierre->maxlength=12;
-		$edit->cierre->size=12;
+		$edit->cierre->size=11;
 		$edit->cierre->group='Apertura';
 		$edit->cierre->css_class='inputnum';
 		$edit->cierre->rule='trim|numeric';

@@ -15,7 +15,7 @@ class Grcl extends Controller {
 	function index(){
 		$this->instalar();
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
-		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->datasis->modintramenu( 680, 500, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -59,158 +59,23 @@ class Grcl extends Controller {
 	//Funciones de los Botones
 	//***************************
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
+		$ngrid = '#newapi'.$grid0;
 
-		$bodyscript .= '
-		function grcladd(){
-			$.post("'.site_url($this->url.'dataedit/create').'",
-			function(data){
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		};';
+		$bodyscript .= $this->jqdatagrid->bsshow('grcl', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'grcl', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'grcl', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('grcl', $ngrid, $this->url );
 
-		$bodyscript .= '
-		function grcledit(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
-				});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
-
-		$bodyscript .= '
-		function grclshow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
-					$("#fshow").html(data);
-					$("#fshow").dialog( "open" );
-				});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
-
-		$bodyscript .= '
-		function grcldel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				if(confirm(" Seguro desea eliminar el registro?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
-					mId = id;
-					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
-						try{
-							var json = JSON.parse(data);
-							if (json.status == "A"){
-								$.prompt("Registro eliminado");
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-							}else{
-								$.prompt("Registro no se puede eliminado");
-							}
-						}catch(e){
-							$("#fborra").html(data);
-							$("#fborra").dialog( "open" );
-						}
-					});
-				}
-			}else{
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
 		//Wraper de javascript
-		$bodyscript .= '
-		$(function(){
-			$("#dialog:ui-dialog").dialog( "destroy" );
-			var mId = 0;
-			var montotal = 0;
-			var ffecha = $("#ffecha");
-			var grid = jQuery("#newapi'.$grid0.'");
-			var s;
-			var allFields = $( [] ).add( ffecha );
-			var tips = $( ".validateTips" );
-			s = grid.getGridParam(\'selarrrow\');
-			';
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= '
-		$("#fedita").dialog({
-			autoOpen: false, height: 300, width: 400, modal: true,
-			buttons: {
-				"Guardar": function() {
-					var bValid = true;
-					var murl = $("#df1").attr("action");
-					allFields.removeClass( "ui-state-error" );
-					$.ajax({
-						type: "POST", dataType: "html", async: false,
-						url: murl,
-						data: $("#df1").serialize(),
-						success: function(r,s,x){
-							try{
-								var json = JSON.parse(r);
-								if (json.status == "A"){
-									apprise("Registro Guardado");
-									$( "#fedita" ).dialog( "close" );
-									grid.trigger("reloadGrid");
-									return true;
-								} else {
-									apprise(json.mensaje);
-								}
-							}catch(e){
-								$("#fedita").html(r);
-							}
-						}
-					})
-				},
-				"Cancelar": function() {
-					$("#fedita").html("");
-					$( this ).dialog( "close" );
-				}
-			},
-			close: function() {
-				$("#fedita").html("");
-				allFields.val( "" ).removeClass( "ui-state-error" );
-			}
-		});';
-
-		$bodyscript .= '
-		$("#fshow").dialog({
-			autoOpen: false, height: 280, width: 380, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fshow").html("");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				$("#fshow").html("");
-			}
-		});';
-
-		$bodyscript .= '
-		$("#fborra").dialog({
-			autoOpen: false, height: 300, width: 400, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fborra").html("");
-					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-				$("#fborra").html("");
-			}
-		});';
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '200', '370' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '190', '360' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '200', '300' );
 
 		$bodyscript .= '});';
+
 		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
@@ -263,9 +128,10 @@ class Grcl extends Controller {
 		$grid->addField('cuenta');
 		$grid->label('Cuenta');
 		$grid->params(array(
+			'align'         => "'center'",
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 150,
+			'width'         => 100,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:false}',
 			'editoptions'   => '{'.$grid->autocomplete($link, 'cuenta','cucucu','<div id=\"cucucu\"><b>"+ui.item.descrip+"</b></div>').'}',
@@ -274,6 +140,7 @@ class Grcl extends Controller {
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
+			'hidden'        => 'true',
 			'align'         => "'center'",
 			'frozen'        => 'true',
 			'width'         => 40,
@@ -284,7 +151,7 @@ class Grcl extends Controller {
 
 		$grid->showpager(true);
 		$grid->setWidth('');
-		$grid->setHeight('290');
+		$grid->setHeight('235');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');

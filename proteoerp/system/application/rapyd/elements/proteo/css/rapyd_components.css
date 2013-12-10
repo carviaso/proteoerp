@@ -10,7 +10,7 @@
 .pagenav a { font-family: Verdana, Geneva, Arial, Helvetica, sans-serif; font-size: 10px; font-weight: bold; border: 1px solid; padding:3px 6px;background: #DDDDDD;text-decoration:none; }
 .pagenav a:hover{ font-family: Verdana, Geneva, Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; border: 1px solid; color:#DDDDDD; padding:6px 12px;background: #124194 }
 .mainheader { clear:both;  border-bottom: 1px solid #ECECEC; height:22px; padding:4px; color: #153D51; font-family: Lucida Grande, Verdana, Geneva, Sans-serif;	font-size: 12px;font-weight: bold;}
-.mainfooter { clear:both;  border-color: #92B8CB;  border-top:1px solid #ECECEC; height:22px; padding:4px; color: #153D51; font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;	font-size: 11px;	font-weight: bold;}
+.mainfooter { clear:both;  border-color: #92B8CB;  border-top:1px solid #ECECEC;  padding:4px; color: #153D51; font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;	font-size: 11px;	font-weight: bold;}
 .littletablerow       { color: #151515;	border-bottom: 1px solid #ECECEC;	 font-family: Lucida Grande, Verdana, Geneva, Sans-serif;	font-size: 10px;}
 .littletablerow10     { color: #153D51;	border-bottom: 1px solid #ECECEC;	 font-family: Lucida Grande, Verdana, Geneva, Sans-serif;	font-size: 10px;}
 .littletablerowth     { color: #153D51;	border-bottom: 1px solid #ECECEC;	 font-family: Lucida Grande, Verdana, Geneva, Sans-serif;	font-size: 12px; font-weight: bold;}

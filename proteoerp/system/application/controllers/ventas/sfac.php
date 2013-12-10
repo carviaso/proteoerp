@@ -37,9 +37,9 @@ class Sfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir'      ,'label'=>'Reimprimir Documento'));
-		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png'              ,'alt' => 'Cierre de Caja'  ,'label'=>'Cierre de Caja'));
-		$grid->wbotonadd(array('id'=>'fmanual'  ,'img'=>'images/mano.png'                ,'alt' => 'Factura Manual'  ,'label'=>'Factura Manual'));
+		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento', 'label'=>'Reimprimir'));
+		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png',              'alt' => 'Cierre de Caja',       'label'=>'Cierre de Caja'));
+		$grid->wbotonadd(array('id'=>'fmanual'  ,'img'=>'images/mano.png',                'alt' => 'Factura Manual',       'label'=>'Factura Manual'));
 
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
@@ -65,7 +65,7 @@ class Sfac extends Controller {
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array('id'=>'fedita' , 'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fedita' , 'title'=>'Agregar Factura Fecha '.date('d/m/Y')),
 			array('id'=>'scliexp', 'title'=>'Ficha de Cliente'),
 			array('id'=>'fshow'  , 'title'=>'Mostrar registro'),
 			array('id'=>'fborra' , 'title'=>'Anula Factura' ),
@@ -183,6 +183,8 @@ class Sfac extends Controller {
 			$.post("'.site_url($this->url.'dataedit/N/create').'",
 			function(data){
 				$("#fimpser").html("");
+				$("#fedita").dialog({ title:"Agregar Factura" });
+
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
@@ -251,6 +253,7 @@ class Sfac extends Controller {
 				function(data){
 					$("#fimpser").html("");
 					$("#fedita").html(data);
+					$("#fedita").dialog({ title:"Agregar Factura ******** MANUAL ********" });
 					$("#fedita").dialog( "open" );
 				})
 			});';
@@ -384,7 +387,7 @@ class Sfac extends Controller {
 		//Agregar Factura
 		$bodyscript .= '
 			$("#fedita").dialog({
-				autoOpen: false, height: 600, width: 800, modal: true,
+				autoOpen: false, height: 450, width: 800, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;
@@ -1139,7 +1142,7 @@ class Sfac extends Controller {
 
 		$grid->showpager(true);
 		$grid->setWidth('');
-		$grid->setHeight('200');
+		$grid->setHeight('165');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
@@ -2328,8 +2331,6 @@ class Sfac extends Controller {
 		$dbtipo_doc= $this->db->escape($tipo_doc);
 		$dbnumero  = $this->db->escape($numero);
 
-
-
 		$salida = '<br><table width=\'100%\' border=\'1\'>';
 		$pago  = 0;
 		$encab = false;
@@ -2472,8 +2473,6 @@ class Sfac extends Controller {
 		$edit->sclitipo->insertValue = 1;
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
-		//$edit->fecha->mode = 'autohide';
-		//$edit->fecha->when = array('show');
 		if($manual <> 'S'){
 			$edit->fecha->insertValue=date('Y-m-d');
 		}
@@ -2481,31 +2480,41 @@ class Sfac extends Controller {
 		$edit->fecha->calendar = false;
 		$edit->fecha->size = 12;
 
-		$edit->tipo_doc = new  dropdownField('Documento', 'tipo_doc');
-		$edit->tipo_doc->option('F','Factura');
-		$edit->tipo_doc->option('D','Devoluci&oacute;n');
-		$edit->tipo_doc->style='width:140px;';
-		$edit->tipo_doc->size = 5;
-		$edit->tipo_doc->rule='required';
+		//$edit->tipo_doc = new  dropdownField('Documento', 'tipo_doc');
+		$edit->tipo_doc = new  hiddenField('Documento', 'tipo_doc');
+		$edit->tipo_doc->insertValue = 'F';
+		
+		//$edit->tipo_doc->option('F','Factura');
+		//$edit->tipo_doc->option('D','Devoluci&oacute;n');
+		//$edit->tipo_doc->style='width:80px;';
+		//$edit->tipo_doc->size = 5;
+		//$edit->tipo_doc->rule='required';
 
-		//$edit->manual =  new checkboxField('Manual', 'manual','S','N');
 		$edit->manual = new hiddenField('Manual', 'manual');
 		$edit->manual->insertValue = $manual;
 
 		$edit->vd = new  dropdownField ('Vendedor', 'vd');
 		$edit->vd->options('SELECT vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend ORDER BY vendedor');
-		$edit->vd->style='width:140px;';
+		$edit->vd->style='width:100px;';
 		$edit->vd->insertValue=$this->secu->getvendedor();
 
-		$edit->almacen= new dropdownField ('Almac&eacute;n', 'almacen');
-		$edit->almacen->options('SELECT ubica,ubides FROM caub WHERE gasto="N" ORDER BY ubides');
-		$edit->almacen->rule='required';
-		$edit->almacen->style='width:150px;';
+
 		$alma = $this->secu->getalmacen();
 		if(empty($alma)){
+			$edit->almacen= new dropdownField ('Almac&eacute;n', 'almacen');
+			$edit->almacen->options('SELECT ubica,ubides FROM caub WHERE gasto="N" ORDER BY ubides');
+			$edit->almacen->rule='required';
+			$edit->almacen->style='width:130px;';
 			$alma = $this->datasis->traevalor('ALMACEN');
+			$edit->almacen->insertValue=$alma;
+		} else {
+			$edit->almacen= new inputField ('Almac&eacute;n', 'almacen');
+			$edit->almacen->readonly  = true;
+			$edit->almacen->size      = 8;
+			$edit->almacen->insertValue=$alma;
 		}
-		$edit->almacen->insertValue=$alma;
+
+
 
 		$edit->numero = new inputField('N&uacute;mero', 'numero');
 		$edit->numero->size = 10;
@@ -2515,7 +2524,7 @@ class Sfac extends Controller {
 		$edit->numero->when=array('show','modify');
 
 		$edit->factura = new inputField('Factura', 'factura');
-		$edit->factura->size = 10;
+		$edit->factura->size = 12;
 		$edit->factura->mode='autohide';
 		$edit->factura->maxlength=8;
 		$edit->factura->rule='condi_required|callback_chfactura';
@@ -2550,15 +2559,20 @@ class Sfac extends Controller {
 		$edit->direc->readonly =true;
 		$edit->direc->size = 40;
 
+
+		$cajero = $this->datasis->dameval('SELECT a.cajero FROM usuario a JOIN scaj b ON a.cajero=b.cajero WHERE a.us_codigo='.$this->session->userdata('usuario') );
+		$edit->cajero= new hiddenField('Cajero', 'cajero');
+		$edit->cajero->inputValue = $cajero;
+
+/*
 		$edit->cajero= new dropdownField('Cajero', 'cajero');
 		$edit->cajero->options('SELECT cajero,nombre FROM scaj ORDER BY nombre');
 		$edit->cajero->rule ='required|cajerostatus';
 		$edit->cajero->style='width:150px;';
 		$edit->cajero->insertValue=$this->secu->getcajero();
-
-		$edit->descuento = new hiddenField('Desc.','descuento');
+*/
+		$edit->descuento = new hiddenField('Descuento','descuento');
 		$edit->descuento->insertValue = '0';
-		//$edit->descuento->when=array('modify','create');
 
 		//***********************************
 		//  Campos para el detalle 1 sitems
@@ -2570,7 +2584,7 @@ class Sfac extends Controller {
 		$edit->codigoa->rule     = 'required';
 
 		$edit->desca = new inputField('Descripci&oacute;n <#o#>', 'desca_<#i#>');
-		$edit->desca->size=36;
+		$edit->desca->size=45;
 		$edit->desca->db_name='desca';
 		$edit->desca->maxlength=50;
 		$edit->desca->readonly  = true;
@@ -2592,7 +2606,7 @@ class Sfac extends Controller {
 		$edit->preca->db_name   = 'preca';
 		$edit->preca->css_class = 'inputnum';
 		$edit->preca->rel_id    = 'sitems';
-		$edit->preca->size      = 10;
+		$edit->preca->size      = 14;
 		$edit->preca->rule      = 'required|positive|callback_chpreca[<#i#>]';
 		$edit->preca->onkeyup   = 'post_precioselec(<#i#>,this);';
 		//$edit->preca->readonly  = true;
@@ -2707,7 +2721,11 @@ class Sfac extends Controller {
 		$edit->totalg->readonly  =true;
 		$edit->totalg->size      = 10;
 
-		$edit->observa   = new inputField('Observaci&oacute;n', 'observa');
+		$edit->observa       = new textareaField('Observaci&oacute;n', 'observa');
+		$edit->observa->cols = 60;
+		$edit->observa->rows = 2;
+
+
 		$edit->nfiscal   = new inputField('No.Fiscal', 'nfiscal');
 		$edit->observ1   = new inputField('Observaci&oacute;n', 'observ1');
 		$edit->zona      = new inputField('Zona', 'zona');
@@ -2767,7 +2785,8 @@ class Sfac extends Controller {
 		}else{
 			if($this->genesal){
 				$conten['form']  =& $edit;
-				$this->load->view('view_sfac_add', $conten);
+				//$this->load->view('view_sfac_add', $conten);
+				$this->load->view('view_sfac_pos1', $conten);
 			}else{
 				$rt=array(
 					'status' =>'B',
@@ -3321,7 +3340,6 @@ class Sfac extends Controller {
 				$sfpa+=$sfpa_monto;
 				$laid=$i;
 			}
-
 			if($sfpa>$totalg){
 				$ult = $do->get_rel('sfpa','monto',$laid);
 				$do->set_rel('sfpa','monto',$ult-($sfpa-$totalg),$laid);

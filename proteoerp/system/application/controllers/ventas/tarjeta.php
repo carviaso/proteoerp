@@ -1,5 +1,5 @@
-<?php  require_once(BASEPATH.'application/controllers/validaciones.php');
-
+<?php  
+//require_once(BASEPATH.'application/controllers/validaciones.php');
 class Tarjeta extends Controller {
 	var $mModulo='TARJETA';
 	var $titp='Formas de Pago';
@@ -15,7 +15,7 @@ class Tarjeta extends Controller {
 
 	function index(){
 		$this->instalar();
-		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->datasis->modintramenu( 700, 500, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -59,7 +59,7 @@ class Tarjeta extends Controller {
 	//Funciones de los Botones
 	//***************************
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
 		$ngrid = '#newapi'.$grid0;
 
 		$bodyscript .= $this->jqdatagrid->bsshow('tarjeta', $ngrid, $this->url );
@@ -70,8 +70,8 @@ class Tarjeta extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '300', '550' );
-		$bodyscript .= $this->jqdatagrid->bsfshow( '250', '500' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '250', '430' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '240', '500' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
 		$bodyscript .= '});';
@@ -168,6 +168,7 @@ class Tarjeta extends Controller {
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
+			'hidden'        => 'true',
 			'align'         => "'center'",
 			'frozen'        => 'true',
 			'width'         => 40,
@@ -177,7 +178,7 @@ class Tarjeta extends Controller {
 
 		$grid->showpager(true);
 		$grid->setWidth('');
-		$grid->setHeight('290');
+		$grid->setHeight('235');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');

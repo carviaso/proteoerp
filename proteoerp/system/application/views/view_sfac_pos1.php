@@ -28,6 +28,10 @@ $(document).ready(function() {
 	}).mouseout(function(){
 		$(this).next().fadeOut("fast");
 	});
+ 
+	$('#formapago').dialog({
+		autoOpen: false, height: 330, width: 630, modal: true,
+	});
 
 	$("#persiana").click( function() {
 		$('#efecha').toggle();
@@ -35,7 +39,6 @@ $(document).ready(function() {
 
 });		
 </script>
-
 <?php
 
 $container_bl=join('&nbsp;', $form->_button_container['BL']);
@@ -156,6 +159,7 @@ $(function(){
 		},
 		minLength: 2,
 		select: function( event, ui ) {
+			var meco;
 			$('#cod_cli').attr("readonly", "readonly");
 
 			$('#nombre').val(ui.item.nombre);
@@ -167,8 +171,9 @@ $(function(){
 			$('#cod_cli').val(ui.item.cod_cli);
 			$('#sclitipo').val(ui.item.tipo);
 
-			$('#direc').val(ui.item.direc);
-			$('#direc_val').text(ui.item.direc);
+			meco = 'Direccion:'+ui.item.direc+" Telefono: "+ui.item.telefono+" Ciudad: "+ui.item.ciudad;
+			$('#direc').val(meco);
+			$('#direc_val').text(meco);
 
 			var manual = $("#manual").val();
 			if(manual=='S'){
@@ -223,6 +228,7 @@ $(function(){
 		},
 		minLength: 2,
 		select: function( event, ui ) {
+			var meco;
 			$('#factura').attr("readonly", "readonly");
 			$('#factura').val(ui.item.value);
 
@@ -476,6 +482,10 @@ function add_sfpa(){
 	return can;
 }
 
+function fpaga(){
+	$("#formapago").dialog( "open" );
+}
+
 function post_precioselec(ind,obj){
 	if(obj.value=='o'){
 		var itiva = Number($('#itiva_'+ind).val());
@@ -581,7 +591,7 @@ function cdropdown(nind){
 	pprecio.setAttribute("id"    , "preca_"+ind);
 	pprecio.setAttribute("name"  , "preca_"+ind);
 	pprecio.setAttribute("class" , "select");
-	pprecio.setAttribute("style" , "width: 100px");
+	pprecio.setAttribute("style" , "width: 95px");
 	pprecio.setAttribute("onchange" , "post_precioselec("+ind+",this)");
 
 	var ban=0;
@@ -625,14 +635,14 @@ function cdescrip(nind){
 	var tipo =$("#sinvtipo_"+ind).val();
 
 	if(tipo=='Servicio'){
-		var desca  =$("#desca_"+ind).val();
-		var detalle=$("#detalle_"+ind).val();
+		var desca  = $("#desca_"+ind).val();
+		var detalle= $("#detalle_"+ind).val();
 		var ddetalle = document.createElement("textarea");
 		ddetalle.setAttribute("id"    , "detalle_"+ind);
 		ddetalle.setAttribute("name"  , "detalle_"+ind);
 		ddetalle.setAttribute("class" , "textarea");
-		ddetalle.setAttribute("cols"  , 34);
-		ddetalle.setAttribute("rows"  , 3);
+		ddetalle.setAttribute("cols"  , 43);
+		ddetalle.setAttribute("rows"  , 2);
 		$("#detalle_"+ind).replaceWith(ddetalle);
 
 		if(detalle.length==0){
@@ -660,7 +670,7 @@ function cdescrip(nind){
 		ddeca.setAttribute("id"    , "desca_"+ind);
 		ddeca.setAttribute("name"  , "desca_"+ind);
 		ddeca.setAttribute("class" , "input");
-		ddeca.setAttribute("size"  , 36);
+		ddeca.setAttribute("size"  , 45);
 		ddeca.setAttribute("maxlength", 50);
 		ddeca.setAttribute("readonly" ,"readonly");
 		ddeca.setAttribute("value"    ,desca);
@@ -791,6 +801,7 @@ function del_sitems(id){
 		add_sitems();
 	}
 }
+
 function del_sfpa(id){
 	id = id.toString();
 	$('#tr_sfpa_'+id).remove();
@@ -830,82 +841,89 @@ function chreferen(){
 	}
 }
 </script>
-<?php } 
+<?php } ?>
+<table align='center' width="95%" cellpadding='0' cellspacing='0'>
+	<tr>
+		<td align=right><?php echo $container_tr; ?><?php echo $form->pfac->output; ?></td>
+	</tr>
+</table>
+<?php 
 	// Campos hidden
 	echo $form->manual->output;  
 	echo $form->tipo_doc->output;
 	echo $form->cajero->output;
 	echo $form->nombre->output
 ?>
-<table align='center' width="95%" cellpadding='0' cellspacing='0'>
-	<tr>
-		<td align=right><?php echo $container_tr; ?><?php echo $form->pfac->output; ?></td>
-	</tr>
-</table>
-<table style="width:100%;border-collapse:collapse;padding:0px;background:#EFEFEF;" border='0'>
-	<tr>
-		<td class="littletableheader" width='20px' style='background:#EFEFEF;'>
-		<?php
-			if($form->_status!='show'){ ?>
-				<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;"><?php echo image('add1-.png'); ?></a>
-		<?php } ?>
-		</td>
-		<td class="littletablerow"  style='width:45px;align;right'><?php echo $form->cliente->label; ?>*</td>
-		<td class="littletablerow"  style='width:75px;' align='left'><?php echo $form->cliente->output,$form->sclitipo->output.$form->upago->output; ?></td>
-		<td class="littletablerow"  style='background:#E0E6F8;'> <div id='nombre_val' style='font-weight:bold;white-space:nowrap;'><?php echo $form->nombre->value;  ?>&nbsp;</div><div id='direc_val' class='tooltip'><?php echo $form->direc->value.$form->direc->output ?></div></td>
-		<td class="littletablerow"  style='width:25px;background:#E0E6F8;text-align:right;'>RIF:</td>
-		<td class="littletablerow"  style='width:75px;background:#E0E6F8;'  ><b id='rifci_val'><?php echo $form->rifci->value; ?></b><?php echo $form->rifci->output;   ?>&nbsp;</td>
-		<td class="littletablerow"  style='width:35px;background:#EFEFEF;'>Vende</td>
-		<td class="littletablerow"  style='width:80px;background:#EAFAEA;'><?php echo $form->vd->output; ?></td>
-		<!--td                         style='width:20px;'><?php echo img(array('src' =>"images/arrow_down.png","id"=>"persiana")); ?></td-->
-	</tr>
-</table>
-
-<table align='center' style="width:100%;border-collapse:collapse;padding:0px;">
-	<tr>
-		<td class="littletableheader" width='65px'><?php echo $form->almacen->label;   ?>*</td>
-		<td class="littletablerow">   <?php echo $form->almacen->output;  ?></td>
-		<td align='center'>
-			<?php
-				if ($form->manual->value == 'S')
-					echo "<span style='font-size:11pt;font-weight: bold;background:#087C0E;color:white;width:100%;' >&nbsp;&nbsp;** FACTURA MANUAL **&nbsp;&nbsp;</span>";
-			?>
-		</td>
-		<td class="littletableheader"><?php echo $form->fecha->label;     ?>*</td>
-		<td class="littletablerow">   <?php echo $form->fecha->output;    ?></td>
-		<td class="littletableheader"><?php echo $form->factura->label;   ?></td>
-		<td class="littletablerow"   ><?php echo $form->factura->output;  ?></td>
-	</tr>
-</table>
-
-<table align='center' style="width:100%;border-collapse:collapse;padding:0px;">
+<!--fieldset style='border: 1px outset #9AC8DA;background: #FFFFFF;'-->
+<table style="width:100%;border-collapse:collapse;padding:0px;" >
 	<tr>
 		<td>
-		<table width='100%' cellpadding='0' cellspacing='0'>
-		<tr>
-			<td>
-			<table style="margin: 0;" width='100%'>
-			<tr>
-			</tr>
-			<?php echo $form->manual->output; ?>
+			<table style="width:100%;border-collapse:collapse;padding:0px;background:#EFEFEF;" border='0'>
+				<tr>
+					<td class="littletableheader" width='20px' style='background:#EFEFEF;'>
+					<?php
+						if($form->_status!='show'){ ?>
+							<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;"><?php echo image('add1-.png'); ?></a>
+					<?php } ?>
+					</td>
+					<td class="littletablerow"  style='width:45px;align;right'><?php echo $form->cliente->label; ?>*</td>
+					<td class="littletablerow"  style='width:75px;' align='center'><?php echo $form->cliente->output,$form->sclitipo->output.$form->upago->output; ?></td>
+					<td class="littletablerow"  style='background:#E0E6F8;'> <div id='nombre_val' style='font-weight:bold;white-space:nowrap;'><?php echo $form->nombre->value;  ?>&nbsp;</div><div id='direc_val' class='tooltip'><?php echo $form->direc->value.$form->direc->output ?></div></td>
+					<td class="littletablerow"  style='width:25px;background:#E0E6F8;text-align:right;'>RIF:</td>
+					<td class="littletablerow"  style='width:75px;background:#E0E6F8;'  ><b id='rifci_val'><?php echo $form->rifci->value; ?></b><?php echo $form->rifci->output;   ?>&nbsp;</td>
+					<td class="littletablerow"  style='width:35px;background:#EFEFEF;'>Vende</td>
+					<td class="littletablerow"  style='width:80px;background:#EAFAEA;'><?php echo $form->vd->output; ?></td>
+					<td                         style='width:20px;'><?php echo img(array('src' =>"images/arrow_down.png","id"=>"persiana")); ?></td>
+				</tr>
 			</table>
-		</tr></table>
 		</td>
-	</tr><tr>
+	</tr>
+</table>
+
+<div id='efecha' style='display:none;'>
+<table style="width:100%;border-collapse:collapse;padding:0px;">
+	<tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:190px'>
-		<table width='100%' border='0'>
+			<table style="width:100%;border-collapse:collapse;padding:0px;">
+				<tr>
+					<!-- td class="littletableheader"><?php echo $form->tipo_doc->label; ?></td -->
+					<!-- td class="littletablerow"   ><?php echo $form->tipo_doc->output;?></td -->
+					<td class="littletableheader"><?php echo $form->almacen->label;  ?>*</td>
+					<td class="littletablerow"   ><?php echo $form->almacen->output; ?></td>
+					<td class="littletableheader"><?php echo $form->observ1->label;  ?>*</td>
+					<td rowspan='2'><?php echo $form->observa->output; ?> </td>
+				</tr><tr>
+					<td class="littletableheader"><?php echo $form->fecha->label;    ?>*</td>
+					<td class="littletablerow"   ><?php echo $form->fecha->output;   ?></td>
+					<!--td class="littletableheader"><?php echo $form->cajero->label;   ?>*</td>
+					<td class="littletablerow"   ><?php echo $form->cajero->output;  ?></td-->
+					<!--td class="littletableheader"><?php echo $form->factura->label;  ?></td>
+					<td class="littletablerow"   ><?php echo $form->factura->output; ?></td-->
+					<td></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</div>
+
+<!--/fieldset -->
+
+<table style="width:100%;border-collapse:collapse;padding:0px;">
+	<tr>
+		<td width='595px'>
+		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:280px;width:590px;'>
+		<table width='100%' border='0' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL__'>
-				<td class="littletableheaderdet"><b>C&oacute;digo</b></td>
-				<td class="littletableheaderdet"><b>Descripci&oacute;n</b></td>
-				<td class="littletableheaderdet"><b>Cantidad</b></td>
-				<td class="littletableheaderdet"><b>Precio</b></td>
-				<td class="littletableheaderdet"><b>Importe</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>C&oacute;digo</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>Descripci&oacute;n</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>Cant.</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>Precio</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>Importe</b></td>
 				<?php if($form->_status!='show') {?>
-					<td bgcolor='#7098D0'>&nbsp;</td>
+					<td bgcolor='#0B3861'>&nbsp;</td>
 				<?php } ?>
 			</tr>
-
 			<?php for($i=0;$i<$form->max_rel_count['sitems'];$i++) {
 				$it_codigo  = "codigoa_${i}";
 				$it_desca   = "desca_${i}";
@@ -924,13 +942,11 @@ function chreferen(){
 					$it_obj   = "precio${o}_${i}";
 					$pprecios.= $form->$it_obj->output;
 				}
-
 				$pprecios .= $form->$it_iva->output;
 				$pprecios .= $form->$it_peso->output;
 				$pprecios .= $form->$it_tipo->output;
 				$pprecios .= $form->$it_combo->output;
 			?>
-
 			<tr id='tr_sitems_<?php echo $i; ?>' ondblclick="marcar(this)">
 				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
 				<td class="littletablerow" align="left" ><?php
@@ -956,13 +972,55 @@ function chreferen(){
 			</tr>
 		</table>
 		</div>
-		<?php
-			echo $container_bl.$container_br;
-			echo $form->referen->output.'<b>'.$form->referen->label.'</b>';
-		?>
 		</td>
-	</tr><tr>
-		<table width='100%' id='sfpatable'>
+		<td valign='top'>
+			<table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
+			<tr>
+				<td style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>FORMA DE PAGO</td>
+			</tr><tr>	
+				<!--td><input name="btn_add_sitems" value="Agregar" onclick="add_sitems()" class="button" type="button">&nbsp;</td-->
+				<td><?php echo $form->referen->output.'<b>'.$form->referen->label.'</b>';?></td>
+			</tr>
+			<!--tr>	
+				<td><?php echo $form->referen->output.'<b>Credito</b>';?></td>
+			</tr><tr>	
+				<td><?php echo $form->referen->output.'<b>Efectivo</b>';?></td>
+			</tr-->
+			<tr>	
+				<td><input name="bpagar" value="Pago Multiple" onclick="fpaga()" class="button" type="button">&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+	</tr><tr>	
+		<td>
+		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;width:590px;'>
+		<table style="width:100%;border-collapse:collapse;padding:0px;">
+			<tr>
+				<td class="littletableheader" align='right'><?php echo $form->totals->label; ?></td>
+				<td class="littletablerow"    align='right' style='font-size:18px;'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
+				<td class="littletableheader" align='right'><?php echo $form->ivat->label;    ?></td>
+				<td class="littletablerow"    align='right' style='font-size:18px;'><b id='ivat_val'><?php echo nformat($form->ivat->value); ?></b><?php echo $form->ivat->output; ?></td>
+				<td class="littletableheader" align='right'><?php echo $form->totalg->label;  ?></td>
+				<td class="littletablerow"    align='right' style='font-size:18px;'><b id='totalg_val'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
+			</tr>
+		</table>
+		</div>
+		</td>
+		<td>
+		<table style="width:100%;border-collapse:collapse;padding:0px;" border='0'>
+			<td class="littletableheader" align='right' width='70px'><?php echo $form->descuento->label;  ?></td>
+			<td class="littletablerow"    align='right' ><b id='descuentomon_val'></b><?php echo $form->descuento->output; ?></td>
+		</table>
+		</td>
+	</tr>
+</table>
+
+<div id='formapago'>
+<table style="width:100%;border-collapse:collapse;padding:0px;">
+	<tr>
+		<td>
+		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:200px;'>
+		<table width='100%' id='sfpatable' border='0' cellpadding='0' cellspacing='0'>
 			<tr id='__ITPL__sfpa'>
 				<td class="littletableheaderdet">Tipo</td>
 				<td class="littletableheaderdet">Fecha</td>
@@ -983,39 +1041,43 @@ function chreferen(){
 				$banco    = "banco_${i}";
 			?>
 			<tr id='tr_sfpa_<?php echo $i; ?>'>
-				<td class="littletablerow" nowrap><?php echo $form->$tipo->output      ?></td>
+				<td class="littletablerow" nowrap        ><?php echo $form->$tipo->output      ?></td>
 				<td class="littletablerow" align="center"><?php echo $form->$sfpafecha->output ?></td>
-				<td class="littletablerow">       <?php echo $form->$numref->output    ?></td>
-				<td class="littletablerow">       <?php echo $form->$banco->output     ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$monto->output ?></td>
+				<td class="littletablerow"               ><?php echo $form->$numref->output    ?></td>
+				<td class="littletablerow"               ><?php echo $form->$banco->output     ?></td>
+				<td class="littletablerow" align="right" ><?php echo $form->$monto->output     ?></td>
 				<?php if($form->_status!='show') {?>
 					<td class="littletablerow"><a href='#' onclick="del_sfpa(<?php echo $i; ?>);return false;"><?php echo img('images/delete.jpg'); ?></a></td>
 				<?php } ?>
 			</tr>
 			<?php } ?>
 			<tr id='__UTPL__sfpa'>
-				<td colspan='<?php echo ($form->_status!='show')? '6':'5';  ?>' class="littletableheaderdet">&nbsp;</td>
+				<td colspan='<?php echo ($form->_status!='show')? '6':'5';  ?>' class="littletableheaderdet"></td>
 			</tr>
 		</table>
-	</tr><tr>
+		</div>
+		</td>
+	</tr>
+	<tr>
 		<td>
-		<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
-		<table width='100%'>
+			<?php 
+			echo '<input name="btn_add_sfpa" value="Agregar" onclick="add_sfpa()" class="button" type="button">&nbsp;';
+			?>
+		</td>
+	</tr>
+</table>
+</div>
+
+<!--table style="width:100%;border-collapse:collapse;padding:0px;">
+	<tr>
+		<td>
+		<fieldset style='border: 1px outset #9AC8DA;background: #FFFFFF;'>
+		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
-				<td class="littletableheader" align='right'><?php echo $form->descuento->label;  ?></td>
-				<td class="littletablerow"    align='right'><b id='descuentomon_val'></b><?php echo $form->descuento->output; ?></td>
-				<td class="littletableheader" align='right'><?php echo $form->totals->label;  ?></td>
-				<td class="littletablerow"    align='right'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
-				<td class="littletableheader" align='right'><?php echo $form->ivat->label;    ?></td>
-				<td class="littletablerow"    align='right'><b id='ivat_val'><?php echo nformat($form->ivat->value); ?></b><?php echo $form->ivat->output; ?></td>
-				<td class="littletableheader" align='right'><?php echo $form->totalg->label;  ?></td>
-				<td class="littletablerow"    align='right' style='font-size:18px;font-weight: bold'><b id='totalg_val'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
-			</tr>
-			<tr>
-				<td colspan='6'><?php echo  $form->observ1->label.$form->observ1->output; ?> </td>
 				<td colspan='2' align='center'>
 				<?php
-//					if ($form->manual->value == 'S') echo "<span style='font-size:11pt;font-weight: bold;background:#087C0E;color:white;' >&nbsp;&nbsp;FACTURACION MANUAL&nbsp;&nbsp;</span>";
+					if ($form->manual->value == 'S')
+						echo "<span style='font-size:11pt;font-weight: bold;background:#087C0E;color:white;' >&nbsp;&nbsp;FACTURACION MANUAL&nbsp;&nbsp;</span>";
 				?>
 				</td>
 			</tr>
@@ -1023,7 +1085,9 @@ function chreferen(){
 		</fieldset>
 		</td>
 	</tr>
-</table>
+</table -->
+
+
 <?php echo $form_end; ?>
 
 <?php
