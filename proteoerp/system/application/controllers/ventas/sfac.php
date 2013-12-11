@@ -2666,7 +2666,7 @@ class Sfac extends Controller {
 		$edit->tipo->style      = 'width:150px;';
 		$edit->tipo->onchange   = 'sfpatipo(<#i#>)';
 		//$edit->tipo->rule     = 'required';
-
+/*
 		$edit->sfpafecha = new dateonlyField('Fecha','sfpafecha_<#i#>');
 		$edit->sfpafecha->rel_id   = 'sfpa';
 		$edit->sfpafecha->db_name  = 'fecha';
@@ -2674,7 +2674,7 @@ class Sfac extends Controller {
 		$edit->sfpafecha->maxlength= 8;
 		$edit->sfpafecha->calendar = false;
 		$edit->sfpafecha->rule ='condi_required|callback_chtipo[<#i#>]';
-
+*/
 		$edit->numref = new inputField('Numero <#o#>', 'num_ref_<#i#>');
 		$edit->numref->size     = 12;
 		$edit->numref->db_name  = 'num_ref';
@@ -2684,15 +2684,14 @@ class Sfac extends Controller {
 		$edit->banco = new dropdownField('Banco <#o#>', 'banco_<#i#>');
 		$edit->banco->option('','Ninguno');
 		$edit->banco->options('SELECT cod_banc,nomb_banc
-			FROM tban
-			WHERE cod_banc<>\'CAJ\'
+		FROM tban WHERE cod_banc<>\'CAJ\'
 		UNION ALL
-			SELECT codbanc,CONCAT_WS(\' \',TRIM(banco),numcuent)
-			FROM banc
-			WHERE tbanco <> \'CAJ\' ORDER BY nomb_banc');
+		SELECT codbanc,CONCAT_WS(\' \',TRIM(banco),numcuent) 
+		FROM banc WHERE tbanco <> \'CAJ\' ORDER BY nomb_banc');
+			
 		$edit->banco->db_name='banco';
 		$edit->banco->rel_id ='sfpa';
-		$edit->banco->style  ='width:180px;';
+		$edit->banco->style  ='width:150px;';
 		$edit->banco->rule   ='condi_required|callback_chtipo[<#i#>]';
 
 		$edit->monto = new inputField('Monto <#o#>', 'monto_<#i#>');
@@ -2745,9 +2744,14 @@ class Sfac extends Controller {
 		$edit->hora      = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 
 		//Campos comodines
-		$edit->referen = new checkboxField('Dejar pendiente', 'referen', 'P','');
-		$edit->referen->insertValue = 'N';
+		//$edit->referen = new checkboxField('Dejar pendiente', 'referen', 'P','');
+		//$edit->referen->insertValue = 'N';
+
+		$edit->referen = new radiogroupField('', 'referen', array('P'=>'Dejar Pendiente','E'=>'Efectivo','C'=>'Credito','M'=>'Multiple/Otros'));
+		$edit->referen->insertValue = 'P';
 		$edit->referen->onchange='chreferen()';
+
+
 		if($manual=='S'){
 			$edit->referen->when=array('');
 		}else{
@@ -4020,7 +4024,7 @@ class Sfac extends Controller {
 					$_POST["monto_${lasid}"]=$monto-$ajmonto;
 				}else{
 					unset($_POST["tipo_${lasid}"]);
-					unset($_POST["sfpafecha_${lasid}"]);
+					//unset($_POST["sfpafecha_${lasid}"]);
 					unset($_POST["num_ref_${lasid}"]);
 					unset($_POST["banco_${lasid}"]);
 					unset($_POST["monto_${lasid}"]);
@@ -4036,7 +4040,7 @@ class Sfac extends Controller {
 			if($lasid>0){
 				for($i=0;$i<$lasid;$i++){
 					unset($_POST["tipo_${i}"]);
-					unset($_POST["sfpafecha_${i}"]);
+					//unset($_POST["sfpafecha_${i}"]);
 					unset($_POST["num_ref_${i}"]);
 					unset($_POST["banco_${i}"]);
 					unset($_POST["monto_${i}"]);
@@ -4150,7 +4154,7 @@ class Sfac extends Controller {
 				//sfpa
 				$i=0;
 				$_POST["tipo_${i}"]      = '';
-				$_POST["sfpafecha_${i}"] = '';
+				//$_POST["sfpafecha_${i}"] = '';
 				$_POST["num_ref_${i}"]   = '';
 				$_POST["banco_${i}"]     = '';
 				$_POST["monto_${i}"]     = 0;
@@ -4229,7 +4233,7 @@ class Sfac extends Controller {
 			//sfpa
 			$i=0;
 			$_POST["tipo_${i}"]      = '';
-			$_POST["sfpafecha_${i}"] = '';
+			//$_POST["sfpafecha_${i}"] = '';
 			$_POST["num_ref_${i}"]   = '';
 			$_POST["banco_${i}"]     = '';
 			$_POST["monto_${i}"]     = 0;

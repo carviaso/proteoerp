@@ -3,11 +3,11 @@
 <?php 
 if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 
-<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
+<fieldset style='border: 1px outset #9AC8DA;background: #FFFDFF;'>
 <table border=0 width="100%">
 	<tr>
 		<td colspan='2'>
-			<table border=0 width="100%">
+			<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
 				<td width="70" class="littletableheaderc"><?php echo $form->proveed->label  ?></td>
 				<td width='140' class="littletablerow" ><?php echo $form->proveed->output ?></td>

@@ -67,7 +67,7 @@ $campos=$form->js_escape($scampos);
 $sfpa_campos=$form->template_details('sfpa');
 $sfpa_scampos  ='<tr id="tr_sfpa_<#i#>">';
 $sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['tipo']['field'].  '</td>';
-$sfpa_scampos .='<td class="littletablerow" align="center" >'.$sfpa_campos['sfpafecha']['field'].  '</td>';
+//$sfpa_scampos .='<td class="littletablerow" align="center" >'.$sfpa_campos['sfpafecha']['field'].  '</td>';
 $sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['numref']['field'].'</td>';
 $sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['banco']['field']. '</td>';
 $sfpa_scampos .='<td class="littletablerow" align="right">'.$sfpa_campos['monto']['field']. '</td>';
@@ -99,7 +99,7 @@ var sfpa_cont  =<?php echo $form->max_rel_count['sfpa'];?>;
 $(function(){
 	$(".inputnum").numeric(".");
 	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
-	$('input[name^="sfpafecha_"]').datepicker({ dateFormat: "dd/mm/yy" });
+	//$('input[name^="sfpafecha_"]').datepicker({ dateFormat: "dd/mm/yy" });
 
 	totalizar();
 	for(var i=0;i < <?php echo $form->max_rel_count['sitems']; ?>;i++){
@@ -471,7 +471,7 @@ function add_sfpa(){
 	$("#__ITPL__sfpa").after(htm);
 	falta =faltante();
 	$("#monto_"+can).val(roundNumber(falta,2));
-	$("#sfpafecha_"+can).datepicker({ dateFormat: "dd/mm/yy" });
+	//$("#sfpafecha_"+can).datepicker({ dateFormat: "dd/mm/yy" });
 	sfpa_cont=sfpa_cont+1;
 	return can;
 }
@@ -631,8 +631,8 @@ function cdescrip(nind){
 		ddetalle.setAttribute("id"    , "detalle_"+ind);
 		ddetalle.setAttribute("name"  , "detalle_"+ind);
 		ddetalle.setAttribute("class" , "textarea");
-		ddetalle.setAttribute("cols"  , 34);
-		ddetalle.setAttribute("rows"  , 3);
+		ddetalle.setAttribute("cols"  , 43);
+		ddetalle.setAttribute("rows"  , 2);
 		$("#detalle_"+ind).replaceWith(ddetalle);
 
 		if(detalle.length==0){
@@ -649,21 +649,21 @@ function cdescrip(nind){
 		$("#desca_"+ind).replaceWith(ddesca);
 	}else{
 		var ddetalle = document.createElement("input");
-		ddetalle.setAttribute("type", "hidden");
-		ddetalle.setAttribute("id"    , "detalle_"+ind);
-		ddetalle.setAttribute("name"  , "detalle_"+ind);
-		ddetalle.setAttribute("value" , "");
+		ddetalle.setAttribute("type",  "hidden");
+		ddetalle.setAttribute("id",    "detalle_"+ind);
+		ddetalle.setAttribute("name",  "detalle_"+ind);
+		ddetalle.setAttribute("value", "");
 		$("#detalle_"+ind).replaceWith(ddetalle);
 
 		var desca = $("#desca_"+ind).val();
 		var ddeca = document.createElement("input");
-		ddeca.setAttribute("id"    , "desca_"+ind);
-		ddeca.setAttribute("name"  , "desca_"+ind);
-		ddeca.setAttribute("class" , "input");
-		ddeca.setAttribute("size"  , 36);
+		ddeca.setAttribute("id",        "desca_"+ind);
+		ddeca.setAttribute("name",      "desca_"+ind);
+		ddeca.setAttribute("class",     "input");
+		ddeca.setAttribute("size",      45);
 		ddeca.setAttribute("maxlength", 50);
-		ddeca.setAttribute("readonly" ,"readonly");
-		ddeca.setAttribute("value"    ,desca);
+		ddeca.setAttribute("readonly",  "readonly");
+		ddeca.setAttribute("value",     desca);
 		$("#desca_"+ind).replaceWith(ddeca);
 	}
 }
@@ -857,7 +857,6 @@ function chreferen(){
 		<td class="littletablerow"  style='width:75px;background:#E0E6F8;'  ><b id='rifci_val'><?php echo $form->rifci->value; ?></b><?php echo $form->rifci->output;   ?>&nbsp;</td>
 		<td class="littletablerow"  style='width:35px;background:#EFEFEF;'>Vende</td>
 		<td class="littletablerow"  style='width:80px;background:#EAFAEA;'><?php echo $form->vd->output; ?></td>
-		<!--td                         style='width:20px;'><?php echo img(array('src' =>"images/arrow_down.png","id"=>"persiana")); ?></td-->
 	</tr>
 </table>
 
@@ -873,36 +872,24 @@ function chreferen(){
 		</td>
 		<td class="littletableheader"><?php echo $form->fecha->label;     ?>*</td>
 		<td class="littletablerow">   <?php echo $form->fecha->output;    ?></td>
-		<td class="littletableheader"><?php echo $form->factura->label;   ?></td>
-		<td class="littletablerow"   ><?php echo $form->factura->output;  ?></td>
+		<td class="littletableheader" width='50px'><?php echo $form->factura->label;   ?></td>
+		<td class="littletablerow"    width='100px'><?php echo $form->factura->output;  ?></td>
 	</tr>
 </table>
 
 <table align='center' style="width:100%;border-collapse:collapse;padding:0px;">
 	<tr>
 		<td>
-		<table width='100%' cellpadding='0' cellspacing='0'>
-		<tr>
-			<td>
-			<table style="margin: 0;" width='100%'>
-			<tr>
-			</tr>
-			<?php echo $form->manual->output; ?>
-			</table>
-		</tr></table>
-		</td>
-	</tr><tr>
-		<td>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:190px'>
-		<table width='100%' border='0'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:190px;width:610px;'>
+		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr id='__INPL__'>
-				<td class="littletableheaderdet"><b>C&oacute;digo</b></td>
-				<td class="littletableheaderdet"><b>Descripci&oacute;n</b></td>
-				<td class="littletableheaderdet"><b>Cantidad</b></td>
-				<td class="littletableheaderdet"><b>Precio</b></td>
-				<td class="littletableheaderdet"><b>Importe</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>C&oacute;digo</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>Descripci&oacute;n</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>Cant.</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>Precio</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>Importe</b></td>
 				<?php if($form->_status!='show') {?>
-					<td bgcolor='#7098D0'>&nbsp;</td>
+					<td class="littletableheaderdet" style='background:#0B3861;'>&nbsp;</td>
 				<?php } ?>
 			</tr>
 
@@ -977,14 +964,14 @@ function chreferen(){
 
 			for($i=0; $i < $form->max_rel_count['sfpa']; $i++) {
 				$tipo     = "tipo_${i}";
-				$sfpafecha= "sfpafecha_${i}";
+				//$sfpafecha= "sfpafecha_${i}";
 				$numref   = "numref_${i}";
 				$monto    = "monto_${i}";
 				$banco    = "banco_${i}";
 			?>
 			<tr id='tr_sfpa_<?php echo $i; ?>'>
 				<td class="littletablerow" nowrap><?php echo $form->$tipo->output      ?></td>
-				<td class="littletablerow" align="center"><?php echo $form->$sfpafecha->output ?></td>
+				<!--td class="littletablerow" align="center"><?php //echo $form->$sfpafecha->output ?></td-->
 				<td class="littletablerow">       <?php echo $form->$numref->output    ?></td>
 				<td class="littletablerow">       <?php echo $form->$banco->output     ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$monto->output ?></td>
@@ -1012,12 +999,7 @@ function chreferen(){
 				<td class="littletablerow"    align='right' style='font-size:18px;font-weight: bold'><b id='totalg_val'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
 			</tr>
 			<tr>
-				<td colspan='6'><?php echo  $form->observ1->label.$form->observ1->output; ?> </td>
-				<td colspan='2' align='center'>
-				<?php
-//					if ($form->manual->value == 'S') echo "<span style='font-size:11pt;font-weight: bold;background:#087C0E;color:white;' >&nbsp;&nbsp;FACTURACION MANUAL&nbsp;&nbsp;</span>";
-				?>
-				</td>
+				<td colspan='6'><?php echo  $form->observa->label.$form->observa->output; ?> </td>
 			</tr>
 		</table>
 		</fieldset>
