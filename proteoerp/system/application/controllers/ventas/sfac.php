@@ -194,7 +194,7 @@ class Sfac extends Controller {
 		function sfacshow() {
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				$.post("'.site_url($this->url.'N/dataedit/show').'/"+id,
+				$.post("'.site_url($this->url.'dataedit/N/show').'/"+id,
 					function(data){
 						$("#fshow").html(data);
 						$("#fshow").dialog( "open" );
