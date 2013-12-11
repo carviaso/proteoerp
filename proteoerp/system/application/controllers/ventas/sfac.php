@@ -2483,7 +2483,7 @@ class Sfac extends Controller {
 		//$edit->tipo_doc = new  dropdownField('Documento', 'tipo_doc');
 		$edit->tipo_doc = new  hiddenField('Documento', 'tipo_doc');
 		$edit->tipo_doc->insertValue = 'F';
-		
+
 		//$edit->tipo_doc->option('F','Factura');
 		//$edit->tipo_doc->option('D','Devoluci&oacute;n');
 		//$edit->tipo_doc->style='width:80px;';
@@ -2686,9 +2686,9 @@ class Sfac extends Controller {
 		$edit->banco->options('SELECT cod_banc,nomb_banc
 		FROM tban WHERE cod_banc<>\'CAJ\'
 		UNION ALL
-		SELECT codbanc,CONCAT_WS(\' \',TRIM(banco),numcuent) 
+		SELECT codbanc,CONCAT_WS(\' \',TRIM(banco),numcuent)
 		FROM banc WHERE tbanco <> \'CAJ\' ORDER BY nomb_banc');
-			
+
 		$edit->banco->db_name='banco';
 		$edit->banco->rel_id ='sfpa';
 		$edit->banco->style  ='width:150px;';
@@ -3228,41 +3228,9 @@ class Sfac extends Controller {
 
 		$dbcliente=$this->db->escape($cliente);
 
-		if($referen=='P'){
-			if($manual=='S'){
-				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='No se puede dejar una factura pendiente manual';
-				return false;
-			}
-			$do->truncate_rel('sfpa');
-		}
-
-		//Determina si deja la factura pendiente
-		$pendiente= $do->get('pendiente');
-		$do->rm_get('pendiente');
-
-
-		$con=$this->db->query("SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1");
-		if($con->num_rows() > 0){
-			$t=$con->row('tasa');$rt=$con->row('redutasa');$st=$con->row('sobretasa');
-		}else{
-			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Debe cargar la tabla de IVA.';
-			return false;
-		}
-
-		//Totaliza los pagos
-		$sfpa=0;
-		$cana=$do->count_rel('sfpa');
-		for($i=0;$i<$cana;$i++){
-			$sfpa_tipo = $do->get_rel('sfpa','tipo',$i);
-			$sfpa_monto= $do->get_rel('sfpa','monto',$i);
-			$sfpa+=$sfpa_monto;
-		}
-		$sfpa=round($sfpa,2);
-		//Fin de la totalizacion del pago
 
 		//Totaliza la factura
 		$totalg=0;
-		$maxlin=intval($this->datasis->traevalor('MAXLIN'));
 		$cana=$do->count_rel('sitems');
 		if($cana<=0){
 			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Debe tener al menos un producto';
@@ -3284,6 +3252,42 @@ class Sfac extends Controller {
 		$totalg = round($totalg,2);
 		//Fin de la totalizacion de facturas
 
+
+		if($referen=='P'){
+			if($manual=='S'){
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='No se puede dejar una factura pendiente manual';
+				return false;
+			}
+			$do->truncate_rel('sfpa');
+		}elseif($referen=='E'){
+			$do->truncate_rel('sfpa');
+			$do->set_rel('sfpa','tipo' ,'EF'   ,0);
+			$do->set_rel('sfpa','monto',$totalg,0);
+		}elseif($referen=='C'){
+			$do->truncate_rel('sfpa');
+			$do->set_rel('sfpa','tipo' ,''     ,0);
+			$do->set_rel('sfpa','monto',$totalg,0);
+		}
+
+		$con=$this->db->query("SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1");
+		if($con->num_rows() > 0){
+			$t=$con->row('tasa');$rt=$con->row('redutasa');$st=$con->row('sobretasa');
+		}else{
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Debe cargar la tabla de IVA.';
+			return false;
+		}
+
+		//Totaliza los pagos
+		$sfpa=0;
+		$cana=$do->count_rel('sfpa');
+		for($i=0;$i<$cana;$i++){
+			$sfpa_tipo = $do->get_rel('sfpa','tipo',$i);
+			$sfpa_monto= $do->get_rel('sfpa','monto',$i);
+			$sfpa+=$sfpa_monto;
+		}
+		$sfpa=round($sfpa,2);
+		//Fin de la totalizacion del pago
+
 		//Validaciones del pago
 		if(abs($sfpa-$totalg)>0.02 && $referen!='P'){
 			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El monto del pago no coincide con el monto de la factura (Pago:'.$sfpa.', Factura:'.$totalg.') ';
@@ -3292,6 +3296,7 @@ class Sfac extends Controller {
 		//Fin de la validacion de pago
 
 		//Calcula totalizacion y corte por maxlin
+		$maxlin=intval($this->datasis->traevalor('MAXLIN'));
 		$this->_creanfac=false;
 		$tasa=$montasa=$reducida=$monredu=$sobretasa=$monadic=$exento=$totalg=0;
 		$cana=$do->count_rel('sitems');

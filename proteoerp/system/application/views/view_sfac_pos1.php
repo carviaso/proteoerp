@@ -30,10 +30,10 @@ $(document).ready(function() {
 	});
 
 });
- 
+
 $("#persiana").click( function() {
 	$('#efecha').toggle();
-		
+
 	if ( $('#efecha').css('display') == 'none' ){
 		$('#ditems01').css({'height':'280px'});
 	} else {
@@ -839,7 +839,7 @@ function chreferen(){
 		fpaga();
 		$('#bpagardiv').show();
 	}
-	
+
 }
 </script>
 <?php } ?>
@@ -848,9 +848,9 @@ function chreferen(){
 		<td align=right><?php echo $container_tr; ?><?php echo $form->pfac->output; ?></td>
 	</tr>
 </table>
-<?php 
+<?php
 	// Campos hidden
-	echo $form->manual->output;  
+	echo $form->manual->output;
 	echo $form->tipo_doc->output;
 	echo $form->cajero->output;
 	echo $form->nombre->output
@@ -1017,7 +1017,7 @@ function chreferen(){
 	</tr>
 	<tr>
 		<td style='background:#ABCDEF'>
-			<?php 
+			<?php
 			echo '<input name="btn_add_sfpa" value="Agregar" onclick="add_sfpa()" class="button" type="button">&nbsp;';
 			?>&nbsp;&nbsp;
 			<input name="bpagar" value="Cerrar" onclick="fpaga()" class="button" type="button">
@@ -1030,7 +1030,7 @@ function chreferen(){
 			<table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
 			<tr>
 				<td style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>FORMA DE PAGO</td>
-			</tr><tr>	
+			</tr><tr>
 				<td><input name="referen" value="P" id="referen" type="radio" onchange='chreferen()' checked="checked">Dejar Pendiente&nbsp;</td>
 			</tr><tr>
 				<td><input name="referen" value="E" id="referen" type="radio" onchange='chreferen()'>Efectivo&nbsp;</td>
@@ -1041,7 +1041,7 @@ function chreferen(){
 			</tr>
 		</table>
 		</td>
-	</tr><tr>	
+	</tr><tr>
 		<td>
 		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;width:590px;'>
 		<table style="width:100%;border-collapse:collapse;padding:0px;">
