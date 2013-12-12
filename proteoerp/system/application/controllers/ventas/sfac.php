@@ -183,8 +183,7 @@ class Sfac extends Controller {
 			$.post("'.site_url($this->url.'dataedit/N/create').'",
 			function(data){
 				$("#fimpser").html("");
-				$("#fedita").dialog({ title:"Agregar Factura" });
-
+				$("#fedita").dialog({ title:"Agregar Factura Fecha '.date('d/m/Y').'" });
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
@@ -2721,8 +2720,8 @@ class Sfac extends Controller {
 		$edit->totalg->size      = 10;
 
 		$edit->observa       = new textareaField('Observaci&oacute;n', 'observa');
-		$edit->observa->cols = 60;
-		$edit->observa->rows = 2;
+		$edit->observa->cols = 50;
+		$edit->observa->rows = 3;
 
 
 		$edit->nfiscal   = new inputField('No.Fiscal', 'nfiscal');

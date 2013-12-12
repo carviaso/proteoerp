@@ -1,18 +1,5 @@
 <style>
-.tooltip{
-	position: absolute;
-	background: #c0df71;
-	color: #FFFFFF;
-	border-radius:10px;
-	font-family: "Lucida Grande", Lucida, Verdana, sans-serif;
-	font-weight: bold;
-	padding: 10px;
-	margin-top: -10px;
-	margin-left: 10px;
-	z-index: 3;
-	display: none;
-	background-color: #B45F04;
-}
+.tooltip{position: absolute;	background: #c0df71;color: #FFFFFF;border-radius:5px;font-family: "Lucida Grande", Lucida, Verdana, sans-serif;font-weight: bold;padding: 10px;margin-top: -10px;margin-left: 10px;z-index: 3;display: none;background-color: #B45F04;}
 </style>
 <script type="text/javascript">
 $(document).ready(function() {
@@ -31,6 +18,7 @@ $(document).ready(function() {
 
 });
 
+/*
 $("#persiana").click( function() {
 	$('#efecha').toggle();
 
@@ -40,7 +28,7 @@ $("#persiana").click( function() {
 		$('#ditems01').css({'height':'233px'});
 	}
 })
-
+*/
 </script>
 <?php
 
@@ -685,6 +673,7 @@ function cdescrip(nind){
 
 //Agrega el autocomplete
 function autocod(id){
+	var ancho='.ui-autocomplete-input#codigoa_'+id;
 	$('#codigoa_'+id).autocomplete({
 		delay: 600,
 		autoFocus: true,
@@ -693,7 +682,7 @@ function autocod(id){
 				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: {"q":req.term},
+				data: {"q":req.term, "alma": $('#almacen').val() },
 				success:
 					function(data){
 						var sugiere = [];
@@ -779,8 +768,14 @@ function autocod(id){
 				post_modbus_sinv(Number(id));
 			}
 			setTimeout(function() {  $('#codigoa_'+id).removeAttr("readonly"); }, 1500);
-		}
-	});
+		},
+		open: function() { $('#codigoa_'+id).autocomplete("widget").width(420) }
+	})
+	.data( "ui-autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li>" )
+		.append( "<a><table style='width:100%;border-collapse:collapse;padding:0px;'><tr><td colspan='6' style='font-size:14px;color:#0B0B61;'><b>" + item.descrip + "</b></td></tr><tr><td>Codigo:</td><td>" + item.codigo + "</td><td>Precio: </td><td><b>" + item.base1 + "</b></td><td>Existencia:</td><td>" + item.existen + "</td><td></td></tr></table></a>" )
+		.appendTo( ul );
+	};
 }
 
 function del_sitems(id){
@@ -873,7 +868,7 @@ function chreferen(){
 					<td class="littletablerow"  style='width:75px;background:#E0E6F8;'  ><b id='rifci_val'><?php echo $form->rifci->value; ?></b><?php echo $form->rifci->output;   ?>&nbsp;</td>
 					<td class="littletablerow"  style='width:35px;background:#EFEFEF;'>Vende</td>
 					<td class="littletablerow"  style='width:80px;background:#EAFAEA;'><?php echo $form->vd->output; ?></td>
-					<td                         style='width:20px;'><?php echo img(array('src' =>"images/arrow_down.png","id"=>"persiana")); ?></td>
+					<!--td                         style='width:20px;'><?php echo img(array('src' =>"images/arrow_down.png","id"=>"persiana")); ?></td-->
 				</tr>
 			</table>
 		</td>
@@ -886,19 +881,10 @@ function chreferen(){
 		<td>
 			<table style="width:100%;border-collapse:collapse;padding:0px;">
 				<tr>
-					<!-- td class="littletableheader"><?php echo $form->tipo_doc->label; ?></td -->
-					<!-- td class="littletablerow"   ><?php echo $form->tipo_doc->output;?></td -->
 					<td class="littletableheader"><?php echo $form->almacen->label;  ?>*</td>
 					<td class="littletablerow"   ><?php echo $form->almacen->output; ?></td>
-					<td class="littletableheader"><?php echo $form->observ1->label;  ?></td>
-					<td rowspan='2'><?php echo $form->observa->output; ?> </td>
-				</tr><tr>
 					<td class="littletableheader"><?php echo $form->fecha->label;    ?>*</td>
 					<td class="littletablerow"   ><?php echo $form->fecha->output;   ?></td>
-					<!--td class="littletableheader"><?php echo $form->cajero->label;   ?>*</td>
-					<td class="littletablerow"   ><?php echo $form->cajero->output;  ?></td-->
-					<!--td class="littletableheader"><?php echo $form->factura->label;  ?></td>
-					<td class="littletablerow"   ><?php echo $form->factura->output; ?></td-->
 					<td></td>
 				</tr>
 			</table>
@@ -972,59 +958,62 @@ function chreferen(){
 		</table>
 		</div>
 
-<div id='formapago' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:590px;'>
-<table style="border-collapse:collapse;padding:0px;border: 1px solid #0B3861;">
-	<tr>
-		<td>
-		<div style='overflow:auto;background: #FAFAFA;height:200px;'>
-		<table width='100%' id='sfpatable' border='0' cellpadding='0' cellspacing='0'>
-			<tr><td class="littletableheaderdet" colspan='5' style='text-align:center;font-weight:bold;background:#0B3861;'>PAGOS MULTIPLES</td></tr>
-			<tr id='__ITPL__sfpa'>
-				<td class="littletableheaderdet">Tipo</td>
-				<td class="littletableheaderdet">N&uacute;mero</td>
-				<td class="littletableheaderdet">Banco</td>
-				<td class="littletableheaderdet">Monto</td>
-				<?php if($form->_status!='show') {?>
-					<td class="littletableheaderdet"></td>
-				<?php } ?>
+		<div id='formapago' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:590px;'>
+		<table style="border-collapse:collapse;padding:0px;border: 1px solid #0B3861;">
+			<tr>
+				<td>
+				<div style='overflow:auto;background: #FAFAFA;height:190px;'>
+				<table id='sfpatable' style="width:100%;border-collapse:collapse;padding:0px;">
+					<tr><td class="littletableheaderdet" colspan='5' style='text-align:center;font-weight:bold;background:#0B3861;'>PAGOS MULTIPLES</td></tr>
+					<tr id='__ITPL__sfpa'>
+						<td class="littletableheaderdet">Tipo</td>
+						<td class="littletableheaderdet">N&uacute;mero</td>
+						<td class="littletableheaderdet">Banco</td>
+						<td class="littletableheaderdet">Monto</td>
+						<?php if($form->_status!='show') {?>
+							<td class="littletableheaderdet"></td>
+						<?php } ?>
+					</tr>
+					<?php
+					for($i=0; $i < $form->max_rel_count['sfpa']; $i++) {
+						$tipo     = "tipo_${i}";
+						//$sfpafecha= "sfpafecha_${i}";
+						$numref   = "numref_${i}";
+						$monto    = "monto_${i}";
+						$banco    = "banco_${i}";
+					?>
+					<tr id='tr_sfpa_<?php echo $i; ?>'>
+						<td class="littletablerow" nowrap        ><?php echo $form->$tipo->output      ?></td>
+						<!--td class="littletablerow" align="center"><?php //echo $form->$sfpafecha->output ?></td-->
+						<td class="littletablerow"               ><?php echo $form->$numref->output    ?></td>
+						<td class="littletablerow"               ><?php echo $form->$banco->output     ?></td>
+						<td class="littletablerow" align="right" ><?php echo $form->$monto->output     ?></td>
+						<?php if($form->_status!='show') {?>
+							<td class="littletablerow"><a href='#' onclick="del_sfpa(<?php echo $i; ?>);return false;"><?php echo img('images/delete.jpg'); ?></a></td>
+						<?php } ?>
+					</tr>
+					<?php } ?>
+					<tr id='__UTPL__sfpa'>
+						<td colspan='<?php echo ($form->_status!='show')? '6':'5';  ?>' class="littletableheaderdet"></td>
+					</tr>
+				</table>
+				</div>
+				</td>
 			</tr>
-			<?php
-
-			for($i=0; $i < $form->max_rel_count['sfpa']; $i++) {
-				$tipo     = "tipo_${i}";
-				//$sfpafecha= "sfpafecha_${i}";
-				$numref   = "numref_${i}";
-				$monto    = "monto_${i}";
-				$banco    = "banco_${i}";
-			?>
-			<tr id='tr_sfpa_<?php echo $i; ?>'>
-				<td class="littletablerow" nowrap        ><?php echo $form->$tipo->output      ?></td>
-				<!--td class="littletablerow" align="center"><?php //echo $form->$sfpafecha->output ?></td-->
-				<td class="littletablerow"               ><?php echo $form->$numref->output    ?></td>
-				<td class="littletablerow"               ><?php echo $form->$banco->output     ?></td>
-				<td class="littletablerow" align="right" ><?php echo $form->$monto->output     ?></td>
-				<?php if($form->_status!='show') {?>
-					<td class="littletablerow"><a href='#' onclick="del_sfpa(<?php echo $i; ?>);return false;"><?php echo img('images/delete.jpg'); ?></a></td>
-				<?php } ?>
-			</tr>
-			<?php } ?>
-			<tr id='__UTPL__sfpa'>
-				<td colspan='<?php echo ($form->_status!='show')? '6':'5';  ?>' class="littletableheaderdet"></td>
+			<tr>
+				<td>
+					<table style="width:100%;border-collapse:collapse;padding:0px;border-top:3px solid #0B3861;">
+						<tr>
+							<td style='border-right:1px solid #0B3861;' align='center'><?php echo '<input name="btn_add_sfpa" value="Agregar" onclick="add_sfpa()" class="button" type="button">&nbsp;'; ?><br>
+							<input name="bpagar" value="Cerrar" onclick="fpaga()" class="button" type="button"></td>
+							<td class="littletableheader" valign='top'><?php echo $form->observa->label; ?>&nbsp;&nbsp;</td>
+							<td class='littletablerow'    valign='top'><?php echo $form->observa->output; ?></td>
+						</tr>
+					</table>
+				</td>
 			</tr>
 		</table>
 		</div>
-		</td>
-	</tr>
-	<tr>
-		<td style='background:#ABCDEF'>
-			<?php
-			echo '<input name="btn_add_sfpa" value="Agregar" onclick="add_sfpa()" class="button" type="button">&nbsp;';
-			?>&nbsp;&nbsp;
-			<input name="bpagar" value="Cerrar" onclick="fpaga()" class="button" type="button">
-		</td>
-	</tr>
-</table>
-</div>
 		</td>
 		<td valign='top'>
 			<table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
@@ -1057,7 +1046,7 @@ function chreferen(){
 		</div>
 		</td>
 		<td>
-		<table style="width:100%;border-collapse:collapse;padding:0px;" border='0'>
+		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<td class="littletableheader" align='right' width='70px'><?php echo $form->descuento->label;  ?></td>
 			<td class="littletablerow"    align='right' ><b id='descuentomon_val'></b><?php echo $form->descuento->output; ?></td>
 		</table>

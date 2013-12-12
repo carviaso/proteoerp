@@ -468,6 +468,8 @@ class Ajax extends Controller {
 	function buscasinv(){
 		$comodin= $this->datasis->traevalor('COMODIN');
 		$mid    = $this->input->post('q');
+		$alma   = $this->input->post('alma');
+
 		if($mid == false) $mid  = $this->input->post('term');
 
 		if(strlen($comodin)==1 && $comodin!='%' && $mid!==false){
@@ -477,36 +479,60 @@ class Ajax extends Controller {
 		$qba  = $this->db->escape($mid);
 
 		$data = '[]';
-		if($mid !== false){
 
+		if($mid !== false){
 			$vdescu=$this->datasis->traevalor('DESCUFIJO');
 			if($vdescu=='S') $colnom='a.descufijo'; else $colnom='0';
-			//Vemos si aplica descuento solo promocional
-			if($this->db->table_exists('sinvpromo')){
-				$mSQL="
-				SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
-				a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo,c.margen AS dgrupo,d.margen AS promo
-				FROM sinv AS a
-				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
-				LEFT JOIN grup AS c ON a.grupo=c.grupo
-				LEFT JOIN sinvpromo AS d ON a.codigo=d.codigo
-				WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S'
-				ORDER BY a.descrip LIMIT ".$this->autolimit;
-			}else{
-				$mSQL="
-				SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
-				a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo, c.margen AS dgrupo,0 AS promo
-				FROM sinv AS a
-				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
-				LEFT JOIN grup AS c ON a.grupo=c.grupo
-				WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S'
-				ORDER BY a.descrip LIMIT ".$this->autolimit;
+			if($alma == false){
+				//Vemos si aplica descuento solo promocional
+				if($this->db->table_exists('sinvpromo')){
+					$mSQL="
+					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
+					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo,c.margen AS dgrupo,d.margen AS promo, a.existen
+					FROM sinv AS a
+					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
+					LEFT JOIN grup AS c ON a.grupo=c.grupo
+					LEFT JOIN sinvpromo AS d ON a.codigo=d.codigo
+					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S'
+					ORDER BY a.descrip LIMIT ".$this->autolimit;
+				}else{
+					$mSQL="
+					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
+					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo, c.margen AS dgrupo,0 AS promo, a.existen
+					FROM sinv AS a
+					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
+					LEFT JOIN grup AS c ON a.grupo=c.grupo
+					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S'
+					ORDER BY a.descrip LIMIT ".$this->autolimit;
+				}
+			} else {
+				$almadb  = $this->db->escape($alma);
+				if($this->db->table_exists('sinvpromo')){
+					$mSQL="
+					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
+					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo,c.margen AS dgrupo,d.margen AS promo, COALESCE(e.existen,0) existen
+					FROM sinv AS a
+					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
+					LEFT JOIN grup      AS c ON a.grupo=c.grupo
+					LEFT JOIN sinvpromo AS d ON a.codigo=d.codigo
+					LEFT JOIN itsinv    AS e ON a.codigo=e.codigo
+					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S' AND e.alma=${alma}
+					ORDER BY a.descrip LIMIT ".$this->autolimit;
+				}else{
+					$mSQL="
+					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
+					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo, c.margen AS dgrupo,0 AS promo, COALESCE(e.existen,0) existen
+					FROM sinv AS a
+					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
+					LEFT JOIN grup      AS c ON a.grupo=c.grupo
+					LEFT JOIN itsinv    AS e ON a.codigo=e.codigo
+					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S' AND e.alma=${alma}
+					ORDER BY a.descrip LIMIT ".$this->autolimit;
+				}
 			}
 			//Fin del descuento promocional
 
 			$retArray = $retorno = array();
-
-
 			$cana=1;
 
 			$query = $this->db->query($mSQL);
@@ -540,6 +566,7 @@ class Ajax extends Controller {
 					$retArray['barras']  = $row['barras'];
 					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
 					$retArray['iva']     = $row['iva'];
+					$retArray['existen'] = $row['existen'];
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
