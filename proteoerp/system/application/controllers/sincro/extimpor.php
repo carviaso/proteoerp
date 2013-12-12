@@ -48,6 +48,7 @@ class extimpor extends Controller {
 			'exmin'   => 'Mínimo',
 			'exmax'   => 'Máximo',
 			'marca'   => 'Marca',
+			//'margen'  => 'Promocion',
 			//'precio1' => 'Precio 1', //Desarrollar validaciones
 			//'precio2' => 'Precio 2', //Desarrollar validaciones
 			//'precio3' => 'Precio 3', //Desarrollar validaciones
@@ -94,8 +95,9 @@ class extimpor extends Controller {
 		$form = new DataForm($this->url.'procesar/'.$id_tabla.'/process');
 
 		$form->tabla = new dropdownField('Tabla', 'tabla');
-		$form->tabla->option('sinv','Inventario');
-		$form->tabla->rule = 'required|enum[sinv]';
+		$form->tabla->option('sinv'     ,'Inventario' );
+		//$form->tabla->option('sinvpromo','Promociones');
+		$form->tabla->rule = 'required|enum[sinv,sinvpromo]';
 
 		$form->fila = new inputField('Procesar a partir de la fila', 'fila');
 		$form->fila->append(' Incluyente.');
@@ -250,8 +252,15 @@ class extimpor extends Controller {
 				return false;
 			}
 
+			$campos=$this->db->list_fields($tabla);
+
 			$select=array();
 			foreach($def as $i=>$nombre){
+				if(!in_array($nombre,$campos)){
+					continue;
+					//$this->val_error="La columna ${nombre} no exiten en la tabla ${tabla}.";
+					//return false;
+				}
 				$select[]="GROUP_CONCAT(IF(columna=${i},TRIM(valor),NULL)) AS ${nombre}";
 			}
 
@@ -291,7 +300,7 @@ class extimpor extends Controller {
 							$mSQL="DELETE FROM ${ttabla} WHERE codigo=${dbcodigo}";
 							$ban=$this->db->simple_query($mSQL);
 						}else{
-							$this->val_error .= 'El código '.$row->codigo.' tiene un valor no apto para el costo.<br>';
+							$this->val_error .= 'El código "'.$row->codigo.'" tiene un valor no apto para el costo.<br>';
 							$error=true;
 						}
 					}
@@ -317,11 +326,13 @@ class extimpor extends Controller {
 					$mSQL="DELETE FROM ${ttabla} AS a WHERE ".implode(' AND ',$ww);
 					$ban=$this->db->simple_query($mSQL);
 				}else{
-					$mSQL="SELECT a.codigo FROM ${ttabla} AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE ".implode(' AND ',$ww);
-					$query = $this->db->query($mSQL);
-					foreach($query->result() as $row){
-						$this->val_error .= 'El producto código '.$row->codigo." tiene costo menor o igual a cero.<br>";
-						$error=true;
+					if(count($ww)>0){
+						$mSQL="SELECT a.codigo FROM ${ttabla} AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE ".implode(' AND ',$ww);
+						$query = $this->db->query($mSQL);
+						foreach($query->result() as $row){
+							$this->val_error .= 'El producto código "'.$row->codigo.'" tiene costo menor o igual a cero.<br>';
+							$error=true;
+						}
 					}
 					if($error){
 						return false;
@@ -335,7 +346,6 @@ class extimpor extends Controller {
 				return true;
 			}else{
 				$mSQL="SELECT GROUP_CONCAT(a.codigo SEPARATOR ', ') AS codigo FROM ${ttabla} AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo WHERE b.codigo IS NULL";
-				echo $mSQL;
 				$query = $this->db->query($mSQL);
 				foreach($query->result() as $row){
 					$this->val_error .= 'Código(s) no registrado(s) en el inventario: '.$row->codigo."<br>";

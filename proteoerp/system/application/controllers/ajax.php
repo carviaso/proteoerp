@@ -483,7 +483,7 @@ class Ajax extends Controller {
 		if($mid !== false){
 			$vdescu=$this->datasis->traevalor('DESCUFIJO');
 			if($vdescu=='S') $colnom='a.descufijo'; else $colnom='0';
-			if($alma == false){
+			if($alma === false){
 				//Vemos si aplica descuento solo promocional
 				if($this->db->table_exists('sinvpromo')){
 					$mSQL="
@@ -862,7 +862,7 @@ class Ajax extends Controller {
 			}else{
 				$ww ='';
 			}
-			$mSQL.=" WHERE (a.codigo LIKE $qdb OR a.descrip LIKE  $qdb OR a.barras LIKE $qdb OR b.suplemen=$qba OR a.alterno LIKE $qba $ww) AND a.activo='S' AND a.tipo='Articulo'
+			$mSQL.=" WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba} OR a.alterno LIKE ${qba} ${ww}) AND a.activo='S' AND a.tipo='Articulo'
 				ORDER BY a.descrip LIMIT ".$this->autolimit;
 			$cana=1;
 

@@ -3193,12 +3193,16 @@ class Scst extends Controller {
 
 								if($icontrol){
 									if($cprecio=='S'){
-										$mSQL='UPDATE sinv SET
-										precio1='.round(floatval($itrow->precio1),2).',
-										precio2='.round(floatval($itrow->precio2),2).',
-										precio3='.round(floatval($itrow->precio3),2).',
-										precio4='.round(floatval($itrow->precio4),2).'
-										WHERE codigo='.$dbcodigo;
+										$data  = array();
+										for($i=1;$i<5;$i++){
+											$obj  = 'precio'.$i;
+											$$obj = floatval($itrow->$obj);
+											if($$obj > 0){
+												$data[$obj]=round($$obj,2);
+											}
+										}
+										$mSQL = $this->db->update_string('sinv', $data, 'codigo='.$dbcodigo);
+
 										$ban=$this->db->simple_query($mSQL);
 										if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 									}elseif($cprecio=='D'){

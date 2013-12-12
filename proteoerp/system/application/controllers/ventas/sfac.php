@@ -192,8 +192,9 @@ class Sfac extends Controller {
 		$bodyscript .= '
 		function sfacshow() {
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				$.post("'.site_url($this->url.'dataedit/N/show').'/"+id,
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				$.post("'.site_url($this->url.'dataedit').'/"+ret.manual+"/show/"+id,
 					function(data){
 						$("#fshow").html(data);
 						$("#fshow").dialog( "open" );
@@ -2730,7 +2731,6 @@ class Sfac extends Controller {
 		$edit->ciudad    = new inputField('Ciudad', 'ciudad');
 		$edit->exento    = new inputField('Exento', 'exento');
 		$edit->maqfiscal = new inputField('Mq.Fiscal', 'maqfiscal');
-		$edit->referen   = new inputField('Referencia', 'referen');
 		$edit->pfac      = new hiddenField('Presupuesto', 'pfac');
 
 		$edit->reiva     = new inputField('Retencion de IVA', 'reiva');
@@ -2742,14 +2742,9 @@ class Sfac extends Controller {
 		$edit->estampa   = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora      = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 
-		//Campos comodines
-		//$edit->referen = new checkboxField('Dejar pendiente', 'referen', 'P','');
-		//$edit->referen->insertValue = 'N';
-
 		$edit->referen = new radiogroupField('', 'referen', array('P'=>'Dejar Pendiente','E'=>'Efectivo','C'=>'Credito','M'=>'Multiple/Otros'));
 		$edit->referen->insertValue = 'P';
 		$edit->referen->onchange='chreferen()';
-
 
 		if($manual=='S'){
 			$edit->referen->when=array('');
