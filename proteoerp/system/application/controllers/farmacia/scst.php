@@ -212,7 +212,7 @@ class Scst extends Controller {
 		}
 
 		//Indica si el producto tiene una oferta
-		function ofertas($sinv,$margen,$pvp){
+		function ofertas($sinv,$margen,$pvp,$ultimo){
 			if(empty($sinv)) return '';
 			$CI =& get_instance();
 			$mSQL='SELECT id,margen FROM sinvpromo WHERE codigo='.$CI->db->escape($sinv);
@@ -238,8 +238,14 @@ class Scst extends Controller {
 				$val = nformat($margen).'%';
 				$link= anchor_popup('inventario/sinvpromo/dataeditexpress/'.raencode($sinv).'/create/',$val, $atts);
 			}
+			$precio=$pvp*(1-$m);
+			if($precio<=floatval($ultimo)){
+				$tprecio='<b style="color:red" title="Precio por debajo del costo" >'.nformat($precio).'</b>';
+			}else{
+				$tprecio=nformat($precio);
+			}
 
-			return nformat($pvp*(1-$m)).' '.$link;
+			return $tprecio.' '.$link;
 		}
 
 		//Campos para el detalle
@@ -265,7 +271,7 @@ class Scst extends Controller {
 		$detalle->column('Costo'              ,'<nformat><#ultimo#></nformat>'  ,'align=\'right\'');
 		$detalle->column('Importe'            ,'<nformat><#importe#></nformat>' ,'align=\'right\'');
 		$detalle->column('C&oacute;digo local','<exissinv><#sinv#>|<#dg_row_id#></exissinv>',"bgcolor='#D7F7D7' align='center'");
-		$detalle->column('Desc.'              ,'<ofertas><#sinv#>|<#margen#>|<#precio1#></ofertas>' ,'align=\'right\'');
+		$detalle->column('Desc.'              ,'<ofertas><#sinv#>|<#margen#>|<#precio1#>|<#ultimo#></ofertas>' ,'align=\'right\'');
 		$detalle->build();
 		//echo $detalle->db->last_query();
 		$c_articulos=$detalle->recordCount;
@@ -739,7 +745,7 @@ class Scst extends Controller {
 		$mSQL='SELECT COUNT(*) FROM farmaxasig WHERE barras='.$this->db->escape($barras).' AND proveed='.$proveed;
 		$cana=$this->datasis->dameval($mSQL);
 		if($cana>0){
-			$error="El c&oacute;digo de barras '$barras' ya fue asignado a otro producto";
+			$error="El c&oacute;digo de barras '${barras}' ya fue asignado a otro producto";
 			$this->validation->set_message('fueasignado',$error);
 			return false;
 		}
@@ -773,7 +779,7 @@ class Scst extends Controller {
 				$fhasta=date('Ymd', mktime(0, 0, 0, date('n'), 0, date('Y')));
 
 				if($block=='P'){
-					$sql   = "SELECT SUM(cana) AS cana FROM sitems WHERE fecha BETWEEN $fdesde AND $fhasta AND codigoa=".$this->db->escape($row->codigo);
+					$sql   = "SELECT SUM(cana) AS cana FROM sitems WHERE fecha BETWEEN ${fdesde} AND ${fhasta} AND codigoa=".$this->db->escape($row->codigo);
 					$venta = $this->datasis->dameval($sql);
 					if(empty($venta)) $venta=0; else $venta = ceil($venta/2);
 
@@ -804,7 +810,7 @@ class Scst extends Controller {
 
 		$cana=$this->datasis->dameval("SELECT COUNT(*) AS val FROM caub WHERE gasto='N' and invfis='N'");
 		$form->almacen = new  dropdownField ('Almac&eacute;n', 'almacen');
-		if ($cana>1)$form->almacen->option('','Seleccionar');
+		if($cana>1)$form->almacen->option('','Seleccionar');
 		$form->almacen->options("SELECT ubica,CONCAT_WS('-',ubica,ubides) AS val FROM caub WHERE gasto='N' and invfis='N' ORDER BY ubides");
 		$form->almacen->insertValue=$this->datasis->traevalor('ALMACEN');
 		$form->almacen->rule = 'required';
@@ -1009,7 +1015,7 @@ class Scst extends Controller {
 						$rt=$this->db->simple_query($mSQL);
 						if(!$rt){ memowrite('farmaejec1',$sql);}*/
 
-						$retorna='Compra guardada con el control '.anchor("compras/scst/dataedit/show/${lcontrol}",$lcontrol);
+						$retorna='Compra guardada con el control '.$lcontrol;//.anchor("compras/scst/dataedit/show/${lcontrol}",$lcontrol);
 					}else{
 						$retorna='Al parecer la factura fue ya pasada';
 					}
