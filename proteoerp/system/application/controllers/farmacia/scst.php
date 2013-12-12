@@ -840,7 +840,7 @@ class Scst extends Controller {
 		$form->submit('btnsubmit','Guardar');
 		$form->build_form();
 
-		if ($form->on_success()){
+		if($form->on_success()){
 			$nfiscal= $form->nfiscal->newValue;
 			$almacen= $form->almacen->newValue;
 			$dias   = $form->dias->newValue;
@@ -856,9 +856,9 @@ class Scst extends Controller {
 		});
 		</script>';
 
-		$data['script']  = $script;
-		$data['head']    = $this->rapyd->get_head().script('jquery.js').script('plugins/jquery.numeric.pack.js');
-		$data['title']   = '<h1>Cargar compra '.$control.'</h1>';
+		$data['script'] = $script;
+		$data['head']   = $this->rapyd->get_head().script('jquery.js').script('plugins/jquery.numeric.pack.js');
+		$data['title']  = '<h1>Cargar compra '.$control.'</h1>';
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -1014,7 +1014,7 @@ class Scst extends Controller {
 						WHERE a.control='$lcontrol'";
 						$rt=$this->db->simple_query($mSQL);
 						if(!$rt){ memowrite('farmaejec1',$sql);}*/
-
+						logusu('scst',"Compra ${numero} control ${lcontrol} CARGADA DESDE FarmaSIS");
 						$retorna='Compra guardada con el control '.$lcontrol;//.anchor("compras/scst/dataedit/show/${lcontrol}",$lcontrol);
 					}else{
 						$retorna='Al parecer la factura fue ya pasada';

@@ -384,7 +384,7 @@ class Rrepu extends Controller {
 					$this->db->insert('rrepu', $data);
 					echo "Registro Agregado";
 
-					logusu('RREPU',"Registro ????? INCLUIDO");
+					logusu('rrepu',"Registro ????? INCLUIDO");
 				} else
 					echo "Ya existe un registro con ese $mcodp";
 			} else
@@ -399,13 +399,13 @@ class Rrepu extends Controller {
 				$this->db->query("UPDATE rrepu SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
 				$this->db->where("id", $id);
 				$this->db->update("rrepu", $data);
-				logusu('RREPU',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
+				logusu('rrepu',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
 				echo "Grupo Cambiado/Fusionado en clientes";
 			} else {
 				unset($data[$mcodp]);
 				$this->db->where("id", $id);
 				$this->db->update('rrepu', $data);
-				logusu('RREPU',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+				logusu('rrepu',"Grupo de Cliente  ".$nuevo." MODIFICADO");
 				echo "$mcodp Modificado";
 			}
 

@@ -2755,10 +2755,10 @@ class Scst extends Controller {
 				//Valida que si cambia los precios estos no esten por debajo del costo
 				if($cprecio!='N'){
 					$mSQL = "SELECT COUNT(*) AS cana FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE (
-					a.costo<=(a.precio1/(1+(b.iva/100))) OR
-					a.costo<=(a.precio2/(1+(b.iva/100))) OR
-					a.costo<=(a.precio3/(1+(b.iva/100))) OR
-					a.costo<=(a.precio4/(1+(b.iva/100)))) AND a.control=${dbcontrol}";
+					a.costo>=(a.precio1/(1+(b.iva/100))) OR
+					a.costo>=(a.precio2/(1+(b.iva/100))) OR
+					a.costo>=(a.precio3/(1+(b.iva/100))) OR
+					a.costo>=(a.precio4/(1+(b.iva/100)))) AND a.control=${dbcontrol}";
 
 					$cana = $this->datasis->dameval($mSQL);
 					if(!empty($cana)){
@@ -3766,7 +3766,7 @@ class Scst extends Controller {
 					$mSALDO = $row->cantidad;
 					foreach( $mORDENES as $orden){
 						$dbitorden = $this->db->escape($orden);
-						if ($mSALDO > 0 ) {
+						if($mSALDO > 0){
 							$mSQL   = "SELECT recibido  FROM itordc WHERE numero=${dbitorden} AND codigo=${itdbcodigo}";
 							$mTEMPO = $this->datasis->dameval($mSQL);
 							if($mTEMPO > 0){
@@ -4186,7 +4186,7 @@ class Scst extends Controller {
 	function _post_vehi_update($do){
 		$codigo  = $do->get('numero');
 		$control = $do->get('control');
-		logusu('scst',"Compra $codigo control $control SERIALES CAMBIADOS");
+		logusu('scst',"Compra ${codigo} control ${control} SERIALES CAMBIADOS");
 	}
 
 	function instalar(){

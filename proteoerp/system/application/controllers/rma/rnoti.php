@@ -535,7 +535,7 @@ class Rnoti extends Controller {
 					$this->db->insert('rnoti', $data);
 					echo "Registro Agregado";
 
-					logusu('RNOTI',"Registro ????? INCLUIDO");
+					logusu('rnoti',"Registro ????? INCLUIDO");
 				} else
 					echo "Ya existe un registro con ese $mcodp";
 			} else
@@ -550,13 +550,13 @@ class Rnoti extends Controller {
 				$this->db->query("UPDATE rnoti SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
 				$this->db->where("id", $id);
 				$this->db->update("rnoti", $data);
-				logusu('RNOTI',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
+				logusu('rnoti',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
 				echo "Grupo Cambiado/Fusionado en clientes";
 			} else {
 				unset($data[$mcodp]);
 				$this->db->where("id", $id);
 				$this->db->update('rnoti', $data);
-				logusu('RNOTI',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+				logusu('rnoti',"Grupo de Cliente  ".$nuevo." MODIFICADO");
 				echo "$mcodp Modificado";
 			}
 
@@ -567,7 +567,7 @@ class Rnoti extends Controller {
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
 				$this->db->simple_query("DELETE FROM rnoti WHERE id=$id ");
-				logusu('RNOTI',"Registro ????? ELIMINADO");
+				logusu('rnoti',"Registro ????? ELIMINADO");
 				echo "Registro Eliminado";
 			}
 		};

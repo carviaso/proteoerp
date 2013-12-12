@@ -406,7 +406,7 @@ class Tbgastos extends Controller {
 					$this->db->insert('tbgastos', $data);
 					echo "Registro Agregado";
 
-					logusu('TBGASTOS',"Registro ????? INCLUIDO");
+					logusu('tbgastos',"Registro ????? INCLUIDO");
 				} else
 					echo "Ya existe un registro con ese $mcodp";
 			} else
@@ -421,7 +421,7 @@ class Tbgastos extends Controller {
 				$this->db->query("UPDATE tbgastos SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
 				$this->db->where("id", $id);
 				$this->db->update("tbgastos", $data);
-				logusu('TBGASTOS',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
+				logusu('tbgastos',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
 				echo "Grupo Cambiado/Fusionado en clientes";
 			} else {
 				unset($data[$mcodp]);
