@@ -355,7 +355,7 @@ class Scst extends Controller {
 		$bodyscript .= '
 			function acturever(){
 				var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-				if (id)	{
+				if(id){
 					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 					if(ret.tipo_doc == "XX"){
 						$.prompt( "<h1>Documento Eliminado.</h1>");
@@ -436,14 +436,14 @@ class Scst extends Controller {
 								success: function(r,s,x){
 									try{
 										var json = JSON.parse(r);
-										if (json.status == "A"){
-											$.prompt("Registro Guardado");
+										if(json.status == "A"){
+											//$.prompt("Registro Actualizado");
 											$( "#factuali" ).dialog("close");
 											grid.trigger("reloadGrid");
 											'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+json.pk.id+"/id"').';
 											return true;
 										}else{
-											$.prompt("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
+											$.prompt("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+json.mensaje+"</h1>");
 										}
 									}catch(e){
 										$("#factuali").html(r);
@@ -2750,8 +2750,29 @@ class Scst extends Controller {
 				$actualiza = $form->fecha->newValue;
 				$cambio    = $cprecio;
 				$dbcontrol = $this->db->escape($control);
-
 				$id = $this->datasis->dameval("SELECT id FROM scst WHERE control=${dbcontrol}");
+
+				//Valida que si cambia los precios estos no esten por debajo del costo
+				if($cprecio!='N'){
+					$mSQL = "SELECT COUNT(*) AS cana FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE (
+					a.costo<=(a.precio1/(1+(b.iva/100))) OR
+					a.costo<=(a.precio2/(1+(b.iva/100))) OR
+					a.costo<=(a.precio3/(1+(b.iva/100))) OR
+					a.costo<=(a.precio4/(1+(b.iva/100)))) AND a.control=${dbcontrol}";
+
+					$cana = $this->datasis->dameval($mSQL);
+					if(!empty($cana)){
+						$rt=array(
+							'status' =>'B',
+							'mensaje'=>'Existen productos con precios menor al costo de compra, debe arreglar el problema antes de cargar la compra.',
+							'pk'     =>array('id'=>$id)
+						);
+						echo json_encode($rt);
+						return false;
+					}
+				}
+				//Fin de la validacion
+
 				$rt = $this->_actualizar($id,$cambio,$actualiza);
 				if($rt === false){
 					$rt=array(
@@ -3184,7 +3205,7 @@ class Scst extends Controller {
 								if($ccpre=='N'){
 									$sucursal    = $this->datasis->traevalor('SUCURSAL');
 									$dbsucursal  = $this->db->escape($sucursal);
-									$sinvcontrol = $this->datasis->dameval("SELECT precio FROM sinvcontrol WHERE sucursal=${dbsucu} AND codigo=${dbcodigo}");
+									$sinvcontrol = $this->datasis->dameval("SELECT precio FROM sinvcontrol WHERE sucursal=${dbsucursal} AND codigo=${dbcodigo}");
 									if($sinvcontrol!='S'){
 										$icontrol=false;
 									}
