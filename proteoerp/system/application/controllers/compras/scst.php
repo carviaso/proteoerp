@@ -2755,10 +2755,9 @@ class Scst extends Controller {
 				//Valida que si cambia los precios estos no esten por debajo del costo
 				if($cprecio!='N'){
 					$mSQL = "SELECT COUNT(*) AS cana FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE (
-					a.costo>=(a.precio1/(1+(b.iva/100))) OR
-					a.costo>=(a.precio2/(1+(b.iva/100))) OR
-					a.costo>=(a.precio3/(1+(b.iva/100))) OR
-					a.costo>=(a.precio4/(1+(b.iva/100)))) AND a.control=${dbcontrol}";
+					a.costo>(a.precio1/(1+(b.iva/100))) OR
+					a.costo>(a.precio2/(1+(b.iva/100))) OR
+					a.costo>(a.precio3/(1+(b.iva/100)))) AND a.control=${dbcontrol}";
 
 					$cana = $this->datasis->dameval($mSQL);
 					if(!empty($cana)){
