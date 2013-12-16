@@ -679,11 +679,11 @@ class Scli extends validaciones {
 			'editoptions'   => '{ size:40, maxlength: 40 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
-
+/*
 		$grid->addField('credito');
 		$grid->label('Cr&eacute;dito');
 		$grid->params(array(
-			'hidden'        => 'true',
+			//'hidden'        => 'true',
 			'search'        => 'true',
 			'editable'      => 'false',
 			'width'         => 40,
@@ -691,7 +691,7 @@ class Scli extends validaciones {
 			'editoptions'   => '{value: {"S":"Activo","N":"Suspendido" }, style:"width:100px" }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
-
+*/
 		$linea = $linea + 1;
 		$grid->addField('dire12');
 		$grid->label('Direcci&oacute;n 2');
@@ -781,7 +781,6 @@ class Scli extends validaciones {
 			'editable'      => $editar,
 			'width'         => 200,
 			'edittype'      => "'text'",
-			//'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 30 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
@@ -828,6 +827,7 @@ class Scli extends validaciones {
 		$grid->addField('pais');
 		$grid->label('Pa&iacute;s');
 		$grid->params(array(
+			'hidden'        => 'true',
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 180,
@@ -850,10 +850,21 @@ class Scli extends validaciones {
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
 
+		$grid->addField('credito');
+		$grid->label('Cr&eacute;dito');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'false',
+			'width'         => 40,
+			'edittype'      => "'select'",
+			'editoptions'   => '{value: {"S":"Activo","N":"Suspendido" }, style:"width:100px" }',
+			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
+		));
+
 		$grid->addField('limite');
 		$grid->label('L&iacute;mite');
 		$grid->params(array(
-			'hidden'        => 'true',
+			//'hidden'        => 'true',
 			'align'         => "'right'",
 			'search'        => 'true',
 			'editable'      => 'false',
@@ -863,7 +874,7 @@ class Scli extends validaciones {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
-
+/*
 		$linea = $linea + 1;
 		$grid->addField('repre');
 		$grid->label('Representante');
@@ -888,7 +899,7 @@ class Scli extends validaciones {
 			'editoptions'   => '{ size:10, maxlength: 13 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
-
+*/
 		$linea = $linea + 1;
 		$grid->addField('email');
 		$grid->label('Email');
@@ -901,7 +912,7 @@ class Scli extends validaciones {
 			'editoptions'   => '{ size:30, maxlength: 18 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
-
+/*
 		$grid->addField('porcobr');
 		$grid->label('Comisi&oacute;n C %');
 		$grid->params(array(
@@ -916,7 +927,7 @@ class Scli extends validaciones {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
-
+*/
 		$linea = $linea + 1;
 		$grid->addField('url');
 		$grid->label('URL');
@@ -929,7 +940,7 @@ class Scli extends validaciones {
 			'editoptions'   => '{ size:30, maxlength: 18 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
-
+/*
 		$grid->addField('fb');
 		$grid->label('facebook');
 		$grid->params(array(
@@ -978,6 +989,7 @@ class Scli extends validaciones {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
+
 		$grid->addField('mensaje');
 		$grid->label('Mensaje');
 		$grid->params(array(
@@ -988,7 +1000,7 @@ class Scli extends validaciones {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 40 }',
 		));
-
+*/
 		$grid->addField('observa');
 		$grid->label('Observaci&oacute;n');
 		$grid->params(array(
@@ -1592,7 +1604,6 @@ class Scli extends validaciones {
 		$edit->entidad->option('','Seleccione un Estado');
 		$edit->entidad->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
 
-
 		$edit->pais = new inputField('Pa&iacute;s','pais');
 		$edit->pais->rule = 'trim';
 		$edit->pais->size =20;
@@ -1725,7 +1736,7 @@ class Scli extends validaciones {
 		$edit->tminimo->type='inputhidden';
 
 		$edit->sucursal = new dropdownField('Sucursal', 'sucursal');
-		$edit->sucursal->rule = 'required';
+		//$edit->sucursal->rule = 'required';
 		$edit->sucursal->style= 'width:150px;';
 		$edit->sucursal->option('','Ninguna');
 		$edit->sucursal->options('SELECT TRIM(codigo) AS codigo,sucursal FROM sucu WHERE codigo IS NOT NULL ORDER BY sucursal');
@@ -1841,7 +1852,7 @@ class Scli extends validaciones {
 
 		$do = new DataObject('scli');
 
-		$edit = new DataEdit('Ficha clientes', $do);
+		$edit = new DataEdit(' ', $do);
 		$edit->back_save   = true;
 		$edit->back_cancel = true;
 		$edit->back_cancel_save   = true;
@@ -1921,6 +1932,7 @@ class Scli extends validaciones {
 		$data['script'] .= $script;
 		$data['title']   = '';
 		$this->load->view('view_ventanas_sola', $data);
+
 	}
 
 	//******************************************************************

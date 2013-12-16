@@ -15,7 +15,7 @@ class Sprv extends Controller {
 
 	function index(){
 		$this->instalar();
-		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->datasis->modintramenu( 750, 580, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -182,74 +182,19 @@ class Sprv extends Controller {
 		$bodyscript = '		<script type="text/javascript">'."\n";
 		$ngrid = '#newapi'.$grid0;
 
-		$bodyscript .= '
-		function sprvadd() {
-			$.post("'.site_url('compras/sprv/dataedit/create').'",
-			function(data){
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		};';
-
-		$bodyscript .= '
-		function sprvedit() {
-			var id  = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret    = $("'.$ngrid.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url('compras/sprv/dataedit/modify').'/"+id, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
-				});
-			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
-		};';
-
-		$bodyscript .= '
-		function sprvshow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
-					$("#fshow").html(data);
-					$("#fshow").dialog( "open" );
-				});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
-
-
-		$bodyscript .= '
-		function sprvdel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				if(confirm(" Seguro desea eliminar el registro?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
-					mId = id;
-					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
-						try{
-							var json = JSON.parse(data);
-							if (json.status == "A"){
-								apprise("Registro eliminado");
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-							}else{
-								apprise("Registro no se puede eliminado");
-							}
-						}catch(e){
-							$("#fborra").html(data);
-							$("#fborra").dialog( "open" );
-						}
-					});
-				}
-			}else{
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
+		$bodyscript .= $this->jqdatagrid->bsshow('sprv', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'sprv', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'sprv', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('sprv', $ngrid, $this->url );
 
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '380', '680' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '190', '360' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '200', '300' );
+
+/*
 		$bodyscript .= '
 		jQuery("#edocta").click( function(){
 			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -274,7 +219,7 @@ class Sprv extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 520, width: 720, modal: true,
+			autoOpen: false, height: 380, width: 720, modal: true,
 			buttons: {
 			"Guardar": function() {
 				var murl = $("#df1").attr("action");
@@ -315,39 +260,31 @@ class Sprv extends Controller {
 				$("#fedita").html("");
 			}
 		});';
+*/
 
 		$bodyscript .= '
-		$("#fshow").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fshow").html("");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				$("#fshow").html("");
+		jQuery("#edocta").click( function(){
+			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('reportes/ver/SPRMECU/SPRM/').'/\'+ret.proveed').';
+			} else { $.prompt("<h1>Por favor Seleccione un Proveedor</h1>");}
+		});';
+
+		// Pagina Web
+		$bodyscript .= '
+		jQuery("#pagweb").click( function(){
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret  = $("'.$ngrid.'").getRowData(id);
+				if ( ret.url.length > 10 )
+					window.open(ret.url);
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Proveedor</h1>");
 			}
 		});';
 
-		$bodyscript .= '
-		$("#fborra").dialog({
-			autoOpen: false, height: 300, width: 400, modal: true,
-			buttons: {
-				"Aceptar": function() {
-					$("#fborra").html("");
-					jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-					$( this ).dialog( "close" );
-				},
-			},
-			close: function() {
-				jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-				$("#fborra").html("");
-			}
-		});';
-
-
-		$bodyscript .= '});'."\n";
+		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
@@ -718,7 +655,7 @@ class Sprv extends Controller {
 
 		$grid->showpager(true);
 		$grid->setWidth('');
-		$grid->setHeight('290');
+		$grid->setHeight('310');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
@@ -730,7 +667,7 @@ class Sprv extends Controller {
 				$.ajax({
 					url: "'.site_url($this->url).'/resumen/"+id,
 					success: function(msg){
-						msg += "<img src=\''.site_url($this->url.'vcard').'/'.'"+id+"\' alt=\'vCard\' height=\'200\' width=\'200\'> ";
+						msg += "<img src=\''.site_url($this->url.'vcard').'/'.'"+id+"\' alt=\'vCard\' height=\'150\' width=\'150\'> ";
 						$("#ladicional").html(msg);
 					}
 				});
@@ -1038,10 +975,9 @@ class Sprv extends Controller {
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->rule = 'trim|strtoupper|required';
-		$edit->nombre->size = 35;
+		$edit->nombre->size = 42;
 		$edit->nombre->maxlength =40;
 		$edit->nombre->title = 'Nombre del Proveedor';
-
 
 		//$lriffis='<a href="javascript:consulrif();" title="Consultar RIF en el SENIAT" onclick="" style="color:red;font-size:9px;border:none;">SENIAT</a>';
 		$edit->rif =  new inputField('RIF', 'rif');
@@ -1052,10 +988,18 @@ class Sprv extends Controller {
 		$edit->rif->title = 'RIF o Cedula del Proveedor';
 
 		$edit->contacto = new inputField('Contacto', 'contacto');
-		$edit->contacto->size =35;
+		$edit->contacto->size =42;
 		$edit->contacto->rule ='trim';
 		$edit->contacto->maxlength =40;
 		$edit->contacto->title = 'Nombre de la persona con quien hablan o son atendidos en el proveedor';
+
+		$edit->nomfis = new textareaField('Raz&oacute;n Social', 'nomfis');
+		$edit->nomfis->rule = 'trim';
+		$edit->nomfis->cols = 40;
+		$edit->nomfis->rows =  2;
+		$edit->nomfis->maxlength =200;
+		$edit->nomfis->style = 'width:170;';
+		$edit->nomfis->title = 'Nombre como aparecen en el registro';
 
 		$edit->grupo = new dropdownField('Grupo', 'grupo');
 		$edit->grupo->option('','Seleccionar');
@@ -1078,24 +1022,42 @@ class Sprv extends Controller {
 		$edit->tiva->options(array('N'=>'Nacional','I'=>'Internacional','O'=>'Otros'));
 		$edit->tiva->style='width:190px;';
 
+		$edit->direc1 = new textareaField('Direcci&oacute;n','direc1');
+		$edit->direc1->rule = 'trim';
+		$edit->direc1->cols = 43;
+		$edit->direc1->rows =  2;
+		$edit->direc1->maxlength =200;
+		$edit->direc1->style = 'width:170;';
+		$edit->direc1->title = 'Nombre como aparecen en el registro';
+
+		$edit->estado = new dropdownField('Estado','estado');
+		$edit->estado->style='width:170px;';
+		$edit->estado->option('','Seleccione un Estado');
+		$edit->estado->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
+
+		$edit->pais = new inputField('Pa&iacute;s','pais');
+		$edit->pais->rule = 'trim';
+		$edit->pais->size = 30;
+		$edit->pais->maxlength = 30;
+/*
 		$edit->direc1 = new inputField('Direcci&oacute;n','direc1');
-		$edit->direc1->size =34;
+		$edit->direc1->size =42;
 		$edit->direc1->rule ='trim';
 		$edit->direc1->maxlength =40;
-
+*/
 		$edit->direc2 = new inputField(' ','direc2');
-		$edit->direc2->size =34;
+		$edit->direc2->size =42;
 		$edit->direc2->rule ='trim';
 		$edit->direc2->maxlength =40;
 
 		$edit->direc3 = new inputField(' ','direc3');
-		$edit->direc3->size =34;
+		$edit->direc3->size =42;
 		$edit->direc3->rule ='trim';
 		$edit->direc3->maxlength =40;
 
 		$edit->telefono = new textareaField('Tel&eacute;fono', 'telefono');
 		$edit->telefono->rule = 'trim';
-		$edit->telefono->cols = 27;
+		$edit->telefono->cols = 26;
 		$edit->telefono->rows =  2;
 		$edit->telefono->maxlength =200;
 
@@ -1105,11 +1067,11 @@ class Sprv extends Controller {
 		$edit->email->maxlength =30;
 		$edit->email->title = 'Correo electr&oacute;nico';
 
-		$edit->url = new inputField('URL', 'url');
+		$edit->url = new inputField('Sitio Web', 'url');
 		$edit->url->group = 'Datos del Proveedor';
 		$edit->url->rule  = 'trim';
-		$edit->url->size  = 25;
-		$edit->url->maxlength =30;
+		$edit->url->size  = 28;
+		$edit->url->maxlength =40;
 		$edit->url->title = 'P&aacute;gina Web del Proveedor';
 
 		$atts = array(
@@ -1135,7 +1097,7 @@ class Sprv extends Controller {
 		$edit->banco1->style ='width:140px;';
 
 		$edit->cuenta1 = new inputField('&nbsp;&nbsp;N&uacute;mero (1)','cuenta1');
-		$edit->cuenta1->size = 28;
+		$edit->cuenta1->size = 22;
 		$edit->cuenta1->rule = 'trim';
 		$edit->cuenta1->maxlength = 25;
 		$edit->cuenta1->group = "Cuentas Bancarias";
@@ -1147,7 +1109,7 @@ class Sprv extends Controller {
 		$edit->banco2->style='width:140px;';
 
 		$edit->cuenta2 = new inputField('&nbsp;&nbsp;N&uacute;mero (2)','cuenta2');
-		$edit->cuenta2->size = 28;
+		$edit->cuenta2->size = 22;
 		$edit->cuenta2->rule = 'trim';
 		$edit->cuenta2->maxlength = 25;
 		$edit->cuenta2->group = "Cuentas Bancarias";
@@ -1171,24 +1133,16 @@ class Sprv extends Controller {
 		$edit->codigo->rule  = 'trim';
 		$edit->codigo->title = 'C&oacute;digo en el sistema del proveedor';
 
-		$edit->nomfis = new textareaField('Raz&oacute;n Social', 'nomfis');
-		$edit->nomfis->rule = 'trim';
-		$edit->nomfis->cols = 33;
-		$edit->nomfis->rows =  3;
-		$edit->nomfis->maxlength =200;
-		$edit->nomfis->style = 'width:170;';
-		$edit->nomfis->title = 'Nombre como aparecen en el registro';
-
 		$edit->cuenta = new inputField('Contable', 'cuenta');
 		$edit->cuenta->rule='trim|existecpla';
-		$edit->cuenta->size =17;
+		$edit->cuenta->size =15;
 		$edit->cuenta->maxlength =15;
 		$edit->cuenta->append($bcpla);
 		$edit->cuenta->title = 'C&oacute;digo en el plan de cuentas contable';
 
 		$edit->canticipo = new inputField('Anticipo', 'canticipo');
 		$edit->canticipo->rule='trim|existecpla';
-		$edit->canticipo->size =17;
+		$edit->canticipo->size =15;
 		$edit->canticipo->maxlength =15;
 		$edit->canticipo->append($banti);
 		$edit->canticipo->title = 'C&oacute;digo en el plan de cuentas contable para cargar anticipos si es diferente';
@@ -1497,18 +1451,21 @@ class Sprv extends Controller {
 			$this->db->query('ALTER TABLE sprv ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 
-		if(!in_array('copre'    ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN copre     VARCHAR(11)  NULL DEFAULT NULL   AFTER cuenta');
-		if(!in_array('ocompra'  ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ocompra   CHAR(1)      NULL DEFAULT NULL   AFTER copre');
-		if(!in_array('dcredito' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN dcredito  DECIMAL(3,0) NULL DEFAULT "0"    AFTER ocompra');
-		if(!in_array('despacho' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN despacho  DECIMAL(3,0) NULL DEFAULT NULL   AFTER dcredito');
-		if(!in_array('visita'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN visita    VARCHAR(9)   NULL DEFAULT NULL   AFTER despacho');
-		if(!in_array('cate'     ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN cate      VARCHAR(20)  NULL DEFAULT NULL   AFTER visita');
-		if(!in_array('reteiva'  ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN reteiva   DECIMAL(7,2) NULL DEFAULT "0.00" AFTER cate');
-		if(!in_array('ncorto'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ncorto    VARCHAR(20)  NULL DEFAULT NULL   AFTER nombre');
-		if(!in_array('prefpago' ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN prefpago  CHAR(1)      NULL DEFAULT "T"    COMMENT "Preferencia de pago, Transferencia, Deposito, Caja" AFTER reteiva');
+		if(!in_array('copre',    $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN copre     VARCHAR(11)  NULL DEFAULT NULL   AFTER cuenta');
+		if(!in_array('ocompra',  $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ocompra   CHAR(1)      NULL DEFAULT NULL   AFTER copre');
+		if(!in_array('dcredito', $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN dcredito  DECIMAL(3,0) NULL DEFAULT "0"    AFTER ocompra');
+		if(!in_array('despacho', $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN despacho  DECIMAL(3,0) NULL DEFAULT NULL   AFTER dcredito');
+		if(!in_array('visita',   $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN visita    VARCHAR(9)   NULL DEFAULT NULL   AFTER despacho');
+		if(!in_array('cate',     $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN cate      VARCHAR(20)  NULL DEFAULT NULL   AFTER visita');
+		if(!in_array('reteiva',  $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN reteiva   DECIMAL(7,2) NULL DEFAULT "0.00" AFTER cate');
+		if(!in_array('ncorto',   $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ncorto    VARCHAR(20)  NULL DEFAULT NULL   AFTER nombre');
+		if(!in_array('prefpago', $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN prefpago  CHAR(1)      NULL DEFAULT "T"    COMMENT "Preferencia de pago, Transferencia, Deposito, Caja" AFTER reteiva');
 		if(!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE sprv ADD COLUMN canticipo VARCHAR(15)  NULL DEFAULT NULL   COMMENT 'Cuenta contable de Anticipo'                        AFTER cuenta");
+		if(!in_array('estado'     ,$campos)) $this->db->query("ALTER TABLE sprv ADD COLUMN estado      INT(11) NULL DEFAULT 0 COMMENT 'Estados o Entidades'");
+		if(!in_array('aniversario',$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN aniversario DATE NULL DEFAULT NULL COMMENT "Fecha de Aniversario"');
 
-		$this->db->query('ALTER TABLE sprv CHANGE nomfis nomfis VARCHAR(200) DEFAULT NULL NULL');
-		$this->db->query('ALTER TABLE sprv CHANGE COLUMN telefono telefono TEXT NULL DEFAULT NULL');
+		$this->db->query('ALTER TABLE sprv CHANGE COLUMN nomfis   nomfis   VARCHAR(200) DEFAULT NULL NULL');
+		$this->db->query('ALTER TABLE sprv CHANGE COLUMN telefono telefono TEXT NULL    DEFAULT NULL');
+		$this->db->query('ALTER TABLE sprv CHANGE COLUMN direc1   direc1   TEXT NULL    DEFAULT NULL');
 	}
 }

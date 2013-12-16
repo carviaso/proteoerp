@@ -3,9 +3,11 @@
 <head>
 <meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>ProteoERP<?php if(isset($title)) echo ':'.preg_replace('/<[^>]*>/', '', $title); ?></title>
-<?php echo style("ventanas.css");?>
-<?php if (isset($style))  echo $style; ?>
-<?php if (isset($filtro)) { ?>
+<?php 
+echo style("ventanas.css");
+if (isset($style))  echo $style;
+if (!isset($target)) $target='popu'; 
+if (isset($filtro)) { ?>
 <style type="text/css">
 #cajafiltro {width: 100%;display: block;padding: 5px;border-bottom: 1px solid #2067B5;background-color: #D7DEF0;}
 #mostrafiltro {display: block;width: 100%;padding: 5px;border-bottom: 1px solid #2067B5;background-color: #F5F5F5;background:url(<?php echo base_url();?>images/huellaazul.gif);}
@@ -30,6 +32,9 @@ $(function(){
 <?php }; ?>
 </head>
 <body>
+<?php 
+if ( $target != 'dialogo' ) { 
+?>
 <div id='encabe'>
 <?php if (isset($title)) { ?>
 <table width="98%">
@@ -40,8 +45,10 @@ $(function(){
 </table>
 <?php }; ?>
 </div>
-
-<?php if(isset($smenu)) echo '<div id="smenu">'.$smenu.'</div>'; ?>
+<?php 
+} 
+if(isset($smenu)) echo '<div id="smenu">'.$smenu.'</div>'; 
+?>
 <div id='contenido'>
 	<table width="100%" border=0 align="center">
 		<?php if (isset($filtro)) { ?>

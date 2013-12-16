@@ -91,9 +91,11 @@ var sitems_cont=<?php echo $form->max_rel_count['sitems']; ?>;
 var sfpa_cont  =<?php echo $form->max_rel_count['sfpa'];?>;
 
 $(function(){
+	var manual = $("#manual").val();
+	if( manual=='S'){
+		$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
+	}
 	$(".inputnum").numeric(".");
-	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
-	//$('input[name^="sfpafecha_"]').datepicker({ dateFormat: "dd/mm/yy" });
 
 	totalizar();
 	for(var i=0;i < <?php echo $form->max_rel_count['sitems']; ?>;i++){
@@ -308,6 +310,9 @@ $(function(){
 	});
 
 	chreferen();
+	$("#scliexp").dialog({ autoOpen: false, height: 420, width: 400, modal: true });
+
+
 });
 
 function marcar(obj){
@@ -325,12 +330,23 @@ function aplicadesc(){
 }
 
 function scliadd() {
+
+	$("#scliexp").dialog({
+		autoOpen:false, modal:false, width:500, height:350,
+		open: function(ev, ui){
+			$('#scliexp').html('<iframe src="<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>" width="100%", height="100%" seamless></iframe>');
+		}
+	});
+	$("#scliexp").dialog( "open" );
+
+/*
 	$.post('<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>',
 	function(data){
-		$("#scliexp").html("");
+	1	$("#scliexp").html("");
 		$("#scliexp").html(data);
 		$("#scliexp").dialog( "open" );
 	})
+*/
 };
 
 function limpiavacio(){
@@ -848,7 +864,7 @@ function chreferen(){
 	echo $form->manual->output;
 	echo $form->tipo_doc->output;
 	echo $form->cajero->output;
-	echo $form->nombre->output
+	echo $form->nombre->output;
 ?>
 <table style="width:100%;border-collapse:collapse;padding:0px;" >
 	<tr>
@@ -857,8 +873,10 @@ function chreferen(){
 				<tr>
 					<td class="littletableheader" width='20px' style='background:#EFEFEF;'>
 					<?php
-						if($form->_status!='show'){ ?>
-							<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;"><?php echo image('add1-.png'); ?></a>
+						if($form->_status!='show'){ 
+							//<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ? >" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;">< ?php echo image('add1-.png'); ? ></a>
+					?>
+						<a href="#" onClick="scliadd();"><?php echo image('add1-.png'); ?></a>
 					<?php } ?>
 					</td>
 					<td class="littletablerow"  style='width:45px;align;right'><?php echo $form->cliente->label; ?>*</td>
@@ -875,23 +893,7 @@ function chreferen(){
 	</tr>
 </table>
 
-<div id='efecha' style='display:none;'>
-<table style="width:100%;border-collapse:collapse;padding:0px;">
-	<tr>
-		<td>
-			<table style="width:100%;border-collapse:collapse;padding:0px;">
-				<tr>
-					<td class="littletableheader"><?php echo $form->almacen->label;  ?>*</td>
-					<td class="littletablerow"   ><?php echo $form->almacen->output; ?></td>
-					<td class="littletableheader"><?php echo $form->fecha->label;    ?>*</td>
-					<td class="littletablerow"   ><?php echo $form->fecha->output;   ?></td>
-					<td></td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-</table>
-</div>
+<div id='efecha' style='display:none;'></div>
 
 
 <table style="width:100%;border-collapse:collapse;padding:0px;">
@@ -1029,6 +1031,16 @@ function chreferen(){
 				<td><input name="referen" value="M" id="referen" type="radio" onchange='chreferen()'>Multiple/Otros&nbsp;</td>
 			</tr>
 		</table>
+		<br>
+		<table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
+			<tr>
+				<td class="littletableheader"><?php echo $form->almacen->label;  ?></td>
+				<td class="littletablerow"   ><?php echo $form->almacen->output; ?></td>
+			</tr><tr>
+				<td class="littletableheader"><?php echo $form->fecha->label;    ?>*</td>
+				<td class="littletablerow"   ><?php echo $form->fecha->output;   ?></td>
+			</tr>
+		</table>
 		</td>
 	</tr><tr>
 		<td>
@@ -1053,6 +1065,7 @@ function chreferen(){
 		</td>
 	</tr>
 </table>
+<div id='scliexp'></div>
 
 <?php echo $form_end; ?>
 

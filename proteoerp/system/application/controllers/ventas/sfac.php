@@ -37,7 +37,7 @@ class Sfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento', 'label'=>'Reimprimir'));
+		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento', 'label'=>'Reimprimir','estilo'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png',              'alt' => 'Cierre de Caja',       'label'=>'Cierre de Caja'));
 		$grid->wbotonadd(array('id'=>'fmanual'  ,'img'=>'images/mano.png',                'alt' => 'Factura Manual',       'label'=>'Factura Manual'));
 
@@ -2434,7 +2434,7 @@ class Sfac extends Controller {
 	}
 
 	//******************************************************************
-	//Forma de facturacion
+	// Forma de facturacion
 	//
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
@@ -2473,12 +2473,13 @@ class Sfac extends Controller {
 		$edit->sclitipo->insertValue = 1;
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
-		if($manual <> 'S'){
-			$edit->fecha->insertValue=date('Y-m-d');
-		}
 		$edit->fecha->rule = 'required|chfecha';
 		$edit->fecha->calendar = false;
 		$edit->fecha->size = 12;
+		if($manual <> 'S'){
+			$edit->fecha->insertValue = date('Y-m-d');
+			$edit->fecha->readonly    = true;
+		}
 
 		//$edit->tipo_doc = new  dropdownField('Documento', 'tipo_doc');
 		$edit->tipo_doc = new  hiddenField('Documento', 'tipo_doc');
@@ -2498,7 +2499,6 @@ class Sfac extends Controller {
 		$edit->vd->style='width:100px;';
 		$edit->vd->insertValue=$this->secu->getvendedor();
 
-
 		$alma = $this->secu->getalmacen();
 		if(empty($alma)){
 			$edit->almacen= new dropdownField ('Almac&eacute;n', 'almacen');
@@ -2513,8 +2513,6 @@ class Sfac extends Controller {
 			$edit->almacen->size      = 8;
 			$edit->almacen->insertValue=$alma;
 		}
-
-
 
 		$edit->numero = new inputField('N&uacute;mero', 'numero');
 		$edit->numero->size = 10;
@@ -2558,7 +2556,6 @@ class Sfac extends Controller {
 		$edit->direc = new hiddenField('Direcci&oacute;n','direc');
 		$edit->direc->readonly =true;
 		$edit->direc->size = 40;
-
 
 		$cajero = $this->datasis->dameval('SELECT a.cajero FROM usuario a JOIN scaj b ON a.cajero=b.cajero WHERE a.us_codigo='.$this->session->userdata('usuario') );
 		$edit->cajero= new hiddenField('Cajero', 'cajero');
@@ -2723,7 +2720,6 @@ class Sfac extends Controller {
 		$edit->observa       = new textareaField('Observaci&oacute;n', 'observa');
 		$edit->observa->cols = 50;
 		$edit->observa->rows = 3;
-
 
 		$edit->nfiscal   = new inputField('No.Fiscal', 'nfiscal');
 		$edit->observ1   = new inputField('Observaci&oacute;n', 'observ1');

@@ -311,6 +311,9 @@ $(function(){
 	});
 
 	chreferen();
+
+
+
 });
 
 function marcar(obj){
@@ -846,8 +849,10 @@ function chreferen(){
 	<tr>
 		<td class="littletableheader" width='20px' style='background:#EFEFEF;'>
 		<?php
-			if($form->_status!='show'){ ?>
-				<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;"><?php echo image('add1-.png'); ?></a>
+			if($form->_status!='show'){ 
+				//<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;"><?php echo image('add1-.png'); ?></a>
+				?>
+				<a href="#" onClick="scliadd();"><?php echo image('add1-.png'); ?></a>
 		<?php } ?>
 		</td>
 		<td class="littletablerow"  style='width:45px;align;right'><?php echo $form->cliente->label; ?>*</td>

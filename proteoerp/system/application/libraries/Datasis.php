@@ -1465,7 +1465,7 @@ class Datasis {
 	//
 	function modintramenu( $ancho, $alto, $ejecutar, $modulo = '', $nombre = '' ){
 		$CI =& get_instance();
-		$mSQL = 'UPDATE intramenu SET ancho='.$ancho.', alto='.$alto.' WHERE ejecutar="'.$ejecutar.'" OR ejecutar="/'.$ejecutar.'"';
+		$mSQL = 'UPDATE intramenu SET ancho='.$ancho.', alto='.$alto.' WHERE ejecutar="'.$ejecutar.'" OR ejecutar="'.$ejecutar.'/"';
 		$CI->db->query($mSQL);
 		if ( $modulo != '' ){
 			$tablas = $CI->db->list_tables();

@@ -1039,7 +1039,6 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 					$str .= "xtype: 'textfield' ";
 				}
 				$campos .= $str."},<br>";
-
 			}
 			echo "$fields<br>";
 			echo "<br>$columna";

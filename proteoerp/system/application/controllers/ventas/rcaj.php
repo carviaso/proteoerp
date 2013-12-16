@@ -1,5 +1,7 @@
-<?php require_once(BASEPATH.'application/controllers/validaciones.php');
+<?php 
+require_once(BASEPATH.'application/controllers/validaciones.php');
 class Rcaj extends validaciones {
+	var $target = 'popu';
 
 	function Rcaj(){
 		parent::Controller();
@@ -9,11 +11,13 @@ class Rcaj extends validaciones {
 
 	function index(){
 		$this->instalar();
+		$this->target = $this->datasis->dameval('SELECT target FROM intramenu WHERE ejecutar="ventas/rcaj" OR ejecutar="ventas/rcaj/"');
 		redirect('ventas/rcaj/filteredgrid');
 	}
 
 	function filteredgrid(){
 		$this->rapyd->load('datafilter','datagrid');
+		$this->target = $this->datasis->dameval('SELECT target FROM intramenu WHERE ejecutar="ventas/rcaj" OR ejecutar="ventas/rcaj/"');
 
 		$atts = array(
 			'width'      => '800',
@@ -26,7 +30,7 @@ class Rcaj extends validaciones {
 
 		$recep = anchor('ventas/rcaj/forcierre/','Recepcion de Caja');
 		//$filter = new DataFilter($titulo);
-		$filter = new DataFilter('Filtro');
+		$filter = new DataFilter('');
 		$filter->fecha = new dateonlyField('Fecha','fecha','d/m/Y');
 		$filter->fecha->db_name='c.f_factura';
 		$filter->fecha->size =11;
@@ -34,11 +38,12 @@ class Rcaj extends validaciones {
 		$filter->fecha->operator='=';
 		$filter->fecha->insertValue=date('Y-m-d');
 
+/*
 		$filter->cajero = new dropdownField('Cajero', 'cajero');
 		$filter->cajero->db_name='c.cobrador';
 		$filter->cajero->option('','Todos');
 		$filter->cajero->options('SELECT cajero, nombre FROM scaj ORDER BY nombre');
-
+*/
 		$filter->buttons('reset','search');
 		$filter->build();
 
@@ -74,7 +79,6 @@ class Rcaj extends validaciones {
 				}
 			}
 		}
-
 		$data['forma'] ='';
 		if($this->rapyd->uri->is_set('search') && !empty($filter->fecha->value)){
 			$fecha=$filter->fecha->value;
@@ -101,16 +105,14 @@ class Rcaj extends validaciones {
 			$grid->column('Fecha'      ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
 			$grid->column('Cajero'     ,'<#cajero#>-<#nombre#>','align=\'center\'');
 			$grid->column('Entregado por el cajero'   ,'<sinulo><nformat><#recibido#></nformat>|0.00</sinulo>','align=\'right\'');
-			//$grid->column('Ingreso'    ,'<nformat><#ingreso#></nformat>' ,'align=\'right\'');
 			$grid->column('Status/Caja','<iconcaja><#cajero#>|<#fecha#>|<#numero#>|<#tipo#>|<#caja#>|'.$reve.'</iconcaja>','align="center"');
 			$grid->column('Ver html'   ,"<siinulo><#numero#>|---|$urih</siinulo>",'align=\'center\'');
 			$grid->build();
-			//echo $grid->db->last_query();
 			$data['content'] .= $grid->output;
 		}
-
 		$data['title']   = '<h1>Recepci&oacute;n de Caja</h1>';
 		$data['head']    = $this->rapyd->get_head();
+		$data['target']  = $this->target;
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -1071,34 +1073,15 @@ class Rcaj extends validaciones {
 			$this->db->query($mSQL);
 		}
 
+
 		$campos=$this->db->list_fields('rcaj');
-		if(!in_array('xventa',$campos)){
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN xventa DECIMAL(17,2) NULL DEFAULT 0');
-		}
-
-		if(!in_array('xviva',$campos)){
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN xviva DECIMAL(17,2) NULL DEFAULT 0');
-		}
-
-		if(!in_array('xdevo',$campos)){
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN xdevo DECIMAL(17,2) NULL DEFAULT 0');
-		}
-
-		if(!in_array('xdiva',$campos)){
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN xdiva DECIMAL(17,2) NULL DEFAULT 0');
-		}
-
-		if(!in_array('maqfiscal',$campos)){
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN maqfiscal VARCHAR(17) NULL ');
-		}
-
-		if(!in_array('ultimafc',$campos)){
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN ultimafc VARCHAR(10) NULL ');
-		}
-
-		if(!in_array('ultimanc',$campos)){
-			$this->db->query('ALTER TABLE rcaj ADD COLUMN ultimanc VARCHAR(10) NULL ');
-		}
+		if(!in_array('xventa',   $campos)) $this->db->query('ALTER TABLE rcaj ADD COLUMN xventa DECIMAL(17,2) NULL DEFAULT 0');
+		if(!in_array('xviva',    $campos)) $this->db->query('ALTER TABLE rcaj ADD COLUMN xviva DECIMAL(17,2) NULL DEFAULT 0');
+		if(!in_array('xdevo',    $campos)) $this->db->query('ALTER TABLE rcaj ADD COLUMN xdevo DECIMAL(17,2) NULL DEFAULT 0');
+		if(!in_array('xdiva',    $campos)) $this->db->query('ALTER TABLE rcaj ADD COLUMN xdiva DECIMAL(17,2) NULL DEFAULT 0');
+		if(!in_array('maqfiscal',$campos)) $this->db->query('ALTER TABLE rcaj ADD COLUMN maqfiscal VARCHAR(17) NULL ');
+		if(!in_array('ultimafc', $campos)) $this->db->query('ALTER TABLE rcaj ADD COLUMN ultimafc VARCHAR(10) NULL ');
+		if(!in_array('ultimanc', $campos)) $this->db->query('ALTER TABLE rcaj ADD COLUMN ultimanc VARCHAR(10) NULL ');
 
 
 		$itcampos=$this->db->list_fields('itrcaj');
@@ -1107,15 +1090,9 @@ class Rcaj extends validaciones {
 			$this->db->query($mSQL);
 		}
 
-		//$mSQL="ALTER TABLE `itrcaj`  DROP PRIMARY KEY,  ADD PRIMARY KEY (`numero`, `tipo`, `cierre`)";
-		//$this->db->query($mSQL);
-
 		if( !$this->db->field_exists('cierre', 'sfpa')){
 			$mSQL="ALTER TABLE sfpa  ADD COLUMN cierre CHAR(8) DEFAULT '' AFTER hora";
 			$this->db->query($mSQL);
 		}
-
-		//$mSQL="ALTER TABLE `rcaj` CHANGE COLUMN `estampa` `estampa` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP";
-		//$this->db->query($mSQL);
 	}
 }

@@ -19,6 +19,7 @@ class Mvcerti extends validaciones {
 
 
 	function index(){
+		$this->datasis->modintramenu( 750, 550, substr($this->url,0,-1) );
 		$this->datasis->modulo_id('13C',1);
 		redirect($this->url.'jqdatag');
 	}
@@ -80,7 +81,7 @@ class Mvcerti extends validaciones {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '300', '450' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '280', '450' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '450' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '200', '400' );
 
@@ -103,6 +104,7 @@ class Mvcerti extends validaciones {
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
+			'hidden'   => 'true',
 			'align'    => "'center'",
 			'frozen'   => 'true',
 			'width'    => 40,
@@ -149,7 +151,7 @@ class Mvcerti extends validaciones {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
-			'width'         => 190,
+			'width'         => 280,
 			'edittype'      => "'text'",
 		));
 
@@ -158,11 +160,12 @@ class Mvcerti extends validaciones {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'true',
-			'width'         => 250,
+			'width'         => 220,
 			'edittype'      => "'text'",
 			'editoptions'   => '{ size:40, maxlength:32}'
 		));
 
+/*
 		$grid->addField('obra');
 		$grid->label('Obra');
 		$grid->params(array(
@@ -175,7 +178,7 @@ class Mvcerti extends validaciones {
 
 
 		));
-
+*/
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('290');

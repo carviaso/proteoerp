@@ -66,7 +66,7 @@ function arr2link($arr,$utf8c=false){
 				autoOpen:false, modal:false, width:'.$dancho.', height:'.$dalto.',
 				minimize: "#toolbar",
 				open: function(ev, ui){
-					$(\'#d'.$arr['modulo'].'\').html(\'<iframe src="'.base_url().$indi.'" width="100%", height="100%"  seamless></iframe></iframe>\');
+					$(\'#d'.$arr['modulo'].'\').html(\'<iframe src="'.base_url().$indi.'" width="100%", height="100%"  seamless></iframe>\');
 				}
 			})
 			.dialogExtend({
