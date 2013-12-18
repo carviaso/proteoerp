@@ -2912,7 +2912,7 @@ class Sinv extends Controller {
 		$edit->barras = new inputField('C&oacute;digo Barras', 'barras');
 		$edit->barras->size=15;
 		$edit->barras->maxlength=15;
-		$edit->barras->rule = 'trim';
+		$edit->barras->rule = 'trim|unique';
 
 		$edit->tipo = new dropdownField('Tipo', 'tipo');
 		$edit->tipo->style='width:100px;';

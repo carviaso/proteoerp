@@ -320,7 +320,7 @@ class Consultas extends Controller {
 			$wtipo = '';
 		}
 		$cod_bar=$this->db->escape($cod_bar);
-		if(!empty($suple) AND $this->db->table_exists('suple')){
+		if(!empty($suple) && $this->db->table_exists('suple')){
 			$mSQL  ="SELECT codigo FROM suple WHERE suplemen=${cod_bar} LIMIT 1";
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() != 0){
@@ -330,7 +330,7 @@ class Consultas extends Controller {
 			}
 		}
 
-		foreach($busca AS $b){
+		foreach($busca as $b){
 			$mSQL  =$mSQL_p." WHERE ${b}=${cod_bar} ${activo} ${wtipo} LIMIT 1";
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() != 0){
@@ -338,7 +338,7 @@ class Consultas extends Controller {
 			}
 		}
 
-		if ($this->db->table_exists('barraspos')) {
+		if($this->db->table_exists('barraspos')) {
 			$mSQL  ="SELECT codigo FROM barraspos WHERE suplemen=${cod_bar} LIMIT 1";
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() != 0){

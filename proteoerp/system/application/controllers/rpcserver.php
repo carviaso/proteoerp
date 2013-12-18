@@ -114,7 +114,7 @@ class Rpcserver extends Controller {
 							$rrow[$ind]=base64_encode($val);
 						}
 						if($barr_exis){
-							$sql= "SELECT GROUP_CONCAT(suplemen SEPARATOR '|') AS suplemen FROM barraspos WHERE codigo=".$this->db->escape($rrow['codigoa']);
+							$sql= "SELECT GROUP_CONCAT(suplemen SEPARATOR '|') AS suplemen FROM barraspos WHERE suplemen REGEXP '^[0-9]+$' AND codigo=".$this->db->escape($rrow['codigoa']);
 							$suple=$this->datasis->dameval($sql);
 							if(strlen($suple)>0){
 								$rrow['suplemen'] = base64_encode($suple);
