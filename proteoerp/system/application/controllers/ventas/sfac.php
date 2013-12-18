@@ -40,6 +40,7 @@ class Sfac extends Controller {
 		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento', 'label'=>'Reimprimir','estilo'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png',              'alt' => 'Cierre de Caja',       'label'=>'Cierre de Caja'));
 		$grid->wbotonadd(array('id'=>'fmanual'  ,'img'=>'images/mano.png',                'alt' => 'Factura Manual',       'label'=>'Factura Manual'));
+		$grid->wbotonadd(array('id'=>'bdevolu'  ,'img' =>'images/dinero.png',             'alt' => 'Devolver Factura' ,     'label'=>'Devolver'));
 
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
@@ -124,9 +125,9 @@ class Sfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'cobroser', 'img' =>'images/agrega4.png',              'alt' => 'Cobro de Servicio','label'=>'Cobro de Servicio'));
-		$grid->wbotonadd(array('id'=>'imptxt',   'img' =>'assets/default/images/print.png', 'alt' => 'Imprimir Servicio','label'=>'Imprimir Factura'));
-		$grid->wbotonadd(array('id'=>'precierre','img' =>'images/dinero.png',               'alt' => 'Cierre de Caja',   'label'=>'Cierre de Caja'));
+		$grid->wbotonadd(array('id'=>'cobroser' ,'img' =>'images/agrega4.png',              'alt' => 'Cobro de Servicio','label'=>'Cobro de Servicio'));
+		$grid->wbotonadd(array('id'=>'imptxt'   ,'img' =>'assets/default/images/print.png', 'alt' => 'Imprimir Servicio','label'=>'Imprimir Factura'));
+		$grid->wbotonadd(array('id'=>'precierre','img' =>'images/dinero.png',               'alt' => 'Cierre de Caja'   ,'label'=>'Cierre de Caja'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -246,6 +247,31 @@ class Sfac extends Controller {
 		};';
 
 		$bodyscript .= '$(function() { ';
+
+		$bodyscript .= '
+		$("#bdevolu").click( function() {
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				if(ret.tipo_doc!="F"){
+					alert("Debe seleccionar una factura.");
+					return false;
+				}
+
+				$.post("'.site_url($this->url.'dataedit/N/create').'",
+				function(data){
+					$("#fimpser").html("");
+					$("#fedita").dialog({ title:"Agregar Devolucion Fecha '.date('d/m/Y').'" });
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+					$("#factura").val(ret.numero);
+					$("#tipo_doc").val("D");
+					itdevolver(ret.numero);
+				});
+			}
+		});';
+
+
 
 		$bodyscript .= '
 			$("#fmanual").click( function() {
@@ -3079,7 +3105,7 @@ class Sfac extends Controller {
 				$this->devpreca=array();
 				$mSQL="SELECT b.codigoa,b.preca
 				FROM sitems AS b
-				WHERE b.numa=$dbfactura AND b.tipoa='F'
+				WHERE b.numa=${dbfactura} AND b.tipoa='F'
 				GROUP BY b.codigoa,b.preca";
 				$query = $this->db->query($mSQL);
 				foreach ($query->result() as $row){
@@ -4281,6 +4307,10 @@ class Sfac extends Controller {
 
 		if(!in_array('descuento',$campos)){
 			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `descuento` DECIMAL(10,2) NULL DEFAULT '0'");
+		}
+
+		if(!in_array('maestra',$campos)){
+			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `maestra` VARCHAR(8) NULL DEFAULT '' AFTER `descuento`");
 		}
 
 		if(!in_array('id'  ,$campos)){

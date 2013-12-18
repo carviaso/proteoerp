@@ -91,6 +91,7 @@ var sitems_cont=<?php echo $form->max_rel_count['sitems']; ?>;
 var sfpa_cont  =<?php echo $form->max_rel_count['sfpa'];?>;
 
 $(function(){
+	$('#factura').attr('type', 'hidden');
 	var manual = $("#manual").val();
 	if( manual=='S'){
 		$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
@@ -314,6 +315,63 @@ $(function(){
 
 
 });
+
+function itdevolver(numero){
+	truncate();
+	$("#tipo_doc").val('D');
+	$.ajax({
+		url: "<?php echo site_url('ajax/buscasinvdev'); ?>",
+		dataType: 'json',
+		type: 'POST',
+		data: {"q":numero},
+		success: function(data){
+				$.each(data,
+					function(id, val){
+						add_sitems();
+						$('#codigoa_'+id).val(val.codigo);
+						$('#detalle_'+id).val(val.detalle);
+						$('#desca_'+id).val(val.descrip);
+						$('#preca_'+id).val(val.preca);
+						$('#precio1_'+id).val(val.base1);
+						$('#precio2_'+id).val(val.base2);
+						$('#precio3_'+id).val(val.base3);
+						$('#precio4_'+id).val(val.base4);
+						$('#itiva_'+id).val(val.iva);
+						$('#sinvtipo_'+id).val(val.tipo);
+						$('#sinvpeso_'+id).val(val.peso);
+						$('#pond_'+id).val(val.pond);
+						$('#ultimo_'+id).val(val.ultimo);
+						$('#cana_'+id).val(val.cana);
+						post_modbus_sinv(id);
+					}
+				);
+			},
+	});
+
+	$.ajax({
+		url: "<?php echo site_url('ajax/buscasfpadev'); ?>",
+		dataType: 'json',
+		type: 'POST',
+		data: {"q":ui.item.value},
+		success: function(data){
+				$.each(data,
+					function(id, val){
+						add_sfpa();
+						$('#tipo_'+id).val(val.tipo);
+						$('#num_ref_'+id).val(val.num_ref);
+						$('#banco_'+id).val(val.banco);
+						$('#monto_'+id).val(val.monto);
+					}
+				);
+				falta=faltante();
+				if(falta>0){
+					can=add_sfpa();
+					$('#tipo_'+can).val('');
+				}
+			},
+	});
+	setTimeout(function() {  $("#factura").removeAttr("readonly"); }, 1500);
+}
 
 function marcar(obj){
 	var color = $(obj).css("background-color");
@@ -865,6 +923,7 @@ function chreferen(){
 	echo $form->tipo_doc->output;
 	echo $form->cajero->output;
 	echo $form->nombre->output;
+	echo $form->factura->output;
 ?>
 <table style="width:100%;border-collapse:collapse;padding:0px;" >
 	<tr>
@@ -873,7 +932,7 @@ function chreferen(){
 				<tr>
 					<td class="littletableheader" width='20px' style='background:#EFEFEF;'>
 					<?php
-						if($form->_status!='show'){ 
+						if($form->_status!='show'){
 							//<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ? >" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;">< ?php echo image('add1-.png'); ? ></a>
 					?>
 						<a href="#" onClick="scliadd();"><?php echo image('add1-.png'); ?></a>
