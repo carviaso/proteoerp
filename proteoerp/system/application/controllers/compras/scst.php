@@ -4036,7 +4036,9 @@ class Scst extends Controller {
 				$por_rete=$por_rete/100;
 			}
 			if($tipo_doc=='FC'){
-				$do->set('reteiva', round($iva*$por_rete,2));
+				if($gtotal>2140){
+					$do->set('reteiva', round($iva*$por_rete,2));
+				}
 			}
 		}
 		//fin de la retencion
