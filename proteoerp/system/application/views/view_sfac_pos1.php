@@ -17,18 +17,6 @@ $(document).ready(function() {
 	});
 
 });
-
-/*
-$("#persiana").click( function() {
-	$('#efecha').toggle();
-
-	if ( $('#efecha').css('display') == 'none' ){
-		$('#ditems01').css({'height':'280px'});
-	} else {
-		$('#ditems01').css({'height':'233px'});
-	}
-})
-*/
 </script>
 <?php
 
@@ -388,7 +376,6 @@ function aplicadesc(){
 }
 
 function scliadd() {
-
 	$("#scliexp").dialog({
 		autoOpen:false, modal:false, width:500, height:350,
 		open: function(ev, ui){
@@ -547,10 +534,28 @@ function add_sfpa(){
 	return can;
 }
 
-function fpaga(){
+function fpaga( fp ){
 	//Oculta uno y prende el otro
-	$("#formapago").toggle();
-	$("#ditems01").toggle();
+	if ( fp == 'M' ){
+		$("#ditems01").hide();
+		$("#fpefectivo").hide();
+		$("#formapago").toggle();
+	} else if ( fp == 'E' ) {
+		$("#ditems01").hide();
+		$("#formapago").hide();
+		$("#fpefectivo").toggle();
+	} else {
+		$("#formapago").hide();
+		$("#fpefectivo").hide();
+		$("#ditems01").show();
+	}
+}
+
+function fvuelto(){
+	var vuelto;
+	vuelto = roundNumber($('#pagacon').val()-$('#totalg').val(),2);
+	$('#vuelto').html("Cambio: "+vuelto);
+	//alert(vuelto);
 }
 
 function post_precioselec(ind,obj){
@@ -748,6 +753,7 @@ function cdescrip(nind){
 //Agrega el autocomplete
 function autocod(id){
 	var ancho='.ui-autocomplete-input#codigoa_'+id;
+	var ihtml;
 	$('#codigoa_'+id).autocomplete({
 		delay: 600,
 		autoFocus: true,
@@ -789,7 +795,6 @@ function autocod(id){
 		select: function( event, ui ) {
 			$('#codigoa_'+id).attr("readonly", "readonly");
 			if(ui.item.tipo.substr(0,1)=='C'){
-
 				$.ajax({
 					url: "<?php echo site_url('ajax/buscasinvcombo'); ?>",
 					dataType: 'json',
@@ -838,9 +843,23 @@ function autocod(id){
 				$('#cana_'+id).val('1');
 				$('#cana_'+id).focus();
 				$('#cana_'+id).select();
-
 				post_modbus_sinv(Number(id));
+				
 			}
+			
+			ihtml  = '<table style="width:100%;border-collapse:collapse;padding:0px;background:#EDEDFD">';
+			ihtml += '<tr><td align="right">TIPO:</tdt><td><b>'    +ui.item.tipo+   '</b></td></tr>';
+			ihtml += '<tr><td align="right">EXISTEN:</tdt><td><b>' +ui.item.existen+'</b></td></tr>';
+			ihtml += '<tr><td align="right">I.V.A.:</td><td><b>'   +ui.item.iva+    '</b></td></tr>';
+			ihtml += '<tr><td align="right">MARCA:</td><td><b>'    +ui.item.marca+  '</b></td></tr>';
+			ihtml += '<tr><td align="right">PESO:</td><td><b>'     +ui.item.peso+   '</b></td></tr>';
+			ihtml += '<tr><td align="right">UBICA:</td><td><b>'    +ui.item.ubica+  '</b></td></tr>';
+			ihtml += '<tr><td align="right">EMPAQUE:</td><td><b>'  +ui.item.unidad+  '</b></td></tr>';
+			ihtml += '</table>';
+
+
+			$('#informa').html(ihtml);
+			
 			setTimeout(function() {  $('#codigoa_'+id).removeAttr("readonly"); }, 1500);
 		},
 		open: function() { $('#codigoa_'+id).autocomplete("widget").width(420) }
@@ -903,12 +922,21 @@ function sfpatipo(id){
 
 function chreferen(){
 	var fp;
+	var pagac;
+	var total;
 	fp = $('#referen:checked').val();
 	if( fp == 'M' ){
-		fpaga();
-		$('#bpagardiv').show();
+		fpaga('M');
+	} else if ( fp == 'E' ) {
+		pagac = $('#pagacon').val();
+		total = $('#totalg').val();
+		if ( pagac < total ) {
+			$('#pagacon').val(total);
+		}
+		fpaga('E');
+	} else {
+		fpaga(fp);
 	}
-
 }
 </script>
 <?php } ?>
@@ -933,7 +961,6 @@ function chreferen(){
 					<td class="littletableheader" width='20px' style='background:#EFEFEF;'>
 					<?php
 						if($form->_status!='show'){
-							//<a href="<?php echo site_url('ventas/scli/dataeditexpress/create'); ? >" target="_blank" onClick="window.open(this.href, this.target, 'width=300,height=400,screenx='+((screen.availWidth/2)-200)+',screeny='+((screen.availHeight/2)-150)); return false;">< ?php echo image('add1-.png'); ? ></a>
 					?>
 						<a href="#" onClick="scliadd();"><?php echo image('add1-.png'); ?></a>
 					<?php } ?>
@@ -953,12 +980,10 @@ function chreferen(){
 </table>
 
 <div id='efecha' style='display:none;'></div>
-
-
 <table style="width:100%;border-collapse:collapse;padding:0px;">
 	<tr>
 		<td width='595px' align='center'>
-		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:280px;width:590px;'>
+		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:335px;width:590px;'>
 		<table width='100%' border='0' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL__'>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>C&oacute;digo</b></td>
@@ -1066,7 +1091,7 @@ function chreferen(){
 					<table style="width:100%;border-collapse:collapse;padding:0px;border-top:3px solid #0B3861;">
 						<tr>
 							<td style='border-right:1px solid #0B3861;' align='center'><?php echo '<input name="btn_add_sfpa" value="Agregar" onclick="add_sfpa()" class="button" type="button">&nbsp;'; ?><br>
-							<input name="bpagar" value="Cerrar" onclick="fpaga()" class="button" type="button"></td>
+							<input name="bpagar" value="Cerrar" onclick="fpaga('M')" class="button" type="button"></td>
 							<td class="littletableheader" valign='top'><?php echo $form->observa->label; ?>&nbsp;&nbsp;</td>
 							<td class='littletablerow'    valign='top'><?php echo $form->observa->output; ?></td>
 						</tr>
@@ -1075,19 +1100,38 @@ function chreferen(){
 			</tr>
 		</table>
 		</div>
+		<div id='fpefectivo' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:590px;'>
+		<table style="border-collapse:collapse;padding:0px;border: 1px solid #0B3861;">
+			<tr><td class="littletableheaderdet" colspan='3' style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;'>PAGO EN EFECTIVO</td></tr>
+			<tr>
+				<td class="littletableheader" valign='top'><?php echo $form->pagacon->label; ?>&nbsp;</td>
+				<td class='littletablerow'    valign='top'><?php echo $form->pagacon->output; ?></td>
+				<td class='littletablerow'    valign='right'><div id='vuelto' style='font-size:16px;font-weight:bold;'>0.00</div></td>
+			</tr>
+			<tr>
+				<td class="littletableheader" valign='top'><?php echo $form->observa->label; ?>&nbsp;&nbsp;</td>
+				<td class='littletablerow'    colspan='2'><?php echo $form->observa->output; ?></td>
+			</tr>
+			<tr>
+				<td align='center'><?php echo '<input name="btn_add_sfpa" value="Agregar" onclick="add_sfpa()" class="button" type="button">&nbsp;'; ?></td>
+				<td>&nbsp;</td>
+				<td align='right'><input name="bpagar" value="Cerrar" onclick="fpaga('E')" class="button" type="button"></td>
+			</tr>
+		</table>
+		</div>
 		</td>
 		<td valign='top'>
 			<table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
 			<tr>
-				<td style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>FORMA DE PAGO</td>
+				<td colspan='2' style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>FORMA DE PAGO</td>
 			</tr><tr>
-				<td><input name="referen" value="P" id="referen" type="radio" onchange='chreferen()' checked="checked">Dejar Pendiente&nbsp;</td>
-			</tr><tr>
+				<td><input name="referen" value="P" id="referen" type="radio" onchange='chreferen()' checked="checked">Pendiente&nbsp;</td>
+			<!--/tr><tr-->
 				<td><input name="referen" value="E" id="referen" type="radio" onchange='chreferen()'>Efectivo&nbsp;</td>
 			</tr><tr>
-				<td><input name="referen" value="C" id="referen" type="radio" onchange='chreferen()'>Credito&nbsp;</td>
-			</tr><tr>
 				<td><input name="referen" value="M" id="referen" type="radio" onchange='chreferen()'>Multiple/Otros&nbsp;</td>
+			<!--/tr><tr-->
+				<td><input name="referen" value="C" id="referen" type="radio" onchange='chreferen()'>Credito&nbsp;</td>
 			</tr>
 		</table>
 		<br>
@@ -1100,12 +1144,16 @@ function chreferen(){
 				<td class="littletablerow"   ><?php echo $form->fecha->output;   ?></td>
 			</tr>
 		</table>
+		<div id='informa'></div>
 		</td>
 	</tr><tr>
 		<td>
 		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;width:590px;'>
 		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
+				<td class="littletablerow"    align='left'   style='background:#CFCFCF;width:30px;'><?php echo $form->descuento->label;  ?></td>
+				<td class="littletablerow"    align='center' style='background:#CFCFCF;'><b id='descuentomon_val'></b><?php echo $form->descuento->output; ?></td>
+
 				<td class="littletableheader" align='right'><?php echo $form->totals->label; ?></td>
 				<td class="littletablerow"    align='right' style='font-size:18px;'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
 				<td class="littletableheader" align='right'><?php echo $form->ivat->label;    ?></td>
@@ -1118,8 +1166,8 @@ function chreferen(){
 		</td>
 		<td>
 		<table style="width:100%;border-collapse:collapse;padding:0px;">
-			<td class="littletableheader" align='right' width='70px'><?php echo $form->descuento->label;  ?></td>
-			<td class="littletablerow"    align='right' ><b id='descuentomon_val'></b><?php echo $form->descuento->output; ?></td>
+			<td class="littletableheader" align='right' width='70px'></td>
+			<td class="littletablerow"    align='right' ><b></b></td>
 		</table>
 		</td>
 	</tr>

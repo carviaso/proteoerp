@@ -509,7 +509,7 @@ class Ajax extends Controller {
 				$almadb  = $this->db->escape($alma);
 				if($this->db->table_exists('sinvpromo')){
 					$mSQL="
-					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
+					SELECT DISTINCT TRIM(a.descrip) descrip, TRIM(a.codigo) codigo, a.marca, a.ubica, a.unidad,
 					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo,c.margen AS dgrupo,d.margen AS promo, COALESCE(e.existen,0) existen
 					FROM sinv AS a
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
@@ -520,7 +520,7 @@ class Ajax extends Controller {
 					ORDER BY a.descrip LIMIT ".$this->autolimit;
 				}else{
 					$mSQL="
-					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
+					SELECT DISTINCT TRIM(a.descrip) descrip, TRIM(a.codigo) codigo, a.marca, a.ubica, a.unidad,
 					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo, c.margen AS dgrupo,0 AS promo, COALESCE(e.existen,0) existen
 					FROM sinv AS a
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
@@ -567,6 +567,9 @@ class Ajax extends Controller {
 					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
 					$retArray['iva']     = $row['iva'];
 					$retArray['existen'] = $row['existen'];
+					$retArray['marca']   = $row['marca'];
+					$retArray['ubica']   = $row['ubica'];
+					$retArray['unidad']  = $row['unidad'];
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);

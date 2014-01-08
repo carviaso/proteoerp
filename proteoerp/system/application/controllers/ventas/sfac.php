@@ -16,7 +16,7 @@ class Sfac extends Controller {
 
 	function index(){
 		$this->instalar();
-		$this->datasis->modintramenu( 1000, 650, 'ventas/sfac' );
+		$this->datasis->modintramenu( 900, 650, 'ventas/sfac' );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -413,7 +413,7 @@ class Sfac extends Controller {
 		//Agregar Factura
 		$bodyscript .= '
 			$("#fedita").dialog({
-				autoOpen: false, height: 450, width: 800, modal: true,
+				autoOpen: false, height: 480, width: 850, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;
@@ -426,32 +426,48 @@ class Sfac extends Controller {
 							url: murl,
 							data: $("#df1").serialize(),
 							success: function(r,s,x){
-								try{
+								try {
 									var json = JSON.parse(r);
 									if(json.status == "A" ) {
 										if ( json.manual == "N" ) {
 											$( "#fedita" ).dialog( "close" );
 											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											setTimeout(\'window.location="'.base_url().'formatos/descargar/FACTURA/\'+json.pk.id+\'"\');
+											$.prompt("<h1>Registro Guardado</h1>Nro de Control:<input id=\'nfiscal\' name=\'nfiscal\'><br><h2>Cambio: "+json.vuelto+"</h2>",{
+												buttons: { Guardar: true, Cancelar: false },
+												submit: function(e,v,m,f){
+													if (v) {
+														if( f.nfiscal == null || nfiscal == "" ){
+															alert("Debe colocal un Nro de Control");
+														} else {
+															yurl = encodeURIComponent(f.nfiscal);
+															$.ajax({
+																url: \''.site_url('ventas/sfac/guardafiscal').'\',
+																global: false, type: "POST",
+																data: ({ nfiscal : encodeURIComponent(f.nfiscal), factura : json.pk.id }),
+																dataType: "text", async: false,
+																success: function(sino) { alert(sino);},
+																error: function(h,t,e) { alert("Error.. ",e) }
+															});
+														}
+													}
+												}
+											});
 											return true;
 										}else{
 											//$( "#fedita" ).dialog( "close" );
-
 											$.post("'.site_url($this->url.'dataedit/S/create').'",
 											function(data){
 												$("#fedita").html(data);
 											})
-
-											//jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 											//alert("Factura guardada");
 											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 											return true;
 										}
-
 									} else {
 										apprise(json.mensaje);
 									}
-								}catch(e){
+								} catch(e) {
 									$("#fedita").html(r);
 								}
 							}
@@ -2486,12 +2502,12 @@ class Sfac extends Controller {
 		$edit->set_rel_title('sitems','Producto <#o#>');
 		$edit->set_rel_title('sfpa'  ,'Forma de pago <#o#>');
 
-		$edit->pre_process( 'insert','_pre_insert' );
-		$edit->pre_process( 'update','_pre_update' );
-		$edit->pre_process( 'delete','_pre_delete' );
-		$edit->post_process('insert','_post_insert');
-		$edit->post_process('update','_post_update');
-		$edit->post_process('delete','_post_delete');
+		$edit->pre_process( 'insert', '_pre_insert' );
+		$edit->pre_process( 'update', '_pre_update' );
+		$edit->pre_process( 'delete', '_pre_delete' );
+		$edit->post_process('insert', '_post_insert');
+		$edit->post_process('update', '_post_update');
+		$edit->post_process('delete', '_post_delete');
 
 		$edit->sclitipo = new hiddenField('', 'sclitipo');
 		$edit->sclitipo->db_name     = 'sclitipo';
@@ -2594,7 +2610,7 @@ class Sfac extends Controller {
 		$edit->cajero->style='width:150px;';
 		$edit->cajero->insertValue=$this->secu->getcajero();
 */
-		$edit->descuento = new hiddenField('Descuento','descuento');
+		$edit->descuento = new hiddenField('Desc.','descuento');
 		$edit->descuento->insertValue = '0';
 
 		//***********************************
@@ -2747,6 +2763,12 @@ class Sfac extends Controller {
 		$edit->observa->cols = 50;
 		$edit->observa->rows = 3;
 
+		$edit->pagacon = new inputField('Paga con', 'pagacon');
+		$edit->pagacon->css_class   = 'inputnum';
+		$edit->pagacon->size        = 10;
+		$edit->pagacon->insertValue = '0.00';
+		$edit->pagacon->onkeyup    = 'fvuelto()';
+
 		$edit->nfiscal   = new inputField('No.Fiscal', 'nfiscal');
 		$edit->observ1   = new inputField('Observaci&oacute;n', 'observ1');
 		$edit->zona      = new inputField('Zona', 'zona');
@@ -2766,7 +2788,7 @@ class Sfac extends Controller {
 
 		$edit->referen = new radiogroupField('', 'referen', array('P'=>'Dejar Pendiente','E'=>'Efectivo','C'=>'Credito','M'=>'Multiple/Otros'));
 		$edit->referen->insertValue = 'P';
-		$edit->referen->onchange='chreferen()';
+		$edit->referen->onchange    = 'chreferen()';
 
 		if($manual=='S'){
 			$edit->referen->when=array('');
@@ -2781,6 +2803,7 @@ class Sfac extends Controller {
 		$edit->build();
 
 		if($edit->on_success()){
+
 			if(isset($this->_sfacmaestra)){
 				$numero = $edit->_dataobject->get('numero');
 				if($numero==$this->_sfacmaestra){
@@ -2789,8 +2812,8 @@ class Sfac extends Controller {
 						'mensaje'=>'Registro guardado',
 						'pk'     =>$edit->_dataobject->pk,
 						'manual' =>$manual,
+						'vuelto' =>$edit->pagacon->newValue - $edit->totalg->newValue
 					);
-
 					echo json_encode($rt);
 				}
 			}else{
@@ -2799,6 +2822,7 @@ class Sfac extends Controller {
 					'mensaje'=>'Registro guardado',
 					'pk'     =>$edit->_dataobject->pk,
 					'manual' =>$manual,
+					'vuelto' =>$edit->pagacon->newValue - $edit->totalg->newValue
 				);
 				echo json_encode($rt);
 			}
@@ -2811,7 +2835,8 @@ class Sfac extends Controller {
 				$rt=array(
 					'status' =>'B',
 					'mensaje'=> utf8_encode(html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string))),
-					'pk'     =>''
+					'pk'     =>'',
+					'vuelto' => 0.00
 				);
 				echo json_encode($rt);
 			}
@@ -2831,21 +2856,15 @@ class Sfac extends Controller {
 			$edit->back_url = site_url($this->back_url);
 		else
 			$edit->back_url = site_url('ajax/reccierraventana');
-			//$edit->back_url = site_url($this->url.'dataedit/show/'.$uid);
 
 		$edit->back_save   = true;
 		$edit->back_delete = true;
 		$edit->back_cancel = true;
 		$edit->back_cancel_save   = true;
 		$edit->back_cancel_delete = true;
-		//$edit->on_save_redirect   = false;
 
-		//$edit->post_process('update','_post_print_update');
 		$edit->pre_process('insert' ,'_pre_print_insert');
-		//$edit->pre_process('update' ,'_pre_print_update');
 		$edit->pre_process('delete' ,'_pre_print_delete');
-
-		//$edit->container = new containerField('impresion','La descarga se realizara en 5 segundos, en caso de no hacerlo haga click '.anchor('formatos/descargar/FACTURA'.$urlid,'aqui'));
 
 		$edit->nfiscal = new inputField('Control F&iacute;scal','nfiscal');
 		$edit->nfiscal->rule='max_length[12]|required';
@@ -2915,7 +2934,22 @@ class Sfac extends Controller {
 		}
 	}
 
-	function dataprint($st,$uid){
+
+	//******************************************************************
+	// Guarda el Nro Fiscal 
+	//
+	function guardafiscal() {
+		$factura = $this->input->post('factura');
+		$nfiscal = $this->input->post('nfiscal');
+		$this->db->where('id',$factura);
+		$this->db->update('sfac',array('nfiscal'=>$nfiscal));
+		echo 'Nro fiscal Guardado';
+	}
+
+	//******************************************************************
+	//  Reimprimir Factura y cambia Nro Fiscal
+	//
+	function dataprint( $st, $uid ){
 		$referen = $this->datasis->dameval('SELECT referen FROM sfac WHERE id='.$this->db->escape($uid));
 		if($referen=='P'){
 			redirect('formatos/descargar/FACTURA/'.$uid);
@@ -2924,11 +2958,12 @@ class Sfac extends Controller {
 		$this->rapyd->load('dataedit');
 
 		$edit = new DataEdit('Imprimir factura', 'sfac');
-		//$id=$edit->get_from_dataobjetct('id');
 
 		$sfacforma=$this->datasis->traevalor('FORMATOSFAC','Especifica el metodo a ejecutar para descarga de formato de factura en Proteo Ej. descargartxt...');
+
 		if(empty($sfacforma)) $sfacforma='descargar';
-		$url=site_url('formatos/'.$sfacforma.'/FACTURA/'.$uid);
+			$url=site_url('formatos/'.$sfacforma.'/FACTURA/'.$uid);
+
 		if(isset($this->back_url))
 			$edit->back_url = site_url($this->back_url);
 		else
@@ -2939,7 +2974,6 @@ class Sfac extends Controller {
 		$edit->back_cancel = true;
 		$edit->back_cancel_save   = true;
 		$edit->back_cancel_delete = true;
-		//$edit->on_save_redirect   = false;
 
 		$edit->post_process('update','_post_print_update');
 		$edit->pre_process( 'insert','_pre_print_insert');
@@ -3079,7 +3113,9 @@ class Sfac extends Controller {
 
 		$data['content'] = $edit->output;
 		$data['head']    = $this->rapyd->get_head();
-		$data['script']  = script('jquery.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js');
+		$data['script']  = script('jquery.js');
+		$data['script'] .= script('plugins/jquery.numeric.pack.js');
+		$data['script'] .= script('plugins/jquery.floatnumber.js');
 		$data['script'] .= $script;
 		$data['title']   = heading($this->tits);
 		$this->load->view('view_ventanas', $data);
@@ -4302,11 +4338,15 @@ class Sfac extends Controller {
 		}
 
 		if(!in_array('manual',$campos)){
-			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `manual` CHAR(50) NULL DEFAULT 'N'");
+			$this->db->query("ALTER TABLE sfac ADD COLUMN manual CHAR(50) NULL DEFAULT 'N'");
 		}
 
 		if(!in_array('descuento',$campos)){
-			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `descuento` DECIMAL(10,2) NULL DEFAULT '0'");
+			$this->db->query("ALTER TABLE sfac ADD COLUMN descuento DECIMAL(10,2) NULL DEFAULT '0'");
+		}
+
+		if(!in_array('pagacon',$campos)){
+			$this->db->query("ALTER TABLE sfac ADD COLUMN pagacon DECIMAL(10,2) NULL DEFAULT '0'");
 		}
 
 		if(!in_array('maestra',$campos)){
