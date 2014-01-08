@@ -3632,7 +3632,7 @@ class Sinv extends Controller {
 		if($ccpre=='N'){
 			$sucursal    = $this->datasis->traevalor('SUCURSAL');
 			$dbsucursal  = $this->db->escape($sucursal);
-			$sinvcontrol = $this->datasis->dameval("SELECT precio FROM sinvcontrol WHERE sucursal=${dbsucu} AND codigo=${dbcodigo}");
+			$sinvcontrol = $this->datasis->dameval("SELECT precio FROM sinvcontrol WHERE sucursal=${dbsucursal} AND codigo=${dbcodigo}");
 			if($sinvcontrol!='S'){
 				$rowprec = $this->datasis->damerow('SELECT precio1,precio2,precio3,precio4 FROM sinv WHERE codigo='.$dbcodigo);
 				if(!empty($rowprec)){
