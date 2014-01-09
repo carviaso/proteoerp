@@ -1040,7 +1040,11 @@ function bobo(url){'."
 		$usr = $this->db->username;
 		$file= tempnam('/tmp',$db.'.sql');
 
-		$cmd="mysqldump -u $usr -p $pwd -h $host --opt --routines $db > $file";
+		if(!empty($pwd)){
+			$pwd = "-p ${pwd}";
+		}
+
+		$cmd="mysqldump -u ${usr} ${pwd} -h ${host} --opt --routines ${db} > ${file}";
 		$sal=exec($cmd);
 
 		$this->zip->read_file($file);

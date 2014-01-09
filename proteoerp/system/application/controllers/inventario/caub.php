@@ -167,6 +167,17 @@ class Caub extends validaciones {
 			)
 		);
 
+		$grid->addField('warehouse');
+		$grid->label('Warehouse');
+		$grid->params(array(
+				'width'       => 200,
+				'editable'    => 'true',
+				'edittype'    => "'text'",
+				'search'      => 'false',
+				'editoptions' => '{ size:30, maxlength: 50 }'
+			)
+		);
+
 		$grid->addField('cu_cost');
 		$grid->label('Cta.Costo');
 		$grid->params(array(
@@ -348,7 +359,9 @@ class Caub extends validaciones {
 		$this->db->simple_query('UPDATE caub SET tipo="S" WHERE tipo="" OR tipo IS NULL ');
 		$this->db->simple_query('UPDATE caub SET tipo="N" WHERE gasto="S" OR invfis = "S" ');
 
-
+		if(!in_array('warehouse',$campos)){
+			$this->db->simple_query('ALTER TABLE `caub` ADD COLUMN `warehouse` VARCHAR(100) NULL DEFAULT NULL COMMENT "Codigo de warehouse"');
+		}
 
 		$c=$this->datasis->dameval('SELECT COUNT(*) FROM caub WHERE ubica="AJUS"');
 		if(!($c>0)) $this->db->simple_query('INSERT IGNORE INTO caub (ubica,ubides,gasto,invfis) VALUES ("AJUS","AJUSTES","S","N")');
