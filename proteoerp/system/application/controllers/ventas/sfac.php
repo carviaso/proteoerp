@@ -257,7 +257,6 @@ class Sfac extends Controller {
 					alert("Debe seleccionar una factura.");
 					return false;
 				}
-
 				$.post("'.site_url($this->url.'dataedit/N/create').'",
 				function(data){
 					$("#fimpser").html("");

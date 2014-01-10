@@ -15,7 +15,6 @@ $(document).ready(function() {
 	}).mouseout(function(){
 		$(this).next().fadeOut("fast");
 	});
-
 });
 </script>
 <?php
