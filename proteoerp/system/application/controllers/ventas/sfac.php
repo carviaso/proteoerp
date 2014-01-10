@@ -37,10 +37,10 @@ class Sfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento', 'label'=>'Reimprimir','estilo'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png',              'alt' => 'Cierre de Caja',       'label'=>'Cierre de Caja'));
-		$grid->wbotonadd(array('id'=>'fmanual'  ,'img'=>'images/mano.png',                'alt' => 'Factura Manual',       'label'=>'Factura Manual'));
-		$grid->wbotonadd(array('id'=>'bdevolu'  ,'img' =>'images/dinero.png',             'alt' => 'Devolver Factura' ,     'label'=>'Devolver'));
+		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento','tema'=>'anexos', 'label'=>'Reimprimir'));
+		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png',              'alt' => 'Cierre de Caja',      'tema'=>'anexos', 'label'=>'Cierre de Caja'));
+		$grid->wbotonadd(array('id'=>'fmanual'  ,'img'=>'images/mano.png',                'alt' => 'Factura Manual',      'tema'=>'anexos', 'label'=>'Factura Manual'));
+		$grid->wbotonadd(array('id'=>'bdevolu'  ,'img' =>'images/dinero.png',             'alt' => 'Devolver Factura',    'tema'=>'anexos', 'label'=>'Devolver'));
 
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
@@ -230,7 +230,7 @@ class Sfac extends Controller {
 		function sfacdel() {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				if(confirm(" Seguro desea anular el registro?")){
+				if(confirm(" Seguro desea anular la Factura o Devolucion?")){
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
 					mId = id;
 					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
@@ -2610,6 +2610,7 @@ class Sfac extends Controller {
 		$edit->cajero->style='width:150px;';
 		$edit->cajero->insertValue=$this->secu->getcajero();
 */
+
 		$edit->descuento = new hiddenField('Desc.','descuento');
 		$edit->descuento->insertValue = '0';
 

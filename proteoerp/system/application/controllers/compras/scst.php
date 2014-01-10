@@ -68,7 +68,7 @@ class Scst extends Controller {
 		if($this->datasis->traevalor('MOTOS')=='S')
 			$grid->wbotonadd(array('id'=>'vehiculo', 'img'=>'images/carro.png',  'alt' => 'Seriales Vehiculares',   'label'=>'Seriales Vehiculares'));
 
-		$grid->wbotonadd(array('id'=>'actualizar','img'=>'images/arrow_up.png' ,'alt' => 'Actualizar','label'=>'Actualizar'));
+		$grid->wbotonadd(array('id'=>'actualizar','img'=>'images/arrow_up.png' ,'alt'   => 'Actualizar','label'=>'Actualizar'));
 		$grid->wbotonadd(array('id'=>'reversar',  'img'=>'images/arrow_down.png' ,'alt' => 'Reversar',  'label'=>'Reversar'));
 
 		$WestPanel = $grid->deploywestp();

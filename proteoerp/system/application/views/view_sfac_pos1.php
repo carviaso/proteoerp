@@ -56,8 +56,6 @@ $sfpa_scampos .='<td class="littletablerow" align="right">'.$sfpa_campos['monto'
 $sfpa_scampos .='<td class="littletablerow"><a href=# onclick="del_sfpa(<#i#>);return false;">'.img('images/delete.jpg').'</a></td></tr>';
 $sfpa_campos=$form->js_escape($sfpa_scampos);
 
-if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
-
 echo $form_begin;
 if($form->_status!='show'){
 
@@ -300,6 +298,18 @@ $(function(){
 
 	chreferen();
 	$("#scliexp").dialog({ autoOpen: false, height: 420, width: 400, modal: true });
+
+<?php 
+	if (isset($form->error_string)) { 
+		if ( !empty($form->error_string) ) {
+			$mensaje = preg_replace("/\r|\n/",'',$form->error_string);
+?>
+			var mensaje = "<?php echo "<h2 style='color:red;'>Advertencias</h2>".$mensaje; ?>"; 
+			$.prompt(mensaje);
+<?php
+		}
+	}
+?>
 
 
 });
@@ -555,7 +565,6 @@ function fvuelto(){
 	var vuelto;
 	vuelto = roundNumber($('#pagacon').val()-$('#totalg').val(),2);
 	$('#vuelto').html("Cambio: "+vuelto);
-	//alert(vuelto);
 }
 
 function post_precioselec(ind,obj){
@@ -983,7 +992,7 @@ function chreferen(){
 <table style="width:100%;border-collapse:collapse;padding:0px;">
 	<tr>
 		<td width='595px' align='center'>
-		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:335px;width:590px;'>
+		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:335px;width:600px;'>
 		<table width='100%' border='0' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL__'>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>C&oacute;digo</b></td>
@@ -1100,7 +1109,7 @@ function chreferen(){
 			</tr>
 		</table>
 		</div>
-		<div id='fpefectivo' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:590px;'>
+		<div id='fpefectivo' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:600px;'>
 		<table style="border-collapse:collapse;padding:0px;border: 1px solid #0B3861;">
 			<tr><td class="littletableheaderdet" colspan='3' style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;'>PAGO EN EFECTIVO</td></tr>
 			<tr>
