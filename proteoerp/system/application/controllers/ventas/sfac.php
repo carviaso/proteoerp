@@ -55,8 +55,6 @@ class Sfac extends Controller {
 				</div>
 			</td></tr>";
 			$grid->setWpAdicional($WpAdic);
-			//$grid->wbotonadd(array('id'=>'bcierrex','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre X','label'=>'Cierre X'));
-			//$grid->wbotonadd(array('id'=>'bcierrez','img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Cierre Z','label'=>'Cierre Z'));
 		}
 
 

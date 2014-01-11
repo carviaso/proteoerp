@@ -1460,7 +1460,7 @@ class Datasis {
 		return utf8_encode($campos);
 	}
 
-	//**************************************************
+	//******************************************************************
 	// Modifica Intramenu
 	//
 	function modintramenu( $ancho, $alto, $ejecutar, $modulo = '', $nombre = '' ){
@@ -1478,7 +1478,7 @@ class Datasis {
 	}
 
 
-	//**************************************************
+	//******************************************************************
 	// Inserta Intramenu
 	//
 	// creaintramenu( $data = array('modulo'=>'148','titulo'=>'Punto de Ventas','mensaje'=>'Punto de Ventas','panel'=>'TRANSACCIONES','ejecutar'=>'ventas/pos','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>800,'alto'=>600)
@@ -1491,7 +1491,7 @@ class Datasis {
 	}
 
 
-	//**************************************************
+	//******************************************************************
 	// Lee Intramenu
 	//
 	function getintramenu( $ejecutar ){
@@ -1507,14 +1507,14 @@ class Datasis {
 
 
 
-	//**************************************************
+	//******************************************************************
 	// Pop up Ventana de javascript
 	//
 	function jwinopen($url, $ancho=800, $alto=600){
 		return  'window.open(\''.$url.', \'_blank\', \'width='.$ancho.',height='.$alto.',scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-'.($ancho/2).'), screeny=((screen.availWidth/2)-'.($alto/2).')\')';
 	}
 
-	//**************************************************
+	//******************************************************************
 	// Modifica Intramenu
 	//
 	function sinvrecalcular( $mTIPO = 'P', $mcodigo='' ){
@@ -1765,5 +1765,6 @@ class Datasis {
 		$valor = $this->dameval("SELECT valor FROM utributa ORDER BY fecha DESC LIMIT 1");
 		return $valor;
 	}
+
 
 }

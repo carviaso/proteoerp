@@ -2388,14 +2388,6 @@ class Ajax extends Controller {
 	//  CONSULTA LA CEDULA O RIF EN INTERNET
 	//
 	function traerif(){
-		//$t=array(
-		//	'error' =>0,
-		//	'msj'   =>'',
-		//	'nombre'=>''
-		//);
-		//echo json_encode($t);
-
-
 		$rifci = $this->input->post('rifci');
 		$t=array(
 			'error' =>1,
