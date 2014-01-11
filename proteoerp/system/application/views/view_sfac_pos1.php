@@ -223,6 +223,7 @@ $(function(){
 			$('#direc').val(ui.item.direc);
 			$('#direc_val').text(ui.item.direc);
 
+
 			$('#descuento').val('0');
 
 			truncate();
@@ -298,12 +299,12 @@ $(function(){
 	chreferen();
 	$("#scliexp").dialog({ autoOpen: false, height: 420, width: 400, modal: true });
 
-<?php 
-	if (isset($form->error_string)) { 
+<?php
+	if (isset($form->error_string)) {
 		if ( !empty($form->error_string) ) {
 			$mensaje = preg_replace("/\r|\n/",'',$form->error_string);
 ?>
-			var mensaje = "<?php echo "<h2 style='color:red;'>Advertencias</h2>".$mensaje; ?>"; 
+			var mensaje = "<?php echo "<h2 style='color:red;'>Advertencias</h2>".$mensaje; ?>";
 			$.prompt(mensaje);
 <?php
 		}
@@ -316,6 +317,40 @@ $(function(){
 function itdevolver(numero){
 	truncate();
 	$("#tipo_doc").val('D');
+
+	$('input[name="referen"]:radio').each(function(){
+		if($(this).val() == 'M'){
+			$(this).attr('checked','checked');
+		}else{
+			$(this).removeAttr('checked');
+		}
+	});
+
+	$.ajax({
+		url: "<?php echo site_url('ajax/buscasfacdev'); ?>",
+		dataType: 'json',
+		type: 'POST',
+		data: {"q":numero},
+		success: function(data){
+			val=data[0];
+			$('#factura').val(val.value);
+
+			$('#nombre').val(val.nombre);
+			$('#nombre_val').text(val.nombre);
+
+			$('#rifci').val(val.rifci);
+			$('#rifci_val').text(val.rifci);
+
+			$('#cod_cli').val(val.cod_cli);
+			$('#sclitipo').val(val.tipo);
+
+			$('#direc').val(val.direc);
+			$('#direc_val').text(val.direc);
+
+			$('#descuento').val('0');
+		},
+	});
+
 	$.ajax({
 		url: "<?php echo site_url('ajax/buscasinvdev'); ?>",
 		dataType: 'json',
@@ -349,7 +384,7 @@ function itdevolver(numero){
 		url: "<?php echo site_url('ajax/buscasfpadev'); ?>",
 		dataType: 'json',
 		type: 'POST',
-		data: {"q":ui.item.value},
+		data: {"q":numero},
 		success: function(data){
 				$.each(data,
 					function(id, val){
@@ -852,9 +887,9 @@ function autocod(id){
 				$('#cana_'+id).focus();
 				$('#cana_'+id).select();
 				post_modbus_sinv(Number(id));
-				
+
 			}
-			
+
 			ihtml  = '<table style="width:100%;border-collapse:collapse;padding:0px;background:#EDEDFD">';
 			ihtml += '<tr><td align="right">TIPO:</tdt><td><b>'    +ui.item.tipo+   '</b></td></tr>';
 			ihtml += '<tr><td align="right">EXISTEN:</tdt><td><b>' +ui.item.existen+'</b></td></tr>';
@@ -867,7 +902,7 @@ function autocod(id){
 
 
 			$('#informa').html(ihtml);
-			
+
 			setTimeout(function() {  $('#codigoa_'+id).removeAttr("readonly"); }, 1500);
 		},
 		open: function() { $('#codigoa_'+id).autocomplete("widget").width(420) }
@@ -1133,13 +1168,13 @@ function chreferen(){
 			<tr>
 				<td colspan='2' style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>FORMA DE PAGO</td>
 			</tr><tr>
-				<td><input name="referen" value="P" id="referen" type="radio" onchange='chreferen()' checked="checked">Pendiente&nbsp;</td>
+				<td><input name="referen" value="P" type="radio" onchange='chreferen()' checked="checked">Pendiente&nbsp;</td>
 			<!--/tr><tr-->
-				<td><input name="referen" value="E" id="referen" type="radio" onchange='chreferen()'>Efectivo&nbsp;</td>
+				<td><input name="referen" value="E" type="radio" onchange='chreferen()'>Efectivo&nbsp;</td>
 			</tr><tr>
-				<td><input name="referen" value="M" id="referen" type="radio" onchange='chreferen()'>Multiple/Otros&nbsp;</td>
+				<td><input name="referen" value="M" type="radio" onchange='chreferen()'>Multiple/Otros&nbsp;</td>
 			<!--/tr><tr-->
-				<td><input name="referen" value="C" id="referen" type="radio" onchange='chreferen()'>Credito&nbsp;</td>
+				<td><input name="referen" value="C" type="radio" onchange='chreferen()'>Credito&nbsp;</td>
 			</tr>
 		</table>
 		<br>
