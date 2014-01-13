@@ -1889,6 +1889,7 @@ class Scst extends Controller {
 
 		$do = new DataObject('scst');
 		$do->rel_one_to_many('itscst', 'itscst', 'control');
+		$do->rel_one_to_many('gereten','gereten',array('id'=>'idd'));
 		$do->pointer('sprv' ,'sprv.proveed=scst.proveed','sprv.nombre AS sprvnombre,sprv.reteiva AS sprvreteiva','left');
 		$do->rel_pointer('itscst','sinv','itscst.codigo=sinv.codigo','sinv.descrip AS sinvdescrip, sinv.base1 AS sinvprecio1, sinv.base2 AS sinvprecio2, sinv.base3 AS sinvprecio3, sinv.base4 AS sinvprecio4, sinv.iva AS sinviva, sinv.peso AS sinvpeso,sinv.tipo AS sinvtipo');
 
@@ -2113,6 +2114,58 @@ class Scst extends Controller {
 		//fin de campos para detalle
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
+
+
+		//*****************************
+		//Campos para el detalle reten
+		//****************************
+		$edit->itorigen = new autoUpdateField('origen','SCST','SCST');
+		$edit->itorigen->rel_id ='gereten';
+
+		$edit->codigorete = new dropdownField('','codigorete_<#i#>');
+		$edit->codigorete->option('','Seleccionar');
+		$edit->codigorete->options('SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",codigo,activida)) AS activida FROM rete ORDER BY codigo');
+		$edit->codigorete->db_name='codigorete';
+		$edit->codigorete->rule   ='max_length[4]';
+		$edit->codigorete->style  ='width: 350px';
+		$edit->codigorete->rel_id ='gereten';
+		$edit->codigorete->onchange='post_codigoreteselec(<#i#>,this.value)';
+
+		$edit->base = new inputField('base','base_<#i#>');
+		$edit->base->db_name='base';
+		$edit->base->rule='max_length[10]|numeric|positive';
+		$edit->base->css_class='inputnum';
+		$edit->base->size =12;
+		$edit->base->autocomplete=false;
+		$edit->base->rel_id    ='gereten';
+		$edit->base->maxlength =10;
+		$edit->base->onkeyup   ='importerete(<#i#>)';
+		$edit->base->showformat ='decimal';
+
+		$edit->porcen = new inputField('porcen','porcen_<#i#>');
+		$edit->porcen->db_name='porcen';
+		$edit->porcen->rule='max_length[5]|numeric|positive';
+		$edit->porcen->css_class='inputnum';
+		$edit->porcen->size =7;
+		$edit->porcen->rel_id    ='gereten';
+		$edit->porcen->readonly  = true;
+		$edit->porcen->maxlength =5;
+		$edit->porcen->showformat ='decimal';
+		$edit->porcen->type='inputhidden';
+
+		$edit->monto = new inputField('monto','monto_<#i#>');
+		$edit->monto->db_name='monto';
+		$edit->monto->rule='max_length[10]|numeric|positive';
+		$edit->monto->css_class='inputnum';
+		$edit->monto->rel_id    ='gereten';
+		$edit->monto->size =12;
+		$edit->monto->readonly  = true;
+		$edit->monto->maxlength =8;
+		$edit->monto->showformat ='decimal';
+		$edit->monto->type='inputhidden';
+		//*****************************
+		//Fin de campos para detalle
+		//*****************************
 
 		$recep  = strtotime($edit->get_from_dataobjetct('recep'));
 		$fecha  = strtotime($edit->get_from_dataobjetct('fecha'));
@@ -3144,7 +3197,7 @@ class Scst extends Controller {
 			//Fin de la validacion vehicular
 
 			$SQL='SELECT tipo_doc,transac,depo,proveed,fecha,vence, nombre,tipo_doc,nfiscal,fafecta,reteiva,
-			cexento,cgenera,civagen,creduci,civared,cadicio,civaadi,cstotal,ctotal,cimpuesto,numero,fafecta
+			cexento,cgenera,civagen,creduci,civared,cadicio,civaadi,cstotal,ctotal,cimpuesto,numero,fafecta,reten
 			FROM scst WHERE control=?';
 			$query=$this->db->query($SQL,array($control));
 
@@ -3377,6 +3430,101 @@ class Scst extends Controller {
 						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 					}//Fin de la retencion
 
+					//Inicio de la retencion ISLR
+					$reten=floatval($row['reten']);
+					if($reten>0){
+						//Crea la nota de credito
+						$mnumnc = $this->datasis->fprox_numero('num_nc');
+						$sprm=array();
+						$sprm['cod_prv']    = $proveed;
+						$sprm['nombre']     = $row['nombre'];
+						$sprm['tipo_doc']   = 'NC';
+						$sprm['numero']     = $mnumnc;
+						$sprm['fecha']      = $actuali;
+						$sprm['monto']      = $reten;
+						$sprm['impuesto']   = 0;
+						$sprm['abonos']     = $reten;
+						$sprm['vence']      = $actuali;
+						$sprm['tipo_ref']   = $row['tipo_doc'];
+						$sprm['num_ref']    = $row['numero'];
+						$sprm['observa1']   = 'RETENCION DE I.S.L.R. CAUSADA EN';
+						$sprm['observa2']   = $row['tipo_doc'].$row['numero'].' DE FECHA '.dbdate_to_human($row['fecha']);
+						$sprm['estampa']    = $estampa;
+						$sprm['hora']       = $hora;
+						$sprm['transac']    = $transac;
+						$sprm['usuario']    = $usuario;
+						$sprm['codigo']     = 'NOCON';
+						$sprm['descrip']    = 'NOTA DE CONTABILIDAD';
+						$mSQL = $this->db->insert_string('sprm', $sprm);
+						$ban=$this->db->simple_query($mSQL);
+						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+
+						//Aplica la NC a la FC
+						$itppro=array();
+						$itppro['numppro']    = $mnumnc;
+						$itppro['tipoppro']   = 'NC';
+						$itppro['cod_prv']    = $proveed;
+						$itppro['tipo_doc']   = 'FC';
+						$itppro['numero']     = $row['numero'];
+						$itppro['fecha']      = $actuali;
+						$itppro['monto']      = $reten;
+						$itppro['abono']      = $reten;
+						$itppro['ppago']      = 0;
+						$itppro['reten']      = 0;
+						$itppro['cambio']     = 0;
+						$itppro['mora']       = 0;
+						$itppro['transac']    = $transac;
+						$itppro['estampa']    = $estampa;
+						$itppro['hora']       = $hora;
+						$itppro['usuario']    = $usuario;
+						$itppro['preten']     = 0;
+						$itppro['creten']     = 0;
+						$itppro['breten']     = 0;
+						$itppro['reteiva']    = 0;
+						$mSQL = $this->db->insert_string('itppro', $itppro);
+						$ban=$this->db->simple_query($mSQL);
+						if(!$ban){ memowrite($mSQL,'scst'); $error++;}
+
+						//Crea la nota de debito
+						$mnsprm  = $this->datasis->fprox_numero('num_nd');
+						$ccontrol = $this->datasis->fprox_numero('nsprm');
+
+						$data=array();
+						$data['cod_prv']    = 'RETEN';
+						$data['nombre']     = 'RETENCIONES POR ENTERAR';
+						$data['tipo_doc']   = 'ND';
+						$data['numero']     = $mnsprm;
+						$data['fecha']      = $actuali;
+						$data['monto']      = $reten;
+						$data['impuesto']   = 0;
+						$data['abonos']     = 0;
+						$data['vence']      = $actuali;
+						$data['tipo_ref']   = $row['tipo_doc'];
+						$data['num_ref']    = $row['numero'];
+						$data['observa1']   = 'RETENCION DE I.S.L.R. CAUSADA EN';
+						$data['observa2']   = $row['tipo_doc'].$row['numero'].' DE FECHA '.dbdate_to_human($row['fecha']);
+						$data['transac']    = $transac;
+						$data['estampa']    = $estampa;
+						$data['hora']       = $hora;
+						$data['usuario']    = $usuario;
+						$data['reteiva']    = 0;
+						$data['montasa']    = 0;
+						$data['monredu']    = 0;
+						$data['monadic']    = 0;
+						$data['tasa']       = 0;
+						$data['reducida']   = 0;
+						$data['sobretasa']  = 0;
+						$data['exento']     = 0;
+						$data['control']    = $ccontrol;
+						$data['codigo']     = 'NOCON';
+						$data['descrip']    = 'NOTA DE CONTABILIDAD';
+
+						$sql=$this->db->insert_string('sprm', $data);
+						$ban=$this->db->simple_query($sql);
+						if($ban==false){ memowrite($sql,'gser');}
+
+					}//Fin de la retencion ISLR
+
 					//Carga la CxP
 					$sprm=array();
 					$causado = $this->datasis->fprox_numero('ncausado');
@@ -3388,7 +3536,7 @@ class Scst extends Controller {
 					$sprm['vence']    = $vence;
 					$sprm['monto']    = $row['ctotal'];
 					$sprm['impuesto'] = $row['cimpuesto'];
-					$sprm['abonos']   = $reteiva;
+					$sprm['abonos']   = $reteiva+$reten;
 					$sprm['observa1'] = 'FACTURA DE COMPRA';
 					$sprm['reteiva']  = $reteiva;
 					$sprm['causado']  = $causado;
@@ -3555,6 +3703,103 @@ class Scst extends Controller {
 						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 					}//Fin de la retencion
 
+
+					//Inicio de la retencion ISLR
+					$reten=floatval($row['reten']);
+					if($reten>0){
+						//Crea la nota de credito
+						$mnumnc = $this->datasis->fprox_numero('num_nd');
+						$sprm=array();
+						$sprm['cod_prv']    = $proveed;
+						$sprm['nombre']     = $row['nombre'];
+						$sprm['tipo_doc']   = 'ND';
+						$sprm['numero']     = $mnumnc;
+						$sprm['fecha']      = $actuali;
+						$sprm['monto']      = $reten;
+						$sprm['impuesto']   = 0;
+						$sprm['abonos']     = $reten;
+						$sprm['vence']      = $actuali;
+						$sprm['tipo_ref']   = $row['tipo_doc'];
+						$sprm['num_ref']    = $row['numero'];
+						$sprm['observa1']   = 'RETENCION DE I.S.L.R. CAUSADA EN';
+						$sprm['observa2']   = $row['tipo_doc'].$row['numero'].' DE FECHA '.dbdate_to_human($row['fecha']);
+						$sprm['estampa']    = $estampa;
+						$sprm['hora']       = $hora;
+						$sprm['transac']    = $transac;
+						$sprm['usuario']    = $usuario;
+						$sprm['codigo']     = 'NOCON';
+						$sprm['descrip']    = 'NOTA DE CONTABILIDAD';
+						$mSQL = $this->db->insert_string('sprm', $sprm);
+						$ban=$this->db->simple_query($mSQL);
+						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+
+						//Aplica la NC a la FC
+						$itppro=array();
+						$itppro['numppro']    = $mnumnc;
+						$itppro['tipoppro']   = 'ND';
+						$itppro['cod_prv']    = $proveed;
+						$itppro['tipo_doc']   = 'NC';
+						$itppro['numero']     = $row['numero'];
+						$itppro['fecha']      = $actuali;
+						$itppro['monto']      = $reten;
+						$itppro['abono']      = $reten;
+						$itppro['ppago']      = 0;
+						$itppro['reten']      = 0;
+						$itppro['cambio']     = 0;
+						$itppro['mora']       = 0;
+						$itppro['transac']    = $transac;
+						$itppro['estampa']    = $estampa;
+						$itppro['hora']       = $hora;
+						$itppro['usuario']    = $usuario;
+						$itppro['preten']     = 0;
+						$itppro['creten']     = 0;
+						$itppro['breten']     = 0;
+						$itppro['reteiva']    = 0;
+						$mSQL = $this->db->insert_string('itppro', $itppro);
+						$ban=$this->db->simple_query($mSQL);
+						if(!$ban){ memowrite($mSQL,'scst'); $error++;}
+
+						//Crea la nota de debito
+						$mnsprm  = $this->datasis->fprox_numero('num_nc');
+						$ccontrol = $this->datasis->fprox_numero('nsprm');
+
+						$data=array();
+						$data['cod_prv']    = 'RETEN';
+						$data['nombre']     = 'RETENCIONES POR ENTERAR';
+						$data['tipo_doc']   = 'NC';
+						$data['numero']     = $mnsprm;
+						$data['fecha']      = $actuali;
+						$data['monto']      = $reten;
+						$data['impuesto']   = 0;
+						$data['abonos']     = 0;
+						$data['vence']      = $actuali;
+						$data['tipo_ref']   = $row['tipo_doc'];
+						$data['num_ref']    = $row['numero'];
+						$data['observa1']   = 'RETENCION DE I.S.L.R. CAUSADA EN';
+						$data['observa2']   = $row['tipo_doc'].$row['numero'].' DE FECHA '.dbdate_to_human($row['fecha']);
+						$data['transac']    = $transac;
+						$data['estampa']    = $estampa;
+						$data['hora']       = $hora;
+						$data['usuario']    = $usuario;
+						$data['reteiva']    = 0;
+						$data['montasa']    = 0;
+						$data['monredu']    = 0;
+						$data['monadic']    = 0;
+						$data['tasa']       = 0;
+						$data['reducida']   = 0;
+						$data['sobretasa']  = 0;
+						$data['exento']     = 0;
+						$data['control']    = $ccontrol;
+						$data['codigo']     = 'NOCON';
+						$data['descrip']    = 'NOTA DE CONTABILIDAD';
+
+						$sql=$this->db->insert_string('sprm', $data);
+						$ban=$this->db->simple_query($sql);
+						if($ban==false){ memowrite($sql,'gser');}
+
+					}//Fin de la retencion ISLR
+
+
 					//Carga la CxP
 					$sprm=array();
 					$causado = $this->datasis->fprox_numero('ncausado');
@@ -3566,7 +3811,7 @@ class Scst extends Controller {
 					$sprm['vence']    = $vence;
 					$sprm['monto']    = $row['ctotal'];
 					$sprm['impuesto'] = $row['cimpuesto'];
-					$sprm['abonos']   = $reteiva;
+					$sprm['abonos']   = $reteiva+$reten;
 					$sprm['observa1'] = 'DEVOLUCION A FACTURA '.$fafecta;
 					$sprm['reteiva']  = $reteiva;
 					$sprm['causado']  = $causado;
@@ -3826,14 +4071,14 @@ class Scst extends Controller {
 		FROM recep a
 		JOIN seri b ON a.recep=b.recep
 		JOIN sinv c ON b.codigo=c.codigo
-		WHERE origen='scst' AND a.refe2=$facturae AND clipro=$cod_prove
+		WHERE origen='scst' AND a.refe2=${facturae} AND clipro=${cod_prove}
 		GROUP BY b.codigo";
 
 		$this->db->query($query);
 
 		$query="
 		INSERT INTO scst (`numero`,`proveed`,`control`,`serie`)
-		VALUES ($facturae,$cod_prove,$controle,$facturae)";
+		VALUES (${facturae},${cod_prove},${controle},${facturae})";
 		$this->db->query($query);
 		redirect("compras/scst/dataedit/modify/$control");
 	}
@@ -3850,7 +4095,7 @@ class Scst extends Controller {
 		return true;
 	}
 
-	function _pre_insert($do){
+	function _pre_insert($do,$act='I'){
 
 		$control = $do->get('control');
 		$transac = $do->get('transac');
@@ -3865,14 +4110,49 @@ class Scst extends Controller {
 		if(empty($control)) $control = $this->datasis->fprox_numero('nscst');
 		if(empty($transac)) $transac = $this->datasis->fprox_numero('ntransa');
 
+		$serie   = $do->get('serie');
 		$fecha   = $do->get('fecha');
-		$numero  = substr($do->get('serie'),-8);
+		$numero  = substr($serie,-8);
 		$usuario = $do->get('usuario');
 		$proveed = $do->get('proveed');
 		$depo    = $do->get('depo');
 		$estampa = date('Ymd');
 		$hora    = date('H:i:s');
 		$alicuota=$this->datasis->ivaplica($fecha);
+
+		//Totalizamos la retenciones (exepto la de iva)
+		$retemonto=$rete_cana_vacio=$retebase=0;
+		$rete_real=0;
+		$rete_cana=$do->count_rel('gereten');
+		for($i=0;$i<$rete_cana;$i++){
+			$codigorete = $do->get_rel('gereten','codigorete',$i);
+			if(!empty($codigorete)){
+				$importe = $do->get_rel('gereten','base'  ,$i);
+				$monto   = $do->get_rel('gereten','monto' ,$i);
+				$porcen  = $do->get_rel('gereten','porcen',$i);
+
+				$do->set_rel('gereten','numero' ,$serie,$i);
+				$retemonto += $monto;
+				$retebase  += $importe;
+				$rete_real++;
+			}else{
+				$mSQL='';
+				$do->rel_rm('gereten',$i);
+			}
+		}
+		if($rete_real<=0){
+			if($act=='U'){
+				$id  =$do->get('id');
+				$dbid=intval($id);
+				$mSQL="DELETE FROM gereten WHERE idd=${dbid}";
+				$this->db->simple_query($mSQL);
+
+			}
+			$do->unset_rel('gereten');
+		}
+		$do->set('reten',$retemonto);
+		$do->set('flete',$retebase);
+		//Fin de las retenciones exepto iva
 
 		$iva=$stotal=0;
 		$cgenera=$civagen=$creduci=$civared=$cadicio=$civaadi=$cexento=0;
@@ -4003,6 +4283,11 @@ class Scst extends Controller {
 		}
 		if($cm){
 			$gtotal=$stotal+$iva;
+		}
+
+		if($retebase>$stotal){
+			$do->error_message_ar['pre_ins'] ='El monto base de la retencion es no puede ser mayor que la base de la factura';
+			return false;
 		}
 
 		$do->set('montotot' , round($stotal ,2));
@@ -4146,7 +4431,7 @@ class Scst extends Controller {
 				return false;
 			}
 		}
-		return $this->_pre_insert($do);
+		return $this->_pre_insert($do,'U');
 	}
 
 	function _post_delete($do){

@@ -3979,7 +3979,7 @@ class gser extends Controller {
 		$nfiscal = $do->get('nfiscal');
 		$tipo_doc= $do->get('tipo_doc');
 		$monto1  = $do->get('monto1');
-		$numero   = substr($serie,-8);
+		$numero  = substr($serie,-8);
 		$do->set('numero',$numero);
 
 		$rivaex  = $this->input->post('_rivaex');
