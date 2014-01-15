@@ -677,8 +677,8 @@ class Lprod extends Controller {
 			$ww='';
 		}
 
-		$this->validation->set_message('chlitros',$fecha);
-		return false;
+		//$this->validation->set_message('chlitros',$fecha);
+		//return false;
 
 		$dbfecha= $this->db->escape($fecha);
 		$dbruta = $this->db->escape($ruta);

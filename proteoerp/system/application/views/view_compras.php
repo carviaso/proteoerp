@@ -1,9 +1,9 @@
 <?php
-$container_bl=join('&nbsp;', $form->_button_container['BL']);
+$container_bl=$form->_button_container['BL'][0];
 $container_br=join('&nbsp;', $form->_button_container['BR']);
 $container_tr=join('&nbsp;', $form->_button_container['TR']);
 
-if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
+if($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	echo $form->output;
 else:
 
@@ -19,16 +19,51 @@ $scampos .= $campos['sinvpeso']['field'].$campos['iva']['field'].'</td>';
 $scampos .='<td class="littletablerow"><a href=# onclick="del_itscst(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
 $campos=$form->js_escape($scampos);
 
+$ccampos=$form->detail_fields['gereten'];
+$cgereten ='<tr id="tr_gereten_<#i#>">';
+//$cgereten.=' <td class="littletablerow">'.join('</td><td align="right">',$ggereten).'</td>';
+$cgereten.=' <td class="littletablerow" nowrap>       '.$ccampos['codigorete']['field'].'</td>';
+$cgereten.=' <td class="littletablerow" align="right">'.$ccampos['base']['field']      .'</td>';
+$cgereten.=' <td class="littletablerow" align="right">'.$ccampos['porcen']['field']    .'</td>';
+$cgereten.=' <td class="littletablerow" align="right">'.$ccampos['monto']['field']     .'</td>';
+$cgereten.=' <td class="littletablerow" align="center"><a href=\'#\' onclick="del_gereten(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
+$cgereten=$form->js_escape($cgereten);
+
 if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
 
 echo $form_begin;
-if($form->_status!='show'){ ?>
+if($form->_status!='show'){
+	$rete=array();
+	$mSQL='SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",codigo,activida)) AS activida ,base1,tari1,pama1,TRIM(tipo) AS tipo FROM rete ORDER BY codigo';
+	$query = $this->db->query($mSQL);
+	if ($query->num_rows() > 0){
+		foreach ($query->result() as $row){
+			$ind='_'.$row->codigo;
+			$rete[$ind]=array($row->activida,$row->base1,$row->tari1,$row->pama1,$row->tipo);
+		}
+	}
+	$json_rete=json_encode($rete);
 
+	$sql='SELECT TRIM(a.codbanc) AS codbanc,tbanco FROM banc AS a';
+	$query = $this->db->query($sql);
+	$comis=array();
+	if ($query->num_rows() > 0){
+		foreach ($query->result() as $row){
+			$ind='_'.$row->codbanc;
+			$comis[$ind]['tbanco']  =$row->tbanco;
+		}
+	}
+	$json_comis=json_encode($comis);
+?>
 <script language="javascript" type="text/javascript">
 var itscst_cont =<?php echo $form->max_rel_count['itscst']; ?>;
 var tasa_general=<?php echo $alicuota['tasa'];     ?>;
 var tasa_reducid=<?php echo $alicuota['redutasa']; ?>;
 var tasa_adicion=<?php echo $alicuota['sobretasa'];?>;
+var gereten_cont=<?php echo $form->max_rel_count['gereten'];?>;
+
+var comis    = <?php echo $json_comis; ?>;
+var rete     = <?php echo $json_rete;  ?>;
 var ctimeout = -1;
 $(function(){
 	$(".inputnum").numeric(".");
@@ -476,6 +511,74 @@ function truncate(){
 	$('tr[id^="tr_itscst_"]').remove();
 	itscst_cont=0;
 }
+
+//retencion
+function importerete(nind){
+	var ind=nind.toString();
+	var codigo  = $("#codigorete_"+ind).val();
+	if(codigo.length>0){
+		//var tari1   = Number($("#porcen_"+ind).val());
+		var importe = Number($("#base_"+ind).val());
+		var base1   = Number(eval('rete._'+codigo+'[1]'));
+		var tari1   = Number(eval('rete._'+codigo+'[2]'));
+		var pama1   = Number(eval('rete._'+codigo+'[3]'));
+
+		var tt=codigo.substring(0,1);
+		if(tt=='1')
+			monto=(importe*base1*tari1)/10000;
+		else if(importe>pama1)
+			monto=((importe-pama1)*base1*tari1)/10000;
+		else
+			monto = 0;
+
+		$("#monto_"+ind).val(roundNumber(monto,2));
+		$("#monto_"+ind+'_val').text(nformat(monto,2));
+	}
+	totalizar();
+}
+
+function totalrete(){
+	monto=0;
+	arr  =$('input[name^="monto_"]');
+	jQuery.each(arr, function() {
+		monto=monto+Number(this.value);
+	});
+	$("#reten").val(monto);
+	$("#reten_val").text(nformat(monto,2));
+	return monto;
+}
+
+function post_codigoreteselec(nind,cod){
+	var ind=nind.toString();
+	var porcen=eval('rete._'+cod+'[2]');
+	var base1 =eval('rete._'+cod+'[1]');
+	$("#porcen_"+ind).val(porcen);
+	$("#porcen_"+ind+"_val").text(nformat(porcen,2));
+	importerete(nind);
+}
+
+function add_gereten(){
+	var htm = <?php echo $cgereten; ?>;
+	var can = gereten_cont.toString();
+	var con = (gereten_cont+1).toString();
+	htm = htm.replace(/<#i#>/g,can);
+	htm = htm.replace(/<#o#>/g,con);
+	$("#__UTPL__gereten").before(htm);
+	gereten_cont=gereten_cont+1;
+}
+
+function del_gereten(id){
+	id = id.toString();
+	obj='#tr_gereten_'+id;
+	$(obj).remove();
+	totalizar();
+}
+
+function truncate_gereten(){
+	$('tr[id^="tr_gereten_"]').remove();
+	gereten_cont=0;
+}
+//fin de retenciones
 </script>
 <?php } ?>
 
@@ -619,5 +722,39 @@ if (!$solo){
 	</tr>
 </table>
 
+
+<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:80px'>
+<table width='100%'>
+	<tr>
+		<td class="littletableheaderdet">Retenci&oacute;n ISLR</td>
+		<td class="littletableheaderdet">Base</td>
+		<td class="littletableheaderdet" align="right">Porcentaje</td>
+		<td class="littletableheaderdet" align="right">Monto</td>
+		<?php if($form->_status!='show') {?>
+			<td class="littletableheaderdet">&nbsp;</td>
+		<?php } ?>
+	</tr>
+	<?php for($i=0; $i < $form->max_rel_count['gereten']; $i++) {
+		$it_codigorete= "codigorete_$i";
+		//$it_actividad = "actividad_$i";
+		$it_base      = "base_$i";
+		$it_porcen    = "porcen_$i";
+		$it_monto     = "monto_$i";
+	?>
+	<tr id='tr_gereten_<?php echo $i; ?>'>
+		<td class="littletablerow" nowrap><?php echo $form->$it_codigorete->output ?></td>
+		<td class="littletablerow" align="right"><?php echo $form->$it_base->output      ?></td>
+		<td class="littletablerow" align="right"><?php echo $form->$it_porcen->output    ?></td>
+		<td class="littletablerow" align="right"><?php echo $form->$it_monto->output     ?></td>
+		<?php if($form->_status!='show') {?>
+			<td class="littletablerow" align="center"><a href='#' onclick='del_gereten(<?php echo $i; ?>);return false;'><?php echo img("images/delete.jpg"); ?></a></td>
+		<?php }
+	}?>
+	</tr>
+	<tr id='__UTPL__gereten'>
+		<td colspan='<?php echo ($form->_status!='show')? 8 : 9; ?>'><?php echo $form->_button_container['BL'][1]; ?></td>
+	</tr>
+</table>
+</div>
 <?php echo $form_end?>
 <?php endif; ?>

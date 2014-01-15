@@ -638,7 +638,7 @@ function toggle() {
 		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:80px'>
 		<table width='100%'>
 			<tr>
-				<td class="littletableheaderdet">Retencion</td>
+				<td class="littletableheaderdet">Retenci&oacute;n ISLR</td>
 				<td class="littletableheaderdet">Base</td>
 				<td class="littletableheaderdet" align="right">Porcentaje</td>
 				<td class="littletableheaderdet" align="right">Monto</td>
