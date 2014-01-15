@@ -257,16 +257,19 @@ function post_modbus_scli(){
 	$('#direc_val').text(direc);
 }
 
+
 function post_modbus_sinv(nind){
 	ind=nind.toString();
-	var tipo =Number($("#sclitipo").val()); if(tipo>0 && tipo<5) tipo=tipo-1;
+	var tipo = Number($("#sclitipo").val()); if(tipo>0) tipo=tipo-1;
 	$("#preca_"+ind).empty();
 	var arr=$('#preca_'+ind);
 
 	cdropdown(nind);
 
 	if(tipo!=5){
-		jQuery.each(arr, function() { this.selectedIndex=tipo; });
+		jQuery.each(arr, function(){
+			$('#'+this.id).prop('selectedIndex', tipo);
+		});
 	}else{
 		sclimmargen=parseFloat($("#mmargen").val());
 		sinvmmargen=parseFloat($("#mmargen_"+ind).val());
