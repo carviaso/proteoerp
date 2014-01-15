@@ -57,7 +57,7 @@ class Pfac extends Controller {
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$param['WestPanel']    = $WestPanel;
-		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		//$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;

@@ -487,7 +487,7 @@ class Ajax extends Controller {
 				//Vemos si aplica descuento solo promocional
 				if($this->db->table_exists('sinvpromo')){
 					$mSQL="
-					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
+					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.unidad,
 					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo,c.margen AS dgrupo,d.margen AS promo, a.existen, a.marca, a.ubica
 					FROM sinv AS a
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
@@ -497,7 +497,7 @@ class Ajax extends Controller {
 					ORDER BY a.descrip LIMIT ".$this->autolimit;
 				}else{
 					$mSQL="
-					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo,
+					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.unidad,
 					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo, c.margen AS dgrupo,0 AS promo, a.existen, a.marca, a.ubica
 					FROM sinv AS a
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
