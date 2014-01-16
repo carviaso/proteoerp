@@ -1762,31 +1762,6 @@ class Scli extends validaciones {
 			$this->load->view('view_scli', $conten);
 		}
 
-/*
-		if($this->genesal){
-			$edit->build();
-			$conten['form']   =& $edit;
-			$conten['script'] =  $script;
-			$data['content']  =  $this->load->view('view_scli', $conten);
-
-		}else{
-			$edit->on_save_redirect=false;
-			$edit->build();
-			if($edit->on_success()){
-				//$rt= 'Cliente Guardado';
-				$rt=array(
-					'status' =>'A',
-					'mensaje'=>'Cliente Guardado',
-					'pk'     =>$edit->_dataobject->pk
-				);
-				$rt = json_encode($rt);
-			}elseif($edit->on_error()){
-				$rt= html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string));
-			}
-			return $rt;
-		}
-*/
-
 	}
 
 	function dataeditexpress(){

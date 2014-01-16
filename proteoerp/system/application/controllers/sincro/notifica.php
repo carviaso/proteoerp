@@ -635,7 +635,6 @@ class notifica extends controller {
 		$subject= $this->input->post('fasunto');
 		$body   = $this->input->post('fbody');
 
-
 		if(preg_match_all('/(?P<correos>[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,6})/i', $to, $matches)){
 			$to = $matches['correos'];
 		}else{
@@ -688,11 +687,10 @@ class notifica extends controller {
 			$rt['status']='B';
 			$rt['msj']   =$this->error;
 		}
-
 		echo json_encode($rt);
 	}
 
-	function _sendmail($to,$subject,$body,$type='text'){
+	function _sendmail($to, $subject, $body, $type='text'){
 		if(!@include_once 'Mail.php'){
 			$this->error='Problemas al cargar la clase Mail, probablemente sea necesario instalarla desde PEAR, comuniquese con soporte t&eacute;cnico';
 			return false;

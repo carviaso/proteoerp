@@ -2596,7 +2596,7 @@ class Sfac extends Controller {
 		$edit->direc->readonly =true;
 		$edit->direc->size = 40;
 
-		$cajero = $this->datasis->dameval('SELECT a.cajero FROM usuario a JOIN scaj b ON a.cajero=b.cajero WHERE a.us_codigo='.$this->session->userdata('usuario') );
+		$cajero = $this->datasis->dameval('SELECT a.cajero FROM usuario a JOIN scaj b ON a.cajero=b.cajero WHERE a.us_codigo='.$this->db->escape( $this->session->userdata('usuario')) );
 		$edit->cajero= new hiddenField('Cajero', 'cajero');
 		$edit->cajero->inputValue = $cajero;
 
