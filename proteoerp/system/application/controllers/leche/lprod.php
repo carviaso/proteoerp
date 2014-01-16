@@ -58,7 +58,7 @@ class Lprod extends Controller {
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$param['WestPanel']    = $WestPanel;
-		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		//$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
 		$param['listados']     = $this->datasis->listados('LPROD', 'JQ');
@@ -134,6 +134,7 @@ class Lprod extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		};';
 
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function() {
@@ -201,7 +202,7 @@ class Lprod extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 500, width: 750, modal: true,
 			buttons: {
 			"Guardar": function() {
 				var bValid = true;
@@ -235,10 +236,8 @@ class Lprod extends Controller {
 			},
 			close: function() { $("#fedita").html(""); allFields.val( "" ).removeClass( "ui-state-error" );}
 		});';
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -247,7 +246,7 @@ class Lprod extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -312,6 +311,30 @@ class Lprod extends Controller {
 			//'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 		));
 
+		$grid->addField('grasa');
+		$grid->label('Grasa');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			//'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+		));
+
+		$grid->addField('acidez');
+		$grid->label('Acidez');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			//'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+		));
+
 		$grid->addField('inventario');
 		$grid->label('Inventario');
 		$grid->params(array(
@@ -362,7 +385,7 @@ class Lprod extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: lprodadd, editfunc: lprodedit,delfunc: lproddel, viewfunc: lprodshow");
+		$grid->setBarOptions('addfunc: lprodadd, editfunc: lprodedit,delfunc: lproddel, viewfunc: lprodshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -399,7 +422,7 @@ class Lprod extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = '??????';
 		$check  = 0;
 
 		unset($data['oper']);
@@ -407,28 +430,29 @@ class Lprod extends Controller {
 		if($oper == 'add'){
 			if(false == empty($data)){
 				$check = $this->datasis->dameval("SELECT count(*) FROM lprod WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
+				if($check == 0 ){
 					$this->db->insert('lprod', $data);
 					echo "Registro Agregado";
 
 					logusu('LPROD',"Registro ????? INCLUIDO");
-				} else
+				}else{
 					echo "Ya existe un registro con ese $mcodp";
-			} else
+				}
+			}else{
 				echo "Fallo Agregado!!!";
-
+			}
 		} elseif($oper == 'edit') {
 			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM lprod WHERE id=$id");
-			if ( $nuevo <> $anterior ){
+			$anterior = $this->datasis->dameval("SELECT ${mcodp} FROM lprod WHERE id=${id}");
+			if($nuevo <> $anterior ){
 				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM lprod WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE lprod SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("lprod", $data);
-				logusu('LPROD',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
+				$this->db->query("DELETE FROM lprod WHERE ${mcodp}=?", array($mcodp));
+				$this->db->query("UPDATE lprod SET ${mcodp}=? WHERE ${mcodp}=?", array( $nuevo, $anterior ));
+				$this->db->where('id', $id);
+				$this->db->update('lprod', $data);
+				logusu('LPROD',"${mcodp} Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
 				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
+			}else{
 				unset($data[$mcodp]);
 				$this->db->where("id", $id);
 				$this->db->update('lprod', $data);
@@ -581,7 +605,7 @@ class Lprod extends Controller {
 
 		$edit->codigo = new inputField('Producto','codigo');
 		$edit->codigo->rule='required';
-		$edit->codigo->size =12;
+		$edit->codigo->size =8;
 		$edit->codigo->maxlength =10;
 
 		$edit->descrip = new inputField('Descripci&oacute;n','descrip');
@@ -617,6 +641,18 @@ class Lprod extends Controller {
 		$edit->peso->type='inputhidden';
 		$edit->peso->size =14;
 		$edit->peso->maxlength =12;
+
+		$edit->grasa = new inputField('Grasa','grasa');
+		//$edit->grasa->rule='required';
+		$edit->grasa->css_class='inputnum';
+		$edit->grasa->size =4;
+		$edit->grasa->maxlength =10;
+
+		$edit->acidez = new inputField('Acidez','acidez');
+		//$edit->acidez->rule='required';
+		$edit->acidez->css_class='inputnum';
+		$edit->acidez->size =4;
+		$edit->acidez->maxlength =10;
 
 		//Inicio del detalle
 		$edit->itid = new hiddenField('','itid_<#i#>');
@@ -720,8 +756,7 @@ class Lprod extends Controller {
 
 	function _pre_insert($do){
 		//$do->set('fecha',date('Y-m-d'));
-		$leche = $do->get('inventario');
-
+		$leche  = floatval($do->get('inventario'));
 		$fecha  = $do->get('fecha');
 		$dbfecha= $this->db->escape($fecha);
 		$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
@@ -732,17 +767,18 @@ class Lprod extends Controller {
 			return false;
 		}
 
-		$cana=$do->count_rel('itlprod');
-		for($i=0;$i<$cana;$i++){
+		$itcana=$do->count_rel('itlprod');
+		for($i=0;$i<$itcana;$i++){
 			$codrut = $do->get_rel('itlprod','codrut' ,$i);
 			if(empty($codrut)){
 				$do->rel_rm('itlprod',$i);
+			}else{
+				$leche += floatval($do->get_rel('itlprod','litros' ,$i));
 			}
-			$leche += $do->get_rel('itlprod','itlitros' ,$i);
 		}
 
 		if($leche <= 0){
-			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'No puede tener una produccion sin leche como materia prima.';
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'No puede tener una produccion sin leche como materia prima. '.$leche.' '.$itcana;
 			return false;
 		}
 
@@ -782,8 +818,7 @@ class Lprod extends Controller {
 
 	function instalar(){
 		if(!$this->db->table_exists('lprod')){
-			$mSQL = "
-			CREATE TABLE `lprod` (
+			$mSQL = "CREATE TABLE `lprod` (
 				`id` INT(10) NOT NULL AUTO_INCREMENT,
 				`codigo` VARCHAR(15) NULL DEFAULT NULL,
 				`descrip` VARCHAR(45) NULL DEFAULT NULL,
@@ -791,16 +826,27 @@ class Lprod extends Controller {
 				`peso` DECIMAL(12,2) NULL DEFAULT NULL,
 				`litros` DECIMAL(12,2) NULL DEFAULT NULL,
 				`inventario` DECIMAL(12,2) NULL DEFAULT NULL,
+				`grasa` DECIMAL(12,2) NULL DEFAULT NULL,
+				`acidez` DECIMAL(12,2) NULL DEFAULT NULL,
 				`estampa` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
 				`usuario` VARCHAR(15) NULL DEFAULT NULL,
-				PRIMARY KEY (`id`)
+				PRIMARY KEY (`id`),
+				INDEX `codigo` (`codigo`)
 			)
 			COMMENT='Control de produccion de lacteos'
 			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM;";
+			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
 
+		$campos=$this->db->list_fields('lprod');
+		if(!in_array('grasa',$campos)){
+			$mSQL="ALTER TABLE `lprod` ADD COLUMN `grasa` DECIMAL(12,2) NULL DEFAULT NULL AFTER `inventario`";
+		}
+
+		if(!in_array('acidez',$campos)){
+			$mSQL="ALTER TABLE `lprod` ADD COLUMN `acidez` DECIMAL(12,2) NULL DEFAULT NULL AFTER `grasa`";
+		}
 
 		if(!$this->db->table_exists('itlprod')){
 			$mSQL = "

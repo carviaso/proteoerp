@@ -1110,7 +1110,7 @@ class Lrece extends Controller {
 	*/
 	function getdatait( $id = 0 ){
 		if ($id === 0 ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM lrece");
+			$id = $this->datasis->dameval("SELECT MAX(id) AS id FROM lrece");
 		}
 		if(empty($id)) return "";
 		$grid    = $this->jqdatagrid;

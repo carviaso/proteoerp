@@ -161,18 +161,20 @@ function autocod(id){
 </script>
 <?php } ?>
 
-
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 <table width='100%' style='font-size:11pt;background:#F2E69D;'>
 	<tr>
 		<td><b><?php echo $form->litros->label;      ?></b></td>
 		<td>   <?php echo $form->litros->output;     ?></td>
-		<td><b><?php echo $form->codigo->label;     ?></b><?php echo $form->codigo->output;    ?></td>
-		<td>   <?php echo $form->descrip->output; ?></td>
-	</tr>
-	<tr>
-		<td><b><?php echo $form->fecha->label;      ?></b></td>
-		<td>   <?php echo $form->fecha->output;     ?></td>
+		<td><b><?php echo $form->grasa->label;       ?></b></td>
+		<td>   <?php echo $form->grasa->output;      ?></td>
+		<td><b><?php echo $form->codigo->label;      ?></b><?php echo $form->codigo->output;    ?></td>
+		<td>   <?php echo $form->descrip->output;    ?></td>
+	</tr><tr>
+		<td><b><?php echo $form->fecha->label;       ?></b></td>
+		<td>   <?php echo $form->fecha->output;      ?></td>
+		<td><b><?php echo $form->acidez->label;      ?></b></td>
+		<td>   <?php echo $form->acidez->output;     ?></td>
 		<td><b><?php echo $form->inventario->label;  ?></b></td>
 		<td>   <?php echo $form->inventario->output; ?></td>
 	</tr>

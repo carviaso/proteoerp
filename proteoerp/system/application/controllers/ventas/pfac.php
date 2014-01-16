@@ -1243,7 +1243,7 @@ class Pfac extends Controller {
 				'iva'     => 'itiva_<#i#>',
 				'tipo'    => 'sinvtipo_<#i#>',
 				'peso'    => 'sinvpeso_<#i#>',
-				'base1' => 'itpvp_<#i#>',
+				'base1'   => 'itpvp_<#i#>',
 				'pond'    => 'itcosto_<#i#>',
 				'pond'    => 'pond_<#i#>',
 				'mmargen' => 'mmargen_<#i#>',
