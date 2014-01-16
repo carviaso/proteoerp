@@ -13,6 +13,7 @@ class Icon extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		$this->datasis->creaintramenu(array('modulo'=>'327','titulo'=>'Conceptos de Ajuste','mensaje'=>'Conceptos de Ajuste','panel'=>'REGISTROS','ejecutar'=>'/inventario/icon','target'=>'popu','visible'=>'S','pertenece'=>'3','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
