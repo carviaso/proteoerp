@@ -1,4 +1,4 @@
-<?php 
+<?php
 class Icon extends Controller {
 	var $mModulo = 'ICON';
 	var $titp    = 'Conceptos de Ajuste';
@@ -13,12 +13,7 @@ class Icon extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('icon','id') ) {
-			$this->db->simple_query('ALTER TABLE icon DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE icon ADD UNIQUE INDEX codigo (codigo)');
-			$this->db->simple_query('ALTER TABLE icon ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
-		$this->datasis->creaintramenu(array('modulo'=>'327','titulo'=>'Conceptos de Ajuste','mensaje'=>'Conceptos de Ajuste','panel'=>'REGISTROS','ejecutar'=>'/inventario/icon','target'=>'popu','visible'=>'S','pertenece'=>'3','ancho'=>900,'alto'=>600));		
+		$this->datasis->creaintramenu(array('modulo'=>'327','titulo'=>'Conceptos de Ajuste','mensaje'=>'Conceptos de Ajuste','panel'=>'REGISTROS','ejecutar'=>'/inventario/icon','target'=>'popu','visible'=>'S','pertenece'=>'3','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -702,7 +697,12 @@ class Icon extends Controller {
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
-	}
 
+		$campos=$this->db->list_fields('icon');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE icon DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE icon ADD UNIQUE INDEX codigo (codigo)');
+			$this->db->simple_query('ALTER TABLE icon ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+	}
 }
-?>
