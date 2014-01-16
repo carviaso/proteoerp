@@ -98,7 +98,7 @@ class Gserchi extends Controller {
 
 					$sql=$this->db->insert_string('gitser', $data);
 					$ban=$this->db->simple_query($sql);
-					if($ban==false){ memowrite($sql,'gser'); $error++;}
+					if($ban==false){ memowrite($sql,'gserchi'); $error++;}
 
 					$montasa  +=$row->montasa  ;
 					$monredu  +=$row->monredu  ;
@@ -175,7 +175,7 @@ class Gserchi extends Controller {
 
 					$sql=$this->db->insert_string('sprm', $data);
 					$ban=$this->db->simple_query($sql);
-					if($ban==false){ memowrite($sql,'gser'); $error++;}
+					if($ban==false){ memowrite($sql,'gserchi'); $error++;}
 					$cargo   = '';
 					$cheque  = '';
 					$negreso = '';
@@ -229,7 +229,7 @@ class Gserchi extends Controller {
 
 					$sql=$this->db->insert_string('bmov', $data);
 					$ban=$this->db->simple_query($sql);
-					if($ban==false){ memowrite($sql,'gser'); $error++;}
+					if($ban==false){ memowrite($sql,'gserchi'); $error++;}
 
 					$this->datasis->actusal($cargo, $sp_fecha, (-1)*$totneto);
 				}
@@ -297,7 +297,7 @@ class Gserchi extends Controller {
 
 				$sql=$this->db->insert_string('gser', $data);
 				$ban=$this->db->simple_query($sql);
-				if($ban==false){ memowrite($sql,'gser'); $error++;}
+				if($ban==false){ memowrite($sql,'gserchi'); $error++;}
 				$idgser=$this->db->insert_id();
 
 				$data = array('idgser' => $idgser);
@@ -307,13 +307,13 @@ class Gserchi extends Controller {
 				$where = "fecha=${dbfecha} AND proveed=${dbcodprv} AND  numero=${dbnumero}";
 				$mSQL = $this->db->update_string('gitser', $data, $where);
 				$ban=$this->db->simple_query($mSQL);
-				if($ban==false){ memowrite($mSQL,'gser'); $error++; }
+				if($ban==false){ memowrite($mSQL,'gserchi'); $error++; }
 
 				$data = array('ngasto' => $numero);
 				$where = "ngasto IS NULL AND  codbanc=${dbcodbanc} AND aceptado='S'";
 				$mSQL = $this->db->update_string('gserchi', $data, $where);
 				$ban=$this->db->simple_query($mSQL);
-				if($ban==false){ memowrite($mSQL,'gser'); $error++; }
+				if($ban==false){ memowrite($mSQL,'gserchi'); $error++; }
 				$this->idgser=$idgser;
 			}
 		return ($error==0)? true : false;
