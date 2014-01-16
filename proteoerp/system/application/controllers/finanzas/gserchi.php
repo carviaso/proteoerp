@@ -1548,13 +1548,13 @@ class Gserchi extends Controller {
 
 		$edit->sucursal = new dropdownField('Sucursal','sucursal');
 		$edit->sucursal->options('SELECT codigo,sucursal FROM sucu ORDER BY sucursal');
-		$edit->sucursal->rule='max_length[2]|required';
-		$edit->codbanc->style = "width:180px";
+		$edit->sucursal->rule ='max_length[2]|required';
+		$edit->sucursal->style= "width:300px";
 
 		$edit->departa = new dropdownField('Departamento','departa');
-		$edit->departa->options("SELECT codigo, CONCAT_WS('-',codigo,departam) AS label FROM dept ORDER BY codigo");
-		$edit->departa->rule='max_length[2]';
-		$edit->codbanc->style = "width:180px";
+		$edit->departa->options("SELECT TRIM(depto) AS codigo, CONCAT_WS('-',depto,TRIM(descrip)) AS label FROM dpto WHERE tipo='G' ORDER BY depto");
+		$edit->departa->rule ='max_length[2]';
+		$edit->departa->style= "width:300px";
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 		$edit->estampa = new autoUpdateField('estampa' ,date('YmD'), date('Ymd'));

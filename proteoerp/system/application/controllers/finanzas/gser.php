@@ -68,8 +68,8 @@ class gser extends Controller {
 		$grid->setWpAdicional($WpAdic);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'creamga', 'img'=>'images/agrega4.png' , 'alt' => 'Crear gasto caja chica', 'label'=>'Gasto caja chica', 'tema'=>'proteo' ));
-		$grid->wbotonadd(array('id'=>'creaprv', 'img'=>'images/agrega4.png' , 'alt' => 'Crear proveedor'       , 'label'=>'Crear Proveedor',  'tema'=>'proteo'   ));
+		$grid->wbotonadd(array('id'=>'creamga', 'img'=>'images/agrega4.png' , 'alt' => 'Crear concepto de gasto', 'label'=>'Crear concepto de gasto', 'tema'=>'proteo' ));
+		$grid->wbotonadd(array('id'=>'creaprv', 'img'=>'images/agrega4.png' , 'alt' => 'Crear proveedor'        , 'label'=>'Crear Proveedor',  'tema'=>'proteo'   ));
 		$WestPanel = $grid->deploywestp();
 
 
@@ -225,7 +225,7 @@ class gser extends Controller {
 		});';
 
 
-		// Agrgar Proveedor
+		// Agregar Proveedor
 		$bodyscript .= '
 		jQuery("#creaprv").click(
 			function(){
