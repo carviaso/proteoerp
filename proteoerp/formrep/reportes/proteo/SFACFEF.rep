@@ -1,0 +1,140 @@
+$modbus=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_cli'),
+	'titulo'  =>'Buscar Cliente');
+
+$boton=$this->datasis->modbus($modbus);
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('tipo_doc','numero','a.fecha','a.nombre','hora',
+"SUM(totals*IF(tipo_doc='D',-1,1)) AS subtotal",
+"SUM(iva*IF(tipo_doc='D',-1,1)) AS impuesto",
+"SUM(totalg*IF(tipo_doc='D',-1,1)) AS grantotal",
+"SUM(totalg*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1) ) AS contado",
+"SUM(totalg*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1) ) AS credito",
+"COUNT(*) AS numfac");
+
+$filter->db->select($select);
+$filter->db->from('sfac a');
+$filter->db->join('scli AS b','a.cod_cli=b.cliente','LEFT');
+$filter->db->where("referen<>'P' AND tipo_doc<>'X' ");
+//$filter->db->groupby('fecha');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause='where';
+$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d');
+$filter->fechad->operator='>=';
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechah->operator='<=';
+$filter->fechad->rule='required|chfecha';
+$filter->fechah->rule='required|chfecha';
+
+$filter->cajero = new dropdownField('Cajero', 'cajero');
+$filter->cajero->db_name ='cajero';
+$filter->cajero->clause='where';
+$filter->cajero->option('','Todos');
+$filter->cajero->options("SELECT cajero, CONCAT(cajero,' ',nombre) nombre FROM scaj ORDER BY cajero ");
+$filter->cajero->operator='=';
+
+$filter->vd = new dropdownField('Vendedor', 'vd');
+$filter->vd->db_name ='vd';
+$filter->vd->clause='where';
+$filter->vd->option('','Todos');
+$filter->vd->options("SELECT vendedor, CONCAT(vendedor,' ',nombre) nombre FROM vend ORDER BY vendedor");
+$filter->vd->operator='=';
+
+$filter->cod_cli = new inputField('Cliente', 'cod_cli');
+$filter->cod_cli->db_name ='cod_cli';
+$filter->cod_cli->clause='where';
+$filter->cod_cli->operator='=';
+$filter->cod_cli->append($boton);
+
+$filter->gscli = new dropdownField('Grupo de Cliente', 'grupo');
+$filter->gscli->clause='where';
+$filter->gscli->db_name ='b.grupo';
+$filter->gscli->option('','Todos');
+$filter->gscli->options('SELECT grupo, gr_desc FROM grcl ORDER BY gr_desc');
+$filter->gscli->operator='=';
+
+$filter->agrupado = new dropdownField('Agrupado por', 'agrupado');
+$filter->agrupado->option('D','Dia');
+$filter->agrupado->option('M','Mes');
+$filter->agrupado->option('H','Hora');
+$filter->agrupado->clause='';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+
+	if(ISSET($_POST['agrupado']))
+	switch($_POST['agrupado']){
+	case 'H' :
+		$filter->db->groupby('MID(hora,1,4)');
+		break;
+	case 'D' :
+		$filter->db->groupby('fecha');
+		break;
+	case 'M' :
+		$filter->db->groupby('EXTRACT(YEAR_MONTH FROM fecha)');
+		break;
+	};
+
+	$mSQL=$this->rapyd->db->_compile_select();
+
+	//echo $mSQL;
+
+	$sobretabla='';
+	if (!empty($filter->cajero->newValue))   $sobretabla.='       Cajero: '.$filter->cajero->description;
+	if (!empty($filter->vd->newValue))       $sobretabla.='       Vendedor: '.$filter->vd->description;
+	if (!empty($filter->gscli->newValue))    $sobretabla.='       Grupo Cliente: '.$filter->gscli->description;
+	if (!empty($filter->agrupado->newValue)) $sobretabla.='       Agrupado por: '.$filter->agrupado->description;
+	if (!empty($filter->cod_cli->newValue))  $sobretabla.='       Cliente: ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_cli->newValue.'"');
+
+	$subtitu='';
+	if(!empty($_POST['fechad'])) $subtitu.=' Desde la fecha '.$_POST['fechad'];
+	if(!empty($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Listado de Ventas por Fecha");
+	$pdf->setSubTitulo($subtitu);
+	$pdf->setSobreTabla($sobretabla,7);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol('fecha'    ,20,'Fecha',    'C',8);
+	$pdf->AddCol('subtotal' ,26,'Ventas',   'R',8);
+	$pdf->AddCol('impuesto' ,26,'IVA',      'R',8);
+	$pdf->AddCol('grantotal',26,'Facturado','R',8);
+	$pdf->AddCol('contado'  ,26,'Contado',  'R',8);
+	$pdf->AddCol('credito'  ,26,'Crédito',  'R',8);
+	$pdf->AddCol('numfac'   ,18,'# Fact' ,  'R',8);
+	$pdf->AddCol('hora'     ,15,'Hora',     'R',8);
+
+	$pdf->setTotalizar('subtotal','impuesto','grantotal','contado','credito','numfac');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Ventas por Fecha Determinada</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

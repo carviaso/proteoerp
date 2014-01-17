@@ -1,0 +1,81 @@
+$base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, 'search'));
+$filter->title('Elija un formato de salida');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+	$this->db->select(array('TRIM(ubica) AS ubica','TRIM(ubides) AS ubides'));
+	$this->db->from('caub AS a');
+	$this->db->where('gasto' ,'N');
+	$this->db->where('invfis','N');
+	$query = $this->db->get();
+
+	foreach($query->result() as $row){
+		$obj='caub_'.$row->ubica;
+		$filter->$obj = new checkboxField($row->ubica.' '.$row->ubides, $obj, 'S','N');
+		$filter->$obj->insertValue = 'N';
+	}
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit','Descargar');
+$filter->build_form();
+if($this->rapyd->uri->is_set('search')){
+
+	$vals=array();
+	$this->db->select(array('TRIM(ubica) AS ubica','TRIM(ubides) AS ubides'));
+	$this->db->from('caub AS a');
+	$this->db->where('gasto' ,'N');
+	$this->db->where('invfis','N');
+	$query = $this->db->get();
+	$sel=array('a.codigo','b.descrip');
+
+	$amostrar=array('0001','0002','0003','VIG'); //Lista los almacenes que se desea mostrar
+	foreach($query->result() as $row){
+		if(count($amostrar)>0 && !in_array($row->ubica,$amostrar)) continue;
+
+		$ubica = $this->db->escape($row->ubica);
+		$ind   = 'N'.$row->ubica;
+		$vals[$ind]= $row->ubides;
+		$sel[] = "SUM((a.alma=${ubica})*a.existen) AS ${ind}";
+
+	}
+	$selec=implode(',',$sel);
+	$mSQL= "SELECT ${selec},c.nom_grup,b.grupo
+		FROM itsinv AS a
+		JOIN sinv AS b ON a.codigo=b.codigo
+		JOIN grup AS c ON b.grupo=c.grupo
+	GROUP BY b.grupo,a.codigo";
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Inventario por almacenes");
+	//$pdf->setSobreTabla($sobretabla,9);
+	//$pdf->setSubTitulo("Para la fecha: ".$this->input->post('fechad'));
+	//$pdf->seType('fecha','date');
+	$pdf->AddPage();
+
+	$pdf->setTableTitu(8,'Times');
+	$pdf->AddCol('codigo'   ,20,'Codigo'       ,'L',7);
+	$pdf->AddCol('descrip'  ,60,'Descripción'  ,'L',7);
+	foreach($vals AS $id=>$val){
+		$pdf->setType($id,'real');
+		$pdf->AddCol($id,20,$val,'R',7);
+	}
+
+	//$pdf->setTotalizar('cantvent');
+	$pdf->setGrupoLabel('Grupo: (<#grupo#>) <#nom_grup#>');
+	$pdf->setGrupo('grupo');
+	$pdf->Table();
+	$pdf->Output();
+}else{
+	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Inventario por almacenes</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

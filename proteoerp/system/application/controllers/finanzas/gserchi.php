@@ -33,7 +33,7 @@ class Gserchi extends Controller {
 			$estampa  = date('Y-m-d');
 			$hora     = date('H:i:s');
 
-			if($codbanc!=$cr){
+			if($cargo!=$cr){
 				$databan  = common::_traebandata($codbanc);
 				$datacar  = common::_traebandata($cargo);
 				if(!empty($datacar)){
@@ -316,6 +316,7 @@ class Gserchi extends Controller {
 				if($ban==false){ memowrite($mSQL,'gserchi'); $error++; }
 				$this->idgser=$idgser;
 			}
+		logusu('gserchi',"Genero gasto de caja chica ${numero}");
 		return ($error==0)? true : false;
 	}
 

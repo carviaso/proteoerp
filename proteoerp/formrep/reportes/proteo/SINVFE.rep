@@ -32,7 +32,7 @@ if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
 	$mSQL .= "(SELECT MAX(costoint.origen) FROM costos AS costoint ";
 	$mSQL .= "WHERE a.codigo=costoint.codigo AND MAX(a.fecha)=costoint.fecha ) origen ";
 	$mSQL .= "FROM costos AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo ";
-	$mSQL .= "WHERE a.fecha<=".$filter->fechad->newValue." AND SUBSTRING(b.tipo,1,1)='A' ";
+	$mSQL .= "WHERE a.fecha<=".$filter->fechad->newValue." AND SUBSTRING(b.tipo,1,1) IN ('A','F','L') ";
 	$mSQL .= "GROUP BY a.codigo,a.ubica ) AS aa ";
 	$mSQL .= "JOIN costos AS bb ON aa.codigo = bb.codigo AND aa.fecha=bb.fecha AND aa.origen=bb.origen AND aa.ubica=bb.ubica AND bb.salcant!=0 ";
 	if($xubica=='N'){
