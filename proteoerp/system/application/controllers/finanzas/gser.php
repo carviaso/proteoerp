@@ -23,10 +23,9 @@ class gser extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
+	//******************************************************************
 	//   Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -109,9 +108,9 @@ class gser extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
+	//******************************************************************
 	//Funciones de los Botones
-	//***************************
+	//
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '<script type="text/javascript">';
 
@@ -129,7 +128,7 @@ class gser extends Controller {
 			$.post("'.site_url('finanzas/gser/solo/create').'",
 			function(data){
 				$("#fgasto").html(data);
-				$("#fgasto").dialog({height: 600, width: 950, title: "Agregar Egreso"});
+				$("#fgasto").dialog({height: 550, width: 920, title: "Agregar Egreso"});
 				$( "#fgasto" ).dialog( "open" );
 			})
 		};';
@@ -313,7 +312,7 @@ class gser extends Controller {
 
 		$bodyscript .= '
 			$("#fgasto").dialog({
-				autoOpen: false, height: 500, width: 950, modal: true,
+				autoOpen: false, height: 450, width: 900, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;
@@ -398,9 +397,9 @@ class gser extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -608,147 +607,6 @@ class gser extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 6 }',
 		));
 
-		/*$grid->addField('monto1');
-		$grid->label('Monto1');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('codb2');
-		$grid->label('Codb2');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 2 }',
-		));
-
-
-		$grid->addField('tipo2');
-		$grid->label('Tipo2');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 1 }',
-		));
-
-
-		$grid->addField('cheque2');
-		$grid->label('Cheque2');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 12 }',
-		));
-
-
-		$grid->addField('comprob2');
-		$grid->label('Comprob2');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 60,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 6 }',
-		));
-
-
-		$grid->addField('monto2');
-		$grid->label('Monto2');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('codb3');
-		$grid->label('Codb3');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 2 }',
-		));
-
-
-		$grid->addField('tipo3');
-		$grid->label('Tipo3');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 1 }',
-		));
-
-
-		$grid->addField('cheque3');
-		$grid->label('Cheque3');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 150,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 15 }',
-		));
-
-
-		$grid->addField('comprob3');
-		$grid->label('Comprob3');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 60,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 6 }',
-		));
-
-
-		$grid->addField('monto3');
-		$grid->label('Monto3');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));*/
-
-
 		$grid->addField('credito');
 		$grid->label('Cr&eacute;dito');
 		$grid->params(array(
@@ -801,21 +659,6 @@ class gser extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 40 }',
 		));
-
-
-		/*$grid->addField('mdolar');
-		$grid->label('Mdolar');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));*/
 
 
 		$grid->addField('usuario');
@@ -908,18 +751,6 @@ class gser extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
-
-
-		/*$grid->addField('huerfano');
-		$grid->label('Huerfano');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 1 }',
-		));*/
 
 
 		$grid->addField('nfiscal');
@@ -1205,18 +1036,18 @@ class gser extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 2 }',
-		));
+		));*/
 
 
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
 			'align'         => "'center'",
-			'frozen'        => 'true',
+			'hidden'        => 'true',
 			'width'         => 40,
 			'editable'      => 'false',
 			'search'        => 'false'
-		));*/
+		));
 
 
 		$grid->showpager(true);
@@ -3552,7 +3383,7 @@ class gser extends Controller {
 		$edit->monto1->autocomplete=false;
 		$edit->monto1->showformat ='decimal';
 
-		$edit->credito= new inputField('Cr&eacute;dito', 'credito');
+		$edit->credito= new inputField('Monto a Cr&eacute;dito', 'credito');
 		$edit->credito->rule = 'numeric|positive';
 		$edit->credito->size = 10;
 		$edit->credito->showformat ='decimal';
@@ -3570,9 +3401,9 @@ class gser extends Controller {
 		$edit->reten->showformat ='decimal';
 		$edit->reten->type='inputhidden';
 
-		$edit->reteiva = new inputField('Ret.de IVA','reteiva');
+		$edit->reteiva = new inputField('Retencion de IVA','reteiva');
 		$edit->reteiva->rule = 'numeric|positive';
-		$edit->reteiva->size = 7;
+		$edit->reteiva->size = 10;
 		$edit->reteiva->maxlength=10;
 		$edit->reteiva->rule = 'callback_chreteiva';
 		$edit->reteiva->onchange ='totalizar()';
@@ -3588,7 +3419,7 @@ class gser extends Controller {
 		$edit->reteica->css_class='inputnum';
 		$edit->reteica->when=array('show');
 
-		$edit->totneto = new inputField('Neto','totneto');
+		$edit->totneto = new inputField('Monto Neto','totneto');
 		$edit->totneto->rule = 'numeric|positive';
 		$edit->totneto->size = 10;
 		$edit->totneto->maxlength=10;
@@ -3605,14 +3436,14 @@ class gser extends Controller {
 		//Campos para el detalle 1
 		//***************************
 		$edit->codigo = new inputField('Codigo <#o#>', 'codigo_<#i#>');
-		$edit->codigo->size=5;
+		$edit->codigo->size=7;
 		$edit->codigo->db_name='codigo';
 		//$edit->codigo->append($btn);
 		$edit->codigo->rule  = 'required';
 		$edit->codigo->rel_id= 'gitser';
 
 		$edit->descrip = new inputField('Descripcion <#o#>', 'descrip_<#i#>');
-		$edit->descrip->size=25;
+		$edit->descrip->size=50;
 		$edit->descrip->db_name='descrip';
 		$edit->descrip->maxlength=50;
 		$edit->descrip->rel_id='gitser';
@@ -3689,7 +3520,7 @@ class gser extends Controller {
 		$edit->codigorete->options('SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",codigo,activida)) AS activida FROM rete ORDER BY codigo');
 		$edit->codigorete->db_name='codigorete';
 		$edit->codigorete->rule   ='max_length[4]';
-		$edit->codigorete->style  ='width: 350px';
+		$edit->codigorete->style  ='width: 330px';
 		$edit->codigorete->rel_id ='gereten';
 		$edit->codigorete->onchange='post_codigoreteselec(<#i#>,this.value)';
 

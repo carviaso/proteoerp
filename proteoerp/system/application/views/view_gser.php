@@ -23,13 +23,6 @@ $campos.=' <td class="littletablerow" align="center"><a href=\'#\' onclick="del_
 $campos=$form->js_escape($campos);
 
 
-//foreach($form->detail_fields['gereten'] AS $ind=>$data){
-//	if(!empty($data['field'])){
-//		$ggereten[]=$data['field'];
-//	}
-//}
-
-
 $ccampos=$form->detail_fields['gereten'];
 $cgereten ='<tr id="tr_gereten_<#i#>">';
 //$cgereten.=' <td class="littletablerow">'.join('</td><td align="right">',$ggereten).'</td>';
@@ -500,32 +493,32 @@ function toggle() {
 	</tr>
 	<tr>
 		<td>
-		<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
+		<fieldset style='border: 1px outset #9AC8DA;background: #EFEFFF;'>
 		<!-- <legend class="titulofieldset" style='color: #114411;'>Documento</legend> -->
-		<table width="100%" style="margin: 0; width: 100%;">
+		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
-				<td width='90' class="littletableheader"><?php echo $form->tipo_doc->label  ?>*&nbsp;</td>
-				<td width='115' class="littletablerow">  <?php echo $form->tipo_doc->output ?>&nbsp; </td>
-				<td width='90' class="littletableheader"><?php echo $form->proveed->label   ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->proveed->output.$form->sprvtipo->output.$form->sprvreteiva->output  ?>&nbsp; </td>
+				<td width='90'  class="littletableheader"><?php echo $form->tipo_doc->label  ?>*&nbsp;</td>
+				<td width='115' class="littletablerow"   ><?php echo $form->tipo_doc->output ?>&nbsp; </td>
+				<td width='90'  class="littletableheader"><?php echo $form->proveed->label   ?>*&nbsp;</td>
+				<td             class="littletablerow"   ><?php echo $form->proveed->output.$form->sprvtipo->output.$form->sprvreteiva->output  ?>&nbsp; </td>
 				<td width='70'  class="littletableheader"><?php echo $form->ffactura->label  ?>*&nbsp;</td>
-				<td width='130' class="littletablerow">   <?php echo $form->ffactura->output ?>&nbsp; </td>
+				<td width='130' class="littletablerow"   ><?php echo $form->ffactura->output ?>&nbsp; </td>
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->numero->label  ?>*</td>
-				<td class="littletablerow">   <?php echo $form->numero->output ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->numero->output ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->nombre->label  ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->nombre->output ?>&nbsp; </td>
+				<td class="littletablerow"   ><?php echo $form->nombre->output ?>&nbsp; </td>
 				<td class="littletableheader"><?php echo $form->fecha->label   ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->fecha->output  ?>&nbsp; </td>
+				<td class="littletablerow"   ><?php echo $form->fecha->output  ?>&nbsp; </td>
 			</tr>
 			<tr>
 				<td class="littletableheader"><?php echo $form->nfiscal->label  ?>&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->nfiscal->output ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->nfiscal->output ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->compra->label   ?>&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->compra->output  ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->compra->output  ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->vence->label    ?>&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->vence->output   ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->vence->output   ?>&nbsp;</td>
 			</tr>
 		</table>
 		</fieldset>
@@ -534,21 +527,21 @@ function toggle() {
 	<tr>
 		<td>
 <?php if( !$solo) {?>
-		<fieldset style='border: 2px outset #9AC8DA;background: #EFEFFF;'>
+		<fieldset style='border: 1px outset #9AC8DA;background: #EFEFFF;'>
 		<legend class="titulofieldset" style='color: #114411;'>Detalle</legend>
 <?php } else { ?>
 		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:160px'>
 <?php } ?>
-		<table width='100%'>
+		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
-				<td class="littletableheaderdet">C&oacute;digo</td>
-				<td class="littletableheaderdet">Descripci&oacute;n del Gasto</td>
+				<td class="littletableheaderdet"              >C&oacute;digo</td>
+				<td class="littletableheaderdet"              >Descripci&oacute;n del Gasto</td>
 				<td class="littletableheaderdet" align="right">Precio</td>
 				<td class="littletableheaderdet" align="right">Tasa</td>
-				<td class="littletableheaderdet" align="right">IVA</td>
-				<td class="littletableheaderdet" align="right">Importe</td>
-				<td class="littletableheaderdet">Depto.</td>
-				<td class="littletableheaderdet">Sucursal</td>
+				<td class="littletableheaderdet" align="right" width="90px">IVA</td>
+				<td class="littletableheaderdet" align="right" width="110px">Importe</td>
+				<td class="littletableheaderdet"              >Depto.</td>
+				<td class="littletableheaderdet"              >Sucursal</td>
 				<?php if($form->_status!='show') {?>
 					<td class="littletableheaderdet">&nbsp;</td>
 				<?php } ?>
@@ -570,14 +563,14 @@ function toggle() {
 				}
 			?>
 			<tr id='tr_gitser_<?php echo $i ?>'>
-				<td class="littletablerow" nowrap><?php echo $form->$obj1->output ?></td>
-				<td class="littletablerow">       <?php echo $form->$obj2->output ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$obj3->output  ?></td>
-				<td class="littletablerow" align="right"><?php echo $ivaval ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$obj4->output  ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$obj5->output  ?></td>
-				<td class="littletablerow"><?php echo $form->$obj7->output  ?></td>
-				<td class="littletablerow"><?php echo $form->$obj8->output  ?></td>
+				<td class="littletablerow" nowrap       ><?php echo $form->$obj1->output; ?></td>
+				<td class="littletablerow"              ><?php echo $form->$obj2->output; ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$obj3->output;  ?></td>
+				<td class="littletablerow" align="right"><?php echo $ivaval; ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$obj4->output;  ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$obj5->output;  ?></td>
+				<td class="littletablerow"              ><?php echo $form->$obj7->output;  ?></td>
+				<td class="littletablerow"              ><?php echo $form->$obj8->output;  ?></td>
 
 				<?php if($form->_status!='show') {?>
 					<td class="littletablerow" align="center"><a href='#' onclick='del_gitser(<?php echo $i; ?>);return false;'><?php echo img("images/delete.jpg"); ?></a></td>
@@ -608,7 +601,7 @@ function toggle() {
 <?php } else { ?>
 		</div>
 <?php } ?>
-		<table width='100%' border='0' cellpadding='0' cellspacing='0'>
+		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr style="background:#DFDFDF;font-size:12px;font-weight:bold">
 		<?php if( $form->_status != 'show') {?>
 			<td width="90"><input name="btn_add_gitser" value="Agregar Gasto" onclick="add_gitser()" class="button" type="button"></td>
@@ -632,16 +625,16 @@ function toggle() {
 		<table width='100%' border='0' cellpadding='0' cellspacing='0' ><tr>
 		<td>
 <?php if( !$solo) {?>
-		<fieldset style='border: 2px outset #9AC8DA;background: #EFEFFF;'>
+		<fieldset style='border: 1px outset #9AC8DA;background: #EFEFFF;'>
 		<legend class="titulofieldset" style='color: #114411;'>Retenciones</legend>
 <?php } ?>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:80px'>
-		<table width='100%'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:90px;width:600px;'>
+		<table style="border-collapse:collapse;padding:0px;">
 			<tr>
 				<td class="littletableheaderdet">Retenci&oacute;n ISLR</td>
 				<td class="littletableheaderdet">Base</td>
-				<td class="littletableheaderdet" align="right">Porcentaje</td>
-				<td class="littletableheaderdet" align="right">Monto</td>
+				<td class="littletableheaderdet" align="right">Tasa%</td>
+				<td class="littletableheaderdet" align="right" width="100px">Monto</td>
 				<?php if($form->_status!='show') {?>
 					<td class="littletableheaderdet">&nbsp;</td>
 				<?php } ?>
@@ -672,15 +665,38 @@ function toggle() {
 		</fieldset>
 <?php } ?>
 		</td>
-		<td width="100" align='center' style="background:#FFFFFF;" valign='top'>
+		<td width="70px" align='center' style="background:#FFFFFF;" valign='top' border='1'>
 			<table width='100%'>
+
 		<?php if( $form->_status != 'show') {?>
-			<tr><td align='right'><input name="btn_add_gereten" value="Agregar" onclick="add_gereten()" class="button" type="button"></td></tr>
-			<tr><td align='right'><input name="btn_creten"      value="Calcular" onclick="calcularete()" class="button" type="button"></td></tr>
-			<tr><td align="right" style="font-size:12px;font-weight:bold;background:#EFEFEF">&nbsp;<?php echo $form->reten->output  ?></td></tr>
+			<tr><td align='left'><input name="btn_add_gereten" value="Agregar"  onclick="add_gereten()" class="button" type="button"></td></tr>
+			<tr><td align='left'><input name="btn_creten"      value="Calcular" onclick="calcularete()" class="button" type="button"></td></tr>
+			<!--tr><td align="right" style="font-size:12px;font-weight:bold;background:#EFEFEF">&nbsp;<?php echo $form->reten->output  ?></td></tr -->
 		<?php } ?>
 			</table>
 		</td>
+		<td>
+			<fieldset style='border: 1px outset #9AC8DA;background: #FFFBE9;'>
+			<table style="width:100%;border-collapse:collapse;padding:0px;">
+				<tr>
+					<td class="littletableheader" colspan='2'>Exonerar Retencion de IVA
+					<input type="checkbox" name="_rivaex" id="_rivaex" value="S"> </td>
+				</tr>
+				<tr>
+					<td class="littletableheader">           <?php echo $form->reteiva->label  ?>&nbsp;</td>
+					<td class="littletablerow" align='right'><?php echo $form->reteiva->output; ?>&nbsp;</td>
+				</tr>
+				<tr>
+					<td class="littletableheader">           <?php echo $form->credito->label  ?>&nbsp;</td>
+					<td class="littletablerow" align='right'><?php echo $form->credito->output ?>&nbsp;</td>
+				</tr>
+				<tr>
+					<td class="littletableheader">           <?php echo $form->totneto->label  ?>&nbsp;</td>
+					<td class="littletablerow" align='right'><?php echo $form->totneto->output ?>&nbsp;</td>
+				</tr>
+			</table>
+			</fieldset>
+		<td>
 		</tr>
 		</table>
 <?php if( !$solo) {?>
@@ -692,35 +708,38 @@ function toggle() {
 
 		<?php echo $form_end     ?>
 		</td>
+
+
 	</tr>
 	<tr>
 		<td align='center'>
 			<table width='100%'><tr><td valign='top'>
-			<fieldset style='border: 2px outset #9AC8DA;background: #FFFBE9;'>
+			<fieldset style='border: 1px outset #9AC8DA;background: #FFFBE9;'>
 			<legend class="titulofieldset" style='color: #114411;'>Forma de Pago</legend>
-			<table width='100%'>
+			<table style="width:100%;border-collapse:collapse;padding:0px;">
 				<tr>
+					<td>Forma de Pago:</td>
 					<td class="littletableheader"><?php echo $form->codb1->label   ?>&nbsp;</td>
 					<td class="littletablerow">   <?php echo $form->codb1->output  ?>&nbsp;</td>
 					<td class="littletableheader"><?php echo $form->tipo1->label   ?>&nbsp;</td>
 					<td class="littletablerow">   <?php echo $form->tipo1->output  ?>&nbsp;</td>
-				</tr>
-				<tr>
 					<td class="littletableheader"><?php echo $form->cheque1->label  ?>&nbsp;</td>
 					<td class="littletablerow">   <?php echo $form->cheque1->output ?>&nbsp;</td>
 					<td class="littletableheader"><?php echo $form->monto1->label   ?>&nbsp;</td>
 					<td class="littletablerow">   <?php echo $form->monto1->output  ?>&nbsp;</td>
 				</tr>
 				<tr>
+					<td>&nbsp;</td>
 					<td class="littletableheader"><?php echo $form->benefi->label   ?>&nbsp;</td>
-					<td colspan='3' class="littletablerow"><?php echo $form->benefi->output  ?>&nbsp;</td>
+					<td colspan='6' class="littletablerow"><?php echo $form->benefi->output  ?>&nbsp;</td>
 				</tr>
 			</table>
 			</fieldset>
 			</td><td valign='top'>
-			<fieldset style='border: 2px outset #9AC8DA;background: #FFFBE9;'>
+
+			<!--fieldset style='border: 2px outset #9AC8DA;background: #FFFBE9;'>
 			<legend class="titulofieldset" style='color: #114411;'>Totales</legend>
-			<table width='100%'>
+			<table style="width:100%;border-collapse:collapse;padding:0px;">
 				<tr>
 					<td class="littletableheader">           <?php echo $form->reteiva->label  ?>&nbsp;</td>
 					<td class="littletablerow" align='right'><?php
@@ -739,7 +758,7 @@ function toggle() {
 					<td class="littletablerow" align='right'><?php echo $form->totneto->output ?>&nbsp;</td>
 				</tr>
 			</table>
-			</fieldset>
+			</fieldset-->
 			</td></tr></table>
 		</td>
 	</tr>

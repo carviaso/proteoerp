@@ -200,8 +200,8 @@ class Invfis extends Controller {
 			}
 		}';
 
-		$filter = new DataFilter2('Filtro por Producto');
-		$filter->db->select("e.existen,e.modificado,e.contado,e.agregar,e.quitar,e.sustituir,a.tipo AS tipo,a.id,e.codigo,a.descrip,precio1,precio2,precio3,precio4,b.nom_grup AS nom_grup,b.grupo AS grupoid,c.descrip AS nom_linea,c.linea AS linea,d.descrip AS nom_depto,d.depto AS depto,e.id AS idfis,e.despacha");
+		$filter = new DataFilter2('');
+		$filter->db->select("e.existen,e.modificado,e.contado,e.agregar,e.quitar,e.sustituir,a.tipo AS tipo,a.id,e.codigo,a.descrip,precio1,precio2,precio3,precio4,b.nom_grup AS nom_grup,a.barras,b.grupo AS grupoid,c.descrip AS nom_linea,c.linea AS linea,d.descrip AS nom_depto,d.depto AS depto,e.id AS idfis,e.despacha");
 		$filter->db->from("${tabla} AS e");
 		$filter->db->join('sinv AS a','a.codigo=e.codigo');
 		$filter->db->join('grup AS b','a.grupo=b.grupo');
@@ -330,24 +330,25 @@ class Invfis extends Controller {
 		$titulo1 = anchor_popup("reportes/ver/INVFIS/${tabla}",'Conteo',$atts);
 		$titulo2 = anchor_popup('reportes/ver/SINVFIS','Hoja de trabajo',$atts);
 
-		$cana=15;
+		$cana=100;
 		$grid = new DataGrid('Reportes -->'.$titulo1.' '.$titulo2 );
 		$grid->per_page  = $cana;
 		$grid->use_function('caja','pinta');
 		$action = "javascript:window.location='".site_url($this->url)."'";
 		$grid->button('btn_regresa', 'Regresar', $action, 'TR');
 
-		$grid->column_orderby('Dpto'              ,'depto'                                                 ,'d.depto' ,'align=center');
-		$grid->column_orderby('Linea'             ,'linea'                                                 ,'c.linea' ,'align=center');
-		$grid->column_orderby('Grupo'             ,'grupoid'                                               ,'b.grupo' ,'align=center');
-		$grid->column_orderby('Codigo'            ,'<pinta><#modificado#>|<#codigo#>|<#idfis#>|a</pinta>'  ,'codigo'  ,'align=center');
+		$grid->column_orderby('Dpto',              'depto'                                                 ,'d.depto' ,'align=center');
+		$grid->column_orderby('Linea',             'linea'                                                 ,'c.linea' ,'align=center');
+		$grid->column_orderby('Grupo',             'grupoid'                                               ,'b.grupo' ,'align=center');
+		$grid->column_orderby('Barras',            'barras'                                               ,'b.grupo' ,'align=center');
+		$grid->column_orderby('Codigo',            '<pinta><#modificado#>|<#codigo#>|<#idfis#>|a</pinta>'  ,'codigo'  ,'align=center');
 		$grid->column_orderby('Descripci&oacute;n','<pinta><#modificado#>|<#descrip#>|<#idfis#>|b</pinta>' ,'descrip' );
-		$grid->column_orderby('P.Desp.'           ,'<pinta><#modificado#>|<#despacha#>|<#idfis#>|d</pinta>','despacha','align=right');
-		$grid->column_orderby('Anterior'          ,'<pinta><#modificado#>|<#existen#>|<#idfis#>|d</pinta>' ,'existen' ,'align=right');
-		$grid->column_orderby('Contado'           ,'<caja>c|<#contado#>|<#idfis#>|true|<#dg_row_id#>|0|'.$cana.'</caja>','contado','align=right');
-		$grid->column('Agregar'                   ,'<caja>a|<#agregar#>|<#idfis#>|false|<#dg_row_id#>|1|'.$cana.'</caja>');
-		$grid->column('Quitar'                    ,'<caja>q|<#quitar#>|<#idfis#>|false|<#dg_row_id#>|2|'.$cana.'</caja>');
-		$grid->column('Sustituir'                 ,'<caja>s||<#idfis#>|false|<#dg_row_id#>|3|'.$cana.'</caja>');
+		$grid->column_orderby('P.Desp.',           '<pinta><#modificado#>|<#despacha#>|<#idfis#>|d</pinta>','despacha','align=right');
+		$grid->column_orderby('Anterior',          '<pinta><#modificado#>|<#existen#>|<#idfis#>|d</pinta>' ,'existen' ,'align=right');
+		$grid->column_orderby('Contado',           '<caja>c|<#contado#>|<#idfis#>|true|<#dg_row_id#>|0|'.$cana.'</caja>','contado','align=right');
+		$grid->column('Agregar',                   '<caja>a|<#agregar#>|<#idfis#>|false|<#dg_row_id#>|1|'.$cana.'</caja>');
+		$grid->column('Quitar',                    '<caja>q|<#quitar#>|<#idfis#>|false|<#dg_row_id#>|2|'.$cana.'</caja>');
+		$grid->column('Sustituir',                 '<caja>s||<#idfis#>|false|<#dg_row_id#>|3|'.$cana.'</caja>');
 		$grid->build();
 		//echo $grid->db->last_query();
 
