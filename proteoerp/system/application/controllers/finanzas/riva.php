@@ -523,8 +523,10 @@ class Riva extends Controller {
 			function(id){ },
 			afterInsertRow:
 			function( rid, aData, rowe){
-				if(aData.transac.substr(0,1)=="_"){
-					$(this).jqGrid( "setCell", rid, "nrocomp","", {color:"#FFFFFF", background:"#C90623" });
+			if(aData.transac!=undefined){
+					if(aData.transac.substr(0,1)=="_"){
+						$(this).jqGrid( "setCell", rid, "nrocomp","", {color:"#FFFFFF", background:"#C90623" });
+					}
 				}
 			}
 		');
