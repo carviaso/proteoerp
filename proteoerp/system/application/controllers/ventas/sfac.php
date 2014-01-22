@@ -741,7 +741,7 @@ class Sfac extends Controller {
 		$grid->label('Estatus');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => $editar,
+			'editable'      => 'false',
 			'width'         => 40,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
@@ -2934,7 +2934,7 @@ class Sfac extends Controller {
 
 
 	//******************************************************************
-	// Guarda el Nro Fiscal 
+	// Guarda el Nro Fiscal
 	//
 	function guardafiscal() {
 		$factura = $this->input->post('factura');
@@ -3702,7 +3702,6 @@ class Sfac extends Controller {
 		$transac  = $do->get('transac');
 		$referen  = $do->get('referen');
 
-
 		//Pasa si es una prefactura
 		if($numero[0]=='_' && $tipo_doc=='F'){
 			return true;
@@ -3725,10 +3724,10 @@ class Sfac extends Controller {
 		}
 
 		if($fecha != $hoy){
-			$mSQL ="SELECT abonos FROM smov WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
+			$mSQL ="SELECT abonos FROM smov WHERE numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
 			$abono=floatval($this->datasis->dameval($mSQL));
 			if($referen!='C'){
-				$do->error_message_ar['pre_del']='No se puede anular de dias pasados.';
+				$do->error_message_ar['pre_del']='No se puede anular documentos de dias pasados.';
 				return false;
 			}elseif($inicial>0 || $abono>0){
 				$do->error_message_ar['pre_del']='No se puede anular el documento por tener abonos.';
@@ -3774,7 +3773,7 @@ class Sfac extends Controller {
 			$dbnnumero= $dbnumero;
 		}
 
-		$mSQL ="DELETE FROM smov WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
+		$mSQL ="DELETE FROM smov WHERE numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 
@@ -3786,7 +3785,7 @@ class Sfac extends Controller {
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 
-		$mSQL="UPDATE sitems SET tipoa='X', numero=${dbnnumero} WHERE tipoa=${dbtipo_doc} AND numa=${dbnumero}";
+		$mSQL="UPDATE sitems SET tipoa='X', numa=${dbnnumero} WHERE tipoa=${dbtipo_doc} AND numa=${dbnumero}";
 		$ban=$this->db->simple_query($mSQL);
 		if($ban==false){ memowrite($mSQL,'sfac'); }
 

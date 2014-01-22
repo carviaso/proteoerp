@@ -1456,15 +1456,16 @@ class Scst extends Controller {
 				}
 			}
 
-			$row = $this->datasis->damerow("SELECT fecha,tipo_doc, numero,proveed,transac,control FROM scst WHERE id=${id}");
+			$row = $this->datasis->damerow("SELECT fecha,tipo_doc, numero,proveed,transac,control,nfiscal FROM scst WHERE id=${id}");
 			if(empty($row)){
 				echo 'Registro no encontrado';
 				return false;
 			}
+			$transac = $row['transac'];
+			$control = $row['control'];
 
 			//if(isset($data['serie'])){
 			//	$data['numero'] = substr($data['serie'],-8);
-			//	$transac = $row['transac'];
 			//	if($data['numero'] != $row['numero']){
 			//		//Chequea si puede cambiar los valores
 			//		$this->db->from('scst');
@@ -1484,9 +1485,39 @@ class Scst extends Controller {
 			$this->db->where('id'   , $id);
 			$this->db->update('scst', $data);
 
-			logusu('SCST',"Registro control:${row[control]} MODIFICADO");
-			echo 'Registro Modificado';
+			//if($data['numero'] != $row['numero']){
+			//	//Cambia el detalle
+			//	$this->db->where('control',$control);
+			//	$this->db->update('itscst',array('numero'=>$data['numero']));
+            //
+			//	//Cambia la retencion ISLR
+			//	$this->db->where('idd'     ,$id);
+			//	$this->db->update('gereten',array('numero'=>$data['numero']));
+            //
+			//	//Cambia las aplicaciones
+			//	$this->db->where('numero'  ,$row['numero']);
+			//	$this->db->where('tipo_doc',$row['tipo_doc']);
+			//	$this->db->where('cod_prv' ,$row['proveed']);
+			//	$this->db->update('itppro' ,array('numero'=>$data['numero']));
+			//}
 
+			if($data['nfiscal'] != $row['nfiscal']){
+				//Cambia la retencion de IVA
+				$this->db->where('transac',$transac);
+				$this->db->update('riva'  ,array('nfiscal'=>$data['nfiscal']));
+				//$this->db->update('riva'  ,array('numero'=>$data['numero'],'nfiscal'=>$data['nfiscal']));
+
+				//Cambia la CxC
+				$this->db->where('transac' ,$transac);
+				$this->db->where('tipo_doc',$row['tipo_doc']);
+				$this->db->where('fecha'   ,$row['fecha']);
+				$this->db->where('cod_prv' ,$row['proveed']);
+				$this->db->update('sprm'   ,array('nfiscal'=>$data['nfiscal']));
+				//$this->db->update('sprm'   ,array('numero'=>$data['numero'],'nfiscal'=>$data['nfiscal']));
+			}
+
+			logusu('SCST','Registro control:'.$row['control'].' MODIFICADO');
+			echo 'Registro Modificado';
 		}elseif($oper == 'del'){
 			echo 'Deshabilitado';
 		}

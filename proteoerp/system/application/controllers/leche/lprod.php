@@ -43,7 +43,8 @@ class Lprod extends Controller {
 		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir','label'=>'Reimprimir Documento'));
 
 		if($this->datasis->sidapuede('LCIERRE','INCLUIR%')){
-			$grid->wbotonadd(array('id'=>'bcierre', 'img'=>'images/candado.png' ,'alt' => 'Cierre Producci&oacute;n','label'=>'Cierre Producci&oacute;n'));
+			$grid->wbotonadd(array('id'=>'bcierre', 'img'=>'images/candado.png' ,'alt' => 'Cierre Producci&oacute;n'    ,'label'=>'Cierre Producci&oacute;n'));
+			$grid->wbotonadd(array('id'=>'bconsol', 'img'=>'images/acuerdo.png' ,'alt' => 'Consolidar Producci&oacute;n','label'=>'Consolidar Producci&oacute;n'));
 		}
 		$WestPanel = $grid->deploywestp();
 
@@ -92,7 +93,7 @@ class Lprod extends Controller {
 		$bodyscript .= '
 		function lproddel() {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				if(confirm(" Seguro desea eliminar el registro?")){
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);
 					mId = id;
@@ -110,34 +111,36 @@ class Lprod extends Controller {
 		$bodyscript .= '
 		function lprodshow() {
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				$.post("'.site_url($this->url.'dataedit/show').'/"+id,
 					function(data){
 						$("#fshow").html(data);
 						$("#fshow").dialog( "open" );
 					});
-			} else {
+			}else{
 				$.prompt("<h1>Por favor Seleccione un registro</h1>");
 			}
 		};';
 
 		$bodyscript .= '
 		function lprodedit() {
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog( "open" );
 				});
-			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
 		};';
 
 
 		//Wraper de javascript
 		$bodyscript .= '
-		$(function() {
+		$(function(){
 			$("#dialog:ui-dialog").dialog( "destroy" );
 			var mId = 0;
 			var montotal = 0;
@@ -151,37 +154,76 @@ class Lprod extends Controller {
 
 		$bodyscript .= '
 		jQuery("#bcierre").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret      = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				var idcierre = $.ajax({ type: "POST", url: "'.site_url($this->url.'getcierre').'/"+ret.fecha, async: false }).responseText;
 
-				if(idcierre == "0"){
-					$.post("'.site_url('leche/lcierre/dataedit/').'/"+ret.fecha+"/create",
-					function(data){
+
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				if(ret.status!="A"){
+					$.prompt("<h1>Solo se pueden cerrar las producciones abiertas</h1>");
+				}else{
+					mId = id;
+					$.post("'.site_url($this->url.'datacie/modify').'/"+id, function(data){
+						$("#fedita").html(data);
+						$("#fedita").dialog( "open" );
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
+
+		$bodyscript .= '
+		jQuery("#bconsol").click( function(){
+
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				if(ret.status=="C"){
+					mId = id;
+					$.post("'.site_url($this->url.'datacon/modify').'/"+id, function(data){
 						$("#fedita").html(data);
 						$("#fedita").dialog( "open" );
 					});
 				}else{
-					var status = $.ajax({ type: "POST", url: "'.site_url($this->url.'getstatus').'/"+ret.fecha, async: false }).responseText;
-
-					if(status=="A"){
-						$.post("'.site_url('leche/lcierre/dataedit/').'/"+ret.fecha+"/modify/"+idcierre,
-						function(data){
-							$("#fedita").html(data);
-							$("#fedita").dialog( "open" );
-						});
-					}else{
-						$.post("'.site_url('leche/lcierre/dataedit/').'/show/"+idcierre,
-						function(data){
-							$("#fshow").html(data);
-							$("#fshow").dialog( "open" );
-						});
-					}
+					$.prompt("<h1>Debe cerrar primero la producci&oacute;n para consolidarla</h1>");
 				}
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
+
+
+			//var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			//if (id)	{
+			//	var ret      = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+			//	var idcierre = $.ajax({ type: "POST", url: "'.site_url($this->url.'getcierre').'/"+ret.fecha, async: false }).responseText;
+            //
+			//	if(idcierre == "0"){
+			//		$.post("'.site_url('leche/lcierre/dataedit/').'/"+ret.fecha+"/create",
+			//		function(data){
+			//			$("#fedita").html(data);
+			//			$("#fedita").dialog( "open" );
+			//		});
+			//	}else{
+			//		var status = $.ajax({ type: "POST", url: "'.site_url($this->url.'getstatus').'/"+ret.fecha, async: false }).responseText;
+            //
+			//		if(status=="A"){
+			//			$.post("'.site_url('leche/lcierre/dataedit/').'/"+ret.fecha+"/modify/"+idcierre,
+			//			function(data){
+			//				$("#fedita").html(data);
+			//				$("#fedita").dialog( "open" );
+			//			});
+			//		}else{
+			//			$.post("'.site_url('leche/lcierre/dataedit/').'/show/"+idcierre,
+			//			function(data){
+			//				$("#fshow").html(data);
+			//				$("#fshow").dialog( "open" );
+			//			});
+			//		}
+			//	}
+			//} else {
+			//	$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
+			//}
 		});';
 
 		$bodyscript .= '
@@ -252,6 +294,16 @@ class Lprod extends Controller {
 
 		$grid->addField('id');
 		$grid->label('N&uacute;mero');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 50,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
+
+		$grid->addField('status');
+		$grid->label('Estatus');
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
@@ -373,6 +425,19 @@ class Lprod extends Controller {
 				}
 			}'
 		);
+
+		$grid->setAfterInsertRow('
+			function( rid, aData, rowe){
+				if(aData.status == "A"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#047D04" });
+				}else if(aData.status == "C"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#EFCD00" });
+				}else if(aData.status == "O"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#1D1F7D" });
+				}
+			}
+		');
+
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
@@ -461,7 +526,7 @@ class Lprod extends Controller {
 			}
 
 		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM lprod WHERE id=$id");
+			$meco = $this->datasis->dameval("SELECT ${mcodp} FROM lprod WHERE id=${id}");
 			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM lprod WHERE id='$id' ");
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
@@ -478,7 +543,7 @@ class Lprod extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -675,12 +740,21 @@ class Lprod extends Controller {
 
 		$edit->itlitros = new inputField('litros','itlitros_<#i#>');
 		$edit->itlitros->db_name = 'litros';
-		$edit->itlitros->rule='max_length[12]|numeric|required|mayorcero|callback_chlitros[<#i#>]';
+		$edit->itlitros->rule='max_length[12]|numeric|mayorcero|callback_chlitros[<#i#>]';
 		$edit->itlitros->css_class='inputnum';
 		$edit->itlitros->size =14;
 		$edit->itlitros->maxlength =12;
 		$edit->itlitros->onkeyup='totalizar();';
 		$edit->itlitros->rel_id   ='itlprod';
+
+		$edit->itbufala = new inputField('bufala','itbufala_<#i#>');
+		$edit->itbufala->db_name = 'bufala';
+		$edit->itbufala->rule='max_length[12]|numeric|mayorcero|callback_chlitros[<#i#>]';
+		$edit->itbufala->css_class='inputnum';
+		$edit->itbufala->size =14;
+		$edit->itbufala->maxlength =12;
+		$edit->itbufala->onkeyup='totalizar();';
+		$edit->itbufala->rel_id   ='itlprod';
 		//Fin del detalle
 
 		$edit->usuario = new autoUpdateField('usuario', $this->secu->usuario(), $this->secu->usuario());
@@ -702,8 +776,200 @@ class Lprod extends Controller {
 		}
 	}
 
+	function datacon(){
+		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+		});';
+
+		$edit = new DataEdit('Consolidacion de Producci&oacute;n', 'lprod');
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		$edit->post_process('insert','_post_con_insert');
+		$edit->post_process('update','_post_con_update');
+		$edit->post_process('delete','_post_con_delete');
+		$edit->pre_process( 'insert', '_pre_con_insert');
+		$edit->pre_process( 'update', '_pre_con_update');
+		$edit->pre_process( 'delete', '_pre_con_delete');
+
+		$edit->codigo = new inputField('Producto','codigo');
+		$edit->codigo->rule='';
+		$edit->codigo->size =17;
+		$edit->codigo->maxlength =15;
+		$edit->codigo->mode='autohide';
+
+		$edit->descrip = new inputField('Descripci&oacute;n','descrip');
+		$edit->descrip->rule='';
+		$edit->descrip->size =47;
+		$edit->descrip->in='codigo';
+		$edit->descrip->maxlength =45;
+		$edit->descrip->mode='autohide';
+
+		$edit->fecha = new dateField('Fecha de producci&oacute;n','fecha');
+		$edit->fecha->mode='autohide';
+
+		$edit->litros = new inputField('Litros procesados','litros');
+		$edit->litros->rule='numeric';
+		$edit->litros->css_class='inputnum';
+		$edit->litros->size =14;
+		$edit->litros->maxlength =12;
+		$edit->litros->mode='autohide';
+
+		$edit->unidades = new inputField('Unidades Producidas','unidades');
+		$edit->unidades->mode = 'autohide';
+
+		$edit->peso = new inputField('Peso Producido','peso');
+		$edit->peso->rule='integer|required';
+		$edit->peso->css_class='inputonlynum';
+		$edit->peso->size =12;
+		$edit->peso->maxlength =10;
+
+		$edit->status = new autoUpdateField('status' ,'C', 'C');
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+	function _pre_con_update($do){
+		$status = $do->get('status');
+		if($status=='C'){
+			$do->error_message_ar['pre_upd']='Debe primero cerrar la produccion para luego consolidar';
+			return false;
+		}
+		$do->set('status','O');
+		return true;
+	}
+
+	function _pre_con_insert($do){
+		$do->error_message_ar['pre_ins']='No permitido';
+		return false;
+	}
+
+	function _pre_con_delete($do){
+		$do->error_message_ar['pre_del']='No permitido';
+		return false;
+	}
+
+	function _post_con_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
+	function _post_con_delete($do){ }
+
+
+	function datacie(){
+		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+		});
+		';
+
+		$edit = new DataEdit('Cierre de producci&oacute;n', 'lprod');
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		$edit->post_process('insert','_post_con_insert');
+		$edit->post_process('update','_post_con_update');
+		$edit->post_process('delete','_post_con_delete');
+		$edit->pre_process( 'insert', '_pre_con_insert');
+		$edit->pre_process( 'update', '_pre_con_update');
+		$edit->pre_process( 'delete', '_pre_con_delete');
+
+		$edit->codigo = new inputField('Producto','codigo');
+		$edit->codigo->rule='';
+		$edit->codigo->size =17;
+		$edit->codigo->maxlength =15;
+		$edit->codigo->mode='autohide';
+
+		$edit->descrip = new inputField('Descripci&oacute;n','descrip');
+		$edit->descrip->rule='';
+		$edit->descrip->size =47;
+		$edit->descrip->in='codigo';
+		$edit->descrip->maxlength =45;
+		$edit->descrip->mode='autohide';
+
+		$edit->fecha = new dateField('Fecha de producci&oacute;n','fecha');
+		$edit->fecha->mode='autohide';
+
+		$edit->litros = new inputField('Litros procesados','litros');
+		$edit->litros->rule='numeric';
+		$edit->litros->css_class='inputnum';
+		$edit->litros->size =14;
+		$edit->litros->maxlength =12;
+		$edit->litros->mode='autohide';
+
+		$edit->unidades = new inputField('Unidades Producidas','unidades');
+		$edit->unidades->rule='integer|required';
+		$edit->unidades->css_class='inputonlynum';
+		$edit->unidades->size =12;
+		$edit->unidades->maxlength =10;
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+	function _pre_cie_update($do){
+		$status = $do->get('status');
+		if($status=='C'){
+			$do->error_message_ar['pre_upd']='Debe primero cerrar la produccion para luego consolidar';
+			return false;
+		}
+		$do->set('status','C');
+		return true;
+	}
+
+	function _pre_cie_insert($do){
+		$do->error_message_ar['pre_ins']='No permitido';
+		return false;
+	}
+
+	function _pre_cie_delete($do){
+		$do->error_message_ar['pre_del']='No permitido';
+		return false;
+	}
+
+	function _post_cie_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
+	function _post_cie_delete($do){ }
+
 	function chlitros($litros,$ind){
-		$litros = round($litros,2);
+		$bufala = round(floatval($this->input->post('itbufala_'.$ind)),2);
+		$vaca   = round(floatval($this->input->post('itlitros_'.$ind)),2);
+		$litros = $vaca+$bufala;
+
 		$ruta   = $this->input->post('codrut_'.$ind);
 		$fecha  = human_to_dbdate($this->input->post('fecha'));
 		$id     = $this->input->post('itid_'.$ind);
@@ -712,9 +978,6 @@ class Lprod extends Controller {
 		}else{
 			$ww='';
 		}
-
-		//$this->validation->set_message('chlitros',$fecha);
-		//return false;
 
 		$dbfecha= $this->db->escape($fecha);
 		$dbruta = $this->db->escape($ruta);
@@ -735,7 +998,7 @@ class Lprod extends Controller {
 
 	function getcierre($fecha){
 		$dbfecha = $this->db->escape($fecha);
-		$cierre  = $this->datasis->dameval("SELECT id FROM lcierre WHERE fecha=$dbfecha");
+		$cierre  = $this->datasis->dameval("SELECT id FROM lcierre WHERE fecha=${dbfecha}");
 		if(empty($cierre)){
 			echo '0';
 		}else{
@@ -745,7 +1008,7 @@ class Lprod extends Controller {
 
 	function getstatus($fecha){
 		$dbfecha = $this->db->escape($fecha);
-		$status = $this->datasis->dameval("SELECT status FROM lcierre WHERE fecha=$dbfecha");
+		$status = $this->datasis->dameval("SELECT status FROM lcierre WHERE fecha=${dbfecha}");
 		if($status=='A'){
 			echo 'A';
 		}else{
@@ -753,13 +1016,13 @@ class Lprod extends Controller {
 		}
 	}
 
-
 	function _pre_insert($do){
 		//$do->set('fecha',date('Y-m-d'));
 		$leche  = floatval($do->get('inventario'));
 		$fecha  = $do->get('fecha');
 		$dbfecha= $this->db->escape($fecha);
-		$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
+		$cana   = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM lcierre WHERE fecha=".$dbfecha);
+		$do->set('status','A');
 
 		if($cana>0){
 			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
@@ -770,10 +1033,14 @@ class Lprod extends Controller {
 		$itcana=$do->count_rel('itlprod');
 		for($i=0;$i<$itcana;$i++){
 			$codrut = $do->get_rel('itlprod','codrut' ,$i);
-			if(empty($codrut)){
+			$vaca   = floatval($do->get_rel('itlprod','litros' ,$i));
+			$bufala = floatval($do->get_rel('itlprod','bufala' ,$i));
+			$pleche = $vaca+$bufala;
+
+			if(empty($codrut) || $pleche != 0 ){
 				$do->rel_rm('itlprod',$i);
 			}else{
-				$leche += floatval($do->get_rel('itlprod','litros' ,$i));
+				$leche += $pleche;
 			}
 		}
 
@@ -786,13 +1053,18 @@ class Lprod extends Controller {
 	}
 
 	function _pre_update($do){
+		$status = $do->get('status');
+		if($status!='A'){
+			$do->error_message_ar['pre_upd'] = $do->error_message_ar['update'] = 'Solo se pueden modificar las producciones abiertas.';
+			return false;
+		}
 		return $this->_pre_insert($do);
 	}
 
 	function _pre_delete($do){
 		$fecha  = $do->get('fecha');
 		$dbfecha= $this->db->escape($fecha);
-		$cana   = $this->datasis->dameval("SELECT COUNT(*) FROM lcierre WHERE fecha=".$dbfecha);
+		$cana   = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM lcierre WHERE fecha=".$dbfecha);
 
 		if($cana>0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete'] = 'Ya el d&iacute;a '.dbdate_to_human($fecha).' fue cerrado.';
@@ -803,17 +1075,17 @@ class Lprod extends Controller {
 
 	function _post_insert($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits ${primary} ");
 	}
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${primary} ");
 	}
 
 	function _post_delete($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		logusu($do->table,"Elimino $this->tits ${primary} ");
 	}
 
 	function instalar(){
@@ -824,10 +1096,11 @@ class Lprod extends Controller {
 				`descrip` VARCHAR(45) NULL DEFAULT NULL,
 				`fecha` DATE NULL DEFAULT NULL,
 				`peso` DECIMAL(12,2) NULL DEFAULT NULL,
+				`unidades` INT(10) NULL DEFAULT NULL,
+				`producido` DECIMAL(12,2) NULL DEFAULT NULL,
+				`status` CHAR(1) NOT NULL DEFAULT 'A',
 				`litros` DECIMAL(12,2) NULL DEFAULT NULL,
 				`inventario` DECIMAL(12,2) NULL DEFAULT NULL,
-				`grasa` DECIMAL(12,2) NULL DEFAULT NULL,
-				`acidez` DECIMAL(12,2) NULL DEFAULT NULL,
 				`estampa` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
 				`usuario` VARCHAR(15) NULL DEFAULT NULL,
 				PRIMARY KEY (`id`),
@@ -842,25 +1115,38 @@ class Lprod extends Controller {
 		$campos=$this->db->list_fields('lprod');
 		if(!in_array('grasa',$campos)){
 			$mSQL="ALTER TABLE `lprod` ADD COLUMN `grasa` DECIMAL(12,2) NULL DEFAULT NULL AFTER `inventario`";
+			$this->db->simple_query($mSQL);
 		}
 
 		if(!in_array('acidez',$campos)){
 			$mSQL="ALTER TABLE `lprod` ADD COLUMN `acidez` DECIMAL(12,2) NULL DEFAULT NULL AFTER `grasa`";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('unidades',$campos)){
+			$mSQL = "ALTER TABLE `lprod` ADD COLUMN `unidades` INT(10) NULL DEFAULT NULL AFTER `peso`, ADD COLUMN `producido` DECIMAL(12,2) NULL DEFAULT NULL AFTER `unidades`, ADD COLUMN `status` CHAR(1) NOT NULL DEFAULT 'A' AFTER `producido`";
+			$this->db->simple_query($mSQL);
 		}
 
 		if(!$this->db->table_exists('itlprod')){
-			$mSQL = "
-			CREATE TABLE `itlprod` (
+			$mSQL = "CREATE TABLE `itlprod` (
 				`id` INT(10) NOT NULL AUTO_INCREMENT,
 				`id_lprod` INT(10) NOT NULL DEFAULT '0',
 				`codrut` CHAR(4) NOT NULL DEFAULT '0',
 				`nombre` VARCHAR(50) NOT NULL DEFAULT '0',
 				`litros` DECIMAL(12,2) NOT NULL DEFAULT '0.00',
-				PRIMARY KEY (`id`)
+				`bufala` DECIMAL(12,2) NOT NULL DEFAULT '0.00',
+				PRIMARY KEY (`id`),
+				INDEX `id_lprod` (`id_lprod`)
 			)
 			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM
-			AUTO_INCREMENT=0;";
+			ENGINE=MyISAM";
+			$this->db->simple_query($mSQL);
+		}
+
+		$campos=$this->db->list_fields('itlprod');
+		if(!in_array('bufala',$campos)){
+			$mSQL="ALTER TABLE `itlprod` ADD COLUMN `bufala` DECIMAL(12,2) NOT NULL DEFAULT '0.00' AFTER `litros`";
 			$this->db->simple_query($mSQL);
 		}
 

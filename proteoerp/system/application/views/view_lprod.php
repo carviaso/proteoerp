@@ -14,6 +14,7 @@ $scampos  ='<tr id="tr_itlprod_<#i#>">';
 $scampos .='<td class="littletablerow" align="center" >'.$campos['itcodrut']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="center" >'.$campos['itnombre']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="center" >'.$campos['itlitros']['field'].'</td>';
+$scampos .='<td class="littletablerow" align="center" >'.$campos['itbufala']['field'].'</td>';
 $scampos .='<td class="littletablerow"><a href=# onclick="del_itlprod(<#i#>);return false;">'.img('images/delete.jpg').'</a></td>';
 $scampos .='</td></tr>';
 $campos=$form->js_escape($scampos);
@@ -78,7 +79,18 @@ $(function(){
 function totalizar(){
 	var litros = Number($('#inventario').val());
 
+	//litros de vaca
 	var arr=$('input[name^="itlitros_"]');
+	jQuery.each(arr, function() {
+		nom=this.name
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			litros = litros+Number(Math.abs(this.value));
+		}
+	});
+
+	//litros de bufala
+	var arr=$('input[name^="itbufala_"]');
 	jQuery.each(arr, function() {
 		nom=this.name
 		pos=this.name.lastIndexOf('_');
@@ -184,7 +196,8 @@ function autocod(id){
 	<tr style='background:#030B7A;color:#FDFDFD;font-size:10pt;'>
 		<th align="center">Ruta</th>
 		<th align="center">Nombre</th>
-		<th align="center">Litros</th>
+		<th align="center">Litros V.</th>
+		<th align="center">Litros B.</th>
 		<?php if($form->_status!='show') {?>
 			<th align="center">&nbsp;</th>
 		<?php } ?>
@@ -196,11 +209,13 @@ function autocod(id){
 		$it_codrut  = "itcodrut_${i}";
 		$it_nombre  = "itnombre_${i}";
 		$it_litros  = "itlitros_${i}";
+		$it_bufala  = "itbufala_${i}";
 ?>
 	<tr id='tr_itlprod_<?php echo $i; ?>'>
 		<td class="littletablerow" align="center"><?php echo $form->$it_codrut->output; if(isset($form->$it_id)) echo $form->$it_id->output;  ?></td>
 		<td class="littletablerow" align="center"><?php echo $form->$it_nombre->output;  ?></td>
 		<td class="littletablerow" align="center"><?php echo $form->$it_litros->output;  ?></td>
+		<td class="littletablerow" align="center"><?php echo $form->$it_bufala->output;  ?></td>
 		<?php if($form->_status!='show') { ?>
 			<td class="littletablerow"><a href=# onclick="del_itlprod(<?php echo $i; ?>);return false;"><?php echo img('images/delete.jpg'); ?></a></td>
 		<?php } ?>
@@ -209,7 +224,7 @@ function autocod(id){
 	$mod=!$mod;
 	} ?>
 	<tr id='__UTPL__lprod'>
-		<td colspan='<?php echo ($form->_status!='show')? 4: 3 ?>' class="littletableheaderdet">&nbsp;</td>
+		<td colspan='<?php echo ($form->_status!='show')? 5: 4 ?>' class="littletableheaderdet">&nbsp;</td>
 	</tr>
 </table>
 </div>
