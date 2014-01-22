@@ -472,10 +472,9 @@ function totalizarpitem(){
 		}
 	});
 	tota=roundNumber(tota,2);
-	$("#pond").val(tota);
-	$("#ultimo").val(tota);
-	calculos('S');
-	//requeridos();
+	//$("#pond").val(tota);
+	//$("#ultimo").val(tota);
+	//calculos('S');
 }
 
 function autocodpitem(id){

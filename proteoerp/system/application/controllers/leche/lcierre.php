@@ -1,8 +1,8 @@
 <?php
 class Lcierre extends Controller {
 	var $mModulo = 'LCIERRE';
-	var $titp    = 'Modulo de cierre de producci&oacute;n';
-	var $tits    = 'Modulo de cierre de producci&oacute;n';
+	var $titp    = 'Modulo de cierre de jornada';
+	var $tits    = 'Modulo de cierre de jornada';
 	var $url     = 'leche/lcierre/';
 
 	function Lcierre(){
@@ -218,10 +218,8 @@ class Lcierre extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 

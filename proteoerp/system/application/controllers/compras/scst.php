@@ -193,11 +193,10 @@ class Scst extends Controller {
 		function scstedit() {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				if(ret.actuali >= ret.fecha){
 					$.prompt("<h1>Documento ya actualizado</h1>Debe reversarlo primero si desea hacer modificaciones");
-				} else {
-					mId = id;
+				}else{
 					$.post("'.site_url('compras/scst/solo/modify').'/"+id, function(data){
 						$("#factuali").html("");
 						$("#fvehi").html("");

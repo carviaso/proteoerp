@@ -178,15 +178,13 @@ function autocod(id){
 	<tr>
 		<td><b><?php echo $form->litros->label;      ?></b></td>
 		<td>   <?php echo $form->litros->output;     ?></td>
-		<td><b><?php echo $form->grasa->label;       ?></b></td>
-		<td>   <?php echo $form->grasa->output;      ?></td>
-		<td><b><?php echo $form->codigo->label;      ?></b><?php echo $form->codigo->output;    ?></td>
-		<td>   <?php echo $form->descrip->output;    ?></td>
+		<td colspan='2'><b><?php echo $form->codigo->label;      ?></b><?php echo $form->codigo->output;    ?></td>
+		<td colspan='2'>   <?php echo $form->descrip->output;    ?></td>
 	</tr><tr>
 		<td><b><?php echo $form->fecha->label;       ?></b></td>
 		<td>   <?php echo $form->fecha->output;      ?></td>
-		<td><b><?php echo $form->acidez->label;      ?></b></td>
-		<td>   <?php echo $form->acidez->output;     ?></td>
+		<td><b><?php echo $form->grasa->label;       ?></b></td>
+		<td>   <?php echo $form->grasa->output;      ?></td>
 		<td><b><?php echo $form->inventario->label;  ?></b></td>
 		<td>   <?php echo $form->inventario->output; ?></td>
 	</tr>
