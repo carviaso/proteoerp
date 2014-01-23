@@ -46,6 +46,8 @@ $scampos2  ='<tr id="tr_sinvpitem_<#i#>">';
 $scampos2 .='<td class="littletablerow" align="left" >'.$campos2['it2codigo']['field'].'</td>';
 $scampos2 .='<td class="littletablerow" align="left" >'.$campos2['it2descrip']['field'].'</td>';
 $scampos2 .='<td class="littletablerow" align="right">'.$campos2['it2cantidad']['field'].'</td>';
+$scampos2 .='<td class="littletablerow" align="left" >'.$campos2['itunidad']['field'].'</td>';
+$scampos2 .='<td class="littletablerow" align="right">'.$campos2['itfactor']['field'].'</td>';
 $scampos2 .='<td class="littletablerow" align="right">'.$campos2['it2merma']['field'];
 $ocultos2=array('ultimo','pond','formcal','id_sinv');
 foreach($ocultos2 as $obj){
@@ -1481,10 +1483,13 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 	<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:170px'>
 		<table width='100%' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL_SINVPITEM__'>
-				<td bgcolor='#7098D0'            ><b>C&oacute;digo     </b></td>
-				<td bgcolor='#7098D0'            ><b>Descripci&oacute;n</b></td>
-				<td bgcolor='#7098D0' align=right><b>Cantidad          </b></td>
-				<td bgcolor='#7098D0' align=right><b>Merma &#37;       </b></td>
+				<td bgcolor='#7098D0'              ><b>C&oacute;digo     </b></td>
+				<td bgcolor='#7098D0'              ><b>Descripci&oacute;n</b></td>
+				<td bgcolor='#7098D0' align='right'><b>Cantidad          </b></td>
+				<td bgcolor='#7098D0' align='right'><b>Merma &#37;       </b></td>
+				<td bgcolor='#7098D0'              ><b>Unidad;</b>       </td>
+				<td bgcolor='#7098D0' align='right'><b>Merma &#37;       </b></td>
+
 				<?php if($form->_status!='show') {?>
 					<td  bgcolor='#7098D0' align='center'><b>&nbsp;</b></td>
 				<?php } ?>
@@ -1495,6 +1500,10 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				$it2descrip  = "it2descrip_${i}";
 				$it2cantidad = "it2cantidad_${i}";
 				$it2merma    = "it2merma_${i}";
+
+				$itunidad    = "itunidad_${i}";
+				$itfactor    = "itfactor_${i}";
+
 				$it2formcal  = "it2formcal_${i}";
 				$it2pond     = "it2pond_${i}";
 				$it2ultimo   = "it2ultimo_${i}";
@@ -1504,6 +1513,8 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				<td class="littletablerow" align="left" nowrap><?php echo $form->$it2codigo->output;   ?></td>
 				<td class="littletablerow" align="left"       ><?php echo $form->$it2descrip->output;  ?></td>
 				<td class="littletablerow" align="right"      ><?php echo $form->$it2cantidad->output; ?></td>
+				<td class="littletablerow" align="left"       ><?php echo $form->$itunidad->output ?></td>
+				<td class="littletablerow" align="right"      ><?php echo $form->$itfactor->output ?></td>
 				<td class="littletablerow" align="right"      ><?php echo $form->$it2merma->output.$form->$it2pond->output.$form->$it2ultimo->output.$form->$it2formcal->output.$form->$it2id_sinv->output; ?></td>
 				<?php if($form->_status!='show'){?>
 				<td class="littletablerow" align="center">

@@ -967,7 +967,7 @@ function chreferen(){
 	var fp;
 	var pagac;
 	var total;
-	fp = $('#referen:checked').val();
+	fp = $("input[name='referen']:radio:checked").val();
 	if( fp == 'M' ){
 		fpaga('M');
 	} else if ( fp == 'E' ) {
@@ -1015,7 +1015,6 @@ function chreferen(){
 					<td class="littletablerow"  style='width:75px;background:#E0E6F8;'  ><b id='rifci_val'><?php echo $form->rifci->value; ?></b><?php echo $form->rifci->output;   ?>&nbsp;</td>
 					<td class="littletablerow"  style='width:35px;background:#EFEFEF;'>Vende</td>
 					<td class="littletablerow"  style='width:80px;background:#EAFAEA;'><?php echo $form->vd->output; ?></td>
-					<!--td                         style='width:20px;'><?php echo img(array('src' =>"images/arrow_down.png","id"=>"persiana")); ?></td-->
 				</tr>
 			</table>
 		</td>
@@ -1035,7 +1034,7 @@ function chreferen(){
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Precio</b></td>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Importe</b></td>
 				<?php if($form->_status!='show') {?>
-					<td bgcolor='#0B3861'>&nbsp;</td>
+					<td bgcolor='#0B3861'><a href='#' onclick="add_sitems()" title='Agregar otro articulo'><?php echo img('images/agrega4.png'); ?></a></td>
 				<?php } ?>
 			</tr>
 			<?php for($i=0;$i<$form->max_rel_count['sitems'];$i++) {
@@ -1100,7 +1099,7 @@ function chreferen(){
 						<td class="littletableheaderdet">Banco</td>
 						<td class="littletableheaderdet">Monto</td>
 						<?php if($form->_status!='show') {?>
-							<td class="littletableheaderdet"></td>
+							<td class="littletableheaderdet"><a href='#' onclick="add_sfpa()" title='Agregar otro pago'><?php echo img('images/agrega4.png'); ?></a></td>
 						<?php } ?>
 					</tr>
 					<?php
@@ -1133,7 +1132,7 @@ function chreferen(){
 				<td>
 					<table style="width:100%;border-collapse:collapse;padding:0px;border-top:3px solid #0B3861;">
 						<tr>
-							<td style='border-right:1px solid #0B3861;' align='center'><?php echo '<input name="btn_add_sfpa" value="Agregar" onclick="add_sfpa()" class="button" type="button">&nbsp;'; ?><br>
+							<td style='border-right:1px solid #0B3861;' align='center'>
 							<input name="bpagar" value="Cerrar" onclick="fpaga('M')" class="button" type="button"></td>
 							<td class="littletableheader" valign='top'><?php echo $form->observa->label; ?>&nbsp;&nbsp;</td>
 							<td class='littletablerow'    valign='top'><?php echo $form->observa->output; ?></td>
@@ -1156,7 +1155,7 @@ function chreferen(){
 				<td class='littletablerow'    colspan='2'><?php echo $form->observa->output; ?></td>
 			</tr>
 			<tr>
-				<td align='center'><?php echo '<input name="btn_add_sfpa" value="Agregar" onclick="add_sfpa()" class="button" type="button">&nbsp;'; ?></td>
+				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td align='right'><input name="bpagar" value="Cerrar" onclick="fpaga('E')" class="button" type="button"></td>
 			</tr>

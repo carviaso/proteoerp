@@ -78,7 +78,7 @@ if(isset($smenu)) echo '<div id="smenu">'.$smenu.'</div>';
 	</table>
 </div>
 <div class="footer">
-	<p>Tiempo de la consulta {elapsed_time} seg | Proteo ERP </p>
+	<!--p>Tiempo de la consulta {elapsed_time} seg | Proteo ERP </p-->
 </div>
 <?php if (isset($extras)) echo $extras; ?>
 </body>

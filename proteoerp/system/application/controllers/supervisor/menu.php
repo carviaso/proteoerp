@@ -11,77 +11,215 @@ class Menu extends Controller{
 	function index(){
 		$this->datasis->modulo_id(905);
 		if ($this->uri->segment(3) === FALSE) $mod = FALSE; else $mod = $this->uri->segment(3);
-
-		//$mSQL="SELECT titulo, modulo, codigo FROM intramenu WHERE MID(modulo,1,1)!= '0' AND modulo REGEXP  '[[:digit:]]' ORDER BY modulo";
-		//$mSQL="SELECT b.pertenece AS pertenece,IFNULL(b.modulo,a.modulo) AS modulo,IFNULL(b.titulo,a.titulo) AS titulo FROM intramenu AS a RIGHT JOIN intramenu AS b ON a.modulo= b.pertenece ORDER BY modulo";
 		$mSQL='SELECT modulo,titulo  FROM intramenu AS a ORDER BY modulo';
-		$mc  = $this->db->query($mSQL);
-		$prop=array('border'=>'0');
+
+		$prop=array('border'=>'0','height'=>'14px');
+
+		$out = '
+<div id="arbolito" style="overflow:auto;border:1px solid #9AC8DA;background: #FAFAFA;height:400px;width:320px;font-size:12px;float:left;">
+	<div id="sidetreecontrol">
+	<table style=""><tr>
+		<td><a name="botones" href="?#">Contraer </a></td> 
+		<td><a name="botones" href="?#">Expandir </a></td>
+		<td><a name="botones" href="?#">Invertir </a></td>
+	</tr></table>
+	</div>
+	<div id="arbol">
+	';
+
 		if( strlen($mod)>1) $esde=$mod[0]; else $esde=$mod;
-		$out   ='<a href="'.site_url('supervisor/menu/dataedit/m/create').'">'.image('list-add.png','Agregar opcion',$prop).'</a><b>Men&uacute;</b>';
-		$out .= '<ul id="tree">';
-		//$out .= '<li><ul>';
-		$out .= '<li><a href="'.site_url('supervisor/menu/dataedit/0/create/').'" >'.image('list-add.png','Agregar'     ,$prop).'</a>0-Libres';
+
+		$out .= "\t".'<a href="#" onclick="creanuevo(\'m\');">'.image('list-add.png','Agregar opcion',$prop).'</a><b>Men&uacute;</b>'."\n";
+		$out .= "\t\t".'<ul id="tree">'."\n";
+		$out .= "\t\t\t<li>\n";
+		$out .= "\t\t\t\t".'<a href="'.site_url('supervisor/menu/dataedit/0/create/').'" >'.image('list-add.png','Agregar',$prop).'</a>0-Libres'."\n";
 		$n=1;
 
+		$mc  = $this->db->query($mSQL);
 		foreach( $mc->result() as $row ){
 			if(strlen($row->modulo)==1){
 				if($n==2){
-					$out .= "</li></ul></li>";
+					$out .= "\t\t\t\t\t</li>\n";
+					$out .= "\t\t\t\t</ul>\n";
+					$out .= "\t\t\t</li>\n";
 				}elseif($n==1){
-					$out .= '</li>';
+					$out .= "\n\t\t\t</li>\n";
 				}elseif($n==3){
-					$out .= '</ul></li></ul>';
+					$out .= "\t\t\t</ul>\n";
+					$out .= "\t\t\t</li>\n";
+					$out .= "\t\t\t</ul>\n";
 				}
-
 				$n=1;
-				$out .= "\n<li>";
-				$out .= '<a href="'.site_url("supervisor/menu/dataedit/modify/$row->modulo").'" >'.image('editor.png','Editar'       ,$prop).'</a> ';
-				$out .= '<a href="'.site_url("supervisor/menu/dataedit/$row->modulo/create").'" >'.image('list-add.png','Agregar'  ,$prop).'</a> ';
-				$out .= '<a href="'.site_url("supervisor/menu/dataedit/delete/$row->modulo").'" >'.image('list-remove.png','Eliminar',$prop).'</a> ';
-				$out .= $row->modulo.'-'.$row->titulo;
+				$out .= "\t\t\t<li>\n";
+
+				$out .= "\t\t\t\t";
+				$out .= '<a href="#" onclick="modifica(\''.$row->modulo.'\') " >'.image('editor.png',     'Editar',  $prop).'</a>';
+				$out .= '<a href="#" onclick="creanuevo(\''.$row->modulo.'\')" >'.image('list-add.png',   'Agregar', $prop).'</a>';
+				$out .= '<a href="#" onclick="elimina(\''.$row->modulo.'\')  " >'.image('list-remove.png','Eliminar',$prop).'</a>';
+				$out .= $row->modulo.'-'.$row->titulo."\n";
 
 			//nivel 2
 			}elseif(strlen($row->modulo)==3){
 				if($n==1){
-					$out .= "<ul>";
+					$out .= "\t\t\t\t<ul>\n";
 				}elseif($n==2){
-					$out .= '</li>';
+					$out .= "\t\t\t\t\t</li>\n";
 				}elseif($n==3){
-					$out .= '</ul></li>';
+					$out .= "\t\t\t\t\t\t</ul>\n";
+					$out .= "\t\t\t\t\t</li>\n";
 				}
-
 				$n=2;
-				$out .= "\n  <li>";
-				$out .= '<a href="'.site_url("supervisor/menu/dataedit/modify/$row->modulo").'" >'.image('editor.png','Editar'       ,$prop).'</a> ';
-				$out .= '<a href="'.site_url("supervisor/menu/dataedit/$row->modulo/create").'" >'.image('list-add.png','Agregar'  ,$prop).'</a> ';
-				$out .= '<a href="'.site_url("supervisor/menu/dataedit/delete/$row->modulo").'" >'.image('list-remove.png','Eliminar',$prop).'</a> ';
-				$out .= $row->modulo.'-'.$row->titulo;
+				$out .= "\t\t\t\t\t<li>\n";
+
+				$out .= "\t\t\t\t\t\t";
+
+				$out .= '<a href="#" onclick="modifica(\''.$row->modulo.'\') " >'.image('editor.png',     'Editar',  $prop).'</a>';
+				$out .= '<a href="#" onclick="creanuevo(\''.$row->modulo.'\')" >'.image('list-add.png',   'Agregar', $prop).'</a>';
+				$out .= '<a href="#" onclick="elimina(\''.$row->modulo.'\')  " >'.image('list-remove.png','Eliminar',$prop).'</a>';
+
+
+				$out .= $row->modulo.'-'.$row->titulo."\n";
 
 			//nivel 3
 			}else{
 				if($n==2){
-					$out .= '<ul>';
+					$out .= "\t\t\t\t\t\t<ul>\n";
 				}
-
 				$n=3;
-				$out .= "\n    <li>";
-				$out .= '<a href="'.site_url("supervisor/menu/dataedit/modify/$row->modulo").'" >'.image('editor.png','Editar'       ,$prop).'</a> ';
-				$out .= '<a href="'.site_url("supervisor/menu/dataedit/delete/$row->modulo").'" >'.image('list-remove.png','Eliminar',$prop).'</a> ';
-				$out .= $row->modulo.'-'.$row->titulo;
-				$out .='</li>';
+				$out .= "\t\t\t\t\t\t\t<li>\n";
+
+				$out .= "\t\t\t\t\t\t\t\t";
+
+				$out .= '<a href="#" onclick="modifica(\''.$row->modulo.'\') " >'.image('editor.png',     'Editar',  $prop).'</a>';
+				$out .= '<a href="#" onclick="elimina(\''.$row->modulo.'\')  " >'.image('list-remove.png','Eliminar',$prop).'</a>';
+
+
+
+				$out .= $row->modulo.'-'.$row->titulo."\n";
+				$out .= "\t\t\t\t\t\t\t</li>\n";
 			}
 		}
-		if($n==1){
-			$out .= "</li>";
-		}elseif($n==2){
-			$out .= '</li></ul></li>';
-		}elseif($n==3){
-			$out .= '</ul></li>';
+		if( $n == 1 ){
+			$out .= "</li>\n";
+		}elseif( $n == 2 ){
+			$out .= "\t\t\t\t\t</li>\n";
+			$out .= "\t\t\t\t</ul>\n";
+			$out .= "\t\t\t</li>\n";
+		}elseif( $n == 3 ){
+			$out .= "\t\t\t\t\t</ul>\n";
+			$out .= "</li>\n";
 		}
-		$out .= '</ul>';
+		$out .= "\t\t</ul>\n";
+		$out .= "\t</div>\n";
+		$out .= "</div>\n";
 
-		$data['script']  ='<script type="text/javascript">
+		$data['script']  ='<script type="text/javascript">';
+		$data['script'] .='
+		$(function() {
+			$.post("'.site_url('supervisor/menu/arbolito').'", function(data){
+				$("#arbolito").html(data);
+			});
+		})';
+
+		$data['script'] .='
+		function creanuevo(modulo){
+			$.post("'.site_url('supervisor/menu/dataedit').'/"+modulo+"/create", function(data){
+				$("#dedita").html(data+\'<button onclick="guardanv()">Guardar</button>\');
+			});
+		}';
+
+		$data['script'] .='
+		function actuarbol(){
+			$.post("'.site_url('supervisor/menu/arbolito').'", function(data){
+				$("#arbolito").html(data);
+			});
+		}';
+
+		$data['script'] .='
+		function guardanv(){
+				var murl = $("#df1").attr("action");
+				$.ajax({
+					type: "POST", dataType: "html", async: false,
+					url: murl,
+					data: $("#df1").serialize(),
+					success: function(r,s,x){
+						try{
+							var json = JSON.parse(r);
+							if (json.status == "A"){
+								alert("Registro Guardado");
+								$( "#dedita" ).html( "Registro Guardado" );
+								if (json.tipo != "update"){
+									actuarbol();
+								}
+								return true;
+							}else{
+								alert(json.mensaje);
+							}
+						}catch(e){
+							//$("#dedita").html(r);
+						}
+					}
+				})
+		}';
+
+		$data['script'] .='
+		function modifica(modulo){
+			$.post("'.site_url('supervisor/menu/dataedit/modify').'/"+modulo, function(data){
+				$("#dedita").html(data+\'<button onclick="guardanv()">Guardar</button>\');
+			});
+		}';
+
+		$data['script'] .='
+		function elimina(modulo){
+			if(confirm("Eliminar "+modulo+"?")){
+				$.post("'.site_url("supervisor/menu/dataedit/do_delete/").'/"+modulo, 
+					function(data){
+						try {
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								actuarbol();
+								alert("Registro Eliminado");
+							} else {
+								alert("No se pudo eliminar el Registro");
+							} 
+						} catch(e){
+							alert("Hola");
+						}
+					}
+				)
+			}
+		}';
+
+		$data['script'] .="\n".'</script>'."\n";
+
+		$out = '<div id="arbolito" style="overflow:auto;border:1px solid #9AC8DA;background: #FAFAFA;height:400px;width:320px;font-size:12px;float:left;"></div>';
+
+		$data['content'] = $out.'<div id="dedita" style="overflow:auto;border:1px solid #9AC8DA;background:#FAFAFA;width:460px;font-size:12px;float:left;"></div>';
+
+		$data['head']    = script("jquery-min.js");
+		$data['head']   .= script("jquery-migrate-min.js");
+		$data['head']   .= script("jquery-ui.custom.min.js");
+
+		$data['head']   .= script("jquery.treeview.pack.js");
+		$data['head']   .= $this->rapyd->get_head();
+		$data['head']   .= style('jquery.treeview.css');
+		$data['head']   .= style("proteo/proteo.css");
+
+		$data['title']   = '<h1>Administraci&oacute;n del Men&uacute;</h1>';
+		$this->load->view('view_ventanas', $data);
+		
+	}
+
+	//******************************************************************
+	//
+	//
+	function arbolito(){
+		$prop=array('border'=>'0','height'=>'14px');
+		$mSQL='SELECT modulo,titulo  FROM intramenu AS a ORDER BY modulo';
+
+		$script  ='<script type="text/javascript">';
+		
+		$script .='
 		$(function() {
 			$("#tree").treeview({
 				collapsed: true,
@@ -89,20 +227,112 @@ class Menu extends Controller{
 				control:"#sidetreecontrol",
 				persist: "location"
 			});
-		})
-		</script>';
-		$data['content'] = '<div id="sidetreecontrol"><a href="?#">Contraer todos</a> | <a href="?#">Expandir todos</a> | <a href="?#">Invertir </a></div>'.$out;
-		$data['head']    = script("jquery.pack.js").script("jquery.treeview.pack.js").$this->rapyd->get_head().style('jquery.treeview.css');
-		$data['title']   = '<h1>Administraci&oacute;n del Men&uacute;</h1>';
-		$this->load->view('view_ventanas', $data);
+		})';
+
+		$script .="</script>\n";
+
+		$out = '
+	<div id="sidetreecontrol">
+	<table style=""><tr>
+		<td><a name="botones" href="?#">Contraer </a></td> 
+		<td><a name="botones" href="?#">Expandir </a></td>
+		<td><a name="botones" href="?#">Invertir </a></td>
+	</tr></table>
+	</div>
+	<div id="arbol">
+	';
+
+		//if( strlen($mod)>1) $esde=$mod[0]; else $esde=$mod;
+
+		$out .= "\t".'<a href="#" onclick="creanuevo(\'m\');">'.image('list-add.png','Agregar opcion',$prop).'</a><b>Men&uacute;</b>'."\n";
+		$out .= "\t\t".'<ul id="tree">'."\n";
+		$out .= "\t\t\t<li>\n";
+		$out .= "\t\t\t\t".'<a href="'.site_url('supervisor/menu/dataedit/0/create/').'" >'.image('list-add.png','Agregar',$prop).'</a>0-Libres'."\n";
+		$n=1;
+
+		$mc  = $this->db->query($mSQL);
+		foreach( $mc->result() as $row ){
+			if(strlen($row->modulo)==1){
+				if($n==2){
+					$out .= "\t\t\t\t\t</li>\n";
+					$out .= "\t\t\t\t</ul>\n";
+					$out .= "\t\t\t</li>\n";
+				}elseif($n==1){
+					$out .= "\n\t\t\t</li>\n";
+				}elseif($n==3){
+					$out .= "\t\t\t</ul>\n";
+					$out .= "\t\t\t</li>\n";
+					$out .= "\t\t\t</ul>\n";
+				}
+				$n=1;
+				$out .= "\t\t\t<li>\n";
+
+				$out .= "\t\t\t\t";
+				$out .= '<a href="#" onclick="modifica(\''.$row->modulo.'\') " >'.image('editor.png',     'Editar',  $prop).'</a>';
+				$out .= '<a href="#" onclick="creanuevo(\''.$row->modulo.'\')" >'.image('list-add.png',   'Agregar', $prop).'</a>';
+				$out .= '<a href="#" onclick="elimina(\''.$row->modulo.'\')  " >'.image('list-remove.png','Eliminar',$prop).'</a>';
+				$out .= $row->modulo.'-'.$row->titulo."\n";
+
+			//nivel 2
+			}elseif(strlen($row->modulo)==3){
+				if($n==1){
+					$out .= "\t\t\t\t<ul>\n";
+				}elseif($n==2){
+					$out .= "\t\t\t\t\t</li>\n";
+				}elseif($n==3){
+					$out .= "\t\t\t\t\t\t</ul>\n";
+					$out .= "\t\t\t\t\t</li>\n";
+				}
+				$n=2;
+				$out .= "\t\t\t\t\t<li>\n";
+				$out .= "\t\t\t\t\t\t";
+				$out .= '<a href="#" onclick="modifica(\''.$row->modulo.'\') " >'.image('editor.png',     'Editar',  $prop).'</a>';
+				$out .= '<a href="#" onclick="creanuevo(\''.$row->modulo.'\')" >'.image('list-add.png',   'Agregar', $prop).'</a>';
+				$out .= '<a href="#" onclick="elimina(\''.$row->modulo.'\')  " >'.image('list-remove.png','Eliminar',$prop).'</a>';
+				$out .= $row->modulo.'-'.$row->titulo."\n";
+
+			//nivel 3
+			}else{
+				if($n==2){
+					$out .= "\t\t\t\t\t\t<ul>\n";
+				}
+				$n=3;
+				$out .= "\t\t\t\t\t\t\t<li>\n";
+				$out .= "\t\t\t\t\t\t\t\t";
+				$out .= '<a href="#" onclick="modifica(\''.$row->modulo.'\') " >'.image('editor.png',     'Editar',  $prop).'</a>';
+				$out .= '<a href="#" onclick="elimina(\''.$row->modulo.'\')  " >'.image('list-remove.png','Eliminar',$prop).'</a>';
+				$out .= $row->modulo.'-'.$row->titulo."\n";
+				$out .= "\t\t\t\t\t\t\t</li>\n";
+			}
+		}
+		if( $n == 1 ){
+			$out .= "</li>\n";
+		}elseif( $n == 2 ){
+			$out .= "\t\t\t\t\t</li>\n";
+			$out .= "\t\t\t\t</ul>\n";
+			$out .= "\t\t\t</li>\n";
+		}elseif( $n == 3 ){
+			$out .= "\t\t\t\t\t</ul>\n";
+			$out .= "</li>\n";
+		}
+		$out .= "\t\t</ul>\n";
+		$out .= "\t</div>\n";
+
+
+		echo $script.$out;
 		
 	}
-	
+
+	//******************************************************************
+	// Dataedit
+	//
 	function dataedit($pertenece){
 		$this->rapyd->load('dataedit');
 
-		$edit = new DataEdit(' ', 'intramenu');
-		$edit->back_url = site_url('supervisor/menu/index');
+		$edit = new DataEdit('', 'intramenu');
+		$edit->on_save_redirect=false;
+		//$edit->back_url = site_url('supervisor/menu/index');
+
 		$edit->pre_process('insert' ,'_pre_insert');
 		$edit->post_process('delete','_pos_del');
 		$edit->post_process('insert','_pos_insert');
@@ -131,6 +361,7 @@ class Menu extends Controller{
 		$edit->target->option("self"     ,"Link en ventana actual");
 		$edit->target->option("javascript","Proceso Javascript"); 
 		$edit->target->option("dialogo","Abre en un Dialogo"); 
+		$edit->target->style = 'width:170px';
 
 		$edit->ejecutar = new inputField("Ejecutar", "ejecutar");
 		$edit->ejecutar->rule='callback_ejecutar';
@@ -139,31 +370,36 @@ class Menu extends Controller{
 		$edit->visible = new dropdownField("Visible", "visible");
 		$edit->visible->option("S","Si");
 		$edit->visible->option("N","No");
-
-		//$edit->orden = new inputField("Orden", "orden");
-		//$edit->orden->size = 10;
+		$edit->visible->style = 'width:100px';
 
 		$edit->ancho = new inputField("Ancho", "ancho");
-		$edit->ancho->insertValue='800'; 
-		$edit->ancho->css_class='inputnum';
-		$edit->ancho->rule     ='numeric';
-		$edit->ancho->group    ='Ventana';
-		$edit->ancho->size     =8;
+		$edit->ancho->insertValue = '800'; 
+		$edit->ancho->css_class   = 'inputnum';
+		$edit->ancho->rule        = 'numeric';
+		$edit->ancho->group       = 'Dimensiones';
+		$edit->ancho->size        = 8;
 
 		$edit->alto = new inputField("Alto", "alto");
-		$edit->alto->insertValue='600';
-		$edit->alto->css_class='inputnum';
-		$edit->alto->rule     ='numeric';
-		$edit->alto->group      ='Ventana';
-		$edit->alto->size       =8;
-
-		$edit->buttons("modify", "save", "undo", "delete", "back");
+		$edit->alto->insertValue = '600';
+		$edit->alto->css_class   = 'inputnum';
+		$edit->alto->rule        = 'numeric';
+		$edit->alto->group       = 'Dimensiones';
+		$edit->alto->size        = 8;
+		
+		//$edit->buttons("modify", "save", "undo", "delete", "back");
 		$edit->build();
 
-		$data['content'] = $edit->output;
-		$data['head']    = $this->rapyd->get_head();
-		$data['title']   = '<h1>Menu de opciones</h1>';
-		$this->load->view('view_ventanas', $data);
+		if($edit->on_success()){
+			$rt=array(
+				'status' => 'A',
+				'mensaje'=> 'Registro guardado',
+				'pk'     => $edit->_dataobject->pk,
+				'tipo'   => $edit->_action
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
 	}
 
 	// Devuelve codigo disponible
@@ -185,7 +421,7 @@ class Menu extends Controller{
 	}
 
 	function _pos_del($do) {
-		$codigo=$do->get('modulo');
+		$codigo = $do->get('modulo');
 		$sql = "DELETE FROM intrasida WHERE modulo like '$codigo%'";
 		$this->db->query($sql);
 		$mSQL="DELETE FROM intramenu WHERE modulo like '$codigo%'";
@@ -199,7 +435,7 @@ class Menu extends Controller{
 			$retorna=$this->datasis->dameval($mSQL);
 			if(strlen($retorna)>3){
 				$do->error_message_ar['pre_ins']='Se ha alcanzado el l&iacute;mite de opciones';
-				return FALSE;
+				return false;
 			}
 			$modulo =str_pad($retorna,3,'0',STR_PAD_LEFT);
 		}else{
@@ -214,13 +450,12 @@ class Menu extends Controller{
 			$modulo=$this->_coddisp($mod);
 			if(strlen($modulo)>$acu){
 				$do->error_message_ar['pre_ins']="Se ha alcanzado el l&iacute;mite de opciones";
-				return FALSE;
+				return false;
 			}
 		}
-
 		$do->set('modulo', $modulo);
 		$this->session->set_userdata('menu_m', $modulo);
-		return TRUE;
+		return true;
 	}
 
 	function _pos_insert($do){
@@ -231,7 +466,7 @@ class Menu extends Controller{
 			$mSQL="INSERT INTO intrasida (usuario,modulo,acceso) VALUES ('$usuario','$modulo','S')";
 			$this->db->simple_query($mSQL);
 		}
-		redirect('/supervisor/menu');
+		return true;
 	}
 
 	function instalar(){

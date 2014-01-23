@@ -19,10 +19,9 @@ class Grcl extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
+	//******************************************************************
 	//Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -55,9 +54,9 @@ class Grcl extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
+	//******************************************************************
 	//Funciones de los Botones
-	//***************************
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
 		$ngrid = '#newapi'.$grid0;
@@ -80,9 +79,9 @@ class Grcl extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'true';
@@ -183,7 +182,7 @@ class Grcl extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -197,7 +196,7 @@ class Grcl extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -254,6 +253,9 @@ class Grcl extends Controller {
 		};
 	}
 
+	//******************************************************************
+	//
+	//
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 

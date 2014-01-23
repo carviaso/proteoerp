@@ -65,7 +65,6 @@ class Mgas extends validaciones {
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
 
-
 		$bodyscript .= '
 		function mgasadd(){
 			$.post("'.site_url($this->url.'dataedit/create').'",
@@ -131,8 +130,6 @@ class Mgas extends validaciones {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
-
-
 
 		//Wraper de javascript
 		$bodyscript .= '

@@ -128,7 +128,7 @@ class gser extends Controller {
 			$.post("'.site_url('finanzas/gser/solo/create').'",
 			function(data){
 				$("#fgasto").html(data);
-				$("#fgasto").dialog({height: 550, width: 920, title: "Agregar Egreso"});
+				$("#fgasto").dialog({height: 500, width: 770, title: "Agregar Gasto/Egreso"});
 				$( "#fgasto" ).dialog( "open" );
 			})
 		};';
@@ -2313,7 +2313,7 @@ class gser extends Controller {
 		$edit->importe->label ='<b style="font-size:2em">Total</b>';
 
 		$edit->sucursal = new dropdownField('Sucursal','sucursal');
-		$edit->sucursal->options('SELECT codigo,sucursal FROM sucu ORDER BY sucursal');
+		$edit->sucursal->options('SELECT codigo, sucursal FROM sucu ORDER BY sucursal');
 		$edit->sucursal->rule='max_length[2]|required';
 
 		$edit->departa = new dropdownField('Departamento','departa');
@@ -3256,9 +3256,9 @@ class gser extends Controller {
 		$edit->post_process('delete','_post_delete');
 
 		$edit->tipo_doc =  new dropdownField('Documento', 'tipo_doc');
-		$edit->tipo_doc->style='width:100px';
+		$edit->tipo_doc->style='width:70px';
 		$edit->tipo_doc->option('FC','Factura');
-		$edit->tipo_doc->option('ND','Nota Debito');
+		$edit->tipo_doc->option('ND','N. Debito');
 		if($edit->_status=='show'){
 			$edit->tipo_doc->option('XX','Anulado');
 			$edit->tipo_doc->option('AD','Amortizacion');
@@ -3358,12 +3358,12 @@ class gser extends Controller {
 		$edit->codb1->style = 'width:120px';
 		$edit->codb1->onchange="esbancaja(this.value)";
 
-		$edit->tipo1 =  new dropdownField('Cheque/ND', 'tipo1');
+		$edit->tipo1 =  new dropdownField('Tipo', 'tipo1');
 		$edit->tipo1->option('' ,'Ninguno');
 		$edit->tipo1->option('C','Cheque');
 		$edit->tipo1->option('D','N.Debito');
 		$edit->tipo1->rule ='condi_required|callback_chtipoe';
-		$edit->tipo1->style='width:100px';
+		$edit->tipo1->style='width:70px';
 
 		$edit->cheque1 = new inputField('N&uacute;mero','cheque1');
 		$edit->cheque1->rule = 'condi_required|callback_chobliganumerog';
@@ -3401,7 +3401,7 @@ class gser extends Controller {
 		$edit->reten->showformat ='decimal';
 		$edit->reten->type='inputhidden';
 
-		$edit->reteiva = new inputField('Retencion de IVA','reteiva');
+		$edit->reteiva = new inputField('Ret. de IVA','reteiva');
 		$edit->reteiva->rule = 'numeric|positive';
 		$edit->reteiva->size = 10;
 		$edit->reteiva->maxlength=10;
@@ -3443,7 +3443,7 @@ class gser extends Controller {
 		$edit->codigo->rel_id= 'gitser';
 
 		$edit->descrip = new inputField('Descripcion <#o#>', 'descrip_<#i#>');
-		$edit->descrip->size=50;
+		$edit->descrip->size=40;
 		$edit->descrip->db_name='descrip';
 		$edit->descrip->maxlength=50;
 		$edit->descrip->rel_id='gitser';
@@ -3494,15 +3494,17 @@ class gser extends Controller {
 		$edit->departa->options("SELECT TRIM(depto) AS codigo, CONCAT_WS('-',depto,TRIM(descrip)) AS label FROM dpto WHERE tipo='G' ORDER BY depto");
 		$edit->departa->db_name='departa';
 		$edit->departa->rule='required';
-		$edit->departa->style = 'width:100px';
+		$edit->departa->style = 'width:80px';
 		$edit->departa->rel_id   ='gitser';
 		$edit->departa->onchange="gdeparta(this.value)";
 
 		$edit->sucursal =  new dropdownField('Sucursal <#o#>', 'sucursal_<#i#>');
-		$edit->sucursal->options("SELECT codigo,CONCAT(codigo,'-', sucursal) AS sucursal FROM sucu ORDER BY codigo");
+		$edit->sucursal->options("SELECT codigo,codigo AS sucursal FROM sucu ORDER BY codigo");
 		$edit->sucursal->db_name='sucursal';
 		$edit->sucursal->rule='required';
-		$edit->sucursal->style = 'width:100px';
+		$edit->sucursal->style = 'width:40px';
+		$edit->sucursal->title ='Sucursal';
+		
 		$edit->sucursal->rel_id   ='gitser';
 		$edit->sucursal->onchange="gsucursal(this.value)";
 		//*****************************
@@ -3520,7 +3522,7 @@ class gser extends Controller {
 		$edit->codigorete->options('SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",codigo,activida)) AS activida FROM rete ORDER BY codigo');
 		$edit->codigorete->db_name='codigorete';
 		$edit->codigorete->rule   ='max_length[4]';
-		$edit->codigorete->style  ='width: 330px';
+		$edit->codigorete->style  ='width: 300px';
 		$edit->codigorete->rel_id ='gereten';
 		$edit->codigorete->onchange='post_codigoreteselec(<#i#>,this.value)';
 
@@ -3778,7 +3780,7 @@ class gser extends Controller {
 		$this->db->query($update2);
 
 		//MODIFICA SPRM
-		$update3="UPDATE sprm SET fecha=$fecha,vence=$vence, numero=$numero, cod_prv=$proveed,nombre=$nombre WHERE tipo_doc='FC'AND transac=$dbtransac";
+		$update3="UPDATE sprm SET fecha=$fecha,vence=$vence, numero=$numero, cod_prv=$proveed,nombre=$nombre WHERE tipo_doc='FC' AND transac=$dbtransac";
 		$this->db->query($update3);
 
 		//MODIFICA BMOV

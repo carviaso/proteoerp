@@ -3486,6 +3486,22 @@ class Sinv extends Controller {
 		$edit->it2cantidad->onkeyup      = 'totalizarpitem(<#i#>)';
 		$edit->it2cantidad->insertValue  = 1;
 
+		$edit->itunidad = new dropdownField('Unidad <#o#>','itunidad_<#i#>');
+		$edit->itunidad->style   = 'width:150px;';
+		$edit->itunidad->option('','Seleccionar');
+		$edit->itunidad->options('SELECT unidades, unidades descrip FROM unidad ORDER BY unidades');
+		$edit->itunidad->rel_id   = 'sinvpitem';
+		$edit->itunidad->db_name  = 'unidad';
+
+		$edit->itfactor = new inputField('Factor <#o#>', 'itfactor_<#i#>');
+		$edit->itfactor->size       = 10;
+		$edit->itfactor->db_name    = 'factor';
+		$edit->itfactor->maxlength  = 15;
+		$edit->itfactor->css_class  = 'inputnum';
+		$edit->itfactor->rel_id     = 'sinvpitem';
+		$edit->itfactor->insertValue= 0;
+		$edit->itfactor->autocomplete= false;
+
 		$edit->it2merma = new inputField('Ultimo <#o#>', 'it2merma_<#i#>');
 		$edit->it2merma->size       = 5;
 		$edit->it2merma->db_name    = 'merma';
@@ -6165,6 +6181,23 @@ class Sinv extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
+		$camposcomb = $this->db->list_fields('sinvpitem');
+		if(!in_array('unidad',$camposcomb)){
+			$mSQL="ALTER TABLE sinvpitem ADD COLUMN unidad VARCHAR(12) NULL AFTER cantidad";
+			$this->db->query($mSQL);
+		}
+
+		if(!in_array('factor',$camposcomb)){
+			$mSQL="ALTER TABLE sinvpitem ADD COLUMN factor DECIMAL(12,4) NULL DEFAULT 1 AFTER unidad";
+			$this->db->query($mSQL);
+		}
+
+/*
+			$mSQL="ALTER TABLE sinvpitem
+			ADD COLUMN unidad VARCHAR(12)   NULL AFTER cantidad,
+			ADD COLUMN factor DECIMAL(12,4) NULL DEFAULT '1' AFTER unidad;";
+*/
+
 		if(!$this->db->table_exists('sinvplabor')){
 			$mSQL="CREATE TABLE `sinvplabor` (
 				`producto` VARCHAR(15) NULL DEFAULT '' COMMENT 'Producto Terminado',
@@ -6283,3 +6316,4 @@ class Sinv extends Controller {
 	}
 
 }
+?>
