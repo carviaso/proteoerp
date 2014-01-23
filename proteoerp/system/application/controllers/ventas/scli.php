@@ -3118,7 +3118,7 @@ function chrif(rif){
 				parroquias  int(11) DEFAULT NULL,
 				PRIMARY KEY (id),
 				UNIQUE KEY `codigo` (`codigo`)
-			) ENGINE=MyISAM  DEFAULT CHARSET=utf8;";
+			) ENGINE=MyISAM  DEFAULT CHARSET=utf8";
 			$this->db->query($mSQL);
 
 			$mSQL="
