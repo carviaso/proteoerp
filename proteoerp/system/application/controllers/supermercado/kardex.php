@@ -141,7 +141,7 @@ class Kardex extends Controller {
 			$mayor   = $this->datasis->dameval("SELECT SUM(cantidad) AS cana FROM itfmay WHERE codigo=${dbcode} AND fecha>${dbfinal}");
 			$ventas  = $this->datasis->dameval("SELECT SUM(cantidad) AS cana FROM positfact WHERE codigo=${dbcode} AND fecha>${dbfinal}");
 			$compras = $this->datasis->dameval("SELECT SUM(IF(b.tipo_doc='ND',-1,1)*a.cantidad) AS cana FROM itscst AS a JOIN scst AS b ON a.control=b.control WHERE a.codigo=${dbcode} AND b.actuali>=b.fecha AND b.actuali>${dbfinal}");
-			$nentreg = $this->datasis->dameval("SELECT SUM(a.cana) AS cana FROM itsnte AS a JOIN snte AS b ON a.numero=b.numero WHERE a.codigo=${dbcode} AND a.fecha>${dbfinal}");
+			$nentreg = $this->datasis->dameval("SELECT SUM(a.cana) AS cana FROM itsnte AS a JOIN snte AS b ON a.numero=b.numero WHERE a.codigo=${dbcode} AND b.fecha>${dbfinal}");
 			$ajustes = $this->datasis->dameval("SELECT SUM(IF(b.tipo='E',1,-1)*cantidad) AS cana FROM itssal AS a JOIN ssal AS b ON a.numero = b.numero WHERE a.codigo = ${dbcode} AND b.fecha>${dbfinal}");
 			$conver  = $this->datasis->dameval("SELECT SUM(a.entrada-a.salida) AS cana FROM itconv AS a JOIN conv AS b ON a.numero = b.numero WHERE a.codigo = ${dbcode} AND b.fecha>${dbfinal}");
 
@@ -164,7 +164,7 @@ class Kardex extends Controller {
 			$optadd = '<div style="">';
 			$optadd.= ' <table>';
 			$optadd.= '  <tr><td colspan=\'5\'><b style="text-size:1.4em;font-weight:bold;">Movimientos posteriores a la fecha '.dbdate_to_human($ffinal).' para todos los almacenes</b></td></tr>';
-			$optadd.= "  <tr><td>Ventas   </td><td style='text-align:right' ><b> ${ventas}</b></td><td style='padding-left:50px;'>Ajustes      </td><td style='text-align:right' ><b>${ajustes}</b></td><td rowspan='3' style='text-align:center'>Existencia actual <p style='font-size:2em;padding:0 0 0 0;margin: 0 0 0 0;font-weight:bold;'>${actual} - ${fracci}</p></td></tr>";
+			$optadd.= "  <tr><td>Ventas   </td><td style='text-align:right' ><b> ${ventas}</b></td><td style='padding-left:50px;'>Ajustes      </td><td style='text-align:right' ><b>${ajustes}</b></td><td rowspan='3' style='text-align:center'>Existencia actual <p style='font-size:2em;padding:0 0 0 0;margin: 0 0 0 0;font-weight:bold;'>${actual} / ${fracci}</p></td></tr>";
 			$optadd.= "  <tr><td>Compras  </td><td style='text-align:right' ><b>${compras}</b></td><td style='padding-left:50px;'>Conversiones </td><td style='text-align:right' ><b> ${conver}</b></td></tr>";
 			$optadd.= "  <tr><td>N.Entrega</td><td style='text-align:right' ><b>${nentreg}</b></td><td style='padding-left:50px;'>Mayor        </td><td style='text-align:right' ><b>  ${mayor}</b></td></tr>";
 			$optadd.= ' </table>';
