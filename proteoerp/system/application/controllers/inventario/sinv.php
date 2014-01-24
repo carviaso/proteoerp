@@ -5635,7 +5635,7 @@ class Sinv extends Controller {
 		$grid->showpager(true);
 		$grid->setViewRecords(false);
 		$grid->setWidth('300');
-		$grid->setHeight('280');
+		$grid->setHeight('240');
 
 		$grid->setUrlget(site_url('inventario/marc/getdata/'));
 		$grid->setUrlput(site_url('inventario/marc/setdata/'));

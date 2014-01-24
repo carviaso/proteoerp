@@ -111,21 +111,21 @@ class Marc extends Controller{
 		$data   = $_POST;
 		$check  = 0;
 
+		$id = str_replace('jqg','',$id);
 
 		$this->load->library('jqdatagrid');
 		$oper = $this->input->post('oper');
 		unset($data['oper']);
 		unset($data['id']);
 
-
 		// ver si puede borrar
 		if ($oper == 'del') {
-			// si tiene personas no puede borrar
+			// si tiene articulos no puede borrar
 			$id   = $this->input->post('id');
 			$mSQL = "SELECT COUNT(*) FROM sinv a JOIN marc b ON a.marca=b.marca WHERE b.id=$id";
 			if ($this->datasis->dameval($mSQL) == 0 ){
-				$grid             = $this->jqdatagrid;
-				$response         = $grid->operations('marc','id');
+				$grid     = $this->jqdatagrid;
+				$response = $grid->operations('marc','id');
 				echo 'Registro Borrado!!!';
 			} else {
 				echo 'No se puede borrar, existen productos con esta marca';
@@ -137,7 +137,7 @@ class Marc extends Controller{
 			$this->db->update('marc', $data);
 
 			$mSQL = "UPDATE sinv SET marca=".$this->db->escape($data['marca'])." WHERE marca=".$this->db->escape($marcant);
-			$this->db->simple_query($mSQL);
+			$this->db->query($mSQL);
 
 			logusu('MARC',"Registro $id MODIFICADO");
 			//echo "Registro Modificado";
