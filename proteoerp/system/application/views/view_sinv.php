@@ -151,7 +151,8 @@ $(function(){
 	$('#maintabcontainer').tabs();
 	$(".inputnum").numeric(".");
 
-	if(sinvcombo_cont>0){
+	tipo=$("#tipo").val().substr(0,1);
+	if(tipo=='C'){
 		totalizarcombo();
 	}
 	for(var i=0;i < <?php echo $form->max_rel_count['sinvpitem']; ?>;i++){
@@ -289,31 +290,36 @@ function post_enlace(){
 }
 
 function totalizarcombo(){
-	var tpond=tultimo=tprecio=0;
+	var tpond=tultimo=tprecio=cont=0;
 	var arr=$('input[name^="itcantidad_"]');
 	jQuery.each(arr, function() {
 		nom=this.name;
 		pos=this.name.lastIndexOf('_');
 		if(pos>0){
 			ind     = this.name.substring(pos+1);
-			precio  = Number($("#itprecio_"+ind).val());
-			cana    = Number($("#itcantidad_"+ind).val());
-			pond    = Number($("#itpond_"+ind).val());
-			ultimo  = Number($("#itultimo_"+ind).val());
-			tpond   = tpond   +cana*pond;
-			tultimo = tultimo +cana*ultimo;
-			tprecio = tprecio +cana*precio;
+			codigo  = $('itcodigo_'+ind).val();
+			if(codigo!=''){
+				precio  = Number($("#itprecio_"+ind).val());
+				cana    = Number($("#itcantidad_"+ind).val());
+				pond    = Number($("#itpond_"+ind).val());
+				ultimo  = Number($("#itultimo_"+ind).val());
+				tpond   = tpond   +cana*pond;
+				tultimo = tultimo +cana*ultimo;
+				tprecio = tprecio +cana*precio;
+				cont    = cont+1;
+			}
 		}
 	});
 
-	$("#base1").val(roundNumber(tprecio,2));
-	$("#base2").val(roundNumber(tprecio,2));
-	$("#base3").val(roundNumber(tprecio,2));
-	$("#base4").val(roundNumber(tprecio,2));
-	$("#pond").val(roundNumber(tpond,2));
-	$("#ultimo").val(roundNumber(tultimo,2));
-	cambiobase('S');
-	//requeridos();
+	if(cont>0){
+		$("#base1").val(roundNumber(tprecio,2));
+		$("#base2").val(roundNumber(tprecio,2));
+		$("#base3").val(roundNumber(tprecio,2));
+		$("#base4").val(roundNumber(tprecio,2));
+		$("#pond").val(roundNumber(tpond,2));
+		$("#ultimo").val(roundNumber(tultimo,2));
+		cambiobase('S');
+	}
 }
 
 function add_sinvcombo(){

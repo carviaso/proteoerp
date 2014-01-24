@@ -3709,6 +3709,14 @@ class Sinv extends Controller {
 				if(empty($v['codigo'])){
 					$do->rel_rm('sinvcombo',$k);
 				}else{
+					//Ya lo verifica en otro lado
+					//$dbcomboart=$this->db->escape($v['codigo']);
+					//$tipo = $this->datasis->dameval("SELECT tipo FROM sinv WHERE codigo=${dbcomboart}");
+					//if(!empty($tipo) && $tipo[0]=='C'){
+					//	$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='El articulo '.$v['codigo'].' no puede ser usado en el combo.';
+					//	return false;
+					//}
+
 					$combobase  +=floatval($do->get_rel('sinvcombo','precio' ,$k));
 					$combopond  +=floatval($do->get_rel('sinvcombo','pond' ,$k));
 					$comboultimo+=floatval($do->get_rel('sinvcombo','ultimo' ,$k));
