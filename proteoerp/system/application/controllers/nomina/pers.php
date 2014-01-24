@@ -10,6 +10,7 @@ class Pers extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
+		//$this->load->library('pnomina');
 		$this->datasis->modulo_nombre( 'PERS', $ventana=0 );
 	}
 
@@ -57,7 +58,6 @@ class Pers extends Controller {
 
 		$grid->setWpAdicional($WpAdic);
 		$WestPanel = $grid->deploywestp();
-
 
 		$adic = array(
 			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
@@ -163,6 +163,22 @@ class Pers extends Controller {
 			});
 		';
 
+
+		// REPOSO
+		$bodyscript .= '
+		$("#vacacion").click(
+			function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id)	{
+					$.post("'.site_url('nomina/pers/vacaform').'/"+id,
+					function(data){
+						$("#fshow").html(data);
+						$("#fshow").dialog( { title:"VACACIONES", width: 690, height: 400, modal: true } );
+						$("#fshow").dialog( "open" );
+					});
+				} else { $.prompt("<h1>Por favor Seleccione una Persona</h1>");}
+			});
+		';
 
 
 		$fvari = '"<h1>Variables del Trabajador</h1>Cliente: <b>"+ret.nombre+"</b><br><br><table align=center><tr><td>';
@@ -1994,53 +2010,6 @@ class Pers extends Controller {
 			'editoptions'   => "{rows:2, cols:80}",
 		));
 
-/*
-		$grid->addField('estampa');
-		$grid->label('Estampa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('usuario');
-		$grid->label('Usuario');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:12, maxlength: 12 }',
-		));
-
-		$grid->addField('hora');
-		$grid->label('Hora');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-		$grid->addField('id');
-		$grid->label('Id');
-		$grid->params(array(
-			'align'         => "'center'",
-			'frozen'        => 'true',
-			'width'         => 40,
-			'editable'      => 'false',
-			'search'        => 'false'
-		));
-*/
-
 		$grid->showpager(true);
 		$grid->setViewRecords(false);
 		$grid->setWidth('670');
@@ -2125,7 +2094,7 @@ class Pers extends Controller {
 		} elseif($oper == 'edit') {
 			$this->db->where("id", $id);
 			$this->db->update('preposo', $data);
-			logusu('PREPOSO',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+			logusu('PREPOSO',"Reposo de Nomina  ".$nuevo." MODIFICADO");
 			echo "Registro Modificado";
 
 		} elseif($oper == 'del') {
@@ -2141,6 +2110,249 @@ class Pers extends Controller {
 		};
 	}
 
+	//******************************************************************
+	// Forma de Reposo
+	//
+	function vacaform( $id=0){
+		$editar = "true";
+
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('Numero');
+		$grid->params(array(
+			'align'    => "'center'",
+			'frozen'   => 'true',
+			'width'    => 60,
+			'editable' => 'false',
+			'search'   => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+		$grid->addField('codigo');
+		$grid->label('Codigo');
+		$grid->params(array(
+			'hidden'        => 'true',
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 100,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:false}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
+		));
+
+		$grid->addField('fecha');
+		$grid->label('Fecha');
+		$grid->params(array(
+			'hidden'        => 'true',
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+		$grid->addField('inicio');
+		$grid->label('Salida');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 70,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+		$grid->addField('final');
+		$grid->label('Ingreso');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 70,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+		$grid->addField('dias');
+		$grid->label('Dias');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 70,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editable'      => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+		$grid->addField('descanso');
+		$grid->label('Descanso');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 70,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editable'      => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+		));
+
+		$grid->addField('feriados');
+		$grid->label('Feriado');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'width'         => 40,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+		));
+
+		$grid->addField('observa');
+		$grid->label('Observa');
+		$grid->params(array(
+			'search'        => 'false',
+			'editable'      => $editar,
+			//'width'         => 250,
+			'edittype'      => "'textarea'",
+			'editoptions'   => "{rows:2, cols:80}",
+		));
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('670');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url('nomina/pers/vacaget/'.$id));
+		$grid->setUrlput(site_url('nomina/pers/vacaset/'.$id));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+		echo $msalida;
+	}
+
+
+	//******************************************************************
+	// Traer Data
+	//
+	function vacaget( $id = 0 ){
+		$grid       = $this->jqdatagrid;
+
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('prevaca');
+		$codigo = $this->datasis->dameval("SELECT codigo FROM pers WHERE id=$id");
+
+		$mWHERE[] = array('=', 'codigo', $codigo, '' );
+
+		$response   = $grid->getData('prevaca', array(array()), array(), false, $mWHERE );
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+	}
+
+	//******************************************************************
+	// Guarda la Informacion del Grid o Tabla
+	//
+	function vacaset( $idper = 0 ){
+		$this->load->library('pnomina');
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = $this->input->post('id');
+		$data   = $_POST;
+		$check  = 0;
+		$codigo = $this->datasis->dameval("SELECT codigo FROM pers WHERE id=$idper");
+
+		$data['codigo'] = $codigo;
+		$data['fecha']  = date('Ymd');
+
+		unset($data['oper']);
+		unset($data['id']);
+
+		if($oper == 'add'){
+			if(false == empty($data)){
+				$check = $this->datasis->dameval("SELECT count(*) FROM prevaca WHERE codigo=".$this->db->escape($codigo)." AND final>".$this->db->escape($data['inicio']) );
+				if ( $check == 0 ){
+					$data['usuario']  = $this->secu->usuario();
+					$data['estampa']  = date('Ymd');
+					$data['hora']     = date('H:i:s');
+					$this->db->insert('prevaca', $data);
+					$id = $this->db->insert_id()  ;
+					echo "Registro Agregado";
+					logusu('PREVACA',"Registro  INCLUIDO");
+				} else
+					echo "Ya existe un registro con esa fecha";
+			} else
+				echo "Fallo Agregado!!! ";
+
+		} elseif($oper == 'edit') {
+			$this->db->where("id", $id);
+			$this->db->update('prevaca', $data);
+			logusu('PREVACA',"Vacaciones  ".$codigo." id=".$id." MODIFICADO");
+			echo "Registro Modificado ";
+
+		} elseif($oper == 'del') {
+			if ($check > 0){
+				echo " El registro no puede ser eliminado; tiene movimiento asosciado ";
+			} else {
+				echo "Registro Eliminado ";
+			}
+		};
+		
+		if($oper != 'del'){
+			// Calcula los annos
+			$this->pnomina->CODIGO = $codigo;
+			$anti = $this->pnomina->ANTIGUEDAD();
+			$diatotal = $anti[0]+14+$data['feriados'];
+			
+			//Calcula los dias de descanso
+			$salida   = $data['inicio'];
+			$i        = 0;
+			$dia      = 0;
+			$descanso = 0;
+			$fin      = true;
+			
+			while ( $dia < $diatotal-1 ) {
+				$diasem = date('N', strtotime($data['inicio']. ' + '.$i.' days'));
+				if ( $diasem < 6 ) 
+					$dia++;
+				else
+					$descanso++;
+				$i++;
+			}
+			
+			$diasem = date('Y-m-d', strtotime($data['inicio'].' + '.$i.' days'));
+			$this->db->where("id", $id);
+			$this->db->update('prevaca', array( "dias"=>$diatotal, "descanso"=>$descanso, 'final'=>$diasem ));
+			
+			echo $i." ".$diatotal." dias ".$diatotal." descanso ".$descanso." feriados ".$dia.' final '.$diasem ;
+
+		}
+		
+	}
 
 
 	//******************************************************************
