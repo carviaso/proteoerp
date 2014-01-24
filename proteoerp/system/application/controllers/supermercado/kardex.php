@@ -4,25 +4,26 @@ class Kardex extends Controller {
 	function Kardex(){
 		parent::Controller();
 		$this->load->helper('text');
-		$this->load->library("rapyd");
-		//$this->rapyd->load_db();
+		$this->load->library('rapyd');
 	}
 
 	function index(){
 		$this->datasis->modulo_id(300,1);
-		redirect("supermercado/kardex/filteredgrid");
+		redirect('supermercado/kardex/filteredgrid');
 	}
 
 	function filteredgrid(){
 		$this->rapyd->load('datafilter','datagrid2');
 		$atts = array(
-        'width'     =>'800',
-        'height'    =>'600',
-        'scrollbars'=>'yes',
-        'status'    =>'yes',
-        'resizable' =>'yes',
-        'screenx'   =>'5',
-        'screeny'   =>'5');
+			'width'     =>'800',
+			'height'    =>'600',
+			'scrollbars'=>'yes',
+			'status'    =>'yes',
+			'resizable' =>'yes',
+			'screenx'   =>'5',
+			'screeny'   =>'5'
+		);
+
 		function convierte($par,$link){
 			$atts = array(
 				'width'     =>'800',
@@ -47,6 +48,7 @@ class Kardex extends Controller {
 				default:   return($par);
 			};
 		}
+
 		$modbus=array(
 			'tabla'   =>'maes',
 			'columnas'=>array(
@@ -185,7 +187,7 @@ class Kardex extends Controller {
 		$codigo =$this->uri->segment(6);
 		$almacen=$this->uri->segment(7);
 		if($fecha===false || $codigo===false || $tipo===false || $almacen===false) redirect('supermercado/kardex');
-		$this->rapyd->load('datagrid');
+		$this->rapyd->load('datagrid','fields');
 
 		$grid = new DataGrid();
 		$grid->per_page = 20;
@@ -266,7 +268,7 @@ class Kardex extends Controller {
 		$grid->build();
 		//echo $grid->db->last_query();
 
-		$iframe = new iframeField('showefect', 'inventario/kardex/showefect' ,'400');
+		$iframe = new iframeField('showefect', 'supermercado/kardex/showefect' ,'400');
 		$iframe->status='show';
 		$iframe->build();
 
@@ -276,6 +278,7 @@ class Kardex extends Controller {
 		$this->load->view('view_ventanas', $data);
 
 	}
+
 	function factura(){
 		$tipo   =$this->uri->segment(4);
 		$fecha  =$this->uri->segment(5);
@@ -287,5 +290,9 @@ class Kardex extends Controller {
 		$content['content']    = $this->load->view('rapyd/crud', $data, true);
 		$content['rapyd_head'] = $this->rapyd->get_head();
 		$this->load->view('view_kardex', $content);
+	}
+
+	function showefect(){
+		echo '';
 	}
 }
