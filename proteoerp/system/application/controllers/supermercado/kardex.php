@@ -98,19 +98,19 @@ class Kardex extends Controller {
 		if(isset($_POST['codigo'])){
 			$code   = $_POST['codigo'];
 			$dbcode = $this->db->escape($code);
-			$mSQL   = "SELECT descrip,activo FROM maes WHERE codigo=${dbcode}";
+			$mSQL   = "SELECT descrip FROM maes WHERE codigo=${dbcode}";
 			$query  = $this->db->query($mSQL);
 			$descrip= '';
 			if($query->num_rows() > 0){
 				$row = $query->row();
 				$descrip=trim($row->descrip);
-				$activo =trim($row->activo);
+				//$activo =trim($row->activo);
 
 				$actual = $this->datasis->dameval("SELECT SUM(cantidad) AS cana FROM ubic WHERE codigo=${dbcode}");
 				$fracci = $this->datasis->dameval("SELECT SUM(fraccion) AS cana FROM ubic WHERE codigo=${dbcode}");
 
 			}else{
-				$activo ='';
+				//$activo ='';
 			}
 
 			$link="/supermercado/kardex/grid/<#origen#>/<dbdate_to_human><#fecha#>|Ymd</dbdate_to_human>/<str_replace>/|:slach:|<#codigo#></str_replace>/<#ubica#>";
@@ -155,16 +155,16 @@ class Kardex extends Controller {
 			$consi   = (empty($consi  ))? htmlnformat(0) : htmlnformat($consi  );
 			$mayor   = (empty($mayor  ))? htmlnformat(0) : htmlnformat($mayor  );
 
-			if($activo=='S'){
-				$sactivo='<span style=\'font-size:0.7em;color:green;\'>ACTIVO</span>';
-			}else{
-				$sactivo='<span style=\'font-size:0.7em;color:red;\'>INACTIVO</span>';
-			}
+			//if($activo=='S'){
+			//	$sactivo='<span style=\'font-size:0.7em;color:green;\'>ACTIVO</span>';
+			//}else{
+			//	$sactivo='<span style=\'font-size:0.7em;color:red;\'>INACTIVO</span>';
+			//}
 
 			$optadd = '<div style="">';
 			$optadd.= ' <table>';
 			$optadd.= '  <tr><td colspan=\'5\'><b style="text-size:1.4em;font-weight:bold;">Movimientos posteriores a la fecha '.dbdate_to_human($ffinal).' para todos los almacenes</b></td></tr>';
-			$optadd.= "  <tr><td>Ventas   </td><td style='text-align:right' ><b> ${ventas}</b></td><td style='padding-left:50px;'>Ajustes      </td><td style='text-align:right' ><b>${ajustes}</b></td><td rowspan='3' style='text-align:center'>Existencia actual <p style='font-size:2em;padding:0 0 0 0;margin: 0 0 0 0;font-weight:bold;'>${actual} - ${fracci}</p>${sactivo}</td></tr>";
+			$optadd.= "  <tr><td>Ventas   </td><td style='text-align:right' ><b> ${ventas}</b></td><td style='padding-left:50px;'>Ajustes      </td><td style='text-align:right' ><b>${ajustes}</b></td><td rowspan='3' style='text-align:center'>Existencia actual <p style='font-size:2em;padding:0 0 0 0;margin: 0 0 0 0;font-weight:bold;'>${actual} - ${fracci}</p></td></tr>";
 			$optadd.= "  <tr><td>Compras  </td><td style='text-align:right' ><b>${compras}</b></td><td style='padding-left:50px;'>Conversiones </td><td style='text-align:right' ><b> ${conver}</b></td></tr>";
 			$optadd.= "  <tr><td>N.Entrega</td><td style='text-align:right' ><b>${nentreg}</b></td><td style='padding-left:50px;'>Mayor        </td><td style='text-align:right' ><b>  ${mayor}</b></td></tr>";
 			$optadd.= ' </table>';
