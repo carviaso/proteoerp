@@ -134,6 +134,12 @@ $pie_final=<<<piefinal
 			</tr>
 		</tfoot>
 	</table>
+	<table width="100%">
+		<tr>
+			<td style="text-align:center;"><b>Preparado por: </b></td>
+			<td style="text-align:center;"><b>Autorizado por:</b></td>
+		</tr>
+	</table>
 piefinal;
 
 $pie_continuo=<<<piecontinuo

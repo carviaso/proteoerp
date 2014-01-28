@@ -1,4 +1,5 @@
 <?php
+//reproceso en  cierre
 class Lprod extends Controller {
 	var $mModulo = 'LPROD';
 	var $titp    = 'Control de producci&oacute;n';
@@ -803,7 +804,7 @@ class Lprod extends Controller {
 
 		$edit->fecha = new dateField('Fecha','fecha');
 		$edit->fecha->rule='chfecha|required';
-		$edit->fecha->size =12;
+		$edit->fecha->size =11;
 		$edit->fecha->insertValue=date('Y-m-d');
 		$edit->fecha->maxlength =8;
 		$edit->fecha->calendar=false;
@@ -811,16 +812,16 @@ class Lprod extends Controller {
 		$edit->inventario = new inputField('Leche de inventario','inventario');
 		$edit->inventario->rule='max_length[12]|numeric|required';
 		$edit->inventario->css_class='inputnum';
-		$edit->inventario->size =12;
+		$edit->inventario->size =8;
 		$edit->inventario->insertValue='0';
 		$edit->inventario->onkeyup='totalizar();';
 		$edit->inventario->maxlength =12;
 
-		$edit->litros = new inputField('Litros totales','litros');
+		$edit->litros = new inputField('L.Totales','litros');
 		$edit->litros->rule='max_length[12]|numeric';
 		$edit->litros->css_class='inputnum';
 		$edit->litros->type='inputhidden';
-		$edit->litros->size =14;
+		$edit->litros->size =8;
 		$edit->litros->maxlength =12;
 
 		$edit->peso = new inputField('Peso','peso');
@@ -836,11 +837,11 @@ class Lprod extends Controller {
 		$edit->grasa->size =4;
 		$edit->grasa->maxlength =10;
 
-		$edit->acidez = new inputField('Acidez','acidez');
-		//$edit->acidez->rule='required';
-		$edit->acidez->css_class='inputnum';
-		$edit->acidez->size =4;
-		$edit->acidez->maxlength =10;
+		$edit->reciclaje = new inputField('Reproceso','reciclaje');
+		$edit->reciclaje->css_class='inputnum';
+		$edit->reciclaje->insertValue='0';
+		$edit->reciclaje->size =8;
+		$edit->reciclaje->maxlength =10;
 
 		//Inicio del detalle
 		$edit->itid = new hiddenField('','itid_<#i#>');
@@ -948,18 +949,6 @@ class Lprod extends Controller {
 		$edit->unidades->mode = 'autohide';
 		$edit->unidades->showformat = 'decimal';
 
-		$edit->reproceso = new inputField('Peso del producto para <b>Reproceso</b>','reproceso');
-		$edit->reproceso->rule='numeric|required';
-		$edit->reproceso->css_class='inputonlynum';
-		$edit->reproceso->size =12;
-		$edit->reproceso->maxlength =10;
-		$edit->reproceso->style = 'font-size: 2em;font-weight:bold;';
-
-		$edit->almacen= new dropdownField ('Almac&eacute;n', 'almacen');
-		$edit->almacen->options('SELECT ubica,ubides FROM caub WHERE gasto="N" ORDER BY ubides');
-		$edit->almacen->rule='required';
-		$edit->almacen->style='width:130px;';
-
 		$edit->peso = new inputField('Peso del producto <b>Producido</b>','peso');
 		$edit->peso->rule='numeric|required';
 		$edit->peso->css_class='inputonlynum';
@@ -973,6 +962,18 @@ class Lprod extends Controller {
 		$edit->unidadespeso->size =12;
 		$edit->unidadespeso->maxlength =10;
 		$edit->unidadespeso->style = 'font-size: 2em;font-weight:bold;';
+
+		$edit->reproceso = new inputField('Peso del producto para <b>Reproceso</b>','reproceso');
+		$edit->reproceso->rule='numeric|required';
+		$edit->reproceso->css_class='inputonlynum';
+		$edit->reproceso->size =12;
+		$edit->reproceso->maxlength =10;
+		$edit->reproceso->style = 'font-size: 2em;font-weight:bold;';
+
+		$edit->almacen= new dropdownField ('Almac&eacute;n', 'almacen');
+		$edit->almacen->options('SELECT ubica,ubides FROM caub WHERE gasto="N" ORDER BY ubides');
+		$edit->almacen->rule='required';
+		$edit->almacen->style='width:130px;';
 
 		$edit->build();
 
@@ -1308,7 +1309,7 @@ class Lprod extends Controller {
 		$leche  = floatval($do->get('inventario'));
 		$fecha  = $do->get('fecha');
 		$dbfecha= $this->db->escape($fecha);
-		$cana   = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM lcierre WHERE fecha=".$dbfecha);
+		$cana   = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM lcierre WHERE fecha='.$dbfecha);
 		$do->set('status','A');
 
 		if($cana>0){
@@ -1324,7 +1325,7 @@ class Lprod extends Controller {
 			$bufala = floatval($do->get_rel('itlprod','bufala' ,$i));
 			$pleche = $vaca+$bufala;
 
-			if(empty($codrut) || $pleche != 0 ){
+			if(empty($codrut) || $pleche == 0 ){
 				$do->rel_rm('itlprod',$i);
 			}else{
 				$leche += $pleche;
@@ -1332,7 +1333,7 @@ class Lprod extends Controller {
 		}
 
 		if($leche <= 0){
-			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'No puede tener una produccion sin leche como materia prima. '.$leche.' '.$itcana;
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'No puede tener una produccion sin leche como materia prima.';
 			return false;
 		}
 
@@ -1386,11 +1387,13 @@ class Lprod extends Controller {
 				`unidadespeso` INT(11) NULL DEFAULT NULL,
 				`unidades` INT(10) NULL DEFAULT NULL,
 				`reproceso` DECIMAL(12,2) NULL DEFAULT NULL,
+				`reciclaje` DECIMAL(12,2) NULL DEFAULT NULL,
 				`status` CHAR(1) NOT NULL DEFAULT 'A',
 				`litros` DECIMAL(12,2) NULL DEFAULT NULL,
 				`inventario` DECIMAL(12,2) NULL DEFAULT NULL,
 				`grasa` DECIMAL(12,2) NULL DEFAULT NULL,
 				`acidez` DECIMAL(12,2) NULL DEFAULT NULL,
+				`almacen` VARCHAR(4) NULL DEFAULT NULL,
 				`estampa` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
 				`usuario` VARCHAR(15) NULL DEFAULT NULL,
 				PRIMARY KEY (`id`),
@@ -1430,7 +1433,12 @@ class Lprod extends Controller {
 		}
 
 		if(!in_array('almacen',$campos)){
-			$mSQL="ALTER TABLE `lprod` ADD COLUMN `almacen` VARCHAR(4) NULL DEFAULT NULL AFTER `acidez`;";
+			$mSQL="ALTER TABLE `lprod` ADD COLUMN `almacen` VARCHAR(4) NULL DEFAULT NULL AFTER `acidez`";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('reciclaje',$campos)){
+			$mSQL="ALTER TABLE `lprod` ADD COLUMN `reciclaje` DECIMAL(12,2) NULL DEFAULT NULL AFTER `reproceso`";
 			$this->db->simple_query($mSQL);
 		}
 

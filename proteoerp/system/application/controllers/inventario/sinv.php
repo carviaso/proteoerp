@@ -2880,7 +2880,7 @@ class Sinv extends Controller {
 		$edit->enlace  = new inputField('Caja', 'enlace');
 		$edit->enlace ->size=15;
 		$edit->enlace->maxlength=15;
-		$edit->enlace->rule = 'condi_required|callback_chenlace|callback_chobligafraccion|trim';
+		$edit->enlace->rule = 'trim|condi_required|callback_chenlace|callback_chobligafraccion';
 
 		$edit->cdescrip = new inputField('', 'cdescrip');
 		$edit->cdescrip->pointer=true;
@@ -5693,7 +5693,7 @@ class Sinv extends Controller {
 		$grid->showpager(true);
 		$grid->setViewRecords(true);
 		$grid->setWidth('250');
-		$grid->setHeight('280');
+		$grid->setHeight('240');
 
 		$grid->setUrlget(site_url('inventario/unidad/getdata/'));
 		$grid->setUrlput(site_url('inventario/unidad/setdata/'));

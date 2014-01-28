@@ -525,12 +525,11 @@ class PDFReporte extends Fpdf {
 					if (count($sal)>0){
 
 						foreach($sal as $pasa){
-							if(!is_numeric($nf[$pasa])) $nf[$pasa]=0;
+							//if(!is_numeric($nf[$pasa])) $nf[$pasa]=0;
 							$val=str_replace('<#'.$pasa.'#>',$nf[$pasa],$val);
 						}
 
 						$col='$val='.$val.';';
-						//echo '--->'.$col;
 						eval($col);
 						$row[$key]=$val;
 

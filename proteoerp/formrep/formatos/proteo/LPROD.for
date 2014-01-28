@@ -6,27 +6,42 @@ $id = $parametros[0];
 $dbid=$this->db->escape($id);
 
 $mSQL_1 = $this->db->query("SELECT
-	a.fecha,a.codigo,b.descrip,a.status,
-	a.peso
+	a.fecha,a.codigo,b.descrip,a.status,a.grasa,a.acidez,a.reciclaje,
+	a.peso,a.litros,a.reproceso,a.inventario
 FROM lprod AS a
 JOIN sinv AS b ON a.codigo=b.codigo
 WHERE a.id=${dbid}");
+
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row = $mSQL_1->row();
 
 $fecha     = dbdate_to_human($row->fecha);
 $numero    = str_pad($id, 8, '0', STR_PAD_LEFT);
 $peso      = nformat($row->peso);
+$litros    = nformat($row->litros);
+$acidez    = nformat($row->acidez);
+$reciclado = nformat($row->reciclaje);
+$reproceso = nformat($row->reproceso);
+$inventario= nformat($row->inventario);
+$llitros   = $row->litros;
+
+if($row->status=='F'){
+	$rendimiento= $row->litros/$row->peso;
+}else{
+	$rendimiento= '';
+}
+
 $codigo    = htmlspecialchars(trim($row->codigo ));
 $descrip   = htmlspecialchars(trim($row->descrip));
 $dbcodigo  = $this->db->escape($codigo);
 $status    =($row->status=='C')? 'Cerrado' : ($row->status=='A')? 'Abierto' : ($row->status=='F')? 'Finalizado' : 'Desconocido';
 
+
 $lineas = 0;
 $uline  = array();
 
 $mSQL_3 = $this->db->query("SELECT
-a.codrut AS codigo, a.nombre AS descrip, a.litros
+a.codrut AS codigo, a.nombre AS descrip, a.litros,a.bufala
 FROM itlprod AS a
 WHERE a.id_lprod=${dbid}
 ORDER BY a.codrut");
@@ -34,7 +49,7 @@ $detalle2 = $mSQL_3->result();
 
 
 $mSQL_2 = $this->db->query("SELECT
-a.codigo,a.descrip,a.cantidad
+a.codigo,a.descrip,a.cantidad,a.unidad,a.factor*a.cantidad/1000 AS factor
 FROM sinvpitem AS a
 WHERE a.producto=${dbcodigo}");
 $detalle  = $mSQL_2->result();
@@ -57,12 +72,19 @@ $encabezado = <<<encabezado
 	<table style="width: 100%;" class="header">
 		<tr>
 			<td valign='bottom'><h1 style="text-align: left">Orden de producci&oacute;n</h1></td>
-			<td valign='bottom'><h1 style="text-align: right">N&uacute;mero: ${numero}</h1></td>
+			<td valign='bottom' colspan='3'><h1 style="text-align: right">N&uacute;mero: ${numero}</h1></td>
 		</tr><tr>
 			<td>Producto:<b>(${codigo}) ${descrip}</b></td>
 			<td>Fecha: <b>${fecha}</b></td>
+			<td>Reciclado: <b>${reciclado}</b></td>
 		</tr><tr>
-			<td>Estado: <b>${status}</b></td>
+			<td>Enfriamiento: <b>${inventario}</b></td>
+			<td>Reproceso: <b>${reproceso}</b></td>
+			<td>L.Totales: <b>${litros}</b></td>
+		</tr><tr>
+			<td>Estado:    <b>${status}</b></td>
+			<td></td>
+			<td>Producido: <b>${peso} - ${rendimiento}%</b></td>
 		</tr>
 	</table>
 encabezado;
@@ -78,7 +100,8 @@ $encabezado_tabla=<<<encabezado_tabla
 			<tr>
 				<th ${estilo}'>Ruta</th>
 				<th ${estilo}'>Nombre</th>
-				<th ${estilo}'>Litros</th>
+				<th ${estilo}'>Litros Vac.</th>
+				<th ${estilo}'>Litros Buf.</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -95,6 +118,7 @@ $pie_final=<<<piefinal
 				<td style="text-align: right;">&nbsp;</td>
 				<td style="text-align: right;">&nbsp;</td>
 				<td style="text-align: right;"><b>%s</b></td>
+				<td style="text-align: right;"><b>%s</b></td>
 			</tr>
 		</tfoot>
 	</table>
@@ -104,7 +128,7 @@ $pie_continuo=<<<piecontinuo
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="3" style="text-align: right;">CONTINUA...</td>
+				<td colspan="4" style="text-align: right;">CONTINUA...</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -112,12 +136,17 @@ $pie_continuo=<<<piecontinuo
 piecontinuo;
 //Fin Pie Pagina
 
+$this->incluir('X_CINTILLO');
+echo $encabezado;
+echo $encabezado_tabla;
+
 $mod     = $clinea = false;
-$npagina = true;
-$litrost   = $pesot = 0;
+$npagina = false;
+$litrost = $bufalat =$pesot = 0;
 $i       = 0;
 foreach ($detalle2 AS $items){ $i++;
 	$litrost += $items->litros;
+	$bufalat += $items->bufala;
 	do {
 		if($npagina){
 			$this->incluir('X_CINTILLO');
@@ -158,6 +187,7 @@ foreach ($detalle2 AS $items){ $i++;
 					?>
 				</td>
 				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->litros,2); ?></td>
+				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->bufala,2); ?></td>
 			</tr>
 <?php
 		if($npagina){
@@ -167,7 +197,7 @@ foreach ($detalle2 AS $items){ $i++;
 		}
 	} while ($clinea);
 }
-echo sprintf($pie_final,nformat($litrost));
+echo sprintf($pie_final,nformat($litrost),nformat($bufalat));
 
 //************************************
 // Lista de articulos
@@ -183,6 +213,7 @@ $encabezado_tabla=<<<encabezado_tabla
 			<tr>
 				<th ${estilo}'>C&oacute;digo</th>
 				<th ${estilo}'>Descripci&oacute;n</th>
+				<th ${estilo}'>C.Unitaria</th>
 				<th ${estilo}'>Cantidad</th>
 			</tr>
 		</thead>
@@ -197,7 +228,7 @@ $pie_final=<<<piefinal
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="3" style="text-align: right;">&nbsp;</td>
+				<td colspan="4" style="text-align: right;">&nbsp;</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -207,7 +238,7 @@ $pie_continuo=<<<piecontinuo
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="3" style="text-align: right;">CONTINUA...</td>
+				<td colspan="4" style="text-align: right;">CONTINUA...</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -262,6 +293,7 @@ foreach ($detalle AS $items){ $i++; $nsitems=$nsitems-1;
 					?>
 				</td>
 				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->cantidad  ,2); ?></td>
+				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->factor*$llitros,2).$items->unidad; ?></td>
 			</tr>
 <?php
 		if($npagina && $nsitems>0){
@@ -274,6 +306,7 @@ foreach ($detalle AS $items){ $i++; $nsitems=$nsitems-1;
 
 for(1;$lineas<$maxlin;$lineas++){ ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
+				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>

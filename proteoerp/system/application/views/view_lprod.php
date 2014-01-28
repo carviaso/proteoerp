@@ -177,12 +177,15 @@ function autocod(id){
 <table width='100%' style='font-size:11pt;background:#F2E69D;'>
 	<tr>
 		<td><b><?php echo $form->litros->label;      ?></b></td>
-		<td>   <?php echo $form->litros->output;     ?></td>
-		<td colspan='2'><b><?php echo $form->codigo->label;      ?></b><?php echo $form->codigo->output;    ?></td>
-		<td colspan='2'>   <?php echo $form->descrip->output;    ?></td>
+		<td style='text-align:right;'> <?php echo $form->litros->output;     ?>&nbsp;</td>
+		<td><b><?php echo $form->codigo->label;      ?></b></td>
+		<td>   <?php echo $form->codigo->output;    ?></td>
+		<td colspan='3'>   <?php echo $form->descrip->output;    ?></td>
 	</tr><tr>
 		<td><b><?php echo $form->fecha->label;       ?></b></td>
 		<td>   <?php echo $form->fecha->output;      ?></td>
+		<td><b><?php echo $form->reciclaje->label;    ?></b></td>
+		<td>   <?php echo $form->reciclaje->output;  ?></td>
 		<td><b><?php echo $form->grasa->label;       ?></b></td>
 		<td>   <?php echo $form->grasa->output;      ?></td>
 		<td><b><?php echo $form->inventario->label;  ?></b></td>
@@ -194,8 +197,8 @@ function autocod(id){
 	<tr style='background:#030B7A;color:#FDFDFD;font-size:10pt;'>
 		<th align="center">Ruta</th>
 		<th align="center">Nombre</th>
-		<th align="center">Litros V.</th>
-		<th align="center">Litros B.</th>
+		<th align="center">Litros Vac.</th>
+		<th align="center">Litros Buf.</th>
 		<?php if($form->_status!='show') {?>
 			<th align="center">&nbsp;</th>
 		<?php } ?>
