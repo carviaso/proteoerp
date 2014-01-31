@@ -691,7 +691,13 @@ class sinv extends Controller {
 
 		$data['content'] = $edit->output;
 		$data['title']   = heading('Inventario de Farmacia');
-		$data['head']    = script('jquery.pack.js').script('plugins/jquery.numeric.pack.js').script("plugins/jquery.floatnumber.js").script("sinvmaes.js").$this->rapyd->get_head();
+		$data['head']    = script('jquery.pack.js');
+		$data['head']   .= script('plugins/jquery.numeric.pack.js');
+		$data['head']   .= script('plugins/jquery.floatnumber.js');
+		$data['head']   .= phpscript('nformat.js');
+		$data['head']   .= script('sinvmaes.js');
+
+		$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
