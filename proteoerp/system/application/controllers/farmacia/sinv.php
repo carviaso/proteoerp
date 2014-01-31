@@ -696,8 +696,7 @@ class sinv extends Controller {
 		$data['head']   .= script('plugins/jquery.floatnumber.js');
 		$data['head']   .= phpscript('nformat.js');
 		$data['head']   .= script('sinvmaes.js');
-
-		$this->rapyd->get_head();
+		$data['head']   .= $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
