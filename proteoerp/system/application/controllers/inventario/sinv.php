@@ -4866,21 +4866,23 @@ class Sinv extends Controller {
 	function chenlace($enlace){
 
 		$tipo=$this->input->post('tipo');
-		if($tipo[0]=='F' && empty($enlace)){
-			$this->validation->set_message('chenlace','El campo %s es requerido cuando el producto es Fraccion');
-			return false;
-		}else{
-			$dbcodigo=$this->db->escape($enlace);
-			$tipo = $this->datasis->dameval('SELECT tipo FROM sinv WHERE codigo='.$dbcodigo);
-
-			if(empty($tipo)){
-				$this->validation->set_message('chenlace','El producto en el campo %s no existe');
+		if($tipo[0]=='F'){
+			if(empty($enlace)){
+				$this->validation->set_message('chenlace','El campo %s es requerido cuando el producto es Fraccion');
 				return false;
-			}
+			}else{
+				$dbcodigo=$this->db->escape($enlace);
+				$tipo = $this->datasis->dameval('SELECT tipo FROM sinv WHERE codigo='.$dbcodigo);
 
-			if($tipo[0]!='A'){
-				$this->validation->set_message('chenlace','El producto en el campo %s debe ser tipo Articulo');
-				return false;
+				if(empty($tipo)){
+					$this->validation->set_message('chenlace','El producto en el campo %s no existe');
+					return false;
+				}
+
+				if($tipo[0]!='A'){
+					$this->validation->set_message('chenlace','El producto en el campo %s debe ser tipo Articulo');
+					return false;
+				}
 			}
 		}
 		return true;
