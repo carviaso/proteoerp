@@ -843,100 +843,99 @@ class Datasis {
 	//****************************************************
 	function sinvcarga( $mCODIGO, $mALMA, $mCANTIDAD){
 		$CI =& get_instance();
-		if (empty($mALMA)) $mALMA = $this->traevalor('ALMACEN');
-		if (empty($mALMA)) $mALMA = $this->dameval("SELECT ubica FROM caub WHERE gasto='N' ORDER BY ubica");
-		$dbmALMA=$CI->db->escape($mALMA);
+		if(empty($mALMA)) $mALMA = $this->traevalor('ALMACEN');
+		if(empty($mALMA)) $mALMA = $this->dameval("SELECT ubica FROM caub WHERE gasto='N' ORDER BY ubica");
+		$dbmALMA = $CI->db->escape($mALMA);
 		$mGASTO  = $this->dameval("SELECT gasto FROM caub WHERE ubica=${dbmALMA}",1);
-		if ($mGASTO == 'S') {
+		if($mGASTO == 'S') {
 			$mSQL = "DELETE  FROM itsinv WHERE alma=${dbmALMA}";
 			$CI->db->simple_query($mSQL);
 			return;
-		};
+		}
 
 		$codigoesc = $CI->db->escape($mCODIGO);
 
-		// VERIFICA SI EL ARTICULO ES SERVICIO
-		$mSQL = "SELECT SUBSTRING(tipo,1,1) tipo, enlace, fracci, derivado FROM sinv WHERE codigo=".$codigoesc;
-		$query     = $CI->db->query($mSQL);
+		// Verifica si el articulo es servicio
+		$mSQL  = "SELECT SUBSTRING(tipo,1,1) AS tipo, enlace, fracci, derivado FROM sinv WHERE codigo=".$codigoesc;
+		$query = $CI->db->query($mSQL);
 		if($query->num_rows() <= 0) return;
 		$mREG      = $query->row_array();
-		$mTIPO     = $mREG['tipo'];
+		$mTIPO     = strtoupper($mREG['tipo']);
 		$mENLACE   = $mREG['enlace'];
 		$mFRACCI   = $mREG['fracci'];
 		$mDERIVADO = $mREG['derivado'];
+		$dbmENLACE = $CI->db->escape($mENLACE);
 
-		// SERVICIO NO DESCUENTA
-		if($mTIPO == 'S' ) return;
+		// Servicio no descuenta
+		if($mTIPO == 'S') return;
 
-		$mSQL = "UPDATE sinv SET existen=existen+$mCANTIDAD WHERE codigo=".$codigoesc;
+		$mSQL = "UPDATE sinv SET existen=existen+(${mCANTIDAD}) WHERE codigo=".$codigoesc;
 		$CI->db->simple_query($mSQL);
 
-		// REVISA SI EXISTE EN ITSINV
-		$mHAY = $this->dameval("SELECT COUNT(*) FROM itsinv WHERE codigo=$codigoesc AND alma=$dbmALMA");
-		if ( $mHAY == 0 ){
-			$mSQL = $CI->db->query("INSERT INTO itsinv SET codigo=$codigoesc, alma=$dbmALMA, existen=0");
+		// Revisa si existe en itsinv
+		$mHAY = $this->dameval("SELECT COUNT(*) AS hay FROM itsinv WHERE codigo=${codigoesc} AND alma=${dbmALMA}");
+		if($mHAY == 0){
+			$mSQL = $CI->db->query("INSERT INTO itsinv SET codigo=${codigoesc}, alma=${dbmALMA}, existen=0");
 			$CI->db->simple_query($mSQL);
 		}
 
-		// ACTUALIZA ITSINV
-		$mSQL = "UPDATE itsinv SET existen=existen+$mCANTIDAD WHERE codigo=$codigoesc AND alma=$dbmALMA";
+		// Actualiza itsinv
+		$mSQL = "UPDATE itsinv SET existen=existen+(${mCANTIDAD}) WHERE codigo=${codigoesc} AND alma=${dbmALMA}";
 		$CI->db->simple_query($mSQL);
-		//echo $mSQL;
 
-		// VERIFICA SI ES MENOR QUE 0
-		if ( $mTIPO == 'F' and !empty($mENLACE) and $mCANTIDAD < 0 ){
-			// SI EXISTE EL ENLACE
-			if ($this->dameval("SELECT COUNT(*) FROM sinv WHERE codigo='$mENLACE'") == 1) {
-				$mSQL = "SELECT existen FROM itsinv WHERE codigo=".$codigoesc." AND alma='$mALMA'";
+		// Verifica si es menor que 0
+		if($mTIPO == 'F' && !empty($mENLACE) && $mCANTIDAD < 0){
+			// Si existe el enlace
+			if($this->dameval("SELECT COUNT(*) AS cana FROM sinv WHERE codigo=${dbmENLACE}") == 1) {
+				$mSQL = "SELECT existen FROM itsinv WHERE codigo=".$codigoesc." AND alma=${dbmALMA}";
 				$mEXISTEN = $this->dameval($mSQL);
-				// SI ES MENOR QUE 0 CALCULA LA NECESIDAD
-				if ( $mEXISTEN < 0 ){
+				// Si es menor que 0 calcula la necesidad
+				if($mEXISTEN < 0){
 					// Cuantas necesita?
-					if ( $mFRACCI > 0 ){
+					if($mFRACCI > 0){
 						$mNECE = round(abs($mEXISTEN)/$mFRACCI,0);
-						if ( $mNECE*$mFRACCI < abs( $mEXISTEN) ) $mNECE += 1;
-					} else {
+						if($mNECE*$mFRACCI < abs( $mEXISTEN)) $mNECE += 1;
+					}else{
 						$mNECE = round(abs($mEXISTEN)*abs($mFRACCI),0);
 					}
 
-					// SUMA AL DETALLE
-					$mSQL = "UPDATE itsinv SET existen=existen+$mCANTIDAD WHERE codigo=$codigoesc AND alma=$dbmALMA";
-					//CMNJ(STR(mNECE)+STR(mEXISTEN)+STR(mFRACCI))
-					if ( $mFRACCI > 0 ){
+					// Suma al detalle
+					$mSQL = "UPDATE itsinv SET existen=existen+(${mCANTIDAD}) WHERE codigo=${codigoesc} AND alma=${dbmALMA}";
+					if($mFRACCI > 0){
 						$descu = $mNECE*$mFRACCI;
-						$mSQL = "UPDATE itsinv SET existen=existen+$descu WHERE codigo=$codigoesc AND alma=$dbmALMA";
+						$mSQL = "UPDATE itsinv SET existen=existen+${descu} WHERE codigo=${codigoesc} AND alma=${dbmALMA}";
 						$CI->db->simple_query($mSQL);
-					} else {
+					}else{
 						$descu = $mNECE/abs($mFRACCI);
-						$mSQL = "UPDATE itsinv SET existen=existen+$descu WHERE codigo=$codigoesc AND alma=$dbmALMA";
+						$mSQL = "UPDATE itsinv SET existen=existen+${descu} WHERE codigo=${codigoesc} AND alma=${dbmALMA}";
 						$CI->db->simple_query($mSQL);
 					}
 
-					// DESCUENTA DEL MAYOR
-					$mSQL = "UPDATE itsinv SET existen=existen-$mNECE WHERE codigo=$codigoesc AND alma=$dbmALMA";
+					// Descuenta del mayor
+					$mSQL = "UPDATE itsinv SET existen=existen-${mNECE} WHERE codigo=${codigoesc} AND alma=${dbmALMA}";
 					$CI->db->simple_query($mSQL);
 
-					// FALTA ACTUALIZAR LOS MAESTROS
-					if ( $mFRACCI > 0 ){
+					// Falta actualizar los maestros
+					if($mFRACCI > 0){
 						$descu = $mNECE*$mFRACCI;
-						$mSQL = "UPDATE sinv SET existen=existen+$descu WHERE codigo=$codigoesc";
+						$mSQL = "UPDATE sinv SET existen=existen+${descu} WHERE codigo=${codigoesc}";
 						$CI->db->simple_query($mSQL);
-					} else {
-						$descu = $mNECE/ABS($mFRACCI);
-						$mSQL = "UPDATE sinv SET existen=existen+$descu WHERE codigo=".$codigoesc;
+					}else{
+						$descu = $mNECE/abs($mFRACCI);
+						$mSQL = "UPDATE sinv SET existen=existen+${descu} WHERE codigo=".$codigoesc;
 						$CI->db->simple_query($mSQL);
 					}
-					$mSQL = "UPDATE sinv SET existen=existen+$mNECE WHERE codigo=$mENLACE";
+					$mSQL = "UPDATE sinv SET existen=existen+${mNECE} WHERE codigo=${mENLACE}";
 					$CI->db->simple_query($mSQL);
 
-					// GUARDA EL MOVIMIENTO
-					if ( $mFRACCI > 0 ) {
+					// Guarda el movimiento
+					if($mFRACCI > 0){
 						$descu = $mNECE*$mFRACCI;
-						$mSQL = "INSERT INTO trafrac SET id=0, fecha=now(), codigo=$codigoesc, enlace='$mENLACE', cantidad=$mNECE, fraccion=$descu, alma=$dbmALMA";
+						$mSQL = "INSERT INTO trafrac SET id=0, fecha=CURDATE(), codigo=${codigoesc}, enlace=${dbmENLACE}, cantidad=${mNECE}, fraccion=${descu}, alma=${dbmALMA}";
 						$CI->db->simple_query($mSQL);
-					} else {
+					}else{
 						$descu = $mNECE/abs($mFRACCI);
-						$mSQL = "INSERT INTO trafrac SET id=0, fecha=now(), codigo=$codigoesc, enlace='$mENLACE', cantidad=$mNECE, fraccion=$descu, alma=$dbmALMA";
+						$mSQL = "INSERT INTO trafrac SET id=0, fecha=CURDATE(), codigo=${codigoesc}, enlace=${dbmENLACE}, cantidad=${mNECE}, fraccion=${descu}, alma=${dbmALMA}";
 						$CI->db->simple_query($mSQL);
 					}
 				}
@@ -1533,7 +1532,7 @@ class Datasis {
 				base3=ROUND(pond*100/(100-margen3),2),
 				base4=ROUND(pond*100/(100-margen4),2)
 			WHERE formcal='P' ";
-			
+
 			if ( $mcodigo != '' ) $mSQL .= " AND codigo = ".$mcodigo." " ;
 			$CI->db->query($mSQL);
 

@@ -4003,18 +4003,18 @@ class Sfac extends Controller {
 			$dbcodigoa = $this->db->escape($itcodigoa);
 
 			$factor=($tipo_doc=='F')? -1:1;
-			$sql="INSERT IGNORE INTO itsinv (alma,codigo,existen) VALUES (${dbalma},${dbcodigoa},0)";
-			$ban=$this->db->simple_query($sql);
-			if($ban==false){ memowrite($sql,'sfac'); $error++;}
 
-			$sql="UPDATE itsinv SET existen=existen+${factor}*${itcana} WHERE codigo=${dbcodigoa} AND alma=${dbalma}";
-			$ban=$this->db->simple_query($sql);
-			if($ban==false){ memowrite($sql,'sfac'); $error++;}
+			//$sql="INSERT IGNORE INTO itsinv (alma,codigo,existen) VALUES (${dbalma},${dbcodigoa},0)";
+			//$ban=$this->db->simple_query($sql);
+			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
+			//$sql="UPDATE itsinv SET existen=existen+${factor}*${itcana} WHERE codigo=${dbcodigoa} AND alma=${dbalma}";
+			//$ban=$this->db->simple_query($sql);
+			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
+			//$sql="UPDATE sinv   SET existen=existen+${factor}*${itcana} WHERE codigo=${dbcodigoa}";
+			//$ban=$this->db->simple_query($sql);
+			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
 
-			$sql="UPDATE sinv   SET existen=existen+${factor}*${itcana} WHERE codigo=${dbcodigoa}";
-			$ban=$this->db->simple_query($sql);
-			if($ban==false){ memowrite($sql,'sfac'); $error++;}
-
+			$this->datasis->sinvcarga($itcodigoa, $almacen, $factor*$itcana);
 		}
 
 		//Chequea si es una venta vehicular

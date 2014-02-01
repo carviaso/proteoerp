@@ -3370,7 +3370,10 @@ class Scst extends Controller {
 					if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 
 					//Inicio de la retencion
-					if($reteiva>0){
+					$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
+					$rif     = $this->datasis->traevalor('RIF');
+
+					if($reteiva>0 && $contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
 						//Crea la nota de credito
 						$mnumnc = $this->datasis->fprox_numero('num_nc');
 						$sprm=array();
@@ -4406,6 +4409,8 @@ class Scst extends Controller {
 					$do->set('reteiva', round($iva*$por_rete,2));
 				}
 			}
+		}else{
+			$do->set('reteiva', 0);
 		}
 		//fin de la retencion
 
