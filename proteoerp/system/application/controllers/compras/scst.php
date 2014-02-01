@@ -3200,7 +3200,7 @@ class Scst extends Controller {
 
 	function _actualizar($id, $cprecio, $actuali=null){
 		$error = 0;
-		$pasa  = $this->datasis->dameval('SELECT COUNT(*) FROM scst WHERE actuali>=fecha AND id= '.$id);
+		$pasa  = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM scst WHERE actuali>=fecha AND id= '.$id);
 
 		if($pasa==0){
 			$control=$this->datasis->dameval('SELECT control FROM scst WHERE  id='.$id);
@@ -3252,16 +3252,41 @@ class Scst extends Controller {
 					if(empty($actuali)) $actuali=date('Ymd');
 
 					$itdata=array();
-					$sql='SELECT a.codigo,a.cantidad,a.importe,a.importe/a.cantidad AS costo,
-						a.precio1,a.precio2,a.precio3,a.precio4,b.formcal,b.ultimo,b.standard,b.pond,b.existen
+					$sql='SELECT a.codigo,a.cantidad,a.importe,a.importe/a.cantidad AS costo,a.id,
+						a.precio1,a.precio2,a.precio3,a.precio4,b.formcal,b.ultimo,b.standard,b.pond,b.existen,b.fracci
 						FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE a.control=?';
 					$qquery=$this->db->query($sql,array($control));
 					if($qquery->num_rows()>0){
 						foreach ($qquery->result() as $itrow){
+							//Revisa la modalidad de compra por bulto
+							$cbulto = $this->datasis->traevalor('SCSTBULTO','Colocal S para que asuma que TODAS las compras son por bulto');
+							if($cbulto=='S' && $itrow->fracci>1){//1 bulto = cantidad * fracci
+								$itrow->cantidad = round($itrow->cantidad*$itrow->fracci,2);
+								$itrow->costo    = round($itrow->costo/$itrow->fracci,2);
+								$itrow->precio1  = round($itrow->precio1/$itrow->fracci,2);
+								$itrow->precio2  = round($itrow->precio2/$itrow->fracci,2);
+								$itrow->precio3  = round($itrow->precio3/$itrow->fracci,2);
+								$itrow->precio4  = round($itrow->precio4/$itrow->fracci,2);
+
+								$data = array(
+									'cantidad'=> $itrow->cantidad ,
+									'costo'   => $itrow->costo,
+									'precio1' => $itrow->precio1,
+									'precio2' => $itrow->precio2,
+									'precio3' => $itrow->precio3,
+									'precio4' => $itrow->precio4
+								);
+								$mSQL = $this->db->update_string('itscst', $data, 'id = '.$this->db->escape($itrow->id));
+								$ban=$this->db->simple_query($mSQL);
+								if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+
+							}
+							//Fin modalidad de bulto
+
 							$pond     = $this->_pond($itrow->existen,$itrow->cantidad,$itrow->pond,$itrow->costo);
+							$dbcodigo = $this->db->escape($itrow->codigo);
 
 							$costo    = $this->_costos($itrow->formcal,$pond,$itrow->costo,$itrow->standard);
-							$dbcodigo = $this->db->escape($itrow->codigo);
 							//Actualiza el inventario
 							$mSQL='UPDATE sinv SET
 								pond='.$pond.',
@@ -3516,7 +3541,7 @@ class Scst extends Controller {
 						if(!$ban){ memowrite($mSQL,'scst'); $error++;}
 
 						//Crea la nota de debito
-						$mnsprm  = $this->datasis->fprox_numero('num_nd');
+						$mnsprm   = $this->datasis->fprox_numero('num_nd');
 						$ccontrol = $this->datasis->fprox_numero('nsprm');
 
 						$data=array();
@@ -4020,10 +4045,10 @@ class Scst extends Controller {
 		//$query->destroy();
 
 		// DESACTUALIZA INVENTARIO
-		$query = $this->db->query("SELECT codigo, cantidad FROM itscst WHERE control=${dbcontrol}");
+		$query = $this->db->query("SELECT a.codigo, a.cantidad, a.id, a.precio1, a.precio2, a.precio3, a.precio4,a.costo, b.fracci FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE control=${dbcontrol}");
 		foreach($query->result() as $row){
 			$itdbcodigo= $this->db->escape($row->codigo);
-			$mTIPO = $this->datasis->dameval("SELECT MID(tipo,1,1) FROM sinv WHERE codigo=${itdbcodigo}");
+			$mTIPO = $this->datasis->dameval("SELECT MID(tipo,1,1) AS tipo FROM sinv WHERE codigo=${itdbcodigo}");
 
 			if($tipo_doc == 'FC' || $tipo_doc =='NE'){
 				$this->datasis->sinvcarga($row->codigo,  $mALMA, (-1)*$row->cantidad);
@@ -4063,6 +4088,32 @@ class Scst extends Controller {
 			}else{
 				$this->datasis->sinvcarga($row->codigo, $mALMA, $row->cantidad);
 			}
+
+
+			//Revisa la modalidad de compra por bulto
+			$cbulto = $this->datasis->traevalor('SCSTBULTO','Colocal S para que asuma que TODAS las compras son por bulto');
+			if($cbulto=='S' && $row->fracci>1){//1 bulto = cantidad * fracci
+				$row->cantidad = round($row->cantidad/$row->fracci,2);
+				$row->costo    = round($row->costo*$row->fracci,2);
+				$row->precio1  = round($row->precio1*$row->fracci,2);
+				$row->precio2  = round($row->precio2*$row->fracci,2);
+				$row->precio3  = round($row->precio3*$row->fracci,2);
+				$row->precio4  = round($row->precio4*$row->fracci,2);
+
+				$data = array(
+					'cantidad'=> $row->cantidad ,
+					'costo'   => $row->costo,
+					'precio1' => $row->precio1,
+					'precio2' => $row->precio2,
+					'precio3' => $row->precio3,
+					'precio4' => $row->precio4
+				);
+				$mSQL = $this->db->update_string('itscst', $data, 'id = '.$this->db->escape($row->id));
+				$ban=$this->db->simple_query($mSQL);
+				if(!$ban){ memowrite($mSQL,'scst'); }
+
+			}
+			//Fin modalidad de bulto
 		}
 
 		$mSQL = "UPDATE scst SET actuali=0 WHERE control=${dbcontrol}";
