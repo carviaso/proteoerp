@@ -2021,13 +2021,13 @@ class Scst extends Controller {
 		$edit->credito->when=array('show');
 
 		$edit->montotot  = new inputField('Subtotal', 'montotot');
-		$edit->montotot->onkeyup='cmontotot()';
+		//$edit->montotot->onkeyup='cmontotot()';
 		$edit->montotot->size = 12;
 		$edit->montotot->autocomplete=false;
 		$edit->montotot->css_class='inputnum';
 
 		$edit->montoiva  = new inputField('IVA', 'montoiva');
-		$edit->montoiva->onkeyup='cmontoiva()';
+		//$edit->montoiva->onkeyup='cmontoiva()';
 		$edit->montoiva->size = 12;
 		$edit->montoiva->autocomplete=false;
 		$edit->montoiva->css_class='inputnum';
@@ -3262,7 +3262,7 @@ class Scst extends Controller {
 							$cbulto = $this->datasis->traevalor('SCSTBULTO','Colocal S para que asuma que TODAS las compras son por bulto');
 							if($cbulto=='S' && $itrow->fracci>1){//1 bulto = cantidad * fracci
 								$itrow->cantidad = round($itrow->cantidad*$itrow->fracci,2);
-								$itrow->costo    = round($itrow->costo/$itrow->fracci,2);
+								$itrow->costo    = round($itrow->costo/$itrow->fracci,4);
 								$itrow->precio1  = round($itrow->precio1/$itrow->fracci,2);
 								$itrow->precio2  = round($itrow->precio2/$itrow->fracci,2);
 								$itrow->precio3  = round($itrow->precio3/$itrow->fracci,2);
@@ -4094,7 +4094,7 @@ class Scst extends Controller {
 			$cbulto = $this->datasis->traevalor('SCSTBULTO','Colocal S para que asuma que TODAS las compras son por bulto');
 			if($cbulto=='S' && $row->fracci>1){//1 bulto = cantidad * fracci
 				$row->cantidad = round($row->cantidad/$row->fracci,2);
-				$row->costo    = round($row->costo*$row->fracci,2);
+				$row->costo    = round($row->costo*$row->fracci,4);
 				$row->precio1  = round($row->precio1*$row->fracci,2);
 				$row->precio2  = round($row->precio2*$row->fracci,2);
 				$row->precio3  = round($row->precio3*$row->fracci,2);

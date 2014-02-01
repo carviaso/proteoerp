@@ -77,6 +77,14 @@ $(function(){
 		autocod(i.toString());
 	}
 
+	$("#montotot").focusout(function(){
+		cmontotot();
+	});
+
+	$("#montoiva").focusout(function(){
+		cmontoiva();
+	});
+
 	$('input[name^="cantidad_"]').keypress(function(e) {
 		if(e.keyCode == 13) {
 		    add_itscst();
@@ -112,7 +120,7 @@ $(function(){
 			$('#nombre_val').text(ui.item.nombre);
 			$('#proveed').val(ui.item.proveed);
 			$('#sprvreteiva').val(ui.item.reteiva);
-			setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
+			setTimeout(function(){ $("#proveed").removeAttr("readonly"); }, 1500);
 			$('#serie').change();
 		}
 	});
@@ -254,10 +262,15 @@ function costo(id){
 	}else{
 		$("#importe_"+ind).val('0.0');
 	}
-	totalizar();
+	totalizar(1);
 }
 
-function totalizar(){
+function totalizar(taca){
+	if(taca){
+		var tolera = 0;
+	}else{
+		var tolera = 0.07;
+	}
 	var iva      =0;
 	var totalg   =0;
 	var itiva    =0;
@@ -275,7 +288,6 @@ function totalizar(){
 	var civaadi  =0;
 	var montotot =0;
 	var montoiva =0;
-	var tolera   =0.07
 
 	var arr=$('input[name^="importe_"]');
 	jQuery.each(arr, function() {
@@ -401,15 +413,16 @@ function post_modbus_sinv(nind){
 }
 
 function cmontotot(){
-	if(ctimeout > 0) clearTimeout(ctimeout);
-	ctimeout=setTimeout('timecmontotot();', 1000);
+	//if(ctimeout > 0) clearTimeout(ctimeout);
+	//ctimeout=setTimeout('timecmontotot();', 1000);
+	timecmontotot();
 }
 
 function timecmontotot(){
-	var totals  = 0;
+	var totals   = 0;
 	var vimporte = $("#montotot").val();
 	var iva      = Number($("#montoiva").val());
-	var arr=$('input[name^="importe_"]');
+	var arr      = $('input[name^="importe_"]');
 	jQuery.each(arr, function() {
 		totals  = totals+Number(this.value);
 	});
