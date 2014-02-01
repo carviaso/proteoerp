@@ -2880,7 +2880,7 @@ class Sinv extends Controller {
 		$edit->enlace  = new inputField('Caja', 'enlace');
 		$edit->enlace ->size=15;
 		$edit->enlace->maxlength=15;
-		$edit->enlace->rule = 'trim|condi_required|callback_chenlace|callback_chobligafraccion';
+		$edit->enlace->rule = 'trim|condi_required|callback_chenlace';
 
 		$edit->cdescrip = new inputField('', 'cdescrip');
 		$edit->cdescrip->pointer=true;
@@ -2987,7 +2987,8 @@ class Sinv extends Controller {
 		$edit->fracci ->size=10;
 		$edit->fracci->maxlength=4;
 		$edit->fracci->css_class='inputnum';
-		$edit->fracci->rule='numeric|callback_positivo|trim';
+		$edit->fracci->rule='numeric|condi_required|trim|callback_chobligafraccion';
+		$edit->fracci->insertValue='1';
 
 		$edit->activo = new dropdownField('Activo', 'activo');
 		$edit->activo->style='width:50px;';
@@ -3597,17 +3598,6 @@ class Sinv extends Controller {
 		if($min>=$max){
 			$this->validation->set_message('chminven',"El campo %s no puede ser mayor que el de venta m&aacute;xima.");
 			return false;
-		}
-		return true;
-	}
-
-	function chfraccion($tipo){
-		if($tipo[0]=='F'){
-			$caja=$this->input->post('caja');
-			if(empty($caja)){
-				$this->validation->set_message('chfraccion','El campo %s es requerido cuando el tipo de producto es fracci&oacute;n.');
-				return false;
-			}
 		}
 		return true;
 	}
@@ -4865,6 +4855,7 @@ class Sinv extends Controller {
 
 	function chobligafraccion($enlace){
 		$tipo=$this->input->post('tipo');
+
 		if($tipo[0]=='F' && empty($enlace)){
 			$this->validation->set_message('chobligafraccion',"Cuando en producto es fraccion es obligatorio el campo %s");
 			return false;
@@ -4873,13 +4864,24 @@ class Sinv extends Controller {
 	}
 
 	function chenlace($enlace){
-		if(empty($enlace)) return true;
 
-		$dbcodigo=$this->db->escape($enlace);
-		$tipo = $this->datasis->dameval('SELECT tipo FROM sinv WHERE codigo='.$dbcodigo);
-		if($tipo[0]!='A'){
-			$this->validation->set_message('chenlace','El producto en el campo %s debe obligartoriamente tipo Articulo');
+		$tipo=$this->input->post('tipo');
+		if($tipo[0]=='F' && empty($enlace)){
+			$this->validation->set_message('chenlace','El campo %s es requerido cuando el producto es Fraccion');
 			return false;
+		}else{
+			$dbcodigo=$this->db->escape($enlace);
+			$tipo = $this->datasis->dameval('SELECT tipo FROM sinv WHERE codigo='.$dbcodigo);
+
+			if(empty($tipo)){
+				$this->validation->set_message('chenlace','El producto en el campo %s no existe');
+				return false;
+			}
+
+			if($tipo[0]!='A'){
+				$this->validation->set_message('chenlace','El producto en el campo %s debe ser tipo Articulo');
+				return false;
+			}
 		}
 		return true;
 	}

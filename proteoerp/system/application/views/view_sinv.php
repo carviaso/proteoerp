@@ -123,6 +123,7 @@ function chtipo(){
 		$("#precio4").attr("readonly", "readonly");
 		$("#pond").attr("readonly", "readonly");
 		$("#ultimo").attr("readonly", "readonly");
+		post_enlace();
 	}else{
 		$("#base1").removeAttr("readonly");
 		$("#base2").removeAttr("readonly");
@@ -172,27 +173,22 @@ $(function(){
 		}
 	});
 
-	$('#fracci').keyup(function(e){
-		var valor   = Number($('#fracci').val());
-		var aumento = Number($('#aumento').val());
-		if(valor > 0){
-			base1 =  Number($('#cbase1').val())/valor;
-			base2 =  Number($('#cbase2').val())/valor;
-			base3 =  Number($('#cbase3').val())/valor;
-			base4 =  Number($('#cbase4').val())/valor;
-		}
-	});
-
 	$("#tipo").change(function(){
 		chtipo();
 	});
 
 	$("#aumento").keyup(function(){
-		post_enlace();
+		var tipo  = $("#tipo").val().substr(0,1);
+		if(tipo=='F'){
+			post_enlace();
+		}
 	});
 
 	$("#fracci").keyup(function(){
-		post_enlace();
+		var tipo  = $("#tipo").val().substr(0,1);
+		if(tipo=='F'){
+			post_enlace();
+		}
 	});
 
 	$("#depto").change(function(){dpto_change(); });
