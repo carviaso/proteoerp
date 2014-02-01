@@ -332,6 +332,40 @@ class Pfac extends Controller {
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
 
+		$grid->addField('status');
+		$grid->label('Estatus');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'center'",
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
+			'cellattr'      => 'function(rowId, tv, aData, cm, rdata){
+				var tips = "";
+				if(aData.status !== undefined){
+					if(aData.status=="F"){
+						tips = "Facturado";
+					}else if(aData.status=="B"){
+						tips = "BackOrder";
+					}else if(aData.status=="C"){
+						tips = "Cerrado";
+					}else if(aData.status=="T"){
+						tips = "Temporar";
+					}else if(aData.status=="P"){
+						tips = "Pendiente";
+					}else if(aData.status=="A"){
+						tips = "Anulada";
+					}else if(aData.status=="I"){
+						tips = "Internet";
+					}else{
+						tips = "Interno";
+					}
+				}
+				return \'title="\'+tips+\'"\';
+			}'
+		));
 
 		$grid->addField('fecha');
 		$grid->label('Fecha');
@@ -486,18 +520,6 @@ class Pfac extends Controller {
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('status');
-		$grid->label('Estatus');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
 
 
@@ -760,8 +782,30 @@ class Pfac extends Controller {
 					jQuery(gridId2).jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
 					jQuery(gridId2).trigger("reloadGrid");
 				}
+			},
+			afterInsertRow:
+			function( rid, aData, rowe){
+				if(aData.status == "P"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#008B00" });
+				}else if(aData.status =="F"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#2F3CAD" });
+				}else if(aData.status =="B"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#FFDD00" });
+				}else if(aData.status =="C"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#000000", background:"#F0FFFF" });
+				}else if(aData.status =="A"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#C90623" });
+				}else if(aData.status =="T"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#D5D1CF" });
+				}else if(aData.status =="I"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#1EA961" });
+				}else{
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#660088" });
+				}
 			}'
 		);
+
+
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');

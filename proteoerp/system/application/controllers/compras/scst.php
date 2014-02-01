@@ -1995,7 +1995,7 @@ class Scst extends Controller {
 		$edit->cfis->maxlength=12;
 
 		$edit->almacen = new  dropdownField ('Almac&eacute;n', 'depo');
-		$edit->almacen->options('SELECT ubica, CONCAT(ubica,\' \',ubides) nombre FROM caub ORDER BY ubica');
+		$edit->almacen->options('SELECT ubica, CONCAT(ubica," ",ubides) nombre FROM caub WHERE gasto<>"S" AND invfis="N" ORDER BY ubica');
 		$edit->almacen->rule = 'required';
 		$edit->almacen->style='width:145px;';
 
