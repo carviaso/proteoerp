@@ -3740,7 +3740,7 @@ class Sinv extends Controller {
 		if($tipo[0]!='F'){
 			//$do->set('enlace' ,'');
 			$do->set('aumento',0);
-			$do->set('fracci' ,1);
+			//$do->set('fracci' ,1);
 		}
 
 		$comision = $do->get('comision');
