@@ -2828,10 +2828,27 @@ class Scst extends Controller {
 			$form->tablafo = new containerField('tablafo',$htmltabla);
 
 			if($scstrow['tipo_doc']=='FC'){
+				$opt_arr=array(
+					'D' => 'Dejar el precio mayor',
+					'N' => 'No',
+					'S' => 'Si'
+				);
+
+				$optstr  = $this->datasis->traevalor('SCSTACTUALIOPT','Fija las opciones para actualizar compras Ej SND');
+				if(!empty($optstr)){
+					$opt_val = array_unique(str_split(strtoupper($optstr)));
+					$pivo    = array_intersect($opt_val, array_keys($opt_arr));
+					if(count($pivo)>0){
+						$result  = array();
+						foreach($pivo as $val){
+							$result[$val]=$opt_arr[$val];
+						}
+						$opt_arr=$result;
+					}
+				}
+
 				$form->cprecio = new  dropdownField ('Cambiar precios', 'cprecio');
-				$form->cprecio->option('D','Dejar el precio mayor');
-				$form->cprecio->option('N','No');
-				$form->cprecio->option('S','Si');
+				$form->cprecio->options($opt_arr);
 				$form->cprecio->append(' <sup>1</sup>');
 				$form->cprecio->title ='Ver nota 1';
 				$form->cprecio->style = 'width:170px;';

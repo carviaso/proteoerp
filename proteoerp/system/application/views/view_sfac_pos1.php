@@ -1152,7 +1152,7 @@ function chreferen(){
 			</tr>
 			<tr>
 				<td class="littletableheader" valign='top'><?php echo $form->observa->label; ?>&nbsp;&nbsp;</td>
-				<td class='littletablerow'    colspan='2'><?php echo $form->observa->output; ?></td>
+				<td class='littletablerow'    colspan='2' ><?php echo $form->observa->output; ?></td>
 			</tr>
 			<tr>
 				<td>&nbsp;</td>
@@ -1167,13 +1167,12 @@ function chreferen(){
 			<tr>
 				<td colspan='2' style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>FORMA DE PAGO</td>
 			</tr><tr>
-				<td><input name="referen" value="P" type="radio" onchange='chreferen()' checked="checked">Pendiente&nbsp;</td>
-			<!--/tr><tr-->
-				<td><input name="referen" value="E" type="radio" onchange='chreferen()'>Efectivo&nbsp;</td>
+				<?php $referen=$this->input->post('referen'); ?>
+				<td><input name="referen" value="P" type="radio" onchange='chreferen()' <?php echo ($referen=='P' || empty($referen))? 'checked="checked"':''; ?>>Pendiente&nbsp;</td>
+				<td><input name="referen" value="E" type="radio" onchange='chreferen()' <?php echo ($referen=='E')? 'checked="checked"':''; ?>>Efectivo&nbsp;</td>
 			</tr><tr>
-				<td><input name="referen" value="M" type="radio" onchange='chreferen()'>Multiple/Otros&nbsp;</td>
-			<!--/tr><tr-->
-				<td><input name="referen" value="C" type="radio" onchange='chreferen()'>Credito&nbsp;</td>
+				<td><input name="referen" value="M" type="radio" onchange='chreferen()' <?php echo ($referen=='M')? 'checked="checked"':''; ?>>Multiple/Otros&nbsp;</td>
+				<td><input name="referen" value="C" type="radio" onchange='chreferen()' <?php echo ($referen=='C')? 'checked="checked"':''; ?>>Credito&nbsp;</td>
 			</tr>
 		</table>
 		<br>

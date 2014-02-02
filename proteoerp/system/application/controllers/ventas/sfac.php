@@ -3186,7 +3186,7 @@ class Sfac extends Controller {
 				}else{
 					$precio4 = $this->datasis->dameval('SELECT precio4*100/(100+iva) FROM sinv WHERE codigo='.$dbcodigo);
 				}
-				$this->validation->set_message('chpreca', 'El art&iacute;culo "'.$codigo.'" debe contener un precio de al menos '.nformat($precio4));
+				$this->validation->set_message('chpreca', 'El art&iacute;culo '.$codigo.' debe contener un precio de al menos '.nformat($precio4));
 				if(empty($precio4)) $precio4=0; else $precio4=round($precio4,2);
 				if($val>=$precio4){
 					return true;
