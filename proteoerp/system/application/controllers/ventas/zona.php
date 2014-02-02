@@ -69,8 +69,8 @@ class Zona extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '230', '410' );
-		$bodyscript .= $this->jqdatagrid->bsfshow( '230', '400' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '270', '410' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '270', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
 		$bodyscript .= '});';
@@ -296,11 +296,17 @@ class Zona extends Controller {
 		$edit->nombre->size =30;
 		$edit->nombre->maxlength =30;
 
-		$edit->descrip = new inputField('Descripci&oacute;n','descrip');
+		$edit->descrip = new textareaField('Descripci&oacute;n','descrip');
+		$edit->descrip->rule = 'trim';
+		$edit->descrip->cols = 30;
+		$edit->descrip->rows =  2;
+		$edit->descrip->maxlength = 90;
+		$edit->descrip->style = 'width:100%;';
+/*
 		$edit->descrip->rule='';
 		$edit->descrip->size =30;
 		$edit->descrip->maxlength =90;
-
+*/
 		$edit->margen = new inputField('Margen','margen');
 		$edit->margen->rule='numeric';
 		$edit->margen->css_class='inputnum';

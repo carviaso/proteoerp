@@ -395,17 +395,6 @@ class Grcl extends Controller {
 
 
 	function instalar(){
-		//if (!$this->db->table_exists('grcl')) {
-		//	$mSQL="CREATE TABLE `grcl` (
-		//	  `grupo` varchar(4) NOT NULL DEFAULT '',
-		//	  `gr_desc` varchar(25) DEFAULT NULL,
-		//	  `clase` char(1) DEFAULT NULL,
-		//	  `cuenta` varchar(15) DEFAULT NULL,
-		//	  PRIMARY KEY (`grupo`)
-		//	) ENGINE=MyISAM DEFAULT CHARSET=latin1";
-		//	$this->db->simple_query($mSQL);
-		//}
-
 		$campos=$this->db->list_fields('grcl');
 		if(!in_array('id',$campos)){
 			$this->db->simple_query('ALTER TABLE grcl DROP PRIMARY KEY');

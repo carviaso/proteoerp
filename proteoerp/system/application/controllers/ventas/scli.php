@@ -38,10 +38,10 @@ class Scli extends validaciones {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'edocta',  'img'=>'images/pdf_logo.gif', 'alt' => 'Formato PDF',        'label'=>'Estado de Cuenta' ));
-		$grid->wbotonadd(array('id'=>'editacr', 'img'=>'images/check.png',    'alt' => 'Cr&eacute;dito',     'label'=>'L&iacute;mite de Cr&eacute;dito'));
-		$grid->wbotonadd(array('id'=>'gciud',   'img'=>'images/star.png',     'alt' => 'Gestionar ciudades', 'label'=>'Ciudades'));
-		$grid->wbotonadd(array('id'=>'gclave',  'img'=>'images/candado.png',  'alt' => 'Clave para acceso',  'label'=>'Clave'));
+		$grid->wbotonadd(array('id'=>'edocta',  'img'=>'images/pdf_logo.gif', 'alt' => 'Formato PDF',        'tema'=>'anexos', 'label'=>'Estado de Cuenta' ));
+		$grid->wbotonadd(array('id'=>'editacr', 'img'=>'images/check.png',    'alt' => 'Cr&eacute;dito',     'tema'=>'anexos', 'label'=>'L&iacute;mite de Cr&eacute;dito'));
+		$grid->wbotonadd(array('id'=>'gciud',   'img'=>'images/star.png',     'alt' => 'Gestionar ciudades', 'tema'=>'anexos', 'label'=>'Ciudades'));
+		$grid->wbotonadd(array('id'=>'gclave',  'img'=>'images/candado.png',  'alt' => 'Clave para acceso',  'tema'=>'anexos', 'label'=>'Clave'));
 
 		$WestPanel = $grid->deploywestp();
 

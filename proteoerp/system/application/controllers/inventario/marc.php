@@ -112,9 +112,6 @@ class Marc extends Controller{
 		$check  = 0;
 
 		$id = str_replace('jqg','',$id);
-
-		$this->load->library('jqdatagrid');
-		$oper = $this->input->post('oper');
 		unset($data['oper']);
 		unset($data['id']);
 
@@ -151,13 +148,6 @@ class Marc extends Controller{
 			} else
 			echo "Fallo Agregado!!!";
 		}
-/*
-		} else {
-			$grid       = $this->jqdatagrid;
-			$response   = $grid->operations('marc','id');
-			echo 'Registro Actualizado';
-		}
-*/
 	}
 
 
