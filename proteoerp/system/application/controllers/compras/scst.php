@@ -62,7 +62,7 @@ class Scst extends Controller {
 
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'cprecios','img'=>'images/precio.png' ,'alt' => 'Ajustar Precios'    ,'label'=>'Cambiar Precios', ));
+		//$grid->wbotonadd(array('id'=>'cprecios','img'=>'images/precio.png' ,'alt' => 'Ajustar Precios'    ,'label'=>'Cambiar Precios', ));
 		$grid->wbotonadd(array('id'=>'bcmonto' ,'img'=>'images/precio.png' ,'alt' => 'Modificar la CxP'   ,'label'=>'Modificar la CxP'));
 
 		if($this->datasis->traevalor('MOTOS')=='S')
@@ -214,7 +214,7 @@ class Scst extends Controller {
 		function itscstedit(){
 			var id  = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			var iid = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (iid){
+			if(iid){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				if(ret.actuali >= ret.fecha){
 					$.prompt("<h1>Documento ya actualizado</h1>Debe reversarlo primero si desea hacer modificaciones");
@@ -444,7 +444,7 @@ class Scst extends Controller {
 
 		$bodyscript .= '
 			$("#factuali").dialog({
-				autoOpen: false, height: 360, width: 450, modal: true,
+				autoOpen: false, height: 380, width: 450, modal: true,
 				buttons: {
 					"Actualizar": function() {
 						var bValid = true;
@@ -2843,7 +2843,7 @@ class Scst extends Controller {
 				<ul style="padding: 0px;margin: 0px 0px 0px 20px;">
 					<li><b>Dejar mayor</b>: Coloca el precio mayor entre el precio en inventario y el nuevo precio seg&uacute;n compra.</li>
 					<li><b>No</b>:Respeta los precios de los productos en inventario e ignora los provenientes de la compra.</li>
-					<li><b>Si</b>:Coloca los precios provenientes de la compra reemplazando los del inventario.</li>
+					<li><b>Si</b>:Coloca los precios provenientes de la compra reemplazando los del inventario exepto los productos marcados con la opci&oacute;n de repetar margen a los cuales se les calculara el precio sin modificar sus margenes.</li>
 				</ul>
 				</div>';
 			}else{
@@ -3359,7 +3359,22 @@ class Scst extends Controller {
 								if($icontrol){
 									if($cprecio=='S'){
 										//Respeta el margen
-										if($itrow->rmargen!='S'){
+										if($itrow->rmargen=='S'){
+											//Actualiza los margenes y bases
+											$mSQL='UPDATE sinv SET
+												base1=ROUND('.$costo.'*100/(100-margen1),2),
+												base2=ROUND('.$costo.'*100/(100-margen2),2),
+												base3=ROUND('.$costo.'*100/(100-margen3),2),
+												base4=ROUND('.$costo.'*100/(100-margen4),2),
+												precio1=ROUND(('.$costo.'*100/(100-margen1))*(1+(iva/100)),2),
+												precio2=ROUND(('.$costo.'*100/(100-margen2))*(1+(iva/100)),2),
+												precio3=ROUND(('.$costo.'*100/(100-margen3))*(1+(iva/100)),2),
+												precio4=ROUND(('.$costo.'*100/(100-margen4))*(1+(iva/100)),2),
+												activo="S"
+											WHERE codigo='.$dbcodigo;
+											$ban=$this->db->simple_query($mSQL);
+											if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+										}else{
 											$data  = array();
 											for($i=1;$i<5;$i++){
 												$obj  = 'precio'.$i;
@@ -3387,22 +3402,7 @@ class Scst extends Controller {
 							}
 
 
-							if($cprecio=='S' && $itrow->rmargen=='S'){
-								//Actualiza los margenes y bases
-								$mSQL='UPDATE sinv SET
-									base1=ROUND('.$costo.'*100/(100-margen1),2),
-									base2=ROUND('.$costo.'*100/(100-margen2),2),
-									base3=ROUND('.$costo.'*100/(100-margen3),2),
-									base4=ROUND('.$costo.'*100/(100-margen4),2),
-									precio1=ROUND(('.$costo.'*100/(100-margen1))*(1+(iva/100)),2),
-									precio2=ROUND(('.$costo.'*100/(100-margen2))*(1+(iva/100)),2),
-									precio3=ROUND(('.$costo.'*100/(100-margen3))*(1+(iva/100)),2),
-									precio4=ROUND(('.$costo.'*100/(100-margen4))*(1+(iva/100)),2),
-									activo="S"
-								WHERE codigo='.$dbcodigo;
-								$ban=$this->db->simple_query($mSQL);
-								if(!$ban){ memowrite($mSQL,'scst'); $error++; }
-							}else{
+							if($itrow->rmargen!='S'){
 								//Actualiza los margenes y bases
 								$mSQL='UPDATE sinv SET
 									base1=ROUND(precio1*10000/(100+iva))/100,
@@ -4623,74 +4623,94 @@ class Scst extends Controller {
 
 	function dataeditit(){
 		$this->rapyd->load('dataedit','dataobject');
+		$id = intval($this->rapyd->uri->get_edited_id());
 
-		$do = new DataObject('itscst');
-		$do->pointer('sinv' ,'sinv.codigo=itscst.codigo','sinv.formcal AS sinvformcal,sinv.pond AS sinvpond, sinv.standard AS sinvstandard,sinv.existen AS sinvexisten','left');
+		$mSQL="SELECT
+			a.proveed,a.nombre,a.fecha,a.montotot,a.montoiva,a.montonet,a.serie,a.vence,a.tipo_doc,a.nfiscal,
+			b.costo,b.cantidad,b.iva,b.codigo,c.descrip,
+			c.pond AS sinvpond,c.existen AS sinvexisten,c.standard AS sinvstandard,c.formcal AS sinvformcal,
+			c.margen1,c.margen2,c.margen3,c.margen4,c.ultimo,c.standard
+			FROM scst   AS a
+			JOIN itscst AS b ON a.control=b.control
+			JOIN sinv   AS c ON b.codigo=c.codigo
+			WHERE b.id=${id}";
+		$scstrow = $this->datasis->damerow($mSQL);
 
-		$edit = new DataEdit('', $do);
-
-		$formcal = $do->get_pointer('sinvformcal');
-		$pon     = floatval(($do->get_pointer('sinvpond')*$do->get_pointer('sinvexisten')+$do->get('costo')*$do->get('cantidad'))/($do->get_pointer('sinvexisten')+$do->get('cantidad')));
-		if($formcal=='U'){
-			$cformcal='&Uacute;ltimo';
-			$vcosto  =$do->get('costo');
-		}elseif($formcal=='P'){
-			$cformcal='Ponderado';
-			$vcosto=$vpond;
-		}elseif($formcal=='S'){
-			$cformcal='Est&aacute;ndar';
-			$vcosto=$do->get_pointer('sinvstandard');
-		}else{
-			$cformcal='Mayor';
-			$ult=floatval($do->get('costo'));
-			if($ult > $pon){
-				$vcosto=$ult;
-			}else{
-				$vcosto=$pon;
-			}
-		}
-
-		$script= '
-		function calculamar(){
-			var costo  = '.$vcosto.';
-			var iva    = '.(100+($do->get('iva'))).';
-			var precio1= Number($("#precio1").val());
-			var precio2= Number($("#precio2").val());
-			var precio3= Number($("#precio3").val());
-			var precio4= Number($("#precio4").val());
-
-			var margen1=nformat(100-(costo*112)/precio1,2);
-			var margen2=nformat(100-(costo*112)/precio2,2);
-			var margen3=nformat(100-(costo*112)/precio3,2);
-			var margen4=nformat(100-(costo*112)/precio4,2);
-
-			$("#m1").text(margen1);
-			$("#m2").text(margen2);
-			$("#m3").text(margen3);
-			$("#m4").text(margen4);
-
-		}
-
-		$(function(){
-			$(".inputnum").keyup(function(e) { calculamar(); });
-			calculamar();
-			$(".inputnum").numeric(".");
-		});
-		';
-
-		$edit->script($script,'modify');
-		$edit->on_save_redirect=false;
-
-		$edit->post_process('insert','_post_it_insert');
-		$edit->post_process('update','_post_it_update');
-		$edit->post_process('delete','_post_it_delete');
-		$edit->pre_process( 'update', '_pre_it_update' );
-
-		$dbcontrol = $this->db->escape($do->get('control'));
-		$scstrow   = $this->datasis->damerow("SELECT proveed,nombre,fecha,montotot, montoiva,montonet,serie,vence,tipo_doc FROM scst WHERE control=${dbcontrol}");
 		if(!empty($scstrow)){
+			$formcal = $scstrow['sinvformcal'];
+			$pon     = floatval(($scstrow['sinvpond']*$scstrow['sinvexisten']+$scstrow['costo']*$scstrow['cantidad'])/($scstrow['sinvexisten']+$scstrow['cantidad']));
+			if($formcal=='U'){
+				$cformcal='&Uacute;ltimo';
+				$vcosto  =$scstrow['costo'];
+			}elseif($formcal=='P'){
+				$cformcal='Ponderado';
+				$vcosto=$vpond;
+			}elseif($formcal=='S'){
+				$cformcal='Est&aacute;ndar';
+				$vcosto=$scstrow['sinvstandard'];
+			}else{
+				$cformcal='Mayor';
+				$ult=floatval($scstrow['costo']);
+				if($ult > $pon){
+					$vcosto=$ult;
+				}else{
+					$vcosto=$pon;
+				}
+			}
+
+			$script= '
+			function calculamar(){
+				var costo  = '.$vcosto.';
+				var iva    = '.(100+$scstrow['iva']).';
+				var precio1= Number($("#precio1").val());
+				var precio2= Number($("#precio2").val());
+				var precio3= Number($("#precio3").val());
+				var precio4= Number($("#precio4").val());
+
+				var margen1=nformat(100-(costo*112)/precio1,2);
+				var margen2=nformat(100-(costo*112)/precio2,2);
+				var margen3=nformat(100-(costo*112)/precio3,2);
+				var margen4=nformat(100-(costo*112)/precio4,2);
+
+				$("#m1").text(margen1);
+				$("#m2").text(margen2);
+				$("#m3").text(margen3);
+				$("#m4").text(margen4);
+
+			}
+
+			$(function(){
+				$(".inputnum").keyup(function(e) { calculamar(); });
+				calculamar();
+				$(".inputnum").numeric(".");
+
+				$("#rmargen").click(function (){
+					var thisCheck = $(this);
+					if(!thisCheck.is(":checked")){
+						$("#precio1").removeAttr("disabled");
+						$("#precio2").removeAttr("disabled");
+						$("#precio3").removeAttr("disabled");
+						$("#precio4").removeAttr("disabled");
+						calculamar();
+					}else{
+						$("#precio1").attr("disabled", "disabled");
+						$("#precio2").attr("disabled", "disabled");
+						$("#precio3").attr("disabled", "disabled");
+						$("#precio4").attr("disabled", "disabled");
+						$("#m1").text("");
+						$("#m2").text("");
+						$("#m3").text("");
+						$("#m4").text("");
+					}
+				});
+				$("#rmargen").click();
+				$("#rmargen").click();
+			});';
 
 			$htmltabla="<table width='100%' style='background-color:#FBEC88;font-size:12px'>
+				<tr>
+					<td colspan='6' style='text-align:center;font-size:18px'><b>Detalles del documento</b></td>
+				</tr>
 				<tr>
 					<td>Documento:</td>
 					<td><b>".htmlspecialchars($scstrow['tipo_doc'].$scstrow['serie'])."</b></td>
@@ -4699,28 +4719,59 @@ class Scst extends Controller {
 					<td>Fecha: </td>
 					<td><b>".dbdate_to_human($scstrow['fecha'])."</b></td>
 				</tr><tr>
-					<td>Forma de C&aacute;lculo: </td>
-					<td><b>".$cformcal."</b></td>
+					<td>C.Fiscal</td>
+					<td>".htmlspecialchars($scstrow['nfiscal'])."</td>
 					<td>Producto:</td>
-					<td><b>".htmlspecialchars('('.$do->get('codigo').') '.$do->get('descrip'))."</b></td>
+					<td><b>".htmlspecialchars('('.$scstrow['codigo'].') '.$scstrow['descrip'])."</b></td>
 					<td>Cantidad: </td>
-					<td><b>".nformat($do->get('cantidad'))."</b></td>
+					<td><b>".nformat($scstrow['cantidad'])."</b></td>
 				</tr><tr>
 					<td>IVA: </td>
-					<td><b>".nformat($do->get('iva'))."%</b></td>
-					<td></td>
-					<td></td>
+					<td><b>".nformat($scstrow['iva'])."%</b></td>
+					<td>Forma de C&aacute;lculo: </td>
+					<td><b>".$cformcal."</b></td>
 					<td>Costo: </td>
-					<td><b>".nformat($do->get('costo'))."</b></td>
+					<td><b>".nformat($scstrow['costo'])."</b></td>
+				</tr>
+			</table>
+			<table width='100%' style='background-color:#7DC2FF;text-align:center;font-size:18px'>
+				<tr>
+					<td colspan='4'><b>Detalles del producto:</b></td>
+				</tr><tr>
+					<td>Ultimo Costo:   <b style='font-size:1.3em'>".htmlnformat($scstrow['ultimo'])."</b></td>
+					<td>Costo Promedio: <b style='font-size:1.3em'>".htmlnformat($scstrow['sinvpond'])."</b></td>
+					<td>Costo Estandar: <b style='font-size:1.3em'>".htmlnformat($scstrow['standard'])."</b></td>
+					<td>Costo actual:   <b style='font-size:1.3em'>".htmlnformat($scstrow['costo'])."</b></td>
+				</tr><tr>
+					<td>Margen 1: <b style='font-size:1.3em'>".htmlnformat($scstrow['margen1'])."%</b></td>
+					<td>Margen 2: <b style='font-size:1.3em'>".htmlnformat($scstrow['margen2'])."%</b></td>
+					<td>Margen 3: <b style='font-size:1.3em'>".htmlnformat($scstrow['margen3'])."%</b></td>
+					<td>Margen 4: <b style='font-size:1.3em'>".htmlnformat($scstrow['margen4'])."%</b></td>
 				</tr>
 			</table>";
 
-			$edit->tablafo = new containerField('tablafo',$htmltabla);
+		}else{
+			$htmltabla=$script='';
 		}
+
+		$edit = new DataEdit('', 'itscst');
+
+		$edit->script($script,'modify');
+		$edit->on_save_redirect=false;
+
+		$edit->post_process('insert','_post_it_insert');
+		$edit->post_process('update','_post_it_update');
+		$edit->post_process('delete','_post_it_delete');
+		$edit->pre_process( 'update', '_pre_it_update');
+
+		$edit->tablafo = new containerField('tablafo',$htmltabla);
 
 		$edit->rmargen = new checkboxField('<span style="font-size:1.5em">Respetar Margen</span>', 'rmargen', 'S','N');
 		$edit->rmargen->insertValue = 'S';
-		$edit->rmargen->append('No modifica los margenes al momento de actualizar la compra con cambio de precio.');
+		$edit->rmargen->append('<b style="color:red">Si se selecciona esta opci&oacute;n NO se modificaran los margenes al
+			momento de actualizar la compra con opci&oacute;n de cambio de precio. En caso contrario se usar&aacute;n los precios
+			abajo mostrados si se actualiza con opci&oacute;n de cambio de precio.
+			</b>');
 
 		$edit->precio1 = new inputField('<span style="font-size:1.5em">Precio 1</span>','precio1');
 		$edit->precio1->rule='numeric';
@@ -4785,16 +4836,28 @@ class Scst extends Controller {
 			return false;
 		}
 
-		$control  = $do->get('control');
-		$dbcontrol= $this->db->escape($control);
+		//Valida los precios
+		for($i=1;$i<5;$i++){
+			$prec='precio'.$i;
+			$$prec=floatval($do->get($prec)); //optenemos el precio
+		}
 
-		$pasa  = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM scst WHERE actuali>=fecha AND control= '.$dbcontrol);
-		if($pasa==0){
-			return true;
+		if($precio1>=$precio2 && $precio2>=$precio3 && $precio3>=$precio4){
+			$control  = $do->get('control');
+			$dbcontrol= $this->db->escape($control);
+
+			$pasa  = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM scst WHERE actuali>=fecha AND control= '.$dbcontrol);
+			if($pasa==0){
+				return true;
+			}else{
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']="No se puede modificar una compra actualizada, debe reversarla primero.";
+				return false;
+			}
 		}else{
-			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']="No se puede modificar una compra actualizada, debe reversarla primero.";
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']="Los precios debe estar en orden decreciente comenzando por el precio 1.";
 			return false;
 		}
+		return true;
 	}
 
 	function _pre_it_insert($do){ return false; }
