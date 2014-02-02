@@ -19,10 +19,10 @@ class Scst extends Controller {
 		$this->instalar();
 		$this->datasis->modintramenu( 900, 650, substr($this->url,0,-1) );
 		// Crea los accesos en tmenus
-		if ($this->datasis->dameval("SELECT COUNT(*) FROM tmenus WHERE modulo='SCSTOTR' AND proteo='actualizar'") == 0) {
+		if($this->datasis->dameval("SELECT COUNT(*) FROM tmenus WHERE modulo='SCSTOTR' AND proteo='actualizar'") == 0) {
 			$this->db->query("INSERT INTO tmenus SET modulo='SCSTOTR',secu=1,titulo='Actualizar',proteo='actualizar' ");
 		}
-		if ($this->datasis->dameval("SELECT COUNT(*) FROM tmenus WHERE modulo='SCSTOTR' AND proteo='reversar'") == 0) {
+		if($this->datasis->dameval("SELECT COUNT(*) FROM tmenus WHERE modulo='SCSTOTR' AND proteo='reversar'") == 0) {
 			$this->db->query("INSERT INTO tmenus SET modulo='SCSTOTR',secu=2,titulo='Reversar',proteo='reversar' ");
 		}
 
@@ -198,6 +198,28 @@ class Scst extends Controller {
 					$.prompt("<h1>Documento ya actualizado</h1>Debe reversarlo primero si desea hacer modificaciones");
 				}else{
 					$.post("'.site_url('compras/scst/solo/modify').'/"+id, function(data){
+						$("#factuali").html("");
+						$("#fvehi").html("");
+						$("#fcompra").html(data);
+						$("#fcompra" ).dialog( "open" );
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un documento primero</h1>");
+			}
+		};';
+
+
+		$bodyscript .= '
+		function itscstedit(){
+			var id  = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var iid = jQuery("#newapi'.$grid1.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (iid){
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				if(ret.actuali >= ret.fecha){
+					$.prompt("<h1>Documento ya actualizado</h1>Debe reversarlo primero si desea hacer modificaciones");
+				}else{
+					$.post("'.site_url('compras/scst/dataeditit/modify').'/"+iid, function(data){
 						$("#factuali").html("");
 						$("#fvehi").html("");
 						$("#fcompra").html(data);
@@ -1723,6 +1745,17 @@ class Scst extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		$grid->addField('rmargen');
+		$grid->label('R.Margen');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'false',
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:30, maxlength: 1 }',
+		));
+
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
@@ -1746,7 +1779,10 @@ class Scst extends Controller {
 				cellsubmit: "remote",
 				cellurl: "'.site_url($this->url.'setdatait/').'"
 		');
-		$grid->setOndblClickRow('');
+		$grid->setOndblClickRow('
+		,ondblClickRow: function(id, row, col, e){
+			itscstedit();
+		}');
 
 		$grid->setFormOptionsE('');
 		$grid->setFormOptionsA('');
@@ -3253,7 +3289,8 @@ class Scst extends Controller {
 
 					$itdata=array();
 					$sql='SELECT a.codigo,a.cantidad,a.importe,a.importe/a.cantidad AS costo,a.id,
-						a.precio1,a.precio2,a.precio3,a.precio4,b.formcal,b.ultimo,b.standard,b.pond,b.existen,b.fracci
+						a.precio1,a.precio2,a.precio3,a.precio4,b.formcal,b.ultimo,b.standard,b.pond,b.existen,b.fracci,
+						a.rmargen,b.margen1,b.margen2,b.margen3,b.margen4
 						FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE a.control=?';
 					$qquery=$this->db->query($sql,array($control));
 					if($qquery->num_rows()>0){
@@ -3321,18 +3358,21 @@ class Scst extends Controller {
 
 								if($icontrol){
 									if($cprecio=='S'){
-										$data  = array();
-										for($i=1;$i<5;$i++){
-											$obj  = 'precio'.$i;
-											$$obj = floatval($itrow->$obj);
-											if($$obj > 0){
-												$data[$obj]=round($$obj,2);
+										//Respeta el margen
+										if($itrow->rmargen!='S'){
+											$data  = array();
+											for($i=1;$i<5;$i++){
+												$obj  = 'precio'.$i;
+												$$obj = floatval($itrow->$obj);
+												if($$obj > 0){
+													$data[$obj]=round($$obj,2);
+												}
 											}
-										}
-										$mSQL = $this->db->update_string('sinv', $data, 'codigo='.$dbcodigo);
+											$mSQL = $this->db->update_string('sinv', $data, 'codigo='.$dbcodigo);
 
-										$ban=$this->db->simple_query($mSQL);
-										if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+											$ban=$this->db->simple_query($mSQL);
+											if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+										}
 									}elseif($cprecio=='D'){
 										$pps=array('precio1','precio2','precio3','precio4');
 										foreach($pps as $obj){
@@ -3346,20 +3386,38 @@ class Scst extends Controller {
 								//Fin del cambio de precios
 							}
 
-							//Actualiza los margenes y bases
-							$mSQL='UPDATE sinv SET
-								base1=ROUND(precio1*10000/(100+iva))/100,
-								base2=ROUND(precio2*10000/(100+iva))/100,
-								base3=ROUND(precio3*10000/(100+iva))/100,
-								base4=ROUND(precio4*10000/(100+iva))/100,
-								margen1=ROUND(10000-('.$costo.'*10000/base1))/100,
-								margen2=ROUND(10000-('.$costo.'*10000/base2))/100,
-								margen3=ROUND(10000-('.$costo.'*10000/base3))/100,
-								margen4=ROUND(10000-('.$costo.'*10000/base4))/100,
-								activo="S"
-							WHERE codigo='.$dbcodigo;
-							$ban=$this->db->simple_query($mSQL);
-							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+
+							if($cprecio=='S' && $itrow->rmargen=='S'){
+								//Actualiza los margenes y bases
+								$mSQL='UPDATE sinv SET
+									base1=ROUND('.$costo.'*100/(100-margen1),2),
+									base2=ROUND('.$costo.'*100/(100-margen2),2),
+									base3=ROUND('.$costo.'*100/(100-margen3),2),
+									base4=ROUND('.$costo.'*100/(100-margen4),2),
+									precio1=ROUND(('.$costo.'*100/(100-margen1))*(1+(iva/100)),2),
+									precio2=ROUND(('.$costo.'*100/(100-margen2))*(1+(iva/100)),2),
+									precio3=ROUND(('.$costo.'*100/(100-margen3))*(1+(iva/100)),2),
+									precio4=ROUND(('.$costo.'*100/(100-margen4))*(1+(iva/100)),2),
+									activo="S"
+								WHERE codigo='.$dbcodigo;
+								$ban=$this->db->simple_query($mSQL);
+								if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+							}else{
+								//Actualiza los margenes y bases
+								$mSQL='UPDATE sinv SET
+									base1=ROUND(precio1*10000/(100+iva))/100,
+									base2=ROUND(precio2*10000/(100+iva))/100,
+									base3=ROUND(precio3*10000/(100+iva))/100,
+									base4=ROUND(precio4*10000/(100+iva))/100,
+									margen1=ROUND(10000-('.$costo.'*10000/base1))/100,
+									margen2=ROUND(10000-('.$costo.'*10000/base2))/100,
+									margen3=ROUND(10000-('.$costo.'*10000/base3))/100,
+									margen4=ROUND(10000-('.$costo.'*10000/base4))/100,
+									activo="S"
+								WHERE codigo='.$dbcodigo;
+								$ban=$this->db->simple_query($mSQL);
+								if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+							}
 							//Fin de la actualizacion de inventario
 						}
 					}
@@ -4032,7 +4090,7 @@ class Scst extends Controller {
 		$this->db->simple_query($mSQL);
 
 		// ANULA LA RETENCION SI TIENE
-		if($this->datasis->dameval("SELECT COUNT(*) FROM riva WHERE transac=${dbmTRANSAC}") > 0){
+		if($this->datasis->dameval("SELECT COUNT(*) AS val FROM riva WHERE transac=${dbmTRANSAC}") > 0){
 			$mTRANULA = '_'.$this->datasis->fprox_numero('rivanula',7);
 			$this->db->simple_query("UPDATE riva SET transac='${mTRANULA}' WHERE transac=${dbmTRANSAC}");
 		}
@@ -4313,6 +4371,7 @@ class Scst extends Controller {
 				}
 
 				$do->set_rel('itscst','precio'.$o ,$pp,$i);
+				$do->set_rel('itscst','rmargen' ,'S',$i);
 			}
 
 			$itimporte = $do->get_rel('itscst','importe' ,$i);
@@ -4561,6 +4620,187 @@ class Scst extends Controller {
 		logusu('scst',"Compra ${codigo} control ${control} SERIALES CAMBIADOS");
 	}
 
+
+	function dataeditit(){
+		$this->rapyd->load('dataedit','dataobject');
+
+		$do = new DataObject('itscst');
+		$do->pointer('sinv' ,'sinv.codigo=itscst.codigo','sinv.formcal AS sinvformcal,sinv.pond AS sinvpond, sinv.standard AS sinvstandard,sinv.existen AS sinvexisten','left');
+
+		$edit = new DataEdit('', $do);
+
+		$formcal = $do->get_pointer('sinvformcal');
+		$pon     = floatval(($do->get_pointer('sinvpond')*$do->get_pointer('sinvexisten')+$do->get('costo')*$do->get('cantidad'))/($do->get_pointer('sinvexisten')+$do->get('cantidad')));
+		if($formcal=='U'){
+			$cformcal='&Uacute;ltimo';
+			$vcosto  =$do->get('costo');
+		}elseif($formcal=='P'){
+			$cformcal='Ponderado';
+			$vcosto=$vpond;
+		}elseif($formcal=='S'){
+			$cformcal='Est&aacute;ndar';
+			$vcosto=$do->get_pointer('sinvstandard');
+		}else{
+			$cformcal='Mayor';
+			$ult=floatval($do->get('costo'));
+			if($ult > $pon){
+				$vcosto=$ult;
+			}else{
+				$vcosto=$pon;
+			}
+		}
+
+		$script= '
+		function calculamar(){
+			var costo  = '.$vcosto.';
+			var iva    = '.(100+($do->get('iva'))).';
+			var precio1= Number($("#precio1").val());
+			var precio2= Number($("#precio2").val());
+			var precio3= Number($("#precio3").val());
+			var precio4= Number($("#precio4").val());
+
+			var margen1=nformat(100-(costo*112)/precio1,2);
+			var margen2=nformat(100-(costo*112)/precio2,2);
+			var margen3=nformat(100-(costo*112)/precio3,2);
+			var margen4=nformat(100-(costo*112)/precio4,2);
+
+			$("#m1").text(margen1);
+			$("#m2").text(margen2);
+			$("#m3").text(margen3);
+			$("#m4").text(margen4);
+
+		}
+
+		$(function(){
+			$(".inputnum").keyup(function(e) { calculamar(); });
+			calculamar();
+			$(".inputnum").numeric(".");
+		});
+		';
+
+		$edit->script($script,'modify');
+		$edit->on_save_redirect=false;
+
+		$edit->post_process('insert','_post_it_insert');
+		$edit->post_process('update','_post_it_update');
+		$edit->post_process('delete','_post_it_delete');
+		$edit->pre_process( 'update', '_pre_it_update' );
+
+		$dbcontrol = $this->db->escape($do->get('control'));
+		$scstrow   = $this->datasis->damerow("SELECT proveed,nombre,fecha,montotot, montoiva,montonet,serie,vence,tipo_doc FROM scst WHERE control=${dbcontrol}");
+		if(!empty($scstrow)){
+
+			$htmltabla="<table width='100%' style='background-color:#FBEC88;font-size:12px'>
+				<tr>
+					<td>Documento:</td>
+					<td><b>".htmlspecialchars($scstrow['tipo_doc'].$scstrow['serie'])."</b></td>
+					<td>Proveedor:</td>
+					<td><b>(".htmlspecialchars($scstrow['proveed']).") ".htmlspecialchars($scstrow['nombre'])."</b></td>
+					<td>Fecha: </td>
+					<td><b>".dbdate_to_human($scstrow['fecha'])."</b></td>
+				</tr><tr>
+					<td>Forma de C&aacute;lculo: </td>
+					<td><b>".$cformcal."</b></td>
+					<td>Producto:</td>
+					<td><b>".htmlspecialchars('('.$do->get('codigo').') '.$do->get('descrip'))."</b></td>
+					<td>Cantidad: </td>
+					<td><b>".nformat($do->get('cantidad'))."</b></td>
+				</tr><tr>
+					<td>IVA: </td>
+					<td><b>".nformat($do->get('iva'))."%</b></td>
+					<td></td>
+					<td></td>
+					<td>Costo: </td>
+					<td><b>".nformat($do->get('costo'))."</b></td>
+				</tr>
+			</table>";
+
+			$edit->tablafo = new containerField('tablafo',$htmltabla);
+		}
+
+		$edit->rmargen = new checkboxField('<span style="font-size:1.5em">Respetar Margen</span>', 'rmargen', 'S','N');
+		$edit->rmargen->insertValue = 'S';
+		$edit->rmargen->append('No modifica los margenes al momento de actualizar la compra con cambio de precio.');
+
+		$edit->precio1 = new inputField('<span style="font-size:1.5em">Precio 1</span>','precio1');
+		$edit->precio1->rule='numeric';
+		$edit->precio1->css_class='inputnum';
+		$edit->precio1->size =12;
+		$edit->precio1->maxlength =15;
+		$edit->precio1->style='font-size: 2em;font-weight:bold;';
+
+		$edit->precio2 = new inputField('<span style="font-size:1.5em">Precio 2</span>','precio2');
+		$edit->precio2->rule='numeric';
+		$edit->precio2->css_class='inputnum';
+		$edit->precio2->size =12;
+		$edit->precio2->maxlength =15;
+		$edit->precio2->style='font-size: 2em;font-weight:bold;';
+
+		$edit->precio3 = new inputField('<span style="font-size:1.5em">Precio 3</span>','precio3');
+		$edit->precio3->rule='numeric';
+		$edit->precio3->css_class='inputnum';
+		$edit->precio3->size =12;
+		$edit->precio3->maxlength =15;
+		$edit->precio3->style='font-size: 2em;font-weight:bold;';
+
+		$edit->precio4 = new inputField('<span style="font-size:1.5em">Precio 4</span>','precio4');
+		$edit->precio4->rule='numeric';
+		$edit->precio4->css_class='inputnum';
+		$edit->precio4->size =12;
+		$edit->precio4->maxlength =15;
+		$edit->precio4->style='font-size: 2em;font-weight:bold;';
+
+		$edit->margen1 = new freeField('', 'total','<span style="font-size:1.7em;" id="m1">0,00</span>% (*IVA incluido)');
+		$edit->margen1->in='precio1';
+		$edit->margen2 = new freeField('', 'total','<span style="font-size:1.7em;" id="m2">0,00</span>% (*IVA incluido)');
+		$edit->margen2->in='precio2';
+		$edit->margen3 = new freeField('', 'total','<span style="font-size:1.7em;" id="m3">0,00</span>% (*IVA incluido)');
+		$edit->margen3->in='precio3';
+		$edit->margen4 = new freeField('', 'total','<span style="font-size:1.7em;" id="m4">0,00</span>% (*IVA incluido)');
+		$edit->margen4->in='precio4';
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+	function _post_it_update($do){
+		$control = $do->get('control');
+		$codigo  = $do->get('codigo');
+		logusu('scst',"Compra ${codigo} control ${control} PRECIOS CAMBIADOS");
+	}
+
+	function _pre_it_update($do){
+		if(!$this->datasis->sidapuede('SCST','2')){
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']="No tiene accesos a modificar.";
+			return false;
+		}
+
+		$control  = $do->get('control');
+		$dbcontrol= $this->db->escape($control);
+
+		$pasa  = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM scst WHERE actuali>=fecha AND control= '.$dbcontrol);
+		if($pasa==0){
+			return true;
+		}else{
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']="No se puede modificar una compra actualizada, debe reversarla primero.";
+			return false;
+		}
+	}
+
+	function _pre_it_insert($do){ return false; }
+	function _pre_it_delete($do){ return false; }
+
+
 	function instalar(){
 		if (!$this->db->table_exists('sinvehiculo')) {
 			$mSQL="CREATE TABLE `sinvehiculo` (
@@ -4613,24 +4853,29 @@ class Scst extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
-		if ( !$this->datasis->iscampo('scst','id') ) {
+		if(!$this->datasis->iscampo('scst','id') ) {
 			$this->db->simple_query('ALTER TABLE scst DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE scst ADD UNIQUE INDEX control (control)');
 			$this->db->simple_query('ALTER TABLE scst ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 
-			$this->db->simple_query("update tmenus set secu=1 where titulo='Incluye'");
-			$this->db->simple_query("update tmenus set secu=2 where titulo='Modifica'");
-			$this->db->simple_query("update tmenus set secu=3 where titulo='Prox'");
-			$this->db->simple_query("update tmenus set secu=4 where titulo='Ante'");
-			$this->db->simple_query("update tmenus set secu=5 where titulo='Elimina'");
-			$this->db->simple_query("update tmenus set secu=6 where titulo='Busca'");
-			$this->db->simple_query("update tmenus set secu=7 where titulo='Tabla'");
-			$this->db->simple_query("update tmenus set secu=8 where titulo='Lista'");
-			$this->db->simple_query("update tmenus set secu=9 where titulo='Otros'");
-		};
+			$this->db->simple_query("UPDATE tmenus SET secu=1 WHERE titulo='Incluye'");
+			$this->db->simple_query("UPDATE tmenus SET secu=2 WHERE titulo='Modifica'");
+			$this->db->simple_query("UPDATE tmenus SET secu=3 WHERE titulo='Prox'");
+			$this->db->simple_query("UPDATE tmenus SET secu=4 WHERE titulo='Ante'");
+			$this->db->simple_query("UPDATE tmenus SET secu=5 WHERE titulo='Elimina'");
+			$this->db->simple_query("UPDATE tmenus SET secu=6 WHERE titulo='Busca'");
+			$this->db->simple_query("UPDATE tmenus SET secu=7 WHERE titulo='Tabla'");
+			$this->db->simple_query("UPDATE tmenus SET secu=8 WHERE titulo='Lista'");
+			$this->db->simple_query("UPDATE tmenus SET secu=9 WHERE titulo='Otros'");
+		}
 
-		if ( !$this->datasis->iscampo('itscst','id') ) {
+		$campos=$this->db->list_fields('itscst');
+		if(!in_array('id',$campos)){
 			$this->db->query('ALTER TABLE itscst ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		if(!in_array('rmargen',$campos)){
+			$this->db->query("ALTER TABLE `itscst` ADD COLUMN `rmargen` CHAR(1) NULL DEFAULT 'N' COMMENT 'Respeta el margen al actualizar' AFTER `usuario`");
 		}
 
 	}

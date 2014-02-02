@@ -3683,6 +3683,7 @@ class Sinv extends Controller {
 		$base4  = $do->get('base4');
 		$ultimo = $do->get('ultimo');
 		$pond   = $do->get('pond');
+		$codigo = $do->get('codigo');
 
 		//SINVCOMBO
 		if($tipo[0]!='C'){
@@ -3828,6 +3829,10 @@ class Sinv extends Controller {
 			$do->error_message_ar['pre_upd'] = 'Las escalas deben cumplir con:<br> Escala 3 mayor o igual a la Escala 2 mayor o igual a la Escala 3, en cantidades y descuentos';
 			return false;
 		}
+
+		$existen=floatval($this->datasis->dameval('SELECT SUM(existen) AS exist FROM itsinv WHERE codigo='.$this->db->escape($codigo)));
+		$do->set('existen',$existen);
+		return true;
 	}
 
 	/* REDONDEA LOS PRECIOS DE TODOS LOS PRODUCTOS */
