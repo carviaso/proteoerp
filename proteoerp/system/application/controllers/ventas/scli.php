@@ -1355,8 +1355,7 @@ class Scli extends validaciones {
 		<script type="text/javascript" >
 		$(function() {
 			$("#aniversario").datepicker({ dateFormat: "dd/mm/yy" });
-			//Default Action
-			$("#tiva").change(function () { anomfis(); }).change();
+			//$("#tiva").change(function () { anomfis(); }).change();
 
 			$("#tarifa").autocomplete({
 				source: function( req, add){
@@ -1437,8 +1436,8 @@ class Scli extends validaciones {
 				$("#tr_nomfis").show();
 				$("#tr_riffis").show();
 			}else{
-				$("#nomfis").val("");
-				$("#riffis").val("");
+				//$("#nomfis").val("");
+				//$("#riffis").val("");
 				$("#tr_nomfis").hide();
 				$("#tr_riffis").hide();
 			}
