@@ -519,41 +519,52 @@ class Datasis {
 		$parametros=serialize($modbus);
 
 		$data=array();
-		if (empty($id)) $id=$modbus['tabla'];
+		if(empty($id)) $id=$modbus['tabla'];
+		$dbid = $CI->db->escape($id);
+		$dburi= $CI->db->escape($uri);
 
-		$idt=$this->dameval("SELECT id FROM modbus WHERE idm='$id' AND uri='$uri'");
-		if (!empty($idt)){
-			$mSQL="UPDATE modbus SET parametros = '$parametros' WHERE idm='$id' AND uri='$uri'";
-			$CI->db->query($mSQL);
+		$idt=$this->dameval("SELECT id FROM modbus WHERE idm=${dbid} AND uri=${dburi}");
+		if(!empty($idt)){
+			$paradb= $this->dameval("SELECT parametros FROM modbus WHERE id=${idt}");
+			if($paradb!=$parametros){
+				$dbparametros=$CI->db->escape($parametros);
+				$mSQL="UPDATE modbus SET parametros = ${dbparametros} WHERE idm=${dbid} AND uri=${dburi}";
+				$CI->db->query($mSQL);
+			}
 		}else{
 			$CI->db->set('uri', $uri);
 			$CI->db->set('idm', $id);
-			$CI->db->set('parametros', serialize($modbus));
+			$CI->db->set('parametros', $parametros);
 			$CI->db->insert('modbus');
 			$idt=$CI->db->insert_id();
 		}
 
-		return("<a href='javascript:void(0);'onclick=\"vent=window.open('".site_url("buscar/index/$idt/$puri")."','ventbuscar$id','width=$width,height=$height,scrollbars=Yes,	status=Yes,resizable=Yes,screenx=5,screeny=5');vent.focus();document.body.setAttribute('onUnload','vent.close();');\">".image('system-search.png',$modbus['titulo'],array('border'=>'0')).'</a>');
+		return("<a href='javascript:void(0);'onclick=\"vent=window.open('".site_url("buscar/index/${idt}/${puri}")."','ventbuscar${id}','width=${width},height=${height},scrollbars=Yes,	status=Yes,resizable=Yes,screenx=5,screeny=5');vent.focus();document.body.setAttribute('onUnload','vent.close();');\">".image('system-search.png',$modbus['titulo'],array('border'=>'0')).'</a>');
 	}
 
 	function p_modbus($modbus,$puri='',$width=800,$height=600,$id=''){
 		$CI =& get_instance();
-		//$uri  =$CI->uri->uri_string();
 		$uri=$this->get_uri();
 		$tabla=$modbus['tabla'];
 		$parametros=serialize($modbus);
 
 		$data=array();
-		if (empty($id)) $id=$modbus['tabla'];
+		if(empty($id)) $id=$modbus['tabla'];
+		$dbid = $CI->db->escape($id);
+		$dburi= $CI->db->escape($uri);
 
-		$idt=$this->dameval("SELECT id FROM modbus WHERE idm='$id' AND uri='$uri'");
-		if (!empty($idt)){
-			$mSQL="UPDATE modbus SET parametros = '$parametros' WHERE idm='$id' AND uri='$uri'";
-			$CI->db->query($mSQL);
+		$idt=$this->dameval("SELECT id FROM modbus WHERE idm=${dbid} AND uri=${dburi}");
+		if(!empty($idt)){
+			$paradb= $this->dameval("SELECT parametros FROM modbus WHERE id=${idt}");
+			if($paradb!=$parametros){
+				$dbparametros=$CI->db->escape($parametros);
+				$mSQL="UPDATE modbus SET parametros = ${dbparametros} WHERE idm=${dbid} AND uri=${dburi}";
+				$CI->db->query($mSQL);
+			}
 		}else{
 			$CI->db->set('uri', $uri);
 			$CI->db->set('idm', $id);
-			$CI->db->set('parametros', serialize($modbus));
+			$CI->db->set('parametros', $parametros);
 			$CI->db->insert('modbus');
 			$idt=$CI->db->insert_id();
 		}
@@ -562,8 +573,8 @@ class Datasis {
 	href='javascript:void(0);'
 	onclick=\"
 		vent=window.open(
-			'".site_url("buscar/index/$idt/$puri")."',
-			'ventbuscar$id',
+			'".site_url("buscar/index/${idt}/${puri}")."',
+			'ventbuscar${id}',
 			'width=$width,height=$height,scrollbars=Yes,status=Yes,resizable=Yes,screenx=5,screeny=5'
 		);
 		vent.focus();

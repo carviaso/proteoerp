@@ -1603,6 +1603,7 @@ class Scli extends validaciones {
 		$edit->entidad->style='width:166px;';
 		$edit->entidad->option('','Seleccione un Estado');
 		$edit->entidad->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
+		$edit->entidad->insertValue=$this->datasis->dameval("SELECT codigo FROM estado WHERE entidad=".$this->db->escape(trim($this->datasis->traevalor('ESTADO'))));
 
 		$edit->pais = new inputField('Pa&iacute;s','pais');
 		$edit->pais->rule = 'trim';
@@ -2554,15 +2555,15 @@ function chrif(rif){
 	}
 
 	function chtolera($monto){
-		$paxt=$this->secu->puede('1313');
+		$paxt = $this->datasis->sidapuede('SCLIOTR', 'SCLIMAXTOLE()');
 		if($paxt){
-			$maxtole=$this->input->post('maxtole');
+			$maxtole=floatval($this->input->post('maxtole'));
 		}else{
-			$maxtole=$this->datasis->dameval('SELECT maxtole FROM scli WHERE id='.$this->rapyd->uri->get_edited_id());
+			$maxtole=floatval($this->datasis->dameval('SELECT maxtole FROM scli WHERE id='.$this->rapyd->uri->get_edited_id()));
 		}
 
 		if($monto>$maxtole){
-			$this->validation->set_message('chtolera', 'La tolerancia no puede ser mayor que el margen m&aacute;ximo pautado');
+			$this->validation->set_message('chtolera', 'La tolerancia no puede ser mayor que el margen m&aacute;ximo pautado '.$maxtole);
 			return false;
 		}
 		return true;
@@ -2571,12 +2572,12 @@ function chrif(rif){
 	function chdfiscal($tiva){
 		$nomfis=$this->input->post('nomfis');
 		$riffis=$this->input->post('riffis');
-		if($tiva=='C' OR $tiva=='E' OR $tiva=='R')
+		if($tiva=='C' || $tiva=='E' || $tiva=='R')
 			if(empty($nomfis)){
 				$this->validation->set_message('chdfiscal', "Debe introducir el nombre fiscal cuando el cliente es contribuyente");
 				return false;
 			}
-		return TRUE;
+		return true;
 	}
 
 	function _pre_credi_update($do){
@@ -2659,7 +2660,7 @@ function chrif(rif){
 	function _pre_udp($do){
 		$do->set('riffis',trim($do->get('rifci')));
 		$nomfis = $do->get('nomfis');
-		if ( empty( $nomfis ) ) {
+		if(empty( $nomfis )){
 			$do->set('nomfis',trim($do->get('nombre')));
 		}
 
@@ -2671,7 +2672,7 @@ function chrif(rif){
 	function _pre_ins($do) {
 		$do->set('riffis',trim($do->get('rifci')));
 		$nomfis = $do->get('nomfis');
-		if ( empty( $nomfis ) ) {
+		if(empty($nomfis)){
 			$do->set('nomfis',trim($do->get('nombre')));
 		}
 
@@ -2685,7 +2686,7 @@ function chrif(rif){
 	function _post_insert($do){
 		$codigo=$do->get('cliente');
 		$limite=$do->get('limite');
-		logusu('scli',"CLIENTE $codigo CREADO, LIMITE $limite");
+		logusu('scli',"CLIENTE ${codigo} CREADO, LIMITE ${limite}");
 	}
 
 	function _post_update($do){
@@ -2697,7 +2698,7 @@ function chrif(rif){
 	function _post_delete($do){
 		$codigo=$do->get('cliente');
 		$limite=$do->get('limite');
-		logusu('scli',"CLIENTE $codigo ELIMINADO, LIMITE $limite");
+		logusu('scli',"CLIENTE ${codigo} ELIMINADO, LIMITE ${limite}");
 	}
 
 	function chexiste($codigo){
@@ -2716,7 +2717,7 @@ function chrif(rif){
 		}
 	}
 
-	function autocomplete($campo,$cod=FALSE){
+	function autocomplete($campo,$cod=false){
 		if($cod!==false){
 			$cod=$this->db->escape_like_str($cod);
 			$data['cliente']="SELECT cliente AS c1 ,nombre AS c2 FROM scli WHERE cliente LIKE '$cod%' ORDER BY cliente LIMIT 10";
@@ -2847,7 +2848,7 @@ function chrif(rif){
 		if ( $this->datasis->istabla('snot'))
 			$this->db->query("UPDATE snot SET cod_cli=".$this->db->escape($mnuevo)." WHERE cod_cli=".$this->db->escape($mviejo));
 
-		logusu('SCLI',"Cambio/Fusion de cliente $mviejo ==> $mnuevo ");
+		logusu('SCLI',"Cambio/Fusion de cliente ${mviejo} ==> ${mnuevo} ");
 		echo "Cambios concluidos ";
 
 	}
@@ -2861,7 +2862,7 @@ function chrif(rif){
 		$maxtole = isset($_REQUEST['maxtole']) ? $_REQUEST['maxtole'] : -1;
 		$observa = isset($_REQUEST['observa']) ? $_REQUEST['observa'] : '';
 
-		if ( $mid == -1 ){
+		if($mid == -1){
 			echo 'Error de id';
 			return;
 		}

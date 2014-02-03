@@ -314,9 +314,10 @@ class Buscar extends Controller
 		$dbid= $this->db->escape($id);
 		$query = $this->db->query("SELECT parametros FROM modbus WHERE id=${dbid}");
 
-		if ($query->num_rows() > 0){
+		if($query->num_rows() > 0){
 			$row = $query->row();
 			$modbus=unserialize($row->parametros);
+
 			$this->tabla   =$modbus['tabla'];
 			$this->columnas=$modbus['columnas'];
 			$this->filtro  =$modbus['filtro'];
@@ -331,6 +332,8 @@ class Buscar extends Controller
 			if(isset($modbus['orderby']))   $this->order_by  =$modbus['orderby'];
 			if(isset($modbus['direction'])) $this->direction =$modbus['direction'];
 
+		}else{
+			show_error("id no encontrado ${id}");
 		}
 		//echo '<pre>';print_r($this->session->userdata);echo '</pre>';
 	}
