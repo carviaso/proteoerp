@@ -78,7 +78,8 @@ class pfaclite extends validaciones{
 		function hfactura($status,$factura,$numero,$vence=null,$act=false){
 			if($status=='P'){        //Pendiente
 				if($act){
-					$rt = anchor('ventas/sfac_add/creafrompfac/'.$numero.'/create', 'Pendiente');
+					//$rt = anchor('ventas/sfac_add/creafrompfac/'.$numero.'/create', 'Pendiente');
+					$rt = 'Pendiente';
 				}else{
 					$rt = 'Pendiente';
 				}
