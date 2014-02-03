@@ -426,17 +426,17 @@ class Sfac extends Controller {
 								try {
 									var json = JSON.parse(r);
 									if(json.status == "A" ) {
-										if ( json.manual == "N" ) {
-											$( "#fedita" ).dialog( "close" );
+										if(json.manual == "N"){
+											$("#fedita").dialog("close");
 											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 											setTimeout(\'window.location="'.base_url().'formatos/descargar/FACTURA/\'+json.pk.id+\'"\');
 											$.prompt("<h1>Registro Guardado</h1>Nro de Control:<input id=\'nfiscal\' name=\'nfiscal\'><br><h2>Cambio: "+json.vuelto+"</h2>",{
 												buttons: { Guardar: true, Cancelar: false },
 												submit: function(e,v,m,f){
-													if (v) {
-														if( f.nfiscal == null || nfiscal == "" ){
+													if(v){
+														if(f.nfiscal == null || nfiscal == "" ){
 															alert("Debe colocal un Nro de Control");
-														} else {
+														}else{
 															yurl = encodeURIComponent(f.nfiscal);
 															$.ajax({
 																url: \''.site_url('ventas/sfac/guardafiscal').'\',
@@ -3273,11 +3273,19 @@ class Sfac extends Controller {
 		$fecha  = $do->get('fecha');
 		$estampa= $do->get('estampa');
 		$referen= $do->get('referen');
+		$cajero = $do->get('cajero');
 		$descuento=floatval($do->get('descuento'));
 		$globaldes=$descuento/100;
 
 		$dbcliente=$this->db->escape($cliente);
-
+		if(empty($cajero) && $referen<>'C'){
+			$cajero=$this->secu->getcajero();
+			if(empty($cajero)){
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El usuario debe tener un cajero asignado';
+				return false;
+			}
+			$do->set('cajero',$cajero);
+		}
 
 		//Totaliza la factura
 		$totalg=0;
@@ -3828,6 +3836,15 @@ class Sfac extends Controller {
 		$direc   = $do->get('direc');
 		$dire1   = $do->get('dire1');
 
+		$exento   = $do->get('exento'   );
+		$tasa     = $do->get('tasa'     );
+		$reducida = $do->get('reducida' );
+		$sobretasa= $do->get('sobretasa');
+		$montasa  = $do->get('montasa'  );
+		$monredu  = $do->get('monredu'  );
+		$monadic  = $do->get('monadic'  );
+
+
 		if($referen=='P'){
 			logusu($do->table,"Creo pre-factura ${tipo_doc}${numero}");
 			return true;
@@ -3857,6 +3874,14 @@ class Sfac extends Controller {
 				$data['usuario']  = $usuario;
 				$data['codigo']   = '';
 				$data['descrip']  = '';
+				$data['montasa']  = $montasa;
+				$data['monredu']  = $monredu;
+				$data['monadic']  = $monadic;
+				$data['tasa']     = $tasa;
+				$data['reducida'] = $reducida;
+				$data['sobretasa']= $sobretasa;
+				$data['exento']   = $exento;
+
 
 				$sql= $this->db->insert_string('smov', $data);
 				$ban=$this->db->simple_query($sql);

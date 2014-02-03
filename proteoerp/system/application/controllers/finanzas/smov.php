@@ -99,7 +99,7 @@ class Smov extends Controller {
 					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
 						try{
 							var json = JSON.parse(data);
-							if (json.status == "A"){
+							if(json.status == "A"){
 								apprise("Registro eliminado");
 								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 							}else{
@@ -1707,7 +1707,7 @@ class Smov extends Controller {
 		$fecha   = $do->get('fecha');
 		$concepto= $do->get('observa1');
 		$codigo  = $do->get('codigo');
-		$itabono=$sfpamonto=$ppagomonto=$impuesto=$ppimpuesto=0;
+		$itabono = $sfpamonto=$ppagomonto=$impuesto=$ppimpuesto=0;
 		$dbcod_cli=$this->db->escape($cod_cli);
 		$this->ppagodata=$ivadata=array(
 			'montasa'  =>0,
@@ -1719,7 +1719,7 @@ class Smov extends Controller {
 			'exento'   =>0
 		);
 
-		$rrow    = $this->datasis->damerow('SELECT nombre,rifci,dire11,dire12 FROM scli WHERE cliente='.$this->db->escape($cliente));
+		$rrow = $this->datasis->damerow('SELECT nombre,rifci,dire11,dire12 FROM scli WHERE cliente='.$this->db->escape($cliente));
 		if($rrow!=false){
 			$do->set('nombre',$rrow['nombre']);
 			$do->set('dire1' ,$rrow['dire11']);
@@ -2426,6 +2426,29 @@ class Smov extends Controller {
 			}
 			$salida .= '</table></td>';
 		}
+
+		//Documentos aplicados
+		//$mSQL = "SELECT tipo_doc,numero, monto, abono FROM itccli WHERE tipoccli=${dbtipo_doc} AND numccli=${dbnumero}";
+		//$query = $this->db->query($mSQL);
+		//$saldo = 0;
+		//if($query->num_rows() > 0){
+		//	$saldo = 0;
+		//	$salida .= $td1;
+		//	$salida .= 'Movimientos Aplicados</caption>';
+		//	$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td><td align='center'>Monto</td></tr>";
+		//	foreach ($query->result_array() as $row){
+		//		$saldo += $row['abono'];
+		//		$salida .= '<tr>';
+		//		$salida .= '<td>'.$row['tipo_doc'].'</td>';
+		//		$salida .= '<td>'.$row['numero'].'</td>';
+		//		$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
+		//		$salida .= '<td align=\'right\'>'.nformat($row['abono']).'</td>';
+		//		$salida .= '</tr>';
+		//	}
+		//	if ($saldo <> 0)
+		//		$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'><b>Saldo : ".nformat($saldo). "</b></td></tr>";
+		//	$salida .= '</table></td>';
+		//}
 		echo $salida.'</tr></table>';
 	}
 

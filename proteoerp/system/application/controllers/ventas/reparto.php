@@ -978,7 +978,7 @@ class Reparto extends Controller {
 		$reparto  = $this->datasis->dameval("SELECT reparto FROM sfac    WHERE id=${dbid}");
 		$dbreparto= $this->db->escape($reparto);
 		$tipo     = $this->datasis->dameval("SELECT tipo    FROM reparto WHERE id=${dbreparto}");
-		if ( $tipo == 'E'){
+		if($tipo == 'E'){
 			$this->db->where('id',$id);
 			$this->db->update('sfac',array( 'reparto' => 0 ));
 			$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS('',eliminadas,".$reparto.") WHERE id=${dbreparto}");
@@ -1153,7 +1153,7 @@ class Reparto extends Controller {
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('reparto')) {
+		if (!$this->db->table_exists('reparto')){
 			$mSQL="CREATE TABLE `reparto` (
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
 			  `tipo` char(1) NOT NULL COMMENT 'Tipo Pendiente, Cargado, Despachado, Finalizado, Anulado',
@@ -1172,6 +1172,10 @@ class Reparto extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
-		//ALTER TABLE `sfac` ADD COLUMN `reparto` INT(11) NULL DEFAULT '0' AFTER `manual`;
+		$campos=$this->db->list_fields('sfac');
+		if(!in_array('reparto',$campos)){
+			$mSQL="ALTER TABLE `sfac` ADD COLUMN `reparto` INT(11) NULL DEFAULT '0' AFTER `manual`";
+			$this->db->simple_query($mSQL);
+		}
 	}
 }
