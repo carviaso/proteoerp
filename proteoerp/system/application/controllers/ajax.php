@@ -469,8 +469,15 @@ class Ajax extends Controller {
 		$comodin= $this->datasis->traevalor('COMODIN');
 		$mid    = $this->input->post('q');
 		$alma   = $this->input->post('alma');
+		$vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
 
-		if($mid == false) $mid  = $this->input->post('term');
+		if($vnega=='N'){
+			$wvnega=' AND e.existen>0 ';
+		}else{
+			$wvnega='';
+		}
+
+		if($mid == false) $mid = $this->input->post('term');
 
 		if(strlen($comodin)==1 && $comodin!='%' && $mid!==false){
 			$mid=str_replace($comodin,'%',$mid);
@@ -505,7 +512,7 @@ class Ajax extends Controller {
 					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S'
 					ORDER BY a.descrip LIMIT ".$this->autolimit;
 				}
-			} else {
+			}else{
 				$almadb  = $this->db->escape($alma);
 				if($this->db->table_exists('sinvpromo')){
 					$mSQL="
@@ -516,7 +523,7 @@ class Ajax extends Controller {
 					LEFT JOIN grup      AS c ON a.grupo=c.grupo
 					LEFT JOIN sinvpromo AS d ON a.codigo=d.codigo
 					LEFT JOIN itsinv    AS e ON a.codigo=e.codigo AND e.alma=${alma}
-					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S'
+					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S' ${wvnega}
 					ORDER BY a.descrip LIMIT ".$this->autolimit;
 				}else{
 					$mSQL="
@@ -526,7 +533,7 @@ class Ajax extends Controller {
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
 					LEFT JOIN grup      AS c ON a.grupo=c.grupo
 					LEFT JOIN itsinv    AS e ON a.codigo=e.codigo AND e.alma=${alma}
-					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S'
+					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S' ${wvnega}
 					ORDER BY a.descrip LIMIT ".$this->autolimit;
 				}
 			}

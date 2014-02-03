@@ -12,6 +12,7 @@ class Sfac extends Controller {
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
 		$this->datasis->modulo_nombre( 'SFAC', 0 );
+		$this->vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
 	}
 
 	function index(){
@@ -2633,7 +2634,7 @@ class Sfac extends Controller {
 		$edit->cana->rel_id   = 'sitems';
 		$edit->cana->maxlength= 10;
 		$edit->cana->size     = 6;
-		$edit->cana->rule     = 'required|positive|callback_chcanadev[<#i#>]';
+		$edit->cana->rule     = 'required|positive|callback_chcanadev[<#i#>]|callback_chcananeg[<#i#>]';
 		$edit->cana->autocomplete=false;
 		$edit->cana->onkeyup  ='importe(<#i#>)';
 		$edit->cana->showformat ='decimal';
@@ -3194,6 +3195,24 @@ class Sfac extends Controller {
 			}
 		}
 		return false;
+	}
+
+	//Chequea si puede o no vender negativo
+	function chcananeg($val,$i){
+		$tipo_doc = $this->input->post('tipo_doc');
+		if($this->vnega=='N' || $tipo_doc=='D'){
+			$codigo   = $this->input->post('codigoa_'.$i);
+			$dbcodigo = $this->db->escape($codigo);
+
+			$mSQL    = "SELECT SUM(a.existen) AS cana FROM itsinv AS a JOIN caub AS b ON a.alma=b.ubica WHERE a.codigo=${dbcodigo}";
+			$existen = floatval($this->datasis->dameval($mSQL));
+			$val     = floatval($val);
+			if($val>$existen){
+				$this->validation->set_message('chcananeg', 'El art&iacute;culo '.$codigo.' no tiene cantidad suficiente para facturarse ('.nformat($existen).')');
+				return false;
+			}
+		}
+		return true;
 	}
 
 	//Chequea que la cantidad devuelta no sea mayor que la facturada
