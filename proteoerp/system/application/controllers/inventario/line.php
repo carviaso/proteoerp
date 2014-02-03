@@ -639,11 +639,11 @@ class Line extends Controller {
 		$codigo  =$do->get('linea');
 		$dbcodigo=$this->db->escape($codigo);
 		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM grup WHERE linea=${dbcodigo}");
-		if ($check > 0){
+		if($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='La l&iacute;nea contiene grupos, por ello no puede ser eliminada.';
 			return false;
 		}
-		return false;
+		return true;
 	}
 
 	function _post_insert($do){
@@ -667,12 +667,12 @@ class Line extends Controller {
 	function chexiste($codigo){
 		$codigo  =$this->input->post('linea');
 		$dbcodigo=$this->db->escape($codigo);
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM line WHERE linea=${dbcodigo}");
-		if ($check > 0){
+		$check=$this->datasis->dameval("SELECT COUNT(*) AS check FROM line WHERE linea=${dbcodigo}");
+		if($check > 0){
 			$linea=$this->datasis->dameval("SELECT descrip FROM line WHERE linea=${dbcodigo}");
 			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para la linea ${linea}");
 			return false;
-		}else {
+		}else{
 			return true;
 		}
 	}
