@@ -2524,8 +2524,14 @@ class Sprm extends Controller {
 				$ppobserva[] = $ittipo.$itnumero;
 			}
 
-			$mSQL = "UPDATE sprm SET abonos=abonos+?, preabono=0, preppago=0 WHERE tipo_doc=? AND numero=? AND cod_prv=? AND fecha=?";
-			$this->db->query($mSQL, array($itabono,$ittipo,$itnumero,$cod_prv,$itfecha));
+			$dbittipo   = $this->db->escape($ittipo  );
+			$dbitnumero = $this->db->escape($itnumero);
+			$dbcod_prv  = $this->db->escape($cod_prv );
+			$dbitfecha  = $this->db->escape($itfecha );
+
+			$mSQL = "UPDATE sprm SET abonos=abonos+${itabono}, preabono=0, preppago=0
+			WHERE tipo_doc=${dbittipo} AND numero=${dbitnumero} AND cod_prv=${dbcod_prv}";
+			$this->db->query($mSQL);
 		}
 
 		//Crea Movimiento en Bancos
