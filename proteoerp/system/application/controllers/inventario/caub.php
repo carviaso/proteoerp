@@ -106,7 +106,7 @@ class Caub extends validaciones {
 				'editable'    => 'true',
 				'search'      => 'false',
 				'edittype'    => "'select'",
-				'editoptions' => '{value: {"S":"Si", "N":"No"} }'
+				'editoptions' => '{value: {"N":"No","S":"Si"} }'
 			)
 		);
 
@@ -118,7 +118,7 @@ class Caub extends validaciones {
 				'editable'    => 'true',
 				'edittype'    => "'select'",
 				'search'      => 'false',
-				'editoptions' => '{value: {"S":"Si", "N":"No"} }'
+				'editoptions' => '{value: {"N":"No", "S":"Si"} }'
 			)
 		);
 
