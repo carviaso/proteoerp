@@ -3561,6 +3561,8 @@ class Scst extends Controller {
 						$mSQL=$this->db->insert_string('riva', $riva);
 						$ban =$this->db->simple_query($mSQL);
 						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+					}else{
+						$reteiva=0;
 					}//Fin de la retencion
 
 					//Inicio de la retencion ISLR
