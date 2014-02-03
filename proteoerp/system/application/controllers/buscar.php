@@ -316,7 +316,11 @@ class Buscar extends Controller
 
 		if($query->num_rows() > 0){
 			$row = $query->row();
-			$modbus=unserialize($row->parametros);
+			if($this->config->item('charset')=='UTF-8' && $this->db->char_set=='latin1'){
+				$modbus=unserialize(utf8_encode($row->parametros));
+			}else{
+				$modbus=unserialize($row->parametros);
+			}
 
 			$this->tabla   =$modbus['tabla'];
 			$this->columnas=$modbus['columnas'];
