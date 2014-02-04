@@ -13,7 +13,7 @@ class parqueador extends Sfac {
 	}
 
 	function index(){
-		$this->datasis->creaintramenu( $data = array('modulo'=>'149','titulo'=>'Parqueador','mensaje'=>'Parqueador','panel'=>'TRANSACCIONES','ejecutar'=>'ventas/parqueador','target'=>'popu','visible'=>'S','pertenece'=>'2','ancho'=>900,'alto'=>600));
+		$this->datasis->creaintramenu( $data = array('modulo'=>'152','titulo'=>'Parqueador','mensaje'=>'Parqueador','panel'=>'TRANSACCIONES','ejecutar'=>'ventas/parqueador','target'=>'popu','visible'=>'S','pertenece'=>'2','ancho'=>900,'alto'=>600));
 		parent::index();
 	}
 

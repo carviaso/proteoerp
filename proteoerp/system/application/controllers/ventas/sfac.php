@@ -3297,7 +3297,7 @@ class Sfac extends Controller {
 		$globaldes=$descuento/100;
 
 		$dbcliente=$this->db->escape($cliente);
-		if(empty($cajero) && $referen<>'C'){
+		if(empty($cajero) && $referen<>'C' && $referen<>'P'){
 			$cajero=$this->secu->getcajero();
 			if(empty($cajero)){
 				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El usuario debe tener un cajero asignado';
