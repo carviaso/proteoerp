@@ -1466,7 +1466,7 @@ class Pers extends Controller {
 		$edit->vari5->size =10;
 		$edit->vari5->maxlength=12;
 		$edit->vari5->rule='trim|chfecha';
-		$edit->var5->calendar=false;
+		$edit->vari5->calendar=false;
 
 		$edit->vari6 = new inputField($vari6, 'vari6');
 		$edit->vari6->group = 'Variables';
@@ -2321,37 +2321,37 @@ class Pers extends Controller {
 				echo "Registro Eliminado ";
 			}
 		};
-		
+
 		if($oper != 'del'){
 			// Calcula los annos
 			$this->pnomina->CODIGO = $codigo;
 			$anti = $this->pnomina->ANTIGUEDAD();
 			$diatotal = $anti[0]+14+$data['feriados'];
-			
+
 			//Calcula los dias de descanso
 			$salida   = $data['inicio'];
 			$i        = 0;
 			$dia      = 0;
 			$descanso = 0;
 			$fin      = true;
-			
+
 			while ( $dia < $diatotal-1 ) {
 				$diasem = date('N', strtotime($data['inicio']. ' + '.$i.' days'));
-				if ( $diasem < 6 ) 
+				if ( $diasem < 6 )
 					$dia++;
 				else
 					$descanso++;
 				$i++;
 			}
-			
+
 			$diasem = date('Y-m-d', strtotime($data['inicio'].' + '.$i.' days'));
 			$this->db->where("id", $id);
 			$this->db->update('prevaca', array( "dias"=>$diatotal, "descanso"=>$descanso, 'final'=>$diasem ));
-			
+
 			echo $i." ".$diatotal." dias ".$diatotal." descanso ".$descanso." feriados ".$dia.' final '.$diasem ;
 
 		}
-		
+
 	}
 
 
