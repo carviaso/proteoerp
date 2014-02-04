@@ -32,7 +32,7 @@ class Reportes extends Controller{
 		if(empty($mc)){
 			$mc=$this->_crearep($repo,'proteo');
 		}else{
-			if(($this->db->char_set=='latin1') && ($this->config->item('charset')=='UTF-8')){
+			if(($this->db->char_set=='latin1') && ($this->config->item('charset')=='UTF-8') && $_formato!='PDF'){
 				$mc=utf8_encode($mc);
 			}
 		}
