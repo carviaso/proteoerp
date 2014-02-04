@@ -340,7 +340,7 @@ function del_itscon(id){
 
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow">
-					<a href='#' onclick='del_itscon(<?=$i ?>);return false;'>Eliminar</a>
+					<a href='#' onclick='del_itscon(<?php echo $i; ?>);return false;'>Eliminar</a>
 				</td>
 				<?php } ?>
 			</tr>

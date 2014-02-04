@@ -189,7 +189,7 @@ function buscaprod(){
 				$obj2="descrip_$i";
 				$obj3="cantidad_$i";
 			?>
-			<tr id='tr_itstra_<?=$i ?>'>
+			<tr id='tr_itstra_<?php echo $i; ?>'>
 				<td class="littletablerow"><?php echo $form->$obj1->output ?></td>
 				<td class="littletablerow"><?php echo $form->$obj2->output ?></td>
 				<td class="littletablerow"align="right"><?php echo $form->$obj3->output ?></td>

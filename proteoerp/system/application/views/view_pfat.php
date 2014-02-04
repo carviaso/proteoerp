@@ -33,7 +33,7 @@ if($form->_status!='show'){
 
 
 <script language="javascript" type="text/javascript">
-itpfac_cont=<?=$form->max_rel_count['itpfac']?>;
+itpfac_cont=<?php echo $form->max_rel_count['itpfac']?>;
 
 $(document).ready(function() {
 	//alert(itpfac_cont);

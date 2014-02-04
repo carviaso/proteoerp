@@ -66,12 +66,12 @@ if($ban){
 		foreach($query->result_array() as $row){
 	?>			
 			<tr>
-			  <td background="#arriba" scope="col"><a name="<?=$i?>"><a class="Estilo12" onClick="javascript:foc();" >Buscar</a></td>
+			  <td background="#arriba" scope="col"><a name="<?php echo $i; ?>"><a class="Estilo12" onClick="javascript:foc();" >Buscar</a></td>
 			  <td scope="col"><?php if($i>0){$ant=$i-1;echo "<a class='Estilo12' href='#$ant'>Atras</a>";} ?></td>
 		      <td scope="col"><?php if($i < $num-1){$sig=$i+1;echo "<a class='Estilo12' href='#$sig'>Siguiente</a>";} ?></td>
 		  </tr>			
 			<tr>
-        <td width="14%" scope="col"><div align="left"><img src="<?=base_url()?>uploads/inventario/Image/<?=$row['nombre']?>" alt="principal" width="100" height="100"></div></td>
+        <td width="14%" scope="col"><div align="left"><img src="<?=base_url()?>uploads/inventario/Image/<?php echo $row['nombre']; ?>" alt="principal" width="100" height="100"></div></td>
         <td width="86%" colspan="2" bgcolor="#FFFFFF" scope="col"><span class="Estilo14"><?php echo $row['comentario']?></span></td>
   		</tr>
         <tr>

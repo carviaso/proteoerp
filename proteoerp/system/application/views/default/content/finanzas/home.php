@@ -1,3 +1,3 @@
 <div id='home'>
-	<?=$titulo ?>
+	<?php echo $titulo ?>
 </div>

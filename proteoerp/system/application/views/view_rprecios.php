@@ -3,9 +3,9 @@
 	<tr>
 		<td width='100%'>
 			<table width='100%' bgcolor='#FAFFFB'>
-				<tr><td align='center'><b style="font-size:24pt"><?=$descrip ?></b></td></tr>
+				<tr><td align='center'><b style="font-size:24pt"><?php echo $descrip; ?></b></td></tr>
 				<?php if(isset($corta)){ ?>
-				<tr><td align='center'><b style="font-size:16pt;"><?=$corta ?> </b></td></tr>
+				<tr><td align='center'><b style="font-size:16pt;"><?php echo $corta; ?> </b></td></tr>
 				<?php }?>
 			</table>
 		</td>

@@ -72,8 +72,8 @@ if($form->_status!='show'){ ?>
 			<tr>
 				<td class="littletableheader"><?php echo $form->numero->label   ?>&nbsp;</td>
 				<td class="littletablerow"   ><?php echo $form->numero->output  ?>&nbsp;</td>
-				<td class="littletableheader"><?=$form->fecha->label            ?>&nbsp;</td>
-				<td class="littletablerow"   ><?=$form->fecha->output           ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->fecha->label    ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->fecha->output   ?>&nbsp;</td>
 			</tr>
 			<tr>
 				<td class="littletableheader"          ><?php echo $form->falla->label;    ?>&nbsp;</td>

@@ -523,7 +523,7 @@ function del_itspre(id){
 
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow">
-					<a href='#' onclick='del_itspre(<?=$i ?>);return false;'><?php echo img("images/delete.jpg"); ?></a>
+					<a href='#' onclick='del_itspre(<?php echo $i; ?>);return false;'><?php echo img("images/delete.jpg"); ?></a>
 				</td>
 				<?php } ?>
 			</tr>
