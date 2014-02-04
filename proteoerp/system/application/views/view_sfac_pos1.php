@@ -1151,7 +1151,7 @@ function chreferen(){
 				<td class='littletablerow'    valign='right'><div id='vuelto' style='font-size:16px;font-weight:bold;'>0.00</div></td>
 			</tr>
 			<tr>
-				<td class="littletableheader" valign='top'><?php echo $form->observa->label; ?>&nbsp;&nbsp;</td>
+				<td class="littletableheader" valign='top'><?php echo $form->observa->label;  ?>&nbsp;&nbsp;</td>
 				<td class='littletablerow'    colspan='2' ><?php echo $form->observa->output; ?></td>
 			</tr>
 			<tr>
@@ -1167,7 +1167,7 @@ function chreferen(){
 			<tr>
 				<td colspan='2' style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>FORMA DE PAGO</td>
 			</tr><tr>
-				<?php $referen=$this->input->post('referen'); ?>
+				<?php $referen=$form->referen->value; ?>
 				<td><input name="referen" value="P" type="radio" onchange='chreferen()' <?php echo ($referen=='P' || empty($referen))? 'checked="checked"':''; ?>>Pendiente&nbsp;</td>
 				<td><input name="referen" value="E" type="radio" onchange='chreferen()' <?php echo ($referen=='E')? 'checked="checked"':''; ?>>Efectivo&nbsp;</td>
 			</tr><tr>

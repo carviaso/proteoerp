@@ -2786,7 +2786,7 @@ class Sfac extends Controller {
 		$edit->hora      = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 
 		$edit->referen = new radiogroupField('', 'referen', array('P'=>'Dejar Pendiente','E'=>'Efectivo','C'=>'Credito','M'=>'Multiple/Otros'));
-		$edit->referen->insertValue = 'P';
+		$edit->referen->insertValue = 'C';
 		$edit->referen->onchange    = 'chreferen()';
 
 		if($manual=='S'){
