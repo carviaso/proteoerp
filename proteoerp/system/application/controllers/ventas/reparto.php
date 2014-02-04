@@ -939,8 +939,8 @@ class Reparto extends Controller {
 				if(mid){           // ID del Reparto
 					var id = jQuery(gridId2).jqGrid(\'getGridParam\',\'selrow\');
 					if (id){       // ID de la factura
-						var ret = $(gridId2).getRowData(id);
-						if ( ret.tipo == "E"){
+						var ret = $(gridId1).getRowData(mid);
+						if ( ret.tipo == "E" ){
 							$.prompt(\'Eliminar Factura del reparto?\', {
 							buttons: { \'Quitar\': true, \'Cancelar\': false },
 							submit: function(e,v,m,f){
@@ -1003,7 +1003,6 @@ class Reparto extends Controller {
 		}
 		if(empty($id)) return '';
 		$dbid = $this->db->escape($id);
-		//$numero   = $this->datasis->dameval("SELECT id FROM reparto WHERE id=$id");
 		$grid     = $this->jqdatagrid;
 		$mSQL     = "SELECT tipo_doc, numero, fecha, zona, peso, cod_cli, nombre, vd, totalg, almacen, id FROM sfac WHERE reparto=${dbid}";
 		$response = $grid->getDataSimple($mSQL);
