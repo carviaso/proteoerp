@@ -150,6 +150,10 @@ $(function(){
 			$('#cod_cli').val(ui.item.cod_cli);
 			$('#sclitipo').val(ui.item.tipo);
 
+			if ( ui.item.vendedor != ''){
+				$('#vd').val(ui.item.vendedor);
+			}
+
 			meco = 'Direccion:'+ui.item.direc+" Telefono: "+ui.item.telefono+" Ciudad: "+ui.item.ciudad;
 			$('#direc').val(meco);
 			$('#direc_val').text(meco);

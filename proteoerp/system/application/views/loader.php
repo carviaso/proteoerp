@@ -11,24 +11,28 @@
 <meta name="Description"               content="<?php echo property('app_description');?>" />
 <meta name="Copyright"                 content="<?php echo property('app_copyright');  ?>" />
 <title><?php echo property('app_title')?></title>
-<?php echo style('menutab.css');  ?>
-<?php echo style('acordeon.css'); ?>
-<?php echo style('masonry.css'); ?>
-<?php echo style('estilos.css');  ?>
+<?php 
+echo style('menutab.css'); 
+echo style('acordeon.css');
+echo style('masonry.css'); 
+echo style('estilos.css');  
 
-<?php echo style("themes/proteo/proteo.css"); ?>
+echo style("themes/proteo/proteo.css");
 
-<?php echo script('jquery-min.js'); ?>
-<?php echo script('jquery-migrate-min.js'); ?>
-<?php echo script('jquery-ui.custom.min.js'); ?>
-<?php echo script('plugins/myAccordion.js'); ?>
-<?php echo script('jquery.layout.js'); ?>
-<?php echo script('plugins/jquery.masonry.min.js'); ?>
-<?php echo script("jquery.dialogextend.min.js"); ?>
+echo script('jquery-min.js'); 
+echo script('jquery-migrate-min.js'); 
+echo script('jquery-ui.custom.min.js'); 
+echo script('plugins/myAccordion.js'); 
+echo script('jquery.layout.js'); 
+echo script('plugins/jquery.masonry.min.js'); 
+echo script("jquery.dialogextend.min.js"); 
 
-<?php echo "\n<!-- Impromptu -->\n"; ?>
-<?php echo script('jquery-impromptu.js'); ?>
-<?php echo style('impromptu/default.css'); ?>
+echo "\n<!-- Impromptu -->\n"; 
+echo script('jquery-impromptu.js'); 
+echo style('impromptu/default.css'); 
+echo "\n<!-- Block Out -->\n";
+echo script('plugins/jquery.blockUI.js');
+?>
 
 <style>
 .ui-dialog .ui-dialog-titlebar{

@@ -70,7 +70,7 @@ class Vend extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '370', '430' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '370', '450' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '250', '500' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -101,7 +101,7 @@ class Vend extends Controller {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-
+/*
 		$grid->addField('clave');
 		$grid->label('Clave');
 		$grid->params(array(
@@ -112,7 +112,7 @@ class Vend extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
-
+*/
 
 		$grid->addField('nombre');
 		$grid->label('Nombre');
@@ -365,9 +365,9 @@ class Vend extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->pre_process( 'insert', '_pre_insert' );
+		$edit->pre_process( 'update', '_pre_update' );
+		$edit->pre_process( 'delete', '_pre_delete' );
 
 		$edit->vendedor = new inputField('C&oacute;digo', 'vendedor');
 		$edit->vendedor->size=5;
@@ -383,15 +383,15 @@ class Vend extends Controller {
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
 		$edit->nombre->rule = 'trim|strtoupper|required';
-		$edit->nombre->size=35;
-		$edit->nombre->maxlength=30;
+		$edit->nombre->size=40;
+		$edit->nombre->maxlength=35;
 
 		$edit->direc1 = new inputField('Direcci&oacute;n', 'direc1');
 		$edit->direc1->size=40;
 		$edit->direc1->rule='trim';
 		$edit->direc1->maxlength=35;
 
-		$edit->direc2 = new inputField("&nbsp;&nbsp;Continuaci&oacute;n", "direc2");
+		$edit->direc2 = new inputField("", "direc2");
 		$edit->direc2->size=40;
 		$edit->direc2->rule='trim';
 		$edit->direc2->maxlength=35;
@@ -410,7 +410,7 @@ class Vend extends Controller {
 		$edit->clave->size=7;
 		$edit->clave->rule='trim';
 		$edit->clave->maxlength=5;
-		//$edit->clave->type='password';
+		$edit->clave->type='password';
 		$edit->clave->when =array('create','modify');
 
 		$edit->comive  = new inputField("% por ventas ", "comive");

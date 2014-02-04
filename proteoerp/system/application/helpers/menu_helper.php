@@ -30,7 +30,6 @@ function arr_menu( $nivel=1, $pertenece=NULL){
 }
 
 function arr2link($arr,$utf8c=false){
-//print_r($arr);
 	$dialogos = '';
 	$divis = '';
 	$att = array(
@@ -60,30 +59,35 @@ function arr2link($arr,$utf8c=false){
 		$ialto  = $arr['alto']-180;
 		$iancho = $arr['ancho']-50;
 
+		//$(function(){
 		$dialogos .= '
-		$(function(){
 			$("#d'.$arr['modulo'].'").dialog({
-				autoOpen:false, modal:false, width:'.$dancho.', height:'.$dalto.',
-				minimize: "#toolbar",
-				open: function(ev, ui){
-					$(\'#d'.$arr['modulo'].'\').html(\'<iframe src="'.base_url().$indi.'" width="100%", height="100%"  seamless></iframe>\');
-				}
-			})
-			.dialogExtend({
-				"maximizable" : true,
-				"minimizable" : true,
-				"dblclick" : "maximize",
-				"icons" : { "maximize" : "ui-icon-arrow-4-diag" },
-				"icons" : { "minimize" : "ui-icon-circle-minus" }
-			});
-		});
-
-		function f'.$arr['modulo'].'(){
-			$("#d'.$arr['modulo'].'").dialog("open");
-		}
+				autoOpen:false, modal:false, width:'.$dancho.', height:'.$dalto.',minimize: "#toolbar",
+				open: function(ev, ui){$(\'#d'.$arr['modulo'].'\').html(\'<iframe src="'.base_url().$indi.'" width="100%", height="100%"  seamless></iframe>\');}
+			}).dialogExtend({"maximizable":true,"minimizable":true,"dblclick":"maximize","icons":{"maximize":"ui-icon-arrow-4-diag" },"icons":{"minimize":"ui-icon-circle-minus"}});
+			function f'.$arr['modulo'].'(){$("#d'.$arr['modulo'].'").dialog("open");}
 		';
 		$dialogos .= '</script>';
 		$divis .= '<div id="d'.$arr['modulo'].'" title="'.$arr['titulo'].' ('.$arr['modulo'].')"></div>';
+
+	}elseif($arr['target']=='ajax'){
+		$ejecutar="<a href='javascript:void(0);' title='".$arr['mensaje']."' onclick='f".$arr['modulo']."();'>".$arr['titulo']."</a> ";
+		$dialogos .= '<script>';
+		$dalto  = $arr['alto']-100;
+		$dancho = $arr['ancho'];
+		$ialto  = $arr['alto']-180;
+		$iancho = $arr['ancho']-50;
+
+		//$(function(){base_url().$indi
+		$dialogos .= '
+			$("#d'.$arr['modulo'].'").dialog({
+				autoOpen:false, modal:false, width:'.$dancho.', height:'.$dalto.',minimize: "#toolbar"
+			}).dialogExtend({"maximizable":true,"minimizable":true,"dblclick":"maximize","icons":{"maximize":"ui-icon-arrow-4-diag" },"icons":{"minimize":"ui-icon-circle-minus"}});
+			function f'.$arr['modulo'].'(){$("#d'.$arr['modulo'].'").load("'.base_url().$indi.'").dialog("open");}
+		';
+		$dialogos .= '</script>';
+		$divis .= '<div id="d'.$arr['modulo'].'" title="'.$arr['titulo'].' ('.$arr['modulo'].')"></div>';
+
 	}else{
 		$ejecutar=anchor($indi, $arr['titulo']);
 	}

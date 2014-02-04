@@ -9,176 +9,96 @@ class Mantenimiento extends Controller{
 
 	function index(){
 		$this->datasis->modulo_id('900',1);
-		//$list = array();
-		//$list[]=anchor('supervisor/mantenimiento/bprefac','Borrar PreFacturas menores o iguales al d&iacute;a de ayer');
-		//$list[]=anchor('supervisor/mantenimiento/puertosdir','Descargar PUERTOS.DIR');
-		//$list[]=anchor('supervisor/mantenimiento/bmodbus','Vaciar la tabla ModBus');
-		//$list[]=anchor('supervisor/mantenimiento/centinelas','Centinelas');
-		//$list[]=anchor('supervisor/mantenimiento/reparatabla','Reparar Tablas');
-		//$list[]=anchor('supervisor/mantenimiento/clinconsis','Incosistencias Clientes');
-		//$list[]=anchor('supervisor/mantenimiento/calcosto','Recalcula Inventario');
-		//$list[]=anchor('supervisor/repodupli/','Reportes Duplicado');
-		//$list[]=anchor('supervisor/mantenimiento/contadores','Cambios en contadores').'Advertencia: uselo solo si sabe lo que esta haciendo';
-		//$list[]=anchor('supervisor/mantenimiento/tablas','Mantenimiento de Tablas');
-		//$list[]=anchor('supervisor/mantenimiento/sntealma','Modifica el almac&eacute;n en las notas de entrega');
-		//$list[]=anchor('supervisor/mantenimiento/actualizaproteo','Actualiza proteo a la &uacute;ltima vesi&oacute;n del svn');
 
-		//$attributes = array(
-		//	'class' => 'boldlist',
-		//	'id'    => 'mylist'
-		//);
+		//$contenido  = '<center>'."\n";
+		$contenido  = '<div class="mantenidiv" style="font-size:12px;">'."\n";
+		$contenido .= '<div class="column">'."\n";
 
-		//$out=ul($list, $attributes);
-		//$data['content'] = $out;
-		//image('repair-database.jpeg')
+		$contenido .= $this->opciontb( 
+			'Actualizar Proteo', 
+			anchor('#',img(array('src'=>'assets/default/images/logo.png','border'=>'0','alt'=>'Actualizar','width'=>'130px')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/actualizaproteo\');return false;')),
+			'Actualiza a la &uacute;ltima vesi&oacute;n'
+		);
 
-		$data['content'] = '
-<center>
-<div class="column">
-	<div class="portlet">
-		<div class="portlet-header">Borrar Prefacturas</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('#',img(array('src'=>'assets/default/images/clean-database.jpeg','border'=>'0','alt'=>'Actualizar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/bprefac\');return false;')).'</td>
-					<td>Borrar PreFacturas menores o iguales al d&iacute;a de ayer</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-	<div class="portlet">
-		<div class="portlet-header">Descargar Puertos</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('supervisor/mantenimiento/puertosdir',img(array('src'=>'assets/default/images/download.png','border'=>'0','alt'=>'Actualizar'))).'</td>
-					<td>Descargar PUERTOS.DIR para DataSIS '.anchor('supervisor/mantenimiento/puertosdir/LPT1','LPT1').', '.anchor('supervisor/mantenimiento/puertosdir/LPT2','LPT2').', ' .anchor('supervisor/mantenimiento/puertosdir/OBJETO','OBJ').'</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-	<div class="portlet">
-		<div class="portlet-header">Recalcualr Inventario</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('#',img(array('src'=>'assets/default/images/inventario1.png','border'=>'0','alt'=>'Recalcular')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/calcosto\');return false;')).'</td>
-					<td>Recalcula Inventario</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-	<div class="portlet">
-		<div class="portlet-header">Cambiar Almacen en NE</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('#',img(array('src'=>'assets/default/images/package.png','border'=>'0','alt'=>'Actualizar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/sntealma\');return false;')).'</td>
-					<td>Modifica el almac&eacute;n en las notas de entrega</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-</div>
-<div class="column">
-	<div class="portlet">
-		<div class="portlet-header">Centinelas</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('supervisor/mantenimiento/centinelas',img(array('src'=>'assets/default/images/process-stop32.png','border'=>'0','alt'=>'Actualizar'))).'</td>
-					<td>Centinelas o Mesajes del sistema</td>
-				</tr>
-			</table>
-		</div>
-	</div>
+		$contenido .= $this->opciontb( 
+			'Borrar Prefacturas', 
+			anchor('#',img(array('src'=>'assets/default/images/clean-database.jpeg','border'=>'0','alt'=>'Actualizar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/bprefac\');return false;')), 
+			'Borrar PreFacturas menores o iguales al d&iacute;a de ayer' 
+		);
 
-	<div class="portlet">
-		<div class="portlet-header">Revisa CLientes</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('supervisor/mantenimiento/clinconsis',img(array('src'=>'assets/default/images/clients.png','border'=>'0','alt'=>'Inconsistencia de Clientes'))).'</td>
-					<td>Incosistencias Clientes</td>
-				</tr>
-			</table>
-		</div>
-	</div>
+		$contenido .= $this->opciontb( 
+			'Descargar Puertos', 
+			anchor('supervisor/mantenimiento/puertosdir',img(array('src'=>'assets/default/images/download.png','border'=>'0','alt'=>'Descargar Puertos'))), 
+			'Descargar PUERTOS.DIR para DataSIS '.anchor('supervisor/mantenimiento/puertosdir/LPT1','LPT1').', '.anchor('supervisor/mantenimiento/puertosdir/LPT2','LPT2').', ' .anchor('supervisor/mantenimiento/puertosdir/OBJETO','OBJ')
+		);
 
-	<div class="portlet">
-		<div class="portlet-header">Reportes Duplicados</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('supervisor/mantenimiento/sfacdif',img(array('src'=>'assets/default/images/report-database.jpeg','border'=>'0','alt'=>'Actualizar'))).'</td>
-					<td>Detectar inconsistencias en Facturas</td>
-				</tr>
-			</table>
-		</div>
-	</div>
+/*
+		$contenido .= $this->opciontb( 
+			'Cambiar Almacen en NE', 
+			anchor('#',img(array('src'=>'assets/default/images/package.png','border'=>'0','alt'=>'Actualizar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/sntealma\');return false;')), 
+			'Modifica el almac&eacute;n en las notas de entrega'
+		);
+*/
+		$contenido .= '</div>'."\n";
+		$contenido .= '<div class="column">'."\n";
 
-	<div class="portlet">
-		<div class="portlet-header">Actualizar Proteo</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td align="center">'.anchor('#',img(array('src'=>'assets/default/images/logo.png','border'=>'0','alt'=>'Actualizar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/actualizaproteo\');return false;')).'</td>
-				</tr><tr>
-					<td>Actualiza proteo a la &uacute;ltima vesi&oacute;n</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-</div>
-<div class="column">
-	<div class="portlet">
-		<div class="portlet-header">Vaciar ModBus</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('#',img(array('src'=>'assets/default/images/delete-database.jpeg','border'=>'0','alt'=>'Borrar Temporales')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/bmodbus\');return false;')).'</td>
-					<td>Vaciar tablas Temporales</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-	<div class="portlet">
-		<div class="portlet-header">Reparar Tablas</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('#',img(array('src'=>'assets/default/images/repair-database.jpeg','border'=>'0','alt'=>'Reparar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/reparatabla\');return false;')).'</td>
-					<td>Reparar Todas las Tablas de la BD</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-	<div class="portlet">
-		<div class="portlet-header">Mantenimiento de Tablas</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('supervisor/mantenimiento/tablas',img(array('src'=>'assets/default/images/accept-database.png','border'=>'0','alt'=>'Reparar'))).'</td>
-					<td>Mantenimiento de las Tablas</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-	<div class="portlet">
-		<div class="portlet-header">Modificar Contadores</div>
-		<div class="portlet-content">
-			<table width="100%">
-				<tr>
-					<td>'.anchor('#',img(array('src'=>'assets/default/images/speedometer.png','border'=>'0','alt'=>'Borrar Temporales')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/contadores\');return false;')).'</td>
-					<td>Cambiar Contadores<br>Advertencia: uselo solo si sabe lo que esta haciendo'.'</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-</div>
-</center>
+		$contenido .= $this->opciontb( 
+			'Centinelas', 
+			anchor('#',img(array('src'=>'assets/default/images/process-stop32.png','border'=>'0','alt'=>'Centinelas','id'=>'centinelas'))), 
+			'Centinelas o Mesajes del sistema'
+		);
 
-';
+		$contenido .= $this->opciontb( 
+			'Revisa CLientes', 
+			anchor('#',img(array('src'=>'assets/default/images/clients.png','border'=>'0','alt'=>'Inconsistencias','id'=>'inconsist'))), 
+			'Incosistencias Clientes'
+		);
+			//anchor('supervisor/mantenimiento/clinconsis',img(array('src'=>'assets/default/images/clients.png','border'=>'0','alt'=>'Inconsistencia de Clientes'))),
+
+		$contenido .= $this->opciontb( 
+			'Reportes Duplicados', 
+			anchor('supervisor/mantenimiento/sfacdif',img(array('src'=>'assets/default/images/report-database.jpeg','border'=>'0','alt'=>'Actualizar'))),
+			'Detectar inconsistencias en Facturas'
+		);
+
+
+		$contenido .= '</div>'."\n";
+		$contenido .= '<div class="column">'."\n";
+
+		$contenido .= $this->opciontb( 
+			'Vaciar ModBus', 
+			anchor('#',img(array('src'=>'assets/default/images/delete-database.jpeg','border'=>'0','alt'=>'Borrar Temporales')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/bmodbus\');return false;')),
+			'Vaciar tablas Temporales'
+		);
+
+		$contenido .= $this->opciontb( 
+			'Reparar Tablas', 
+			anchor('#',img(array('src'=>'assets/default/images/repair-database.jpeg','border'=>'0','alt'=>'Reparar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/reparatabla\');return false;')),
+			'Reparar Todas las Tablas de la BD'
+		);
+
+		$contenido .= $this->opciontb( 
+			'Recalcualr Inventario', 
+			anchor('#',img(array('src'=>'assets/default/images/inventario1.png','border'=>'0','alt'=>'Recalcular')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/calcosto\');return false;')), 
+			'Recalcula Inventario'
+		);
+
+/*
+		$contenido .= $this->opciontb( 
+			'Mantenimiento de Tablas', 
+			anchor('supervisor/mantenimiento/tablas',img(array('src'=>'assets/default/images/accept-database.png','border'=>'0','alt'=>'Reparar'))),
+			'Mantenimiento de Tablas'
+		);
+
+		$contenido .= $this->opciontb( 
+			'Modificar Contadores', 
+			anchor('#',img(array('src'=>'assets/default/images/speedometer.png','border'=>'0','alt'=>'Borrar Temporales')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/contadores\');return false;')),
+			'Cambiar Contadores'
+		);
+*/
+		$contenido .= '</div>'."\n";
+		$contenido .= '</div>'."\n";
+		//$contenido .= '</center>'."\n";
 
 		$style = '
 <style>
@@ -198,43 +118,36 @@ class Mantenimiento extends Controller{
 		$script = '
 <script>
 $(function() {
-	$( ".column" ).sortable({ connectWith: ".column" });
-
-	$( ".portlet" ).addClass( "ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" )
-	.find( ".portlet-header" )
-		.addClass( "ui-widget-header ui-corner-all" )
-		.prepend( "<span class=\'ui-icon ui-icon-minusthick\'></span>")
-		.end()
-	.find( ".portlet-content" );
-
-	$( ".portlet-header .ui-icon" ).click(function() {
-		$( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
-		$( this ).parents( ".portlet:first" ).find( ".portlet-content" ).toggle();
-	});
-
+	$(".column").sortable({ connectWith: ".column" });
+	$(".portlet").addClass("ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" ).find(".portlet-header").addClass( "ui-widget-header ui-corner-all").prepend("<span class=\'ui-icon ui-icon-minusthick\'></span>").end().find( ".portlet-content" );
+	$( ".portlet-header .ui-icon" ).click(function(){$( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );$( this ).parents( ".portlet:first" ).find( ".portlet-content" ).toggle();});
 	$( ".column" ).disableSelection();
-});
-function bobo(url){'."
-	$.blockUI({
-		message: $('#displayBox'),
-		css: {
-		top:  ($(window).height() - 400) /2 + 'px',
-		left: ($(window).width() - 300) /2 + 'px',
-		width: '400px'
-		}".'
-	});
-	$.get(url, function(data) {
-		setTimeout($.unblockUI, 2);
-		$.prompt(data);
+})
+
+function bobo(url,mensa){'."
+	$.blockUI({message: $('#displayBox'),css:{top:($(window).height()-400)/2+'px',left:($(window).width() -300)/2+'px',width:'400px'}".'});
+	$.get(url, function(data){setTimeout($.unblockUI, 2);
+	if ( !mensa ){ $.prompt(data); }
+
 	});
 	return false;
-};
+}
+
+$("#centinelas").click( function() {
+	$("#d900").load("supervisor/mantenimiento/centinelas"); 
+})
+
+$("#inconsist").click( function() {
+	$("#d900").load("supervisor/mantenimiento/clinconsis"); 
+})
+
+
 </script>
 ';
 
-		$espera = '<div id="displayBox" style="display:none" ><p>Disculpe por la espera.....</p><img  src="'.base_url().'images/doggydig.gif" width="131px" height="79px"  /></div>';
-		$data['content'] .= $espera;
-		//$data['content'] .= $porcent;
+		$contenido .= '<div id="displayBox" style="display:none" ><p>Disculpe por la espera.....</p><img  src="'.base_url().'images/doggydig.gif" width="131px" height="79px"  /></div>';
+
+		$data['content'] = $contenido;
 
 		$data['style']   = style('themes/proteo/proteo.css');
 		$data['style']  .= style('impromptu/default.css');
@@ -247,11 +160,30 @@ function bobo(url){'."
 		$data['script'] .= script('jquery-impromptu.js');
 		$data['script'] .= $script;
 
-		//$data['head'] .= $style;
 		$data['head']   = $this->rapyd->get_head();
 
 		$data['title']   = '<h1>Mantenimiento</h1>';
-		$this->load->view('view_ventanas', $data);
+		//$this->load->view('view_ventanas', $data);
+		echo $script.$style.$contenido;
+
+	}
+
+
+	function opciontb( $titulo, $url, $leyenda ){
+		$contenido = '
+	<div class="portlet">
+		<div class="portlet-header">'.$titulo.'</div>
+		<div class="portlet-content">
+			<table width="100%">
+				<tr>
+					<td>'.$url.'</td>
+					<td>'.$leyenda.'</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+		';
+		return $contenido;
 	}
 
 	function reparatabla(){
@@ -304,47 +236,68 @@ function bobo(url){'."
 	function centinelas(){
 		$this->datasis->modulo_id('900',1);
 		$this->load->helper('directory');
-		$this->load->library('table');
-		$tmpl = array('row_start' => '<tr valign="top">');
-		$this->table->set_template($tmpl);
 
 		$map = directory_map('./system/logs/');
 		$lista=array();
+		$mensajes = "<table width='100%'>";
 		foreach($map AS $file) {
 			if($file!='index.html')
-			$lista[]=anchor("supervisor/mantenimiento/borracentinela/$file",'X')." <a href='javascript:void(0)' onclick=\"carga('$file')\" >$file</a>";
+				$mensajes .= '<tr><td><a href="#" onclick="elminacenti(\''.$file.'\')">'.img(array('src'=>'images/delete.jpg','border'=>'0','alt'=>'Elimina'))."</a><a href='javascript:void(0)' onclick=\"carga('$file')\" >$file</a></td></tr>\n";
 		}
+		$mensajes .= "</table>";
+
 		$copy="<br><a href='javascript:void(0)' class='mininegro'  onclick=\"copiar()\" >Copiar texto</a>";
-		$tadata = array(
-			'name'  => 'sql',
-			'id'    => 'log',
-			'rows'  => '20',
-			'cols'  => '60'
-		);
+		$tadata = array('name' => 'sql','id'   => 'log','rows' => '20','cols' => '60');
 
-		$form = form_open('ejecutasql/filteredgrid/process').form_textarea($tadata).br();
-		$form.= ($this->datasis->essuper()) ? form_submit('mysubmit', 'Ejecutar como SQL') : '';
-		$form.= form_close();
-		$this->table->add_row(ul($lista), '<b id="fnom">Seleccione un archivo de centinela</b><br>'.$form);
+		//$this->table->add_row(ul($lista), '<b id="fnom">Seleccione un archivo de centinela</b><br>'.$form);
 		$link=site_url('supervisor/mantenimiento/vercentinela');
-		$data['script']  ="<script>
-		  function carga(arch){
-		    link='$link'+'/'+arch;
-		    //alert(link);
-		    $('#fnom').text(arch);
-		    $('#log').load(link);
-		  };
-		  function copiar(){
-		    $('#log').copy();
-		  };
-		</script>";
 
-		$data['content'] = $this->table->generate();
-		$data['title']   = heading('Centinelas');
-		//script('plugins/jquery.clipboard.pack.js')
-		$data['head']    =  script("jquery.pack.js").script('plugins/jquery.copy.min.js').$this->rapyd->get_head().style('marcos.css').style('estilos.css');
-		$this->load->view('view_ventanas', $data);
+
+		$script ="
+<script>
+function carga(arch){
+	link='$link'+'/'+arch;
+	$('#fnom').text(arch);
+	$('#log').load(link);
+}
+
+function cargamante() {
+	$('#d900').load('supervisor/mantenimiento'); 
+}
+
+function elminacenti(cual){
+	var url = '".site_url("supervisor/mantenimiento/borracentinela")."/'+cual;
+	$.post(
+		url,
+		function(data){
+			$('#d900').load('supervisor/mantenimiento/centinelas');
+		}
+	);
+}
+
+</script>";
+
+
+		$contenido  = "<div>\n";
+		$contenido .= "<table width='100%'>\n";
+		$contenido .= "<tr><td>CENTINELAS</td><td align='right'>".image('go-previous.png','Regresar',array('onclick'=>'cargamante()','height'=>'30'))."</td></tr>";
+
+		$contenido .= "<tr>\n";
+		$contenido .= "<td style='valign:top;font-size:14px;'>\n";
+		$contenido .= $mensajes;
+		$contenido .= "</td>\n";
+		$contenido .= "<td>\n";
+		$contenido .= "<div id='log' style='font-size:12px;width:600px;height:300px;border:1px solid;'></div>\n";
+
+		$contenido .= "</td>\n";
+		$contenido .= "</tr>\n";
+
+		$contenido .= "</table>\n";
+		$contenido .= "</div>\n";
+
+		echo $script.$contenido;
 	}
+
 
 	function vercentinela($file=NULL){
 		$this->datasis->modulo_id('900',1);
@@ -387,7 +340,6 @@ function bobo(url){'."
 			$fechad=$filter->fechad->newValue;
 
 			$alma=$this->datasis->dameval("SELECT a.ubica FROM (`costos` as a) LEFT JOIN `caub` AS b ON `a`.`ubica`=`b`.`ubica` WHERE `b`.`ubica` = 'NULL' AND `origen` = '3I' AND a.fecha >= '$fechad' AND a.fecha <= '$fechah'");
-			//echo $alma;
 
 			$uri = anchor('supervisor/mantenimiento/cambioalma/modify/<#tipo_doc#>/<#numero#>','Cambio');
 
@@ -409,17 +361,22 @@ function bobo(url){'."
 			$grid->column('Realizar'    ,$uri );
 
 			$grid->build();
-			//echo $grid->db->last_query();
-			//memowrite($grid->db->last_query());
 
 			$tabla=$grid->output;
 		}else{
 			$tabla='';
 		}
+		echo $filter->output.$tabla;
+
+/*
 		$data['content']  = $filter->output.$tabla;
 		$data['title']    = "<h1>Almacenes con problemas de incosistencias</h1>";
 		$data['head']     = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
+*/
+
+
+
 	}
 
 	function cambioalma(){
@@ -455,8 +412,6 @@ function bobo(url){'."
 		$edit->buttons("modify", "save", "undo", "back");
 		$edit->build();
 
-		//$smenu['link']=barra_menu('113');
-		//$data['smenu']   = $this->load->view('view_sub_menu', $smenu,true);
 		$data['content'] =$edit->output;
 		$data['title']   = "Almacen Inconsistente";
 		$data["head"]    = $this->rapyd->get_head();
@@ -480,7 +435,7 @@ function bobo(url){'."
 
 		$boton=$this->datasis->modbus($scli);
 
-		$filter = new DataFilter('Clientes inconsistentes');
+		$filter = new DataFilter('');
 		$select=array(
 			'a.fecha',
 			'a.tipo_doc',
@@ -494,18 +449,14 @@ function bobo(url){'."
 		$filter->db->select($select);
 		$filter->db->from('smov AS a');
 		$filter->db->join('itccli AS b','a.cod_cli=b.cod_cli AND a.numero=b.numero AND a.tipo_doc=b.tipo_doc');
-		//$filter->db->join('itcruc AS c','c.onumero=')
 		$filter->db->groupby('a.cod_cli, a.tipo_doc,a.numero');
 		$filter->db->having('abonoreal  <>','inconsist');
-		//$filter->db->having('diferencia >=','0.05');
 		$filter->db->orderby('a.cod_cli','b.numero');
 
 		$filter->fechad = new dateonlyField('Desde','fechad');
 		$filter->fechah = new dateonlyField('Hasta','fechah');
 		$filter->fechad->clause  =$filter->fechah->clause="where";
 		$filter->fechad->db_name =$filter->fechah->db_name="a.fecha";
-		//$filter->fechad->insertValue = date("Y-m-d");
-		//$filter->fechah->insertValue = date("Y-m-d");
 		$filter->fechad->operator=">=";
 		$filter->fechah->operator="<=";
 
@@ -550,8 +501,6 @@ function bobo(url){'."
 		$grid->column('Ajustar Saldo'          ,'<descheck><#numero#>|<#cod_cli#>|<#tipo_doc#>|<#fecha#>|<#abonoreal#></descheck>',"align=center");
 
 		$grid->build();
-		//echo $grid->db->last_query();
-		//memowrite($grid->db->last_query());
 
 		$script='';
 		$url=site_url('supervisor/mantenimiento/ajustesaldo');
@@ -571,12 +520,16 @@ function bobo(url){'."
 			});
 			</script>';
 
+		echo $filter->output;
+		echo form_open('').$grid->output.form_close().$script;
+/*
 		$data['content']  = $filter->output;
 		$data['content'] .= form_open('').$grid->output.form_close().$script;
 		$data['title']    = "<h1>Clientes con problemas de incosistencias</h1>";
 		$data["head"]     = script("jquery.js");
 		$data["head"]    .= script("plugins/jquery.checkboxes.pack.js").$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
+*/
 	}
 
 	function clinconsismasivo(){
@@ -607,7 +560,6 @@ function bobo(url){'."
 	function ajustesaldo(){
 		$this->datasis->modulo_id('900',1);
 		$pk  = unserialize(htmlspecialchars_decode($this->input->post('pk')));
-		//print_r($pk);
 		if(count($pk)!=5){
 			echo 0;
 		}else{
@@ -616,24 +568,6 @@ function bobo(url){'."
 			else
 			echo 0;
 		}
-
-		/*$data = array('abonos' => $pk[4]);
-
-		$where  =' numero='.$this->db->escape($pk[0]);
-		$where .=' AND cod_cli ='.$this->db->escape($pk[1]);
-		$where .=' AND tipo_doc='.$this->db->escape($pk[2]);
-		$where .=' AND fecha   ='.$this->db->escape($pk[3]);
-
-		$mSQL = $this->db->update_string('smov', $data, $where);
-
-		if($this->db->simple_query($mSQL)){
-		echo 1;
-		return true;
-		}else{
-		memowrite($mSQL,'ajusal');
-		echo 0;
-		return false;
-		}*/
 	}
 
 	function _sclisaldo($numero,$cod_cli,$tipo_doc,$fecha,$abono){
@@ -674,8 +608,6 @@ function bobo(url){'."
 		$grid->totalizar('abono');
 		$grid->build();
 
-		//echo $grid->db->last_query();
-		//memowrite($grid->db->last_query());
 		$data['content'] = $grid->output;
 		$data['title']   = "<h1>Detalle de los Abonos del cliente:$cliente</h1>";
 		$data["head"]    = $this->rapyd->get_head();
@@ -834,8 +766,6 @@ function bobo(url){'."
 		$this->datasis->modulo_id('900',1);
 		$this->rapyd->load("dataform","datatable");
 		$tables = $this->db->list_tables();
-		//print("<pre>");
-		//print_R($tables);
 
 		$form = new DataForm("supervisor/mantenimiento/tablas/process");
 		$form->free = new freeField("Lista de Tablas","free","Chequear|Reparar|Optimizar");
@@ -956,8 +886,6 @@ function bobo(url){'."
 		$edit->buttons('modify', 'save', 'undo', 'back');
 		$edit->build();
 
-		//$smenu['link']=barra_menu('113');
-		//$data['smenu']   = $this->load->view('view_sub_menu', $smenu,true);
 		$data['content'] =$edit->output;
 		$data['title']   = '<h1>Cambio de almac&eacute;n en nota de entrega</h1>';
 		$data['head']    = $this->rapyd->get_head();
@@ -1014,19 +942,11 @@ function bobo(url){'."
 				}
 			}
 		}
-
 		$host= $this->db->hostname;
 		$db  = $this->db->database;
 		$pwd = $this->db->password;
 		$usr = $this->db->username;
 		$file= tempnam('/tmp',$db.'.sql');
-
-		/*$cmd="mysql -u $usr -p $pwd -h $host -D $db < intramenu.sql";
-		$sal=exec($cmd);*/
-
-		//$data['title']   = heading('Actualizaci&oacute;n de ProteoERP desde el svn');
-		//$data['head']    = '';
-		//$this->load->view('view_ventanas', $data);
 		echo $responde;
 	}
 

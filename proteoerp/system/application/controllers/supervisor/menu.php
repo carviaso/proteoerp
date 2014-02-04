@@ -361,6 +361,7 @@ class Menu extends Controller{
 		$edit->target->option("self"     ,"Link en ventana actual");
 		$edit->target->option("javascript","Proceso Javascript"); 
 		$edit->target->option("dialogo","Abre en un Dialogo"); 
+		$edit->target->option("ajax",   "Abre en un Ajax"); 
 		$edit->target->style = 'width:170px';
 
 		$edit->ejecutar = new inputField("Ejecutar", "ejecutar");
