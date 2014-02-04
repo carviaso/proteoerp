@@ -1466,6 +1466,7 @@ class Smov extends Controller {
 		$edit->numero->maxlength =8;
 
 		$edit->fecdoc = new dateonlyField('Fecha','fecdoc');
+		$edit->fecdoc->db_name='fecha';
 		$edit->fecdoc->size =12;
 		$edit->fecdoc->maxlength =8;
 		$edit->fecdoc->insertValue=date('Y-m-d');
@@ -1499,7 +1500,7 @@ class Smov extends Controller {
 		$edit->usuario = new autoUpdateField('usuario' ,$this->secu->usuario(),$this->secu->usuario());
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
-		$edit->fecha   = new autoUpdateField('fecha'   ,date('Ymd'), date('Ymd'));
+		//$edit->fecha   = new autoUpdateField('fecha'   ,date('Ymd'), date('Ymd'));
 
 		//************************************************
 		//inicio detalle itccli
