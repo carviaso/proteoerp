@@ -934,6 +934,7 @@ function elminacenti(cual){
 						$dbver = $this->db->escape($ver);
 						$mSQL="UPDATE valores SET valor=${dbver} WHERE nombre='SVNVER'";
 						$this->db->simple_query($mSQL);
+						$this->db->simple_query('TRUNCATE modbus');
 					}else{
 						$responde .= 'Ya estaba la ultima versi&oacute;n instalada '.$aver;
 					}
