@@ -5,6 +5,16 @@ if(count($parametros)==0) show_error('Faltan parametros');
 $id = $parametros[0];
 $dbid=$this->db->escape($id);
 
+//Para esconder o no los precios
+if(isset($parametros[1])){
+	if($parametros[1]=='S'){
+		$mprec=false;
+	}else{
+		$mprec=true;
+	}
+}else{
+	$mprec=true;
+}
 
 $mSQL_1 = $this->db->query('SELECT a.fecha,a.numero,a.peso,a.arribo,a.proveed,
 	a.nombre,a.condi,
@@ -97,56 +107,78 @@ encabezado;
 //************************
 //   Encabezado Tabla
 //************************
-$encabezado_tabla=<<<encabezado_tabla
-	<table class="change_order_items">
+$encabezado_tabla="
+	<table class='change_order_items'>
 		<thead>
 			<tr>
 				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >C&oacute;digo</th>
 				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >Descripci&oacute;n</th>
-				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >Cantidad</th>
+				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >Cantidad</th>";
+if($mprec){
+	$encabezado_tabla.="
 				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >Precio</th>
-				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >Importe</th>
+				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >Importe</th>";
+}
+$encabezado_tabla.="
 			</tr>
 		</thead>
-		<tbody>
-encabezado_tabla;
+		<tbody>";
 //Fin Encabezado Tabla
 
 //************************
 //     Pie Pagina
 //************************
-$pie_final=<<<piefinal
-		</tbody>
+if($mprec){
+	$pie_final=<<<piefinal
+			</tbody>
 
-		<tfoot style='border:1px solid;background:#EEEEEE;'>
+			<tfoot style='border:1px solid;background:#EEEEEE;'>
+				<tr>
+					<td colspan="2" style="text-align: right;"></td>
+					<td colspan="2" style="text-align: right;"><b>SUB-TOTAL:</b></td>
+					<td class="change_order_total_col"><b>${stotal}</b></td>
+				</tr><tr>
+					<td colspan="2" style="text-align: right;"></td>
+					<td colspan="2" style="text-align: right;"><b>IMPUESTO:</b></td>
+					<td class="change_order_total_col"><b>${impuesto}</b></td>
+				</tr><tr  style='border-top: 1px solid;background:#AAAAAA;'>
+					<td colspan="2" style="text-align: right;"></td>
+					<td colspan="2" style="text-align: right;font-size:2em;"><b>TOTAL:</b></td>
+					<td class="change_order_total_col" style="font-size:2em;" ><b>${gtotal}</b></td>
+				</tr>
+			</tfoot>
+		</table>
+		<table width="100%">
 			<tr>
-				<td colspan="2" style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;"><b>SUB-TOTAL:</b></td>
-				<td class="change_order_total_col"><b>${stotal}</b></td>
-			</tr><tr>
-				<td colspan="2" style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;"><b>IMPUESTO:</b></td>
-				<td class="change_order_total_col"><b>${impuesto}</b></td>
-			</tr><tr  style='border-top: 1px solid;background:#AAAAAA;'>
-				<td colspan="2" style="text-align: right;"></td>
-				<td colspan="2" style="text-align: right;font-size:2em;"><b>TOTAL:</b></td>
-				<td class="change_order_total_col" style="font-size:2em;" ><b>${gtotal}</b></td>
+				<td style="text-align:center;"><b>Preparado por: </b></td>
+				<td style="text-align:center;"><b>Autorizado por:</b></td>
 			</tr>
-		</tfoot>
-	</table>
-	<table width="100%">
-		<tr>
-			<td style="text-align:center;"><b>Preparado por: </b></td>
-			<td style="text-align:center;"><b>Autorizado por:</b></td>
-		</tr>
-	</table>
+		</table>
 piefinal;
+}else{
+	$pie_final=<<<piefinal
+			</tbody>
+			<tfoot style='border:1px solid;background:#EEEEEE;'>
+				<tr style='border-top: 1px solid;background:#AAAAAA;'>
+					<td colspan="3" style="text-align: right;">&nbsp;</td>
+				</tr>
+			</tfoot>
+		</table>
+		<table width="100%">
+			<tr>
+				<td style="text-align:center;"><b>Preparado por: </b></td>
+				<td style="text-align:center;"><b>Autorizado por:</b></td>
+			</tr>
+		</table>
+piefinal;
+}
 
+$colspan= ($mprec)? 5: 2;
 $pie_continuo=<<<piecontinuo
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="5" style="text-align: right;">CONTINUA...</td>
+				<td colspan="${colspan}" style="text-align: right;">CONTINUA...</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -198,8 +230,10 @@ foreach ($detalle AS $items){ $i++;
 					?>
 				</td>
 				<td style="text-align: center;"><?php echo ($clinea)? '': nformat($items->cana,3); ?></td>
+				<?php if($mprec){ ?>
 				<td style="text-align: right;" ><?php echo ($clinea)? '': nformat($items->preca); ?></td>
 				<td class="change_order_total_col"><?php echo ($clinea)? '':nformat($items->preca*$items->cana); ?></td>
+				<?php } ?>
 			</tr>
 <?php
 		if($npagina){
@@ -214,8 +248,10 @@ for(1;$lineas<$maxlin;$lineas++){ ?>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
+				<?php if($mprec){ ?>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
+				<?php } ?>
 			</tr>
 <?php
 	$mod = ! $mod;

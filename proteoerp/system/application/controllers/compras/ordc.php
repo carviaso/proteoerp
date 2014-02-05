@@ -41,7 +41,8 @@ class Ordc extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png', 'alt' => 'Reimprimir Documento', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png', 'alt' => 'Reimprimir Documento', 'label'=>'Imprimir Orden'));
+		$grid->wbotonadd(array('id'=>'imprim2', 'img'=>'assets/default/images/print.png', 'alt' => 'Reimprimir Documento', 'label'=>'Imprimir S/Precio'));
 		$farma=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 
 
@@ -200,7 +201,16 @@ class Ordc extends Controller {
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/ORDC').'/\'+id+"/id", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+				window.open(\''.site_url('formatos/ver/ORDC').'/\'+id+"/", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+			}else{ $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+		});';
+
+		$bodyscript .='
+		jQuery("#imprim2").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url('formatos/ver/ORDC').'/\'+id+"/S", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
 			}else{ $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});';
 

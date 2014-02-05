@@ -1,0 +1,166 @@
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('b.codigo','"" AS c1',"GROUP_CONCAT(b.hora ORDER BY b.hora  SEPARATOR ' - ') AS horas",'a.cedula','a.nombre','a.apellido','b.cedula', 'b.fecha');
+
+$filter->db->select($select);
+$filter->db->from('pers AS a');
+$filter->db->join('cacc AS b' ,"a.cedula=b.cedula");
+$filter->db->orderby('a.ingreso');
+$filter->db->groupby('a.codigo,b.fecha');
+
+$filter->cedula = new inputField('Cedula', 'a.cedula');
+$filter->cedula ->clause='where';
+$filter->cedula ->operator="=";
+$filter->cedula ->size='15';
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause="where";
+$filter->fechad->db_name =$filter->fechah->db_name="b.fecha";
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 1, date('m')  , 1));
+$filter->fechah->insertValue = date("Y-m-d");
+$filter->fechad->operator=">=";
+$filter->fechah->operator="<=";
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons("search");
+$filter->build();
+
+
+if($this->rapyd->uri->is_set('search')){
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL; exit();
+
+
+	//Calcula las horas nocturnas
+	function calculan($horas){
+		$rr = 0;
+		$rango=array(
+			array(0 ,5 ), //12am-5am
+			array(19,24)  //7pm-12am
+		);
+
+		foreach($rango as $val){;
+			$x = $val[0]*60;
+			$y = $val[1]*60;
+			$arr = explode(' - ',$horas);
+			if(count($arr)>=2){
+				$ff1=array_shift($arr);
+				$ff2=array_shift($arr);
+				do{
+					$pp = explode(':',$ff1); $a = intval($pp[0])*60+intval($pp[1]);
+					$pp = explode(':',$ff2); $b = intval($pp[0])*60+intval($pp[1]);
+					$xa=$a-$x;
+					$yb=$y-$b;
+					$ya=$y-$a;
+					$xb=$b-$x;
+					if($xa<0 && $yb<0){
+						$rr+=$y-$x;
+					}elseif($xa>=0 && $yb>=0){
+						$rr+=$b-$a;
+					}elseif($ya>=0 && $yb<0){
+						$rr+=$y-$a;
+					}elseif($xa<0 && $xb>=0){
+						$rr+=$b-$x;
+
+					}
+					$ff1=array_shift($arr);
+					$ff2=array_shift($arr);
+				}while(!is_null($ff2));
+			}
+		}
+		return round($rr/60,2);
+	}
+
+	//Calcula las horas diurnas
+	function calculad($horas){
+		$rr = 0;
+		$rango=array(
+			array(5 ,8 ), //5am-8am
+			array(18,19)  //6pm-7pm
+		);
+
+		foreach($rango as $val){;
+			$x = $val[0]*60;
+			$y = $val[1]*60;
+			$arr = explode(' - ',$horas);
+			if(count($arr)>=2){
+				$ff1=array_shift($arr);
+				$ff2=array_shift($arr);
+				do{
+					$pp = explode(':',$ff1); $a = intval($pp[0])*60+intval($pp[1]);
+					$pp = explode(':',$ff2); $b = intval($pp[0])*60+intval($pp[1]);
+					$xa=$a-$x;
+					$yb=$y-$b;
+					$ya=$y-$a;
+					$xb=$b-$x;
+					if($xa<0 && $yb<0){
+						$rr+=$y-$x;
+					}elseif($xa>=0 && $yb>=0){
+						$rr+=$b-$a;
+					}elseif($ya>=0 && $yb<0){
+						$rr+=$y-$a;
+					}elseif($xa<0 && $xb>=0){
+						$rr+=$b-$x;
+
+					}
+					$ff1=array_shift($arr);
+					$ff2=array_shift($arr);
+				}while(!is_null($ff2));
+			}
+		}
+		return round($rr/60,2);
+	}
+
+	//Calcula las horas trabajadas
+	function calculah($horas){
+		$arr = explode(' - ',$horas);
+		$rr = 0;
+		if(count($arr)>=2){
+			$ff1=array_shift($arr);
+			$ff2=array_shift($arr);
+			do{
+				$pp = explode(':',$ff1); $a = intval($pp[0])*60+intval($pp[1]);
+				$pp = explode(':',$ff2); $b = intval($pp[0])*60+intval($pp[1]);
+				$rr  += $b-$a;
+				$ff1=array_shift($arr);
+				$ff2=array_shift($arr);
+			}while(!is_null($ff2));
+		}
+		return round($rr/60,2);
+	}
+
+
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Entrada del Personal");
+	$pdf->setSubTitulo("Desde la fecha: ".$_POST['fechad']." Hasta ".$_POST['fechah']);
+
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol('horas'                ,60,'Hora'      ,'C', 8);
+	$pdf->AddCol('fecha'                ,25,'Fecha'     ,'C', 8);
+	$pdf->AddCof("calculah('<#horas#>')",25,'Horas T.'  ,'R', 8);
+	$pdf->AddCof("calculad('<#horas#>')",25,'Horas D.'  ,'R', 8);
+	$pdf->AddCof("calculan('<#horas#>')",25,'Horas N.'  ,'R', 8);
+	$pdf->setTotalizar('precio1');
+	$pdf->setGrupoLabel('(<#codigo#>) <#cedula#> <#nombre#> <#apellido#>');
+	$pdf->setGrupo('codigo');
+	$pdf->Table();
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Accesos del Personal</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
