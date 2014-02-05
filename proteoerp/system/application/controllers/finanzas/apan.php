@@ -1420,3 +1420,278 @@ class Apan extends Controller {
 		}
 	}
 }
+
+/*
+
+	mTRANSAC := PROX_SQL("ntransa")
+	XNUMERO  := PROX_SQL("napan")
+	aLISTA := {}
+
+	AADD(aLISTA, {"NUMERO",   XNUMERO })
+	AADD(aLISTA, {"FECHA",    XFECHA })
+	AADD(aLISTA, {"TIPO",     XTIPO })
+	AADD(aLISTA, {"CLIPRO",   XCLIPRO })
+	AADD(aLISTA, {"NOMBRE",   XNOMBRE })
+	AADD(aLISTA, {"MONTO",    XMONTO })
+	AADD(aLISTA, {"REINTE",   XREINTE })
+	AADD(aLISTA, {"OBSERVA1", XOBSERVA1 })
+	AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
+
+	aVALORES := {}
+	mSQL := "INSERT INTO apan SET "
+	oCursor:Insert()
+	LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
+	GUARDAOCUR(aLISTA,mTRANSAC)
+
+	LOGUSU("APLICA ANTICIPOS "+XNUMERO+" TIPO "+XTIPO+" DE "+XCLIPRO+" CREADO, TRANSACCION #" + mTRANSAC )
+
+	IF !EMPTY(XREINTE)
+		IF XTIPO = 'P'
+			// GENERA ND EN CLIENTE Y EN PROVEEDOR XCLIPRO=PROVEEDOR
+			mNUMERO := PROX_SQL("num_nd")
+			aLISTA := {}
+			AADD(aLISTA, {"COD_PRV",  XCLIPRO })
+			AADD(aLISTA, {"NOMBRE",   XNOMBRE })
+			AADD(aLISTA, {"TIPO_DOC", "ND" })
+			AADD(aLISTA, {"NUMERO",   mNUMERO })
+			AADD(aLISTA, {"FECHA",    XFECHA })
+			AADD(aLISTA, {"MONTO",    XMONTO })
+			AADD(aLISTA, {"IMPUESTO", 0 })
+			AADD(aLISTA, {"ABONOS",   0 })
+			AADD(aLISTA, {"VENCE",    XFECHA })
+			AADD(aLISTA, {"OBSERVA1", XOBSERVA1 })
+			AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
+			AADD(aLISTA, {"TIPO_REF", 'AP' })
+			AADD(aLISTA, {"NUM_REF",  XNUMERO })
+         
+			aVALORES := {}
+			mSQL := "INSERT INTO sprm SET "
+			LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
+			EJECUTASQL(mSQL,aVALORES)
+
+			mSELE := {{"ND"+mNUMERO, ; //1
+				XFECHA,       ; //2
+				XFECHA,       ; //3
+				XMONTO,       ; //4
+				0,            ; //5
+				0,            ; //6 
+				XMONTO }}        // 7
+
+			mNUMERO  := PROX_SQL("ndcli")
+			mNOMBRE  := DAMEVAL("SELECT nombre FROM scli WHERE cliente='"+XREINTE+"' ")
+			aLISTA := {}
+			AADD(aLISTA, {"COD_CLI",  XREINTE })
+			AADD(aLISTA, {"NOMBRE",   mNOMBRE })
+			AADD(aLISTA, {"TIPO_DOC", "ND" })
+			AADD(aLISTA, {"NUMERO",   mNUMERO })
+			AADD(aLISTA, {"FECHA",    XFECHA })
+			AADD(aLISTA, {"MONTO",    XMONTO })
+			AADD(aLISTA, {"ABONOS",   0 })
+			AADD(aLISTA, {"VENCE",    XFECHA })
+			AADD(aLISTA, {"OBSERVA1", XOBSERVA1 })
+			AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
+			AADD(aLISTA, {"IMPUESTO", 0 })
+			AADD(aLISTA, {"TIPO_REF", 'AP' })
+			AADD(aLISTA, {"NUM_REF",  XNUMERO })
+         
+			aVALORES := {}
+			mSQL := "INSERT INTO smov SET "
+			LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
+			EJECUTASQL(mSQL,aVALORES)
+
+		ELSE
+			// GENERA ND EN CLIENTE Y EN PROVEEDOR XCLIPRO=PROVEEDOR
+
+			mNUMERO := PROX_SQL("ndcli")
+			aLISTA := {}
+			AADD(aLISTA, {"COD_CLI",  XCLIPRO })
+			AADD(aLISTA, {"NOMBRE",   XNOMBRE })
+			AADD(aLISTA, {"TIPO_DOC", "ND" })
+			AADD(aLISTA, {"NUMERO",   mNUMERO })
+			AADD(aLISTA, {"FECHA",    XFECHA })
+			AADD(aLISTA, {"MONTO",    XMONTO })
+			AADD(aLISTA, {"IMPUESTO", 0 })
+			AADD(aLISTA, {"ABONOS",   0 })
+			AADD(aLISTA, {"VENCE",    XFECHA })
+			AADD(aLISTA, {"OBSERVA1", XOBSERVA1 })
+			AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
+			AADD(aLISTA, {"TIPO_REF", 'AP' })
+			AADD(aLISTA, {"NUM_REF",  XNUMERO })
+         
+			aVALORES := {}
+			mSQL := "INSERT INTO smov SET "
+			LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
+			EJECUTASQL(mSQL,aVALORES)
+
+			mSELE := {{"ND"+mNUMERO, ; //1
+				XFECHA,       ; //2
+				XFECHA,       ; //3
+				XMONTO,       ; //4
+				0,            ; //5
+				0,            ; //6 
+				XMONTO }}        // 7
+
+
+			mNUMERO  := PROX_SQL("num_nd")
+			mNOMBRE  := DAMEVAL("SELECT nombre FROM sprv WHERE proveed='"+XREINTE+"' ")
+			aLISTA := {}
+			AADD(aLISTA, {"COD_PRV",  XREINTE })
+			AADD(aLISTA, {"NOMBRE",   mNOMBRE })
+			AADD(aLISTA, {"TIPO_DOC", "ND" })
+			AADD(aLISTA, {"NUMERO",   mNUMERO })
+			AADD(aLISTA, {"FECHA",    XFECHA })
+			AADD(aLISTA, {"MONTO",    XMONTO })
+			AADD(aLISTA, {"ABONOS",   0 })
+			AADD(aLISTA, {"VENCE",    XFECHA })
+			AADD(aLISTA, {"OBSERVA1", XOBSERVA1 })
+			AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
+			AADD(aLISTA, {"IMPUESTO", 0 })
+			AADD(aLISTA, {"TIPO_REF", 'AP' })
+			AADD(aLISTA, {"NUM_REF",  XNUMERO })
+         
+			aVALORES := {}
+			mSQL := "INSERT INTO sprm SET "
+			LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
+			EJECUTASQL(mSQL,aVALORES)
+		ENDIF
+	ENDIF
+
+
+	// ACTUALIZA CON LOS ARREGLOS
+	IF XTIPO = 'P'
+		mSQL := "UPDATE sprm SET abonos=abonos+? WHERE tipo_doc=? AND numero=? AND cod_prv=? "
+		FOR i := 1 TO LEN(mANTI)
+			EJECUTASQL(mSQL, {mANTI[i,5], SUBSTR(mANTI[i,1],1,2), SUBSTR(mANTI[i,1],3,8), XCLIPRO } )
+		NEXT
+		mSQL := "UPDATE sprm SET abonos=abonos+? WHERE tipo_doc=? AND numero=? AND cod_prv=? "
+		FOR i := 1 TO LEN(mSELE)
+			EJECUTASQL(mSQL, {mSELE[i,7], SUBSTR(mSELE[i,1],1,2), SUBSTR(mSELE[i,1],3,8), XCLIPRO } )
+		NEXT
+		// QUE LADILLA MARCOS
+		mSALDO := 0
+		mSQL := "INSERT INTO itppro SET numppro=?, tipoppro=?,cod_prv=?, tipo_doc=?, "
+		mSQL += "numero=?, fecha=?, monto=?, abono=?, transac=?, estampa=?, hora=?, usuario=? "
+		FOR i := 1 TO LEN(mANTI)
+			FOR m:=1 TO LEN(mSELE)
+				IF mSELE[m,7]=0
+					LOOP
+				ENDIF
+				IF mANTI[i,5] = mSELE[m,7]
+					EJECUTASQL(mSQL,{ SUBSTR(mANTI[i,1],3,8), ;
+							SUBSTR(mANTI[i,1],1,2), ;
+							XCLIPRO,                ;
+							SUBSTR(mSELE[m,1],1,2), ;  // tipo_doc
+							SUBSTR(mSELE[m,1],3,8), ;  // numero
+							mSELE[m,2],             ;  // fecha
+							mSELE[m,4],             ;  // monto
+							mSELE[m,7],             ;  // fecha
+							mTRANSAC,               ;  // transac
+							DATE(),                 ;  // fecha
+							TIME(),                 ;  // hora
+							ms_CODIGO              })  // usuario
+							mSELE[m,7] := 0
+					EXIT
+				ELSEIF mANTI[i,5] > mSELE[m,7]
+					EJECUTASQL(mSQL,{ SUBSTR(mANTI[i,1],3,8), ;
+							SUBSTR(mANTI[i,1],1,2), ;
+							XCLIPRO,                ;
+							SUBSTR(mSELE[m,1],1,2), ;  // tipo_doc
+							SUBSTR(mSELE[m,1],3,8), ;  // numero
+							mSELE[m,2],             ;  // fecha
+							mSELE[m,4],             ;  // monto
+							mSELE[m,7],             ;  // fecha
+							mTRANSAC,               ;  // transac
+							DATE(),                 ;  // fecha
+							TIME(),                 ;  // hora
+							ms_CODIGO              })  // usuario
+					mANTI[i,5] -= mSELE[m,7]
+					mSELE[m,7] := 0
+				ELSE  // mANTI < mSELE
+					EJECUTASQL(mSQL,{ SUBSTR(mANTI[i,1],3,8), ;
+							SUBSTR(mANTI[i,1],1,2), ;
+							XCLIPRO,                ;
+							SUBSTR(mSELE[m,1],1,2), ;  // tipo_doc
+							SUBSTR(mSELE[m,1],3,8), ;  // numero
+							mSELE[m,2],             ;  // fecha
+							mSELE[m,4],             ;  // monto
+							mANTI[i,5],             ;  // fecha
+							mTRANSAC,               ;  // transac
+							DATE(),                 ;  // fecha
+							TIME(),                 ;  // hora
+							ms_CODIGO              })  // usuario
+					mSELE[m,7] -= mANTI[i,5]
+					mANTI[i,5] := 0
+					EXIT
+				ENDIF
+			NEXT
+		NEXT
+	ELSE
+		// LO MISMO PARA CLIENTES
+		mSQL := "UPDATE smov SET abonos=abonos+? WHERE tipo_doc=? AND numero=? AND cod_cli=? "
+		FOR i := 1 TO LEN(mANTI)
+			EJECUTASQL(mSQL, {mANTI[i,5], SUBSTR(mANTI[i,1],1,2),SUBSTR(mANTI[i,1],3,8), XCLIPRO } )
+		NEXT
+		mSQL := "UPDATE smov SET abonos=abonos+? WHERE tipo_doc=? AND numero=? AND cod_cli=? "
+		FOR i := 1 TO LEN(mSELE)
+			EJECUTASQL(mSQL, {mSELE[i,7], SUBSTR(mSELE[i,1],1,2), SUBSTR(mSELE[i,1],3,8), XCLIPRO } )
+		NEXT
+		// QUE LADILLA MARCOS
+		mSALDO := 0
+		mSQL := "INSERT INTO itccli SET numccli=?, tipoccli=?,cod_cli=?, tipo_doc=?, "
+		mSQL += "numero=?, fecha=?, monto=?, abono=?, transac=?, estampa=?, hora=?, usuario=? "
+		FOR i := 1 TO LEN(mANTI)
+			FOR m:=1 TO LEN(mSELE)
+				IF mSELE[m,7]=0
+					LOOP
+				ENDIF
+				IF mANTI[i,5] = mSELE[m,7]
+					EJECUTASQL(mSQL,{ SUBSTR(mANTI[i,1],3,8), ;
+							SUBSTR(mANTI[i,1],1,2), ;
+							XCLIPRO,                ;
+							SUBSTR(mSELE[m,1],1,2), ;  // tipo_doc
+							SUBSTR(mSELE[m,1],3,8), ;  // numero
+							mSELE[m,2],             ;  // fecha
+							mSELE[m,4],             ;  // monto
+							mSELE[m,7],             ;  // fecha
+							mTRANSAC,               ;  // transac
+							DATE(),                 ;  // fecha
+							TIME(),                 ;  // hora
+							ms_CODIGO              })  // usuario
+					mSELE[m,7] := 0
+					EXIT
+				ELSEIF mANTI[i,5] > mSELE[m,7]
+					EJECUTASQL(mSQL,{ SUBSTR(mANTI[i,1],3,8), ;
+							SUBSTR(mANTI[i,1],1,2), ;
+							XCLIPRO,                ;
+							SUBSTR(mSELE[m,1],1,2), ;  // tipo_doc
+							SUBSTR(mSELE[m,1],3,8), ;  // numero
+							mSELE[m,2],             ;  // fecha
+							mSELE[m,4],             ;  // monto
+							mSELE[m,7],             ;  // fecha
+							mTRANSAC,               ;  // transac
+							DATE(),                 ;  // fecha
+							TIME(),                 ;  // hora
+							ms_CODIGO              })  // usuario
+					mANTI[i,5] -= mSELE[m,7]
+					mSELE[m,7] := 0
+				ELSE  // mANTI < mSELE
+					EJECUTASQL(mSQL,{ SUBSTR(mANTI[i,1],3,8), ;
+							SUBSTR(mANTI[i,1],1,2), ;
+							XCLIPRO,                ;
+							SUBSTR(mSELE[m,1],1,2), ;  // tipo_doc
+							SUBSTR(mSELE[m,1],3,8), ;  // numero
+							mSELE[m,2],             ;  // fecha
+							mSELE[m,4],             ;  // monto
+							mANTI[i,5],             ;  // fecha
+							mTRANSAC,               ;  // transac
+							DATE(),                 ;  // fecha
+							TIME(),                 ;  // hora
+							ms_CODIGO              })  // usuario
+					mSELE[m,7] -= mANTI[i,5]
+					mANTI[i,5] := 0
+					EXIT
+				ENDIF
+			NEXT
+		NEXT
+	ENDIF
+*/
