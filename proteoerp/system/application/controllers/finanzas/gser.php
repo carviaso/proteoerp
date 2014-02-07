@@ -1142,7 +1142,7 @@ class gser extends Controller {
 				echo 'Deshabilitado.';
 				return false;
 			}elseif($oper == 'edit'){
-				if($this->datasis->sidapuede('GSER','MODIFICA%')){
+				if($this->datasis->sidapuede('GSER','INCLUIR%')){
 					echo 'No tiene acceso a modificar';
 					return false;
 				}
@@ -2284,7 +2284,7 @@ class gser extends Controller {
 			'sobretasa'=>'Montos con Alicuota <b>adicional</b> '.$ivas['sobretasa'].'%|Monto del IVA',
 			'importe'  =>'Importe total');
 
-		foreach($arr AS $obj=>$label){
+		foreach($arr as $obj=>$label){
 			$pos = strrpos($label, '|');
 			if($pos!==false){
 				$piv=explode('|',$label);
@@ -3504,7 +3504,7 @@ class gser extends Controller {
 		$edit->sucursal->rule='required';
 		$edit->sucursal->style = 'width:40px';
 		$edit->sucursal->title ='Sucursal';
-		
+
 		$edit->sucursal->rel_id   ='gitser';
 		$edit->sucursal->onchange="gsucursal(this.value)";
 		//*****************************
