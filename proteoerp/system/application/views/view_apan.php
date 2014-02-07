@@ -32,6 +32,19 @@ var itefec_cont = 0;
 
 $(document).ready(function() {
 	$(".inputnum").numeric(".");
+	$("#grid3_container").hide();
+	$("#preinte").change(function(){
+		if($(this).is(':checked')){
+			$("#grid2_container").hide();
+			$("#grid3_container").show();
+		}else{
+			$("#grid3_container").hide();
+			$("#grid2_container").show();
+			$("#reinte").val('');
+			$("#reinte_val").text('');
+		}
+		cnota();
+	});
 });
 
 function add_itannc(){
@@ -105,6 +118,14 @@ function totalefe(){
 
 function cnota(){
 	var mascara= "APLICA <#apl#>A <#efe#>";
+	if($("#preinte").is(':checked')){
+		<?php if ($form->tipo->insertValue == 'C') {  ?>
+		mascara="CONVERSION DE <#apl#>A CxP";
+		<?php }else{ ?>
+		mascara="CONVERSION DE <#apl#>A CxC";
+		<?php } ?>
+	}
+
 	var aplica = "";
 	var efecto = "";
 
@@ -183,11 +204,11 @@ function truncate(id){
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 <table width='100%'>
 	<tr>
-		<td class="littletablerowth"><?php echo $form->clipro->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->clipro->output; ?></td>
-		<td class="littletablerow"  ><?php echo $form->nombre->output; ?></td>
-		<td class="littletablerowth"><?php echo $form->monto->label;   ?></td>
-		<td class="littletablerow"  ><?php echo $form->monto->output;  ?></td>
+		<td><b class="littletablerowth"><?php echo $form->clipro->label;?></b><?php echo $form->clipro->output; ?><?php echo $form->nombre->output; ?></td>
+		<td style='text-align:right;'>
+			<b class="littletablerowth"><?php echo $form->preinte->label;?></b><?php echo $form->preinte->output;?>
+			<b class="littletablerowth"><?php echo $form->monto->label;  ?></b><?php echo $form->monto->output;  ?>
+		</td>
 	</tr>
 </table>
 </fieldset>
@@ -224,6 +245,16 @@ function truncate(id){
 						<th class="littletableheaderdet">Saldo</th>
 						<th class="littletableheaderdet">Abono</th>
 					</tr>
+					</table>
+				</div>
+				<div id='grid3_container'  style='overflow:auto;width:100%;height:210px; border: 1px outset #123;background: #E4E4E4;'>
+					<table>
+						<tr>
+							<td><b>Reintegrar a:</b></td>
+							<td><?php echo $form->reinte->output; ?></td>
+						</tr><tr>
+							<td colspan='2'><span id='reinte_val' style='font-size:1.2em'></span></td>
+						</tr>
 					</table>
 				</div>
 			</td>

@@ -1208,9 +1208,9 @@ class Sprm extends Controller {
 			}
 
 			$mSQL = "
-				SELECT tipo_doc, numero, montonet,fecha FROM scst a WHERE a.transac=${dbtransac}
+				SELECT a.tipo_doc, a.numero, a.montonet,a.fecha FROM scst AS a WHERE a.transac=${dbtransac}
 				UNION ALL
-				SELECT tipo_doc, numero, totneto,fecha  FROM gser a WHERE a.transac=${dbtransac}";
+				SELECT a.tipo_doc, a.numero, a.totneto,a.fecha  FROM gser AS a WHERE a.transac=${dbtransac}";
 			$query = $this->db->query($mSQL);
 			if($query->num_rows() > 0){
 				$salida .= $td1;

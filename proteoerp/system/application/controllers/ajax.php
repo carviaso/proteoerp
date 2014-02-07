@@ -2646,6 +2646,15 @@ class Ajax extends Controller {
 
 	}
 
+	function saldocuenta(){
+		$cuenta  = $this->input->get('cuenta');
+		$dbcuenta= $this->db->escape($cuenta);
+
+		$mSQL="SELECT SUM(debe-haber) AS val FROM datasis.itcasi WHERE cuenta=${dbcuenta}";
+		$monto=$this->datasis->dameval($mSQL);
+		echo $monto;
+	}
+
 	function en_utf8($str){
 		if($this->config->item('charset')=='UTF-8' && $this->db->char_set=='latin1'){
 			return utf8_encode($str);

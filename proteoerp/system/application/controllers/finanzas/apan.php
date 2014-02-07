@@ -826,12 +826,16 @@ class Apan extends Controller {
 		$edit->nombre->rule      = '';
 		$edit->nombre->size      = 30;
 		$edit->nombre->maxlength = 30;
+		$edit->nombre->type ='inputhidden';
 
 		$edit->monto = new inputField('Monto','monto');
 		$edit->monto->rule      = 'numeric|mayorcero';
 		$edit->monto->css_class = 'inputnum';
 		$edit->monto->size      = 10;
 		$edit->monto->maxlength = 17;
+
+		$edit->preinte = new checkboxField('Reintegrar', 'preinte', 'S','N');
+		$edit->preinte->insertValue = 'N';
 
 		$edit->reinte = new inputField('Reinte','reinte');
 		$edit->reinte->rule      = '';
@@ -885,7 +889,7 @@ class Apan extends Controller {
 									$("#clipro").val("");
 
 									$("#nombre").val("");
-									//$("#nombre_val").text("");
+									$("#nombre_val").text("");
 
 									$("#saldo_val").text("");
 								}else{
@@ -904,7 +908,7 @@ class Apan extends Controller {
 					$("#clipro").attr("readonly", "readonly");
 
 					$("#nombre").val(ui.item.nombre);
-					//$("#nombre_val").text(ui.item.nombre);
+					$("#nombre_val").text(ui.item.nombre);
 
 					setTimeout(function() {  $("#clipro").removeAttr("readonly"); }, 1500);
 
@@ -997,6 +1001,42 @@ class Apan extends Controller {
 
 				}
 			});
+
+
+			$("#reinte").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscasprv').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#reinte").val("");
+									$("#reinte_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					});
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#reinte").attr("readonly", "readonly");
+					$("#reinte_val").text(ui.item.nombre);
+					setTimeout(function(){ $("#reinte").removeAttr("readonly"); }, 1500);
+				}
+			});
+
 		});';
 
 		$edit->script($script,'modify');
@@ -1144,9 +1184,40 @@ class Apan extends Controller {
 								);
 							},
 					});
-					//var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					//$("#saldoa").val(roundNumber(saldo,2))
+				}
+			});
 
+			$("#reinte").autocomplete({
+				delay: 600,
+				autoFocus: true,
+				source: function( req, add){
+					$.ajax({
+						url:  "'.site_url('ajax/buscascli').'",
+						type: "POST",
+						dataType: "json",
+						data: {"q":req.term},
+						success:
+							function(data){
+								var sugiere = [];
+								if(data.length==0){
+									$("#reinte").val("");
+									$("#reinte_val").text("");
+								}else{
+									$.each(data,
+										function(i, val){
+											sugiere.push( val );
+										}
+									);
+								}
+								add(sugiere);
+							},
+					});
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					$("#reinte").attr("readonly", "readonly");
+					$("#reinte_val").text(ui.item.nombre);
+					setTimeout(function(){ $("#reinte").removeAttr("readonly"); }, 1500);
 				}
 			});
 
@@ -1169,6 +1240,12 @@ class Apan extends Controller {
 		$estampa = $do->get('estampa');
 		$hora    = $do->get('hora');
 		$usuario = $do->get('usuario');
+		$reinte  = $do->get('reinte');
+		$observa = $do->get('observa1');
+		$dbclipro= $this->db->escape($clipro);
+
+		$preinte = $this->input->post('preinte');
+		$do->rm_get('preinte');
 
 		//Calcula los movimientos aplicables
 		$arr_apl = array();
@@ -1202,50 +1279,78 @@ class Apan extends Controller {
 		}
 		//Fin de los aplicables
 
-		//Calcula los efectos a los que se aplica
+
 		$arr_efe=array();
-		$i=$efectos=0;
-		while(true){
-			$ind = 'itenumero_'.$i; $numero = $this->input->post($ind);
-			$ind = 'itetipo_'.$i;   $tipo   = $this->input->post($ind);
-			$ind = 'itefecha_'.$i;  $fecha  = $this->input->post($ind);
+		//Chequea si se reintegra
+		if($preinte!='S'){
+			//Calcula los efectos a los que se aplica
 
-			if($numero === false || $tipo === false || $fecha === false ){
-				break;
-			}
-			if(empty($numero)|| empty($tipo) || empty($fecha)){
-				break;
-			}
+			$i=$efectos=0;
+			while(true){
+				$ind = 'itenumero_'.$i; $numero = $this->input->post($ind);
+				$ind = 'itetipo_'.$i;   $tipo   = $this->input->post($ind);
+				$ind = 'itefecha_'.$i;  $fecha  = $this->input->post($ind);
 
-			$ind = 'iteaplicar_'.$i; $abono  = $this->input->post($ind);
-			$ind = 'itemonto_'.$i;   $monto  = $this->input->post($ind);
-			$ind = 'iteid_'.$i;      $id     = $this->input->post($ind);
-			if(!empty($abono)){
-				if(!is_numeric($abono)){
-					$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no es num&eacute;rico.';
-					return false;
+				if($numero === false || $tipo === false || $fecha === false ){
 					break;
 				}
-				$efectos += $abono;
-				if($abono > $monto){
-					$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no puede exceder su saldo.';
-					return false;
+				if(empty($numero)|| empty($tipo) || empty($fecha)){
 					break;
 				}
-				$arr_efe[] = array('id'=>$id,'numero'=>$numero,'tipo'=>$tipo,'fecha'=>$fecha,'abono'=>$abono,'monto'=>$monto);
+
+				$ind = 'iteaplicar_'.$i; $abono  = $this->input->post($ind);
+				$ind = 'itemonto_'.$i;   $monto  = $this->input->post($ind);
+				$ind = 'iteid_'.$i;      $id     = $this->input->post($ind);
+				if(!empty($abono)){
+					if(!is_numeric($abono)){
+						$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no es num&eacute;rico.';
+						return false;
+						break;
+					}
+					$efectos += $abono;
+					if($abono > $monto){
+						$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no puede exceder su saldo.';
+						return false;
+						break;
+					}
+					$arr_efe[] = array('id'=>$id,'numero'=>$numero,'tipo'=>$tipo,'fecha'=>$fecha,'abono'=>$abono,'monto'=>$monto);
+				}
+				$i++;
 			}
-			$i++;
-		}
-		if($efectos<=0){
-			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto de los efectos a aplicar debe ser mayor a cero.';
-			return false;
-		}
-		//Fin de los efectos
+			if($efectos<=0){
+				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto de los efectos a aplicar debe ser mayor a cero.';
+				return false;
+			}
+			//Fin de los efectos
 
 
-		if($aplicar-$efectos != 0){
-			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto a aplicar es diferente al aplicado. '."$aplicar-$efectos";
-			return false;
+			if($aplicar-$efectos != 0){
+				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto a aplicar es diferente al aplicado. '."$aplicar-$efectos";
+				return false;
+			}
+
+		}
+
+		$dbreinte = $this->db->escape($reinte);
+		if($preinte=='S'){
+			if(empty($reinte)){
+				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Si es un reintegro debe seleccionar a quien se le reintegra.';
+				return false;
+			}else{
+				if($ttipo=='P'){
+					$can=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM scli WHERE cliente=${dbreinte}"));
+					if($can <= 0){
+						$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El cliente elegido para el reintegro no existe.';
+						return false;
+					}
+				}else{
+					$can=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sprv WHERE proveed=${dbreinte}"));
+					if($can <= 0){
+						$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El proveedor elegido para el reintegro no existe.';
+						return false;
+					}
+				}
+			}
 		}
 
 		$transac = $this->datasis->fprox_numero('ntransa');
@@ -1254,7 +1359,109 @@ class Apan extends Controller {
 		$do->set('numero' ,$numero );
 		$do->set('fecha'  ,date('Y-m-d'));
 
-		$data = $mSQLs = array();
+		$mSQLs = array();
+		if($preinte=='S'){
+			$fecha    = $do->get('fecha');
+			if($ttipo=='P'){ //Aplica a proveedor
+				$mNOMBRE  = $this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$dbclipro);
+				$mNUMERO = $this->datasis->fprox_numero('num_nd');
+				$data = array();
+				$data['cod_prv']  = $clipro;
+				$data['nombre']   = $mNOMBRE ;
+				$data['tipo_doc'] = 'ND';
+				$data['numero']   = $mNUMERO;
+				$data['fecha']    = $fecha;
+				$data['monto']    = $aplicar;
+				$data['impuesto'] = 0;
+				$data['abonos']   = 0;
+				$data['vence']    = $fecha;
+				$data['observa1'] = substr($observa,0,50);
+				$data['observa2'] = (strlen($observa)>=50)? substr($observa,50):'';
+				$data['tipo_ref'] = 'AP';
+				$data['estampa']  = $do->get('estampa');
+				$data['hora']     = $do->get('hora');
+				$data['usuario']  = $do->get('usuario');
+				$data['transac']  = $transac;
+				$data['num_ref']  = $numero;
+				$sql = $this->db->insert_string('sprm', $data);
+				$ban = $this->db->simple_query($sql);
+				$iid = $this->db->insert_id();
+				$arr_efe[] = array('id'=>$iid,'numero'=>$mNUMERO,'tipo'=>'ND','fecha'=>$fecha,'abono'=>$aplicar,'monto'=>$aplicar);
+
+				$mNUMERO  = $this->datasis->fprox_numero('ndcli');
+				$mNOMBRE  = $this->datasis->dameval('SELECT nombre FROM scli WHERE cliente='.$dbreinte);
+				$data = array();
+				$data['cod_cli']  = $reinte;
+				$data['nombre']   = $mNOMBRE;
+				$data['tipo_doc'] = 'ND';
+				$data['numero']   = $mNUMERO;
+				$data['fecha']    = $fecha;
+				$data['monto']    = $aplicar;
+				$data['abonos']   = 0;
+				$data['vence']    = $fecha;
+				$data['observa1'] = substr($observa,0,50);
+				$data['observa2'] = (strlen($observa)>=50)? substr($observa,50):'';
+				$data['impuesto'] = 0;
+				$data['tipo_ref'] = 'AP';
+				$data['estampa']  = $do->get('estampa');
+				$data['hora']     = $do->get('hora');
+				$data['usuario']  = $do->get('usuario');
+				$data['transac']  = $transac;
+				$data['num_ref']  = $numero;
+				$mSQLs[] = $this->db->insert_string('smov', $data);
+
+			}else{ //Aplica a cliente
+
+				$mNUMERO  = $this->datasis->fprox_numero('ndcli');
+				$mNOMBRE  = $this->datasis->dameval('SELECT nombre FROM scli WHERE cliente='.$dbclipro);
+				$data=array();
+				$data['cod_cli']  = $clipro;
+				$data['nombre']   = $mNOMBRE;
+				$data['tipo_doc'] = 'ND';
+				$data['numero']   = $mNUMERO;
+				$data['fecha']    = $fecha;
+				$data['monto']    = $aplicar;
+				$data['impuesto'] = 0;
+				$data['abonos']   = 0;
+				$data['vence']    = $fecha;
+				$data['observa1'] = substr($observa,0,50);
+				$data['observa2'] = (strlen($observa)>=50)? substr($observa,50):'';
+				$data['tipo_ref'] = 'AP';
+				$data['estampa']  = $do->get('estampa');
+				$data['hora']     = $do->get('hora');
+				$data['usuario']  = $do->get('usuario');
+				$data['transac']  = $transac;
+				$data['num_ref']  = $numero;
+				$sql = $this->db->insert_string('smov', $data);
+				$ban = $this->db->simple_query($sql);
+				$iid = $this->db->insert_id();
+				$arr_efe[] = array('id'=>$iid,'numero'=>$mNUMERO,'tipo'=>'ND','fecha'=>$fecha,'abono'=>$aplicar,'monto'=>$aplicar);
+
+				$mNUMERO  = $this->datasis->fprox_numero('num_nd');
+				$mNOMBRE  = $this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$dbreinte);
+				$data = array();
+				$data['cod_prv']  = $reinte;
+				$data['nombre']   = $mNOMBRE;
+				$data['tipo_doc'] = 'ND';
+				$data['numero']   = $mNUMERO;
+				$data['fecha']    = $fecha;
+				$data['monto']    = $aplicar;
+				$data['abonos']   = 0;
+				$data['vence']    = $fecha;
+				$data['observa1'] = substr($observa,0,50);
+				$data['observa2'] = (strlen($observa)>=50)? substr($observa,50):'';
+				$data['impuesto'] = 0;
+				$data['tipo_ref'] = 'AP';
+				$data['estampa']  = $do->get('estampa');
+				$data['hora']     = $do->get('hora');
+				$data['usuario']  = $do->get('usuario');
+				$data['transac']  = $transac;
+				$data['num_ref']  = $numero;
+				$mSQLs[] = $this->db->insert_string('sprm', $data);
+			}
+		}
+
+		$data = array();
 		$data['transac'] = $transac;
 		$data['estampa'] = $estampa;
 		$data['hora']    = $hora;
@@ -1263,7 +1470,7 @@ class Apan extends Controller {
 		$saldoefe=0;
 		$centi = '';
 
-		foreach($arr_apl AS $apl){
+		foreach($arr_apl as $apl){
 
 			$saldoapl = $apl['monto'];
 			do{
@@ -1316,13 +1523,12 @@ class Apan extends Controller {
 			}
 		}
 
+
 		//$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = print_r($arr_apl,true);
 		//return false;
 
-
-		$observa = $do->get('observa1');
 		$do->set('observa1',substr($observa,0,50));
-		$do->set('observa2',substr($observa,50));
+		$do->set('observa2',(strlen($observa)>=50)? substr($observa,50):'');
 		//$obs = wordwrap($observa, 50,"\n");
 
 		$this->_sqls=$mSQLs;
@@ -1463,7 +1669,7 @@ class Apan extends Controller {
 			AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
 			AADD(aLISTA, {"TIPO_REF", 'AP' })
 			AADD(aLISTA, {"NUM_REF",  XNUMERO })
-         
+
 			aVALORES := {}
 			mSQL := "INSERT INTO sprm SET "
 			LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
@@ -1474,7 +1680,7 @@ class Apan extends Controller {
 				XFECHA,       ; //3
 				XMONTO,       ; //4
 				0,            ; //5
-				0,            ; //6 
+				0,            ; //6
 				XMONTO }}        // 7
 
 			mNUMERO  := PROX_SQL("ndcli")
@@ -1493,7 +1699,7 @@ class Apan extends Controller {
 			AADD(aLISTA, {"IMPUESTO", 0 })
 			AADD(aLISTA, {"TIPO_REF", 'AP' })
 			AADD(aLISTA, {"NUM_REF",  XNUMERO })
-         
+
 			aVALORES := {}
 			mSQL := "INSERT INTO smov SET "
 			LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
@@ -1517,7 +1723,7 @@ class Apan extends Controller {
 			AADD(aLISTA, {"OBSERVA2", XOBSERVA2 })
 			AADD(aLISTA, {"TIPO_REF", 'AP' })
 			AADD(aLISTA, {"NUM_REF",  XNUMERO })
-         
+
 			aVALORES := {}
 			mSQL := "INSERT INTO smov SET "
 			LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
@@ -1528,7 +1734,7 @@ class Apan extends Controller {
 				XFECHA,       ; //3
 				XMONTO,       ; //4
 				0,            ; //5
-				0,            ; //6 
+				0,            ; //6
 				XMONTO }}        // 7
 
 
@@ -1548,7 +1754,7 @@ class Apan extends Controller {
 			AADD(aLISTA, {"IMPUESTO", 0 })
 			AADD(aLISTA, {"TIPO_REF", 'AP' })
 			AADD(aLISTA, {"NUM_REF",  XNUMERO })
-         
+
 			aVALORES := {}
 			mSQL := "INSERT INTO sprm SET "
 			LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )

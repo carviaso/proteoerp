@@ -1,7 +1,7 @@
 $filter = new DataFilter('Filtro del Reporte');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$select=array('b.codigo','"" AS c1',"GROUP_CONCAT(b.hora ORDER BY b.hora  SEPARATOR ' - ') AS horas",'a.cedula','a.nombre','a.apellido','b.cedula', 'b.fecha');
+$select=array('b.codigo',"GROUP_CONCAT(b.hora ORDER BY b.hora  SEPARATOR ' - ') AS horas",'a.cedula','a.nombre','a.apellido','b.cedula', 'b.fecha');
 
 $filter->db->select($select);
 $filter->db->from('pers AS a');
@@ -11,31 +11,31 @@ $filter->db->groupby('a.codigo,b.fecha');
 
 $filter->cedula = new inputField('Cedula', 'a.cedula');
 $filter->cedula ->clause='where';
-$filter->cedula ->operator="=";
+$filter->cedula ->operator='=';
 $filter->cedula ->size='15';
 
 $filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
 $filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
-$filter->fechad->clause  =$filter->fechah->clause="where";
-$filter->fechad->db_name =$filter->fechah->db_name="b.fecha";
+$filter->fechad->clause  =$filter->fechah->clause='where';
+$filter->fechad->db_name =$filter->fechah->db_name='b.fecha';
 $filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 1, date('m')  , 1));
-$filter->fechah->insertValue = date("Y-m-d");
-$filter->fechad->operator=">=";
-$filter->fechah->operator="<=";
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechad->operator='>=';
+$filter->fechah->operator='<=';
+$filter->fechah->rule='required|chfecha';
+$filter->fechad->rule='required|chfecha';
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons("search");
+$filter->buttons('search');
 $filter->build();
 
 
-if($this->rapyd->uri->is_set('search')){
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$mSQL=$this->rapyd->db->_compile_select();
-	//echo $mSQL; exit();
-
 
 	//Calcula las horas nocturnas
 	function calculan($horas){
@@ -135,8 +135,6 @@ if($this->rapyd->uri->is_set('search')){
 		return round($rr/60,2);
 	}
 
-
-
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
@@ -146,19 +144,19 @@ if($this->rapyd->uri->is_set('search')){
 	$pdf->AddPage();
 	$pdf->setTableTitu(9,'Times');
 
-	$pdf->AddCol('horas'                ,60,'Hora'      ,'C', 8);
-	$pdf->AddCol('fecha'                ,25,'Fecha'     ,'C', 8);
-	$pdf->AddCof("calculah('<#horas#>')",25,'Horas T.'  ,'R', 8);
-	$pdf->AddCof("calculad('<#horas#>')",25,'Horas D.'  ,'R', 8);
-	$pdf->AddCof("calculan('<#horas#>')",25,'Horas N.'  ,'R', 8);
-	$pdf->setTotalizar('precio1');
+	$pdf->AddCol('horas'                ,80,'Hora'     ,'C', 8);
+	$pdf->AddCol('fecha'                ,25,'Fecha'    ,'C', 8);
+	$pdf->AddCof("calculah('<#horas#>')",25,'Horas T.' ,'R', 8);
+	$pdf->AddCof("calculad('<#horas#>')",25,'Horas D.' ,'R', 8);
+	$pdf->AddCof("calculan('<#horas#>')",25,'Horas N.' ,'R', 8);
+	$pdf->setTotalizar('__cC0','__cC1','__cC2');
 	$pdf->setGrupoLabel('(<#codigo#>) <#cedula#> <#nombre#> <#apellido#>');
 	$pdf->setGrupo('codigo');
-	$pdf->Table();
 	$pdf->Table();
 	$pdf->Output();
 
 }else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
 	$data['titulo'] = '<h2 class="mainheader">Accesos del Personal</h2>';
 	$data['head'] = $this->rapyd->get_head();

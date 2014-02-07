@@ -396,7 +396,7 @@ class Cpla extends Controller {
 		$mSQL = '';
 
 		$mSQL = "SELECT codigo item, CONCAT(codigo, ' ', descrip) valor FROM cpla WHERE LENGTH(TRIM(codigo))=$long ";
-		if ( strlen($semilla)>0 ){
+		if(strlen($semilla)>0 ){
 			$mSQL .= " AND ( codigo LIKE '$semilla%' OR descrip LIKE '%$semilla%' ) ";
 		} else {
 			if ( strlen($cuenta)>0 ) $mSQL .= " AND ( codigo LIKE '$cuenta%' OR descrip LIKE '%$cuenta%' ) ";

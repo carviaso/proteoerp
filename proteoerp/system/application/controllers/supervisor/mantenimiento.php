@@ -14,49 +14,49 @@ class Mantenimiento extends Controller{
 		$contenido  = '<div class="mantenidiv" style="font-size:12px;">'."\n";
 		$contenido .= '<div class="column">'."\n";
 
-		$contenido .= $this->opciontb( 
-			'Actualizar Proteo', 
+		$contenido .= $this->opciontb(
+			'Actualizar Proteo',
 			anchor('#',img(array('src'=>'assets/default/images/logo.png','border'=>'0','alt'=>'Actualizar','width'=>'130px')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/actualizaproteo\');return false;')),
 			'Actualiza a la &uacute;ltima vesi&oacute;n'
 		);
 
-		$contenido .= $this->opciontb( 
-			'Borrar Prefacturas', 
-			anchor('#',img(array('src'=>'assets/default/images/clean-database.jpeg','border'=>'0','alt'=>'Actualizar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/bprefac\');return false;')), 
-			'Borrar PreFacturas menores o iguales al d&iacute;a de ayer' 
+		$contenido .= $this->opciontb(
+			'Borrar Prefacturas',
+			anchor('#',img(array('src'=>'assets/default/images/clean-database.jpeg','border'=>'0','alt'=>'Actualizar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/bprefac\');return false;')),
+			'Borrar PreFacturas menores o iguales al d&iacute;a de ayer'
 		);
 
-		$contenido .= $this->opciontb( 
-			'Descargar Puertos', 
-			anchor('supervisor/mantenimiento/puertosdir',img(array('src'=>'assets/default/images/download.png','border'=>'0','alt'=>'Descargar Puertos'))), 
+		$contenido .= $this->opciontb(
+			'Descargar Puertos',
+			anchor('supervisor/mantenimiento/puertosdir',img(array('src'=>'assets/default/images/download.png','border'=>'0','alt'=>'Descargar Puertos'))),
 			'Descargar PUERTOS.DIR para DataSIS '.anchor('supervisor/mantenimiento/puertosdir/LPT1','LPT1').', '.anchor('supervisor/mantenimiento/puertosdir/LPT2','LPT2').', ' .anchor('supervisor/mantenimiento/puertosdir/OBJETO','OBJ')
 		);
 
 /*
-		$contenido .= $this->opciontb( 
-			'Cambiar Almacen en NE', 
-			anchor('#',img(array('src'=>'assets/default/images/package.png','border'=>'0','alt'=>'Actualizar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/sntealma\');return false;')), 
+		$contenido .= $this->opciontb(
+			'Cambiar Almacen en NE',
+			anchor('#',img(array('src'=>'assets/default/images/package.png','border'=>'0','alt'=>'Actualizar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/sntealma\');return false;')),
 			'Modifica el almac&eacute;n en las notas de entrega'
 		);
 */
 		$contenido .= '</div>'."\n";
 		$contenido .= '<div class="column">'."\n";
 
-		$contenido .= $this->opciontb( 
-			'Centinelas', 
-			anchor('#',img(array('src'=>'assets/default/images/process-stop32.png','border'=>'0','alt'=>'Centinelas','id'=>'centinelas'))), 
+		$contenido .= $this->opciontb(
+			'Centinelas',
+			anchor('#',img(array('src'=>'assets/default/images/process-stop32.png','border'=>'0','alt'=>'Centinelas','id'=>'centinelas'))),
 			'Centinelas o Mesajes del sistema'
 		);
 
-		$contenido .= $this->opciontb( 
-			'Revisa CLientes', 
-			anchor('#',img(array('src'=>'assets/default/images/clients.png','border'=>'0','alt'=>'Inconsistencias','id'=>'inconsist'))), 
+		$contenido .= $this->opciontb(
+			'Revisa CLientes',
+			anchor('#',img(array('src'=>'assets/default/images/clients.png','border'=>'0','alt'=>'Inconsistencias','id'=>'inconsist'))),
 			'Incosistencias Clientes'
 		);
 			//anchor('supervisor/mantenimiento/clinconsis',img(array('src'=>'assets/default/images/clients.png','border'=>'0','alt'=>'Inconsistencia de Clientes'))),
 
-		$contenido .= $this->opciontb( 
-			'Reportes Duplicados', 
+		$contenido .= $this->opciontb(
+			'Reportes Duplicados',
 			anchor('supervisor/mantenimiento/sfacdif',img(array('src'=>'assets/default/images/report-database.jpeg','border'=>'0','alt'=>'Actualizar'))),
 			'Detectar inconsistencias en Facturas'
 		);
@@ -65,33 +65,33 @@ class Mantenimiento extends Controller{
 		$contenido .= '</div>'."\n";
 		$contenido .= '<div class="column">'."\n";
 
-		$contenido .= $this->opciontb( 
-			'Vaciar ModBus', 
+		$contenido .= $this->opciontb(
+			'Vaciar ModBus',
 			anchor('#',img(array('src'=>'assets/default/images/delete-database.jpeg','border'=>'0','alt'=>'Borrar Temporales')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/bmodbus\');return false;')),
 			'Vaciar tablas Temporales'
 		);
 
-		$contenido .= $this->opciontb( 
-			'Reparar Tablas', 
+		$contenido .= $this->opciontb(
+			'Reparar Tablas',
 			anchor('#',img(array('src'=>'assets/default/images/repair-database.jpeg','border'=>'0','alt'=>'Reparar')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/reparatabla\');return false;')),
 			'Reparar Todas las Tablas de la BD'
 		);
 
-		$contenido .= $this->opciontb( 
-			'Recalcualr Inventario', 
-			anchor('#',img(array('src'=>'assets/default/images/inventario1.png','border'=>'0','alt'=>'Recalcular')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/calcosto\');return false;')), 
+		$contenido .= $this->opciontb(
+			'Recalcualr Inventario',
+			anchor('#',img(array('src'=>'assets/default/images/inventario1.png','border'=>'0','alt'=>'Recalcular')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/calcosto\');return false;')),
 			'Recalcula Inventario'
 		);
 
 /*
-		$contenido .= $this->opciontb( 
-			'Mantenimiento de Tablas', 
+		$contenido .= $this->opciontb(
+			'Mantenimiento de Tablas',
 			anchor('supervisor/mantenimiento/tablas',img(array('src'=>'assets/default/images/accept-database.png','border'=>'0','alt'=>'Reparar'))),
 			'Mantenimiento de Tablas'
 		);
 
-		$contenido .= $this->opciontb( 
-			'Modificar Contadores', 
+		$contenido .= $this->opciontb(
+			'Modificar Contadores',
 			anchor('#',img(array('src'=>'assets/default/images/speedometer.png','border'=>'0','alt'=>'Borrar Temporales')),array('onclick'=>'bobo(\''.base_url().'supervisor/mantenimiento/contadores\');return false;')),
 			'Cambiar Contadores'
 		);
@@ -134,11 +134,11 @@ function bobo(url,mensa){'."
 }
 
 $("#centinelas").click( function() {
-	$("#d900").load("supervisor/mantenimiento/centinelas"); 
+	$("#d900").load("supervisor/mantenimiento/centinelas");
 })
 
 $("#inconsist").click( function() {
-	$("#d900").load("supervisor/mantenimiento/clinconsis"); 
+	$("#d900").load("supervisor/mantenimiento/clinconsis");
 })
 
 
@@ -262,7 +262,7 @@ function carga(arch){
 }
 
 function cargamante() {
-	$('#d900').load('supervisor/mantenimiento'); 
+	$('#d900').load('supervisor/mantenimiento');
 }
 
 function elminacenti(cual){
@@ -934,7 +934,7 @@ function elminacenti(cual){
 						$dbver = $this->db->escape($ver);
 						$mSQL="UPDATE valores SET valor=${dbver} WHERE nombre='SVNVER'";
 						$this->db->simple_query($mSQL);
-						$this->db->simple_query('TRUNCATE modbus');
+						//$this->db->simple_query('TRUNCATE modbus');
 					}else{
 						$responde .= 'Ya estaba la ultima versi&oacute;n instalada '.$aver;
 					}

@@ -185,7 +185,7 @@ class Casi extends Controller {
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, "300", "300" );
 
 		$bodyscript .= '});';
-		$bodyscript .= "\n</script>\n";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -201,7 +201,7 @@ class Casi extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('comprob');
-		$grid->label('Comprob');
+		$grid->label('Comprobate');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',
@@ -403,7 +403,7 @@ class Casi extends Controller {
 
 		$grid->setOnSelectRow('
 			function(id){
-				if (id){
+				if(id){
 					var ret = $("#titulos").getRowData(id);
 					jQuery(gridId2).jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
 					jQuery(gridId2).trigger("reloadGrid");
@@ -467,7 +467,7 @@ class Casi extends Controller {
 		if($oper == 'add'){
 			if(false == empty($data)){
 				$this->db->insert('casi', $data);
-				echo "Registro Agregado";
+				echo 'Registro Agregado';
 
 				logusu('CASI',"Registro ????? INCLUIDO");
 			} else
@@ -485,7 +485,7 @@ class Casi extends Controller {
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
-				$this->db->simple_query("DELETE FROM casi WHERE id=$id ");
+				$this->db->simple_query("DELETE FROM casi WHERE id=${id}");
 				logusu('CASI',"Registro ????? ELIMINADO");
 				echo "Registro Eliminado";
 			}
@@ -498,7 +498,7 @@ class Casi extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -792,9 +792,9 @@ class Casi extends Controller {
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
-		$edit->fecha->rule = 'required';
-		$edit->fecha->mode = 'autohide';
+		$edit->fecha->rule = 'required|chfecha';
 		$edit->fecha->size = 12;
+		$edit->fecha->calendar=false;
 
 		$edit->comprob = new inputField('N&uacute;mero', 'comprob');
 		$edit->comprob->size     = 12;
@@ -803,10 +803,10 @@ class Casi extends Controller {
 		//$edit->comprob->apply_rules=false; //necesario cuando el campo es clave y no se pide al usuario
 
 		$edit->descrip = new inputField('Descripci&oacute;n', 'descrip');
-		$edit->descrip->size      = 40;
+		$edit->descrip->size      = 60;
 		$edit->descrip->maxlength = 60;
 
-		$edit->status = new  dropdownField ('Status', 'status');
+		$edit->status = new  dropdownField ('Estatus', 'status');
 		$edit->status->option('A','Actualizado');
 		$edit->status->option('D','Diferido');
 		$edit->status->style='width:110px;';
@@ -816,20 +816,20 @@ class Casi extends Controller {
 		//  Campos para el detalle
 		//**************************
 		$edit->cuenta = new inputField('Cuenta <#o#>', 'cuenta_<#i#>');
-		$edit->cuenta->size     = 8;
+		$edit->cuenta->size     = 15;
 		$edit->cuenta->db_name  = 'cuenta';
 		$edit->cuenta->rel_id   = 'itcasi';
-		$edit->cuenta->rule     = 'required|callback_chrepetidos';
+		$edit->cuenta->rule     = 'required';
 		$edit->cuenta->append($btn);
 
 		$edit->referen = new inputField('Referencia <#o#>', 'referen_<#i#>');
-		$edit->referen->size      = 10;
+		$edit->referen->size      = 20;
 		$edit->referen->db_name   = 'referen';
 		$edit->referen->maxlength = 12;
 		$edit->referen->rel_id    = 'itcasi';
 
 		$edit->concepto = new inputField('Concepto <#o#>', 'concepto_<#i#>');
-		$edit->concepto->size      = 24;
+		$edit->concepto->size      = 25;
 		$edit->concepto->db_name   = 'concepto';
 		$edit->concepto->maxlength = 50;
 		$edit->concepto->rel_id    = 'itcasi';
@@ -838,19 +838,21 @@ class Casi extends Controller {
 		$edit->itdebe->db_name      = 'debe';
 		$edit->itdebe->css_class    = 'inputnum';
 		$edit->itdebe->rel_id       = 'itcasi';
-		$edit->itdebe->maxlength    = 10;
-		$edit->itdebe->size         = 5;
+		$edit->itdebe->maxlength    = 19;
+		$edit->itdebe->size         = 18;
 		$edit->itdebe->rule         = 'required|positive';
 		$edit->itdebe->autocomplete = false;
+		$edit->itdebe->showformat   = 'decimal';
 		$edit->itdebe->onkeyup      = 'validaDebe(<#i#>)';
 
 		$edit->ithaber = new inputField('Haber <#o#>', 'ithaber_<#i#>');
 		$edit->ithaber->db_name      = 'haber';
 		$edit->ithaber->css_class    = 'inputnum';
 		$edit->ithaber->rel_id       = 'itcasi';
-		$edit->ithaber->maxlength    = 10;
-		$edit->ithaber->size         = 5;
+		$edit->ithaber->maxlength    = 19;
+		$edit->ithaber->size         = 18;
 		$edit->ithaber->rule         = 'required|positive';
+		$edit->ithaber->showformat   = 'decimal';
 		$edit->ithaber->autocomplete = false;
 		$edit->ithaber->onkeyup      = 'validaHaber(<#i#>)';
 
@@ -860,7 +862,7 @@ class Casi extends Controller {
 		$edit->itccosto->db_name   = 'ccosto';
 		$edit->itccosto->rel_id    = 'itcasi';
 		$edit->itccosto->rule      = 'condi_required|callback_chdepaccosto[<#i#>]';
-		$edit->itccosto->style     = 'width:110px;';
+		$edit->itccosto->style     = 'width:150px;';
 
 		$edit->itsucursal =  new dropdownField('Sucursal', 'itsucursal_<#i#>');
 		$edit->itsucursal->option('','Ninguno');
@@ -868,7 +870,7 @@ class Casi extends Controller {
 		$edit->itsucursal->db_name   = 'sucursal';
 		$edit->itsucursal->rel_id    = 'itcasi';
 		$edit->itsucursal->rule      = 'condi_required|callback_chdepaccosto[<#i#>]';
-		$edit->itsucursal->style     = 'width:100px';
+		$edit->itsucursal->style     = 'width:150px';
 
 		$edit->cplaccosto = new hiddenField('', 'cplaccosto_<#i#>');
 		$edit->cplaccosto->db_name   = 'cplaccosto';
@@ -887,18 +889,21 @@ class Casi extends Controller {
 		$edit->debe->css_class ='inputnum';
 		$edit->debe->readonly  =true;
 		$edit->debe->size      = 10;
+		$edit->debe->showformat   = 'decimal';
 		$edit->debe->type ='inputhidden';
 
 		$edit->haber = new inputField('Haber', 'haber');
 		$edit->haber->css_class ='inputnum';
 		$edit->haber->readonly  =true;
 		$edit->haber->size      = 10;
+		$edit->haber->showformat= 'decimal';
 		$edit->haber->type ='inputhidden';
 
 		$edit->total = new inputField('Saldo', 'total');
 		$edit->total->css_class ='inputnum';
 		$edit->total->readonly  =true;
 		$edit->total->size      = 10;
+		$edit->total->showformat= 'decimal';
 		$edit->total->type ='inputhidden';
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));

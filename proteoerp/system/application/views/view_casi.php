@@ -14,11 +14,13 @@ $scampos .='<td class="littletablerow" align="left" >'.$campos['referen']['field
 $scampos .='<td class="littletablerow" align="left" >'.$campos['concepto']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['itdebe']['field'].  '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['ithaber']['field']. '</td>';
-$scampos .='<td class="littletablerow" align="right">'.$campos['itccosto']['field'].'</td>';
-$scampos .='<td class="littletablerow" align="right">'.$campos['itsucursal']['field'];
+$scampos .='<td rowspan="2" class="littletablerow"><a href=# onclick="del_itcasi(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
+$scampos .='</tr>';
+$scampos .='<tr id="tr_itcasi_<#i#>_<#i#>">';
+$scampos .='<td colspan="5" class="littletablerow" align="center"> <b>Centro de costo:</b> '.$campos['itccosto']['field'];
+$scampos .=' <b>Sucursal:</b> '.$campos['itsucursal']['field'];
 $scampos .= $campos['cpladeparta']['field'];
 $scampos .= $campos['cplaccosto']['field'].'</td>';
-$scampos .= '<td class="littletablerow"><a href=# onclick="del_itcasi(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
 $jscampos=$form->js_escape($scampos);
 $jscosto =$form->js_escape($campos['itccosto']['field']);
 $jssucus =$form->js_escape($campos['itsucursal']['field']);
@@ -50,6 +52,31 @@ $(function(){
 				$("#itsucursal_"+ind).append($('<option></option>').val('').html('No aplica'));
 			}
 			autocod(ind);
+
+			$("#itdebe_"+ind).focusout(function(){
+				var valor = $(this).val();
+				if(valor==''){
+					$(this).val('0');
+				}
+				totaliza();
+			});
+
+			$("#ithaber_"+ind).focusout(function(){
+				var valor = $(this).val();
+				if(valor==''){
+					$(this).val('0');
+				}
+				totaliza();
+			});
+
+			$("#ithaber_"+ind).focus(function(){
+				$(this).select();
+			});
+
+			$("#itdebe_"+ind).focus(function(){
+				$(this).select();
+			});
+
 		}
 	});
 
@@ -80,11 +107,15 @@ function autocod(id){
 		},
 		minLength: 2,
 		select: function( event, ui ) {
+
+			$('#cuenta_'+id).attr("readonly", "readonly");
 			$('#cuenta_'+id).val(ui.item.codigo);
 			$('#concepto_'+id).val(ui.item.descrip);
 			$('#cpladeparta_'+id).val(ui.item.departa);
 			$('#cplacosto_'+id).val(ui.item.ccosto);
 			post_modbus(Number(id));
+			setTimeout(function(){ $('#cuenta_'+id).removeAttr("readonly"); }, 1500);
+			traesaldo(ui.item.value);
 		}
 	});
 }
@@ -109,8 +140,30 @@ function add_itcasi(){
 	con = (itcasi_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
 	htm = htm.replace(/<#o#>/g,con);
-	$("#__UTPL__").before(htm);
+	$("#__PTPL__").after(htm);
 	$("#itdebe_"+can).numeric(".");
+	$("#ithaber_"+can).numeric(".");
+
+	$("#itdebe_"+can).focusout(function(){
+		var valor = $(this).val();
+		if(valor==''){
+			$(this).val('0');
+		}
+		totaliza();
+	});
+	$("#ithaber_"+can).focusout(function(){
+		var valor = $(this).val();
+		if(valor==''){
+			$(this).val('0');
+		}
+		totaliza();
+	});
+	$("#ithaber_"+can).focus(function(){
+		$(this).select();
+	});
+	$("#itdebe_"+can).focus(function(){
+		$(this).select();
+	});
 	$("#ithaber_"+can).numeric(".");
 	post_modbus(itcasi_cont);
 	itcasi_cont=itcasi_cont+1;
@@ -142,11 +195,19 @@ function totaliza(){
 	$("#debe_val").text(nformat(debe,2));
 	$("#haber_val").text(nformat(haber,2));
 	$("#total_val").text(nformat(total,2));
+	if(total>0){
+		$("#total_val").css("color",'blue');
+	}else if(total==0){
+		$("#total_val").css("color",'green');
+	}else{
+		$("#total_val").css("color",'red');
+	}
 }
 
 function del_itcasi(id){
 	id = id.toString();
 	$('#tr_itcasi_'+id).remove();
+	$('#tr_itcasi_'+id+'_'+id).remove();
 	totaliza();
 }
 
@@ -167,6 +228,16 @@ function post_modbus(nind){
 		$("#itsucursal_"+ind).append($('<option></option>').val('').html('No aplica'));
 	}
 }
+
+function traesaldo(cu){
+	if(cu!=''){
+		var saldo= $.ajax({ type: "POST", data:{cuenta:cu},url: "<?php echo site_url('ajax/saldocuenta') ?>", async: false }).responseText;
+		$('#saldocta').html('Saldo de la cuenta '+cu+' <b style="font-size:1.4em">'+nformat(saldo,2)+'</b>');
+	}else{
+			$('#saldocta').text('');
+	}
+
+}
 </script>
 <?php } ?>
 
@@ -182,32 +253,29 @@ function post_modbus(nind){
 				<td class="littletableheader"><?php echo $form->comprob->label;  ?>*&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->comprob->output; ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->status->label;   ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->status->output;  ?>&nbsp;</td>
-			</tr>
-			<tr>
+				<td class="littletablerow">   <?php echo $form->status->output;  ?>&nbsp; <span id='saldocta'></span></td>
+			</tr><tr>
 				<td class="littletableheader"><?php echo $form->fecha->label;   ?>*&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->fecha->output;  ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->descrip->label;  ?>&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->descrip->output; ?>&nbsp;</td>
 			</tr>
-		</table><br>
+		</table>
 		</fieldset>
 		</td>
 	</tr>
 	<tr>
 		<td>
-		<div id='grid_container' style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px'>
+		<div id='grid_container' style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:230px'>
 		<table width='100%'>
-			<tr>
-				<td class="littletableheader">Cuenta</td>
-				<td class="littletableheader">Referencia</td>
-				<td class="littletableheader">Concepto</td>
-				<td class="littletableheader">Debe</td>
-				<td class="littletableheader">Haber</td>
-				<td class="littletableheader">Centro de Costo</td>
-				<td class="littletableheader">Sucursal</td>
+			<tr  id='__PTPL__' style='font-size:1.1em;font-weight:bold;'>
+				<td bgcolor='#7098D0' >Cuenta</td>
+				<td bgcolor='#7098D0' >Referencia</td>
+				<td bgcolor='#7098D0' >Concepto</td>
+				<td bgcolor='#7098D0' >Debe</td>
+				<td bgcolor='#7098D0' >Haber</td>
 				<?php if($form->_status!='show') {?>
-					<td class="littletableheader">&nbsp;</td>
+					<td bgcolor='#7098D0' ><a href='#' onclick="add_itcasi()" title='Agregar otra cuenta'><?php echo img('images/agrega4.png'); ?></a></td>
 				<?php } ?>
 			</tr>
 			<?php for($i=0;$i<$form->max_rel_count['itcasi'];$i++) {
@@ -229,19 +297,19 @@ function post_modbus(nind){
 				<td class="littletablerow" align="left" ><?php echo $form->$it_concepto->output;?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_debe->output;    ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_haber->output;   ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_ccosto->output;  ?></td>
-				<td class="littletablerow" align="right"><?php echo $form->$it_sucursal->output; echo $pprecios; ?></td>
 				<?php if($form->_status!='show') {?>
-				<td class="littletablerow">
+				<td rowspan='2' class="littletablerow">
 					<a href='#' onclick='del_itcasi(<?php echo $i ?>);return false;'><?php echo img("images/delete.jpg"); ?></a>
 				</td>
 				<?php } ?>
 			</tr>
-			<?php } ?>
-
-			<tr id='__UTPL__'>
-				<td id='cueca'></td>
+			<tr id='tr_itcasi_<?php echo $i.'_'.$i; ?>'>
+				<td colspan='5' class="littletablerow" align='center'>
+					<b>Centro de costo:</b> <?php echo $form->$it_ccosto->output;  ?>
+					<b>Sucursal:</b> <?php echo $form->$it_sucursal->output; echo $pprecios; ?>
+				</td>
 			</tr>
+			<?php } ?>
 		</table>
 		</div>
 		</td>
@@ -249,17 +317,15 @@ function post_modbus(nind){
 	<tr>
 		<td>
 		<table width='100%'>
-			<tr>
-				<td>
-					<?php echo $container_bl ?>
-					<?php echo $container_br ?>
-				</td>
-				<td class="littletableheader">           <?php echo $form->debe->label;   ?></td>
-				<td class="littletablerow" align='right'><?php echo $form->debe->output;  ?></td>
-				<td class="littletableheader">           <?php echo $form->haber->label;  ?></td>
-				<td class="littletablerow" align='right'><?php echo $form->haber->output; ?></td>
-				<td class="littletableheader">           <?php echo $form->total->label;  ?></td>
-				<td class="littletablerow" align='right'><?php echo $form->total->output; ?></td>
+			<tr style='font-size:1em;'>
+				<td style='font-size:1em;font-weight:bold;'><?php echo $form->debe->label;   ?></td>
+				<td align='right'><?php echo $form->debe->output;  ?></td>
+				<td rowspan='2' style='font-size:2.3em;font-weight:bold;'><?php echo $form->total->label;  ?></td>
+				<td rowspan='2' style='font-size:2.3em;font-weight:bold;text-align:right'><?php echo $form->total->output; ?></td>
+			</tr>
+			<tr >
+				<td style='font-weight:bold;'><?php echo $form->haber->label;  ?></td>
+				<td align='right'><?php echo $form->haber->output; ?></td>
 			</tr>
 		</table>
 		<?php echo (isset($form_end))? $form_end:''; ?>
