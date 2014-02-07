@@ -1142,7 +1142,7 @@ class gser extends Controller {
 				echo 'Deshabilitado.';
 				return false;
 			}elseif($oper == 'edit'){
-				if($this->datasis->sidapuede('GSER','INCLUIR%')){
+				if(!$this->datasis->sidapuede('GSER','INCLUIR%')){
 					echo 'No tiene acceso a modificar';
 					return false;
 				}
