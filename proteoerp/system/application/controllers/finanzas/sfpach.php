@@ -751,9 +751,7 @@ class sfpach extends Controller {
 		if ( $monto <= 0 ) $check = $check + 1 ;
 		
 		if ( $check == 0 ){
-		
 			$transac = $this->datasis->prox_sql("ntransa",8);
-
 			$i = 0;
 			while ( $i == 0){
 				$numero  =$this->datasis->prox_sql("nbcaj",8);

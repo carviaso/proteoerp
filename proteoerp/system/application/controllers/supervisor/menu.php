@@ -357,8 +357,9 @@ class Menu extends Controller{
 		$edit->panel->size = 45;
 
 		$edit->target= new dropdownField("Objetivo", "target");
-		$edit->target->option("popu"     ,"Link en Popup");
-		$edit->target->option("self"     ,"Link en ventana actual");
+		$edit->target->option("tab",    "Abre en un Tab");
+		$edit->target->option("popu",   "Link en Popup");
+		$edit->target->option("self",   "Link en ventana actual");
 		$edit->target->option("javascript","Proceso Javascript"); 
 		$edit->target->option("dialogo","Abre en un Dialogo"); 
 		$edit->target->option("ajax",   "Abre en un Ajax"); 

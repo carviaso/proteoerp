@@ -48,9 +48,15 @@ function arr2link($arr,$utf8c=false){
 	}
 
 	if($arr['target']=='popu'){
-		$ejecutar=anchor_popup($indi, $arr['titulo'], $att);
+		$ejecutar = anchor_popup($indi, $arr['titulo'], $att);
+
+	}elseif($arr['target']=='tab'){
+		$ejecutar = anchor_popup($indi, $arr['titulo']);
+		$ejecutar = str_replace('_blank','_newtab',$ejecutar );
+
 	}elseif($arr['target']=='javascript'){
 		$ejecutar="<a href='javascript:".str_replace('\'',"\\'",$indi)."' title='".$arr['mensaje']."'>".$arr['titulo']."</a>";
+
 	}elseif($arr['target']=='dialogo'){
 		$ejecutar="<a href='javascript:void(0);' title='".$arr['mensaje']."' onclick='f".$arr['modulo']."();'>".$arr['titulo']."</a> ";
 		$dialogos .= '<script>';

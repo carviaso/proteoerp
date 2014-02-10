@@ -305,7 +305,7 @@ class Bcaj extends Controller {
 				if (id)	{
 					$.prompt( "Eliminar Registro? ",{
 							buttons: { Borrar:true, Cancelar:false},
-							callback: function(e,v,m,f){
+							submit: function(e,v,m,f){
 								if (v == true) {
 									$.get("'.site_url($this->url.'bcajborra').'/"+id,
 									function(data){
@@ -1683,8 +1683,8 @@ class Bcaj extends Controller {
 	// Elimina Movimiento
 	//
 	function bcajborra(){
-		$id  = $this->uri->segment($this->uri->total_segments());
-		$dbid= $this->db->escape($id);
+		$id   = $this->uri->segment($this->uri->total_segments());
+		$dbid = $this->db->escape($id);
 
 		$drow    = $this->datasis->damerow('SELECT transac,status,numero FROM bcaj WHERE id='.$dbid);
 		$transac = $drow['transac'];
@@ -1703,6 +1703,7 @@ class Bcaj extends Controller {
 				}
 			}
 		}
+
 		$fla=false;
 		$query = $this->db->query('SELECT concilia FROM bmov WHERE transac='.$dbtransac);
 		foreach ($query->result() as $row){
@@ -1710,6 +1711,7 @@ class Bcaj extends Controller {
 				$fla=true;
 			}
 		}
+
 		if($fla){
 			$rt=array(
 				'status' =>'B',
@@ -1739,7 +1741,7 @@ class Bcaj extends Controller {
 		$this->db->query("DELETE FROM gitser WHERE transac=?", array($transac));
 
 		// LIBERA LOS CHEQUES SI ES DEPOSITO
-		$this->db->simple_query('UPDATE sfpa SET status=\'\' AND deposito=\'\' WHERE deposito=?"', array($numero));
+		$this->db->query('UPDATE sfpa SET status=\'\' AND deposito=\'\' WHERE deposito=?"', array($numero));
 		logusu('BCAJ',"MOVIMIENTO DE CAJA $numero Transaccion $transac ELIMINADO");
 
 		$rt=array(

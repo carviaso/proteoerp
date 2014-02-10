@@ -3201,7 +3201,7 @@ class Sfac extends Controller {
 	//Chequea si puede o no vender negativo
 	function chcananeg($val,$i){
 		$tipo_doc = $this->input->post('tipo_doc');
-		if($this->vnega=='N' || $tipo_doc=='D'){
+		if($this->vnega=='N' && $tipo_doc=='F'){
 			$codigo   = $this->input->post('codigoa_'.$i);
 			$dbcodigo = $this->db->escape($codigo);
 

@@ -37,6 +37,7 @@ if($form->_status!='show'){ ?>
 var itspre_cont=<?php echo $form->max_rel_count['itspre']; ?>;
 
 $(function(){
+
 	$(".inputnum").numeric(".");
 	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
 	totalizar();
