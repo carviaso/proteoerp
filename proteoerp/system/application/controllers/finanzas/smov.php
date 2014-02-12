@@ -1147,7 +1147,7 @@ class Smov extends Controller {
 			$it_fecha   = $this->db->escape($row->fecha);
 			$it_abono   = floatval($row->abono);
 
-			$mSQL="UPDATE smov SET abonos=abonos-(${it_abono}) WHERE tipo_doc=${it_tipo_doc} AND numero=${it_numero} AND cod_cli=${it_cod_cli} AND fecha=${it_fecha}";
+			$mSQL="UPDATE smov SET abonos=abonos-(${it_abono}) WHERE tipo_doc=${it_tipo_doc} AND numero=${it_numero} AND cod_cli=${it_cod_cli}";
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'smov'); }
 		}

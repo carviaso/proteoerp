@@ -1305,6 +1305,56 @@ class Casi extends Controller {
 	function auditscli(){
 		$this->rapyd->load('datagrid','dataform');
 
+		$mSQL="SELECT COUNT(*) AS cana FROM scli WHERE cliente='RETED'";
+		$cana=intval($this->datasis->dameval($mSQL));
+		if($cana<=0){
+			$data = array(
+				'cliente'    => 'RETED',
+				'nombre'     => 'RETENCION I.S.L.R TDC/BANCOS',
+				'grupo'      => '17',
+				'gr_desc'    => 'TRIBUTOS',
+				'formap'     => 15,
+				'cuenta'     => '',
+				'tipo'       => '1',
+				'limite'     => 0,
+				'socio'      => 'RETEN',
+				'estado'     => 0,
+				'vendedor'   => '',
+				'porvend'    => 0.0,
+				'porcobr'    => 0.0,
+				'copias'     => 0,
+				'porcomi'    => 0.00,
+				'rifci'      => 'J000000',
+				'fecha2'     => NULL,
+				'tiva'       => 'C',
+				'riffis'     => 'J000000',
+				'credito'    => 'N',
+				'tolera'     => 0.00,
+				'maxtole'    => 0.00,
+				'zona'       => '','ciudad1'    => '',
+				'separa'     => '','regimen'    => '',
+				'url'        => NULL,'mensaje'    => NULL,
+				'pin'        => NULL,'sucursal'   => NULL,
+				'fb'         => NULL,'mmargen'    => NULL,
+				'twitter'    => NULL,'repre'      => NULL,
+				'upago'      => NULL,'cirepre'    => NULL,
+				'tarifa'     => NULL,'ciudad'     => NULL,
+				'tarimonto'  => NULL,'clave'      => NULL,
+				'aniversario'=> NULL,'nomfis'     => NULL,
+				'dire21'     => NULL,'contacto'   => NULL,
+				'dire22'     => NULL,'dire11'     => NULL,
+				'ciudad2'    => NULL,'dire12'     => NULL,
+				'telefono'   => NULL,'pais'       => NULL,
+				'telefon2'   => NULL,'email'      => NULL,
+				'observa'    => NULL,'nit'        => NULL,
+				'fecha1'     => NULL,'canticipo'  => NULL,
+				'comisio'    => NULL,'cobrador'   => NULL,
+			);
+			$sql = $this->db->insert_string('scli', $data);
+			$this->db->simple_query($sql);
+		}
+
+
 		$qformato=$this->datasis->formato_cpla();
 		$mCPLA=array(
 			'tabla'   =>'cpla',
@@ -2007,6 +2057,12 @@ class Casi extends Controller {
 
 		if(!in_array('idcasi',$campos)){
 			$mSQL="ALTER TABLE `itcasi` ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (`id`)";
+			$this->db->simple_query($mSQL);
+		}
+
+		$campos=$this->db->list_fields('cpla');
+		if(!in_array('ccosto',$campos)){
+			$mSQL="ALTER TABLE `cpla` ADD COLUMN `ccosto` CHAR(1) NULL DEFAULT 'N' AFTER `sucursal`";
 			$this->db->simple_query($mSQL);
 		}
 	}

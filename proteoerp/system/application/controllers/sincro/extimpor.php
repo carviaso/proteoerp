@@ -42,8 +42,8 @@ class extimpor extends Controller {
 			''        => 'Ignorar',
 			'codigo'  => 'Código',
 			'descrip' => 'Descripción',
-			'ultimo'  => 'Costo Último',
-			'pond'    => 'Costo Promedio',
+			//'ultimo'  => 'Costo Último',
+			//'pond'    => 'Costo Promedio',
 			'standard'=> 'Costo Estandar',
 			'exmin'   => 'Mínimo',
 			'exmax'   => 'Máximo',
@@ -198,13 +198,16 @@ class extimpor extends Controller {
 				$cpond    = 'a.pond';
 				$cstandard= 'a.standard';
 				if(in_array('ultimo',$def)){
-					$cultimo  = 'b.ultimo';
+					$cultimo= 'b.ultimo';
+					$set[]  = "a.formcal = 'U'";
 				}
 				if(in_array('pond',$def)){
-					$cpond    = 'b.pond';
+					$cpond = 'b.pond';
+					$set[] = "a.formcal = 'P'";
 				}
 				if(in_array('standard',$def)){
 					$cstandard= 'b.standard';
+					$set[]    = "a.formcal = 'S'";
 				}
 
 				$costo = "ROUND(IF(a.formcal='U',${cultimo},IF(a.formcal='P',${cpond},IF(a.formcal='S',${cstandard},GREATEST(${cpond},${cultimo})))),2)";

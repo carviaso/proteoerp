@@ -3773,7 +3773,7 @@ class Sfac extends Controller {
 		}
 
 		//Descuento del inventario
-		$factor=($tipo_doc=='F')? -1:1;
+		$factor=($tipo_doc=='F' || $tipo_doc=='T')? -1:1;
 		$almacen=$do->get('almacen');
 		$dbalma = $this->db->escape($almacen);
 		$cana=$do->count_rel('sitems');
@@ -3797,6 +3797,30 @@ class Sfac extends Controller {
 
 		if($tipo_doc=='D'){
 			$dbnnumero= $this->db->escape('N'.substr($numero,1));
+
+
+			//Deshace las aplicaciones del efecto a eliminar
+			$mSQL = "SELECT tipo_doc,numero,numccli,tipoccli,monto,abono,cod_cli,fecha FROM itccli WHERE transac=${dbtransac}";
+			$query = $this->db->query($mSQL);
+			foreach($query->result() as $row){
+				$it_tipo_doc= $this->db->escape($row->tipo_doc);
+				$it_cod_cli = $this->db->escape($row->cod_cli);
+				$it_numero  = $this->db->escape($row->numero);
+				$it_fecha   = $this->db->escape($row->fecha);
+				$it_abono   = floatval($row->abono);
+
+				$mSQL="UPDATE smov SET abonos=abonos-(${it_abono}) WHERE tipo_doc=${it_tipo_doc} AND numero=${it_numero} AND cod_cli=${it_cod_cli}";
+				$ban=$this->db->simple_query($mSQL);
+				if($ban==false){ memowrite($mSQL,'smov'); }
+			}
+			//Fin
+
+			$mSQL="DELETE FROM itccli WHERE transac=${dbtransac}";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'smov'); }
+
+		}else if($tipo_doc=='T'){
+			$dbnnumero= $this->db->escape('T'.substr($numero,1));
 		}else{
 			$dbnnumero= $dbnumero;
 		}
