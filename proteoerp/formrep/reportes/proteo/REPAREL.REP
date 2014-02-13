@@ -4,7 +4,8 @@ $filter->attributes=array('onsubmit'=>'is_loaded()');
 $select=array(
 	'b.tipo_doc','b.numero','b.fecha','a.entregado',
 	'b.cod_cli','c.nombre','c.vendedor','b.peso',
-	'a.chofer','d.nombre AS cnombre','a.id'
+	'a.chofer','d.nombre AS cnombre','a.id',
+	'c.zona','e.nombre AS znombre'
 );
 
 $filter->db->select($select);
@@ -17,29 +18,23 @@ $filter->db->orderby('a.id','desc');
 
 $filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
 $filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
-$filter->fechad->clause  =$filter->fechah->clause='where';
+$filter->fechad->clause  =$filter->fechah->clause="where";
 $filter->fechad->db_name =$filter->fechah->db_name='a.entregado';
-$filter->fechad->insertValue = date('Y-m-d');
-$filter->fechah->insertValue = date('Y-m-d');
-$filter->fechad->operator='>=';
-$filter->fechah->operator='<=';
-$filter->fechad->group='Fecha';
-$filter->fechah->group='Fecha';
+$filter->fechad->insertValue = date("Y-m-d");
+$filter->fechah->insertValue = date("Y-m-d");
+$filter->fechad->operator=">=";
+$filter->fechah->operator="<=";
+$filter->fechad->group="Fecha";
+$filter->fechah->group="Fecha";
 
 $filter->vd = new dropdownField('Vendedor', 'vd');
 $filter->vd->db_name='vd';
 $filter->vd->clause='where';
 $filter->vd->option('','Todos');
-$filter->vd->options('SELECT TRIM(vendedor) AS vend, nombre FROM vend ORDER BY vendedor');
+$filter->vd->options('SELECT TRIM(vendedor) AS vend, nombre FROM vend WHERE tipo<>"I" ORDER BY vendedor');
 $filter->vd->operator='=';
 
-$filter->chofer = new dropdownField('Chofer','chofer');
-$filter->chofer->option('','Todos');
-$filter->chofer->options('SELECT codigo, nombre nombre FROM chofer ORDER BY nombre');
-$filter->chofer->rule  = 'required';
-$filter->chofer->style = 'width:300px;';
-
-$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
@@ -47,7 +42,7 @@ $filter->salformat->clause = '';
 $filter->buttons('search');
 $filter->build();
 
-if($this->rapyd->uri->is_set('search')){
+if($this->rapyd->uri->is_set("search")){
 	$mSQL=$filter->db->_compile_select();
 	//echo $mSQL;
 
@@ -55,9 +50,8 @@ if($this->rapyd->uri->is_set('search')){
 	if(!empty($_POST['fechad'])) $subtitu.=' Desde la fecha '.$_POST['fechad'];
 	if(!empty($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
 
-	$sobretabla='';
-	if(!empty($filter->vd->newValue))      $sobretabla.=' Vendedor: ('.$filter->vd->newValue.') '.$filter->vd->description;
-	if(!empty($filter->chofer->newValue))  $sobretabla.=' Chofer: ('.$filter->chofer->newValue.') '.$filter->chofer->description;
+	$sobretabla='Fecha de Elaboración: '.date('d/m/Y').' por: '.$this->secu->usuario();
+	if (!empty($filter->vd->newValue))      $sobretabla.=' Vendedor: ('.$filter->vd->newValue.') '.$filter->vd->description;
 
 	$pdf = new PDFReporte($mSQL,'L');
 	$pdf->setType('id','string');
@@ -72,16 +66,12 @@ if($this->rapyd->uri->is_set('search')){
 	$pdf->AddCol('tipo_doc' ,10,'Tipo'      ,'L',7);
 	$pdf->AddCol('numero'   ,15,'Número'    ,'R',7);
 	$pdf->AddCol('fecha'    ,20,'F.Fact.'   ,'L',7);
-	$pdf->AddCol('id'       ,10,'N. Desp.'  ,'R',7);
-	$pdf->AddCol('entregado',20,'F.Desp.'   ,'L',7);
 	$pdf->AddCol('cod_cli'  ,12,'Cliente'   ,'L',7);
 	$pdf->AddCol('nombre'   ,70,'Nombre'    ,'L',7);
 	$pdf->AddCol('vendedor' ,10,'Vend.'     ,'L',7);
-	$pdf->AddCol('chofer'   ,10,'Chofer'    ,'L',7);
-	$pdf->AddCol('cnombre'  ,40,'Nombre'    ,'L',7);
-	$pdf->AddCol('peso'     ,15,'Peso'      ,'R',7);
-	$pdf->AddCol('zona'     ,10,'zona'      ,'L',7);
-	$pdf->AddCol('znombre'  ,50,'Zona.'     ,'L',7);
+	$pdf->AddCol('entregado',20,'F.Desp.'   ,'L',7);
+	$pdf->AddCol('zona'   ,10,'zona'        ,'L',7);
+	$pdf->AddCol('znombre',50,'Zona.'       ,'L',7);
 
 	$pdf->setTotalizar('peso');
 	$pdf->Table();
@@ -89,7 +79,7 @@ if($this->rapyd->uri->is_set('search')){
 
 }else{
 	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Detalle de Reparto</h2>';
+	$data['titulo'] = '<h2 class="mainheader">Ventas Por Artículo</h2>';
 	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

@@ -22,11 +22,13 @@ class Reportes extends Controller{
 	}
 
 	function ver($repo,$esta=null){
+		$this->instalar();
 		$this->rapyd->load('datafilter2');
 
-		$mSQL= 'SELECT proteo FROM reportes WHERE nombre='.$this->db->escape($repo);
-		$mc  = $this->datasis->dameval($mSQL);
-		$nombre =strtolower($repo).'.pdf';
+		$dbrepo = $this->db->escape($repo);
+		$mSQL   = 'SELECT proteo FROM reportes WHERE nombre='.$dbrepo;
+		$mc     = $this->datasis->dameval($mSQL);
+		$nombre = strtolower($repo).'.pdf';
 
 		$_formato=$this->input->post('salformat');
 		if(empty($mc)){
@@ -37,6 +39,8 @@ class Reportes extends Controller{
 			}
 		}
 		if(!empty($mc)){
+			$sql="UPDATE reportes SET instancias = instancias+1 WHERE nombre=${dbrepo}";
+			$this->db->simple_query($sql);
 			if(empty($esta)) $esta=$this->datasis->dameval('SELECT modulo FROM intrarepo WHERE nombre='.$this->db->escape($repo));
 			$data['regresar'] = '<a href='.site_url('/reportes/enlistar/'.$esta).'>'.image('go-previous.png','Regresar',array('border'=>0)).'Regresar'.'</a>';
 			$data['regresar'].= '<p style="font-size:0.6em;text-align:center;padding:0">..::'.$repo.'::..</p>';
@@ -226,11 +230,25 @@ class Reportes extends Controller{
 	}
 
 	function instalar(){
-		$mSQL="ALTER TABLE `reportes` ADD `proteo` TEXT NULL";
-		$this->db->simple_query($mSQL);
-		$mSQL="ALTER TABLE `reportes` ADD `harbour` TEXT NULL";
-		$this->db->simple_query($mSQL);
-		$mSQL="UPDATE tmenus SET ejecutar=REPLACE(ejecutar,"."'".'" )'."','".'")'."') ";
-		$this->db->simple_query($mSQL);
+
+		$campos=$this->db->list_fields('reportes');
+
+		if(!in_array('proteo',$campos)){
+			$mSQL="ALTER TABLE `reportes` ADD `proteo` TEXT NULL";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('harbour',$campos)){
+			$mSQL="ALTER TABLE `reportes` ADD `harbour` TEXT NULL";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('instancias',$campos)){
+			$mSQL="ALTER TABLE `reportes` ADD COLUMN `instancias` INT(11) NULL DEFAULT '0' AFTER `harbour`";
+			$this->db->simple_query($mSQL);
+		}
+
+		//$mSQL="UPDATE tmenus SET ejecutar=REPLACE(ejecutar,"."'".'" )'."','".'")'."') ";
+		//$this->db->simple_query($mSQL);
 	}
 }
