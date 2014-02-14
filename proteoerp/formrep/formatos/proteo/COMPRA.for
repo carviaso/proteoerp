@@ -18,8 +18,8 @@ $fecha    =dbdate_to_human($row->fecha);
 $numero   =$row->numero;
 $control  =$row->control;
 $depo     =trim($row->depo);
-$proveed  =htmlspecialchars($row->proveed);
-$nombre   =(empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
+$proveed  =$this->us_ascii2html($row->proveed);
+$nombre   =(empty($row->nomfis))? $this->us_ascii2html(trim($row->nombre)) : $this->us_ascii2html($row->nomfis);
 $montotot =$row->montotot;
 $montoiva =$row->montoiva;
 $montonet =$row->montonet;
@@ -149,8 +149,8 @@ foreach ($detalle AS $items){ $i++;
 	};
 ?>
 				<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-					<td style="text-align:left"><?php echo $items->codigo ?></td>
-					<td><?php echo htmlspecialchars($items->descrip) ?></td>
+					<td style="text-align:left"><?php echo $this->us_ascii2html($items->codigo) ?></td>
+					<td><?php echo $this->us_ascii2html($items->descrip) ?></td>
 					<td style="text-align: center"><?php echo nformat($items->cantidad,0)  ?></td>
 					<td style="text-align: right;"><?php echo nformat($items->costo).$moneda  ?></td>
 					<td style="text-align: right;"><?php echo "<b>".$items->alerta."</b>".nformat($items->precio2) ?></td>

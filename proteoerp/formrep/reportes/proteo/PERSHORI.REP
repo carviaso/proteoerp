@@ -1,0 +1,87 @@
+$base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, 'search'));
+$filter->title('Elija un formato de salida');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit','Descargar');
+$filter->build_form();
+
+$mContrato = $this->datasis->dameval("SELECT CONCAT(b.codigo,' ',b.nombre) FROM prenom a JOIN noco b ON a.contrato=b.codigo LIMIT 1");
+if($this->rapyd->uri->is_set('search')){
+
+	// Consulta las Columnas
+	$mSQL  = "SELECT a.concepto, b.encab1, b.encab2,  sum(a.valor) valor FROM prenom a JOIN conc b ON    a.concepto=b.concepto ";
+	$mSQL .= "WHERE MID(a.concepto,1,1)!='9'  GROUP BY concepto HAVING valor<>0 ";
+	$mEnca = $this->db->query($mSQL);
+	$cfilas=$mEnca->num_rows();
+	if($cfilas==0) die ('Nomina no generada o vacia');
+	$cfilas=$cfilas+2;
+	$cell_size=184/$cfilas;
+	//$mFONT2 = 6;
+	$mFONT1 = 6;
+	if($cfilas<=5)$cfilas=8;
+	$mFONT2 = 66/$cfilas;
+	if($mFONT2>14) $mFONT2=14;
+
+	$mSQL = "SELECT b.divi, b.depto, a.codigo, CONCAT(RTRIM(b.nombre),' ' ,b.apellido)  nombre, CONCAT(b.divi, b.depto) dividep  ";
+	foreach ($mEnca->result() as $row){
+		$mSQL .= ", SUM(valor*(concepto='".$row->concepto."'))  C".$row->concepto ;
+	}
+	$fecha=$this->datasis->dameval("SELECT DATE_FORMAT(fecha, '%d/%m/%Y') FROM prenom ORDER BY fecha DESC LIMIT 1");
+
+	$valor=$this->datasis->dameval("SELECT IF(b.tipo='Q','15',IF(b.tipo='S','7',IF(b.tipo='M','30','0'))) AS periodo
+	FROM prenom AS a
+	JOIN noco AS b on a.contrato=b.codigo
+	LIMIT 1");
+	$dbvalor=$this->db->escape($valor);
+
+	$fechad=$this->datasis->dameval("SELECT SUBDATE('${fecha}', INTERVAL  ${dbvalor} DAY) ");
+
+	$mSQL .= ", SUM(a.valor) totalnom, ";
+	$mSQL .= "COALESCE((SELECT SUM(IF(d.monto-d.abonos-c.cuota>0, c.cuota, d.monto-d.abonos )) neto ";
+	$mSQL .= "FROM pres c JOIN smov d ON  c.cod_cli=d.cod_cli AND c.tipo_doc=d.tipo_doc AND c.numero=d.numero WHERE c.codigo=a.codigo AND c.apartir<=a.fecha),0) AS  prestamo ";
+	$mSQL .= "FROM prenom a JOIN pers b ON a.codigo=b.codigo ";
+	$mSQL .= "WHERE MID(a.concepto,1,1) != '9' ";
+	$mSQL .= "GROUP BY a.codigo ORDER BY dividep, a.codigo ";
+
+	//echo $mSQL;
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('CONTRATO '.$mContrato);
+	$pdf->setSubTitulo("Periodo ${fechad} Hasta  ${fecha}");
+
+	$pdf->AddPage();
+	$pdf->setTableTitu($mFONT2,'Times');
+
+	$pdf->AddCol('codigo' ,  13 ,array('Código',' ')                ,'L', $mFONT1 );
+	$pdf->AddCol('nombre' ,  42 ,array('Nombre del ','Trabajador ') ,'L' ,$mFONT1 );
+
+	foreach ($mEnca->result() as $row){
+		$pdf->AddCol('C'.$row->concepto, $cell_size,  array($row->encab1, $row->encab2) ,'R', $mFONT2);
+		$pdf->setTotalizar('C'.$row->concepto);
+	}
+	//print_r($row);
+
+	$pdf->AddCol('totalnom', $cell_size,  array('TOTAL','NOMINA')          ,'R', $mFONT2);
+	$pdf->AddCol('prestamo', $cell_size,  array('CUOTA DE ','PRESTAMO')    ,'R', $mFONT2);
+	$pdf->AddCof('<#totalnom#>-<#prestamo#>', 20,  array('NETO','A PAGAR') ,'R', $mFONT2);
+	$pdf->setTotalizar('totalnom','prestamo','__cC0');
+
+	$pdf->setGrupoLabel(' <#depto#> ');
+	$pdf->setGrupo('depto');
+	$pdf->Table();
+
+	$pdf->Output();
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">CONTRATO '.$mContrato.'</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

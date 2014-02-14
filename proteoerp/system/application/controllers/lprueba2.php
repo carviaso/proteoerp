@@ -1,8 +1,8 @@
 <?php
 class Lprueba2 extends Controller {
- 
+
 	var $cargo=0;
-	
+
 	function Lprueba2(){
 		parent::Controller();
 		$this->load->library("rapyd");
