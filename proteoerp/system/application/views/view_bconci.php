@@ -218,7 +218,7 @@ function totalizar(){
 
 	var saldoi = Number($('#saldoi').val());
 	var saldof = Number($('#saldof').val());
-	var tconcil= saldof-saldoi+total;
+	var tconcil= saldof-saldoi-total;
 	$("#tconcil").text(nformat(tconcil,2));
 
 	//$("#total").val(roundNumber(total,2));
