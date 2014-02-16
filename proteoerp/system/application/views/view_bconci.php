@@ -34,7 +34,7 @@ $(function(){
 
 	jQuery("#tliable").jqGrid({
 		datatype: "local",
-		height: 230,
+		height: 250,
 		colNames:["Fecha","Tipo", "N&uacute;mero", "Monto"," "],
 		colModel:[
 			{name:"fecha"  , index:"fecha"  , width:70   },
@@ -216,6 +216,11 @@ function totalizar(){
 		}
 	});
 
+	var saldoi = Number($('#saldoi').val());
+	var saldof = Number($('#saldof').val());
+	var tconcil= saldof-saldoi+total;
+	$("#tconcil").text(nformat(tconcil,2));
+
 	//$("#total").val(roundNumber(total,2));
 	$("#conciliado").text(nformat(total,2));
 	$("#deposito").val(roundNumber(de,2));
@@ -295,7 +300,11 @@ function totalizar(){
 			</table>
 
 			<p style='text-align:center;font-size:2em'>
-				<span style='font-size:2em;' id='conciliado'><?php
+				<?php if($form->_status!='show'){ ?>
+				<span style='font-size:1.2em;color:#1900FF' id='tconcil'>0,0</span>
+				<br><span style='font-size:0.5em;color:#1900FF'>Monto por conciliar</span><br>
+				<?php } ?>
+				<span style='font-size:1.8em;' id='conciliado'><?php
 				$tota = $form->deposito->value+$form->credito->value-$form->cheque->value-$form->debito->value;
 				echo ($form->_status=='show')? nformat($tota):nformat(0); ?></span>
 				<br><span style='font-size:0.5em;'>Monto conciliado</span>

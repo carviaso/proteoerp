@@ -170,9 +170,12 @@ class Comparativo extends Controller {
 		//$filter->db->join('line AS c' ,'c.linea=b.linea');
 		//$filter->db->join('dpto AS d' ,'c.depto=d.depto');
 		$filter->db->join('sinv AS s' ,'a.codigo=s.codigo');
-		$filter->db->where('s.activo','S');
+		//$filter->db->where('s.activo','S');
 		$filter->db->where('s.tipo','Articulo');
 		$filter->db->groupby('a.descrip');
+
+		//Agregar proveedor y filtro de activo, columna de activo maximo=doble minu +1 predeterminado, guardar historial de cambios
+		//Diferencias porcentual enete el minimo calculado y el minimo actual-
 
 		$filter->fechad = new dateonlyField("Desde", "fechad",'m/Y');
 		$filter->fechah = new dateonlyField("Hasta", "fechah",'m/Y');

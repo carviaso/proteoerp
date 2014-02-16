@@ -204,7 +204,7 @@ class Bconci extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 510, width: 700, modal: true,
+			autoOpen: false, height: 540, width: 750, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -588,6 +588,7 @@ class Bconci extends Controller {
 		$edit->saldoi->rule='numeric|required';
 		$edit->saldoi->insertValue='0.0';
 		$edit->saldoi->css_class='inputnum';
+		$edit->saldoi->onkeyup='totalizar()';
 		$edit->saldoi->size =15;
 		$edit->saldoi->maxlength =18;
 
@@ -595,6 +596,7 @@ class Bconci extends Controller {
 		$edit->saldof->insertValue='0.0';
 		$edit->saldof->rule='numeric|required';
 		$edit->saldof->css_class='inputnum';
+		$edit->saldof->onkeyup='totalizar()';
 		$edit->saldof->size =15;
 		$edit->saldof->maxlength =18;
 
