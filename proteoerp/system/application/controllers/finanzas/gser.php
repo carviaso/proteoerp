@@ -3106,7 +3106,7 @@ class gser extends Controller {
 		$data['benefi']     = $benefi;
 		$data['posdata']    = '';
 		$data['abanco']     = '';
-		$data['liable']     = ($ttipo=='CAJ') ? 'S': 'N';;
+		$data['liable']     = ($ttipo=='CAJ') ? 'N': 'S';
 		$data['transac']    = $transac;
 		$data['usuario']    = $this->session->userdata('usuario');
 		$data['estampa']    = date('Y-m-d');
