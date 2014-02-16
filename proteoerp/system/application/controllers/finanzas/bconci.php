@@ -147,8 +147,8 @@ class Bconci extends Controller {
 
 		$bodyscript .= '
 		$("#impbtn").click( function(){
-			var id = jQuery("'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
 				var ret = jQuery("'.$grid0.'").jqGrid(\'getRowData\',id);
 				window.open(\''.site_url('formatos/ver/BCONCI').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
 			} else { $.prompt("<h1>Por favor Seleccione un registro</h1>");}
