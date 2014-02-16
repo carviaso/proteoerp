@@ -1,233 +1,322 @@
 <?php
-$maxlin=33; //Maximo de lineas de items.
+echo $form_begin;
 
-if(count($parametros) < 0) show_error('Faltan parametros');
-$id=$parametros[0];
+$container_tr=join('&nbsp;', $form->_button_container['TR']);
+$container_bl=join('&nbsp;', $form->_button_container['BL']);
+$container_br=join('&nbsp;', $form->_button_container['BR']);
 
-$sel=array(
-	'a.fecha','a.codbanc','a.numcuent',
-	'a.banco','a.saldoi','a.saldof',
-	'a.deposito','a.credito','a.cheque',
-	'a.debito','a.cdeposito'
-);
-$this->db->select($sel);
-$this->db->from('bconci AS a');
-$this->db->where('a.id', $id);
+if($form->_status!='show'){
 
-$mSQL_1 = $this->db->get();
-if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
+	if($form->_status=='create'){
+		$jsfecha  = '$(\'#fecha\').val()';
+		$jscodban = '$(\'#codbanc\').val()';
+	}else{
+		$jsfecha  = $form->js_escape(dbdate_to_human($form->fecha->value, $form->fecha->format));
+		$jscodban = $form->js_escape($form->codbanc->value);
+	}
+?>
+<script language="javascript" type="text/javascript">
+var bmov_cont =0;
 
-$row = $mSQL_1->row();
-$numero  = $id;
-$codbanc = $row->codbanc;
-$banco   = $this->us_ascii2html(trim($row->banco));
-$fecha   = $row->fecha;
-$hfecha  = dbdate_to_human($row->fecha);
-$saldoi  = nformat($row->saldoi);
-$saldof  = nformat($row->saldof);
-$conciliado=nformat($row->deposito-$row->cheque+$row->credito-$row->debito);
-$diff    = nformat($row->deposito-$row->cheque+$row->credito-$row->debito-$row->saldof);
+$(function(){
+	$("#fecha").datepicker({
+		dateFormat:"mm/yy",
+		onSelect: function(dateText) {
+			cambiaban();
+		},
+	});
 
-$sel=array('a.numero','a.fecha','a.concepto','a.tipo_op',"IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto AS monto");
-$this->db->select($sel);
+	$("#codbanc").change(function(){
+		cambiaban();
+	});
 
-$this->db->from('bmov AS a');
-$this->db->where('a.fecha <=' ,$fecha);
-$this->db->where('a.codbanc'  ,$codbanc);
-$this->db->where('a.liable'   ,'S');
-$this->db->where('a.anulado'  ,'N');
-$this->db->where('a.status <>'  ,'û');
-$this->db->orderby('a.tipo_op,a.fecha');
-$mSQL_2 = $this->db->get();
-$detalle = $mSQL_2->result();
+	$(".inputnum").numeric(".");
 
-$ittot['monto']=$lineas=0;
-?><html>
-<head>
-<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
-<title>Conciliacion Bancaria <?php echo $id ?></title>
-<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
-</head>
-<body style="margin-left: 30px; margin-right: 30px;">
-<script type="text/php">
-	if (isset($pdf)){
-		$texto = array();
-		$font  = Font_Metrics::get_font("verdana");
-		$size  = 6;
-		$color = array(0,0,0);
-		$text_height = Font_Metrics::get_font_height($font, $size);
-		$w     = $pdf->get_width();
-		$h     = $pdf->get_height();
-		$y     = $h - $text_height - 24;
+	jQuery("#tliable").jqGrid({
+		datatype: "local",
+		height: 250,
+		colNames:["Fecha","Tipo", "N&uacute;mero", "Monto"," "],
+		colModel:[
+			{name:"fecha"  , index:"fecha"  , width:70   },
+			{
+				name: "tipo",
+				index:"tipo",
+				align:"center",
+				width:45,
+				formatter: function (cellvalue, options, rowObject) {
+					return cellvalue+'<input type="hidden" name="ittipo_'+rowObject.id+'" id="ittipo_'+rowObject.id+'" value="'+cellvalue+'">';
+				}
+			},
+			{name:"numero" , index:"numero" , width:100 , align:"right" },
+			{
+				name: "monto",
+				index:"monto",
+				width:100,
+				align:"right",
+				sorttype:"float",
+				formatter: function (cellvalue, options, rowObject) {
+					return nformat(cellvalue,2)+'<input type="hidden" name="itmonto_'+rowObject.id+'" id="itmonto_'+rowObject.id+'" value="'+cellvalue+'">';
+				}
+			},
+			{
+				name:'concilia',
+				width:40,
+				align:"center",
+				formatter: function (cellvalue, options, rowObject) {
+					if(cellvalue){
+						checkp = 'checked="checked"';
+					}else{
+						checkp = '';
+					}
+					return '<input type="checkbox" name="itid_'+rowObject.id+'" id="itid_'+rowObject.id+'" value="'+rowObject.id+'" onchange="tilda('+rowObject.id+')" '+checkp+'>';
+				}
+			}
 
-		//***Inicio cuadro
-		//**************VARIABLES MODIFICABLES***************
-		$texto[]='Elaborado por';
-		$texto[]='Auditoria';
-		$texto[]='Autorizado por:';
-		$texto[]='Fecha ____/____/_______';
+		],
+		multiselect: false,
+		caption: "Efectos liables",
+		rowNum:9000000000,
+		onSelectRow:
+			function(id){
+				if (id){
+					//var ret = $(gridId1).getRowData(id);
+					$.get('<?php echo site_url('finanzas/bconci/localizador'); ?>'+'/'+id,
+						function(data){
+							$("#traconsul").html(data);
+					});
+				}
+			}
 
-		$cuadros = 0;   //Cantidad de cuadros (en caso de ser 0 calcula la cantidad)
-		$margenh = 40;  //Distancia desde el borde derecho e izquierdo
-		$margenv = 80;  //Distancia desde el borde inferior
-		$alto    = 50;  //Altura de los cuadros
-		$size    = 9;   //Tamanio del texto en los cuadros
-		$color   = array(0,0,0); //Color del marco
-		$lcolor  = array(0,0,0); //Color de la letra
-		////**************************************************
+		//multiselect: true
+	});
 
-		$cuadros = ($cuadros>0) ? $cuadros : count($texto);
-		$cuadro  = $pdf->open_object();
-		$margenl = $margenv-$alto+$text_height+5;    //Margen de la letra desde el borde inferior
-		$ancho   = intval(($w-2*$margenh)/$cuadros); //Ancho de cada cuadro
-		for($i=0;$i<$cuadros;$i++){
-			$pdf->rectangle($margenh+$i*$ancho, $h-$margenv, $ancho, $alto,$color, 1);
-			if(isset($texto[$i])){
-				$width = Font_Metrics::get_text_width($texto[$i],$font,$size);
-				$pdf->text($margenh+$i*$ancho+intval($ancho/2)-intval($width/2), $h-$margenl, $texto[$i], $font, $size, $lcolor);
+	cambiaban();
+});
+
+
+function cambiaban(){
+	var codbanc= <?php echo $jscodban; ?>;
+	var fecha  = <?php echo $jsfecha ; ?>;
+	if(codbanc!='' && fecha!=''){
+		jQuery("#tliable").jqGrid("clearGridData",true).trigger("reloadGrid");
+		$.ajax({
+			url: "<?php echo site_url('ajax/buscaconci'); ?>",
+			dataType: "json",
+			type: "POST",
+			data: {"codbanc" : codbanc , "fecha": fecha},
+			success: function(data){
+					var cana = 0;
+					$.each(data,
+						function(id, val){
+							//val.rowid = id;
+							jQuery("#tliable").jqGrid("addRowData",val.id,val);
+							cana ++;
+						}
+					);
+					totalizar();
+				},
+		});
+	}
+}
+
+function actualizalist(){
+	var codbanc= <?php echo $jscodban; ?>;
+	var fecha  = <?php echo $jsfecha ; ?>;
+	if(codbanc!='' && fecha!=''){
+
+		//Eliminas las no tildadas
+		var lista = jQuery("#tliable").getDataIDs();
+		for(i=0;i<lista.length;i++){
+			//rowData = jQuery("#tliable").getRowData(lista[i]);
+			if(!$('#itid_'+lista[i]).is(':checked')){
+				jQuery("#tliable").delRowData(lista[i]);
 			}
 		}
-		//***Fin del cuadro
+		//fin de la eliminacion de las no tildadas
 
-		$pdf->close_object();
-		$pdf->add_object($cuadro,'add');
-
-		$text = "PP {PAGE_NUM} de {PAGE_COUNT}";
-
-		// Center the text
-		$width = Font_Metrics::get_text_width('PP 1 de 2', $font, $size);
-		$pdf->page_text($w / 2 - $width / 2, $y, $text, $font, $size, $color);
+		$.ajax({
+			url: "<?php echo site_url('ajax/buscaconci'); ?>",
+			dataType: "json",
+			type: "POST",
+			data: {"codbanc" : codbanc , "fecha": fecha},
+			success: function(data){
+					var cana = 0;
+					$.each(data,
+						function(id, val){
+							//val.rowid = id;
+							if(jQuery.isEmptyObject(jQuery("#tliable").jqGrid('getRowData', val.id))){
+								jQuery("#tliable").jqGrid("addRowData",val.id,val);
+							}
+						}
+					);
+					totalizar();
+				},
+		});
 	}
-</script>
-<?php
-//************************
-//     Encabezado
-//************************
-$encabezado = "
-	<table style='width:100%;font-size: 9pt;' class='header' cellpadding='0' cellspacing='0'>
-		<tr>
-			<td valign='bottom'><h1 style='text-align:left; border-bottom:1px solid;font-size:12pt;'>CONCILIACI&Oacute;N BANCARIA  Nro. ${id}</h1></td>
-			<td valign='bottom' style='text-align:right;'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>FECHA: ${hfecha}</h1></td>
-		</tr><tr>
-			<td><b>Saldo seg&uacute;n estrato bancario</b> </td>
-			<td style='text-align:right;' ><b>$saldof</b></td>
-		</tr><tr>
-			<td><b>Saldo seg&uacute;n libro</b> </td>
-			<td style='text-align:right;' ><b>${conciliado}</b></td>
-		</tr><tr>
-			<td><b>Diferencia</b> </td>
-			<td style='text-align:right;' ><b>${diff}</b></td>
-		</tr>
-	</table><br>
-";
-// Fin  Encabezado
+}
 
-//************************
-//   Encabezado Tabla
-//************************
-$estilo  = "style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;";
-$encabezado_tabla="
-	<h1>Movimientos en transito</h1>
-	<table class=\"change_order_items\" style=\"padding-top:0; \">
-		<thead>
-			<tr>
-				<th ${estilo}' >Fecha</th>
-				<th ${estilo}' >N&uacute;mero</th>
-				<th ${estilo}' >Concepto</th>
-				<th ${estilo}' >Monto</th>
-			</tr>
-		</thead>
-		<tbody>
-";
-//Fin Encabezado Tabla
+function del_itbmov(id){
+	id = id.toString();
+	$('#tr_bmov_'+id).remove();
+}
 
-//************************
-//     Pie Pagina
-//************************
-$pie_final=<<<piefinal
-		</tbody>
-		<tfoot style='border:1px solid;background:#EEEEEE;'>
-			<tr>
-				<td style="text-align: right;" colspan='3'><b>TOTAL</b></td>
-				<td style="text-align: right;font-size:16px;font-weight:bold;" > %s </td>
-			</tr>
-		</tfoot>
-
-	</table>
-piefinal;
-
-$pie_continuo=<<<piecontinuo
-		</tbody>
-		<tfoot>
-			<tr>
-				<td colspan="4" style="text-align: right;">CONTINUA...</td>
-			</tr>
-		</tfoot>
-	</table>
-<div style="page-break-before: always;"></div>
-piecontinuo;
-//Fin Pie Pagina
-
-$mod     = $clinea = false;
-
-$titus=array(
-	'DE'=>'Dep&oacute;sitos',
-	'CH'=>'Cheques',
-	'NC'=>'Notas de Cr&eacute;dito',
-	'ND'=>'Notas de d&eacute;bito',
-);
-$this->incluir('X_CINTILLO');
-echo $encabezado;
-echo $encabezado_tabla;
-$npagina = false;
-$i       = 0;
-$tipo_op = '';
-foreach ($detalle AS $items2){ $i++;
-	do {
-		if($npagina){
-			$this->incluir('X_CINTILLO');
-			echo $encabezado;
-			echo $encabezado_tabla;
-			$npagina=false;
-		}
-	if($items2->tipo_op!=$tipo_op){ ?>
-	<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-		<td rowspan='4'><?php echo (isset($titus[$items2->tipo_op]))? $titus[$items2->tipo_op] : 'Documentos'; ?></td>
-	</tr>
-	<?php } ?>
-			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-
-				<td style="text-align: left"  ><?php echo dbdate_to_human($items2->fecha); ?></td>
-				<td style="text-align: left"  ><?php echo $items2->tipo_op.$items2->numero; ?></td>
-				<td style="text-align: left"  ><?php echo $items2->concepto; ?></td>
-				<td style="text-align: right" ><?php echo nformat($items2->monto); ?></td>
-				<?php
-				$ittot['monto'] += $items2->monto;
-				$lineas++;
-				if($lineas > $maxlin){
-					$lineas =0;
-					$npagina=true;
-					echo $pie_continuo;
-					break;
+function tilda(id){
+	if(id>0){
+		//Realiza lo marca de conciliado
+		var fecha =<?php echo $jsfecha ; ?>;
+		$.ajax({
+			url: "<?php echo site_url('finanzas/bconci/concilia'); ?>",
+			dataType: "json",
+			type: "POST",
+			data: {"id" : id ,"fecha": fecha, act : $('#itid_'+id).is(':checked')},
+			success: function(data){
+				if(data.status=='A'){
+					jQuery("#tliable").jqGrid('getLocalRow', id).concilia = ! jQuery("#tliable").jqGrid('getLocalRow', id).concilia;
+				}else{
+					$('#itid_'+id).attr("checked", !$('#itid_'+id).attr("checked"));
+					$.prompt(data.msj);
 				}
-				?>
-			</tr>
-<?php
-
-		$mod = ! $mod;
-	} while ($clinea);
+				totalizar();
+			}
+		}).fail(function() { $('#itid_'+id).attr("checked", !$('#itid_'+id).attr("checked")); });
+		//fin de la marca
+	}
 }
 
-for(1;$lineas<$maxlin;$lineas++){ ?>
-			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-				<td>&nbsp;</td>
-			</tr>
-<?php
-	$mod = ! $mod;
+function totalizar(){
+
+	var total = 0;
+	var nc = 0;
+	var nd = 0;
+	var ch = 0;
+	var de = 0;
+	var arr=$('input[name^="itid_"]');
+	jQuery.each(arr, function() {
+		nom=this.name;
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			ind = this.name.substring(pos+1);
+			if(this.checked){
+				monto  = Number($('#itmonto_'+ind).val());
+				tipo   = $('#ittipo_'+ind).val();
+				if(tipo=='CH' || tipo=='ND'){
+					monto=(-1)*monto;
+				}
+				total  = total+monto;
+				if(tipo == 'CH'){
+					ch = ch+monto;
+				}else if(tipo == 'ND'){
+					nd = nd+monto;
+				}else if(tipo == 'NC'){
+					nc = nc+monto;
+				}else if(tipo == 'DE'){
+					de = de+monto;
+				}
+			}
+		}
+	});
+
+	var saldoi = Number($('#saldoi').val());
+	var saldof = Number($('#saldof').val());
+	var tconcil= saldof-saldoi-total;
+	$("#tconcil").text(nformat(tconcil,2));
+
+	//$("#total").val(roundNumber(total,2));
+	$("#conciliado").text(nformat(total,2));
+	$("#deposito").val(roundNumber(de,2));
+	$("#cheque"  ).val(roundNumber((-1)*ch,2));
+	$("#debito"  ).val(roundNumber((-1)*nd,2));
+	$("#credito" ).val(roundNumber(nc,2));
+
+	$("#deposito_val").text(nformat(de,2));
+	$("#cheque_val"  ).text(nformat((-1)*ch,2));
+	$("#debito_val"  ).text(nformat((-1)*nd,2));
+	$("#credito_val" ).text(nformat(nc,2));
+
+	var cdeposito= Number($("#cdeposito").val());
+	var ccheque  = Number($("#ccheque"  ).val());
+	var cdebito  = Number($("#cdebito"  ).val());
+	var ccredito = Number($("#ccredito" ).val());
+
+	$("#ddeposito").text(nformat(cdeposito-de,2));
+	$("#dcheque"  ).text(nformat(ccheque  +ch,2));
+	$("#ddebito"  ).text(nformat(cdebito  +nd,2));
+	$("#dcredito" ).text(nformat(ccredito -nc,2));
 }
-echo sprintf($pie_final,nformat($ittot['monto']));
-?></body>
-</html>
+
+</script>
+<?php } ?>
+
+<?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
+<table style='width:100%'>
+	<tr>
+		<td colspan='2'>
+			<table style='width:100%;font-size:11pt;background:#F2E69D;'>
+				<tr>
+					<td><b><?php echo $form->codbanc->label;?>*</b></td>
+					<td colspan='3'><?php echo $form->codbanc->output;  ?></td>
+				</tr><tr>
+					<td style='width:25%'><b><?php echo $form->deposito->label;  ?></b></td>
+					<td style='width:25%' align="right"><?php echo $form->deposito->output;  ?></td>
+					<td style='width:25%' align="right"><?php echo $form->cdeposito->output; ?></td>
+					<td style='width:25%' align="right"><span id='ddeposito'><?php echo ($form->_status=='show')? nformat($form->deposito->value-$form->cdeposito->value):nformat(0); ?></span></td>
+				</tr><tr>
+					<td><b><?php echo $form->credito->label;   ?></b></td>
+					<td align="right"><?php echo $form->credito->output;   ?></td>
+					<td align="right"><?php echo $form->ccredito->output;  ?></td>
+					<td align="right"><span id='dcredito'><?php echo ($form->_status=='show')? nformat($form->credito->value-$form->ccredito->value):nformat(0); ?></span></td>
+				</tr><tr>
+					<td><b><?php echo $form->cheque->label;    ?></b></td>
+					<td align="right"><?php echo $form->cheque->output;   ?></td>
+					<td align="right"><?php echo $form->ccheque->output;  ?></td>
+					<td align="right"><span id='dcheque'><?php echo ($form->_status=='show')? nformat($form->cheque->value-$form->ccheque->value):nformat(0); ?></span></td>
+				</tr><tr>
+					<td><b><?php echo $form->debito->label;    ?></b></td>
+					<td align="right"><?php echo $form->debito->output;   ?></td>
+					<td align="right"><?php echo $form->cdebito->output;  ?></td>
+					<td align="right"><span id='ddebito'><?php echo ($form->_status=='show')? nformat($form->debito->value-$form->cdebito->value):nformat(0); ?></span></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<?php if($form->_status!='show'){ ?>
+			<table id="tliable"></table>
+		<?php } ?>
+		</td>
+		<td style='vertical-align:text-top;width:100%;'>
+			<table style='font-size:11pt;width:100%;background:#C4C6FF;vertical-align:text-top;'>
+				<tr>
+					<td><b><?php echo $form->fecha->label;   ?>*</b></td>
+					<td align="right"><?php echo $form->fecha->output;  ?></td>
+				</tr><tr>
+					<td><b><?php echo $form->saldoi->label;  ?>*</b></td>
+					<td align="right"><?php echo $form->saldoi->output; ?></td>
+				</tr><tr>
+					<td><b><?php echo $form->saldof->label;  ?>*</b></td>
+					<td align="right"><?php echo $form->saldof->output; ?></td>
+				</tr>
+			</table>
+
+			<p style='text-align:center;font-size:2em'>
+				<?php if($form->_status!='show'){ ?>
+				<span style='font-size:1.2em;color:#1900FF' id='tconcil'>0,0</span>
+				<br><span style='font-size:0.5em;color:#1900FF'>Monto por conciliar</span><br>
+				<?php } ?>
+				<span style='font-size:1.8em;' id='conciliado'><?php
+				$tota = $form->deposito->value+$form->credito->value-$form->cheque->value-$form->debito->value;
+				echo ($form->_status=='show')? nformat($tota):nformat(0); ?></span>
+				<br><span style='font-size:0.5em;'>Monto conciliado</span>
+			</p>
+			<?php if($form->_status!='show'){ ?>
+			<div id='traconsul' style='border: 1px solid #9AC8DA;background: #FAFAFA;overflow-y: auto;max-height:100px;'>
+				<p style="text-align:center">Seleccione cualquier efecto liable para ver los detalles.</p>
+			</div>
+			<?php } ?>
+		</td>
+	</tr>
+</table>
+
+<?php echo $container_bl.$container_br; ?>
+<?php echo $form_end; ?>
