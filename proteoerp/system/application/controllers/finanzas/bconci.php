@@ -146,36 +146,45 @@ class Bconci extends Controller {
 			';
 
 		$bodyscript .= '
-			$("#impbtn").click( function(){
-				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-				if(id){
-					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+		$("#impbtn").click( function(){
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url('formatos/ver/BCONCI').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-400), screeny=((screen.availWidth/2)-300)\');
+			} else { $.prompt("<h1>Por favor Seleccione un registro</h1>");}
+		});';
 
-					var form = document.createElement("form");
-					form.setAttribute("method", "post");
-					form.setAttribute("action", "'.site_url('reportes/ver/BCONCI/search/osp').'");
-
-					form.setAttribute("target", "repoconci");
-
-					var fecha = document.createElement("input");
-					fecha.setAttribute("name" , "fecha");
-					fecha.setAttribute("value", ret.fecha.substr(0,7));
-
-					var banco = document.createElement("input");
-					banco.setAttribute("name" , "codbanc");
-					banco.setAttribute("value", ret.codbanc);
-
-					form.appendChild(fecha);
-					form.appendChild(banco);
-					document.body.appendChild(form);
-
-					window.open(\''.site_url('reportes/ver/BCONCI').'\', \'repoconci\', \'scrollbars=yes,menubar=no,height=600,width=800,resizable=yes,toolbar=no,status=yes\');
-
-					form.submit();
-				}else{
-					$.prompt("<h1>Por favor Seleccione una Conciliaci&oacute;n.</h1>");
-				}
-			});';
+		//$bodyscript .= '
+		//	$("#impbtn").click( function(){
+		//		var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+		//		if(id){
+		//			var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+        //
+		//			var form = document.createElement("form");
+		//			form.setAttribute("method", "post");
+		//			form.setAttribute("action", "'.site_url('reportes/ver/BCONCI/search/osp').'");
+        //
+		//			form.setAttribute("target", "repoconci");
+        //
+		//			var fecha = document.createElement("input");
+		//			fecha.setAttribute("name" , "fecha");
+		//			fecha.setAttribute("value", ret.fecha.substr(0,7));
+        //
+		//			var banco = document.createElement("input");
+		//			banco.setAttribute("name" , "codbanc");
+		//			banco.setAttribute("value", ret.codbanc);
+        //
+		//			form.appendChild(fecha);
+		//			form.appendChild(banco);
+		//			document.body.appendChild(form);
+        //
+		//			window.open(\''.site_url('reportes/ver/BCONCI').'\', \'repoconci\', \'scrollbars=yes,menubar=no,height=600,width=800,resizable=yes,toolbar=no,status=yes\');
+        //
+		//			form.submit();
+		//		}else{
+		//			$.prompt("<h1>Por favor Seleccione una Conciliaci&oacute;n.</h1>");
+		//		}
+		//	});';
 
 		$bodyscript .= '
 			$("#cabtn").click( function(){

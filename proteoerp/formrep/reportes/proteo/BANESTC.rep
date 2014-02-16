@@ -5,7 +5,7 @@ $filter->db->select(array('fecha','tipo_op','numero', 'concepto', "(tipo_op NOT 
 $filter->db->from('bmov AS a');
 $filter->db->join('banc AS b','a.codbanc=b.codbanc');
 $filter->db->where('a.anulado <>','S');
-//$filter->db->orderby('fecha');
+$filter->db->orderby('fecha');
 
 /*$filter->fecha = new dateonlyField('Desde', 'fechad','m/Y');
 $filter->fecha->clause  ='where';
@@ -61,7 +61,7 @@ $filter->hasta->option('12','12 Diciembre');
 
 $filter->banco = new dropdownField('Caja/Banco', 'codbanc');
 $filter->banco->db_name='a.codbanc';
-$filter->banco->option('','Todas');
+$filter->banco->option('','Seleccionar');
 $filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");
 $filter->banco->rule = 'required';
 
@@ -74,22 +74,35 @@ $filter->buttons('search');
 $filter->build();
 if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 
-	$mSQL=$filter->db->_compile_select();
+	$mmSQL=$filter->db->_compile_select();
 	$mfdesde = $filter->ano->newValue.$filter->desde->newValue;
 	$mfhasta = $filter->ano->newValue.$filter->hasta->newValue;
+	$dbbanco = $this->db->escape($filter->banco->newValue);
 
-	$mSQL=$mSQL." UNION ALL
+	$anio = substr($mfdesde,0,4);
+	$bsal = floatval($this->datasis->dameval("SELECT saldo FROM bsal WHERE ano=${anio} AND codbanc=${dbbanco}"));
+	$mSALDOANT=floatval($this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE anulado='N' AND EXTRACT(YEAR_MONTH FROM fecha) <".$mfdesde."  AND EXTRACT(YEAR_MONTH FROM fecha)>=".$anio."01 AND codbanc = ${dbbanco}"));
+	$ssmonto = $bsal+$mSALDOANT;
+
+	$mSQL="SELECT DATE_ADD('".$mfdesde."01',INTERVAL -1 DAY) AS fecha, NULL AS tipo_op, ' ' AS numero,
+	'SALDO ANTERIOR -->' AS concepto,
+	IF(${ssmonto} > 0,${ssmonto},0 )     AS debitos,
+	IF(${ssmonto} > 0,0,ABS(${ssmonto})) AS creditos,
+	${ssmonto} AS saldo,
+	".$filter->desde->newValue." AS mes UNION ALL ";
+	$mSQL.=$mmSQL;
+
+	/*$mSQL=$mSQL." UNION ALL
 	SELECT DATE_ADD('".$mfdesde."01',INTERVAL -1 DAY) AS fecha, NULL, '00', 'SALDO ANTERIOR',
 	if(sum(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,sum(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as debitos,
-	if(sum(if(tipo_op IN ('CH','ND'),-1,1)*monto)<0,sum(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as creditos, 
+	if(sum(if(tipo_op IN ('CH','ND'),-1,1)*monto)<0,sum(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as creditos,
 	sum(if(tipo_op IN ('CH','ND'),-1,1)*monto) as saldo,
 	".$filter->desde->newValue." mes
 	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc
-	WHERE EXTRACT(YEAR_MONTH FROM fecha) < '".$mfdesde."' AND a.codbanc = '".$filter->banco->newValue."' AND a.anulado<>'S'
+	WHERE EXTRACT(YEAR_MONTH FROM fecha) < '".$mfdesde."' AND a.codbanc = ${dbbanco} AND a.anulado<>'S'
 	GROUP BY a.codbanc
-	ORDER BY fecha";
+	ORDER BY fecha";*/
 
-	$mSALDOANT=$this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE EXTRACT(YEAR_MONTH FROM fecha) <".$mfdesde."  AND codbanc = '".$filter->banco->newValue."'");
 	$mSALDOACT=0;
 	//echo $mSQL;
 
@@ -121,7 +134,7 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$pdf->setGrupoLabel('Mes: <#mes#> ');
 	$pdf->setGrupo('mes');
 
-	//$pdf->setAcumulador('saldo');
+	$pdf->setAcumulador('saldo');
 	//$pdf->add_fila('','','','Saldo anterior','100');
 	$pdf->Table();
 	//$pdf->add_fila('','','','Saldo actual','100');

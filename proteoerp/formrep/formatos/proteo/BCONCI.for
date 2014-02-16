@@ -26,7 +26,16 @@ $hfecha  = dbdate_to_human($row->fecha);
 $saldoi  = nformat($row->saldoi);
 $saldof  = nformat($row->saldof);
 $conciliado=nformat($row->deposito-$row->cheque+$row->credito-$row->debito);
-$diff    = nformat($row->deposito-$row->cheque+$row->credito-$row->debito-$row->saldof);
+
+$anio     = substr($fecha,0,4);
+$dbfecha  = $this->db->escape($fecha);
+$dbbanco  = $this->db->escape($row->codbanc);
+$bsal     = floatval($this->datasis->dameval("SELECT saldo FROM bsal WHERE ano=${anio} AND codbanc=${dbbanco}"));
+$mSALDOANT= floatval($this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE anulado='N' AND fecha<=$dbfecha  AND EXTRACT(YEAR_MONTH FROM fecha)>=".$anio."01 AND codbanc = ${dbbanco}"));
+$ssmonto  = $bsal+$mSALDOANT;
+
+$diff    = nformat($row->saldof-$ssmonto);
+$mlibro  = nformat($ssmonto);
 
 $sel=array('a.numero','a.fecha','a.concepto','a.tipo_op',"IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto AS monto");
 $this->db->select($sel);
@@ -36,7 +45,8 @@ $this->db->where('a.fecha <=' ,$fecha);
 $this->db->where('a.codbanc'  ,$codbanc);
 $this->db->where('a.liable'   ,'S');
 $this->db->where('a.anulado'  ,'N');
-$this->db->where('a.status <>'  ,'û');
+$this->db->where("(a.concilia='0000-00-00' OR a.concilia IS NULL)");
+//$this->db->where('a.status <>'  ,'û');
 $this->db->orderby('a.tipo_op,a.fecha');
 $mSQL_2 = $this->db->get();
 $detalle = $mSQL_2->result();
@@ -104,19 +114,19 @@ $ittot['monto']=$lineas=0;
 //     Encabezado
 //************************
 $encabezado = "
-	<table style='width:100%;font-size: 9pt;' class='header' cellpadding='0' cellspacing='0'>
+	<table style='width:100%;font-size: 12pt;' class='header' cellpadding='0' cellspacing='0'>
 		<tr>
 			<td valign='bottom'><h1 style='text-align:left; border-bottom:1px solid;font-size:12pt;'>CONCILIACI&Oacute;N BANCARIA  Nro. ${id}</h1></td>
 			<td valign='bottom' style='text-align:right;'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>FECHA: ${hfecha}</h1></td>
 		</tr><tr>
 			<td><b>Saldo seg&uacute;n estrato bancario</b> </td>
-			<td style='text-align:right;' ><b>$saldof</b></td>
+			<td style='text-align:right;font-size:1.5em' ><b>$saldof</b></td>
 		</tr><tr>
 			<td><b>Saldo seg&uacute;n libro</b> </td>
-			<td style='text-align:right;' ><b>${conciliado}</b></td>
+			<td style='text-align:right;font-size:1.5em' ><b>${mlibro}</b></td>
 		</tr><tr>
 			<td><b>Diferencia</b> </td>
-			<td style='text-align:right;' ><b>${diff}</b></td>
+			<td style='text-align:right;font-size:1.5em' ><b>${diff}</b></td>
 		</tr>
 	</table><br>
 ";
@@ -127,7 +137,7 @@ $encabezado = "
 //************************
 $estilo  = "style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;";
 $encabezado_tabla="
-	<h1>Movimientos en transito</h1>
+	<h1>Detalles de movimientos por conciliar</h1>
 	<table class=\"change_order_items\" style=\"padding-top:0; \">
 		<thead>
 			<tr>
@@ -148,8 +158,8 @@ $pie_final=<<<piefinal
 		</tbody>
 		<tfoot style='border:1px solid;background:#EEEEEE;'>
 			<tr>
-				<td style="text-align: right;" colspan='3'><b>TOTAL</b></td>
-				<td style="text-align: right;font-size:16px;font-weight:bold;" > %s </td>
+				<td style="text-align: right;font-size:1.5em;" colspan='3'><b>TOTAL GLOBAL DE MOVIMIENTOS EN TRANSITO</b></td>
+				<td style="text-align: right;font-size:1.5em;font-weight:bold;" > %s </td>
 			</tr>
 		</tfoot>
 
@@ -182,6 +192,7 @@ echo $encabezado_tabla;
 $npagina = false;
 $i       = 0;
 $tipo_op = '';
+$g_tota  = 0;
 foreach ($detalle AS $items2){ $i++;
 	do {
 		if($npagina){
@@ -190,18 +201,30 @@ foreach ($detalle AS $items2){ $i++;
 			echo $encabezado_tabla;
 			$npagina=false;
 		}
-	if($items2->tipo_op!=$tipo_op){ ?>
+	if($items2->tipo_op!=$tipo_op){
+		$tipo_op=$items2->tipo_op;
+		if($g_tota != 0){ $lineas++; ?>
 	<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-		<td rowspan='4'><?php echo (isset($titus[$items2->tipo_op]))? $titus[$items2->tipo_op] : 'Documentos'; ?></td>
+		<td colspan='3' align='right'><b style='text-size:1.3em;'>Total:</b></td>
+		<td  align='right'><?php echo nformat($g_tota); ?></td>
 	</tr>
-	<?php } ?>
+	<?php
+			$g_tota  = 0;
+		}
+	?>
+	<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
+		<td colspan='4'><b style='text-size:1.3em;'><?php echo (isset($titus[$items2->tipo_op]))? $titus[$items2->tipo_op] : 'Documentos'; ?></b></td>
+	</tr>
+
+	<?php $lineas++; } ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 
-				<td style="text-align: left"  ><?php echo dbdate_to_human($items2->fecha); ?></td>
+				<td style="text-align: left"  ><?php echo dbdate_to_human($items2->fecha);  ?></td>
 				<td style="text-align: left"  ><?php echo $items2->tipo_op.$items2->numero; ?></td>
 				<td style="text-align: left"  ><?php echo $items2->concepto; ?></td>
 				<td style="text-align: right" ><?php echo nformat($items2->monto); ?></td>
 				<?php
+				$g_tota += $items2->monto;
 				$ittot['monto'] += $items2->monto;
 				$lineas++;
 				if($lineas > $maxlin){
@@ -213,11 +236,19 @@ foreach ($detalle AS $items2){ $i++;
 				?>
 			</tr>
 <?php
-
 		$mod = ! $mod;
 	} while ($clinea);
 }
+$lineas++;
 
+if($g_tota !=0){
+?>
+<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
+	<td colspan='3' align='right'><b style='text-size:1.3em;'>Total:</b></td>
+	<td  align='right'><?php echo nformat($g_tota); ?></td>
+</tr>
+<?php
+}
 for(1;$lineas<$maxlin;$lineas++){ ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 				<td>&nbsp;</td>
