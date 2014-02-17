@@ -33,7 +33,7 @@ class Bconci extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'impbtn', 'img' =>'assets/default/images/print.png', 'alt' => 'Imprimir Conciliaci&oacute;n','label'=>'Imprimir Conciliaci&oacute;n'));
-		$grid->wbotonadd(array('id'=>'cabtn' , 'img'=>'images/precio.png'               , 'alt' => 'Abrir o cerrar consignaci&oacute;n', 'label'=>'Abrir/Cerrar conciliaci&oacute;n'));
+		$grid->wbotonadd(array('id'=>'cabtn' , 'img'=>'images/precio.png'               , 'alt' => 'Procesar o reversar consignaci&oacute;n', 'label'=>'Procesar/Reversar conciliaci&oacute;n'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -786,7 +786,8 @@ class Bconci extends Controller {
 				$dbstatus   = '\'û\'';
 			}else{
 				$factor     = -1;
-				$dbconcilia = 'NULL';
+				//$dbconcilia = 'NULL';
+				$dbconcilia = '\'0000-00-00\'';
 				$dbstatus   = '\'P\'';
 			}
 
@@ -977,8 +978,26 @@ class Bconci extends Controller {
 	}
 
 	function cstatus($id){
-		$dbid  = $this->db->escape($id);
-		$status= $this->datasis->dameval('SELECT status FROM bconci WHERE id='.$dbid);
+		$dbid = $this->db->escape($id);
+		$row  = $this->datasis->damerow('SELECT status,saldoi, saldof,fecha,codbanc FROM bconci WHERE id='.$dbid);
+
+		$rt=array('msj'=>'', 'status'=>'B');
+		if(empty($row)){
+			$rt['msj']    = 'Registro no encontrado';
+			$rt['status'] = 'B';
+			echo json_encode($rt);
+			return true;
+		}
+		$status  = $row['status'];
+		$dbcodbanc = $this->db->escape($row['codbanc']);
+		$arrfecha  = explode('-',$row['fecha']);
+
+		$dbfantes  = $this->db->escape(date('Y-m-d',mktime(0, 0, 0, $arrfecha[1]  , 0, $arrfecha[0])));
+		$dbfdespu  = $this->db->escape(date('Y-m-d',mktime(0, 0, 0, $arrfecha[1]+2, 0, $arrfecha[0])));
+
+		//$mSQL = "SELECT saldof FROM bconci WHERE codbanc=${dbcodban} AND fecha=${dbfantes}";
+		//$mSQL = "SELECT saldoi FROM bconci WHERE codbanc=${dbcodban} AND fecha=${dbfdespu}";
+
 		if($status=='A'){
 			$dbcstatus='\'C\'';
 		}else{

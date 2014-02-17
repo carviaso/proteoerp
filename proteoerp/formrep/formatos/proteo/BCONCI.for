@@ -7,8 +7,8 @@ $id=$parametros[0];
 $sel=array(
 	'a.fecha','a.codbanc','a.numcuent',
 	'a.banco','a.saldoi','a.saldof',
-	'a.deposito','a.credito','a.cheque',
-	'a.debito','a.cdeposito'
+	'a.deposito','a.credito','a.cheque','a.estampa',
+	'a.debito','a.cdeposito','a.status','a.numcuent'
 );
 $this->db->select($sel);
 $this->db->from('bconci AS a');
@@ -17,15 +17,25 @@ $this->db->where('a.id', $id);
 $mSQL_1 = $this->db->get();
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 
+$this->load->helper('fecha');
+
 $row = $mSQL_1->row();
 $numero  = $id;
 $codbanc = $row->codbanc;
 $banco   = $this->us_ascii2html(trim($row->banco));
 $fecha   = $row->fecha;
 $hfecha  = dbdate_to_human($row->fecha);
+$status  = $row->status;
 $saldoi  = nformat($row->saldoi);
 $saldof  = nformat($row->saldof);
+$numcuent= $row->numcuent;
+$estampa = dbdate_to_human($row->estampa);
 $conciliado=nformat($row->deposito-$row->cheque+$row->credito-$row->debito);
+if($status='C'){
+	$tstatus = 'PROCESADO';
+}else{
+	$tstatus = 'EN PROCESO';
+}
 
 $anio     = substr($fecha,0,4);
 $dbfecha  = $this->db->escape($fecha);
@@ -36,6 +46,8 @@ $ssmonto  = $bsal+$mSALDOANT;
 
 $diff    = nformat($row->saldof-$ssmonto);
 $mlibro  = nformat($ssmonto);
+$anio    = substr($fecha,0,4);
+$mes     = strtoupper(mesLetra(substr($fecha,5,2)));
 
 $sel=array('a.numero','a.fecha','a.concepto','a.tipo_op',"IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto AS monto");
 $this->db->select($sel);
@@ -46,7 +58,6 @@ $this->db->where('a.codbanc'  ,$codbanc);
 $this->db->where('a.liable'   ,'S');
 $this->db->where('a.anulado'  ,'N');
 $this->db->where("(a.concilia='0000-00-00' OR a.concilia IS NULL)");
-//$this->db->where('a.status <>'  ,'û');
 $this->db->orderby('a.tipo_op,a.fecha');
 $mSQL_2 = $this->db->get();
 $detalle = $mSQL_2->result();
@@ -75,7 +86,6 @@ $ittot['monto']=$lineas=0;
 		$texto[]='Elaborado por';
 		$texto[]='Auditoria';
 		$texto[]='Autorizado por:';
-		$texto[]='Fecha ____/____/_______';
 
 		$cuadros = 0;   //Cantidad de cuadros (en caso de ser 0 calcula la cantidad)
 		$margenh = 40;  //Distancia desde el borde derecho e izquierdo
@@ -116,8 +126,8 @@ $ittot['monto']=$lineas=0;
 $encabezado = "
 	<table style='width:100%;font-size: 12pt;' class='header' cellpadding='0' cellspacing='0'>
 		<tr>
-			<td valign='bottom'><h1 style='text-align:left; border-bottom:1px solid;font-size:12pt;'>CONCILIACI&Oacute;N BANCARIA  Nro. ${id}</h1></td>
-			<td valign='bottom' style='text-align:right;'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>FECHA: ${hfecha}</h1></td>
+			<td valign='bottom'><h1 style='text-align:left; border-bottom:1px solid;font-size:12pt;'>CONCILIACI&Oacute;N BANCARIA ${mes} $anio</h1></td>
+			<td valign='bottom' style='text-align:right;'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>REALIZADO: ${estampa}</h1></td>
 		</tr><tr>
 			<td><b>Saldo seg&uacute;n estrato bancario</b> </td>
 			<td style='text-align:right;font-size:1.5em' ><b>$saldof</b></td>
@@ -128,7 +138,8 @@ $encabezado = "
 			<td><b>Diferencia</b> </td>
 			<td style='text-align:right;font-size:1.5em' ><b>${diff}</b></td>
 		</tr>
-	</table><br>
+	</table>
+	<p style='text-size:2em;text-align:center;'>Banco: <b>${banco}</b> Cuenta: <b>${numcuent}</b> <b style='text-size:1.2em'>${tstatus}</b></p>
 ";
 // Fin  Encabezado
 
