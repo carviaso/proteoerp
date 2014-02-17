@@ -79,6 +79,16 @@ $filter->attributes=array('onsubmit'=>'is_loaded()');
 $filter->db->from('eventas AS a');
 $filter->db->join('sinv AS s' ,'a.codigo=s.codigo','LEFT');
 
+$estFecha = $this->datasis->dameval('SELECT MAX(fecha) AS fecha FROM eventas');
+if(empty($estFecha)){
+	$estMsj='No existen estad&iacute;sticas generadas, debe generarse primero para usar este reporte.';
+}else{
+	$estMsj='Por favor tenga en cuenta de que este es un reporte estad&iacute;stico, la informaci&oacute;n que se mostrar&aacute; ser&aacute; hasta el '.dbdate_to_human($estFecha).'.';
+}
+$filter->container = new containerField('alert',"<b style='color:#E50E0E;'>${estMsj}</b>");
+$filter->container->clause='';
+
+
 $filter->fechad = new dateonlyField('Desde', 'fechad','m/Y');
 $filter->fechah = new dateonlyField('Hasta', 'fechah','m/Y');
 $filter->fechad->dbformat='Y-m-';
@@ -158,7 +168,7 @@ $filter->ciudad->db_name='a.ciudad';
 $filter->ciudad->clause='where';
 $filter->ciudad->operator='=';
 $filter->ciudad->option('','Todas');
-$filter->ciudad->options('SELECT ciudad as codigo, ciudad FROM ciud ORDER BY ciudad');
+$filter->ciudad->options('SELECT TRIM(ciudad) AS codigo, ciudad FROM ciud ORDER BY ciudad');
 
 $filter->zona = new dropdownField('Zona', 'nombre');
 $filter->zona->db_name='a.zona';
@@ -182,17 +192,17 @@ $filter->marca->option('','Todas');
 $filter->marca->options('SELECT TRIM(marca) AS codigo, marca FROM marc ORDER BY marca');
 
 	$opciones=array(
-		array('opc' => form_radio('agrupo', '1', TRUE ).'Producto'     ),
-		array('opc' => form_radio('agrupo', '2', FALSE).'Grupo'        ),
-		array('opc' => form_radio('agrupo', '3', FALSE).'Línea'        ),
-		array('opc' => form_radio('agrupo', '4', FALSE).'Departamento' ),
-		array('opc' => form_radio('agrupo', '5', FALSE).'Cliente'      ),
-		array('opc' => form_radio('agrupo', '6', FALSE).'Grupo De cliente' ),
-		array('opc' => form_radio('agrupo', '7', FALSE).'Zona'      ),
-		array('opc' => form_radio('agrupo', '8', FALSE).'Vendedor'  ),
-		array('opc' => form_radio('agrupo', '9', FALSE).'Ciudad'    ),
-		array('opc' => form_radio('agrupo', 'A', FALSE).'Proveedor' ),
-		array('opc' => form_radio('agrupo', 'B', FALSE).'Marca'     )
+		array('opc' => form_radio('agrupo', '1', true ).'Producto'     ),
+		array('opc' => form_radio('agrupo', '2', false).'Grupo'        ),
+		array('opc' => form_radio('agrupo', '3', false).'Línea'        ),
+		array('opc' => form_radio('agrupo', '4', false).'Departamento' ),
+		array('opc' => form_radio('agrupo', '5', false).'Cliente'      ),
+		array('opc' => form_radio('agrupo', '6', false).'Grupo De cliente' ),
+		array('opc' => form_radio('agrupo', '7', false).'Zona'      ),
+		array('opc' => form_radio('agrupo', '8', false).'Vendedor'  ),
+		array('opc' => form_radio('agrupo', '9', false).'Ciudad'    ),
+		array('opc' => form_radio('agrupo', 'A', false).'Proveedor' ),
+		array('opc' => form_radio('agrupo', 'B', false).'Marca'     )
 	);
 
 	$grid = new DataTable(null,$opciones);

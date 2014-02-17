@@ -18,9 +18,9 @@ class repomenu extends validaciones {
 
 		function llink($nombre,$alternativo,$modulo){
 			if(!empty($nombre))
-				$uri  = anchor("supervisor/repomenu/dataedit/show/$nombre/$modulo",$nombre);
+				$uri  = anchor("supervisor/repomenu/dataedit/show/${nombre}/${modulo}",$nombre);
 			else
-				$uri  = anchor("supervisor/repomenu/dataedit/$alternativo/create",$alternativo);
+				$uri  = anchor("supervisor/repomenu/dataedit/${alternativo}/create",$alternativo);
 			return $uri;
 		}
 
@@ -34,7 +34,7 @@ class repomenu extends validaciones {
 			return $retorna ;
 		}
 
-		$sel=array('b.nombre AS alternativo','a.nombre','a.modulo','a.titulo','a.mensaje','a.activo','b.reporte','b.proteo','b.harbour');
+		$sel=array('b.nombre AS alternativo','a.nombre','a.modulo','a.titulo','a.mensaje','a.activo','b.reporte','b.proteo','b.harbour','b.instancias');
 		$filter = new DataFilter('Filtro por Menu de Reportes');
 		$filter->db->select($sel);
 		$filter->db->from('intrarepo AS a');
@@ -48,7 +48,7 @@ class repomenu extends validaciones {
 		$filter->modulo = new dropdownField('Modulo','modulo');
 		$filter->modulo->db_name = 'a.modulo';
 		$filter->modulo->option('','Todos');
-		$filter->modulo->options('SELECT modulo,modulo as value FROM intrarepo GROUP BY modulo');
+		$filter->modulo->options('SELECT modulo,modulo AS value FROM intrarepo GROUP BY modulo');
 		$filter->modulo->style='width:130px';
 		$filter->modulo->group = 'Uno';
 
@@ -123,6 +123,7 @@ class repomenu extends validaciones {
 		$grid->column('Proteo'  ,$uri1);
 		$grid->column('DataSIS' ,$uri2);
 		$grid->column('Harbour' ,$uri3);
+		$grid->column_orderby('Inst.','instancias','instancias');
 		//$grid->column('TCPDF'   ,$uri5);
 		$grid->column('Ejecutar',$uri4);
 

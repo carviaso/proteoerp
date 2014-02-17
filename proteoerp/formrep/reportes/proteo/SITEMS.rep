@@ -101,7 +101,7 @@ $filter->codigo->append($iboton);
 $filter->codigo->group="Producto";
 
 $filter->cod_cli = new inputField('Cliente', 'cod_cli');
-$filter->cod_cli->db_name='a.cod_cli';
+$filter->cod_cli->db_name='b.cod_cli';
 $filter->cod_cli->clause='where';
 $filter->cod_cli->operator='=';
 $filter->cod_cli->rule='existescli';
