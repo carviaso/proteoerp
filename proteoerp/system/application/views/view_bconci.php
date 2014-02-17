@@ -74,7 +74,7 @@ $(function(){
 
 		],
 		multiselect: false,
-		caption: "Efectos liables",
+		caption: "Efectos liables. Seleccionar: <a style='color:#5BF2E5;font-weight:bold;' href='javascript:tildatodos()'>Todos</a> <a style='color:#5BF2E5;font-weight:bold;' href='javascript:destildatodos()'>Ninguno</a> <a style='color:#5BF2E5;font-weight:bold;' href='javascript:inviertetodos()'>Invertir</a>",
 		rowNum:9000000000,
 		onSelectRow:
 			function(id){
@@ -182,6 +182,32 @@ function tilda(id){
 		//fin de la marca
 	}
 }
+
+function tildatodos(){
+	$('[id^="itid_"]:checkbox').each(function(){
+		if(!$(this).is(':checked')){
+			$(this).attr('checked',true);
+			tilda($(this).attr('value'));
+		}
+	});
+}
+
+function destildatodos(){
+	$('[id^="itid_"]:checkbox').each(function(){
+		if($(this).is(':checked')){
+			$(this).attr('checked',false);
+			tilda($(this).attr('value'));
+		}
+	});
+}
+
+function inviertetodos(){
+	$('[id^="itid_"]:checkbox').each(function(){
+		$(this).attr("checked", !$(this).attr("checked"));
+		tilda($(this).attr('value'));
+	});
+}
+
 
 function totalizar(){
 

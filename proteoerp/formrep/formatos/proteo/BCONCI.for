@@ -26,11 +26,11 @@ $banco   = $this->us_ascii2html(trim($row->banco));
 $fecha   = $row->fecha;
 $hfecha  = dbdate_to_human($row->fecha);
 $status  = $row->status;
-$saldoi  = nformat($row->saldoi);
-$saldof  = nformat($row->saldof);
+$saldoi  = htmlnformat($row->saldoi);
+$saldof  = htmlnformat($row->saldof);
 $numcuent= $row->numcuent;
 $estampa = dbdate_to_human($row->estampa);
-$conciliado=nformat($row->deposito-$row->cheque+$row->credito-$row->debito);
+$conciliado=htmlnformat($row->deposito-$row->cheque+$row->credito-$row->debito);
 if($status='C'){
 	$tstatus = 'PROCESADO';
 }else{
@@ -44,8 +44,8 @@ $bsal     = floatval($this->datasis->dameval("SELECT saldo FROM bsal WHERE ano=$
 $mSALDOANT= floatval($this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE anulado='N' AND fecha<=$dbfecha  AND EXTRACT(YEAR_MONTH FROM fecha)>=".$anio."01 AND codbanc = ${dbbanco}"));
 $ssmonto  = $bsal+$mSALDOANT;
 
-$diff    = nformat($row->saldof-$ssmonto);
-$mlibro  = nformat($ssmonto);
+$diff    = htmlnformat($row->saldof-$ssmonto);
+$mlibro  = htmlnformat($ssmonto);
 $anio    = substr($fecha,0,4);
 $mes     = strtoupper(mesLetra(substr($fecha,5,2)));
 
@@ -126,20 +126,26 @@ $ittot['monto']=$lineas=0;
 $encabezado = "
 	<table style='width:100%;font-size: 12pt;' class='header' cellpadding='0' cellspacing='0'>
 		<tr>
-			<td valign='bottom'><h1 style='text-align:left; border-bottom:1px solid;font-size:12pt;'>CONCILIACI&Oacute;N BANCARIA ${mes} $anio</h1></td>
+			<td colspan='2' valign='bottom'><h1 style='text-align:left; border-bottom:1px solid;font-size:12pt;'>CONCILIACI&Oacute;N BANCARIA ${mes} $anio</h1></td>
 			<td valign='bottom' style='text-align:right;'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>REALIZADO: ${estampa}</h1></td>
 		</tr><tr>
+			<td rowspan='3'>
+				<p style='text-align:center;'>
+				<span style='font-size: 0.6em;'>Banco</span><br><b>${banco}</b><br>
+				<span style='font-size: 0.6em;'>Nro. Cuenta</span><br><b>${numcuent}</b><br>
+				<span style='font-size: 1.3em;'>*${tstatus}*</span>
+				</p>
+			</td>
 			<td><b>Saldo seg&uacute;n estrato bancario</b> </td>
-			<td style='text-align:right;font-size:1.5em' ><b>$saldof</b></td>
+			<td style='text-align:right;font-size:1.5em' ><b>${saldof}</b></td>
 		</tr><tr>
 			<td><b>Saldo seg&uacute;n libro</b> </td>
-			<td style='text-align:right;font-size:1.5em' ><b>${mlibro}</b></td>
+			<td style='text-align:right;font-size:1.5em;border-bottom-style: solid;' ><b>${mlibro}</b></td>
 		</tr><tr>
 			<td><b>Diferencia</b> </td>
-			<td style='text-align:right;font-size:1.5em' ><b>${diff}</b></td>
+			<td style='text-align:right;font-size:1.5em;' ><b>${diff}</b></td>
 		</tr>
 	</table>
-	<p style='text-size:2em;text-align:center;'>Banco: <b>${banco}</b> Cuenta: <b>${numcuent}</b> <b style='text-size:1.2em'>${tstatus}</b></p>
 ";
 // Fin  Encabezado
 
@@ -216,8 +222,8 @@ foreach ($detalle AS $items2){ $i++;
 		$tipo_op=$items2->tipo_op;
 		if($g_tota != 0){ $lineas++; ?>
 	<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-		<td colspan='3' align='right'><b style='text-size:1.3em;'>Total:</b></td>
-		<td  align='right'><?php echo nformat($g_tota); ?></td>
+		<td colspan='3' align='right'><b style='text-size:1.3em;'>Total parcial:</b></td>
+		<td  align='right'><?php echo htmlnformat($g_tota); ?></td>
 	</tr>
 	<?php
 			$g_tota  = 0;
@@ -233,7 +239,7 @@ foreach ($detalle AS $items2){ $i++;
 				<td style="text-align: left"  ><?php echo dbdate_to_human($items2->fecha);  ?></td>
 				<td style="text-align: left"  ><?php echo $items2->tipo_op.$items2->numero; ?></td>
 				<td style="text-align: left"  ><?php echo $items2->concepto; ?></td>
-				<td style="text-align: right" ><?php echo nformat($items2->monto); ?></td>
+				<td style="text-align: right" ><?php echo htmlnformat($items2->monto); ?></td>
 				<?php
 				$g_tota += $items2->monto;
 				$ittot['monto'] += $items2->monto;
@@ -252,11 +258,11 @@ foreach ($detalle AS $items2){ $i++;
 }
 $lineas++;
 
-if($g_tota !=0){
+if($g_tota!=0){
 ?>
 <tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-	<td colspan='3' align='right'><b style='text-size:1.3em;'>Total:</b></td>
-	<td  align='right'><?php echo nformat($g_tota); ?></td>
+	<td colspan='3' align='right'><b style='text-size:1.3em;'>Total parcial:</b></td>
+	<td  align='right'><?php echo htmlnformat($g_tota); ?></td>
 </tr>
 <?php
 }
@@ -270,6 +276,6 @@ for(1;$lineas<$maxlin;$lineas++){ ?>
 <?php
 	$mod = ! $mod;
 }
-echo sprintf($pie_final,nformat($ittot['monto']));
+echo sprintf($pie_final,htmlnformat($ittot['monto']));
 ?></body>
 </html>

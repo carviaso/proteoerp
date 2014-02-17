@@ -766,6 +766,7 @@ class Bconci extends Controller {
 	}
 
 	function concilia(){
+		session_write_close();
 		$id    = $this->input->post('id');
 		$fecha = $this->input->post('fecha');
 		$act   = $this->input->post('act');
