@@ -470,7 +470,7 @@ class Scst extends Controller {
 
 	function _autoprecios($control){
 
-		$esstd=$this->datasis->traevalor('SCSTSD','Precios en carga de compras por droguerias S P.standard, I margenes de inventario, D sugerido por drogueria ');
+		$esstd=$this->datasis->traevalor('SCSTSD','Precios en carga de compras por droguerias S P.standard, I margenes de inventario, D sugerido por drogueria, F Respeta los margenes al momento de actualizar');
 
 		if(!empty($control)){
 			$dbcontrol=$this->db->escape($control);
@@ -488,13 +488,13 @@ class Scst extends Controller {
 				$tabla    = $dbfarmax->database;
 
 				$mSQL="SELECT COALESCE( b.codigo , c.abarras) AS sinv, a.cstandard, COALESCE(e.margen,f.margen) AS margen, a.id
-				FROM ($tabla.`itscst`  AS a)
+				FROM (${tabla}.`itscst`  AS a)
 				LEFT JOIN `sinv`       AS b ON `a`.`codigo`=`b`.`codigo`
-				LEFT JOIN `farmaxasig` AS c ON `a`.`codigo`=`c`.`barras` AND c.proveed=$dbproveed
+				LEFT JOIN `farmaxasig` AS c ON `a`.`codigo`=`c`.`barras` AND c.proveed=${dbproveed}
 				LEFT JOIN `sinv`       AS d ON `d`.`codigo`=`c`.`abarras`
 				LEFT JOIN `grup`       AS e ON b.grupo=e.grupo
 				LEFT JOIN `grup`       AS f ON d.grupo=f.grupo
-				WHERE `a`.`control` = $dbcontrol";
+				WHERE `a`.`control` = ${dbcontrol}";
 
 				$query = $this->db->query($mSQL);
 				if ($query->num_rows() > 0){
@@ -886,7 +886,7 @@ class Scst extends Controller {
 
 	function _cargar($control,$nfiscal,$almacen,$dias){
 		$control =$this->db->escape($control);
-		$farmaxDB=$this->load->database('farmax',TRUE);
+		$farmaxDB=$this->load->database('farmax',true);
 		$farmaxdb=$farmaxDB->database;
 		$localdb =$this->db->database;
 		$retorna ='';
@@ -986,6 +986,7 @@ class Scst extends Controller {
 
 						$itquery = $farmaxDB->query("SELECT * FROM itscst WHERE control=${control}");
 						//echo "SELECT * FROM itscst WHERE control=$control";
+						$esstd=$this->datasis->traevalor('SCSTSD');
 						foreach ($itquery->result_array() as $itrow){
 							$codigo=$this->datasis->dameval('SELECT abarras FROM farmaxasig WHERE barras='.$this->db->escape($itrow['codigo']).' AND proveed='.$this->db->escape($proveed));
 							$itrow['codigo']  = $codigo;
@@ -993,6 +994,7 @@ class Scst extends Controller {
 							$itrow['usuario'] = $this->session->userdata('usuario');
 							$itrow['estampa'] = $estampa;
 							$itrow['hora']    = $hora;
+							if($esstd=='F') $itrow['rmargen'] = 'S';
 
 							unset($itrow['id']);
 							if(isset($itrow['pmanual'])) unset($itrow['pmanual']);

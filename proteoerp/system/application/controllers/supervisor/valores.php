@@ -100,7 +100,7 @@ class Valores extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 300,
+			'width'         => 650,
 			'edittype'      => "'text'",
 			'editoptions'   => '{ size:30, maxlength: 200 }',
 		));

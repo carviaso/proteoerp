@@ -20,10 +20,10 @@ $row = $mSQL_1->row();
 $fecha     = dbdate_to_human($row->fecha);
 $numero    = $row->numero;
 $almacen   = htmlspecialchars(trim($row->almacen));
-$almacendes= htmlspecialchars(trim($row->almacendes));
-$observa   = htmlspecialchars(trim($row->observa));
+$almacendes= $this->us_ascii2html(trim($row->almacendes));
+$observa   = $this->us_ascii2html(trim($row->observa));
 $cargo     = htmlspecialchars(trim($row->cargo));
-$cargodes  = htmlspecialchars(trim($row->cargodes));
+$cargodes  = $this->us_ascii2html(trim($row->cargodes));
 $dbnumero  = $this->db->escape($numero);
 
 $lineas  = 0;
