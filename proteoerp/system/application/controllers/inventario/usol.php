@@ -13,12 +13,9 @@ class Usol extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('usol','id') ) {
-			$this->db->simple_query('ALTER TABLE usol DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE usol ADD UNIQUE INDEX codigo (codigo)');
-			$this->db->simple_query('ALTER TABLE usol ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
-		$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->instalar();
+		$this->datasis->creaintramenu(array('modulo'=>'329','titulo'=>'Unidades Solicitantes','mensaje'=>'Unidades solicitantes','panel'=>'REGISTROS','ejecutar'=>'inventario/usol','target'=>'popu','visible'=>'S','pertenece'=>'3','ancho'=>900,'alto'=>600));
+		//$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -214,10 +211,8 @@ class Usol extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -226,12 +221,12 @@ class Usol extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -266,7 +261,7 @@ class Usol extends Controller {
 		));
 
 
-		$grid->addField('depto');
+		/*$grid->addField('depto');
 		$grid->label('Depto');
 		$grid->params(array(
 			'search'        => 'true',
@@ -275,7 +270,7 @@ class Usol extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:3, maxlength: 3 }',
-		));
+		));*/
 
 
 		$grid->addField('sucursal');
@@ -346,28 +341,17 @@ class Usol extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = "??????";
+		$mcodp  = '??????';
 		$check  = 0;
 
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM usol WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('usol', $data);
-					echo "Registro Agregado";
-
-					logusu('USOL',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
+			echo 'Deshabilitado';
 		} elseif($oper == 'edit') {
 			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM usol WHERE id=$id");
-			if ( $nuevo <> $anterior ){
+			$anterior = $this->datasis->dameval("SELECT $mcodp FROM usol WHERE id=${id}");
+			if($nuevo <> $anterior){
 				//si no son iguales borra el que existe y cambia
 				$this->db->query("DELETE FROM usol WHERE $mcodp=?", array($mcodp));
 				$this->db->query("UPDATE usol SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
@@ -375,7 +359,7 @@ class Usol extends Controller {
 				$this->db->update("usol", $data);
 				logusu('USOL',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
 				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
+			}else{
 				unset($data[$mcodp]);
 				$this->db->where("id", $id);
 				$this->db->update('usol', $data);
@@ -384,46 +368,31 @@ class Usol extends Controller {
 			}
 
 		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM usol WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM usol WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM usol WHERE id=$id ");
-				logusu('USOL',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
+			echo 'Deshabilitado';
 		};
 	}
 
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 		$script= '
-		$(function() {
+		$(function(){
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});
 		';
 
 		$edit = new DataEdit('', 'usol');
-
-		$edit->script($script,'modify');
-		$edit->script($script,'create');
-		$edit->on_save_redirect=false;
-
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
-		$edit->script($script,'create');
-
-		$edit->script($script,'modify');
-
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
+		$edit->on_save_redirect=false;
 
-		$script= ' 
+		$edit->script($script,'create');
+		$edit->script($script,'modify');
+
+		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});		';
@@ -499,16 +468,16 @@ class Usol extends Controller {
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${primary} ");
 	}
 
 	function _post_delete($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		logusu($do->table,"Elimino $this->tits ${primary} ");
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('usol')) {
+		if(!$this->db->table_exists('usol')){
 			$mSQL="CREATE TABLE `usol` (
 			  `codigo` char(2) NOT NULL DEFAULT '',
 			  `nombre` char(30) DEFAULT NULL,
@@ -519,9 +488,12 @@ class Usol extends Controller {
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('usol');
-		//if(!in_array('<#campo#>',$campos)){ }
+
+		$campos=$this->db->list_fields('usol');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE usol DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE usol ADD UNIQUE INDEX codigo (codigo)');
+			$this->db->simple_query('ALTER TABLE usol ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
 	}
 }
-
-?>
