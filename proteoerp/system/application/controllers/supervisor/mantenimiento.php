@@ -443,7 +443,7 @@ function elminacenti(cual){
 			'a.numero',
 			'a.nombre',
 			'a.monto',
-			'sum(b.abono)+(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` d  JOIN cruc e ON d.numero=e.numero WHERE e.cliente=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`) AS abonoreal',
+			'sum(b.abono)+(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "C%" e.proveed=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`) AS abonoreal',
 			'a.abonos AS inconsist',);
 
 		$filter->db->select($select);
@@ -520,16 +520,15 @@ function elminacenti(cual){
 			});
 			</script>';
 
-		echo $filter->output;
-		echo form_open('').$grid->output.form_close().$script;
-/*
+		/*echo $filter->output;
+		echo form_open('').$grid->output.form_close().$script;*/
+
 		$data['content']  = $filter->output;
 		$data['content'] .= form_open('').$grid->output.form_close().$script;
 		$data['title']    = "<h1>Clientes con problemas de incosistencias</h1>";
-		$data["head"]     = script("jquery.js");
-		$data["head"]    .= script("plugins/jquery.checkboxes.pack.js").$this->rapyd->get_head();
+		$data['head']     = script("jquery.js");
+		$data['head']    .= script("plugins/jquery.checkboxes.pack.js").$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
-*/
 	}
 
 	function clinconsismasivo(){
