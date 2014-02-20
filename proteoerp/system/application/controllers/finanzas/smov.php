@@ -2428,28 +2428,37 @@ class Smov extends Controller {
 			$salida .= '</table></td>';
 		}
 
-		//Documentos aplicados
-		//$mSQL = "SELECT tipo_doc,numero, monto, abono FROM itccli WHERE tipoccli=${dbtipo_doc} AND numccli=${dbnumero}";
-		//$query = $this->db->query($mSQL);
-		//$saldo = 0;
-		//if($query->num_rows() > 0){
-		//	$saldo = 0;
-		//	$salida .= $td1;
-		//	$salida .= 'Movimientos Aplicados</caption>';
-		//	$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td><td align='center'>Monto</td></tr>";
-		//	foreach ($query->result_array() as $row){
-		//		$saldo += $row['abono'];
-		//		$salida .= '<tr>';
-		//		$salida .= '<td>'.$row['tipo_doc'].'</td>';
-		//		$salida .= '<td>'.$row['numero'].'</td>';
-		//		$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
-		//		$salida .= '<td align=\'right\'>'.nformat($row['abono']).'</td>';
-		//		$salida .= '</tr>';
-		//	}
-		//	if ($saldo <> 0)
-		//		$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'><b>Saldo : ".nformat($saldo). "</b></td></tr>";
-		//	$salida .= '</table></td>';
-		//}
+		//Cruces implicado
+
+		$mSQL="SELECT e.numero,e.tipo, d.monto AS abono
+			FROM `itcruc` AS d
+			JOIN cruc AS e ON d.numero=e.numero
+			WHERE e.tipo LIKE 'C%' AND e.proveed=${dbcod_cli} AND `d`.`onumero`= ${dbtiponum}
+			UNION ALL
+			SELECT e.numero,e.tipo, d.monto AS abono
+			FROM `itcruc` AS d
+			JOIN cruc AS e ON d.numero=e.numero
+			WHERE e.tipo LIKE '%C' AND e.cliente=${dbcod_cli} AND `d`.`onumero`= ${dbtiponum}
+			";
+		$query = $this->db->query($mSQL);
+		$saldo = 0;
+		if($query->num_rows() > 0){
+			$saldo = 0;
+			$salida .= $td1;
+			$salida .= 'Cruces implicado</caption>';
+			$salida .= "<tr bgcolor='#e7e3e7'><td>Tp</td><td align='center'>N&uacute;mero</td><td align='center'>Monto</td></tr>";
+			foreach ($query->result_array() as $row){
+				$saldo += $row['abono'];
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['tipo'].'</td>';
+				$salida .= '<td>'.$row['numero'].'</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['abono']).'</td>';
+				$salida .= '</tr>';
+			}
+			if ($saldo <> 0)
+				$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'><b>Saldo : ".nformat($saldo). "</b></td></tr>";
+			$salida .= '</table></td>';
+		}
 		echo $salida.'</tr></table>';
 	}
 
