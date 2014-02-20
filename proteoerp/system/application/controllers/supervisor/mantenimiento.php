@@ -443,7 +443,10 @@ function elminacenti(cual){
 			'a.numero',
 			'a.nombre',
 			'a.monto',
-			'sum(b.abono)+(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "C%" AND e.proveed=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`) AS abonoreal',
+			'(SUM(b.abono)+
+			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "C%" AND e.proveed=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)+
+			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "%C" AND e.cliente=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`))
+			AS abonoreal',
 			'a.abonos AS inconsist',);
 
 		$filter->db->select($select);
