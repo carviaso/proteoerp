@@ -199,18 +199,21 @@ class extimpor extends Controller {
 				$cstandard= 'a.standard';
 				if(in_array('ultimo',$def)){
 					$cultimo= 'b.ultimo';
+					$costo  = 'b.ultimo';
 					$set[]  = "a.formcal = 'U'";
 				}
 				if(in_array('pond',$def)){
 					$cpond = 'b.pond';
+					$costo = 'b.pond';
 					$set[] = "a.formcal = 'P'";
 				}
 				if(in_array('standard',$def)){
 					$cstandard= 'b.standard';
+					$costo    = 'b.standard';
 					$set[]    = "a.formcal = 'S'";
 				}
 
-				$costo = "ROUND(IF(a.formcal='U',${cultimo},IF(a.formcal='P',${cpond},IF(a.formcal='S',${cstandard},GREATEST(${cpond},${cultimo})))),2)";
+				//$costo = "ROUND(IF(a.formcal='U',${cultimo},IF(a.formcal='P',${cpond},IF(a.formcal='S',${cstandard},GREATEST(${cpond},${cultimo})))),2)";
 				$base1 = "ROUND(${costo}*100/(100-a.margen1),2)";
 				$base2 = "ROUND(${costo}*100/(100-a.margen2),2)";
 				$base3 = "ROUND(${costo}*100/(100-a.margen3),2)";
