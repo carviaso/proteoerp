@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Cruc extends Controller {
 	var $mModulo = 'CRUC';
 	var $titp    = 'Cruce de Cuentas';

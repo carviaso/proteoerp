@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Pretab extends Controller {
 	var $mModulo = 'PRETAB';
 	var $titp    = 'PRENOMINA';

@@ -1,4 +1,11 @@
-<?php require_once(APPPATH.'/controllers/inventario/consultas.php');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+require_once(APPPATH.'/controllers/inventario/consultas.php');
 class Pedidos extends Controller {
 	var $mModulo='FALLAPED';
 	var $titp='Pedido de Fallas Diarias';
@@ -24,7 +31,7 @@ class Pedidos extends Controller {
 		$content_id = md5(uniqid(time()));
 		$ttabla = 'fsisu_'.$content_id;
 
-		$columnas = array('b.codigo AS codigoa', 'd.barras', 'b.descrip AS desca', 'b.existen', 'b.exmin', 'b.exmax', 
+		$columnas = array('b.codigo AS codigoa', 'd.barras', 'b.descrip AS desca', 'b.existen', 'b.exmin', 'b.exmax',
 			'SUM(c.cana*(IF(c.tipoa=\'F\',1,-1))) AS trimestral',
 			'b.exmax-IF(existen<0,0,b.existen) AS pedir'
 		);
@@ -83,7 +90,7 @@ class Pedidos extends Controller {
 		if(!empty($bfecha)) $dbbfecha=$this->db->escape($bfecha); else $dbbfecha='CURDATE()';
 
 		$mSQL  = "CREATE TEMPORARY TABLE ${ttabla} (abarras VARCHAR(15)  NOT NULL, PRIMARY KEY (abarras))
-		SELECT a.barras,a.abarras 
+		SELECT a.barras,a.abarras
 		FROM farmaxasig AS a
 		JOIN sitems AS b ON a.abarras=b.codigoa
 		WHERE  b.fecha=${dbbfecha}

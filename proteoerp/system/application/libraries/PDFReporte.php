@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 require_once(RAPYD_PATH."helpers/datehelper.php");
 require_once('Fpdf.php');
 

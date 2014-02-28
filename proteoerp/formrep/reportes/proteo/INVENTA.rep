@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $filter = new DataFilter2('');
 //$filter->attributes=array('onsubmit'=>'is_loaded()');
 

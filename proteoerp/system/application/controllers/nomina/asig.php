@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 //asignacion
 class Asig extends Controller {
 	var $mModulo='ASIG';

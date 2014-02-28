@@ -1,4 +1,11 @@
-<?php	//ordenservicio
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+//ordenservicio
 class Ords extends Controller {
 	var $mModulo = 'ORDS';
 	var $titp    = 'Ordenes de servicio';

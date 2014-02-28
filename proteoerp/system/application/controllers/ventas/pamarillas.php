@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 class Pamarillas extends Controller {
 	var $mModulo='PAMARILLAS';
 	var $titp='Modulo PAMARILLAS';

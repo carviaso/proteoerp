@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Snot extends Controller {
 	var $mModulo = 'SNOT';
 	var $titp    = 'Notas de despacho';

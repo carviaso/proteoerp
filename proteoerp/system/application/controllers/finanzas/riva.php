@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Riva extends Controller {
 	var $mModulo='RIVA';
 	var $titp='Retenciones de I.V.A.';

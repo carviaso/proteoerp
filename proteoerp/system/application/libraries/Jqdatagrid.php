@@ -1001,7 +1001,7 @@ class Jqdatagrid
 
 		$comodin = $this->CI->datasis->traevalor('COMODIN');
 
-		if ( empty($sortby) )  {
+		if(empty($sortby)){
 			$sortby  = $orden;
 			$sortdir = $orddire;
 		} else {
@@ -1052,22 +1052,22 @@ class Jqdatagrid
 		$limitstart = $limit*$page - $limit; // do not put $limit*($page - 1)
 		$limitstart = ($limitstart < 0)?0:$limitstart;
 
-		if( false == empty($filter) ) {
+		if(false == empty($filter)){
 			switch ($oper) {
 			case 'cn':
-				$this->CI->db->like( $table .'.' . $filter, $filtertext );
+				$this->CI->db->like( $table .'.' . $filter, trim($filtertext) );
 				break;
 			case 'eq':
-				$this->CI->db->where( $table .'.' . $filter , $filtertext );
+				$this->CI->db->where( $table .'.' . $filter, trim($filtertext) );
 				break;
 			case 'ge':
-				$this->CI->db->where( "$table .{$filter} >=", $filtertext );
+				$this->CI->db->where( "${table}.{$filter} >=", $filtertext );
 				break;
 			case 'le':
-				$this->CI->db->where( "$table .{$filter} <=", $filtertext );
+				$this->CI->db->where( "${table}.{$filter} <=", $filtertext );
 				break;
 			default:
-				$this->CI->db->like( $table .'.' . $filter, $filtertext );
+				$this->CI->db->like( $table .'.' . $filter, trim($filtertext) );
 				break;
 			}
 		}
@@ -1075,21 +1075,21 @@ class Jqdatagrid
 		if(!empty($mwhere)){
 			foreach($mwhere as $busca){
 				if(trim(strtoupper($busca[0]))== 'LIKE'){
-					$this->CI->db->like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
-				} elseif(trim(strtoupper($busca[0]))== 'IN'){
+					$this->CI->db->like( $busca[1], trim(str_replace($comodin,'%', $busca[2])), $busca[3] );
+				}elseif(trim(strtoupper($busca[0]))== 'IN'){
 					$this->CI->db->where_in( $busca[1], $busca[2] );
-				} else {
+				}else{
 					if (in_array($busca[0], array('>','<')) || in_array($busca[0],array('<>','>=','<=','!=')) ){
-						$this->CI->db->where( $busca[1].' '.$busca[0], $busca[2] );
-					} else {
+						$this->CI->db->where( $busca[1].' '.$busca[0], trim($busca[2]));
+					}else{
 						//Eliminado para poder buscar campos numericos en cero
 						if($busca[2]==='' || is_null($busca[2])){
 							$this->CI->db->where($busca[1]);
-						} else {
+						}else{
 							if(is_array($busca[2])){
 								$this->CI->db->where_in($busca[1], $busca[2]);
-							} else {
-								$this->CI->db->where( $busca[1], $busca[2] );
+							}else{
+								$this->CI->db->where( $busca[1], trim($busca[2]) );
 							}
 						}
 					}
@@ -1117,22 +1117,22 @@ class Jqdatagrid
 			}
 		}
 
-		if( empty($sortdir) ) {
+		if(empty($sortdir)){
 			$sortdir = 'asc';
 		}
 
-		if( !empty($sortby) ) {
+		if(!empty($sortby)){
 			$this->CI->db->order_by( $sortby, $sortdir );
 	    }
 
-		if( !isset($limitstart) || $limitstart == '' ) {
+		if(!isset($limitstart) || $limitstart == ''){
 			$limitstart = 0;
 		}
 
 		if(isset($limitstart) && !empty($limit)){
 			$this->CI->db->limit( $limit, $limitstart);
 		}
-		if(false == empty($joinmodel)){
+		if(!empty($joinmodel)){
 			if(is_array($joinmodel)){
 				foreach($joinmodel as $model){
 					if(isset($model['table']) && isset($model['join'])){
@@ -1176,7 +1176,7 @@ class Jqdatagrid
 		$queryString = $this->CI->db->last_query();
 
 		$mSQL = preg_replace('/SELECT((.*)\n*)FROM/i', 'SELECT  COUNT(*) AS cana FROM', $queryString);
-		$pos = stripos($mSQL, 'ORDER BY');
+		$pos  = stripos($mSQL, 'ORDER BY');
 		if($pos !== false){
 			$mSQL=substr($mSQL,0,$pos);
 		}else{
@@ -1470,10 +1470,10 @@ class Jqdatagrid
 		$mWhere = array();
 		if ($this->CI->input->get_post('_search')==true){
 			$campos = $this->CI->db->field_data($db);
-			foreach ( $campos as $campo){
+			foreach($campos as $campo){
 				$valor = $this->CI->input->get_post($campo->name);
-				if ($valor!==false){
-
+				if($valor!==false){
+					$valor = trim($valor);
 					if(in_array($campo->type,array('string',254,253))){
 						if(substr($valor,0,1) == '%' || substr($valor,0,1) == '*'){
 							$valor = substr($valor,1);
@@ -1503,6 +1503,66 @@ class Jqdatagrid
 		return $mWhere;
 	}
 
+	/***********************************************************************
+	* Returns the where from a select
+	*/
+	function geneSelWhere($sel,$types=array()){
+		$mWhere = array();
+		if($this->CI->input->get_post('_search')==true){
+			$campos=array();
+			foreach($sel as $campo){
+
+				$cc=preg_match('/(?P<name>.+) +AS +(?P<alias>\w+)/', trim($campo), $matches);
+				if($cc>0){
+					$obj=array(
+						'name' => $matches['name'],
+						'alias'=> $matches['alias'],
+					);
+					if(isset($types[$matches['alias']])){
+						$obj['type']=$types[$matches['alias']];
+					}else{
+						$obj['type']='string';
+					}
+					$campos[]=$obj;
+				}
+			}
+			if(count($campos)<=0){
+				return $mWhere;
+			}
+
+			foreach($campos as $campo){
+				$valor = $this->CI->input->get_post($campo['alias']);
+				if($valor!==false){
+					$valor = trim($valor);
+
+					if(in_array($campo['type'],array('string',254,253))){
+						if(substr($valor,0,1) == '%' || substr($valor,0,1) == '*'){
+							$valor = substr($valor,1);
+							$mWhere[] = array('like', $campo['name'], $valor, 'both' );
+						}else{
+							$mWhere[] = array('like', $campo['name'], $valor, 'after');
+						}
+					}elseif(in_array($campo['type'],array('date','timestamp',10,12,7))){
+						$mWhere[] = array('', $campo['name'], $valor, '' );
+					}elseif(in_array($campo['type'],array('real','int',1,2,9,3,8,4,5,246))) {
+						$valor= trim($valor);
+						if(in_array(substr($valor,0,2), array('>=','<=','<>','!='))){
+							$mWhere[] = array(substr($valor,0,2), $campo['name'], floatval(substr($valor,2)), '' );
+						}elseif( in_array(substr($valor,0,1), array('>','<') ) ) {
+							$mWhere[] = array(substr($valor,0,1), $campo['name'], floatval(substr($valor,1)), '' );
+						}else{
+							$mWhere[] = array('', $campo['name'], floatval($valor), '' );
+						}
+					}elseif($campo['type'] == 'blob'){
+						$mWhere[] = array('like', $campo['name'], $valor, 'both' );
+					}else{
+						$mWhere[] = array('like', $campo['name'], $valor, 'both' );
+					}
+				}
+			}
+		}
+		return $mWhere;
+	}
 
 	/***********************************************************************
 	* Returns the where from a table

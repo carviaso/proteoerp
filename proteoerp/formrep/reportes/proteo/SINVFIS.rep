@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $mSPRV=array(
 	'tabla'   =>'sprv',
 	'columnas'=>array(

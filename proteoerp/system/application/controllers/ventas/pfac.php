@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Pfac extends Controller {
 	var $mModulo = 'PFAC';
 	var $titp    = 'Pedidos de Clientes';

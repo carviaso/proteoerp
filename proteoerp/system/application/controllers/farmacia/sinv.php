@@ -1,4 +1,11 @@
-<?php require_once(BASEPATH.'application/controllers/inventario/common.php');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+require_once(BASEPATH.'application/controllers/inventario/common.php');
 class sinv extends Controller {
 
 	function sinv(){

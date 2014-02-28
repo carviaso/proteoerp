@@ -1,4 +1,11 @@
-<?php		$funciones = "";
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$funciones = "";
 class Usuarios extends Controller {
 	var $mModulo='usuarios';
 	var $titp = 'Usuarios del Sistema';

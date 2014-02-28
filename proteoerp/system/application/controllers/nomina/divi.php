@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 //division
 class Divi extends Controller {
 	var $mModulo='DIVI';

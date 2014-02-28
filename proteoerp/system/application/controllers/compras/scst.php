@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Scst extends Controller {
 	var $mModulo = 'SCST';
 	var $titp    = 'Compras de Productos';

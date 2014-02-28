@@ -1,4 +1,11 @@
-<?php require_once(APPPATH.'/controllers/crm/contenedor.php');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+require_once(APPPATH.'/controllers/crm/contenedor.php');
 
 class Ordi extends Controller {
 

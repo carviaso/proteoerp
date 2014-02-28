@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 class Lprecio extends Controller {
 	var $mModulo = 'LPRECIO';
 	var $titp    = 'Precios de la Leche';

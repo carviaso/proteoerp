@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Plano extends Controller {
 	var $mModulo = 'PLANO';
 	var $titp    = 'Gerencia de categorías';

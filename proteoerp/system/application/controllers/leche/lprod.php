@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 //reproceso en  cierre
 class Lprod extends Controller {
 	var $mModulo = 'LPROD';

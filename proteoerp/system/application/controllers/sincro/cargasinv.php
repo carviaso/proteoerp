@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 //la funcion ejecuta() es la que actualiza de la tabla sinvactu a la tabla prueba
 class cargasinv extends Controller{
 	var $upload_path;
@@ -149,7 +155,7 @@ class cargasinv extends Controller{
 					margen2=37.50,
 					margen3=33.33,
 					margen4=23.08,
-					
+
 					base1 =IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(ultimo,pond)))*100/(100-50.00),
 					base2 =IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(ultimo,pond)))*100/(100-37.50),
 					base3 =IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(ultimo,pond)))*100/(100-33.33),
@@ -193,7 +199,7 @@ class cargasinv extends Controller{
 	function deshacer(){
 
 		$actualizo=$this->db->query("
-		UPDATE sinv AS a 
+		UPDATE sinv AS a
 		JOIN sinvactu b
 		ON a.codigo = b.codigo
 		SET

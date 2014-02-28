@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 class Lruta extends Controller {
 	var $mModulo = 'LRUTA';
 	var $titp    = 'Rutas de Recoleccion';

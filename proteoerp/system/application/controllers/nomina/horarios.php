@@ -1,5 +1,10 @@
 <?php
-//plancuenta
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 class Horarios extends Controller {
 	
 	var $url ="nomina/horarios/";

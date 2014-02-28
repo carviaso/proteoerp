@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Chofer extends Controller {
 	var $mModulo = 'CHOFER';
 	var $titp    = 'CHOFERES';

@@ -1,5 +1,11 @@
-<?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
-
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+if (!defined('BASEPATH')) exit('No direct script access allowed');
 function logusu($modulo,$comentario){
 	if(empty($modulo) || empty($comentario)) return false;
 	$CI =& get_instance();

@@ -1,5 +1,6 @@
 <?php
-/*  FUNCIONES INVOCADAS POR AJAX
+/** ProteoERP
+ *  FUNCIONES INVOCADAS POR AJAX
  *
  *
  *

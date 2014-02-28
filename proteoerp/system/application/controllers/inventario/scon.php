@@ -1,8 +1,14 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class scon extends Controller {
 
 	function scon(){
-		parent::Controller(); 
+		parent::Controller();
 		$this->load->library('rapyd');
 		$this->datasis->modulo_id('320',1);
 		$this->back_dataedit='inventario/scon/index';
@@ -163,7 +169,7 @@ class scon extends Controller {
 
 		$grid = new DataGrid();
 		$grid->order_by('numero','desc');
-		$grid->per_page = 15;  
+		$grid->per_page = 15;
 
 		$grid->column_orderby('Cliente' ,'(<#clipro#>)-<#nombre#>','nombre');
 		$grid->column_orderby('Saldo'   ,'<nformat><#stotal#></nformat>'  ,'stotal','align=\'right\'');
@@ -208,7 +214,7 @@ class scon extends Controller {
 			'tabla'   =>'scli',
 			'columnas'=>array(
 				'cliente' =>'C&oacute;digo Cliente',
-				'nombre'=>'Nombre', 
+				'nombre'=>'Nombre',
 				'cirepre'=>'Rif/Cedula',
 				'dire11'=>'Direcci&oacute;n',
 				'tipo'=>'Tipo'),

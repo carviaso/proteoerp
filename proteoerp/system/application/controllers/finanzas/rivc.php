@@ -1,4 +1,11 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 include('common.php');
 
 class Rivc extends Controller {

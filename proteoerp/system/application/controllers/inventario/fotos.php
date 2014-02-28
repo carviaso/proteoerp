@@ -1,4 +1,11 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
+
 class Fotos extends Controller {
 	var $upload_path;
 	function Fotos(){

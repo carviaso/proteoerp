@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Conv extends Controller {
 	var $mModulo = 'CONV';
 	var $titp    = 'Conversiones de Inventario';
@@ -886,7 +892,7 @@ class Conv extends Controller {
 			$ban=$this->db->simple_query($mSQL);
 			if(!$ban){ memowrite($mSQL,'conv');}
 
-			if( $monto < 0 ) {   // Salida 
+			if( $monto < 0 ) {   // Salida
 				$peso=$this->pesos[$codigo]*$monto;
 				$participa=$peso/$this->peso_salida;
 				$ncosto   =round($this->costo_entrada*$participa/$monto,2);
@@ -912,7 +918,7 @@ class Conv extends Controller {
 				if(!$ban){ memowrite($mSQL,'conv');}
 			}
 		}
-	
+
 
 		//trafrac ittrafrac
 		logusu('conv',"Conversion ${codigo} CREADO");

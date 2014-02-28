@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class ccli extends Controller {
 	var $titp='Cobro a clientes';
 	var $tits='Cobro a cliente';

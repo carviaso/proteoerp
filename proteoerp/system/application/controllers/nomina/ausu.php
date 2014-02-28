@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Ausu extends Controller {
 	var $mModulo = 'AUSU';
 	var $titp    = 'Ajuste de sueldo';

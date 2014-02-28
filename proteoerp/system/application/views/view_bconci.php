@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 echo $form_begin;
 
 $container_tr=join('&nbsp;', $form->_button_container['TR']);

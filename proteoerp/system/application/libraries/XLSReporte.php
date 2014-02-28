@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Ender Ochoa, Andres Hocevar
+ * @license  GNU GPL v3
+*/
 require_once "writeexcel/class.writeexcel_workbookbig.inc.php";
 require_once "writeexcel/class.writeexcel_worksheet.inc.php";
 

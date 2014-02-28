@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Grup extends Controller {
 	var $mModulo = 'GRUP';
 	var $titp    = 'Grupos de Inventario';
@@ -743,7 +749,7 @@ class Grup extends Controller {
 		$linea  = $this->db->escape($do->get('linea'));
 		$depto  = $this->db->escape($do->get('depto'));
 		// Cambia todos los productos de inv
-		$this->db->query('UPDATE sinv SET linea='.$linea.', depto='.$depto.' WHERE grupo='.$this->db->escape($codigo));
+		$this->db->simple_query('UPDATE sinv SET linea='.$linea.', depto='.$depto.' WHERE grupo='.$this->db->escape($codigo));
 		logusu('grup',"GRUPO DE INVENTARIO ${codigo} NOMBRE  ${nombre}  MODIFICADO");
 	}
 

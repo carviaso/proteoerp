@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 class Lacida extends Controller {
 	var $mModulo = 'LACIDA';
 	var $titp    = 'Notificaci&oacute; de leche acida';

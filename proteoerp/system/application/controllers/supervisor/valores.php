@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Valores extends Controller {
 	var $mModulo='VALORES';
 	var $titp='Variables del Sistema';

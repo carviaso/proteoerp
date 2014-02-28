@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Nomina extends Controller {
 	var $mModulo = 'NOMI';
 	var $titp    = 'NOMINAS GUARDADAS';
@@ -926,27 +932,27 @@ class Nomina extends Controller {
 		$this->db->query($mSQL);
 
 		// PRESTAMOS
-		$mSQL= "SELECT 
-					c.cod_cli, c.nombre, c.tipo_doc, c.numero, c.fecha, a.fechap, 
+		$mSQL= "SELECT
+					c.cod_cli, c.nombre, c.tipo_doc, c.numero, c.fecha, a.fechap,
 					a.codigo, b.cuota, a.valor, a.estampa, a.usuario, a.hora, a.transac,
-					IF(c.monto-c.abonos-b.cuota>0,b.cuota,c.monto-c.abonos) cuotac, c.monto 
+					IF(c.monto-c.abonos-b.cuota>0,b.cuota,c.monto-c.abonos) cuotac, c.monto
 				FROM nomina a
 				JOIN pres   b ON a.codigo=b.codigo
-				JOIN smov   c ON b.cod_cli=c.cod_cli AND b.tipo_doc=c.tipo_doc AND b.numero=c.numero 
+				JOIN smov   c ON b.cod_cli=c.cod_cli AND b.tipo_doc=c.tipo_doc AND b.numero=c.numero
 				AND c.monto<>c.abonos
 				WHERE a.concepto='PRES' AND a.numero='".$nomina."' AND b.cuota = abs(a.valor)";
-		
+
 		$query = $this->db->query($mSQL);
-		
+
 		if ($query->num_rows() > 0){
 			foreach ($query->result() as $row){
 				//Busca si ya existe
 				$mSQL = "SELECT COUNT(*) FROM smov WHERE cod_cli='".$row->cod_cli."' AND tipo_doc='NC' AND transac='".$mTRANSAC."' AND monto=".abs($row->valor);
-				
-				if ( $this->datasis->dameval($mSQL) == 0 ) { 
+
+				if ( $this->datasis->dameval($mSQL) == 0 ) {
 					$mCONTROL = $this->datasis->fprox_numero("nsmov");
 					$mNOTACRE = $this->datasis->fprox_numero("nccli");
-					
+
 					$data = array();
 					$data["cod_cli"]  = $row->cod_cli;
 					$data["nombre"]   = $row->nombre;
@@ -969,23 +975,23 @@ class Nomina extends Controller {
 					$data["hora"]     = $row->hora;
 					$data["usuario"]  = $row->usuario;
 					$this->db->insert('smov', $data );
-	
+
 					// ACTUALIZA EL DOCUMENTO ORIGEN
 					$mSQL = "
 						UPDATE smov SET abonos=abonos+".abs($row->valor)."
-						WHERE tipo_doc='$row->tipo_doc' AND numero='".$row->numero."' 
+						WHERE tipo_doc='$row->tipo_doc' AND numero='".$row->numero."'
 						AND cod_cli='".$row->cod_cli."' AND fecha=".$row->fecha." LIMIT 1";
 					$this->db->query($mSQL);
 
 					// CARGA EL MOVIMIENTO EN ITCCLI
 					$data = array();
 					$data["numccli"]  = $mNOTACRE;
-					$data["tipoccli"] = 'NC'; 
-					$data["cod_cli"]  = $row->cod_cli; 
-					$data["tipo_doc"] = $row->tipo_doc; 
-					$data["numero"]   = $row->numero; 
+					$data["tipoccli"] = 'NC';
+					$data["cod_cli"]  = $row->cod_cli;
+					$data["tipo_doc"] = $row->tipo_doc;
+					$data["numero"]   = $row->numero;
 					$data["fecha"]    = $row->fecha;
-					$data["monto"]    = $row->monto; 
+					$data["monto"]    = $row->monto;
 					$data["abono"]    = abs($row->valor);
 					$data["transac"]  = $mTRANSAC;
 					$data["estampa"]  = $row->estampa;
@@ -1486,21 +1492,21 @@ Ext.onReady(function(){
 
 Vacaciones
 Periodo correspondiente al Ano 2011
-Dias habiles vacaciones 15 + anos de servicio hasta 30  
+Dias habiles vacaciones 15 + anos de servicio hasta 30
 Dias de Descanso 6
 Dias Feriados    1
 
-Paga sobre la ultima nomina 
- 
+Paga sobre la ultima nomina
+
 sueldo integral * 15+anos
 sueldo integral * descanso
 sueldo integral * feriados
 
 
 
- 
-dias 
- 
- 
+
+dias
+
+
 */
 }

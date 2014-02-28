@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Calcomi extends Controller {
 
 	var $titp  = 'Penalizaci&oacute;n';

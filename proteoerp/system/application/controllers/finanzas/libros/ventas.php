@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class ventas{
 	//Libro de ventas basado en Z
 	function wlvcierrez($mes) {

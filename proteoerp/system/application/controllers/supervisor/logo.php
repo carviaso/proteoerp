@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class logo extends Controller {
 	var $upload_path;
 
@@ -64,10 +70,10 @@ class logo extends Controller {
 			}
 
 			$this->load->library('table');
-			
+
 			$i=0;
 			$pivot=array();
-			foreach (glob('images/*_generatriz.gd2') as $nombre_archivo) { 
+			foreach (glob('images/*_generatriz.gd2') as $nombre_archivo) {
 				$nn=explode('_',basename($nombre_archivo));
 				$url=site_url("supervisor/logo/traer/$nn[0].jpg");
 				$pivot[]="<img src='".$url."' alt='$nombre_archivo'>";
@@ -79,7 +85,7 @@ class logo extends Controller {
 			}
 			if($i==0)  $pivot[]="<img src='".site_url("supervisor/logo/traer/logo.jpg")."' alt='logo.jpg'>";
 			if(count($pivot)>0) $this->table->add_row($pivot);
-			$img=$this->table->generate(); 
+			$img=$this->table->generate();
 
 			$data['content'] = $form->output.br().$img;
 		}else{
@@ -154,14 +160,14 @@ class logo extends Controller {
 			$im    = imagecreate($ancho, $alto);
 			$white = imagecolorallocate($im, 255, 255, 255);
 			$black = imagecolorallocate($im, 0, 0, 0);
-			$font_ancho   = imagefontwidth(5); // para calcular el grosor de la fuente 
+			$font_ancho   = imagefontwidth(5); // para calcular el grosor de la fuente
 			$string_alto  = imagefontheight(5);
 			$string_ancho = $font_ancho*strlen($titu);
 			//imagefill($im, 0, 0, $white);      //Se crea una imagen con un unico color
 			$x=floor(($ancho-$string_ancho)/2);
 			$y=floor(($alto-$string_alto)/2);
 
-			imagestring($im, 5,$x ,$y , $titu, $black); //El 5 viene a ser el tamaño de la letra 1-5 
+			imagestring($im, 5,$x ,$y , $titu, $black); //El 5 viene a ser el tamaño de la letra 1-5
 			imageline($im, $x, $y,$x+$string_ancho, $y, $black);
 			imageline($im, $x, $y+$string_alto,$x+$string_ancho, $y+$string_alto, $black);
 		}

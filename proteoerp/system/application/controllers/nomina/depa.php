@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 //departamento
 class Depa extends Controller {
 	var $mModulo='DEPA';
@@ -275,12 +281,12 @@ jQuery("#a1").click( function(){
 
 /*
 class Depa extends Controller {
-	
+
 	function depa(){
-		parent::Controller(); 
+		parent::Controller();
 		$this->load->library("rapyd");
 	}
- 
+
 	function index(){
 		if ( !$this->datasis->iscampo('depa','id') ) {
 			$this->db->simple_query('ALTER TABLE depa DROP PRIMARY KEY');
@@ -295,7 +301,7 @@ class Depa extends Controller {
 	function filteredgrid(){
 		$this->rapyd->load("datafilter","datagrid");
 		$this->rapyd->uri->keep_persistence();
-		
+
 		$filter = new DataFilter("Filtro por Departamentos", 'depa');
 
 		$filter->division = new inputField("Departamento","departa");
@@ -306,36 +312,36 @@ class Depa extends Controller {
 
 		$filter->buttons("reset","search");
 		$filter->build();
-		 
+
 		$uri = anchor('nomina/depa/dataedit/show/<#division#>/<#departa#>','<#division#>');
-		
+
 		$grid = new DataGrid("Lista de Departamentos");
 		$grid->order_by("division","asc");
 		$grid->per_page = 20;
-		
+
 		$grid->column("Divisi&oacute;n",$uri);
 		$grid->column("Descripci&oacute;n","descrip");
 		$grid->column("Departamento","departa");
 		$grid->column("Descripci&oacute;n","depadesc");
 		$grid->add("nomina/depa/dataedit/create");
 		$grid->build();
-		
+
 		$data['content'] = $filter->output.$grid->output;
 		$data['title']   = "<h1>Departamentos</h1>";
 		$data["head"]    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);	
+		$this->load->view('view_ventanas', $data);
 	}
-	
+
 	function dataedit(){
 		$this->rapyd->load("dataedit");
 		$edit = new DataEdit("Departamento", "depa");
 		$edit->back_url = site_url("nomina/depa/filteredgrid");
-		
+
 		$edit->pre_process('delete' ,'_pre_del');
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-	
+
 	   $div=array(
 	  'tabla'   =>'divi',
 	  'columnas'=>array(
@@ -344,9 +350,9 @@ class Depa extends Controller {
 	  'filtro'  =>array('division'=>'C&oacute;digo de Division','descrip'=>'Descripcion'),
 	  'retornar'=>array('division'=>'division','descrip'=>'descrip'),
 	  'titulo'  =>'Buscar Division');
-		
+
 		$boton=$this->datasis->modbus($div);
-		
+
 		$depto=array(
 	  'tabla'   =>'dept',
 	  'columnas'=>array(
@@ -355,44 +361,44 @@ class Depa extends Controller {
 	  'filtro'  =>array('division'=>'C&oacute;digo de Enlace','departam'=>'Descripcion'),
 	  'retornar'=>array('codigo'=>'enlace'),
 	  'titulo'  =>'Buscar Enlace');
-		
+
 		$boton1=$this->datasis->modbus($depto);
-	
+
 		$edit->division =  new inputField("Divisi&oacute;n", "division");
 		$edit->division->mode="autohide";
 		$edit->division->maxlength=8;
 		$edit->division->size=9;
 		$edit->division->rule="required|callback_chexiste";
-		$edit->division->append($boton);	
-		
+		$edit->division->append($boton);
+
 		$edit->descrip =  new inputField("Descripci&oacute;n", "descrip");
 		$edit->descrip->maxlength=30;
 		$edit->descrip->size =35;
 		$edit->descrip->rule="strtoupper|required";
-		
+
 		$edit->departa =  new inputField("Departamento", "departa");
 		$edit->departa->rule="required";
 		$edit->departa->mode="autohide";
 		$edit->departa->maxlength=8;
 		$edit->departa->size=9;
-		
+
 		$edit->depadesc =  new inputField("Descripci&oacute;n", "depadesc");
 		$edit->depadesc->maxlength=30;
 		$edit->depadesc->size =35;
 		$edit->depadesc->rule="strtoupper|required";
-		
+
 		$edit->enlace =  new inputField("Enlace","enlace");
 		$edit->enlace->maxlength=3;
 		$edit->enlace->size=5;
-		$edit->enlace->append($boton1);	
-		
+		$edit->enlace->append($boton1);
+
 		$edit->buttons("modify", "save", "undo", "delete", "back");
 		$edit->build();
-		
-		$data['content'] = $edit->output;           
-    $data['title']   = "<h1>Departamentos</h1>";        
+
+		$data['content'] = $edit->output;
+    $data['title']   = "<h1>Departamentos</h1>";
     $data["head"]    = $this->rapyd->get_head();
-    $this->load->view('view_ventanas', $data); 
+    $this->load->view('view_ventanas', $data);
 	}
 	function _pre_del($do) {
 		$codigo=$do->get('departa');
@@ -430,7 +436,7 @@ class Depa extends Controller {
 			return FALSE;
 		}else {
   		return TRUE;
-		}	
+		}
 	}
 
 
@@ -453,7 +459,7 @@ class Depa extends Controller {
 				$qs = "";
 				for ($i=0;$i<count($filter);$i++){
 					switch($filter[$i]['type']){
-					case 'string' : $qs .= " ".$filter[$i]['field']." LIKE '%".$filter[$i]['value']."%'"; 
+					case 'string' : $qs .= " ".$filter[$i]['field']." LIKE '%".$filter[$i]['value']."%'";
 						Break;
 					case 'list' :
 						if (strstr($filter[$i]['value'],',')){
@@ -467,29 +473,29 @@ class Depa extends Controller {
 							$qs .= " AND ".$filter[$i]['field']." = '".$filter[$i]['value']."'";
 						}
 						Break;
-					case 'boolean' : $qs .= " AND ".$filter[$i]['field']." = ".($filter[$i]['value']); 
+					case 'boolean' : $qs .= " AND ".$filter[$i]['field']." = ".($filter[$i]['value']);
 						Break;
 					case 'numeric' :
 						switch ($filter[$i]['comparison']) {
-							case 'ne' : $qs .= " AND ".$filter[$i]['field']." != ".$filter[$i]['value']; 
+							case 'ne' : $qs .= " AND ".$filter[$i]['field']." != ".$filter[$i]['value'];
 								Break;
-							case 'eq' : $qs .= " AND ".$filter[$i]['field']." = ".$filter[$i]['value']; 
+							case 'eq' : $qs .= " AND ".$filter[$i]['field']." = ".$filter[$i]['value'];
 								Break;
-							case 'lt' : $qs .= " AND ".$filter[$i]['field']." < ".$filter[$i]['value']; 
+							case 'lt' : $qs .= " AND ".$filter[$i]['field']." < ".$filter[$i]['value'];
 								Break;
-							case 'gt' : $qs .= " AND ".$filter[$i]['field']." > ".$filter[$i]['value']; 
+							case 'gt' : $qs .= " AND ".$filter[$i]['field']." > ".$filter[$i]['value'];
 								Break;
 						}
 						Break;
 					case 'date' :
 						switch ($filter[$i]['comparison']) {
-							case 'ne' : $qs .= " AND ".$filter[$i]['field']." != '".date('Y-m-d',strtotime($filter[$i]['value']))."'"; 
+							case 'ne' : $qs .= " AND ".$filter[$i]['field']." != '".date('Y-m-d',strtotime($filter[$i]['value']))."'";
 								Break;
-							case 'eq' : $qs .= " AND ".$filter[$i]['field']." = '".date('Y-m-d',strtotime($filter[$i]['value']))."'"; 
+							case 'eq' : $qs .= " AND ".$filter[$i]['field']." = '".date('Y-m-d',strtotime($filter[$i]['value']))."'";
 								Break;
-							case 'lt' : $qs .= " AND ".$filter[$i]['field']." < '".date('Y-m-d',strtotime($filter[$i]['value']))."'"; 
+							case 'lt' : $qs .= " AND ".$filter[$i]['field']." < '".date('Y-m-d',strtotime($filter[$i]['value']))."'";
 								Break;
-							case 'gt' : $qs .= " AND ".$filter[$i]['field']." > '".date('Y-m-d',strtotime($filter[$i]['value']))."'"; 
+							case 'gt' : $qs .= " AND ".$filter[$i]['field']." > '".date('Y-m-d',strtotime($filter[$i]['value']))."'";
 								Break;
 						}
 						Break;
@@ -497,10 +503,10 @@ class Depa extends Controller {
 				}
 				$where .= $qs;
 				$this->db->where($where,null, false);
-				
+
 			}
 		}
-		
+
 		$sort = json_decode($sort, true);
 		for ($i=0;$i<count($sort);$i++) {
 			$this->db->order_by($sort[$i]['property'],$sort[$i]['direction']);
@@ -527,7 +533,7 @@ class Depa extends Controller {
 		$data= json_decode($js,true);
 		$campos = $data['data'];
 		$departa  = $data['data']['departa'];
-		
+
 		unset($campos['id']);
 		$mHay = $this->datasis->dameval("SELECT count(*) FROM depa WHERE departa='".$departa."'");
 		if  ( $mHay > 0 ){
@@ -562,7 +568,7 @@ class Depa extends Controller {
 		$campos= $data['data'];
 
 		$departa = $data['data']['departa'];
-		
+
 		// VERIFICAR SI PUEDE
 		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM pers WHERE depto='$departa'");
 
@@ -593,29 +599,29 @@ class Depa extends Controller {
 
 		$mSQL = "SELECT depto, CONCAT(depto,' ',descrip) descrip FROM dpto WHERE tipo='G' ORDER BY depto ";
 		$dpto = $this->datasis->llenacombo($mSQL);
-		
+
 		$urlajax = 'nomina/depa/';
 		$variables = "";
 
 		$funciones = "";
-		
+
 		$valida = "
 		{ type: 'length', field: 'division', min:  1 },
 		{ type: 'length', field: 'depadesc', min:  1 },
 		{ type: 'length', field: 'departa',  min:  1 }
 		";
-		
+
 
 		$columnas = "
-		{ header: 'Departamento', width:  60, sortable: true, dataIndex: 'departa',  field: { type: 'textfield' }, filter: { type: 'string' }}, 
+		{ header: 'Departamento', width:  60, sortable: true, dataIndex: 'departa',  field: { type: 'textfield' }, filter: { type: 'string' }},
 		{ header: 'Descripcion',  width: 220, sortable: true, dataIndex: 'depadesc', field: { type: 'textfield' }, filter: { type: 'string' }},
-		{ header: 'Division',     width:  50, sortable: true, dataIndex: 'division', field: { type: 'textfield' }, filter: { type: 'string' }}, 
+		{ header: 'Division',     width:  50, sortable: true, dataIndex: 'division', field: { type: 'textfield' }, filter: { type: 'string' }},
 		{ header: 'Descripcion.', width: 220, sortable: true, dataIndex: 'descrip',  field: { type: 'textfield' }, filter: { type: 'string' }},
 		{ header: 'Enlace',       width:  50, sortable: true, dataIndex: 'enlace',   field: { type: 'textfield' }, filter: { type: 'string' }}
 	";
 
 		$campos = "'id', 'departa','depadesc','division', 'descrip', 'enlace'";
-		
+
 		$camposforma = "
 			{
 			frame: false,
@@ -623,7 +629,7 @@ class Depa extends Controller {
 			labelAlign: 'right',
 			defaults: { xtype:'fieldset', labelWidth:80 },
 			style:'padding:4px',
-			items:[	
+			items:[
 				{ xtype: 'textfield', fieldLabel: 'Departamento', name: 'departa',  allowBlank: false,  width: 150 },
 				{ xtype: 'textfield', fieldLabel: 'Descripcion',  name: 'depadesc', allowBlank: false,  width: 400 },
 				{ xtype: 'combo',     fieldLabel: 'Division',     name: 'division', store: [".$divi."], width: 400 },
@@ -674,10 +680,10 @@ class Depa extends Controller {
 		$data['dockedItems'] = $dockedItems;
 		$data['winwidget']   = $winwidget;
 		$data['features']    = $features;
-		
+
 		$data['title']  = heading('Departamentos de Nomina');
 		$this->load->view('extjs/extjsven',$data);
-		
+
 	}
 
 }

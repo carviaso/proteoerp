@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 class ordp extends Controller {
 	var $titp='Orden de producci&oacute;n';
 	var $tits='Orden de producci&oacute;n';

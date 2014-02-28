@@ -1,4 +1,11 @@
-<?php include('common.php');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+include('common.php');
 class Gserchi extends Controller {
 	var $mModulo = 'GSERCHI';
 	var $titp    = 'Caja chica';

@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 class Cheques {

@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
 
 $filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, "search"));

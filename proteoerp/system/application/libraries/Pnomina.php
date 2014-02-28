@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class fnomina {
 
 	var $ci;
@@ -72,7 +78,7 @@ class fnomina {
 		return $SUELDOA;
 	}
 
-	// CALCULA EL SUELDO PROMEDIO POR DIA 
+	// CALCULA EL SUELDO PROMEDIO POR DIA
 	function SUELDO_DIA_PROM(){
 		$CODIGO=$this->ci->db->escape($this->CODIGO);
 		$SUELDOA = 0;
@@ -102,7 +108,7 @@ class fnomina {
 		$hasta = new DateTime($mHASTA);
 		$anti  = $desde->diff($hasta);
 		//memowrite('Antiguedad: Ano='.$anti->format('%y').' Mes='.$anti->format('%m').' dia='.$anti->format('%d'),'Antiguedad');
-		
+
 		return array( $anti->format('%y'), $anti->format('%m'), $anti->format('%d') );
 	}
 
@@ -182,7 +188,7 @@ class fnomina {
 	}
 
 	//******************************************************************
-	// Reposo 
+	// Reposo
 	//
 	function REPOSO(){
 		// VER SI ESTA EN REPOSO
@@ -190,7 +196,7 @@ class fnomina {
 		//memowrite($mSQL, 'Reposo');
 		$query = $this->ci->db->query($mSQL);
 		$diasefect = 0;
-		
+
 		$reposos = $query->num_rows();
 		if ( $query->num_rows() > 0 ){
 			if ( $reposos == 1 ) {
@@ -198,15 +204,15 @@ class fnomina {
 				$row     = $query->row();
 				$inicial = $row->inicio;
 				$final   = min( $row->final, $this->fhasta);
-				
+
 				$d = new DateTime($inicial);
 				$h = new DateTime($final);
 				$diasantes = $d->diff($h)->format('%a');
-				
+
 				$d = new DateTime($this->fdesde);
 				$h = new DateTime($final);
 				$diasduran = $d->diff($h)->format('%a');
-				
+
 				$diasefect = min($diasantes-3, $diasduran);
 				if ( $diasefect < 0 ) $diasefect = 0;
 
@@ -219,11 +225,11 @@ class fnomina {
 
 		return $diasefect;
 	}
-	
+
 	//******************************************************************
 	// Calcula los lunes del periodo
-	// 
-	function SEMANAS(){ 
+	//
+	function SEMANAS(){
 		$desde = $this->fdesde;
 		$hasta = $this->fhasta;
 
@@ -264,7 +270,7 @@ class Pnomina extends fnomina {
 	}
 
 	//******************************************************************
-	// Evalua la Formula del concepto 
+	// Evalua la Formula del concepto
 	//
 	function evalform($formula){
 		$MONTO  = $this->MONTO;
@@ -280,7 +286,7 @@ class Pnomina extends fnomina {
 		$VARI6 = $this->VARI6;
 
 		$SMINIMO = $this->ci->datasis->traevalor('SUELDOMINIMO');
-		
+
 		$fformula = $this->_traduce($formula);
 
 		if ( strpos($formula,'REPOSO') )
@@ -299,7 +305,7 @@ class Pnomina extends fnomina {
 		$rr = $qq->row_array();
 		$aa = each($rr);
 		$ut = $aa[1];
-		
+
 		// Transforma los if
 		$long = strlen($formula);
 		$pos  = $long+1;

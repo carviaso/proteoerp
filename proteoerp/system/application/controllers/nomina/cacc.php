@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Cacc extends Controller {
 	var $mModulo = 'CACC';
 	var $titp    = 'Modulo de Accesos';

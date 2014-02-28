@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Flota extends Controller {
 	var $mModulo = 'FLOTA';
 	var $titp    = 'FLOTA VEHICULAR';

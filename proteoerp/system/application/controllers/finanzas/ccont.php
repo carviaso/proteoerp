@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Ccont extends Controller {
 	var $mModulo = 'CCONT';
 	var $titp    = 'Contratos';

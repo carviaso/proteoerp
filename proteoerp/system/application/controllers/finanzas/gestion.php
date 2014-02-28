@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class gestion extends Controller {
 	var $titp='Indicadores de Gesti&oacute;n';
 	var $tits='Indicadores de Gesti&oacute;n';

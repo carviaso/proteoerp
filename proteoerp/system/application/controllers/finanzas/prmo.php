@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Prmo extends Controller {
 	var $mModulo = 'PRMO';
 	var $titp    = 'Otros Movimientos';

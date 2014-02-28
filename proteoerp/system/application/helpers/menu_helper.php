@@ -1,4 +1,11 @@
-<?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 function arr_menu( $nivel=1, $pertenece=NULL){
 	if($nivel!=1 AND $pertenece===NULL) $nivel=1;
@@ -54,7 +61,7 @@ function arr2link( $arr, $utf8c=false){
 		$ejecutar = anchor_popup($indi, $arr['titulo']);
 		$ejecutar = str_replace('_blank','_nt'.$arr['modulo'], $ejecutar );
 
-	}elseif($arr['target']=='javascript'){ 
+	}elseif($arr['target']=='javascript'){
 		$ejecutar="<a href='javascript:".str_replace('\'',"\\'",$indi)."' title='".$arr['mensaje']."'>".$arr['titulo']."</a>";
 
 	}elseif($arr['target']=='dialogo'){

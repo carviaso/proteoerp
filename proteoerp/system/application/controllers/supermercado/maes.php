@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Maes extends Controller {
 	var $mModulo = 'MAES';
 	var $titp    = 'MAESTRO DE INVENTARIO';
@@ -1842,17 +1848,17 @@ class Maes extends Controller {
 		$(function(){
 			$("#depto").change(
 				function(){
-					dpto_change(); 
+					dpto_change();
 				}
 			);
-			
-			$("#familia").change(function(){ 
+
+			$("#familia").change(function(){
 				$.post("'.$link14.'",
 					{ fami:$(this).val(), depto: $("#depto").val() },
 					function(data){
 						$("#grupo").html(data);
 					}
-				) 
+				)
 			});
 
 			$("#tdecimal").change(function(){
@@ -3368,13 +3374,13 @@ class maes extends Controller {
 
 		$data['content'] = $edit->output;
 		$data['title']   = "<h1>Maestro de supermercado</h1>";
-		$data["head"]    = 
+		$data["head"]    =
 		   script("jquery.pack.js").
 		   script("plugins/jquery.numeric.pack.js").
 		   script("plugins/jquery.floatnumber.js").
 		   script("sinvmaes.js").
 		   $this->rapyd->get_head();
-		
+
 		$this->load->view('view_ventanas', $data);
 	}
 	function dataeditsan() {

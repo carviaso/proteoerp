@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Bcaj extends Controller {
 	var $titp='Depositos Transferencias y Remesas';
 	var $tits='Depositos Transferencias y Remesas';

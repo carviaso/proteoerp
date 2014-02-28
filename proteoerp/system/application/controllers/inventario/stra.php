@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Stra extends Controller {
 	var $mModulo = 'STRA';
 	var $titp    = 'Transferencias de Inventario';

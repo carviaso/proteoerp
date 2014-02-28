@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Icon extends Controller {
 	var $mModulo = 'ICON';
 	var $titp    = 'Conceptos de Ajuste';

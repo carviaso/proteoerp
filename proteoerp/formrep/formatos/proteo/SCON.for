@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $maxlin=39; //Maximo de lineas de items.
 
 if(count($parametros)==0) show_error('Faltan parametros');

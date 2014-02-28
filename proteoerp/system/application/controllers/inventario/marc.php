@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Marc extends Controller{
 	var $genesal=true;
 	var $url ='inventario/marc/';

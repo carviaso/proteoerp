@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class acdatasis extends Controller {
 	var $mModulo='VIEW_TMENUSACC';
 	var $titp='Accesos a los Modulo';

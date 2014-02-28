@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Bienvenido extends Controller {
 	function Bienvenido(){
 		parent::Controller();
@@ -15,7 +21,7 @@ class Bienvenido extends Controller {
 
 		if ($this->datasis->login())
 			$data['titulo1']  .= '<p>&nbsp;</p>';
-			
+
 		$data['titulo1']  .= '</center>';
 		$this->layout->buildPage('bienvenido/home', $data);
 	}

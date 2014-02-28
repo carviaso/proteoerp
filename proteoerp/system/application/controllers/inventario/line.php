@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 //Grupos de Inventario
 require_once(BASEPATH.'application/controllers/inventario/grup.php');
 //lineasinventario

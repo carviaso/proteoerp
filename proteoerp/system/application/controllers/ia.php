@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 class ia extends Controller {
 	var $titp='Centro de IA';
 	var $tits='Modelos de Neuronas';

@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Ciud extends Controller {
 	var $mModulo = 'CIUD';
 	var $titp    = 'Modulo Ciudades';

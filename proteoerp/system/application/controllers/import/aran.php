@@ -1,4 +1,11 @@
 <?php require_once(BASEPATH.'application/controllers/validaciones.php');
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
+
 class Aran extends Controller {
 	var $mModulo = 'ARAN';
 	var $titp    = 'Aranceles de aduana';

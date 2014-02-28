@@ -1,4 +1,11 @@
-<?php require_once(BASEPATH.'application/controllers/formams.php');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+require_once(BASEPATH.'application/controllers/formams.php');
 class edcont extends Controller {
 	var $titp='Contratos';
 	var $tits='Contratos';

@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Casi extends Controller {
 	var $mModulo='CASI';
 	var $titp='Comprobantes de Contabilidad';

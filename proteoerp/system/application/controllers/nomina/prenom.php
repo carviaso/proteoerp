@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Prenom extends Controller {
 
 	function Prenom(){
@@ -227,7 +233,7 @@ class Prenom extends Controller {
 
 		if ($sobrescribe)
 			$this->db->query("TRUNCATE ${prenom}");
-		
+
 
 		// ---- CONCEPTOS PARTICULARES ---- //
 		$mSQL  = "INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
@@ -266,7 +272,7 @@ class Prenom extends Controller {
 			echo 'Vacio';
 			return false;
 		}
-		
+
 		$this->load->library('pnomina');
 		$this->pnomina->CODIGO = $codigo;
 

@@ -1,4 +1,11 @@
-<?php include('common.php');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+include('common.php');
 class Sinvfalla extends Controller {
 	var $mModulo='SINVFALLA';
 	var $titp='Fallas de Inventario';
@@ -273,4 +280,3 @@ jQuery("#a1").click( function(){
 		};
 	}
 }
-

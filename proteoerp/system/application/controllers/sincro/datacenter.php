@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 require_once(APPPATH.'/controllers/sincro/importar.php');
 class Datacenter extends Controller {
 

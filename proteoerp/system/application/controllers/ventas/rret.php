@@ -1,4 +1,11 @@
-<?php require_once(BASEPATH.'application/controllers/validaciones.php');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+require_once(BASEPATH.'application/controllers/validaciones.php');
 class Rret extends validaciones {
 
 	function Rret(){
@@ -54,7 +61,7 @@ class Rret extends validaciones {
 		$grid->per_page = 7;
 
 		$formato= anchor_popup('formatos/verhtml/RRET/<#id#>', 'Ver formato',$atts);
-		
+
 		$grid->column_orderby('Fecha' ,'<dbdate_to_human><#fecha#>|d/m/Y H:i:s</dbdate_to_human>','fecha','align="center"');
 		$grid->column_orderby('Cajero','(<#cajero#>) <#nombre#>','cajero','align="left"');
 		$grid->column_orderby('Cierre','<sinulo><#cierre#>|No Aplicado</sinulo>','cajero','align="left"');
@@ -309,7 +316,7 @@ class Rret extends validaciones {
 
 	function retirohechocaj($cajero,$monto,$id=0){
 		$nombre=$this->datasis->dameval('SELECT nombre FROM scaj WHERE cajero='.$this->db->escape($cajero));
-		
+
 		if($id==0)
 			$descarga=anchor('formatos/descargar/RRET/'.$id,'Imprimir');
 		else
@@ -326,7 +333,7 @@ class Rret extends validaciones {
 
 	function retirohecho($cajero,$monto,$id=0){
 		$nombre=$this->datasis->dameval('SELECT nombre FROM scaj WHERE cajero='.$this->db->escape($cajero));
-		
+
 		if($id!=0)
 			$descarga=anchor('formatos/descargar/RRET/'.$id,'Imprimir');
 		else

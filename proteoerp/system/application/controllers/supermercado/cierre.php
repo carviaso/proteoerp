@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Cierre extends Controller {
 
 	function Cierre(){

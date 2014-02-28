@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 include('common.php');
 class Sinv extends Controller {
 	var $mModulo = 'SINV';
@@ -170,13 +176,13 @@ class Sinv extends Controller {
 		function recalcular(){
 			var seguro = true;
 			var mtipo="M";
-			$.prompt( "<h1>Recalcular Precios de Inventario</h1><p><b>Margenes:</b> Recalcula los margenes dejando fijos los precios</p><p><b>Precios:</b> Recalcula los preios segun los margenes</p>", {
+			$.prompt( "<h1>Recalcular Precios de Inventario</h1><p><b>Margenes:</b> Recalcula los margenes dejando fijos los precios</p><p><b>Precios:</b> Recalcula los precios seg&uacte;n los margenes</p>", {
 				buttons: { Margenes: 1, Precios: 2, Cancelar: 0 },
 				submit: function(e,v,m,f){
-					if (v == 1){
+					if(v == 1){
 						$.ajax({ url: "'.site_url('inventario/sinv/recalcular/M').'",
 							complete: function(){ alert(("Recalculo Finalizado")) }})
-					} else if( v == 2) {
+					}else if( v == 2){
 						$.ajax({ url: "'.site_url('inventario/sinv/recalcular/P').'",
 							complete: function(){ alert(("Recalculo Finalizado")) }})
 					}
@@ -3858,7 +3864,7 @@ class Sinv extends Controller {
 		$mtipo = $this->uri->segment($this->uri->total_segments());
 		$this->datasis->sinvrecalcular($mtipo);
 		$this->datasis->sinvredondear();
-		logusu('SINV',"Recalcula Precios $mtipo");
+		logusu('SINV',"Recalcula Precios ${mtipo}");
 	}
 
 
@@ -5285,7 +5291,7 @@ class Sinv extends Controller {
 		$precio2=$do->get('precio2');
 		$precio3=$do->get('precio3');
 		$precio4=$do->get('precio4');
-		logusu('sinv',"Modifico $codigo precios: $precio1,$precio2,$precio3, $precio4");
+		logusu('sinv',"Modifico $codigo precios: ${precio1},${precio2},${precio3}, ${precio4}");
 	}
 
 	function _post_delete($do){
@@ -5294,6 +5300,10 @@ class Sinv extends Controller {
 		$mSQL="DELETE FROM itsinv WHERE codigo=${dbcodigo}";
 		$this->db->simple_query($mSQL);
 
+		if($this->db->table_exists('sinvcontrol')){
+			$mSQL="DELETE FROM sinvcontrol WHERE codigo=${dbcodigo}";
+			$this->db->simple_query($mSQL);
+		}
 		logusu('sinv',"Elimino ${codigo}");
 	}
 

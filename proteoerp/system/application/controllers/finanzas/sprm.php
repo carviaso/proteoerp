@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 require_once('common.php');
 class Sprm extends Controller {
 	var $mModulo='SPRM';

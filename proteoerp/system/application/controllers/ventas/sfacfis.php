@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Sfacfis extends Controller {
 	var $mModulo = 'SFACFIS';
 	var $titp    = 'Documentos fiscales en impresoras';

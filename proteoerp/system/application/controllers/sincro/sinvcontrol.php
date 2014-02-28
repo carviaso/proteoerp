@@ -1,405 +1,538 @@
 <?php
-require_once(BASEPATH.'application/controllers/validaciones.php');
-class sinvcontrol extends validaciones {
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+class Sinvcontrol extends Controller {
+	var $mModulo = 'SINVCONTROL';
+	var $titp    = 'Control de sincronizacion de inventario';
+	var $tits    = 'Control de sincronizacion de inventario';
+	var $url     = 'sincro/sinvcontrol/';
 
-	function sinvcontrol(){
+	function Sinvcontrol(){
 		parent::Controller();
 		$this->load->library('rapyd');
-		//$this->datasis->modulo_id('924',1);
-		$this->sucu=$this->datasis->traevalor('NROSUCU');
-		$sucu = $this->db->escape($this->sucu);
-		$this->prefijo = $this->datasis->dameval("SELECT prefijo FROM sucu WHERE codigo=$sucu");
-		$this->mSQL="";
+		$this->load->library('jqdatagrid');
+		$this->datasis->modulo_nombre( 'SINVCONTRO', $ventana=0 );
 	}
 
 	function index(){
-		$this->rapyd->load('datafilter','datagrid');
-		$this->rapyd->uri->keep_persistence();
+		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
+		$this->instalar();
+		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		redirect($this->url.'jqdatag');
+	}
 
-		$cpre=$this->input->post('pros');
-		if($cpre!==false){
-			$msj=$this->_cprecios();
-		}else{
-			$msj='';
-		}
+	//******************************************************************
+	// Layout en la Ventana
+	//
+	function jqdatag(){
 
-		$this->rapyd->load('datafilter2','datagrid');
-		$mSPRV=array(
-				'tabla'   =>'sprv',
-				'columnas'=>array(
-				'proveed' =>'C&oacute;digo',
-				'nombre'=>'Nombre',
-				'contacto'=>'Contacto'),
-				'filtro'  =>array('proveed'=>'C&oacute;digo','nombre'=>'Nombre'),
-				'retornar'=>array('proveed'=>'proveed'),
-				'titulo'  =>'Buscar Proveedor');
+		$grid = $this->defgrid();
+		$param['grids'][] = $grid->deploy();
 
-		$bSPRV=$this->datasis->modbus($mSPRV);
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
-		$link2=site_url('inventario/common/get_linea');
-		$link3=site_url('inventario/common/get_grupo');
+			$WpAdic = "<tr><td>
+				<div>
+					<table cellpadding='0' cellspacing='0'>
+						<tr>
+							<td style='vertical-align:top;text-align:center'><b>Para cambiar la condici&oacute;n de sincronizaci&oacute;n debe precioar 2 veces sobre el registro deseado</b></td>
+						</tr>
+						<tr>
+							<td style='vertical-align:top;'><div style='text-align:center;vertical-align:middle;height:35px;background-color:#004A00; color:#FFFFFF'>Producto sincronizable y con precio fijo en la sucursal destino</div></td>
+						</tr>
+						<tr>
+							<td style='vertical-align:top;'><div style='text-align:center;vertical-align:middle;height:35px;background-color:#203255; color:#FFFFFF'>Producto no sincronizable y precio modificable en sucursal</div></td>
+						</tr>
+						<tr>
+							<td style='vertical-align:top;text-align:center'><b>Para modificaciones en lote puede aplicar el filtro y seleccionar alguna de las siguientes opciones:</b></td>
+						</tr>
+					</table>
+				</div>
+			</td></tr>";
+			$grid->setWpAdicional($WpAdic);
 
-		$script='
-		$(document).ready(function(){
-			$(".inputnum").numeric(".");
-			$("#depto").change(function(){
-				depto();
-				$.post("'.$link2.'",{ depto:$(this).val() },function(data){$("#linea").html(data);})
-				$.post("'.$link3.'",{ linea:"" },function(data){$("#grupo").html(data);})
+		//Botones Panel Izq
+		$grid->wbotonadd(array('id'=>'bmsincro',  'img'=>'images/arrow_up.png'  ,'alt' => 'Marcar todos los productos filtrados como Sincronizables'   , 'label'=>'Marcar Sincronizables'));
+		$grid->wbotonadd(array('id'=>'bmnosincro','img'=>'images/arrow_down.png','alt' => 'Marcar todos los productos filtrados como NO Sincronizables', 'label'=>'Marcar NO Sincronizables'));
+		$WestPanel = $grid->deploywestp();
+
+		$adic = array(
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
+
+		$param['WestPanel']   = $WestPanel;
+		//$param['EastPanel'] = $EastPanel;
+		$param['SouthPanel']  = $SouthPanel;
+		$param['listados']    = $this->datasis->listados('SINVCONTRO', 'JQ');
+		$param['otros']       = $this->datasis->otros('SINVCONTRO', 'JQ');
+		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['bodyscript']  = $bodyscript;
+		$param['tabs']        = false;
+		$param['encabeza']    = $this->titp;
+		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
+		$this->load->view('jqgrid/crud2',$param);
+	}
+
+	//******************************************************************
+	// Funciones de los Botones
+	//
+	function bodyscript( $grid0 ){
+		$bodyscript = '<script type="text/javascript">';
+		$ngrid = '#newapi'.$grid0;
+
+		/*$bodyscript .= $this->jqdatagrid->bsshow('sinvcontrol', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'sinvcontrol', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'sinvcontrol', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('sinvcontrol', $ngrid, $this->url );*/
+
+		$bodyscript .= '
+		$("#bmsincro").click(
+			function(){
+				$.ajax({ url: "'.site_url('sincro/sinvcontrol/msync').'/",
+					success: function(data){
+						alert((data));
+						jQuery("'.$ngrid.'").trigger("reloadGrid");
+					}
+				});
+			}
+		);';
+
+		$bodyscript .= '
+		function tsync(id){
+			var aData = $("#newapi'.$grid0.'").getRowData(id);
+			$.ajax({
+				type: "POST",
+				url: "'.site_url('sincro/sinvcontrol/tsync').'",
+				data: { precio:aData.precio, codigo:aData.codigo , sucu:aData.sucursal }
+			}).done(function( msg ) {
+				if(msg==""){
+					jQuery("'.$ngrid.'").trigger("reloadGrid");
+				}else{
+					alert(msg);
+				}
 			});
-			$("#linea").change(function(){
-				linea();
-				$.post("'.$link3.'",{ linea:$(this).val() },function(data){$("#grupo").html(data);})
-			});
-			$("#grupo").change(function(){
-				grupo();
-			});
-			$("#sinvprecioc").submit(function() {
-				return confirm("Se van a actualizar todos los precios en pantalla \nEstas seguro de que quieres seguir??");
-			});
-			depto();
-			linea();
-			grupo();
-		});
-
-		function depto(){
-			if($("#depto").val()!=""){
-				$("#nom_depto").attr("disabled","disabled");
-			}
-			else{
-				$("#nom_depto").attr("disabled","");
-			}
-		}
-
-		function linea(){
-			if($("#linea").val()!=""){
-				$("#nom_linea").attr("disabled","disabled");
-			}
-			else{
-				$("#nom_linea").attr("disabled","");
-			}
-		}
-
-		function grupo(){
-			if($("#grupo").val()!=""){
-				$("#nom_grupo").attr("disabled","disabled");
-			}
-			else{
-				$("#nom_grupo").attr("disabled","");
-			}
 		}';
 
-		$filter = new DataFilter2('Filtro por Producto');
+		$bodyscript .= '
+		$("#bmnosincro").click(
+			function(){
+				$.ajax({ url: "'.site_url('sincro/sinvcontrol/nsync').'/",
+					success: function(data){
+						alert((data));
+						jQuery("'.$ngrid.'").trigger("reloadGrid");
+					}
+				});
+			}
+		);';
 
-		$select=array(
-			'IF(a.formcal=\'U\',a.ultimo,IF(a.formcal=\'P\',a.pond,IF(a.formcal=\'S\',a.standard,GREATEST(a.ultimo,a.pond)))) AS costo',
-			'a.existen','a.marca','a.tipo','a.id',
-			'TRIM(a.codigo) AS codigo',
-			'a.descrip','precio1','precio2','precio3','precio4','b.nom_grup','b.grupo',
-			'c.descrip AS nom_linea','c.linea','d.descrip AS nom_depto','d.depto AS depto',
-			'a.base1','a.base2','a.base3','a.base4','e.sucursal','e.precio','e.id AS idcontrol'
+		//Wraper de javascript
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
+
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '300', '400' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
+
+		$bodyscript .= '});';
+
+		$bodyscript .= '</script>';
+
+		return $bodyscript;
+	}
+
+	//******************************************************************
+	// Definicion del Grid o Tabla
+	//
+	function defgrid( $deployed = false ){
+		$i      = 1;
+		$editar = 'false';
+
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('precio');
+		$grid->label('Sinc.');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'center'",
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
+			'cellattr'      => 'function(rowId, tv, aData, cm, rdata){
+				var tips = "";
+				if(aData.precio !== undefined){
+					if(aData.precio=="S"){
+						tips = "Producto sincronizable y fijo en la sucursal "+aData.sucursal;
+					}else{
+						tips = "Producto NO sincronizable";
+					}
+				}
+				return \'title="\'+tips+\'"\';
+			}'
+		));
+
+
+		$grid->addField('sucursal');
+		$grid->label('Sucursal');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 45,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:2, maxlength: 2 }',
+		));
+
+
+		$grid->addField('tipo');
+		$grid->label('Tipo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 90,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
+		));
+
+		$grid->addField('codigo');
+		$grid->label('C&oacute;digo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 100,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
+		));
+
+
+		$grid->addField('descrip');
+		$grid->label('Descripci&oacute;n');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 250,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:50, maxlength: 50 }',
+		));
+
+		$grid->addField('grupo');
+		$grid->label('Grupo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 45,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:10, maxlength: 10 }',
+		));
+
+		$grid->addField('precio1');
+		$grid->label('Precio1');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('precio2');
+		$grid->label('Precio2');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('precio3');
+		$grid->label('Precio3');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('precio4');
+		$grid->label('Precio4');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('ultimo');
+		$grid->label('C.Ultimo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
+
+		$grid->showpager(true);
+		$grid->setWidth('');
+		$grid->setHeight('290');
+		$grid->setTitle($this->titp);
+		$grid->setfilterToolbar(true);
+		$grid->setToolbar('false', '"top"');
+
+		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
+
+		$grid->setOndblClickRow(',ondblClickRow: function(rid){ tsync(rid); }');
+
+		$grid->setAfterInsertRow('
+			function( rid, aData, rowe){
+				if(aData.precio !== undefined){
+					if(aData.precio == "S"){
+						$(this).jqGrid( "setCell", rid, "precio","", {color:"#FFFFFF", background:"#004A00" });
+					}else{
+						$(this).jqGrid( "setCell", rid, "precio","", {color:"#FFFFFF", background:"#203255" });
+					}
+				}
+			}
+		');
+
+		$grid->setAdd(    false);
+		$grid->setEdit(   false);
+		$grid->setDelete( false);
+		$grid->setSearch( false);
+		$grid->setRowNum(30);
+		$grid->setShrinkToFit('false');
+
+		//$grid->setBarOptions("addfunc: sinvcontroladd, editfunc: sinvcontroledit, delfunc: sinvcontroldel, viewfunc: sinvcontrolshow");
+
+		#Set url
+		$grid->setUrlput(site_url($this->url.'setdata/'));
+
+		#GET url
+		$grid->setUrlget(site_url($this->url.'getdata/'));
+
+		if ($deployed) {
+			return $grid->deploy();
+		} else {
+			return $grid;
+		}
+	}
+
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
+	function getdata(){
+		$grid       = $this->jqdatagrid;
+
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$join = array(
+			array('table'=>'sucu','join'=>'sucu.codigo=sucu.codigo'),
+			array('table'=>'sinvcontrol','join'=>'sinvcontrol.codigo=sinv.codigo AND sucu.codigo=sinvcontrol.sucursal','type'=>'left')
 		);
 
-		$filter->db->select($select);
-		$filter->db->from('sinv AS a');
-		$filter->db->join('grup AS b','a.grupo=b.grupo');
-		$filter->db->join('line AS c','b.linea=c.linea');
-		$filter->db->join('dpto AS d','c.depto=d.depto');
-		$filter->db->join('sinvcontrol AS e','e.codigo=a.codigo','left');
-		$filter->db->where('a.activo','S');
-		$filter->script($script);
+		$fields=array(
+			'sinv.codigo  AS codigo',
+			'sinv.descrip AS descrip',
+			'sinv.precio1 AS precio1',
+			'sinv.precio2 AS precio2',
+			'sinv.precio3 AS precio3',
+			'sinv.precio4 AS precio4',
+			'sinv.ultimo  AS ultimo',
+			'sucu.codigo AS sucursal',
+			'COALESCE(sinvcontrol.precio,"S") AS precio',
+			'sinv.grupo AS grupo',
+			'sinv.tipo AS tipo',
+			'CONCAT(sinv.id,sucu.codigo) AS id'
+		);
 
-		$filter->codigo = new inputField('C&oacute;digo', 'codigo');
-		$filter->codigo->db_name='a.codigo';
-		$filter->codigo-> size=15;
-		$filter->codigo->group = 'Uno';
+		$types=array(
+			'precio1'=>'real',
+			'precio2'=>'real',
+			'precio3'=>'real',
+			'precio4'=>'real',
+			'id'     =>'int'
+			);
 
-		$filter->descrip = new inputField('Descripci&oacute;n', 'descrip');
-		$filter->descrip->db_name='CONCAT_WS(" ",a.descrip,a.descrip2)';
-		$filter->descrip-> size=30;
-		$filter->descrip->group ='Uno';
+		$mWHERE   = $grid->geneSelWhere($fields,$types);
 
-		$filter->tipo = new dropdownField('Tipo', 'tipo');
-		$filter->tipo->db_name='a.tipo';
-		$filter->tipo->option('','Todos');
-		$filter->tipo->option('Articulo' ,'Art&iacute;culo');
-		$filter->tipo->option('Servicio' ,'Servicio');
-		$filter->tipo->option('Descartar','Descartar');
-		$filter->tipo->option('Consumo'  ,'Consumo');
-		$filter->tipo->option('Fraccion' ,'Fracci&oacute;n');
-		$filter->tipo->style='width:120px;';
-		$filter->tipo->group = 'Uno';
+		$sucu= $this->datasis->traevalor('SUCURSAL');
+		if(!empty($sucu))
+			$mWHERE[] = array('', 'sucu.codigo !=', $sucu, '' );
+		$response = $grid->getData('sinv', $join , $fields, false, $mWHERE);
+		$rs       = $grid->jsonresult($response);
+		echo $rs;
 
-		$filter->clave = new inputField('Clave', 'clave');
-		$filter->clave->size  = 15;
-		$filter->clave->group = 'Uno';
+		//Guarda en la BD el Where para usarlo luego
+		$querydata = array('data2' => $this->session->userdata('dtgQuery'));
+		$emp = strpos($querydata['data2'],'WHERE ');
 
-		$filter->proveed = new inputField('Proveedor', 'proveed');
-		$filter->proveed->append($bSPRV);
-		$filter->proveed->db_name='CONCAT_WS("-",`a`.`prov1`, `a`.`prov2`, `a`.`prov3`)';
-		$filter->proveed -> size=10;
-		$filter->proveed->group = 'Dos';
-
-		$filter->depto2 = new inputField('Departamento', 'nom_depto');
-		$filter->depto2->db_name='d.descrip';
-		$filter->depto2 -> size=5;
-		$filter->depto2->group = 'Dos';
-
-		$filter->depto = new dropdownField("Departamento","depto");
-		$filter->depto->db_name="d.depto";
-		$filter->depto->option("","Seleccione un Departamento");
-		$filter->depto->options("SELECT depto, CONCAT(depto,'-',descrip) descrip FROM dpto WHERE tipo='I' ORDER BY depto");
-		$filter->depto->in="depto2";
-		$filter->depto->group = "Dos";
-		$filter->depto->style='width:190px;';
-
-		$filter->linea = new inputField("Linea", "nom_linea");
-		$filter->linea->db_name="c.descrip";
-		$filter->linea -> size=5;
-		$filter->linea->group = "Dos";
-
-		$filter->linea2 = new dropdownField("L&iacute;nea","linea");
-		$filter->linea2->db_name="c.linea";
-		$filter->linea2->option("","Seleccione un Departamento primero");
-		$filter->linea2->in="linea";
-		$filter->linea2->group = "Dos";
-		$filter->linea2->style='width:190px;';
-
-		$depto=$filter->getval('depto');
-		if($depto!==FALSE){
-			$filter->linea2->options("SELECT linea, CONCAT(linea,'-',descrip) descrip FROM line WHERE depto='$depto' ORDER BY descrip");
+		if($emp > 0){
+			$querydata['data2'] = substr( $querydata['data2'], $emp );
+			$emp = strpos($querydata['data2'],'ORDER BY ');
+			if($emp > 0){
+				$querydata['data2'] = substr( $querydata['data2'], 0, $emp );
+			}
 		}else{
-			$filter->linea2->option("","Seleccione un Departamento primero");
+			$querydata['data2'] = '';
 		}
 
-		$filter->grupo2 = new inputField("Grupo", "nom_grupo");
-		$filter->grupo2->db_name="b.nom_grup";
-		$filter->grupo2 -> size=5;
-		$filter->grupo2->group = "Dos";
-
-		$filter->grupo = new dropdownField("Grupo", "grupo");
-		$filter->grupo->db_name="b.grupo";
-		$filter->grupo->option("","Seleccione una L&iacute;nea primero");
-		$filter->grupo->in="grupo2";
-		$filter->grupo->group = "Dos";
-		$filter->grupo->style='width:190px;';
-
-		$linea=$filter->getval('linea2');
-		if($linea!==FALSE){
-			$filter->grupo->options("SELECT grupo, CONCAT(grupo,'-',nom_grup) nom_grup FROM grup WHERE linea='$linea' ORDER BY nom_grup");
-		}else{
-			$filter->grupo->option("","Seleccione un Departamento primero");
-		}
-
-		$filter->marca = new dropdownField('Marca', 'marca');
-		$filter->marca->option('','Todas');
-		$filter->marca->options("SELECT TRIM(marca) AS clave, TRIM(marca) AS valor FROM marc ORDER BY marca"); 
-		$filter->marca->style='width:220px;';
-		$filter->marca->group = "Dos";
-
-		$filter->fijado = new dropdownField('Solos precios no fijos ', 'fijado');
-		//$filter->fijado->clause='';
-		$filter->fijado->db_name='e.precio';
-		$filter->fijado->option('','No');
-		$filter->fijado->option('N' ,'Si');
-		$filter->fijado->style='width:120px;';
-		$filter->fijado->group = 'Uno';
-
-		$filter->buttons('reset','search');
-		$filter->build('dataformfiltro');
-
-		$ggrid='';
-		if($filter->is_valid()){
-			$fijado=$filter->fijado->newValue;
-			if($fijado=='S'){
-			
-			}
-			
-			
-			$ggrid ='';
-			
-			foreach ($filter->_fields as $field_name => $field_copy){
-				$ggrid.= form_hidden($field_copy->id, $field_copy->value);
-			}
-
-			$grid = new DataGrid('Art&iacute;culos de Inventario');
-			$grid->order_by('codigo','asc');
-			$grid->per_page = 15;
-			$link2 = anchor('sincro/sinvcontrol/dataedit/modify/<#idcontrol#>','<#codigo#>');
-			$link1 = anchor('sincro/sinvcontrol/dataedit/<raencode><#codigo#></raencode>/create/','<#codigo#>');
-			$uri_2 =anchor('sincro/sinvcontrol/dataedit/modify/<#idcontrol#>',img(array('src'=>'images/editar.png','border'=>'0','alt'=>'Editar','height'=>'12')));
-
-			$grid->column('Acci&oacute;n',$uri_2,'align=center');
-			$grid->column_orderby('C&oacute;digo',"<siinulo><#sucursal#>|$link1|$link2</siinulo>",'codigo');
-			$grid->column_orderby('Descripci&oacute;n','descrip','descrip');
-			$grid->column_orderby('Marca','marca','marca');
-			for($i=1;$i<5;$i++){
-				$obj='precio'.$i;
-				$grid->column("Precio $i",$obj,'align=right');
-			}
-			$grid->column('Costo'     ,'<nformat><#costo#></nformat>'  ,'align=right');
-			$grid->column('Existencia','<nformat><#existen#></nformat>','align=right');
-			$grid->column('Sucursal'  ,'<sinulo><#sucursal#>|Todas</sinulo>');
-			$grid->column('F. Precio'  ,'<sinulo><#precio#>|S</sinulo>');
-
-			$grid->build('datagridST');
-			$ggrid.=$grid->output;
-			///
-			$lastq = $this->db->last_query();
-			$where = substr($lastq,stripos($lastq,"WHERE" ));
-			
-			$where = substr($where,0,stripos($where,"ORDER BY" ));
-			//echo $where;
-			$from = substr($lastq,stripos($lastq,"FROM" ));
-			$from = substr($from,4,stripos($from,"WHERE" )-4);
-			//echo "<br>".$from;
-			$id = $this->datasis->guardasesion(array("data1"=>$from,"data2"=>$where));
-		
-			$mSQL = "Select a.codigo FROM ".$from." ".$where;
-			$resul=$this->db->query($mSQL);
-			
-			$this->mSQL=$resul->result();
-			
-			
-			///ECHO $mSQL;
-			///
-		}
-		$options = array(
-                 'S'  => 'SI',
-                 'N' => 'NO',
-                );
-		$out  = '<h1>'.form_open('sincro/sinvcontrol/cambia');
-		$out .= form_hidden("consulta",$mSQL);
-		$out .= form_dropdown("opt",$options);
-		$out .= form_submit('btnsubmit','Fijar Precios').form_close().'</h1>';
-		// *************************************
-//
-//       Para usar SuperTable
-//
-// *************************************
-		$extras = '
-<script type="text/javascript">
-//<![CDATA[
-(function() {
-	var mySt = new superTable("demoTable", {
-	cssSkin : "sSky",
-	fixedCols : 1,
-	headerRows : 1,
-	onStart : function () {	this.start = new Date();},
-	onFinish : function () {document.getElementById("testDiv").innerHTML += "Finished...<br>" + ((new Date()) - this.start) + "ms.<br>";}
-	});
-})();
-//]]>
-</script>
-';
-		$style ='
-<style type="text/css">
-.fakeContainer { /* The parent container */
-    margin: 5px;
-    padding: 0px;
-    border: none;
-    width: 740px; /* Required to set */
-    height: 320px; /* Required to set */
-    overflow: hidden; /* Required to set */
-}
-</style>	
-		';
-		
-		$data['style']   = $style;
-		$data['style']  .= style('superTables.css');
-		$data['extras']  = $extras;
-		
-		
-		$data['content'] = '<div class="alert">'.$msj.'</div>';
-		$data['content'].= $ggrid.$out."<br>";
-		$data['filtro']  = $filter->output;
-		$data['title']   = heading('Control de cambio de precios');
-		$data['head']    = $this->rapyd->get_head().script('jquery.pack.js');
-		$data['head']   .= script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js');
-		$this->load->view('view_ventanas', $data);
+		$ids = $this->datasis->guardasesion($querydata);
 	}
-	
-	function cambia(){
-		$atras=base_url().'sincro/sinvcontrol/index';
-		$opt   = $this->input->post('opt');
-		$consul = $this->input->post('consulta');
-		//echo $consul;
-		$result = $this->db->query($consul);
-		//print_R($result->result());
-		$codigos=$result->result();
-		$msj = "";
-		foreach($codigos as $cod){
-			//echo $cod->codigo."<br>";
-			$cant=$this->datasis->dameval("select count(*) from sinvcontrol where codigo='".$cod->codigo."' ");
-			if ($cant!=0){
-				$query="UPDATE sinvcontrol SET precio='".$opt."'";
-				$resul=$this->db->query($query);
-				$msj.="El producto con codigo fue ACTUALIZADO con exito <br>";
+
+	//******************************************************************
+	// Guarda la Informacion del Grid o Tabla
+	//
+	function setData(){
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = $this->input->post('id');
+		$data   = $_POST;
+		$mcodp  = '??????';
+		$check  = 0;
+
+		unset($data['oper']);
+		unset($data['id']);
+		if($oper == 'add'){
+
+		} elseif($oper == 'edit') {
+
+		} elseif($oper == 'del') {
+
+		}
+	}
+
+
+	//Marca dbclick
+	function tsync(){
+		$sucu  = $this->input->post('sucu');
+		$precio= $this->input->post('precio');
+		$codigo= $this->input->post('codigo');
+		//$rt=array('status'=>'B');
+		if($sucu!==false && $precio!==false && $codigo!==false){
+			$dbsucu  = $this->db->escape($sucu);
+			$dbcodigo= $this->db->escape($codigo);
+			if($precio=='S'){
+				$mSQL= "INSERT INTO sinvcontrol (sucursal, codigo, precio) VALUES (${dbsucu},${dbcodigo},'N') ON DUPLICATE KEY UPDATE precio='N'";
 			}else{
-				$query="INSERT INTO sinvcontrol (codigo,precio) VALUES('".$cod->codigo."','".$opt."')";
-				$resul=$this->db->query($query);
-				$msj.="El producto con codigo fue AGREGADO con exito <br>";
+				$mSQL= "DELETE FROM sinvcontrol WHERE  sucursal=${dbsucu} AND codigo=${dbcodigo}";
+			}
+
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){
+				echo 'Hubo problemas con elcambio';
+			}else{
+				//$rt['status']='A';
+				echo '';
 			}
 		}
-		$data['content'] = '<div class="alert">'.$msj.'</div>';
-		$data['content'].="<a href='".$atras."'>ATRAS</a>"; 
-		$data['title']   = heading('Control de cambio de precios');
-		$data['head']    = $this->rapyd->get_head().script('jquery.pack.js');
-		$data['head']   .= script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js');
-		$this->load->view('view_ventanas', $data);
 	}
 
-	function dataedit($codigo){
-		$this->rapyd->load('dataedit');
-		$this->rapyd->uri->keep_persistence();
-		$sucu=$this->db->escape($this->sucu);
+	//Marca sincronizables
+	function msync(){
+		$data = $this->datasis->damesesion();
 
-		$edit = new DataEdit('Contro de precio', 'sinvcontrol');
-		$edit->back_save  =true;
-		$edit->back_cancel =true;
-		$edit->back_cancel_save=true;
-		$edit->back_url='sincro/sinvcontrol/index';
+		if(isset($data['data2'])){
+			$where = $data['data2'];
+		}else{
+			$where='';
+		}
 
-		$edit->codigo = new inputField('codigo','codigo');
-		$edit->codigo->rule='max_length[15]|required';
-		$edit->codigo->size =17;
-		$edit->codigo->insertValue=$codigo;
-		$edit->codigo->maxlength =15;
+		$mSQL="DELETE sinvcontrol FROM (`sinv`)
+		INNER JOIN `sucu` ON `sucu`.`codigo`=`sucu`.`codigo`
+		LEFT JOIN `sinvcontrol` ON `sinvcontrol`.`codigo`=`sinv`.`codigo` AND sucu.codigo=sinvcontrol.sucursal
+		${where}";
 
-		$edit->sucursal = new dropdownField('Sucursal', 'sucursal');
-		$edit->sucursal->rule='max_length[2]|required';
-		$edit->sucursal->style='width:100px;';
-		$edit->sucursal->option('','Selecionar');
-		$edit->sucursal->options("SELECT codigo, sucursal  FROM sucu WHERE codigo <> $sucu AND CHAR_LENGTH(url)>0");
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){
+			echo 'Hubo problemas con elcambio';
+		}else{
+			echo 'Listo';
+		}
+	}
 
-		$edit->precio = new dropdownField('Fijar precio','precio');
-		$edit->precio->rule='max_length[1]|required';
-		$edit->precio->option('','Selecionar');
-		$edit->precio->option('S','Si');
-		$edit->precio->option('N','No');
-		$edit->precio->style='width:100px;';
-		$edit->precio->append('"S&iacute;" para fijar este precio en la sucursal, "No" para permitir el cambio de precio en la sucursal');
+	//Marca no sincronizables
+	function nsync(){
+		$data = $this->datasis->damesesion();
+				if(isset($data['data2'])){
+			$where = $data['data2'];
+		}else{
+			$where='';
+		}
 
-		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
-		$edit->build();
+		$mSQL="INSERT INTO sinvcontrol (sucursal, codigo, precio)
+		SELECT `sucu`.`codigo`,`sinv`.`codigo`,'N' FROM (`sinv`)
+		INNER JOIN `sucu` ON `sucu`.`codigo`=`sucu`.`codigo`
+		LEFT JOIN `sinvcontrol` ON `sinvcontrol`.`codigo`=`sinv`.`codigo` AND sucu.codigo=sinvcontrol.sucursal
+		${where} ON DUPLICATE KEY UPDATE
+		`sinvcontrol`.`precio` = 'N'";
 
-		$data['content'] = $edit->output;
-		$data['head']    = $this->rapyd->get_head();
-		$data['title']   = heading('Control de precios en sucursales');
-		$this->load->view('view_ventanas', $data);
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){
+			echo 'Hubo problemas con elcambio';
+		}else{
+			echo 'Listo';
+		}
 	}
 
 	function instalar(){
-		$mSQL="CREATE TABLE IF NOT EXISTS `sinvcontrol` (
-			`id` INT(10) NOT NULL AUTO_INCREMENT,
-			`sucursal` VARCHAR(2) NOT NULL,
-			`codigo` VARCHAR(15) NOT NULL,
-			`precio` CHAR(1) NOT NULL COMMENT 'S modifica el precio N no modifica el precio',
-			PRIMARY KEY (`id`),
-			UNIQUE INDEX `sucursal_codigo` (`sucursal`, `codigo`)
-		)
-		ENGINE=MyISAM
-		ROW_FORMAT=DEFAULT";
-		var_dump($this->db->simple_query($mSQL));
+		if(!$this->db->table_exists('sinvcontrol')){
+			$mSQL="CREATE TABLE `sinvcontrol` (
+			  `id` int(10) NOT NULL AUTO_INCREMENT,
+			  `sucursal` varchar(2) NOT NULL,
+			  `codigo` varchar(15) NOT NULL,
+			  `precio` char(1) NOT NULL COMMENT 'S modifica el precio N no modifica el precio',
+			  PRIMARY KEY (`id`),
+			  UNIQUE KEY `sucursal_codigo` (`sucursal`,`codigo`)
+			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1";
+			$this->db->simple_query($mSQL);
+		}
+		//$campos=$this->db->list_fields('sinvcontrol');
+		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }

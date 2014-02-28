@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 require_once 'XLSReporte.php';
 
 class XLSReporteplano extends XLSReporte  {

@@ -1,4 +1,11 @@
-<?php include('common.php');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+include('common.php');
 class gser extends Controller {
 
 	var $mModulo = 'GSER';

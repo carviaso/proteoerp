@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 class Lgasto extends Controller {
 	var $mModulo = 'LGASTO';
 	var $titp    = 'Adiciones y Deducciones';

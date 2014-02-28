@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 require_once(BASEPATH.'application/controllers/ventas/sfac.php');
 class venta extends sfac {
 

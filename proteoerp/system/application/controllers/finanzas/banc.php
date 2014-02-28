@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Banc extends Controller {
 	var $mModulo='BANC';
 	var $titp='Bancos y Cajas';
@@ -734,7 +740,7 @@ class Banc extends Controller {
 			gasto();
 			$(".inputnum").numeric(".");
 		});
-		
+
 		$("#rif").focusout(function(){
 			if ( $(this).val() != "CAJ"  ){
 				rif = $(this).val().toUpperCase();
@@ -892,7 +898,7 @@ class Banc extends Controller {
 		$rif = '';
 		if ( $edit->getval('tbanco') && $edit->getval('tbanco') <> 'CAJ' )
 			$rif = $this->datasis->dameval('SELECT rif FROM tban WHERE cod_banc="'.$edit->getval('tbanco').'"');
-		
+
 		$edit->rif = new inputField('RIF del Banco', 'rif');
 		$edit->rif->rule='trim';
 		$edit->rif->size =12;
@@ -919,7 +925,7 @@ class Banc extends Controller {
 		$rif = $this->datasis->dameval("SELECT rif FROM tban WHERE cod_banc='".$tbanco."'");
 		echo $rif;
 	}
-	
+
 
 	function _pre_delete($do){
 		$codigo  =$do->get('codbanc');
@@ -935,7 +941,7 @@ class Banc extends Controller {
 	}
 
 	function _pre_insert($do){
-		
+
 		$this->bacsprv($do);
 		$do->error_message_ar['pre_ins']='';
 		return true;
@@ -984,7 +990,7 @@ class Banc extends Controller {
 				$data = array();
 				$data['proveed']  = $codprv;
 				$data['rif']      = $rif;
-				
+
 				$data['nombre']   = $do->get('banco');
 				$data['nomfis']   = $do->get('banco');
 				$data['contacto'] = $do->get('nombre');
@@ -997,13 +1003,13 @@ class Banc extends Controller {
 				$data['reteiva']  = 0.00;
 				$data['tipo']     = '5';
 				$data['tiva']     = 'N';
-				
+
 				$this->db->insert('sprv',$data);
 			}
 			$do->set('codprv',$codprv);
 		} else {
 			$do->set('rif', '');
-		
+
 		}
 		return true;
 	}
@@ -1255,7 +1261,7 @@ class Banc extends Controller {
 			$this->db->query($mSQL);
 		}
 
-		
+
 		if (!$this->db->field_exists('rif','tban')) {
 			$mSQL="ALTER TABLE `tban` ADD COLUMN `rif` VARCHAR(15) NULL DEFAULT NULL COMMENT 'RIF del Banco';";
 			$this->db->query($mSQL);

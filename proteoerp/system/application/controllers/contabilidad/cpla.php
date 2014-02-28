@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Cpla extends Controller {
 	var $mModulo='CPLA';
 	var $titp='Plan de Cuentas';

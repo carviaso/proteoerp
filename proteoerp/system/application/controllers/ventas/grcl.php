@@ -1,4 +1,11 @@
-<?php require_once(BASEPATH.'application/controllers/validaciones.php');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+require_once(BASEPATH.'application/controllers/validaciones.php');
 class Grcl extends Controller {
 	var $mModulo='GRCL';
 	var $titp='Grupo de Clientes';

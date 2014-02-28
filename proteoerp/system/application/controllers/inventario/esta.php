@@ -1,4 +1,11 @@
-<?php require_once('estajefe.php');
+<?php 
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
+require_once('estajefe.php');
 class Esta extends Controller {
 	var $mModulo = 'ESTA';
 	var $titp    = 'Estaciones de producci&oacute;n';

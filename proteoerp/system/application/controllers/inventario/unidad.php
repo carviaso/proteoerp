@@ -1,4 +1,10 @@
 <?php 
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 include('marc.php');
 class Unidad extends Controller{
 	var $genesal=true;

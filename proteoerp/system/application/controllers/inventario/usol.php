@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Usol extends Controller {
 	var $mModulo = 'USOL';
 	var $titp    = 'SOLICITANTE';

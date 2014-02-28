@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Ssal extends Controller {
 	var $mModulo = 'SSAL';
 	var $titp    = 'Ajustes de Inventario';

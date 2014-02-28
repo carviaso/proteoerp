@@ -1,4 +1,10 @@
 <?php
+/** 
+ * ProteoERP 
+ * 
+ * @autor    Andres Hocevar 
+ * @license  GNU GPL v3
+*/
 class Estajefe extends Controller {
 	var $mModulo = 'ESTAJEFE';
 	var $titp    = 'Encargado de estaciones';

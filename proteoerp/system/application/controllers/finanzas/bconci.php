@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Bconci extends Controller {
 	var $mModulo = 'BCONCI';
 	var $titp    = 'Conciliaci&oacute;n Bancaria';

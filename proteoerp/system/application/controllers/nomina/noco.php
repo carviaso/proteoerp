@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Noco extends Controller {
 	var $mModulo='NOCO';
 	var $titp='Contratos de Nomina';

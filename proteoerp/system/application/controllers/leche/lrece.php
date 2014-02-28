@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Lrece extends Controller {
 	var $mModulo = 'LRECE';
 	var $titp    = 'Recepci&oacute;n de Leche';

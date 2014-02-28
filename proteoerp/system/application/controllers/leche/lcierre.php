@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Lcierre extends Controller {
 	var $mModulo = 'LCIERRE';
 	var $titp    = 'Modulo de cierre de jornada';

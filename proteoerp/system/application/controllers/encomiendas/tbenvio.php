@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Tbenvio extends Controller {
 	var $mModulo = 'TBENVIO';
 	var $titp    = 'Envios';

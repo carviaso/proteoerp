@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 //notaentrega
 class Snte extends Controller {
 	var $mModulo='SNTE';

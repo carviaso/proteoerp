@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Otin extends Controller {
 	var $mModulo = 'OTIN';
 	var $titp    = 'OTROS INGRESOS';
@@ -1167,9 +1173,9 @@ class Otin extends Controller {
 
 
 	function dataedit(){
- 		$this->rapyd->load('datadetails','dataobject');
+		$this->rapyd->load('datadetails','dataobject');
 
- 	 	$modbusp=array(
+		$modbusp=array(
 			'tabla'   =>'scli',
 			'columnas'=> array(
 				'cliente' =>'C&oacute;digo Cliente',
@@ -1183,7 +1189,7 @@ class Otin extends Controller {
 
 		$boton=$this->datasis->modbus($modbusp);
 
- 		 $modbus=array(
+		 $modbus=array(
 			'tabla'   =>'botr',
 			'columnas'=>array(
 				'codigo' =>'C&oacute;digo',

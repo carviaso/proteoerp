@@ -1,13 +1,9 @@
 <?php
-/***********************************************************************
+/**
+ * ProteoERP
  *
- *
- *
- *
- *
- *
- *
- *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
 */
 
 class Desarrollo extends Controller{
@@ -38,7 +34,7 @@ html, body {margin: 0;padding: 0;overflow: hidden;font-size: 90%;}
 .ui-layout-west .ui-jqgrid tr.jqgrow td { border-bottom: 0px none;}
 .ui-datepicker {z-index:1200;}
 .rotate { -webkit-transform: rotate(-90deg); -moz-transform: rotate(-90deg); filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);}
-</style>		
+</style>
 		';
 */
 
@@ -48,18 +44,18 @@ html, body {margin: 0;padding: 0;overflow: hidden;font-size: 90%;}
 
 		$styles .= '
 //	PANES & CONTENT-DIVs
-.ui-layout-pane {  
-	background:	#FFF; 
+.ui-layout-pane {
+	background:	#FFF;
 	border:		1px solid #BBB;
-	padding:	10px; 
+	padding:	10px;
 	overflow:	auto;
 }
-	
-// (scrolling) content-div inside pane allows for fixed header(s) and/or footer(s) 
+
+// (scrolling) content-div inside pane allows for fixed header(s) and/or footer(s)
 .ui-layout-content {
 	padding:	10px;
-	position:	relative; // contain floated or positioned elements 
-	overflow:	auto; // add scrolling to content-div 
+	position:	relative; // contain floated or positioned elements
+	overflow:	auto; // add scrolling to content-div
 }
 ';
 
@@ -131,7 +127,7 @@ html, body {margin: 0;padding: 0;overflow: hidden;font-size: 90%;}
 			opacity: 1.00; /* on-hover, show the resizer-bar normally */
 			filter:  alpha(opacity=100);
 		}
-		/* sliding resizer - add outside-border to resizer on-hover 
+		/* sliding resizer - add outside-border to resizer on-hover
 		 * this sample illustrates how to target specific panes and states */
 		.ui-layout-resizer-north-sliding-hover	{ border-bottom-width:	1px; }
 		.ui-layout-resizer-south-sliding-hover	{ border-top-width:		1px; }
@@ -180,7 +176,7 @@ html, body {margin: 0;padding: 0;overflow: hidden;font-size: 90%;}
 
 /*
  *	PANE-MASKS
- *	these styles are hard-coded on mask elems, but are also 
+ *	these styles are hard-coded on mask elems, but are also
  *	included here as !important to ensure will overrides any generic styles
  */
 .ui-layout-mask {
@@ -246,7 +242,7 @@ iframe.ui-layout-mask {}	/* extra mask for objects/applets */
 	html, body {
 		background:	#666;
 		width:		100%;
-		height:		100%;					
+		height:		100%;
 		padding:	0;
 		margin:		0;
 		overflow:	auto; /* when page gets too small */
@@ -269,7 +265,7 @@ iframe.ui-layout-mask {}	/* extra mask for objects/applets */
 
 		$script  = "\n<!-- JQUERY -->\n";
 		$script .= script('jquery-min.js');
-		$script .= script('jquery-migrate-min.js'); 
+		$script .= script('jquery-migrate-min.js');
 		$script .= script('jquery-ui.custom.min.js');
 
 		$script .= script("jquery.layout.js");
@@ -314,7 +310,7 @@ $(document).ready(function(){
             maintab.tabs(\'select\', \'#\' + ui.panel.id);
         }
     });
-    
+
 	$("#west-grid").jqGrid({
 		ajaxGridOptions : { type: "POST "},
         url: "'.site_url('desarrollo/menu').'/",
@@ -354,7 +350,7 @@ $(document).ready(function(){
 
 							var clck = \'<p style="border: 1px solid; background-color: lemonchiffon; width:654px;height:25px;margin-bottom: 8px;padding-top: 8px;text-align: center">\';
 							clck += \'<b>Please, support the jqGrid project by clicking on our sponsors ad! </b></p>\';
- 
+
 							var fs = "";
 
 							$(st,"#tabs").append(clck);
@@ -365,7 +361,7 @@ $(document).ready(function(){
             }
         }
     });
-	
+
 // end splitter
 
 });
@@ -373,10 +369,10 @@ $(document).ready(function(){
 ';
 
 /*
-							try { 
-								var pageTracker = _gat._getTracker("UA-5463047-4"); 
-								pageTracker._trackPageview(); 
-							} 
+							try {
+								var pageTracker = _gat._getTracker("UA-5463047-4");
+								pageTracker._trackPageview();
+							}
 							catch(err) {};
 
 
@@ -387,7 +383,7 @@ var fs = \'
 <iframe src="adds2.html" style="width:728px; height:95px;"  scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/><br>\&nbsp;&nbsp;&nbsp;&nbsp;
 <iframe src="adds4.html" style="width:728px; height:95px;"  scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>\
 \';
- 
+
 */
 
 		$script .= '
@@ -455,12 +451,12 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 </div>
 ';
 
-		
+
 		$data['content'] = $tabla;
-		$data['title']   = $title; 
+		$data['title']   = $title;
 		$data['head']    = $styles;
 		$data['head']   .= $script;
-		
+
 		$this->load->view('view_ventanas_lite',$data);
 
 	}
@@ -1062,14 +1058,14 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 		// Programa
 		$path = 'system/application/controllers/';
-		if ( is_file($path.$contro.'/'.$db.'.php') ) 
+		if ( is_file($path.$contro.'/'.$db.'.php') )
 			$columna = file_get_contents('system/application/controllers/'.$contro.'/'.$db.'.php');
 		else
 			$columna = $this->programa($db,$contro);
 
 		// Vistas
 		$path = 'system/application/views/';
-		if ( is_file($path.'view_'.$db.'.php') ) 
+		if ( is_file($path.'view_'.$db.'.php') )
 			$vista = file_get_contents('system/application/views/view_'.$db.'.php');
 		else
 			$vista = $this->vista($db);
@@ -1089,7 +1085,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$this->load->view('editorcm', $data);
 
 	}
-	
+
 	//******************************************************************
 	//
 	//
@@ -2556,7 +2552,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$crud .= "\t\t\t\t\t".'<td class="littletablerow"><?php echo $form->$obj'.$i.'->output ?></td>'."\n";
 			$i++;
 		}
-	
+
 		$crud .= "\t\t\t\t\t".'<?php if($form->_status!=\'show\') {?>'."\n";
 		$crud .= "\t\t\t\t\t".'	<td class="littletablerow"><a href="#" onclick=\'del_'.$tablait.'(<?php echo $i; ?>);return false;\'><?php echo img("images/delete.jpg"); ?></a></td>'."\n";
 		$crud .= "\t\t\t\t\t".'<?php } ?>'."\n";
@@ -2564,7 +2560,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$crud .= "\t\t\t\t".'</tr>'."\n";
 		$crud .= "\t\t\t\t".'<?php } ?>'."\n";
 		$crud .= "\t\t\t\t".'<tr id=\'__UTPL__\'>'."\n";
-		
+
 		foreach ($query->result() as $field){
 			$crud .= "\t\t\t\t\t".'<td class="littletablefooterb" align="right">&nbsp;</td>'."\n";
 		}
@@ -2630,7 +2626,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 	function menu(){
 
-		
+
 		$arbol = '<?xml version=\'1.0\' encoding="utf-8"?>
 <rows>
     <page>1</page>
@@ -2678,17 +2674,17 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
     <row><cell>30</cell><cell>XML Mapping</cell><cell>xmlmap.html</cell><cell>1</cell><cell>60</cell><cell>61</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>31</cell><cell>JSON Mapping</cell><cell>jsonmap.html</cell><cell>1</cell><cell>62</cell><cell>63</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>32</cell><cell>Data Optimization</cell><cell>jsonopt.html</cell><cell>1</cell><cell>64</cell><cell>65</cell><cell>true</cell><cell>true</cell></row>
-	
+
     <row><cell>33</cell><cell>Integrations</cell><cell></cell><cell>0</cell><cell>67</cell><cell>70</cell><cell>false</cell><cell>false</cell></row>
     <row><cell>34</cell><cell>UI Datepicker</cell><cell>calendar.html</cell><cell>1</cell><cell>68</cell><cell>69</cell><cell>true</cell><cell>true</cell></row>
-	
+
     <row><cell>35</cell><cell>Live Data Manipulation</cell><cell></cell><cell>0</cell><cell>70</cell><cell>81</cell><cell>false</cell><cell>false</cell></row>
     <row><cell>36</cell><cell>Searching Data</cell><cell>searching.html</cell><cell>1</cell><cell>71</cell><cell>72</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>37</cell><cell>Edit row</cell><cell>editing.html</cell><cell>1</cell><cell>73</cell><cell>74</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>38</cell><cell>Add row</cell><cell>adding.html</cell><cell>1</cell><cell>75</cell><cell>76</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>39</cell><cell>Delete row</cell><cell>deleting.html</cell><cell>1</cell><cell>77</cell><cell>78</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>40</cell><cell>Navigator</cell><cell>navgrid.html</cell><cell>1</cell><cell>79</cell><cell>80</cell><cell>true</cell><cell>true</cell></row>
-	
+
     <row><cell>41</cell><cell>New in version 3.1</cell><cell></cell><cell>0</cell><cell>81</cell><cell>90</cell><cell>false</cell><cell>false</cell></row>
     <row><cell>42</cell><cell>Toolbars and userdata</cell><cell>toolbar.html</cell><cell>1</cell><cell>82</cell><cell>83</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>43</cell><cell>New Methods</cell><cell>methods.html</cell><cell>1</cell><cell>84</cell><cell>85</cell><cell>true</cell><cell>true</cell></row>
@@ -2750,7 +2746,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
     <row><cell>99</cell><cell>Virtual scrolling</cell><cell>37scroll.html</cell><cell>1</cell><cell>194</cell><cell>195</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>100</cell><cell>Tooolbar search</cell><cell>37toolbar.html</cell><cell>1</cell><cell>196</cell><cell>197</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>101</cell><cell>Add/edit/delete on local data</cell><cell>37crud.html</cell><cell>1</cell><cell>198</cell><cell>199</cell><cell>true</cell><cell>true</cell></row>
-   
+
     <row><cell>102</cell><cell>Grouping</cell><cell></cell><cell>0</cell><cell>201</cell><cell>229</cell><cell>false</cell><cell>false</cell></row>
     <row><cell>103</cell><cell>Simple grouping with array data</cell><cell>38array.html</cell><cell>1</cell><cell>202</cell><cell>203</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>104</cell><cell>Hide grouping column</cell><cell>38array2.html</cell><cell>1</cell><cell>204</cell><cell>205</cell><cell>true</cell><cell>true</cell></row>
@@ -2788,7 +2784,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
     <row><cell>151</cell><cell>Group Header - no colspan style </cell><cell>43groupnc.html</cell><cell>1</cell><cell>291</cell><cell>292</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>152</cell><cell>Group Header - with colspan style </cell><cell>43groupwc.html</cell><cell>1</cell><cell>293</cell><cell>294</cell><cell>true</cell><cell>true</cell></row>
     <row><cell>153</cell><cell>Frozen column</cell><cell>43frozen1.html</cell><cell>1</cell><cell>295</cell><cell>296</cell><cell>true</cell><cell>true</cell></row>
-    <row><cell>156</cell><cell>Frozen column with group header</cell><cell>43frozen2.html</cell><cell>1</cell><cell>297</cell><cell>298</cell><cell>true</cell><cell>true</cell></row>	
+    <row><cell>156</cell><cell>Frozen column with group header</cell><cell>43frozen2.html</cell><cell>1</cell><cell>297</cell><cell>298</cell><cell>true</cell><cell>true</cell></row>
 
 </rows>';
 

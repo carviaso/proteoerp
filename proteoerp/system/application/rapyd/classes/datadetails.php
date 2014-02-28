@@ -1,11 +1,9 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 /**
- * Rapyd Components
- *
- * An open source library for CodeIgniter application development framework for PHP 4.3.2 or newer
+ * ProteoERP
  *
  * @package		rapyd.components
- * @author		Felice Ostuni
+ * @author		Felice Ostuni, Andres Hocevar
  * @license		http://www.fsf.org/licensing/licenses/lgpl.txt LGPL
  * @version		0.9.6
  * @filesource

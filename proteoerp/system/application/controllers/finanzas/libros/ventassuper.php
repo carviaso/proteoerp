@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class ventassuper{
 	function wlvexcelpdv1($mes) {
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));

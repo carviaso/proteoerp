@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 //adelantoprestamos
 class Pres extends Controller {
 	var $mModulo='PRES';

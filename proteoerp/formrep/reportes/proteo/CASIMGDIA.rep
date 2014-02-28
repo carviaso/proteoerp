@@ -1,5 +1,11 @@
-$this->rapyd->load("datafilter");
-$this->rapyd->load("datatable");
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$this->rapyd->load('datafilter');
+$this->rapyd->load('datatable');
 $mCPLAD=array(
 	'tabla'   =>'cpla',
 	'columnas'=>array('codigo' =>'Código',

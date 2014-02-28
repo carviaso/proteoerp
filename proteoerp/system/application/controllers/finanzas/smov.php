@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Smov extends Controller {
 	var $mModulo='SMOV';
 	var $titp='Movimiento de Clientes';

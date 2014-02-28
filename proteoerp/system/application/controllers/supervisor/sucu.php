@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Sucu extends Controller {
 	var $mModulo = 'SUCU';
 	var $titp    = 'Sucursales';

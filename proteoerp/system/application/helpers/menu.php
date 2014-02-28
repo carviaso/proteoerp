@@ -1,4 +1,11 @@
-<?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 //Menu principal 1 nivel
 function p_menu(){
@@ -12,7 +19,7 @@ function p_menu(){
 		else
 			$mSQL = "SELECT a.modulo, a.titulo, a.mensaje, a.target  FROM intramenu AS a JOIN intrasida AS b ON a.modulo=b.modulo AND a.visible='S' WHERE CHAR_LENGTH(a.modulo)=1 AND b.usuario='$usr' AND b.acceso='S' ORDER BY a.modulo";
 		$query = $CI->db->query($mSQL);
-		
+
 		$retorna=$query->result_array();
 	}else{
 		$retorna=array();
@@ -33,7 +40,7 @@ function s_menu(){
 		else
 			$mSQL = "SELECT a.modulo, a.titulo, a.mensaje, a.target  FROM intramenu AS a JOIN intrasida AS b ON a.modulo=b.modulo AND a.visible='S' WHERE CHAR_LENGTH(a.modulo)=1 AND b.usuario='$usr' AND b.acceso='S' ORDER BY a.modulo";
 		$query = $CI->db->query($mSQL);
-		
+
 		$retorna=$query->result_array();
 	}else{
 		$retorna=array();
@@ -53,7 +60,7 @@ function i_menu($modulo=NULL){
 			'screenx'    => "'+((screen.availWidth/2)-400)+'",
 			'screeny'    => "'+((screen.availHeight/2)-300)+'" );
 	$CI->load->database('default',TRUE);
-	
+
 	$bote = array();
 	$usr=$CI->session->userdata('usuario');
 	if ( strlen($modulo) == 1 ){
@@ -64,7 +71,7 @@ function i_menu($modulo=NULL){
 	}else
 		$mSQL = "SELECT modulo, titulo, mensaje, panel, ejecutar,target FROM intramenu WHERE MID(modulo,1,1) = '0' AND visible='S' ORDER BY panel, modulo";
 	$query = $CI->db->query($mSQL);
-	
+
 	return;
 }
 

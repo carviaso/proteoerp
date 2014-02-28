@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Zona extends Controller {
 	var $mModulo='ZONA';
 	var $titp='Zonas de ventas';

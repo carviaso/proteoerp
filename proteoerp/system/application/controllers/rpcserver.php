@@ -1,4 +1,10 @@
 ﻿<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Rpcserver extends Controller {
 
 	function index(){

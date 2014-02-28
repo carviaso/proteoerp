@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Bmov extends Controller {
 	var $mModulo='BMOV';
 	var $titp='Movimiento de Bancos';

@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Reparto extends Controller {
 	var $mModulo = 'REPARTO';
 	var $titp    = 'REPARTO AL CLIENTE';

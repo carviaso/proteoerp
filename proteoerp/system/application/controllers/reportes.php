@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Reportes extends Controller{
 	var $cargo=0;
 	var $opciones=array();
