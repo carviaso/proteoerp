@@ -846,9 +846,8 @@ class Pretab extends Controller {
 					if(strpos($formula, 'MONTO')){
 						$dReg = $this->datasis->damereg('SELECT monto, valor FROM prenom WHERE codigo='.$dbcodigo.' AND concepto='.$dbconcepto);
 						if(empty($dReg)){
-							continue;
-							//$obj = $row->Field;
-							//$edit->$obj = new freeField($nombre,$nombre,"${codigo} ${concepto} no encontrado");
+							$obj = $row->Field;
+							$edit->$obj = new freeField($nombre,$nombre,"Concepto ${concepto} no aplica para este trabajador");
 						}else{
 							$obj = $row->Field;
 							$edit->$obj = new inputField($nombre, $obj);
