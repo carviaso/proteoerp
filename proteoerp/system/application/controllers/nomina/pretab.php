@@ -847,8 +847,10 @@ class Pretab extends Controller {
 						$dReg = $this->datasis->damereg('SELECT monto, valor FROM prenom WHERE codigo='.$dbcodigo.' AND concepto='.$dbconcepto);
 						if(empty($dReg)){
 							$obj = $row->Field;
-							$edit->$obj = new containerField($nombre,"${codigo} ${concepto} no encontrado");
-							$edit->$obj->when = array('show','modify');
+
+							$edit->$obj = new freeField($nombre,$nombre,"${codigo} ${concepto} no encontrado");
+							//$edit->$obj = new containerField($nombre,"${codigo} ${concepto} no encontrado");
+							//$edit->$obj->when = array('show','modify');
 						}else{
 							$obj = $row->Field;
 							$edit->$obj = new inputField($nombre, $obj);
