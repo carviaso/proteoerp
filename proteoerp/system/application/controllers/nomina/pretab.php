@@ -809,6 +809,7 @@ class Pretab extends Controller {
 
 		$edit->fecha = new dateonlyField('Fecha','fecha');
 		$edit->fecha->rule      = 'chfecha';
+		$edit->fecha->mode      = 'autohide';
 		$edit->fecha->size      = 10;
 		$edit->fecha->maxlength =  8;
 		$edit->fecha->calendar  = false;
@@ -877,8 +878,12 @@ class Pretab extends Controller {
 						$formula = $reg['formula'];
 
 						if(strpos($formula, 'MONTO')){
+							$monto = floatval($edit->$obj->newValue);
+							if(empty($monto)){
+								$monto=0;
+							}
 							$obj = $row->Field;
-							$this->db->query('UPDATE prenom SET monto='.$edit->$obj->newValue.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"');
+							$this->db->query('UPDATE prenom SET monto='.$monto.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"');
 							//memowrite('UPDATE prenom SET monto='.$edit->$obj->newValue.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"','meco');
 						}
 					}
