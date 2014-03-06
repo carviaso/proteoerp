@@ -769,23 +769,25 @@ class Pretab extends Controller {
 		$this->rapyd->load('dataform');
 
 
-		if ( $this->uri->segment($this->uri->total_segments()) != 'process')
-			$id = $this->uri->segment($this->uri->total_segments());
-		else
-			$id = $this->uri->segment($this->uri->total_segments()-1);
-
+		if($this->uri->segment($this->uri->total_segments()) != 'process'){
+			$id = intval($this->uri->segment($this->uri->total_segments()));
+		}else{
+			$id = intval($this->uri->segment($this->uri->total_segments()-1));
+		}
 
 		$edit = new DataForm('nomina/pretab/dataedit/'.$id.'/process');
 
-
-		$mReg = $this->datasis->damereg("SELECT codigo, frec, fecha, nombre, total FROM pretab WHERE id=$id");
+		$mReg = $this->datasis->damereg("SELECT codigo, frec, fecha, nombre, total FROM pretab WHERE id=${id}");
+		if(empty($mReg)){
+			echo 'Registro no encontrado';
+			return false;
+		}
 		$codigo = $mReg['codigo'];
 
 
 		$edit->back_url = site_url('nomina/pretab/index');
 
-
-		if ( empty($mReg) ){
+		if(empty($mReg)){
 			echo 'Registro no encontrado '.$id;
 			return true;
 		}
@@ -793,7 +795,7 @@ class Pretab extends Controller {
 		$edit->id = new hiddenField('ID','id');
 		$edit->id->insertValue = $id;
 
-		$edit->codigo = new inputField('Codigo','codigo');
+		$edit->codigo = new inputField('C&oacute;digo','codigo');
 		$edit->codigo->rule        = '';
 		$edit->codigo->size        = 10;
 		$edit->codigo->maxlength   = 15;
@@ -825,26 +827,36 @@ class Pretab extends Controller {
 		$edit->total->maxlength = 12;
 		$edit->total->insertValue = $mReg['total'];
 
-		$query = $this->db->query("DESCRIBE pretab");
+		$query = $this->db->query('DESCRIBE pretab');
 		$i = 0;
-		if ($query->num_rows() > 0){
-			foreach ($query->result() as $row){
+		if($query->num_rows() > 0){
+			$dbcodigo = $this->db->escape($codigo);
+			foreach($query->result() as $row){
 
 				if(substr($row->Field,0,1) == 'c' && $row->Field != 'codigo' && substr($row->Field,1,1) != '9' ) {
-					$reg     = $this->datasis->damereg('SELECT descrip, formula FROM conc WHERE concepto="'.substr($row->Field,1,4).'"');
+					$dbconcepto= $this->db->escape(substr($row->Field,1,4));
+					$reg     = $this->datasis->damereg('SELECT descrip, formula FROM conc WHERE concepto='.$dbconcepto);
+					if(empty($reg)){
+						continue;
+					}
 					$nombre  = $reg['descrip'];
 					$formula = $reg['formula'];
 
-					if ( strpos($formula, 'MONTO') ) {
-						$dReg = $this->datasis->damereg('SELECT monto, valor FROM prenom WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"');
-
-						$obj = $row->Field;
-						$edit->$obj = new inputField($nombre, $obj);
-						$edit->$obj->rule      = 'numeric';
-						$edit->$obj->css_class = 'inputnum';
-						$edit->$obj->size      = 10;
-						$edit->$obj->maxlength = 10;
-						$edit->$obj->insertValue = $dReg['monto'];
+					if(strpos($formula, 'MONTO')){
+						$dReg = $this->datasis->damereg('SELECT monto, valor FROM prenom WHERE codigo='.$dbcodigo.' AND concepto='.$dbconcepto);
+						if(empty($dReg)){
+							$obj = $row->Field;
+							$edit->$obj = new containerField($nombre,"${codigo} ${concepto} no encontrado");
+							$edit->$obj->when = array('show','modify');
+						}else{
+							$obj = $row->Field;
+							$edit->$obj = new inputField($nombre, $obj);
+							$edit->$obj->rule      = 'numeric';
+							$edit->$obj->css_class = 'inputnum';
+							$edit->$obj->size      = 10;
+							$edit->$obj->maxlength = 10;
+							$edit->$obj->insertValue = $dReg['monto'];
+						}
 					}
 				}
 			}
@@ -855,7 +867,7 @@ class Pretab extends Controller {
 
 		if($edit->on_success()){
 			$codigo = $edit->codigo->newValue;
-			$query = $this->db->query("DESCRIBE pretab");
+			$query = $this->db->query('DESCRIBE pretab');
 			$i = 0;
 			if ($query->num_rows() > 0){
 				foreach ($query->result() as $row){
@@ -864,7 +876,7 @@ class Pretab extends Controller {
 						$nombre  = $reg['descrip'];
 						$formula = $reg['formula'];
 
-						if ( strpos($formula, 'MONTO') ) {
+						if(strpos($formula, 'MONTO')){
 							$obj = $row->Field;
 							$this->db->query('UPDATE prenom SET monto='.$edit->$obj->newValue.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"');
 							//memowrite('UPDATE prenom SET monto='.$edit->$obj->newValue.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"','meco');
