@@ -834,7 +834,8 @@ class Pretab extends Controller {
 			foreach($query->result() as $row){
 
 				if(substr($row->Field,0,1) == 'c' && $row->Field != 'codigo' && substr($row->Field,1,1) != '9' ) {
-					$dbconcepto= $this->db->escape(substr($row->Field,1,4));
+					$concepto  = substr($row->Field,1,4);
+					$dbconcepto= $this->db->escape($concepto);
 					$reg     = $this->datasis->damereg('SELECT descrip, formula FROM conc WHERE concepto='.$dbconcepto);
 					if(empty($reg)){
 						continue;
