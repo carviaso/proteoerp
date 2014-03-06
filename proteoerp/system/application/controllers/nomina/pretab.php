@@ -19,11 +19,7 @@ class Pretab extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('pretab','id') ) {
-			$this->db->simple_query('ALTER TABLE pretab DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE pretab ADD UNIQUE INDEX codigo (codigo)');
-			$this->db->simple_query('ALTER TABLE pretab ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		$this->datasis->creaintramenu(array('modulo'=>'716','titulo'=>'Prenomina','mensaje'=>'Prenomina','panel'=>'TRANSACCIONES','ejecutar'=>'nomina/pretab','target'=>'popu','visible'=>'S','pertenece'=>'7','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -198,15 +194,21 @@ class Pretab extends Controller {
 		//Busca nominas respaldadas
 		$query = $this->db->query("SHOW TABLES LIKE 'PRENOM%'");
 		$respaldos = '';
-		if ( $query->num_rows() > 0 ) {
+		if($query->num_rows() > 0){
 			$respaldos .= '<center><select id=\'mtabla\' name=\'mtabla\'>';
 			$respaldos .= '<option value=\'\'>Seleccione un Respaldo</option>';
 			foreach( $query->result_array() as $row ) {
-				$aa    = each($row);
-				$tabla = substr($aa[1],6);
-				$respaldos .= '<option value=\''.$aa[1].'\'>';
-				$respaldos .= dbdate_to_human($this->datasis->dameval("SELECT fecha FROM ".$aa[1]." limit 1"))." ";
-				$respaldos .= $this->datasis->dameval("SELECT CONCAT(codigo,' ',nombre) nomina FROM noco WHERE codigo='$tabla'");
+				$aa     = each($row);
+				$tabla  = substr($aa[1],6);
+				$dbtabla= $this->db->escape($tabla);
+				$value  = htmlspecialchars($aa[1]);
+				$value  = str_replace(array("'", '"'), array("&#39;", "&quot;"), $value);
+				$respaldos .= '<option value=\''.$value.'\'>';
+				$respaldos .= dbdate_to_human($this->datasis->dameval("SELECT fecha FROM `".$aa[1]."` LIMIT 1"))." ";
+
+				$nom = htmlspecialchars($this->datasis->dameval("SELECT CONCAT(codigo,' ',nombre) AS nomina FROM noco WHERE codigo=${dbtabla}"));
+				$nom = str_replace(array("'", '"'), array("&#39;", "&quot;"), $nom);
+				$respaldos .= $nom;
 				$respaldos .= '</option>';
 			}
 			$respaldos .= '</select></center>';
@@ -1111,46 +1113,21 @@ class Pretab extends Controller {
 		$this->db->query("TRUNCATE pretab");
 		logusu('NOMI',"NOMINA $mNOMINA CREADA");
 
-		echo "Nomina Guardada";
+		echo 'Nomina Guardada';
 
 	}
 
-
-/*
-	function _pre_insert($do){
-		$do->error_message_ar['pre_ins']='';
-		return true;
-	}
-
-	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='';
-		return true;
-	}
-
-	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
-		return false;
-	}
-
-	function _post_insert($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
-	}
-
-	function _post_update($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
-	}
-
-	function _post_delete($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
-	}
-*/
 	function instalar(){
-		if (!$this->db->table_exists('pretab')) {
-
-
+		$campos=$this->db->list_fields('pretab');
+		if(!in_array('id',$campos)){
+			$this->db->simple_query('ALTER TABLE pretab DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE pretab ADD UNIQUE INDEX codigo (codigo)');
+			$this->db->simple_query('ALTER TABLE pretab ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
+
+		/*if (!$this->db->table_exists('pretab')) {
+
+
+		}*/
 	}
 }
