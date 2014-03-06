@@ -836,7 +836,7 @@ class Pretab extends Controller {
 				if(substr($row->Field,0,1) == 'c' && $row->Field != 'codigo' && substr($row->Field,1,1) != '9' ) {
 					$concepto  = substr($row->Field,1,4);
 					$dbconcepto= $this->db->escape($concepto);
-					$reg     = $this->datasis->damereg('SELECT descrip, formula FROM conc WHERE concepto='.$dbconcepto);
+					$reg = $this->datasis->damereg('SELECT descrip, formula FROM conc WHERE concepto='.$dbconcepto);
 					if(empty($reg)){
 						continue;
 					}
@@ -846,11 +846,9 @@ class Pretab extends Controller {
 					if(strpos($formula, 'MONTO')){
 						$dReg = $this->datasis->damereg('SELECT monto, valor FROM prenom WHERE codigo='.$dbcodigo.' AND concepto='.$dbconcepto);
 						if(empty($dReg)){
-							$obj = $row->Field;
-
-							$edit->$obj = new freeField($nombre,$nombre,"${codigo} ${concepto} no encontrado");
-							//$edit->$obj = new containerField($nombre,"${codigo} ${concepto} no encontrado");
-							//$edit->$obj->when = array('show','modify');
+							continue;
+							//$obj = $row->Field;
+							//$edit->$obj = new freeField($nombre,$nombre,"${codigo} ${concepto} no encontrado");
 						}else{
 							$obj = $row->Field;
 							$edit->$obj = new inputField($nombre, $obj);
@@ -917,7 +915,7 @@ class Pretab extends Controller {
 		$tipo     = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo='".$contrato."' ");
 		$existe   = $this->datasis->dameval("SELECT count(*) FROM nomina WHERE contrato='".$contrato."' AND fecha='".$fecha."' AND trabaja='".$trabaja."' ");
 
-		if($existe > 0 AND $tipo <> 'O'){
+		if($existe > 0 && $tipo <> 'O'){
 			echo 'Nomina ya Guardada debe eliminarla primero!!';
 			return false;
 		}

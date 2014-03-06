@@ -224,12 +224,13 @@ class Prenom extends Controller {
 
 		// APLICA AUMENTOS DE SUELDO
 		$mSQL  = "UPDATE ausu a JOIN pers b ON a.codigo=b.codigo ";
-		$mSQL .= "SET b.sueldo=a.sueldo WHERE a.fecha<='".$fecha."'";
+		$mSQL .= "SET b.sueldo=a.sueldo WHERE a.fecha<='${fecha}'";
 		//$this->db->query($mSQL);
 
 		// TRAE FRECUENCIA DE CONTRATO
-		$FRECUEN = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=".$contdb);
-		$this->db->query("UPDATE pers SET tipo='".$FRECUEN."' WHERE contrato=".$contdb);
+		$FRECUEN  = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=".$contdb);
+		$dbFRECUEN= $this->db->escape($FRECUEN);
+		$this->db->query("UPDATE pers SET tipo=${dbFRECUEN} WHERE contrato=".$contdb);
 
 		if ($sobrescribe)
 			$this->db->query("TRUNCATE ${prenom}");
@@ -237,18 +238,19 @@ class Prenom extends Controller {
 
 		// ---- CONCEPTOS PARTICULARES ---- //
 		$mSQL  = "INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
-		$mSQL .= "SELECT ".$contdb." contrato, b.codigo, CONCAT(RTRIM(b.apellido),', ',b.nombre) nombre,";
-		$mSQL .= "a.concepto, c.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fechap."' ";
+		$mSQL .= "SELECT ${contdb} contrato, b.codigo, CONCAT(RTRIM(b.apellido),', ',b.nombre) nombre,";
+		$mSQL .= "a.concepto, c.grupo, a.tipo, a.descrip, a.formula, 0, '${fecha}', '${fechap}' ";
 		$mSQL .= "FROM asig a JOIN pers b ON a.codigo=b.codigo ";
 		$mSQL .= "JOIN conc c ON a.concepto=c.concepto ";
-		$mSQL .= "WHERE b.tipo='".$FRECUEN."' AND b.contrato=".$contdb." AND b.status='A' ";
+		$mSQL .= "WHERE b.tipo=${dbFRECUEN} AND b.contrato=${contdb} AND b.status='A' ";
 		$this->db->query($mSQL);
 
 		$mSQL  = "INSERT IGNORE INTO prenom (contrato, codigo,nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
-		$mSQL .= "SELECT ".$contdb.", b.codigo, CONCAT(RTRIM(b.apellido),', ',b.nombre) nombre, ";
-		$mSQL .= "a.concepto, a.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fechap."' ";
+		$mSQL .= "SELECT ${contdb}, b.codigo, CONCAT(RTRIM(b.apellido),', ',b.nombre) nombre, ";
+		$mSQL .= "a.concepto, a.grupo, a.tipo, a.descrip, a.formula, 0, '${fecha}', '${fechap}' ";
 		$mSQL .= "FROM conc a JOIN itnoco c ON a.concepto=c.concepto ";
-		$mSQL .= "JOIN pers b ON b.contrato=c.codigo WHERE c.codigo=".$contdb." AND b.status='A' ";
+		$mSQL .= "JOIN pers b ON b.contrato=c.codigo ";
+		$mSQL .= "WHERE c.codigo=${contdb} AND b.status='A' ";
 		$this->db->query($mSQL);
 
 		$this->db->query("UPDATE prenom SET trabaja=contrato");
