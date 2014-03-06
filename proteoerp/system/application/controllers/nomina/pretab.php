@@ -674,7 +674,8 @@ class Pretab extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: pretabadd, editfunc: pretabedit, delfunc: pretabdel, viewfunc: pretabshow");
+		$grid->setBarOptions('addfunc: pretabadd, editfunc: pretabedit, delfunc: pretabdel, viewfunc: pretabshow');
+		$grid->setOndblClickRow(',ondblClickRow: function(id){ pretabedit(); return; }');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));

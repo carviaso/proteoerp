@@ -582,7 +582,8 @@ class Sfac extends Controller {
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
+			'formoptions'   => '{ label:"Fecha" }',
+			//'searchoptions' => "{ sopt:['eq','ne','le','lt','gt','ge']}"
 		));
 
 		$grid->addField('vence');

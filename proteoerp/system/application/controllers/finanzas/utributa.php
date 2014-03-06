@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Utributa extends Controller {
 	var $mModulo = 'UTRIBUTA';
 	var $titp    = 'Unidades Tributarias';
@@ -13,6 +19,7 @@ class Utributa extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		$this->datasis->creaintramenu( $opcion = array('modulo'=>'52A','titulo'=>'Unidad Tributaria','mensaje'=>'Unidad Tributaria','panel'=>'OBLIGACIONES','ejecutar'=>'finanzas/utributa','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>530,'alto'=>400) );   // Crea opcion en el menu
 		$this->datasis->modintramenu( 530, 400, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -38,7 +45,7 @@ class Utributa extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-		array("id"=>"fedita",  "title"=>"Agregar/Editar Registro")
+		array('id'=>'fedita',  'title'=>'Agregar/Editar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -118,7 +125,7 @@ class Utributa extends Controller {
 							grid.trigger("reloadGrid");
 							'.$this->datasis->jwinopen(site_url('formatos/ver/UTRIBUTA').'/\'+res.id+\'/id\'').';
 							return true;
-						} else { 
+						} else {
 							$("#fedita").html(r);
 						}
 					}
@@ -296,5 +303,33 @@ class Utributa extends Controller {
 			echo "Registro Eliminado";
 		};
 	}
+
+	function instalar(){
+		if(!$this->db->table_exists('utributa')){
+			$mSQL="CREATE TABLE `utributa` (
+				`ano` INT(6) NULL DEFAULT NULL,
+				`gaceta` VARCHAR(50) NULL DEFAULT NULL,
+				`fecha` DATE NULL DEFAULT NULL,
+				`valor` DECIMAL(12,2) NULL DEFAULT NULL,
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				PRIMARY KEY (`id`),
+				UNIQUE INDEX `gaceta` (`gaceta`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM";
+			$this->db->simple_query($mSQL);
+		}
+
+		$this->db->simple_query("INSERT IGNORE INTO `utributa` (`ano`, `gaceta`, `fecha`, `valor`) VALUES (2005, '38.116', '2005-01-27', 29400.00)");
+		$this->db->simple_query("INSERT IGNORE INTO `utributa` (`ano`, `gaceta`, `fecha`, `valor`) VALUES (2006, '38.350', '2006-01-04', 33600.00)");
+		$this->db->simple_query("INSERT IGNORE INTO `utributa` (`ano`, `gaceta`, `fecha`, `valor`) VALUES (2007, '38.603', '2007-01-12', 37632.00)");
+		$this->db->simple_query("INSERT IGNORE INTO `utributa` (`ano`, `gaceta`, `fecha`, `valor`) VALUES (2008, '38.855', '2008-01-22', 46.00)");
+		$this->db->simple_query("INSERT IGNORE INTO `utributa` (`ano`, `gaceta`, `fecha`, `valor`) VALUES (2009, '39.127', '2009-02-26', 55.00)");
+		$this->db->simple_query("INSERT IGNORE INTO `utributa` (`ano`, `gaceta`, `fecha`, `valor`) VALUES (2010, '39.361', '2010-02-04', 65.00)");
+		$this->db->simple_query("INSERT IGNORE INTO `utributa` (`ano`, `gaceta`, `fecha`, `valor`) VALUES (2011, '39.623', '2011-02-24', 76.00)");
+		$this->db->simple_query("INSERT IGNORE INTO `utributa` (`ano`, `gaceta`, `fecha`, `valor`) VALUES (2012, '39.866', '2012-02-16', 90.00)");
+		$this->db->simple_query("INSERT IGNORE INTO `utributa` (`ano`, `gaceta`, `fecha`, `valor`) VALUES (2013, '40.106', '2014-02-06', 107.00)");
+		$this->db->simple_query("INSERT IGNORE INTO `utributa` (`ano`, `gaceta`, `fecha`, `valor`) VALUES (2014, '40.359', '2014-02-19', 127.00)");
+
+	}
 }
-?>

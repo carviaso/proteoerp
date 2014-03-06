@@ -5281,6 +5281,16 @@ class Sinv extends Controller {
 			$this->db->simple_query($sql);
 		}
 
+		$ccpre   = $this->datasis->traevalor('SCSTCAMBIAPRECIO');
+		if($ccpre=='N'){
+			$sucu= $this->datasis->traevalor('SUCURSAL');
+			if(!empty($sucu)){
+				$data = array('sucursal' => $sucu, 'codigo' => $codigo, 'precio' => 'S');
+				$sql  = $this->db->insert_string('sinvcontrol', $data);
+				$this->db->simple_query($sql);
+			}
+		}
+
 		logusu('sinv',"Creo  ${codigo} precios: ${precio1}, ${precio2}, ${precio3}, ${precio4}");
 	}
 
