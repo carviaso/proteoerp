@@ -9,7 +9,7 @@ class Prenom extends Controller {
 
 	function Prenom(){
 		parent::Controller();
-		$this->load->library("rapyd");
+		$this->load->library('rapyd');
 		$this->titulo='Generar Prenomina';
 	}
 
@@ -88,7 +88,7 @@ class Prenom extends Controller {
 			$this->_creapretab();  // Crea Pretabla
 			$this->calcuto();      // Calcula todos
 
-			echo "Crea los 2 $contrato, $fechac, $fechap";
+			echo "Crea los 2 ${contrato}, ${fechac}, ${fechap}";
 		} else
 			echo $form->output;
 

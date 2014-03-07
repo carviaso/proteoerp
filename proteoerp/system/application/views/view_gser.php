@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $container_bl=join("&nbsp;", $form->_button_container["BL"]);
 $container_br=join("&nbsp;", $form->_button_container["BR"]);
 $container_tr=join("&nbsp;", $form->_button_container["TR"]);

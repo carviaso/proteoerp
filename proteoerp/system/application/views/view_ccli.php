@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 ob_start('comprimir_pagina');
 
 $container_bl = join('&nbsp;', $form->_button_container['BL']);

@@ -667,9 +667,9 @@ class Pretab extends Controller {
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(    $this->datasis->sidapuede('PRETAB','INCLUIR%' ));
+		$grid->setAdd(    false);
 		$grid->setEdit(   $this->datasis->sidapuede('PRETAB','MODIFICA%'));
-		$grid->setDelete( $this->datasis->sidapuede('PRETAB','BORR_REG%'));
+		$grid->setDelete( false);
 		$grid->setSearch( $this->datasis->sidapuede('PRETAB','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
@@ -759,7 +759,7 @@ class Pretab extends Controller {
 				logusu('PRETAB',"Registro ????? ELIMINADO");
 				echo "Registro Eliminado";
 			}
-		};
+		}
 	}
 
 	//******************************************************************
@@ -828,8 +828,8 @@ class Pretab extends Controller {
 		$edit->total->maxlength = 12;
 		$edit->total->insertValue = $mReg['total'];
 
+		$arr_concs=array();
 		$query = $this->db->query('DESCRIBE pretab');
-		$i = 0;
 		if($query->num_rows() > 0){
 			$dbcodigo = $this->db->escape($codigo);
 			foreach($query->result() as $row){
@@ -839,12 +839,15 @@ class Pretab extends Controller {
 					$dbconcepto= $this->db->escape($concepto);
 					$reg = $this->datasis->damereg('SELECT descrip, formula FROM conc WHERE concepto='.$dbconcepto);
 					if(empty($reg)){
-						continue;
+						$nombre  = 'CONCEPTO NO ENCONTRADO '.$concepto;
+						$formula = '';
+					}else{
+						$nombre  = $reg['descrip'];
+						$formula = $reg['formula'];
 					}
-					$nombre  = $reg['descrip'];
-					$formula = $reg['formula'];
 
 					if(strpos($formula, 'MONTO')){
+						$arr_concs[$concepto] = $formula;
 						$dReg = $this->datasis->damereg('SELECT monto, valor FROM prenom WHERE codigo='.$dbcodigo.' AND concepto='.$dbconcepto);
 						if(empty($dReg)){
 							$obj = $row->Field;
@@ -862,32 +865,19 @@ class Pretab extends Controller {
 				}
 			}
 		}
-
-		//$edit->build();
 		$edit->build_form();
 
 		if($edit->on_success()){
-			$codigo = $edit->codigo->newValue;
-			$query = $this->db->query('DESCRIBE pretab');
-			$i = 0;
-			if ($query->num_rows() > 0){
-				foreach ($query->result() as $row){
-					if ( substr($row->Field,0,1) == 'c' && $row->Field != 'codigo' && substr($row->Field,1,1) != '9' ) {
-						$reg     = $this->datasis->damereg('SELECT descrip, formula FROM conc WHERE concepto="'.substr($row->Field,1,4).'"');
-						$nombre  = $reg['descrip'];
-						$formula = $reg['formula'];
-
-						if(strpos($formula, 'MONTO')){
-							$monto = floatval($edit->$obj->newValue);
-							if(empty($monto)){
-								$monto=0;
-							}
-							$obj = $row->Field;
-							$this->db->query('UPDATE prenom SET monto='.$monto.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"');
-							//memowrite('UPDATE prenom SET monto='.$edit->$obj->newValue.' WHERE codigo="'.$codigo.'" AND concepto="'.substr($row->Field,1,4).'"','meco');
-						}
-					}
+			$codigo   = $edit->codigo->newValue;
+			$dbcodigo = $this->db->escape($codigo);
+			foreach($arr_concs as $concepto=>$formula){
+				$obj = 'c'.$concepto;
+				$monto = floatval($edit->$obj->newValue);
+				if(empty($monto)){
+					$monto=0;
 				}
+				$dbconcepto= $this->db->escape($concepto);
+				$this->db->query('UPDATE prenom SET monto='.$monto.' WHERE codigo='.$dbcodigo.' AND concepto='.$dbconcepto);
 			}
 
 			$rt=array(
@@ -896,9 +886,10 @@ class Pretab extends Controller {
 				'pk'      => $codigo
 			);
 			echo json_encode($rt);
-
 		}else{
-			$conten['form'] =&  $edit;
+			$conten=array();
+			$conten['arr_concs']=  array_keys($arr_concs);
+			$conten['form']     =& $edit;
 			$this->load->view('view_pretab', $conten);
 
 		}

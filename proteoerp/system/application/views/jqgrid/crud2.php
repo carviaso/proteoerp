@@ -234,9 +234,6 @@ echo "\n<!-- USUARIO -->\n";
 if( isset($script)) echo $script;
 
 echo "\n";
-echo script('i18n/grid.locale-sp.js');
-echo script('jquery.jqGrid.min.js');
-
 ?>
 <style>
 <?php echo $LayoutStyle; ?>

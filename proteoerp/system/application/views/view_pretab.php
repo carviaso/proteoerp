@@ -2,7 +2,7 @@
 //echo $form_scripts;
 echo $form_begin;
 $frec = '';
-if ( $form->frec->value == 'Q' ) 
+if ( $form->frec->value == 'Q' )
 	$frec = 'Quncenal';
 elseif ( $form->frec->value == 'S' )
 	$frec = 'Semanal';
@@ -17,6 +17,12 @@ if($form->_status <> 'show'){ ?>
 
 
 <?php } ?>
+<script language="javascript" type="text/javascript">
+$(function(){
+	$(".inputnum").numeric(".");
+	$('.inputnum').focus(function (){ $(this).select(); });
+});
+</script>
 <?php echo $form->id->output; ?>
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 <table width='100%'>
@@ -28,47 +34,28 @@ if($form->_status <> 'show'){ ?>
 	</tr>
 	<tr>
 		<td class="littletablerowth"><?php echo $form->fecha->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->fecha->value; ?></td>
+		<td class="littletablerow"  ><?php echo dbdate_to_human($form->fecha->value); ?></td>
 		<td class="littletablerowth" align='center'><?php echo $form->frec->label." ".$frec;  ?></td>
 		<td class="littletablerowth"><?php echo $form->total->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->total->value; ?></td>
+		<td class="littletablerow"  ><?php echo nformat($form->total->value); ?></td>
 	</tr>
 </table>
 </fieldset>
 <br>
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 <table width='100%'>
-
 <?php
-		$query = $this->db->query("DESCRIBE pretab");
-		$i = 0;
-		if ($query->num_rows() > 0){
-			foreach ($query->result() as $row){
-				if ( substr($row->Field,0,1) == 'c' && $row->Field != 'codigo' && substr($row->Field,1,1) != '9' ) {
-					$reg     = $this->datasis->damereg('SELECT descrip, formula FROM conc WHERE concepto="'.substr($row->Field,1,4).'"');
-					$nombre  = $reg['descrip'];
-					$formula = $reg['formula'];
+	$i = false;
+	foreach($arr_concs as $concepto){
+		$obj = 'c'.$concepto;
 
-					if ( strpos($formula, 'MONTO') ) {
-						$obj = $row->Field;
-						
-						if ( $i == 0 ) 
-							echo '		<tr>';
-							
-						echo '			<td class="littletablerowth">'.$form->$obj->label.'</td>';
-						echo '			<td class="littletablerow"  >'.$form->$obj->output.'</td>';
-						if ( $i == 1 ) {
-							echo '		</tr>';
-							$i = 0;
-						} else
-							$i = 1;
-
-					}
-				}
-			}
-		}
-?>		
-		
+		if(!$i){ echo '		<tr>'; }
+		echo '			<td class="littletablerowth">'.$form->$obj->label.'</td>';
+		echo '			<td class="littletablerow"  >'.$form->$obj->output.'</td>';
+		if($i){  echo '		</tr>'; }
+		$i= !$i;
+	}
+?>
 </table>
 </fieldset>
 <?php echo $form_end; ?>

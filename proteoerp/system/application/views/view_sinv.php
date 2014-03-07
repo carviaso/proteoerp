@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	$meco = $form->output;
 	$meco = str_replace('class="tablerow"','class="tablerow" style="font-size:20px; align:center;" ',$meco);

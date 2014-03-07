@@ -1,3 +1,11 @@
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+?>
 <style>
 .tooltip{
 	position: absolute;

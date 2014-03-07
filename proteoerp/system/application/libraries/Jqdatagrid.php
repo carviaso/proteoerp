@@ -769,8 +769,8 @@ class Jqdatagrid
 
 		//calendario
 		$calendar = "
-			size: 10,
-			maxlengh: 10,
+			size: 12,
+			maxlengh: 12,
 			dataInit: function(element) {
 				$(element).datepicker({
 					dateFormat: 'yy-mm-dd',
@@ -836,7 +836,7 @@ class Jqdatagrid
 										$pos = strpos($params,'editoptions:{');
 										$addcal = substr($params, $pos +  13);
 										if(false == empty($addcal)){
-											$calc = ",editoptions: {{$calendar} $addcal,searchoptions: {{$calendar}}";
+											$calc = ",editoptions: {{$calendar} ${addcal},searchoptions: {{$calendar}}";
 										} else {
 											$calc = ",editoptions: {{$calendar}},searchoptions: {{$calendar}}";
 										}
@@ -930,7 +930,8 @@ class Jqdatagrid
 			}
 
 
-			$bar   .= "	,{sopt:['eq','cn','ge','le'], overlay:false,mtype: 'POST', multipleSearch:true }"; //search options
+			$bar   .= "	,{sopt:['eq','cn','ge','le'], overlay:false, mtype: 'POST', multipleSearch:true }"; //search options
+			//$bar   .= "	,{ multipleSearch:true , multipleGroup:true}"; //search options
 			if ( $this->afterPager == '' )
 				$bar .= "\r\n";
 			else
