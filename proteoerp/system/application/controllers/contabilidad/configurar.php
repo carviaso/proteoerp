@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Configurar extends Controller {
 	
 	function Configurar(){
@@ -10,9 +16,9 @@ class Configurar extends Controller {
 	function index() {		
 		redirect('contabilidad/configurar/dataedit/show/1');
 	}
-	
+
 	function dataedit(){
- 		$this->rapyd->load("dataedit");
+		$this->rapyd->load("dataedit");
 		$edit = new DataEdit('Parametros Contables',"cemp");
 		$edit->back_url = "contabilidad/configurar";
 		
@@ -76,7 +82,7 @@ class Configurar extends Controller {
 			$this->validation->set_message('chformato',"El formato '$formato' introducido no parece valido");
 			return FALSE;
 		}else {
-  		return TRUE;
+		return TRUE;
 		}
 	}
 	function _post_insert($do){
@@ -95,4 +101,3 @@ class Configurar extends Controller {
 		logusu('cpla',"PLAN DE CUENTA $codigo NOMBRE  $nombre  ELIMINADO ");
 	}
 }
-?>

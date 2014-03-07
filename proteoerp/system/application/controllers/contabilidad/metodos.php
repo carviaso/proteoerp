@@ -1,4 +1,9 @@
 <?php
+/** * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Metodos extends Controller {
 
 	//Genera las consulta para la contabilidad

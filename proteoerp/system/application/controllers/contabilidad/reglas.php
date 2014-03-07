@@ -1,21 +1,25 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 include('metodos.php');
 class Reglas extends Metodos {
 
 	function Reglas(){
 		parent::Controller();
-		$this->load->library("rapyd");
+		$this->load->library('rapyd');
 		$this->datasis->modulo_id(601,1);
-		//$this->rapyd->set_connection('supermer');
-		//$this->load->database('supermer',TRUE);
 	}
 
 	function index() {
-		$this->rapyd->load("datagrid","dataform");
+		$this->rapyd->load('datagrid','dataform');
 		$fecha=$this->uri->segment(4);
 		$form = new DataForm();
 		$form->title('Fecha para la ejecuci&oacute;n');
-		$form->fecha = new dateonlyField("Fecha", "fecha","d/m/Y");
+		$form->fecha = new dateonlyField('Fecha', 'fecha','d/m/Y');
 		$form->fecha->size = 10;
 		$form->fecha->insertValue = ($fecha ? $fecha : date("Ymd"));
 		$form->fecha->append("<input type='hidden' name='modulo' id='modulo'>");
@@ -28,9 +32,9 @@ class Reglas extends Metodos {
 		$grid->db->from('`reglascont`');
 		$grid->db->groupby('modulo');
 		$grid->db->orderby('modulo,regla');
-		$grid->column("Modulo"     , "modulo"     );
-		$grid->column("Descripcion", "descripcion");
-		$grid->column("Reglas"     , "cant",'align="center"');
+		$grid->column('Modulo'     , "modulo"     );
+		$grid->column('Descripcion', "descripcion");
+		$grid->column('Reglas'     , "cant",'align="center"');
 		$grid->column(''           , $link ,'align="center"');
 		$grid->column(''           , $link2,'align="center"');
 		//$grid->column(''           , "Explicar",'align="center"');
@@ -197,19 +201,27 @@ class Reglas extends Metodos {
 	}
 
 	function ejecutar() {
-		$this->rapyd->load("datagrid2","fields");
+		$this->rapyd->load('datagrid2','fields');
 
 		function dif($a,$b){
 			return number_format($a-$b,2,',','.');
 		}
 
-		$modulo = $_POST['modulo'];
-		$mFECHA = date("Ymd",timestampFromInputDate($_POST['fecha'], 'd/m/Y'));
-		$mTABLA  =$this->datasis->dameval("SELECT origen  FROM reglascont WHERE modulo='$modulo' AND regla=1 ");
-		$mCONTROL=$this->datasis->dameval("SELECT control FROM reglascont WHERE modulo='$modulo' AND regla=1 ");
-		$action = "javascript:window.location='" . site_url("contabilidad/reglas/index/$mFECHA") . "'";
+		function escasql($text){
+			$text=preg_replace("/\r\n+|\r+|\n+|\t+/i", ' ', $text);
+			$text=htmlspecialchars($text);
+			$text=str_replace(array("'", '"'), array('&#39;', '&quot;'), $text);
+			return $text;
+		}
+
+		$modulo  = $_POST['modulo'];
+		$dbmodulo= $this->db->escape($modulo);
+		$mFECHA  = date('Ymd',timestampFromInputDate($_POST['fecha'], 'd/m/Y'));
+		$mTABLA  =$this->datasis->dameval("SELECT origen  FROM reglascont WHERE modulo=${dbmodulo} AND regla=1 ");
+		$mCONTROL=$this->datasis->dameval("SELECT control FROM reglascont WHERE modulo=${dbmodulo} AND regla=1 ");
+		$action = "javascript:window.location='" . site_url("contabilidad/reglas/index/${mFECHA}") . "'";
 		$data['content']='';
-		$query=$this->db->query("SELECT a.$mCONTROL FROM $mTABLA WHERE a.fecha=$mFECHA GROUP BY $mCONTROL ");
+		$query=$this->db->query("SELECT a.${mCONTROL} FROM ${mTABLA} WHERE a.fecha=${mFECHA} GROUP BY ${mCONTROL} ");
 
 		foreach ($query->result_array() as $fila){
 			$aregla = $this->_hace_regla($modulo, $mCONTROL, $fila[$mCONTROL]);
@@ -218,10 +230,10 @@ class Reglas extends Metodos {
 			//Construye los encabezados
 			foreach ($aregla['casi'] as $mSQL){
 				$casi_query=$this->db->query($mSQL);
-				if ($casi_query->num_rows() > 0){
+				if($casi_query->num_rows() > 0){
 					$row = $casi_query->row();
 					$encab[$row->comprob]=array();
-					$encab_titu[$row->comprob]='<b>Comprobante:</b> '.$row->comprob.' <b>Fecha:</b> '.date("d/m/Y",timestampFromInputDate($row->fecha, 'Y-m-d')).' <b>Concepto:</b> '.$row->concepto;
+					$encab_titu[$row->comprob]='<b>Comprobante:</b> '.$row->comprob.' <b>Fecha:</b> '.date('d/m/Y',timestampFromInputDate($row->fecha, 'Y-m-d')).' <b>Concepto:</b> '.$row->concepto;
 				}
 			}
 			//echo $query;
@@ -240,17 +252,19 @@ class Reglas extends Metodos {
 						$pivote['haber']   =$row->haber;
 						$pivote['sucursal']=$row->sucursal;
 						$pivote['ccosto']  =$row->ccosto;
+						$pivote['msql']    =$mSQL;
 						$encab[$row->comprob][]=$pivote;
 						//$acumulador[0]+=$row->debe;
 						//$acumulador[1]+=$row->haber;
 					}
 					$pivote['origen']=$pivote['cuenta']=$pivote['referen']=$pivote['concepto']=$pivote['sucursal']='';
-					$pivote['debe']  =number_format($acumulador[0],2,',','.');
-					$pivote['haber'] =number_format($acumulador[1],2,',','.');
-					$pivote['diferencia']=number_format($acumulador[0]-$acumulador[1],2,',','.');
+					$pivote['debe']  =nformat($acumulador[0]);
+					$pivote['haber'] =nformat($acumulador[1]);
+					$pivote['diferencia']=nformat($acumulador[0]-$acumulador[1]);
 					//$encab[$row->comprob][]=$pivote;
 				}
 			}
+
 			foreach ($encab  as $comprob=>$tabla){
 					if (array_key_exists($comprob, $encab_titu))
 						$titulo=$encab_titu[$comprob];
@@ -258,17 +272,18 @@ class Reglas extends Metodos {
 						$titulo='HUERFANO';
 				$grid = new DataGrid2($titulo,$tabla);
 				$grid->per_page=count($tabla);
-				$grid->use_function('dif');
+				$grid->use_function('dif','escasql');
 
-				$grid->column('Or&iacute;gen', 'origen');
-				$grid->column('Cuenta'    , 'cuenta'  );
-				$grid->column('Referencia', 'referen' );
-				$grid->column('Concepto'  , 'concepto');
-				$grid->column("Debe","<nformat><#debe#></nformat>","align=right");
-				$grid->column("Haber","<nformat><#haber#></nformat>","align=right");
+				//$grid->column('Or&iacute;gen', 'msql');
+				$grid->column('Or&iacute;gen', '<span title="<escasql><#msql#></escasql>" onclick="prompt(\'Consulta\',this.title)"><#origen#></span>');
+				$grid->column('Cuenta'       , 'cuenta'  );
+				$grid->column('Referencia'   , 'referen' );
+				$grid->column('Concepto'     , 'concepto');
+				$grid->column('Debe'   ,'<nformat><#debe#></nformat>' ,'align=\'right\'');
+				$grid->column('Haber'  ,'<nformat><#haber#></nformat>','align=\'right\'');
 				//$grid->column("Diferencia" , "<dif><#debe#>|<#haber#></dif>",'align=right');
-				$grid->column('Sucursal'  , 'sucursal','align=right');
-				$grid->column('C. Costo'  , 'ccosto'  ,'align=right');
+				$grid->column('Sucursal'  , 'sucursal','align=\'right\'');
+				$grid->column('C. Costo'  , 'ccosto'  ,'align=\'right\'');
 
 				$grid->totalizar('debe','haber');
 				$grid->build();
@@ -277,9 +292,9 @@ class Reglas extends Metodos {
 
 			}
 		}
-		$data['content'] .= HTML::button('regresa', RAPYD_BUTTON_BACK, $action, "button", "button");
+		$data['content'] .= HTML::button('regresa', RAPYD_BUTTON_BACK, $action, 'button', 'button');
 		$data['head']    = $this->rapyd->get_head();
-		$data['title']   ="<h1>Ejecuci&oacute;n de la regla $modulo</h1>";
+		$data['title']   ="<h1>Ejecuci&oacute;n de la regla ${modulo}</h1>";
 		$this->load->view('view_ventanas', $data);
 	}
 
