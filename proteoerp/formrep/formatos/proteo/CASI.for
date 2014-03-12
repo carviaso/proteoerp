@@ -1,5 +1,5 @@
 <?php
-$maxlin=48; //Maximo de lineas de items.
+$maxlin=45; //Maximo de lineas de items.
 
 if(count($parametros)==0) show_error('Faltan parametros');
 $id   = $parametros[0];
@@ -15,11 +15,11 @@ if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row = $mSQL_1->row();
 
 $fecha    = dbdate_to_human($row->fecha);
-$numero   = htmlspecialchars(trim($row->comprob));
-$descrip  = htmlspecialchars(trim($row->descrip));
-$status   = htmlspecialchars(trim($row->status));
-$tipo     = htmlspecialchars(trim($row->tipo));
-$origen   = htmlspecialchars(trim($row->origen));
+$numero   = $this->us_ascii2html(trim($row->comprob));
+$descrip  = $this->us_ascii2html(trim($row->descrip));
+$status   = $this->us_ascii2html(trim($row->status));
+$tipo     = $this->us_ascii2html(trim($row->tipo));
+$origen   = $this->us_ascii2html(trim($row->origen));
 $haber    = nformat($row->haber);
 $debe     = nformat($row->debe);
 $total    = nformat($row->total);
@@ -141,7 +141,7 @@ foreach ($detalle AS $items){ $i++;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo htmlspecialchars($uline).'<br />';
+						echo $this->us_ascii2html($uline).'<br />';
 						$lineas++;
 						if($lineas >= $maxlin){
 							$lineas =0;

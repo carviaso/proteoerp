@@ -1096,10 +1096,10 @@ class Ssal extends Controller {
 					$this->datasis->sinvcarga( $row->codigo, $alma, $row->cantidad);
 			}
 		}
-		$monto = $this->datasis->dameval('SELECT sum(costo*cantidad) FROM itssal WHERE numero='.$this->db->escape($numero));
+		$monto = $this->datasis->dameval('SELECT SUM(costo*cantidad) FROM itssal WHERE numero='.$this->db->escape($numero));
 
 		//Segun el Caso hace GASTO o OTIN
-		if ( $tipo == 'S' ) {  // GASTO
+		if($tipo == 'S'){  // GASTO
 			$data['fecha']    = $do->get('fecha');
 			$data['numero']   = $numero;
 			$data['proveed']  = 'AJUSI';
@@ -1134,18 +1134,18 @@ class Ssal extends Controller {
 						WHERE a.numero='".$numero."' GROUP BY a.concepto ";
 			$this->db->query($mSQL);
 
-		} else {  //
-			$mNUMERO = $this->datasis->prox_sql("notiot");
-			$mNUMERO = "O".substr($mNUMERO,1,7);
+		}else{  //
+			$mNUMERO = $this->datasis->prox_sql('notiot');
+			$mNUMERO = 'O'.substr($mNUMERO,1,7);
 			$data['tipo_doc']  = 'OT';
 			$data['numero']    = $mNUMERO;
 			$data['fecha']     = $do->get('fecha');
-			$data['orden']     =  '';
-			$data['cod_cli']   = "AJUSI";
-			$data['rifci']     = "";
-			$data['nombre']    = "AJUSTES DE INVENTARIO";
-			$data['direc']     = "";
-			$data['dire1']     = "";
+			$data['orden']     = '';
+			$data['cod_cli']   = 'AJUSI';
+			$data['rifci']     = '';
+			$data['nombre']    = 'AJUSTES DE INVENTARIO';
+			$data['direc']     = '';
+			$data['dire1']     = '';
 			$data['totals']    = $monto;
 			$data['iva']       = 0;
 			$data['totalg']    = $monto;
@@ -1159,7 +1159,7 @@ class Ssal extends Controller {
 
 			$this->db->insert('otin', $data);
 			$mSQL="	INSERT INTO itotin (tipo_doc, numero, codigo, descrip, precio, impuesto, importe, usuario, estampa, hora, transac )
-					SELECT 'OT' AS tipo_doc, '".$mNUMERO."' AS numero,   b.ingreso codigo, 'AJUSTES DE INVENTARIO' descrip, SUM(a.costo*a.cantidad) precio, 0 impuesto, SUM(a.costo*a.cantidad) importe, a.usuario, a.estampa, a.hora, a.transac
+					SELECT 'OT' AS tipo_doc, '${mNUMERO}' AS numero,   b.ingreso codigo, 'AJUSTES DE INVENTARIO' descrip, SUM(a.costo*a.cantidad) precio, 0 impuesto, SUM(a.costo*a.cantidad) importe, a.usuario, a.estampa, a.hora, a.transac
 					FROM itssal a JOIN icon b ON a.concepto=b.codigo WHERE a.numero='".$numero."' GROUP BY a.concepto";
 
 			$this->db->query($mSQL);

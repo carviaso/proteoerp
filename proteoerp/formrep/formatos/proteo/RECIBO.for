@@ -52,18 +52,18 @@ foreach ($_query->result() as $_row){
 
 	$tipo      = trim($row->tipo);
 
-	$contrato  = htmlspecialchars(trim($row->contrato));
-	$ncontrato = htmlspecialchars(trim($row->ncontrato));
-	$nombre    = htmlspecialchars(trim($row->nombre  ));
-	$nacional  = htmlspecialchars(trim($row->nacional));
-	$cedula    = htmlspecialchars(trim($row->cedula  ));
+	$contrato  = $this->us_ascii2html(trim($row->contrato));
+	$ncontrato = $this->us_ascii2html(trim($row->ncontrato));
+	$nombre    = $this->us_ascii2html(trim($row->nombre  ));
+	$nacional  = $this->us_ascii2html(trim($row->nacional));
+	$cedula    = $this->us_ascii2html(trim($row->cedula  ));
 	$ingreso   = $row->ingreso;
 	$hingreso  = dbdate_to_human($ingreso);
 	$fecha     = $row->fecha;
 	$enlace    = $row->enlace;
 	$hfecha    = dbdate_to_human($fecha);
-	$codigo    = htmlspecialchars(trim($row->codigo  ));
-	$cargo     = htmlspecialchars(trim($row->cargo   ));
+	$codigo    = $this->us_ascii2html(trim($row->codigo  ));
+	$cargo     = $this->us_ascii2html(trim($row->cargo   ));
 
 	$datetime1 =  new DateTime($ingreso);
 	$datetime2 =  new DateTime($fecha);
@@ -74,13 +74,17 @@ foreach ($_query->result() as $_row){
 	if($interval->m >1 ) $antiguedad .= $interval->m.' meses y '    ; else $antiguedad .= $interval->m.' mes y ';
 	if($interval->d >1 ) $antiguedad .= $interval->d.' d&iacute;as '; else $antiguedad .= $interval->d.' d&iacute;a ';
 
-	if($tipo=='Q'){
+	if($tipo=='M'){
+		$dias = 30;
+	}elseif($tipo=='Q'){
 		$dias = 15;
 	}elseif($tipo=='S'){
 		$dias = 7;
 	}elseif($tipo=='B'){
 		$dias = 14;
 	}elseif($tipo=='O'){
+		$dias = 0;
+	}else{
 		$dias = 0;
 	}
 
@@ -240,7 +244,7 @@ foreach ($detalle AS $items){ $i++;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo htmlspecialchars($uline).'<br>';
+						echo $this->us_ascii2html($uline).'<br>';
 						$lineas++;
 						if($lineas >= $maxlin){
 							$lineas =0;

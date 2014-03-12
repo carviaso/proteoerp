@@ -601,7 +601,7 @@ class Casi extends Controller {
 		));
 
 		$grid->addField('origen');
-		$grid->label('Origen');
+		$grid->label('Or&iacute;gen');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -637,7 +637,7 @@ class Casi extends Controller {
 		));
 
 		$grid->addField('comprob');
-		$grid->label('Comprob');
+		$grid->label('Comprob.');
 		$grid->params(array(
 			'align'         => "'center'",
 			'search'        => 'true',

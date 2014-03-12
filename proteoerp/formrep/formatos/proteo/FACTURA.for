@@ -56,8 +56,10 @@ elseif($tipo_doc == "F")
 	$documento = "FACTURA";
 elseif($tipo_doc == "D")
 	$documento = "NOTA DE CREDITO";
-elseif($tipo_doc == "X")
+elseif($tipo_doc == "X" && $numero[0]!='N')
 	$documento = "FACTURA ANULADA";
+elseif($tipo_doc == "X" && $numero[0]=='N')
+	$documento = "NOTA DE CREDITO ANULADA";
 else
 	$documento = "DOCUMENTO";
 
