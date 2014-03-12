@@ -1526,6 +1526,13 @@ class Scst extends Controller {
 				$this->db->where('tipo_doc',$row['tipo_doc']);
 				$this->db->where('cod_prv' ,$row['proveed']);
 				$this->db->update('itppro' ,array('numero'=>$data['numero']));
+
+				//Cambia la cuenta por cobrar
+				$this->db->where('numero'  ,$row['numero']);
+				$this->db->where('tipo_doc',$row['tipo_doc']);
+				$this->db->where('cod_prv' ,$row['proveed']);
+				$this->db->where('fecha'   ,$row['fecha']);
+				$this->db->update('sprm'   ,array('numero'=>$data['numero']));
 			}
 
 			if($data['nfiscal'] != $row['nfiscal']){
@@ -4435,7 +4442,6 @@ class Scst extends Controller {
 		$do->set('control'  , $control);
 		$do->set('estampa'  , $estampa);
 		$do->set('hora'     , $hora);
-		$do->set('transac'  , $transac);
 
 		//$montonet = $do->get('montonet');
 		$montotot = $do->get('montotot');
