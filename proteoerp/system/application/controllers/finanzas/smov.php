@@ -2306,7 +2306,7 @@ class Smov extends Controller {
 		//Retencion de IVA RIVC
 		$mSQL = "
 			SELECT b.periodo, b.nrocomp, a.reiva
-			FROM itrivc a JOIN rivc b ON a.idrivc=b.id WHERE a.tipo_doc=IF('$tipo_doc'='FC','F','D') AND a.numero=${dbnumero}
+			FROM itrivc a JOIN rivc b ON a.idrivc=b.id WHERE a.tipo_doc=IF('$tipo_doc'='FC','F','D') AND a.numero=${dbnumero} AND b.anulado<>'S'
 			UNION ALL
 			SELECT b.periodo, b.nrocomp, a.reiva
 			FROM itrivc a JOIN rivc b ON a.idrivc=b.id WHERE a.transac=${dbtransac}";

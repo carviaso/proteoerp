@@ -525,7 +525,7 @@ class Ajax extends Controller {
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
 					LEFT JOIN grup      AS c ON a.grupo=c.grupo
 					LEFT JOIN sinvpromo AS d ON a.codigo=d.codigo
-					LEFT JOIN itsinv    AS e ON a.codigo=e.codigo AND e.alma=${alma}
+					LEFT JOIN itsinv    AS e ON a.codigo=e.codigo AND e.alma=${dbalma}
 					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S' ${wvnega}
 					ORDER BY a.descrip LIMIT ".$this->autolimit;
 				}else{
@@ -535,7 +535,7 @@ class Ajax extends Controller {
 					FROM sinv AS a
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
 					LEFT JOIN grup      AS c ON a.grupo=c.grupo
-					LEFT JOIN itsinv    AS e ON a.codigo=e.codigo AND e.alma=${alma}
+					LEFT JOIN itsinv    AS e ON a.codigo=e.codigo AND e.alma=${dbalma}
 					WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba}) AND a.activo='S' ${wvnega}
 					ORDER BY a.descrip LIMIT ".$this->autolimit;
 				}
