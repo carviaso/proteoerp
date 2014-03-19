@@ -48,12 +48,13 @@ $(function(){
 	$i = false;
 	foreach($arr_concs as $concepto){
 		$obj = 'c'.$concepto;
-
-		if(!$i){ echo '		<tr>'; }
-		echo '			<td class="littletablerowth">'.$form->$obj->label.'</td>';
-		echo '			<td class="littletablerow"  >'.$form->$obj->output.'</td>';
-		if($i){  echo '		</tr>'; }
-		$i= !$i;
+		if ( isset($form->$obj->label) ) {
+			if(!$i){ echo '		<tr>'; }
+			echo '			<td class="littletablerowth">'.$form->$obj->label.'</td>';
+			echo '			<td class="littletablerow"  >'.$form->$obj->output.'</td>';
+			if($i){  echo '		</tr>'; }
+			$i= !$i;
+		}
 	}
 ?>
 </table>

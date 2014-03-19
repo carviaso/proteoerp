@@ -850,8 +850,8 @@ class Pretab extends Controller {
 						$arr_concs[$concepto] = $formula;
 						$dReg = $this->datasis->damereg('SELECT monto, valor FROM prenom WHERE codigo='.$dbcodigo.' AND concepto='.$dbconcepto);
 						if(empty($dReg)){
-							$obj = $row->Field;
-							$edit->$obj = new freeField($nombre,$nombre,"Concepto ${concepto} no aplica para este trabajador");
+							//$obj = $row->Field;
+							//$edit->$obj = new freeField($nombre,$nombre,"Concepto ${concepto} no aplica para este trabajador");
 						}else{
 							$obj = $row->Field;
 							$edit->$obj = new inputField($nombre, $obj);
@@ -872,7 +872,10 @@ class Pretab extends Controller {
 			$dbcodigo = $this->db->escape($codigo);
 			foreach($arr_concs as $concepto=>$formula){
 				$obj = 'c'.$concepto;
-				$monto = floatval($edit->$obj->newValue);
+				$monto = 0;
+				if ( isset($edit->$obj->newValue) )
+					$monto = floatval($edit->$obj->newValue);
+
 				if(empty($monto)){
 					$monto=0;
 				}

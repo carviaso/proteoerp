@@ -348,6 +348,7 @@ class Prenom extends Controller {
 
 			}
 
+			$this->db->query("UPDATE pretab SET total=0 WHERE codigo=".$this->db->escape($codigo) );
 			foreach ($query->result() as $row){
 				$this->pnomina->MONTO   = $row->monto;
 				$this->pnomina->SUELDO  = $row->sueldo;
