@@ -664,6 +664,32 @@ class Icon extends Controller {
 	}
 
 	function _pre_update($do){
+		$tipo = $do->get('tipo');
+		$dbid = intval($do->get('id'));
+		$this->_mSQL='';
+		if($tipo=='E'){
+			$agasto   = trim($this->datasis->dameval("SELECT gasto FROM icon WHERE id=${dbid}"));
+			$gasto    = trim($do->get('gasto'));
+
+			if($agasto!=$gasto){
+				$dbagasto = $this->db->escape($agasto);
+				$dbgasto  = $this->db->escape($gasto);
+
+				$this->_mSQL="UPDATE gitser SET codigo=${dbgasto} WHERE codigo=${dbagasto} AND proveed='AJUSI'";
+			}
+
+		}elseif($tipo=='I'){
+			$aingreso = trim($this->datasis->dameval("SELECT gasto FROM icon WHERE id=${dbid}"));
+			$ingreso  = trim($do->get('ingreso'));
+
+			if($aingreso!=$ingreso){
+				$dbaingreso = $this->db->escape($aingreso);
+				$dbingreso  = $this->db->escape($ingreso);
+
+				$this->_mSQL="UPDATE itotin AS a JOIN otin AS b ON a.numero=b.numero SET a.codigo=${dbingreso} WHERE a.codigo=${dbaingreso} AND b.cod_cli='AJUSI'";
+			}
+		}
+
 		$do->error_message_ar['pre_upd']='';
 		return true;
 	}
@@ -679,6 +705,10 @@ class Icon extends Controller {
 	}
 
 	function _post_update($do){
+		if(!empty($this->_mSQL)){
+			$this->db->simple_query($this->_mSQL);
+		}
+
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Modifico $this->tits $primary ");
 	}
@@ -689,7 +719,7 @@ class Icon extends Controller {
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('icon')) {
+		if(!$this->db->table_exists('icon')) {
 			$mSQL="CREATE TABLE `icon` (
 				codigo   char( 6) DEFAULT NULL,
 				concepto char(30) DEFAULT NULL,

@@ -43,7 +43,10 @@ $direccion= htmlspecialchars(trim($row->direccion));
 $dbnumero = $this->db->escape($numero);
 $lineas   = 0;
 $uline    = array();
-$mSQL_2   = $this->db->query('SELECT codigo,descrip AS desca,cantidad AS cana,costo AS preca,importe FROM itordc WHERE numero='.$dbnumero);
+$mSQL_2   = $this->db->query('SELECT a.codigo, b.alterno, a.descrip AS desca, a.cantidad AS cana, a.costo AS preca, a.importe
+FROM itordc AS a
+JOIN sinv AS b ON a.codigo=b.codigo
+WHERE a.numero='.$dbnumero);
 $detalle  = $mSQL_2->result();
 ?><html>
 <head>
@@ -112,6 +115,7 @@ $encabezado_tabla="
 		<thead>
 			<tr>
 				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >C&oacute;digo</th>
+				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >Alterno</th>
 				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >Descripci&oacute;n</th>
 				<th style='color: #111111;background: #EEEEEE;border: 1px solid black;font-size: 8pt;' >Cantidad</th>";
 if($mprec){
@@ -134,15 +138,15 @@ if($mprec){
 
 			<tfoot style='border:1px solid;background:#EEEEEE;'>
 				<tr>
-					<td colspan="2" style="text-align: right;"></td>
+					<td colspan="3" style="text-align: right;"></td>
 					<td colspan="2" style="text-align: right;"><b>SUB-TOTAL:</b></td>
 					<td class="change_order_total_col"><b>${stotal}</b></td>
 				</tr><tr>
-					<td colspan="2" style="text-align: right;"></td>
+					<td colspan="3" style="text-align: right;"></td>
 					<td colspan="2" style="text-align: right;"><b>IMPUESTO:</b></td>
 					<td class="change_order_total_col"><b>${impuesto}</b></td>
 				</tr><tr  style='border-top: 1px solid;background:#AAAAAA;'>
-					<td colspan="2" style="text-align: right;"></td>
+					<td colspan="3" style="text-align: right;"></td>
 					<td colspan="2" style="text-align: right;font-size:2em;"><b>TOTAL:</b></td>
 					<td class="change_order_total_col" style="font-size:2em;" ><b>${gtotal}</b></td>
 				</tr>
@@ -160,7 +164,7 @@ piefinal;
 			</tbody>
 			<tfoot style='border:1px solid;background:#EEEEEE;'>
 				<tr style='border-top: 1px solid;background:#AAAAAA;'>
-					<td colspan="3" style="text-align: right;">&nbsp;</td>
+					<td colspan="4" style="text-align: right;">&nbsp;</td>
 				</tr>
 			</tfoot>
 		</table>
@@ -200,7 +204,8 @@ foreach ($detalle AS $items){ $i++;
 		}
 ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-				<td style="text-align: center"><?php echo ($clinea)? '': $items->codigo; ?></td>
+				<td style="text-align: center"><?php echo ($clinea)? '': $items->codigo;  ?></td>
+				<td style="text-align: center"><?php echo ($clinea)? '': $items->alterno; ?></td>
 				<td>
 					<?php
 					if(!$clinea){
@@ -245,6 +250,7 @@ foreach ($detalle AS $items){ $i++;
 }
 for(1;$lineas<$maxlin;$lineas++){ ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
+				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
