@@ -1,0 +1,118 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$modbus=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_cli'),
+	'titulo'  =>'Buscar Cliente');
+
+$boton=$this->datasis->modbus($modbus);
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->db->select(array('nombre','cliente','rifci','fecha1','fecha2','vendedor','contacto','zona','grupo','ciudad1','telefono','limite','tipo','dire11'));
+$filter->db->from('scli');
+$filter->db->where('cliente=cliente');
+
+$filter->grupo = new dropdownField('Grupo', 'grupo');
+$filter->grupo->db_name = 'grupo';
+$filter->grupo->clause='where';
+$filter->grupo->operator='=';
+$filter->grupo->option('','Todos');
+$filter->grupo->options('SELECT grupo, gr_desc FROM grcl ORDER BY grupo');
+
+$filter->zona = new dropdownField('Zona', 'zona');
+$filter->zona->db_name = 'zona';
+$filter->zona->clause='where';
+$filter->zona->operator="=";
+$filter->zona->option('','Todas');
+$filter->zona->options('SELECT codigo, nombre FROM zona ORDER BY codigo');
+
+$filter->ciudad = new dropdownField('Ciudad', 'ciudad');
+$filter->ciudad->db_name ='ciudad1';
+$filter->ciudad->clause="where";
+$filter->ciudad->operator='=';
+$filter->ciudad->option('','Todas');
+$filter->ciudad->options("SELECT TRIM(ciudad) AS codigo, ciudad FROM ciud ORDER BY ciudad");
+
+$filter->vendedor = new dropdownField('Vendedor', "vendedor");
+$filter->vendedor->db_name = 'vendedor';
+$filter->vendedor->clause="where";
+$filter->vendedor->operator="=";
+$filter->vendedor->option('','Todos');
+$filter->vendedor->options("SELECT vendedor, nombre FROM vend ORDER BY vendedor");
+
+$filter->tipo = new dropdownField("Tipo", "tipo");
+$filter->tipo->db_name = 'tipo';
+$filter->tipo->clause="where";
+$filter->tipo->operator='=';
+$filter->tipo->option('','Todos');
+$filter->tipo->option('1','1 Precio');
+$filter->tipo->option('2','2 Precio');
+$filter->tipo->option('3','3 Precio');
+$filter->tipo->option('4','4 Precio');
+$filter->tipo->option('0','Inactivo');
+
+$filter->ordenpor = new dropdownField("Ordenado por", "orden");
+$filter->ordenpor->option('nombre' ,'Nombre');
+$filter->ordenpor->option('cliente','Cliente');
+$filter->ordenpor->clause ='';
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
+
+	$filter->db->orderby($filter->ordenpor->newValue);
+	$mSQL=$this->rapyd->db->_compile_select();
+	$mSQL.=" limit 34000";
+		//echo $mSQL;
+
+	$sobretabla='';
+	if (!empty($filter->grupo->newValue))    $sobretabla.='Grupo: '.$filter->grupo->description;
+	if (!empty($filter->zona->newValue))     $sobretabla.='Zona: '.$filter->zona->description;
+	if (!empty($filter->ciudad->newValue))   $sobretabla.='Ciudad: '.$filter->ciudad->description;
+	if (!empty($filter->vendedor->newValue)) $sobretabla.='Vendedor: '.$filter->vendedor->description;
+	if (!empty($filter->tipo->newValue))     $sobretabla.='Tipo: '.$filter->tipo->description;
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Listado de Clientes');
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+
+	$pdf->AddCol('cliente' ,17,'Código',   'L',7);
+	$pdf->AddCol('nombre'  ,65,'Nombre',   'L',6);
+	$pdf->AddCol('rifci'   ,20,'Rif',      'L',7);
+	$pdf->AddCol('grupo'   ,12,'Grupo',    'C',7);
+	$pdf->AddCol('ciudad1' ,25,'Ciudad',   'L',7);
+	$pdf->AddCol('telefono',35,'Teléfonos','L',7);
+	$pdf->AddCol('limite'  ,10 ,'Lim',     'L',7);
+	$pdf->AddCol('tipo'    ,10 ,'Tipo',    'L',7);
+	$pdf->AddCol('dire11'  ,75,'Dirección','L',7);
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Listado de Clientes</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

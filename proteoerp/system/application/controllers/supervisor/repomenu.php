@@ -385,7 +385,7 @@ class repomenu extends validaciones {
 		$rs = false;
 		$nombre=$this->input->post('nombre');
 		$proteo=$this->input->post('proteo');
-		if($proteo !== false and $nombre !== false){
+		if($proteo !== false && $nombre !== false){
 			if(stripos($this->config->item('charset'), 'utf')===false){
 				$rs = file_put_contents('formrep/reportes/proteo/'.$nombre.'.rep',$proteo);
 			}
@@ -399,10 +399,13 @@ class repomenu extends validaciones {
 
 	function cargar(){
 		$nombre=$this->input->post('nombre');
-		if( $nombre ){
-			if ( file_exists('formrep/reportes/proteo/'.$nombre.'.rep') ){
+		if($nombre){
+			if(file_exists('formrep/reportes/proteo/'.$nombre.'.rep')){
 				$leer = file_get_contents('formrep/reportes/proteo/'.$nombre.'.rep');
-				if ( $leer ) echo $leer;
+				if($leer) echo $leer;
+			}elseif(file_exists('formrep/reportes/proteo/'.$nombre.'.REP') ){
+				$leer = file_get_contents('formrep/reportes/proteo/'.$nombre.'.REP');
+				if($leer) echo $leer;
 			}
 		}
 	}

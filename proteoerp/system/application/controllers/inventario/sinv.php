@@ -2706,7 +2706,7 @@ class Sinv extends Controller {
 			$this->db->where('id'   , $id);
 			$this->db->update('sinv', $data);
 
-			logusu('SINV',"Registro ${row[codigo]} MODIFICADO");
+			logusu('SINV','Registro '.$row['codigo'].' MODIFICADO');
 			echo 'Registro Modificado';
 
 		}elseif($oper == 'del'){

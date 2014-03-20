@@ -1,0 +1,70 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->fecha = new dateonlyField('Desde', 'fechad','m/Y');
+$filter->fecha->clause  ='where';
+$filter->fecha->db_name ='EXTRACT(YEAR_MONTH FROM fecha)';
+$filter->fecha->insertValue = date('Y-m-d');
+$filter->fecha->operator='=';
+$filter->fecha->dbformat='Ym';
+$filter->fecha->size=7;
+$filter->fecha->append(' mes/año');
+$filter->fecha->rule = 'required';
+
+$filter->nivel = new dropdownField('Nivel', 'nivel');
+$filter->nivel->style = "width:60px;";
+$filter->nivel->clause='';
+for($i=$this->datasis->nivel(); $i>0 ; $i--)
+	$filter->nivel->option($i,$i);
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit',RAPYD_BUTTON_SEARCH);
+$filter->build_form();
+
+$filter->buttons('search');
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+
+	$largo=intval($filter->nivel->value);
+
+	$select=array(
+		"IF(b.codigo IS NULL,'VACIO', SUBSTRING_INDEX(a.cuenta,'.',${largo})) AS cuenta",
+		'SUM(a.debe) AS debe',
+		'SUM(a.haber) AS haber',
+		'b.descrip'
+	);
+	$filter->db->select($select);
+	$filter->db->from ('itcasi AS a');
+	$filter->db->join('cpla AS b' ,"SUBSTRING_INDEX(a.cuenta,'.',${largo})=b.codigo",'LEFT');
+	$filter->db->groupby("SUBSTRING_INDEX(a.cuenta,'.',${largo})");
+	$mSQL=$filter->db->_compile_select();
+	//echo $mSQL;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Resumen Libro Diario');
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+	$pdf->AddCol('cuenta' ,25,'Cuenta'             ,'L',8);
+	$pdf->AddCol('descrip',70,'Nombre de la Cuenta','L',8);
+	$pdf->AddCol('debe'   ,30,'Débitos'            ,'R',8);
+	$pdf->AddCol('haber'  ,30,'Créditos'           ,'R',8);
+	$pdf->setTotalizar('debe','haber');
+	$pdf->Table();
+	$pdf->Output();
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Resumen Libro Diario</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

@@ -906,12 +906,18 @@ class Pretab extends Controller {
 
 		$mreg     = $this->datasis->damereg("SELECT fecha, contrato, trabaja, fechap FROM prenom LIMIT 1");
 
-		$fecha    = $mreg['fecha'];
-		$contrato = $mreg['contrato'];
-		$trabaja  = $mreg['trabaja'];
-		$fechap   = $mreg['fechap'];
-		$tipo     = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo='".$contrato."' ");
-		$existe   = $this->datasis->dameval("SELECT count(*) FROM nomina WHERE contrato='".$contrato."' AND fecha='".$fecha."' AND trabaja='".$trabaja."' ");
+		$fecha      = $mreg['fecha'];
+		$contrato   = $mreg['contrato'];
+		$trabaja    = $mreg['trabaja'];
+		$fechap     = $mreg['fechap'];
+		$dbfecha    = $this->db->escape($fecha   );
+		$dbcontrato = $this->db->escape($contrato);
+		$dbtrabaja  = $this->db->escape($trabaja );
+		$dbfechap   = $this->db->escape($fechap  );
+
+
+		$tipo       = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=${dbcontrato}");
+		$existe     = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM nomina WHERE contrato=${dbcontrato} AND fecha=${dbfecha} AND trabaja=${dbtrabaja}");
 
 		if($existe > 0 && $tipo <> 'O'){
 			echo 'Nomina ya Guardada debe eliminarla primero!!';
@@ -922,35 +928,39 @@ class Pretab extends Controller {
 		$mGSERNUM = $this->datasis->fprox_numero('ngser');
 		$mFREC    = $tipo;
 
-		$transac = $this->datasis->fprox_numero('ntransa');
-		$estampa = date('Ymd');
-		$hora    = date('H:i:s');
-		$usuario = $this->session->userdata('usuario');
+		$transac  = $this->datasis->fprox_numero('ntransa');
+		$estampa  = date('Ymd');
+		$hora     = date('H:i:s');
+		$usuario  = $this->session->userdata('usuario');
+		$dbusuario= $this->db->escape($usuario);
 
 		// GENERAR ITEMS GITSER
 		$mGSER = $this->datasis->fprox_numero('ngser');
 		$mSQL= "INSERT INTO gitser (fecha, numero, proveed, codigo, descrip, precio,   iva, importe, unidades, fraccion, almacen, departa, sucursal, usuario, estampa, transac)
-				SELECT fechap, '".$mNOMINA."',ctaac, ctade,   CONCAT(RTRIM(b.descrip),' ',d.depadesc), SUM(valor), 0, SUM(valor), 0,        0,        '',     d.enlace, c.sucursal, '".$usuario."', '".$estampa."','".$transac."'
-				FROM prenom a JOIN conc b ON a.concepto=b.concepto
-					JOIN pers c ON a.codigo=c.codigo
-					JOIN depa d ON c.depto=d.departa
-				WHERE valor<>0 AND tipod='G'
+				SELECT fechap, '".$mNOMINA."',ctaac, ctade,   CONCAT(RTRIM(b.descrip),' ',d.depadesc), SUM(valor), 0, SUM(valor), 0,        0,        '',     d.enlace, c.sucursal, ${dbusuario}, '".$estampa."','".$transac."'
+				FROM prenom a
+				JOIN conc b ON a.concepto=b.concepto
+				JOIN pers c ON a.codigo=c.codigo
+				JOIN depa d ON c.depto=d.departa
+				WHERE a.valor<>0 AND b.tipod='G'
 				GROUP BY ctade, d.enlace ";
 		$this->db->query($mSQL);
 
 		// CALCULA LAS DEDUCCIONES
-		$mSQL = "SELECT sum(valor) total
-				FROM prenom a JOIN conc b ON a.concepto=b.concepto
-					JOIN pers c ON a.codigo=c.codigo
+		$mSQL = "SELECT SUM(valor) total
+				FROM prenom a
+				JOIN conc b ON a.concepto=b.concepto
+				JOIN pers c ON a.codigo=c.codigo
 				WHERE valor<>0 AND tipod!='G' ";
 
 		$mDEDU = $this->datasis->dameval($mSQL);
 
 		// CALCULA LOS PRESTAMOS
 		$mSQL = "SELECT SUM(IF(b.monto-b.abonos-a.cuota>0,a.cuota,b.monto-b.abonos))
-				FROM pres a JOIN smov b ON a.cod_cli=b.cod_cli AND a.tipo_doc=b.tipo_doc AND a.numero=b.numero
+				FROM pres a
+				JOIN smov b ON a.cod_cli=b.cod_cli AND a.tipo_doc=b.tipo_doc AND a.numero=b.numero
 				WHERE a.codigo IN (SELECT codigo FROM prenom GROUP BY codigo)
-				AND b.monto>b.abonos AND a.apartir<='".$fecha."' ";
+				AND b.monto>b.abonos AND a.apartir<=${dbfecha}";
 
 		$mPRE   = $this->datasis->dameval($mSQL);
 		$mDEDU  = abs($mDEDU)+$mPRE;
@@ -958,9 +968,11 @@ class Pretab extends Controller {
 
 		// GENERA EL ENCABEZADO DE GSER
 		$mSQL = "INSERT INTO gser (fecha, numero, proveed, nombre, vence, totpre,   totiva, totbruto, reten, totneto,    codb1, tipo1, cheque1, monto1, credito, anticipo, orden, tipo_doc, usuario, estampa, transac)
-				SELECT a.fechap, '".$mNOMINA."', b.ctaac, d.nombre, a.fechap, SUM(a.valor), 0, SUM(a.valor), 0, SUM(a.valor), '', '' , '', ".$mDEDU."*(b.ctaac='".$mNOMI."'), sum(a.valor)-".$mDEDU."*(b.ctaac='".$mNOMI."'), 0, '', 'GA','".$usuario."', '".$estampa."', '".$transac."'
-				FROM prenom a JOIN conc b ON a.concepto=b.concepto
-					JOIN pers c ON a.codigo=c.codigo JOIN sprv d ON ctaac=d.proveed
+				SELECT a.fechap, '".$mNOMINA."', b.ctaac, d.nombre, a.fechap, SUM(a.valor), 0, SUM(a.valor), 0, SUM(a.valor), '', '' , '', ".$mDEDU."*(b.ctaac='".$mNOMI."'), SUM(a.valor)-".$mDEDU."*(b.ctaac='".$mNOMI."'), 0, '', 'GA',${dbusuario}, '".$estampa."', '".$transac."'
+				FROM prenom a
+				JOIN conc b ON a.concepto=b.concepto
+				JOIN pers c ON a.codigo=c.codigo
+				JOIN sprv d ON ctaac=d.proveed
 				WHERE valor<>0 AND tipod='G'
 				GROUP BY ctaac ";
 		$this->db->query($mSQL);
@@ -968,24 +980,25 @@ class Pretab extends Controller {
 		// GENERA CXP
 		$mNUMCXP = $mNOMINA;
 		$mSQL ="INSERT INTO sprm (tipo_doc, fecha, numero, cod_prv, nombre, vence, monto, impuesto, tipo_ref, num_ref, codigo, descrip, usuario, estampa, transac, observa1 )
-				SELECT 'ND' tipo_doc, fecha, CONCAT('N',MID(numero,2,7)), proveed, nombre, vence, credito, 0, 'GA', '' ,'NOCON', 'NOMINA', '".$usuario."', '".$estampa."', '".$transac."', 'NOMINA '
+				SELECT 'ND' tipo_doc, fecha, CONCAT('N',MID(numero,2,7)), proveed, nombre, vence, credito, 0, 'GA', '' ,'NOCON', 'NOMINA', ${dbusuario}, '".$estampa."', '".$transac."', 'NOMINA '
 				FROM gser
 				WHERE tipo_doc='GA' AND numero='".$mNOMINA."' AND transac='".$transac."'";
 		$this->db->query($mSQL);
 
 		// GENERA LAS ND EN PROVEEDORES SPRM
-		$mSQL= "SELECT b.ctaac, a.fechap fecha, sum(valor) valor, d.nombre, b.descrip
-				FROM prenom a JOIN conc b ON a.concepto=b.concepto
-					JOIN pers c ON a.codigo=c.codigo
-					JOIN sprv d ON ctaac=d.proveed
+		$mSQL= "SELECT b.ctaac, a.fechap fecha, SUM(valor) valor, d.nombre, b.descrip
+				FROM prenom a
+				JOIN conc b ON a.concepto=b.concepto
+				JOIN pers c ON a.codigo=c.codigo
+				JOIN sprv d ON ctaac=d.proveed
 				WHERE valor<>0 AND tipod='P' AND tipoa='P'
 				GROUP BY ctaac ";
 		$query  = $this->db->query($mSQL);
 
-		if ($query->num_rows() > 0){
+		if($query->num_rows() > 0){
 			foreach ($query->result() as $row){
-				$mCONTROL = $this->datasis->fprox_numero("nsprm");
-				$mNOTADEB = $this->datasis->fprox_numero("num_nd");
+				$mCONTROL = $this->datasis->fprox_numero('nsprm');
+				$mNOTADEB = $this->datasis->fprox_numero('num_nd');
 
 				$data = array();
 				$data['cod_prv']  = $row->ctaac;
@@ -1011,9 +1024,6 @@ class Pretab extends Controller {
 				$data['transac']  = $transac;
 
 				$this->db->insert('sprm',$data);
-
-				//$mSQL = "REPLACE INTO sprm SET "
-
 			}
 		}
 
@@ -1022,16 +1032,17 @@ class Pretab extends Controller {
 		// PRESTAMOS
 		$mSQL= "SELECT b.cod_cli, b.nombre, b.tipo_doc, b.numero, b.fecha, a.codigo, a.nombre,
 						IF(b.monto-b.abonos-a.cuota>0,a.cuota,b.monto-b.abonos) cuota, b.monto
-				FROM pres a JOIN smov b ON a.cod_cli=b.cod_cli AND a.tipo_doc=b.tipo_doc AND a.numero=b.numero
+				FROM pres a
+				JOIN smov b ON a.cod_cli=b.cod_cli AND a.tipo_doc=b.tipo_doc AND a.numero=b.numero
 				WHERE a.codigo IN (SELECT codigo FROM prenom GROUP BY codigo)
-				AND b.monto>b.abonos AND a.apartir<='".$fecha."' ";
+				AND b.monto>b.abonos AND a.apartir<=${dbfecha}";
 		$query  = $this->db->query($mSQL);
 
-		if ($query->num_rows() > 0){
-			foreach ($query->result() as $row){
+		if($query->num_rows() > 0){
+			foreach($query->result() as $row){
 
-				$mCONTROL = $this->datasis->fprox_numero("nsmov");
-				$mNOTACRE = $this->datasis->fprox_numero("nccli");
+				$mCONTROL = $this->datasis->fprox_numero('nsmov');
+				$mNOTACRE = $this->datasis->fprox_numero('nccli');
 
 				$data = array();
 				$data['cod_cli']  = $row->cod_cli;
@@ -1057,11 +1068,12 @@ class Pretab extends Controller {
 
 				$this->db->insert('smov',$data);
 
+				$dbcod_cli = $this->db->escape($cod_cli);
 				// ACTUALIZA EL DOCUMENTO ORIGEN
 				$mSQL = "UPDATE smov SET abonos=abonos+".abs($row->cuota)."
 				WHERE tipo_doc='".$row->tipo_doc."' AND numero='".$row->numero."'
-				AND cod_cli='".$row->cod_cli."' AND fecha='".$row->fecha."' LIMIT 1";
-				$this->db->query($mSQL);   // { ABS(mC:FieldGet('CUOTA')),mC:FieldGet('TIPO_DOC'), mC:FieldGet('NUMERO'), mC:FieldGet('COD_CLI'), mC:FieldGet('FECHA')  })
+				AND cod_cli=${dbcod_cli} AND fecha='".$row->fecha."' LIMIT 1";
+				$this->db->query($mSQL);
 
 				$data = array();
 				$data['numccli']  = $mNOTACRE;
@@ -1082,9 +1094,10 @@ class Pretab extends Controller {
 		}
 
 		// MANDA LA NOMINA AL HISTORICO
-		$mSQL= "INSERT INTO nomina (numero, frecuencia,               contrato,   depto,   codigo,   nombre,   concepto,   tipo,   descrip,   grupo,   formula,   monto,   fecha,   valor, estampa, usuario,          transac,      hora, fechap, trabaja )
-				SELECT '".$mNOMINA."' numa, '".$mFREC."' frecu, a.contrato, b.depto, a.codigo, a.nombre, a.concepto, a.tipo, a.descrip, a.grupo, a.formula, a.monto, a.fecha, a.valor, now(), '".$usuario."', '".$transac."', CURTIME(), a.fechap,'".$trabaja."'
-				FROM prenom a JOIN pers b ON a.codigo=b.codigo
+		$mSQL= "INSERT INTO nomina (numero, frecuencia,        contrato,   depto,   codigo,   nombre,   concepto,   tipo,   descrip,   grupo,   formula,   monto,   fecha,   valor, estampa, usuario,          transac,      hora, fechap, trabaja )
+				SELECT '".$mNOMINA."' numa, '".$mFREC."' frecu, a.contrato, b.depto, a.codigo, a.nombre, a.concepto, a.tipo, a.descrip, a.grupo, a.formula, a.monto, a.fecha, a.valor, now(), ${dbusuario}, '".$transac."', CURTIME(), a.fechap,${dbtrabaja}
+				FROM prenom a
+				JOIN pers b ON a.codigo=b.codigo
 				WHERE a.valor<>0 ";
 		$this->db->query($mSQL);
 
@@ -1092,8 +1105,9 @@ class Pretab extends Controller {
 		$mVALOR = "SUM(IF(b.monto-b.abonos-a.cuota>0,a.cuota,b.monto-b.abonos))";
 
 		// MANDA LOS PRESTAMOS
-		foreach ( $mPRESTAMO as $meco ) {
-			$mDEPTO = $this->datasis->dameval("SELECT depto FROM pers WHERE codigo='".$mPRESTAMO[0]."'");
+		foreach($mPRESTAMO as $meco){
+			$dbcodpr = $this->db->escape($mPRESTAMO[0]);
+			$mDEPTO  = $this->datasis->dameval("SELECT depto FROM pers WHERE codigo=${dbcodpr}");
 
 			$data = array();
 			$data['numero']     = $mNOMINA;
@@ -1109,7 +1123,7 @@ class Pretab extends Controller {
 			$data['formula']    = '';
 			$data['monto']      = 0;
 			$data['fecha']      = $fecha;
-			$data['valor']      = -$meco[2];
+			$data['valor']      = -1*$meco[2];
 			$data['estampa']    = $estampa;
 			$data['usuario']    = $usuario;
 
@@ -1121,9 +1135,9 @@ class Pretab extends Controller {
 
 		}
 
-		$this->db->query("TRUNCATE prenom");
-		$this->db->query("TRUNCATE pretab");
-		logusu('NOMI',"NOMINA $mNOMINA CREADA");
+		$this->db->query('TRUNCATE prenom');
+		$this->db->query('TRUNCATE pretab');
+		logusu('NOMI',"NOMINA ${mNOMINA} CREADA");
 
 		echo 'Nomina Guardada';
 
