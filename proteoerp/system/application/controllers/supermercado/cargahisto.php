@@ -42,7 +42,7 @@ class Cargahisto extends Controller {
 		$form->submit('btnsubmit','Procesar');
 		$form->build_form();
 
-		if ($form->on_success()){
+		if($form->on_success()){
 			$fecha=$form->fecha->newValue;
 			$encab=false;
 			if(!empty($form->hf->upload_data['full_path'])){
@@ -99,8 +99,9 @@ class Cargahisto extends Controller {
 				for ($i = 1; $i <= $record_numbers; $i++) {
 					$row = dbase_get_record_with_names($db, $i);
 					if($row['FECHA']==$fecha){
+						$dbfecha=$this->db->escape($fecha);
 						if($cc==0){
-							$mSQL="DELETE FROM $tabla WHERE fecha='$fecha' AND caja=".$this->db->escape(trim($row['CAJA']));
+							$mSQL="DELETE FROM ${tabla} WHERE fecha=${dbfecha} AND caja=".$this->db->escape(trim($row['CAJA']));
 							$ban=$this->db->simple_query($mSQL);
 							if(!$ban){ memowrite($mSQL,'cargahisto'); $error++; }
 						}
@@ -135,6 +136,7 @@ class Cargahisto extends Controller {
 							$data['cuadre']     ='';
 							$this->cajero = trim($row['CAJERO']);
 						}else{
+							if($row['F_FACTURA']!=$row['FECHA']) continue;
 							if(empty($cajero)) $cajero=$this->cajero;
 							$data['tipo_doc']   =trim($row['TIPO_DOC']);
 							$data['numero']     =$row['NUMERO'];

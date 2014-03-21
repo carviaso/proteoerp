@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $this->rapyd->load('datafilter2');
 $this->rapyd->load('datatable');
 $mSPRV=array(
