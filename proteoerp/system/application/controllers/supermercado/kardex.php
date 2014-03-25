@@ -107,6 +107,7 @@ class Kardex extends Controller {
 			$code   = $_POST['codigo'];
 			$dbcode = $this->db->escape($code);
 			$mSQL   = "SELECT descrip FROM maes WHERE codigo=${dbcode}";
+			$ffinal  = $this->datasis->dameval("SELECT MAX(fecha) AS fecha FROM costos WHERE codigo=${dbcode}");
 			$query  = $this->db->query($mSQL);
 			$descrip= '';
 			if($query->num_rows() > 0){
@@ -143,7 +144,6 @@ class Kardex extends Controller {
 			//echo $grid->db->last_query();
 		}
 
-		$ffinal  = $this->datasis->dameval("SELECT MAX(fecha) AS fecha FROM costos WHERE codigo=${dbcode}");
 		if(!empty($ffinal)){
 			$dbfinal = $this->db->escape($ffinal);
 			$mayor   = $this->datasis->dameval("SELECT SUM(cantidad) AS cana FROM itfmay WHERE codigo=${dbcode} AND fecha>${dbfinal}");
