@@ -1128,7 +1128,7 @@ class Invresu extends Controller {
 		// Trae saldos Iniciales
 		$mesante = $this->datasis->dameval("SELECT mes FROM invresu WHERE mes < ${mes} ORDER BY mes DESC LIMIT 1");
 
-		if ( $mesante ) {
+		if($mesante){
 
 			// Agrega codigos desde los anteriores
 			$mSQL = "
@@ -1142,16 +1142,15 @@ class Invresu extends Controller {
 			UPDATE invresu a JOIN  invresu b ON a.codigo=b.codigo AND a.mes=${mes} AND b.mes=${mesante}
 			SET a.inicial=b.final, a.minicial=b.mfinal;";
 			$this->db->query($mSQL);
-
-			// Recalcula saldo final
-			$mSQL = "
-			UPDATE invresu SET
-			final  =  inicial + compras  + conver  - ventas  - notas  + trans  + ajuste  + fisico,
-			mfinal = minicial + mcompras + mconver - mventas - mnotas + mtrans + majuste + mfisico
-			WHERE mes = ${mes} ";
-			$this->db->query($mSQL);
-
 		}
+
+		// Recalcula saldo final
+		$mSQL = "
+		UPDATE invresu SET
+		final  =  inicial + compras  + conver  - ventas  - notas  + trans  + ajuste  + fisico,
+		mfinal = minicial + mcompras + mconver - mventas - mnotas + mtrans + majuste + mfisico
+		WHERE mes = ${mes} ";
+		$this->db->query($mSQL);
 
 		$mSQL = "
 SELECT mes INTO @mPAPA FROM invresu WHERE mes < mFECHA ORDER BY mes DESC LIMIT 1;

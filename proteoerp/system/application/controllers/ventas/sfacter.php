@@ -611,7 +611,7 @@ class sfacter extends validaciones {
 		if(!empty($sprv)){
 			$causado  = $this->datasis->fprox_numero('ncausado');
 			$sprvnobre= $this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$this->db->escape($sprv));
-			$mnumnc   = $this->datasis->fprox_numero('ndcli');
+			$mnumnc   = $this->datasis->fprox_numero('num_nd');
 
 			$data=array();
 			$data['cod_prv']    = $sprv;

@@ -11,7 +11,7 @@
 		<p><?php echo $forma  ?></p>
 		<?php foreach($opts as $opt){ ?>
 		<div class='<?php echo ($opt['siste']=='D')? 'rconte' : 'pconte'; ?>' tile='Averr'>
-			<a href="<?php echo site_url('reportes/ver/'.$opt['nombre'].'/'.$repo); ?>" title="<?php echo 'Nombre: '.$opt['nombre']; ?>">
+			<a href="<?php echo site_url('reportes/ver/'.$opt['nombre'].'/'.$repo); ?>" title="<?php echo 'C&oacute;digo: '.$opt['nombre']; ?>">
 			<h3 style="padding:2px;margin:0px;font-size:0.9em"><?php
 			$ban = stripos($this->db->char_set,'latin')!==false && $this->config->item('charset')=='UTF-8';
 			if($ban){
