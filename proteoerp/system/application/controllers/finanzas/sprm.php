@@ -1741,7 +1741,7 @@ class Sprm extends Controller {
 			'tipo_doc'=>'tipoppro',
 			'numero'  =>'numppro',
 			'cod_prv' =>'cod_prv',
-			'fecha'   =>'fecha')
+			'transac' =>'transac')
 		);
 		//$do->rel_one_to_many('sfpa'  , 'sfpa'  , array(
 		//	'transac' =>'transac',
