@@ -1427,7 +1427,7 @@ class Smov extends Controller {
 			'tipo_doc'=>'tipoccli',
 			'numero'  =>'numccli',
 			'cod_cli' =>'cod_cli',
-			'fecha'   =>'fecha')
+			'transac' =>'transac',)
 		);
 		$do->rel_one_to_many('sfpa'  , 'sfpa'  , array(
 			'transac' =>'transac',
