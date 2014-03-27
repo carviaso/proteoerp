@@ -2250,6 +2250,7 @@ class Sprm extends Controller {
 		$do->rm_get('padicional');
 		$do->rm_get('apltasa');
 
+		$cfecha=intval(str_replace('-','',$fecha));
 		$ppago=$totalab=$impuesto=$ppimpuesto=0;
 		$arr_itimpuestos=array();
 		//Totaliza el abonado
@@ -2260,6 +2261,7 @@ class Sprm extends Controller {
 			$itpppago = floatval($do->get_rel($rel, 'ppago', $i));
 			$ittipo   = $do->get_rel($rel, 'tipo_doc', $i);
 			$itnumero = $do->get_rel($rel, 'numero'  , $i);
+			$itfecha  = $do->get_rel($rel, 'fecha'   , $i);
 
 			if(empty($itabono) || $itabono==0){
 				continue;
@@ -2267,6 +2269,12 @@ class Sprm extends Controller {
 				$totalab   += $itabono;
 				$dbittipo   = $this->db->escape($ittipo);
 				$dbitnumero = $this->db->escape($itnumero);
+
+				$citfecha  = intval(str_replace('-','',$itfecha));
+				if($citfecha>$cfecha){
+					$do->error_message_ar['pre_ins']='No puede pagar un efecto con una fecha anterior a su emision como el caso de '.$ittipo.$itnumero;
+					return false;
+				}
 
 				$rrow=$this->datasis->damerow("SELECT impuesto,monto,montasa,monredu,monadic,tasa,reducida,sobretasa,exento FROM sprm WHERE cod_prv=${dbcod_prv} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}");
 				if(empty($rrow)){
@@ -2421,7 +2429,6 @@ class Sprm extends Controller {
 			}else{
 				$ittipo    = $do->get_rel($rel, 'tipo_doc', $i);
 				$itnumero  = $do->get_rel($rel, 'numero'  , $i);
-				$itfecha   = $do->get_rel($rel, 'fecha'   , $i);
 				$itimpuesto= $arr_itimpuestos[$i];
 
 				$do->set_rel($rel, 'tipoppro', $tipo_doc, $i);

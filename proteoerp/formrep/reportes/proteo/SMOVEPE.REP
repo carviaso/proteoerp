@@ -1,0 +1,110 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$this->rapyd->load("datafilter2");
+$this->rapyd->load("datatable");
+$scli=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_cli'),
+	'titulo'  =>'Buscar Cliente');
+
+$mSOCIO=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Socio',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Socio','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'socio'),
+	'titulo'  =>'Buscar Socio',
+	'join'    =>array('scli AS a','scli.cliente=a.socio',''),
+	'groupby' =>'cliente'
+);
+
+$cboton=$this->datasis->modbus($scli);
+$bsocio=$this->datasis->modbus($mSOCIO,'socio');
+
+if (!empty($_POST['socio'])) $_POST['cod_cli']='';
+
+$filter = new DataFilter2('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('a.cod_cli','a.tipo_doc','a.fecha','a.transac','a.monto','a.numero','a.vence','a.abonos','b.cliente','b.nombre',
+"DATEDIFF(NOW(),a.vence) AS dv",
+"(monto)*IF(tipo_doc IN ('AN','NC'),-1,1) AS monto2",
+"(monto-abonos)*IF(tipo_doc IN ('AN','NC'),-1,1) AS saldo");
+
+$filter->db->select($select );
+$filter->db->from('smov AS a');
+$filter->db->join('scli AS b','a.cod_cli=b.cliente');
+$filter->db->where("`abonos`<>`monto` AND a.tipo_doc IN ('AN','FC','ND','GI','NC')");
+$filter->db->orderby('a.cod_cli,a.fecha,a.transac');
+
+$filter->cod_cli = new inputField('Cliente', 'cod_cli');
+$filter->cod_cli->clause='where';
+$filter->cod_cli->db_name='cod_cli';
+$filter->cod_cli->operator='=';
+//$filter->cod_cli->rule='required';
+$filter->cod_cli->append($cboton);
+
+$filter->socio = new inputField('Socio', 'socio');
+$filter->socio->clause ='in';
+$filter->socio->db_name='(socio,cod_cli) ';
+$filter->socio->append($bsocio.' No se tomará en cuenta el cliente');
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	if(isset($_POST['fechad'])) $subtitu.=' Desde la fecha '.$_POST['fechad'];
+
+ 	$sobretabla='';
+ 	//if (!empty($filter->cod_cli->newValue)) $sobretabla.=' Cliente : ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_cli->newValue.'"');
+ 	if (!empty($filter->socio->newValue))     $sobretabla.=' Socio: ('.$filter->socio->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->socio->newValue.'"');
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Efectos Pendientes");
+  	$pdf->setSobreTabla($sobretabla,9);
+   	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+
+	$pdf->AddCol('tipo_doc',19,'Tipo',     'L',9);
+	$pdf->AddCol('numero'  ,21,'Número' ,  'L',9);
+	$pdf->AddCol('fecha'   ,28,'Emisión',  'C',9);
+	$pdf->AddCol('vence'   ,28,'Vence',    'C',9);
+	$pdf->AddCol('dv'      ,20,'Dias_Vcto','R',9);
+	$pdf->AddCol('monto2'  ,30,'Importe',  'R',9);
+ 	$pdf->AddCol('saldo'   ,30,'Saldo',    'R',9);
+	$pdf->setTotalizar('dv','monto2','saldo');
+ 	$pdf->setGrupoLabel('Cliente  <#cod_cli#>  <#nombre#> ');
+	$pdf->setGrupo('cod_cli');
+
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Efectos Pendientes</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

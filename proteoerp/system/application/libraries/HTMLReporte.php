@@ -350,7 +350,7 @@ border-bottom-right-radius:5px;
 							$campo=$cols['campo'];
 							if(in_array($campo,$this->totalizar))
 								//--------escritura totales finales--------------
-								echo '<td>'.nformat($rstotal[$u][$campo]).'</td>';
+								echo '<td style=\'text-align:'.$aalign[$campo].';border-top-style: solid;border-width:1px;border-color:#000000;\'>'.nformat($rstotal[$u][$campo]).'</td>';
 							else
 								echo '<td></td>';
 						}
@@ -609,13 +609,14 @@ border-bottom-right-radius:5px;
 	function us_ascii2html($str){
 		$rt =trim($str);
 
-		//if($this->DBcharset=='latin1'){
-		//	$rt=utf8_encode($rt);
-		//}
 		//Convierte los caracteres de us-ascii
 		$rt =str_replace(utf8_encode(chr(165)),'Ñ',$rt);
 		$rt =str_replace(utf8_encode(chr(164)),'ñ',$rt);
 		$rt =str_replace(utf8_encode(chr(166)),'º',$rt);
+
+		if($this->DBcharset=='latin1'){
+			$rt=utf8_encode($rt);
+		}
 
 		$rt =htmlspecialchars($rt,ENT_COMPAT,'UTF-8');
 		if($this->DBcharset=='latin1'){

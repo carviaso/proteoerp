@@ -1,0 +1,127 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$mSCLId=array(
+	'tabla'   =>'scli',
+	'columnas'=>array('cliente'=>'Código Cliente','nombre'=>'Nombre','contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_clid'),
+	'titulo'  =>'Buscar Cliente');
+
+$bsclid =$this->datasis->modbus($mSCLId);
+
+$filter = new DataFilter2("Filtro del Reporte");
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
+$filter->fechah->insertValue = date("Y-m-d");
+$filter->fechah->clause = '';
+
+$filter->cuenta = new inputField("Cuenta", "cuenta");
+$filter->cuenta->clause = '';
+
+$filter->cod_clid = new inputField("Cliente", "cod_clid");
+$filter->cod_clid->clause="";
+$filter->cod_clid->append($bsclid);
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons("search");
+$filter->build();
+
+if($this->rapyd->uri->is_set("search")){
+
+	$cuenta='';
+	if ( $_POST['cuenta'] )
+	$cuenta = ' AND b.cuenta="'.$_POST['cuenta'].'" ';
+
+	$mSQL = 'SELECT TRIM(cuenta) cuenta, descrip,  cod_cli, nombre, fecha, tipo_doc, numero, SUM(total) todo, transac, SUM(anticipos) anticipos
+	FROM (
+	SELECT b.cuenta cuenta, c.descrip, a.cod_cli, a.nombre, a.fecha, a.tipo_doc, a.numero,a.monto*IF(a.tipo_doc in("AB","NC"),-1,1) total, a.transac, 0 anticipos
+	FROM smov a
+	JOIN scli b ON a.cod_cli=b.cliente
+	JOIN cpla c ON b.cuenta=c.codigo
+	WHERE a.fecha<='.$filter->fechah->newValue.' AND a.tipo_doc<>"AN"
+	'.$cuenta.'
+	UNION ALL
+	SELECT b.cuenta cuenta, c.descrip, a.cod_cli, b.nombre, a.fecha, a.tipoccli, a.numccli,-a.abono total, a.transac, 0 anticipos
+	FROM itccli a
+	JOIN scli b ON a.cod_cli=b.cliente
+	JOIN cpla c ON b.cuenta=c.codigo
+	JOIN smov d ON a.tipoccli=d.tipo_doc AND a.numccli=d.numero
+	WHERE a.fecha<='.$filter->fechah->newValue.' AND a.tipoccli="AN" '.$cuenta.'
+	UNION ALL
+	SELECT b.cuenta cuenta, c.descrip, a.cod_cli, a.nombre, a.fecha, a.tipo_doc, a.numero, 0 total, a.transac, a.monto anticipos
+	FROM smov a
+	JOIN scli b ON a.cod_cli=b.cliente
+	JOIN cpla c ON b.cuenta=c.codigo
+	WHERE a.fecha<='.$filter->fechah->newValue.' AND a.tipo_doc="AN" '.$cuenta.'
+	UNION ALL
+	SELECT b.cuenta cuenta, c.descrip, a.cod_cli, b.nombre, a.fecha, a.tipoccli, a.numccli, 0 total, a.transac, -a.abono anticipos
+	FROM itccli a
+	JOIN scli b ON a.cod_cli=b.cliente
+	JOIN cpla c ON b.cuenta=c.codigo
+	JOIN smov d ON a.tipoccli=d.tipo_doc AND a.numccli=d.numero
+	WHERE a.fecha<='.$filter->fechah->newValue.' AND a.tipoccli="AN" '.$cuenta.'
+	) AS meco ';
+	$resumen = true;
+	if ( $filter->cod_clid->newValue != '' ){
+		$mSQL .= 'WHERE cod_cli='.$this->db->escape($filter->cod_clid->newValue);
+		$mSQL .= 'GROUP BY fecha, transac ';
+		$mSQL .= 'HAVING todo<>0 ';
+
+		$agruparlab = 'Cliente: (<#cod_cli#>) <#nombre#>';
+		$agrupar = 'cod_cli';
+		$resumen = false;
+	} else {
+		$mSQL .= 'GROUP BY cod_cli ';
+		$mSQL .= 'HAVING todo<>0 ';
+		$mSQL .= 'ORDER BY cuenta, nombre  ';
+
+		$agruparlab = 'Cuenta: (<#cuenta#>) <#descrip#>';
+		$agrupar = 'cuenta';
+	}
+
+	$subtitu='';
+	if(isset($_POST['fechah'])) $subtitu.=' Hasta el dia '.$_POST['fechah'];
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Auditoria de Cuentas por Cobrar");
+	$pdf->setSubTitulo($subtitu);
+
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+	$pdf->AddCol('fecha',  20, 'Fecha',    'L',7);
+
+	if ( !$resumen ) $pdf->AddCol('cuenta'  , 25, 'Cuenta'     ,  'L',7);
+	if ( !$resumen ) $pdf->AddCol('descrip' , 65, 'Descripcion',  'L',7);
+	if ( $resumen )  $pdf->AddCol('cod_cli' , 14, 'Cliente'    ,  'L',7);
+	if ( $resumen )  $pdf->AddCol('nombre'  , 65, 'Nombre'     ,  'L',7);
+	if ( !$resumen ) $pdf->AddCol('tipo_doc', 10, 'Tipo'       ,  'R',7);
+	if ( !$resumen ) $pdf->AddCol('numero'  , 15, 'Numero'     ,  'R',7);
+
+	$pdf->AddCol('todo',     25, 'Monto',    'R',7);
+
+	if ( $resumen ) $pdf->AddCol('anticipos',     25, 'Anticipos',    'R',7);
+
+	$pdf->setGrupoLabel( $agruparlab );
+	$pdf->setGrupo($agrupar);
+
+	$pdf->setTotalizar('todo','anticipos');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Relación de facturas pagadas en meses anteriores</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

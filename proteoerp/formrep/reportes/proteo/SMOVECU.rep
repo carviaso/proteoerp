@@ -1,0 +1,157 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$mSCLId=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_clid'),
+	'titulo'  =>'Buscar Cliente');
+
+$mSOCIO=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Socio',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Socio','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'socio'),
+	'titulo'  =>'Buscar Socio',
+	'join'    =>array('scli AS a','scli.cliente=a.socio',''),
+	'groupby' =>'cliente'
+);
+
+if (!empty($_POST['socio'])) $_POST['cod_cli']='';
+
+$bsocio=$this->datasis->modbus($mSOCIO,'socio');
+$bsclid =$this->datasis->modbus($mSCLId);
+
+$filter = new DataFilter2("Filtro del Reporte");
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array("'1' AS orden",'a.tipo_doc', "a.numero","a.fecha", "a.monto","a.abonos","TRIM(a.cod_cli) AS cod_cli","a.nombre","a.observa1","transac",
+"IF(tipo_doc IN ('FC','GI','ND'),monto, 0) as deber",
+"IF(tipo_doc IN ('FC','GI','ND'),0,monto) as haber",
+"IF(tipo_doc IN ('FC','GI','ND'),monto-abonos,0) as saldodoc",
+"IF(tipo_doc IN ('FC','GI','ND'),monto-abonos, -1*monto) AS saldo",
+'b.cuenta','b.rifci');
+
+$filter->db->select($select );
+$filter->db->from('smov AS a');
+$filter->db->join('scli AS b','a.cod_cli=b.cliente');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechad->clause  ='where';
+$filter->fechad->db_name ='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30, date('Y')));
+$filter->fechad->operator=">=";
+
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->clause='where';
+$filter->fechah->db_name='a.fecha';
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechah->operator='<=';
+
+$filter->cod_clid = new inputField('Cliente', 'cod_clid');
+$filter->cod_clid->clause="where";
+$filter->cod_clid->db_name="a.cod_cli";
+$filter->cod_clid->append($bsclid);
+$filter->cod_clid->operator='=';
+
+$filter->socio = new inputField('Socio', 'socio');
+$filter->socio->clause ='in';
+$filter->socio->db_name='(socio,cod_cli) ';
+$filter->socio->append($bsocio.' No se tomará en cuenta el cliente');
+
+$filter->tipos = new dropdownField('Tipo', 'tipo');
+$filter->tipos->db_name='tipo_doc';
+$filter->tipos->clause='where';
+$filter->tipos->operator='=';
+$filter->tipos->option('','Todos');
+$filter->tipos->option('NC','Notas de Crédito');
+$filter->tipos->option('ND','Notas de Débito');
+$filter->tipos->option('AN','Anticipos');
+$filter->tipos->option('GI','Giros');
+$filter->tipos->option('FC','Facturas');
+
+$filter->cuenta = new inputField('Cuenta Contable', 'cuenta');
+$filter->cuenta->db_name='b.cuenta';
+$filter->cuenta->clause='where';
+$filter->cuenta->operator='=';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+	$mSQL1     = $this->rapyd->db->_compile_select();
+	$cliente   = $filter->cod_clid->value;
+	$dbcliente = $this->db->escape($cliente);
+	$cuenta    = $filter->cuenta->value;
+	$fdesde    = $filter->fechad->newValue;
+
+	$mSQL2 ="(SELECT '0' AS orden,  'SALDO' AS tipo_doc,'ANTERIOR AL' AS numero,CAST('$fdesde' AS DATE) AS fecha,a.monto, a.abonos, TRIM(a.cod_cli) AS cod_cli, a.nombre,'' AS observa1,'0' AS transac, ";
+	$mSQL2.=" IF( SUM(monto*IF(tipo_doc IN ('FC','GI','ND'),1,-1)) >0,         SUM(monto*IF(tipo_doc IN ('FC','GI','ND'),1,-1)), 0) as deber,";
+	$mSQL2.=" IF( SUM(monto*IF(tipo_doc IN ('FC','GI','ND'),1,-1)) >0, 0, ABS( SUM(monto*IF(tipo_doc IN ('FC','GI','ND'),1,-1))  )  ) as haber,";
+	$mSQL2.="SUM((monto-abonos)*IF(tipo_doc IN ('FC','GI','ND'),1,0)) AS saldodoc, ";
+	$mSQL2.="SUM((monto-abonos)*IF(tipo_doc IN ('FC','GI','ND'),1,-1)) AS saldo, ";
+	$mSQL2.="b.cuenta,b.rifci";
+
+	$mSQL2.=" FROM (`smov` as a) JOIN `scli` as b ON a.cod_cli=b.cliente ";
+	$mSQL2.=" WHERE a.fecha <".$filter->fechad->newValue.' ';
+	if(!empty($cliente)) $mSQL2.=" AND a.cod_cli = $dbcliente";
+	if(!empty($cuenta))  $mSQL2.=' AND b.cuenta = '.$this->db->escape($cuenta);
+	$mSQL2.=" GROUP BY cod_cli) ";
+	$mSQL2.=" ORDER BY cod_cli,orden,fecha,transac ";
+
+        $mSQL= $mSQL1.' UNION ALL '.$mSQL2;
+
+	//echo $mSQL;
+	$sobretabla='';
+	//if (!empty($filter->cod_clid->newValue)) $sobretabla.='         Cliente ('.$filter->cod_clid->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_clid->newValue.'"');
+	if (!empty($filter->socio->newValue))    $sobretabla.='           Socio: ('.$filter->socio->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->socio->newValue.'"');
+	if (!empty($filter->tipos->newValue))    $sobretabla.='           Tipos: '.$filter->tipos->description;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setType('vence','date');
+	$pdf->setTitulo("Estado de Cuenta");
+	$pdf->setSubTitulo("Desde la fecha: ".$_POST['fechad']." Hasta ".$_POST['fechah']);
+	$pdf->setSobreTabla($sobretabla,7);
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+
+	$pdf->AddCol('tipo_doc',12,'Tipo'    , 'L',7);
+	$pdf->AddCol('numero'  ,18,'Número'  , 'L',7);
+	$pdf->AddCol('fecha'   ,22,'Emisión' , 'L',7);
+	$pdf->AddCol('vence'   ,18,'Vence'   , 'L',7);
+	$pdf->AddCol('deber'   ,18,'Debe'    , 'R',7);
+	$pdf->AddCol('haber'   ,18,'Haber'   , 'R',7);
+	//$pdf->AddCol('saldodoc',18,'Saldo/Doc.', 'R',7);
+	$pdf->AddCol('saldo'   ,18,'Saldo'   , 'R',7);
+	$pdf->AddCol('observa1',70,'Concepto', 'L',6);
+	//$pdf->AddCol('cuenta'  ,15,'Cuenta'  , 'L',6);
+	$pdf->setTotalizar('haber','deber','saldo');
+	$pdf->setGrupoLabel('<#cod_cli#> <#rifci#> <#nombre#> Cuenta: <#cuenta#> ');
+	$pdf->setGrupo('cod_cli');
+
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Estado de Cuenta</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
