@@ -3789,7 +3789,19 @@ class Sinv extends Controller {
 			$$prec=round($do->get($prec),2); //optenemos el precio
 		}
 
-		if($precio1>=$precio2 && $precio2>=$precio3 && $precio3>=$precio4){
+
+		$modopre  = $this->datasis->traevalor('SINVMODOPRECIO');
+
+		if ( $modopre == 'S' )
+			$mp = ($precio1 >= $precio4 && $precio2 >= $precio4 && $precio3 >= $precio4);
+		else
+			$mp = ($precio1 >= $precio2 && $precio2 >= $precio3 && $precio3 >= $precio4);
+		
+		
+		//if($precio1 >= $precio2 && $precio2 >= $precio3 && $precio3 >= $precio4){
+		//if($precio1 >= $precio4 && $precio2 >= $precio4 && $precio3 >= $precio4){
+
+		if ( $mp ){
 			$formcal= $do->get('formcal');
 			$iva    = $do->get('iva');
 			$ultimo = floatval($do->get('ultimo'));
@@ -3811,17 +3823,23 @@ class Sinv extends Controller {
 				$base='base'.$i;
 				$marg='margen'.$i;
 
-				$$base=$$prec*100/(100+$iva);   //calculamos la base
-				$$marg=100-($costo*100/$$base); //calculamos el margen
+				$$base=$$prec*100/(100+$iva);   //calcula la base
+				$$marg=100-($costo*100/$$base); //calcula el margen
 
 				$do->set($prec,round($$prec,2));
 				$do->set($base,round($$base,2));
 				$do->set($marg,round($$marg,2));
 			}
 		}else{
-			$do->error_message_ar['pre_upd'] =$do->error_message_ar['pre_ins'] = 'Los precios deben cumplir con:<br> Precio 1 mayor o igual al Precio 2 mayor o igual al  Precio 3 mayor o igual al Precio 4';
+			if ( $modopre == 'S' )
+				$do->error_message_ar['pre_upd'] =$do->error_message_ar['pre_ins'] = 'Los precios deben cumplir con:<br> El Precio 4 debe ser el menor';
+			else
+				$do->error_message_ar['pre_upd'] =$do->error_message_ar['pre_ins'] = 'Los precios deben cumplir con:<br> Precio 1 mayor o igual al Precio 2 mayor o igual al  Precio 3 mayor o igual al Precio 4';
+			
 			return false;
 		}
+
+
 
 		//valida las escalas
 		for($i=1;$i<4;$i++){
