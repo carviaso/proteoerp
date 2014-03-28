@@ -3819,12 +3819,16 @@ class Sinv extends Controller {
 			}
 
 			for($i=1;$i<5;$i++){
-				$prec='precio'.$i;
-				$base='base'.$i;
-				$marg='margen'.$i;
+				$prec = 'precio'.$i;
+				$base = 'base'.$i;
+				$marg = 'margen'.$i;
 
-				$$base=$$prec*100/(100+$iva);   //calcula la base
-				$$marg=100-($costo*100/$$base); //calcula el margen
+				$$base = $$prec*100/(100+$iva);   //calcula la base
+				
+				$$marg = 20;
+
+				if ( $$base > 0 )
+					$$marg = 100-($costo*100/$$base); //calcula el margen
 
 				$do->set($prec,round($$prec,2));
 				$do->set($base,round($$base,2));
@@ -3838,7 +3842,6 @@ class Sinv extends Controller {
 			
 			return false;
 		}
-
 
 
 		//valida las escalas
