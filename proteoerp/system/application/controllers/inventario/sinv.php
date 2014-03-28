@@ -3823,16 +3823,19 @@ class Sinv extends Controller {
 				$base = 'base'.$i;
 				$marg = 'margen'.$i;
 
-				$$base = $$prec*100/(100+$iva);   //calcula la base
-				
-				$$marg = 20;
+				//$$base = $$prec*100/(100+$iva);   //calcula la base
+				//$$marg = 100-($costo*100/$$base); //calcula el margen
 
-				//if ( $$base > 0 )
-					$$marg = 100-($costo*100/$$base); //calcula el margen
+				$mbase = $$prec*100/(100+$iva);   //calcula la base
+				$mmarg = 100-($costo*100/$mbase); //calcula el margen
+			
 
 				$do->set($prec,round($$prec,2));
-				$do->set($base,round($$base,2));
-				$do->set($marg,round($$marg,2));
+				$do->set($base,round($mbase,2));
+				$do->set($marg,round($mmarg,2));
+
+				//$do->set($base,round($$base,2));
+				//$do->set($marg,round($$marg,2));
 			}
 		}else{
 			if ( $modopre == 'S' )
