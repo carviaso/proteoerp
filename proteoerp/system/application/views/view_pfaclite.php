@@ -60,6 +60,12 @@ function totalizar(){
 		<td><?php echo $form->numero->value.'-'.$form->nombre->value.$form->cliente->output; ?></td>
 		<td align=right><?php echo $container_tl.$container_tr;?></td>
 	</tr>
+	<?php if(isset($saldo) && $saldo>0){ ?>
+	<tr>
+		<td colspan='2' align='center'>Saldo: <?php echo nformat($saldo);?></td>
+	</tr>
+	<?php } ?>
+
 </table>
 
 

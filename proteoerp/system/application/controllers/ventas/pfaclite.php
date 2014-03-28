@@ -233,10 +233,11 @@ class pfaclite extends validaciones{
 		$uri = anchor($this->url.'dataedit/<raencode><#cliente#></raencode>/create','<#cliente#>');
 
 		$grid = new DataGrid('Seleccione el cliente al cual se le va a realizar el pedido');
+		$grid->use_function('htmlspecialchars');
 		$grid->order_by('nombre','asc');
 		$grid->per_page=20;
 		$grid->column_orderby('Cliente',$uri,'cliente');
-		$grid->column_orderby('Nombre','nombre','nombre');
+		$grid->column_orderby('Nombre','<htmlspecialchars><#nombre#>|2|ISO-8859-1</htmlspecialchars>','nombre');
 		$grid->column_orderby('RIF/CI','rifci');
 		$grid->build();
 
@@ -251,6 +252,13 @@ class pfaclite extends validaciones{
 		$this->datasis->modulo_id(143,1);
 
 		if(!$this->_exitescli($cliente)) redirect($this->url.'filterscli');
+
+		$this->db->select_sum('a.monto*IF(tipo_doc IN ("FC","ND","GI"),1,-1)','saldo');
+		$this->db->from('smov AS a');
+		$this->db->where('a.cod_cli',$cliente);
+		$q=$this->db->get();
+		$row = $q->row_array();
+		$saldo = (empty($row['saldo']))? 0: $row['saldo'];
 
 		$this->rapyd->load('dataobject', 'datadetails');
 		$this->load->helper('form');
@@ -465,6 +473,7 @@ class pfaclite extends validaciones{
 		if($this->genesal){
 			$edit->build();
 
+			$conten['saldo']   = $saldo;
 			$conten['act_meta']= $act_meta;
 			$conten['tiposcli']= $tiposcli;
 			$conten['form']    = & $edit;
