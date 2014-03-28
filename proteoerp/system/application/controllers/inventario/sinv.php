@@ -3827,7 +3827,7 @@ class Sinv extends Controller {
 				
 				$$marg = 20;
 
-				if ( $$base > 0 )
+				//if ( $$base > 0 )
 					$$marg = 100-($costo*100/$$base); //calcula el margen
 
 				$do->set($prec,round($$prec,2));
