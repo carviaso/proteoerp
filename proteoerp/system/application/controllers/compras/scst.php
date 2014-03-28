@@ -4272,7 +4272,7 @@ class Scst extends Controller {
 	function _pre_insert($do,$act='I'){
 
 		$control = $do->get('control');
-		$transac = $do->get('transac');
+		$transac = trim($do->get('transac'));
 		$tipo_doc= $do->get('tipo_doc');
 		$tolera =0.07; //Tolerancia entre los items y el encabezado
 
@@ -4282,7 +4282,10 @@ class Scst extends Controller {
 
 		if(substr($control,7,1)=='_') $control = $this->datasis->fprox_numero('nscst');
 		if(empty($control)) $control = $this->datasis->fprox_numero('nscst');
-		if(empty($transac)) $transac = $this->datasis->fprox_numero('ntransa');
+		if(empty($transac)){
+			$transac = $this->datasis->fprox_numero('ntransa');
+			$do->set('transac',$transac);
+		}
 
 		$serie   = $do->get('serie');
 		$fecha   = $do->get('fecha');
