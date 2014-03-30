@@ -230,7 +230,7 @@ class Tban extends Controller {
 	}
 
 	//******************************************************************
-	// Definicion del Grid o Tabla 
+	// Definicion del Grid o Tabla
 	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
@@ -635,14 +635,14 @@ class Tban extends Controller {
 	}
 
 	function _pre_delete($do){
-		$id       = $do->get('id');
-		$cod_banc = $this->datasis->dameval("SELECT cod_banc FROM tban WHERE id=$id");
-		$check    =  $this->datasis->dameval("SELECT COUNT(*) FROM banc WHERE tbanco='$cod_banc' ");
-		$check   +=  $this->datasis->dameval("SELECT COUNT(*) FROM sfpa WHERE banco='$cod_banc' ");
-		if ($check = 0) {
-			$do->error_message_ar['pre_del']='';
+		$id        = $do->get('id');
+		$cod_banc  = $this->datasis->dameval("SELECT cod_banc FROM tban WHERE id=${id}");
+		$dbcod_banc= $this->db->escape($cod_banc);
+		$check     = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM banc WHERE tbanco=${cod_banc}"));
+		$check    += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfpa WHERE  banco=${cod_banc}"));
+		if($check == 0) {
 			return true;
-		} else {
+		}else{
 			$do->error_message_ar['pre_del']='Existen bancos o pagos asociados al banco';
 			return false;
 		}
@@ -697,7 +697,7 @@ class Tban extends Controller {
 		if(!in_array('id',$campos)){
 			$this->db->simple_query('ALTER TABLE tban DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE tban DROP INDEX cod_banc');
-			
+
 			$this->db->query('ALTER TABLE tban ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
 			$this->db->query('ALTER TABLE tban ADD UNIQUE INDEX cod_banc (cod_banc)');
 		}
