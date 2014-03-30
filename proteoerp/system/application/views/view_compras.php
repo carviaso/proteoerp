@@ -128,6 +128,7 @@ $(function(){
 			$('#sprvreteiva').val(ui.item.reteiva);
 			setTimeout(function(){ $("#proveed").removeAttr("readonly"); }, 1500);
 			$('#serie').change();
+			post_modbus_sprv();
 		}
 	});
 
@@ -460,6 +461,21 @@ function cmontoiva(){
 
 function post_modbus_sprv(){
 	$('#nombre_val').text($('#nombre').val());
+
+	$.ajax({
+		url: "<?php echo site_url('ajax/ajaxsanncprov'); ?>",
+		dataType: 'json',
+		type: 'POST',
+		data: {'clipro' : $("#proveed").val()},
+		success: function(data){
+			if(data>0){
+				$.prompt("<span style='font-size:1.5em'>Proveedor presenta anticipos y/o Notas de cr&eacute;dito por un monto de <b>"+nformat(data,2)+" Bs.</b></span>", {
+					title: "Saldo por aplicar",
+					buttons: { "Continuar": true }
+				});
+			}
+		},
+	});
 }
 
 function del_itscst(id){

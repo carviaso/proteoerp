@@ -151,14 +151,34 @@ $(document).ready(function() {
 
 			setTimeout(function(){ $('#proveed').removeAttr("readonly"); }, 1500);
 			$('#serie').change();
+			ajaxsanncprov();
 		}
 	});
 });
+
+function ajaxsanncprov(){
+	$.ajax({
+		url: "<?php echo site_url('ajax/ajaxsanncprov'); ?>",
+		dataType: 'json',
+		type: 'POST',
+		data: {'clipro' : $("#proveed").val()},
+		success: function(data){
+			if(data>0){
+				$.prompt("<span style='font-size:1.5em'>Proveedor presenta anticipos y/o Notas de cr&eacute;dito por un monto de <b>"+nformat(data,2)+" Bs.</b></span>", {
+					title: "Saldo por aplicar",
+					buttons: { "Continuar": true }
+				});
+			}
+		},
+	});
+}
 
 function post_sprv_modbus(){
 	nombre=$('#nombre').val();
 	$('#nombre_val').text(nombre);
 	totalizar();
+	ajaxsanncprov();
+	$('#serie').change();
 }
 
 function calcularete(){

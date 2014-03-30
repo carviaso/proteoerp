@@ -1713,6 +1713,24 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
+	//Saldo pendiente de proveedor
+	function ajaxsanncprov(){
+		$mid = $this->input->post('clipro');
+
+		if($mid !== false){
+			$this->db->select_sum('(a.monto-abonos)*(tipo_doc IN ("AN","NC"))','saldo');
+			$this->db->from('sprm AS a');
+			$this->db->where('a.cod_prv',$mid);
+			$this->db->where('a.monto > a.abonos');
+			$q=$this->db->get();
+			$row = $q->row_array();
+			echo (empty($row['saldo']))? 0: $row['saldo'];
+		}else{
+			echo 0;
+		}
+	}
+
+	//******************************************************************
 	// Busca Plan de cuentas
 	//
 	function buscacpla(){
