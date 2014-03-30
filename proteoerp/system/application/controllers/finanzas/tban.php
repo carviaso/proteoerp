@@ -638,8 +638,8 @@ class Tban extends Controller {
 		$id        = $do->get('id');
 		$cod_banc  = $this->datasis->dameval("SELECT cod_banc FROM tban WHERE id=${id}");
 		$dbcod_banc= $this->db->escape($cod_banc);
-		$check     = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM banc WHERE tbanco=${cod_banc}"));
-		$check    += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfpa WHERE  banco=${cod_banc}"));
+		$check     = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM banc WHERE tbanco=${dbcod_banc}"));
+		$check    += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfpa WHERE  banco=${dbcod_banc}"));
 		if($check == 0) {
 			return true;
 		}else{
