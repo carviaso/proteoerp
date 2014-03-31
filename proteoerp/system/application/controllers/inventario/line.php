@@ -460,7 +460,7 @@ class Line extends Controller {
 		unset($data['id']);
 		if($oper == 'add'){
 			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM line WHERE $mcodp=".$this->db->escape($data[$mcodp]));
+				$check = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM line WHERE $mcodp=".$this->db->escape($data[$mcodp]));
 				if ( $check == 0 ){
 					$this->db->insert('line', $data);
 					echo "Registro Agregado";
@@ -492,7 +492,7 @@ class Line extends Controller {
 
 		} elseif($oper == 'del') {
 			$meco = $this->datasis->dameval("SELECT $mcodp FROM line WHERE id=$id");
-			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM grup WHERE linea='".$meco."' ");
+			$check =  $this->datasis->dameval("SELECT COUNT(*) AS cana FROM grup WHERE linea='".$meco."' ");
 			if ($check > 0){
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
@@ -644,7 +644,7 @@ class Line extends Controller {
 	function _pre_delete($do) {
 		$codigo  =$do->get('linea');
 		$dbcodigo=$this->db->escape($codigo);
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM grup WHERE linea=${dbcodigo}");
+		$check =  $this->datasis->dameval("SELECT COUNT(*) AS cana FROM grup WHERE linea=${dbcodigo}");
 		if($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='La l&iacute;nea contiene grupos, por ello no puede ser eliminada.';
 			return false;
@@ -673,7 +673,7 @@ class Line extends Controller {
 	function chexiste($codigo){
 		$codigo  =$this->input->post('linea');
 		$dbcodigo=$this->db->escape($codigo);
-		$check=$this->datasis->dameval("SELECT COUNT(*) AS check FROM line WHERE linea=${dbcodigo}");
+		$check=$this->datasis->dameval("SELECT COUNT(*) AS cana FROM line WHERE linea=${dbcodigo}");
 		if($check > 0){
 			$linea=$this->datasis->dameval("SELECT descrip FROM line WHERE linea=${dbcodigo}");
 			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para la linea ${linea}");
