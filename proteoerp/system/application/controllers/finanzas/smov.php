@@ -2732,7 +2732,10 @@ class Smov extends Controller {
 	function dataprint($st,$uid){
 		$this->rapyd->load('dataedit');
 
-		$url=site_url('formatos/descargar/CCLINC/'.$uid);
+		$sfacforma=$this->datasis->traevalor('FORMATOSFAC');
+		if(empty($sfacforma)) $sfacforma='descargar';
+
+		$url=site_url('formatos/'.$sfacforma.'/CCLINC/'.$uid);
 		$edit = new DataEdit('Imprimir Nota de Cr&eacute;dito', 'smov');
 		//$id=$edit->get_from_dataobjetct('id');
 

@@ -609,13 +609,19 @@ function post_precioselec(ind,obj){
 	if(obj.value=='o'){
 		var itiva = Number($('#itiva_'+ind).val());
 		otro = prompt('Precio nuevo','');
-		otro = Number(otro);
-		if(otro>0){
-			var opt=document.createElement("option");
-			opt.text = nformat(otro,2);
-			opt.value= roundNumber(otro*100/(100+itiva),2);
-			obj.add(opt,null);
-			obj.selectedIndex=obj.length-1;
+		if(!otro){
+			var ctipo  = $("#sclitipo").val();
+			var tipo  = Number(ctipo); if(tipo>0) tipo=tipo-1;
+			obj.selectedIndex=tipo;
+		}else{
+			otro = Number(otro);
+			if(otro>0){
+				var opt=document.createElement("option");
+				opt.text = nformat(otro,2);
+				opt.value= roundNumber(otro*100/(100+itiva),2);
+				obj.add(opt,null);
+				obj.selectedIndex=obj.length-1;
+			}
 		}
 	}
 	importe(ind);
@@ -661,7 +667,7 @@ function post_modbus_scli(){
 function post_modbus_sinv(nind){
 	ind=nind.toString();
 	var manual = $("#manual").val();
-	var ctipo  = $("#sclitipo").val()
+	var ctipo  = $("#sclitipo").val();
 	var tipo   = Number(ctipo); if(tipo>0) tipo=tipo-1;
 	var combo  = $("#combo_"+ind).val();
 	//var codigo = $("#codigoa_"+ind).val();

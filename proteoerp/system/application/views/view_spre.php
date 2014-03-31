@@ -187,13 +187,17 @@ function post_modbus_scli(){
 	jQuery.each(arr, function() {
 		nom=this.name;
 		pos=this.name.lastIndexOf('_');
-		if(pos>0){
-			ind = this.name.substring(pos+1);
-			id  = Number(ind);
-			tipo=$('#sinvtipo_'+ind).val();
-			if(tipo!='Servicio'){
-				this.selectedIndex=tipo;
-				importe(id);
+		if(!otro){
+			obj.selectedIndex=tipo;
+		}else{
+			if(pos>0){
+				ind = this.name.substring(pos+1);
+				id  = Number(ind);
+				tipo=$('#sinvtipo_'+ind).val();
+				if(tipo!='Servicio'){
+					this.selectedIndex=tipo;
+					importe(id);
+				}
 			}
 		}
 	});

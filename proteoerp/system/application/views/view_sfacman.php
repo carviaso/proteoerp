@@ -196,13 +196,19 @@ function add_sitems(){
 function post_precioselec(ind,obj){
 	if(obj.value=='o'){
 		otro = prompt('Precio nuevo','');
-		otro = Number(otro);
-		if(otro>0){
-			var opt=document.createElement("option");
-			opt.text = nformat(otro,2);
-			opt.value= otro;
-			obj.add(opt,null);
-			obj.selectedIndex=obj.length-1;
+		if(!otro){
+			var ctipo = $("#sclitipo").val();
+			var tipo  = Number(ctipo); if(tipo>0) tipo=tipo-1;
+			obj.selectedIndex=tipo;
+		}else{
+			otro = Number(otro);
+			if(otro>0){
+				var opt=document.createElement("option");
+				opt.text = nformat(otro,2);
+				opt.value= otro;
+				obj.add(opt,null);
+				obj.selectedIndex=obj.length-1;
+			}
 		}
 	}
 	importe(ind);

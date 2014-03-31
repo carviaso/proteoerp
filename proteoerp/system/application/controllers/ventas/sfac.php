@@ -414,6 +414,8 @@ class Sfac extends Controller {
 				}
 			});';
 
+		$sfacforma=$this->datasis->traevalor('FORMATOSFAC');
+		if(empty($sfacforma)) $sfacforma='descargar';
 		//Agregar Factura
 		$bodyscript .= '
 			$("#fedita").dialog({
@@ -436,7 +438,7 @@ class Sfac extends Controller {
 										if(json.manual == "N"){
 											$("#fedita").dialog("close");
 											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-											setTimeout(\'window.location="'.base_url().'formatos/descargar/FACTURA/\'+json.pk.id+\'"\');
+											setTimeout(\'window.location="'.base_url().'formatos/'.$sfacforma.'/FACTURA/\'+json.pk.id+\'"\');
 											$.prompt("<h1>Registro Guardado</h1>Nro de Control:<input id=\'nfiscal\' name=\'nfiscal\'><br><h2>Cambio: "+json.vuelto+"</h2>",{
 												buttons: { Guardar: true, Cancelar: false },
 												submit: function(e,v,m,f){
