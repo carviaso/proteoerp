@@ -35,9 +35,9 @@ $nomvend  = '';
 $factura  = ($tipo_doc=='D')? $row->factura :'';
 $base     = nformat($row->montasa);
 $exento   = nformat($row->exento);
-$observa  = wordwrap($this->us_ascii2html(str_replace(',',', ',$row->observa)), 100, '<br>');
-$codigo   = htmlspecialchars(trim($row->codigo));
-$descrip  = $this->us_ascii2html($row->descrip);
+$observa  = wordwrap(str_replace(',',', ',$row->observa), 100, "\n");
+$codigo   = trim($row->codigo);
+$descrip  = $row->descrip;
 $monto    = nformat($row->monto);
 
 $dd=explode("\n",$direccion);

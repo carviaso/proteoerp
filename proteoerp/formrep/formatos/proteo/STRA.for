@@ -33,13 +33,13 @@ $row = $mSQL_1->row();
 
 $fecha     = dbdate_to_human($row->fecha);
 $numero    = $row->numero;
-$envia     = htmlspecialchars(trim($row->envia));
-$enviades  = htmlspecialchars(trim($row->enviades));
-$recibe    = htmlspecialchars(trim($row->recibe));
-$recibedes = htmlspecialchars(trim($row->recibedes));
-$observa   = htmlspecialchars(trim($row->observa));
+$envia     = $this->us_ascii2html(trim($row->envia));
+$enviades  = $this->us_ascii2html(trim($row->enviades));
+$recibe    = $this->us_ascii2html(trim($row->recibe));
+$recibedes = $this->us_ascii2html(trim($row->recibedes));
+$observa   = $this->us_ascii2html(trim($row->observa));
 $dbnumero  = $this->db->escape($numero);
-$sprv      = htmlspecialchars(trim($row->proveed));
+$sprv      = $this->us_ascii2html(trim($row->proveed));
 $nombre    = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
 $condi     = htmlspecialchars(trim($row->condiciones));
 $vacio     = '';
@@ -193,7 +193,7 @@ foreach ($detalle AS $items){ $i++;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo htmlspecialchars($uline).'<br />';
+						echo $this->us_ascii2html($uline).'<br />';
 						$lineas++;
 						if($lineas >= $maxlin){
 							$lineas =0;
