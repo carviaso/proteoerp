@@ -1439,7 +1439,7 @@ class Otin extends Controller {
 		$edit->monto->css_class = 'inputnum';
 		$edit->monto->rel_id    = 'sfpa';
 		$edit->monto->size      = 10;
-		$edit->monto->rule      = 'required|mayorcero';
+		$edit->monto->rule      = 'condi_required|chpagopositivo[<#i#>]';
 		$edit->monto->showformat='decimal';
 		//************************************************
 		// Fin detalle 2 (sfpa)
@@ -1510,6 +1510,18 @@ class Otin extends Controller {
 			return false;
 		else
 			return true;
+	}
+
+	function chpagopositivo($val,$i){
+		$val = floatval($val);
+		$tipo=$this->input->post('tipo_doc');
+		$this->validation->set_message('chpagopositivo', 'El campo %s debe ser positivo');
+
+		if($tipo=='OT' && $val<=0){
+			return false;
+		}else{
+			return true;
+		}
 	}
 
 	function _pre_insert($do){

@@ -907,6 +907,8 @@ class Ajax extends Controller {
 
 	//Busca sinv solo articulos
 	function buscasinvart($activo='S'){
+		$alma   = $this->input->post('alma');
+
 		if($activo=='S'){
 			$activo=' AND a.activo=\'S\'';
 		}else{
@@ -927,18 +929,28 @@ class Ajax extends Controller {
 		if($mid !== false){
 			$retArray = $retorno = array();
 
-			$mSQL="SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo
-				,a.peso, a.ultimo, a.pond FROM sinv AS a
+			if(empty($alma)){
+				$mcana='a.existen';
+				$mjoin='';
+			}else{
+				$mcana='c.existen';
+				$mjoin='LEFT JOIN itsinv AS c ON a.codigo=b.codigo AND c.alma='.$this->db->escape($alma);
+			}
+
+			$mSQL="SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.precio1,precio2,precio3,precio4, a.iva,${mcana},a.tipo
+				,a.peso, a.ultimo, a.pond
+				FROM sinv AS a
 				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
+				${mjoin}
 				WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba} OR a.alterno LIKE ${qba})
 					${activo} AND a.tipo='Articulo'
 				ORDER BY a.descrip LIMIT ".$this->autolimit;
 			$cana=1;
 
 			$query = $this->db->query($mSQL);
-			if ($query->num_rows() > 0){
+			if($query->num_rows() > 0){
 				foreach( $query->result_array() as  $row ) {
-					$retArray['label']   = '('.$this->en_utf8($row['codigo']).') '.$this->en_utf8($row['descrip']).' '.$row['precio1'].' Bs. - '.$row['existen'];
+					$retArray['label']   = '('.$this->en_utf8($row['codigo']).') '.$this->en_utf8($row['descrip']).' '.$row['precio1'].' Bs. - '.nformat($row['existen']);
 					$retArray['value']   = $this->en_utf8($row['codigo']);
 					$retArray['codigo']  = $this->en_utf8($row['codigo']);
 					$retArray['cana']    = $cana;

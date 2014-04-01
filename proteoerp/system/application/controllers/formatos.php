@@ -120,13 +120,16 @@ class Formatos extends Controller{
 			if ($query->num_rows() > 0){
 				$row = $query->row();
 				$forma= $row->txt;
+
 				if(empty($forma)){
 					$forma=$this->_crearep($_fnombre,'txt');
 				}
+
 				ob_start();
 					echo eval('?>'.preg_replace('/;*\s*\?>/', '; ?>', str_replace('<?=', '<?php echo ', $forma)).'<?php ');
 					$_txt=ob_get_contents();
 				@ob_end_clean();
+
 				if(strlen($_txt)>0){
 					if(!array_key_exists('HTTP_USER_AGENT', $_SERVER))
 						$_SERVER['HTTP_USER_AGENT']='curl';

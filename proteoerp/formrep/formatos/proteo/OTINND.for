@@ -56,7 +56,7 @@ else
 $lineas = 0;
 $uline  = array();
 
-$mSQL="SELECT codigo,descrip AS desca,precio AS preca,importe, impuesto AS iva
+$mSQL="SELECT codigo,descrip AS desca,precio AS preca,importe, impuesto AS iva,larga AS detalle
 FROM itotin
 WHERE numero=$dbnumero AND tipo_doc=$dbtipo_doc";
 
@@ -197,7 +197,19 @@ foreach ($detalle AS $items){ $i++;
 				<td>
 					<?php
 					if(!$clinea){
-						$descrip = trim($items->desca);
+						$ddetall = $this->us_ascii2html(trim($items->detalle));
+						$descrip = $this->us_ascii2html(trim($items->desca));
+						if(strlen($ddetall) > 0 ) {
+							if(strlen($descrip)>0 ){
+								if(strpos($ddetall,$descrip)!==false){
+									$descrip = $ddetall;
+								}else{
+									$descrip .= "\n".$ddetall;
+								}
+							}else{
+								$descrip .= $ddetall;
+							}
+						}
 
 						$descrip = str_replace("\r",'',$descrip);
 						$descrip = str_replace(array("\t"),' ',$descrip);

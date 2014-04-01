@@ -1986,14 +1986,14 @@ class Scst extends Controller {
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
-		$edit->fecha->size = 10;
+		$edit->fecha->size = 12;
 		$edit->fecha->rule ='required';
 		$edit->fecha->calendar=false;
 		$transac=$edit->get_from_dataobjetct('transac');
 
 		$edit->vence = new DateonlyField('Vence', 'vence','d/m/Y');
 		$edit->vence->insertValue = date('Y-m-d');
-		$edit->vence->size = 10;
+		$edit->vence->size = 12;
 		$edit->vence->rule ='required';
 		$edit->vence->calendar=false;
 
@@ -2888,7 +2888,7 @@ class Scst extends Controller {
 			$form->fecha->rule='required|callback_chddate';
 			$form->fecha->calendar = false;
 			$form->fecha->title='El sistema asume que esta es la fecha en que la mercanc&iacute;a entra en inventario y de la retenci&oacute;n de IVA si aplica al presente caso';
-			$form->fecha->size=10;
+			$form->fecha->size=12;
 
 			$form->container = new containerField('tabafo2',$htmltabla);
 
