@@ -1705,6 +1705,7 @@ class Smov extends Controller {
 	}
 
 	function _pre_ccli_insert($do){
+
 		$cliente  =$do->get('cod_cli');
 		$estampa = $do->get('estampa');
 		$hora    = $do->get('hora');
@@ -1840,59 +1841,62 @@ class Smov extends Controller {
 		$rel='itccli';
 		$observa=array();
 		$cana = $do->count_rel($rel);
-		for($i = 0;$i < $cana;$i++){
-			$itabono = floatval($do->get_rel($rel, 'abono'   , $i));
-			$ittipo  = $do->get_rel($rel, 'tipo_doc', $i);
-			$itnumero= $do->get_rel($rel, 'numero'  , $i);
-			//$itmonto = floatval($do->get_rel($rel, 'monto'  , $i));
+		if($cana>0){
+			$iis=array_keys($do->data_rel[$rel]);
+			foreach($iis as $i){
+				$itabono = floatval($do->get_rel($rel, 'abono'   , $i));
+				$ittipo  = $do->get_rel($rel, 'tipo_doc', $i);
+				$itnumero= $do->get_rel($rel, 'numero'  , $i);
+				//$itmonto = floatval($do->get_rel($rel, 'monto'  , $i));
 
-			$dbittipo   = $this->db->escape($ittipo);
-			$dbitnumero = $this->db->escape($itnumero);
+				$dbittipo   = $this->db->escape($ittipo);
+				$dbitnumero = $this->db->escape($itnumero);
 
-			$rrow=$this->datasis->damerow("SELECT impuesto,monto,montasa,monredu,monadic,tasa,reducida,sobretasa,exento  FROM smov WHERE cod_cli=${dbcod_cli} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}");
-			if(empty($rrow)){
-				$do->error_message_ar['pre_ins']='Efecto inexistente '.$ittipo.$itnumero;
-				return false;
-			}
-			$itimpuesto = floatval($rrow['impuesto']);
-			$itmonto    = floatval($rrow['monto']);
+				$rrow=$this->datasis->damerow("SELECT impuesto,monto,montasa,monredu,monadic,tasa,reducida,sobretasa,exento  FROM smov WHERE cod_cli=${dbcod_cli} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}");
+				if(empty($rrow)){
+					$do->error_message_ar['pre_ins']='Efecto inexistente '.$ittipo.$itnumero;
+					return false;
+				}
+				$itimpuesto = floatval($rrow['impuesto']);
+				$itmonto    = floatval($rrow['monto']);
 
-			$impuesto  += $itabono*$itimpuesto/$itmonto;
+				$impuesto  += $itabono*$itimpuesto/$itmonto;
 
-			$observa[]=$ittipo.$itnumero;
-			$do->set_rel($rel, 'tipoccli', $tipo_doc, $i);
-			$do->set_rel($rel, 'cod_cli' , $cod_cli , $i);
-			$do->set_rel($rel, 'estampa' , $estampa , $i);
-			$do->set_rel($rel, 'hora'    , $hora    , $i);
-			$do->set_rel($rel, 'usuario' , $usuario , $i);
-			$do->set_rel($rel, 'transac' , $transac , $i);
-			$do->set_rel($rel, 'monto'   , $itmonto , $i);
-			$do->set_rel($rel, 'mora'    , 0, $i);
-			$do->set_rel($rel, 'reten'   , 0, $i);
-			$do->set_rel($rel, 'cambio'  , 0, $i);
-			$do->set_rel($rel, 'reteiva' , 0, $i);
+				$observa[]=$ittipo.$itnumero;
+				$do->set_rel($rel, 'tipoccli', $tipo_doc, $i);
+				$do->set_rel($rel, 'cod_cli' , $cod_cli , $i);
+				$do->set_rel($rel, 'estampa' , $estampa , $i);
+				$do->set_rel($rel, 'hora'    , $hora    , $i);
+				$do->set_rel($rel, 'usuario' , $usuario , $i);
+				$do->set_rel($rel, 'transac' , $transac , $i);
+				$do->set_rel($rel, 'monto'   , $itmonto , $i);
+				$do->set_rel($rel, 'mora'    , 0, $i);
+				$do->set_rel($rel, 'reten'   , 0, $i);
+				$do->set_rel($rel, 'cambio'  , 0, $i);
+				$do->set_rel($rel, 'reteiva' , 0, $i);
 
-			if($tipo_doc=='NC'){
-				$ivadata['montasa'  ]= floatval($rrow['montasa'  ])*$itabono/$itmonto;
-				$ivadata['monredu'  ]= floatval($rrow['monredu'  ])*$itabono/$itmonto;
-				$ivadata['monadic'  ]= floatval($rrow['monadic'  ])*$itabono/$itmonto;
-				$ivadata['tasa'     ]= floatval($rrow['tasa'     ])*$itabono/$itmonto;
-				$ivadata['reducida' ]= floatval($rrow['reducida' ])*$itabono/$itmonto;
-				$ivadata['sobretasa']= floatval($rrow['sobretasa'])*$itabono/$itmonto;
-				$ivadata['exento'   ]= floatval($rrow['exento'   ])*$itabono/$itmonto;
-			}
+				if($tipo_doc=='NC'){
+					$ivadata['montasa'  ]= floatval($rrow['montasa'  ])*$itabono/$itmonto;
+					$ivadata['monredu'  ]= floatval($rrow['monredu'  ])*$itabono/$itmonto;
+					$ivadata['monadic'  ]= floatval($rrow['monadic'  ])*$itabono/$itmonto;
+					$ivadata['tasa'     ]= floatval($rrow['tasa'     ])*$itabono/$itmonto;
+					$ivadata['reducida' ]= floatval($rrow['reducida' ])*$itabono/$itmonto;
+					$ivadata['sobretasa']= floatval($rrow['sobretasa'])*$itabono/$itmonto;
+					$ivadata['exento'   ]= floatval($rrow['exento'   ])*$itabono/$itmonto;
+				}
 
-			$pppago = $do->get_rel($rel, 'ppago', $i);
-			if($pppago>0){
-				$ppimpuesto += $pppago*$itimpuesto/$itmonto;
+				$pppago = $do->get_rel($rel, 'ppago', $i);
+				if($pppago>0){
+					$ppimpuesto += $pppago*$itimpuesto/$itmonto;
 
-				$this->ppagodata['montasa'  ]= floatval($rrow['montasa'  ])*$pppago/$itmonto;
-				$this->ppagodata['monredu'  ]= floatval($rrow['monredu'  ])*$pppago/$itmonto;
-				$this->ppagodata['monadic'  ]= floatval($rrow['monadic'  ])*$pppago/$itmonto;
-				$this->ppagodata['tasa'     ]= floatval($rrow['tasa'     ])*$pppago/$itmonto;
-				$this->ppagodata['reducida' ]= floatval($rrow['reducida' ])*$pppago/$itmonto;
-				$this->ppagodata['sobretasa']= floatval($rrow['sobretasa'])*$pppago/$itmonto;
-				$this->ppagodata['exento'   ]= floatval($rrow['exento'   ])*$pppago/$itmonto;
+					$this->ppagodata['montasa'  ]= floatval($rrow['montasa'  ])*$pppago/$itmonto;
+					$this->ppagodata['monredu'  ]= floatval($rrow['monredu'  ])*$pppago/$itmonto;
+					$this->ppagodata['monadic'  ]= floatval($rrow['monadic'  ])*$pppago/$itmonto;
+					$this->ppagodata['tasa'     ]= floatval($rrow['tasa'     ])*$pppago/$itmonto;
+					$this->ppagodata['reducida' ]= floatval($rrow['reducida' ])*$pppago/$itmonto;
+					$this->ppagodata['sobretasa']= floatval($rrow['sobretasa'])*$pppago/$itmonto;
+					$this->ppagodata['exento'   ]= floatval($rrow['exento'   ])*$pppago/$itmonto;
+				}
 			}
 		}
 

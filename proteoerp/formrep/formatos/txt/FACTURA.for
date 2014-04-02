@@ -1,13 +1,13 @@
 <?php
-$maxlin = 40; //Maximo de lineas de items.
+$maxlin = 24; //Maximo de lineas de items.
 
 if(count($parametros)==0) show_error('Faltan parametros');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 
-$mSQL = "SELECT If(a.referen='E','Efectivo',IF( a.referen='C','Cr&eacute;dito',IF(a.referen='M','Mixto','Pendiente'))) AS referen,
-	a.tipo_doc,a.numero,a.cod_cli,a.nombre,a.rifci,CONCAT(a.direc,a.dire1) AS direccion,a.factura,a.fecha,a.vence,a.vd,
-	a.iva,a.totals,a.totalg, a.exento,b.nombre AS nomvend,tipo_doc, a.numero,a.peso,c.telefono
+$mSQL = "SELECT If(a.referen='E','Contado',IF( a.referen='C','Credito',IF(a.referen='M','Mixto','Pendiente'))) AS referen,
+	a.tipo_doc,a.numero,a.cod_cli,a.nombre,a.rifci,CONCAT_WS('',TRIM(c.dire11),TRIM(c.dire12)) AS direccion,a.factura,a.fecha,a.vence,a.vd,
+	a.iva,a.totals,a.totalg, a.exento,c.nomfis,b.nombre AS nomvend,tipo_doc, a.numero,a.peso,c.telefono,c.formap,a.referen AS condi
 FROM sfac a
 JOIN scli AS c ON a.cod_cli=c.cliente
 LEFT JOIN vend b ON a.vd=b.vendedor
@@ -22,7 +22,7 @@ $vence    = dbdate_to_human($row->vence);
 $numero   = $row->numero;
 $cod_cli  = trim($row->cod_cli);
 $rifci    = trim($row->rifci);
-$nombre   = trim($row->nombre);
+$nombre   = (empty($row->nomfis))? $row->nombre : $row->nomfis;
 $stotal   = nformat($row->totals);
 $gtotal   = nformat($row->totalg);
 $peso     = nformat($row->peso);
@@ -33,6 +33,15 @@ $referen  = strtoupper($row->referen);
 $telefono = trim($row->telefono);
 $nomvend  = $row->nomvend;
 $factura  = ($tipo_doc=='D')? $row->factura :'';
+$base     = nformat($row->totals - $row->exento );
+$exento   = nformat($row->exento);
+$vd       = str_pad($row->vd,4);
+
+$condi = $row->condi;
+$formap= intval($row->formap);
+if($formap <= 1 && $condi=='C'){
+	$vence    = $fecha;
+}
 
 $dd=explode("\n",$direccion);
 foreach($dd as $iid=>$val){
@@ -57,8 +66,9 @@ $lineas = 0;
 $uline  = array();
 
 $mSQL="SELECT
-	codigoa AS codigo,desca,cana,preca,tota AS importe,iva,detalle
-FROM sitems
+	a.codigoa AS codigo,a.desca,a.cana,a.preca,a.tota AS importe,a.iva,a.detalle,b.peso*a.cana AS peso
+FROM sitems AS a
+JOIN sinv AS b ON a.codigoa=b.codigo
 WHERE numa=$dbnumero AND tipoa=$dbtipo_doc";
 
 $mSQL_2   = $this->db->query($mSQL);
@@ -70,32 +80,32 @@ $separador='Ä';
 //     Encabezado
 //************************
 
-$encabezado  = "\n\n\n\n\n\n\n\n";
-$encabezado .=" CODIGO   : ".str_pad("${cod_cli}  C.I/RIF: ${rifci}",40).str_pad($documento.'    :',13,' ',0).chr(15).chr(14).$numero.chr(18)."\n";
-$encabezado .=" CLIENTE  : ".chr(15).str_pad($nombre,69).chr(18)." FECHA      : ${fecha}\n";
-$encabezado .=" DIRECCION: ".str_pad($direc0,40)." VENCE      : $vence\n";
-$encabezado .="          : ".str_pad($direc1,40)." VENDEDOR   : $nomvend\n";
-$encabezado .=" TELEFONO : ".str_pad($telefono,30).chr(14).$referen.CHR(15)." PAG. NRO :  1".CHR(18)."\n";
+$encabezado  = "\n\n\n\n\n";
+$encabezado .=" Nombre   : ".chr(15).str_pad($this->us_ascii($nombre),69).chr(18).str_pad($documento.'    :',13,' ',0).chr(15).chr(14).$numero.chr(18)."\n";
+$encabezado .=" RIF/C.I. : ".str_pad("${rifci}",12)."VEND: ${vd} VENCE :$vence FECHA      :${fecha}\n";
+$encabezado .=" Direccion: ".chr(15).str_pad($this->us_ascii($direc0.$direc1),70).chr(18)."\n";
+$encabezado .="     Telf.: ".str_pad($telefono,40).chr(14).$referen.CHR(15).CHR(18)."\n";
 // Fin  Encabezado
 
 //************************
 //   Encabezado Tabla
 //************************
-$encabezado_tabla  = str_pad('', 160, $separador)."\n";
-$encabezado_tabla .= " CANT     CODIGO              DESCRIPCION              PRECIO     IMPORTE    IVA\n";
-$encabezado_tabla .= str_pad('', 160, $separador)."\n";
+//$encabezado_tabla  = str_pad('', 80, $separador)."\n";
+$encabezado_tabla = CHR(18)." CODIGO   DESCRIPCION                   PESO     CANT     PRECIO    IMPORTE IVA".CHR(18)."\n";
+$encabezado_tabla .= str_pad('', 80, $separador)."\n";
 //Fin Encabezado Tabla
 
 //************************
 //     Pie Pagina
 //************************
-$pie_final  = str_pad('', 160, $separador)."\n";
-$pie_final .= chr(18).chr(14).str_pad('BASE IMPONIBLE: '          ,26,' ',0).str_pad(nformat($stotal  ),13,'*',0).chr(18)."\n";
-$pie_final .= chr(18).chr(14).str_pad('MONTO TOTAL DEL IMPUESTO: ',26,' ',0).str_pad(nformat($impuesto),13,'*',0).chr(18)."\n";
-$pie_final .= chr(18).chr(14).str_pad('MONTO TOTAL DE LA VENTA: ' ,26,' ',0).str_pad(nformat($gtotal  ),13,'*',0).chr(18)."\n";
-$pie_final .= str_pad('', 160, $separador)."\n";
+$pie_final  = CHR(18).str_pad('', 80, $separador)."\n";
+$pie_final .= " Peso: <----------->".str_pad('MONTO EXENTO O EXONERADO: ',                   44,' ',0).chr(15).chr(14).str_pad($exento , 13,' ',0).chr(18)."\n";
+$pie_final .= str_pad('BASE IMPONIBLE SEGUN ALICUOTA DEL 12%: ',      64,' ',0).chr(15).chr(14).str_pad($base,    13,' ',0).chr(18)."\n";
+$pie_final .= str_pad('MONTO TOTAL DEL IMPUESTO SEGUN ALICUOTA 12%: ',64,' ',0).chr(15).chr(14).str_pad($impuesto,13,' ',0).chr(18)."\n";
+$pie_final .= str_pad('VALOR TOTAL DE LA VENTA DE LOS BIENES: ' ,     64,' ',0).chr(15).chr(14).str_pad($gtotal,  13,'*',0).chr(18)."\n";
+$pie_final .= str_pad('', 80, $separador)."\n\n\n\n\n";
 
-$pie_continuo   = str_pad('', 160, $separador)."\n";
+$pie_continuo   = str_pad('', 80, $separador)."\n";
 $pie_continuo  .= '  CONTINUA...'."\n";
 //Fin Pie Pagina
 
@@ -103,21 +113,14 @@ $mod     = $clinea = false;
 $npagina = true;
 $i       = 0;
 $sumline = 0;
+$tpeso   = 0;
 
 foreach ($detalle AS $items){ $i++;
 	do {
 		if($npagina){
 			echo $encabezado;
 			echo $encabezado_tabla;
-			$lineas =  substr_count($encabezado,"\n")+substr_count($encabezado_tabla,"\n")+substr_count($pie_continuo,"\n");;
-
-			//if($lineas+substr_count($pie_final,"\n")+$art_cana <= $maxlin ){
-			//	$lineas += substr_count($pie_final,"\n");
-			//}else{
-			//	$lineas += substr_count($pie_continuo,"\n");
-			//}
-
-
+			$lineas =  substr_count($encabezado,"\n")+substr_count($encabezado_tabla,"\n")+substr_count($pie_continuo,"\n");
 			$npagina=false;
 		}
 		if(!$clinea){
@@ -135,11 +138,12 @@ foreach ($detalle AS $items){ $i++;
 			$descrip = str_replace("\r",'',$descrip);
 			$descrip = str_replace(array("\t"),' ',$descrip);
 
-			$descrip = wordwrap($descrip,40,"\n");
+			$descrip = wordwrap($descrip,50,"\n");
 			$arr_des = explode("\n",$descrip);
 			$uline   = array_shift($arr_des);
-			echo sprintf('%\'*3d %-10s %-40s %10s %10s %5s',$items->cana,$items->codigo,$uline,nformat($items->preca),nformat($items->cana*$items->preca),nformat($items->iva,0));
+			echo chr(15)." ".sprintf('%-13s %-49s %9s %16s %17s %20s %4s',$this->us_ascii($items->codigo),$this->us_ascii($uline),nformat($items->peso),nformat($items->cana),nformat($items->preca),nformat($items->cana*$items->preca),nformat($items->iva,2));
 			echo "\n";
+			$tpeso += $items->peso;
 			$art_cana--;
 			$lineas++;
 		}
@@ -147,7 +151,7 @@ foreach ($detalle AS $items){ $i++;
 		while(count($arr_des)>0){
 			$uline   = array_shift($arr_des);
 
-			echo sprintf('%3s %-10s %-40s %10s %10s %5s', '', '',$uline,'','','');
+			echo sprintf('%-13s %-49s %9s %16s %17s %20s %4s', '', '',$this->us_ascii($uline),'','','','');
 			echo "\n";
 
 			$lineas++;
@@ -174,5 +178,5 @@ foreach ($detalle AS $items){ $i++;
 for(1;$lineas<$maxlin;$lineas++){
 	echo "\n";
 }
-echo $pie_final;
+echo str_replace('<----------->', str_pad(nformat($tpeso), 13), $pie_final);
 ?>

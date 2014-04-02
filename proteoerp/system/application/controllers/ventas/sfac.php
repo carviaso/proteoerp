@@ -3782,7 +3782,7 @@ class Sfac extends Controller {
 		}
 
 		//Descuento del inventario
-		$factor=($tipo_doc=='F' || $tipo_doc=='T')? -1:1;
+		$factor=($tipo_doc=='F' || $tipo_doc=='T')? 1:-1;
 		$almacen=$do->get('almacen');
 		$dbalma = $this->db->escape($almacen);
 		$cana=$do->count_rel('sitems');
@@ -3791,17 +3791,17 @@ class Sfac extends Controller {
 			$itcodigoa = $do->get_rel('sitems','codigoa',$i);
 			$dbcodigoa = $this->db->escape($itcodigoa);
 
-			$sql="INSERT IGNORE INTO itsinv (alma,codigo,existen) VALUES (${dbalma},${dbcodigoa},0)";
-			$ban=$this->db->simple_query($sql);
-			if($ban==false){ memowrite($sql,'sfac'); $error++;}
+			$this->datasis->sinvcarga($itcodigoa, $almacen, $factor*$itcana);
 
-			$sql="UPDATE itsinv SET existen=existen+(${factor})*${itcana} WHERE codigo=${dbcodigoa} AND alma=${dbalma}";
-			$ban=$this->db->simple_query($sql);
-			if($ban==false){ memowrite($sql,'sfac'); $error++;}
-
-			$sql="UPDATE sinv   SET existen=existen+(${factor})*${itcana} WHERE codigo=${dbcodigoa}";
-			$ban=$this->db->simple_query($sql);
-			if($ban==false){ memowrite($sql,'sfac'); $error++;}
+			//$sql="INSERT IGNORE INTO itsinv (alma,codigo,existen) VALUES (${dbalma},${dbcodigoa},0)";
+			//$ban=$this->db->simple_query($sql);
+			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
+			//$sql="UPDATE itsinv SET existen=existen+(${factor})*${itcana} WHERE codigo=${dbcodigoa} AND alma=${dbalma}";
+			//$ban=$this->db->simple_query($sql);
+			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
+			//$sql="UPDATE sinv   SET existen=existen+(${factor})*${itcana} WHERE codigo=${dbcodigoa}";
+			//$ban=$this->db->simple_query($sql);
+			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
 		}
 
 		if($tipo_doc=='D'){
