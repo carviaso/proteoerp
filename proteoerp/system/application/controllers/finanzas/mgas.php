@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 require_once(BASEPATH.'application/controllers/validaciones.php');
 class Mgas extends validaciones {
 
@@ -14,6 +20,7 @@ class Mgas extends validaciones {
 	}
 
 	function index(){
+		$this->instalar();
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		$this->datasis->modulo_nombre( 'MGAS', $ventana=0 );
 		redirect($this->url.'jqdatag');

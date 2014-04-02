@@ -19,22 +19,22 @@ $row = $mSQL_1->row();
 $fecha     = dbdate_to_human($row->fecha);
 $retorno   = dbdate_to_human($row->retorno);
 $numero    = str_pad($id, 8, '0', STR_PAD_LEFT);
-$cnombre   = htmlspecialchars(trim($row->cnombre));
+$cnombre   = $this->us_ascii2html(trim($row->cnombre));
 
 $peso      = nformat($row->peso);
 $capacidad = nformat($row->capacidad);
-$tipo      = htmlspecialchars(trim($row->tipo     ));
-$chofer    = htmlspecialchars(trim($row->chofer   ));
-$cnombre   = htmlspecialchars(trim($row->cnombre  ));
-$vehiculo  = htmlspecialchars(trim($row->vehiculo ));
-$observa   = htmlspecialchars(trim($row->observa  ));
-$facturas  = htmlspecialchars(trim($row->facturas ));
-$hora      = htmlspecialchars(trim($row->hora     ));
-$placa     = htmlspecialchars(trim($row->placa    ));
-$ano       = htmlspecialchars(trim($row->ano      ));
-$marca     = htmlspecialchars(trim($row->marca    ));
-$modelo    = htmlspecialchars(trim($row->modelo   ));
-$descrip   = htmlspecialchars(trim($row->descrip  ));
+$tipo      = $this->us_ascii2html(trim($row->tipo     ));
+$chofer    = $this->us_ascii2html(trim($row->chofer   ));
+$cnombre   = $this->us_ascii2html(trim($row->cnombre  ));
+$vehiculo  = $this->us_ascii2html(trim($row->vehiculo ));
+$observa   = $this->us_ascii2html(trim($row->observa  ));
+$facturas  = $this->us_ascii2html(trim($row->facturas ));
+$hora      = $this->us_ascii2html(trim($row->hora     ));
+$placa     = $this->us_ascii2html(trim($row->placa    ));
+$ano       = $this->us_ascii2html(trim($row->ano      ));
+$marca     = $this->us_ascii2html(trim($row->marca    ));
+$modelo    = $this->us_ascii2html(trim($row->modelo   ));
+$descrip   = $this->us_ascii2html(trim($row->descrip  ));
 
 $vvehiculo = $placa.' '.$marca.' '.$modelo.' '.$ano.' '.$descrip;
 
@@ -56,7 +56,7 @@ $detalle2 = $mSQL_3->result();
 $mSQL_2 = $this->db->query("SELECT
 a.tipo_doc, a.numero, a.fecha, a.zona, b.nombre AS nzona, a.totalg, a.cod_cli, a.nombre, a.vd, a.almacen,a.peso
 FROM sfac AS a
-JOIN zona AS b ON a.zona=b.codigo
+LEFT JOIN zona AS b ON a.zona=b.codigo
 WHERE a.reparto=${dbid}");
 $detalle  = $mSQL_2->result();
 
@@ -167,7 +167,7 @@ foreach ($detalle2 AS $items){ $i++;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo $uline.'<br />';
+						echo $this->us_ascii2html($uline).'<br />';
 						$lineas++;
 						if($lineas >= $maxlin){
 							$lineas =0;
@@ -260,7 +260,7 @@ foreach ($detalle AS $items){ $i++; $nsitems=$nsitems-1;
 ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 				<td style="text-align: center;"><?php echo ($clinea)? '': $items->tipo_doc.$items->numero; ?></td>
-				<td style="text-align: left;"  ><?php echo ($clinea)? '': $items->zona.' '.$items->nzona; ?></td>
+				<td style="text-align: left;"  ><?php echo ($clinea)? '': $this->us_ascii2html($items->zona).' '.$items->nzona; ?></td>
 				<td>
 				<?php
 					if(!$clinea){
@@ -273,7 +273,7 @@ foreach ($detalle AS $items){ $i++; $nsitems=$nsitems-1;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo $uline.'<br />';
+						echo $this->us_ascii2html($uline).'<br />';
 						$lineas++;
 						if($lineas >= $maxlin){
 							if($nsitems>0){

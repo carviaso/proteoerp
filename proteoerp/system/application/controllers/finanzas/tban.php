@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Tban extends Controller {
 	var $mModulo = 'TBAN';
 	var $titp    = 'Instituciones Bancarias';

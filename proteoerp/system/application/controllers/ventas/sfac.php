@@ -3569,11 +3569,12 @@ class Sfac extends Controller {
 		}
 		//Fin de las validaciones
 
-		$rrow    = $this->datasis->damerow('SELECT nombre,rifci,dire11,dire12 FROM scli WHERE cliente='.$dbcliente);
+		$rrow    = $this->datasis->damerow('SELECT nombre,rifci,dire11,dire12,zona FROM scli WHERE cliente='.$dbcliente);
 		if($rrow!=false){
 			$do->set('nombre',$rrow['nombre']);
 			$do->set('direc' ,$rrow['dire11']);
 			$do->set('dire1' ,$rrow['dire12']);
+			$do->set('zona'  ,$rrow['zona']);
 		}
 
 		//Determina el numero de factura
@@ -3622,7 +3623,7 @@ class Sfac extends Controller {
 		$usuario= $do->get('usuario');
 		$hora   = $do->get('hora');
 
-		$iva=$totals=0;
+		$iva=$totals=$tpeso=0;
 		$cana=$do->count_rel('sitems');
 		for($i=0;$i<$cana;$i++){
 			$itcodigo  = $do->get_rel('sitems','codigoa',$i);
@@ -3635,11 +3636,12 @@ class Sfac extends Controller {
 			$do->set_rel('sitems','mostrado',0,$i);
 
 
-			$rowval = $this->datasis->damerow('SELECT pond, base1,precio4 FROM sinv WHERE codigo='.$this->db->escape($itcodigo));
+			$rowval = $this->datasis->damerow('SELECT pond, base1,precio4,peso FROM sinv WHERE codigo='.$this->db->escape($itcodigo));
 			if(empty($rowval)){
 				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Producto no encontrado ('.$itcodigo.')';
 				return false;
 			}
+			$tpeso += floatval($rowval['peso']);
 			$do->set_rel('sitems','costo'  , $rowval['pond']   ,$i);
 			$do->set_rel('sitems','pvp'    , $rowval['base1']  ,$i);
 			$do->set_rel('sitems','precio4', $rowval['precio4'],$i);
@@ -3696,6 +3698,7 @@ class Sfac extends Controller {
 		$do->set('totals' ,round($totals ,2));
 		$do->set('totalg' ,round($totalg ,2));
 		$do->set('iva'    ,round($iva    ,2));
+		$do->set('peso'   ,round($tpeso  ,2));
 
 		$this->pfac = $_POST['pfac'];
 		$do->rm_get('pfac');
@@ -4225,10 +4228,11 @@ class Sfac extends Controller {
 		$this->_url= $this->url.'dataedit/insert';
 
 		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
-		,'a.totals','a.iva','a.totalg','TRIM(a.factura) AS factura');
+		,'a.totals','a.iva','a.totalg','TRIM(a.factura) AS factura','a.vd','c.almacen');
 		$this->db->select($sel);
 		$this->db->from('pfac AS a');
 		$this->db->join('scli AS b','a.cod_cli=b.cliente');
+		$this->db->join('vend AS c','c.vendedor=a.vd','left');
 		$this->db->where('a.numero',$numero);
 		$this->db->where('a.status','P');
 		$query = $this->db->get();
@@ -4240,8 +4244,8 @@ class Sfac extends Controller {
 					'btn_submit' => 'Guardar',
 					'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
 					'cajero'     => $this->secu->getcajero(),
-					'vd'         => $this->secu->getvendedor(),
-					'almacen'    => $this->secu->getalmacen(),
+					'vd'         => (empty($row->vd))? $this->secu->getvendedor() :  $row->vd,
+					'almacen'    => (empty($row->almacen))? $this->secu->getalmacen() : $row->almacen,
 					'tipo_doc'   => 'F',
 					'factura'    => '',
 					'cod_cli'    => $row->cod_cli,
