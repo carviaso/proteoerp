@@ -3210,11 +3210,13 @@ class Sfac extends Controller {
 	//Chequea si puede o no vender negativo
 	function chcananeg($val,$i){
 		$tipo_doc = $this->input->post('tipo_doc');
+		$almacen  = $this->input->post('almacen');
 		if($this->vnega=='N' && $tipo_doc=='F'){
 			$codigo   = $this->input->post('codigoa_'.$i);
 			$dbcodigo = $this->db->escape($codigo);
+			$dbalmacen= $this->db->escape($almacen);
 
-			$mSQL    = "SELECT SUM(a.existen) AS cana FROM itsinv AS a JOIN caub AS b ON a.alma=b.ubica WHERE a.codigo=${dbcodigo}";
+			$mSQL    = "SELECT SUM(a.existen) AS cana FROM itsinv AS a JOIN caub AS b ON a.alma=b.ubica AND b.tipo='S' WHERE a.codigo=${dbcodigo} AND b.ubica=${dbalmacen}";
 			$existen = floatval($this->datasis->dameval($mSQL));
 			$val     = floatval($val);
 			if($val>$existen){
