@@ -216,7 +216,8 @@ class pfaclite extends validaciones{
 
 		$filter = new DataFilter('Selecci&oacute;n de Clientes', 'scli');
 		$filter->button('btn_back',RAPYD_BUTTON_BACK,"javascript:window.location='".site_url($back)."'", 'BL');
-		$filter->db->where('vendedor',$vd);
+		$dbvd = $this->db->escape($vd);
+		$filter->db->where("( vendedor = ${dbvd} OR cobrador=${dbvd} )");
 
 		$filter->cliente = new inputField('C&oacute;digo', 'cliente');
 		$filter->cliente->size = 8;

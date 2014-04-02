@@ -331,7 +331,7 @@ class Rcaj extends validaciones {
 				UNION ALL
 				SELECT e.tipo,e.monto AS monto
 				FROM sfpa AS e
-				WHERE e.f_factura=${dbfecha} AND e.cobrador=${dbcajero} AND e.tipo_doc IN ('AB','AN')
+				WHERE e.f_factura=${dbfecha} AND e.cobrador=${dbcajero} AND e.tipo_doc IN ('AB','AN') AND e.tipo NOT IN ('NC','DE')
 				UNION ALL
 				SELECT d.tipo,d.monto AS monto
 				FROM sfpa AS d
