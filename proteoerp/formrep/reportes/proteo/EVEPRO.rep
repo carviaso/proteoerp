@@ -277,7 +277,7 @@ $filter->grupo->db_name='a.grupo';
 
 $filter->vendedor = new dropdownField('Vendedor', 'vendedor');
 $filter->vendedor->clause='where';
-$filter->vendedor->db_name='vendedor';
+$filter->vendedor->db_name='a.vendedor';
 $filter->vendedor->operator='=';
 $filter->vendedor->option('','Todos');
 $filter->vendedor->options("SELECT vendedor, concat('(',vendedor,')',nombre) FROM vend ORDER BY vendedor");

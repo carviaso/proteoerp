@@ -934,7 +934,7 @@ class Ajax extends Controller {
 				$mjoin='';
 			}else{
 				$mcana='c.existen';
-				$mjoin='LEFT JOIN itsinv AS c ON a.codigo=b.codigo AND c.alma='.$this->db->escape($alma);
+				$mjoin='LEFT JOIN itsinv AS c ON a.codigo=c.codigo AND c.alma='.$this->db->escape($alma);
 			}
 
 			$mSQL="SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.precio1,precio2,precio3,precio4, a.iva,${mcana},a.tipo
