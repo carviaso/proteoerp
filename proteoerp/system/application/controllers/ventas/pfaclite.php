@@ -420,7 +420,7 @@ class pfaclite extends validaciones{
 		$this->db->where('a.tipo'  ,'Articulo');
 		$this->db->group_by('a.codigo');
 		$this->db->order_by('a.marca , a.descrip , a.peso');
-		$this->db->limit(300);
+		$this->db->limit(500);
 
 		$act_meta=false;
 		if($status=='create' || $status=='insert'){
