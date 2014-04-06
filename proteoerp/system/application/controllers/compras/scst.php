@@ -2036,6 +2036,11 @@ class Scst extends Controller {
 
 		$edit->sprvreteiva = new hiddenField('', 'sprvreteiva');
 		$edit->sprvreteiva->pointer=true;
+		$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
+		$rif     = $this->datasis->traevalor('RIF');
+		if($contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
+			$edit->sprvreteiva->insertValue='75';
+		}
 
 		$edit->cfis = new inputField('N&uacute;mero fiscal', 'nfiscal');
 		$edit->cfis->size = 15;

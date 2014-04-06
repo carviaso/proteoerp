@@ -314,7 +314,7 @@ $(function(){
 		}
 	}
 ?>
-
+	saldoven();
 
 });
 
@@ -647,21 +647,27 @@ function post_modbus_scli(){
 		}
 	});
 	totalizar();
+	saldoven();
+}
 
-	$.ajax({
-		url: "<?php echo site_url('ajax/ajaxsaldoscliven'); ?>",
-		dataType: 'json',
-		type: 'POST',
-		data: {'clipro' : $('#cod_cli').val()},
-		success: function(data){
-			if(data>0){
-				$.prompt("<span style='font-size:1.5em'>Cliente presenta saldo vencido de <b>"+nformat(data,2)+" Bs.</b> debe ponerse al d&iacute;a.</span>", {
-					title: "Saldo vencido",
-					buttons: { "Continuar": true }
-				});
-			}
-		},
-	});
+function saldoven(){
+	var codcli=$('#cod_cli').val();
+	if(codcli!=''){
+		$.ajax({
+			url: "<?php echo site_url('ajax/ajaxsaldoscliven'); ?>",
+			dataType: 'json',
+			type: 'POST',
+			data: {'clipro' : codcli},
+			success: function(data){
+				if(data>0){
+					$.prompt("<span style='font-size:1.5em'>Cliente presenta saldo vencido de <b>"+nformat(data,2)+" Bs.</b> debe ponerse al d&iacute;a.</span>", {
+						title: "Saldo vencido",
+						buttons: { "Continuar": true }
+					});
+				}
+			},
+		});
+	}
 }
 
 function post_modbus_sinv(nind){

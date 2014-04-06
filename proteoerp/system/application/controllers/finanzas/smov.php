@@ -1963,9 +1963,11 @@ class Smov extends Controller {
 		$cliente  =$do->get('cod_cli');
 		$dbcliente=$this->db->escape($cliente);
 		$impuesto =$do->get('impuesto');
-		$tipo_doc =$do->get('tipo_doc');
+		$ttipo_doc=$do->get('tipo_doc');
 		$concepto =$do->get('observa1');
 		$ningreso =$do->get('ningreso');
+		$ffecha   =$do->get('fecha');
+		$dbffecha =$this->db->escape($ffecha);
 
 		$rel_id='itccli';
 		$cana = $do->count_rel($rel_id);
@@ -2045,9 +2047,14 @@ class Smov extends Controller {
 				$dbmonto    = $monto+$ppago;
 
 				$mSQL="UPDATE smov SET abonos=abonos+${dbmonto} WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND cod_cli=${dbcliente} LIMIT 1";
-
 				$ban=$this->db->simple_query($mSQL);
 				if($ban==false){ memowrite($mSQL,'ccli'); }
+
+				if($ttipo_doc=='AB' && $tipo_doc=='FC'){
+					$mSQL="UPDATE sfac SET pagada=${dbffecha} WHERE tipo_doc='F' AND numero=${dbnumero} AND cod_cli=${dbcliente} LIMIT 1";
+					$ban=$this->db->simple_query($mSQL);
+					if($ban==false){ memowrite($mSQL,'ccli'); }
+				}
 
 				if($ppago > 0){
 					$itdbdata['tipo_doc'] = $tipo_doc;
@@ -2109,7 +2116,7 @@ class Smov extends Controller {
 				$this->datasis->actusal($codbanc, $sfecha, $monto);
 			}
 		}
-		logusu('smov',"Cobro a cliente ${tipo_doc}${numero} creado");
+		logusu('smov',"Cobro a cliente ${ttipo_doc}${numero} creado");
 	}
 
 	function _pre_ccli_update($do){

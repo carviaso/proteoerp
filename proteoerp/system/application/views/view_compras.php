@@ -12,7 +12,7 @@ $container_tr=join('&nbsp;', $form->_button_container['TR']);
 if($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	echo $form->output;
 else:
-
+$aplrete=false;
 $campos=$form->template_details('itscst');
 $scampos  ='<tr id="tr_itscst_<#i#>"  ondblclick="marcar(this)">';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['codigo']['field'].'</td>';
@@ -352,6 +352,7 @@ function totalizar(taca){
 	$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
 	$rif     = $this->datasis->traevalor('RIF');
 	if($contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
+		$aplrete=true;
 		echo "\tif(tipodoc=='FC'){";
 		echo '$("#reteiva").val(roundNumber(montoiva*porreten/100,2));';
 		echo '}';
@@ -446,8 +447,8 @@ function timecmontotot(){
 		}
 	});
 
-	$("#montonet_val").text(nformat(totals+iva,2));
-	$("#montonet").val(totals+iva);
+	//$("#montonet_val").text(nformat(totals+iva,2));
+	//$("#montonet").val(totals+iva);
 
 }
 
@@ -455,6 +456,18 @@ function cmontoiva(){
 	var totals = Number($("#montotot").val());
 	var iva    = Number($("#montoiva").val());
 
+	<?php
+	if($aplrete){
+		echo 'var porreten = Number($("#sprvreteiva").val());'."\n";
+		echo 'var tipodoc  = $("#tipo_doc").val();'."\n";
+
+		echo "\tif(tipodoc=='FC'){";
+		echo '$("#reteiva").val(roundNumber(iva*porreten/100,2));';
+		echo '}';
+	}
+	?>
+
+	//cmontotot();
 	$("#montonet_val").text(nformat(totals+iva,2));
 	$("#montonet").val(totals+iva);
 }

@@ -214,10 +214,17 @@ class pfaclite extends validaciones{
 
 		$this->rapyd->load('datafilter','datagrid');
 
-		$filter = new DataFilter('Selecci&oacute;n de Clientes', 'scli');
+		$filter = new DataFilter('Lista de clientes asignados al vendedor '.$vd);
 		$filter->button('btn_back',RAPYD_BUTTON_BACK,"javascript:window.location='".site_url($back)."'", 'BL');
 		$dbvd = $this->db->escape($vd);
-		$filter->db->where("( vendedor = ${dbvd} OR cobrador=${dbvd} )");
+
+		$dbfini=$this->db->escape(date('Y-m-d', mktime(0, 0, 0, date('n'),1)));
+		$sel=array('a.cliente','a.nombre','a.rifci','SUM(b.numero IS NOT NULL) AS rayado');
+		$filter->db->select($sel);
+		$filter->db->from('scli AS a');
+		$filter->db->join('sfac AS b',"b.cod_cli=a.cliente AND b.vd=${dbvd} AND b.fecha>=${dbfini}",'left');
+		$filter->db->where("( a.vendedor = ${dbvd} OR a.cobrador=${dbvd} )");
+		$filter->db->groupby('a.cliente');
 
 		$filter->cliente = new inputField('C&oacute;digo', 'cliente');
 		$filter->cliente->size = 8;
@@ -231,18 +238,35 @@ class pfaclite extends validaciones{
 		$filter->buttons('reset','search');
 		$filter->build();
 
+		if(!empty($vd)){
+			$mSQL="SELECT COUNT(*) AS cana FROM scli WHERE ( vendedor = ${dbvd} OR cobrador=${dbvd} )";
+			$clientes=$this->datasis->dameval($mSQL);
+
+			$mSQL="SELECT COUNT(*) AS cana FROM sfac WHERE vd = ${dbvd} AND fecha>=${dbfini}";
+			$facturas=$this->datasis->dameval($mSQL);
+
+			$mSQL="SELECT COUNT(*) AS cca FROM (SELECT 1 AS cana FROM scli AS a JOIN sfac AS b ON b.cod_cli=a.cliente WHERE b.fecha>=${dbfini} AND vendedor=${dbvd} GROUP BY a.cliente) AS aa";
+			$atendidos=$this->datasis->dameval($mSQL);
+
+			$efe = htmlnformat($atendidos*100/$clientes);
+			$frace = "<p style='text-align:center;font-weight: bold;'>Clientes atendidos: <span style='font-size:1.5em; color:#000063'>${atendidos}</span>/${clientes} Efectividad: <span style='font-size:1.5em; color:#000063'>${efe}%</span> Facturas: ${facturas}</p>";
+		}else{
+			$frace='';
+		}
+
 		$uri = anchor($this->url.'dataedit/<raencode><#cliente#></raencode>/create','<#cliente#>');
 
 		$grid = new DataGrid('Seleccione el cliente al cual se le va a realizar el pedido');
 		$grid->use_function('htmlspecialchars');
 		$grid->order_by('nombre','asc');
 		$grid->per_page=20;
+		$grid->column_orderby('#Fact.','rayado','rayado',"align='right'");
 		$grid->column_orderby('Cliente',$uri,'cliente');
 		$grid->column_orderby('Nombre','<htmlspecialchars><#nombre#>|2|ISO-8859-1</htmlspecialchars>','nombre');
 		$grid->column_orderby('RIF/CI','rifci');
 		$grid->build();
 
-		$data['content'] = $filter->output.$grid->output;
+		$data['content'] = $filter->output.$frace.$grid->output;
 		$data['title']   = heading('Clientes');
 		$data['head']    = $this->rapyd->get_head();
 		$data['extras']  = '';
@@ -420,7 +444,7 @@ class pfaclite extends validaciones{
 		$this->db->where('a.tipo'  ,'Articulo');
 		$this->db->group_by('a.codigo');
 		$this->db->order_by('a.marca , a.descrip , a.peso');
-		$this->db->limit(500);
+		$this->db->limit(1000);
 
 		$act_meta=false;
 		if($status=='create' || $status=='insert'){

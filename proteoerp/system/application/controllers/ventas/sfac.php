@@ -3893,6 +3893,7 @@ class Sfac extends Controller {
 		$iva     = $do->get('iva');
 		$direc   = $do->get('direc');
 		$dire1   = $do->get('dire1');
+		$vd      = $do->get('vd');
 
 		$exento   = $do->get('exento'   );
 		$tasa     = $do->get('tasa'     );
@@ -3939,6 +3940,7 @@ class Sfac extends Controller {
 				$data['reducida'] = $reducida;
 				$data['sobretasa']= $sobretasa;
 				$data['exento']   = $exento;
+				$data['vendedor'] = $vd;
 
 
 				$sql= $this->db->insert_string('smov', $data);
