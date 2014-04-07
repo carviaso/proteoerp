@@ -449,7 +449,7 @@ class pfaclite extends validaciones{
 		$act_meta=false;
 		if($status=='create' || $status=='insert'){
 			$this->db->join('itsinv AS b','a.codigo=b.codigo AND b.alma='.$this->db->escape($alma));
-			$this->db->where('b.existen > a.exord');
+			//$this->db->where('b.existen > a.exord');
 			if($this->db->table_exists('metas')){
 				$pmargen=$this->datasis->dameval('SELECT pmargen FROM vend WHERE vendedor='.$dbvd);
 				if(empty($pmargen)){
