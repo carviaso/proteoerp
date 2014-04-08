@@ -62,7 +62,7 @@ function totalizar(){
 	</tr>
 	<?php if(isset($saldo) && $saldo>0){ ?>
 	<tr>
-		<td colspan='2' align='center'>Saldo: <?php echo nformat($saldo);?></td>
+		<td colspan='2' align='center'>Saldo pendiente: <b style='font-size:1.1em'><?php echo htmlnformat($saldo);?></b></td>
 	</tr>
 	<?php } ?>
 
@@ -79,8 +79,8 @@ function totalizar(){
 	<tr id='__INPL__'>
 		<td><b>Art&iacute;culo</b></td>
 		<?php if($act_meta) echo '<td><b>Meta</b></td>'; ?>
-		<td><b>Exis. </b></td>
-		<td><b>Cant. </b></td>
+		<td align='center'><b>Exis. </b></td>
+		<td align='center'><b>Cant. </b></td>
 		<td><b>Precio</b></td>
 	</tr>
 	</thead>
@@ -124,16 +124,25 @@ function totalizar(){
 	}
 
 	foreach($arreglo as $row) {
+
 			$pmarca  = $row['marca'];
-			$pexisten= ($row['existen']>$row['exord'])?$row['existen']-$row['exord']:0;
 			$peso    = $row['peso'];
 			$pdesca  = $row['descrip'].' '.nformat($peso).' KG';
-			$codigoa = $row['codigo'];
+			$codigoa = trim($row['codigo']);
 			$preca   = $row['preca'];
 			$cana    = $row['cana'];
 			$precio1 = $row['precio1'];
 			$precio2 = $row['precio2'];
 			$precio1 = $row['precio1'];
+			$existen = $row['existen'];
+
+			if(isset($pedido[$codigoa])){
+				$row['exdes']=$pedido[$codigoa];
+			}else{
+				$row['exdes']=0;
+			}
+
+			$pexisten= ($row['existen']>$row['exdes'])?$row['existen']-$row['exdes']:0;
 			if($form->_status!='show'){
 				$obj = 'cana_'.$i;
 				if(isset($form->$obj)){
@@ -168,7 +177,13 @@ function totalizar(){
 			} ?>
 		</td>
 		<?php } ?>
-		<td align='right'><?php echo nformat($pexisten)  ?>  </td>
+		<td align='right'><?php
+		if($status=='show'){
+			echo ' ';
+		}else{
+			echo '<b>'.snformat($pexisten).'/</b><span style="font-size:0.8em;color:#FFD900">'.snformat($existen).'</span>';
+		}
+		?></td>
 		<td align='right'><?php echo $f_cana;   ?></td>
 		<td align='right'><?php
 			if($form->_status=='show'){

@@ -4119,7 +4119,7 @@ class Sfac extends Controller {
 			$dbpfac=$this->db->escape($this->pfac);
 
 			$sql="UPDATE itpfac AS c JOIN sinv   AS d ON d.codigo=c.codigoa
-			SET d.exord=IF(d.exord>c.cana,d.exord-c.cana,0)
+			SET d.exdes=IF(d.exdes>c.cana,d.exdes-c.cana,0)
 			WHERE c.numa = ${dbpfac}";
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}

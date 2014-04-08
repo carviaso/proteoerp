@@ -28,6 +28,15 @@ function nformat($numero,$num=null,$centimos=null,$miles=null){
 	return $sig.number_format($numero,$num,$centimos,$miles);
 }
 
+function snformat($numero,$num=null,$centimos=null,$miles=null){
+	if(is_null($numero)) return null;
+	if(abs(intval($numero)-floatval($numero))!=0){
+		return nformat($numero,$num,$centimos,$miles);
+	}else{
+		return intval($numero);
+	}
+}
+
 function htmlnformat($numero){
 	$centimos = (is_null(constant('RAPYD_DECIMALS'))) ? ',' : RAPYD_DECIMALS;
 	$numero   = nformat($numero);

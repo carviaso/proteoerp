@@ -8,6 +8,7 @@
 require_once(BASEPATH . 'application/controllers/validaciones.php');
 class pfaclite extends validaciones{
 	var $genesal= true;
+	var $limit  = 1000;
 	var $url    = 'ventas/pfaclite/';
 
 	function pfaclite(){
@@ -168,7 +169,7 @@ class pfaclite extends validaciones{
 				$dbcodigo= $this->db->escape($row->codigoa);
 				$itcana  = $row->cana;
 
-				$mSQL = "UPDATE sinv SET exord=IF(exord IS NULL OR exord>=$itcana , 0 , exord-$itcana) WHERE codigo=$dbcodigo";
+				$mSQL = "UPDATE sinv SET exdes=IF(exdes IS NULL OR exdes>=${itcana} , 0 , exdes-${itcana}) WHERE codigo=$dbcodigo";
 				$ban=$this->db->simple_query($mSQL);
 				if($ban==false){ memowrite($mSQL,'pfaclite'); }
 			}
@@ -191,7 +192,7 @@ class pfaclite extends validaciones{
 				$dbcodigo= $this->db->escape($row->codigoa);
 				$itcana  = $row->cana;
 
-				$mSQL = "UPDATE sinv SET exord=$itcana WHERE codigo=$dbcodigo";
+				$mSQL = "UPDATE sinv SET exdes=${itcana} WHERE codigo=${dbcodigo}";
 				$ban=$this->db->simple_query($mSQL);
 				if($ban==false){ memowrite($mSQL,'pfaclite'); }
 			}
@@ -431,12 +432,13 @@ class pfaclite extends validaciones{
 		//$edit->button_status('btn_load','Subir desde Excel',$accion,'TL','create');
 		//$edit->button_status('btn_load','Subir desde Excel',$accion,'TL','modify');
 
-		$alma   = $this->secu->getalmacen();
-		$tiposcli=$this->datasis->dameval("SELECT tipo FROM scli WHERE cliente=$dbcliente");
+		$alma     = $this->secu->getalmacen();
+		$dbalma   = $this->db->escape($alma);
+		$tiposcli = $this->datasis->dameval("SELECT tipo FROM scli WHERE cliente=$dbcliente");
 		if($tiposcli<1) $tiposcli=1; elseif($tiposcli>4) $tiposcli=4;
 
 		$sel=array('TRIM(a.codigo) AS codigo','a.descrip'
-		,'a.precio1','a.precio2','a.precio3','a.precio4','a.exord'
+		,'a.precio1','a.precio2','a.precio3','a.precio4','a.exdes'
 		,'a.marca','b.existen','a.iva','a.peso');
 
 		$this->db->from('sinv AS a');
@@ -444,12 +446,12 @@ class pfaclite extends validaciones{
 		$this->db->where('a.tipo'  ,'Articulo');
 		$this->db->group_by('a.codigo');
 		$this->db->order_by('a.marca , a.descrip , a.peso');
-		$this->db->limit(1000);
+		$this->db->limit($this->limit);
 
 		$act_meta=false;
 		if($status=='create' || $status=='insert'){
-			$this->db->join('itsinv AS b','a.codigo=b.codigo AND b.alma='.$this->db->escape($alma));
-			//$this->db->where('b.existen > a.exord');
+			$this->db->join('itsinv AS b','a.codigo=b.codigo AND b.alma='.$dbalma);
+			//$this->db->where('b.existen > a.exdes');
 			if($this->db->table_exists('metas')){
 				$pmargen=$this->datasis->dameval('SELECT pmargen FROM vend WHERE vendedor='.$dbvd);
 				if(empty($pmargen)){
@@ -468,7 +470,7 @@ class pfaclite extends validaciones{
 		}elseif($status=='show'){
 			$this->db->join('itsinv AS b','a.codigo=b.codigo');
 		}else{
-			$this->db->join('itsinv AS b','a.codigo=b.codigo AND b.alma='.$this->db->escape($alma));
+			$this->db->join('itsinv AS b','a.codigo=b.codigo AND b.alma='.$dbalma);
 		}
 		$this->db->select($sel);
 		$sinv=$this->db->get();
@@ -487,7 +489,7 @@ class pfaclite extends validaciones{
 				,'iva'     => $v['iva']
 				,'peso'    => $v['peso']
 				,'codigo'  => $v['codigo']
-				,'exord'   => $v['exord']
+				,'exdes'   => $v['exdes']
 			);
 			if($act_meta){
 				$sinv_arr[$v['codigo']]['meta']   = $v['meta'];
@@ -495,9 +497,29 @@ class pfaclite extends validaciones{
 			}
 		}
 
+		$pedido=array();
+		if($status=='create'){
+			$vds=array();
+			$mmSQL="SELECT TRIM(vendedor) AS vd FROM usuario WHERE almacen=${dbalma}";
+			$qquery = $this->db->query($mmSQL);
+			foreach($qquery->result() as $rrow){ $vds[]=$this->db->escape($rrow->vd); }
+			$vds=implode(',',$vds);
+			$mmSQL="SELECT TRIM(a.codigoa) AS codigo,SUM(a.cana) AS cana
+				FROM itpfac AS a
+				JOIN pfac AS b ON b.numero=a.numa
+			WHERE b.status='P' AND b.vd IN (${vds})
+			GROUP BY a.codigoa";
+			$qquery = $this->db->query($mmSQL);
+			foreach($qquery->result() as $rrow){
+				$pedido[$rrow->codigo]=$rrow->cana;
+			}
+		}
+
 		if($this->genesal){
 			$edit->build();
 
+			$conten['status']  = $status;
+			$conten['pedido']  = $pedido;
 			$conten['saldo']   = $saldo;
 			$conten['act_meta']= $act_meta;
 			$conten['tiposcli']= $tiposcli;
@@ -531,26 +553,30 @@ class pfaclite extends validaciones{
 		$dbalma   = $this->db->escape($alma);
 
 		$this->validation->set_message('chcana', 'No existe cantidad suficiente para el art&iacute;culo '.$codigo);
-		$udp=$this->rapyd->uri->is_set('update');
-		if($udp){
-			$arrurl = $this->uri->segment_array();
-			$id     = array_pop($arrurl);
-			$numa   = $this->datasis->dameval("SELECT numero FROM pfac WHERE id=".$this->db->escape($id));
-			$dbnuma = $this->db->escape($numa);
-
-			$mSQL="SELECT  COALESCE(b.existen,0)-COALESCE(a.exord,0)+COALESCE(c.cana,0) AS cana
+		//$udp=$this->rapyd->uri->is_set('update');
+		//if($udp){
+		//	$arrurl = $this->uri->segment_array();
+		//	$id     = array_pop($arrurl);
+		//	$numa   = $this->datasis->dameval("SELECT numero FROM pfac WHERE id=".$this->db->escape($id));
+		//	$dbnuma = $this->db->escape($numa);
+        //
+		//	$mSQL="SELECT  COALESCE(b.existen,0)-COALESCE(a.exdes,0)+COALESCE(c.cana,0) AS cana
+		//	FROM sinv AS a
+		//	LEFT JOIN itsinv AS b ON a.codigo=b.codigo
+		//	LEFT JOIN itpfac AS c ON a.codigo=c.codigoa AND c.numa=${dbnuma}
+		//	WHERE a.codigo=${dbcodigo} AND b.alma=${dbalma}";
+		//}else{
+		//	$mSQL="SELECT  COALESCE(b.existen,0)-COALESCE(a.exdes,0) AS cana
+		//	FROM sinv AS a
+		//	LEFT JOIN itsinv AS b ON a.codigo=b.codigo
+		//	WHERE a.codigo=${dbcodigo} AND b.alma=${dbalma}";
+		//}
+		$mSQL="SELECT  COALESCE(b.existen,0) AS cana
 			FROM sinv AS a
 			LEFT JOIN itsinv AS b ON a.codigo=b.codigo
-			LEFT JOIN itpfac AS c ON a.codigo=c.codigoa AND c.numa=$dbnuma
-			WHERE a.codigo=$dbcodigo AND b.alma=$dbalma";
-		}else{
-			$mSQL="SELECT  COALESCE(b.existen,0)-COALESCE(a.exord,0) AS cana
-			FROM sinv AS a
-			LEFT JOIN itsinv AS b ON a.codigo=b.codigo
-			WHERE a.codigo=$dbcodigo AND b.alma=$dbalma";
-		}
-		$hay=$this->datasis->dameval($mSQL);
+			WHERE a.codigo=${dbcodigo} AND b.alma=${dbalma}";
 
+		$hay=floatval($this->datasis->dameval($mSQL));
 		if(empty($hay))  return false;
 		if($cana > $hay) return false;
 		return true;
@@ -558,7 +584,7 @@ class pfaclite extends validaciones{
 
 	function _exitescli($cliente){
 		$dbscli= $this->db->escape($cliente);
-		$mSQL  = "SELECT COUNT(*) AS cana FROM scli WHERE cliente=$dbscli";
+		$mSQL  = "SELECT COUNT(*) AS cana FROM scli WHERE cliente=${dbscli}";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
@@ -646,7 +672,7 @@ class pfaclite extends validaciones{
 		for($i = 0;$i < $cana;$i++){
 			$itcodigo= $do->get_rel('itpfac', 'codigoa', $i);
 			$itcana  = $do->get_rel('itpfac', 'cana', $i);
-			$mSQL = "UPDATE sinv SET exord=IF(exord IS NULL,$itcana,exord+$itcana) WHERE codigo=".$this->db->escape($itcodigo);
+			$mSQL = "UPDATE sinv SET exdes=IF(exdes IS NULL,${itcana},exdes+${itcana}) WHERE codigo=".$this->db->escape($itcodigo);
 
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'pfaclite'); }
@@ -682,8 +708,8 @@ class pfaclite extends validaciones{
 		$dbnuma = $this->db->escape($numa);
 
 		$sql="UPDATE itpfac AS c JOIN sinv   AS d ON d.codigo=c.codigoa
-		SET d.exord=IF(d.exord>c.cana,d.exord-c.cana,0)
-		WHERE c.numa = $dbnuma";
+		SET d.exdes=IF(d.exdes>c.cana,d.exdes-c.cana,0)
+		WHERE c.numa = ${dbnuma}";
 		$ban=$this->db->simple_query($sql);
 		if($ban==false){ memowrite($sql,'pfaclite'); $error++;}
 
@@ -696,7 +722,7 @@ class pfaclite extends validaciones{
 			$itcodigo= $do->get_rel('itpfac', 'codigoa', $i);
 			$itcana  = $do->get_rel('itpfac', 'cana', $i);
 
-			$mSQL = "UPDATE sinv SET exord=exord+$itcana WHERE codigo=".$this->db->escape($itcodigo);
+			$mSQL = "UPDATE sinv SET exdes=exdes+${itcana} WHERE codigo=".$this->db->escape($itcodigo);
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'pfaclite'); }
 		}
@@ -721,7 +747,7 @@ class pfaclite extends validaciones{
 		$status = $do->get('status');
 		$codigo = $do->get('numero');
 		if($status!='C'){
-			$mSQL='UPDATE sinv JOIN itpfac ON sinv.codigo=itpfac.codigoa SET sinv.exord=IF(sinv.exord>itpfac.cana,sinv.exord-itpfac.cana,0) WHERE itpfac.numa='.$this->db->escape($codigo);
+			$mSQL='UPDATE sinv JOIN itpfac ON sinv.codigo=itpfac.codigoa SET sinv.exdes=IF(sinv.exdes>itpfac.cana,sinv.exdes-itpfac.cana,0) WHERE itpfac.numa='.$this->db->escape($codigo);
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'pfaclite'); }
 		}
@@ -797,7 +823,7 @@ class pfaclite extends validaciones{
 					if(empty($row[9]) || $row[9]<1) continue;
 					$dbcodigo=$this->db->escape($codigo);
 
-					$mSQL="SELECT  COALESCE(b.existen,0)-COALESCE(a.exord,0) AS cana
+					$mSQL="SELECT  COALESCE(b.existen,0)-COALESCE(a.exdes,0) AS cana
 						FROM sinv AS a
 						LEFT JOIN itsinv AS b ON a.codigo=b.codigo
 						WHERE a.codigo=$dbcodigo";
@@ -1126,7 +1152,7 @@ for (\$count = 1; \$count <= 10; \$count++) {
 \$mmfil= \$mfil+1;
 \$grup = '';
 
-\$mSQL = "SELECT a.peso, a.codigo, a.descrip, a.marca AS grupo, a.marca AS nom_grup, a.unidad, IF(a.existen<a.exord,0,a.existen-a.exord) AS existen,
+\$mSQL = "SELECT a.peso, a.codigo, a.descrip, a.marca AS grupo, a.marca AS nom_grup, a.unidad, IF(a.existen<a.exdes,0,a.existen-a.exdes) AS existen,
 	round(a.precio1*100/(100+a.iva),2) AS base1,
 	round(a.precio2*100/(100+a.iva),2) AS base2,
 	round(a.precio3*100/(100+a.iva),2) AS base3,
