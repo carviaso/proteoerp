@@ -232,6 +232,7 @@ class pfaclite extends validaciones{
 		//$filter->cliente->append($boton);
 
 		$filter->nombre= new inputField('Nombre','nombre');
+		$filter->nombre->db_name = 'a.nombre';
 
 		$filter->rifci= new inputField('CI/RIF','rifci');
 		$filter->rifci->size=15;
