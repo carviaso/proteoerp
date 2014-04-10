@@ -189,7 +189,7 @@ class Sprm extends Controller {
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				if(ret.tipo_op=="CH"){
-					window.open(\''.site_url($this->url.'/impcheque').'/\'+id, \'_blank\', \'width=300,height=400,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-200), screeny=((screen.availWidth/2)-150)\');
+					window.open(\''.site_url($this->url.'impcheque').'/\'+id, \'_blank\', \'width=300,height=400,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-200), screeny=((screen.availWidth/2)-150)\');
 				}else{
 					$.prompt("<h1>El efecto seleccionado no possee cheques</h1>");
 				}
@@ -2430,6 +2430,11 @@ class Sprm extends Controller {
 				$ittipo    = $do->get_rel($rel, 'tipo_doc', $i);
 				$itnumero  = $do->get_rel($rel, 'numero'  , $i);
 				$itimpuesto= $arr_itimpuestos[$i];
+				if(!empty($impuesto)){
+					$rriva = $reteiva*$itimpuesto/$impuesto;
+				}else{
+					$rriva = 0;
+				}
 
 				$do->set_rel($rel, 'tipoppro', $tipo_doc, $i);
 				$do->set_rel($rel, 'cod_prv' , $cod_prv , $i);
@@ -2437,8 +2442,8 @@ class Sprm extends Controller {
 				$do->set_rel($rel, 'hora'    , $hora    , $i);
 				$do->set_rel($rel, 'usuario' , $usuario , $i);
 				$do->set_rel($rel, 'transac' , $transac , $i);
-				$do->set_rel($rel, 'mora'    , 0, $i);
-				$do->set_rel($rel, 'reteiva'   , $reteiva*$itimpuesto/$impuesto, $i);
+				$do->set_rel($rel, 'mora'    , 0        , $i);
+				$do->set_rel($rel, 'reteiva' , $rriva   , $i);
 				$do->set_rel($rel, 'reten'   , 0, $i);
 				$do->set_rel($rel, 'cambio'  , 0, $i);
 				//$do->set_rel($rel, 'reteiva' , 0, $i);
