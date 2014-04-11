@@ -420,7 +420,124 @@ function elminacenti(cual){
 
 		$data['content'] =$edit->output;
 		$data['title']   = "Almacen Inconsistente";
-		$data["head"]    = $this->rapyd->get_head();
+		$data['head']    = $this->rapyd->get_head();
+		$this->load->view('view_ventanas', $data);
+	}
+
+	function princonsis(){
+		$this->rapyd->load('datafilter','datagrid');
+		$this->rapyd->uri->keep_persistence();
+		$this->datasis->modulo_id('900',1);
+
+		$scli=array(
+		'tabla'   =>'sprv',
+		'columnas'=>array(
+		'cliente' =>'C&oacute;digo ',
+		'nombre'  =>'Nombre',
+		'contacto'=>'Contacto'),
+		'filtro'  =>array('proveed'=>'C&oacute;digo','nombre'=>'Nombre'),
+		'retornar'=>array('proveed'=>'proveed'),
+		'titulo'  =>'Buscar Cliente');
+
+		$boton=$this->datasis->modbus($scli);
+
+		$filter = new DataFilter('');
+		$select=array(
+			'a.fecha',
+			'a.tipo_doc',
+			'a.cod_prv',
+			'a.numero',
+			'a.nombre',
+			'a.monto',
+			'(SUM(b.abono)+
+			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "P%" AND e.proveed=a.cod_prv AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)+
+			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "%P" AND e.cliente=a.cod_prv AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`))
+			AS abonoreal',
+			'a.abonos AS inconsist','a.transac');
+
+		$filter->db->select($select);
+		$filter->db->from('sprm AS a');
+		$filter->db->join('itppro AS b','a.cod_prv=b.cod_prv AND a.numero=b.numero AND a.tipo_doc=b.tipo_doc');
+		$filter->db->groupby('a.cod_prv, a.tipo_doc,a.numero');
+		$filter->db->having('abonoreal  <>','inconsist');
+		$filter->db->orderby('a.cod_prv','b.numero');
+
+		$filter->fechad = new dateonlyField('Desde','fechad');
+		$filter->fechah = new dateonlyField('Hasta','fechah');
+		$filter->fechad->clause  =$filter->fechah->clause='where';
+		$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
+		$filter->fechad->operator='>=';
+		$filter->fechah->operator='<=';
+
+		$filter->cliente = new inputField('Proveedor', 'cod_prv');
+		$filter->cliente->db_name='a.cod_prv';
+		$filter->cliente->size = 30;
+		$filter->cliente->append($boton);
+
+		$filter->buttons('reset','search');
+		$filter->build();
+
+		function descheck($numero,$cod_cli,$tipo_doc,$fecha,$abonoreal){
+			$pk=array($numero,$cod_cli,$tipo_doc,$fecha,$abonoreal);
+			$str=htmlspecialchars(serialize($pk));
+			$data = array(
+			  'name'    => 'pk',
+			  'value'   => $str,
+			  'checked' => FALSE);
+			return form_checkbox($data);
+		}
+
+		function diff($a,$b){
+			return nformat($a-$b);
+		}
+
+		$uri1 = anchor('supervisor/mantenimiento/itclinconsis/<str_replace>/|:slach:|<#cod_cli#></str_replace>/<#numero#>/<#tipo_doc#>','<#cod_cli#>');
+		$uri2 = anchor('supervisor/mantenimiento/ajustar/<#cod_cli#>','Ajustar Saldo');
+
+		$grid = new DataGrid('Lista de Proveedores');
+		$grid->use_function('descheck','diff');
+		$grid->per_page = 15;
+		$grid->use_function('str_replace');
+
+		$grid->column_orderby('Cliente'        ,$uri1     ,'cod_cli');
+		$grid->column_orderby('Nombre'         ,'nombre'  ,'nombre');
+		$grid->column_orderby('transac'        ,'transac' ,'transac');
+		$grid->column_orderby('Fecha'          ,'<dbdate_to_human><#fecha#></dbdate_to_human>' ,'fecha');
+		$grid->column_orderby('N&uacute;mero'  ,'<#tipo_doc#><#numero#>'    ,'numero');
+		$grid->column_orderby('Monto'          ,'<nformat><#monto#></nformat>'        ,'monto'     ,"align='right'");
+		$grid->column_orderby('Abono Real'     ,'<nformat><#abonoreal#></nformat>'    ,'abonoreal' ,"align='right'");
+		$grid->column_orderby('Abono Inconsis.','<nformat><#inconsist#></nformat>'    ,'inconsist' ,"align='right'");
+		$grid->column('Faltante'               ,'<diff><#abonoreal#>|<#inconsist#></diff>',"align='right'");
+		$grid->column('Ajustar Saldo'          ,'<descheck><#numero#>|<#cod_cli#>|<#tipo_doc#>|<#fecha#>|<#abonoreal#></descheck>',"align=center");
+
+		$grid->build();
+
+		$script='';
+		$url=site_url('supervisor/mantenimiento/ajustesaldoprv');
+		$data['script']='<script type="text/javascript">
+			$(document).ready(function() {
+				$("form :checkbox").click(function () {
+				$.ajax({
+					  type: "POST",
+					  url: "'.$url.'",
+					  data: $(this).serialize(),
+					  success: function(msg){
+					    if(msg==0)
+					      alert("No se puedo ajustar el saldo");
+					  }
+					});
+				}).change();
+			});
+			</script>';
+
+		/*echo $filter->output;
+		echo form_open('').$grid->output.form_close().$script;*/
+
+		$data['content']  = $filter->output;
+		$data['content'] .= form_open('').$grid->output.form_close().$script;
+		$data['title']    = "<h1>Proveedores con problemas de incosistencias</h1>";
+		$data['head']     = script("jquery.js");
+		$data['head']    .= script("plugins/jquery.checkboxes.pack.js").$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -453,7 +570,7 @@ function elminacenti(cual){
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "C%" AND e.proveed=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "%C" AND e.cliente=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`))
 			AS abonoreal',
-			'a.abonos AS inconsist',);
+			'a.abonos AS inconsist','a.transac');
 
 		$filter->db->select($select);
 		$filter->db->from('smov AS a');
@@ -499,8 +616,9 @@ function elminacenti(cual){
 		$grid->per_page = 15;
 		$grid->use_function('str_replace');
 
-		$grid->column_orderby('Cliente'        ,$uri1    ,'cod_cli');
-		$grid->column_orderby('Nombre'         ,'nombre' ,'nombre');
+		$grid->column_orderby('Cliente'        ,$uri1     ,'cod_cli');
+		$grid->column_orderby('Nombre'         ,'nombre'  ,'nombre');
+		$grid->column_orderby('transac'        ,'transac' ,'transac');
 		$grid->column_orderby('Fecha'          ,'<dbdate_to_human><#fecha#></dbdate_to_human>' ,'fecha');
 		$grid->column_orderby('N&uacute;mero'  ,'<#tipo_doc#><#numero#>'    ,'numero');
 		$grid->column_orderby('Monto'          ,'<nformat><#monto#></nformat>'        ,'monto'     ,"align='right'");
@@ -565,6 +683,34 @@ function elminacenti(cual){
 		}
 	}
 
+	//Ajusta el saldo princonsis
+	function ajustesaldoprv(){
+		$this->datasis->modulo_id('900',1);
+		$pk  = unserialize(htmlspecialchars_decode($this->input->post('pk')));
+		if(count($pk)!=5){
+			echo 0;
+		}else{
+			if($this->_sprvsaldo($pk[0],$pk[1],$pk[2],$pk[3],$pk[4]))
+			echo 1;
+			else
+			echo 0;
+		}
+	}
+	function _sprvsaldo($numero,$cod_prv,$tipo_doc,$fecha,$abono){
+		$data = array('abonos' => $abono);
+
+		$where  =' numero='.$this->db->escape($numero);
+		$where .=' AND cod_prv ='.$this->db->escape($cod_prv);
+		$where .=' AND tipo_doc='.$this->db->escape($tipo_doc);
+		$where .=' AND fecha   ='.$this->db->escape($fecha);
+
+		$mSQL = $this->db->update_string('sprm', $data, $where);
+
+		return $this->db->simple_query($mSQL);
+	}
+	//Fin del ajuste de saldo princonsis
+
+	//Ajusta el saldo clinconsis
 	function ajustesaldo(){
 		$this->datasis->modulo_id('900',1);
 		$pk  = unserialize(htmlspecialchars_decode($this->input->post('pk')));
@@ -577,7 +723,6 @@ function elminacenti(cual){
 			echo 0;
 		}
 	}
-
 	function _sclisaldo($numero,$cod_cli,$tipo_doc,$fecha,$abono){
 		$data = array('abonos' => $abono);
 
@@ -590,6 +735,7 @@ function elminacenti(cual){
 
 		return $this->db->simple_query($mSQL);
 	}
+	//Fin del ajuste de saldo clinconsis
 
 
 	function itclinconsis($cliente='',$numero='',$tipo_doc){
