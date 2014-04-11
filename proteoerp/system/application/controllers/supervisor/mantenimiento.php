@@ -437,7 +437,7 @@ function elminacenti(cual){
 		'contacto'=>'Contacto'),
 		'filtro'  =>array('proveed'=>'C&oacute;digo','nombre'=>'Nombre'),
 		'retornar'=>array('proveed'=>'proveed'),
-		'titulo'  =>'Buscar Cliente');
+		'titulo'  =>'Buscar Proveedor');
 
 		$boton=$this->datasis->modbus($scli);
 
@@ -449,7 +449,7 @@ function elminacenti(cual){
 			'a.numero',
 			'a.nombre',
 			'a.monto',
-			'(SUM(b.abono)+
+			'(SUM(b.abono)+a.reteiva+a.reten+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "P%" AND e.proveed=a.cod_prv AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "%P" AND e.cliente=a.cod_prv AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`))
 			AS abonoreal',
@@ -499,7 +499,7 @@ function elminacenti(cual){
 		$grid->per_page = 15;
 		$grid->use_function('str_replace');
 
-		$grid->column_orderby('Cliente'        ,$uri1     ,'cod_cli');
+		$grid->column_orderby('Proveedor'      ,$uri1     ,'cod_prv');
 		$grid->column_orderby('Nombre'         ,'nombre'  ,'nombre');
 		$grid->column_orderby('transac'        ,'transac' ,'transac');
 		$grid->column_orderby('Fecha'          ,'<dbdate_to_human><#fecha#></dbdate_to_human>' ,'fecha');
