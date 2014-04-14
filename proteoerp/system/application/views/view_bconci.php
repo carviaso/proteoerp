@@ -32,6 +32,12 @@ $(function(){
 		},
 	});
 
+	$("#fecha").focusout(
+		function(){
+			cambiaban();
+		}
+	);
+
 	$("#codbanc").change(function(){
 		cambiaban();
 	});
