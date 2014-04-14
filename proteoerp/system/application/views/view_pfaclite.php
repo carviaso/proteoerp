@@ -44,13 +44,16 @@ function total(id){
 }
 
 function totalizar(){
-	var totalg=0;
-	var ivas  =0;
+	var totalg  =0;
+	var ivas    =0;
+	var impuesto=0;
 	for(var i in importes){
 		iva    = document.getElementById("iva_"+i).value;
-		totalg+= importes[i]+(Math.round(importes[i]*iva/100));
+		impuesto+=Math.round(importes[i]*iva/100);
+		totalg  +=importes[i]+(Math.round(importes[i]*iva/100));
 	}
-	document.getElementById("totalg_value").innerHTML=totalg/100;
+	document.getElementById("impuesto_value").innerHTML=impuesto/100;
+	document.getElementById("totalg_value").innerHTML  =totalg/100;
 }
 </script>
 <?php } ?>
@@ -79,6 +82,7 @@ function totalizar(){
 	<tr id='__INPL__'>
 		<td><b>Art&iacute;culo</b></td>
 		<?php if($act_meta) echo '<td><b>Meta</b></td>'; ?>
+		<td align='center'><b>IVA </b></td>
 		<td align='center'><b>Exis. </b></td>
 		<td align='center'><b>Cant. </b></td>
 		<td><b>Precio</b></td>
@@ -178,6 +182,7 @@ function totalizar(){
 			} ?>
 		</td>
 		<?php } ?>
+		<td align='right'><b style='font-size:0.7em'><?php echo $sinv[$codigoa]['iva']; ?>%</b></td>
 		<td align='right'><?php
 		if($status=='show'){
 			echo ' ';
@@ -223,12 +228,13 @@ function totalizar(){
 
 <table width='100%'>
 	<tr bgcolor='#5a7600'>
+		<td align='right'><b>Impuesto</b> <b id='impuesto_value' style='font-size:1em'><?php echo nformat($form->iva->value); ?></b></td>
 		<td align='right'><b><?php echo $form->totalg->label;  ?></b></td>
-		<td align='right'><b id='totalg_value'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
+		<td align='right'><b id='totalg_value' style='font-size:1.2em'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
 	</tr>
 	<tr>
 		<td><b><?php echo $form->observa->label;   ?></b></td>
-		<td><?php echo $form->observa->output;   ?></td>
+		<td colspan='2'><?php echo $form->observa->output;   ?></td>
 	</tr>
 </table>
 

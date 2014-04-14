@@ -74,6 +74,7 @@ if($form->_status!='show'){
 <script language="javascript" type="text/javascript">
 var sitems_cont=<?php echo $form->max_rel_count['sitems']; ?>;
 var sfpa_cont  =<?php echo $form->max_rel_count['sfpa'];?>;
+var sclidescu  =0; <?php // Porcentaje de descuento mayor dado en ficha de cliente ?>
 
 $(function(){
 	$('#factura').attr('type', 'hidden');
@@ -516,8 +517,10 @@ function totalizar(){
 			importe = Number(this.value);
 
 			if(descu>0){
-				importe   = roundNumber(itpreca*(1-descu),2)
-				descuento = descuento+(itpreca-importe)*cana;
+				nimporte  = roundNumber(itpreca*(1-descu),2)*cana;
+				nimporte  = roundNumber(nimporte,2);
+				descuento = descuento+(importe-nimporte);
+				importe   = roundNumber(nimporte,2);
 			}
 
 			peso    = peso+(itpeso*cana);
@@ -821,7 +824,7 @@ function autocod(id){
 				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: {"q":req.term, "alma": $('#almacen').val() },
+				data: {"q":req.term.trim(), "alma": $('#almacen').val().trim() },
 				success:
 					function(data){
 						var sugiere = [];
@@ -858,7 +861,7 @@ function autocod(id){
 					url: "<?php echo site_url('ajax/buscasinvcombo'); ?>",
 					dataType: 'json',
 					type: 'POST',
-					data: {"q":ui.item.codigo},
+					data: {"q":ui.item.codigo.trim()},
 					success: function(data){
 							$.each(data,
 								function(iid, val){
@@ -995,6 +998,22 @@ function chreferen(){
 		fpaga('E');
 	} else {
 		fpaga(fp);
+	}
+}
+
+function apldes(){
+	var descu=aplicadesc();
+	if(descu > 0){
+		if(confirm("Seguro desea quitar el descuento de "+descu+"%?")){
+			$('#descuento').val('0');
+			sclidescu = descu;
+			totalizar();
+		}
+	}else if(descu==0 && sclidescu>0){
+		if(confirm("Seguro desea aplicar el descuento de "+sclidescu+"%?")){
+			$('#descuento').val(sclidescu);
+			totalizar();
+		}
 	}
 }
 </script>
@@ -1208,8 +1227,8 @@ function chreferen(){
 		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;width:600px;'>
 		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
-				<td class="littletablerow"    align='left'   style='background:#CFCFCF;width:30px;'><?php echo $form->descuento->label;  ?></td>
-				<td class="littletablerow"    align='center' style='background:#CFCFCF;'><b id='descuentomon_val'></b><?php echo $form->descuento->output; ?></td>
+				<td class="littletablerow"    align='left'   style='background:#CFCFCF;width:30px;'><span><?php echo $form->descuento->label;  ?></span></td>
+				<td class="littletablerow"    align='center' style='background:#CFCFCF;'><b id='descuentomon_val' ondblclick='apldes();' style='cursor: hand'><?php echo $form->descuento->output; ?></b></td>
 
 				<td class="littletableheader" align='right'><?php echo $form->totals->label; ?></td>
 				<td class="littletablerow"    align='right' style='font-size:16px;'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>

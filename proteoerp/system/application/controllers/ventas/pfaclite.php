@@ -406,6 +406,11 @@ class pfaclite extends validaciones{
 		$edit->totalg->readonly = true;
 		$edit->totalg->size = 10;
 
+		$edit->iva = new hiddenField('Impuesto', 'iva');
+		$edit->iva->css_class = 'inputnum';
+		$edit->iva->readonly = true;
+		$edit->iva->size = 10;
+
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'), $this->session->userdata('usuario'));
 		$edit->estampa = new autoUpdateField('estampa',date('Ymd')  , date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora'   ,date('H:i:s'), date('H:i:s'));

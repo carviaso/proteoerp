@@ -171,7 +171,6 @@ function itppago(obj,ind){
 		monto=Number($('#monto_'+ind).val());
 		abono=Number($('#abono_'+ind).val());
 		if(abono<=0){ abono=monto; }
-		alert(abono);
 		nval=monto*valor*(-1)/100;
 		obj.value=roundNumber(nval,2);
 		$('#abono_'+ind).val(roundNumber(abono-nval,2));
