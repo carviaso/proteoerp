@@ -1228,7 +1228,7 @@ function apldes(){
 		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
 				<td class="littletablerow"    align='left'   style='background:#CFCFCF;width:30px;'><span><?php echo $form->descuento->label;  ?></span></td>
-				<td class="littletablerow"    align='center' style='background:#CFCFCF;'><b id='descuentomon_val' ondblclick='apldes();' style='cursor: hand'><?php echo $form->descuento->output; ?></b></td>
+				<td class="littletablerow"    align='center' style='background:#CFCFCF;'><b id='descuentomon_val' ondblclick='apldes();' style='cursor: hand'></b><?php echo $form->descuento->output; ?></td>
 
 				<td class="littletableheader" align='right'><?php echo $form->totals->label; ?></td>
 				<td class="littletablerow"    align='right' style='font-size:16px;'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
@@ -1255,7 +1255,7 @@ function apldes(){
 <?php
 if($form->_status=='show'){
 	$transac=$form->get_from_dataobjetct('transac');
-	$canasmov = $this->datasis->dameval('SELECT COUNT(*) FROM smov WHERE transac='.$this->db->escape($transac));
+	$canasmov = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM smov WHERE transac='.$this->db->escape($transac));
 	if($canasmov>0){
 ?>
 <br>
