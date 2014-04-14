@@ -3988,7 +3988,7 @@ class Scst extends Controller {
 					//Falta implementar
 				}
 
-				logusu('scst',"Compra ${numero} control ${control} ACTUALIZADA");
+				logusu('scst',"Compra ${numero} control ${control} C.Precio ${cprecio} ACTUALIZADA");
 			}else{
 				$this->error_string='Compra no existe '.$id;
 				return false;

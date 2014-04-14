@@ -1012,6 +1012,7 @@ function apldes(){
 	}else if(descu==0 && sclidescu>0){
 		if(confirm("Seguro desea aplicar el descuento de "+sclidescu+"%?")){
 			$('#descuento').val(sclidescu);
+			sclidescu = 0;
 			totalizar();
 		}
 	}
