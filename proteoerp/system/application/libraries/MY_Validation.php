@@ -289,7 +289,7 @@ class MY_Validation extends CI_Validation{
 
 	function porcent($porcen){
 		if ($porcen<=100 AND $porcen>=0) return true;
-		$this->validation->set_message('porcent', 'El valor del campo <b>%s</b> debe estar entre 0 y 100');
+		$this->set_message('porcent', 'El valor del campo <b>%s</b> debe estar entre 0 y 100');
 		return false;
 	}
 

@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $modbus=array(
 	'tabla'   =>'scli',
 	'columnas'=>array(
@@ -9,16 +15,16 @@ $modbus=array(
 	'titulo'  =>'Buscar Clíente');
 
 $boton=$this->datasis->modbus($modbus);
-$select=array("tipo_doc", "numero", "fecha", "CONCAT_WS(' ',tipo_doc,numero) as num","nombre", "vence", "pagada", "vd", "dias", "cod_cli", "comical",
-"totals*IF(tipo_doc='D',-1,1) as subtotal",
-"iva*IF(tipo_doc='D',-1,1) as impuesto",
-"totalg*IF(tipo_doc='D',-1,1) as grantotal",
-"totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1) as contado",
-"totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1) as credito",
-"(totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1)+totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1)) as monto",
-"(comical*100/totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1)+totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1)) as porc", "comision","sepago");
+$select=array('tipo_doc', 'numero', 'fecha', "CONCAT_WS(' ',tipo_doc,numero) AS num",'nombre', 'vence', 'pagada', 'vd', 'dias', 'cod_cli', 'comical',
+"totals*IF(tipo_doc='D',-1,1) AS subtotal",
+"iva*IF(tipo_doc='D',-1,1) AS impuesto",
+"totalg*IF(tipo_doc='D',-1,1) AS grantotal",
+"totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1) AS contado",
+"totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1) AS credito",
+"(totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1)+totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1)) AS monto",
+"(comical*100/totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1)+totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1)) AS porc", 'comision','sepago');
 
-$filter = new DataFilter("Filtro del Reporte");
+$filter = new DataFilter('Filtro del Reporte');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
 $filter->db->select($select);
@@ -58,12 +64,12 @@ $filter->cod_cli->clause='where';
 $filter->cod_cli->operator='=';
 $filter->cod_cli->append($boton);
 
-$filter->fechaemision = new dropdownField("Por Fecha de Emisión", 'fechaemision');
+$filter->fechaemision = new dropdownField('Por Fecha de Emisión', 'fechaemision');
 $filter->fechaemision->option('S','Si');
 $filter->fechaemision->option('N','No');
 $filter->fechaemision->clause='';
 
-$filter->sepago = new dropdownField("Solo Comisiones Pendientes?", 'sepago');
+$filter->sepago = new dropdownField('Solo Comisiones Pendientes?', 'sepago');
 $filter->sepago->option('' ,'Si');
 $filter->sepago->option('N','No');
 $filter->sepago->clause  ='where';
@@ -74,15 +80,15 @@ $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons("search");
+$filter->buttons('search');
 $filter->build();
 
 if($this->rapyd->uri->is_set('search')){
-
-	if($this->input->post('fechaemision')=='S')
+	if($this->input->post('fechaemision')=='S'){
 		$filter->db->where('fecha BETWEEN '.$filter->fechad->newValue.' AND '.$filter->fechah->newValue);
-	else
+	}else{
 		$filter->db->where('pagada BETWEEN '.$filter->fechad->newValue.' AND '.$filter->fechah->newValue);
+	}
 
 	$mSQL=$this->rapyd->db->_compile_select();
 	//echo $mSQL;
@@ -90,10 +96,8 @@ if($this->rapyd->uri->is_set('search')){
 	$sobretabla='';
 	if(!empty($filter->cajero->newValue))    $sobretabla.=' Cajero: '.$filter->cajero->description;
 	if(!empty($filter->vd->newValue))        $sobretabla.=' Vendedor: '.$filter->vd->description;
-	if(!empty($filter->cod_cli->newValue))   $sobretabla.=' Cliente: ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_cli->newValue.'"');
-	//if(!empty($filter->cod_cli->newValue)) $sobretabla.=' Cliente: '.$filter->cod_cli->newValue;
+	if(!empty($filter->cod_cli->newValue))   $sobretabla.=' Cliente: ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente='.$this->db->escape($filter->cod_cli->newValue));
 
-	memowrite($mSQL);
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
@@ -113,9 +117,10 @@ if($this->rapyd->uri->is_set('search')){
 	$pdf->AddCol('comision',20,'Comisión' ,'R',8);
 	$pdf->AddCol('comical' ,20,'Com. Ajus','R',8);
 	$pdf->AddCol('porc'    ,20,'%'        ,'R',8);
-	$pdf->AddCol('sepago'  ,5 ,'Se Pago '        ,'R',8);
+	$pdf->AddCol('sepago'  ,5 ,'Se Pago ' ,'R',8);
+
 	$pdf->setTotalizar('monto','comision','comical');
-	$pdf->setGrupoLabel(' (Vendedor <#vd#>)  ');
+	$pdf->setGrupoLabel(' (Vendedor: <#vd#>)  ');
 	$pdf->setGrupo('vd');
 	$pdf->Table();
 	$pdf->Output();

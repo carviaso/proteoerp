@@ -46,7 +46,7 @@ class sfacpaga extends Controller {
 		$filter->vd->rule    = 'required';
 		$filter->vd->clause  = 'where';
 		$filter->vd->operator= '=';
-		$filter->vd->options("SELECT vendedor, CONCAT_WS(' ',vendedor,nombre)a FROM vend ORDER BY vendedor");
+		$filter->vd->options("SELECT vendedor, CONCAT_WS(' ',vendedor,nombre) AS nom FROM vend ORDER BY vendedor");
 
 		$filter->buttons('reset','search');
 		$action = "javascript:window.location='".site_url('ventas/sfacpaga/principal')."'";
@@ -73,11 +73,12 @@ class sfacpaga extends Controller {
 		$grid->use_function('colum');
 		$grid->use_function('parcial');
 
-		function colum($tipo_doc) {
-			if ($tipo_doc=='Anulada')
+		function colum($tipo_doc){
+			if($tipo_doc=='Anulada'){
 				return ('<b style="color:red;">'.$tipo_doc.'</b>');
-			else
+			}else{
 				return ($tipo_doc);
+			}
 		}
 
 		function parcial($parcial) {
@@ -241,47 +242,52 @@ class sfacpaga extends Controller {
 			'screeny'    => '0'
 		);
 
-		$salida = "<table width='95%'><tr><td valign='top'>";
+		$salida = "<table width='95%'>
+		<tr>
+			<td colspan='2'><h1>Pasos para el pago de comisiones</h1></td>
+		</tr>
+		<tr><td valign='top'>";
 		$salida.= "<h2>1-.".anchor($this->url.'filteredgrid','Marcar Facturas')."</h2>";
-		$salida.= "<p>Marca las facturas cuyas comisiones fueron pagadas</p>";
+		$salida.= "<p>En esta secci&oacute;n puede marca las facturas cuyas comisiones ya fueron pagadas en procesos anteriores.</p>";
 
-		$salida.="</td><td valign='top'>";
+		$salida.= "</td><td valign='top'>";
 
 		$salida.= "<h2>2-.".anchor($this->url.'call','Calcular Comisiones')."</h2>";
-		$salida.= "<p>Ejecuta un procedimiento que calcula las comisiones por cada factura segun los parametros prestablecidos y busca la fecha del ultimo pago para calcular los dias efectivamente transcurridos entre la emision del documento y su respectivo pago </p>";
+		$salida.= "<p>Ejecuta un procedimiento que calcula las comisiones por cada factura seg&uacute;n los parametros prestablecidos y busca la fecha del &uacute;ltimo pago para calcular los d&iacute;as efectivamente transcurridos entre la emisi&oacute;n del documento y su respectivo pago.</p>";
 
-		$salida.="</td></tr><tr><td valign='top'>";
+		$salida.= "</td></tr><tr><td valign='top'>";
 
 		$salida.= "<h2>3-.".anchor_popup('ventas/calcomi','Penalizaci&oacute;n',$atts)."</h2>";
-		$salida.= "<p>Permite definir y aplicar una sancion de acuerdo a la efectividad de la cobranza medida por los dias transcurridos para el pago de las mismas</p>";
-		$salida.="</td><td valign='top'>";
+		$salida.= "<p>Permite definir y aplicar una sanciones de acuerdo a la efectividad de la cobranza medida por los d&iacute;as transcurridos para el pago de las mismas.</p>";
+		$salida.= "</td><td valign='top'>";
 
 		$salida.= "<h2>4-.".anchor_popup('reportes/ver/SFACCOM/SFAC','Listado de Comisiones',$atts)."</h2>";
-		$salida.= "<p>Emite un listado para la verificacion y liquidacion</p>";
-		$salida.="</td></tr></table>\n";
+		$salida.= "<p>Emite un listado para la verificaci&oacute;n y liquidaci&oacute;n.</p>";
+		$salida.= "</td></tr></table>\n";
 
 		$data['content'] = $salida;
-		$data['title']   =  "<h1>".img("/assets/default/images/groups.png",array("border"=>"0"))."Comisiones por Ventas y Cobros</h1>";
-		$data['head']    =  script("jquery-1.2.6.pack.js");
-		$data['head']    .= script("plugins/jquery.checkboxes.pack.js").$this->rapyd->get_head();
+		$data['title']   = '<h1>'.img('/assets/default/images/groups.png',array('border'=>'0')).'Comisiones por Ventas y Cobros</h1>';
+		$data['head']    = script('jquery-1.2.6.pack.js');
+		$data['head']   .= script('plugins/jquery.checkboxes.pack.js').$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
 	function call(){
-		$bool = $this->db->query('call sp_comical()');
-		if($bool)
+		$bool = $this->db->query('CALL sp_comical()');
+		if($bool){
 			$salida = 'Se calcularon la comisiones correctamente';
-		else
+		}else{
 			$salida = 'No se pudireon calcular la comisiones correctamente';
+		}
 
-			$salida.="</br>";
-		$salida.=anchor($this->url.'principal','Menu');
-		$salida.="</br>";
+		$salida.='</br>';
+		$salida.=anchor($this->url.'principal','Regresar');
+		$salida.='</br>';
 
 		$data['content'] = $salida;
-		$data['title']   = '<h1>Menu</h1>';
-		$data['head']    = script("jquery-1.2.6.pack.js");
-		$data['head']   .= script("plugins/jquery.checkboxes.pack.js").$this->rapyd->get_head();
+		$data['title']   = heading('C&aacute;lculo de las comisiones');
+		$data['head']    = script('jquery-1.2.6.pack.js');
+		$data['head']   .= script('plugins/jquery.checkboxes.pack.js').$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 }

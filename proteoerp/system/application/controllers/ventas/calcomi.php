@@ -36,6 +36,8 @@ class Calcomi extends Controller {
 		$form->vd = new dropdownField('Vendedor', 'vd');
 		$form->vd->options("SELECT TRIM(vendedor) AS vd, CONCAT_WS(' ',vendedor,nombre) AS nom FROM vend ORDER BY vendedor");
 		$form->vd->rule='required';
+		//$form->vd->multiple=true;
+		$form->vd->style='width:320px;';
 
 		$form->diacomi1 = new inputField('1- Hasta (d&iacute;as)', 'diacomi1');
 		$form->diacomi1->css_class='inputnum';
@@ -53,7 +55,7 @@ class Calcomi extends Controller {
 		$form->porcomi1->size=3;
 		$form->porcomi1->maxlength=3;
 		$form->porcomi1->in='diacomi1';
-		$form->porcomi1->rule='required|numeric';
+		$form->porcomi1->rule='required|numeric|porcent';
 		$form->porcomi1->insertValue = $porcomi1;
 		$form->porcomi1->append('%');
 
@@ -73,7 +75,7 @@ class Calcomi extends Controller {
 		$form->porcomi2->size=3;
 		$form->porcomi2->maxlength=3;
 		$form->porcomi2->in='diacomi2';
-		$form->porcomi2->rule='required|numeric';
+		$form->porcomi2->rule='required|numeric|porcent';
 		$form->porcomi2->insertValue = $porcomi2;
 		$form->porcomi2->append('%');
 
@@ -93,7 +95,7 @@ class Calcomi extends Controller {
 		$form->porcomi3->size=3;
 		$form->porcomi3->maxlength=3;
 		$form->porcomi3->in='diacomi3';
-		$form->porcomi3->rule='required|numeric';
+		$form->porcomi3->rule='required|numeric|porcent';
 		$form->porcomi3->insertValue = $porcomi3;
 		$form->porcomi3->append('%');
 
@@ -101,17 +103,18 @@ class Calcomi extends Controller {
 
 		$form->build_form();
 
-		if($form->on_success()){  
-			$porcomi1 = floatval($form->porcomi1->newValue);
-			$porcomi2 = floatval($form->porcomi2->newValue);
-			$porcomi3 = floatval($form->porcomi3->newValue);
-			$diacomi1 = intval($form->diacomi1->newValue);
-			$diacomi2 = intval($form->diacomi2->newValue);
-			$diacomi3 = intval($form->diacomi3->newValue);
-			$vd       = trim($form->vd->newValue);
-
-			$rt=$this->_actualiza($porcomi1,$porcomi2,$porcomi3,$diacomi1,$diacomi2,$diacomi3,$vd);
-			redirect($this->url.'vista/'.$vd);
+		if($form->on_success()){
+			print_r($_POST);
+			//$porcomi1 = floatval($form->porcomi1->newValue);
+			//$porcomi2 = floatval($form->porcomi2->newValue);
+			//$porcomi3 = floatval($form->porcomi3->newValue);
+			//$diacomi1 = intval($form->diacomi1->newValue);
+			//$diacomi2 = intval($form->diacomi2->newValue);
+			//$diacomi3 = intval($form->diacomi3->newValue);
+			//$vd       = trim($form->vd->newValue);
+            //
+			//$rt=$this->_actualiza($porcomi1,$porcomi2,$porcomi3,$diacomi1,$diacomi2,$diacomi3,$vd);
+			//redirect($this->url.'vista/'.$vd);
 		}
 
 		$data['content'] = $form->output;
@@ -138,9 +141,9 @@ class Calcomi extends Controller {
 
 		$grid->column('Vendedor'                 ,'vd');
 		$grid->column('Tipo'                     ,'<colum><#tipo_doc#></colum>');
-		$grid->column('N&uacute;mero'            ,'<#numero#>');
-		$grid->column('Fecha'                    ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
-		$grid->column('Vence'                    ,'<dbdate_to_human><#vence#></dbdate_to_human>');
+		$grid->column('N&uacute;mero'            ,'numero');
+		$grid->column('Fecha'                    ,'<dbdate_to_human><#fecha#></dbdate_to_human>' );
+		$grid->column('Vence'                    ,'<dbdate_to_human><#vence#></dbdate_to_human>' );
 		$grid->column('Pagada'                   ,'<dbdate_to_human><#pagada#></dbdate_to_human>');
 		$grid->column('Dias'                     ,'dias'        ,'align=\'right\'');
 		$grid->column('Comisi&oacute;n'          ,'<nformat><#comision#></nformat>','align=\'right\'');
@@ -158,27 +161,36 @@ class Calcomi extends Controller {
 
 	function procesar(){
 		foreach($_POST['calculada'] as $key=>$value){
-			$a=explode("AA",$key);
-			$mSQL="UPDATE sfac SET comical=$value WHERE numero='".$a[1]."' AND tipo_doc='".$a[0]."' ";
+			$a=explode('AA',$key);
+			$dbnumero= $this->db->escape($a[1]);
+			$dbtipo  = $this->db->escape($a[0]);
+			$dbvalue = floatval($value);
+			$mSQL="UPDATE sfac SET comical=${dbvalue} WHERE numero=${dbnumero} AND tipo_doc=${dbtipo}";
 			$this->db->simple_query($mSQL);
 		}
-		redirect($this->url."filteredgrid");
+		redirect($this->url.'filteredgrid');
 	}
 
-	function _actualiza($porcomi1,$porcomi2,$porcomi3,$diacomi1,$diacomi2,$diacomi3,$vd){ 
+	function _actualiza($porcomi1,$porcomi2,$porcomi3,$diacomi1,$diacomi2,$diacomi3,$vd){
 		$dbvd = $this->db->escape($vd);
 
 		$ban  = 0;
 		$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision WHERE vd=${dbvd} AND sepago='N' AND pagada>=fecha");
-		$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision*(100-${porcomi1})/100 WHERE vd=${dbvd} AND sepago='N' AND dias >${diacomi1} AND pagada>=fecha");
-		$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision*(100-${porcomi2})/100 WHERE vd=${dbvd} AND sepago='N' AND dias >${diacomi2} AND pagada>=fecha");
-		$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision*(100-${porcomi3})/100 WHERE vd=${dbvd} AND sepago='N' AND dias >${diacomi3} AND pagada>=fecha");
-		$ban += !$this->db->simple_query("UPDATE valores SET valor='${porcomi1}' WHERE nombre='porcomi1'");
-		$ban += !$this->db->simple_query("UPDATE valores SET valor='${porcomi2}' WHERE nombre='porcomi2'");
-		$ban += !$this->db->simple_query("UPDATE valores SET valor='${porcomi3}' WHERE nombre='porcomi3'");
-		$ban += !$this->db->simple_query("UPDATE valores SET valor='${diacomi1}' WHERE nombre='diacomi1'");
-		$ban += !$this->db->simple_query("UPDATE valores SET valor='${diacomi2}' WHERE nombre='diacomi2'");
-		$ban += !$this->db->simple_query("UPDATE valores SET valor='${diacomi3}' WHERE nombre='diacomi3'");
+
+		$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision*(100-${porcomi1})/100 WHERE vd=${dbvd} AND sepago='N' AND dias>${diacomi1} AND pagada>=fecha");
+		if($porcomi1!=$porcomi2 && $diacomi2!=$diacomi1){
+			$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision*(100-${porcomi2})/100 WHERE vd=${dbvd} AND sepago='N' AND dias>${diacomi2} AND pagada>=fecha");
+		}
+		if($porcomi3!=$porcomi2 && $diacomi2!=$diacomi3){
+			$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision*(100-${porcomi3})/100 WHERE vd=${dbvd} AND sepago='N' AND dias>${diacomi3} AND pagada>=fecha");
+		}
+
+		$this->db->simple_query("UPDATE valores SET valor='${porcomi1}' WHERE nombre='PORCOMI1'");
+		$this->db->simple_query("UPDATE valores SET valor='${porcomi2}' WHERE nombre='PORCOMI2'");
+		$this->db->simple_query("UPDATE valores SET valor='${porcomi3}' WHERE nombre='PORCOMI3'");
+		$this->db->simple_query("UPDATE valores SET valor='${diacomi1}' WHERE nombre='DIACOMI1'");
+		$this->db->simple_query("UPDATE valores SET valor='${diacomi2}' WHERE nombre='DIACOMI2'");
+		$this->db->simple_query("UPDATE valores SET valor='${diacomi3}' WHERE nombre='DIACOMI3'");
 
 		if($ban>0){
 			return false;

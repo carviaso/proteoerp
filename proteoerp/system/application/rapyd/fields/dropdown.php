@@ -23,6 +23,7 @@ class dropdownField extends objField{
 	var $description = '';
 	var $clause      = 'where';
 	var $css_class   = 'select';
+	var $multiple    = false;
 
 	//costruttore
 	function dropdownField($label, $name, $options=array(), $selected=''){
@@ -69,6 +70,7 @@ class dropdownField extends objField{
 			case 'modify':
 				$onchange = '';
 				$style = '';
+				$multiple='';
 
 				if ($this->onchange!=''){
 					$onchange = ' onchange="'.$this->onchange.'"';
@@ -79,6 +81,11 @@ class dropdownField extends objField{
 					$style = ' style="'.$this->style.'"';
 
 				}
+
+				if($this->multiple){
+					$style = ' multiple="multiple"';
+				}
+
 				$class = ' class=\'select\'';
 
 				if($this->type=='inputhidden'){
@@ -97,7 +104,7 @@ class dropdownField extends objField{
 					$output.='<span id=\''.$this->name."_val'  >$this->description</span>";
 				}else{
 					$title  = ' title="'.$this->title.'"';
-					$output = form_dropdown($this->name, $this->options, $this->value, $id.$onchange.$style.$class.$title). $this->extra_output;
+					$output = form_dropdown($this->name, $this->options, $this->value, $id.$onchange.$style.$class.$title.$multiple). $this->extra_output;
 				}
 
 				break;
