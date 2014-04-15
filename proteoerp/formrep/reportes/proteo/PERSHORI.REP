@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
 
 $filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, 'search'));
@@ -67,7 +73,6 @@ if($this->rapyd->uri->is_set('search')){
 		$pdf->AddCol('C'.$row->concepto, $cell_size,  array($row->encab1, $row->encab2) ,'R', $mFONT2);
 		$pdf->setTotalizar('C'.$row->concepto);
 	}
-	//print_r($row);
 
 	$pdf->AddCol('totalnom', $cell_size,  array('TOTAL','NOMINA')          ,'R', $mFONT2);
 	$pdf->AddCol('prestamo', $cell_size,  array('CUOTA DE ','PRESTAMO')    ,'R', $mFONT2);

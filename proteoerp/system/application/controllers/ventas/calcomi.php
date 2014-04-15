@@ -18,100 +18,104 @@ class Calcomi extends Controller {
 	}
 
 	function index() {
-		redirect($this->url."filteredgrid");
+		redirect($this->url.'filteredgrid');
 	}
 
 	function filteredgrid(){
+		$this->rapyd->load('dataform');
 
-		$this->rapyd->load("dataform");
+		$porcomi1 =$this->datasis->traevalor('PORCOMI1');
+		$porcomi2 =$this->datasis->traevalor('PORCOMI2');
+		$porcomi3 =$this->datasis->traevalor('PORCOMI3');
+		$diacomi1 =$this->datasis->traevalor('DIACOMI1');
+		$diacomi2 =$this->datasis->traevalor('DIACOMI2');
+		$diacomi3 =$this->datasis->traevalor('DIACOMI3');
 
-		$filter = new DataForm($this->url."actualiza");
+		$form = new DataForm($this->url.'filteredgrid/process');
 
-		//$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
-		//$filter->fechad->db_name     = "fechah";
-		//$filter->fechad->dbformat    = 'ymd';
-		//$filter->fechad->insertValue = date("Ymd");
-		//$filter->fechad->append(' mes/año');
-		//
-		//$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
-		//$filter->fechah->db_name     = "fechad";
-		//$filter->fechah->dbformat    = 'Ymd';
-		//$filter->fechah->insertValue = date("Ymd");
-		//$filter->fechah->append(' mes/año');
+		$form->vd = new dropdownField('Vendedor', 'vd');
+		$form->vd->options("SELECT TRIM(vendedor) AS vd, CONCAT_WS(' ',vendedor,nombre) AS nom FROM vend ORDER BY vendedor");
+		$form->vd->rule='required';
 
-		$filter->vd = new dropdownField("Vendedor", "vd");
-		$filter->vd->db_name = 'vd';
-		$filter->vd->clause="where";
-		$filter->vd->operator="=";
-		$filter->vd->options("SELECT vendedor, CONCAT_WS(' ',vendedor,nombre)a FROM vend ORDER BY vendedor");
+		$form->diacomi1 = new inputField('1- Hasta (d&iacute;as)', 'diacomi1');
+		$form->diacomi1->css_class='inputnum';
+		$form->diacomi1->size=3;
+		$form->diacomi1->maxlength=3;
+		$form->diacomi1->rule='required|numeric';
+		$form->diacomi1->insertValue = $diacomi1;
+		$form->diacomi1->group='Condiciones';
 
-		$porcomi1 =$this->datasis->traevalor("PORCOMI1");
-		$porcomi2 =$this->datasis->traevalor("PORCOMI2");
-		$porcomi3 =$this->datasis->traevalor("PORCOMI3");
-		$diacomi1 =$this->datasis->traevalor("DIACOMI1");
-		$diacomi2 =$this->datasis->traevalor("DIACOMI2");
-		$diacomi3 =$this->datasis->traevalor("DIACOMI3");
+		$form->p1 = new freeField('','','Porcentaje ');
+		$form->p1->in='diacomi1';
 
-		$filter->diacomi1 = new inputField("Hasta ", "diacomi1");
-		$filter->diacomi1->css_class='inputnum';
-		$filter->diacomi1->size=3;
-		$filter->diacomi1->maxlength=3;
-		$filter->diacomi1->rule="required";
-		$filter->diacomi1->insertValue = $diacomi1;
+		$form->porcomi1 = new inputField('Porcent ', 'porcomi1');
+		$form->porcomi1->css_class='inputnum';
+		$form->porcomi1->size=3;
+		$form->porcomi1->maxlength=3;
+		$form->porcomi1->in='diacomi1';
+		$form->porcomi1->rule='required|numeric';
+		$form->porcomi1->insertValue = $porcomi1;
+		$form->porcomi1->append('%');
 
-		$filter->p1 = new freeField("","","Porcentaje ");
-		$filter->p1->in="diacomi1";
+		$form->diacomi2 = new inputField('2- Hasta (d&iacute;as)', 'diacomi2');
+		$form->diacomi2->css_class='inputnum';
+		$form->diacomi2->size=3;
+		$form->diacomi2->maxlength=3;
+		$form->diacomi2->rule='required|numeric';
+		$form->diacomi2->insertValue = $diacomi2;
+		$form->diacomi2->group='Condiciones';
 
-		$filter->porcomi1 = new inputField("Porcent ", "porcomi1");
-		$filter->porcomi1->css_class='inputnum';
-		$filter->porcomi1->size=3;
-		$filter->porcomi1->maxlength=3;
-		$filter->porcomi1->in="diacomi1";
-		$filter->porcomi1->rule="required";
-		$filter->porcomi1->insertValue = $porcomi1;
+		$form->p2 = new freeField('','','Porcentaje ');
+		$form->p2->in="diacomi2";
 
-		$filter->diacomi2 = new inputField("Hasta", "diacomi2");
-		$filter->diacomi2->css_class='inputnum';
-		$filter->diacomi2->size=3;
-		$filter->diacomi2->maxlength=3;
-		$filter->diacomi2->rule="required";
-		$filter->diacomi2->insertValue = $diacomi2;
+		$form->porcomi2 = new inputField('Porcent ', 'porcomi2');
+		$form->porcomi2->css_class='inputnum';
+		$form->porcomi2->size=3;
+		$form->porcomi2->maxlength=3;
+		$form->porcomi2->in='diacomi2';
+		$form->porcomi2->rule='required|numeric';
+		$form->porcomi2->insertValue = $porcomi2;
+		$form->porcomi2->append('%');
 
-		$filter->p2 = new freeField("","","Porcentaje ");
-		$filter->p2->in="diacomi2";
+		$form->diacomi3 = new inputField('3- Hasta (d&iacute;as)', 'diacomi3');
+		$form->diacomi3->css_class='inputnum';
+		$form->diacomi3->size=3;
+		$form->diacomi3->maxlength=3;
+		$form->diacomi3->rule='required|numeric';
+		$form->diacomi3->insertValue = $diacomi3;
+		$form->diacomi3->group='Condiciones';
 
-		$filter->porcomi2 = new inputField("Porcent ", "porcomi2");
-		$filter->porcomi2->css_class='inputnum';
-		$filter->porcomi2->size=3;
-		$filter->porcomi2->maxlength=3;
-		$filter->porcomi2->in="diacomi2";
-		$filter->porcomi2->rule="required";
-		$filter->porcomi2->insertValue = $porcomi2;
+		$form->p3 = new freeField('','','Porcentaje ');
+		$form->p3->in='diacomi3';
 
-		$filter->diacomi3 = new inputField("Hasta ", "diacomi3");
-		$filter->diacomi3->css_class='inputnum';
-		$filter->diacomi3->size=3;
-		$filter->diacomi3->maxlength=3;
-		$filter->diacomi3->rule="required";
-		$filter->diacomi3->insertValue = $diacomi3;
+		$form->porcomi3 = new inputField('Porcent ', 'porcomi3');
+		$form->porcomi3->css_class='inputnum';
+		$form->porcomi3->size=3;
+		$form->porcomi3->maxlength=3;
+		$form->porcomi3->in='diacomi3';
+		$form->porcomi3->rule='required|numeric';
+		$form->porcomi3->insertValue = $porcomi3;
+		$form->porcomi3->append('%');
 
-		$filter->p3 = new freeField("","","Porcentaje ");
-		$filter->p3->in="diacomi3";
+		$form->submit('btnsubmit','Calcular');
 
-		$filter->porcomi3 = new inputField("Porcent ", "porcomi3");
-		$filter->porcomi3->css_class='inputnum';
-		$filter->porcomi3->size=3;
-		$filter->porcomi3->maxlength=3;
-		$filter->porcomi3->in="diacomi3";
-		$filter->porcomi3->rule="required";
-		$filter->porcomi3->insertValue = $porcomi3;
+		$form->build_form();
 
-		$filter->submit('btnsubmit','Calcular');
+		if($form->on_success()){  
+			$porcomi1 = floatval($form->porcomi1->newValue);
+			$porcomi2 = floatval($form->porcomi2->newValue);
+			$porcomi3 = floatval($form->porcomi3->newValue);
+			$diacomi1 = intval($form->diacomi1->newValue);
+			$diacomi2 = intval($form->diacomi2->newValue);
+			$diacomi3 = intval($form->diacomi3->newValue);
+			$vd       = trim($form->vd->newValue);
 
-		$filter->build_form();
+			$rt=$this->_actualiza($porcomi1,$porcomi2,$porcomi3,$diacomi1,$diacomi2,$diacomi3,$vd);
+			redirect($this->url.'vista/'.$vd);
+		}
 
-		$data['content'] = $filter->output;
-		$data['title']   = "<h1>$this->tits</h1>";
+		$data['content'] = $form->output;
+		$data['title']   = heading($this->tits);
 		$data['head']    = script('jquery.js').$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
@@ -124,8 +128,7 @@ class Calcomi extends Controller {
 		$grid->db->select($select);
 		$grid->db->from('sfac');
 		$grid->db->where('tipo_doc <>','X');
-		if(!empty($vd))
-		$grid->db->where('vd',$vd);
+		if(!empty($vd)) $grid->db->where('vd',$vd);
 		$grid->db->where('sepago','N');
 		$grid->db->where('pagada >= fecha');
 		$grid->order_by('numero','desc');
@@ -133,17 +136,17 @@ class Calcomi extends Controller {
 		$grid->use_function('substr','str_pad','comi');
 		$grid->use_function('sta');
 
-		$grid->column('Vendedor'       ,'<#vd#>');
-		$grid->column('Tipo'           ,'<colum><#tipo_doc#></colum>');
-		$grid->column('N&uacute;mero'  ,'<#numero#>');
-		$grid->column('Fecha'          ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
-		$grid->column('Vence'          ,'<dbdate_to_human><#vence#></dbdate_to_human>');
-		$grid->column('Pagada'         ,'<dbdate_to_human><#pagada#></dbdate_to_human>');
-		$grid->column('Dias'           ,'dias'        ,"align='right'");
-		$grid->column('Comisi&oacute;n','<number_format><#comision#>|2|,|.</number_format>',"align='right'");
-		$grid->column('Comisi&oacute;n Calculada','<nformat><#comical#></nformat>'         ,"align='right'");
-		$grid->column('Cliente'        ,'<#cod_cli#>');
-		$grid->column('Nombre'         ,'<#nombre#>' );
+		$grid->column('Vendedor'                 ,'vd');
+		$grid->column('Tipo'                     ,'<colum><#tipo_doc#></colum>');
+		$grid->column('N&uacute;mero'            ,'<#numero#>');
+		$grid->column('Fecha'                    ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
+		$grid->column('Vence'                    ,'<dbdate_to_human><#vence#></dbdate_to_human>');
+		$grid->column('Pagada'                   ,'<dbdate_to_human><#pagada#></dbdate_to_human>');
+		$grid->column('Dias'                     ,'dias'        ,'align=\'right\'');
+		$grid->column('Comisi&oacute;n'          ,'<nformat><#comision#></nformat>','align=\'right\'');
+		$grid->column('Comisi&oacute;n Calculada','<nformat><#comical#></nformat>','align=\'right\'');
+		$grid->column('Cliente'                  ,'cod_cli');
+		$grid->column('Nombre'                   ,'nombre' );
 		//$grid->totalizar('reiva');
 
 		$grid->build();
@@ -158,34 +161,30 @@ class Calcomi extends Controller {
 			$a=explode("AA",$key);
 			$mSQL="UPDATE sfac SET comical=$value WHERE numero='".$a[1]."' AND tipo_doc='".$a[0]."' ";
 			$this->db->simple_query($mSQL);
-			//exit();
 		}
 		redirect($this->url."filteredgrid");
 	}
 
-	function actualiza(){
-		$porcomi1 = $this->input->post('porcomi1');
-		$porcomi2 = $this->input->post('porcomi2');
-		$porcomi3 = $this->input->post('porcomi3');
-		$diacomi1 = $this->input->post('diacomi1');
-		$diacomi2 = $this->input->post('diacomi2');
-		$diacomi3 = $this->input->post('diacomi3');
-		$vd       = $this->input->post('vd'      );
+	function _actualiza($porcomi1,$porcomi2,$porcomi3,$diacomi1,$diacomi2,$diacomi3,$vd){ 
+		$dbvd = $this->db->escape($vd);
 
-		$this->db->simple_query("UPDATE sfac SET comical=comision WHERE vd='$vd' AND sepago='N' AND pagada>=fecha");
-		$this->db->simple_query("UPDATE sfac SET comical=comision * (100-$porcomi1)/100 WHERE vd='$vd' AND sepago='N' AND dias >$diacomi1 AND pagada>=fecha");
-		$this->db->simple_query("UPDATE sfac SET comical=comision * (100-$porcomi2)/100 WHERE vd='$vd' AND sepago='N' AND dias >$diacomi2 AND pagada>=fecha");
-		$this->db->simple_query("UPDATE sfac SET comical=comision * (100-$porcomi3)/100 WHERE vd='$vd' AND sepago='N' AND dias >$diacomi3 AND pagada>=fecha");
+		$ban  = 0;
+		$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision WHERE vd=${dbvd} AND sepago='N' AND pagada>=fecha");
+		$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision*(100-${porcomi1})/100 WHERE vd=${dbvd} AND sepago='N' AND dias >${diacomi1} AND pagada>=fecha");
+		$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision*(100-${porcomi2})/100 WHERE vd=${dbvd} AND sepago='N' AND dias >${diacomi2} AND pagada>=fecha");
+		$ban += !$this->db->simple_query("UPDATE sfac SET comical=comision*(100-${porcomi3})/100 WHERE vd=${dbvd} AND sepago='N' AND dias >${diacomi3} AND pagada>=fecha");
+		$ban += !$this->db->simple_query("UPDATE valores SET valor='${porcomi1}' WHERE nombre='porcomi1'");
+		$ban += !$this->db->simple_query("UPDATE valores SET valor='${porcomi2}' WHERE nombre='porcomi2'");
+		$ban += !$this->db->simple_query("UPDATE valores SET valor='${porcomi3}' WHERE nombre='porcomi3'");
+		$ban += !$this->db->simple_query("UPDATE valores SET valor='${diacomi1}' WHERE nombre='diacomi1'");
+		$ban += !$this->db->simple_query("UPDATE valores SET valor='${diacomi2}' WHERE nombre='diacomi2'");
+		$ban += !$this->db->simple_query("UPDATE valores SET valor='${diacomi3}' WHERE nombre='diacomi3'");
 
-		$this->db->simple_query("UPDATE valores SET valor='$porcomi1' WHERE nombre='porcomi1'");
-		$this->db->simple_query("UPDATE valores SET valor='$porcomi2' WHERE nombre='porcomi2'");
-		$this->db->simple_query("UPDATE valores SET valor='$porcomi3' WHERE nombre='porcomi3'");
-		$this->db->simple_query("UPDATE valores SET valor='$diacomi1' WHERE nombre='diacomi1'");
-		$this->db->simple_query("UPDATE valores SET valor='$diacomi2' WHERE nombre='diacomi2'");
-		$this->db->simple_query("UPDATE valores SET valor='$diacomi3' WHERE nombre='diacomi3'");
-		//exit('as');
-
-		redirect($this->url."vista/$vd");
+		if($ban>0){
+			return false;
+		}else{
+			return true;
+		}
 	}
 
 }
