@@ -1001,6 +1001,7 @@ class Scst extends Controller {
 							$itrow['usuario'] = $this->session->userdata('usuario');
 							$itrow['estampa'] = $estampa;
 							$itrow['hora']    = $hora;
+							$itrow['transac'] = $transac;
 							if($esstd=='F') $itrow['rmargen'] = 'S';
 
 							unset($itrow['id']);
