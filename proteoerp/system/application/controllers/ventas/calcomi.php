@@ -104,17 +104,16 @@ class Calcomi extends Controller {
 		$form->build_form();
 
 		if($form->on_success()){
-			print_r($_POST);
-			//$porcomi1 = floatval($form->porcomi1->newValue);
-			//$porcomi2 = floatval($form->porcomi2->newValue);
-			//$porcomi3 = floatval($form->porcomi3->newValue);
-			//$diacomi1 = intval($form->diacomi1->newValue);
-			//$diacomi2 = intval($form->diacomi2->newValue);
-			//$diacomi3 = intval($form->diacomi3->newValue);
-			//$vd       = trim($form->vd->newValue);
-            //
-			//$rt=$this->_actualiza($porcomi1,$porcomi2,$porcomi3,$diacomi1,$diacomi2,$diacomi3,$vd);
-			//redirect($this->url.'vista/'.$vd);
+			$porcomi1 = floatval($form->porcomi1->newValue);
+			$porcomi2 = floatval($form->porcomi2->newValue);
+			$porcomi3 = floatval($form->porcomi3->newValue);
+			$diacomi1 = intval($form->diacomi1->newValue);
+			$diacomi2 = intval($form->diacomi2->newValue);
+			$diacomi3 = intval($form->diacomi3->newValue);
+			$vd       = trim($form->vd->newValue);
+
+			$rt=$this->_actualiza($porcomi1,$porcomi2,$porcomi3,$diacomi1,$diacomi2,$diacomi3,$vd);
+			redirect($this->url.'vista/'.$vd);
 		}
 
 		$data['content'] = $form->output;
