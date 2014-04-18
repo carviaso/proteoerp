@@ -65,6 +65,11 @@ $(function() {
 	$('input[name^="sfpafecha_"]').datepicker({ dateFormat: "dd/mm/yy" });
 
 	chtipodoc();
+
+	for(var i=0;i < sfpa_cont;i++){
+		sfpatipo(i);
+	}
+
 });
 
 function chtipodoc(){

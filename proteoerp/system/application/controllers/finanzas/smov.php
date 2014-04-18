@@ -1642,7 +1642,8 @@ class Smov extends Controller {
 		$edit->tipo->style    = 'width:160px;';
 		$edit->tipo->rule     = 'condi_required|callback_chsfpatipo[<#i#>]';
 		$edit->tipo->insertValue='EF';
-		$edit->tipo->onchange   = 'sfpatipo(<#i#>)';
+		$edit->tipo->onchange = 'sfpatipo(<#i#>)';
+		$edit->tipo->rule     = 'callback_chbmovrep[<#i#>]';
 
 		$edit->sfpafecha = new dateonlyField('Fecha','sfpafecha_<#i#>');
 		$edit->sfpafecha->rel_id   = 'sfpa';
@@ -1656,7 +1657,7 @@ class Smov extends Controller {
 		$edit->numref->size     = 15;
 		$edit->numref->db_name  = 'num_ref';
 		$edit->numref->rel_id   = 'sfpa';
-		$edit->numref->rule     = 'condi_required|callback_chtipo[<#i#>]';
+		$edit->numref->rule     = 'trim|condi_required|callback_chtipo[<#i#>]';
 
 		$edit->banco = new dropdownField('Banco <#o#>', 'banco_<#i#>');
 		$edit->banco->option('','Ninguno');
@@ -2160,6 +2161,32 @@ class Smov extends Controller {
 			return false;
 		else
 			return true;
+	}
+
+	function chbmovrep($tipo,$i){
+		$this->validation->set_message('chbmovrep', 'Ya existe un movimiento en banco con las mismas caracteristicas dadas previamente registrado.');
+		//$tipo   = $this->input->post('tipo_'.$i);
+		if(empty($tipo)) return true;
+
+		if($tipo=='NC' || $tipo=='DP' || $tipo=='DE'){
+			$codban = $this->input->post('banco_'.$i);
+			$numref = $this->input->post('num_ref_'.$i);
+			$numero = str_pad(trim($numref), 12,'0', STR_PAD_LEFT);
+
+			$dbtipo   = $this->db->escape($tipo);
+			$dbnumero = $this->db->escape($numero);
+			$dbcodban = $this->db->escape($codban);
+
+			$mSQL = "SELECT COUNT(*) AS cana FROM bmov WHERE tipo_op=${dbtipo} AND numero=${dbnumero} AND codbanc=${dbcodban}";
+			$cana = intval($this->datasis->dameval($mSQL));
+			if($cana>0){
+				return false;
+			}else{
+				return true;
+			}
+		}else{
+			return true;
+		}
 	}
 
 	function chmontosfpa($monto){
