@@ -1541,7 +1541,7 @@ class Scli extends validaciones {
 		$edit->dire12 = new inputField('','dire12');
 		$edit->dire12->rule = 'trim';
 		$edit->dire12->size      = 45;
-		$edit->dire12->maxlength = 40;
+		$edit->dire12->maxlength = 60;
 		$edit->dire12->style = 'width:95%;';
 
 		$edit->ciudad1 = new dropdownField('Ciudad','ciudad1');
