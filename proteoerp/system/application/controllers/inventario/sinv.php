@@ -3694,11 +3694,6 @@ class Sinv extends Controller {
 		//SINVCOMBO
 		if($tipo[0]!='C'){
 			$do->truncate_rel('sinvcombo');
-			//if($tipo[0]!='C' && count($do->data_rel['sinvcombo']) >0){
-			//	$error='ERROR. el tipo de Art&acute;iculo debe ser Combo, debido a que tiene varios Art&iacute;culos relacionados';
-			//	$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']=$error;
-			//	return false;
-			//}
 		}else{
 			//Limpia los vacios y totaliza las bases
 			$combobase=$combopond=$comboultimo=0;
@@ -3706,14 +3701,6 @@ class Sinv extends Controller {
 				if(empty($v['codigo'])){
 					$do->rel_rm('sinvcombo',$k);
 				}else{
-					//Ya lo verifica en otro lado
-					//$dbcomboart=$this->db->escape($v['codigo']);
-					//$tipo = $this->datasis->dameval("SELECT tipo FROM sinv WHERE codigo=${dbcomboart}");
-					//if(!empty($tipo) && $tipo[0]=='C'){
-					//	$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='El articulo '.$v['codigo'].' no puede ser usado en el combo.';
-					//	return false;
-					//}
-
 					$combobase  +=floatval($do->get_rel('sinvcombo','precio' ,$k));
 					$combopond  +=floatval($do->get_rel('sinvcombo','pond' ,$k));
 					$comboultimo+=floatval($do->get_rel('sinvcombo','ultimo' ,$k));
@@ -3724,11 +3711,6 @@ class Sinv extends Controller {
 				$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Cuando el articulo es un combo las 4 bases deben ser iguales a '.nformat($combobase);
 				return false;
 			}
-
-			//if(abs($ultimo-$comboultimo)!=0 || abs($pond-$combopond)!=0){
-			//	$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Los costos deben ser '.nformat($combopond).' para el ponderado y '.nformat($comboultimo).' para el ultimo.';
-			//	return false;
-			//}
 
 			$cana=$do->count_rel('sinvcombo');
 			if($cana <= 0){
@@ -3745,9 +3727,7 @@ class Sinv extends Controller {
 		}
 
 		if($tipo[0]!='F'){
-			//$do->set('enlace' ,'');
 			$do->set('aumento',0);
-			//$do->set('fracci' ,1);
 		}
 
 		$comision = $do->get('comision');
@@ -3786,9 +3766,8 @@ class Sinv extends Controller {
 		//Valida los precios
 		for($i=1;$i<5;$i++){
 			$prec='precio'.$i;
-			$$prec=round($do->get($prec),2); //optenemos el precio
+			$$prec=round($do->get($prec),2); //obtenemos el precio
 		}
-
 
 		$modopre  = $this->datasis->traevalor('SINVMODOPRECIO');
 
@@ -3796,7 +3775,6 @@ class Sinv extends Controller {
 			$mp = ($precio1 >= $precio4 && $precio2 >= $precio4 && $precio3 >= $precio4);
 		else
 			$mp = ($precio1 >= $precio2 && $precio2 >= $precio3 && $precio3 >= $precio4);
-		
 		
 		//if($precio1 >= $precio2 && $precio2 >= $precio3 && $precio3 >= $precio4){
 		//if($precio1 >= $precio4 && $precio2 >= $precio4 && $precio3 >= $precio4){
@@ -3846,7 +3824,6 @@ class Sinv extends Controller {
 			return false;
 		}
 
-
 		//valida las escalas
 		for($i=1;$i<4;$i++){
 			$esca='pescala'.$i;
@@ -3883,6 +3860,7 @@ class Sinv extends Controller {
 		logusu('SINV',"Redondea Precios ${maximo}");
 	}
 
+	// **************************************
 	/* RECALCULA LOS PRECIOS DE TODOS LOS PRODUCTOS */
 	function recalcular() {
 		$mtipo = $this->uri->segment($this->uri->total_segments());

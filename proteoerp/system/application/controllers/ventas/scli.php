@@ -2463,7 +2463,7 @@ function chrif(rif){
 			$codigo    = $this->input->post('codigo');
 			$dbid_pers = $this->db->escape($id_pers);
 
-			$query = $this->db->query("SELECT nacional,cedula,codigo,nombre,apellido,direc1,direc2 FROM pers WHERE id=".$dbid_pers);
+			$query = $this->db->query("SELECT nacional,cedula,codigo,nombre,apellido,direc1,direc2, telefono FROM pers WHERE id=".$dbid_pers);
 			if($query->num_rows()>0){
 				$row = $query->row();
 
