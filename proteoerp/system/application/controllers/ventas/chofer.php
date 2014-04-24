@@ -148,7 +148,7 @@ class Chofer extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 300, width: 500, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -189,7 +189,7 @@ class Chofer extends Controller {
 
 		$bodyscript .= '
 		$("#fshow").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 300, width: 500, modal: true,
 			buttons: {
 				"Aceptar": function() {
 					$("#fshow").html("");
@@ -268,6 +268,19 @@ class Chofer extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 30 }',
 		));
 
+		$grid->addField('comision');
+		$grid->label('Com.%');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 80,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
 
 		$grid->addField('direc1');
 		$grid->label('Direcci&oacute;n 1');
@@ -430,7 +443,7 @@ class Chofer extends Controller {
 		});
 		';
 
-		$edit = new DataEdit($this->tits, 'chofer');
+		$edit = new DataEdit('', 'chofer');
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -470,6 +483,12 @@ class Chofer extends Controller {
 		$edit->nombre->rule='';
 		$edit->nombre->size =32;
 		$edit->nombre->maxlength =30;
+
+		$edit->comision = new inputField('Comision','comision');
+		$edit->comision->rule='max_length[15]|numeric';
+		$edit->comision->css_class='inputnum';
+		$edit->comision->size =9;
+		$edit->comision->maxlength =10;
 
 		$edit->direc1 = new inputField('Direcci&oacute;n 1','direc1');
 		$edit->direc1->rule='';
@@ -545,7 +564,9 @@ class Chofer extends Controller {
 			) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('chofer');
-		//if(!in_array('<#campo#>',$campos)){ }
+		if (!$this->db->field_exists('comision', 'chofer')){
+			$mSQL="ALTER TABLE chofer ADD COLUMN comision DECIMAL(10,2) AFTER nombre";
+			$this->db->query($mSQL);
+		}
 	}
 }
