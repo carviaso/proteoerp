@@ -1,0 +1,94 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$filter = new DataFilter("Filtro del Reporte");
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('codcp','fecha', 'numero', "a.tipo_op",
+"IF(LENGTH(concep2)=0 OR concep2 IS NULL,concepto,concep2) AS concepto",
+"IF(a.tipo_op='CH' or a.tipo_op='ND',0.0,monto) AS ingresos",
+"IF(a.tipo_op='CH' or a.tipo_op='ND',monto,0.0) AS egresos",
+'a.clipro');
+
+$filter->db->select($select);
+$filter->db->from('bmov AS a');
+$filter->db->join('banc AS b' ,'a.codbanc=b.codbanc');
+$filter->db->where("anulado<>'S'");
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechad->clause  ='where';
+$filter->fechad->db_name ='a.fecha';
+$filter->fechad->operator='>=';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
+$filter->fechad->group = 'Fecha';
+
+$filter->fechah = new dateonlyField('Hasta', "fechah",'d/m/Y');
+$filter->fechah->clause="where";
+$filter->fechah->insertValue = date("Y-m-d");
+$filter->fechah->db_name="a.fecha";
+$filter->fechah->operator="<=";
+$filter->fechah->group = "Fecha";
+
+$filter->banco = new dropdownField("Caja/Banco", "codbanc");
+$filter->banco->db_name="a.codbanc";
+$filter->banco->clause="where";
+$filter->banco->operator="=";
+$filter->banco->option("","");
+$filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");
+$filter->banco->rule="required";
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons("search");
+$filter->build();
+
+if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
+	$mSQL1=$this->rapyd->db->_compile_select();
+
+	$codbanc=$filter->banco->value;
+	$mSQL2 ="SELECT codcp,fecha, 'SI   ' numero, a.tipo_op, 'SALDO ANTERIOR' concepto, ";
+	$mSQL2.="IF(SUM(monto*IF(a.tipo_op IN ('CH','ND'),-1,1))>0, SUM(monto*IF(a.tipo_op IN ('CH','ND'),-1,1)),0) ingresos, ";
+	$mSQL2.="IF(SUM(monto*IF(a.tipo_op IN ('CH','ND'),-1,1))<0, ABS(SUM(monto*IF(a.tipo_op IN ('CH','ND'),-1,1))),0) egresos, a.clipro ";
+	$mSQL2.="FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc ";
+	$mSQL2.="WHERE anulado<>'S' AND a.fecha <CAST('".$filter->fechad->newValue."' AS DATE) AND a.codbanc = '$codbanc' ";
+	$mSQL2.="GROUP BY a.codbanc ";
+	$mSQL2.="ORDER BY fecha,tipo_op,clipro,concepto,numero ";
+
+	$mSQL= $mSQL1.' UNION '.$mSQL2;
+	//echo $mSQL;
+
+	$sobretabla='';
+	if(!empty($filter->banco->newValue)) $sobretabla.='     Caja o Banco: '.$filter->banco->description;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Relación de Caja o Banco");
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->setSubTitulo("Desde la fecha: ".$_POST['fechad']." Hasta ".$_POST['fechah']);
+	$pdf->AddPage();
+
+	$pdf->setTableTitu(10,'Times');
+	$pdf->AddCol('codcp'   ,25 ,'Benef.'  ,'L',8);
+	$pdf->AddCol('concepto',100,'Concepto','L',8);
+	$pdf->AddCol('ingresos',30 ,'Ingresos','R',8);
+	$pdf->AddCol('egresos' ,30 ,'Egresos' ,'R',8);
+	$pdf->setTotalizar('ingresos','egresos');
+	$pdf->setGrupoLabel('Fecha: <#fecha#>');
+	$pdf->setGrupo('fecha');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if (strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Relación de Caja o Banco</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

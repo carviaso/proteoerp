@@ -31,13 +31,13 @@ div.absolute {
 <div class="absolute" style="top: -20px; right: 0px; font-weight:bold; font-size: 12pt"><?php echo $tmonto; ?></div>
 
 <div class="absolute" style="top: 35px; left: 65px; right: -10px;"><?php echo $nombre; ?></div>
-<div class="absolute" style="top: 60px; left: 10px; right: -10px; text-align:left;text-indent: 50px;font-size: 0.8em;line-height: 1.8em"><?php echo $smonto; ?></div>
+<div class="absolute" style="top: 60px; left: 15px; right: -10px; text-align:left;text-indent: 60px;font-size: 0.8em;line-height: 1.8em"><?php echo $smonto; ?></div>
 
-<div class="absolute" style="top: 100px; left: 10px; right: 350px text-align: right;"><?php echo $ffecha; ?></div>
-<div class="absolute" style="top: 100px; left: 265px;"><?php echo $anio; ?></div>
+<div class="absolute" style="top: 105px; left: 10px; right: 350px text-align: right;"><?php echo $ffecha; ?></div>
+<div class="absolute" style="top: 105px; left: 280px;"><?php echo $anio; ?></div>
 
 <?php if($endosable){ ?>
-<div class="absolute" style="top: 180px; right:30px;font-size: 1.3em;">NO ENDOSABLE</div>
+<div class="absolute" style="top: 180px; right:40px;font-size: 1.3em;">NO ENDOSABLE</div>
 <?php } ?>
 </body>
 </html>
