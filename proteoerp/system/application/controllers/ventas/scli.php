@@ -2688,7 +2688,7 @@ function chrif(rif){
 			do{
 				$codcli  = $this->_numatri();
 				$dbcodcli= $this->db->escape($codcli );
-				$mSQL="SELECT COUNT(*) AS cana FROM scli WHERE cod_cli=${dbcodcli}";
+				$mSQL="SELECT COUNT(*) AS cana FROM scli WHERE cliente=${dbcodcli}";
 				$cana= intval($this->datasis->dameval($mSQL));
 				if($cana==0){
 					$do->set('cliente',$codcli);
