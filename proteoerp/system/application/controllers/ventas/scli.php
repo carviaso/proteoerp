@@ -2683,8 +2683,26 @@ function chrif(rif){
 
 		$cliente = $do->get('cliente');
 		if(empty($cliente)){
-			$do->set('cliente',$this->_numatri());
+			$i=0;
+			$encon=false;
+			do{
+				$codcli  = $this->_numatri();
+				$dbcodcli= $this->db->escape($codcli );
+				$mSQL="SELECT COUNT(*) AS cana FROM scli WHERE cod_cli=${dbcodcli}";
+				$cana= intval($this->datasis->dameval($mSQL));
+				if($cana==0){
+					$do->set('cliente',$codcli);
+					$encon=true;
+					break;
+				}
+				$i++;
+			} while ($i<100);
+			if(!$encon){
+				$do->error_message_ar['pre_ins']='Debe colocar un c&oacute;digo de cliente';
+				return false;
+			}
 		}
+
 		return true;
 	}
 

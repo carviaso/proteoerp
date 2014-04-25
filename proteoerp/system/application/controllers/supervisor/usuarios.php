@@ -606,7 +606,7 @@ class Usuarios extends Controller {
 		$edit->activo->option('S','Si');
 		$edit->activo->option('N','No');
 		$edit->activo->style='width:80px';
-		$edit->activo->insertValue='N';
+		$edit->activo->insertValue='S';
 		$edit->activo->rule='required|enum[S,N]';
 
 		$edit->almacen = new dropdownField('Almac&eacute;n', 'almacen');

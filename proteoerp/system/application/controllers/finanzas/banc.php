@@ -1215,7 +1215,7 @@ class Banc extends Controller {
 		FROM bmov WHERE year(fecha)=$ano AND codbanc=".$this->db->escape($codbanc)."
 		GROUP BY codbanc, YEAR(fecha)";
 
-		memowrite($mSQL);
+		//memowrite($mSQL);
 
 		$query = $this->db->query($mSQL);
 		$data  = $query->row();

@@ -823,6 +823,7 @@ class Rcaj extends validaciones {
 					$query= $this->db->query($mSQL);
 					$row  = $query->first_row();
 					if($row->n==0){
+						$data=array();
 						$data['codbanc'] ='DF';
 						$data['tbanco']  ='CAJ';
 						$data['moneda']  ='Bs';
