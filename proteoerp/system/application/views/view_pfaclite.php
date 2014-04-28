@@ -48,7 +48,7 @@ function totalizar(){
 	var ivas    =0;
 	var impuesto=0;
 	for(var i in importes){
-		iva    = document.getElementById("iva_"+i).value;
+		iva    = document.getElementById("itiva_"+i).value;
 		impuesto+=Math.round(importes[i]*iva/100);
 		totalg  +=importes[i]+(Math.round(importes[i]*iva/100));
 	}
@@ -196,8 +196,8 @@ function totalizar(){
 				echo nformat($preca);
 			}else{
 				$data = array(
-					'name'  => 'iva_'.$i,
-					'id'    => 'iva_'.$i,
+					'name'  => 'itiva_'.$i,
+					'id'    => 'itiva_'.$i,
 					'value' => $sinv[$codigoa]['iva'],
 					'type'  => 'hidden'
 				);

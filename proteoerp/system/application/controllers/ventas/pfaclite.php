@@ -225,6 +225,7 @@ class pfaclite extends validaciones{
 		$filter->db->from('scli AS a');
 		$filter->db->join('sfac AS b',"b.cod_cli=a.cliente AND b.vd=${dbvd} AND b.fecha>=${dbfini}",'left');
 		$filter->db->where("( a.vendedor = ${dbvd} OR a.cobrador=${dbvd} )");
+		$filter->db->where('a.tipo <>','0');
 		$filter->db->groupby('a.cliente');
 
 		$filter->cliente = new inputField('C&oacute;digo', 'cliente');
@@ -391,9 +392,9 @@ class pfaclite extends validaciones{
 		$edit->preca->rel_id    = 'itpfac';
 		$edit->preca->rule      = 'positive|callback_chpreca[<#i#>]';
 
-		$edit->iva = new hiddenField('', 'iva_<#i#>');
-		$edit->iva->db_name = 'iva';
-		$edit->iva->rel_id  = 'itpfac';
+		$edit->itiva = new hiddenField('', 'itiva_<#i#>');
+		$edit->itiva->db_name = 'iva';
+		$edit->itiva->rel_id  = 'itpfac';
 
 		$edit->pmarca = new inputField('', 'pmarca_<#i#>');
 		$edit->pmarca->db_name = 'pmarca';
@@ -610,7 +611,7 @@ class pfaclite extends validaciones{
 		if(empty($numero)){
 			$numero = $this->datasis->fprox_numero('npfac');
 			$do->set('numero', $numero);
-			$ntransac = $this->datasis->fprox_numero('transac');
+			$ntransac = $this->datasis->fprox_numero('ntransa');
 			$do->set('transac', $ntransac);
 			$fecha = date('%Y%m%d');
 		}else{
@@ -629,7 +630,9 @@ class pfaclite extends validaciones{
 		if(empty($vd)) $vd=$this->secu->getvendedor();
 		$do->set('vd',$vd);
 
-		$iva = $totals = 0;
+		$transac = $do->get('transac');
+
+		$iva = $totals = $tpeso = 0;
 		$borrar=array();
 		for($i = 0;$i < $do->count_rel('itpfac');$i++){
 			$itcana  = $do->get_rel('itpfac', 'cana', $i);
@@ -646,11 +649,19 @@ class pfaclite extends validaciones{
 					$mostrado= round($itpreca*(1+$itiva),2);
 				}
 
+				$rowval = $this->datasis->damerow('SELECT descrip,pond, base1,precio4,peso FROM sinv WHERE codigo='.$this->db->escape($itcodigo));
+				if(!empty($rowval)){
+					$do->set_rel('itpfac', 'desca'    , $rowval['descrip'] , $i);
+					$tpeso += floatval($rowval['peso'])*$itcana;
+				}
+
+
 				$do->set_rel('itpfac', 'tota'    , $ittota  , $i);
 				$do->set_rel('itpfac', 'fecha'   , $fecha   , $i);
 				$do->set_rel('itpfac', 'vendedor', $vd      , $i);
 				$do->set_rel('itpfac', 'mostrado', $mostrado, $i);
 
+				$do->set_rel('itpfac', 'transac', $transac , $i);
 				$do->set_rel('itpfac', 'usuario', $usuario , $i);
 				$do->set_rel('itpfac', 'estampa', $estampa , $i);
 				$do->set_rel('itpfac', 'hora'   , $hora    , $i);
@@ -670,6 +681,7 @@ class pfaclite extends validaciones{
 		$do->set('totals' , round($totals , 2));
 		$do->set('totalg' , round($totalg , 2));
 		$do->set('iva'    , round($iva    , 2));
+		$do->set('peso'   , round($tpeso  , 2));
 		return true;
 	}
 
