@@ -7,8 +7,8 @@
 */
 class Usol extends Controller {
 	var $mModulo = 'USOL';
-	var $titp    = 'SOLICITANTE';
-	var $tits    = 'SOLICITANTE';
+	var $titp    = 'UNIDAD SOLICITANTE';
+	var $tits    = 'UNIDAD SOLICITANTE';
 	var $url     = 'inventario/usol/';
 
 	function Usol(){

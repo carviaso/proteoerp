@@ -17,6 +17,7 @@ class Accesos extends Controller{
 
 		$mSQL='SELECT us_codigo, CONCAT( us_codigo,\' - \' ,us_nombre ) FROM usuario WHERE us_nombre != \'SUPERVISOR\' ORDER BY us_codigo';
 		$dropdown=$this->datasis->consularray($mSQL);
+/*
 		$data['content']  = form_open('accesos/crear');
 		$data['content'] .= form_dropdown('usuario',$dropdown);
 		$data['content'] .= form_submit('pasa','Aceptar');
@@ -24,6 +25,17 @@ class Accesos extends Controller{
 		$data['head']    = '';
 		$data['title']   = '<h1>Administraci&oacute;n de accesos</h1>';
 		$this->load->view('view_ventanas', $data);
+*/
+
+		$content  = form_open('accesos/crear');
+		$content .= form_dropdown('usuario',$dropdown);
+		$content .= form_submit('pasa','Aceptar');
+		$content .= form_close();
+		$head    = '';
+		$title   = '<h1>Administraci&oacute;n de accesos</h1>';
+		//$this->load->view('view_ventanas', $data);
+		echo $content;
+
 	}
 
 	function crear(){

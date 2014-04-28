@@ -1483,8 +1483,16 @@ class Datasis {
 			$CI->db->query("CREATE TABLE modulos (modulo varchar(20) NULL ,nombre varchar(50) NULL, PRIMARY KEY (modulo) ) ENGINE=MyISAM DEFAULT CHARSET=latin1");
 			$mSQL = 'REPLACE INTO modulos SET modulo='.$CI->db->escape($modulo).', nombre='.$CI->db->escape($nombre);
 			$CI->db->query($mSQL);
-
 		}
+	}
+
+	//******************************************************************
+	// Modifica Destino en Intramenu
+	//
+	function targintramenu( $target, $ejecutar ){
+		$CI =& get_instance();
+		$mSQL = 'UPDATE intramenu SET target="'.$target.'" WHERE ejecutar="'.$ejecutar.'" OR ejecutar="'.$ejecutar.'/"';
+		$CI->db->query($mSQL);
 	}
 
 
@@ -1500,7 +1508,6 @@ class Datasis {
 		}
 	}
 
-
 	//******************************************************************
 	// Lee Intramenu
 	//
@@ -1515,8 +1522,6 @@ class Datasis {
 			return array();
 	}
 
-
-
 	//******************************************************************
 	// Pop up Ventana de javascript
 	//
@@ -1525,7 +1530,7 @@ class Datasis {
 	}
 
 	//******************************************************************
-	// Modifica Intramenu
+	// Recalcula Inventario
 	//
 	function sinvrecalcular( $mTIPO = 'P', $mcodigo='' ){
 		$CI =& get_instance();
@@ -1634,7 +1639,6 @@ class Datasis {
 			$CI->db->query($mSQL);
 
 		}
-
 	}
 
 	//******************************************************************

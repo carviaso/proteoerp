@@ -44,10 +44,11 @@ class Sfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'boton1'   ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento','tema'=>'anexos', 'label'=>'Reimprimir'));
+		$grid->wbotonadd(array('id'=>'boton1',   'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento','tema'=>'anexos', 'label'=>'Reimprimir'));
 		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png',              'alt' => 'Cierre de Caja',      'tema'=>'anexos', 'label'=>'Cierre de Caja'));
-		$grid->wbotonadd(array('id'=>'fmanual'  ,'img'=>'images/mano.png',                'alt' => 'Factura Manual',      'tema'=>'anexos', 'label'=>'Factura Manual'));
-		$grid->wbotonadd(array('id'=>'bdevolu'  ,'img' =>'images/dinero.png',             'alt' => 'Devolver Factura',    'tema'=>'anexos', 'label'=>'Devolver'));
+		$grid->wbotonadd(array('id'=>'fmanual',  'img'=>'images/mano.png',                'alt' => 'Factura Manual',      'tema'=>'anexos', 'label'=>'Factura Manual'));
+		$grid->wbotonadd(array('id'=>'bdevolu',  'img' =>'images/dinero.png',             'alt' => 'Devolver Factura',    'tema'=>'anexos', 'label'=>'Devolver'));
+		$grid->wbotonadd(array('id'=>'nccob',    'img'=>'images/check.png'  , 'alt' => 'Nota de credito a factura pagada', 'label'=>'NC a Factura Cobrada'));
 
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
@@ -250,6 +251,22 @@ class Sfac extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+
+
+		$bodyscript .= '
+		jQuery("#nccob").click( function(){
+			var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var ret = $("#newapi'.$grid0.'").getRowData(id);
+
+			$.post("'.site_url('finanzas/smov/ncfac').'/"+ret.numero+"/create",
+				function(data){
+					$("#fedita").html(data);
+					$("#fedita").dialog({ height: 300, width: 500 });
+					$("#fedita").dialog("open");
+				}
+			);
+		});';
+
 
 		$bodyscript .= '$(function() { ';
 

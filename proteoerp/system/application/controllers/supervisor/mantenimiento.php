@@ -153,6 +153,7 @@ $("#inconsist").click( function() {
 
 		$contenido .= '<div id="displayBox" style="display:none" ><p>Disculpe por la espera.....</p><img  src="'.base_url().'images/doggydig.gif" width="131px" height="79px"  /></div>';
 
+/*
 		$data['content'] = $contenido;
 
 		$data['style']   = style('themes/proteo/proteo.css');
@@ -169,6 +170,7 @@ $("#inconsist").click( function() {
 		$data['head']   = $this->rapyd->get_head();
 
 		$data['title']   = '<h1>Mantenimiento</h1>';
+*/
 		//$this->load->view('view_ventanas', $data);
 		echo $script.$style.$contenido;
 

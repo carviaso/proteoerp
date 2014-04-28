@@ -166,9 +166,13 @@ class Smov extends Controller {
 
 		$bodyscript .= '
 		jQuery("#nccob").click( function(){
-			$.post("'.site_url($this->url.'ncfac/create').'",
+			var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var ret = $("#newapi'.$grid0.'").getRowData(id);
+
+			$.post("'.site_url($this->url.'ncfac').'/"+ret.numero+"/create",
 				function(data){
 					$("#fedita").html(data);
+					$("#fedita").dialog({ height: 300, width: 500 });
 					$("#fedita").dialog("open");
 				}
 			);
@@ -2516,10 +2520,23 @@ class Smov extends Controller {
 		echo $salida.'</tr></table>';
 	}
 
-	//*********************************
-	//Nota de credito a factura pagada
-	//*********************************
+	//******************************************************************
+	//  Nota de credito a factura pagada
+	//
 	function ncfac(){
+		$id = $this->uri->segment(4);
+		$numero = '';
+		$cod_cli = '';
+		$nombre  = '';
+		$monto   = 0.00;
+
+		if ($id && $id!='insert') {
+			$transac = $this->datasis->dameval("SELECT transac FROM sfac WHERE tipo_doc='F' AND numero=".$this->db->escape($id));
+			$numero  = $this->datasis->dameval("SELECT numero  FROM sfac WHERE transac=".$transac);
+			$cod_cli = $this->datasis->dameval("SELECT cod_cli FROM sfac WHERE transac=".$transac);
+			$nombre  = $this->datasis->dameval("SELECT nombre  FROM sfac WHERE transac=".$transac);
+			$monto   = $this->datasis->dameval("SELECT totalg  FROM sfac WHERE transac=".$transac);
+		}
 		$this->rapyd->load('dataedit');
 		$script= '
 		$(function() {
@@ -2594,24 +2611,29 @@ class Smov extends Controller {
 		$edit->pre_process( 'delete', '_pre_ncfac_delete');
 
 		$edit->num_ref = new inputField('Factura','num_ref');
-		$edit->num_ref->rule='required|existesfac';
+		//$edit->num_ref->rule='required|existesfac';
+		$edit->num_ref->type= 'inputhidden';
+		$edit->num_ref->insertValue=$numero;
 		$edit->num_ref->size =10;
 		$edit->num_ref->maxlength =8;
 		$edit->num_ref->group='Detalles de la factura afectada';
 
 		$edit->cod_cli = new inputField('Cliente','cod_cli');
-		$edit->cod_cli->rule='required|existescli';
+		//$edit->cod_cli->rule='required|existescli';
 		$edit->cod_cli->type = 'inputhidden';
+		$edit->cod_cli->insertValue=$cod_cli;
 		$edit->cod_cli->group='Detalles de la factura afectada';
 
 		$edit->nombre = new inputField('Nombre','nombre');
 		$edit->nombre->rule= '';
 		$edit->nombre->type= 'inputhidden';
 		$edit->nombre->in  = 'cod_cli';
+		$edit->nombre->insertValue=$nombre;
 		$edit->nombre->group='Detalles de la factura afectada';
 
 		$edit->sfacmonto = new inputField('Monto de la factura','sfacmonto');
 		$edit->sfacmonto->type = 'inputhidden';
+		$edit->sfacmonto->insertValue=$monto;
 		$edit->sfacmonto->group='Detalles de la factura afectada';
 
 		$edit->fecha = new dateonlyField('Fecha','fecha');

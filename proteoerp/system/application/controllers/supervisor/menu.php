@@ -10,8 +10,10 @@ class Menu extends Controller{
 
 	function index(){
 		$this->datasis->modulo_id(905);
+		$this->datasis->targintramenu( 'ajax', 'supervisor/menu' );
+		
 		if ($this->uri->segment(3) === FALSE) $mod = FALSE; else $mod = $this->uri->segment(3);
-		$mSQL='SELECT modulo,titulo  FROM intramenu AS a ORDER BY modulo';
+		$mSQL='SELECT modulo, titulo FROM intramenu AS a ORDER BY modulo';
 
 		$prop=array('border'=>'0','height'=>'14px');
 
@@ -113,6 +115,7 @@ class Menu extends Controller{
 		$out .= "\t</div>\n";
 		$out .= "</div>\n";
 
+/*
 		$data['script']  ='<script type="text/javascript">';
 		$data['script'] .='
 		$(function() {
@@ -189,12 +192,10 @@ class Menu extends Controller{
 				)
 			}
 		}';
-
 		$data['script'] .="\n".'</script>'."\n";
-
 		$out = '<div id="arbolito" style="overflow:auto;border:1px solid #9AC8DA;background: #FAFAFA;height:400px;width:320px;font-size:12px;float:left;"></div>';
-
 		$data['content'] = $out.'<div id="dedita" style="overflow:auto;border:1px solid #9AC8DA;background:#FAFAFA;width:460px;font-size:12px;float:left;"></div>';
+
 
 		$data['head']    = script("jquery-min.js");
 		$data['head']   .= script("jquery-migrate-min.js");
@@ -207,6 +208,98 @@ class Menu extends Controller{
 
 		$data['title']   = '<h1>Administraci&oacute;n del Men&uacute;</h1>';
 		$this->load->view('view_ventanas', $data);
+
+*/
+
+
+		$script  ='<script type="text/javascript">';
+		$script .='
+		$(function() {
+			$.post("'.site_url('supervisor/menu/arbolito').'", function(data){
+				$("#arbolito").html(data);
+			});
+		})';
+
+		$script .='
+		function creanuevo(modulo){
+			$.post("'.site_url('supervisor/menu/dataedit').'/"+modulo+"/create", function(data){
+				$("#dedita").html(data+\'<button onclick="guardanv()">Guardar</button>\');
+			});
+		}';
+
+		$script .='
+		function actuarbol(){
+			$.post("'.site_url('supervisor/menu/arbolito').'", function(data){
+				$("#arbolito").html(data);
+			});
+		}';
+
+		$script .='
+		function guardanv(){
+				var murl = $("#df1").attr("action");
+				$.ajax({
+					type: "POST", dataType: "html", async: false,
+					url: murl,
+					data: $("#df1").serialize(),
+					success: function(r,s,x){
+						try{
+							var json = JSON.parse(r);
+							if (json.status == "A"){
+								alert("Registro Guardado");
+								$( "#dedita" ).html( "Registro Guardado" );
+								if (json.tipo != "update"){
+									actuarbol();
+								}
+								return true;
+							}else{
+								alert(json.mensaje);
+							}
+						}catch(e){
+							//$("#dedita").html(r);
+						}
+					}
+				})
+		}';
+
+		$script .='
+		function modifica(modulo){
+			$.post("'.site_url('supervisor/menu/dataedit/modify').'/"+modulo, function(data){
+				$("#dedita").html(data+\'<button onclick="guardanv()">Guardar</button>\');
+			});
+		}';
+
+		$script .='
+		function elimina(modulo){
+			if(confirm("Eliminar "+modulo+"?")){
+				$.post("'.site_url("supervisor/menu/dataedit/do_delete/").'/"+modulo, 
+					function(data){
+						try {
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								actuarbol();
+								alert("Registro Eliminado");
+							} else {
+								alert("No se pudo eliminar el Registro");
+							} 
+						} catch(e){
+							alert("Hola");
+						}
+					}
+				)
+			}
+		}';
+
+		$script .="\n".'</script>'."\n";
+		$out = '<div id="arbolito" style="overflow:auto;border:1px solid #9AC8DA;background: #FAFAFA;height:400px;width:320px;font-size:12px;float:left;"></div>';
+		$contenido = $out.'<div id="dedita" style="overflow:auto;border:1px solid #9AC8DA;background:#FAFAFA;width:460px;font-size:12px;float:left;"></div>';
+
+
+		$script   .= script("jquery.treeview.pack.js");
+		$style    = style('jquery.treeview.css');
+
+		//$data['title']   = '<h1>Administraci&oacute;n del Men&uacute;</h1>';
+		echo $script.$style.$contenido;
+
 		
 	}
 
