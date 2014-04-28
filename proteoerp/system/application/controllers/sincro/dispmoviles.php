@@ -130,13 +130,13 @@ class Dispmoviles extends Controller {
 			a.bonicant,
 			UNIX_TIMESTAMP(a.fdesde) AS fdesde,
 			UNIX_TIMESTAMP(a.fhasta) AS fhasta,
-			${existen} AS existen,
+			${existen}*IF(a.activo='S') AS existen,
 			TRIM(a.clave) AS clave,
 			a.tdecimal,
 			a.activo,
 			a.exdes AS pedido
 			FROM sinv AS a ${join}
-			WHERE a.tipo='Articulo' AND a.base1>0 AND a.base2>0 AND a.base3>0 AND a.base3>0 AND a.ultimo>0";
+			WHERE a.tipo='Articulo' AND a.base1>0 AND a.base2>0 AND a.base3>0 AND a.base3>0 AND a.ultimo>0 AND a.activo='S'";
 
 		$mSQL['scli'] = "SELECT a.id,
 			TRIM(a.cliente) AS cliente, TRIM(a.nombre) AS nombre,CONCAT_WS('-',TRIM(a.dire11),TRIM(a.dire12)) AS direc,

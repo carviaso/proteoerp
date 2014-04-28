@@ -3,11 +3,10 @@ if(count($parametros)==0) show_error('Faltan parametros ');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 $mSQL_1 = $this->db->query('SELECT
-	a.fecha,a.numero,b.nomfis,a.proveed,a.nombre,a.breten,a.tipo_doc,a.reten,a.creten,a.nombre,
-	b.direc1,b.direc2,b.direc3,b.telefono,b.rif,c.activida,c.base1,c.tari1, a.ffactura,a.nfiscal
-FROM gser AS a
+	a.fecha,a.numero,b.nomfis,a.proveed,a.nombre,a.tipo_doc,a.reten,a.nombre,a.flete AS breten,
+	b.direc1,b.direc2,b.direc3,b.telefono,b.rif, a.fecha AS ffactura,a.nfiscal
+FROM scst AS a
 JOIN sprv AS b ON a.proveed=b.proveed
-LEFT JOIN rete AS c ON c.codigo=a.creten
 WHERE a.reten>0 AND a.id='.$dbid);
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row = $mSQL_1->row();
@@ -20,23 +19,20 @@ $proveed  = $this->us_ascii2html($row->proveed);
 $tipo_doc = trim($row->tipo_doc);
 $breten   = $row->breten;
 $reten    = $row->reten;
-$creten   = trim($row->creten);
 $nombre   = (empty($row->nomfis))? $this->us_ascii2html($row->nombre) : $this->us_ascii2html($row->nomfis);
 $direc1   = $this->us_ascii2html($row->direc1);
 $direc2   = $this->us_ascii2html($row->direc2);
 $direc3   = $this->us_ascii2html($row->direc3);
 $telefono = htmlspecialchars(trim($row->telefono));
 $rif      = htmlspecialchars(trim($row->rif));
-$activida = $this->us_ascii2html($row->activida);
 $nfiscal  = htmlspecialchars(trim($row->nfiscal));
-$base1    = $row->base1;
-$tari1    = $row->tari1;
+$tari1    = 3;
 
 $mSQL_2 = $this->db->query('SELECT
 e.codigorete,c.activida,e.base,e.porcen,e.monto
 FROM gereten AS e
 JOIN rete AS c ON c.codigo=e.codigorete
-WHERE e.origen=\'GSER\'  AND e.idd='.$dbid);
+WHERE e.origen=\'SCST\' AND e.idd='.$dbid);
 
 if(!empty($nfiscal)){
 	$titcontrol = '<b>Nro. CONTROL:</b> '.$nfiscal;
@@ -133,13 +129,13 @@ if ( isset($pdf) ) {
 		<?php if($mSQL_2->num_rows()==0){ ?>
 			<tr style='color: #111111;background: #EEEEEE;'>
 				<td><div align="left"  style="font-size: 8pt"><b>CONCEPTO:</b></div></td>
-				<td><div align="rigth" style="font-size: 8pt"><?php echo $activida ?></div></td>
+				<td><div align="rigth" style="font-size: 8pt">GASTOS DE TRANSPORTE POR FLETES</div></td>
 			</tr><tr>
 				<td><div align="left"  style="font-size: 8pt"><b>MONTO DEL PAGO OBJETO DE RETENCI&Oacute;N  Bs. :</b></div></td>
 				<td><div align="rigth" style="font-size: 8pt"><?php echo nformat($breten)?></div></td>
 			</tr><tr>
 				<td><div align="left"  style="font-size: 8pt"><b>MONTO DE LA BASE IMPONIBLE Bs. :</b></div></td>
-				<td><div align="rigth" style="font-size: 8pt"><?php echo nformat($breten*$base1/100) ?></div></td>
+				<td><div align="rigth" style="font-size: 8pt"><?php echo nformat($breten) ?></div></td>
 			</tr><tr>
 				<td><div align="left" style="font-size: 8pt"><b>PORCENTAJE DE RETENCI&Oacute;N:</b></div></td>
 				<td><div align="rigth" style="font-size: 8pt"><?php echo nformat($tari1) ?> &#37; </div></td>

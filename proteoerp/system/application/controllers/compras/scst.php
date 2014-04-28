@@ -56,8 +56,9 @@ class Scst extends Controller {
 			<table cellpadding='0' cellspacing='0' style='width:100%;'>
 				<tr>
 					<td style='vertical-align:center;border:1px solid #AFAFAF;'><div class='tema1 botones'>".img(array('src' =>"assets/default/images/print.png",  'height' => 18, 'alt' => 'Imprimir',  'title' => 'Imprimir', 'border'=>'0'))."</div></td>
-					<td style='vertical-align:top;text-align:center;'><div class='tema1 botones'><a style='width:70px;text-align:left;vertical-align:top;' border='0' href='#' id='imprimir'>Compra</a></div></td>
-					<td style='vertical-align:top;text-align:center;'><div class='tema1 botones'><a class='tema1 botones' style='width:80px;text-align:left;vertical-align:top;' href='#' id='reteprin'>Retenci&oacute;n</a></div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='tema1 botones'><a style='width:60px;text-align:left;vertical-align:top;' border='0' href='#' id='imprimir'>Compra</a></div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='tema1 botones'><a class='tema1 botones' style='width:45px;text-align:left;vertical-align:top;' href='#' id='reteprin'>R.IVA</a></div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='tema1 botones'><a class='tema1 botones' style='width:45px;text-align:left;vertical-align:top;' href='#' id='reteislr'>ISLR</a></div></td>
 				</tr>
 			</table>
 			</div>
@@ -265,6 +266,20 @@ class Scst extends Controller {
 					'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+id+"/id"').';
 				} else { $.prompt("<h1>Por favor Seleccione un documento primero</h1>");}
 			});';
+
+		//Imprime retencion islr
+		$bodyscript .= '
+		jQuery("#reteislr").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id){
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if(Number(ret.reten) > 0){
+					window.open(\''.site_url('formatos/ver/SCSTRT/').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+				}else{
+					$.prompt("<h1>La compra seleccionada no tiene retenci&oacute;n ISLR</h1>");
+				}
+			} else { $.prompt("<h1>Por favor Seleccione un registro</h1>");}
+		});';
 
 		//Imprimir retencion
 		$bodyscript .= '
@@ -911,21 +926,6 @@ class Scst extends Controller {
 		));
 
 
-		$grid->addField('reten');
-		$grid->label('Reten');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
 		$grid->addField('ppago');
 		$grid->label('Ppago');
 		$grid->params(array(
@@ -1133,6 +1133,20 @@ class Scst extends Controller {
 */
 		$grid->addField('reteiva');
 		$grid->label('Retenci&oacute;n IVA');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('reten');
+		$grid->label('Retenci&oacute;n ISLR');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,

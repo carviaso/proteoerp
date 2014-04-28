@@ -617,8 +617,8 @@ class Usuarios extends Controller {
 
 		$edit->vendedor = new dropdownField('Vendedor', 'vendedor');
 		$edit->vendedor->option('','Ninguno');
-		$edit->vendedor->options("SELECT vendedor, CONCAT(vendedor,'-',nombre) AS nom FROM vend WHERE tipo IN ('V','A') ORDER BY vendedor");
-		$edit->vendedor->rule = 'existevend';
+		$edit->vendedor->options("SELECT TRIM(vendedor) AS ven, CONCAT(vendedor,'-',nombre) AS nom FROM vend WHERE tipo IN ('V','A') ORDER BY vendedor");
+		$edit->vendedor->rule = 'existevend|trim';
 		$edit->vendedor->style='width:180px';
 
 		$edit->cajero = new dropdownField('Cajero', 'cajero');

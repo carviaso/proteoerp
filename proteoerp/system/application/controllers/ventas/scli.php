@@ -2727,7 +2727,7 @@ function chrif(rif){
 	function chexiste($codigo){
 		$codigo  =$this->input->post('cliente');
 		$dbcodigo=$this->db->escape($codigo);
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM scli WHERE cliente=${dbcodigo}");
+		$check=$this->datasis->dameval("SELECT COUNT(*) AS cana FROM scli WHERE cliente=${dbcodigo}");
 		if ($check > 0){
 			$mSQL_1=$this->db->query("SELECT nombre, rifci FROM scli WHERE cliente=${dbcodigo}");
 			$row = $mSQL_1->row();
