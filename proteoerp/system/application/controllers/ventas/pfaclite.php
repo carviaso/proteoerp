@@ -251,8 +251,11 @@ class pfaclite extends validaciones{
 			$mSQL="SELECT COUNT(*) AS cca FROM (SELECT 1 AS cana FROM scli AS a JOIN sfac AS b ON b.cod_cli=a.cliente WHERE b.fecha>=${dbfini} AND vendedor=${dbvd} GROUP BY a.cliente) AS aa";
 			$atendidos=$this->datasis->dameval($mSQL);
 
+			$mSQL="SELECT SUM(c.peso*a.cana) AS peso FROM sitems AS a JOIN sfac AS b ON a.numa=b.numero AND a.tipoa=b.tipo_doc JOIN sinv AS c ON a.codigoa=c.codigo WHERE b.vd = ${dbvd} AND b.fecha>=${dbfini}";
+			$ttpeso=nformat(floatval($this->datasis->dameval($mSQL))/1000,3);
+
 			$efe = htmlnformat($atendidos*100/$clientes);
-			$frace = "<p style='text-align:center;font-weight: bold;'>Clientes atendidos: <span style='font-size:1.5em; color:#000063'>${atendidos}</span>/${clientes} Efectividad: <span style='font-size:1.5em; color:#000063'>${efe}%</span> Facturas: ${facturas}</p>";
+			$frace = "<p style='text-align:center;font-weight: bold;'>Clientes atendidos: <span style='font-size:1.5em; color:#000063'>${atendidos}</span>/${clientes} Efectividad: <span style='font-size:1.5em; color:#000063'>${efe}%</span> Facturas: ${facturas} Peso: ${ttpeso}T</p>";
 		}else{
 			$frace='';
 		}
@@ -652,6 +655,7 @@ class pfaclite extends validaciones{
 				$rowval = $this->datasis->damerow('SELECT descrip,pond, base1,precio4,peso FROM sinv WHERE codigo='.$this->db->escape($itcodigo));
 				if(!empty($rowval)){
 					$do->set_rel('itpfac', 'desca'    , $rowval['descrip'] , $i);
+					$do->set_rel('itpfac', 'pvp'      , $rowval['base1'] , $i);
 					$tpeso += floatval($rowval['peso'])*$itcana;
 				}
 
