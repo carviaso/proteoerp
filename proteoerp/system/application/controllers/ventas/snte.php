@@ -17,6 +17,7 @@ class Snte extends Controller {
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
 		$this->datasis->modulo_nombre( 'SNTE', $ventana=0 );
+		$this->vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
 	}
 
 	function index(){
@@ -1127,7 +1128,7 @@ class Snte extends Controller {
 		$edit->cana->rel_id   = 'itsnte';
 		$edit->cana->maxlength= 10;
 		$edit->cana->size     = 6;
-		$edit->cana->rule     = 'required|positive';
+		$edit->cana->rule     = 'required|positive|callback_chcananeg[<#i#>]';
 		$edit->cana->autocomplete=false;
 		$edit->cana->onkeyup  ='importe(<#i#>)';
 		$edit->cana->style    = 'width:98%';
@@ -1356,6 +1357,26 @@ class Snte extends Controller {
 		}
 
 		logusu('snte',"Nota entrega ${numero} CREADO");
+	}
+
+	//Chequea si puede o no vender negativo
+	function chcananeg($val,$i){
+		$almacen = $this->input->post('almacen');
+
+		if($this->vnega=='N'){
+			$codigo   = $this->input->post('codigo_'.$i);
+			$dbcodigo = $this->db->escape($codigo);
+			$dbalmacen= $this->db->escape($almacen);
+
+			$mSQL    = "SELECT SUM(a.existen) AS cana FROM itsinv AS a JOIN caub AS b ON a.alma=b.ubica AND b.tipo='S' WHERE a.codigo=${dbcodigo} AND b.ubica=${dbalmacen}";
+			$existen = floatval($this->datasis->dameval($mSQL));
+			$val     = floatval($val);
+			if($val>$existen){
+				$this->validation->set_message('chcananeg', 'El art&iacute;culo '.$codigo.' no tiene cantidad suficiente ('.nformat($existen).')');
+				return false;
+			}
+		}
+		return true;
 	}
 
 	function chpreca($preca,$ind){

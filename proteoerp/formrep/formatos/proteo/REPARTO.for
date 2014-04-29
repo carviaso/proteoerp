@@ -189,13 +189,17 @@ foreach ($detalle2 AS $items){ $i++;
 			</tr>
 <?php
 		if($npagina){
-			echo $pie_continuo;
+			if(count($detalle2)!=$maxlin){
+				echo $pie_continuo;
+			}
 		}else{
 			$mod = ! $mod;
 		}
 	} while ($clinea);
 }
 echo sprintf($pie_final,nformat($canat ),nformat($pesot));
+if(count($detalle2)==$maxlin)
+	echo '<div style="page-break-before: always;"></div>';
 
 //************************************
 // Lista de articulos
@@ -243,6 +247,13 @@ $pie_continuo=<<<piecontinuo
 <div style="page-break-before: always;"></div>
 piecontinuo;
 //Fin Pie Pagina
+
+if($npagina){
+	$this->incluir('X_CINTILLO');
+	echo $encabezado;
+	$npagina=false;
+	$lineas=0;
+}
 
 $lineas+=$det2encab;
 $i = 0;
