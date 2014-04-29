@@ -77,7 +77,25 @@ class Cheques {
 		}else{
 			return '';
 		}
+	}
 
+	function us_ascii($str){
+		$rt =trim($str);
+
+		if($this->db->char_set=='latin1'){
+			$rt=utf8_encode($rt);
+		}
+		//Convierte los caracteres de us-ascii
+		$rt =str_replace('Ñ',chr(165),$rt);
+		$rt =str_replace('ñ',chr(164),$rt);
+		$rt =str_replace('ª',chr(166),$rt);
+		$rt =str_replace('º',chr(167),$rt);
+
+		//$rt =htmlspecialchars($rt,ENT_COMPAT,'UTF-8');
+		//if($this->config->item('charset')!='UTF-8'){
+		//	$rt= utf8_decode($rt);
+		//}
+		return $rt;
 	}
 
 }

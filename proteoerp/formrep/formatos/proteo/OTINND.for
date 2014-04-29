@@ -22,11 +22,11 @@ $fecha    = dbdate_to_human($row->fecha);
 $numero   = $row->numero;
 $cod_cli  = htmlspecialchars(trim($row->cod_cli));
 $rifci    = htmlspecialchars(trim($row->rifci));
-$nombre   = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
+$nombre   = (empty($row->nomfis))? $this->us_ascii2html(trim($row->nombre)) : $this->us_ascii2html($row->nomfis);
 $stotal   = nformat($row->totals);
 $gtotal   = nformat($row->totalg);
 $exento   = nformat($row->exento);
-$observa  = htmlspecialchars(trim($row->observa1).trim($row->observa2));
+$observa  = $this->us_ascii2html(trim($row->observa1).trim($row->observa2));
 
 $tasa      = nformat($row->tasa);
 $montasa   = nformat($row->montasa);
@@ -36,7 +36,7 @@ $sobretasa = nformat($row->sobretasa);
 $monadic   = nformat($row->monadic);
 
 $impuesto = nformat($row->iva);
-$direc    = htmlspecialchars(trim($row->direccion));
+$direc    = $this->us_ascii2html(trim($row->direccion));
 $tipo_doc = trim($row->tipo_doc);
 $nfiscal  = htmlspecialchars(trim($row->nfiscal));
 $telefono = htmlspecialchars(trim($row->telefono));
@@ -46,19 +46,19 @@ $dbnumero   = $this->db->escape($numero);
 
 if($tipo_doc == 'OT')
 	$documento = 'Ingreso';
-elseif($tipo_doc == "OC")
-	$documento = "CREDITO";
-elseif($tipo_doc == "ND")
-	$documento = "NOTA DE DEBITO";
+elseif($tipo_doc == 'OC')
+	$documento = 'CREDITO';
+elseif($tipo_doc == 'ND')
+	$documento = 'NOTA DE DEBITO';
 else
-	$documento = "DOCUMENTO";
+	$documento = 'DOCUMENTO';
 
 $lineas = 0;
 $uline  = array();
 
 $mSQL="SELECT codigo,descrip AS desca,precio AS preca,importe, impuesto AS iva,larga AS detalle
 FROM itotin
-WHERE numero=$dbnumero AND tipo_doc=$dbtipo_doc";
+WHERE numero=${dbnumero} AND tipo_doc=${dbtipo_doc}";
 
 $mSQL_2 = $this->db->query($mSQL);
 $detalle  = $mSQL_2->result();
