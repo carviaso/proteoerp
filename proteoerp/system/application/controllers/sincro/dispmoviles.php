@@ -130,7 +130,7 @@ class Dispmoviles extends Controller {
 			a.bonicant,
 			UNIX_TIMESTAMP(a.fdesde) AS fdesde,
 			UNIX_TIMESTAMP(a.fhasta) AS fhasta,
-			${existen}*IF(a.activo='S') AS existen,
+			${existen}*(a.activo='S') AS existen,
 			TRIM(a.clave) AS clave,
 			a.tdecimal,
 			a.activo,

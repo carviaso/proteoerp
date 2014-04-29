@@ -3232,6 +3232,8 @@ class Sfac extends Controller {
 			$codigo   = $this->input->post('codigoa_'.$i);
 			$dbcodigo = $this->db->escape($codigo);
 			$dbalmacen= $this->db->escape($almacen);
+			$tipo     = trim($this->datasis->dameval("SELECT tipo FROM sinv WHERE codigo=${dbcodigo}"));
+			if($tipo[0]=='S') return true;
 
 			$mSQL    = "SELECT SUM(a.existen) AS cana FROM itsinv AS a JOIN caub AS b ON a.alma=b.ubica AND b.tipo='S' WHERE a.codigo=${dbcodigo} AND b.ubica=${dbalmacen}";
 			$existen = floatval($this->datasis->dameval($mSQL));
