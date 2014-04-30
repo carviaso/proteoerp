@@ -51,6 +51,8 @@ class Pfac extends Controller {
 
 		$WestPanel = $grid->deploywestp();
 
+		$grid->setWpAdicional('<div>averr</div>');
+
 		//Panel Central
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
@@ -802,6 +804,8 @@ class Pfac extends Controller {
 				if (id){
 					jQuery(gridId2).jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
 					jQuery(gridId2).trigger("reloadGrid");
+					var ret = $(this).getRowData(id);
+					$("#ladicional").text(ret.observa+ret.observ1);
 				}
 			},
 			afterInsertRow:
@@ -1634,13 +1638,27 @@ class Pfac extends Controller {
 
 	function _pre_insert($do){
 		$modoiva = $this->datasis->traevalor('MODOIVA');
-		$numero = $this->datasis->fprox_numero('npfac');
+		$numero  = $this->datasis->fprox_numero('npfac');
 		$do->set('numero', $numero);
 
 		//$transac = $this->datasis->fprox_numero('ntransa');
 		//$do->set('transac', $transac);
 		$fecha = $do->get('fecha');
 		$vd    = $do->get('vd');
+
+		$cod_cli  = $do->get('cod_cli');
+		$dbcod_cli= $this->db->escape($cod_cli);
+		$scli    =$this->datasis->damerow("SELECT rifci,nombre,CONCAT(TRIM(dire11),' ',TRIM(dire12)) direc,CONCAT(TRIM(dire21),' ',TRIM(dire22)) dire1,zona,ciudad1 AS ciudad FROM scli WHERE cliente=${dbcod_cli}");
+		if(empty($scli)){
+			$do->error_message_ar['pre_ins']='Cliente inexistente.';
+			return false;
+		}
+		$do->set('rifci' ,$scli['rifci'] );
+		$do->set('nombre',$scli['nombre']);
+		$do->set('direc' ,$scli['direc'] );
+		$do->set('dire1' ,$scli['dire1'] );
+		$do->set('zona'  ,trim($scli['zona']));
+		$do->set('ciudad',trim($scli['ciudad']));
 
 		$iva = $totals = 0;
 		$cana = $do->count_rel('itpfac');

@@ -53,7 +53,7 @@ class Reparto extends Controller {
 		$grid->wbotonadd(array('id'=>'entrega', 'img'=>'images/acuerdo.png',     'alt'=>'Entregado al Cliente', 'label'=>'Entregado al Cliente', 'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png',     'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'buscafc', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Buscar Faturas',      ));
+		//$grid->wbotonadd(array('id'=>'buscafc', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Buscar Faturas',      ));
 
 		$WestPanel = $grid->deploywestp();
 
@@ -74,7 +74,7 @@ class Reparto extends Controller {
 
 		$param['funciones']    = $funciones;
 		$param['WestPanel']    = $WestPanel;
-		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		//$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
 		$param['listados']     = $this->datasis->listados('REPARTO', 'JQ');
@@ -550,6 +550,21 @@ class Reparto extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:1, maxlength: 1 }',
+			'cellattr'      => 'function(rowId, tv, aData, cm, rdata){
+				var tips = "";
+				if(aData.tipo !== undefined){
+					if(aData.tipo=="P"){
+						tips = "Pendiente";
+					}else if(aData.tipo=="E"){
+						tips = "Entregado";
+					}else if(aData.tipo=="C"){
+						tips = "Cargado";
+					}else{
+						tips = "Otro";
+					}
+				}
+				return \'title="\'+tips+\'"\';
+			}'
 		));
 
 		$grid->addField('fecha');
@@ -697,8 +712,19 @@ class Reparto extends Controller {
 						$("#anulard").hide();
 					}
 				}
+			},
+			afterInsertRow:
+			function( rid, aData, rowe){
+				if(aData.tipo == "P"){
+					$(this).jqGrid( "setCell", rid, "tipo","", {color:"#FFFFFF", background:"#008B00" });
+				}else if(aData.tipo =="E"){
+					$(this).jqGrid( "setCell", rid, "tipo","", {color:"#FFFFFF", background:"#2F3CAD" });
+				}else if(aData.tipo =="C"){
+					$(this).jqGrid( "setCell", rid, "tipo","", {color:"#FFFFFF", background:"#FFDD00" });
+				}
 			}'
 		);
+
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");

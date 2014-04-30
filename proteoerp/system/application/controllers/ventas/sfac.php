@@ -47,8 +47,8 @@ class Sfac extends Controller {
 		$grid->wbotonadd(array('id'=>'boton1',   'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento','tema'=>'anexos', 'label'=>'Reimprimir'));
 		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png',              'alt' => 'Cierre de Caja',      'tema'=>'anexos', 'label'=>'Cierre de Caja'));
 		$grid->wbotonadd(array('id'=>'fmanual',  'img'=>'images/mano.png',                'alt' => 'Factura Manual',      'tema'=>'anexos', 'label'=>'Factura Manual'));
-		$grid->wbotonadd(array('id'=>'bdevolu',  'img' =>'images/dinero.png',             'alt' => 'Devolver Factura',    'tema'=>'anexos', 'label'=>'Devolver'));
-		$grid->wbotonadd(array('id'=>'nccob',    'img'=>'images/check.png'  , 'alt' => 'Nota de credito a factura pagada', 'label'=>'NC a Factura Cobrada'));
+		$grid->wbotonadd(array('id'=>'bdevolu',  'img'=>'images/dinero.png',              'alt' => 'Devolver Factura',    'tema'=>'anexos', 'label'=>'Devolver'));
+		$grid->wbotonadd(array('id'=>'nccob',    'img'=>'images/check.png', 'alt' => 'Nota de credito a factura pagada', 'label'=>'NC a Factura Cobrada'));
 
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){

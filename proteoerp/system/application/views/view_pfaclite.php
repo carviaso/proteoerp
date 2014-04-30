@@ -15,25 +15,6 @@ echo $form_begin;
 if($form->_status!='show'){ ?>
 <script language="javascript" type="text/javascript">
 
-function print_r(theObj){
-	var a='';
-   if(theObj.constructor == Array || theObj.constructor == Object){
-      a=a+"<ul>";
-      for(var p in theObj){
-         if(theObj [p] .constructor == Array || theObj [p] .constructor == Object){
-            a=a+"<li> ["+p+"]  => "+typeof(theObj)+"</li>";
-            a=a+"<ul>";
-            print_r(theObj [p] );
-            a=a+"</ul>";
-         } else {
-            a=a+"<li> ["+p+"]  => "+theObj [p] +"</li>";
-         }
-      }
-      a=a+"</ul>";
-   }
-   alert(a);
-}
-
 var importes= new Array();
 function total(id){
 	cana=Number(document.getElementById("cana_"+id).value);
@@ -90,7 +71,7 @@ function totalizar(){
 	</thead>
 	<tbody>
 	<?php
-	$pmarcat='';
+	$pmarcat=$js_ctotal='';
 	$i=0;
 
 	$arreglo=$it=$a=array();
@@ -134,7 +115,7 @@ function totalizar(){
 			$pdesca  = $row['descrip'].' '.nformat($peso).' KG';
 			$codigoa = trim($row['codigo']);
 			$preca   = $row['preca'];
-			$cana    = $row['cana'];
+			$cana    = floatval($row['cana']);
 			$precio1 = $row['precio1'];
 			$precio2 = $row['precio2'];
 			$precio1 = $row['precio1'];
@@ -155,6 +136,9 @@ function totalizar(){
 				//}else{
 				//	$f_cana='<input type="text" autocomplete="off" onkeyup="total(\''.$i.'\')" maxlength="10" style="height:30px;font-size:18px" size="4" class="inputnum" id="cana_'.$i.'" value="'.($cana>0?$cana:'').'" name="cana_'.$i.'">';
 				//}
+				if($cana>0){
+					$js_ctotal.= "total('${i}');\n";
+				}
 			}else{
 				$f_cana =nformat($cana);
 			}
@@ -237,7 +221,11 @@ function totalizar(){
 		<td colspan='2'><?php echo $form->observa->output;   ?></td>
 	</tr>
 </table>
-
+<?php if(!empty($js_ctotal)){ ?>
+<script language="javascript" type="text/javascript">
+	<?php echo $js_ctotal; ?>
+</script>
+<?php } ?>
 <?php echo $form_end; ?>
 <?php endif;
 ob_end_flush();

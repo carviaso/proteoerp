@@ -621,12 +621,19 @@ class pfaclite extends validaciones{
 			$fecha=$do->get('fecha');
 		}
 
-		$cod_cli=$do->get('cod_cli');
-		$scli   =$this->datasis->damerow("SELECT rifci,nombre,CONCAT(dire11,' ',dire12) direc,CONCAT(dire21,' ',dire22) dire1 FROM scli WHERE cliente='$cod_cli'");
+		$cod_cli  = $do->get('cod_cli');
+		$dbcod_cli= $this->db->escape($cod_cli);
+		$scli    =$this->datasis->damerow("SELECT rifci,nombre,CONCAT(TRIM(dire11),' ',TRIM(dire12)) direc,CONCAT(TRIM(dire21),' ',TRIM(dire22)) dire1,zona,ciudad1 AS ciudad FROM scli WHERE cliente=${dbcod_cli}");
+		if(empty($scli)){
+			$do->error_message_ar['pre_ins']='Cliente inexistente.';
+			return false;
+		}
 		$do->set('rifci' ,$scli['rifci'] );
 		$do->set('nombre',$scli['nombre']);
 		$do->set('direc' ,$scli['direc'] );
 		$do->set('dire1' ,$scli['dire1'] );
+		$do->set('zona'  ,trim($scli['zona']));
+		$do->set('ciudad',trim($scli['ciudad']));
 		$do->set('status','P');
 
 		$vd=$this->input->post('vd');
