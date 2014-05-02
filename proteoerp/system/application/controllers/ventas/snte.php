@@ -133,7 +133,24 @@ class Snte extends Controller {
 		function sntedel() {
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				alert("Opcion deshabilitada");
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if(json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog("open");
+						}
+					});
+				}
 			} else {
 				$.prompt("<h1>Por favor Seleccione un registro</h1>");
 			}
@@ -258,6 +275,20 @@ class Snte extends Controller {
 
 		$grid  = new $this->jqdatagrid;
 
+
+		$grid->addField('tipo');
+		$grid->label('Tipo');
+		$grid->params(array(
+			'align'         => "'center'",
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 45,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:40, maxlength: 1 }',
+		));
+
+
 		$grid->addField('numero');
 		$grid->label('N&uacute;mero');
 		$grid->params(array(
@@ -322,7 +353,7 @@ class Snte extends Controller {
 
 
 		$grid->addField('almacen');
-		$grid->label('Almacen');
+		$grid->label('Almac&eacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -455,17 +486,6 @@ class Snte extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-		$grid->addField('tipo');
-		$grid->label('Tipo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 1 }',
-		));
-
 		$grid->addField('peso');
 		$grid->label('Peso');
 		$grid->params(array(
@@ -573,13 +593,15 @@ class Snte extends Controller {
 			},
 			afterInsertRow:
 			function( rid, aData, rowe){
-				if ( aData.status == "PE"  ){
-					$(this).jqGrid( "setRowData", rid, false,{color:"#000000", background:"#DCFFB5" });
-				} else if ( aData.status == "BA" ){
-					$(this).jqGrid( "setRowData", rid, false,{color:"#000000", background:"#ECE2FF" });
+				if(aData.tipo == "E"){
+					$(this).jqGrid( "setCell", rid, "tipo","",{color:"#000000", background:"#DCFFB5" });
+				}else if(aData.tipo == "A"){
+					//$(this).jqGrid( "setRowData", rid, "tipo",{color:"#000000", background:"#C90623" });
+					$(this).jqGrid( "setCell", rid, "tipo","",{color:"#000000", background:"#C90623" });
 				}
 			}
 		');
+
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
@@ -666,17 +688,9 @@ class Snte extends Controller {
 				echo "Orden No Cambiada";
 
 
-		} elseif($oper == 'del') {
-		$meco = $this->datasis->dameval("SELECT $mcodp FROM snte WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM snte WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM snte WHERE id=$id ");
-				logusu('SNTE',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+		}elseif($oper == 'del'){
+			echo 'Deshabilitado';
+		}
 	}
 
 
@@ -1397,7 +1411,11 @@ class Snte extends Controller {
 	function _pre_delete($do){
 		$tipo     = $do->get('tipo');
 		$transac  = $do->get('transac');
+		$numero   = $do->get('numero');
+		$almacen  = $do->get('almacen');
 		$dbtransac= $this->db->escape($transac);
+		$dbnumero = $this->db->escape($numero);
+		$dbalmacen= $this->db->escape($almacen);
 
 		if($tipo=='C'){
 			$do->error_message_ar['pre_del']='La nota de entrega esta cerrada, no se puede anular';
@@ -1432,7 +1450,8 @@ class Snte extends Controller {
 			if($ban==false){ memowrite($mSQL,'snte'); }
 
 			$mSQL ="UPDATE snte SET tipo='A' WHERE numero = ${dbnumero}";
-			$this->db->simple_query($mSQL);
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'snte'); }
 
 			$do->error_message_ar['pre_del']='La nota de entrega fue anulada';
 			return false;
@@ -1449,7 +1468,7 @@ class Snte extends Controller {
 
 	function _post_delete($do){
 		$codigo=$do->get('numero');
-		logusu('snte',"Nota Entrega $codigo ELIMINADO");
+		logusu('snte',"Nota Entrega ${codigo} ELIMINADO");
 	}
 
 	function sclibu(){
