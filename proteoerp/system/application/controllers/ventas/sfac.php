@@ -242,8 +242,20 @@ class Sfac extends Controller {
 					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
 						$("#fedita").html("");
 						$("#fimpser").html("");
-						$("#fborra").html(data);
-						$("#fborra").dialog("open");
+
+						try{
+							var json = JSON.parse(data);
+							if(json.status == "A"){
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+								return true;
+							}else{
+								apprise(json.mensaje);
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog("open");
+						}
+
 						jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 					});
 				}
@@ -454,28 +466,30 @@ class Sfac extends Controller {
 									if(json.status == "A" ) {
 										if(json.manual == "N"){
 											$("#fedita").dialog("close");
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-											setTimeout(\'window.location="'.base_url().'formatos/'.$sfacforma.'/FACTURA/\'+json.pk.id+\'"\');
-											$.prompt("<h1>Registro Guardado</h1>Nro de Control:<input id=\'nfiscal\' name=\'nfiscal\'><br><h2>Cambio: "+json.vuelto+"</h2>",{
-												buttons: { Guardar: true, Cancelar: false },
-												submit: function(e,v,m,f){
-													if(v){
-														if(f.nfiscal == null || nfiscal == "" ){
-															alert("Debe colocal un Nro de Control");
-														}else{
-															yurl = encodeURIComponent(f.nfiscal);
-															$.ajax({
-																url: \''.site_url('ventas/sfac/guardafiscal').'\',
-																global: false, type: "POST",
-																data: ({ nfiscal : encodeURIComponent(f.nfiscal), factura : json.pk.id }),
-																dataType: "text", async: false,
-																success: function(sino) { alert(sino);},
-																error: function(h,t,e) { alert("Error.. ",e) }
-															});
-														}
-													}
-												}
-											});
+											//setTimeout(\'window.location="'.base_url().'formatos/'.$sfacforma.'/FACTURA/\'+json.pk.id+\'"\');
+											//$.prompt("<h1>Registro Guardado</h1>Nro de Control:<input id=\'nfiscal\' name=\'nfiscal\'><br><h2>Cambio: "+json.vuelto+"</h2>",{
+											//	buttons: { Guardar: true, Cancelar: false },
+											//	submit: function(e,v,m,f){
+											//		if(v){
+											//			if(f.nfiscal == null || nfiscal == "" ){
+											//				alert("Debe colocal un Nro de Control");
+											//			}else{
+											//				yurl = encodeURIComponent(f.nfiscal);
+											//				$.ajax({
+											//					url: \''.site_url('ventas/sfac/guardafiscal').'\',
+											//					global: false, type: "POST",
+											//					data: ({ nfiscal : encodeURIComponent(f.nfiscal), factura : json.pk.id }),
+											//					dataType: "text", async: false,
+											//					success: function(sino) { alert(sino);},
+											//					error: function(h,t,e) { alert("Error.. ",e) }
+											//				});
+											//			}
+											//		}
+											//	}
+											//});
+
 											return true;
 										}else{
 											//$( "#fedita" ).dialog( "close" );

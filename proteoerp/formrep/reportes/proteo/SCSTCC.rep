@@ -1,0 +1,126 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$mSPRV=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('proveed'=>'Código','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'proveed'),
+	'titulo'  =>'Buscar Proveedor');
+
+$bSPRV=$this->datasis->modbus($mSPRV);
+
+$sinv=array(
+	'tabla'   =>'sinv',
+	'columnas'=>array(
+		'codigo' =>'Código',
+		'descrip'=>'descrip'),
+	'filtro'  =>array('codigo' =>'Código','descrip'=>'descrip'),
+	'retornar'=>array('codigo'=>'codigo'),
+	'titulo'  =>'Buscar Artículo');
+
+$bSINVd=$this->datasis->modbus($sinv,'sinv');
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('a.fecha','a.numero','a.montotot','a.montoiva','a.montonet','a.credito','c.peso*b.cantidad AS peso','a.proveed','a.nombre',
+	'(a.montonet-a.credito) AS contado',
+	'b.codigo', 'b.descrip','b.cantidad','b.costo','b.importe',
+	'(b.costo*(b.iva+100)/100)-b.costo AS iva',
+	'(b.costo*(b.iva+100)/100) AS  piva',
+	'(b.costo*(b.iva+100)/100)*cantidad AS total','c.pond','c.margen1','c.base1','c.precio1','c.existen');
+
+$filter->db->select($select);
+$filter->db->from('scst   AS a');
+$filter->db->join('itscst AS b','a.control=b.control');
+$filter->db->join('sinv   AS c','b.codigo=c.codigo');
+$filter->db->orderby('a.proveed');
+
+$filter->fechad = new dateField('Desde', 'fechad','d/m/Y');
+$filter->fechad->clause  ='where';
+$filter->fechad->db_name ='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30, date('Y')));
+$filter->fechad->operator='>=';
+$filter->fechad->rule='required';
+$filter->fechad->group='Fecha';
+
+$filter->fechah = new dateField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->clause='where';
+$filter->fechah->db_name='a.fecha';
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechah->operator='<=';
+$filter->fechah->rule='required';
+$filter->fechah->group='Fecha';
+
+$filter->codigo = new inputField('Producto', 'codigo');
+$filter->codigo->db_name='b.codigo';
+$filter->codigo->clause='where';
+$filter->codigo->operator='=';
+$filter->codigo->append($bSINVd);
+
+$filter->proveed = new inputField('Proveedor', 'proveed');
+$filter->proveed->clause='where';
+$filter->proveed->operator='=';
+$filter->proveed->db_name='a.proveed';
+$filter->proveed->append($bSPRV);
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL; exit();
+
+	$sobretabla='';
+	if(!empty($filter->proveed->newValue)) $sobretabla.='Proveedor: ('.$filter->proveed->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$this->db->escape($filter->proveed->newValue));
+	if(!empty($filter->codigo->newValue))  $sobretabla.='Producto: ('.$filter->codigo->newValue.') '.$this->datasis->dameval('SELECT descrip FROM sinv WHERE codigo='.$this->db->escape($filter->codigo->newValue));
+
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Listado de Compras Detallada');
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->setSubTitulo('Desde la fecha: '.$_POST['fechad'].' Hasta '.$_POST['fechah']);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol('fecha'      ,20,'Fecha',       'C',7);
+	$pdf->AddCol('codigo'     ,15,'Codigo',      'C',7);
+	$pdf->AddCol('descrip'    ,55,'Nombre',      'L',7);
+	$pdf->AddCol('cantidad'   ,15,'Cantidad',    'C',7);
+	$pdf->AddCol('costo'      ,15,'Costo',       'R',7);
+	//$pdf->AddCol('iva'        ,15,'Iva',         'R',7);
+	$pdf->AddCol('piva'       ,18,'Precio + Iva','R',7);
+	$pdf->AddCol('total'      ,15,'Total',       'R',7);
+	$pdf->AddCol('peso'       ,15,'Peso',        'R',7);
+	$pdf->AddCol('margen1'    ,15,'Margen1',     'R',7);
+	$pdf->AddCol('base1'      ,15,'Base1',       'R',7);
+	//$pdf->AddCol('precio1'    ,15,'Precio1',     'R',7);
+	//$pdf->AddCol('existen'    ,15,'Existencia',  'R',7);
+
+	$pdf->setGrupoLabel('(<#proveed#>)<#nombre#>','Numero <#numero#>');
+	$pdf->setGrupo('proveed','numero');
+	$pdf->setTotalizar('cantidad','costo','iva','piva','total','peso');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Listado de Compras Detalladas</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
