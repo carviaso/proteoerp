@@ -56,8 +56,8 @@ $mGrup=array(
 	'retornar'=>array('grupo'=>'sinvgru'),
 	'titulo'  =>'Buscar Proveedor');
 
-$bPrv =$this->datasis->modbus($mPrv);
-$bGrup=$this->datasis->modbus($mGrup);
+$bPrv  =$this->datasis->modbus($mPrv);
+$bGrup =$this->datasis->modbus($mGrup);
 $cboton=$this->datasis->modbus($scli);
 $iboton=$this->datasis->modbus($sinv);
 $bsocio=$this->datasis->modbus($mSOCIO,'socio');
@@ -67,10 +67,12 @@ if(!empty($_POST['socio'])) $_POST['cod_cli']='';
 $filter = new DataFilter2('Filtro del Reporte');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$select=array('tipoa','CONCAT(tipoa, numa) AS nnumero', 'codigoa', 'a.fecha', 'desca' , "CONCAT_WS(' ',cod_cli,b.nombre) cliente","cod_cli", "a.vendedor", "b.nombre", "f.nombre as vendedor" ,"g.linea", "CONCAT_WS(' ',g.grupo, g.nom_grup) ggrupo", "b.numero",
-"IF(tipoa='X',0,cana)*if(tipoa='F',1,-1) AS cana", 'preca',
-"IF(tipoa='X',0,tota)*if(tipoa='F',1,-1) AS tota", 'costo',
-"IF(tipoa='D',tota,0)  AS tdevo",
+$select=array('tipoa','CONCAT(tipoa, numa) AS nnumero', 'codigoa', 'a.fecha', 'desca' ,
+"CONCAT_WS(' ',cod_cli,b.nombre) cliente",'cod_cli', 'a.vendedor',
+'b.nombre', 'f.nombre AS vendedor' ,'g.linea', "CONCAT_WS(' ',g.grupo, g.nom_grup) AS ggrupo", 'b.numero',
+"IF(tipoa='X',0,cana)*IF(tipoa='F',1,-1) AS cana", 'preca',
+"IF(tipoa='X',0,tota)*IF(tipoa='F',1,-1) AS tota", 'costo',
+"IF(tipoa='D',tota,0)  AS tdevo",'c.peso*a.cana*(a.tipoa<>"X") AS peso',
 "(tota-(costo*cana))   AS margenbs",
 "(preca*100/costo-100) AS porcen");
 
@@ -104,7 +106,7 @@ $filter->codigo->clause='where';
 $filter->codigo->operator='=';
 $filter->codigo->rule = 'existesinv';
 $filter->codigo->append($iboton);
-$filter->codigo->group="Producto";
+$filter->codigo->group='Producto';
 
 $filter->cod_cli = new inputField('Cliente', 'cod_cli');
 $filter->cod_cli->db_name='b.cod_cli';
@@ -117,7 +119,7 @@ $filter->socio = new inputField('Socio', 'socio');
 $filter->socio->clause ='in';
 $filter->socio->db_name='(d.socio,d.cliente) ';
 $filter->socio->rule = 'existescli';
-$filter->socio->append($bsocio.' No se tomará en cuenta el cliente');
+$filter->socio->append($bsocio.' No se tomar&aacute; en cuenta el cliente');
 
 $filter->grupo = new dropdownField('Grupo de Cliente', 'grupo');
 $filter->grupo->db_name = 'e.grupo';
@@ -126,25 +128,23 @@ $filter->grupo->operator='=';
 $filter->grupo->option('','Todos');
 $filter->grupo->options('SELECT grupo, gr_desc FROM grcl ORDER BY grupo');
 
-$filter->sinvgru = new inputField('Grupo de Artículo', 'sinvgru');
+$filter->sinvgru = new inputField('Grupo de Art&iacute;culo', 'sinvgru');
 $filter->sinvgru->db_name = 'c.grupo';
 $filter->sinvgru->clause  = 'where';
 $filter->sinvgru->operator= '=';
 $filter->sinvgru->rule='existegrupo';
 $filter->sinvgru->append($bGrup);
 
-$filter->proveed = new inputField('C&oacute;digo de proveedor', 'prov1');
-$filter->proveed->db_name ='c.prov1';
-$filter->proveed->clause  ='where';
-$filter->proveed->rule='existesprv';
-$filter->proveed->operator='=';
+$filter->proveed = new inputField('Proveedor', 'prov1');
+$filter->proveed->clause ='in';
+$filter->proveed->db_name='( c.prov1, c.prov2, c.prov3 )';
 $filter->proveed->append($bPrv);
 
 $filter->marca = new dropdownField('Marca', 'marca');
 $filter->marca->db_name ='c.marca';
 $filter->marca->clause  ='where';
 $filter->marca->option('','Todas');
-$filter->marca->options('SELECT marca as codigo, marca FROM marc ORDER BY marca');
+$filter->marca->options('SELECT TRIM(marca) AS codigo, marca FROM marc ORDER BY marca');
 $filter->marca->operator='=';
 
 $filter->vd = new dropdownField('Vendedor', 'vd');
@@ -153,6 +153,12 @@ $filter->vd->clause='where';
 $filter->vd->option('','Todos');
 $filter->vd->options('SELECT vendedor, nombre FROM vend ORDER BY vendedor');
 $filter->vd->operator='=';
+
+$filter->sucu = new dropdownField('Sucursal', 'sucursal');
+$filter->sucu->db_name='d.sucursal';
+$filter->sucu->style= 'width:150px;';
+$filter->sucu->option('','Todas');
+$filter->sucu->options('SELECT TRIM(codigo) AS codigo,sucursal FROM sucu WHERE codigo IS NOT NULL ORDER BY sucursal');
 
 $filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
@@ -164,20 +170,22 @@ $filter->build();
 
 if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$mSQL=$filter->db->_compile_select();
-	//echo $mSQL;
+	//echo $mSQL; exit();
 
 	$subtitu='';
 	if(!empty($_POST['fechad'])) $subtitu.=' Desde la fecha '.$_POST['fechad'];
 	if(!empty($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
 
 	$sobretabla='';
-	if (!empty($filter->codigo->newValue))  $sobretabla.=' Código: ('.$filter->codigo->newValue.') '.$this->datasis->dameval('SELECT descrip FROM sinv WHERE codigo="'.$filter->codigo->newValue.'"');
-	if (!empty($filter->socio->newValue))   $sobretabla.=' Socio: ('.$filter->socio->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->socio->newValue.'"');
-	if (!empty($filter->sinvgru->newValue)) $sobretabla.=' Grupo Artículo: ('.$filter->sinvgru->newValue.') '.$this->datasis->dameval('SELECT nom_grup FROM grup WHERE grupo="'.$filter->sinvgru->newValue.'"');
-	if (!empty($filter->cod_cli->newValue)) $sobretabla.=' Cliente: ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_cli->newValue.'"');
+	if (!empty($filter->codigo->newValue))  $sobretabla.=' Código: ('.$filter->codigo->newValue.') '.$this->datasis->dameval('SELECT descrip FROM sinv WHERE codigo='.$this->db->escape($filter->codigo->newValue));
+	if (!empty($filter->socio->newValue))   $sobretabla.=' Socio: ('.$filter->socio->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente='.$this->db->escape($filter->socio->newValue));
+	if (!empty($filter->sinvgru->newValue)) $sobretabla.=' Grupo Artículo: ('.$filter->sinvgru->newValue.') '.$this->datasis->dameval('SELECT nom_grup FROM grup WHERE grupo='.$this->db->escape($filter->sinvgru->newValue));
+	if (!empty($filter->cod_cli->newValue)) $sobretabla.=' Cliente: ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente='.$this->db->escape($filter->cod_cli->newValue));
 	if (!empty($filter->grupo->newValue))   $sobretabla.=' Grupo Cliente: '.$filter->grupo->description;
 	if (!empty($filter->marca->newValue))   $sobretabla.=' Marca: '.$filter->marca->description;
-	if (!empty($filter->proveed->newValue)) $sobretabla.=' Proveedor: ('.$filter->proveed->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed="'.$filter->proveed->newValue.'"');
+	if (!empty($filter->proveed->newValue)) $sobretabla.=' Proveedor: ('.$filter->proveed->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$this->db->escape($filter->proveed->newValue));
+	if (!empty($filter->sucu->newValue))    $sobretabla.=' Sucursal: ('.$filter->sucu->newValue.') '.$filter->sucu->description;
+
 
 	$pdf = new PDFReporte($mSQL,'L');
 	$pdf->setHeadValores('TITULO1');
@@ -192,6 +200,7 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$pdf->AddCol('fecha'   ,12,'Fecha'      ,'L',5);
 	$pdf->AddCol('codigoa' ,15,'Código'     ,'L',5);
 	$pdf->AddCol('desca'   ,50,'Descripción','L',5);
+	$pdf->AddCol('peso',    12,'Peso'       ,'R',5);
 	$pdf->AddCol('cana'    ,15,'Cant.'      ,'R',5);
 	$pdf->AddCol('preca'   ,15,'Base'       ,'R',5);
 	$pdf->AddCol('tota'    ,15,'Importe'    ,'R',5);
@@ -201,14 +210,14 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$pdf->AddCol('cliente' ,52,'Cliente'    ,'L',5);
 	$pdf->AddCol('vendedor',25,'Vendedor'   ,'L',5);
 
-	//$pdf->setTotalizar('cana','preca','tota','costo','porcen','margenbs');
+	$pdf->setTotalizar('tota','costo','peso');
 	$pdf->Table();
 	$pdf->Output();
 
 }else{
 	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Ventas Por Artículo</h2>';
+	$data['titulo'] = '<h2 class="mainheader">Ventas Por Art&iacute;culo</h2>';
 	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

@@ -251,7 +251,7 @@ class pfaclite extends validaciones{
 			$mSQL="SELECT COUNT(*) AS cca FROM (SELECT 1 AS cana FROM scli AS a JOIN sfac AS b ON b.cod_cli=a.cliente WHERE b.fecha>=${dbfini} AND vendedor=${dbvd} GROUP BY a.cliente) AS aa";
 			$atendidos=$this->datasis->dameval($mSQL);
 
-			$mSQL="SELECT SUM(c.peso*a.cana) AS peso FROM sitems AS a JOIN sfac AS b ON a.numa=b.numero AND a.tipoa=b.tipo_doc JOIN sinv AS c ON a.codigoa=c.codigo WHERE b.vd = ${dbvd} AND b.fecha>=${dbfini}";
+			$mSQL="SELECT SUM(c.peso*a.cana*IF(a.tipoa='F',1,-1)) AS peso FROM sitems AS a JOIN sfac AS b ON a.numa=b.numero AND a.tipoa=b.tipo_doc JOIN sinv AS c ON a.codigoa=c.codigo WHERE b.vd = ${dbvd} AND a.tipoa<>'X' AND b.fecha>=${dbfini}";
 			$ttpeso=nformat(floatval($this->datasis->dameval($mSQL))/1000,3);
 
 			$efe = htmlnformat($atendidos*100/$clientes);
