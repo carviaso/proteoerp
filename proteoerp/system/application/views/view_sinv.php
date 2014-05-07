@@ -1394,7 +1394,9 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class="littletableheader" style='background: #3B240B;color: #FFEEFF;font-weight: bold;text-align:center;'>Precio</td>
 				</tr>
 			  	<tr>
-					<?php if( $form->grupo->value == '0002' && $this->datasis->dameval('RIF')=='J-40310702-5' ) { ?>
+					<?php 
+					$mrif = $this->datasis->dameval('RIF');
+					if( $form->grupo->value == '0002' && $mrif == 'J-40310702-5' ) { ?>
 					<td class="littletableheaderc" align="center">6</td>
 					<?php } else { ?>
 					<td class="littletableheaderc" align="center">1</td>
