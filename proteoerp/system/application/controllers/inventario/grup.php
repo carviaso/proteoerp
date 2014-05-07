@@ -20,7 +20,7 @@ class Grup extends Controller {
 
 	function index(){
 		$this->instalar();
-		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->datasis->modintramenu( 700, 500, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -148,7 +148,7 @@ class Grup extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 450, width: 500, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;

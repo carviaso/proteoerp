@@ -1365,8 +1365,8 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class="littletablerow"    ><?php echo $form->pond->output.$form->cpond->output   ?></td>
 				</tr>
 				<tr>
-					<td class="littletableheaderc"><?php echo $form->standard->label    ?></td>
-					<td class="littletablerow"    ><?php echo $form->standard->output   ?></td>
+					<td class="littletableheaderc"><?php echo $form->standard->label  ?></td>
+					<td class="littletablerow"    ><?php echo $form->standard->output ?></td>
 				</tr>
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->formcal->label ?></td>
@@ -1394,7 +1394,11 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class="littletableheader" style='background: #3B240B;color: #FFEEFF;font-weight: bold;text-align:center;'>Precio</td>
 				</tr>
 			  	<tr>
+					<?php if( $form->grupo->value == '0002' && $this->datasis->dameval('RIF')=='J-40310702-5' ) { ?>
+					<td class="littletableheaderc" align="center">6</td>
+					<?php } else { ?>
 					<td class="littletableheaderc" align="center">1</td>
+					<?php } ?>
 					<td class="littletablerow" align='center'><?php echo $form->margen1->output ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->base1->output   ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->precio1->output.$form->cbase1->output; ?></td>
