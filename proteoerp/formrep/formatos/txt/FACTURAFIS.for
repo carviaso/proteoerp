@@ -1,5 +1,4 @@
 <?php
-$maxlin=40; //Maximo de lineas de items.
 $_arch_nombre='sfac.fis';
 
 if(count($parametros)==0) show_error('Faltan parametros');
@@ -68,15 +67,15 @@ $uline  = array();
 $mSQL="SELECT
 	codigoa AS codigo,desca,cana,preca,tota AS importe,iva,detalle
 FROM sitems
-WHERE numa=$dbnumero AND tipoa=$dbtipo_doc";
+WHERE numa=${dbnumero} AND tipoa=${dbtipo_doc}";
 
 $mSQL_2 = $this->db->query($mSQL);
 $detalle  = $mSQL_2->result();
 
-//$encab  = 'CLIENTE: '.str_pad($cod_cli,9).' REF: '.$numero."\n";
-//$encab .= $nombre."\n";
-//$encab .= 'RIF:'.str_pad($rifci,14).' Vende: '.$vd."\n";
-//$encab .= $direccion."\n";
+$encab  = 'CLIENTE: '.str_pad($cod_cli,9).' REF: '.$numero."\n";
+$encab .= $nombre."\n";
+$encab .= 'RIF:'.str_pad($rifci,14).' Vende: '.$vd."\n";
+$encab .= $direccion."\n";
 $encab = $row->observa;
 
 $encab  = wordwrap($encab,40,"\n");

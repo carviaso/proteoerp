@@ -264,6 +264,19 @@ $(function(){
 		autocod(i.toString());
 	}
 	chtipo();
+
+
+	$("#linfe").change(function(){
+		var val=$(this).val();
+		if(val=='S'){
+			$("#lindia").show();
+		}else{
+			$("#lindia").hide();
+		}
+	});
+
+	$("#linfe").change();
+
 });
 
 function post_enlace(){
@@ -1186,8 +1199,10 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class="littletablerow">    <?php echo $form->ubica->output; ?></td>
 				</tr>
 				<tr>
-					<td class='littletableheaderc'><?php echo $form->modelo->label;  ?></td>
-					<td class="littletablerow">    <?php echo $form->modelo->output; ?></td>
+					<td class='littletableheaderc'><?php echo $form->modelo->label;   ?></td>
+					<td class="littletablerow">    <?php echo $form->modelo->output;  ?></td>
+					<td class='littletableheaderc'><?php echo $form->garantia->label; ?></td>
+					<td class="littletablerow">    <?php echo $form->garantia->output;?></td>
 				</tr>
 			</table>
 		</td>
@@ -1198,12 +1213,15 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				<tr>
 					<td class="littletablerow"><?php echo $form->tipo->label;    ?></td>
 					<td class="littletablerow"><?php echo $form->tipo->output;   ?></td>
-					<td class='littletablerow'><?php echo $form->activo->label;  ?></td>
+					<td class="littletablerow"><?php echo $form->activo->label;  ?></td>
 					<td class="littletablerow"><?php echo $form->activo->output; ?></td>
 					<td class="littletablerow"><?php echo $form->iva->label;     ?></td>
 					<td class="littletablerow"><?php echo $form->iva->output;    ?></td>
 					<td class="littletablerow"><?php echo $form->exento->label;  ?></td>
 					<td class="littletablerow"><?php echo $form->exento->output; ?></td>
+					<td class="littletablerow"><?php echo $form->clase->label    ?></td>
+					<td class="littletablerow"><?php echo $form->clase->output   ?></td>
+
 				</tr>
 			</table>
 		</td>
@@ -1248,13 +1266,17 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class="littletablerow"><?php echo $form->serial->output   ?></td>
 				</tr>
 				<tr>
-					<td width="100" class='littletableheaderc'><?php echo $form->clave->label ?></td>
+					<td class='littletableheaderc'><?php echo $form->clave->label ?></td>
 					<td class="littletablerow"><?php echo $form->clave->output   ?></td>
 				</tr>
 			</table>
 		</td>
 		<td valign='top' align='center'>
 			<table border='0'  width='100%' cellpadding='0' cellspacing='0'>
+				<tr>
+					<td class='littletableheaderc'><?php echo $form->fracci->label ?></td>
+					<td class="littletablerow"><?php echo $form->fracci->output   ?></td>
+				</tr>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->peso->label ?></td>
 					<td class="littletablerow"><?php echo $form->peso->output   ?></td>
@@ -1263,10 +1285,6 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->unidad->label ?></td>
 					<td class="littletablerow"><?php echo $form->unidad->output   ?></td>
-				</tr>
-				<tr>
-					<td class='littletableheaderc'><?php echo $form->fracci->label ?></td>
-					<td class="littletablerow"><?php echo $form->fracci->output   ?></td>
 				</tr>
 			</table>
 		</td>
@@ -1296,7 +1314,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 		<td valign='top' align='left'>
 			<table border='0' cellpadding='0' cellspacing='0'>
 				<tr>
-					<td width='100' class='littletableheaderc'><?php echo $form->depto->label ?></td>
+					<td width='80' class='littletableheaderc'><?php echo $form->depto->label ?></td>
 					<td nowrap class="littletablerow"><?php echo $form->depto->output   ?></td>
 				</tr>
 				<tr style="height:14px">
@@ -1327,12 +1345,8 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 		<td valign='top'  align='left'>
 			<table border='0' width="100%" cellpadding='0' cellspacing='0'>
 				<tr>
-					<td class='littletableheaderc'><?php echo $form->clase->label ?></td>
-					<td class="littletablerow">    <?php echo $form->clase->output   ?></td>
-				</tr>
-				<tr>
-					<td class='littletableheaderc'><?php echo $form->garantia->label ?></td>
-					<td class="littletablerow"><?php echo $form->garantia->output   ?></td>
+					<td class='littletableheaderc'><?php echo $form->linfe->label ?></td>
+					<td class="littletablerow" style='width:90px'>    <?php echo $form->linfe->output.$form->lindia->output   ?></td>
 				</tr>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->comision->label ?></td>
@@ -1365,8 +1379,8 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class="littletablerow"    ><?php echo $form->pond->output.$form->cpond->output   ?></td>
 				</tr>
 				<tr>
-					<td class="littletableheaderc"><?php echo $form->standard->label  ?></td>
-					<td class="littletablerow"    ><?php echo $form->standard->output ?></td>
+					<td class="littletableheaderc"><?php echo $form->standard->label    ?></td>
+					<td class="littletablerow"    ><?php echo $form->standard->output   ?></td>
 				</tr>
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->formcal->label ?></td>
@@ -1394,44 +1408,25 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class="littletableheader" style='background: #3B240B;color: #FFEEFF;font-weight: bold;text-align:center;'>Precio</td>
 				</tr>
 			  	<tr>
-					<?php 
-					$mrif = $this->datasis->traevalor('RIF');
-					if( $form->grupo->value == '0002' && $mrif == 'J-40310702-5' ) { ?>
-					<td class="littletableheaderc" align="center">6</td>
-					<?php } else { ?>
 					<td class="littletableheaderc" align="center">1</td>
-					<?php } ?>
 					<td class="littletablerow" align='center'><?php echo $form->margen1->output ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->base1->output   ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->precio1->output.$form->cbase1->output; ?></td>
-
 				</tr>
 				<tr>
-					<?php if( $form->grupo->value == '0002' && $mrif == 'J-40310702-5' ) { ?>
-					<td class="littletableheaderc" align="center">1</td>
-					<?php } else { ?>
 					<td class="littletableheaderc" align="center">2</td>
-					<?php } ?>
 					<td class="littletablerow" align='center'><?php echo $form->margen2->output ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->base2->output   ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->precio2->output.$form->cbase2->output; ?></td>
 				</tr>
 				<tr>
-					<?php if( $form->grupo->value == '0002' && $mrif == 'J-40310702-5' ) { ?>
-					<td class="littletableheaderc" align="center">2</td>
-					<?php } else { ?>
 					<td class="littletableheaderc" align="center">3</td>
-					<?php } ?>
 					<td class="littletablerow" align='center'><?php echo $form->margen3->output ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->base3->output   ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->precio3->output.$form->cbase3->output; ?></td>
 				</tr>
 				<tr>
-					<?php if( $form->grupo->value == '0002' && $mrif == 'J-40310702-5' ) { ?>
-					<td class="littletableheaderc" align="center">3</td>
-					<?php } else { ?>
 					<td class="littletableheaderc" align="center">4</td>
-					<?php } ?>
 					<td class="littletablerow" align='center'><?php echo $form->margen4->output ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->base4->output   ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->precio4->output.$form->cbase4->output; ?></td>

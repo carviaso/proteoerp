@@ -3076,7 +3076,7 @@ class Sinv extends Controller {
 		$edit->largo->rule='numeric|callback_positivo';
 
 		$edit->garantia = new inputField('Garantia', 'garantia');
-		$edit->garantia->size=7;
+		$edit->garantia->size=9;
 		$edit->garantia->maxlength=3;
 		$edit->garantia->css_class='inputonlynum';
 		$edit->garantia->rule='numeric|callback_positivo';
@@ -3143,7 +3143,7 @@ class Sinv extends Controller {
 		$edit->cpond->pointer=true;
 		$edit->cpond->db_name='cpond';
 
-		$edit->standard = new inputField('Standard', 'standard');
+		$edit->standard = new inputField('Estandar', 'standard');
 		$edit->standard->css_class='inputnum';
 		$edit->standard->size=10;
 		$edit->standard->maxlength=13;
@@ -3173,6 +3173,22 @@ class Sinv extends Controller {
 		$edit->redecen->option('C','Centenas');
 		$edit->redecen->rule='enum[N,M,F,D,C]';
 		$edit->redecen->onchange='calculos(\'S\');';
+
+		$edit->linfe = new dropdownField('Limitar ventas seguidas', 'linfe');
+		$edit->linfe->style='width:45px;';
+		$edit->linfe->option('N' ,'No');
+		$edit->linfe->option('S' ,'Si');
+		$edit->linfe->insertValue='N';
+		$edit->linfe->rule='enum[N,S]|callback_chlinfe';
+		$edit->linfe->title='Activar si desea evitar que este producto no sea vendido a la misma persona en un per&iacute;odo de d&iacute;as';
+
+		$edit->lindia = new inputField('D&iacute;as de limitaci&oacute;n', 'lindia');
+		$edit->lindia->css_class='inputnum';
+		$edit->lindia->size=3;
+		$edit->lindia->maxlength=5;
+		$edit->lindia->rule='numeric';
+		$edit->lindia->insertValue='0';
+		$edit->lindia->autocomplete = false;
 
 		for($i=1;$i<=4;$i++){
 			$objeto="margen$i";
@@ -3775,7 +3791,7 @@ class Sinv extends Controller {
 			$mp = ($precio1 >= $precio4 && $precio2 >= $precio4 && $precio3 >= $precio4);
 		else
 			$mp = ($precio1 >= $precio2 && $precio2 >= $precio3 && $precio3 >= $precio4);
-		
+
 		//if($precio1 >= $precio2 && $precio2 >= $precio3 && $precio3 >= $precio4){
 		//if($precio1 >= $precio4 && $precio2 >= $precio4 && $precio3 >= $precio4){
 
@@ -3806,7 +3822,7 @@ class Sinv extends Controller {
 
 				$mbase = $$prec*100/(100+$iva);   //calcula la base
 				$mmarg = 100-($costo*100/$mbase); //calcula el margen
-			
+
 
 				$do->set($prec,round($$prec,2));
 				$do->set($base,round($mbase,2));
@@ -3820,7 +3836,7 @@ class Sinv extends Controller {
 				$do->error_message_ar['pre_upd'] =$do->error_message_ar['pre_ins'] = 'Los precios deben cumplir con:<br> El Precio 4 debe ser el menor';
 			else
 				$do->error_message_ar['pre_upd'] =$do->error_message_ar['pre_ins'] = 'Los precios deben cumplir con:<br> Precio 1 mayor o igual al Precio 2 mayor o igual al  Precio 3 mayor o igual al Precio 4';
-			
+
 			return false;
 		}
 
@@ -4864,6 +4880,16 @@ class Sinv extends Controller {
 		}else{
 		 return true;
 		}
+	}
+
+	function chlinfe($val){
+		$lindia=intval($this->input->post('lindia'));
+
+		if($val=='S' && $lindia<=0){
+			$this->validation->set_message('chlinfe',"Si activa la limitaci&oacute;n de ventas seguidas debe colocar la cantidad de d&iacute;as");
+			return false;
+		}
+		return true;
 	}
 
 	function chobligafraccion($enlace){
@@ -6147,6 +6173,10 @@ class Sinv extends Controller {
 		if (!in_array('mpps'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `mpps`        VARCHAR(20) NULL  COMMENT 'Numero de Ministerior de Salud'");
 		if (!in_array('cpe'        ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpe`         VARCHAR(20) NULL  COMMENT 'Registro de CPE'");
 		if (!in_array('tasa'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpe`         VARCHAR(20) NULL  COMMENT 'Tasa asociada'");
+		if (!in_array('linfe'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `linfe`       CHAR(1) NULL DEFAULT NULL");
+		if (!in_array('lindia'     ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `lindia`      INT(5) NULL DEFAULT NULL");
+
+
 
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
 			if (!in_array('dcomercial', $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `dcomercial`  INT(6)     NULL  COMMENT 'Destino Comercial'");
