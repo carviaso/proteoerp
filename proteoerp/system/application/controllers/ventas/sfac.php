@@ -2814,7 +2814,8 @@ class Sfac extends Controller {
 		$edit->ciudad    = new inputField('Ciudad', 'ciudad');
 		$edit->exento    = new inputField('Exento', 'exento');
 		$edit->maqfiscal = new inputField('Mq.Fiscal', 'maqfiscal');
-		$edit->pfac      = new hiddenField('Presupuesto', 'pfac');
+		$edit->pfac      = new hiddenField('Presupuesto'    , 'pfac');
+		$edit->snte      = new hiddenField('Nota de entrega', 'snte');
 
 		$edit->reiva     = new inputField('Retencion de IVA', 'reiva');
 		$edit->creiva    = new inputField('Comprobante', 'creiva');
@@ -3243,6 +3244,11 @@ class Sfac extends Controller {
 		$tipo_doc = $this->input->post('tipo_doc');
 		$almacen  = $this->input->post('almacen');
 		if($this->vnega=='N' && $tipo_doc=='F'){
+			$snte     = $this->input->post('snte');
+			if(!empty($snte)){
+				return true;
+			}
+
 			$codigo   = $this->input->post('codigoa_'.$i);
 			$dbcodigo = $this->db->escape($codigo);
 			$dbalmacen= $this->db->escape($almacen);
@@ -3253,7 +3259,7 @@ class Sfac extends Controller {
 			$existen = floatval($this->datasis->dameval($mSQL));
 			$val     = floatval($val);
 			if($val>$existen){
-				$this->validation->set_message('chcananeg', 'El art&iacute;culo '.$codigo.' no tiene cantidad suficiente para facturarse ('.nformat($existen).')');
+				$this->validation->set_message('chcananeg', 'El art&iacute;culo '.htmlspecialchars($codigo).' no tiene cantidad suficiente para facturarse ('.nformat($existen).')');
 				return false;
 			}
 		}
@@ -3293,13 +3299,14 @@ class Sfac extends Controller {
 					$this->devitems[$ind][$ind2]=$c-$d;
 				}
 			}
+
 			if(isset($this->devitems[$codigo][$precio])){
 				if($val <= $this->devitems[$codigo][$precio]){
 					return true;
 				}
-				$this->validation->set_message('chcanadev', 'Esta devolviendo m&aacute;s de lo que se facturo del art&iacute;culo '.$codigo.' puede devolver m&aacute;ximo '.implode(', ',$this->devitems[$codigo]));
+				$this->validation->set_message('chcanadev', 'Esta devolviendo m&aacute;s de lo que se facturo del art&iacute;culo '. htmlspecialchars($codigo).' puede devolver m&aacute;ximo '.implode(', ',$this->devitems[$codigo]));
 			}else{
-				$this->validation->set_message('chcanadev', 'El art&iacute;culo '.$codigo.' no se puede devolver, nunca fue facturado o ya esta devuelto');
+				$this->validation->set_message('chcanadev', 'El art&iacute;culo '. htmlspecialchars($codigo).' no se puede devolver, nunca fue facturado o ya esta devuelto');
 			}
 			return false;
 		}
@@ -3373,6 +3380,7 @@ class Sfac extends Controller {
 		}
 		$totalg = round($totalg,2);
 		//Fin de la totalizacion de facturas
+
 
 
 		if($referen=='P'){
@@ -3736,7 +3744,9 @@ class Sfac extends Controller {
 		$do->set('peso'   ,round($tpeso  ,2));
 
 		$this->pfac = $_POST['pfac'];
+		$this->snte = $_POST['snte'];
 		$do->rm_get('pfac');
+		$do->rm_get('snte');
 
 		if(isset($this->_sfacmaestra)){
 			$do->set('maestra',$this->_sfacmaestra);
@@ -4122,17 +4132,9 @@ class Sfac extends Controller {
 
 			$factor=($tipo_doc=='F')? -1:1;
 
-			//$sql="INSERT IGNORE INTO itsinv (alma,codigo,existen) VALUES (${dbalma},${dbcodigoa},0)";
-			//$ban=$this->db->simple_query($sql);
-			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
-			//$sql="UPDATE itsinv SET existen=existen+${factor}*${itcana} WHERE codigo=${dbcodigoa} AND alma=${dbalma}";
-			//$ban=$this->db->simple_query($sql);
-			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
-			//$sql="UPDATE sinv   SET existen=existen+${factor}*${itcana} WHERE codigo=${dbcodigoa}";
-			//$ban=$this->db->simple_query($sql);
-			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
-
-			$this->datasis->sinvcarga($itcodigoa, $almacen, $factor*$itcana);
+			if(empty($this->pfac)){
+				$this->datasis->sinvcarga($itcodigoa, $almacen, $factor*$itcana);
+			}
 		}
 
 		//Chequea si es una venta vehicular
@@ -4149,13 +4151,19 @@ class Sfac extends Controller {
 		if(strlen($this->pfac)>7 && $tipo_doc == 'F'){
 			$this->db->where('numero', $this->pfac);
 			$this->db->update('pfac', array('factura' => $numero,'status' => 'C'));
-			$dbpfac=$this->db->escape($this->pfac);
 
+			$dbpfac=$this->db->escape($this->pfac);
 			$sql="UPDATE itpfac AS c JOIN sinv   AS d ON d.codigo=c.codigoa
 			SET d.exdes=IF(d.exdes>c.cana,d.exdes-c.cana,0)
 			WHERE c.numa = ${dbpfac}";
 			$ban=$this->db->simple_query($sql);
 			if($ban==false){ memowrite($sql,'sfac'); $error++;}
+		}
+
+		//Si viene de snte
+		if(strlen($this->snte)>7 && $tipo_doc == 'F'){
+			$this->db->where('numero', $this->snte);
+			$this->db->update('snte', array('factura' => $numero,'tipo' => 'E'));
 		}
 
 		$primary =implode(',',$do->pk);
@@ -4428,6 +4436,88 @@ class Sfac extends Controller {
 			echo 'Presupuesto no existe';
 		}
 	}
+
+	//Crea una factura desde una nota de entrega
+	function creafromsnte($manual,$numero,$status=null){
+		$this->_url= $this->url.'dataedit/insert';
+
+		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
+		,'a.stotal AS totals','a.impuesto AS iva','a.gtotal AS totalg','TRIM(a.factura) AS factura','a.vende AS vd','c.almacen');
+		$this->db->select($sel);
+		$this->db->from('snte AS a');
+		$this->db->join('scli AS b','a.cod_cli=b.cliente');
+		$this->db->join('vend AS c','c.vendedor=a.vende','left');
+		$this->db->where('a.numero',$numero);
+		$this->db->where('a.tipo','E');
+		$query = $this->db->get();
+
+		if ($query->num_rows() > 0 && $status=='create'){
+			$row = $query->row();
+			if(empty($row->factura)){
+				$_POST=array(
+					'btn_submit' => 'Guardar',
+					'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
+					'cajero'     => $this->secu->getcajero(),
+					'vd'         => (empty($row->vd))? $this->secu->getvendedor() :  $row->vd,
+					'almacen'    => (empty($row->almacen))? $this->secu->getalmacen() : $row->almacen,
+					'tipo_doc'   => 'F',
+					'factura'    => '',
+					'cod_cli'    => $row->cod_cli,
+					'sclitipo'   => $row->tipo,
+					'nombre'     => rtrim($row->nombre),
+					'rifci'      => $row->rifci,
+					'direc'      => rtrim($row->direc),
+					'totals'     => $row->totals,
+					'iva'        => $row->iva,
+					'totalg'     => $row->totalg,
+					'snte'       => $numero,
+				);
+
+				$itsel=array('a.codigo AS codigoa','b.descrip AS desca','a.cana','a.precio AS preca','a.importe AS tota','b.iva',
+				'b.precio1','b.precio2','b.precio3','b.precio4','b.tipo','b.peso');
+				$this->db->select($itsel);
+				$this->db->from('itsnte AS a');
+				$this->db->join('sinv AS b','b.codigo=a.codigo');
+				$this->db->where('a.numero',$numero);
+				$this->db->where('a.cana >','0');
+				$qquery = $this->db->get();
+				$i=0;
+
+				foreach ($qquery->result() as $itrow){
+					$_POST["codigoa_${i}"]  = rtrim($itrow->codigoa);
+					$_POST["desca_${i}"]    = rtrim($itrow->desca);
+					$_POST["cana_${i}"]     = $itrow->cana;
+					$_POST["preca_${i}"]    = $itrow->preca;
+					$_POST["tota_${i}"]     = $itrow->tota;
+					$_POST["precio1_${i}"]  = $itrow->precio1;
+					$_POST["precio2_${i}"]  = $itrow->precio2;
+					$_POST["precio3_${i}"]  = $itrow->precio3;
+					$_POST["precio4_${i}"]  = $itrow->precio4;
+					$_POST["itiva_${i}"]    = $itrow->iva;
+					$_POST["sinvpeso_${i}"] = $itrow->peso;
+					$_POST["sinvtipo_${i}"] = $itrow->tipo;
+					$_POST["detalle_${i}"]  = '';
+					$_POST["combo_$i"]      = '';
+					$i++;
+				}
+
+				//sfpa
+				$i=0;
+				$_POST["tipo_${i}"]      = '';
+				//$_POST["sfpafecha_${i}"] = '';
+				$_POST["num_ref_${i}"]   = '';
+				$_POST["banco_${i}"]     = '';
+				$_POST["monto_${i}"]     = 0;
+
+				$this->dataedit();
+			}else{
+				echo 'Nota de entrega ya facturada';
+			}
+		}else{
+			echo 'Nota de entrega no encontrada';
+		}
+	}
+
 
 	function instalar(){
 		$campos = $this->db->list_fields('sfac');

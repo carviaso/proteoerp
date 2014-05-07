@@ -1021,7 +1021,7 @@ function apldes(){
 <?php } ?>
 <table align='center' width="95%" cellpadding='0' cellspacing='0'>
 	<tr>
-		<td align=right><?php echo $container_tr; ?><?php echo $form->pfac->output; ?></td>
+		<td align=right><?php echo $container_tr; ?><?php echo $form->pfac->output.$form->snte->output; ?></td>
 	</tr>
 </table>
 <?php
@@ -1070,7 +1070,7 @@ function apldes(){
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Precio</b></td>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Importe</b></td>
 				<?php if($form->_status!='show') {?>
-					<td bgcolor='#0B3861'><a href='#' onclick="add_sitems()" title='Agregar otro articulo'><?php echo img('images/agrega4.png'); ?></a></td>
+					<td bgcolor='#0B3861'><a href='#' id='addlink' onclick="add_sitems()" title='Agregar otro articulo'><?php echo img('images/agrega4.png'); ?></a></td>
 				<?php } ?>
 			</tr>
 			<?php for($i=0;$i<$form->max_rel_count['sitems'];$i++) {

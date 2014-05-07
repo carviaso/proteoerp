@@ -53,12 +53,15 @@ class Snte extends Controller {
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprimir'  ,'img'=>'assets/default/images/print.png',  'alt' => 'Reimprimir', 'label'=>'Reimprimir documento'));
 		$grid->wbotonadd(array('id'=>'imprimirnp','img'=>'assets/default/images/print.png',  'alt' => 'Reimprimir sin precios', 'label'=>'Reimprimir sin precios'));
+		$grid->wbotonadd(array('id'=>'bffact' , 'img'=>'images/star.png'                ,'alt' => 'Facturar'  , 'label'=>'Facturar'));
+
 		$WestPanel = $grid->deploywestp();
 		//Panel Central y Sur
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 
 		$adic = array(
+			array('id'=>'ffact' , 'title'=>'Convertir en factura'),
 			array('id'=>'fedita', 'title'=>'Agregar/Editar registro'),
 			array('id'=>'fborra', 'title'=>'Eliminar registro'),
 			array('id'=>'fshow' , 'title'=>'Mostrar registro')
@@ -156,6 +159,14 @@ class Snte extends Controller {
 			}
 		};';
 
+		$bodyscript .= '
+		function bloqueo() {
+			$("#addlink").hide();
+			$(\'a[onclick^="del_sitems"]\').hide();
+			$(\'input[id^="cana_"]\').attr("readonly","readonly");
+			$(\'input[id^="codigoa_"]\').attr("readonly","readonly");
+		};';
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function() {
@@ -169,6 +180,20 @@ class Snte extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 		';
+
+		$bodyscript .= '
+		jQuery("#bffact").click(function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				$.post("'.site_url('ventas/sfac/creafromsnte/N').'/"+ret.numero+"/create",
+				function(data){
+					$("#ffact").html(data);
+					$("#ffact").dialog( "open" );
+					bloqueo();
+				});
+			} else { $.prompt("<h1>Por favor Seleccione una nota de entrega</h1>");}
+		});';
 
 		$bodyscript .='
 		jQuery("#imprimir").click( function(){
@@ -214,6 +239,7 @@ class Snte extends Controller {
 								}
 							}catch(e){
 								$("#fedita").html(r);
+								bloqueo();
 							}
 						}
 					})
@@ -259,6 +285,57 @@ class Snte extends Controller {
 			}
 		});';
 
+		//Convierte Factura
+		$bodyscript .= '
+			$("#ffact").dialog({
+				autoOpen: false, height: 600, width: 800, modal: true,
+				buttons: {
+					"Guardar": function() {
+						var bValid = true;
+						var murl = $("#df1").attr("action");
+						$.ajax({
+							type: "POST",
+							dataType: "html",
+							async: false,
+							url: murl,
+							data: $("#df1").serialize(),
+							success: function(r,s,x){
+								try{
+									var json = JSON.parse(r);
+									if ( json.status == "A" ) {
+										if ( json.manual == "N" ) {
+											$( "#ffact" ).dialog( "close" );
+											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											return true;
+										}else{
+											$.post("'.site_url($this->url.'dataedit/S/create').'",
+											function(data){
+												$("#ffact").html(data);
+											})
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											return true;
+										}
+									}else{
+										apprise(json.mensaje);
+									}
+								}catch(e){
+									$("#ffact").html(r);
+								}
+							}
+						});
+					},
+					"Cancelar": function() {
+						$("#ffact").html("");
+						$( this ).dialog( "close" );
+						$("#newapi'.$grid0.'").trigger("reloadGrid");
+					}
+				},
+				close: function() {
+					$("#ffact").html("");
+				}
+			});';
+
 		$bodyscript .= '	});';
 		$bodyscript .= '</script>';
 
@@ -286,6 +363,21 @@ class Snte extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:40, maxlength: 1 }',
+			'cellattr'      => 'function(rowId, tv, aData, cm, rdata){
+				var tips = "";
+				if(aData.tipo !== undefined){
+					if(aData.tipo=="C"){
+						tips = "Cerrada";
+					}else if(aData.tipo=="E"){
+						tips = "Entregada";
+					}else if(aData.tipo=="A"){
+						tips = "Anulada";
+					}else{
+						tips = aData.referen;
+					}
+				}
+				return \'title="\'+tips+\'"\';
+			}'
 		));
 
 
@@ -1324,19 +1416,13 @@ class Snte extends Controller {
 		$dbnumero = $this->db->escape($numero);
 		$dbalmacen= $this->db->escape($almacen);
 
-		$mSQL='UPDATE sinv
-		JOIN itsnte ON sinv.codigo=itsnte.codigo
-		SET sinv.existen=sinv.existen-itsnte.cana
-		WHERE itsnte.numero='.$dbnumero;
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'snte'); }
+		$cana=$do->count_rel('itsnte');
+		for($i=0;$i<$cana;$i++){
+			$itcodigo = $do->get_rel('itsnte','codigo',$i);
+			$itcana   = $do->get_rel('itsnte','cana'  ,$i);
 
-		$mSQL='UPDATE itsinv
-		JOIN itsnte ON itsinv.codigo=itsnte.codigo
-		SET itsinv.existen=itsinv.existen-itsnte.cana
-		WHERE itsnte.numero='.$dbnumero.' AND itsinv.alma='.$dbalmacen;
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'snte'); }
+			$this->datasis->sinvcarga($itcodigo, $almacen, $itcana);
+		}
 
 		$codigo=$do->get('numero');
 

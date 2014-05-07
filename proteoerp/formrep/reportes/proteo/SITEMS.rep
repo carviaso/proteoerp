@@ -185,6 +185,7 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	if (!empty($filter->marca->newValue))   $sobretabla.=' Marca: '.$filter->marca->description;
 	if (!empty($filter->proveed->newValue)) $sobretabla.=' Proveedor: ('.$filter->proveed->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$this->db->escape($filter->proveed->newValue));
 	if (!empty($filter->sucu->newValue))    $sobretabla.=' Sucursal: ('.$filter->sucu->newValue.') '.$filter->sucu->description;
+	if (!empty($filter->vd->newValue))      $sobretabla.=' Vendedor: ('.$filter->vd->newValue.') '.$filter->vd->description;
 
 
 	$pdf = new PDFReporte($mSQL,'L');
