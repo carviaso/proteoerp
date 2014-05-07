@@ -1742,7 +1742,7 @@ class Scli extends validaciones {
 		$edit->tminimo->type='inputhidden';
 
 		$edit->sucursal = new dropdownField('Sucursal', 'sucursal');
-		//$edit->sucursal->rule = 'required';
+		$edit->sucursal->rule = 'condi_required|callback_chsucu';
 		$edit->sucursal->style= 'width:150px;';
 		$edit->sucursal->insertValue=$this->secu->getsucursal();
 		$edit->sucursal->option('','Ninguna');
@@ -2558,6 +2558,15 @@ function chrif(rif){
 			$this->validation->set_message('chtarifa','El campo %s debe contener una tarifa v&aacute;lida.');
 			return false;
 		}
+	}
+
+	function chsucu($sucu){
+		$obliga=trim($this->datasis->traevalor('SCLIOBLIGASUCU','Colocar S para que la sucursal sea obligatorio al registrar clientes'));
+		if($obliga=='S' && empty($sucu)){
+			$this->validation->set_message('chsucu', 'El campo %s es obligatorio');
+			return false;
+		}
+		return true;
 	}
 
 	function chtolera($monto){
