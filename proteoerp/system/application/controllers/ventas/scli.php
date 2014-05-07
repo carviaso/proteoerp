@@ -1586,7 +1586,7 @@ class Scli extends validaciones {
 		$edit->socio->append($boton);
 
 		$arr_tiva=$this->pi18n->arr_msj('tivaarr','N=No Contribuyente,C=Contribuyente,E=Especial,R=Regimen Exento,O=Otro');
-		$edit->tiva = new dropdownField('Tipo Fiscal', 'tiva');
+		$edit->tiva = new dropdownField('Condici&oacute;n', 'tiva');
 		$edit->tiva->options($arr_tiva);
 		$edit->tiva->style = 'width:110px';
 		$edit->tiva->insertValue = 'N';
@@ -1663,7 +1663,7 @@ class Scli extends validaciones {
 		$edit->twitter->size=20;
 		$edit->twitter->maxlength =120;
 
-		$edit->tipo = new dropdownField('Precio ', 'tipo');
+		$edit->tipo = new dropdownField('Tipo ', 'tipo');
 		$edit->tipo->options(array('1'=> 'Precio 1','2'=>'Precio 2', '3'=>'Precio 3','4'=>'Precio 4','5'=>'Mayor','0'=>'Inactivo'));
 		$edit->tipo->style = 'width:90px';
 
@@ -1744,6 +1744,7 @@ class Scli extends validaciones {
 		$edit->sucursal = new dropdownField('Sucursal', 'sucursal');
 		//$edit->sucursal->rule = 'required';
 		$edit->sucursal->style= 'width:150px;';
+		$edit->sucursal->insertValue=$this->secu->getsucursal();
 		$edit->sucursal->option('','Ninguna');
 		$edit->sucursal->options('SELECT TRIM(codigo) AS codigo,sucursal FROM sucu WHERE codigo IS NOT NULL ORDER BY sucursal');
 

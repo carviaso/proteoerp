@@ -8,10 +8,10 @@ if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unk
 	$meco = str_replace('class="tablerow"','class="tablerow" style="font-size:20px; align:center;" ',$meco);
 	echo $meco."</td><td align='center'>".img("images/borrar.jpg");
 else:
-	echo $script; 
+	echo $script;
 	echo $form_scripts;
-	echo "\n<div id='diveditor' style='font-size:'10px;'>\n"; 
-	echo $form_begin; 
+	echo "\n<div id='diveditor' style='font-size:'10px;'>\n";
+	echo $form_begin;
 ?>
 <style>
 #maintabcontainer ul { font-size: 9px; }
@@ -24,11 +24,11 @@ else:
 		<td>
 			<table border='0' width="100%" cellspacing='0' cellpadding='0' >
 				<tr>
-					<td class="littletableheaderc" width="100"><?php      echo $form->cliente->label;  ?></td>
+					<td class="littletableheaderc" width="65"><?php      echo $form->cliente->label;  ?></td>
 					<td class="littletablerow"     width="60" ><?php      echo $form->cliente->output; ?></td>
 					<td class="littletableheaderc" width="40" ><?php      echo $form->rifci->label;    ?> </td>
 					<td class="littletablerow"                ><?php      echo $form->rifci->output;   ?></td>
-					<td class="littletablerow" align="right"  >Tipo <?php echo $form->tiva->output;    ?></td>
+					<td class="littletablerow" align="right"  ><?php echo $form->tiva->label.' '.$form->tiva->output;    ?></td>
 				</tr>
 				<tr>
 					<td class="littletableheaderc"        ><?php echo $form->nombre->label ?></td>
@@ -204,7 +204,7 @@ else:
 	</tr>
 	</table>
 	</div>
- 
+
 	<div id="tab3" style='background:#EEFFFF'>
 	<fieldset style='border: 1px outset #8AF8F8;background:#EEFFFF;'>
 	<table width= '100%' >

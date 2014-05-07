@@ -242,7 +242,7 @@ class pfaclite extends validaciones{
 		$filter->build();
 
 		if(!empty($vd)){
-			$mSQL="SELECT COUNT(*) AS cana FROM scli WHERE ( vendedor = ${dbvd} OR cobrador=${dbvd} )";
+			$mSQL="SELECT COUNT(*) AS cana FROM scli WHERE ( vendedor = ${dbvd} OR cobrador=${dbvd} ) AND tipo<>0";
 			$clientes=$this->datasis->dameval($mSQL);
 
 			$mSQL="SELECT COUNT(*) AS cana FROM sfac WHERE vd = ${dbvd} AND fecha>=${dbfini}";
