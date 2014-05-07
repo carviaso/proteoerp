@@ -1395,7 +1395,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 				</tr>
 			  	<tr>
 					<?php 
-					$mrif = $this->datasis->dameval('RIF');
+					$mrif = $this->datasis->traevalor('RIF');
 					if( $form->grupo->value == '0002' && $mrif == 'J-40310702-5' ) { ?>
 					<td class="littletableheaderc" align="center">6</td>
 					<?php } else { ?>
