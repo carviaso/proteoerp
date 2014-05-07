@@ -1404,21 +1404,34 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class="littletablerow" align='center'><?php echo $form->margen1->output ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->base1->output   ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->precio1->output.$form->cbase1->output; ?></td>
+
 				</tr>
 				<tr>
+					<?php if( $form->grupo->value == '0002' && $mrif == 'J-40310702-5' ) { ?>
+					<td class="littletableheaderc" align="center">1</td>
+					<?php } else { ?>
 					<td class="littletableheaderc" align="center">2</td>
+					<?php } ?>
 					<td class="littletablerow" align='center'><?php echo $form->margen2->output ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->base2->output   ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->precio2->output.$form->cbase2->output; ?></td>
 				</tr>
 				<tr>
+					<?php if( $form->grupo->value == '0002' && $mrif == 'J-40310702-5' ) { ?>
+					<td class="littletableheaderc" align="center">2</td>
+					<?php } else { ?>
 					<td class="littletableheaderc" align="center">3</td>
+					<?php } ?>
 					<td class="littletablerow" align='center'><?php echo $form->margen3->output ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->base3->output   ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->precio3->output.$form->cbase3->output; ?></td>
 				</tr>
 				<tr>
+					<?php if( $form->grupo->value == '0002' && $mrif == 'J-40310702-5' ) { ?>
+					<td class="littletableheaderc" align="center">3</td>
+					<?php } else { ?>
 					<td class="littletableheaderc" align="center">4</td>
+					<?php } ?>
 					<td class="littletablerow" align='center'><?php echo $form->margen4->output ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->base4->output   ?></td>
 					<td class="littletablerow" align='center'><?php echo $form->precio4->output.$form->cbase4->output; ?></td>
