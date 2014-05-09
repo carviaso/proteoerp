@@ -130,6 +130,7 @@ $(document).ready(function() {
 							$('#nombre').val('');
 							$('#nombre_val').text('');
 							$('#proveed').val('');
+							$('#sprvreteiva').val('75');
 						}else{
 							$.each(data,
 								function(i, val){
@@ -148,6 +149,7 @@ $(document).ready(function() {
 			$('#nombre').val(ui.item.nombre);
 			$('#nombre_val').text(ui.item.nombre);
 			$('#proveed').val(ui.item.proveed);
+			$('#sprvreteiva').val(ui.item.reteiva);
 
 			setTimeout(function(){ $('#proveed').removeAttr("readonly"); }, 1500);
 			$('#serie').change();
