@@ -21,7 +21,7 @@ for($o=1;$o<5;$o++){
 $scampos .= $campos['itiva']['field'];
 $scampos .= $campos['sinvpeso']['field'];
 $scampos .= $campos['sinvtipo']['field'].'</td>';
-$scampos .= '<td class="littletablerow"><a href=# onclick="del_itscon(<#i#>);return false;">Eliminar</a></td></tr>';
+$scampos .= '<td class="littletablerow"><a href=# onclick="del_itscon(<#i#>);return false;">'.img('images/delete.jpg').'</a></td></tr>';
 $campos=$form->js_escape($scampos);
 
 if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
@@ -32,17 +32,116 @@ if($form->_status!='show'){ ?>
 
 <script language="javascript" type="text/javascript">
 var itscon_cont=<?php echo $form->max_rel_count['itscon']; ?>;
-var invent = (<?php echo $inven; ?>);
 $(function(){
+
+	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
+
 	$(document).keydown(function(e){
 		if (e.which == 13) return false;
 	});
 
 	$(".inputnum").numeric(".");
 	totalizar();
+
 	for(var i=0;i < <?php echo $form->max_rel_count['itscon']; ?>;i++){
 		cdropdown(i);
+		autocod(i.toString());
 	}
+
+	$('#clipro').autocomplete({
+		<?php if($opttipo=='C'){ ?>
+			delay: 600,
+			autoFocus: true,
+			source: function(req, add){
+				$.ajax({
+					url:  "<?php echo site_url('ajax/buscascli'); ?>",
+					type: "POST",
+					dataType: "json",
+					data: {"q":req.term},
+					success:
+						function(data){
+							var sugiere = [];
+							if(data.length==0){
+								$('#nombre').val('');
+								$('#nombre_val').text('');
+
+								$('#rifci').val('');
+								$('#rifci_val').text('');
+								$('#cliprotipo').val('1');
+
+								$('#direc1').val('');
+								$('#direc1_val').text('');
+							}else{
+								$.each(data,
+									function(i, val){
+										sugiere.push( val );
+									}
+								);
+							}
+							add(sugiere);
+						},
+				})
+			},
+			minLength: 2,
+			select: function( event, ui ) {
+				var meco;
+				$('#clipro').attr("readonly", "readonly");
+				$('#nombre').val(ui.item.nombre);
+				$('#rifci').val(ui.item.rifci);
+				$('#clipro').val(ui.item.cod_cli);
+				$('#cliprotipo').val(ui.item.tipo);
+				$('#direc1').val(ui.item.direc);
+				post_modbus_scli();
+				setTimeout(function() {  $("#clipro").removeAttr("readonly"); }, 1500);
+			}
+		<?php } else { ?>
+
+			delay: 600,
+			autoFocus: true,
+			source: function( req, add){
+				$.ajax({
+					url:  "<?php echo site_url('ajax/buscasprv'); ?>",
+					type: "POST",
+					dataType: "json",
+					data: {"q":req.term},
+					success:
+						function(data){
+							var sugiere = [];
+							if(data.length==0){
+								$('#nombre').val('');
+								$('#nombre_val').text('');
+
+								$('#rifci').val('');
+								$('#rifci_val').text('');
+								$('#cliprotipo').val('1');
+
+								$('#direc1').val('');
+								$('#direc1_val').text('');
+							}else{
+								$.each(data,
+									function(i, val){
+										sugiere.push( val );
+									}
+								);
+							}
+							add(sugiere);
+						},
+				})
+			},
+			minLength: 2,
+			select: function( event, ui ) {
+				$('#clipro').attr("readonly", "readonly");
+
+				$('#nombre').val(ui.item.nombre);
+				$('#clipro').val(ui.item.clipro);
+				$('#cliprotipo').val('1');
+				$('#direc1').val(ui.item.direc);
+
+				setTimeout(function(){ $('#clipro').removeAttr("readonly"); }, 1500);
+				post_modbus_scli();
+			}
+		<?php } ?>
+	});
 });
 
 function OnEnter(e,ind){
@@ -56,7 +155,7 @@ function OnEnter(e,ind){
 		keynum = e.which;
 	}
 	if(keynum==13){
-		dacodigo(ind);
+		//dacodigo(ind);
 		return false;
 	}
 
@@ -64,48 +163,81 @@ function OnEnter(e,ind){
 	return true;
 }
 
-function dacodigo(nind){
-	ind=nind.toString();
-	var codigo = $("#codigo_"+ind).val();
-	var eeval;
-	eval('eeval= typeof invent._'+codigo);
 
-	var descrip='';
-	if(eeval != "undefined"){
-		eval('descrip=invent._'+codigo+'[0]');
-		eval('tipo   =invent._'+codigo+'[1]');
-		eval('base1  =invent._'+codigo+'[2]');
-		eval('base2  =invent._'+codigo+'[3]');
-		eval('base3  =invent._'+codigo+'[4]');
-		eval('base4  =invent._'+codigo+'[5]');
-		eval('itiva  =invent._'+codigo+'[6]');
-		eval('peso   =invent._'+codigo+'[7]');
-		eval('precio1=invent._'+codigo+'[8]');
-		eval('pond   =invent._'+codigo+'[9]');
+//Agrega el autocomplete
+function autocod(id){
+	var ancho='.ui-autocomplete-input#codigoa_'+id;
+	var ihtml;
+	$('#codigo_'+id).autocomplete({
+		delay: 600,
+		autoFocus: true,
+		source: function( req, add){
+			$.ajax({
+				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
+				type: "POST",
+				dataType: "json",
+				data: {"q":req.term.trim(), "alma": $('#almacen').val().trim() },
+				success:
+					function(data){
+						var sugiere = [];
+						if(data.length==0){
+							$('#codigo_'+id).val('')
+							$('#desca_'+id).val('');
+							$('#precio1_'+id).val('');
+							$('#precio2_'+id).val('');
+							$('#precio3_'+id).val('');
+							$('#precio4_'+id).val('');
+							$('#itiva_'+id).val('');
+							$('#sinvtipo_'+id).val('');
+							$('#sinvpeso_'+id).val('');
+							$('#itcosto_'+id).val('');
+							$('#itpvp_'+id).val('');
+							$('#cana_'+id).val('');
+							post_modbus_sinv(Number(id));
+						}else{
+							$.each(data,
+								function(i, val){
+									sugiere.push( val );
+								}
+							);
+							add(sugiere);
+						}
+					},
+			})
+		},
+		minLength: 2,
+		select: function( event, ui ) {
+			$('#codigo_'+id).attr("readonly", "readonly");
+			if(ui.item.tipo.substr(0,1)=='C'){
+				return true;
+			}else{
 
-		$("#desca_"+ind).val(descrip);
-		$("#precio1_"+ind).val(base1);
-		$("#precio2_"+ind).val(base2);
-		$("#precio3_"+ind).val(base3);
-		$("#precio4_"+ind).val(base4);
-		$("#itiva_"+ind).val(itiva);
-		$("#sinvtipo_"+ind).val(tipo);
-		$("#sinvpeso_"+ind).val(peso);
-		$("#itpvp_"+ind).val(precio1);
-		$("#itcosto_"+ind).val(pond);
-	}else{
-		$("#desca_"+ind).val('');
-		$("#precio1_"+ind).val('');
-		$("#precio2_"+ind).val('');
-		$("#precio3_"+ind).val('');
-		$("#precio4_"+ind).val('');
-		$("#itiva_"+ind).val('');
-		$("#sinvtipo_"+ind).val('');
-		$("#sinvpeso_"+ind).val('');
-		$("#itpvp_"+ind).val('');
-		$("#itcosto_"+ind).val('');
-	}
-	post_modbus_sinv(nind);
+				$('#codigo_'+id).val(ui.item.codigo);
+				$('#desca_'+id).val(ui.item.descrip);
+				$('#precio1_'+id).val(ui.item.base1);
+				$('#precio2_'+id).val(ui.item.base2);
+				$('#precio3_'+id).val(ui.item.base3);
+				$('#precio4_'+id).val(ui.item.base4);
+				$('#itiva_'+id).val(ui.item.iva);
+				$('#sinvtipo_'+id).val(ui.item.tipo);
+				$('#sinvpeso_'+id).val(ui.item.peso);
+				$('#itpvp_'+id).val(ui.item.base1);
+				$('#costo_'+id).val(ui.item.pond);
+				$('#cana_'+id).val('1');
+				$('#cana_'+id).focus();
+				$('#cana_'+id).select();
+				post_modbus_sinv(Number(id));
+
+			}
+			setTimeout(function() {  $('#codigo_'+id).removeAttr("readonly"); }, 1500);
+		},
+		open: function() { $('#codigo_'+id).autocomplete("widget").width(420) }
+	})
+	.data( "ui-autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li>" )
+		.append( "<a><table style='width:100%;border-collapse:collapse;padding:0px;'><tr><td colspan='6' style='font-size:14px;color:#0B0B61;'><b>" + item.descrip + "</b></td></tr><tr><td>Codigo:</td><td>" + item.codigo + "</td><td>Precio: </td><td><b>" + item.base1 + "</b></td><td>Existencia:</td><td>" + item.existen + "</td><td></td></tr></table></a>" )
+		.appendTo( ul );
+	};
 }
 
 function importe(id){
@@ -147,7 +279,11 @@ function totalizar(){
 	$("#gtotal").val(roundNumber(totals+iva,2));
 	$("#stotal").val(roundNumber(totals,2));
 	$("#impuesto").val(roundNumber(iva,2));
-	
+
+	$("#peso_val").text(nformat(peso,2));
+	$("#gtotal_val").text(nformat(totals+iva,2));
+	$("#stotal_val").text(nformat(totals,2));
+	$("#impuesto_val").text(nformat(iva,2));
 }
 
 function add_itscon(){
@@ -156,9 +292,11 @@ function add_itscon(){
 	con = (itscon_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
 	htm = htm.replace(/<#o#>/g,con);
-	$("#__UTPL__").before(htm);
+	$("#__PTPL__").after(htm);
 	$("#cana_"+can).numeric(".");
 	itscon_cont=itscon_cont+1;
+	autocod(can);
+	$('#codigo_'+can).focus();
 }
 
 function post_precioselec(ind,obj){
@@ -182,7 +320,6 @@ function post_precioselec(ind,obj){
 
 function post_modbus_scli(){
 	var tipo  =Number($("#cliprotipo").val()); if(tipo>0) tipo=tipo-1;
-	//var cambio=confirm('�Deseas cambiar los precios por los que tenga asginado el cliente?');
 
 	var arr=$('select[name^="precio_"]');
 	jQuery.each(arr, function() {
@@ -196,6 +333,9 @@ function post_modbus_scli(){
 		}
 	});
 	totalizar();
+	$('#direc1_val').text($('#direc1').val());
+	$('#nombre_val').text($('#nombre').val());
+	$('#rifci_val').text($('#rifci').val());
 }
 
 function post_modbus_sinv(nind){
@@ -223,7 +363,7 @@ function cdropdown(nind){
 	var ban=0;
 	var ii=0;
 	var id='';
-	
+
 	if(preca==null || preca.length==0) ban=1;
 	for(ii=1;ii<5;ii++){
 		id =ii.toString();
@@ -269,29 +409,23 @@ function del_itscon(id){
 		<td>
 		<table width="100%" style="margin: 0; width: 100%;">
 			<tr>
-				<th colspan='5' class="littletableheader">Pr&eacute;stamo de inventario <b><?php if($form->_status=='show' or $form->_status=='modify' ) echo str_pad($form->numero->output,8,0,0); ?></b></th>
+				<th colspan='5' class="littletableheader">Pr&eacute;stamo de Mercanc&iacute;a <b><?php if($form->_status=='show' or $form->_status=='modify' ) echo str_pad($form->numero->output,8,0,0); ?></b></th>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?php echo $form->fecha->label;   ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->fecha->output;  ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->tipod->label       ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->tipod->output      ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->clipro->label;  ?>*&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->clipro->output,$form->cliprotipo->output,$form->nombre->output; ?>&nbsp;</td>
 			</tr>
 			<tr>
-				<td class="littletableheader"><?php echo $form->tipod->label  ?>&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->tipod->output ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->fecha->label;   ?>*&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->fecha->output;  ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->dir_clipro->label  ?>&nbsp;</td>
 				<td class="littletablerow"   ><?php echo $form->dir_clipro->output ?>&nbsp;</td>
 			</tr>
 			<tr>
 				<td class="littletableheader">          <?php echo $form->asociado->label;  ?>&nbsp;</td>
 				<td class="littletablerow" align="left"><?php echo $form->asociado->output; ?>&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->observ1->label; ?>&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->observ1->output;?>&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="littletableheader">          <?php echo $form->peso->label;  ?>&nbsp;</td>
-				<td class="littletablerow" align="left"><?php echo $form->peso->output; ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->almacen->label;     ?>&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->almacen->output;    ?>&nbsp;</td>
 			</tr>
@@ -301,17 +435,14 @@ function del_itscon(id){
 	<tr>
 		<td>
 		<table width='100%'>
-			<tr>
-				<th colspan='6' class="littletableheader">Lista de Art&iacute;culos</th>
-			</tr>
-			<tr>
+			<tr  id='__PTPL__'>
 				<td class="littletableheader">C&oacute;digo</td>
 				<td class="littletableheader">Descripci&oacute;n</td>
 				<td class="littletableheader">Cantidad</td>
 				<td class="littletableheader">Precio</td>
 				<td class="littletableheader">Importe</td>
 				<?php if($form->_status!='show') {?>
-					<td class="littletableheader">&nbsp;</td>
+					<td class="littletableheader"><a href='#' onclick="add_itscon()" title='Agregar otro pago'><?php echo img('images/agrega4.png'); ?></a></td>
 				<?php } ?>
 			</tr>
 
@@ -344,15 +475,11 @@ function del_itscon(id){
 
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow">
-					<a href='#' onclick='del_itscon(<?php echo $i; ?>);return false;'>Eliminar</a>
+					<a href='#' onclick='del_itscon(<?php echo $i; ?>);return false;'><?php echo img("images/delete.jpg"); ?></a>
 				</td>
 				<?php } ?>
 			</tr>
 			<?php } ?>
-
-			<tr id='__UTPL__'>
-				<td id='cueca'></td>
-			</tr>
 		</table>
 		<?php echo $container_bl ?>
 		<?php echo $container_br ?>
@@ -362,15 +489,22 @@ function del_itscon(id){
 		<td>
 		<table width='100%'>
 			<tr>
-				<th colspan='6' class="littletableheader">Res&uacute;men Financiero</th>
-			</tr>
-			<tr>
-				<td class="littletableheader">           <?php echo $form->impuesto->label;    ?></td>
-				<td class="littletablerow" align='right'><?php echo $form->impuesto->output;   ?></td>
-				<td class="littletableheader">           <?php echo $form->stotal->label;  ?></td>
-				<td class="littletablerow" align='right'><?php echo $form->stotal->output; ?></td>
-				<td class="littletableheader">           <?php echo $form->gtotal->label;  ?></td>
-				<td class="littletablerow" align='right'><?php echo $form->gtotal->output; ?></td>
+				<td class="littletableheader" colspan='4'>Res&uacute;men financiero</td>
+			</tr><tr>
+				<td><b><?php echo $form->peso->label;    ?></b></td>
+				<td><?php echo $form->peso->output;   ?></td>
+				<td><b><?php echo $form->stotal->label;  ?></b></td>
+				<td align='right' style='font-size:1.2em'><?php echo $form->stotal->output;  ?></td>
+			</tr><tr>
+				<td><b><?php echo $form->observ1->label; ?></b></td>
+				<td><?php echo $form->observ1->output;?></td>
+				<td><b><?php echo $form->impuesto->label; ?></b></td>
+				<td align='right' style='font-size:1.1em'><?php echo $form->impuesto->output;?></td>
+			</tr><tr>
+				<td></td>
+				<td></td>
+				<td><b><?php echo $form->gtotal->label;  ?></b></td>
+				<td align='right' style='font-size:2em'><?php echo $form->gtotal->output;  ?></td>
 			</tr>
 		</table>
 		<?php echo $form_end; ?>

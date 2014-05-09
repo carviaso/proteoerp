@@ -82,8 +82,12 @@ $separador='Ä';
 
 $encabezado  = "\n\n\n\n\n";
 $encabezado .=" Nombre   : ".chr(15).str_pad($this->us_ascii($nombre),69).chr(18).str_pad($documento.'    :',13,' ',0).chr(15).chr(14).$numero.chr(18)."\n";
-$encabezado .=" RIF/C.I. : ".str_pad("${rifci}",12)."VEND: ${vd} VENCE :$vence FECHA      :${fecha}\n";
-$encabezado .=" Direccion: ".chr(15).str_pad($this->us_ascii($direc0.$direc1),70).chr(18)."\n";
+$encabezado .=" RIF/C.I. : ".str_pad("${rifci}",12)."Vend: ${vd} Vence :$vence FECHA      :${fecha}\n";
+$encabezado .=" Direccion: ".chr(15).str_pad($this->us_ascii($direc0.$direc1),66).chr(18);
+if($tipo_doc=='D'){
+	$encabezado .=' Afecta: '.$factura;
+}
+$encabezado .= "\n";
 $encabezado .="     Telf.: ".str_pad($telefono,40).chr(14).$referen.CHR(15).CHR(18)."\n";
 // Fin  Encabezado
 
