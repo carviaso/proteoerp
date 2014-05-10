@@ -82,7 +82,7 @@ class fnomina {
 	function SUELDO_DIA_PROM(){
 		$CODIGO=$this->ci->db->escape($this->CODIGO);
 		$SUELDOA = 0;
-		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=$CODIGO");
+		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=${CODIGO}");
 		$mMONTO  = $this->SPROME;
 
 		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
@@ -101,7 +101,7 @@ class fnomina {
 
 	function ANTIGUEDAD( $mHASTA = '' ){
 		$CODIGO = $this->ci->db->escape($this->CODIGO);
-		$mDESDE = $this->ci->datasis->dameval("SELECT ingreso FROM pers WHERE codigo=$CODIGO");
+		$mDESDE = $this->ci->datasis->dameval("SELECT ingreso FROM pers WHERE codigo=${CODIGO}");
 		if ( $mHASTA == '' ) $mHASTA = date('Y-m-d');
 
 		$desde = new DateTime($mDESDE);
@@ -113,10 +113,11 @@ class fnomina {
 	}
 
 	function TRAESALDO($mmCONC){
-		$CODIGO=$this->ci->db->escape($this->CODIGO);
-		$mTCONC = $this->ci->datasis->dameval("SELECT COUNT(*) FROM prenom WHERE codigo=$CODIGO AND concepto='$mmCONC' ");
-		if ($mTCONC == 1)
-			$mTEMPO = $this->ci->datasis->dameval("SELECT valor FROM prenom WHERE codigo=$CODIGO AND concepto='$mmCONC' ");
+		$CODIGO = $this->ci->db->escape($this->CODIGO);
+		$mmCONC = $this->ci->db->escape($mmCONC);
+		$mTCONC = $this->ci->datasis->dameval("SELECT COUNT(*) AS cana FROM prenom WHERE codigo=${CODIGO} AND concepto=${mmCONC}");
+		if($mTCONC == 1)
+			$mTEMPO = $this->ci->datasis->dameval("SELECT valor FROM prenom WHERE codigo=${CODIGO} AND concepto=${mmCONC}");
 		return $mTEMPO;
 	}
 
@@ -157,7 +158,8 @@ class fnomina {
 	// Suma por Grupo
 	//
 	function GRUPO($parr){
-		$mSQL  = "SELECT sum(a.valor) cuenta FROM prenom a WHERE a.codigo='".$this->CODIGO."' AND a.grupo regexp '[".$parr."]+' AND MID(a.concepto,1,1)<9 ";
+		$CODIGO   = $this->ci->db->escape($this->CODIGO);
+		$mSQL  = "SELECT sum(a.valor) cuenta FROM prenom a WHERE a.codigo=".$CODIGO." AND a.grupo regexp '[".$parr."]+' AND MID(a.concepto,1,1)<9 ";
 		$query = $this->ci->db->query($mSQL);
 		$row   = $query->row();
 		$suma  = $row->cuenta;
@@ -168,7 +170,8 @@ class fnomina {
 	// Trae un concepto
 	//
 	function TRAE($parr){
-		$mSQL  = "SELECT a.valor FROM prenom a WHERE a.codigo='".$this->CODIGO."' AND a.concepto=".$this->ci->db->escape($parr);
+		$CODIGO   = $this->ci->db->escape($this->CODIGO);
+		$mSQL  = "SELECT a.valor FROM prenom a WHERE a.codigo=".$CODIGO." AND a.concepto=".$this->ci->db->escape($parr);
 		$query = $this->ci->db->query($mSQL);
 		$row   = $query->row();
 		$suma  = $row->valor;
@@ -180,7 +183,8 @@ class fnomina {
 	// Suma de todas las asignaciones
 	//
 	function ASIGNA(){
-		$mSQL  = "SELECT sum(valor) cuenta FROM prenom WHERE codigo='".$this->CODIGO."' AND tipo='A' AND MID(concepto,1,1)<9 ";
+		$CODIGO   = $this->ci->db->escape($this->CODIGO);
+		$mSQL  = "SELECT SUM(valor) cuenta FROM prenom WHERE codigo=".$CODIGO." AND tipo='A' AND MID(concepto,1,1)<9 ";
 		$query = $this->ci->db->query($mSQL);
 		$row   = $query->row();
 		$suma  = $row->cuenta;
@@ -219,7 +223,7 @@ class fnomina {
 				if ( $row->final > $this->fhasta ){
 					$diasefect = $diasefect+1 ;
 				}
-				memowrite($row->final.' > '.$this->fhasta.' '.$diasefect, 'Reposo');
+				//memowrite($row->final.' > '.$this->fhasta.' '.$diasefect, 'Reposo');
 			}
 		}
 
@@ -306,7 +310,23 @@ class Pnomina extends fnomina {
 		$aa = each($rr);
 		$ut = $aa[1];
 
-		// Transforma los if
+		//Trata el caso de las funciones que retornan arreglo
+		$antf='';
+		if(preg_match_all('/ANTIGUEDAD\((?P<arg>[^\)]*)\)\[(?P<ind>[0-9]+)\]/',$formula, $mat)>0){
+			foreach($mat[0] as $id=>$rp){
+				if($rp!=$antf){
+					$arg=$mat['arg'][$id];
+					$ind=$mat['ind'][$id];
+
+					$nf='$'."this->_getarray(ANTIGUEDAD(${arg}),${ind})";
+					$formula=str_replace($rp,$nf,$formula);
+					$antf=$rp;
+				}
+			}
+		}
+		//Finaliza el caso de las funciones que retornan arreglos
+
+		//Transforma los if
 		$long = strlen($formula);
 		$pos  = $long+1;
 		while(1){
@@ -346,7 +366,7 @@ class Pnomina extends fnomina {
 			$formula=str_replace($metodo.'(','$this->'.$metodo.'(',$formula);
 		}
 
-		$query = $this->ci->db->query("SELECT * FROM pers WHERE codigo=$CODIGO");
+		$query = $this->ci->db->query("SELECT * FROM pers WHERE codigo=${CODIGO}");
 		if ($query->num_rows() > 0){
 			$rows = $query->row_array();
 
@@ -376,9 +396,11 @@ class Pnomina extends fnomina {
 		$formula=str_replace('VAL(','floatval(',$formula);
 		$formula=str_replace('TRAEVALOR','$this->ci->datasis->traevalor',$formula);
 
-		$formula=str_replace('.AND.','&&',$formula);
-		$formula=str_replace('.OR.','||',$formula);
-		$formula=str_replace('.NOT.','!',$formula);
+		$formula=str_replace('.AND.','&&'   ,$formula);
+		$formula=str_replace('.OR.' ,'||'   ,$formula);
+		$formula=str_replace('.NOT.','!'    ,$formula);
+		$formula=str_replace('.T.'  ,'true' ,$formula);
+		$formula=str_replace('.F.'  ,'false',$formula);
 
 		return $formula;
 	}
@@ -434,5 +456,12 @@ class Pnomina extends fnomina {
 			}
 		}
 	}
+
+	function _getarray($arr,$ind){
+		if(isset($arr[$ind])){
+			return $arr[$ind];
+		}else{
+			return 0;
+		}
+	}
 }
-?>

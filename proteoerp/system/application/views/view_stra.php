@@ -86,7 +86,11 @@ function autocod(id){
 
 			setTimeout(function(){ $('#codigo_'+id).removeAttr('readonly'); }, 1500);
 		}
-	});
+	}).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li>" )
+		.append( "<a><table style='width:100%;border-collapse:collapse;padding:0px;'><tr><td colspan='6' style='font-size:12px;color:#0B0B61;'><b>" + item.descrip + "</b></td></tr><tr><td>Codigo:</td><td>" + item.codigo + "</td><td>Precio: </td><td><b>" + item.base1 + "</b></td><td>Existencia:</td><td>" + item.existen + "</td><td></td></tr></table></a>" )
+		.appendTo( ul );
+	};
 }
 
 function add_itstra(){

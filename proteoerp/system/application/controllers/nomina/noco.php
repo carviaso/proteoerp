@@ -873,7 +873,7 @@ class Noco extends Controller {
 
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo');
 		$edit->codigo->size = 10;
-		$edit->codigo->rule= 'required';
+		$edit->codigo->rule= 'required|alpha_numeric';
 		$edit->codigo->mode= 'autohide';
 		$edit->codigo->maxlength=8;
 

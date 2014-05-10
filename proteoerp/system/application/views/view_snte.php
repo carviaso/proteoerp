@@ -257,9 +257,10 @@ function cdropdown(nind){
 	if(preca==null || preca.length==0) ban=1;
 	for(ii=1;ii<5;ii++){
 		id =ii.toString();
-		val=$("#precio"+id+"_"+ind).val();
+		val=Number($("#precio"+id+"_"+ind).val());
+		ntt=val*(1+(itiva/100));
 		opt=document.createElement("option");
-		opt.text =nformat(val,2);
+		opt.text =nformat(ntt,2);
 		opt.value=val;
 		pprecio.add(opt,null);
 		if(val==preca){
@@ -355,7 +356,11 @@ function autocod(id){
 			totalizar();
 			setTimeout(function(){ $('#codigo_'+id).removeAttr("readonly"); }, 1500);
 		}
-	});
+	}).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li>" )
+		.append( "<a><table style='width:100%;border-collapse:collapse;padding:0px;'><tr><td colspan='6' style='font-size:14px;color:#0B0B61;'><b>" + item.descrip + "</b></td></tr><tr><td>Codigo:</td><td>" + item.codigo + "</td><td>Precio: </td><td><b>" + item.base1 + "</b></td><td>Existencia:</td><td>" + item.existen + "</td><td></td></tr></table></a>" )
+		.appendTo( ul );
+	};
 }
 </script>
 <?php } ?>

@@ -21,11 +21,7 @@ class Snte extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('snte','id') ) {
-			$this->db->simple_query('ALTER TABLE snte DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE snte ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE snte ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		$this->datasis->modintramenu( 900, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -1172,7 +1168,7 @@ class Snte extends Controller {
 
 		$edit->cliente = new inputField('Cliente','cod_cli');
 		$edit->cliente->size = 6;
-		$edit->cliente->maxlength=5;
+		//$edit->cliente->maxlength=5;
 		$edit->cliente->rule = 'required';
 		$edit->cliente->append($btnc);
 
@@ -1561,6 +1557,14 @@ class Snte extends Controller {
 		$numero = $this->uri->segment(4);
 		$id = $this->datasis->dameval("SELECT b.id FROM snte a JOIN scli b ON a.cod_cli=b.cliente WHERE numero='$numero'");
 		redirect('ventas/scli/dataedit/show/'.$id);
+	}
+
+	function instalar(){
+		if(!$this->datasis->iscampo('snte','id')){
+			$this->db->simple_query('ALTER TABLE snte DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE snte ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE snte ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
 	}
 
 }

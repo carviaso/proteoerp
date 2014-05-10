@@ -61,7 +61,7 @@ class Spre extends Controller {
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$param['WestPanel']    = $WestPanel;
-		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		$param['script']       = '';
 		//$param['EastPanel']  = $EastPanel;
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
@@ -1123,7 +1123,7 @@ class Spre extends Controller {
 
 		$edit->cliente = new inputField('Cliente','cod_cli');
 		$edit->cliente->size = 6;
-		$edit->cliente->maxlength=5;
+		//$edit->cliente->maxlength=5;
 		$edit->cliente->append($boton);
 
 		$edit->nombre = new inputField('Nombre', 'nombre');

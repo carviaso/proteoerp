@@ -796,7 +796,7 @@ script;
 		$edit->post_process('delete','_post_delete');
 
 		$edit->concepto = new inputField('Concepto', 'concepto');
-		$edit->concepto->rule = 'required|callback_chexiste';
+		$edit->concepto->rule = 'required|callback_chexiste|alpha_numeric';
 		$edit->concepto->mode = 'autohide';
 		$edit->concepto->maxlength= 4;
 		$edit->concepto->size = 7;
