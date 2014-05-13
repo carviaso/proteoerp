@@ -1431,7 +1431,7 @@ class Ajax extends Controller {
 				GROUP BY aa.codigoa";
 			$query = $this->db->query($mSQL_2);
 			if ($query->num_rows() > 0){
-				foreach( $query->result_array() as $row ) {
+				foreach( $query->result() as $row ) {
 					$arr_devolu[$row->codigoa]=$row->cana;
 				}
 			}

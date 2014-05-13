@@ -305,17 +305,20 @@ $(function(){
 	$("#scliexp").dialog({ autoOpen: false, height: 420, width: 400, modal: true });
 
 <?php
-	if (isset($form->error_string)) {
+	if(isset($form->error_string)) {
 		if ( !empty($form->error_string) ) {
 			$mensaje = preg_replace("/\r|\n/",'',$form->error_string);
 ?>
 			var mensaje = "<?php echo "<h2 style='color:red;'>Advertencias</h2>".$mensaje; ?>";
 			$.prompt(mensaje);
 <?php
+		}else{
+			echo 'saldoven();';
 		}
+	}else{
+		echo 'saldoven();';
 	}
 ?>
-	saldoven();
 
 });
 

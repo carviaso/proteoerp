@@ -1012,8 +1012,8 @@ class Snot extends Controller {
 		//fin de campos para detalle
 		//**************************
 
-		$edit->hora    = new autoUpdateField('hora'   ,date('H:i:s'), date('H:i:s'));
-		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+		$edit->hora    = new autoUpdateField('hora'   ,date('Hi') , date('Hi'));
+		$edit->estampa = new autoUpdateField('estampa',date('Ymd'), date('Ymd'));
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
 		//$edit->buttons('save', 'undo', 'delete', 'back','add_rel');
@@ -1036,7 +1036,7 @@ class Snot extends Controller {
 	function chsclifa($scli){
 		$factura  = $this->input->post('factura');
 		$dbfactura= $this->db->escape($factura);
-		$mSQL='SELECT TRIM(cliente) AS cliente FROM sfac WHERE tipo_doc="F" AND numero='.$dbfactura;
+		$mSQL='SELECT TRIM(cod_cli) AS cliente FROM sfac WHERE tipo_doc="F" AND numero='.$dbfactura;
 		$cliente=$this->datasis->dameval($mSQL);
 		if($scli==$cliente){
 			return true;
