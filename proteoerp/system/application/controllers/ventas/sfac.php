@@ -3920,6 +3920,7 @@ class Sfac extends Controller {
 	}
 
 	function _post_insert($do){
+
 		$numero  = $do->get('numero');
 		$fecha   = $do->get('fecha');
 		$vence   = $do->get('vence');
@@ -4132,7 +4133,7 @@ class Sfac extends Controller {
 
 			$factor=($tipo_doc=='F')? -1:1;
 
-			if(empty($this->pfac)){
+			if(!(strlen($this->snte)>7 && $tipo_doc == 'F')){
 				$this->datasis->sinvcarga($itcodigoa, $almacen, $factor*$itcana);
 			}
 		}
