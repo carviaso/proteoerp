@@ -1608,9 +1608,9 @@ class Ordc extends Controller {
 		$campo->disable_paste=true;
 
 		$grid->column_orderby('C&oacute;digo',$uri ,'codigo');
-		$grid->column_orderby('Descripci&oacute;n' ,'descrip' ,'descrip');
+		$grid->column_orderby('Descripci&oacute;n' ,'<#descrip#>' ,'descrip');
 		$grid->column('M&aacute;x-Min'          ,'<nformat><#exmax#>|0</nformat><b>-</b><nformat><#exmin#>|0</nformat>', "align='center'");
-		$grid->column_orderby('Existencia'         ,'<nformat><#existen#></nformat>' ,'existen' , "align='right'");
+		$grid->column_orderby('Existencia'      ,'<nformat><#existen#></nformat>' ,'existen' , "align='right'");
 		//$grid->column('Sugerido'            ,'<b><nformat><#sug#>|0</nformat></b>'   , "align='right'");
 		$grid->column('Sugerido'            ,$campo , "align='right'");
 		$grid->column('&Uacute;ltimo costo' ,'<nformat><#ultimo#></nformat>', "align='right'");

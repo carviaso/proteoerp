@@ -39,6 +39,43 @@ function totalizar(){
 </script>
 <?php } ?>
 
+<style>
+#saldoven
+{
+background:yellow;
+/* Chrome, Safari, Opera */
+-webkit-animation-name:anisalven;
+-webkit-animation-duration:2s;
+-webkit-animation-timing-function:linear;
+-webkit-animation-delay:1s;
+-webkit-animation-iteration-count:infinite;
+-webkit-animation-direction:alternate;
+-webkit-animation-play-state:running;
+/* Standard syntax */
+animation-name:anisalven;
+animation-duration:2s;
+animation-timing-function:linear;
+animation-delay:1s;
+animation-iteration-count:infinite;
+animation-direction:alternate;
+animation-play-state:running;
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes anisalven
+{
+from {background:yellow;}
+to {background:#32FFD3;}
+}
+
+/* Standard syntax */
+@keyframes anisalven
+{
+from {background:yellow;}
+to {background:#32FFD3}
+}
+</style>
+
 <table align='center' width="100%">
 	<tr>
 		<td><?php echo $form->numero->value.'-'.$form->nombre->value.$form->cliente->output; ?></td>
@@ -46,7 +83,7 @@ function totalizar(){
 	</tr>
 	<?php if(isset($saldo) && $saldo>0){ ?>
 	<tr>
-		<td colspan='2' align='center'>Saldo pendiente: <b style='font-size:1.1em'><?php echo htmlnformat($saldo);?></b></td>
+		<td colspan='2' align='center'>Saldo vencido: <b id='saldoven' style='font-size:1.7em;color:#FF0800;'><?php echo htmlnformat($saldo);?></b></td>
 	</tr>
 	<?php } ?>
 

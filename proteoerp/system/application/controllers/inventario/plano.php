@@ -19,7 +19,7 @@ class Plano extends Controller {
 	}
 
 	function index(){
-		$this->datasis->creaintramenu(array('modulo'=>'327','titulo'=>'Gerencia de Categorías','mensaje'=>'Gerencia de Categorías','panel'=>'REGISTROS','ejecutar'=>'inventario/plano','target'=>'popu','visible'=>'S','pertenece'=>'3','ancho'=>800,'alto'=>600));
+		$this->datasis->creaintramenu(array('modulo'=>'331','titulo'=>'Gerencia de Categorías','mensaje'=>'Gerencia de Categorías','panel'=>'REGISTROS','ejecutar'=>'inventario/plano','target'=>'popu','visible'=>'S','pertenece'=>'3','ancho'=>800,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
