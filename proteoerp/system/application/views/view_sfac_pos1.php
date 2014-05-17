@@ -642,7 +642,6 @@ function post_precioselec(ind,obj){
 			totalizar(ind);
 			otro = Number(otro)/100;
 			if(otro>0){
-				alert($("#totalg").val());
 				var descu = aplicadesc()/100;
 				var valor = Number($("#totalg").val())*otro/(1-descu);
 
