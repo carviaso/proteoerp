@@ -519,14 +519,18 @@ function totalizar(){
 			cana    = Number($("#cana_"+ind).val());
 			itiva   = Number($("#itiva_"+ind).val());
 			itpeso  = Number($("#sinvpeso_"+ind).val());
-			itpreca = Number($("#preca_"+ind).val());
 			importe = Number(this.value);
 
 			if(descu>0){
-				nimporte  = roundNumber(itpreca*(1-descu),2)*cana;
-				nimporte  = roundNumber(nimporte,2);
-				descuento = descuento+(importe-nimporte);
-				importe   = roundNumber(nimporte,2);
+				itpreca = Number($("#preca_"+ind).val());
+				if(!isNaN(itpreca)){
+					nimporte  = roundNumber(itpreca*(1-descu),2)*cana;
+					nimporte  = roundNumber(nimporte,2);
+					descuento = descuento+(importe-nimporte);
+					importe   = roundNumber(nimporte,2);
+				}else{
+					importe   = 0;
+				}
 			}
 
 			peso    = peso+(itpeso*cana);
@@ -638,7 +642,10 @@ function post_precioselec(ind,obj){
 			totalizar(ind);
 			otro = Number(otro)/100;
 			if(otro>0){
-				var valor=Number($("#totalg").val())*otro;
+				alert($("#totalg").val());
+				var descu = aplicadesc()/100;
+				var valor = Number($("#totalg").val())*otro/(1-descu);
+
 				var opt=document.createElement("option");
 				opt.text = nformat(valor,2);
 				opt.value= roundNumber(valor*100/(100+itiva),2);
