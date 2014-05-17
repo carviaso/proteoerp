@@ -614,12 +614,13 @@ function fvuelto(){
 function post_precioselec(ind,obj){
 	if(obj.value=='o'){
 		var itiva = Number($('#itiva_'+ind).val());
+		var ittipo= $('#sinvtipo_'+ind).val();
+		var renum = /^[0-9]+\.?[0-9*]*$/;
+		var repor = /^[0-9]+\.?[0-9*]*%$/;
+
 		otro = prompt('Precio nuevo','');
-		if(!otro){
-			var ctipo  = $("#sclitipo").val();
-			var tipo  = Number(ctipo); if(tipo>0) tipo=tipo-1;
-			obj.selectedIndex=tipo;
-		}else{
+
+		if(renum.test(otro)){
 			otro = Number(otro);
 			if(otro>0){
 				var opt=document.createElement("option");
@@ -628,6 +629,23 @@ function post_precioselec(ind,obj){
 				obj.add(opt,null);
 				obj.selectedIndex=obj.length-1;
 			}
+		}else if(repor.test(otro) && ittipo.substr(0,1)=='S'){
+			otro = otro.replace("%","");
+			$("#tota_"+ind).val('0');
+			totalizar(ind);
+			otro = Number(otro)/100;
+			if(otro>0){
+				var valor=Number($("#totalg").val())*otro;
+				var opt=document.createElement("option");
+				opt.text = nformat(valor,2);
+				opt.value= roundNumber(valor*100/(100+itiva),2);
+				obj.add(opt,null);
+				obj.selectedIndex=obj.length-1;
+			}
+		}else{
+			var ctipo  = $("#sclitipo").val();
+			var tipo  = Number(ctipo); if(tipo>0) tipo=tipo-1;
+			obj.selectedIndex=tipo;
 		}
 	}
 	importe(ind);

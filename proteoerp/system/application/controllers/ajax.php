@@ -475,7 +475,7 @@ class Ajax extends Controller {
 		$vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
 
 		if($vnega=='N'){
-			$wvnega=' AND e.existen>0 ';
+			$wvnega=' AND IF(MID(a.tipo,1,1)="S",1,e.existen>0) ';
 		}else{
 			$wvnega='';
 		}
