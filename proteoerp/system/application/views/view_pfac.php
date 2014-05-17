@@ -105,6 +105,9 @@ $(function(){
 			$('#rifci_val').text(ui.item.rifci);
 
 			$('#cod_cli').val(ui.item.cod_cli);
+			if(Number(ui.item.tipo)>4){
+				ui.item.tipo=4;
+			}
 			$('#sclitipo').val(ui.item.tipo);
 
 			$('#direc').val(ui.item.direc);
