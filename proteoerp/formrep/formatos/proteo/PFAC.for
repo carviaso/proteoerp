@@ -26,7 +26,10 @@ $dbnumero = $this->db->escape($row->numero);
 
 $lineas = 0;
 $uline  = array();
-$mSQL_2 = $this->db->query("SELECT codigoa AS codigo,desca,cana,preca,tota,iva FROM itpfac WHERE numa=${dbnumero}");
+$mSQL_2 = $this->db->query("SELECT a.codigoa AS codigo,b.descrip AS desca,a.cana,a.preca,a.tota,a.iva
+	FROM itpfac AS a
+	JOIN sinv   AS b ON a.codigoa=b.codigo
+	WHERE a.numa=${dbnumero} AND a.cana>0");
 $detalle= $mSQL_2->result();
 ?><html>
 <head>
@@ -130,7 +133,7 @@ foreach ($detalle AS $items){ $i++;
 		}
 ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-				<td style="text-align: center"><?php echo ($clinea)? '':  htmlspecialchars(trim($items->codigo)); ?></td>
+				<td style="text-align: center"><?php echo ($clinea)? '':  $this->us_ascii2html(trim($items->codigo)); ?></td>
 				<td>
 					<?php
 					if(!$clinea){
@@ -143,7 +146,7 @@ foreach ($detalle AS $items){ $i++;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo  htmlspecialchars($uline).'<br />';
+						echo  $this->us_ascii2html($uline).'<br />';
 						$lineas++;
 						if($lineas >= $maxlin){
 							$lineas =0;

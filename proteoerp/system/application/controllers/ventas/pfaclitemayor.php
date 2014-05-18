@@ -579,7 +579,7 @@ class pfaclitemayor extends validaciones{
 		for($i = 0;$i < $cana;$i++){
 			$itcana  = $do->get_rel('itpfac', 'cana', $i);
 			if($itcana>0){
-				$itcodigo = $do->get_rel('itpfac', 'codigoa', $i);
+				$itcodigo = trim($do->get_rel('itpfac', 'codigoa', $i));
 				$itpreca  = $do->get_rel('itpfac', 'preca', $i);
 				$itiva    = $do->get_rel('itpfac', 'iva', $i);
 				$ittota   = $itpreca * $itcana;
@@ -587,8 +587,12 @@ class pfaclitemayor extends validaciones{
 				$do->set_rel('itpfac', 'fecha'   , $fecha , $i);
 				$do->set_rel('itpfac', 'vendedor', $vd    , $i);
 				$dbcodigoa= $this->db->escape($itcodigo);
-				$desca    = $this->datasis->dameval("SELECT descrip FROM sinv WHERE codigo=$dbcodigoa");
-				$do->set_rel('itpfac', 'desca'   , $desca , $i);
+				$rowval = $this->datasis->damerow('SELECT descrip,pond, base1,precio4,peso FROM sinv WHERE codigo='.$dbcodigoa);
+				if(!empty($rowval)){
+					$do->set_rel('itpfac', 'desca'    , $rowval['descrip'] , $i);
+					$do->set_rel('itpfac', 'pvp'      , $rowval['base1'] , $i);
+					$tpeso += floatval($rowval['peso'])*$itcana;
+				}
 
 				$iva    += $ittota * ($itiva / 100);
 				$totals += $ittota;
@@ -602,6 +606,7 @@ class pfaclitemayor extends validaciones{
 		$do->set('totals' , round($totals , 2));
 		$do->set('totalg' , round($totalg , 2));
 		$do->set('iva'    , round($iva    , 2));
+		$do->set('peso'   , round($tpeso  , 2));
 		return true;
 	}
 

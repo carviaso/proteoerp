@@ -1256,7 +1256,7 @@ class Pfac extends Controller {
 	*/
 	function getdatait($id=0){
 		if($id === 0 ){
-			$id = $this->datasis->dameval("SELECT MAX(id) AS val FROM pfac");
+			$id = $this->datasis->dameval('SELECT MAX(id) AS val FROM pfac');
 		}
 		if(empty($id)) return '';
 		$id = intval($id);
@@ -1275,7 +1275,7 @@ class Pfac extends Controller {
 		}
 
 		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM itpfac WHERE numa=${dbnumero} ${orderby}";
+		$mSQL    = "SELECT * FROM itpfac WHERE numa=${dbnumero} AND cana>0 ${orderby}";
 		$response= $grid->getDataSimple($mSQL);
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
