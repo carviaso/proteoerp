@@ -4295,7 +4295,7 @@ class Sfac extends Controller {
 					'tipo_doc'   => 'F',
 					'factura'    => '',
 					'cod_cli'    => $row->cod_cli,
-					'sclitipo'   => $row->tipo,
+					'sclitipo'   => (intval($row->tipo)>4)? 4 : (intval($row->tipo)==0)? 1 : $row->tipo,
 					'nombre'     => rtrim($row->nombre),
 					'rifci'      => $row->rifci,
 					'direc'      => rtrim($row->direc),
