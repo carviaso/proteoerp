@@ -10,28 +10,34 @@ class Foliador extends Controller {
 	function Foliador(){
 		parent::Controller();
 		$this->load->library('rapyd');
-		$this->datasis->modulo_id(601,1);
+		//$this->datasis->modulo_id(601,1);
 	}
 
 	function index() {
+		$this->instalar();
+
 		$this->rapyd->load('datagrid','dataform');
 
 
 		$form = new DataForm('contabilidad/foliador/index/process');
-		$form->title('Fecha para la ejecuci&oacute;n');
+		//$form->title('Fecha para la ejecuci&oacute;n');
 
-		$size=15;
+		$size=20;
 
-		$form->desde = new inputField('Desde', 'desde');
+		$form->desde = new inputField('Desde-Hasta', 'desde');
 		$form->desde->rule='required|numeric';
 		$form->desde->group='Numeraci&oacute;n';
-		$form->desde->size=20;
+		$form->desde->size=10;
+		$form->desde->css_class = 'inputnum';
 		$form->desde->autocomplete=false;
+		$form->desde->append('-');
 
 		$form->hasta = new inputField('Hasta', 'hasta');
 		$form->hasta->rule='required|numeric|callback_chmayor';
 		$form->hasta->group='Numeraci&oacute;n';
-		$form->hasta->size=20;
+		$form->hasta->size=10;
+		$form->hasta->in = 'desde';
+		$form->hasta->css_class = 'inputnum';
 		$form->hasta->autocomplete=false;
 
 		$form->encab = new containerField('encab','');
@@ -41,7 +47,7 @@ class Foliador extends Controller {
 		$form->ei->size=$size;
 		$form->ei->in='encab';
 
-		$form->ec = new inputField('ec', 'ed');
+		$form->ec = new inputField('ec', 'ec');
 		$form->ec->size=$size;
 		$form->ec->in='encab';
 
@@ -56,7 +62,7 @@ class Foliador extends Controller {
 		$form->pi->size=$size;
 		$form->pi->in='pie';
 
-		$form->pc = new inputField('pc', 'pd');
+		$form->pc = new inputField('pc', 'pc');
 		$form->pc->size=$size;
 		$form->pc->in='pie';
 
@@ -66,10 +72,12 @@ class Foliador extends Controller {
 
 		$form->formato = new dropdownField('Formato', 'formato');
 		$form->formato->option('pdf','PDF');
-		$form->formato->option('prn','PRN');
+		//$form->formato->option('prn','PRN');
 		$form->formato->style='width:80px;';
 		$form->formato->rule  = 'required|enum[pdf,prn]';
 		$form->formato->group = 'Opciones';
+
+		$form->instru = new containerField('instru','Dejar vacios los campos que no desea utilizar, la etiqueta <b>&lt;#pagina#&gt;</b> se reemplazara por el n&uacute;mero de p&aacute;gina.');
 
 		$form->submit = new submitField('Generar','btn_submit');
 		$form->submit->in='formato';
@@ -99,20 +107,16 @@ class Foliador extends Controller {
 
 					$this->load->library('dompdf/cidompdf');
 					$cont='';
-					for($i=0;$i<=$diff;$i++){
+					for($i=0;$i<$diff;$i++){
 						$cont.='<div style="page-break-before: always;"></div>';
 					}
 
 					$html='<html>
-					<style>
-						.move-ahead { counter-increment: page 2; position: absolute; visibility: hidden; }
-						.pagenum:after { content:\' \' counter(page); }
-					</style>
-
 					<body>
 					<script type="text/php">
 						if(isset($pdf)){
-
+							$pdf->page_script(\'
+							$PAGE_NUM=$PAGE_NUM+'.($desde-1).';
 
 							$texto = array();
 							$font  = Font_Metrics::get_font("verdana");
@@ -126,6 +130,7 @@ class Foliador extends Controller {
 							//***Inicio cuadro
 							//**************VARIABLES MODIFICABLES***************
 							$texto = array('.$encab.');
+							$ptext = array('.$piso.');
 
 							$cuadros = 0;   //Cantidad de cuadros (en caso de ser 0 calcula la cantidad)
 							$margenh = 40;  //Distancia desde el borde derecho e izquierdo
@@ -136,15 +141,28 @@ class Foliador extends Controller {
 							$lcolor  = array(0,0,0); //Color de la letra
 							////**************************************************
 
+							$cuadro  = $pdf->open_object();
 
 							$cuadros = ($cuadros>0) ? $cuadros : count($texto);
-							$cuadro  = $pdf->open_object();
 							$margenl = $margenv-$alto+$text_height+5;    //Margen de la letra desde el borde inferior
 							$ancho   = intval(($w-2*$margenh)/$cuadros); //Ancho de cada cuadro
 							for($i=0;$i<$cuadros;$i++){
 								if(isset($texto[$i])){
+									$texto[$i] = str_replace("<#pagina#>",$PAGE_NUM,$texto[$i]);
 									$width = Font_Metrics::get_text_width($texto[$i],$font,$size);
-									$pdf->page_text($margenh+$i*$ancho+intval($ancho/2)-intval($width/2), $h-$margenl, $texto[$i], $font, $size, $lcolor);
+									$pdf->text($margenh+$i*$ancho+intval($ancho/2)-intval($width/2), $h-$margenl, $texto[$i], $font, $size, $lcolor);
+								}
+							}
+
+							$margenv = 80;
+							$cuadros = ($cuadros>0) ? $cuadros : count($ptext);
+							$margenl = $margenv-$alto+$text_height+5;    //Margen de la letra desde el borde inferior
+							$ancho   = intval(($w-2*$margenh)/$cuadros); //Ancho de cada cuadro
+							for($i=0;$i<$cuadros;$i++){
+								if(isset($texto[$i])){
+									$ptext[$i] = str_replace("<#pagina#>",$PAGE_NUM,$ptext[$i]);
+									$width = Font_Metrics::get_text_width($ptext[$i],$font,$size);
+									$pdf->text($margenh+$i*$ancho+intval($ancho/2)-intval($width/2), $h-$margenl, $ptext[$i], $font, $size, $lcolor);
 								}
 							}
 							//***Fin del cuadro
@@ -152,13 +170,7 @@ class Foliador extends Controller {
 							$pdf->close_object();
 							$pdf->add_object($cuadro,"add");
 
-
-							$text = "PP {PAGE_NUM} de {PAGE_COUNT}";
-
-							// Center the text
-							$width = Font_Metrics::get_text_width("PP 1 de 2", $font, $size);
-							$pdf->page_text($w / 2 - $width / 2, $y, $text, $font, $size, $color);
-
+							\');
 						}
 					</script>'.$cont.'</body>
 					</html>';
@@ -190,6 +202,10 @@ class Foliador extends Controller {
 			$this->validation->set_message('chmayor', 'El campo "%s" debe ser mayor');
 			return false;
 		}
+	}
+
+	function instalar(){
+		$this->datasis->creaintramenu(array('modulo'=>'608','titulo'=>'Foliador','mensaje'=>'Generador de folios','panel'=>'GENERADOR','ejecutar'=>'/contabilidad/foliador','target'=>'popu','visible'=>'S','pertenece'=>'6','ancho'=>800,'alto'=>600));
 	}
 
 }
