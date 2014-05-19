@@ -188,10 +188,26 @@ class Pfac extends Controller {
 		$bodyscript .= '
 		jQuery("#imprime").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/PFAC/').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes\');
-			} else { $.prompt("<h1>Por favor Seleccione una Factura</h1>");}
+
+				if(ret.factura != null && ret.factura != false){
+					$.prompt("<h2>Qu&eacute; documento dese imprimir?</h2>",{
+						buttons: { Presupuesto: true, Factura: false },
+						submit: function(e,v,m,f){
+							if(v){
+								window.open(\''.site_url('formatos/ver/PFAC/').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes\');
+							}else{
+								window.open(\''.site_url($this->url.'sfacprint').'/\'+ret.factura, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+							}
+						}
+					});
+				}else{
+					window.open(\''.site_url('formatos/ver/PFAC/').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes\');
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un pedido</h1>");
+			}
 		});';
 
 		$bodyscript .= '
@@ -1860,6 +1876,17 @@ class Pfac extends Controller {
 	function _post_delete($do){
 		$codigo = $do->get('numero');
 		logusu('pfac', "Pedido ${codigo} ELIMINADO");
+	}
+
+	function sfacprint($factura){
+		$dbnumero=$this->db->escape($factura);
+		$mSQL='SELECT a.id FROM sfac AS a WHERE a.tipo_doc="F" AND a.numero='.$dbnumero;
+		$sfac_id=$this->datasis->dameval($mSQL);
+		if(!empty($sfac_id)){
+			redirect('ventas/sfac/dataprint/modify/'.$sfac_id);
+		}else{
+			echo 'Factura no encontrada';
+		}
 	}
 
 	function sclibu(){

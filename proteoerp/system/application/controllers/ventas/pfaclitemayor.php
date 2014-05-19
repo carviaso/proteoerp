@@ -92,7 +92,7 @@ class pfaclitemayor extends validaciones{
 		$grid->per_page = 50;
 
 		$grid->column_orderby('N&uacute;mero', $uri ,'numero');
-		$grid->column_orderby('Factura'      , "<siinulo><#factura#>|$uri3|<#factura#></siinulo>",'factura');
+		$grid->column_orderby('Factura'      , 'factura','factura');
 		$grid->column_orderby('Fecha'        , '<dbdate_to_human><#fecha#></dbdate_to_human>','fecha', 'align=\'center\'');
 		$grid->column_orderby('Cliente'      , 'cod_cli','cod_cli');
 		$grid->column_orderby('Nombre'       , 'nombre','nombre');

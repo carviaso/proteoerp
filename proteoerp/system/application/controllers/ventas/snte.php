@@ -48,7 +48,6 @@ class Snte extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprimir'  ,'img'=>'assets/default/images/print.png',  'alt' => 'Reimprimir', 'label'=>'Reimprimir documento'));
-		$grid->wbotonadd(array('id'=>'imprimirnp','img'=>'assets/default/images/print.png',  'alt' => 'Reimprimir sin precios', 'label'=>'Reimprimir sin precios'));
 		$grid->wbotonadd(array('id'=>'bffact' , 'img'=>'images/star.png'                ,'alt' => 'Facturar'  , 'label'=>'Facturar'));
 
 		$WestPanel = $grid->deploywestp();
@@ -194,19 +193,33 @@ class Snte extends Controller {
 		$bodyscript .='
 		jQuery("#imprimir").click( function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/SNTE').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});';
+			if(id){
 
-		$bodyscript .='
-		jQuery("#imprimirnp").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/SNTE').'/\'+id+"/S", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
-			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var btns= { };
+
+				if(ret.factura != null && ret.factura != false){
+					btns={ "Con precios": "N","Sin precios":"S", Factura: "F" };
+				}else{
+					btns={ "Con precios": "N","Sin precios":"S"};
+				}
+
+				$.prompt("<h2>Qu&eacute; modalidad desea imprimir?</h2>",{
+					buttons: btns,
+					submit: function(e,v,m,f){
+						if(v=="F"){
+							window.open(\''.site_url($this->url.'sfacprint').'/\'+ret.factura, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+						}else if(v=="S"){
+							window.open(\''.site_url('formatos/ver/SNTE').'/\'+id+"/S", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+						}else{
+							window.open(\''.site_url('formatos/ver/SNTE').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+						}
+					}
+				});
+
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
+			}
 		});';
 
 		$bodyscript .= '
@@ -1557,6 +1570,17 @@ class Snte extends Controller {
 		$numero = $this->uri->segment(4);
 		$id = $this->datasis->dameval("SELECT b.id FROM snte a JOIN scli b ON a.cod_cli=b.cliente WHERE numero='$numero'");
 		redirect('ventas/scli/dataedit/show/'.$id);
+	}
+
+	function sfacprint($factura){
+		$dbnumero=$this->db->escape($factura);
+		$mSQL='SELECT a.id FROM sfac AS a WHERE a.tipo_doc="F" AND a.numero='.$dbnumero;
+		$sfac_id=$this->datasis->dameval($mSQL);
+		if(!empty($sfac_id)){
+			redirect('ventas/sfac/dataprint/modify/'.$sfac_id);
+		}else{
+			echo 'Factura no encontrada';
+		}
 	}
 
 	function instalar(){

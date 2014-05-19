@@ -4346,7 +4346,7 @@ class Sfac extends Controller {
 				echo 'Pedido ya facturado';
 			}
 		}else{
-			echo 'Pedido no encontrado';
+			echo 'Pedido cerrado o ya fue facturado';
 		}
 	}
 
