@@ -6,8 +6,8 @@ $dbid= $this->db->escape($id);
 //ENCABEZADO
 $moneda = $this->datasis->traevalor('MONEDA');
 $mSQL_1 = $this->db->query("SELECT
-a.tipo_doc,a.numero,a.fecha,a.vence,a.control,a.actuali,a.depo,a.proveed,b.nombre,TRIM(b.nomfis) AS nomfis,a.montotot,a.montoiva,a.montonet,a.peso,
-if(a.actuali>=a.fecha,'CARGADA','PENDIENTE') cargada, a.control
+a.tipo_doc,a.numero,a.fecha,a.vence,a.control,a.actuali,a.depo,a.proveed,b.nombre,TRIM(b.nomfis) AS nomfis,a.montotot,a.montoiva,a.montonet,a.peso, a.transac,
+if(a.actuali>=a.fecha,'CARGADA','PENDIENTE') cargada, a.control, a.cexento, a.cgenera, a.creduci, a.cadicio, a.cimpuesto, a.ctotal, a.reten, a.reteiva, a.cstotal 
 FROM scst AS a
 JOIN sprv AS b ON a.proveed=b.proveed
 WHERE a.id=${dbid}");
@@ -29,6 +29,18 @@ $control  =$row->control;
 $vence    =dbdate_to_human($row->vence);
 $actuali  =dbdate_to_human($row->actuali);
 
+$cexento   =$row->cexento;
+$cgenera   =$row->cgenera;
+$creduci   =$row->creduci;
+$cadicio   =$row->cadicio;
+$cimpuesto =$row->cimpuesto;
+$ctotal    =$row->ctotal;
+$reten     =$row->reten;
+$reteiva   =$row->reteiva;
+$cstotal   =$row->cstotal;
+
+$reten = $this->datasis->dameval("SELECT SUM(monto) FROM sprm WHERE cod_prv='RETEN' AND transac=".$row->transac)+0;
+
 if($row->tipo_doc=='FC'){
 	$tit1 = 'Compra';
 }elseif($row->tipo_doc=='NC'){
@@ -44,7 +56,7 @@ $mSQL_2 = $this->db->query("SELECT numero,codigo,descrip,cantidad,costo,importe,
 $detalle =$mSQL_2->result();
 
 $pagina = 0;
-$maxlinea = 28;
+$maxlinea = 32;
 
 //ENCABEZADO PRINCIPAL
 $encabeza = '
@@ -132,7 +144,8 @@ if ( isset($pdf) ) {
 $mod=FALSE;
 $i=0;
 $pagina = 0 ;
-foreach ($detalle AS $items){ $i++;
+foreach ($detalle AS $items){ 
+	$i++;
 	if ( $pagina == 0 ) {
 ?>
 <table style="width: 100%;">
@@ -185,6 +198,21 @@ foreach ($detalle AS $items){ $i++;
 	};
 	$mod = ! $mod;
 }
+while ( $i%$maxlinea != 0) {
+	$i++;
+?>
+				<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
+					<td style="text-align:left"> </td>
+					<td> </td>
+					<td style="text-align: center;"> </td>
+					<td style="text-align: center;"> </td>
+					<td style="text-align: center;"> </td>
+					<td class="change_order_total_col"> . </td>
+				</tr>
+<?php
+	$mod = ! $mod;
+
+}
 ?>
 			</tbody>
 			<tfoot>
@@ -208,6 +236,28 @@ foreach ($detalle AS $items){ $i++;
 				</tr>
 			</table>
 			</td></tr>
+			<tr><td colspan="7">
+			<table width="100%">
+				<tr>
+					<td style="text-align:center;"><b>Exento</b></td>
+					<td style="text-align:center;"><b>Base</b></td>
+					<td style="text-align:center;"><b>Impuesto</b></td>
+					<td style="text-align:center;"><b>Total</b></td>
+					<td style="text-align:center;"><b>R. IVA</b></td>
+					<td style="text-align:center;"><b>ISLR</b></td>
+					<td style="text-align:center;"><b>Neto CxP</b></td>
+				</tr><tr>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($cexento).$moneda?></b></td>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($cstotal).$moneda?></b></td>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($cimpuesto).$moneda?></b></td>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($ctotal).$moneda?></b></td>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($reteiva).$moneda?></b></td>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($reten).$moneda?></b></td>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($ctotal-$reteiva-$reten).$moneda?></b></td>
+				</tr>
+			</table>
+			</td></tr>
+
 			</tfoot>
 			</table>
 			</div>
