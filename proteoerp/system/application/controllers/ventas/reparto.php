@@ -1205,7 +1205,7 @@ class Reparto extends Controller {
 
 		$campos=$this->db->list_fields('sfac');
 		if(!in_array('reparto',$campos)){
-			$mSQL="ALTER TABLE `sfac` ADD COLUMN `reparto` INT(11) NULL DEFAULT '0' AFTER `manual`";
+			$mSQL="ALTER TABLE sfac ADD COLUMN reparto INT(11) NULL DEFAULT 0 AFTER manual";
 			$this->db->simple_query($mSQL);
 		}
 	}

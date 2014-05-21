@@ -186,6 +186,7 @@ class Lprod extends Controller {
 					mId = id;
 					$.post("'.site_url($this->url.'datacie/modify').'/"+id, function(data){
 						$("#fciecon").html(data);
+						$("#fciecon").dialog( { title:"Finalizacion"} );
 						$("#fciecon").dialog( "open" );
 					});
 				}
@@ -217,7 +218,6 @@ class Lprod extends Controller {
 
 		$bodyscript .= '
 		jQuery("#bconsol").click( function(){
-
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
@@ -456,8 +456,9 @@ class Lprod extends Controller {
 			//'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 		));
 
-		$grid->addField('grasa');
-		$grid->label('Grasa');
+
+		$grid->addField('sal');
+		$grid->label('Sal');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -465,7 +466,6 @@ class Lprod extends Controller {
 			'edittype'      => "'text'",
 			'width'         => 100,
 			'editrules'     => '{ required:true }',
-			//'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 		));
 
 		$grid->addField('acidez');
@@ -501,8 +501,21 @@ class Lprod extends Controller {
 			'edittype'      => "'text'",
 			'width'         => 100,
 			'editrules'     => '{ required:true }',
-			//'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 		));
+
+		$grid->addField('unidadespeso');
+		$grid->label('U.Producidas');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+		));
+
 
 		$grid->addField('producido');
 		$grid->label('P.Producido');
@@ -815,13 +828,13 @@ class Lprod extends Controller {
 		$edit->fecha->maxlength =8;
 		$edit->fecha->calendar=false;
 
-		$edit->inventario = new inputField('Leche de inventario','inventario');
+		$edit->inventario = new inputField('Leche de Inv.','inventario');
 		$edit->inventario->rule='max_length[12]|numeric|required';
 		$edit->inventario->css_class='inputnum';
 		$edit->inventario->size =8;
 		$edit->inventario->insertValue='0';
 		$edit->inventario->onkeyup='totalizar();';
-		$edit->inventario->maxlength =12;
+		$edit->inventario->maxlength =9;
 
 		$edit->litros = new inputField('L.Totales','litros');
 		$edit->litros->rule='max_length[12]|numeric';
@@ -837,17 +850,34 @@ class Lprod extends Controller {
 		$edit->peso->size =14;
 		$edit->peso->maxlength =12;
 
+/*
 		$edit->grasa = new inputField('Grasa','grasa');
 		//$edit->grasa->rule='required';
 		$edit->grasa->css_class='inputnum';
 		$edit->grasa->size =4;
 		$edit->grasa->maxlength =10;
+*/
 
+		$edit->sal = new inputField('Sal','sal');
+		//$edit->grasa->rule='required';
+		$edit->sal->css_class='inputnum';
+		$edit->sal->size =4;
+		$edit->sal->maxlength =10;
+
+		$edit->tina = new dropdownField('Tina Quesera', 'tina');
+		$edit->tina->rule ='required';
+		$edit->tina->option('','Seleccionar');
+		$edit->tina->options("SELECT codigo, CONCAT( codigo, '-', descripcion, '-', capacidad) descrip FROM tinaq ORDER BY codigo");
+		$edit->tina->style ='width:150px;';
+
+
+/*
 		$edit->reciclaje = new inputField('Reproceso','reciclaje');
 		$edit->reciclaje->css_class='inputnum';
 		$edit->reciclaje->insertValue='0';
 		$edit->reciclaje->size =8;
 		$edit->reciclaje->maxlength =10;
+*/
 
 		//Inicio del detalle
 		$edit->itid = new hiddenField('','itid_<#i#>');
@@ -955,7 +985,7 @@ class Lprod extends Controller {
 		$edit->unidades->mode = 'autohide';
 		$edit->unidades->showformat = 'decimal';
 
-		$edit->peso = new inputField('Peso del producto <b>Producido</b>','peso');
+		$edit->peso = new inputField('Peso del producto','peso');
 		$edit->peso->rule='numeric|required';
 		$edit->peso->css_class='inputonlynum';
 		$edit->peso->size =12;
@@ -969,7 +999,7 @@ class Lprod extends Controller {
 		$edit->unidadespeso->maxlength =10;
 		$edit->unidadespeso->style = 'font-size: 2em;font-weight:bold;';
 
-		$edit->reproceso = new inputField('Peso del producto para <b>Reproceso</b>','reproceso');
+		$edit->reproceso = new inputField('Peso para <b>Reproceso</b>','reproceso');
 		$edit->reproceso->rule='numeric|required';
 		$edit->reproceso->css_class='inputonlynum';
 		$edit->reproceso->size =12;
@@ -1415,6 +1445,11 @@ class Lprod extends Controller {
 		$campos=$this->db->list_fields('lprod');
 		if(!in_array('grasa',$campos)){
 			$mSQL="ALTER TABLE `lprod` ADD COLUMN `grasa` DECIMAL(12,2) NULL DEFAULT NULL AFTER `inventario`";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('sal',$campos)){
+			$mSQL="ALTER TABLE `lprod` ADD COLUMN `sal` DECIMAL(12,2) NULL DEFAULT NULL AFTER `grasa`";
 			$this->db->simple_query($mSQL);
 		}
 

@@ -190,10 +190,10 @@ function autocod(id){
 	</tr><tr>
 		<td><b><?php echo $form->fecha->label;       ?></b></td>
 		<td>   <?php echo $form->fecha->output;      ?></td>
-		<td><b><?php echo $form->reciclaje->label;    ?></b></td>
-		<td>   <?php echo $form->reciclaje->output;  ?></td>
-		<td><b><?php echo $form->grasa->label;       ?></b></td>
-		<td>   <?php echo $form->grasa->output;      ?></td>
+		<td><b><?php echo $form->tina->label;   ?></b></td>
+		<td>   <?php echo $form->tina->output;  ?></td>
+		<td><b><?php echo $form->sal->label;         ?></b></td>
+		<td>   <?php echo $form->sal->output;        ?></td>
 		<td><b><?php echo $form->inventario->label;  ?></b></td>
 		<td>   <?php echo $form->inventario->output; ?></td>
 	</tr>

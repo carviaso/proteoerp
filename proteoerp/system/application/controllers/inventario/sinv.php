@@ -6154,29 +6154,27 @@ class Sinv extends Controller {
 
 		$this->db->query("INSERT IGNORE INTO sinvalub SELECT a.codigo, b.ubica, a.ubica FROM sinv a JOIN caub b WHERE MID(a.tipo,1,1) <> 'S' AND b.gasto='N' ");
 
-
 		if (!in_array('alto'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN alto          DECIMAL(10,2)");
 		if (!in_array('ancho'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN ancho         DECIMAL(10,2)");
 		if (!in_array('largo'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN largo         DECIMAL(10,2)");
 		if (!in_array('forma'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN forma         VARCHAR(50)");
 		if (!in_array('exento'     ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN exento        CHAR(1) DEFAULT 'N'");
-		if (!in_array('mmargen'    ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN mmargen       DECIMAL(7,2) DEFAULT 0 COMMENT 'Margen al Mayor'");
+		if (!in_array('mmargen'    ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN mmargen       DECIMAL(7,2)       DEFAULT 0 COMMENT 'Margen al Mayor'");
 		if (!in_array('pm'         ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pm`          DECIMAL(19,2) NULL DEFAULT '0.00' COMMENT 'porcentaje mayor'");
 		if (!in_array('pmb'        ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pmb`         DECIMAL(19,2) NULL DEFAULT '0.00' COMMENT 'porcentaje mayor'");
-		if (!in_array('mmargenplus',$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `mmargenplus` DECIMAL(7,2) NULL DEFAULT '0.00' COMMENT 'Margen al Mayor'");
+		if (!in_array('mmargenplus',$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `mmargenplus` DECIMAL(7,2)  NULL DEFAULT '0.00' COMMENT 'Margen al Mayor'");
 		if (!in_array('escala1'    ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `escala1`     DECIMAL(12,2) NULL DEFAULT '0.00'");
-		if (!in_array('pescala1'   ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pescala1`    DECIMAL(5,2) NULL DEFAULT '0.00' COMMENT 'porcentaje descuento escala1'");
+		if (!in_array('pescala1'   ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pescala1`    DECIMAL(5,2)  NULL DEFAULT '0.00' COMMENT 'porcentaje descuento escala1'");
 		if (!in_array('escala2'    ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `escala2`     DECIMAL(12,2) NULL DEFAULT '0.00'");
-		if (!in_array('pescala2'   ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pescala2`    DECIMAL(5,2) NULL DEFAULT '0.00' COMMENT 'porcentaje descuento escala2'");
+		if (!in_array('pescala2'   ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pescala2`    DECIMAL(5,2)  NULL DEFAULT '0.00' COMMENT 'porcentaje descuento escala2'");
 		if (!in_array('escala3'    ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `escala3`     DECIMAL(12,2) NULL DEFAULT '0.00'");
-		if (!in_array('pescala3'   ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pescala3`    DECIMAL(5,2) NULL DEFAULT '0.00' COMMENT 'porcentaje descuento escala3'");
-		if (!in_array('mpps'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `mpps`        VARCHAR(20) NULL  COMMENT 'Numero de Ministerior de Salud'");
-		if (!in_array('cpe'        ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpe`         VARCHAR(20) NULL  COMMENT 'Registro de CPE'");
-		if (!in_array('tasa'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpe`         VARCHAR(20) NULL  COMMENT 'Tasa asociada'");
-		if (!in_array('linfe'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `linfe`       CHAR(1) NULL DEFAULT NULL");
-		if (!in_array('lindia'     ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `lindia`      INT(5) NULL DEFAULT NULL");
+		if (!in_array('pescala3'   ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pescala3`    DECIMAL(5,2)  NULL DEFAULT '0.00' COMMENT 'porcentaje descuento escala3'");
+		if (!in_array('mpps'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `mpps`        VARCHAR(20)   NULL  COMMENT 'Numero de Ministerior de Salud'");
+		if (!in_array('cpe'        ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpe`         VARCHAR(20)   NULL  COMMENT 'Registro de CPE'");
+		if (!in_array('tasa'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `cpe`         VARCHAR(20)   NULL  COMMENT 'Tasa asociada'");
 
-
+		if (!in_array('linfe'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `linfe`       CHAR(1)       NULL DEFAULT 'N' ");
+		if (!in_array('lindia'     ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `lindia`      INT(5)        NULL DEFAULT '0'");
 
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
 			if (!in_array('dcomercial', $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `dcomercial`  INT(6)     NULL  COMMENT 'Destino Comercial'");
@@ -6191,19 +6189,19 @@ class Sinv extends Controller {
 
 		if(!$this->db->table_exists('sinvcombo')){
 			$mSQL="CREATE TABLE `sinvcombo` (
-				`id` INT(11) NOT NULL AUTO_INCREMENT,
-				`combo` CHAR(15) NOT NULL,
-				`codigo` CHAR(15) NOT NULL DEFAULT '',
-				`descrip` CHAR(30) NULL DEFAULT NULL,
+				`id`       INT(11)   NOT NULL AUTO_INCREMENT,
+				`combo`    CHAR(15)  NOT NULL,
+				`codigo`   CHAR(15)  NOT NULL DEFAULT '',
+				`descrip`  CHAR(30)      NULL DEFAULT NULL,
 				`cantidad` DECIMAL(10,3) NULL DEFAULT NULL,
-				`precio` DECIMAL(15,2) NULL DEFAULT NULL,
-				`transac` CHAR(8) NULL DEFAULT NULL,
-				`estampa` DATE NULL DEFAULT NULL,
-				`hora` CHAR(8) NULL DEFAULT NULL,
-				`usuario` CHAR(12) NULL DEFAULT NULL,
-				`costo` DECIMAL(17,2) NULL DEFAULT '0.00',
-				`ultimo` DECIMAL(19,2) NULL DEFAULT '0.00',
-				`pond` DECIMAL(19,2) NULL DEFAULT '0.00',
+				`precio`   DECIMAL(15,2) NULL DEFAULT NULL,
+				`transac`  CHAR(8)       NULL DEFAULT NULL,
+				`estampa`  DATE          NULL DEFAULT NULL,
+				`hora`     CHAR(8)       NULL DEFAULT NULL,
+				`usuario`  CHAR(12)      NULL DEFAULT NULL,
+				`costo`    DECIMAL(17,2) NULL DEFAULT '0.00',
+				`ultimo`   DECIMAL(19,2) NULL DEFAULT '0.00',
+				`pond`     DECIMAL(19,2) NULL DEFAULT '0.00',
 				PRIMARY KEY (`id`)
 			)
 			COLLATE='latin1_swedish_ci'

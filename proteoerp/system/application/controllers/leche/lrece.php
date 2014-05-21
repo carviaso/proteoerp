@@ -68,8 +68,9 @@ class Lrece extends Controller {
 
 		//Botones Panel Izq
 		//$grid->wbotonadd(array('id'=>'imprime',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
-		$grid->wbotonadd(array('id'=>'recalcu'  , 'img'=>'images/vaca.png','alt' => 'Recalcular' , 'label'=>'Recalcular'  ));
-		$grid->wbotonadd(array('id'=>'bagrega'  , 'img'=>'images/vaca.png','alt' => 'Agrega'     , 'label'=>'Agregar Vaquera'  ));
+		$grid->wbotonadd(array('id'=>'bagrega', 'img'=>'images/vaca.png','alt' => 'Agrega'     , 'label'=>'Agregar Vaquera'  ));
+		//$grid->wbotonadd(array('id'=>'vacio',   'img'=>'images/vaca.png','alt' => 'Vacio',       'label'=>'Agregar Vacio'  ));
+		$grid->wbotonadd(array('id'=>'recalcu', 'img'=>'images/vaca.png','alt' => 'Recalcular' , 'label'=>'Recalcular'  ));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -215,8 +216,6 @@ class Lrece extends Controller {
 		$bodyscript .= '
 		jQuery("#bagrega").click( function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-
-
 			if (id)	{
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
@@ -280,6 +279,37 @@ class Lrece extends Controller {
 				$.prompt("<h1>Por favor Seleccione un registro</h1>");
 			}
 		});';
+
+
+/*
+		$bodyscript .= '
+		jQuery("#vacio").click( function(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				$.prompt( "<h1>Agregar nuevo codigo de Barras</h1><center><input type=\'text\' id=\'mcodbar\' name=\'mcodbar\' value=\'\' maxlengh=\'15\' size=\'15\' ></center><br/>", {
+					buttons: { Agregar: true, Cancelar: false },
+					submit: function(e,v,m,f){
+						if (v) {
+							if( f.mcodbar > 0 ) {
+								$.ajax({
+									type: "POST",
+									url: "'.site_url('inventario/sinv/sinvbarras').'",
+									data: { id: id, codigo: f.mcodbar },
+									complete: function(){
+										$("#bpos1").trigger("reloadGrid");
+									}
+								});
+							} else {
+								alert("Debe colocar un numero");
+							}
+						}
+					}
+				});
+			}
+		}
+		});';
+*/
+
 
 		$bodyscript .= '
 		jQuery("#banalisis").click( function(){
@@ -426,6 +456,7 @@ class Lrece extends Controller {
 			'editoptions'   => '{ size:4, maxlength: 4 }',
 		));
 
+/*
 		$grid->addField('flete');
 		$grid->label('Flete');
 		$grid->params(array(
@@ -436,13 +467,14 @@ class Lrece extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
+*/
 
 		$grid->addField('nombre');
 		$grid->label('Nombre del Chofer');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
+			'editable'      => 'true',
+			'width'         => 150,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:45, maxlength: 45 }',
@@ -480,7 +512,7 @@ class Lrece extends Controller {
 		$grid->label('Peso Vacio');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => $editar,
+			'editable'      => 'true',
 			'align'         => "'right'",
 			'edittype'      => "'text'",
 			'width'         => 100,
@@ -811,14 +843,16 @@ class Lrece extends Controller {
 			//} else
 			//	echo "Fallo Agregado!!!";
 		} elseif($oper == 'edit') {
-			if($this->datasis->sidapuede('LRECE','CAMBIO DE FECHA%' ) || true){
-				$this->db->where('id', $id);
-				$this->db->update('lrece', $data);
-				logusu('LRECE',"Registro $id MODIFICADO");
-				echo "Registro Modificado";
-			}else{
-				echo "No tiene permisos para modificar el registro";
-			}
+			//if($this->datasis->sidapuede('LRECE','CAMBIO DE FECHA' ) || true){
+			$this->db->where('id', $id);
+			$this->db->update('lrece', $data);
+			logusu('LRECE',"Registro $id MODIFICADO");
+			//Recalcula
+			$this->recalcula();
+			echo "Registro Modificado";
+			//}else{
+				//echo "No tiene permisos para modificar el registro";
+			//}
 		} elseif($oper == 'del') {
 			//$meco = $this->datasis->dameval("SELECT $mcodp FROM lrece WHERE id=$id");
 			////$check =  $this->datasis->dameval("SELECT COUNT(*) FROM lrece WHERE id='$id' ");
@@ -1367,7 +1401,6 @@ class Lrece extends Controller {
 			);
 			echo json_encode($rt);
 		}else{
-			//echo $edit->output;
 			$conten['form'] =&  $edit;
 			$this->load->view('view_lrecean', $conten);
 		}
@@ -1560,18 +1593,33 @@ class Lrece extends Controller {
 		$edit->cloruros->size =7;
 		$edit->cloruros->maxlength =10;
 
+/*
 		$edit->alcohol = new inputField('Alcohol','alcohol');
 		$edit->alcohol->rule='numeric|required';
 		$edit->alcohol->insertValue='-1';
 		$edit->alcohol->css_class='inputnum';
 		$edit->alcohol->size =7;
-		$edit->alcohol->maxlength =10;
+		$edit->alcohol->maxlength = 10;
+*/
+
+		$edit->alcohol = new  dropdownField ('Alcohol','alcohol');
+		$edit->alcohol->option('-1', 'Negativo');
+		$edit->alcohol->option('1',  'Positivo');
+		$edit->alcohol->rule = 'required';
+		$edit->alcohol->style= 'width:70px;';
 
 		$edit->dtoagua = new inputField('Dcto. de Agua','dtoagua');
 		$edit->dtoagua->rule='max_length[10]|numeric|required';
 		$edit->dtoagua->css_class='inputnum';
 		$edit->dtoagua->size =7;
 		$edit->dtoagua->maxlength =10;
+
+		$edit->ph = new inputField('pH','ph');
+		$edit->ph->rule='max_length[10]|numeric|required';
+		$edit->ph->css_class='inputnum';
+		$edit->ph->insertValue='0';
+		$edit->ph->size =7;
+		$edit->ph->maxlength =10;
 
 //		$edit->id_lrece = new inputField('id_lrece','id_lrece');
 //		$edit->id_lrece->rule        = 'numeric|required';
@@ -1582,7 +1630,6 @@ class Lrece extends Controller {
 //		$edit->id_lrece->
 
 		$edit->id_lrece  = new autoUpdateField('id_lrece',$this->uri->segment(4), $this->uri->segment(4) );
-
 
 		$edit->build();
 
@@ -2419,6 +2466,12 @@ class Lrece extends Controller {
 			$mSQL = "ALTER TABLE lanal ADD COLUMN `alcohol` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'alcohol' AFTER `dtoagua`";
 			$this->db->simple_query($mSQL);
 		}
+
+		if(!$this->db->field_exists('ph', 'lanal')){
+			$mSQL = "ALTER TABLE lanal ADD COLUMN `ph` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'PH' AFTER `alcohol`";
+			$this->db->simple_query($mSQL);
+		}
+
 
 		if(!$this->db->table_exists('itlrece')){
 			$mSQL="CREATE TABLE `itlrece` (

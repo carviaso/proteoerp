@@ -6,7 +6,6 @@ if (isset($script)) echo $script; ?>
 </head>
 <body>
 <?php 
-//if (isset($title)) echo $title;
 if (isset($content)) echo $content; 
 if (isset($extras))  echo $extras; 
 ?>

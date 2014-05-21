@@ -595,7 +595,7 @@ class Lvaca extends Controller {
 		$edit->ubicacion->maxlength =200;
 
 		$edit->animal = new  dropdownField ('Animal', 'animal');
-		$edit->animal->option('M' ,'Mezcla');
+		//$edit->animal->option('M' ,'Mezcla');
 		$edit->animal->option('V' ,'Vaca');
 		$edit->animal->option('B' ,'Bufala');
 		$edit->animal->rule = 'required';

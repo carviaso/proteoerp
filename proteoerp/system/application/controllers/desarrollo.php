@@ -1,9 +1,9 @@
 <?php
 /**
- * ProteoERP
- *
- * @autor    Andres Hocevar
- * @license  GNU GPL v3
+  ProteoERP
+ 
+  @autor    Andres Hocevar
+  @license  GNU GPL v3
 */
 
 class Desarrollo extends Controller{
@@ -20,378 +20,30 @@ class Desarrollo extends Controller{
 		$styles .= style('themes/proteo/proteo.css');
 		$styles .= style("themes/ui.jqgrid.css");
 		$styles .= style("themes/ui.multiselect.css");
+		$styles .= style('layout1.css');
 
-/*
-		$styles .= '
-<style>
-html, body {margin: 0;padding: 0;overflow: hidden;font-size: 90%;}
-#LeftPane {overflow: auto;}
-#RightPane {padding: 2px;overflow: auto;}
-.ui-tabs-nav li {position: relative;}
-.ui-tabs-selected a span {padding-right: 10px;}
-.ui-tabs-close {display: none;position: absolute;top: 3px;right: 0px;z-index: 800;width: 16px;height: 14px;font-size: 10px; font-style: normal;cursor: pointer;}
-.ui-tabs-selected .ui-tabs-close {display: block;}
-.ui-layout-west .ui-jqgrid tr.jqgrow td { border-bottom: 0px none;}
-.ui-datepicker {z-index:1200;}
-.rotate { -webkit-transform: rotate(-90deg); -moz-transform: rotate(-90deg); filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);}
-</style>
-		';
-*/
 
 		$styles .= '
 <style type="text/css">
-';
+	p {font-size:1em; margin: 1ex 0;}
+	p.buttons {text-align:center;line-height:2.5em;}
+	button {line-height: normal;}
+	.hidden {display: none;}
+	ul {z-index:100000;margin:1ex 0;padding:0;list-style:none;cursor:pointer;border:1px solid Black;width:15ex;position:	relative;}
+	ul li {background-color: #EEE;padding: 0.15em 1em 0.3em 5px;}
+	ul ul {display:none;position:absolute;width:100%;left:-1px;bottom:0;margin:0;margin-bottom: 1.55em;}
+	.ui-layout-north ul ul {bottom:auto;margin:0;margin-top:1.45em;}
+	ul ul li { padding: 3px 1em 3px 5px; }
+	ul ul li:hover { background-color: #FF9; }
+	ul li:hover ul { display:block; background-color: #EEE; }
 
-		$styles .= '
-//	PANES & CONTENT-DIVs
-.ui-layout-pane {
-	background:	#FFF;
-	border:		1px solid #BBB;
-	padding:	10px;
-	overflow:	auto;
-}
-
-// (scrolling) content-div inside pane allows for fixed header(s) and/or footer(s)
-.ui-layout-content {
-	padding:	10px;
-	position:	relative; // contain floated or positioned elements
-	overflow:	auto; // add scrolling to content-div
-}
-';
-
-
-		$styles .= '
-/*
- *	UTILITY CLASSES
- *	Must come AFTER pane-class above so will override
- *	These classes are NOT auto-generated and are NOT used by Layout
- */
-.layout-child-container,
-.layout-content-container {
-	padding:	0;
-	overflow:	hidden;
-}
-.layout-child-container {
-	border:		0; /* remove border because inner-layout-panes probably have borders */
-}
-.layout-scroll {
-	overflow:	auto;
-}
-.layout-hide {
-	display:	none;
-}
-
-/*
- *	RESIZER-BARS
- */
-.ui-layout-resizer	{ /* all resizer-bars */
-	resizerClass: "ui-state-default"
-	//background:		#DDD;
-	//border:			1px solid #BBB;
-	//border-width:	0;
-	}
-	.ui-layout-resizer-drag {		/* REAL resizer while resize in progress */
-	}
-	.ui-layout-resizer-hover	{	/* affects both open and closed states */
-	}
-	/* NOTE: It looks best when hover and dragging are set to the same color,
-		otherwise color shifts while dragging when bar cant keep up with mouse */
-	.ui-layout-resizer-open-hover ,	/* hover-color to resize */
-	.ui-layout-resizer-dragging {	/* resizer beging dragging */
-		background: #C4E1A4;
-	}
-	.ui-layout-resizer-dragging {	/* CLONED resizer being dragged */
-		border: 	 1px solid #BBB;
-	}
-	.ui-layout-resizer-north-dragging,
-	.ui-layout-resizer-south-dragging {
-		border-width:	1px 0;
-	}
-	.ui-layout-resizer-west-dragging,
-	.ui-layout-resizer-east-dragging {
-		border-width:	0 1px;
-	}
-	/* NOTE: Add a dragging-limit color to provide visual feedback when resizer hits min/max size limits */
-	.ui-layout-resizer-dragging-limit {	/* CLONED resizer at min or max size-limit */
-		background: #E1A4A4; /* red */
-	}
-
-	.ui-layout-resizer-closed-hover	{ /* hover-color to slide open */
-		background: #EBD5AA;
-	}
-	.ui-layout-resizer-sliding {	/* resizer when pane is slid open */
-		opacity: .10; /* show only a slight shadow */
-		filter:  alpha(opacity=10);
-		}
-		.ui-layout-resizer-sliding-hover {	/* sliding resizer - hover */
-			opacity: 1.00; /* on-hover, show the resizer-bar normally */
-			filter:  alpha(opacity=100);
-		}
-		/* sliding resizer - add outside-border to resizer on-hover
-		 * this sample illustrates how to target specific panes and states */
-		.ui-layout-resizer-north-sliding-hover	{ border-bottom-width:	1px; }
-		.ui-layout-resizer-south-sliding-hover	{ border-top-width:		1px; }
-		.ui-layout-resizer-west-sliding-hover	{ border-right-width:	1px; }
-		.ui-layout-resizer-east-sliding-hover	{ border-left-width:	1px; }
-
-/*
- *	TOGGLER-BUTTONS
- */
-.ui-layout-toggler {
-	border: 1px solid #BBB; /* match pane-border */
-	background-color: #BBB;
-	}
-	.ui-layout-resizer-hover .ui-layout-toggler {
-		opacity: .60;
-		filter:  alpha(opacity=60);
-	}
-	.ui-layout-toggler-hover , /* need when NOT resizable */
-	.ui-layout-resizer-hover .ui-layout-toggler-hover { /* need specificity when IS resizable */
-		background-color: #FC6;
-		opacity: 1.00;
-		filter:  alpha(opacity=100);
-	}
-	.ui-layout-toggler-north ,
-	.ui-layout-toggler-south {
-		border-width: 0 1px; /* left/right borders */
-	}
-	.ui-layout-toggler-west ,
-	.ui-layout-toggler-east {
-		border-width: 1px 0; /* top/bottom borders */
-	}
-	/* hide the toggler-button when the pane is slid open */
-	.ui-layout-resizer-sliding  .ui-layout-toggler {
-		display: none;
-	}
-	/*
-	 *	style the text we put INSIDE the togglers
-	 */
-	.ui-layout-toggler .content {
-		color:			#666;
-		font-size:		12px;
-		font-weight:	bold;
-		width:			100%;
-		padding-bottom:	0.35ex; /* to vertically center text inside text-span */
-	}
-
-/*
- *	PANE-MASKS
- *	these styles are hard-coded on mask elems, but are also
- *	included here as !important to ensure will overrides any generic styles
- */
-.ui-layout-mask {
-	border:		none !important;
-	padding:	0 !important;
-	margin:		0 !important;
-	overflow:	hidden !important;
-	position:	absolute !important;
-	opacity:	0 !important;
-	filter:		Alpha(Opacity="0") !important;
-}
-.ui-layout-mask-inside-pane { /* masks always inside pane EXCEPT when pane is an iframe */
-	top:		0 !important;
-	left:		0 !important;
-	width:		100% !important;
-	height:		100% !important;
-}
-div.ui-layout-mask {}		/* standard mask for iframes */
-iframe.ui-layout-mask {}	/* extra mask for objects/applets */
-
-/*
- *	Default printing styles
- */
-@media print {
-	/*
-	 *	Unless you want to print the layout as it appears onscreen,
-	 *	these html/body styles are needed to allow the content to flow
-	 */
-	html {
-		height:		auto !important;
-		overflow:	visible !important;
-	}
-	body.ui-layout-container {
-		position:	static !important;
-		top:		auto !important;
-		bottom:		auto !important;
-		left:		auto !important;
-		right:		auto !important;
-		/* only IE6 has container width & height set by Layout */
-		_width:		auto !important;
-		_height:	auto !important;
-	}
-	.ui-layout-resizer, .ui-layout-toggler {
-		display:	none !important;
-	}
-	/*
-	 *	Default pane print styles disables positioning, borders and backgrounds.
-	 *	You can modify these styles however it suit your needs.
-	 */
-	.ui-layout-pane {
-		border:		none !important;
-		background:	 transparent !important;
-		position:	relative !important;
-		top:		auto !important;
-		bottom:		auto !important;
-		left:		auto !important;
-		right:		auto !important;
-		width:		auto !important;
-		height:		auto !important;
-		overflow:	visible !important;
-	}
-}
-	html, body {
-		background:	#666;
-		width:		100%;
-		height:		100%;
-		padding:	0;
-		margin:		0;
-		overflow:	auto; /* when page gets too small */
-	}
-	#container {
-		background:	#999;
-		height:		100%;
-		margin:		0 auto;
-		width:		100%;
-		max-width:	900px;
-		min-width:	700px;
-		_width:		700px; /* min-width for IE6 */
-	}
-	.pane {
-		display:	none; /* will appear when layout inits */
-	}
+	#feedback { font-size: 0.8em; }
+	#tablas .ui-selecting { background: #FECA40; }
+	#tablas .ui-selected { background: #F39814; color: white; }
+	#tablas { list-style-type: none; margin: 0; padding: 0; width: 90%; }
+	#tablas li { margin: 1px; padding: 0em; font-size: 0.8em; height: 14px; }
 </style>
-		';
-
-
-		$script  = "\n<!-- JQUERY -->\n";
-		$script .= script('jquery-min.js');
-		$script .= script('jquery-migrate-min.js');
-		$script .= script('jquery-ui.custom.min.js');
-
-		$script .= script("jquery.layout.js");
-		$script .= script("i18n/grid.locale-sp.js");
-
-
-
-		$script .= '
-<script type="text/javascript">
-	$.jgrid.no_legacy_api = true;
-	$.jgrid.useJSON = true;
-</script>
-';
-		$script .= script("ui.multiselect.js");
-		$script .= script("jquery.jqGrid.min.js");
-		$script .= script("jquery.tablednd.js");
-		$script .= script("jquery.contextmenu.js");
-
-/*
-		$script .= '
-<script type="text/javascript">
-
-$(document).ready(function(){
-	$(\'body\').layout({
-		resizerClass: \'ui-state-default\',
-		west__onresize: function (pane, $Pane) {
-			$("#west-grid").jqGrid(\'setGridWidth\',$Pane.innerWidth()-2);
-		}
-	});
-	$.jgrid.defaults = $.extend($.jgrid.defaults,{loadui:"enable"});
-	var maintab = $(\'#tabs\',\'#RightPane\').tabs({
-        add: function(e, ui) {
-            // append close thingy
-            $(ui.tab).parents(\'li:first\')
-                .append(\'<span class="ui-tabs-close ui-icon ui-icon-close" title="Close Tab"></span>\')
-                .find(\'span.ui-tabs-close\')
-				.show()
-                .click(function() {
-                    maintab.tabs(\'remove\', $(\'li\', maintab).index($(this).parents(\'li:first\')[0]));
-                });
-            // select just added tab
-            maintab.tabs(\'select\', \'#\' + ui.panel.id);
-        }
-    });
-
-	$("#west-grid").jqGrid({
-		ajaxGridOptions : { type: "POST "},
-        url: "'.site_url('desarrollo/menu').'/",
-        datatype: "xml",
-        height: "auto",
-        pager: false,
-        loadui: "disable",
-        colNames: ["id","Herramientas","url"],
-        colModel: [
-            {name: "id",   width:1,   hidden:true, key:true},
-            {name: "menu", width:150, resizable: false, sortable:false},
-            {name: "url",   width:1,  hidden:true}
-        ],
-        treeGrid: true,
-		caption: "Desarrollo",
-        ExpandColumn: "menu",
-        autowidth: true,
-        rowNum: 200,
-        ExpandColClick: true,
-        treeIcons: {leaf:\'ui-icon-document-b\'},
-        onSelectRow: function(rowid) {
-            var treedata = $("#west-grid").jqGrid(\'getRowData\',rowid);
-            if(treedata.isLeaf=="true") {
-                //treedata.url
-                var st = "#t"+treedata.id;
-				if($(st).html() != null ) {
-					maintab.tabs(\'select\',st);
-				} else {
-					maintab.tabs(\'add\',st, treedata.menu);
-					//$(st,"#tabs").load(treedata.url);
-					$.ajax({
-						url: treedata.url,
-						type: "GET",
-						dataType: "html",
-						complete : function (req, err) {
-							$(st,"#tabs").append(req.responseText);
-
-							var clck = \'<p style="border: 1px solid; background-color: lemonchiffon; width:654px;height:25px;margin-bottom: 8px;padding-top: 8px;text-align: center">\';
-							clck += \'<b>Please, support the jqGrid project by clicking on our sponsors ad! </b></p>\';
-
-							var fs = "";
-
-							$(st,"#tabs").append(clck);
-							//$(st,"#tabs").append(fs);
-						}
-					});
-				}
-            }
-        }
-    });
-
-// end splitter
-
-});
-</script>
-';
-
-/*
-							try {
-								var pageTracker = _gat._getTracker("UA-5463047-4");
-								pageTracker._trackPageview();
-							}
-							catch(err) {};
-
-
-
-var fs = \'
-<iframe src="adds.html"  style="width:336px; height:290px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>\&nbsp;&nbsp;&nbsp;&nbsp;
-<iframe src="adds3.html" style="width:336px; height:290px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>\<br/>
-<iframe src="adds2.html" style="width:728px; height:95px;"  scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/><br>\&nbsp;&nbsp;&nbsp;&nbsp;
-<iframe src="adds4.html" style="width:728px; height:95px;"  scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>\
-\';
-
-*/
-
-		$script .= '
-<script type="text/javascript">
-	$(document).ready(function () {
-		$("#contenedor").layout();
-	});
-</script>
+</style>
 ';
 
 		$title = "
@@ -405,52 +57,223 @@ var fs = \'
 </div>
 ";
 
-		$tabla  = '
-	<div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
-	<table id="west-grid"></table>
-	</div> <!-- #LeftPane -->
-	<div id="RightPane" class="ui-layout-center ui-helper-reset ui-widget-content" ><!-- Tabs pane -->
 
-	<div id="switcher"></div>
-		<div id="tabs" class="jqgtabs">
-			<ul>
-				<li><a href="#tabs-1">Desarrollo</a></li>
-			</ul>
-			<div id="tabs-1" style="font-size:10px;">
+		$script  = "\n<!-- JQUERY -->\n";
+		$script .= script('jquery-min.js');
+		$script .= script('jquery-migrate-min.js');
+		$script .= script('jquery-ui.custom.min.js');
 
+		$script .= script("jquery.layout.js");
+		$script .= script("i18n/grid.locale-sp.js");
 
-			</div>
-		</div>
-	</div> <!-- #RightPane -->
+		$script .= script("ui.multiselect.js");
+		$script .= script("jquery.jqGrid.min.js");
+		$script .= script("jquery.tablednd.js");
+		$script .= script("jquery.contextmenu.js");
+
+		$script .= '
+<script type="text/javascript">
 ';
 
-/*
-				<iframe src="adds_c.html" style="width:728px; height:100px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"/>
+		$script .= '
+	// set EVERY state here so will undo ALL layout changes
+	// used by the Reset State button: myLayout.loadState( stateResetSettings )
+	var stateResetSettings = {
+		north__size:		"auto"
+	,	north__initClosed:	false
+	,	north__initHidden:	false
+	,	south__size:		"auto"
+	,	south__initClosed:	false
+	,	south__initHidden:	false
+	,	west__size:			200
+	,	west__initClosed:	false
+	,	west__initHidden:	false
+	,	east__size:			300
+	,	east__initClosed:	false
+	,	east__initHidden:	false
+	};
+
+	var myLayout;
+
+	$(document).ready(function () {
+
+		// this layout could be created with NO OPTIONS - but showing some here just as a sample...
+		// myLayout = $("body").layout(); -- syntax with No Options
+
+		myLayout = $("body").layout({
+
+		//	reference only - these options are NOT required because "true" is the default
+			closable: true,	resizable:	true, slidable:	true, livePaneResizing:	true
+		//	some resizing/toggling settings
+		,	north__slidable: false, north__togglerLength_closed: "100%", north__spacing_closed:	20
+		,	south__resizable:false,	south__spacing_open:0
+		,	south__spacing_closed:20
+		//	some pane-size settings
+		,	west__minSize: 100, east__size: 300, east__minSize: 200, east__maxSize: .5, center__minWidth: 100
+		//	some pane animation settings
+		,	west__animatePaneSizing: false,	west__fxSpeed_size:	"fast",	west__fxSpeed_open: 1000
+		,	west__fxSettings_open:{ easing: "easeOutBounce" },	west__fxName_close:"none"
+		//	enable showOverflow on west-pane so CSS popups will overlap north pane
+		//,	west__showOverflowOnHover:	true
+		,	stateManagement__enabled:true, showDebugMessages: true
+		});
+ 	});
+
+	$(function() {
+		$("#tablas").selectable({
+			selected: function( event, ui ) {
+				if ( $("#tabla1").val() == "" ) 
+					$("#tabla1").val(ui.selected.id);
+				else 
+					$("#tabla2").val(ui.selected.id);
+			}
+		});
+	});
+
+	function camposdb() { 
+		$.post("'.site_url('desarrollo/camposdb')."/".'"+$("#tabla1").val(),
+		function(data){
+			$("#resultado").html("");
+			$("#resultado").html(data);
+		});
+	};
+	
+	function lcamposdb () { 
+		$.post("'.site_url('desarrollo/lcamposdb')."/".'"+$("#tabla1").val(),
+		function(data){
+			$("#resultado").html("");
+			$("#resultado").html(data);
+		});
+	};
+
+	function ccamposdb () { 
+		$.post("'.site_url('desarrollo/ccamposdb')."/".'"+$("#tabla1").val(),
+		function(data){
+			
+			$("#resultado").html(data);
+		});
+	};
+
+	function jqgrid () { 
+		window.open(\''.site_url('desarrollo/jqgrid').'/\'+$("#tabla1").val()+"/"+$("#modulo").val(), \'_blank\', \'width=900, height=700, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-350), screeny=((screen.availWidth/2)-450)\');
+	};
+
+	function jqgridmd () { 
+		window.open(\''.site_url('desarrollo/jqgridmd').'/\'+$("#tabla1").val()+"/"+$("#tabla2").val()+"/"+$("#modulo").val(), \'_blank\', \'width=900, height=700, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-350), screeny=((screen.availWidth/2)-450)\');
+	};
 
 
-<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src=\'" + gaJsHost + "google-analytics.com/ga.js\' type=\'text/javascript\'%3E%3C/script%3E"));
-</script>
-<script type="text/javascript">
-try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPageview(); } catch(err) {}
 </script>
 ';
-*/
 
-		$tabla  = '
-<div id="container">
-	<div class="pane ui-layout-center">
-		Center
-		<p><a href="http://layout.jquery-dev.net/demos.html"><b>Go to the Demos page</b></a></p>
-	</div>
-	<div class="pane ui-layout-north">North</div>
-	<div class="pane ui-layout-south">South</div>
-	<div class="pane ui-layout-east">East</div>
-	<div class="pane ui-layout-west">West</div>
+// ENCABEZADO
+$tabla = '
+<div class="ui-layout-north" onmouseover="myLayout.allowOverflow(\'north\')" onmouseout="myLayout.resetOverflow(this)">
+<table width="100%" bgcolor="#2067B5">
+	<tr>
+		<td align="left" width="80px"><img src="'.base_url().'assets/default/css/templete_01.jpg" width="120"></td><td align="center"><h1 style="font-size: 20px; color: rgb(255, 255, 255);" onclick="history.back()">HERRAMIENTAS DE DESARROLLO</h1></td><td align="left" width="100px" nowrap="nowrap"><font style="color:#FFFFFF;font-size:12px">Usuario: '.$this->secu->usuario().'<br/>'.$this->secu->getnombre().'</font></td><td align="right" width="28px"></td>
+	</tr>
+</table>
 </div>
 ';
 
+// IZQUIERDO
+$tabla .= '
+<div class="ui-layout-west">
+	Tablas Disponibles:
+	<ol id="tablas">
+';
+	//Trae las tablas
+	$query = $this->db->query("SHOW TABLE STATUS");
+	foreach ($query->result_array() as $field){
+		if ( substr($field['Name'],0,4) != 'b2b_'
+			&& $field['Name'] != 'ModBusqueda' 
+			&& $field['Name'] != 'accdirecto' 
+			&& $field['Name'] != 'bitacora' 
+			&& substr($field['Name'],0,4) != 'crm_' 
+			&& substr($field['Name'],0,4) != 'gpt_' 
+			&& $field['Name'] != 'data_sesion' 
+			&& $field['Name'] != 'chat' 
+			&& $field['Name'] != 'costos' 
+			&& $field['Name'] != 'cerberus' 
+			&& $field['Name'] != 'contadores'
+			&& $field['Name'] != 'ejecutasql'
+			&& $field['Name'] != 'formatos'
+			&& $field['Name'] != 'reportes'
+			&& $field['Name'] != 'graficos'
+			&& $field['Name'] != 'impor_data'
+			&& $field['Name'] != 'pantallas'   
+			&& $field['Name'] != 'i18n' 
+			&& $field['Name'] != 'logusu' 
+			&& $field['Name'] != 'intramenu' 
+			&& $field['Name'] != 'internet' 
+			&& $field['Name'] != 'intrarepo' 
+			&& $field['Name'] != 'intermenu' 
+			&& $field['Name'] != 'intrasida' 
+			&& $field['Name'] != 'tmenus' 
+			&& $field['Name'] != 'usuario' 
+			&& $field['Name'] != 'sida' 
+
+		)
+		$tabla .= "\t<li class='ui-widget-content' id='".$field['Name']."' > ".$field['Name'].'</li>';
+	}
+
+$tabla .= '
+	</ol>
+</div>
+';
+
+// INFERIOR
+$tabla .= '
+<div class="ui-layout-south">
+';
+
+$tabla .= $this->datasis->traevalor('TITULO1');
+
+$tabla .= '
+</div>
+';
+
+// DERECHA
+$tabla .= '
+<div class="ui-layout-east">
+</div>
+';
+
+// CENTRO
+$tabla .= '
+<div class="ui-layout-center">
+	<table width="100%" bgcolor="#58ACFA">
+		<tr>
+			<td>Tabla Maestra</td>
+			<td><input id="tabla1" type="text" value="" ></td>
+			<td><button id="camposdb"  onclick="camposdb()" >Arreglo de Campos</button></td>
+			<td><button id="lcamposdb" onclick="lcamposdb()">Lista de Campos</button></td>
+		</tr><tr>
+			<td>Tabla Detalle </td>
+			<td><input id="tabla2" type="text" value="" ></td>
+			<td><button id="ccamposdb" onclick="ccamposdb()">Lista con comillas</button></td>
+		</tr><tr>
+			<td>Modulo</td>
+			<td><select id="modulo">
+				<option value="">Elija uno</option>
+';
+
+$dirs = array_filter(glob('system/application/controllers/*'), 'is_dir');
+foreach ( $dirs as $field ){
+	$modulo = str_replace('system/application/controllers/','',$field);
+	$tabla .= "\t\t\t\t<option value='".$modulo."'>".$modulo.'</option>'."\n";
+}
+$tabla .= '
+			</select></td>
+			<td><button id="jqgrid"   onclick="jqgrid()"  >Generar Maestro</button></td>
+			<td><button id="jqgridmd" onclick="jqgridmd()">Maestro Detalle</button></td>
+		</tr>
+	</table>
+	<br>
+	<div style="background:#EAEAEA" id="resultado"></div>
+</div>
+';
 
 		$data['content'] = $tabla;
 		$data['title']   = $title;
@@ -460,6 +283,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$this->load->view('view_ventanas_lite',$data);
 
 	}
+
 
 	function camposdb(){
 		$db=$this->uri->segment(3);
@@ -903,7 +727,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 		$crud.="\t".'function instalar(){'."\n";
 		$crud.="\t\t".'if (!$this->db->table_exists(\''.$tabla.'\')) {'."\n";
 		$crud.="\t\t\t".'$mSQL="'.str_replace("\n","\n\t\t\t",$row['Create Table']).'";'."\n";
-		$crud.="\t\t\t".'$this->db->simple_query($mSQL);'."\n";
+		$crud.="\t\t\t".'$this->db->query($mSQL);'."\n";
 		$crud.="\t\t".'}'."\n";
 		$crud.="\t\t".'//$campos=$this->db->list_fields(\''.$tabla.'\');'."\n";
 		$crud.="\t\t".'//if(!in_array(\'<#campo#>\',$campos)){ }'."\n";
@@ -1352,7 +1176,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $tab3.'if ($check > 0){'."\n";
 			$str .= $tab4.'echo " El registro no puede ser eliminado; tiene movimiento ";'."\n";
 			$str .= $tab3.'} else {'."\n";
-			$str .= $tab4.'$this->db->simple_query("DELETE FROM '.$db.' WHERE id=$id ");'."\n";
+			$str .= $tab4.'$this->db->query("DELETE FROM '.$db.' WHERE id=$id ");'."\n";
 			$str .= $tab4.'logusu(\''.strtoupper($db).'\',"Registro ????? ELIMINADO");'."\n";
 			$str .= $tab4.'echo "Registro Eliminado";'."\n";
 			$str .= $tab3.'}'."\n";
@@ -1779,7 +1603,7 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 			$str .= $tab3.'if ($check > 0){'."\n";
 			$str .= $tab4.'echo " El registro no puede ser eliminado; tiene movimiento ";'."\n";
 			$str .= $tab3.'} else {'."\n";
-			$str .= $tab4.'$this->db->simple_query("DELETE FROM '.$db.' WHERE id=$id ");'."\n";
+			$str .= $tab4.'$this->db->query("DELETE FROM '.$db.' WHERE id=$id ");'."\n";
 			$str .= $tab4.'logusu(\''.strtoupper($db).'\',"Registro ????? ELIMINADO");'."\n";
 			$str .= $tab4.'echo "Registro Eliminado";'."\n";
 			$str .= $tab3.'}'."\n";
@@ -1909,9 +1733,9 @@ try { var pageTracker = _gat._getTracker("UA-5463047-4"); pageTracker._trackPage
 
 		$str .= $tab1.'function index(){'."\n";
 		$str .= $tab2.'/*if ( !$this->datasis->iscampo(\''.$db.'\',\'id\') ) {'."\n";
-		$str .= $tab3.'$this->db->simple_query(\'ALTER TABLE '.$db.' DROP PRIMARY KEY\');'."\n";
-		$str .= $tab3.'$this->db->simple_query(\'ALTER TABLE '.$db.' ADD UNIQUE INDEX numero (numero)\');'."\n";
-		$str .= $tab3.'$this->db->simple_query(\'ALTER TABLE '.$db.' ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)\');'."\n";
+		$str .= $tab3.'$this->db->query(\'ALTER TABLE '.$db.' DROP PRIMARY KEY\');'."\n";
+		$str .= $tab3.'$this->db->query(\'ALTER TABLE '.$db.' ADD UNIQUE INDEX numero (numero)\');'."\n";
+		$str .= $tab3.'$this->db->query(\'ALTER TABLE '.$db.' ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)\');'."\n";
 		$str .= $tab2.'};*/'."\n";
 
 		$str .= $tab2.'//$this->datasis->creaintramenu(array(\'modulo\'=>\'000\',\'titulo\'=>\'<#titulo#>\',\'mensaje\'=>\'<#mensaje#>\',\'panel\'=>\'<#panal#>\',\'ejecutar\'=>\'<#ejecuta#>\',\'target\'=>\'popu\',\'visible\'=>\'S\',\'pertenece\'=>\'<#pertenece#>\',\'ancho\'=>900,\'alto\'=>600));'."\n";

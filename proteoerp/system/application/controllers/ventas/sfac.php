@@ -4557,7 +4557,17 @@ class Sfac extends Controller {
 		}
 
 		if(!in_array('maestra',$campos)){
-			$this->db->query("ALTER TABLE `sfac` ADD COLUMN `maestra` VARCHAR(8) NULL DEFAULT '' AFTER `descuento`");
+			$this->db->query("ALTER TABLE sfac ADD COLUMN maestra VARCHAR(8) NULL DEFAULT '' AFTER descuento");
+		}
+
+		if(!in_array('reparto',$campos)){
+			$mSQL="ALTER TABLE sfac ADD COLUMN reparto INT(11) NULL DEFAULT 0 AFTER manual";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('rcobra',$campos)){
+			$mSQL="ALTER TABLE sfac ADD COLUMN rcobro INT(11) NULL DEFAULT 0 AFTER reparto";
+			$this->db->query($mSQL);
 		}
 
 		if(!in_array('id'  ,$campos)){

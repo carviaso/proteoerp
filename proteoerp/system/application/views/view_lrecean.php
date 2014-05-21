@@ -69,6 +69,8 @@ function descuagua(){
 	</tr><tr>
 		<td class="littletableheaderc"><?php echo $form->dtoagua->label; ?></td>
 		<td class="littletablerow"    ><?php echo $form->dtoagua->output;?></td>
+		<td class="littletableheaderc"><?php echo $form->ph->label; ?></td>
+		<td class="littletablerow"    ><?php echo $form->ph->output;?></td>
 	</tr>
 	
 </table>
