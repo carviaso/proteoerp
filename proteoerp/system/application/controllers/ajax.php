@@ -875,7 +875,7 @@ class Ajax extends Controller {
 			}else{
 				$ww ='';
 			}
-			$mSQL.=" WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba} OR a.alterno LIKE ${qba} ${ww}) AND a.activo='S' AND a.tipo='Articulo'
+			$mSQL.=" WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba} OR a.alterno LIKE ${qba} ${ww}) AND a.tipo='Articulo'
 				ORDER BY a.descrip LIMIT ".$this->autolimit;
 			$cana=1;
 

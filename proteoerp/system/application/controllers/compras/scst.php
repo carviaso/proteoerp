@@ -4697,7 +4697,7 @@ class Scst extends Controller {
 				$vcosto  =$scstrow['costo'];
 			}elseif($formcal=='P'){
 				$cformcal='Ponderado';
-				$vcosto=$vpond;
+				$vcosto=$pon;
 			}elseif($formcal=='S'){
 				$cformcal='Est&aacute;ndar';
 				$vcosto=$scstrow['sinvstandard'];
