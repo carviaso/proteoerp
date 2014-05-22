@@ -459,10 +459,11 @@ function elminacenti(cual){
 
 		$filter->db->select($select);
 		$filter->db->from('sprm AS a');
-		$filter->db->join('itppro AS b','a.cod_prv=b.cod_prv AND a.numero=b.numero AND a.tipo_doc=b.tipo_doc');
+		$filter->db->join('itppro AS b','a.cod_prv=b.cod_prv AND ((a.numero=b.numero AND a.tipo_doc=b.tipo_doc) OR (a.numero=b.numppro AND a.tipo_doc=b.tipoppro))');
 		$filter->db->groupby('a.cod_prv, a.tipo_doc,a.numero');
 		$filter->db->having('abonoreal  <>','inconsist');
-		$filter->db->orderby('a.cod_prv','b.numero');
+		$filter->db->where('`a`.`tipo_doc` IN (\'FC\',\'GI\',\'ND\')');
+		$filter->db->orderby('a.cod_prv','a.numero');
 
 		$filter->fechad = new dateonlyField('Desde','fechad');
 		$filter->fechah = new dateonlyField('Hasta','fechah');
@@ -580,7 +581,7 @@ function elminacenti(cual){
 		//$filter->db->join('itccli AS b','a.cod_cli=b.cod_cli AND a.numero=b.numero AND a.tipo_doc=b.tipo_doc');
 		$filter->db->groupby('a.cod_cli, a.tipo_doc,a.numero');
 		$filter->db->having('abonoreal  <>','inconsist');
-		$filter->db->orderby('a.cod_cli','b.numero');
+		$filter->db->orderby('a.cod_cli','a.numero');
 		$filter->db->where('`a`.`tipo_doc` IN (\'FC\',\'GI\',\'ND\')');
 
 		$filter->fechad = new dateonlyField('Desde','fechad');

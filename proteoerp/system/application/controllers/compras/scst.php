@@ -1531,6 +1531,10 @@ class Scst extends Controller {
 				$this->db->where('control',$control);
 				$this->db->update('itscst',array('numero'=>$data['numero']));
 
+				//Cambia la retencion IVA
+				$this->db->where('transac',$transac);
+				$this->db->update('riva',array('numero'=>$data['numero']));
+
 				//Cambia la retencion ISLR
 				$this->db->where('idd'     ,$id);
 				$this->db->update('gereten',array('numero'=>$data['numero']));
