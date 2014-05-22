@@ -1,5 +1,5 @@
 <?php
-$maxlin = 32; //Maximo de lineas
+$maxlin = 38; //Maximo de lineas
 
 if(count($parametros)==0) show_error('Faltan parametros ');
 $id   = $parametros[0];
@@ -15,7 +15,7 @@ $row    = $mSQL_1->row();
 
 $tipo_doc = trim($row->tipo_doc);
 if($tipo_doc=='GA') show_error('Gasto de nomina, debe sacarlo por los formatos de nomina');
-if($tipo_doc=='Aj') show_error('Gasto por ajuste de inventario, debe imprimirlo por el modulo respectivo');
+if($tipo_doc=='AJ') show_error('Gasto por ajuste de inventario, debe imprimirlo por el modulo respectivo');
 if($tipo_doc=='XX') show_error('Gasto por anulado, no se puede imprimir');
 
 $fecha    = dbdate_to_human($row->fecha);
@@ -56,7 +56,8 @@ if($row->cajachi=='S'){
 	WHERE numero=${dbnumero} AND proveed=${dbproveed} AND fecha=${dbfecha} AND transac=${dbtransac}");
 	//WHERE idgser=${dbid}");
 }
-if($mSQL_2->num_rows()==0) show_error('Registro presenta inconsistencias');
+$ndetalle=$mSQL_2->num_rows();
+if($ndetalle==0) show_error('Registro presenta inconsistencias');
 $detalle = $mSQL_2->result();
 
 
@@ -256,7 +257,7 @@ $mod     = $clinea = false;
 $npagina = true;
 $i       = 0;
 
-foreach ($detalle AS $items){ $i++;
+foreach ($detalle AS $items){ $i++; $ndetalle=$ndetalle-1;
 	$tprecio  += $items->precio;
 	$tiva     += $items->iva;
 	$timporte += $items->importe;
@@ -297,11 +298,13 @@ foreach ($detalle AS $items){ $i++;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo htmlspecialchars($uline).'<br />';
+						echo $this->us_ascii2html($uline).'<br />';
 						$lineas++;
 						if($lineas >= $maxlin){
-							$lineas =0;
-							$npagina=true;
+							if($ndetalle>0){
+								$npagina=true;
+								$lineas =0;
+							}
 							if(count($arr_des)>0){
 								$clinea = true;
 							}else{
@@ -319,12 +322,12 @@ foreach ($detalle AS $items){ $i++;
 			</tr>
 			<?php if(!empty($cachi_desc)){ $lineas++; ?>
 			<tr class='<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>'>
-				<td colspan='5' style='text-align: center;font-size:0.7em'><b><?php echo htmlspecialchars($cachi_desc); ?></b></td>
+				<td colspan='5' style='text-align: center;font-size:0.7em'><b><?php echo $this->us_ascii2html($cachi_desc); ?></b></td>
 			</tr>
 			<?php } ?>
 
 <?php
-		if($npagina){
+		if($npagina && $ndetalle>0){
 			echo $pie_continuo;
 		}else{
 			$mod = ! $mod;

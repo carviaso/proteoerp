@@ -576,15 +576,17 @@ function elminacenti(cual){
 
 		$filter->db->select($select);
 		$filter->db->from('smov AS a');
-		$filter->db->join('itccli AS b','a.cod_cli=b.cod_cli AND a.numero=b.numero AND a.tipo_doc=b.tipo_doc');
+		$filter->db->join('itccli AS b','a.cod_cli=b.cod_cli AND ((a.numero=b.numero AND a.tipo_doc=b.tipo_doc) OR (a.numero=b.numccli AND a.tipo_doc=b.tipoccli))');
+		//$filter->db->join('itccli AS b','a.cod_cli=b.cod_cli AND a.numero=b.numero AND a.tipo_doc=b.tipo_doc');
 		$filter->db->groupby('a.cod_cli, a.tipo_doc,a.numero');
 		$filter->db->having('abonoreal  <>','inconsist');
 		$filter->db->orderby('a.cod_cli','b.numero');
+		$filter->db->where('`a`.`tipo_doc` IN (\'FC\',\'GI\',\'ND\')');
 
 		$filter->fechad = new dateonlyField('Desde','fechad');
 		$filter->fechah = new dateonlyField('Hasta','fechah');
-		$filter->fechad->clause  =$filter->fechah->clause="where";
-		$filter->fechad->db_name =$filter->fechah->db_name="a.fecha";
+		$filter->fechad->clause  =$filter->fechah->clause='where';
+		$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
 		$filter->fechad->operator=">=";
 		$filter->fechah->operator="<=";
 
@@ -593,7 +595,7 @@ function elminacenti(cual){
 		$filter->cliente->size = 30;
 		$filter->cliente->append($boton);
 
-		$filter->buttons("reset","search");
+		$filter->buttons('reset','search');
 		$filter->build();
 
 		function descheck($numero,$cod_cli,$tipo_doc,$fecha,$abonoreal){
@@ -613,7 +615,7 @@ function elminacenti(cual){
 		$uri1 = anchor('supervisor/mantenimiento/itclinconsis/<str_replace>/|:slach:|<#cod_cli#></str_replace>/<#numero#>/<#tipo_doc#>','<#cod_cli#>');
 		$uri2 = anchor('supervisor/mantenimiento/ajustar/<#cod_cli#>','Ajustar Saldo');
 
-		$grid = new DataGrid("Lista de Clientes");
+		$grid = new DataGrid('Lista de Clientes');
 		$grid->use_function('descheck','diff');
 		$grid->per_page = 15;
 		$grid->use_function('str_replace');
@@ -655,8 +657,8 @@ function elminacenti(cual){
 		$data['content']  = $filter->output;
 		$data['content'] .= form_open('').$grid->output.form_close().$script;
 		$data['title']    = "<h1>Clientes con problemas de incosistencias</h1>";
-		$data['head']     = script("jquery.js");
-		$data['head']    .= script("plugins/jquery.checkboxes.pack.js").$this->rapyd->get_head();
+		$data['head']     = script('jquery.js');
+		$data['head']    .= script('plugins/jquery.checkboxes.pack.js').$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 

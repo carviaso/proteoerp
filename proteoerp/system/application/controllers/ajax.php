@@ -865,7 +865,7 @@ class Ajax extends Controller {
 			$retArray = $retorno = array();
 
 			$mSQL="SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo
-				,a.peso, a.ultimo, a.pond
+				,a.peso, a.ultimo, a.pond,a.activo
 				FROM sinv AS a
 				LEFT JOIN barraspos AS b ON a.codigo=b.codigo ";
 			if(!empty($sprv)){
@@ -897,6 +897,7 @@ class Ajax extends Controller {
 					$retArray['descrip'] = $this->en_utf8($row['descrip']);
 					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
 					$retArray['iva']     = $row['iva'];
+					$retArray['activo']  = $row['activo'];
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
