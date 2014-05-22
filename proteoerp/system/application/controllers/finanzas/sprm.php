@@ -1234,16 +1234,13 @@ class Sprm extends Controller {
 			}
 
 			// Movimientos Relacionados ITPPRO
-			$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itppro WHERE transac=${dbtransac}";
-			$query = $this->db->query($mSQL);
-			if($query->num_rows() == 0 ){
-				if($tipo_doc=='AB' || $tipo_doc=='AN' || $tipo_doc=='NC'){
-					$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itppro WHERE tipoppro=${dbtipo_doc} AND numppro=${dbnumero} AND cod_prv=${dbcod_prv}";
-				}else{
-					$mSQL = "SELECT tipoppro tipo_doc, numppro numero, monto, abono FROM itppro WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND cod_prv=${dbcod_prv}";
-				}
-				$query = $this->db->query($mSQL);
+
+			if($tipo_doc=='AB' || $tipo_doc=='AN' || $tipo_doc=='NC'){
+				$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itppro WHERE tipoppro=${dbtipo_doc} AND numppro=${dbnumero} AND cod_prv=${dbcod_prv}";
+			}else{
+				$mSQL = "SELECT tipoppro tipo_doc, numppro numero, monto, abono FROM itppro WHERE tipo_doc=${dbtipo_doc} AND numero=${dbnumero} AND cod_prv=${dbcod_prv}";
 			}
+			$query = $this->db->query($mSQL);
 
 			if($query->num_rows() > 0){
 				$saldo = 0;
