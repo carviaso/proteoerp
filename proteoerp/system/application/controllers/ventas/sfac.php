@@ -4565,7 +4565,7 @@ class Sfac extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
-		if(!in_array('rcobra',$campos)){
+		if(!in_array('rcobro',$campos)){
 			$mSQL="ALTER TABLE sfac ADD COLUMN rcobro INT(11) NULL DEFAULT 0 AFTER reparto";
 			$this->db->query($mSQL);
 		}
