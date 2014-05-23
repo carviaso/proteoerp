@@ -476,6 +476,7 @@ class pfaclite extends validaciones{
 				$sel[]="COALESCE(c.cantidad,0)*$pmargen AS meta";
 				$sel[]='COALESCE(SUM(d.cana*IF(tipoa=\'D\',-1,1)),0) AS vendido';
 				$act_meta=true;
+				$this->db->where('b.existen > 0');
 			}
 		}elseif($status=='show'){
 			$this->db->join('itsinv AS b','a.codigo=b.codigo');
