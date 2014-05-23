@@ -2226,7 +2226,7 @@ class Scst extends Controller {
 
 		$edit->codigorete = new dropdownField('','codigorete_<#i#>');
 		$edit->codigorete->option('','Seleccionar');
-		$edit->codigorete->options('SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",codigo,activida)) AS activida FROM rete ORDER BY codigo');
+		$edit->codigorete->options('SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",tipo,codigo,activida)) AS activida FROM rete ORDER BY tipo,codigo');
 		$edit->codigorete->db_name='codigorete';
 		$edit->codigorete->rule   ='max_length[4]';
 		$edit->codigorete->style  ='width: 350px';

@@ -451,7 +451,7 @@ function elminacenti(cual){
 			'a.numero',
 			'a.nombre',
 			'a.monto',
-			'(SUM(b.abono)+a.reteiva+a.reten+
+			'(SUM(b.abono)+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "P%" AND e.proveed=a.cod_prv AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "%P" AND e.cliente=a.cod_prv AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`))
 			AS abonoreal',

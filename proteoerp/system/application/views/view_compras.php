@@ -550,6 +550,12 @@ function autocod(id){
 			//post_modbus_sinv(parseInt(id));
 			importe(parseInt(id));
 			//totalizar();
+			if(ui.item.activo=='N'){
+				$('#tr_itscst_'+id).css("background-color","#FFFF28");
+			}else{
+				$('#tr_itscst_'+id).css("background-color", "transparent");
+			}
+
 			setTimeout(function() {  $('#codigo_'+id).removeAttr("readonly"); }, 1500);
 		}
 	});
