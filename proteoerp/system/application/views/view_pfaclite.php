@@ -166,13 +166,9 @@ to {background:#32FFD3}
 
 			$pexisten= ($row['existen']>$row['exdes'])?$row['existen']-$row['exdes']:0;
 			if($form->_status!='show'){
-				$f_cana='<input type="text" autocomplete="off" onkeyup="total(\''.$i.'\')" maxlength="10" style="height:30px;font-size:18px" size="4" class="inputnum" id="cana_'.$i.'" value="'.($cana>0?$cana:'').'" name="cana_'.$i.'">';
-				//$obj = 'cana_'.$i;
-				//if(isset($form->$obj)){
-				//	$f_cana=$form->$obj->output.' obj';
-				//}else{
-				//	$f_cana='<input type="text" autocomplete="off" onkeyup="total(\''.$i.'\')" maxlength="10" style="height:30px;font-size:18px" size="4" class="inputnum" id="cana_'.$i.'" value="'.($cana>0?$cana:'').'" name="cana_'.$i.'">';
-				//}
+				if($pexisten>0){
+					$f_cana='<input type="text" autocomplete="off" onkeyup="total(\''.$i.'\')" maxlength="10" style="height:30px;font-size:18px" size="4" class="inputnum" id="cana_'.$i.'" value="'.($cana>0?$cana:'').'" name="cana_'.$i.'">';
+				}
 				if($cana>0){
 					$js_ctotal.= "total('${i}');\n";
 				}
