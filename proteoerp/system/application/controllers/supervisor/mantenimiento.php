@@ -494,15 +494,14 @@ function elminacenti(cual){
 			return nformat($a-$b);
 		}
 
-		$uri1 = anchor('supervisor/mantenimiento/itclinconsis/<str_replace>/|:slach:|<#cod_cli#></str_replace>/<#numero#>/<#tipo_doc#>','<#cod_cli#>');
-		$uri2 = anchor('supervisor/mantenimiento/ajustar/<#cod_cli#>','Ajustar Saldo');
+		$uri1 = anchor('supervisor/mantenimiento/itprinconsis/<str_replace>/|:slach:|<#cod_prv#></str_replace>/<#numero#>/<#tipo_doc#>','<#cod_prv#>');
 
 		$grid = new DataGrid('Lista de Proveedores');
 		$grid->use_function('descheck','diff');
 		$grid->per_page = 15;
 		$grid->use_function('str_replace');
 
-		$grid->column_orderby('Proveedor'      ,$uri1     ,'cod_prv');
+		$grid->column_orderby('Proveedor'      ,'cod_prv' ,'cod_prv');
 		$grid->column_orderby('Nombre'         ,'nombre'  ,'nombre');
 		$grid->column_orderby('transac'        ,'transac' ,'transac');
 		$grid->column_orderby('Fecha'          ,'<dbdate_to_human><#fecha#></dbdate_to_human>' ,'fecha');
@@ -670,7 +669,9 @@ function elminacenti(cual){
 			`a`.`tipo_doc`,
 			`a`.`cod_cli`,
 			`a`.`numero`,
-			sum(b.abono)+(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d WHERE CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`) AS abonoreal,
+			(SUM(b.abono)+
+			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE \"C%\" AND e.proveed=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)+
+			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE \"%C\" AND e.cliente=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)) AS abonoreal,
 			`a`.`abonos` AS inconsist
 			FROM (`smov` AS a)
 			JOIN `itccli` AS b ON `a`.`cod_cli`=`b`.`cod_cli` AND a.numero=b.numero AND a.tipo_doc=b.tipo_doc
@@ -769,7 +770,7 @@ function elminacenti(cual){
 
 		$data['content'] = $grid->output;
 		$data['title']   = "<h1>Detalle de los Abonos del cliente:$cliente</h1>";
-		$data["head"]    = $this->rapyd->get_head();
+		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
