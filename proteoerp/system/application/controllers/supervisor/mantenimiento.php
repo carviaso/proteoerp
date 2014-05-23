@@ -510,7 +510,7 @@ function elminacenti(cual){
 		$grid->column_orderby('Abono Real'     ,'<nformat><#abonoreal#></nformat>'    ,'abonoreal' ,"align='right'");
 		$grid->column_orderby('Abono Inconsis.','<nformat><#inconsist#></nformat>'    ,'inconsist' ,"align='right'");
 		$grid->column('Faltante'               ,'<diff><#abonoreal#>|<#inconsist#></diff>',"align='right'");
-		$grid->column('Ajustar Saldo'          ,'<descheck><#numero#>|<#cod_cli#>|<#tipo_doc#>|<#fecha#>|<#abonoreal#></descheck>',"align=center");
+		$grid->column('Ajustar Saldo'          ,'<descheck><#numero#>|<#cod_prv#>|<#tipo_doc#>|<#fecha#>|<#abonoreal#></descheck>',"align=center");
 
 		$grid->build();
 
