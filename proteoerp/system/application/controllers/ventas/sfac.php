@@ -3786,6 +3786,7 @@ class Sfac extends Controller {
 		$numero   = $do->get('numero');
 		$transac  = $do->get('transac');
 		$referen  = $do->get('referen');
+		$sprv     = $do->get('sprv');
 
 		//Pasa si es una prefactura
 		if($numero[0]=='_' && $tipo_doc=='F'){
@@ -3808,9 +3809,14 @@ class Sfac extends Controller {
 			return false;
 		}
 
+		$mSQL ="SELECT abonos FROM smov WHERE numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
+		$abono=floatval($this->datasis->dameval($mSQL));
+		if($abono-$inicial>0){
+			$do->error_message_ar['pre_del']='No se puede anular el documento por tener abonos.';
+			return false;
+		}
+
 		if($fecha != $hoy){
-			$mSQL ="SELECT abonos FROM smov WHERE numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
-			$abono=floatval($this->datasis->dameval($mSQL));
 			if($referen!='C'){
 				$do->error_message_ar['pre_del']='No se puede anular documentos de dias pasados.';
 				return false;
@@ -3829,6 +3835,19 @@ class Sfac extends Controller {
 			}
 		}
 
+		$tercero=false;
+		if(!empty($sprv)){
+			$dbsprv= $this->db->escape($sprv);
+			$mSQL  = "SELECT abonos FROM sprm WHERE cod_prv=${dbsprv} AND fecha=${dbfecha} AND transac=${dbtransac}";
+			$abono = floatval($this->datasis->dameval($mSQL));
+			if($abono>0){
+				$do->error_message_ar['pre_del'] = 'No se puede anular el documento por tener una cuenta a terceros abonada.';
+				return false;
+			}
+			$tercero=true;
+		}
+
+
 		//Descuento del inventario
 		$factor=($tipo_doc=='F' || $tipo_doc=='T')? 1:-1;
 		$almacen=$do->get('almacen');
@@ -3841,15 +3860,6 @@ class Sfac extends Controller {
 
 			$this->datasis->sinvcarga($itcodigoa, $almacen, $factor*$itcana);
 
-			//$sql="INSERT IGNORE INTO itsinv (alma,codigo,existen) VALUES (${dbalma},${dbcodigoa},0)";
-			//$ban=$this->db->simple_query($sql);
-			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
-			//$sql="UPDATE itsinv SET existen=existen+(${factor})*${itcana} WHERE codigo=${dbcodigoa} AND alma=${dbalma}";
-			//$ban=$this->db->simple_query($sql);
-			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
-			//$sql="UPDATE sinv   SET existen=existen+(${factor})*${itcana} WHERE codigo=${dbcodigoa}";
-			//$ban=$this->db->simple_query($sql);
-			//if($ban==false){ memowrite($sql,'sfac'); $error++;}
 		}
 
 		if($tipo_doc=='D'){
@@ -3880,6 +3890,12 @@ class Sfac extends Controller {
 			$dbnnumero= $this->db->escape('T'.substr($numero,1));
 		}else{
 			$dbnnumero= $dbnumero;
+		}
+
+		if($tercero){
+			$mSQL ="DELETE FROM sprm WHERE cod_prv=${dbsprv} AND fecha=${dbfecha} AND transac=${dbtransac}";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'sfac'); }
 		}
 
 		$mSQL ="DELETE FROM smov WHERE numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
