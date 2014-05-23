@@ -1345,6 +1345,7 @@ class Sprm extends Controller {
 					redirect('formatos/ver/RIVA/'.$rivc_id);
 					break;
 				}else{
+					redirect('formatos/descargar/PPRONC/'.$id);
 					echo 'Formato no definido';
 				}
 

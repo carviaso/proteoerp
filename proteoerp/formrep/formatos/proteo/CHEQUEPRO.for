@@ -1,5 +1,5 @@
 <?php
-$nombre = '**'.strtoupper($nombre).'**';
+$nombre = '**'.strtoupper(utf8_encode($nombre)).'**';
 $dia    = date('d'    ,$mkt);
 $mes    = date('n'    ,$mkt)-1;
 $anio   = date('Y'    ,$mkt);
@@ -30,11 +30,11 @@ div.absolute {
 
 <div class="absolute" style="top: -25px; right: 40px; font-weight:bold; font-size: 12pt"><?php echo $tmonto; ?></div>
 
-<div class="absolute" style="top: 50px; left: 65px; right: -10px;"><?php echo $nombre; ?></div>
-<div class="absolute" style="top: 70px; left: 10px; right: -10px; text-align:left;text-indent: 55px;font-size: 0.8em;line-height: 1.8em"><?php echo $smonto; ?></div>
+<div class="absolute" style="top: 35px; left: 65px; right: -10px;"><?php echo $nombre; ?></div>
+<div class="absolute" style="top: 55px; left: 10px; right: -10px; text-align:left;text-indent: 55px;font-size: 0.8em;line-height: 1.8em"><?php echo $smonto; ?></div>
 
-<div class="absolute" style="top: 117px; left: 10px; right: 350px text-align: right;"><?php echo $ffecha; ?></div>
-<div class="absolute" style="top: 117px; left: 250px;"><?php echo $anio; ?></div>
+<div class="absolute" style="top: 103px; left: 10px; right: 350px text-align: right;"><?php echo $ffecha; ?></div>
+<div class="absolute" style="top: 103px; left: 250px;"><?php echo $anio; ?></div>
 
 <?php if($endosable){ ?>
 <div class="absolute" style="top: 180px; right:30px;font-size: 1.3em;">NO ENDOSABLE</div>
