@@ -272,6 +272,29 @@ function costo(id){
 	totalizar(1);
 }
 
+function buscarep(id,codigo){
+	codigo=codigo.trim();
+	var arr=$('input[name^="codigo_"]');
+	jQuery.each(arr, function() {
+		nom=this.name
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			if(this.value!=''){
+				ind     = this.name.substring(pos+1);
+				if(ind!=id){
+					itcodigo= this.value.trim();
+					if(itcodigo==codigo){
+						alert('El codigo introducido ya esta repetido ('+codigo+')');
+						$('#codigo_'+ind).focus();
+						$('#codigo_'+ind).select();
+						$('#tr_itscst_'+id).css("background-color", "#FFFF28");
+					}
+				}
+			}
+		}
+	});
+}
+
 function totalizar(taca){
 	if(taca){
 		var tolera = 0;
@@ -416,6 +439,7 @@ function post_modbus_sinv(nind){
 	$('#cantidad_'+ind).focus();
 	$('#cantidad_'+ind).select();
 	$('#it_descrip_val_'+ind).text($('#descrip_'+ind).val());
+	buscarep(ind,$("#codigo_"+ind).val());
 	importe(nind);
 	totalizar();
 }
@@ -551,12 +575,13 @@ function autocod(id){
 			importe(parseInt(id));
 			//totalizar();
 			if(ui.item.activo=='N'){
-				$('#tr_itscst_'+id).css("background-color","#FFFF28");
+				$('#tr_itscst_'+id).css("background-color","#FF7A46");
 			}else{
 				$('#tr_itscst_'+id).css("background-color", "transparent");
 			}
 
 			setTimeout(function() {  $('#codigo_'+id).removeAttr("readonly"); }, 1500);
+			buscarep(id,ui.item.codigo);
 		}
 	});
 }

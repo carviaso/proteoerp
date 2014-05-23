@@ -550,6 +550,7 @@ class sfacter extends validaciones {
 		$do->set('montasa'  ,$montasa  );
 		$do->set('monredu'  ,$monredu  );
 		$do->set('monadic'  ,$monadic  );
+		$do->set('referen'  ,'C'       );
 
 		$do->set('inicial',0 );
 		$do->set('totals' ,round($totals ,2));

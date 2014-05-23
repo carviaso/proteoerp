@@ -2622,6 +2622,15 @@ class gser extends Controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
+	function chnumero($val){
+		$tipo_doc = $this->input->post('tipo_doc');
+		if($tipo_doc<>'ND' && empty($val)){
+			$this->validation->set_message('chnumero', 'El campo %s es obligatorio.');
+			return false;
+		}
+		return true;
+	}
+
 	function chtipoe($tipoe){
 		$eenvia = $this->input->post('codb1');
 		if(!empty($eenvia)){
@@ -3296,11 +3305,11 @@ class gser extends Controller {
 		$edit->compra->size =10;
 		$edit->compra->maxlength =8;
 
-		$edit->numero = new inputField('N&uacute;mero', 'serie');
+		$edit->numero = new inputField('Documento Nro.', 'serie');
 		$edit->numero->size = 10;
 		$edit->numero->maxlength=12;
 		$edit->numero->autocomplete=false;
-		$edit->numero->rule='required';
+		$edit->numero->rule='condi_required|callback_chnumero';
 
 		$edit->proveed = new inputField('Proveedor','proveed');
 		$edit->proveed->size = 6;
@@ -3815,10 +3824,16 @@ class gser extends Controller {
 		$tipo1   = $do->get('tipo1');
 		$benefi  = $do->get('benefi');
 		$nombre  = $do->get('nombre');
-		$serie   = $do->get('serie');
 		$nfiscal = $do->get('nfiscal');
 		$tipo_doc= $do->get('tipo_doc');
 		$monto1  = $do->get('monto1');
+		$serie   = $do->get('serie');
+
+		if(empty($serie) && $tipo_doc='ND'){
+			$serie = $this->datasis->fprox_numero('num_nd');
+			$do->set('serie',$serie);
+		}
+
 		$numero  = substr($serie,-8);
 		$do->set('numero',$numero);
 
