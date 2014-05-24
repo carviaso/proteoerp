@@ -257,7 +257,7 @@ function cdropdown(nind){
 	var ii=0;
 	var id='';
 
-	if(preca==null || preca.length==0) ban=1;
+	if(preca==null || preca.length==0 || Number(preca)==0) ban=1;
 	for(ii=1;ii<5;ii++){
 		id =ii.toString();
 		val=Number($("#precio"+id+"_"+ind).val());
@@ -300,7 +300,7 @@ function autocod(id){
 		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('ajax/buscasinvart'); ?>",
+				url:  "<?php echo site_url('ajax/buscasinvart/S'); ?>",
 				type: "POST",
 				dataType: "json",
 				data: {'q': req.term},
@@ -424,7 +424,7 @@ function autocod(id){
 				<td bgcolor='#7098D0'><b>Precio</b></td>
 				<td bgcolor='#7098D0'><b>Importe</b></td>
 				<?php if($form->_status!='show') {?>
-					<td bgcolor='#7098D0'>&nbsp;</td>
+					<td bgcolor='#7098D0'><a href='#' onclick="add_itsnte()" title='Agregar otro pago'><?php echo img('images/agrega4.png'); ?></a></td>
 				<?php } ?>
 			</tr>
 

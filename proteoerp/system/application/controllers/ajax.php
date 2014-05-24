@@ -576,7 +576,7 @@ class Ajax extends Controller {
 					$retArray['barras']  = $row['barras'];
 					//$retArray['descrip'] = wordwrap($row['descrip'], 25, '<br />');
 					$retArray['iva']     = $row['iva'];
-					$retArray['existen'] = $row['existen'];
+					$retArray['existen'] = (empty($row['existen']))? 0 : round($row['existen'],2);
 					$retArray['marca']   = $row['marca'];
 					$retArray['ubica']   = $row['ubica'];
 					$retArray['unidad']  = $row['unidad'];
@@ -938,13 +938,20 @@ class Ajax extends Controller {
 				$mjoin='LEFT JOIN itsinv AS c ON a.codigo=c.codigo AND c.alma='.$this->db->escape($alma);
 			}
 
+			$vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
+			if($vnega=='N'){
+				$wvnega=" AND ${mcana}>0 ";
+			}else{
+				$wvnega='';
+			}
+
 			$mSQL="SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.precio1,precio2,precio3,precio4, a.iva,${mcana},a.tipo
 				,a.peso, a.ultimo, a.pond
 				FROM sinv AS a
 				LEFT JOIN barraspos AS b ON a.codigo=b.codigo
 				${mjoin}
 				WHERE (a.codigo LIKE ${qdb} OR a.descrip LIKE  ${qdb} OR a.barras LIKE ${qdb} OR b.suplemen=${qba} OR a.alterno LIKE ${qba})
-					${activo} AND a.tipo='Articulo'
+					${activo} AND a.tipo='Articulo' ${wvnega}
 				ORDER BY a.descrip LIMIT ".$this->autolimit;
 			$cana=1;
 
@@ -959,7 +966,7 @@ class Ajax extends Controller {
 					$retArray['peso']    = $row['peso'];
 					$retArray['ultimo']  = $row['ultimo'];
 					$retArray['pond']    = $row['pond'];
-					$retArray['existen'] = round($row['existen']);
+					$retArray['existen'] = (empty($row['existen']))? 0 : round($row['existen'],2);
 					$retArray['base1']   = round($row['precio1']*100/(100+$row['iva']),2);
 					$retArray['base2']   = round($row['precio2']*100/(100+$row['iva']),2);
 					$retArray['base3']   = round($row['precio3']*100/(100+$row['iva']),2);

@@ -3345,6 +3345,7 @@ class Sfac extends Controller {
 		$estampa= $do->get('estampa');
 		$referen= $do->get('referen');
 		$cajero = $do->get('cajero');
+		$numero = $do->get('numero');
 		$descuento=floatval($do->get('descuento'));
 		$globaldes=$descuento/100;
 
@@ -3380,8 +3381,6 @@ class Sfac extends Controller {
 		}
 		$totalg = round($totalg,2);
 		//Fin de la totalizacion de facturas
-
-
 
 		if($referen=='P'){
 			if($manual=='S'){
@@ -3620,6 +3619,38 @@ class Sfac extends Controller {
 			$do->set('zona'  ,$rrow['zona']);
 		}
 
+		//Marca si la factura viene de otro lado
+		$this->snte = $_POST['snte'];
+		$do->rm_get('snte');
+		if(empty($this->snte) && substr($numero,0,1)=='_'){
+			$dbfactura=$this->db->escape($numero);
+			$mSQL="SELECT numero FROM snte WHERE factura=${dbfactura}";
+			$query = $this->db->query($mSQL);
+			if($query->num_rows() > 0){
+				$arr_snte=array();
+				foreach ($query->result() as $row){
+					$arr_snte[]=$row->numero;
+				}
+				$this->snte=implode('-',$arr_snte);
+			}
+		}
+
+		$this->pfac = $_POST['pfac'];
+		$do->rm_get('pfac');
+		if(empty($this->pfac) && substr($numero,0,1)=='_'){
+			$dbfactura=$this->db->escape($numero);
+			$mSQL="SELECT numero FROM pfac WHERE factura=${dbfactura}";
+			$query = $this->db->query($mSQL);
+			if($query->num_rows() > 0){
+				$arr_pfac=array();
+				foreach ($query->result() as $row){
+					$arr_pfac[]=$row->numero;
+				}
+				$this->pfac=implode('-',$arr_pfac);
+			}
+		}
+		//Fin de la marca
+
 		//Determina el numero de factura
 		if($referen=='P'){
 			if($action=='U'){
@@ -3742,11 +3773,6 @@ class Sfac extends Controller {
 		$do->set('totalg' ,round($totalg ,2));
 		$do->set('iva'    ,round($iva    ,2));
 		$do->set('peso'   ,round($tpeso  ,2));
-
-		$this->pfac = $_POST['pfac'];
-		$this->snte = $_POST['snte'];
-		$do->rm_get('pfac');
-		$do->rm_get('snte');
 
 		if(isset($this->_sfacmaestra)){
 			$do->set('maestra',$this->_sfacmaestra);
@@ -3962,7 +3988,36 @@ class Sfac extends Controller {
 		$montasa  = $do->get('montasa'  );
 		$monredu  = $do->get('monredu'  );
 		$monadic  = $do->get('monadic'  );
+		$maestra  = $do->get('maestra');
 
+		//Si viene de pfac
+		if(strlen($this->pfac)>7 && $tipo_doc == 'F'){
+			$arr_pfac=explode('-',$this->pfac);
+			foreach($arr_pfac as $pfac){
+				if(strlen($pfac)>7){
+					$this->db->where('numero', $pfac);
+					$this->db->update('pfac', array('factura' => $maestra,'status' => 'C'));
+
+					$dbpfac=$this->db->escape($pfac);
+					$sql="UPDATE itpfac AS c JOIN sinv   AS d ON d.codigo=c.codigoa
+					SET d.exdes=IF(d.exdes>c.cana,d.exdes-c.cana,0)
+					WHERE c.numa = ${dbpfac}";
+					$ban=$this->db->simple_query($sql);
+					if($ban==false){ memowrite($sql,'sfac'); $error++;}
+				}
+			}
+		}
+
+		//Si viene de snte
+		if(strlen($this->snte)>7 && $tipo_doc == 'F'){
+			$arr_snte=explode('-',$this->snte);
+			foreach($arr_snte as $snte){
+				if(strlen($snte)>7){
+					$this->db->where('numero', $snte);
+					$this->db->update('snte' , array('factura' => $maestra,'tipo' => 'E'));
+				}
+			}
+		}
 
 		if($referen=='P'){
 			logusu($do->table,"Creo pre-factura ${tipo_doc}${numero}");
@@ -4162,25 +4217,6 @@ class Sfac extends Controller {
 			if(!empty($id)){
 				$this->db->simple_query("UPDATE sinvehiculo SET id_sfac=NULL WHERE id_sfac=${id}");
 			}
-		}
-
-		//Si viene de pfac
-		if(strlen($this->pfac)>7 && $tipo_doc == 'F'){
-			$this->db->where('numero', $this->pfac);
-			$this->db->update('pfac', array('factura' => $numero,'status' => 'C'));
-
-			$dbpfac=$this->db->escape($this->pfac);
-			$sql="UPDATE itpfac AS c JOIN sinv   AS d ON d.codigo=c.codigoa
-			SET d.exdes=IF(d.exdes>c.cana,d.exdes-c.cana,0)
-			WHERE c.numa = ${dbpfac}";
-			$ban=$this->db->simple_query($sql);
-			if($ban==false){ memowrite($sql,'sfac'); $error++;}
-		}
-
-		//Si viene de snte
-		if(strlen($this->snte)>7 && $tipo_doc == 'F'){
-			$this->db->where('numero', $this->snte);
-			$this->db->update('snte', array('factura' => $numero,'tipo' => 'E'));
 		}
 
 		$primary =implode(',',$do->pk);
@@ -4529,6 +4565,100 @@ class Sfac extends Controller {
 				$this->dataedit();
 			}else{
 				echo 'Nota de entrega ya facturada';
+			}
+		}else{
+			echo 'Nota de entrega no encontrada';
+		}
+	}
+
+	//Crea una factura desde varias nota de entrega
+	function creafromsntes($manual,$numero,$status=null){
+		$this->_url= $this->url.'dataedit/insert';
+		$ids=explode('-',$numero);
+
+		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
+		,'SUM(a.stotal) AS totals','SUM(a.impuesto) AS iva','SUM(a.gtotal) AS totalg','GROUP_CONCAT(TRIM(a.factura) SEPARATOR "") AS factura',
+		'a.vende AS vd','c.almacen','GROUP_CONCAT(TRIM(a.numero) SEPARATOR "-") AS numeros');
+		$this->db->select($sel);
+		$this->db->from('snte AS a');
+		$this->db->join('scli AS b','a.cod_cli=b.cliente');
+		$this->db->join('vend AS c','c.vendedor=a.vende','left');
+		$this->db->where_in('a.id',$ids);
+		$this->db->group_by('a.cod_cli');
+		$this->db->where('a.tipo','E');
+		$query = $this->db->get();
+
+		if ($query->num_rows() > 0 && $status=='create'){
+			if($query->num_rows()>1){
+				echo 'Las notas no pertenecen a un mismo cliente';
+				return false;
+			}
+
+			$row = $query->row();
+			if(empty($row->factura)){
+
+				$_POST=array(
+					'btn_submit' => 'Guardar',
+					'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
+					'cajero'     => $this->secu->getcajero(),
+					'vd'         => (empty($row->vd))? $this->secu->getvendedor() :  $row->vd,
+					'almacen'    => (empty($row->almacen))? $this->secu->getalmacen() : $row->almacen,
+					'tipo_doc'   => 'F',
+					'factura'    => '',
+					'cod_cli'    => $row->cod_cli,
+					'sclitipo'   => $row->tipo,
+					'nombre'     => rtrim($row->nombre),
+					'rifci'      => $row->rifci,
+					'direc'      => rtrim($row->direc),
+					'totals'     => $row->totals,
+					'iva'        => $row->iva,
+					'totalg'     => $row->totalg,
+					'snte'       => $row->numeros,
+				);
+
+				$itsel=array('a.codigo AS codigoa','b.descrip AS desca','SUM(a.cana) AS cana','SUM(a.importe) AS tota',
+				'b.iva','b.precio1','b.precio2','b.precio3','b.precio4','b.tipo','b.peso');
+				$this->db->select($itsel);
+				$this->db->from('snte AS c');
+				$this->db->join('itsnte AS a','a.numero=c.numero');
+				$this->db->join('sinv AS b','b.codigo=a.codigo');
+				$this->db->where_in('c.id',$ids);
+				$this->db->where('a.cana >','0');
+				$this->db->group_by('a.codigo');
+				$qquery = $this->db->get();
+				$i=0;
+
+				foreach ($qquery->result() as $itrow){
+					$preca=round($itrow->tota/$itrow->cana,2);
+
+					$_POST["codigoa_${i}"]  = rtrim($itrow->codigoa);
+					$_POST["desca_${i}"]    = rtrim($itrow->desca);
+					$_POST["cana_${i}"]     = $itrow->cana;
+					$_POST["preca_${i}"]    = $preca;
+					$_POST["tota_${i}"]     = $preca*$itrow->cana;
+					$_POST["precio1_${i}"]  = $itrow->precio1;
+					$_POST["precio2_${i}"]  = $itrow->precio2;
+					$_POST["precio3_${i}"]  = $itrow->precio3;
+					$_POST["precio4_${i}"]  = $itrow->precio4;
+					$_POST["itiva_${i}"]    = $itrow->iva;
+					$_POST["sinvpeso_${i}"] = $itrow->peso;
+					$_POST["sinvtipo_${i}"] = $itrow->tipo;
+					$_POST["detalle_${i}"]  = '';
+					$_POST["combo_$i"]      = '';
+					$i++;
+				}
+
+				//sfpa
+				$i=0;
+				$_POST["tipo_${i}"]      = '';
+				//$_POST["sfpafecha_${i}"] = '';
+				$_POST["num_ref_${i}"]   = '';
+				$_POST["banco_${i}"]     = '';
+				$_POST["monto_${i}"]     = 0;
+
+				$this->dataedit();
+			}else{
+				echo 'Algunas notas ya estan facturadas '.$row->numeros;
 			}
 		}else{
 			echo 'Nota de entrega no encontrada';

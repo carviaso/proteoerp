@@ -193,7 +193,7 @@ class Pfac extends Controller {
 
 				if(ret.factura != null && ret.factura != false){
 					$.prompt("<h2>Qu&eacute; documento dese imprimir?</h2>",{
-						buttons: { Presupuesto: true, Factura: false },
+						buttons: { Pedido: true, Factura: false },
 						submit: function(e,v,m,f){
 							if(v){
 								window.open(\''.site_url('formatos/ver/PFAC/').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes\');
@@ -225,7 +225,7 @@ class Pfac extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 500, width: 800, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -1604,7 +1604,7 @@ class Pfac extends Controller {
 		//	$edit->buttons( 'delete', 'back', 'add_rel');
         //
 		//}
-		$edit->buttons('add_rel');
+		//$edit->buttons('add_rel');
 		$edit->build();
 
 		if($edit->on_success()){

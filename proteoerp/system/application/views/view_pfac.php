@@ -338,7 +338,7 @@ function cdropdown(nind){
 	var ii=0;
 	var id='';
 
-	if(preca==null || preca.length==0) ban=1;
+	if(preca==null || preca.length==0 || Number(preca)==0) ban=1;
 
 	for(ii=1;ii<5;ii++){
 		id =ii.toString();
@@ -426,7 +426,11 @@ function autocod(id){
 			totalizar();
 			setTimeout(function() {  $("#codigoa_"+id).removeAttr("readonly"); }, 1500);
 		}
-	});
+	}).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li>" )
+		.append( "<a><table style='width:100%;border-collapse:collapse;padding:0px;'><tr><td colspan='6' style='font-size:14px;color:#0B0B61;'><b>" + item.descrip + "</b></td></tr><tr><td>Codigo:</td><td>" + item.codigo + "</td><td>Precio: </td><td><b>" + item.base1 + "</b></td><td>Existencia:</td><td>" + item.existen + "</td><td></td></tr></table></a>" )
+		.appendTo( ul );
+	};
 }
 </script>
 <?php } ?>
@@ -435,20 +439,19 @@ function autocod(id){
 		<td align=right><?php echo $container_tr?></td>
 	</tr>
 </table>
-<table align='center' width="95%">
+<table align='center' width="100%">
 	<tr>
 		<td colspan='2'>
 		<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
 			<table width='100%'>
 				<tr>
-					<td class="littletableheader"><?php echo $form->cliente->label;  ?>*&nbsp;</td>
-					<td class="littletablerow">   <?php echo $form->cliente->output,$form->sclitipo->output; ?>&nbsp;</td>
-					<td class="littletablerow">   <?php echo $form->nombre->output;  ?>&nbsp;</td>
-				</tr><tr>
-					<td class="littletableheader"><?php echo $form->rifci->label;  ?>&nbsp;</td>
+					<td class="littletableheader" style='width:70px'><?php echo $form->cliente->label;  ?>*&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->cliente->output.$form->sclitipo->output.$form->nombre->output; ?></td>
+					<td class="littletableheader"><?php echo $form->rifci->label;  ?>*&nbsp;</td>
 					<td class="littletablerow"   ><?php echo $form->rifci->output; ?>&nbsp;</td>
-					<td class="littletableheader"><?php echo $form->direc->label;  ?>&nbsp;
-					<span class="littletablerow" ><?php echo $form->direc->output; ?>&nbsp;</span></td>
+				</tr><tr>
+					<td class="littletableheader"><?php echo $form->direc->label;  ?>&nbsp;</td>
+					<td class="littletablerow" colspan='3'><?php echo $form->direc->output; ?></td>
 				</tr>
 			</table>
 		</fieldset>
@@ -474,7 +477,7 @@ function autocod(id){
 		</td>
 	</tr><tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:195px'>
 			<table width='100%'>
 				<tr id='__INPL__'>
 					<td bgcolor='#7098D0'><b>C&oacute;digo</b></td>
@@ -483,7 +486,7 @@ function autocod(id){
 					<td bgcolor='#7098D0'><b>Precio</b></td>
 					<td bgcolor='#7098D0'><b>Importe</b></td>
 					<?php if($form->_status!='show'  && !($faplica < $fenvia)) {?>
-						<td  bgcolor='#7098D0' align='center'><b>&nbsp;</b></td>
+						<td bgcolor='#7098D0' align='center'><a href='#' onclick="add_itpfac()" title='Agregar otro pago'><?php echo img('images/agrega4.png'); ?></a></td>
 					<?php } ?>
 				</tr>
 

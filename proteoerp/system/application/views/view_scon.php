@@ -364,7 +364,7 @@ function cdropdown(nind){
 	var ii=0;
 	var id='';
 
-	if(preca==null || preca.length==0) ban=1;
+	if(preca==null || preca.length==0 || Number(preca)==0) ban=1;
 	for(ii=1;ii<5;ii++){
 		id =ii.toString();
 		val=$("#precio"+id+"_"+ind).val();
@@ -401,7 +401,7 @@ function del_itscon(id){
 </script>
 <?php } ?>
 
-<table align='center' width="95%">
+<table align='center' width="100%">
 	<tr>
 		<td align=right><?php echo $container_tr?></td>
 	</tr>
@@ -429,20 +429,21 @@ function del_itscon(id){
 				<td class="littletableheader"><?php echo $form->almacen->label;     ?>&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->almacen->output;    ?>&nbsp;</td>
 			</tr>
-		</table><br>
+		</table>
 		</td>
 	</tr>
 	<tr>
 		<td>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
 		<table width='100%'>
 			<tr  id='__PTPL__'>
-				<td class="littletableheader">C&oacute;digo</td>
-				<td class="littletableheader">Descripci&oacute;n</td>
-				<td class="littletableheader">Cantidad</td>
-				<td class="littletableheader">Precio</td>
-				<td class="littletableheader">Importe</td>
+				<td style='font-weight: bold;background-color:#7098D0;'>C&oacute;digo</td>
+				<td style='font-weight: bold;background-color:#7098D0;'>Descripci&oacute;n</td>
+				<td style='font-weight: bold;background-color:#7098D0;'>Cantidad</td>
+				<td style='font-weight: bold;background-color:#7098D0;'>Precio</td>
+				<td style='font-weight: bold;background-color:#7098D0;'>Importe</td>
 				<?php if($form->_status!='show') {?>
-					<td class="littletableheader"><a href='#' onclick="add_itscon()" title='Agregar otro pago'><?php echo img('images/agrega4.png'); ?></a></td>
+					<td style='font-weight: bold;background-color:#7098D0;'><a href='#' onclick="add_itscon()" title='Agregar otro pago'><?php echo img('images/agrega4.png'); ?></a></td>
 				<?php } ?>
 			</tr>
 
@@ -481,16 +482,16 @@ function del_itscon(id){
 			</tr>
 			<?php } ?>
 		</table>
+		</div>
 		<?php echo $container_bl ?>
 		<?php echo $container_br ?>
 		</td>
 	</tr>
 	<tr>
 		<td>
+		<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9;'>
 		<table width='100%'>
 			<tr>
-				<td class="littletableheader" colspan='4'>Res&uacute;men financiero</td>
-			</tr><tr>
 				<td><b><?php echo $form->peso->label;    ?></b></td>
 				<td><?php echo $form->peso->output;   ?></td>
 				<td><b><?php echo $form->stotal->label;  ?></b></td>
@@ -507,6 +508,7 @@ function del_itscon(id){
 				<td align='right' style='font-size:2em'><?php echo $form->gtotal->output;  ?></td>
 			</tr>
 		</table>
+		</fieldset>
 		<?php echo $form_end; ?>
 		</td>
 	</tr>

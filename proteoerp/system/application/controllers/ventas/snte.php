@@ -47,8 +47,8 @@ class Snte extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'imprimir'  ,'img'=>'assets/default/images/print.png',  'alt' => 'Reimprimir', 'label'=>'Reimprimir documento'));
-		$grid->wbotonadd(array('id'=>'bffact' , 'img'=>'images/star.png'                ,'alt' => 'Facturar'  , 'label'=>'Facturar'));
+		$grid->wbotonadd(array('id'=>'imprimir' ,'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir documento'));
+		$grid->wbotonadd(array('id'=>'bffact'   ,'img'=>'images/star.png'                ,'alt' => 'Facturar'  , 'label'=>'Facturar'));
 
 		$WestPanel = $grid->deploywestp();
 		//Panel Central y Sur
@@ -178,16 +178,34 @@ class Snte extends Controller {
 
 		$bodyscript .= '
 		jQuery("#bffact").click(function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				$.post("'.site_url('ventas/sfac/creafromsnte/N').'/"+ret.numero+"/create",
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selarrrow\');
+			if(id.length>0){
+
+				var i;
+				var ret;
+				var cod_cli=null;
+				for(i = 0; i < id.length; ++i){
+					ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id[i]);
+					if(cod_cli==null) cod_cli=ret.cod_cli;
+					if(ret.factura != null && ret.factura != false){
+						$.prompt("<h1>La nota de entrega "+ret.numero+" ya esta facturada</h1>");
+						return false;
+					}
+					if(cod_cli!=ret.cod_cli){
+						$.prompt("<h1>La nota de entrega seleccionadas no son de un mismo cliente</h1>");
+						return false;
+					}
+				}
+
+				$.post("'.site_url('ventas/sfac/creafromsntes/N').'/"+id.join("-")+"/create",
 				function(data){
 					$("#ffact").html(data);
 					$("#ffact").dialog( "open" );
 					bloqueo();
 				});
-			} else { $.prompt("<h1>Por favor Seleccione una nota de entrega</h1>");}
+			}else{
+				$.prompt("<h1>Por favor Seleccione una nota de entrega</h1>");
+			}
 		});';
 
 		$bodyscript .='
@@ -678,6 +696,7 @@ class Snte extends Controller {
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
+		$grid->setMultiSelect(true);
 
 		$grid->setOnSelectRow('function(id){
 				if (id){
@@ -1301,7 +1320,7 @@ class Snte extends Controller {
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
-		$edit->buttons('add_rel');
+		//$edit->buttons('add_rel');
 		$edit->build();
 
 		if($edit->on_success()){

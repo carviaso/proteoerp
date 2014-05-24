@@ -258,7 +258,7 @@ function cdropdown(nind){
 	var ii=0;
 	var id='';
 
-	if(preca==null || preca.length==0) ban=1;
+	if(preca==null || preca.length==0 || Number(preca)==0) ban=1;
 	for(ii=1;ii<5;ii++){
 		id =ii.toString();
 		val=Number($("#precio"+id+"_"+ind).val());
