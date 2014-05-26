@@ -486,7 +486,7 @@ function autocod(id){
 					<td bgcolor='#7098D0'><b>Precio</b></td>
 					<td bgcolor='#7098D0'><b>Importe</b></td>
 					<?php if($form->_status!='show'  && !($faplica < $fenvia)) {?>
-						<td bgcolor='#7098D0' align='center'><a href='#' onclick="add_itpfac()" title='Agregar otro pago'><?php echo img('images/agrega4.png'); ?></a></td>
+						<td bgcolor='#7098D0' align='center'><a href='#' onclick="add_itpfac()" title='Agregar otro producto'><?php echo img('images/agrega4.png'); ?></a></td>
 					<?php } ?>
 				</tr>
 

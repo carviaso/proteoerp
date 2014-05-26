@@ -443,7 +443,7 @@ function del_itscon(id){
 				<td style='font-weight: bold;background-color:#7098D0;'>Precio</td>
 				<td style='font-weight: bold;background-color:#7098D0;'>Importe</td>
 				<?php if($form->_status!='show') {?>
-					<td style='font-weight: bold;background-color:#7098D0;'><a href='#' onclick="add_itscon()" title='Agregar otro pago'><?php echo img('images/agrega4.png'); ?></a></td>
+					<td style='font-weight: bold;background-color:#7098D0;'><a href='#' onclick="add_itscon()" title='Agregar otro producto'><?php echo img('images/agrega4.png'); ?></a></td>
 				<?php } ?>
 			</tr>
 

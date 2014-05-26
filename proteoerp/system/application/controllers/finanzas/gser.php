@@ -1204,6 +1204,7 @@ class gser extends Controller {
 					if($data['numero'] != $row['numero']){
 						//Cambia la retencion ISLR
 						$this->db->where('idd'     ,$id);
+						$this->db->where('origen'  ,'GSER');
 						$this->db->update('gereten',array('numero'=>$data['numero']));
 
 						//Cambia las aplicaciones
@@ -3250,13 +3251,14 @@ class gser extends Controller {
 		$do->pointer('sprv' ,'sprv.proveed=gser.proveed','sprv.tipo AS sprvtipo, sprv.reteiva AS sprvreteiva','left');
 		$do->rel_one_to_many('gitser' ,'gitser' ,array('id'=>'idgser'));
 		$do->rel_one_to_many('gereten','gereten',array('id'=>'idd'));
+		$do->where_rel_one_to_many('gereten',array('gereten.origen','GSER'));
 		//$do->rel_pointer('rete','rete','gereten.codigorete=rete.codigo','rete.pama1 AS retepama1');
 
-		$edit = new DataDetails("Gastos", $do);
+		$edit = new DataDetails('Gastos', $do);
 		if ( $edit->_status == 'show' ) {
-			$edit->back_url = site_url("finanzas/gser/filteredgrid");
+			$edit->back_url = site_url('finanzas/gser/filteredgrid');
 		} else {
-			$edit->back_url = site_url("finanzas/gser/agregar");
+			$edit->back_url = site_url('finanzas/gser/agregar');
 		}
 
 		$edit->set_rel_title('gitser','Gasto <#o#>');
@@ -3863,7 +3865,7 @@ class gser extends Controller {
 			}
 		}
 
-		$mSQL='SELECT COUNT(*) FROM gser WHERE proveed='.$this->db->escape($proveed).' AND numero='.$this->db->escape($numero).' AND fecha='.$this->db->escape($fecha).' AND tipo_doc='.$this->db->escape($tipo_doc);
+		$mSQL='SELECT COUNT(*) AS cana FROM gser WHERE proveed='.$this->db->escape($proveed).' AND numero='.$this->db->escape($numero).' AND fecha='.$this->db->escape($fecha).' AND tipo_doc='.$this->db->escape($tipo_doc);
 		$ca=$this->datasis->dameval($mSQL);
 		if($ca>0){
 			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert']='Al parecer ya esta registrado un gasto con la misma fecha de recepcion, numero y proveedor.';
@@ -3881,6 +3883,7 @@ class gser extends Controller {
 				$porcen  = $do->get_rel('gereten','porcen',$i);
 
 				$do->set_rel('gereten','numero' ,$serie,$i);
+				$do->set_rel('gereten','origen' ,'GSER',$i);
 				$retemonto += $monto;
 				$retebase  += $importe;
 			}else{
@@ -4444,7 +4447,7 @@ class gser extends Controller {
 		$this->db->simple_query($mSQL);
 
 		//Borra las retenciones islr
-		$mSQL='DELETE FROM gereten WHERE idd='.$id;
+		$mSQL='DELETE FROM gereten WHERE origen=\'GSER\' AND idd='.$id;
 		$this->db->simple_query($mSQL);
 
 		//Anula la retencion de IVA

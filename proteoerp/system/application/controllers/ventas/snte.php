@@ -1219,6 +1219,12 @@ class Snte extends Controller {
 		$edit->almacen->rule = 'required';
 		$edit->almacen->style= 'width:200px;';
 		$edit->almacen->size = 5;
+		$alma = $this->secu->getalmacen();
+		if(empty($alma)){
+			$alma = $this->datasis->traevalor('ALMACEN');
+		}
+		$edit->almacen->insertValue=$alma;
+
 
 		$edit->orden = new inputField('Orden', 'orden');
 		$edit->orden->size = 10;

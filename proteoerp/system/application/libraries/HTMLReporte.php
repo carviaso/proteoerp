@@ -323,11 +323,6 @@ border-bottom-right-radius:5px;
 					}
 				}
 
-				if(isset($this->DBfieldsType[$campo])){
-					if(    in_array($this->DBfieldsType[$campo], array('real',4,5,246))  ) { $row[$campo]=nformat($row[$campo]); }
-					elseif(in_array($this->DBfieldsType[$campo], array('date',10,12,7))  ) { $row[$campo]=dbdate_to_human($row[$campo]); }
-					elseif(in_array($this->DBfieldsType[$campo], array('int' ,1,2,9,3,8))) { $row[$campo]=intval($row[$campo]); }
-				}
 				//------se escribe los datos----------------------------
 				$l=$this->ii;
 
@@ -559,9 +554,9 @@ border-bottom-right-radius:5px;
 
 	function selectWrite($f,$c,$campo,$dbcampo,$align){
 		if(isset($this->DBfieldsType[$dbcampo])){
-			$tipo=$this->DBfieldsType[$dbcampo];
-		}else{
-			$tipo='string';
+			if(    in_array($this->DBfieldsType[$dbcampo], array('real',4,5,246))  ) { $campo=nformat($campo); }
+			elseif(in_array($this->DBfieldsType[$dbcampo], array('date',10,12,7))  ) { $campo=dbdate_to_human($campo); }
+			elseif(in_array($this->DBfieldsType[$dbcampo], array('int' ,1,2,9,3,8))) { $campo=intval($campo); }
 		}
 
 		echo '<td style=\'text-align:'.$align.';\'>';

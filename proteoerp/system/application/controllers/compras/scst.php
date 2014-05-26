@@ -465,7 +465,7 @@ class Scst extends Controller {
 
 		$bodyscript .= '
 			$("#factuali").dialog({
-				autoOpen: false, height: 380, width: 450, modal: true,
+				autoOpen: false, height: 410, width: 450, modal: true,
 				buttons: {
 					"Actualizar": function() {
 						var bValid = true;
@@ -1537,6 +1537,7 @@ class Scst extends Controller {
 
 				//Cambia la retencion ISLR
 				$this->db->where('idd'     ,$id);
+				$this->db->where('origen'  ,'SCST');
 				$this->db->update('gereten',array('numero'=>$data['numero']));
 
 				//Cambia las aplicaciones
@@ -1985,10 +1986,12 @@ class Scst extends Controller {
 			'titulo'  =>'Buscar Proveedor');
 
 		$do = new DataObject('scst');
-		$do->rel_one_to_many('itscst', 'itscst', 'control');
-		$do->rel_one_to_many('gereten','gereten',array('id'=>'idd'));
+		$do->rel_one_to_many('itscst'  ,'itscst'  ,'control');
+		$do->rel_one_to_many('gereten' ,'gereten' ,array('id'=>'idd'));
+		$do->rel_one_to_many('scstordc','scstordc',array('control'=>'compra'));
 		$do->pointer('sprv' ,'sprv.proveed=scst.proveed','sprv.nombre AS sprvnombre,sprv.reteiva AS sprvreteiva','left');
 		$do->rel_pointer('itscst','sinv','itscst.codigo=sinv.codigo','sinv.descrip AS sinvdescrip, sinv.base1 AS sinvprecio1, sinv.base2 AS sinvprecio2, sinv.base3 AS sinvprecio3, sinv.base4 AS sinvprecio4, sinv.iva AS sinviva, sinv.peso AS sinvpeso,sinv.tipo AS sinvtipo');
+		$do->where_rel_one_to_many('gereten',array('gereten.origen','SCST'));
 
 		$edit = new DataDetails('Compras',$do);
 		$edit->set_rel_title('itscst','Producto <#o#>');
@@ -2221,9 +2224,6 @@ class Scst extends Controller {
 		//*****************************
 		//Campos para el detalle reten
 		//****************************
-		$edit->itorigen = new autoUpdateField('origen','SCST','SCST');
-		$edit->itorigen->rel_id ='gereten';
-
 		$edit->codigorete = new dropdownField('','codigorete_<#i#>');
 		$edit->codigorete->option('','Seleccionar');
 		$edit->codigorete->options('SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",tipo,codigo,activida)) AS activida FROM rete ORDER BY tipo,codigo');
@@ -2267,6 +2267,16 @@ class Scst extends Controller {
 		$edit->monto->type='inputhidden';
 		//*****************************
 		//Fin de campos para detalle
+		//*****************************
+
+		//*****************************
+		//Campos relacionados con ordc
+		//*****************************
+		$edit->ordc = new hiddenField('', 'ordc_<#i#>');
+		$edit->ordc->db_name  ='orden';
+		$edit->ordc->rel_id   ='scstordc';
+		//*****************************
+		//Fin de campos ordc
 		//*****************************
 
 		$recep  = strtotime($edit->get_from_dataobjetct('recep'));
@@ -3090,6 +3100,10 @@ class Scst extends Controller {
 		$edit->almacen->rule = 'required';
 		$edit->almacen->mode = 'autohide';
 		$edit->almacen->style='width:145px;';
+		$alma = $this->datasis->traevalor('ALMACEN');
+		if(!empty($alma)){
+			$edit->almacen->insertValue=$alma;
+		}
 
 		$edit->tipo = new dropdownField('Tipo', 'tipo_doc');
 		$edit->tipo->option('FC','Factura a Cr&eacute;dito');
@@ -3327,6 +3341,14 @@ class Scst extends Controller {
 				$row     = $query->row_array();
 				$numero  = $row['numero'];
 
+				$mORDENES = array();
+				$query = $this->db->query('SELECT orden FROM scstordc WHERE compra=?',array($control));
+				if($query->num_rows() > 0){
+					foreach($query->result() as $row){
+						$mORDENES[] = $row->orden;
+					}
+				}
+
 				if($row['tipo_doc']=='FC'){
 					$transac = $row['transac'];
 					$depo    = $row['depo'];
@@ -3472,6 +3494,33 @@ class Scst extends Controller {
 								if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 							}
 							//Fin de la actualizacion de inventario
+
+							if(count($mORDENES) > 0){
+								$mSALDO = floatval($row->cantidad);
+								foreach($mORDENES as $orden){
+									$dbitorden = $this->db->escape($orden);
+									if($mSALDO > 0){
+										$mSQL   = "SELECT cantidad-recibido  FROM itordc WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
+										$mTEMPO = floatval($this->datasis->dameval($mSQL));
+										if($mTEMPO > 0){
+											if($mSALDO<=$mTEMPO){
+												$mSQL = "UPDATE itordc SET recibido=recibido-${mSALDO} WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
+												$this->db->simple_query($mSQL);
+												$mSQL = "UPDATE sinv SET exord=exord-${mSALDO} WHERE codigo=${dbcodigo}";
+												$this->db->simple_query($mSQL);
+												$mSALDO = 0;
+											}else{
+												$mSQL = "UPDATE itordc SET recibido=recibido-${mTEMPO} WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
+												$this->db->simple_query($mSQL);
+												$mSQL = "UPDATE sinv SET exord=exord-${mTEMPO} WHERE codigo=${dbcodigo}";
+												$this->db->simple_query($mSQL);
+												$mSALDO -= $mTEMPO;
+											}
+										}
+									}
+								}
+							}
+
 						}
 					}
 
@@ -3722,6 +3771,16 @@ class Scst extends Controller {
 					$ban =$this->db->simple_query($mSQL);
 					if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 					//Fin de la carga de la CxP
+
+					//Si viene de ordc
+					$qquery = $this->db->query('SELECT orden FROM scstordc WHERE compra=?',array($control));
+					foreach($qquery->result() as $row){
+						$dborden = $this->db->escape($row->orden);
+						$mSQL = "UPDATE ordc SET status='CE' WHERE numero=${dborden}";
+						$ban  = $this->db->simple_query($mSQL);
+						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+					}
+					//Fin ordc
 
 					$mSQL='UPDATE scst SET `actuali`=CURDATE() , `recep`='.$actuali.' WHERE `control`='.$this->db->escape($control);
 					$ban=$this->db->simple_query($mSQL);
@@ -4178,12 +4237,12 @@ class Scst extends Controller {
 				}
 
 				if(count($mORDENES) > 0){
-					$mSALDO = $row->cantidad;
+					$mSALDO = floatval($row->cantidad);
 					foreach( $mORDENES as $orden){
 						$dbitorden = $this->db->escape($orden);
 						if($mSALDO > 0){
 							$mSQL   = "SELECT recibido  FROM itordc WHERE numero=${dbitorden} AND codigo=${itdbcodigo}";
-							$mTEMPO = $this->datasis->dameval($mSQL);
+							$mTEMPO = floatval($this->datasis->dameval($mSQL));
 							if($mTEMPO > 0){
 								if($mTEMPO >= $mSALDO){
 									$mSQL = "UPDATE itordc SET recibido=recibido-${mSALDO} WHERE numero=${dbitorden} AND codigo=${itdbcodigo}";
@@ -4195,6 +4254,7 @@ class Scst extends Controller {
 									$mSQL = "UPDATE itordc SET recibido=recibido-${mTEMPO} WHERE numero=${dbitorden} AND codigo=${itdbcodigo}";
 									$this->db->simple_query($mSQL);
 									$mSQL = "UPDATE sinv SET exord=exord+${mTEMPO} WHERE codigo=${itdbcodigo}";
+									$this->db->simple_query($mSQL);
 									$mSALDO -= $mTEMPO;
 								}
 							}
@@ -4320,6 +4380,18 @@ class Scst extends Controller {
 		$hora    = date('H:i:s');
 		$alicuota=$this->datasis->ivaplica($fecha);
 
+		//Saca la relacion con ordc
+		$ordc_real=0;
+		$ordc_cana=$do->count_rel('scstordc');
+		for($i=0;$i<$ordc_cana;$i++){
+			$numeroordc = $do->get_rel('scstordc','orden',$i);
+			if(!empty($numeroordc)) $ordc_real++;
+		}
+		if($ordc_real<=0){
+			$do->unset_rel('scstordc');
+		}
+		//Fin de la relacion ordc
+
 		//Totalizamos la retenciones (exepto la de iva)
 		$retemonto=$rete_cana_vacio=$retebase=0;
 		$rete_real=0;
@@ -4332,6 +4404,8 @@ class Scst extends Controller {
 				$porcen  = $do->get_rel('gereten','porcen',$i);
 
 				$do->set_rel('gereten','numero' ,$serie,$i);
+				$do->set_rel('gereten','origen' ,'SCST',$i);
+
 				$retemonto += $monto;
 				$retebase  += $importe;
 				$rete_real++;
@@ -4344,7 +4418,7 @@ class Scst extends Controller {
 			if($act=='U'){
 				$id  =$do->get('id');
 				$dbid=intval($id);
-				$mSQL="DELETE FROM gereten WHERE idd=${dbid}";
+				$mSQL="DELETE FROM gereten WHERE origen='SCST' AND idd=${dbid}";
 				$this->db->simple_query($mSQL);
 
 			}
@@ -4354,31 +4428,36 @@ class Scst extends Controller {
 		$do->set('flete',$retebase);
 		//Fin de las retenciones exepto iva
 
-		$iva=$stotal=0;
+		$iva=$stotal=$tpeso=0;
 		$cgenera=$civagen=$creduci=$civared=$cadicio=$civaadi=$cexento=0;
 		$cana=$do->count_rel('itscst');
 		for($i=0;$i<$cana;$i++){
 			$itcodigo  = $do->get_rel('itscst','codigo'  ,$i);
-			$itcana    = $do->get_rel('itscst','cantidad',$i);
-			$itprecio  = floatval($do->get_rel('itscst','costo'  ,$i));
-			$itiva     = floatval($do->get_rel('itscst','iva'    ,$i));
-			$itpvp1    = floatval($do->get_rel('itscst','precio1',$i));
+			$itcana    = floatval($do->get_rel('itscst','cantidad',$i));
+			$itprecio  = floatval($do->get_rel('itscst','costo'   ,$i));
+			$itiva     = floatval($do->get_rel('itscst','iva'     ,$i));
+			$itpvp1    = floatval($do->get_rel('itscst','precio1' ,$i));
 
 			//$itimporte = $itprecio*$itcana;
 			$itimporte = $do->get_rel('itscst','importe',$i);
 			$iiva      = $itimporte*($itiva/100);
 
-			$mSQL='SELECT ultimo,existen,pond,standard,formcal,margen1,margen2,margen3,margen4,precio1,precio2,precio3,precio4,iva FROM sinv WHERE codigo='.$this->db->escape($itcodigo);
+			$mSQL='SELECT ultimo,existen,pond,standard,formcal,margen1,margen2,margen3,margen4,precio1,precio2,precio3,precio4,iva,peso FROM sinv WHERE codigo='.$this->db->escape($itcodigo);
 			$query = $this->db->query($mSQL);
 			if($query->num_rows() > 0){
 				$row = $query->row();
-				if(($itcana+$row->existen) <> 0)
+				if(($itcana+$row->existen) <> 0){
 					$costo_pond=(($row->pond*$row->existen)+($itcana*$itprecio))/($itcana+$row->existen);
-				else
+				}else{
 					$costo_pond=$itprecio;
+				}
 				$costo_ulti=$itprecio;
 
 				$costo=$this->_costos($row->formcal,$costo_pond,$costo_ulti,$row->standard);
+				$tpeso+=floatval($row->peso)*$itcana;
+			}else{
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Producto no encontrado ('.$itcodigo.')';
+				return false;
 			}
 
 			if($itpvp1 > 0){
@@ -4468,6 +4547,7 @@ class Scst extends Controller {
 		$do->set('control'  , $control);
 		$do->set('estampa'  , $estampa);
 		$do->set('hora'     , $hora);
+		$do->set('peso'     , $tpeso);
 
 		//$montonet = $do->get('montonet');
 		$montotot = $do->get('montotot');

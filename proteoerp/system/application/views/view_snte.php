@@ -303,7 +303,7 @@ function autocod(id){
 				url:  "<?php echo site_url('ajax/buscasinvart/S'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: {'q': req.term},
+				data: {'q': req.term, "alma": $('#almacen').val().trim()},
 				success:
 					function(data){
 						var sugiere = [];

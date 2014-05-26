@@ -29,49 +29,49 @@ $link3=site_url('inventario/common/get_grupo');
 $script='
 $(document).ready(function(){
 
-        $("#depto").change(function(){
-                depto();
-                $.post("'.$link2.'",{ depto:$(this).val() },function(data){$("#linea").html(data);})
-                $.post("'.$link3.'",{ linea:"" },function(data){$("#grupo").html(data);})
-        });
-        $("#linea").change(function(){
-                linea();
-                $.post("'.$link3.'",{ linea:$(this).val() },function(data){$("#grupo").html(data);})
-        });
+	$("#depto").change(function(){
+		depto();
+		$.post("'.$link2.'",{ depto:$(this).val() },function(data){$("#linea").html(data);})
+		$.post("'.$link3.'",{ linea:"" },function(data){$("#grupo").html(data);})
+	});
+	$("#linea").change(function(){
+		linea();
+		$.post("'.$link3.'",{ linea:$(this).val() },function(data){$("#grupo").html(data);})
+	});
 
-        $("#grupo").change(function(){
-                grupo();
-        });
-        depto();
-        linea();
-        grupo();
+	$("#grupo").change(function(){
+		grupo();
+	});
+	depto();
+	linea();
+	grupo();
 });
 
 function depto(){
-        if($("#depto").val()!=""){
-                $("#nom_depto").attr("disabled","disabled");
-        }
-        else{
-                $("#nom_depto").attr("disabled","");
-        }
+	if($("#depto").val()!=""){
+		$("#nom_depto").attr("disabled","disabled");
+	}
+	else{
+		$("#nom_depto").attr("disabled","");
+	}
 }
 
 function linea(){
-        if($("#linea").val()!=""){
-                $("#nom_linea").attr("disabled","disabled");
-        }
-        else{
-                $("#nom_linea").attr("disabled","");
-        }
+	if($("#linea").val()!=""){
+		$("#nom_linea").attr("disabled","disabled");
+	}
+	else{
+		$("#nom_linea").attr("disabled","");
+	}
 }
 
 function grupo(){
-        if($("#grupo").val()!=""){
-                $("#nom_grupo").attr("disabled","disabled");
-        }
-        else{
-                $("#nom_grupo").attr("disabled","");
-        }
+	if($("#grupo").val()!=""){
+		$("#nom_grupo").attr("disabled","disabled");
+	}
+	else{
+		$("#nom_grupo").attr("disabled","");
+	}
 }';
 
 $filter = new DataFilter2("Filtro por Producto");
@@ -210,7 +210,7 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 		$columncal[]=$etiq;
 	}
 	if($i>2){
-		$connt='array(<#'.implode('#>,<#',$columncal).'#>)';
+		$connt='array(<#'.implode('#>+0,<#',$columncal).'#>+0)';
 		$vval=$i-2;
 
 		$formula="(array_sum($connt)-min($connt)-max($connt))/$vval";

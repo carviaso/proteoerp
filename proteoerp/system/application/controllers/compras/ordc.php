@@ -48,7 +48,6 @@ class Ordc extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png', 'alt' => 'Reimprimir Documento', 'label'=>'Imprimir Orden'));
-		$grid->wbotonadd(array('id'=>'imprim2', 'img'=>'assets/default/images/print.png', 'alt' => 'Reimprimir Documento', 'label'=>'Imprimir S/Precio'));
 		$farma=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 
 
@@ -206,18 +205,24 @@ class Ordc extends Controller {
 		jQuery("#imprime").click( function(){
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/ORDC').'/\'+id+"/", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
-			}else{ $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
-		});';
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 
-		$bodyscript .='
-		jQuery("#imprim2").click( function(){
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret = jQuery("#newapi'. $grid0.'").jqGrid(\'getRowData\',id);
-				window.open(\''.site_url('formatos/ver/ORDC').'/\'+id+"/S", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
-			}else{ $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
+				btns={ "Con precios": "N","Sin precios":"S"};
+
+				$.prompt("<h2>Qu&eacute; modalidad desea imprimir?</h2>",{
+					buttons: btns,
+					submit: function(e,v,m,f){
+						if(v=="S"){
+							window.open(\''.site_url('formatos/ver/ORDC').'/\'+id+"/S", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+						}else{
+							window.open(\''.site_url('formatos/ver/ORDC').'/\'+id+"/", \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+						}
+					}
+				});
+
+			}else{
+				$.prompt("<h1>Por favor Seleccione una orden</h1>");
+			}
 		});';
 
 		$bodyscript .= '
@@ -1310,6 +1315,16 @@ class Ordc extends Controller {
 		$edit->status->style='width:100px;';
 		$edit->status->when=array('show');
 
+		$edit->almacen = new  dropdownField ('Almac&eacute;n', 'almacen');
+		$edit->almacen->options('SELECT ubica, CONCAT(ubica,\' \',ubides) nombre FROM caub ORDER BY ubica');
+		$edit->almacen->rule = 'required';
+		$edit->almacen->mode = 'autohide';
+		$edit->almacen->style='width:145px;';
+		$alma = $this->datasis->traevalor('ALMACEN');
+		if(!empty($alma)){
+			$edit->almacen->insertValue=$alma;
+		}
+
 		$edit->arribo = new DateonlyField('Fecha de Arribo', 'arribo','d/m/Y');
 		$edit->arribo->insertValue = date('Y-m-d');
 		$edit->arribo->rule = 'required';
@@ -1631,21 +1646,43 @@ class Ordc extends Controller {
 	}
 
 	function _pre_insert($do){
-		$iva=$totals=0;
+		$fecha  = $do->get('fecha');
+		$proveed= $do->get('proveed');
+		$almacen= $do->get('almacen');
+
+		$iva=$totals=$tpeso=0;
 		$cana=$do->count_rel('itordc');
 		for($i=0;$i<$cana;$i++){
-			$itcana    = $do->get_rel('itordc','cantidad',$i);
-			$itpreca   = $do->get_rel('itordc','costo',$i);
-			$itiva     = $do->get_rel('itordc','iva',$i);
+			$itcodigo  = $do->get_rel('itordc','codigo',$i);
+			$itcana    = floatval($do->get_rel('itordc','cantidad',$i));
+			$itpreca   = floatval($do->get_rel('itordc','costo',$i));
+			$itiva     = floatval($do->get_rel('itordc','iva',$i));
 			$itimporte = $itpreca*$itcana;
 			$do->set_rel('itordc','importe' ,$itimporte,$i);
 
+			$rowval = $this->datasis->damerow('SELECT base1,base2,base3,base4,peso FROM sinv WHERE codigo='.$this->db->escape($itcodigo));
+			if(empty($rowval)){
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Producto no encontrado ('.$itcodigo.')';
+				return false;
+			}
+
+			$do->set_rel('itordc','precio1'  , $rowval['base1']   ,$i);
+			$do->set_rel('itordc','precio2'  , $rowval['base2']   ,$i);
+			$do->set_rel('itordc','precio3'  , $rowval['base3']   ,$i);
+			$do->set_rel('itordc','precio4'  , $rowval['base4']   ,$i);
+
 			$iva    +=$itimporte*($itiva/100);
 			$totals +=$itimporte;
-			//$do->set_rel('itspre','mostrado',$iva+$totals,$i);
+			$tpeso += floatval($rowval['peso'])*$itcana;
+			$do->set_rel('itordc','montoiva' ,round($itimporte*$iva/100,2),$i);
+			$do->set_rel('itordc','fecha'    ,$fecha  , $i);
+			$do->set_rel('itordc','proveed'  ,$proveed, $i);
+			$do->set_rel('itordc','depo'     ,$almacen, $i);
+			$do->set_rel('itordc','entregado',0       , $i);
 		}
 		$totalg = $totals+$iva;
 
+		$do->set('peso'     ,round($tpeso ,2));
 		$do->set('montonet' ,round($totals ,2));
 		$do->set('montotot' ,round($totalg ,2));
 		$do->set('montoiva' ,round($iva    ,2));
@@ -1672,6 +1709,12 @@ class Ordc extends Controller {
 	}
 
 	function _pre_update($do){
+		$status   = $do->get('status');
+		if($status!='PE'){
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='No se puede modificar una orden que no este pendiente';
+			return false;
+		}
+
 		$numero   = $do->get('numero');
 		$iva=$totals=0;
 		$cana=$do->count_rel('itordc');
@@ -1685,7 +1728,7 @@ class Ordc extends Controller {
 
 			$iva    +=$itimporte*($itiva/100);
 			$totals +=$itimporte;
-			//$do->set_rel('itspre','mostrado',$iva+$totals,$i);
+			$do->set_rel('itordc','entregado',0,$i);
 		}
 		$totalg = $totals+$iva;
 

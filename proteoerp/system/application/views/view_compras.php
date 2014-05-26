@@ -5,7 +5,8 @@
  * @autor    Andres Hocevar
  * @license  GNU GPL v3
 */
-$container_bl=$form->_button_container['BL'][0];
+
+$container_bl=(count($form->_button_container['BL'])>0)? $form->_button_container['BL'][0]:'';
 $container_br=join('&nbsp;', $form->_button_container['BR']);
 $container_tr=join('&nbsp;', $form->_button_container['TR']);
 
@@ -34,6 +35,9 @@ $cgereten.=' <td class="littletablerow" align="right">'.$ccampos['porcen']['fiel
 $cgereten.=' <td class="littletablerow" align="right">'.$ccampos['monto']['field']     .'</td>';
 $cgereten.=' <td class="littletablerow" align="center"><a href=\'#\' onclick="del_gereten(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
 $cgereten=$form->js_escape($cgereten);
+
+$cscstordc = $form->detail_fields['scstordc']['ordc']['field'];
+$cscstordc = $form->js_escape($cscstordc);
 
 if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
 
@@ -430,6 +434,7 @@ function add_itscst(){
 	$('#codigo_'+can).focus();
 
 	itscst_cont=itscst_cont+1;
+	return can;
 }
 
 function post_modbus_sinv(nind){
@@ -513,6 +518,97 @@ function post_modbus_sprv(){
 			}
 		},
 	});
+
+	$.ajax({
+		url: "<?php echo site_url('ajax/traeordc'); ?>",
+		dataType: 'json',
+		type: 'POST',
+		data: {'cod_prv' : $("#proveed").val()},
+		success: function(data){
+			if(data != null){
+				var pant  = "<table id='tordc'></table>";
+
+				var promt = $.prompt(pant, {
+					title: "El proveedor posse la siguiente lista de ordenes",
+					buttons: { "Continuar": true },
+					submit: function(e,v,m,f){
+						var srows = jQuery("#tordc").jqGrid('getGridParam','selarrrow');
+						if(srows.length>0){
+							var arr_num = [];
+							for(var i=0;i < srows.length;i++){
+								ret  = $("#tordc").getRowData(srows[i]);
+								arr_num.push(ret.numero);
+							}
+
+							$.ajax({
+								url: "<?php echo site_url('ajax/traeitordc'); ?>",
+								dataType: 'json',
+								type: 'POST',
+								data: {'ids' : srows},
+								success: function(dat){
+									if(dat.length>0){
+										truncate();
+										var can;
+										var item;
+										for(var i=0;i < dat.length;i++){
+											id   = add_itscst();
+											item = dat[i];
+
+											$('#codigo_'+id).val(item.codigo);
+											$('#descrip_'+id).val(item.descrip);
+											$('#it_descrip_val_'+id).text(item.descrip);
+											$('#iva_'+id).val(item.iva);
+											$('#sinvpeso_'+id).val(item.peso);
+											$('#costo_'+id).val(item.pond);
+											$('#precio1_'+id).val(item.precio1);
+											$('#cantidad_'+id).val(item.cantidad);
+											importe(parseInt(id));
+											if(item.activo=='N'){
+												$('#tr_itscst_'+id).css("background-color","#FF7A46");
+											}else{
+												$('#tr_itscst_'+id).css("background-color", "transparent");
+											}
+										}
+
+										var numero,ret,can;
+										var htm = <?php echo $cscstordc; ?>;
+										$('input[id^="ordc_"]').remove();
+										for(var i=0;i < arr_num.length;i++){
+											can = i.toString();
+											html = htm.replace(/<#i#>/g,can);
+											$("#divgereten").after(html);
+											$("#ordc_"+can).val(arr_num[i]);
+										}
+									}
+								},
+							});
+						}
+					}
+				});
+
+				jQuery("#tordc").jqGrid({
+					datatype: "local",
+					height: 200,
+					colNames:["N&uacute;mero","Fecha", "Peso","Monto"],
+					colModel:[
+						{name:"numero" , index:"numero" , width:80 , align:"center"},
+						{name:"fecha"  , index:"fecha"  , width:70 , align:"center"},
+						{name:"peso"   , index:"peso"   , width:90 , align:"right"  , sorttype:"float"},
+						{name:"monto"  , index:"monto"  , width:100, align:"right"  , sorttype:"float"}
+					],
+					multiselect: true,
+					caption: "Seleccione las que desee importar",
+					rowNum:10,
+				});
+
+				for(var i=0;i<=data.length;i++){
+					jQuery("#tordc").jqGrid('addRowData',i+1,data[i]);
+				}
+
+			}
+		},
+	});
+
 }
 
 function del_itscst(id){
@@ -642,7 +738,7 @@ function add_gereten(){
 	var con = (gereten_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
 	htm = htm.replace(/<#o#>/g,con);
-	$("#__UTPL__gereten").before(htm);
+	$("#__PTPL__gereten").after(htm);
 	gereten_cont=gereten_cont+1;
 }
 
@@ -802,15 +898,15 @@ if (!$solo){
 </table>
 
 
-<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:80px'>
+<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:80px' id='divgereten'>
 <table width='100%'>
-	<tr>
+	<tr id='__PTPL__gereten'>
 		<td class="littletableheaderdet">Retenci&oacute;n ISLR</td>
 		<td class="littletableheaderdet">Base</td>
 		<td class="littletableheaderdet" align="right">Porcentaje</td>
 		<td class="littletableheaderdet" align="right">Monto</td>
 		<?php if($form->_status!='show') {?>
-			<td class="littletableheaderdet">&nbsp;</td>
+			<td class="littletableheaderdet" align='center'><a href='#' onclick="add_gereten()" title='Agregar otro concepto'><?php echo img('images/agrega4.png'); ?></a></td>
 		<?php } ?>
 	</tr>
 	<?php for($i=0; $i < $form->max_rel_count['gereten']; $i++) {
@@ -830,10 +926,12 @@ if (!$solo){
 		<?php }
 	}?>
 	</tr>
-	<tr id='__UTPL__gereten'>
-		<td colspan='<?php echo ($form->_status!='show')? 8 : 9; ?>'><?php echo $form->_button_container['BL'][1]; ?></td>
-	</tr>
 </table>
 </div>
-<?php echo $form_end?>
+<?php
+for($i=0;$i<$form->max_rel_count['scstordc'];$i++){
+	$it_ordc  = "ordc_${i}";
+	echo $form->$it_ordc->output;
+}
+echo $form_end?>
 <?php endif; ?>

@@ -2697,6 +2697,54 @@ class Ajax extends Controller {
 		echo $monto;
 	}
 
+	function traeordc(){
+		$cod_prv = $this->input->post('cod_prv');
+		header('Content-Type: application/json');
+		if(!empty($cod_prv)){
+			$dbcod_prv = $this->db->escape($cod_prv);
+			$mSQL="SELECT id,numero,fecha,montotot AS monto,peso  FROM ordc WHERE status='PE' AND proveed=${dbcod_prv} ORDER BY fecha DESC LIMIT 10";
+			$query = $this->db->query($mSQL);
+			if($query->num_rows()>0){
+				echo json_encode($query->result());
+			}else{
+				echo json_encode(null);
+			}
+		}else{
+			echo json_encode(null);
+		}
+	}
+
+	function traeitordc(){
+		$ids = $this->input->post('ids');
+		if(is_array($ids)){
+			header('Content-Type: application/json');
+			$sel=array('TRIM(c.descrip) AS descrip', 'TRIM(c.codigo) AS codigo', 'c.precio1', 'c.precio2', 'c.precio3', 'c.precio4',
+				'c.iva','c.existen','c.tipo','c.peso','c.ultimo', 'c.pond','c.activo','SUM(b.cantidad-b.recibido) AS cantidad');
+			$this->db->select($sel);
+			$this->db->from('ordc   AS a');
+			$this->db->join('itordc AS b','a.numero=b.numero');
+			$this->db->join('sinv   AS c','b.codigo=c.codigo');
+			$this->db->where_in('a.id',$ids);
+			$this->db->group_by('c.codigo');
+			$this->db->where('a.status','PE');
+
+			$query = $this->db->get();
+			if($query->num_rows() > 0){
+				$rt=array();
+				foreach ($query->result_array() as $row){
+					$row['descrip']=$this->en_utf8($row['descrip']);
+					$rt[]=$row;
+				}
+
+				echo json_encode($rt);
+			}else{
+				echo json_encode(null);
+			}
+		}else{
+			echo json_encode(null);
+		}
+	}
+
 	function en_utf8($str){
 		if($this->config->item('charset')=='UTF-8' && $this->db->char_set=='latin1'){
 			return utf8_encode($str);

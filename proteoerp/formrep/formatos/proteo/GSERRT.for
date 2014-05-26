@@ -103,9 +103,9 @@ if ( isset($pdf) ) {
 			</tr>
 			</table>
 			<table style="width: 100%; font-size: 8pt;">
-				<tr><td>Raz&oacute;n Social:</td><td><b><?php echo $proveed." ".$nombre; ?></b></td></tr>
-				<tr><td>Direcci&oacute;n:</td><td><b><?php echo $direc1." ".$direc2." ".$direc3; ?></b></td></tr>
-				<tr><td>Tel&eacute;fono:</td><td><b><?php echo $telefono; ?></b>R.I.F. :<b><?php echo $rif; ?></b></td></tr>
+				<tr><td>Raz&oacute;n Social:</td><td><b><?php echo $proveed.' '.$nombre; ?></b></td></tr>
+				<tr><td>Direcci&oacute;n:</td><td><b><?php echo $direc1.' '.$direc2.' '.$direc3; ?></b></td></tr>
+				<tr><td>Tel&eacute;fono:</td><td><b><?php echo $telefono; ?></b> R.I.F. :<b><?php echo $rif; ?></b></td></tr>
 			</table>
 			</div>
 	</thead>
@@ -117,7 +117,7 @@ if ( isset($pdf) ) {
 		</tr>
 	</table>
 
-	<table style="width: 80%;" class="header" align='center' -->
+	<table style="width: 80%;" class="header" align='center' >
 		<tr>
 			<td><div align="left"  style="font-size: 8pt"><b>DOCUMENTO:</b></div></td>
 			<td><div align="rigth" style="font-size: 8pt"><?php echo $tipo_doc.$numero.' '.$titcontrol;  ?></div></td>

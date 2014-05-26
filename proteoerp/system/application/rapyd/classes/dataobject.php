@@ -52,6 +52,7 @@ class DataObject{
 	var $_one_to_one   = array();
 	var $_one_to_many  = array();
 	var $_many_to_many = array();
+	var $_where_rel    = array();
 
 	var $flag_pointer     = false;
 	var $flag_rel_pointer = array();
@@ -297,7 +298,7 @@ class DataObject{
 							$fields = $this->db->list_fields($_one_to_one['table']);
 							$rresults = $query->result_array();
 							$results=array();
-							foreach($fields AS $field){
+							foreach($fields as $field){
 								$results[$field]=$rresults[0][$field];
 								unset($rresults[0][$field]);
 							}
@@ -318,6 +319,19 @@ class DataObject{
 					$_one_to_many['on'] = str_replace('<#pk#>', $pk_name, $_one_to_many['on']);
 					$this->db->join($_one_to_many['table'], $_one_to_many['on']);
 					$this->db->where($where);
+
+					//Where (hay otro en borrar)
+					if(isset($this->_where_rel[$_one_to_many['id']])){
+						foreach($this->_where_rel[$_one_to_many['id']] as $w){
+							if(is_array($w) && count($w)>1){
+								$this->db->where($w[0],$w[1]);
+							}else{
+								$this->db->where($w);
+							}
+						}
+					}
+					//Fin where
+
 					if(isset($_one_to_many['order'])){
 						$this->db->orderby($_one_to_many['order']);
 					}
@@ -351,7 +365,7 @@ class DataObject{
 							$results=array();
 							$cana=count($rresults);
 							for($i=0;$i<$cana;$i++){
-								foreach($fields AS $field){
+								foreach($fields as $field){
 									$campos[$field]=$rresults[$i][$field];
 									unset($rresults[$i][$field]);
 								}
@@ -486,10 +500,10 @@ class DataObject{
 
 				// guarda detalle
 				if($this->save_rel){
-					foreach($this->data_rel AS $rel=>$items){
+					foreach($this->data_rel as $rel=>$items){
 						//hace las equivalencias de las claves primarias
 						$pk_rel=array();
-						foreach($this->_rel_fields[$rel] AS $iind){ // $iind[0] encab $iind[1] detalle
+						foreach($this->_rel_fields[$rel] as $iind){ // $iind[0] encab $iind[1] detalle
 							$indiceit=$iind[1];
 							$indice =$iind[0];
 							$pk_rel[$indiceit]= (array_key_exists($indice,$this->pk)) ? $this->pk[$indice] : $this->get($indice);
@@ -498,6 +512,18 @@ class DataObject{
 						if($this->_rel_type[$rel][0]==0){   //uno a uno
 							$itresult = $this->db->update($this->_one_to_one[$rel]['table'], $items);
 						}elseif($this->_rel_type[$rel][0]==1){//uno a muchos
+							//Where (hay otro en cargar y borrar)
+							if(isset($this->_where_rel[$rel])){
+								foreach($this->_where_rel[$rel] as $w){
+									if(is_array($w) && count($w)>1){
+										$this->db->where($w[0],$w[1]);
+									}else{
+										$this->db->where($w);
+									}
+								}
+							}
+							//Fin where
+
 							$itresult = $this->db->delete($this->_one_to_many[$rel]['table']);
 							foreach($items AS $item){
 								$itdata=array_merge($item,$pk_rel);
@@ -831,6 +857,7 @@ class DataObject{
 				//inicia detalle
 				foreach($this->data_rel AS $rel=>$items){
 					//hace las equivalencias de las claves primarias
+					$pk_rel = array();
 					foreach($this->_rel_fields[$rel] AS $iind){ // $iind[0] encab $iind[1] detalle
 						$indiceit=$iind[1];
 						$indice =$iind[0];
@@ -843,10 +870,24 @@ class DataObject{
 							return false;
 						}
 					}
+
 					$this->db->where($pk_rel);
 					if($this->_rel_type[$rel][0]==0){   //uno a uno
 						 $itresult = $this->db->delete($this->_one_to_one[$rel]['table']);
 					}elseif($this->_rel_type[$rel][0]==1){//uno a muchos
+
+						//Where (hay otro en cargar)
+						if(isset($this->_where_rel[$rel])){
+							foreach($this->_where_rel[$rel] as $w){
+								if(is_array($w) && count($w)>1){
+									$this->db->where($w[0],$w[1]);
+								}else{
+									$this->db->where($w);
+								}
+							}
+						}
+						//Fin where
+
 						 $itresult = $this->db->delete($this->_one_to_many[$rel]['table']);
 					}
 				}
@@ -1074,5 +1115,13 @@ class DataObject{
 
 	function set_field_order($pk='',$field=''){
 		$this->field_order[$pk]=$field;
+	}
+
+	function where_rel_one_to_many($rel_id,$w){
+		if(isset($this->_one_to_many[$rel_id])){
+			$this->_where_rel[$rel_id][]=$w;
+			return true;
+		}
+		return false;
 	}
 }

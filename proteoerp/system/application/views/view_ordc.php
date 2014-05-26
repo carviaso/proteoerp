@@ -104,7 +104,7 @@ function autocod(id){
 				url:  "<?php echo site_url('ajax/buscascstart'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: {'q':req.term,sprv:$('#sprv').val()},
+				data: {'q':req.term,'sprv':$('#sprv').val(),'alma': $('#almacen').val().trim()},
 				success:
 					function(data){
 						var sugiere = [];
@@ -249,8 +249,8 @@ function del_itordc(id){
 			<tr>
 				<td class="littletableheader"><?php echo $form->peso->label  ?>&nbsp;</td>
 				<td class="littletablerow" align="left"><?php echo $form->peso->output ?>&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->fechafac->label  ?>&nbsp;</td>
-				<td class="littletablerow" >  <?php echo $form->fechafac->output ?>&nbsp;</td>
+				<td class="littletableheader"><?php echo $form->almacen->label  ?>&nbsp;</td>
+				<td class="littletablerow" >  <?php echo $form->almacen->output ?>&nbsp;</td>
 			</tr>
 		</table>
 		</fieldset>
