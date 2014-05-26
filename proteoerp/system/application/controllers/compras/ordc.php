@@ -1678,7 +1678,7 @@ class Ordc extends Controller {
 			$do->set_rel('itordc','fecha'    ,$fecha  , $i);
 			$do->set_rel('itordc','proveed'  ,$proveed, $i);
 			$do->set_rel('itordc','depo'     ,$almacen, $i);
-			$do->set_rel('itordc','entregado',0       , $i);
+			$do->set_rel('itordc','recibido' ,0       , $i);
 		}
 		$totalg = $totals+$iva;
 

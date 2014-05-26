@@ -2842,7 +2842,9 @@ class Scst extends Controller {
 		$this->rapyd->load('dataform');
 		$dbcontrol = $this->db->escape($control);
 
-		$script = '$(function(){ $("#fecha").datepicker({ dateFormat: "dd/mm/yy" }); })';
+		$script = '$(function(){
+		$(".littletableheader").css("width","200px");
+		$("#fecha").datepicker({ dateFormat: "dd/mm/yy" }); })';
 
 		$form = new DataForm("compras/scst/actualizar/${control}/process");
 		$form->script($script);
@@ -2922,6 +2924,17 @@ class Scst extends Controller {
 			$form->fecha->calendar = false;
 			$form->fecha->title='El sistema asume que esta es la fecha en que la mercanc&iacute;a entra en inventario y de la retenci&oacute;n de IVA si aplica al presente caso';
 			$form->fecha->size=12;
+			$form->fecha->append(' <sup>1</sup>');
+
+			$canaordc=intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM scstordc WHERE compra='.$this->db->escape($control)));
+			if($canaordc>0){
+				$form->ordc = new  dropdownField ('Cerrar Ordenes de Compra', 'ordc');
+				$form->ordc->option('N','No');
+				$form->ordc->option('S','Si');
+				$form->ordc->rule  = 'required|enum[N,S]';
+				$form->ordc->style = 'width:100px;';
+				$form->ordc->title ='Selecionar SI para cerrar las ordenes de compra asociadas o NO para dejarlas en backorder';
+			}
 
 			$form->container = new containerField('tabafo2',$htmltabla);
 
@@ -2954,7 +2967,13 @@ class Scst extends Controller {
 				}
 				//Fin de la validacion
 
-				$rt = $this->_actualizar($id,$cambio,$actualiza);
+				if($canaordc>0){
+					$tordc=$form->ordc->newValue;
+				}else{
+					$tordc=null;
+				}
+
+				$rt = $this->_actualizar($id,$cambio,$actualiza,$tordc);
 				if($rt === false){
 					$rt=array(
 						'status' =>'B',
@@ -3301,7 +3320,7 @@ class Scst extends Controller {
 		}
 	}
 
-	function _actualizar($id, $cprecio, $actuali=null){
+	function _actualizar($id, $cprecio, $actuali=null,$tordc=null){
 		$error = 0;
 		$pasa  = $this->datasis->dameval('SELECT COUNT(*) AS cana FROM scst WHERE actuali>=fecha AND id= '.$id);
 
