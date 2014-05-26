@@ -289,8 +289,9 @@ class Gserchi extends Controller {
 				$data['negreso']    = $negreso;
 				$data['ncausado']   = $causado;
 				$data['tipo_or']    = '';
+				$data['monto1']     = $totneto;
 				//$data['comprob1']   = '';
-				//$data['monto1']     = '';
+
 				//$data['codb2']      = '';
 				//$data['tipo2']      = '';
 				//$data['cheque2']    = '';

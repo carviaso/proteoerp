@@ -609,9 +609,9 @@ border-bottom-right-radius:5px;
 		$rt =str_replace(utf8_encode(chr(164)),'ñ',$rt);
 		$rt =str_replace(utf8_encode(chr(166)),'º',$rt);
 
-		if($this->DBcharset=='latin1'){
-			$rt=utf8_encode($rt);
-		}
+		//if($this->DBcharset=='latin1'){
+		//	$rt=utf8_encode($rt);
+		//}
 
 		$rt =htmlspecialchars($rt,ENT_COMPAT,'UTF-8');
 		if($this->DBcharset=='latin1'){

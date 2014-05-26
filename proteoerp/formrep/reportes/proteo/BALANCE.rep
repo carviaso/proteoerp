@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $pasamos=false;
 $query = $this->db->query("SELECT formato, DATE_FORMAT(inicio, '/%m/%Y')as inicio,final FROM cemp LIMIT 0,1");
 

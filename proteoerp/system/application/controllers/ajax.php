@@ -2726,7 +2726,7 @@ class Ajax extends Controller {
 			$this->db->join('sinv   AS c','b.codigo=c.codigo');
 			$this->db->where_in('a.id',$ids);
 			$this->db->group_by('c.codigo');
-			$this->db->where('a.status','PE');
+			$this->db->where_in('a.status',array('PE','BA'));
 
 			$query = $this->db->get();
 			if($query->num_rows() > 0){

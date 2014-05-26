@@ -7,7 +7,7 @@ $dbid= $this->db->escape($id);
 $moneda = $this->datasis->traevalor('MONEDA');
 $mSQL_1 = $this->db->query("SELECT
 a.tipo_doc,a.numero,a.fecha,a.vence,a.control,a.actuali,a.depo,a.proveed,b.nombre,TRIM(b.nomfis) AS nomfis,a.montotot,a.montoiva,a.montonet,a.peso, a.transac,
-if(a.actuali>=a.fecha,'CARGADA','PENDIENTE') cargada, a.control, a.cexento, a.cgenera, a.creduci, a.cadicio, a.cimpuesto, a.ctotal, a.reten, a.reteiva, a.cstotal 
+if(a.actuali>=a.fecha,'CARGADA','PENDIENTE') cargada, a.control, a.cexento, a.cgenera, a.creduci, a.cadicio, a.cimpuesto, a.ctotal, a.reten, a.reteiva, a.cstotal
 FROM scst AS a
 JOIN sprv AS b ON a.proveed=b.proveed
 WHERE a.id=${dbid}");
@@ -144,7 +144,7 @@ if ( isset($pdf) ) {
 $mod=FALSE;
 $i=0;
 $pagina = 0 ;
-foreach ($detalle AS $items){ 
+foreach ($detalle AS $items){
 	$i++;
 	if ( $pagina == 0 ) {
 ?>
@@ -167,7 +167,7 @@ foreach ($detalle AS $items){
 					<td style="text-align: center"><?php echo nformat($items->cantidad,0)  ?></td>
 					<td style="text-align: right;"><?php echo nformat($items->costo).$moneda  ?></td>
 					<td style="text-align: right;"><?php echo "<b>".$items->alerta."</b>".nformat($items->precio2) ?></td>
-					<td class="change_order_total_col"><?php echo  nformat($items->importe).$moneda   ?></td>
+					<td style="text-align: right;"><?php echo  nformat($items->importe).$moneda;   ?></td>
 				</tr>
 <?php
 	if($i%$maxlinea == 0) {
@@ -236,7 +236,7 @@ while ( $i%$maxlinea != 0) {
 				</tr>
 			</table>
 			</td></tr>
-			<tr><td colspan="7">
+			<tr><td colspan="6">
 			<table width="100%">
 				<tr>
 					<td style="text-align:center;"><b>Exento</b></td>
@@ -246,6 +246,7 @@ while ( $i%$maxlinea != 0) {
 					<td style="text-align:center;"><b>R. IVA</b></td>
 					<td style="text-align:center;"><b>ISLR</b></td>
 					<td style="text-align:center;"><b>Neto CxP</b></td>
+					<td style="text-align:center;"><b>Desc. por Aprovechar</b></td>
 				</tr><tr>
 					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($cexento).$moneda?></b></td>
 					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($cstotal).$moneda?></b></td>
@@ -254,6 +255,7 @@ while ( $i%$maxlinea != 0) {
 					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($reteiva).$moneda?></b></td>
 					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($reten).$moneda?></b></td>
 					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($ctotal-$reteiva-$reten).$moneda?></b></td>
+					<td style="border-style:solid;" class="change_order_total_col"><b><?php echo  nformat($ctotal-$montonet).$moneda?></b></td>
 				</tr>
 			</table>
 			</td></tr>

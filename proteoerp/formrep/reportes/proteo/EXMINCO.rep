@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $scli=array(
 	'tabla'   =>'scli',
 	'columnas'=>array(
@@ -20,7 +26,7 @@ $sinv=array(
 $cboton=$this->datasis->modbus($scli);
 $iboton=$this->datasis->modbus($sinv);
 
-$filter = new DataFilter2("Filtro del Reporte");
+$filter = new DataFilter2('Filtro del Reporte');
 //$filter->attributes=array('onsubmit'=>'is_loaded()');
 
 $link2=site_url('inventario/common/get_linea');
@@ -50,8 +56,7 @@ $(document).ready(function(){
 function depto(){
 	if($("#depto").val()!=""){
 		$("#nom_depto").attr("disabled","disabled");
-	}
-	else{
+	}else{
 		$("#nom_depto").attr("disabled","");
 	}
 }
@@ -59,8 +64,7 @@ function depto(){
 function linea(){
 	if($("#linea").val()!=""){
 		$("#nom_linea").attr("disabled","disabled");
-	}
-	else{
+	}else{
 		$("#nom_linea").attr("disabled","");
 	}
 }
@@ -68,26 +72,20 @@ function linea(){
 function grupo(){
 	if($("#grupo").val()!=""){
 		$("#nom_grupo").attr("disabled","disabled");
-	}
-	else{
+	}else{
 		$("#nom_grupo").attr("disabled","");
 	}
 }';
 
-$filter = new DataFilter2("Filtro por Producto");
+$filter = new DataFilter2('Filtro del reporte');
 $filter->script($script);
 
-$filter->db->select('a.codigo');
-$filter->db->select('a.descrip');
-$filter->db->select('s.exmin');
-$filter->db->select('s.existen');
-$filter->db->select('s.id');
-$filter->db->select('s.grupo');
-$filter->db->select('b.nom_grup');
-$filter->db->select('c.linea');
-$filter->db->select('c.descrip as dlinea');
-$filter->db->select('d.depto');
-$filter->db->select('d.descrip AS dptodescrip');
+$sel=array('a.codigo','a.descrip','s.grupo','b.nom_grup',
+'IF(s.exmin IS NULL OR s.exmin="",0,s.exmin) AS exmin',
+'IF(s.exmin IS NULL OR s.exmax="",0,s.exmax) AS exmax','s.existen','s.id',
+'c.linea','c.descrip as dlinea','d.depto','d.descrip AS dptodescrip');
+
+$filter->db->select($sel);
 $filter->db->from('eventas AS a');
 $filter->db->join('sinv AS s','a.codigo=s.codigo');
 $filter->db->join('grup AS b','s.grupo=b.grupo');
@@ -210,15 +208,13 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 		$columncal[]=$etiq;
 	}
 	if($i>2){
-		$connt='array(<#'.implode('#>+0,<#',$columncal).'#>+0)';
+		$connt='array(<#'.implode('#>,<#',$columncal).'#>)';
 		$vval=$i-2;
 
 		$formula="(array_sum($connt)-min($connt)-max($connt))/$vval";
-		//$pformula="(<#exmin#> > 0)?(($formula)*100/<#exmin#>)-100 : (($formula)>0)? 100 : 0";
-		$pformula="(<#exmin#> > 0)? round((($formula)*100/<#exmin#>)-100,2):((($formula)>0)? 100 : 0)";
+		$pformula="(floatval(<#exmin#>) > 0)? round((($formula)*100/<#exmin#>)-100,2):((($formula)>0)? 100 : 0)";
 		$mSQL=$this->rapyd->db->_compile_select();
-		//memowrite($mSQL);
-		//echo $mSQL;
+		//echo $mSQL; exit();
 		$sobretabla='';
 
 		if (!empty($filter->depto->newValue))  $sobretabla.=' Dpto: '.$filter->depto->newValue;
@@ -241,19 +237,22 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 		$pdf->AddCol('codigo' ,15,'Código'     ,'L',6);
 		$pdf->AddCol('descrip',40,'Descripción','L',6);
 		$pdf->AddCol('existen',12,'Exist.'     ,'L',6);
-
-		foreach($columncal AS $col){
-			$pdf->setType($col,'real');
-			$pdf->AddCol( $col ,12, $col,'R',6);
-		}
 		$pdf->setType('exmin','real');
 		$pdf->AddCol('exmin', 12,'Min/Actual' ,'R',6);
+		$pdf->setType('exmax','real');
+		$pdf->AddCol('exmax', 12,'Max/Actual' ,'R',6);
 		if(count($columncal)>0){
 			$pdf->AddCof($formula, 15,'Min.Sug' ,'R',6);
 			$pdf->setType('__cC0','real');
 			$pdf->AddCof($pformula, 15,'% Var.' ,'R',6);
 			$pdf->setType('__cC1','real');
 		}
+
+		foreach($columncal AS $col){
+			$pdf->setType($col,'real');
+			$pdf->AddCol( $col ,12, $col,'R',6);
+		}
+
 		//$pdf->AddCof("nformat(($formula)/<#exmin#>)", 15,'Pocen' ,'R',6);
 		//$pdf->setGrupoLabel('(<#nom_grup#>)');
 		//$pdf->setGrupo('grupo');
@@ -272,6 +271,6 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
 	$data['titulo'] = '<h2 class="mainheader">Comparativo M&iacute;nimos</h2>';
-	$data['head']    = script("jquery.pack.js").$this->rapyd->get_head();
+	$data['head']    = script('jquery.pack.js').$this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }
