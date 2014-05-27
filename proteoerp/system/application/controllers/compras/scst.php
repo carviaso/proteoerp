@@ -435,12 +435,14 @@ class Scst extends Controller {
 									function(r){
 										try{
 											var json = JSON.parse(r);
+
 											if (json.status == "A"){
 												$.prompt("Documento reversado");
 												grid.trigger("reloadGrid");
 												return true;
 											}else{
-												$.prompt("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
+												alert(json.mensaje);
+												//$.prompt("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+json.mensaje+"</h1>");
 											}
 										}catch(e){
 											$.prompt("Error en respuesta");
@@ -3795,7 +3797,17 @@ class Scst extends Controller {
 					$qquery = $this->db->query('SELECT orden FROM scstordc WHERE compra=?',array($control));
 					foreach($qquery->result() as $row){
 						$dborden = $this->db->escape($row->orden);
-						$mSQL = "UPDATE ordc SET status='CE' WHERE numero=${dborden}";
+						if($tordc=='S'){
+							$sta='CE';
+						}else{
+							$ordcana=intval($this->datasis->dameval('SELECT COUNT(*) AS c FROM itordc WHERE cantidad>recibido AND numero='.$dborden));
+							if($ordcana>0){
+								$sta='BA';
+							}else{
+								$sta='CE';
+							}
+						}
+						$mSQL = "UPDATE ordc SET status='${sta}' WHERE numero=${dborden}";
 						$ban  = $this->db->simple_query($mSQL);
 						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 					}
@@ -4398,6 +4410,15 @@ class Scst extends Controller {
 		$estampa = date('Ymd');
 		$hora    = date('H:i:s');
 		$alicuota=$this->datasis->ivaplica($fecha);
+
+		$sprvnombre = trim($this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$this->db->escape($proveed)));
+		if(!empty($sprvnombre)){
+			$do->set('nombre',$sprvnombre);
+		}else{
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Proveedor inexistente';
+			return false;
+		}
+
 
 		//Saca la relacion con ordc
 		$ordc_real=0;
