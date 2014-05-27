@@ -207,7 +207,7 @@ to {background:#32FFD3}
 			echo '<b>'.snformat($pexisten).'/</b><span style="font-size:0.8em;color:#FFD900">'.snformat($existen).'</span>';
 		}
 		?></td>
-		<td align='right'><?php echo $f_cana;   ?></td>
+		<td align='right'><?php if(isset($f_cana)){ echo $f_cana; }else{ echo nformat(0); }  ?></td>
 		<td align='right'><?php
 			if($form->_status=='show'){
 				echo nformat($preca);
