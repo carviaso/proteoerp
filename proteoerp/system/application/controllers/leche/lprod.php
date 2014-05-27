@@ -50,7 +50,7 @@ class Lprod extends Controller {
 		$grid->wbotonadd(array('id'=>'imprimir', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir','label'=>'Reimprimir Documento'));
 
 		if($this->datasis->sidapuede('LCIERRE','INCLUIR%')){
-			$grid->wbotonadd(array('id'=>'bacidez', 'img'=>'images/lab.png'     ,'alt' => 'Colocar acidez'              ,'label'=>'1-Colocar Acidez'));
+			$grid->wbotonadd(array('id'=>'bacidez', 'img'=>'images/lab.png'     ,'alt' => 'Colocar acidez'              ,'label'=>'1-Definir Producto'));
 			$grid->wbotonadd(array('id'=>'bcierre', 'img'=>'images/candado.png' ,'alt' => 'Cierre Producci&oacute;n'    ,'label'=>'2-Cierre Producci&oacute;n'));
 			$grid->wbotonadd(array('id'=>'bconsol', 'img'=>'images/acuerdo.png' ,'alt' => 'Consolidar Producci&oacute;n','label'=>'3-Finalizar Producci&oacute;n'));
 		}
@@ -164,7 +164,7 @@ class Lprod extends Controller {
 			';
 
 		$bodyscript.= '
-		jQuery("#imprimir").click( function(){
+		$("#imprimir").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
@@ -175,20 +175,23 @@ class Lprod extends Controller {
 		});';
 
 		$bodyscript .= '
-		jQuery("#bcierre").click( function(){
-
+		$("#bcierre").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
+			if( id ){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
-				if(ret.status!="A"){
+				if(ret.status != "A"){
 					$.prompt("<h1>Solo se pueden cerrar las producciones abiertas</h1>");
-				}else{
-					mId = id;
-					$.post("'.site_url($this->url.'datacie/modify').'/"+id, function(data){
-						$("#fciecon").html(data);
-						$("#fciecon").dialog( { title:"Finalizacion"} );
-						$("#fciecon").dialog( "open" );
-					});
+				} else {
+					if ( ret.acidez != 0 ) {
+						mId = id;
+						$.post("'.site_url($this->url.'datacie/modify').'/"+id, function(data){
+							$("#fciecon").html(data);
+							$("#fciecon").dialog( { title:"Cierre de Produccion", width:350, height:250} );
+							$("#fciecon").dialog( "open" );
+						});
+					} else {
+						$.prompt("<h1>Debe definir el producto primero</h1>");
+					}
 				}
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
@@ -196,8 +199,7 @@ class Lprod extends Controller {
 		});';
 
 		$bodyscript .= '
-		jQuery("#bacidez").click( function(){
-
+		$("#bacidez").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
@@ -207,6 +209,7 @@ class Lprod extends Controller {
 					mId = id;
 					$.post("'.site_url($this->url.'dataacid/modify').'/"+id, function(data){
 						$("#fciecon").html(data);
+						$("#fciecon").dialog( { title:"Definir Producto", width:400, height:250 } );
 						$("#fciecon").dialog( "open" );
 					});
 				}
@@ -217,7 +220,7 @@ class Lprod extends Controller {
 
 
 		$bodyscript .= '
-		jQuery("#bconsol").click( function(){
+		$("#bconsol").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
@@ -225,6 +228,7 @@ class Lprod extends Controller {
 					mId = id;
 					$.post("'.site_url($this->url.'datacon/modify').'/"+id, function(data){
 						$("#fciecon").html(data);
+						$("#fciecon").dialog( { title:"Finalizacion de Produccion", width:400, height:400 } );
 						$("#fciecon").dialog( "open" );
 					});
 				}else{
@@ -233,7 +237,7 @@ class Lprod extends Controller {
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-
+		});';
 
 			//var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			//if (id)	{
@@ -266,7 +270,6 @@ class Lprod extends Controller {
 			//} else {
 			//	$.prompt("<h1>Por favor Seleccione un Movimiento</h1>");
 			//}
-		});';
 
 		$bodyscript .= '
 		$("#fshow").dialog({
@@ -793,7 +796,6 @@ class Lprod extends Controller {
 	//***********************************
 	// DataEdit
 	//***********************************
-
 	function dataedit(){
 		$this->rapyd->load('datadetails','dataobject');
 
@@ -828,15 +830,15 @@ class Lprod extends Controller {
 		$edit->fecha->maxlength =8;
 		$edit->fecha->calendar=false;
 
-		$edit->inventario = new inputField('Leche de Inv.','inventario');
+		$edit->inventario = new inputField('Leche de Inventario','inventario');
 		$edit->inventario->rule='max_length[12]|numeric|required';
 		$edit->inventario->css_class='inputnum';
-		$edit->inventario->size =8;
+		$edit->inventario->size =7;
 		$edit->inventario->insertValue='0';
 		$edit->inventario->onkeyup='totalizar();';
 		$edit->inventario->maxlength =9;
 
-		$edit->litros = new inputField('L.Totales','litros');
+		$edit->litros = new inputField('Total Lts.','litros');
 		$edit->litros->rule='max_length[12]|numeric';
 		$edit->litros->css_class='inputnum';
 		$edit->litros->type='inputhidden';
@@ -850,13 +852,12 @@ class Lprod extends Controller {
 		$edit->peso->size =14;
 		$edit->peso->maxlength =12;
 
-/*
-		$edit->grasa = new inputField('Grasa','grasa');
+
+		$edit->grasa = new inputField('Grasa %','grasa');
 		//$edit->grasa->rule='required';
 		$edit->grasa->css_class='inputnum';
 		$edit->grasa->size =4;
 		$edit->grasa->maxlength =10;
-*/
 
 		$edit->sal = new inputField('Sal','sal');
 		//$edit->grasa->rule='required';
@@ -864,13 +865,11 @@ class Lprod extends Controller {
 		$edit->sal->size =4;
 		$edit->sal->maxlength =10;
 
-		$edit->tina = new dropdownField('Tina Quesera', 'tina');
+		$edit->tina = new dropdownField('Tina', 'tina');
 		$edit->tina->rule ='required';
 		$edit->tina->option('','Seleccionar');
 		$edit->tina->options("SELECT codigo, CONCAT( codigo, '-', descripcion, '-', capacidad) descrip FROM tinaq ORDER BY codigo");
 		$edit->tina->style ='width:150px;';
-
-
 /*
 		$edit->reciclaje = new inputField('Reproceso','reciclaje');
 		$edit->reciclaje->css_class='inputnum';
@@ -878,7 +877,6 @@ class Lprod extends Controller {
 		$edit->reciclaje->size =8;
 		$edit->reciclaje->maxlength =10;
 */
-
 		//Inicio del detalle
 		$edit->itid = new hiddenField('','itid_<#i#>');
 		$edit->itid->db_name = 'id';
@@ -936,12 +934,29 @@ class Lprod extends Controller {
 		}
 	}
 
+	//******************************************************************
+	// Finalizacion de Produccion
+	//******************************************************************
 	function datacon(){
 		$this->rapyd->load('dataedit');
 		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 			$(".inputnum").numeric(".");
+
+			$("#bruto").focusout(
+				function(){
+					var mcestas = $("#cestas").val();
+					var mbruto = $("#bruto").val();
+					if ( mcestas == "" ) { mcestas=0;};
+					if ( mbruto == "" ) { mbruto=0;};
+					
+					$("#peso").val(mbruto-mcestas*2.4);
+
+					//alert(mcestas);
+			
+			});
+
 		});';
 
 		$edit = new DataEdit('', 'lprod');
@@ -973,38 +988,70 @@ class Lprod extends Controller {
 		$edit->fecha = new dateField('Fecha de producci&oacute;n','fecha');
 		$edit->fecha->mode='autohide';
 
-		$edit->litros = new inputField('Litros procesados','litros');
+		$edit->litros = new inputField('Volumen procesado','litros');
 		$edit->litros->rule='numeric';
 		$edit->litros->css_class='inputnum';
 		$edit->litros->size =14;
 		$edit->litros->maxlength =12;
 		$edit->litros->mode='autohide';
 		$edit->litros->showformat='decimal';
+		$edit->litros->append("Litros");
 
-		$edit->unidades = new inputField('Unidades Producidas','unidades');
+		$edit->medida = new freeField("Litros","medida","<b>Litros</b>");
+		$edit->medida->in = "litros";
+
+		$edit->unidades = new inputField('Produccion','unidades');
 		$edit->unidades->mode = 'autohide';
-		$edit->unidades->showformat = 'decimal';
+		$edit->unidades->showformat = 'integer';
 
-		$edit->peso = new inputField('Peso del producto','peso');
+		$edit->medidau = new freeField("Unidades","medidau","<b>Unidades</b>");
+		$edit->medidau->in = "unidades";
+
+		$edit->cestas = new inputField('Cestas','cestas');
+		$edit->cestas->rule='integer|required';
+		$edit->cestas->css_class='inputonlynum';
+		$edit->cestas->size =10;
+		$edit->cestas->maxlength =10;
+		$edit->cestas->style = 'font-size: 1.5em;font-weight:bold;';
+		$edit->cestas->append("Unidades");
+
+		$edit->bruto = new inputField('Peso Bruto','bruto');
+		$edit->bruto->rule='numeric|required';
+		$edit->bruto->css_class='inputonlynum';
+		$edit->bruto->size =10;
+		$edit->bruto->maxlength =10;
+		$edit->bruto->style = 'font-size: 1.5em;font-weight:bold;';
+		$edit->bruto->append("Kg.");
+
+		$edit->peso = new inputField('Peso neto','peso');
 		$edit->peso->rule='numeric|required';
 		$edit->peso->css_class='inputonlynum';
-		$edit->peso->size =12;
+		$edit->peso->size =10;
 		$edit->peso->maxlength =10;
-		$edit->peso->style = 'font-size: 2em;font-weight:bold;';
+		$edit->peso->style = 'font-size: 1.5em;font-weight:bold;';
+		$edit->peso->append("Kg.");
 
-		$edit->unidadespeso = new inputField('Unidades producidas','unidadespeso');
+		$edit->unidadespeso = new inputField('Produccion Efectiva','unidadespeso');
 		$edit->unidadespeso->rule='integer|required|callback_chunidadespeso';
 		$edit->unidadespeso->css_class='inputonlynum';
-		$edit->unidadespeso->size =12;
+		$edit->unidadespeso->size =10;
 		$edit->unidadespeso->maxlength =10;
-		$edit->unidadespeso->style = 'font-size: 2em;font-weight:bold;';
+		$edit->unidadespeso->style = 'font-size: 1.5em;font-weight:bold;';
+		$edit->unidadespeso->append("Unidades");
 
 		$edit->reproceso = new inputField('Peso para <b>Reproceso</b>','reproceso');
 		$edit->reproceso->rule='numeric|required';
 		$edit->reproceso->css_class='inputonlynum';
-		$edit->reproceso->size =12;
+		$edit->reproceso->size =10;
 		$edit->reproceso->maxlength =10;
-		$edit->reproceso->style = 'font-size: 2em;font-weight:bold;';
+		$edit->reproceso->style = 'font-size: 1.5em;font-weight:bold;';
+		$edit->reproceso->append("Kg.");
+
+/*
+		Cestas = 2.4kg c/u 
+		* peso neto = peso_bruto-(peso_cestas*cestas)
+
+*/
 
 		$edit->almacen= new dropdownField ('Almac&eacute;n', 'almacen');
 		$edit->almacen->options('SELECT ubica,ubides FROM caub WHERE gasto="N" ORDER BY ubides');
@@ -1065,6 +1112,9 @@ class Lprod extends Controller {
 	function _post_con_delete($do){ }
 
 
+	//******************************************************************
+	// Definir Producto y acidez
+	//******************************************************************
 	function dataacid(){
 		$this->rapyd->load('dataedit');
 		$script= '
@@ -1115,7 +1165,7 @@ class Lprod extends Controller {
 
 		});';
 
-		$edit = new DataEdit('Cierre de producci&oacute;n', 'lprod');
+		$edit = new DataEdit('', 'lprod');
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -1141,20 +1191,25 @@ class Lprod extends Controller {
 		$edit->fecha = new dateField('Fecha de producci&oacute;n','fecha');
 		$edit->fecha->mode='autohide';
 
-		$edit->litros = new inputField('Litros procesados','litros');
+		$edit->litros = new inputField('Volumen procesado','litros');
 		$edit->litros->rule='numeric';
 		$edit->litros->css_class='inputnum';
 		$edit->litros->size =14;
 		$edit->litros->maxlength =12;
 		$edit->litros->mode='autohide';
 		$edit->litros->showformat='decimal';
+		$edit->litros->style = 'font-size: 1.5em;font-weight:bold;';
+		
+		$edit->medida = new freeField("Litros","medida","<b>Litros</b>");
+		$edit->medida->in = "litros";
 
 		$edit->acidez = new inputField('Acidez del suero','acidez');
 		$edit->acidez->rule='numeric|required';
 		$edit->acidez->css_class='inputonlynum';
-		$edit->acidez->size =12;
+		$edit->acidez->size =8;
 		$edit->acidez->maxlength =10;
-		$edit->acidez->style = 'font-size: 2em;font-weight:bold;';
+		$edit->acidez->style = 'font-size: 1.5em;font-weight:bold;';
+		$edit->acidez->append('<b>Unidades</b>');
 
 		$edit->build();
 
@@ -1196,6 +1251,9 @@ class Lprod extends Controller {
 
 	function _post_acid_delete($do){ }
 
+	//******************************************************************
+	// Cierre de Produccion
+	//******************************************************************
 	function datacie(){
 		$this->rapyd->load('dataedit');
 		$script= '
@@ -1204,7 +1262,7 @@ class Lprod extends Controller {
 			$(".inputnum").numeric(".");
 		});';
 
-		$edit = new DataEdit('Cierre de producci&oacute;n', 'lprod');
+		$edit = new DataEdit('', 'lprod');
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -1233,20 +1291,24 @@ class Lprod extends Controller {
 		$edit->fecha = new dateField('Fecha de producci&oacute;n','fecha');
 		$edit->fecha->mode='autohide';
 
-		$edit->litros = new inputField('Litros procesados','litros');
+		$edit->litros = new inputField('Volumen procesado','litros');
 		$edit->litros->rule='numeric';
 		$edit->litros->css_class='inputnum';
 		$edit->litros->size =14;
 		$edit->litros->maxlength =12;
 		$edit->litros->mode='autohide';
-		$edit->litros->showformat='decimal';
+		$edit->litros->rowformat='decimal';
+		
+		$edit->medida = new freeField('Litros','medida','<b>Litros<b>');
+		$edit->medida->in='litros';
 
-		$edit->unidades = new inputField('Unidades Producidas','unidades');
+		$edit->unidades = new inputField('Produccion','unidades');
 		$edit->unidades->rule='integer|required';
 		$edit->unidades->css_class='inputonlynum';
-		$edit->unidades->size =12;
+		$edit->unidades->size =8;
 		$edit->unidades->maxlength =10;
-		$edit->unidades->style = 'font-size: 2em;font-weight:bold;';
+		$edit->unidades->style = 'font-size: 1.5em;font-weight:bold;';
+		$edit->unidades->append('Unidades');
 
 		$edit->build();
 

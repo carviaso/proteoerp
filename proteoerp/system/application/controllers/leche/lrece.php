@@ -1677,6 +1677,7 @@ class Lrece extends Controller {
 					$data['cloruros']   = 0;
 					$data['alcohol']    = 0;
 					$data['dtoagua']    = 0;
+					$data['ph']         = 0;
 					$data['id_lvaca']   = $row->id;
 					$data['id_lrece']   = $id;
 
@@ -1968,7 +1969,7 @@ class Lrece extends Controller {
 		$edit->itacidez->size =6;
 		$edit->itacidez->maxlength =10;
 
-		$edit->itcloruros = new inputField('Cloruros','cloruros_<#i#>');
+		$edit->itcloruros = new inputField('Cloros','cloruros_<#i#>');
 		$edit->itcloruros->db_name  = 'cloruros';
 		$edit->itcloruros->rel_id = 'itlrece';
 		$edit->itcloruros->rule='numeric|required';
@@ -1985,6 +1986,14 @@ class Lrece extends Controller {
 		//$edit->italcohol->insertValue='-1';
 		$edit->italcohol->rel_id = 'itlrece';
 		$edit->italcohol->maxlength =10;
+
+		$edit->itph = new inputField('pH','ph_<#i#>');
+		$edit->itph->db_name  = 'ph';
+		$edit->itph->rel_id = 'itlrece';
+		$edit->itph->rule='numeric|required';
+		$edit->itph->css_class='inputnum';
+		$edit->itph->size =6;
+		$edit->itph->maxlength =10;
 
 /*
 		$edit->itdtoagua = new inputField('Dto. Agua','dtoagua_<#i#>');
@@ -2013,9 +2022,7 @@ class Lrece extends Controller {
 	}
 
 	function itvaqueras($id_lrece){
-
 		$this->rapyd->load('dataedit');
-
 		$script= "
 		$(document).ready(function() {
 			$('.inputnum').numeric('.');
@@ -2065,11 +2072,8 @@ class Lrece extends Controller {
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
 
-		//$edit->post_process('update','_post_vaqueras_update');
 		$edit->post_process('insert', '_post_itvaqueras_insert');
 		$edit->pre_process( 'insert', '_pre_itvaqueras_insert');
-		//$edit->pre_process( 'update', '_pre_vaqueras_update');
-		//$edit->pre_process( 'delete', '_pre_vaqueras_delete');
 
 		$edit->vaquera = new inputField('Vaquera','vaquera');
 		$edit->vaquera->db_name  = 'vaquera';
@@ -2127,9 +2131,15 @@ class Lrece extends Controller {
 	//Pre y Pos para la apertura
 	function _pre_itvaqueras_insert($do){
 		$dbcodigo = $this->db->escape($do->get('vaquera'));
-		$id=$this->datasis->dameval('SELECT id FROM lvaca WHERE codigo='.$dbcodigo);
-
+		$id = $this->datasis->dameval('SELECT id FROM lvaca WHERE codigo='.$dbcodigo);
 		$do->set('id_lvaca',$id);
+		// chequea si esta repetido
+		$esta = $this->datasis->dameval("SELECT COUNT(*) FROM itlrece WHERE id_lvaca=".$id);
+		if ( $esta > 0 ) { 
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'Vaquera ya agregada';
+			return false;
+		} else return true;
+		
 	}
 
 	function _post_itvaqueras_insert($do){
@@ -2457,42 +2467,48 @@ class Lrece extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
+		if(!$this->db->field_exists('ph', 'itlrece')){
+			$mSQL = "ALTER TABLE itlrece ADD COLUMN `ph` INT(6) NULL DEFAULT NULL COMMENT 'pH' AFTER `alcohol`";
+			$this->db->simple_query($mSQL);
+		}
+
 		if(!$this->db->field_exists('montopago', 'itlrece')){
 			$mSQL = "ALTER TABLE `itlrece` ADD COLUMN `montopago` DECIMAL(12,2) NULL DEFAULT '0' COMMENT 'Monto del pago' AFTER `pago`";
 			$this->db->simple_query($mSQL);
 		}
 
 		if(!$this->db->field_exists('alcohol', 'lanal')){
-			$mSQL = "ALTER TABLE lanal ADD COLUMN `alcohol` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'alcohol' AFTER `dtoagua`";
+			$mSQL = "ALTER TABLE lanal ADD COLUMN `alcohol` INT(6) NULL DEFAULT NULL COMMENT 'alcohol' AFTER `dtoagua`";
 			$this->db->simple_query($mSQL);
 		}
 
 		if(!$this->db->field_exists('ph', 'lanal')){
-			$mSQL = "ALTER TABLE lanal ADD COLUMN `ph` DECIMAL(10,3) NULL DEFAULT NULL COMMENT 'PH' AFTER `alcohol`";
+			$mSQL = "ALTER TABLE lanal ADD COLUMN `ph` INT(6) NULL DEFAULT NULL COMMENT 'PH' AFTER `alcohol`";
 			$this->db->simple_query($mSQL);
 		}
 
 
 		if(!$this->db->table_exists('itlrece')){
 			$mSQL="CREATE TABLE `itlrece` (
-				`vaquera` VARCHAR(5) NULL DEFAULT NULL COMMENT 'Vaquera',
-				`nombre` VARCHAR(45) NULL DEFAULT NULL COMMENT 'Productor ',
+				`vaquera`  VARCHAR(5) NULL DEFAULT NULL COMMENT 'Vaquera',
+				`nombre`   VARCHAR(45) NULL DEFAULT NULL COMMENT 'Productor ',
 				`densidad` DECIMAL(10,4) NULL DEFAULT '1.0164' COMMENT 'Densidad',
-				`lista` DECIMAL(16,2) NULL DEFAULT NULL COMMENT 'Segun Lista',
-				`animal` CHAR(1) NULL DEFAULT 'V' COMMENT 'Vaca o Bufala',
-				`crios` DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'Crioscopia',
-				`h2o` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT '% de Agua',
-				`temp` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Temperatura',
-				`brix` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Grados Brix',
-				`grasa` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT '% Grasa',
-				`acidez` DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'Acidez',
+				`lista`    DECIMAL(16,2) NULL DEFAULT NULL COMMENT 'Segun Lista',
+				`animal`   CHAR(1) NULL DEFAULT 'V' COMMENT 'Vaca o Bufala',
+				`crios`    DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'Crioscopia',
+				`h2o`      DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT '% de Agua',
+				`temp`     DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Temperatura',
+				`brix`     DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Grados Brix',
+				`grasa`    DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT '% Grasa',
+				`acidez`   DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'Acidez',
 				`cloruros` DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'Cloruros',
-				`dtoagua` DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Dto. Agua',
-				`alcohol` DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'alcohol',
+				`dtoagua`  DECIMAL(10,2) NULL DEFAULT '0.00' COMMENT 'Dto. Agua',
+				`alcohol`  DECIMAL(10,0) NULL DEFAULT '0' COMMENT 'alcohol',
+				`ph`       INT(6) NULL DEFAULT '0' COMMENT 'pH',
 				`id_lrece` INT(11) NULL DEFAULT NULL,
 				`id_lvaca` INT(11) NULL DEFAULT NULL,
-				`activa` CHAR(1) NULL DEFAULT 'A' COMMENT 'Activa Si o No',
-				`pago` INT(11) NULL DEFAULT '0' COMMENT 'ID del pago lpago',
+				`activa`   CHAR(1) NULL DEFAULT 'A' COMMENT 'Activa Si o No',
+				`pago`     INT(11) NULL DEFAULT '0' COMMENT 'ID del pago lpago',
 				`montopago` DECIMAL(12,2) NULL DEFAULT '0' COMMENT 'Monto del pago',
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
 				PRIMARY KEY (`id`),

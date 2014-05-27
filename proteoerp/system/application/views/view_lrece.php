@@ -22,6 +22,7 @@ $scampos .='<td class="littletablerow" align="center">'.$campos['itbrix']['field
 $scampos .='<td class="littletablerow" align="center">'.$campos['itgrasa']['field']   .'</td>';
 $scampos .='<td class="littletablerow" align="center">'.$campos['itcloruros']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="center">'.$campos['italcohol']['field'] .'</td>';
+$scampos .='<td class="littletablerow" align="center">'.$campos['itph']['field'] .'</td>';
 $scampos .='<td class="littletablerow"><a href=# onclick="del_itlrece(<#i#>);return false;">'.img("images/delete.jpg").'</a></td>';
 $scampos .='</tr>';
 $campos=$form->js_escape($scampos);
@@ -77,16 +78,17 @@ function del_itlrece(id){
 <table width='100%' cellspacing='0' cellpadding='0'>
 	<tr style='background:#030B7A;color:#FDFDFD;font-size:10pt;' id='__INPL__'>
 		<th align="center">Vaquera</th>
-		<th align="center">Denc</th>
+		<th align="center">Dens</th>
 		<th align="center">Temp.</th>
-		<th align="center">Animal</th>
+		<th align="center">Tipo</th>
 		<th align="center">Acidez</th>
-		<th align="center">% Agua</th>
-		<th align="center">Crioscopia</th>
-		<th align="center">Grados Brix</th>
-		<th align="center">% Grasa</th>
-		<th align="center">Cloruros</th>
-		<th align="center">Alcohol</th>
+		<th align="center">Agua</th>
+		<th align="center">Crio.</th>
+		<th align="center">G.Brix</th>
+		<th align="center">Grasa</th>
+		<th align="center">Cloro</th>
+		<th align="center">Alcoh.</th>
+		<th align="center">pH</th>
 		<?php if($form->_status!='show'){ ?>
 		<th></th>
 		<?php } ?>
@@ -114,6 +116,7 @@ function del_itlrece(id){
 		$it_vaquera      = "itvaquera_${i}";
 		$it_nombre       = "itnombre_${i}";
 		$it_alcohol      = "italcohol_${i}";
+		$it_ph           = "itph_${i}";
 
 		echo $form->$it_lista->output.$form->$it_id->output.$form->$it_id_lvaca->output.$form->$it_nombre->output.$form->$it_vaquera->output;
 ?>
@@ -130,6 +133,7 @@ function del_itlrece(id){
 		<td class="littletablerow" align="center"><?php echo $form->$it_grasa->output;   ?></td>
 		<td class="littletablerow" align="center"><?php echo $form->$it_cloruros->output;?></td>
 		<td class="littletablerow" align="center"><?php echo $form->$it_alcohol->output; ?></td>
+		<td class="littletablerow" align="center"><?php echo $form->$it_ph->output; ?></td>
 		<?php if($form->_status!='show'){ ?>
 		<td class="littletablerow"><a href=# onclick="del_itlrece(<?php echo $i; ?>);return false;"><?php echo img("images/delete.jpg"); ?></a></td>
 		<?php } ?>

@@ -182,23 +182,22 @@ function autocod(id){
 <?php if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 <table width='100%' style='font-size:11pt;background:#F2E69D;'>
 	<tr>
-		<td><b><?php echo $form->litros->label;      ?></b></td>
-		<td style='text-align:right;'> <?php echo $form->litros->output;     ?>&nbsp;</td>
 		<td><b><?php echo $form->codigo->label;      ?></b></td>
 		<td>   <?php echo $form->codigo->output;    ?></td>
-		<td colspan='3'>   <?php echo $form->descrip->output;    ?></td>
+		<td colspan='4'>   <?php echo $form->descrip->output;    ?></td>
 	</tr><tr>
 		<td><b><?php echo $form->fecha->label;       ?></b></td>
 		<td>   <?php echo $form->fecha->output;      ?></td>
 		<td><b><?php echo $form->tina->label;   ?></b></td>
 		<td>   <?php echo $form->tina->output;  ?></td>
-		<td><b><?php echo $form->sal->label;         ?></b></td>
-		<td>   <?php echo $form->sal->output;        ?></td>
 		<td><b><?php echo $form->inventario->label;  ?></b></td>
 		<td>   <?php echo $form->inventario->output; ?></td>
 	</tr>
 </table>
-<div style='border: 1px solid #9AC8DA;background: #FAFAFA'>
+
+<table width='100%'>
+<tr><td style='width:552px'>
+<div style='border: 1px solid #9AC8DA;background: #FAFAFA;overflow:auto;height:305px;width:550px;'>
 <table width='100%' cellspacing='0' cellpadding='0'>
 	<tr style='background:#030B7A;color:#FDFDFD;font-size:10pt;'>
 		<th align="center">Ruta</th>
@@ -220,7 +219,7 @@ function autocod(id){
 ?>
 	<tr id='tr_itlprod_<?php echo $i; ?>'>
 		<td class="littletablerow" align="center"><?php echo $form->$it_codrut->output; if(isset($form->$it_id)) echo $form->$it_id->output;  ?></td>
-		<td class="littletablerow" align="center"><?php echo $form->$it_nombre->output;  ?></td>
+		<td class="littletablerow" align="left"><?php echo $form->$it_nombre->output;  ?></td>
 		<td class="littletablerow" align="center"><?php echo $form->$it_litros->output;  ?></td>
 		<td class="littletablerow" align="center"><?php echo $form->$it_bufala->output;  ?></td>
 		<?php if($form->_status!='show') { ?>
@@ -233,8 +232,28 @@ function autocod(id){
 	<tr id='__UTPL__lprod'>
 		<td colspan='<?php echo ($form->_status!='show')? 5: 4 ?>' class="littletableheaderdet">&nbsp;</td>
 	</tr>
+
 </table>
 </div>
+<table style='border: 1px solid #9AC8DA;width:552px;font-size:14pt;background:#F2E69D;'>
+	<tr>
+		<td style='text-align:rigth;width:300px;'>&nbsp;<?php echo $container_bl.$container_br; ?></b></td>
+		<td style='text-align:rigth;'><b><?php echo $form->litros->label;   ?></b></td>
+		<td style='text-align:left;'><b><?php echo $form->litros->output;   ?>&nbsp;</b></td>
+	</tr>
+</table>
+</td><td style='font-size:11pt;background:#F2E69D;vertical-align:top;'>
+<table width='100%' style='font-size:11pt;background:#F2E69D;'>
+	<tr>
+		<td><b><?php echo $form->grasa->label;    ?></b></td>
+		<td>   <?php echo $form->grasa->output;   ?></td>
+	</tr><tr>
+		<td><b><?php echo $form->sal->label;      ?></b></td>
+		<td>   <?php echo $form->sal->output;     ?></td>
+	</tr>
+</table>
+</td>
+</tr>
+</table>
 
-<?php echo $container_bl.$container_br; ?>
 <?php echo $form_end; ?>

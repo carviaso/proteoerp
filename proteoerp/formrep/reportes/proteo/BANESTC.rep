@@ -1,119 +1,52 @@
-/**
- * ProteoERP
- *
- * @autor    Andres Hocevar
- * @license  GNU GPL v3
-*/
-$filter = new DataFilter('Filtro del Reporte');
+$filter = new DataFilter("Filtro del Reporte");
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$filter->db->select(array('fecha','tipo_op','numero', 'concepto', "(tipo_op NOT IN ('CH','ND'))*monto as debitos", "(tipo_op IN ('CH','ND'))*monto as creditos", "if(tipo_op IN ('CH','ND'),-1,1)*monto as saldo, month(fecha) mes"));
-$filter->db->from('bmov AS a');
-$filter->db->join('banc AS b','a.codbanc=b.codbanc');
-$filter->db->where('a.anulado <>','S');
-$filter->db->orderby('fecha');
+$filter->db->select(array("fecha","tipo_op","numero", "CONCAT(TRIM(a.concepto),' ',a.nombre) concepto", "(tipo_op NOT IN ('CH','ND'))*monto as debitos", "(tipo_op IN ('CH','ND'))*monto as creditos", "(tipo_op IN ('CH','ND'))*monto as saldo"));
+$filter->db->from('bmov as a');
+$filter->db->join('banc as b','a.codbanc=b.codbanc');
+//$filter->db->orderby('fecha');
 
-/*$filter->fecha = new dateonlyField('Desde', 'fechad','m/Y');
+$filter->fecha = new dateonlyField("Desde", "fechad",'m/Y');
 $filter->fecha->clause  ='where';
 $filter->fecha->db_name ="EXTRACT(YEAR_MONTH FROM fecha)";
-$filter->fecha->insertValue = date('Y-m-d');
-$filter->fecha->operator='=';
+$filter->fecha->insertValue = date("Y-m-d");
+$filter->fecha->operator="=";
 $filter->fecha->dbformat='Ym';
 $filter->fecha->size=7;
 $filter->fecha->append(' mes/año');
-$filter->fecha->rule = "required";*/
+$filter->fecha->rule = "required";
 
-$filter->ano = new dropdownField('Año', 'ano');
-$filter->ano->db_name="YEAR(a.fecha)";
-//$filter->ano->option('','');
-$filter->ano->options("SELECT YEAR(fecha) id, YEAR(fecha) ano FROM bmov WHERE YEAR(fecha) <= YEAR(curdate()) GROUP BY YEAR(fecha) ORDER BY ano DESC ");
-$filter->ano->rule = 'required';
+$filter->banco = new dropdownField("Caja/Banco", "codbanc");
+$filter->banco->db_name="a.codbanc";
+$filter->banco->option("","");
+$filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");  
+$filter->banco->rule = "required";
 
-
-$filter->desde = new dropdownField('Desde el mes', 'desde');
-$filter->desde->db_name='MONTH(a.fecha)';
-$filter->desde->operator='>=';
-$filter->desde->option('01','01 Enero');
-$filter->desde->option('02','02 Febrero');
-$filter->desde->option('03','03 Marzo');
-$filter->desde->option('04','04 Abril');
-$filter->desde->option('05','05 Mayo');
-$filter->desde->option('06','06 Junio');
-$filter->desde->option('07','07 Julio');
-$filter->desde->option('08','08 Agosto');
-$filter->desde->option('09','09 Septiembre');
-$filter->desde->option('10','10 Octubre');
-$filter->desde->option('11','11 Noviembre');
-$filter->desde->option('12','12 Diciembre');
-$filter->desde->rule = 'required';
-
-$filter->hasta = new dropdownField('Hasta el mes', 'hasta');
-$filter->hasta->db_name="MONTH(a.fecha)";
-$filter->hasta->operator='<=';
-
-$filter->hasta->option('01','01 Enero');
-$filter->hasta->option('02','02 Febrero');
-$filter->hasta->option('03','03 Marzo');
-$filter->hasta->option('04','04 Abril');
-$filter->hasta->option('05','05 Mayo');
-$filter->hasta->option('06','06 Junio');
-$filter->hasta->option('07','07 Julio');
-$filter->hasta->option('08','08 Agosto');
-$filter->hasta->option('09','09 Septiembre');
-$filter->hasta->option('10','10 Octubre');
-$filter->hasta->option('11','11 Noviembre');
-$filter->hasta->option('12','12 Diciembre');
-
-
-$filter->banco = new dropdownField('Caja/Banco', 'codbanc');
-$filter->banco->db_name='a.codbanc';
-$filter->banco->option('','Seleccionar');
-$filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");
-$filter->banco->rule = 'required';
-
-$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons('search');
+$filter->buttons("search");
 $filter->build();
-if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
+	$mSQL=$filter->db->_compile_select();
+	$mSQL=$mSQL."UNION ALL
 
-	$mmSQL=$filter->db->_compile_select();
-	$mfdesde = $filter->ano->newValue.$filter->desde->newValue;
-	$mfhasta = $filter->ano->newValue.$filter->hasta->newValue;
-	$dbbanco = $this->db->escape($filter->banco->newValue);
-
-	$anio = substr($mfdesde,0,4);
-	$bsal = floatval($this->datasis->dameval("SELECT saldo FROM bsal WHERE ano=${anio} AND codbanc=${dbbanco}"));
-	$mSALDOANT=floatval($this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE anulado='N' AND EXTRACT(YEAR_MONTH FROM fecha) <".$mfdesde."  AND EXTRACT(YEAR_MONTH FROM fecha)>=".$anio."01 AND codbanc = ${dbbanco}"));
-	$ssmonto = $bsal+$mSALDOANT;
-
-	$mSQL="SELECT DATE_ADD('".$mfdesde."01',INTERVAL -1 DAY) AS fecha, NULL AS tipo_op, ' ' AS numero,
-	'SALDO ANTERIOR -->' AS concepto,
-	IF(${ssmonto} > 0,${ssmonto},0 )     AS debitos,
-	IF(${ssmonto} > 0,0,ABS(${ssmonto})) AS creditos,
-	${ssmonto} AS saldo,
-	".$filter->desde->newValue." AS mes UNION ALL ";
-	$mSQL.=$mmSQL;
-
-	/*$mSQL=$mSQL." UNION ALL
-	SELECT DATE_ADD('".$mfdesde."01',INTERVAL -1 DAY) AS fecha, NULL, '00', 'SALDO ANTERIOR',
-	if(sum(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,sum(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as debitos,
-	if(sum(if(tipo_op IN ('CH','ND'),-1,1)*monto)<0,sum(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as creditos,
-	sum(if(tipo_op IN ('CH','ND'),-1,1)*monto) as saldo,
-	".$filter->desde->newValue." mes
-	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc
-	WHERE EXTRACT(YEAR_MONTH FROM fecha) < '".$mfdesde."' AND a.codbanc = ${dbbanco} AND a.anulado<>'S'
+	SELECT DATE_ADD('".$filter->fecha->newValue."01',INTERVAL -1 DAY) AS fecha, NULL, 'SI', 'SALDO ANTERIOR', 
+	((tipo_op NOT IN ('CH', 'D'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))>0) as debitos, 
+	((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))<0)*(-1) as creditos, 0 as saldo
+	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc 
+	WHERE EXTRACT(YEAR_MONTH FROM fecha) < ' ".$filter->fecha->newValue." ' AND a.codbanc = ' ".$filter->banco->newValue."' 
 	GROUP BY a.codbanc
-	ORDER BY fecha";*/
+	ORDER BY fecha";
 
+	$mSALDOANT=$this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE EXTRACT(YEAR_MONTH FROM fecha) <".$filter->fecha->newValue."  AND codbanc = '".$filter->banco->newValue."' AND anulado<>'S' ");
 	$mSALDOACT=0;
-	//echo $mSQL;
 
 	$sobretabla='';
-	if (!empty($filter->banco->newValue))   $sobretabla.='     Caja o Banco: '.$filter->banco->description;
+
+	if (!empty($filter->banco->newValue))   $sobretabla.='     Caja o Banco: '.$filter->banco->description; 
 	//if (!empty($filter->banco->newValue)) $sobretabla.='    Banco: '.$this->datasis->dameval('SELECT banco FROM banc WHERE codbanc="'.$filter->banco->newValue.'"');
 	//if (!empty($filter->fecha->newValue)) $sobretabla.=' Saldo Anterior: '.saldo;
 
@@ -121,34 +54,29 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$pdf->setType('fecha','date');
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
-	$pdf->setTitulo('Estado de Cuenta');
+	$pdf->setTitulo("Estado de Cuenta");
 	$pdf->setSobreTabla($sobretabla,9);
-	$pdf->setSubTitulo("Desde el mes ".$this->input->post('desde'). " hasta ".$this->input->post('hasta')." del ".$this->input->post('ano'));
+	$pdf->setSubTitulo("Para la fecha: ".$this->input->post('fechad'));
 	//$pdf->seType('fecha','date');
 	$pdf->AddPage();
 
 	$pdf->setTableTitu(10,'Times');
-	$pdf->AddCol('fecha'   ,20,'Fecha'   ,'L',9);
-	$pdf->AddCol('numero'  ,28,'Número'  ,'L',9);
-	$pdf->AddCol('concepto',75,'Concepto','L',8);
+	$pdf->AddCol('fecha',20,'Fecha'   ,'L',9);
+	$pdf->AddCol('numero'  ,30,'Número'  ,'L',9);
+	$pdf->AddCol('concepto',78,'Concepto','L',9);
 	$pdf->AddCol('debitos' ,25,'Débitos' ,'R',9);
 	$pdf->AddCol('creditos',25,'Créditos','R',9);
-	$pdf->AddCol('saldo',   25,'Saldo','R',9);
-
-	$pdf->setTotalizar('debitos','creditos','saldo');
-
-	$pdf->setGrupoLabel('Mes: <#mes#> ');
-	$pdf->setGrupo('mes');
-
+	$pdf->AddCol('saldo',25,'Saldos','R',9);
+	$pdf->setTotalizar('debitos','creditos');
 	$pdf->setAcumulador('saldo');
 	//$pdf->add_fila('','','','Saldo anterior','100');
 	$pdf->Table();
 	//$pdf->add_fila('','','','Saldo actual','100');
 	$pdf->Output();
 }else{
-	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
-	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Estado de Cuenta</h2>';
-	$data['head'] = $this->rapyd->get_head();
+	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
+	$data["filtro"] = $filter->output;
+	$data["titulo"] = '<h2 class="mainheader">Estado de Cuenta<h2>';
+	$data["head"] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }
