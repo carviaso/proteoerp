@@ -1334,8 +1334,22 @@ class Sfac extends Controller {
 					}
 				}
 
+				$row = $this->datasis->damerow("SELECT tipo_doc, numero,vd FROM sfac WHERE id=${id}");
+				if(empty($row)){
+					echo 'Registro no encontrado';
+					return false;
+				}
+
 				$this->db->where('id', $id);
 				$this->db->update('sfac', $data);
+
+				if($row['vd']!=$data['vd']){
+					//$this->db->where('numa'   , $row['numero']);
+					//$this->db->where('tipoa'  , $row['tipoa']);
+					$this->db->where('id_sfac', $id);
+					$this->db->update('sitems', array('vendedor'=>$data['vd']));
+				}
+
 				logusu('SFAC',"Factura ${id} MODIFICADO");
 				echo 'Registro Modificado';
 

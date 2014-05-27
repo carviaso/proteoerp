@@ -70,9 +70,9 @@ $filter->attributes=array('onsubmit'=>'is_loaded()');
 $select=array('tipoa','CONCAT(tipoa, numa) AS nnumero', 'codigoa', 'a.fecha', 'desca' ,
 "CONCAT_WS(' ',cod_cli,b.nombre) cliente",'cod_cli', 'a.vendedor',
 'b.nombre', 'f.nombre AS vendedor' ,'g.linea', "CONCAT_WS(' ',g.grupo, g.nom_grup) AS ggrupo", 'b.numero',
-"IF(tipoa='X',0,cana)*IF(tipoa='F',1,-1) AS cana", 'preca',
-"IF(tipoa='X',0,tota)*IF(tipoa='F',1,-1) AS tota", 'costo',
-"IF(tipoa='D',tota,0)  AS tdevo",'c.peso*a.cana*(a.tipoa<>"X") AS peso',
+"IF(a.tipoa='X',0,cana)*IF(tipoa='F',1,-1) AS cana", 'preca',
+"IF(a.tipoa='X',0,tota)*IF(tipoa='F',1,-1) AS tota", 'costo',
+"IF(a.tipoa='D',tota,0)  AS tdevo",'c.peso*a.cana*IF(a.tipoa="D",-1,1)*(a.tipoa<>"X") AS peso',
 "(tota-(costo*cana))   AS margenbs",
 "(preca*100/costo-100) AS porcen");
 
@@ -82,7 +82,7 @@ $filter->db->join('sfac   AS b' ,'b.numero=a.numa AND a.tipoa=b.tipo_doc');
 $filter->db->join('sinv   AS c' ,'a.codigoa=c.codigo'   ,'left');
 $filter->db->join('scli   AS d' ,'b.cod_cli=d.cliente'  ,'left');
 $filter->db->join('grcl   AS e' ,'d.grupo=e.grupo'      ,'left');
-$filter->db->join('vend   AS f' ,'a.vendedor=f.vendedor','left');
+$filter->db->join('vend   AS f' ,'b.vd=f.vendedor','left');
 $filter->db->join('grup   AS g' ,'c.grupo=g.grupo'      ,'left');
 $filter->db->where('c.tipo <>','Servicio');
 $filter->db->orderby('g.linea, g.grupo, c.codigo, a.fecha');
@@ -148,7 +148,7 @@ $filter->marca->options('SELECT TRIM(marca) AS codigo, marca FROM marc ORDER BY 
 $filter->marca->operator='=';
 
 $filter->vd = new dropdownField('Vendedor', 'vd');
-$filter->vd->db_name='a.vendedor';
+$filter->vd->db_name='b.vd';
 $filter->vd->clause='where';
 $filter->vd->option('','Todos');
 $filter->vd->options('SELECT vendedor, nombre FROM vend ORDER BY vendedor');
