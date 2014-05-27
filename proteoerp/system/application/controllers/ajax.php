@@ -2702,7 +2702,7 @@ class Ajax extends Controller {
 		header('Content-Type: application/json');
 		if(!empty($cod_prv)){
 			$dbcod_prv = $this->db->escape($cod_prv);
-			$mSQL="SELECT id,numero,fecha,montotot AS monto,peso  FROM ordc WHERE status='PE' AND proveed=${dbcod_prv} ORDER BY fecha DESC LIMIT 10";
+			$mSQL="SELECT id,numero,fecha,montotot AS monto,peso  FROM ordc WHERE status IN ('PE','BA') AND proveed=${dbcod_prv} ORDER BY fecha DESC LIMIT 10";
 			$query = $this->db->query($mSQL);
 			if($query->num_rows()>0){
 				echo json_encode($query->result());
