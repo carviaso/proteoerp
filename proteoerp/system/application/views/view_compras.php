@@ -546,6 +546,7 @@ function post_modbus_sprv(){
 								type: 'POST',
 								data: {'ids' : srows},
 								success: function(dat){
+									if(dat=== null) return false;
 									if(dat.length>0){
 										truncate();
 										var can;
