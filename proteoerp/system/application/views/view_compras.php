@@ -603,8 +603,8 @@ function post_modbus_sprv(){
 					rowNum:10,
 				});
 
-				for(var i=0;i<=data.length;i++){
-					jQuery("#tordc").jqGrid('addRowData',i+1,data[i]);
+				for(var i=0;i<data.length;i++){
+					jQuery("#tordc").jqGrid('addRowData',data[i].id,data[i]);
 				}
 
 			}
