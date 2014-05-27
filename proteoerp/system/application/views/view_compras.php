@@ -590,7 +590,7 @@ function post_modbus_sprv(){
 				jQuery("#tordc").jqGrid({
 					datatype: "local",
 					height: 200,
-					colNames:["N&uacute;mero","Fecha", "Peso","Monto"],
+					colNames:["id","N&uacute;mero","Fecha", "Peso","Monto"],
 					colModel:[
 						{name:"id"     , index:"id"     , key: true, hidden: true },
 						{name:"numero" , index:"numero" , width:80 , align:"center"},
