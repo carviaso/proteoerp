@@ -529,7 +529,7 @@ function post_modbus_sprv(){
 				var pant  = "<table id='tordc'></table>";
 
 				var promt = $.prompt(pant, {
-					title: "El proveedor posse la siguiente lista de ordenes",
+					title: "El proveedor posee la siguiente lista de ordenes",
 					buttons: { "Continuar": true },
 					submit: function(e,v,m,f){
 						var srows = jQuery("#tordc").jqGrid('getGridParam','selarrrow');
@@ -592,6 +592,7 @@ function post_modbus_sprv(){
 					height: 200,
 					colNames:["N&uacute;mero","Fecha", "Peso","Monto"],
 					colModel:[
+						{name:"id"     , index:"id"     , key: true, hidden: true },
 						{name:"numero" , index:"numero" , width:80 , align:"center"},
 						{name:"fecha"  , index:"fecha"  , width:70 , align:"center"},
 						{name:"peso"   , index:"peso"   , width:90 , align:"right"  , sorttype:"float"},
