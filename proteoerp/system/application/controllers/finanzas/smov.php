@@ -44,7 +44,7 @@ class Smov extends Controller {
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'bimpri', 'img'=>'assets/default/images/print.png', 'alt' => 'Formato PDF'    , 'label'=>'Reimprimir Documento'));
 		$grid->wbotonadd(array('id'=>'cobro' , 'img'=>'images/dinero.png' , 'alt' => 'Cobro a cliente', 'label'=>'Cobro a Cliente'     ));
-		$grid->wbotonadd(array('id'=>'nccob' , 'img'=>'images/check.png'  , 'alt' => 'Nota de credito a factura pagada', 'label'=>'NC a Factura Cobrada'));
+		//$grid->wbotonadd(array('id'=>'nccob' , 'img'=>'images/check.png'  , 'alt' => 'Nota de credito a factura pagada', 'label'=>'NC a Factura Cobrada'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central y Sur
@@ -164,19 +164,19 @@ class Smov extends Controller {
 			);
 		});';
 
-		$bodyscript .= '
-		jQuery("#nccob").click( function(){
-			var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			var ret = $("#newapi'.$grid0.'").getRowData(id);
-
-			$.post("'.site_url($this->url.'ncfac').'/"+ret.numero+"/create",
-				function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog({ height: 300, width: 500 });
-					$("#fedita").dialog("open");
-				}
-			);
-		});';
+		//$bodyscript .= '
+		//jQuery("#nccob").click( function(){
+		//	var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+		//	var ret = $("#newapi'.$grid0.'").getRowData(id);
+        //
+		//	$.post("'.site_url($this->url.'ncfac').'/"+ret.numero+"/create",
+		//		function(data){
+		//			$("#fedita").html(data);
+		//			$("#fedita").dialog({ height: 300, width: 500 });
+		//			$("#fedita").dialog("open");
+		//		}
+		//	);
+		//});';
 
 		$bodyscript .= '
 			$("#fedita").dialog({

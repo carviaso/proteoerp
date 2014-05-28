@@ -511,10 +511,11 @@ function post_modbus_sprv(){
 		data: {'clipro' : $("#proveed").val()},
 		success: function(data){
 			if(data>0){
-				$.prompt("<span style='font-size:1.5em'>Proveedor presenta anticipos y/o Notas de cr&eacute;dito por un monto de <b>"+nformat(data,2)+" Bs.</b></span>", {
-					title: "Saldo por aplicar",
-					buttons: { "Continuar": true }
-				});
+				alert("Proveedor presenta anticipos y/o Notas de cr&eacute;dito por un monto de "+nformat(data,2)+" Bs.");
+				//	$.prompt("<span style='font-size:1.5em'>Proveedor presenta anticipos y/o Notas de cr&eacute;dito por un monto de <b>"+nformat(data,2)+" Bs.</b></span>", {
+				//		title: "Saldo por aplicar",
+				//		buttons: { "Continuar": true }
+				//	});
 			}
 		},
 	});
