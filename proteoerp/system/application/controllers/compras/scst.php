@@ -3363,10 +3363,10 @@ class Scst extends Controller {
 				$numero  = $row['numero'];
 
 				$mORDENES = array();
-				$query = $this->db->query('SELECT orden FROM scstordc WHERE compra=?',array($control));
-				if($query->num_rows() > 0){
-					foreach($query->result() as $row){
-						$mORDENES[] = $row->orden;
+				$qquery = $this->db->query('SELECT orden FROM scstordc WHERE compra=?',array($control));
+				if($qquery->num_rows() > 0){
+					foreach($qquery->result() as $rrow){
+						$mORDENES[] = $rrow->orden;
 					}
 				}
 
@@ -3517,23 +3517,23 @@ class Scst extends Controller {
 							//Fin de la actualizacion de inventario
 
 							if(count($mORDENES) > 0){
-								$mSALDO = floatval($row->cantidad);
+								$mSALDO = floatval($itrow->cantidad);
 								foreach($mORDENES as $orden){
 									$dbitorden = $this->db->escape($orden);
 									if($mSALDO > 0){
-										$mSQL   = "SELECT cantidad-recibido  FROM itordc WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
+										$mSQL   = "SELECT cantidad-recibido AS tempo  FROM itordc WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
 										$mTEMPO = floatval($this->datasis->dameval($mSQL));
 										if($mTEMPO > 0){
 											if($mSALDO<=$mTEMPO){
-												$mSQL = "UPDATE itordc SET recibido=recibido-${mSALDO} WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
+												$mSQL = "UPDATE itordc SET recibido=recibido+${mSALDO} WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
 												$this->db->simple_query($mSQL);
-												$mSQL = "UPDATE sinv SET exord=exord-${mSALDO} WHERE codigo=${dbcodigo}";
+												$mSQL = "UPDATE sinv SET exord=IF(exord>${mSALDO},exord-${mSALDO},0) WHERE codigo=${dbcodigo}";
 												$this->db->simple_query($mSQL);
 												$mSALDO = 0;
 											}else{
 												$mSQL = "UPDATE itordc SET recibido=recibido-${mTEMPO} WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
 												$this->db->simple_query($mSQL);
-												$mSQL = "UPDATE sinv SET exord=exord-${mTEMPO} WHERE codigo=${dbcodigo}";
+												$mSQL = "UPDATE sinv SET exord=IF(exord>${mTEMPO},exord-${mTEMPO},0) WHERE codigo=${dbcodigo}";
 												$this->db->simple_query($mSQL);
 												$mSALDO -= $mTEMPO;
 											}
@@ -4278,13 +4278,13 @@ class Scst extends Controller {
 								if($mTEMPO >= $mSALDO){
 									$mSQL = "UPDATE itordc SET recibido=recibido-${mSALDO} WHERE numero=${dbitorden} AND codigo=${itdbcodigo}";
 									$this->db->simple_query($mSQL);
-									$mSQL = "UPDATE sinv SET exord=exord+${mSALDO} WHERE codigo=${itdbcodigo}";
+									$mSQL = "UPDATE sinv SET exord=IF(exord>=0,exord+${mSALDO},${mSALDO}) WHERE codigo=${itdbcodigo}";
 									$this->db->simple_query($mSQL);
 									$mSALDO = 0;
 								}elseif($mTEMPO < $mSALDO){
 									$mSQL = "UPDATE itordc SET recibido=recibido-${mTEMPO} WHERE numero=${dbitorden} AND codigo=${itdbcodigo}";
 									$this->db->simple_query($mSQL);
-									$mSQL = "UPDATE sinv SET exord=exord+${mTEMPO} WHERE codigo=${itdbcodigo}";
+									$mSQL = "UPDATE sinv SET exord=IF(exord>=0,exord+${mTEMPO},${mTEMPO}) WHERE codigo=${itdbcodigo}";
 									$this->db->simple_query($mSQL);
 									$mSALDO -= $mTEMPO;
 								}
