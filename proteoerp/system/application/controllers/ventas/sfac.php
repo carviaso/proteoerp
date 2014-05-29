@@ -73,9 +73,10 @@ class Sfac extends Controller {
 
 		$adic = array(
 			array('id'=>'fedita' , 'title'=>'Agregar Factura Fecha '.date('d/m/Y')),
-			array('id'=>'scliexp', 'title'=>'Ficha de Cliente'),
-			array('id'=>'fshow'  , 'title'=>'Mostrar registro'),
-			array('id'=>'fborra' , 'title'=>'Anula Factura' ),
+			array('id'=>'scliexp', 'title'=>'Ficha de Cliente' ),
+			array('id'=>'fshow'  , 'title'=>'Mostrar registro' ),
+			array('id'=>'fborra' , 'title'=>'Anula Factura'    ),
+			array('id'=>'fncob'    , 'title'=>'NC a factura cobrada')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -142,7 +143,7 @@ class Sfac extends Controller {
 		$adic = array(
 			array('id'=>'fcobroser', 'title'=>'Cobro de servicio'),
 			array('id'=>'fimpser'  , 'title'=>'Imprimir Factura' ),
-			array('id'=>'fborra'   , 'title'=>'Anula Factura' ),
+			array('id'=>'fborra'   , 'title'=>'Anula Factura'    ),
 			array('id'=>'scliexp'  , 'title'=>'Ficha de Cliente' )
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
@@ -268,15 +269,20 @@ class Sfac extends Controller {
 		$bodyscript .= '
 		jQuery("#nccob").click( function(){
 			var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			var ret = $("#newapi'.$grid0.'").getRowData(id);
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 
-			$.post("'.site_url('finanzas/smov/ncfac').'/"+ret.numero+"/create",
-				function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog({ height: 300, width: 500 });
-					$("#fedita").dialog("open");
-				}
-			);
+				$.post("'.site_url('finanzas/smov/ncfac').'/"+ret.numero+"/create",
+					function(data){
+						$("#fncob").html(data);
+						//$("#fncob").dialog({ height: 300, width: 500 });
+						$("#fncob").dialog("open");
+					}
+				);
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
 		});';
 
 
@@ -551,6 +557,46 @@ class Sfac extends Controller {
 				},
 				close: function() {
 					$("#fcobroser").html("");
+				}
+			});';
+
+		$bodyscript .= '
+			$("#fncob").dialog({
+				autoOpen: false, height: 350, width: 500, modal: true,
+				buttons: {
+					"Guardar": function(){
+						var bValid = true;
+						var murl = $("#df1").attr("action");
+						$.ajax({
+							type: "POST",
+							dataType: "html",
+							async: false,
+							url: murl,
+							data: $("#df1").serialize(),
+							success: function(r,s,x){
+								try{
+									var json = JSON.parse(r);
+									if(json.status == "A"){
+										$("#fncob").dialog("close");
+										//jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+										window.open(\''.site_url('finanzas/smov/smovprint').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+										return true;
+									}else{
+										apprise(json.mensaje);
+									}
+								}catch(e){
+									$("#fncob").html(r);
+								}
+							}
+						})
+					},
+					"Cancelar": function() {
+						$("#fncob").html("");
+						$( this ).dialog( "close" );
+					}
+				},
+				close: function(){
+					$("#fncob").html("");
 				}
 			});';
 

@@ -169,7 +169,7 @@ class Smov extends Controller {
 		//	var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 		//	var ret = $("#newapi'.$grid0.'").getRowData(id);
         //
-		//	$.post("'.site_url($this->url.'ncfac').'/"+ret.numero+"/create",
+		//	$.post("'.site_url($this->url.'ncfac').'/create",
 		//		function(data){
 		//			$("#fedita").html(data);
 		//			$("#fedita").dialog({ height: 300, width: 500 });
@@ -2595,7 +2595,9 @@ class Smov extends Controller {
 					setTimeout(function() {  $("#factura").removeAttr("readonly"); }, 1500);
 				}
 			});
-		});';
+		});
+		function limpiavacio(){ }
+		';
 
 		$edit = new DataEdit('', 'smov');
 
@@ -2740,9 +2742,10 @@ class Smov extends Controller {
 		$ttransac  =$row['transac'];
 		$dbttransac=$this->db->escape($ttransac);
 
-		$saldo=floatval($this->datasis->dameval('SELECT monto-abonos FROM smov WHERE tipo_doc=\'FC\' AND numero='.$dbfactura.' AND transac='.$dbttransac));
+		$saldo=abs(floatval($this->datasis->dameval('SELECT monto-abonos FROM smov WHERE tipo_doc=\'FC\' AND numero='.$dbfactura.' AND transac='.$dbttransac)));
 		if($saldo>0){
-			$do->error_message_ar['pre_ins']='La factura seleccionada ya esta pagada';
+			$do->error_message_ar['pre_ins']='La factura seleccionada todavia tiene saldo disponible';
+			return false;
 		}
 		$factor=$monto/$totalg;
 
@@ -2813,7 +2816,7 @@ class Smov extends Controller {
 		$edit->pre_process( 'insert','_pre_print_insert');
 		$edit->pre_process( 'delete','_pre_print_delete');
 
-		$edit->container = new containerField('impresion','La descarga se realizara en algunos segundos, en caso de no hacerlo haga click '.anchor('formatos/descargar/CCLINC/'.$uid,'aqui'));
+		$edit->container = new containerField('impresion','La descarga se realizara en algunos segundos, en caso de no hacerlo haga click '.anchor('formatos/'.$sfacforma.'/CCLINC/'.$uid,'aqui'));
 
 		$edit->tipo_doc = new inputField('Nota de Cr&eacute;dito','tipo_doc');
 		$edit->tipo_doc->mode='autohide';

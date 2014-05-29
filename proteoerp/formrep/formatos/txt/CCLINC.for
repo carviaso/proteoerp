@@ -66,6 +66,21 @@ $this->db->where('a.fecha'   ,$row->fecha);
 $mSQL_2 = $this->db->get();
 $detalle  = $mSQL_2->result();
 $art_cana = $mSQL_2->num_rows();
+
+if($art_cana==0){
+	$sel=array('b.tipo_doc','b.numero','b.fecha','b.totalg AS monto','a.monto AS abono');
+	$this->db->select($sel);
+	$this->db->from('smov AS a');
+	$this->db->join('sfac AS b','b.tipo_doc = a.tipo_ref AND b.numero=a.num_ref AND a.cod_cli=b.cod_cli');
+	$this->db->where('a.cod_cli' ,$row->cod_cli);
+	$this->db->where('a.tipo_doc',$row->tipo_doc);
+	$this->db->where('a.numero'  ,$row->numero);
+	$this->db->where('a.fecha'   ,$row->fecha);
+	$mSQL_2 = $this->db->get();
+	$detalle  = $mSQL_2->result();
+	$art_cana = $mSQL_2->num_rows();
+}
+
 $separador='Ä';
 
 //************************
