@@ -539,6 +539,7 @@ class Cruc extends Controller {
 		$grid->setShrinkToFit('false');
 
 		//$grid->setBarOptions("addfunc: crucadd, editfunc: crucedit, delfunc: crucdel, viewfunc: crucshow");
+		$grid->setBarOptions('delfunc: crucdel, viewfunc: crucshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -571,48 +572,7 @@ class Cruc extends Controller {
 	* Guarda la Informacion
 	*/
 	function setData(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = '??????';
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM cruc WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('cruc', $data);
-					echo "Registro Agregado";
-
-					logusu('CRUC',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM cruc WHERE id=$id");
-			unset($data[$mcodp]);
-			$this->db->where("id", $id);
-			//$this->db->update('cruc', $data);
-			//logusu('CRUC',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-			echo "$mcodp Modificado";
-
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM cruc WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM cruc WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				//$this->db->simple_query("DELETE FROM cruc WHERE id=$id ");
-				//logusu('CRUC',"Registro ????? ELIMINADO");
-				echo 'Registro Eliminado';
-			}
-		};
+		echo 'inabilitado';
 	}
 
 	//******************************************************************
@@ -913,6 +873,14 @@ class Cruc extends Controller {
 
 	}
 
+	//******************************************************************
+	// Comodin para eliminar
+	//
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+		$edit = $this->_decruc();
+		$this->_dataedit($edit);
+	}
 
 	//******************************************************************
 	// Cruce Cliente Cliente
@@ -1502,6 +1470,10 @@ class Cruc extends Controller {
 		$cliente = $do->get('cliente');
 		$proveed = $do->get('proveed');
 
+		if(empty($tipo)){
+			return false;
+		}
+
 		if($tipo=='C-C' || $tipo=='P-P'){
 			if($cliente == $proveed ){
 				$do->error_message_ar['pre_ins']='Cruce entre el mismo no es valido';
@@ -1538,8 +1510,28 @@ class Cruc extends Controller {
 	}
 
 	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
-		return false;
+		$tipo    = $do->get('tipo');
+		$transac = $do->get('transac');
+
+		$dbtransac=$this->db->escape($transac);
+		if($tipo == 'P-C'){
+			$abonos=floatval($this->datasis->dameval("SELECT abonos FROM smov WHERE tipo_doc='NC' AND transac=${dbtransac}"));
+		}elseif($tipo == 'C-P'){
+			$abonos=floatval($this->datasis->dameval("SELECT abonos FROM sprm WHERE tipo_doc='NC' AND transac=${dbtransac}"));
+		}elseif($tipo == 'C-C'){
+			$abonos=floatval($this->datasis->dameval("SELECT abonos FROM smov WHERE tipo_doc='ND' AND transac=${dbtransac}"));
+		}elseif($tipo == 'P-P'){
+			$abonos=floatval($this->datasis->dameval("SELECT abonos FROM sprm WHERE tipo_doc='ND' AND transac=${dbtransac}"));
+		}else{
+			$do->error_message_ar['pre_del']='El cruce no se puede anular';
+			return false;
+		}
+		if($abonos>0){
+			$do->error_message_ar['pre_del']='El cruce tiene efectos aplicados';
+			return false;
+		}
+
+		return true;
 	}
 
 	function _post_insert($do){
@@ -1549,6 +1541,8 @@ class Cruc extends Controller {
 		$cliente = $do->get('cliente');
 		$proveed = $do->get('proveed');
 		$numero  = $do->get('numero');
+		$dbcliente=$this->db->escape($cliente);
+		$dbproveed=$this->db->escape($proveed);
 
 		if($tipo == 'P-C'){
 			// PROVEEDOR ----> CLIENTE
@@ -1585,7 +1579,7 @@ class Cruc extends Controller {
 				if($tipoit == 'APA'){
 					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
 					         AND numero='".substr($onumero,2,8)."'
-					         AND fecha=".$fechait." AND cod_cli='".$cliente."' ";
+					         AND fecha=".$fechait." AND cod_cli=${dbcliente}";
 					$this->db->query($mSQL);
 				}
 			}
@@ -1625,7 +1619,7 @@ class Cruc extends Controller {
 				if($tipoit == 'ADE'){
 					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
 					         AND numero='".substr($onumero,2,8)."'
-					         AND cod_prv='".$proveed."' ";
+					         AND cod_prv=${dbproveed}";
 					$this->db->query($mSQL);
 				}
 			}
@@ -1664,7 +1658,7 @@ class Cruc extends Controller {
 				if($tipoit == 'APA'){
 					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
 					         AND numero='".substr($onumero,2,8)."'
-					         AND cod_prv='".$cliente."' ";
+					         AND cod_prv=${dbcliente}";
 					$this->db->query($mSQL);
 				}
 			}
@@ -1703,7 +1697,7 @@ class Cruc extends Controller {
 				if($tipoit == 'ADE'){
 					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
 					         AND numero='".substr($onumero,2,8)."'
-					         AND cod_cli='".$proveed."' ";
+					         AND cod_cli=${dbproveed}";
 					$this->db->query($mSQL);
 				}
 			}
@@ -1744,7 +1738,7 @@ class Cruc extends Controller {
 				if($tipoit == 'ADE'){
 					$mSQL = "UPDATE smov SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
 					         AND numero='".substr($onumero,2,8)."'
-					         AND cod_cli='".$proveed."' ";
+					         AND cod_cli=${dbproveed}";
 
 					$this->db->query($mSQL);
 				}
@@ -1808,7 +1802,7 @@ class Cruc extends Controller {
 				if($tipoit == 'ADE'){
 					$mSQL = "UPDATE sprm SET abonos=abonos+".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
 					         AND numero='".substr($onumero,2,8)."'
-					         AND cod_prv='".$proveed."' ";
+					         AND cod_prv=${dbproveed}";
 					$this->db->query($mSQL);
 				}
 			}
@@ -1838,7 +1832,7 @@ class Cruc extends Controller {
 			$this->db->insert('sprm', $data);
 		}
 
-		logusu($do->table,"Creo curce de cuenta ${numero} ${primary}");
+		logusu($do->table,"Creo cruce de cuenta ${numero} ${primary}");
 	}
 
 	function _post_update($do){
@@ -1848,8 +1842,188 @@ class Cruc extends Controller {
 	}
 
 	function _post_delete($do){
-		$primary =implode(',',$do->pk);
+		$primary = implode(',',$do->pk);
 		$numero  = $do->get('numero');
+		$tipo    = $do->get('tipo');
+		$transac = $do->get('transac');
+		$cliente = $do->get('cliente');
+		$proveed = $do->get('proveed');
+		$dbcliente=$this->db->escape($cliente);
+		$dbproveed=$this->db->escape($proveed);
+
+		if($tipo == 'P-C'){
+			// PROVEEDOR ----> CLIENTE
+
+			$w = array(
+				'transac' =>$transac,
+				'tipo_doc'=>'NC',
+				'cod_cli' =>$cliente
+			);
+			$this->db->where($w);
+			$this->db->delete('smov');
+
+			$cana = $do->count_rel('itcruc');
+			for( $i = 0; $i < $cana; $i++ ){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = floatval($do->get_rel('itcruc', 'monto',   $i));
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+
+				if($tipoit == 'APA'){
+					$mSQL = "UPDATE smov SET abonos=abonos-".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
+					         AND fecha=".$fechait." AND cod_cli=${dbcliente}";
+					$this->db->query($mSQL);
+				}
+			}
+
+			$w = array(
+				'transac' =>$transac,
+				'tipo_doc'=>'NC',
+				'cod_prv' =>$proveed
+			);
+			$this->db->where($w);
+			$this->db->delete('sprm');
+
+			$cana = $do->count_rel('itcruc');
+			for( $i = 0; $i < $cana; $i++ ){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = floatval($do->get_rel('itcruc', 'monto',   $i));
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+
+				if($tipoit == 'ADE'){
+					$mSQL = "UPDATE sprm SET abonos=abonos-".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
+					         AND cod_prv=${dbproveed}";
+					$this->db->query($mSQL);
+				}
+			}
+
+		}elseif($tipo == 'C-P'){
+			// CLIENTE ----> PROVEEDOR
+
+			$w = array(
+				'transac' =>$transac,
+				'tipo_doc'=>'NC',
+				'cod_prv' =>$cliente
+			);
+			$this->db->where($w);
+			$this->db->delete('sprm');
+
+			// DEBE ABONAR A DESDE
+			$cana = $do->count_rel('itcruc');
+			for( $i = 0; $i < $cana; $i++ ){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = floatval($do->get_rel('itcruc', 'monto',   $i));
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+				if($tipoit == 'APA'){
+					$mSQL = "UPDATE sprm SET abonos=abonos-".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
+					         AND cod_prv=${dbcliente}";
+					$this->db->query($mSQL);
+				}
+			}
+
+			$w = array(
+				'transac' =>$transac,
+				'tipo_doc'=>'NC',
+				'cod_cli' =>$proveed
+			);
+			$this->db->where($w);
+			$this->db->delete('smov');
+
+			// DEBE ABONAR A DESDE
+			$cana = $do->count_rel('itcruc');
+			for( $i = 0; $i < $cana; $i++ ){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = floatval($do->get_rel('itcruc', 'monto',   $i));
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+
+				if($tipoit == 'ADE'){
+					$mSQL = "UPDATE smov SET abonos=abonos-".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
+					         AND cod_cli=${dbproveed}";
+					$this->db->query($mSQL);
+				}
+			}
+
+		}elseif($tipo == 'C-C'){
+			// CLIENTE ----> CLIENTE
+
+			$w = array(
+				'transac' =>$transac,
+				'tipo_doc'=>'NC',
+				'cod_cli' =>$proveed
+			);
+			$this->db->where($w);
+			$this->db->delete('smov');
+
+			// DEBE ABONAR A DESDE
+			$cana = $do->count_rel('itcruc');
+			for( $i = 0; $i < $cana; $i++ ){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = floatval($do->get_rel('itcruc', 'monto',   $i));
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+
+				if($tipoit == 'ADE'){
+					$mSQL = "UPDATE smov SET abonos=abonos-".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
+					         AND cod_cli=${dbproveed}";
+
+					$this->db->query($mSQL);
+				}
+			}
+
+			$w = array(
+				'transac' =>$transac,
+				'tipo_doc'=>'ND',
+				'cod_cli' =>$cliente
+			);
+			$this->db->where($w);
+			$this->db->delete('smov');
+
+			$mNUMERO = $this->datasis->fprox_numero('ndcli');
+			$data = array();
+
+		}elseif($tipo == 'P-P'){
+			// PROVEEDOR ----> PROVEEDOR
+
+			$w = array(
+				'transac' =>$transac,
+				'tipo_doc'=>'NC',
+				'cod_prv' =>$proveed
+			);
+			$this->db->where($w);
+			$this->db->delete('sprm');
+
+			// DEBE ABONAR A DESDE
+			$cana = $do->count_rel('itcruc');
+			for($i=0; $i < $cana; $i++){
+				$onumero = $do->get_rel('itcruc', 'onumero', $i);
+				$montoit = floatval($do->get_rel('itcruc', 'monto',   $i));
+				$fechait = $do->get_rel('itcruc', 'ofecha',  $i);
+				$tipoit  = $do->get_rel('itcruc', 'tipo',    $i);
+				if($tipoit == 'ADE'){
+					$mSQL = "UPDATE sprm SET abonos=abonos-".$montoit." WHERE tipo_doc='".substr($onumero,0,2)."'
+					         AND numero='".substr($onumero,2,8)."'
+					         AND cod_prv=${dbproveed}";
+					$this->db->query($mSQL);
+				}
+			}
+
+			$w = array(
+				'transac' =>$transac,
+				'tipo_doc'=>'ND',
+				'cod_prv' =>$cliente
+			);
+			$this->db->where($w);
+			$this->db->delete('sprm');
+		}
+
 		logusu($do->table,"Elimino cruce de cuenta ${numero} ${primary}");
 	}
 
