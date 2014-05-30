@@ -163,9 +163,15 @@ to {background:#32FFD3}
 			$row['exdes']=0;
 		}
 
-		$pexisten= ($row['existen']>$row['exdes'])?$row['existen']-$row['exdes']:0;
+		if(isset($lleva[$codigoa])){
+			$plleva=$lleva[$codigoa];
+		}else{
+			$plleva=0;
+		}
+
+		$pexisten= ($row['existen']>$row['exdes'])?$row['existen']-$row['exdes']+$plleva:0+$plleva;
 		if($form->_status!='show'){
-			if($pexisten>0){
+			if($pexisten>0 || $plleva>0){
 				$val = floatval($this->input->post('cana_'.$i));
 				if($val>0){
 					$vval=$val;

@@ -526,9 +526,25 @@ class pfaclite extends validaciones{
 			}
 		}
 
+		if($edit->getstatus()=='update'){
+			$pfacnum  =$edit->get_from_dataobjetct('numero');
+			$dbpfacnum=$this->db->escape($pfacnum);
+			$mmSQL="SELECT TRIM(a.codigoa) AS codigo,SUM(a.cana) AS cana
+				FROM itpfac AS a
+			WHERE a.numa=${dbpfacnum}
+			GROUP BY a.codigoa";
+			$qquery = $this->db->query($mmSQL);
+			foreach($qquery->result() as $rrow){
+				$lleva[$rrow->codigo]=floatval($rrow->cana);
+			}
+		}else{
+			$lleva=array();
+		}
+
 		if($this->genesal){
 			$edit->build();
 
+			$conten['lleva']   = $lleva;
 			$conten['status']  = $status;
 			$conten['pedido']  = $pedido;
 			$conten['saldo']   = $saldo;
