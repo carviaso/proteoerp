@@ -503,6 +503,8 @@ function cmontoiva(){
 
 function post_modbus_sprv(){
 	$('#nombre_val').text($('#nombre').val());
+	var tipo    = $('#tipo_doc').val();
+
 
 	$.ajax({
 		url: "<?php echo site_url('ajax/ajaxsanncprov'); ?>",
@@ -520,97 +522,99 @@ function post_modbus_sprv(){
 		},
 	});
 
-	$.ajax({
-		url: "<?php echo site_url('ajax/traeordc'); ?>",
-		dataType: 'json',
-		type: 'POST',
-		data: {'cod_prv' : $("#proveed").val()},
-		success: function(data){
-			if(data != null){
-				var pant  = "<table id='tordc'></table>";
+	if(tipo=='FC'){
+		$.ajax({
+			url: "<?php echo site_url('ajax/traeordc'); ?>",
+			dataType: 'json',
+			type: 'POST',
+			data: {'cod_prv' : $("#proveed").val()},
+			success: function(data){
+				if(data != null){
+					var pant  = "<table id='tordc'></table>";
 
-				var promt = $.prompt(pant, {
-					title: "El proveedor posee la siguiente lista de ordenes",
-					buttons: { "Continuar": true },
-					submit: function(e,v,m,f){
-						var srows = jQuery("#tordc").jqGrid('getGridParam','selarrrow');
-						if(srows.length>0){
-							var arr_num = [];
-							for(var i=0;i < srows.length;i++){
-								ret  = $("#tordc").getRowData(srows[i]);
-								arr_num.push(ret.numero);
-							}
+					var promt = $.prompt(pant, {
+						title: "El proveedor posee la siguiente lista de ordenes",
+						buttons: { "Continuar": true },
+						submit: function(e,v,m,f){
+							var srows = jQuery("#tordc").jqGrid('getGridParam','selarrrow');
+							if(srows.length>0){
+								var arr_num = [];
+								for(var i=0;i < srows.length;i++){
+									ret  = $("#tordc").getRowData(srows[i]);
+									arr_num.push(ret.numero);
+								}
 
-							$.ajax({
-								url: "<?php echo site_url('ajax/traeitordc'); ?>",
-								dataType: 'json',
-								type: 'POST',
-								data: {'ids' : srows},
-								success: function(dat){
-									if(dat=== null) return false;
-									if(dat.length>0){
-										truncate();
-										var can;
-										var item;
-										for(var i=0;i < dat.length;i++){
-											id   = add_itscst();
-											item = dat[i];
+								$.ajax({
+									url: "<?php echo site_url('ajax/traeitordc'); ?>",
+									dataType: 'json',
+									type: 'POST',
+									data: {'ids' : srows},
+									success: function(dat){
+										if(dat=== null) return false;
+										if(dat.length>0){
+											truncate();
+											var can;
+											var item;
+											for(var i=0;i < dat.length;i++){
+												id   = add_itscst();
+												item = dat[i];
 
-											$('#codigo_'+id).val(item.codigo);
-											$('#descrip_'+id).val(item.descrip);
-											$('#it_descrip_val_'+id).text(item.descrip);
-											$('#iva_'+id).val(item.iva);
-											$('#sinvpeso_'+id).val(item.peso);
-											$('#costo_'+id).val(item.pond);
-											$('#precio1_'+id).val(item.precio1);
-											$('#cantidad_'+id).val(item.cantidad);
-											importe(parseInt(id));
-											if(item.activo=='N'){
-												$('#tr_itscst_'+id).css("background-color","#FF7A46");
-											}else{
-												$('#tr_itscst_'+id).css("background-color", "transparent");
+												$('#codigo_'+id).val(item.codigo);
+												$('#descrip_'+id).val(item.descrip);
+												$('#it_descrip_val_'+id).text(item.descrip);
+												$('#iva_'+id).val(item.iva);
+												$('#sinvpeso_'+id).val(item.peso);
+												$('#costo_'+id).val(item.pond);
+												$('#precio1_'+id).val(item.precio1);
+												$('#cantidad_'+id).val(item.cantidad);
+												importe(parseInt(id));
+												if(item.activo=='N'){
+													$('#tr_itscst_'+id).css("background-color","#FF7A46");
+												}else{
+													$('#tr_itscst_'+id).css("background-color", "transparent");
+												}
+											}
+
+											var numero,ret,can;
+											var htm = <?php echo $cscstordc; ?>;
+											$('input[id^="ordc_"]').remove();
+											for(var i=0;i < arr_num.length;i++){
+												can = i.toString();
+												html = htm.replace(/<#i#>/g,can);
+												$("#divgereten").after(html);
+												$("#ordc_"+can).val(arr_num[i]);
 											}
 										}
-
-										var numero,ret,can;
-										var htm = <?php echo $cscstordc; ?>;
-										$('input[id^="ordc_"]').remove();
-										for(var i=0;i < arr_num.length;i++){
-											can = i.toString();
-											html = htm.replace(/<#i#>/g,can);
-											$("#divgereten").after(html);
-											$("#ordc_"+can).val(arr_num[i]);
-										}
-									}
-								},
-							});
+									},
+								});
+							}
 						}
+					});
+
+					jQuery("#tordc").jqGrid({
+						datatype: "local",
+						height: 200,
+						colNames:["id","N&uacute;mero","Fecha", "Peso","Monto"],
+						colModel:[
+							{name:"id"     , index:"id"     , key: true, hidden: true },
+							{name:"numero" , index:"numero" , width:80 , align:"center"},
+							{name:"fecha"  , index:"fecha"  , width:70 , align:"center"},
+							{name:"peso"   , index:"peso"   , width:90 , align:"right"  , sorttype:"float"},
+							{name:"monto"  , index:"monto"  , width:100, align:"right"  , sorttype:"float"}
+						],
+						multiselect: true,
+						caption: "Seleccione las que desee importar",
+						rowNum:10,
+					});
+
+					for(var i=0;i<data.length;i++){
+						jQuery("#tordc").jqGrid('addRowData',data[i].id,data[i]);
 					}
-				});
 
-				jQuery("#tordc").jqGrid({
-					datatype: "local",
-					height: 200,
-					colNames:["id","N&uacute;mero","Fecha", "Peso","Monto"],
-					colModel:[
-						{name:"id"     , index:"id"     , key: true, hidden: true },
-						{name:"numero" , index:"numero" , width:80 , align:"center"},
-						{name:"fecha"  , index:"fecha"  , width:70 , align:"center"},
-						{name:"peso"   , index:"peso"   , width:90 , align:"right"  , sorttype:"float"},
-						{name:"monto"  , index:"monto"  , width:100, align:"right"  , sorttype:"float"}
-					],
-					multiselect: true,
-					caption: "Seleccione las que desee importar",
-					rowNum:10,
-				});
-
-				for(var i=0;i<data.length;i++){
-					jQuery("#tordc").jqGrid('addRowData',data[i].id,data[i]);
 				}
-
-			}
-		},
-	});
+			},
+		});
+	}
 
 }
 
