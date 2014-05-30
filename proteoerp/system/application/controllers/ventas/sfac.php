@@ -1380,7 +1380,7 @@ class Sfac extends Controller {
 					}
 				}
 
-				$row = $this->datasis->damerow("SELECT tipo_doc, numero,vd,transac, cliente,fecha FROM sfac WHERE id=${id}");
+				$row = $this->datasis->damerow("SELECT tipo_doc, numero,vd,transac, cod_cli AS cliente,fecha FROM sfac WHERE id=${id}");
 				if(empty($row)){
 					echo 'Registro no encontrado';
 					return false;
