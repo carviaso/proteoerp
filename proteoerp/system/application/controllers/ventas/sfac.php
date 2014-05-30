@@ -1380,7 +1380,7 @@ class Sfac extends Controller {
 					}
 				}
 
-				$row = $this->datasis->damerow("SELECT tipo_doc, numero,vd FROM sfac WHERE id=${id}");
+				$row = $this->datasis->damerow("SELECT tipo_doc, numero,vd,transac, cliente,fecha FROM sfac WHERE id=${id}");
 				if(empty($row)){
 					echo 'Registro no encontrado';
 					return false;
@@ -1390,10 +1390,19 @@ class Sfac extends Controller {
 				$this->db->update('sfac', $data);
 
 				if($row['vd']!=$data['vd']){
-					//$this->db->where('numa'   , $row['numero']);
-					//$this->db->where('tipoa'  , $row['tipoa']);
 					$this->db->where('id_sfac', $id);
 					$this->db->update('sitems', array('vendedor'=>$data['vd']));
+
+					$this->db->where('numero'   , $row['numero']);
+					$this->db->where('cod_cli'  , $row['cliente']);
+					$this->db->where('transac'  , $row['transac']);
+					$this->db->update('smov', array('vendedor'=>$data['vd']));
+
+					$this->db->where('numero'   , $row['numero']);
+					$this->db->where('f_factura', $row['fecha']);
+					$this->db->where('cod_cli'  , $row['cliente']);
+					$this->db->where('transac'  , $row['transac']);
+					$this->db->update('sfpa', array('vendedor'=>$data['vd']));
 				}
 
 				logusu('SFAC',"Factura ${id} MODIFICADO");
