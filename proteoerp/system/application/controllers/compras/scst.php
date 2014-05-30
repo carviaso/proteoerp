@@ -3427,7 +3427,8 @@ class Scst extends Controller {
 								prov3=prov2, prepro3=prepro2, pfecha3=pfecha2, prov2=prov1, prepro2=prepro1, pfecha2=pfecha1,
 								prov1='.$this->db->escape($proveed).',
 								prepro1='.$itrow->costo.',
-								pfecha1='.$this->db->escape($fecha).'
+								pfecha1='.$this->db->escape($fecha).',
+								activo="S"
 								WHERE codigo='.$dbcodigo;
 							$ban=$this->db->simple_query($mSQL);
 							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
@@ -3515,9 +3516,6 @@ class Scst extends Controller {
 								if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 							}
 							//Fin de la actualizacion de inventario
-
-							$mSQL='UPDATE sinv SET activo="S" WHERE codigo='.$dbcodigo;
-							$ban=$this->db->simple_query($mSQL);
 
 							if(count($mORDENES) > 0){
 								$mSALDO = floatval($itrow->cantidad);
