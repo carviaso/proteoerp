@@ -444,7 +444,7 @@ class pfaclite extends validaciones{
 
 		$alma     = $this->secu->getalmacen();
 		$dbalma   = $this->db->escape($alma);
-		$tiposcli = $this->datasis->dameval("SELECT tipo FROM scli WHERE cliente=$dbcliente");
+		$tiposcli = $this->datasis->dameval("SELECT tipo FROM scli WHERE cliente=${dbcliente}");
 		if($tiposcli<1) $tiposcli=1; elseif($tiposcli>4) $tiposcli=4;
 
 		$sel=array('TRIM(a.codigo) AS codigo','a.descrip'
@@ -461,7 +461,7 @@ class pfaclite extends validaciones{
 		$act_meta=false;
 		if($status=='create' || $status=='insert'){
 			$this->db->join('itsinv AS b','a.codigo=b.codigo AND b.alma='.$dbalma);
-			//$this->db->where('b.existen > a.exdes');
+			$this->db->where('b.existen > 0');
 			if($this->db->table_exists('metas')){
 				$pmargen=$this->datasis->dameval('SELECT pmargen FROM vend WHERE vendedor='.$dbvd);
 				if(empty($pmargen)){
@@ -473,14 +473,14 @@ class pfaclite extends validaciones{
 				$uday=days_in_month(substr($mmes,4),substr($mmes,0,4));
 				$this->db->join('metas  AS c','a.codigo=c.codigo AND c.fecha='.$mmes,'left');
 				$this->db->join('sitems AS d','d.codigoa=c.codigo AND vendedor='.$dbvd.' AND d.fecha BETWEEN '.$mmes.'01 AND '.$mmes.$uday,'left');
-				$sel[]="COALESCE(c.cantidad,0)*$pmargen AS meta";
+				$sel[]="COALESCE(c.cantidad,0)*${pmargen} AS meta";
 				$sel[]='COALESCE(SUM(d.cana*IF(tipoa=\'D\',-1,1)),0) AS vendido';
 				$act_meta=true;
-				$this->db->where('b.existen > 0');
 			}
 		}elseif($status=='show'){
 			$this->db->join('itsinv AS b','a.codigo=b.codigo');
 		}else{
+			$this->db->where('b.existen > 0');
 			$this->db->join('itsinv AS b','a.codigo=b.codigo AND b.alma='.$dbalma);
 		}
 		$this->db->select($sel);
@@ -509,7 +509,7 @@ class pfaclite extends validaciones{
 		}
 
 		$pedido=array();
-		if($status=='create'){
+		if($status=='create' || $status=='insert' || $status=='modify'  || $status=='update'){
 			$vds=array();
 			$mmSQL="SELECT TRIM(vendedor) AS vd FROM usuario WHERE almacen=${dbalma}";
 			$qquery = $this->db->query($mmSQL);
@@ -564,6 +564,7 @@ class pfaclite extends validaciones{
 		$dbalma   = $this->db->escape($alma);
 
 		$this->validation->set_message('chcana', 'No existe cantidad suficiente para el art&iacute;culo '.$codigo);
+		//return false;
 		//$udp=$this->rapyd->uri->is_set('update');
 		//if($udp){
 		//	$arrurl = $this->uri->segment_array();
@@ -612,6 +613,26 @@ class pfaclite extends validaciones{
 		$hora    = $do->get('hora');
 		$modoiva = $this->datasis->traevalor('MODOIVA');
 
+		$tcana=0;
+		for($i = 0;$i < $do->count_rel('itpfac');$i++){
+			$itcana  = floatval($do->get_rel('itpfac', 'cana', $i));
+			if($itcana>0){
+				$tcana++;
+			}
+		}
+		if($tcana<=0){
+			$do->error_message_ar['pre_ins']='No puede guardar un pedido sin productos.';
+			return false;
+		}
+
+		$cod_cli  = $do->get('cod_cli');
+		$dbcod_cli= $this->db->escape($cod_cli);
+		$scli     = $this->datasis->damerow("SELECT rifci,nombre,CONCAT(TRIM(dire11),' ',TRIM(dire12)) direc,CONCAT(TRIM(dire21),' ',TRIM(dire22)) dire1,zona,ciudad1 AS ciudad FROM scli WHERE cliente=${dbcod_cli}");
+		if(empty($scli)){
+			$do->error_message_ar['pre_ins']='Cliente inexistente.';
+			return false;
+		}
+
 		if(empty($numero)){
 			$numero = $this->datasis->fprox_numero('npfac');
 			$do->set('numero', $numero);
@@ -622,13 +643,6 @@ class pfaclite extends validaciones{
 			$fecha=$do->get('fecha');
 		}
 
-		$cod_cli  = $do->get('cod_cli');
-		$dbcod_cli= $this->db->escape($cod_cli);
-		$scli    =$this->datasis->damerow("SELECT rifci,nombre,CONCAT(TRIM(dire11),' ',TRIM(dire12)) direc,CONCAT(TRIM(dire21),' ',TRIM(dire22)) dire1,zona,ciudad1 AS ciudad FROM scli WHERE cliente=${dbcod_cli}");
-		if(empty($scli)){
-			$do->error_message_ar['pre_ins']='Cliente inexistente.';
-			return false;
-		}
 		$do->set('rifci' ,$scli['rifci'] );
 		$do->set('nombre',$scli['nombre']);
 		$do->set('direc' ,$scli['direc'] );
@@ -643,7 +657,7 @@ class pfaclite extends validaciones{
 
 		$transac = $do->get('transac');
 
-		$iva = $totals = $tpeso = 0;
+		$iva = $totals = $tpeso =0;
 		$borrar=array();
 		for($i = 0;$i < $do->count_rel('itpfac');$i++){
 			$itcana  = $do->get_rel('itpfac', 'cana', $i);
@@ -666,7 +680,6 @@ class pfaclite extends validaciones{
 					$do->set_rel('itpfac', 'pvp'      , $rowval['base1'] , $i);
 					$tpeso += floatval($rowval['peso'])*$itcana;
 				}
-
 
 				$do->set_rel('itpfac', 'tota'    , $ittota  , $i);
 				$do->set_rel('itpfac', 'fecha'   , $fecha   , $i);

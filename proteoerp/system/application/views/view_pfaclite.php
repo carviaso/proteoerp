@@ -89,7 +89,6 @@ to {background:#32FFD3}
 
 </table>
 
-
 <table width='100%' <?php echo ($form->_status!='show'?' border="0" cellpadding="0" cellspacing="0"':'') ?>>
 	<col>
 	<?php if($act_meta) echo '<col align=\'center\'>'; ?>
@@ -101,7 +100,7 @@ to {background:#32FFD3}
 		<td><b>Art&iacute;culo</b></td>
 		<?php if($act_meta) echo '<td><b>Meta</b></td>'; ?>
 		<td align='center'><b>IVA </b></td>
-		<td align='center'><b>Exis. </b></td>
+		<td align='center'><b>Disp/Exis. </b></td>
 		<td align='center'><b>Cant. </b></td>
 		<td><b>Precio</b></td>
 	</tr>
@@ -147,36 +146,46 @@ to {background:#32FFD3}
 
 	foreach($arreglo as $row) {
 
-			$pmarca  = $row['marca'];
-			$peso    = $row['peso'];
-			$pdesca  = $row['descrip'].' '.nformat($peso).' KG';
-			$codigoa = trim($row['codigo']);
-			$preca   = $row['preca'];
-			$cana    = floatval($row['cana']);
-			$precio1 = $row['precio1'];
-			$precio2 = $row['precio2'];
-			$precio1 = $row['precio1'];
-			$existen = $row['existen'];
+		$pmarca  = $row['marca'];
+		$peso    = $row['peso'];
+		$pdesca  = $row['descrip'].' '.nformat($peso).' KG';
+		$codigoa = trim($row['codigo']);
+		$preca   = $row['preca'];
+		$cana    = floatval($row['cana']);
+		$precio1 = $row['precio1'];
+		$precio2 = $row['precio2'];
+		$precio1 = $row['precio1'];
+		$existen = $row['existen'];
 
-			if(isset($pedido[$codigoa])){
-				$row['exdes']=$pedido[$codigoa];
-			}else{
-				$row['exdes']=0;
-			}
+		if(isset($pedido[$codigoa])){
+			$row['exdes']=$pedido[$codigoa];
+		}else{
+			$row['exdes']=0;
+		}
 
-			$pexisten= ($row['existen']>$row['exdes'])?$row['existen']-$row['exdes']:0;
-			if($form->_status!='show'){
-				if($pexisten>0){
-					$f_cana='<input type="text" autocomplete="off" onkeyup="total(\''.$i.'\')" maxlength="10" style="height:30px;font-size:18px" size="4" class="inputnum" id="cana_'.$i.'" value="'.($cana>0?$cana:'').'" name="cana_'.$i.'">';
+		$pexisten= ($row['existen']>$row['exdes'])?$row['existen']-$row['exdes']:0;
+		if($form->_status!='show'){
+			if($pexisten>0){
+				$val = floatval($this->input->post('cana_'.$i));
+				if($val>0){
+					$vval=$val;
+				}elseif($cana>0){
+					$vval=$cana;
+				}else{
+					$vval='';
 				}
-				if($cana>0){
-					$js_ctotal.= "total('${i}');\n";
-				}
+
+				$f_cana='<input type="text" autocomplete="off" onkeyup="total(\''.$i.'\')" maxlength="10" style="height:30px;font-size:18px;background-color:rgba(255,255,255,0.5);text-align:right;width:100%" size="4" class="inputnum" id="cana_'.$i.'" value="'.$vval.'" name="cana_'.$i.'">';
 			}else{
 				$f_cana =nformat($cana);
 			}
 
-			$f_codigoa='<input id="codigoa_'.$i.'" type="hidden" value='.$this->db->escape($row['codigo']).' name="codigoa_'.$i.'"> <span id="codigoa_'.$i.'_val">'.$row['codigo'].'</span>';
+			$js_ctotal.= "total('${i}');\n";
+		}else{
+			$f_cana =nformat($cana);
+		}
+
+		$f_codigoa='<input id="codigoa_'.$i.'" type="hidden" value='.$this->db->escape($row['codigo']).' name="codigoa_'.$i.'"> <span id="codigoa_'.$i.'_val">'.$row['codigo'].'</span>';
 
 		if($pmarcat!=$pmarca){
 			$pmarcat=$pmarca;
