@@ -3516,6 +3516,9 @@ class Scst extends Controller {
 							}
 							//Fin de la actualizacion de inventario
 
+							$mSQL='UPDATE sinv SET activo="S" WHERE codigo='.$dbcodigo;
+							$ban=$this->db->simple_query($mSQL);
+
 							if(count($mORDENES) > 0){
 								$mSALDO = floatval($itrow->cantidad);
 								foreach($mORDENES as $orden){
