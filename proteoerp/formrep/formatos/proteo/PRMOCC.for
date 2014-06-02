@@ -19,21 +19,21 @@ if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row = $mSQL_1->row();
 $tipo_doc = trim($row->tipop);
 $numero   = $row->numero;
-$clipro   = htmlspecialchars(trim($row->clipro));
-$numcuent = htmlspecialchars(trim($row->numcuent));
-$numche   = htmlspecialchars(trim($row->numche));
-$docum    = htmlspecialchars(trim($row->docum));
+$clipro   = $this->us_ascii2html(trim($row->clipro));
+$numcuent = $this->us_ascii2html(trim($row->numcuent));
+$numche   = $this->us_ascii2html(trim($row->numche));
+$docum    = $this->us_ascii2html(trim($row->docum));
 $tipop    = trim($row->tipop);
 $fecha    = dbdate_to_human($row->fecha);
 $vence    = dbdate_to_human($row->vence);
 $hfecha   = dbdate_to_human($row->fecha);
 $monto    = nformat($row->monto);
 $cuotas   = $row->cuotas;
-$banco    = htmlspecialchars(trim($row->banco));
-$nombre   = htmlspecialchars(trim($row->nombre));
+$banco    = $this->us_ascii2html(trim($row->banco));
+$nombre   = $this->us_ascii2html(trim($row->nombre));
 $observa  = wordwrap(trim(str_replace(',',', ',$row->observa)), 90, '<br>');
 $transac  = $row->transac;
-$prmobanco= htmlspecialchars(trim($row->prmobanco));
+$prmobanco= $this->us_ascii2html(trim($row->prmobanco));
 
 $lineas=0;
 ?><html>
