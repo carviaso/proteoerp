@@ -104,6 +104,41 @@ class Conv extends Controller {
 		};';
 
 		$bodyscript .= '
+		function convdel() {
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				if(confirm("Seguro desea eliminar el registro?")){
+					var ret    = jQuery("#newapi'. $grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						$("#fedita").html("");
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								$.prompt("<h1>Registro eliminado</h1>");
+								jQuery("#newapi'. $grid0.'").trigger("reloadGrid");
+							}else{
+								$.prompt("<h1>Registro no se puede eliminado</h1>");
+							}
+						}catch(e){
+							$("#fshow").html(data);
+							$("#fshow").dialog({
+								autoOpen: false, height: 350, width: 450, modal: true,
+								buttons: {"Aceptar": function() {
+										$(this).dialog("close");
+										jQuery("#newapi'. $grid0.'").trigger("reloadGrid");
+									}
+								}
+							});
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
 		function convedit() {
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
@@ -133,7 +168,7 @@ class Conv extends Controller {
 		$bodyscript .= '
 		jQuery("#boton1").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			if(id){
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				window.open(\''.site_url('formatos/ver/CONV').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
 			} else { $.prompt("<h1>Por favor Seleccione una Factura</h1>");}
@@ -142,7 +177,7 @@ class Conv extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 550, width: 700, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -153,13 +188,19 @@ class Conv extends Controller {
 						url: murl,
 						data: $("#df1").serialize(),
 						success: function(r,s,x){
-							if ( r.length == 0 ) {
-								apprise("Registro Guardado");
-								$( "#fedita" ).dialog( "close" );
-								grid.trigger("reloadGrid");
-								'.$this->datasis->jwinopen(site_url('formatos/ver/CONV').'/\'+res.id+\'/id\'').';
-								return true;
-							} else {
+
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									$.prompt("Registro Guardado");
+									$( "#fedita" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									'.$this->datasis->jwinopen(site_url('formatos/ver/CONV').'/\'+json.pk.id+\'/id\'').';
+									return true;
+								} else {
+									$.prompt(json.mensaje);
+								}
+							}catch(e){
 								$("#fedita").html(r);
 							}
 						}
@@ -189,9 +230,8 @@ class Conv extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 
 		return $bodyscript;
 	}
@@ -201,7 +241,7 @@ class Conv extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -255,7 +295,7 @@ class Conv extends Controller {
 
 
 		$grid->addField('almacen');
-		$grid->label('Almacen');
+		$grid->label('Almac&acute;en');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -361,14 +401,14 @@ class Conv extends Controller {
 
 		#show/hide navigations buttons
 		$grid->setAdd(    $this->datasis->sidapuede('CONV','INCLUIR%' ));
-		$grid->setEdit(   $this->datasis->sidapuede('CONV','MODIFICA%'));
+		$grid->setEdit(  false);
 		$grid->setDelete( $this->datasis->sidapuede('CONV','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('CONV','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 		$grid->setOndblClickRow('');
 
-		$grid->setBarOptions('addfunc: convadd,editfunc: convedit,viewfunc: convshow');
+		$grid->setBarOptions('addfunc: convadd,editfunc: convedit,viewfunc: convshow,delfunc: convdel');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -401,34 +441,7 @@ class Conv extends Controller {
 	* Guarda la Informacion
 	*/
 	function setData(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = "numero";
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'edit' ){
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM conv WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM conv WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE conv SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("conv", $data);
-				logusu('CONV',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('conv', $data);
-				logusu('CONV',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-		}
+		echo 'Deshabilitado';
 	}
 
 
@@ -509,7 +522,7 @@ class Conv extends Controller {
 
 /*
 		$grid->addField('transac');
-		$grid->label('Transac');
+		$grid->label('Transaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -518,7 +531,6 @@ class Conv extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
-
 
 		$grid->addField('estampa');
 		$grid->label('Estampa');
@@ -641,7 +653,7 @@ class Conv extends Controller {
 	* Guarda la Informacion
 	*/
 	function setDatait(){
-
+		echo 'Deshabilitado';
 	}
 
 
@@ -662,21 +674,22 @@ class Conv extends Controller {
 			'retornar'=>array(
 				'codigo' =>'codigo_<#i#>',
 				'descrip'=>'descrip_<#i#>',
-				'ultimo' =>'costo_<#i#>'
+				'ultimo' =>'costo_<#i#>',
+				'peso' =>'sinvpeso_<#i#>'
 			),
 			'p_uri'   => array(4=>'<#i#>'),
 			'titulo'  => 'Buscar Articulo',
-			'where'   => '`activo` = "S" AND `tipo` = "Articulo"',
+			'where'   => '`tipo` = "Articulo"',
 			'script'  => array('post_modbus_sinv(<#i#>)')
 		);
 		$btn=$this->datasis->p_modbus($modbus,'<#i#>');
 
 		$do = new DataObject('conv');
 		$do->rel_one_to_many('itconv', 'itconv', 'numero');
-		$do->rel_pointer('itconv','sinv','itconv.codigo=sinv.codigo','sinv.descrip AS sinvdescrip','sinv.ultimo AS sinvultimo');
+		$do->rel_pointer('itconv','sinv','itconv.codigo=sinv.codigo','sinv.descrip AS sinvdescrip','sinv.ultimo AS sinvultimo','sinv.peso AS sinvpeso');
 
 		$edit = new DataDetails('Conversiones', $do);
-		//$edit->back_url = $this->back_dataedit;
+		$edit->on_save_redirect=false;
 		$edit->set_rel_title('itconv','Producto <#o#>');
 
 		//$edit->script($script,'create');
@@ -686,6 +699,8 @@ class Conv extends Controller {
 		$edit->pre_process('update' ,'_pre_update');
 		$edit->pre_process('delete','_pre_delete');
 		$edit->post_process('insert','_post_insert');
+		$edit->post_process('delete','_post_delete');
+		$edit->post_process('update','_post_update');
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
@@ -718,13 +733,11 @@ class Conv extends Controller {
 		$edit->codigo->size     = 12;
 		$edit->codigo->db_name  = 'codigo';
 		$edit->codigo->rel_id   = 'itconv';
-		$edit->codigo->rule     = 'required|callback_chrepetidos|callback_chpeso[<#i#>]';
+		$edit->codigo->rule     = 'required|callback_chrepetidos|callback_chcodigoa|callback_chpeso[<#i#>]';
 		$edit->codigo->append($btn);
 
 		$edit->descrip = new inputField('Descripci&oacute;n <#o#>', 'descrip_<#i#>');
-		$edit->descrip->size=36;
 		$edit->descrip->db_name='descrip';
-		$edit->descrip->maxlength=50;
 		$edit->descrip->rel_id='itconv';
 		$edit->descrip->type='inputhidden';
 
@@ -751,21 +764,41 @@ class Conv extends Controller {
 		$edit->costo = new hiddenField('', 'costo_<#i#>');
 		$edit->costo->db_name   = 'costo';
 		$edit->costo->rel_id    = 'itconv';
+
+		$edit->sinvpeso = new inputField('', 'sinvpeso_<#i#>');
+		$edit->sinvpeso->db_name='sinvpeso';
+		$edit->sinvpeso->rel_id='itconv';
+		$edit->sinvpeso->pointer=true;
+		$edit->sinvpeso->type='inputhidden';
+
 		//**************************
 		//fin de campos para detalle
 		//**************************
+
+		$edit->container = new containerField('alert','<b style="font-size:1.2em">Advertencia</b>: el costo de los productos de salida <b>ser&aacute;n modificados</b> en base al costos de los productos de entrada y la participacion en peso de los productos de salida.');
+		$edit->container->when = array('create');
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
 		$edit->buttons('save', 'undo', 'back','add_rel','add');
 		$edit->build();
 
-		$conten['form']  =& $edit;
-		$data['content']  = $this->load->view('view_conv', $conten, false);
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+
+			echo json_encode($rt);
+		}else{
+			$conten['form']  =& $edit;
+			$data['content']  = $this->load->view('view_conv', $conten, false);
+		}
 	}
 
 	function chpeso($codigo,$id){
-		$salida=$this->input->post('salida_'.$id);
+		$salida=floatval($this->input->post('salida_'.$id));
 		$this->validation->set_message('chpeso', 'El art&iacute;culo '.$codigo.' no tiene peso, se necesita para el c&aacute;lculo del costo');
 		if($salida>0){
 			$dbcodigo=$this->db->escape($codigo);
@@ -773,6 +806,15 @@ class Conv extends Controller {
 			if($peso>0){
 				return true;
 			}
+			return false;
+		}
+		return true;
+	}
+
+	function chcodigoa($codigo){
+		$cana=$this->datasis->dameval('SELECT COUNT(*) AS val FROM sinv WHERE activo=\'S\' AND MID(tipo,1,1)="A" AND codigo='.$this->db->escape($codigo));
+		if(empty($cana) || $cana==0){
+			$this->validation->set_message('chcodigoa', 'El campo %s contiene un codigo de producto no v&aacute;lido o inactivo');
 			return false;
 		}
 		return true;
@@ -799,9 +841,9 @@ class Conv extends Controller {
 		//costo=costo*(entrada o salida segun se el caso)
 		$cana=$do->count_rel('itconv');
 		for($i=0;$i<$cana;$i++){
-			$ent   =$do->get_rel('itconv','entrada',$i);
-			$sal   =$do->get_rel('itconv','salida' ,$i);
-			$costo =$do->get_rel('itconv','costo' ,$i);
+			$ent   =floatval($do->get_rel('itconv','entrada',$i));
+			$sal   =floatval($do->get_rel('itconv','salida' ,$i));
+			$costo =floatval($do->get_rel('itconv','costo' ,$i));
 			$codigo=$do->get_rel('itconv','codigo' ,$i);
 
 			if ($ent!=0 && $sal!=0){
@@ -820,7 +862,7 @@ class Conv extends Controller {
 			if($sal != 0){
 				$salidas+=$sal;
 				$dbcodigo=$this->db->escape($codigo);
-				$peso    =$this->datasis->dameval('SELECT peso FROM sinv WHERE codigo='.$dbcodigo);
+				$peso    =floatval($this->datasis->dameval('SELECT peso FROM sinv WHERE codigo='.$dbcodigo));
 				$this->pesos[$codigo] = $peso;
 
 				$this->peso_salida+=$sal*$peso;
@@ -828,11 +870,13 @@ class Conv extends Controller {
 			}
 			$do->set_rel('itconv','costo'   ,$monto  ,$i);
 		}
-		if ($entradas == 0){
+
+		if($entradas == 0){
 			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert']='Debe ingresar al menos una entrada.';
 			return false;
 		}
-		if ($salidas == 0){
+
+		if($salidas == 0){
 			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert']='Debe ingresar al menos una salida.';
 			return false;
 		}
@@ -875,6 +919,10 @@ class Conv extends Controller {
 		return false;
 	}
 
+	function _pre_delete($do){
+		return true;
+	}
+
 	function _post_insert($do){
 		$alma   = $do->get('almacen');
 		$numero = $do->get('numero');
@@ -888,17 +936,16 @@ class Conv extends Controller {
 			$dbcodigo= $this->db->escape($codigo);
 			$dbalma  = $this->db->escape($alma);
 
-			$mSQL="INSERT INTO itsinv (codigo,alma,existen) VALUES ($dbcodigo,$dbalma,$monto) ON DUPLICATE KEY UPDATE existen=existen+($monto)";
-			$ban=$this->db->simple_query($mSQL);
-			if(!$ban){ memowrite($mSQL,'conv');}
+			$this->datasis->sinvcarga($codigo, $alma, $monto);
 
-			if( $monto < 0 ) {   // Salida
-				$peso=$this->pesos[$codigo]*$monto;
-				$participa=$peso/$this->peso_salida;
-				$ncosto   =round($this->costo_entrada*$participa/$monto,2);
+			if($monto < 0 && $this->peso_salida>0){   // Salida
+				$peso      = $this->pesos[$codigo]*$monto;
+				$participa = $peso/$this->peso_salida;
+				$ncosto    = round($this->costo_entrada*$participa/$monto,2);
 
-				$mycosto="IF(formcal='P',pond,IF(formcal='U',$ncosto,IF(formcal='S',standard,GREATEST(pond,ultimo))))";
-				$mSQL='UPDATE sinv SET
+				if($ncosto>0){
+					$mycosto="IF(formcal='P',pond,IF(formcal='U',${ncosto},IF(formcal='S',standard,GREATEST(pond,ultimo))))";
+					$mSQL='UPDATE sinv SET
 							ultimo ='.$ncosto.',
 							base1  =ROUND(precio1*10000/(100+iva))/100,
 							base2  =ROUND(precio2*10000/(100+iva))/100,
@@ -907,25 +954,37 @@ class Conv extends Controller {
 							margen1=ROUND(10000-(('.$mycosto.')*10000/base1))/100,
 							margen2=ROUND(10000-(('.$mycosto.')*10000/base2))/100,
 							margen3=ROUND(10000-(('.$mycosto.')*10000/base3))/100,
-							margen4=ROUND(10000-(('.$mycosto.')*10000/base4))/100,
-							existen=existen+('.$monto.')
+							margen4=ROUND(10000-(('.$mycosto.')*10000/base4))/100
 					WHERE codigo='.$dbcodigo;
 					$ban=$this->db->simple_query($mSQL);
 					if(!$ban){ memowrite($mSQL,'conv');}
-			} else { // Entrada
-				$mSQL= "UPDATE sinv SET existen = existen+($monto) WHERE codigo=${dbcodigo}";
-				$ban=$this->db->simple_query($mSQL);
-				if(!$ban){ memowrite($mSQL,'conv');}
+				}
 			}
 		}
 
-
 		//trafrac ittrafrac
-		logusu('conv',"Conversion ${codigo} CREADO");
+		logusu('conv',"Conversion ${numero} CREADA");
 	}
 
-	function _pre_delete($do){
-		return false;
+	function _post_delete($do){
+		$numero = $do->get('numero');
+		$alma   = $do->get('almacen');
+		$cana   = $do->count_rel('itconv');
+		for($i=0;$i<$cana;$i++){
+			$codigo = $do->get_rel('itconv','codigo' ,$i);
+			$ent    = $do->get_rel('itconv','entrada',$i);
+			$sal    = $do->get_rel('itconv','salida' ,$i);
+
+			$monto   = $sal-$ent;
+
+			$this->datasis->sinvcarga($codigo, $alma, $monto);
+		}
+
+		logusu('conv',"Conversion ${numero} ELIMINADA");
+	}
+
+	function _post_update($do){
+		logusu('conv',"Conversion ${numero} MODIFICADA");
 	}
 
 	function tabla() {

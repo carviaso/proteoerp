@@ -1476,7 +1476,7 @@ class Ordc extends Controller {
 	}
 
 	function chcodigoa($codigo){
-		$cana=$this->datasis->dameval('SELECT COUNT(*) FROM sinv WHERE codigo='.$this->db->escape($codigo));
+		$cana=$this->datasis->dameval('SELECT COUNT(*) AS cana FROM sinv WHERE codigo='.$this->db->escape($codigo));
 		if(empty($cana) || $cana==0){
 			$this->validation->set_message('chcodigoa', 'El campo %s contiene un codigo no v&aacute;lido o inactivo');
 			return false;

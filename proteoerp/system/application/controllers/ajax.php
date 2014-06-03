@@ -870,7 +870,7 @@ class Ajax extends Controller {
 				LEFT JOIN barraspos AS b ON a.codigo=b.codigo ";
 			if(!empty($sprv)){
 				$dbsprv = $this->db->escape($sprv);
-				$mSQL.="LEFT JOIN sinvprov  AS c ON c.proveed=$dbsprv AND c.codigo=a.codigo";
+				$mSQL.="LEFT JOIN sinvprov  AS c ON c.proveed=${dbsprv} AND c.codigo=a.codigo";
 				$ww = 'OR c.codigop='.$qdb;
 			}else{
 				$ww ='';
@@ -890,6 +890,7 @@ class Ajax extends Controller {
 					$retArray['peso']    = $row['peso'];
 					$retArray['ultimo']  = $row['ultimo'];
 					$retArray['pond']    = $row['pond'];
+					$retArray['existen'] = floatval($row['existen']);
 					$retArray['base1']   = $row['precio1']*100/(100+$row['iva']);
 					$retArray['base2']   = $row['precio2']*100/(100+$row['iva']);
 					$retArray['base3']   = $row['precio3']*100/(100+$row['iva']);
@@ -907,7 +908,7 @@ class Ajax extends Controller {
 	}
 
 	//Busca sinv solo articulos
-	function buscasinvart($activo='S'){
+	function buscasinvart($activo='S',$chneg='N'){
 		$alma   = $this->input->post('alma');
 
 		if($activo=='S'){
@@ -938,9 +939,13 @@ class Ajax extends Controller {
 				$mjoin='LEFT JOIN itsinv AS c ON a.codigo=c.codigo AND c.alma='.$this->db->escape($alma);
 			}
 
-			$vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
-			if($vnega=='N'){
-				$wvnega=" AND ${mcana}>0 ";
+			if($chneg!='S'){
+				$vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
+				if($vnega=='N'){
+					$wvnega=" AND ${mcana}>0 ";
+				}else{
+					$wvnega='';
+				}
 			}else{
 				$wvnega='';
 			}
@@ -963,7 +968,7 @@ class Ajax extends Controller {
 					$retArray['codigo']  = $this->en_utf8($row['codigo']);
 					$retArray['cana']    = $cana;
 					$retArray['tipo']    = $row['tipo'];
-					$retArray['peso']    = $row['peso'];
+					$retArray['peso']    = floatval($row['peso']);
 					$retArray['ultimo']  = $row['ultimo'];
 					$retArray['pond']    = $row['pond'];
 					$retArray['existen'] = (empty($row['existen']))? 0 : round($row['existen'],2);

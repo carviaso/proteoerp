@@ -1770,9 +1770,9 @@ class Pfac extends Controller {
 	}
 
 	function chcodigoa($codigo){
-		$cana=$this->datasis->dameval('SELECT COUNT(*) AS val FROM sinv WHERE activo=\'S\' AND codigo='.$this->db->escape($codigo));
+		$cana=$this->datasis->dameval('SELECT COUNT(*) AS val FROM sinv WHERE activo=\'S\' AND MID(tipo,1,1)="A" AND codigo='.$this->db->escape($codigo));
 		if(empty($cana) || $cana==0){
-			$this->validation->set_message('chcodigoa', 'El campo %s contiene un codigo no v&aacute;lido o inactivo');
+			$this->validation->set_message('chcodigoa', 'El campo %s contiene un codigo de producto no v&aacute;lido o inactivo');
 			return false;
 		}
 		return true;

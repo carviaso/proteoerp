@@ -12,7 +12,8 @@ $campos=$form->template_details('itconv');
 $scampos  ='<tr id="tr_itconv_<#i#>">';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['codigo']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['descrip']['field'].'</td>';
-$scampos .='<td class="littletablerow" align="right">'.$campos['entrada']['field'].  '</td>';
+$scampos .='<td class="littletablerow" align="right">'.$campos['sinvpeso']['field'].'</td>';
+$scampos .='<td class="littletablerow" align="right">'.$campos['entrada']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['salida']['field'];
 $scampos .= $campos['costo']['field'].'</td>';
 $scampos .= '<td class="littletablerow"><a href=# onclick="del_itconv(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
@@ -40,10 +41,10 @@ function autocod(id){
 	$('#codigo_'+id).autocomplete({
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('ajax/buscasinv'); ?>",
+				url:  "<?php echo site_url('ajax/buscasinvart/N/S'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {'q':req.term,'alma':$('#almacen').val()},
 				success:
 					function(data){
 						var sugiere = [];
@@ -63,12 +64,25 @@ function autocod(id){
 			$('#codigo_'+id).val(ui.item.codigo);
 			$('#descrip_'+id).val(ui.item.descrip);
 			$('#descrip_'+id+'_val').text(ui.item.descrip);
-			$("#costo_"+id).val(ui.item.ultimo);
+			$('#costo_'+id).val(ui.item.ultimo);
 			$('#entrada_'+id).focus();
 
+			$('#sinvpeso_'+id).val(ui.item.peso);
+			$('#sinvpeso_'+id+'_val').text(ui.item.peso);
+
 			setTimeout(function() {  $("#codigo").removeAttr("readonly"); }, 1500);
+
+			if(ui.item.activo=='N'){
+				$('#tr_itconv_'+id).css("background-color","#FF7A46");
+			}else{
+				$('#tr_itconv_'+id).css("background-color", "transparent");
+			}
 		}
-	});
+	}).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li>" )
+		.append( "<a><table style='width:100%;border-collapse:collapse;padding:0px;'><tr><td colspan='6' style='font-size:14px;color:#0B0B61;'><b>" + item.descrip + "</b></td></tr><tr><td>Codigo:</td><td>" + item.codigo + "</td><td>Precio: </td><td><b>" + item.base1 + "</b></td><td>Existencia:</td><td>" + item.existen + "</td><td></td></tr></table></a>" )
+		.appendTo( ul );
+	};
 }
 
 function validaEnt(i){
@@ -91,7 +105,7 @@ function add_itconv(){
 	con = (itconv_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
 	htm = htm.replace(/<#o#>/g,con);
-	$("#__UTPL__").before(htm);
+	$("#__PTPL__").after(htm);
 	$("#entrada_"+can).numeric(".");
 	$("#salida_"+can).numeric(".");
 	//$("#costo_"+can).numeric(".");
@@ -104,6 +118,8 @@ function post_modbus_sinv(nind){
 	id=nind.toString();
 	descrip=$('#descrip_'+id).val();
 	$('#descrip_'+id+'_val').text(descrip);
+	peso=$('#sinvpeso_'+id).val();
+	$('#sinvpeso_'+id+'_val').text(peso);
 	$('#entrada_'+id).focus();
 }
 
@@ -114,21 +130,25 @@ function del_itconv(id){
 </script>
 <?php } ?>
 
-<table align='center' width="95%">
+<table align='center' width="100%">
 	<tr>
 		<td>
 		<table width="100%" style="margin: 0; width: 100%;">
+			<?php if(!empty($form->container->value)){ ?>
+			<tr>
+				<td colspan='4' style='color:#FFA70F; font-size:1.2em;background-color:#43524D;border-radius: 7px;padding: 7px;'><?php  echo $form->container->output; ?></td>
+			</tr>
+			<?php } ?>
 			<tr>
 				<td class="littletableheader"><?php echo $form->almacen->label   ?>*&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->almacen->output  ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->fecha->output;   ?>&nbsp;</td>
-			</tr>
-			<tr>
+			</tr><tr>
 				<td class="littletableheader"><?php echo $form->observa1->label;  ?>&nbsp;</td>
 				<td colspan='3' class="littletablerow">   <?php echo $form->observa1->output; ?>&nbsp;</td>
 			</tr>
-		</table><br>
+		</table>
 		</td>
 	</tr>
 	<tr>
@@ -136,13 +156,16 @@ function del_itconv(id){
 
 		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px'>
 		<table width='100%'>
-			<tr>
+			<tr id='__PTPL__'>
 				<td width='135' bgcolor='#7098D0' align='center'>C&oacute;digo</td>
 				<td             bgcolor='#7098D0' align='center'>Descripci&oacute;n</td>
+				<td             bgcolor='#7098D0' align='center'>Peso</td>
 				<td width='80'  bgcolor='#7098D0' align='center'>Entrada</td>
 				<td width='80'  bgcolor='#7098D0' align='center'>Salida</td>
 				<?php if($form->_status!='show') {?>
-					<td width='20' bgcolor='#7098D0' align='center'>&nbsp;</td>
+					<td width='20' bgcolor='#7098D0' align='center'>
+						<a href='#' onclick="add_itconv()" title='Agregar otro producto'><?php echo img('images/agrega4.png'); ?></a>
+					</td>
 				<?php } ?>
 			</tr>
 
@@ -152,13 +175,15 @@ function del_itconv(id){
 				$it_salida   = "salida_$i";
 				$it_entrada  = "entrada_$i";
 				$it_costo    = "costo_$i";
+				$it_peso     = "sinvpeso_$i";
 
 				$pprecios = $form->$it_costo->output;
 			?>
 
 			<tr id='tr_itconv_<?php echo $i; ?>'>
-				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
-				<td class="littletablerow" align="left" ><?php echo $form->$it_descrip->output;  ?></td>
+				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output;    ?></td>
+				<td class="littletablerow" align="left" ><?php echo $form->$it_descrip->output;   ?></td>
+				<td class="littletablerow" align="right" ><?php echo $form->$it_peso->output;     ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_entrada->output;   ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_salida->output.$pprecios;  ?></td>
 
@@ -170,12 +195,8 @@ function del_itconv(id){
 			</tr>
 			<?php } ?>
 
-			<tr id='__UTPL__'>
-				<td id='cueca'></td>
-			</tr>
 		</table>
 		</div>
-		<?php echo $container_bl ?>
 		<?php echo $container_br ?>
 		</td>
 	</tr>
