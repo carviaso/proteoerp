@@ -15,20 +15,25 @@ $modbus=array(
 	'titulo'  =>'Buscar Clíente');
 
 $boton=$this->datasis->modbus($modbus);
-$select=array('tipo_doc', 'numero', 'fecha', "CONCAT_WS(' ',tipo_doc,numero) AS num",'nombre', 'vence', 'pagada', 'vd', 'dias', 'cod_cli', 'comical',
-"totals*IF(tipo_doc='D',-1,1) AS subtotal",
-"iva*IF(tipo_doc='D',-1,1) AS impuesto",
-"totalg*IF(tipo_doc='D',-1,1) AS grantotal",
-"totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1) AS contado",
-"totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1) AS credito",
-"(totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1)+totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1)) AS monto",
-"(comical*100/totals*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1)+totals*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1)) AS porc", 'comision','sepago');
+$select=array('a.tipo_doc', 'a.numero', 'a.fecha', "CONCAT_WS(' ',a.tipo_doc,a.numero) AS num",'a.nombre', 'a.vence', 'a.pagada', 'a.vd',
+'a.dias', 'a.cod_cli', 'b.nombre AS nomven','b.comive','b.comicob',
+"a.comical*IF(a.tipo_doc='D',-1,1) AS comical",
+"a.totals*IF(a.tipo_doc='D',-1,1) AS subtotal",
+"a.iva*IF(a.tipo_doc='D',-1,1) AS impuesto",
+"a.totalg*IF(a.tipo_doc='D',-1,1) AS grantotal",
+"a.totals*(a.referen IN ('E','M'))*IF(a.tipo_doc='D',-1,1) AS contado",
+"a.totals*(a.referen NOT IN ('E','M'))*IF(a.tipo_doc='D',-1,1) AS credito",
+"(a.totals*(a.referen IN ('E','M'))*IF(tipo_doc='D',-1,1)+a.totals*(a.referen NOT IN ('E','M'))*IF(a.tipo_doc='D',-1,1)) AS monto",
+"(a.comical*100/a.totals*(a.referen IN ('E','M'))*IF(a.tipo_doc='D',-1,1)+a.totals*(a.referen NOT IN ('E','M'))*IF(a.tipo_doc='D',-1,1)) AS porc",
+"a.comision*IF(a.tipo_doc='D',-1,1) AS comision",'sepago',
+"ROUND(a.totals*(basecomi/totalg)*IF(tipo_doc='D',-1,1),2) AS basecomi");
 
 $filter = new DataFilter('Filtro del Reporte');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
 $filter->db->select($select);
 $filter->db->from('sfac AS a');
+$filter->db->join('vend AS b','a.vd=b.vendedor');
 $filter->db->where('tipo_doc <>','X');
 $filter->db->where('pagada IS NOT NULL');
 $filter->db->where('pagada <>','0000-00-00');
@@ -109,18 +114,19 @@ if($this->rapyd->uri->is_set('search')){
 
 	$pdf->AddCol('num'     ,20,'Factura'  ,'L',8);
 	$pdf->AddCol('cod_cli' ,15,'Cliente'  ,'L',8);
-	$pdf->AddCol('fecha'   ,20,'Fecha'    ,'R',8);
-	$pdf->AddCol('vence'   ,20,'Vence'    ,'R',8);
-	$pdf->AddCol('pagada'  ,20,'U. Pago'  ,'R',8);
-	$pdf->AddCol('dias'    ,20,'Dias P'   ,'R',8);
+	$pdf->AddCol('fecha'   ,15,'Fecha'    ,'R',8);
+	$pdf->AddCol('vence'   ,15,'Vence'    ,'R',8);
+	$pdf->AddCol('pagada'  ,15,'U. Pago'  ,'R',8);
+	$pdf->AddCol('dias'    ,15,'Dias P'   ,'R',8);
 	$pdf->AddCol('monto'   ,20,'Monto'    ,'R',8);
+	$pdf->AddCol('basecomi',20,'Pagado'   ,'R',8);
 	$pdf->AddCol('comision',20,'Comisión' ,'R',8);
 	$pdf->AddCol('comical' ,20,'Com. Ajus','R',8);
 	$pdf->AddCol('porc'    ,20,'%'        ,'R',8);
 	$pdf->AddCol('sepago'  ,5 ,'Se Pago ' ,'R',8);
 
 	$pdf->setTotalizar('monto','comision','comical');
-	$pdf->setGrupoLabel(' (Vendedor: <#vd#>)  ');
+	$pdf->setGrupoLabel(' (Vendedor: <#vd#>) <#nomven#> <#comicob#> <#comive#>');
 	$pdf->setGrupo('vd');
 	$pdf->Table();
 	$pdf->Output();
