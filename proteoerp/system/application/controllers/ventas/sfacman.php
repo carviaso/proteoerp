@@ -525,6 +525,7 @@ class sfacman extends validaciones {
 		$do->set('totals' ,round($totals ,2));
 		$do->set('totalg' ,round($totalg ,2));
 		$do->set('iva'    ,round($iva    ,2));
+		$do->set('referen','C');
 
 		return true;
 	}

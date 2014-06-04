@@ -3522,9 +3522,13 @@ class Scst extends Controller {
 								foreach($mORDENES as $orden){
 									$dbitorden = $this->db->escape($orden);
 									if($mSALDO > 0){
-										$mSQL   = "SELECT cantidad-recibido AS tempo  FROM itordc WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
+										$mSQL   = "SELECT IF(recibido>cantidad,0,cantidad-recibido) AS tempo  FROM itordc WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
 										$mTEMPO = floatval($this->datasis->dameval($mSQL));
 										if($mTEMPO > 0){
+											if($mSALDO>$mTEMPO){
+												$mSALDO=$mTEMPO;
+											}
+
 											if($mSALDO<=$mTEMPO){
 												$mSQL = "UPDATE itordc SET recibido=recibido+${mSALDO} WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
 												$this->db->simple_query($mSQL);
@@ -3532,7 +3536,7 @@ class Scst extends Controller {
 												$this->db->simple_query($mSQL);
 												$mSALDO = 0;
 											}else{
-												$mSQL = "UPDATE itordc SET recibido=recibido-${mTEMPO} WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
+												$mSQL = "UPDATE itordc SET recibido=IF(${mTEMPO}>recibido,recibido-${mTEMPO},0) WHERE numero=${dbitorden} AND codigo=${dbcodigo}";
 												$this->db->simple_query($mSQL);
 												$mSQL = "UPDATE sinv SET exord=IF(exord>${mTEMPO},exord-${mTEMPO},0) WHERE codigo=${dbcodigo}";
 												$this->db->simple_query($mSQL);
@@ -3786,8 +3790,13 @@ class Scst extends Controller {
 					$sprm['usuario']  = $usuario;
 					$sprm['hora']     = $hora;
 					$sprm['transac']  = $transac;
-					//$sprm['montasa']  = $row['cimpuesto'];
-					//$sprm['impuesto'] = $row['cimpuesto'];
+					$sprm['montasa']  = $row['cgenera'];
+					$sprm['tasa']     = $row['civagen'];
+					$sprm['monadic']  = $row['cadicio'];
+					$sprm['sobretasa']= $row['civaadi'];
+					$sprm['monredu']  = $row['creduci'];
+					$sprm['reducida'] = $row['civared'];
+					$sprm['exento']   = $row['cexento'];
 
 					$mSQL=$this->db->insert_string('sprm', $sprm);
 					$ban =$this->db->simple_query($mSQL);
@@ -4081,8 +4090,13 @@ class Scst extends Controller {
 					$sprm['usuario']  = $usuario;
 					$sprm['hora']     = $hora;
 					$sprm['transac']  = $transac;
-					//$sprm['montasa']  = $row['cimpuesto'];
-					//$sprm['impuesto'] = $row['cimpuesto'];
+					$sprm['montasa']  = $row['cgenera'];
+					$sprm['tasa']     = $row['civagen'];
+					$sprm['monadic']  = $row['cadicio'];
+					$sprm['sobretasa']= $row['civaadi'];
+					$sprm['monredu']  = $row['creduci'];
+					$sprm['reducida'] = $row['civared'];
+					$sprm['exento']   = $row['cexento'];
 
 					$mSQL=$this->db->insert_string('sprm', $sprm);
 					$ban =$this->db->simple_query($mSQL);

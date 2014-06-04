@@ -3888,15 +3888,17 @@ class Sfac extends Controller {
 			return true;
 		}
 
-		$fecha    = $do->get('fecha');
-		$referen  = $do->get('referen');
-		$cajero   = $do->get('cajero');
-		$inicial  = floatval($do->get('inicial'));
+		$fecha     = $do->get('fecha');
+		$referen   = $do->get('referen');
+		$cajero    = $do->get('cajero');
+		$mandatario= $do->get('mandatario');
+		$inicial   = floatval($do->get('inicial'));
 
 		$dbtransac  = $this->db->escape($transac);
 		$dbtipo_doc = $this->db->escape($tipo_doc);
 		$dbnumero   = $this->db->escape($numero);
 		$dbfecha    = $this->db->escape($fecha);
+		$dbmandatario= $this->db->escape($mandatario);
 		$hoy        = date('Y-m-d');
 
 		if($tipo_doc=='X'){
@@ -3926,6 +3928,14 @@ class Sfac extends Controller {
 			$cana = $this->datasis->dameval($mSQL);
 			if($cana>0){
 				$do->error_message_ar['pre_del'] = 'No se puede anular una factura con devolucion.';
+				return false;
+			}
+		}elseif($tipo_doc=='T'){
+
+			$mSQL ="SELECT abonos FROM smov WHERE cod_cli=${dbmandatario} AND fecha=${dbfecha} AND transac=${dbtransac} AND tipo_doc='ND'";
+			$abono=floatval($this->datasis->dameval($mSQL));
+			if($abono>0){
+				$do->error_message_ar['pre_del']='No se puede anular el documento por tener abonos al mandatario.';
 				return false;
 			}
 		}
@@ -3973,16 +3983,20 @@ class Sfac extends Controller {
 
 				$mSQL="UPDATE smov SET abonos=abonos-(${it_abono}) WHERE tipo_doc=${it_tipo_doc} AND numero=${it_numero} AND cod_cli=${it_cod_cli}";
 				$ban=$this->db->simple_query($mSQL);
-				if($ban==false){ memowrite($mSQL,'smov'); }
+				if($ban==false){ memowrite($mSQL,'sfac'); }
 			}
 			//Fin
 
 			$mSQL="DELETE FROM itccli WHERE transac=${dbtransac}";
 			$ban=$this->db->simple_query($mSQL);
-			if($ban==false){ memowrite($mSQL,'smov'); }
+			if($ban==false){ memowrite($mSQL,'sfac'); }
 
 		}else if($tipo_doc=='T'){
 			$dbnnumero= $this->db->escape('T'.substr($numero,1));
+			$mSQL="DELETE FROM smov WHERE cod_cli=${dbmandatario} AND transac=${dbtransac} AND tipo_doc='ND'";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'sfac'); }
+
 		}else{
 			$dbnnumero= $dbnumero;
 		}
