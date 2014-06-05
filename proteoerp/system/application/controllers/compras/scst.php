@@ -4722,7 +4722,7 @@ class Scst extends Controller {
 	}
 
 	function _pond($existen,$itcana,$pond,$ultimo){
-		if($itcana+$existen==0) return $ultimo;
+		if($itcana+$existen==0 || $existen<0) return $ultimo;
 		return (($pond*$existen)+($itcana*$ultimo))/($itcana+$existen);
 	}
 
