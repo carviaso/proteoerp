@@ -1049,7 +1049,7 @@ function apldes(){
 }
 </script>
 <?php } ?>
-<table align='center' width="95%" cellpadding='0' cellspacing='0'>
+<table align='center' width="98%" cellpadding='0' cellspacing='0'>
 	<tr>
 		<td align=right><?php echo $container_tr; ?><?php echo $form->pfac->output.$form->snte->output; ?></td>
 	</tr>
@@ -1090,8 +1090,8 @@ function apldes(){
 <div id='efecha' style='display:none;'></div>
 <table style="width:100%;border-collapse:collapse;padding:0px;">
 	<tr>
-		<td width='595px' align='center'>
-		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:335px;width:600px;'>
+		<td align='center'>
+		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:335px;width:630px;'>
 		<table width='100%' border='0' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL__'>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>C&oacute;digo</b></td>
@@ -1152,7 +1152,7 @@ function apldes(){
 		</table>
 		</div>
 
-		<div id='formapago' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:600px;'>
+		<div id='formapago' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:630px;'>
 		<table style="border-collapse:collapse;padding:0px;border: 1px solid #0B3861;">
 			<tr>
 				<td>
@@ -1208,7 +1208,7 @@ function apldes(){
 			</tr>
 		</table>
 		</div>
-		<div id='fpefectivo' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:600px;'>
+		<div id='fpefectivo' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:630px;'>
 		<table style="border-collapse:collapse;padding:0px;border: 1px solid #0B3861;">
 			<tr><td class="littletableheaderdet" colspan='3' style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;'>PAGO EN EFECTIVO</td></tr>
 			<tr>
@@ -1223,7 +1223,7 @@ function apldes(){
 			<tr>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
-				<td align='right'><input name="bpagar" value="Cerrar" onclick="fpaga('E')" class="button" type="button"></td>
+				<td align='right'></td>
 			</tr>
 		</table>
 		</div>
@@ -1255,7 +1255,7 @@ function apldes(){
 		</td>
 	</tr><tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;width:600px;'>
+		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;width:630px;'>
 		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
 				<td class="littletablerow"    align='left'   style='background:#CFCFCF;width:30px;'><span><?php echo $form->descuento->label;  ?></span></td>
