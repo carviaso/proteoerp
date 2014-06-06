@@ -190,7 +190,6 @@ to {background:#32FFD3}
 			$js_ctotal .= "total('${i}');\n";
 		}else{
 			$f_cana  =nformat($cana);
-			$f_cana .=$f_cana='<input type="hidden" id="cana_'.$i.'" value="'.$cana.'" name="cana_'.$i.'">';
 		}
 
 		$f_codigoa='<input id="codigoa_'.$i.'" type="hidden" value='.$this->db->escape($row['codigo']).' name="codigoa_'.$i.'"> <span id="codigoa_'.$i.'_val">'.$row['codigo'].'</span>';
