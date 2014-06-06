@@ -944,7 +944,7 @@ class Ssal extends Controller {
 
 		$edit->almacen = new dropdownField('Almacen','almacen');
 		$edit->almacen->option('','Seleccionar');
-		$edit->almacen->options('SELECT ubica, CONCAT(ubica, " ", ubides) descrip FROM caub WHERE invfis="N" ORDER BY ubica');
+		$edit->almacen->options('SELECT ubica, CONCAT(ubica, " ", ubides) descrip FROM caub WHERE invfis="N" AND gasto="N" ORDER BY ubica');
 		$edit->almacen->rule ='required|existecaub';
 		$edit->almacen->style='width:200px;';
 

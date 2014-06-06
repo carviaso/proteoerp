@@ -2731,7 +2731,7 @@ class Sfac extends Controller {
 		$edit->codigoa->rule     = 'required';
 
 		$edit->desca = new inputField('Descripci&oacute;n <#o#>', 'desca_<#i#>');
-		$edit->desca->size=45;
+		$edit->desca->size=40;
 		$edit->desca->db_name='desca';
 		$edit->desca->maxlength=50;
 		$edit->desca->readonly  = true;
@@ -2753,7 +2753,7 @@ class Sfac extends Controller {
 		$edit->preca->db_name   = 'preca';
 		$edit->preca->css_class = 'inputnum';
 		$edit->preca->rel_id    = 'sitems';
-		$edit->preca->size      = 14;
+		$edit->preca->size      = 9;
 		$edit->preca->rule      = 'required|positive|callback_chpreca[<#i#>]';
 		$edit->preca->onkeyup   = 'post_precioselec(<#i#>,this);';
 		//$edit->preca->readonly  = true;
