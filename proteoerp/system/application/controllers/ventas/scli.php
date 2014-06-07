@@ -1428,6 +1428,21 @@ class Scli extends validaciones {
 							}
 						}
 					});
+
+					//Chequea si esta repetido
+					$.ajax({
+						type: "POST",
+						url: "'.site_url('ajax/rifrep/C').'",
+						dataType: "json",
+						data: {rifci: rif},
+						success: function(data){
+							if(data.rt){
+								$.prompt(data.msj);
+							}
+						}
+					});
+					//Fin del chequeo repetido
+
 				}
 			});
 		});
@@ -1777,7 +1792,7 @@ class Scli extends validaciones {
 		$script ='
 		<script type="text/javascript" >
 		$(function() {
-			$("#rifci").focusout(function() {
+			$("#rifci").focusout(function(){
 				rif=$(this).val();
 				if(!chrif(rif)){
 					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
@@ -1796,7 +1811,23 @@ class Scli extends validaciones {
 							}
 						}
 					});
+
+					//Chequea si esta repetido
+					$.ajax({
+						type: "POST",
+						url: "'.site_url('ajax/rifrep/C').'",
+						dataType: "json",
+						data: {rifci: rif},
+						success: function(data){
+							if(data.rt){
+								$.prompt(data.msj);
+							}
+						}
+					});
+					//Fin del chequeo repetido
+
 				}
+
 			});
 		});
 

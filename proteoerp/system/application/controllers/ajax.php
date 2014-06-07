@@ -2750,6 +2750,34 @@ class Ajax extends Controller {
 		}
 	}
 
+	function rifrep($tipo='C'){
+		$rifci = $this->input->post('rifci');
+		$rt    = array('rt'=>false,'msj'=>'');
+
+		if($rifci!==false){
+			$rifci   = strtoupper(str_replace(array('-',' ','.'),'',$rifci));
+			$dbrifci = $this->db->escape($rifci);
+
+			if($tipo=='C'){
+				$mSQL="SELECT nombre FROM scli WHERE rifci=${dbrifci}";
+			}else{
+				$mSQL="SELECT nombre FROM sprv WHERE rif=${dbrifci}";
+			}
+
+			$query = $this->db->query($mSQL);
+
+			if($query->num_rows() > 0){
+				$rt['rt'] = true;
+				$rt['msj'] = '<b>Ya existen registros con el mismo rif o c&eacute;dula:</b> <ul>';
+				foreach ($query->result() as $row){
+					$rt['msj'] .= '<li>'.htmlspecialchars($this->en_utf8($row->nombre)).'</li>';
+				}
+				$rt['msj'] .= '</ul> Puede estar repitiendo el registro';
+			}
+		}
+		echo json_encode($rt);
+	}
+
 	function en_utf8($str){
 		if($this->config->item('charset')=='UTF-8' && $this->db->char_set=='latin1'){
 			return utf8_encode($str);

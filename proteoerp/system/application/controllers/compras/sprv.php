@@ -895,6 +895,22 @@ class Sprv extends Controller {
 									}
 								}
 							});
+
+						//Chequea si esta repetido
+						$.ajax({
+							type: "POST",
+							url: "'.site_url('ajax/rifrep/P').'",
+							dataType: "json",
+							data: {rifci: rif},
+							success: function(data){
+								if(data.rt){
+									$.prompt(data.msj);
+								}
+							}
+						});
+						//Fin del chequeo repetido
+
+
 						}
 					} else {
 						alert("El RIF o Cedula introducida no es correcta, por favor verifique e intente de nuevo.");

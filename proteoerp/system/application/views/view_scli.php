@@ -24,21 +24,18 @@ else:
 		<td>
 			<table border='0' width="100%" cellspacing='0' cellpadding='0' >
 				<tr>
-					<td class="littletableheaderc" width="65"><?php      echo $form->cliente->label;  ?></td>
-					<td class="littletablerow"     width="60" ><?php      echo $form->cliente->output; ?></td>
-					<td class="littletableheaderc" width="40" ><?php      echo $form->rifci->label;    ?> </td>
-					<td class="littletablerow"                ><?php      echo $form->rifci->output;   ?></td>
+					<td class="littletableheaderc" width="65" ><?php echo $form->cliente->label;  ?></td>
+					<td class="littletablerow"     width="60" ><?php echo $form->cliente->output; ?></td>
+					<td class="littletableheaderc" width="40" ><?php echo $form->rifci->label;    ?></td>
+					<td class="littletablerow"                ><?php echo $form->rifci->output;   ?></td>
 					<td class="littletablerow" align="right"  ><?php echo $form->tiva->label.' '.$form->tiva->output;    ?></td>
-				</tr>
-				<tr>
-					<td class="littletableheaderc"        ><?php echo $form->nombre->label ?></td>
-					<td class="littletablerow" colspan='4'><?php echo $form->nombre->output?></td>
-				</tr>
-				<tr>
-					<td class="littletableheaderc"        ><?php echo $form->nomfis->label;  ?></td>
-					<td class="littletablerow" colspan='4'><?php echo $form->nomfis->output; ?></td>
-				</tr>
-				<tr>
+				</tr><tr>
+					<td class="littletableheaderc"        ><?php echo $form->nombre->label     ?></td>
+					<td class="littletablerow" colspan='4'><?php echo $form->nombre->output    ?></td>
+				</tr><tr>
+					<td class="littletableheaderc"        ><?php echo $form->nomfis->label;    ?></td>
+					<td class="littletablerow" colspan='4'><?php echo $form->nomfis->output;   ?></td>
+				</tr><tr>
 					<td class="littletableheaderc"        ><?php echo $form->contacto->label;  ?></td>
 					<td class="littletablerow" colspan='4'><?php echo $form->contacto->output; ?></td>
 				</tr>
