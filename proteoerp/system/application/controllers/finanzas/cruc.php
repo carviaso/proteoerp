@@ -19,11 +19,7 @@ class Cruc extends Controller {
 	}
 
 	function index(){
-		if ( !$this->datasis->iscampo('cruc','id') ) {
-			$this->db->simple_query('ALTER TABLE cruc DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE cruc ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE cruc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		$this->instalar();
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -74,10 +70,10 @@ class Cruc extends Controller {
 		';
 
 		$param['WestPanel']    = $WestPanel;
-		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		$param['script']       = '';
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
-		$param['funciones']   = $funciones;
+		$param['funciones']    = $funciones;
 		$param['listados']     = $this->datasis->listados('CRUC', 'JQ');
 		$param['otros']        = $this->datasis->otros('CRUC', 'JQ');
 		$param['centerpanel']  = $centerpanel;
@@ -810,7 +806,8 @@ class Cruc extends Controller {
 					});
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					$("#saldoa").val(roundNumber(saldo,2))
+					$("#saldoa").val(roundNumber(saldo,2));
+					$("#saldoa_val").text(nformat(saldo,2));
 
 				}
 			});
@@ -855,7 +852,8 @@ class Cruc extends Controller {
 					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					$("#saldod").val(roundNumber(saldo,2))
+					$("#saldod").val(roundNumber(saldo,2));
+					$("#saldod_val").text(nformat(saldo,2));
 				}
 			});
 		});';
@@ -864,8 +862,8 @@ class Cruc extends Controller {
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
 
-		$edit->proveed->label = 'Cliente';
-		$edit->cliente->label = 'Proveedor';
+		$edit->proveed->label = 'Cliente que cede la deuda';
+		$edit->cliente->label = 'Proveedor que asume la deuda';
 
 		$edit->tipo = new autoUpdateField('tipo','C-P','C-P');
 
@@ -966,7 +964,8 @@ class Cruc extends Controller {
 					});
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					$("#saldoa").val(roundNumber(saldo,2))
+					$("#saldoa").val(roundNumber(saldo,2));
+					$("#saldoa_val").text(nformat(saldo,2));
 
 				}
 			});
@@ -1011,7 +1010,8 @@ class Cruc extends Controller {
 					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					$("#saldod").val(roundNumber(saldo,2))
+					$("#saldod").val(roundNumber(saldo,2));
+					$("#saldod_val").text(nformat(saldo,2));
 				}
 			});
 		});';
@@ -1020,9 +1020,9 @@ class Cruc extends Controller {
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
 
-		$edit->proveed->label = 'Cede';
+		$edit->proveed->label = 'Cliente que cede la deuda';
 
-		$edit->cliente->label = 'Recibe';
+		$edit->cliente->label = 'Cliente que asume la deuda';
 
 		$edit->tipo = new autoUpdateField('tipo','C-C','C-C');
 
@@ -1116,7 +1116,8 @@ class Cruc extends Controller {
 					});
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					$("#saldoa").val(roundNumber(saldo,2))
+					$("#saldoa").val(roundNumber(saldo,2));
+					$("#saldoa_val").text(nformat(saldo,2));
 
 				}
 			});
@@ -1161,7 +1162,8 @@ class Cruc extends Controller {
 					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					$("#saldod").val(roundNumber(saldo,2))
+					$("#saldod").val(roundNumber(saldo,2));
+					$("#saldod_val").text(nformat(saldo,2));
 				}
 			});
 		});';
@@ -1169,9 +1171,9 @@ class Cruc extends Controller {
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
 
-		$edit->proveed->label = 'Cede';
+		$edit->proveed->label = 'Proveedor que cede la deuda';
 
-		$edit->cliente->label = 'Recibe';
+		$edit->cliente->label = 'Proveedor que asume la deuda';
 
 		$edit->tipo = new autoUpdateField('tipo','P-P','P-P');
 
@@ -1262,7 +1264,8 @@ class Cruc extends Controller {
 					});
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					$("#saldoa").val(roundNumber(saldo,2))
+					$("#saldoa").val(roundNumber(saldo,2));
+					$("#saldoa_val").text(nformat(saldo,2));
 
 				}
 			});
@@ -1307,7 +1310,8 @@ class Cruc extends Controller {
 					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
-					$("#saldod").val(roundNumber(saldo,2))
+					$("#saldod").val(roundNumber(saldo,2));
+					$("#saldod_val").text(nformat(saldo,2));
 				}
 			});
 		});';
@@ -1316,9 +1320,9 @@ class Cruc extends Controller {
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
 
-		$edit->proveed->label = 'Proveedor';
+		$edit->proveed->label = 'Proveedor que cede la deuda';
 
-		$edit->cliente->label = 'Cliente';
+		$edit->cliente->label = 'Cliente que recibe la deuda';
 
 		$edit->tipo = new autoUpdateField('tipo','P-C','P-C');
 
@@ -1356,15 +1360,16 @@ class Cruc extends Controller {
 		$edit->fecha->size       = 10;
 		$edit->fecha->maxlength  =  8;
 		$edit->fecha->calendar   = false;
+		$edit->fecha->rule       = 'required|chfecha';
 		$edit->fecha->insertValue= date('Y-m-d');
 
 		$edit->proveed = new inputField('Proveedor','proveed');
 		$edit->proveed->rule      = 'trim|required';
-		$edit->proveed->size      =  6;
+		$edit->proveed->size      =  10;
 		//$edit->proveed->maxlength =  5;
 
 		$edit->nombre = new inputField('Nombre','nombre');
-		//$edit->nombre->type      = 'inputhidden';
+		$edit->nombre->type      = 'inputhidden';
 		$edit->nombre->rule      = '';
 		$edit->nombre->size      = 35;
 		$edit->nombre->maxlength = 40;
@@ -1374,14 +1379,17 @@ class Cruc extends Controller {
 		$edit->saldoa->css_class = 'inputnum';
 		$edit->saldoa->size      = 10;
 		$edit->saldoa->maxlength = 16;
+		$edit->saldoa->type      = 'inputhidden';
+		$edit->saldoa->insertValue= '0';
+		$edit->saldoa->showformat = 'decimal';
 
 		$edit->cliente = new inputField('Cliente','cliente');
 		$edit->cliente->rule      = 'trim|required';
-		$edit->cliente->size      = 6;
+		$edit->cliente->size      = 10;
 		//$edit->cliente->maxlength = 5;
 
 		$edit->nomcli = new inputField('Nomcli','nomcli');
-		//$edit->nomcli->type      = 'inputhidden';
+		$edit->nomcli->type      = 'inputhidden';
 		$edit->nomcli->rule      = '';
 		$edit->nomcli->size      = 35;
 		$edit->nomcli->maxlength = 40;
@@ -1391,12 +1399,17 @@ class Cruc extends Controller {
 		$edit->saldod->css_class = 'inputnum';
 		$edit->saldod->size      = 10;
 		$edit->saldod->maxlength = 16;
+		$edit->saldod->type      = 'inputhidden';
+		$edit->saldod->insertValue= '0';
+		$edit->saldod->showformat = 'decimal';
 
-		$edit->monto = new inputField('Monto','monto');
+		$edit->monto = new inputField('Monto Cruzado','monto');
 		$edit->monto->rule       = 'numeric|positive';
 		$edit->monto->css_class  = 'inputnum';
 		$edit->monto->size       = 12;
 		$edit->monto->maxlength  = 16;
+		$edit->monto->showformat = 'decimal';
+		$edit->monto->type      = 'inputhidden';
 
 		$edit->concept1 = new inputField('Concepto','concept1');
 		$edit->concept1->rule      = '';
@@ -1426,13 +1439,24 @@ class Cruc extends Controller {
 		$edit->itofecha->rel_id='itcruc';
 
 		$edit->itmonto = new inputField('Monto','itmonto_<#i#>');
-		$edit->itmonto->rule      = 'max_length[17]|numeric';
+		$edit->itmonto->rule      = 'max_length[17]|numeric|positive';
 		$edit->itmonto->css_class = 'inputnum';
 		$edit->itmonto->db_name   = 'monto';
 		$edit->itmonto->rel_id    = 'itcruc';
 		$edit->itmonto->size      = 19;
 		$edit->itmonto->maxlength = 17;
-		//fin del detalle
+
+		//Campos comodines
+		$edit->itpmonto = new inputField('','itpmonto_<#i#>');
+		$edit->itpmonto->db_name  = 'pmonto';
+		$edit->itpmonto->type     = 'inputhidden';
+		$edit->itpmonto->rel_id='itcruc';
+
+		$edit->itpsaldo = new inputField('','itpsaldo_<#i#>');
+		$edit->itpsaldo->db_name  = 'psaldo';
+		$edit->itpsaldo->type     = 'inputhidden';
+		$edit->itpsaldo->rel_id='itcruc';
+		//fin campos comodines, fin del detalle
 
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
@@ -1484,10 +1508,11 @@ class Cruc extends Controller {
 		$do->set('transac',$trans );
 		$do->set('numero' ,$numero);
 
+		$citcruc=0;
 		$cana = $do->count_rel('itcruc');
 		for($i=0;$i<$cana;$i++){
 			$onumero = $do->get_rel('itcruc','onumero' ,$i);
-			$monto   = $do->get_rel('itcruc','monto'   ,$i);
+			$monto   = floatval($do->get_rel('itcruc','monto'   ,$i));
 
 			if($monto == 0){
 				$do->rel_rm('itcruc',$i);
@@ -1499,6 +1524,13 @@ class Cruc extends Controller {
 			}else{
 				$do->set_rel('itcruc','tipo','APA',$i);
 			}
+			$do->rel_rm_field('itcruc','psaldo',$i);
+			$do->rel_rm_field('itcruc','pmonto',$i);
+			$citcruc++;
+		}
+		if($citcruc==0){
+			$do->error_message_ar['pre_ins']='No selecciono efectos para cruzar';
+			return false;
 		}
 
 		return true;
@@ -2028,31 +2060,11 @@ class Cruc extends Controller {
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('cruc')) {
-			$mSQL="CREATE TABLE `cruc` (
-			  `numero`   varchar(8) NOT NULL DEFAULT '',
-			  `fecha`    date          DEFAULT NULL,
-			  `tipo`     char(3)       DEFAULT NULL,
-			  `proveed`  varchar(5)    DEFAULT NULL,
-			  `nombre`   varchar(40)   DEFAULT NULL,
-			  `saldoa`   decimal(16,2) DEFAULT NULL,
-			  `cliente`  varchar(5)    DEFAULT NULL,
-			  `nomcli`   varchar(40)   DEFAULT NULL,
-			  `saldod`   decimal(16,2) DEFAULT NULL,
-			  `monto`    decimal(16,2) DEFAULT NULL,
-			  `concept1` varchar(40)   DEFAULT NULL,
-			  `concept2` varchar(40)   DEFAULT NULL,
-			  `transac`  varchar(8)    DEFAULT NULL,
-			  `estampa`  date          DEFAULT NULL,
-			  `hora`     varchar(8)    DEFAULT NULL,
-			  `usuario`  varchar(12)   DEFAULT NULL,
-			  `id`       int(11) NOT NULL AUTO_INCREMENT,
-			  PRIMARY KEY (`id`),
-			  UNIQUE KEY `numero` (`numero`),
-			  KEY `transaccion` (`transac`),
-			  KEY `fecha` (`fecha`)
-			) ENGINE=MyISAM AUTO_INCREMENT=437 DEFAULT CHARSET=latin1";
-			$this->db->simple_query($mSQL);
+
+		if(!$this->datasis->iscampo('cruc','id')){
+			$this->db->simple_query('ALTER TABLE cruc DROP PRIMARY KEY');
+			$this->db->simple_query('ALTER TABLE cruc ADD UNIQUE INDEX numero (numero)');
+			$this->db->simple_query('ALTER TABLE cruc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 	}
 }

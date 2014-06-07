@@ -2010,14 +2010,14 @@ class Scst extends Controller {
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->size = 12;
-		$edit->fecha->rule ='required';
+		$edit->fecha->rule ='required|chfecha';
 		$edit->fecha->calendar=false;
 		$transac=$edit->get_from_dataobjetct('transac');
 
 		$edit->vence = new DateonlyField('Vence', 'vence','d/m/Y');
 		$edit->vence->insertValue = date('Y-m-d');
 		$edit->vence->size = 12;
-		$edit->vence->rule ='required';
+		$edit->vence->rule ='required|chfecha';
 		$edit->vence->calendar=false;
 
 		$edit->actuali = new DateonlyField('Actualizado', 'actuali','d/m/Y');
