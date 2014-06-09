@@ -1430,17 +1430,17 @@ class Scli extends validaciones {
 					});
 
 					//Chequea si esta repetido
-					$.ajax({
-						type: "POST",
-						url: "'.site_url('ajax/rifrep/C').'",
-						dataType: "json",
-						data: {rifci: rif,codigo:$("#cliente").val()},
-						success: function(data){
-							if(data.rt){
-								$.prompt(data.msj);
-							}
-						}
-					});
+					//$.ajax({
+					//	type: "POST",
+					//	url: "'.site_url('ajax/rifrep/C').'",
+					//	dataType: "json",
+					//	data: {rifci: rif, codigo: $("#cliente").val()},
+					//	success: function(data){
+					//		if(data.rt){
+					//			$.prompt(data.msj);
+					//		}
+					//	}
+					//});
 					//Fin del chequeo repetido
 
 				}
@@ -1817,7 +1817,7 @@ class Scli extends validaciones {
 						type: "POST",
 						url: "'.site_url('ajax/rifrep/C').'",
 						dataType: "json",
-						data: {rifci: rif},
+						data: {rifci: rif,codigo:$("#cliente").val()},
 						success: function(data){
 							if(data.rt){
 								$.prompt(data.msj);
