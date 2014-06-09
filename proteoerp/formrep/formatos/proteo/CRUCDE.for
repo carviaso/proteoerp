@@ -17,15 +17,15 @@ $row      = $mSQL_1->row();
 $tipo     = trim($row->tipo);
 $numero   = $row->numero;
 $montolet = strtoupper(numletra($row->monto));
-$cliente  = htmlspecialchars(trim($row->cliente));
-$nomcli   = htmlspecialchars(trim($row->nomcli));
-$proveed  = htmlspecialchars(trim($row->proveed));
-$nomprov  = htmlspecialchars(trim($row->nombre));
+$cliente  =  $this->us_ascii2html(trim($row->cliente));
+$nomcli   =  $this->us_ascii2html(trim($row->nomcli));
+$proveed  =  $this->us_ascii2html(trim($row->proveed));
+$nomprov  =  $this->us_ascii2html(trim($row->nombre));
 $fecha    = $row->fecha;
 $hfecha   = dbdate_to_human($row->fecha);
 $monto    = nformat($row->monto);
 $saldo    = nformat($row->saldod);
-$concepto = htmlspecialchars(trim($row->concept1).trim($row->concept2));
+$concepto =  $this->us_ascii2html(trim($row->concept1).trim($row->concept2));
 
 
 $sel=array('a.numero','a.tipo','a.onumero','a.ofecha','a.oregist','a.monto');

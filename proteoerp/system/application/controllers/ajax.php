@@ -1516,7 +1516,7 @@ class Ajax extends Controller {
 			$retArray = $retorno = array();
 			$mSQL="SELECT id, fecha,monto, numero, tipo_doc, monto-abonos AS saldo
 			FROM sprm
-			WHERE tipo_doc IN ('FC','ND','GI') AND abonos<monto AND cod_prv=${dbsprv}";
+			WHERE tipo_doc IN ('FC','ND','GI') AND abonos<monto AND cod_prv=${dbsprv} ORDER BY fecha";
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
@@ -1626,7 +1626,7 @@ class Ajax extends Controller {
 			$retArray = $retorno = array();
 			$mSQL="SELECT id, fecha,monto, numero, tipo_doc, monto-abonos AS saldo
 			FROM smov
-			WHERE tipo_doc IN ('FC','ND','GI') AND abonos<monto AND cod_cli=${dbscli}";
+			WHERE tipo_doc IN ('FC','ND','GI') AND abonos<monto AND cod_cli=${dbscli} ORDER BY fecha";
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){

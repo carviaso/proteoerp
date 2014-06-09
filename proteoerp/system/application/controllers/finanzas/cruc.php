@@ -722,6 +722,19 @@ class Cruc extends Controller {
 	function setDatait(){
 	}
 
+	//******************************************************************
+	// Comodin para eliminar
+	//
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+		$edit = $this->_decruc();
+		$edit->tipo = new hiddenField('Tipo','tipo');
+
+		$edit->proveed->label = 'Acreedor';
+		$edit->cliente->label = 'Deudor';
+
+		$this->_dataedit($edit);
+	}
 
 	//******************************************************************
 	// Cruce Cliente Proveedor
@@ -769,6 +782,8 @@ class Cruc extends Controller {
 					$("#nombre").val(ui.item.nombre);
 					$("#nombre_val").text(ui.item.nombre);
 
+					$("#proveed").val(ui.item.value);
+
 					setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
 
 					$.ajax({
@@ -786,6 +801,7 @@ class Cruc extends Controller {
 										$("#itofecha_"+can ).val(val.fecha);
 										$("#itpmonto_"+can  ).val(val.monto);
 										$("#itpsaldo_"+can  ).val(val.saldo);
+										$("#ittipo_"+can ).val("ADE");
 										$("#itmonto_"+can ).val("0");
 
 										$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
@@ -808,6 +824,7 @@ class Cruc extends Controller {
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
 					$("#saldoa").val(roundNumber(saldo,2));
 					$("#saldoa_val").text(nformat(saldo,2));
+					coment();
 
 				}
 			});
@@ -849,11 +866,65 @@ class Cruc extends Controller {
 					$("#nomcli").val(ui.item.nombre);
 					$("#nomcli_val").text(ui.item.nombre);
 
+					$("#cliente").val(ui.item.value);
+
+					$.ajax({
+						url: "'.site_url('ajax/buscasprm').'",
+						dataType: "json",
+						type: "POST",
+						data: {"sprv" : ui.item.value},
+						success: function(data){
+								truncateapa();
+								$.each(data,
+									function(id, val){
+										can=add_itcrucapa();
+
+										$("#itonumero_"+can).val(val.tipo_doc+val.numero);
+										$("#itofecha_"+can ).val(val.fecha);
+										$("#itpmonto_"+can  ).val(val.monto);
+										$("#itpsaldo_"+can  ).val(val.saldo);
+										$("#ittipo_"+can ).val("APA");
+										$("#itmonto_"+can ).val("0");
+
+										$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
+										$("#itofecha_"+can+"_val" ).text(val.fecha);
+										$("#itpmonto_"+can+"_val"  ).text(nformat(val.monto,2));
+										$("#itpsaldo_"+can+"_val"  ).text(nformat(val.saldo,2));
+
+										$("#itmonto_"+can ).focus(function(){
+											var monto   = Number($("#monto").val());
+											var montoapa= totalizaapa();
+											var valor   = $(this).val();
+											var aplsaldo= roundNumber(monto-montoapa,2);
+
+											if(aplsaldo>0){
+												if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+													pos=this.name.lastIndexOf("_");
+													if(pos>0){
+														ind   = this.name.substring(pos+1);
+														saldo = Number($("#itpsaldo_"+ind).val());
+
+														if(aplsaldo>saldo){
+															$(this).val(saldo);
+														}else{
+															$(this).val(aplsaldo);
+														}
+													}
+												}
+											}
+										});
+									}
+								);
+							},
+					});
+
+
 					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
 					$("#saldod").val(roundNumber(saldo,2));
 					$("#saldod_val").text(nformat(saldo,2));
+					coment();
 				}
 			});
 		});';
@@ -863,21 +934,15 @@ class Cruc extends Controller {
 		$edit->script($script,'create');
 
 		$edit->proveed->label = 'Cliente que cede la deuda';
+		$edit->proveed->rule  = 'trim|required|existescli';
+
 		$edit->cliente->label = 'Proveedor que asume la deuda';
+		$edit->cliente->rule  = 'trim|required|existesprv';
 
 		$edit->tipo = new autoUpdateField('tipo','C-P','C-P');
 
 		$this->_dataedit($edit);
 
-	}
-
-	//******************************************************************
-	// Comodin para eliminar
-	//
-	function dataedit(){
-		$this->rapyd->load('dataedit');
-		$edit = $this->_decruc();
-		$this->_dataedit($edit);
 	}
 
 	//******************************************************************
@@ -927,6 +992,8 @@ class Cruc extends Controller {
 					$("#nombre").val(ui.item.nombre);
 					$("#nombre_val").text(ui.item.nombre);
 
+					$("#proveed").val(ui.item.value);
+
 					setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
 
 					$.ajax({
@@ -944,6 +1011,7 @@ class Cruc extends Controller {
 										$("#itofecha_"+can ).val(val.fecha);
 										$("#itpmonto_"+can  ).val(val.monto);
 										$("#itpsaldo_"+can  ).val(val.saldo);
+										$("#ittipo_"+can ).val("ADE");
 										$("#itmonto_"+can ).val("0");
 
 										$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
@@ -966,6 +1034,7 @@ class Cruc extends Controller {
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
 					$("#saldoa").val(roundNumber(saldo,2));
 					$("#saldoa_val").text(nformat(saldo,2));
+					coment();
 
 				}
 			});
@@ -1007,11 +1076,14 @@ class Cruc extends Controller {
 					$("#nomcli").val(ui.item.nombre);
 					$("#nomcli_val").text(ui.item.nombre);
 
+					$("#cliente").val(ui.item.value);
+
 					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
 					$("#saldod").val(roundNumber(saldo,2));
 					$("#saldod_val").text(nformat(saldo,2));
+					coment();
 				}
 			});
 		});';
@@ -1021,8 +1093,10 @@ class Cruc extends Controller {
 		$edit->script($script,'create');
 
 		$edit->proveed->label = 'Cliente que cede la deuda';
+		$edit->proveed->rule  = 'trim|required|existescli';
 
 		$edit->cliente->label = 'Cliente que asume la deuda';
+		$edit->cliente->rule  = 'trim|required|existescli';
 
 		$edit->tipo = new autoUpdateField('tipo','C-C','C-C');
 
@@ -1079,6 +1153,8 @@ class Cruc extends Controller {
 					$("#nombre").val(ui.item.nombre);
 					$("#nombre_val").text(ui.item.nombre);
 
+					$("#proveed").val(ui.item.value);
+
 					setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
 
 					$.ajax({
@@ -1096,6 +1172,7 @@ class Cruc extends Controller {
 										$("#itofecha_"+can ).val(val.fecha);
 										$("#itpmonto_"+can  ).val(val.monto);
 										$("#itpsaldo_"+can  ).val(val.saldo);
+										$("#ittipo_"+can  ).val("ADE");
 										$("#itmonto_"+can ).val("0");
 
 										$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
@@ -1118,6 +1195,7 @@ class Cruc extends Controller {
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
 					$("#saldoa").val(roundNumber(saldo,2));
 					$("#saldoa_val").text(nformat(saldo,2));
+					coment();
 
 				}
 			});
@@ -1159,11 +1237,14 @@ class Cruc extends Controller {
 					$("#nomcli").val(ui.item.nombre);
 					$("#nomcli_val").text(ui.item.nombre);
 
+					$("#cliente").val(ui.item.value);
+
 					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
 					$("#saldod").val(roundNumber(saldo,2));
 					$("#saldod_val").text(nformat(saldo,2));
+					coment();
 				}
 			});
 		});';
@@ -1172,8 +1253,10 @@ class Cruc extends Controller {
 		$edit->script($script,'create');
 
 		$edit->proveed->label = 'Proveedor que cede la deuda';
+		$edit->proveed->rule  = 'trim|required|existesprv';
 
 		$edit->cliente->label = 'Proveedor que asume la deuda';
+		$edit->cliente->rule  = 'trim|required|existesprv';
 
 		$edit->tipo = new autoUpdateField('tipo','P-P','P-P');
 
@@ -1227,6 +1310,8 @@ class Cruc extends Controller {
 					$("#nombre").val(ui.item.nombre);
 					$("#nombre_val").text(ui.item.nombre);
 
+					$("#proveed").val(ui.item.value);
+
 					setTimeout(function() {  $("#proveed").removeAttr("readonly"); }, 1500);
 
 					$.ajax({
@@ -1242,14 +1327,15 @@ class Cruc extends Controller {
 
 										$("#itonumero_"+can).val(val.tipo_doc+val.numero);
 										$("#itofecha_"+can ).val(val.fecha);
-										$("#itpmonto_"+can  ).val(val.monto);
-										$("#itpsaldo_"+can  ).val(val.saldo);
-										$("#itmonto_"+can ).val("0");
+										$("#itpmonto_"+can ).val(val.monto);
+										$("#itpsaldo_"+can ).val(val.saldo);
+										$("#ittipo_"+can   ).val("ADE");
+										$("#itmonto_"+can  ).val("0");
 
 										$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
 										$("#itofecha_"+can+"_val" ).text(val.fecha);
-										$("#itpmonto_"+can+"_val"  ).text(nformat(val.monto,2));
-										$("#itpsaldo_"+can+"_val"  ).text(nformat(val.saldo,2));
+										$("#itpmonto_"+can+"_val" ).text(nformat(val.monto,2));
+										$("#itpsaldo_"+can+"_val" ).text(nformat(val.saldo,2));
 
 										$("#itmonto_"+can ).focus(function(){
 											var valor = $(this).val();
@@ -1266,6 +1352,7 @@ class Cruc extends Controller {
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldosprv').'", async: false, data: {clipro: ui.item.value } }).responseText);
 					$("#saldoa").val(roundNumber(saldo,2));
 					$("#saldoa_val").text(nformat(saldo,2));
+					coment();
 
 				}
 			});
@@ -1307,11 +1394,65 @@ class Cruc extends Controller {
 					$("#nomcli").val(ui.item.nombre);
 					$("#nomcli_val").text(ui.item.nombre);
 
+					$("#cliente").val(ui.item.value);
+
+
+					$.ajax({
+						url: "'.site_url('ajax/buscasmov').'",
+						dataType: "json",
+						type: "POST",
+						data: {"scli" : ui.item.value},
+						success: function(data){
+								truncateapa();
+								$.each(data,
+									function(id, val){
+										can=add_itcrucapa();
+
+										$("#itonumero_"+can).val(val.tipo_doc+val.numero);
+										$("#itofecha_"+can ).val(val.fecha);
+										$("#itpmonto_"+can  ).val(val.monto);
+										$("#itpsaldo_"+can  ).val(val.saldo);
+										$("#ittipo_"+can ).val("APA");
+										$("#itmonto_"+can ).val("0");
+
+										$("#itonumero_"+can+"_val").text(val.tipo_doc+val.numero);
+										$("#itofecha_"+can+"_val" ).text(val.fecha);
+										$("#itpmonto_"+can+"_val" ).text(nformat(val.monto,2));
+										$("#itpsaldo_"+can+"_val" ).text(nformat(val.saldo,2));
+
+										$("#itmonto_"+can ).focus(function(){
+											var monto   = Number($("#monto").val());
+											var montoapa= totalizaapa();
+											var valor   = $(this).val();
+											var aplsaldo= roundNumber(monto-montoapa,2);
+
+											if(aplsaldo>0){
+												if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
+													pos=this.name.lastIndexOf("_");
+													if(pos>0){
+														ind   = this.name.substring(pos+1);
+														saldo = Number($("#itpsaldo_"+ind).val());
+
+														if(aplsaldo>saldo){
+															$(this).val(saldo);
+														}else{
+															$(this).val(aplsaldo);
+														}
+													}
+												}
+											}
+										});
+									}
+								);
+							},
+					});
+
 					setTimeout(function() {  $("#cliente").removeAttr("readonly"); }, 1500);
 
 					var saldo= Number($.ajax({ type: "POST", url: "'.site_url('ajax/ajaxsaldoscli').'", async: false, data: {clipro: ui.item.value } }).responseText);
 					$("#saldod").val(roundNumber(saldo,2));
 					$("#saldod_val").text(nformat(saldo,2));
+					coment();
 				}
 			});
 		});';
@@ -1321,8 +1462,10 @@ class Cruc extends Controller {
 		$edit->script($script,'create');
 
 		$edit->proveed->label = 'Proveedor que cede la deuda';
+		$edit->proveed->rule  = 'trim|required|existesprv';
 
 		$edit->cliente->label = 'Cliente que recibe la deuda';
+		$edit->cliente->rule  = 'trim|required|existescli';
 
 		$edit->tipo = new autoUpdateField('tipo','P-C','P-C');
 
@@ -1364,9 +1507,7 @@ class Cruc extends Controller {
 		$edit->fecha->insertValue= date('Y-m-d');
 
 		$edit->proveed = new inputField('Proveedor','proveed');
-		$edit->proveed->rule      = 'trim|required';
 		$edit->proveed->size      =  10;
-		//$edit->proveed->maxlength =  5;
 
 		$edit->nombre = new inputField('Nombre','nombre');
 		$edit->nombre->type      = 'inputhidden';
@@ -1374,7 +1515,7 @@ class Cruc extends Controller {
 		$edit->nombre->size      = 35;
 		$edit->nombre->maxlength = 40;
 
-		$edit->saldoa = new inputField('Saldo','saldoa');
+		$edit->saldoa = new inputField('Saldo Acreedor','saldoa');
 		$edit->saldoa->rule      = 'numeric';
 		$edit->saldoa->css_class = 'inputnum';
 		$edit->saldoa->size      = 10;
@@ -1384,9 +1525,7 @@ class Cruc extends Controller {
 		$edit->saldoa->showformat = 'decimal';
 
 		$edit->cliente = new inputField('Cliente','cliente');
-		$edit->cliente->rule      = 'trim|required';
 		$edit->cliente->size      = 10;
-		//$edit->cliente->maxlength = 5;
 
 		$edit->nomcli = new inputField('Nomcli','nomcli');
 		$edit->nomcli->type      = 'inputhidden';
@@ -1394,7 +1533,7 @@ class Cruc extends Controller {
 		$edit->nomcli->size      = 35;
 		$edit->nomcli->maxlength = 40;
 
-		$edit->saldod = new inputField('Saldo','saldod');
+		$edit->saldod = new inputField('Saldo Deudor','saldod');
 		$edit->saldod->rule      = 'numeric';
 		$edit->saldod->css_class = 'inputnum';
 		$edit->saldod->size      = 10;
@@ -1445,6 +1584,10 @@ class Cruc extends Controller {
 		$edit->itmonto->rel_id    = 'itcruc';
 		$edit->itmonto->size      = 19;
 		$edit->itmonto->maxlength = 17;
+
+		$edit->ittipo = new hiddenField('','ittipo_<#i#>');
+		$edit->ittipo->db_name  = 'tipo';
+		$edit->ittipo->rel_id='itcruc';
 
 		//Campos comodines
 		$edit->itpmonto = new inputField('','itpmonto_<#i#>');
@@ -1508,22 +1651,23 @@ class Cruc extends Controller {
 		$do->set('transac',$trans );
 		$do->set('numero' ,$numero);
 
-		$citcruc=0;
+		$citcruc=$apatot=$adetot=0;
 		$cana = $do->count_rel('itcruc');
 		for($i=0;$i<$cana;$i++){
 			$onumero = $do->get_rel('itcruc','onumero' ,$i);
 			$monto   = floatval($do->get_rel('itcruc','monto'   ,$i));
+			$ittipo  = $do->get_rel('itcruc','tipo',$i);
 
 			if($monto == 0){
 				$do->rel_rm('itcruc',$i);
 				continue;
 			}
-
-			if(substr($onumero,0,2)=='FC' || substr($onumero,0,2)=='GI' || substr($onumero,0,2)=='ND'){
-				$do->set_rel('itcruc','tipo','ADE',$i);
+			if($ittipo=='APA'){
+				$apatot += $monto;
 			}else{
-				$do->set_rel('itcruc','tipo','APA',$i);
+				$adetot += $monto;
 			}
+
 			$do->rel_rm_field('itcruc','psaldo',$i);
 			$do->rel_rm_field('itcruc','pmonto',$i);
 			$citcruc++;
@@ -1532,6 +1676,15 @@ class Cruc extends Controller {
 			$do->error_message_ar['pre_ins']='No selecciono efectos para cruzar';
 			return false;
 		}
+
+		if($tipo=='C-P' || $tipo=='P-C'){
+			if($apatot!=$adetot){
+				$do->error_message_ar['pre_ins']='El monto adeudado no coincide con el monto acreedor';
+				return false;
+			}
+		}
+
+		$do->set('monto',round($apatot,2));
 
 		return true;
 	}
