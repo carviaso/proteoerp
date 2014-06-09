@@ -684,7 +684,15 @@ class Cruc extends Controller {
 		}
 	}
 
-
+	function chsaldo($val,$i){
+		$val  =floatval($val);
+		$saldo=floatval($this->input->post('itpsaldo_'.$i));
+		if($val > $saldo){
+			$this->validation->set_message('chsaldo', 'No puede abonar al documento mas que el saldo disponible');
+			return false;
+		}
+		return true;
+	}
 
 	/*******************************************************************
 	* Busca la data en el Servidor por json
@@ -1578,7 +1586,7 @@ class Cruc extends Controller {
 		$edit->itofecha->rel_id='itcruc';
 
 		$edit->itmonto = new inputField('Monto','itmonto_<#i#>');
-		$edit->itmonto->rule      = 'max_length[17]|numeric|positive';
+		$edit->itmonto->rule      = 'max_length[17]|numeric|positive|callback_chsaldo[<#i#>]';
 		$edit->itmonto->css_class = 'inputnum';
 		$edit->itmonto->db_name   = 'monto';
 		$edit->itmonto->rel_id    = 'itcruc';
@@ -1656,7 +1664,14 @@ class Cruc extends Controller {
 		for($i=0;$i<$cana;$i++){
 			$onumero = $do->get_rel('itcruc','onumero' ,$i);
 			$monto   = floatval($do->get_rel('itcruc','monto'   ,$i));
-			$ittipo  = $do->get_rel('itcruc','tipo',$i);
+			$ittipo  = $do->get_rel('itcruc','tipo'  ,$i);
+			$itofecha= $do->get_rel('itcruc','ofecha',$i);
+
+			$ittipo_doc=substr($onumero,0,2);
+			$itnumero  =substr($onumero,2);
+			$dbittipo_doc= $this->db->escape($ittipo_doc);
+			$dbitnumero  = $this->db->escape($itnumero  );
+			$dbitofecha  = $this->db->escape($itofecha);
 
 			if($monto == 0){
 				$do->rel_rm('itcruc',$i);
@@ -1667,6 +1682,43 @@ class Cruc extends Controller {
 			}else{
 				$adetot += $monto;
 			}
+
+			if($tipo=='C-C' || $tipo=='C-P'){
+
+				if($ittipo=='ADE'){
+					$adech=trim($this->datasis->dameval("SELECT cod_cli FROM smov WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero} AND fecha=${dbitofecha}"));
+					if($proveed!=$adech){
+						$do->error_message_ar['pre_ins']='El efecto '.$onumero.' no pertenece al deudor '.$proveed;
+						return false;
+					}
+				}
+				if($ittipo=='APA'){
+					$adech=trim($this->datasis->dameval("SELECT cod_prv FROM sprm WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero} AND fecha=${dbitofecha} AND monto=${monto}"));
+					if($cliente!=$adech){
+						$do->error_message_ar['pre_ins']='El efecto '.$onumero.' no pertenece al acreedor '.$cliente;
+						return false;
+					}
+				}
+
+			}elseif($tipo=='P-P' || $tipo=='P-C'){
+
+				if($ittipo=='ADE'){
+					$adech=trim($this->datasis->dameval("SELECT cod_prv FROM sprm WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero} AND fecha=${dbitofecha} AND monto=${monto}"));
+					if($proveed!=$adech){
+						$do->error_message_ar['pre_ins']='El efecto '.$onumero.' no pertenece al acreedor '.$proveed;
+						return false;
+					}
+				}
+
+				if($ittipo=='APA'){
+					$adech=trim($this->datasis->dameval("SELECT cod_cli FROM smov WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero} AND fecha=${dbitofecha}"));
+					if($cliente!=$adech){
+						$do->error_message_ar['pre_ins']='El efecto '.$onumero.' no pertenece al deudor '.$cliente;
+						return false;
+					}
+				}
+			}
+
 
 			$do->rel_rm_field('itcruc','psaldo',$i);
 			$do->rel_rm_field('itcruc','pmonto',$i);

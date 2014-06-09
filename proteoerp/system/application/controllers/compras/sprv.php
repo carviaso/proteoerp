@@ -901,7 +901,7 @@ class Sprv extends Controller {
 							type: "POST",
 							url: "'.site_url('ajax/rifrep/P').'",
 							dataType: "json",
-							data: {rifci: rif},
+							data: {rifci: rif,codigo:$("#proveed").val()},
 							success: function(data){
 								if(data.rt){
 									$.prompt(data.msj);

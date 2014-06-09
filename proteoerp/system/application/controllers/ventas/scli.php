@@ -1434,7 +1434,7 @@ class Scli extends validaciones {
 						type: "POST",
 						url: "'.site_url('ajax/rifrep/C').'",
 						dataType: "json",
-						data: {rifci: rif},
+						data: {rifci: rif,codigo:$("#cliente").val()},
 						success: function(data){
 							if(data.rt){
 								$.prompt(data.msj);

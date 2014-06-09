@@ -2751,17 +2751,25 @@ class Ajax extends Controller {
 	}
 
 	function rifrep($tipo='C'){
-		$rifci = $this->input->post('rifci');
+		$rifci  = $this->input->post('rifci');
+		$codigo = trim($this->input->post('codigo'));
 		$rt    = array('rt'=>false,'msj'=>'');
 
 		if($rifci!==false){
+
 			$rifci   = strtoupper(str_replace(array('-',' ','.'),'',$rifci));
 			$dbrifci = $this->db->escape($rifci);
 
 			if($tipo=='C'){
 				$mSQL="SELECT nombre FROM scli WHERE rifci=${dbrifci}";
+				if(!empty($codigo)){
+					$mSQL=" AND cliente<>".$this->db->escape($codigo);
+				}
 			}else{
 				$mSQL="SELECT nombre FROM sprv WHERE rif=${dbrifci}";
+				if(!empty($codigo)){
+					$mSQL=" AND proveed<>".$this->db->escape($codigo);
+				}
 			}
 
 			$query = $this->db->query($mSQL);
