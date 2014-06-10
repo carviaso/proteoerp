@@ -862,6 +862,9 @@ class Sprv extends Controller {
 		$consulrif=$this->datasis->traevalor('CONSULRIF');
 		$link=site_url('compras/sprv/uproveed');
 
+
+		$edit = new DataEdit('', 'sprv');
+		$edit->on_save_redirect=false;
 		$script ='
 			$(function() {
 				$("#tr_gr_desc").hide();
@@ -901,15 +904,21 @@ class Sprv extends Controller {
 							type: "POST",
 							url: "'.site_url('ajax/rifrep/P').'",
 							dataType: "json",
-							data: {rifci: rif,codigo:$("#proveed").val()},
+							data: {rifci: rif, codigo: '.json_encode($edit->_dataobject->get('proveed')).'},
 							success: function(data){
 								if(data.rt){
-									$.prompt(data.msj);
+									$.prompt(data.msj,{
+										buttons: { Continuar: true },
+										focus: 1,
+										submit:function(e,v,m,f){
+
+											$("#nombre").focus();
+										}
+									});
 								}
 							}
 						});
 						//Fin del chequeo repetido
-
 
 						}
 					} else {
@@ -977,8 +986,6 @@ class Sprv extends Controller {
 				}
 			}';
 
-		$edit = new DataEdit('', 'sprv');
-		$edit->on_save_redirect=false;
 		$edit->script($script, 'create');
 		$edit->script($script, 'modify');
 		$edit->pre_process( 'delete','_pre_delete' );

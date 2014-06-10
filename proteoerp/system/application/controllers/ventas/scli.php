@@ -1357,144 +1357,6 @@ class Scli extends validaciones {
 		$link20=site_url('ventas/scli/scliexiste');
 		$link21=site_url('ventas/scli/sclicodigo');
 
-		$script ='
-		<script type="text/javascript" >
-		$(function() {
-			$("#aniversario").datepicker({ dateFormat: "dd/mm/yy" });
-			//$("#tiva").change(function () { anomfis(); }).change();
-
-			$("#tarifa").autocomplete({
-				source: function( req, add){
-					$.ajax({
-						url:  "'.site_url('ajax/buscastarifa').'",
-						type: "POST",
-						dataType: "json",
-						data: "q="+req.term,
-						success:
-							function(data){
-								var sugiere = [];
-								if(data.length==0){
-									$("#tarifa").val("");
-									$("#tactividad").val("");
-									$("#tactividad_val").text("");
-									$("#tminimo").val("");
-									$("#tminimo_val").text("");
-								}else{
-									$.each(data,
-										function(i, val){
-											sugiere.push( val );
-										}
-									);
-								}
-								add(sugiere);
-							},
-					})
-				},
-				minLength: 2,
-				select: function( event, ui ) {
-					$("#tarifa").attr("readonly", "readonly");
-
-					$("#tarifa").val(ui.item.value);
-					$("#tactividad").val(ui.item.actividad);
-					$("#tactividad_val").text(ui.item.actividad);
-					$("#tminimo").val(ui.item.minimo);
-					$("#tminimo_val").text(ui.item.minimo);
-					setTimeout(function() {  $("#tarifa").removeAttr("readonly"); }, 1500);
-				}
-			});
-
-			$("#maintabcontainer").tabs();
-
-			$("#rifci").focusout(function(){
-				rif=$(this).val().toUpperCase();
-				$(this).val(rif);
-				if(!chrif(rif)){
-					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
-					return true;
-				}else{
-					$.ajax({
-						type: "POST",
-						url: "'.site_url('ajax/traerif').'",
-						dataType: "json",
-						data: {rifci: rif},
-						success: function(data){
-							if(data.error==0){
-								if($("#nombre").val()==""){
-									$("#nombre").val(data.nombre);
-								}
-								if($("#nomfis").val()==""){
-									$("#nomfis").val(data.nombre);
-								}
-							}
-						}
-					});
-
-					//Chequea si esta repetido
-					//$.ajax({
-					//	type: "POST",
-					//	url: "'.site_url('ajax/rifrep/C').'",
-					//	dataType: "json",
-					//	data: {rifci: rif, codigo: $("#cliente").val()},
-					//	success: function(data){
-					//		if(data.rt){
-					//			$.prompt(data.msj);
-					//		}
-					//	}
-					//});
-					//Fin del chequeo repetido
-
-				}
-			});
-		});
-
-		function formato(row) {
-			return row[0] + "-" + row[1];
-		}
-
-		function anomfis(){
-			vtiva=$("#tiva").val();
-			if(vtiva=="C" || vtiva=="E" || vtiva=="R"){
-				$("#tr_nomfis").show();
-				$("#tr_riffis").show();
-			}else{
-				//$("#nomfis").val("");
-				//$("#riffis").val("");
-				$("#tr_nomfis").hide();
-				$("#tr_riffis").hide();
-			}
-		}
-
-		function chrif(rif){
-			rif.toUpperCase();
-			var patt=/[EJPGV][0-9]{9} */g;
-			if(patt.test(rif)){
-				var factor= new Array(4,3,2,7,6,5,4,3,2);
-				var v=0;
-				if(rif[0]=="V"){
-					v=1;
-				}else if(rif[0]=="E"){
-					v=2;
-				}else if(rif[0]=="J"){
-					v=3;
-				}else if(rif[0]=="P"){
-					v=4;
-				}else if(rif[0]=="G"){
-					v=5;
-				}
-				acum=v*factor[0];
-				for(i=1;i<9;i++){
-					acum=acum+parseInt(rif[i])*factor[i];
-				}
-				acum=11-acum%11;
-				if(acum>=10 || acum<=0){
-					acum=0;
-				}
-				return (acum==parseInt(rif[9]));
-			}else{
-				return true;
-			}
-		}
-		</script>';
 
 		$do = new DataObject('scli');
 		$do->pointer('tarifa' ,'tarifa.id =scli.tarifa' ,'`tarifa`.`actividad`  AS tactividad, `tarifa`.`minimo`  AS tminimo'  ,'left');
@@ -1665,7 +1527,7 @@ class Scli extends validaciones {
 
 		$edit->url = new inputField('Url', 'url');
 		$edit->url->rule = 'trim';
-		$edit->url->size=60;
+		$edit->url->size=50;
 		$edit->url->maxlength =120;
 
 		$edit->fb = new inputField('facebook', 'fb');
@@ -1779,6 +1641,153 @@ class Scli extends validaciones {
 			);
 			echo json_encode($rt);
 		}else{
+			$script ='
+			<script type="text/javascript" >
+			var rifrep=false;
+			$(function() {
+				$("#aniversario").datepicker({ dateFormat: "dd/mm/yy" });
+				//$("#tiva").change(function () { anomfis(); }).change();
+
+				$("#tarifa").autocomplete({
+					source: function( req, add){
+						$.ajax({
+							url:  "'.site_url('ajax/buscastarifa').'",
+							type: "POST",
+							dataType: "json",
+							data: "q="+req.term,
+							success:
+								function(data){
+									var sugiere = [];
+									if(data.length==0){
+										$("#tarifa").val("");
+										$("#tactividad").val("");
+										$("#tactividad_val").text("");
+										$("#tminimo").val("");
+										$("#tminimo_val").text("");
+									}else{
+										$.each(data,
+											function(i, val){
+												sugiere.push( val );
+											}
+										);
+									}
+									add(sugiere);
+								},
+						})
+					},
+					minLength: 2,
+					select: function( event, ui ) {
+						$("#tarifa").attr("readonly", "readonly");
+
+						$("#tarifa").val(ui.item.value);
+						$("#tactividad").val(ui.item.actividad);
+						$("#tactividad_val").text(ui.item.actividad);
+						$("#tminimo").val(ui.item.minimo);
+						$("#tminimo_val").text(ui.item.minimo);
+						setTimeout(function() {  $("#tarifa").removeAttr("readonly"); }, 1500);
+					}
+				});
+
+				$("#maintabcontainer").tabs();
+
+				$("#rifci").focusout(function(){
+					rif=$(this).val().toUpperCase();
+					$(this).val(rif);
+					if(!chrif(rif)){
+						alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
+						return true;
+					}else{
+						$.ajax({
+							type: "POST",
+							url: "'.site_url('ajax/traerif').'",
+							dataType: "json",
+							data: {rifci: rif},
+							success: function(data){
+								if(data.error==0){
+									if($("#nombre").val()==""){
+										$("#nombre").val(data.nombre);
+									}
+									if($("#nomfis").val()==""){
+										$("#nomfis").val(data.nombre);
+									}
+								}
+							}
+						});
+
+						//Chequea si esta repetido
+						$.ajax({
+							type: "POST",
+							url: "'.site_url('ajax/rifrep/C').'",
+							dataType: "json",
+							data: {rifci: rif, codigo: '.json_encode($do->get('cliente')).'},
+							success: function(data){
+								if(data.rt){
+									$.prompt(data.msj,{
+										buttons: { Continuar: true },
+										focus: 1,
+										submit:function(e,v,m,f){
+
+											$("#nombre").focus();
+										}
+									});
+								}
+							}
+						});
+						//Fin del chequeo repetido
+					}
+					return true;
+				});
+			});
+
+			function formato(row) {
+				return row[0] + "-" + row[1];
+			}
+
+			function anomfis(){
+				vtiva=$("#tiva").val();
+				if(vtiva=="C" || vtiva=="E" || vtiva=="R"){
+					$("#tr_nomfis").show();
+					$("#tr_riffis").show();
+				}else{
+					//$("#nomfis").val("");
+					//$("#riffis").val("");
+					$("#tr_nomfis").hide();
+					$("#tr_riffis").hide();
+				}
+			}
+
+			function chrif(rif){
+				rif.toUpperCase();
+				var patt=/[EJPGV][0-9]{9} */g;
+				if(patt.test(rif)){
+					var factor= new Array(4,3,2,7,6,5,4,3,2);
+					var v=0;
+					if(rif[0]=="V"){
+						v=1;
+					}else if(rif[0]=="E"){
+						v=2;
+					}else if(rif[0]=="J"){
+						v=3;
+					}else if(rif[0]=="P"){
+						v=4;
+					}else if(rif[0]=="G"){
+						v=5;
+					}
+					acum=v*factor[0];
+					for(i=1;i<9;i++){
+						acum=acum+parseInt(rif[i])*factor[i];
+					}
+					acum=11-acum%11;
+					if(acum>=10 || acum<=0){
+						acum=0;
+					}
+					return (acum==parseInt(rif[9]));
+				}else{
+					return true;
+				}
+			}
+			</script>';
+
 			$conten['form']  =& $edit;
 			$conten['script'] =  $script;
 			$this->load->view('view_scli', $conten);
@@ -1788,80 +1797,6 @@ class Scli extends validaciones {
 
 	function dataeditexpress(){
 		$this->rapyd->load('dataedit');
-
-		$script ='
-		<script type="text/javascript" >
-		$(function() {
-			$("#rifci").focusout(function(){
-				rif=$(this).val();
-				if(!chrif(rif)){
-					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
-					return true;
-				}else{
-					$.ajax({
-						type: "POST",
-						url: "'.site_url('ajax/traerif').'",
-						dataType: "json",
-						data: {rifci: rif},
-						success: function(data){
-							if(data.error==0){
-								if($("#nombre").val()==""){
-									$("#nombre").val(data.nombre);
-								}
-							}
-						}
-					});
-
-					//Chequea si esta repetido
-					$.ajax({
-						type: "POST",
-						url: "'.site_url('ajax/rifrep/C').'",
-						dataType: "json",
-						data: {rifci: rif,codigo:$("#cliente").val()},
-						success: function(data){
-							if(data.rt){
-								$.prompt(data.msj);
-							}
-						}
-					});
-					//Fin del chequeo repetido
-
-				}
-
-			});
-		});
-
-		function chrif(rif){
-			rif.toUpperCase();
-			var patt=/[EJPGV][0-9]{9} * /g;
-			if(patt.test(rif)){
-				var factor= new Array(4,3,2,7,6,5,4,3,2);
-				var v=0;
-				if(rif[0]=="V"){
-					v=1;
-				}else if(rif[0]=="E"){
-					v=2;
-				}else if(rif[0]=="J"){
-					v=3;
-				}else if(rif[0]=="P"){
-					v=4;
-				}else if(rif[0]=="G"){
-					v=5;
-				}
-				acum=v*factor[0];
-				for(i=1;i<9;i++){
-					acum=acum+parseInt(rif[i])*factor[i];
-				}
-				acum=11-acum%11;
-				if(acum>=10 || acum<=0){
-					acum=0;
-				}
-				return (acum==parseInt(rif[9]));
-			}else{
-				return true;
-			}
-		}
-		</script>';
 
 		$do = new DataObject('scli');
 
@@ -1938,6 +1873,87 @@ class Scli extends validaciones {
 		$edit->tipo = new autoUpdateField('tipo','1', '1');
 		$edit->buttons('save', 'undo');
 		$edit->build();
+
+		$script ='
+		<script type="text/javascript" >
+		$(function() {
+			$("#rifci").focusout(function(){
+				rif=$(this).val();
+				if(!chrif(rif)){
+					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
+					return true;
+				}else{
+					$.ajax({
+						type: "POST",
+						url: "'.site_url('ajax/traerif').'",
+						dataType: "json",
+						data: {rifci: rif},
+						success: function(data){
+							if(data.error==0){
+								if($("#nombre").val()==""){
+									$("#nombre").val(data.nombre);
+								}
+							}
+						}
+					});
+
+					//Chequea si esta repetido
+					$.ajax({
+						type: "POST",
+						url: "'.site_url('ajax/rifrep/C').'",
+						dataType: "json",
+						data: {rifci: rif, codigo: '.json_encode($do->get('cliente')).'},
+						success: function(data){
+							if(data.rt){
+								$.prompt(data.msj,{
+									buttons: { Continuar: true },
+									focus: 1,
+									submit:function(e,v,m,f){
+
+										$("#nombre").focus();
+									}
+								});
+							}
+						}
+					});
+					//Fin del chequeo repetido
+
+				}
+
+			});
+		});
+
+		function chrif(rif){
+			rif.toUpperCase();
+			var patt=/[EJPGV][0-9]{9} * /g;
+			if(patt.test(rif)){
+				var factor= new Array(4,3,2,7,6,5,4,3,2);
+				var v=0;
+				if(rif[0]=="V"){
+					v=1;
+				}else if(rif[0]=="E"){
+					v=2;
+				}else if(rif[0]=="J"){
+					v=3;
+				}else if(rif[0]=="P"){
+					v=4;
+				}else if(rif[0]=="G"){
+					v=5;
+				}
+				acum=v*factor[0];
+				for(i=1;i<9;i++){
+					acum=acum+parseInt(rif[i])*factor[i];
+				}
+				acum=11-acum%11;
+				if(acum>=10 || acum<=0){
+					acum=0;
+				}
+				return (acum==parseInt(rif[9]));
+			}else{
+				return true;
+			}
+		}
+		</script>';
 
 		$data['content'] = $edit->output;
 		$data['head']    = $this->rapyd->get_head();
