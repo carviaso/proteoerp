@@ -1646,6 +1646,44 @@ class Ajax extends Controller {
 		echo $data;
 	}
 
+
+	//******************************************************************
+	//Busca los efectos que se deben para los cruces
+	//
+	function buscasmovrc(){
+		$mid = $this->input->post('q');
+
+		$data = '[ ]';
+		if($mid !== false){
+			$dbnumero = $this->db->escape($mid.'%');
+
+			$retArray = $retorno = array();
+			$mSQL="SELECT a.id, a.fecha, a.vence, a.monto, a.numero, a.tipo_doc, a.monto-a.abonos AS saldo, b.nombre, a.cod_cli
+			FROM smov a JOIN scli b ON a.cod_cli=b.cliente
+			WHERE a.tipo_doc IN ('FC','ND','GI') AND a.abonos < a.monto AND a.numero like ${dbnumero}";
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $id=>$row ) {
+					$retArray['label']  = $row['tipo_doc'].$row['numero'].' '.$row['fecha'].' '.$row['saldo'].' '.$this->en_utf8($row['nombre']);
+					$retArray['value']  = $row['numero'];
+					$retArray['tipo_doc']= trim($row['tipo_doc']);
+					$retArray['fecha']   = $row['fecha'];
+					$retArray['vence']   = $row['vence'];
+					$retArray['nombre']  = $this->en_utf8($row['nombre']);
+					$retArray['monto']   = $row['monto'];
+					$retArray['saldo']   = $row['saldo'];
+					$retArray['id']      = $row['id'];
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
+
 	//******************************************************************
 	//Busca la factura afectada para otin
 	//

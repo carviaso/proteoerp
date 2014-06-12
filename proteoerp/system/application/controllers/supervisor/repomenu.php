@@ -21,7 +21,6 @@ class repomenu extends validaciones {
 
 	function filteredgrid(){
 		$this->rapyd->load('datafilter','datagrid');
-		//$this->rapyd->uri->keep_persistence();
 
 		function llink($nombre,$alternativo,$modulo){
 			if(!empty($nombre))
@@ -387,13 +386,13 @@ class repomenu extends validaciones {
 		$proteo=$this->input->post('proteo');
 		if($proteo !== false && $nombre !== false){
 			if(stripos($this->config->item('charset'), 'utf')===false){
-				$rs = file_put_contents('formrep/reportes/proteo/'.$nombre.'.rep',$proteo);
+				$rs = file_put_contents('formrep/reportes/proteo/'.trim($nombre).'.rep', $proteo);
 			}
 		}
 		if ($rs)
 			echo 'Reporte Guardado';
 		else
-			echo 'Error al guardar';
+			echo 'Error al guardar '.$nombre.'.rep';
 
 	}
 

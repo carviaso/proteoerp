@@ -61,12 +61,12 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 	$pdf->AddPage();
 
 	$pdf->setTableTitu(10,'Times');
-	$pdf->AddCol('fecha',20,'Fecha'   ,'L',9);
-	$pdf->AddCol('numero'  ,30,'Número'  ,'L',9);
-	$pdf->AddCol('concepto',78,'Concepto','L',9);
-	$pdf->AddCol('debitos' ,25,'Débitos' ,'R',9);
-	$pdf->AddCol('creditos',25,'Créditos','R',9);
-	$pdf->AddCol('saldo',25,'Saldos','R',9);
+	$pdf->AddCol('fecha',   16,'Fecha',   'L',8);
+	$pdf->AddCol('numero',  23,'Numero',  'L',8);
+	$pdf->AddCol('concepto',85,'Concepto','L',8);
+	$pdf->AddCol('debitos' ,25,'Debitos', 'R',8);
+	$pdf->AddCol('creditos',25,'Creditos','R',8);
+	$pdf->AddCol('saldo',   25,'Saldos',  'R',8);
 	$pdf->setTotalizar('debitos','creditos');
 	$pdf->setAcumulador('saldo');
 	//$pdf->add_fila('','','','Saldo anterior','100');
