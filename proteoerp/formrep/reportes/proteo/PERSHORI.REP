@@ -76,7 +76,7 @@ if($this->rapyd->uri->is_set('search')){
 
 	$pdf->AddCol('totalnom', $cell_size,  array('TOTAL','NOMINA')          ,'R', $mFONT2);
 	$pdf->AddCol('prestamo', $cell_size,  array('CUOTA DE ','PRESTAMO')    ,'R', $mFONT2);
-	$pdf->AddCof('<#totalnom#>-<#prestamo#>', 20,  array('NETO','A PAGAR') ,'R', $mFONT2);
+	$pdf->AddCof('<#totalnom#>-(<#prestamo#>)', 20,  array('NETO','A PAGAR') ,'R', $mFONT2);
 	$pdf->setTotalizar('totalnom','prestamo','__cC0');
 
 	$pdf->setGrupoLabel(' <#depto#> ');

@@ -14,6 +14,7 @@ class Usuarios extends Controller {
 
 	function Usuarios(){
 		parent::Controller();
+		$this->datasis->modulo_id(901,1);
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
 	}

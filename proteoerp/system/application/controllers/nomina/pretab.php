@@ -1068,7 +1068,7 @@ class Pretab extends Controller {
 
 				$this->db->insert('smov',$data);
 
-				$dbcod_cli = $this->db->escape($cod_cli);
+				$dbcod_cli = $this->db->escape($row->cod_cli);
 				// ACTUALIZA EL DOCUMENTO ORIGEN
 				$mSQL = "UPDATE smov SET abonos=abonos+".abs($row->cuota)."
 				WHERE tipo_doc='".$row->tipo_doc."' AND numero='".$row->numero."'

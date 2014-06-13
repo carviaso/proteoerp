@@ -1265,6 +1265,7 @@ class Sprv extends Controller {
 	}
 
 	function _pre_insert($do){
+		$do->set('registrado',date('Y-m-d'));
 		return true;
 	}
 
@@ -1480,18 +1481,19 @@ class Sprv extends Controller {
 			$this->db->query('ALTER TABLE sprv ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
 
-		if(!in_array('copre',    $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN copre     VARCHAR(11)  NULL DEFAULT NULL   AFTER cuenta');
-		if(!in_array('ocompra',  $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ocompra   CHAR(1)      NULL DEFAULT NULL   AFTER copre');
-		if(!in_array('dcredito', $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN dcredito  DECIMAL(3,0) NULL DEFAULT "0"    AFTER ocompra');
-		if(!in_array('despacho', $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN despacho  DECIMAL(3,0) NULL DEFAULT NULL   AFTER dcredito');
-		if(!in_array('visita',   $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN visita    VARCHAR(9)   NULL DEFAULT NULL   AFTER despacho');
-		if(!in_array('cate',     $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN cate      VARCHAR(20)  NULL DEFAULT NULL   AFTER visita');
-		if(!in_array('reteiva',  $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN reteiva   DECIMAL(7,2) NULL DEFAULT "0.00" AFTER cate');
-		if(!in_array('ncorto',   $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ncorto    VARCHAR(20)  NULL DEFAULT NULL   AFTER nombre');
-		if(!in_array('prefpago', $campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN prefpago  CHAR(1)      NULL DEFAULT "T"    COMMENT "Preferencia de pago, Transferencia, Deposito, Caja" AFTER reteiva');
-		if(!in_array('canticipo',$campos)) $this->db->query("ALTER TABLE sprv ADD COLUMN canticipo VARCHAR(15)  NULL DEFAULT NULL   COMMENT 'Cuenta contable de Anticipo'                        AFTER cuenta");
+		if(!in_array('copre'      ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN copre     VARCHAR(11)  NULL DEFAULT NULL   AFTER cuenta');
+		if(!in_array('ocompra'    ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ocompra   CHAR(1)      NULL DEFAULT NULL   AFTER copre');
+		if(!in_array('dcredito'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN dcredito  DECIMAL(3,0) NULL DEFAULT "0"    AFTER ocompra');
+		if(!in_array('despacho'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN despacho  DECIMAL(3,0) NULL DEFAULT NULL   AFTER dcredito');
+		if(!in_array('visita'     ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN visita    VARCHAR(9)   NULL DEFAULT NULL   AFTER despacho');
+		if(!in_array('cate'       ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN cate      VARCHAR(20)  NULL DEFAULT NULL   AFTER visita');
+		if(!in_array('reteiva'    ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN reteiva   DECIMAL(7,2) NULL DEFAULT "0.00" AFTER cate');
+		if(!in_array('ncorto'     ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN ncorto    VARCHAR(20)  NULL DEFAULT NULL   AFTER nombre');
+		if(!in_array('prefpago'   ,$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN prefpago  CHAR(1)      NULL DEFAULT "T"    COMMENT "Preferencia de pago, Transferencia, Deposito, Caja" AFTER reteiva');
+		if(!in_array('canticipo'  ,$campos)) $this->db->query("ALTER TABLE sprv ADD COLUMN canticipo VARCHAR(15)  NULL DEFAULT NULL   COMMENT 'Cuenta contable de Anticipo'                        AFTER cuenta");
 		if(!in_array('estado'     ,$campos)) $this->db->query("ALTER TABLE sprv ADD COLUMN estado      INT(11) NULL DEFAULT 0 COMMENT 'Estados o Entidades'");
 		if(!in_array('aniversario',$campos)) $this->db->query('ALTER TABLE sprv ADD COLUMN aniversario DATE NULL DEFAULT NULL COMMENT "Fecha de Aniversario"');
+		if(!in_array('registrado' ,$campos)) $this->db->query('ALTER TABLE `sprv` ADD COLUMN `registrado` DATE NULL DEFAULT NULL AFTER `aniversario`');
 
 		$this->db->query('ALTER TABLE sprv CHANGE COLUMN nomfis   nomfis   VARCHAR(200) DEFAULT NULL NULL');
 		$this->db->query('ALTER TABLE sprv CHANGE COLUMN telefono telefono TEXT NULL    DEFAULT NULL');

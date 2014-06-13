@@ -1,18 +1,15 @@
 <?php
 class Accesos extends Controller{
 	var $niveles;
-	
+
 	function Accesos(){
 		parent::Controller();
-		$this->load->library("rapyd");
+		$this->datasis->modulo_id(904,1);
+		$this->load->library('rapyd');
 		$this->niveles=$this->config->item('niveles_menu');
 	}
 
 	function index(){
-/*SELECT a.modulo,a.titulo, IFNULL(b.acceso,'N')
-FROM intramenu AS a
-LEFT JOIN intrasida AS b ON a.modulo=b.modulo AND b.usuario='321'
-WHERE MID(a.modulo,1,1)!=0 ORDER BY a.modulo, a.panel*/
 
 		$data['script']  ='<script type="text/javascript">
 		$(function() {
@@ -25,10 +22,10 @@ WHERE MID(a.modulo,1,1)!=0 ORDER BY a.modulo, a.panel*/
 		})
 		</script>';
 		$data['content'] = '<div id="sidetreecontrol"><a href="?#">Contraer todos</a> | <a href="?#">Expandir todos</a> | <a href="?#">Invertir </a></div>'.$out;
-		$data["head"]    = script("jquery.pack.js").script("jquery.treeview.pack.js").$this->rapyd->get_head().style('jquery.treeview.css');
+		$data['head']    = script("jquery.pack.js").script("jquery.treeview.pack.js").$this->rapyd->get_head().style('jquery.treeview.css');
 		$data['title']   = '<h1>Administraci&oacute;n del Men&uacute;</h1>';
 		$this->load->view('view_ventanas', $data);
-		
+
 	}
 
 	function instalar(){

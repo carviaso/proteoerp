@@ -2759,6 +2759,7 @@ function chrif(rif){
 				return false;
 			}
 		}
+		$do->set('registrado',date('Y-m-d'));
 
 		return true;
 	}
@@ -3138,6 +3139,8 @@ function chrif(rif){
 		if(!in_array('canticipo'  ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN canticipo   VARCHAR(15) NULL DEFAULT NULL COMMENT 'Cuenta contable de Anticipo'");
 		if(!in_array('estado'     ,$campos)) $this->db->query("ALTER TABLE scli ADD COLUMN estado      INT(11) NULL DEFAULT 0 COMMENT 'Estados o Entidades'");
 		if(!in_array('aniversario',$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN aniversario DATE NULL DEFAULT NULL');
+		if(!in_array('registrado' ,$campos)) $this->db->query('ALTER TABLE `scli` ADD COLUMN `registrado` DATE NULL DEFAULT NULL AFTER `aniversario`');
+
 
 		if(!$this->db->table_exists('tarifa')){
 			$mSQL="CREATE TABLE `tarifa` (
