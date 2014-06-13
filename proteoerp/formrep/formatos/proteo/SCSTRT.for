@@ -4,7 +4,7 @@ $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 $mSQL_1 = $this->db->query('SELECT
 	a.fecha,a.numero,b.nomfis,a.proveed,a.nombre,a.tipo_doc,a.reten,a.nombre,a.flete AS breten,
-	b.direc1,b.direc2,b.direc3,b.telefono,b.rif, a.fecha AS ffactura,a.nfiscal
+	b.direc1,b.direc2,b.direc3,b.telefono,b.rif, a.fecha AS ffactura,a.nfiscal,a.serie
 FROM scst AS a
 JOIN sprv AS b ON a.proveed=b.proveed
 WHERE a.reten>0 AND a.id='.$dbid);
@@ -14,7 +14,7 @@ $row = $mSQL_1->row();
 $fecha    = dbdate_to_human($row->fecha);
 $ffecha   = dbdate_to_human($row->ffactura);
 
-$numero   = trim($row->numero);
+$numero   = (!empty($row->serie))? trim($row->serie) :trim($row->numero);
 $proveed  = $this->us_ascii2html($row->proveed);
 $tipo_doc = trim($row->tipo_doc);
 $breten   = $row->breten;

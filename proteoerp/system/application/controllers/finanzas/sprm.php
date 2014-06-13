@@ -1732,6 +1732,17 @@ class Sprm extends Controller {
 		$sprv_nombre = $row['nombre'];
 		$sprv_rif    = $row['rif'];
 
+
+		if(date('d')<=15){
+			$pdia  ='01';
+			$dia   ='15';
+		}else{
+			$pdia  ='16';
+			$dia   =date('d', mktime(0, 0, 0, date('n'), 0));
+		}
+		$rivafechai =date('Ym'.$pdia);
+		$rivafechac =date('Ym'.$dia );
+
 		$this->rapyd->load('dataobject','datadetails');
 
 		$do = new DataObject('sprm');
@@ -1871,21 +1882,21 @@ class Sprm extends Controller {
 		$edit->nfiscal->maxlength =17;
 
 		$edit->montasa = new inputField('Montasa','montasa');
-		$edit->montasa->rule      ='max_length[17]|numeric';
+		$edit->montasa->rule      ='max_length[17]|numeric|positive';
 		$edit->montasa->css_class ='inputnum';
 		$edit->montasa->size      =19;
 		$edit->montasa->maxlength =17;
 		$edit->montasa->rule='condi_required|callback_chobligatipo[NC]';
 
 		$edit->monredu = new inputField('Monredu','monredu');
-		$edit->monredu->rule      ='max_length[17]|numeric';
+		$edit->monredu->rule      ='max_length[17]|numeric|positive';
 		$edit->monredu->css_class ='inputnum';
 		$edit->monredu->size      =19;
 		$edit->monredu->maxlength =17;
 		$edit->monredu->rule='condi_required|callback_chobligatipo[NC]';
 
 		$edit->monadic = new inputField('Monadic','monadic');
-		$edit->monadic->rule      ='max_length[17]|numeric';
+		$edit->monadic->rule      ='max_length[17]|numeric|positive';
 		$edit->monadic->css_class ='inputnum';
 		$edit->monadic->size      =19;
 		$edit->monadic->maxlength =17;
@@ -1899,25 +1910,25 @@ class Sprm extends Controller {
 		$edit->tasa->rule='condi_required|callback_chobligatipo[NC]|callback_chmontasa[G]';
 
 		$edit->reducida = new inputField('reducida','reducida');
-		$edit->reducida->rule      ='max_length[17]|numeric';
+		$edit->reducida->rule      ='max_length[17]|numeric|positive';
 		$edit->reducida->css_class ='inputnum';
 		$edit->reducida->size      =12;
 		$edit->reducida->maxlength =17;
 		$edit->reducida->rule='condi_required|callback_chobligatipo[NC]|callback_chmontasa[R]';
 
 		$edit->sobretasa = new inputField('adicional','sobretasa');
-		$edit->sobretasa->rule      ='max_length[17]|numeric';
+		$edit->sobretasa->rule      ='max_length[17]|numeric|positive';
 		$edit->sobretasa->css_class ='inputnum';
 		$edit->sobretasa->size      =12;
 		$edit->sobretasa->maxlength =17;
-		$edit->sobretasa->rule='condi_required|callback_chobligatipo[NC]|callback_chmontasa[A]';
+		$edit->sobretasa->rule='condi_required|callback_chobligatipo[NC]|callback_chmontasa[A]|positive';
 
 		$edit->exento = new inputField('exento','exento');
 		$edit->exento->rule      ='max_length[17]|numeric';
 		$edit->exento->css_class ='inputnum';
 		$edit->exento->size      =19;
 		$edit->exento->maxlength =17;
-		$edit->exento->rule='condi_required|callback_chobligatipo[NC]';
+		$edit->exento->rule='condi_required|callback_chobligatipo[NC]|positive';
 
 		$edit->reteiva = new inputField('Ret. IVA','reteiva');
 		$edit->reteiva->rule      ='max_length[17]|numeric';
@@ -1925,7 +1936,7 @@ class Sprm extends Controller {
 		$edit->reteiva->size      =19;
 		$edit->reteiva->maxlength =17;
 		$edit->reteiva->insertValue='0';
-		$edit->reteiva->rule='condi_required|callback_chobligatipo[NC]';
+		$edit->reteiva->rule='condi_required|callback_chobligatipo[NC]|positive';
 
 		//Para la retencion de iva si aplica
 		$contribu= trim($this->datasis->traevalor('CONTRIBUYENTE'));
@@ -1981,7 +1992,7 @@ class Sprm extends Controller {
 		$i=0;
 		$arr_ivas=array();
 		$edit->detail_expand_except('itppro');
-		$sel=array('a.tipo_doc','a.numero','a.fecha','a.vence','a.monto','a.abonos','a.monto - a.abonos AS saldo','impuesto','montasa','monredu','monadic','tasa','reducida','sobretasa','exento');
+		$sel=array('a.tipo_doc','a.numero','a.fecha','a.vence','a.monto','a.abonos','a.monto - a.abonos AS saldo','impuesto','reteiva','montasa','monredu','monadic','tasa','reducida','sobretasa','exento');
 		$this->db->select($sel);
 		$this->db->from('sprm AS a');
 		$this->db->where('a.cod_prv',$proveed);
@@ -2080,6 +2091,24 @@ class Sprm extends Controller {
 			$edit->$obj->ind       = $i;
 			$edit->$obj->showformat='decimal';
 			$edit->$obj->type='inputhidden';
+
+			$obj='riva_'.$i;
+			$edit->$obj = new hiddenField('riva',$obj);
+			$edit->$obj->db_name='riva';
+			$edit->$obj->rel_id = 'itppro';
+			$fecha  = str_replace('-','',$row->fecha);
+			if(floatval($row->reteiva)>0){
+				if($fecha>=$rivafechai && $fecha<=$rivafechac){
+					$aplrete='S';
+				}else{
+					$aplrete='V';
+				}
+			}else{
+				$aplrete='N';
+			}
+			$edit->$obj->insertValue= $aplrete;
+			$edit->$obj->ind        = $i;
+			$edit->$obj->showformat ='decimal';
 
 			$obj='saldo_'.$i;
 			$edit->$obj = new freeField($obj,$obj,nformat($row->saldo));
@@ -2312,6 +2341,8 @@ class Sprm extends Controller {
 
 				$impuesto  += round(($itabono-$itpppago)*$itimpuesto/$itmonto,2);
 			}
+
+			$do->rel_rm_field($rel,'riva',$i);
 		}
 		$totalab=round($totalab,2);
 		$this->ppimpuesto=$ppimpuesto;

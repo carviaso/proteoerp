@@ -48,10 +48,10 @@ $(function(){
 
 	$('#montasa'  ).focus(function (){ invasdif('montasa','tasa'     ,Number($("#ptasa"     ).val())/100); });
 	$('#monredu'  ).focus(function (){ invasdif('monredu','reducida' ,Number($("#preducida" ).val())/100); });
-	$('#monadic'  ).focus(function (){ invasdif('monadic','sobretasa',Number($("#psobretasa").val())/100); });
+	$('#monadic'  ).focus(function (){ invasdif('monadic','sobretasa',Number($("#padicional").val())/100); });
 	$('#tasa'     ).focus(function (){ invasdif('montasa','tasa'     ,Number($("#ptasa"     ).val())/100); });
 	$('#reducida' ).focus(function (){ invasdif('monredu','reducida' ,Number($("#preducida" ).val())/100); });
-	$('#sobretasa').focus(function (){ invasdif('monadic','sobretasa',Number($("#psobretasa").val())/100); });
+	$('#sobretasa').focus(function (){ invasdif('monadic','sobretasa',Number($("#padicional").val())/100); });
 	$('#exento'   ).focus(function (){ invasdif('exento' ,'E'        ,0);     });
 
 
@@ -59,45 +59,123 @@ $(function(){
 		var ptasa = Number($("#ptasa").val())/100;
 		var base  = Number($('#montasa').val());
 		$('#tasa').val(roundNumber(base*ptasa,2));
+		calretiva();
 	});
 
 	$('#monredu').keyup(function (){
 		var ptasa = Number($("#preducida").val())/100;
 		var base  = Number($('#monredu').val());
 		$('#reducida').val(roundNumber(base*ptasa,2));
+		calretiva();
 	});
 
 	$('#monadic').keyup(function (){
 		var ptasa = Number($("#padicional").val())/100;
 		var base  = Number($('#monadic').val());
 		$('#sobretasa').val(roundNumber(base*ptasa,2));
+		calretiva();
 	});
 
 	$('#tasa').keyup(function (){
 		var ptasa    = Number($("#ptasa").val())/100;
 		var impuesto = Number($('#tasa').val());
 		$('#montasa').val(roundNumber(impuesto*ptasa,2));
+		calretiva();
 	});
 
 	$('#reducida').keyup(function (){
 		var ptasa    = Number($("#preducida").val())/100;
 		var impuesto = Number($('#reducida').val());
 		$('#monredu').val(roundNumber(impuesto*ptasa,2));
+		calretiva();
 	});
 
 	$('#sobretasa').keyup(function (){
 		var ptasa    = Number($("#padiciona").val())/100;
 		var impuesto = Number($('#sobretasa').val());
 		$('#monadic').val(roundNumber(impuesto*ptasa,2));
+		calretiva();
 	});
 
-	$('#exento').keyup(function (){
+	/*$('#exento').keyup(function (){
 		invasdif('exento','E',0);
-	});
+	});*/
 
 	chtipodoc();
 	totaliza();
 });
+
+function marcariva(){
+	var arr  = $('input[name^="riva_"]');
+	jQuery.each(arr, function(){
+		nom=this.name;
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			ind   = this.name.substring(pos+1);
+			val   = this.value;
+			if(val=='N'){
+				$('#tr_itccli_'+ind).css("background-color", "#FFFF28");
+				$('#tr_itccli_'+ind).attr("title", 'No se le realizo retenci&oacute;n');
+			}else if(val=='V'){
+				$('#tr_itccli_'+ind).css("background-color", "#FFCF62");
+				$('#tr_itccli_'+ind).attr("title", 'Período vencido para devolver retención');
+			}else{
+				$('#tr_itccli_'+ind).css("background-color",  'transparent');
+			}
+		}
+	});
+}
+
+function desmarcariva(){
+	var arr  = $('input[name^="riva_"]');
+	jQuery.each(arr, function(){
+		nom=this.name;
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			ind   = this.name.substring(pos+1);
+			$('#tr_itccli_'+ind).css("background-color",  'transparent');
+			$('#tr_itccli_'+ind).removeAttr('title');
+		}
+	});
+}
+
+function calretiva(){
+	var montasa   = Number($('#montasa'  ).val());
+	var monredu   = Number($('#monredu'  ).val());
+	var monadic   = Number($('#monadic'  ).val());
+	var tasa      = Number($('#tasa'     ).val());
+	var reducida  = Number($('#reducida' ).val());
+	var sobretasa = Number($('#sobretasa').val());
+	var noret     = 0;
+	var tasatot   = 0;
+
+	var arr  = $('input[name^="riva_"]');
+	jQuery.each(arr, function(){
+		nom=this.name;
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			ind  = this.name.substring(pos+1);
+			val  = this.value;
+			i    = parseInt(ind);
+			num  = Number($('#abono_'+ind).val());
+			monto= Number($('#monto_'+ind).val());
+
+			if(val=='N' || val=='V'){
+				noret = noret+num*objivas[i].tasa     /monto;
+				noret = noret+num*objivas[i].reducida /monto;
+				noret = noret+num*objivas[i].sobretasa/monto;
+			}
+		}
+	});
+
+	if(noret>=tasa+reducida+sobretasa){
+		tasatot=0;
+	}else{
+		tasatot=tasa+reducida+sobretasa-noret;
+	}
+
+	$('#reteiva').val(roundNumber(tasatot*<?php echo $por_rete; ?>,2));
+}
 
 function invasdif(base,iva,ptasa){
 	var total     = Number($('#monto').val());
@@ -108,18 +186,31 @@ function invasdif(base,iva,ptasa){
 	var monadic   = Number($('#monadic').val());
 	var monredu   = Number($('#monredu').val());
 	var montasa   = Number($('#montasa').val());
-	var itota = sobretasa+exento+reducida+tasa+monadic+monredu+montasa;
+	var basactual = Number($('#'+base).val());
+	var ivaactual = Number($('#'+iva).val());
+	if(isNaN(exento   )) exento   =0;
+	if(isNaN(sobretasa)) sobretasa=0;
+	if(isNaN(reducida )) reducida =0;
+	if(isNaN(tasa     )) tasa     =0;
+	if(isNaN(monadic  )) monadic  =0;
+	if(isNaN(monredu  )) monredu  =0;
+	if(isNaN(montasa  )) montasa  =0;
+	if(isNaN(ptasa    )) ptasa    =0;
+	if(isNaN(basactual)) basactual=0;
+	if(isNaN(ivaactual)) ivaactual=0;
+
+	var itota = sobretasa+exento+reducida+tasa+monadic+monredu+montasa-basactual-ivaactual;
 	var diff  = total-itota;
 
-	if(diff!=0){
-		var bbase = diff/(1+ptasa);
-		var iiva  = bbase*ptasa;
+	var bbase = diff/(1+ptasa);
+	var iiva  = bbase*ptasa;
 
-		$('#'+base).val(roundNumber(bbase,2));
-		if(iva!='E'){
-			$('#'+iva).val(roundNumber(iiva,2));
-		}
+	$('#'+base).val(roundNumber(bbase,2));
+	if(iva!='E'){
+		$('#'+iva).val(roundNumber(iiva,2));
 	}
+
+	calretiva();
 }
 
 function chtipodoc(){
@@ -137,6 +228,8 @@ function chtipodoc(){
 		$('#ncadic').show();
 		$('#fpago').hide();
 		$('#trnd2').show();
+		calretiva();
+		marcariva();
 	}else if(tipo=='AN'){
 		$('#aplefectos').hide();
 		$('input[name^="abono_"]').val("");
@@ -150,6 +243,7 @@ function chtipodoc(){
 		$('#fpago').show();
 		$('#trnd2').hide();
 		totaliza();
+		desmarcariva()
 	}else{
 		$('#aplefectos').show();
 		$('#aplpago').show();
@@ -162,6 +256,7 @@ function chtipodoc(){
 		$('#ncadic').hide();
 		$('#fpago').show();
 		$('#trnd2').hide();
+		desmarcariva();
 	}
 }
 
@@ -221,17 +316,30 @@ function totaliza(){
 	sobretasa=roundNumber(sobretasa,2);
 	exento   =roundNumber(exento   ,2);
 
-	$('#montasa'  ).val(montasa  );
-	$('#monredu'  ).val(monredu  );
-	$('#monadic'  ).val(monadic  );
-	$('#tasa'     ).val(tasa     );
-	$('#reducida' ).val(reducida );
-	$('#sobretasa').val(sobretasa);
-	$('#exento'   ).val(exento   );
+
+	var actualmontasa  = Number($('#montasa'  ).val());
+	var actualmonredu  = Number($('#monredu'  ).val());
+	var actualmonadic  = Number($('#monadic'  ).val());
+	var actualtasa     = Number($('#tasa'     ).val());
+	var actualreducida = Number($('#reducida' ).val());
+	var actualsobretasa= Number($('#sobretasa').val());
+	var actualexento   = Number($('#exento'   ).val());
+	var actualtot      = actualmontasa+actualmonredu+actualmonadic+actualtasa+actualreducida+actualsobretasa+actualexento;
+	var calctot        = montasa+monredu+monadic+tasa+reducida+sobretasa+exento;
+
+	if(actualtot!=calctot){
+		$('#montasa'  ).val(montasa  );
+		$('#monredu'  ).val(monredu  );
+		$('#monadic'  ).val(monadic  );
+		$('#tasa'     ).val(tasa     );
+		$('#reducida' ).val(reducida );
+		$('#sobretasa').val(sobretasa);
+		$('#exento'   ).val(exento   );
+	}
 
 	<?php if($por_rete>=0){ ?>
 	if(tipo=='NC'){
-		$('#reteiva').val(roundNumber((tasa+reducida+sobretasa)*<?php echo $por_rete; ?>,2));
+		calretiva();
 	}
 	<?php } ?>
 
@@ -354,10 +462,11 @@ echo $title;
 		$it_saldo    = "saldo_${i}";
 		//$it_ppago    = "ppago_${i}";
 		$it_vence    = "vence_${i}";
+		$it_riva     = "riva_${i}";
 	?>
 	<tr id='tr_itccli_<?php echo $i; ?>' <?php echo ($i%2 == 0) ? 'class="odd"' : '';?> >
 		<td><?php echo $form->$it_tipo_doc->output;?>-<?php echo $form->$it_numero->output;?></td>
-		<td align="center"><?php echo $form->$it_fecha->output; ?></td>
+		<td align="center"><?php echo $form->$it_fecha->output.$form->$it_riva->output; ?></td>
 		<td align="center"><?php echo $form->$it_vence->output; ?></td>
 		<td align="right" ><?php echo $form->$it_monto->output; ?></td>
 		<td align="right" ><?php echo $form->$it_saldo->output; ?></td>

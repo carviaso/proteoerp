@@ -2,7 +2,7 @@
 if(count($parametros)==0) show_error('Faltan parametros ');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
-$mSQL_1 = $this->db->query('SELECT
+$mSQL_1 = $this->db->query('SELECT a.serie,
 	a.fecha,a.numero,b.nomfis,a.proveed,a.nombre,a.breten,a.tipo_doc,a.reten,a.creten,a.nombre,
 	b.direc1,b.direc2,b.direc3,b.telefono,b.rif,c.activida,c.base1,c.tari1, a.ffactura,a.nfiscal
 FROM gser AS a
@@ -15,7 +15,7 @@ $row = $mSQL_1->row();
 $fecha    = dbdate_to_human($row->fecha);
 $ffecha   = dbdate_to_human($row->ffactura);
 
-$numero   = trim($row->numero);
+$numero   = (!empty($row->serie))? trim($row->serie): trim($row->numero);
 $proveed  = $this->us_ascii2html($row->proveed);
 $tipo_doc = trim($row->tipo_doc);
 $breten   = $row->breten;
@@ -36,7 +36,7 @@ $mSQL_2 = $this->db->query('SELECT
 e.codigorete,c.activida,e.base,e.porcen,e.monto
 FROM gereten AS e
 JOIN rete AS c ON c.codigo=e.codigorete
-WHERE e.origen=\'GSER\'  AND e.idd='.$dbid);
+WHERE e.idd='.$dbid);
 
 if(!empty($nfiscal)){
 	$titcontrol = '<b>Nro. CONTROL:</b> '.$nfiscal;
@@ -103,9 +103,9 @@ if ( isset($pdf) ) {
 			</tr>
 			</table>
 			<table style="width: 100%; font-size: 8pt;">
-				<tr><td>Raz&oacute;n Social:</td><td><b><?php echo $proveed.' '.$nombre; ?></b></td></tr>
-				<tr><td>Direcci&oacute;n:</td><td><b><?php echo $direc1.' '.$direc2.' '.$direc3; ?></b></td></tr>
-				<tr><td>Tel&eacute;fono:</td><td><b><?php echo $telefono; ?></b> R.I.F. :<b><?php echo $rif; ?></b></td></tr>
+				<tr><td>Raz&oacute;n Social:</td><td><b><?php echo $proveed." ".$nombre; ?></b></td></tr>
+				<tr><td>Direcci&oacute;n:</td><td><b><?php echo $direc1." ".$direc2." ".$direc3; ?></b></td></tr>
+				<tr><td>Tel&eacute;fono:</td><td><b><?php echo $telefono; ?></b>R.I.F. :<b><?php echo $rif; ?></b></td></tr>
 			</table>
 			</div>
 	</thead>
@@ -117,7 +117,7 @@ if ( isset($pdf) ) {
 		</tr>
 	</table>
 
-	<table style="width: 80%;" class="header" align='center' >
+	<table style="width: 80%;" class="header" align='center' -->
 		<tr>
 			<td><div align="left"  style="font-size: 8pt"><b>DOCUMENTO:</b></div></td>
 			<td><div align="rigth" style="font-size: 8pt"><?php echo $tipo_doc.$numero.' '.$titcontrol;  ?></div></td>
