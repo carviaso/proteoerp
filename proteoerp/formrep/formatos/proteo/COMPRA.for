@@ -7,7 +7,8 @@ $dbid= $this->db->escape($id);
 $moneda = $this->datasis->traevalor('MONEDA');
 $mSQL_1 = $this->db->query("SELECT
 a.tipo_doc,a.numero,a.fecha,a.vence,a.control,a.actuali,a.depo,a.proveed,b.nombre,TRIM(b.nomfis) AS nomfis,a.montotot,a.montoiva,a.montonet,a.peso, a.transac,
-if(a.actuali>=a.fecha,'CARGADA','PENDIENTE') cargada, a.control, a.cexento, a.cgenera, a.creduci, a.cadicio, a.cimpuesto, a.ctotal, a.reten, a.reteiva, a.cstotal
+if(a.actuali>=a.fecha,'CARGADA','PENDIENTE') cargada, a.control, a.cexento, a.cgenera, a.creduci, a.cadicio, a.cimpuesto, a.ctotal, a.reten, a.reteiva, a.cstotal,
+observa1,observa2,observa3,a.recep
 FROM scst AS a
 JOIN sprv AS b ON a.proveed=b.proveed
 WHERE a.id=${dbid}");
@@ -26,8 +27,10 @@ $montonet =$row->montonet;
 $peso     =$row->peso;
 $cargada  =$row->cargada;
 $control  =$row->control;
+$recep    =$row->recep;
 $vence    =dbdate_to_human($row->vence);
 $actuali  =dbdate_to_human($row->actuali);
+$observa  =$this->us_ascii2html(trim($row->observa1).' '.trim($row->observa2).' '.trim($row->observa3));
 
 $cexento   =$row->cexento;
 $cgenera   =$row->cgenera;
@@ -38,6 +41,11 @@ $ctotal    =$row->ctotal;
 $reten     =$row->reten;
 $reteiva   =$row->reteiva;
 $cstotal   =$row->cstotal;
+
+$crecep='';
+if($cargada=='CARGADA'){
+	$crecep=' Recepcionada: <b>'.dbdate_to_human($recep).'</b>';
+}
 
 $reten = $this->datasis->dameval("SELECT SUM(monto) FROM sprm WHERE cod_prv='RETEN' AND transac=".$row->transac)+0;
 
@@ -56,7 +64,7 @@ $mSQL_2 = $this->db->query("SELECT numero,codigo,descrip,cantidad,costo,importe,
 $detalle =$mSQL_2->result();
 
 $pagina = 0;
-$maxlinea = 32;
+$maxlinea = 30;
 
 //ENCABEZADO PRINCIPAL
 $encabeza = '
@@ -72,9 +80,9 @@ $encabeza = '
 			</div>
 			</td>
 		</tr>
-	</table>
+</table>
 </div>
-<div class="page" style="font-size: 7pt">
+	<div class="page" style="font-size: 7pt">
 		<table style="width:100%;font-size:7pt;" class="header">
 		<tr>
 			<td valign=\'bottom\'><h1 style="text-align: left">'.$tit1.' '.$cargada.'</h1></td>
@@ -90,11 +98,14 @@ $encabeza1p = '
 					<td>Almac&eacute;n: <b>'.$depo.'</b></td>
 					<td>Actualizado: <b>'.$actuali.'</b></td>
 				</tr><tr>
-					<td>Fecha: <b>'.$fecha.'</b></td>
+					<td>Fecha: <b>'.$fecha.'</b> '.$crecep.'</td>
 					<td>Vencimiento: <b>'.$vence.'</b></td>
 				</tr><tr>
 					<td>Proveedor: <b>('.$proveed.') '.$nombre.'</b></td>
 					<td>Peso: <b>'.$peso.'</b></td>
+				</tr>
+				<tr>
+					<td colspan=\'2\'>Observaci&oacute;n: <b>'.$observa.'</b></td>
 				</tr>
 				</table>
 ';

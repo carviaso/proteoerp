@@ -115,7 +115,7 @@ function marcariva(){
 			val   = this.value;
 			if(val=='N'){
 				$('#tr_itccli_'+ind).css("background-color", "#FFFF28");
-				$('#tr_itccli_'+ind).attr("title", 'No se le realizo retenci&oacute;n');
+				$('#tr_itccli_'+ind).attr("title", 'No se le realizo retención');
 			}else if(val=='V'){
 				$('#tr_itccli_'+ind).css("background-color", "#FFCF62");
 				$('#tr_itccli_'+ind).attr("title", 'Período vencido para devolver retención');

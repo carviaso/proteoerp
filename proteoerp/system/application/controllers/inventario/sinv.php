@@ -71,9 +71,9 @@ class Sinv extends Controller {
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-		array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
-		array('id'=>'fborra', 'title'=>'Eliminar registro'),
-		array('id'=>'fshow' , 'title'=>'Varios')
+			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fborra', 'title'=>'Eliminar registro'),
+			array('id'=>'fshow' , 'title'=>'Varios')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -724,6 +724,42 @@ class Sinv extends Controller {
 		};';
 
 		$bodyscript .= '
+		function sinvdel() {
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm("Seguro desea eliminar el registro?")){
+					var ret    = $("'.$ngrid.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						$("#fedita").html("");
+						try{
+							var json = JSON.parse(data);
+							if(json.status == "A"){
+								$.prompt("<h1>Registro eliminado</h1>");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								$.prompt("<h1>Registro no se puede eliminado</h1>");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog({
+								autoOpen: false, height: 350, width: 450, modal: true,
+								buttons: {"Aceptar": function() {
+										$(this).dialog("close");
+										jQuery("'.$ngrid.'").trigger("reloadGrid");
+									}
+								}
+							});
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
 		function sinvshow(){
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
@@ -814,86 +850,6 @@ class Sinv extends Controller {
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		};';
-
-		// Barras Adicionales
-		$bodyscript .= '
-		$("#bbarras").click(
-			function(){
-				var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
-				if (id)	{
-					var ret = $("'.$ngrid.'").getRowData(id);
-					$.post("'.site_url('inventario/sinv/barrasform')."/".'"+id,
-					function(data){
-						$("#fshow").html(data);
-						$("#fshow").dialog( { title:"BARRAS ADICIONALES", width: 235, height: 320, modal: true } );
-						$("#fshow").dialog( "open" );
-					});
-				} else {
-					$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-				}
-		})';
-
-		// Principios Activos
-		$bodyscript .= '
-		$("#bpactivo").click(
-			function(){
-				$.post("'.site_url('inventario/sinv/pactivosform').'",
-				function(data){
-					$("#fshow").html(data);
-					$("#fshow").dialog( { title:"PRINCIPIOS ACTIVOS", width: 350, height: 400, modal: true } );
-					$("#fshow").dialog( "open" );
-				});
-			}
-		);';
-
-		// Marcas
-		$bodyscript .= '
-		$("#gmarcas").click(
-			function(){
-				$.post("'.site_url('inventario/sinv/marcaform').'",
-				function(data){
-					$("#fshow").html(data);
-					$("#fshow").dialog( { title:"MARCAS", width: 320, height: 400, modal: true } );
-					$("#fshow").dialog( "open" );
-				});
-			});
-		';
-
-		// Unidades
-		$bodyscript .= '
-		$("#gunidad").click(
-			function(){
-				$.post("'.site_url('inventario/sinv/uniform').'",
-				function(data){
-					$("#fshow").html(data);
-					$("#fshow").dialog( { title:"UNIDAES DE PRESENTACION", width: 270, height: 400, modal: true } );
-					$("#fshow").dialog( "open" );
-				});
-			});
-		';
-
-		// Inactivos
-		$bodyscript .= '
-		$("#hinactivo").click( function(){
-			if (verinactivos==0){ verinactivos=1; } else { verinactivos=0;};
-			$("'.$ngrid.'").jqGrid(\'setGridParam\', {postData: { verinactivos: verinactivos }})
-			$("'.$ngrid.'").trigger("reloadGrid");
-			//alert("inactivo="+verinactivos);
-		});';
-
-		// Kardex
-		$bodyscript .= '
-		$("#kardex").click( function(){
-			var id     = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				window.open(\''.site_url("inventario/kardex/kardexpres").'/\'+id, \'_blank\', \'width=420,height=450,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-225), screeny=((screen.availWidth/2)-250)\');
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Producto</h1>");
-			}
-		});
-		$("#sundecop").click( function(){ sundecop();});
-		';
-
 
 		// Detalle del Registro
 		$bodyscript .= '
@@ -986,43 +942,6 @@ class Sinv extends Controller {
 					}
 				}
 			});
-		};
-		';
-
-
-		$bodyscript .= '
-		function sinvdel() {
-			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				if(confirm("Seguro desea eliminar el registro?")){
-					var ret    = $("'.$ngrid.'").getRowData(id);
-					mId = id;
-					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
-						$("#fedita").html("");
-						try{
-							var json = JSON.parse(data);
-							if (json.status == "A"){
-								$.prompt("<h1>Registro eliminado</h1>");
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-							}else{
-								$.prompt("<h1>Registro no se puede eliminado</h1>");
-							}
-						}catch(e){
-							$("#fborra").html(data);
-							$("#fborra").dialog({
-								autoOpen: false, height: 350, width: 450, modal: true,
-								buttons: {"Aceptar": function() {
-										$(this).dialog("close");
-										jQuery("'.$ngrid.'").trigger("reloadGrid");
-									}
-								}
-							});
-						}
-					});
-				}
-			}else{
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
 		};';
 
 
@@ -1037,6 +956,80 @@ class Sinv extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 			';
+
+		// Barras Adicionales
+		$bodyscript .= '
+		$("#bbarras").click(
+			function(){
+				var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+				if(id){
+					var ret = $("'.$ngrid.'").getRowData(id);
+					$.post("'.site_url('inventario/sinv/barrasform')."/".'"+id,
+					function(data){
+						$("#fshow").html(data);
+						$("#fshow").dialog( { title:"BARRAS ADICIONALES", width: 235, height: 320, modal: true } );
+						$("#fshow").dialog( "open" );
+					});
+				} else {
+					$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+				}
+		})';
+
+		// Principios Activos
+		$bodyscript .= '
+		$("#bpactivo").click(function(){
+			$.post("'.site_url('inventario/sinv/pactivosform').'",
+			function(data){
+				$("#fshow").html(data);
+				$("#fshow").dialog( { title:"PRINCIPIOS ACTIVOS", width: 350, height: 400, modal: true } );
+				$("#fshow").dialog( "open" );
+			});
+		});';
+
+		// Marcas
+		$bodyscript .= '
+		$("#gmarcas").click(function(){
+			$.post("'.site_url('inventario/sinv/marcaform').'",
+			function(data){
+				$("#fshow").html(data);
+				$("#fshow").dialog( { title:"MARCAS", width: 320, height: 400, modal: true } );
+				$("#fshow").dialog( "open" );
+			});
+		});';
+
+		// Unidades
+		$bodyscript .= '
+		$("#gunidad").click(function(){
+			$.post("'.site_url('inventario/sinv/uniform').'",
+			function(data){
+				$("#fshow").html(data);
+				$("#fshow").dialog( { title:"UNIDAES DE PRESENTACION", width: 270, height: 400, modal: true } );
+				$("#fshow").dialog( "open" );
+			});
+		});';
+
+		// Inactivos
+		$bodyscript .= '
+		$("#hinactivo").click( function(){
+			if (verinactivos==0){ verinactivos=1; } else { verinactivos=0;};
+			$("'.$ngrid.'").jqGrid(\'setGridParam\', {postData: { verinactivos: verinactivos }})
+			$("'.$ngrid.'").trigger("reloadGrid");
+			//alert("inactivo="+verinactivos);
+		});';
+
+		// Kardex
+		$bodyscript .= '
+		$("#kardex").click( function(){
+			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				window.open(\''.site_url("inventario/kardex/kardexpres").'/\'+id, \'_blank\', \'width=420,height=450,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-225), screeny=((screen.availWidth/2)-250)\');
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Producto</h1>");
+			}
+		});';
+
+		// Sundec
+		$bodyscript .= '$("#sundecop").click( function(){ sundecop();}); ';
 
 		$bodyscript .= '
 		$("#fshow").dialog({
