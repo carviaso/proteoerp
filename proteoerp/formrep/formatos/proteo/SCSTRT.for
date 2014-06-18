@@ -4,7 +4,7 @@ $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 $mSQL_1 = $this->db->query('SELECT
 	a.fecha,a.numero,b.nomfis,a.proveed,a.nombre,a.tipo_doc,a.reten,a.nombre,a.flete AS breten,
-	b.direc1,b.direc2,b.direc3,b.telefono,b.rif, a.fecha AS ffactura,a.nfiscal,a.serie
+	b.direc1,b.direc2,b.direc3,b.telefono,b.rif, a.fecha AS ffactura,a.nfiscal,a.serie,a.recep
 FROM scst AS a
 JOIN sprv AS b ON a.proveed=b.proveed
 WHERE a.reten>0 AND a.id='.$dbid);
@@ -13,6 +13,7 @@ $row = $mSQL_1->row();
 
 $fecha    = dbdate_to_human($row->fecha);
 $ffecha   = dbdate_to_human($row->ffactura);
+$recep    = dbdate_to_human($row->recep);
 
 $numero   = (!empty($row->serie))? trim($row->serie) :trim($row->numero);
 $proveed  = $this->us_ascii2html($row->proveed);
@@ -23,7 +24,7 @@ $nombre   = (empty($row->nomfis))? $this->us_ascii2html($row->nombre) : $this->u
 $direc1   = $this->us_ascii2html($row->direc1);
 $direc2   = $this->us_ascii2html($row->direc2);
 $direc3   = $this->us_ascii2html($row->direc3);
-$telefono = htmlspecialchars(trim($row->telefono));
+$telefono = $this->us_ascii2html($row->telefono);
 $rif      = htmlspecialchars(trim($row->rif));
 $nfiscal  = htmlspecialchars(trim($row->nfiscal));
 $tari1    = 3;
@@ -101,7 +102,7 @@ if ( isset($pdf) ) {
 			<table style="width: 100%; font-size: 8pt;">
 				<tr><td>Raz&oacute;n Social:</td><td><b><?php echo $proveed." ".$nombre; ?></b></td></tr>
 				<tr><td>Direcci&oacute;n:</td><td><b><?php echo $direc1." ".$direc2." ".$direc3; ?></b></td></tr>
-				<tr><td>Tel&eacute;fono:</td><td><b><?php echo $telefono; ?></b>R.I.F. :<b><?php echo $rif; ?></b></td></tr>
+				<tr><td>Tel&eacute;fono:</td><td><b><?php echo $telefono; ?></b> R.I.F. :<b><?php echo $rif; ?></b></td></tr>
 			</table>
 			</div>
 	</thead>
@@ -123,7 +124,7 @@ if ( isset($pdf) ) {
 		</tr>
 		 </tr><tr>
 			<td><div align="left"  style="font-size: 8pt"><b>FECHA DE RECEPCION:</b></div></td>
-			<td><div align="rigth" style="font-size: 8pt"><?php echo $fecha ?></div></td>
+			<td><div align="rigth" style="font-size: 8pt"><?php echo $recep; ?></div></td>
 		</tr>
 
 		<?php if($mSQL_2->num_rows()==0){ ?>
@@ -148,7 +149,7 @@ if ( isset($pdf) ) {
 		?>
 			<tr style='color: #111111;background: #EEEEEE;'>
 				<td><div align="left"  style="font-size: 8pt"><b>CONCEPTO:</b></div></td>
-				<td><div align="rigth" style="font-size: 8pt"><?php echo htmlspecialchars($items->activida) ?></div></td>
+				<td><div align="rigth" style="font-size: 8pt"><?php echo $this->us_ascii2html($items->activida) ?></div></td>
 			</tr><tr>
 				<td><div align="left"  style="font-size: 8pt"><b>MONTO DEL PAGO OBJETO DE RETENCI&Oacute;N  Bs. :</b></div></td>
 				<td><div align="rigth" style="font-size: 8pt"><?php echo nformat($items->monto)?></div></td>

@@ -774,7 +774,7 @@ class Ordc extends Controller {
 
 		#show/hide navigations buttons
 		$grid->setAdd(    $this->datasis->sidapuede('ORDC','INCLUIR%' ));
-		$grid->setEdit(   $this->datasis->sidapuede('ORDC','MODIFICA%'));
+		$grid->setEdit(   $this->datasis->sidapuede('ORDC','MODIFICA%') || $this->datasis->sidapuede('ORDC','ORDCMODI%'));
 		$grid->setDelete( $this->datasis->sidapuede('ORDC','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('ORDC','BUSQUEDA%'));
 		$grid->setRowNum(30);
@@ -1728,7 +1728,8 @@ class Ordc extends Controller {
 
 			$iva    +=$itimporte*($itiva/100);
 			$totals +=$itimporte;
-			$do->set_rel('itordc','entregado',0,$i);
+
+			$do->set_rel('itordc','recibido',0,$i);
 		}
 		$totalg = $totals+$iva;
 
