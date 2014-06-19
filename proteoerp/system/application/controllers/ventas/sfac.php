@@ -3952,6 +3952,16 @@ class Sfac extends Controller {
 			$tercero=true;
 		}
 
+		$mSQL="SELECT COUNT(*) AS cana
+			FROM stra   AS a
+			JOIN itstra AS b ON a.numero=b.numero
+			JOIN sitems AS c ON b.codigo=c.codigoa AND c.numa=${dbnumero}
+			WHERE a.envia='INFI' AND a.fecha>=${dbfecha}";
+		$invfis=intval($this->datasis->dameval($mSQL));
+		if($invfis>0){
+			$do->error_message_ar['pre_del'] = 'No se puede anular el documento por tener un inventario físico intercalado, debe realizar la operación inversa.';
+			return false;
+		}
 
 		//Descuento del inventario
 		$factor=($tipo_doc=='F' || $tipo_doc=='T')? 1:-1;
