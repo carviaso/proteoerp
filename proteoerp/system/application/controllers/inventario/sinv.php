@@ -2890,7 +2890,7 @@ class Sinv extends Controller {
 		$edit->aumento->css_class='inputnum';
 		$edit->aumento->size=5;
 		$edit->aumento->maxlength=6;
-		$edit->aumento->rule='numeric|callback_chobligafraccion';
+		$edit->aumento->rule='condi_required|callback_chobligafraccion';
 		$edit->aumento->autocomplete = false;
 		//$edit->aumento->append('Solo si es fracci&oacute;n');
 
@@ -2986,7 +2986,7 @@ class Sinv extends Controller {
 		$edit->fracci ->size=10;
 		$edit->fracci->maxlength=4;
 		$edit->fracci->css_class='inputnum';
-		$edit->fracci->rule='numeric|condi_required|trim|callback_chobligafraccion';
+		$edit->fracci->rule='condi_required|trim|callback_chobligafraccion';
 		$edit->fracci->insertValue='1';
 
 		$edit->activo = new dropdownField('Activo', 'activo');
@@ -4892,6 +4892,12 @@ class Sinv extends Controller {
 			$this->validation->set_message('chobligafraccion',"Cuando en producto es fraccion es obligatorio el campo %s");
 			return false;
 		}
+
+		if($tipo[0]=='F' && !is_numeric($enlace)){
+			$this->validation->set_message('chobligafraccion','El campo %s debe ser num&eacute;rico');
+			return false;
+		}
+
 		return true;
 	}
 
