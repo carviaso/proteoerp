@@ -3,7 +3,7 @@ class Frontdesk extends Controller
 {
 	function Frontdesk(){
 		parent::Controller();
-		$this->load->database('hotel',TRUE);
+		//$this->load->database('hotel',TRUE);
 	}
 	function index(){
 		

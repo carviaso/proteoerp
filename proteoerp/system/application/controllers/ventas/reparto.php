@@ -482,11 +482,11 @@ class Reparto extends Controller {
 		$dbfactura= $this->db->escape($factura);
 		$dbreparto= $this->db->escape($reparto);
 		$actual   = $this->datasis->dameval("SELECT reparto FROM sfac WHERE id=${dbfactura}");
-		if ( $actual == 0 ) {
+		if($actual == 0){
 			$mSQL = "UPDATE sfac SET reparto=${dbreparto} WHERE id=${dbfactura}";
 			$this->db->query($mSQL);
 			$msj = 'Factura Agregada';
-		} else {
+		}else{
 			$mSQL = "UPDATE sfac SET reparto=0 WHERE id=${dbfactura}";
 			$this->db->query($mSQL);
 			$msj = 'Factura Desmarcada';
@@ -1164,7 +1164,15 @@ class Reparto extends Controller {
 	}
 
 	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
+		$id   = intval($do->get('id'));
+		$tipo = $do->get('tipo');
+
+		$cana = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfac WHERE reparto=${id}"));
+		if($tipo == 'P' && $cana == 0){
+			return true;
+		}
+
+		$do->error_message_ar['pre_del']='Solo puede eliminar un reparto cuando esta pendiente y no tiene facturas asociadas.';
 		return false;
 	}
 

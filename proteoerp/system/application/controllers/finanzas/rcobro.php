@@ -9,6 +9,7 @@ class Rcobro extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
+		$this->instalar();
 		$this->datasis->modulo_nombre( 'RCOBRO', $ventana=0 );
 	}
 
@@ -673,7 +674,7 @@ class Rcobro extends Controller {
 	}
 
 	//******************************************************************
-	// DataEdit  
+	// DataEdit
 	//******************************************************************
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
@@ -698,9 +699,9 @@ class Rcobro extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
 
 		$edit->tipo = new inputField('Tipo','tipo');
 		$edit->tipo->rule='';
@@ -716,7 +717,7 @@ class Rcobro extends Controller {
 		$edit->fecha->maxlength =8;
 		$edit->fecha->calendar = false;
 
-		$edit->retorno = new dateonlyField('Recepcion','retorno');
+		$edit->retorno = new dateonlyField('Recepci&oacute;n','retorno');
 		$edit->retorno->rule='chfecha';
 		$edit->retorno->calendar=false;
 		$edit->retorno->size =10;
@@ -733,7 +734,7 @@ class Rcobro extends Controller {
 		$edit->vende->style ="width:250px;";
 
 
-		$edit->observa = new textareaField('Observacion','observa');
+		$edit->observa = new textareaField('Observaci&oacute;n','observa');
 		$edit->observa->rule='';
 		$edit->observa->cols = 70;
 		$edit->observa->rows = 2;
@@ -758,7 +759,7 @@ class Rcobro extends Controller {
 
 
 		//**************************************************************
-		// Detalle 
+		// Detalle
 		//**************************************************************
 /*
 		$edit->tipo_doc = new inputField('Tipo_doc','tipo_doc_<#i#>');
@@ -767,7 +768,7 @@ class Rcobro extends Controller {
 		$edit->tipo_doc->maxlength =1;
 		$edit->tipo_doc->rel_id ='smov';
 */
-		$edit->numero = new inputField('Numero','numero_<#i#>');
+		$edit->numero = new inputField('N&uacute;mero','numero_<#i#>');
 		$edit->numero->rule='';
 		$edit->numero->size =10;
 		$edit->numero->maxlength =8;
@@ -892,7 +893,7 @@ class Rcobro extends Controller {
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('rcobro')) {
+		if(!$this->db->table_exists('rcobro')){
 			$mSQL="CREATE TABLE `rcobro` (
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
 			  `tipo` char(1) NOT NULL COMMENT 'Tipo Pendiente, Cerrado',
@@ -906,7 +907,7 @@ class Rcobro extends Controller {
 			  `usuario` char(12) DEFAULT NULL,
 			  `hora` char(8) DEFAULT NULL,
 			  PRIMARY KEY (`id`)
-			) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Relacion de cobro'";
+			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Relacion de cobro'";
 			$this->db->query($mSQL);
 		}
 		//$campos=$this->db->list_fields('rcobro');

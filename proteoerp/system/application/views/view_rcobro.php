@@ -85,7 +85,7 @@ function add_smov(){
 
 	//$("#facturas").val(can);
 	//$("#numero_"+can).focus();
-	
+
 	autocod(can);
 
 	$("#numero_"+can).keypress(function(e) {
@@ -131,7 +131,7 @@ function del_smov(id){
 			<td bgcolor='#7098D0' width="80"  align='center'>Vence </td>
 			<td bgcolor='#7098D0' width="270" align='center'>Nombre</td>
 			<td bgcolor='#7098D0' width="110" align='center'>Total </td>
-			<td bgcolor='#0B3861' align='center'><a href='#' id='addlink' onclick="add_smov()" title='Agregar otra factura'><?php echo img('images/agrega4.png'); ?></a></td>
+			<td bgcolor='#7098D0' align='center'><a href='#' id='addlink' onclick="add_smov()" title='Agregar otra factura'><?php echo img('images/agrega4.png'); ?></a></td>
 		</tr>
 	</table>
 	<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px'>
