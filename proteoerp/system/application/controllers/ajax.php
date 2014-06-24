@@ -1665,11 +1665,11 @@ class Ajax extends Controller {
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
 				foreach( $query->result_array() as  $id=>$row ) {
-					$retArray['label']  = $row['tipo_doc'].$row['numero'].' '.$row['fecha'].' '.$row['saldo'].' '.$this->en_utf8($row['nombre']);
+					$retArray['label']  = $row['tipo_doc'].$row['numero'].' '.$this->_datehuman($row['fecha']).' '.$row['saldo'].' '.$this->en_utf8($row['nombre']);
 					$retArray['value']  = $row['numero'];
 					$retArray['tipo_doc']= trim($row['tipo_doc']);
-					$retArray['fecha']   = $row['fecha'];
-					$retArray['vence']   = $row['vence'];
+					$retArray['fecha']   = $this->_datehuman($row['fecha']);
+					$retArray['vence']   = $this->_datehuman($row['vence']);
 					$retArray['nombre']  = $this->en_utf8($row['nombre']);
 					$retArray['monto']   = $row['monto'];
 					$retArray['saldo']   = $row['saldo'];

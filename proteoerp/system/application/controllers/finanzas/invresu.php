@@ -1087,7 +1087,7 @@ class Invresu extends Controller {
 			$this->_calcula($meco);
 			$meco++;
 		}
-		logusu('invresu','Genero para la fecha '.$ano);
+		logusu('invresu','Genero para todo el '.substr($ano,0,4));
 		echo "Calculo Concluido";
 	}
 

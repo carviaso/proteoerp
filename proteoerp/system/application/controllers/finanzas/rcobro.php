@@ -14,12 +14,6 @@ class Rcobro extends Controller {
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('rcobro','id') ) {
-			$this->db->query('ALTER TABLE rcobro DROP PRIMARY KEY');
-			$this->db->query('ALTER TABLE rcobro ADD UNIQUE INDEX numero (numero)');
-			$this->db->query('ALTER TABLE rcobro ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
-		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -45,11 +39,11 @@ class Rcobro extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"imprime",  "img"=>"assets/default/images/print.png","alt" => 'Reimprimir', "label"=>"Reimprimir Documento"));
+		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
 			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
@@ -59,7 +53,7 @@ class Rcobro extends Controller {
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$param['WestPanel']    = $WestPanel;
-		$param['script']       = script('plugins/jquery.ui.autocomplete.autoSelectOne.js');
+		$param['script']       = '';
 		$param['readyLayout']  = $readyLayout;
 		$param['SouthPanel']   = $SouthPanel;
 		$param['listados']     = $this->datasis->listados('RCOBRO', 'JQ');
@@ -230,10 +224,8 @@ class Rcobro extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -242,16 +234,16 @@ class Rcobro extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('id');
-		$grid->label('Id');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
-			'width'         => 40,
+			'width'         => 50,
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
@@ -430,8 +422,7 @@ class Rcobro extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdata()
-	{
+	function getdata(){
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
@@ -445,60 +436,8 @@ class Rcobro extends Controller {
 	/**
 	* Guarda la Informacion
 	*/
-	function setData()
-	{
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = "??????";
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM rcobro WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('rcobro', $data);
-					echo "Registro Agregado";
-
-					logusu('RCOBRO',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM rcobro WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM rcobro WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE rcobro SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("rcobro", $data);
-				logusu('RCOBRO',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('rcobro', $data);
-				logusu('RCOBRO',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM rcobro WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM rcobro WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->query("DELETE FROM rcobro WHERE id=$id ");
-				logusu('RCOBRO',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+	function setData(){
+		echo 'Deshabilitado';
 	}
 
 	//***************************
@@ -506,7 +445,7 @@ class Rcobro extends Controller {
 	//***************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -523,7 +462,7 @@ class Rcobro extends Controller {
 
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -561,7 +500,7 @@ class Rcobro extends Controller {
 
 
 		$grid->addField('vd');
-		$grid->label('Vd');
+		$grid->label('Vendedor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -595,7 +534,7 @@ class Rcobro extends Controller {
 		));
 
 		$grid->addField('totalg');
-		$grid->label('Totalg');
+		$grid->label('Total');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -633,8 +572,6 @@ class Rcobro extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
 		));
 
-
-
 		$grid->setShrinkToFit('false');
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdatait/'));
@@ -652,25 +589,22 @@ class Rcobro extends Controller {
 	/**
 	* Busca la data en el Servidor por json
 	*/
-	function getdatait( $id = 0 )
-	{
-		if ($id === 0 ){
-			$id = $this->datasis->dameval("SELECT MAX(id) FROM rcobro");
+	function getdatait( $id = 0 ){
+		if($id === 0){
+			$id = intval($this->datasis->dameval("SELECT MAX(id) FROM rcobro"));
 		}
-		if(empty($id)) return "";
-		$numero   = $this->datasis->dameval("SELECT numero FROM rcobro WHERE id=$id");
-		$grid    = $this->jqdatagrid;
-		$mSQL    = "SELECT * FROM sfac WHERE numero='$numero' ";
-		$response   = $grid->getDataSimple($mSQL);
-		$rs = $grid->jsonresult( $response);
+		if(empty($id)) return '';
+		$grid     = $this->jqdatagrid;
+		$mSQL     = "SELECT * FROM smov WHERE rcobro=${id}";
+		$response = $grid->getDataSimple($mSQL);
+		$rs       = $grid->jsonresult( $response);
 		echo $rs;
 	}
 
 	/**
 	* Guarda la Informacion
 	*/
-	function setDatait()
-	{
+	function setDatait(){
 	}
 
 	//******************************************************************
@@ -682,12 +616,11 @@ class Rcobro extends Controller {
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 			$(".inputnum").numeric(".");
-		});
-		';
+		});';
 
 		$do = new DataObject('rcobro');
 
-		$do->rel_one_to_many('smov','smov','numero');
+		$do->rel_one_to_many('smov','smov',array('id'=>'rcobro'));
 		$edit = new DataDetails($this->tits, $do );
 
 		$edit->script($script,'modify');
@@ -733,7 +666,6 @@ class Rcobro extends Controller {
 		$edit->vende->options('SELECT vendedor, CONCAT(vendedor," - ",nombre) nombre FROM vend WHERE tipo IN ("C","A") ORDER BY nombre');
 		$edit->vende->style ="width:250px;";
 
-
 		$edit->observa = new textareaField('Observaci&oacute;n','observa');
 		$edit->observa->rule='';
 		$edit->observa->cols = 70;
@@ -742,15 +674,16 @@ class Rcobro extends Controller {
 		$edit->facturas = new inputField('Nro. de Facturas','facturas');
 		$edit->facturas->rule      = 'integer';
 		$edit->facturas->css_class = 'inputonlynum';
-		$edit->facturas->size      = 8;
-		$edit->facturas->maxlength = 11;
+		$edit->facturas->type     = 'inputhidden';
+		$edit->facturas->showformat = 'decimal';
 		$edit->facturas->readonly  = true;
 
-		$edit->monto = new inputField('Monto','monto');
+		$edit->monto = new inputField('Monto total','total');
+		$edit->monto->db_name   = 'monto';
 		$edit->monto->rule      = 'numeric';
 		$edit->monto->css_class = 'inputnum';
-		$edit->monto->size      = 12;
-		$edit->monto->maxlength = 17;
+		$edit->monto->type      = 'inputhidden';
+		$edit->monto->showformat = 'decimal';
 		$edit->monto->readonly  = true;
 
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
@@ -761,34 +694,40 @@ class Rcobro extends Controller {
 		//**************************************************************
 		// Detalle
 		//**************************************************************
-/*
-		$edit->tipo_doc = new inputField('Tipo_doc','tipo_doc_<#i#>');
+
+		$edit->itid = new hiddenField('Id','id_<#i#>');
+		$edit->itid->rule    = '';
+		$edit->itid->db_name = 'id';
+		$edit->itid->rel_id  = 'smov';
+
+		$edit->tipo_doc = new inputField('Tipo Doc.','tipo_doc_<#i#>');
+		$edit->tipo_doc->db_name = 'tipo_doc';
 		$edit->tipo_doc->rule='';
-		$edit->tipo_doc->size =3;
-		$edit->tipo_doc->maxlength =1;
 		$edit->tipo_doc->rel_id ='smov';
-*/
+		$edit->tipo_doc->type     = 'inputhidden';
+
 		$edit->numero = new inputField('N&uacute;mero','numero_<#i#>');
-		$edit->numero->rule='';
-		$edit->numero->size =10;
-		$edit->numero->maxlength =8;
-		$edit->numero->rel_id ='smov';
+		$edit->numero->db_name   = 'numero';
+		$edit->numero->rule      = '';
+		$edit->numero->size      = 10;
+		$edit->numero->maxlength = 8;
+		$edit->numero->rel_id    = 'smov';
 
 		$edit->fechad = new dateonlyField('Fecha','fechad_<#i#>');
-		$edit->fechad->rule='chfecha';
-		$edit->fechad->size =10;
-		$edit->fechad->maxlength =8;
-		$edit->fechad->rel_id ='smov';
+		$edit->fechad->db_name  = 'fechad';
+		$edit->fechad->rule     = 'chfecha';
+		$edit->fechad->rel_id   = 'smov';
 		$edit->fechad->calendar = false;
-		$edit->fechad->readonly  = true;
+		$edit->fechad->readonly = true;
+		$edit->fechad->type     = 'inputhidden';
 
 		$edit->vence = new dateonlyField('Vence','vence_<#i#>');
-		$edit->vence->rule='chfecha';
-		$edit->vence->size =10;
-		$edit->vence->maxlength =8;
-		$edit->vence->rel_id ='smov';
+		$edit->vence->db_name  = 'vence';
+		$edit->vence->rule     = 'chfecha';
+		$edit->vence->rel_id   = 'smov';
+		$edit->vence->type     = 'inputhidden';
 		$edit->vence->calendar = false;
-		$edit->vence->readonly  = true;
+		$edit->vence->readonly = true;
 /*
 		$edit->vd = new inputField('Vd','vd_<#i#>');
 		$edit->vd->rule='';
@@ -803,11 +742,11 @@ class Rcobro extends Controller {
 		$edit->cod_cli->rel_id ='smov';
 */
 		$edit->nombre = new inputField('Nombre','nombre_<#i#>');
+		$edit->nombre->db_name = 'nombre';
 		$edit->nombre->rule='';
-		$edit->nombre->size =42;
-		$edit->nombre->maxlength =40;
 		$edit->nombre->rel_id ='smov';
-		$edit->nombre->readonly  = true;
+		$edit->nombre->type     = 'inputhidden';
+		$edit->nombre->readonly = true;
 /*
 		$edit->referen = new inputField('Referen','referen_<#i#>');
 		$edit->referen->rule='';
@@ -823,26 +762,14 @@ class Rcobro extends Controller {
 		$edit->totals->rel_id ='sfac';
 */
 		$edit->totalg = new inputField('Total','monto_<#i#>');
+		$edit->totalg->db_name = 'monto';
 		$edit->totalg->rule='numeric';
 		$edit->totalg->css_class='inputnum';
 		$edit->totalg->size =14;
 		$edit->totalg->maxlength =12;
 		$edit->totalg->rel_id ='smov';
+		$edit->totalg->type     = 'inputhidden';
 		$edit->totalg->readonly  = true;
-/*
-		$edit->transac = new inputField('Transac','transac_<#i#>');
-		$edit->transac->rule='';
-		$edit->transac->size =10;
-		$edit->transac->maxlength =8;
-		$edit->transac->rel_id ='smov';
-
-		$edit->rcobro = new inputField('Rcobro','rcobro_<#i#>');
-		$edit->rcobro->rule='integer';
-		$edit->rcobro->css_class='inputonlynum';
-		$edit->rcobro->size =13;
-		$edit->rcobro->maxlength =11;
-		$edit->rcobro->rel_id ='smov';
-*/
 		//******************************************************************
 
 		$edit->buttons('add_rel');
@@ -863,36 +790,76 @@ class Rcobro extends Controller {
 	}
 
 	function _pre_insert($do){
-		$do->error_message_ar['pre_ins']='';
+		$do->save_rel = false;
+
+		$cana=$do->count_rel('smov');
+		if($cana<=0){
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Debe tener al menos un afecto por cobrar';
+			return false;
+		}
+
 		return true;
 	}
 
 	function _pre_update($do){
-		$do->error_message_ar['pre_upd']='';
+		$do->save_rel = false;
+		$id = $do->get('id');
+
+		$cana=$do->count_rel('smov');
+		if($cana<=0){
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Debe tener al menos un afecto por cobrar';
+			return false;
+		}
+
 		return true;
 	}
 
 	function _pre_delete($do){
+		$do->save_rel = false;
 		$do->error_message_ar['pre_del']='';
 		return false;
 	}
 
+	function _post_inserup($do){
+		$id = $do->pk['id'];
+
+		$cana=$do->count_rel('smov');
+		for($i=0;$i<$cana;$i++){
+			$itid = $do->get_rel('smov','id' ,$i);
+			$mSQL = "UPDATE smov SET rcobro=${id} WHERE id=${itid}";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'rcobro'); }
+		}
+	}
+
 	function _post_insert($do){
+		$this->_post_inserup($do);
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits ${primary} ");
 	}
 
 	function _post_update($do){
+		$id = $do->get('id');
+		$mSQL = "UPDATE smov SET rcobro=NULL WHERE rcobro=${id}";
+		$ban=$this->db->simple_query($mSQL);
+		if($ban==false){ memowrite($mSQL,'rcobro'); }
+
+		$this->_post_inserup($do);
+
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${primary} ");
 	}
 
 	function _post_delete($do){
+		$id = $do->get('id');
+		$mSQL = "UPDATE smov SET rcobro=NULL WHERE rcobro=${id}";
+
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		logusu($do->table,"Elimino $this->tits ${primary} ");
 	}
 
 	function instalar(){
+		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
 		if(!$this->db->table_exists('rcobro')){
 			$mSQL="CREATE TABLE `rcobro` (
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -910,8 +877,10 @@ class Rcobro extends Controller {
 			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Relacion de cobro'";
 			$this->db->query($mSQL);
 		}
-		//$campos=$this->db->list_fields('rcobro');
-		//if(!in_array('<#campo#>',$campos)){ }
-	}
 
+		$campos=$this->db->list_fields('smov');
+		if(!in_array('rcobro',$campos)){
+			$this->db->query("ALTER TABLE `smov` ADD COLUMN `rcobro` INT(11) NULL DEFAULT NULL AFTER `ncredito`");
+		}
+	}
 }

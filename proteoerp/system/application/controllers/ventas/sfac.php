@@ -4809,6 +4809,11 @@ class Sfac extends Controller {
 			$this->db->query($mSQL);
 		}
 
+		if(!in_array('basecomi',$campos)){
+			$mSQL="ALTER TABLE `sfac` ADD COLUMN `basecomi` DECIMAL(17,2) NULL DEFAULT '0.00'";
+			$this->db->query($mSQL);
+		}
+
 		if(!in_array('id'  ,$campos)){
 			$this->db->simple_query('ALTER TABLE sfac DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE sfac ADD UNIQUE INDEX tipo_doc, numero (numero)');
