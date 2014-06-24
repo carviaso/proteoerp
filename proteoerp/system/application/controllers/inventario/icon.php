@@ -254,7 +254,7 @@ class Icon extends Controller {
 	//***************************
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -271,7 +271,7 @@ class Icon extends Controller {
 		));
 
 		$grid->addField('codigo');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -307,7 +307,7 @@ class Icon extends Controller {
 
 
 		$grid->addField('gastode');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -331,7 +331,7 @@ class Icon extends Controller {
 
 
 		$grid->addField('ingresod');
-		$grid->label('Descripcion');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -364,8 +364,6 @@ class Icon extends Controller {
 			'editoptions'   => '{ size:2, maxlength: 2 }',
 		));
 */
-
-
 
 
 		$grid->showpager(true);
@@ -420,58 +418,36 @@ class Icon extends Controller {
 	* Guarda la Informacion
 	*/
 	function setData(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = "codigo";
-		$check  = 0;
+		echo 'Deshabilitado';
+	}
 
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM icon WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('icon', $data);
-					echo "Registro Agregado";
 
-					logusu('ICON',"Registro codigo INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
+	//****************************
+	// Comodin para eliminar
+	//****************************
+	function dataedit(){
+		$this->rapyd->load('dataedit');
 
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM icon WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM icon WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE icon SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("icon", $data);
-				logusu('ICON',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('icon', $data);
-				logusu('ICON',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
+		$edit = new DataEdit('', 'icon');
+		$edit->on_save_redirect=false;
+		$edit->post_process('insert','_pre_false');
+		$edit->post_process('update','_pre_false');
+		$edit->pre_process( 'delete','_pre_delete' );
+		$edit->post_process('delete','_post_delete');
 
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM icon WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM icon WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM icon WHERE id=$id ");
-				logusu('ICON',"Registro codigo ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form'] =&  $edit;
+			$this->load->view('view_icon', $conten);
+		}
 	}
 
 	function deingreso(){
@@ -486,9 +462,9 @@ class Icon extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_false'  );
 
 		$script = "
 		$('#ingreso').autocomplete({
@@ -524,7 +500,7 @@ class Icon extends Controller {
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
 
-		$edit->codigo = new inputField('Codigo','codigo');
+		$edit->codigo = new inputField('C&oacute;digo','codigo');
 		$edit->codigo->rule        = '';
 		$edit->codigo->size        =  8;
 		$edit->codigo->maxlength   =  6;
@@ -539,7 +515,7 @@ class Icon extends Controller {
 		$edit->ingreso->size       =  7;
 		$edit->ingreso->maxlength  = 20;
 
-		$edit->ingresod = new inputField('Descripcion','ingresod');
+		$edit->ingresod = new inputField('Descripci&oacute;n','ingresod');
 		$edit->ingresod->rule      = '';
 		$edit->ingresod->size      = 32;
 		$edit->ingresod->maxlength = 30;
@@ -577,7 +553,7 @@ class Icon extends Controller {
 		$edit->post_process('delete','_post_delete');
 		$edit->pre_process('insert', '_pre_insert' );
 		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->pre_process('delete', '_pre_false'  );
 
 		$script = "
 		$('#gasto').autocomplete({
@@ -618,7 +594,7 @@ class Icon extends Controller {
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
 
-		$edit->codigo = new inputField('Codigo','codigo');
+		$edit->codigo = new inputField('C&oacute;digo','codigo');
 		$edit->codigo->rule        = '';
 		$edit->codigo->size        =  8;
 		$edit->codigo->maxlength   =  6;
@@ -633,7 +609,7 @@ class Icon extends Controller {
 		$edit->gasto->size         =  8;
 		$edit->gasto->maxlength    = 20;
 
-		$edit->gastode = new inputField('Descripcion','gastode');
+		$edit->gastode = new inputField('Descripci&oacute;n','gastode');
 		$edit->gastode->rule       = '';
 		$edit->gastode->size       = 32;
 		$edit->gastode->maxlength  = 30;
@@ -690,32 +666,44 @@ class Icon extends Controller {
 			}
 		}
 
-		$do->error_message_ar['pre_upd']='';
+		//$do->error_message_ar['pre_upd']='';
 		return true;
 	}
 
-	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='';
+	function _pre_false($do){
 		return false;
 	}
 
+	function _pre_delete($do){
+		$dbcodigo=$this->db->escape($do->get('codigo'));
+		$check =  intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM itssal WHERE concepto=${dbcodigo}"));
+		if($check>0){
+			$do->error_message_ar['pre_del']='Este concepto esta asociado a ajustes, no se puede eliminar';
+			return false;
+		}
+		return true;
+	}
+
 	function _post_insert($do){
+		$codigo  =$do->get('codigo');
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits ${codigo} ${primary}");
 	}
 
 	function _post_update($do){
+		$codigo  =$do->get('codigo');
 		if(!empty($this->_mSQL)){
 			$this->db->simple_query($this->_mSQL);
 		}
 
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${codigo} ${primary} ");
 	}
 
 	function _post_delete($do){
+		$codigo  =$do->get('codigo');
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		logusu($do->table,"Elimino $this->tits ${codigo} ${primary} ");
 	}
 
 	function instalar(){
