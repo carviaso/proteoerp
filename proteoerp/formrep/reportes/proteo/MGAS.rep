@@ -1,0 +1,50 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+
+	$mSQL="SELECT a.cuenta,a.codigo, a.tipo, a.descrip, a.iva, a.grupo,a.nom_grup
+		FROM mgas AS a
+		JOIN grga AS b ON a.grupo=b.grupo
+	ORDER BY a.grupo,a.codigo";
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+
+	$pdf->setTitulo('Maestros de Gastos');
+	//$pdf->setSubTitulo('');
+	//$pdf->setSobreTabla('');
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol('codigo' ,25,'Código'     ,'L',8);
+	$pdf->AddCol('tipo'   ,35,'Tipo'       ,'C',8);
+	$pdf->AddCol('descrip',80,'Descripción','L',8);
+	$pdf->AddCol('cuenta' ,20,'Cuenta'     ,'C',8);
+	//$pdf->AddCol('iva'    ,20,'Iva'        ,'R',8);
+
+	$pdf->setGrupoLabel('<#nom_grup#>  <#grupo#>');
+	$pdf->setGrupo('grupo');
+	$pdf->Table();
+
+	$pdf->Output();
+}else{
+	$data["filtro"] = $filter->output;
+	$data["titulo"] = '<h2 class="mainheader">Maestros de Gastos</h2>';
+	$data["head"] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

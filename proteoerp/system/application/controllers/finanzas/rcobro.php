@@ -253,6 +253,7 @@ class Rcobro extends Controller {
 		$grid->label('Tipo');
 		$grid->params(array(
 			'search'        => 'true',
+			'align'         => "'center'",
 			'editable'      => $editar,
 			'width'         => 40,
 			'edittype'      => "'text'",
@@ -288,7 +289,7 @@ class Rcobro extends Controller {
 
 
 		$grid->addField('vende');
-		$grid->label('Vende');
+		$grid->label('Vendedor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -300,7 +301,7 @@ class Rcobro extends Controller {
 
 
 		$grid->addField('observa');
-		$grid->label('Observa');
+		$grid->label('Observaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -390,8 +391,18 @@ class Rcobro extends Controller {
 					jQuery(gridId2).jqGrid("setGridParam",{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
 					jQuery(gridId2).trigger("reloadGrid");
 				}
-			}'
-		);
+			},
+			afterInsertRow:
+			function( rid, aData, rowe){
+				if(aData.tipo == "P"){
+					$(this).jqGrid( "setCell", rid, "tipo","",{color:"#000000", background:"#DCFFB5" });
+				}else if(aData.tipo == "A"){
+					//$(this).jqGrid( "setRowData", rid, "tipo",{color:"#000000", background:"#C90623" });
+					$(this).jqGrid( "setCell", rid, "tipo","",{color:"#000000", background:"##FFDD00" });
+				}
+			}
+		');
+
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
@@ -404,7 +415,7 @@ class Rcobro extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: rcobroadd, editfunc: rcobroedit, delfunc: rcobrodel, viewfunc: rcobroshow");
+		$grid->setBarOptions('addfunc: rcobroadd, editfunc: rcobroedit, delfunc: rcobrodel, viewfunc: rcobroshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -450,7 +461,7 @@ class Rcobro extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('tipo_doc');
-		$grid->label('Tipo');
+		$grid->label('Tipo Doc.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
