@@ -1,18 +1,20 @@
 <?php
 $_arch_nombre='sfac.fis';
 
+$tipo_iva = 'I'; //'I' manda iva incluido, 'A' manda el iva adicional
+
 if(count($parametros)==0) show_error('Faltan parametros');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 
-$con=$this->db->query("SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1");
+$con=$this->db->query('SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1');
 if($con->num_rows() > 0){
 	$t=$con->row('tasa');$rt=$con->row('redutasa');$st=$con->row('sobretasa');
 }else{
 	show_error('Debe cargar la tabla de IVA.');
 }
 
-$mSQL = "SELECT If(a.referen='E','Efectivo',IF( a.referen='C','Cr&eacute;dito',IF(a.referen='M','Mixto','Pendiente'))) AS referen,
+$mSQL = "SELECT If(a.referen='E','CONTADO',IF( a.referen='C','CREDITO',IF(a.referen='M','MIXTO','Pendiente'))) AS referen,
 	a.tipo_doc,a.numero,a.cod_cli,a.nombre,a.rifci,CONCAT(a.direc,a.dire1) AS direccion,a.factura,a.fecha,a.vence,a.vd,
 	a.iva,a.totals,a.totalg, a.exento,b.nombre AS nomvend,tipo_doc, a.numero,a.peso,c.telefono,a.observa
 FROM sfac a
@@ -45,13 +47,13 @@ $vd       = $row->vd;
 $dbtipo_doc = $this->db->escape($tipo_doc);
 $dbnumero   = $this->db->escape($numero);
 
-if($tipo_doc == "F"){
+if($tipo_doc == 'F'){
 	$doc  = '';
 	$tasa = '!';
 	$redu = '"';
 	$adic = '#';
 	$exeb = ' ';
-}elseif ($tipo_doc == "D"){
+}elseif ($tipo_doc == 'D'){
 	$doc  = 'd';
 	$tasa = '1';
 	$redu = '2';
@@ -102,7 +104,11 @@ foreach ($detalle AS $items){
 	}
 
 	//precio y cantidad
-	$precio = number_format($items->preca*((100+$items->iva)/100),2,'','');
+	if($tipo_iva=='I'){
+		$precio = number_format($items->preca*((100+$items->iva)/100),2,'','');
+	}else{
+		$precio = number_format($items->preca,2,'','');
+	}
 	$cana   = number_format($items->cana,3,'','');
 	echo str_pad($precio,10,'0',0).str_pad($cana,8,'0',0);
 
@@ -126,4 +132,3 @@ foreach ($detalle AS $items){
 	}
 }
 echo "101\n";
-?>

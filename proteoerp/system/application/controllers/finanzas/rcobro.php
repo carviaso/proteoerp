@@ -154,6 +154,17 @@ class Rcobro extends Controller {
 			';
 
 		$bodyscript .= '
+		jQuery("#imprime").click( function(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('formatos/ver/RCOBRO').'/\'+id+\'/id\'').';
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		});';
+
+		$bodyscript .= '
 		$("#fedita").dialog({
 			autoOpen: false, height: 500, width: 700, modal: true,
 			buttons: {
