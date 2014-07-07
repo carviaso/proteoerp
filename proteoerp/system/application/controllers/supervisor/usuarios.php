@@ -265,6 +265,9 @@ class Usuarios extends Controller {
 		$i      = 1;
 		$editar = 'false';
 
+		// cajero
+		$iscaja = $this->datasis->istabla('scaj');
+
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('id');
@@ -325,55 +328,52 @@ class Usuarios extends Controller {
 			'formoptions'   => '{ label:"Supervisor" }'
 		));
 
-		$mSQL = "SELECT TRIM(vendedor) vendedor, CONCAT(trim(vendedor), ' ', trim(nombre)) nombre FROM vend ORDER BY vendedor ";
-//		$link = $this->datasis->llenajqselect($mSQL, true);
-		$grid->addField('vendedor');
-		$grid->label('Vende');
-		$grid->params(array(
-			'align'         => "'center'",
-			'width'         => 50,
-			'editable'      => $editar,
-			'edittype'      => "'select'",
-//			'editoptions'   => '{ value: '.$link.', style:"width:250px "}',
-			'formoptions'   => '{ label:"Vendedor" }'
-		));
+		if ($iscaja){
+			
+			$mSQL = "SELECT TRIM(vendedor) vendedor, CONCAT(trim(vendedor), ' ', trim(nombre)) nombre FROM vend ORDER BY vendedor ";
+			$grid->addField('vendedor');
+			$grid->label('Vende');
+			$grid->params(array(
+				'align'         => "'center'",
+				'width'         => 50,
+				'editable'      => $editar,
+				'edittype'      => "'select'",
+				'formoptions'   => '{ label:"Vendedor" }'
+			));
 
-		$mSQL = "SELECT cajero, CONCAT(cajero, ' ', nombre) nombre FROM scaj ORDER BY nombre";
-		//$link = $this->datasis->llenajqselect($mSQL, true);
-		$grid->addField('cajero');
-		$grid->label('Cajero');
-		$grid->params(array(
-			'align'    => "'center'",
-			'width'         => 50,
-			'editable'      => $editar,
-			'edittype'      => "'select'",
-			//'editoptions'   => '{ value: '.$link.', style:"width:250px "}',
-		));
+			$mSQL = "SELECT cajero, CONCAT(cajero, ' ', nombre) nombre FROM scaj ORDER BY nombre";
+			$grid->addField('cajero');
+			$grid->label('Cajero');
+			$grid->params(array(
+				'align'    => "'center'",
+				'width'         => 50,
+				'editable'      => $editar,
+				'edittype'      => "'select'",
+				//'editoptions'   => '{ value: '.$link.', style:"width:250px "}',
+			));
 
-		$mSQL = "SELECT ubica, CONCAT(ubica, ' ', ubides) ubides FROM caub WHERE gasto='N' AND invfis='N' ORDER BY ubica ";
-		//$link = $this->datasis->llenajqselect($mSQL, true);
-		$grid->addField('almacen');
-		$grid->label('Almacen');
-		$grid->params(array(
-			'align'         => "'center'",
-			'width'         => 50,
-			'editable'      => $editar,
-			'edittype'      => "'select'",
-			//'editoptions'   => '{ value: '.$link.', style:"width:250px" }',
-		));
+			$mSQL = "SELECT ubica, CONCAT(ubica, ' ', ubides) ubides FROM caub WHERE gasto='N' AND invfis='N' ORDER BY ubica ";
+			$grid->addField('almacen');
+			$grid->label('Almacen');
+			$grid->params(array(
+				'align'         => "'center'",
+				'width'         => 50,
+				'editable'      => $editar,
+				'edittype'      => "'select'",
+				//'editoptions'   => '{ value: '.$link.', style:"width:250px" }',
+			));
 
-		$mSQL = "SELECT TRIM(codigo) codigo, CONCAT(TRIM(codigo),' ',TRIM(sucursal)) sucursal FROM sucu ORDER BY codigo";
-		//$link = $this->datasis->llenajqselect($mSQL, true);
-		$grid->addField('sucursal');
-		$grid->label('Sucursal');
-		$grid->params(array(
-			'align'    => "'center'",
-			'width'         => 50,
-			'editable'      => $editar,
-			'edittype'      => "'select'",
-			//'editoptions'   => '{ value: '.$link.', style:"width:250px" }',
-		));
+			$grid->addField('sucursal');
+			$grid->label('Sucursal');
+			$grid->params(array(
+				'align'    => "'center'",
+				'width'         => 50,
+				'editable'      => $editar,
+				'edittype'      => "'select'",
+			));
 
+		}
+		
 		$grid->addField('us_clave');
 		$grid->label('Clave');
 		$grid->params(array(
@@ -408,39 +408,6 @@ class Usuarios extends Controller {
 			'editrules'     => '{ required:false}'
 		));
 
-/*
-		$grid->addField('us_horae');
-		$grid->label('Hora Entr');
-		$grid->params(array(
-			'search'        => 'false',
-			'editable'      => 'false',
-			'width'         => 60,
-			'edittype'      => "'text'",
-		));
-
-
-		$grid->addField('us_fechas');
-		$grid->label('Salida');
-		$grid->params(array(
-			'search'        => 'false',
-			'editable'      => 'false',
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('us_horas');
-		$grid->label('Hora Sal');
-		$grid->params(array(
-			'search'        => 'false',
-			'editable'      => 'false',
-			'width'         => 60,
-			'edittype'      => "'text'",
-		));
-*/
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -472,51 +439,6 @@ class Usuarios extends Controller {
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdata/'));
 
-
-
-/*
-		$grid->setFormOptionsE('
-			closeAfterEdit:false,
-			mtype: "POST",
-			width: 400,
-			height:340,
-			closeOnEscape: true,
-			top: 50,
-			left:20,
-			recreateForm:true,
-			afterSubmit: function(a,b){
-				if (a.responseText.length > 0)
-					$.prompt(a.responseText);
-				return [true, a ];
-				},
-			beforeShowForm: function(frm){
-					$(\'#us_codigo\').attr(\'readonly\',\'readonly\');
-				},
-			afterShowForm: function(frm){
-					$("select").selectmenu({style:"popup"});
-				}
-
-		');
-		$grid->setFormOptionsA('
-			closeAfterAdd:true,
-			mtype: "POST",
-			width: 400,
-			height:340,
-			closeOnEscape: true,
-			top: 50,
-			left:20,
-			recreateForm:true,
-			afterSubmit: function(a,b){
-				if (a.responseText.length > 0)
-					$.prompt(a.responseText);
-				return [true, a ];
-			},
-			afterShowForm: function(frm){
-					$("select").selectmenu({style:"popup"});
-				}
-
-		');
-*/
 
 		#show/hide navigations buttons
 		$grid->setAdd(true);
@@ -577,6 +499,8 @@ class Usuarios extends Controller {
 		});
 		';
 
+		$iscaja = $this->datasis->istabla('scaj');
+
 		$edit = new DataEdit('', 'usuario');
 
 		$edit->script($script,'modify');
@@ -610,24 +534,27 @@ class Usuarios extends Controller {
 		$edit->activo->insertValue='S';
 		$edit->activo->rule='required|enum[S,N]';
 
-		$edit->almacen = new dropdownField('Almac&eacute;n', 'almacen');
-		$edit->almacen->option('','Ninguno');
-		$edit->almacen->options("SELECT TRIM(ubica) AS ubica, CONCAT_WS('-',ubica,ubides) AS descrip FROM caub ORDER BY ubica");
-		$edit->almacen->rule = 'existecaub';
-		$edit->almacen->style='width:180px';
+		if ( $iscaja ) {
 
-		$edit->vendedor = new dropdownField('Vendedor', 'vendedor');
-		$edit->vendedor->option('','Ninguno');
-		$edit->vendedor->options("SELECT TRIM(vendedor) AS ven, CONCAT(vendedor,'-',nombre) AS nom FROM vend WHERE tipo IN ('V','A') ORDER BY vendedor");
-		$edit->vendedor->rule = 'existevend|trim';
-		$edit->vendedor->style='width:180px';
+			$edit->almacen = new dropdownField('Almac&eacute;n', 'almacen');
+			$edit->almacen->option('','Ninguno');
+			$edit->almacen->options("SELECT TRIM(ubica) AS ubica, CONCAT_WS('-',ubica,ubides) AS descrip FROM caub ORDER BY ubica");
+			$edit->almacen->rule = 'existecaub';
+			$edit->almacen->style='width:180px';
 
-		$edit->cajero = new dropdownField('Cajero', 'cajero');
-		$edit->cajero->option('','Ninguno');
-		$edit->cajero->options("SELECT TRIM(cajero) cajero, CONCAT_WS('-',trim(cajero), nombre) AS descri FROM scaj ORDER BY nombre");
-		$edit->cajero->rule = 'existescaj';
-		$edit->cajero->style='width:180px';
+			$edit->vendedor = new dropdownField('Vendedor', 'vendedor');
+			$edit->vendedor->option('','Ninguno');
+			$edit->vendedor->options("SELECT TRIM(vendedor) AS ven, CONCAT(vendedor,'-',nombre) AS nom FROM vend WHERE tipo IN ('V','A') ORDER BY vendedor");
+			$edit->vendedor->rule = 'existevend|trim';
+			$edit->vendedor->style='width:180px';
 
+			$edit->cajero = new dropdownField('Cajero', 'cajero');
+			$edit->cajero->option('','Ninguno');
+			$edit->cajero->options("SELECT TRIM(cajero) cajero, CONCAT_WS('-',trim(cajero), nombre) AS descri FROM scaj ORDER BY nombre");
+			$edit->cajero->rule = 'existescaj';
+			$edit->cajero->style='width:180px';
+		}
+		
 		$edit->sucursal = new dropdownField('Sucursal','sucursal');
 		$edit->sucursal->option('','Ninguno');
 		$edit->sucursal->options("SELECT TRIM(codigo) codigo, CONCAT(TRIM(codigo),' ',TRIM(sucursal)) sucursal FROM sucu ORDER BY codigo");

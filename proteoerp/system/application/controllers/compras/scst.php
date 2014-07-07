@@ -78,6 +78,13 @@ class Scst extends Controller {
 		$grid->wbotonadd(array('id'=>'actualizar','img'=>'images/arrow_up.png' ,'alt'   => 'Actualizar','label'=>'Actualizar'));
 		$grid->wbotonadd(array('id'=>'reversar',  'img'=>'images/arrow_down.png' ,'alt' => 'Reversar',  'label'=>'Reversar'));
 
+		$grid->wbotonadd(array('id'=>'recargos',  'img'=>'images/arrow_down.png' ,'alt' => 'Reversar',  'label'=>'Recargos '));
+
+/*
+		ESCOJER FACTURA DESDE GASTOS O COLOCO UN ESTIMADO EN MONTO O %
+
+		$grid->wbotonadd(array('id'=>'cpredeter',  'img'=>'images/arrow_down.png' ,'alt' => 'Reversar', 'label'=>'Rec. Predeterminado'));
+*/
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central y Sur
@@ -86,8 +93,7 @@ class Scst extends Controller {
 		//Panel de pie de forma
 		$adic = array(
 			array('id'=>'fcompra' , 'title'=>'Modificar Compra'),
-			array('id'=>'factuali', 'title'=>'Actualizar'),
-			array('id'=>'fvehi'   , 'title'=>'Seriales Vehiculares'),
+			array('id'=>'factuali', 'title'=>'Actualizar'),		array('id'=>'fvehi'   , 'title'=>'Seriales Vehiculares'),
 			array('id'=>'fborra'  , 'title'=>'Eliminar Registro'),
 			array('id'=>'fcmonto' , 'title'=>'Cambiar los montos que van a CxP'),
 			array('id'=>'fshow'   , 'title'=>'Mostrar Compra'),
@@ -366,22 +372,6 @@ class Scst extends Controller {
 
 		$bodyscript .= $this->jqdatagrid->bsfshow( $height = "500", $width = "700" );
 
-
-		/*$bodyscript .= '
-			$("#fshow").dialog({
-				autoOpen: false, height: 500, width: 700, modal: true,
-				buttons: {
-					"Aceptar": function() {
-						$("#fshow").html("");
-						$( this ).dialog( "close" );
-					},
-				},
-				close: function() {
-					$("#fshow").html("");
-				}
-			});';*/
-
-
 		$bodyscript .= '
 			$("#actualizar").click( function(){
 				acturever();
@@ -404,6 +394,13 @@ class Scst extends Controller {
 					} else {
 					mid = id;
 					if(ret.actuali<ret.fecha){'."\n";
+
+		//Recargos
+		$bodyscript .= '
+			$("#recargos").click( function(){
+				alert("jeje");
+			});';
+
 
 		if($this->datasis->sidapuede('SCSTOTR','actualizar')){
 			//Revisa si puede Actualizar
@@ -1121,6 +1118,7 @@ class Scst extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
+
 /*
 		$grid->addField('preauto');
 		$grid->label('Preauto');
@@ -1133,6 +1131,7 @@ class Scst extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 1 }',
 		));
 */
+
 		$grid->addField('reteiva');
 		$grid->label('Retenci&oacute;n IVA');
 		$grid->params(array(

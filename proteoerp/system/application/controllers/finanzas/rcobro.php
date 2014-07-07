@@ -39,7 +39,7 @@ class Rcobro extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Imprimir', 'label'=>'Imprimir Relacion'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -82,6 +82,19 @@ class Rcobro extends Controller {
 				$("#fedita").dialog( "open" );
 			})
 		};';
+
+		//Imprime 
+		$bodyscript .= '
+		$("#imprime").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id){
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				window.open(\''.site_url('formatos/ver/RCOBRO/').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+			} else { 
+				$.prompt("<h1>Por favor Seleccione una relacion</h1>");
+			}
+		});';
+
 
 		$bodyscript .= '
 		function rcobroedit(){
@@ -472,7 +485,7 @@ class Rcobro extends Controller {
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('tipo_doc');
-		$grid->label('Tipo Doc.');
+		$grid->label('Doc.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,

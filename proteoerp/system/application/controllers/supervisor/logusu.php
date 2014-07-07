@@ -9,21 +9,15 @@ class Logusu extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		//$this->datasis->modulo_id('NNN',1);
 	}
 
 	function index(){
-		/*if ( !$this->datasis->iscampo('logusu','id') ) {
-			$this->db->simple_query('ALTER TABLE logusu DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE logusu ADD UNIQUE INDEX numero (numero)');
-			$this->db->simple_query('ALTER TABLE logusu ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};*/
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
 	//******************************************************************
-	//  Layout en la Ventana
-	//
+	// Layout en la Ventana
 	//
 	function jqdatag(){
 
@@ -57,9 +51,10 @@ class Logusu extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	// Funciones de los Botones
+	//
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
 
@@ -473,10 +468,19 @@ class Logusu extends Controller {
 			}
 		}
 		echo $mensaje;
-	
 	}
 
-
+	function instalar(){
+		if (!$this->db->table_exists('logusu')) {
+			$mSQL="CREATE TABLE `logusu` (
+			  `usuario` varchar(12) NOT NULL DEFAULT '',
+			  `fecha` date NOT NULL DEFAULT '0000-00-00',
+			  `hora` time NOT NULL DEFAULT '00:00:00',
+			  `modulo` varchar(20) DEFAULT NULL,
+			  `comenta` text
+			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+			$this->db->query($mSQL);
+		}
+	}
 }
-
 ?>

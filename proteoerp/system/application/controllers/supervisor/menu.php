@@ -95,8 +95,6 @@ class Menu extends Controller{
 				$out .= '<a href="#" onclick="modifica(\''.$row->modulo.'\') " >'.image('editor.png',     'Editar',  $prop).'</a>';
 				$out .= '<a href="#" onclick="elimina(\''.$row->modulo.'\')  " >'.image('list-remove.png','Eliminar',$prop).'</a>';
 
-
-
 				$out .= $row->modulo.'-'.$row->titulo."\n";
 				$out .= "\t\t\t\t\t\t\t</li>\n";
 			}
@@ -114,103 +112,6 @@ class Menu extends Controller{
 		$out .= "\t\t</ul>\n";
 		$out .= "\t</div>\n";
 		$out .= "</div>\n";
-
-/*
-		$data['script']  ='<script type="text/javascript">';
-		$data['script'] .='
-		$(function() {
-			$.post("'.site_url('supervisor/menu/arbolito').'", function(data){
-				$("#arbolito").html(data);
-			});
-		})';
-
-		$data['script'] .='
-		function creanuevo(modulo){
-			$.post("'.site_url('supervisor/menu/dataedit').'/"+modulo+"/create", function(data){
-				$("#dedita").html(data+\'<button onclick="guardanv()">Guardar</button>\');
-			});
-		}';
-
-		$data['script'] .='
-		function actuarbol(){
-			$.post("'.site_url('supervisor/menu/arbolito').'", function(data){
-				$("#arbolito").html(data);
-			});
-		}';
-
-		$data['script'] .='
-		function guardanv(){
-				var murl = $("#df1").attr("action");
-				$.ajax({
-					type: "POST", dataType: "html", async: false,
-					url: murl,
-					data: $("#df1").serialize(),
-					success: function(r,s,x){
-						try{
-							var json = JSON.parse(r);
-							if (json.status == "A"){
-								alert("Registro Guardado");
-								$( "#dedita" ).html( "Registro Guardado" );
-								if (json.tipo != "update"){
-									actuarbol();
-								}
-								return true;
-							}else{
-								alert(json.mensaje);
-							}
-						}catch(e){
-							//$("#dedita").html(r);
-						}
-					}
-				})
-		}';
-
-		$data['script'] .='
-		function modifica(modulo){
-			$.post("'.site_url('supervisor/menu/dataedit/modify').'/"+modulo, function(data){
-				$("#dedita").html(data+\'<button onclick="guardanv()">Guardar</button>\');
-			});
-		}';
-
-		$data['script'] .='
-		function elimina(modulo){
-			if(confirm("Eliminar "+modulo+"?")){
-				$.post("'.site_url("supervisor/menu/dataedit/do_delete/").'/"+modulo, 
-					function(data){
-						try {
-							var json = JSON.parse(data);
-							if (json.status == "A"){
-								actuarbol();
-								alert("Registro Eliminado");
-							} else {
-								alert("No se pudo eliminar el Registro");
-							} 
-						} catch(e){
-							alert("Hola");
-						}
-					}
-				)
-			}
-		}';
-		$data['script'] .="\n".'</script>'."\n";
-		$out = '<div id="arbolito" style="overflow:auto;border:1px solid #9AC8DA;background: #FAFAFA;height:400px;width:320px;font-size:12px;float:left;"></div>';
-		$data['content'] = $out.'<div id="dedita" style="overflow:auto;border:1px solid #9AC8DA;background:#FAFAFA;width:460px;font-size:12px;float:left;"></div>';
-
-
-		$data['head']    = script("jquery-min.js");
-		$data['head']   .= script("jquery-migrate-min.js");
-		$data['head']   .= script("jquery-ui.custom.min.js");
-
-		$data['head']   .= script("jquery.treeview.pack.js");
-		$data['head']   .= $this->rapyd->get_head();
-		$data['head']   .= style('jquery.treeview.css');
-		$data['head']   .= style("proteo/proteo.css");
-
-		$data['title']   = '<h1>Administraci&oacute;n del Men&uacute;</h1>';
-		$this->load->view('view_ventanas', $data);
-
-*/
-
 
 		$script  ='<script type="text/javascript">';
 		$script .='
@@ -516,11 +417,12 @@ class Menu extends Controller{
 	}
 
 	function _pos_del($do) {
-		$codigo = $do->get('modulo');
+		$codigo = trim($do->get('modulo'));
 		$sql = "DELETE FROM intrasida WHERE modulo like '$codigo%'";
 		$this->db->query($sql);
 		$mSQL="DELETE FROM intramenu WHERE modulo like '$codigo%'";
 		$this->db->simple_query($mSQL);
+
 	}
 
 	function _pre_insert($do){

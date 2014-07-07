@@ -175,7 +175,7 @@ function del_smov(id){
 
 	<table width='100%'>
 		<tr id='__PTPL__'>
-			<td bgcolor='#7098D0' align='center'>Tipo Doc.</td>
+			<td bgcolor='#7098D0' align='center'>Doc.</td>
 			<td bgcolor='#7098D0' align='center'>N&uacute;mero</td>
 			<td bgcolor='#7098D0' align='center'>Fecha </td>
 			<td bgcolor='#7098D0' align='center'>Vence </td>

@@ -968,7 +968,7 @@ class Spre extends Controller {
 		$grid->setEdit(   $this->datasis->sidapuede('SPRE','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('SPRE','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('SPRE','BUSQUEDA%'));
-		$grid->setRowNum(30);
+		$grid->setRowNum(180);
 		$grid->setShrinkToFit('false');
 
 		#Set url
