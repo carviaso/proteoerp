@@ -1309,32 +1309,32 @@ class Prmo extends Controller {
 		$monto  = $do->get('monto');
 		$tipop  = $do->get('tipop');
 		$docum  = $do->get('docum');
-		$codban = $do->get('codban');
+		$codban = trim($do->get('codban'));
 
 		$escaja = $this->datasis->dameval("SELECT tbanco FROM banc WHERE codbanc=".$this->db->escape($codban));
 
 		$atipop = array('1','2','3','4','5','6');
-		if ( !in_array( $tipop, $atipop ) ){
+		if(!in_array($tipop, $atipop)){
 			$do->error_message_ar['pre_ins']='Tipo de Movimiento errado';
 			return false;
 		}
 
-		if ( $monto <= 0 ){
+		if($monto <= 0){
 			$do->error_message_ar['pre_ins']='Falta colocar el Monto';
 			return false;
 		}
 
-		if ( empty($escaja) ){
+		if(empty($escaja)){
 			$do->error_message_ar['pre_ins']='Error con el banco o la caja, reintente...';
 			return false;
 		}
 
 		//Validaciones PRESTAMO OTORGADO
-		if ( $tipop == '1' ){
-			if ( $escaja == 'CAJ' )
-				$numche = $this->datasis->fprox_numero('ncaja'.$codban);
-			else {
-				if ( empty( $numche ) ){
+		if($tipop == '1'){
+			if($escaja == 'CAJ'){
+				$numche = $this->datasis->banprox($codban);
+			}else{
+				if(empty($numche)){
 					$do->error_message_ar['pre_ins']='Falta colocar el Numero de Documento';
 					return false;
 				}
@@ -1342,7 +1342,7 @@ class Prmo extends Controller {
 				$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
 				$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
 
-				if ( !empty($esta) ) {
+				if(!empty($esta)){
 					$do->error_message_ar['pre_ins']='Movimiento ya existe en bancos ('.$esta.')';
 					return false;
 				}
@@ -1359,11 +1359,11 @@ class Prmo extends Controller {
 			$do->set('numche', $numche);
 
 		//Validaciones PRESTAMO RECIBIDO
-		} elseif ( $tipop == '2' ){
-			if ( $escaja == 'CAJ' )
-				$numche = $this->datasis->fprox_numero('ncaja'.$codban);
-			else {
-				if ( empty( $numche ) ){
+		}elseif($tipop == '2'){
+			if($escaja == 'CAJ'){
+				$numche = $this->datasis->banprox($codban);
+			}else{
+				if(empty($numche)){
 					$do->error_message_ar['pre_ins']='Falta colocar el Numero de Documento';
 					return false;
 				}
@@ -1371,7 +1371,7 @@ class Prmo extends Controller {
 				$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
 				$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
 
-				if ( !empty($esta) ) {
+				if(!empty($esta)){
 					$do->error_message_ar['pre_ins']='Movimiento ya existe en bancos ('.$esta.')';
 					return false;
 				}
@@ -1379,21 +1379,21 @@ class Prmo extends Controller {
 			$numero   = $this->datasis->fprox_numero('nprmo');
 			$transac  = $this->datasis->fprox_numero('ntransa');
 			$ningreso = $this->datasis->fprox_numero('ningreso');
-			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
+			$numche   = str_pad($numche,12,'0',STR_PAD_LEFT);
 
-			$do->set('numero',   $numero   );
-			$do->set('transac',  $transac  );
-			$do->set('ningreso', $ningreso );
-			$do->set('numche', $numche);
+			$do->set('numero'  , $numero  );
+			$do->set('transac' , $transac );
+			$do->set('ningreso', $ningreso);
+			$do->set('numche'  , $numche  );
 
 
 		//Validaciones CHEQUE DEVUELTO CLIENTE
-		} elseif ( $tipop == '3' ){
+		}elseif($tipop == '3'){
 
-			if ( $escaja == 'CAJ' )
-				$numche = $this->datasis->fprox_numero('ncaja'.$codban);
-			else {
-				if ( empty( $numche ) ){
+			if($escaja == 'CAJ'){
+				$numche = $this->datasis->banprox($codban);
+			}else{
+				if(empty($numche)){
 					$do->error_message_ar['pre_ins']='Falta colocar el Numero de Documento';
 					return false;
 				}
@@ -1401,8 +1401,7 @@ class Prmo extends Controller {
 				$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
 
 				$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
-
-				if ( !empty($esta) ) {
+				if(!empty($esta)){
 					$do->error_message_ar['pre_ins']='Movimiento ya existe en bancos ('.$esta.')';
 					return false;
 				}
@@ -1418,21 +1417,21 @@ class Prmo extends Controller {
 			$do->set('transac',$transac);
 
 		//Validaciones CHEQUE DEVUELTO PROVEEDOR
-		} elseif ( $tipop == '4' ){
+		}elseif($tipop == '4'){
 
-			if ( empty( $numche ) ){
+			if(empty($numche)){
 				$numche  = $this->datasis->fprox_numero('nprmocd');
 			}
 
-			if ( empty( $docum ) ){
+			if(empty($docum)){
 				$do->error_message_ar['pre_ins']='Falta colocar el Numero de Documento';
 				return false;
 			}
 			// Busca si ya esta en bmov
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
 
-			$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
-				if ( !empty($esta) ) {
+			$esta = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
+			if(!empty($esta)){
 				$do->error_message_ar['pre_ins']='Movimiento ya existe en bancos ('.$esta.')';
 				return false;
 			}
@@ -1441,15 +1440,15 @@ class Prmo extends Controller {
 			$transac = $this->datasis->fprox_numero('ntransa');
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
 
-			$do->set('vence',  $do->get('fecha'));
-			$do->set('numche', $numche);
-			$do->set('numero', $numero);
-			$do->set('transac',$transac);
+			$do->set('vence'  , $do->get('fecha'));
+			$do->set('numche' , $numche);
+			$do->set('numero' , $numero);
+			$do->set('transac', $transac);
 
 		//Validaciones DEPOSITOS POR ANALIZAR
-		} elseif ( $tipop == '5' ){
+		}elseif($tipop == '5'){
 
-			if ( empty( $numche ) ){
+			if(empty($numche)){
 				$do->error_message_ar['pre_ins']='Falta colocar el Numero del Deposito';
 				return false;
 			}
@@ -1458,15 +1457,14 @@ class Prmo extends Controller {
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
 
 			$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
-			if ( !empty($esta) ) {
+			if(!empty($esta)){
 				$do->error_message_ar['pre_ins']='Movimiento ya existe en bancos ('.$esta.')';
 				return false;
 			}
 
 			// revisa si el bco tiene proveedor
 			$clipro = $this->datasis->dameval("SELECT a.codprv FROM banc a JOIN sprv b ON a.codprv=b.proveed WHERE a.codbanc=".$this->db->escape($codban));
-
-			if (empty($clipro)) {
+			if(empty($clipro)){
 				$do->error_message_ar['pre_ins']='El Banco no tiene asignado proveedor';
 				return false;
 			}
@@ -1474,20 +1472,20 @@ class Prmo extends Controller {
 
 			$numero  = $this->datasis->fprox_numero('nprmo');
 			$transac = $this->datasis->fprox_numero('ntransa');
-			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
+			$numche  = str_pad($numche,12,'0',STR_PAD_LEFT);
 
-			$do->set('clipro', $clipro);
-			$do->set('nombre', $nombre);
+			$do->set('clipro' , $clipro);
+			$do->set('nombre' , $nombre);
 
-			$do->set('vence',  $do->get('fecha'));
-			$do->set('numche', $numche);
-			$do->set('numero', $numero);
-			$do->set('transac',$transac);
+			$do->set('vence'  , $do->get('fecha'));
+			$do->set('numche' , $numche);
+			$do->set('numero' , $numero);
+			$do->set('transac', $transac);
 
 		//Validaciones CARGOS INDEBIDOS EN BANCOS
-		} elseif ( $tipop == '6' ){
+		}elseif($tipop == '6'){
 
-			if ( empty( $numche ) ){
+			if(empty($numche)){
 				$do->error_message_ar['pre_ins']='Falta colocar el Numero de Documento';
 				return false;
 			}
@@ -1495,14 +1493,14 @@ class Prmo extends Controller {
 			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
 
 			$esta   = $this->bmovrepe($do->get('codban'), $do->get('tipo'), $numche);
-				if ( !empty($esta) ) {
+				if(!empty($esta)){
 				$do->error_message_ar['pre_ins']='Movimiento ya existe en bancos ('.$esta.')';
 				return false;
 			}
 
 			$numero  = $this->datasis->fprox_numero('nprmo');
 			$transac = $this->datasis->fprox_numero('ntransa');
-			$numche = str_pad($numche,12,'0',STR_PAD_LEFT);
+			$numche  = str_pad($numche,12,'0',STR_PAD_LEFT);
 
 			$do->set('vence',  $do->get('fecha'));
 			$do->set('numche', $numche);
@@ -1514,12 +1512,20 @@ class Prmo extends Controller {
 	}
 
 	function bmovrepe($codbanc, $tipo_op, $numero){
-		$mSQL  = "SELECT count(*) FROM bmov WHERE codbanc=".$this->db->escape($codbanc);
-		$mSQL .= " AND tipo_op='".$tipo_op."' AND numero='".$numero."'  AND anulado<>'S' ";
-		$esta  = $this->datasis->dameval($mSQL);
-		if ( $esta > 0 ) {
-			$mSQL  = "SELECT CONCAT_WS(' ',fecha, tipo_op , numero, nombre) jojo FROM bmov WHERE codbanc=".$this->db->escape($codbanc);
-			$mSQL .= " AND tipo_op='".$tipo_op."' AND numero='".$numero."'  AND anulado<>'S' ";
+		$dbcodbanc = $this->db->escape($codbanc );
+		$dbtipo_op = $this->db->escape($tipo_op );
+		$dbnumero  = $this->db->escape($numero  );
+		$mSQL  = "SELECT COUNT(*) AS val
+			FROM bmov
+			WHERE codbanc=${dbcodbanc}
+			AND tipo_op=${dbtipo_op} AND numero=${dbnumero} AND anulado<>'S'";
+
+		$esta = intval($this->datasis->dameval($mSQL));
+		if($esta > 0){
+			$mSQL  = "SELECT CONCAT_WS(' ',fecha, tipo_op , numero, nombre) jojo
+				FROM bmov
+				WHERE codbanc=${dbcodbanc}
+				AND tipo_op=${dbtipo_op} AND numero=${dbnumero}  AND anulado<>'S'";
 			$esta  = $this->datasis->dameval($mSQL);
 			$do->error_message_ar['pre_ins']='Documento ya existe ('.$esta.')';
 			return 'Documento ya existe ('.$esta.')';
@@ -1553,8 +1559,9 @@ class Prmo extends Controller {
 		if($tipop == '1'){
 			// Crea bmov egreso
 			$this->datasis->actusal($codban, $fecha, -1*$monto );
+			$dbcodban = $this->db->escape($codban);
 
-			$mREG = $this->datasis->damereg("SELECT numcuent, banco, saldo, tbanco FROM banc WHERE codbanc='".$codban."'");
+			$mREG = $this->datasis->damereg("SELECT numcuent, banco, saldo, tbanco FROM banc WHERE codbanc=${dbcodban}");
 
 			$mCUENTA  = $mREG['numcuent'];
 			$mBANCO   = $mREG['banco'];
@@ -1592,12 +1599,13 @@ class Prmo extends Controller {
 			if($ban==false){ memowrite($mSQL,'bmov');}
 
 			// Crea smov el pasivo
-			$mNUMERO  = $this->datasis->fprox_numero('ndcli');
-			$mSQL = "SELECT COUNT(*) FROM smov WHERE tipo_doc='ND' AND numero='".$mNUMERO."' ";
+			$mNUMERO   = $this->datasis->fprox_numero('ndcli');
+			$dbmNUMERO = $this->db->escape($mNUMERO);
+			$mSQL = "SELECT COUNT(*) AS val FROM smov WHERE tipo_doc='ND' AND numero=${dbmNUMERO}";
 
-			while($this->datasis->dameval($mSQL) > 0){
+			while(intval($this->datasis->dameval($mSQL)) > 0){
 				$mNUMERO  = $this->datasis->fprox_numero('ndcli');
-				$mSQL = "SELECT COUNT(*) FROM smov WHERE tipo_doc='ND' AND numero='".$mNUMERO."' ";
+				$mSQL = "SELECT COUNT(*) AS val FROM smov WHERE tipo_doc='ND' AND numero=${dbmNUMERO}";
 			}
 
 			$data = array();

@@ -146,12 +146,13 @@ class Datasis {
 		if (empty($usr))
 			$usr=$CI->session->userdata('usuario');
 		if(!$CI->db->table_exists($mcontador))
-			$CI->db->simple_query("CREATE TABLE $mcontador (
+			$CI->db->simple_query("CREATE TABLE ${mcontador} (
 			`numero` INT(11) NOT NULL AUTO_INCREMENT,
 			`usuario` CHAR(10) NULL DEFAULT NULL,
 			`fecha` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (`numero`))");
-		$CI->db->query("INSERT INTO $mcontador VALUES(null, '$usr', now() )");
+		$dbusr = $CI->db->escape($usr);
+		$CI->db->query("INSERT INTO ${mcontador} VALUES(null, ${dbusr}, NOW())");
 		$aa = $CI->db->insert_id();
 		return $aa;
 	}
@@ -672,30 +673,31 @@ class Datasis {
 	function banprox($codban){
 		$CI =& get_instance();
 		$dbcodban=$CI->db->escape($codban);
-		$tipo=$this->dameval("SELECT tbanco FROM banc WHERE codbanc=$dbcodban");
+		$tipo=$this->dameval("SELECT tbanco FROM banc WHERE codbanc=${dbcodban}");
 		if($tipo != 'CAJ'){
 			$nom='nBAN'.$codban;
 			while(true){
 				$numero=$this->fprox_numero($nom,12);
 				$dbnumero=$CI->db->escape($numero);
-				$mSQL = "SELECT COUNT(*) AS n FROM bmov WHERE numero=$dbnumero";
+				$mSQL = "SELECT COUNT(*) AS n FROM bmov WHERE numero=${dbnumero}";
 				$query= $CI->db->query($mSQL);
 				$row  = $query->first_row('array');
 				if($row['n']==0) break;
 			}
 			return $numero;
-		} else {
-			$mSQL  = "UPDATE banc SET proxch=LPAD(proxch+1,12,'0')  WHERE codbanc='$codban'";
+		}else{
+			$mSQL  = "UPDATE banc SET proxch=LPAD(proxch+1,12,'0')  WHERE codbanc=${dbcodban}";
 			$CI->db->simple_query($mSQL);
-			$numero = $CI->datasis->dameval("SELECT proxch FROM banc WHERE codbanc='$codban'");
+			$numero = $this->dameval("SELECT proxch FROM banc WHERE codbanc=${dbcodban}");
 			while(true){
-				$mSQL  = "UPDATE banc SET proxch=LPAD(proxch+1,12,'0') WHERE codbanc='$codban'";
-				if ( $CI->datasis->dameval("SELECT COUNT(*) FROM bmov WHERE codbanc='$codban' AND numero='$numero'") == 0){
+				$mSQL  = "UPDATE banc SET proxch=LPAD(proxch+1,12,'0') WHERE codbanc=${dbcodban}";
+				$cana  = intval($this->dameval("SELECT COUNT(*) AS cana FROM bmov WHERE codbanc=${dbcodban} AND numero='${numero}'"));
+				if($cana == 0){
 					break;
 				}
-				$mSQL  = "UPDATE banc SET proxch=LPAD(proxch+1,12,'0')  WHERE codbanc='$codban'";
+				$mSQL  = "UPDATE banc SET proxch=LPAD(proxch+1,12,'0') WHERE codbanc=${dbcodban}";
 				$CI->db->simple_query($mSQL);
-				$numero = $CI->datasis->dameval("SELECT proxch FROM banc WHERE codbanc='$codban'");
+				$numero = $CI->datasis->dameval("SELECT proxch FROM banc WHERE codbanc=${dbcodban}");
 			}
 			return $numero;
 		}
