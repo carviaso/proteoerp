@@ -156,7 +156,7 @@ class Minfra extends Controller {
 				$nombre1=$nombre2='';
 				foreach($temp AS $token){
 					if($ban){
-						if (preg_match("/^([lL][aeoAEO][sS]|[Dd][aieoAIEO]|[dD]?[eE][lL]|[lL][aA])$/",$token)>0){
+						if(preg_match("/^([lL][aeoAEO][sS]|[Dd][aieoAIEO]|[dD]?[eE][lL]|[lL][aA])$/",$token)>0){
 							$nombre1.=$token.' ';
 						}else{
 							$nombre1.=$token;
@@ -187,17 +187,17 @@ class Minfra extends Controller {
 		$dbfechad=$this->db->escape($fechad);
 		$dbfechah=$this->db->escape($fechah);
 
-		$mSQL="SELECT a.codigo, a.monto, 
+		$mSQL="SELECT a.codigo, a.monto,
 			SUM(a.valor*(a.concepto IN ('010' ))) sueldo,
-			SUM(a.valor*(a.concepto IN ('920' ))) retencion, 
+			SUM(a.valor*(a.concepto IN ('920' ))) retencion,
 			'N/A' control, 0.00 reten,
 			a.fecha, a.contrato, d.nombre contnom, '0000000000' factura, '001' codcon,
-			CONCAT(b.nacional,b.cedula) cedula , 0 AS ingreso,DATE_FORMAT(b.retiro,'%d%m%Y')AS retiro 
-		FROM (nomina a) JOIN pers as b ON a.codigo=b.codigo 
-			JOIN conc as c ON a.concepto=c.concepto 
-			LEFT JOIN noco d ON a.contrato=d.codigo 
-		WHERE a.valor<>0 AND a.fecha >= $dbfechad AND a.fecha <= $dbfechah 
-		GROUP BY EXTRACT( YEAR_MONTH FROM a.fecha ), a.codigo"; 
+			CONCAT(b.nacional,b.cedula) cedula , 0 AS ingreso,DATE_FORMAT(b.retiro,'%d%m%Y')AS retiro
+		FROM (nomina a) JOIN pers as b ON a.codigo=b.codigo
+			JOIN conc as c ON a.concepto=c.concepto
+			LEFT JOIN noco d ON a.contrato=d.codigo
+		WHERE a.valor<>0 AND a.fecha >= $dbfechad AND a.fecha <= $dbfechah
+		GROUP BY EXTRACT( YEAR_MONTH FROM a.fecha ), a.codigo";
 
 		$query=$this->db->query($mSQL);
 		$line=$error='';

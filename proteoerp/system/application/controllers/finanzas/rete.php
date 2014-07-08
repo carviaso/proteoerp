@@ -265,7 +265,7 @@ class Rete extends Controller {
 		  )
 		)) tipodesc FROM rete ORDER BY tipo, codigo
 		";
-		
+
 
 		$response   = $grid->getData('view_rete', array(array()), array(), false, $mWHERE, 'tipo, codigo' );
 		//$response   = $grid->getDataSimple($mSQL);
@@ -475,7 +475,7 @@ class Rete extends Controller {
 		// Crea el View
 		if (!$this->db->table_exists('view_rete')) {
 			$mSQL = "
-			CREATE ALGORITHM = UNDEFINED 
+			CREATE ALGORITHM = UNDEFINED
 			VIEW `view_rete` AS SELECT codigo, activida, base1, tari1, pama1, tipo, cuenta, concepto, id, CONCAT(tipo,' ',if(tipo='JD','Juridico Domiciliado',
 			if(tipo='JN','Juridico No Domiciliado',	if(tipo='NR','Natural Domiciliado','Natural No Domiciliado')))) tipodesc
 			FROM rete ;

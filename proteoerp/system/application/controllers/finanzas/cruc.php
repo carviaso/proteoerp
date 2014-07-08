@@ -1736,7 +1736,7 @@ class Cruc extends Controller {
 			}
 		}
 
-		$do->set('monto',round($apatot,2));
+		$do->set('monto',round($adetot,2));
 
 		return true;
 	}

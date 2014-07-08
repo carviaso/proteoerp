@@ -78,7 +78,7 @@ $encab  = 'CLIENTE: '.str_pad($cod_cli,9).' REF: '.$numero."\n";
 $encab .= $nombre."\n";
 $encab .= 'RIF:'.str_pad($rifci,14).' Vende: '.$vd."\n";
 $encab .= $direccion."\n";
-$encab = $row->observa;
+$encab .= $row->observa;
 
 $encab  = wordwrap($encab,40,"\n");
 $arr_lin= explode("\n",$encab);
@@ -132,3 +132,4 @@ foreach ($detalle AS $items){
 	}
 }
 echo "101\n";
+?>

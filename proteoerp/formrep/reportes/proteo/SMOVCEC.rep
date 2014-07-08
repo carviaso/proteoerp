@@ -1,0 +1,151 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$mSCLId=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_clid'),
+	'titulo'  =>'Buscar Cliente');
+
+$mSCLIh=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_clih'),
+	'titulo'  =>'Buscar Cliente');
+
+$bsclid =$this->datasis->modbus($mSCLId);
+$bsclih =$this->datasis->modbus($mSCLIh,'sclih');
+
+if (!empty($_POST['socio'])) $_POST['cod_clid']='';
+if (!empty($_POST['socio'])) $_POST['cod_clih']='';
+
+$filter = new DataFilter2("Filtro del Reporte");
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array("a.tipo_doc", "a.numero", "a.fecha", "a.vence","a.monto", "a.abonos","a.cod_cli","b.vendedor", "a.nombre", "c.clase",
+"DATEDIFF(NOW(),a.vence) as dv",
+"(monto)*IF(tipo_doc='AN',-1,1) as importe",
+"(monto-abonos)*IF(tipo_doc='AN',-1,1) as saldo");
+
+$filter->db->select($select );
+$filter->db->from('smov as a');
+$filter->db->join("scli as b","a.cod_cli=b.cliente");
+$filter->db->join("grcl as c","b.grupo=c.grupo");
+$filter->db->where("abonos<monto AND (tipo_doc IN ('FC','ND','GI','AN'))");
+$filter->db->orderby("b.cliente,fecha");
+
+$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
+$filter->fechah->clause="where";
+$filter->fechah->db_name="a.fecha";
+$filter->fechah->insertValue = date("Y-m-d");
+$filter->fechah->operator="<=";
+$filter->fechah->group="Fecha";
+
+$filter->cod_clid = new inputField("Desde el cliente", "cod_clid");
+$filter->cod_clid->clause="where";
+$filter->cod_clid->db_name="cod_cli";
+$filter->cod_clid->append($bsclid);
+$filter->cod_clid->operator=">=";
+$filter->cod_clid->group="Cliente";
+
+$filter->cod_clih = new inputField("Hasta el cliente", "cod_clih");
+$filter->cod_clih->db_name="cod_cli";
+$filter->cod_clih->clause="where";
+$filter->cod_clih->append($bsclih);
+$filter->cod_clih->operator="<=";
+$filter->cod_clih->group="Cliente";
+
+$filter->zona = new dropdownField("Zona", "zona");
+$filter->zona->db_name="b.zona";
+$filter->zona->clause="where";
+$filter->zona->operator='=';
+$filter->zona->option('','Todas');
+$filter->zona->options("SELECT codigo, nombre FROM zona ORDER BY nombre ");
+$filter->zona->group='Cliente';
+
+$filter->ciudad = new dropdownField('Ciudad', 'ciudad');
+$filter->ciudad->db_name='b.ciudad1';
+$filter->ciudad->clause="where";
+$filter->ciudad->operator='=';
+$filter->ciudad->option('','Todos');
+$filter->ciudad->options("SELECT ciudad as etiqueta,ciudad FROM ciud ORDER BY ciudad");
+$filter->ciudad->group="Cliente";
+
+$filter->grupo = new dropdownField("Grupo", "grupo");
+$filter->grupo->db_name='b.grupo';
+$filter->grupo->clause='where';
+$filter->grupo->operator='=';
+$filter->grupo->option('','Todos');
+$filter->grupo->options("SELECT grupo,gr_desc FROM grcl ORDER BY gr_desc ");
+$filter->grupo->group="Cliente";
+
+$filter->vendedor = new dropdownField("Vendedor", "vendedor");
+$filter->vendedor->db_name='a.vendedor';
+$filter->vendedor->clause='where';
+$filter->vendedor->operator='=';
+$filter->vendedor->option('','Todos');
+$filter->vendedor->options("SELECT vendedor, nombre FROM vend ORDER BY nombre ");
+$filter->vendedor->group="Cliente";
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons("search");
+$filter->build();
+
+if($this->rapyd->uri->is_set("search")){
+
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$sobretabla='';
+	if (!empty($filter->cod_clid->newValue)) $sobretabla.='    Cliente Desde: ('.$filter->cod_clid->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_clid->newValue.'"');
+	if (!empty($filter->cod_clih->newValue)) $sobretabla.='  Cliente Hasta: ('.$filter->cod_clih->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_clih->newValue.'"');
+	if (!empty($filter->zona->newValue))     $sobretabla.='   Zona: '.$filter->zona->description;
+	if (!empty($filter->ciudad->newValue))   $sobretabla.='   Ciudad: '.$filter->ciudad->description;
+	if (!empty($filter->grupo->newValue))    $sobretabla.='   Grupo: ('.$filter->grupo->newValue.') '.$this->datasis->dameval('SELECT gr_desc FROM grcl WHERE grupo="'.$filter->grupo->newValue.'"');
+	if (!empty($filter->vendedor->newValue)) $sobretabla.='    Vendedor: ('.$filter->vendedor->newValue.') '.$this->datasis->dameval('SELECT nombre FROM vend WHERE vendedor="'.$filter->vendedor->newValue.'"');
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Efectos por Cobrar');
+  	$pdf->setSubtitulo("Fecha: ".$_POST['fechah']);
+	$pdf->setSobreTabla($sobretabla,5);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol('tipo_doc',20,'Tipo',     'L',8);
+	$pdf->AddCol('numero'  ,27,'Número' ,  'L',8);
+	$pdf->AddCol('fecha'   ,27,'Emisión',  'C',8);
+	$pdf->AddCol('vence'   ,27,'Vence',    'C',8);
+	$pdf->AddCol('dv'      ,25,'Días_Vcto','R',8);
+	$pdf->AddCol('importe' ,32,'Importe',  'R',8);
+	$pdf->AddCol('saldo'   ,32,'Saldo',    'R',8);
+
+        $pdf->setTotalizar('saldo');
+	$pdf->setGrupoLabel('Cliente <#nombre#> [<#cod_cli#>]  ');
+	$pdf->setGrupo('cod_cli');
+
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Efectos por Cobrar</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

@@ -1,0 +1,105 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$modbus=array(
+	'tabla'   =>'noco',
+	'columnas'=>array(
+		'codigo' =>'Código Contrato',
+		'nombre'=>'Nombre',
+		'observa1'=>'Observacion'),
+	'filtro'  =>array('codigo'=>'Código','nombre'=>'Nombre'),
+	'retornar'=>array('codigo'=>'contrato'),
+	'titulo'  =>'Buscar Contrato'
+);
+
+$boton=$this->datasis->modbus($modbus);
+$base_process_uri = $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+
+$filter = new DataForm('');
+$filter->_process_uri  = $this->rapyd->uri->add_clause($base_process_uri, 'search');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->contrato = new inputField('Contrato', 'contrato');
+$filter->contrato->append($boton);
+$filter->contrato->rule = 'required';
+
+$filter->fechad = new dateField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->insertValue = date('Y-m-d');
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechad->rule = 'required|chfecha';
+$filter->fechah->rule = 'required|chfecha';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit',RAPYD_BUTTON_SEARCH);
+$filter->build_form();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$noco  =$filter->contrato->newValue;
+	$dbnoco=$this->db->escape($noco);
+
+	// Consulta las Columnas
+	$mSQL  = "SELECT a.concepto, b.encab1, b.encab2,  sum(a.valor) valor FROM nomina a JOIN conc b ON a.concepto=b.concepto ";
+	$mSQL .= "WHERE MID(a.concepto,1,1)!='9' AND a.contrato=${dbnoco} AND a.fecha BETWEEN '".$filter->fechad->newValue."' AND '".$filter->fechah->newValue."'  GROUP BY concepto HAVING valor<>0 ";
+	$mEnca = $this->db->query($mSQL);
+	$cfilas=$mEnca->num_rows();
+	if($cfilas==0) die ('Nomina no generada o vacia');
+	$cell_size=184/$cfilas;
+	//$mFONT2 = 6;
+	$mFONT1 = 6;
+	if($cfilas<=5)$cfilas=8;
+	$mFONT2 = 66/$cfilas;
+	if ($mFONT2>14) $mFONT2=14;
+
+	$mSQL = "SELECT b.cedula,b.rif,a.fecha,b.divi, b.depto, a.codigo,a.numero , CONCAT(RTRIM(b.nombre),' ' ,b.apellido)  nombre, CONCAT(b.divi, b.depto) dividep  ";
+	foreach ($mEnca->result() as $row){
+		$mSQL .= ", SUM(valor*(concepto='".$row->concepto."'))  C".$row->concepto ;
+	}
+	//$fecha=$this->datasis->dameval("SELECT DATE_FORMAT(fecha, '%d/%m/%Y') FROM nomina order by fecha desc limit 1");
+	$mSQL .= ", SUM(a.valor) totalnom, ";
+	$mSQL .= "(SELECT sum(IF(d.monto-d.abonos-c.cuota>0, c.cuota, d.monto-d.abonos )) neto ";
+	$mSQL .= "FROM pres c JOIN smov d ON  c.cod_cli=d.cod_cli AND c.tipo_doc=d.tipo_doc AND c.numero=d.numero 	WHERE c.codigo=a.codigo AND c.apartir<=a.fecha )   prestamo ";
+	$mSQL .= "FROM nomina a JOIN pers b ON a.codigo=b.codigo ";
+	$mSQL .= "WHERE MID(a.concepto,1,1) != '9' AND a.contrato='".$filter->contrato->newValue."' AND a.fecha BETWEEN '".$filter->fechad->newValue."' AND '".$filter->fechah->newValue."' ";
+	$mSQL .= "GROUP BY a.numero, a.codigo ORDER BY  a.numero,a.codigo ";
+	$mContrato = $this->datasis->dameval("SELECT CONCAT(codigo,' ',nombre) FROM noco WHERE codigo='".$filter->contrato->newValue."' LIMIT 1");
+	//echo $mSQL; exit();
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('NOMINA DE '.$mContrato);
+	$pdf->setSubTitulo('Fecha desde '.$filter->fechad->value.' hasta '.$filter->fechah->value);
+
+	$pdf->AddPage();
+	$pdf->setTableTitu($mFONT2,'Times');
+
+	$pdf->AddCol('codigo' , 13,array('Código',' ')                ,'L', $mFONT1 );
+	$pdf->AddCol('nombre' , 42,array('Nombre del ','Trabajador ') ,'L' ,$mFONT1 );
+	$pdf->AddCol('cedula' , 20,array('Cedula ','del Trabajador ') ,'L' ,$mFONT1 );
+
+	foreach ($mEnca->result() as $row){
+		$pdf->AddCol('C'.$row->concepto, $cell_size,  array($row->encab1, $row->encab2) ,'R', $mFONT2);
+		$pdf->setTotalizar('C'.$row->concepto);
+	}
+
+	$pdf->AddCol('totalnom', 20,  array('Total','Nomina') ,'R', $mFONT2);
+	$pdf->setTotalizar('totalnom');
+	$pdf->setGrupoLabel('Numero: <#numero#>   Fecha: <#fecha#>');
+	$pdf->setGrupo('numero');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Nominas Guardadas</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

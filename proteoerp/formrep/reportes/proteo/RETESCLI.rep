@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $this->load->helper('fecha');
 $base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
 

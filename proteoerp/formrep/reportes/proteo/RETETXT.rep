@@ -1,0 +1,142 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$this->load->helper('download');
+$this->rapyd->load('dataform');
+
+$script='$(document).ready(function(){
+	$("#df1").submit(function() {
+		if($("#ignorar").attr("checked"))
+			return confirm("Serán ignorados todos los registros inválidos lo que puede generar un monto malo en la declaración, \nSeguro que desea continuar?")
+		return true;
+	});
+});';
+
+$filter = new DataForm('reportes/ver/RETETXT/process');
+$filter->title('Filtro');
+$filter->script($script);
+$filter->fechad = new dateonlyField("Fecha Desde", "fechad");
+$filter->fechah = new dateonlyField("Fecha Hasta" , "fechah");
+$filter->fechah->rule=$filter->fechad->rule = "required";
+$filter->fechah->size=$filter->fechad->size=10;
+
+$mes=date('m');
+$ano=date('Y');
+
+if(date('d') > 15 ){
+	$filter->fechad->insertValue = date('Y-m-01');
+	$filter->fechah->insertValue = date('Y-m-15');
+}  else {
+	$filter->fechad->insertValue = date("Y-m-d", mktime(0, 0, 0, $mes-1, 16, $ano));
+	$filter->fechah->insertValue = date("Y-m-d", mktime(0, 0, 0, $mes, 0, $ano));
+}
+$filter->checkbox = new checkboxField('Ignorar errores', 'ignorar', 's','n');
+$filter->checkbox->append ('Activar esta opción puede generar errores en la declaración');
+
+$UPDATE=$this->db->query("UPDATE sprv SET reteiva=75 WHERE reteiva<>100");
+$filter->submit('btnsubmit','Descargar');
+$filter->build_form();
+
+if($filter->on_success()){
+	$fechad=$filter->fechad->newValue;
+	$fechah=$filter->fechah->newValue;
+	$ignorar=$filter->checkbox->newValue;
+
+	$mSQL="SELECT
+		REPLACE(a.periodo,'-','') as periodo,
+		a.nrocomp, a.emision,
+		'C' AS ticom,
+		IF(a.tipo_doc='FC','01',IF(a.tipo_doc='ND','02',IF(a.tipo_doc='NC','03',0))) AS tipo,
+		a.nombre, b.rif, a.numero,
+		IF(a.nfiscal<>'',a.nfiscal,'0') AS nfiscal,
+		a.general+geneimpu+exento AS total,
+		a.general as base,
+		(a.reiva/a.impuesto)*a.geneimpu as rete,
+		if(tipo_doc='FC','0',afecta) as afecta,
+		CONCAT(REPLACE(periodo,'-',''), a.nrocomp) as comprobante,
+		a.exento, a.tasa, '0' as impor, a.fecha, b.reteiva AS porcen
+	FROM riva AS a
+	JOIN sprv AS b ON a.clipro=b.proveed
+	WHERE a.emision>= $fechad AND a.emision<= $fechah  AND MID(a.transac,1,1)<>'_'  AND a.tipo_doc<>'AN' and a.general <> 0
+	UNION ALL
+	SELECT
+		REPLACE(a.periodo,'-','') AS periodo,
+		a.nrocomp,a.emision,
+		'C' AS ticom,
+		IF(a.tipo_doc='FC','01',IF(a.tipo_doc='ND','02',IF(a.tipo_doc='NC','03',0))) AS tipo,
+		a.nombre,b.rif, a.numero,
+		IF(a.nfiscal<>'',a.nfiscal,'0')AS nfiscal,
+		a.reducida+a.reduimpu+exento AS total,
+		a.reducida AS base,
+		(a.reiva/a.impuesto)*a.reduimpu AS rete,
+		if(a.tipo_doc='FC','0',a.afecta) AS afecta ,
+		CONCAT(REPLACE(a.periodo,'-',''), a.nrocomp) AS comprobante,
+		a.exento, a.tasaredu AS tasa, '0' AS impor, a.fecha, b.reteiva AS porcen
+	FROM riva AS a
+	JOIN sprv AS b ON a.clipro=b.proveed
+	WHERE a.emision>= '$fechad' AND a.emision<= '$fechah' AND MID(a.transac,1,1)<>'_'  AND a.tipo_doc<>'AN' AND a.reducida <>0
+	UNION ALL
+	SELECT
+		REPLACE(a.periodo,'-','') AS periodo,
+		a.nrocomp,a.emision,
+		'C' AS ticom,
+		IF(a.tipo_doc='FC','01',IF(a.tipo_doc='ND','02',IF(a.tipo_doc='NC','03',0))) AS tipo,
+		a.nombre,b.rif,a.numero,
+		IF(a.nfiscal<>'',a.nfiscal,'0')AS nfiscal,
+		a.adicional+a.adicimpu+exento AS total,
+		a.adicional as base,
+		(a.reiva/a.impuesto)*a.adicimpu AS rete,
+		IF(tipo_doc='FC','0',afecta) AS afecta ,
+		CONCAT(REPLACE(a.periodo,'-',''), a.nrocomp) AS comprobante,
+		a.exento, a.tasaadic AS tasa ,'0' AS impor, fecha, b.reteiva AS porcen
+	FROM riva AS a
+	JOIN sprv AS b ON a.clipro=b.proveed
+	WHERE a.emision>= '$fechad' AND a.emision<= '$fechah' AND MID(a.transac,1,1)<>'_'  AND a.tipo_doc<>'AN' AND adicional <>0   ORDER BY nrocomp";
+
+	$query=$this->db->query($mSQL);
+	$line=$error='';
+	if($query->num_rows() > 0){
+		$rem=array('.','-');
+		$rif=str_replace($rem,'',$this->datasis->traevalor('RIF'));
+		foreach($query->result_array() as $row){
+			$row['afecta']=trim($row['afecta']);
+			$line.=trim($rif)."\t";
+			$line.=trim($row["periodo"])."\t";
+			$line.=trim($row["fecha"])."\t";
+			$line.='C'."\t";
+			$line.=trim($row["tipo"])."\t";
+			$line.=str_replace($rem,'',trim($row['rif']))."\t";
+			$line.=trim($row["numero"])."\t";
+			$line.=trim($row["nfiscal"])."\t";
+			$line.=number_format($row['total'],2,'.','')."\t";
+			$line.=number_format($row['base'],2,'.','')."\t";
+			$line.=number_format($row['rete'],2,'.','')."\t";
+			$line.=(empty($row['afecta']))? '0':$row['afecta'];
+			$line.="\t";
+			$line.=trim($row['comprobante'])."\t";
+			$line.=number_format($row['exento'],2,'.','')."\t";
+			$line.=number_format($row['tasa'],2,'.','')."\t";
+			$line.=number_format($row['impor'],0,'','');
+			$line.="\r\n";
+		}
+	}else{
+		$line="\r\n";
+	}
+	if(empty($error) or $ignorar=='s'){
+		$nombre=str_replace('-','',$fechad);
+		$nombre='Reten'.$nombre.'.txt';
+		force_download($nombre,$line);
+		return;
+	}else{
+		$filter->error_string=$error;
+		$filter->build_form();
+	}
+}
+
+$data['filtro'] = $filter->output;
+$data['titulo'] = "<h2>Retenciones para sistema SENIAT</h2>";
+$data['head']   = script('jquery.js').$this->rapyd->get_head();
+$this->load->view('view_freportes', $data);

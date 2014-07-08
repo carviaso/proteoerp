@@ -19,7 +19,7 @@ $filter->fecha->rule = "required";
 $filter->banco = new dropdownField("Caja/Banco", "codbanc");
 $filter->banco->db_name="a.codbanc";
 $filter->banco->option("","");
-$filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");  
+$filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");
 $filter->banco->rule = "required";
 
 $filter->salformat = new radiogroupField("Formato de salida","salformat");
@@ -33,11 +33,11 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 	$mSQL=$filter->db->_compile_select();
 	$mSQL=$mSQL."UNION ALL
 
-	SELECT DATE_ADD('".$filter->fecha->newValue."01',INTERVAL -1 DAY) AS fecha, NULL, 'SI', 'SALDO ANTERIOR', 
-	((tipo_op NOT IN ('CH', 'D'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))>0) as debitos, 
+	SELECT DATE_ADD('".$filter->fecha->newValue."01',INTERVAL -1 DAY) AS fecha, NULL, 'SI', 'SALDO ANTERIOR',
+	((tipo_op NOT IN ('CH', 'D'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))>0) as debitos,
 	((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))<0)*(-1) as creditos, 0 as saldo
-	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc 
-	WHERE EXTRACT(YEAR_MONTH FROM fecha) < ' ".$filter->fecha->newValue." ' AND a.codbanc = ' ".$filter->banco->newValue."' 
+	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc
+	WHERE EXTRACT(YEAR_MONTH FROM fecha) < ' ".$filter->fecha->newValue." ' AND a.codbanc = ' ".$filter->banco->newValue."'
 	GROUP BY a.codbanc
 	ORDER BY fecha";
 
@@ -46,7 +46,7 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 
 	$sobretabla='';
 
-	if (!empty($filter->banco->newValue))   $sobretabla.='     Caja o Banco: '.$filter->banco->description; 
+	if (!empty($filter->banco->newValue))   $sobretabla.='     Caja o Banco: '.$filter->banco->description;
 	//if (!empty($filter->banco->newValue)) $sobretabla.='    Banco: '.$this->datasis->dameval('SELECT banco FROM banc WHERE codbanc="'.$filter->banco->newValue.'"');
 	//if (!empty($filter->fecha->newValue)) $sobretabla.=' Saldo Anterior: '.saldo;
 
@@ -75,8 +75,8 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 	$pdf->Output();
 }else{
 	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Estado de Cuenta<h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Estado de Cuenta<h2>';
+	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

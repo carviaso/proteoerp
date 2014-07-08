@@ -43,10 +43,11 @@ $this->db->where('a.fecha'   ,$row->fecha);
 $mSQL_2 = $this->db->get();
 $detalle  = $mSQL_2->result();
 
-$sel=array('a.tipo','a.monto','a.num_ref','a.fecha','a.cambio','b.nomb_banc AS banco');
+$sel=array('a.tipo','a.monto','a.num_ref','a.fecha','a.cambio','c.nomb_banc AS banco');
 $this->db->select($sel);
 $this->db->from('sfpa AS a');
-$this->db->join('tban AS b','a.banco=b.cod_banc','left');
+$this->db->join('banc AS b','a.banco=b.codbanc');
+$this->db->join('tban AS c','b.tbanco=c.cod_banc','left');
 $this->db->where('a.transac',$transac);
 $mSQL_3 = $this->db->get();
 $detalle2 = $mSQL_3->result();

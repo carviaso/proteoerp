@@ -1,0 +1,82 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$this->load->helper('download');
+$this->rapyd->load('dataform');
+
+$filter = new DataForm('reportes/ver/RETENDE/process');
+$filter->title('Filtro');
+$filter->fechad = new dateonlyField('Fecha Desde', 'fechad');
+$filter->fechah = new dateonlyField('Fecha Hasta' ,'fechah');
+$filter->fechah->rule=$filter->fechad->rule = 'required';
+$filter->fechah->size=$filter->fechad->size=10;
+
+$mes=date('m');
+$ano=date('Y');
+
+$filter->fechad->insertValue = date("Y-m-d", mktime(0, 0, 0, $mes-1, 1, $ano));
+$filter->fechah->insertValue = date("Y-m-d", mktime(0, 0, 0, $mes, 0, $ano));
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit','Descargar');
+$filter->build_form();
+
+if($filter->on_success()){
+	$fechad=$filter->fechad->newValue;
+	$fechah=$filter->fechah->newValue;
+
+	$mSQL = "SELECT * FROM (SELECT b.fecha , a.numero ,  a.nfiscal, a.nombre, d.rif,   c.concepto creten ,  a.breten AS breten, c.tari1
+	FROM gser AS a
+	LEFT JOIN sprm  AS b ON a.transac=b.transac
+	LEFT JOIN rete AS c  ON a.creten=c.codigo
+	LEFT JOIN sprv AS d ON a.proveed=d.proveed
+	WHERE b.fecha<=${fechah} AND b.fecha>=${fechad} AND b.tipo_doc='ND' AND b.cod_prv='RETEN' AND b.abonos<b.monto
+		UNION
+	SELECT b.fecha ,  b.num_ref AS numero, a.nfiscal, a.nombre, c.rif ,  IF(SUBSTR(c.rif,1,1)='J', '072' , '071')  AS creten , a.flete    AS breten, d.tari1
+	FROM scst  AS a
+	LEFT JOIN sprm  AS b  ON a.transac=b.transac  AND b.cod_prv = 'RETEN'
+	LEFT JOIN sprv   AS c   ON  a.proveed=c.proveed
+	LEFT JOIN rete  AS d  ON  d.codigo =IF(SUBSTR(c.rif,1,1)='J', '115' , '215')
+	WHERE a.fecha<=${fechah} AND a.fecha>=${fechad}
+	AND b.tipo_doc='ND' AND b.cod_prv='RETEN'  AND b.abonos<b.monto
+		UNION
+	SELECT b.fecha , b.num_ref AS numero, c.nfiscal , b.nombre, 'r.i.f.' AS fif ,  '001'  AS creten ,  0   AS breten ,  3  AS  tari1
+	FROM cruc  AS a
+	LEFT JOIN sprm  AS b  ON a.transac=b.transac  AND b.cod_prv = 'RETEN'
+	LEFT JOIN scst AS c  ON  a.transac= c.transac
+	WHERE a.fecha<=${fechah} AND a.fecha>=${fechad}
+	AND b.tipo_doc='ND' AND b.cod_prv='RETEN'  AND b.abonos<b.monto) AS aa ORDER BY aa.creten, aa.fecha";
+//echo $mSQL;
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('COMPROBANTE DE RETENCIONES VARIAS I.S.L.R. DECRETO 1808');
+	$pdf->setSubTitulo('Para la fecha: '.$this->input->post('fechad').' - '.$this->input->post('fechah'));
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+	$pdf->AddCol('fecha'    ,15,'Fecha'      ,'C',8);
+	$pdf->AddCol('numero'   ,15,'Numero'     ,'L',8);
+	$pdf->AddCol('control'  ,25,'Control'    ,'C',8);
+	$pdf->AddCol('nombre'   ,70,'Proveedor'  ,'L',8);
+	$pdf->AddCol('rif'      ,20,'RIF'        ,'L',8);
+	$pdf->AddCol('creten'   ,15,'Concepto'   ,'L',8);
+	$pdf->AddCol('breten'   ,18,'Base'       ,'R',8);
+	$pdf->AddCol('tari1'    ,15,'%'          ,'R',8);
+
+	//$pdf->setTotalizar('debitos','creditos');
+	$pdf->setAcumulador('saldo');
+	$pdf->Table();
+	$pdf->Output();
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = "<h2>Retenciones para sistema SENIAT</h2>";
+	$data['head']   = script('jquery.js').$this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

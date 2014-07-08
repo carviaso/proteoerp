@@ -1,0 +1,146 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$this->rapyd->load('datafilter');
+$this->rapyd->load('datatable');
+$this->load->library('msql');
+
+$mCPLAD=array(
+	'tabla'   =>'cpla',
+	'columnas'=>array('codigo' =>'Código',
+	'descrip'=>'Descripción'),
+	'filtro'  =>array('codigo'=>'Código','descrip'=>'Descripción'),
+	'retornar'=>array('codigo'=>'codigod'),
+	'titulo'  =>'Buscar Cuenta');
+
+$mCPLAH=array(
+	'tabla'   =>'cpla',
+	'columnas'=>array(
+	'codigo' =>'Código',
+	'descrip'=>'Descripción'),
+	'filtro'  =>array('codigo'=>'Código','descrip'=>'Descripción'),
+	'retornar'=>array('codigo'=>'codigoh'),
+	'titulo'  =>'Buscar Cuenta');
+
+$bCPLAD=$this->datasis->modbus($mCPLAD,'cplad');
+$bCPLAH=$this->datasis->modbus($mCPLAH,'cplah');
+
+$base_process_uri   = $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+
+$filter = new DataForm('');
+$filter->_process_uri  = $this->rapyd->uri->add_clause($base_process_uri, "search");
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->anio = new inputField('Año', 'anio');
+$filter->anio->size=5;
+$filter->anio->maxlength=4;
+$filter->anio->insertValue = date('Y');
+$filter->anio->rule = 'required|numeric|exact_length[4]';
+
+$filter->cuentad = new inputField('Desde la  Cuenta', 'codigod');
+$filter->cuentad->db_name ='a.cuenta';
+$filter->cuentad->clause  ='where';
+$filter->cuentad->operator='>=';
+$filter->cuentad->append($bCPLAD);
+$filter->cuentad->group = 'Cuenta';
+
+$filter->cuentah = new inputField('Hasta', 'codigoh');
+$filter->cuentah->db_name ='a.cuenta';
+$filter->cuentah->clause='where';
+$filter->cuentah->operator='<=';
+$filter->cuentah->append($bCPLAH);
+$filter->cuentah->group = 'Cuenta';
+
+$filter->nivel = new dropdownField('Nivel', 'nivel');
+$filter->nivel->style = 'width:60px;';
+for($i=$this->datasis->nivel(); $i>0 ; $i--) $filter->nivel->option($i,$i);
+
+$filter->nocie = new checkboxField('No incluir cierres', 'nocie', 'S','N');
+$filter->nocie->insertValue = 'N';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+$filter->salformat->group = 'Opciones';
+
+$filter->submit('btnsubmit',RAPYD_BUTTON_SEARCH);
+$filter->build_form();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$query=array();
+	for($i=1;$i<=$filter->nivel->value;$i++){
+		$db[$i-1]=new msql();
+		$db[$i-1]->select("SUBSTRING_INDEX(a.cuenta,'.',$i) AS cuenta,c.descrip,
+		SUM((a.debe-a.haber)*(a.fecha<".$filter->anio->newValue."0101 )) AS anterior,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."01)) AS enero,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."02)) AS febrero,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."03)) AS marzo,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."04)) AS abril,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."05)) AS mayo,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."06)) AS junio,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."07)) AS julio,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."08)) AS agosto,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."09)) AS septiembre,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."10)) AS octubre,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."11)) AS noviembre,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR_MONTH FROM a.fecha)=".$filter->anio->newValue."12)) AS diciembre,
+		SUM((a.debe-a.haber)*(EXTRACT(YEAR FROM a.fecha)=".$filter->anio->newValue."))+SUM((a.debe-a.haber)*(a.fecha<".$filter->anio->newValue."0101 )) AS total,
+		SUM((a.debe-a.haber)*(a.fecha<=".$filter->anio->newValue."1231 )) AS saldo");
+
+		if(!empty($filter->cuentad->newValue)) $db[$i]->where('a.cuenta >='.$this->db->escape($filter->cuentad->newValue));
+		if(!empty($filter->cuentah->newValue)) $db[$i]->where('a.cuenta <='.$this->db->escape($filter->cuentah->newValue));
+
+		$db[$i-1]->from('itcasi AS a');
+		$db[$i-1]->join("cpla AS c" ,"SUBSTRING_INDEX(a.cuenta,'.',$i)=c.codigo",'LEFT');
+		if($filter->nocie->newValue=='S'){
+			$db[$i-1]->where("a.comprob NOT LIKE 'ZIERRE".substr($filter->anio->newValue,-2)."'");
+		}
+		$db[$i-1]->groupby("SUBSTRING_INDEX(a.cuenta,'.',$i)");
+		$query[]=$db[$i-1]->compile_select();
+	}
+
+	$mSQL=implode(' UNION ',$query);
+	$mSQL.='ORDER BY cuenta';
+
+	$sobretabla='';
+	if(!empty($filter->cuentad->newValue)) $sobretabla.='   Cuenta Desde: ('.$filter->cuentad->newValue.') '.$this->datasis->dameval('SELECT descrip FROM cpla WHERE codigo="'.$filter->cuentad->newValue.'"');
+	if(!empty($filter->cuentah->newValue)) $sobretabla.='   Cuenta Hasta: ('.$filter->cuentah->newValue.') '.$this->datasis->dameval('SELECT descrip FROM cpla WHERE codigo="'.$filter->cuentah->newValue.'"');
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Gestión Analítico');
+	$pdf->setSobreTabla($sobretabla);
+	$pdf->setSubTitulo("Para el año ".$filter->anio->newValue);
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+
+	$pdf->AddCol('cuenta'    ,10,'Cuenta'             ,'L',4);
+	$pdf->AddCol('descrip'   ,30,'Nombre de la Cuenta','L',4);
+	$pdf->AddCol('anterior'  ,15,'Anterior'           ,'R',4);
+	$pdf->AddCol('enero'     ,15,'Enero'              ,'R',4);
+	$pdf->AddCol('febrero'   ,15,'Febrero'            ,'R',4);
+	$pdf->AddCol('marzo'     ,15,'Marzo'              ,'R',4);
+	$pdf->AddCol('abril'     ,15,'Abril'              ,'R',4);
+	$pdf->AddCol('mayo'      ,15,'Mayo'               ,'R',4);
+	$pdf->AddCol('junio'     ,15,'Junio'              ,'R',4);
+	$pdf->AddCol('julio'     ,15,'Julio'              ,'R',4);
+	$pdf->AddCol('agosto'    ,15,'Agosto'             ,'R',4);
+	$pdf->AddCol('septiembre',15,'Septiembre'         ,'R',4);
+	$pdf->AddCol('octubre'   ,15,'Octubre'            ,'R',4);
+	$pdf->AddCol('noviembre' ,15,'Noviembre'          ,'R',4);
+	$pdf->AddCol('diciembre' ,15,'Diciembre'          ,'R',4);
+	$pdf->AddCol('total'     ,16,'Total'              ,'R',4);
+
+	$pdf->Table();
+	$pdf->Output();
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Gestión Analítico</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

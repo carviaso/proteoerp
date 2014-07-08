@@ -345,8 +345,9 @@ class Gserchi extends Controller {
 
 		//Botones Panel Izq
 		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
-		$grid->wbotonadd(array('id'=>'baprov','img'=>'images/arrow_up.png', 'alt' => 'Aprobar o rechazar gasto para el pago' ,'label'=>'Aprobar/Rechazar' ));
-		$grid->wbotonadd(array('id'=>'brepon','img'=>'images/star.png'    , 'alt' => 'Reposici&oacute;n de caja Chica' ,'label'=>'Reponer Caja Chica' ));
+		$grid->wbotonadd(array('id'=>'imprime','img'=>'assets/default/images/print.png','alt' => 'Reimprimir caja chica', 'label'=>'Imprimir caja chica'));
+		$grid->wbotonadd(array('id'=>'baprov' ,'img'=>'images/arrow_up.png', 'alt' => 'Aprobar o rechazar gasto para el pago' ,'label'=>'Aprobar/Rechazar' ));
+		$grid->wbotonadd(array('id'=>'brepon' ,'img'=>'images/star.png'    , 'alt' => 'Reposici&oacute;n de caja Chica' ,'label'=>'Reponer Caja Chica' ));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -383,45 +384,6 @@ class Gserchi extends Controller {
 				$("#fedita").dialog( "open" );
 			})
 		};';
-
-		$bodyscript .= '
-		jQuery("#baprov").click( function(){
-			var grid = jQuery("#newapi'.$grid0.'");
-			var rowcells=new Array();
-			var s = grid.getGridParam(\'selarrrow\');
-			$("#ladicional").html("");
-			if(s.length){
-				for(var i=0;i<s.length;i++){
-					var entirerow = grid.jqGrid(\'getRowData\',s[i]);
-
-					$.post("'.site_url('finanzas/gser/gserchiajax').'",{ id: entirerow["id"]},
-						function(data){
-							if(data=="1"){
-								grid.trigger("reloadGrid");
-								return true;
-							}else{
-								alert("Hubo un error, comuniquese con soporte tecnico: "+data);
-								return false;
-							}
-						}
-					);
-				}
-			}
-		});';
-
-		$bodyscript .= '
-		jQuery("#brepon").click( function(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
-				caja = jQuery("#newapi'.$grid0.'").jqGrid (\'getCell\', id, \'codbanc\');
-				$.post("'.site_url($this->url.'gserchipros').'/'.'"+caja, function(data){
-					$("#frepon").html(data);
-				});
-				$( "#frepon").dialog( "open" );
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		});';
 
 		$bodyscript .= '
 		function gserchidel() {
@@ -489,6 +451,50 @@ class Gserchi extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 			';
+
+		$bodyscript .= '
+		jQuery("#brepon").click( function(){
+			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				caja = jQuery("#newapi'.$grid0.'").jqGrid (\'getCell\', id, \'codbanc\');
+				$.post("'.site_url($this->url.'gserchipros').'/'.'"+caja, function(data){
+					$("#frepon").html(data);
+				});
+				$( "#frepon").dialog( "open" );
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
+
+		$bodyscript .= '
+		jQuery("#imprime").click( function(){
+			'.$this->datasis->jwinopen(site_url('formatos/ver/GSERCHI')).';
+		});';
+
+		$bodyscript .= '
+		jQuery("#baprov").click( function(){
+			var grid = jQuery("#newapi'.$grid0.'");
+			var rowcells=new Array();
+			var s = grid.getGridParam(\'selarrrow\');
+			$("#ladicional").html("");
+			if(s.length){
+				for(var i=0;i<s.length;i++){
+					var entirerow = grid.jqGrid(\'getRowData\',s[i]);
+
+					$.post("'.site_url('finanzas/gser/gserchiajax').'",{ id: entirerow["id"]},
+						function(data){
+							if(data=="1"){
+								grid.trigger("reloadGrid");
+								return true;
+							}else{
+								alert("Hubo un error, comuniquese con soporte tecnico: "+data);
+								return false;
+							}
+						}
+					);
+				}
+			}
+		});';
 
 		$bodyscript .= '
 		$("#fedita").dialog({

@@ -139,8 +139,8 @@ $encabezado = "
 			<td><b>Tipo de cruce:</b> ${tipo_tit}</td>
 			<td><b>Monto</b> ${monto}</td>
 		</tr><tr>
-			<td><b>Del ${tit1}:</b> (${cliente}) ${nomcli}</td>
-			<td><b>Al ${tit2}:</b> (${proveed}) ${nomprov}</td>
+			<td><b>Del ${tit1}:</b> (${proveed}) ${nomprov}</td>
+			<td><b>Al  ${tit2}:</b> (${cliente}) ${nomcli} </td>
 		</tr><tr>
 			<td colspan='2'><b>La cantidad de:</b>  ${montolet}</td>
 		</tr><tr>
