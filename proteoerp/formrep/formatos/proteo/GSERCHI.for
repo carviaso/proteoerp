@@ -5,21 +5,23 @@ if(count($parametros)==0) show_error('Faltan parametros ');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 
-$mSQL_1 = $this->db->query('SELECT codbanc AS caja FROM gserchi WHERE id='.$dbid);
+$mSQL_1 = $this->db->query('SELECT a.codbanc AS caja,b.banco FROM gserchi AS a JOIN banc AS b ON a.codbanc=b.codbanc WHERE a.id='.$dbid);
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row    = $mSQL_1->row();
 
 $caja  = trim($row->caja);
+$desc  =  $this->us_ascii2html($row->banco);
 $dbcaja= $this->db->escape($caja);
 
 $mSQL_2  = $this->db->query("SELECT
 	fechafac,numfac,rif,proveedor,codigo,descrip,importe,
 	monredu+montasa+monadic+tasa+reducida+exento+sobretasa AS monto,aceptado
 	FROM gserchi
-	WHERE codbanc=${dbcaja} AND ngasto IS NULL");
+	WHERE codbanc=${dbcaja} AND ngasto IS NULL
+	ORDER BY fechafac");
 
 $ndetalle=$mSQL_2->num_rows();
-if($ndetalle==0) show_error('Registro presenta inconsistencias');
+if($ndetalle==0) show_error('No existen gastos en caja chica');
 $detalle = $mSQL_2->result();
 
 $tprecio=$tiva=$timporte=$lineas=0;
@@ -27,7 +29,7 @@ $pagina = 0;
 ?><html>
 <head>
 <meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
-<title>Relacion de caja chica <?php echo $caja ?></title>
+<title>Relaci&oacute;n de caja chica <?php echo $caja ?></title>
 <link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
 </head>
 <body style="margin-left: 30px; margin-right: 30px;">
@@ -68,8 +70,8 @@ $pagina = 0;
 $encabezado = "
 	<table style='width:100%;font-size: 9pt;' class='header' cellpadding='0' cellspacing='0'>
 		<tr>
-			<td colspan='4' valign='bottom'><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>Relacion de caja chica</h1></td>
-			<td colspan='2' valign='bottom'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>Caja: ${caja}</h1></td>
+			<td valign='bottom'><h1 style='text-align:left;border-bottom:1px solid;font-size:12pt;'>Relaci&oacute;n de caja chica</h1></td>
+			<td valign='bottom'><h1 style='text-align:right;border-bottom:1px solid;font-size:12pt;'>Caja: (${caja}) ${desc}</h1></td>
 		</tr>
 	</table>
 ";
@@ -83,8 +85,10 @@ $encabezado_tabla="
 	<table class=\"change_order_items\" style=\"padding-top:0; \">
 		<thead>
 			<tr style='background-color:black;border-style:solid;color:white;font-weight:bold'>
+				<th>Acep.</th>
 				<th>Fecha</th>
 				<th>Factura</th>
+				<th>Proveedor</th>
 				<th>Descripci&oacute;n</th>
 				<th>Monto</th>
 			</tr>
@@ -100,8 +104,8 @@ $pie_final="
 					</tbody>
 					<tfoot>
 					<tr>
-						<td  colspan='2' style='text-align: right;border:1px solid black;'><b>Totales </b></td>
-						<td  style='text-align:right;border:1px solid black;'></td>
+						<td  colspan='4' style='text-align: right;border:1px solid black;'>Renglones: ${ndetalle}</td>
+						<td  style='text-align:right;border:1px solid black;'><b>Totales </b></td>
 						<td  style='text-align:right;border:1px solid black;'><b>%s</b></td>
 					</tr>
 					</tfoot>
@@ -111,7 +115,7 @@ $pie_continuo=<<<piecontinuo
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan='4' style='text-align: right;font-size:16px'>Continua...</td>
+				<td colspan='6' style='text-align: right;font-size:16px'>Continua...</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -136,8 +140,10 @@ foreach ($detalle AS $items){ $i++; $ndetalle=$ndetalle-1;
 		}
 ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
-				<td style="text-align: center;"><?php echo trim($items->fechafac); ?></td>
+				<td style="text-align: center;"><?php echo ($items->aceptado=='S')? 'Si': 'No'; ?></td>
+				<td style="text-align: center;"><?php echo dbdate_to_human($items->fechafac); ?></td>
 				<td style="text-align: center;"><?php echo trim($items->numfac); ?></td>
+				<td style="text-align: center;"><?php echo trim($items->proveedor); ?></td>
 				<td>
 					<?php
 					if(!$clinea){
@@ -182,6 +188,8 @@ foreach ($detalle AS $items){ $i++; $ndetalle=$ndetalle-1;
 
 for(1;$lineas<$maxlin;$lineas++){ ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>

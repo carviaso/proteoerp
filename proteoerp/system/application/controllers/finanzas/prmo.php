@@ -1078,9 +1078,7 @@ class Prmo extends Controller {
 				success:
 					function(data){
 						var sugiere = [];
-						if(data.length==0){
-							$("#docum").val("");
-						}else{
+						if(data.length>0){
 							$.each(data, function(i, val){ sugiere.push( val );});
 						}
 						add(sugiere);
