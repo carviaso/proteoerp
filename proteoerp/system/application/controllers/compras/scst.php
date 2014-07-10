@@ -3437,6 +3437,7 @@ class Scst extends Controller {
 							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 
 							if($itrow->precio1>0 && $itrow->precio2>0 && $itrow->precio3>0 && $itrow->precio4>0){
+
 								//Cambio de precios
 								$icontrol=true;
 
@@ -3498,7 +3499,7 @@ class Scst extends Controller {
 							}
 
 
-							if($itrow->rmargen!='S'){
+							if($itrow->rmargen!='S' || $cprecio=='N' || $cprecio=='D'){
 								//Actualiza los margenes y bases
 								$mSQL='UPDATE sinv SET
 									base1=ROUND(precio1*10000/(100+iva))/100,

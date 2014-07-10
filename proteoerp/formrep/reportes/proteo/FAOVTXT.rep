@@ -1,99 +1,103 @@
-$base_process_uri= $this->rapyd->uri->implode_uri("base_uri","gfid","orderby");
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
 
-$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, "search"));
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, 'search'));
 $filter->title('Elija un formato de salida');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
-$filter->fechad->group = "Fecha de Ingreso";
+$filter->fechad = new dateonlyField('Desde', 'fechad');
+$filter->fechad->group = 'Fecha de Ingreso';
 $filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m')-1, 1,   date('Y')));
 $filter->fechad->rule='required';
 $filter->fechad->size='12';
 
-$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
-$filter->fechah->group = "Fecha de Ingreso";
-$filter->fechah->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), 0,   date('Y')));
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->group = 'Fecha de Ingreso';
+$filter->fechah->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), 0, date('Y')));
 $filter->fechah->rule='required';
 $filter->fechah->size='12';
 
-//$filter->status = new dropdownField("Status","status");
-//$filter->status->option("A","Activos");
-//$filter->status->option("I","Inactivos");
+//$filter->status = new dropdownField('Estatus','status');
+//$filter->status->option('A','Activos');
+//$filter->status->option('I','Inactivos');
 //$filter->status->style='width:100px';
 
-$filter->checkbox = new checkboxField("Descargar", "ignorar", "s","n");
+$filter->checkbox = new checkboxField('Descargar', 'ignorar', 's','n');
 $filter->checkbox->append ('Version TXT');
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
-//$filter->salformat->append($salida);
 
-//$salida=anchor("/nomina/minfra/","Desargar version TXT");
-
-$filter->submit("btnsubmit","Descargar");
+$filter->submit('btnsubmit','Descargar');
 $filter->build_form();
 
-if($this->rapyd->uri->is_set("search")){
+if($this->rapyd->uri->is_set('search')){
 
-       //$status=$filter->status->newValue;
-       $fechad=$filter->fechad->newValue;
-       $fechah=$filter->fechah->newValue;
-       $ignorar=$filter->checkbox->newValue;
+	$fechad   = $filter->fechad->newValue;
+	$fechah   = $filter->fechah->newValue;
+	$dbfechad = $this->db->escape($fechad);
+	$dbfechah = $this->db->escape($fechah);
 
-if($ignorar=='s'){
-			      redirect ("nomina/minfra/faovtxt/$fechad/$fechah");
-		}else{
+	$txt= $filter->checkbox->newValue;
 
-$mSQL="SELECT a.codigo, a.concepto, a.monto, SUM(a.valor*(a.tipo='A' AND MID(a.concepto,1,1)<>'9' )) asignacion,
-		 SUM(a.valor*(a.concepto IN ('620', '621' ))) retencion,
-		 SUM(a.valor*(a.concepto IN ('920', '921' ))) aporte,
-		 SUM(a.valor*(a.concepto IN ('620', '621' ))) +SUM(a.valor*(a.concepto IN ('920', '921' ))) as total,
-		 CONCAT(RTRIM(b.nombre), ' ',RTRIM(b.apellido)) nombre, c.descrip,
-		 a.fecha, a.contrato, d.nombre contnom, b.sexo,
-     b.nacional,b.cedula,b.nombre,b.apellido,b.sueldo,DATE_FORMAT(b.ingreso,'%w%m%Y')AS ingreso,DATE_FORMAT(b.retiro,'%w%m%Y')AS retiro
-		 FROM (nomina a) JOIN pers as b ON a.codigo=b.codigo
-		 JOIN conc as c ON a.concepto=c.concepto
-		 LEFT JOIN noco d ON a.contrato=d.codigo
-		 WHERE a.valor<>0 AND a.fecha >= '$fechad' AND a.fecha <= '$fechah'
-		 GROUP BY EXTRACT( YEAR_MONTH FROM a.fecha ), a.codigo
-		 HAVING retencion<>0";
+	if($txt=='s'){
+		redirect ("nomina/minfra/faovtxt/${fechad}/${fechah}");
+	}else{
 
+		$mSQL="SELECT a.codigo, a.concepto, a.monto,
+			SUM(a.valor*(a.tipo='A' AND MID(a.concepto,1,1)<>'9')) AS asignacion,
+			SUM(a.valor*(a.concepto IN ('620', '621'))) AS retencion,
+			SUM(a.valor*(a.concepto IN ('920', '921'))) AS aporte,
+			SUM(a.valor*(a.concepto IN ('620', '621')))+SUM(a.valor*(a.concepto IN ('920', '921'))) AS total,
+			CONCAT(RTRIM(b.nombre), ' ',RTRIM(b.apellido)) AS nombre, c.descrip,
+			a.fecha, a.contrato, d.nombre contnom, b.sexo,
+			b.nacional,b.cedula,b.nombre,b.apellido,b.sueldo,
+			DATE_FORMAT(b.ingreso,'%w%m%Y') AS ingreso,
+			DATE_FORMAT(b.retiro ,'%w%m%Y') AS retiro
+		FROM nomina AS a
+		JOIN pers   AS b ON a.codigo=b.codigo
+		JOIN conc   AS c ON a.concepto=c.concepto
+		LEFT JOIN noco d ON a.contrato=d.codigo
+		WHERE a.valor<>0 AND a.fecha >= ${dbfechad} AND a.fecha <= ${dbfechah}
+		GROUP BY EXTRACT( YEAR_MONTH FROM a.fecha ), a.codigo
+		HAVING retencion<>0";
+		//echo $mSQL;
 
-      //echo $mSQL;
+		$pdf = new PDFReporte($mSQL);
+		$pdf->setHeadValores('TITULO1');
+		$pdf->setSubHeadValores('TITULO2','TITULO3');
 
-      $pdf = new PDFReporte($mSQL);
-      $pdf->setHeadValores('TITULO1');
-      $pdf->setSubHeadValores('TITULO2','TITULO3');
+		$pdf->setTitulo('Listado de FAOV');
+		//$pdf->setSubTitulo('');
+		//$pdf->setSobreTabla('');
 
-      $pdf->setTitulo("Listado de Faov");
-      //$pdf->setSubTitulo("");
-      //$pdf->setSobreTabla("");
+		$pdf->AddPage();
+		$pdf->setTableTitu(10,'Times');
 
-      $pdf->AddPage();
-      $pdf->setTableTitu(10,'Times');
+		$pdf->AddCol('nacional'  ,20,'Nacional' ,'C',9);
+		$pdf->AddCol('cedula'    ,20,'Cedula'   ,'C',9);
+		$pdf->AddCol('nombre'    ,35,'Nombre'   ,'L',9);
+		$pdf->AddCol('apellido'  ,35,'Apellido' ,'L',9);
+		$pdf->AddCol('asignacion',25,'Salario'  ,'R',9);
+		$pdf->AddCol('ingreso'   ,20,'Ingreso'  ,'C',9);
+		$pdf->AddCol('retiro'    ,20,'Retiro'   ,'C',9);
 
-
-      $pdf->AddCol('nacional' ,20,'Nacional'        ,'C',9);
-      $pdf->AddCol('cedula',20,'Cedula'              ,'C',9);
-      $pdf->AddCol('nombre'   ,35,'Nombre'        ,'L',9);
-      $pdf->AddCol('apellido'   ,35,'Apellido'       ,'L',9);
-      $pdf->AddCol('asignacion'  ,25,'Salario'      ,'R',9);
-      $pdf->AddCol('ingreso'  ,20,'Ingreso'         ,'C',9);
-      $pdf->AddCol('retiro'  ,20,'Retiro'               ,'C',9);
-
-      //$pdf->setTotalizar('');
-      //$pdf->setGrupoLabel('');
-      //$pdf->setGrupo('');
-      $pdf->Table();
-
-      $pdf->Output();
-}
-
+		//$pdf->setTotalizar('');
+		//$pdf->setGrupoLabel('');
+		//$pdf->setGrupo('');
+		$pdf->Table();
+		$pdf->Output();
+	}
 }else{
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Listado de Faov</h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Listado de FAOV</h2>';
+	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }
