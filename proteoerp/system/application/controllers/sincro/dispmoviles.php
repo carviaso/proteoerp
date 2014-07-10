@@ -165,7 +165,7 @@ class Dispmoviles extends Controller {
 			if($tabla=='scli'){
 				if($row['vsaldo']>0){
 					$dbscli = $this->db->escape($row['cliente']);
-					$mSQL="SELECT tipo_doc AS Tipo, TRIM(numero) AS Numero, monto AS Monto,monto-abonos AS Saldo FROM smov WHERE tipo_doc NOT IN ('AB','NC','AN') AND monto>abonos AND vence<=CURDATE() AND cod_cli=${dbscli} ORDER BY fecha DESC";
+					$mSQL="SELECT CONCAT(tipo_doc,TRIM(numero)) AS Numero,DATE_FORMAT(fecha, '%Y/%m/%d') AS Fecha, DATEDIFF(fecha,CURDATE()) AS Dias,monto-abonos AS Saldo FROM smov WHERE tipo_doc NOT IN ('AB','NC','AN') AND monto>abonos AND vence<=CURDATE() AND cod_cli=${dbscli} ORDER BY fecha DESC";
 					$qq = $this->db->query($mSQL);
 					if($qq->num_rows() > 0){
 						$itdata[]=json_encode($qq->result());
