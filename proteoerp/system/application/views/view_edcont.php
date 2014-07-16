@@ -31,12 +31,11 @@ $(function(){
 	$('#inicial').keyup(function(){ pagofinal(); });
 	$('#financiable').keyup(function(){ pagofinal(); distrib(); });
 	$('input[id^="it_monto"]').keyup(function(){ distrib(); });
+	$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+	$('input[id^="it_vencimiento"]').datepicker({dateFormat:"dd/mm/yy"});
 
 	$(".inputnum").numeric(".");
 	totalizar();
-	//for(var i=0;i < <?php echo $form->max_rel_count['itedcont']; ?>;i++){
-	//	autocod(i.toString());
-	//}
 
 	$('#cliente').autocomplete({
 		source: function( req, add){
@@ -288,6 +287,7 @@ function add_itedcont(){
 	enumeragiro();
 	$('#it_monto_'+can).keyup(function(){ distrib(); });
 	$('#it_monto_'+can).numeric(".");
+	$('input[id^="it_vencimiento"]').datepicker({dateFormat:"dd/mm/yy"});
 	return can;
 }
 
@@ -308,68 +308,50 @@ function del_itedcont(id){
 		<td align=right><?php echo $container_tr?></td>
 	</tr>
 </table>
+
 <table align='center' width="100%">
 	<tr>
 		<td>
-		<table width='100%'>
-		<tr><td style="width:50%">
-			<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9; min-height:105px;'>
-			<legend class="titulofieldset" style='color: #114411;'>Documento <?php echo $form->status->output; ?> <?php echo $form->numero->output; ?></legend>
+			<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9;'>
+			<!--legend class="titulofieldset" style='color: #114411;'>Documento <?php echo $form->status->output; ?> <?php echo $form->numero->output; ?></legend-->
 			<table style="margin: 0;">
 			<tr>
 				<td class="littletableheader"><?php echo $form->edificacion->label;   ?>*</td>
 				<td class="littletablerow">   <?php echo $form->edificacion->output;  ?>&nbsp; </td>
 				<td class="littletableheader"><?php echo $form->fecha->label;  ?>*&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->fecha->output; ?>&nbsp; </td>
+				<td class="littletableheader"><?php echo $form->mt2->label;    ?>*</td>
+				<td class="littletablerow">   <?php echo $form->mt2->output;   ?>&nbsp; </td>
+				<td class="littletableheader"><?php echo $form->precioxmt2->label;   ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->precioxmt2->output;  ?>&nbsp;</td>
 			</tr><tr>
 				<td class="littletableheader"><?php echo $form->inmueble->label;  ?>*</td>
 				<td class="littletablerow"   ><?php echo $form->inmueble->output; ?>&nbsp;</td>
-				<td class="littletableheader"><?php echo $form->mt2->label;    ?>*</td>
-				<td class="littletablerow">   <?php echo $form->mt2->output;   ?>&nbsp; </td>
-			</tr><tr>
 				<td class="littletableheader"><?php echo $form->uso->label;    ?>*</td>
-				<td class="littletablerow">   <?php echo $form->uso->output;   ?>&nbsp; </td>
-				<td class="littletableheader"><?php echo $form->precioxmt2->label;   ?>&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->precioxmt2->output;  ?>&nbsp;</td>
-			</tr>
-			<!--<tr>
-				<td class="littletableheader"><?php echo $form->notas->label;  ?>&nbsp; </td>
-				<td class="littletablerow">   <?php echo $form->notas->output; ?>&nbsp; </td>
-			</tr>-->
-			</table>
-			</fieldset>
-		</td><td style="width:50%">
-			<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9; min-height:105px;'>
-			<legend class="titulofieldset" style='color: #114411;'>Cliente</legend>
-			<table style="margin: 0;">
-			<tr>
-				<td class="littletableheader"><?php echo $form->cliente->label;  ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->cliente->output.$form->sclitipo->output; ?>&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->nombre->output;  ?>&nbsp;</td>
-			</tr><tr>
-				<td class="littletableheader">         <?php echo $form->rifci->label; ?>&nbsp;</td>
-				<td class="littletablerow" colspan='2'><?php echo $form->rifci->output;   ?>&nbsp;</td>
-			</tr><tr>
-				<td class="littletableheader">         <?php echo $form->direc->label  ?>&nbsp;</td>
-				<td class="littletablerow" colspan='2'><?php echo $form->direc->output ?>&nbsp;</td>
-			</tr><tr>
+				<td colspan='3' class="littletablerow">   <?php echo $form->uso->output;   ?>&nbsp; </td>
 				<td class="littletableheader">         <?php echo $form->numero_edres->label;    ?>&nbsp;</td>
-				<td class="littletablerow" colspan='2'><?php echo $form->numero_edres->output;   ?>&nbsp; </td>
+				<td class="littletablerow" ><?php echo $form->numero_edres->output;   ?>&nbsp; </td>
 			</tr>
 			</table>
 			</fieldset>
-		</td></tr>
-		</table>
 		</td>
-	</tr><tr>
+	</tr>
+	<tr>
 		<td>
-		<!--<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>-->
-		<table width='100%' border='0'>
+		</td>
+	</tr>
+</table>
+
+<table width='100%'>
+	<tr>
+		<td width='360px'>
+		<div style='overflow:auto;border: 1px outset #9AC8DA;background: #FAFAFA;height:300px;width:360px;'>
+		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr id='__INPL__'>
-				<td class="littletableheaderdet"><b>Giros</b></td>
-				<td class="littletableheaderdet"><b>Cuota especial</b></td>
-				<td class="littletableheaderdet"><b>Vencimiento</b></td>
-				<td class="littletableheaderdet"><b>Monto</b></td>
+				<td class="littletableheaderdet" align='center'><b>Nro.</b></td>
+				<td class="littletableheaderdet" align='center'><b>Giro</b></td>
+				<td class="littletableheaderdet" align='center'><b>Vence</b></td>
+				<td class="littletableheaderdet" align='center'><b>Monto</b></td>
 				<?php if($form->_status!='show') {?>
 					<td bgcolor='#7098D0'>&nbsp;</td>
 				<?php } ?>
@@ -400,35 +382,47 @@ function del_itedcont(id){
 				<td></td>
 			</tr>
 		</table>
-		<!-- </div>-->
+		</div>
 		<?php echo $container_bl ?>
 		<?php echo $container_br ?>
+
 		</td>
-	</tr><tr>
-		<td>
+		<td valign='top'>
+
+			<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9;'>
+			<table style="margin: 0;">
+			<tr>
+				<td class="littletableheader"><?php echo $form->cliente->label;  ?>*&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->cliente->output.$form->sclitipo->output; ?>&nbsp;</td>
+			</tr><tr>
+				<td class="littletableheader"><?php echo $form->nombre->label;  ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->nombre->output;  ?>&nbsp;</td>
+			</tr><tr>
+				<td class="littletableheader"><?php echo $form->rifci->label; ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->rifci->output;   ?>&nbsp;</td>
+			</tr><tr>
+				<td class="littletableheader"><?php echo $form->direc->label  ?>&nbsp;</td>
+				<td class="littletablerow"   ><?php echo $form->direc->output ?>&nbsp;</td>
+			</tr>
+			</table>
+			</fieldset>
+
+
 		<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9;'>
 		<table width='100%'>
 			<tr>
-				<td class="littletableheader" width='100'></td>
-				<td class="littletablerow"    width='350'></td>
 				<td class="littletableheader">           <?php echo $form->inicial->label;  ?></td>
 				<td class="littletablerow" align='right'><?php echo $form->inicial->output; ?></td>
+			</tr>
 			<tr>
-			<tr>
-				<td class="littletableheader" width='100'></td>
-				<td class="littletablerow"    width='350'></td>
 				<td class="littletableheader">           <?php echo $form->financiable->label;  ?></td>
 				<td class="littletablerow" align='right'><?php echo $form->financiable->output; ?></td>
+			</tr>
 			<tr>
-			<tr>
-				<td class="littletableheader" width='100'></td>
-				<td class="littletablerow"    width='350'></td>
 				<td class="littletableheader">           <?php echo $form->firma->label;  ?></td>
 				<td class="littletablerow" align='right'><?php echo $form->firma->output; ?></td>
+			</tr>
 			<tr>
-			<tr>
-				<td class="littletableheader" width='100'></td>
-				<td class="littletablerow"    width='350'></td>
 				<td class="littletableheader">           <?php echo $form->monto->label;  ?></td>
 				<td class="littletablerow" align='right'><?php echo $form->monto->output; ?></td>
 			<tr>

@@ -462,6 +462,7 @@ class Edinmue extends Controller {
 		$edit->objeto->option('A','Alquiler');
 		$edit->objeto->option('V','Venta');
 		$edit->objeto->rule='max_length[1]|required';
+		$edit->objeto->style='width:150px;';
 
 		$edit->status = new dropdownField('Estatus','status');
 		$edit->status->option('D','Disponible');
@@ -470,14 +471,17 @@ class Edinmue extends Controller {
 		$edit->status->option('R','Reservado');
 		$edit->status->option('O','Otro');
 		$edit->status->rule='max_length[11]';
+		$edit->status->style='width:150px;';
 
 		$edit->edificacion = new dropdownField('Edificaci&oacute;n','edificacion');
 		$edit->edificacion->option('','Seleccionar');
 		$edit->edificacion->options('SELECT id,TRIM(nombre) AS nombre FROM edif ORDER BY nombre');
 		$edit->edificacion->rule='max_length[11]';
+		$edit->edificacion->style='width:150px;';
 
 		$edit->ubicacion = new dropdownField('Ubicaci&oacute;n','ubicacion');
 		$edit->ubicacion->rule='max_length[11]|integer';
+		$edit->ubicacion->style='width:150px;';
 		$edif=$edit->getval('edificacion');
 		if($edif!==false){
 			$dbedif=$this->db->escape($edif);
@@ -491,11 +495,13 @@ class Edinmue extends Controller {
 		$edit->uso->option('','Seleccionar');
 		$edit->uso->options('SELECT id,uso FROM `eduso` ORDER BY uso');
 		$edit->uso->rule='max_length[11]|required';
+		$edit->uso->style='width:150px;';
 
 		$edit->usoalter = new dropdownField('Uso Alternativo','usoalter');
 		$edit->usoalter->option('','Seleccionar');
 		$edit->usoalter->options('SELECT id,uso FROM `eduso` ORDER BY uso');
 		$edit->usoalter->rule='max_length[11]';
+		$edit->usoalter->style='width:150px;';
 
 		$edit->caracteristicas = new textareaField('Caracter&iacute;sticas','caracteristicas');
 		//$edit->caracteristicas->rule='max_length[8]';
@@ -668,7 +674,9 @@ class Edinmue extends Controller {
 			);
 			echo json_encode($rt);
 		}else{
-			echo $edit->output;
+			$conten['form']  =&  $edit;
+			$data['content']  =  $this->load->view('view_edinmue', $conten, false);
+			//echo $edit->output;
 		}
 	}
 

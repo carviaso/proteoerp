@@ -217,14 +217,10 @@ $('#guardar').click(function(){
 
 	forma.submit();
 
-
-//	forma.attr("action","<?php echo site_url('/desarrollo/jqguarda') ?>");
-//	forma.submit();
-//	alert('Hola');
-	
 });
 
 $('#generar').click(function(){
+	//alert('Generar '+$('#bd').val()+" "+$('#contro').val());
 	window.location = "<?php echo site_url('desarrollo/jqgrid'); ?>"+"/"+$('#bd').val()+"/"+$('#contro').val();
 });
 

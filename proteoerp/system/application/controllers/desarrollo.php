@@ -882,16 +882,16 @@ $tabla .= '
 
 		// Programa
 		$path = 'system/application/controllers/';
-		if ( is_file($path.$contro.'/'.$db.'.php') )
-			$columna = file_get_contents('system/application/controllers/'.$contro.'/'.$db.'.php');
-		else
+		//if ( is_file($path.$contro.'/'.$db.'.php') )
+			//$columna = file_get_contents('system/application/controllers/'.$contro.'/'.$db.'.php');
+		//else
 			$columna = $this->programa($db,$contro);
 
 		// Vistas
 		$path = 'system/application/views/';
-		if ( is_file($path.'view_'.$db.'.php') )
-			$vista = file_get_contents('system/application/views/view_'.$db.'.php');
-		else
+		//if ( is_file($path.'view_'.$db.'.php') )
+		//	$vista = file_get_contents('system/application/views/view_'.$db.'.php');
+		//else
 			$vista = $this->vista($db);
 
 		// Reportes
@@ -917,8 +917,15 @@ $tabla .= '
 		$query = $this->db->query("DESCRIBE $db");
 		$i = 0;
 		if ($query->num_rows() > 0){
-			$fields  = '';
-			$columna = '<?php'."\n";
+			$fields   = '';
+			$columna  = '<?php'."\n";
+			$columna .= "/**\n";
+ 			$columna .= "* ProteoERP\n";
+ 			$columna .= "*\n";
+ 			$columna .= "* @autor    Andres Hocevar\n";
+ 			$columna .= "* @license  GNU GPL v3\n";
+			$columna .= "*/\n";
+
 			$param   = '';
 			$campos  = '';
 			$str = '';
@@ -1702,7 +1709,6 @@ $tabla .= '
 			$columna .= $this->geneviewjqmd($db, $dbit,true);
 			$columna .= "*/\n";
 
-
 			echo $columna."</pre>";
 
 		}
@@ -2184,6 +2190,12 @@ $tabla .= '
 	//
 	function vista( $tabla ){
 		$crud  = '<?php'."\n";
+		$crud .= "/**\n";
+		$crud .= "* ProteoERP\n";
+		$crud .= "*\n";
+		$crud .= "* @autor    Andres Hocevar\n";
+		$crud .= "* @license  GNU GPL v3\n";
+		$crud .= "*/\n";
 		$crud .= 'echo $form_scripts;'."\n";
 		$crud .= 'echo $form_begin;'."\n\n";
 		$crud .= 'if(isset($form->error_string)) echo \'<div class="alert">\'.$form->error_string.\'</div>\';'."\n";
@@ -2219,6 +2231,12 @@ $tabla .= '
 			show_error('Tabla no existe o faltan parametros');
 
 		$crud  ='<?php'."\n";
+		$crud .= "/**\n";
+		$crud .= "* ProteoERP\n";
+		$crud .= "*\n";
+		$crud .= "* @autor    Andres Hocevar\n";
+		$crud .= "* @license  GNU GPL v3\n";
+		$crud .= "*/\n";
 
 		$crud .= 'if ($form->_status==\'delete\' || $form->_action==\'delete\' || $form->_status==\'unknow_record\'){'."\n";
 		$crud .= "\t".'echo $form->output;'."\n";

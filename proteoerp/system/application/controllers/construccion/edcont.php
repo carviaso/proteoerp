@@ -5,90 +5,438 @@
  * @autor    Andres Hocevar
  * @license  GNU GPL v3
 */
-require_once(BASEPATH.'application/controllers/formams.php');
-class edcont extends Controller {
-	var $titp='Contratos';
-	var $tits='Contratos';
-	var $url ='construccion/edcont/';
+//require_once(BASEPATH.'application/controllers/formams.php');
+class Edcont extends Controller {
+	var $mModulo = 'EDCONT';
+	var $titp    = 'CONTRATOS DE VENTA';
+	var $tits    = 'CONTRATOS DE VENTA';
+	var $url     = 'construccion/edcont/';
 
-	function edcont(){
+	function Edcont(){
 		parent::Controller();
 		$this->load->library('rapyd');
-		//$this->datasis->modulo_id(216,1);
-		$this->instalar();
+		$this->load->library('jqdatagrid');
+		$this->datasis->modulo_nombre( 'EDCONT', $ventana=0 );
 	}
 
 	function index(){
-		redirect($this->url.'filteredgrid');
+		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
+		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		redirect($this->url.'jqdatag');
 	}
 
-	function filteredgrid(){
-		$this->rapyd->load('datafilter','datagrid');
+	//******************************************************************
+	// Layout en la Ventana
+	//
+	function jqdatag(){
 
-		$filter = new DataFilter($this->titp, 'edcont');
+		$grid = $this->defgrid();
+		$param['grids'][] = $grid->deploy();
 
-		$filter->numero_edres = new inputField('Reservaci&oacute;n','numero_edres');
-		$filter->numero_edres->size      =13;
-		$filter->numero_edres->maxlength =11;
+		//Funciones que ejecutan los botones
+		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
-		$filter->numero = new inputField('N&uacute;mero','numero');
-		$filter->numero->rule      ='max_length[8]';
-		$filter->numero->size      =10;
-		$filter->numero->maxlength =8;
+		//Botones Panel Izq
+		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$WestPanel = $grid->deploywestp();
 
-		$filter->fecha = new dateField('Fecha','fecha');
-		$filter->fecha->rule      ='chfecha';
-		$filter->fecha->size      =10;
-		$filter->fecha->maxlength =8;
+		$adic = array(
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+		);
+		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
-		$filter->cliente = new inputField('Cliente','cliente');
-		$filter->cliente->rule      ='max_length[5]';
-		$filter->cliente->size      =7;
-		$filter->cliente->maxlength =5;
-
-		$filter->edificacion = new inputField('Edificaci&oacute;n','edificacion');
-		$filter->edificacion->rule      ='max_length[11]';
-		$filter->edificacion->size      =13;
-		$filter->edificacion->maxlength =11;
-
-		$filter->inmueble = new inputField('Inmueble','inmueble');
-		$filter->inmueble->rule      ='max_length[11]';
-		$filter->inmueble->size      =13;
-		$filter->inmueble->maxlength =11;
-
-		$filter->notas = new textareaField('Notas','notas');
-		$filter->notas->rule = 'max_length[8]';
-		$filter->notas->cols = 70;
-		$filter->notas->rows = 4;
-
-		$filter->buttons('reset', 'search');
-		$filter->build();
-
-		$uri = anchor($this->url.'dataedit/show/<raencode><#id#></raencode>','<#id#>');
-
-		$grid = new DataGrid('');
-		$grid->order_by('id');
-		$grid->per_page = 40;
-
-		$grid->column_orderby('Id',$uri,'id','align="left"');
-		$grid->column_orderby('Reservaci&oacute;n','numero_edres','numero_edres','align="right"');
-		$grid->column_orderby('N&uacute;mero','numero','numero','align="left"');
-		$grid->column_orderby('Fecha','<dbdate_to_human><#fecha#></dbdate_to_human>','fecha','align="center"');
-		$grid->column_orderby('Cliente','cliente','cliente','align="left"');
-		$grid->column_orderby('Inicial','<nformat><#inicial#></nformat>','inicial','align="right"');
-		$grid->column_orderby('Financiable','<nformat><#financiable#></nformat>','financiable','align="right"');
-		$grid->column_orderby('Monto','<nformat><#monto#></nformat>','monto','align="right"');
-
-		$grid->add($this->url.'dataedit/create');
-		$grid->build();
-
-		$data['filtro']  = $filter->output;
-		$data['content'] = $grid->output;
-		$data['head']    = $this->rapyd->get_head().script('jquery.js');
-		$data['title']   = heading($this->titp);
-		$this->load->view('view_ventanas', $data);
+		$param['WestPanel']   = $WestPanel;
+		//$param['EastPanel'] = $EastPanel;
+		$param['SouthPanel']  = $SouthPanel;
+		$param['listados']    = $this->datasis->listados('EDCONT', 'JQ');
+		$param['otros']       = $this->datasis->otros('EDCONT', 'JQ');
+		$param['temas']       = array('proteo','darkness','anexos1');
+		$param['bodyscript']  = $bodyscript;
+		$param['tabs']        = false;
+		$param['encabeza']    = $this->titp;
+		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
+		$this->load->view('jqgrid/crud2',$param);
 	}
 
+	//******************************************************************
+	// Funciones de los Botones
+	//
+	function bodyscript( $grid0 ){
+		$bodyscript = '<script type="text/javascript">';
+		$ngrid = '#newapi'.$grid0;
+
+		$bodyscript .= $this->jqdatagrid->bsshow('edcont', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsadd( 'edcont', $this->url );
+		$bodyscript .= $this->jqdatagrid->bsdel( 'edcont', $ngrid, $this->url );
+		$bodyscript .= $this->jqdatagrid->bsedit('edcont', $ngrid, $this->url );
+
+		//Wraper de javascript
+		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
+
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '500', '750' );
+		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
+
+		$bodyscript .= '});';
+
+		$bodyscript .= '</script>';
+
+		return $bodyscript;
+	}
+
+	//******************************************************************
+	// Definicion del Grid o Tabla 
+	//
+	function defgrid( $deployed = false ){
+		$i      = 1;
+		$editar = "false";
+
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
+
+
+		$grid->addField('id_edres');
+		$grid->label('Id_edres');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+		));
+
+
+		$grid->addField('numero_edres');
+		$grid->label('Numero_edres');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:8, maxlength: 8 }',
+		));
+
+
+		$grid->addField('numero');
+		$grid->label('Numero');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:8, maxlength: 8 }',
+		));
+
+
+		$grid->addField('status');
+		$grid->label('Status');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
+		));
+
+
+		$grid->addField('fecha');
+		$grid->label('Fecha');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
+
+		$grid->addField('cliente');
+		$grid->label('Cliente');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 50,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:5, maxlength: 5 }',
+		));
+
+
+		$grid->addField('edificacion');
+		$grid->label('Edificacion');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+		));
+
+
+		$grid->addField('inmueble');
+		$grid->label('Inmueble');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+		));
+
+
+		$grid->addField('inicial');
+		$grid->label('Inicial');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('financiable');
+		$grid->label('Financiable');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('firma');
+		$grid->label('Firma');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('precioxmt2');
+		$grid->label('Precioxmt2');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('mt2');
+		$grid->label('Mt2');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('monto');
+		$grid->label('Monto');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+
+		$grid->addField('notas');
+		$grid->label('Notas');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 250,
+			'edittype'      => "'textarea'",
+			'editoptions'   => "'{rows:2, cols:60}'",
+		));
+
+
+		$grid->addField('uso');
+		$grid->label('Uso');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+		));
+
+
+		$grid->showpager(true);
+		$grid->setWidth('');
+		$grid->setHeight('290');
+		$grid->setTitle($this->titp);
+		$grid->setfilterToolbar(true);
+		$grid->setToolbar('false', '"top"');
+
+		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
+		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
+
+		$grid->setOndblClickRow('');		#show/hide navigations buttons
+		$grid->setAdd(    $this->datasis->sidapuede('EDCONT','INCLUIR%' ));
+		$grid->setEdit(   $this->datasis->sidapuede('EDCONT','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('EDCONT','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('EDCONT','BUSQUEDA%'));
+		$grid->setRowNum(30);
+		$grid->setShrinkToFit('false');
+
+		$grid->setBarOptions("addfunc: edcontadd, editfunc: edcontedit, delfunc: edcontdel, viewfunc: edcontshow");
+
+		#Set url
+		$grid->setUrlput(site_url($this->url.'setdata/'));
+
+		#GET url
+		$grid->setUrlget(site_url($this->url.'getdata/'));
+
+		if ($deployed) {
+			return $grid->deploy();
+		} else {
+			return $grid;
+		}
+	}
+
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
+	function getdata(){
+		$grid       = $this->jqdatagrid;
+
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('edcont');
+
+		$response   = $grid->getData('edcont', array(array()), array(), false, $mWHERE );
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+	}
+
+	//******************************************************************
+	// Guarda la Informacion del Grid o Tabla
+	//
+	function setData(){
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = $this->input->post('id');
+		$data   = $_POST;
+		$mcodp  = "??????";
+		$check  = 0;
+
+		unset($data['oper']);
+		unset($data['id']);
+		if($oper == 'add'){
+			if(false == empty($data)){
+				$check = $this->datasis->dameval("SELECT count(*) FROM edcont WHERE $mcodp=".$this->db->escape($data[$mcodp]));
+				if ( $check == 0 ){
+					$this->db->insert('edcont', $data);
+					echo "Registro Agregado";
+
+					logusu('EDCONT',"Registro ????? INCLUIDO");
+				} else
+					echo "Ya existe un registro con ese $mcodp";
+			} else
+				echo "Fallo Agregado!!!";
+
+		} elseif($oper == 'edit') {
+			$nuevo  = $data[$mcodp];
+			$anterior = $this->datasis->dameval("SELECT $mcodp FROM edcont WHERE id=$id");
+			if ( $nuevo <> $anterior ){
+				//si no son iguales borra el que existe y cambia
+				$this->db->query("DELETE FROM edcont WHERE $mcodp=?", array($mcodp));
+				$this->db->query("UPDATE edcont SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
+				$this->db->where("id", $id);
+				$this->db->update("edcont", $data);
+				logusu('EDCONT',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
+				echo "Grupo Cambiado/Fusionado en clientes";
+			} else {
+				unset($data[$mcodp]);
+				$this->db->where("id", $id);
+				$this->db->update('edcont', $data);
+				logusu('EDCONT',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+				echo "$mcodp Modificado";
+			}
+
+		} elseif($oper == 'del') {
+			$meco = $this->datasis->dameval("SELECT $mcodp FROM edcont WHERE id=$id");
+			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM edcont WHERE id='$id' ");
+			if ($check > 0){
+				echo " El registro no puede ser eliminado; tiene movimiento ";
+			} else {
+				$this->db->query("DELETE FROM edcont WHERE id=$id ");
+				logusu('EDCONT',"Registro ????? ELIMINADO");
+				echo "Registro Eliminado";
+			}
+		};
+	}
+
+
+	//******************************************************************
+	// Edicion 
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
 
@@ -98,7 +446,19 @@ class edcont extends Controller {
 		$do->rel_one_to_many('itedcont', 'itedcont', array('id'=>'id_edcont'));
 		$do->order_rel_one_to_many('itedcont','id');
 
-		$edit = new DataDetails($this->tits, $do);
+		$edit = new DataDetails('', $do);
+/*
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+			$(".inputonlynum").numeric();
+		});
+		';
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+*/
+		$edit->on_save_redirect=false;
 
 		$id=$edit->get_from_dataobjetct('id');
 		if($id!==false){
@@ -112,17 +472,17 @@ class edcont extends Controller {
 			$edit->button('btn_actuali', 'Actualizar', $action,'TR');
 		}
 
-		$edit->back_url = site_url($this->url.'filteredgrid');
+		//$edit->back_url = site_url($this->url.'filteredgrid');
 
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert','_pre_insert');
-		$edit->pre_process('update','_pre_update');
-		$edit->pre_process('delete','_pre_delete');
+		$edit->pre_process( 'insert','_pre_insert');
+		$edit->pre_process( 'update','_pre_update');
+		$edit->pre_process( 'delete','_pre_delete');
 
 		$edit->id_edres = new inputField('Id_edres','id_edres');
-		$edit->id_edres->rule='max_length[11]|integer';
+		$edit->id_edres->rule = 'max_length[11]|integer';
 		$edit->id_edres->css_class='inputonlynum';
 		$edit->id_edres->size =13;
 		$edit->id_edres->maxlength =11;
@@ -155,6 +515,7 @@ class edcont extends Controller {
 		$edit->fecha->size =10;
 		$edit->fecha->insertValue=date('Y-m-d');
 		$edit->fecha->maxlength =8;
+		$edit->fecha->calendar=false;
 
 		$edit->cliente = new inputField('Cliente','cliente');
 		$edit->cliente->rule='max_length[5]|required';
@@ -191,7 +552,7 @@ class edcont extends Controller {
 		$edit->edificacion = new dropdownField('Edificaci&oacute;n','edificacion');
 		$edit->edificacion->option('','Seleccionar');
 		$edit->edificacion->options('SELECT id,TRIM(nombre) AS nombre FROM `edif` ORDER BY nombre');
-		$edit->edificacion->style='width:180px;';
+		$edit->edificacion->style='width:150px;';
 		$edit->edificacion->rule='max_length[11]|required';
 
 		$edit->inmueble = new dropdownField('Inmueble','inmueble');
@@ -204,7 +565,7 @@ class edcont extends Controller {
 		}else{
 			$edit->inmueble->option('','Seleccione una edificacion');
 		}
-		$edit->inmueble->style='width:180px;';
+		$edit->inmueble->style='width:150px;';
 		$edit->inmueble->rule='max_length[11]|required';
 
 		$edit->reserva = new inputField('Reserva','reserva');
@@ -213,17 +574,17 @@ class edcont extends Controller {
 		$edit->reserva->size =10;
 		$edit->reserva->maxlength =17;
 
-		$edit->precioxmt2 = new inputField('Precioxmt2','precioxmt2');
+		$edit->precioxmt2 = new inputField('Precio m2','precioxmt2');
 		$edit->precioxmt2->rule='max_length[17]|numeric|mayorcero|required';
 		$edit->precioxmt2->css_class='inputnum';
 		$edit->precioxmt2->size =10;
 		$edit->precioxmt2->maxlength =17;
 		$edit->precioxmt2->showformat ='decimal';
 
-		$edit->mt2 = new inputField('&Aacute;rea Mt2','mt2');
+		$edit->mt2 = new inputField('&Aacute;rea m2','mt2');
 		$edit->mt2->rule='max_length[17]|numeric|mayorcero|required';
 		$edit->mt2->css_class='inputnum';
-		$edit->mt2->size =10;
+		$edit->mt2->size =7;
 		$edit->mt2->maxlength =17;
 		$edit->mt2->showformat ='decimal';
 
@@ -278,14 +639,15 @@ class edcont extends Controller {
 		$edit->it_vencimiento->db_name ='vencimiento';
 		$edit->it_vencimiento->rel_id  ='itedcont';
 		$edit->it_vencimiento->maxlength =8;
+		$edit->it_vencimiento->calendar=false;
 
 		$edit->it_especial = new dropdownField('Especial <#o#>','it_especial_<#i#>');
 		$edit->it_especial->rule    = 'max_length[1]|enum[S,N]';
 		$edit->it_especial->db_name = 'especial';
 		$edit->it_especial->rel_id  = 'itedcont';
 		$edit->it_especial->style='width:80px;';
-		$edit->it_especial->option('N','No');
-		$edit->it_especial->option('S','Si');
+		$edit->it_especial->option('N','Normal');
+		$edit->it_especial->option('S','Especial');
 
 		$edit->it_monto = new inputField('Monto <#o#>','it_monto_<#i#>');
 		$edit->it_monto->rule='max_length[10]|numeric';
@@ -302,27 +664,29 @@ class edcont extends Controller {
 		//******************************
 
 		if($status != 'A'){
-			$edit->buttons('modify', 'save', 'undo', 'delete','add_rel');
+			$edit->buttons('modify', 'delete','add_rel');
+			//$edit->buttons('modify', 'save', 'undo', 'delete','add_rel');
 		}
-		$edit->buttons('back', 'add');
+		//$edit->buttons('back', 'add');
 		$edit->build();
 
-		$script= '<script type="text/javascript" >
-		$(function() {
-			$(".inputnum").numeric(".");
-			$(".inputonlynum").numeric();
-		});
-		</script>';
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form']  =&  $edit;
+			$data['content']  =  $this->load->view('view_edcont', $conten, false);
 
-		/*$data['content'] = $edit->output;
-		$data['head']    = $this->rapyd->get_head();
-		$data['script']  = script('jquery.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js');
-		$data['script'] .= $script;
-		$data['title']   = heading($this->tits);
-		$this->load->view('view_ventanas', $data);*/
+			//$data['content'] = $this->load->view('view_edcont', $conten,true);
+			//echo $edit->output;
+		}
 
+/*
 		$conten['form']     =& $edit;
-
 		$data['content'] = $this->load->view('view_edcont', $conten,true);
 		$data['title']   = heading($this->tits);
 		$data['head']    = $this->rapyd->get_head();
@@ -334,6 +698,8 @@ class edcont extends Controller {
 		$data['head']   .= phpscript('nformat.js');
 		$data['head']   .= style('redmond/jquery-ui-1.8.1.custom.css');
 		$this->load->view('view_ventanas', $data);
+*/
+
 	}
 
 	function letracambio($id,$numero='1'){
