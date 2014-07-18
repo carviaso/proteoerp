@@ -95,7 +95,7 @@ $(function(){
 				url:  "<?php echo site_url('ajax/buscascli'); ?>",
 				type: "POST",
 				dataType: "json",
-				data: "q="+req.term,
+				data: {"q":req.term},
 				success:
 					function(data){
 						var sugiere = [];
@@ -194,21 +194,28 @@ function add_sitems(){
 }
 
 function post_precioselec(ind,obj){
+	var renum = /^[0-9]+\.?[0-9*]*$/;
+	var ctipo = $("#sclitipo").val();
+	var tipo  = Number(ctipo); if(tipo>0) tipo=tipo-1;
 	if(obj.value=='o'){
 		otro = prompt('Precio nuevo','');
-		if(!otro){
-			var ctipo = $("#sclitipo").val();
-			var tipo  = Number(ctipo); if(tipo>0) tipo=tipo-1;
-			obj.selectedIndex=tipo;
-		}else{
+
+		if(renum.test(otro)){
 			otro = Number(otro);
-			if(otro>0){
-				var opt=document.createElement("option");
-				opt.text = nformat(otro,2);
-				opt.value= otro;
-				obj.add(opt,null);
-				obj.selectedIndex=obj.length-1;
+			if(otro==0){
+				obj.selectedIndex=tipo;
+			}else{
+				otro = Number(otro);
+				if(otro>0){
+					var opt=document.createElement("option");
+					opt.text = nformat(otro,2);
+					opt.value= otro;
+					obj.add(opt,null);
+					obj.selectedIndex=obj.length-1;
+				}
 			}
+		}else{
+			obj.selectedIndex=tipo;
 		}
 	}
 	importe(ind);

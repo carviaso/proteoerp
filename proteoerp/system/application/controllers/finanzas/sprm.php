@@ -59,6 +59,7 @@ class Sprm extends Controller {
 			array('id'=>'fedita'  , 'title'=>'Agregar/Editar Registro'),
 			array('id'=>'fabono'  , 'title'=>'Abonar a Proveedor'),
 			array('id'=>'fsprvsel', 'title'=>'Seleccionar proveedor'),
+			array('id'=>'fborra'  , 'title'=>'Borrar registro'),
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
