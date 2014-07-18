@@ -819,32 +819,6 @@ class Rivc extends Controller {
 
 		$grid  = new $this->jqdatagrid;
 
-		//$grid->addField('id');
-		//$grid->label('Id');
-		//$grid->params(array(
-		//	'align'         => "'center'",
-		//	'frozen'        => 'true',
-		//	'width'         => 40,
-		//	'editable'      => 'false',
-		//	'search'        => 'false'
-		//));
-
-
-		//$grid->addField('idrivc');
-		//$grid->label('Idrivc');
-		//$grid->params(array(
-		//	'search'        => 'true',
-		//	'editable'      => $editar,
-		//	'align'         => "'right'",
-		//	'edittype'      => "'text'",
-		//	'width'         => 100,
-		//	'editrules'     => '{ required:true }',
-		//	'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-		//	'formatter'     => "'number'",
-		//	'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
-		//));
-
-
 		$grid->addField('tipo_doc');
 		$grid->label('Tipo');
 		$grid->params(array(
@@ -2022,6 +1996,8 @@ class Rivc extends Controller {
 			$sqls[]="DELETE FROM bmov WHERE transac=${dbtransac} AND clipro='C'";
 		}
 		$sqls[]="UPDATE rivc SET anulado='S' WHERE id=".$this->db->escape($id);
+
+		$mSQL = "DELETE FROM itccli WHERE transac=${dbtransac}";
 
 		if($error==0){
 			foreach($sqls as $sql){

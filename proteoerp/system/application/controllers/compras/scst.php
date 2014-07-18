@@ -75,8 +75,8 @@ class Scst extends Controller {
 		if($this->datasis->traevalor('MOTOS')=='S')
 			$grid->wbotonadd(array('id'=>'vehiculo', 'img'=>'images/carro.png',  'alt' => 'Seriales Vehiculares',   'label'=>'Seriales Vehiculares'));
 
-		$grid->wbotonadd(array('id'=>'actualizar','img'=>'images/arrow_up.png' ,'alt'   => 'Actualizar','label'=>'Actualizar'));
-		$grid->wbotonadd(array('id'=>'reversar',  'img'=>'images/arrow_down.png' ,'alt' => 'Reversar',  'label'=>'Reversar'));
+		$grid->wbotonadd(array('id'=>'actualizar','img'=>'images/arrow_up.png',  'alt' => 'Actualizar','label' => 'Actualizar'));
+		$grid->wbotonadd(array('id'=>'reversar',  'img'=>'images/arrow_down.png','alt' => 'Reversar',  'label' => 'Reversar'));
 
 		$grid->wbotonadd(array('id'=>'recargos',  'img'=>'images/arrow_down.png' ,'alt' => 'Reversar',  'label'=>'Recargos '));
 
@@ -3327,7 +3327,9 @@ class Scst extends Controller {
 
 		if($pasa==0){
 			$control=$this->datasis->dameval('SELECT control FROM scst WHERE  id='.$id);
-
+			
+			$msql = "'UPDATE scst SET credito=ctotal-reten-anticipo WHERE id='.$id";
+			
 			//Chequea si tiene vehiculos y estan registrados los seriales
 			if($this->db->table_exists('sinvehiculo')){
 				$SQL="SELECT COUNT(*) AS cana
@@ -3344,7 +3346,6 @@ class Scst extends Controller {
 						$this->error_string='Debe cargar los seriales de los veh&iacute;culos para poder recibir la compra ';
 						return false;
 					}
-
 				}
 			}
 			//Fin de la validacion vehicular
