@@ -1504,6 +1504,7 @@ class Ajax extends Controller {
 		}
 		echo $data;
 	}
+
 	//******************************************************************
 	//  Busca los efectos que se deben para los cruces
 	//
@@ -1728,8 +1729,6 @@ class Ajax extends Controller {
 			$this->db->select_sum('a.monto*IF(tipo_doc IN ("FC","ND","GI"),1,-1)','saldo');
 			$this->db->from('sprm AS a');
 			$this->db->where('a.cod_prv',$mid);
-			//$this->db->where('a.monto > a.abonos');
-			//$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
 			$q=$this->db->get();
 			$row = $q->row_array();
 			echo (empty($row['saldo']))? 0: $row['saldo'];
@@ -1745,11 +1744,8 @@ class Ajax extends Controller {
 
 		if($mid !== false){
 			$this->db->select_sum('a.monto*IF(tipo_doc IN ("FC","ND","GI"),1,-1)','saldo');
-//			$this->db->select_sum('a.monto - a.abonos','saldo');
 			$this->db->from('smov AS a');
 			$this->db->where('a.cod_cli',$mid);
-			//$this->db->where('a.monto > a.abonos');
-			//$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
 			$q=$this->db->get();
 			$row = $q->row_array();
 			echo (empty($row['saldo']))? 0: $row['saldo'];
@@ -2055,13 +2051,6 @@ class Ajax extends Controller {
 	}
 
 	function buscasinv2(){
-		//busca por CODIGO comience por la busqueda LIKE 'BUSQUEDA%',
-		//sino busca por CODIGO en cualquier parte LIKE '%BUSQUEDA%',
-		//sino consigue buscar los que comiencen en DESCRIP LIKE 'BUSQUEDA%'
-		//sino busca por DESCRIP LIKE '%BUSQUEDA%'
-		//acepta el parametro comodin
-		//busca solo los activos
-
 		$comodin=$this->datasis->traevalor('COMODIN');
 		$mid  = $this->input->post('q');
 		if(strlen($comodin)==1){
@@ -2076,7 +2065,6 @@ class Ajax extends Controller {
 				,a.peso, a.ultimo, a.pond,a.formcal,a.id FROM sinv AS a
 				WHERE a.codigo LIKE ".$this->db->escape($mid.'%')." AND a.activo='S'
 				ORDER BY a.descrip";
-
 
 			$query = $this->db->query($mSQL);
 			$cant=$query->num_rows();
@@ -2723,7 +2711,6 @@ class Ajax extends Controller {
 
 		$salida .= 	"Seleccione un Origen";
 
-
 		$salida .= '</center></body>';
 		$salida .= '</html>';
 
@@ -2830,6 +2817,16 @@ class Ajax extends Controller {
 		}else{
 			return $str;
 		}
+	}
+
+
+	function get_municipio( $entidad = 0 ){
+		$mSQL = "SELECT codigo, municipio FROM cne.municipios WHERE entidad=$entidad ORDER BY municipio";
+	}
+
+	function get_parroquia( $entidad = 0, $municipio = 0 ){
+		$mSQL = "SELECT codigo, parroquia FROM cne.parroquias WHERE entidad=$entidad AND municipio=$municipio ORDER BY parroquia");
+	
 	}
 
 }

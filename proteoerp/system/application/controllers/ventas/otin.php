@@ -1726,8 +1726,10 @@ class Otin extends Controller {
 			$mSQL = $this->db->insert_string('smov', $data);
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'OTIN'); }
+
 		}elseif($tipo_doc=='OT'){
 			$cana=$do->count_rel('sfpa');
+			$mMonto = 0;
 			for($i=0;$i<$cana;$i++){
 				$monto = $do->get_rel('sfpa','monto',$i);
 				$tipo  = $do->get_rel('sfpa','tipo' ,$i);
@@ -1767,8 +1769,69 @@ class Otin extends Controller {
 					if($ban==false){ memowrite($mSQL,'OTIN'); }
 
 					$this->datasis->actusal($banco, $ffecha, $monto);
-				}
+				} else
+					$mMonto += $monto;
 			}
+			// GUARDA EN LA CAJA
+			if ( $mMonto > 0 ){
+				//   CMNJ("GUARDA EN CAJA "+mCAJA)
+				$rowban  = $this->datasis->damerow("SELECT numcuent,banco,moneda,saldo FROM banc WHERE codbanc='".$mcaja."'");
+
+				$data['codbanc']  = $mcaja;
+				$data['numcuent'] = $rowban['numcuent'];
+				$data['banco']    = $rowban['banco'];
+				$data['saldo']    = $rowban['saldo'];
+				$data['moneda']   = $rowban['moneda'];
+				$data['tipo_op']  = 'NC';
+				$data['numero']   = $num_ref;
+				$data['fecha']    = $ffecha;
+				$data['clipro']   = 'C';
+				$data['codcp']    = $cod_cli;
+				$data['nombre']   = $nombre;
+				$data['monto']    = $mMonto;
+				$data['concepto'] = $observa1;
+				$data['concep2']  = $observa2;
+				$data['benefi']   = '';
+				$data['usuario']  = $usuario;
+				$data['estampa']  = $estampa;
+				$data['hora']     = $hora;
+				$data['transac']  = $transac;
+				$data['anulado']  = 'N';
+				$data['liable']   = 'S';
+
+				$mSQL = $this->db->insert_string('bmov', $data);
+				$ban=$this->db->simple_query($mSQL);
+				if($ban==false){ memowrite($mSQL,'OTIN'); }
+
+				$this->datasis->actusal($mcaja, $ffecha, $mMonto);
+
+/*
+			ACTUSAL(mCAJA, mFECHA, mMONTO)
+			aLISTA := {}
+			AADD(aLISTA, {"CODBANC",  mCAJA })
+			AADD(aLISTA, {"NUMCUENT", mREG[1] })
+			AADD(aLISTA, {"BANCO",    mREG[2] })
+			AADD(aLISTA, {"MONEDA",   mREG[3] })
+			AADD(aLISTA, {"SALDO",    mREG[4] })
+			AADD(aLISTA, {"FECHA",    mFECHA })
+			AADD(aLISTA, {"BENEFI",   '' })
+			AADD(aLISTA, {"TIPO_OP",  "NC" })
+			AADD(aLISTA, {"NUMERO",   mNUMERO })
+			AADD(aLISTA, {"CONCEPTO", mOBSERVA1 })
+			AADD(aLISTA, {"CONCEP2",  mOBSERVA2 })
+			AADD(aLISTA, {"CONCEP3",  '' })
+			AADD(aLISTA, {"MONTO",    mMONTO })
+			AADD(aLISTA, {"CLIPRO",   'C' })
+			AADD(aLISTA, {"CODCP",    mCOD_CLI })
+			AADD(aLISTA, {"NOMBRE",   mNOMBRE })
+			AADD(aLISTA, {"NEGRESO",  mINGRESO })
+	mSQL := "INSERT INTO bmov SET "
+	aVALORES := {}
+	LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
+	EJECUTASQL(mSQL,aVALORES)
+*/
+			}
+
 		}
 
 		$primary =implode(',',$do->pk);

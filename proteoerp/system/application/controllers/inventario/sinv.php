@@ -3241,6 +3241,7 @@ class Sinv extends Controller {
 
 		$edit->exord = new inputField('Orden Proveedor','exord');
 		$edit->exord->readonly = true;
+		$edit->exord->insertValue = 0;
 		$edit->exord->size=10;
 		$edit->exord->css_class='inputonlynum';
 		$edit->exord->style='background:#F5F6CE;';

@@ -366,7 +366,7 @@ $tabla .= '
 
 		$crud ="\n\t".'function dataedit(){'."\n";
 		$crud.="\t\t".'$this->rapyd->load(\'dataedit\');'."\n\n";
-		$crud.="\t\t".'$edit = new DataEdit($this->tits, \''.$tabla.'\');'."\n\n";
+		$crud.="\t\t".'$edit = new DataEdit(\'\', \''.$tabla.'\');'."\n\n";
 		$crud.="\t\t".'$edit->back_url = site_url($this->url.\'filteredgrid\');'."\n\n";
 
 		$crud.="\t\t".'$edit->post_process(\'insert\',\'_post_insert\');'."\n";
@@ -1889,7 +1889,7 @@ $tabla .= '
 		$crud.="\t\t".'});'."\n";
 		$crud.="\t\t".'\';'."\n\n";
 
-		$crud.="\t\t".'$edit = new DataEdit($this->tits, \''.$tabla.'\');'."\n\n";
+		$crud.="\t\t".'$edit = new DataEdit(\'\', \''.$tabla.'\');'."\n\n";
 		$crud.="\t\t".'$edit->script($script,\'modify\');'."\n";
 		$crud.="\t\t".'$edit->script($script,\'create\');'."\n";
 		$crud.="\t\t".'$edit->on_save_redirect=false;'."\n\n";

@@ -1646,7 +1646,6 @@ class Scli extends validaciones {
 			var rifrep=false;
 			$(function() {
 				$("#aniversario").datepicker({ dateFormat: "dd/mm/yy" });
-				//$("#tiva").change(function () { anomfis(); }).change();
 
 				$("#tarifa").autocomplete({
 					source: function( req, add){
