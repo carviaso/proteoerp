@@ -3676,15 +3676,16 @@ class Sinv extends Controller {
 			}
 		}
 		//Fin de las politicas de sinvcontrol
-
 		return $this->_pre_inserup($do);
 	}
 
 	function _pre_insert($do){
 		$codigo = $do->get('codigo');
 		$do->set('existen',0);
-		if(empty($do->get('peso')))  $do->set('peso',0);
-		if(empty($do->get('exord'))) $do->set('exord',0);
+		$meco = $do->get('peso');
+		if(empty($meco))  $do->set('peso',0);
+		$meco = $do->get('exord');
+		if(empty($meco)) $do->set('exord',0);
 		
 		if(empty($codigo)){
 			$size='6';
