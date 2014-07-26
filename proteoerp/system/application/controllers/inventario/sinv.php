@@ -3682,10 +3682,17 @@ class Sinv extends Controller {
 	function _pre_insert($do){
 		$codigo = $do->get('codigo');
 		$do->set('existen',0);
+
 		$meco = $do->get('peso');
 		if(empty($meco))  $do->set('peso',0);
 		$meco = $do->get('exord');
 		if(empty($meco)) $do->set('exord',0);
+		$meco = $do->get('exdes');
+		if(empty($meco)) $do->set('exdes',0);
+		$meco = $do->get('garantia');
+		if(empty($meco)) $do->set('garantia',0);
+
+
 		
 		if(empty($codigo)){
 			$size='6';
