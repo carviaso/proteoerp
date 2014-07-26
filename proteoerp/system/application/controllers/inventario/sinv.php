@@ -3238,18 +3238,18 @@ class Sinv extends Controller {
 		$edit->exmin->maxlength=12;
 		$edit->exmin->css_class='inputonlynum';
 		$edit->exmin->rule='numeric|callback_positivo|trim';
-		$edit->exmin->insertValue = 0;
+		$edit->exmin->insertValue = '0';
 
 		$edit->exmax = new inputField('M&aacute;ximo', 'exmax');
 		$edit->exmax->size=10;
 		$edit->exmax->maxlength=12;
 		$edit->exmax->css_class='inputonlynum';
 		$edit->exmax->rule='numeric|callback_positivo|trim';
-		$edit->exmax->insertValue = 0;
+		$edit->exmax->insertValue = '0';
 
 		$edit->exord = new inputField('Orden Proveedor','exord');
 		$edit->exord->readonly = true;
-		$edit->exord->insertValue = 0;
+		$edit->exord->insertValue = '0';
 		$edit->exord->size=10;
 		$edit->exord->css_class='inputonlynum';
 		$edit->exord->style='background:#F5F6CE;';
@@ -3343,7 +3343,7 @@ class Sinv extends Controller {
 			$objeto="pescala$i";
 			$edit->$objeto = new inputField('Descuento por escala '.$i,$objeto);
 			$edit->$objeto->rule='numeric|callback_positivo|trim';
-			$edit->$objeto->insertValue=0;
+			$edit->$objeto->insertValue='0';
 			$edit->$objeto->css_class='inputnum';
 			$edit->$objeto->size=5;
 			$edit->$objeto->autocomplete=false;
@@ -3351,7 +3351,7 @@ class Sinv extends Controller {
 			$objeto="escala$i";
 			$edit->$objeto = new inputField('Cantidad m&iacute;nima para la escala '.$i,$objeto);
 			$edit->$objeto->rule='numeric|callback_positivo|trim';
-			$edit->$objeto->insertValue=0;
+			$edit->$objeto->insertValue='0';
 			$edit->$objeto->css_class='inputnum';
 			$edit->$objeto->size=10;
 			$edit->$objeto->autocomplete=false;
@@ -3406,7 +3406,7 @@ class Sinv extends Controller {
 
 		$edit->mmargenplus = new inputField('Descuento +','mmargenplus');
 		$edit->mmargenplus->css_class='inputnum';
-		$edit->mmargenplus->insertValue=0;
+		$edit->mmargenplus->insertValue='0';
 		$edit->mmargenplus->size=10;
 		$edit->mmargenplus->maxlength=10;
 
@@ -3509,7 +3509,7 @@ class Sinv extends Controller {
 		$edit->it2cantidad->rule         = 'positive';
 		$edit->it2cantidad->autocomplete = false;
 		$edit->it2cantidad->onkeyup      = 'totalizarpitem(<#i#>)';
-		$edit->it2cantidad->insertValue  = 1;
+		$edit->it2cantidad->insertValue  = '1';
 
 		$edit->itunidad = new dropdownField('Unidad <#o#>','itunidad_<#i#>');
 		$edit->itunidad->style   = 'width:150px;';
@@ -3524,7 +3524,7 @@ class Sinv extends Controller {
 		$edit->itfactor->maxlength  = 15;
 		$edit->itfactor->css_class  = 'inputnum';
 		$edit->itfactor->rel_id     = 'sinvpitem';
-		$edit->itfactor->insertValue= 0;
+		$edit->itfactor->insertValue= '0';
 		$edit->itfactor->autocomplete= false;
 
 		$edit->it2merma = new inputField('Ultimo <#o#>', 'it2merma_<#i#>');
@@ -3533,7 +3533,7 @@ class Sinv extends Controller {
 		$edit->it2merma->maxlength  = 15;
 		$edit->it2merma->css_class  = 'inputnum';
 		$edit->it2merma->rel_id     = 'sinvpitem';
-		$edit->it2merma->insertValue= 0;
+		$edit->it2merma->insertValue= '0';
 		$edit->it2merma->autocomplete= false;
 
 		$ocultos=array('ultimo','pond','formcal','id_sinv');
@@ -3577,7 +3577,7 @@ class Sinv extends Controller {
 		$edit->it3tiempo->size         = 5;
 		$edit->it3tiempo->rule         = 'positive';
 		$edit->it3tiempo->autocomplete = false;
-		$edit->it3tiempo->insertValue  = 1;
+		$edit->it3tiempo->insertValue  = '1';
 
 		$inven=array();
 		$query=$this->db->query('SELECT TRIM(codigo) AS codigo ,TRIM(descrip) AS descrip,tipo,base1,base2,base3,base4,iva,peso,precio1,pond,ultimo FROM sinv WHERE activo=\'S\' AND tipo=\'Articulo\'');
