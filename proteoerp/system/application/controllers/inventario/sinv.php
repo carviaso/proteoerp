@@ -3049,30 +3049,35 @@ class Sinv extends Controller {
 		$edit->peso->maxlength=12;
 		$edit->peso->css_class='inputnum';
 		$edit->peso->rule='numeric|callback_positivo';
+		$edit->peso->insertValue = 0;
 
 		$edit->alto = new inputField('Alto', 'alto');
 		$edit->alto->size=10;
 		$edit->alto->maxlength=12;
 		$edit->alto->css_class='inputnum';
 		$edit->alto->rule='numeric|callback_positivo';
+		$edit->alto->insertValue = 0;
 
 		$edit->ancho = new inputField('Ancho', 'ancho');
 		$edit->ancho->size=10;
 		$edit->ancho->maxlength=12;
 		$edit->ancho->css_class='inputnum';
 		$edit->ancho->rule='numeric|callback_positivo';
+		$edit->ancho->insertValue = 0;
 
 		$edit->largo = new inputField('Largo', 'largo');
 		$edit->largo->size=10;
 		$edit->largo->maxlength=12;
 		$edit->largo->css_class='inputnum';
 		$edit->largo->rule='numeric|callback_positivo';
+		$edit->largo->insertValue = 0;
 
 		$edit->garantia = new inputField('Garantia', 'garantia');
 		$edit->garantia->size=9;
 		$edit->garantia->maxlength=3;
 		$edit->garantia->css_class='inputonlynum';
 		$edit->garantia->rule='numeric|callback_positivo';
+		$edit->garantia->insertValue = 0;
 
 		$edit->marca = new dropdownField('Marca', 'marca');
 		$edit->marca->rule = 'required';
@@ -3111,6 +3116,7 @@ class Sinv extends Controller {
 		$edit->dolar->size         = 10;
 		$edit->dolar->maxlength    = 13;
 		$edit->dolar->autocomplete = false;
+		$edit->dolar->insertValue = 0;
 
 		$edit->ultimo = new inputField('&Uacute;ltimo', 'ultimo');
 		$edit->ultimo->css_class    = 'inputnum';
@@ -3232,12 +3238,14 @@ class Sinv extends Controller {
 		$edit->exmin->maxlength=12;
 		$edit->exmin->css_class='inputonlynum';
 		$edit->exmin->rule='numeric|callback_positivo|trim';
+		$edit->exmin->insertValue = 0;
 
 		$edit->exmax = new inputField('M&aacute;ximo', 'exmax');
 		$edit->exmax->size=10;
 		$edit->exmax->maxlength=12;
 		$edit->exmax->css_class='inputonlynum';
 		$edit->exmax->rule='numeric|callback_positivo|trim';
+		$edit->exmax->insertValue = 0;
 
 		$edit->exord = new inputField('Orden Proveedor','exord');
 		$edit->exord->readonly = true;
