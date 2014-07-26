@@ -3681,8 +3681,11 @@ class Sinv extends Controller {
 	}
 
 	function _pre_insert($do){
-		$codigo=$do->get('codigo');
+		$codigo = $do->get('codigo');
 		$do->set('existen',0);
+		if(empty($do->get('peso')))  $do->set('peso',0);
+		if(empty($do->get('exord'))) $do->set('exord',0);
+		
 		if(empty($codigo)){
 			$size='6';
 			$mSQL="SELECT LPAD(a.hexa,${size},0) AS val FROM serie AS a LEFT JOIN sinv AS b ON b.codigo=LPAD(a.hexa,${size},0) WHERE valor<16777215 AND b.codigo IS NULL LIMIT 1";
