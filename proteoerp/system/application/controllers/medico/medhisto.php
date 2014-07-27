@@ -558,12 +558,12 @@ class Medhisto extends Controller {
 		$edit->estado->rule='';
 		$edit->estado->size =52;
 		$edit->estado->maxlength =50;
-
+/*
 		$edit->ciudad = new inputField('Ciudad','ciudad');
 		$edit->ciudad->rule='';
 		$edit->ciudad->size =52;
 		$edit->ciudad->maxlength =50;
-
+*/
 		$edit->ecivil = new dropdownField('Estado civil','ecivil');
 	   	$edit->ecivil->option('S','Soltero/a');        //0
 	   	$edit->ecivil->option('C','Casado/a');         //1
@@ -624,6 +624,29 @@ class Medhisto extends Controller {
 	}
 
 	function _pre_insert($do){
+		$numero = $this->datasis->fprox_numero('nmedhis');
+
+/*
+		$numero =$this->datasis->fprox_numero('nssal');
+		$transac=$this->datasis->fprox_numero('ntransa');
+		$usuario=$do->get('usuario');
+		$estampa=date('Ymd');
+		$hora   =date('H:i:s');
+
+		$cana=$do->count_rel('itssal');
+		for($i=0;$i<$cana;$i++){
+			$do->set_rel('itssal','estampa',$estampa  ,$i);
+			$do->set_rel('itssal','usuario',$usuario  ,$i);
+			$do->set_rel('itssal','hora'   ,$hora     ,$i);
+			$do->set_rel('itssal','transac',$transac  ,$i);
+		}
+		$do->set('numero',$numero);
+		$do->set('estampa',$estampa);
+		$do->set('hora'   ,$hora);
+		$do->set('numero' ,$numero);
+		$do->set('transac',$transac);
+
+*/
 		$do->error_message_ar['pre_ins']='';
 		return true;
 	}
