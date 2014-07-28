@@ -1773,6 +1773,18 @@ class Datasis {
 		return $mandale;
 	}
 
+	// Calcula la Edad
+	function edad( $mDESDE ){
+		$mHASTA = date('Y-m-d');
+
+		$desde = new DateTime($mDESDE);
+		$hasta = new DateTime($mHASTA);
+		$anti  = $desde->diff($hasta);
+
+		//return array( $anti->format('%y'), $anti->format('%m'), $anti->format('%d') );
+		return  $anti->format('%y').' a&ntilde;os '.$anti->format('%m').' meses '.$anti->format('%d').' dias';
+	}
+
 
 	//******************************************************************
 	// Unidad Tributaria

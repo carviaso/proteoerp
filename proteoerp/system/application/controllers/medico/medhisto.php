@@ -71,10 +71,13 @@ class Medhisto extends Controller {
 		$bodyscript .= $this->jqdatagrid->bsdel( 'medhisto', $ngrid, $this->url );
 		$bodyscript .= $this->jqdatagrid->bsedit('medhisto', $ngrid, $this->url );
 
+		$imp = '
+		'.$this->datasis->jwinopen(site_url('formatos/ver/HISTORIA').'/\'+idactual').';';
+
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '500', '600' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '500', '600', 'fedita', $imp );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -417,7 +420,7 @@ class Medhisto extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('medhisto');
 
-		$response   = $grid->getData('medhisto', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('medhisto', array(array()), array(), false, $mWHERE, 'numero', 'desc' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -562,7 +565,7 @@ class Medhisto extends Controller {
 		$edit->nacio->size =10;
 		$edit->nacio->maxlength =8;
 
-		$edit->estado = new inputField('Estado','estado');
+		$edit->estado = new inputField('Lugar de Nacimiento','estado');
 		$edit->estado->rule='';
 		$edit->estado->size =52;
 		$edit->estado->maxlength =50;
