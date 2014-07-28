@@ -674,7 +674,7 @@ class Medhisto extends Controller {
 
 	function _pre_delete($do){
 		$do->error_message_ar['pre_del']='';
-		return false;
+		return true;
 	}
 
 	function _post_insert($do){
