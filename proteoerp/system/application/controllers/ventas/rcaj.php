@@ -12,7 +12,7 @@ class Rcaj extends validaciones {
 	function Rcaj(){
 		parent::Controller();
 		$this->load->library('rapyd');
-		$this->datasis->modulo_id('12A',1);
+		//$this->datasis->modulo_id('12A',1);
 	}
 
 	function index(){
