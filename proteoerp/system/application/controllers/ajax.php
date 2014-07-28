@@ -2825,7 +2825,7 @@ class Ajax extends Controller {
 	}
 
 	function get_parroquia( $entidad = 0, $municipio = 0 ){
-		$mSQL = "SELECT codigo, parroquia FROM cne.parroquias WHERE entidad=$entidad AND municipio=$municipio ORDER BY parroquia");
+		$mSQL = "SELECT codigo, parroquia FROM cne.parroquias WHERE entidad=$entidad AND municipio=$municipio ORDER BY parroquia";
 	
 	}
 

@@ -625,6 +625,13 @@ class Medhisto extends Controller {
 
 	function _pre_insert($do){
 		$numero = $this->datasis->fprox_numero('nmedhis');
+		// REVISA SI EXISTE EL NRO
+		$do->set('numero',$numero);
+		$mSQL = "SELECT count(*) FROM medhis WHERE numero=";
+		$cuantos = 2;
+		while ($cuantos <> 0) {
+			$cuantos = $this->datasis->dameval($mSQL.$numero);
+		}
 
 /*
 		$numero =$this->datasis->fprox_numero('nssal');
@@ -645,8 +652,8 @@ class Medhisto extends Controller {
 		$do->set('hora'   ,$hora);
 		$do->set('numero' ,$numero);
 		$do->set('transac',$transac);
-
 */
+
 		$do->error_message_ar['pre_ins']='';
 		return true;
 	}
