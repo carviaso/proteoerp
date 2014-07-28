@@ -36,7 +36,7 @@ class Medhisto extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"phistoria",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Historia"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -79,6 +79,15 @@ class Medhisto extends Controller {
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
 		$bodyscript .= '});';
+
+		$bodyscript .= '
+		jQuery("#phistoria").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('formatos/ver/HISTORIA').'/\'+id').';
+			} else { $.prompt("<h1>Por favor Seleccione una Historia</h1>");}
+		});';
 
 		$bodyscript .= '</script>';
 
@@ -717,5 +726,4 @@ class Medhisto extends Controller {
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
-
 ?>
