@@ -512,7 +512,7 @@ class Medhisto extends Controller {
 		$edit->numero->rule='';
 		$edit->numero->size =22;
 		$edit->numero->maxlength =20;
-		$edit->numero->readonly = true;
+		//$edit->numero->readonly = true;
 
 		$edit->ingreso = new dateonlyField('Ingreso','ingreso');
 		$edit->ingreso->rule='chfecha';
