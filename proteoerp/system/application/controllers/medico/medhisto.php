@@ -512,7 +512,7 @@ class Medhisto extends Controller {
 		$edit->numero->rule='';
 		$edit->numero->size =22;
 		$edit->numero->maxlength =20;
-		//$edit->numero->readonly = true;
+		$edit->numero->readonly = true;
 
 		$edit->ingreso = new dateonlyField('Ingreso','ingreso');
 		$edit->ingreso->rule='chfecha';
@@ -555,7 +555,6 @@ class Medhisto extends Controller {
 	   	$edit->sexo->option('M','Masculino');
 	   	$edit->sexo->option('3','Otro');
 		$edit->sexo->style='width:120px;';
-	   
 
 		$edit->nacio = new dateonlyField('Fecha de Nacimiento','nacio');
 		$edit->nacio->rule='chfecha';
@@ -567,12 +566,14 @@ class Medhisto extends Controller {
 		$edit->estado->rule='';
 		$edit->estado->size =52;
 		$edit->estado->maxlength =50;
+		
 /*
 		$edit->ciudad = new inputField('Ciudad','ciudad');
 		$edit->ciudad->rule='';
 		$edit->ciudad->size =52;
 		$edit->ciudad->maxlength =50;
 */
+
 		$edit->ecivil = new dropdownField('Estado civil','ecivil');
 	   	$edit->ecivil->option('S','Soltero/a');        //0
 	   	$edit->ecivil->option('C','Casado/a');         //1
@@ -580,7 +581,6 @@ class Medhisto extends Controller {
 	   	$edit->ecivil->option('V','Viudo/a');          //3
 	   	$edit->ecivil->option('R','Relacion estable'); //4
 		$edit->ecivil->style='width:120px;';
-
 	   
 		$edit->ocupacion = new inputField('Ocupacion','ocupacion');
 		$edit->ocupacion->rule='';
@@ -608,16 +608,16 @@ class Medhisto extends Controller {
 		$edit->email->maxlength =100;
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
-
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
-	   /*
+
+/*
 		$edit->edad = new inputField('Edad','edad');
 		$edit->edad->rule='';
 		$edit->edad->size =52;
 		$edit->edad->maxlength =255;
 */
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -635,12 +635,13 @@ class Medhisto extends Controller {
 	function _pre_insert($do){
 		$numero = $this->datasis->fprox_numero('nmedhis');
 		// REVISA SI EXISTE EL NRO
-		$do->set('numero',$numero);
-		$mSQL = "SELECT count(*) FROM medhis WHERE numero=";
-		$cuantos = 2;
+		$mSQL = "SELECT count(*) FROM medhisto WHERE numero=";
+		$cuantos = $this->datasis->dameval($mSQL.$numero);
 		while ($cuantos <> 0) {
+			$numero = $this->datasis->fprox_numero('nmedhis');
 			$cuantos = $this->datasis->dameval($mSQL.$numero);
 		}
+		$do->set('numero',$numero);
 
 /*
 		$numero =$this->datasis->fprox_numero('nssal');
