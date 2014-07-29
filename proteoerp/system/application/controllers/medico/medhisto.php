@@ -525,12 +525,12 @@ class Medhisto extends Controller {
 		$edit->ingreso->insertValue = date('Y-m-d');
 
 		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='';
+		$edit->nombre->rule='strtoupper';
 		$edit->nombre->size =52;
 		$edit->nombre->maxlength =50;
 
 		$edit->papellido = new inputField('Apellidos','papellido');
-		$edit->papellido->rule='';
+		$edit->papellido->rule='strtoupper';
 		$edit->papellido->size =52;
 		$edit->papellido->maxlength =50;
 
@@ -566,7 +566,7 @@ class Medhisto extends Controller {
 		$edit->nacio->maxlength =8;
 
 		$edit->estado = new inputField('Lugar de Nacimiento','estado');
-		$edit->estado->rule='';
+		$edit->estado->rule='strtoupper';
 		$edit->estado->size =52;
 		$edit->estado->maxlength =50;
 		
@@ -586,22 +586,22 @@ class Medhisto extends Controller {
 		$edit->ecivil->style='width:120px;';
 	   
 		$edit->ocupacion = new inputField('Ocupacion','ocupacion');
-		$edit->ocupacion->rule='';
+		$edit->ocupacion->rule='strtoupper';
 		$edit->ocupacion->size =52;
 		$edit->ocupacion->maxlength =50;
 
 		$edit->direccion = new textareaField('Direccion','direccion');
-		$edit->direccion->rule='';
+		$edit->direccion->rule='strtoupper';
 		$edit->direccion->cols = 50;
 		$edit->direccion->rows = 2;
 
 		$edit->telefono = new inputField('Telefono','telefono');
-		$edit->telefono->rule='';
+		$edit->telefono->rule='strtoupper';
 		$edit->telefono->size =52;
 		$edit->telefono->maxlength =50;
 
 		$edit->referido = new inputField('Referido','referido');
-		$edit->referido->rule='';
+		$edit->referido->rule='strtoupper';
 		$edit->referido->size =52;
 		$edit->referido->maxlength =50;
 
