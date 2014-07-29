@@ -730,4 +730,5 @@ class Medhisto extends Controller {
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
+
 ?>

@@ -10,50 +10,48 @@ $modbus=array(
 
 $boton=$this->datasis->modbus($modbus);
 
-$filter = new DataFilter2('Filtro del Reporte');
+$filter = new DataFilter2("Filtro del Reporte");
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
 $filter->db->select("a.tipo_doc, a.numero,
 IF(a.tipo_doc='FC',date_format(c.ffactura,'%d/%m/%Y'),date_format(a.fecha,'%d/%m/%Y')) AS fecha,
 a.nombre, date_format(a.vence,'%d/%m/%Y') vence,
-monto*(a.tipo_doc NOT IN ('FC','GI','ND')) as debe,
-monto*(a.tipo_doc IN ('FC','GI','ND')) as haber,
-monto-abonos as saldoc,
+monto*(a.tipo_doc NOT IN ('FC','GI','ND')) as debe, monto*(a.tipo_doc IN ('FC','GI','ND')) as haber,
 (monto*(a.tipo_doc NOT IN ('FC', 'GI', 'ND')))-(monto*(a.tipo_doc IN ('FC', 'GI', 'ND'))) as saldo,
+(monto-abonos)*IF(a.tipo_doc IN ('FC','ND','GI'),-1,1) saldodoc,
 CONCAT_WS(' ',TRIM(observa1),TRIM(observa2)) concepto");
-
 $filter->db->from('sprm AS a');
 $filter->db->join("sprv AS b" ,"proveed=cod_prv");
 $filter->db->join("gser AS c",'a.transac=c.transac AND a.tipo_doc=c.tipo_doc','LEFT' );
 $filter->db->orderby("cod_prv,fecha");
 
-$filter->cod_prv = new inputField('Proveedor', 'cod_prv');
-$filter->cod_prv->clause  ='where';
-$filter->cod_prv->operator='=';
+$filter->cod_prv = new inputField("Proveedor", "cod_prv");
+$filter->cod_prv->clause  = "where";
+$filter->cod_prv->operator="=";
 $filter->cod_prv->append($boton);
 $filter->cod_prv->rule = "required";
 
-$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
-$filter->fechad->clause  = 'where';
-$filter->fechad->db_name = 'a.fecha';
-$filter->fechad->operator='>=';
-$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30,   date('Y')));
+$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
+$filter->fechad->clause  = "where";
+$filter->fechad->db_name = "a.fecha";
+$filter->fechad->operator=">=";
+$filter->fechad->insertValue = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")-30,   date("Y")));
 
-$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
-$filter->fechah->clause  = 'where';
-$filter->fechah->db_name = 'a.fecha';
-$filter->fechah->operator='<=';
-$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
+$filter->fechah->clause = "where";
+$filter->fechah->db_name = "a.fecha";
+$filter->fechah->operator="<=";
+$filter->fechah->insertValue = date("Y-m-d");
 
-$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons('search');
+$filter->buttons("search");
 $filter->build();
 
-if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
+if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 	$mSQL=$this->rapyd->db->_compile_select();
 
 	$codpro=$_POST['cod_prv'];
@@ -62,7 +60,9 @@ if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
 	$mSQL1="SELECT 'Saldo ' tipo_doc,'Anterior' numero, CAST('".$filter->fechad->newValue."' AS DATE) fecha,'' nombre,NULL vence,
 	SUM(monto*(tipo_doc NOT IN ('FC','ND','GI'))) debe,
 	SUM(monto*(tipo_doc IN ('FC','ND','GI'))) haber,
-	(SUM(monto*(tipo_doc NOT IN ('FC','ND','GI')))-SUM(monto*(tipo_doc IN ('FC','ND','GI')))) saldo, SUM(monto-abonos) saldoc, '' concepto
+	(SUM(monto*(tipo_doc NOT IN ('FC','ND','GI')))-SUM(monto*(tipo_doc IN ('FC','ND','GI')))) saldo,
+	SUM((monto-abonos)*IF(tipo_doc IN ('FC','ND','GI'),-1,1)) saldodoc,
+	'' concepto
 	FROM sprm WHERE cod_prv='$codpro' AND fecha<'".$filter->fechad->newValue."'";
 	$mSQL='('.$mSQL1.') UNION ('.$mSQL.')';
 	//echo $mSQL;
@@ -82,26 +82,26 @@ if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
 
 	$pdf->AddPage();
 	$pdf->setTableTitu(10,'Times');
-	$pdf->AddCol('tipo_doc',10,'Tipo'      ,'L',8);
-	$pdf->AddCol('numero'  ,23,'Número'    ,'L',8);
-	$pdf->AddCol('fecha'   ,20,'Emision'   ,'L',8);
-	$pdf->AddCol('vence'   ,23,'Vence'     ,'C',8);
-	$pdf->AddCol('debe'    ,25,'Debe'      ,'R',8);
-	$pdf->AddCol('haber'   ,25,'Haber'     ,'R',8);
-	$pdf->AddCol('saldo'   ,25,'Saldo'     ,'R',8);
-	$pdf->AddCol('saldoc'  ,25,'Saldo Doc.','R',8);
-	$pdf->AddCol('concepto',110,'Concepto' ,'L',8);
+	$pdf->AddCol('tipo_doc',10,'Tipo',   'L',8);
+	$pdf->AddCol('numero'  ,20,'Número', 'L',8);
+	$pdf->AddCol('fecha'   ,20,'Emision','L',8);
+	$pdf->AddCol('vence'   ,21,'Vence',  'C',8);
+	$pdf->AddCol('debe'    ,23,'Debe',   'R',8);
+	$pdf->AddCol('haber'   ,23,'Haber',  'R',8);
+	$pdf->AddCol('saldodoc',23,'Saldo Doc.',  'R',8);
+	$pdf->AddCol('saldo'   ,23,'Saldo',  'R',8);
+	$pdf->AddCol('concepto',100,'Concepto','L',8);
 
 	//$pdf->setGrupoLabel('Proveedor <#nombre#> ');
 	//$pdf->setGrupo('cod_prv');
-	$pdf->setTotalizar('debe','haber','saldo');
+	$pdf->setTotalizar('debe','haber','saldo','saldodoc');
 	$pdf->Table();
 	$pdf->Output();
 
 }else{
-	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
-	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Estado de Cuenta</h2>';
-	$data['head'] = $this->rapyd->get_head();
+	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
+	$data["filtro"] = $filter->output;
+	$data["titulo"] = '<h2 class="mainheader">Estado de Cuenta';
+	$data["head"] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

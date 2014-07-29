@@ -18,6 +18,7 @@ class Rcaj extends validaciones {
 	function index(){
 		$this->instalar();
 		$this->target = $this->datasis->dameval('SELECT target FROM intramenu WHERE ejecutar="ventas/rcaj" OR ejecutar="ventas/rcaj/"');
+		$this->datasis->modulo_id('12A',1);
 		redirect('ventas/rcaj/filteredgrid');
 	}
 
@@ -124,6 +125,7 @@ class Rcaj extends validaciones {
 
 
 	function precierre($caja=NULL,$cajero=NULL,$fecha=NULL){
+		$this->datasis->modulo_id('145',1);
 
 		//Para cuando venga de datasis y sin parametros
 		if(is_null($caja) || is_null($cajero) || is_null($fecha)){
