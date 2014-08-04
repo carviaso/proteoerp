@@ -2467,6 +2467,34 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
+	//  TRAE LOS DATOS DEL PARTICIPANTE EN EVENTOS
+	//
+	function traeparti(){
+		$rifci = $this->input->post('rifci');
+		$t=array(
+			'error'    => 1,
+			'msj'      => 'Cedula o rif no valido',
+			'telefono' => '',
+			'email'    => '',
+			'sector'   => ''
+		);
+		if($rifci == false) echo json_encode($t);
+		$cedula = $this->db->escape($rifci);
+		$mSQL = "SELECT count(*) FROM proparti WHERE cedula=".$cedula;
+		if ( $this->datasis->dameval($mSQL) > 0 ) {
+			$mSQL = "SELECT telefono, email, sector FROM proparti WHERE cedula=".$cedula;
+			$row = $this->datasis->damerow($mSQL);
+			$t['error']    = 0;
+			$t['msj']      = 'Registro encontrado';
+			$t['telefono'] = $row['telefono'];
+			$t['email']    = $row['email'];
+			$t['sector']   = $row['sector'];
+		}
+		echo json_encode($t);
+	}
+
+
+	//******************************************************************
 	//  CONSULTA LA CEDULA O RIF EN INTERNET
 	//
 	function traerif(){
@@ -2819,14 +2847,66 @@ class Ajax extends Controller {
 		}
 	}
 
-
-	function get_municipio( $entidad = 0 ){
-		$mSQL = "SELECT codigo, municipio FROM cne.municipios WHERE entidad=$entidad ORDER BY municipio";
+	function get_municipio(){
+		$entidad = $this->input->post('estado');
+		echo "<option value=''>Seleccione un Municipio ($entidad)</option>";
+		if(!empty($entidad)){
+			$mSQL = $this->db->query("SELECT codigo, municipio FROM municipios WHERE entidad=$entidad ORDER BY municipio");
+			if($mSQL){
+				foreach($mSQL->result() AS $fila ){
+					echo "<option value='".$fila->codigo."'>".$fila->municipio."</option>";
+				}
+			}
+		}
 	}
 
-	function get_parroquia( $entidad = 0, $municipio = 0 ){
-		$mSQL = "SELECT codigo, parroquia FROM cne.parroquias WHERE entidad=$entidad AND municipio=$municipio ORDER BY parroquia";
-	
+	function get_parroquia(){
+		$entidad   = $this->input->post('entidad');
+		$municipio = $this->input->post('municipio');
+		if(!empty($municipio) && !empty($entidad)){
+			$mSQL=$this->db->query("SELECT codigo, parroquia FROM parroquias WHERE entidad=$entidad AND municipio=$municipio ORDER BY parroquia");
+			if($mSQL){
+				echo "<option value=''>Seleccione una Parroquia</option>";
+				foreach($mSQL->result() AS $fila ){
+					echo "<option value='".$fila->codigo."'>".$fila->parroquia."</option>";
+				}
+			}
+		}else{
+			echo "<option value=''>Seleccione un Municipio primero</option>";
+		}
 	}
+
+	function get_evento(){
+		$campana = $this->input->post('campana');
+		if(!empty($campana)){
+			$mSQL=$this->db->query("SELECT id, nombre FROM proevent WHERE campana=$campana ORDER BY nombre");
+			if($mSQL){
+				echo "<option value=''>Seleccione un Evento</option>";
+				foreach($mSQL->result() AS $fila ){
+					echo "<option value='".$fila->id."'>".$fila->nombre."</option>";
+				}
+			}
+		}else{
+			echo "<option value=''>Seleccione una Campa&acute;a primero</option>";
+		}
+	}
+
+
+	function get_asislista(){
+		$campana = $this->input->post('campana');
+		$evento  = $this->input->post('evento');
+		if( $campana>0 && $evento > 0 ){
+			$mSQL=$this->db->query("SELECT * FROM proasiste WHERE campana=$campana AND evento=$evento ORDER BY id DESC");
+			if($mSQL){
+				echo "<table>";
+				foreach($mSQL->result() AS $fila ){
+					echo "<tr><td>".$fila->cedula."</td><td>".$fila->nombre."</td></tr>";
+				}
+			}
+		}else{
+			echo "</table>";
+		}
+	}
+
 
 }
