@@ -594,7 +594,7 @@ class Proasiste extends Controller {
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
 			  PRIMARY KEY (`id`),
 			  KEY `papellido` (`nombre`)
-			) ENGINE=MyISAM DEFAULT ROW_FORMAT=DYNAMIC";
+			) ENGINE=MyISAM ROW_FORMAT=DYNAMIC";
 			$this->db->query($mSQL);
 		}
 

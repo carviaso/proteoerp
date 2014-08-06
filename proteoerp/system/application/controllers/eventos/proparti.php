@@ -554,7 +554,7 @@ class Proparti extends Controller {
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
 			  PRIMARY KEY (`id`),
 			  KEY `papellido` (`nombre`)
-			) ENGINE=MyISAM DEFAULT CHARSET=utf8";
+			) ENGINE=MyISAM";
 			$this->db->query($mSQL);
 		}
 		//$campos=$this->db->list_fields('proparti');

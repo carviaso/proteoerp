@@ -605,7 +605,7 @@ class Proevent extends Controller {
 			  estampa    timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			  PRIMARY KEY (`id`),
 			  UNIQUE KEY `nombre` (`nombre`)
-			) ENGINE=MyISAM DEFAULT ROW_FORMAT=DYNAMIC COMMENT='Promocion y eventos'";
+			) ENGINE=MyISAM ROW_FORMAT=DYNAMIC COMMENT='Promocion y eventos'";
 			$this->db->query($mSQL);
 		}
 		if ( !$this->db->table_exists('view_proevent') ) {
