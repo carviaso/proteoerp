@@ -610,8 +610,7 @@ class Proevent extends Controller {
 		}
 		if ( !$this->db->table_exists('view_proevent') ) {
 			$mSQL = "
-			CREATE ALGORITHM=UNDEFINED 
-			DEFINER=`datasis`@`%` SQL SECURITY INVOKER 
+			CREATE ALGORITHM=UNDEFINED SQL SECURITY INVOKER 
 			VIEW `view_proevent` AS 
 			select a.id, a.campana, a.nombre, a.comenta, a.cedula, a.persona, a.telefono, a.fecha, a.horai, a.horaf, a.activador, a.activo, a.entidad, a.municipio, a.parroquia, a.sector, a.usuario, a.estampa, b.campana AS ncampana 
 			from (`proevent` `a` join `procamp` `b` on((`a`.`campana` = `b`.`id`)))
