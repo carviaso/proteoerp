@@ -21,6 +21,7 @@ class Proasiste extends Controller {
 	function index(){
 		$this->datasis->creaintramenu(array('modulo'=>'163','titulo'=>'Asistencia','mensaje'=>'Asistencia','panel'=>'PROMOCIONES','ejecutar'=>'eventos/proasiste','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -93,33 +94,25 @@ class Proasiste extends Controller {
 
 		$grid  = new $this->jqdatagrid;
 
-		$grid->addField('campana');
+		$grid->addField('ncampana');
 		$grid->label('Campana');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'align'         => "'right'",
+			'align'         => "'left'",
 			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+			'width'         => 180,
 		));
 
 
-		$grid->addField('evento');
+		$grid->addField('nevento');
 		$grid->label('Evento');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'align'         => "'right'",
+			'align'         => "'left'",
 			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+			'width'         => 120,
 		));
 
 
@@ -128,7 +121,7 @@ class Proasiste extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 70,
+			'width'         => 60,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:15, maxlength: 15 }',
@@ -152,7 +145,7 @@ class Proasiste extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 100,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 30 }',
@@ -164,7 +157,7 @@ class Proasiste extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 120,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:100, maxlength: 100 }',
@@ -221,12 +214,11 @@ class Proasiste extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 120,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:100, maxlength: 100 }',
 		));
-
 
 		$grid->addField('fecha');
 		$grid->label('Fecha');
@@ -240,7 +232,6 @@ class Proasiste extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
@@ -250,7 +241,6 @@ class Proasiste extends Controller {
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
-
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -292,9 +282,9 @@ class Proasiste extends Controller {
 	function getdata(){
 		$grid       = $this->jqdatagrid;
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
-		$mWHERE = $grid->geneTopWhere('proasiste');
+		$mWHERE = $grid->geneTopWhere('view_proasiste');
 
-		$response   = $grid->getData('proasiste', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('view_proasiste', array(array()), array(), false, $mWHERE );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -604,7 +594,19 @@ class Proasiste extends Controller {
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
 			  PRIMARY KEY (`id`),
 			  KEY `papellido` (`nombre`)
-			) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC";
+			) ENGINE=MyISAM DEFAULT ROW_FORMAT=DYNAMIC";
+			$this->db->query($mSQL);
+		}
+
+		if (!$this->db->table_exists('view_proasiste')) {
+			$mSQL="
+				CREATE ALGORITHM=UNDEFINED 
+				SQL SECURITY INVOKER 
+				VIEW view_proasiste AS 
+				SELECT a.campana, a.evento, a.cedula, a.nombre, a.telefono, a.email, a.entidad, a.municipio, a.parroquia, a.sector, a.fecha, a.id, b.campana AS ncampana, c.nombre AS nevento 
+				FROM proasiste a 
+				JOIN procamp   b ON a.campana = b.id 
+				JOIN proevent  c ON a.evento  = c.id";
 			$this->db->query($mSQL);
 		}
 	}

@@ -289,7 +289,7 @@ class Proevent extends Controller {
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
-		$mWHERE = $grid->geneTopWhere('proevent');
+		$mWHERE = $grid->geneTopWhere('view_proevent');
 
 		$response   = $grid->getData('view_proevent', array(array()), array(), false, $mWHERE );
 		$rs = $grid->jsonresult( $response);
@@ -583,6 +583,31 @@ class Proevent extends Controller {
 	}
 
 	function instalar(){
+		if (!$this->db->table_exists('proevent')) {
+			$mSQL="CREATE TABLE `proevent` (
+			  id         int(11) unsigned NOT NULL AUTO_INCREMENT,
+			  campana    int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Campanna',
+			  nombre     varchar(100) NOT NULL COMMENT 'Nombre del Evento',
+			  comenta    text NOT NULL COMMENT 'Comentario',
+			  cedula     varchar(15) NOT NULL COMMENT 'Cedula del Responsable',
+			  persona    varchar(100) NOT NULL COMMENT 'Persona Responsable',
+			  telefono   varchar(30) NOT NULL,
+			  fecha date NOT NULL COMMENT 'Fecha',
+			  horai time NOT NULL COMMENT 'Hora de Inicio',
+			  horaf time NOT NULL COMMENT 'Hora de Finalizacion',
+			  activador text NOT NULL,
+			  activo     char(1) NOT NULL DEFAULT 'N',
+			  entidad    int(11) unsigned NOT NULL DEFAULT '0',
+			  municipio  int(11) unsigned NOT NULL DEFAULT '0',
+			  parroquia  int(11) unsigned NOT NULL DEFAULT '0',
+			  sector     varchar(100) NOT NULL,
+			  usuario    varchar(12) NOT NULL,
+			  estampa    timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			  PRIMARY KEY (`id`),
+			  UNIQUE KEY `nombre` (`nombre`)
+			) ENGINE=MyISAM DEFAULT ROW_FORMAT=DYNAMIC COMMENT='Promocion y eventos'";
+			$this->db->query($mSQL);
+		}
 		if ( !$this->db->table_exists('view_proevent') ) {
 			$mSQL = "
 			CREATE ALGORITHM=UNDEFINED 
@@ -593,30 +618,6 @@ class Proevent extends Controller {
 			";
 			$this->db->query($mSQL);
 		}
-
-
-		if (!$this->db->table_exists('proevent')) {
-			$mSQL="CREATE TABLE `proevent` (
-			  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-			  `campana` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Campanna',
-			  `nombre` varchar(100) NOT NULL COMMENT 'Nombre del Evento',
-			  `comenta` text NOT NULL COMMENT 'Comentario',
-			  `cedula` varchar(15) NOT NULL COMMENT 'Cedula del Responsable',
-			  `persona` varchar(15) NOT NULL COMMENT 'Persona Responsable',
-			  `fecha` date NOT NULL COMMENT 'Fecha',
-			  `horai` time NOT NULL COMMENT 'Hora de Inicio',
-			  `horaf` time NOT NULL COMMENT 'Hora de Finalizacion',
-			  `activador` text NOT NULL,
-			  `activo` char(1) NOT NULL DEFAULT 'N',
-			  `usuario` varchar(12) NOT NULL,
-			  `estampa` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			  PRIMARY KEY (`id`),
-			  UNIQUE KEY `nombre` (`nombre`)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Promocion y eventos'";
-			$this->db->query($mSQL);
-		}
-		//$campos=$this->db->list_fields('proevent');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
 
