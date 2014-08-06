@@ -176,6 +176,7 @@ class Sfac extends Controller {
 	//
 	function bodyscript($grid0, $grid1){
 		$bodyscript = '<script type="text/javascript">';
+		$ngrid = '#newapi'.$grid0;
 
 		$bodyscript .= '
 		function tconsulta(transac){
@@ -186,9 +187,13 @@ class Sfac extends Controller {
 			}
 		};';
 
+
+
+		$bodyscript .= $this->jqdatagrid->bsshow('sfac', $ngrid, $this->url );
+
 		$bodyscript .= '
 		function sfacadd(){
-			$.post("'.site_url($this->url.'dataedit/N/create').'",
+			$.post(xurl+"/N/create",
 			function(data){
 				$("#fimpser").html("");
 				$("#fedita").dialog({ title:"Agregar Factura Fecha '.date('d/m/Y').'" });
@@ -197,28 +202,14 @@ class Sfac extends Controller {
 			})
 		};';
 
-		$bodyscript .= '
-		function sfacshow() {
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				$.post("'.site_url($this->url.'dataedit').'/"+ret.manual+"/show/"+id,
-					function(data){
-						$("#fshow").html(data);
-						$("#fshow").dialog( "open" );
-					});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un registro</h1>");
-			}
-		};';
 
 		$bodyscript .= '
 		function sfacedit() {
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret    = $("'.$ngrid.'").getRowData(id);
 				if(ret.referen=="P"){
-					$.post("'.site_url($this->url.'dataedit').'/"+ret.manual+"/modify/"+id, function(data){
+					$.post(xurl+"/"+ret.manual+"/modify/"+id, function(data){
 						$("#fborra").html("");
 						$("#fimpser").html("");
 						$("#fedita").html(data);
@@ -235,19 +226,18 @@ class Sfac extends Controller {
 
 		$bodyscript .= '
 		function sfacdel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				if(confirm(" Seguro desea anular la Factura o Devolucion?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					var ret    = $("'.$ngrid.'").getRowData(id);
 					mId = id;
-					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+					$.post(xurl+"/do_delete/"+id, function(data){
 						$("#fedita").html("");
 						$("#fimpser").html("");
-
 						try{
 							var json = JSON.parse(data);
 							if(json.status == "A"){
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+								jQuery("'.$ngrid.'").trigger("reloadGrid");
 								return true;
 							}else{
 								apprise(json.mensaje);
@@ -256,8 +246,7 @@ class Sfac extends Controller {
 							$("#fborra").html(data);
 							$("#fborra").dialog("open");
 						}
-
-						jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+						jQuery("'.$ngrid.'").trigger("reloadGrid");
 					});
 				}
 			}else{
@@ -268,10 +257,10 @@ class Sfac extends Controller {
 
 		$bodyscript .= '
 		jQuery("#nccob").click( function(){
-			var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id  = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("'.$ngrid.'").getRowData(id);
 
 				$.post("'.site_url('finanzas/smov/ncfac').'/"+ret.numero+"/create",
 					function(data){
@@ -290,14 +279,14 @@ class Sfac extends Controller {
 
 		$bodyscript .= '
 		$("#bdevolu").click( function() {
-			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("'. $ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("'.$ngrid.'").getRowData(id);
 				if(ret.tipo_doc!="F"){
 					alert("Debe seleccionar una factura.");
 					return false;
 				}
-				$.post("'.site_url($this->url.'dataedit/N/create').'",
+				$.post(xurl+"/N/create",
 				function(data){
 					$("#fimpser").html("");
 					$("#fedita").dialog({ title:"Agregar Devolucion Fecha '.date('d/m/Y').'" });
@@ -310,11 +299,9 @@ class Sfac extends Controller {
 			}
 		});';
 
-
-
 		$bodyscript .= '
 			$("#fmanual").click( function() {
-				$.post("'.site_url($this->url.'dataedit/S/create').'",
+				$.post(xurl+"/S/create",
 				function(data){
 					$("#fimpser").html("");
 					$("#fedita").html(data);
@@ -325,9 +312,9 @@ class Sfac extends Controller {
 
 		$bodyscript .= '
 			$("#boton1").click( function(){
-				var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+				var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
-					var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+					var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
 					window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 				} else { $.prompt("<h1>Por favor Seleccione una Factura</h1>");}
 			});';
@@ -474,31 +461,45 @@ class Sfac extends Controller {
 											$("#fedita").dialog("close");
 											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-											//setTimeout(\'window.location="'.base_url().'formatos/'.$sfacforma.'/FACTURA/\'+json.pk.id+\'"\');
-											//$.prompt("<h1>Registro Guardado</h1>Nro de Control:<input id=\'nfiscal\' name=\'nfiscal\'><br><h2>Cambio: "+json.vuelto+"</h2>",{
-											//	buttons: { Guardar: true, Cancelar: false },
-											//	submit: function(e,v,m,f){
-											//		if(v){
-											//			if(f.nfiscal == null || nfiscal == "" ){
-											//				alert("Debe colocal un Nro de Control");
-											//			}else{
-											//				yurl = encodeURIComponent(f.nfiscal);
-											//				$.ajax({
-											//					url: \''.site_url('ventas/sfac/guardafiscal').'\',
-											//					global: false, type: "POST",
-											//					data: ({ nfiscal : encodeURIComponent(f.nfiscal), factura : json.pk.id }),
-											//					dataType: "text", async: false,
-											//					success: function(sino) { alert(sino);},
-											//					error: function(h,t,e) { alert("Error.. ",e) }
-											//				});
-											//			}
-											//		}
-											//	}
-											//});
-
 											return true;
 										}else{
 											//$( "#fedita" ).dialog( "close" );
+											$.post("'.site_url($this->url.'dataedit/S/create').'",
+											function(data){
+												$("#fedita").html(data);
+											})
+											//alert("Factura guardada");
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											return true;
+										}
+									} else {
+										apprise(json.mensaje);
+									}
+								} catch(e) {
+									$("#fedita").html(r);
+								}
+							}
+						})
+					},
+					"Guardar y Seguir": function() {
+						var murl = $("#df1").attr("action");
+						limpiavacio();
+						$.ajax({
+							type: "POST",
+							dataType: "html",
+							async: false,
+							url: murl,
+							data: $("#df1").serialize(),
+							success: function(r,s,x){
+								try {
+									var json = JSON.parse(r);
+									if(json.status == "A" ) {
+										if(json.manual == "N"){
+											$.post(xurl+"/create/"+idactual,function(data){$("#fedita").html(data);});
+											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											jQuery("'.$ngrid.'").trigger("reloadGrid");
+											return true;
+										}else{
 											$.post("'.site_url($this->url.'dataedit/S/create').'",
 											function(data){
 												$("#fedita").html(data);
@@ -526,6 +527,31 @@ class Sfac extends Controller {
 					$("#fedita").html("");
 				}
 			});';
+
+/*
+											//setTimeout(\'window.location="'.base_url().'formatos/'.$sfacforma.'/FACTURA/\'+json.pk.id+\'"\');
+											//$.prompt("<h1>Registro Guardado</h1>Nro de Control:<input id=\'nfiscal\' name=\'nfiscal\'><br><h2>Cambio: "+json.vuelto+"</h2>",{
+											//	buttons: { Guardar: true, Cancelar: false },
+											//	submit: function(e,v,m,f){
+											//		if(v){
+											//			if(f.nfiscal == null || nfiscal == "" ){
+											//				alert("Debe colocal un Nro de Control");
+											//			}else{
+											//				yurl = encodeURIComponent(f.nfiscal);
+											//				$.ajax({
+											//					url: \''.site_url('ventas/sfac/guardafiscal').'\',
+											//					global: false, type: "POST",
+											//					data: ({ nfiscal : encodeURIComponent(f.nfiscal), factura : json.pk.id }),
+											//					dataType: "text", async: false,
+											//					success: function(sino) { alert(sino);},
+											//					error: function(h,t,e) { alert("Error.. ",e) }
+											//				});
+											//			}
+											//		}
+											//	}
+											//});
+
+*/
 
 		$bodyscript .= '
 			$("#fcobroser" ).dialog({

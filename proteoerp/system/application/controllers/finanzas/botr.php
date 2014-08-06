@@ -260,5 +260,134 @@ jQuery("#a1").click( function(){
 		};
 	}
 
+	//******************************************************************
+	// Edicion 
+
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+		});
+		';
+
+		$qformato=$this->qformato=$this->datasis->formato_cpla();
+
+		$mCPLA=array(
+			'tabla'   =>'cpla',
+			'columnas'=>array(
+				'codigo' =>'C&oacute;digo',
+				'descrip'=>'Descripci&oacute;n'),
+			'filtro'  =>array('codigo'=>'C&oacute;digo','descrip'=>'Descripci&oacute;n'),
+			'retornar'=>array('codigo'=>'cuenta'),
+			'titulo'  =>'Buscar Cuenta',
+			'where'=>"codigo LIKE \"$qformato\"",
+			);
+
+		$bcpla = $this->datasis->modbus($mCPLA);
+
+
+		$edit = new DataEdit('', 'botr');
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		$edit->back_url = site_url($this->url.'filteredgrid');
+
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process('insert', '_pre_insert' );
+		$edit->pre_process('update', '_pre_update' );
+		$edit->pre_process('delete', '_pre_delete' );
+
+		$edit->codigo = new inputField('Codigo','codigo');
+		$edit->codigo->rule='';
+		$edit->codigo->size =7;
+		$edit->codigo->maxlength =5;
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->rule='';
+		$edit->nombre->size =32;
+		$edit->nombre->maxlength =30;
+
+		$edit->tipo = new dropdownField('Tipo','tipo');
+		$edit->tipo->options(array("C"=>"Cliente", "P"=>"Proveedor", "O"=>"Otro" ));
+
+		$edit->clase = new dropdownField('Clase','clase');
+		$edit->clase->options(array("E"=>"Entrada", "S"=>"Salida", "N"=>"Ninguno" ));
+
+		$edit->cuenta = new inputField('Cuenta','cuenta');
+		$edit->cuenta->rule='trim|existecpla';
+		$edit->cuenta->size =15;
+		$edit->cuenta->maxlength =15;
+		$edit->cuenta->append($bcpla);
+
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do){
+		$do->error_message_ar['pre_del']='';
+		return false;
+	}
+
+	function _post_insert($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits $primary ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
+	function _post_delete($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Elimino $this->tits $primary ");
+	}
+
+	function instalar(){
+		if (!$this->db->table_exists('botr')) {
+			$mSQL="CREATE TABLE `botr` (
+			  `codigo` varchar(5) NOT NULL DEFAULT '',
+			  `nombre` varchar(30) DEFAULT NULL,
+			  `cuenta` varchar(15) DEFAULT NULL,
+			  `precio` decimal(17,2) DEFAULT NULL,
+			  `iva` decimal(6,2) DEFAULT NULL,
+			  `tipo` char(1) DEFAULT NULL,
+			  `intocable` char(1) NOT NULL DEFAULT 'N',
+			  `clase` char(1) DEFAULT NULL,
+			  `usacant` char(1) DEFAULT NULL,
+			  `id` int(11) NOT NULL AUTO_INCREMENT,
+			  PRIMARY KEY (`id`),
+			  UNIQUE KEY `codigo` (`codigo`)
+			) ENGINE=MyISAM AUTO_INCREMENT=51 DEFAULT CHARSET=latin1";
+			$this->db->query($mSQL);
+		}
+	}
 }
 ?>

@@ -1877,7 +1877,7 @@ class Jqdatagrid
 	//******************************************************************
 	//  AYUDA PARA BODYSCRIPT
 	//
-	function bswrapper($ngrid){
+	function bswrapper($ngrid ){
 		$bodyscript = '
 		$(function() {
 			$("#dialog:ui-dialog").dialog( "destroy" );
@@ -1886,6 +1886,7 @@ class Jqdatagrid
 			var s;
 			s = grid.getGridParam(\'selarrrow\');
 		';
+		
 		return $bodyscript;
 	}
 
@@ -1926,7 +1927,44 @@ class Jqdatagrid
 							}
 						}
 					})
-				},'.$botones.'
+				},
+				"Guardar y Seguir": function(){
+					var murl = $("#df1").attr("action");
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									$.prompt("<h1>Registro Guardado con exito</h1>",{
+										submit: function(e,v,m,f){
+											setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
+										}}
+									);
+									grid.trigger("reloadGrid");
+									idactual = json.pk.id;
+									'.$post.'
+									if ( xestatus == "add" ) {
+										$.post(xurl+"/create/"+idactual,
+										function(data){
+											$("#'.$dialogo.'").html(data);
+										});
+									} else {
+										$( "#'.$dialogo.'" ).dialog( "close" );
+									};
+									return true;
+								} else {
+									$.prompt(json.mensaje);
+								}
+							} catch(e) {
+								$("#'.$dialogo.'").html(r);
+							}
+						}
+					})				
+				},
+				'.$botones.'
 				"Cancelar": function() {
 					$("#'.$dialogo.'").html("");
 					$( this ).dialog( "close" );
@@ -1936,7 +1974,6 @@ class Jqdatagrid
 				$("#'.$dialogo.'").html("");
 			}
 		});';
-
 		return $bodyscript;
 	}
 
@@ -1992,7 +2029,8 @@ class Jqdatagrid
 	function bsadd( $modulo, $url ){
 		$bodyscript = '
 		function '.$modulo.'add(){
-			$.post("'.site_url($url.'dataedit/create').'",
+			xestatus = "add";
+			$.post(xurl+"/create",
 			function(data){
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
@@ -2007,9 +2045,10 @@ class Jqdatagrid
 	function bsedit( $modulo, $ngrid, $url ){
 		$bodyscript = '
 		function '.$modulo.'edit(){
+			xestatus = "edit";
 			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				$.post("'.site_url($url.'dataedit/modify').'/"+id, function(data){
+				$.post(xurl+"/modify/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog( "open" );
 				})
@@ -2023,13 +2062,17 @@ class Jqdatagrid
 	//******************************************************************
 	// Mostrar
 	function bsshow( $modulo, $ngrid, $url ){
-		$bodyscript = '
+		$bodyscript  = "\n\t\t".'var xurl = "'.site_url($url.'dataedit').'";'."\n";
+		$bodyscript  .= "\t\tvar xestatus = '';\n";
+
+		$bodyscript .= '
 		function '.$modulo.'show(){
+			xestatus = "show";
 			var id  = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("'.$ngrid.'").getRowData(id);
 				mId = id;
-				$.post("'.site_url($url.'dataedit/show').'/"+id, function(data){
+				$.post(xurl+"/show/"+id, function(data){
 					$("#fshow").html(data);
 					$("#fshow").dialog( "open" );
 				});
@@ -2046,12 +2089,13 @@ class Jqdatagrid
 	function bsdel( $modulo, $ngrid, $url ){
 		$bodyscript = '
 		function '.$modulo.'del() {
+			xestatus = "del";
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				if(confirm(" Seguro desea eliminar el registro?")){
 					var ret    = $("'.$ngrid.'").getRowData(id);
 					mId = id;
-					$.post("'.site_url($url.'dataedit/do_delete').'/"+id, function(data){
+					$.post(xurl+"/do_delete/"+id, function(data){
 						try{
 							var json = JSON.parse(data);
 							if (json.status == "A"){
@@ -2072,8 +2116,6 @@ class Jqdatagrid
 		};';
 		return $bodyscript;
 	}
-
-
 
 }
 /* End of file datagrid.php */

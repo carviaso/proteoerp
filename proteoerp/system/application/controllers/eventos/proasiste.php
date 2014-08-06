@@ -74,12 +74,11 @@ class Proasiste extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '500', '600' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '490', '520' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
 		$bodyscript .= '});';
-
 		$bodyscript .= '</script>';
 
 		return $bodyscript;
@@ -367,6 +366,7 @@ class Proasiste extends Controller {
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 			$(".inputnum").numeric(".");
+			$.post(\''.site_url('ajax/get_asislista').'\',{ campana:$("#campana").val(), evento:$("#evento").val() },function(data){$("#contenedor").html(data);})
 		});
 		';
 
@@ -449,7 +449,15 @@ class Proasiste extends Controller {
 		}
 		';
 
+		$idanterior = intval($this->uri->segment(5));
+		$campana = '';
+		$evento  = '';
 
+		if ( $idanterior ){
+			$ante = $this->datasis->damerow("SELECT campana, evento FROM proasiste WHERE id=$idanterior");
+			$campana = $ante['campana'];
+			$evento  = $ante['evento'];
+		}
 
 		$edit = new DataEdit('', 'proasiste');
 
@@ -457,7 +465,7 @@ class Proasiste extends Controller {
 		$edit->script($script,'create');
 		$edit->on_save_redirect=false;
 
-		$edit->back_url = site_url($this->url.'filteredgrid');
+		//$edit->back_url = site_url($this->url.'filteredgrid');
 
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
@@ -470,16 +478,19 @@ class Proasiste extends Controller {
 		$edit->campana->option('','Seleccione una Campa&acute;a');
 		$edit->campana->options('SELECT id, campana FROM procamp ORDER BY campana');
 		$edit->campana->style='width:250px;';
+		$edit->campana->insertValue = $campana;
 
 		$edit->evento = new dropdownField('Evento','evento');
-		$edit->evento->style='width:220px;';
+		$edit->evento->style='width:250px;';
 		$campa = $edit->getval('campana');
+		if ( $campana ) $campa = $campana;
 		if( $campa !== FALSE ){
 			$dbcampa = $this->db->escape($campa);
 			$edit->evento->options("SELECT id, nombre FROM proevent WHERE campana=$dbcampa ORDER BY nombre");
 		}else{
 			$edit->evento->option('','Seleccione una Campa&acute;a primero');
 		}
+		$edit->evento->insertValue = $evento;
 
 		$edit->cedula = new inputField('Cedula','cedula');
 		$edit->cedula->rule='';
@@ -506,7 +517,8 @@ class Proasiste extends Controller {
 		$edit->sector->size = 52;
 		$edit->sector->maxlength =100;
 
-		$edit->contenedor = new containerField('contenedor','<div id="contenedor">Hola</div>');  
+		$div = "<br><div style='overflow:auto;border: 1px solid #9AC8DA;background: #EAEAEA;height:200px' id='contenedor'></div>";
+		$edit->contenedor = new containerField('contenedor',$div);  
 
 		$edit->build();
 

@@ -2898,9 +2898,9 @@ class Ajax extends Controller {
 		if( $campana>0 && $evento > 0 ){
 			$mSQL=$this->db->query("SELECT * FROM proasiste WHERE campana=$campana AND evento=$evento ORDER BY id DESC");
 			if($mSQL){
-				echo "<table>";
+				echo "<table width='100%'>";
 				foreach($mSQL->result() AS $fila ){
-					echo "<tr><td>".$fila->cedula."</td><td>".$fila->nombre."</td></tr>";
+					echo "<tr><td>".$fila->cedula."</td><td>".$fila->nombre."</td><td>".$fila->telefono."</td></tr>";
 				}
 			}
 		}else{

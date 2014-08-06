@@ -144,7 +144,7 @@ class Scst extends Controller {
 				$.prompt("<h1>Transaccion invalida</h1>");
 			}
 		};';
-
+/*
 		$bodyscript .= '
 		function scstshow(){
 			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -159,7 +159,10 @@ class Scst extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+*/
+		$bodyscript .= str_replace('dataedit','solo', $this->jqdatagrid->bsshow('scst', $ngrid, $this->url));
 
+/*
 		$bodyscript .= '
 		function scstdel() {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -190,9 +193,14 @@ class Scst extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		};';
+*/
+		$bodyscript .= $this->jqdatagrid->bsdel( 'scst', $ngrid, $this->url );
+
+
 
 		$bodyscript .= '
 		function scstadd(){
+			xestatus = "add";
 			$.post("'.site_url('compras/scst/solo/create').'",
 			function(data){
 				$("#factuali").html("");
@@ -204,6 +212,7 @@ class Scst extends Controller {
 
 		$bodyscript .= '
 		function scstedit() {
+			xestatus = "edit";
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
@@ -248,19 +257,7 @@ class Scst extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		/*$bodyscript .= '
-		$(function() {
-			$("#dialog:ui-dialog").dialog( "destroy" );
-			var mId = 0;
-			var montotal = 0;
-			var ffecha = $("#ffecha");
-			var grid = jQuery("#newapi'.$grid0.'");
-			var s;
-			var allFields = $( [] ).add( ffecha );
-			var tips = $( ".validateTips" );
-
-
-			s = grid.getGridParam(\'selarrrow\');';*/
+		/*$bodyscript .= '$(function() {$("#dialog:ui-dialog").dialog( "destroy" );var mId = 0;var montotal = 0;var ffecha = $("#ffecha");var grid = jQuery("#newapi'.$grid0.'");var s;var allFields = $( [] ).add( ffecha );var tips = $( ".validateTips" );s = grid.getGridParam(\'selarrrow\');';*/
 
 
 		// Imprime Compra
@@ -524,7 +521,7 @@ class Scst extends Controller {
 				}
 			});';
 
-		$post = $this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+res.id+\'/id\'').';';
+		$post = $this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+idactual+\'/id\'').';';
 		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "570", $width = "860", 'fcompra', $post );
 
 /*
@@ -2003,8 +2000,9 @@ class Scst extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
+		$edit->on_save_redirect=false;
 
-		$edit->back_url = $this->back_dataedit;
+		//$edit->back_url = $this->back_dataedit;
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
@@ -2386,7 +2384,6 @@ class Scst extends Controller {
 					'mensaje'=> 'Error Desconocido',
 					'pk'     => array('id' => $id)
 				);
-				//$rtjson=array('id'=> 0,'mensaje'=> utf8_encode('Error desconocido'), 'status'=>'C');
 				echo json_encode($rtjson);
 			}
 		}elseif($id == 'process'){
@@ -2413,7 +2410,6 @@ class Scst extends Controller {
 
 				if($rt == 'Compra Guardada'){
 					$p='A';
-
 					$rtjson=array(
 						'status' => $p,
 						'mensaje'=> $rt,
