@@ -562,7 +562,7 @@ class Procamp extends Controller {
 			  `usuario` varchar(80) DEFAULT NULL,
 			  `estampa` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			  PRIMARY KEY (`id`)
-			) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT COMMENT='Eventos de captacion'";
+			) ENGINE=MyISAM COMMENT='Eventos de captacion'";
 			$this->db->query($mSQL);
 		}
 		//$campos=$this->db->list_fields('procamp');
