@@ -28,7 +28,7 @@ class Resumendiario extends Controller {
 		$form->build_form();
 
 		if ($form->on_success()){
-			$this->fecha=$form->fecha->newValue;
+			$this->fecha = $form->fecha->newValue;
 		}
 		$dbfecha=$this->db->escape($this->fecha);
 
@@ -103,16 +103,14 @@ class Resumendiario extends Controller {
 		//***********************************
 		//   RESUMEN DE VENTAS
 		//***********************************
-
 		$udia=days_in_month(substr($this->fecha,4,2),substr($this->fecha,0,4));
-		$fdesde=substr($this->fecha,0,6).'01';
-		$fhasta=substr($this->fecha,0,6).$udia;
+		$fdesde= substr($this->fecha,0,6).'01';
+		$fhasta= substr($this->fecha,0,6).$udia;
 		$ano   = substr($this->fecha,0,4);
 
-		$row2 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND YEAR(fecha) = $ano AND fecha < $dbfecha");
+		$row1 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND YEAR(fecha) = $ano AND fecha < $dbfecha");
 		$row2 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND fecha BETWEEN $fdesde AND $fhasta");
 		$row3 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND fecha = $dbfecha");
-
 
 		$cost1 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND YEAR(fecha) = $ano AND fecha < $dbfecha");
 		$cost2 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND fecha BETWEEN $fdesde AND $dbfecha");
@@ -130,7 +128,7 @@ class Resumendiario extends Controller {
 		$rdata[1]=array('a'=>$row2['a'],'b'=>$row2['b'],'c'=>$row2['c'],'d'=>($row2['b']-$row2['c']),'razon'=>'Ventas en lo que va de mes');
 		$rdata[2]=array('a'=>$row3['a'],'b'=>$row3['b'],'c'=>$row3['c'],'d'=>($row3['b']-$row3['c']),'razon'=>'Ventas de hoy');
 
-		$grid8 = new DataGrid("Resumen de Ventas al ".$dbfecha,$rdata);
+		$grid8 = new DataGrid("Resumen de Ventas ".$this->fecha,$rdata);
 		$grid8->column("Raz&oacute;n", "razon");
 		$grid8->column("Cantidad",     "a","align='right'");
 		$grid8->column("Costo",        "<nformat><#c#></nformat>","align='right'");
@@ -142,7 +140,6 @@ class Resumendiario extends Controller {
 		//***********************************
 		//   CUENTAS POR COBRAR (smov)
 		//***********************************
-
 		$grid4 = new DataGrid2("Cuentas por Cobrar");
 		$grid4->db->select(array("c.gr_desc grupo","SUM((a.monto-a.abonos)*IF(tipo_doc='AN',-1,1))saldo"));
 		$grid4->db->from("smov a");
@@ -162,7 +159,6 @@ class Resumendiario extends Controller {
 		//***********************************
 		//            GASTOS
 		//***********************************
-
 		$row  = $this->datasis->dameval("SELECT SUM(montotot) AS a FROM scst WHERE tipo_doc = 'FC' AND recep = $dbfecha");
 		$row2 = $this->datasis->dameval("SELECT SUM(totbruto) AS a FROM gser WHERE tipo_doc = 'FC' AND fecha = $dbfecha");
 		$rdata[0]=array('nombre'=>'Total de Compras','monto'=>$row );
