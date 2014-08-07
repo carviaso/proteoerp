@@ -358,6 +358,10 @@ class Proparti extends Controller {
 			});
 
 		});
+		function entidad_change(){
+			$.post(\''.site_url('ajax/get_municipio').'\',{ estado:$("#entidad").val() },function(data){$("#municipio").html(data);})
+			$.post(\''.site_url('ajax/get_parroquia').'\',{ municipio:\'\', entidad:\'\' },function(data){$("#parroquia").html(data);})
+		}
 		';
 
 		// Valida RIF o CI con mensaje
@@ -372,10 +376,6 @@ class Proparti extends Controller {
 				return [true,""];
 		};
 
-		function entidad_change(){
-			$.post(\''.site_url('ajax/get_municipio').'\',{ estado:$("#entidad").val() },function(data){$("#municipio").html(data);})
-			$.post(\''.site_url('ajax/get_parroquia').'\',{ municipio:\'\', entidad:\'\' },function(data){$("#parroquia").html(data);})
-		}
 
 		$("#cedula").focusout(function(){
 			rif=$(this).val().toUpperCase();

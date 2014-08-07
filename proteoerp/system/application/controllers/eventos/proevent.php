@@ -359,11 +359,30 @@ class Proevent extends Controller {
 
 	function dataedit(){
 		$this->rapyd->load('dataedit');
-		$script= '
+		$script =  '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 			$(".inputnum").numeric(".");
+			var edo = $("#entidad").val();
+			if ( $("#municipio").val() == false ){
+				entidad_change();
+			}
+			$("#entidad").change(function(){
+				entidad_change();
+				edo = $(this).val();
+			});
+			$("#municipio").change(
+				function(){ 
+					$.post(\''.site_url('ajax/get_parroquia').'\',
+						{ municipio:$(this).val(), entidad:edo },
+						function(data){	$("#parroquia").html(data);	}
+					) 
+			});
 		});
+		function entidad_change(){
+			$.post(\''.site_url('ajax/get_municipio').'\',{ estado:$("#entidad").val() },function(data){$("#municipio").html(data);})
+			$.post(\''.site_url('ajax/get_parroquia').'\',{ municipio:\'\', entidad:\'\' },function(data){$("#parroquia").html(data);})
+		}
 		';
 
 		// Valida RIF o CI con mensaje
@@ -377,7 +396,6 @@ class Proevent extends Controller {
 			else
 				return [true,""];
 		};
-
 		$("#cedula").focusout(function(){
 			rif=$(this).val().toUpperCase();
 			$(this).val(rif);
@@ -403,10 +421,12 @@ class Proevent extends Controller {
 		});
 		';
 
+
 		$edit = new DataEdit('', 'proevent');
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
+
 		$edit->on_save_redirect=false;
 
 		$edit->back_url = site_url($this->url.'filteredgrid');
