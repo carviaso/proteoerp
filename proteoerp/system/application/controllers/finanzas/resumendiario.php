@@ -105,23 +105,35 @@ class Resumendiario extends Controller {
 		//***********************************
 
 		$udia=days_in_month(substr($this->fecha,4,2),substr($this->fecha,0,4));
-		$fdesde=substr($this->fecha,4,2).'01';
-		$fhasta=substr($this->fecha,4,2).$udia;
+		$fdesde=substr($this->fecha,0,6).'01';
+		$fhasta=substr($this->fecha,0,6).$udia;
+		$ano   = substr($this->fecha,0,4);
 
-		$row1 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND fecha BETWEEN $fdesde AND $fhasta");
-		$row2 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND fecha = SUBDATE($dbfecha,1)");
+		$row2 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND YEAR(fecha) = $ano AND fecha < $dbfecha");
+		$row2 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND fecha BETWEEN $fdesde AND $fhasta");
 		$row3 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND fecha = $dbfecha");
+
+
+		$cost1 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND YEAR(fecha) = $ano AND fecha < $dbfecha");
+		$cost2 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND fecha BETWEEN $fdesde AND $fhasta");
+		$cost3 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND fecha = $dbfecha");
+
 		if(empty($row1)) $row1=array("a"=>0,"b"=>0);
 		if(empty($row2)) $row2=array("a"=>0,"b"=>0);
 		if(empty($row3)) $row3=array("a"=>0,"b"=>0);
 
-		$rdata[0]=array('a'=>$row1['a'],'b'=>$row1['b'],'razon'=>'Ventas en lo que va de año');
-		$rdata[1]=array('a'=>$row2['a'],'b'=>$row2['b'],'razon'=>'Ventas de ayer');
-		$rdata[2]=array('a'=>$row3['a'],'b'=>$row3['b'],'razon'=>'Ventas de hoy');
+		$row1['c'] = $cost1;
+		$row2['c'] = $cost2;
+		$row3['c'] = $cost3;
+
+		$rdata[0]=array('a'=>$row1['a'],'b'=>$row1['b'],'c'=>$row1['c'],'razon'=>'Ventas en lo que va de año');
+		$rdata[1]=array('a'=>$row2['a'],'b'=>$row2['b'],'c'=>$row2['c'],'razon'=>'Ventas en lo que va de mes');
+		$rdata[2]=array('a'=>$row3['a'],'b'=>$row3['b'],'c'=>$row3['c'],'razon'=>'Ventas de hoy');
 
 		$grid8 = new DataGrid("Resumen de Ventas",$rdata);
-		$grid8->column("Raz&oacute;n","razon");
+		$grid8->column("Raz&oacute;n".$fdesde.' '.$fhasta,"razon");
 		$grid8->column("Cantidad"    ,"a","align='right'");
+		$grid8->column("Costo"       ,"<nformat><#c#></nformat>","align='right'");
 		$grid8->column("Monto"       ,"<nformat><#b#></nformat>","align='right'");
 		$grid8->build();
 		$rdata=array();
