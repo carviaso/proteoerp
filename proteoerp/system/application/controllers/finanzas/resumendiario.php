@@ -115,7 +115,7 @@ class Resumendiario extends Controller {
 
 
 		$cost1 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND YEAR(fecha) = $ano AND fecha < $dbfecha");
-		$cost2 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND fecha BETWEEN $fdesde AND $fhasta");
+		$cost2 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND fecha BETWEEN $fdesde AND $dbfecha");
 		$cost3 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND fecha = $dbfecha");
 
 		if(empty($row1)) $row1=array("a"=>0,"b"=>0);
@@ -126,15 +126,16 @@ class Resumendiario extends Controller {
 		$row2['c'] = $cost2;
 		$row3['c'] = $cost3;
 
-		$rdata[0]=array('a'=>$row1['a'],'b'=>$row1['b'],'c'=>$row1['c'],'razon'=>'Ventas en lo que va de año');
-		$rdata[1]=array('a'=>$row2['a'],'b'=>$row2['b'],'c'=>$row2['c'],'razon'=>'Ventas en lo que va de mes');
-		$rdata[2]=array('a'=>$row3['a'],'b'=>$row3['b'],'c'=>$row3['c'],'razon'=>'Ventas de hoy');
+		$rdata[0]=array('a'=>$row1['a'],'b'=>$row1['b'],'c'=>$row1['c'],'d'=>($row1['b']-$row1['c']),'razon'=>'Ventas en lo que va de año');
+		$rdata[1]=array('a'=>$row2['a'],'b'=>$row2['b'],'c'=>$row2['c'],'d'=>($row2['b']-$row2['c']),'razon'=>'Ventas en lo que va de mes');
+		$rdata[2]=array('a'=>$row3['a'],'b'=>$row3['b'],'c'=>$row3['c'],'d'=>($row3['b']-$row3['c']),'razon'=>'Ventas de hoy');
 
-		$grid8 = new DataGrid("Resumen de Ventas",$rdata);
-		$grid8->column("Raz&oacute;n".$fdesde.' '.$fhasta,"razon");
-		$grid8->column("Cantidad"    ,"a","align='right'");
-		$grid8->column("Costo"       ,"<nformat><#c#></nformat>","align='right'");
-		$grid8->column("Monto"       ,"<nformat><#b#></nformat>","align='right'");
+		$grid8 = new DataGrid("Resumen de Ventas al ".$dbfecha,$rdata);
+		$grid8->column("Raz&oacute;n", "razon");
+		$grid8->column("Cantidad",     "a","align='right'");
+		$grid8->column("Costo",        "<nformat><#c#></nformat>","align='right'");
+		$grid8->column("Monto",        "<nformat><#b#></nformat>","align='right'");
+		$grid8->column("Margen",       "<nformat><#d#></nformat>","align='right'");
 		$grid8->build();
 		$rdata=array();
 
