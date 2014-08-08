@@ -112,9 +112,9 @@ class Resumendiario extends Controller {
 		$row2 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND fecha BETWEEN $fdesde AND $fhasta");
 		$row3 = $this->datasis->damerow("SELECT COUNT(*) AS a,SUM(totals*(IF(tipo_doc = 'F',1,-1))) AS b FROM sfac WHERE tipo_doc <>'X' AND fecha = $dbfecha");
 
-		$cost1 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND YEAR(fecha) = $ano AND fecha < $dbfecha");
-		$cost2 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND fecha BETWEEN $fdesde AND $dbfecha");
-		$cost3 = $this->datasis->dameval("SELECT SUM(costo*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND fecha = $dbfecha");
+		$cost1 = $this->datasis->dameval("SELECT SUM(costo*cana*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND YEAR(fecha) = $ano AND fecha < $dbfecha");
+		$cost2 = $this->datasis->dameval("SELECT SUM(costo*cana*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND fecha BETWEEN $fdesde AND $dbfecha");
+		$cost3 = $this->datasis->dameval("SELECT SUM(costo*cana*(IF(tipoa = 'F',1,-1))) AS a FROM sitems WHERE tipoa <>'X' AND fecha = $dbfecha");
 
 		if(empty($row1)) $row1=array("a"=>0,"b"=>0);
 		if(empty($row2)) $row2=array("a"=>0,"b"=>0);
