@@ -343,12 +343,10 @@ class Proparti extends Controller {
 			if ( $("#municipio").val() == false ){
 				entidad_change();
 			}
-
 			$("#entidad").change(function(){
 				entidad_change();
 				edo = $(this).val();
 			});
-			
 			$("#municipio").change(
 				function(){ 
 					$.post(\''.site_url('ajax/get_parroquia').'\',
@@ -441,7 +439,7 @@ class Proparti extends Controller {
 		$edit->entidad->rule ='required';
 		$edit->entidad->style='width:220px;';
 		$edit->entidad->option('','Seleccione un Estado');
-		$edit->entidad->options('SELECT codigo, entidad FROM cne.estados ORDER BY entidad');
+		$edit->entidad->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
 		$edit->entidad->insertValue = 12;
 
 		$edit->municipio = new dropdownField('Municipio','municipio');
@@ -449,7 +447,7 @@ class Proparti extends Controller {
 		$edo = $edit->getval('entidad');
 		if($edo!==FALSE){
 			$dbedo=$this->db->escape($edo);
-			$edit->municipio->options("SELECT codigo, municipio FROM cne.municipios WHERE entidad=$dbedo ORDER BY municipio");
+			$edit->municipio->options("SELECT codigo, municipio FROM municipios WHERE entidad=$dbedo ORDER BY municipio");
 		}else{
 			$edit->municipio->option('','Seleccione una Entidad primero');
 		}
@@ -459,7 +457,7 @@ class Proparti extends Controller {
 		$muni = $edit->getval('municipio');
 		if($muni!==FALSE){
 			$dbmuni=$this->db->escape($muni);
-			$edit->parroquia->options("SELECT codigo, parroquia FROM cne.parroquias WHERE entidad=$edo AND municipio=$dbmuni ORDER BY parroquia");
+			$edit->parroquia->options("SELECT codigo, parroquia FROM parroquias WHERE entidad=$edo AND municipio=$dbmuni ORDER BY parroquia");
 		}else{
 			$edit->parroquia->option('','Seleccione un Municipio primero');
 		}
