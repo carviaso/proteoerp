@@ -412,9 +412,13 @@ class Medhtab extends Controller {
 	function dataedit(){
 		
 		$idanterior = intval($this->uri->segment(5));
-		$grupo = 0;
+		$grupo  =  0;
+		$indice = 0;
 		if ( $idanterior ){
-			$grupo = $this->datasis->dameval("SELECT grupo FROM medhtab WHERE id=$idanterior");
+			$ante  = $this->datasis->damerow("SELECT grupo, indice FROM medhtab WHERE id=$idanterior");
+			$grupo = $ante['grupo'];
+			$indice = $ante['indice']+1;
+			
 		}
 
 		$this->rapyd->load('dataedit');
@@ -452,6 +456,7 @@ class Medhtab extends Controller {
 		$edit->indice->css_class='inputonlynum';
 		$edit->indice->size =6;
 		$edit->indice->maxlength =11;
+		$edit->indice->insertValue = $indice;
 
 		$edit->nombre = new inputField('Nombre','nombre');
 		$edit->nombre->rule='';
