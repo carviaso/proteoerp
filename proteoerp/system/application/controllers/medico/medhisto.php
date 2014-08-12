@@ -36,11 +36,13 @@ class Medhisto extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"phistoria",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Historia"));
+		$grid->wbotonadd(array("id"=>"phistoria", "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Historia"));
+		$grid->wbotonadd(array("id"=>"gvisitas",  "img"=>"images/pdf_logo.gif",  "alt" => "Visistas",    "label"=>"Visitas"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
 			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fvisita',  'title'=>'Agregar/Editar Visita'),
 			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
 			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
@@ -92,6 +94,83 @@ class Medhisto extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione una Historia</h1>");}
 		});';
 
+		$bodyscript .= '
+		jQuery("#gvisitas").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				$.post("'.site_url('medico/medhvisita/dataefla/create').'/"+id, function(data){
+					$("#fvisita").html(data);
+					$("#fvisita").dialog( "open" );
+				})
+			} else { $.prompt("<h1>Por favor Seleccione una Historia</h1>");}
+		});';
+
+
+		$bodyscript .= '
+		$("#fvisita").dialog({
+			autoOpen: false, height: 500, width: 600, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var vurl = $("#df1").attr("action");
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: vurl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									//$.prompt("<h1>Registro Guardado</h1>");
+									$( "#fvisita" ).dialog( "close" );
+									idvisita = json.pk.id;
+									return true;
+								} else {
+									$.prompt(json.mensaje);
+								}
+							} catch(e) {
+								$("#fvisita").html(r);
+							}
+						}
+					})
+				},
+				"Guardar y Seguir": function(){
+					var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+					var vurl = $("#df1").attr("action");
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: vurl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									$.prompt("<h1>Registro Guardado con exito</h1>");
+									idvisita = json.pk.id;
+									$.post(xurl+"/create/"+id+"/"+idactual,
+									function(data){
+										$("#fvisita").html(data);
+									});
+									return true;
+								} else {
+									$.prompt(json.mensaje);
+								}
+							} catch(e) {
+								$("#fvisita").html(r);
+							}
+						}
+					})				
+				},
+				"Cancelar": function() {
+					$("#fvisita").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fvisita").html("");
+			}
+		});
+		';
+
 		$bodyscript .= '</script>';
 
 		return $bodyscript;
@@ -116,7 +195,6 @@ class Medhisto extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
-
 
 		$grid->addField('ingreso');
 		$grid->label('Ingreso');
@@ -516,6 +594,7 @@ class Medhisto extends Controller {
 		$edit->numero->size =22;
 		$edit->numero->maxlength =20;
 		$edit->numero->readonly = true;
+		$edit->numero->hidden = true;
 
 		$edit->ingreso = new dateonlyField('Ingreso','ingreso');
 		$edit->ingreso->rule='chfecha';
@@ -570,13 +649,6 @@ class Medhisto extends Controller {
 		$edit->estado->size =52;
 		$edit->estado->maxlength =50;
 		
-/*
-		$edit->ciudad = new inputField('Ciudad','ciudad');
-		$edit->ciudad->rule='';
-		$edit->ciudad->size =52;
-		$edit->ciudad->maxlength =50;
-*/
-
 		$edit->ecivil = new dropdownField('Estado civil','ecivil');
 	   	$edit->ecivil->option('S','Soltero/a');        //0
 	   	$edit->ecivil->option('C','Casado/a');         //1
@@ -636,39 +708,27 @@ class Medhisto extends Controller {
 	}
 
 	function _pre_insert($do){
-		$numero = $this->datasis->fprox_numero('nmedhis');
-		// REVISA SI EXISTE EL NRO
-		$mSQL = "SELECT count(*) FROM medhisto WHERE numero=";
-		$cuantos = $this->datasis->dameval($mSQL.$numero);
-		while ($cuantos <> 0) {
+		// Busca Cedula repetida
+		$cedula = $do->get('cedula');
+		$mSQL = "SELECT count(*) FROM medhisto WHERE cedula=".$cedula;
+		$cuantos = $this->datasis->dameval($mSQL);
+		if ( $cuantos > 0 ) {
+			$error='ERROR. Cedula Repetida!!!!';
+			$do->error_message_ar['pre_ins']=$error;
+			return false;
+		} else {
 			$numero = $this->datasis->fprox_numero('nmedhis');
+			// REVISA SI EXISTE EL NRO
+			$mSQL = "SELECT count(*) FROM medhisto WHERE numero=";
 			$cuantos = $this->datasis->dameval($mSQL.$numero);
+			while ($cuantos <> 0) {
+				$numero = $this->datasis->fprox_numero('nmedhis');
+				$cuantos = $this->datasis->dameval($mSQL.$numero);
+			}
+			$do->set('numero',$numero);
+			$do->error_message_ar['pre_ins']='';
+			return true;
 		}
-		$do->set('numero',$numero);
-
-/*
-		$numero =$this->datasis->fprox_numero('nssal');
-		$transac=$this->datasis->fprox_numero('ntransa');
-		$usuario=$do->get('usuario');
-		$estampa=date('Ymd');
-		$hora   =date('H:i:s');
-
-		$cana=$do->count_rel('itssal');
-		for($i=0;$i<$cana;$i++){
-			$do->set_rel('itssal','estampa',$estampa  ,$i);
-			$do->set_rel('itssal','usuario',$usuario  ,$i);
-			$do->set_rel('itssal','hora'   ,$hora     ,$i);
-			$do->set_rel('itssal','transac',$transac  ,$i);
-		}
-		$do->set('numero',$numero);
-		$do->set('estampa',$estampa);
-		$do->set('hora'   ,$hora);
-		$do->set('numero' ,$numero);
-		$do->set('transac',$transac);
-*/
-
-		$do->error_message_ar['pre_ins']='';
-		return true;
 	}
 
 	function _pre_update($do){

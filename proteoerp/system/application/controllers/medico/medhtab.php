@@ -404,9 +404,6 @@ class Medhtab extends Controller {
 	}
 
 
-
-
-
 	//******************************************************************
 	// Edicion 
 	function dataedit(){

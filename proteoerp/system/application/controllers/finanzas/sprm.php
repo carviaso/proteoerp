@@ -1769,7 +1769,7 @@ class Sprm extends Controller {
 		$edit->pre_process('insert' , '_pre_pprv_insert');
 		$edit->pre_process('update' , '_pre_pprv_update');
 		$edit->pre_process('delete' , '_pre_pprv_delete');
-		$edit->post_process('insert','_post_pprv_insert');
+		$edit->post_process('insert', '_post_pprv_insert');
 		//$edit->post_process('delete', '_post_pprv_delete');
 
 		$edit->cod_prv = new hiddenField('Proveedor','cod_prv');
@@ -2639,7 +2639,7 @@ class Sprm extends Controller {
 			$this->db->insert('sprm',$data);
 		}
 
-		if($tipo_doc=='NC' && $reteiva>0){
+		if($tipo_doc=='NC' && $reteiva>0 ){
 			$montasa   = $do->get('montasa'  );
 			$monredu   = $do->get('monredu'  );
 			$monadic   = $do->get('monadic'  );
@@ -2674,6 +2674,11 @@ class Sprm extends Controller {
 			$mSQL = $this->db->insert_string('sprm', $sprm);
 			$ban=$this->db->simple_query($mSQL);
 			if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
+
+			//Abona la Factura
+			$mSQL = 'UPDATE sprm SET abonos=abonos+'.$reteiva.' WHERE cod_prv="'.$cod_prv.'" AND tipo_doc="'.$tipo_doc.'" AND numero="'.$mnumero.'"';
+			$ban=$this->db->simple_query($mSQL);
+			if(!$ban){ memowrite($mSQL,'scst'); $error++;}
 
 			//Crea la nota de credito
 			$mnumnc  = $this->datasis->fprox_numero('num_nc');
@@ -2737,14 +2742,15 @@ class Sprm extends Controller {
 			$mSQL=$this->db->insert_string('riva', $riva);
 			$ban =$this->db->simple_query($mSQL);
 			if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+
 		}//Fin de la retencion
 
 		logusu('PPRO',"Abono a proveedor CREADO Prov=${cod_prv}  Numero=${numero}");
 	}
+
 	//**********************************************
 	// Fin de pago a proveedor
 	//***********************************************
-
 	//Obliga el campo segun el tipo
 	function chobligatipo($val,$tipo){
 		$tipo_doc = $this->input->post('tipo_doc');
@@ -2794,4 +2800,22 @@ class Sprm extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 	}
+
+/*
+DEVOLUCIONES
+========================================================================
+Al hacer una devolucion si la factura a aplicar esta pendiente cargar automaticamente
+La retencion debe advertir si tiene 15 dias colocarla por defecto sino colocar 0
+
+Cuando reversa la devolucion se joden los saldos de la FC
+En itppro no borra la transaccion reversada
+
+NOTA DE CREDITO
+========================================================================
+La ND por dev de reiva no la carga al saldo
+
+
+ 
+*/
+
 }
