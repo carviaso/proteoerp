@@ -2680,7 +2680,7 @@ class Sprm extends Controller {
 			$sprm['numero']     = $numero;
 			$sprm['fecha']      = $fecha;
 			$sprm['monto']      = $reteiva;
-			$sprm['abonos']     = $reteiva;
+			$sprm['abono']     = $reteiva;
 
 			$sprm['estampa']    = $estampa;
 			$sprm['hora']       = $hora;
