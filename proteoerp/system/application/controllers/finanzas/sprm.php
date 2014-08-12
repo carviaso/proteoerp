@@ -2681,13 +2681,15 @@ class Sprm extends Controller {
 			$sprm['fecha']      = $fecha;
 			$sprm['monto']      = $reteiva;
 			$sprm['abonos']     = $reteiva;
+
 			$sprm['estampa']    = $estampa;
 			$sprm['hora']       = $hora;
 			$sprm['transac']    = $transac;
 			$sprm['usuario']    = $usuario;
 			$mSQL = $this->db->insert_string('itppro', $sprm);
-			$ban=$this->db->simple_query($mSQL);
-			//if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
+			
+			$ban=$this->db->query($mSQL);
+			if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
 
 			//Crea la nota de credito
 			$mnumnc  = $this->datasis->fprox_numero('num_nc');
