@@ -1235,7 +1235,6 @@ class Sprm extends Controller {
 			}
 
 			// Movimientos Relacionados ITPPRO
-
 			if($tipo_doc=='AB' || $tipo_doc=='AN' || $tipo_doc=='NC'){
 				$mSQL = "SELECT tipo_doc, numero, monto, abono FROM itppro WHERE tipoppro=${dbtipo_doc} AND numppro=${dbnumero} AND cod_prv=${dbcod_prv}";
 			}else{
@@ -1479,7 +1478,6 @@ class Sprm extends Controller {
 			$do->error_message_ar['pre_del']='El efecto ya esta en contabilidad, no puede ser modificado ni eliminado.';
 			return false;
 		}
-
 
 		if($tipo_doc=='ND' || $tipo_doc=='NC'){
 			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM cruc WHERE transac=${dbtransac}"));
@@ -1753,12 +1751,6 @@ class Sprm extends Controller {
 			'cod_prv' =>'cod_prv',
 			'transac' =>'transac')
 		);
-		//$do->rel_one_to_many('sfpa'  , 'sfpa'  , array(
-		//	'transac' =>'transac',
-		//	'numero'  =>'numero',
-		//	'tipo_doc'=>'tipo_doc',
-		//	'fecha'   =>'fecha')
-		//);
 		$do->order_by('itppro','itppro.fecha');
 
 		$edit = new DataDetails('Pago a proveedor', $do);
@@ -2679,6 +2671,23 @@ class Sprm extends Controller {
 			$mSQL = 'UPDATE sprm SET abonos=abonos+'.$reteiva.' WHERE cod_prv="'.$cod_prv.'" AND tipo_doc="'.$tipo_doc.'" AND numero="'.$mnumero.'"';
 			$ban=$this->db->simple_query($mSQL);
 			if(!$ban){ memowrite($mSQL,'scst'); $error++;}
+			
+			$sprm=array();
+			$sprm['numppro']    = $mnumnd;
+			$sprm['tipoppro']   = 'ND';
+			$sprm['cod_prv']    = $cod_prv;
+			$sprm['tipo_doc']   = $tipo_doc;
+			$sprm['numero']     = $numero;
+			$sprm['fecha']      = $fecha;
+			$sprm['monto']      = $reteiva;
+			$sprm['abonos']     = $reteiva;
+			$sprm['estampa']    = $estampa;
+			$sprm['hora']       = $hora;
+			$sprm['transac']    = $transac;
+			$sprm['usuario']    = $usuario;
+			$mSQL = $this->db->insert_string('itppro', $sprm);
+			$ban=$this->db->simple_query($mSQL);
+			if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
 
 			//Crea la nota de credito
 			$mnumnc  = $this->datasis->fprox_numero('num_nc');
