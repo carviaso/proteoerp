@@ -455,7 +455,6 @@ class Proasiste extends Controller {
 		$edit->script($script,'create');
 		$edit->on_save_redirect=false;
 
-		//$edit->back_url = site_url($this->url.'filteredgrid');
 
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
