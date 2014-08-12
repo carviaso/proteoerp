@@ -2563,7 +2563,6 @@ class Sprm extends Controller {
 			if($itpppago>0){
 				$ppobserva[] = $ittipo.$itnumero;
 			}
-
 			$dbittipo   = $this->db->escape($ittipo  );
 			$dbitnumero = $this->db->escape($itnumero);
 			$dbcod_prv  = $this->db->escape($cod_prv );
@@ -2576,6 +2575,7 @@ class Sprm extends Controller {
 
 		//Crea Movimiento en Bancos
 		if($tipo_doc!='NC'){
+
 			$bdata = Common::_traebandata($banco);
 
 			$data = array();
@@ -2677,10 +2677,10 @@ class Sprm extends Controller {
 			$sprm['tipoppro']   = 'ND';
 			$sprm['cod_prv']    = $cod_prv;
 			$sprm['tipo_doc']   = $tipo_doc;
-			$sprm['numero']     = $numero;
+			$sprm['numero']     = $mnumero;
 			$sprm['fecha']      = $fecha;
 			$sprm['monto']      = $reteiva;
-			$sprm['abono']     = $reteiva;
+			$sprm['abono']      = $reteiva;
 
 			$sprm['estampa']    = $estampa;
 			$sprm['hora']       = $hora;
