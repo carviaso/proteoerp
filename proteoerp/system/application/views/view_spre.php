@@ -85,6 +85,7 @@ $(function(){
 			$('#cod_cli').val(ui.item.cod_cli);
 			$('#sclitipo').val(ui.item.tipo);
 			$('#direc').val(ui.item.direc);
+			$('#vd').val(ui.item.vendedor);
 
 			setTimeout(function() {  $('#cod_cli').removeAttr("readonly"); }, 1500);
 		}

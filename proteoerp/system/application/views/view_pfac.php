@@ -113,6 +113,10 @@ $(function(){
 			$('#direc').val(ui.item.direc);
 			$('#direc_val').text(ui.item.direc);
 
+			$('#vd').val(ui.item.vendedor);
+
+			$('#direc').val(ui.item.direc);
+
 			setTimeout(function() {  $("#cod_cli").removeAttr("readonly"); }, 1500);
 		}
 	});
