@@ -129,19 +129,26 @@ $(function(){
 				type: 'POST',
 				data: {"q":ui.item.value},
 				success: function(data){
-					$.each(data,
-						function(id, val){
-							add_itsnot();
-							$('#codigo_'+id).val(val.codigo);
-							$('#codigo_'+id+'_val').text(val.codigo);
-							$('#descrip_'+id).val(val.descrip);
-							$('#descrip_'+id+'_val').text(val.descrip);
-							$('#cant_'+id).val(val.cant);
-							$('#cant_'+id+'_val').text(nformat(val.cant,2));
-							$('#saldo_'+id).val(val.saldo);
-							$('#saldo_'+id+'_val').text(nformat(val.saldo,2));
-						}
-					);
+					if(data.length==0){
+						$.prompt("<span style='font-size:1.5em'>No hay productos para despachar.</span>", {
+							title: "Factura ya despachada",
+							buttons: { "Continuar": true }
+						});
+					}else{
+						$.each(data,
+							function(id, val){
+								add_itsnot();
+								$('#codigo_'+id).val(val.codigo);
+								$('#codigo_'+id+'_val').text(val.codigo);
+								$('#descrip_'+id).val(val.descrip);
+								$('#descrip_'+id+'_val').text(val.descrip);
+								$('#cant_'+id).val(val.cant);
+								$('#cant_'+id+'_val').text(nformat(val.cant,2));
+								$('#saldo_'+id).val(val.saldo);
+								$('#saldo_'+id+'_val').text(nformat(val.saldo,2));
+							}
+						);
+					}
 				},
 			});
 			setTimeout(function() {  $("#factura").removeAttr("readonly"); }, 1500);

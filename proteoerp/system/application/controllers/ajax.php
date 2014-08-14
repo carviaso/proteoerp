@@ -1428,7 +1428,7 @@ class Ajax extends Controller {
 			FROM (
 				SELECT  aa.codigoa, aa.desca,aa.numa, SUM(aa.cana) AS cana
 				FROM sitems AS aa
-				WHERE aa.numa=${dbfactura} AND aa.tipoa='F' AND aa.despacha='N'
+				WHERE aa.numa=${dbfactura} AND aa.tipoa='F' AND aa.despacha<>'S'
 				GROUP BY aa.codigoa
 			) AS a
 			JOIN sinv   AS c ON a.codigoa=c.codigo AND c.tipo='Articulo'

@@ -554,7 +554,7 @@ class Snot extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('snot');
 
-		$response   = $grid->getData('snot', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('snot', array(array()), array(), false, $mWHERE , 'id', 'desc');
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
