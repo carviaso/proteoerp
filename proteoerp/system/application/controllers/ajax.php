@@ -1424,7 +1424,7 @@ class Ajax extends Controller {
 		if($mid !== false){
 			$dbfactura = $this->db->escape($mid);
 			$retArray = $retorno = array();
-			$mSQL="SELECT a.codigoa, a.desca, a.cana,SUM(IF(d.tipo='D',-1,1)*e.entrega) AS entregado
+			$mSQL="SELECT TRIM(a.codigoa) AS codigoa, a.desca, a.cana,SUM(IF(d.tipo='D',-1,1)*e.entrega) AS entregado
 			FROM (
 				SELECT  aa.codigoa, aa.desca,aa.numa, SUM(aa.cana) AS cana
 				FROM sitems AS aa
@@ -1439,7 +1439,7 @@ class Ajax extends Controller {
 
 			//Restas las devoluciones
 			$arr_devolu=array();
-			$mSQL_2="SELECT  aa.codigoa, SUM(aa.cana) AS cana
+			$mSQL_2="SELECT  TRIM(aa.codigoa) AS codigoa, SUM(aa.cana) AS cana
 				FROM sitems AS aa
 				JOIN sfac   AS bb ON bb.tipo_doc=aa.tipoa AND aa.numa=bb.numero
 				WHERE bb.factura=${dbfactura} AND bb.tipo_doc='D'
