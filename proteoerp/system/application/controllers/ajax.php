@@ -1126,7 +1126,7 @@ class Ajax extends Controller {
 
 			$retArray = $retorno = array();
 
-			$mSQL="SELECT a.numero, a.totalg, a.cod_cli, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.tipo, b.dire11 AS direc,a.fecha
+			$mSQL="SELECT a.numero, a.totalg, a.cod_cli, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.tipo, b.dire11 AS direc,a.fecha,vd
 				FROM  sfac AS a
 				JOIN scli AS b ON a.cod_cli=b.cliente
 				WHERE a.numero LIKE ${qdb} AND a.tipo_doc='F' AND MID(a.numero,1,1)<>'_'
@@ -1144,6 +1144,7 @@ class Ajax extends Controller {
 					$retArray['direc']   = $this->en_utf8($row['direc']);
 					$retArray['nombre']  = $this->en_utf8($row['nombre']);
 					$retArray['totalg']  = $row['totalg'];
+					$retArray['vd']      = $row['vd'];
 
 					array_push($retorno, $retArray);
 				}
@@ -1157,6 +1158,7 @@ class Ajax extends Controller {
 				$retArray[0]['tipo']    = '';
 				$retArray[0]['nombre']  = '';
 				$retArray[0]['direc']   = '';
+				$retArray['vd']         = '';
 				$data = json_encode($retArray);
 			}
 		}

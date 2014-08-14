@@ -231,6 +231,7 @@ $(function(){
 			$('#direc').val(ui.item.direc);
 			$('#direc_val').text(ui.item.direc);
 
+			$('#vd').val(ui.item.vd);
 
 			$('#descuento').val('0');
 
@@ -357,6 +358,8 @@ function itdevolver(numero){
 
 			$('#direc').val(val.direc);
 			$('#direc_val').text(val.direc);
+
+			$('#vd').val(val.vd);
 
 			$('#descuento').val('0');
 		},
