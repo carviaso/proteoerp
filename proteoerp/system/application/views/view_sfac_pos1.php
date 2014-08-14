@@ -1247,11 +1247,15 @@ function apldes(){
 		<br>
 		<table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
 			<tr>
-				<td class="littletableheader"><?php echo $form->almacen->label;  ?></td>
+				<td class="littletableheader"><b><?php echo $form->almacen->label;  ?></b></td>
 				<td class="littletablerow"   ><?php echo $form->almacen->output; ?></td>
 			</tr><tr>
-				<td class="littletableheader"><?php echo $form->fecha->label;    ?>*</td>
+				<td class="littletableheader"><?php echo $form->fecha->label;    ?></td>
 				<td class="littletablerow"   ><?php echo $form->fecha->output;   ?></td>
+			</tr>
+			<tr>
+				<td class="littletableheader"><?php echo $form->orden->label;    ?></td>
+				<td class="littletablerow"   ><?php echo $form->orden->output;   ?></td>
 			</tr>
 		</table>
 		<div id='informa'></div>

@@ -2747,6 +2747,9 @@ class Sfac extends Controller {
 		$edit->descuento = new hiddenField('Desc.','descuento');
 		$edit->descuento->insertValue = '0';
 
+		$edit->orden = new inputField ('Orden', 'orden');
+		$edit->orden->size = 12;
+
 		//***********************************
 		//  Campos para el detalle 1 sitems
 		//***********************************
