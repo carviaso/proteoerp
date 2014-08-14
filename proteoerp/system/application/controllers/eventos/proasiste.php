@@ -434,6 +434,7 @@ class Proasiste extends Controller {
 		$("#evento").change(function(){
 			evento_change();
 		});
+
 		function evento_change(){
 			$.post(\''.site_url('ajax/get_asislista').'\',{ campana:$("#campana").val(), evento:$("#evento").val() },function(data){$("#contenedor").html(data);})
 		}

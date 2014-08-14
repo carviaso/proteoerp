@@ -2866,7 +2866,6 @@ NOTA DE CREDITO
 ========================================================================
 La ND por dev de reiva no la carga al saldo
 
-
  
 */
 

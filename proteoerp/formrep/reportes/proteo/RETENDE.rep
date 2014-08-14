@@ -32,28 +32,49 @@ if($filter->on_success()){
 	$fechad=$filter->fechad->newValue;
 	$fechah=$filter->fechah->newValue;
 
-	$mSQL = "SELECT * FROM (SELECT b.fecha , a.numero ,  a.nfiscal, a.nombre, d.rif,   c.concepto creten ,  a.breten AS breten, c.tari1
-	FROM gser AS a
-	LEFT JOIN sprm  AS b ON a.transac=b.transac
-	LEFT JOIN rete AS c  ON a.creten=c.codigo
-	LEFT JOIN sprv AS d ON a.proveed=d.proveed
+	$mSQL = "SELECT * FROM (
+	SELECT b.fecha , a.numero ,  a.nfiscal, a.nombre, d.rif,   c.concepto creten ,  a.breten AS breten, c.tari1
+	FROM gser    AS a
+	JOIN sprm    AS b ON a.transac=b.transac
+	JOIN rete    AS c ON a.creten=c.codigo
+	JOIN sprv    AS d ON a.proveed=d.proveed
 	WHERE b.fecha<=${fechah} AND b.fecha>=${fechad} AND b.tipo_doc='ND' AND b.cod_prv='RETEN' AND b.abonos<b.monto
-		UNION
+	UNION ALL
 	SELECT b.fecha ,  b.num_ref AS numero, a.nfiscal, a.nombre, c.rif ,  IF(SUBSTR(c.rif,1,1)='J', '072' , '071')  AS creten , a.flete    AS breten, d.tari1
 	FROM scst  AS a
-	LEFT JOIN sprm  AS b  ON a.transac=b.transac  AND b.cod_prv = 'RETEN'
-	LEFT JOIN sprv   AS c   ON  a.proveed=c.proveed
-	LEFT JOIN rete  AS d  ON  d.codigo =IF(SUBSTR(c.rif,1,1)='J', '115' , '215')
+	JOIN sprm  AS b  ON a.transac=b.transac  AND b.cod_prv = 'RETEN'
+	JOIN sprv   AS c   ON  a.proveed=c.proveed
+	JOIN rete  AS d  ON  d.codigo =IF(SUBSTR(c.rif,1,1)='J', '115' , '215')
+	LEFT JOIN gereten AS e ON a.id = e.idd
 	WHERE a.fecha<=${fechah} AND a.fecha>=${fechad}
+	AND e.id IS NULL
 	AND b.tipo_doc='ND' AND b.cod_prv='RETEN'  AND b.abonos<b.monto
-		UNION
+	UNION ALL
 	SELECT b.fecha , b.num_ref AS numero, c.nfiscal , b.nombre, 'r.i.f.' AS fif ,  '001'  AS creten ,  0   AS breten ,  3  AS  tari1
 	FROM cruc  AS a
 	LEFT JOIN sprm  AS b  ON a.transac=b.transac  AND b.cod_prv = 'RETEN'
 	LEFT JOIN scst AS c  ON  a.transac= c.transac
 	WHERE a.fecha<=${fechah} AND a.fecha>=${fechad}
-	AND b.tipo_doc='ND' AND b.cod_prv='RETEN'  AND b.abonos<b.monto) AS aa ORDER BY aa.creten, aa.fecha";
+	AND b.tipo_doc='ND' AND b.cod_prv='RETEN'  AND b.abonos<b.monto
+	UNION ALL
+	SELECT b.fecha, f.numero, f.nfiscal, d.nombre, d.rif, c.concepto creten, a.base AS breten, c.tari1
+	FROM gereten a 
+	JOIN gser f ON a.idd=f.id AND a.origen='GSER'
+	JOIN sprm  AS b ON f.transac=b.transac
+	JOIN rete  AS c ON a.codigorete=c.codigo
+	JOIN sprv  AS d ON f.proveed=d.proveed
+	WHERE b.fecha<=${fechah} AND b.fecha>=${fechad} AND b.tipo_doc='ND' AND b.cod_prv='RETEN' AND b.abonos<b.monto
+	UNION ALL
+	SELECT b.fecha, f.numero, f.nfiscal, d.nombre, d.rif, c.concepto creten, a.base AS breten, c.tari1
+	FROM gereten a 
+	JOIN scst f ON a.idd=f.id AND a.origen='SCST'
+	JOIN sprm  AS b ON f.transac=b.transac 
+	JOIN rete  AS c ON a.codigorete=c.codigo
+	JOIN sprv  AS d ON f.proveed=d.proveed
+	WHERE b.fecha<=${fechah} AND b.fecha>=${fechad} AND b.tipo_doc='ND' AND b.cod_prv='RETEN' AND b.abonos<b.monto
+	) AS aa ORDER BY aa.creten, aa.fecha";
 //echo $mSQL;
+
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');

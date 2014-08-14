@@ -133,6 +133,10 @@ class Medhisto extends Controller {
 						}
 					})
 				},
+				"Imprimir": function() {
+					var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+					'.$this->datasis->jwinopen(site_url('formatos/ver/HISTORIA').'/\'+id+"/id"').';
+				},
 				"Guardar y Seguir": function(){
 					var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 					var vurl = $("#df1").attr("action");
@@ -146,7 +150,7 @@ class Medhisto extends Controller {
 								if (json.status == "A"){
 									$.prompt("<h1>Registro Guardado con exito</h1>");
 									idvisita = json.pk.id;
-									$.post(xurl+"/create/"+id+"/"+idactual,
+									$.post("'.site_url('medico/medhvisita/dataefla').'/create/"+id+"/"+idvisita,
 									function(data){
 										$("#fvisita").html(data);
 									});
@@ -196,16 +200,29 @@ class Medhisto extends Controller {
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
 
-		$grid->addField('ingreso');
-		$grid->label('Ingreso');
+		$grid->addField('nacional');
+		$grid->label('Nac');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 70,
-			'align'         => "'center'",
+			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
+			'align'         => "'center'",
+			'width'         => 40,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
+		));
+
+
+		$grid->addField('cedula');
+		$grid->label('Cedula');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
 
 
@@ -245,32 +262,6 @@ class Medhisto extends Controller {
 		));
 */
 
-		$grid->addField('nacional');
-		$grid->label('Nac');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'align'         => "'center'",
-			'width'         => 40,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:1, maxlength: 1 }',
-		));
-
-
-		$grid->addField('cedula');
-		$grid->label('Cedula');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:20, maxlength: 20 }',
-		));
-
-
 		$grid->addField('sexo');
 		$grid->label('Sexo');
 		$grid->params(array(
@@ -284,6 +275,17 @@ class Medhisto extends Controller {
 			'editoptions'   => '{ size:1, maxlength: 1  }',
 		));
 
+		$grid->addField('ingreso');
+		$grid->label('Ingreso');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 70,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
 
 		$grid->addField('nacio');
 		$grid->label('F.Nacio');
