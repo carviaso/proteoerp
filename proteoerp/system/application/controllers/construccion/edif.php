@@ -686,8 +686,6 @@ class Edif extends Controller {
 		$edit = new DataEdit('', 'edif');
 		$edit->on_save_redirect=false;
 
-		//$edit->back_url = site_url($this->url.'filteredgrid');
-
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
@@ -705,12 +703,10 @@ class Edif extends Controller {
 		$edit->tipo->rule='max_length[10]|required';
 
 		$edit->direccion = new textareaField('Direcci&oacute;n','direccion');
-		//$edit->direccion->rule='max_length[255]';
 		$edit->direccion->cols = 70;
 		$edit->direccion->rows = 4;
 
 		$edit->descripcion = new textareaField('Descripci&oacute;n','descripcion');
-		//$edit->descripcion->rule='max_length[512]';
 		$edit->descripcion->cols = 70;
 		$edit->descripcion->rows = 4;
 
@@ -723,62 +719,6 @@ class Edif extends Controller {
 		$edit->buttons('modify', 'save', 'undo', 'delete', 'back','add');
 		$edit->build();
 
-/*
-		$data['content'] = $edit->output;
-		$data['head']    = $this->rapyd->get_head();
-		$data['title']   = heading($this->tits);
-
-		$this->rapyd->load('dataedit');
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-			$(".inputnum").numeric(".");
-		});
-		';
-
-		$edit = new DataEdit($this->tits, 'edif');
-
-		$edit->script($script,'modify');
-		$edit->script($script,'create');
-		$edit->on_save_redirect=false;
-
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
-		$edit->post_process('insert','_post_insert');
-		$edit->post_process('update','_post_update');
-		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
-
-		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='';
-		$edit->nombre->size =122;
-		$edit->nombre->maxlength =120;
-
-		$edit->tipo = new inputField('Tipo','tipo');
-		$edit->tipo->rule='integer';
-		$edit->tipo->css_class='inputonlynum';
-		$edit->tipo->size =12;
-		$edit->tipo->maxlength =10;
-
-		$edit->direccion = new textareaField('Direccion','direccion');
-		$edit->direccion->rule='';
-		$edit->direccion->cols = 70;
-		$edit->direccion->rows = 4;
-
-		$edit->descripcion = new textareaField('Descripcion','descripcion');
-		$edit->descripcion->rule='';
-		$edit->descripcion->cols = 70;
-		$edit->descripcion->rows = 4;
-
-		$edit->promotora = new inputField('Promotora','promotora');
-		$edit->promotora->rule='';
-		$edit->promotora->size =7;
-		$edit->promotora->maxlength =5;
-
-		$edit->build();
-*/
 		if($edit->on_success()){
 			$rt=array(
 				'status' =>'A',
