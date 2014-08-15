@@ -12,6 +12,78 @@ if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'<
 if($form->_status <> 'show'){ ?>
 
 <script language="javascript" type="text/javascript">
+$('#propietario').autocomplete({
+	delay: 600,
+	autoFocus: true,
+	source: function(req, add){
+		$.ajax({
+			url:  "<?php echo site_url('ajax/buscascli'); ?>",
+			type: "POST",
+			dataType: "json",
+			data: {"q":req.term},
+			success:
+				function(data){
+					var sugiere = [];
+					if(data.length==0){
+						$('#nompro').html('');
+					}else{
+						$.each(data,
+							function(i, val){
+								sugiere.push( val );
+							}
+						);
+					}
+					add(sugiere);
+				},
+		})
+	},
+	minLength: 2,
+	select: function( event, ui ) {
+		var meco;
+		$('#propietario').attr("readonly", "readonly");
+		$('#nompro').html(ui.item.nombre);
+		$('#propietario').val(ui.item.cod_cli);
+		setTimeout(function() {  $("#propietario").removeAttr("readonly"); }, 1500);
+	}
+});
+
+$('#ocupante').autocomplete({
+	delay: 600,
+	autoFocus: true,
+	source: function(req, add){
+		$.ajax({
+			url:  "<?php echo site_url('ajax/buscascli'); ?>",
+			type: "POST",
+			dataType: "json",
+			data: {"q":req.term},
+			success:
+				function(data){
+					var sugiere = [];
+					if(data.length==0){
+						$('#nomocu').html('');
+					}else{
+						$.each(data,
+							function(i, val){
+								sugiere.push( val );
+							}
+						);
+					}
+					add(sugiere);
+				},
+		})
+	},
+	minLength: 2,
+	select: function( event, ui ) {
+		var meco;
+		$('#ocupante').attr("readonly", "readonly");
+		$('#nomocu').html(ui.item.nombre);
+		$('#ocupante').val(ui.item.cod_cli);
+		setTimeout(function() {  $("#ocupante").removeAttr("readonly"); }, 1500);
+	}
+});
+
+
+
 </script>
 <?php } ?>
 
@@ -84,7 +156,21 @@ if($form->_status <> 'show'){ ?>
 		<td class="littletablerowth"><?php echo $form->alicuota->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->alicuota->output; ?></td>
 	</tr>
-
 </table>
 </fieldset>
+<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+<table width='100%'>
+	<tr>
+		<td class="littletablerowth" width='100'><?php echo $form->propietario->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->propietario->output; ?></td>
+		<td class="littletablerow"  ><div id='nompro'>&nbsp;</div></td>
+	</tr>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->ocupante->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->ocupante->output; ?></td>
+		<td class="littletablerow"  ><div id='nomocu'>&nbsp;</div></td>
+	</tr>
+</table>
+</fieldset>
+
 <?php echo $form_end; ?>

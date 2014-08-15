@@ -69,7 +69,7 @@ class Edinmue extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '450', '600' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '500', '600' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -540,7 +540,7 @@ class Edinmue extends Controller {
 		function edif_change(){
 			$.post("'.$link1.'",{ edif:$("#edificacion").val() }, function(data){ $("#ubicacion").html(data);})
 		}
-';
+		';
 
 
 		$edit = new DataEdit('', 'edinmue');
@@ -614,8 +614,8 @@ class Edinmue extends Controller {
 
 		$edit->caracteristicas = new textareaField('Caracter&iacute;sticas','caracteristicas');
 		//$edit->caracteristicas->rule='max_length[8]';
-		$edit->caracteristicas->cols = 69;
-		$edit->caracteristicas->rows = 4;
+		$edit->caracteristicas->cols = 65;
+		$edit->caracteristicas->rows = 2;
 
 		$edit->area = new inputField('&Aacute;rea Mt2','area');
 		$edit->area->rule='max_length[15]|numeric';
@@ -657,6 +657,16 @@ class Edinmue extends Controller {
 		$edit->alicuota->rule='max_length[15]|numeric';
 		$edit->alicuota->css_class='inputnum';
 		$edit->alicuota->size =15;
+
+		$edit->propietario = new inputField('Propietario','propietario');
+		$edit->propietario->rule='';
+		$edit->propietario->size =7;
+		$edit->propietario->maxlength =5;
+
+		$edit->ocupante = new inputField('Ocupante','ocupante');
+		$edit->ocupante->rule='';
+		$edit->ocupante->size =7;
+		$edit->ocupante->maxlength =5;
 
 		$edit->buttons('modify', 'save', 'undo', 'delete', 'back','add');
 		$edit->build();
