@@ -72,20 +72,20 @@ $scampos3 .='<td class="littletablerow" align="left" >'.$campos3['it3actividad']
 $scampos3 .='<td class="littletablerow" align="right">'.$campos3['it3tunidad']['field'].'</td>';
 $scampos3 .='<td class="littletablerow" align="right">'.$campos3['it3tiempo']['field'].'</td>';
 $scampos3 .='<td class="littletablerow"  align="center"><a href=# onclick="del_sinvplabor(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
-$campos3=$form->js_escape($scampos3);
+$campos3 = $form->js_escape($scampos3);
 
-$link  =site_url('inventario/common/add_marc');
-$link4 =site_url('inventario/common/get_marca');
-$link5 =site_url('inventario/common/add_unidad');
-$link6 =site_url('inventario/common/get_unidad');
-$link7 =site_url('inventario/sinv/ultimo');
-$link8 =site_url('inventario/sinv/sugerir');
-$link9 =site_url('inventario/common/add_depto');
-$link10=site_url('inventario/common/get_depto');
-$link11=site_url('inventario/common/add_linea');
-$link12=site_url('inventario/common/get_linea');
-$link13=site_url('inventario/common/add_grupo');
-$link14=site_url('inventario/common/get_grupo');
+$link  = site_url('inventario/common/add_marc');
+$link4 = site_url('inventario/common/get_marca');
+$link5 = site_url('inventario/common/add_unidad');
+$link6 = site_url('inventario/common/get_unidad');
+$link7 = site_url('inventario/sinv/ultimo');
+$link8 = site_url('inventario/sinv/sugerir');
+$link9 = site_url('inventario/common/add_depto');
+$link10= site_url('inventario/common/get_depto');
+$link11= site_url('inventario/common/add_linea');
+$link12= site_url('inventario/common/get_linea');
+$link13= site_url('inventario/common/add_grupo');
+$link14= site_url('inventario/common/get_grupo');
 ?>
 <style >
 .ui-autocomplete {max-height: 150px;overflow-y: auto;max-width: 600px;}
@@ -495,9 +495,6 @@ function totalizarpitem(){
 		}
 	});
 	tota=roundNumber(tota,2);
-	//$("#pond").val(tota);
-	//$("#ultimo").val(tota);
-	//calculos('S');
 }
 
 function autocodpitem(id){

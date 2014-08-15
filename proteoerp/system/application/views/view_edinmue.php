@@ -80,6 +80,11 @@ if($form->_status <> 'show'){ ?>
 		<td class="littletablerowth"><?php echo $form->preciomt2a->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->preciomt2a->output; ?></td>
 	</tr>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->alicuota->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->alicuota->output; ?></td>
+	</tr>
+
 </table>
 </fieldset>
 <?php echo $form_end; ?>

@@ -4,7 +4,7 @@ $maxlin=33; //Maximo de lineas de items.
 if(count($parametros) < 0) show_error('Faltan parametros');
 $id = $parametros[0];
 $ultima = 0;
-if (count($parametros)== 2 ) $ultima = $parametros[1];
+if (count($parametros) == 2 ) $ultima = $parametros[1];
 
 $this->db->select("*");
 $this->db->from('medhisto');

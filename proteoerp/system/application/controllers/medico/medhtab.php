@@ -511,17 +511,16 @@ class Medhtab extends Controller {
 
 	function instalar(){
 		if (!$this->db->table_exists('medhtab')) {
-			$mSQL="CREATE TABLE `medhtab` (
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `grupo` int(11) NOT NULL DEFAULT '0',
-			  `nombre` varchar(80) DEFAULT NULL,
-			  `descripcion` text,
-			  PRIMARY KEY (`id`)
+			$mSQL="
+			CREATE TABLE `medhtab` (
+			  id          int(11) NOT NULL AUTO_INCREMENT,
+			  grupo       int(11) NOT NULL DEFAULT '0',
+			  nombre      varchar(80) DEFAULT NULL,
+			  descripcion text,
+			  PRIMARY KEY (id)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=FIXED";
 			$this->db->query($mSQL);
 		}
-		//$campos=$this->db->list_fields('medhtab');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 
 

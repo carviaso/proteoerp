@@ -760,7 +760,8 @@ class Medhisto extends Controller {
 
 	function instalar(){
 		if (!$this->db->table_exists('medhisto')) {
-			$mSQL="CREATE TABLE `medhisto` (
+			$mSQL="
+			CREATE TABLE `medhisto` (
 			  `numero` varchar(20) DEFAULT NULL,
 			  `ingreso` date DEFAULT NULL,
 			  `nombre` varchar(50) DEFAULT NULL,
@@ -785,7 +786,9 @@ class Medhisto extends Controller {
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
 			  PRIMARY KEY (`id`),
 			  KEY `numero` (`numero`)
-			) ENGINE=InnoDB AUTO_INCREMENT=27260 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='Historias Medicas'";
+			) ENGINE=InnoDB AUTO_INCREMENT=27260 DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT COMMENT='Historias Medicas'
+			
+			";
 			$this->db->query($mSQL);
 		}
 		//$campos=$this->db->list_fields('medhisto');

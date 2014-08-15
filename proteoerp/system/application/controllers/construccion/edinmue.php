@@ -30,12 +30,13 @@ class Edinmue extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"galicuota", "img"=>"images/pdf_logo.gif",  "alt" => "Alicuotas", "label"=>"Alicuotas"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
 			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
 			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'falicu',  'title'=>'Agregar/Editar Alicuota'),
 			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
@@ -68,11 +69,106 @@ class Edinmue extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '550', '600' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '450', '600' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
 		$bodyscript .= '});';
+
+		$bodyscript .= '
+		jQuery("#galicuota").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				$.post("'.site_url('construccion/edalicuota/dataefla/create').'/"+id, function(data){
+					$("#falicu").html(data);
+					$("#falicu").dialog( "open" );
+				})
+			} else { $.prompt("<h1>Por favor Seleccione un Inmueble</h1>");}
+		});';
+
+
+		$bodyscript .= '
+		$("#falicu").dialog({
+			autoOpen: false, height: 200, width: 400, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var vurl = $("#df1").attr("action");
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: vurl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									//$.prompt("<h1>Registro Guardado</h1>");
+									$( "#falicu" ).dialog( "close" );
+									idvisita = json.pk.id;
+									return true;
+								} else {
+									$.prompt(json.mensaje);
+								}
+							} catch(e) {
+								$("#falicu").html(r);
+							}
+						}
+					})
+				},
+				"Guardar y Seguir": function(){
+					var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+					var vurl = $("#df1").attr("action");
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: vurl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									$.prompt("<h1>Registro Guardado con exito</h1>");
+									idalicu = json.pk.id;
+									$.post("'.site_url('construccion/edialicuota/dataefla').'/create/"+id+"/"+idalicu,
+									function(data){
+										$("#falicu").html(data);
+									});
+									return true;
+								} else {
+									$.prompt(json.mensaje);
+								}
+							} catch(e) {
+								$("#falicu").html(r);
+							}
+						}
+					})				
+				},
+				"Cancelar": function() {
+					$("#falicu").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#falicu").html("");
+			}
+		});
+		';
+
+		$bodyscript .= '
+		function elialicu(id){
+			$.prompt("<h1>Eliminar alicuota</h1>", {
+				buttons: { Eliminar: true, Cancelar: false },
+				submit: function(e,v,m,f){
+					if (v) {
+						$.ajax({ url: "'.site_url('construccion/edalicuota/elimina').'/"+id,
+							complete: function(){ 
+								alert("Alicuota Eliminada");
+							}
+						});
+					}
+				}
+			});
+		}
+		';
+
 
 		$bodyscript .= '</script>';
 
@@ -92,8 +188,9 @@ class Edinmue extends Controller {
 		$grid->label('Id');
 		$grid->params(array(
 			'align'         => "'center'",
+			'hidden'        => 'true',
 			'frozen'        => 'true',
-			'width'         => 40,
+			'width'         => 30,
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
@@ -104,7 +201,7 @@ class Edinmue extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 150,
+			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:15, maxlength: 15 }',
@@ -307,13 +404,24 @@ class Edinmue extends Controller {
 			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
 
-
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('290');
 		$grid->setTitle($this->titp);
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
+
+		$grid->setOnSelectRow('
+			function(id){
+			if (id){
+				$.ajax({
+					url: "'.site_url('construccion/edalicuota').'/tabla/"+id,
+					success: function(msg){
+						$("#ladicional").html(msg);
+					}
+				});
+			}}
+		');
 
 		$grid->setFormOptionsE('closeAfterEdit:true, mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
@@ -324,6 +432,7 @@ class Edinmue extends Controller {
 		$grid->setEdit(   $this->datasis->sidapuede('EDINMUE','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('EDINMUE','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('EDINMUE','BUSQUEDA%'));
+
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
@@ -351,7 +460,7 @@ class Edinmue extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('edinmue');
 
-		$response   = $grid->getData('edinmue', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('edinmue', array(array()), array(), false, $mWHERE, 'codigo' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -505,7 +614,7 @@ class Edinmue extends Controller {
 
 		$edit->caracteristicas = new textareaField('Caracter&iacute;sticas','caracteristicas');
 		//$edit->caracteristicas->rule='max_length[8]';
-		$edit->caracteristicas->cols = 70;
+		$edit->caracteristicas->cols = 69;
 		$edit->caracteristicas->rows = 4;
 
 		$edit->area = new inputField('&Aacute;rea Mt2','area');
@@ -516,156 +625,42 @@ class Edinmue extends Controller {
 
 		$edit->estaciona = new inputField('Estacionamiento','estaciona');
 		$edit->estaciona->rule='max_length[10]|integer';
-		$edit->estaciona->size =10;
+		$edit->estaciona->size =15;
 		$edit->estaciona->css_class='inputonlynum';
 		$edit->estaciona->maxlength =10;
 
 		$edit->deposito = new inputField('Dep&oacute;sito','deposito');
 		$edit->deposito->rule='max_length[11]|integer';
-		$edit->deposito->size =10;
+		$edit->deposito->size =15;
 		$edit->deposito->maxlength =11;
 		$edit->deposito->css_class='inputonlynum';
 
 		$edit->preciomt2e = new inputField('Precio x mt2 (Contado)','preciomt2e');
 		$edit->preciomt2e->rule='max_length[15]|numeric';
 		$edit->preciomt2e->css_class='inputnum';
-		$edit->preciomt2e->size =10;
+		$edit->preciomt2e->size =15;
 		$edit->preciomt2e->maxlength =15;
 
 		$edit->preciomt2c = new inputField('Precio x mt2 (Cr&eacute;dito)','preciomt2c');
 		$edit->preciomt2c->rule='max_length[15]|numeric';
 		$edit->preciomt2c->css_class='inputnum';
-		$edit->preciomt2c->size =10;
+		$edit->preciomt2c->size =15;
 		$edit->preciomt2c->maxlength =15;
 
 		$edit->preciomt2a = new inputField('Precio x mt2 (Alquiler)','preciomt2');
 		$edit->preciomt2a->rule='max_length[15]|numeric';
 		$edit->preciomt2a->css_class='inputnum';
-		$edit->preciomt2a->size =10;
+		$edit->preciomt2a->size =15;
 		$edit->preciomt2a->maxlength =15;
 
+		$edit->alicuota = new inputField('Alicuota %','alicuota');
+		$edit->alicuota->rule='max_length[15]|numeric';
+		$edit->alicuota->css_class='inputnum';
+		$edit->alicuota->size =15;
 
 		$edit->buttons('modify', 'save', 'undo', 'delete', 'back','add');
 		$edit->build();
-/*
-		$data['content'] = $edit->output;
-		$data['script']  = script('jquery.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js').$script;
-		$data['head']    = $this->rapyd->get_head();
-		$data['title']   = heading($this->tits);
-		$this->load->view('view_ventanas', $data);
-*/
 
-/*
-		$this->rapyd->load('dataedit');
-		$script= '
-		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
-			$(".inputnum").numeric(".");
-		});
-		';
-
-		$edit = new DataEdit($this->tits, 'edinmue');
-
-		$edit->script($script,'modify');
-		$edit->script($script,'create');
-		$edit->on_save_redirect=false;
-
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
-		$edit->post_process('insert','_post_insert');
-		$edit->post_process('update','_post_update');
-		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
-
-		$edit->codigo = new inputField('Codigo','codigo');
-		$edit->codigo->rule='';
-		$edit->codigo->size =17;
-		$edit->codigo->maxlength =15;
-
-		$edit->descripcion = new inputField('Descripcion','descripcion');
-		$edit->descripcion->rule='';
-		$edit->descripcion->size =102;
-		$edit->descripcion->maxlength =100;
-
-		$edit->edificacion = new inputField('Edificacion','edificacion');
-		$edit->edificacion->rule='integer';
-		$edit->edificacion->css_class='inputonlynum';
-		$edit->edificacion->size =13;
-		$edit->edificacion->maxlength =11;
-
-		$edit->uso = new inputField('Uso','uso');
-		$edit->uso->rule='integer';
-		$edit->uso->css_class='inputonlynum';
-		$edit->uso->size =13;
-		$edit->uso->maxlength =11;
-
-		$edit->usoalter = new inputField('Usoalter','usoalter');
-		$edit->usoalter->rule='integer';
-		$edit->usoalter->css_class='inputonlynum';
-		$edit->usoalter->size =13;
-		$edit->usoalter->maxlength =11;
-
-		$edit->ubicacion = new inputField('Ubicacion','ubicacion');
-		$edit->ubicacion->rule='integer';
-		$edit->ubicacion->css_class='inputonlynum';
-		$edit->ubicacion->size =13;
-		$edit->ubicacion->maxlength =11;
-
-		$edit->caracteristicas = new textareaField('Caracteristicas','caracteristicas');
-		$edit->caracteristicas->rule='';
-		$edit->caracteristicas->cols = 70;
-		$edit->caracteristicas->rows = 4;
-
-		$edit->area = new inputField('Area','area');
-		$edit->area->rule='numeric';
-		$edit->area->css_class='inputnum';
-		$edit->area->size =17;
-		$edit->area->maxlength =15;
-
-		$edit->estaciona = new inputField('Estaciona','estaciona');
-		$edit->estaciona->rule='integer';
-		$edit->estaciona->css_class='inputonlynum';
-		$edit->estaciona->size =12;
-		$edit->estaciona->maxlength =10;
-
-		$edit->deposito = new inputField('Deposito','deposito');
-		$edit->deposito->rule='integer';
-		$edit->deposito->css_class='inputonlynum';
-		$edit->deposito->size =13;
-		$edit->deposito->maxlength =11;
-
-		$edit->preciomt2e = new inputField('Preciomt2e','preciomt2e');
-		$edit->preciomt2e->rule='numeric';
-		$edit->preciomt2e->css_class='inputnum';
-		$edit->preciomt2e->size =17;
-		$edit->preciomt2e->maxlength =15;
-
-		$edit->preciomt2c = new inputField('Preciomt2c','preciomt2c');
-		$edit->preciomt2c->rule='numeric';
-		$edit->preciomt2c->css_class='inputnum';
-		$edit->preciomt2c->size =17;
-		$edit->preciomt2c->maxlength =15;
-
-		$edit->preciomt2a = new inputField('Preciomt2a','preciomt2a');
-		$edit->preciomt2a->rule='numeric';
-		$edit->preciomt2a->css_class='inputnum';
-		$edit->preciomt2a->size =17;
-		$edit->preciomt2a->maxlength =15;
-
-		$edit->objeto = new inputField('Objeto','objeto');
-		$edit->objeto->rule='';
-		$edit->objeto->size =3;
-		$edit->objeto->maxlength =1;
-
-		$edit->status = new inputField('Status','status');
-		$edit->status->rule='';
-		$edit->status->size =3;
-		$edit->status->maxlength =1;
-
-		$edit->build();
-*/
 		if($edit->on_success()){
 			$rt=array(
 				'status' =>'A',
@@ -692,7 +687,7 @@ class Edinmue extends Controller {
 
 	function _pre_delete($do){
 		$do->error_message_ar['pre_del']='';
-		return false;
+		return true;
 	}
 
 	function _post_insert($do){

@@ -528,30 +528,6 @@ class Sfac extends Controller {
 				}
 			});';
 
-/*
-											//setTimeout(\'window.location="'.base_url().'formatos/'.$sfacforma.'/FACTURA/\'+json.pk.id+\'"\');
-											//$.prompt("<h1>Registro Guardado</h1>Nro de Control:<input id=\'nfiscal\' name=\'nfiscal\'><br><h2>Cambio: "+json.vuelto+"</h2>",{
-											//	buttons: { Guardar: true, Cancelar: false },
-											//	submit: function(e,v,m,f){
-											//		if(v){
-											//			if(f.nfiscal == null || nfiscal == "" ){
-											//				alert("Debe colocal un Nro de Control");
-											//			}else{
-											//				yurl = encodeURIComponent(f.nfiscal);
-											//				$.ajax({
-											//					url: \''.site_url('ventas/sfac/guardafiscal').'\',
-											//					global: false, type: "POST",
-											//					data: ({ nfiscal : encodeURIComponent(f.nfiscal), factura : json.pk.id }),
-											//					dataType: "text", async: false,
-											//					success: function(sino) { alert(sino);},
-											//					error: function(h,t,e) { alert("Error.. ",e) }
-											//				});
-											//			}
-											//		}
-											//	}
-											//});
-
-*/
 
 		$bodyscript .= '
 			$("#fcobroser" ).dialog({

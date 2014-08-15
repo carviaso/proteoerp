@@ -867,7 +867,6 @@ class Banc extends Controller {
 		$edit->codprv->rule= 'condi_required|callback_chiscaja|trim';
 		$edit->codprv->append($boton);
 		$edit->codprv->append($lsprv);
-		//$edit->codprv->append(' Solo bancos');
 		$edit->codprv->size = 6;
 
 		$edit->depto = new dropdownField('Departamento', 'depto');
