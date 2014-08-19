@@ -7,7 +7,7 @@
 */
 class Edgasto extends Controller {
 	var $mModulo = 'EDGASTO';
-	var $titp    = 'GASTOSTOS DE CONDOMINIO';
+	var $titp    = 'GASTOS DE CONDOMINIO';
 	var $tits    = 'GASTOS DE CONDOMINIO';
 	var $url     = 'construccion/edgasto/';
 
@@ -99,6 +99,7 @@ class Edgasto extends Controller {
 		$grid->params(array(
 			'align'         => "'center'",
 			'frozen'        => 'true',
+			'hidden'        => 'true',
 			'width'         => 40,
 			'editable'      => 'false',
 			'search'        => 'false'
@@ -106,9 +107,10 @@ class Edgasto extends Controller {
 
 
 		$grid->addField('tipo_doc');
-		$grid->label('Tipo_doc');
+		$grid->label('Tipo');
 		$grid->params(array(
 			'search'        => 'true',
+			'align'         => "'center'",
 			'editable'      => $editar,
 			'width'         => 40,
 			'edittype'      => "'text'",
@@ -122,7 +124,7 @@ class Edgasto extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:20, maxlength: 20 }',
@@ -164,21 +166,6 @@ class Edgasto extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
-		));
-
-
-		$grid->addField('partida');
-		$grid->label('Partida');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
 		));
 
 
@@ -237,6 +224,19 @@ class Edgasto extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		$grid->addField('partida');
+		$grid->label('Partida');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 40,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+		));
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -352,6 +352,7 @@ class Edgasto extends Controller {
 		$script = '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$("#causado").datepicker({dateFormat:"dd/mm/yy"});
 			$(".inputnum").numeric(".");
 		});
 		';

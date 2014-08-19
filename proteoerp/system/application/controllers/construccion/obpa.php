@@ -278,6 +278,17 @@ class Obpa extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		$grid->addField('gasto');
+		$grid->label('Gasto');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 60,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:6, maxlength: 6 }',
+		));
+
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('290');
@@ -391,7 +402,6 @@ class Obpa extends Controller {
 		$this->rapyd->load('dataedit');
 		$script= '
 		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 			$(".inputnum").numeric(".");
 		});
 		';
@@ -440,6 +450,11 @@ class Obpa extends Controller {
 		$edit->comision->size =7;
 		$edit->comision->maxlength =5;
 
+		$edit->gasto = new inputField('Gasto','gasto');
+		$edit->gasto->rule='';
+		$edit->gasto->size =8;
+		$edit->gasto->maxlength =6;
+
 
 		$edit->build();
 
@@ -475,7 +490,6 @@ class Obpa extends Controller {
 		$mSQL = 'UPDATE obpa a JOIN obgp b ON a.grupo=b.id SET a.nomgrup=b.grupo';
 		$this->db->query($mSQL);
 		logusu($do->table,"Creo $this->tits $primary ");
-
 	}
 
 	function _post_update($do){
@@ -493,12 +507,15 @@ class Obpa extends Controller {
 	function instalar(){
 		if (!$this->db->table_exists('obpa')) {
 			$mSQL="CREATE TABLE `obpa` (
-			  `codigo` char(4) NOT NULL DEFAULT '',
-			  `descrip` varchar(40) DEFAULT NULL,
-			  `grupo` char(4) DEFAULT NULL,
-			  `comision` decimal(5,2) DEFAULT NULL,
-			  `nomgrup` varchar(30) DEFAULT NULL,
-			  PRIMARY KEY (`codigo`)
+			  codigo    char(4)      NOT NULL DEFAULT '',
+			  descrip   varchar(40)  DEFAULT NULL,
+			  grupo     int(11)      DEFAULT NULL,
+			  comision  decimal(5,2) DEFAULT NULL,
+			  nomgrup   varchar(30)  DEFAULT NULL,
+			  gasto     varchar(6)   DEFAULT NULL,
+			  id        int(11)      NOT NULL AUTO_INCREMENT,
+			  PRIMARY KEY (id),
+			  UNIQUE KEY codigo (codigo)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
 			$this->db->query($mSQL);
 		}

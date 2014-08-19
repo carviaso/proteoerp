@@ -83,7 +83,6 @@ $('#ocupante').autocomplete({
 });
 
 
-
 </script>
 <?php } ?>
 
