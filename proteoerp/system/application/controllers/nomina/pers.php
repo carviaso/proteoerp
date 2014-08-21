@@ -1490,7 +1490,7 @@ class Pers extends Controller {
 				'pk'     =>$edit->_dataobject->pk
 			);
 			echo json_encode($rt);
-		}else{
+		} else {
 			$conten['form']  =& $edit;
 			$this->load->view('view_pers', $conten);
 		}
