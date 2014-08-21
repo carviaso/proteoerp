@@ -276,6 +276,8 @@ class Caub extends validaciones {
 		$id     = $this->input->post('id');
 		$codigo = $this->input->post('ubica');
 
+		$dbcodigo=$this->db->escape($codigo);
+
 		$data = $_POST;
 
 		unset($data['oper']);
@@ -284,7 +286,7 @@ class Caub extends validaciones {
 		if($oper == 'add'){
 			if(false == empty($data)){
 				$this->db->insert('caub', $data);
-				logusu('caub',"Almacen $codigo CREADO");
+				logusu('caub',"Almacen ${codigo} CREADO");
 			}
 			echo '';
 			return;
@@ -293,11 +295,15 @@ class Caub extends validaciones {
 			unset($data['ubica']);
 			$this->db->where('id', $id);
 			$this->db->update('caub', $data);
-			logusu('caub',"Almacen $codigo MODIFICADO");
+			logusu('caub',"Almacen ${codigo} MODIFICADO");
 			return;
 
 		} elseif($oper == 'del') {
-			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM itsinv WHERE alma='$codigo' AND existen>0");
+			$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM itsinv WHERE alma=${dbcodigo} AND existen>0"));
+			$check+= intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM scst WHERE depo=${dbcodigo}"));
+			$check+= intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM stra WHERE ${dbcodigo} IN (envia,recibe)"));
+			$check+= intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM ssal WHERE almacen=${dbcodigo}"));
+
 			if ($check > 0){
 				echo " El almacen no fuede ser eliminado; tiene movimiento ";
 			} else {

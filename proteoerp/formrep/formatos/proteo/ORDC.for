@@ -33,7 +33,7 @@ $fecha    = dbdate_to_human($row->fecha);
 $numero   = htmlspecialchars(trim($row->numero));
 $proveed  = htmlspecialchars(trim($row->proveed));
 $rifci    = htmlspecialchars(trim($row->rif));
-$nombre   = htmlspecialchars(trim($row->nombre));
+$nombre   = $this->us_ascii2html($row->nombre);
 $stotal   = nformat($row->totals);
 $gtotal   = nformat($row->totalg);
 $peso     = nformat($row->peso);
@@ -218,7 +218,7 @@ foreach ($detalle AS $items){ $i++;
 
 					while(count($arr_des)>0){
 						$uline   = array_shift($arr_des);
-						echo $uline.'<br>';
+						echo $this->us_ascii2html($uline).'<br>';
 						$lineas++;
 						if($lineas >= $maxlin){
 							$lineas =0;
