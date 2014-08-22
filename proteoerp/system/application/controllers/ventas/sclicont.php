@@ -7,8 +7,8 @@
 */
 class Sclicont extends Controller {
 	var $mModulo = 'SCLICONT';
-	var $titp    = 'CONTRATOS RECURRENTES';
-	var $tits    = 'CONTRATOS RECURRENTES';
+	var $titp    = 'CONTRATOS PERIODICOS';
+	var $tits    = 'CONTRATOS PERIODICOS';
 	var $url     = 'ventas/sclicont/';
 
 	function Sclicont(){
@@ -75,7 +75,7 @@ class Sclicont extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '300', '550' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '350', '560' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -376,6 +376,7 @@ class Sclicont extends Controller {
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 		$script = '
+		var mtasa = 12;
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 			$("#inicio").datepicker({dateFormat:"dd/mm/yy"});
@@ -453,18 +454,56 @@ class Sclicont extends Controller {
 		},
 		minLength: 2,
 			select: function( event, ui ){
+				var cana = $("#cantidad").val();
+				mtasa = ui.item.iva;
+				
 				$("#codigo").attr("readonly", "readonly");
 				$("#codigo").val(ui.item.value);
 				$("#descrip").val(ui.item.descrip);
+				if ( !cana ){ 
+					$("#cantidad").val(1);
+				}
+				$("#precio").val(ui.item.base1);
 				$("#base").val(ui.item.base1);
-				$("#iva").val(ui.item.iva);
-				$("#precio").val(ui.item.precio1);
-					
-					
+				totaliza();
 				setTimeout(function() {  $("#codigo").removeAttr("readonly"); }, 1500);
 			}
 		});
 		';
+
+
+		$script .= '
+		function totaliza(){
+			var iva      = 0;
+			var precio   = 0;
+			var base     = 0;
+			var importe  = 0;
+			var cantidad = 0;
+			
+			cantidad = Number($("#cantidad").val())
+			precio   = Number($("#precio").val());
+
+			base    = roundNumber(cantidad*precio,2);
+			iva     = roundNumber(base*mtasa/100,2);
+			importe = base+iva;
+
+			$("#base").val(base);
+			$("#iva").val(iva);
+			$("#importe").val(importe);
+		}
+		';
+
+		$script .= '
+		$("#cantidad").change(function () {
+			totaliza();
+		})
+		
+		$("#precio").change(function () {
+			totaliza();
+		})
+
+		';
+
 
 		$edit = new DataEdit('', 'sclicont');
 
@@ -531,23 +570,32 @@ class Sclicont extends Controller {
 		$edit->cantidad->size =8;
 		$edit->cantidad->maxlength =17;
 
-		$edit->base = new inputField('Precio','base');
+		$edit->base = new inputField('Base','base');
 		$edit->base->rule='numeric';
 		$edit->base->css_class='inputnum';
 		$edit->base->size =16;
 		$edit->base->maxlength =17;
+		$edit->base->readonly  =true;
 
 		$edit->iva = new inputField('IVA','iva');
 		$edit->iva->rule='numeric';
 		$edit->iva->css_class='inputnum';
 		$edit->iva->size =16;
 		$edit->iva->maxlength =17;
+		$edit->iva->readonly  =true;
 
-		$edit->precio = new inputField('Total','precio');
+		$edit->precio = new inputField('Precio','precio');
 		$edit->precio->rule='numeric';
 		$edit->precio->css_class='inputnum';
 		$edit->precio->size =16;
 		$edit->precio->maxlength =17;
+
+		$edit->importe = new inputField('Importe','importe');
+		$edit->importe->rule='numeric';
+		$edit->importe->readonly  =true;
+		$edit->importe->css_class='inputnum';
+		$edit->importe->size =16;
+		$edit->importe->maxlength =17;
 
 		$edit->build();
 
@@ -566,6 +614,11 @@ class Sclicont extends Controller {
 	}
 
 	function _pre_insert($do){
+		$numero = $do->get('numero');
+		if ( $numero == '') {
+			$numero = $this->datasis->fprox_numero('nsclicont');
+			$do->set('numero',$numero);
+		}
 		$do->error_message_ar['pre_ins']='';
 		return true;
 	}

@@ -34,6 +34,15 @@ if($form->_status <> 'show'){ ?>
 	<tr>
 		<td class="littletablerowth"><?php echo $form->cliente->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->cliente->output; ?></td>
+<?php
+if ( $form->cliente->value != '' ){
+	$nombre = $this->datasis->dameval('SELECT nombre FROM scli WHERE cliente='.$this->db->escape($form->cliente->value));
+?>
+		<td class="littletablerow" colspan='4'  ><div id='nombre' style='font-weight:bold;'><?php echo $nombre; ?></div></td>
+
+<?php
+} else
+?>
 		<td class="littletablerow" colspan='4'  ><div id='nombre' style='font-weight:bold;'></div></td>
 	</tr>
 </table>
@@ -46,23 +55,26 @@ if($form->_status <> 'show'){ ?>
 		<th><?php echo $form->codigo->label;   ?></th>
 		<th><?php echo $form->descrip->label;  ?></th>
 		<th><?php echo $form->cantidad->label; ?></th>
-		<th><?php echo $form->base->label;     ?></th>
+		<th><?php echo $form->precio->label;     ?></th>
 	</tr>
 	<tr>
 		<td class="littletablerow" valign='top' ><?php echo $form->codigo->output; ?></td>
 		<td class="littletablerow" valign='top' ><?php echo $form->descrip->output; ?></td>
 		<td class="littletablerow" valign='top' ><?php echo $form->cantidad->output; ?></td>
-		<td class="littletablerow" valign='top' ><?php echo $form->base->output; ?></td>
+		<td class="littletablerow" valign='top' ><?php echo $form->precio->output; ?></td>
 	</tr>
+</table>
+</fieldset>
+
+<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+<table width='100%'>
 	<tr>
-		<td colspan='2' class="littletablerow"  >&nbsp;</td>
+		<td class="littletablerowth"><?php echo $form->base->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->base->output; ?></td>
 		<td class="littletablerowth"><?php echo $form->iva->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->iva->output; ?></td>
-	</tr>
-	<tr>
-		<td colspan='2' class="littletablerow"  >&nbsp;</td>
-		<td class="littletablerowth"><?php echo $form->precio->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->precio->output; ?></td>
+		<td class="littletablerowth"><?php echo $form->importe->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->importe->output; ?></td>
 	</tr>
 </table>
 </fieldset>

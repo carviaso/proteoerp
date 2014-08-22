@@ -74,7 +74,7 @@ class Edgasto extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '400', '500' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '350', '500' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -346,12 +346,11 @@ class Edgasto extends Controller {
 
 	//******************************************************************
 	// Edicion 
-
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 		$script = '
 		$(function() {
-			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$("#fecha").datepicker(  {dateFormat:"dd/mm/yy"});
 			$("#causado").datepicker({dateFormat:"dd/mm/yy"});
 			$(".inputnum").numeric(".");
 		});
@@ -371,8 +370,8 @@ class Edgasto extends Controller {
 					function(data){
 						var sugiere = [];
 						if(data.length==0){
-							$("#nombre").val("");
-							$("#nombre_val").text("");
+							$("#proveedor").val("");
+							$("#proveedor_val").text("");
 							$("#proveed").val("");
 							$("#sprvreteiva").val("75");
 						}else{
@@ -389,7 +388,9 @@ class Edgasto extends Controller {
 			minLength: 2,
 			select: function( event, ui ) {
 				$("#proveed").attr("readonly", "readonly");
-				$("#td_nombre").text(ui.item.nombre);
+				$("#proveedor").val(ui.item.nombre);
+				$("#rif").val(ui.item.rif);
+				
 				setTimeout(function(){ $("#proveed").removeAttr("readonly"); }, 1500);
 				$("#serie").change();
 				//ajaxsanncprov();
@@ -409,13 +410,14 @@ class Edgasto extends Controller {
 		function totaliza(){
 			var total = 0;
 			var iva   = 0;
-			total = Number($("#base").val());
+			var base  = 0;
+			base = Number($("#base").val());
 			if ( $("#iva").val() == "" ){
-				$("#iva").val( roundNumber(total*0.12,2));
-				$("#iva_val").text(nformat(total*0.12,2));
+				$("#iva").val( 0 ); 
+				$("#iva_val").text(nformat(0,2));
 				
 			}
-			total = Number($("#base").val())+Number($("#iva").val());
+			total = base + Number($("#iva").val());
 			
 			$("#total").val(roundNumber(total,2));
 			$("#total_val").text(nformat(total,2));
@@ -423,6 +425,7 @@ class Edgasto extends Controller {
 
 		';
 
+/*
 		$sprvbus=array(
 			'tabla'   =>'sprv',
 			'columnas'=>array(
@@ -434,6 +437,7 @@ class Edgasto extends Controller {
 			'titulo'  =>'Buscar Proveedor');
 
 		$boton=$this->datasis->modbus($sprvbus);
+*/
 
 		$edit = new DataEdit('', 'edgasto');
 
@@ -450,16 +454,21 @@ class Edgasto extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$edit->tipo = new dropdownField('Tipo', 'tipo_doc');
-		$edit->tipo->option('FC','Factura');
-		$edit->tipo->option('RB','Recibo de Pago');
-		$edit->tipo->option('OT','Otro');
-		$edit->tipo->rule = 'required';
-		$edit->tipo->style='width:140px;';
+		$edit->aplicacion = new inputField('Aplicacion','aplicacion');
+		$edit->aplicacion->rule='';
+		$edit->aplicacion->size =7;
+		$edit->aplicacion->maxlength =5;
+
+		$edit->tipo_doc = new dropdownField('Tipo', 'tipo_doc');
+		$edit->tipo_doc->option('FC','Factura');
+		$edit->tipo_doc->option('RB','Recibo de Pago');
+		$edit->tipo_doc->option('OT','Otro');
+		$edit->tipo_doc->rule = 'required';
+		$edit->tipo_doc->style='width:140px;';
 
 		$edit->numero = new inputField('Numero','numero');
 		$edit->numero->rule      = '';
-		$edit->numero->size      = 22;
+		$edit->numero->size      = 15;
 		$edit->numero->maxlength = 20;
 		$edit->numero->rule      = 'required';
 
@@ -480,10 +489,10 @@ class Edgasto extends Controller {
 		$edit->proveed = new inputField('Proveedor', 'proveed');
 		$edit->proveed->size     = 10;
 		$edit->proveed->autocomplete=false;
-		$edit->proveed->rule     = 'required';
-		$edit->proveed->append($boton);
+		//$edit->proveed->rule     = 'required';
+		//$edit->proveed->append($boton);
 
-		$edit->nombre = new freeField("Nombre","nombre",""); 
+		//$edit->nombre = new freeField("Nombre","nombre",""); 
 
 		$edit->partida = new  dropdownField ('Partida', 'partida');
 		$edit->partida->options('SELECT codigo, CONCAT(codigo," ",descrip) descrip FROM obpa ORDER BY descrip');
@@ -514,6 +523,16 @@ class Edgasto extends Controller {
 		$edit->total->maxlength =10;
 		$edit->total->readonly  = true;
 
+		$edit->rif = new inputField('RIF','rif');
+		$edit->rif->rule='';
+		$edit->rif->size =13;
+		$edit->rif->maxlength =13;
+
+		$edit->proveedor = new inputField('Nombre','proveedor');
+		$edit->proveedor->rule='';
+		$edit->proveedor->size =42;
+		$edit->proveedor->maxlength =80;
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -524,7 +543,9 @@ class Edgasto extends Controller {
 			);
 			echo json_encode($rt);
 		}else{
-			echo $edit->output;
+			$conten['form']  =&  $edit;
+			$data['content']  =  $this->load->view('view_edgasto', $conten, false);
+			//echo $edit->output;
 		}
 	}
 

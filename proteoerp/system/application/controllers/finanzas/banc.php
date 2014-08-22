@@ -892,7 +892,6 @@ class Banc extends Controller {
 		$edit->gastocom->option('','Seleccionar');
 		$edit->gastocom->options($mSQL);
 		$edit->gastocom->style ='width:300px;';
-		//$edit->gastocom->append('Solo bancos');
 
 		$rif = '';
 		if ( $edit->getval('tbanco') && $edit->getval('tbanco') <> 'CAJ' )

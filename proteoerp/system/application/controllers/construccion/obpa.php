@@ -90,7 +90,7 @@ class Obpa extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '230', '400' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '250', '420' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -400,7 +400,8 @@ class Obpa extends Controller {
 
 	function dataedit(){
 		$this->rapyd->load('dataedit');
-		$script= '
+
+		$script = '
 		$(function() {
 			$(".inputnum").numeric(".");
 		});
@@ -426,7 +427,7 @@ class Obpa extends Controller {
 		$edit->codigo->size =6;
 		$edit->codigo->maxlength =4;
 
-		$edit->descrip = new inputField('Descrip','descrip');
+		$edit->descrip = new inputField('Descripcion','descrip');
 		$edit->descrip->rule='';
 		$edit->descrip->size =42;
 		$edit->descrip->maxlength =40;
@@ -450,11 +451,18 @@ class Obpa extends Controller {
 		$edit->comision->size =7;
 		$edit->comision->maxlength =5;
 
+		$mSQL="SELECT codigo, CONCAT_WS('-',TRIM(descrip),TRIM(codigo)) AS descrip FROM mgas ORDER BY descrip";
+		$edit->gasto = new dropdownField('Gasto','gasto');
+		$edit->gasto->option('','Seleccionar');
+		//$edit->gasto->rule= 'condi_required|callback_chisidb';
+		$edit->gasto->options($mSQL);
+		$edit->gasto->style ='width:300px;';
+/*
 		$edit->gasto = new inputField('Gasto','gasto');
 		$edit->gasto->rule='';
 		$edit->gasto->size =8;
 		$edit->gasto->maxlength =6;
-
+*/
 
 		$edit->build();
 

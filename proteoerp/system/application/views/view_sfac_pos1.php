@@ -441,15 +441,6 @@ function scliadd() {
 		}
 	});
 	$("#scliexp").dialog( "open" );
-
-/*
-	$.post('<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>',
-	function(data){
-	1	$("#scliexp").html("");
-		$("#scliexp").html(data);
-		$("#scliexp").dialog( "open" );
-	})
-*/
 };
 
 function limpiavacio(){
@@ -593,7 +584,6 @@ function add_sfpa(){
 	$("#__ITPL__sfpa").after(htm);
 	falta =faltante();
 	$("#monto_"+can).val(roundNumber(falta,2));
-	//$("#sfpafecha_"+can).datepicker({ dateFormat: "dd/mm/yy" });
 	sfpa_cont=sfpa_cont+1;
 	return can;
 }
