@@ -2009,7 +2009,7 @@ class Scst extends Controller {
 		$edit->fecha->size = 12;
 		$edit->fecha->rule ='required|chfecha';
 		$edit->fecha->calendar=false;
-		$transac=$edit->get_from_dataobjetct('transac');
+		//$transac=$edit->get_from_dataobjetct('transac');
 
 		$edit->vence = new DateonlyField('Vence', 'vence','d/m/Y');
 		$edit->vence->insertValue = date('Y-m-d');
@@ -2054,12 +2054,28 @@ class Scst extends Controller {
 		$edit->nombre->size = 50;
 		$edit->nombre->maxlength=40;
 
+		$edit->aplrete  = new hiddenField('aplrete', 'aplrete');
+
 		$edit->sprvreteiva = new hiddenField('', 'sprvreteiva');
 		$edit->sprvreteiva->pointer=true;
 		$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
 		$rif     = $this->datasis->traevalor('RIF');
 		if($contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
 			$edit->sprvreteiva->insertValue='75';
+
+			$tipo_doc=$edit->get_from_dataobjetct('tipo_doc');
+			if($tipo_doc=='NC'){
+				$reteiva = floatval($edit->get_from_dataobjetct('reteiva'));
+				if($reteiva>0){
+					$edit->aplrete->insertValue = '1';
+				}else{
+					$edit->aplrete->insertValue = '0';
+				}
+			}else{
+				$edit->aplrete->insertValue = '1';
+			}
+		}else{
+			$edit->aplrete->insertValue = '0';
 		}
 
 		$edit->cfis = new inputField('N&uacute;mero fiscal', 'nfiscal');
@@ -3104,7 +3120,7 @@ class Scst extends Controller {
 		$edit->serie->mode = 'autohide';
 		$edit->serie->maxlength=12;
 
-		$edit->cfis = new inputField('Numero fiscal', 'nfiscal');
+		$edit->cfis = new inputField('N&uacute;mero fiscal', 'nfiscal');
 		$edit->cfis->size = 15;
 		$edit->cfis->autocomplete=false;
 		$edit->cfis->mode = 'autohide';
@@ -3292,6 +3308,7 @@ class Scst extends Controller {
 		$edit->id_sfac->rel_id   = 'sinvehiculo';
 		$edit->id_sfac->db_name  = 'id_sfac';
 
+
 		$recep  =strtotime($edit->get_from_dataobjetct('recep'));
 		$fecha  =strtotime($edit->get_from_dataobjetct('fecha'));
 		$actuali=strtotime($edit->get_from_dataobjetct('actuali'));
@@ -3323,9 +3340,9 @@ class Scst extends Controller {
 
 		if($pasa==0){
 			$control=$this->datasis->dameval('SELECT control FROM scst WHERE  id='.$id);
-			
+
 			$msql = "'UPDATE scst SET credito=ctotal-reten-anticipo WHERE id='.$id";
-			
+
 			//Chequea si tiene vehiculos y estan registrados los seriales
 			if($this->db->table_exists('sinvehiculo')){
 				$SQL="SELECT COUNT(*) AS cana
@@ -3398,7 +3415,7 @@ class Scst extends Controller {
 								$itrow->precio4  = round($itrow->precio4/$itrow->fracci,2);
 
 								$data = array(
-									'cantidad'=> $itrow->cantidad ,
+									'cantidad'=> $itrow->cantidad,
 									'costo'   => $itrow->costo,
 									'precio1' => $itrow->precio1,
 									'precio2' => $itrow->precio2,
@@ -4401,6 +4418,8 @@ class Scst extends Controller {
 		$transac = trim($do->get('transac'));
 		$tipo_doc= $do->get('tipo_doc');
 		$tolera =0.07; //Tolerancia entre los items y el encabezado
+
+		$do->rm_get('aplrete');
 
 		if($tipo_doc=='FC' || $tipo_doc=='NE'){
 			$do->set('fafecta','');

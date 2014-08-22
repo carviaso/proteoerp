@@ -64,6 +64,8 @@ if($form->_status!='show'){
 		}
 	}
 	$json_comis=json_encode($comis);
+	$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
+	$rif     = $this->datasis->traevalor('RIF');
 ?>
 <script language="javascript" type="text/javascript">
 var itscst_cont =<?php echo $form->max_rel_count['itscst']; ?>;
@@ -71,6 +73,7 @@ var tasa_general=<?php echo $alicuota['tasa'];     ?>;
 var tasa_reducid=<?php echo $alicuota['redutasa']; ?>;
 var tasa_adicion=<?php echo $alicuota['sobretasa'];?>;
 var gereten_cont=<?php echo $form->max_rel_count['gereten'];?>;
+var oaplrete    =<?php echo $form->aplrete->value; ?>;
 
 var comis    = <?php echo $json_comis; ?>;
 var rete     = <?php echo $json_rete;  ?>;
@@ -174,6 +177,7 @@ $(function(){
 						var sugiere = [];
 						if(data.length==0){
 							$('#fafecta').val('');
+							$('#aplrete').val(oaplrete);
 							truncate();
 						}else{
 							$.each(data,
@@ -190,6 +194,7 @@ $(function(){
 		select: function( event, ui ) {
 			$('#fafecta').attr("readonly", "readonly");
 			$('#fafecta').val(ui.item.value);
+			$('#aplrete').val(ui.item.aplrete);
 
 			if(ui.item.control!=''){
 				$('#sprvreteiva').val(ui.item.reteiva);
@@ -211,7 +216,7 @@ $(function(){
 								$('#sinvpeso_'+id).val(val.peso);
 								$('#costo_'+id).val(val.pond);
 								$('#precio1_'+id).val(val.precio1);
-								$("#cantidad_"+id).val(val.cana);
+								$('#cantidad_'+id).val(val.cana);
 
 								nind=Number(id);
 								post_modbus_sinv(nind);
@@ -376,11 +381,10 @@ function totalizar(taca){
 	}
 
 	<?php
-	$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
-	$rif     = $this->datasis->traevalor('RIF');
 	if($contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
 		$aplrete=true;
-		echo "\tif(tipodoc=='FC'){";
+		echo "\tvar aplrete=Number($('#aplrete').val());\n";
+		echo "\tif(tipodoc=='FC' || (tipodoc=='NC' && aplrete>0)){ ";
 		echo '$("#reteiva").val(roundNumber(montoiva*porreten/100,2));';
 		echo '}';
 	}
@@ -487,10 +491,11 @@ function cmontoiva(){
 
 	<?php
 	if($aplrete){
+		echo "var aplrete  = Number($('#aplrete').val());\n";
 		echo 'var porreten = Number($("#sprvreteiva").val());'."\n";
 		echo 'var tipodoc  = $("#tipo_doc").val();'."\n";
 
-		echo "\tif(tipodoc=='FC'){";
+		echo "\tif(tipodoc=='FC' || (tipodoc=='NC' && aplrete>0)){ ";
 		echo '$("#reteiva").val(roundNumber(iva*porreten/100,2));';
 		echo '}';
 	}
@@ -762,7 +767,9 @@ function truncate_gereten(){
 }
 //fin de retenciones
 </script>
-<?php } ?>
+<?php }
+echo $form->aplrete->output;
+?>
 
 <table width='100%' align='center'>
 <?php

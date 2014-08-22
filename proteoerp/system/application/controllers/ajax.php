@@ -1208,6 +1208,7 @@ class Ajax extends Controller {
 					$retArray['reteiva'] = ($aplrete)? floatval($row['reteiva']) : 0;
 					$retArray['fecha']   = $this->_datehuman($row['fecha']);
 					$retArray['msj']     = null;
+					$retArray['aplrete'] = intval($aplrete);
 
 					$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
 					$rif     = $this->datasis->traevalor('RIF');
@@ -1225,6 +1226,7 @@ class Ajax extends Controller {
 				$retArray[0]['rif']     = '';
 				$retArray[0]['fecha']   = '';
 				$retArray[0]['msj']     = null;
+				$retArray[0]['aplrete'] = 1;
 				$data = json_encode($retArray);
 			}
 		}else{
@@ -1234,6 +1236,7 @@ class Ajax extends Controller {
 			$retArray[0]['rif']     = '';
 			$retArray[0]['fecha']   = '';
 			$retArray[0]['msj']     = null;
+			$retArray[0]['aplrete'] = 1;
 			$data = json_encode($retArray);
 		}
 		echo $data;
