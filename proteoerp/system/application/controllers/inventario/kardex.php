@@ -112,14 +112,15 @@ class Kardex extends Controller {
 		$filter->fechah->size=$filter->fechad->size=10;
 		$filter->fechah->rule=$filter->fechad->rule='required|chfecha';
 
-
 		$filter->buttons('reset','search');
 		$filter->build('dataformfiltro');
 
 		$data['filtro'] =  $filter->output;
 
 		$code=$this->input->post('codigo');
-		if($code){
+		$data['content'] = '';
+		$cana=0;
+		if($code  && $filter->is_valid()){
 			$dbcode = $this->db->escape($code);
 			$mSQL="SELECT CONCAT_WS(' ',TRIM(descrip),TRIM(descrip2)) descrip,existen,activo FROM sinv WHERE codigo=${dbcode}";
 			$query = $this->db->query($mSQL);
@@ -171,7 +172,7 @@ class Kardex extends Controller {
 			$grid->column('Or&iacute;gen','<convierte><#origen#>|'.$link.'</convierte>','align=\'left\'' );
 			$grid->column('Fecha'        ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
 			$grid->column('Cantidad'     ,'<nformat><#cantidad#></nformat>'  ,'align=\'right\'');
-			$grid->column('Acumulado'    ,'<b><nformat><#salcant#></nformat></b>'   ,'align=\'right\'');
+			$grid->column('<b>Acumulado</b>','<b style="font-size:1.3em"><nformat><#salcant#></nformat></b>'   ,'align=\'right\'');
 			$grid->column('Monto'        ,'<nformat><#monto#></nformat>'     ,'align=\'right\'');
 			$grid->column('Saldo'        ,'<nformat><#saldo#></nformat>'     ,'align=\'right\'');
 			$grid->column('Costo Prom.'  ,'<nformat><#promedio#></nformat>'  ,'align=\'right\'');
@@ -181,7 +182,8 @@ class Kardex extends Controller {
 			$grid->column('Margen Bs.'   ,'<nformat><#vutil#></nformat>'     ,'align=\'right\'');
 
 			$grid->build();
-			$data['content'] = $grid->output;
+			$data['content']  = '<h4 style="text-align:center;padding:0px;margin:0px;">Movimiento comprendido desde la fecha <b style="color:#000000; font-size:1.2em">'.$filter->fechad->value.'</b> Hasta <b style="color:#000000; font-size:1.2em">'.$filter->fechah->value.'</b></h4>';
+			$data['content'] .= $grid->output;
 
 			$ffinal  = $this->datasis->dameval("SELECT MAX(fecha) AS fecha FROM costos WHERE codigo=${dbcode}");
 			if(!empty($ffinal)){
@@ -223,6 +225,11 @@ class Kardex extends Controller {
 			}
 			$data['content'] .= $optadd;
 			//echo $grid->db->last_query();
+			$cana=$grid->recordCount;
+		}
+
+		if($cana<=0){
+			$data['content'] .=  '<script type="text/javascript"> $(function(){ $("#cajafiltro").show(); }); </script>';
 		}
 
 		$data['forma'] = '';
