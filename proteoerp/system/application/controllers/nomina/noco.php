@@ -560,6 +560,18 @@ class Noco extends Controller {
 		$grid->setfilterToolbar(false);
 		$grid->setToolbar('false', '"top"');
 
+		$grid->setOnSelectRow('
+			function(id){
+				if(id>0){
+					$.ajax({
+						url: "'.site_url($this->url.'dconc').'/"+id+"/it",
+						success: function(msg){
+							$("#concdescrip").html(msg);
+						}
+					});
+				}
+			}');
+
 		$grid->setOndblClickRow('
 			,ondblClickRow: function(id){
 				if(idnoco<=0){
@@ -783,11 +795,18 @@ class Noco extends Controller {
 		}
 	}
 
-	function dconc($id){
+	function dconc($id,$c='con'){
 		session_write_close();
 		$id  = intval($id);
 		if($id>0){
-			$mSQL= "SELECT concepto,descrip,aplica,formula,tipod,tipoa,ctade,ctaac FROM conc WHERE id=${id}";
+			if($c=='it'){
+				$mSQL= "SELECT a.concepto,a.descrip,a.aplica,a.formula,a.tipod,a.tipoa,a.ctade,a.ctaac
+					FROM conc AS a
+					JOIN itnoco AS b ON a.concepto=b.concepto
+					WHERE b.id=${id}";
+			}else{
+				$mSQL= "SELECT concepto,descrip,aplica,formula,tipod,tipoa,ctade,ctaac FROM conc WHERE id=${id}";
+			}
 			$row = $this->datasis->damerow($mSQL);
 			if(!empty($row)){
 				echo '<p>';
