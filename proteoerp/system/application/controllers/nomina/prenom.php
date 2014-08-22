@@ -298,12 +298,12 @@ class Prenom extends Controller {
 
 		} elseif ( $mFREC == 'S'){   // Semanal
 			$d = new DateTime($fhasta);
-			$d->sub('P7D');
+			$d->sub(new DateInterval('P7D'));
 			$this->pnomina->fdesde = $d->format('Y-m-d');
 
 		} elseif ( $mFREC == 'B'){   // Bisemanal
 			$d = new DateTime($fhasta);
-			$d->sub('P14D');
+			$d->sub(new DateInterval('P14D'));
 			$this->pnomina->fdesde = $d->format('Y-m-d');
 		}
 
