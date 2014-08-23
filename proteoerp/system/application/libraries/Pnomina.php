@@ -155,7 +155,11 @@ class fnomina {
 		$mSQL .= "ORDER BY ano DESC, mes DESC, dia DESC ";
 		$mSQL .= "LIMIT 1 ";
 		$mREG  = $this->ci->datasis->damereg($mSQL);
-		return  $mREG;
+		if(empty($mREG)){
+			return array('preaviso'=>0, 'vacacion'=>0, 'bonovaca'=>0, 'antiguedad'=>0, 'utilidades'=>0);
+		}else{
+			return  $mREG;
+		}
 	}
 
 	function SUELDO_INT(){
