@@ -1455,7 +1455,7 @@ class Snte extends Controller {
 			$itcodigo = $do->get_rel('itsnte','codigo',$i);
 			$itcana   = $do->get_rel('itsnte','cana'  ,$i);
 
-			$this->datasis->sinvcarga($itcodigo, $almacen, $itcana);
+			$this->datasis->sinvcarga($itcodigo, $almacen, (-1)*$itcana);
 		}
 
 		$codigo=$do->get('numero');
