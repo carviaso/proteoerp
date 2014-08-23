@@ -199,8 +199,8 @@ class Kardex extends Controller {
 					$consi   = 0;
 				}
 				$ventas  = (empty($ventas ))? htmlnformat(0) : htmlnformat($ventas );
-                $compras = (empty($compras))? htmlnformat(0) : htmlnformat($compras);
-                $nentreg = (empty($nentreg))? htmlnformat(0) : htmlnformat($nentreg);
+				$compras = (empty($compras))? htmlnformat(0) : htmlnformat($compras);
+				$nentreg = (empty($nentreg))? htmlnformat(0) : htmlnformat($nentreg);
 				$actual  = (empty($actual ))? htmlnformat(0) : htmlnformat($actual );
 				$ajustes = (empty($ajustes))? htmlnformat(0) : htmlnformat($ajustes);
 				$conver  = (empty($conver ))? htmlnformat(0) : htmlnformat($conver );
@@ -369,7 +369,7 @@ class Kardex extends Controller {
 			$grid2->db->select($select);
 			$grid2->db->from('snte   AS a');
 			$grid2->db->join('itsnte AS b','a.numero=b.numero');
-			$grid2->db->join('sfac   AS c','a.factura=a.numero AND c.tipo_doc=\'F\'');
+			$grid2->db->join('sfac   AS c','a.factura=c.numero AND c.tipo_doc=\'F\'');
 			$grid2->db->where('b.codigo',$codigo);
 			$grid2->db->where('a.fecha' ,$fecha);
 			$grid2->build();
