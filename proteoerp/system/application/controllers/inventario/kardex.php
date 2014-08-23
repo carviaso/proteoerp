@@ -272,6 +272,30 @@ class Kardex extends Controller {
 			'resizable'  => 'yes',
 		);
 
+		function bfacts($factura,$codigo){
+			//return '';
+			$factura=trim($factura);
+			if(empty($factura)){
+				return 'No encontrado';
+			}
+			$CI =& get_instance();
+			$dbcodigo  = $CI->db->escape($codigo);
+			$dbfactura = $CI->db->escape($factura);
+			$mSQL="SELECT GROUP_CONCAT( DISTINCT CONCAT(a.id,':',numero)) AS fact
+				FROM sfac AS a
+				JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
+				WHERE b.codigoa=${dbcodigo} AND ${dbfactura} IN (a.numero,a.maestra) AND a.tipo_doc='F'";
+			$facts=$CI->datasis->dameval($mSQL);
+			$rt ='';
+			$lls=array();
+			$arr=explode(',',$facts);
+			foreach($arr as $fact){
+				$parr  = explode(':',$fact);
+				$lls[] = anchor('formatos/verhtml/FACTURA/'.$parr[0], $parr[1],array('target'=>'showefect'));
+			}
+			return implode(', ',$lls);
+		}
+
 		$grid = new DataGrid();
 		$grid->order_by('numero','desc');
 		$grid->per_page = 50;
@@ -290,6 +314,8 @@ class Kardex extends Controller {
 					}
 				}
 			}
+
+			$gridout='';
 
 			$ll=anchor_popup('formatos/descargar/FACTURA/'.implode('/',$ppk), '(pdf)', $attsp);
 			$link=anchor('formatos/verhtml/FACTURA/'.implode('/',$ppk),'<#tipoa#><#numa#> '.$ll,array('target'=>'showefect'));
@@ -310,7 +336,48 @@ class Kardex extends Controller {
 			$grid->db->not_like('a.numa','_','after');
 			$grid->db->where('b.almacen',$almacen);
 			$grid->build();
-			$gridout=$grid->output;
+			if($grid->recordCount > 0){
+				$gridout.=$grid->output;
+			}
+
+			$fields = $this->db->field_data('snte');
+			$ppk=array();
+			$select=array('a.numero','a.fecha','a.nombre','b.cana','b.precio','b.importe','a.factura');
+			foreach($fields as $field){
+				if($field->primary_key==1){
+					$ppk[]='<#'.$field->name.'#>';
+					$pknombre='a.'.$field->name;
+					if(array_search($pknombre, $select)===false){
+						$select[]=$pknombre;
+					}
+				}
+			}
+			$grid2 = new DataGrid();
+			$grid2->use_function('bfacts');
+			$ll=anchor_popup('formatos/descargar/SNTE/'.implode('/',$ppk), '(pdf)', $attsp);
+			$link=anchor('formatos/verhtml/SNTE/'.implode('/',$ppk),'<#numero#> '.$ll,array('target'=>'showefect'));
+
+			$grid2->title('Notas de Entrega Facturadas');
+			$grid2->column('N&uacute;mero',$link);
+			$grid2->column('Fecha'    ,'<dbdate_to_human><#fecha#></dbdate_to_human>','align=center');
+			$grid2->column('Cliente'  ,'nombre');
+			$grid2->column('Cantidad' ,'<nformat><#cana#></nformat>'   ,'align=\'right\'');
+			$grid2->column('Costo'    ,'<nformat><#precio#></nformat>' ,'align=\'right\'');
+			$grid2->column('Importe'  ,'<nformat><#importe#></nformat>','align=\'right\'');
+			//$grid2->column('Factura'  ,'<#factura#>');
+			$grid2->column('Fact.(s)' ,"<bfacts><#factura#>|${codigo}</bfacts>");
+			$grid2->db->select($select);
+			$grid2->db->from('snte   AS a');
+			$grid2->db->join('itsnte AS b','a.numero=b.numero');
+			$grid2->db->join('sfac   AS c','a.factura=a.numero AND c.tipo_doc=\'F\'');
+			$grid2->db->where('b.codigo',$codigo);
+			$grid2->db->where('a.fecha' ,$fecha);
+			$grid2->build();
+			if($grid2->recordCount > 0){
+				$gridout.=$grid2->output;
+			}
+
+
 		}elseif($tipo=='3R'){ //ventas de Restaurante
 			$grid->title('Facturas');
 			//$link=anchor('inventario/kardex/rfac/'.$this->_unionuri().'/show/'.implode('/',$ppk),'<#tipoa#><#numa#>');
@@ -425,30 +492,6 @@ class Kardex extends Controller {
 						$select[]=$pknombre;
 					}
 				}
-			}
-
-			function bfacts($factura,$codigo){
-				//return '';
-				$factura=trim($factura);
-				if(empty($factura)){
-					return 'No encontrado';
-				}
-				$CI =& get_instance();
-				$dbcodigo  = $CI->db->escape($codigo);
-				$dbfactura = $CI->db->escape($factura);
-				$mSQL="SELECT GROUP_CONCAT( DISTINCT CONCAT(a.id,':',numero)) AS fact
-					FROM sfac AS a
-					JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
-					WHERE b.codigoa=${dbcodigo} AND ${dbfactura} IN (a.numero,a.maestra) AND a.tipo_doc='F'";
-				$facts=$CI->datasis->dameval($mSQL);
-				$rt ='';
-				$lls=array();
-				$arr=explode(',',$facts);
-				foreach($arr as $fact){
-					$parr  = explode(':',$fact);
-					$lls[] = anchor('formatos/verhtml/FACTURA/'.$parr[0], $parr[1],array('target'=>'showefect'));
-				}
-				return implode(', ',$lls);
 			}
 
 			$ll=anchor_popup('formatos/descargar/SNTE/'.implode('/',$ppk), '(pdf)', $attsp);
