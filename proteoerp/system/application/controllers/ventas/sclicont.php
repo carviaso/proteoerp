@@ -75,7 +75,7 @@ class Sclicont extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '350', '560' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '350', '600' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -592,10 +592,16 @@ class Sclicont extends Controller {
 
 		$edit->importe = new inputField('Importe','importe');
 		$edit->importe->rule='numeric';
-		$edit->importe->readonly  =true;
+		$edit->importe->readonly  = true;
 		$edit->importe->css_class='inputnum';
 		$edit->importe->size =16;
 		$edit->importe->maxlength =17;
+
+		$edit->observa = new textareaField('Observaciones','observa');
+		$edit->observa->rule='';
+		$edit->observa->cols = 68;
+		$edit->observa->rows = 2;
+
 
 		$edit->build();
 
@@ -609,7 +615,6 @@ class Sclicont extends Controller {
 		} else {
 			$conten['form']  =&  $edit;
 			$data['content']  =  $this->load->view('view_sclicont', $conten, false);
-			//echo $edit->output;
 		}
 	}
 
@@ -651,25 +656,29 @@ class Sclicont extends Controller {
 	function instalar(){
 		if (!$this->db->table_exists('sclicont')) {
 			$mSQL="CREATE TABLE `sclicont` (
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `numero` char(8) DEFAULT NULL,
-			  `status` char(1) NOT NULL DEFAULT 'A' COMMENT 'Activo, Suspendido, Terminado',
-			  `fecha` date DEFAULT NULL,
-			  `inicio` date DEFAULT NULL,
-			  `final` date DEFAULT NULL,
-			  `cliente` char(5) DEFAULT NULL,
-			  `codigo` varchar(15) DEFAULT NULL,
-			  `descrip` text,
-			  `cantidad` decimal(17,2) DEFAULT '0.00',
-			  `base` decimal(17,2) DEFAULT '0.00',
-			  `iva` decimal(17,2) DEFAULT '0.00',
-			  `precio` decimal(17,2) DEFAULT '0.00',
+			  id       INT(11) NOT NULL AUTO_INCREMENT,
+			  numero   CHAR(8) DEFAULT NULL,
+			  status   CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Activo, Suspendido, Terminado',
+			  fecha    DATE DEFAULT NULL,
+			  inicio   DATE DEFAULT NULL,
+			  final    DATE DEFAULT NULL,
+			  cliente  CHAR(5) DEFAULT NULL,
+			  codigo   VARCHAR(15) DEFAULT NULL,
+			  descrip  TEXT,
+			  cantidad DECIMAL(17,2) DEFAULT '0.00',
+			  base     DECIMAL(17,2) DEFAULT '0.00',
+			  iva      DECIMAL(17,2) DEFAULT '0.00',
+			  precio   DECIMAL(17,2) DEFAULT '0.00',
+			  observa  TEXT NULL,
 			  PRIMARY KEY (`id`)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Contratos recurrentes'";
 			$this->db->query($mSQL);
 		}
-		//$campos=$this->db->list_fields('sclicont');
-		//if(!in_array('<#campo#>',$campos)){ }
+		$campos=$this->db->list_fields('sclicont');
+		if(!in_array('observa',$campos)){
+			$this->db->simple_query('ALTER TABLE sclicont ADD COLUMN observa TEXT NULL ');
+		};
+
 	}
 }
 

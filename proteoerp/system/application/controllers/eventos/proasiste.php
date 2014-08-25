@@ -178,7 +178,6 @@ class Proasiste extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
 		));
 
-
 		$grid->addField('municipio');
 		$grid->label('Municipio');
 		$grid->params(array(
@@ -193,6 +192,7 @@ class Proasiste extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
 		));
 
+//0212 762 8111 hab 1104
 
 		$grid->addField('parroquia');
 		$grid->label('Parroquia');
@@ -521,6 +521,9 @@ class Proasiste extends Controller {
 
 		$div = "<br><div style='overflow:auto;border: 1px solid #9AC8DA;background: #EAEAEA;height:200px' id='contenedor'></div>";
 		$edit->contenedor = new containerField('contenedor',$div);  
+
+		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 
 		$edit->build();
 

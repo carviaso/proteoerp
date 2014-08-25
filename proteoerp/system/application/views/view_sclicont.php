@@ -76,6 +76,11 @@ if ( $form->cliente->value != '' ){
 		<td class="littletablerowth"><?php echo $form->importe->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->importe->output; ?></td>
 	</tr>
+	<tr>
+		<td class="littletablerowth"><?php echo $form->observa->label;  ?></td>
+		<td class="littletablerow" colspan='5' ><?php echo $form->observa->output; ?></td>
+	</tr>
+
 </table>
 </fieldset>
 <?php echo $form_end; ?>
