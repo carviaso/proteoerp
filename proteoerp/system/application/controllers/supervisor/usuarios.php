@@ -575,6 +575,15 @@ class Usuarios extends Controller {
 		$edit->uuid->maxlength =100;
 		$edit->uuid->append('Solo para dispositivo movil de pedidos');
 
+		$edit->propio = new dropdownField('Solo ver los propios', 'propio');
+		$edit->propio->rule = 'required';
+		$edit->propio->option('S','Si');
+		$edit->propio->option('N','No');
+		$edit->propio->style='width:80px';
+		$edit->propio->insertValue='S';
+		$edit->propio->rule='required|enum[S,N]';
+
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -794,6 +803,11 @@ class Usuarios extends Controller {
 		if(!in_array('uuid',$campos)){
 			$this->db->simple_query("ALTER TABLE `usuario` ADD COLUMN `uuid` VARCHAR(100) NULL DEFAULT NULL COMMENT 'Dispositivo movil para pedidos' AFTER `activo`");
 		}
+
+		if(!in_array('propio',$campos)){
+			$this->db->simple_query("ALTER TABLE usuario ADD COLUMN `propio` CHAR(1) NULL DEFAULT 'N' COMMENT 'Solo puede modificar los registros creado por este usuario' AFTER `uuid`");
+		}
+
 		$this->db->simple_query('DELETE FROM sida USING sida LEFT JOIN usuario ON sida.usuario=usuario.us_codigo WHERE usuario.us_codigo IS NULL');
 	}
 }

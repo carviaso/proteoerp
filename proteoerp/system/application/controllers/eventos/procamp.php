@@ -74,7 +74,7 @@ class Procamp extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '460', '500' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '480', '520' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -374,6 +374,8 @@ class Procamp extends Controller {
 	// Edicion 
 
 	function dataedit(){
+
+
 		$this->rapyd->load('dataedit');
 		$script= '
 		$(function() {

@@ -281,8 +281,13 @@ class Proasiste extends Controller {
 	//
 	function getdata(){
 		$grid       = $this->jqdatagrid;
+
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('view_proasiste');
+		$propio = $this->datasis->dameval("SELECT propio FROM usuario WHERE us_codigo=".$this->db->escape($this->session->userdata('usuario')));
+		if ( $propio == 'S' ){
+			$mWHERE[] = array('', 'usuario', $this->session->userdata('usuario'),'');
+		} 
 
 		$response   = $grid->getData('view_proasiste', array(array()), array(), false, $mWHERE );
 		$rs = $grid->jsonresult( $response);
@@ -351,6 +356,13 @@ class Proasiste extends Controller {
 	// Edicion 
 	//
 	function dataedit(){
+		if ($this->rapyd->uri->is_set('modify')){
+			$id = $this->uri->segment($this->uri->total_segments());
+			$us = $this->datasis->dameval("SELECT usuario FROM proasiste WHERE id=$id");
+			if ( !$this->datasis->propio($us) ){
+				die( "No puede modificar este registro $us");
+			}
+		}
 		$this->rapyd->load('dataedit');
 		$script= '
 		$(function() {

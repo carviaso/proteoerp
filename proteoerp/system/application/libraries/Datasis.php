@@ -266,6 +266,25 @@ class Datasis {
 		return false;
 	}
 
+	// Solo modifique los que creo
+	function propio($us){
+		$CI =& get_instance();
+		if ($CI->session->userdata('logged_in')){
+			$usuario  = $CI->session->userdata['usuario'];
+			$dbusuario= $CI->db->escape($usuario);
+			$propio   = $CI->datasis->dameval("SELECT propio FROM usuario WHERE us_codigo=$dbusuario "); 
+			if ($propio == 'S' ){
+				if ( $us == $usuario )
+					return true;
+				else
+					return false;
+			} else 
+				return true;
+		}
+		return false;
+	}
+
+
 	// Verifica acceso en tmenus por funcion a ejecutar
 	function puede_ejecuta($nombre, $modulo){
 		$CI =& get_instance();
