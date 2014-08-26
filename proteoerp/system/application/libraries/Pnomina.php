@@ -127,14 +127,6 @@ class fnomina {
 		$XTRABAJA = $this->ci->datasis->dameval("SELECT trabaja FROM prenom LIMIT 1");
 		$mTABLA   = $this->NOTABU( $XTRABAJA, $mREG[0], $mREG[1], $mREG[2] );
 
-		/*
-		if ( strtoupper($par) == "PREAVISO"   ) $mVALOR = $mTABLA[0];
-		if ( strtoupper($par) == "VACACIONES" ) $mVALOR = $mTABLA[1];
-		if ( strtoupper($par) == "BONOVACA"   ) $mVALOR = $mTABLA[2];
-		if ( strtoupper($par) == "ANTIGUEDAD" ) $mVALOR = $mTABLA[3];
-		if ( strtoupper($par) == "UTILIDADES" ) $mVALOR = $mTABLA[4];
-		*/
-
 		if ( strtoupper($par) == "PREAVISO"   ) $mVALOR = $mTABLA["preaviso"  ];
 		if ( strtoupper($par) == "VACACIONES" ) $mVALOR = $mTABLA["vacaciones"];
 		if ( strtoupper($par) == "BONOVACA"   ) $mVALOR = $mTABLA["bonovaca"  ];
