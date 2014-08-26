@@ -61,6 +61,10 @@ $(function() {
 		return r;
 	});
 
+	$('input[name^="itmonto_"]').keyup(function(){
+		fitmonto();
+	});
+
 	$('#fecdoc').datepicker({ dateFormat: "dd/mm/yy" });
 	$('input[name^="sfpafecha_"]').datepicker({ dateFormat: "dd/mm/yy" });
 
@@ -82,23 +86,24 @@ function chtipodoc(){
 		$('input[name^="ppago_"]').hide('');
 		$('#ppagotit').hide();
 		$('#trcodigo').show();
-
+		totaliza();
 	}else if(tipo=='AN'){
 		$('#aplefectos').hide();
 		$('input[name^="abono_"]').val("");
 		$('input[name^="ppago_"]').val("");
-		 totaliza();
+		totaliza();
 		$('#aplpago').show();
 		$('#trcodigo').hide();
+		fitmonto();
 	}else{
 		$('#aplefectos').show();
 		$('#aplpago').show();
 		$('input[name^="ppago_"]').show('');
 		$('#ppagotit').show();
 		$('#trcodigo').hide();
+		totaliza();
 	}
 	$("#observa1").val('');
-	totaliza();
 }
 
 function totaliza(){
@@ -144,6 +149,16 @@ function totaliza(){
 	}
 }
 
+function fitmonto(){
+	var tipo=$('#tipo_doc').val();
+
+	if(tipo=='AN'){
+		var stota = apagar();
+		$('#monto').val(roundNumber(stota,2));
+		$('#monto_val').text(nformat(stota,2));
+	}
+}
+
 function add_sfpa(){
 	var htm = <?php echo $sfpa_campos; ?>;
 	can = sfpa_cont.toString();
@@ -155,6 +170,9 @@ function add_sfpa(){
 	$("#itmonto_"+can).val(falta);
 	$("#sfpafecha_"+can).datepicker({ dateFormat: "dd/mm/yy" });
 	sfpa_cont=sfpa_cont+1;
+	$('#itmonto_'+can).keyup(function(){
+		fitmonto();
+	});
 	return can;
 }
 
@@ -208,6 +226,12 @@ function apagar(){
 
 //Determina lo que falta por pagar
 function faltante(){
+	var tipo=$('#tipo_doc').val();
+
+	if(tipo=='AN'){
+		return 0;
+	}
+
 	totalg=Number($("#monto").val());
 	if(isNaN(totalg)){
 		$("#monto").val('0');
@@ -289,11 +313,13 @@ echo $title;
 	</tr>
 	<?php } ?>
 	</tbody>
+</table>
+
+<table width='100%' align='center'>
 	<tfoot>
 	<tr>
-		<td colspan='4' align="right" style='font-size: 1.6em;'><b><?php echo $form->monto->label; ?></b></td>
+		<td align="right" style='font-size: 1.6em;width:60%'><b><?php echo $form->monto->label; ?></b></td>
 		<td align="right" style='font-size: 1.6em;font-weight: bold;'><?php echo $form->monto->output; ?></td>
-		<td align="right"></td>
 	</tr>
 	</tfoot>
 </table>

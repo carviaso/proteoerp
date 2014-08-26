@@ -47,6 +47,22 @@ class Kardex extends Controller {
 			default:   return($par); };
 		}
 
+		function colorgal($par){
+			switch ($par) {
+				case '3I': return '(  0,163,  0, 0.4)'; break;
+				case '3R': return '(  0,163,  0, 0.4)'; break;
+				case '3M': return '(  0,163,  0, 0.4)'; break;
+				case '1T': return '(255, 34,  5, 0.4)'; break;
+				case '2C': return '(183, 84, 35, 0.4)'; break;
+				case '4N': return '( 17, 19,148, 0.4)'; break;
+				case '6C': return '(  0,  0,  0, 0.4)'; break;
+				case '5C': return '( 65,185,255, 0.4)'; break;
+				case '5D': return '(144,  0,255, 0.4)'; break;
+				case '0F': return '(255,221,  0, 0.4)'; break;
+				case '9F': return '(255,221,  0, 0.4)'; break;
+			default:       return '(255,255,255, 0.4)'; };
+		}
+
 		$modbus=array(
 			'tabla'   =>'sinv',
 			'columnas'=>array(
@@ -145,7 +161,7 @@ class Kardex extends Controller {
 			$grid = new DataGrid2("Producto: (${code}) ${descrip}");
 			$grid->table_id = 'kardextabla';
 			$grid->agrupar(' ', 'almacen');
-			$grid->use_function('convierte','str_replace');
+			$grid->use_function('convierte','str_replace','colorgal');
 			$grid->db->select(array(
 						'IFNULL( b.ubides , a.ubica ) almacen',
 						'a.ubica','a.fecha',
@@ -169,7 +185,7 @@ class Kardex extends Controller {
 			$grid->db->orderby('almacen, fecha, origen');
 			$grid->per_page = 60;
 
-			$grid->column('Or&iacute;gen','<convierte><#origen#>|'.$link.'</convierte>','align=\'left\'' );
+			$grid->column('Or&iacute;gen','<p style="background-color: rgba<colorgal><#origen#></colorgal>;font-size:1.3em;font-weight: bold;margin:0px;padding:0px;border:0px;"><convierte><#origen#>|'.$link.'</convierte></p>','align=\'left\'' );
 			$grid->column('Fecha'        ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
 			$grid->column('Cantidad'     ,'<nformat><#cantidad#></nformat>'  ,'align=\'right\'');
 			$grid->column('<b>Acumulado</b>','<b style="font-size:1.3em"><nformat><#salcant#></nformat></b>'   ,'align=\'right\'');

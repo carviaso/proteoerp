@@ -43,7 +43,7 @@
 <?php elseif ($cell["type"] == "clean"):?>
           <td <?php echo $cell["attributes"]?>><?php echo $cell["field"]?></td>
 <?php else:?>
-          <td <?php echo $cell["attributes"]?> class="littletablerow"><?php echo $cell["field"]?>&nbsp;</td>
+          <td <?php echo $cell["attributes"]?> class="littletablerow"><?php echo $cell["field"]; echo (empty($cell["field"]))? '&nbsp;':''; ?></td>
 <?php endif;?>
 <?php endforeach;?>
         </tr>
