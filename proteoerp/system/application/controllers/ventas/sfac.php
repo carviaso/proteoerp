@@ -4763,6 +4763,98 @@ class Sfac extends Controller {
 		}
 	}
 
+	// Factura Mensualidades
+	function lote($status=null){
+		$this->load->helper('download');
+		$this->genesal=false;
+
+		$data   = '';
+		if($status=='insert'){
+			$mSQL="SELECT a.id, a.numero contrato, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.cliente, b.tipo, 
+					a.codigo, b.dire11 AS direc, a.cantidad, a.precio, a.base, b.telefono, a.descrip, c.iva, a.upago,
+					EXTRACT(YEAR_MONTH FROM inicio ) inicio, b.vendedor
+					FROM sclicont a JOIN scli b ON a.cliente=b.cliente JOIN sinv c ON a.codigo=c.codigo
+				WHERE a.status = 'A'
+				ORDER BY b.rifci";
+			$query = $this->db->query($mSQL);
+
+			foreach ($query->result() as $row){
+				$saldo = 0;
+				$dbcliente= $this->db->escape($row->cliente);
+				$sql      = "SELECT SUM(monto*(tipo_doc IN ('FC','GI','ND'))) AS debe, SUM(monto*(tipo_doc IN ('NC','AB','AN'))) AS haber FROM smov WHERE cod_cli=${dbcliente}";
+				$qquery   = $this->db->query($sql);
+				if ($qquery->num_rows() > 0){
+					$rrow = $qquery->row();
+					$saldo= $rrow->debe-$rrow->haber;
+				}
+				$saldo += $row->base*(1+($row->iva/100));
+				$sql="UPDATE scli SET credito='S',tolera=10,maxtole=10,limite=${saldo},formap=30 WHERE cliente=${dbcliente}";
+				$this->db->simple_query($sql);
+
+				$upago = $row->upago;
+				if ( $upago <= 0 ){
+					$upago = $row->inicio;
+				} else
+					$upago = $upago + 1;
+
+				$desde    = substr($row->upago,4,2).' del '.substr($row->upago,0,4);
+
+				$contrato = $row->contrato;
+				$_POST['btn_submit']  = 'Guardar';
+				$_POST['pfac']        = '';
+				$_POST['fecha']       = date('d/m/Y');
+				$_POST['cajero']      = '';
+				$_POST['vd']          = $row->vendedor;
+				$_POST['almacen']     = '0001'; //$this->secu->getalmacen();
+				$_POST['tipo_doc']    = 'F';
+				$_POST['factura']     = '';
+				$_POST['cod_cli']     = $row->cliente;
+				$_POST['sclitipo']    = '1';
+				$_POST['nombre']      = $row->nombre;
+				$_POST['rifci']       = $row->rifci;
+				$_POST['direc']       = $row->direc;
+				$_POST['upago']       = $row->upago;
+
+				$_POST['codigoa_0']   = $row->codigo;
+				$_POST['desca_0']     = $row->descrip;
+				$_POST['detalle_0']   = "Contrato Nro. ${contrato} correspondiente al mes ${desde}";
+				$_POST['cana_0']      = $row->cantidad;
+				$_POST['preca_0']     = $row->precio;
+				$_POST['tota_0']      = $row->base;
+				$_POST['precio1_0']   = 0;
+				$_POST['precio2_0']   = 0;
+				$_POST['precio3_0']   = 0;
+				$_POST['precio4_0']   = 0;
+				$_POST['itiva_0']     = $row->iva;
+				$_POST['sinvpeso_0']  = 0;
+				$_POST['sinvtipo_0']  = 'Servicio';
+				$_POST['tipo_0']      = '';
+				$_POST['sfpafecha_0'] = '';
+				$_POST['num_ref_0']   = '';
+				$_POST['banco_0']     = '';
+				$_POST['monto_0']     = $row->precio*(1+($row->iva/100)) ;
+				$_POST['snte']        = '';
+				$_POST['observ1']     = $upago;
+
+				ob_start();
+					$this->dataedit();
+					$rt = ob_get_contents();
+				@ob_end_clean();
+
+				$getdata=json_decode($rt,true);
+				if($getdata['status']=='A'){
+					$id=$getdata['pk']['id'];
+					$this->db->simple_query("UPDATE sclicont SET upago=$upago WHERE id=".$row->id);
+					//$url=$this->_direccion='http://localhost/'.site_url('formatos/descargartxt/FACTSER/'.$id);
+					//$data .= file_get_contents($url);
+					//$data .= "<FIN>\r\n";
+				}else{
+					echo $getdata['mensaje'];
+				}
+			}
+			//force_download('inprin.prn', preg_replace("/[\r]*\n/","\r\n",$data));
+		}
+	}
 
 	function instalar(){
 		$campos = $this->db->list_fields('sfac');
