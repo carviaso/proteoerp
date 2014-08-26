@@ -40,7 +40,7 @@ class Kardex extends Controller {
 				case '2C': return(anchor_popup($link,'Compras'             ,$atts)); break;
 				case '4N': return(anchor_popup($link,'Nota/Entrega'        ,$atts)); break;
 				case '6C': return(anchor_popup($link,'Conversión'          ,$atts)); break;
-				case '5C': return(anchor_popup($link,'Ajuste de inventario',$atts)); break;
+				case '5C': return(anchor_popup($link,'Ajuste'              ,$atts)); break;
 				case '5D': return(anchor_popup($link,'Consignación'        ,$atts)); break;
 				case '0F': return(anchor_popup($link,'Inventario'          ,$atts)); break;
 				case '9F': return(anchor_popup($link,'Inventario'          ,$atts)); break;
@@ -188,7 +188,7 @@ class Kardex extends Controller {
 			$grid->column('Or&iacute;gen','<p style="background-color: rgba<colorgal><#origen#></colorgal>;font-size:1.3em;font-weight: bold;margin:0px;padding:0px;border:0px;"><convierte><#origen#>|'.$link.'</convierte></p>','align=\'left\'' );
 			$grid->column('Fecha'        ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
 			$grid->column('Cantidad'     ,'<nformat><#cantidad#></nformat>'  ,'align=\'right\'');
-			$grid->column('<b>Acumulado</b>','<b style="font-size:1.3em"><nformat><#salcant#></nformat></b>'   ,'align=\'right\'');
+			$grid->column('<b style="color:#FFFFFF">Acumulado</b>','<b style="font-size:1.3em"><nformat><#salcant#></nformat></b>'   ,'align=\'right\'');
 			$grid->column('Monto'        ,'<nformat><#monto#></nformat>'     ,'align=\'right\'');
 			$grid->column('Saldo'        ,'<nformat><#saldo#></nformat>'     ,'align=\'right\'');
 			$grid->column('Costo Prom.'  ,'<nformat><#promedio#></nformat>'  ,'align=\'right\'');
