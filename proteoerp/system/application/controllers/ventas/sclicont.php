@@ -37,7 +37,7 @@ class Sclicont extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"gfactura",   "img"=>"images/pdf_logo.gif",  "alt" => "Facturar", "label"=>"Facturar"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -80,6 +80,12 @@ class Sclicont extends Controller {
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
 		$bodyscript .= '});';
+
+		$bodyscript .= '
+		$("#gfactura").click(function(){
+			alert("Hola");
+		});
+		';
 
 		$bodyscript .= '</script>';
 
