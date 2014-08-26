@@ -13,7 +13,7 @@ class Sclicont extends sfac {
 	var $url     = 'ventas/sclicont/';
 
 	function Sclicont(){
-		parent::Controller();
+		parent::Sfac();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
 		$this->datasis->modulo_nombre( 'SCLICONT', $ventana=0 );
@@ -94,7 +94,7 @@ class Sclicont extends sfac {
 	}
 
 	//******************************************************************
-	// Definicion del Grid o Tabla 
+	// Definicion del Grid o Tabla
 	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
@@ -378,7 +378,7 @@ class Sclicont extends sfac {
 	}
 
 	//******************************************************************
-	// Edicion 
+	// Edicion
 
 	function dataedit(){
 		$this->rapyd->load('dataedit');
@@ -463,11 +463,11 @@ class Sclicont extends sfac {
 			select: function( event, ui ){
 				var cana = $("#cantidad").val();
 				mtasa = ui.item.iva;
-				
+
 				$("#codigo").attr("readonly", "readonly");
 				$("#codigo").val(ui.item.value);
 				$("#descrip").val(ui.item.descrip);
-				if ( !cana ){ 
+				if ( !cana ){
 					$("#cantidad").val(1);
 				}
 				$("#precio").val(ui.item.base1);
@@ -486,7 +486,7 @@ class Sclicont extends sfac {
 			var base     = 0;
 			var importe  = 0;
 			var cantidad = 0;
-			
+
 			cantidad = Number($("#cantidad").val())
 			precio   = Number($("#precio").val());
 
@@ -504,7 +504,7 @@ class Sclicont extends sfac {
 		$("#cantidad").change(function () {
 			totaliza();
 		})
-		
+
 		$("#precio").change(function () {
 			totaliza();
 		})
@@ -675,23 +675,23 @@ class Sclicont extends sfac {
 			$cana   = 1;
 
 			$mSQL="SELECT TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.cliente, b.tipo, b.dire11 AS direc, a.cantidad, a.precio, a.base, b.telefono, a.codigo, a.descrip, c.iva, a.upago
-					FROM sclicont a JOIN scli b ON a.cliente=b.cliente JOIN sinv c ON a.codigo=c.codigo 
-				WHERE a.status = 'A' 
+					FROM sclicont a JOIN scli b ON a.cliente=b.cliente JOIN sinv c ON a.codigo=c.codigo
+				WHERE a.status = 'A'
 				ORDER BY b.rifci";
 
 			$query = $this->db->query($mSQL);
 			foreach ($query->result() as $row){
 				$saldo=0;
 				$dbcliente= $this->db->escape($row->cliente);
-				$sql      = "SELECT SUM(monto*(tipo_doc IN ('FC','GI','ND'))) AS debe, SUM(monto*(tipo_doc IN ('NC','AB','AN'))) AS haber FROM smov WHERE cod_cli=$dbcliente";
+				$sql      = "SELECT SUM(monto*(tipo_doc IN ('FC','GI','ND'))) AS debe, SUM(monto*(tipo_doc IN ('NC','AB','AN'))) AS haber FROM smov WHERE cod_cli=${dbcliente}";
 				$qquery   = $this->db->query($sql);
 				if ($qquery->num_rows() > 0){
 					$rrow = $qquery->row();
-					$saldo=$rrow->debe-$rrow->haber;
+					$saldo= $rrow->debe-$rrow->haber;
 				}
 
 				$saldo += $row->base*(1+($row->iva/100));
-				$sql="UPDATE scli SET credito='S',tolera=10,maxtole=10,limite=$saldo,formap=30 WHERE cliente=$dbcliente";
+				$sql="UPDATE scli SET credito='S',tolera=10,maxtole=10,limite=${saldo},formap=30 WHERE cliente=${dbcliente}";
 				$this->db->simple_query($sql);
 
 				$desde = dbdate_to_human($row->upago.'01','m/Y');
@@ -713,7 +713,7 @@ class Sclicont extends sfac {
 				$_POST['codigoa_0']   = $row->codigo;
 				$_POST['desca_0']     = $row->descrip;
 
-				$_POST['detalle_0']   = "correspondiente al mes $desde";
+				$_POST['detalle_0']   = "correspondiente al mes ${desde}";
 				$_POST['cana_0']      = $row->cantidad;
 				$_POST['preca_0']     = $row->precio;
 
@@ -745,13 +745,13 @@ class Sclicont extends sfac {
 					$url=$this->_direccion='http://localhost/'.site_url('formatos/descargartxt/FACTSER/'.$id);
 					$data .= file_get_contents($url);
 					$data .= "<FIN>\r\n";
+				}else{
+					echo $getdata['mensaje'];
 				}
 			}
-			force_download('inprin.prn', preg_replace("/[\r]*\n/","\r\n",$data));
-			echo 'Hola = '.$data;
+			//force_download('inprin.prn', preg_replace("/[\r]*\n/","\r\n",$data));
 		}
 	}
-
 
 
 	function instalar(){
@@ -782,5 +782,3 @@ class Sclicont extends sfac {
 
 	}
 }
-
-?>
