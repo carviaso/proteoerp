@@ -775,7 +775,7 @@ class Conv extends Controller {
 		//fin de campos para detalle
 		//**************************
 
-		$edit->container = new containerField('alert','<b style="font-size:1.2em">Advertencia</b>: el costo de los productos de salida <b>ser&aacute;n modificados</b> en base al costos de los productos de entrada y la participacion en peso de los productos de salida.');
+		$edit->container = new containerField('alert','<b style="font-size:1.2em">Advertencia</b>: el costo de los productos de entrada <b>ser&aacute;n modificados</b> en base al costos de los productos de salida y tomando en cuenta su participacion en peso.');
 		$edit->container->when = array('create');
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
@@ -798,9 +798,9 @@ class Conv extends Controller {
 	}
 
 	function chpeso($codigo,$id){
-		$salida=floatval($this->input->post('salida_'.$id));
+		$entrada=floatval($this->input->post('entrada_'.$id));
 		$this->validation->set_message('chpeso', 'El art&iacute;culo '.$codigo.' no tiene peso, se necesita para el c&aacute;lculo del costo');
-		if($salida>0){
+		if($entrada>0){
 			$dbcodigo=$this->db->escape($codigo);
 			$peso=$this->datasis->dameval('SELECT peso FROM sinv WHERE codigo='.$dbcodigo);
 			if($peso>0){
@@ -833,8 +833,8 @@ class Conv extends Controller {
 
 	function _pre_insert($do){
 		$monto=$entradas=$salidas=0;
-		$this->costo_entrada= 0;
-		$this->peso_salida  = 0;
+		$this->costo_salidas= 0;
+		$this->peso_entradas= 0;
 		$this->pesos        = array();
 
 		//Hasta aca en costo trae el valor del ultimo de sinv, se opera para cambiarlo a:
@@ -854,19 +854,19 @@ class Conv extends Controller {
 				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert']='Debe tener entradas o salidas en el rubro .'.$i+1;
 				return false;
 			}
-			if($ent != 0){
-				$entradas+=$ent;
-				$this->costo_entrada+=$ent*$costo;
-				$monto=round($ent*$do->get_rel('itconv','costo',$i),2);
-			}
 			if($sal != 0){
 				$salidas+=$sal;
+				$this->costo_salidas+=$sal*$costo;
+				$monto=round($sal*$do->get_rel('itconv','costo',$i),2);
+			}
+			if($ent != 0){
+				$entradas+=$ent;
 				$dbcodigo=$this->db->escape($codigo);
 				$peso    =floatval($this->datasis->dameval('SELECT peso FROM sinv WHERE codigo='.$dbcodigo));
 				$this->pesos[$codigo] = $peso;
 
-				$this->peso_salida+=$sal*$peso;
-				$monto=round($sal*$do->get_rel('itconv','costo',$i),2);
+				$this->peso_entradas+=$sal*$peso;
+				$monto=round($ent*$do->get_rel('itconv','costo',$i),2);
 			}
 			$do->set_rel('itconv','costo'   ,$monto  ,$i);
 		}
@@ -938,10 +938,10 @@ class Conv extends Controller {
 
 			$this->datasis->sinvcarga($codigo, $alma, $monto);
 
-			if($monto < 0 && $this->peso_salida>0){   // Salida
+			if($monto > 0 && $this->peso_entradas>0){   // Entrada
 				$peso      = $this->pesos[$codigo]*$monto;
-				$participa = $peso/$this->peso_salida;
-				$ncosto    = round($this->costo_entrada*$participa/$monto,2);
+				$participa = $peso/$this->peso_entradas;
+				$ncosto    = round($this->costo_salidas*$participa/$monto,2);
 
 				if($ncosto>0){
 					$mycosto="IF(formcal='P',pond,IF(formcal='U',${ncosto},IF(formcal='S',standard,GREATEST(pond,ultimo))))";
