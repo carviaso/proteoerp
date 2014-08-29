@@ -10,6 +10,7 @@ class Conv extends Controller {
 	var $titp    = 'Conversiones de Inventario';
 	var $tits    = 'Conversiones de Inventario';
 	var $url     = 'inventario/conv/';
+	var $cpeso   = array();
 
 	function Conv(){
 		parent::Controller();
@@ -295,11 +296,11 @@ class Conv extends Controller {
 
 
 		$grid->addField('almacen');
-		$grid->label('Almac&acute;en');
+		$grid->label('Almac&eacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 40,
+			'width'         => 45,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:4, maxlength: 4 }',
@@ -721,7 +722,7 @@ class Conv extends Controller {
 		$edit->observa1->maxlength = 80;
 
 		$edit->almacen = new  dropdownField ('Almac&eacute;n', 'almacen');
-		$edit->almacen->options('SELECT ubica, CONCAT(ubica,\' \',ubides) nombre FROM caub ORDER BY ubica');
+		$edit->almacen->options('SELECT ubica, CONCAT(ubica,\' \',ubides) nombre FROM caub WHERE invfis="N" AND gasto<>"S" ORDER BY ubica');
 		$edit->almacen->rule = 'required';
 		$edit->almacen->style='width:200px;';
 		$edit->almacen->size = 5;
@@ -733,7 +734,7 @@ class Conv extends Controller {
 		$edit->codigo->size     = 12;
 		$edit->codigo->db_name  = 'codigo';
 		$edit->codigo->rel_id   = 'itconv';
-		$edit->codigo->rule     = 'required|callback_chrepetidos|callback_chcodigoa|callback_chpeso[<#i#>]';
+		$edit->codigo->rule     = 'required|callback_chrepetidos|callback_chcodigoa';
 		$edit->codigo->append($btn);
 
 		$edit->descrip = new inputField('Descripci&oacute;n <#o#>', 'descrip_<#i#>');
@@ -747,9 +748,12 @@ class Conv extends Controller {
 		$edit->entrada->rel_id   = 'itconv';
 		$edit->entrada->maxlength= 10;
 		$edit->entrada->size     = 6;
+		$edit->entrada->style    = 'color:green';
 		$edit->entrada->rule     = 'required|positive';
 		$edit->entrada->autocomplete=false;
 		$edit->entrada->onkeyup  ='validaEnt(<#i#>)';
+		$edit->entrada->onfocus  ='this.select()';
+		$edit->entrada->title    ='Cantidad de productos que se suman al inventario';
 
 		$edit->salida = new inputField('Salida <#o#>', 'salida_<#i#>');
 		$edit->salida->db_name  = 'salida';
@@ -757,9 +761,12 @@ class Conv extends Controller {
 		$edit->salida->rel_id   = 'itconv';
 		$edit->salida->maxlength= 10;
 		$edit->salida->size     = 6;
+		$edit->salida->style    = 'color:red';
 		$edit->salida->rule     = 'required|positive';
 		$edit->salida->autocomplete=false;
 		$edit->salida->onkeyup  ='validaSalida(<#i#>)';
+		$edit->salida->onfocus  ='this.select()';
+		$edit->salida->title    ='Cantidad de productos que se restan al inventario';
 
 		$edit->costo = new hiddenField('', 'costo_<#i#>');
 		$edit->costo->db_name   = 'costo';
@@ -775,7 +782,9 @@ class Conv extends Controller {
 		//fin de campos para detalle
 		//**************************
 
-		$edit->container = new containerField('alert','<b style="font-size:1.2em">Advertencia</b>: el costo de los productos de entrada <b>ser&aacute;n modificados</b> en base al costos de los productos de salida y tomando en cuenta su participacion en peso.');
+		$edit->container = new containerField('alert','<b style="font-size:1.2em">Advertencia</b>:
+		el costo de los productos de <b style="color:#219F21">entrada</b> <b>ser&aacute;n modificados</b> en base al costos de los productos
+		de <b style="color:red">salida</b>, si los productos de entrada son mas de uno su costo se calculara tomando en cuenta su participaci&oacute;n en peso.');
 		$edit->container->when = array('create');
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
@@ -797,12 +806,13 @@ class Conv extends Controller {
 		}
 	}
 
+	//se paso al pre-process, no se esta usando
 	function chpeso($codigo,$id){
 		$entrada=floatval($this->input->post('entrada_'.$id));
 		$this->validation->set_message('chpeso', 'El art&iacute;culo '.$codigo.' no tiene peso, se necesita para el c&aacute;lculo del costo');
 		if($entrada>0){
 			$dbcodigo=$this->db->escape($codigo);
-			$peso=$this->datasis->dameval('SELECT peso FROM sinv WHERE codigo='.$dbcodigo);
+			$peso=floatval($this->datasis->dameval('SELECT peso FROM sinv WHERE codigo='.$dbcodigo));
 			if($peso>0){
 				return true;
 			}
@@ -835,7 +845,7 @@ class Conv extends Controller {
 		$monto=$entradas=$salidas=0;
 		$this->costo_salidas= 0;
 		$this->peso_entradas= 0;
-		$this->pesos        = array();
+		$this->pesos=$errpeso= array();
 
 		//Hasta aca en costo trae el valor del ultimo de sinv, se opera para cambiarlo a:
 		//costo=costo*(entrada o salida segun se el caso)
@@ -863,12 +873,31 @@ class Conv extends Controller {
 				$entradas+=$ent;
 				$dbcodigo=$this->db->escape($codigo);
 				$peso    =floatval($this->datasis->dameval('SELECT peso FROM sinv WHERE codigo='.$dbcodigo));
+				if($peso<=0){
+					$errpeso[]=$codigo;
+				}
 				$this->pesos[$codigo] = $peso;
 
 				$this->peso_entradas+=$sal*$peso;
 				$monto=round($ent*$do->get_rel('itconv','costo',$i),2);
 			}
 			$do->set_rel('itconv','costo'   ,$monto  ,$i);
+		}
+
+		//Si es solo un producto de entrada no importa el peso
+		if($entradas==1 && $this->peso_entradas==0){
+			$this->peso_entradas=$this->pesos[$codigo]=1;
+		}
+
+		if($entradas>1 && count($errpeso)>0){
+			$errprod=implode(',',$errpeso);
+			if(count($errpeso)>1){
+				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert']="Los productos de entrada: ${errprod} no tienen pesos registrado";
+			}else{
+				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert']="El producto de entrada ${errprod} no tienen peso registrado";
+			}
+			$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'].=', debe registrar los pesos ya que estos seran usados para calcular los nuevos costos';
+			return false;
 		}
 
 		if($entradas == 0){

@@ -34,6 +34,7 @@ $(function(){
 	for(var i=0;i < <?php echo $form->max_rel_count['itconv']; ?>;i++){
 		autocod(i.toString());
 	};
+	totalizar();
 });
 
 //Agrega el autocomplete
@@ -90,13 +91,15 @@ function validaEnt(i){
 	if(entrada>0)
 		$("#salida_"+i).val('0');
 	$("#entrada_"+i).val(entrada);
+	totalizar();
 }
 
 function validaSalida(i){
 	var salida =Number($("#salida_"+i).val());
 	if(salida>0)
 		$("#entrada_"+i).val('0');
-	$("#salida_"+i).val(salida)
+	$("#salida_"+i).val(salida);
+	totalizar();
 }
 
 function add_itconv(){
@@ -123,6 +126,29 @@ function post_modbus_sinv(nind){
 	$('#entrada_'+id).focus();
 }
 
+function totalizar(){
+	var tcosto=0;
+
+	var arr=$('input[name^="costo_"]');
+	jQuery.each(arr, function() {
+		nom=this.name
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			if(this.value!=''){
+				ind     = this.name.substring(pos+1);
+
+				cana   = Number($("#salida_"+ind).val());
+				costo  = Number(this.value);
+				if(cana>0)
+					tcosto = tcosto + costo*cana;
+			}
+		}
+	});
+
+	$("#tcosto").text('Costo: '+nformat(tcosto,2));
+}
+
+
 function del_itconv(id){
 	id = id.toString();
 	$('#tr_itconv_'+id).remove();
@@ -143,10 +169,11 @@ function del_itconv(id){
 				<td class="littletableheader"><?php echo $form->almacen->label   ?>*&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->almacen->output  ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->fecha->output;   ?>&nbsp;</td>
+				<td class="littletablerow" align='right'> <?php echo $form->fecha->output;   ?></td>
 			</tr><tr>
 				<td class="littletableheader"><?php echo $form->observa1->label;  ?>&nbsp;</td>
-				<td colspan='3' class="littletablerow">   <?php echo $form->observa1->output; ?>&nbsp;</td>
+				<td class="littletablerow">   <?php echo $form->observa1->output; ?>&nbsp;</td>
+				<td colspan='2' class="littletablerow" align='right' style='font-size:1.2em'><b id='tcosto'></b></td>
 			</tr>
 		</table>
 		</td>
@@ -156,12 +183,12 @@ function del_itconv(id){
 
 		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px'>
 		<table width='100%'>
-			<tr id='__PTPL__'>
+			<tr id='__PTPL__' style='color:white;font-weight: bold;'>
 				<td width='135' bgcolor='#7098D0' align='center'>C&oacute;digo</td>
 				<td             bgcolor='#7098D0' align='center'>Descripci&oacute;n</td>
 				<td             bgcolor='#7098D0' align='center'>Peso</td>
-				<td width='80'  bgcolor='#7098D0' align='center'>Entrada</td>
-				<td width='80'  bgcolor='#7098D0' align='center'>Salida</td>
+				<td width='80'  bgcolor='#7098D0' align='center' title='Cantidad de productos que se suman al inventario' ><sup>1</sup>Entrada a inventario</td>
+				<td width='80'  bgcolor='#7098D0' align='center' title='Cantidad de productos que se restan al inventario'><sup>1</sup>Salida de inventario</td>
 				<?php if($form->_status!='show') {?>
 					<td width='20' bgcolor='#7098D0' align='center'>
 						<a href='#' onclick="add_itconv()" title='Agregar otro producto'><?php echo img('images/agrega4.png'); ?></a>
@@ -203,3 +230,4 @@ function del_itconv(id){
 	<?php echo $form_end; ?>
 </table>
 <?php endif; ?>
+<sup>1</sup>Tenga en cuenta que en una conversi&oacute;n los <b style='color:red'>productos de salida</b> son los que se <b style='color:red'>restan</b> del inventario para <b style='color:green'>sumar</b> los <b style='color:green'>productos de entrada</b>.

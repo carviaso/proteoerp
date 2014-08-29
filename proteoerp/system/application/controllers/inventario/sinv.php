@@ -1918,9 +1918,9 @@ class Sinv extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-/*
+
 		$grid->addField('pondcal');
-		$grid->label('Pondcal');
+		$grid->label('Pond.Calculado');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -1933,7 +1933,7 @@ class Sinv extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-*/
+
 		$grid->addField('alterno');
 		$grid->label('Alterno');
 		$grid->params(array(
@@ -3693,7 +3693,7 @@ class Sinv extends Controller {
 		if(empty($meco)) $do->set('garantia',0);
 
 
-		
+
 		if(empty($codigo)){
 			$size='6';
 			$mSQL="SELECT LPAD(a.hexa,${size},0) AS val FROM serie AS a LEFT JOIN sinv AS b ON b.codigo=LPAD(a.hexa,${size},0) WHERE valor<16777215 AND b.codigo IS NULL LIMIT 1";
