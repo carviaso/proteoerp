@@ -22,6 +22,8 @@ class Sclicont extends Controller {
 	function index(){
 		$this->datasis->creaintramenu(array('modulo'=>'152','titulo'=>'Contratos','mensaje'=>'Contratos','panel'=>'CONTRATOS','ejecutar'=>'ventas/sclicont','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$mSQL = "ALTER TABLE sclicont CHANGE COLUMN `upago` `upago` DATE NULL DEFAULT NULL AFTER observa;";
+		$this->db->query($mSQL);
 		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
@@ -84,12 +86,39 @@ class Sclicont extends Controller {
 
 		$bodyscript .= '
 		$("#gfactura").click(function(){
+			var temp = {
+					state0:{
+						html: "<h1>Generar las facturas</h1>",
+						buttons: { Cancelar: false, Facturar: true},
+						focus: 1,
+						submit: function(e,v,m,f){
+							if (v){
+								var murl = "'.site_url('ventas/sfac/lote/insert').'";
+								$.post(murl, function (data){  
+									$.prompt.goToState("state1");
+								});
+								e.preventDefault();
+							}
+						}
+					},
+					state1: {
+						html: "<h1>Facturacion Concluida</h1>",
+						focus: 2
+					}
+			};
+			$.prompt(temp);
+		});
+		';
+
+/*
+		$("#gfactura").click(function(){
 			var murl = "'.site_url('ventas/sfac/lote/insert').'";
 			$.post(murl, function (data){  
 				$.prompt("<h1>Facturacion Concluida</h1>"+data);
 			});
 		});
 		';
+*/
 
 		$bodyscript .= '</script>';
 
@@ -681,21 +710,22 @@ class Sclicont extends Controller {
 	function instalar(){
 		if (!$this->db->table_exists('sclicont')) {
 			$mSQL="CREATE TABLE `sclicont` (
-			  id       INT(11) NOT NULL AUTO_INCREMENT,
-			  numero   CHAR(8) DEFAULT NULL,
-			  status   CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Activo, Suspendido, Terminado',
-			  fecha    DATE DEFAULT NULL,
-			  inicio   DATE DEFAULT NULL,
-			  final    DATE DEFAULT NULL,
-			  cliente  CHAR(5) DEFAULT NULL,
-			  codigo   VARCHAR(15) DEFAULT NULL,
-			  descrip  TEXT,
-			  cantidad DECIMAL(17,2) DEFAULT '0.00',
-			  base     DECIMAL(17,2) DEFAULT '0.00',
-			  iva      DECIMAL(17,2) DEFAULT '0.00',
-			  precio   DECIMAL(17,2) DEFAULT '0.00',
-			  observa  TEXT NULL,
-			  PRIMARY KEY (`id`)
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`numero` CHAR(8) NULL DEFAULT NULL,
+				`status` CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Activo, Suspendido, Terminado',
+				`fecha` DATE NULL DEFAULT NULL,
+				`inicio` DATE NULL DEFAULT NULL,
+				`final` DATE NULL DEFAULT NULL,
+				`cliente` CHAR(5) NULL DEFAULT NULL,
+				`codigo` VARCHAR(15) NULL DEFAULT NULL,
+				`descrip` TEXT NULL,
+				`cantidad` DECIMAL(17,2) NULL DEFAULT '0.00',
+				`base` DECIMAL(17,2) NULL DEFAULT '0.00',
+				`iva` DECIMAL(17,2) NULL DEFAULT '0.00',
+				`precio` DECIMAL(17,2) NULL DEFAULT '0.00',
+				`observa` TEXT NULL,
+				`upago` INT(11) NULL DEFAULT '0',
+			PRIMARY KEY (`id`)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Contratos recurrentes'";
 			$this->db->query($mSQL);
 		}

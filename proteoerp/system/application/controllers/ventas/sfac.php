@@ -4771,7 +4771,7 @@ class Sfac extends Controller {
 		$data   = '';
 		if($status=='insert'){
 			$mSQL="SELECT a.id, a.numero contrato, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.cliente, b.tipo, 
-					a.codigo, b.dire11 AS direc, a.cantidad, a.precio, a.base, b.telefono, a.descrip, c.iva, a.upago,
+					a.codigo, b.dire11 AS direc, a.cantidad, a.precio, a.base, b.telefono, a.descrip, c.iva, IF(a.upago<a.inicio, a.inicio, DATE_ADD(a.upago, INTERVAL 1 MONTH) ) upago,
 					EXTRACT(YEAR_MONTH FROM inicio ) inicio, b.vendedor
 					FROM sclicont a JOIN scli b ON a.cliente=b.cliente JOIN sinv c ON a.codigo=c.codigo
 				WHERE a.status = 'A'
@@ -4787,17 +4787,13 @@ class Sfac extends Controller {
 					$rrow = $qquery->row();
 					$saldo= $rrow->debe-$rrow->haber;
 				}
-				$saldo += $row->base*(1+($row->iva/100));
+				$saldo += $row->base*(1+($row->iva/100))+1;
 				$sql="UPDATE scli SET credito='S',tolera=10,maxtole=10,limite=${saldo},formap=30 WHERE cliente=${dbcliente}";
 				$this->db->simple_query($sql);
 
 				$upago = $row->upago;
-				if ( $upago <= 0 ){
-					$upago = $row->inicio;
-				} else
-					$upago = $upago + 1;
-
-				$desde    = substr($row->upago,4,2).' del '.substr($row->upago,0,4);
+					
+				$desde    = substr($row->upago,5,2).' del '.substr($row->upago,0,4);
 
 				$contrato = $row->contrato;
 				$_POST['btn_submit']  = 'Guardar';
@@ -4807,6 +4803,7 @@ class Sfac extends Controller {
 				$_POST['vd']          = $row->vendedor;
 				$_POST['almacen']     = '0001'; //$this->secu->getalmacen();
 				$_POST['tipo_doc']    = 'F';
+				$_POST['referen']     = 'C';
 				$_POST['factura']     = '';
 				$_POST['cod_cli']     = $row->cliente;
 				$_POST['sclitipo']    = '1';
@@ -4814,6 +4811,7 @@ class Sfac extends Controller {
 				$_POST['rifci']       = $row->rifci;
 				$_POST['direc']       = $row->direc;
 				$_POST['upago']       = $row->upago;
+				//$_POST['observ1']     = $upago;
 
 				$_POST['codigoa_0']   = $row->codigo;
 				$_POST['desca_0']     = $row->descrip;
@@ -4834,7 +4832,6 @@ class Sfac extends Controller {
 				$_POST['banco_0']     = '';
 				$_POST['monto_0']     = $row->precio*(1+($row->iva/100)) ;
 				$_POST['snte']        = '';
-				$_POST['observ1']     = $upago;
 
 				ob_start();
 					$this->dataedit();
@@ -4844,10 +4841,7 @@ class Sfac extends Controller {
 				$getdata=json_decode($rt,true);
 				if($getdata['status']=='A'){
 					$id=$getdata['pk']['id'];
-					$this->db->simple_query("UPDATE sclicont SET upago=$upago WHERE id=".$row->id);
-					//$url=$this->_direccion='http://localhost/'.site_url('formatos/descargartxt/FACTSER/'.$id);
-					//$data .= file_get_contents($url);
-					//$data .= "<FIN>\r\n";
+					$this->db->simple_query("UPDATE sclicont SET upago='$upago' WHERE id=".$row->id);
 				}else{
 					echo $getdata['mensaje'];
 				}
