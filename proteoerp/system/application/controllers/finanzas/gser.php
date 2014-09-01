@@ -3882,8 +3882,8 @@ class gser extends Controller {
 				$monto   = $do->get_rel('gereten','monto' ,$i);
 				$porcen  = $do->get_rel('gereten','porcen',$i);
 
-				$do->set_rel('gereten','numero' ,$serie,$i);
-				$do->set_rel('gereten','origen' ,'GSER',$i);
+				$do->set_rel('gereten','numero'  ,$serie  ,$i);
+				$do->set_rel('gereten','origen'  ,'GSER'  ,$i);
 				$retemonto += $monto;
 				$retebase  += $importe;
 			}else{
@@ -3999,6 +3999,14 @@ class gser extends Controller {
 		$do->set('sobretasa',$sobretasa);
 		$do->set('monadic'  ,$monadic  );
 		$do->set('exento'   ,$exento   );
+
+		$rete_cana=$do->count_rel('gereten');
+		for($i=0;$i<$rete_cana;$i++){
+			$codigorete = $do->get_rel('gereten','codigorete',$i);
+			if(!empty($codigorete)){
+				$do->set_rel('gereten','transac' ,$trans,$i);
+			}
+		}
 
 		if ($monto1>0){
 			$negreso  = $this->datasis->fprox_numero('negreso');
@@ -4686,7 +4694,7 @@ class gser extends Controller {
 			SET a.idgser=b.id WHERE a.idgser IS NULL OR a.idgser=0";
 		$this->db->query($query);
 
-		if (!$this->db->table_exists('gereten')){
+		if(!$this->db->table_exists('gereten')){
 			$mSQL="CREATE TABLE `gereten` (
 				`id` INT(10) NOT NULL AUTO_INCREMENT,
 				`idd` INT(11) NULL DEFAULT NULL,
@@ -4697,11 +4705,20 @@ class gser extends Controller {
 				`base` DECIMAL(10,2) NULL DEFAULT NULL,
 				`porcen` DECIMAL(5,2) NULL DEFAULT NULL,
 				`monto` DECIMAL(10,2) NULL DEFAULT NULL,
-				PRIMARY KEY (`id`)
+				`transac` VARCHAR(8) NULL DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				INDEX `transac` (`transac`)
 			)
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
 			$this->db->query($mSQL);
+		}
+		$gcampos=$this->db->list_fields('gereten');
+		if(!in_array('transac',$gcampos)){
+			$query="ALTER TABLE `gereten` ADD COLUMN `transac` VARCHAR(8) NULL DEFAULT NULL AFTER `monto`";
+			$this->db->query($query);
+			$query="ALTER TABLE `gereten` ADD INDEX `transac` (`transac`)";
+			$this->db->query($query);
 		}
 
 		if (!$this->db->table_exists('gserchi')) {
@@ -4734,6 +4751,17 @@ class gser extends Controller {
 			$this->db->query($query);
 		}
 
+		$gcampos=$this->db->list_fields('gserchi');
+		if(!in_array('ngasto',$gcampos)){
+			$query="ALTER TABLE `gserchi` ADD COLUMN `ngasto` VARCHAR(8) NULL DEFAULT NULL AFTER `departa`";
+			$this->db->query($query);
+		}
+
+		if(!in_array('aceptado',$gcampos)){
+			$query="ALTER TABLE gserchi ADD COLUMN aceptado CHAR(1) NULL DEFAULT NULL";
+			$this->db->query($query);
+		}
+
 		if (!$this->db->table_exists('rica')) {
 			$query="CREATE TABLE `rica` (
 				`codigo` CHAR(5)    NOT  NULL,
@@ -4742,16 +4770,6 @@ class gser extends Controller {
 				`tasa` DECIMAL(8,2) NULL DEFAULT NULL,
 				PRIMARY KEY (`codigo`)
 				) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
-			$this->db->query($query);
-		}
-
-		if (!$this->db->field_exists('ngasto','gserchi')) {
-			$query="ALTER TABLE `gserchi` ADD COLUMN `ngasto` VARCHAR(8) NULL DEFAULT NULL AFTER `departa`";
-			$this->db->query($query);
-		}
-
-		if (!$this->db->field_exists('aceptado','gserchi')) {
-			$query="ALTER TABLE gserchi ADD COLUMN aceptado CHAR(1) NULL DEFAULT NULL";
 			$this->db->query($query);
 		}
 	}

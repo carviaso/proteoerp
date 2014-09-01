@@ -4474,8 +4474,9 @@ class Scst extends Controller {
 				$monto   = $do->get_rel('gereten','monto' ,$i);
 				$porcen  = $do->get_rel('gereten','porcen',$i);
 
-				$do->set_rel('gereten','numero' ,$serie,$i);
-				$do->set_rel('gereten','origen' ,'SCST',$i);
+				$do->set_rel('gereten','numero' ,$serie  ,$i);
+				$do->set_rel('gereten','origen' ,'SCST'  ,$i);
+				$do->set_rel('gereten','transac',$transac,$i);
 
 				$retemonto += $monto;
 				$retebase  += $importe;
@@ -5147,6 +5148,35 @@ class Scst extends Controller {
 
 		if(!in_array('rmargen',$campos)){
 			$this->db->query("ALTER TABLE `itscst` ADD COLUMN `rmargen` CHAR(1) NULL DEFAULT 'N' COMMENT 'Respeta el margen al actualizar' AFTER `usuario`");
+		}
+
+
+		//para islr
+		if(!$this->db->table_exists('gereten')){
+			$mSQL="CREATE TABLE `gereten` (
+				`id` INT(10) NOT NULL AUTO_INCREMENT,
+				`idd` INT(11) NULL DEFAULT NULL,
+				`origen` CHAR(4) NULL DEFAULT NULL,
+				`numero` VARCHAR(25) NULL DEFAULT NULL,
+				`codigorete` VARCHAR(4) NULL DEFAULT NULL,
+				`actividad` VARCHAR(45) NULL DEFAULT NULL,
+				`base` DECIMAL(10,2) NULL DEFAULT NULL,
+				`porcen` DECIMAL(5,2) NULL DEFAULT NULL,
+				`monto` DECIMAL(10,2) NULL DEFAULT NULL,
+				`transac` VARCHAR(8) NULL DEFAULT NULL,
+				PRIMARY KEY (`id`),
+				INDEX `transac` (`transac`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM";
+			$this->db->query($mSQL);
+		}
+		$gcampos=$this->db->list_fields('gereten');
+		if(!in_array('transac',$gcampos)){
+			$query="ALTER TABLE `gereten` ADD COLUMN `transac` VARCHAR(8) NULL DEFAULT NULL AFTER `monto`";
+			$this->db->query($query);
+			$query="ALTER TABLE `gereten` ADD INDEX `transac` (`transac`)";
+			$this->db->query($query);
 		}
 
 	}
