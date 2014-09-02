@@ -226,7 +226,13 @@ class notifica extends controller {
 							$tt=7*24*3600;
 							break;
 						case 'M':
-							$tt=30*24*3600;
+							$fect = explode('-',substr($__row->fechahora,0,10));
+							$hor  = explode(':',substr($__row->fechahora,11  ));
+							if($__row->utime>0){
+								$tt=mktime(intval($hor[0]),intval($hor[1]), intval($hor[2]), date('n',$__row->utime)+1,intval($fect[2]))-$__row->utime;
+							}else{
+								$tt=30*24*3600;
+							}
 							break;
 						case 'A':
 							$tt=365*24*3600;
