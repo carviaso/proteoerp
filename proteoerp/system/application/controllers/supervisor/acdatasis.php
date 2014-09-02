@@ -356,6 +356,7 @@ class acdatasis extends Controller {
 			echo "Insertados Nuevos Accesos <br>";
 
 			echo "<h1>El Usuario ${usuario} ahora tiene los accesos de ${copia}</h1>";
+			logusu('SIDA',"Copiado accesos de ${usuario} a  ${copia}");
 		} else {
 			echo "<h1>Usuarios origen y destino iguales ${usuario} = ${copia}</h1>";
 		}

@@ -2679,7 +2679,7 @@ class Sprm extends Controller {
 				$itnumero = $do->get_rel($rel, 'numero'  , $i);
 				$itfecha  = $do->get_rel($rel, 'fecha'   , $i);
 				$abono    = $do->get_rel($rel, 'reteiva'   , $i);
-				
+
 				//$itpppago = $do->get_rel($rel, 'ppago'   , $i);
 
 				$dbittipo   = $this->db->escape($ittipo  );
@@ -2701,7 +2701,7 @@ class Sprm extends Controller {
 				$sprm['transac']    = $transac;
 				$sprm['usuario']    = $usuario;
 				$mSQL = $this->db->insert_string('itppro', $sprm);
-			
+
 				$ban=$this->db->query($mSQL);
 				if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
 
@@ -2710,7 +2710,7 @@ class Sprm extends Controller {
 				//$this->db->query($mSQL);
 		}
 
-/*		
+/*
 			$sprm=array();
 			$sprm['numppro']    = $mnumnd;
 			$sprm['tipoppro']   = 'ND';
@@ -2726,7 +2726,7 @@ class Sprm extends Controller {
 			$sprm['transac']    = $transac;
 			$sprm['usuario']    = $usuario;
 			$mSQL = $this->db->insert_string('itppro', $sprm);
-			
+
 			$ban=$this->db->query($mSQL);
 			if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
 */
@@ -2743,7 +2743,7 @@ class Sprm extends Controller {
 			$sprm['fecha']     = $fecha;
 			$sprm['monto']     = $reteiva;
 			$sprm['impuesto']  = 0;
-			$sprm['abonos']    = $reteiva;
+			$sprm['abonos']    = 0;
 			$sprm['vence']     = $fecha;
 			$sprm['tipo_ref']  = '';
 			$sprm['num_ref']   = '';
@@ -2866,7 +2866,7 @@ NOTA DE CREDITO
 ========================================================================
 La ND por dev de reiva no la carga al saldo
 
- 
+
 */
 
 }
