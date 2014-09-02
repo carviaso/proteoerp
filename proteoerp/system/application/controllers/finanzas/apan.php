@@ -1268,12 +1268,25 @@ class Apan extends Controller {
 				break;
 			}
 
-			$ind = 'itsaldo_'.$i;  $itsaldo= $this->input->post($ind);
+			$ind = 'itsaldo_'.$i;  $itsaldo= floatval($this->input->post($ind));
 			$ind = 'itmonto_'.$i;  $monto  = $this->input->post($ind);
-			$ind = 'itid_'.$i;     $id     = $this->input->post($ind);
+			$ind = 'itid_'.$i;     $id     = intval($this->input->post($ind));
+
+			if($ttipo=='C'){
+				$rsaldo = floatval($this->datasis->dameval("SELECT monto-abonos AS saldo FROM smov WHERE id=${id}"));
+			}else{
+				$rsaldo = floatval($this->datasis->dameval("SELECT monto-abonos AS saldo FROM sprm WHERE id=${id}"));
+			}
 			if(!empty($monto)){
 				if(!is_numeric($monto)){
 					$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto '.$tipo.$numero.' no es num&eacute;rico.';
+					return false;
+					break;
+				}
+
+				$monto = floatval($monto);
+				if($monto > $rsaldo){
+					$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto '.$tipo.$numero.' es mayor al saldo disponible '.nformat($rsaldo).'.';
 					return false;
 					break;
 				}
@@ -1307,12 +1320,27 @@ class Apan extends Controller {
 				$ind = 'iteaplicar_'.$i; $abono  = $this->input->post($ind);
 				$ind = 'itemonto_'.$i;   $monto  = $this->input->post($ind);
 				$ind = 'iteid_'.$i;      $id     = $this->input->post($ind);
+
+				if($ttipo=='C'){
+					$rsaldo = floatval($this->datasis->dameval("SELECT monto-abonos AS saldo FROM smov WHERE id=${id}"));
+				}else{
+					$rsaldo = floatval($this->datasis->dameval("SELECT monto-abonos AS saldo FROM sprm WHERE id=${id}"));
+				}
+
 				if(!empty($abono)){
 					if(!is_numeric($abono)){
 						$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no es num&eacute;rico.';
 						return false;
 						break;
 					}
+
+					$abono = floatval($abono);
+					if($abono > $rsaldo){
+						$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' es mayor al saldo disponible '.nformat($rsaldo).'.';
+						return false;
+						break;
+					}
+
 					$efectos += $abono;
 					if($abono > $monto){
 						$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto del efecto a aplicar '.$tipo.$numero.' no puede exceder su saldo.';

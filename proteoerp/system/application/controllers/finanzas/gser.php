@@ -135,7 +135,7 @@ class gser extends Controller {
 			$.post("'.site_url('finanzas/gser/solo/create').'",
 			function(data){
 				$("#fgasto").html(data);
-				$("#fgasto").dialog({height: 500, width: 770, title: "Agregar Gasto/Egreso"});
+				$("#fgasto").dialog({height: 500, width: 780, title: "Agregar Gasto/Egreso"});
 				$( "#fgasto" ).dialog( "open" );
 			})
 		};';
@@ -1929,27 +1929,29 @@ class gser extends Controller {
 	}
 
 	function gserserie(){
-		$serie   = $this->uri->segment($this->uri->total_segments());
-		$id = $this->uri->segment($this->uri->total_segments()-1);
-		if (!empty($serie)) {
-			$this->db->simple_query("UPDATE gser SET serie='$serie' WHERE id='$id'");
-			echo " con exito ";
-		} else {
-			echo " NO se guardo ";
+		$serie = $this->uri->segment($this->uri->total_segments());
+		$id    = intval($this->uri->segment($this->uri->total_segments()-1));
+		if(!empty($serie) && $id>0){
+			$dbserie = $this->db->escape($serie);
+			$this->db->simple_query("UPDATE gser SET serie=${dbserie} WHERE id=${id}");
+			echo ' con exito ';
+		}else{
+			echo ' NO se guardo ';
 		}
-		logusu('GSER',"Cambia Nro. Serie $id ->  $serie ");
+		logusu('GSER',"Cambia Nro. Serie ${id} ->  ${serie}");
 	}
 
 	function gserfiscal(){
-		$serie   = $this->uri->segment($this->uri->total_segments());
-		$id = $this->uri->segment($this->uri->total_segments()-1);
-		if (!empty($serie)) {
-			$this->db->simple_query("UPDATE gser SET nfiscal='$serie' WHERE id='$id'");
+		$serie = $this->uri->segment($this->uri->total_segments());
+		$id    = intval($this->uri->segment($this->uri->total_segments()-1));
+		if(!empty($serie) && $id>0){
+			$dbserie = $this->db->escape($serie);
+			$this->db->simple_query("UPDATE gser SET nfiscal=${dbserie} WHERE id=${id}");
 			echo " con exito ";
-		} else {
+		}else{
 			echo " NO se guardo ";
 		}
-		logusu('GSER',"Cambia Nro. Serie ${id} ->  ${serie}");
+		logusu('GSER',"Cambia Nro. Fiscal ${id} ->  ${serie}");
 	}
 
 
@@ -3370,7 +3372,7 @@ class gser extends Controller {
 		$edit->retesimple->showformat ='decimal';
 
 		$edit->codb1 = new dropdownField('Caja/Banco','codb1');
-		$edit->codb1->option('','');
+		$edit->codb1->option('','Ninguno');
 		$edit->codb1->options("SELECT TRIM(codbanc) AS ind, CONCAT_WS('-',codbanc,banco) AS label FROM banc ORDER BY codbanc");
 		$edit->codb1->rule  = 'max_length[5]|callback_chcodb|condi_required';
 		$edit->codb1->style = 'width:120px';

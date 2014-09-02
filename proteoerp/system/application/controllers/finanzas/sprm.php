@@ -1530,6 +1530,14 @@ class Sprm extends Controller {
 			}
 		}
 
+		if($tipo_doc=='AB'){
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM gser WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Abono proveniente de un gasto, debe eliminarlo del modulo respectivo.';
+				return false;
+			}
+		}
+
 		return true;
 	}
 
