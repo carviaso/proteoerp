@@ -4774,7 +4774,7 @@ class Sfac extends Controller {
 					a.codigo, b.dire11 AS direc, a.cantidad, a.precio, a.base, b.telefono, a.descrip, c.iva, IF(a.upago<a.inicio, a.inicio, DATE_ADD(a.upago, INTERVAL 1 MONTH) ) upago,
 					EXTRACT(YEAR_MONTH FROM inicio ) inicio, b.vendedor
 					FROM sclicont a JOIN scli b ON a.cliente=b.cliente JOIN sinv c ON a.codigo=c.codigo
-				WHERE a.status = 'A'
+				WHERE a.status = 'A' 
 				ORDER BY b.rifci";
 			$query = $this->db->query($mSQL);
 

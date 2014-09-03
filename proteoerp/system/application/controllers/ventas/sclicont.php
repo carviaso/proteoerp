@@ -22,8 +22,6 @@ class Sclicont extends Controller {
 	function index(){
 		$this->datasis->creaintramenu(array('modulo'=>'152','titulo'=>'Contratos','mensaje'=>'Contratos','panel'=>'CONTRATOS','ejecutar'=>'ventas/sclicont','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
-		$mSQL = "ALTER TABLE sclicont CHANGE COLUMN `upago` `upago` DATE NULL DEFAULT NULL AFTER observa;";
-		$this->db->query($mSQL);
 		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
@@ -729,10 +727,18 @@ class Sclicont extends Controller {
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Contratos recurrentes'";
 			$this->db->query($mSQL);
 		}
+
 		$campos=$this->db->list_fields('sclicont');
 		if(!in_array('observa',$campos)){
 			$this->db->simple_query('ALTER TABLE sclicont ADD COLUMN observa TEXT NULL ');
 		};
+
+		if(!in_array('upago',$campos)){
+			$this->db->simple_query('ALTER TABLE sclicont ADD COLUMN upago DATE NULL ');
+		};
+
+		$mSQL = "ALTER TABLE sclicont CHANGE COLUMN `upago` `upago` DATE NULL DEFAULT NULL AFTER observa;";
+		$this->db->query($mSQL);
 
 	}
 }

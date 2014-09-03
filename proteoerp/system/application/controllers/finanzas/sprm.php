@@ -1959,7 +1959,7 @@ class Sprm extends Controller {
 		//Detalle del pago
 		$edit->banco = new dropdownField('Banco', 'banco');
 		$edit->banco->option('','Seleccionar');
-		$edit->banco->options('SELECT TRIM(codbanc) AS codbanc,CONCAT_WS(\' \',TRIM(banco),numcuent) FROM banc ORDER BY banco');
+		$edit->banco->options('SELECT TRIM(codbanc) AS codbanc,CONCAT_WS(\' \',TRIM(codbanc),TRIM(banco),numcuent) FROM banc ORDER BY banco');
 		$edit->banco->style  = 'width:200px;';
 		$edit->banco->rule   = 'condi_required|callback_chbanc';
 

@@ -86,6 +86,9 @@ $(document).ready(function() {
 	$( "#ffactura" ).datepicker({ dateFormat: "dd/mm/yy" });
 	$( "#vence" ).datepicker({    dateFormat: "dd/mm/yy" });
 
+	$('#benefi').change(function () {
+		$.prompt("<h1>Advertencia</h1><p>El beneficiario del cheque debe ser el mismo contribuyente o proveedor segun la normativa de la ley del Impuesto al Valor Agregado</p>");
+	});
 
 	codb1=$('#codb1').val();
 	desactivacampo(codb1);
@@ -492,6 +495,8 @@ function autocod(id){
 		}
 	});
 }
+
+
 </script>
 <?php } else { ?>
 <script language="javascript" type="text/javascript">

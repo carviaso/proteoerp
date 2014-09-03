@@ -893,10 +893,8 @@ class Apan extends Controller {
 								var sugiere = [];
 								if(data.length==0){
 									$("#clipro").val("");
-
 									$("#nombre").val("");
 									$("#nombre_val").text("");
-
 									$("#saldo_val").text("");
 								}else{
 									$.each(data,
@@ -912,14 +910,10 @@ class Apan extends Controller {
 				minLength: 2,
 				select: function( event, ui ) {
 					$("#clipro").attr("readonly", "readonly");
-
 					$("#nombre").val(ui.item.nombre);
 					$("#nombre_val").text(ui.item.nombre);
-
 					setTimeout(function() {  $("#clipro").removeAttr("readonly"); }, 1500);
-
 					truncate();
-
 					$.ajax({
 						url: "'.site_url('ajax/buscasmovapan/annc').'",
 						dataType: "json",
@@ -929,7 +923,6 @@ class Apan extends Controller {
 							$.each(data,
 								function(id, val){
 									can= add_itannc();
-
 									$("#itnumero_" +can).val(val.numero);
 									$("#ittipo_"   +can).val(val.tipo_doc);
 									$("#itfecha_"  +can).val(val.fecha);
@@ -938,7 +931,6 @@ class Apan extends Controller {
 									$("#itnumero_" +can+"_val").text(val.tipo_doc+val.numero);
 									$("#itfecha_"  +can+"_val").text(val.fecha);
 									$("#itsaldo_"  +can+"_val").text(nformat(val.saldo,2));
-
 									$("#itmonto_"+can ).focus(function(){
 										var valor = $(this).val();
 										if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
@@ -962,7 +954,6 @@ class Apan extends Controller {
 								$.each(data,
 									function(id, val){
 										can= add_itefec();
-
 										$("#itenumero_" +can).val(val.numero);
 										$("#itetipo_"   +can).val(val.tipo_doc);
 										$("#itefecha_"  +can).val(val.fecha);
@@ -973,7 +964,6 @@ class Apan extends Controller {
 										$("#itefecha_"  +can+"_val").text(val.fecha);
 										$("#itesaldo_"  +can+"_val").text(nformat(val.saldo,2));
 										$("#itemonto_"  +can+"_val").text(nformat(val.monto,2));
-
 										$("#iteaplicar_"+can ).focus(function(){
 											totaliza();
 											var valor  = $(this).val();
@@ -1007,7 +997,6 @@ class Apan extends Controller {
 
 				}
 			});
-
 
 			$("#reinte").autocomplete({
 				delay: 600,
@@ -1301,7 +1290,7 @@ class Apan extends Controller {
 
 		$arr_efe=array();
 		//Chequea si se reintegra
-		if($preinte!='S'){
+		if($preinte != 'S'){
 			//Calcula los efectos a los que se aplica
 
 			$i=$efectos=0;
@@ -1356,7 +1345,6 @@ class Apan extends Controller {
 				return false;
 			}
 			//Fin de los efectos
-
 
 			if($aplicar-$efectos != 0){
 				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto a aplicar es diferente al aplicado. '."$aplicar-$efectos";

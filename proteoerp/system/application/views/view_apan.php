@@ -184,6 +184,8 @@ function cnota(){
 function totaliza(){
 	var tmonto = total();
 	$("#monto").val(roundNumber(tmonto,2));
+	tmonto = totalefe();
+	$("#tefecto").html(roundNumber(tmonto,2));
 }
 
 function truncate(id){
@@ -213,7 +215,6 @@ function truncate(id){
 		<td><b class="littletablerowth"><?php echo $form->clipro->label;?></b><?php echo $form->clipro->output; ?><?php echo $form->nombre->output; ?></td>
 		<td style='text-align:right;'>
 			<b class="littletablerowth"><?php echo $form->preinte->label;?></b><?php echo $form->preinte->output;?>
-			<b class="littletablerowth"><?php echo $form->monto->label;  ?></b><?php echo $form->monto->output;  ?>
 		</td>
 	</tr>
 </table>
@@ -226,7 +227,7 @@ function truncate(id){
 				<div id='grid1_container' style='overflow:auto;width:100%; height:210px; border: 1px outset #123;background: #FFFFFF; '>
 					<table style='width:100%;' >
 						<tr>
-							<th colspan='4' class="littletableheaderdet">ANTICIPOS O NC</th>
+							<th colspan='4' class="littletableheaderdet">ANTICIPOS Y NC</th>
 						</tr>
 
 						<tr id='__PNPL__'>
@@ -265,7 +266,19 @@ function truncate(id){
 				</div>
 			</td>
 		</tr>
+		<tr>
+			<td align='right'>
+				<b class="littletablerowth">TOTAL ANTICIPOS</b><?php echo $form->monto->output;  ?>
+			</td>
+			<td align='right'>
+				<b class="littletablerowth">TOTAL EFECTOS <span id='tefecto'>0.00</span></b>
+			</td>
+		</tr>
+
+		
+		
 	</table>
+
 </div>
 
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
