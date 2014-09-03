@@ -186,7 +186,7 @@ class Apan extends Controller {
 		$("#fcliente").click( function() {
 			$.post("'.site_url($this->url.'decliente/create').'",
 			function(data){
-				$("#fedita").dialog( {height: 450, width: 750, title: "Aplicacion de Anticipo a Cliente"} );
+				$("#fedita").dialog( {height: 500, width: 750, title: "Aplicacion de Anticipo a Cliente"} );
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
@@ -197,7 +197,7 @@ class Apan extends Controller {
 		$("#fproveed").click( function() {
 			$.post("'.site_url($this->url.'deproveed/create').'",
 			function(data){
-				$("#fedita").dialog( {height: 450, width: 750, title: "Aplicacion de Anticipo a Proveedor"} );
+				$("#fedita").dialog( {height: 500, width: 750, title: "Aplicacion de Anticipo a Proveedor"} );
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
 			})
@@ -830,8 +830,6 @@ class Apan extends Controller {
 
 		$edit->nombre = new inputField('Nombre','nombre');
 		$edit->nombre->rule      = '';
-		$edit->nombre->size      = 30;
-		$edit->nombre->maxlength = 30;
 		$edit->nombre->type ='inputhidden';
 
 		$edit->monto = new inputField('Monto','monto');
@@ -839,6 +837,8 @@ class Apan extends Controller {
 		$edit->monto->css_class = 'inputnum';
 		$edit->monto->size      = 10;
 		$edit->monto->maxlength = 17;
+		$edit->monto->type      = 'inputhidden';
+		$edit->monto->showformat= 'decimal';
 
 		$edit->preinte = new checkboxField('Reintegrar', 'preinte', 'S','N');
 		$edit->preinte->insertValue = 'N';
@@ -931,14 +931,15 @@ class Apan extends Controller {
 									$("#itnumero_" +can+"_val").text(val.tipo_doc+val.numero);
 									$("#itfecha_"  +can+"_val").text(val.fecha);
 									$("#itsaldo_"  +can+"_val").text(nformat(val.saldo,2));
+									$("#itmonto_"+can ).keyup(function(){ totaliza(); });
 									$("#itmonto_"+can ).focus(function(){
 										var valor = $(this).val();
 										if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
 											$(this).val(val.saldo);
-											totaliza();
 										}
 										$(this).select();
 										cnota();
+										totaliza();
 									});
 								}
 							);
@@ -964,6 +965,7 @@ class Apan extends Controller {
 										$("#itefecha_"  +can+"_val").text(val.fecha);
 										$("#itesaldo_"  +can+"_val").text(nformat(val.saldo,2));
 										$("#itemonto_"  +can+"_val").text(nformat(val.monto,2));
+										$("#iteaplicar_"+can ).keyup(function(){ totaliza(); });
 										$("#iteaplicar_"+can ).focus(function(){
 											totaliza();
 											var valor  = $(this).val();
@@ -989,6 +991,7 @@ class Apan extends Controller {
 											}
 											$(this).select();
 											cnota();
+											totaliza();
 										});
 									}
 								);
@@ -1114,14 +1117,15 @@ class Apan extends Controller {
 										$("#itfecha_"  +can+"_val").text(val.fecha);
 										$("#itsaldo_"  +can+"_val").text(nformat(val.saldo,2));
 
+										$("#itmonto_"+can ).keyup(function(){ totaliza(); });
 										$("#itmonto_"+can ).focus(function(){
 											var valor = $(this).val();
 											if(valor=="" || valor=="0" || valor=="0.0" || valor=="0.00"){
 												$(this).val(val.saldo);
-												totaliza();
 											}
 											$(this).select();
 											cnota();
+											totaliza();
 										});
 									}
 								);
@@ -1149,6 +1153,7 @@ class Apan extends Controller {
 										$("#itesaldo_"  +can+"_val").text(nformat(val.saldo,2));
 										$("#itemonto_"  +can+"_val").text(nformat(val.monto,2));
 
+										$("#iteaplicar_"+can ).keyup(function(){ totaliza(); });
 										$("#iteaplicar_"+can ).focus(function(){
 											totaliza();
 											var valor  = $(this).val();
@@ -1174,6 +1179,7 @@ class Apan extends Controller {
 											}
 											$(this).select();
 											cnota();
+											totaliza();
 										});
 									}
 								);

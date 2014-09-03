@@ -43,14 +43,17 @@ $(document).ready(function() {
 		if($(this).is(':checked')){
 			$("#grid2_container").hide();
 			$("#grid3_container").show();
+			$("#ttefec").hide();
 		}else{
 			$("#grid3_container").hide();
 			$("#grid2_container").show();
 			$("#reinte").val('');
 			$("#reinte_val").text('');
+			$("#ttefec").show();
 		}
 		cnota();
 	});
+	totaliza();
 });
 
 function add_itannc(){
@@ -183,9 +186,19 @@ function cnota(){
 
 function totaliza(){
 	var tmonto = total();
+	var tefect = totalefe();
 	$("#monto").val(roundNumber(tmonto,2));
-	tmonto = totalefe();
-	$("#tefecto").html(roundNumber(tmonto,2));
+	$("#monto_val").text(nformat(tmonto,2));
+
+	$("#tefecto").text(nformat(tefect,2));
+
+	if(tmonto > tefect){
+		$("#tefecto").css('color', 'red');
+	}else if(tmonto < tefect){
+		$("#tefecto").css('color', '#740998');
+	}else{
+		$("#tefecto").css('color', '');
+	}
 }
 
 function truncate(id){
@@ -268,15 +281,12 @@ function truncate(id){
 		</tr>
 		<tr>
 			<td align='right'>
-				<b class="littletablerowth">TOTAL ANTICIPOS</b><?php echo $form->monto->output;  ?>
+				<b class="littletablerowth">TOTAL ANTICIPOS<?php echo $form->monto->output;  ?></b>
 			</td>
 			<td align='right'>
-				<b class="littletablerowth">TOTAL EFECTOS <span id='tefecto'>0.00</span></b>
+				<b class="littletablerowth" id='ttefec'>TOTAL EFECTOS <span id='tefecto'>0,00</span></b>
 			</td>
 		</tr>
-
-		
-		
 	</table>
 
 </div>
