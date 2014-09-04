@@ -3914,9 +3914,9 @@ class gser extends Controller {
 			$codigo = $do->get_rel('gitser','codigo' ,$i);
 			$auxt   = $do->get_rel('gitser','tasaiva',$i);
 			$precio = $do->get_rel('gitser','precio' ,$i);
-			$iva    = $precio*($auxt/100);
+			$iva    = round($precio*($auxt/100),2);
 
-			$importe=$iva+$precio;
+			$importe=round($iva+$precio,2);
 			$total+=$importe;
 			$ivat +=$iva;
 			$subt +=$precio;
