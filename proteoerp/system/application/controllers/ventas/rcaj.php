@@ -18,7 +18,7 @@ class Rcaj extends validaciones {
 	function index(){
 		$this->instalar();
 		$this->target = $this->datasis->dameval('SELECT target FROM intramenu WHERE ejecutar="ventas/rcaj" OR ejecutar="ventas/rcaj/"');
-		$this->datasis->modulo_id('12A',1);
+		//$this->datasis->modulo_id('12A',1);
 		redirect('ventas/rcaj/filteredgrid');
 	}
 

@@ -1,3 +1,9 @@
+/**
+* ProteoERP
+*
+* @autor    Andres Hocevar
+* @license  GNU GPL v3
+*/
 $sinv=array(
 	'tabla'   =>'sinv',
 	'columnas'=>array(

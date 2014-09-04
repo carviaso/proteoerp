@@ -220,7 +220,7 @@ class Pfac extends Controller {
 					$("#ffact").html(data);
 					$("#ffact").dialog( "open" );
 				});
-			} else { $.prompt("<h1>Por favor Seleccione un Presupuesto</h1>");}
+			} else { $.prompt("<h1>Por favor Seleccione un pedido</h1>");}
 		});';
 
 		$bodyscript .= '
@@ -267,7 +267,7 @@ class Pfac extends Controller {
 		//Convierte Factura
 		$bodyscript .= '
 			$("#ffact").dialog({
-				autoOpen: false, height: 600, width: 800, modal: true,
+				autoOpen: false, height: 550, width: 840, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;
