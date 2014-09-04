@@ -24,15 +24,15 @@ $filter->salformat->clause = '';
 $filter->submit('btnsubmit',RAPYD_BUTTON_SEARCH);
 $filter->build_form();
 
-if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$xubica=$filter->agrupado->newValue;
 	$fecha =$filter->fechad->newValue;
 
-	$mSQL  =  "SELECT ";
+	$mSQL  =  'SELECT ';
 	if($xubica=='N'){
-		$mSQL .= "aa.codigo,aa.descrip,bb.salcant, bb.salcant*bb.promedio AS saldo, aa.fecha,aa.ubica ";
+		$mSQL .= "aa.codigo,aa.descrip,bb.salcant, bb.salcant*bb.promedio AS saldo, aa.fecha,aa.ubica,bb.promedio ";
 	}else{
-		$mSQL .= "aa.codigo,aa.descrip,SUM(bb.salcant) AS salcant, SUM(bb.salcant*bb.promedio) AS saldo, MAX(aa.fecha) AS fecha ";
+		$mSQL .= "aa.codigo,aa.descrip,SUM(bb.salcant) AS salcant, SUM(bb.salcant*bb.promedio) AS saldo, MAX(aa.fecha) AS fecha,bb.promedio ";
 	}
 	$mSQL .= "FROM ( SELECT a.codigo, b.descrip,  MAX(a.fecha) fecha, a.ubica, ";
 	$mSQL .= "(SELECT MAX(costoint.origen) FROM costos AS costoint ";
@@ -57,13 +57,14 @@ if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
 	$pdf->AddPage();
 	$pdf->setTableTitu(10,'Times');
 
-	$pdf->AddCol('codigo' ,25,'Código'     ,'L',8);
-	$pdf->AddCol('descrip',75,'Descripción','L',8);
-	$pdf->AddCol('fecha'  ,20,'Fecha','L',8);
-	$pdf->AddCol('salcant',25,'Cantidad'   ,'R',8);
-	$pdf->AddCol('saldo'  ,25,'Costo Total','R',8);
+	$pdf->AddCol('codigo'  ,25,'Código'     ,'L',8);
+	$pdf->AddCol('descrip' ,75,'Descripción','L',8);
+	$pdf->AddCol('fecha'   ,18,'Fecha'      ,'L',8);
+	$pdf->AddCol('salcant' ,25,'Cantidad'   ,'R',8);
+	$pdf->AddCol('promedio',20,'Costo U.'   ,'R',8);
+	$pdf->AddCol('saldo'   ,25,'Costo Total','R',8);
 	if($xubica=='N'){
-		$pdf->AddCol('ubica'  ,20,'Almacen'    ,'L',8);
+		$pdf->AddCol('ubica'  ,18,'Almacen'    ,'L',8);
 	}
 	$pdf->setTotalizar('saldo');
 	$pdf->Table();

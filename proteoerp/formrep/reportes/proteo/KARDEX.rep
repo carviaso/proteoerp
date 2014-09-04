@@ -14,27 +14,27 @@ $sinv=array(
 	'titulo'  =>'Buscar Artículo');
 $iboton=$this->datasis->modbus($sinv);
 
-rapydlib("prototype");
+rapydlib('prototype');
 
 $filter = new DataFilter("Filtro del Reporte");
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
 $filter->db->select(array(
-			'IFNULL( b.ubides , a.ubica ) almacen',
-			'a.ubica','a.fecha',
-			'a.venta',
-			'a.cantidad',
-			'a.saldo',
-			'a.monto',
-			'a.salcant',
-			'TRIM(a.codigo) AS codigo',
-			'a.origen',
-			'a.promedio',
-			'(a.venta/a.cantidad)*(a.cantidad>0) AS vpromedio',
-			'ROUND(100-(a.promedio*100/(a.venta/a.cantidad)),2)*(a.origen="3I") AS vmargen',
-			'((a.venta/a.cantidad)-a.promedio)*a.cantidad*(a.origen="3I") AS vutil',
-			'c.activo',
-			'c.grupo'));
+	'IFNULL( b.ubides , a.ubica ) almacen',
+	'a.ubica','a.fecha',
+	'a.venta',
+	'a.cantidad',
+	'a.saldo',
+	'a.monto',
+	'a.salcant',
+	'TRIM(a.codigo) AS codigo',
+	'a.origen',
+	'a.promedio',
+	'(a.venta/a.cantidad)*(a.cantidad>0) AS vpromedio',
+	'ROUND(100-(a.promedio*100/(a.venta/a.cantidad)),2)*(a.origen="3I") AS vmargen',
+	'((a.venta/a.cantidad)-a.promedio)*a.cantidad*(a.origen="3I") AS vutil',
+	'c.activo',
+	'c.grupo'));
 
 $filter->db->from('costos AS a');
 $filter->db->join('caub AS b','b.ubica=a.ubica'  ,'LEFT');
@@ -43,7 +43,7 @@ $filter->db->orderby('almacen, fecha, origen');
 
 $filter->codigo = new inputField('C&oacute;digo ', 'codigo');
 $filter->codigo->db_name ='a.codigo';
-$filter->codigo->rule = 'required';
+//$filter->codigo->rule = 'required';
 $filter->codigo->operator='=';
 $filter->codigo->size    = 10;
 $filter->codigo->clause  ='where';
@@ -73,10 +73,15 @@ $filter->fechah->group = 'DOS';
 $filter->fechah->clause=$filter->fechad->clause=$filter->codigo->clause='where';
 $filter->fechah->size=$filter->fechad->size=12;
 
-$filter->buttons("search");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
 $filter->build('dataformfiltro');
 
-if($this->rapyd->uri->is_set("search")){
+if($this->rapyd->uri->is_set('search')){
 	//$mSQL=$this->rapyd->db->orderby($_POST['orden']);
 	$mSQL=$this->rapyd->db->_compile_select();
 	//echo $mSQL;
@@ -109,8 +114,8 @@ if($this->rapyd->uri->is_set("search")){
 	$pdf->Output();
 
 }else{
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Lista de Kardex de Inventario</h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Lista de Kardex de Inventario</h2>';
+	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

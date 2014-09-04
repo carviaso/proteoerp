@@ -305,7 +305,7 @@ class gser extends Controller {
 
 		$bodyscript .= '
 			$("#fshow").dialog({
-				autoOpen: false, height: 500, width: 700, modal: true,
+				autoOpen: false, height: 500, width: 900, modal: true,
 				buttons: {
 					"Aceptar": function() {
 						$("#fshow").html("");
