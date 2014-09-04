@@ -125,7 +125,7 @@ class Rcaj extends validaciones {
 
 
 	function precierre($caja=NULL,$cajero=NULL,$fecha=NULL){
-		$this->datasis->modulo_id('145',1);
+		//$this->datasis->modulo_id('145',1);
 
 		//Para cuando venga de datasis y sin parametros
 		if(is_null($caja) || is_null($cajero) || is_null($fecha)){

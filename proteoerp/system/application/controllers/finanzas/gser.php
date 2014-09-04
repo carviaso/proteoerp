@@ -4158,7 +4158,7 @@ class gser extends Controller {
 
 
 		//Crea la cuenta por pagar si es necesario
-		if($totcred > 0.00){
+		if($totcred > 0.0){
 			$causado = $this->datasis->fprox_numero('ncausado');
 			$control = $this->datasis->fprox_numero('nsprm');
 
