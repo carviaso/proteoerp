@@ -20,7 +20,7 @@ class PDFReporte extends Fpdf {
 	var $HeaderColor;
 	var $RowColors;
 	var $ColorIndex;
-	var $Titulo;
+	var $Titulo='';
 	var $Acumulador=array();
 	var $SobreTabla;
 	var $SubTitulo;

@@ -101,11 +101,15 @@ class XLSReporte extends writeexcel_workbookbig  {
 
 		$this->centrar[0]=$this->Titulo;
 
-		$ifilas[0]=implode(' ',$this->tituHeader);
-		$this->worksheet->write_row('A1', $ifilas , $this->h3);
+		if(count($this->tituHeader)>0){
+			$ifilas[0]=implode(' ',$this->tituHeader);
+			$this->worksheet->write_row('A1', $ifilas , $this->h3);
+		}
 
-		$ifilas[0] = implode(' ',$this->tituSubHeader);
-		$this->worksheet->write_row('A2', $ifilas, $this->h4);
+		if(count($this->tituSubHeader)>0){
+			$ifilas[0] = implode(' ',$this->tituSubHeader);
+			$this->worksheet->write_row('A2', $ifilas, $this->h4);
+		}
 
 		$cfilas[0]=$this->Titulo;
 		$this->worksheet->write_row('A4', $cfilas, $this->h1);

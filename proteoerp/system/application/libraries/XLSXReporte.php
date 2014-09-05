@@ -94,6 +94,14 @@ class XLSXReporte {
 	function Header(){
 		$this->ii = 6;
 
+		if(count($this->tituHeader)==0){
+			$this->tituHeader=array();
+		}
+
+		if(count($this->tituSubHeader)==0){
+			$this->tituSubHeader=array();
+		}
+
 		$this->ci->phpexcel->setActiveSheetIndex(0)
 			->setCellValue('A1', $this->utf8(implode(' ',$this->tituHeader)))
 			->setCellValue('A2', $this->utf8(implode(' ',$this->tituSubHeader)))

@@ -18,7 +18,7 @@ class HTMLReporte {
 	var $cols;
 	var $ccols;
 	var $crows;
-	var $Titulo;
+	var $Titulo='';
 	var $Acumulador=array();
 	var $SubTitulo;
 	var $SobreTabla;
@@ -188,11 +188,16 @@ border-bottom-right-radius:5px;
 		echo '</head>';
 		echo '<body>';
 
-		$ifilas=implode(' ',$this->tituHeader);
-		echo '<h1>'.$this->us_ascii2html($ifilas).'</h1>';
+		if(count($this->tituHeader)>0){
+			$ifilas=implode(' ',$this->tituHeader);
+			echo '<h1>'.$this->us_ascii2html($ifilas).'</h1>';
+		}
 
-		$ifilas = implode(' ',$this->tituSubHeader);
-		echo '<h2>'.$ifilas.'</h2>';
+
+		if(count($this->tituSubHeader)>0){
+			$ifilas = implode(' ',$this->tituSubHeader);
+			echo '<h2>'.$ifilas.'</h2>';
+		}
 
 		echo '<h1 style="text-align:center;">'.$this->us_ascii2html($this->Titulo).'</h1>';
 		if(!empty($this->SubTitulo)){
