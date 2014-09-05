@@ -135,7 +135,7 @@ class gser extends Controller {
 			$.post("'.site_url('finanzas/gser/solo/create').'",
 			function(data){
 				$("#fgasto").html(data);
-				$("#fgasto").dialog({height: 500, width: 780, title: "Agregar Gasto/Egreso"});
+				$("#fgasto").dialog({height: 570, width: 880, title: "Agregar Gasto/Egreso"});
 				$( "#fgasto" ).dialog( "open" );
 			})
 		};';
@@ -148,7 +148,7 @@ class gser extends Controller {
 				mId = id;
 				$.post("'.site_url('finanzas/gser/solo/modify').'/"+id, function(data){
 					$("#fgasto").html(data);
-					$("#fgasto").dialog({height: 500, width: 950, title: "Agregar Egreso"});
+					$("#fgasto").dialog({height: 570, width: 880, title: "Agregar Egreso"});
 					$("#fgasto").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Gasto</h1>");}
@@ -3422,7 +3422,7 @@ class gser extends Controller {
 		$edit->credito->css_class='inputnum';
 		$edit->credito->onkeyup='ccredito()';
 		$edit->credito->autocomplete=false;
-		$edit->credito->readonly=true;
+		//$edit->credito->readonly=true;
 
 		$edit->reten = new inputField('Ret. ISLR','reten');
 		$edit->reten->rule = 'numeric|positive';

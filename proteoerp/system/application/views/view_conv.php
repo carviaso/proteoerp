@@ -210,13 +210,13 @@ function del_itconv(id){
 			<tr id='tr_itconv_<?php echo $i; ?>'>
 				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output;    ?></td>
 				<td class="littletablerow" align="left" ><?php echo $form->$it_descrip->output;   ?></td>
-				<td class="littletablerow" align="right" ><?php echo $form->$it_peso->output;     ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$it_peso->output;      ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_entrada->output;   ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_salida->output.$pprecios;  ?></td>
 
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow">
-					<a href='#' onclick='del_itconv(<?php echo $i ?>);return false;'><?php echo img("images/delete.jpg"); ?></a>
+					<a href='#' onclick='del_itconv(<?php echo $i ?>);return false;'><?php echo img('images/delete.jpg'); ?></a>
 				</td>
 				<?php } ?>
 			</tr>
