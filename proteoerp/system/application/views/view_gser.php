@@ -5,9 +5,9 @@
  * @autor    Andres Hocevar
  * @license  GNU GPL v3
 */
-$container_bl=join("&nbsp;", $form->_button_container["BL"]);
-$container_br=join("&nbsp;", $form->_button_container["BR"]);
-$container_tr=join("&nbsp;", $form->_button_container["TR"]);
+$container_bl=join("&nbsp;", $form->_button_container['BL']);
+$container_br=join("&nbsp;", $form->_button_container['BR']);
+$container_tr=join("&nbsp;", $form->_button_container['TR']);
 
 if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	echo $form->output;
@@ -335,8 +335,40 @@ function totalizar(){
 	totneto=roundNumber(tb-riva-reten,2);
 	$("#totneto").val(totneto);
 	$("#totneto_val").text(nformat(totneto));
-	monto1=Number($("#monto1").val());
-	$("#credito").val(roundNumber(totneto-monto1,2));
+	calcred();
+}
+
+function calcred(){
+	var montonet = Number($("#totneto").val());
+	var credito  = Number($("#credito").val());
+	var monto1   = Number($("#monto1").val());
+
+	if(montonet>0){
+		if(monto1+credito <= 0){
+			$("#monto1").val('0');
+			$("#credito").val(roundNumber(montonet,2));
+		}else if(monto1*credito == 0){
+			if(monto1>0){
+				$("#monto1").val(roundNumber(montonet,2));
+				$("#credito").val('0');
+			}else{
+				$("#monto1").val('0');
+				$("#credito").val(roundNumber(montonet,2));
+			}
+		}else{
+			var diff= montonet-monto1;
+			if(diff<0){
+				$("#monto1").val(roundNumber(montonet,2));
+				$("#credito").val('0');
+			}else{
+				$("#credito").val(roundNumber(diff,2));
+			}
+		}
+	}else{
+		$("#monto1").val('0');
+		$("#credito").val('0');
+	}
+
 }
 
 function ccredito(){
@@ -348,7 +380,12 @@ function ccredito(){
 function contado(){
 	monto1  =Number($("#monto1").val());
 	montonet=Number($("#totneto").val());
-	$("#credito").val(roundNumber(montonet-monto1,2));
+	if(monto1>montonet){
+		$("#credito").val('0');
+		$("#monto1").val(roundNumber(montonet,2));
+	}else{
+		$("#credito").val(roundNumber(montonet-monto1,2));
+	}
 }
 
 function esbancaja(codb1){

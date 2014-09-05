@@ -1888,43 +1888,55 @@ class gser extends Controller {
 		$this->solo = true;
 		$id = $this->uri->segment($this->uri->total_segments());
 
-		//Creando Gaasto
-		if ( $id == 'create'){
+		//Creando Gasto
+		if($id == 'create'){
 			$this->dataedit();
-
-		} elseif ( $id == 'insert'){
+		}elseif($id == 'insert'){
 			$this->genesal = false;
 			$rt = $this->dataedit();
-			$rt = str_replace("\n","<br>",$rt);
-			if ($rt == 'Gasto Guardado')
-				$status='E';
-			else
-				$status='E';
-			if ( strlen($rt) > 0 )
-				echo '{"status":"'.$status.'","id":"'.$id.'" ,"mensaje":"'.$rt.'"}';
+			$rt = str_replace("\n",'<br>',$rt);
 
-		} elseif ( $id == 'process'){
+			$arr_rt=array('status' =>'','id'=>'','mensaje'=>'');
+			if($rt == 'Gasto Guardado'){
+				$status='E';
+			}else{
+				$status='E';
+			}
+			if(strlen($rt) > 0){
+				$arr_rt['status'] = $status;
+				$arr_rt['id']     = $id;
+				$arr_rt['mensaje']= $rt;
+				echo json_encode($arr_rt);
+			}
+		}elseif($id == 'process'){
 			$control = $this->uri->segment($this->uri->total_segments()-1);
 			$rt = $this->actualizar($control);
-			$rt = str_replace("\n","<br>",$rt);
-			if ( strlen($rt[1]) > 0 )
-				if ( $rt[0] === false ) $p = 'E'; else $p='A';
-				echo '{"status":"'.$p.'","id":"'.$control.'" ,"mensaje":"<h1>'.$rt[1].'</h1>"}';
-		} else {
+			$rt = str_replace("\n",'<br>',$rt);
+			if(strlen($rt[1]) > 0){
+				$p = ($rt[0] === false)? 'E' : 'A';
+			}
+			$arr_rt['status'] = $p;
+			$arr_rt['id']     = $control;
+			$arr_rt['mensaje']= heading($rt[1]);
+			echo json_encode($arr_rt);
+		}else{
 			$modo = $this->uri->segment($this->uri->total_segments()-1);
 
-
-			if ( $modo == 'update' ) $this->genesal = false;
+			if($modo == 'update') $this->genesal = false;
 			$rt = $this->dataedit();
 
-			$rt = str_replace("\n","<br>",$rt);
-			if ($rt == 'Gasto Guardado')
+			$rt = str_replace("\n",'<br>',$rt);
+			if($rt == 'Gasto Guardado'){
 				$status='A';
-			else
+			}else{
 				$status='E';
-			if ( strlen($rt) > 0 )
-				echo '{"status":"'.$status.'","id":"'.$id.'" ,"mensaje":"'.$rt.'"}';
-
+			}
+			if(strlen($rt)>0){
+				$arr_rt['status'] = $status;
+				$arr_rt['id']     = $id;
+				$arr_rt['mensaje']= $rt;
+				echo json_encode($arr_rt);
+			}
 		}
 	}
 
@@ -3398,7 +3410,7 @@ class gser extends Controller {
 		$edit->monto1->rule = 'numeric|positive';
 		$edit->monto1->size = 10;
 		$edit->monto1->css_class='inputnum';
-		$edit->monto1->onkeyup="contado()";
+		$edit->monto1->onkeyup='contado()';
 		$edit->monto1->rule = 'condi_required|callback_chmontocontado|positive';
 		$edit->monto1->autocomplete=false;
 		$edit->monto1->showformat ='decimal';
@@ -3603,7 +3615,7 @@ class gser extends Controller {
 			}else{
 				$rt=array(
 					'status' =>'B',
-					'mensaje'=> utf8_encode(html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string))),
+					'mensaje'=> html_entity_decode( $edit->error_string),
 					'pk'     =>''
 				);
 				echo json_encode($rt);
@@ -3914,16 +3926,17 @@ class gser extends Controller {
 			$codigo = $do->get_rel('gitser','codigo' ,$i);
 			$auxt   = $do->get_rel('gitser','tasaiva',$i);
 			$precio = $do->get_rel('gitser','precio' ,$i);
-			$iva    = round($precio*($auxt/100),2);
+			$iva    = $precio*($auxt/100);
 
 			$importe=round($iva+$precio,2);
 			$total+=$importe;
 			$ivat +=$iva;
 			$subt +=$precio;
 
-			$do->set_rel('gitser','iva'    ,$iva    ,$i);
+			$do->set_rel('gitser','iva'    ,round($iva,2),$i);
 			$do->set_rel('gitser','importe',$importe,$i);
 		}
+		$ivat=round($ivat,2);
 
 		if($retebase>$subt){
 			$do->error_message_ar['pre_ins'] ='El monto base de la retencion es no puede ser mayor que la base de la factura';
@@ -3940,6 +3953,7 @@ class gser extends Controller {
 		}else{
 			$reteiva=0;
 		}
+		$reteiva=round($reteiva,2);
 		$do->set('reteiva', $reteiva);
 		//Fin del calculo de la retencion de iva
 
@@ -3950,11 +3964,21 @@ class gser extends Controller {
 		}
 
 		//Calcula los totales
+		$atotneto = floatval($do->get('totneto'));
 		$totneto=$total-$retemonto-$reteiva;
 		$do->set('totpre'  ,$subt );
 		$do->set('totbruto',$total);
 		$do->set('totiva'  ,$ivat );
-		$do->set('totneto' ,$totneto);
+
+		//Ajuste por problemas de decimas
+		if($atotneto!=$totneto){
+			$do->set('totneto' ,$totneto);
+			if($atotneto==$monto1){
+				$do->set('monto1'  ,$totneto);
+				$monto1=$totneto;
+			}
+		}
+		//Fin del ajuste por decimas
 		$do->set('credito' ,$totneto-$monto1);
 
 		//Calcula la tasa particulares
