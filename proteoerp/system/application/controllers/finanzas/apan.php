@@ -1352,7 +1352,7 @@ class Apan extends Controller {
 			}
 			//Fin de los efectos
 
-			if($aplicar-$efectos != 0){
+			if($aplicar-$efectos != 0.0){
 				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto a aplicar es diferente al aplicado. '."$aplicar-$efectos";
 				return false;
 			}
@@ -1550,10 +1550,6 @@ class Apan extends Controller {
 				$mSQLs[] = 'UPDATE sprm SET abonos=abonos+'.$apl['monto'].' WHERE id='.$this->db->escape($apl['id']);
 			}
 		}
-
-
-		//$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = print_r($arr_apl,true);
-		//return false;
 
 		$do->set('observa1',substr($observa,0,50));
 		$do->set('observa2',(strlen($observa)>=50)? substr($observa,50):'');
