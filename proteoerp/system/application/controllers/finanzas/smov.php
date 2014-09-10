@@ -1881,38 +1881,38 @@ class Smov extends Controller {
 				$do->set_rel($rel, 'reteiva' , 0, $i);
 
 				if($tipo_doc=='NC'){
-					$ivadata['montasa'  ]= floatval($rrow['montasa'  ])*$itabono/$itmonto;
-					$ivadata['monredu'  ]= floatval($rrow['monredu'  ])*$itabono/$itmonto;
-					$ivadata['monadic'  ]= floatval($rrow['monadic'  ])*$itabono/$itmonto;
-					$ivadata['tasa'     ]= floatval($rrow['tasa'     ])*$itabono/$itmonto;
-					$ivadata['reducida' ]= floatval($rrow['reducida' ])*$itabono/$itmonto;
-					$ivadata['sobretasa']= floatval($rrow['sobretasa'])*$itabono/$itmonto;
-					$ivadata['exento'   ]= floatval($rrow['exento'   ])*$itabono/$itmonto;
+					$ivadata['montasa'  ]+= floatval($rrow['montasa'  ])*$itabono/$itmonto;
+					$ivadata['monredu'  ]+= floatval($rrow['monredu'  ])*$itabono/$itmonto;
+					$ivadata['monadic'  ]+= floatval($rrow['monadic'  ])*$itabono/$itmonto;
+					$ivadata['tasa'     ]+= floatval($rrow['tasa'     ])*$itabono/$itmonto;
+					$ivadata['reducida' ]+= floatval($rrow['reducida' ])*$itabono/$itmonto;
+					$ivadata['sobretasa']+= floatval($rrow['sobretasa'])*$itabono/$itmonto;
+					$ivadata['exento'   ]+= floatval($rrow['exento'   ])*$itabono/$itmonto;
 				}
 
 				$pppago = $do->get_rel($rel, 'ppago', $i);
 				if($pppago>0){
 					$ppimpuesto += $pppago*$itimpuesto/$itmonto;
 
-					$this->ppagodata['montasa'  ]= floatval($rrow['montasa'  ])*$pppago/$itmonto;
-					$this->ppagodata['monredu'  ]= floatval($rrow['monredu'  ])*$pppago/$itmonto;
-					$this->ppagodata['monadic'  ]= floatval($rrow['monadic'  ])*$pppago/$itmonto;
-					$this->ppagodata['tasa'     ]= floatval($rrow['tasa'     ])*$pppago/$itmonto;
-					$this->ppagodata['reducida' ]= floatval($rrow['reducida' ])*$pppago/$itmonto;
-					$this->ppagodata['sobretasa']= floatval($rrow['sobretasa'])*$pppago/$itmonto;
-					$this->ppagodata['exento'   ]= floatval($rrow['exento'   ])*$pppago/$itmonto;
+					$this->ppagodata['montasa'  ]+= floatval($rrow['montasa'  ])*$pppago/$itmonto;
+					$this->ppagodata['monredu'  ]+= floatval($rrow['monredu'  ])*$pppago/$itmonto;
+					$this->ppagodata['monadic'  ]+= floatval($rrow['monadic'  ])*$pppago/$itmonto;
+					$this->ppagodata['tasa'     ]+= floatval($rrow['tasa'     ])*$pppago/$itmonto;
+					$this->ppagodata['reducida' ]+= floatval($rrow['reducida' ])*$pppago/$itmonto;
+					$this->ppagodata['sobretasa']+= floatval($rrow['sobretasa'])*$pppago/$itmonto;
+					$this->ppagodata['exento'   ]+= floatval($rrow['exento'   ])*$pppago/$itmonto;
 				}
 			}
 		}
 
 		if($tipo_doc=='NC'){
-			$do->set('montasa'  ,$ivadata['montasa'  ]);
-			$do->set('monredu'  ,$ivadata['monredu'  ]);
-			$do->set('monadic'  ,$ivadata['monadic'  ]);
-			$do->set('tasa'     ,$ivadata['tasa'     ]);
-			$do->set('reducida' ,$ivadata['reducida' ]);
-			$do->set('sobretasa',$ivadata['sobretasa']);
-			$do->set('exento'   ,$ivadata['exento'   ]);
+			$do->set('montasa'  ,round($ivadata['montasa'  ],2));
+			$do->set('monredu'  ,round($ivadata['monredu'  ],2));
+			$do->set('monadic'  ,round($ivadata['monadic'  ],2));
+			$do->set('tasa'     ,round($ivadata['tasa'     ],2));
+			$do->set('reducida' ,round($ivadata['reducida' ],2));
+			$do->set('sobretasa',round($ivadata['sobretasa'],2));
+			$do->set('exento'   ,round($ivadata['exento'   ],2));
 		}
 
 		if(empty($concepto)){
@@ -1954,6 +1954,14 @@ class Smov extends Controller {
 		$do->set('ppago'   ,$ppagomonto);
 		$do->set('ningreso',$ningreso);
 		$do->set('vendedor', $this->secu->getvendedor());
+
+		$this->ppagodata['montasa'  ] = round($this->ppagodata['montasa'  ],2);
+		$this->ppagodata['monredu'  ] = round($this->ppagodata['monredu'  ],2);
+		$this->ppagodata['monadic'  ] = round($this->ppagodata['monadic'  ],2);
+		$this->ppagodata['tasa'     ] = round($this->ppagodata['tasa'     ],2);
+		$this->ppagodata['reducida' ] = round($this->ppagodata['reducida' ],2);
+		$this->ppagodata['sobretasa'] = round($this->ppagodata['sobretasa'],2);
+		$this->ppagodata['exento'   ] = round($this->ppagodata['exento'   ],2);
 
 		if(!empty($codigo)){
 			$dbcodigo = $this->db->escape($codigo);

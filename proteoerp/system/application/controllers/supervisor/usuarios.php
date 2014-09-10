@@ -329,7 +329,7 @@ class Usuarios extends Controller {
 		));
 
 		if ($iscaja){
-			
+
 			$mSQL = "SELECT TRIM(vendedor) vendedor, CONCAT(trim(vendedor), ' ', trim(nombre)) nombre FROM vend ORDER BY vendedor ";
 			$grid->addField('vendedor');
 			$grid->label('Vende');
@@ -373,7 +373,7 @@ class Usuarios extends Controller {
 			));
 
 		}
-		
+
 		$grid->addField('us_clave');
 		$grid->label('Clave');
 		$grid->params(array(
@@ -511,6 +511,8 @@ class Usuarios extends Controller {
 		$edit->script($script,'modify');
 
 		$edit->pre_process( 'delete','_pre_delete');
+		$edit->pre_process( 'insert','_pre_insert');
+		$edit->pre_process( 'update','_pre_update');
 
 		$edit->post_process('delete','_pos_delete');
 		$edit->post_process('insert','_pos_insert');
@@ -534,8 +536,7 @@ class Usuarios extends Controller {
 		$edit->activo->insertValue='S';
 		$edit->activo->rule='required|enum[S,N]';
 
-		if ( $iscaja ) {
-
+		if($iscaja){
 			$edit->almacen = new dropdownField('Almac&eacute;n', 'almacen');
 			$edit->almacen->option('','Ninguno');
 			$edit->almacen->options("SELECT TRIM(ubica) AS ubica, CONCAT_WS('-',ubica,ubides) AS descrip FROM caub ORDER BY ubica");
@@ -554,20 +555,24 @@ class Usuarios extends Controller {
 			$edit->cajero->rule = 'existescaj';
 			$edit->cajero->style='width:180px';
 		}
-		
+
 		$edit->sucursal = new dropdownField('Sucursal','sucursal');
 		$edit->sucursal->option('','Ninguno');
 		$edit->sucursal->options("SELECT TRIM(codigo) codigo, CONCAT(TRIM(codigo),' ',TRIM(sucursal)) sucursal FROM sucu ORDER BY codigo");
 		$edit->sucursal->rule = 'existesucu';
 		$edit->sucursal->style='width:180px';
 
-		$edit->supervisor = new dropdownField('Es Supervisor', 'supervisor');
-		$edit->supervisor->rule = 'required';
-		$edit->supervisor->option('N','No');
-		$edit->supervisor->option('S','Si');
-		$edit->supervisor->insertValue='N';
-		$edit->supervisor->rule='required|enum[S,N]';
-		$edit->supervisor->style='width:80px';
+		if($this->secu->essuper()){
+			$edit->supervisor = new dropdownField('Es Supervisor', 'supervisor');
+			$edit->supervisor->rule = 'required';
+			$edit->supervisor->option('N','No');
+			$edit->supervisor->option('S','Si');
+			$edit->supervisor->insertValue='N';
+			$edit->supervisor->rule='required|enum[S,N]';
+			$edit->supervisor->style='width:80px';
+		}else{
+			$edit->supervisor = new autoUpdateField('supervisor','N','N');
+		}
 
 		$edit->uuid = new inputField('Movil UUID','uuid');
 		$edit->uuid->rule ='unique';
@@ -582,7 +587,6 @@ class Usuarios extends Controller {
 		$edit->propio->style='width:80px';
 		$edit->propio->insertValue='S';
 		$edit->propio->rule='required|enum[S,N]';
-
 
 		$edit->build();
 
@@ -650,6 +654,23 @@ class Usuarios extends Controller {
 		return true;
 	}
 
+	function _pre_update($do){
+		$id=$do->get('id');
+		$super = strtoupper($this->datasis->dameval("SELECT supervisor FROM usuario WHERE id=${id}"));
+		if($super=='S' && !$this->secu->essuper()){
+			$do->error_message_ar['pre_upd']='Solo un usuario supervisor puede modificar otro supervisor';
+			return false;
+		}
+	}
+
+	function _pre_insert($do){
+		$super = $do->get('supervisor');
+		if($super=='S' && !$this->secu->essuper()){
+			$do->error_message_ar['pre_upd']='Solo un usuario supervisor puede agregar otro supervisor';
+			return false;
+		}
+	}
+
 	function _pos_delete($do){
 		$codigo  =$do->get('us_codigo');
 		$dbcodigo=$this->db->escape($codigo);
@@ -709,12 +730,20 @@ class Usuarios extends Controller {
 		$us_clave1 = $this->input->post('us_clave1');
 		$id        = $this->input->post('id');
 
-		if ( $us_clave == $us_clave1) {
+		if($us_clave == $us_clave1){
 			$clave = $this->db->escape($us_clave);
-			if ( $id > 0 ){
-				$codigo = $this->datasis->dameval("SELECT us_codigo FROM usuario WHERE id=$id");
-				$this->db->simple_query("UPDATE usuario SET us_clave=".$clave." WHERE id=$id");
-				logusu('USUARIOS',"CAMBIO LA CLAVE DEL USUARIO $codigo");
+			if($id > 0){
+				$row = $this->datasis->damerow("SELECT us_codigo,supervisor FROM usuario WHERE id=${id}");
+				if(!empty($row)){
+					$codigo = $row['us_codigo'];
+					$super  = $row['supervisor'];
+					if($super == 'S' && !$this->secu->essuper()){
+						echo 'Solo un usuario supervisor le puede cambiar la clave a otro un supervisor';
+					}else{
+						$this->db->simple_query("UPDATE usuario SET us_clave=${clave} WHERE id=${id}");
+						logusu('usuario',"CAMBIO LA CLAVE DEL USUARIO ${codigo}");
+					}
+				}
 			}
 		}
 		redirect($this->url.'jqdatag');

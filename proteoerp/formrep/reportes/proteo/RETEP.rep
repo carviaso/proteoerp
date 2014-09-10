@@ -35,25 +35,25 @@ if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
 	$dbfechad=$this->db->escape($filter->fechad->newValue);
 	$dbfechah=$this->db->escape($filter->fechah->newValue);
 
-	$mSQL="SELECT @row := @row + 1 AS Row,' ' as cedula,b.rif, a.numero as numfac, a.nfiscal as numcont,a.creten as concep,totpre as monto,c.tari1 AS reten
-	FROM gser AS a
-	JOIN sprv AS b ON a.proveed=b.proveed
-	JOIN rete AS c ON a.creten=c.codigo
+	$mSQL="SELECT ' ' AS cedula,b.rif, a.numero AS numfac, a.nfiscal AS numcont,a.creten AS concep,
+	totpre AS monto,c.tari1 AS reten,a.fecha
+		FROM gser AS a
+		JOIN sprv AS b ON a.proveed=b.proveed
+		JOIN rete AS c ON a.creten=c.codigo
 	WHERE a.reten>0 AND a.tipo_doc<>'XX'
-	AND fecha >= ${dbfechad} AND fecha <= ${dbfechah}
-	UNION
-	SELECT @row := @row + 1 AS Row,b.cedula,b.rif,'N/A' as numfac,'N/A' as numcont,'001' as concep,
-	SUM(a.valor) AS monto, vari3 as reten
-	FROM (nomina AS a)
-	JOIN pers AS b ON a.codigo=b.codigo
-	JOIN conc AS c ON a.concepto=c.concepto
-	LEFT JOIN noco AS d ON a.contrato=d.codigo
+		AND a.fecha >= ${dbfechad} AND a.fecha <= ${dbfechah}
+	UNION ALL
+	SELECT b.cedula,b.rif,'N/A' AS numfac,'N/A' AS numcont,'001' AS concep,
+	SUM(a.valor) AS monto, vari3 AS reten,a.fecha
+		FROM (nomina AS a)
+		JOIN pers AS b ON a.codigo=b.codigo
+		JOIN conc AS c ON a.concepto=c.concepto
+		LEFT JOIN noco AS d ON a.contrato=d.codigo
 	WHERE a.valor<>0 AND MID(a.concepto,1,1)<>'9'
-	AND a.tipo='A' AND a.fecha >= ${dbfechad} AND a.fecha <= ${dbfechah}
+		AND a.tipo='A' AND a.fecha >= ${dbfechad} AND a.fecha <= ${dbfechah}
 	GROUP BY a.codigo";
 
-
-	//echo $mSQL;
+	//echo $mSQL; exit();
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
@@ -66,14 +66,15 @@ if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
 	$pdf->AddPage();
 	$pdf->setTableTitu(8,'Times');
 
-	$pdf->AddCol('Row'    ,10,'ID-Sec '              ,'C',8);
-	$pdf->AddCol('cedula' ,28,'Cedula'               ,'C',8);
+	//$pdf->AddCol('Row'    ,10,'ID-Sec '              ,'C',8);
+	$pdf->AddCol('cedula' ,25,'Cedula'               ,'C',8);
 	$pdf->AddCol('rif'    ,28,'Rif Retenido'         ,'C',8);
 	$pdf->AddCol('numfac' ,30,'Número de Factura'    ,'C',8);
 	$pdf->AddCol('numcont',30,'Número de Control'    ,'C',8);
-	$pdf->AddCol('concep' ,30,'Codigo Concepto'      ,'C',8);
+	$pdf->AddCol('concep' ,15,'Concepto'             ,'C',8);
 	$pdf->AddCol('monto'  ,30,'Monto Operacion'      ,'R',8);
-	$pdf->AddCol('reten'  ,30,'Porcentaje Retencion' ,'R',8);
+	$pdf->AddCol('reten'  ,15,'% Ret.'               ,'R',8);
+	$pdf->AddCol('fecha'  ,20,'Fecha'                ,'C',8);
 
 	$pdf->Table();
 	$pdf->Output();
@@ -81,6 +82,6 @@ if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
 }else{
 	$data['filtro'] = $filter->output;
 	$data['titulo'] = '<h2 class="mainheader">Montos sujetos a Retencion de ISLR</h2>';
-	$data['head'] = $this->rapyd->get_head();
+	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

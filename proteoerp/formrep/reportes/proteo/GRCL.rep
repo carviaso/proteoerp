@@ -1,0 +1,56 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->db->select(array('SUM(b.grupo IS NOT NULL) AS cana','SUM(b.grupo IS NOT NULL AND b.tipo<>0) AS activo',
+'a.grupo','a.gr_desc', 'a.cuenta'));
+$filter->db->from('grcl AS a');
+$filter->db->join('scli AS b','a.grupo=b.grupo','left');
+$filter->db->group_by('a.grupo');
+
+$filter->ordenpor = new dropdownField('Ordenado por Nombre', 'orden');
+$filter->ordenpor->option('a.gr_desc','Si');
+$filter->ordenpor->option('a.grupo'  ,'No');
+$filter->ordenpor->clause ='';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+
+	$filter->db->orderby($filter->ordenpor->value);
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Grupo de Clientes');
+	//$pdf->setSobreTabla($sobretabla);
+	$pdf->AddPage();
+	$pdf->setTableTitu(11,'Times');
+	$pdf->AddCol('grupo'  ,25,'Grupo'   ,'L',10);
+	$pdf->AddCol('gr_desc',65,'Nombre'  ,'L',10);
+	$pdf->AddCol('cuenta' ,30,'Cuenta'  ,'R',10);
+	$pdf->AddCol('cana'   ,30,'Cantidad','R',10);
+	$pdf->AddCol('activo' ,30,'Activos' ,'R',10);
+	$pdf->setTotalizar('cana','activo');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Grupo de Clientes</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

@@ -254,7 +254,11 @@ class pfaclite extends validaciones{
 			$mSQL="SELECT SUM(c.peso*a.cana*IF(a.tipoa='F',1,-1)) AS peso FROM sitems AS a JOIN sfac AS b ON a.numa=b.numero AND a.tipoa=b.tipo_doc JOIN sinv AS c ON a.codigoa=c.codigo WHERE b.vd = ${dbvd} AND a.tipoa<>'X' AND b.fecha>=${dbfini}";
 			$ttpeso=nformat(floatval($this->datasis->dameval($mSQL))/1000,3);
 
-			$efe = htmlnformat($atendidos*100/$clientes);
+			if($clientes>0){
+				$efe = htmlnformat($atendidos*100/$clientes);
+			}else{
+				$efe = htmlnformat(0);
+			}
 			$frace = "<p style='text-align:center;font-weight: bold;'>Clientes atendidos: <span style='font-size:1.5em; color:#000063'>${atendidos}</span>/${clientes} Efectividad: <span style='font-size:1.5em; color:#000063'>${efe}%</span> Facturas: ${facturas} Peso: ${ttpeso}T</p>";
 		}else{
 			$frace='';

@@ -1726,6 +1726,155 @@ class Sprm extends Controller {
 	}
 
 	//*****************************************
+	// Nota de credito a factura pagada
+	//*****************************************
+	function ncppro(){
+
+		$edit = new Dataedit('Nota de credito a proveedor', 'sprm');
+		$edit->on_save_redirect=false;
+
+		$edit->pre_process('insert' , '_pre_ncppro_insert');
+		$edit->pre_process('update' , '_pre_ncppro_update');
+		$edit->pre_process('delete' , '_pre_ncppro_delete');
+		$edit->post_process('insert', '_post_ncppro_insert');
+
+		$edit->cod_prv = new hiddenField('Proveedor','cod_prv');
+		$edit->cod_prv->rule ='max_length[5]';
+		$edit->cod_prv->size =7;
+		$edit->cod_prv->maxlength =5;
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->type='inputhidden';
+		$edit->nombre->in='cod_prv';
+
+		$edit->codigo = new  dropdownField('Motivo', 'codigo');
+		$edit->codigo->option('','Ninguno');
+		$edit->codigo->options('SELECT TRIM(codigo) AS cod, nombre FROM botr WHERE tipo=\'P\' ORDER BY nombre');
+		$edit->codigo->style='width:200px;';
+		$edit->codigo->rule ='condi_required|callback_chobligatipo[NC]';
+
+		$edit->fecha = new dateonlyField('Fecha','fecha');
+		$edit->fecha->size =12;
+		$edit->fecha->maxlength =8;
+		$edit->fecha->insertValue=date('Y-m-d');
+		$edit->fecha->calendar = false;
+		$edit->fecha->rule ='chfecha|required';
+
+		$edit->observa1 = new  textareaField('Concepto:','observa1');
+		$edit->observa1->cols = 70;
+		$edit->observa1->rows = 2;
+		$edit->observa1->style='width:100%;';
+
+		$edit->observa2 = new  textareaField('','observa2');
+		$edit->observa2->cols = 70;
+		$edit->observa2->rows = 2;
+		$edit->observa2->style='width:100%;';
+		$edit->observa2->when=array('show');
+
+		$edit->nfiscal = new inputField('Control F&iacute;scal','nfiscal');
+		$edit->nfiscal->rule='condi_required|callback_chobligatipo[NC]';
+		$edit->nfiscal->size =15;
+		$edit->nfiscal->maxlength =17;
+
+		$edit->serie = new inputField('N&uacute;mero','serie');
+		$edit->serie->rule='condi_required|callback_chobligatipo[NC]';
+		$edit->serie->size =15;
+		$edit->serie->maxlength =17;
+
+		//bases de los impuestos
+		$edit->montasa = new inputField('Montasa','montasa');
+		$edit->montasa->rule      ='max_length[17]|numeric|positive';
+		$edit->montasa->css_class ='inputnum';
+		$edit->montasa->size      =19;
+		$edit->montasa->maxlength =17;
+		$edit->montasa->rule='condi_required';
+
+		$edit->monredu = new inputField('Monredu','monredu');
+		$edit->monredu->rule      ='max_length[17]|numeric|positive';
+		$edit->monredu->css_class ='inputnum';
+		$edit->monredu->size      =19;
+		$edit->monredu->maxlength =17;
+		$edit->monredu->rule='condi_required';
+
+		$edit->monadic = new inputField('Monadic','monadic');
+		$edit->monadic->rule      ='max_length[17]|numeric|positive';
+		$edit->monadic->css_class ='inputnum';
+		$edit->monadic->size      =19;
+		$edit->monadic->maxlength =17;
+		$edit->monadic->rule='condi_required';
+		//fin de las bases de los impuestos
+
+		$edit->tasa = new inputField('general','tasa');
+		$edit->tasa->rule      ='max_length[17]|numeric';
+		$edit->tasa->css_class ='inputnum';
+		$edit->tasa->size      =12;
+		$edit->tasa->maxlength =17;
+		$edit->tasa->rule='condi_required|callback_chmontasa[G]';
+
+		$edit->reducida = new inputField('reducida','reducida');
+		$edit->reducida->rule      ='max_length[17]|numeric|positive';
+		$edit->reducida->css_class ='inputnum';
+		$edit->reducida->size      =12;
+		$edit->reducida->maxlength =17;
+		$edit->reducida->rule='condi_required|callback_chmontasa[R]';
+
+		$edit->sobretasa = new inputField('adicional','sobretasa');
+		$edit->sobretasa->rule      ='max_length[17]|numeric|positive';
+		$edit->sobretasa->css_class ='inputnum';
+		$edit->sobretasa->size      =12;
+		$edit->sobretasa->maxlength =17;
+		$edit->sobretasa->rule='condi_required|callback_chmontasa[A]|positive';
+
+		$edit->exento = new inputField('Exento','exento');
+		$edit->exento->rule      ='max_length[17]|numeric';
+		$edit->exento->css_class ='inputnum';
+		$edit->exento->size      =19;
+		$edit->exento->maxlength =17;
+		$edit->exento->rule='condi_required|positive';
+
+		$edit->reteiva = new inputField('Ret. IVA','reteiva');
+		$edit->reteiva->rule      ='max_length[17]|numeric';
+		$edit->reteiva->css_class ='inputnum';
+		$edit->reteiva->size      =19;
+		$edit->reteiva->maxlength =17;
+		$edit->reteiva->insertValue='0';
+		$edit->reteiva->rule='condi_required|callback_chobligatipo[NC]|positive';
+
+		$edit->tipo_doc= new autoUpdateField('tipo_doc','NC', 'NC');
+		$edit->usuario = new autoUpdateField('usuario' ,$this->secu->usuario(),$this->secu->usuario());
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
+
+		$edit->buttons('add_rel');
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+
+			echo json_encode($rt);
+		}else{
+			$conten['json_ptasa']= json_encode($arr_ptasa);
+			$conten['json_ivas'] = json_encode($arr_ivas);
+			$conten['cana']      = $i;
+			$conten['form']      = & $edit;
+			$conten['title']     = heading('Nota de cr&eacute;dito a factura pagada de proveedor');
+			$conten['por_rete']  = $por_rete;
+
+			$data['content'] = $this->load->view('view_ncppro.php', $conten);
+		}
+
+	}
+	//*****************************************
+	// Fin Nota de credito a factura pagada
+	//*****************************************
+
+
+
+	//*****************************************
 	// Inicio pago a proveedor
 	//*****************************************
 	function pprov($id_sprv){
