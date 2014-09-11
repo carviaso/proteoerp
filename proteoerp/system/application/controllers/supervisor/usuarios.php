@@ -152,7 +152,7 @@ class Usuarios extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 370, width: 480, modal: true,
+			autoOpen: false, height: 380, width: 480, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var murl = $("#df1").attr("action");
@@ -252,8 +252,7 @@ class Usuarios extends Controller {
 		});
 		';
 
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
@@ -326,6 +325,19 @@ class Usuarios extends Controller {
 			'editrules'   => '{ required:true}',
 			'editoptions' => '{value: "S:N" }',
 			'formoptions'   => '{ label:"Supervisor" }'
+		));
+
+		$grid->addField('remoto');
+		$grid->label('A.Remoto');
+		$grid->params(array(
+			'align'       => "'center'",
+			'width'       => 50,
+			'editable'    => 'true',
+			'edittype'    => "'checkbox'",
+			'search'      => 'false',
+			'editrules'   => '{ required:true}',
+			'editoptions' => '{value: "S:N" }',
+			'formoptions'   => '{ label:"Acceso Remoto" }'
 		));
 
 		if ($iscaja){
@@ -588,6 +600,14 @@ class Usuarios extends Controller {
 		$edit->propio->insertValue='S';
 		$edit->propio->rule='required|enum[S,N]';
 
+		$edit->remoto = new dropdownField('Permite acceso remoto', 'remoto');
+		$edit->remoto->rule = 'required';
+		$edit->remoto->option('N','No');
+		$edit->remoto->option('S','Si');
+		$edit->remoto->style='width:80px';
+		$edit->remoto->insertValue='N';
+		$edit->remoto->rule='required|enum[S,N]';
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -837,6 +857,9 @@ class Usuarios extends Controller {
 			$this->db->simple_query("ALTER TABLE usuario ADD COLUMN `propio` CHAR(1) NULL DEFAULT 'N' COMMENT 'Solo puede modificar los registros creado por este usuario' AFTER `uuid`");
 		}
 
+		if(!in_array('remoto',$campos)){
+			$this->db->simple_query("ALTER TABLE `usuario` ADD COLUMN `remoto` CHAR(1) NULL DEFAULT 'S' COMMENT 'Si permite acceso remoto' AFTER `propio`");
+		}
 		$this->db->simple_query('DELETE FROM sida USING sida LEFT JOIN usuario ON sida.usuario=usuario.us_codigo WHERE usuario.us_codigo IS NULL');
 	}
 }

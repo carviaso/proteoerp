@@ -11,25 +11,25 @@
 <meta name="Description"               content="<?php echo property('app_description');?>" />
 <meta name="Copyright"                 content="<?php echo property('app_copyright');  ?>" />
 <title><?php echo property('app_title')?></title>
-<?php 
-echo style('menutab.css'); 
+<?php
+echo style('menutab.css');
 echo style('acordeon.css');
-echo style('masonry.css'); 
-echo style('estilos.css');  
+echo style('masonry.css');
+echo style('estilos.css');
 
 echo style("themes/proteo/proteo.css");
 
-echo script('jquery-min.js'); 
-echo script('jquery-migrate-min.js'); 
-echo script('jquery-ui.custom.min.js'); 
-echo script('plugins/myAccordion.js'); 
-echo script('jquery.layout.js'); 
-echo script('plugins/jquery.masonry.min.js'); 
-echo script("jquery.dialogextend.min.js"); 
+echo script('jquery-min.js');
+echo script('jquery-migrate-min.js');
+echo script('jquery-ui.custom.min.js');
+echo script('plugins/myAccordion.js');
+echo script('jquery.layout.js');
+echo script('plugins/jquery.masonry.min.js');
+echo script("jquery.dialogextend.min.js");
 
-echo "\n<!-- Impromptu -->\n"; 
-echo script('jquery-impromptu.js'); 
-echo style('impromptu/default.css'); 
+echo "\n<!-- Impromptu -->\n";
+echo script('jquery-impromptu.js');
+echo style('impromptu/default.css');
 echo "\n<!-- Block Out -->\n";
 echo script('plugins/jquery.blockUI.js');
 ?>
@@ -67,7 +67,7 @@ tumblelog { font-size: 10px;}
 $(document).ready(function() {
 
 	$("#accordion").myAccordion({
-		speed: "fast", 
+		speed: "fast",
 		defautContent:0
 	});
 
@@ -95,7 +95,7 @@ $(document).ready(function() {
 
 	//	reference only - these options are NOT required because 'true' is the default
 		closable:					true	// pane can open & close
-	,	resizable:					true	// when open, pane can be resized 
+	,	resizable:					true	// when open, pane can be resized
 	,	slidable:					true	// when closed, pane can 'slide' open over other panes - closes on mouse-out
 	,	livePaneResizing:			true
 
@@ -130,6 +130,10 @@ $(document).ready(function() {
 	,	showDebugMessages:			true // log and/or display messages from debugging & testing code
 	});
 
+<?php if(!$this->secu->es_logeado()){
+	echo "\t$('#user').focus();";
+}?>
+
 });
 
 <?php $this->load->view('loadscript'); ?>
@@ -147,7 +151,7 @@ $(document).ready(function() {
 <!-- allowOverflow auto-attached by option: west__showOverflowOnHover = true -->
 <div class="ui-layout-west">
 	<div id='aizquierdo'>
-	<?php //Acordeon 
+	<?php //Acordeon
 		echo $smenu;
 	?>
 	</div>
@@ -157,7 +161,7 @@ $(document).ready(function() {
 <div id='footer'>
 	<table width='100%'><tr>
 	<td><div id='izquierdo'>
-<?php 
+<?php
 	echo "Conexion: <b>".strtoupper($this->db->database)."</b>\n";
 	if(isset($_SERVER['REMOTE_ADDR'])){
 		echo "IP: <b>".$_SERVER['REMOTE_ADDR']."</b>\n";
@@ -167,12 +171,12 @@ $(document).ready(function() {
 
 
 	<td><div id='centro'>
-<?php 
+<?php
 	echo 	image('codeigniter.gif').
 			image('php-power-micro.png').
 			image('jquery-icon.png').
 			image('mysqlpowered.png').
-			image('buttongnugpl.png'); 
+			image('buttongnugpl.png');
 ?>
 	</div></td>
 	<td>

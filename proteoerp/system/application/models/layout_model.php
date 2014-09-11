@@ -84,7 +84,7 @@ class Layout_model extends Model {
 			$attributes      = array('name' => 'user_form','autocomplete'=>'off');
 			$retval['idus']  = form_open('bienvenido/autentificar',$attributes);
 			
-			$attributes      = array('name' => 'user','size' => '9','autocomplete'=>'off');
+			$attributes      = array('id'=> 'user','name' => 'user','size' => '9','autocomplete'=>'off');
 			$retval['idus'] .='<table><tr><td><label>Usuario: </label></td><td>'.form_input($attributes).'</td></tr>';
 			
 			$attributes      = array('name' => 'pws','size' => '9','type' => 'password','autocomplete'=>'off');
