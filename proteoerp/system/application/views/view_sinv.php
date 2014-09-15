@@ -1453,10 +1453,10 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			<tr id='__INPL_SINVCOMBO__'>
 				<td bgcolor='#7098D0'><b>C&oacute;digo</b></td>
 				<td bgcolor='#7098D0'><b>Descripci&oacute;n</b></td>
-				<td bgcolor='#7098D0'><b>Cantidad</b></td>
-				<td bgcolor='#7098D0'><b>Precio</b></td>
-				<td bgcolor='#7098D0'><b>&Uacute;ltimo</b></td>
-				<td bgcolor='#7098D0'><b>Ponderado</b></td>
+				<td bgcolor='#7098D0' style='text-align:center;'><b>Cantidad</b></td>
+				<td bgcolor='#7098D0' style='text-align:right;' ><b>Precio</b></td>
+				<td bgcolor='#7098D0' style='text-align:right;' ><b>&Uacute;ltimo</b></td>
+				<td bgcolor='#7098D0' style='text-align:right;' ><b>Ponderado</b></td>
 				<?php if($form->_status!='show') {?>
 				<td  bgcolor='#7098D0' align='center'><b>&nbsp;</b></td>
 				<?php } ?>

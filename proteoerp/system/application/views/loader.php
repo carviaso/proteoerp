@@ -17,7 +17,7 @@ echo style('acordeon.css');
 echo style('masonry.css');
 echo style('estilos.css');
 
-echo style("themes/proteo/proteo.css");
+echo style('themes/proteo/proteo.css');
 
 echo script('jquery-min.js');
 echo script('jquery-migrate-min.js');
@@ -25,7 +25,7 @@ echo script('jquery-ui.custom.min.js');
 echo script('plugins/myAccordion.js');
 echo script('jquery.layout.js');
 echo script('plugins/jquery.masonry.min.js');
-echo script("jquery.dialogextend.min.js");
+echo script('jquery.dialogextend.min.js');
 
 echo "\n<!-- Impromptu -->\n";
 echo script('jquery-impromptu.js');

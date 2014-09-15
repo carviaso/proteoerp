@@ -1729,6 +1729,7 @@ class Sprm extends Controller {
 	// Nota de credito a factura pagada
 	//*****************************************
 	function ncppro(){
+		$this->rapyd->load('dataobject','datadetails','dataedit');
 
 		$edit = new Dataedit('Nota de credito a proveedor', 'sprm');
 		$edit->on_save_redirect=false;
@@ -1858,7 +1859,6 @@ class Sprm extends Controller {
 			echo json_encode($rt);
 		}else{
 			$conten['json_ptasa']= json_encode($arr_ptasa);
-			$conten['json_ivas'] = json_encode($arr_ivas);
 			$conten['cana']      = $i;
 			$conten['form']      = & $edit;
 			$conten['title']     = heading('Nota de cr&eacute;dito a factura pagada de proveedor');

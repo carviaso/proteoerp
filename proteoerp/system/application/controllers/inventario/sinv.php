@@ -3730,13 +3730,15 @@ class Sinv extends Controller {
 				if(empty($v['codigo'])){
 					$do->rel_rm('sinvcombo',$k);
 				}else{
-					$combobase  +=floatval($do->get_rel('sinvcombo','precio' ,$k));
-					$combopond  +=floatval($do->get_rel('sinvcombo','pond' ,$k));
-					$comboultimo+=floatval($do->get_rel('sinvcombo','ultimo' ,$k));
+					$combocana  = floatval($do->get_rel('sinvcombo','cantidad',$k));
+					$combobase  +=$combocana*floatval($do->get_rel('sinvcombo','precio'  ,$k));
+					$combopond  +=$combocana*floatval($do->get_rel('sinvcombo','pond'    ,$k));
+					$comboultimo+=$combocana*floatval($do->get_rel('sinvcombo','ultimo'  ,$k));
 				}
 			}
+			$combobase=round($combobase,2);
 
-			if(abs($combobase-$base1)!=0 || abs($combobase-$base2)!=0 || abs($combobase-$base3)!=0 || abs($combobase-$base4)!=0){
+			if(abs($combobase-$base1)>0.01 || abs($combobase-$base2)>0.01 || abs($combobase-$base3)>0.01 || abs($combobase-$base4)>0.01){
 				$do->error_message_ar['pre_upd']=$do->error_message_ar['pre_ins']='Cuando el articulo es un combo las 4 bases deben ser iguales a '.nformat($combobase);
 				return false;
 			}
