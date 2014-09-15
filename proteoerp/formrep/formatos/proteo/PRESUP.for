@@ -169,7 +169,7 @@ foreach ($detalle AS $items){ $i++;
 						$uline   = array_shift($arr_des);
 						echo $uline.'<br>';
 						$lineas++;
-						if($lineas >= $maxlin){
+						if($lineas >= $maxlin && count($detalle)!=$i){
 							$lineas =0;
 							$npagina=true;
 							if(count($arr_des)>0){
