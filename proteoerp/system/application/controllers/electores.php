@@ -31,6 +31,17 @@ class Electores extends Controller {
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$data = '<table>';
+				$data .= '<tr>';
+				$data .= '<td>Cedula</td>';
+				$data .= '<td>Primer Nombre</td>';
+				$data .= '<td>Segundo Nombre</td>';
+				$data .= '<td>Primer Apellido</td>';
+				$data .= '<td>Segundo Apellido</td>';
+				$data .= '<td>Nacio</td>';
+				$data .= '<td>Sexo</td>';
+				$data .= '</tr>';
+
+
 			foreach( $query->result_array() as  $row ) {
 				$data .= '<tr>';
 				$data .= '<td>'.$row['cedula'].'</td>';
