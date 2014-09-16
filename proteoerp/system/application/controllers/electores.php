@@ -27,18 +27,18 @@ class Electores extends Controller {
 		
 		$data = 'Consulta Vacia';
 		$mSQL="SELECT CONCAT(nacionalidad,cedula) cedula, pnombre, snombre, papellido, sapellido, nacimiento, sexo
-			FROM matloca_vente.electores WHERE papellido LIKE ${dbpa} AND pnombre like ${dbpn} ORDER BY sapellido LIMIT 100";
+			FROM matloca_vente.electores WHERE papellido LIKE ${dbpa} AND pnombre like ${dbpn} ORDER BY sapellido LIMIT 500";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$data = '<table>';
-				$data .= '<tr>';
+				$data .= '<tr bgcolor="#AABBAA">';
 				$data .= '<td>Cedula</td>';
 				$data .= '<td>Primer Nombre</td>';
 				$data .= '<td>Segundo Nombre</td>';
 				$data .= '<td>Primer Apellido</td>';
 				$data .= '<td>Segundo Apellido</td>';
 				$data .= '<td>Nacio</td>';
-				$data .= '<td>Sexo</td>';
+				$data .= '<td align="center">Sexo</td>';
 				$data .= '</tr>';
 
 
