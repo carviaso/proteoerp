@@ -27,7 +27,7 @@ class Electores extends Controller {
 		
 		$data = 'Consulta Vacia';
 		$mSQL="SELECT CONCAT(nacionalidad,cedula) cedula, pnombre, snombre, papellido, sapellido, nacimiento, sexo
-			FROM matloca_vente.electores WHERE papellido LIKE ${dbpa} AND pnombre like ${dbpn} LIMIT 100";
+			FROM matloca_vente.electores WHERE papellido LIKE ${dbpa} AND pnombre like ${dbpn} ORDER BY sapellido LIMIT 100";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$data = '<table>';
