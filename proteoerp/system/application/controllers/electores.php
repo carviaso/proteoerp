@@ -38,7 +38,7 @@ class Electores extends Controller {
 				$data .= '<td>Primer Apellido</td>';
 				$data .= '<td>Segundo Apellido</td>';
 				$data .= '<td>Nacio</td>';
-				$data .= '<td align="center">Sexo</td>';
+				$data .= '<td>Sexo</td>';
 				$data .= '</tr>';
 
 
@@ -50,7 +50,7 @@ class Electores extends Controller {
 				$data .= '<td>'.$row['papellido'].'</td>';
 				$data .= '<td>'.$row['sapellido'].'</td>';
 				$data .= '<td>'.$row['nacimiento'].'</td>';
-				$data .= '<td>'.$row['sexo'].'</td>';
+				$data .= '<td align="center">'.$row['sexo'].'</td>';
 				$data .= '</tr>';
 			}
 			$data .= '</table>';
