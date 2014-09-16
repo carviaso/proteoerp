@@ -481,7 +481,7 @@ class Edgasto extends Controller {
 		//$edit->nombre = new freeField("Nombre","nombre",""); 
 
 		$edit->partida = new  dropdownField ('Partida', 'partida');
-		$edit->partida->options('SELECT codigo, CONCAT(codigo," ",descrip) descrip FROM mgas ORDER BY descrip');
+		$edit->partida->options('SELECT id, CONCAT(codigo," ",descrip) descrip FROM mgas ORDER BY descrip');
 		$edit->partida->rule = 'required';
 		$edit->partida->style='width:250px;';
 
@@ -568,17 +568,17 @@ class Edgasto extends Controller {
 	function instalar(){
 		if (!$this->db->table_exists('edgasto')) {
 			$mSQL="CREATE TABLE `edgasto` (
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `tipo_doc` char(2) NOT NULL DEFAULT 'FC',
-			  `numero` char(20) DEFAULT NULL,
-			  `fecha` date DEFAULT NULL,
-			  `causado` date DEFAULT NULL,
-			  `proveed` char(5) DEFAULT NULL,
-			  `partida` int(11) DEFAULT '0',
-			  `detalle` text,
-			  `base` decimal(10,2) DEFAULT '0.00',
-			  `iva` decimal(10,2) DEFAULT '0.00',
-			  `total` decimal(10,2) DEFAULT '0.00',
+			  id       int(11)  NOT NULL AUTO_INCREMENT,
+			  tipo_doc char(2)  NOT NULL DEFAULT 'FC',
+			  numero   char(20) DEFAULT NULL,
+			  fecha    date     DEFAULT NULL,
+			  causado  date     DEFAULT NULL,
+			  proveed  char(5)  DEFAULT NULL,
+			  partida  int(11)  DEFAULT '0',
+			  detalle  text,
+			  base     decimal(10,2) DEFAULT '0.00',
+			  iva      decimal(10,2) DEFAULT '0.00',
+			  total    decimal(10,2) DEFAULT '0.00',
 			  PRIMARY KEY (`id`),
 			  UNIQUE KEY `numero` (`numero`)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Gastos de Condominio'";
