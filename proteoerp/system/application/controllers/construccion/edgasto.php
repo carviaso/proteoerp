@@ -425,20 +425,6 @@ class Edgasto extends Controller {
 
 		';
 
-/*
-		$sprvbus=array(
-			'tabla'   =>'sprv',
-			'columnas'=>array(
-			'proveed' =>'C&oacute;digo Proveedor',
-			'nombre'=>'Nombre',
-			'rif'=>'RIF'),
-			'filtro'  =>array('proveed'=>'C&oacute;digo Proveedor','nombre'=>'Nombre'),
-			'retornar'=>array('proveed'=>'proveed'),
-			'titulo'  =>'Buscar Proveedor');
-
-		$boton=$this->datasis->modbus($sprvbus);
-*/
-
 		$edit = new DataEdit('', 'edgasto');
 
 		$edit->script($script,'modify');
@@ -495,7 +481,7 @@ class Edgasto extends Controller {
 		//$edit->nombre = new freeField("Nombre","nombre",""); 
 
 		$edit->partida = new  dropdownField ('Partida', 'partida');
-		$edit->partida->options('SELECT codigo, CONCAT(codigo," ",descrip) descrip FROM obpa ORDER BY descrip');
+		$edit->partida->options('SELECT codigo, CONCAT(codigo," ",descrip) descrip FROM mgas ORDER BY descrip');
 		$edit->partida->rule = 'required';
 		$edit->partida->style='width:250px;';
 
