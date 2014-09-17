@@ -4430,7 +4430,7 @@ class Sfac extends Controller {
 		$this->db->join('scli AS b','a.cod_cli=b.cliente');
 		$this->db->join('vend AS c','c.vendedor=a.vd','left');
 		$this->db->where('a.numero',$numero);
-		$this->db->where('a.status','P');
+		$this->db->where_in('a.status',array('P','I'));
 		$query = $this->db->get();
 
 		if ($query->num_rows() > 0 && $status=='create'){
@@ -4770,11 +4770,11 @@ class Sfac extends Controller {
 
 		$data   = '';
 		if($status=='insert'){
-			$mSQL="SELECT a.id, a.numero contrato, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.cliente, b.tipo, 
+			$mSQL="SELECT a.id, a.numero contrato, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.cliente, b.tipo,
 					a.codigo, b.dire11 AS direc, a.cantidad, a.precio, a.base, b.telefono, a.descrip, c.iva, IF(a.upago<a.inicio, a.inicio, DATE_ADD(a.upago, INTERVAL 1 MONTH) ) upago,
 					EXTRACT(YEAR_MONTH FROM inicio ) inicio, b.vendedor
 					FROM sclicont a JOIN scli b ON a.cliente=b.cliente JOIN sinv c ON a.codigo=c.codigo
-				WHERE a.status = 'A' 
+				WHERE a.status = 'A'
 				ORDER BY b.rifci";
 			$query = $this->db->query($mSQL);
 
@@ -4792,7 +4792,7 @@ class Sfac extends Controller {
 				$this->db->simple_query($sql);
 
 				$upago = $row->upago;
-					
+
 				$desde    = substr($row->upago,5,2).' del '.substr($row->upago,0,4);
 
 				$contrato = $row->contrato;
