@@ -192,7 +192,7 @@ class gastosycxp{
 		}
 
 		//Carga los descuentos por pronto pago
-		$mSQL="SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,
+/*		$mSQL="SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,
 			ROUND(IF(d.cstotal  >0, d.cgenera*(c.ppago/c.monto),0),2) AS montasa,
 			ROUND(IF(d.montoiva >0, d.civagen*(c.ppago/c.monto),0),2) AS tasa,
 			ROUND(IF(d.cstotal  >0, d.creduci*(c.ppago/c.monto),0),2) AS monredu,
@@ -208,6 +208,25 @@ class gastosycxp{
 			JOIN itppro AS c ON a.transac=c.transac
 			JOIN scst AS d ON c.tipo_doc=d.tipo_doc AND c.numero=d.numero
 			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo='DESPP' AND c.ppago>0";
+*/
+
+		$mSQL="SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,
+			a.montasa,
+			a.tasa,
+			a.monredu,
+			a.reducida,
+			a.monadic,
+			a.sobretasa,
+			a.exento,
+			ROUND(IF(a.iva>0, d.cimpuesto*(c.ppago/c.monto),0),2) AS impuesto,
+			c.ppago AS monto,
+			c.reteiva, a.fecha, a.fecapl, b.rif, b.nomfis ,TRIM(c.numero) AS afecta,a.codigo
+			FROM sprm AS a
+			LEFT JOIN sprv AS b ON a.cod_prv=b.proveed
+			JOIN itppro AS c ON a.transac=c.transac
+			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo='DESPP' AND c.ppago>0";
+
+
 
 		$query = $this->db->query($mSQL);
 		if ( $query->num_rows() > 0 ){
