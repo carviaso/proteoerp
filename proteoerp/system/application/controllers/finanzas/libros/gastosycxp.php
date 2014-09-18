@@ -218,7 +218,7 @@ class gastosycxp{
 			a.monadic,
 			a.sobretasa,
 			a.exento,
-			ROUND(IF(a.iva>0, d.iva*(c.ppago/c.monto),0),2) AS impuesto,
+			ROUND(IF(a.impuesto>0, a.impuesto*(c.ppago/c.monto),0),2) AS impuesto,
 			c.ppago AS monto,
 			c.reteiva, a.fecha, a.fecapl, b.rif, b.nomfis ,TRIM(c.numero) AS afecta,a.codigo
 			FROM sprm AS a

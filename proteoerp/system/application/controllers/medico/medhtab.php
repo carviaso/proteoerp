@@ -19,6 +19,7 @@ class Medhtab extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		$this->datasis->creaintramenu(array('modulo'=>'171','titulo'=>'Tabulador','mensaje'=>'Tabulador','panel'=>'SALUD','ejecutar'=>'medico/medhtab','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -112,13 +113,10 @@ class Medhtab extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'align'         => "'right'",
+			'width'         => 150,
 			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:80, maxlength: 80 }',
 		));
 
 		$grid->addField('indice');
@@ -128,7 +126,7 @@ class Medhtab extends Controller {
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 60,
+			'width'         => 50,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -157,6 +155,17 @@ class Medhtab extends Controller {
 			'edittype'      => "'textarea'",
 			'editoptions'   => "'{rows:2, cols:60}'",
 		));
+
+		$grid->addField('variables');
+		$grid->label('Variables');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 60,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
+
 
 		$grid->addField('id');
 		$grid->label('ID');
@@ -210,9 +219,9 @@ class Medhtab extends Controller {
 		$grid       = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
-		$mWHERE = $grid->geneTopWhere('medhtab');
+		$mWHERE = $grid->geneTopWhere('view_medhtab');
 
-		$response   = $grid->getData('medhtab', array(array()), array(), false, $mWHERE );
+		$response   = $grid->getData('view_medhtab', array(array()), array(), false, $mWHERE );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -276,7 +285,7 @@ class Medhtab extends Controller {
 	}
 
 	//******************************************************************
-	// Forma de Marcas
+	// Forma de Grupo
 	//
 	function grupoform(){
 		$grid  = new $this->jqdatagrid;
@@ -465,6 +474,17 @@ class Medhtab extends Controller {
 		$edit->descripcion->cols = 50;
 		$edit->descripcion->rows = 4;
 
+		$edit->variables = new inputField('Nro de Variables','variables');
+		$edit->variables->rule='integer';
+		$edit->variables->css_class='inputonlynum';
+		$edit->variables->size =5;
+		$edit->variables->maxlength =11;
+
+		$edit->nomvar = new inputField('Nombres','nomvar');
+		$edit->nomvar->rule='';
+		$edit->nomvar->size =52;
+		$edit->nomvar->maxlength =100;
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -510,15 +530,29 @@ class Medhtab extends Controller {
 	}
 
 	function instalar(){
+		if (!$this->db->table_exists('view_medhtab')) {
+			$mSQL="
+			CREATE ALGORITHM=UNDEFINED SQL SECURITY INVOKER VIEW `view_medhtab` AS 
+			SELECT a.id, b.nombre AS grupo, a.indice, a.nombre, a.descripcion, a.variables 
+			FROM (medhtab a JOIN medhgrup b ON ((a.grupo = b.id)))
+			";
+			$this->db->query($mSQL);
+		}
+
+
 		if (!$this->db->table_exists('medhtab')) {
 			$mSQL="
-			CREATE TABLE `medhtab` (
-			  id          int(11) NOT NULL AUTO_INCREMENT,
-			  grupo       int(11) NOT NULL DEFAULT '0',
-			  nombre      varchar(80) DEFAULT NULL,
-			  descripcion text,
-			  PRIMARY KEY (id)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=FIXED";
+				CREATE TABLE `medhtab` (
+				id           INT(11) NOT NULL AUTO_INCREMENT,
+				grupo        INT(11) NOT NULL DEFAULT '0',
+				indice       INT(11) NOT NULL DEFAULT '0',
+				nombre       VARCHAR(80) NULL DEFAULT NULL,
+				descripcion  TEXT NULL,
+				variables    INT(11) NULL DEFAULT '0',
+				nomvar       VARCHAR(100) NULL DEFAULT NULL,
+				PRIMARY KEY (`id`)) 
+				ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=FIXED
+			";
 			$this->db->query($mSQL);
 		}
 	}
