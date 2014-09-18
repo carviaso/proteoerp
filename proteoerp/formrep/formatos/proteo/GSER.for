@@ -1,5 +1,5 @@
 <?php
-$maxlin = 38; //Maximo de lineas
+$maxlin = 36; //Maximo de lineas
 
 if(count($parametros)==0) show_error('Faltan parametros ');
 $id   = $parametros[0];
@@ -61,13 +61,19 @@ if($ndetalle==0) show_error('Registro presenta inconsistencias');
 $detalle = $mSQL_2->result();
 
 
-if ($row->monto1>0){
+if($row->monto1>0){
 	$dbcodb1  = $this->db->escape($codb1);
-	$cuenta   = $this->db->query("SELECT numcuent, banco FROM banc WHERE  codbanc=${dbcodb1}");
+	$cuenta   = $this->db->query("SELECT numcuent, banco,tbanco FROM banc WHERE  codbanc=${dbcodb1}");
 	$row2     = $cuenta->row();
 	$numcuent = htmlspecialchars(trim($row2->numcuent));
-	$banco    = htmlspecialchars(trim($row2->banco));
-	$fpago    = "Banco/Caja:  <b>(${codb1}) ${banco}</b> Cuenta: <b>${numcuent}</b> Monto: <b>${monto1}</b>";
+	$banco    = $this->us_ascii2html($row2->banco);
+	$tbanco   = trim($row2->tbanco);
+	if($tbanco=='CAJ'){
+		$fpago = 'Caja';
+	}else{
+		$fpago = 'Banco';
+	}
+	$fpago   .= ":  <b>(${codb1}) ${banco}</b> Cuenta: <b>${numcuent}</b> Monto: <b>${monto1}</b> Nro.<b>${cheque1}</b>";
 }else{
 	$numcuent = '';
 	$banco    = '';
