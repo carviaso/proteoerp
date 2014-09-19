@@ -1083,7 +1083,7 @@ function apldes(){
 <div id='efecha' style='display:none;'></div>
 <table style="width:100%;border-collapse:collapse;padding:0px;">
 	<tr>
-		<td align='center'>
+		<td align='left'>
 		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:335px;width:630px;'>
 		<table width='100%' border='0' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL__'>

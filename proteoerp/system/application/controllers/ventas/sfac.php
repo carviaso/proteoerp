@@ -245,6 +245,7 @@ class Sfac extends Controller {
 						}catch(e){
 							$("#fborra").html(data);
 							$("#fborra").dialog("open");
+							jQuery("'.$ngrid.'").trigger("reloadGrid");
 						}
 						jQuery("'.$ngrid.'").trigger("reloadGrid");
 					});
@@ -470,6 +471,7 @@ class Sfac extends Controller {
 											})
 											//alert("Factura guardada");
 											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 											return true;
 										}
 									} else {
@@ -2607,6 +2609,7 @@ class Sfac extends Controller {
 
 		$edit = new DataDetails('', $do);
 		$edit->on_save_redirect=false;
+		$edit->cid='df1';
 
 		$edit->set_rel_title('sitems','Producto <#o#>');
 		$edit->set_rel_title('sfpa'  ,'Forma de pago <#o#>');
@@ -2686,7 +2689,7 @@ class Sfac extends Controller {
 		$edit->cliente = new inputField('Cliente','cod_cli');
 		$edit->cliente->size = 8;
 		$edit->cliente->autocomplete=false;
-		$edit->cliente->rule='required|existescli';
+		$edit->cliente->rule='required|trim|existescli';
 
 		$edit->nombre = new hiddenField('Nombre', 'nombre');
 		$edit->nombre->size = 25;
@@ -3481,12 +3484,13 @@ class Sfac extends Controller {
 		}
 
 		//Totaliza los pagos
-		$sfpa=0;
+		$sfpa=$tcredito=0;
 		$cana=$do->count_rel('sfpa');
 		for($i=0;$i<$cana;$i++){
 			$sfpa_tipo = $do->get_rel('sfpa','tipo',$i);
-			$sfpa_monto= $do->get_rel('sfpa','monto',$i);
+			$sfpa_monto= floatval($do->get_rel('sfpa','monto',$i));
 			$sfpa+=$sfpa_monto;
+			if(empty($sfpa_tipo)) $tcredito+=$sfpa_monto;
 		}
 		$sfpa=round($sfpa,2);
 		//Fin de la totalizacion del pago
@@ -3588,8 +3592,8 @@ class Sfac extends Controller {
 
 		$fecha  = $do->get('fecha');
 		//Validacion del limite de credito del cliente
-		if($credito>0 && $tipoa=='F' && $manual!='S' && $referen!='P'){
-			$rrow     =$this->datasis->damerow("SELECT limite,formap,credito,tolera,TRIM(socio) AS socio FROM scli WHERE cliente=${dbcliente}");
+		if($tcredito>0 && $tipoa=='F' && $manual!='S' && $referen!='P'){
+			$rrow = $this->datasis->damerow("SELECT limite,formap,credito,tolera,TRIM(socio) AS socio FROM scli WHERE cliente=${dbcliente}");
 			if($rrow!=false){
 				if(empty($rrow['tolera']))  $rrow['tolera'] =0;
 				if(empty($rrow['limite']))  $rrow['limite'] =0;
@@ -3616,7 +3620,7 @@ class Sfac extends Controller {
 				$saldo=0;
 			}
 
-			if($credito > ($limite-$saldo) || $cdias<=0 || $pcredito=='N'){
+			if($tcredito > ($limite-$saldo) || $cdias<=0 || $pcredito=='N'){
 				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El cliente no tiene suficiente cr&eacute;dito propio';
 				return false;
 			}
@@ -3634,7 +3638,7 @@ class Sfac extends Controller {
 				$asaldo=0;
 			}
 
-			if($credito > ($limite-$saldo-$asaldo) || $cdias<=0 || $pcredito=='N'){
+			if($tcredito > ($limite-$saldo-$asaldo) || $cdias<=0 || $pcredito=='N'){
 				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El cliente no tiene suficiente cr&eacute;dito de grupo';
 				return false;
 			}
@@ -3671,7 +3675,7 @@ class Sfac extends Controller {
 					$mastersaldo=0;
 				}
 
-				if($credito > ($masterlimite-$saldo-$mastersaldo) || $mastercdias<=0 || $mastercredito=='N'){
+				if($tcredito > ($masterlimite-$saldo-$mastersaldo) || $mastercdias<=0 || $mastercredito=='N'){
 					$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El fiador del cliente no tiene suficiente saldo';
 					return false;
 				}
@@ -4086,13 +4090,21 @@ class Sfac extends Controller {
 		$montasa  = $do->get('montasa'  );
 		$monredu  = $do->get('monredu'  );
 		$monadic  = $do->get('monadic'  );
-		$maestra  = $do->get('maestra');
+		$maestra  = $do->get('maestra'  );
+		$error    = 0;
+
+		$dbcod_cli= $this->db->escape($cod_cli);
+		$sql="UPDATE scli SET fecha1=LEAST(${fecha},fecha1), fecha2=${fecha} WHERE cliente=${dbcod_cli}";
+		$ban=$this->db->simple_query($sql);
+		if($ban==false){ memowrite($sql,'sfac'); $error++;}
 
 		//Si viene de pfac
 		if(strlen($this->pfac)>7 && $tipo_doc == 'F'){
+			$ent_saldos=array();
 			$arr_pfac=explode('-',$this->pfac);
 			foreach($arr_pfac as $pfac){
 				if(strlen($pfac)>7){
+					$dbpfac=$this->db->escape($pfac);
 					$this->db->where('numero', $pfac);
 					$this->db->update('pfac', array('factura' => $maestra,'status' => 'C'));
 
@@ -4102,6 +4114,39 @@ class Sfac extends Controller {
 					WHERE c.numa = ${dbpfac}";
 					$ban=$this->db->simple_query($sql);
 					if($ban==false){ memowrite($sql,'sfac'); $error++;}
+
+					//Descuenta lo entregado
+					$cana=$do->count_rel('sitems');
+					for($i=0;$i<$cana;$i++){
+						$itcana    = floatval($do->get_rel('sitems','cana',$i));
+						$itcodigoa = $do->get_rel('sitems','codigoa',$i);
+						$dbcodigoa = $this->db->escape($itcodigoa);
+
+						if(!isset($ent_saldos[$itcodigoa])){
+							$ent_saldos[$itcodigoa] = $itcana;
+						}else{
+							$ent_saldos[$itcodigoa]+= $itcana;
+						}
+
+						$drow=$this->datasis->damerow("SELECT entregado,cana FROM itpfac WHERE numa=${dbpfac} AND codigoa=${dbcodigoa}");
+						if(!empty($drow)){
+							$drow['cana']      = floatval($drow['cana']     );
+							$drow['entregado'] = floatval($drow['entregado']);
+							if($drow['entregado']< 0) $drow['entregado']=0;
+
+							if($ent_saldos[$itcodigoa]+$drow['entregado'] > $drow['cana']){
+								$itent=$drow['cana']-$drow['entregado'];
+							}else{
+								$itent=$ent_saldos[$itcodigoa];
+							}
+							$ent_saldos[$itcodigoa] = $ent_saldos[$itcodigoa]-$itent;
+
+							$sql= "UPDATE itpfac SET entregado=IF(entregado+${itent}>cana,cana,entregado+${itent}) WHERE numa=${dbpfac} AND codigoa=${dbcodigoa}";
+							$ban=$this->db->simple_query($sql);
+							if($ban==false){ memowrite($sql,'sfac'); $error++;}
+						}
+					}
+
 				}
 			}
 		}
@@ -4455,7 +4500,7 @@ class Sfac extends Controller {
 					'pfac'       => $numero,
 				);
 
-				$itsel=array('a.codigoa','b.descrip AS desca','a.cana','a.preca','a.tota','b.iva',
+				$itsel=array('a.codigoa','b.descrip AS desca','a.cana-a.entegado AS cana','a.preca','a.tota','b.iva',
 				'b.precio1','b.precio2','b.precio3','b.precio4','b.tipo','b.peso');
 				$this->db->select($itsel);
 				$this->db->from('itpfac AS a');
