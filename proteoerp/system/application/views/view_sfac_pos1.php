@@ -324,6 +324,13 @@ $(function(){
 	}
 ?>
 
+	$("#cod_cli").keypress(function(e) {
+		if(e.keyCode == 13) {
+		    $('input[name^="codigoa_"]').first().focus();
+			return false;
+		}
+	});
+
 });
 
 function itdevolver(numero){

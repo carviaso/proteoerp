@@ -199,6 +199,7 @@ class Sfac extends Controller {
 				$("#fedita").dialog({ title:"Agregar Factura Fecha '.date('d/m/Y').'" });
 				$("#fedita").html(data);
 				$("#fedita").dialog( "open" );
+				$("#cod_cli").focus();
 			})
 		};';
 
@@ -214,6 +215,7 @@ class Sfac extends Controller {
 						$("#fimpser").html("");
 						$("#fedita").html(data);
 						$("#fedita").dialog("open");
+						$("#cod_cli").focus();
 					});
 				}else{
 					$.prompt("<h1>Solo se pueden modificar las facturas pendientes</h1>");
@@ -445,79 +447,83 @@ class Sfac extends Controller {
 				autoOpen: false, height: 480, width: 850, modal: true,
 				buttons: {
 					"Guardar": function() {
-						var bValid = true;
-						var murl = $("#df1").attr("action");
-						limpiavacio();
-						$.ajax({
-							type: "POST",
-							dataType: "html",
-							async: false,
-							url: murl,
-							data: $("#df1").serialize(),
-							success: function(r,s,x){
-								try {
-									var json = JSON.parse(r);
-									if(json.status == "A" ) {
-										if(json.manual == "N"){
-											$("#fedita").dialog("close");
-											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
-											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-											return true;
-										}else{
-											//$( "#fedita" ).dialog( "close" );
-											$.post("'.site_url($this->url.'dataedit/S/create').'",
-											function(data){
-												$("#fedita").html(data);
-											})
-											//alert("Factura guardada");
-											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
-											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-											return true;
+						if($("#df1").length > 0){
+							var bValid = true;
+							var murl = $("#df1").attr("action");
+							limpiavacio();
+							$.ajax({
+								type: "POST",
+								dataType: "html",
+								async: false,
+								url: murl,
+								data: $("#df1").serialize(),
+								success: function(r,s,x){
+									try {
+										var json = JSON.parse(r);
+										if(json.status == "A" ) {
+											if(json.manual == "N"){
+												$("#fedita").dialog("close");
+												window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+												jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+												return true;
+											}else{
+												//$( "#fedita" ).dialog( "close" );
+												$.post("'.site_url($this->url.'dataedit/S/create').'",
+												function(data){
+													$("#fedita").html(data);
+												})
+												//alert("Factura guardada");
+												window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+												jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+												return true;
+											}
+										} else {
+											apprise(json.mensaje);
 										}
-									} else {
-										apprise(json.mensaje);
+									} catch(e) {
+										$("#fedita").html(r);
 									}
-								} catch(e) {
-									$("#fedita").html(r);
 								}
-							}
-						})
+							});
+						}
 					},
 					"Guardar y Seguir": function() {
-						var murl = $("#df1").attr("action");
-						limpiavacio();
-						$.ajax({
-							type: "POST",
-							dataType: "html",
-							async: false,
-							url: murl,
-							data: $("#df1").serialize(),
-							success: function(r,s,x){
-								try {
-									var json = JSON.parse(r);
-									if(json.status == "A" ) {
-										if(json.manual == "N"){
-											$.post(xurl+"/create/"+idactual,function(data){$("#fedita").html(data);});
-											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
-											jQuery("'.$ngrid.'").trigger("reloadGrid");
-											return true;
-										}else{
-											$.post("'.site_url($this->url.'dataedit/S/create').'",
-											function(data){
-												$("#fedita").html(data);
-											})
-											//alert("Factura guardada");
-											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
-											return true;
+						if($("#df1").length > 0){
+							var murl = $("#df1").attr("action");
+							limpiavacio();
+							$.ajax({
+								type: "POST",
+								dataType: "html",
+								async: false,
+								url: murl,
+								data: $("#df1").serialize(),
+								success: function(r,s,x){
+									try {
+										var json = JSON.parse(r);
+										if(json.status == "A" ) {
+											if(json.manual == "N"){
+												$.post(xurl+"/create/"+idactual,function(data){$("#fedita").html(data);});
+												window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+												jQuery("'.$ngrid.'").trigger("reloadGrid");
+												return true;
+											}else{
+												$.post("'.site_url($this->url.'dataedit/S/create').'",
+												function(data){
+													$("#fedita").html(data);
+												})
+												//alert("Factura guardada");
+												window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+												return true;
+											}
+										} else {
+											apprise(json.mensaje);
 										}
-									} else {
-										apprise(json.mensaje);
+									} catch(e) {
+										$("#fedita").html(r);
 									}
-								} catch(e) {
-									$("#fedita").html(r);
 								}
-							}
-						})
+							});
+						}
 					},
 					"Cancelar": function() {
 						$("#fedita").html("");
@@ -2952,9 +2958,10 @@ class Sfac extends Controller {
 			}else{
 				$rt=array(
 					'status' =>'B',
-					'mensaje'=> utf8_encode(html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string))),
+					'mensaje'=> html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string)),
 					'pk'     =>'',
-					'vuelto' => 0.00
+					'manual' =>$manual,
+					'vuelto' =>0.00
 				);
 				echo json_encode($rt);
 			}
@@ -3505,6 +3512,7 @@ class Sfac extends Controller {
 		//Calcula totalizacion y corte por maxlin
 		$maxlin=intval($this->datasis->traevalor('MAXLIN'));
 		$this->_creanfac=false;
+
 		$tasa=$montasa=$reducida=$monredu=$sobretasa=$monadic=$exento=$totalg=0;
 		$cana=$do->count_rel('sitems');
 		for($i=0;$i<$cana;$i++){

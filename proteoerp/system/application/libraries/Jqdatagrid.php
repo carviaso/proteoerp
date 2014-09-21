@@ -1005,13 +1005,12 @@ class Jqdatagrid
 		if(empty($sortby)){
 			$sortby  = $orden;
 			$sortdir = $orddire;
-		} else {
-				$sortby = str_replace(' asc,','',$sortby);
+		}else{
+			$sortby = str_replace(' asc,','',$sortby);
 		}
 
-		$fields2    = array();
-
-		$response = array();
+		$fields2  = $response = array();
+		if($limit<=0) $limit=30;
 		//$this->CI->db->select('count(1) as rows');
 		//$this->CI->db->from($table);
         //
@@ -1886,7 +1885,7 @@ class Jqdatagrid
 			var s;
 			s = grid.getGridParam(\'selarrrow\');
 		';
-		
+
 		return $bodyscript;
 	}
 
@@ -1962,7 +1961,7 @@ class Jqdatagrid
 								$("#'.$dialogo.'").html(r);
 							}
 						}
-					})				
+					})
 				},
 				'.$botones.'
 				"Cancelar": function() {
