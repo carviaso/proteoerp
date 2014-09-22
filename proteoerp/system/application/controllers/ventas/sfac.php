@@ -3787,9 +3787,9 @@ class Sfac extends Controller {
 		$cana=$do->count_rel('sitems');
 		for($i=0;$i<$cana;$i++){
 			$itcodigo  = $do->get_rel('sitems','codigoa',$i);
-			$itcana    = $do->get_rel('sitems','cana'   ,$i);
-			$itpreca   = $do->get_rel('sitems','preca'  ,$i);
-			$itiva     = $do->get_rel('sitems','iva'    ,$i);
+			$itcana    = floatval($do->get_rel('sitems','cana'   ,$i));
+			$itpreca   = floatval($do->get_rel('sitems','preca'  ,$i));
+			$itiva     = floatval($do->get_rel('sitems','iva'    ,$i));
 			$itimporte = $itpreca*$itcana;
 			$do->set_rel('sitems','tota'    ,$itimporte,$i);
 			//$do->set_rel('sitems','mostrado',$itimporte*(1+($itiva/100)),$i);
@@ -3801,7 +3801,7 @@ class Sfac extends Controller {
 				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Producto no encontrado ('.$itcodigo.')';
 				return false;
 			}
-			$tpeso += floatval($rowval['peso']);
+			$tpeso += floatval($rowval['peso'])*$itcana;
 			$do->set_rel('sitems','costo'  , $rowval['pond']   ,$i);
 			$do->set_rel('sitems','pvp'    , $rowval['base1']  ,$i);
 			$do->set_rel('sitems','precio4', $rowval['precio4'],$i);
@@ -4508,13 +4508,13 @@ class Sfac extends Controller {
 					'pfac'       => $numero,
 				);
 
-				$itsel=array('a.codigoa','b.descrip AS desca','a.cana-a.entegado AS cana','a.preca','a.tota','b.iva',
+				$itsel=array('a.codigoa','b.descrip AS desca','a.cana - a.entregado AS cana','a.preca','a.tota','b.iva',
 				'b.precio1','b.precio2','b.precio3','b.precio4','b.tipo','b.peso');
 				$this->db->select($itsel);
 				$this->db->from('itpfac AS a');
 				$this->db->join('sinv AS b','b.codigo=a.codigoa');
 				$this->db->where('a.numa',$numero);
-				$this->db->where('a.cana >','0');
+				$this->db->where('a.cana >',0);
 				$qquery = $this->db->get();
 				$i=0;
 
