@@ -1528,6 +1528,12 @@ class Sprm extends Controller {
 				$do->error_message_ar['pre_del']='Movimiento proveniente de compra, debe reversarlo por el modulo respectivo.';
 				return false;
 			}
+
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM gser WHERE transac=${dbtransac}"));
+			if($cana>0){
+				$do->error_message_ar['pre_del']='Movimiento proveniente de gasto, debe reversarlo por el modulo respectivo.';
+				return false;
+			}
 		}
 
 		if($tipo_doc=='AB'){

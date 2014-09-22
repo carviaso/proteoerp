@@ -434,7 +434,7 @@ function elminacenti(cual){
 		$scli=array(
 		'tabla'   =>'sprv',
 		'columnas'=>array(
-		'cliente' =>'C&oacute;digo ',
+		'proveed' =>'C&oacute;digo ',
 		'nombre'  =>'Nombre',
 		'contacto'=>'Contacto'),
 		'filtro'  =>array('proveed'=>'C&oacute;digo','nombre'=>'Nombre'),
