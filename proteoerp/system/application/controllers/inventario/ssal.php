@@ -101,7 +101,7 @@ class Ssal extends Controller {
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				'.$this->datasis->jwinopen(site_url('formatos/ver/SSAL').'/\'+id+"/id"').';
-			} else { $.prompt("<h1>Por favor Seleccione una Factura</h1>");}
+			} else { $.prompt("<h1>Por favor Seleccione un Ajuste</h1>");}
 		});';
 
 

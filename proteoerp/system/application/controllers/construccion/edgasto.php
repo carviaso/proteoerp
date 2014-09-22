@@ -475,10 +475,6 @@ class Edgasto extends Controller {
 		$edit->proveed = new inputField('Proveedor', 'proveed');
 		$edit->proveed->size     = 10;
 		$edit->proveed->autocomplete=false;
-		//$edit->proveed->rule     = 'required';
-		//$edit->proveed->append($boton);
-
-		//$edit->nombre = new freeField("Nombre","nombre",""); 
 
 		$edit->partida = new  dropdownField ('Partida', 'partida');
 		$edit->partida->options('SELECT id, CONCAT(codigo," ",descrip) descrip FROM mgas ORDER BY descrip');
