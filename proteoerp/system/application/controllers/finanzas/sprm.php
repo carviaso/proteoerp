@@ -1572,7 +1572,7 @@ class Sprm extends Controller {
 			}else{
 				$monto=$it_abono;
 			}
-			$mSQL="UPDATE sprm SET abonos=abonos-(${monto}) WHERE tipo_doc=${it_tipo_doc} AND numero=${it_numero} AND cod_prv=${it_cod_prv} AND fecha=${it_fecha}";
+			$mSQL="UPDATE sprm SET abonos=abonos-(${monto}) WHERE tipo_doc=${it_tipo_doc} AND numero=${it_numero} AND cod_prv=${it_cod_prv}";
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'sprm'); }
 		}
@@ -1589,8 +1589,7 @@ class Sprm extends Controller {
 			$sfecha = str_replace('-','',$it_fecha);
 			$this->datasis->actusal($row->codbanc, $sfecha, $it_monto);
 			//$mSQL  = "UPDATE bmov SET liable='N', anulado='S' ";
-			$mSQL  = 'DELETE FROM  bmov ';
-			$mSQL .= "WHERE id=${it_id}";
+			$mSQL = "DELETE FROM bmov WHERE id=${it_id}";
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'sprm'); }
 		}
