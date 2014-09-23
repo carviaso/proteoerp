@@ -284,7 +284,7 @@ class Scli extends validaciones {
 		$("#fciud").dialog({
 			autoOpen: false, height: 400, width: 320, modal: true,
 			close: function() {
-				$("#fshow").html("");
+				$("#fciud").html("");
 			}
 		});';
 

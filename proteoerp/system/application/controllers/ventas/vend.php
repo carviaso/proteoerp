@@ -40,12 +40,14 @@ class Vend extends Controller {
 
 		//Botones Panel Izq
 		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array('id'=>'bgrupo',   'img'=>'images/star.png',     'alt' => 'Gestionar grupos', 'tema'=>'anexos', 'label'=>'Grupos'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
 			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
 			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
-			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+			array('id'=>'fborra',  'title'=>'Eliminar Registro'),
+			array('id'=>'fgrupo',  'title'=>'Gestionar Grupos')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -80,6 +82,23 @@ class Vend extends Controller {
 		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '370', '450' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '250', '500' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
+
+		$bodyscript .= '
+		$("#bgrupo").click(function(){
+			$.post("'.site_url($this->url.'grvdform').'",
+			function(data){
+				$("#fgrupo").html(data);
+				$("#fgrupo").dialog("open");
+			});
+		});';
+
+		$bodyscript .= '
+		$("#fgrupo").dialog({
+			autoOpen: false, height: 400, width: 320, modal: true,
+			close: function() {
+				$("#fgrupo").html("");
+			}
+		});';
 
 		$bodyscript .= '});';
 
@@ -238,6 +257,16 @@ class Vend extends Controller {
 		));
 
 
+		$grid->addField('grupo');
+		$grid->label('Grupo');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
+
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
@@ -382,6 +411,12 @@ class Vend extends Controller {
 		$edit->vendedor->rule = 'trim|required|callback_chexiste|alpha_numeric';
 		$edit->vendedor->mode ='autohide';
 
+		$edit->grupo = new dropdownField('Grupo', 'grupo');
+		$edit->grupo->option('','Seleccionar');
+		$edit->grupo->options('SELECT id, nombre FROM grvd ORDER BY nombre');
+		$edit->grupo->style='width:180px';
+		$edit->grupo->rule ='required';
+
 		$edit->tipo = new dropdownField('Tipo', 'tipo');
 		$edit->tipo->option('','Seleccionar');
 		$edit->tipo->options(array('V'=> 'Vendedor','C'=>'Cobrador', 'A'=>'Vendedor y Cobrador','I'=>'Inactivo'));
@@ -496,9 +531,9 @@ class Vend extends Controller {
 	function chexiste($codigo){
 		$codigo  =$this->input->post('vendedor');
 		$dbcodigo=$this->db->escape($codigo);
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM vend WHERE vendedor=$dbcodigo");
+		$check=$this->datasis->dameval("SELECT COUNT(*) FROM vend WHERE vendedor=${dbcodigo}");
 		if ($check > 0){
-			$nombre=$this->datasis->dameval("SELECT nombre FROM vend WHERE vendedor=$dbcodigo");
+			$nombre=$this->datasis->dameval("SELECT nombre FROM vend WHERE vendedor=${dbcodigo}");
 			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para el vendedor ${nombre}");
 			return false;
 		}else {
@@ -506,8 +541,130 @@ class Vend extends Controller {
 		}
 	}
 
+	//******************************************************************
+	// Forma de Grupos vend
+	//
+	function grvdform(){
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'      => 'true',
+			'align'       => "'center'",
+			'width'       => 20,
+			'editable'    => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+			)
+		);
+
+		$grid->addField('nombre');
+		$grid->label('Nombre del grupo');
+		$grid->params(array(
+			'width'     => 180,
+			'editable'  => 'true',
+			'edittype'  => "'text'",
+			'editrules' => '{required:true}'
+			)
+		);
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('300');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url($this->url.'getgdata/'));
+		$grid->setUrlput(site_url($this->url.'setgdata/'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= '</script>';
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+		echo $msalida;
+	}
+
+	function getgdata(){
+		$grid       = $this->jqdatagrid;
+
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('grvd');
+
+		$response   = $grid->getData('grvd', array(array()), array(), false, $mWHERE );
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+	}
+
+
+	function setgdata(){
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = intval($this->input->post('id'));
+		$data   = $_POST;
+		$mcodp  = 'nombre';
+		$check  = 0;
+
+		unset($data['oper']);
+		unset($data['id']);
+
+		$posibles=array('nombre');
+		foreach($data as $ind=>$val){
+			if(!in_array($ind,$posibles)){
+				echo 'Campo no permitido ('.$ind.')';
+				return false;
+			}
+		}
+
+		if($oper == 'add'){
+			if(!empty($data)){
+				$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM grvd WHERE ${mcodp}=".$this->db->escape($data[$mcodp])));
+				if($check == 0){
+					$this->db->insert('grvd', $data);
+					echo 'Registro Agregado';
+					logusu('GRVD','Grupo de vendedor INCLUIDO');
+				}else{
+					echo "Ya existe un registro con ese ${mcodp}";
+				}
+			}else{
+				echo 'Fallo Agregado!!!';
+			}
+		}elseif($oper == 'edit'){
+			if($id <= 0) return false;
+
+			$this->db->where('id', $id);
+			$this->db->update('grvd', $data);
+			logusu('GRVD',"Grupo de vendedor  ${id} MODIFICADO");
+			echo "Grupo de vendedor modificado";
+		}elseif($oper == 'del'){
+			if($id <= 0) return false;
+
+			$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM vend WHERE grupo=${id}"));
+			if($check > 0){
+				echo " El registro no puede ser eliminado por tener vendedores asociados";
+			}else{
+				$this->db->query("DELETE FROM grvd WHERE id=${id}");
+				logusu('GRVD',"Grupo de vendedor ${id} ELIMINADO");
+				echo 'Registro Eliminado';
+			}
+		}
+	}
+
 	function instalar(){
-		if (!$this->db->table_exists('vend')) {
+		if(!$this->db->table_exists('vend')){
 			$mSQL="CREATE TABLE `vend` (
 			  `vendedor` varchar(5) NOT NULL DEFAULT '',
 			  `clave` varchar(5) DEFAULT NULL,
@@ -521,8 +678,9 @@ class Vend extends Controller {
 			  `tipo` char(1) DEFAULT NULL,
 			  `almacen` varchar(4) DEFAULT NULL,
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
+			  `grupo` INT(11) NOT NULL DEFAULT '1',
 			  PRIMARY KEY (`id`)
-			) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=latin1";
+			) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
 
@@ -531,6 +689,23 @@ class Vend extends Controller {
 			$this->db->simple_query('ALTER TABLE vend DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE vend ADD UNIQUE INDEX vendedor (vendedor)');
 			$this->db->simple_query('ALTER TABLE vend ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		if(!in_array('grupo',$campos)){
+			$this->db->simple_query('ALTER TABLE `vend`	ADD COLUMN `grupo` INT(11) NOT NULL DEFAULT \'1\' AFTER `id`');
+		}
+
+		if(!$this->db->table_exists('grvd')){
+			$mSQL="CREATE TABLE `grvd` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`nombre` VARCHAR(100) NULL DEFAULT NULL,
+				PRIMARY KEY (`id`)
+				)
+			COMMENT='Grupo de vendedores'
+			ENGINE=MyISAM;";
+			$this->db->simple_query($mSQL);
+			$mSQL="INSERT INTO `grvd` (`nombre`) VALUES ('UNICO')";
+			$this->db->simple_query($mSQL);
 		}
 	}
 }
