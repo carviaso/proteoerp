@@ -2129,7 +2129,7 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
-	//  Busca sinv solo articulos
+	//  Busca aranceles
 	//
 	function buscaaran(){
 		$comodin= $this->datasis->traevalor('COMODIN');
@@ -2145,7 +2145,7 @@ class Ajax extends Controller {
 			$retArray = $retorno = array();
 			$mSQL="SELECT a.codigo, a.descrip, a.tarifa
 			FROM aran AS a
-			WHERE descrip LIKE $qdb OR codigo LIKE $qdb";
+			WHERE a.descrip LIKE ${qdb} OR ca.odigo LIKE ${qdb}";
 
 			$query = $this->db->query($mSQL);
 			if ($query->num_rows() > 0){
@@ -2153,6 +2153,59 @@ class Ajax extends Controller {
 					$retArray['label']   = '('.$row['codigo'].') '.$row['descrip'].' '.$row['tarifa'];
 					$retArray['value']   = $row['codigo'];
 					$retArray['tarifa']  = $row['tarifa'];
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+	        }
+		}
+		echo $data;
+	}
+
+	function sprvfc(){
+		$sprv   = $this->input->post('sprv');
+		$mid    = $this->input->post('q');
+
+		if(!($sprv!==false && $mid!==false)){
+			return true;
+		}
+		$comodin= $this->datasis->traevalor('COMODIN');
+		if(strlen($comodin)==1 && $comodin!='%' && $mid!==false){
+			$mid=str_replace($comodin,'%',$mid);
+		}
+		$data = '[{ }]';
+		if($mid !== false){
+			$qdb   = $this->db->escape($mid.'%');
+			$dbsprv= $this->db->escape($sprv);
+
+			if(date('d')<=15){
+				$pdia  ='01';
+				$dia   ='15';
+			}else{
+				$pdia  ='16';
+				$dia   =date('d', mktime(0, 0, 0, date('n'), 0));
+			}
+			$fechai =date('Ym'.$pdia);
+			$fechac =date('Ym'.$dia );
+
+			$retArray = $retorno = array();
+			$mSQL="SELECT a.numero, a.fecha
+			FROM gser AS a
+			WHERE a.numero LIKE ${qdb} AND a.tipo_doc='FC' AND a.proveed=${dbsprv}
+			UNION ALL
+			SELECT b.numero, b.fecha
+			FROM scst AS b
+			WHERE b.numero LIKE ${qdb} AND b.tipo_doc='FC' AND b.proveed=${dbsprv}";
+
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$fecha  = str_replace('-','',$row['fecha']);
+
+					$retArray['label']   = '('.$row['numero'].') '.$this->_datehuman($row['fecha']);
+					$retArray['value']   = $row['numero'];
+					$retArray['fecha']   = $this->_datehuman($row['fecha']);
+					$retArray['aplrete'] = $fecha>=$fechai && $fecha<=$fechac;
+
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);

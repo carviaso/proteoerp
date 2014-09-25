@@ -421,7 +421,7 @@ function elminacenti(cual){
 		$edit->build();
 
 		$data['content'] =$edit->output;
-		$data['title']   = "Almacen Inconsistente";
+		$data['title']   = 'Almacen Inconsistente';
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
@@ -438,7 +438,7 @@ function elminacenti(cual){
 		'nombre'  =>'Nombre',
 		'contacto'=>'Contacto'),
 		'filtro'  =>array('proveed'=>'C&oacute;digo','nombre'=>'Nombre'),
-		'retornar'=>array('proveed'=>'proveed'),
+		'retornar'=>array('proveed'=>'cod_prv'),
 		'titulo'  =>'Buscar Proveedor');
 
 		$boton=$this->datasis->modbus($scli);
@@ -455,7 +455,7 @@ function elminacenti(cual){
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "P%" AND e.proveed=a.cod_prv AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "%P" AND e.cliente=a.cod_prv AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`))
 			AS abonoreal',
-			'a.abonos AS inconsist','a.transac');
+			'a.abonos AS inconsist','a.transac','GROUP_CONCAT(DISTINCT b.transac SEPARATOR ", ") transas');
 
 		$filter->db->select($select);
 		$filter->db->from('sprm AS a');
@@ -465,20 +465,30 @@ function elminacenti(cual){
 		$filter->db->where('`a`.`tipo_doc` IN (\'FC\',\'GI\',\'ND\')');
 		$filter->db->orderby('a.cod_prv','a.numero');
 
-		$filter->fechad = new dateonlyField('Desde','fechad');
-		$filter->fechah = new dateonlyField('Hasta','fechah');
+		$filter->fechad = new dateonlyField('Fecha Desde','fechad');
+		$filter->fechah = new dateonlyField('Fecha Hasta','fechah');
 		$filter->fechad->clause  =$filter->fechah->clause='where';
 		$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
 		$filter->fechad->operator='>=';
 		$filter->fechah->operator='<=';
+		$filter->fechad->rule='chfecha';
+		$filter->fechah->rule='chfecha';
 
-		$filter->cliente = new inputField('Proveedor', 'cod_prv');
-		$filter->cliente->db_name='a.cod_prv';
-		$filter->cliente->size = 30;
-		$filter->cliente->append($boton);
+		$filter->cod_prv = new inputField('Proveedor', 'cod_prv');
+		$filter->cod_prv->db_name='a.cod_prv';
+		$filter->cod_prv->size = 30;
+		$filter->cod_prv->append($boton);
+		$filter->cod_prv->rule='required';
 
 		$filter->buttons('reset','search');
 		$filter->build();
+
+		$addtit='';
+		if(!$filter->is_valid()){
+			$mktim  = mktime(0, 0, 0, date('n'), date('j')-200);
+			$addtit.= 'a partir de '.date('d/m/Y', $mktim);
+			$filter->db->where('a.fecha >= ',date('Y-m-d', $mktim));
+		}
 
 		function descheck($numero,$cod_cli,$tipo_doc,$fecha,$abonoreal){
 			$pk=array($numero,$cod_cli,$tipo_doc,$fecha,$abonoreal);
@@ -491,25 +501,62 @@ function elminacenti(cual){
 		}
 
 		function diff($a,$b){
-			return nformat($a-$b);
+			$dif=$a-$b;
+			if($dif>0){
+				$color='blue';
+			}else{
+				$color='red';
+			}
+			return '<b style="color:'.$color.'">'.nformat($a-$b).'</b>';
+		}
+
+		function abon($monto,$abono){
+			if($abono>$monto){
+				$color='orange';
+			}else{
+				$color='black';
+			}
+			return '<b style="color:'.$color.'">'.nformat($abono).'</b>';
+		}
+
+		function tlink($transas){
+			$arr_tran=explode(',',$transas);
+			$arr_tran=array_unique($arr_tran);
+			$atts = array(
+				'width'      => '800',
+				'height'     => '600',
+				'scrollbars' => 'yes',
+				'status'     => 'yes',
+				'resizable'  => 'yes',
+				'screenx'    => '0',
+				'screeny'    => '0'
+			);
+
+			$rt=array();
+			foreach($arr_tran as $transac){
+				$transac=trim($transac);
+				if(!empty($transac))
+					$rt[] = anchor_popup('contabilidad/casi/localizador/transac/procesar/'.$transac, $transac, $atts);
+			}
+			return implode(', ',$rt);
 		}
 
 		$uri1 = anchor('supervisor/mantenimiento/itprinconsis/<str_replace>/|:slach:|<#cod_prv#></str_replace>/<#numero#>/<#tipo_doc#>','<#cod_prv#>');
 
-		$grid = new DataGrid('Lista de Proveedores');
-		$grid->use_function('descheck','diff');
+		$grid = new DataGrid('Lista de Proveedores'.$addtit);
+		$grid->use_function('descheck','diff','abon','tlink');
 		$grid->per_page = 15;
 		$grid->use_function('str_replace');
 
 		$grid->column_orderby('Proveedor'      ,'cod_prv' ,'cod_prv');
 		$grid->column_orderby('Nombre'         ,'nombre'  ,'nombre');
-		$grid->column_orderby('transac'        ,'transac' ,'transac');
+		$grid->column('Transac. (NO CRUC)'        ,'<tlink><#transac#>, <#transas#></tlink>');
 		$grid->column_orderby('Fecha'          ,'<dbdate_to_human><#fecha#></dbdate_to_human>' ,'fecha');
 		$grid->column_orderby('N&uacute;mero'  ,'<#tipo_doc#><#numero#>'    ,'numero');
 		$grid->column_orderby('Monto'          ,'<nformat><#monto#></nformat>'        ,'monto'     ,"align='right'");
-		$grid->column_orderby('Abono Real'     ,'<nformat><#abonoreal#></nformat>'    ,'abonoreal' ,"align='right'");
+		$grid->column_orderby('Abono Real'     ,'<abon><#monto#>|<#abonoreal#></abon>','abonoreal' ,"align='right'");
 		$grid->column_orderby('Abono Inconsis.','<nformat><#inconsist#></nformat>'    ,'inconsist' ,"align='right'");
-		$grid->column('Faltante'               ,'<diff><#abonoreal#>|<#inconsist#></diff>',"align='right'");
+		$grid->column('Diferencia'               ,'<diff><#abonoreal#>|<#inconsist#></diff>',"align='right'");
 		$grid->column('Ajustar Saldo'          ,'<descheck><#numero#>|<#cod_prv#>|<#tipo_doc#>|<#fecha#>|<#abonoreal#></descheck>',"align=center");
 
 		$grid->build();
@@ -544,7 +591,7 @@ function elminacenti(cual){
 	}
 
 	function clinconsis(){
-		$this->rapyd->load("datafilter","datagrid");
+		$this->rapyd->load('datafilter','datagrid');
 		$this->rapyd->uri->keep_persistence();
 		$this->datasis->modulo_id('900',1);
 
@@ -572,7 +619,7 @@ function elminacenti(cual){
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "C%" AND e.proveed=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "%C" AND e.cliente=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`))
 			AS abonoreal',
-			'a.abonos AS inconsist','a.transac');
+			'a.abonos AS inconsist','a.transac','GROUP_CONCAT(DISTINCT b.transac SEPARATOR ", ") transas');
 
 		$filter->db->select($select);
 		$filter->db->from('smov AS a');
@@ -583,20 +630,30 @@ function elminacenti(cual){
 		$filter->db->orderby('a.cod_cli','a.numero');
 		$filter->db->where('`a`.`tipo_doc` IN (\'FC\',\'GI\',\'ND\')');
 
-		$filter->fechad = new dateonlyField('Desde','fechad');
-		$filter->fechah = new dateonlyField('Hasta','fechah');
+		$filter->fechad = new dateonlyField('Fecha Desde','fechad');
+		$filter->fechah = new dateonlyField('Fecha Hasta','fechah');
 		$filter->fechad->clause  =$filter->fechah->clause='where';
 		$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
-		$filter->fechad->operator=">=";
-		$filter->fechah->operator="<=";
+		$filter->fechad->operator='>=';
+		$filter->fechah->operator='<=';
+		$filter->fechad->rule='chfecha';
+		$filter->fechah->rule='chfecha';
 
-		$filter->cliente = new inputField("Cliente", "cod_cli");
-		$filter->cliente->db_name="a.cod_cli";
+		$filter->cliente = new inputField('Cliente', 'cod_cli');
+		$filter->cliente->db_name='a.cod_cli';
 		$filter->cliente->size = 30;
 		$filter->cliente->append($boton);
+		$filter->cliente->rule='required';
 
 		$filter->buttons('reset','search');
 		$filter->build();
+
+		$addtit='';
+		if(!$filter->is_valid()){
+			$mktim  = mktime(0, 0, 0, date('n'), date('j')-200);
+			$addtit.= 'a partir de '.date('d/m/Y', $mktim);
+			$filter->db->where('a.fecha >= ',date('Y-m-d', $mktim));
+		}
 
 		function descheck($numero,$cod_cli,$tipo_doc,$fecha,$abonoreal){
 			$pk=array($numero,$cod_cli,$tipo_doc,$fecha,$abonoreal);
@@ -609,26 +666,63 @@ function elminacenti(cual){
 		}
 
 		function diff($a,$b){
-			return nformat($a-$b);
+			$dif=$a-$b;
+			if($dif>0){
+				$color='blue';
+			}else{
+				$color='red';
+			}
+			return '<b style="color:'.$color.'">'.nformat($a-$b).'</b>';
+		}
+
+		function abon($monto,$abono){
+			if($abono>$monto){
+				$color='orange';
+			}else{
+				$color='black';
+			}
+			return '<b style="color:'.$color.'">'.nformat($abono).'</b>';
+		}
+
+		function tlink($transas){
+			$arr_tran=explode(',',$transas);
+			$arr_tran=array_unique($arr_tran);
+			$atts = array(
+				'width'      => '800',
+				'height'     => '600',
+				'scrollbars' => 'yes',
+				'status'     => 'yes',
+				'resizable'  => 'yes',
+				'screenx'    => '0',
+				'screeny'    => '0'
+			);
+
+			$rt=array();
+			foreach($arr_tran as $transac){
+				$transac=trim($transac);
+				if(!empty($transac))
+					$rt[] = anchor_popup('contabilidad/casi/localizador/transac/procesar/'.$transac, $transac, $atts);
+			}
+			return implode(', ',$rt);
 		}
 
 		$uri1 = anchor('supervisor/mantenimiento/itclinconsis/<str_replace>/|:slach:|<#cod_cli#></str_replace>/<#numero#>/<#tipo_doc#>','<#cod_cli#>');
 		$uri2 = anchor('supervisor/mantenimiento/ajustar/<#cod_cli#>','Ajustar Saldo');
 
-		$grid = new DataGrid('Lista de Clientes');
-		$grid->use_function('descheck','diff');
+		$grid = new DataGrid('Lista de Clientes'.$addtit);
+		$grid->use_function('descheck','diff','abon','tlink');
 		$grid->per_page = 15;
 		$grid->use_function('str_replace');
 
 		$grid->column_orderby('Cliente'        ,$uri1     ,'cod_cli');
 		$grid->column_orderby('Nombre'         ,'nombre'  ,'nombre');
-		$grid->column_orderby('transac'        ,'transac' ,'transac');
+		$grid->column('Transac. (SIN CRUC)'   ,'<tlink><#transac#>, <#transas#></tlink>');
 		$grid->column_orderby('Fecha'          ,'<dbdate_to_human><#fecha#></dbdate_to_human>' ,'fecha');
 		$grid->column_orderby('N&uacute;mero'  ,'<#tipo_doc#><#numero#>'    ,'numero');
-		$grid->column_orderby('Monto'          ,'<nformat><#monto#></nformat>'        ,'monto'     ,"align='right'");
-		$grid->column_orderby('Abono Real'     ,'<nformat><#abonoreal#></nformat>'    ,'abonoreal' ,"align='right'");
-		$grid->column_orderby('Abono Inconsis.','<nformat><#inconsist#></nformat>'    ,'inconsist' ,"align='right'");
-		$grid->column('Faltante'               ,'<diff><#abonoreal#>|<#inconsist#></diff>',"align='right'");
+		$grid->column_orderby('Monto'          ,'<nformat><#monto#></nformat>'         ,'monto'     ,"align='right'");
+		$grid->column_orderby('Abono Real'     ,'<abon><#monto#>|<#abonoreal#></abon>' ,'abonoreal' ,"align='right'");
+		$grid->column_orderby('Abono Inconsis.','<nformat><#inconsist#></nformat>'     ,'inconsist' ,"align='right'");
+		$grid->column('Diferencia'             ,'<diff><#abonoreal#>|<#inconsist#></diff>',"align='right'");
 		$grid->column('Ajustar Saldo'          ,'<descheck><#numero#>|<#cod_cli#>|<#tipo_doc#>|<#fecha#>|<#abonoreal#></descheck>',"align=center");
 
 		$grid->build();

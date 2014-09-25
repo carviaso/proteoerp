@@ -1111,7 +1111,7 @@ class gser extends Controller {
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdata/'));
 
-		if ($deployed) {
+		if($deployed){
 			return $grid->deploy();
 		} else {
 			return $grid;

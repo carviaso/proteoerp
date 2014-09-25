@@ -52,6 +52,7 @@ class Sprm extends Controller {
 		$grid->wbotonadd(array('id'=>'imprime'   ,'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir',      'label'=>'Reimprimir Documento', 'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'princheque','img'=>'images/check.png'  , 'alt' => 'Emitir Cheque'   , 'label'=>'Imprimir cheque',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'pago'      ,'img'=>'images/dinero.png' , 'alt' => 'Pago a proveedor', 'label'=>'Pago a proveedor'));
+		//$grid->wbotonadd(array('id'=>'bncpro'    ,'img'=>'images/dinero.png' , 'alt' => 'NC a FC pagada'  , 'label'=>'NC a FC pagada'));
 		$WestPanel = $grid->deploywestp();
 
 
@@ -197,6 +198,14 @@ class Sprm extends Controller {
 			} else {
 				$.prompt("<h1>Por favor Seleccione una Egreso</h1>");
 			}
+		});';
+
+		$bodyscript .= '
+		jQuery("#bncpro").click( function(){
+			$.post("'.site_url($this->url.'ncppro').'/create", function(data){
+				$("#fabono").html(data);
+				$("#fabono").dialog( "open" );
+			});
 		});';
 
 		$bodyscript .= '
@@ -1734,9 +1743,9 @@ class Sprm extends Controller {
 	// Nota de credito a factura pagada
 	//*****************************************
 	function ncppro(){
-		$this->rapyd->load('dataobject','datadetails','dataedit');
+		$this->rapyd->load('dataedit');
 
-		$edit = new Dataedit('Nota de credito a proveedor', 'sprm');
+		$edit = new DataEdit('Nota de credito a proveedor', 'sprm');
 		$edit->on_save_redirect=false;
 
 		$edit->pre_process('insert' , '_pre_ncppro_insert');
@@ -1744,20 +1753,24 @@ class Sprm extends Controller {
 		$edit->pre_process('delete' , '_pre_ncppro_delete');
 		$edit->post_process('insert', '_post_ncppro_insert');
 
-		$edit->cod_prv = new hiddenField('Proveedor','cod_prv');
+		$edit->cod_prv = new inputField('Proveedor','cod_prv');
 		$edit->cod_prv->rule ='max_length[5]';
-		$edit->cod_prv->size =7;
-		$edit->cod_prv->maxlength =5;
+		$edit->cod_prv->size =8;
 
 		$edit->nombre = new inputField('Nombre','nombre');
 		$edit->nombre->type='inputhidden';
 		$edit->nombre->in='cod_prv';
 
+		$edit->numero = new inputField('N&uacute;mero','numero');
+		$edit->numero->rule='max_length[8]';
+		$edit->numero->size =10;
+		$edit->numero->maxlength =8;
+
 		$edit->codigo = new  dropdownField('Motivo', 'codigo');
-		$edit->codigo->option('','Ninguno');
+		$edit->codigo->option('','Seleccionar');
 		$edit->codigo->options('SELECT TRIM(codigo) AS cod, nombre FROM botr WHERE tipo=\'P\' ORDER BY nombre');
 		$edit->codigo->style='width:200px;';
-		$edit->codigo->rule ='condi_required|callback_chobligatipo[NC]';
+		$edit->codigo->rule ='required';
 
 		$edit->fecha = new dateonlyField('Fecha','fecha');
 		$edit->fecha->size =12;
@@ -1778,14 +1791,51 @@ class Sprm extends Controller {
 		$edit->observa2->when=array('show');
 
 		$edit->nfiscal = new inputField('Control F&iacute;scal','nfiscal');
-		$edit->nfiscal->rule='condi_required|callback_chobligatipo[NC]';
+		$edit->nfiscal->rule='required';
 		$edit->nfiscal->size =15;
 		$edit->nfiscal->maxlength =17;
 
 		$edit->serie = new inputField('N&uacute;mero','serie');
-		$edit->serie->rule='condi_required|callback_chobligatipo[NC]';
+		$edit->serie->rule='required';
 		$edit->serie->size =15;
 		$edit->serie->maxlength =17;
+
+		$edit->afecta = new inputField('F.Afectada','afecta');
+		$edit->afecta->rule='required';
+		$edit->afecta->size =15;
+		$edit->afecta->maxlength =12;
+
+		$edit->fecapl = new dateonlyField('Fecha','fecapl');
+		$edit->fecapl->size =12;
+		$edit->fecapl->maxlength =8;
+		$edit->fecapl->type='inputhidden';
+		$edit->fecapl->calendar = false;
+		$edit->fecapl->rule ='chfecha|required';
+
+		$edit->depto = new  dropdownField('Asignar a departamento', 'depto');
+		$edit->depto->option('','Seleccionar');
+		$edit->depto->options('SELECT depto,CONCAT_WS(\'-\',depto,TRIM(descrip)) AS descrip FROM dpto WHERE tipo=\'G\' ORDER BY descrip');
+		$edit->depto->style='width:200px;';
+		$edit->depto->rule ='required';
+
+		$ivas = $this->datasis->ivaplica();
+		$edit->ptasa = new inputField('','ptasa');
+		$edit->ptasa->rule='numeric';
+		$edit->ptasa->type='inputhidden';
+		$edit->ptasa->insertValue=$ivas['tasa'];
+		$edit->ptasa->showformat='decimal';
+
+		$edit->preducida = new inputField('','preducida');
+		$edit->preducida->rule='numeric';
+		$edit->preducida->type='inputhidden';
+		$edit->preducida->insertValue=$ivas['redutasa'];
+		$edit->preducida->showformat='decimal';
+
+		$edit->padicional = new inputField('','padicional');
+		$edit->padicional->rule='numeric';
+		$edit->padicional->type='inputhidden';
+		$edit->padicional->insertValue=$ivas['sobretasa'];
+		$edit->padicional->showformat='decimal';
 
 		//bases de los impuestos
 		$edit->montasa = new inputField('Montasa','montasa');
@@ -1846,12 +1896,35 @@ class Sprm extends Controller {
 		$edit->reteiva->insertValue='0';
 		$edit->reteiva->rule='condi_required|callback_chobligatipo[NC]|positive';
 
+		$edit->monto = new inputField('Total a pagar','monto');
+		$edit->monto->rule='required|max_length[17]|numeric';
+		$edit->monto->css_class='inputnum';
+		$edit->monto->size =19;
+		$edit->monto->maxlength =17;
+		$edit->monto->type='inputhidden';
+
+		//Campos comodines
+		$edit->sprvreteiva = new hiddenField('','sprvreteiva');
+		$edit->aplrete     = new hiddenField('','aplrete');
+		//Fin de los campos comodines
+
 		$edit->tipo_doc= new autoUpdateField('tipo_doc','NC', 'NC');
 		$edit->usuario = new autoUpdateField('usuario' ,$this->secu->usuario(),$this->secu->usuario());
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
 
-		$edit->buttons('add_rel');
+		$arr_ptasa = array();
+		$edit->apltasa = new dropdownField('', 'apltasa');
+		$mSQL='SELECT fecha,tasa,redutasa,sobretasa FROM civa ORDER BY fecha DESC LIMIT 3';
+		$query = $this->db->query($mSQL);
+		foreach ($query->result() as $row){
+			$arr_ptasa[] = array(floatval($row->tasa),floatval($row->redutasa),floatval($row->sobretasa));
+			$edit->apltasa->option($row->fecha,dbdate_to_human($row->fecha));
+		}
+		$edit->apltasa->onchange='chapltasa()';
+		$edit->apltasa->style='width:100px;';
+		$edit->apltasa->rule='required';
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -1863,13 +1936,12 @@ class Sprm extends Controller {
 
 			echo json_encode($rt);
 		}else{
-			$conten['json_ptasa']= json_encode($arr_ptasa);
-			$conten['cana']      = $i;
-			$conten['form']      = & $edit;
-			$conten['title']     = heading('Nota de cr&eacute;dito a factura pagada de proveedor');
-			$conten['por_rete']  = $por_rete;
 
-			$data['content'] = $this->load->view('view_ncppro.php', $conten);
+			$conten['json_ptasa']= json_encode($arr_ptasa);
+			$conten['form']      =& $edit;
+			$conten['title']     = heading('Nota de cr&eacute;dito a factura pagada de proveedor');
+
+			$this->load->view('view_ncppro', $conten);
 		}
 
 	}
@@ -1877,7 +1949,61 @@ class Sprm extends Controller {
 	// Fin Nota de credito a factura pagada
 	//*****************************************
 
+	function _pre_ncppro_insert($do){
 
+		$montasa   = floatval($do->get('montasa'  ));
+		$monredu   = floatval($do->get('monredu'  ));
+		$monadic   = floatval($do->get('monadic'  ));
+		$tasa      = floatval($do->get('tasa'     ));
+		$reducida  = floatval($do->get('reducida' ));
+		$sobretasa = floatval($do->get('sobretasa'));
+		$exento    = floatval($do->get('exento'   ));
+
+		$impuesto= $tasa+$reducida+$sobretasa;
+		$monto   = $montasa+$monredu+$monadic+$tasa+$reducida+$sobretasa+$exento;
+
+		$transac   = $this->datasis->prox_sql('ntransa' ,8);
+		$mcontrol  = $this->datasis->prox_sql('nsprm'   ,8);
+		$mncausado = $this->datasis->prox_sql('ncausado',8);
+
+		$do->rm_get('aplrete');
+		$do->rm_get('sprvrete');
+
+		$do->set('vence'   , $fecha);
+		$do->set('causado' , $mncausado);
+		$do->set('negreso' , '');
+		$do->set('ndebito' , '');
+		$do->set('monto'   , $monto);
+		$do->set('impuesto', $impuesto);
+		$do->set('reten'   , 0 );
+		$do->set('ppago'   , 0 );
+		$do->set('control' , $mcontrol);
+		$do->set('cambio'  , 0 );
+		$do->set('nfiscal' , '') ;
+		$do->set('mora'    , 0 );
+		$do->set('comprob' , '');
+		$do->set('banco'   , '');
+		$do->set('tipo_op' , '');
+		$do->set('numche'  , '');
+		$do->set('benefi'  , '');
+		$do->set('posdata' , '');
+		$do->set('abonos'  , 0);
+		$do->set('fecapl'  ,$fecha);
+		$do->set('fecdoc'  ,$itfecha);
+
+	}
+
+	function _post_ncppro_insert($do){
+		$this->_post_pprv_insert($do);
+	}
+
+	function _pre_ncppro_update($do){
+		return false;
+	}
+
+	function _pre_ncppro_delete($do){
+		return false;
+	}
 
 	//*****************************************
 	// Inicio pago a proveedor
@@ -1946,7 +2072,7 @@ class Sprm extends Controller {
 		$edit->tipo_doc->rule ='enum[AB,NC,AN]|required';
 
 		$edit->codigo = new  dropdownField('Motivo', 'codigo');
-		$edit->codigo->option('','Ninguno');
+		$edit->codigo->option('','Seleccionar');
 		$edit->codigo->options('SELECT TRIM(codigo) AS cod, nombre FROM botr WHERE tipo=\'P\' ORDER BY nombre');
 		$edit->codigo->style='width:200px;';
 		$edit->codigo->rule ='condi_required|callback_chobligatipo[NC]';
@@ -2324,7 +2450,7 @@ class Sprm extends Controller {
 			$conten['title']     = heading("Pago a proveedor: (${proveed}) ${sprv_nombre} ${sprv_rif}");
 			$conten['por_rete']  = $por_rete;
 
-			$data['content'] = $this->load->view('view_pprv.php', $conten);
+			$this->load->view('view_pprv', $conten);
 		}
 	}
 

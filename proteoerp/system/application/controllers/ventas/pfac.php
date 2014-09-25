@@ -51,7 +51,6 @@ class Pfac extends Controller {
 
 		$WestPanel = $grid->deploywestp();
 
-		$grid->setWpAdicional('<div>averr</div>');
 
 		//Panel Central
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );

@@ -39,6 +39,8 @@ class Grcl extends Controller {
 
 		//Botones Panel Izq
 		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+
+
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -154,7 +156,6 @@ class Grcl extends Controller {
 			'search'        => 'false'
 		));
 
-
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('235');
@@ -181,6 +182,24 @@ class Grcl extends Controller {
 
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdata/'));
+
+
+		$grid->setOnSelectRow('
+			function(id){
+				$.post("'.site_url($this->url.'canascli').'/"+encodeURIComponent(id),
+				function(data){
+					var cana=Number(data);
+					var msj ="";
+					if(cana>1){
+						msj = "<b>"+data+"</b> clientes asociados";
+					}else if(cana==1){
+						msj = "<b>"+data+"</b> cliente asociado";
+					}else{
+						msj = "Ning&uacute;n cliente asociado";
+					}
+					$("#ladicional").html("<p style=\'text-align:center;\'>"+msj+"</p>");
+				});
+			}');
 
 		if ($deployed) {
 			return $grid->deploy();
@@ -218,46 +237,46 @@ class Grcl extends Controller {
 		if($oper == 'add'){
 			if(false == empty($data)){
 				$check = $this->datasis->dameval("SELECT count(*) FROM grcl WHERE grupo=".$this->db->escape($data['grupo']));
-				if ( $check == 0 ){
+				if($check == 0){
 					$this->db->insert('grcl', $data);
-					echo "Registro Agregado";
-					logusu('GRCL',"Grupo de Cliente  ".$data['grupo']." INCLUIDO");
-				} else
-					echo "Ya existe un grupo con ese Codigo";
-
-			} else
-				echo "Fallo Agregado!!!";
-
+					echo 'Registro Agregado';
+					logusu('GRCL','Grupo de Cliente '.$data['grupo'].' INCLUIDO');
+				}else{
+					echo 'Ya existe un grupo con ese Codigo';
+				}
+			}else{
+				echo 'Fallo Agregado!!!';
+			}
 		}elseif($oper == 'edit') {
 			$grupo  = $data['grupo'];
-			$grupov = $this->datasis->dameval("SELECT grupo FROM grcl WHERE id=$id");
-			if ( $grupo <> $grupov ){
+			$grupov = $this->datasis->dameval("SELECT grupo FROM grcl WHERE id=${id}");
+			if($grupo <> $grupov){
 				//si no son iguales borra el que existe y cambia
 				$this->db->query("DELETE FROM grcl WHERE grupo=?", array($grupo));
 				$this->db->query("UPDATE scli SET grupo=? WHERE grupo=?", array( $grupo, $grupov ));
 				$this->db->where('id', $id);
 				$this->db->update('grcl', $data);
-				logusu('GRCL',"Grupo Cambiado/Fusionado Nuevo:".$grupo." Anterior: ".$grupov." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
+				logusu('GRCL',"Grupo Cambiado/Fusionado Nuevo:${grupo} Anterior: ${grupov} MODIFICADO");
+				echo 'Grupo Cambiado/Fusionado en clientes';
+			}else{
 				unset($data['grupo']);
 				$this->db->where('id', $id);
 				$this->db->update('grcl', $data);
-				logusu('GRCL',"Grupo de Cliente  ".$grupo." MODIFICADO");
-				echo "Grupo Modificado";
+				logusu('GRCL',"Grupo de Cliente ${grupo} MODIFICADO");
+				echo 'Grupo Modificado';
 			}
 
-		} elseif($oper == 'del') {
-			$grupo = $this->datasis->dameval("SELECT grupo FROM grcl WHERE id=$id");
-			$check = $this->datasis->dameval("SELECT count(*) FROM scli WHERE grupo=".$this->db->escape($grupo));
-			if ($check > 0){
-				echo " El grupo no puede ser eliminado; tiene clientes asociados ";
-			} else {
-				$this->db->simple_query("DELETE FROM grcl WHERE id=$id ");
-				logusu('GRCL',"Grupo de Cliente ".$grupo." ELIMINADO");
-				echo "Grupo Eliminado";
+		}elseif($oper == 'del'){
+			$grupo = $this->datasis->dameval("SELECT grupo FROM grcl WHERE id=${id}");
+			$check = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM scli WHERE grupo=".$this->db->escape($grupo));
+			if($check > 0){
+				echo ' El grupo no puede ser eliminado; tiene clientes asociados ';
+			}else{
+				$this->db->simple_query("DELETE FROM grcl WHERE id=${id}");
+				logusu('GRCL','Grupo de Cliente '.$grupo.' ELIMINADO');
+				echo 'Grupo Eliminado';
 			}
-		};
+		}
 	}
 
 	//******************************************************************
@@ -400,6 +419,15 @@ class Grcl extends Controller {
 		}
 	}
 
+	function canascli($id=null){
+		$id=intval($id);
+		if($id>0){
+			$grupo   = $this->datasis->dameval('SELECT grupo FROM grcl WHERE id='.$id);
+			$dbgrupo = $this->db->escape($grupo);
+			$cana    = intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM scli WHERE grupo='.$dbgrupo));
+			echo $cana;
+		}
+	}
 
 	function instalar(){
 		$campos=$this->db->list_fields('grcl');

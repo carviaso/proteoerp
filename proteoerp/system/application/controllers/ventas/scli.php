@@ -291,8 +291,6 @@ class Scli extends validaciones {
 		$bodyscript .= $this->jqdatagrid->bsfshow( $height = '370', $width = '700' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '300' );
 
-
-
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 		return $bodyscript;

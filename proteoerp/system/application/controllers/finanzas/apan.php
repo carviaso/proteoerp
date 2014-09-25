@@ -214,7 +214,7 @@ class Apan extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 800, modal: true,
+			autoOpen: false, height: 510, width: 800, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
