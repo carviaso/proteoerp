@@ -486,7 +486,7 @@ function elminacenti(cual){
 		$addtit='';
 		if(!$filter->is_valid()){
 			$mktim  = mktime(0, 0, 0, date('n'), date('j')-200);
-			$addtit.= 'a partir de '.date('d/m/Y', $mktim);
+			$addtit.= ' a partir de '.date('d/m/Y', $mktim);
 			$filter->db->where('a.fecha >= ',date('Y-m-d', $mktim));
 		}
 
@@ -541,22 +541,32 @@ function elminacenti(cual){
 			return implode(', ',$rt);
 		}
 
-		$uri1 = anchor('supervisor/mantenimiento/itprinconsis/<str_replace>/|:slach:|<#cod_prv#></str_replace>/<#numero#>/<#tipo_doc#>','<#cod_prv#>');
+		$atts = array(
+			'width'      => '800',
+			'height'     => '600',
+			'scrollbars' => 'yes',
+			'status'     => 'yes',
+			'resizable'  => 'yes',
+			'screenx'    => '0',
+			'screeny'    => '0'
+		);
+
+		$uri1 = anchor_popup('supervisor/mantenimiento/itprinconsis/<str_replace>/|:slach:|<#cod_prv#></str_replace>/<#numero#>/<#tipo_doc#>','<#cod_prv#>',$atts);
 
 		$grid = new DataGrid('Lista de Proveedores'.$addtit);
 		$grid->use_function('descheck','diff','abon','tlink');
 		$grid->per_page = 15;
 		$grid->use_function('str_replace');
 
-		$grid->column_orderby('Proveedor'      ,'cod_prv' ,'cod_prv');
+		$grid->column_orderby('Proveedor'      ,$uri1 ,'cod_prv');
 		$grid->column_orderby('Nombre'         ,'nombre'  ,'nombre');
-		$grid->column('Transac. (NO CRUC)'        ,'<tlink><#transac#>, <#transas#></tlink>');
+		$grid->column('Transac. (NO CRUC)'     ,'<tlink><#transac#>, <#transas#></tlink>');
 		$grid->column_orderby('Fecha'          ,'<dbdate_to_human><#fecha#></dbdate_to_human>' ,'fecha');
 		$grid->column_orderby('N&uacute;mero'  ,'<#tipo_doc#><#numero#>'    ,'numero');
 		$grid->column_orderby('Monto'          ,'<nformat><#monto#></nformat>'        ,'monto'     ,"align='right'");
 		$grid->column_orderby('Abono Real'     ,'<abon><#monto#>|<#abonoreal#></abon>','abonoreal' ,"align='right'");
 		$grid->column_orderby('Abono Inconsis.','<nformat><#inconsist#></nformat>'    ,'inconsist' ,"align='right'");
-		$grid->column('Diferencia'               ,'<diff><#abonoreal#>|<#inconsist#></diff>',"align='right'");
+		$grid->column('Diferencia'             ,'<diff><#abonoreal#>|<#inconsist#></diff>',"align='right'");
 		$grid->column('Ajustar Saldo'          ,'<descheck><#numero#>|<#cod_prv#>|<#tipo_doc#>|<#fecha#>|<#abonoreal#></descheck>',"align=center");
 
 		$grid->build();
@@ -590,20 +600,102 @@ function elminacenti(cual){
 		$this->load->view('view_ventanas', $data);
 	}
 
+	function itprinconsis($proveed='',$numero='',$tipo_doc){
+		$this->datasis->modulo_id('900',1);
+		$this->rapyd->load('datagrid2');
+		$this->rapyd->uri->keep_persistence();
+
+		$atts = array(
+			'width'      => '800',
+			'height'     => '600',
+			'scrollbars' => 'yes',
+			'status'     => 'yes',
+			'resizable'  => 'yes',
+			'screenx'    => '0',
+			'screeny'    => '0'
+		);
+		$url = anchor_popup('contabilidad/casi/localizador/transac/procesar/<#transac#>', '<#transac#>', $atts);
+
+		$select=array('numppro','tipoppro','fecha','abono','tipo_doc','transac');
+		$grid = new DataGrid2('Movimientos derecha');
+		$grid->per_page = 15;
+		$grid->db->select($select);
+		$grid->db->from('itppro');
+		$grid->db->where('cod_prv' ,$proveed );
+		$grid->db->where('tipo_doc',$tipo_doc);
+		$grid->db->where('numero'  ,$numero  );
+
+		$grid->column('Tipo'    ,'tipoppro' );
+		$grid->column('Numero'  ,'numppro'  );
+		$grid->column('Transac.',$url );
+		$grid->column('Fecha'   ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
+		$grid->column('Monto'   ,'<nformat><#abono#></nformat>',"align='right'");
+
+		$grid->totalizar('abono');
+		$grid->build();
+
+		$select=array('numero AS numccli','tipo_doc AS tipoccli','fecha','abono','tipo_doc','cod_cli','transac');
+		$grid2 = new DataGrid2('Movimientos izquierda');
+		$grid2->per_page = 15;
+		$grid2->db->select($select);
+		$grid2->db->from('itccli');
+		$grid2->db->where('cod_cli' ,$proveed );
+		$grid2->db->where('tipoccli',$tipo_doc);
+		$grid2->db->where('numccli' ,$numero  );
+
+		$grid2->column('Tipo'    ,'tipoccli' );
+		$grid2->column('Numero'  ,'numccli'  );
+		$grid2->column('Transac.',$url );
+		$grid2->column('Fecha'   ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
+		$grid2->column('Monto'   ,'<nformat><#abono#></nformat>',"align='right'");
+
+		$grid2->totalizar('abono');
+		$grid2->build();
+		if($grid2->recordCount==0){
+			$grid2->output='';
+		}
+
+		$select=array('b.numero','b.fecha','a.monto','b.transac','b.tipo');
+		$grid3 = new DataGrid2('Cruces');
+		$grid3->per_page = 15;
+		$grid3->db->select($select);
+		$grid3->db->from('itcruc AS a');
+		$grid3->db->join('cruc   AS b','a.numero=b.numero');
+		$grid3->db->like('CONCAT_WS(\'-\',b.proveed,b.cliente)',$proveed);
+		$grid3->db->where('a.onumero',$tipo_doc.$numero);
+		$grid3->db->where('b.tipo LIKE "%P%"');
+		$grid3->column('Tipo'    ,'tipo' );
+		$grid3->column('Numero'  ,'numero'  );
+		$grid3->column('Transac.',$url  );
+		$grid3->column('Fecha'   ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
+		$grid3->column('Monto'   ,'<nformat><#monto#></nformat>',"align='right'");
+		$grid3->totalizar('monto');
+		$grid3->build();
+		if($grid3->recordCount==0){
+			$grid3->output='';
+		}
+
+		$data['content'] = $grid->output.$grid2->output.$grid3->output;
+		$data['title']   = "<h1>Detalle de los Abonos del proveedor:${proveed}</h1>";
+		$data['head']    = $this->rapyd->get_head();
+		$this->load->view('view_ventanas', $data);
+	}
+
 	function clinconsis(){
 		$this->rapyd->load('datafilter','datagrid');
 		$this->rapyd->uri->keep_persistence();
 		$this->datasis->modulo_id('900',1);
 
 		$scli=array(
-		'tabla'   =>'scli',
-		'columnas'=>array(
-		'cliente' =>'C&oacute;digo Cliente',
-		'nombre'  =>'Nombre',
-		'contacto'=>'Contacto'),
-		'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre'),
-		'retornar'=>array('cliente'=>'cod_cli'),
-		'titulo'  =>'Buscar Cliente');
+			'tabla'   =>'scli',
+			'columnas'=>array(
+			'cliente' =>'C&oacute;digo Cliente',
+			'nombre'  =>'Nombre',
+			'contacto'=>'Contacto'),
+			'filtro'  =>array('cliente'=>'C&oacute;digo Cliente','nombre'=>'Nombre'),
+			'retornar'=>array('cliente'=>'cod_cli'),
+			'titulo'  =>'Buscar Cliente'
+		);
 
 		$boton=$this->datasis->modbus($scli);
 
@@ -651,7 +743,7 @@ function elminacenti(cual){
 		$addtit='';
 		if(!$filter->is_valid()){
 			$mktim  = mktime(0, 0, 0, date('n'), date('j')-200);
-			$addtit.= 'a partir de '.date('d/m/Y', $mktim);
+			$addtit.= ' a partir de '.date('d/m/Y', $mktim);
 			$filter->db->where('a.fecha >= ',date('Y-m-d', $mktim));
 		}
 
@@ -700,14 +792,24 @@ function elminacenti(cual){
 			$rt=array();
 			foreach($arr_tran as $transac){
 				$transac=trim($transac);
-				if(!empty($transac))
+				if(!empty($transac)){
 					$rt[] = anchor_popup('contabilidad/casi/localizador/transac/procesar/'.$transac, $transac, $atts);
+				}
 			}
 			return implode(', ',$rt);
 		}
 
-		$uri1 = anchor('supervisor/mantenimiento/itclinconsis/<str_replace>/|:slach:|<#cod_cli#></str_replace>/<#numero#>/<#tipo_doc#>','<#cod_cli#>');
-		$uri2 = anchor('supervisor/mantenimiento/ajustar/<#cod_cli#>','Ajustar Saldo');
+		$atts = array(
+			'width'      => '800',
+			'height'     => '600',
+			'scrollbars' => 'yes',
+			'status'     => 'yes',
+			'resizable'  => 'yes',
+			'screenx'    => '0',
+			'screeny'    => '0'
+		);
+
+		$uri1 = anchor_popup('supervisor/mantenimiento/itclinconsis/<str_replace>/|:slach:|<#cod_cli#></str_replace>/<#numero#>/<#tipo_doc#>','<#cod_cli#>', $atts);
 
 		$grid = new DataGrid('Lista de Clientes'.$addtit);
 		$grid->use_function('descheck','diff','abon','tlink');
@@ -840,30 +942,81 @@ function elminacenti(cual){
 
 	function itclinconsis($cliente='',$numero='',$tipo_doc){
 		$this->datasis->modulo_id('900',1);
-		$this->rapyd->load("datagrid2");
+		$this->rapyd->load('datagrid2');
 		$this->rapyd->uri->keep_persistence();
 
-		$uri = anchor('supervisor/mantenimiento/clinconsis','Regresar');
+		$atts = array(
+			'width'      => '800',
+			'height'     => '600',
+			'scrollbars' => 'yes',
+			'status'     => 'yes',
+			'resizable'  => 'yes',
+			'screenx'    => '0',
+			'screeny'    => '0'
+		);
+		$url = anchor_popup('contabilidad/casi/localizador/transac/procesar/<#transac#>', '<#transac#>', $atts);
 
-		$select=array('numccli','tipoccli','fecha','abono','tipo_doc','cod_cli');
-		$grid = new DataGrid2($uri);
+		$select=array('numccli','tipoccli','fecha','abono','tipo_doc','cod_cli','transac');
+		$grid = new DataGrid2('Movimientos derecha');
 		$grid->per_page = 15;
 		$grid->db->select($select);
 		$grid->db->from('itccli');
-		$grid->db->where('cod_cli',$cliente);
+		$grid->db->where('cod_cli' ,$cliente );
 		$grid->db->where('tipo_doc',$tipo_doc);
-		$grid->db->where('numero',$numero);
+		$grid->db->where('numero'  ,$numero  );
 
-		$grid->column('Numero' ,'numccli' );
-		$grid->column('Tipo'   ,'tipoccli' );
-		$grid->column('Fecha'  ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
-		$grid->column('Monto'  ,'<nformat><#abono#></nformat>',"align='right'");
+		$grid->column('Tipo'    ,'tipoccli' );
+		$grid->column('Numero'  ,'numccli'  );
+		$grid->column('Transac.',$url );
+		$grid->column('Fecha'   ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
+		$grid->column('Monto'   ,'<nformat><#abono#></nformat>',"align='right'");
 
 		$grid->totalizar('abono');
 		$grid->build();
 
-		$data['content'] = $grid->output;
-		$data['title']   = "<h1>Detalle de los Abonos del cliente:$cliente</h1>";
+		$select=array('numero AS numccli','tipo_doc AS tipoccli','fecha','abono','tipo_doc','cod_cli','transac');
+		$grid2 = new DataGrid2('Movimientos izquierda');
+		$grid2->per_page = 15;
+		$grid2->db->select($select);
+		$grid2->db->from('itccli');
+		$grid2->db->where('cod_cli' ,$cliente );
+		$grid2->db->where('tipoccli',$tipo_doc);
+		$grid2->db->where('numccli' ,$numero  );
+
+		$grid2->column('Tipo'    ,'tipoccli' );
+		$grid2->column('Numero'  ,'numccli'  );
+		$grid2->column('Transac.',$url );
+		$grid2->column('Fecha'   ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
+		$grid2->column('Monto'   ,'<nformat><#abono#></nformat>',"align='right'");
+
+		$grid2->totalizar('abono');
+		$grid2->build();
+		if($grid2->recordCount==0){
+			$grid2->output='';
+		}
+
+		$select=array('b.numero','b.fecha','a.monto','b.transac','b.tipo');
+		$grid3 = new DataGrid2('Cruces');
+		$grid3->per_page = 15;
+		$grid3->db->select($select);
+		$grid3->db->from('itcruc AS a');
+		$grid3->db->join('cruc   AS b','a.numero=b.numero');
+		$grid3->db->like('CONCAT_WS(\'-\',b.proveed,b.cliente)',$cliente);
+		$grid3->db->where('a.onumero',$tipo_doc.$numero);
+		$grid3->db->where('b.tipo LIKE "%C%"');
+		$grid3->column('Tipo'    ,'tipo' );
+		$grid3->column('Numero'  ,'numero'  );
+		$grid3->column('Transac.',$url  );
+		$grid3->column('Fecha'   ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
+		$grid3->column('Monto'   ,'<nformat><#monto#></nformat>',"align='right'");
+		$grid3->totalizar('monto');
+		$grid3->build();
+		if($grid3->recordCount==0){
+			$grid3->output='';
+		}
+
+		$data['content'] = $grid->output.$grid2->output.$grid3->output;
+		$data['title']   = "<h1>Detalle de los Abonos del cliente:${cliente}</h1>";
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
