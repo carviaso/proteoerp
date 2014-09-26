@@ -1093,7 +1093,7 @@ class Sprv extends Controller {
 		$edit->email  = new inputField('Email', 'email');
 		$edit->email->rule = 'trim|valid_email';
 		$edit->email->size =29;
-		$edit->email->maxlength =30;
+		$edit->email->maxlength =100;
 		$edit->email->title = 'Correo electr&oacute;nico';
 
 		$edit->url = new inputField('Sitio Web', 'url');
