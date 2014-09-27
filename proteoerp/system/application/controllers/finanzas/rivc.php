@@ -760,7 +760,7 @@ class Rivc extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: rivcadd, editfunc: rivcedit, delfunc: rivcdel, viewfunc: rivcshow");
+		$grid->setBarOptions('addfunc: rivcadd, editfunc: rivcedit, delfunc: rivcdel, viewfunc: rivcshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));

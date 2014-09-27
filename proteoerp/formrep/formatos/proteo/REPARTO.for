@@ -197,7 +197,9 @@ foreach ($detalle2 AS $items){ $i++;
 		}
 	} while ($clinea);
 }
-echo sprintf($pie_final,nformat($canat ),nformat($pesot));
+if($i>0){
+	echo sprintf($pie_final,nformat($canat ),nformat($pesot));
+}
 if(count($detalle2)==$maxlin)
 	echo '<div style="page-break-before: always;"></div>';
 

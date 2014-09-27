@@ -5,9 +5,9 @@ if(count($parametros)==0) show_error('Faltan parametros');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
 
-$mSQL = "SELECT If(a.referen='E','Contado',IF( a.referen='C','Credito',IF(a.referen='M','Mixto','Pendiente'))) AS referen,
+$mSQL = "SELECT IF(a.referen='E','Contado',IF( a.referen='C','Credito',IF(a.referen='M','Mixto','Pendiente'))) AS referen,
 	a.tipo_doc,a.numero,a.cod_cli,a.nombre,a.rifci,CONCAT_WS('',TRIM(c.dire11),TRIM(c.dire12)) AS direccion,a.factura,a.fecha,a.vence,a.vd,
-	a.iva,a.totals,a.totalg, a.exento,c.nomfis,b.nombre AS nomvend,tipo_doc, a.numero,a.peso,c.telefono,c.formap,a.referen AS condi
+	a.iva,a.totals,a.totalg, a.exento,TRIM(c.nomfis) AS nomfis,b.nombre AS nomvend,tipo_doc, a.numero,a.peso,c.telefono,c.formap,a.referen AS condi
 FROM sfac a
 JOIN scli AS c ON a.cod_cli=c.cliente
 LEFT JOIN vend b ON a.vd=b.vendedor
@@ -36,11 +36,14 @@ $factura  = ($tipo_doc=='D')? $row->factura :'';
 $base     = nformat($row->totals - $row->exento );
 $exento   = nformat($row->exento);
 $vd       = str_pad($row->vd,4);
+$ivaaplica= $this->datasis->ivaplica($row->fecha);
+$afecta   = ($tipo_doc=='D')? 'Afecta: '.$factura : '';
 
 $condi = $row->condi;
 $formap= intval($row->formap);
 if($formap <= 1 && $condi=='C'){
 	$vence    = $fecha;
+	$referen = 'CONTADO';
 }
 
 $dd=explode("\n",$direccion);
@@ -74,21 +77,17 @@ WHERE numa=$dbnumero AND tipoa=$dbtipo_doc";
 $mSQL_2   = $this->db->query($mSQL);
 $detalle  = $mSQL_2->result();
 $art_cana = $mSQL_2->num_rows();
-$separador='Ä';
+$separador=chr(196);
 
 //************************
 //     Encabezado
 //************************
 
 $encabezado  = "\n\n\n\n\n";
-$encabezado .=" Nombre   : ".chr(15).str_pad($this->us_ascii($nombre),69).chr(18).str_pad($documento.'    :',13,' ',0).chr(15).chr(14).$numero.chr(18)."\n";
-$encabezado .=" RIF/C.I. : ".str_pad("${rifci}",12)."Vend: ${vd} Vence :$vence FECHA      :${fecha}\n";
-$encabezado .=" Direccion: ".chr(15).str_pad($this->us_ascii($direc0.$direc1),66).chr(18);
-if($tipo_doc=='D'){
-	$encabezado .=' Afecta: '.$factura;
-}
-$encabezado .= "\n";
-$encabezado .="     Telf.: ".str_pad($telefono,40).chr(14).$referen.CHR(15).CHR(18)."\n";
+$encabezado .=" Nombre   :".chr(15).str_pad("(${cod_cli}) ".$this->us_ascii($nombre),70).chr(18).str_pad($documento,16,' ',0).':'.chr(15).chr(14).$numero.chr(18)."\n";
+$encabezado .=" RIF/C.I. :".str_pad("${rifci}",16)."   RUTA: ${vd}   VENCE :$vence FECHA:${fecha}\n";
+$encabezado .=" Direccion:".chr(15).str_pad($this->us_ascii($direc0.$direc1),70).chr(18)."\n";
+$encabezado .="     Telf.:".str_pad($telefono,34).chr(14).$referen.CHR(15).CHR(18)." ${afecta}\n";
 // Fin  Encabezado
 
 //************************
@@ -104,10 +103,11 @@ $encabezado_tabla .= str_pad('', 80, $separador)."\n";
 //************************
 $pie_final  = CHR(18).str_pad('', 80, $separador)."\n";
 $pie_final .= " Peso: <----------->".str_pad('MONTO EXENTO O EXONERADO: ',                   44,' ',0).chr(15).chr(14).str_pad($exento , 13,' ',0).chr(18)."\n";
-$pie_final .= str_pad('BASE IMPONIBLE SEGUN ALICUOTA DEL 12%: ',      64,' ',0).chr(15).chr(14).str_pad($base,    13,' ',0).chr(18)."\n";
-$pie_final .= str_pad('MONTO TOTAL DEL IMPUESTO SEGUN ALICUOTA 12%: ',64,' ',0).chr(15).chr(14).str_pad($impuesto,13,' ',0).chr(18)."\n";
-$pie_final .= str_pad('VALOR TOTAL DE LA VENTA DE LOS BIENES: ' ,     64,' ',0).chr(15).chr(14).str_pad($gtotal,  13,'*',0).chr(18)."\n";
-$pie_final .= str_pad('', 80, $separador)."\n\n\n\n\n";
+$pie_final .= str_pad('BASE IMPONIBLE SEGUN ALICUOTA DEL '.nformat($ivaaplica['tasa'],2).'%: ',      64,' ',0).chr(15).chr(14).str_pad($base,    13,' ',0).chr(18)."\n";
+$pie_final .= str_pad('MONTO TOTAL DEL IMPUESTO SEGUN ALICUOTA '.nformat($ivaaplica['tasa'],2).'%: ',64,' ',0).chr(15).chr(14).str_pad($impuesto,13,' ',0).chr(18)."\n";
+$pie_final .= str_pad('VALOR TOTAL DE LA VENTA DE LOS BIENES: ' ,     64,' ',0).chr(15).chr(14).str_pad($gtotal,  13,' ',0).chr(18)."\n";
+$pie_final .= substr(str_pad('FAVOR EMITIR CHEQUE A NOMBRE DE '.$this->datasis->traevalor('TITULO1'), 80, ' ', STR_PAD_BOTH),0,80);
+$pie_final .= "\n\n\n\n\n";
 
 $pie_continuo   = str_pad('', 80, $separador)."\n";
 $pie_continuo  .= '  CONTINUA...'."\n";
@@ -183,4 +183,5 @@ for(1;$lineas<$maxlin;$lineas++){
 	echo "\n";
 }
 echo str_replace('<----------->', str_pad(nformat($tpeso), 13), $pie_final);
+echo "\n";
 ?>

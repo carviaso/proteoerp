@@ -48,7 +48,7 @@ class Reparto extends Controller {
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
 
-		$grid->wbotonadd(array('id'=>'agregaf', 'img'=>'images/databaseadd.png', 'alt'=>'Agregar Factura',      'label'=>'Agregar Facturas',     'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'agregaf', 'img'=>'images/databaseadd.png', 'alt'=>'Gestionar Factura',    'label'=>'Gestionar Facturas',   'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'cargard', 'img'=>'images/camion.png',      'alt'=>'Cargar Vehiculo',      'label'=>'Cargar Vehiculo',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'entrega', 'img'=>'images/acuerdo.png',     'alt'=>'Entregado al Cliente', 'label'=>'Entregado al Cliente', 'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png',     'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
@@ -273,20 +273,29 @@ class Reparto extends Controller {
 
 		$bodyscript .= '
 		function repartoedit(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				if ( ret.tipo == "P"){
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				if(ret.tipo == "P"){
 					mId = id;
 					$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 						$("#fedita").html(data);
 						$("#fedita").dialog( "open" );
 					});
-				} else {
+				}else{
 					$.promp("<h1>No puede modificar un Reparto ya Cargado</h1>");
 				}
-			} else {
+			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+		$bodyscript .= '
+		function incorporar(id,iid){
+			if(id>0 && iid>0){
+				$.post("'.site_url($this->url.'incorporar/').'/"+id+"/"+iid, function(data){
+					$.prompt(data);
+				});
 			}
 		};';
 
@@ -301,13 +310,13 @@ class Reparto extends Controller {
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);  //Por Defecto
 
 		// Dialogo fedita
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, "300", "550" );  //Por Defecto
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '300', '550' );  //Por Defecto
 
 		// Dialogo fshow
-		$bodyscript .= $this->jqdatagrid->bsfshow( "250", "500" );  //Por Defecto
+		$bodyscript .= $this->jqdatagrid->bsfshow( '250', '500' );  //Por Defecto
 
 		// Dialogo fborra
-		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, "300", "400" );  //Por Defecto
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );  //Por Defecto
 
 		$bodyscript .= '});';
 
@@ -320,47 +329,69 @@ class Reparto extends Controller {
 	// Cambia Tipo de Reparto
 	//
 	function cambiatipo(){
-		$id    = $this->input->post('mid');
+		$id    = intval($this->input->post('mid'));
 		$fecha = human_to_dbdate($this->input->post('fecha'));
+		$hoy   = intval(date('Ymd'));
+		$fc    = intval(str_replace('-','',$fecha));
+
 		$oper  = $this->input->post('oper');
-		if ( $oper == 'carga' ){
-			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=$id");
-			if ($tipo == 'P') {
-				$this->db->where("id", $id);
-				$this->db->update('reparto', array( "tipo" => 'C', "carga" => $fecha ) );
-				echo "Guardada ";
-			} else
-				echo "No esta Pendiente";
-
-		} elseif ( $oper == 'entrega' ){
-			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=$id");
-			if ($tipo == 'C') {
-				$this->db->where("id", $id);
-				$this->db->update('reparto', array( "tipo" => 'E', "entregado" => $fecha ) );
-				echo "Guardada ";
-			} else
-				echo "No esta Cargada";
-
-		} elseif ( $oper == 'cierre' ){
-			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=$id");
-			if ($tipo == 'E') {
-				$this->db->where("id", $id);
-				$this->db->update('reparto', array( "tipo" => 'F', "retorno" => $fecha ) );
-				$entrega = $this->datasis->dameval("SELECT entregado FROM reparto WHERE id=$id");
-				$this->db->query("UPDATE sfac SET entregado='".$entrega."' WHERE reparto=$id");
-				echo "Guardada ";
-			} else
-				echo "No esta Entregada";
-
-		} elseif ( $oper == 'anular' ){
-			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=$id");
-			if ($tipo != 'F') {
-				$this->db->where("id", $id);
-				$this->db->update('reparto', array( "tipo" => 'A' ) );
-				$this->db->query("UPDATE sfac SET entregado='0', reparto=0 WHERE reparto=$id");
-				echo "Reparto Eliminado ";
-			} else
-				echo "Reparto ya finaliado no se puede anular";
+		if($oper == 'carga'){
+			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
+			if($tipo == 'P'){
+				if($fc>$hoy){
+					echo 'No puede cargar a una fecha futura';
+				}else{
+					$cana=intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM sfac WHERE reparto='.$id));
+					if($cana>0){
+						$this->db->where('id', $id);
+						$this->db->update('reparto', array( 'tipo' => 'C', 'carga' => $fecha ) );
+						echo 'Guardada';
+					}else{
+						echo 'No puede cargar un reparto sin facturas asociadas';
+					}
+				}
+			}else{
+				echo 'No esta Pendiente';
+			}
+		}elseif($oper == 'entrega'){
+			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
+			if($tipo == 'C'){
+				if($fc>$hoy){
+					echo 'No puede cargar a una fecha futura';
+				}else{
+					$this->db->where('id', $id);
+					$this->db->update('reparto', array('tipo' => 'E', 'entregado' => $fecha));
+					echo 'Guardada';
+				}
+			}else{
+				echo 'No esta Cargada';
+			}
+		}elseif($oper == 'cierre'){
+			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
+			if($tipo == 'E'){
+				if($fc>$hoy){
+					echo 'No puede cargar a una fecha futura';
+				}else{
+					$this->db->where('id', $id);
+					$this->db->update('reparto', array('tipo' => 'F', 'retorno' => $fecha));
+					$entrega  = $this->datasis->dameval("SELECT entregado FROM reparto WHERE id=${id}");
+					$dbentrega= $this->db->escape($entrega);
+					$this->db->query("UPDATE sfac SET entregado=${dbentrega} WHERE reparto=${id}");
+					echo 'Guardada';
+				}
+			}else{
+				echo 'No esta Entregada';
+			}
+		}elseif($oper == 'anular'){
+			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
+			if($tipo != 'F'){
+				$this->db->where('id', $id);
+				$this->db->update('reparto', array('tipo' => 'A'));
+				$this->db->query("UPDATE sfac SET entregado=0, reparto=0 WHERE reparto=${id}");
+				echo 'Reparto Eliminado';
+			}else{
+				echo 'Reparto ya finaliado no se puede anular';
+			}
 		}
 	}
 
@@ -369,6 +400,12 @@ class Reparto extends Controller {
 	// Formato de la ventana
 	//
 	function factuforma( $id = 0 ){
+		$id = intval($id);
+		$reg  = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=${id}");
+		if(empty($reg)){
+			echo 'Reparto inexistente';
+			return false;
+		}
 		$msalida = '<script type="text/javascript">'."\n";
 		$msalida .= 'var mid='.$id.";\n";
 
@@ -406,36 +443,44 @@ class Reparto extends Controller {
 
 		function fsele(el, val, opts){
 			var meco=\'<div><img src="'.base_url().'images/circuloverde.png" border="0" /></div>\';
-			if ( el == "0" ){
+			if(el == "0"){
 				meco=\'<div>&nbsp;</div>\';
 			}
 			return meco;
 		}
 
-
 		function pasa(){
+			var capacidad='.$reg['capacidad'].';
 			var id = $("#bpos1").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				$.post("'.site_url($this->url.'agregaf').'/"+mid+"/"+id, function(data){
 					var json = JSON.parse(data);
-					$("#totpeso").html(json.peso);
-					$("#totcana").html(json.cana);
+					$("#totpeso").text(nformat(json.peso    ,2));
+					$("#totcana").text(nformat(json.cantidad,2));
 					$("#bpos1").trigger("reloadGrid");
+					if(json.peso>capacidad){
+						$("#sobrepeso").text(nformat(json.peso-capacidad,2));
+						$("#sobrepeso").css("color","#FF2C14");
+					}else{
+						$("#sobrepeso").text(nformat(0,2));
+						$("#sobrepeso").css("color","black");
+					}
 				});
-
 			}
 		}
 		';
 
-		$peso = $this->datasis->dameval("SELECT SUM(peso) FROM sfac WHERE peso IS NOT NULL AND reparto=$id");
-		if( !$peso ) $peso = "0.00";
+		$peso = floatval($this->datasis->dameval("SELECT SUM(peso) AS peso FROM sfac WHERE peso IS NOT NULL AND reparto=${id}"));
+		if(!$peso) $peso = 0;
 
-		$cana = $this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE peso IS NOT NULL AND reparto=$id");
-		if( !$cana ) $cana = "0.00";
+		$cana = floatval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfac WHERE peso IS NOT NULL AND reparto=${id}"));
+		if(!$cana) $cana = 0;
 
-		$reg  = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=$id");
-		$msalida .= "\n</script>\n";
+		$msalida .= '</script>';
+		$capacidad= floatval($reg['capacidad']);
 
+		$sobrepeso=($peso>$capacidad)? $peso-$capacidad:0;
+		$sobrecolo=($peso>$capacidad)? '#FF2C14':'black';
 		$msalida .= "<table width='100%'><tr><td>
 		<div class=\"tema1\"><table id=\"bpos1\"></table></div>
 		<div id='pbpos1'></div>\n
@@ -443,21 +488,22 @@ class Reparto extends Controller {
 		<p style='background:#ABE278;font-size:10pt;text-align:left;'>Para agregar o quitar facturas haga doble click sobre las mismas</p>\n
 		<table width='100%' align='center'>
 			<tr>
-				<td bgcolor='#DFDFDF'>VEHICULO</td>
-			</tr>
-				<td style='font-size:10pt;font-weight:bold;'>".$reg['descrip']." ".$reg['placa']."</td>
-			</tr>
+				<td bgcolor='#DFDFDF'>VEH&Iacute;CULO</td>
+			</tr><tr>
+				<td style='font-size:10pt;font-weight:bold;'>".$reg['descrip'].' '.$reg['placa']."</td>
+			</tr><tr>
 				<td bgcolor='#DFDFDF'>CAPACIDAD Kg.</td>
-			</tr>
-				<tr><td align='center' style='font-size:14pt;font-weight:bold;'>".$reg['capacidad']."</td>
+			</tr><tr>
+				<td align='center' style='font-size:14pt;font-weight:bold;'>".nformat($reg['capacidad'])."
+				<p id='sobrepeso' title='Sobrepeso' style='text-align:center;font-size:0.7em;color:${sobrecolo}'>".nformat($sobrepeso)."</p>
+				</td>
 			</tr>
 		</table>
-		<br><br>
 		<table width='100%' align='center'>
 			<tr>
-				<td bgcolor='#DFDFDF'>TOTAL SELECCION</td>
+				<td bgcolor='#DFDFDF'>TOTAL SELECCI&Oacute;N</td>
 			</tr><tr>
-				<td align='center' style='font-size:14pt;font-weight:bold;'><div id='totpeso'>".$peso."</div></td>
+				<td align='center' style='font-size:14pt;font-weight:bold;'><span id='totpeso'>".nformat($peso)."</span></td>
 			</tr>
 		</table>
 		<br><br>
@@ -465,7 +511,7 @@ class Reparto extends Controller {
 			<tr>
 				<td bgcolor='#DFDFDF'>TOTAL FACTURAS</td>
 			</tr><tr>
-				<td align='center' style='font-size:14pt;font-weight:bold;'><div id='totcana'>".$cana."</div></td>
+				<td align='center' style='font-size:14pt;font-weight:bold;'><span id='totcana'>".nformat($cana)."</span></td>
 			</tr>
 		</table>
 		</td></tr>
@@ -481,11 +527,13 @@ class Reparto extends Controller {
 	function agregaf($reparto, $factura){
 		$dbfactura= $this->db->escape($factura);
 		$dbreparto= $this->db->escape($reparto);
-		$actual   = $this->datasis->dameval("SELECT reparto FROM sfac WHERE id=${dbfactura}");
+		$actual   = intval($this->datasis->dameval("SELECT reparto FROM sfac WHERE id=${dbfactura}"));
 		if($actual == 0){
 			$mSQL = "UPDATE sfac SET reparto=${dbreparto} WHERE id=${dbfactura}";
 			$this->db->query($mSQL);
 			$msj = 'Factura Agregada';
+		}elseif($actual!=$reparto){
+			$msj = 'Factura Agregada en otro despacho';
 		}else{
 			$mSQL = "UPDATE sfac SET reparto=0 WHERE id=${dbfactura}";
 			$this->db->query($mSQL);
@@ -493,13 +541,18 @@ class Reparto extends Controller {
 		}
 		$row = $this->datasis->damereg("SELECT SUM(peso) peso, COUNT(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=${dbreparto}");
 
-		$peso = $row['peso'];
-		$cana = $row['cana'];
+		$peso = floatval($row['peso']);
+		$cana = floatval($row['cana']);
 
 		$this->db->where('id',$reparto);
 		$this->db->update('reparto',array('peso'=>$row['peso'], 'facturas'=>$row['cana']) );
+		$rt=array(
+			'mensaje' =>$msj,
+			'peso'    =>$peso,
+			'cantidad'=>$cana
+		);
 
-		echo '{ "mensaje": "'.$msj.'", "peso": "'.$peso.'", "cantidad": "'.$cana.'"  }';
+		echo json_encode($rt);
 
 	}
 
@@ -685,26 +738,33 @@ class Reparto extends Controller {
 
 		$grid->setOnSelectRow('
 			function(id){
+				$("#leliminados").remove();
+				$("#ladicional").text("");
 				if (id){
-					var ret    = $(gridId1).getRowData(id);
+					var ret = $(gridId1).getRowData(id);
 					jQuery(gridId2).jqGrid("setGridParam",{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
 					jQuery(gridId2).trigger("reloadGrid");
-					if ( ret.tipo == \'P\' ) {
+					if(ret.tipo == \'P\' ){
 						$("#agregaf").show();
 						$("#cargard").show();
 						$("#entrega").hide();
 						$("#cerrard").hide();
-					} else if ( ret.tipo == \'C\' ) {
+					}else if( ret.tipo == \'C\'){
 						$("#agregaf").hide();
 						$("#cargard").hide();
 						$("#entrega").show();
 						$("#cerrard").hide();
-					} else if ( ret.tipo == \'E\' ) {
+					}else if( ret.tipo == \'E\'){
 						$("#agregaf").hide();
 						$("#cargard").hide();
 						$("#entrega").hide();
 						$("#cerrard").show();
-					} else if ( ret.tipo == \'F\' || ret.tipo == \'A\' ) {
+						$("#ladicional").text("Para desincorporar una factura no entregada haga doble click sobre la factura a eliminar.");
+						$.post("'.site_url($this->url.'eliminadas').'/"+id, function(data){
+							$("#ladicional").after(data);
+						});
+
+					}else if( ret.tipo == \'F\' || ret.tipo == \'A\'){
 						$("#agregaf").hide();
 						$("#cargard").hide();
 						$("#entrega").hide();
@@ -720,7 +780,9 @@ class Reparto extends Controller {
 				}else if(aData.tipo =="E"){
 					$(this).jqGrid( "setCell", rid, "tipo","", {color:"#FFFFFF", background:"#2F3CAD" });
 				}else if(aData.tipo =="C"){
-					$(this).jqGrid( "setCell", rid, "tipo","", {color:"#FFFFFF", background:"#FFDD00" });
+					$(this).jqGrid( "setCell", rid, "tipo","", {color:"black", background:"#FFDD00" });
+				}else if(aData.tipo =="A"){
+					$(this).jqGrid( "setCell", rid, "tipo","", {color:"#FFFFFF", background:"#FF2C14" });
 				}
 			}'
 		);
@@ -736,6 +798,7 @@ class Reparto extends Controller {
 		$grid->setSearch( $this->datasis->sidapuede('REPARTO','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
+		$grid->setOndblClickRow('');
 
 		$grid->setBarOptions('addfunc: repartoadd, editfunc: repartoedit, delfunc: repartodel, viewfunc: repartoshow');
 
@@ -780,48 +843,13 @@ class Reparto extends Controller {
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM reparto WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('reparto', $data);
-					echo "Registro Agregado";
+			echo 'deshabilitado';
+		}elseif($oper == 'edit') {
+			echo 'deshabilitado';
 
-					logusu('REPARTO',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM reparto WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM reparto WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE reparto SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("reparto", $data);
-				logusu('REPARTO',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('reparto', $data);
-				logusu('REPARTO',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM reparto WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM reparto WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->query("DELETE FROM reparto WHERE id=$id ");
-				logusu('REPARTO',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+		}elseif($oper == 'del') {
+			echo 'deshabilitado';
+		}
 	}
 
 	//******************************************************************
@@ -989,7 +1017,6 @@ class Reparto extends Controller {
 			}
 		');
 
-
 		$grid->setShrinkToFit('false');
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdatait/'));
@@ -1004,25 +1031,81 @@ class Reparto extends Controller {
 		}
 	}
 
+	function eliminadas($id){
+		$id=intval($id);
+		if($id>0){
+			$elim  = $this->datasis->dameval('SELECT eliminadas FROM reparto WHERE id='.$id);
+			$real  = 0;
+			$arr_e = explode(',',$elim);
+			$arr_e = array_unique($arr_e);
+			if(count($arr_e)>0){
+				$rt = '<table id="leliminados" border="1" align="center">';
+				$rt.= '<tr><th colspan="2">Facturas Desincorporadas</th></tr>';
+				$rt.= '<tr><th>N&uacute;mero</th><th>Reparto</th></tr>';
+				foreach($arr_e as $iid){
+					$iid=intval($iid);
+					if($iid>0){
+						$row=$this->datasis->damerow('SELECT numero,reparto FROM sfac WHERE id='.$iid);
+
+						if(!empty($row) && intval($row['reparto'])!=$id){ $real++;
+							$rep = (intval($row['reparto'])>0)? $row['reparto'] : "<a href='#' onclick='incorporar(${id},${iid});'>Reincorporar</aa>";
+							$rt .= '<tr><td>'.$row['numero'].'</td><td style="text-align:right;">'.$rep.'</td></tr>';
+						}
+					}
+				}
+				$rt.= '</table>';
+				if($real>0) echo $rt;
+			}
+		}
+	}
 
 	function quita($id){
-		$dbid=$this->db->escape($id);
+		$dbid=intval($id);
 		$reparto  = $this->datasis->dameval("SELECT reparto FROM sfac    WHERE id=${dbid}");
 		$dbreparto= $this->db->escape($reparto);
 		$tipo     = $this->datasis->dameval("SELECT tipo    FROM reparto WHERE id=${dbreparto}");
 		if($tipo == 'E'){
 			$this->db->where('id',$id);
-			$this->db->update('sfac',array( 'reparto' => 0 ));
-			$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS('',eliminadas,".$reparto.") WHERE id=${dbreparto}");
+			$this->db->update('sfac',array('reparto' => 0));
+			$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS(',',eliminadas,${dbreparto}) WHERE id=${dbreparto}");
 
-			$row = $this->datasis->damereg("SELECT SUM(peso) peso, COUNT(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=${dbreparto}");
-			$peso = $row['peso'];
+			$row = $this->datasis->damereg("SELECT SUM(peso) AS peso, COUNT(*) AS cana FROM sfac WHERE peso IS NOT NULL AND reparto=${dbreparto}");
 
 			$this->db->where('id',$reparto);
-			$this->db->update('reparto',array('peso'=>$row['peso'], 'facturas'=>$row['cana']) );
+			$this->db->update('reparto',array('peso'=>floatval($row['peso']), 'facturas'=>$row['cana']) );
 
+			logusu('reparto',"Retiro factura id: ${id} reparto ${reparto}");
 			echo 'Factura retirada';
+		}
+	}
 
+	function incorporar($idreparto,$idsfac){
+
+		$idsfac   = intval($idsfac);
+		$idreparto= intval($idreparto);
+		$row      = $this->datasis->damerow("SELECT tipo,eliminadas FROM reparto WHERE id=${idreparto}");
+		if(empty($row)){
+			return false;
+		}
+		$repartoesta=intval($this->datasis->dameval("SELECT reparto FROM sfac WHERE id=${idsfac}"));
+		if($repartoesta!=0){
+			echo "La factura ya fue incorpoada en otro reparto (${repartoesta})";
+			return false;
+		}
+		$pos=strpos($row['eliminadas'],"${idsfac}");
+		if($row['tipo'] == 'E' && $pos!==false){
+			$this->db->where('id',$idsfac);
+			$this->db->update('sfac',array('reparto' => $idreparto));
+
+			$row = $this->datasis->damerow("SELECT SUM(peso) AS peso, COUNT(*) AS cana FROM sfac WHERE peso IS NOT NULL AND reparto=${idreparto}");
+
+			$this->db->where('id',$idreparto);
+			$this->db->update('reparto',array('peso'=>floatval($row['peso']), 'facturas'=>$row['cana']) );
+
+			logusu('reparto',"Incorporacion factura id: ${idsfac} reparto ${idreparto}");
+			echo 'Factura incorporada';
+		}else{
+			echo 'Factura no incorporada en el reparto '.$row['eliminadas'].'--'.$idreparto;
 		}
 	}
 
@@ -1214,6 +1297,12 @@ class Reparto extends Controller {
 		$campos=$this->db->list_fields('sfac');
 		if(!in_array('reparto',$campos)){
 			$mSQL="ALTER TABLE sfac ADD COLUMN reparto INT(11) NULL DEFAULT 0 AFTER manual";
+			$this->db->simple_query($mSQL);
+		}
+
+		$campos=$this->db->list_fields('reparto');
+		if(!in_array('eliminadas',$campos)){
+			$mSQL="ALTER TABLE reparto ADD COLUMN eliminadas varchar(200) NULL DEFAULT ''";
 			$this->db->simple_query($mSQL);
 		}
 	}
