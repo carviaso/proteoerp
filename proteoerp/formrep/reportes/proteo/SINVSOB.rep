@@ -1,0 +1,182 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$mSPRV=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('proveed'=>'Código','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'proveed'),
+	'titulo'  =>'Buscar Proveedor');
+
+$bSPRV=$this->datasis->modbus($mSPRV);
+
+rapydlib('prototype');
+$ajax_onchange = '
+	function get_linea(){
+		var url = "'.site_url('reportes/sinvlineas').'";
+		var pars = "dpto="+$F("depto");
+		var myAjax = new Ajax.Updater("td_linea", url, { method: "post", parameters: pars });
+		get_grupo();
+	}
+
+	function get_grupo(){
+		var url = "'.site_url('reportes/sinvgrupos').'";
+		var pars = "dpto="+$F("depto")+"&linea="+$F("linea");
+		var myAjax = new Ajax.Updater("td_grupo", url, { method: "post", parameters: pars });
+	}';
+
+$filter = new DataFilter2('Filtro del Reporte');
+$filter->script($ajax_onchange);
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('a.codigo', 'a.descrip', 'a.unidad', 'a.peso', 'a.fracci', 'a.existen', 'a.precio1',
+'a.precio2', 'a.precio3', 'a.prov1','a.prov2','a.prov3','a.grupo', 'a.activo','b.nom_grup', 'a.exmin',
+'a.exmax', 'c.descrip as nomlinea',
+ 'SUBSTRING(a.descrip,1,1) AS dletra',
+ 'SUBSTRING(a.codigo,1,1) AS cletra',
+ '(exmax-existen ) AS sobra');
+
+$filter->db->select($select);
+$filter->db->from('sinv as a ');
+$filter->db->join('grup as b','a.grupo=b.grupo');
+$filter->db->join('line as c','b.linea=c.linea');
+$filter->db->where('existen>exmax');
+
+$filter->proveed = new inputField('Proveedor', 'proveed');
+$filter->proveed->clause='in';
+$filter->proveed->db_name='(a.prov1,a.prov2,a.prov3)';
+$filter->proveed->append($bSPRV);
+
+$filter->clase= new dropdownField('Clase','clase');
+$filter->clase->db_name='clase';
+$filter->clase->clause='where';
+$filter->clase->operator='=';
+$filter->clase->option('','Todos');
+$filter->clase->option('A','A');
+$filter->clase->option('B','B');
+$filter->clase->option('C','C');
+$filter->clase->option('I','I');
+
+
+$filter->depto = new dropdownField('Departamento', 'depto');
+$filter->depto->db_name='b.depto';
+$filter->depto->option('','Todos');
+$filter->depto->options("SELECT depto, descrip FROM dpto WHERE tipo='I' ORDER BY depto");
+$filter->depto->onchange = 'get_linea();';
+$filter->depto->group = 'Producto';
+
+$filter->linea = new dropdownField('Línea', 'linea');
+$filter->linea->db_name='b.linea';
+$filter->linea->option('','Seleccione un Departamento');
+$filter->linea->onchange = 'get_grupo();';
+$filter->linea->group    = 'Producto';
+
+$filter->grupo = new dropdownField('Grupo', 'grupo');
+$filter->grupo->option('','Seleccione una Línea');
+$filter->grupo->group = 'Producto';
+$filter->grupo->db_name='b.grupo';
+
+$filter->marca = new dropdownField('Marca', 'marca');
+$filter->marca->clause='where';
+$filter->marca->db_name='marca';
+$filter->marca->operator='=';
+$filter->marca->option('','Todas');
+$filter->marca->options('SELECT marca, marca nombre FROM marc ORDER BY marca');
+
+$filter->tipo = new dropdownField('Tipo', 'tipo');
+$filter->tipo->clause='where';
+$filter->tipo->db_name='a.tipo';
+$filter->tipo->operator='=';
+$filter->tipo->option('','Todos');
+$filter->tipo->option('Articulo' ,'Artículo' );
+$filter->tipo->option('Consumo'  ,'Consumo'  );
+$filter->tipo->option('Descartar','Descartar');
+$filter->tipo->option('Fraccion' ,'Fracción' );
+
+$filter->activo = new dropdownField('Activo', 'activo');
+$filter->activo->db_name='a.activo';
+$filter->activo->clause='where';
+$filter->activo->operator='=';
+$filter->activo->option('','Todos');
+$filter->activo->option('S','Si');
+$filter->activo->option('N','No');
+
+$filter->ordenpor = new dropdownField('Ordenado por', 'orden');
+$filter->ordenpor->option('G','Grupo');
+$filter->ordenpor->option('D','Descripción');
+$filter->ordenpor->option('C','Código');
+$filter->ordenpor->clause ='';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+$filter->salformat->group = 'Opciones';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+
+	if($filter->ordenpor->newValue=='G'){
+		$grupolabel='  <#nom_grup#>';
+		$orden='b.depto, b.linea, b.grupo, a.codigo';
+		$grupo='grupo';
+
+	}elseif($filter->ordenpor->value=='D'){
+		$grupolabel='  <#dletra#>';
+		$orden='a.descrip';
+		$grupo='dletra';
+	}else{
+		$grupolabel='Código  <#cletra#>';
+		$orden='a.codigo';
+		$grupo='cletra';
+	}
+	$filter->db->orderby($orden);
+
+	$mSQL=$filter->db->_compile_select();
+	//echo $mSQL;
+
+	$sobretabla='';
+	if (!empty($filter->proveed->newValue))  $sobretabla.='   Proveedor: ('.$filter->proveed->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed="'.$filter->proveed->newValue.'"');
+	if (!empty($filter->grupo->newValue))    $sobretabla.='   Grupo: ('.$filter->grupo->newValue.') '.$this->datasis->dameval('SELECT nom_grup FROM grup WHERE grupo="'.$filter->grupo->newValue.'"');
+	if (!empty($filter->linea->newValue))    $sobretabla.='   Línea: ('.$filter->linea->newValue.') '.$this->datasis->dameval('SELECT descrip FROM line WHERE linea="'.$filter->linea->newValue.'"');
+	if (!empty($filter->clase->newValue))    $sobretabla.='   Clase: '.$filter->clase->description;
+	if (!empty($filter->marca->newValue))    $sobretabla.='   Marca: '.$filter->marca->description;
+	if (!empty($filter->depto->newValue))    $sobretabla.='   Dpto: '.$filter->depto->description;
+	if (!empty($filter->tipo->newValue))     $sobretabla.='   Tipo: '.$filter->tipo->description;
+	if (!empty($filter->activo->newValue))   $sobretabla.='   Activo: '.$filter->activo->description;
+	if (!empty($filter->ordenpor->newValue)) $sobretabla.='   Ordenado por: '.$filter->ordenpor->description;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Productos con Sobre Existencia");
+	$pdf->setSobreTabla($sobretabla,5);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol('codigo' ,30,'Código'     ,'L',7);
+	$pdf->AddCol('descrip',85,'Descripción','L',7);
+	$pdf->AddCol('existen',18,'Existencia' ,'R',7);
+	$pdf->AddCol('exmax'  ,18,'Máxima'     ,'R',7);
+	$pdf->AddCol('exmin'  ,18,'Minima'     ,'R',7);
+	$pdf->AddCol('sobra'  ,18,'Sobra'      ,'R',7);
+	//$pdf->setTotalizar('existen','exmax','sobra');
+	$pdf->setGrupoLabel($grupolabel);
+	$pdf->setGrupo($grupo);
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Productos con Sobre Existencia</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

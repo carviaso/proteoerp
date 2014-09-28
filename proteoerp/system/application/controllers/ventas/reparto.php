@@ -313,7 +313,7 @@ class Reparto extends Controller {
 		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '300', '550' );  //Por Defecto
 
 		// Dialogo fshow
-		$bodyscript .= $this->jqdatagrid->bsfshow( '250', '500' );  //Por Defecto
+		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '500' );  //Por Defecto
 
 		// Dialogo fborra
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );  //Por Defecto
@@ -424,15 +424,16 @@ class Reparto extends Controller {
 			rowList:[],
 			toolbar: [false],
 
-			width:  400,
+			width:  420,
 			hiddengrid: false,
 			postdata: { tboficiid: "wapi"},
-			colNames:[\'id\', \'Numero\',\'Fecha\', \'Cliente\', \'Zona\', \'Rep\', \'Peso\'],
+			colNames:[\'id\', \'Numero\',\'Fecha\', \'Cliente\',\'Vend.\', \'Zona\', \'Rep\', \'Peso\'],
 			colModel:[
 				{name:\'id\',      index:\'id\',      width: 10, hidden:true},
 				{name:\'numero\',  index:\'numero\',  width: 35, editable:false, search: true},
 				{name:\'fecha\',   index:\'fecha\',   width: 35, editable:false, search: true, align:\'center\',edittype:\'text\', editoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}, defaultValue:\'2013-05-01\'}, searchoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}}},
 				{name:\'cod_cli\', index:\'cod_cli\', width: 20, editable:false, search: true },
+				{name:\'vd\',      index:\'vd\',      width: 22, editable:false, search: true },
 				{name:\'zona\',    index:\'zona\',    width: 20, editable:false, search: true, align:\'center\' },
 				{name:\'reparto\', index:\'reparto\', width: 20, editable:false, search: true, formatter: fsele },
 				{name:\'peso\',    index:\'peso\',    width: 40, editable:false, search: true, editoptions: {size:10,maxlength:10,dataInit:function(elem){$(elem).numeric();}},formatter:\'number\',formatoptions:{decimalSeparator:".",thousandsSeparator:",",decimalPlaces:2}, align:\'right\' }
@@ -568,7 +569,7 @@ class Reparto extends Controller {
 		$mWHERE[] = array('', 'reparto', array($id,'0'), '' );
 		$mWHERE[] = array('', 'tipo_doc', 'F', '' );
 
-		$response   = $grid->getData('sfac', array(array()), array('id', 'numero','fecha', 'cod_cli', 'zona', 'reparto', 'peso'), false, $mWHERE, 'id','desc' );
+		$response   = $grid->getData('sfac', array(array()), array('id', 'numero','fecha', 'cod_cli','zona', 'vd', 'reparto', 'peso'), false, $mWHERE, 'id','desc' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}

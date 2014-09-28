@@ -1,0 +1,79 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$filter = new DataFilter('Filtro del Reporte');
+$filter->db->select("a.fecha,d.rif,a.abonos,a.control, b.breten AS monto,a.transac,a.numero,a.num_ref, b.serie, IF(b.nfiscal='',b.serie,b.nfiscal) nfiscal, CONCAT_WS(' ',a.observa1,a.observa2) obser , e.concepto AS creten,e.tari1 AS prete,b.creten AS viejo");
+$filter->db->from('sprm AS a');
+$filter->db->join('sprm AS c', 'a.transac=c.transac AND c.tipo_doc=\'FC\'');
+$filter->db->join('gser AS b' ,'a.transac=b.transac','LEFT');
+$filter->db->join('rete AS e' ,'b.creten=e.codigo');
+$filter->db->join('sprv AS d' ,'c.cod_prv=d.proveed');
+$filter->db->where("a.tipo_doc='ND' AND a.cod_prv='RETEN' AND a.abonos < a.monto");
+//$filter->db->orderby('b.creten');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause = $filter->fechah->clause ='where';
+$filter->fechad->db_name= $filter->fechah->db_name='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30,   date('Y')));
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechad->operator='>=';
+$filter->fechah->operator='<=';
+$filter->fechad->group = 'Fecha';
+$filter->fechah->group = 'Fecha';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+	$mSQL=$this->rapyd->db->_compile_select();
+
+	$subtitu='';
+	if(isset($_POST['fechad'])) $subtitu.=' Desde la fecha '.$_POST['fechad'];
+	if(isset($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
+	//echo $mSQL;
+
+	$mSQL .= "UNION ALL
+	SELECT a.fecha, d.rif, a.abonos, a.control, b.breten AS monto, a.transac, a.numero, a.num_ref, b.serie, b.nfiscal, CONCAT_WS(' ', a.observa1, a.observa2) obser, e.concepto AS creten, e.tari1 AS prete,b.creten AS viejo
+	FROM sprm AS a
+	LEFT JOIN gser AS b ON a.transac=b.transac
+		JOIN rete AS e ON b.creten=e.codigo
+		JOIN sprv AS d ON b.proveed=d.proveed
+	WHERE a.tipo_doc='ND' AND a.cod_prv='RETEN' AND a.abonos < a.monto AND a.fecha >= '".$filter->fechad->newValue."' AND a.fecha <= '".$filter->fechah->newValue."' AND b.credito = 0
+	ORDER BY creten ";
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Listado de Retenciones por Enterar');
+	$pdf->setSubTitulo($subtitu);
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+
+	$pdf->AddCol('rif'       , 30, 'Rif'            ,'L',9);
+	$pdf->AddCol('serie'     , 30, 'Numero Factura' ,'L',9);
+	$pdf->AddCol('nfiscal'   , 25, 'Control'        ,'L',9);
+	$pdf->AddCol('fecha'     , 20, 'Fecha'          ,'L',9);
+	$pdf->AddCol('creten'    , 30, 'Código Concepto','L',9);
+	$pdf->AddCol('monto'     , 20, 'Monto'          ,'R',9);
+	$pdf->AddCol('prete'     , 15, '% Ret.'         ,'R',9);
+	//$pdf->AddCol('viejo'   , 30, 'Código Viejo'   ,'L',9);
+
+	$pdf->setTotalizar('monto');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Listado General de Retenciones de ISLR</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
