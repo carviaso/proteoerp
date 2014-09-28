@@ -3125,13 +3125,12 @@ class Sfac extends Controller {
 			$edit->nromanual->autocomplete=false;
 		}
 
-		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
+		$tipo     = $edit->get_from_dataobjetct('tipo_doc');
+		$dbtipo   = $this->db->escape($tipo );
+		$dbcajero = $this->db->escape($edit->get_from_dataobjetct('cajero'));
+		$numfis   = trim($edit->get_from_dataobjetct('nfiscal'));
+		$fiscal   = $this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
-			$tipo     = $edit->get_from_dataobjetct('tipo_doc');
-			$dbtipo   = $this->db->escape($tipo );
-			$dbcajero = $this->db->escape($edit->get_from_dataobjetct('cajero'));
-
-			$numfis= trim($edit->get_from_dataobjetct('nfiscal'));
 			if(empty($numfis)){
 				$num      = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo}");
 				$nn       = $num+1;
@@ -3160,6 +3159,24 @@ class Sfac extends Controller {
 					$dbnumero=$this->db->escape($edit->get_from_dataobjetct('factura'));
 					$mfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE numero=${dbnumero} AND tipo_doc='F'");
 					$edit->dmaqfiscal->updateValue=$mfiscal;
+				}
+			}
+		}else{
+			$numfis = trim($edit->get_from_dataobjetct('nfiscal'));
+			if(empty($numfis)){
+				$num = trim($this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo}"));
+				if(!empty($num)){
+					$arr_num  = explode('-',$num);
+					$last     = count($arr_num)-1;
+					if($last>0){
+						if(is_numeric($arr_num[$last])){
+							$long = strlen($arr_num[$last]);
+							$arr_num[$last] = $arr_num[$last]+1;
+							$arr_num[$last] = str_pad($arr_num[$last],$long,'0',STR_PAD_LEFT);
+							$nn = implode('-',$arr_num);
+							$edit->nfiscal->updateValue=$nn;
+						}
+					}
 				}
 			}
 		}

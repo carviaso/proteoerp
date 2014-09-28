@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $mSPRV=array(
 	'tabla'   =>'sprv',
 	'columnas'=>array(
@@ -50,6 +56,7 @@ $filter->proveed = new inputField('Proveedor', 'proveed');
 $filter->proveed->rule = 'trim';
 $filter->proveed->db_name='(a.prov1,a.prov2,a.prov3)';
 $filter->proveed->append($bSPRV);
+$filter->proveed->size='10';
 $filter->proveed->clause='in';
 
 $filter->depto = new dropdownField('Departamento', 'depto');
@@ -75,11 +82,6 @@ $filter->marca->option('','Todas');
 $filter->marca->options('SELECT TRIM(marca) AS cod, marca nombre FROM marc ORDER BY marca');
 $filter->marca->db_name='a.marca';
 
-$filter->almacen = new dropdownField('Almac&eacute;n', 'almacen');
-$filter->almacen->option('','Todos');
-$filter->almacen->options('SELECT TRIM(ubica) AS cod,ubides FROM caub ORDER BY ubica');
-$filter->almacen->db_name='d.alma';
-
 $filter->tipo = new dropdownField('Tipo', 'tipo');
 $filter->tipo->db_name='a.tipo';
 $filter->tipo->option('','Todos');
@@ -98,6 +100,12 @@ $filter->ordenpor = new dropdownField('Ordenado por', 'orden');
 $filter->ordenpor->option('a.descrip','Descripción');
 $filter->ordenpor->option('a.codigo' ,'Código');
 $filter->ordenpor->clause ='';
+
+$filter->almacen = new dropdownField('<b>Almac&eacute;n</b>', 'almacen');
+$filter->almacen->option('','Todos');
+$filter->almacen->options('SELECT TRIM(ubica) AS cod,ubides FROM caub WHERE invfis=\'N\' AND gasto=\'N\' ORDER BY ubica');
+$filter->almacen->db_name='d.alma';
+$filter->almacen->group  = 'Ubicaci&oacute;n';
 
 $filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
