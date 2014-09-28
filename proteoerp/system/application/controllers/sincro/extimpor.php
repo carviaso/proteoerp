@@ -48,8 +48,6 @@ class extimpor extends Controller {
 			''        => 'Ignorar',
 			'codigo'  => 'Código',
 			'descrip' => 'Descripción',
-			//'ultimo'  => 'Costo Último',
-			//'pond'    => 'Costo Promedio',
 			'standard'=> 'Costo Estandar',
 			'exmin'   => 'Mínimo',
 			'exmax'   => 'Máximo',
@@ -63,8 +61,11 @@ class extimpor extends Controller {
 			//'base2'   => 'Base 2',   //Desarrollar validaciones
 			//'base3'   => 'Base 3',   //Desarrollar validaciones
 			//'base4'   => 'Base 4',   //Desarrollar validaciones
-
 		);
+		if($this->secu->essuper()){
+			$options['ultimo'] = 'Costo Último';
+			$options['pond']   = 'Costo Promedio';
+		}
 
 		$colunma = new dropdownField('Tabla', 'tabla');
 		$colunma->options($options );
