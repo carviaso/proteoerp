@@ -2474,13 +2474,15 @@ class Sfac extends Controller {
 	function tabla() {
 		$id  = $this->uri->segment($this->uri->total_segments());
 		$dbid= $this->db->escape($id);
-		$row = $this->datasis->damerow("SELECT cod_cli,transac,referen,tipo_doc,numero FROM sfac WHERE id=${dbid}");
+		$row = $this->datasis->damerow("SELECT cod_cli,transac,referen,tipo_doc,numero,reparto,fecha FROM sfac WHERE id=${dbid}");
 		if(!empty($row)){
 			$cliente   = $row['cod_cli'];
 			$transac   = $row['transac'];
 			$referen   = $row['referen'];
 			$tipo_doc  = $row['tipo_doc'].'C';
 			$numero    = $row['numero'];
+			$reparto   = $row['reparto'];
+			$fecha     = $row['fecha'];
 		}else{
 			return false;
 		}
@@ -2489,6 +2491,7 @@ class Sfac extends Controller {
 		$dbtransac = $this->db->escape($transac);
 		$dbtipo_doc= $this->db->escape($tipo_doc);
 		$dbnumero  = $this->db->escape($numero);
+		$dbfecha   = $this->db->escape($fecha);
 
 		$salida = '<br><table width=\'100%\' border=\'1\'>';
 		$pago  = 0;
@@ -2582,6 +2585,32 @@ class Sfac extends Controller {
 			$salida .= '</table>';
 		}
 
+		// Revisa los despachos
+		$mSQL  = "SELECT numero, fecha, peso FROM snot WHERE factura=${dbnumero}";
+		$query = $this->db->query($mSQL);
+		if($query->num_rows() > 0){
+			$salida .= '<br><table width=\'100%\' border=\'1\'>';
+			$salida .= '<tr bgcolor=\'#e7e3e7\'><td colspan=\'3\'>Despachos realizados</td></tr>';
+			$salida .= '<tr bgcolor=\'#e7e3e7\'><td>N&uacute;mero</td><td align=\'center\'>Fecha</td><td align=\'center\'>Peso</td></tr>';
+			foreach ($query->result_array() as $row){
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['numero'].'</td>';
+				$salida .= '<td>'.$row['fecha']. '</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['peso']).'</td>';
+				$salida .= '</tr>';
+			}
+			$salida .= '</table>';
+		}
+
+		// Revisa los repartos
+		if(!empty($reparto)){
+			$salida .= '<p style=\'text-align:center\'>Reparto: '.str_pad($reparto,8,'0',0).'</p>';
+		}
+
+		$row=$this->datasis->damerow("SELECT SUM(tipo_doc IN ('F','T')) AS fac,SUM(tipo_doc='D') AS dev,SUM(tipo_doc='X') AS anu FROM sfac WHERE fecha=${dbfecha}");
+		if(!empty($row)){
+			$salida .= "<p style='text-align:center'>Transacciones del d&iacute;a ".$fecha.": Facturas <b>$row[fac]</b>, Devoluciones <b>$row[dev]</b>, Anuladas <b>$row[anu]</b></p>";
+		}
 		echo $salida;
 	}
 
@@ -2657,7 +2686,7 @@ class Sfac extends Controller {
 		$edit->vd = new  dropdownField ('Vendedor', 'vd');
 		$edit->vd->options('SELECT TRIM(vendedor) AS vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend ORDER BY vendedor');
 		$edit->vd->style='width:100px;';
-		$edit->vd->insertValue=$this->secu->getvendedor();
+		$edit->vd->insertValue=trim($this->secu->getvendedor());
 
 		$alma = $this->secu->getalmacen();
 		if(empty($alma)){
@@ -4509,9 +4538,9 @@ class Sfac extends Controller {
 				$_POST=array(
 					'btn_submit' => 'Guardar',
 					'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
-					'cajero'     => $this->secu->getcajero(),
-					'vd'         => (empty($row->vd))? $this->secu->getvendedor() :  $row->vd,
-					'almacen'    => (empty($row->almacen))? $this->secu->getalmacen() : $row->almacen,
+					'cajero'     => trim($this->secu->getcajero()),
+					'vd'         => (empty($row->vd))? trim($this->secu->getvendedor()) :  trim($row->vd),
+					'almacen'    => (empty($row->almacen))? trim($this->secu->getalmacen()) : trim($row->almacen),
 					'tipo_doc'   => 'F',
 					'factura'    => '',
 					'cod_cli'    => $row->cod_cli,
