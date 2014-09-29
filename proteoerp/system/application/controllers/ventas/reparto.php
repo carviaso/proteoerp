@@ -1061,14 +1061,14 @@ class Reparto extends Controller {
 	}
 
 	function quita($id){
-		$dbid=intval($id);
+		$dbid     = intval($id);
 		$reparto  = $this->datasis->dameval("SELECT reparto FROM sfac    WHERE id=${dbid}");
-		$dbreparto= $this->db->escape($reparto);
+		$dbreparto= intval($reparto);
 		$tipo     = $this->datasis->dameval("SELECT tipo    FROM reparto WHERE id=${dbreparto}");
 		if($tipo == 'E'){
-			$this->db->where('id',$id);
+			$this->db->where('id',$dbid);
 			$this->db->update('sfac',array('reparto' => 0));
-			$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS(',',eliminadas,${dbreparto}) WHERE id=${dbreparto}");
+			$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS(',',TRIM(eliminadas),${dbid}) WHERE id=${dbreparto}");
 
 			$row = $this->datasis->damereg("SELECT SUM(peso) AS peso, COUNT(*) AS cana FROM sfac WHERE peso IS NOT NULL AND reparto=${dbreparto}");
 
