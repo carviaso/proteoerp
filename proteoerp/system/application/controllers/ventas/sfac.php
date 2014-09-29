@@ -2584,6 +2584,23 @@ class Sfac extends Controller {
 			}
 			$salida .= '</table>';
 		}
+		//Revisa las devoluciones
+		$mSQL  = "SELECT numero, fecha, totalg FROM sfac WHERE factura=${dbnumero} AND tipo_doc='D'";
+		$query = $this->db->query($mSQL);
+		if($query->num_rows() > 0){
+			$salida .= '<br><table width=\'100%\' border=\'1\'>';
+			$salida .= '<tr bgcolor=\'#e7e3e7\'><td colspan=\'3\'>Devoluciones</td></tr>';
+			$salida .= '<tr bgcolor=\'#e7e3e7\'><td>N&uacute;mero</td><td align=\'center\'>Fecha</td><td align=\'center\'>Peso</td></tr>';
+			foreach ($query->result_array() as $row){
+				$salida .= '<tr>';
+				$salida .= '<td>'.$row['numero'].'</td>';
+				$salida .= '<td>'.$row['fecha']. '</td>';
+				$salida .= '<td align=\'right\'>'.nformat($row['totalg']).'</td>';
+				$salida .= '</tr>';
+			}
+			$salida .= '</table>';
+		}
+
 
 		// Revisa los despachos
 		$mSQL  = "SELECT numero, fecha, peso FROM snot WHERE factura=${dbnumero}";
