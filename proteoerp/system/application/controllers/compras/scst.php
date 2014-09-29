@@ -3341,7 +3341,7 @@ class Scst extends Controller {
 		if($pasa==0){
 			$control=$this->datasis->dameval('SELECT control FROM scst WHERE  id='.$id);
 
-			$msql = "'UPDATE scst SET credito=ctotal-reten-anticipo WHERE id='.$id";
+			//$msql = "'UPDATE scst SET credito=ctotal-reten-anticipo WHERE id='.$id";
 
 			//Chequea si tiene vehiculos y estan registrados los seriales
 			if($this->db->table_exists('sinvehiculo')){
@@ -3374,6 +3374,7 @@ class Scst extends Controller {
 				$usuario = $this->session->userdata('usuario');
 				$row     = $query->row_array();
 				$numero  = $row['numero'];
+				$depo    = $row['depo'];
 
 				$mORDENES = array();
 				$qquery = $this->db->query('SELECT orden FROM scstordc WHERE compra=?',array($control));
@@ -3383,9 +3384,11 @@ class Scst extends Controller {
 					}
 				}
 
+				$dbactuali= $this->db->escape($actuali);
+				$dbdepo   = $this->db->escape($depo);
+
 				if($row['tipo_doc']=='FC'){
 					$transac = $row['transac'];
-					$depo    = $row['depo'];
 					$proveed = $row['proveed'];
 					$fecha   = str_replace('-','',$row['fecha']);
 					$vence   = $row['vence'];
@@ -3446,9 +3449,16 @@ class Scst extends Controller {
 							$ban=$this->db->simple_query($mSQL);
 							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 
-							$this->datasis->sinvcarga($itrow->codigo,$depo, $itrow->cantidad );
-
-							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+							//Chequea que no este in inventario fisico antes de cargar cantidades
+							$dbcodigo = $this->db->escape($itrow->codigo);
+							$mSQL="SELECT COUNT(*) AS cana
+								FROM stra   AS a
+								JOIN itstra AS b ON a.numero=b.numero
+								WHERE a.envia='INFI' AND a.recibe=${dbdepo} AND b.codigo=${dbcodigo} AND a.fecha>${dbactuali}";
+							$chinnfis=intval($this->datasis->dameval($mSQL));
+							if($chinnfis==0){
+								$this->datasis->sinvcarga($itrow->codigo,$depo, $itrow->cantidad );
+							}
 
 							if($itrow->precio1>0 && $itrow->precio2>0 && $itrow->precio3>0 && $itrow->precio4>0){
 
@@ -3862,7 +3872,16 @@ class Scst extends Controller {
 					$qquery=$this->db->query($sql,array($control));
 					if($qquery->num_rows()>0){
 						foreach ($qquery->result() as $itrow){
-							$this->datasis->sinvcarga($itrow->codigo,$depo,(-1)*$itrow->cantidad);
+							//Chequea que no este in inventario fisico antes de cargar cantidades
+							$dbcodigo = $this->db->escape($itrow->codigo);
+							$mSQL="SELECT COUNT(*) AS cana
+								FROM stra   AS a
+								JOIN itstra AS b ON a.numero=b.numero
+								WHERE a.envia='INFI' AND a.recibe=${dbdepo} AND b.codigo=${dbcodigo} AND a.fecha>${dbactuali}";
+							$chinnfis=intval($this->datasis->dameval($mSQL));
+							if($chinnfis==0){
+								$this->datasis->sinvcarga($itrow->codigo,$depo,(-1)*$itrow->cantidad);
+							}
 						}
 					}
 					//Fin de las cantidades
@@ -4190,6 +4209,7 @@ class Scst extends Controller {
 		$anticipo = $scst['anticipo'];
 		$proveed  = $scst['proveed'];
 		$mALMA    = $scst['depo'];
+		$recep    = $scst['recep'];
 		$id_scst  = $scst['id'];
 
 		//********************************
@@ -4280,13 +4300,27 @@ class Scst extends Controller {
 		//$query->destroy();
 
 		// DESACTUALIZA INVENTARIO
+		$dbdepo   = $this->db->escape($mALMA);
+		$dbrecep= $this->db->escape($recep);
 		$query = $this->db->query("SELECT a.codigo, a.cantidad, a.id, a.precio1, a.precio2, a.precio3, a.precio4,a.costo, b.fracci FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE control=${dbcontrol}");
 		foreach($query->result() as $row){
 			$itdbcodigo= $this->db->escape($row->codigo);
 			$mTIPO = $this->datasis->dameval("SELECT MID(tipo,1,1) AS tipo FROM sinv WHERE codigo=${itdbcodigo}");
 
+			//Chequea que no este in inventario fisico antes de cargar cantidades
+
+			$dbcodigo = $this->db->escape($row->codigo);
+			$mSQL="SELECT COUNT(*) AS cana
+				FROM stra   AS a
+				JOIN itstra AS b ON a.numero=b.numero
+				WHERE a.envia='INFI' AND a.recibe=${dbdepo} AND b.codigo=${dbcodigo} AND a.fecha>${dbrecep}";
+			$chinnfis=intval($this->datasis->dameval($mSQL));
+
 			if($tipo_doc == 'FC' || $tipo_doc =='NE'){
-				$this->datasis->sinvcarga($row->codigo,  $mALMA, (-1)*$row->cantidad);
+
+				if($chinnfis==0){
+					$this->datasis->sinvcarga($row->codigo,  $mALMA, (-1)*$row->cantidad);
+				}
 
 				// DEBE ARREGLAR EL PROMEDIO BUSCANDO EN KARDEX
 				$mSQL = "SELECT promedio FROM costos WHERE codigo=${itdbcodigo} ORDER BY fecha DESC LIMIT 1";
@@ -4322,7 +4356,9 @@ class Scst extends Controller {
 					}
 				}
 			}else{
-				$this->datasis->sinvcarga($row->codigo, $mALMA, $row->cantidad);
+				if($chinnfis==0){
+					$this->datasis->sinvcarga($row->codigo, $mALMA, $row->cantidad);
+				}
 			}
 
 

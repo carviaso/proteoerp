@@ -915,6 +915,19 @@ class Pretab extends Controller {
 		$dbtrabaja  = $this->db->escape($trabaja );
 		$dbfechap   = $this->db->escape($fechap  );
 
+		$sql = 'SELECT GROUP_CONCAT( DISTINCT b.ctaac) AS proveed, COUNT(*) AS cana
+		FROM prenom AS a
+		JOIN conc AS b ON a.concepto=b.concepto
+		LEFT JOIN sprv AS d ON ctaac=d.proveed
+		WHERE valor<>0 AND tipod=\'G\' AND d.proveed IS NULL';
+		$row = $this->datasis->damerow($sql);
+		if(!empty($row)){
+			if(intval($row['cana'])>0){
+				echo 'Nomina no se pudo guardar, faltan los proveedores '.$row['proveed'];
+				return false;
+			}
+		}
+
 
 		$tipo       = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=${dbcontrato}");
 		$existe     = $this->datasis->dameval("SELECT COUNT(*) AS cana FROM nomina WHERE contrato=${dbcontrato} AND fecha=${dbfecha} AND trabaja=${dbtrabaja}");
@@ -972,9 +985,9 @@ class Pretab extends Controller {
 				FROM prenom a
 				JOIN conc b ON a.concepto=b.concepto
 				JOIN pers c ON a.codigo=c.codigo
-				JOIN sprv d ON ctaac=d.proveed
+				LEFT JOIN sprv d ON b.ctaac=d.proveed
 				WHERE valor<>0 AND tipod='G'
-				GROUP BY ctaac ";
+				GROUP BY ctaac";
 		$this->db->query($mSQL);
 
 		// GENERA CXP
@@ -990,7 +1003,7 @@ class Pretab extends Controller {
 				FROM prenom a
 				JOIN conc b ON a.concepto=b.concepto
 				JOIN pers c ON a.codigo=c.codigo
-				JOIN sprv d ON ctaac=d.proveed
+				LEFT JOIN sprv d ON ctaac=d.proveed
 				WHERE valor<>0 AND tipod='P' AND tipoa='P'
 				GROUP BY ctaac ";
 		$query  = $this->db->query($mSQL);

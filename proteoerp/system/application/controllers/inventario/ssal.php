@@ -172,7 +172,6 @@ class Ssal extends Controller {
 								apprise("Registro Guardado");
 								$( "#fedita" ).dialog( "close" );
 								grid.trigger("reloadGrid");
-								'.$this->datasis->jwinopen(site_url('formatos/ver/SSAL').'/\'+res.id+\'/id\'').';
 								return true;
 							} else {
 								$("#fedita").html(r);
@@ -1083,18 +1082,30 @@ class Ssal extends Controller {
 		$numero = $do->get('numero');
 		$alma   = $do->get('alma');
 		$tipo   = $do->get('tipo');
+		$fecha  = $do->get('fecha');
+		$dbalma = $this->db->escape($alma);
+		$dbfecha= $this->db->escape($fecha);
 
 		// Actualiza Inventario
 		$mc = $this->db->query('SELECT codigo, cantidad FROM itssal WHERE numero='.$this->db->escape($numero));
-		if ( $mc->num_rows() > 0) {
+		if($mc->num_rows() > 0){
 			foreach ($mc->result() as $row){
-				if ( $tipo == 'S' )
-					$this->datasis->sinvcarga( $row->codigo, $alma, -$row->cantidad);
-				else
-					$this->datasis->sinvcarga( $row->codigo, $alma, $row->cantidad);
+				$dbcodigo = $this->db->escape($row->codigo);
+				$mSQL="SELECT COUNT(*) AS cana
+						FROM stra   AS a
+						JOIN itstra AS b ON a.numero=b.numero
+						WHERE a.envia='INFI' AND a.recibe=${dbalma} AND b.codigo=${dbcodigo} AND a.fecha>${dbfecha}";
+				$chinnfis=intval($this->datasis->dameval($mSQL));
+				if($chinnfis==0){
+					if ( $tipo == 'S' ){
+						$this->datasis->sinvcarga( $row->codigo, $alma, -1*$row->cantidad);
+					}else{
+						$this->datasis->sinvcarga( $row->codigo, $alma, $row->cantidad);
+					}
+				}
 			}
 		}
-		$monto = $this->datasis->dameval('SELECT SUM(costo*cantidad) FROM itssal WHERE numero='.$this->db->escape($numero));
+		$monto = floatval($this->datasis->dameval('SELECT SUM(costo*cantidad) AS monto FROM itssal WHERE numero='.$this->db->escape($numero)));
 
 		//Segun el Caso hace GASTO o OTIN
 		if($tipo == 'S'){  // GASTO
@@ -1132,7 +1143,7 @@ class Ssal extends Controller {
 						WHERE a.numero='".$numero."' GROUP BY a.concepto ";
 			$this->db->query($mSQL);
 
-		}else{  //
+		}else{
 			$mNUMERO = $this->datasis->prox_sql('notiot');
 			$mNUMERO = 'O'.substr($mNUMERO,1,7);
 			$data['tipo_doc']  = 'OT';

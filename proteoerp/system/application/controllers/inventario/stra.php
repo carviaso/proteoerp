@@ -105,6 +105,35 @@ class Stra extends Controller {
 			}
 		};';
 
+		//Borrar
+		$bodyscript .= '
+		function stradel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+
 		$bodyscript .= '
 		function straedit() {
 			$.prompt("No se pueden modificar, debe hacer un reverso!");
@@ -437,7 +466,7 @@ class Stra extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions('addfunc: straadd,editfunc: straedit,viewfunc: strashow');
+		$grid->setBarOptions('addfunc: straadd,editfunc: straedit,viewfunc: strashow, delfunc: stradel');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -572,7 +601,7 @@ class Stra extends Controller {
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdatait/'));
 
-		if ($deployed) {
+		if($deployed){
 			return $grid->deploy();
 		} else {
 			return $grid;
@@ -584,7 +613,7 @@ class Stra extends Controller {
 	//******************************************************************
 	function getdatait($id = 0){
 		if($id == 0){
-			$id = $this->datasis->dameval("SELECT MAX(id) AS id FROM stra");
+			$id = $this->datasis->dameval('SELECT MAX(id) AS id FROM stra');
 		}
 		$dbid = intval($id);
 		if(empty($id)) return '';
@@ -617,7 +646,7 @@ class Stra extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = '??????';
+		$mcodp  = 'codigo';
 		$check  = 0;
 
 		unset($data['oper']);
@@ -625,35 +654,10 @@ class Stra extends Controller {
 		if($oper == 'add'){
 			echo 'Deshabilitado';
 		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM itstra WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM itstra WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE itstra SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("itstra", $data);
-				logusu('ITSTRA',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('itstra', $data);
-				logusu('ITSTRA',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
+			echo 'Deshabilitado';
 		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM itstra WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM itstra WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM itstra WHERE id=$id ");
-				logusu('ITSTRA',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+			echo 'Deshabilitado';
+		}
 	}
 
 	function _post_update($do){
@@ -662,8 +666,7 @@ class Stra extends Controller {
 	}
 
 	function _post_delete($do){
-		$primary =implode(',',$do->pk);
-		logusu($do->table,"Elimino $this->tits $primary ");
+		$this->_post_insert($do,'ELIMINADO');
 	}
 
 
@@ -704,10 +707,12 @@ class Stra extends Controller {
 		$edit->script($script,'create');
 		$edit->script($script,'modify');
 
-		$edit->pre_process('insert','_pre_insert');
-		$edit->pre_process('update','_pre_update');
-		$edit->pre_process('delete','_pre_delete');
+		$edit->pre_process('insert' ,'_pre_insert');
+		$edit->pre_process('update' ,'_pre_update');
+		$edit->pre_process('delete' ,'_pre_delete');
 		$edit->post_process('insert','_post_insert');
+		$edit->post_process('delete','_post_delete');
+		$edit->post_process('update','_post_update');
 
 		$edit->numero= new inputField('N&uacute;mero', 'numero');
 		$edit->numero->mode='autohide';
@@ -766,8 +771,8 @@ class Stra extends Controller {
 		$edit->cantidad->size     =10;
 		//Fin del detalle
 
-		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
-		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd')  , date('Ymd'));
+		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
 		$edit->buttons('save', 'undo', 'add','back','add_rel');
@@ -778,10 +783,10 @@ class Stra extends Controller {
 
 			if($edit->on_success()){
 				$rt=array(
-						'status' =>'A',
-						'mensaje'=>'Registro guardado',
-						'pk'     =>$edit->_dataobject->pk
-					);
+					'status' =>'A',
+					'mensaje'=>'Registro guardado',
+					'pk'     =>$edit->_dataobject->pk
+				);
 
 				echo json_encode($rt);
 			}else{
@@ -1474,6 +1479,12 @@ class Stra extends Controller {
 	}
 
 	function _pre_insert($do){
+		$envia   = $do->get('envia');
+		if($envia=='INFI'){
+			$do->error_message_ar['pre_ins']='No se puede crear un inventario fisico desde este modulo';
+			return false;
+		}
+
 		$numero=$this->datasis->fprox_numero('nstra');
 		$do->set('numero',$numero);
 		$transac = $this->datasis->fprox_numero('ntransa');
@@ -1496,35 +1507,53 @@ class Stra extends Controller {
 		return true;
 	}
 
-	function _post_insert($do){
+	function _post_insert($do,$accion='CREADO'){
 		$envia   = $do->get('envia');
 		$recibe  = $do->get('recibe');
+		$fecha   = $do->get('fecha');
 		$dbenvia = $this->db->escape($envia);
 		$dbrecibe= $this->db->escape($recibe);
+		$dbfecha = $this->db->escape($fecha);
 
+
+		$factor = ($accion=='CREADO')? 1:-1;
+		$egasto=$this->datasis->dameval('SELECT gasto FROM caub WHERE ubica='.$dbenvia);
+		$rgasto=$this->datasis->dameval('SELECT gasto FROM caub WHERE ubica='.$dbrecibe);
 		$cana = $do->count_rel('itstra'); $error=0;
 		for($i = 0;$i < $cana;$i++){
-			$itcana    = floatval($do->get_rel('itstra', 'cantidad',$i));
+			$itcana    = $factor*floatval($do->get_rel('itstra', 'cantidad',$i));
 			$itcodigo  = $do->get_rel('itstra', 'codigo'  ,$i);
 			$dbitcodigo=$this->db->escape($itcodigo);
 
-			$gasto=$this->datasis->dameval('SELECT gasto FROM caub WHERE ubica='.$dbenvia);
-			if($gasto!='S'){
-				$mSQL="INSERT INTO itsinv (codigo,alma,existen) VALUES (${dbitcodigo},${dbenvia},-${itcana}) ON DUPLICATE KEY UPDATE existen=existen-${itcana}";
-				$ban=$this->db->simple_query($mSQL);
-				if(!$ban){ memowrite($mSQL,'stra'); $error++;}
+
+			if($egasto!='S'){
+				//Chequea que no este in inventario fisico antes de cargar cantidades
+				$mSQL="SELECT COUNT(*) AS cana
+					FROM stra   AS a
+					JOIN itstra AS b ON a.numero=b.numero
+					WHERE a.envia='INFI' AND a.recibe=${dbenvia} AND b.codigo=${dbitcodigo} AND a.fecha>${dbfecha}";
+				$chinnfis=intval($this->datasis->dameval($mSQL));
+				if($chinnfis==0){
+					$this->datasis->sinvcarga($itcodigo,$envia, -1*$itcana);
+				}
+
 			}
 
-			$gasto=$this->datasis->dameval('SELECT gasto FROM caub WHERE ubica='.$dbrecibe);
-			if($gasto!='S'){
-				$mSQL="INSERT INTO itsinv (codigo,alma,existen) VALUES (${dbitcodigo},${dbrecibe},${itcana}) ON DUPLICATE KEY UPDATE existen=existen+${itcana}";
-				$ban=$this->db->simple_query($mSQL);
-				if(!$ban){ memowrite($mSQL,'stra'); $error++;}
+			if($rgasto!='S'){
+				//Chequea que no este in inventario fisico antes de cargar cantidades
+				$mSQL="SELECT COUNT(*) AS cana
+					FROM stra   AS a
+					JOIN itstra AS b ON a.numero=b.numero
+					WHERE a.envia='INFI' AND a.recibe=${dbrecibe} AND b.codigo=${dbitcodigo} AND a.fecha>${dbfecha}";
+				$chinnfis=intval($this->datasis->dameval($mSQL));
+				if($chinnfis==0){
+					$this->datasis->sinvcarga($itcodigo,$recibe, $itcana);
+				}
 			}
 		}
 
 		$codigo=$do->get('numero');
-		logusu('stra',"TRANSFERENCIA ${codigo} CREADO");
+		logusu('stra',"TRANSFERENCIA ${codigo} ${accion}");
 		return true;
 	}
 
@@ -1534,8 +1563,15 @@ class Stra extends Controller {
 	}
 
 	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='No se pueden eliminar';
-		return false;
+		if($this->secu->essuper()) return true;
+
+		$envia = $do->get('envia');
+		if($envia == 'INFI'){
+			$do->error_message_ar['pre_del']='No se puede anular un inventario fisico';
+			return false;
+		}
+
+		return true;
 	}
 
 	function instalar(){
@@ -1573,7 +1609,6 @@ class Stra extends Controller {
 			$mSQL="INSERT INTO tmenus (modulo, secu, titulo, mensaje, ejecutar) VALUES ('STRA',5,'Eliminar','Eliminar Registro', 'BORR_REG()')";
 			$this->db->query($mSQL);
 		}
-
 
 	}
 }
