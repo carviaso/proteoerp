@@ -2655,7 +2655,7 @@ class Sfac extends Controller {
 		$edit->manual->insertValue = $manual;
 
 		$edit->vd = new  dropdownField ('Vendedor', 'vd');
-		$edit->vd->options('SELECT vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend ORDER BY vendedor');
+		$edit->vd->options('SELECT TRIM(vendedor) AS vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend ORDER BY vendedor');
 		$edit->vd->style='width:100px;';
 		$edit->vd->insertValue=$this->secu->getvendedor();
 
