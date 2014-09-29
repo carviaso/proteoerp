@@ -1006,6 +1006,9 @@ class Edrec extends Controller {
 			return false;
 		}
 		$dbanomes = $this->db->escape($anomes);
+		$tasa = traevalor('CONDOADM','COMISION DE GASTOS ADMINISTRATIVOS');
+		if ($tasa == '') $tasa = 10; 
+	
 		//Genera los recibos
 		$mSQL = "
 			SELECT '000001' numero, CURDATE() fecha, CURDATE() + INTERVAL 5 DAY vence, cliente cod_cli, inmueble, total, alicuota, cuota, 'P' status, 'Recibo' observa, '321' usuario, CURDATE() estampa, CURTIME() hora, 0 transac, 0 id
@@ -1064,6 +1067,7 @@ class Edrec extends Controller {
 					GROUP BY d.codigo, a.partida ) aa
 				";
 				$query1 = $this->db->query($mSQL);
+				$monto = 0;
 				foreach( $query1->result() as  $row1 ) {
 					$data1 = array();
 					$data1['numero']   = $numero;
@@ -1082,7 +1086,22 @@ class Edrec extends Controller {
 					$data1['hora']     = date('h:m:s');
 					$data1['id_edrc']  = $id;
 					$this->db->insert('editrec',$data1);
+					$monto = $monto + $row1->cuota;
 				}
+				$data1 = array();
+				$data1['numero']   = $numero;
+				$data1['tipo']     = 'CO';
+				$data1['codigo']   = 'COMADM';
+				$data1['detalle']  = 'Gastos de Administracion '.$tasa.'%';
+				$data1['total']    = $monto;
+				$data1['alicuota'] = 0;
+				$data1['cuota']    = $monto;
+				$data1['fecha']    = $fecha;
+				$data1['usuario']  = $this->session->userdata('usuario');
+				$data1['estampa']  = date('Ymd');
+				$data1['hora']     = date('h:m:s');
+				$data1['id_edrc']  = $id;
+				$this->db->insert('editrec',$data1);
 			}
 			echo "Si se Guardaron";
 		}
