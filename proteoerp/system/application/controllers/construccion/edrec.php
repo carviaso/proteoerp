@@ -1006,7 +1006,7 @@ class Edrec extends Controller {
 			return false;
 		}
 		$dbanomes = $this->db->escape($anomes);
-		$tasa = traevalor('CONDOADM','COMISION DE GASTOS ADMINISTRATIVOS');
+		$tasa = $this->datasis->traevalor('CONDOADM','COMISION DE GASTOS ADMINISTRATIVOS');
 		if ($tasa == '') $tasa = 10; 
 	
 		//Genera los recibos
