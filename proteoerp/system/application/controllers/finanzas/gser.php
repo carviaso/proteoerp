@@ -2343,7 +2343,7 @@ class gser extends Controller {
 		$edit->departa->rule='max_length[2]';
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-		$edit->estampa = new autoUpdateField('estampa' ,date('YmD'), date('Ymd'));
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora',date('H:m:s'), date('H:m:s'));
 
 		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');

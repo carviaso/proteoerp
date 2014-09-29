@@ -542,4 +542,13 @@ class Prenom extends Controller {
 	}
 
 }
+/*
+
+	1.- Calcular la primera nomina desde la fecha de ingreso
+	
+	 
+	 
+ 
+*/
+
 ?>

@@ -36,7 +36,7 @@ class Edgasto extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"edtraegas",   "img"=>"images/engrana.png",  "alt" => "Traer Gastos", "label"=>"Traer Gastos"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -66,6 +66,60 @@ class Edgasto extends Controller {
 		$bodyscript = '<script type="text/javascript">';
 		$ngrid = '#newapi'.$grid0;
 
+		$ano1 = date('Y',mktime(0,0,0,date('m'),date('d'),date('Y')));
+		$ano2 = date('Y',mktime(0,0,0,date('m'),date('d'),date('Y')-1));
+		$ano3 = date('Y',mktime(0,0,0,date('m'),date('d'),date('Y')-2));
+		$mano = '<select id=\'mano\' name=\'mano\'><option value=\''.$ano1.'\'>'.$ano1.'</option><option value=\''.$ano2.'\'>'.$ano2.'</option><option value=\''.$ano3.'\'>'.$ano3.'</option></select>';
+		$mes  = '<select id=\'mmes\' name=\'mmes\'><option value=\'01\'>01</option><option value=\'02\'>02</option><option value=\'03\'>03</option><option value=\'04\'>04</option><option value=\'05\'>05</option><option value=\'06\'>06</option><option value=\'07\'>07</option><option value=\'08\'>08</option><option value=\'09\'>09</option><option value=\'10\'>10</option><option value=\'11\'>11</option><option value=\'12\'>12</option></select>';
+
+		$bodyscript .= '
+		$("#edtraegas").click(function(){
+			var meco = "";
+			var mgene = {
+			state0: {
+				html:"<h1>Traer Gastos: </h1><br/><center>Fecha: '.$mano.'&nbsp; Mes: '.$mes.'</center><br/>",
+				buttons: { Cancelar: false, Aceptar: true },
+				focus: 1,
+				submit:function(e,v,m,f){
+					if(v){
+						e.preventDefault();
+						$.ajax({
+							url: \''.site_url('construccion/edgasto/edtraegas').'\',
+							global: false,
+							type: "POST",
+							data: ({ anomes : encodeURIComponent(f.mano+f.mmes) }),
+							dataType: "text",
+							async: false,
+							success: function(sino) {
+								meco = " sino="+sino;
+								if (sino.substring(0,1)=="S"){
+									$.prompt.goToState("state1");
+								} else {
+									$.prompt.close();
+								}
+							},
+							error: function(h,t,e) { alert("Error.. ",e) }
+						});
+						return false;
+					}
+				}
+			},
+			state1: {
+				html:"Gastos transferidos!"+meco,
+				buttons: { Regresar: -1, Salir: 0 },
+				focus: 1,
+				submit:function(e,v,m,f){
+					e.preventDefault();
+					if(v==0)
+						$.prompt.close();
+					else if(v==-1)
+						$.prompt.goToState("state0");
+				}
+			}
+			};
+			$.prompt(mgene);
+		});';
+
 		$bodyscript .= $this->jqdatagrid->bsshow('edgasto', $ngrid, $this->url );
 		$bodyscript .= $this->jqdatagrid->bsadd( 'edgasto', $this->url );
 		$bodyscript .= $this->jqdatagrid->bsdel( 'edgasto', $ngrid, $this->url );
@@ -84,6 +138,24 @@ class Edgasto extends Controller {
 
 		return $bodyscript;
 	}
+
+	//******************************************************************
+	//  Trae Gastos
+	//
+	function edtraegas($anomes = 0){
+		if ( $anomes == 0 ) $anomes = $this->input->post('anomes');
+		if ( $anomes <= 0  ) {
+			echo 'No se Guardo '.$anomes;
+			return false;
+		}
+		$dbanomes = $this->db->escape($anomes);
+		//Genera los recibos
+		$mSQL = "CALL sp_edgasto(${dbanomes})";
+		$this->db->query($mSQL);
+		echo "Si Ejecutado CALL sp_edgasto(${dbanomes})";
+
+	}
+
 
 	//******************************************************************
 	// Definicion del Grid o Tabla 
@@ -238,6 +310,15 @@ class Edgasto extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
 		));
 
+		$grid->addField('tipo');
+		$grid->label('Tipo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'false',
+			'width'         => 50,
+			'edittype'      => "'textarea'",
+		));
+
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('290');
@@ -305,7 +386,6 @@ class Edgasto extends Controller {
 				if ( $check == 0 ){
 					$this->db->insert('edgasto', $data);
 					echo "Registro Agregado";
-
 					logusu('EDGASTO',"Registro ????? INCLUIDO");
 				} else
 					echo "Ya existe un registro con ese $mcodp";
@@ -515,6 +595,13 @@ class Edgasto extends Controller {
 		$edit->proveedor->size =42;
 		$edit->proveedor->maxlength =80;
 
+		$edit->tipo = new hiddenField('Tipo','tipo');
+		$edit->tipo->insertValue = 'M';
+		$edit->tipo->updateValue = 'M';
+
+		//$edit->tipo = new autoUpdateField('Tipo','M', 'M');
+
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -527,7 +614,6 @@ class Edgasto extends Controller {
 		}else{
 			$conten['form']  =&  $edit;
 			$data['content']  =  $this->load->view('view_edgasto', $conten, false);
-			//echo $edit->output;
 		}
 	}
 
@@ -580,8 +666,6 @@ class Edgasto extends Controller {
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Gastos de Condominio'";
 			$this->db->query($mSQL);
 		}
-		//$campos=$this->db->list_fields('edgasto');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
 

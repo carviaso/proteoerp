@@ -952,7 +952,7 @@ $tabla .= '
 			$str .= $tab2.'$bodyscript = $this->bodyscript( $param[\'grids\'][0][\'gridname\']);'."\n\n";
 
 			$str .= $tab2.'//Botones Panel Izq'."\n";
-			$str .= $tab2.'//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));'."\n";
+			$str .= $tab2.'//$grid->wbotonadd(array("id"=>"funcion",   "img"=>"images/engrana.png",  "alt" => "Formato PDF", "label"=>"Ejemplo"));'."\n";
 			$str .= $tab2.'$WestPanel = $grid->deploywestp();'."\n\n";
 
 			$str .= $tab2.'$adic = array('."\n";
