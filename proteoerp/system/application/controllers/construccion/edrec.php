@@ -1091,10 +1091,10 @@ class Edrec extends Controller {
 				}
 				$data1 = array();
 				$data1['numero']   = $numero;
-				$data1['tipo']     = 'CO';
+				$data1['tipo']     = 'ZZ';
 				$data1['codigo']   = 'COMADM';
-				$data1['detalle']  = 'Gastos de Administracion '.$tasa.'%';
-				$data1['total']    = $monto;
+				$data1['detalle']  = 'COMISION POR ADMINISTRACION '.$tasa.'%';
+				$data1['total']    = 0;
 				$data1['alicuota'] = 0;
 				$data1['cuota']    = round($monto*$tasa/100,2);
 				$data1['fecha']    = $fecha;
