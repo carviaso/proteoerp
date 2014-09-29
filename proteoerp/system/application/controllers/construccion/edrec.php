@@ -1025,6 +1025,7 @@ class Edrec extends Controller {
 			FROM edinmue aa) mm ON d.id = mm.id
 			WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${dbanomes}
 			GROUP BY d.codigo ) aa
+			HAVING alicuota >0
 		";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
@@ -1095,7 +1096,7 @@ class Edrec extends Controller {
 				$data1['detalle']  = 'Gastos de Administracion '.$tasa.'%';
 				$data1['total']    = $monto;
 				$data1['alicuota'] = 0;
-				$data1['cuota']    = $monto;
+				$data1['cuota']    = round($monto*$tasa/100,2);
 				$data1['fecha']    = $fecha;
 				$data1['usuario']  = $this->session->userdata('usuario');
 				$data1['estampa']  = date('Ymd');
