@@ -268,14 +268,16 @@ class pfaclite extends validaciones{
 
 		$grid = new DataGrid('Seleccione el cliente al cual se le va a realizar el pedido');
 		$grid->use_function('htmlspecialchars');
+		$grid->table_id='sclilist';
 		$grid->order_by('nombre','asc');
 		$grid->per_page=20;
-		$grid->column_orderby('#Fact.','rayado','rayado',"align='right'");
+		$grid->column_orderby('#Fact.','rayado','rayado','align=\'right\'');
 		$grid->column_orderby('Cliente',$uri,'cliente');
 		$grid->column_orderby('Nombre','<htmlspecialchars><#nombre#>|2|ISO-8859-1</htmlspecialchars>','nombre');
 		$grid->column_orderby('RIF/CI','rifci');
 		$grid->build();
 
+		$data['script']  = '<style type="text/css">#sclilist tr:hover { background-color: #ffff99; }</style>';
 		$data['content'] = $filter->output.$frace.$grid->output;
 		$data['title']   = heading('Clientes');
 		$data['head']    = $this->rapyd->get_head();

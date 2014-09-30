@@ -249,7 +249,7 @@ class Kardex extends Controller {
 		}
 
 		$data['forma'] = '';
-		$data['script'] = script('jquery.js');
+		$data['script'] = script('jquery.js').'<style type="text/css">#kardextabla tr:hover { background-color: #ffff99; }</style>';
 		//$data['script'].= script('plugins/jquery.columnhover.pack.js');
 		$data['title'] = heading('Kardex de Inventario');
 		$data['head']  = $this->rapyd->get_head();

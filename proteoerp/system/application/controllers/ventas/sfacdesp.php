@@ -276,12 +276,12 @@ class sfacdesp extends Controller {
 
 		$filter = new DataFilter('');
 		$select=array("IF(a.tipo_doc='F','Activa',IF(a.tipo_doc='D','Devolucion',IF(a.tipo_doc='X','Anulada','Otro'))) AS tipo_doc",
-		'a.cod_cli AS cliente','a.fecha',"IF(a.referen='C','Cred','Cont') referen",'a.numero','a.nombre','a.totalg AS total','a.vd');
+		'a.cod_cli AS cliente','a.fecha',"IF(a.referen='C','Cred','Cont') referen",'a.numero','a.nombre','a.totalg AS total','a.vd',
+		'g.numero AS devo','a.id');
 		$filter->db->select($select);
 		$filter->db->from('sfac AS a');
 		$filter->db->join('snot AS c' ,'a.numero=c.factura','LEFT');
-		//$filter->db->join('vend AS d' ,'a.vd=d.vendedor');
-		//$filter->db->join('sitems AS e','e.numa=a.numero AND e.tipoa=a.tipo_doc');
+		$filter->db->join('sfac AS g'   ,'a.numero=g.factura AND g.tipo_doc=\'D\'','LEFT');
 		$filter->db->groupby('a.numero,a.tipo_doc');
 		$filter->db->where('a.fdespacha IS NULL');
 		$filter->db->where('a.tipo_doc','F');
@@ -322,30 +322,51 @@ class sfacdesp extends Controller {
 
 		if(!$this->rapyd->uri->is_set('search')) $filter->db->where('a.fecha','CURDATE()');
 
-		function descheck($numero){
+		function descheck($numero,$devolu=null){
 			$data = array(
 			  'name'    => 'despacha[]',
 			  'id'      => $numero,
 			  'value'   => $numero,
 			  'title' => 'Tildar para marcar como despachada la factura y presionar el boton de "Despachar Facturas Marcadas"',
 			  'checked' => false);
-			return form_checkbox($data);
+
+			if(!empty($devolu)){
+				$data['title']='Factura con devolucion '.$devolu;
+				$style='style="background-color:red;" title=\'Factura con devolucion '.$devolu.'\'';
+			}else{
+				$style='';
+			}
+			return "<div ${style}>".form_checkbox($data).'</div>';
+		}
+
+		function verfact($numero,$id){
+			$atts = array(
+				'width'      => '800',
+				'height'     => '600',
+				'scrollbars' => 'yes',
+				'status'     => 'yes',
+				'resizable'  => 'yes',
+				'screenx'    => '0',
+				'screeny'    => '0'
+			);
+
+			return anchor_popup('formatos/verhtml/FACTURA/'.$id, $numero, $atts);
 		}
 
 		$seltodos='Seleccionar <a id="todos" href=# >Todos</a> <a id="nada" href=# >Ninguno</a> <a id="alter" href=# >Invertir</a>';
 
 		if($filter->is_valid()){
 			$grid = new DataGrid($seltodos);
-			$grid->use_function('descheck');
+			$grid->use_function('descheck','verfact');
 
 			$grid->column('Fecha'        ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
 			$grid->column('Tipo'         ,'referen');
-			$grid->column('N&uacute;mero','numero');
+			$grid->column('N&uacute;mero','<verfact><#numero#>|<#id#></verfact>');
 			$grid->column('Cliente'      ,'cliente');
 			$grid->column('Nombre'       ,'nombre');
 			$grid->column('Total'        ,'<nformat><#total#></nformat>',"align=right");
 			$grid->column('Vendedor'     ,'vd',"align=center");
-			$grid->column('Despachar'    ,'<descheck><#numero#></descheck>',"align=center");
+			$grid->column('Despachar'    ,'<descheck><#numero#>|<#devo#></descheck>',"align=center");
 
 			$action = "javascript:$('#aexcel').submit();";
 			$grid->button('btn_excel', 'Descargar a Excel', $action, 'BL');
@@ -354,6 +375,7 @@ class sfacdesp extends Controller {
 			$grid->button('btn_submit', 'Despachar Facturas  Marcadas', $action, 'BR');
 
 			$grid->build();
+
 			//echo $grid->db->last_query();
 			$cana=$grid->recordCount;
 
@@ -378,7 +400,7 @@ class sfacdesp extends Controller {
 		//$ggrid.=form_hidden('mSQL', $mSQL);
 
 		$attributes = array('id' => 'adespacha');
-				$data['content'] =  '<table width="100%"><tr><td>'.img(array('src'=>'images/despachoexp1.png','align'=>'left')).'</td><td>'.$filter->output.'</td></tr></table>';
+			$data['content'] =  '<table width="100%"><tr><td>'.img(array('src'=>'images/despachoexp1.png','align'=>'left')).'</td><td>'.$filter->output.'</td></tr></table>';
 		if($cana>0)
 			$data['content'] .=form_open('ventas/sfacdesp/procesar/M',$attributes).$grid->output.form_close().$campo.$script;
 		$data['title']   =  heading('Despacho Express Masivo');
