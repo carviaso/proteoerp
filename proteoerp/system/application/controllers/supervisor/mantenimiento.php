@@ -451,7 +451,7 @@ function elminacenti(cual){
 			'a.numero',
 			'a.nombre',
 			'a.monto',
-			'(SUM(b.abono)+
+			'(SUM(COALESCE(b.abono,0))+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "P%" AND e.proveed=a.cod_prv AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "%P" AND e.cliente=a.cod_prv AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`))
 			AS abonoreal',
@@ -459,7 +459,7 @@ function elminacenti(cual){
 
 		$filter->db->select($select);
 		$filter->db->from('sprm AS a');
-		$filter->db->join('itppro AS b','a.cod_prv=b.cod_prv AND ((a.numero=b.numero AND a.tipo_doc=b.tipo_doc) OR (a.numero=b.numppro AND a.tipo_doc=b.tipoppro))');
+		$filter->db->join('itppro AS b','a.cod_prv=b.cod_prv AND ((a.numero=b.numero AND a.tipo_doc=b.tipo_doc) OR (a.numero=b.numppro AND a.tipo_doc=b.tipoppro))','LEFT');
 		$filter->db->groupby('a.cod_prv, a.tipo_doc,a.numero');
 		$filter->db->having('abonoreal  <>','inconsist');
 		$filter->db->where('`a`.`tipo_doc` IN (\'FC\',\'GI\',\'ND\')');
@@ -707,7 +707,7 @@ function elminacenti(cual){
 			'a.numero',
 			'a.nombre',
 			'a.monto',
-			'(SUM(b.abono)+
+			'(SUM(COALESCE(b.abono,0))+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "C%" AND e.proveed=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`)+
 			(SELECT COALESCE(SUM(d.monto),0) FROM `itcruc` AS d  JOIN cruc AS e ON d.numero=e.numero WHERE e.tipo LIKE "%C" AND e.cliente=a.cod_cli AND CONCAT(`a`.`tipo_doc`,`a`.`numero`)=`d`.`onumero`))
 			AS abonoreal',
@@ -715,7 +715,7 @@ function elminacenti(cual){
 
 		$filter->db->select($select);
 		$filter->db->from('smov AS a');
-		$filter->db->join('itccli AS b','a.cod_cli=b.cod_cli AND ((a.numero=b.numero AND a.tipo_doc=b.tipo_doc) OR (a.numero=b.numccli AND a.tipo_doc=b.tipoccli))');
+		$filter->db->join('itccli AS b','a.cod_cli=b.cod_cli AND ((a.numero=b.numero AND a.tipo_doc=b.tipo_doc) OR (a.numero=b.numccli AND a.tipo_doc=b.tipoccli))','LEFT');
 		//$filter->db->join('itccli AS b','a.cod_cli=b.cod_cli AND a.numero=b.numero AND a.tipo_doc=b.tipo_doc');
 		$filter->db->groupby('a.cod_cli, a.tipo_doc,a.numero');
 		$filter->db->having('abonoreal  <>','inconsist');

@@ -3210,7 +3210,7 @@ class Sfac extends Controller {
 		}else{
 			$numfis = trim($edit->get_from_dataobjetct('nfiscal'));
 			if(empty($numfis)){
-				$num = trim($this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo}"));
+				$num = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo}"));
 				if(!empty($num)){
 					$arr_num  = explode('-',$num);
 					$last     = count($arr_num)-1;
