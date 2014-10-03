@@ -524,47 +524,6 @@ class Scst extends Controller {
 		$post = $this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+idactual+\'/id\'').';';
 		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "570", $width = "860", 'fcompra', $post );
 
-/*
-		$bodyscript .= '
-			$("#fcompra").dialog({
-				autoOpen: false, height: 570, width: 860, modal: true,
-				buttons: {
-					"Guardar": function() {
-						var bValid = true;
-						var murl = $("#df1").attr("action");
-						if ( bValid ) {
-							$.ajax({
-								type: "POST", dataType: "html", async: false,
-								url: murl,
-								data: $("#df1").serialize(),
-								success: function(r,s,x){
-									var res = $.parseJSON(r);
-									if ( res.status == "A"){
-										$.prompt(res.mensaje);
-										$( "#fcompra" ).dialog( "close" );
-										grid.trigger("reloadGrid");
-										'.$this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+res.id+\'/id\'').';
-										return true;
-									} else if ( res.status == "C"){
-										$.prompt("<div style=\"font-size:16px;font-weight:bold;background:green;color:white\">Mensaje:</div> <h1>"+res.mensaje);
-									} else {
-										$.prompt("<div style=\"font-size:16px;font-weight:bold;background:red;color:white\">Error:</div> <h1>"+res.mensaje+"</h1>");
-									}
-								}
-							});
-						}
-					},
-					Cancelar: function() {
-						$( this ).dialog( "close" );
-						$( "#fcompra" ).html("");
-					}
-				},
-				close: function() {
-					$( "#fcompra" ).html("");
-				}
-			});';
-*/
-
 		$bodyscript .= "\n".'
 			$( "#fcmonto" ).dialog({
 				autoOpen: false, height: 300, width: 300, modal: true,

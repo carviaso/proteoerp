@@ -63,7 +63,7 @@ function add_proveed(){
 <table width="100%">
 	<tr>
 		<td>
-			<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
+			<fieldset style='border: 1px outset #9AC8DA;background: #FAFAFA;'>
 			<table border=0 width="100%">
 			<tr>
 				<td width="90"    class="littletableheaderc"><?php echo $form->codbanc->label; ?></td>
@@ -83,7 +83,7 @@ function add_proveed(){
 			</fieldset>
 		</td>
 		<td>
-			<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
+			<fieldset style='border: 1px outset #9AC8DA;background: #FAFAFA;'>
 			<table border=0 width="100%">
 			<tr>
 				<td class="littletableheaderc"><?php echo $form->sucur->label; ?></td>
@@ -105,7 +105,7 @@ function add_proveed(){
 <table  width="100%" border='0'>
 	<tr>
 		<td valign='top'>
-			<fieldset style='border: 1px outset #9AC8DA;background: #E0ECF8;'>
+			<fieldset style='border: 1px outset #9AC8DA;background: #FAFAFA;'>
 			<table width= "100%" >
 				<tr>
 					<td width='60px' class="littletableheaderc"><?php echo $form->nombre->label; ?></td>
@@ -129,7 +129,7 @@ function add_proveed(){
 
 
 		<td  valign="top">
-			<fieldset style='border: 1px outset #9AC8DA;background: #E0ECF8;'>
+			<fieldset style='border: 1px outset #9AC8DA;background: #FAFAFA;'>
 			<table style="height: 100%;width: 100%">
 				<tr>
 					<td  width="95" class="littletableheaderc"><?php echo $form->moneda->label; ?></td>
@@ -155,34 +155,19 @@ function add_proveed(){
 <table  width="100%" border='0'>
 	<tr>
 		<td>
-			<fieldset style='border: 1px outset #8A0808;background: #FFFBE9;'>
+			<fieldset style='border: 1px outset #9AC8DA;background: #FAFAFA;'>
 			<table width= '100%' >
-				<!-- tr>
-					<td class="littletableheaderc"><?php echo $form->codprv->label; ?></td>
-					<td class="littletablerow"    ><?php echo $form->codprv->output;?>
-					<?php
-					if(!empty($form->codprv->value)){
-						$mSQL = 'SELECT nombre FROM sprv WHERE proveed='.$this->db->escape(trim($form->codprv->value));
-						echo $this->datasis->dameval($mSQL);
-					}
-					?>
-					</td>
-				</tr -->
-
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->gastocom->label; ?></td>
 					<td class="littletablerow"    ><?php echo $form->gastocom->output;?></td>
-
 					<td class="littletableheaderc"><?php echo $form->rif->label; ?></td>
 					<td class="littletablerow"    ><?php echo $form->rif->output;?></td>
-
 				</tr>
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->gastoidb->label; ?></td>
 					<td class="littletablerow"    ><?php echo $form->gastoidb->output;?></td>
-
-					<td class="littletableheaderc">&nbsp;</td>
-					<td class="littletablerow"    >&nbsp;</td>
+					<td class="littletableheaderc"><?php echo $form->ctasoc->label; ?></td>
+					<td class="littletablerow"    ><?php echo $form->ctasoc->output;?></td>
 				</tr>
 				<tr>
 				<td class="littletableheaderc"><?php echo $form->cuenta->label ?></td>

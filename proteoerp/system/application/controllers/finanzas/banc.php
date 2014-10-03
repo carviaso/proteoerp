@@ -714,6 +714,7 @@ class Banc extends Controller {
 		$bTBAN =$this->datasis->modbus($mTBAN);
 
 		$link=site_url('finanzas/banc/ubanc');
+
 		$script ='
 		function  add_proveed(){
 			$.prompt("<h1>Opci&oacute;n no habilitada</h1>");
@@ -856,7 +857,6 @@ class Banc extends Controller {
 		$edit->dbporcen->rule = 'callback_chporcent';
 		$edit->dbporcen->onchange='gasto()';
 
-		//$lcuent=anchor_popup('/contabilidad/cpla/dataedit/create','Agregar Cuenta Contable',$atts);
 		$edit->cuenta = new inputField('Cta. Contable', 'cuenta');
 		$edit->cuenta->rule='trim|existecpla';
 		$edit->cuenta->size =12;
@@ -885,16 +885,17 @@ class Banc extends Controller {
 		$edit->gastoidb->option('','Seleccionar');
 		$edit->gastoidb->rule= 'condi_required|callback_chisidb';
 		$edit->gastoidb->options($mSQL);
-		$edit->gastoidb->style ='width:300px;';
+		$edit->gastoidb->style ='width:280px;';
 
 		$edit->gastocom = new dropdownField('Comisi&oacute;n', 'gastocom');
 		$edit->gastocom->rule= 'condi_required|callback_chiscaja|trim';
 		$edit->gastocom->option('','Seleccionar');
 		$edit->gastocom->options($mSQL);
-		$edit->gastocom->style ='width:300px;';
+		$edit->gastocom->style ='width:280px;';
 
 		$rif = '';
-		if ( $edit->getval('tbanco') && $edit->getval('tbanco') <> 'CAJ' )
+		$tbanco = $edit->getval('tbanco');
+		if ( $tbanco && $tbanco!='CAJ' && $tbanco!='FON' )
 			$rif = $this->datasis->dameval('SELECT rif FROM tban WHERE cod_banc="'.$edit->getval('tbanco').'"');
 
 		$edit->rif = new inputField('RIF del Banco', 'rif');
@@ -903,6 +904,13 @@ class Banc extends Controller {
 		$edit->rif->maxlength=12;
 		$edit->rif->updateValue = $rif;
 		$edit->rif->showValue = $rif;
+
+		$mSQL="SELECT codbanc, CONCAT_WS(' ',TRIM(codbanc),TRIM(numcuent),TRIM(banco)) AS descrip FROM banc WHERE tbanco<>'FON' ORDER BY codbanc";
+		$edit->ctasoc = new dropdownField('Cuenta asociada', 'ctasoc');
+		$edit->ctasoc->rule= '';
+		$edit->ctasoc->option('','Seleccionar');
+		$edit->ctasoc->options($mSQL);
+		$edit->ctasoc->style ='width:200px;';
 
 		$edit->build();
 
@@ -948,7 +956,7 @@ class Banc extends Controller {
 	function _pre_update($do){
 		$rif    = trim($this->input->post('rif'));
 		$tbanco = $do->get('tbanco');
-		if ( $rif == '' && $tbanco <> 'CAJ' ){
+		if ( $rif=='' && $tbanco<>'CAJ' && $tbanco<>'FON'){
 			$do->error_message_ar['pre_upd']="Favor coloque el RIF del banco";
 			return false;
 		} else {
@@ -1048,7 +1056,7 @@ class Banc extends Controller {
 
 	function chiscaja($proveed){
 		$tbanco=$this->input->post('tbanco');
-		if ($tbanco!='CAJ' && strlen(trim($proveed))==0){
+		if ($tbanco!='CAJ' && $tbanco!='FON' && strlen(trim($proveed))==0){
 			$this->validation->set_message('chiscaja',"El campo '%s' es obligatorio cuando el registro no es una caja");
 			return false;
 		}else {
@@ -1259,7 +1267,6 @@ class Banc extends Controller {
 			$this->db->query($mSQL);
 		}
 
-
 		if (!$this->db->field_exists('rif','tban')) {
 			$mSQL="ALTER TABLE `tban` ADD COLUMN `rif` VARCHAR(15) NULL DEFAULT NULL COMMENT 'RIF del Banco';";
 			$this->db->query($mSQL);
@@ -1267,6 +1274,11 @@ class Banc extends Controller {
 
 		if (!$this->db->field_exists('activo','tban')) {
 			$mSQL="ALTER TABLE `tban` ADD COLUMN `activo` CHAR(1) NULL DEFAULT 'S' COMMENT 'Activar/Desactivar';";
+			$this->db->query($mSQL);
+		}
+
+		if (!$this->db->field_exists('ctasoc','banc')) {
+			$mSQL="ALTER TABLE banc ADD COLUMN ctasoc VARCHAR(2) NULL DEFAULT NULL COMMENT 'Cuenta Asociada' AFTER rif;";
 			$this->db->query($mSQL);
 		}
 

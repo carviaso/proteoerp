@@ -1173,7 +1173,6 @@ class Ssal extends Controller {
 
 			$this->db->query($mSQL);
 		}
-
 		logusu('ssal',"Entradas y Salidas ${numero} CREADO");
 	}
 
@@ -1190,47 +1189,47 @@ class Ssal extends Controller {
 	function instalar(){
 
 		if (!$this->db->table_exists('ssal')) {
-			$mSQL="CREATE TABLE `ssal` (
-			  `numero` char(8) NOT NULL DEFAULT '',
-			  `fecha` date DEFAULT NULL,
-			  `tipo` char(1) DEFAULT NULL,
-			  `almacen` char(4) DEFAULT NULL,
-			  `cargo` char(6) DEFAULT NULL,
-			  `descrip` char(30) DEFAULT NULL,
-			  `motivo` char(40) DEFAULT NULL,
-			  `estampa` date DEFAULT NULL,
-			  `usuario` char(12) DEFAULT NULL,
-			  `hora` char(8) DEFAULT NULL,
-			  `transac` char(8) DEFAULT NULL,
-			  `modificado` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-			  `depto` char(3) DEFAULT NULL,
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  PRIMARY KEY (`id`),
-			  UNIQUE KEY `numero` (`numero`),
-			  KEY `modificado` (`modificado`)
+			$mSQL="CREATE TABLE ssal (
+			  numero     CHAR(8)   NOT NULL DEFAULT '',
+			  fecha      DATE      DEFAULT NULL,
+			  tipo       CHAR(1)   DEFAULT NULL,
+			  almacen    CHAR(4)   DEFAULT NULL,
+			  cargo      CHAR(6)   DEFAULT NULL,
+			  descrip    CHAR(30)  DEFAULT NULL,
+			  motivo     CHAR(40)  DEFAULT NULL,
+			  estampa    DATE      DEFAULT NULL,
+			  usuario    CHAR(12)  DEFAULT NULL,
+			  hora       CHAR(8)   DEFAULT NULL,
+			  transac    CHAR(8)   DEFAULT NULL,
+			  modificado TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			  depto      CHAR(3) DEFAULT NULL,
+			  id         INT(11) NOT NULL AUTO_INCREMENT,
+			  PRIMARY KEY (id),
+			  UNIQUE KEY numero (numero),
+			  KEY modificado (modificado)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}
 
 		if (!$this->db->table_exists('itssal')) {
-			$mSQL="CREATE TABLE `itssal` (
-			  `numero` char(8) DEFAULT NULL,
-			  `codigo` char(15) DEFAULT NULL,
-			  `descrip` char(40) DEFAULT NULL,
-			  `cantidad` decimal(12,3) DEFAULT NULL,
-			  `costo` decimal(17,2) DEFAULT '0.00',
-			  `estampa` date DEFAULT NULL,
-			  `usuario` char(12) DEFAULT NULL,
-			  `hora` char(8) DEFAULT NULL,
-			  `transac` char(8) DEFAULT NULL,
-			  `gasto` char(6) DEFAULT NULL,
-			  `concepto` char(6) DEFAULT NULL,
-			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-			  `modificado` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-			  PRIMARY KEY (`id`),
-			  KEY `numero` (`numero`),
-			  KEY `codigo` (`codigo`),
-			  KEY `modificado` (`modificado`)
+			$mSQL="CREATE TABLE itssal (
+			  numero    CHAR(8)       DEFAULT NULL,
+			  codigo    CHAR(15)      DEFAULT NULL,
+			  descrip   CHAR(40)      DEFAULT NULL,
+			  cantidad  DECIMAl(12,3) DEFAULT NULL,
+			  costo     DECIMAl(17,2) DEFAULT '0.00',
+			  estampa   DATE          DEFAULT NULL,
+			  usuario   CHAR(12)      DEFAULT NULL,
+			  hora      CHAR(8)       DEFAULT NULL,
+			  transac   CHAR(8)       DEFAULT NULL,
+			  gasto     CHAR(6)       DEFAULT NULL,
+			  concepto  CHAR(6)       DEFAULT NULL,
+			  id        INT(11) unsigned NOT NULL AUTO_INCREMENT,
+			  modificado TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			  PRIMARY KEY (id),
+			  KEY numero (numero),
+			  KEY codigo (codigo),
+			  KEY modificado (modificado)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
 		}

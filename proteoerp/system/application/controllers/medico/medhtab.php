@@ -37,7 +37,8 @@ class Medhtab extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"grupos",   "img"=>"images/pdf_logo.gif",  "alt" => "Grupos", "label"=>"Grupos"));
+		$grid->wbotonadd(array("id"=>"grupos",    "img"=>"images/pdf_logo.gif", "alt" => "Grupos",    "label"=>"Grupos"));
+		$grid->wbotonadd(array("id"=>"variables", "img"=>"images/engrana.png",  "alt" => "Variables", "label"=>"Variables"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -77,6 +78,18 @@ class Medhtab extends Controller {
 				$("#fshow").dialog( "open" );
 			});
 		});';
+
+		// Variables
+		$bodyscript .= '
+		$("#variables").click(function(){
+			$.post("'.site_url('medico/medhtab/grupoform').'",
+			function(data){
+				$("#fshow").html(data);
+				$("#fshow").dialog( { title:"VARIABLES", width: 430, height: 400, modal: true } );
+				$("#fshow").dialog( "open" );
+			});
+		});';
+
 
 
 		$bodyscript .= $this->jqdatagrid->bsshow('medhtab', $ngrid, $this->url );
