@@ -521,17 +521,17 @@ class Edgasto extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$edit->aplicacion = new inputField('Aplicacion','aplicacion');
-		$edit->aplicacion->rule='';
-		$edit->aplicacion->size =7;
-		$edit->aplicacion->maxlength =5;
+		$edit->aplicacion = new dropdownField('Aplicacion','aplicacion');
+		$edit->aplicacion->options('SELECT depto, CONCAT(depto," ",descrip) descrip FROM dpto WHERE tipo="G" ORDER BY depto');
+		$edit->aplicacion->rule = 'required';
+		$edit->aplicacion->style='width:150px;';
 
 		$edit->tipo_doc = new dropdownField('Tipo', 'tipo_doc');
 		$edit->tipo_doc->option('FC','Factura');
 		$edit->tipo_doc->option('RB','Recibo de Pago');
 		$edit->tipo_doc->option('OT','Otro');
 		$edit->tipo_doc->rule = 'required';
-		$edit->tipo_doc->style='width:140px;';
+		$edit->tipo_doc->style='width:150px;';
 
 		$edit->numero = new inputField('Numero','numero');
 		$edit->numero->rule      = '';
@@ -557,7 +557,7 @@ class Edgasto extends Controller {
 		$edit->proveed->size     = 10;
 		$edit->proveed->autocomplete=false;
 
-		$edit->partida = new  dropdownField ('Partida', 'partida');
+		$edit->partida = new  dropdownField('Partida', 'partida');
 		$edit->partida->options('SELECT id, CONCAT(codigo," ",descrip) descrip FROM mgas ORDER BY descrip');
 		$edit->partida->rule = 'required';
 		$edit->partida->style='width:250px;';
