@@ -654,6 +654,60 @@ class Vend extends Controller {
 		}
 	}
 
+	function setgdata(){
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = intval($this->input->post('id'));
+		$data   = $_POST;
+		$mcodp  = 'nombre';
+		$check  = 0;
+
+		unset($data['oper']);
+		unset($data['id']);
+
+		$posibles=array('nombre');
+		foreach($data as $ind=>$val){
+			if(!in_array($ind,$posibles)){
+				echo 'Campo no permitido ('.$ind.')';
+				return false;
+			}
+		}
+
+		if($oper == 'add'){
+			if(!empty($data)){
+				$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM grvd WHERE ${mcodp}=".$this->db->escape($data[$mcodp])));
+				if($check == 0){
+					$this->db->insert('grvd', $data);
+					echo 'Registro Agregado';
+					logusu('GRVD','Grupo de vendedor INCLUIDO');
+				}else{
+					echo "Ya existe un registro con ese ${mcodp}";
+				}
+			}else{
+				echo 'Fallo Agregado!!!';
+			}
+		}elseif($oper == 'edit'){
+			if($id <= 0) return false;
+
+			$this->db->where('id', $id);
+			$this->db->update('grvd', $data);
+			logusu('GRVD',"Grupo de vendedor  ${id} MODIFICADO");
+			echo "Grupo de vendedor modificado";
+		}elseif($oper == 'del'){
+			if($id <= 0) return false;
+
+			$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM vend WHERE grupo=${id}"));
+			if($check > 0){
+				echo " El registro no puede ser eliminado por tener vendedores asociados";
+			}else{
+				$this->db->query("DELETE FROM grvd WHERE id=${id}");
+				logusu('GRVD',"Grupo de vendedor ${id} ELIMINADO");
+				echo 'Registro Eliminado';
+			}
+		}
+	}
+
+
 	function instalar(){
 		if(!$this->db->table_exists('vend')){
 			$mSQL="CREATE TABLE `vend` (
