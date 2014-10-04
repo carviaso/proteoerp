@@ -17,10 +17,10 @@ $filter->build();
 
 if($this->rapyd->uri->is_set('search')){
 
-	$mSQL="SELECT a.cuenta,a.codigo, a.tipo, a.descrip, a.iva, a.grupo,a.nom_grup
+	$mSQL='SELECT a.cuenta,a.codigo, a.tipo, a.descrip, a.iva, a.grupo,a.nom_grup
 		FROM mgas AS a
 		JOIN grga AS b ON a.grupo=b.grupo
-	ORDER BY a.grupo,a.codigo";
+	ORDER BY a.grupo,a.codigo';
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
@@ -31,9 +31,9 @@ if($this->rapyd->uri->is_set('search')){
 	$pdf->AddPage();
 	$pdf->setTableTitu(9,'Times');
 
-	$pdf->AddCol('codigo' ,25,'Código'     ,'L',8);
-	$pdf->AddCol('tipo'   ,35,'Tipo'       ,'C',8);
-	$pdf->AddCol('descrip',80,'Descripción','L',8);
+	$pdf->AddCol('codigo' ,20,'Código'     ,'L',8);
+	$pdf->AddCol('tipo'   ,30,'Tipo'       ,'C',8);
+	$pdf->AddCol('descrip',90,'Descripción','L',8);
 	$pdf->AddCol('cuenta' ,20,'Cuenta'     ,'C',8);
 	//$pdf->AddCol('iva'    ,20,'Iva'        ,'R',8);
 
@@ -43,8 +43,8 @@ if($this->rapyd->uri->is_set('search')){
 
 	$pdf->Output();
 }else{
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Maestros de Gastos</h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Maestros de Gastos</h2>';
+	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

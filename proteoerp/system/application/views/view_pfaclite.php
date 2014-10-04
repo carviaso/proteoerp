@@ -79,7 +79,7 @@ to {background:#32FFD3}
 <table align='center' width="100%">
 	<tr>
 		<td><?php echo $form->numero->value.'-'.$form->nombre->value.$form->cliente->output; ?></td>
-		<td align=right><?php echo $container_tl.$container_tr;?></td>
+		<td align='right'><?php echo $container_tl.$container_tr;?></td>
 	</tr>
 	<?php if(isset($saldo) && $saldo>0){ ?>
 	<tr>

@@ -41,6 +41,7 @@ class Vend extends Controller {
 		//Botones Panel Izq
 		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
 		$grid->wbotonadd(array('id'=>'bgrupo',   'img'=>'images/star.png',     'alt' => 'Gestionar grupos', 'tema'=>'anexos', 'label'=>'Grupos'));
+		$grid->wbotonadd(array('id'=>'bzona' ,   'img'=>'images/arrow_up.png' ,   'alt' => 'Asignar zona', 'tema'=>'anexos', 'label'=>'Asignar a Zona'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -79,7 +80,7 @@ class Vend extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '370', '450' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '400', '450' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '250', '500' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -98,6 +99,19 @@ class Vend extends Controller {
 			close: function() {
 				$("#fgrupo").html("");
 			}
+		});';
+
+		$bodyscript .= '
+		$("#bzona").click(function(){
+			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret    = $("'.$ngrid.'").getRowData(id);
+				mId = id;
+				$.post("'.site_url($this->url.'asignazona').'/"+ret.vendedor, function(data){
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		});';
 
 		$bodyscript .= '});';
@@ -297,7 +311,7 @@ class Vend extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: vendadd, editfunc: vendedit, delfunc: venddel, viewfunc: vendshow");
+		$grid->setBarOptions('addfunc: vendadd, editfunc: vendedit, delfunc: venddel, viewfunc: vendshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -340,48 +354,12 @@ class Vend extends Controller {
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM vend WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('vend', $data);
-					echo "Registro Agregado";
-
-					logusu('VEND',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM vend WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM vend WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE vend SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("vend", $data);
-				logusu('VEND',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('vend', $data);
-				logusu('VEND',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM vend WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM vend WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM vend WHERE id=$id ");
-				logusu('VEND',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+			echo 'Deshabilitado';
+		}elseif($oper == 'edit'){
+			echo 'Deshabilitado';
+		}elseif($oper == 'del'){
+			echo 'Deshabilitado';
+		}
 	}
 
 	function dataedit(){
@@ -610,56 +588,69 @@ class Vend extends Controller {
 	}
 
 
-	function setgdata(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = intval($this->input->post('id'));
-		$data   = $_POST;
-		$mcodp  = 'nombre';
-		$check  = 0;
+	function asignazona($vd){
+		$this->rapyd->load('dataform');
+		$dbvd = $this->db->escape($vd);
 
-		unset($data['oper']);
-		unset($data['id']);
+		$form = new DataForm($this->url."asignazona/${vd}/process");
+		//$form->script($script);
 
-		$posibles=array('nombre');
-		foreach($data as $ind=>$val){
-			if(!in_array($ind,$posibles)){
-				echo 'Campo no permitido ('.$ind.')';
-				return false;
-			}
-		}
+		$row = $this->datasis->damerow("SELECT nombre FROM vend WHERE vendedor=${dbvd}");
+		if(!empty($row)){
+			$htmltabla="<table width='100%' style='background-color:#FBEC88;text-align:center;font-size:12px'>
+				<tr>
+					<td>Vendedor:</td>
+					<td><b>(".htmlspecialchars($row['nombre']).")</b></td>
+				</tr>
+			</table>";
 
-		if($oper == 'add'){
-			if(!empty($data)){
-				$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM grvd WHERE ${mcodp}=".$this->db->escape($data[$mcodp])));
-				if($check == 0){
-					$this->db->insert('grvd', $data);
-					echo 'Registro Agregado';
-					logusu('GRVD','Grupo de vendedor INCLUIDO');
+			$form->tablafo = new containerField('tablafo',$htmltabla);
+
+			$form->tipo = new dropdownField('Tipo', 'tipo');
+			$form->tipo->option('V','Vendedor');
+			$form->tipo->option('C','Cobrador');
+			$form->tipo->rule  = 'required|enum[C,V]';
+			$form->tipo->style = 'width:166px';
+
+			$form->zona = new dropdownField('Zona asignada', 'zona');
+			$form->zona->rule = 'trim|required';
+			$form->zona->option('','Seleccionar');
+			$form->zona->options('SELECT TRIM(codigo) AS codigo, CONCAT(codigo," ", nombre) nombre FROM zona ORDER BY nombre');
+			$form->zona->style = 'width:166px';
+			$form->zona->rule  = 'required';
+
+			$form->build_form();
+
+			if($form->on_success()){
+				$tipo   = $form->tipo->newValue;
+				$dbzona = $this->db->escape($form->zona->newValue);
+				if($tipo=='C'){
+					$opt='cobrador';
 				}else{
-					echo "Ya existe un registro con ese ${mcodp}";
+					$opt='vendedor';
 				}
-			}else{
-				echo 'Fallo Agregado!!!';
-			}
-		}elseif($oper == 'edit'){
-			if($id <= 0) return false;
 
-			$this->db->where('id', $id);
-			$this->db->update('grvd', $data);
-			logusu('GRVD',"Grupo de vendedor  ${id} MODIFICADO");
-			echo "Grupo de vendedor modificado";
-		}elseif($oper == 'del'){
-			if($id <= 0) return false;
-
-			$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM vend WHERE grupo=${id}"));
-			if($check > 0){
-				echo " El registro no puede ser eliminado por tener vendedores asociados";
+				$mSQL="UPDATE scli SET ${opt}=${dbvd} WHERE zona=${dbzona}";
+				$ban=$this->db->simple_query($mSQL);
+				if($ban){
+					$rt=array(
+							'status' =>'A',
+							'mensaje'=>'Zona asignada.',
+							'pk'     =>null
+						);
+				}else{
+					$rt=array(
+							'status' =>'B',
+							'mensaje'=>'No se pudo asignar la zona al vendedor',
+							'pk'     =>null
+						);
+				}
+				echo json_encode($rt);
 			}else{
-				$this->db->query("DELETE FROM grvd WHERE id=${id}");
-				logusu('GRVD',"Grupo de vendedor ${id} ELIMINADO");
-				echo 'Registro Eliminado';
+				echo $form->output;
 			}
+		}else{
+			echo 'Registro inexistente';
 		}
 	}
 

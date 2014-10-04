@@ -46,7 +46,7 @@ class Bienvenido extends Controller {
 		//	$this->session->set_userdata($sess_data);
 		//	redirect($this->session->userdata('estaba'));
 		//}
-		if(!$this->secu->es_interno()){
+		if($this->secu->es_interno()){
 			$ww='';
 		}else{
 			$ww=' AND remoto=\'S\'';
@@ -208,4 +208,3 @@ class Bienvenido extends Controller {
 		echo $out;
 	}
 }
-?>
