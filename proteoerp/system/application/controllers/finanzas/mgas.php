@@ -441,6 +441,19 @@ class Mgas extends validaciones {
 		));
 
 
+		$grid->addField('ctarein');
+		$grid->label('Reintegro');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 150,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
+		));
+
+
+
 		/*$grid->addField('tasa1');
 		$grid->label('Tasa');
 		$grid->params(array(
@@ -892,8 +905,17 @@ class Mgas extends validaciones {
 		$edit->cuenta->maxlength = 15;
 		$edit->cuenta->rule = 'trim|existecpla';
 		$edit->cuenta->append($bcpla);
-		$edit->cuenta->append($lcuent);
+		//$edit->cuenta->append($lcuent);
 		$edit->cuenta->readonly=true;
+
+		$lcuent=anchor_popup("/contabilidad/cpla/dataedit/create",image('list_plus.png','Agregar',array("border"=>"0")),$atts);
+		$edit->ctarein    = new inputField("Cta. Reintegro", "ctarein");
+		$edit->ctarein->size = 12;
+		$edit->ctarein->maxlength = 15;
+		$edit->ctarein->rule = 'trim|existecpla';
+		$edit->ctarein->append($bcpla);
+		//$edit->ctarein->append($lcuent);
+		$edit->ctarein->readonly=true;
 
 /*
 		$edit->iva = new inputField("IVA", "iva");
@@ -1180,5 +1202,11 @@ class Mgas extends validaciones {
 			$mSQL="ALTER TABLE mgas ADD COLUMN reten VARCHAR(4) NULL DEFAULT NULL AFTER rica, ADD COLUMN retej VARCHAR(4) NULL DEFAULT NULL AFTER reten";
 			$this->db->simple_query($mSQL);
 		}
+
+		if (!in_array('ctarein',$campos)) {
+			$mSQL="ALTER TABLE mgas ADD COLUMN ctarein VARCHAR(15) NULL DEFAULT NULL AFTER retej";
+			$this->db->simple_query($mSQL);
+		}
+
 	}
 }

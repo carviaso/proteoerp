@@ -835,7 +835,7 @@ class Banc extends Controller {
 
 		$edit->tipocta = new dropdownField('Cuenta Tipo', 'tipocta');
 		$edit->tipocta->style ='width:100px;';
-		$edit->tipocta->options(array('K'=>'Caja','C'=>'Corriente','A' =>'Ahorros','P'=>'Plazo Fijo', 'T'=>'Tarjeta', 'Q'=>'Caja Chica' ));
+		$edit->tipocta->options(array('K'=>'Caja','C'=>'Corriente','A' =>'Ahorros','P'=>'Plazo Fijo', 'T'=>'Tarjeta', 'Q'=>'Caja Chica', 'F'=>'Fondo' ));
 
 		$edit->proxch = new inputField('Pr&oacute;ximo CH', 'proxch');
 		$edit->proxch->rule='trim';
@@ -895,7 +895,8 @@ class Banc extends Controller {
 
 		$rif = '';
 		$tbanco = $edit->getval('tbanco');
-		if ( $tbanco && $tbanco!='CAJ' && $tbanco!='FON' )
+		$tipoct = $edit->getval('tipocta');
+		if ( $tbanco && $tbanco!='CAJ' && $tipoct!='F' )
 			$rif = $this->datasis->dameval('SELECT rif FROM tban WHERE cod_banc="'.$edit->getval('tbanco').'"');
 
 		$edit->rif = new inputField('RIF del Banco', 'rif');
@@ -905,13 +906,14 @@ class Banc extends Controller {
 		$edit->rif->updateValue = $rif;
 		$edit->rif->showValue = $rif;
 
+/*
 		$mSQL="SELECT codbanc, CONCAT_WS(' ',TRIM(codbanc),TRIM(numcuent),TRIM(banco)) AS descrip FROM banc WHERE tbanco<>'FON' ORDER BY codbanc";
 		$edit->ctasoc = new dropdownField('Cuenta asociada', 'ctasoc');
 		$edit->ctasoc->rule= '';
 		$edit->ctasoc->option('','Seleccionar');
 		$edit->ctasoc->options($mSQL);
 		$edit->ctasoc->style ='width:200px;';
-
+*/
 		$edit->build();
 
 		if($edit->on_success()){

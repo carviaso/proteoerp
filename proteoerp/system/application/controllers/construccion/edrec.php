@@ -39,8 +39,10 @@ class Edrec extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"imprime",  "img"=>"assets/default/images/print.png","alt" => 'Reimprimir', "label"=>"Documento"));
-		$grid->wbotonadd(array("id"=>"generec",  "img"=>"images/engrana.png","alt" => 'Generar Recibos', "label"=>"Generar Recibos"));
+		$grid->wbotonadd(array("id"=>"imprime",   "img"=>"assets/default/images/print.png","alt" => 'Reimprimir', "label"=>"Imprimir Recibo"));
+		$grid->wbotonadd(array("id"=>"edtraegas", "img"=>"images/engrana.png",  "alt" => "Traer Gastos", "label"=>"Traer Gastos"));
+		$grid->wbotonadd(array("id"=>"generec",   "img"=>"images/engrana.png",  "alt" => 'Generar Recibos', "label"=>"Generar Recibos"));
+		$grid->wbotonadd(array("id"=>"genecobro", "img"=>"images/engrana.png",  "alt" => 'Enviar Recibos al cobro', "label"=>"Recibos al cobro"));
 
 		$WestPanel = $grid->deploywestp();
 
@@ -128,6 +130,103 @@ class Edrec extends Controller {
 			};
 			$.prompt(mgene);
 		});';
+
+		$bodyscript .= '
+		$("#genecobro").click(function(){
+			var mgene = {
+			state0: {
+				html:"<h1>Recibos al Cobro: </h1><br/><center>Fecha: '.$mano.'&nbsp; Mes: '.$mes.'</center><br/>",
+				buttons: { Cancelar: false, Aceptar: true },
+				focus: 1,
+				submit:function(e,v,m,f){
+					if(v){
+						e.preventDefault();
+						$.ajax({
+							url: \''.site_url('construccion/edrec/genecobro').'\',
+							global: false,
+							type: "POST",
+							data: ({ anomes : encodeURIComponent(f.mano+f.mmes) }),
+							dataType: "text",
+							async: false,
+							success: function(sino) {
+								if (sino.substring(0,1)=="S"){
+									$.prompt.goToState("state1");
+								} else {
+									$.prompt.close();
+								}
+							},
+							error: function(h,t,e) { alert("Error.. ",e) }
+						});
+						return false;
+					}
+				}
+			},
+			state1: {
+				html:"Was that awesome or what!?",
+				buttons: { Back: -1, Exit: 0 },
+				focus: 1,
+				submit:function(e,v,m,f){
+					e.preventDefault();
+					if(v==0)
+						$.prompt.close();
+					else if(v==-1)
+						$.prompt.goToState("state0");
+				}
+			}
+			};
+			$.prompt(mgene);
+		});';
+
+
+
+		$bodyscript .= '
+		$("#edtraegas").click(function(){
+			var meco = "";
+			var mgene = {
+			state0: {
+				html:"<h1>Traer Gastos: </h1><br/><center>Fecha: '.$mano.'&nbsp; Mes: '.$mes.'</center><br/>",
+				buttons: { Cancelar: false, Aceptar: true },
+				focus: 1,
+				submit:function(e,v,m,f){
+					if(v){
+						e.preventDefault();
+						$.ajax({
+							url: \''.site_url('construccion/edgasto/edtraegas').'\',
+							global: false,
+							type: "POST",
+							data: ({ anomes : encodeURIComponent(f.mano+f.mmes) }),
+							dataType: "text",
+							async: false,
+							success: function(sino) {
+								meco = " sino="+sino;
+								if (sino.substring(0,1)=="S"){
+									$.prompt.goToState("state1");
+								} else {
+									$.prompt.close();
+								}
+							},
+							error: function(h,t,e) { alert("Error.. ",e) }
+						});
+						return false;
+					}
+				}
+			},
+			state1: {
+				html:"Gastos transferidos!"+meco,
+				buttons: { Regresar: -1, Salir: 0 },
+				focus: 1,
+				submit:function(e,v,m,f){
+					e.preventDefault();
+					if(v==0)
+						$.prompt.close();
+					else if(v==-1)
+						$.prompt.goToState("state0");
+				}
+			}
+			};
+			$.prompt(mgene);
+		});';
+
 
 
 		$bodyscript .= '
@@ -424,17 +523,15 @@ class Edrec extends Controller {
 			'editoptions'   => '{ size:1, maxlength: 1 }',
 		));
 
-
-		$grid->addField('observa');
-		$grid->label('Observa');
+		$grid->addField('anomes');
+		$grid->label('Mes');
 		$grid->params(array(
 			'search'        => 'true',
+			'align'         => "'center'",
 			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'textarea'",
-			'editoptions'   => "'{rows:2, cols:60}'",
+			'width'         => 70,
+			'edittype'      => "'text'"
 		));
-
 
 		$grid->addField('usuario');
 		$grid->label('Usuario');
@@ -447,7 +544,6 @@ class Edrec extends Controller {
 			'editoptions'   => '{ size:12, maxlength: 12 }',
 		));
 
-
 		$grid->addField('estampa');
 		$grid->label('Estampa');
 		$grid->params(array(
@@ -459,7 +555,6 @@ class Edrec extends Controller {
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
 		));
-
 
 		$grid->addField('hora');
 		$grid->label('Hora');
@@ -550,7 +645,7 @@ class Edrec extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData()
@@ -609,9 +704,9 @@ class Edrec extends Controller {
 		};
 	}
 
-	//***************************
+	//******************************************************************
 	//Definicion del Grid y la Forma
-	//***************************
+	//
 	function defgridit( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -999,6 +1094,9 @@ class Edrec extends Controller {
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
 
+	//******************************************************************
+	//  Genera Recibos de Cobro
+	//
 	function generec( $anomes = 0){
 		if ( $anomes == 0 ) $anomes = $this->input->post('anomes');
 		if ( $anomes <= 0  ) {
@@ -1091,9 +1189,9 @@ class Edrec extends Controller {
 				}
 				$data1 = array();
 				$data1['numero']   = $numero;
-				$data1['tipo']     = 'ZZ';
+				$data1['tipo']     = 'Z1';
 				$data1['codigo']   = 'COMADM';
-				$data1['detalle']  = 'COMISION POR ADMINISTRACION '.$tasa.'%';
+				$data1['detalle']  = 'COMISION POR SERVICIOS ADMINISTRATIVOS';
 				$data1['total']    = $monto;
 				$data1['alicuota'] = 0;
 				$data1['cuota']    = round($monto*$tasa/100,2);
@@ -1107,6 +1205,77 @@ class Edrec extends Controller {
 			echo "Si se Guardaron";
 		}
 	}
+
+	//******************************************************************
+	//  Genera Recibos de Cobro
+	//
+	function genecobro( $anomes = 0){
+		if ( $anomes == 0 ) $anomes = $this->input->post('anomes');
+		if ( $anomes <= 0  ) {
+			echo 'No se Guardo '.$anomes;
+			return false;
+		}
+		$dbanomes = $this->db->escape($anomes);
+		$tasa = $this->datasis->traevalor('CONDOADM','COMISION DE GASTOS ADMINISTRATIVOS');
+		if ($tasa == '') $tasa = 10; 
+	
+		//Genera los recibos
+		$mSQL = "
+			SELECT 
+				a.cod_cli, b.nombre, 'ND' tipo_doc, CONCAT('RC',MID(a.numero,3,6)) numero,
+				a.fecha, a.cuota monto, 0 impuesto, 0 abonos, a.vence, 'RC' tipo_ref, a.numero num_ref,
+				'RECIBO DE CONDOMINIO' observa1, a.id,
+				CONCAT('CORRESPONDIENTE AL MES ',MID(a.anomes,5,2),'-',MID(a.anomes,1,4)) observa2,
+				a.usuario,a.estampa, a.hora,a.transac, 'NOCON' codigo, 0 montasa, 0 monredu, 0 monadic, 0 tasa, 0 reducida, 0 sobretasa, 0 exento
+			FROM edrec a JOIN scli b ON a.cod_cli=b.cliente
+			WHERE a.status = 'P' AND a.anomes = ${dbanomes}
+		";
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			foreach( $query->result() as  $row ) {
+				$transac   = $this->datasis->fprox_numero('transac');
+				$fecha    = date('Ymd'); 
+				$data = array();
+				$data['cod_cli']   = $row->cod_cli;
+				$data['nombre']    = $row->nombre;
+				$data['tipo_doc']  = $row->tipo_doc;
+				$data['numero']    = $row->numero;
+				$data['fecha']     = $row->fecha;
+				$data['monto']     = $row->monto;
+				$data['impuesto']  = $row->impuesto;
+				$data['abonos']    = $row->abonos;
+				$data['vence']     = $row->vence;
+				$data['tipo_ref']  = $row->tipo_ref;
+				$data['num_ref']   = $row->num_ref;
+				$data['observa1']  = $row->observa1;
+				$data['observa2']  = $row->observa2;
+				$data['usuario']   = $row->usuario;
+				$data['estampa']   = date('h:m:s');
+				$data['hora']      = date('h:m:s');
+				$data['transac']   = $transac;
+				$data['codigo']    = $row->codigo;
+				$data['montasa']   = $row->montasa;
+				$data['monredu']   = $row->monredu;
+				$data['monadic']   = $row->monadic;
+				$data['tasa']      = $row->tasa;
+				$data['reducida']  = $row->reducida;
+				$data['sobretasa'] = $row->sobretasa;
+				$data['exento']    = $row->exento;
+				$this->db->insert('smov',$data);
+
+				// Actualiza edrec
+				$data = array();
+				$data['transac'] = $transac;
+				$data['status']  = 'F';
+				$this->db->where("id", $id);
+				$this->db->update('edrec',$data);
+			}
+			echo "Si se Guardaron";
+		}
+	}
+
+
+
 
 	function instalar(){
 		if (!$this->db->table_exists('edrec')) {

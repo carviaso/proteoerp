@@ -315,6 +315,7 @@ class Edgasto extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
+			'align'         => "'center'",
 			'width'         => 50,
 			'edittype'      => "'textarea'",
 		));

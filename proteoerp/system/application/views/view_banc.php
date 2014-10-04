@@ -166,8 +166,8 @@ function add_proveed(){
 				<tr>
 					<td class="littletableheaderc"><?php echo $form->gastoidb->label; ?></td>
 					<td class="littletablerow"    ><?php echo $form->gastoidb->output;?></td>
-					<td class="littletableheaderc"><?php echo $form->ctasoc->label; ?></td>
-					<td class="littletablerow"    ><?php echo $form->ctasoc->output;?></td>
+					<!-- td class="littletableheaderc"><?php echo $form->ctasoc->label; ?></td>
+					<td class="littletablerow"    ><?php echo $form->ctasoc->output;?></td -->
 				</tr>
 				<tr>
 				<td class="littletableheaderc"><?php echo $form->cuenta->label ?></td>

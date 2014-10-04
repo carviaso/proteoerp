@@ -33,11 +33,21 @@ $container_br=join('&nbsp;', $form->_button_container['BR']);
 				<td class="littletablerow"    ><?php echo $form->grupo->output;?></td>
 			</tr>
 			<tr>
-				<td             class="littletableheaderc"><?php echo $form->cuenta->label ?></td>
-				<td colspan="3" class="littletablerow"    ><?php echo $form->cuenta->output." "; ?>
+				<td class="littletableheaderc"><?php echo $form->cuenta->label ?></td>
+				<td class="littletablerow"    ><?php echo $form->cuenta->output." "; ?>
 				<?php
 					if ( $form->_status == 'show' ) {
 						$mSQL = "SELECT descrip FROM cpla WHERE codigo='".trim($form->cuenta->output)."'";
+						echo $this->datasis->dameval($mSQL);
+					}
+				?>
+				</td>
+
+				<td class="littletableheaderc"><?php echo $form->ctarein->label ?></td>
+				<td class="littletablerow"    ><?php echo $form->ctarein->output." "; ?>
+				<?php
+					if ( $form->_status == 'show' ) {
+						$mSQL = "SELECT descrip FROM cpla WHERE codigo='".trim($form->ctarein->output)."'";
 						echo $this->datasis->dameval($mSQL);
 					}
 				?>
