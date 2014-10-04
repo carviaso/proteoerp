@@ -100,6 +100,19 @@ $(function(){
 
 	$('input[name^="cantidad_"]').keypress(function(e) {
 		if(e.keyCode == 13) {
+			var nom=this.name
+			var pos=this.name.lastIndexOf('_');
+			if(pos>0){
+				var ind = this.name.substring(pos+1);
+				$('#costo_'+ind).focus();
+				$('#costo_'+ind).select();
+			}
+			return false;
+		}
+	});
+
+	$('input[name^="costo_"]').keypress(function(e) {
+		if(e.keyCode == 13) {
 		    add_itscst();
 			return false;
 		}
@@ -428,10 +441,20 @@ function add_itscst(){
 	$("#cantidad_"+can).numeric(".");
 	$("#cantidad_"+can).keypress(function(e) {
 		if(e.keyCode == 13) {
+		    $('#costo_'+can).focus();
+			$('#costo_'+can).select();
+			return false;
+		}
+	});
+
+	$("#costo_"+can).keypress(function(e) {
+		if(e.keyCode == 13) {
 		    add_itscst();
 			return false;
 		}
 	});
+
+
 	$("#costo_"+can).numeric(".");
 	$("#importe_"+can).numeric(".");
 	autocod(can);

@@ -522,7 +522,7 @@ class Scst extends Controller {
 			});';
 
 		$post = $this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+idactual+\'/id\'').';';
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "570", $width = "860", 'fcompra', $post );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "580", $width = "860", 'fcompra', $post );
 
 		$bodyscript .= "\n".'
 			$( "#fcmonto" ).dialog({

@@ -48,7 +48,8 @@ class Vend extends Controller {
 			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
 			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
 			array('id'=>'fborra',  'title'=>'Eliminar Registro'),
-			array('id'=>'fgrupo',  'title'=>'Gestionar Grupos')
+			array('id'=>'fgrupo',  'title'=>'Gestionar Grupos'),
+			array('id'=>'fzona' ,  'title'=>'Asginar Zona a vendedor')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -101,6 +102,7 @@ class Vend extends Controller {
 			}
 		});';
 
+
 		$bodyscript .= '
 		$("#bzona").click(function(){
 			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -108,11 +110,50 @@ class Vend extends Controller {
 				var ret    = $("'.$ngrid.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'asignazona').'/"+ret.vendedor, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
+					$("#fzona").html(data);
+					$("#fzona").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		});';
+
+		$bodyscript .= '
+		$("#fzona").dialog({
+			autoOpen: false, height: 250, width: 360, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if(json.status == "A"){
+									apprise("Zona asignada");
+									$("#fzona").html("");
+									$("#fzona").dialog("close");
+								}else{
+									apprise("No se pudo asignar la zona");
+								}
+							}catch(e){
+								$("#fzona").html(r);
+								$("#fzona").dialog( "open" );
+							}
+						}
+				})},
+				"Cancelar": function(){
+					$("#fzona").html("");
+					$(this).dialog("close");
+				}
+			},
+			close: function(){
+				$("#fzona").html("");
+			}
+		});';
+
 
 		$bodyscript .= '});';
 
@@ -582,7 +623,7 @@ class Vend extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('grvd');
 
-		$response   = $grid->getData('grvd', array(array()), array(), false, $mWHERE );
+		$response = $grid->getData('grvd', array(array()), array(), false, $mWHERE );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -706,7 +747,6 @@ class Vend extends Controller {
 			}
 		}
 	}
-
 
 	function instalar(){
 		if(!$this->db->table_exists('vend')){
