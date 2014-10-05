@@ -338,6 +338,7 @@ class Invfis extends Controller {
 
 		$cana=100;
 		$grid = new DataGrid('Reportes -->'.$titulo1.' '.$titulo2 );
+		$grid->table_id = 'conteotabla';
 		$grid->per_page  = $cana;
 		$grid->use_function('caja','pinta');
 		$action = "javascript:window.location='".site_url($this->url)."'";
@@ -427,7 +428,8 @@ class Invfis extends Controller {
 			});
 
 		});
-		</script>';
+		</script>
+		<style type="text/css">#conteotabla tr:hover { background-color: #ffff99; }</style>';
 
 		$leyenda ='<span style="color:orange">Reci&eacute;n contado</span> ';
 		$leyenda.='<span style="color:red">Ya contado</span> ';
