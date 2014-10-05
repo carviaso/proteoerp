@@ -136,12 +136,12 @@ class Sinv extends Controller {
 		jQuery("#bpos1").jqGrid(\'navGrid\',"#pbpos1",{edit:false, add:true, del:true, search: false, addfunc: bposadd });
 
 		function bposadd(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
 				$.prompt( "<h1>Agregar nuevo codigo de Barras</h1><center><input type=\'text\' id=\'mcodbar\' name=\'mcodbar\' value=\'\' maxlengh=\'15\' size=\'15\' ></center><br/>", {
 					buttons: { Agregar: true, Cancelar: false },
 					submit: function(e,v,m,f){
-						if (v) {
+						if(v){
 							if( f.mcodbar > 0 ) {
 								$.ajax({
 									type: "POST",
@@ -158,8 +158,7 @@ class Sinv extends Controller {
 					}
 				});
 			}
-		}
-		';
+		}';
 
 		$funciones = '
 		function factivo(el, val, opts){
@@ -168,15 +167,14 @@ class Sinv extends Controller {
 				meco=\'<div><img src="'.base_url().'images/basura.png" width="20" height="20" border="0" /></div>\';
 			}
 			return meco;
-		};
-		';
+		}';
 
 		//Recalcular Precios
 		$funciones .= '
 		function recalcular(){
 			var seguro = true;
 			var mtipo="M";
-			$.prompt( "<h1>Recalcular Precios de Inventario</h1><p><b>Margenes:</b> Recalcula los margenes dejando fijos los precios</p><p><b>Precios:</b> Recalcula los precios seg&uacte;n los margenes</p>", {
+			$.prompt( "<h1>Recalcular Precios de Inventario</h1><p><b>Margenes:</b> Recalcula los margenes dejando fijos los precios</p><p><b>Precios:</b> Recalcula los precios seg&uacute;n los margenes</p>", {
 				buttons: { Margenes: 1, Precios: 2, Cancelar: 0 },
 				submit: function(e,v,m,f){
 					if(v == 1){
@@ -188,8 +186,47 @@ class Sinv extends Controller {
 					}
 				}
 			})
-		}
-		';
+		}';
+
+
+		//Permite asignar a varios producto el mismo precio
+		$aprecios="<form id='setprecio'>
+		<fieldset>
+			<legend>Cambio de precios:</legend>
+			Precio1: <input name='_p1' id='_p1' style='text-align: right;width: 100px' type='text'>
+			Precio3: <input name='_p3' id='_p3' style='text-align: right;width: 100px' type='text'><br>
+			Precio2: <input name='_p2' id='_p2' style='text-align: right;width: 100px' type='text'>
+			Precio4: <input name='_p4' id='_p4' style='text-align: right;width: 100px' type='text'><br>
+			<p style='text-align:center'>Costo:   <input name='_cos' id='_cos' style='text-align: right;width: 100px' type='text'></p>
+		</fieldset>
+		</form>";
+		$aprecios=str_replace(array("\n","\t"),array('',''),$aprecios);
+		$funciones .= '
+		function asignaprecios(){
+			var s = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selarrrow\');
+			if(s.length > 0){
+				$.prompt("<h1>Precios de Productos</h1>'.$aprecios.'", {
+					buttons: { Cambiar: 1, Cancelar: 2 },
+					submit: function(e,v,m,f){
+						if(v==1){
+							$.ajax({
+								type: "POST",
+								data: {p1:$("#_p1").val(),p2:$("#_p2").val(),p3:$("#_p3").val(),p4:$("#_p4").val(),cos:$("#_cos").val(),ids:s },
+								url: "'.site_url($this->url.'asignaprecio').'",
+								complete:
+									function(r,s,x){
+										alert(r);
+									}
+							});
+						}else if( v == 2){
+
+						}
+					}
+				});
+			}else{
+				alert("Seleccione al menos un producto");
+			}
+		}';
 
 		// Consulta de Movimiento
 		$funciones .= '
@@ -197,7 +234,7 @@ class Sinv extends Controller {
 			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				window.open(\''.site_url("inventario/sinv/consulta/").'/\'+ret.id, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
+				window.open(\''.site_url('inventario/sinv/consulta/').'/\'+ret.id, \'_blank\', \'width=800, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)\');
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Producto</h1>");
 			}
@@ -358,7 +395,7 @@ class Sinv extends Controller {
 									url: \''.site_url('inventario/sinv/sinvcodigoexiste').'\',
 									global: false,
 									type: "POST",
-									data: ({ codigo : encodeURIComponent(f.mcodigo) }),
+									data: ({ codigo : f.mcodigo }),
 									dataType: "text",
 									async: false,
 									success: function(sino) {
@@ -446,10 +483,10 @@ class Sinv extends Controller {
 							} else {
 								e.preventDefault();
 								$.ajax({
-									url: "'.site_url("inventario/sinv/sinvcammarca/").'",
+									url: "'.site_url('inventario/sinv/sinvcammarca/').'",
 									global: false,
 									type: "POST",
-									data: ({ marca : encodeURIComponent(f.mmarca), productos : s }),
+									data: ({ marca : f.mmarca, productos : s }),
 									dataType: "text",
 									async: false,
 									success: function(sino) {
@@ -509,7 +546,7 @@ class Sinv extends Controller {
 									url: "'.site_url("inventario/sinv/sinvcamgrup/").'",
 									global: false,
 									type: "POST",
-									data: ({ grupo : encodeURIComponent(f.mgrupo), productos : s }),
+									data: ({ grupo : f.mgrupo, productos : s }),
 									dataType: "text",
 									async: false,
 									success: function(sino) {
@@ -549,7 +586,7 @@ class Sinv extends Controller {
 								url: "'.site_url("inventario/sinv/recaldolar/").'",
 								global: false,
 								type: "POST",
-								data: ({ cambio : encodeURIComponent(f.mcambio) }),
+								data: ({ cambio : f.mcambio }),
 								dataType: "text",
 								async: false,
 								success: function(sino) {
@@ -569,6 +606,48 @@ class Sinv extends Controller {
 
 	}
 
+	function asignaprecio(){
+		$pp1  =round(floatval($this->input->post('p1')),2);
+		$pp2  =round(floatval($this->input->post('p2')),2);
+		$pp3  =round(floatval($this->input->post('p3')),2);
+		$pp4  =round(floatval($this->input->post('p4')),2);
+		$costo=round(floatval($this->input->post('cos')),2);
+		$ids  = $this->input->post('ids');
+
+		if(is_array($ids)){
+			if($pp1>=$pp2 && $pp2>=$pp3 && $pp3>=$pp4 && $pp1>$costo && $pp2>$costo && $pp3>$costo && $pp4>$costo && $pp1*$pp2*$pp3*$pp4>0){
+				foreach($ids as $id){
+					$id=intval($id);
+					if($id>0){
+						if($costo>0){
+							$setcosto=",ultimo  = IF(ultimo=0,${costo},ultimo),
+							pond    = IF(pond=0  ,${costo},pond) ";
+						}
+						$mSQL="UPDATE sinv SET
+							precio1 = ${pp1}, base1=ROUND(${pp1}*100/(100+iva),2),
+							precio2 = ${pp2}, base2=ROUND(${pp2}*100/(100+iva),2),
+							precio3 = ${pp3}, base3=ROUND(${pp3}*100/(100+iva),2),
+							precio4 = ${pp4}, base4=ROUND(${pp4}*100/(100+iva),2) ${setcosto}
+							WHERE id=${id} AND formcal IN ('P','U','M')";
+						$this->db->simple_query($mSQL);
+
+						$mSQL="UPDATE sinv SET
+							margen1=ROUND(100-((IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(pond,ultimo)))*100)/base1),2),
+							margen2=ROUND(100-((IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(pond,ultimo)))*100)/base2),2),
+							margen3=ROUND(100-((IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(pond,ultimo)))*100)/base3),2),
+							margen4=ROUND(100-((IF(formcal='U',ultimo,IF(formcal='P',pond,GREATEST(pond,ultimo)))*100)/base4),2)
+							WHERE formcal IN ('P','U','M') AND id=${id}";
+						$this->db->simple_query($mSQL);
+
+						logusu('sinv','Cambio de precios producto id='.$id);
+					}
+				}
+				echo 'Precios cambiados';
+			}else{
+				echo 'Precios no cumplen con la jerarquia';
+			}
+		}
+	}
 	//******************************************************************
 	// Funciones de los Botones
 	//
@@ -861,7 +940,7 @@ class Sinv extends Controller {
 			var mBlanco = "<tr class=\'littletablerow\'><td>&nbsp;</td></tr>";
 			var mTabla = "<table class=\'bordetabla\' cellpadding=\'1\' cellspacing=\'0\'";
 
-			mSalida += "<tr><td width=\'255\'>";
+			mSalida += "<tr><td width=\'255\' 	style=\'vertical-align: text-top;\'>";
 			mSalida += mTabla+" width=\'250\'>";
 			mSalida += "<tr class=\'tableheaderm\'><th colspan=\'3\'>Precios de Venta</th></tr>";
 			mSalida += "<tr class=\'tableheader\'><th>%</th><th>Base</th><th>Precio</th></tr>";
@@ -871,7 +950,7 @@ class Sinv extends Controller {
 			mSalida += mClaser+"<td align=\'right\'>"+ret.margen4+"</td><td align=\'right\'>"+nformat(ret.base4,2)+"</td><td align=\'right\'>"+nformat(ret.precio4,2)+"</td></tr>";
 			mSalida += "</table>";
 
-			mSalida += "</td><td width=\'205\' >";
+			mSalida += "</td><td width=\'205\' style=\'vertical-align: text-top;\'>";
 
 			mSalida += "<div id=\'itsinv\'>";
 			mSalida += mTabla+" width=\'200\'>";
@@ -881,7 +960,7 @@ class Sinv extends Controller {
 			mSalida += "</table>";
 			mSalida += "</div>";
 
-			mSalida += "</td><td width=\'205\'>";
+			mSalida += "</td><td width=\'205\' style=\'vertical-align: text-top;\'>";
 
 			mSalida += mTabla+" width=\'200\'>";
 			mSalida += "<tr class=\'tableheaderm\'><th colspan=\'2\'>Codigos Asociados</th></tr>";
@@ -892,7 +971,7 @@ class Sinv extends Controller {
 			mSalida += mClaser+"<td>C.P.E.</td><td>"+ret.cpe+    "</td></tr>";
 			mSalida += "</table>";
 
-			mSalida += "</td><td width=\'105\'>";
+			mSalida += "</td><td width=\'105\' style=\'vertical-align: text-top;\'>";
 			mSalida += mTabla+" width=\'100\'>";
 			mSalida += "<tr class=\'tableheader\'><th colspan=\'2\'>Medidas</th></tr>";
 			mSalida += mClaser+"<td>Peso  </td><td align=\'right\'>"+nformat(ret.peso,2)+ "</td></tr>";
@@ -902,7 +981,7 @@ class Sinv extends Controller {
 			mSalida += mClaser+"<td>Unidad</td><td>"+ret.unidad+"</td></tr>";
 			mSalida += "</table>";
 
-			mSalida += "</td><td>";
+			mSalida += "</td><td style=\'vertical-align: text-top;\'>";
 
 			mSalida += mTabla+" width=\'250\'>";
 			mSalida += "<tr class=\'tableheaderm\'><th colspan=\'3\'>&Uacute;ltimas Compras</th></tr>";
@@ -2566,14 +2645,14 @@ class Sinv extends Controller {
 			function(id){
 				if (id){
 					var ret = $(gridId1).getRowData(id);
-					var url= "'.site_url("inventario/fotos/thumbnail").'/"+id;
+					var url= "'.site_url('inventario/fotos/thumbnail').'/"+id;
 					var sitio = "";
 					var codqr = "<div class=\'botones\'><button class=\'anexos\' onclick=\'codqr();\'>Etiqueta</button></div>";
 					if ( ret.url.length > 12 )
 						sitio = "<button onclick=\'irurl();\'>Pagina Web</button>";
 					$("#ladicional").html("<center><img src=\'"+url+"\' width=\'160\' ondblclick=\'verfotos()\' ><br>"+codqr+sitio+"<center><div id=\'textofoto\' style=\'text-align:center;\'></div>");
 					$("#radicional").html(detalle(id));
-					$.get(\''.site_url("inventario/sinv/sinvitems").'/\'+id,
+					$.get(\''.site_url('inventario/sinv/sinvitems').'/\'+id,
 						function(data){
 							$("#itsinv").html(data);
 					});
@@ -5005,7 +5084,7 @@ class Sinv extends Controller {
 	//Manda una tabla para la consulta
 	function sinvitems($id = 0){
 		$dbid=intval($id);
-		$salida = "No hay Existencias";
+		$salida = 'No hay Existencias';
 		$codigo = $this->datasis->dameval("SELECT codigo FROM sinv WHERE id=${dbid}");
 
 		if(!empty($codigo)){

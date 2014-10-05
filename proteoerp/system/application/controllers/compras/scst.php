@@ -395,7 +395,7 @@ class Scst extends Controller {
 		//Recargos
 		$bodyscript .= '
 			$("#recargos").click( function(){
-				alert("jeje");
+				alert("funcion no disponible");
 			});';
 
 
@@ -461,7 +461,7 @@ class Scst extends Controller {
 
 		$bodyscript .= '
 			$("#factuali").dialog({
-				autoOpen: false, height: 410, width: 450, modal: true,
+				autoOpen: false, height: 430, width: 450, modal: true,
 				buttons: {
 					"Actualizar": function() {
 						var bValid = true;
@@ -2815,8 +2815,26 @@ class Scst extends Controller {
 		$dbcontrol = $this->db->escape($control);
 
 		$script = '$(function(){
-		$(".littletableheader").css("width","200px");
-		$("#fecha").datepicker({ dateFormat: "dd/mm/yy" }); })';
+			$(".littletableheader").css("width","200px");
+			$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
+			$("#cprecio").change(function(){
+				var cprecio=$("#cprecio").val();
+				if(cprecio=="S"){
+					$("#advs").show();
+					$("#advn").hide();
+					$("#advd").hide();
+				}else if(cprecio=="N"){
+					$("#advs").hide();
+					$("#advn").show();
+					$("#advd").hide();
+				}else{
+					$("#advs").hide();
+					$("#advn").hide();
+					$("#advd").show();
+				}
+			});
+			$("#cprecio").change();
+		})';
 
 		$form = new DataForm("compras/scst/actualizar/${control}/process");
 		$form->script($script);
@@ -2908,8 +2926,60 @@ class Scst extends Controller {
 				$form->ordc->title ='Selecionar SI para cerrar las ordenes de compra asociadas o NO para dejarlas en backorder';
 			}
 
-			$form->container = new containerField('tabafo2',$htmltabla);
+			$style='style="background-color:red;border-radius: 5px;color:yellow;padding:3px;font-size:1.2em;"';
+			//Advertencia con opcion a cambio de precios S
+			$mSQL = "SELECT GROUP_CONCAT(DISTINCT TRIM(a.codigo)) AS codigos
+				FROM itscst AS a
+				JOIN sinv AS b ON a.codigo=b.codigo WHERE (
+				b.margen1<0 OR b.margen2<0 OR b.margen3<0 OR b.margen4<0) AND a.rmargen='S' AND a.control=${dbcontrol}";
+			$codigo1=trim($this->datasis->dameval($mSQL));
 
+			$mSQL = "SELECT GROUP_CONCAT(DISTINCT TRIM(a.codigo)) AS codigos
+				FROM itscst AS a
+				JOIN sinv AS b ON a.codigo=b.codigo WHERE (
+				ABS(a.costo-(a.precio1/(1+(b.iva/100))))<0 OR
+				ABS(a.costo-(a.precio2/(1+(b.iva/100))))<0 OR
+				ABS(a.costo-(a.precio3/(1+(b.iva/100))))<0  ) AND a.rmargen='N' AND a.control=${dbcontrol}";
+			$codigo2=trim($this->datasis->dameval($mSQL));
+			$cc = array();
+			if(!empty($codigo1)) $cc[]=$codigo1;
+			if(!empty($codigo2)) $cc[]=$codigo2;
+			$codigos=implode(',',$cc);
+			if(!empty($codigos)){
+				$form->advs = new containerField('advs','<div id="advs" '.$style.'>Los productos <b>'.$codigos.'</b> van a quedar en perdida si  procede con esta operaci&oacute;n.</div>');
+			}
+			//Fin precios S
+
+			//Advertencia cambio de precios N
+			$mSQL = "SELECT GROUP_CONCAT(DISTINCT TRIM(a.codigo)) AS codigos
+				FROM itscst AS a
+				JOIN sinv AS b ON a.codigo=b.codigo WHERE (
+				b.precio1/(1+(b.iva/100))<a.costo OR
+				b.precio2/(1+(b.iva/100))<a.costo OR
+				b.precio3/(1+(b.iva/100))<a.costo OR
+				b.precio4/(1+(b.iva/100))<a.costo   ) AND a.rmargen='S' AND a.control=${dbcontrol}";
+			$codigos=trim($this->datasis->dameval($mSQL));
+			if(!empty($codigos)){
+				$form->advn = new containerField('advn','<div id="advn" '.$style.'>Los productos <b>'.$codigos.'</b> van a quedar en perdida si  procede con esta operaci&oacute;n.</div>');
+			}
+			//Fin de advertencia cambio de precios n
+
+			//Advertencia cambio de precios D
+			$mSQL = "SELECT GROUP_CONCAT(DISTINCT TRIM(a.codigo)) AS codigos
+				FROM itscst AS a
+				JOIN sinv AS b ON a.codigo=b.codigo WHERE (
+				GREATEST((b.precio1/(1+(b.iva/100))),(a.precio1/(1+(b.iva/100)))) < a.costo OR
+				GREATEST((b.precio2/(1+(b.iva/100))),(a.precio2/(1+(b.iva/100)))) < a.costo OR
+				GREATEST((b.precio3/(1+(b.iva/100))),(a.precio3/(1+(b.iva/100)))) < a.costo OR
+				GREATEST((b.precio4/(1+(b.iva/100))),(a.precio4/(1+(b.iva/100)))) < a.costo   ) AND a.control=${dbcontrol}";
+			$codigos=trim($this->datasis->dameval($mSQL));
+			if(!empty($codigos)){
+				$form->advd = new containerField('advd','<div id="advd" '.$style.'>Los productos <b>'.$codigos.'</b> van a quedar en perdida si  procede con esta operaci&oacute;n.</div>');
+			}
+			//Fin de advertencia cambio de precios D
+
+
+			$form->container = new containerField('tabafo2',$htmltabla);
 			$form->build_form();
 
 			if($form->on_success()){
@@ -2922,9 +2992,9 @@ class Scst extends Controller {
 				//Valida que si cambia los precios estos no esten por debajo del costo
 				if($cprecio!='N'){
 					$mSQL = "SELECT COUNT(*) AS cana FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE (
-					ABS(a.costo-(a.precio1/(1+(b.iva/100))))<0 OR
-					ABS(a.costo-(a.precio2/(1+(b.iva/100))))<0 OR
-					ABS(a.costo-(a.precio3/(1+(b.iva/100))))<0  ) AND a.control=${dbcontrol}";
+					a.costo>(a.precio1/(1+(b.iva/100))) OR
+					a.costo>(a.precio2/(1+(b.iva/100))) OR
+					a.costo>(a.precio3/(1+(b.iva/100)))  ) AND a.rmargen='N' AND a.control=${dbcontrol}";
 
 					$cana = $this->datasis->dameval($mSQL);
 					if(!empty($cana)){
@@ -2936,6 +3006,7 @@ class Scst extends Controller {
 						echo json_encode($rt);
 						return false;
 					}
+
 				}
 				//Fin de la validacion
 

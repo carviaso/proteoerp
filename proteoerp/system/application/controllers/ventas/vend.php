@@ -354,6 +354,23 @@ class Vend extends Controller {
 
 		$grid->setBarOptions('addfunc: vendadd, editfunc: vendedit, delfunc: venddel, viewfunc: vendshow');
 
+		$grid->setOnSelectRow('
+			function(id){
+				$.post("'.site_url($this->url.'canavend').'/"+encodeURIComponent(id),
+				function(data){
+					var cana=Number(data);
+					var msj ="";
+					if(cana>1){
+						msj = "<b>"+data+"</b> clientes";
+					}else if(cana==1){
+						msj = "<b>"+data+"</b> cliente";
+					}else{
+						msj = "Ning&uacute;n cliente";
+					}
+					$("#ladicional").html("<p style=\'text-align:center;\'>"+msj+"</p>");
+				});
+			}');
+
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
@@ -379,6 +396,16 @@ class Vend extends Controller {
 		$response   = $grid->getData('vend', array(array()), array(), false, $mWHERE );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
+	}
+
+	function canavend($id){
+		$id=intval($id);
+		if($id>0){
+			$vd   = $this->datasis->dameval('SELECT vendedor FROM vend WHERE id='.$id);
+			$dbvd = $this->db->escape($vd);
+			$cana    = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM scli WHERE vendedor=${dbvd} OR cobrador=${dbvd}"));
+			echo $cana;
+		}
 	}
 
 	/**
@@ -631,6 +658,7 @@ class Vend extends Controller {
 
 	function asignazona($vd){
 		$this->rapyd->load('dataform');
+		$vd   = trim($vd);
 		$dbvd = $this->db->escape($vd);
 
 		$form = new DataForm($this->url."asignazona/${vd}/process");
@@ -641,7 +669,7 @@ class Vend extends Controller {
 			$htmltabla="<table width='100%' style='background-color:#FBEC88;text-align:center;font-size:12px'>
 				<tr>
 					<td>Vendedor:</td>
-					<td><b>(".htmlspecialchars($row['nombre']).")</b></td>
+					<td><b>(".htmlspecialchars($vd).") ".htmlspecialchars($row['nombre'])."</b></td>
 				</tr>
 			</table>";
 
