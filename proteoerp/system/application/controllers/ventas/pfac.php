@@ -116,14 +116,14 @@ class Pfac extends Controller {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
-				if(ret.status == "A"){
+				if(ret.status == "P"){
 					mId = id;
 					$.post("'.site_url('ventas/pfac/dataedit/modify').'/"+id, function(data){
 						$("#fedita").html(data);
 						$("#fedita").dialog( "open" );
 					});
 				}else{
-					$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+					$.prompt("<h1>Por favor Seleccione un Registro con status P</h1>");
 				}
 			}
 		}';
