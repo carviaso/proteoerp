@@ -1392,6 +1392,10 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 					<td class='littletableheaderc'><?php echo $form->dolar->label;  ?></td>
 					<td class="littletablerow"    ><?php echo $form->dolar->output; ?></td>
 				</tr>
+				<tr>
+					<td class='littletableheaderc'><?php echo $form->margenu->label;  ?></td>
+					<td class="littletablerow"    ><?php echo $form->margenu->output; ?></td>
+				</tr>
 			</table>
 			</fieldset>
 		</td>

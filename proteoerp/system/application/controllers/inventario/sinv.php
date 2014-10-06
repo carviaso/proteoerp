@@ -3030,10 +3030,10 @@ class Sinv extends Controller {
 
 		$AddLinea='<a href="javascript:add_linea();" title="Haz clic para Agregar una nueva Linea;">'.image('list_plus.png','Agregar',array("border"=>"0")).'</a>';
 		$edit->linea = new dropdownField('L&iacute;nea','linea');
-		$edit->linea->rule ='required';
-		$edit->linea->style='width:250px;';
-		$edit->linea->db_name='linelinea';
-		$edit->linea->pointer=true;
+		$edit->linea->rule    = 'required';
+		$edit->linea->style   = 'width:250px;';
+		$edit->linea->db_name = 'linelinea';
+		$edit->linea->pointer = true;
 		$depto=$edit->getval('depto');
 		if($depto!==false){
 			$dbdepto=$this->db->escape($depto);
@@ -3196,6 +3196,16 @@ class Sinv extends Controller {
 		$edit->dolar->maxlength    = 13;
 		$edit->dolar->autocomplete = false;
 		$edit->dolar->insertValue = 0;
+
+
+		$edit->margenu = new inputField('Margen Unico', 'margenu');
+		$edit->margenu->css_class    = 'inputnum';
+		$edit->margenu->size         = 10;
+		$edit->margenu->maxlength    = 13;
+		$edit->margenu->autocomplete = false;
+		$edit->margenu->insertValue = 0;
+
+
 
 		$edit->ultimo = new inputField('&Uacute;ltimo', 'ultimo');
 		$edit->ultimo->css_class    = 'inputnum';
@@ -6170,7 +6180,7 @@ class Sinv extends Controller {
 		};
 
 		if(!in_array('maxven',$campos)) {
-			$this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `maxven` INT(10) NULL DEFAULT '0' COMMENT 'Maximo de venta', ADD COLUMN `minven` INT(10) NULL DEFAULT '0' COMMENT 'Minimo de venta' AFTER `maxven`");
+			$this->db->simple_query("ALTER TABLE sinv ADD COLUMN `maxven` INT(10) NULL DEFAULT '0' COMMENT 'Maximo de venta', ADD COLUMN `minven` INT(10) NULL DEFAULT '0' COMMENT 'Minimo de venta' AFTER `maxven`");
 		};
 
 		if(!in_array('premin',$campos)) {
@@ -6182,7 +6192,6 @@ class Sinv extends Controller {
 			$mSQL="ALTER TABLE sinv ADD COLUMN vnega CHAR(1) NULL DEFAULT 'S' COMMENT 'Permitir Venta Negativa' ";
 			$this->db->query($mSQL);
 		}
-
 
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
 			if (!in_array('mpps',       $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `mpps`        VARCHAR(20) NULL  COMMENT 'Numero de Ministerior de Salud'");
@@ -6275,6 +6284,7 @@ class Sinv extends Controller {
 
 		if (!in_array('linfe'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `linfe`       CHAR(1)       NULL DEFAULT 'N' ");
 		if (!in_array('lindia'     ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `lindia`      INT(5)        NULL DEFAULT '0'");
+		if (!in_array('margenu'    ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `margenu`     DECIMAL(10,2) NULL DEFAULT '0'");
 
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
 			if (!in_array('dcomercial', $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `dcomercial`  INT(6)     NULL  COMMENT 'Destino Comercial'");
