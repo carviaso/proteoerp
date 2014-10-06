@@ -4573,7 +4573,10 @@ class Sfac extends Controller {
 				);
 
 				$itsel=array('a.codigoa','b.descrip AS desca','a.cana - a.entregado AS cana','a.preca','a.tota','b.iva',
-				'b.precio1','b.precio2','b.precio3','b.precio4','b.tipo','b.peso');
+				'ROUND(b.precio1*100/(100+b.iva),2) AS precio1',
+				'ROUND(b.precio2*100/(100+b.iva),2) AS precio2',
+				'ROUND(b.precio3*100/(100+b.iva),2) AS precio3',
+				'ROUND(b.precio4*100/(100+b.iva),2) AS precio4','b.tipo','b.peso');
 				$this->db->select($itsel);
 				$this->db->from('itpfac AS a');
 				$this->db->join('sinv AS b','b.codigo=a.codigoa');
