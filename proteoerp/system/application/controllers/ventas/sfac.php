@@ -3178,7 +3178,7 @@ class Sfac extends Controller {
 		$fiscal   = $this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
 			if(empty($numfis)){
-				$num      = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo}");
+				$num      = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_'");
 				$nn       = $num+1;
 				$edit->nfiscal->updateValue=str_pad($nn,8,'0',STR_PAD_LEFT);
 			}
@@ -3190,7 +3190,7 @@ class Sfac extends Controller {
 
 			$smaqfiscal=trim($edit->get_from_dataobjetct('maqfiscal'));
 			if(empty($smaqfiscal)){
-				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=${dbcajero} ORDER BY id DESC LIMIT 1,1");
+				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=${dbcajero} AND MID(numero,1,1)!='_' ORDER BY id DESC LIMIT 1,1");
 				$edit->maqfiscal->updateValue=$maqfiscal;
 			}
 
@@ -3210,7 +3210,7 @@ class Sfac extends Controller {
 		}else{
 			$numfis = trim($edit->get_from_dataobjetct('nfiscal'));
 			if(empty($numfis)){
-				$num = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo}"));
+				$num = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_'"));
 				if(!empty($num)){
 					$arr_num  = explode('-',$num);
 					$last     = count($arr_num)-1;
