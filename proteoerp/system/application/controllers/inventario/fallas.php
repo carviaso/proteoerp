@@ -16,7 +16,7 @@ class fallas extends Controller {
 		$this->falla[]=array('sql' =>'precio1 <= 0 OR precio2 <= 0 OR precio3 <= 0 OR precio4 <= 0 OR precio1 = NULL OR precio2 = NULL OR precio3 = NULL OR precio4 = NULL', 'nombre' => 'Productos sin precios');
 		$this->falla[]=array('sql' =>'ultimo <= 0 OR ultimo IS NULL', 'nombre'                                                 => 'Productos sin costos');
 		$this->falla[]=array('sql' =>'base1 <= 0 OR base2 <= 0  OR base3 <= 0  OR base4 <= 0 ', 'nombre'                      => 'Productos sin bases');
-		$this->falla[]=array('sql' =>'precio1 < ultimo OR precio2 < ultimo OR precio3 < ultimo OR precio4 < ultimo', 'nombre' => 'Productos con precio por debajo de costo');
+		$this->falla[]=array('sql' =>'precio1*100/(100+iva) < ultimo OR precio2*100/(100+iva) < ultimo OR precio3*100/(100+iva) < ultimo OR precio4*100/(100+iva) < ultimo', 'nombre' => 'Productos con precio por debajo de costo');
 		$this->falla[]=array('sql' =>'LENGTH(descrip) < 5', 'nombre'                                                          => 'Productos con descripciones menor a 5 caracteres');
 		$this->falla[]=array('sql' =>'margen1 > 100 OR margen2 > 100 OR margen3 > 100 OR margen4 > 100', 'nombre'             => 'Productos con margenes altos');
 		$this->falla[]=array('sql' =>'margen1 < 10 OR margen2 < 10 OR margen3 < 10 OR margen4 < 10', 'nombre'                 => 'Productos con margenes bajos');

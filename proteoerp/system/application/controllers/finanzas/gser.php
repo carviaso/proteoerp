@@ -86,7 +86,8 @@ class gser extends Controller {
 			array('id'=>'fgasto', 'title'=>'Agregar/Editar Gasto/Egreso'),
 			array('id'=>'fshow' , 'title'=>'Mostrar registro'),
 			array('id'=>'fimpri', 'title'=>'Imprimir Gasto/Egreso'),
-			array('id'=>'fborra', 'title'=>'Eliminar Registro')
+			array('id'=>'fborra', 'title'=>'Eliminar Registro'),
+			array('id'=>'fsprv' , 'title'=>'Agregar Proveedor')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -224,9 +225,9 @@ class gser extends Controller {
 			function(){
 				$.post("'.site_url('finanzas/mgas/dataedit/create').'",
 				function(data){
-					$("#fgasto").html(data);
-					$("#fgasto").dialog({height: 500, width: 700, title: "Agregar Gasto"});
-					$("#fgasto").dialog( "open" );
+					$("#fsprv").html(data);
+					$("#fsprv").dialog({height: 500, width: 700, title: "Agregar Gasto"});
+					$("#fsprv").dialog( "open" );
 				});
 		});';
 
@@ -237,9 +238,9 @@ class gser extends Controller {
 			function(){
 			$.post("'.site_url('compras/sprv/dataedit/create').'",
 			function(data){
-				$("#fgasto").html(data);
-				$("#fgasto").dialog({height: 500, width: 720, title: "Agregar Proveedor"});
-				$("#fgasto").dialog( "open" );
+				$("#fsprv").html(data);
+				$("#fsprv").dialog({height: 500, width: 720, title: "Agregar Proveedor"});
+				$("#fsprv").dialog( "open" );
 			})
 		});';
 
@@ -357,6 +358,48 @@ class gser extends Controller {
 				close: function() {
 					allFields.val("").removeClass( "ui-state-error" );
 					$("#fgasto").html("");
+				}
+			});';
+
+		$bodyscript .= '
+			$("#fsprv").dialog({
+				autoOpen: false, height: 450, width: 900, modal: true,
+				buttons: {
+					"Guardar": function() {
+						var bValid = true;
+						var murl = $("#df1").attr("action");
+						allFields.removeClass( "ui-state-error" );
+						if ( bValid ) {
+							$.ajax({
+								type: "POST", dataType: "html", async: false,
+								url: murl,
+								data: $("#df1").serialize(),
+								success: function(r,s,x){
+									try{
+										var json = JSON.parse(r);
+										if (json.status == "A"){
+											$("#fsprv").dialog( "close" );
+											grid.trigger("reloadGrid");
+											return true;
+										}else{
+											apprise(json.mensaje);
+										}
+									}catch(e){
+										$("#fsprv").html(r);
+									}
+
+								}
+							});
+						}
+					},
+					Cancelar: function() {
+						$(this).dialog( "close" );
+						$("#fsprv").html("");
+					}
+				},
+				close: function() {
+					allFields.val("").removeClass( "ui-state-error" );
+					$("#fsprv").html("");
 				}
 			});';
 

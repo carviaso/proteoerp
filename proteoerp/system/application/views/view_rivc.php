@@ -240,7 +240,7 @@ function autocod(id){
 				</tr>
 				<tr>
 					<td>
-					<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;  min-height:110px;'>
+					<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;  min-height:100px;'>
 						<table>
 							<tr>
 								<td class="littletablerowth"><?php echo $form->nrocomp->label  ?>*</td>
@@ -255,7 +255,7 @@ function autocod(id){
 						</table>
 					</fieldset>
 					</td><td>
-					<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;  min-height:110px;'>
+					<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;  min-height:100px;'>
 						<table>
 							<tr>
 								<td class="littletablerowth"><?php echo $form->cod_cli->label  ?>*</td>
@@ -279,7 +279,7 @@ function autocod(id){
 	<tr>
 </table>
 
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:190px'>
 		<table width='100%'>
 			<tr id='__INPL__'>
 				<th bgcolor='#7098D0'>Tipo    </th>

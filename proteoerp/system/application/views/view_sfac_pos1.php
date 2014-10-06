@@ -635,6 +635,7 @@ function post_precioselec(ind,obj){
 				opt.value= roundNumber(otro*100/(100+itiva),2);
 				obj.add(opt,null);
 				obj.selectedIndex=obj.length-1;
+				$('#preca_'+ind).css('background-color:','#FFDD00');
 			}
 		}else if(repor.test(otro) && ittipo.substr(0,1)=='S'){
 			otro = otro.replace("%","");
@@ -776,12 +777,14 @@ function cdropdown(nind){
 			pprecio.selectedIndex=ii-1;
 		}
 	}
+
 	if(ban==0){
 		opt=document.createElement("option");
 		opt.text = nformat(Number(preca)*(1+(itiva/100)),2);
 		opt.value= preca;
 		pprecio.add(opt,null);
 		pprecio.selectedIndex=4;
+		pprecio.style = 'width: 95px;background-color:#FFDD00';
 	}
 
 	opt=document.createElement("option");

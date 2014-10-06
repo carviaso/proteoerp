@@ -173,7 +173,7 @@ class Rivc extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 595, width: 795, modal: true,
+			autoOpen: false, height: 570, width: 795, modal: true,
 			buttons: {
 			"Guardar": function() {
 				var bValid = true;

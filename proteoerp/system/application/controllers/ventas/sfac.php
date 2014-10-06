@@ -2624,7 +2624,7 @@ class Sfac extends Controller {
 			$salida .= '<p style=\'text-align:center\'>Reparto: '.str_pad($reparto,8,'0',0).'</p>';
 		}
 
-		$row=$this->datasis->damerow("SELECT SUM(tipo_doc IN ('F','T')) AS fac,SUM(tipo_doc='D') AS dev,SUM(tipo_doc='X') AS anu FROM sfac WHERE fecha=${dbfecha}");
+		$row=$this->datasis->damerow("SELECT SUM(tipo_doc IN ('F','T')) AS fac,SUM(tipo_doc='D') AS dev,SUM(tipo_doc='X') AS anu FROM sfac WHERE fecha=${dbfecha} AND MID(numero,1,1)<>'_'");
 		if(!empty($row)){
 			$salida .= "<p style='text-align:center'>Transacciones del d&iacute;a ".$fecha.": Facturas <b>$row[fac]</b>, Devoluciones <b>$row[dev]</b>, Anuladas <b>$row[anu]</b></p>";
 		}
@@ -3320,6 +3320,7 @@ class Sfac extends Controller {
 		$manual   = $this->input->post('manual');
 		if($manual=='S') return true;
 		$dbcodigo = $this->db->escape($codigo);
+		$val      = floatval($val);
 
 		if($tipo_doc == 'D'){
 			$factura  = $this->input->post('factura');
@@ -3372,9 +3373,9 @@ class Sfac extends Controller {
 					$this->sclitipo = $this->datasis->dameval('SELECT tipo FROM scli WHERE cliente='.$this->db->escape($cliente));
 				}
 				if($this->sclitipo=='5'){
-					$precio4 = $this->datasis->dameval('SELECT ultimo FROM sinv WHERE codigo='.$dbcodigo);
+					$precio4 = floatval($this->datasis->dameval('SELECT ultimo FROM sinv WHERE codigo='.$dbcodigo));
 				}else{
-					$precio4 = $this->datasis->dameval('SELECT precio4*100/(100+iva) FROM sinv WHERE codigo='.$dbcodigo);
+					$precio4 = floatval($this->datasis->dameval('SELECT ROUND(precio4*100/(100+iva),2) FROM sinv WHERE codigo='.$dbcodigo));
 				}
 				$this->validation->set_message('chpreca', 'El art&iacute;culo '.$codigo.' debe contener un precio de al menos '.nformat($precio4));
 				if(empty($precio4)) $precio4=0; else $precio4=round($precio4,2);
