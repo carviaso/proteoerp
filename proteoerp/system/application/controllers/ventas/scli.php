@@ -122,7 +122,7 @@ class Scli extends validaciones {
 		$ngrid = '#newapi'.$grid0;
 
 		$bodyscript .= '
-		jQuery("#edocta").click( function(){
+		$("#edocta").click( function(){
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
@@ -133,7 +133,7 @@ class Scli extends validaciones {
 
 		// Creditos
 		$bodyscript .= '
-		jQuery("#editacr").click( function(){
+		$("#editacr").click( function(){
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret    = $("'.$ngrid.'").getRowData(id);
@@ -141,7 +141,7 @@ class Scli extends validaciones {
 				$.post("'.site_url('ventas/scli/creditoedit/modify').'/"+id, function(data){
 					$("#fedita").html("");
 					$("#feditcr").html(data);
-					$("#feditcr").dialog({height: 400, width: 650});
+					$("#feditcr").dialog({height: 320, width: 500});
 					$("#feditcr").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
@@ -149,7 +149,7 @@ class Scli extends validaciones {
 
 		// Clave de Acceso
 		$bodyscript .= '
-		jQuery("#gclave").click( function(){
+		$("#gclave").click( function(){
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret    = $("'.$ngrid.'").getRowData(id);
@@ -162,8 +162,6 @@ class Scli extends validaciones {
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		});';
-
-
 
 		$bodyscript .= '
 		function scliadd() {
@@ -253,7 +251,6 @@ class Scli extends validaciones {
 			autoOpen: false, height: 400, width: 650, modal: true,
 			buttons: {
 				"Guardar": function() {
-					var bValid = true;
 					var murl = $("#df1").attr("action");
 					$.ajax({
 						type: "POST", dataType: "html", async: false,
@@ -2274,8 +2271,6 @@ function chrif(rif){
 		$edit->back_cancel = true;
 		$edit->back_cancel_save   = true;
 		$edit->back_cancel_delete = true;
-		//$edit->back_url = site_url('ventas/scli/filtergridcredi');
-
 
 		$edit->post_process('insert','_pos_credi_insert');
 		$edit->post_process('update','_pos_credi_update');

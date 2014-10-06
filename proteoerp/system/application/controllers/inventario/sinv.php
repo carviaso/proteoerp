@@ -3206,7 +3206,6 @@ class Sinv extends Controller {
 		$edit->margenu->insertValue = 0;
 
 
-
 		$edit->ultimo = new inputField('&Uacute;ltimo', 'ultimo');
 		$edit->ultimo->css_class    = 'inputnum';
 		$edit->ultimo->size         = 10;
@@ -3683,6 +3682,14 @@ class Sinv extends Controller {
 		$edit->button_status('btn_add_sinvpitem' ,'Agregar','javascript:add_sinvpitem()' ,'IT','modify','button_add_rel');
 		$edit->button_status('btn_add_sinvplabor','Agregar','javascript:add_sinvplabor()','LA','create','button_add_rel');
 		$edit->button_status('btn_add_sinvplabor','Agregar','javascript:add_sinvplabor()','LA','modify','button_add_rel');
+
+		$plim = $this->datasis->sidapuede('SINVOTR', 'FIJA_MARG()'); 
+		if(!$plim){
+			$edit->pond->mode    = 'autohide';
+			$edit->ultimo->mode  = 'autohide';
+			$edit->margenu->mode = 'autohide';
+			//$edit->motivo->mode  = 'autohide';
+		}
 
 		$edit->build();
 
