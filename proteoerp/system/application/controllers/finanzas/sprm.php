@@ -1645,7 +1645,12 @@ class Sprm extends Controller {
 	function selsprv(){
 		$this->rapyd->load('dataform');
 
-		$script="$('#cod_prv').autocomplete({
+		$script="
+		$('#df1').keypress(function(e){
+			if(e.which == 13) return false;
+		});
+
+		$('#cod_prv').autocomplete({
 			source: function( req, add){
 				$.ajax({
 					url:  '".site_url('ajax/buscasprv')."',
