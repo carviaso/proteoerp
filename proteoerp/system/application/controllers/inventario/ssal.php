@@ -972,9 +972,17 @@ class Ssal extends Controller {
 		$edit->buttons('modify', 'save', 'undo', 'delete', 'back','add_rel');
 		$edit->build();
 
-		$conten['form']  =&  $edit;
-		$data['content'] = $this->load->view('view_ssal', $conten,false);
-
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			$conten['form']  =&  $edit;
+			$data['content'] = $this->load->view('view_ssal', $conten,false);
+		}
 	}
 
 	function chconcepto($val){
