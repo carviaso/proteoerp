@@ -3439,6 +3439,7 @@ class Scst extends Controller {
 						foreach ($qquery->result() as $itrow){
 							//Revisa la modalidad de compra por bulto
 							$cbulto = $this->datasis->traevalor('SCSTBULTO','Colocal S para que asuma que TODAS las compras son por bulto');
+							if(empty($itrow->fracci)) $itrow->fracci=1;
 							if($cbulto=='S' && $itrow->fracci>1){//1 bulto = cantidad * fracci
 								$itrow->cantidad = round($itrow->cantidad*$itrow->fracci,2);
 								$itrow->costo    = round($itrow->costo/$itrow->fracci,4);

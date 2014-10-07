@@ -3190,8 +3190,8 @@ class Sfac extends Controller {
 
 			$smaqfiscal=trim($edit->get_from_dataobjetct('maqfiscal'));
 			if(empty($smaqfiscal)){
-				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=${dbcajero} AND MID(numero,1,1)!='_' ORDER BY id DESC LIMIT 1,1");
-				$edit->maqfiscal->updateValue=$maqfiscal;
+				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_' ORDER BY id DESC LIMIT 1");
+				$edit->maqfiscal->updateValue=trim($maqfiscal);
 			}
 
 			if($tipo=='D'){
@@ -3210,7 +3210,7 @@ class Sfac extends Controller {
 		}else{
 			$numfis = trim($edit->get_from_dataobjetct('nfiscal'));
 			if(empty($numfis)){
-				$num = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_'"));
+				$num = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM sfac WHERE cajero=${dbcajero} AND tipo_doc<>'X' AND MID(numero,1,1)!='_'"));
 				if(!empty($num)){
 					$arr_num  = explode('-',$num);
 					$last     = count($arr_num)-1;

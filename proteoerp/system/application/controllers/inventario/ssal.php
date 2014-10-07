@@ -52,7 +52,8 @@ class Ssal extends Controller {
 
 		$adic = array(
 			array('id'=>'fedita',  'title'=>'Agregar Ajuste de Inventario'),
-			array('id'=>'fshow' ,  'title'=>'Ver Ajuste de Inventario')
+			array('id'=>'fshow' ,  'title'=>'Ver Ajuste de Inventario'),
+			array('id'=>'fborra',  'title'=>'Eliminar ajuste')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -104,6 +105,33 @@ class Ssal extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione un Ajuste</h1>");}
 		});';
 
+		//Borrar
+		$bodyscript .= '
+		function ssaldel() {
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("#newapi'.$grid0.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						try{
+							var json = JSON.parse(data);
+							if (json.status == "A"){
+								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+							}else{
+								apprise("Registro no se puede eliminado");
+							}
+						}catch(e){
+							$("#fborra").html(data);
+							$("#fborra").dialog( "open" );
+						}
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
 
 		$bodyscript .= '
 		function ssaladd() {
@@ -204,6 +232,7 @@ class Ssal extends Controller {
 			}
 		});';
 
+		$bodyscript .= $this->jqdatagrid->bsfborra( $grid0, '300', '300' );
 
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
@@ -421,12 +450,12 @@ class Ssal extends Controller {
 		$grid->setOndblClickRow('');
 		$grid->setAdd(    $this->datasis->sidapuede('SSAL','INCLUIR%' ));
 		$grid->setEdit( false );    //  $this->datasis->sidapuede('SSAL','MODIFICA%'));
-		$grid->setDelete( false );  //  $this->datasis->sidapuede('SSAL','BORR_REG%'));
+		$grid->setDelete($this->datasis->sidapuede('SSAL','BORR_REG%'));  //  $this->datasis->sidapuede('SSAL','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('SSAL','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions('addfunc: ssaladd,editfunc: ssaledit,viewfunc: ssalshow');
+		$grid->setBarOptions('addfunc: ssaladd,editfunc: ssaledit,delfunc: ssaldel,viewfunc: ssalshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -469,37 +498,12 @@ class Ssal extends Controller {
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM ssal WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					//$this->db->insert('ssal', $data);
-					//echo "Registro Agregado";
-
-					logusu('SSAL',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$numero = $this->datasis->dameval("SELECT $mcodp FROM ssal WHERE id=$id");
-			unset($data['numero']);
-			$this->db->where("id", $id);
-			$this->db->update('ssal', $data);
-			logusu('SSAL',"Ajustes de Inventario  ".$numero." MODIFICADO");
-			echo "Ajuste $numero Modificado";
-
-		} elseif($oper == 'del') {
-			//$meco = $this->datasis->dameval("SELECT $mcodp FROM ssal WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM ssal WHERE id='$id' ");
-			//if ($check > 0){
-			//	echo " El registro no puede ser eliminado; tiene movimiento ";
-			//} else {
-				//$this->db->simple_query("DELETE FROM ssal WHERE id=$id ");
-				//logusu('SSAL',"Registro ????? ELIMINADO");
-				echo "los Ajustes no se Eliminan; debe hacer un reverso";
-			//}
-		};
+			echo 'Deshabilitado';
+		}elseif($oper == 'edit'){
+			echo 'Deshabilitado';
+		}elseif($oper == 'del'){
+			echo 'Deshabilitado';
+		}
 	}
 
 
@@ -793,58 +797,7 @@ class Ssal extends Controller {
 	* Guarda la Informacion
 	*/
 	function setDatait(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = "??????";
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM itssal WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('itssal', $data);
-					echo "Registro Agregado";
-
-					logusu('ITSSAL',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM itssal WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM itssal WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE itssal SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("itssal", $data);
-				logusu('ITSSAL',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('itssal', $data);
-				logusu('ITSSAL',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM itssal WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM itssal WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM itssal WHERE id=$id ");
-				logusu('ITSSAL',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+		echo 'Deshabilitado';
 	}
 
 
@@ -1038,7 +991,7 @@ class Ssal extends Controller {
 		$dbtipo  = $this->db->escape($tipo);
 		$dbcodigo= $this->db->escape($val);
 
-		$cana= $this->datasis->dameval("SELECT COUNT(*) FROM icon WHERE tipo=${dbtipo} AND codigo=${dbcodigo}");
+		$cana= floatval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM icon WHERE tipo=${dbtipo} AND codigo=${dbcodigo}"));
 		if($cana >0){
 			return true;
 		}
@@ -1074,8 +1027,14 @@ class Ssal extends Controller {
 	}
 
 	function _pre_delete($do){
-		$do->error_message_ar['pre_del']='Los ajustes de inventario no se pueden eliminar, debe hacer el reverso.';
-		return false;
+		$transac   = $do->get('transac');
+		$dbtransac = $this->db->escape($transac);
+		 $cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM casi WHERE comprob=${dbtransac}"));
+        if($cana>0){
+            $do->error_message_ar['pre_del']='El efecto ya esta en contabilidad, no puede ser modificado ni eliminado.';
+            return false;
+        }
+        return true;
 	}
 
 	function _post_insert($do) {
@@ -1097,7 +1056,7 @@ class Ssal extends Controller {
 						WHERE a.envia='INFI' AND a.recibe=${dbalma} AND b.codigo=${dbcodigo} AND a.fecha>${dbfecha}";
 				$chinnfis=intval($this->datasis->dameval($mSQL));
 				if($chinnfis==0){
-					if ( $tipo == 'S' ){
+					if($tipo == 'S'){
 						$this->datasis->sinvcarga( $row->codigo, $alma, -1*$row->cantidad);
 					}else{
 						$this->datasis->sinvcarga( $row->codigo, $alma, $row->cantidad);
@@ -1125,8 +1084,8 @@ class Ssal extends Controller {
 			$data['monto1']   = 0;
 			$data['credito']  = $monto;
 			$data['anticipo'] = 0;
-			$data['orden']    = "";
-			$data['tipo_doc'] = "AJ";
+			$data['orden']    = '';
+			$data['tipo_doc'] = 'AJ';
 			$data['transac']  = $do->get('transac');
 			$data['estampa']  = $do->get('estampa');
 			$data['hora']     = $do->get('hora');
@@ -1182,6 +1141,45 @@ class Ssal extends Controller {
 	}
 
 	function _post_delete($do){
+		$transac  = $do->get('transac');
+		$tipo     = $do->get('tipo');
+		$almacen  = $do->get('almacen');
+		$dbtransac= $this->db->escape($transac);
+		$dbalmacen= $this->db->escape($almacen);
+		$dbactuali= $this->db->escape($do->get('fecha'));
+
+
+		$mSQL="DELETE FROM itotin WHERE transac=${dbtransac} AND tipo_doc='OT'";
+		$this->db->query($mSQL);
+
+		$mSQL="DELETE FROM otin WHERE transac=${dbtransac} AND cod_cli='AJUSI'";
+		$this->db->query($mSQL);
+
+		$mSQL="DELETE FROM gitser WHERE transac=${dbtransac} AND proveed='AJUSI'";
+		$this->db->query($mSQL);
+
+		$mSQL="DELETE FROM gser WHERE transac=${dbtransac} AND proveed= 'AJUSI'";
+		$this->db->query($mSQL);
+
+		$factor=($tipo=='E')? -1:1;
+
+		$cana=$do->count_rel('itssal');
+		for($i=0;$i<$cana;$i++){
+			$itcana    = $do->get_rel('itssal','cantidad',$i);
+			$itcodigoa = $do->get_rel('itssal','codigo',$i);
+			$dbcodigoa = $this->db->escape($itcodigoa);
+
+			//Chequea que no este in inventario fisico antes de cargar cantidades
+			$mSQL="SELECT COUNT(*) AS cana
+				FROM stra   AS a
+				JOIN itstra AS b ON a.numero=b.numero
+				WHERE a.envia='INFI' AND a.recibe=${dbalmacen} AND b.codigo=${dbcodigoa} AND a.fecha>${dbactuali}";
+			$chinnfis=intval($this->datasis->dameval($mSQL));
+			if($chinnfis==0){
+				$this->datasis->sinvcarga($itcodigoa, $almacen, $factor*$itcana);
+			}
+		}
+
 		$codigo=$do->get('numero');
 		logusu('ssal',"Entradas y Salidas ${codigo} ELIMINADO");
 	}
