@@ -3171,12 +3171,14 @@ class Sfac extends Controller {
 			$edit->nromanual->autocomplete=false;
 		}
 
+		$chkval   = false;
+		$mmsj     = 'Dato sugerido por el sistema, no esta guardado';
 		$tipo     = $edit->get_from_dataobjetct('tipo_doc');
 		$dbtipo   = $this->db->escape($tipo );
 		$dbcajero = $this->db->escape($edit->get_from_dataobjetct('cajero'));
 		$numfis   = trim($edit->get_from_dataobjetct('nfiscal'));
 		$fiscal   = $this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
-		if($fiscal=='S'){
+		if($fiscal=='S' && $manual!='S'){
 			if(empty($numfis)){
 				$num      = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_'");
 				$nn       = $num+1;
@@ -3192,6 +3194,9 @@ class Sfac extends Controller {
 			if(empty($smaqfiscal)){
 				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_' ORDER BY id DESC LIMIT 1");
 				$edit->maqfiscal->updateValue=trim($maqfiscal);
+				$edit->maqfiscal->style = 'background-color:#FFDD00';
+				$edit->maqfiscal->title = $mmsj;
+				$chkval = true;
 			}
 
 			if($tipo=='D'){
@@ -3205,22 +3210,28 @@ class Sfac extends Controller {
 					$dbnumero=$this->db->escape($edit->get_from_dataobjetct('factura'));
 					$mfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE numero=${dbnumero} AND tipo_doc='F'");
 					$edit->dmaqfiscal->updateValue=$mfiscal;
+					$edit->dmaqfiscal->style = 'background-color:#FFDD00';
+					$edit->dmaqfiscal->title = $mmsj;
+					$chkval = true;
 				}
 			}
-		}else{
+		}elseif($manual!='S'){
 			$numfis = trim($edit->get_from_dataobjetct('nfiscal'));
 			if(empty($numfis)){
-				$num = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM sfac WHERE cajero=${dbcajero} AND tipo_doc<>'X' AND MID(numero,1,1)!='_'"));
+				$num = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM sfac WHERE cajero=${dbcajero} AND tipo_doc<>'X' AND MID(numero,1,1)!='_' AND fecha=CURDATE()"));
 				if(!empty($num)){
 					$arr_num  = explode('-',$num);
 					$last     = count($arr_num)-1;
-					if($last>0){
+					if($last>=0){
 						if(is_numeric($arr_num[$last])){
 							$long = strlen($arr_num[$last]);
 							$arr_num[$last] = $arr_num[$last]+1;
 							$arr_num[$last] = str_pad($arr_num[$last],$long,'0',STR_PAD_LEFT);
 							$nn = implode('-',$arr_num);
 							$edit->nfiscal->updateValue=$nn;
+							$edit->nfiscal->style = 'background-color:#FFDD00';
+							$edit->nfiscal->title = $mmsj;
+							$chkval = true;
 						}
 					}
 				}
@@ -3250,7 +3261,7 @@ class Sfac extends Controller {
 		$total   = $edit->get_from_dataobjetct('totalg');
 		$edit->totalg = new freeField('<b>Monto a pagar</b>','monto','<b id="vh_monto" style="font-size:2em">'.nformat($total).'</b>');
 
-		$edit->buttons('save', 'undo');
+		$edit->buttons('save');
 		$edit->build();
 
 		$tipo_doc = $edit->get_from_dataobjetct('tipo_doc');
@@ -3292,8 +3303,13 @@ class Sfac extends Controller {
 		if($st=='modify' && $manual!='S'){
 			$script= '<script type="text/javascript" >
 			$(function() {
-				setTimeout(\'window.location="'.$url.'"\',100);
-			});
+				setTimeout(\'window.location="'.$url.'"\',100);';
+				//if($chkval){
+				//	$script.= '$(window).bind("beforeunload", function() {
+				//		return confirm("No se ha guardado los campos resaltados, seguro desea salir?");
+				//	});';
+				//}
+			$script.='});
 			</script>';
 		}else{
 			$script='';
