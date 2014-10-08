@@ -34,8 +34,6 @@ class Analisis extends Controller {
 				return number_format($num,2,',','.');
 			}
 		}
-		// Katy Oviedo
-		//$data['lista'] = open_flash_chart_object(800,300, site_url("ventas/mensuales/grafico/$mes/$anio"));
 
 		$filter = new DataForm();
 		$filter->title('Filtro de An&aacute;lisis ventas');
@@ -48,12 +46,7 @@ class Analisis extends Controller {
 		$filter->anio->maxlength=4;	
 		$filter->anio->rule = "trim";
 		$filter->anio->css_class='inputnum';
-		
-		//$filter->anio = new dropdownField("A&ntilde;o", "anio");
-		//$filter->anio->option("hola","df");
-		//$filter->anio->options('SELECT YEAR(fecha),YEAR(fecha) AS fecha2 FROM eventas GROUP BY fecha2');
-		//$filter->anio->style='width:80px;';
-		
+
 		$filter->button("btnsubmit", "Buscar", form2uri(site_url('/ventas/analisis/index'),array('anio')), $position="BL");
 		$filter->build_form(); 
 
@@ -68,12 +61,12 @@ class Analisis extends Controller {
 		for($i=1;$i<=12;$i++){
 			$nmes=$this->calendar->get_month_name(str_pad($i, 2, "0", STR_PAD_LEFT));
 			$grid->column($nmes, "<blanco><#m$i#>|2|,|.</blanco>" ,'align=right');
-			$select[]="sum(a.tota*(month(a.fecha)=$i))  AS m$i";
+			$select[]="sum(a.tota*(month(a.fecha)=$i)*IF(f.tipo_doc='F',1,-1))  AS m$i";
 		}
 
 		$grid->db->select($select);  
 		$grid->db->from('sfac AS f');
-		$grid->db->join('sitems AS a','f.numero=a.numa AND f.tipo_doc=a.tipoa AND f.fecha=a.fecha','LEFT');
+		$grid->db->join('sitems AS a','f.numero=a.numa AND f.tipo_doc=a.tipoa','LEFT');
 		$grid->db->join('sinv AS b','a.codigoa=b.codigo','LEFT');
 		$grid->db->join('grup AS c','b.grupo=c.grupo','LEFT');
 		$grid->db->join('line AS d','c.linea=d.linea','LEFT');
@@ -82,7 +75,7 @@ class Analisis extends Controller {
 		$grid->db->where("f.tipo_doc <>",'X');
 		$grid->db->groupby('EXTRACT(YEAR_MONTH FROM f.fecha)');
 		$grid->build();
-		//echo  $grid->db->last_query();
+		echo  $grid->db->last_query();
 
 		$data['content'] = $filter->output.'<div style="overflow: auto; width: 100%;">'.$grid->output.'</div>';
 		$data['title']   = "<h1>An&aacute;lisis de ventas</h1>";
