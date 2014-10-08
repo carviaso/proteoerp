@@ -14,7 +14,6 @@ class Usuarios extends Controller {
 
 	function Usuarios(){
 		parent::Controller();
-		$this->datasis->modulo_id(901,1);
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
 	}
@@ -29,6 +28,7 @@ class Usuarios extends Controller {
 	//
 	//***************************
 	function jqdatag(){
+		$this->datasis->modulo_id(901,1);
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
 
@@ -260,7 +260,7 @@ class Usuarios extends Controller {
 	//***************************
 	//Definicion del Grid y la Forma
 	//***************************
-	function defgrid( $deployed = false ){
+	function defgrid($deployed = false){
 		$i      = 1;
 		$editar = 'false';
 
@@ -503,6 +503,7 @@ class Usuarios extends Controller {
 	//
 	//
 	function dataedit(){
+		$this->datasis->modulo_id(901,1);
 		$this->rapyd->load('dataedit');
 		$script= '
 		$(function() {
@@ -806,7 +807,6 @@ class Usuarios extends Controller {
 
 	function ccclaveg(){
 		$us_actual = $this->input->post('us_actual');
-
 		$us_clave  = $this->input->post('us_clave');
 		$us_clave1 = $this->input->post('us_clave1');
 
