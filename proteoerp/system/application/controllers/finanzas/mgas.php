@@ -906,7 +906,7 @@ class Mgas extends validaciones {
 		$edit->cuenta->rule = 'trim|existecpla';
 		$edit->cuenta->append($bcpla);
 		//$edit->cuenta->append($lcuent);
-		$edit->cuenta->readonly=true;
+		//$edit->cuenta->readonly=true;
 
 		$lcuent=anchor_popup("/contabilidad/cpla/dataedit/create",image('list_plus.png','Agregar',array("border"=>"0")),$atts);
 		$edit->ctarein    = new inputField("Cta. Reintegro", "ctarein");
