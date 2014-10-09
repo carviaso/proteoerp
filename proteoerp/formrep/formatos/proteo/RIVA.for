@@ -6,7 +6,7 @@ $sel=array('a.emision','a.periodo','a.tipo_doc','a.fecha','a.numero','a.nfiscal'
 ,'a.tasa'    ,'a.general'  ,'a.geneimpu'
 ,'a.tasaadic','a.adicional','adicimpu'
 ,'a.tasaredu','a.reducida' ,'a.reduimpu'
-,'a.stotal','a.impuesto','a.gtotal','a.reiva','a.nrocomp');
+,'a.stotal','a.impuesto','a.gtotal','a.reiva','a.nrocomp','a.transac');
 $this->db->select($sel);
 $this->db->from('riva AS a');
 $this->db->join('sprv AS b','a.clipro=b.proveed');
@@ -24,14 +24,27 @@ $nrocomp   = htmlspecialchars(trim($row->nrocomp));
 $emision   = dbdate_to_human($row->emision);
 $periodo   = trim($row->periodo)  ;
 $tipo_doc  = htmlspecialchars(trim($row->tipo_doc));
+$transac   = $row->transac;
 $fecha     = dbdate_to_human($row->fecha);
-//$numero    = trim($row->numero) ;
-$numero    = htmlspecialchars(trim($row->serie1.$row->serie2)) ;
 $nfiscal   = htmlspecialchars(trim($row->nfiscal));
 $afecta    = htmlspecialchars(trim($row->afecta)) ;
 $clipro    = $this->us_ascii2html($row->clipro) ;
 $nombre    = (empty($row->nomfis))? $this->us_ascii2html($row->nombre) : $this->us_ascii2html($row->nomfis);
 $direc     = $this->us_ascii2html($row->direc);
+
+//$numero    = trim($row->numero);
+$nnumero   = trim($row->serie1.$row->serie2);
+if(empty($nnumero)){
+	$dbtipo_doc= $this->db->escape($tipo_doc);
+	$dbproveed = $this->db->escape($clipro);
+	$dbnumero  = $this->db->escape(trim($row->numero));
+	$dbtransac = $this->db->escape($transac);
+	$nnumero=$this->datasis->dameval("SELECT serie FROM sprm WHERE tipo_doc=${dbtipo_doc} AND transac=${dbtransac} AND cod_prv=${dbproveed} AND numero=${dbnumero}");
+	if(empty($nnumero)){
+		$nnumero=trim($row->numero);
+	}
+}
+$numero    = htmlspecialchars($nnumero) ;
 
 $rif       = htmlspecialchars(trim($row->rif));
 $exento    = $row->exento   ;

@@ -2782,7 +2782,12 @@ class Sprm extends Controller {
 		$do->set('ppago'   , $ppago);
 		$do->set('control' , $mcontrol);
 		$do->set('cambio'  , 0 );
-		$do->set('nfiscal' , '') ;
+		if($tipo_doc=='NC'){
+			$serie = $do->get('serie');
+			$do->set('serie',substr($serie,-8));
+		}else{
+			$do->set('nfiscal' , '');
+		}
 		$do->set('mora'    , 0 );
 		$do->set('comprob' , '');
 		if($tipo_doc=='AB' || $tipo_doc=='NC'){
@@ -2840,6 +2845,7 @@ class Sprm extends Controller {
 		$mndebito= $do->get('ndebito');
 		$posdata = $do->get('posdata');
 		$reteiva = $do->get('reteiva');
+		$nfiscal = $do->get('nfiscal');
 
 		$do->set('vence',$fecha);
 
@@ -3061,7 +3067,7 @@ class Sprm extends Controller {
 			$riva['tipo_doc']   = $tipo_doc;
 			$riva['fecha']      = $fecha;
 			$riva['numero']     = $numero;
-			$riva['nfiscal']    = '';
+			$riva['nfiscal']    = $nfiscal;
 			$riva['afecta']     = $itnumero;
 			$riva['clipro']     = $cod_prv;
 			$riva['nombre']     = $nombre;
