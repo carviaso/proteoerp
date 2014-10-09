@@ -45,41 +45,43 @@ $filter->db->select($select );
 $filter->db->from('smov as a');
 $filter->db->join("scli as b","a.cod_cli=b.cliente");
 
-$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
-$filter->fechad->clause  ="where";
-$filter->fechad->db_name ="a.fecha";
-$filter->fechad->insertValue = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
-$filter->fechad->operator=">=";
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechad->clause  ='where';
+$filter->fechad->db_name ='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30, date('Y')));
+$filter->fechad->operator='>=';
 
-$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
-$filter->fechah->clause="where";
-$filter->fechah->db_name="a.fecha";
-$filter->fechah->insertValue = date("Y-m-d");
-$filter->fechah->operator="<=";
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->clause='where';
+$filter->fechah->db_name='a.fecha';
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechah->operator='<=';
 
-$filter->cod_clid = new inputField("Cliente", "cod_clid");
-$filter->cod_clid->clause="where";
-$filter->cod_clid->db_name="a.cod_cli";
+$cod_cli=trim($this->uri->segment(5));
+$filter->cod_clid = new inputField('Cliente', 'cod_clid');
+$filter->cod_clid->clause='where';
+$filter->cod_clid->db_name='a.cod_cli';
 $filter->cod_clid->append($bsclid);
-$filter->cod_clid->operator="="; 
+$filter->cod_clid->operator='=';
+$filter->cod_clid->insertValue=($cod_cli!='SCLI')? $cod_cli : '';
 
-$filter->socio = new inputField("Socio", "socio");
-$filter->socio->clause ="in";
+$filter->socio = new inputField('Socio', 'socio');
+$filter->socio->clause ='in';
 $filter->socio->db_name='(socio,cod_cli) ';
-$filter->socio->append($bsocio.' No se tomará en cuenta el cliente'); 
+$filter->socio->append($bsocio.' No se tomará en cuenta el cliente');
 
-$filter->tipos = new dropdownField("Tipo", "tipo");
-$filter->tipos->db_name="tipo_doc";
+$filter->tipos = new dropdownField('Tipo', 'tipo');
+$filter->tipos->db_name='tipo_doc';
 $filter->tipos->clause='where';
 $filter->tipos->operator='=';
-$filter->tipos->option("","Todos");
-$filter->tipos->option("NC","Notas de Crédito");
-$filter->tipos->option("ND","Notas de Débito");
-$filter->tipos->option("AN","Anticipos");
-$filter->tipos->option("GI","Giros");
-$filter->tipos->option("FC","Facturas");
+$filter->tipos->option('','Todos');
+$filter->tipos->option('NC','Notas de Crédito');
+$filter->tipos->option('ND','Notas de Débito');
+$filter->tipos->option('AN','Anticipos');
+$filter->tipos->option('GI','Giros');
+$filter->tipos->option('FC','Facturas');
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
@@ -97,7 +99,7 @@ if($this->rapyd->uri->is_set("search")){
 	$mSQL2.="SUM(monto*(a.tipo_doc NOT IN ('FC','GI','ND'))) as haber,";
 	$mSQL2.="SUM(monto*IF(a.tipo_doc IN ('FC','GI','ND'),1,-1))AS saldo,";
 	$mSQL2.="SUM((monto-abonos)*IF(a.tipo_doc IN ('FC','GI','ND'),1,0))AS saldodoc";
-	$mSQL2.=" FROM `smov` AS a JOIN `scli` as b ON a.cod_cli=b.cliente "; 
+	$mSQL2.=" FROM `smov` AS a JOIN `scli` as b ON a.cod_cli=b.cliente ";
 	$mSQL2.=" WHERE a.fecha <".$filter->fechad->newValue.' ';
 	if(!empty($cliente)) $mSQL2.=" AND a.cod_cli = '$cliente' ";
 	$mSQL2.="GROUP BY cod_cli) ";
@@ -108,8 +110,8 @@ if($this->rapyd->uri->is_set("search")){
 	//memowrite($mSQL);
 	$sobretabla='';
 	if (!empty($filter->socio->newValue))    $sobretabla.='           Socio: ('.$filter->socio->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->socio->newValue.'"');
-	if (!empty($filter->tipos->newValue))    $sobretabla.='           Tipos: '.$filter->tipos->description; 	
-	
+	if (!empty($filter->tipos->newValue))    $sobretabla.='           Tipos: '.$filter->tipos->description;
+
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
@@ -119,26 +121,26 @@ if($this->rapyd->uri->is_set("search")){
 	$pdf->setSobreTabla($sobretabla,7);
 	$pdf->AddPage();
 	$pdf->setTableTitu(8,'Times');
-  
-	$pdf->AddCol('tipo_doc',12,'Tipo'   ,   'L',7); 
+
+	$pdf->AddCol('tipo_doc',12,'Tipo'   ,   'L',7);
 	$pdf->AddCol('numero'  ,18,'Número'  ,  'L',7);
 	$pdf->AddCol('fecha'   ,22,'Emisión' ,  'L',7);
 	$pdf->AddCol('vence'   ,18,'Vence' ,    'L',7);
 	$pdf->AddCol('deber'   ,18,'Debe' ,     'R',7);
 	$pdf->AddCol('haber'   ,18,'Haber' ,    'R',7);
 	$pdf->AddCol('saldo'   ,18,'Saldo',     'R',7);
-	$pdf->AddCol('saldodoc'   ,18,'Saldo Doc',     'R',7);
+	$pdf->AddCol('saldodoc',18,'Saldo Doc', 'R',7);
 	$pdf->AddCol('observa1',70,'Concepto' , 'L',6);
 	$pdf->setTotalizar('haber','deber','saldo', 'saldodoc');
 	$pdf->setGrupoLabel('<#cod_cli#> <#nombre#> ');
 	$pdf->setGrupo('cod_cli');
- 	
+
 	$pdf->Table();
 	$pdf->Output();
-			
+
 }else{
-	$data["filtro"] = $filter->output;
-	$data["titulo"] = '<h2 class="mainheader">Estado de Cuenta<h2>';
-	$data["head"] = $this->rapyd->get_head();
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Estado de Cuenta</h2>';
+	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

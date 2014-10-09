@@ -82,7 +82,7 @@ class Sinv extends Controller {
 		$funciones = $this->funciones( $param['grids'][0]['gridname']);
 
 		//Panel Central y Sur
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'] );
 
 		$param['script']      = script('sinvmaes.js');
 		$param['WestPanel']   = $WestPanel;

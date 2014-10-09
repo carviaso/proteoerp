@@ -2862,6 +2862,7 @@ class Smov extends Controller {
 			$edit->maqfiscal->rule='max_length[15]|strtoupper|required';
 			$edit->maqfiscal->size =16;
 			$edit->maqfiscal->maxlength =15;
+
 		}
 
 		$edit->buttons('save', 'undo');

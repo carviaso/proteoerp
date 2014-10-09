@@ -1,6 +1,10 @@
 <?php echo $form_scripts; ?>
 <?php echo $form_begin;   ?>
-<?php 
+<?php
+if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
+	echo $form->output;
+else:
+
 if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</div>'; ?>
 
 <table style="width:100%;border-collapse:collapse;padding:0px;">
@@ -129,4 +133,5 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 	//foreach (get_object_vars($form) as $label=>$tiene)
 	//	echo "$label => $tiene <br>";
 	//echo '<pre>';print_r($form->grupo->request);echo '</pre>'
+endif;
 ?>

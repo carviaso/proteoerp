@@ -272,13 +272,13 @@ class Datasis {
 		if ($CI->session->userdata('logged_in')){
 			$usuario  = $CI->session->userdata['usuario'];
 			$dbusuario= $CI->db->escape($usuario);
-			$propio   = $CI->datasis->dameval("SELECT propio FROM usuario WHERE us_codigo=$dbusuario "); 
+			$propio   = $CI->datasis->dameval("SELECT propio FROM usuario WHERE us_codigo=$dbusuario ");
 			if ($propio == 'S' ){
 				if ( $us == $usuario )
 					return true;
 				else
 					return false;
-			} else 
+			} else
 				return true;
 		}
 		return false;
@@ -1107,7 +1107,8 @@ class Datasis {
 	//*******************************
 	function otros( $modulo, $tipo = 'E' ){
 		$CI =& get_instance();
-		$usuario    =  $CI->session->userdata('usuario');
+		$usuario    = trim($CI->session->userdata('usuario'));
+		$dbusuario  = $CI->db->escape($usuario);
 
 		if ( !$this->sidapuede($modulo,'OTROS%') ) return '';
 
@@ -1129,15 +1130,15 @@ class Datasis {
 			$CI->db->_escape_char='';
 			$CI->db->_protect_identifiers=false;
 
-			if ( $this->essuper() ) {
-				$mSQL  = "SELECT a.secu, a.titulo, a.mensaje, a.proteo ";
-				$mSQL .= "FROM tmenus a ";
-				$mSQL .= "WHERE a.modulo='".$modulo."OTR' AND CHAR_LENGTH(a.proteo)>1 ORDER BY a.secu";
-			} else {
-				$mSQL  = "SELECT a.secu, a.titulo, a.mensaje, a.proteo ";
-				$mSQL .= "FROM tmenus a JOIN sida b ON a.codigo=b.modulo ";
-				$mSQL .= "WHERE b.acceso='S' AND b.usuario='".$CI->session->userdata('usuario')."' ";
-				$mSQL .= "AND a.modulo='".$modulo."OTR' AND CHAR_LENGTH(a.proteo)>1 ORDER BY a.secu";
+			if($this->essuper()){
+				$mSQL  = 'SELECT a.secu, a.titulo, a.mensaje, a.proteo ';
+				$mSQL .= 'FROM tmenus a ';
+				$mSQL .= "WHERE a.modulo='${modulo}OTR' AND CHAR_LENGTH(a.proteo)>1 ORDER BY a.secu";
+			}else{
+				$mSQL  = 'SELECT a.secu, a.titulo, a.mensaje, a.proteo ';
+				$mSQL .= 'FROM tmenus a JOIN sida b ON a.codigo=b.modulo ';
+				$mSQL .= "WHERE b.acceso='S' AND b.usuario=${dbusuario}";
+				$mSQL .= "AND a.modulo='${modulo}OTR' AND CHAR_LENGTH(a.proteo)>1 ORDER BY a.secu";
 			}
 			$query = $CI->db->query($mSQL);
 

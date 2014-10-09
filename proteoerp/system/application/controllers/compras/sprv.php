@@ -80,16 +80,16 @@ class Sprv extends Controller {
 		$funciones .= '
 		function fusionar(){
 			var yurl = "";
-			var id = jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
-			if (id)	{
+			var id   = jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
 				var mnuevo = "";
 				var ret = jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
 				var mviejo = ret.proveed;
 				$.prompt("<h1>Cambiar Codigo</h1>Proveedor: <b>"+ret.nombre+"</b><br>Codigo Actual: <b>"+ret.proveed+"</b><br><br>Codigo Nuevo <input type=\'text\' id=\'codnuevo\' name=\'mcodigo\' size=\'6\' maxlength=\'5\' >",{
 					buttons: { Cambiar:true, Salir:false},
-					callback: function(e,v,m,f){
+					submit: function(e,v,m,f){
 						mnuevo = f.mcodigo;
-						if (v) {
+						if(v){
 							yurl = encodeURIComponent(mnuevo);
 							$.ajax({
 								url: "'.site_url('compras/sprv/sprvexiste').'",
@@ -1200,11 +1200,11 @@ class Sprv extends Controller {
 	function _pre_delete($do) {
 		$codigo  = $do->get('proveed');
 		$dbcodigo= $this->db->escape($codigo);
-		$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sprm WHERE cod_prv=${dbcodigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM scst WHERE proveed=${dbcodigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM gser WHERE proveed=${dbcodigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM ords WHERE proveed=${dbcodigo}");
-		$check += $this->datasis->dameval("SELECT COUNT(*) FROM bmov WHERE clipro='P' AND codcp=${dbcodigo}");
+		$check =  $this->datasis->dameval("SELECT COUNT(*) AS cana FROM sprm WHERE cod_prv=${dbcodigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM scst WHERE proveed=${dbcodigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM gser WHERE proveed=${dbcodigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM ords WHERE proveed=${dbcodigo}");
+		$check += $this->datasis->dameval("SELECT COUNT(*) AS cana FROM bmov WHERE clipro='P' AND codcp=${dbcodigo}");
 		if ($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Cliente con Movimiento no puede ser Borrado';
 			return false;
@@ -1327,9 +1327,9 @@ class Sprv extends Controller {
 		$nombre = $this->datasis->dameval("SELECT nombre FROM sprv WHERE id=".$claves['id']." ");
 
 		$data['content'] = $grid->output;
-		$data["head"]     = script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").$this->rapyd->get_head();
-		$data['title']    = '<h1>Consulta de Proveedor</h1>';
-		$data["subtitle"] = "
+		$data['head']    = script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js').$this->rapyd->get_head();
+		$data['title']   = '<h1>Consulta de Proveedor</h1>';
+		$data['subtitle']= "
 			<div align='center' style='border: 2px outset #EFEFEF;background: #EFEFEF;font-size:18px'>
 				<a href='javascript:javascript:history.go(-1)'>(".$mCodigo.") ".$nombre."</a>
 			</div>";
@@ -1375,9 +1375,8 @@ class Sprv extends Controller {
 		$mnuevo    = strtoupper($_REQUEST['mnuevo']);
 
 		//ELIMINAR DE SCLI
-		$mYaEsta = $this->datasis->dameval("SELECT count(*) FROM sprv WHERE proveed=".$this->db->escape($mnuevo));
-
-		if ( $mYaEsta > 0 )
+		$mYaEsta = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sprv WHERE proveed=".$this->db->escape($mnuevo)));
+		if($mYaEsta > 0)
 			$this->db->query("DELETE FROM sprv WHERE proveed=".$this->db->escape($mviejo));
 		else
 			$this->db->query("UPDATE sprv SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo));
@@ -1450,29 +1449,30 @@ class Sprv extends Controller {
 		$this->db->simple_query($mSQL);
 
 		// LVACA
-		if ( $this->datasis->istabla('lvaca')){
+		if($this->datasis->istabla('lvaca')){
 			$mSQL = "UPDATE lvaca SET codprv=".$this->db->escape($mnuevo)." WHERE codprv=".$this->db->escape($mviejo);
 			$this->db->simple_query($mSQL);
 		}
 
 		// LRUTA
-		if ( $this->datasis->istabla('lruta')){
+		if($this->datasis->istabla('lruta')){
 			$mSQL = "UPDATE lruta SET codprv=".$this->db->escape($mnuevo)." WHERE codprv=".$this->db->escape($mviejo);
 			$this->db->simple_query($mSQL);
 		}
 
 		// LPAGO
-		if ( $this->datasis->istabla('lpago')){
+		if($this->datasis->istabla('lpago')){
 			$mSQL = "UPDATE lpago SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
 			$this->db->simple_query($mSQL);
 		}
 
 		// LREDU
-		if ( $this->datasis->istabla('lgasto')){
+		if($this->datasis->istabla('lgasto')){
 			$mSQL = "UPDATE lgasto SET proveed=".$this->db->escape($mnuevo)." WHERE proveed=".$this->db->escape($mviejo);
 			$this->db->simple_query($mSQL);
 		}
 	}
+
 	function instalar(){
 		$campos=$this->db->list_fields('sprv');
 		if (!in_array('id',$campos)){
