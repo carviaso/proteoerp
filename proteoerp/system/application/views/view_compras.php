@@ -1003,8 +1003,6 @@ if (!$solo){
 </td>
 </tr>
 </table>
-
-
 <?php
 for($i=0;$i<$form->max_rel_count['scstordc'];$i++){
 	$it_ordc  = "ordc_${i}";
