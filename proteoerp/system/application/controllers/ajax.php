@@ -3011,7 +3011,6 @@ class Ajax extends Controller {
 			}
 			$salida .= "</tbody>\n";
 			$salida .= "</table>\n";
-			//$salida .= "</div>\n";
 		}
 
 		$mSQL   = "
@@ -3045,9 +3044,8 @@ class Ajax extends Controller {
 		$salida .= "<tr><td>Venta por 6 Meses</td><td align='right'>".round($mV6MES,2)."</td></tr>";
 		$salida .= "</tabla>";
 
-
 		$mFRACCI = $this->datasis->dameval("SELECT fracci FROM sinv WHERE codigo=${mCODIGO} ");
-		$mPEDIDO = $this->datasis->dameval("SELECT exord  FROM sinv WHERE codigo=${mCODIGO} ");
+		$mPEDIDO = round($this->datasis->dameval("SELECT exord  FROM sinv WHERE codigo=${mCODIGO} "));
 
 		$mSQL = "SELECT alma, existen FROM itsinv WHERE codigo=${mCODIGO} LIMIT 4 ";
 		$query = $this->db->query($mSQL);
@@ -3066,61 +3064,34 @@ class Ajax extends Controller {
 				$salida .= "<td align='right' >".$row->existen."</td>\n";
 				$salida .= "\t</tr>\n";
 			}
-			$salida .= "\t<tr style='background:#74DF00;font-weight:bold'>\n";
-			$salida .= "<td align='center'>PEDIDO</td>\n";
-			$salida .= "<td align='right' >".$mPEDIDO."</td>\n";
-			$salida .= "\t</tr>\n";
-
 			$salida .= "</tbody>\n";
 			$salida .= "</table>\n";
-			$salida .= "</div>\n";
 		}
 
-		$mSQL = "SELECT DATE_FORMAT(b.fecha,'%d/%c/%Y'), b.numero, b.status, b.proveed, cantidad-recibido saldo FROM itordc a JOIN ordc b ON a.numero=b.numero AND a.codigo=${mCODIGO} AND b.status IN ('PE','BA') ORDER BY a.numero DESC LIMIT 1";
+		$mSQL = "SELECT DATE_FORMAT(b.fecha,'%d/%c/%Y') fecha, b.numero, b.status, b.proveed, cantidad-recibido saldo FROM itordc a JOIN ordc b ON a.numero=b.numero AND a.codigo=${mCODIGO} AND b.status IN ('PE','BA') ORDER BY a.numero DESC LIMIT 2";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
-			$salida .= "<br><table id='texiste' style='border-collapse:collapse;padding:0px;width:100%;' >\n";
+			$salida .= "<table id='texiste' style='border-collapse:collapse;padding:0px;width:100%;background:#74DF00;' >\n";
 			$salida .= "<thead style='background:#CFCFCF;border-bottom: 1px solid black;'>\n";
 			$salida .= "\t<tr>\n";
-			$salida .= "<th>Almacen</th>\n";
-			$salida .= "<th>Existencia</th>\n";
+			$salida .= "<th colspan='4'>TOTAL PEDIDOS ".$mPEDIDO."</th>\n";
+			$salida .= "\t</tr><tr>\n";
+			$salida .= "<th>Prov/</th>\n";
+			$salida .= "<th>Fecha</th>\n";
+			$salida .= "<th>Cant.</th>\n";
 			$salida .= "\t</tr>\n";
 			$salida .= "</thead>\n";
 			$salida .= "<tbody>\n";
 			foreach( $query->result() as  $row ){
 				$salida .= "\t<tr style='background:#EFEFEF;'>\n";
-				$salida .= "<td align='center'>".$row->alma."   </td>\n";
-				$salida .= "<td align='right' >".$row->existen."</td>\n";
+				$salida .= "<td align='center'>".$row->proveed."   </td>\n";
+				$salida .= "<td align='right' >".$row->fecha."</td>\n";
+				$salida .= "<td align='right' >".$row->saldo."</td>\n";
 				$salida .= "\t</tr>\n";
 			}
-			$salida .= "\t<tr style='background:#74DF00;font-weight:bold'>\n";
-			$salida .= "<td align='center'>PEDIDO</td>\n";
-			$salida .= "<td align='right' >".$mPEDIDO."</td>\n";
-			$salida .= "\t</tr>\n";
-
 			$salida .= "</tbody>\n";
 			$salida .= "</table>\n";
-			$salida .= "</div>\n";
 		}
-
-
-/*
-IF  mPEDIDO > 0
-	@ 4,62 SAY "YA PEDIDOS "+STR(mPEDIDO,5) COLOR "W+/R"
-	mSQL := "SELECT DATE_FORMAT(b.fecha,'%d/%c/%Y'), b.numero, b.status, b.proveed, cantidad-recibido saldo FROM itordc a JOIN ordc b ON a.numero=b.numero AND a.codigo='"+mCODIGO+"' AND b.status IN ('PE','BA') ORDER BY a.numero DESC LIMIT 1"
-	mREG := DAMEREG(mSQL)
-	@ 5,62 SAY mREG[1]+" "+SUBSTR(mREG[2],3,6) COLOR "W+/R"
-	@ 6,62 SAY PADR(mREG[4]+"/"+mREG[3]+"/"+ALLTRIM(STR(mREG[5],6)),16) COLOR "W+/R"
-ELSE
-	@ 4,62 SAY SPACE(17) COLOR "N/BG"
-	@ 5,62 SAY SPACE(17) COLOR "N/BG"
-	@ 6,62 SAY SPACE(17) COLOR "N/BG"
-ENDIF
-
-@ 23,60 SAY STR(mFRACCI,8) COLOR "W+/R"
-
-*/
-
 		echo $salida;
 	}
 }

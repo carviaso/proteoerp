@@ -2128,7 +2128,7 @@ class Scst extends Controller {
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo_<#i#>');
 		$edit->codigo->size=10;
 		$edit->codigo->db_name='codigo';
-		$edit->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
+		//$edit->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
 		$edit->codigo->autocomplete=false;
 		$edit->codigo->db_name  = 'codigo';
 		$edit->codigo->rule     = 'required|callback_chcodigoa';
