@@ -2967,4 +2967,136 @@ class Ajax extends Controller {
 	}
 
 
+	//******************************************************************
+	//   Mostrar Estadistica
+	//
+	function codesta($mCOD = ''){
+		$mRET    = 0;
+		$mSQL    = '';
+		$mVSEMA  = 0;
+		$mVMES   = 0;
+		$mV3MES  = 0;
+		$mV6MES  = 0;
+		$mFRACCI = 0;
+		$salida  = ''; 
+
+		$mCODIGO = $this->db->escape($mCOD);
+
+		$mSQL  = "
+		SELECT MID(CONCAT(TRIM(a.proveed),' ',b.nombre),1,20) proveed, a.fecha, a.cantidad, a.costo 
+		FROM itscst a JOIN sprv b ON a.proveed=b.proveed
+		WHERE a.codigo=${mCODIGO} ORDER BY a.fecha DESC LIMIT 4";
+		$query = $this->db->query($mSQL);
+
+		if ($query->num_rows() > 0){
+			$salida  = "<table id='ucompra' style='border-collapse:collapse;padding:0px;width:100%;' >\n";
+			$salida .= "<thead style='background:#FFFF00;border-bottom: 1px solid black;'>\n";
+			$salida .= "\t<tr>\n";
+			$salida .= "<th colspan='4'>ULTIMAS COMPRAS</th>\n";
+			$salida .= "\t</tr><tr>\n";
+			$salida .= "<th>Fecha</th>\n";
+			$salida .= "<th>Cantidad</th>\n";
+			$salida .= "<th>Costo</th>\n";
+			$salida .= "\t</tr>\n";
+			$salida .= "</thead>\n";
+			$salida .= "<tbody>\n";
+			foreach( $query->result() as  $row ){
+				$salida .= "\t<tr style='background:#DFDFDF;'>\n";
+				$salida .= "<td align='center' colspan='3'  >".$row->proveed." </td>\n";
+				$salida .= "\t</tr><tr style='background:#FFFFFF;border-bottom: 1px solid black;'>\n";
+				$salida .= "<td align='left'  >".$row->fecha."   </td>\n";
+				$salida .= "<td align='center'>".round($row->cantidad)."</td>\n";
+				$salida .= "<td align='right' >".$row->costo."   </td>\n";
+				$salida .= "\t</tr>\n";
+			}
+			$salida .= "</tbody>\n";
+			$salida .= "</table>\n";
+			//$salida .= "</div>\n";
+		}
+
+		$mSQL   = "
+		SELECT SUM(cantidad) 
+		FROM costos 
+		WHERE origen='3I' AND codigo=${mCODIGO} AND fecha >= ADDDATE(CURDATE(),-365)";
+		$mV6MES = $this->datasis->dameval($mSQL)/2;
+
+		$mSQL   = "
+		SELECT SUM(cantidad) 
+		FROM costos 
+		WHERE origen='3I' AND codigo=${mCODIGO} AND fecha >= ADDDATE(CURDATE(),-180)";
+		$mV3MES = $this->datasis->dameval($mSQL)/2;
+
+		$mSQL   = "
+		SELECT SUM(cantidad) 
+		FROM costos 
+		WHERE origen='3I' AND codigo=${mCODIGO} AND fecha >=ADDDATE(CURDATE(),-90)";
+		$mVMES  = $this->datasis->dameval($mSQL)/3;
+
+		$mSQL   = "
+		SELECT SUM(cantidad) 
+		FROM costos 
+		WHERE origen='3I' AND codigo=${mCODIGO} AND fecha >= ADDDATE(CURDATE(),-60)";
+		$mVSEMA = $this->datasis->dameval($mSQL)/8;
+
+		$salida .= "<table style='background:#FFBF00;border: 1px solid black;width:100%;'>";
+		$salida .= "<tr><td>Venta por Semana</td><td align='right'>".round($mVSEMA,2)."</td></tr>";
+		$salida .= "<tr><td>Venta por Mes    </td><td align='right'>".round($mVMES,2)."</td></tr>";
+		$salida .= "<tr><td>Venta por 3 Meses</td><td align='right'>".round($mV3MES,2)."</td></tr>";
+		$salida .= "<tr><td>Venta por 6 Meses</td><td align='right'>".round($mV6MES,2)."</td></tr>";
+		$salida .= "</tabla>";
+
+
+		$mFRACCI = $this->datasis->dameval("SELECT fracci FROM sinv WHERE codigo=${mCODIGO} ");
+		$mPEDIDO = $this->datasis->dameval("SELECT exord  FROM sinv WHERE codigo=${mCODIGO} ");
+
+		$mSQL = "SELECT alma, existen FROM itsinv WHERE codigo=${mCODIGO} LIMIT 4 ";
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$salida .= "<br><table id='texiste' style='border-collapse:collapse;padding:0px;width:100%;' >\n";
+			$salida .= "<thead style='background:#CFCFCF;border-bottom: 1px solid black;'>\n";
+			$salida .= "\t<tr>\n";
+			$salida .= "<th>Almacen</th>\n";
+			$salida .= "<th>Existencia</th>\n";
+			$salida .= "\t</tr>\n";
+			$salida .= "</thead>\n";
+			$salida .= "<tbody>\n";
+			foreach( $query->result() as  $row ){
+				$salida .= "\t<tr style='background:#EFEFEF;'>\n";
+				$salida .= "<td align='center'>".$row->alma."   </td>\n";
+				$salida .= "<td align='right' >".$row->existen."</td>\n";
+				$salida .= "\t</tr>\n";
+			}
+			$salida .= "\t<tr style='background:#74DF00;font-weight:bold'>\n";
+			$salida .= "<td align='center'>PEDIDO</td>\n";
+			$salida .= "<td align='right' >".$mPEDIDO."</td>\n";
+			$salida .= "\t</tr>\n";
+
+			$salida .= "</tbody>\n";
+			$salida .= "</table>\n";
+			$salida .= "</div>\n";
+		}
+
+
+
+		$mSQL = "SELECT DATE_FORMAT(b.fecha,'%d/%c/%Y'), b.numero, b.status, b.proveed, cantidad-recibido saldo FROM itordc a JOIN ordc b ON a.numero=b.numero AND a.codigo=${mCODIGO} AND b.status IN ('PE','BA') ORDER BY a.numero DESC LIMIT 1";
+
+/*
+IF  mPEDIDO > 0
+	@ 4,62 SAY "YA PEDIDOS "+STR(mPEDIDO,5) COLOR "W+/R"
+	mSQL := "SELECT DATE_FORMAT(b.fecha,'%d/%c/%Y'), b.numero, b.status, b.proveed, cantidad-recibido saldo FROM itordc a JOIN ordc b ON a.numero=b.numero AND a.codigo='"+mCODIGO+"' AND b.status IN ('PE','BA') ORDER BY a.numero DESC LIMIT 1"
+	mREG := DAMEREG(mSQL)
+	@ 5,62 SAY mREG[1]+" "+SUBSTR(mREG[2],3,6) COLOR "W+/R"
+	@ 6,62 SAY PADR(mREG[4]+"/"+mREG[3]+"/"+ALLTRIM(STR(mREG[5],6)),16) COLOR "W+/R"
+ELSE
+	@ 4,62 SAY SPACE(17) COLOR "N/BG"
+	@ 5,62 SAY SPACE(17) COLOR "N/BG"
+	@ 6,62 SAY SPACE(17) COLOR "N/BG"
+ENDIF
+
+@ 23,60 SAY STR(mFRACCI,8) COLOR "W+/R"
+
+*/
+
+		echo $salida;
+	}
 }

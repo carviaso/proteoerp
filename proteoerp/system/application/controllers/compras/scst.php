@@ -1965,14 +1965,14 @@ class Scst extends Controller {
 
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
-		$edit->fecha->size = 12;
+		$edit->fecha->size = 10;
 		$edit->fecha->rule ='required|chfecha';
 		$edit->fecha->calendar=false;
 		//$transac=$edit->get_from_dataobjetct('transac');
 
 		$edit->vence = new DateonlyField('Vence', 'vence','d/m/Y');
 		$edit->vence->insertValue = date('Y-m-d');
-		$edit->vence->size = 12;
+		$edit->vence->size = 10;
 		$edit->vence->rule ='required|chfecha';
 		$edit->vence->calendar=false;
 
@@ -2037,7 +2037,7 @@ class Scst extends Controller {
 			$edit->aplrete->insertValue = '0';
 		}
 
-		$edit->cfis = new inputField('N&uacute;mero fiscal', 'nfiscal');
+		$edit->cfis = new inputField('Nro.Fiscal', 'nfiscal');
 		$edit->cfis->size = 15;
 		$edit->cfis->autocomplete=false;
 		//$edit->cfis->rule = 'required';
@@ -2046,14 +2046,14 @@ class Scst extends Controller {
 		$edit->almacen = new  dropdownField ('Almac&eacute;n', 'depo');
 		$edit->almacen->options('SELECT ubica, CONCAT(ubica," ",ubides) nombre FROM caub WHERE gasto<>"S" AND invfis="N" ORDER BY ubica');
 		$edit->almacen->rule = 'required';
-		$edit->almacen->style='width:145px;';
+		$edit->almacen->style='width:130px;';
 
 		$edit->tipo = new dropdownField('Tipo', 'tipo_doc');
 		$edit->tipo->option('FC','Factura a Cr&eacute;dito');
 		$edit->tipo->option('NC','Nota de Cr&eacute;dito');
 		//$edit->tipo->option('NE','Nota de Entrega'); //Falta implementar los metodos post para este caso
 		$edit->tipo->rule = 'required';
-		$edit->tipo->style='width:140px;';
+		$edit->tipo->style='width:130px;';
 		$edit->tipo->onchange='chtipodoc()';
 
 		$edit->peso  = new hiddenField('Peso', 'peso');
@@ -2111,8 +2111,8 @@ class Scst extends Controller {
 		$edit->mdolar->when=array('show');
 
 		$edit->observa1 = new textareaField('Observaci&oacute;n', 'observa1');
-		$edit->observa1->cols=65;
-		$edit->observa1->rows=3;
+		$edit->observa1->cols=50;
+		$edit->observa1->rows=2;
 
 		$edit->observa2 = new textareaField('Observaci&oacute;n', 'observa2');
 		$edit->observa2->when=array('show');
@@ -2203,7 +2203,7 @@ class Scst extends Controller {
 		$edit->codigorete->options('SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",tipo,codigo,activida)) AS activida FROM rete ORDER BY tipo,codigo');
 		$edit->codigorete->db_name='codigorete';
 		$edit->codigorete->rule   ='max_length[4]';
-		$edit->codigorete->style  ='width: 350px';
+		$edit->codigorete->style  ='width: 320px';
 		$edit->codigorete->rel_id ='gereten';
 		$edit->codigorete->onchange='post_codigoreteselec(<#i#>,this.value)';
 

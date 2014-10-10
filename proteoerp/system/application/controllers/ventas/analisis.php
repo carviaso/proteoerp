@@ -73,9 +73,11 @@ class Analisis extends Controller {
 		$grid->db->join('dpto AS e','d.depto=e.depto','LEFT');	
 		$grid->db->where('YEAR(f.fecha)',$anio);
 		$grid->db->where("f.tipo_doc <>",'X');
-		$grid->db->groupby('EXTRACT(YEAR_MONTH FROM f.fecha)');
+		//$grid->db->groupby('EXTRACT(YEAR_MONTH FROM f.fecha)');
+		$grid->db->groupby('e.depto');
+
 		$grid->build();
-		echo  $grid->db->last_query();
+		//echo  $grid->db->last_query();
 
 		$data['content'] = $filter->output.'<div style="overflow: auto; width: 100%;">'.$grid->output.'</div>';
 		$data['title']   = "<h1>An&aacute;lisis de ventas</h1>";

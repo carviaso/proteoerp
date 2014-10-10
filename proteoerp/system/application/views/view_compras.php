@@ -713,7 +713,15 @@ function autocod(id){
 
 			setTimeout(function() {  $('#codigo_'+id).removeAttr("readonly"); }, 1500);
 			buscarep(id,ui.item.codigo);
+			codesta(ui.item.codigo);
 		}
+	});
+}
+
+
+function codesta(mcodigo){
+	$.post( "<?php echo site_url('ajax/codesta'); ?>/"+mcodigo, function( data ) {
+		$( "#idcodesta" ).html( data );
 	});
 }
 
@@ -809,67 +817,82 @@ if (!$solo){
 ?>
 	<tr>
 		<td>
-			<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
-			<table width="100%"  style="margin:0;width:100%;" cellspacing='2' cellpadding='2'>
+			<fieldset  style='border: 1px outset #FEB404;background:#FFFCE8;'>
+			<table style="margin:0;width:100%;" cellspacing='0' cellpadding='0' border='0'>
 				<tr>
-					<td colspan="3">
-						<table width="100%">
+					<td style='border-right: 1px solid grey;width:210px;'>
+						<table width='100%' border='0'>
 							<tr>
-								<td class="littletablerowth" width='40'><?php echo $form->tipo->label  ?></td>
-								<td class="littletablerow"   align='left'  width='150'><?php echo $form->tipo->output   ?></td>
-								<td class="littletablerowth" align='right' id='td_fafecta'><?php echo $form->fafecta->label ?>*</td>
-								<td class="littletablerow"   align='right'><?php echo $form->fafecta->output ?></td>
-								<td class="littletablerowth" align='right' width='100'><?php echo $form->proveed->label ?>*</td>
-
-								<td class="littletablerow">
-									<?php echo $form->proveed->output ?>
-									<b id='nombre_val'><?php echo $form->nombre->value ?></b>
-									<?php echo $form->nombre->output.$form->sprvreteiva->output ?></td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<td style='border: 1px solid grey;'>
-						<table width='100%'>
-							<tr>
-								<td class="littletablerowth"><?php echo $form->fecha->label  ?></td>
-								<td class="littletablerow">  <?php echo $form->fecha->output ?></td>
-							</tr><tr>
-								<td class="littletablerowth"><?php echo $form->serie->label  ?></td>
-								<td class="littletablerow">  <?php echo $form->serie->output ?></td>
-							</tr>
-						</table>
-					</td><td style='border: 1px solid grey;'>
-						<table width='100%'>
-							<tr>
-								<td class="littletablerowth"><?php echo $form->cfis->label  ?>*</td>
-								<td class="littletablerow">  <?php echo $form->cfis->output ?></td>
+								<td class="littletablerowth" ><?php echo $form->tipo->label  ?></td>
+								<td class="littletablerow" align='left' ><?php echo $form->tipo->output   ?></td>
 							</tr><tr>
 								<td class="littletablerowth"><?php echo $form->almacen->label  ?>*</td>
 								<td class="littletablerow">  <?php echo $form->almacen->output ?></td>
 							</tr>
 						</table>
-					</td><td style='border: 1px solid grey;'>
-						<table width='100%'>
+					</td>
+					<td style='border-left: 1px solid grey;'>
+						<table width='100%' border='0'>
 							<tr>
+								<td class="littletablerowth" align='right'><?php echo $form->proveed->label ?>*</td>
+								<td  colspan='3' class="littletablerow">
+									<?php echo $form->proveed->output ?>
+									<b id='nombre_val'><?php echo $form->nombre->value ?></b>
+									<?php echo $form->nombre->output.$form->sprvreteiva->output ?></td>
+								<td class="littletablerowth"><?php echo $form->fecha->label  ?></td>
+								<td class="littletablerow">  <?php echo $form->fecha->output ?></td>
+							</tr><tr>
+								<td class="littletablerowth" align='right'><?php echo $form->serie->label  ?></td>
+								<td class="littletablerow">  <?php echo $form->serie->output ?></td>
+								<td class="littletablerowth"><?php echo $form->cfis->label  ?>*</td>
+								<td class="littletablerow">  <?php echo $form->cfis->output ?></td>
 								<td class="littletablerowth"><?php echo $form->vence->label ?></td>
 								<td class="littletablerow">  <?php echo $form->vence->output ?></td>
-							</tr><tr>
-								<td class="littletablerowth"><?php echo $form->actuali->label  ?></td>
-								<td class="littletablerow">  <?php echo $form->actuali->output ?></td>
 							</tr>
 						</table>
 					</td>
+
+
+					<!--td style='border: 1px solid grey;'>
+						<table width='100%'>
+
+								<td class="littletablerowth" align='right' id='td_fafecta'><?php echo $form->fafecta->label ?>*</td>
+								<td class="littletablerow"   align='right'><?php echo $form->fafecta->output ?></td>
+
+
+							<tr>
+								<td class="littletablerowth"><?php echo $form->serie->label  ?></td>
+								<td class="littletablerow">  <?php echo $form->serie->output ?></td>
+							</tr><tr>
+								<td class="littletablerowth"><?php echo $form->cfis->label  ?>*</td>
+								<td class="littletablerow">  <?php echo $form->cfis->output ?></td>
+							</tr>
+						</table>
+					</td><td style='border: 1px solid grey;'>
+						<table width='100%'>
+							<tr>
+								<td class="littletablerowth"><?php echo $form->fecha->label  ?></td>
+								<td class="littletablerow">  <?php echo $form->fecha->output ?></td>
+							</tr><tr>
+								<td class="littletablerowth"><?php echo $form->vence->label ?></td>
+								<td class="littletablerow">  <?php echo $form->vence->output ?></td>
+
+							<!--/tr><tr>
+								<td class="littletablerowth"><?php echo $form->actuali->label  ?></td>
+								<td class="littletablerow">  <?php echo $form->actuali->output ?></td-->
+							</tr>
+						</table>
+					</td-->
 				</tr>
 			</table>
 			</fieldset>
-
 		</tr>
 	<tr>
 </table>
 
-<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
+<table width='100%'>
+	<tr><td style="width:680px;">
+<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px;width:680px'>
 <table width='100%'>
 	<tr id='__INPL__'>
 		<th bgcolor='#7098D0'>C&oacute;digo     </th>
@@ -914,18 +937,19 @@ if (!$solo){
 </table>
 </div>
 
-<table  width="100%" style="margin:0;width:100%;" border='0'>
+<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;width:680px'>
+<table style="margin:0;width:100%;" border='0'>
 	<tr>
-		<td width="131" class="littletablerowth" align='left'><?php echo $container_bl ?></td>
+		<td width="100" class="littletablerowth" align='left'><?php echo $container_bl ?></td>
 		<?php /*<td width="131" class="littletablerowth" align='right'><?php echo $form->rislr->label;     ?></td>*/?>
-		<td width="122" class="littletablerow"   align='right'><?php echo $form->rislr->output;    ?></td>
+		<td width="10" class="littletablerow"   align='right'><?php echo $form->rislr->output;    ?></td>
 		<td class="littletablerowth" align='right'><?php echo $form->riva->label;     ?></td>
 		<td class="littletablerow"   align='left' ><?php echo $form->riva->output;     ?></td>
 		<td width="111" class="littletablerowth" align='right'><?php echo $form->montotot->label;  ?></td>
 		<td width="139" class="littletablerow"   align='right'><?php echo $form->montotot->output; ?></td>
 	</tr><tr>
-		<td class="littletableheader" width="100"  rowspan='2'><?php echo $form->observa1->label;    ?></td>
-		<td colspan='3' rowspan='2'><?php echo $form->observa1->output;   ?><?php echo $form->observa2->output;   ?><?php echo $form->observa3->output;?></td>
+		<!--td class="littletableheader" width="100"  rowspan='2'><?php echo $form->observa1->label;    ?></td-->
+		<td colspan='4' rowspan='2'><?php echo $form->observa1->output;   ?><?php echo $form->observa2->output;   ?><?php echo $form->observa3->output;?></td>
 		<td class="littletablerowth" align='right'><?php echo $form->montoiva->label;  ?></td>
 		<td class="littletablerow"   align='right'><?php echo $form->montoiva->output; ?></td>
 	</tr><tr>
@@ -933,14 +957,14 @@ if (!$solo){
 		<td class="littletablerow"   align='right'><b id='montonet_val' style='font-size:18px;font-weight: bold' ><?php echo nformat($form->montonet->value); ?></b><?php echo $form->montonet->output; ?></td>
 	</tr>
 </table>
+</div>
 
-
-<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:80px' id='divgereten'>
+<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:75px;width:680px;' id='divgereten'>
 <table width='100%'>
 	<tr id='__PTPL__gereten'>
 		<td class="littletableheaderdet">Retenci&oacute;n ISLR</td>
 		<td class="littletableheaderdet">Base</td>
-		<td class="littletableheaderdet" align="right">Porcentaje</td>
+		<td class="littletableheaderdet" align="right">%</td>
 		<td class="littletableheaderdet" align="right">Monto</td>
 		<?php if($form->_status!='show') {?>
 			<td class="littletableheaderdet" align='center'><a href='#' onclick="add_gereten()" title='Agregar otro concepto'><?php echo img('images/agrega4.png'); ?></a></td>
@@ -965,6 +989,22 @@ if (!$solo){
 	</tr>
 </table>
 </div>
+</td><td valign='top'>
+	<fieldset  style='border: 1px outset #FEB404;background:#FFFCE8;'>
+	<table style="width:100%">
+		<tr>
+			<td class="littletablerowth" align='left' id='td_fafecta'><?php echo $form->fafecta->label ?></td>
+			<tr></tr>
+			<td class="littletablerow"   align='left' id='td_fafecta'><?php echo $form->fafecta->output ?></td>
+		</tr>
+	</table>
+	</fieldset>
+	<div id='idcodesta'></div>
+</td>
+</tr>
+</table>
+
+
 <?php
 for($i=0;$i<$form->max_rel_count['scstordc'];$i++){
 	$it_ordc  = "ordc_${i}";
