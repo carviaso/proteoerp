@@ -3076,9 +3076,33 @@ class Ajax extends Controller {
 			$salida .= "</div>\n";
 		}
 
-
-
 		$mSQL = "SELECT DATE_FORMAT(b.fecha,'%d/%c/%Y'), b.numero, b.status, b.proveed, cantidad-recibido saldo FROM itordc a JOIN ordc b ON a.numero=b.numero AND a.codigo=${mCODIGO} AND b.status IN ('PE','BA') ORDER BY a.numero DESC LIMIT 1";
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$salida .= "<br><table id='texiste' style='border-collapse:collapse;padding:0px;width:100%;' >\n";
+			$salida .= "<thead style='background:#CFCFCF;border-bottom: 1px solid black;'>\n";
+			$salida .= "\t<tr>\n";
+			$salida .= "<th>Almacen</th>\n";
+			$salida .= "<th>Existencia</th>\n";
+			$salida .= "\t</tr>\n";
+			$salida .= "</thead>\n";
+			$salida .= "<tbody>\n";
+			foreach( $query->result() as  $row ){
+				$salida .= "\t<tr style='background:#EFEFEF;'>\n";
+				$salida .= "<td align='center'>".$row->alma."   </td>\n";
+				$salida .= "<td align='right' >".$row->existen."</td>\n";
+				$salida .= "\t</tr>\n";
+			}
+			$salida .= "\t<tr style='background:#74DF00;font-weight:bold'>\n";
+			$salida .= "<td align='center'>PEDIDO</td>\n";
+			$salida .= "<td align='right' >".$mPEDIDO."</td>\n";
+			$salida .= "\t</tr>\n";
+
+			$salida .= "</tbody>\n";
+			$salida .= "</table>\n";
+			$salida .= "</div>\n";
+		}
+
 
 /*
 IF  mPEDIDO > 0
