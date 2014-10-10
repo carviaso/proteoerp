@@ -131,11 +131,10 @@ class Prenom extends Controller {
 				$fechac = substr($fechac,0,6).$ultdia;
 			}
 		}elseif($tipo=='S'){ //Fecha - 7
-			$date->sub(new DateInterval('P7D'));
+			//$date->sub(new DateInterval('P7D'));
 			$fechac = $date->format('Ymd');
-
-		}elseif($tipo=='S'){ //Fecha -14
-			$date->sub(new DateInterval('P14D'));
+		}elseif($tipo=='B'){ //Fecha -14
+			//$date->sub(new DateInterval('P14D'));
 			$fechac = $date->format('Ymd');
 		}else{
 
@@ -545,10 +544,10 @@ class Prenom extends Controller {
 /*
 
 	1.- Calcular la primera nomina desde la fecha de ingreso
-	
-	 
-	 
- 
+
+
+
+
 */
 
 ?>
