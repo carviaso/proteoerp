@@ -105,7 +105,7 @@ function total(){
 			tmonto = tmonto+abono;
 		}
 	});
-	return tmonto;
+	return roundNumber(tmonto,2);
 }
 
 function totalefe(){
@@ -122,7 +122,7 @@ function totalefe(){
 		}
 	});
 
-	return tmonto;
+	return roundNumber(tmonto,2);
 }
 
 function cnota(){
@@ -197,7 +197,7 @@ function totaliza(){
 	}else if(tmonto < tefect){
 		$("#tefecto").css('color', '#740998');
 	}else{
-		$("#tefecto").css('color', '');
+		$("#tefecto").css('color', 'green');
 	}
 }
 

@@ -1293,7 +1293,6 @@ class Apan extends Controller {
 		}
 		//Fin de los aplicables
 
-
 		$arr_efe=array();
 		//Chequea si se reintegra
 		if($preinte != 'S'){
@@ -1352,7 +1351,7 @@ class Apan extends Controller {
 			}
 			//Fin de los efectos
 
-			if($aplicar-$efectos != 0.0){
+			if(round($aplicar-$efectos,2) != 0.0){
 				$do->error_message_ar['pre_ins'] = $do->error_message_ar['insert'] = 'El monto a aplicar es diferente al aplicado. '."$aplicar-$efectos";
 				return false;
 			}
@@ -1504,7 +1503,8 @@ class Apan extends Controller {
 			do{
 				if($saldoefe<=0){
 					$efe = array_shift($arr_efe);
-					if(empty($efe)) break;
+					if(empty($efe)){ break; }
+					$saldoefe = $efe['abono'];
 				}
 
 				$data['numero']    = $efe['numero'];
@@ -1512,13 +1512,13 @@ class Apan extends Controller {
 				$data['fecha']     = $efe['fecha'];
 				$data['monto']     = $efe['monto'];
 
-				if($saldoapl >= $efe['abono']){
-					$data['abono'] = $efe['abono'];
-					$saldoapl      = $saldoapl-$efe['abono'];
+				if($saldoapl >= $saldoefe){
+					$data['abono'] = $saldoefe;
+					$saldoapl      = $saldoapl-$saldoefe;
 					$saldoefe      = 0;
 				}else{
 					$data['abono'] = $saldoapl;
-					$saldoefe      = $apl['monto']-$saldoapl;
+					$saldoefe      = $saldoefe-$saldoapl;
 					$saldoapl      = 0;
 				}
 
@@ -1531,7 +1531,7 @@ class Apan extends Controller {
 					$data['emiriva']  = '';
 					$data['recriva']  = '';
 					$mSQLs[] = $this->db->insert_string('itccli', $data);
-					$mSQLs[] = 'UPDATE smov SET abonos=abonos+'.$efe['abono'].' WHERE id='.$this->db->escape($efe['id']);
+					$mSQLs[] = 'UPDATE smov SET abonos=abonos+'.$data['abono'].' WHERE id='.$this->db->escape($efe['id']);
 				}elseif($ttipo == 'P'){
 					$data['numppro']  = $apl['numero'];
 					$data['tipoppro'] = $apl['tipo'];
@@ -1540,7 +1540,7 @@ class Apan extends Controller {
 					$data['creten']   = '';
 					$data['breten']   = '';
 					$mSQLs[] = $this->db->insert_string('itppro', $data);
-					$mSQLs[] = 'UPDATE sprm SET abonos=abonos+'.$efe['abono'].' WHERE id='.$this->db->escape($efe['id']);
+					$mSQLs[] = 'UPDATE sprm SET abonos=abonos+'.$data['abono'].' WHERE id='.$this->db->escape($efe['id']);
 				}
 			}while($saldoapl>0);
 
