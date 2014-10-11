@@ -20,13 +20,13 @@ class fnomina {
 	function SUELDO_MES(){
 		$CODIGO  = $this->ci->db->escape($this->CODIGO);
 		$SUELDOA = 0;
-		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=$CODIGO");
-		$mSUELDO = $this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=$CODIGO");
-		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
+		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=${CODIGO}");
+		$mSUELDO = floatval($this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=${CODIGO}"));
 
-		if($mFRECU == 'S') $SUELDOA = $mSUELDO * 52 / 12;
-		if($mFRECU == 'B') $SUELDOA = $mSUELDO * 26 / 12;
-		if($mFRECU == 'Q') $SUELDOA = $mSUELDO * 2;
+		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=${CODIGO}");
+		if($mFRECU == 'S') $SUELDOA = $mSUELDO*52/12;
+		if($mFRECU == 'B') $SUELDOA = $mSUELDO*26/12;
+		if($mFRECU == 'Q') $SUELDOA = $mSUELDO*2;
 		if($mFRECU == 'M') $SUELDOA = $mSUELDO;
 		//memowrite($SUELDOA,"SUELDO_MES");
 		return $SUELDOA;
@@ -35,12 +35,12 @@ class fnomina {
 	function SUELDO_QUI(){
 		$CODIGO=$this->ci->db->escape($this->CODIGO);
 		$SUELDOA = 0;
-		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=$CODIGO");
-		$mMONTO  = $this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=$CODIGO");
+		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=${CODIGO}");
+		$mMONTO  = floatval($this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=${CODIGO}"));
 
 		if($mFRECU == 'O') $mFRECU = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
-		if($mFRECU == 'S') $SUELDOA = $mMONTO * 52 / 24;
-		if($mFRECU == 'B') $SUELDOA = $mMONTO * 26 / 24;
+		if($mFRECU == 'S') $SUELDOA = $mMONTO*52/24;
+		if($mFRECU == 'B') $SUELDOA = $mMONTO*26/24;
 		if($mFRECU == 'Q') $SUELDOA = $mMONTO;
 		if($mFRECU == 'M') $SUELDOA = $mMONTO/2;
 		//return $SUELDOA;
@@ -49,10 +49,10 @@ class fnomina {
 	function SUELDO_SEM(){
 		$CODIGO=$this->ci->db->escape($this->CODIGO);
 		$SUELDOA = 0;
-		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=$CODIGO");
-		$mMONTO  = $this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=$CODIGO");
+		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=${CODIGO}");
+		$mMONTO  = floatval($this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=${CODIGO}"));
 
-		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
+		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=${CODIGO}");
 		if($mFRECU == 'S') $SUELDOA = $mMONTO;
 		if($mFRECU == 'B') $SUELDOA = $mMONTO/2;
 		if($mFRECU == 'Q') $SUELDOA = $mMONTO*24/52;

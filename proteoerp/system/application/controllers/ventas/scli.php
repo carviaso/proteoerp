@@ -1648,7 +1648,7 @@ class Scli extends validaciones {
 							url:  "'.site_url('ajax/buscastarifa').'",
 							type: "POST",
 							dataType: "json",
-							data: "q="+req.term,
+							data: {"q":req.term},
 							success:
 								function(data){
 									var sugiere = [];
@@ -1685,53 +1685,62 @@ class Scli extends validaciones {
 				$("#maintabcontainer").tabs();
 
 				$("#rifci").focusout(function(){
-					rif=$(this).val().toUpperCase();
-					$(this).val(rif);
-					if(!chrif(rif)){
-						alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
-						return true;
-					}else{
-						$.ajax({
-							type: "POST",
-							url: "'.site_url('ajax/traerif').'",
-							dataType: "json",
-							data: {rifci: rif},
-							success: function(data){
-								if(data.error==0){
-									if($("#nombre").val()==""){
-										$("#nombre").val(data.nombre);
-									}
-									if($("#nomfis").val()==""){
-										$("#nomfis").val(data.nombre);
-									}
-								}
-							}
-						});
-
-						//Chequea si esta repetido
-						$.ajax({
-							type: "POST",
-							url: "'.site_url('ajax/rifrep/C').'",
-							dataType: "json",
-							data: {rifci: rif, codigo: '.json_encode($do->get('cliente')).'},
-							success: function(data){
-								if(data.rt){
-									$.prompt(data.msj,{
-										buttons: { Continuar: true },
-										focus: 1,
-										submit:function(e,v,m,f){
-
-											$("#nombre").focus();
-										}
-									});
-								}
-							}
-						});
-						//Fin del chequeo repetido
-					}
-					return true;
+					frifrep();
 				});
 			});
+
+			function frifrep(){
+				rif=$("#rifci").val().toUpperCase();
+				$("#rifci").val(rif);
+				if(!chrif(rif)){
+					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
+					return true;
+				}else{
+					$.ajax({
+						type: "POST",
+						url: "'.site_url('ajax/traerif').'",
+						dataType: "json",
+						data: {rifci: rif},
+						success: function(data){
+							if(data.error==0){
+								if($("#nombre").val()==""){
+									$("#nombre").val(data.nombre);
+								}
+								if($("#nomfis").val()==""){
+									$("#nomfis").val(data.nombre);
+								}
+							}
+						}
+					});
+
+					//Chequea si esta repetido
+					$.ajax({
+						type: "POST",
+						url: "'.site_url('ajax/rifrep/C').'",
+						dataType: "json",
+						data: {rifci: rif, codigo: '.json_encode($do->get('cliente')).'},
+						success: function(data){
+							if(data.rt){
+								$.prompt(data.msj,{
+									buttons: { Continuar: true },
+									focus: 1,
+									submit:function(e,v,m,f){
+										$("#rifci").unbind("focusout");
+										$("#nombre").focus();
+										//$("#rifci").bind("focusout",function(){ frifrep(); });
+									}
+								});
+								$("#rifci").unbind("focusout");
+								$("#nombre").focus();
+								//$("#rifci").bind("focusout",function(){ frifrep(); });
+							}
+						}
+					});
+					//Fin del chequeo repetido
+				}
+				return true;
+			}
+
 
 			function formato(row) {
 				return row[0] + "-" + row[1];
@@ -1907,6 +1916,7 @@ class Scli extends validaciones {
 										$("#nombre").focus();
 									}
 								});
+								$("#rifci").unbind("focusout");
 							}
 						}
 					});
