@@ -2856,16 +2856,76 @@ class Smov extends Controller {
 		$edit->nfiscal->size=16;
 		$edit->nfiscal->maxlength =15;
 
+
+
+		$chkval   = false;
+		$mmsj     = 'Dato sugerido por el sistema, no esta guardado';
+		$tipo     = $edit->get_from_dataobjetct('tipo_doc');
+		$dbtipo   = $this->db->escape($tipo);
+		$dbcajero = $this->db->escape($edit->get_from_dataobjetct('cajero'));
+		$numfis   = trim($edit->get_from_dataobjetct('nfiscal'));
 		$fiscal=$this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S'){
+			if(empty($numfis)){
+				$num = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_'");
+				if($tipo=='NC'){
+					$nums = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM smov WHERE tipo_doc IN ('NC') AND fecha=CURDATE() AND nfiscal IS NOT NULL"));
+					if($nums>$num){
+						$num=$nums;
+					}
+				}
+				if(!empty($num)){
+					$nn       = $num+1;
+					$edit->nfiscal->updateValue=str_pad($nn,8,'0',STR_PAD_LEFT);
+					$edit->nfiscal->style = 'background-color:#FFDD00';
+				}
+			}
+
 			$edit->maqfiscal = new inputField('Serial m&aacute;quina f&iacute;scal','maqfiscal');
 			$edit->maqfiscal->rule='max_length[15]|strtoupper|required';
 			$edit->maqfiscal->size =16;
 			$edit->maqfiscal->maxlength =15;
 
+			$smaqfiscal=trim($edit->get_from_dataobjetct('maqfiscal'));
+			if(empty($smaqfiscal)){
+				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_' ORDER BY id DESC LIMIT 1");
+				$edit->maqfiscal->updateValue=trim($maqfiscal);
+				$edit->maqfiscal->style = 'background-color:#FFDD00';
+				$edit->maqfiscal->title = $mmsj;
+				$chkval = true;
+			}
+
+		}else{
+			if(empty($numfis)){
+				$numf = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM sfac WHERE cajero=${dbcajero} AND tipo_doc<>'X' AND MID(numero,1,1)!='_' AND fecha=CURDATE()"));
+				$nums = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM smov WHERE tipo_doc IN ('NC','FC') AND fecha=CURDATE() AND nfiscal IS NOT NULL"));
+				if($numf>$nums){
+					$num=$numf;
+				}else{
+					$num=$nums;
+				}
+
+				if(!empty($num)){
+					$arr_num  = explode('-',$num);
+					$last     = count($arr_num)-1;
+					if($last>=0){
+						if(is_numeric($arr_num[$last])){
+							$long = strlen($arr_num[$last]);
+							$arr_num[$last] = $arr_num[$last]+1;
+							$arr_num[$last] = str_pad($arr_num[$last],$long,'0',STR_PAD_LEFT);
+							$nn = implode('-',$arr_num);
+							$edit->nfiscal->updateValue=$nn;
+							$edit->nfiscal->style = 'background-color:#FFDD00';
+							$edit->nfiscal->title = $mmsj;
+							$chkval = true;
+						}
+					}
+				}
+			}
+
 		}
 
-		$edit->buttons('save', 'undo');
+		$edit->buttons('save');
 		$edit->build();
 
 		if($st=='modify'){

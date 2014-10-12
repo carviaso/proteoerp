@@ -771,6 +771,22 @@ class Bconci extends Controller {
 		}
 	}
 
+	function masivo($fecha=null,$codban=null){
+		if(empty($fecha)) return '';
+		if($this->secu->essuper()){
+			$dbfecha  = $this->db->escape($fecha);
+			$dbstatus = '\'û\'';
+			if(empty($codban)){
+				$ww=' AND banco='.$this->db->escape($codban);
+			}else{
+				$ww='';
+			}
+
+			$mSQL = "UPDATE bmov SET concilia=LAST_DAY(fecha), status=${dbstatus} WHERE fecha<${dbfecha} anulado<>'S' AND liable<>'N' ${ww}";
+			$this->db->simple_query($mSQL);
+		}
+	}
+
 	function concilia(){
 		session_write_close();
 		$id    = $this->input->post('id');

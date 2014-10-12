@@ -3181,8 +3181,16 @@ class Sfac extends Controller {
 		if($fiscal=='S' && $manual!='S'){
 			if(empty($numfis)){
 				$num      = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_'");
-				$nn       = $num+1;
-				$edit->nfiscal->updateValue=str_pad($nn,8,'0',STR_PAD_LEFT);
+				if($tipo=='D'){
+					$nums = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM smov WHERE tipo_doc IN ('NC') AND fecha=CURDATE() AND nfiscal IS NOT NULL"));
+					if($nums>$num){
+						$num=$nums;
+					}
+				}
+				if(!empty($num)){
+					$nn       = $num+1;
+					$edit->nfiscal->updateValue=str_pad($nn,8,'0',STR_PAD_LEFT);
+				}
 			}
 
 			$edit->maqfiscal = new inputField('Serial m&aacute;quina f&iacute;scal','maqfiscal');
@@ -3218,7 +3226,15 @@ class Sfac extends Controller {
 		}elseif($manual!='S'){
 			$numfis = trim($edit->get_from_dataobjetct('nfiscal'));
 			if(empty($numfis)){
-				$num = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM sfac WHERE cajero=${dbcajero} AND tipo_doc<>'X' AND MID(numero,1,1)!='_' AND fecha=CURDATE()"));
+				$numf = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM sfac WHERE cajero=${dbcajero} AND tipo_doc<>'X' AND MID(numero,1,1)!='_' AND fecha=CURDATE()"));
+				$nums = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM smov WHERE tipo_doc IN ('NC','FC') AND fecha=CURDATE() AND nfiscal IS NOT NULL"));
+
+				if($numf>$nums){
+					$num=$numf;
+				}else{
+					$num=$nums;
+				}
+
 				if(!empty($num)){
 					$arr_num  = explode('-',$num);
 					$last     = count($arr_num)-1;
