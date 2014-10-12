@@ -718,10 +718,9 @@ function autocod(id){
 	});
 }
 
-
 function codesta(mcodigo){
-	$.post( "<?php echo site_url('ajax/codesta'); ?>/"+mcodigo, function( data ) {
-		$( "#idcodesta" ).html( data );
+	$.post( "<?php echo site_url('ajax/codesta'); ?>/", {mCOD: mcodigo})
+	.done( function( data ) { $( "#idcodesta" ).html( data );
 	});
 }
 

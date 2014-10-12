@@ -2979,6 +2979,8 @@ class Ajax extends Controller {
 		$mV6MES  = 0;
 		$mFRACCI = 0;
 		$salida  = ''; 
+		
+		if ($mCOD == '') $mCOD = $this->input->post('mCOD');
 
 		$mCODIGO = $this->db->escape($mCOD);
 

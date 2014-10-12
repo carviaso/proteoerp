@@ -196,8 +196,6 @@ class Scst extends Controller {
 */
 		$bodyscript .= $this->jqdatagrid->bsdel( 'scst', $ngrid, $this->url );
 
-
-
 		$bodyscript .= '
 		function scstadd(){
 			xestatus = "add";
@@ -2126,7 +2124,7 @@ class Scst extends Controller {
 		//Campos para el detalle
 		//****************************
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo_<#i#>');
-		$edit->codigo->size=10;
+		$edit->codigo->size=12;
 		$edit->codigo->db_name='codigo';
 		//$edit->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
 		$edit->codigo->autocomplete=false;

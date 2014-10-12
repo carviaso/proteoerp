@@ -63,7 +63,6 @@ class Ordc extends Controller {
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			//array('id'=>'fne'   ,  'title'=>'Agregar/Editar Orden de Compra'),
 			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
 			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
 			array('id'=>'fborra',  'title'=>'Eliminar Registro')
@@ -227,7 +226,7 @@ class Ordc extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 500, width: 800, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -363,19 +362,6 @@ class Ordc extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 8 }',
 		));
-
-/*
-		$grid->addField('almacen');
-		$grid->label('Almacen');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 4 }',
-		));
-*/
 
 		$grid->addField('proveed');
 		$grid->label('C&oacute;digo');
@@ -1313,13 +1299,13 @@ class Ordc extends Controller {
 		$edit->status->option('CE','Cerrado');
 		$edit->status->option('BA','BackOrder');
 		$edit->status->style='width:100px;';
-		$edit->status->when=array('show');
+		//$edit->status->when=array('show');
 
 		$edit->almacen = new  dropdownField ('Almac&eacute;n', 'almacen');
 		$edit->almacen->options('SELECT ubica, CONCAT(ubica,\' \',ubides) nombre FROM caub ORDER BY ubica');
 		$edit->almacen->rule = 'required';
-		$edit->almacen->mode = 'autohide';
-		$edit->almacen->style='width:145px;';
+		//$edit->almacen->mode = 'autohide';
+		$edit->almacen->style='width:130px;';
 		$alma = $this->datasis->traevalor('ALMACEN');
 		if(!empty($alma)){
 			$edit->almacen->insertValue=$alma;
@@ -1340,14 +1326,13 @@ class Ordc extends Controller {
 		$edit->fechafac->calendar = false;
 		$edit->fechafac->when=array('show');
 
-
-		//**************************
+		//**************************************************************
 		//  Campos para el detalle
-		//**************************
+		//
 		$edit->codigo = new inputField('C&oacute;digo', 'codigo_<#i#>');
 		$edit->codigo->size=10;
 		$edit->codigo->db_name='codigo';
-		$edit->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
+		//$edit->codigo->append($this->datasis->p_modbus($modbus,'<#i#>'));
 		$edit->codigo->autocomplete=false;
 		$edit->codigo->db_name  = 'codigo';
 		$edit->codigo->rule     = 'required|callback_chcodigoa|callback_chrepetidos';
@@ -1426,15 +1411,15 @@ class Ordc extends Controller {
 		//fin de campos para detalle
 		//**************************
 		$edit->condi1 = new inputField('Condiciones', 'condi1');
-		$edit->condi1->size      = 40;
+		$edit->condi1->size      = 30;
 		$edit->condi1->maxlength = 40;
 
 		$edit->condi2 = new inputField('Condiciones', 'condi2');
-		$edit->condi2->size      = 40;
+		$edit->condi2->size      = 30;
 		$edit->condi2->maxlength = 40;
 
 		$edit->condi3 = new inputField('Condiciones', 'condi3');
-		$edit->condi3->size      = 40;
+		$edit->condi3->size      = 30;
 		$edit->condi3->maxlength = 40;
 
 		$edit->montoiva = new inputField('Impuesto', 'montoiva');
@@ -1457,7 +1442,6 @@ class Ordc extends Controller {
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 
-		//$edit->buttons('modify', 'save', 'undo', 'delete', 'exit','add_rel');
 		$edit->buttons('add_rel');
 
 		$edit->build();

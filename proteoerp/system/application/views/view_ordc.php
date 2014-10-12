@@ -146,7 +146,14 @@ function autocod(id){
 			importe(parseInt(id));
 			//totalizar();
 			setTimeout(function() {  $('#codigo_'+id).removeAttr("readonly"); }, 1500);
+			codesta(ui.item.codigo);
 		}
+	});
+}
+
+function codesta(mcodigo){
+	$.post( "<?php echo site_url('ajax/codesta'); ?>/", {mCOD: mcodigo})
+	.done( function( data ) { $( "#idcodesta" ).html( data );
 	});
 }
 
@@ -231,12 +238,12 @@ function del_itordc(id){
 <table align='center' width="100%">
 	<tr>
 		<td>
-		<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9;'>
+		<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
 		<table width="100%" style="margin: 0; width: 100%;">
 
 			<tr>
 				<td class="littletableheader" width="90"> <?php echo $form->proveed->label;  ?>&nbsp;</td>
-				<td class="littletablerow">   <?php echo $form->proveed->output ?><b id='nombre_val'><?php echo $form->nombre->value ?></b><?php echo $form->nombre->output ?></td>
+				<td class="littletablerow" colspan='3'>   <?php echo $form->proveed->output ?><b id='nombre_val'><?php echo $form->nombre->value ?></b><?php echo $form->nombre->output ?></td>
 				<td class="littletableheader" width="110"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
 				<td class="littletablerow"    width="150"><?php echo $form->fecha->output;   ?>&nbsp;</td>
 			</tr>
@@ -245,10 +252,6 @@ function del_itordc(id){
 				<td class="littletablerow">   <?php echo $form->status->output;   ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->arribo->label     ?>&nbsp;</td>
 				<td class="littletablerow">   <?php echo $form->arribo->output    ?>&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="littletableheader"><?php echo $form->peso->label  ?>&nbsp;</td>
-				<td class="littletablerow" align="left"><?php echo $form->peso->output ?>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->almacen->label  ?>&nbsp;</td>
 				<td class="littletablerow" >  <?php echo $form->almacen->output ?>&nbsp;</td>
 			</tr>
@@ -258,9 +261,11 @@ function del_itordc(id){
 	</tr>
 	<tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
+		<table>
+			<tr>
+				<td>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:230px;width:600px;'>
 		<table width='100%'>
-
 			<tr id='__PTPL__'>
 				<td class="littletableheaderdet">C&oacute;digo</td>
 				<td class="littletableheaderdet">Descripci&oacute;n</td>
@@ -306,24 +311,20 @@ function del_itordc(id){
 				<td class="littletablerow">
 					<a href='#' onclick='del_itordc(<?php echo $i ?>);return false;'><?php echo img("images/delete.jpg");?></a>
 				</td>
-
 				<?php } ?>
 			</tr>
 			<?php } ?>
 		</table>
 		</div>
-		</td>
-	</tr>
-	<tr>
-		<td>
-		<fieldset style='border: 2px outset #9AC8DA;background: #EFEFFF;'>
+
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;width:600px;'>
 		<table width='100%'>
 			<tr>
 				<td rowspan='3' align='center'>
 					<?php echo $container_bl.$container_br; ?>
 					<p>
 					<?php if($form->_status!='show'){ ?>
-						<a href="javascript:void(0);" style='font-size:1.2em;text-decoration:none;font-weight:bold;color:#166D05' onclick="bus_sug=window.open('/proteoerp/compras/ordc/bussug', 'bussug', 'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=0,screeny=0');">Buscar Sugerencias</a>
+						<a href="javascript:void(0);" style='font-size:1.2em;text-decoration:none;font-weight:bold;color:#166D05' onclick="bus_sug=window.open('/proteoerp/compras/ordc/bussug', 'bussug', 'width=800,height=600,scrollbars=yes,status=yes,resizable=yes,screenx=0,screeny=0');">Sugerencias</a>
 					<?php } ?>
 					</p>
 				</td>
@@ -340,14 +341,29 @@ function del_itordc(id){
 				<td class="littletablerow"   align="right" style='font-size:1.5em;font-weight:bold;'><?php echo $form->montonet->output; ?></td>
 			</tr>
 		</table>
-		<?php echo $form_end; ?>
+		</div>
+		
+				</td><td>
+					<div id='idcodesta'></div>
+				</td>
+			<tr>
+		</table>
 		</td>
 	</tr>
+	<!--tr>
+		<td>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;width:600px;'>
+		<fieldset style='border: 2px outset #9AC8DA;background: #EFEFFF;'>
+		</div>
+		<?php echo $form_end; ?>
+		</td>
+	</tr-->
+
 	<?php if($form->_status == 'show'){ ?>
 	<tr>
 		<td>
-			<fieldset style='border: 2px outset #8A0808;background: #FFFBE9;'>
-			<legend class="titulofieldset" style='color: #114411;'>Informaci&oacute;n del Registro</legend>
+			<fieldset style='border: 1px outset #8A0808;background: #FFFBE9;'>
+			<!--legend class="titulofieldset" style='color: #114411;'>Informaci&oacute;n del Registro</legend-->
 			<table width='100%' cellspacing='1' >
 				<tr style='font-size:12px;color:#0B3B0B;background-color: #F7BE81;'>
 					<td align='center' >Usuario</td>
@@ -368,9 +384,9 @@ function del_itordc(id){
 					<td class="littletablerow" align='center'><?php echo $form->_dataobject->get('hora'); ?>&nbsp;</td>
 					<td class="littletablerow" align='center'><?php echo $form->_dataobject->get('transac'); ?>&nbsp;</td>
 				</tr>
-				<tr style='font-size:12px;color:#0B3B0B;background-color: #F7BE81;'>
+				<!--tr style='font-size:12px;color:#0B3B0B;background-color: #F7BE81;'>
 					<td colspan='5' >&nbsp;</td>
-				</tr>
+				</tr-->
 			</table>
 			</fieldset>
 		</td>
