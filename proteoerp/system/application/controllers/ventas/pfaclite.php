@@ -223,10 +223,9 @@ class pfaclite extends validaciones{
 		$sel=array('a.cliente','a.nombre','a.rifci','SUM(b.numero IS NOT NULL) AS rayado');
 		$filter->db->select($sel);
 		$filter->db->from('scli AS a');
-		$filter->db->join('sfac AS b',"b.cod_cli=a.cliente AND b.vd=${dbvd} AND b.fecha>=${dbfini}",'left');
+		$filter->db->join('sfac AS b',"b.cod_cli=a.cliente AND b.vd=${dbvd} AND b.fecha>=${dbfini} AND b.tipo_doc='F' ",'left');
 		$filter->db->where("( a.vendedor = ${dbvd} OR a.cobrador=${dbvd} )");
 		$filter->db->where('a.tipo <>','0');
-		$filter->db->where('b.tipo_doc','F');
 		$filter->db->groupby('a.cliente');
 
 		$filter->cliente = new inputField('C&oacute;digo', 'cliente');
