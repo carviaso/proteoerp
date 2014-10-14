@@ -1410,7 +1410,7 @@ class Scst extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -1422,7 +1422,7 @@ class Scst extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setdata(){
@@ -1532,9 +1532,9 @@ class Scst extends Controller {
 	}
 
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgridit( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -1796,7 +1796,7 @@ class Scst extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait(){
@@ -1826,7 +1826,7 @@ class Scst extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function setdatait(){

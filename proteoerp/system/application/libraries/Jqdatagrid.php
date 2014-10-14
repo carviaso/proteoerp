@@ -1097,18 +1097,17 @@ class Jqdatagrid
 			}
 		}
 
-
 		if(!empty($filters)){
 			$mQUERY = $this->constructWhere($filters);
 			foreach($mQUERY as $busca){
 				if(trim(strtoupper($busca[0])) == 'LIKE'){
-					if(strtoupper($busca[4])=='OR'){
+					if(strtoupper($busca[3])=='OR'){
 						$this->CI->db->or_like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
 					}else{
 						$this->CI->db->like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
 					}
 				}else{
-					if(strtoupper($busca[4])=='OR'){
+					if(strtoupper($busca[3]) == 'OR'){
 						$this->CI->db->or_where( $busca[1], $busca[2]);
 					}else{
 						$this->CI->db->where( $busca[1], $busca[2]);
@@ -1685,7 +1684,7 @@ class Jqdatagrid
 	}
 
 
-	/***********************************************************************
+	/*******************************************************************
 	* Show report table
 	* @param Int $reportid
 	*/
@@ -1695,7 +1694,7 @@ class Jqdatagrid
 	}
 
 
-	/***********************************************************************
+	/*******************************************************************
 	* Unset the Limit and show only the field data
 	* @param String $sql
 	* @param Array $fields
@@ -1806,7 +1805,6 @@ class Jqdatagrid
 			});
 			';
 		} else {
-
 			$readyLayout .= '
 			$(\'div.ui-layout-center\').layout({
 				minSize: 30,
@@ -1824,10 +1822,9 @@ class Jqdatagrid
 			});
 			';
 		}
-
-
 		return $readyLayout;
 	}
+
 
 	function centerpanel( $id = "adicional", $grid0, $grid1 = '' ){
 		if ( $grid1 == '' ) {

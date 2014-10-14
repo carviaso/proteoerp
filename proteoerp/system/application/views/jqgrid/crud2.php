@@ -207,7 +207,7 @@ echo style('apprise.min.css');
 
 echo "\n<!-- JQGRID -->\n";
 echo style('themes/ui.jqgrid.css');
-echo script('i18n/grid.locale-sp.js');
+echo script('i18n/grid.locale-es.js');
 echo script('jquery.jqGrid.min.js');
 
 echo "\n<!-- LAYOUT -->\n";

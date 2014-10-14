@@ -9,6 +9,7 @@ class Edinmue extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
+		$this->instalar();
 		$this->datasis->modulo_nombre( 'EDINMUE', $ventana=0 );
 	}
 
@@ -69,7 +70,7 @@ class Edinmue extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '500', '600' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '450', '570' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -204,9 +205,19 @@ class Edinmue extends Controller {
 			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:15, maxlength: 15 }',
+			'editoptions'   => '{ size:2, maxlength: 2 }',
 		));
 
+		$grid->addField('aplicacion');
+		$grid->label('Aplic');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 50,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
+		));
 
 		$grid->addField('descripcion');
 		$grid->label('Descripcion');
@@ -562,6 +573,12 @@ class Edinmue extends Controller {
 		$edit->codigo->size =17;
 		$edit->codigo->maxlength =15;
 
+		$edit->aplicacion = new dropdownField('Aplicacion','aplicacion');
+		$edit->aplicacion->option('','Seleccionar');
+		$edit->aplicacion->options('SELECT depto, CONCAT(depto," ",descrip) descrip FROM dpto WHERE tipo="G" AND depto NOT IN ("CO","GP") ORDER BY depto');
+		$edit->aplicacion->rule='max_length[11]';
+		$edit->aplicacion->style='width:150px;';
+
 		$edit->descripcion = new inputField('Descripci&oacute;n','descripcion');
 		$edit->descripcion->rule='max_length[100]';
 		$edit->descripcion->maxlength =100;
@@ -717,30 +734,34 @@ class Edinmue extends Controller {
 
 	function instalar(){
 		if (!$this->db->table_exists('edinmue')) {
-			$mSQL="CREATE TABLE `edinmue` (
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `codigo` char(15) DEFAULT NULL,
-			  `descripcion` char(100) DEFAULT NULL,
-			  `edificacion` int(11) DEFAULT NULL,
-			  `uso` int(11) DEFAULT NULL,
-			  `usoalter` int(11) DEFAULT NULL,
-			  `ubicacion` int(11) DEFAULT NULL,
-			  `caracteristicas` text,
-			  `area` decimal(15,2) DEFAULT NULL,
-			  `estaciona` int(10) DEFAULT NULL,
-			  `deposito` int(11) DEFAULT NULL,
-			  `preciomt2e` decimal(15,2) DEFAULT NULL,
-			  `preciomt2c` decimal(15,2) DEFAULT NULL,
-			  `preciomt2a` decimal(15,2) DEFAULT NULL,
-			  `objeto` char(1) NOT NULL,
-			  `status` char(1) NOT NULL COMMENT 'Alquilado, Vendido, Reservado, Otro',
-			  PRIMARY KEY (`id`),
-			  UNIQUE KEY `codigo` (`codigo`)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Facilidades '";
+			$mSQL="
+			CREATE TABLE edinmue (
+				id              INT(11)   NOT NULL AUTO_INCREMENT,
+				codigo          CHAR(15)  DEFAULT NULL,
+				aplicacion      CHAR(2)   NULL DEFAULT NULL,
+				descripcion     CHAR(100) DEFAULT NULL,
+				edificacion     INT(11)   DEFAULT NULL,
+				uso             INT(11)   DEFAULT NULL,
+				usoalter        INT(11)   DEFAULT NULL,
+				ubicacion       INT(11)   DEFAULT NULL,
+				caracteristicas TEXT,
+				area            DECIMAL(15,2) DEFAULT NULL,
+				estaciona       INT(10)   DEFAULT NULL,
+				deposito        INT(11)   DEFAULT NULL,
+				preciomt2e      DECIMAL(15,2) DEFAULT NULL,
+				preciomt2c      DECIMAL(15,2) DEFAULT NULL,
+				preciomt2a      DECIMAL(15,2) DEFAULT NULL,
+				objeto          CHAR(1) NOT NULL,
+				status          CHAR(1) NOT NULL COMMENT 'Alquilado, Vendido, Reservado, Otro',
+			  PRIMARY KEY (id),
+			  UNIQUE KEY codigo (codigo)
+			) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Facilidades'";
 			$this->db->query($mSQL);
 		}
-		//$campos=$this->db->list_fields('edinmue');
-		//if(!in_array('<#campo#>',$campos)){ }
+		$campos = $this->db->list_fields('edinmue');
+		if(!in_array('aplicacion',$campos)) $this->db->query('ALTER TABLE edinmue ADD COLUMN aplicacion CHAR(2) NULL DEFAULT NULL AFTER codigo');
+
+
 	}
 }
 

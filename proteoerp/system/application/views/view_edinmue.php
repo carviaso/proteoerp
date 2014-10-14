@@ -91,10 +91,12 @@ $('#ocupante').autocomplete({
 	<tr>
 		<td class="littletablerowth"><?php echo $form->codigo->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->codigo->output; ?></td>
+		<td class="littletablerowth"><?php echo $form->aplicacion->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->aplicacion->output; ?></td>
 	</tr>
 	<tr>
 		<td class="littletablerowth"><?php echo $form->descripcion->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->descripcion->output; ?></td>
+		<td class="littletablerow" colspan='3'  ><?php echo $form->descripcion->output; ?></td>
 	</tr>
 </table>
 </fieldset>
@@ -151,10 +153,6 @@ $('#ocupante').autocomplete({
 		<td class="littletablerowth"><?php echo $form->preciomt2a->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->preciomt2a->output; ?></td>
 	</tr>
-	<tr>
-		<td class="littletablerowth"><?php echo $form->alicuota->label;  ?></td>
-		<td class="littletablerow"  ><?php echo $form->alicuota->output; ?></td>
-	</tr>
 </table>
 </fieldset>
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
@@ -162,12 +160,24 @@ $('#ocupante').autocomplete({
 	<tr>
 		<td class="littletablerowth" width='100'><?php echo $form->propietario->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->propietario->output; ?></td>
-		<td class="littletablerow"  ><div id='nompro'>&nbsp;</div></td>
+		<td class="littletablerow"  >
+		<div id='nompro'>&nbsp;
+		<?php 
+			if ($form->propietario->value != '')
+				echo $this->datasis->dameval("SELECT nombre FROM scli WHERE cliente=".$this->db->escape($form->propietario->value));?>
+			</div>
+		</td>
 	</tr>
 	<tr>
 		<td class="littletablerowth"><?php echo $form->ocupante->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->ocupante->output; ?></td>
-		<td class="littletablerow"  ><div id='nomocu'>&nbsp;</div></td>
+		<td class="littletablerow"  >
+			<div id='nomocu'>&nbsp;
+		<?php 
+			if ($form->ocupante->value != '')
+				echo $this->datasis->dameval("SELECT nombre FROM scli WHERE cliente=".$this->db->escape($form->ocupante->value));?>
+		</div>
+		</td>
 	</tr>
 </table>
 </fieldset>

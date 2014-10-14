@@ -1181,7 +1181,7 @@ class Ordc extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait(){
@@ -1192,7 +1192,6 @@ class Ordc extends Controller {
 		$dbid=intval($id);
 		$numero  = $this->datasis->dameval("SELECT numero FROM ordc WHERE id=${dbid}");
 		$dbnumero= $this->db->escape($numero);
-
 		$orderby= '';
 		$sidx=$this->input->post('sidx');
 		if($sidx){
@@ -1203,7 +1202,6 @@ class Ordc extends Controller {
 				$orderby="ORDER BY `${sidx}` ".(($sord=='asc')? 'ASC':'DESC');
 			}
 		}
-
 		$grid    = $this->jqdatagrid;
 		$mSQL    = "SELECT * FROM itordc WHERE numero=${dbnumero} ${orderby}";
 		$response   = $grid->getDataSimple($mSQL);

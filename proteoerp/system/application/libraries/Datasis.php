@@ -109,6 +109,30 @@ class Datasis {
 		return $this->damerow($mSQL, $data );
 	}
 
+	// TRAE UN ARREGLO CON TODOS LOS REGISTROS
+	function dameareg($mSQL,$data=array()){
+		$CI =& get_instance();
+		$query = $CI->db->query($mSQL,$data);
+		$tabla = array();
+		if ($query->num_rows() > 0){
+			foreach ( $query->result_array() as $row ) $tabla[] = $row;
+		}
+		return $tabla;
+	}
+
+	// TRAE UN ARREGLO DUPLETA
+	function dameduple($mSQL,$data=array()){
+		$CI =& get_instance();
+		$query = $CI->db->query($mSQL,$data);
+		$tabla = array();
+		if ($query->num_rows() > 0){
+			foreach ( $query->result_array() as $row ) $tabla[] = $row;
+		}
+		return $tabla;
+	}
+
+
+
 	// Trae valor de la table VALORES
 	function traevalor($nombre,$descrip=''){
 		$CI =& get_instance();
@@ -129,7 +153,6 @@ class Datasis {
 			$CI->db->simple_query("INSERT INTO valores SET nombre=${dbnombre}, descrip=${dbdescri}");
 			$rt = '';
 		}
-
 		return $rt;
 	}
 

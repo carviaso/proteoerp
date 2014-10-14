@@ -177,6 +177,16 @@ class Edgasto extends Controller {
 			'search'        => 'false'
 		));
 
+		$grid->addField('aplicacion');
+		$grid->label('Aplic');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 50,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:15, maxlength: 15 }',
+		));
 
 		$grid->addField('tipo_doc');
 		$grid->label('Tipo');
@@ -499,11 +509,9 @@ class Edgasto extends Controller {
 				
 			}
 			total = base + Number($("#iva").val());
-			
 			$("#total").val(roundNumber(total,2));
 			$("#total_val").text(nformat(total,2));
 		}
-
 		';
 
 		$edit = new DataEdit('', 'edgasto');
@@ -522,7 +530,7 @@ class Edgasto extends Controller {
 		$edit->pre_process('delete', '_pre_delete' );
 
 		$edit->aplicacion = new dropdownField('Aplicacion','aplicacion');
-		$edit->aplicacion->options('SELECT depto, CONCAT(depto," ",descrip) descrip FROM dpto WHERE tipo="G" ORDER BY depto');
+		$edit->aplicacion->options('SELECT depto, CONCAT(depto," ",descrip) descrip FROM dpto WHERE tipo="G" AND depto<>"GP" ORDER BY depto');
 		$edit->aplicacion->rule = 'required';
 		$edit->aplicacion->style='width:150px;';
 

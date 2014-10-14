@@ -18,10 +18,9 @@ class Edrec extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
-	//Layout en la Ventana
+	//******************************************************************
+	// Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -72,9 +71,9 @@ class Edrec extends Controller {
 
 	}
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	// Funciones de los Botones
+	//
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '		<script type="text/javascript">';
 
@@ -177,8 +176,6 @@ class Edrec extends Controller {
 			$.prompt(mgene);
 		});';
 
-
-
 		$bodyscript .= '
 		$("#edtraegas").click(function(){
 			var meco = "";
@@ -227,8 +224,6 @@ class Edrec extends Controller {
 			$.prompt(mgene);
 		});';
 
-
-
 		$bodyscript .= '
 		$("#imprime").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -237,7 +232,6 @@ class Edrec extends Controller {
 				'.$this->datasis->jwinopen(site_url('formatos/ver/EDREC').'/\'+id').';
 			} else { $.prompt("<h1>Por favor Seleccione un Recibo</h1>");}
 		});';
-
 
 		$bodyscript .= '
 		function edrecadd(){
@@ -396,9 +390,9 @@ class Edrec extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = "false";
@@ -416,7 +410,6 @@ class Edrec extends Controller {
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
 
-
 		$grid->addField('fecha');
 		$grid->label('Fecha');
 		$grid->params(array(
@@ -425,10 +418,12 @@ class Edrec extends Controller {
 			'width'         => 70,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
+			//'editrules'     => '{ required:true,date:true}',
+			'formatter'     => "'date'",
+			'sorttype'      => "'date'",
+			'datefmt'       => "'d/m/Y'",
+			'formoptions'   => '{ label:"Fecha", srcformat: "Y-m-d", newformat: "d-m-Y" }',
 		));
-
 
 		$grid->addField('vence');
 		$grid->label('Vence');
@@ -439,9 +434,11 @@ class Edrec extends Controller {
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
+			'formatter'     => "'date'",
+			'sorttype'      => "'date'",
+			'datefmt'       => "'d/m/Y'",
+			'formoptions'   => '{ label:"Fecha", srcformat: "Y-m-d", newformat: "d-m-Y" }'
 		));
-
 
 		$grid->addField('cod_cli');
 		$grid->label('Cliente');
@@ -454,7 +451,6 @@ class Edrec extends Controller {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-
 		$grid->addField('inmueble');
 		$grid->label('Inmueble');
 		$grid->params(array(
@@ -465,7 +461,6 @@ class Edrec extends Controller {
 			'width'         => 50,
 			'editrules'     => '{ required:true }',
 		));
-
 
 		$grid->addField('total');
 		$grid->label('Total');
@@ -481,7 +476,6 @@ class Edrec extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('alicuota');
 		$grid->label('Alicuota');
 		$grid->params(array(
@@ -496,7 +490,6 @@ class Edrec extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 10 }'
 		));
 
-
 		$grid->addField('cuota');
 		$grid->label('Cuota');
 		$grid->params(array(
@@ -510,7 +503,6 @@ class Edrec extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
-
 
 		$grid->addField('status');
 		$grid->label('Status');
@@ -630,7 +622,7 @@ class Edrec extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata()
@@ -724,7 +716,6 @@ class Edrec extends Controller {
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
 
-
 		$grid->addField('tipo');
 		$grid->label('Tipo');
 		$grid->params(array(
@@ -737,7 +728,6 @@ class Edrec extends Controller {
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
 
-
 		$grid->addField('codigo');
 		$grid->label('Codigo');
 		$grid->params(array(
@@ -749,7 +739,6 @@ class Edrec extends Controller {
 			'editoptions'   => '{ size:15, maxlength: 15 }',
 		));
 
-
 		$grid->addField('detalle');
 		$grid->label('Detalle');
 		$grid->params(array(
@@ -760,7 +749,6 @@ class Edrec extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:200, maxlength: 200 }',
 		));
-
 
 		$grid->addField('total');
 		$grid->label('Total');
@@ -776,7 +764,6 @@ class Edrec extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('alicuota');
 		$grid->label('Alicuota');
 		$grid->params(array(
@@ -790,7 +777,6 @@ class Edrec extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 10 }'
 		));
-
 
 		$grid->addField('cuota');
 		$grid->label('Cuota');
@@ -856,7 +842,7 @@ class Edrec extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait( $id = 0 )
@@ -873,17 +859,16 @@ class Edrec extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setDatait()
 	{
 	}
 
-	//***********************************
+	//******************************************************************
 	// DataEdit  
-	//***********************************
-
+	//
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
 		$script= '
@@ -968,9 +953,7 @@ class Edrec extends Controller {
 		$edit->observa->rows = 4;
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
-
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
-
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 
 		$edit->transac = new inputField('Transac','transac');
@@ -979,7 +962,7 @@ class Edrec extends Controller {
 		$edit->transac->maxlength =8;
 
 
-		//******************************************************************
+		//**************************************************************
 		// Detalle 
 		$edit->numero = new inputField('Numero','numero_<#i#>');
 		$edit->numero->rule='';
@@ -1045,10 +1028,9 @@ class Edrec extends Controller {
 		$edit->id_edrc->maxlength =11;
 		$edit->id_edrc->rel_id ='editrec';
 
-		//******************************************************************
+		//**************************************************************
 
 		$edit->buttons('add_rel');
-
 		$edit->build();
 
 		if($edit->on_success()){
@@ -1095,18 +1077,40 @@ class Edrec extends Controller {
 	}
 
 	//******************************************************************
-	//  Genera Recibos de Cobro
+	// Genera Recibos de Cobro
 	//
 	function generec( $anomes = 0){
 		if ( $anomes == 0 ) $anomes = $this->input->post('anomes');
 		if ( $anomes <= 0  ) {
-			echo 'No se Guardo '.$anomes;
+			echo 'Error en la Fecha ('.$anomes.')';
 			return false;
 		}
 		$dbanomes = $this->db->escape($anomes);
+
+		//Busca si ya se facturaron
+		$mSQL = "SELECT count(*) FROM edrec WHERE anomes=".$dbanomes;
+		if ( $this->datasis->dameval($mSQL) > 0 ){
+			echo "Fecha ya facturada";
+			return false;
+		}
+
 		$tasa = $this->datasis->traevalor('CONDOADM','COMISION DE GASTOS ADMINISTRATIVOS');
 		if ($tasa == '') $tasa = 10; 
-	
+
+		// Calculas las alicuotas por tipo
+		$mSQL = "
+		SELECT aplicacion indice, sum(alicuota) valor FROM (
+			SELECT a.aplicacion, 
+				(SELECT bb.alicuota FROM edalicuota bb WHERE a.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=201410 ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
+			FROM edinmue a ) aa
+		WHERE aa.aplicacion IS NOT NULL AND aa.aplicacion<>''";
+		$query = $this->db->query($mSQL);
+		$malit = array();
+		if ($query->num_rows() > 0){
+			foreach ( $query->result() as $row ) 
+				$malit[$row->indice] = $row->valor;
+		}
+
 		//Genera los recibos
 		$mSQL = "
 			SELECT '000001' numero, CURDATE() fecha, CURDATE() + INTERVAL 5 DAY vence, cliente cod_cli, inmueble, total, alicuota, cuota, 'P' status, 'Recibo' observa, '321' usuario, CURDATE() estampa, CURTIME() hora, 0 transac, 0 id
@@ -1151,7 +1155,7 @@ class Edrec extends Controller {
 				// Agrega el detalle
 				$mSQL = "
 				SELECT '000001' numero, tipo, codigo, detalle, total, alicuota, cuota, curdate() fecha, '321' usuario, curdate() estampa, curtime() hora, 0 transac, 0 id, 0 id_edrc
-					FROM (
+				FROM (
 					SELECT d.id, a.aplicacion tipo, d.codigo inmueble, b.codigo, b.descrip, sum(a.total) total, mm.alicuota, ROUND(mm.alicuota*sum(a.total)/100,2) cuota, e.cliente, e.nombre, a.detalle, f.descrip aplidesc
 					FROM edgasto a
 					JOIN mgas    b ON a.partida = b.id
@@ -1162,8 +1166,8 @@ class Edrec extends Controller {
 					SELECT aa.id,  aa.codigo, (SELECT bb.alicuota FROM edalicuota bb 
 					WHERE aa.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=${anomes} ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
 					FROM edinmue aa) mm ON d.id = mm.id
-					WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${anomes} AND d.codigo = ${inmueble}
-					GROUP BY d.codigo, a.partida ) aa
+					WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${anomes} AND d.codigo = ${inmueble} AND (a.aplicacion='CO' OR a.aplicacion=d.aplicacion)
+				GROUP BY d.codigo, a.partida ) aa
 				";
 				$query1 = $this->db->query($mSQL);
 				$monto = 0;
@@ -1175,17 +1179,18 @@ class Edrec extends Controller {
 					$data1['detalle']  = $row1->detalle;
 					$data1['total']    = $row1->total;
 					$data1['alicuota'] = $row1->alicuota;
-					$data1['cuota']    = $row1->cuota;
+					if ( $row1->tipo == 'CO'){
+						$data1['cuota']  = $row1->cuota;
+					} else {
+						$data1['cuota'] = round($row1->total*($row1->alicuota/$malit[$row1->tipo]),2);
+					}
 					$data1['fecha']    = $row1->fecha;
-
-					//$data1['status']   = 'P';
-					//$data1['observa']  = 'Recibo';
 					$data1['usuario']  = $this->session->userdata('usuario');
 					$data1['estampa']  = date('Ymd');
 					$data1['hora']     = date('h:m:s');
 					$data1['id_edrc']  = $id;
 					$this->db->insert('editrec',$data1);
-					$monto = $monto + $row1->cuota;
+					$monto = $monto + $data1['cuota'];
 				}
 				$data1 = array();
 				$data1['numero']   = $numero;
@@ -1207,15 +1212,16 @@ class Edrec extends Controller {
 	}
 
 	//******************************************************************
-	//  Genera Recibos de Cobro
+	// Genera Recibos de Cobro
 	//
 	function genecobro( $anomes = 0){
 		if ( $anomes == 0 ) $anomes = $this->input->post('anomes');
 		if ( $anomes <= 0  ) {
-			echo 'No se Guardo '.$anomes;
+			echo 'Error en la fecha ('.$anomes.')';
 			return false;
 		}
 		$dbanomes = $this->db->escape($anomes);
+
 		$tasa = $this->datasis->traevalor('CONDOADM','COMISION DE GASTOS ADMINISTRATIVOS');
 		if ($tasa == '') $tasa = 10; 
 	
@@ -1223,13 +1229,14 @@ class Edrec extends Controller {
 		$mSQL = "
 			SELECT 
 				a.cod_cli, b.nombre, 'ND' tipo_doc, CONCAT('RC',MID(a.numero,3,6)) numero,
-				a.fecha, a.cuota monto, 0 impuesto, 0 abonos, a.vence, 'RC' tipo_ref, a.numero num_ref,
-				'RECIBO DE CONDOMINIO' observa1, a.id,
+				a.fecha, a.cuota monto, 0 impuesto, 0 abonos, a.vence, 'RC' tipo_ref, 
+				a.numero num_ref, 'RECIBO DE CONDOMINIO' observa1, a.id,
 				CONCAT('CORRESPONDIENTE AL MES ',MID(a.anomes,5,2),'-',MID(a.anomes,1,4)) observa2,
-				a.usuario,a.estampa, a.hora,a.transac, 'NOCON' codigo, 0 montasa, 0 monredu, 0 monadic, 0 tasa, 0 reducida, 0 sobretasa, 0 exento
+				a.usuario,a.estampa, a.hora,a.transac, 'NOCON' codigo, 0 montasa, 0 monredu, 
+				0 monadic, 0 tasa, 0 reducida, 0 sobretasa, 0 exento
 			FROM edrec a JOIN scli b ON a.cod_cli=b.cliente
-			WHERE a.status = 'P' AND a.anomes = ${dbanomes}
-		";
+			WHERE a.status = 'P' AND a.anomes = ".$dbanomes;
+		
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			foreach( $query->result() as  $row ) {
@@ -1274,31 +1281,29 @@ class Edrec extends Controller {
 		}
 	}
 
-
-
-
 	function instalar(){
 		if (!$this->db->table_exists('edrec')) {
-			$mSQL="CREATE TABLE `edrec` (
-			  `numero` varchar(8) NOT NULL DEFAULT '',
-			  `fecha` date NOT NULL DEFAULT '0000-00-00',
-			  `vence` date DEFAULT NULL,
-			  `cod_cli` varchar(5) DEFAULT NULL,
-			  `inmueble` int(11) DEFAULT NULL,
-			  `total` decimal(12,2) DEFAULT NULL,
-			  `alicuota` decimal(12,10) DEFAULT NULL,
-			  `cuota` decimal(17,2) DEFAULT NULL,
-			  `status` char(1) DEFAULT NULL,
-			  `observa` text,
-			  `usuario` varchar(12) DEFAULT NULL,
-			  `estampa` date DEFAULT NULL,
-			  `hora` varchar(5) DEFAULT NULL,
-			  `transac` varchar(8) DEFAULT NULL,
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  PRIMARY KEY (`id`),
-			  UNIQUE KEY `numero` (`numero`),
-			  KEY `fecha` (`fecha`),
-			  KEY `cliente` (`cod_cli`)
+			$mSQL="
+			CREATE TABLE edrec (
+				numero    VARCHAR(8) NOT NULL DEFAULT '',
+				fecha     DATE NOT NULL  DEFAULT '0000-00-00',
+				vence     DATE           DEFAULT NULL,
+				cod_cli   VARCHAR(5)     DEFAULT NULL,
+				inmueble  INT(11)        DEFAULT NULL,
+				total     DECIMAL(12,2)  DEFAULT NULL,
+				alicuota  DECIMAL(12,10) DEFAULT NULL,
+				cuota     DECIMAL(17,2)  DEFAULT NULL,
+				status    CHAR(1)        DEFAULT NULL,
+				observa   TEXT,
+				usuario   VARCHAR(12)    DEFAULT NULL,
+				estampa   DATE           DEFAULT NULL,
+				hora      VARCHAR(5)     DEFAULT NULL,
+				transac   VARCHAR(8)     DEFAULT NULL,
+				id        INT(11) NOT NULL AUTO_INCREMENT,
+			  PRIMARY KEY (id),
+			  UNIQUE KEY numero (numero),
+			  KEY fecha (fecha),
+			  KEY cliente (cod_cli)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->query($mSQL);
 		}
