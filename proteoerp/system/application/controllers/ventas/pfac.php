@@ -394,9 +394,9 @@ class Pfac extends Controller {
 					}else if(aData.status=="P"){
 						tips = "Pendiente";
 					}else if(aData.status=="A"){
-						tips = "Anulada";
-					}else if(aData.status=="I"){
 						tips = "Internet";
+					}else if(aData.status=="X"){
+						tips = "Anulado";
 					}else{
 						tips = "Interno";
 					}
@@ -833,11 +833,11 @@ class Pfac extends Controller {
 					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#FFDD00" });
 				}else if(aData.status =="C"){
 					$(this).jqGrid( "setCell", rid, "status","", {color:"#000000", background:"#F0FFFF" });
-				}else if(aData.status =="A"){
+				}else if(aData.status =="X"){
 					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#C90623" });
 				}else if(aData.status =="T"){
 					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#D5D1CF" });
-				}else if(aData.status =="I"){
+				}else if(aData.status =="A"){
 					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#1EA961" });
 				}else{
 					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#660088" });
@@ -1389,9 +1389,9 @@ class Pfac extends Controller {
 		$edit->status->options(array(
 			'P'=>'Pendiente',
 			'C'=>'Cerrado',
-			'I'=>'Internet',
+			'A'=>'Internet',
 			'B'=>'BackOrder',
-			'A'=>'Anulado',
+			'X'=>'Anulado',
 			'T'=>'Temporal',
 			'V'=>'V.Externo',//Estatus locales de vendores ambulantes (Enviado)
 			'U'=>'V.Externo',//Estatus locales de vendores ambulantes (Por enviar)

@@ -259,7 +259,7 @@ class Dispmoviles extends Controller {
 		$_POST['observa']    = $observa;
 		$_POST['observ1']    = '';
 		$_POST['mmargen']    = 0;
-		$_POST['status']     = 'P';
+		$_POST['status']     = 'A';
 
 		$_POST['totals'] = $_POST['iva'] = $_POST['totalg'] = $_POST['peso'] = $i = 0;
 

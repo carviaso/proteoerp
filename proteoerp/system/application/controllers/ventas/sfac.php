@@ -3190,6 +3190,7 @@ class Sfac extends Controller {
 				if(!empty($num)){
 					$nn       = $num+1;
 					$edit->nfiscal->updateValue=str_pad($nn,8,'0',STR_PAD_LEFT);
+					$edit->nfiscal->style = 'background-color:#FFDD00';
 				}
 			}
 
@@ -4579,7 +4580,7 @@ class Sfac extends Controller {
 		$this->db->join('scli AS b','a.cod_cli=b.cliente');
 		$this->db->join('vend AS c','c.vendedor=a.vd','left');
 		$this->db->where('a.numero',$numero);
-		$this->db->where_in('a.status',array('P','I'));
+		$this->db->where_in('a.status',array('P','A'));
 		$query = $this->db->get();
 
 		if ($query->num_rows() > 0 && $status=='create'){
