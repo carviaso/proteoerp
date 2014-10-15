@@ -139,10 +139,12 @@ else:
 		<td class="littletablerow"    ><?php echo $form->pin->output;      ?></td>
 	</tr>
 	<tr>
-		<td class="littletableheaderc"><?php echo $form->email->label;    ?></td>
-		<td class="littletablerow"    ><?php echo $form->email->output;   ?></td>
-		<td class="littletableheaderc"><?php echo $form->twitter->label;  ?></td>
-		<td class="littletablerow"    ><?php echo $form->twitter->output; ?></td>
+		<td class="littletableheaderc"><?php echo $form->email->label;     ?></td>
+		<td class="littletablerow"    ><?php echo $form->email->output;    ?></td>
+		<td class="littletableheaderc"><?php echo $form->twitter->label;   ?></td>
+		<td class="littletablerow"    ><?php echo $form->twitter->output;  ?></td>
+		<td class="littletableheaderc"><?php echo $form->mercalib->label;  ?></td>
+		<td class="littletablerow"    ><?php echo $form->mercalib->output; ?></td>
 	</tr>
 	</table>
 	</div>

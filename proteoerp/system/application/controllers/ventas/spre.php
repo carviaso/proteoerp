@@ -24,10 +24,9 @@ class Spre extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
-	//Layout en la Ventana
+	//******************************************************************
+	// Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -43,7 +42,7 @@ class Spre extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'boton1',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'boton1',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir'));
 		$grid->wbotonadd(array('id'=>'bffact',  'img'=>'images/star.png'                ,'alt' => 'Facturar'  , 'label'=>'Facturar'));
 
 		$WestPanel = $grid->deploywestp();
@@ -78,9 +77,9 @@ class Spre extends Controller {
 
 	}
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	// Funciones de los Botones
+	//
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '		<script type="text/javascript">';
 
@@ -315,9 +314,9 @@ class Spre extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -603,7 +602,7 @@ class Spre extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -617,7 +616,7 @@ class Spre extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -676,9 +675,9 @@ class Spre extends Controller {
 */
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgridit( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -984,7 +983,7 @@ class Spre extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdatait( $id = 0 ){
@@ -1014,7 +1013,7 @@ class Spre extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setdatait(){
@@ -1025,6 +1024,8 @@ class Spre extends Controller {
 		$mcodp  = '??????';
 		$check  = 0;
 	}
+
+
 
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
@@ -1097,14 +1098,13 @@ class Spre extends Controller {
 		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->rule = 'required';
-		//$edit->fecha->mode = 'autohide';
-		$edit->fecha->size = 12;
+		$edit->fecha->size = 10;
 		$edit->fecha->calendar=false;
 
 		$vend=$this->secu->getvendedor();
 		$edit->vd = new  dropdownField ('Vendedor', 'vd');
 		$edit->vd->options('SELECT vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend ORDER BY vendedor');
-		$edit->vd->style='width:200px;';
+		$edit->vd->style='width:120px;';
 		$edit->vd->insertValue=$vend;
 		$edit->vd->size = 5;
 
@@ -1124,26 +1124,72 @@ class Spre extends Controller {
 		$edit->cliente = new inputField('Cliente','cod_cli');
 		$edit->cliente->size = 6;
 		//$edit->cliente->maxlength=5;
-		$edit->cliente->append($boton);
+		//$edit->cliente->append($boton);
 
 		$edit->nombre = new inputField('Nombre', 'nombre');
-		$edit->nombre->size = 25;
-		$edit->nombre->maxlength=40;
+		$edit->nombre->size = 45;
+		$edit->nombre->maxlength=45;
 		$edit->nombre->autocomplete=false;
 		$edit->nombre->rule= 'required';
 
 		$edit->rifci   = new inputField('RIF/CI','rifci');
 		$edit->rifci->autocomplete=false;
-		$edit->rifci->size = 15;
+		$edit->rifci->size = 12;
 
 		$edit->direc = new inputField('Direcci&oacute;n','direc');
 		$edit->direc->size = 40;
+
+		$edit->dire1 = new inputField('','dire1');
+		$edit->dire1->size = 40;
 
 		//Para saber que precio se le va a dar al cliente
 		$edit->sclitipo = new hiddenField('', 'sclitipo');
 		$edit->sclitipo->db_name     = 'sclitipo';
 		$edit->sclitipo->pointer     = true;
 		$edit->sclitipo->insertValue = 1;
+
+
+		$edit->email = new inputField('Email','email');
+		$edit->email->rule='';
+		$edit->email->size =25;
+		$edit->email->maxlength =100;
+
+		$edit->telefono = new inputField('Telefono','telefono');
+		$edit->telefono->rule='';
+		$edit->telefono->size =25;
+		$edit->telefono->maxlength =30;
+
+		$edit->ciudad = new inputField('Ciudad','ciudad');
+		$edit->ciudad->rule='';
+		$edit->ciudad->size =42;
+		$edit->ciudad->maxlength =40;
+
+		$edit->estado = new inputField('Estado','estado');
+		$edit->estado->rule='integer';
+		$edit->estado->css_class='inputonlynum';
+		$edit->estado->size =13;
+		$edit->estado->maxlength =11;
+
+		$edit->mercalib = new inputField('Merc.Libre','mercalib');
+		$edit->mercalib->rule='';
+		$edit->mercalib->size =25;
+		$edit->mercalib->maxlength =50;
+
+		$edit->codbanc = new inputField('Codbanc','codbanc');
+		$edit->codbanc->rule='';
+		$edit->codbanc->size =4;
+		$edit->codbanc->maxlength =2;
+
+		$edit->tipo_op = new inputField('Tipo_op','tipo_op');
+		$edit->tipo_op->rule='';
+		$edit->tipo_op->size =4;
+		$edit->tipo_op->maxlength =2;
+
+		$edit->num_ref = new inputField('Num_ref','num_ref');
+		$edit->num_ref->rule='';
+		$edit->num_ref->size =22;
+		$edit->num_ref->maxlength =20;
+
 
 		//**************************
 		//  Campos para el detalle
@@ -1244,7 +1290,7 @@ class Spre extends Controller {
 		$edit->totals->readonly  =true;
 		$edit->totals->size      = 10;
 
-		$edit->totalg = new hiddenField('Monto Total', 'totalg');
+		$edit->totalg = new hiddenField('Total', 'totalg');
 		$edit->totalg->css_class ='inputnum';
 		$edit->totalg->readonly  =true;
 		$edit->totalg->size      = 10;
@@ -1260,6 +1306,12 @@ class Spre extends Controller {
 		$edit->condi2->size = 40;
 		$edit->condi2->maxlength=25;
 		$edit->condi2->autocomplete=false;
+
+		$edit->observa = new textareaField('Observacion', 'observa');
+		$edit->observa->rule = 'trim';
+		$edit->observa->cols = 40;
+		$edit->observa->rows =  2;
+		$edit->observa->maxlength =200;
 
 		//$edit->buttons('modify', 'save', 'undo', 'delete', 'add_rel','add');
 		$edit->buttons('add_rel');
@@ -1409,6 +1461,15 @@ class Spre extends Controller {
 			$this->db->simple_query('ALTER TABLE spre ADD UNIQUE INDEX numero (numero)');
 			$this->db->simple_query('ALTER TABLE spre ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
+		if(!in_array('email',   $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN email    VARCHAR(100) NULL DEFAULT NULL AFTER dire1');
+		if(!in_array('telefono',$campos)) $this->db->query('ALTER TABLE spre ADD COLUMN telefono VARCHAR(30)  NULL DEFAULT NULL AFTER email');
+		if(!in_array('ciudad',  $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN ciudad   VARCHAR(40)  NULL DEFAULT NULL AFTER telefono');
+		if(!in_array('estado',  $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN estado   INT          NULL DEFAULT NULL AFTER ciudad');
+		if(!in_array('mercalib',$campos)) $this->db->query('ALTER TABLE spre ADD COLUMN mercalib VARCHAR(50)  NULL DEFAULT NULL AFTER estado');
+		if(!in_array('codbanc', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN codbanc  CHAR(2)      NULL DEFAULT NULL AFTER mercalib');
+		if(!in_array('tipo_op', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN tipo_op  CHAR(2)      NULL DEFAULT NULL AFTER codbanc');
+		if(!in_array('num_ref', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN num_ref  VARCHAR(20)  NULL DEFAULT NULL AFTER tipo_op');
+		if(!in_array('observa', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN observa  TEXT         NULL DEFAULT NULL AFTER condi2');
 	}
 
 }

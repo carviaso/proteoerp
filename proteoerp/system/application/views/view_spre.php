@@ -415,43 +415,50 @@ function del_itspre(id){
 		<table width='100%'>
 			<tr>
 				<td>
-				<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
-				<table width="100%" style="margin: 0; width: 100%;">
+				<table width="100%" style="margin: 0; width: 100%;border:1px solid #9AC8DA;">
+					<tr>
+						<td class="littletableheader"><?php echo $form->cliente->label;  ?></td>
+						<td class="littletablerow"   ><?php echo $form->cliente->output,$form->sclitipo->output; ?></td>
+						<td class="littletableheader"         ><?php echo $form->rifci->label; ?>&nbsp;</td>
+						<td class="littletablerow"            ><?php echo $form->rifci->output;   ?>&nbsp;</td>
+						<td class="littletableheader"><?php echo $form->fecha->label;    ?></td>
+						<td class="littletablerow"   ><?php echo $form->fecha->output;   ?></td>
+					</tr><tr>
+						<td class="littletableheader"><?php echo $form->nombre->label;  ?></td>
+						<td class="littletablerow" colspan='5'><?php echo $form->nombre->output;  ?>&nbsp;</td>
+
+					</tr><tr>
+						<td class="littletableheader"         ><?php echo $form->direc->label  ?>&nbsp;</td>
+						<td class="littletablerow" colspan='5'><?php echo $form->direc->output ?>&nbsp;</td>
+					</tr><tr>
+						<td class="littletableheader"         ><?php echo $form->dire1->label  ?>&nbsp;</td>
+						<td class="littletablerow" colspan='5'><?php echo $form->dire1->output ?>&nbsp;</td>
+					</tr>
+				</table>
+				</td>
+				<td>
+				<table width="100%" style="margin:0; width:100%;border:1px solid #9AC8DA;">
 					<tr>
 						<td class="littletableheader"><?php echo $form->vd->label     ?>&nbsp;</td>
 						<td class="littletablerow">   <?php echo $form->vd->output    ?>&nbsp;</td>
 					</tr><tr>
-						<td class="littletableheader"><?php echo $form->fecha->label;    ?>*&nbsp;</td>
-						<td class="littletablerow">   <?php echo $form->fecha->output;   ?>&nbsp;</td>
+						<td class="littletableheader"><?php echo $form->telefono->label;    ?>*&nbsp;</td>
+						<td class="littletablerow">   <?php echo $form->telefono->output;   ?>&nbsp;</td>
 					</tr><tr>
-						<td class="littletableheader"><?php echo $form->peso->label  ?>&nbsp;</td>
-						<td class="littletablerow" align="left"><?php echo $form->peso->output ?>&nbsp;</td>
+						<td class="littletableheader"><?php echo $form->email->label  ?>&nbsp;</td>
+						<td class="littletablerow"   ><?php echo $form->email->output ?>&nbsp;</td>
+					</tr><tr>
+						<td class="littletableheader"><?php echo $form->mercalib->label  ?>&nbsp;</td>
+						<td class="littletablerow"   ><?php echo $form->mercalib->output ?>&nbsp;</td>
 					</tr>
 				</table>
-				</fieldset>
-				</td><td>
-				<fieldset style='border: 1px outset #9AC8DA;background: #FFFDE9;'>
-				<table width="100%" style="margin: 0; width: 100%;">
-					<tr>
-						<td class="littletableheader"><?php echo $form->cliente->label;  ?>&nbsp;</td>
-						<td class="littletablerow">   <?php echo $form->cliente->output,$form->sclitipo->output; ?>&nbsp;</td>
-						<td class="littletablerow">   <?php echo $form->nombre->output;  ?>&nbsp;</td>
-					</tr><tr>
-						<td class="littletableheader"><?php echo $form->rifci->label; ?>&nbsp;</td>
-						<td class="littletablerow" colspan='2'><?php echo $form->rifci->output;   ?>&nbsp;</td>
-					</tr><tr>
-						<td class="littletableheader"><?php echo $form->direc->label  ?>&nbsp;</td>
-						<td class="littletablerow" colspan='2'><?php echo $form->direc->output ?>&nbsp;</td>
-					</tr>
-				</table>
-				</fieldset>
 				</td>
 			<tr>
 		</table>
 		</td>
 	</tr><tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px;width:550px;'>
 		<table width='100%' border='0'>
 			<tr id='__INPL__'>
 				<th bgcolor='#7098D0'><strong>C&oacute;digo</strong></th>
@@ -520,27 +527,30 @@ function del_itspre(id){
 	</tr>
 	<tr>
 		<td>
-		<fieldset style='border: 2px outset #9AC8DA;background: #FFFDE9;'>
-		<table width='100%'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;width:550px;'>
+		<table width='100%' border='0'>
 			<tr>
-				<td colspan='2'><?php echo $container_bl ?></td>
-
-				<td class="littletableheader">           <?php echo $form->totals->label;  ?></td>
-				<td class="littletablerow" align='right'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
-
-			<tr></tr>
-				<td class="littletableheader" width='100'><?php echo $form->condi1->label;    ?></td>
-				<td class="littletablerow"    width='350'><?php echo $form->condi1->output;   ?></td>
+				<td><?php if($form->_status!='show'){?>
+						<a href="#" onClick="add_itspre();"><?php echo image('add1-.png'); ?></a>
+					<?php } ?>
+				</td>
+				<td class="littletableheader" width='100' rowspan='2'><?php echo $form->observa->label;  ?></td>
+				<td class="littletablerow"    width='350' rowspan='2'><?php echo $form->observa->output; ?></td>
+				<td class="littletableheader"                        ><?php echo $form->totals->label;   ?></td>
+				<td class="littletablerow" align='right'             ><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
+			</tr><tr>
+				<td>&nbsp;</td>
 				<td class="littletableheader"><?php echo $form->ivat->label;    ?></td>
 				<td class="littletablerow" align='right'><b id='ivat_val'><?php echo nformat($form->ivat->value); ?></b><?php echo $form->ivat->output; ?></td>
-			<tr></tr>
+			</tr><tr>
 				<td class="littletableheader">&nbsp;</td>
-				<td class="littletablerow"   ><?php echo $form->condi2->output;   ?></td>
-				<td class="littletableheader">           <?php echo $form->totalg->label;  ?></td>
+				<td class="littletableheader"           ><?php echo $form->peso->label;  ?>&nbsp;</td>
+				<td class="littletablerow" align="left" ><?php echo $form->peso->output; ?>&nbsp;</td-->
+				<td class="littletableheader"><?php echo $form->totalg->label;  ?></td>
 				<td class="littletablerow" align='right' style='font-size:18px;font-weight: bold'><b id='totalg_val'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
 			</tr>
 		</table>
-		</fieldset>
+		</div>
 		</td>
 	</tr>
 </table>

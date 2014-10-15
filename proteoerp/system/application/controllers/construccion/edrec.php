@@ -1163,9 +1163,9 @@ class Edrec extends Controller {
 					LEFT JOIN scli    e ON IF(d.ocupante='' OR d.ocupante IS NULL, d.propietario,d.ocupante) = e.cliente
 					JOIN dpto f ON a.aplicacion=f.depto
 					JOIN ( 
-					SELECT aa.id,  aa.codigo, (SELECT bb.alicuota FROM edalicuota bb 
-					WHERE aa.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=${anomes} ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
-					FROM edinmue aa) mm ON d.id = mm.id
+						SELECT aa.id,  aa.codigo, (SELECT bb.alicuota FROM edalicuota bb 
+						WHERE aa.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=${anomes} ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
+						FROM edinmue aa) mm ON d.id = mm.id
 					WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${anomes} AND d.codigo = ${inmueble} AND (a.aplicacion='CO' OR a.aplicacion=d.aplicacion)
 				GROUP BY d.codigo, a.partida ) aa
 				";
