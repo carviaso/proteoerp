@@ -1,11 +1,13 @@
 <?php
 class compras extends Controller {
-		function compras(){
+
+	function compras(){
 		parent::Controller();
 		$this->load->library("rapyd");
 		//$this->datasis->modulo_id(604,1);
 	}
-		function index() {		
+
+	function index() {		
 		$this->rapyd->load("datagrid","datafilter");
 		
 		$modbus=array(
@@ -35,12 +37,12 @@ class compras extends Controller {
 		$filter->fechah->operator="<=";
 		
 		$filter->numero = new inputField("N&uacute;mero", "numero");
-    $filter->numero->size=20;
+		$filter->numero->size=20;
 
 		$filter->proveedor = new inputField("Proveedor", "proveed");
 		$filter->proveedor->append($boton);
 		$filter->proveedor->db_name = "proveed";
-    $filter->proveedor->size=20;
+		$filter->proveedor->size=20;
 
 		$filter->buttons("reset","search");
 		$filter->build();
@@ -67,7 +69,8 @@ class compras extends Controller {
 		$data['title']   ='<h1>Compras</h1>';
 		$this->load->view('view_ventanas', $data);
 	}
-		function dataedit(){
+
+	function dataedit(){
  		$this->rapyd->load("dataedit","datadetalle","fields","datagrid");
  		
  		$formato=$this->datasis->dameval('SELECT formato FROM cemp LIMIT 0,1');
@@ -181,8 +184,8 @@ class compras extends Controller {
 		$edit->tipo->option("NC","Nota Credito");
 		$edit->tipo->option("NE","Nota de Entrega");
 		$edit->tipo->rule = "required";  
-	  $edit->tipo->size = 20;  
-	  $edit->tipo->style='width:150px;';
+		$edit->tipo->size = 20;  
+		$edit->tipo->style='width:150px;';
 	
 		$edit->peso  = new inputField2("Peso", "peso");
 		$edit->peso->size = 20;
@@ -191,7 +194,7 @@ class compras extends Controller {
 		$edit->orden  = new inputField("Orden", "orden");
 		$edit->orden->size = 15;
 		
-	  $edit->credito  = new inputField("Credito", "credito");
+		$edit->credito  = new inputField("Credito", "credito");
 		$edit->credito->size = 20;
 		$edit->credito->css_class='inputnum';
 		
@@ -203,17 +206,17 @@ class compras extends Controller {
 		$edit->iva->size = 20;
 		$edit->iva->css_class='inputnum';
 		
-    $edit->total  = new inputField("Total", "montonet");
+		$edit->total  = new inputField("Total", "montonet");
 		$edit->total->size = 20;
 		$edit->total->css_class='inputnum';
 		
-	  $edit->anticipo  = new inputField("Anticipo", "anticipo");
+		$edit->anticipo  = new inputField("Anticipo", "anticipo");
 		$edit->anticipo->size = 20;
 		$edit->anticipo->css_class='inputnum';
 		
 		$edit->contado  = new inputField("Contado", "inicial");
 		$edit->contado->size = 20;
-	  $edit->contado->css_class='inputnum';
+		$edit->contado->css_class='inputnum';
 				
 		$edit->rislr  = new inputField("R.ISLR", "flete");
 		$edit->rislr->size = 20;
@@ -293,7 +296,8 @@ class compras extends Controller {
 		$data['title']   = '<h1>Compras</h1>';
 		$this->load->view('view_ventanas', $data);
 	}
-		function dpto() {		
+	
+	function dpto() {		
 		$this->rapyd->load("dataform");
 		$campo='ccosto'.$this->uri->segment(4);
  		$script='
@@ -319,6 +323,7 @@ class compras extends Controller {
 		$data['title']   ='<h1>Seleccione un departamento</h1>';
 		$this->load->view('view_detalle', $data);
 	}
+
 	function _guarda_detalle($do) {
 		$cant=$this->input->post('cant_0');
 		$i=$o=0;

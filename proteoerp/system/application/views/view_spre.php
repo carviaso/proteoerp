@@ -40,6 +40,7 @@ $(function(){
 
 	$(".inputnum").numeric(".");
 	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
+	$("#fechadep").datepicker({dateFormat:"dd/mm/yy"});
 	totalizar();
 	for(var i=0;i < <?php echo $form->max_rel_count['itspre']; ?>;i++){
 		cdropdown(i);
@@ -548,6 +549,25 @@ function del_itspre(id){
 				<td class="littletablerow" align="left" ><?php echo $form->peso->output; ?>&nbsp;</td-->
 				<td class="littletableheader"><?php echo $form->totalg->label;  ?></td>
 				<td class="littletablerow" align='right' style='font-size:18px;font-weight: bold'><b id='totalg_val'><?php echo nformat($form->totalg->value); ?></b><?php echo $form->totalg->output; ?></td>
+			</tr>
+		</table>
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;width:100%;'>
+		<table width='100%' border='0'>
+			<tr>
+				<td colspan='6'><b>ANTICIPO</b></td>
+				<td class="littletableheader"><?php echo $form->codbanc->label;  ?></td>
+				<td class="littletablerow"   ><?php echo $form->codbanc->output; ?></td>
+				<td class="littletableheader"><?php echo $form->tipo_op->label;  ?></td>
+				<td class="littletablerow"   ><?php echo $form->tipo_op->output; ?></td>
+				<td class="littletableheader"><?php echo $form->fechadep->label;  ?></td>
+				<td class="littletablerow"   ><?php echo $form->fechadep->output; ?></td>
+				<td class="littletableheader"><?php echo $form->num_ref->label;  ?></td>
+				<td class="littletablerow"   ><?php echo $form->num_ref->output; ?></td-->
 			</tr>
 		</table>
 		</div>

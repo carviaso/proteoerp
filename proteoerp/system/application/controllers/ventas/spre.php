@@ -1313,7 +1313,28 @@ class Spre extends Controller {
 		$edit->observa->rows =  2;
 		$edit->observa->maxlength =200;
 
-		//$edit->buttons('modify', 'save', 'undo', 'delete', 'add_rel','add');
+		$edit->codbanc = new dropdownField('Banco','codbanc');
+		$edit->codbanc->options('SELECT codbanc, CONCAT(banco,\' \',numcuent) banco FROM banc WHERE activo="S" AND tipocta="C" ORDER BY banco');
+		$edit->codbanc->style='width:140px;';
+		$edit->codbanc->size = 2;
+
+		$edit->tipo_op = new dropdownField('Tipo','tipo_op');
+		$edit->tipo_op->option('','Seleccionar');
+		$edit->tipo_op->options(array('NC'=> 'Transferencia','DE'=>'Deposito'));
+		$edit->tipo_op->style='width:90px';
+
+		$edit->fechadep = new DateonlyField('Fecha', 'fechadep','d/m/Y');
+		$edit->fechadep->insertValue = date('Y-m-d');
+		$edit->fechadep->updateValue = date('Y-m-d');
+		//$edit->fechadep->rule = 'required';
+		$edit->fechadep->size = 10;
+		$edit->fechadep->calendar=false;
+
+		$edit->num_ref = new inputField('Numero','num_ref');
+		$edit->num_ref->rule='';
+		$edit->num_ref->size =20;
+		$edit->num_ref->maxlength =20;
+
 		$edit->buttons('add_rel');
 		$edit->build();
 
@@ -1454,6 +1475,180 @@ class Spre extends Controller {
 		echo $salida;
 	}
 
+
+	//******************************************************************
+	// Edicion 
+
+	function dataeditc(){
+		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$("#fechadep").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+		});
+		';
+
+		$edit = new DataEdit('', 'spre');
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		$edit->back_url = site_url($this->url.'filteredgrid');
+
+		$edit->post_process('insert','_post_insertc');
+		$edit->post_process('update','_post_updatec');
+		$edit->post_process('delete','_post_deletec');
+		$edit->pre_process('insert', '_pre_insertc' );
+		$edit->pre_process('update', '_pre_updatec' );
+		$edit->pre_process('delete', '_pre_deletec' );
+
+		$edit->numero = new inputField('Numero','numero');
+		$edit->numero->rule='';
+		$edit->numero->size =10;
+		$edit->numero->maxlength =8;
+
+		$edit->fecha = new dateonlyField('Fecha','fecha');
+		$edit->fecha->rule='chfecha';
+		$edit->fecha->calendar=false;
+		$edit->fecha->size =10;
+		$edit->fecha->maxlength =8;
+
+		$edit->rifci = new inputField('Cedula','rifci');
+		$edit->rifci->rule='';
+		$edit->rifci->size =15;
+		$edit->rifci->maxlength =13;
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->rule='';
+		$edit->nombre->size =42;
+		$edit->nombre->maxlength =40;
+
+		$edit->direc = new inputField('Direccion','direc');
+		$edit->direc->rule='';
+		$edit->direc->size =42;
+		$edit->direc->maxlength =40;
+
+		$edit->dire1 = new inputField('Dire1','dire1');
+		$edit->dire1->rule='';
+		$edit->dire1->size =42;
+		$edit->dire1->maxlength =40;
+
+		$edit->email = new inputField('Email','email');
+		$edit->email->rule='';
+		$edit->email->size =102;
+		$edit->email->maxlength =100;
+
+		$edit->telefono = new inputField('Telefono','telefono');
+		$edit->telefono->rule='';
+		$edit->telefono->size =32;
+		$edit->telefono->maxlength =30;
+
+		$edit->ciudad = new inputField('Ciudad','ciudad');
+		$edit->ciudad->rule='';
+		$edit->ciudad->size =42;
+		$edit->ciudad->maxlength =40;
+
+		$edit->estado = new inputField('Estado','estado');
+		$edit->estado->rule='integer';
+		$edit->estado->css_class='inputonlynum';
+		$edit->estado->size =13;
+		$edit->estado->maxlength =11;
+
+		$edit->mercalib = new inputField('Mercalib','mercalib');
+		$edit->mercalib->rule='';
+		$edit->mercalib->size =52;
+		$edit->mercalib->maxlength =50;
+
+		$edit->codbanc = new inputField('Codbanc','codbanc');
+		$edit->codbanc->rule='';
+		$edit->codbanc->size =4;
+		$edit->codbanc->maxlength =2;
+
+		$edit->tipo_op = new inputField('Tipo','tipo_op');
+		$edit->tipo_op->rule='';
+		$edit->tipo_op->size =4;
+		$edit->tipo_op->maxlength =2;
+
+		$edit->num_ref = new inputField('Num_ref','num_ref');
+		$edit->num_ref->rule='';
+		$edit->num_ref->size =22;
+		$edit->num_ref->maxlength =20;
+
+		$edit->iva = new inputField('Iva','iva');
+		$edit->iva->rule='numeric';
+		$edit->iva->css_class='inputnum';
+		$edit->iva->size =14;
+		$edit->iva->maxlength =12;
+
+		$edit->totals = new inputField('Totals','totals');
+		$edit->totals->rule='numeric';
+		$edit->totals->css_class='inputnum';
+		$edit->totals->size =14;
+		$edit->totals->maxlength =12;
+
+		$edit->totalg = new inputField('Totalg','totalg');
+		$edit->totalg->rule='numeric';
+		$edit->totalg->css_class='inputnum';
+		$edit->totalg->size =14;
+		$edit->totalg->maxlength =12;
+
+		$edit->observa = new textareaField('Observa','observa');
+		$edit->observa->rule='';
+		$edit->observa->cols = 70;
+		$edit->observa->rows = 4;
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+	function _pre_insertc($do){
+		$do->error_message_ar['pre_ins']='';
+		return false;
+	}
+
+	function _pre_updatec($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_deletec($do){
+		$do->error_message_ar['pre_del']='';
+		return false;
+	}
+
+	function _post_insertc($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits $primary ");
+	}
+
+	function _post_updatec($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
+	function _post_deletec($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Elimino $this->tits $primary ");
+	}
+
+
+
+
+	//******************************************************************
+	// Instalar
+	//
 	function instalar(){
 		$campos=$this->db->list_fields('spre');
 		if(!in_array('id',$campos)){
@@ -1470,6 +1665,7 @@ class Spre extends Controller {
 		if(!in_array('tipo_op', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN tipo_op  CHAR(2)      NULL DEFAULT NULL AFTER codbanc');
 		if(!in_array('num_ref', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN num_ref  VARCHAR(20)  NULL DEFAULT NULL AFTER tipo_op');
 		if(!in_array('observa', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN observa  TEXT         NULL DEFAULT NULL AFTER condi2');
+		if(!in_array('fechadep',$campos)) $this->db->query('ALTER TABLE spre ADD COLUMN fechadep DATE         NULL DEFAULT NULL AFTER tipo_op');
 	}
 
 }
