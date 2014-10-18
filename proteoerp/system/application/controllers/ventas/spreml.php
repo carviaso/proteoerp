@@ -522,7 +522,7 @@ class Spreml extends Controller {
 		$edit->fecha->size =10;
 		$edit->fecha->maxlength =8;
 
-		$edit->rifci = new inputField('Identificacion','rifci');
+		$edit->rifci = new inputField('Cedula/RIF','rifci');
 		$edit->rifci->size =10;
 		$edit->rifci->maxlength =13;
 		$edit->rifci->rule = 'required';
@@ -562,7 +562,7 @@ class Spreml extends Controller {
 		$edit->telefono->maxlength =30;
 		$edit->telefono->rule = 'required';
 
-		$edit->envrifci = new inputField('Identificacion','envrifci');
+		$edit->envrifci = new inputField('Cedula/RIF','envrifci');
 		$edit->envrifci->rule='';
 		$edit->envrifci->size =10;
 		$edit->envrifci->maxlength =13;
@@ -572,7 +572,7 @@ class Spreml extends Controller {
 		$edit->envnombre->size      = 31;
 		$edit->envnombre->maxlength = 40;
 
-		$edit->envdirec = new textareaField('Direccion','envdirec');
+		$edit->envdirec = new textareaField('Direccion o Agencia Zoom de Envio','envdirec');
 		$edit->envdirec->rule = '';
 		$edit->envdirec->cols = 50;
 		$edit->envdirec->rows =  3;
@@ -614,7 +614,7 @@ class Spreml extends Controller {
 		$edit->fechadep->size = 10;
 		$edit->fechadep->calendar=false;
 
-		$edit->num_ref = new inputField('Numero','num_ref');
+		$edit->num_ref = new inputField('Nro de referencia','num_ref');
 		$edit->num_ref->rule='required';
 		$edit->num_ref->size =15;
 		$edit->num_ref->maxlength =20;
@@ -656,7 +656,7 @@ html.ui-autocomplete {height: 150px;width: 600px;}
 			$estilo = '
 <script language="javascript" type="text/javascript">
 $(function(){
-	$("#maintabcontainer").tabs();
+	//$("#maintabcontainer").tabs();
 	$("#fechadep").datepicker({dateFormat:"dd/mm/yy"});
 	$(".inputnum").numeric(".");
 	$("#rifci").focusout(function(){

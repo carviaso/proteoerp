@@ -34,11 +34,6 @@ if($form->_status <> 'show'){ ?>
 </fieldset>
 
 <div id="maintabcontainer">
-	<ul>
-		<li><a href="#tab1">Datos del Comprador</a></li>
-		<li><a href="#tab2">Datos para el Envio</a></li>
-		<li><a href="#tab3">Forma de Pago</a></li>
-	</ul>
 	<div id="tab1" style='background:#EFEFFF'>
 		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
