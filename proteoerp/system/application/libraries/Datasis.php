@@ -1780,7 +1780,7 @@ class Datasis {
 	//
 	function validarif( $funcion='chrif'){
 		$mandale = '
-			function chrif(rif){
+			function '.$funcion.'(rif){
 				rif.toUpperCase();
 				var patt=/[EJPGV][0-9]{10} */g;
 

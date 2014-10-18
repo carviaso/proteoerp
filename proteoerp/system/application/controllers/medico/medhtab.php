@@ -37,8 +37,8 @@ class Medhtab extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"grupos",    "img"=>"images/pdf_logo.gif", "alt" => "Grupos",    "label"=>"Grupos"));
-		$grid->wbotonadd(array("id"=>"variables", "img"=>"images/engrana.png",  "alt" => "Variables", "label"=>"Variables"));
+		$grid->wbotonadd(array("id"=>"grupos",    "img"=>"images/engrana.png", "alt" => "Grupos",    "label"=>"Grupos"));
+		$grid->wbotonadd(array("id"=>"variables", "img"=>"images/engrana.png", "alt" => "Variables", "label"=>"Variables"));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -82,15 +82,13 @@ class Medhtab extends Controller {
 		// Variables
 		$bodyscript .= '
 		$("#variables").click(function(){
-			$.post("'.site_url('medico/medhtab/grupoform').'",
+			$.post("'.site_url('medico/medhtab/varform').'",
 			function(data){
 				$("#fshow").html(data);
 				$("#fshow").dialog( { title:"VARIABLES", width: 430, height: 400, modal: true } );
 				$("#fshow").dialog( "open" );
 			});
 		});';
-
-
 
 		$bodyscript .= $this->jqdatagrid->bsshow('medhtab', $ngrid, $this->url );
 		$bodyscript .= $this->jqdatagrid->bsadd( 'medhtab', $this->url );
@@ -119,7 +117,6 @@ class Medhtab extends Controller {
 		$editar = "false";
 
 		$grid  = new $this->jqdatagrid;
-
 
 		$grid->addField('grupo');
 		$grid->label('Grupo');
@@ -372,6 +369,160 @@ class Medhtab extends Controller {
 	// Guarda la Informacion del Grid o Tabla
 	//
 	function gruposd(){
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = $this->input->post('id');
+		$data   = $_POST;
+		$mcodp  = "??????";
+		$check  = 0;
+
+		unset($data['oper']);
+		unset($data['id']);
+		if($oper == 'add'){
+			if(false == empty($data)){
+				$check = $this->datasis->dameval("SELECT count(*) FROM medhgrup WHERE nombre=".$this->db->escape($data['nombre']));
+				if ( $check == 0 ){
+					$this->db->insert('medhgrup', $data);
+					echo "Registro Agregado";
+					logusu('MEDHGRUP',"Registro  INCLUIDO");
+				} else
+					echo "Ya existe un registro con ese nombre";
+			} else
+				echo "Fallo Agregado!!!";
+
+		} elseif($oper == 'edit') {
+			$nuevo  = $data[$mcodp];
+			$anterior = $this->datasis->dameval("SELECT $mcodp FROM medhgrup WHERE id=$id");
+			if ( $nuevo <> $anterior ){
+				//si no son iguales borra el que existe y cambia
+				$this->db->query("DELETE FROM medhgrup WHERE $mcodp=?", array($mcodp));
+				$this->db->query("UPDATE medhgrup SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
+				$this->db->where("id", $id);
+				$this->db->update("medhgrup", $data);
+				logusu('MEDHGRUP',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
+				echo "Grupo Cambiado/Fusionado en clientes";
+			} else {
+				unset($data[$mcodp]);
+				$this->db->where("id", $id);
+				$this->db->update('medhgrup', $data);
+				logusu('MEDHGRUP',"Grupo de Cliente  ".$nuevo." MODIFICADO");
+				echo "$mcodp Modificado";
+			}
+
+		} elseif($oper == 'del') {
+			$meco = $this->datasis->dameval("SELECT $mcodp FROM medhgrup WHERE id=$id");
+			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM medhgrup WHERE id='$id' ");
+			if ($check > 0){
+				echo " El registro no puede ser eliminado; tiene movimiento ";
+			} else {
+				$this->db->query("DELETE FROM medhgrup WHERE id=$id ");
+				logusu('MEDHGRUP',"Registro ????? ELIMINADO");
+				echo "Registro Eliminado";
+			}
+		};
+	}
+
+
+	//******************************************************************
+	// Forma de Variables
+	//
+	function varform(){
+		$grid  = new $this->jqdatagrid;
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false',
+			'hidden'        => 'true'
+		));
+
+		$grid->addField('tabula');
+		$grid->label('Tabula');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'false',
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'hidden'        => 'true'
+		));
+
+
+		$grid->addField('variable');
+		$grid->label('Variable');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'false',
+			'width'         => 100,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:80, maxlength: 80 }',
+		));
+
+
+		$grid->addField('valor');
+		$grid->label('Valor');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'false',
+			'width'         => 200,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:80, maxlength: 80 }',
+		));
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('410');
+		$grid->setHeight('220');
+
+		$grid->setUrlget(site_url('medico/medhtab/vargd/'));
+		$grid->setUrlput(site_url('medico/medhtab/varsd/'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+
+	}
+
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
+	function vargd(){
+		$grid       = $this->jqdatagrid;
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('medvar');
+		$response   = $grid->getData('medvar', array(array()), array(), false, $mWHERE );
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+	}
+
+	//******************************************************************
+	// Guarda la Informacion del Grid o Tabla
+	//
+	function varsd(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');

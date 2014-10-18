@@ -65,6 +65,7 @@ class Spreml extends Controller {
 	// Layout en la Ventana
 	//
 	function jqdatag(){
+		$this->datasis->modulo_nombre( 'SPREML', $ventana=0 );
 
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
@@ -486,12 +487,7 @@ class Spreml extends Controller {
 
 	function dataedit(){
 		$this->rapyd->load('dataedit');
-		$script= '
-		$(function() {
-			$("#fechadep").datepicker({dateFormat:"dd/mm/yy"});
-			$(".inputnum").numeric(".");
-		});
-		';
+		$script= '';
 
 		$edit = new DataEdit('', 'spreml');
 
@@ -527,15 +523,9 @@ class Spreml extends Controller {
 		$edit->fecha->maxlength =8;
 
 		$edit->rifci = new inputField('Identificacion','rifci');
-		$edit->rifci->rule='';
 		$edit->rifci->size =10;
 		$edit->rifci->maxlength =13;
 		$edit->rifci->rule = 'required';
-
-		$edit->envrifci = new inputField('Identificacion','envrifci');
-		$edit->envrifci->rule='';
-		$edit->envrifci->size =10;
-		$edit->envrifci->maxlength =13;
 
 		$edit->nombre = new inputField('Nombre','nombre');
 		$edit->nombre->rule='';
@@ -572,15 +562,38 @@ class Spreml extends Controller {
 		$edit->telefono->maxlength =30;
 		$edit->telefono->rule = 'required';
 
+		$edit->envrifci = new inputField('Identificacion','envrifci');
+		$edit->envrifci->rule='';
+		$edit->envrifci->size =10;
+		$edit->envrifci->maxlength =13;
+
 		$edit->envnombre = new inputField('Nombre','envnombre');
-		$edit->envnombre->rule='';
-		$edit->envnombre->size =31;
-		$edit->envnombre->maxlength =40;
+		$edit->envnombre->rule      = '';
+		$edit->envnombre->size      = 31;
+		$edit->envnombre->maxlength = 40;
 
 		$edit->envdirec = new textareaField('Direccion','envdirec');
-		$edit->envdirec->rule='';
+		$edit->envdirec->rule = '';
 		$edit->envdirec->cols = 50;
-		$edit->envdirec->rows = 3;
+		$edit->envdirec->rows =  3;
+
+		$edit->envestado = new dropdownField('Estado','envestado');
+		$edit->envestado->style='width:160px;';
+		$edit->envestado->option('','Seleccione un Estado');
+		$edit->envestado->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
+		$edit->envestado->insertValue=$this->datasis->dameval("SELECT codigo FROM estado WHERE entidad=".$this->db->escape(trim($this->datasis->traevalor('ESTADO'))));
+
+		$edit->envciudad = new inputField('Ciudad','envciudad');
+		$edit->envciudad->rule='';
+		$edit->envciudad->size =18;
+		$edit->envciudad->maxlength =40;
+		$edit->envciudad->rule = 'required';
+
+		$edit->envtelef = new inputField('Telefono','envtelef');
+		$edit->envtelef->rule='';
+		$edit->envtelef->size =17;
+		$edit->envtelef->maxlength =30;
+		$edit->envtelef->rule = 'required';
 
 		$edit->codbanc = new dropdownField('Banco','codbanc');
 		$edit->codbanc->options('SELECT codbanc, CONCAT(banco,\' \',numcuent) banco FROM banc WHERE activo="S" AND tipocta="C" ORDER BY banco');
@@ -605,6 +618,11 @@ class Spreml extends Controller {
 		$edit->num_ref->rule='required';
 		$edit->num_ref->size =15;
 		$edit->num_ref->maxlength =20;
+
+		$edit->agencia = new inputField('Agencia Zoom','agencia');
+		$edit->agencia->rule='required';
+		$edit->agencia->size =20;
+		$edit->agencia->maxlength =50;
 		
 		$edit->totalg = new inputField('Monto','totalg');
 		$edit->totalg->rule='numeric';
@@ -628,6 +646,56 @@ class Spreml extends Controller {
 			echo json_encode($rt);
 		}else{
 			//echo $edit->output;
+			$estilo = '
+<style >
+.ui-autocomplete {max-height: 150px;overflow-y: auto;max-width: 600px;}
+html.ui-autocomplete {height: 150px;width: 600px;}
+</style>';
+
+
+			$estilo = '
+<script language="javascript" type="text/javascript">
+$(function(){
+	$("#maintabcontainer").tabs();
+	$("#fechadep").datepicker({dateFormat:"dd/mm/yy"});
+	$(".inputnum").numeric(".");
+	$("#rifci").focusout(function(){
+		rif=$(this).val();
+		traenombre( rif, "nombre" )
+	});
+	$("#envrifci").focusout(function(){
+		rif=$(this).val();
+		traenombre( rif, "envnombre" )
+	});
+})
+
+function traenombre( rif, campo ){
+	if(!chrif(rif)){
+		alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
+		return true;
+	} else {
+		$.ajax({
+			type: "POST",
+			url: "'.site_url('ajax/traerif').'",
+			dataType: "json",
+			data: {rifci: rif},
+			success: function(data){
+				if(data.error==0){
+					if($("#"+campo).val()==""){
+						$("#"+campo).val(data.nombre);
+					}
+				}
+			}
+		});
+	}
+};
+
+
+'.$this->datasis->validarif().'
+</script>
+';
+
+	
 			$conten["form"]  =&  $edit;
 			$data['content'] = $this->load->view('view_spreml', $conten,true);
 			
@@ -642,8 +710,9 @@ class Spreml extends Controller {
 			$data["head"]   .= style("themes/proteo/proteo.css");
 			$data["head"]   .= style("themes/darkness/darkness.css");
 			$data["head"]   .= style("themes/anexos1/anexos1.css");
+			$data["head"]   .= $estilo;
 
-
+			$data["target"] = 'dialogo';
 			$data['title']   = heading('Registro de Pago');
 			$this->load->view('view_ventanas', $data);
 		}
@@ -696,6 +765,9 @@ class Spreml extends Controller {
 				mercalib  VARCHAR(50)   DEFAULT NULL,
 				envnombre VARCHAR(40)   DEFAULT NULL COMMENT 'Nombre del Destinatario',
 				envdirec  TEXT          COMMENT 'Direccion de Envio',
+				envestado INT(11)       DEFAULT NULL,
+				envciudad VARCHAR(40)   DEFAULT NULL,
+				envtelef  VARCHAR(30)   DEFAULT NULL,
 				codbanc   CHAR(2)       DEFAULT NULL,
 				tipo_op   CHAR(2)       DEFAULT NULL,
 				fechadep  DATE          DEFAULT NULL COMMENT 'Fecha del Deposito',

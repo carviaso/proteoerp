@@ -4724,18 +4724,6 @@ class Sfac extends Controller {
 			$_POST["monto_${i}"]     = 0;
 
 			$this->dataedit();
-			//}else{
-			//	$url='ventas/pfaclitemayor/filteredgrid';
-			//	$this->rapyd->uri->keep_persistence();
-			//	$persistence = $this->rapyd->session->get_persistence($url, $this->rapyd->uri->gfid);
-			//	$back= (isset($persistence['back_uri'])) ?$persistence['back_uri'] : $url;
-            //
-			//	$data['content'] = 'Pedido ya fue facturado'.br();
-			//	$data['content'].= anchor($back,'Regresar');
-			//	$data['head']    = $this->rapyd->get_head();
-			//	$data['title']   = heading('Actualizar compra');
-			//	$this->load->view('view_ventanas', $data);
-			//}
 		}else{
 			echo 'Presupuesto no existe';
 		}
