@@ -509,12 +509,14 @@ class Spreml extends Controller {
 		$edit->numero->size =8;
 		$edit->numero->maxlength =8;
 		$edit->numero->rule = 'required';
+		$edit->numero->title = 'Numero de la orden que recibio por email';
 
 		$edit->mercalib = new inputField('Alias Mercado Libre','mercalib');
 		$edit->mercalib->rule='';
 		$edit->mercalib->size =20;
 		$edit->mercalib->maxlength =50;
 		$edit->mercalib->rule = 'required';
+		$edit->mercalib->title = 'Nombre de la cuenta en mercado libre';
 
 		$edit->fecha = new dateonlyField('Fecha','fecha');
 		$edit->fecha->rule='chfecha';
@@ -536,7 +538,7 @@ class Spreml extends Controller {
 		$edit->direccion = new textareaField('Direccion','direccion');
 		$edit->direccion->rule='';
 		$edit->direccion->cols = 50;
-		$edit->direccion->rows = 3;
+		$edit->direccion->rows = 2;
 
 		$edit->estado = new dropdownField('Estado','estado');
 		$edit->estado->style='width:160px;';
@@ -575,7 +577,7 @@ class Spreml extends Controller {
 		$edit->envdirec = new textareaField('Direccion o Agencia Zoom de Envio','envdirec');
 		$edit->envdirec->rule = '';
 		$edit->envdirec->cols = 50;
-		$edit->envdirec->rows =  3;
+		$edit->envdirec->rows =  2;
 
 		$edit->envestado = new dropdownField('Estado','envestado');
 		$edit->envestado->style='width:160px;';
@@ -597,14 +599,14 @@ class Spreml extends Controller {
 
 		$edit->codbanc = new dropdownField('Banco','codbanc');
 		$edit->codbanc->options('SELECT codbanc, CONCAT(banco,\' \',numcuent) banco FROM banc WHERE activo="S" AND tipocta="C" ORDER BY banco');
-		$edit->codbanc->style='width:140px;';
+		$edit->codbanc->style='width:180px;';
 		$edit->codbanc->size = 2;
 		$edit->codbanc->rule = 'required';
 
 		$edit->tipo_op = new dropdownField('Tipo','tipo_op');
 		$edit->tipo_op->option('','Seleccionar');
 		$edit->tipo_op->options(array('NC'=> 'Transferencia','DE'=>'Deposito'));
-		$edit->tipo_op->style='width:90px';
+		$edit->tipo_op->style='width:97px';
 		$edit->tipo_op->rule = 'required';
 
 		$edit->fechadep = new DateonlyField('Fecha', 'fechadep','d/m/Y');
@@ -656,7 +658,7 @@ html.ui-autocomplete {height: 150px;width: 600px;}
 			$estilo = '
 <script language="javascript" type="text/javascript">
 $(function(){
-	//$("#maintabcontainer").tabs();
+	$( document ).tooltip();
 	$("#fechadep").datepicker({dateFormat:"dd/mm/yy"});
 	$(".inputnum").numeric(".");
 	$("#rifci").focusout(function(){

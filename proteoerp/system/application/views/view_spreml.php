@@ -21,9 +21,8 @@ if($form->_status <> 'show'){ ?>
 //echo $container_tr;
 ?>
 
-<fieldset style="margin: 0; border:1px solid #9AC8DA;">
-<legend>Su Pedido</legend>
-<table style="margin: 0;">
+<table style='border: 1px solid #0B0B61;border-collapse:collapse;padding:0px;width:100%;'>
+	<tr><th colspan='4' style='background: #0B0B61;color:white;' align='left'>SU PEDIDO</th></tr>
 	<tr>
 		<td class="littletablerowth" width='92px'><?php echo $form->numero->label;   ?></td>
 		<td class="littletablerow"                ><?php echo $form->numero->output;  ?></td>
@@ -31,11 +30,9 @@ if($form->_status <> 'show'){ ?>
 		<td class="littletablerow"                ><?php echo $form->mercalib->output;?></td>
 	</tr>
 </table>
-</fieldset>
-
-<div id="maintabcontainer">
 	<div id="tab1" style='background:#EFEFFF'>
-		<table style="width:100%;border-collapse:collapse;padding:0px;">
+		<table style='border: 1px solid #0B0B61;border-collapse:collapse;padding:0px;width:100%;'>
+			<tr><th colspan='4' style='background: #0B0B61;color:white;' align='left'>DATOS DEL COMPRADOR</th></tr>
 			<tr>
 				<td colspan='2'>
 				<table style="border-collapse:collapse;padding:0px;"><tr>
@@ -70,17 +67,10 @@ if($form->_status <> 'show'){ ?>
 			</tr>
 		</table>
 	</div>
-	<div id="tab2" style='background:#EFEFF4'>
-		<table style="width:100%;border-collapse:collapse;padding:0px;">
+	<div id="tab2" style='background:#EFEFF4;'>
+		<table style='border: 1px solid #0B0B61;border-collapse:collapse;padding:0px;width:100%;'>
 			<tr>
-				<td colspan='2'>
-				<table style="border-collapse:collapse;padding:0px;"><tr>
-					<td class="littletablerowth" width='92px'><?php echo $form->envrifci->label;  ?></td>
-					<td class="littletablerow"                ><?php echo $form->envrifci->output; ?></td>
-					<td class="littletablerowth"              ><?php echo $form->envnombre->label;  ?></td>
-					<td class="littletablerow"                ><?php echo $form->envnombre->output; ?></td>
-				</tr></table>
-				</td>
+				<th colspan='4' style='background: #0B0B61;color:white;' align='left'>DATOS PARA EL ENVIO</th>
 			</tr>
 			<tr>
 				<td class="littletablerowth" width='92px'><?php echo $form->envdirec->label;  ?></td>
@@ -88,31 +78,45 @@ if($form->_status <> 'show'){ ?>
 			</tr>
 			<tr>
 				<td colspan='2'>
-				<table style="border-collapse:collapse;padding:0px;">
+				<table style="border-collapse:collapse;padding:0px;width:100%;">
 				<tr>
 					<td class="littletablerowth" width='92px' ><?php echo $form->envestado->label;   ?></td>
 					<td class="littletablerow"                ><?php echo $form->envestado->output;  ?></td>
-					<td class="littletablerowth">&nbsp;</td>
-					<td class="littletablerow"  >&nbsp;</td>
-				</tr>
-				<tr>
 					<td class="littletablerowth"><?php echo $form->envciudad->label;  ?></td>
 					<td class="littletablerow"  ><?php echo $form->envciudad->output; ?></td>
-					<td class="littletablerowth"><?php echo $form->envtelef->label; ?></td>
-					<td class="littletablerow"  ><?php echo $form->envtelef->output;?></td>
 				</tr>
 				</table>
 				</td>
 			</tr>
+			<tr>
+				<td colspan='2' align='center'>
+				<table style="border-collapse:collapse;padding:0px;WIDTH:95%;background: #E0F2F7;border: 1px solid #0080FF;"><tr>
+				<tr>
+					<th colspan='4' style='background: #0080FF;color:white;' align='left'>SI EL QUE RECIBE ES OTRA PERSONA</th>
+				</tr>
+					<td class="littletablerowth" width='92px'><?php echo $form->envrifci->label;  ?></td>
+					<td class="littletablerow"                ><?php echo $form->envrifci->output; ?></td>
+					<td class="littletablerowth"              ><?php echo $form->envnombre->label;  ?></td>
+					<td class="littletablerow"                ><?php echo $form->envnombre->output; ?></td>
+				<tr>
+					<td class="littletablerowth"><?php echo $form->envtelef->label; ?></td>
+					<td class="littletablerow"  colspan='2' ><?php echo $form->envtelef->output;?></td>
+					<td class="littletablerow"  >&nbsp;</td>
+				</tr>
+
+				</tr></table>
+				</td>
+			</tr>
 		</table>
 	</div>
-	<div id="tab3" style='background:#EFEFF4'>
-		<table>
+	<div id="tab3" style='background:#EFEFF4;'>
+		<table style='border: 1px solid #0B0B61;border-collapse:collapse;padding:0px;width:100%;'>
+			<tr><th colspan='4' style='background: #0B0B61;color:white;' align='left'>FORMA DE PAGO</th></tr>
 			<tr>
-				<td class="littletablerowth" width='92px'><?php echo $form->codbanc->label;  ?></td>
-				<td class="littletablerow"                ><?php echo $form->codbanc->output; ?></td>
-				<td class="littletablerowth"              ><?php echo $form->tipo_op->label;  ?></td>
+				<td class="littletablerowth" width='92px' ><?php echo $form->tipo_op->label;  ?></td>
 				<td class="littletablerow"                ><?php echo $form->tipo_op->output; ?></td>
+				<td class="littletablerowth"              ><?php echo $form->codbanc->label;  ?></td>
+				<td class="littletablerow"                ><?php echo $form->codbanc->output; ?></td>
 			</tr>
 			<tr>
 				<td class="littletablerowth"><?php echo $form->fechadep->label;  ?></td>
@@ -121,12 +125,10 @@ if($form->_status <> 'show'){ ?>
 				<td class="littletablerow"  ><?php echo $form->num_ref->output; ?></td>
 			</tr>
 			<tr>
-				<td class="littletablerowth"><?php echo $form->agencia->label;  ?></td>
-				<td class="littletablerow"  ><?php echo $form->agencia->output; ?></td>
-
-
 				<td class="littletablerowth"><?php echo $form->totalg->label;  ?></td>
 				<td class="littletablerow"  ><?php echo $form->totalg->output; ?></td>
+				<td class="littletablerowth">&nbsp;</td>
+				<td class="littletablerow"  >&nbsp;</td>
 			</tr>
 			<tr>
 				<td class="littletablerowth"><?php echo $form->observa->label;  ?></td>
@@ -134,7 +136,6 @@ if($form->_status <> 'show'){ ?>
 			</tr>
 		</table>
 	</div>
-</div>
 
 <input name="btn_submit" value="Guardar" onclick="" class="button" type="submit">
 &nbsp;
