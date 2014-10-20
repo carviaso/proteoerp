@@ -82,9 +82,10 @@ $filter->db->join('sfac   AS b' ,'b.numero=a.numa AND a.tipoa=b.tipo_doc');
 $filter->db->join('sinv   AS c' ,'a.codigoa=c.codigo'   ,'left');
 $filter->db->join('scli   AS d' ,'b.cod_cli=d.cliente'  ,'left');
 $filter->db->join('grcl   AS e' ,'d.grupo=e.grupo'      ,'left');
-$filter->db->join('vend   AS f' ,'b.vd=f.vendedor','left');
+$filter->db->join('vend   AS f' ,'b.vd=f.vendedor'      ,'left');
 $filter->db->join('grup   AS g' ,'c.grupo=g.grupo'      ,'left');
 $filter->db->where('c.tipo <>','Servicio');
+$filter->db->where('MID(b.numero,1,1) <> "_"');
 $filter->db->orderby('g.linea, g.grupo, c.codigo, a.fecha');
 
 $filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
