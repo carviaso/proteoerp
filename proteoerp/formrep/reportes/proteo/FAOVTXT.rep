@@ -27,11 +27,9 @@ $filter->fechah->size='12';
 //$filter->status->option('I','Inactivos');
 //$filter->status->style='width:100px';
 
-$filter->checkbox = new checkboxField('Descargar', 'ignorar', 's','n');
-$filter->checkbox->append ('Version TXT');
-
 $filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
+$filter->salformat->option('TXT','txt');
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
@@ -45,29 +43,87 @@ if($this->rapyd->uri->is_set('search')){
 	$dbfechad = $this->db->escape($fechad);
 	$dbfechah = $this->db->escape($fechah);
 
-	$txt= $filter->checkbox->newValue;
+	$mSQL="SELECT a.codigo, a.concepto, a.monto,
+		SUM(a.valor*(a.tipo='A' AND MID(a.concepto,1,1)<>'9')) AS asignacion,
+		CONCAT(RTRIM(b.nombre), ' ',RTRIM(b.apellido)) AS nombre,
+		c.descrip,a.fecha, a.contrato, d.nombre contnom, b.sexo,
+		b.nacional,b.cedula,b.nombre,b.apellido,b.sueldo,
+		DATE_FORMAT(b.ingreso,'%d%m%Y') AS ingreso,
+		DATE_FORMAT(b.retiro ,'%d%m%Y') AS retiro
+	FROM nomina AS a
+	JOIN pers   AS b ON a.codigo=b.codigo
+	JOIN conc   AS c ON a.concepto=c.concepto
+	LEFT JOIN noco d ON a.contrato=d.codigo
+	WHERE a.valor<>0 AND
+		a.fecha >= ${dbfechad} AND a.fecha <= ${dbfechah}
+		AND c.psueldo='S'
+	GROUP BY EXTRACT( YEAR_MONTH FROM a.fecha ), a.codigo";
 
-	if($txt=='s'){
-		redirect ("nomina/minfra/faovtxt/${fechad}/${fechah}");
+	$txt= $filter->salformat->newValue;
+	if($txt=='TXT'){
+		$this->load->helper('download');
+		$this->load->helper('file');
+		$query=$this->db->query($mSQL);
+		$line=$error='';
+		//$line='NACIONAL;CEDULA;1ER_NOMBRE;2DO_NOMBRE;1ER_APELLIDO;2DO_APELLIDO;SALARIO;INGRESO;RETIRO';
+		//$line.="\r\n";
+		if($query->num_rows() > 0){
+			$rem=array('.','-');
+			foreach($query->result_array() as $row){
+				$line.=trim($row['nacional']).',';
+				$line.=trim($row['cedula']).',';
+
+				$temp=preg_replace('/\s\s+/', ' ', trim($row['nombre']));
+
+				$temp=str_replace('¥','&ntilde;',$temp);
+				$temp=explode(' ',$temp);
+				$ban=true;
+				$nombre1=$nombre2='';
+				foreach($temp AS $token){
+					if($ban){
+						if (preg_match("/^([lL][aeoAEO][sS]|[Dd][aieoAIEO]|[dD]?[eE][lL]|[lL][aA])$/",$token)>0){
+							$nombre1.=$token.' ';
+						}else{
+							$nombre1.=$token;
+							$ban=false;
+						}
+					}else{
+						$nombre2.=$token.' ';
+					}
+				}
+				$line.=trim($nombre1).','.trim($nombre2).',';
+
+				$temp=preg_replace('/\s\s+/', ' ', trim($row['apellido']));
+				$temp=str_replace('¥','&ntilde;',$temp);
+				$temp=explode(' ',$temp);
+				$ban=true;
+				$nombre1=$nombre2='';
+				foreach($temp AS $token){
+					if($ban){
+						if(preg_match("/^([lL][aeoAEO][sS]|[Dd][aieoAIEO]|[dD]?[eE][lL]|[lL][aA])$/",$token)>0){
+							$nombre1.=$token.' ';
+						}else{
+							$nombre1.=$token;
+							$ban=false;
+						}
+					}else{
+						$nombre2.=$token.' ';
+					}
+				}
+				$line.=rtrim($nombre1).','.rtrim($nombre2).',';
+				$line.=number_format($row['asignacion'],2,'','').",";
+				$line.=$row['ingreso'].',';
+				if ($row['retiro'] != '00000000' )
+				    $line.=$row['retiro'];
+				$line.="\r\n";
+			}
+			//$line.= $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4);
+			//$line.="\r\n";
+		}
+		$name = $this->datasis->traevalor('CODIGOFAOV').substr($fechad,4,2).substr($fechad,0,4).'.txt';
+		force_download($name,$line);
+		exit();
 	}else{
-
-		$mSQL="SELECT a.codigo, a.concepto, a.monto,
-			SUM(a.valor*(a.tipo='A' AND MID(a.concepto,1,1)<>'9')) AS asignacion,
-			SUM(a.valor*(a.concepto IN ('620', '621'))) AS retencion,
-			SUM(a.valor*(a.concepto IN ('920', '921'))) AS aporte,
-			SUM(a.valor*(a.concepto IN ('620', '621')))+SUM(a.valor*(a.concepto IN ('920', '921'))) AS total,
-			CONCAT(RTRIM(b.nombre), ' ',RTRIM(b.apellido)) AS nombre, c.descrip,
-			a.fecha, a.contrato, d.nombre contnom, b.sexo,
-			b.nacional,b.cedula,b.nombre,b.apellido,b.sueldo,
-			DATE_FORMAT(b.ingreso,'%w%m%Y') AS ingreso,
-			DATE_FORMAT(b.retiro ,'%w%m%Y') AS retiro
-		FROM nomina AS a
-		JOIN pers   AS b ON a.codigo=b.codigo
-		JOIN conc   AS c ON a.concepto=c.concepto
-		LEFT JOIN noco d ON a.contrato=d.codigo
-		WHERE a.valor<>0 AND a.fecha >= ${dbfechad} AND a.fecha <= ${dbfechah}
-		GROUP BY EXTRACT( YEAR_MONTH FROM a.fecha ), a.codigo
-		HAVING retencion<>0";
 		//echo $mSQL;
 
 		$pdf = new PDFReporte($mSQL);

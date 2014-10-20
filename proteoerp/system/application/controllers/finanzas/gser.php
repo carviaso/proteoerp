@@ -3899,6 +3899,8 @@ class gser extends Controller {
 		$rivaex  = $this->input->post('_rivaex');
 		if(empty($monto1)){
 			$monto1  = 0;
+		}else{
+			$monto1 = floatval($monto1);
 		}
 		//$cheque1= $do->get('cheque1');
 		$_tipo=common::_traetipo($codb1);
@@ -3935,8 +3937,8 @@ class gser extends Controller {
 		for($i=0;$i<$rete_cana;$i++){
 			$codigorete = $do->get_rel('gereten','codigorete',$i);
 			if(!empty($codigorete)){
-				$importe = $do->get_rel('gereten','base'  ,$i);
-				$monto   = $do->get_rel('gereten','monto' ,$i);
+				$importe = floatval($do->get_rel('gereten','base'  ,$i));
+				$monto   = floatval($do->get_rel('gereten','monto' ,$i));
 				$porcen  = $do->get_rel('gereten','porcen',$i);
 
 				$do->set_rel('gereten','numero'  ,$serie  ,$i);
@@ -3957,6 +3959,7 @@ class gser extends Controller {
 			$do->set('breten',$importe   );
 			$do->set('preten',$porcen    );
 		}
+		$retemonto=round($retemonto,2);
 		//Fin de las retenciones exepto iva
 
 		$ivat=$subt=$total=0;
@@ -3967,8 +3970,8 @@ class gser extends Controller {
 
 		for($i=0;$i<$cana;$i++){
 			$codigo = $do->get_rel('gitser','codigo' ,$i);
-			$auxt   = $do->get_rel('gitser','tasaiva',$i);
-			$precio = $do->get_rel('gitser','precio' ,$i);
+			$auxt   = floatval($do->get_rel('gitser','tasaiva',$i));
+			$precio = floatval($do->get_rel('gitser','precio' ,$i));
 			$iva    = $precio*($auxt/100);
 
 			$importe=round($iva+$precio,2);
@@ -3990,7 +3993,7 @@ class gser extends Controller {
 		$rif      = $this->datasis->traevalor('RIF');
 		$contribu = $this->datasis->traevalor('CONTRIBUYENTE');
 		if($contribu=='ESPECIAL' && $rif!='V' &&  $rivaex!='S'){
-			$prete=$this->datasis->dameval('SELECT reteiva FROM sprv WHERE proveed='.$this->db->escape($proveed));
+			$prete=floatval($this->datasis->dameval('SELECT reteiva FROM sprv WHERE proveed='.$this->db->escape($proveed)));
 			if(empty($prete)) $prete=75;
 			$reteiva=$ivat*$prete/100;
 		}else{
@@ -4014,7 +4017,7 @@ class gser extends Controller {
 		$do->set('totiva'  ,$ivat );
 
 		//Ajuste por problemas de decimas
-		if($atotneto!=$totneto){
+		if(($atotneto-$totneto)!=0){
 			$do->set('totneto' ,$totneto);
 			if($atotneto==$monto1){
 				$do->set('monto1'  ,$totneto);

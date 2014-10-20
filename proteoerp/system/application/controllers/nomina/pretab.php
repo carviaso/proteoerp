@@ -450,7 +450,12 @@ class Pretab extends Controller {
 	function recibo( $id) {
 		$this->load->library('pnomina');
 
-		$row = $this->datasis->damereg("SELECT a.codigo, a.nombre, CONCAT(b.nacional,b.cedula) ci, b.enlace FROM pretab a JOIN pers b ON a.codigo=b.codigo WHERE a.id=$id");
+		$row = $this->datasis->damereg("SELECT a.codigo, a.nombre, CONCAT(b.nacional,b.cedula) ci, b.enlace FROM pretab a JOIN pers b ON a.codigo=b.codigo WHERE a.id=${id}");
+		if(empty($row)){
+			echo 'Recibo no encontrado';
+			return '';
+		}
+
 		$codigo  = $row['codigo'];
 		$nombre  = $row['nombre'];
 		$cedula  = $row['ci'];
@@ -460,7 +465,7 @@ class Pretab extends Controller {
 		$mSALDO  = 0;
 
 
-		$mSQL = "SELECT a.concepto, b.descrip, a.tipo, a.monto, a.valor, a.fecha FROM prenom a JOIN conc b ON a.concepto=b.concepto WHERE MID(a.concepto,1,1)<>'9' AND a.valor<>0 AND a.codigo=".$this->db->escape($codigo)." ORDER BY tipo, codigo ";
+		$mSQL = "SELECT a.concepto, b.descrip, a.tipo, a.monto, a.valor, a.fecha FROM prenom a JOIN conc b ON a.concepto=b.concepto WHERE MID(a.concepto,1,1)<>'9' AND a.valor<>0 AND a.codigo=".$this->db->escape($codigo)." ORDER BY tipo, codigo";
 		$query = $this->db->query($mSQL);
 
 		//$data = $query->row();
