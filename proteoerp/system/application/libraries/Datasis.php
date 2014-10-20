@@ -1816,6 +1816,33 @@ class Datasis {
 		return $mandale;
 	}
 
+	// Trae Nombre del ajax de cedula
+	function traenombre(){
+		$mandale = '
+		function traenombre( rif, campo ){
+			if(!chrif(rif)){
+				alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
+				return true;
+			} else {
+				$.ajax({
+					type: "POST",
+					url: "'.site_url('ajax/traerif').'",
+					dataType: "json",
+					data: {rifci: rif},
+					success: function(data){
+						if(data.error==0){
+							if($("#"+campo).val()==""){
+								$("#"+campo).val(data.nombre);
+							}
+						}
+					}
+				});
+			}
+		};
+		';		
+		return $mandale;
+	}
+
 	// Calcula la Edad
 	function edad( $mDESDE ){
 		$mHASTA = date('Y-m-d');

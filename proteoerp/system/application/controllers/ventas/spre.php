@@ -1314,6 +1314,7 @@ class Spre extends Controller {
 		$edit->observa->maxlength =200;
 
 		$edit->codbanc = new dropdownField('Banco','codbanc');
+		$edit->codbanc->option('','Seleccionar');
 		$edit->codbanc->options('SELECT codbanc, CONCAT(banco,\' \',numcuent) banco FROM banc WHERE activo="S" AND tipocta="C" ORDER BY banco');
 		$edit->codbanc->style='width:140px;';
 		$edit->codbanc->size = 2;

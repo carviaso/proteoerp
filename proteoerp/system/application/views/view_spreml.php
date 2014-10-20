@@ -139,7 +139,7 @@ if($form->_status <> 'show'){ ?>
 
 <input name="btn_submit" value="Guardar" onclick="" class="button" type="submit">
 &nbsp;
-<input name="btn_undo" value="Cancelar" onclick="javascript:window.location='/proteoerp/ventas/spreml/'" class="button" type="button">
+<!--input name="btn_undo" value="Cancelar" onclick="javascript:window.location='/proteoerp/ventas/spreml/'" class="button" type="button"-->
 
 
 <?php echo $form_end; ?>

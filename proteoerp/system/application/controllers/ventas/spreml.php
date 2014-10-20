@@ -495,7 +495,7 @@ class Spreml extends Controller {
 		$edit->script($script,'create');
 		$edit->on_save_redirect=false;
 
-		$edit->back_url = site_url($this->url.'filteredgrid');
+		$edit->back_url = site_url($this->url.'create');
 
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
@@ -589,15 +589,14 @@ class Spreml extends Controller {
 		$edit->envciudad->rule='';
 		$edit->envciudad->size =18;
 		$edit->envciudad->maxlength =40;
-		$edit->envciudad->rule = 'required';
 
 		$edit->envtelef = new inputField('Telefono','envtelef');
 		$edit->envtelef->rule='';
 		$edit->envtelef->size =17;
 		$edit->envtelef->maxlength =30;
-		$edit->envtelef->rule = 'required';
 
 		$edit->codbanc = new dropdownField('Banco','codbanc');
+		$edit->codbanc->option('','Seleccionar');
 		$edit->codbanc->options('SELECT codbanc, CONCAT(banco,\' \',numcuent) banco FROM banc WHERE activo="S" AND tipocta="C" ORDER BY banco');
 		$edit->codbanc->style='width:180px;';
 		$edit->codbanc->size = 2;
@@ -622,7 +621,6 @@ class Spreml extends Controller {
 		$edit->num_ref->maxlength =20;
 
 		$edit->agencia = new inputField('Agencia Zoom','agencia');
-		$edit->agencia->rule='required';
 		$edit->agencia->size =20;
 		$edit->agencia->maxlength =50;
 		
@@ -645,7 +643,38 @@ class Spreml extends Controller {
 				'mensaje'=>'Registro guardado',
 				'pk'     =>$edit->_dataobject->pk
 			);
-			echo json_encode($rt);
+			//echo json_encode($rt);
+
+			$contenido  = '<h1>GRACIA POR SU COMPRA</h1>';
+			$contenido .= '
+			<p>En breves momentos recibira un correo confirmando la recepcion de
+			esta pagos.
+			Una vez confirmado el mismo, se prepara el pedido y se envia segun las
+			instrucciones de este correo y recibira un correo con el numero de guia
+			de la enpresa de transporte
+			</p>
+			<button onclick="volver()">Volver</button>
+			<script>
+			function volver(){
+				window.location.href = "'.site_url('ventas/spreml/dataedit/create').'";
+			}
+			</script>
+			';
+
+
+			$data['content'] = $contenido;
+			$data["head"]    = script("jquery-min.js");
+			$data["head"]   .= $this->rapyd->get_head();
+
+			$data["head"]   .= style("rapyd.css");
+			$data["head"]   .= style("themes/proteo/proteo.css");
+			$data["head"]   .= style("themes/darkness/darkness.css");
+			$data["head"]   .= style("themes/anexos1/anexos1.css");
+
+			$data["target"] = 'dialogo';
+			$data['title']   = heading('Registro de Pago');
+			$this->load->view('view_ventanas', $data);
+
 		}else{
 			//echo $edit->output;
 			$estilo = '
@@ -661,6 +690,7 @@ $(function(){
 	$( document ).tooltip();
 	$("#fechadep").datepicker({dateFormat:"dd/mm/yy"});
 	$(".inputnum").numeric(".");
+
 	$("#rifci").focusout(function(){
 		rif=$(this).val();
 		traenombre( rif, "nombre" )
@@ -669,29 +699,28 @@ $(function(){
 		rif=$(this).val();
 		traenombre( rif, "envnombre" )
 	});
-})
 
-function traenombre( rif, campo ){
-	if(!chrif(rif)){
-		alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
-		return true;
-	} else {
+	$("#mercalib").focusout(function(){
+		numer = $("#numero").val();
+		merca = $("#mercalib").val();
 		$.ajax({
 			type: "POST",
-			url: "'.site_url('ajax/traerif').'",
+			url: "'.site_url('ventas/spreml/buscaspre').'",
 			dataType: "json",
-			data: {rifci: rif},
+			data: {numero: numer, mercalib: merca},
 			success: function(data){
 				if(data.error==0){
-					if($("#"+campo).val()==""){
-						$("#"+campo).val(data.nombre);
-					}
+					$("#totalg").val(data.monto);
+				} else {
+					alert(data.msj);
+					$("#numero").focus();
 				}
 			}
 		});
-	}
-};
+	});
+});
 
+'.$this->datasis->traenombre().'
 
 '.$this->datasis->validarif().'
 </script>
@@ -750,6 +779,30 @@ function traenombre( rif, campo ){
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
 
+	//******************************************************************
+	//  valida orden y nombre ml
+	function buscaspre(){
+		$numero    = $this->input->post('numero');
+		$mercalib  = $this->input->post('mercalib');
+		
+		$t=array(
+			'error' =>1,
+			'msj'   =>'No se encontro la Orden',
+			'monto' =>0
+		);
+
+		if( $numero && $mercalib ){
+			$numero   = $this->db->escape($numero);
+			$mercalib = $this->db->escape($mercalib);
+			$mSQL   = "SELECT totalg FROM spre WHERE numero=LPAD(${numero},8,'0') AND mercalib=${mercalib} ";
+			$monto  = $this->datasis->dameval($mSQL);
+			if ($monto) $t=array('error'=>0, 'msj'=>'Orden valida', 'monto'=>$monto);
+		}
+		echo json_encode($t);
+	}
+
+	//******************************************************************
+	//
 	function instalar(){
 		if (!$this->db->table_exists('spreml')) {
 			$mSQL="
