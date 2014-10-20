@@ -1864,5 +1864,77 @@ class Datasis {
 		return $valor;
 	}
 
+	//******************************************************************
+	// ENVIA CORREOS
+	//
+	function correo( $to, $subject, $body, $tipo='txt', $adjuntos=array(), $embededimage=array() ){
+		$CI =& get_instance();
+		if(!@include_once 'Mail.php'){
+			$error='Problemas al cargar la clase Mail, probablemente sea necesario instalarla desde PEAR, comuniquese con soporte t&eacute;cnico';
+			return false;
+		}
+		if(!@include_once 'Mail/mime.php'){
+			$error='Problemas al cargar la clase Mail_mime, probablemente sea necesario instalarla desde PEAR, comuniquese con soporte t&eacute;cnico';
+			return false;
+		}
+		$CI->config->load('notifica');
+
+		$message = new Mail_mime();
+
+		$from = $CI->config->item('mail_smtp_from');
+		$host = $CI->config->item('mail_smtp_host');
+		$port = $CI->config->item('mail_smtp_port');
+		$user = $CI->config->item('mail_smtp_usr');
+		$pass = $CI->config->item('mail_smtp_pwd');
+
+		$extraheaders =  array (
+			'From'    => $from,
+			'To'      => $to,
+			'Subject' => $subject
+		);
+
+		if(count($embededimage)>0){
+			foreach($embededimage AS $adj){
+				$message->addHTMLImage($adj[0],$adj[1],$adj[2],$adj[3],$adj[4]);
+			}
+		}
+
+		if(is_array($adjuntos)){
+			foreach($adjuntos AS $adj){
+				$message->addAttachment($adj);
+			}
+		}
+
+		$parr=array (
+			'host'     => $host,
+			'port'     => $port,
+			'auth'     => true,
+			'username' => $user,
+			'password' => $pass
+		);
+
+		if($tipo=='html'){
+			$hbody = '<html><head><title></title>';
+			$hbody.= '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />';
+			$hbody.= '</head>';
+			$hbody.= '<body>';
+			$hbody.= $body;
+			$hbody.= '</body></html>';
+			$message->setHTMLBody($hbody);
+		}else{
+			$message->setTXTBody($body);
+		}
+		$sbody   = $message->get();
+		$headers = $message->headers($extraheaders);
+
+		$smtp = Mail::factory('smtp',$parr);
+		$mail = $smtp->send($to, $headers, $sbody);
+		if (PEAR::isError($mail)) {
+			$CI->error=$mail->getMessage();
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 }

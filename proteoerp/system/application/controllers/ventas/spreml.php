@@ -485,7 +485,7 @@ class Spreml extends Controller {
 	//******************************************************************
 	// Edicion 
 
-	function dataedit(){
+	function decliente(){
 		$this->rapyd->load('dataedit');
 		$script= '';
 
@@ -497,12 +497,12 @@ class Spreml extends Controller {
 
 		$edit->back_url = site_url($this->url.'create');
 
-		$edit->post_process('insert','_post_insert');
-		$edit->post_process('update','_post_update');
-		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->post_process('insert','_clpost_insert');
+		$edit->post_process('update','_clpost_update');
+		$edit->post_process('delete','_clpost_delete');
+		$edit->pre_process('insert', '_clpre_insert' );
+		$edit->pre_process('update', '_clpre_update' );
+		$edit->pre_process('delete', '_clpre_delete' );
 
 		$edit->numero = new inputField('Nro. Orden','numero');
 		$edit->numero->rule='';
@@ -554,7 +554,7 @@ class Spreml extends Controller {
 
 		$edit->email = new inputField('Email','email');
 		$edit->email->rule='';
-		$edit->email->size =17;
+		$edit->email->size =20;
 		$edit->email->maxlength =100;
 		$edit->email->rule = 'required';
 
@@ -656,7 +656,7 @@ class Spreml extends Controller {
 			<button onclick="volver()">Volver</button>
 			<script>
 			function volver(){
-				window.location.href = "'.site_url('ventas/spreml/dataedit/create').'";
+				window.location.href = "'.site_url('ventas/spreml/decliente/create').'";
 			}
 			</script>
 			';
@@ -749,32 +749,44 @@ $(function(){
 		}
 	}
 
-	function _pre_insert($do){
+	function _pre_clinsert($do){
 		$do->error_message_ar['pre_ins']='';
 		return true;
 	}
 
-	function _pre_update($do){
+	function _pre_clupdate($do){
 		$do->error_message_ar['pre_upd']='';
 		return true;
 	}
 
-	function _pre_delete($do){
+	function _pre_cldelete($do){
 		$do->error_message_ar['pre_del']='';
 		return false;
 	}
 
-	function _post_insert($do){
+	function _post_clinsert($do){
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Creo $this->tits $primary ");
+		$banco = $this->datasis->damereg("SELECT * FROM banc WHERE codbanc=".$this->db->escape($do->get('codbanc')));
+
+		$notifica  = "Gracias por su compra. Hemos recibido satisfactoriamente los datos de su orden.\n";
+		$notifica  = "Una vez hecho el envio nos comunicaremos con usted al correo electronico para indicarle el numero de guia correspondiente. Por favor tome en cuenta que los envios demoran entre 24 y 48 horas habiles para su procesamiento.\n\n";
+
+		$notifica .= "Institucion bancaria: ".$banco['banco'].' '.$banco['numcuent']."\n";
+		$notifica .= "Tipo de Operacion: ".$do->get('tipo_op')."\n";
+		$notifica .= "Fecha de pago: ".$do->get('fechadep')."\n";
+		$notifica .= "Numero de Referencia: ".$do->get('num_ref')."\n";
+		$notifica .= "Monto: ".$do->get('totalg')."\n\n";
+		$notifica .= "Gracias por preferirnos.\n";
+		$this->datasis->correo( $do->get('email'), 'Registro de Pago, Pedido '.$do->get('numero'), $notifica );
 	}
 
-	function _post_update($do){
+	function _post_clupdate($do){
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Modifico $this->tits $primary ");
 	}
 
-	function _post_delete($do){
+	function _post_cldelete($do){
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
