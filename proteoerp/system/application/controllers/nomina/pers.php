@@ -47,16 +47,13 @@ class Pers extends Controller {
 				<tr>
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gprofe'>Profesiones</a></div></td>
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gcargo'>Cargos</a></div></td>
-				</tr>
-				<tr>
+				</tr><tr>
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gdivi' >Divisiones</a></div></td>
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='gdepa'>Deptos.</a></div></td>
-				</tr>
-				<tr>
+				</tr><tr>
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='reposo'  >Reposo</a></div></td>
 					<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#' id='vacacion'>Vacaciones</a></div></td>
 				</tr>
-
 			</table>
 			</div>
 		</td></tr>\n

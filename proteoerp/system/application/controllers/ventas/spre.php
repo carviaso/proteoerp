@@ -173,8 +173,8 @@ class Spre extends Controller {
 		});';
 
 		$bodyscript .= '
-		jQuery("#bffact").click(function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+		$("#bffact").click(function(){
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				$.post("'.site_url('ventas/sfac/creafromspre/N').'/"+ret.numero+"/create",

@@ -7,8 +7,8 @@
 */
 class Spreml extends Controller {
 	var $mModulo = 'SPREML';
-	var $titp    = 'Modulo SPREML';
-	var $tits    = 'Modulo SPREML';
+	var $titp    = 'ORDEN MERCADO LIBRE';
+	var $tits    = 'ORDEN MERCADO LIBRE';
 	var $url     = 'ventas/spreml/';
 
 	function Spreml(){
@@ -20,7 +20,8 @@ class Spreml extends Controller {
 	}
 
 	function index(){
-		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
+		$this->instalar();
+		$this->datasis->creaintramenu(array('modulo'=>'160','titulo'=>'Pagos Mercado Libre','mensaje'=>'PAGOS MERCADO LIBRE','panel'=>'TRANSACCIONES','ejecutar'=>'ventas/spreml','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		//$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -28,7 +29,7 @@ class Spreml extends Controller {
 	//******************************************************************
 	// Layout en la Ventana
 	//
-	function registro(){
+	/*function registro(){
 
 		$grid = $this->defgrid();
 		$param['grids'][] = $grid->deploy();
@@ -37,8 +38,13 @@ class Spreml extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"funcion",   "img"=>"images/engrana.png",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"fconfirma", "img"=>"images/engrana.png",  "alt" => "Confirmar Pago", "label"=>"Confirmar Pago"));
+		$grid->wbotonadd(array("id"=>"factura",   "img"=>"images/engrana.png",  "alt" => "Facturar",       "label"=>"Facturar"));
+		$grid->wbotonadd(array("id"=>"fenviar",   "img"=>"images/engrana.png",  "alt" => "Enviar",         "label"=>"Enviar"));
+
 		$WestPanel = $grid->deploywestp();
+		$WestPanel .= 'Hola';
+
 
 		$adic = array(
 			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
@@ -58,7 +64,7 @@ class Spreml extends Controller {
 		$param['encabeza']    = $this->titp;
 		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
 		$this->load->view('jqgrid/crud2',$param);
-	}
+	}*/
 
 
 	//******************************************************************
@@ -74,7 +80,19 @@ class Spreml extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"funcion",   "img"=>"images/engrana.png",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array("id"=>"fconfirma", "img"=>"images/engrana.png",  "alt" => "Confirmar Pago", "label"=>"Confirmar Pago"));
+		$grid->wbotonadd(array("id"=>"factura",   "img"=>"images/engrana.png",  "alt" => "Facturar",       "label"=>"Facturar"));
+		$grid->wbotonadd(array("id"=>"fenvia",    "img"=>"images/engrana.png",  "alt" => "Enviar",         "label"=>"Enviar"));
+
+		$Adic = '
+		<table>
+			<tr><td>Status</td><td>Pendiente</td></tr>
+			<tr><td>Status</td><td>Confirmado</td></tr>
+			<tr><td>&nbsp;</td><td>Facturado</td></tr>
+			<tr><td>&nbsp;</td><td>Enviado</td></tr>
+			<tr><td>&nbsp;</td><td>Nulo</td></tr>
+		</tr></table>';
+		//$grid->setWpAdicional($Adic);
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -112,15 +130,139 @@ class Spreml extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '300', '400' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '500', '700' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '300', '400' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
 		$bodyscript .= '});';
 
-		$bodyscript .= '</script>';
+		$bodyscript .= '
+		$("#fconfirma").click(function(){
+			var meco = "";
+			var id  = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
+				if(ret.status != "P"){ 
+					$.prompt("<h1>Por favor Seleccione un Pago tipo Pendiente</h1>");
+					return; 
+				};
+				var mgene = {
+				state0: {
+					html:"<h1>Confirmar Pago</h1><br/><center>Fecha: <b>"+ret.fechadep+"</b><br>Banco: <b>"+ret.codbanc+"</b><br>Numero: "+ret.tipo_op+ret.num_ref+" </center><br/>",
+					buttons: { Cancelar: false, Confirmar: true },
+					focus: 1,
+					submit:function(e,v,m,f){
+						if(v){
+							e.preventDefault();
+							$.ajax({
+								url: \''.site_url('ventas/spreml/confirma').'/\'+id,
+								global: false,
+								type: "POST",
+								data: ({}),
+								dataType: "text",
+								async: false,
+								success: function(sino) {
+									meco = " sino="+sino;
+									$.prompt.goToState("state1");
+								},
+								error: function(h,t,e) { alert("Error.. ",e) }
+							});
+							return false;
+						}}
+				},
+				state1: {
+					html:"<h1>Pago Confirmado! "+meco+"</h1>",
+					buttons: { Salir: 0 },
+					focus: 1,
+					submit:function(e,v,m,f){
+						e.preventDefault();
+						$.prompt.close();
+					}
+				}
+				};
+				$.prompt(mgene);
+			} else {
+				$.prompt("<h1>Por favor Seleccione una Orden</h1>");
+			}
 
+		});';
+
+		$bodyscript .= '
+		$("#factura").click(function(){
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				$.post("'.site_url('ventas/sfac/creafromspreml/N').'/"+ret.numero+"/create",
+				function(data){
+					$("#ffact").html(data);
+					$("#ffact").dialog( "open" );
+				});
+			} else { $.prompt("<h1>Por favor Seleccione una Orden</h1>");}
+
+		});';
+
+		$bodyscript .= '
+		$("#facturar").click(function(){
+			var meco = "";
+			var id  = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
+				if(ret.status != "P"){ return; };
+				var mgene = {
+				state0: {
+					html:"<h1>Confirmar Pago</h1><br/><center>Fecha: <b>"+ret.fechadep+"</b><br>Banco: <b>"+ret.codbanc+"</b><br>Numero: "+ret.tipo_op+ret.num_ref+" </center><br/>",
+					buttons: { Cancelar: false, Confirmar: true },
+					focus: 1,
+					submit:function(e,v,m,f){
+						if(v){
+							e.preventDefault();
+							$.ajax({
+								url: \''.site_url('ventas/spreml/confirma').'/\'+id,
+								global: false,
+								type: "POST",
+								data: ({}),
+								dataType: "text",
+								async: false,
+								success: function(sino) {
+									meco = " sino="+sino;
+									$.prompt.goToState("state1");
+								},
+								error: function(h,t,e) { alert("Error.. ",e) }
+							});
+							return false;
+						}
+					}
+				},
+				state1: {
+					html:"Pago Confirmado! "+meco,
+					buttons: { Salir: 0 },
+					focus: 1,
+					submit:function(e,v,m,f){
+						e.preventDefault();
+						$.prompt.close();
+					}
+				}
+				};
+				$.prompt(mgene);
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+
+		});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
+	}
+
+	//******************************************************************
+	// Confirmar Pago
+	function confirma( $id = 0 ){
+		if ( $id == 0 )
+			$id = $this->uri->segment($this->uri->total_segments());
+		$id = intval($id);
+		$msj = 'Pago Confirmado';
+		$this->db->where('id',$id);
+		$this->db->update('spreml',array('status'=>'C'));
+		echo $msj;
 	}
 
 	//******************************************************************
@@ -132,6 +274,17 @@ class Spreml extends Controller {
 
 		$grid  = new $this->jqdatagrid;
 
+		$grid->addField('status');
+		$grid->label('Status');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
+		));
+
 		$grid->addField('numero');
 		$grid->label('Numero');
 		$grid->params(array(
@@ -142,7 +295,6 @@ class Spreml extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
-
 
 		$grid->addField('fecha');
 		$grid->label('Fecha');
@@ -156,7 +308,6 @@ class Spreml extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
 		$grid->addField('rifci');
 		$grid->label('Rifci');
 		$grid->params(array(
@@ -167,7 +318,6 @@ class Spreml extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:13, maxlength: 13 }',
 		));
-
 
 		$grid->addField('envrifci');
 		$grid->label('Envrifci');
@@ -180,7 +330,6 @@ class Spreml extends Controller {
 			'editoptions'   => '{ size:13, maxlength: 13 }',
 		));
 
-
 		$grid->addField('nombre');
 		$grid->label('Nombre');
 		$grid->params(array(
@@ -192,7 +341,6 @@ class Spreml extends Controller {
 			'editoptions'   => '{ size:40, maxlength: 40 }',
 		));
 
-
 		$grid->addField('direccion');
 		$grid->label('Direccion');
 		$grid->params(array(
@@ -202,7 +350,6 @@ class Spreml extends Controller {
 			'edittype'      => "'textarea'",
 			'editoptions'   => "'{rows:2, cols:60}'",
 		));
-
 
 		$grid->addField('estado');
 		$grid->label('Estado');
@@ -218,7 +365,6 @@ class Spreml extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
 		));
 
-
 		$grid->addField('ciudad');
 		$grid->label('Ciudad');
 		$grid->params(array(
@@ -229,7 +375,6 @@ class Spreml extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:40, maxlength: 40 }',
 		));
-
 
 		$grid->addField('email');
 		$grid->label('Email');
@@ -242,7 +387,6 @@ class Spreml extends Controller {
 			'editoptions'   => '{ size:100, maxlength: 100 }',
 		));
 
-
 		$grid->addField('telefono');
 		$grid->label('Telefono');
 		$grid->params(array(
@@ -253,7 +397,6 @@ class Spreml extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 30 }',
 		));
-
 
 		$grid->addField('mercalib');
 		$grid->label('Mercalib');
@@ -266,7 +409,6 @@ class Spreml extends Controller {
 			'editoptions'   => '{ size:50, maxlength: 50 }',
 		));
 
-
 		$grid->addField('envnombre');
 		$grid->label('Envnombre');
 		$grid->params(array(
@@ -278,7 +420,6 @@ class Spreml extends Controller {
 			'editoptions'   => '{ size:40, maxlength: 40 }',
 		));
 
-
 		$grid->addField('envdirec');
 		$grid->label('Envdirec');
 		$grid->params(array(
@@ -288,7 +429,6 @@ class Spreml extends Controller {
 			'edittype'      => "'textarea'",
 			'editoptions'   => "'{rows:2, cols:60}'",
 		));
-
 
 		$grid->addField('codbanc');
 		$grid->label('Codbanc');
@@ -301,7 +441,6 @@ class Spreml extends Controller {
 			'editoptions'   => '{ size:2, maxlength: 2 }',
 		));
 
-
 		$grid->addField('tipo_op');
 		$grid->label('Tipo_op');
 		$grid->params(array(
@@ -312,7 +451,6 @@ class Spreml extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:2, maxlength: 2 }',
 		));
-
 
 		$grid->addField('fechadep');
 		$grid->label('Fechadep');
@@ -326,7 +464,6 @@ class Spreml extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
 		$grid->addField('num_ref');
 		$grid->label('Num_ref');
 		$grid->params(array(
@@ -337,7 +474,6 @@ class Spreml extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
-
 
 		$grid->addField('totalg');
 		$grid->label('Totalg');
@@ -353,7 +489,6 @@ class Spreml extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('observa');
 		$grid->label('Observa');
 		$grid->params(array(
@@ -364,7 +499,6 @@ class Spreml extends Controller {
 			'editoptions'   => "'{rows:2, cols:60}'",
 		));
 
-
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
@@ -374,7 +508,6 @@ class Spreml extends Controller {
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
-
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -485,6 +618,220 @@ class Spreml extends Controller {
 	//******************************************************************
 	// Edicion 
 
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$("#fechadep").datepicker({dateFormat:"dd/mm/yy"});
+			$("#fechaenv").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+		});
+		';
+
+		$edit = new DataEdit('', 'spreml');
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		$edit->back_url = site_url($this->url.'filteredgrid');
+
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process('insert', '_pre_insert' );
+		$edit->pre_process('update', '_pre_update' );
+		$edit->pre_process('delete', '_pre_delete' );
+
+		$edit->numero = new inputField('Numero','numero');
+		$edit->numero->rule='';
+		$edit->numero->size =10;
+		$edit->numero->maxlength =8;
+
+		$edit->fecha = new dateonlyField('Fecha','fecha');
+		$edit->fecha->rule='chfecha';
+		$edit->fecha->calendar=false;
+		$edit->fecha->size =10;
+		$edit->fecha->maxlength =8;
+
+		$edit->rifci = new inputField('Cedula/RIF','rifci');
+		$edit->rifci->rule='';
+		$edit->rifci->size =12;
+		$edit->rifci->maxlength =13;
+
+		$edit->envrifci = new inputField('Cedula/RIF','envrifci');
+		$edit->envrifci->rule='';
+		$edit->envrifci->size =15;
+		$edit->envrifci->maxlength =13;
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->rule='';
+		$edit->nombre->size =25;
+		$edit->nombre->maxlength =40;
+
+		$edit->direccion = new textareaField('Direccion','direccion');
+		$edit->direccion->rule='';
+		$edit->direccion->cols = 50;
+		$edit->direccion->rows = 2;
+
+		$edit->estado = new dropdownField('Estado','estado');
+		$edit->estado->style='width:150px;';
+		$edit->estado->option('','Seleccione un Estado');
+		$edit->estado->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
+		$edit->estado->insertValue=$this->datasis->dameval("SELECT codigo FROM estado WHERE entidad=".$this->db->escape(trim($this->datasis->traevalor('ESTADO'))));
+
+		$edit->ciudad = new inputField('Ciudad','ciudad');
+		$edit->ciudad->rule='';
+		$edit->ciudad->size =20;
+		$edit->ciudad->maxlength =40;
+
+		$edit->email = new inputField('Email','email');
+		$edit->email->rule='';
+		$edit->email->size =32;
+		$edit->email->maxlength =100;
+
+		$edit->telefono = new inputField('Telefono','telefono');
+		$edit->telefono->rule='';
+		$edit->telefono->size =18;
+		$edit->telefono->maxlength =30;
+
+		$edit->mercalib = new inputField('Alias ML','mercalib');
+		$edit->mercalib->rule='';
+		$edit->mercalib->size =20;
+		$edit->mercalib->maxlength =50;
+
+		$edit->envnombre = new inputField('Nombre','envnombre');
+		$edit->envnombre->rule='';
+		$edit->envnombre->size =25;
+		$edit->envnombre->maxlength =40;
+
+		$edit->envdirec = new textareaField('Direcccion','envdirec');
+		$edit->envdirec->rule='';
+		$edit->envdirec->cols = 50;
+		$edit->envdirec->rows = 2;
+
+		$edit->envestado = new dropdownField('Estado','envestado');
+		$edit->envestado->style='width:160px;';
+		$edit->envestado->option('','Seleccione un Estado');
+		$edit->envestado->options('SELECT codigo, entidad FROM estado ORDER BY entidad');
+		$edit->envestado->insertValue=$this->datasis->dameval("SELECT codigo FROM estado WHERE entidad=".$this->db->escape(trim($this->datasis->traevalor('ESTADO'))));
+
+		$edit->envciudad = new inputField('Ciudad','envciudad');
+		$edit->envciudad->rule='';
+		$edit->envciudad->size =20;
+		$edit->envciudad->maxlength =40;
+
+		$edit->envtelef = new inputField('Telefono','envtelef');
+		$edit->envtelef->rule='';
+		$edit->envtelef->size =20;
+		$edit->envtelef->maxlength =30;
+
+		$edit->codbanc = new dropdownField('Banco','codbanc');
+		$edit->codbanc->option('','Seleccionar');
+		$edit->codbanc->options('SELECT codbanc, CONCAT(banco,\' \',numcuent) banco FROM banc WHERE activo="S" AND tipocta="C" ORDER BY banco');
+		$edit->codbanc->style='width:170px;';
+		$edit->codbanc->size = 2;
+		$edit->codbanc->rule = 'required';
+
+		$edit->tipo_op = new dropdownField('Tipo','tipo_op');
+		$edit->tipo_op->option('','Seleccionar');
+		$edit->tipo_op->options(array('NC'=> 'Transferencia','DE'=>'Deposito'));
+		$edit->tipo_op->style='width:87px';
+		$edit->tipo_op->rule = 'required';
+
+		$edit->fechadep = new dateonlyField('Fecha de pago','fechadep');
+		$edit->fechadep->rule='chfecha';
+		$edit->fechadep->calendar=false;
+		$edit->fechadep->size =10;
+		$edit->fechadep->maxlength =8;
+
+		$edit->num_ref = new inputField('Referencia','num_ref');
+		$edit->num_ref->rule='';
+		$edit->num_ref->size =22;
+		$edit->num_ref->maxlength =20;
+
+		$edit->totalg = new inputField('Monto','totalg');
+		$edit->totalg->rule='numeric';
+		$edit->totalg->css_class='inputnum';
+		$edit->totalg->size =12;
+		$edit->totalg->maxlength =12;
+
+		$edit->agencia = new inputField('Agencia','agencia');
+		$edit->agencia->rule='';
+		$edit->agencia->size =32;
+		$edit->agencia->maxlength =50;
+
+		$edit->observa = new textareaField('Observacion','observa');
+		$edit->observa->rule='';
+		$edit->observa->cols = 50;
+		$edit->observa->rows = 2;
+
+		$edit->status = new dropdownField('Status','status');
+		$edit->status->options(array(''=>'--','P'=>'Pendiente','C'=>'Confirmado','F'=>'Facturado','E'=>'Enviado','N'=>'Nulo'));
+		$edit->status->style='width:80px';
+
+		$edit->guia = new inputField('Nro Guia','guia');
+		$edit->guia->rule='';
+		$edit->guia->size =15;
+		$edit->guia->maxlength =30;
+
+		$edit->fechaenv = new dateonlyField('Fecha de envio','fechaenv');
+		$edit->fechaenv->rule='chfecha';
+		$edit->fechaenv->calendar=false;
+		$edit->fechaenv->size =10;
+		$edit->fechaenv->maxlength =8;
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			//echo $edit->output;
+			$conten['form']  =&  $edit;
+			$data['content'] = $this->load->view('view_spreml', $conten);
+		}
+	}
+
+	function _pre_insert($do){
+		$do->error_message_ar['pre_ins']='';
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='';
+		return true;
+	}
+
+	function _pre_delete($do){
+		$do->error_message_ar['pre_del']='';
+		return false;
+	}
+
+	function _post_insert($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo $this->tits $primary ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico $this->tits $primary ");
+	}
+
+	function _post_delete($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Elimino $this->tits $primary ");
+	}
+
+
+	//******************************************************************
+	// Edicion 
+
 	function decliente(){
 		$this->rapyd->load('dataedit');
 		$script= '';
@@ -523,6 +870,7 @@ class Spreml extends Controller {
 		$edit->fecha->calendar=false;
 		$edit->fecha->size =10;
 		$edit->fecha->maxlength =8;
+		$edit->fechadep->insertValue = date('Y-m-d');
 
 		$edit->rifci = new inputField('Cedula/RIF','rifci');
 		$edit->rifci->size =10;
@@ -726,9 +1074,8 @@ $(function(){
 </script>
 ';
 
-	
 			$conten["form"]  =&  $edit;
-			$data['content'] = $this->load->view('view_spreml', $conten,true);
+			$data['content'] = $this->load->view('view_sprecl', $conten,true);
 			
 			$data["head"]    = script("jquery-min.js");
 			$data["head"]   .= script("jquery-migrate-min.js");
@@ -736,35 +1083,58 @@ $(function(){
 			$data["head"]   .= script("plugins/jquery.numeric.pack.js");
 			$data["head"]   .= script("plugins/jquery.floatnumber.js");
 			$data["head"]   .= $this->rapyd->get_head();
-
+			
 			$data["head"]   .= style("rapyd.css");
 			$data["head"]   .= style("themes/proteo/proteo.css");
 			$data["head"]   .= style("themes/darkness/darkness.css");
 			$data["head"]   .= style("themes/anexos1/anexos1.css");
 			$data["head"]   .= $estilo;
-
+			
 			$data["target"] = 'dialogo';
 			$data['title']   = heading('Registro de Pago');
 			$this->load->view('view_ventanas', $data);
 		}
 	}
 
-	function _pre_clinsert($do){
+	function _clpre_insert($do){
+		// Valida si ya existe
+		$devo = true;
 		$do->error_message_ar['pre_ins']='';
-		return true;
+		$numero   = str_pad(trim($do->get('numero')),8,'0', STR_PAD_LEFT);
+		$mercalib = trim($do->get('mercalib'));
+		$do->set('numero', $numero);
+
+		$numero   = $this->db->escape($numero);
+		$mercalib = $this->db->escape($mercalib);
+		$mSQL     = "SELECT count(*) FROM spre WHERE numero=LPAD(${numero},8,'0') AND mercalib=${mercalib} ";
+		$cant     = $this->datasis->dameval($mSQL);
+		if ($cant == 0) {
+			$do->error_message_ar['pre_ins']='Orden invalida';
+			$devo = false;
+		}
+
+		// BUSCA EN sprml
+		$mSQL   = "SELECT count(*) FROM spreml WHERE numero=LPAD(${numero},8,'0') AND mercalib=${mercalib} ";
+		$cant  = $this->datasis->dameval($mSQL);
+		if ( $cant > 0 ){
+			$do->error_message_ar['pre_ins']='Ya existe un pago para esa orden';
+			$devo = false;
+		}
+
+		return $devo;
 	}
 
-	function _pre_clupdate($do){
+	function _clpre_update($do){
 		$do->error_message_ar['pre_upd']='';
 		return true;
 	}
 
-	function _pre_cldelete($do){
+	function _clpre_delete($do){
 		$do->error_message_ar['pre_del']='';
 		return false;
 	}
 
-	function _post_clinsert($do){
+	function _clpost_insert($do){
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Creo $this->tits $primary ");
 		$banco = $this->datasis->damereg("SELECT * FROM banc WHERE codbanc=".$this->db->escape($do->get('codbanc')));
@@ -781,12 +1151,12 @@ $(function(){
 		$this->datasis->correo( $do->get('email'), 'Registro de Pago, Pedido '.$do->get('numero'), $notifica );
 	}
 
-	function _post_clupdate($do){
+	function _clpost_update($do){
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Modifico $this->tits $primary ");
 	}
 
-	function _post_cldelete($do){
+	function _clpost_delete($do){
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
@@ -797,18 +1167,21 @@ $(function(){
 		$numero    = $this->input->post('numero');
 		$mercalib  = $this->input->post('mercalib');
 		
-		$t=array(
-			'error' =>1,
-			'msj'   =>'No se encontro la Orden',
-			'monto' =>0
-		);
-
+		$t=array( 'error'=>1, 'msj'=>'No se encontro la Orden', 'monto'=>0 );
 		if( $numero && $mercalib ){
 			$numero   = $this->db->escape($numero);
 			$mercalib = $this->db->escape($mercalib);
 			$mSQL   = "SELECT totalg FROM spre WHERE numero=LPAD(${numero},8,'0') AND mercalib=${mercalib} ";
 			$monto  = $this->datasis->dameval($mSQL);
-			if ($monto) $t=array('error'=>0, 'msj'=>'Orden valida', 'monto'=>$monto);
+			if ($monto) 
+				$t=array('error'=>0, 'msj'=>'Orden valida', 'monto'=>$monto);
+			// BUSCA EN sprml
+			$mSQL   = "SELECT count(*) FROM spreml WHERE numero=LPAD(${numero},8,'0') AND mercalib=${mercalib} ";
+			$cant  = $this->datasis->dameval($mSQL);
+			if ( $cant > 0 )
+				$t=array('error'=>1,'msj'=>'Ya se realizo el registro, comuniquese a ventas@tecbloom.com','monto'=>0);
+		} else {
+			$t=array('error'=>1,'msj'=>'Numero o Alias incorrecto','monto'=>0);
 		}
 		echo json_encode($t);
 	}
@@ -851,9 +1224,10 @@ $(function(){
 			COMMENT='Presupuestos para Mercado Libre'";
 			$this->db->query($mSQL);
 		}
-		//$campos=$this->db->list_fields('spreml');
-		//if(!in_array('<#campo#>',$campos)){ }
+		$campos=$this->db->list_fields('spreml');
+		if(!in_array('status',   $campos)) $this->db->query('ALTER TABLE spreml ADD COLUMN status   CHAR(1)     NULL DEFAULT NULL AFTER observa');
+		if(!in_array('guia',     $campos)) $this->db->query('ALTER TABLE spreml ADD COLUMN guia     VARCHAR(30) NULL DEFAULT NULL AFTER status');
+		if(!in_array('fechaenv', $campos)) $this->db->query('ALTER TABLE spreml ADD COLUMN fechaenv DATE        NULL DEFAULT NULL AFTER guia');
 	}
 }
-
 ?>

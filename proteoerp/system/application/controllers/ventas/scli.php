@@ -114,9 +114,9 @@ class Scli extends validaciones {
 		return $postready;
 	}
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	// Funciones de los Botones
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
 		$ngrid = '#newapi'.$grid0;
@@ -1290,10 +1290,9 @@ class Scli extends validaciones {
 		echo $salida;
 	}
 
-	// **************************************
+	//******************************************************************
 	//     DATAEDIT
 	//
-	// **************************************
 	function dataedit(){
 		$this->pi18n->cargar('scli','dataedit');
 		$this->rapyd->load('dataedit');
@@ -2438,7 +2437,8 @@ function chrif(rif){
 
 	}
 
-	//Permite crear un clientes desde otras interfaces
+	//******************************************************************
+	// Permite crear un clientes desde otras interfaces
 	function creascli(){
 		$rifci=$this->input->post('rifci');
 		if(preg_match('/[VEJG][0-9]{9}$/',$rifci)>0){
@@ -2448,7 +2448,7 @@ function chrif(rif){
 		}
 		$_POST['tipo']='1';
 		$this->genesal=false;
-		$rt=$this->dataedit();
+		$rt = $this->dataedit();
 		echo $rt;
 	}
 

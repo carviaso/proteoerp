@@ -4569,7 +4569,8 @@ class Sfac extends Controller {
 		logusu($do->table,"Imprimio ${tipo_doc}${numero} factura $nfiscal");
 	}
 
-	//Crea una factura desde un pedido
+	
+	// Crea una factura desde un pedido
 	function creafrompfac($manual,$numero,$status=null){
 		$this->_url= $this->url.'dataedit/insert';
 
@@ -4653,7 +4654,8 @@ class Sfac extends Controller {
 		}
 	}
 
-	//Crea una factura desde un presupuesto
+	//******************************************************************
+	// Crea una factura desde un presupuesto
 	function creafromspre($manual,$numero,$status=null){
 		$this->_url= $this->url.'dataedit/insert';
 
@@ -4729,7 +4731,108 @@ class Sfac extends Controller {
 		}
 	}
 
-	//Crea una factura desde una nota de entrega
+	//******************************************************************
+	// Crea una factura desde un presupuesto
+	function creafromspreml( $numero, $status=null){
+		$this->_url= $this->url.'dataedit/insert';
+
+		// Crea Cliente si no existe
+		//$this->db->select('*');
+		$this->db->from('spreml AS a');
+		//$this->db->join('scli AS b','a.cod_cli=b.cliente','left');
+		$this->db->where('a.numero',$numero);
+		$query = $this->db->get();
+		if ($query->num_rows() <> 1 ){
+			echo 'Orden no existe';
+			return false;
+		}
+			
+		$row   = $query->row();
+		$rifci = $row->rifci;
+		$mSQL = 'SELECT count(*) FROM scli WHERE rifci='.$this->db->escape($rifci);
+		$hay = $this->datasis->dameval($mSQL);
+		if ($hay == 0 ){
+			//CREA EL CLIENTE
+			
+			
+		} else {
+			$mSQL    = 'SELECT count(*) FROM scli WHERE rifci='.$this->db->escape($rifci);
+			$cod_cli = $this->datasis->dameval($mSQL);
+		}
+/*
+		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
+		,'a.totals','a.iva','a.totalg');
+		$this->db->select($sel);
+		$this->db->from('spre AS a');
+		$this->db->join('scli AS b','a.cod_cli=b.cliente','left');
+		$this->db->where('a.numero',$numero);
+		$query = $this->db->get();
+
+		if ($query->num_rows() > 0 && $status=='create'){
+			$row = $query->row();
+
+			$_POST=array(
+				'btn_submit' => 'Guardar',
+				'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
+				'cajero'     => $this->secu->getcajero(),
+				'vd'         => $this->secu->getvendedor(),
+				'almacen'    => $this->secu->getalmacen(),
+				'tipo_doc'   => 'F',
+				'factura'    => '',
+				'cod_cli'    => $row->cod_cli,
+				'sclitipo'   => $row->tipo,
+				'nombre'     => rtrim($row->nombre),
+				'rifci'      => $row->rifci,
+				'direc'      => rtrim($row->direc),
+				'totals'     => $row->totals,
+				'iva'        => $row->iva,
+				'totalg'     => $row->totalg,
+				'pfac'       => $numero,
+			);
+
+			$itsel=array('a.codigo','b.descrip AS desca','a.cana','a.preca','a.importe AS tota','b.iva',
+			'b.precio1','b.precio2','b.precio3','b.precio4','b.tipo','b.peso');
+			$this->db->select($itsel);
+			$this->db->from('itspre AS a');
+			$this->db->join('sinv AS b','b.codigo=a.codigo');
+			$this->db->where('a.numero',$numero);
+			$this->db->where('a.cana >','0');
+			$qquery = $this->db->get();
+			$i=0;
+			foreach ($qquery->result() as $itrow){
+				$_POST["codigoa_${i}"]  = rtrim($itrow->codigo);
+				$_POST["desca_${i}"]    = rtrim($itrow->desca);
+				$_POST["cana_${i}"]     = $itrow->cana;
+				$_POST["preca_${i}"]    = $itrow->preca;
+				$_POST["tota_${i}"]     = $itrow->tota;
+				$_POST["precio1_${i}"]  = $itrow->precio1;
+				$_POST["precio2_${i}"]  = $itrow->precio2;
+				$_POST["precio3_${i}"]  = $itrow->precio3;
+				$_POST["precio4_${i}"]  = $itrow->precio4;
+				$_POST["itiva_${i}"]    = $itrow->iva;
+				$_POST["sinvpeso_${i}"] = $itrow->peso;
+				$_POST["sinvtipo_${i}"] = $itrow->tipo;
+				$_POST["detalle_${i}"]  = '';
+				$_POST["combo_$i"]      = '';
+				$i++;
+			}
+			//sfpa
+			$i=0;
+			$_POST["tipo_${i}"]      = '';
+			//$_POST["sfpafecha_${i}"] = '';
+			$_POST["num_ref_${i}"]   = '';
+			$_POST["banco_${i}"]     = '';
+			$_POST["monto_${i}"]     = 0;
+
+			$this->dataedit();
+		}else{
+			echo 'Orden no existe';
+		}
+*/
+	}
+
+	//******************************************************************
+	// Crea una factura desde una nota de entrega
 	function creafromsnte($manual,$numero,$status=null){
 		$this->_url= $this->url.'dataedit/insert';
 
@@ -4810,7 +4913,8 @@ class Sfac extends Controller {
 		}
 	}
 
-	//Crea una factura desde varias nota de entrega
+	//******************************************************************
+	// Crea una factura desde varias nota de entrega
 	function creafromsntes($manual,$numero,$status=null){
 		$this->_url= $this->url.'dataedit/insert';
 		$ids=explode('-',$numero);
