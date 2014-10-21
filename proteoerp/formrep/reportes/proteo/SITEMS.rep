@@ -73,7 +73,7 @@ $select=array('tipoa','CONCAT(tipoa, numa) AS nnumero', 'codigoa', 'a.fecha', 'd
 "IF(a.tipoa='X',0,cana)*IF(tipoa='F',1,-1) AS cana", 'preca',
 "IF(a.tipoa='X',0,tota)*IF(tipoa='F',1,-1) AS tota", 'costo',
 "IF(a.tipoa='D',tota,0)  AS tdevo",'c.peso*a.cana*IF(a.tipoa="D",-1,1)*(a.tipoa<>"X") AS peso',
-"(tota-(costo*cana))   AS margenbs",
+"(tota-(costo*cana))*IF(tipoa='F',1,-1)*(a.tipoa<>'X')   AS margenbs",
 "(preca*100/costo-100) AS porcen");
 
 $filter->db->select($select);
