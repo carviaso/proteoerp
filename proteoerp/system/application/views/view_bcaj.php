@@ -32,26 +32,24 @@ if($form->_status <> 'show'){ ?>
 	<tr>
 		<td class="littletablerowth"><?php echo $form->fecha->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->fecha->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->monto->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->monto->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->envia->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->envia->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->tipoe->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->tipoe->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->numeroe->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->numeroe->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->recibe->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->recibe->output; ?></td>
+	</tr><tr>
+		<td class="littletablerowth"><?php echo $form->concepto->label;  ?></td>
+		<td class="littletablerow"  ><?php echo $form->concepto->output; ?></td>
 	</tr>
 </table>
 </fieldset>
@@ -61,20 +59,16 @@ if($form->_status <> 'show'){ ?>
 	<tr>
 		<td class="littletablerowth"><?php echo $form->fecha->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->fecha->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->envia->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->envia->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->recibe->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->recibe->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->tipor->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->tipor->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->numeror->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->numeror->output; ?></td>
 	</tr>
@@ -88,21 +82,16 @@ if($form->_status <> 'show'){ ?>
 		<td class="littletablerow"  ><?php echo $form->tarjeta->output; ?></td>
 		<td class="littletablerowth"><?php echo $form->comision->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->comision->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->tdebito->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->tdebito->output; ?></td>
 		<td class="littletablerowth"><?php echo $form->islr->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->islr->output; ?></td>
-	</tr>
-	<tr>
+	</tr><tr>
 		<td class="littletablerowth"><?php echo $form->monto->label;  ?></td>
 		<td class="littletablerow"  ><?php echo $form->monto->output; ?></td>
 	</tr>
 </table>
 </fieldset>
-
 <?php } ?>
-
-
 <?php echo $form_end; ?>

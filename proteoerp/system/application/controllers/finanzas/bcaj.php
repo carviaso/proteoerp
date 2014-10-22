@@ -269,7 +269,7 @@ class Bcaj extends Controller {
 			jQuery("#transferen").click( function(){
 				$.post("'.site_url($this->url.'transferencia/create').'",
 					function(data){
-						$("#fedita").dialog( {height: 350, width: 500, title: "Prestamo Otorgado"} );
+						$("#fedita").dialog( {height: 350, width: 500} );
 						$("#fedita").html(data);
 						$("#fedita").dialog( "open" );
 				})
@@ -1940,6 +1940,26 @@ class Bcaj extends Controller {
 		$edit->title='Deposito en caja';
 		$link  = site_url('finanzas/bcaj/get_trrecibe');
 		$script='
+		$(function(){
+			$(".inputnum").numeric(".");
+			$("#envia").change(function (){
+				concepto();
+			});
+			$("#recibe").change(function (){
+				concepto();
+			});
+		});
+
+		function concepto(){
+			var envia  = $("#envia").val();
+			var recibe = $("#recibe").val();
+			var cadena="TRANSFERENCIA DESDE <#envia#> HASTA <#recibe#>";
+
+			if(envia!="" && recibe!=""){
+				$("#concepto").val(cadena.replace("<#envia#>", envia).replace("<#recibe#>", recibe));
+			}
+		}
+
 		function get_trrecibe(){
 			if($("#envia").val().length>0){
 				$.post("'.$link.'",{ envia: $("#envia").val()}, function(data){
@@ -1974,7 +1994,7 @@ class Bcaj extends Controller {
 			$tipo  = $this->_traetipo($env);
 			$ww    = ($tipo=='CAJ') ? 'AND tbanco="CAJ"' : '';
 			$desca = 'CONCAT_WS(\'-\',codbanc,banco) AS desca';
-			$edit->recibe->options("SELECT codbanc,$desca FROM banc WHERE codbanc<>".$this->db->escape($env)." $ww ORDER BY banco");
+			$edit->recibe->options("SELECT codbanc,${desca} FROM banc WHERE codbanc<>".$this->db->escape($env)." $ww ORDER BY banco");
 		}
 
 		$edit->numeror = new inputField('N&uacute;mero de envio', 'numeror');
@@ -1984,7 +2004,7 @@ class Bcaj extends Controller {
 		$edit->numeror->append('Solo si el que recibe es un banco');
 
 		$desca='CONCAT_WS(\'-\',codbanc,banco) AS desca';
-		$edit->envia->options("SELECT codbanc,$desca FROM banc ORDER BY banco");
+		$edit->envia->options("SELECT codbanc,${desca} FROM banc ORDER BY banco");
 		$edit->envia->onchange = 'get_trrecibe();';
 		$edit->envia->rule     = 'required';
 
@@ -1992,7 +2012,7 @@ class Bcaj extends Controller {
 		if($codigo!==false){
 			$tipo= $this->_traetipo($codigo);
 			$ww=($tipo=='CAJ') ? 'tbanco="CAJ"' : 'tbanco<>"CAJ"';
-			$edit->recibe->options("SELECT codbanc,$desca FROM banc WHERE $ww AND codbanc<>".$this->db->escape($codigo)." ORDER BY banco");
+			$edit->recibe->options("SELECT TRIM(codbanc) AS cod,${desca} FROM banc WHERE ${ww} AND codbanc<>".$this->db->escape($codigo)." ORDER BY banco");
 		}else{
 			$edit->recibe->option('','Seleccione una caja de envio');
 		}
@@ -2018,26 +2038,29 @@ class Bcaj extends Controller {
 		$edit->tipo = new hiddenField('Tipo','tipo');
 		$edit->tipo->insertValue = 'TR';
 
+		$edit->concepto = new inputField('Concepto', 'concepto');
+		$edit->concepto->rule='trim';
+		$edit->concepto->autocomplete=false;
+		//$edit->concepto->maxlength =15;
+		//$edit->concepto->size = 12;
+
 		$edit->envia->rule   = 'required';
 		$edit->envia->style  = 'width:220px';
 		$edit->recibe->style = 'width:220px';
 
-		$back_url = site_url('finanzas/bcaj/agregar');
-		$edit->button('btn_undo', 'Regresar', "javascript:window.location='${back_url}'", 'BL');
-
-		$edit->submit('btnsubmit','Guardar');
 		$edit->build_form();
 
-		if ($edit->on_success()){
-			$fecha  = $edit->fecha->newValue;
-			$monto  = $edit->monto->newValue;
-			$envia  = $edit->envia->newValue;
-			$recibe = $edit->recibe->newValue;
-			$numeror= $edit->numeror->newValue;
-			$numeroe= $edit->numeroe->newValue;
-			$tipoe  = $edit->tipoe->newValue;
-			$moneda = $edit->moneda->newValue;
-			$rt=$this->_transferencaj($fecha,$monto,$envia,$recibe,false,$numeror,$numeroe,$tipoe,$moneda);
+		if($edit->on_success()){
+			$fecha   = $edit->fecha->newValue;
+			$monto   = $edit->monto->newValue;
+			$envia   = $edit->envia->newValue;
+			$recibe  = $edit->recibe->newValue;
+			$numeror = $edit->numeror->newValue;
+			$numeroe = $edit->numeroe->newValue;
+			$tipoe   = $edit->tipoe->newValue;
+			$moneda  = $edit->moneda->newValue;
+			$concepto= trim($edit->concepto->newValue);
+			$rt=$this->_transferencaj($fecha,$monto,$envia,$recibe,false,$numeror,$numeroe,$tipoe,$moneda,$concepto);
 
 			if($rt){
 				$rt=array(
@@ -2608,7 +2631,7 @@ class Bcaj extends Controller {
 	}
 
 
-	function _transferencaj($fecha,$monto,$envia,$recibe,$auto=false,$numeror=null,$numeroe=null,$tipoe='ND',$moneda='Bs'){
+	function _transferencaj($fecha,$monto,$envia,$recibe,$auto=false,$numeror=null,$numeroe=null,$tipoe='ND',$moneda='Bs',$concepto=null){
 		if($monto<=0) return true;
 		$numero  = $this->datasis->fprox_numero('nbcaj');
 		$transac = $this->datasis->fprox_numero('ntransa');
@@ -2617,8 +2640,10 @@ class Bcaj extends Controller {
 		$numeroe = ($_numeroe===false)? str_pad($numeroe, 12, '0', STR_PAD_LEFT): $_numeroe;
 		$numeror = ($_numeror===false)? str_pad($numeror, 12, '0', STR_PAD_LEFT): $_numeror;
 		$sp_fecha= str_replace('-','',$fecha);
+		if(empty($concepto))
+			$concepto= 'TRANSFERENCIAS ENTRE CAJA '.$envia.' A '.$recibe;
 		$tipor   = ($tipoe=='ND') ? 'NC': 'DE';
-		$error  = 0;
+		$error   = 0;
 		$this->bcajnumero=$numero;
 
 		$mSQL='SELECT codbanc,numcuent,tbanco,banco,saldo FROM banc WHERE codbanc IN ('.$this->db->escape($envia).','.$this->db->escape($recibe).')';
@@ -2647,7 +2672,7 @@ class Bcaj extends Controller {
 			'tipor'   => $tipor,
 			'numeror' => $numeror,
 			'bancor'  => $infbanc[$recibe]['banco'],
-			'concepto'=> 'TRANSFERENCIA ENTRE CAJA '.$envia.' A '.$recibe,
+			'concepto'=> $concepto,
 			'concep2' => ($auto)? 'AUTOTRANFER' : '',
 			'benefi'  => '',
 			'boleta'  => '',
@@ -2672,9 +2697,6 @@ class Bcaj extends Controller {
 
 		//Crea el egreso en el banco
 		$this->datasis->actusal($envia,$sp_fecha, (-1)*$monto);
-		//$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$monto)";
-		//$ban=$this->db->simple_query($mSQL);
-		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $envia;
@@ -2687,7 +2709,7 @@ class Bcaj extends Controller {
 		$data['clipro']   = 'O';
 		$data['codcp']    = 'TRANS';
 		$data['monto']    = $monto;
-		$data['concepto'] = 'TRANSFERENCIAS ENTRE CAJA '.$envia.' A '.$recibe;
+		$data['concepto'] = $concepto;
 		$data['concep2']  = '';
 		$data['transac']  = $transac;
 		$data['usuario']  = $this->session->userdata('usuario');
@@ -2701,9 +2723,6 @@ class Bcaj extends Controller {
 
 		//Crea el ingreso la otra caja
 		$this->datasis->actusal($recibe,$sp_fecha, $monto);
-		//$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$monto)";
-		//$ban=$this->db->simple_query($mSQL);
-		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $recibe;
@@ -2716,7 +2735,7 @@ class Bcaj extends Controller {
 		$data['clipro']   = 'O';
 		$data['codcp']    = 'TRANS';
 		$data['monto']    = $monto;
-		$data['concepto'] = 'TRANSFERENCIAS ENTRE CAJA '.$envia.' A '.$recibe;
+		$data['concepto'] = $concepto;
 		$data['concep2']  = '';
 		$data['transac']  = $transac;
 		$data['usuario']  = $this->session->userdata('usuario');
@@ -2727,7 +2746,7 @@ class Bcaj extends Controller {
 		$sql=$this->db->insert_string('bmov', $data);
 		$ban=$this->db->simple_query($sql);
 		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
-		logusu('bcaj',"Transferencia de caja $numero creada");
+		logusu('bcaj',"Transferencia de caja ${numero} creada");
 
 		return ($error==0) ? true : false;
 	}
