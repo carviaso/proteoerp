@@ -368,7 +368,6 @@ function calcred(){
 		$("#monto1").val('0');
 		$("#credito").val('0');
 	}
-
 }
 
 function ccredito(){
@@ -729,6 +728,14 @@ function toggle() {
 						</tr><tr>
 							<td class="littletableheader">           <?php echo $form->totneto->label  ?>&nbsp;</td>
 							<td class="littletablerow" align='right'><?php echo $form->totneto->output ?>&nbsp;</td>
+<?php
+	$mSQL = "SELECT count(*) FROM banc WHERE activo='S' AND tbanco='FO'";
+	if ( $this->datasis->dameval($mSQL) > 0 ){
+?>
+						</tr><tr>
+							<td class="littletableheader" colspan='2' ><?php echo $form->fondo->label  ?>
+							&nbsp;<?php echo $form->fondo->output ?></td>
+<?php }?>
 						</tr>
 					</table>
 					</div>

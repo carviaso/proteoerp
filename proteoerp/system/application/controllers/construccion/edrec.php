@@ -955,21 +955,22 @@ class Edrec extends Controller {
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
-
+/*
 		$edit->transac = new inputField('Transac','transac');
 		$edit->transac->rule='';
 		$edit->transac->size =10;
 		$edit->transac->maxlength =8;
-
+*/
 
 		//**************************************************************
 		// Detalle 
+/*
 		$edit->numero = new inputField('Numero','numero_<#i#>');
 		$edit->numero->rule='';
 		$edit->numero->size =10;
 		$edit->numero->maxlength =8;
 		$edit->numero->rel_id ='editrec';
-
+*/
 		$edit->tipo = new inputField('Tipo','tipo_<#i#>');
 		$edit->tipo->rule='';
 		$edit->tipo->size =10;
@@ -978,37 +979,38 @@ class Edrec extends Controller {
 
 		$edit->codigo = new inputField('Codigo','codigo_<#i#>');
 		$edit->codigo->rule='';
-		$edit->codigo->size =17;
+		$edit->codigo->size =15;
 		$edit->codigo->maxlength =15;
 		$edit->codigo->rel_id ='editrec';
 
 		$edit->detalle = new inputField('Detalle','detalle_<#i#>');
 		$edit->detalle->rule='';
-		$edit->detalle->size =202;
+		$edit->detalle->size =52;
 		$edit->detalle->maxlength =200;
 		$edit->detalle->rel_id ='editrec';
 
-		$edit->total = new inputField('Total','total_<#i#>');
-		$edit->total->rule='numeric';
-		$edit->total->css_class='inputnum';
-		$edit->total->size =14;
-		$edit->total->maxlength =12;
-		$edit->total->rel_id ='editrec';
+		$edit->totald = new inputField('Total','total_<#i#>');
+		$edit->totald->rule='numeric';
+		$edit->totald->css_class='inputnum';
+		$edit->totald->size =14;
+		$edit->totald->maxlength =12;
+		$edit->totald->rel_id ='editrec';
 
-		$edit->alicuota = new inputField('Alicuota','alicuota_<#i#>');
-		$edit->alicuota->rule='numeric';
-		$edit->alicuota->css_class='inputnum';
-		$edit->alicuota->size =14;
-		$edit->alicuota->maxlength =12;
-		$edit->alicuota->rel_id ='editrec';
+		$edit->alicuotad = new inputField('Alicuota','alicuota_<#i#>');
+		$edit->alicuotad->rule='numeric';
+		$edit->alicuotad->css_class='inputnum';
+		$edit->alicuotad->size =14;
+		$edit->alicuotad->maxlength =12;
+		$edit->alicuotad->rel_id ='editrec';
 
-		$edit->cuota = new inputField('Cuota','cuota_<#i#>');
-		$edit->cuota->rule='numeric';
-		$edit->cuota->css_class='inputnum';
-		$edit->cuota->size =14;
-		$edit->cuota->maxlength =12;
-		$edit->cuota->rel_id ='editrec';
+		$edit->cuotad = new inputField('Cuota','cuota_<#i#>');
+		$edit->cuotad->rule='numeric';
+		$edit->cuotad->css_class='inputnum';
+		$edit->cuotad->size =14;
+		$edit->cuotad->maxlength =12;
+		$edit->cuotad->rel_id ='editrec';
 
+/*
 		$edit->fecha = new dateonlyField('Fecha','fecha_<#i#>');
 		$edit->fecha->rule='chfecha';
 		$edit->fecha->size =10;
@@ -1027,7 +1029,7 @@ class Edrec extends Controller {
 		$edit->id_edrc->size =13;
 		$edit->id_edrc->maxlength =11;
 		$edit->id_edrc->rel_id ='editrec';
-
+*/
 		//**************************************************************
 
 		$edit->buttons('add_rel');
@@ -1240,8 +1242,8 @@ class Edrec extends Controller {
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			foreach( $query->result() as  $row ) {
-				$transac   = $this->datasis->fprox_numero('transac');
-				$fecha    = date('Ymd'); 
+				$transac   = $this->datasis->fprox_numero('ntransa');
+				$fecha     = date('Ymd'); 
 				$data = array();
 				$data['cod_cli']   = $row->cod_cli;
 				$data['nombre']    = $row->nombre;
@@ -1274,7 +1276,7 @@ class Edrec extends Controller {
 				$data = array();
 				$data['transac'] = $transac;
 				$data['status']  = 'F';
-				$this->db->where("id", $id);
+				$this->db->where("id", $row->id);
 				$this->db->update('edrec',$data);
 			}
 			echo "Si se Guardaron";

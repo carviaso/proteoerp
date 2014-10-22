@@ -3428,10 +3428,15 @@ class gser extends Controller {
 
 		$edit->codb1 = new dropdownField('Caja/Banco','codb1');
 		$edit->codb1->option('','Ninguno');
-		$edit->codb1->options("SELECT TRIM(codbanc) AS ind, CONCAT_WS('-',codbanc,banco) AS label FROM banc ORDER BY codbanc");
+		$edit->codb1->options("SELECT TRIM(codbanc) AS ind, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE activo='S' ORDER BY codbanc");
 		$edit->codb1->rule  = 'max_length[5]|callback_chcodb|condi_required';
 		$edit->codb1->style = 'width:120px';
 		$edit->codb1->onchange="esbancaja(this.value)";
+
+		$edit->fondo = new dropdownField('Fondo','fondo');
+		$edit->fondo->option('','Ninguno');
+		$edit->fondo->options("SELECT TRIM(codbanc) AS ind, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE activo='S' AND tbanco='FO' ORDER BY codbanc");
+		$edit->fondo->style = 'width:160px';
 
 		$edit->tipo1 =  new dropdownField('Tipo', 'tipo1');
 		$edit->tipo1->option('' ,'Ninguno');
@@ -3476,7 +3481,7 @@ class gser extends Controller {
 		$edit->reten->showformat ='decimal';
 		$edit->reten->type='inputhidden';
 
-		$edit->reteiva = new inputField('Ret. de IVA','reteiva');
+		$edit->reteiva = new inputField('Ret de IVA','reteiva');
 		$edit->reteiva->rule = 'numeric|positive';
 		$edit->reteiva->size = 10;
 		$edit->reteiva->maxlength=10;
@@ -3648,7 +3653,6 @@ class gser extends Controller {
 				'mensaje'=>'Registro guardado',
 				'pk'     =>$edit->_dataobject->pk
 			);
-
 			echo json_encode($rt);
 		}else{
 			if($this->genesal){
@@ -4719,22 +4723,11 @@ class gser extends Controller {
 	function instalar(){
 
 		$campos=$this->db->list_fields('gser');
-
-		if(!in_array('reteica',$campos)){
-			$this->db->query("ALTER TABLE `gser` ADD COLUMN `reteica` DECIMAL(12,2) NULL DEFAULT NULL");
-		}
-
-		if(!in_array('retesimple',$campos)){
-			$this->db->query("ALTER TABLE `gser` ADD COLUMN `retesimple` DECIMAL(12,2) NULL DEFAULT NULL");
-		}
-
-		if(!in_array('negreso',$campos)){
-			$this->db->query("ALTER TABLE `gser` ADD COLUMN `negreso` CHAR(8) NULL DEFAULT NULL");
-		}
-
-		if(!in_array('ncausado',$campos)){
-			$this->db->query("ALTER TABLE `gser` ADD COLUMN `ncausado` CHAR(8) NULL DEFAULT NULL");
-		}
+		if(!in_array('reteica',   $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN reteica    DECIMAL(12,2) NULL DEFAULT NULL");
+		if(!in_array('retesimple',$campos)) $this->db->query("ALTER TABLE gser ADD COLUMN retesimple DECIMAL(12,2) NULL DEFAULT NULL");
+		if(!in_array('negreso',   $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN negreso  CHAR(8)    NULL DEFAULT NULL");
+		if(!in_array('ncausado',  $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN ncausado VARCHAR(8) NULL DEFAULT NULL");
+		if(!in_array('fondo',     $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN fondo    CHAR(2)    NULL DEFAULT NULL");
 
 		if(!in_array('id',$campos)){
 			$query="ALTER TABLE `gser` DROP PRIMARY KEY";
@@ -4743,7 +4736,6 @@ class gser extends Controller {
 			$this->db->query($query);
 			$query="ALTER TABLE `gser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`)";
 			$this->db->query($query);
-
 			$query="UPDATE gitser AS a
 				JOIN gser AS b on a.numero=b.numero and a.fecha = b.fecha and a.proveed = b.proveed
 				SET a.idgser=b.id  WHERE a.idgser IS NULL";
@@ -4752,7 +4744,7 @@ class gser extends Controller {
 
 		$itcampos=$this->db->list_fields('gitser');
 		if(!in_array('id',$itcampos)){
-			$query="ALTER TABLE `gitser` ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`);";
+			$query="ALTER TABLE gitser ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`);";
 			$this->db->query($query);
 		}
 
@@ -4824,15 +4816,8 @@ class gser extends Controller {
 		}
 
 		$gcampos=$this->db->list_fields('gserchi');
-		if(!in_array('ngasto',$gcampos)){
-			$query="ALTER TABLE `gserchi` ADD COLUMN `ngasto` VARCHAR(8) NULL DEFAULT NULL AFTER `departa`";
-			$this->db->query($query);
-		}
-
-		if(!in_array('aceptado',$gcampos)){
-			$query="ALTER TABLE gserchi ADD COLUMN aceptado CHAR(1) NULL DEFAULT NULL";
-			$this->db->query($query);
-		}
+		if(!in_array('ngasto',  $gcampos)) $this->db->query("ALTER TABLE `gserchi` ADD COLUMN `ngasto` VARCHAR(8) NULL DEFAULT NULL AFTER `departa`");
+		if(!in_array('aceptado',$gcampos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN aceptado CHAR(1) NULL DEFAULT NULL");
 
 		if (!$this->db->table_exists('rica')) {
 			$query="CREATE TABLE `rica` (

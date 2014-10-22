@@ -4733,32 +4733,34 @@ class Sfac extends Controller {
 
 	//******************************************************************
 	// Crea una factura desde un presupuesto
-	function creafromspreml( $numero, $status=null){
+	function creafromspreml( $numero, $tipo=null){
 		$this->_url= $this->url.'dataedit/insert';
 
-		// Crea Cliente si no existe
-		//$this->db->select('*');
 		$this->db->from('spreml AS a');
-		//$this->db->join('scli AS b','a.cod_cli=b.cliente','left');
 		$this->db->where('a.numero',$numero);
 		$query = $this->db->get();
 		if ($query->num_rows() <> 1 ){
-			echo 'Orden no existe';
+			echo 'Orden no existe '.$numero;
 			return false;
 		}
-			
+
+		// Crea Cliente si no existe
 		$row   = $query->row();
 		$rifci = $row->rifci;
 		$mSQL = 'SELECT count(*) FROM scli WHERE rifci='.$this->db->escape($rifci);
 		$hay = $this->datasis->dameval($mSQL);
 		if ($hay == 0 ){
 			//CREA EL CLIENTE
-			
-			
+			echo 'Crea el cliente '.$rifci.' ';
 		} else {
-			$mSQL    = 'SELECT count(*) FROM scli WHERE rifci='.$this->db->escape($rifci);
+			$mSQL    = 'SELECT cliente FROM scli WHERE rifci='.$this->db->escape($rifci);
 			$cod_cli = $this->datasis->dameval($mSQL);
+			echo 'Cliente si existe'.$cod_cli.' '.$rifci;
 		}
+
+		return false;
+
+
 /*
 		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
 		,'a.totals','a.iva','a.totalg');

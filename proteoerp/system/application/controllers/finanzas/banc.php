@@ -24,10 +24,9 @@ class Banc extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
+	//******************************************************************
 	//Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -743,7 +742,7 @@ class Banc extends Controller {
 		});
 
 		$("#rif").focusout(function(){
-			if ( $(this).val() != "CAJ"  ){
+			if ( $(this).val() != "CAJ" && $(this).val() != "FO" ){
 				rif = $(this).val().toUpperCase();
 				$(this).val(rif);
 				patt = /[EJPGV][0-9]{4,9} */g;
@@ -756,7 +755,7 @@ class Banc extends Controller {
 
 		$("#tbanco").change(function(){
 			tbanco = $(this).val();
-			if ( tbanco != "CAJ" ){
+			if ( tbanco != "CAJ" && $(this).val() != "FO" ){
 				$.post("'.site_url('finanzas/banc/traerif').'/"+tbanco,
 				function(data){
 					$("#rif").val(data);
@@ -800,8 +799,8 @@ class Banc extends Controller {
 		$edit->tbanco->style = "width:200px";
 
 		$edit->banco = new inputField('Nombre', 'banco');
-		$edit->banco->size =22;
-		$edit->banco->maxlength=30;
+		$edit->banco->size =30;
+		$edit->banco->maxlength=60;
 		//$edit->banco->readonly=true;
 
 		$edit->numcuent = new inputField('Nro. de Cuenta', 'numcuent');
@@ -872,8 +871,8 @@ class Banc extends Controller {
 		$edit->depto = new dropdownField('Departamento', 'depto');
 		$edit->depto->option('','Seleccionar');
 		$edit->depto->options("SELECT depto, descrip FROM dpto ORDER BY descrip");
-		$edit->depto->rule='required';
-		$edit->depto->style ='width:220px;';
+		$edit->depto->rule='condi_required|callback_chiscaja';
+		$edit->depto->style ='width:180px;';
 
 		$edit->sucur = new dropdownField('Sucursal', 'sucur');
 		$edit->sucur->option('','Ninguna');
@@ -885,13 +884,13 @@ class Banc extends Controller {
 		$edit->gastoidb->option('','Seleccionar');
 		$edit->gastoidb->rule= 'condi_required|callback_chisidb';
 		$edit->gastoidb->options($mSQL);
-		$edit->gastoidb->style ='width:280px;';
+		$edit->gastoidb->style ='width:250px;';
 
 		$edit->gastocom = new dropdownField('Comisi&oacute;n', 'gastocom');
 		$edit->gastocom->rule= 'condi_required|callback_chiscaja|trim';
 		$edit->gastocom->option('','Seleccionar');
 		$edit->gastocom->options($mSQL);
-		$edit->gastocom->style ='width:280px;';
+		$edit->gastocom->style ='width:250px;';
 
 		$rif = '';
 		$tbanco = $edit->getval('tbanco');
@@ -906,14 +905,11 @@ class Banc extends Controller {
 		$edit->rif->updateValue = $rif;
 		$edit->rif->showValue = $rif;
 
-/*
-		$mSQL="SELECT codbanc, CONCAT_WS(' ',TRIM(codbanc),TRIM(numcuent),TRIM(banco)) AS descrip FROM banc WHERE tbanco<>'FON' ORDER BY codbanc";
-		$edit->ctasoc = new dropdownField('Cuenta asociada', 'ctasoc');
-		$edit->ctasoc->rule= '';
-		$edit->ctasoc->option('','Seleccionar');
-		$edit->ctasoc->options($mSQL);
-		$edit->ctasoc->style ='width:200px;';
-*/
+		$edit->formula = new textareaField('Formula','formula');
+		$edit->formula->rule='';
+		$edit->formula->cols = 40;
+		$edit->formula->rows = 2;
+
 		$edit->build();
 
 		if($edit->on_success()){
@@ -934,7 +930,6 @@ class Banc extends Controller {
 		echo $rif;
 	}
 
-
 	function _pre_delete($do){
 		$codigo  =$do->get('codbanc');
 		$dbcodigo=$this->db->escape($codigo);
@@ -944,12 +939,10 @@ class Banc extends Controller {
 			$do->error_message_ar['pre_del']='El banco presenta movimientos no puede ser eliminado';
 			return false;
 		}
-
 		return true;
 	}
 
 	function _pre_insert($do){
-
 		$this->bacsprv($do);
 		$do->error_message_ar['pre_ins']='';
 		return true;
@@ -958,7 +951,7 @@ class Banc extends Controller {
 	function _pre_update($do){
 		$rif    = trim($this->input->post('rif'));
 		$tbanco = $do->get('tbanco');
-		if ( $rif=='' && $tbanco<>'CAJ' && $tbanco<>'FON'){
+		if ( $rif=='' && $tbanco<>'CAJ' && $tbanco<>'FO'){
 			$do->error_message_ar['pre_upd']="Favor coloque el RIF del banco";
 			return false;
 		} else {
@@ -1022,9 +1015,6 @@ class Banc extends Controller {
 		return true;
 	}
 
-
-
-
 	function _post_insert($do){
 		$codigo=$do->get('codbanc');
 		$nombre=$do->get('banco');
@@ -1058,7 +1048,7 @@ class Banc extends Controller {
 
 	function chiscaja($proveed){
 		$tbanco=$this->input->post('tbanco');
-		if ($tbanco!='CAJ' && $tbanco!='FON' && strlen(trim($proveed))==0){
+		if ($tbanco!='CAJ' && $tbanco!='FO' && strlen(trim($proveed))==0){
 			$this->validation->set_message('chiscaja',"El campo '%s' es obligatorio cuando el registro no es una caja");
 			return false;
 		}else {
@@ -1257,33 +1247,16 @@ class Banc extends Controller {
 
 	function instalar(){
 		$campos=$this->db->list_fields('banc');
-
 		if(!in_array('id',$campos)) {
 			$this->db->simple_query('ALTER TABLE banc DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE banc ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
 			$this->db->simple_query('ALTER TABLE banc ADD UNIQUE INDEX codbanc (codbanc)');
 		}
-
-		if(!in_array('rif',$campos)) {
-			$mSQL="ALTER TABLE `banc` ADD COLUMN `rif` VARCHAR(15) NULL DEFAULT NULL COMMENT 'RIF del Banco' AFTER tipocta;";
-			$this->db->query($mSQL);
-		}
-
-		if (!$this->db->field_exists('rif','tban')) {
-			$mSQL="ALTER TABLE `tban` ADD COLUMN `rif` VARCHAR(15) NULL DEFAULT NULL COMMENT 'RIF del Banco';";
-			$this->db->query($mSQL);
-		}
-
-		if (!$this->db->field_exists('activo','tban')) {
-			$mSQL="ALTER TABLE `tban` ADD COLUMN `activo` CHAR(1) NULL DEFAULT 'S' COMMENT 'Activar/Desactivar';";
-			$this->db->query($mSQL);
-		}
-
-		if (!$this->db->field_exists('ctasoc','banc')) {
-			$mSQL="ALTER TABLE banc ADD COLUMN ctasoc VARCHAR(2) NULL DEFAULT NULL COMMENT 'Cuenta Asociada' AFTER rif;";
-			$this->db->query($mSQL);
-		}
-
+		if(!in_array('rif',$campos)) $this->db->query("ALTER TABLE banc ADD COLUMN rif VARCHAR(15) NULL DEFAULT NULL COMMENT 'RIF del Banco' AFTER tipocta;");
+		if(!$this->db->field_exists('rif',    'tban')) $this->db->query("ALTER TABLE tban ADD COLUMN rif     VARCHAR(15) NULL DEFAULT NULL COMMENT 'RIF del Banco'");
+		if(!$this->db->field_exists('activo', 'tban')) $this->db->query("ALTER TABLE tban ADD COLUMN activo  CHAR(1)     NULL DEFAULT 'S'  COMMENT 'Activar/Desactivar'");
+		if(!$this->db->field_exists('ctasoc', 'banc')) $this->db->query("ALTER TABLE banc ADD COLUMN ctasoc  VARCHAR(2)  NULL DEFAULT NULL COMMENT 'Cuenta Asociada' AFTER rif");
+		if(!$this->db->field_exists('formula','banc')) $this->db->query("ALTER TABLE banc ADD COLUMN formula TEXT        NULL DEFAULT NULL COMMENT 'Cuenta Asociada' AFTER ctasoc");
 	}
 
 }

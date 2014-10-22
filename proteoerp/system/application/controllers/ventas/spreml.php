@@ -29,47 +29,6 @@ class Spreml extends Controller {
 	//******************************************************************
 	// Layout en la Ventana
 	//
-	/*function registro(){
-
-		$grid = $this->defgrid();
-		$param['grids'][] = $grid->deploy();
-
-		//Funciones que ejecutan los botones
-		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
-
-		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"fconfirma", "img"=>"images/engrana.png",  "alt" => "Confirmar Pago", "label"=>"Confirmar Pago"));
-		$grid->wbotonadd(array("id"=>"factura",   "img"=>"images/engrana.png",  "alt" => "Facturar",       "label"=>"Facturar"));
-		$grid->wbotonadd(array("id"=>"fenviar",   "img"=>"images/engrana.png",  "alt" => "Enviar",         "label"=>"Enviar"));
-
-		$WestPanel = $grid->deploywestp();
-		$WestPanel .= 'Hola';
-
-
-		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
-			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
-			array('id'=>'fborra',  'title'=>'Eliminar Registro')
-		);
-		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
-
-		$param['WestPanel']   = $WestPanel;
-		//$param['EastPanel'] = $EastPanel;
-		$param['SouthPanel']  = $SouthPanel;
-		$param['listados']    = $this->datasis->listados('SPREML', 'JQ');
-		$param['otros']       = $this->datasis->otros('SPREML', 'JQ');
-		$param['temas']       = array('proteo','darkness','anexos1');
-		$param['bodyscript']  = $bodyscript;
-		$param['tabs']        = false;
-		$param['encabeza']    = $this->titp;
-		$param['tamano']      = $this->datasis->getintramenu( substr($this->url,0,-1) );
-		$this->load->view('jqgrid/crud2',$param);
-	}*/
-
-
-	//******************************************************************
-	// Layout en la Ventana
-	//
 	function jqdatag(){
 		$this->datasis->modulo_nombre( 'SPREML', $ventana=0 );
 
@@ -192,7 +151,7 @@ class Spreml extends Controller {
 			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				$.post("'.site_url('ventas/sfac/creafromspreml/N').'/"+ret.numero+"/create",
+				$.post("'.site_url('ventas/sfac/creafromspreml').'/"+ret.numero+"/create",
 				function(data){
 					$("#ffact").html(data);
 					$("#ffact").dialog( "open" );

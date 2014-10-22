@@ -108,15 +108,16 @@ function del_editrec(id){
 		<tr>
 			<td class="littletablerowth"><?php echo $form->numero->label;  ?></td>
 			<td class="littletablerow"  ><?php echo $form->numero->output; ?></td>
-		</tr>
-		<tr>
 			<td class="littletablerowth"><?php echo $form->fecha->label;  ?></td>
 			<td class="littletablerow"  ><?php echo $form->fecha->output; ?></td>
-		</tr>
-		<tr>
 			<td class="littletablerowth"><?php echo $form->vence->label;  ?></td>
 			<td class="littletablerow"  ><?php echo $form->vence->output; ?></td>
 		</tr>
+	</table>
+	</fieldset>
+
+	<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+	<table width='100%'>
 		<tr>
 			<td class="littletablerowth"><?php echo $form->cod_cli->label;  ?></td>
 			<td class="littletablerow"  ><?php echo $form->cod_cli->output; ?></td>
@@ -157,51 +158,30 @@ function del_editrec(id){
 			<td class="littletablerowth"><?php echo $form->hora->label;  ?></td>
 			<td class="littletablerow"  ><?php echo $form->hora->output; ?></td>
 		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->transac->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->transac->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->id->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->id->output; ?></td>
-		</tr>
-		<tr><td>&nbsp;</td></tr>
+	</table>
+	</fieldset>
+	
+	<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+	<table width='100%'>
 		<tr>
 			<td>
 			<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px'>
 			<table width='100%'>
 				<tr>
-					<td bgcolor='#7098D0' width="80">numero</td>
 					<td bgcolor='#7098D0' width="80">tipo</td>
 					<td bgcolor='#7098D0' width="80">codigo</td>
 					<td bgcolor='#7098D0' width="80">detalle</td>
 					<td bgcolor='#7098D0' width="80">total</td>
 					<td bgcolor='#7098D0' width="80">alicuota</td>
 					<td bgcolor='#7098D0' width="80">cuota</td>
-					<td bgcolor='#7098D0' width="80">fecha</td>
-					<td bgcolor='#7098D0' width="80">usuario</td>
-					<td bgcolor='#7098D0' width="80">estampa</td>
-					<td bgcolor='#7098D0' width="80">hora</td>
-					<td bgcolor='#7098D0' width="80">transac</td>
-					<td bgcolor='#7098D0' width="80">id</td>
-					<td bgcolor='#7098D0' width="80">id_edrc</td>
 				</tr>
 				<?php for($i=0;$i<$form->max_rel_count['editrec'];$i++) {
-					$obj1 = "numero_$i";
-					$obj2 = "tipo_$i";
-					$obj3 = "codigo_$i";
-					$obj4 = "detalle_$i";
-					$obj5 = "total_$i";
-					$obj6 = "alicuota_$i";
-					$obj7 = "cuota_$i";
-					$obj8 = "fecha_$i";
-					$obj9 = "usuario_$i";
-					$obj10 = "estampa_$i";
-					$obj11 = "hora_$i";
-					$obj12 = "transac_$i";
-					$obj13 = "id_$i";
-					$obj14 = "id_edrc_$i";
-
+					$obj1 = "tipo_$i";
+					$obj2 = "codigo_$i";
+					$obj3 = "detalle_$i";
+					$obj4 = "totald_$i";
+					$obj5 = "alicuotad_$i";
+					$obj6 = "cuotad_$i";
 				?>
 
 				<tr id='tr_editrec_<?php echo $i; ?>'>
@@ -211,28 +191,12 @@ function del_editrec(id){
 					<td class="littletablerow"><?php echo $form->$obj4->output ?></td>
 					<td class="littletablerow"><?php echo $form->$obj5->output ?></td>
 					<td class="littletablerow"><?php echo $form->$obj6->output ?></td>
-					<td class="littletablerow"><?php echo $form->$obj7->output ?></td>
-					<td class="littletablerow"><?php echo $form->$obj8->output ?></td>
-					<td class="littletablerow"><?php echo $form->$obj9->output ?></td>
-					<td class="littletablerow"><?php echo $form->$obj10->output ?></td>
-					<td class="littletablerow"><?php echo $form->$obj11->output ?></td>
-					<td class="littletablerow"><?php echo $form->$obj12->output ?></td>
-					<td class="littletablerow"><?php echo $form->$obj13->output ?></td>
-					<td class="littletablerow"><?php echo $form->$obj14->output ?></td>
 					<?php if($form->_status!='show') {?>
 						<td class="littletablerow"><a href="#" onclick='del_editrec(<?php echo $i; ?>);return false;'><?php echo img("images/delete.jpg"); ?></a></td>
 					<?php } ?>
 				</tr>
 				<?php } ?>
 				<tr id='__UTPL__'>
-					<td class="littletablefooterb" align="right">&nbsp;</td>
-					<td class="littletablefooterb" align="right">&nbsp;</td>
-					<td class="littletablefooterb" align="right">&nbsp;</td>
-					<td class="littletablefooterb" align="right">&nbsp;</td>
-					<td class="littletablefooterb" align="right">&nbsp;</td>
-					<td class="littletablefooterb" align="right">&nbsp;</td>
-					<td class="littletablefooterb" align="right">&nbsp;</td>
-					<td class="littletablefooterb" align="right">&nbsp;</td>
 					<td class="littletablefooterb" align="right">&nbsp;</td>
 					<td class="littletablefooterb" align="right">&nbsp;</td>
 					<td class="littletablefooterb" align="right">&nbsp;</td>

@@ -785,7 +785,7 @@ class sfpach extends Controller {
 			$data['codbanc']    = $recibe;
 			$data['recibe']     = '00';
 			$data['bancor']     = 'DEPOSITO EN TRANSITO';
-				$data['tipor']      = 'DE';
+			$data['tipor']      = 'DE';
 	
 			$data['numeror']    = $numeror;
 			$data['concepto']   = "TRANSITO DESDE CAJA $envia A BANCO $recibe ";
@@ -799,9 +799,6 @@ class sfpach extends Controller {
 			//Guarda en BCAJ
 			$this->db->insert('bcaj', $data);
 			$this->datasis->actusal( $envia, $fecha, -$monto );
-		
-			//$mSQL = "UPDATE sfpa SET deposito='$numero', status='P' WHERE id IN ($cheques)";
-			//$this->db->simple_query($mSQL);
 	
 			//GUARDA EN BMOV LA SALIDA DE CAJA
 			$data = array();
@@ -869,7 +866,6 @@ class sfpach extends Controller {
 			
 			//echo "{\"numero\":\"$numero\",\"mensaje\":\"Error \"}";
 		}
-		
 	}
 
 
