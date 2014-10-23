@@ -118,7 +118,7 @@ class Spreml extends Controller {
 								url: \''.site_url('ventas/spreml/confirma').'/\'+id,
 								global: false,
 								type: "POST",
-								data: ({}),
+								data: ({ }),
 								dataType: "text",
 								async: false,
 								success: function(sino) {
@@ -164,41 +164,43 @@ class Spreml extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione una Orden</h1>");}
 		});';
 
-/*
+
 		$bodyscript .= '
-		$("#facturar").click(function(){
+		$("#fenvia").click(function(){
 			var meco = "";
 			var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("'.$ngrid.'").jqGrid(\'getRowData\',id);
-				if(ret.status != "P"){ return; };
+				if( ret.status != "F"){ return false; };
 				var mgene = {
 				state0: {
-					html:"<h1>Confirmar Pago</h1><br/><center>Fecha: <b>"+ret.fechadep+"</b><br>Banco: <b>"+ret.codbanc+"</b><br>Numero: "+ret.tipo_op+ret.num_ref+" </center><br/>",
+					html:"<h1>Registrar Envio</h1><br/><table align=\"center\"><tr><td>Fecha:</td><td><input type=\"text\" name=\"fechaenv\" id=\"fechaenv\" value=\''.date('d/m/Y').'\'></td></tr><tr><td>Nro Guia:</td><td><input type=\"text\" id=\"nguia\" name=\"nguia\" value=\'"+ret.guia+"\' ></td></tr></table><br/>",
 					buttons: { Cancelar: false, Confirmar: true },
 					focus: 1,
 					submit:function(e,v,m,f){
 						if(v){
 							e.preventDefault();
-							$.ajax({
-								url: \''.site_url('ventas/spreml/confirma').'/\'+id,
-								global: false,
-								type: "POST",
-								data: ({}),
-								dataType: "text",
-								async: false,
-								success: function(sino) {
-									meco = " sino="+sino;
-									$.prompt.goToState("state1");
-								},
-								error: function(h,t,e) { alert("Error.. ",e) }
-							});
-							return false;
+							if ( f.nguia != "" ){
+								$.ajax({
+									url: \''.site_url('ventas/spreml/envia').'/\'+id,
+									global: false,
+									type: "POST",
+									data: { guia : f.nguia, fecha : f.fechaenv },
+									dataType: "text",
+									async: false,
+									success: function(sino) {
+										meco = " sino="+sino;
+										$.prompt.goToState("state1");
+									},
+									error: function(h,t,e) { alert("Error.. ",e) }
+								});
+								return false;
+							}
 						}
 					}
 				},
 				state1: {
-					html:"Pago Confirmado! "+meco,
+					html:"Envio efectuado! "+meco,
 					buttons: { Salir: 0 },
 					focus: 1,
 					submit:function(e,v,m,f){
@@ -208,11 +210,13 @@ class Spreml extends Controller {
 				}
 				};
 				$.prompt(mgene);
+				$("#fechaenv").datepicker({dateFormat:"dd/mm/yy"});
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		});';
-*/
+
+
 		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
@@ -228,6 +232,32 @@ class Spreml extends Controller {
 		$this->db->update('spreml',array('status'=>'C'));
 		echo $msj;
 	}
+
+	//******************************************************************
+	// Confirmar Envio
+	function envia( $id = 0 ){
+		if ( $id == 0 )
+			$id = $this->uri->segment($this->uri->total_segments());
+		
+		$fecha1 = $this->input->post('fecha');
+		$guia  = $this->input->post('guia');
+		$fecha =  substr($fecha1,6,4).substr($fecha1,3,2).substr($fecha1,0,2);
+		$id = intval($id);
+		$msj = 'Envio Confirmado ';
+		$this->db->where('id',$id);
+		$this->db->update('spreml',array('status'=>'F', 'fechaenv'=>$fecha, 'guia'=>$guia ));
+
+		$email  = $this->datasis->dameval('SELECT email  FROM spreml WHERE id='.$id);
+		$numero = $this->datasis->dameval('SELECT numero FROM spreml WHERE id='.$id);
+		// Envia correo
+		$notifica  = "Su orden Nro. ${numero} fue enviado por el transporte, con el Nro de guia ${guia} de fecha ${fecha1}.\n";
+		$notifica .= "Gracias por preferirnos.\n";
+		$this->datasis->correo( $email, 'Notificacion de Envio '.$numero, $notifica );
+		
+
+		echo $msj.$guia." ".$fecha;
+	}
+
 
 	//******************************************************************
 	// Definicion del Grid o Tabla 
@@ -417,7 +447,7 @@ class Spreml extends Controller {
 		));
 
 		$grid->addField('fechadep');
-		$grid->label('Fechadep');
+		$grid->label('F. Pago');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -472,6 +502,30 @@ class Spreml extends Controller {
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
+
+		$grid->addField('guia');
+		$grid->label('Guia');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 70,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:40, maxlength: 40 }',
+		));
+
+		$grid->addField('fechaenv');
+		$grid->label('F. Envio');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
+
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -1105,7 +1159,6 @@ $(function(){
 
 		$notifica  = "Gracias por su compra. Hemos recibido satisfactoriamente los datos de su orden.\n";
 		$notifica  = "Una vez hecho el envio nos comunicaremos con usted al correo electronico para indicarle el numero de guia correspondiente. Por favor tome en cuenta que los envios demoran entre 24 y 48 horas habiles para su procesamiento.\n\n";
-
 		$notifica .= "Institucion bancaria: ".$banco['banco'].' '.$banco['numcuent']."\n";
 		$notifica .= "Tipo de Operacion: ".$do->get('tipo_op')."\n";
 		$notifica .= "Fecha de pago: ".$do->get('fechadep')."\n";

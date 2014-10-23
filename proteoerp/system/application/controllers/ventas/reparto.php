@@ -129,7 +129,7 @@ class Reparto extends Controller {
 		$("#cargard").click( function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				var mcome1 = "<h1>Fecha de Carga</h1><table align=\'center\'><tr>"+
 					"<td>Fecha de Carga: </td>"+
 					"<td><input id=\'mfecha\' name=\'mfecha\' size=\'10\'  value=\''.date('d/m/Y').'\'></td></tr></table>";
