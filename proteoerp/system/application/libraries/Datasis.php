@@ -1937,4 +1937,62 @@ class Datasis {
 		}
 	}
 
+	//******************************************************************
+	//  SUGIERE UN CODIGO DE CLIENTE
+	//
+	function proxcli( $mrifci='' ){
+		$CI =& get_instance();
+		$mcliente = '';
+		$mvalor   = 0;
+		$mmeco    = 0;
+		$mrango   = $this->traevalor('SCLIRANGO');
+		$mpiso    = '00000';
+		$mtecho   = 'ZZZZZ';
+
+		if($mrango == 'S'){
+			$mcliente = str_pad($this->numatri($this->prox_sql('ncodcli')),5,'0',STR_PAD_LEFT);
+		}else{
+			// GENERA POR CONVERSION DE CI
+			if ( $mrifci != ''){
+				$mmeco    = substr($mrifci,2,15);
+				$mcliente = str_pad($this->numatri($mmeco), 5, '0', STR_PAD_LEFT );
+			}else
+				$mcliente = str_pad($this->numatri($this->prox_sql('ncodcli')),5,'0', STR_PAD_LEFT);
+		}
+		// REVISA POR SI ESTA REPETIDO
+		while(true){
+			if ($this->dameval("SELECT COUNT(*) FROM scli WHERE cliente=".$CI->db->escape($mcliente)) == 0 )
+				break;
+			$mcliente = str_pad($this->numatri($this->prox_sql('ncodcli')),5,'0',STR_PAD_LEFT);
+		}
+		return $mcliente;
+	}
+
+
+	//******************************************************************
+	//  PARA GENERAR CODIGOS
+	//
+	function numatri(){
+		$CI      =& get_instance();
+		$numero  =  $this->prox_numero('ncodcli');
+		$residuo =  $numero;
+		$mbase   =  36;
+		$conve   =  '';
+		$mtempo  =  $residuo % $mbase;
+		while($residuo > $mbase-1){
+			$residuo = intval($residuo/$mbase);
+			if($mtempo >9 ){
+				$conve .= chr($mtempo+55);
+			}else{
+				$conve .= $mtempo;
+			}
+			$mtempo  = $residuo % $mbase;
+		}
+		if($mtempo >9 ){
+			$conve .= chr($mtempo+55);
+		}else{
+			$conve .= $mtempo;
+		}
+		return str_pad($conve, 5, '0', STR_PAD_LEFT);
+	}
 }

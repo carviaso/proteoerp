@@ -56,6 +56,7 @@ class Spreml extends Controller {
 
 		$adic = array(
 			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'ffact'  , 'title'=>'Convertir en factura'),
 			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
 			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
@@ -143,7 +144,6 @@ class Spreml extends Controller {
 			} else {
 				$.prompt("<h1>Por favor Seleccione una Orden</h1>");
 			}
-
 		});';
 
 		$bodyscript .= '
@@ -151,21 +151,26 @@ class Spreml extends Controller {
 			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				$.post("'.site_url('ventas/sfac/creafromspreml').'/"+ret.numero+"/create",
-				function(data){
-					$("#ffact").html(data);
-					$("#ffact").dialog( "open" );
-				});
+				if( ret.status == "C" ){
+					$.post("'.site_url('ventas/sfac/creafromspreml').'/"+ret.numero+"/insert",
+					function(data){
+						var json = JSON.parse(data);
+						if ( json.status == "A" ) {
+							$("#newapi'.$grid0.'").trigger("reloadGrid");
+							window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+						}
+					});
+				} else { $.prompt("<h1>Por favor Seleccione una Orden Confirmada</h1>");}
 			} else { $.prompt("<h1>Por favor Seleccione una Orden</h1>");}
-
 		});';
 
+/*
 		$bodyscript .= '
 		$("#facturar").click(function(){
 			var meco = "";
-			var id  = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
+				var ret = $("'.$ngrid.'").jqGrid(\'getRowData\',id);
 				if(ret.status != "P"){ return; };
 				var mgene = {
 				state0: {
@@ -206,8 +211,8 @@ class Spreml extends Controller {
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
-
 		});';
+*/
 		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
@@ -829,7 +834,7 @@ class Spreml extends Controller {
 		$edit->fecha->calendar=false;
 		$edit->fecha->size =10;
 		$edit->fecha->maxlength =8;
-		$edit->fechadep->insertValue = date('Y-m-d');
+		$edit->fecha->insertValue = date('Y-m-d');
 
 		$edit->rifci = new inputField('Cedula/RIF','rifci');
 		$edit->rifci->size =10;
@@ -1121,7 +1126,7 @@ $(function(){
 	}
 
 	//******************************************************************
-	//  valida orden y nombre ml
+	//  Valida orden y Nombre ML
 	function buscaspre(){
 		$numero    = $this->input->post('numero');
 		$mercalib  = $this->input->post('mercalib');

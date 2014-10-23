@@ -246,11 +246,10 @@ class Spre extends Controller {
 									if ( json.status == "A" ) {
 										if ( json.manual == "N" ) {
 											$( "#ffact" ).dialog( "close" );
-											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+											$("#newapi'.$grid0.'").trigger("reloadGrid");
 											window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
 											return true;
 										} else {
-
 											$.post("'.site_url($this->url.'dataedit/S/create').'",
 											function(data){
 												$("#ffact").html(data);

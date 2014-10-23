@@ -1182,12 +1182,14 @@ class Scli extends validaciones {
 	}
 
 
-	//**************************************************
-	//
+	//******************************************************************
 	//  SUGIERE UN CODIGO DE CLIENTE
 	//
-	//**************************************************
 	function proxcli( $mrifci='' ){
+		$mcliente = $this->datasis->proxcli($mrifci);
+		return $mcliente;
+	}
+/*
 		$mcliente = '';
 		$mvalor   = 0;
 		$mmeco    = 0;
@@ -1215,11 +1217,9 @@ class Scli extends validaciones {
 	}
 
 
-	//************************************************
-	//
+	//******************************************************************
 	//  PARA GENERAR CODIGOS
 	//
-	//************************************************
 	function _numatri(){
 		$numero = $this->datasis->prox_numero('ncodcli');
 		$residuo= $numero;
@@ -1242,8 +1242,11 @@ class Scli extends validaciones {
 		}
 		return str_pad($conve, 5, '0', STR_PAD_LEFT);
 	}
+*/
 
-	//Resumen rapido
+	//******************************************************************
+	//  Resumen rapido
+	//
 	function resumen() {
 		$id = $this->uri->segment($this->uri->total_segments());
 
@@ -1291,7 +1294,7 @@ class Scli extends validaciones {
 	}
 
 	//******************************************************************
-	//     DATAEDIT
+	//  DATAEDIT
 	//
 	function dataedit(){
 		$this->pi18n->cargar('scli','dataedit');
@@ -2439,6 +2442,7 @@ function chrif(rif){
 
 	//******************************************************************
 	// Permite crear un clientes desde otras interfaces
+	//
 	function creascli(){
 		$rifci=$this->input->post('rifci');
 		if(preg_match('/[VEJG][0-9]{9}$/',$rifci)>0){
@@ -2511,8 +2515,9 @@ function chrif(rif){
 
 	}
 
-
-	//Crea un cliente desde Pers AJAX
+	//******************************************************************
+	// Crea un cliente desde Pers AJAX
+	//
 	function creafrompers( $status=null, $id_pers=null ){
 		if($status=='insert' && !empty($id_pers)){
 			$codigo    = $this->input->post('codigo');
@@ -2750,13 +2755,13 @@ function chrif(rif){
 			$i=0;
 			$encon=false;
 			do{
-				$codcli  = $this->_numatri();
+				$codcli  = $this->datasis->numatri();
 				$dbcodcli= $this->db->escape($codcli );
-				$mSQL="SELECT COUNT(*) AS cana FROM scli WHERE cliente=${dbcodcli}";
-				$cana= intval($this->datasis->dameval($mSQL));
+				$mSQL = "SELECT COUNT(*) AS cana FROM scli WHERE cliente=${dbcodcli}";
+				$cana = intval($this->datasis->dameval($mSQL));
 				if($cana==0){
 					$do->set('cliente',$codcli);
-					$encon=true;
+					$encon = true;
 					break;
 				}
 				$i++;

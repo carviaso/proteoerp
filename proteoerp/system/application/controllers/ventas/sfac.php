@@ -2497,7 +2497,7 @@ class Sfac extends Controller {
 		$pago  = 0;
 		$encab = false;
 		//Revisa formas de pago sfpa
-		$mSQL = "SELECT tipo, numero, monto FROM sfpa WHERE transac=${dbtransac} AND numero=${dbnumero} AND monto<>0";
+		$mSQL = "SELECT tipo, num_ref, monto FROM sfpa WHERE transac=${dbtransac} AND numero=${dbnumero} AND monto<>0";
 		$query = $this->db->query($mSQL);
 		if($query->num_rows() > 0){
 			$encab = true;
@@ -2506,7 +2506,7 @@ class Sfac extends Controller {
 			foreach ($query->result_array() as $row){
 				$salida .= '<tr>';
 				$salida .= '<td>'.$row['tipo'].'</td>';
-				$salida .= '<td>'.$row['numero'].'</td>';
+				$salida .= '<td>'.$row['num_ref'].'</td>';
 				$salida .= '<td align=\'right\'>'.nformat($row['monto']).'</td>';
 				$salida .= '</tr>';
 				$pago += $row['monto'];
@@ -4569,8 +4569,9 @@ class Sfac extends Controller {
 		logusu($do->table,"Imprimio ${tipo_doc}${numero} factura $nfiscal");
 	}
 
-	
+	//******************************************************************
 	// Crea una factura desde un pedido
+	//
 	function creafrompfac($manual,$numero,$status=null){
 		$this->_url= $this->url.'dataedit/insert';
 
@@ -4656,6 +4657,7 @@ class Sfac extends Controller {
 
 	//******************************************************************
 	// Crea una factura desde un presupuesto
+	//
 	function creafromspre($manual,$numero,$status=null){
 		$this->_url= $this->url.'dataedit/insert';
 
@@ -4733,7 +4735,7 @@ class Sfac extends Controller {
 
 	//******************************************************************
 	// Crea una factura desde un presupuesto
-	function creafromspreml( $numero, $tipo=null){
+	function creafromspreml( $numero, $status=null ){
 		$this->_url= $this->url.'dataedit/insert';
 
 		$this->db->from('spreml AS a');
@@ -4745,23 +4747,45 @@ class Sfac extends Controller {
 		}
 
 		// Crea Cliente si no existe
-		$row   = $query->row();
-		$rifci = $row->rifci;
+		$spreml   = $query->row();
+		$rifci    = $spreml->rifci;
 		$mSQL = 'SELECT count(*) FROM scli WHERE rifci='.$this->db->escape($rifci);
 		$hay = $this->datasis->dameval($mSQL);
 		if ($hay == 0 ){
 			//CREA EL CLIENTE
-			echo 'Crea el cliente '.$rifci.' ';
+			$cod_cli = $this->datasis->proxcli($spreml->rifci);
+			$data = array (
+				'cliente'    => $cod_cli,
+				'rifci'      => $spreml->rifci,
+				'nombre'     => $spreml->nombre,
+				'nomfis'     => $spreml->nombre,
+				'mercalib'   => $spreml->mercalib,
+				'estado'     => $spreml->estado,
+				'tipo'       => '1',
+				'tiva'       => 'N',
+				'zona'       => $this->datasis->traevalor('ZONAXDEFECTO'),
+				'grupo'      => $this->datasis->dameval('SELECT grupo FROM grcl WHERE gr_desc like "%CONSUMIDOR%" OR gr_desc like "%FINAL%" OR gr_desc like "%PARTICULAR%"'),
+				'socio'      => $row->estado,
+				'dire11'     => substr($spreml->direccion,0,40),
+				'dire12'     => substr($spreml->direccion,40,40),
+				'ciudad1'    => $spreml->ciudad,
+				'telefono'   => $spreml->telefono,
+				'fb'         => '',
+				'pin'        => '',
+				'email'      => $spreml->email,
+				'twitter'    => '',
+				'cuenta'     => $this->datasis->dameval('SELECT cuenta FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"'),
+				'observa'    => ''
+				);
+				$this->db->insert('scli',$data);
 		} else {
 			$mSQL    = 'SELECT cliente FROM scli WHERE rifci='.$this->db->escape($rifci);
 			$cod_cli = $this->datasis->dameval($mSQL);
-			echo 'Cliente si existe'.$cod_cli.' '.$rifci;
 		}
-
-		return false;
-
-
-/*
+		// Coloca el cliente en spre
+		$this->db->where('numero',$numero);
+		$this->db->update('spre',array('cod_cli'=>$cod_cli));
+		
 		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
 		,'a.totals','a.iva','a.totalg');
 		$this->db->select($sel);
@@ -4770,9 +4794,8 @@ class Sfac extends Controller {
 		$this->db->where('a.numero',$numero);
 		$query = $this->db->get();
 
-		if ($query->num_rows() > 0 && $status=='create'){
+		if ($query->num_rows() > 0 && $status=='insert'){
 			$row = $query->row();
-
 			$_POST=array(
 				'btn_submit' => 'Guardar',
 				'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
@@ -4790,6 +4813,8 @@ class Sfac extends Controller {
 				'iva'        => $row->iva,
 				'totalg'     => $row->totalg,
 				'pfac'       => $numero,
+				'referen'    => 'M',
+				'snte'       => ''
 			);
 
 			$itsel=array('a.codigo','b.descrip AS desca','a.cana','a.preca','a.importe AS tota','b.iva',
@@ -4815,22 +4840,84 @@ class Sfac extends Controller {
 				$_POST["sinvpeso_${i}"] = $itrow->peso;
 				$_POST["sinvtipo_${i}"] = $itrow->tipo;
 				$_POST["detalle_${i}"]  = '';
-				$_POST["combo_$i"]      = '';
+				$_POST["combo_${i}"]    = '';
 				$i++;
 			}
 			//sfpa
 			$i=0;
-			$_POST["tipo_${i}"]      = '';
-			//$_POST["sfpafecha_${i}"] = '';
-			$_POST["num_ref_${i}"]   = '';
-			$_POST["banco_${i}"]     = '';
-			$_POST["monto_${i}"]     = 0;
+			$_POST["tipo_${i}"]      = $spreml->tipo_op;
+			$_POST["sfpafecha_${i}"] = $spreml->fechadep;
+			$_POST["num_ref_${i}"]   = $spreml->num_ref;
+			$_POST["banco_${i}"]     = $spreml->codbanc;
+			$_POST["monto_${i}"]     = $row->totalg;
 
-			$this->dataedit();
+			ob_start();
+				$this->dataedit();
+				$rt = ob_get_contents();
+			@ob_end_clean();
+			$id=0;
+			$getdata=json_decode($rt,true);
+			if($getdata['status']=='A'){
+				$id = $getdata['pk']['id'];
+				$this->db->where('numero',$numero);
+				$this->db->update("spreml",array( 'status'=>'F'));
+
+				$transac = $this->datasis->damerow("SELECT usuario, transac, estampa, hora FROM sfac WHERE id=".$id);
+
+				// Guarda el deposito
+				$sfpatipo  = $spreml->tipo_op;
+				$codbanc   = $spreml->codbanc;
+				$monto     = $spreml->totalg;
+				$fecha     = $spreml->fechadep;
+				$num_ref   = $spreml->num_ref;
+				$dbcodbanc = $this->db->escape($codbanc);
+				
+				// Crea en bmov el movimiento
+				$sql ='SELECT tbanco,moneda,banco,saldo,depto,numcuent FROM banc WHERE codbanc='.$dbcodbanc;
+				$fila=$this->datasis->damerow($sql);
+
+				$ffecha  = $fecha;
+				$itdbdata=array();
+				$itdbdata['codbanc']  = $codbanc;
+				$itdbdata['moneda']   = $fila['moneda'];
+				$itdbdata['numcuent'] = $fila['numcuent'];
+				$itdbdata['banco']    = $fila['banco'];
+				$itdbdata['saldo']    = $monto;
+				$itdbdata['tipo_op']  = $sfpatipo;
+				$itdbdata['numero']   = $num_ref;
+				$itdbdata['fecha']    = $fecha;
+				$itdbdata['clipro']   = 'C';
+				$itdbdata['codcp']    = $cod_cli;
+				$itdbdata['nombre']   = $spreml->nombre;
+				$itdbdata['monto']    = $monto;
+				$itdbdata['bruto']    = $monto;
+				$itdbdata['concepto'] = 'INGRESO POR ORDEN ML';
+				$itdbdata['concep2']  = '';
+				$itdbdata['status']   = 'P';
+				$itdbdata['liable']   = 'S';
+				
+				$itdbdata['transac']  = $transac['transac'];
+				$itdbdata['usuario']  = $transac['usuario'];
+				$itdbdata['estampa']  = $transac['estampa'];
+				$itdbdata['hora']     = $transac['hora'];
+				
+				$itdbdata['negreso']  = '';
+				$itdbdata['anulado']  = 'N';
+				$mSQL = $this->db->insert_string('bmov', $itdbdata);
+				$ban=$this->db->simple_query($mSQL);
+				//if($ban==false){ memowrite($mSQL,'ccli'); }
+
+				$fecha=str_replace( '-', '', $fecha );
+				$this->datasis->actusal($codbanc, $fecha, $monto);
+		
+				echo $rt;
+			}else{
+				echo $rt;
+			}
 		}else{
 			echo 'Orden no existe';
 		}
-*/
+
 	}
 
 	//******************************************************************
@@ -5093,7 +5180,6 @@ class Sfac extends Controller {
 					echo $getdata['mensaje'];
 				}
 			}
-			//force_download('inprin.prn', preg_replace("/[\r]*\n/","\r\n",$data));
 		}
 	}
 

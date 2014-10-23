@@ -1277,22 +1277,14 @@ class Smov extends Controller {
 		$form->script($script);
 
 		$form->cliente = new inputField('Cliente', 'cod_cli');
-		//$form->cliente->rule = "trim|required|max_length[20]";
 
 		$form->id = new hiddenField('', 'id_scli');
 		$form->id->in='cliente';
 
 		$form->nombre = new freeField('Nombre','nombre','<b id=\'nombre_val\'></b>');
-
 		$form->rif    = new freeField('RIF/CI','rif','<b id=\'rifci_val\'></b>');
-
 		$form->direc  = new freeField('Direcci&oacute;n','direc','<b id=\'direc_val\'></b>');
-
 		$form->saldo  = new freeField('Saldo','saldo','<b style="font-size:2em" id=\'saldo_val\'></b>');
-
-		//$form->body = new textareaField("Body", "body");
-		//$form->body->rule = "required";
-		//$form->body->rows = 10;
 
 		$form->build_form();
 
@@ -1405,10 +1397,8 @@ class Smov extends Controller {
 		}
 	}
 
-	//************************************
+	//******************************************************************
 	// Cobro a clientes
-	//************************************
-
 	function ccli($id_scli){
 		$id_scli=intval($id_scli);
 		$row = $this->datasis->damerow("SELECT cliente,nombre,rifci FROM scli WHERE id=${id_scli}");

@@ -108,16 +108,6 @@ class Sclicont extends Controller {
 		});
 		';
 
-/*
-		$("#gfactura").click(function(){
-			var murl = "'.site_url('ventas/sfac/lote/insert').'";
-			$.post(murl, function (data){  
-				$.prompt("<h1>Facturacion Concluida</h1>"+data);
-			});
-		});
-		';
-*/
-
 		$bodyscript .= '</script>';
 
 		return $bodyscript;
