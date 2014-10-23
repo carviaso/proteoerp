@@ -371,7 +371,6 @@ de 9:00 am a 1:00 pm y de 2:00 pm a 6:00 pm.
 No responder a este correo, debe obligatoriamente llenar sus datos en la página 
 web indicada en el paso 2 con el número de orden correspondiente. No se 
 procesará ninguna información que sea enviada a este correo, ni se tomarán 
-Si hace el pago por MercadoPago, seguir directamente al paso 2)
 datos vía telefónica.";
 
 		$this->datasis->correo( $row->email, 'Instrucciones de Compra'.$row->numero, utf8_decode($notifica) );

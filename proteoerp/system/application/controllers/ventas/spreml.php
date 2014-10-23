@@ -1030,12 +1030,15 @@ Saludos cordiales.\n";
 
 			$contenido  = '<h1>GRACIA POR SU COMPRA</h1>';
 			$contenido .= '
-			<p>En breves momentos recibira un correo confirmando la recepcion de
-			esta pagos.
-			Una vez confirmado el mismo, se prepara el pedido y se envia segun las
-			instrucciones de este correo y recibira un correo con el numero de guia
-			de la enpresa de transporte
-			</p>
+<h1>Felicitaciones !!!</h1>
+
+<p>Su información ha sido recibida satisfactoriamente. 
+Una vez confirmado su pago procederemos a hacer el despacho de su artículo. 
+En un lapso de 24 Horas le haremos llegar a su correo el número de guia Zoom 
+correspondiente.</p>
+
+<h1>Gracias por su Compra!!!</h1>
+
 			<button onclick="volver()">Volver</button>
 			<script>
 			function volver(){
