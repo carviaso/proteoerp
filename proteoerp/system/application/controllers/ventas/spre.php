@@ -42,8 +42,9 @@ class Spre extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'boton1',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir'));
-		$grid->wbotonadd(array('id'=>'bffact',  'img'=>'images/star.png'                ,'alt' => 'Facturar'  , 'label'=>'Facturar'));
+		$grid->wbotonadd(array('id'=>'boton1',  'img'=>'assets/default/images/print.png',   'alt' => 'Reimprimir', 'label'=>'Reimprimir'));
+		$grid->wbotonadd(array('id'=>'bffact',  'img'=>'images/star.png',                   'alt' => 'Facturar'  , 'label'=>'Facturar'));
+		$grid->wbotonadd(array('id'=>'bcorreo', 'img'=>'assets/default/images/mail_btn.png','alt' => 'Notificacion', 'label'=>'Notificacion'));
 
 		$WestPanel = $grid->deploywestp();
 
@@ -185,6 +186,20 @@ class Spre extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione un Presupuesto</h1>");}
 		});';
 
+
+		$bodyscript .= '
+		$("#bcorreo").click(function(){
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				$.post("'.site_url('ventas/spre/notifica').'/"+id,
+				function(data){
+					alert("Correo enviado");
+				});
+			} else { $.prompt("<h1>Por favor Seleccione un Presupuesto</h1>");}
+		});';
+
+
 		$bodyscript .= '
 		$("#fedita").dialog({
 			autoOpen: false, height: 550, width: 800, modal: true,
@@ -312,6 +327,59 @@ class Spre extends Controller {
 		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
+
+	//******************************************************************
+	// Notificar por Correo
+	function notifica( $id = 0 ){
+		if ( $id == 0 )
+			$id = $this->uri->segment($this->uri->total_segments());
+		$id = intval($id);
+		$query = $this->db->query("SELECT * FROM spre WHERE id=".$id);
+		$msj = 'No hay correo para enviar';
+		if ( $query->num_rows() > 0 ){
+			$msj = 'Correo enviado';
+			$row = $query->row();
+			$notifica = "
+Muchas gracias por su compra. Su número de orden es: ".$row->numero."
+
+Estos son los pasos para concretar su compra. 
+1) Puede depositar o transferir a las siguientes cuentas:
+
+COEX TRADE C.A. J-40386086-6
+BICENTENARIO Cta. 0175-0011-2300-7305-1179 
+VENEZUELA    Cta. 0102-0441-1000-0023-3563 
+BNC          Cta. 0191-0093-6721-9303-0443 
+MERCANTIL    Cta. 0105-0065-6410-6538-5552 
+
+Miguel Calello  E-84.570.975
+PROVINCIAL Cta. 0108-0120-6501-0004-1734 
+
+FACUNDO CALELLO E-84.571.125
+BANESCO Cta. 0134-0030-0103-0102-9938 
+
+El monto a depositar es de Bs: ".$row->totalg."
+
+2) Ingresar a la página: www.tecbloom.com y registre todos los datos 
+solicitados, su número de orden está al comienzo de este correo. Los datos 
+ingresados son los mismos que se procesarán, por favor llenar los campos 
+indicados cuidadosamente. Si se encuentra en la ciudad de Mérida o desea retirar 
+personalmente en nuestra tienda, la dirección es la siguiente: Av. 2 Lora, esquina 
+calle 18, C.C. Las Pirámides, planta baja, local 14, pasos arriba de Corredor 
+Hermanos. Mérida, estado Mérida, de Lunes a Sábado en horario comprendido 
+de 9:00 am a 1:00 pm y de 2:00 pm a 6:00 pm.
+
+No responder a este correo, debe obligatoriamente llenar sus datos en la página 
+web indicada en el paso 2 con el número de orden correspondiente. No se 
+procesará ninguna información que sea enviada a este correo, ni se tomarán 
+Si hace el pago por MercadoPago, seguir directamente al paso 2)
+datos vía telefónica.";
+
+		$this->datasis->correo( $row->email, 'Instrucciones de Compra'.$row->numero, utf8_decode($notifica) );
+		
+		}
+		echo $msj;
+	}
+
 
 	//******************************************************************
 	// Definicion del Grid y la Forma

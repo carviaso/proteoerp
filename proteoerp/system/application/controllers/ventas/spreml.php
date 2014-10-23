@@ -250,9 +250,25 @@ class Spreml extends Controller {
 		$email  = $this->datasis->dameval('SELECT email  FROM spreml WHERE id='.$id);
 		$numero = $this->datasis->dameval('SELECT numero FROM spreml WHERE id='.$id);
 		// Envia correo
-		$notifica  = "Su orden Nro. ${numero} fue enviado por el transporte, con el Nro de guia ${guia} de fecha ${fecha1}.\n";
-		$notifica .= "Gracias por preferirnos.\n";
-		$this->datasis->correo( $email, 'Notificacion de Envio '.$numero, $notifica );
+		$notifica  = "		
+Estimado cliente, ya se procesó el envío de su pedido.\n\n
+           No de guia: ${numero}\n\n
+Por favor tome en cuenta que el envío va asegurado por ZOOM, 
+al retirar el paquete ábralo y verifíquelo dentro de las oficinas de 
+ZOOM, debe estar completo, sin daños en pantalla y/o accesorios; 
+una vez se haya retirado de las oficinas de ZOOM, ellos dejan de 
+hacerse responsables de algún daño o percance; de igual manera 
+en caso de entrega a domicilio deberá hacer la verificación en 
+presencia del mensajero de ZOOM. 
+Puede rastrear su envío a 
+través de http://www.grupozoom.com/ en la sección de Rastreo de 
+envíos o a través del 0800-7679666 (opción 1).\n
+Cualquier inquietud no dude en comunicarse con nosotros. Gracias 
+por preferirnos, no olvide calificarnos en MercadoLibre para activar su 
+garantía, ya nosotros lo hemos hecho de manera POSITIVA (+).\n
+Saludos cordiales.\n";
+
+		$this->datasis->correo( $email, 'Notificacion de Envio '.$numero, utf8_decode($notifica) );
 		
 
 		echo $msj.$guia." ".$fecha;
@@ -995,6 +1011,7 @@ class Spreml extends Controller {
 		$edit->totalg->css_class='inputnum';
 		$edit->totalg->size =10;
 		$edit->totalg->maxlength =12;
+		$edit->totalg->readonly  = true;
 
 		$edit->observa = new textareaField('Observacion','observa');
 		$edit->observa->rule='';
