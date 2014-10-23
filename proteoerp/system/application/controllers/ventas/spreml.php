@@ -251,8 +251,8 @@ class Spreml extends Controller {
 		$numero = $this->datasis->dameval('SELECT numero FROM spreml WHERE id='.$id);
 		// Envia correo
 		$notifica  = "		
-Estimado cliente, ya se procesó el envío de su pedido.\n\n
-           No de guia: ${numero}\n\n
+Estimado cliente, ya se procesó el envío de su pedido Nro ${numero}.\n\n
+           El No de guia es ${guia}\n\n
 Por favor tome en cuenta que el envío va asegurado por ZOOM, 
 al retirar el paquete ábralo y verifíquelo dentro de las oficinas de 
 ZOOM, debe estar completo, sin daños en pantalla y/o accesorios; 
