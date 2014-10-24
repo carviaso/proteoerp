@@ -1103,16 +1103,16 @@ class Ordi extends Controller {
 		$mSQL="SELECT SUM(a.importefob) AS montofob, SUM(b.peso) AS pesotota
 			FROM itordi AS a
 			JOIN sinv AS b ON a.codigo=b.codigo
-			WHERE numero=$dbid";
+			WHERE numero=${dbid}";
 		$row=$this->datasis->damerow($mSQL);
 
 		$pesotota= $row['pesotota'];
 		$montofob= $row['montofob'];
-		$estimac = $this->datasis->dameval("SELECT SUM(monto)    AS monto    FROM ordiestima WHERE ordeni=$dbid");
-		$gastosi = $this->datasis->dameval("SELECT SUM(monto)    AS gastosi  FROM gseri WHERE ordeni=$dbid");
-		$gsermon = $this->datasis->dameval("SELECT SUM(totpre)   AS gastosn  FROM gser  WHERE ordeni=$dbid AND tipo_doc<>'XX'");
-		$montoiva= $this->datasis->dameval("SELECT SUM(montoiva) AS montoiva FROM ordiva WHERE ordeni=$dbid");
-		$baseiva = $this->datasis->dameval("SELECT SUM(base)     AS base     FROM ordiva WHERE ordeni=$dbid");
+		$estimac = $this->datasis->dameval("SELECT SUM(monto)    AS monto    FROM ordiestima WHERE ordeni=${dbid}");
+		$gastosi = $this->datasis->dameval("SELECT SUM(monto)    AS gastosi  FROM gseri  WHERE ordeni=${dbid}");
+		$gsermon = $this->datasis->dameval("SELECT SUM(totpre)   AS gastosn  FROM gser   WHERE ordeni=${dbid} AND tipo_doc<>'XX'");
+		$montoiva= $this->datasis->dameval("SELECT SUM(montoiva) AS montoiva FROM ordiva WHERE ordeni=${dbid}");
+		$baseiva = $this->datasis->dameval("SELECT SUM(base)     AS base     FROM ordiva WHERE ordeni=${dbid}");
 		if(empty($estimac))  $estimac =0;
 		if(empty($gsermon))  $gsermon =0;
 		if(empty($gastosi))  $gastosi =0;
@@ -1120,7 +1120,7 @@ class Ordi extends Controller {
 		if(empty($baseiva))  $baseiva =0;
 		$gastosn = $estimac+$gsermon;
 
-		$mSQL="SELECT cambioofi, cambioreal FROM ordi WHERE numero=$dbid";
+		$mSQL="SELECT cambioofi, cambioreal FROM ordi WHERE numero=${dbid}";
 		$row=$this->datasis->damerow($mSQL);
 
 		$cambioofi =$row['cambioofi'];
@@ -1133,51 +1133,51 @@ class Ordi extends Controller {
 		}
 
 		//Calcula las participaciones
-		$mSQL="UPDATE itordi AS a JOIN sinv AS b ON a.codigo=b.codigo SET a.participao=b.peso/$pesotota, a.iva=b.iva WHERE a.numero=$dbid";
+		$mSQL="UPDATE itordi AS a JOIN sinv AS b ON a.codigo=b.codigo SET a.participao=b.peso/${pesotota}, a.iva=b.iva WHERE a.numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
-		$mSQL="UPDATE itordi SET participam=importefob/$montofob WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET participam=importefob/${montofob} WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
 
 		//CIF costo,seguro y flete (fob+gastos internacionales)
-		$mSQL="UPDATE itordi SET importecif=($participa*$gastosi)+importefob WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET importecif=(${participa}*${gastosi})+importefob WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
-		$mSQL="UPDATE itordi SET costocif=importecif/cantidad WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET costocif=importecif/cantidad WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
-		$mSQL="UPDATE itordi SET importeciflocal=importecif*$cambioofi,importecifreal=importecif*$cambioreal WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET importeciflocal=importecif*${cambioofi},importecifreal=importecif*${cambioreal} WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
 
 		//Monto del arancel (debe ser en moneda local)
-		$mSQL="UPDATE itordi SET montoaran=IF(arancif>0,arancif,importeciflocal)*(arancel/100) WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET montoaran=IF(arancif>0,arancif,importeciflocal)*(arancel/100) WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
 
 		//Gastos
-		$montoaran =$this->datasis->dameval("SELECT SUM(montoaran) AS montoaran FROM itordi WHERE numero=$dbid");
-		$montoiva  =$this->datasis->dameval("SELECT SUM(montoiva)  AS montoiva  FROM ordiva WHERE ordeni=$dbid");
+		$montoaran =$this->datasis->dameval("SELECT SUM(montoaran) AS montoaran FROM itordi WHERE numero=${dbid}");
+		$montoiva  =$this->datasis->dameval("SELECT SUM(montoiva)  AS montoiva  FROM ordiva WHERE ordeni=${dbid}");
 		$ggastosn=$gastosn-$montoaran-$montoiva;
-		$mSQL="UPDATE itordi SET gastosi=$participa*$gastosi WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET gastosi=${participa}*${gastosi} WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
-		$mSQL="UPDATE itordi SET gastosn=$participa*$ggastosn WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET gastosn=${participa}*${ggastosn} WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
 
 		//Total en moneda local
-		$mSQL="UPDATE itordi SET importefinal=importeciflocal+montoaran+gastosn WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET importefinal=importeciflocal+montoaran+gastosn WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
-		$mSQL="UPDATE itordi SET costofinal=importefinal/cantidad WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET costofinal=importefinal/cantidad WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
-		$mSQL="UPDATE itordi SET importereal=importecifreal+montoaran+gastosn WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET importereal=importecifreal+montoaran+gastosn WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
-		$mSQL="UPDATE itordi SET costoreal=importereal/cantidad WHERE numero=$dbid";
+		$mSQL="UPDATE itordi SET costoreal=importereal/cantidad WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
 
@@ -1187,11 +1187,12 @@ class Ordi extends Controller {
 			a.precio2=(costoreal*100/(100-b.margen2))*(1+(b.iva/100)),
 			a.precio3=(costoreal*100/(100-b.margen3))*(1+(b.iva/100)),
 			a.precio4=(costoreal*100/(100-b.margen4))*(1+(b.iva/100))
-			WHERE numero=$dbid";
+			WHERE numero=${dbid}";
 		$ban=$this->db->simple_query($mSQL);
 		if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
 
-		$mSQL="SELECT SUM(montoaran) AS aranceles, SUM(importecif) AS montocif  FROM itordi WHERE numero=$dbid";
+		$montocif=0;
+		$mSQL="SELECT SUM(montoaran) AS aranceles, SUM(importecif) AS montocif  FROM itordi WHERE numero=${dbid}";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row_array();
@@ -1204,8 +1205,9 @@ class Ordi extends Controller {
 			$row['montotot']=$importecif+$gastosn;
 			$row['montoexc']=$row['montotot']-$baseiva-$montoiva;//monto excento
 			$row['cargoval']=($row['montocif']*$cambioreal)-($row['montocif']*$cambioofi);// Diferencia dolar real y oficial
+			$montocif=floatval($gastosi);
 
-			$where = "numero=$dbid";
+			$where = "numero=${dbid}";
 			$str = $this->db->update_string('ordi', $row, $where);
 			$ban=$this->db->simple_query($str);
 			if(!$ban){ memowrite($mSQL,'ordi'); $error++; }
@@ -1779,7 +1781,7 @@ class Ordi extends Controller {
 			var_dump($this->db->simple_query($mSQL));
 		}
 
-		if (!$this->db->table_exists('itordi')) {
+		if(!$this->db->table_exists('itordi')){
 			$mSQL="CREATE TABLE `itordi` (
 				`numero` INT(15) UNSIGNED NOT NULL,
 				`fecha` DATE NULL DEFAULT NULL,
@@ -1790,16 +1792,19 @@ class Ordi extends Controller {
 				`importefob` DECIMAL(17,2) NULL DEFAULT NULL,
 				`gastosi` DECIMAL(17,2) NULL DEFAULT NULL,
 				`costocif` DECIMAL(17,2) NULL DEFAULT NULL,
-				`importecif` DECIMAL(19,4) NULL DEFAULT NULL,
+				`importecif` DECIMAL(17,2) NULL DEFAULT NULL,
 				`importeciflocal` DECIMAL(17,2) NULL DEFAULT NULL COMMENT 'importe cif en moneda local',
+				`importecifreal` DECIMAL(17,2) NULL DEFAULT NULL COMMENT 'importe cif en moneda local al cambio real',
 				`codaran` CHAR(15) NULL DEFAULT NULL,
 				`arancel` DECIMAL(7,2) NULL DEFAULT NULL,
 				`montoaran` DECIMAL(17,2) NULL DEFAULT NULL,
 				`gastosn` DECIMAL(17,2) NULL DEFAULT NULL,
 				`costofinal` DECIMAL(17,2) NULL DEFAULT NULL,
 				`importefinal` DECIMAL(17,2) NULL DEFAULT NULL,
-				`participam` DOUBLE NULL DEFAULT NULL,
-				`participao` DOUBLE NULL DEFAULT NULL,
+				`costoreal` DECIMAL(17,2) NULL DEFAULT NULL COMMENT 'costo unitario al dolar real',
+				`importereal` DECIMAL(17,2) NULL DEFAULT NULL COMMENT 'importe al dolar real',
+				`participam` DECIMAL(9,6) NULL DEFAULT NULL,
+				`participao` DECIMAL(9,6) NULL DEFAULT NULL,
 				`arancif` DECIMAL(17,4) NULL DEFAULT '0.0000' COMMENT 'Monto del valor en base al cual se calcula el motoaran',
 				`iva` DECIMAL(17,2) NULL DEFAULT NULL,
 				`precio1` DECIMAL(15,2) NULL DEFAULT NULL,
@@ -1816,7 +1821,7 @@ class Ordi extends Controller {
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM
 			ROW_FORMAT=FIXED
-			AUTO_INCREMENT=0";
+			AUTO_INCREMENT=1";
 			var_dump($this->db->simple_query($mSQL));
 		}
 
@@ -1857,11 +1862,11 @@ class Ordi extends Controller {
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM
 			ROW_FORMAT=DYNAMIC
-			AUTO_INCREMENT=0";
+			AUTO_INCREMENT=1";
 			var_dump($this->db->simple_query($mSQL));
 		}
 
-		if (!$this->db->table_exists('ordiva')) {
+		if(!$this->db->table_exists('ordiva')){
 			$mSQL="CREATE TABLE `ordiva` (
 				`id` INT(15) UNSIGNED NOT NULL AUTO_INCREMENT,
 				`ordeni` INT(15) UNSIGNED NULL DEFAULT NULL,
@@ -1879,7 +1884,7 @@ class Ordi extends Controller {
 			var_dump($this->db->simple_query($mSQL));
 		}
 
-		if (!$this->db->table_exists('gseri')) {
+		if(!$this->db->table_exists('gseri')){
 			$mSQL="CREATE TABLE `gseri` (
 			`ordeni` INT(15) UNSIGNED NOT NULL,
 			`fecha` DATE NOT NULL DEFAULT '0000-00-00',

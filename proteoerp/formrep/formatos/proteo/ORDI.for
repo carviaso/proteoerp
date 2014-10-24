@@ -244,7 +244,7 @@ foreach ($detalle1 AS $items){ $i++;
 				<td style="text-align: right"> <?php echo $items->cantidad?></td>
 				<td style="text-align: right;"><?php echo nformat($items->costofob) ?></td>
 				<td style="text-align: right;"><?php echo nformat($items->importefob) ?></td>
-				<td style="text-align: center"><?php echo nformat($items->participam*100) ?></td>
+				<td style="text-align: center"><?php echo nformat($items->participam*100,4) ?></td>
 				<td style="text-align: right;"><?php echo nformat($items->gastosi) ?></td>
 				<td style="text-align: right;"><?php echo nformat($items->importecif) ?></td>
 				<td style="text-align: right;"><?php echo nformat($importecifreal) ?></td>
@@ -269,7 +269,7 @@ foreach ($detalle1 AS $items){ $i++;
 	} while ($clinea);
 }
 
-echo sprintf($pie_final,nformat($montofob),nformat($gastosi),nformat($montocif),nformat($t_importecifreal),nformat($aranceles),nformat($gastosn),nformat($t_importenacional));
+echo sprintf($pie_final,($montofob),($gastosi),($montocif),nformat($t_importecifreal),($aranceles),($gastosn),nformat($t_importenacional));
 
 $lineas+=$det3encab;
 //******************************

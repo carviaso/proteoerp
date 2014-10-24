@@ -1,8 +1,8 @@
-<?php 
-/** 
- * ProteoERP 
- * 
- * @autor    Andres Hocevar 
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
  * @license  GNU GPL v3
 */
 if (!defined('BASEPATH')) exit('No direct script access allowed');
@@ -21,7 +21,7 @@ class limport extends Controller {
 		$mSQL_1="SELECT numero, fecha, status, proveed, nombre, agente, nomage, montofob, gastosi, montocif,
 		aranceles, gastosn, montotot, montoiva, montoexc, arribo, factura, cambioofi, cambioreal, peso, transac,
 		estampa, usuario, hora, dua, cargoval, control, crm
-		FROM ordi WHERE numero=$dbnumero";
+		FROM ordi WHERE numero=${dbnumero}";
 
 		$fnombre='liquidacion.xls';
 		$fname = tempnam('/tmp',$fnombre);
@@ -215,7 +215,7 @@ class limport extends Controller {
 		importecifreal-importeciflocal AS cargo,
 		importecifreal+gastosn+montoaran AS importenac,
 		(importecifreal+gastosn+montoaran)/cantidad AS cunitario
-		FROM itordi WHERE numero=$dbnumero";
+		FROM itordi WHERE numero=${dbnumero}";
 
 		$mc=$this->db->query($mSQL);
 		if($mc->num_rows() > 0){
