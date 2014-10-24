@@ -441,6 +441,7 @@ class Reparto extends Controller {
 		});
 		$("#bpos1").jqGrid(\'navGrid\',"#pbpos1",{edit:false, add:false, del:false, search: true });
 		$("#bpos1").jqGrid(\'filterToolbar\');
+		$("#gbox_bpos1").find(".clearsearchclass").remove();
 
 		function fsele(el, val, opts){
 			var meco=\'<div><img src="'.base_url().'images/circuloverde.png" border="0" /></div>\';

@@ -3684,7 +3684,7 @@ class Sinv extends Controller {
 		$edit->button_status('btn_add_sinvplabor','Agregar','javascript:add_sinvplabor()','LA','modify','button_add_rel');
 
 /*
-		$plim = $this->datasis->sidapuede('SINVOTR', 'FIJA_MARG()'); 
+		$plim = $this->datasis->sidapuede('SINVOTR', 'FIJA_MARG()');
 		if(!$plim){
 			$edit->pond->mode    = 'autohide';
 			$edit->ultimo->mode  = 'autohide';

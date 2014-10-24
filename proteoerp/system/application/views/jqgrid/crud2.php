@@ -272,8 +272,8 @@ if ( isset($tamano) )
 		echo "\n\twindow.resizeTo(".$tamano[0].",".$tamano[1].");\n";
 
 ?>
-
-
+	$('.clearsearchclass').css('padding-right','0');
+	$('.clearsearchclass').css('padding-left' ,'0');
 });
 
 <?php if (isset($postready))  echo $postready; ?>
@@ -299,10 +299,10 @@ function esperar(url){
 </head>
 <body  id="dt_proteo">
 
-<?php 
+<?php
 if ( $target <> 'dialogo')
-	echo '<div class="ui-layout-north" >'.$cintu.'</div>'; 
-	echo (isset($WestPanel) == true)? $WestPanel:''; 
+	echo '<div class="ui-layout-north" >'.$cintu.'</div>';
+	echo (isset($WestPanel) == true)? $WestPanel:'';
 
 if(isset($centerpanel) == true) {
 	echo $centerpanel;
@@ -311,14 +311,15 @@ if(isset($centerpanel) == true) {
 	<table id="newapi<?php echo $grids[0]['gridname'];?>"></table>
 	<div   id="pnewapi<?php echo $grids[0]['gridname'];?>"></div>
 </div> <!-- #RightPane -->
-<?php } 
+<?php }
 
 if (isset($SouthPanel) == true ){
-	if ( $target == 'dialogo'){
+	if($target == 'dialogo'){
 		echo substr($SouthPanel,strpos($SouthPanel,'-->')+3);
-	} else
-		echo $SouthPanel; 
+	}else{
+		echo $SouthPanel;
 	}
+}
 ?>
 
 <div id="dtg_dialog" title="Exporta Datos">
@@ -333,6 +334,6 @@ if (isset($SouthPanel) == true ){
 
 <?php if(isset($bodyscript)) echo $bodyscript; ?>
 
-<div id="displayBox" style="display:none" ><p>Disculpe por la espere.....</p><img  src="<?php echo base_url() ?>images/doggydig.gif" width="131px" height="79px"/></div>
+<div id="displayBox" style="display:none" ><p>Disculpe por la espera.....</p><img  src="<?php echo base_url() ?>images/doggydig.gif" width="131px" height="79px"/></div>
 </body>
 </html>

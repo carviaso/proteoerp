@@ -315,7 +315,7 @@ class Snte extends Controller {
 		//Convierte Factura
 		$bodyscript .= '
 			$("#ffact").dialog({
-				autoOpen: false, height: 600, width: 800, modal: true,
+				autoOpen: false, height: 600, width: 840, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;

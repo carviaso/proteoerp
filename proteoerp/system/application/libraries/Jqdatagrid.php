@@ -1098,16 +1098,17 @@ class Jqdatagrid
 		}
 
 		if(!empty($filters)){
+
 			$mQUERY = $this->constructWhere($filters);
 			foreach($mQUERY as $busca){
 				if(trim(strtoupper($busca[0])) == 'LIKE'){
-					if(strtoupper($busca[3])=='OR'){
+					if(strtoupper($busca[4])=='OR'){
 						$this->CI->db->or_like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
 					}else{
 						$this->CI->db->like( $busca[1], str_replace($comodin,'%', $busca[2]), $busca[3] );
 					}
 				}else{
-					if(strtoupper($busca[3]) == 'OR'){
+					if(strtoupper($busca[4]) == 'OR'){
 						$this->CI->db->or_where( $busca[1], $busca[2]);
 					}else{
 						$this->CI->db->where( $busca[1], $busca[2]);
@@ -1319,22 +1320,22 @@ class Jqdatagrid
 		$mWHERE = array();
 		//['eq','ne','lt','le','gt','ge','bw','bn','in','ni','ew','en','cn','nc']
 		$qopers = array(
-						'eq'=>" = ",
-						'ne'=>" <> ",
-						'lt'=>" < ",
-						'le'=>" <= ",
-						'gt'=>" > ",
-						'ge'=>" >= ",
-						'bw'=>" LIKE ",
-						'bn'=>" NOT LIKE ",
-						'in'=>" IN ",
-						'ni'=>" NOT IN ",
-						'ew'=>" LIKE ",
-						'en'=>" NOT LIKE ",
-						'cn'=>" LIKE " ,
-						'nc'=>" NOT LIKE " );
+						'eq'=>' = ',
+						'ne'=>' <> ',
+						'lt'=>' < ',
+						'le'=>' <= ',
+						'gt'=>' > ',
+						'ge'=>' >= ',
+						'bw'=>' LIKE ',
+						'bn'=>' NOT LIKE ',
+						'in'=>' IN ',
+						'ni'=>' NOT IN ',
+						'ew'=>' LIKE ',
+						'en'=>' NOT LIKE ',
+						'cn'=>' LIKE ' ,
+						'nc'=>' NOT LIKE ' );
 
-		$operador = array(" <> "," < "," <= "," > "," >= ");
+		$operador = array(' <> ',' < ',' <= ',' > ',' >= ');
 
 
 		if($s){

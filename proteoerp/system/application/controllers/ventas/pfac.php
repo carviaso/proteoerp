@@ -1659,8 +1659,6 @@ class Pfac extends Controller {
 		}
 		$modoiva = $this->datasis->traevalor('MODOIVA');
 
-		//$transac = $this->datasis->fprox_numero('ntransa');
-		//$do->set('transac', $transac);
 		$fecha = $do->get('fecha');
 		$vd    = $do->get('vd');
 
@@ -1704,6 +1702,9 @@ class Pfac extends Controller {
 			$do->set_rel('itpfac', 'mostrado', $mostrado, $i);
 		}
 		$totalg = $totals + $iva;
+
+		$transac = $this->datasis->fprox_numero('ntransa');
+		$do->set('transac', $transac);
 
 		$do->set('totals' , round($totals , 2));
 		$do->set('totalg' , round($totalg , 2));
