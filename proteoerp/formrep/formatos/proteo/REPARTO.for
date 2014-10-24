@@ -169,7 +169,7 @@ foreach ($detalle2 AS $items){ $i++;
 						$uline   = array_shift($arr_des);
 						echo $this->us_ascii2html($uline).'<br />';
 						$lineas++;
-						if($lineas >= $maxlin){
+						if($lineas >= $maxlin && count($detalle2)!=$i){
 							$lineas =0;
 							$npagina=true;
 							if(count($arr_des)>0){
@@ -200,8 +200,10 @@ foreach ($detalle2 AS $items){ $i++;
 if($i>0){
 	echo sprintf($pie_final,nformat($canat ),nformat($pesot));
 }
-if($lineas==$maxlin)
+if($lineas==$maxlin){
 	echo '<div style="page-break-before: always;"></div>';
+	$npagina=true;
+}
 
 //************************************
 // Lista de articulos

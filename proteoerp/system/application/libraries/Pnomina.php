@@ -47,7 +47,7 @@ class fnomina {
 	}
 
 	function SUELDO_SEM(){
-		$CODIGO=$this->ci->db->escape($this->CODIGO);
+		$CODIGO  = $this->ci->db->escape($this->CODIGO);
 		$SUELDOA = 0;
 		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=${CODIGO}");
 		$mMONTO  = floatval($this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=${CODIGO}"));
@@ -64,13 +64,13 @@ class fnomina {
 
 	// CALCULA EL SUELDO POR DIA
 	function SUELDO_DIA(){
-		$CODIGO=$this->ci->db->escape($this->CODIGO);
+		$CODIGO  = $this->ci->db->escape($this->CODIGO);
 		$SUELDOA = 0;
 		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=$CODIGO");
 		$mMONTO  = $this->SUELDO;
 		//$this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=$CODIGO");
 
-		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
+		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=${CODIGO}");
 		if($mFRECU == 'S') $SUELDOA = $mMONTO/7 ;
 		if($mFRECU == 'B') $SUELDOA = $mMONTO/14;
 		if($mFRECU == 'Q') $SUELDOA = $mMONTO/15;
@@ -80,12 +80,12 @@ class fnomina {
 
 	// CALCULA EL SUELDO PROMEDIO POR DIA
 	function SUELDO_DIA_PROM(){
-		$CODIGO=$this->ci->db->escape($this->CODIGO);
+		$CODIGO  = $this->ci->db->escape($this->CODIGO);
 		$SUELDOA = 0;
 		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=${CODIGO}");
 		$mMONTO  = $this->SPROME;
 
-		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
+		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=${CODIGO}");
 		if($mFRECU == 'S') $SUELDOA = $mMONTO/7 ;
 		if($mFRECU == 'B') $SUELDOA = $mMONTO/14;
 		if($mFRECU == 'Q') $SUELDOA = $mMONTO/15;
@@ -115,7 +115,7 @@ class fnomina {
 	function TRAESALDO($mmCONC){
 		$CODIGO = $this->ci->db->escape($this->CODIGO);
 		$mmCONC = $this->ci->db->escape($mmCONC);
-		$mTCONC = $this->ci->datasis->dameval("SELECT COUNT(*) AS cana FROM prenom WHERE codigo=${CODIGO} AND concepto=${mmCONC}");
+		$mTCONC = intval($this->ci->datasis->dameval("SELECT COUNT(*) AS cana FROM prenom WHERE codigo=${CODIGO} AND concepto=${mmCONC}"));
 		if($mTCONC == 1)
 			$mTEMPO = $this->ci->datasis->dameval("SELECT valor FROM prenom WHERE codigo=${CODIGO} AND concepto=${mmCONC}");
 		return $mTEMPO;
@@ -124,14 +124,15 @@ class fnomina {
 	function TABUSCA($par){
 		$CODIGO   = $this->ci->db->escape($this->CODIGO);
 		$mREG     = $this->ANTIGUEDAD();
-		$XTRABAJA = $this->ci->datasis->dameval("SELECT trabaja FROM prenom LIMIT 1");
+		$XTRABAJA = $this->ci->datasis->dameval('SELECT trabaja FROM prenom LIMIT 1');
 		$mTABLA   = $this->NOTABU( $XTRABAJA, $mREG[0], $mREG[1], $mREG[2] );
+		$mVALOR   = 0;
 
-		if ( strtoupper($par) == "PREAVISO"   ) $mVALOR = $mTABLA["preaviso"  ];
-		if ( strtoupper($par) == "VACACIONES" ) $mVALOR = $mTABLA["vacaciones"];
-		if ( strtoupper($par) == "BONOVACA"   ) $mVALOR = $mTABLA["bonovaca"  ];
-		if ( strtoupper($par) == "ANTIGUEDAD" ) $mVALOR = $mTABLA["antiguedad"];
-		if ( strtoupper($par) == "UTILIDADES" ) $mVALOR = $mTABLA["utilidades"];
+		if ( strtoupper($par) == 'PREAVISO'   ) $mVALOR = $mTABLA['preaviso'  ];
+		if ( strtoupper($par) == 'VACACIONES' ) $mVALOR = $mTABLA['vacaciones'];
+		if ( strtoupper($par) == 'BONOVACA'   ) $mVALOR = $mTABLA['bonovaca'  ];
+		if ( strtoupper($par) == 'ANTIGUEDAD' ) $mVALOR = $mTABLA['antiguedad'];
+		if ( strtoupper($par) == 'UTILIDADES' ) $mVALOR = $mTABLA['utilidades'];
 
 		return $mVALOR;
 	}
@@ -140,12 +141,13 @@ class fnomina {
 	//  BUSCA EN TABLA
 	//
 	function NOTABU( $mCONTRATO, $mANO, $mMES, $mDIA ){
+		$dbcontrato = $this->db->escape($mCONTRATO);
 		//                1          2         3           4          5
-		$mSQL  = "SELECT preaviso, vacacion, bonovaca, antiguedad, utilidades ";
-		$mSQL .= "FROM notabu WHERE ano<=".$mANO." AND mes<=".$mMES." AND dia<=".$mDIA;
-		$mSQL .= " AND contrato='".$mCONTRATO."' ";
-		$mSQL .= "ORDER BY ano DESC, mes DESC, dia DESC ";
-		$mSQL .= "LIMIT 1 ";
+		$mSQL  = 'SELECT preaviso, vacacion, bonovaca, antiguedad, utilidades ';
+		$mSQL .= "FROM notabu WHERE ano<=${mANO} AND mes<=${mMES} AND dia<=${mDIA}";
+		$mSQL .= " AND contrato=${dbcontrato} ";
+		$mSQL .= 'ORDER BY ano DESC, mes DESC, dia DESC ';
+		$mSQL .= 'LIMIT 1';
 		$mREG  = $this->ci->datasis->damereg($mSQL);
 		if(empty($mREG)){
 			return array('preaviso'=>0, 'vacacion'=>0, 'bonovaca'=>0, 'antiguedad'=>0, 'utilidades'=>0);
@@ -162,11 +164,11 @@ class fnomina {
 	// Suma por Grupo
 	//
 	function GRUPO($parr){
-		$CODIGO   = $this->ci->db->escape($this->CODIGO);
-		$mSQL  = "SELECT sum(a.valor) cuenta FROM prenom a WHERE a.codigo=".$CODIGO." AND a.grupo regexp '[".$parr."]+' AND MID(a.concepto,1,1)<9 ";
+		$CODIGO= $this->ci->db->escape($this->CODIGO);
+		$mSQL  = "SELECT SUM(a.valor) cuenta FROM prenom a WHERE a.codigo=${CODIGO} AND a.grupo regexp '[${parr}]+' AND MID(a.concepto,1,1)<9";
 		$query = $this->ci->db->query($mSQL);
 		$row   = $query->row();
-		$suma  = $row->cuenta;
+		$suma  = floatval($row->cuenta);
 		return $suma;
 	}
 
@@ -175,10 +177,10 @@ class fnomina {
 	//
 	function TRAE($parr){
 		$CODIGO   = $this->ci->db->escape($this->CODIGO);
-		$mSQL  = "SELECT a.valor FROM prenom a WHERE a.codigo=".$CODIGO." AND a.concepto=".$this->ci->db->escape($parr);
+		$mSQL  = "SELECT a.valor FROM prenom a WHERE a.codigo=${CODIGO} AND a.concepto=".$this->ci->db->escape($parr);
 		$query = $this->ci->db->query($mSQL);
 		$row   = $query->row();
-		$suma  = $row->valor;
+		$suma  = floatval($row->valor);
 		return $suma;
 	}
 
@@ -191,7 +193,7 @@ class fnomina {
 		$mSQL  = "SELECT SUM(valor) cuenta FROM prenom WHERE codigo=".$CODIGO." AND tipo='A' AND MID(concepto,1,1)<9 ";
 		$query = $this->ci->db->query($mSQL);
 		$row   = $query->row();
-		$suma  = $row->cuenta;
+		$suma  = floatval($row->cuenta);
 		return $suma;
 	}
 

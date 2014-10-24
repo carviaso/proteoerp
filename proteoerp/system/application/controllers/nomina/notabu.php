@@ -1,4 +1,11 @@
-<?php require_once(BASEPATH.'application/controllers/validaciones.php');
+<?php
+/**
+* ProteoERP
+*
+* @autor    Andres Hocevar
+* @license  GNU GPL v3
+*/
+require_once(BASEPATH.'application/controllers/validaciones.php');
 
 class Notabu extends validaciones {
 	var $mModulo = 'NOTABU';
@@ -15,7 +22,6 @@ class Notabu extends validaciones {
 
 	function index(){
 		$this->instalar();
-		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
 
@@ -244,7 +250,6 @@ class Notabu extends validaciones {
 			'search'        => 'false'
 		));
 
-
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('290');
@@ -264,7 +269,7 @@ class Notabu extends validaciones {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: notabuadd, editfunc: notabuedit, delfunc: notabudel, viewfunc: notabushow");
+		$grid->setBarOptions('addfunc: notabuadd, editfunc: notabuedit, delfunc: notabudel, viewfunc: notabushow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -272,7 +277,7 @@ class Notabu extends validaciones {
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdata/'));
 
-		if ($deployed) {
+		if($deployed){
 			return $grid->deploy();
 		} else {
 			return $grid;
@@ -313,7 +318,6 @@ class Notabu extends validaciones {
 
 		$edit = new DataEdit('', 'notabu');
 		$edit->on_save_redirect=false;
-		$edit->back_url = site_url("nomina/notabu/filteredgrid");
 		$edit->script($script, 'create');
 		$edit->script($script, 'modify');
 
@@ -327,7 +331,7 @@ class Notabu extends validaciones {
 		$edit->contrato = new dropdownField('Contrato','contrato');
 		$edit->contrato->style ='width:380px;';
 		$edit->contrato->option('','Seleccionar');
-		$edit->contrato->options("SELECT TRIM(codigo) AS codigo,CONCAT('',TRIM(codigo),TRIM(nombre)) AS nombre FROM noco ORDER BY codigo");
+		$edit->contrato->options('SELECT TRIM(codigo) AS codigo,CONCAT(\'\',TRIM(codigo),TRIM(nombre)) AS nombre FROM noco ORDER BY codigo');
 		$edit->contrato->group = 'Relaci&oacute;n Laboral';
 
 		$edit->ano = new inputField('A&ntilde;o','ano');
@@ -394,45 +398,45 @@ class Notabu extends validaciones {
 	}
 
 	function calcautilidades(){
-		$this->rapyd->load("dataform");
+		$this->rapyd->load('dataform');
 
 		$script='
 			$(".inputnum").numeric(".");
 		';
 
 		$form = new DataForm('nomina/notabu/calcautilidades/process');
-		$form->back_url = site_url("nomina/notabu/filteredgrid");
+		$form->back_url = site_url('nomina/notabu/filteredgrid');
 		$form->script($script);
 
 
 		$form->contrato = new dropdownField('Contrato','contrato');
 		$form->contrato->style ='width:400px;';
 		$form->contrato->options("SELECT codigo,CONCAT('',codigo,nombre)as nombre FROM noco ORDER BY codigo");
-		$form->contrato->rule="required";
+		$form->contrato->rule='required';
 
 		$form->monto = new inputField("Monto de dias anual para calcular utilidades","monto");
-		$form->monto->style    ="width:400px;";
+		$form->monto->style    ='width:400px;';
 		$form->monto->options("SELECT codigo,CONCAT('',codigo,nombre)as nombre FROM noco ORDER BY codigo");
-		$form->monto->rule     ="required";
+		$form->monto->rule     ='required';
 		$form->monto->size     = 10;
 		$form->monto->css_class='inputnum';
 
-		$form->submit("btnsubmit","Cambiar");
+		$form->submit('btnsubmit','Cambiar');
 		$form->build_form();
 
-		if ($form->on_success()){
+		if($form->on_success()){
 			$contrato=$this->db->escape($form->contrato->newValue);
 			$monto   =$form->monto->newValue;
 
-			$query = "UPDATE notabu SET utilidades=IF(ano>=1,$monto,($monto/12)*mes+($monto/24)*IF(dia>=15,1,0)) WHERE contrato =$contrato";
+			$query = "UPDATE notabu SET utilidades=IF(ano>=1,$monto,($monto/12)*mes+($monto/24)*IF(dia>=15,1,0)) WHERE contrato =${contrato}";
 			$this->db->query($query);
 		}
 
-		$salida=anchor("nomina/notabu/filteredgrid","Regresar al filtro");
+		$salida=anchor('nomina/notabu/filteredgrid','Regresar al filtro');
 
 		$data['content'] = $form->output.$salida;
 		$data['title']   = 'Cambiar Utilidades basado a monto anual';
-		$data["head"]    = script("jquery.pack.js").script("plugins/jquery.numeric.pack.js").script("plugins/jquery.floatnumber.js").$this->rapyd->get_head();
+		$data['head']    = script('jquery.pack.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js').$this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -458,6 +462,7 @@ class Notabu extends validaciones {
 		$dia =$do->get('dia');
 		logusu('notabu',"CONFIGURACION DE NOMINA ${contrato} ${anio} ${mes} ${dia} REGISTRADA");
 	}
+
 	function _post_update($do){
 		$contrato=$do->get('contrato');
 		$anio=$do->get('anio');
@@ -465,6 +470,7 @@ class Notabu extends validaciones {
 		$dia =$do->get('dia');
 		logusu('notabu',"CONFIGURACION DE NOMINA ${contrato} ${anio} ${mes} ${dia} MODIFICADA");
 	}
+
 	function _post_delete($do){
 		$contrato=$do->get('contrato');
 		$anio=$do->get('anio');
@@ -473,26 +479,49 @@ class Notabu extends validaciones {
 		logusu('notabu',"CONFIGURACION DE NOMINA ${contrato} ${anio} ${mes} ${dia}  ELIMINADA");
 	}
 
-
-
-
 	function calcautil(){
 		$contrato = isset($_REQUEST['contrato1'])  ? $_REQUEST['contrato1']  : '';
 		$monto    = isset($_REQUEST['monto1'])     ? $_REQUEST['monto1']     :  0;
 
-		if ( $contrato == '' or $monto == 0 ){
+		if($contrato == '' || $monto == 0){
 			echo "{ success: false, msg: 'Valores malos'}";
-		} else {
-			$query = "UPDATE notabu SET utilidades=IF(ano>=1,$monto,($monto/12)*mes+($monto/24)*IF(dia>=15,1,0)) WHERE contrato='$contrato'";
+		}else{
+			$dbcontrato=$this->db->escape($contrato);
+			$query = "UPDATE notabu SET utilidades=IF(ano>=1,${monto},(${monto}/12)*mes+(${monto}/24)*IF(dia>=15,1,0)) WHERE contrato=${dbcontrato}";
 			$this->db->query($query);
 			echo "{ success: true, msg: 'Todo Bien'}";
 		}
 	}
 
 	function instalar(){
-		if ( !$this->datasis->iscampo('notabu','id') ) {
+		$this->datasis->creaintramenu(array('modulo'=>'717','titulo'=>'Tabla de utilidades','mensaje'=>'Tabla de utilidades','panel'=>'REGISTROS','ejecutar'=>'nomina/notabu','target'=>'popu','visible'=>'S','pertenece'=>'7','ancho'=>900,'alto'=>600));
+		//$this->datasis->modintramenu(800, 600, substr($this->url,0,-1));
+
+		if(!$this->db->table_exists('notabu')){
+			$mSQL="CREATE TABLE `notabu` (
+				`contrato` CHAR(5) NOT NULL DEFAULT '',
+				`ano` DECIMAL(2,0) NOT NULL DEFAULT '0',
+				`mes` DECIMAL(2,0) NOT NULL DEFAULT '0',
+				`dia` DECIMAL(2,0) NOT NULL DEFAULT '0',
+				`preaviso` DECIMAL(5,2) NULL DEFAULT '0.00',
+				`vacacion` DECIMAL(5,2) NULL DEFAULT '0.00',
+				`bonovaca` DECIMAL(5,2) NULL DEFAULT '0.00',
+				`antiguedad` DECIMAL(5,2) NULL DEFAULT '0.00',
+				`utilidades` DECIMAL(5,2) NULL DEFAULT '0.00',
+				`prima` DECIMAL(2,0) NULL DEFAULT '0',
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				PRIMARY KEY (`id`),
+				UNIQUE INDEX `princi` (`contrato`, `ano`, `mes`, `dia`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM;";
+			$this->db->query($mSQL);
+		}
+
+		$campos=$this->db->list_fields('notabu');
+		if(!in_array('id',$campos)){
 			$this->db->simple_query('ALTER TABLE notabu DROP PRIMARY KEY');
-			$this->db->simple_query('ALTER TABLE notabu ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id) ');
+			$this->db->simple_query('ALTER TABLE notabu ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 			$this->db->simple_query('ALTER TABLE notabu ADD UNIQUE INDEX princi (contrato, ano, mes, dia)');
 		}
 	}
