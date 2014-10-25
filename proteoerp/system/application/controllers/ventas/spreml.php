@@ -1145,7 +1145,8 @@ $(function(){
 		$mercalib = trim($do->get('mercalib'));
 		$do->set('numero', $numero);
 		$do->set('status', 'P');
-
+		$do->set('fecha', date('Y-m-d'));
+		
 		$numero   = $this->db->escape($numero);
 		$mercalib = $this->db->escape($mercalib);
 		$mSQL     = "SELECT count(*) FROM spre WHERE numero=LPAD(${numero},8,'0') AND mercalib=${mercalib} ";
