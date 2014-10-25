@@ -1859,8 +1859,11 @@ class Datasis {
 	//******************************************************************
 	// Unidad Tributaria
 	//
-	function utri(){
-		$valor = $this->dameval("SELECT valor FROM utributa ORDER BY fecha DESC LIMIT 1");
+	function utri( $fecha = 0){
+		if ( $fecha == 0 )
+			$valor = $this->dameval("SELECT valor FROM utributa ORDER BY fecha DESC LIMIT 1");
+		else
+			$valor = $this->dameval("SELECT valor FROM utributa WHERE fecha<=${fecha} ORDER BY fecha DESC LIMIT 1");
 		return $valor;
 	}
 

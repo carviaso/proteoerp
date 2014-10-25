@@ -875,7 +875,7 @@ class Pfac extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -889,7 +889,7 @@ class Pfac extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -912,27 +912,14 @@ class Pfac extends Controller {
 	}
 
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	//  Definicion del Grid y la Forma
+	//
 	function defgridit( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
-
-/*
-		$grid->addField('tipoa');
-		$grid->label('Tipoa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:1, maxlength: 1 }',
-		));
-*/
 
 		$grid->addField('numa');
 		$grid->label('N&uacute;mero');
@@ -1055,22 +1042,6 @@ class Pfac extends Controller {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-/*
-		$grid->addField('costo');
-		$grid->label('Costo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-*/
-
 		$grid->addField('entregado');
 		$grid->label('Entregado');
 		$grid->params(array(
@@ -1084,23 +1055,6 @@ class Pfac extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
-
-/*
-		$grid->addField('pos');
-		$grid->label('Pos');
-		$grid->params(array(
-			'hidden'        => 'true',
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
-		));
-*/
 
 		$grid->addField('pvp');
 		$grid->label('PVP');
@@ -1116,93 +1070,6 @@ class Pfac extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-/*
-		$grid->addField('comision');
-		$grid->label('Comision');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('cajero');
-		$grid->label('Cajero');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 50,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:5, maxlength: 5 }',
-		));
-
-
-		$grid->addField('mostrado');
-		$grid->label('Mostrado');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-		$grid->addField('usuario');
-		$grid->label('Usuario');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:12, maxlength: 12 }',
-		));
-
-		$grid->addField('estampa');
-		$grid->label('Estampa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-		$grid->addField('hora');
-		$grid->label('Hora');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:4, maxlength: 4 }',
-		));
-
-		$grid->addField('transac');
-		$grid->label('Transac');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-*/
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
@@ -1213,30 +1080,6 @@ class Pfac extends Controller {
 			'editable'      => 'false',
 			'search'        => 'false'
 		));
-/*
-		$grid->addField('modificado');
-		$grid->label('Modificado');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-		$grid->addField('dxapli');
-		$grid->label('Dxapli');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:20, maxlength: 20 }',
-		));
-*/
 
 		$grid->showpager(true);
 		$grid->setWidth('');
@@ -1296,13 +1139,15 @@ class Pfac extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
-	function setdatait(){
+	function setdatait(){}
 
-	}
 
+	/*******************************************************************
+	*  Dataedit
+	*/
 	function dataedit(){
 		$this->rapyd->load('dataobject', 'datadetails');
 

@@ -30,6 +30,7 @@ if($form->_status!='show'){
 itstra_cont=<?php echo $form->max_rel_count['editrec'] ?>;
 $(function(){
 	$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
+	$("#vence").datepicker({dateFormat:"dd/mm/yy"});
 	$(".inputnum").numeric(".");
 	for(var i=0;i < <?php echo $form->max_rel_count['editrec']; ?>;i++){
 		autocod(i.toString());
@@ -112,6 +113,8 @@ function del_editrec(id){
 			<td class="littletablerow"  ><?php echo $form->fecha->output; ?></td>
 			<td class="littletablerowth"><?php echo $form->vence->label;  ?></td>
 			<td class="littletablerow"  ><?php echo $form->vence->output; ?></td>
+			<td class="littletablerowth"><?php echo $form->status->label;  ?></td>
+			<td class="littletablerow"  ><?php echo $form->status->output; ?></td>
 		</tr>
 	</table>
 	</fieldset>
@@ -119,53 +122,19 @@ function del_editrec(id){
 	<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 	<table width='100%'>
 		<tr>
+			<td class="littletablerowth"><?php echo $form->inmueble->label;  ?></td>
+			<td class="littletablerow"  ><?php echo $form->inmueble->output; ?></td>
 			<td class="littletablerowth"><?php echo $form->cod_cli->label;  ?></td>
 			<td class="littletablerow"  ><?php echo $form->cod_cli->output; ?></td>
 		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->inmueble->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->inmueble->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->total->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->total->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->alicuota->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->alicuota->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->cuota->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->cuota->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->status->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->status->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->observa->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->observa->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->usuario->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->usuario->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->estampa->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->estampa->output; ?></td>
-		</tr>
-		<tr>
-			<td class="littletablerowth"><?php echo $form->hora->label;  ?></td>
-			<td class="littletablerow"  ><?php echo $form->hora->output; ?></td>
-		</tr>
 	</table>
 	</fieldset>
-	
-	<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+
+
 	<table width='100%'>
 		<tr>
 			<td>
-			<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px'>
+			<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:230px'>
 			<table width='100%'>
 				<tr>
 					<td bgcolor='#7098D0' width="80">tipo</td>
@@ -212,5 +181,23 @@ function del_editrec(id){
 			</td>
 		</tr>
 	</table>
+
+	<fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
+	<table style='border-collapse:collapse;padding:0px;width:100%;'>
+		<tr>
+			<td class="littletablerowth" rowspan='4'><?php echo $form->observa->label;  ?></td>
+			<td class="littletablerow"   rowspan='4'><?php echo $form->observa->output; ?></td>
+		</tr><tr>
+			<td class="littletablerowth"><?php echo $form->total->label;  ?></td>
+			<td class="littletablerow"  ><?php echo $form->total->output; ?></td>
+		</tr><tr>
+			<td class="littletablerowth"><?php echo $form->alicuota->label;  ?></td>
+			<td class="littletablerow"  ><?php echo $form->alicuota->output; ?></td>
+		</tr><tr>
+			<td class="littletablerowth"><?php echo $form->cuota->label;  ?></td>
+			<td class="littletablerow"  ><?php echo $form->cuota->output; ?></td>
+		</tr>
+	</table>
 	</fieldset>
+
 <?php echo $form_end; ?>

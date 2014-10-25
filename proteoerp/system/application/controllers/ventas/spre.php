@@ -42,9 +42,9 @@ class Spre extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'boton1',  'img'=>'assets/default/images/print.png',   'alt' => 'Reimprimir', 'label'=>'Reimprimir'));
-		$grid->wbotonadd(array('id'=>'bffact',  'img'=>'images/star.png',                   'alt' => 'Facturar'  , 'label'=>'Facturar'));
-		$grid->wbotonadd(array('id'=>'bcorreo', 'img'=>'assets/default/images/mail_btn.png','alt' => 'Notificacion', 'label'=>'Notificacion'));
+		$grid->wbotonadd(array('id'=>'boton1',  'img'=>'assets/default/images/print.png',   'alt' => 'Reimprimir',   'label'=>'Reimprimir'));
+		$grid->wbotonadd(array('id'=>'bffact',  'img'=>'images/star.png',                   'alt' => 'Facturar',     'label'=>'Facturar'));
+		$grid->wbotonadd(array('id'=>'bcorreo', 'img'=>'assets/default/images/mail_btn.png','alt' => 'Notificacion', 'label'=>'Notificar por email'));
 
 		$WestPanel = $grid->deploywestp();
 
@@ -191,11 +191,30 @@ class Spre extends Controller {
 		$("#bcorreo").click(function(){
 			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				$.post("'.site_url('ventas/spre/notifica').'/"+id,
-				function(data){
-					alert("Correo enviado");
-				});
+				var mgene = {
+				state0: {
+					html:"<h1>Enviar notificacion por email?</h1>",
+					buttons: { Cancelar: false, Aceptar: true },
+					focus: 1,
+					submit:function(e,v,m,f){
+						if(v){
+							e.preventDefault();
+							$.post("'.site_url('ventas/spre/notifica').'/"+id,
+								function(data){
+									$.prompt.goToState("state1");
+							});
+							return false;}}
+				},
+				state1: {
+					html:"<h2>Envio efectuado!</h2> ",
+					buttons: { Salir: 0 },
+					focus: 1,
+					submit:function(e,v,m,f){
+						e.preventDefault();
+						$.prompt.close();
+					}
+				}};
+				$.prompt(mgene);
 			} else { $.prompt("<h1>Por favor Seleccione un Presupuesto</h1>");}
 		});';
 

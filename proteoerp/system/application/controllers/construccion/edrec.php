@@ -874,20 +874,23 @@ class Edrec extends Controller {
 		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$("#vence").datepicker({dateFormat:"dd/mm/yy"});
 			$(".inputnum").numeric(".");
 		});
 		';
 
 		$do = new DataObject('edrec');
-
 		$do->rel_one_to_many('editrec','editrec','numero');
+		//$do->rel_one_to_many('itpfac', 'itpfac', array('numero' => 'numa'));
+
+
 		$edit = new DataDetails($this->tits, $do );
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
 		$edit->on_save_redirect=false;
 
-		$edit->back_url = site_url($this->url.'filteredgrid');
+		//$edit->back_url = site_url($this->url.'filteredgrid');
 
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
@@ -913,15 +916,15 @@ class Edrec extends Controller {
 		$edit->vence->size =10;
 		$edit->vence->maxlength =8;
 
-		$edit->cod_cli = new inputField('Cod_cli','cod_cli');
+		$edit->cod_cli = new inputField('Cliente','cod_cli');
 		$edit->cod_cli->rule='';
 		$edit->cod_cli->size =7;
 		$edit->cod_cli->maxlength =5;
 
 		$edit->inmueble = new inputField('Inmueble','inmueble');
-		$edit->inmueble->rule='integer';
-		$edit->inmueble->css_class='inputonlynum';
-		$edit->inmueble->size =13;
+		$edit->inmueble->rule='';
+		//$edit->inmueble->css_class='inputonlynum';
+		$edit->inmueble->size =11;
 		$edit->inmueble->maxlength =11;
 
 		$edit->total = new inputField('Total','total');
@@ -939,17 +942,17 @@ class Edrec extends Controller {
 		$edit->cuota = new inputField('Cuota','cuota');
 		$edit->cuota->rule='numeric';
 		$edit->cuota->css_class='inputnum';
-		$edit->cuota->size =19;
+		$edit->cuota->size =14;
 		$edit->cuota->maxlength =17;
 
-		$edit->status = new inputField('Status','status');
-		$edit->status->rule='';
-		$edit->status->size =3;
-		$edit->status->maxlength =1;
+		$edit->status = new dropdownField('Status','status');
+		$edit->status->style='width:100px;';
+		$edit->status->option('P' ,'Pendiente');
+		$edit->status->option('F' ,'Facturado');
 
-		$edit->observa = new textareaField('Observa','observa');
+		$edit->observa = new textareaField('Observacion','observa');
 		$edit->observa->rule='';
-		$edit->observa->cols = 70;
+		$edit->observa->cols = 40;
 		$edit->observa->rows = 4;
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
@@ -971,44 +974,49 @@ class Edrec extends Controller {
 		$edit->numero->maxlength =8;
 		$edit->numero->rel_id ='editrec';
 */
-		$edit->tipo = new inputField('Tipo','tipo_<#i#>');
-		$edit->tipo->rule='';
-		$edit->tipo->size =10;
-		$edit->tipo->maxlength =8;
-		$edit->tipo->rel_id ='editrec';
+		$edit->tipo = new dropdownField('Tipo','tipo_<#i#>');
+		$edit->tipo->style='width:120px;';
+		$edit->tipo->options('SELECT depto, CONCAT(depto," ", descrip) descrip FROM dpto WHERE tipo="G" AND depto <> "GP" UNION ALL SELECT codbanc, CONCAT(codbanc," ",banco) banco FROM banc WHERE tbanco="FO" AND activo="S"');
+		$edit->tipo->db_name   = 'tipo';
+		$edit->tipo->rel_id    = 'editrec';
 
 		$edit->codigo = new inputField('Codigo','codigo_<#i#>');
-		$edit->codigo->rule='';
-		$edit->codigo->size =15;
-		$edit->codigo->maxlength =15;
-		$edit->codigo->rel_id ='editrec';
+		$edit->codigo->rule      = '';
+		$edit->codigo->size      =  8;
+		$edit->codigo->maxlength = 15;
+		$edit->codigo->db_name   = 'codigo';
+		$edit->codigo->rel_id    = 'editrec';
 
 		$edit->detalle = new inputField('Detalle','detalle_<#i#>');
-		$edit->detalle->rule='';
-		$edit->detalle->size =52;
-		$edit->detalle->maxlength =200;
-		$edit->detalle->rel_id ='editrec';
+		$edit->detalle->rule      =  '';
+		$edit->detalle->size      =  35;
+		$edit->detalle->maxlength = 200;
+		$edit->detalle->db_name   = 'detalle';
+		$edit->detalle->rel_id    = 'editrec';
 
 		$edit->totald = new inputField('Total','total_<#i#>');
-		$edit->totald->rule='numeric';
-		$edit->totald->css_class='inputnum';
-		$edit->totald->size =14;
-		$edit->totald->maxlength =12;
-		$edit->totald->rel_id ='editrec';
+		$edit->totald->rule       = 'numeric';
+		$edit->totald->css_class  = 'inputnum';
+		$edit->totald->size       = 12;
+		$edit->totald->maxlength  = 12;
+		$edit->totald->db_name    = 'total';
+		$edit->totald->rel_id     = 'editrec';
 
 		$edit->alicuotad = new inputField('Alicuota','alicuota_<#i#>');
-		$edit->alicuotad->rule='numeric';
-		$edit->alicuotad->css_class='inputnum';
-		$edit->alicuotad->size =14;
-		$edit->alicuotad->maxlength =12;
-		$edit->alicuotad->rel_id ='editrec';
+		$edit->alicuotad->rule      = 'numeric';
+		$edit->alicuotad->css_class = 'inputnum';
+		$edit->alicuotad->size      = 12;
+		$edit->alicuotad->maxlength = 12;
+		$edit->alicuotad->db_name   = 'alicuota';
+		$edit->alicuotad->rel_id    = 'editrec';
 
 		$edit->cuotad = new inputField('Cuota','cuota_<#i#>');
-		$edit->cuotad->rule='numeric';
-		$edit->cuotad->css_class='inputnum';
-		$edit->cuotad->size =14;
-		$edit->cuotad->maxlength =12;
-		$edit->cuotad->rel_id ='editrec';
+		$edit->cuotad->rule      = 'numeric';
+		$edit->cuotad->css_class = 'inputnum';
+		$edit->cuotad->size      = 10;
+		$edit->cuotad->maxlength = 12;
+		$edit->cuotad->db_name   = 'cuota';
+		$edit->cuotad->rel_id    = 'editrec';
 
 /*
 		$edit->fecha = new dateonlyField('Fecha','fecha_<#i#>');
@@ -1103,31 +1111,39 @@ class Edrec extends Controller {
 		$mSQL = "
 		SELECT aplicacion indice, sum(alicuota) valor FROM (
 			SELECT a.aplicacion, 
-				(SELECT bb.alicuota FROM edalicuota bb WHERE a.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=201410 ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
+				(SELECT bb.alicuota FROM edalicuota bb WHERE a.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=${dbanomes} ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
 			FROM edinmue a ) aa
-		WHERE aa.aplicacion IS NOT NULL AND aa.aplicacion<>''";
+		WHERE aa.aplicacion IS NOT NULL AND aa.aplicacion NOT IN ('CO','')";
 		$query = $this->db->query($mSQL);
 		$malit = array();
+		$malit['CO'] = 0;
 		if ($query->num_rows() > 0){
-			foreach ( $query->result() as $row ) 
+			foreach ( $query->result() as $row ) {
 				$malit[$row->indice] = $row->valor;
+				$malit['CO'] = $malit['CO'] + $row->valor;
+			}
 		}
-
+		$GRUPO = array();
+		$mSQL = "SELECT grupo indice FROM grga";
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0) {
+			foreach ( $query->result() as $row ){ $GRUPO[$row->indice] = 0 }
+		}
 		//Genera los recibos
 		$mSQL = "
-			SELECT '000001' numero, CURDATE() fecha, CURDATE() + INTERVAL 5 DAY vence, cliente cod_cli, inmueble, total, alicuota, cuota, 'P' status, 'Recibo' observa, '321' usuario, CURDATE() estampa, CURTIME() hora, 0 transac, 0 id
+			SELECT '000001' numero, CURDATE() fecha, CURDATE() + INTERVAL 5 DAY vence, cliente cod_cli, inmueble, total, alicuota, cuota, 'P' status, 'Recibo' observa, '321' usuario, CURDATE() estampa, CURTIME() hora, 0 transac, 0 id, grupo, area
 			FROM (
-			SELECT d.id, a.aplicacion, d.codigo inmueble, b.codigo, b.descrip, sum(a.total) total, mm.alicuota, ROUND(mm.alicuota*sum(a.total)/100,2) cuota, e.cliente, e.nombre, a.detalle, f.descrip aplidesc
-			FROM edgasto   a
-			JOIN mgas      b ON a.partida = b.id
-			JOIN edinmue   d
-			LEFT JOIN scli e ON IF(d.ocupante='' OR d.ocupante IS NULL, d.propietario,d.ocupante) = e.cliente
-			JOIN dpto f ON a.aplicacion=f.depto
-			JOIN ( 
-			SELECT aa.id,  aa.codigo, (SELECT bb.alicuota FROM edalicuota bb 
-			WHERE aa.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=${dbanomes} ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
-			FROM edinmue aa) mm ON d.id = mm.id
-			WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${dbanomes}
+				SELECT d.id, a.aplicacion, d.codigo inmueble, b.codigo, b.descrip, sum(a.total) total, mm.alicuota, ROUND(mm.alicuota*sum(a.total)/100,2) cuota, e.cliente, e.nombre, a.detalle, f.descrip aplidesc, b.grupo, d.area
+				FROM edgasto   a
+				JOIN mgas      b ON a.partida = b.id
+				JOIN edinmue   d
+				LEFT JOIN scli e ON IF(d.ocupante='' OR d.ocupante IS NULL, d.propietario,d.ocupante) = e.cliente
+				JOIN dpto f ON a.aplicacion=f.depto
+				JOIN ( 
+					SELECT aa.id,  aa.codigo, (SELECT bb.alicuota FROM edalicuota bb 
+					WHERE aa.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=${dbanomes} ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
+					FROM edinmue aa) mm ON d.id = mm.id
+				WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${dbanomes}
 			GROUP BY d.codigo ) aa
 			HAVING alicuota >0
 		";
@@ -1137,6 +1153,7 @@ class Edrec extends Controller {
 				$numero = $this->datasis->fprox_numero('nedrec');
 				$fecha  = date('Ymd'); 
 				$inmueble = $this->db->escape($row->inmueble);
+				$AREA = $row->area;
 				$data = array();
 				$data['numero']   = $numero;
 				$data['fecha']    = $fecha;
@@ -1171,8 +1188,8 @@ class Edrec extends Controller {
 					WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${anomes} AND d.codigo = ${inmueble} AND (a.aplicacion='CO' OR a.aplicacion=d.aplicacion)
 				GROUP BY d.codigo, a.partida ) aa
 				";
-				$query1 = $this->db->query($mSQL);
 				$monto = 0;
+				$query1 = $this->db->query($mSQL);
 				foreach( $query1->result() as  $row1 ) {
 					$data1 = array();
 					$data1['numero']   = $numero;
@@ -1193,6 +1210,7 @@ class Edrec extends Controller {
 					$data1['id_edrc']  = $id;
 					$this->db->insert('editrec',$data1);
 					$monto = $monto + $data1['cuota'];
+					$GRUPO[$row1->grupo] = $GRUPO[$row1->grupo]+ata1['cuota'];
 				}
 				$data1 = array();
 				$data1['numero']   = $numero;
@@ -1208,7 +1226,30 @@ class Edrec extends Controller {
 				$data1['hora']     = date('h:m:s');
 				$data1['id_edrc']  = $id;
 				$this->db->insert('editrec',$data1);
+
+				// Agrega los Fondos
+				$mSQL = "SELECT codbanc, banco, formula, depto, id FROM banc WHERE tbanco = 'FO' AND activo='S' ";
+				$query1 = $this->db->query($mSQL);
+				foreach( $query1->result() as  $row2 ) {
+					$UT   = $this->datasis->utri($anomes.'01');
+					$cuota = eval($row2->formula);
+					$data1 = array();
+					$data1['numero']   = $numero;
+					$data1['tipo']     = 'FO';
+					$data1['codigo']   = $row2->codbanc;
+					$data1['detalle']  = $row2->banco;
+					$data1['total']    = $monto;
+					$data1['alicuota'] = 0;
+					$data1['cuota']    = round($cuota,2);
+					$data1['fecha']    = $fecha;
+					$data1['usuario']  = $this->session->userdata('usuario');
+					$data1['estampa']  = date('Ymd');
+					$data1['hora']     = date('h:m:s');
+					$data1['id_edrc']  = $id;
+					$this->db->insert('editrec',$data1);
+				}
 			}
+
 			echo "Si se Guardaron";
 		}
 	}

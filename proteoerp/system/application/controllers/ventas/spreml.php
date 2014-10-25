@@ -41,7 +41,7 @@ class Spreml extends Controller {
 		//Botones Panel Izq
 		$grid->wbotonadd(array("id"=>"fconfirma", "img"=>"images/engrana.png",  "alt" => "Confirmar Pago", "label"=>"Confirmar Pago"));
 		$grid->wbotonadd(array("id"=>"factura",   "img"=>"images/engrana.png",  "alt" => "Facturar",       "label"=>"Facturar"));
-		$grid->wbotonadd(array("id"=>"fenvia",    "img"=>"images/engrana.png",  "alt" => "Enviar",         "label"=>"Enviar"));
+		$grid->wbotonadd(array("id"=>"fenvia",    "img"=>"images/engrana.png",  "alt" => "Guia de Envio",  "label"=>"Guia de Envio"));
 
 		$Adic = '
 		<table>
@@ -171,7 +171,10 @@ class Spreml extends Controller {
 			var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("'.$ngrid.'").jqGrid(\'getRowData\',id);
-				if( ret.status != "F"){ return false; };
+				if( ret.status != "F"){ 
+					$.prompt("<h1>Por favor Seleccione una Orden Facturada</h1>");
+					return false; 
+				};
 				var mgene = {
 				state0: {
 					html:"<h1>Registrar Envio</h1><br/><table align=\"center\"><tr><td>Fecha:</td><td><input type=\"text\" name=\"fechaenv\" id=\"fechaenv\" value=\''.date('d/m/Y').'\'></td></tr><tr><td>Nro Guia:</td><td><input type=\"text\" id=\"nguia\" name=\"nguia\" value=\'"+ret.guia+"\' ></td></tr></table><br/>",
@@ -1028,8 +1031,7 @@ Saludos cordiales.\n";
 			);
 			//echo json_encode($rt);
 
-			$contenido  = '<h1>GRACIA POR SU COMPRA</h1>';
-			$contenido .= '
+			$contenido  = '
 <h1>Felicitaciones !!!</h1>
 
 <p>Su información ha sido recibida satisfactoriamente. 
@@ -1097,6 +1099,7 @@ $(function(){
 			success: function(data){
 				if(data.error==0){
 					$("#totalg").val(data.monto);
+					$("#producto").html(data.producto);
 				} else {
 					alert(data.msj);
 					$("#numero").focus();
@@ -1141,6 +1144,7 @@ $(function(){
 		$numero   = str_pad(trim($do->get('numero')),8,'0', STR_PAD_LEFT);
 		$mercalib = trim($do->get('mercalib'));
 		$do->set('numero', $numero);
+		$do->set('status', 'P');
 
 		$numero   = $this->db->escape($numero);
 		$mercalib = $this->db->escape($mercalib);
@@ -1210,9 +1214,13 @@ $(function(){
 			$mercalib = $this->db->escape($mercalib);
 			$mSQL   = "SELECT totalg FROM spre WHERE numero=LPAD(${numero},8,'0') AND mercalib=${mercalib} ";
 			$monto  = $this->datasis->dameval($mSQL);
-			if ($monto) 
-				$t=array('error'=>0, 'msj'=>'Orden valida', 'monto'=>$monto);
-			// BUSCA EN sprml
+			if ($monto)
+				// Busca el Producto en itspre
+				$mSQL   = "SELECT CONCAT('<table style=\"width:100%;background:#0EF210;\"><tr><td>',desca,'</td><td>Cant.', cana,'</td></tr></table>') prod FROM itspre WHERE numero=LPAD(${numero},8,'0') ";
+				$producto  = $this->datasis->dameval($mSQL);
+				
+				$t=array('error'=>0, 'msj'=>'Orden valida', 'monto'=>$monto, 'producto'=>$producto);
+			// Busca en sprml
 			$mSQL   = "SELECT count(*) FROM spreml WHERE numero=LPAD(${numero},8,'0') AND mercalib=${mercalib} ";
 			$cant  = $this->datasis->dameval($mSQL);
 			if ( $cant > 0 )
