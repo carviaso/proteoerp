@@ -6171,7 +6171,14 @@ class Sinv extends Controller {
 				if($id>0){
 					$mSQL="UPDATE sinv SET activo=IF(activo='S','N','S') WHERE id=${id}";
 					$ban=$this->db->simple_query($mSQL);
-					if(!$ban){ memowrite($mSQL,'sinv'); $error++; }
+					if(!$ban){
+						memowrite($mSQL,'sinv'); $error++;
+					}else{
+						$row=$this->datasis->damerow("SELECT codigo, activo FROM sinv WHERE id=${id}");
+						if(!empty($row)){
+							logusu('sinv','Registro '.$row['codigo'].' Activo:'.$row['activo'].' MODIFICADO');
+						}
+					}
 				}
 			}
 		}

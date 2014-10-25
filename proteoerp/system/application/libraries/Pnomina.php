@@ -141,7 +141,7 @@ class fnomina {
 	//  BUSCA EN TABLA
 	//
 	function NOTABU( $mCONTRATO, $mANO, $mMES, $mDIA ){
-		$dbcontrato = $this->db->escape($mCONTRATO);
+		$dbcontrato = $this->ci->db->escape($mCONTRATO);
 		//                1          2         3           4          5
 		$mSQL  = 'SELECT preaviso, vacacion, bonovaca, antiguedad, utilidades ';
 		$mSQL .= "FROM notabu WHERE ano<=${mANO} AND mes<=${mMES} AND dia<=${mDIA}";
@@ -243,17 +243,44 @@ class fnomina {
 		$desde = $this->fdesde;
 		$hasta = $this->fhasta;
 
-		$first_date = strtotime($desde." -1 days");
-		$first_date = strtotime(date("M d Y",$first_date)." next ".'Monday');
+		$first_date = strtotime($desde.' -1 days');
+		$first_date = strtotime(date('M d Y',$first_date).' next Monday');
 
-		$last_date = strtotime($hasta." +1 days");
-		$last_date = strtotime(date("M d Y",$last_date)." last ".'Monday');
+		$last_date = strtotime($hasta.' +1 days');
+		$last_date = strtotime(date('M d Y',$last_date).' last Monday');
 
 		$dias = floor(($last_date - $first_date)/(7*86400)) + 1;
 
 		return $dias;
 	}
 
+	//Sueldo promedio mensual aplicable a liquidacion
+	function SUELPROM(){
+		$desde  = $this->fdesde;
+		$hasta  = $this->fhasta;
+		$dbdesde= $this->ci->db->escape($desde);
+		$dbhasta= $this->ci->db->escape($hasta);
+
+		$CODIGO  = $this->ci->db->escape($this->CODIGO);
+
+		$mSQL = "SELECT SUM(valor) AS monto
+			FROM nomina AS a
+			JOIN conc AS b ON a.concepto=b.concepto
+			WHERE liquida='S' AND codigo=${CODIGO} AND fecha BETWEEN ${dbdesde} AND ${dbhasta}";
+
+		$sueldo = floatval($this->ci->datasis->dameval($mSQL));
+		return $sueldo;
+	}
+
+	function SUELDOPROD(){
+		return $this->SUELPROM()/30;
+	}
+
+	function DIASUTILIDAD(){
+		$util=$this->ci->datasis->traevalor('DIASUTILIDAD','Dias de utilidad anual que paga la empresa');
+		return floatval($util);
+	}
+	//fin liquidacion
 
 }
 

@@ -435,11 +435,8 @@ class Pretab extends Controller {
 				$("#fborra").html("");
 			}
 		});';
-
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
