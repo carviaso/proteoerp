@@ -921,7 +921,7 @@ class Sinv extends Controller {
 										$("#fedita").html(r);
 									}
 								}
-						})},
+							})},
 						"Cancelar": function() { $( this ).dialog( "close" ); }
 						}
 					});
@@ -929,6 +929,24 @@ class Sinv extends Controller {
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}
 		};';
+
+		$bodyscript .= '
+		function actdesc(){
+			var ids = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selarrrow\');
+			$.ajax({
+				type: "POST", dataType: "html", async: false,
+				url: "'.site_url($this->url.'actdesc').'",
+				data: {ids:ids},
+				success: function(r,s,x){
+
+					if(r.trim().length>0){
+						alert(r);
+					}else{
+						jQuery("'.$ngrid.'").trigger("reloadGrid");
+					}
+				}
+			});
+		}';
 
 		// Detalle del Registro
 		$bodyscript .= '
@@ -6144,6 +6162,24 @@ class Sinv extends Controller {
 		};
 	}
 
+	function actdesc(){
+		$error=0;
+		$ids=$this->input->post('ids');
+		if(is_array($ids)){
+			foreach($ids as $id){
+				$id=intval($id);
+				if($id>0){
+					$mSQL="UPDATE sinv SET activo=IF(activo='S','N','S') WHERE id=${id}";
+					$ban=$this->db->simple_query($mSQL);
+					if(!$ban){ memowrite($mSQL,'sinv'); $error++; }
+				}
+			}
+		}
+		if($error>0){
+			echo 'Hubo problemas en la operacion';
+		}
+	}
+
 /*
 	// Principios Activos
 	function prinactivo() {
@@ -6499,6 +6535,4 @@ class Sinv extends Controller {
 
 
 	}
-
 }
-?>
