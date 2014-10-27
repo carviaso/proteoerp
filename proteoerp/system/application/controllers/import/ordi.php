@@ -1203,7 +1203,7 @@ class Ordi extends Controller {
 			$row['gastosn'] =$ggastosn;
 			$row['montoiva']=$montoiva;
 			$row['montotot']=$importecif+$gastosn;
-			$row['montoexc']=$row['montotot']-$baseiva-$montoiva;//monto excento
+			$row['montoexc']=$row['montotot']-$baseiva-$montoiva;//monto exento
 			$row['cargoval']=($row['montocif']*$cambioreal)-($row['montocif']*$cambioofi);// Diferencia dolar real y oficial
 			$montocif=floatval($gastosi);
 
@@ -1287,11 +1287,11 @@ class Ordi extends Controller {
 		//$gacona =$this->datasis->dameval("SELECT SUM(totpre)   AS gastosn  FROM gser  WHERE ordeni=$id"); //gastos comunes nacionales
 
 		if($status!='C'){
-			$SQL='SELECT fecha, fecha AS recep,factura AS numero,proveed,nombre,fecha AS vence,peso,montocif AS mdolar,montoexc AS exento,cambioofi, cambioreal,dua FROM ordi WHERE numero=?';
+			$SQL='SELECT fecha, fecha AS recep,factura AS numero,proveed,nombre,fecha AS vence,peso,montocif AS mdolar,montoexc AS exento,cambioofi, cambioreal,dua,transac FROM ordi WHERE numero=?';
 			$query=$this->db->query($SQL,array($id));
 			if($query->num_rows()==1){
 				$control = $this->datasis->fprox_numero('nscst');
-				$transac = $this->datasis->fprox_numero('ntransa');
+				$transac = $row['ntransa'];
 				$row     = $query->row_array();
 				$numero  = substr($row['numero'],-8);
 				$serie   = $row['numero'];
@@ -1426,8 +1426,8 @@ class Ordi extends Controller {
 				$row['cstotal'] = $importecifreal;
 				$row['ctotal']  = $importecifreal;
 				$row['cexento'] = $importecifreal;
-				$row['montotot'] = $importereal;
-				$row['apagar']  = 0;
+				$row['montotot']= $importereal;
+				$row['apagar']  = $importecifreal;
 
 				//Al proveedor internacional no se le paga iva
 				//por esa razon todos los montos son cero

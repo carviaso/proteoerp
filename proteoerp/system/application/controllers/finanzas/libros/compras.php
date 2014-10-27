@@ -22,7 +22,7 @@ class compras{
 		$redutasa  = $aa['redutasa'];
 		$sobretasa = $aa['sobretasa'];
 
-		if($this->db->field_exists('serie', 'siva') AND $this->db->field_exists('serie', 'siva')){
+		if($this->db->field_exists('serie', 'siva') && $this->db->field_exists('serie', 'siva')){
 			$dbcampo='COALESCE(a.serie,a.numero)';
 		}else{
 			$dbcampo='a.numero';
@@ -34,27 +34,27 @@ class compras{
 		    a.referen,
 		    a.planilla,
 		    '     ' nose,
-		    IF(a.tipo='FC',$dbcampo,'        ') numero,
+		    IF(a.tipo='FC',${dbcampo},'        ') numero,
 		    a.nfiscal,
-		    IF(a.tipo='ND',$dbcampo,'        ') numnd,
-		    IF(a.tipo='NC',$dbcampo,'        ') numnc,
+		    IF(a.tipo='ND',${dbcampo},'        ') numnd,
+		    IF(a.tipo='NC',${dbcampo},'        ') numnc,
 		    a.registro oper,
 		    '        ' compla,
-		    sum(a.gtotal   *IF(a.tipo='NC',-1,1)) gtotal,
-		    sum(a.exento   *IF(a.tipo='NC',-1,1)) exento,
-		    sum(a.general  *IF(a.tipo='NC',-1,1)) general,
-		    sum(a.geneimpu *IF(a.tipo='NC',-1,1)) geneimpu,
-		    sum(a.adicional*IF(a.tipo='NC',-1,1)) adicional,
-		    sum(a.adicimpu *IF(a.tipo='NC',-1,1)) adicimpu,
-		    sum(a.reducida *IF(a.tipo='NC',-1,1)) reducida,
-		    sum(a.reduimpu *IF(a.tipo='NC',-1,1)) reduimpu,
+		    SUM(a.gtotal   *IF(a.tipo='NC',-1,1)) gtotal,
+		    SUM(a.exento   *IF(a.tipo='NC',-1,1)) exento,
+		    SUM(a.general  *IF(a.tipo='NC',-1,1)) general,
+		    SUM(a.geneimpu *IF(a.tipo='NC',-1,1)) geneimpu,
+		    SUM(a.adicional*IF(a.tipo='NC',-1,1)) adicional,
+		    SUM(a.adicimpu *IF(a.tipo='NC',-1,1)) adicimpu,
+		    SUM(a.reducida *IF(a.tipo='NC',-1,1)) reducida,
+		    SUM(a.reduimpu *IF(a.tipo='NC',-1,1)) reduimpu,
 		    0 reiva,
 		    ' ' nrocomp,
 		    NULL AS emision,
-		    $dbcampo numo, a.tipo tipo_doc, SUM(a.impuesto) AS impuesto, a.nacional,a.afecta
+		    ${dbcampo} numo, a.tipo tipo_doc, SUM(a.impuesto) AS impuesto, a.nacional,a.afecta
 		    FROM siva AS a LEFT JOIN provoca AS d ON a.rif=d.rif
 		                   LEFT JOIN sprv AS e ON a.clipro=e.proveed
-		    WHERE libro='C' AND fechal BETWEEN $fdesde AND $fhasta AND a.fecha>0
+		    WHERE libro='C' AND fechal BETWEEN ${fdesde} AND ${fhasta} AND a.fecha>0
 		    GROUP BY a.fecha,a.tipo,numo,a.rif
 		UNION
 		    SELECT DISTINCT a.sucursal,
@@ -83,47 +83,12 @@ class compras{
 		    b.emision, CONCAT(EXTRACT(YEAR_MONTH FROM fechal),b.nrocomp) numo, 'CR' AS tipo_doc,SUM(a.impuesto) AS impuesto, a.nacional,$dbcampo AS afecta
 		    FROM siva AS a JOIN riva AS b ON a.numero=b.numero AND a.tipo=b.tipo_doc AND a.reiva=b.reiva
 		              LEFT JOIN sprv AS d ON b.clipro=d.proveed
-		    WHERE libro='C' AND fechal BETWEEN $fdesde AND $fhasta AND a.fecha>0 AND a.reiva>0
+		    WHERE libro='C' AND fechal BETWEEN ${fdesde} AND ${fhasta} AND a.fecha>0 AND a.reiva>0
 		    GROUP BY a.fecha,a.tipo,numo,a.rif
 		    ORDER BY fecha,numo ";
-/*
-SELECT DISTINCT a.sucursal,
-	b.emision AS fecha,
-	d.rif,
-	IF(MID(b.transac,1,1)='_','ANULADO',d.nomfis) nombre,
-	'CO' AS contribu,
-	'' AS referen,
-	'' AS planilla,'  ' aaa,
-	'*       ' numero,
-	b.nfiscal,
-	'        ' numnd,
-	'        ' numnc,
-	'01' AS oper,
-	'' AS referen,
-	0 AS gtotal   ,
-	0 AS exento   ,
-	0 AS general  ,
-	0 AS geneimpu ,
-	0 AS adicional,
-	0 AS adicimpu ,
-	0 AS reducida ,
-	0 AS reduimpu ,
-	(b.reiva*IF(b.tipo_doc='NC',-1,1)*(MID(b.transac,1,1)<>'_')) reiva,
-	' ' nrocomp,
-	b.emision, CONCAT(EXTRACT(YEAR_MONTH FROM b.fecha),b.nrocomp) numo, 'CR' AS tipo_doc,
-	b.impuesto AS impuesto,
-	'S' nacional,b.numero AS afecta
-FROM riva AS b
-LEFT JOIN siva AS a ON a.numero=b.numero AND a.tipo=b.tipo_doc AND a.reiva=b.reiva AND a.libro='C'
-LEFT JOIN sprv AS d ON b.clipro=d.proveed
-WHERE b.fecha BETWEEN 20120701 AND 20120731
-ORDER BY fecha,numo
 
- */
-//FROM siva AS a JOIN riva AS b ON a.numero=b.numero AND a.tipo=b.tipo_doc AND MID(b.transac,1,1)<>'_' AND a.reiva=b.reiva
-//WHERE libro='C' AND fechal BETWEEN $fdesde AND $fhasta AND a.fecha>0 AND a.reiva>0
-		$fname = tempnam("/tmp","lcompras.xls");
-		$this->load->library("workbook", array("fname"=>$fname));
+		$fname = tempnam('/tmp','lcompras.xls');
+		$this->load->library('workbook', array('fname'=>$fname));
 		$wb = & $this->workbook ;
 		$ws = & $wb->addworksheet($mes);
 
@@ -145,7 +110,7 @@ ORDER BY fecha,numo
 
 		$titulo  =& $wb->addformat(array( "bold" => 1, "size" => 9, "merge" => 0, "fg_color" => 'silver' ));
 		$cuerpo  =& $wb->addformat(array( "size" => 9 ));
-		$numero  =& $wb->addformat(array(  "num_format" => '#,##0.00' , "size" => 9 ));
+		$numero  =& $wb->addformat(array( "num_format" => '#,##0.00' , "size" => 9 ));
 		$Tnumero =& $wb->addformat(array( "num_format" => '#,##0.00' , "size" => 9, "bold" => 1, "fg_color" => 'silver' ));
 		$Rnumero =& $wb->addformat(array( "num_format" => '#,##0.00' , "size" => 9, "bold" => 1, "align" => 'right' ));
 
@@ -476,7 +441,7 @@ ORDER BY fecha,numo
 		if(in_array('serie'  ,$campos) && $chsiva){
 			$msqlnum=',IF(LENGTH(b.serie)>0,b.serie,b.numero) AS serie';
 			$addcamp=',serie';
-		}elseif(in_array('nrorig'  ,$campos) && $chsiva){ 
+		}elseif(in_array('nrorig'  ,$campos) && $chsiva){
 			//Utiliza el orgen para el caso de supermercado
 			$msqlnum=',IF(TRIM(b.nrorig)<>"",b.nrorig,b.numero) AS serie';
 			$addcamp=',serie';
@@ -508,7 +473,7 @@ ORDER BY fecha,numo
 			b.nombre,
 			'CO' AS contribu,
 			c.rif,
-			if(b.fecha<'$mFECHAF','04', '01') AS registro,
+			IF(b.fecha<'${mFECHAF}','04', '01') AS registro,
 			'S' AS nacional,
 			COALESCE(b.cexento,b.exento)     AS exento,
 			COALESCE(b.cgenera,b.montasa)    AS general,
@@ -521,12 +486,12 @@ ORDER BY fecha,numo
 			COALESCE(b.cimpuesto,b.montoiva) AS impuesto,
 			COALESCE(b.ctotal,b.montonet)    AS gtotal,
 			b.reteiva AS reiva,
-			".$mes."01 AS fechal,
+			${mes}01 AS fechal,
 			0 fafecta
 			$msqlnum
 		FROM itscst AS a JOIN scst as b ON a.control=b.control
 		LEFT JOIN sprv AS c ON b.proveed=c.proveed
-		WHERE b.recep BETWEEN $fdesde AND $fhasta AND b.actuali >= b.fecha AND c.tiva<>'I' AND b.tipo_doc<>'XX'
+		WHERE b.recep BETWEEN ${fdesde} AND ${fhasta} AND b.actuali >= b.fecha AND c.tiva<>'I' AND b.tipo_doc<>'XX'
 		GROUP BY b.control";
 
 		// Procesando Compras scst
@@ -564,30 +529,30 @@ ORDER BY fecha,numo
 			b.nfiscal,
 			'  ' AS nhfiscal,
 			'        ' AS referen,
-			$dua,
+			${dua},
 			b.proveed AS clipro,
 			b.nombre,
 			'CO' AS contribu,
 			c.rif,
-			if(b.fecha<'$mFECHAF','04', '01') AS registro,
+			IF(b.fecha<'${mFECHAF}','04', '01') AS registro,
 			'N' AS nacional,
-			0 exento,
-			ROUND(b.tasa/$iivag,2)      AS general,
-			ROUND(b.tasa,2)             AS geneimpu,
-			ROUND(b.sobretasa/$iivaa,2) AS adicional,
-			ROUND(b.reducida,2)         AS reduimpu,
-			ROUND(b.reducida/$iivar,2)  AS reducida,
-			ROUND(b.sobretasa,2)        AS adicimpu,
-			b.montotot-b.descu+b.licor  AS stotal,
-			b.montoiva AS impuesto,
-			b.montonet-b.descu AS gtotal,
-			b.reteiva AS reiva,
-			".$mes."01 AS fechal,
+			ROUND(b.exento,2)             AS exento,
+			ROUND(b.tasa/${iivag},2)      AS general,
+			ROUND(b.tasa,2)               AS geneimpu,
+			ROUND(b.sobretasa/${iivaa},2) AS adicional,
+			ROUND(b.reducida,2)           AS reduimpu,
+			ROUND(b.reducida/${iivar},2)  AS reducida,
+			ROUND(b.sobretasa,2)          AS adicimpu,
+			b.montotot-b.descu+b.licor    AS stotal,
+			b.montoiva                    AS impuesto,
+			b.montonet-b.descu            AS gtotal,
+			b.reteiva                     AS reiva,
+			${mes}01                      AS fechal,
 			0 fafecta
 		FROM itscst AS a JOIN scst AS b ON a.control=b.control
 		LEFT JOIN sprv AS c ON b.proveed=c.proveed
-		$jjoin
-		WHERE b.recep BETWEEN $fdesde AND $fhasta AND b.actuali >= b.fecha AND c.tiva='I'
+		${jjoin}
+		WHERE b.recep BETWEEN ${fdesde} AND ${fhasta} AND b.actuali >= b.fecha AND c.tiva='I'
 		GROUP BY b.control";
 
 		$flag=$this->db->simple_query($mSQL);

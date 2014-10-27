@@ -144,6 +144,9 @@ class Dispmoviles extends Controller {
 			TRIM(a.repre) AS repre,TRIM(a.tipo) AS tipo,
 			COALESCE(SUM((b.monto-b.abonos)*(b.vence<=CURDATE())),0) AS vsaldo,
 			0 AS csaldo,formap
+			/*,COALESCE((SELECT SUM(aa.tipo_doc='F') FROM sfac AS aa WHERE cod_cli=a.cliente AND fecha>=CONCAT(EXTRACT(YEAR_MONTH FROM CURDATE()),'01')),0) AS numfac
+			,COALESCE((SELECT SUM(aa.tipo_doc='D') FROM sfac AS aa WHERE cod_cli=a.cliente AND fecha>=CONCAT(EXTRACT(YEAR_MONTH FROM CURDATE()),'01')),0) AS numdev
+			*/
 			FROM scli AS a
 			LEFT JOIN smov AS b ON a.cliente=b.cod_cli AND b.tipo_doc NOT IN ('AB','NC','AN') AND b.monto>b.abonos
 			WHERE a.vendedor=${dbvend}
@@ -165,7 +168,7 @@ class Dispmoviles extends Controller {
 			if($tabla=='scli'){
 				if($row['vsaldo']>0){
 					$dbscli = $this->db->escape($row['cliente']);
-					$mSQL="SELECT CONCAT(tipo_doc,TRIM(numero)) AS Numero,DATE_FORMAT(fecha, '%Y/%m/%d') AS Fecha, DATEDIFF(fecha,CURDATE()) AS Dias,monto-abonos AS Saldo FROM smov WHERE tipo_doc NOT IN ('AB','NC','AN') AND monto>abonos AND vence<=CURDATE() AND cod_cli=${dbscli} ORDER BY fecha DESC";
+					$mSQL="SELECT CONCAT(tipo_doc,TRIM(numero)) AS Numero,DATE_FORMAT(fecha, '%Y/%m/%d') AS Fecha, ABS(DATEDIFF(fecha,CURDATE())) AS Dias,monto-abonos AS Saldo FROM smov WHERE tipo_doc NOT IN ('AB','NC','AN') AND monto>abonos AND vence<=CURDATE() AND cod_cli=${dbscli} ORDER BY fecha DESC";
 					$qq = $this->db->query($mSQL);
 					if($qq->num_rows() > 0){
 						$itdata[]=json_encode($qq->result());
@@ -184,6 +187,7 @@ class Dispmoviles extends Controller {
 		}
 
 		echo json_encode($data);
+		logusu('dispmoviles',"Sincronizo ${vend} ${uuid}");
 	}
 
 	function ping($uuid){

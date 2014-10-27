@@ -152,7 +152,7 @@ class Prenom extends Controller {
 	function regenepre(){
 		$this->load->helper('date');
 
-		$mreg = $this->datasis->damereg("SELECT contrato, trabaja, fecha, fechap FROM prenom LIMIT 1");
+		$mreg = $this->datasis->damereg('SELECT contrato, trabaja, fecha, fechap FROM prenom LIMIT 1');
 		$contrato = $mreg['contrato'];
 		$fechac   = $mreg['fecha'];
 		$fechap   = $mreg['fechap'];
@@ -197,12 +197,12 @@ class Prenom extends Controller {
 			$tipo = $this->datasis->dameval('SELECT tipo FROM noco WHERE codigo='.$dbcont);
 			if($tipo=='Q'){
 				if($dia != $ultdia || $dia != '15'){
-					$this->validation->set_message('chcfecha', 'La nomina quincenal solo se puede cortar el 15 o el '.$ultdia.' del mes.');
+					$this->validation->set_message('chcfecha', "La nomina quincenal solo se puede cortar el 15 o el ${ultdia} del mes.");
 					return false;
 				}
 			}elseif($tipo=='M'){
 				if($dia != $ultdia){
-					$this->validation->set_message('chcfecha', 'La nomina mensual solo se puede cortar el ${ultdia} del mes.');
+					$this->validation->set_message('chcfecha', "La nomina mensual solo se puede cortar el ${ultdia} del mes.");
 					return false;
 				}
 			}elseif($tipo=='S'){

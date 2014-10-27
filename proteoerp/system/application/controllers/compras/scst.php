@@ -511,7 +511,7 @@ class Scst extends Controller {
 						$.post("'.site_url('compras/scst/solo/cprecios').'/"+ret.control, function(data){
 							$("#factuali").html("");
 							$("#fcompra").html(data);
-							$( "#fcompra" ).dialog( "open" );
+							$("#fcompra").dialog( "open" );
 						});
 					}
 				}else{
@@ -524,7 +524,7 @@ class Scst extends Controller {
 
 		$bodyscript .= "\n".'
 			$( "#fcmonto" ).dialog({
-				autoOpen: false, height: 300, width: 300, modal: true,
+				autoOpen: false, height: 300, width: 320, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;
@@ -2592,8 +2592,11 @@ class Scst extends Controller {
 		$alicuota=$this->datasis->ivaplica(($ffecha==false)? null : $ffecha);
 
 		$edit = new DataEdit('Compras','scst');
+		$edit->pre_process('insert' , '_pre_cxp_insert');
+		$edit->pre_process('update' , '_pre_cxp_update');
+		$edit->pre_process('delete' , '_pre_cxp_delete');
+		$edit->post_process('update','_post_cxp_update');
 		$edit->on_save_redirect=false;
-		//$edit->post_process('update' ,'_post_cxp_update');
 
 		//Para CXP
 		$edit->cexento = new inputField('Excento', 'cexento');
@@ -4723,6 +4726,7 @@ class Scst extends Controller {
 		$do->set('tasa'     , round($civagen,2));
 		$do->set('reducida' , round($civared,2));
 		$do->set('sobretasa', round($civaadi,2));
+		$do->set('apagar'   , round($gtotal ,2));
 
 		//Para la retencion de iva si aplica
 		$contribu= trim($this->datasis->traevalor('CONTRIBUYENTE'));
@@ -4832,9 +4836,48 @@ class Scst extends Controller {
 	}
 
 	function _post_cxp_update($do){
+		$codigo  = $do->get('numero');
+		$control = $do->get('control');
+		$tipo_doc= $do->get('tipo_doc');
+
+		$opera   = ($tipo_doc=='FC')? 'Compra':'Devolucion';
+		logusu('scst',"${opera} ${codigo} control ${control} CAMBIADO CXP");
+	}
+
+	function _pre_cxp_insert($do){
 		return false;
 	}
 
+	function _pre_cxp_delete($do){
+		return false;
+	}
+
+	function _pre_cxp_update($do){
+
+		$cexento = round($do->get('cexento'),2);
+		$cgenera = round($do->get('cgenera'),2);
+		$civagen = round($do->get('civagen'),2);
+		$creduci = round($do->get('creduci'),2);
+		$civared = round($do->get('civared'),2);
+		$cadicio = round($do->get('cadicio'),2);
+		$civaadi = round($do->get('civaadi'),2);
+
+		$iva  = $civagen+$civared+$civaadi;
+		$base = $cgenera+$creduci+$cadicio+$cexento;
+
+		$ctotal=$base+$iva;
+
+		$do->set('cimpuesto',$iva );
+		$do->set('cstotal'  ,$base);
+		$do->set('ctotal'   ,$ctotal);
+		$do->set('apagar'   ,$ctotal);
+		if($ctotal>0){
+			return true;
+		}else{
+			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='La sumatoria de los montos debe ser mayor a cero.';
+			return false;
+		}
+	}
 
 	function _pre_update($do){
 		$aactuali = $do->get('actuali');

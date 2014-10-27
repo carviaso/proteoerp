@@ -71,15 +71,33 @@ class Pretab extends Controller {
 		$bodyscript = '<script type="text/javascript">';
 
 		// Prepara Prenomina
-		$noco = $this->datasis->llenaopciones("SELECT codigo, CONCAT(codigo,' ', tipo, ' ', nombre) FROM noco ORDER BY codigo", false, 'mcontrato');
+		$mSQL="SELECT a.codigo, CONCAT(a.codigo,' ', a.tipo, ' ', a.nombre)
+			FROM noco AS a
+			LEFT JOIN pers AS b ON b.contrato=a.codigo
+			WHERE b.contrato IS NOT NULL OR a.tipo='O'
+			GROUP BY a.codigo
+			ORDER BY a.codigo";
+
+		$noco = $this->datasis->llenaopciones($mSQL, false, 'mcontrato');
 		$noco = str_replace('"',"'",$noco);
+
+		$mSQL="SELECT a.codigo, CONCAT(a.codigo,' ', a.tipo, ' ', a.nombre)
+			FROM noco AS a
+			JOIN pers AS b ON b.contrato=a.codigo
+			WHERE a.tipo<>'O'
+			GROUP BY a.codigo
+			ORDER BY a.codigo";
+
+		$mpers = $this->datasis->llenaopciones($mSQL, false, 'mpers');
+		$mpers = str_replace('"',"'",$mpers);
 
 		$bodyscript .= '
 		var mcome1 = "<h1>Generar Pre-Nomina</h1>"+
-			"<center><p>Seleccione el Contrato:</p>"+"'.$noco.'</center><br>"+
+			"<div style=\'text-align:center\'><p style=\'margin-bottom: 0;font-weight: bold;\'>Seleccione el Contrato:</p>"+"'.$noco.'</div><br>"+
+			"<div id=\'preno_pers\' style=\'text-align:center;background-color:#E3DCB2; border-radius: 5px;\'><p style=\'margin-bottom: 0;font-weight: bold;\'>Aplicado a los trabajadores de:</p>"+"'.$mpers.'</div><br>"+
 			"<table align=\'center\'>"+
-			"<tr><td>Fecha de Corte: </td><td><input id=\'mfechac\' name=\'mfechac\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
-			"<tr><td>Fecha de Pago:  </td><td><input id=\'mfechap\' name=\'mfechap\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
+			"<tr><td style=\'font-weight: bold;\'>Fecha de Corte: </td><td><input id=\'mfechac\' name=\'mfechac\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
+			"<tr><td style=\'font-weight: bold;\'>Fecha de Pago:  </td><td><input id=\'mfechap\' name=\'mfechap\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
 			"</table>";
 
 		var mprepanom =
@@ -109,11 +127,20 @@ class Pretab extends Controller {
 		';
 
 		$bodyscript .= '
-		$("#genepre").click( function()
-		{
-			$.prompt(mprepanom);
+		$("#genepre").click( function(){
+			var pron = $.prompt(mprepanom);
 			$("#mfechac").datepicker({dateFormat:"dd/mm/yy"});
 			$("#mfechap").datepicker({dateFormat:"dd/mm/yy"});
+			$("#mcontrato").change(function() {
+				var s     = $("#mcontrato :selected").text();
+				var arr_s = s.split(" ");
+				if(arr_s[1]=="O"){
+					$("#preno_pers").show();
+				}else{
+					$("#preno_pers").hide();
+				}
+			});
+			$("#mcontrato").change();
 		});
 		';
 
