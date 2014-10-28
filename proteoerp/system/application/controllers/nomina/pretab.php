@@ -71,23 +71,21 @@ class Pretab extends Controller {
 		$bodyscript = '<script type="text/javascript">';
 
 		// Prepara Prenomina
-		$mSQL="SELECT a.codigo, CONCAT(a.codigo,' ', a.tipo, ' ', a.nombre)
+		$mSQL="SELECT a.codigo, CONCAT(a.codigo,' ', a.tipo, ' ', a.nombre) AS descrip
 			FROM noco AS a
-			LEFT JOIN pers AS b ON b.contrato=a.codigo
-			WHERE b.contrato IS NOT NULL OR a.tipo='O'
+			LEFT JOIN pers AS b ON b.contrato=a.codigo AND b.status='A'
+			WHERE (b.contrato IS NOT NULL OR a.tipo='O')
 			GROUP BY a.codigo
 			ORDER BY a.codigo";
-
 		$noco = $this->datasis->llenaopciones($mSQL, false, 'mcontrato');
 		$noco = str_replace('"',"'",$noco);
 
-		$mSQL="SELECT a.codigo, CONCAT(a.codigo,' ', a.tipo, ' ', a.nombre)
+		$mSQL="SELECT a.codigo, CONCAT(a.codigo,' ', a.tipo, ' ', a.nombre) As descrip
 			FROM noco AS a
 			JOIN pers AS b ON b.contrato=a.codigo
-			WHERE a.tipo<>'O'
+			WHERE a.tipo<>'O' AND b.status='A'
 			GROUP BY a.codigo
 			ORDER BY a.codigo";
-
 		$mpers = $this->datasis->llenaopciones($mSQL, false, 'mpers');
 		$mpers = str_replace('"',"'",$mpers);
 
@@ -108,7 +106,7 @@ class Pretab extends Controller {
 				submit: function(e,v,m,f){
 					mnuevo = f.mcodigo;
 					if (v) {
-						$.post("'.site_url('nomina/prenom/geneprenom').'/", { contrato: f.mcontrato, fechac: f.mfechac, fechap: f.mfechac },
+						$.post("'.site_url('nomina/prenom/geneprenom').'/", { contrato: f.mcontrato, fechac: f.mfechac, fechap: f.mfechac, pers: f.mpers },
 							function(data){
 								$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
 								$.prompt.goToState(\'state1\');

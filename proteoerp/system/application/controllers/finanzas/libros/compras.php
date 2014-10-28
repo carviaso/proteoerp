@@ -455,7 +455,7 @@ class compras{
 			referen, planilla, clipro, nombre, contribu, rif, registro,
 			nacional, exento, general, geneimpu,
 			adicional,reduimpu, reducida,adicimpu,stotal, impuesto,
-			gtotal, reiva, fechal, fafecta $addcamp)
+			gtotal, reiva, fechal, fafecta ${addcamp})
 			SELECT 0 AS id,
 			'C' AS libro,
 			b.tipo_doc AS tipo,

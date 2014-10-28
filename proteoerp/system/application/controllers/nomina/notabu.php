@@ -39,7 +39,9 @@ class Notabu extends validaciones {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array("id"=>"edocta",   "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Ejemplo"));
+		$grid->wbotonadd(array('id'=>'addvar', 'img'=>'images/circuloverde.png'   ,'alt' => 'Agregar variable', 'label'=>'Agregar variable'));
+		$grid->wbotonadd(array('id'=>'delvar', 'img'=>'images/circulorojo.png'    ,'alt' => 'Quitar variable' , 'label'=>'Quitar variable'));
+		$grid->wbotonadd(array('id'=>'modvar', 'img'=>'images/circuloamarillo.png','alt' => 'Modificar variable' , 'label'=>'Modificar variable'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -81,6 +83,34 @@ class Notabu extends validaciones {
 		$bodyscript .= $this->jqdatagrid->bsfshow( '400', '500' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
+		$bodyscript .= '
+		$("#addvar").click(function (){
+			$.post("'.site_url($this->url.'agregavar').'",
+			function(data){
+				$("#fedita").html(data);
+				//$("#fedita").dialog( { title:"PRINCIPIOS ACTIVOS", width: 350, height: 400, modal: true } );
+				$("#fedita").dialog( "open" );
+			});
+		});';
+
+		$bodyscript .= '
+		$("#delvar").click(function (){
+			$.post("'.site_url($this->url.'quitarvar').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			});
+		});';
+
+		$bodyscript .= '
+		$("#modvar").click(function (){
+			$.post("'.site_url($this->url.'modivar').'",
+			function(data){
+				$("#fedita").html(data);
+				$("#fedita").dialog( "open" );
+			});
+		});';
+
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 		return $bodyscript;
@@ -106,8 +136,8 @@ class Notabu extends validaciones {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-		$grid->addField('dia');
-		$grid->label('D&iacute;a');
+		$grid->addField('ano');
+		$grid->label('A&ntilde;os');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -119,10 +149,9 @@ class Notabu extends validaciones {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
-
 
 		$grid->addField('mes');
-		$grid->label('Mes');
+		$grid->label('Meses');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -135,9 +164,8 @@ class Notabu extends validaciones {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
-		$grid->addField('ano');
-		$grid->label('A&ntilde;o');
+		$grid->addField('dia');
+		$grid->label('D&iacute;as');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -150,95 +178,26 @@ class Notabu extends validaciones {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-		$grid->addField('preaviso');
-		$grid->label('Pre-aviso');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
+		$mSQL="SHOW FULL COLUMNS FROM notabu";
+		$query = $this->db->query($mSQL);
+		foreach ($query->result() as $row){
+			if(in_array($row->Field,array('contrato','ano','mes','dia','id'))) continue;
+			$comment=(empty($row->Comment))? $row->Field : trim($row->Comment);
 
-
-		$grid->addField('vacacion');
-		$grid->label('Vacaciones');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('bonovaca');
-		$grid->label('Bono Vacacional');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('antiguedad');
-		$grid->label('Antiguedad');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('utilidades');
-		$grid->label('Utilidades');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('prima');
-		$grid->label('Prima');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
+			$grid->addField(trim($row->Field));
+			$grid->label($comment);
+			$grid->params(array(
+				'search'        => 'true',
+				'editable'      => $editar,
+				'align'         => "'right'",
+				'edittype'      => "'text'",
+				'width'         => 100,
+				'editrules'     => '{ required:true }',
+				'editoptions'   => '{ size:8, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+				'formatter'     => "'number'",
+				'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+			));
+		}
 
 		$grid->addField('id');
 		$grid->label('Id');
@@ -305,9 +264,7 @@ class Notabu extends validaciones {
 
 	}
 
-
 	function dataedit(){
-
 		$this->rapyd->load('dataedit');
 
 		$script ='
@@ -334,53 +291,41 @@ class Notabu extends validaciones {
 		$edit->contrato->options('SELECT TRIM(codigo) AS codigo,CONCAT(\'\',TRIM(codigo),TRIM(nombre)) AS nombre FROM noco ORDER BY codigo');
 		$edit->contrato->group = 'Relaci&oacute;n Laboral';
 
-		$edit->ano = new inputField('A&ntilde;o','ano');
+		$edit->ano = new inputField('A&ntilde;os','ano');
 		$edit->ano->size =3;
 		$edit->ano->maxlength=2;
 		$edit->ano->rule='trim|numeric';
 		$edit->ano->css_class='inputnum';
 
-		$edit->mes = new inputField('Mes','mes');
+		$edit->mes = new inputField('Meses','mes');
 		$edit->mes->size =3;
 		$edit->mes->maxlength=2;
-		$edit->mes->rule='trim|numeric';
-		$edit->mes-> css_class='inputnum';
+		$edit->mes->rule='trim|numeric|callback_chmes';
+		$edit->mes->css_class='inputnum';
+		$edit->mes->append('1...12');
 
-		$edit->dia = new inputField('D&iacute;a','dia');
+		$edit->dia = new inputField('D&iacute;as','dia');
 		$edit->dia->size =3;
 		$edit->dia->maxlength=2;
-		$edit->dia->rule='trim|numeric';
-		$edit->dia-> css_class='inputnum';
+		$edit->dia->rule='trim|numeric|callback_chdia';
+		$edit->dia->css_class='inputnum';
+		$edit->dia->append('1...31');
 
-		$edit->preaviso = new inputField('Pre-aviso','preaviso');
-		$edit->preaviso->size =9;
-		$edit->preaviso->maxlength=7;
-		$edit->preaviso->rule='trim|numeric';
-		$edit->preaviso-> css_class='inputnum';
+		$mSQL='SHOW FULL COLUMNS FROM notabu';
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			if(in_array($row->Field,array('contrato','ano','mes','dia','id'))) continue;
+			$comment=(empty($row->Comment))? $row->Field : trim($row->Comment);
+			$obj=trim($row->Field);
 
-		$edit->vacacion = new inputField('Vacaciones','vacacion');
-		$edit->vacacion->size =9;
-		$edit->vacacion->maxlength=7;
-		$edit->vacacion->rule='trim|numeric';
-		$edit->vacacion-> css_class='inputnum';
-
-		$edit->bonovaca = new inputField('Bono Vacacional','bonovaca');
-		$edit->bonovaca->size =9;
-		$edit->bonovaca->maxlength=7;
-		$edit->bonovaca->rule='trim|numeric';
-		$edit->bonovaca-> css_class='inputnum';
-
-		$edit->antiguedad = new inputField('Antiguedad','antiguedad');
-		$edit->antiguedad->size =9;
-		$edit->antiguedad->maxlength=7;
-		$edit->antiguedad->rule='trim|numeric';
-		$edit->antiguedad-> css_class='inputnum';
-
-		$edit->utilidades = new inputField('Utilidades','utilidades');
-		$edit->utilidades->size =9;
-		$edit->utilidades->maxlength=7;
-		$edit->utilidades->rule='trim|numeric';
-		$edit->utilidades-> css_class='inputnum';
+			$edit->$obj = new inputField($comment,$obj);
+			$edit->$obj->size =9;
+			$edit->$obj->maxlength=7;
+			$edit->$obj->rule='trim|numeric';
+			$edit->$obj->css_class='inputnum';
+			$edit->$obj->insertvalue='0';
+			$edit->$obj->append('Nombre variable: '.$obj);
+		}
 
 		//$edit->buttons('modify','save', 'undo','back');
 		$edit->build();
@@ -396,6 +341,173 @@ class Notabu extends validaciones {
 			echo $edit->output;
 		}
 	}
+
+	function agregavar(){
+		$this->rapyd->load('dataform');
+
+		$script ='
+		$(function() {
+			$(".inputnum").numeric(".");
+		});
+		';
+
+		$form = new DataForm($this->url.'agregavar/process');
+		$form->script($script);
+
+		$form->nombre = new inputField('Nombre de la variable','nombre');
+		$form->nombre->rule = 'trim|strtolower|required|max_length[10]|callback_chvarnom';
+
+		$form->titulo = new inputField('T&iacute;tulo', 'titulo');
+		$form->titulo->rule = 'trim|required';
+
+		$form->defecto = new inputField('Valor por onmision', 'defecto');
+		$form->defecto->rule = 'required|numeric';
+		$form->defecto->insertValue='0';
+
+		$form->build_form();
+
+		if($form->on_success()){
+			$nombre  = $form->nombre->newValue;
+			$dbtitulo= $this->db->escape($form->titulo->newValue);
+			$defecto = floatval($form->defecto->newValue);
+			$mSQL="ALTER TABLE `notabu` ADD COLUMN `${nombre}` DECIMAL(2,0) NULL DEFAULT '${defecto}' COMMENT ${dbtitulo} AFTER `id`";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban){
+				$rt=array(
+					'status' =>'A',
+					'mensaje'=>'Variable guardado',
+					'pk'     =>null
+				);
+				logusu('notabu','Creo variable '.$nombre);
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>'Problemas guardado',
+					'pk'     =>null
+				);
+			}
+			echo json_encode($rt);
+		}else{
+			echo $form->output;
+		}
+	}
+
+	function chvarnom($val){
+		if(preg_match_all('/^[a-zA-Z0-9]+$/i', $val)>0){
+			return true;
+		}
+		$this->validation->set_message('chvarnom', 'El valor introducido en el campo %s no es v&aacute;lido');
+		return false;
+	}
+
+	function quitarvar(){
+		$this->rapyd->load('dataform');
+
+		$script ='
+		$(function() {
+			$(".inputnum").numeric(".");
+		});';
+
+		$form = new DataForm($this->url.'quitarvar/process');
+
+		$form->nombre = new dropdownField('Nombre','nombre');
+		$form->nombre->style ='width:380px;';
+		$form->nombre->option('','Seleccionar');
+		$form->nombre->rule='required';
+		$mSQL='SHOW FULL COLUMNS FROM notabu';
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			if(in_array($row->Field,array('contrato','ano','mes','dia','id'))) continue;
+			$comment=(empty($row->Comment))? $row->Field : trim($row->Comment);
+			$obj=trim($row->Field);
+			$form->nombre->option($obj,"${obj}-${comment}");
+		}
+
+		$form->build_form();
+
+		if($form->on_success()){
+			$nombre  = $form->nombre->newValue;
+			$mSQL="ALTER TABLE `notabu` DROP COLUMN `${nombre}`";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban){
+				$rt=array(
+					'status' =>'A',
+					'mensaje'=>'Variable guardado',
+					'pk'     =>null
+				);
+				logusu('notabu','Elimino variable '.$nombre);
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>'Problemas eliminando',
+					'pk'     =>null
+				);
+			}
+			echo json_encode($rt);
+		}else{
+			echo $form->output;
+		}
+	}
+
+	function modivar(){
+		$this->rapyd->load('dataform');
+
+		$script ='
+		$(function() {
+			$(".inputnum").numeric(".");
+		});';
+
+		$form = new DataForm($this->url.'modivar/process');
+		$form->script($script);
+
+		$form->nombre = new dropdownField('Nombre','nombre');
+		$form->nombre->style ='width:380px;';
+		$form->nombre->option('','Seleccionar');
+		$form->nombre->rule='required';
+		$mSQL='SHOW FULL COLUMNS FROM notabu';
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			if(in_array($row->Field,array('contrato','ano','mes','dia','id'))) continue;
+			$comment=(empty($row->Comment))? $row->Field : trim($row->Comment);
+			$obj=trim($row->Field);
+			$form->nombre->option($obj,"${obj}-${comment}");
+		}
+
+		$form->nnombre = new inputField('T&iacute;tulo de la variable','nnombre');
+		$form->nnombre->rule = 'trim|strtolower|required|max_length[10]|callback_chvarnom';
+
+		$form->defecto = new inputField('Valor por onmision', 'defecto');
+		$form->defecto->rule = 'required|numeric';
+		$form->defecto->insertValue='0';
+
+		$form->build_form();
+
+		if($form->on_success()){
+			$nombre  = $form->nombre->newValue;
+			$nnombre = $this->db->escape($form->nnombre->newValue);
+			$defecto = floatval($form->defecto->newValue);
+			$mSQL="ALTER TABLE `notabu` CHANGE COLUMN `${nombre}` `${nombre}` DECIMAL(5,2) NOT NULL DEFAULT '${defecto}' COMMENT ${nnombre}";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban){
+				$rt=array(
+					'status' =>'A',
+					'mensaje'=>'Variable guardada',
+					'pk'     =>null
+				);
+				logusu('notabu','Elimino variable '.$nombre);
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>'Problemas eliminando',
+					'pk'     =>null
+				);
+			}
+			echo json_encode($rt);
+		}else{
+			echo $form->output;
+		}
+	}
+
 
 	function calcautilidades(){
 		$this->rapyd->load('dataform');
@@ -491,6 +603,24 @@ class Notabu extends validaciones {
 			$this->db->query($query);
 			echo "{ success: true, msg: 'Todo Bien'}";
 		}
+	}
+
+	function chmes($mes){
+		$mes=intval($mes);
+		if($mes >=0 && $mes<=12){
+			return true;
+		}
+		$this->validation->set_message('chmes', 'El valor introducido en el campo %s no es v&aacute;lido');
+		return false;
+	}
+
+	function chdia($dia){
+		$dia=intval($dia);
+		if($dia >=0 && $dia<=31){
+			return true;
+		}
+		$this->validation->set_message('chdia', 'El valor introducido en el campo %s no es v&aacute;lido');
+		return false;
 	}
 
 	function instalar(){

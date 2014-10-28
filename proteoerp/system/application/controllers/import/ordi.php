@@ -731,7 +731,7 @@ class Ordi extends Controller {
 
 	function ordiva($ordi){
 		$this->rapyd->load('dataobject','dataedit');
-		$fecha = $this->datasis->dameval("SELECT fecha FROM ordi WHERE numero=$ordi");
+		$fecha = $this->datasis->dameval("SELECT fecha FROM ordi WHERE numero=${ordi}");
 		$iva   = $this->datasis->ivaplica($fecha);
 
 		$jsc='function calcula(){
@@ -770,6 +770,7 @@ class Ordi extends Controller {
 		$edit->tasa->rule  = 'required|numeric';
 		$edit->tasa->style = 'width:100px';
 		$edit->tasa->mode  = 'autohide';
+		$edit->tasa->append('<span style="color:black;"> Vigente para la fecha <b>'.dbdate_to_human($fecha).'</b></span>');
 
 		$edit->base = new inputField('Base imponible','base');
 		$edit->base->rule= 'required|numeric';
@@ -1291,7 +1292,7 @@ class Ordi extends Controller {
 			$query=$this->db->query($SQL,array($id));
 			if($query->num_rows()==1){
 				$control = $this->datasis->fprox_numero('nscst');
-				$transac = $row['ntransa'];
+				$transac = $row['transac'];
 				$row     = $query->row_array();
 				$numero  = substr($row['numero'],-8);
 				$serie   = $row['numero'];
@@ -1734,44 +1735,41 @@ class Ordi extends Controller {
 
 	function _post_insert($do){
 		$codigo=$do->get('numero');
-		logusu('ordi',"ORDI $codigo CREADO");
-
-		$peso=$this->datasis->dameval("SELECT SUM(b.peso) AS peso FROM itordi AS a JOIN sinv AS b ON a.codigo=b.codigo AND a.numero=$codigo");
+		$peso=$this->datasis->dameval("SELECT SUM(b.peso) AS peso FROM itordi AS a JOIN sinv AS b ON a.codigo=b.codigo AND a.numero=${codigo}");
 		if(empty($peso)) $peso=0;
 		$data  = array('peso' => $peso);
-		$where = "numero= $codigo";
+		$where = "numero= ${codigo}";
 		$str = $this->db->update_string('ordi', $data, $where);
 		$this->db->simple_query($str);
-
+		logusu('ordi',"ORDI $codigo CREADO");
 		return true;
 	}
 
 	function _post_update($do){
 		$codigo=$do->get('numero');
-		logusu('ordi',"ORDI $codigo MODIFICADO");
-
-		$peso=$this->datasis->dameval("SELECT SUM(b.peso) AS peso FROM itordi AS a JOIN sinv AS b ON a.codigo=b.codigo AND a.numero=$codigo");
+		$peso=$this->datasis->dameval("SELECT SUM(b.peso) AS peso FROM itordi AS a JOIN sinv AS b ON a.codigo=b.codigo AND a.numero=${codigo}");
 		if(empty($peso)) $peso=0;
 		$data  = array('peso' => $peso);
 		$where = "numero= $codigo";
 		$str = $this->db->update_string('ordi', $data, $where);
 		$this->db->simple_query($str);
+		logusu('ordi',"ORDI ${codigo} MODIFICADO");
 		return true;
 	}
 
 	function _post_delete($do){
 		$numero  =$do->get('numero');
 		$dbnumero=$this->db->escape($numero);
-		$mSQL="DELETE FROM gseri WHERE ordeni=$dbnumero";
+		$mSQL="DELETE FROM gseri WHERE ordeni=${dbnumero}";
 		$this->db->simple_query($mSQL);
 
-		$mSQL="DELETE FROM ordiva WHERE ordeni=$dbnumero";
+		$mSQL="DELETE FROM ordiva WHERE ordeni=${dbnumero}";
 		$this->db->simple_query($mSQL);
 
-		$mSQL="UPDATE gser SET ordeni=null WHERE ordeni=$dbnumero";
+		$mSQL="UPDATE gser SET ordeni=null WHERE ordeni=${dbnumero}";
 		$this->db->simple_query($mSQL);
 
-		logusu('ordi',"ORDI orden de importacion numero  $numero ELIMINADO");
+		logusu('ordi',"ORDI orden de importacion numero ${numero} ELIMINADO");
 		return true;
 	}
 

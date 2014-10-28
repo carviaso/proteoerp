@@ -202,7 +202,8 @@ function totaliza(){
 }
 
 function truncate(id){
-	itcrud_cont = 0;
+	itefec_cont=0;
+	itannc_cont=0;
 	$('tr[id^="tr_itefec_"]').remove();
 	$('tr[id^="tr_itannc_"]').remove();
 }

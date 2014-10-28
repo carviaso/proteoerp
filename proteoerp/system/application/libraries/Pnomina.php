@@ -13,6 +13,8 @@ class fnomina {
 	var $fdesde;
 	var $fhasta;
 
+	var $arr_notabu=array();
+
 	function fnomina(){
 		$this->ci =& get_instance();
 	}
@@ -128,32 +130,49 @@ class fnomina {
 		$mTABLA   = $this->NOTABU( $XTRABAJA, $mREG[0], $mREG[1], $mREG[2] );
 		$mVALOR   = 0;
 
-		if ( strtoupper($par) == 'PREAVISO'   ) $mVALOR = $mTABLA['preaviso'  ];
+		if(in_array(strtoupper($par),array_map('strtoupper',$arr))){
+			$mVALOR = $mTABLA[strtolower($par)];
+		}
+
+		/*if ( strtoupper($par) == 'PREAVISO'   ) $mVALOR = $mTABLA['preaviso'  ];
 		if ( strtoupper($par) == 'VACACIONES' ) $mVALOR = $mTABLA['vacaciones'];
 		if ( strtoupper($par) == 'BONOVACA'   ) $mVALOR = $mTABLA['bonovaca'  ];
 		if ( strtoupper($par) == 'ANTIGUEDAD' ) $mVALOR = $mTABLA['antiguedad'];
-		if ( strtoupper($par) == 'UTILIDADES' ) $mVALOR = $mTABLA['utilidades'];
+		if ( strtoupper($par) == 'UTILIDADES' ) $mVALOR = $mTABLA['utilidades'];*/
 
 		return $mVALOR;
 	}
 
-	//************************************
-	//  BUSCA EN TABLA
+	//******************************************************************
+	//  Busca en notabu
 	//
 	function NOTABU( $mCONTRATO, $mANO, $mMES, $mDIA ){
+
+		if(count($this->arr_notabu)>0){
+			$mSQL='SHOW FULL COLUMNS FROM notabu';
+			$query = $this->ci->db->query($mSQL);
+			foreach($query->result() as $row){
+				if(in_array(trim($row->Field),array('contrato','ano','mes','dia','id')))
+				$this->arr_notabu[]=trim($row->Field);
+			}
+		}
+		$campos=implode(',',$this->arr_notabu);
+
 		$dbcontrato = $this->ci->db->escape($mCONTRATO);
-		//                1          2         3           4          5
-		$mSQL  = 'SELECT preaviso, vacacion, bonovaca, antiguedad, utilidades ';
-		$mSQL .= "FROM notabu WHERE ano<=${mANO} AND mes<=${mMES} AND dia<=${mDIA}";
+		$mSQL  = 'SELECT '.$campos;
+		$mSQL .= " FROM notabu WHERE ano<=${mANO} AND mes<=${mMES} AND dia<=${mDIA}";
 		$mSQL .= " AND contrato=${dbcontrato} ";
 		$mSQL .= 'ORDER BY ano DESC, mes DESC, dia DESC ';
 		$mSQL .= 'LIMIT 1';
-		$mREG  = $this->ci->datasis->damereg($mSQL);
-		if(empty($mREG)){
-			return array('preaviso'=>0, 'vacacion'=>0, 'bonovaca'=>0, 'antiguedad'=>0, 'utilidades'=>0);
-		}else{
-			return  $mREG;
+
+		$rt  = $this->ci->datasis->damereg($mSQL);
+		if(empty($rt)){
+			foreach($campos as $val){
+				$rt[$val]=0;
+			}
 		}
+
+		return $rt;
 	}
 
 	function SUELDO_INT(){
@@ -190,7 +209,7 @@ class fnomina {
 	//
 	function ASIGNA(){
 		$CODIGO   = $this->ci->db->escape($this->CODIGO);
-		$mSQL  = "SELECT SUM(valor) cuenta FROM prenom WHERE codigo=".$CODIGO." AND tipo='A' AND MID(concepto,1,1)<9 ";
+		$mSQL  = "SELECT SUM(valor) cuenta FROM prenom WHERE codigo=${CODIGO} AND tipo='A' AND MID(concepto,1,1)<9 ";
 		$query = $this->ci->db->query($mSQL);
 		$row   = $query->row();
 		$suma  = floatval($row->cuenta);
@@ -229,7 +248,6 @@ class fnomina {
 				if ( $row->final > $this->fhasta ){
 					$diasefect = $diasefect+1 ;
 				}
-				//memowrite($row->final.' > '.$this->fhasta.' '.$diasefect, 'Reposo');
 			}
 		}
 
@@ -254,6 +272,7 @@ class fnomina {
 		return $dias;
 	}
 
+	//******************************************************************
 	//Sueldo promedio mensual aplicable a liquidacion
 	function SUELPROM(){
 		$desde  = $this->fdesde;
@@ -281,6 +300,7 @@ class fnomina {
 		return floatval($util);
 	}
 	//fin liquidacion
+	//******************************************************************
 
 }
 

@@ -14,7 +14,7 @@ class Prenom extends Controller {
 	}
 
 	function index(){
-		$this->rapyd->load("dataform");
+		$this->rapyd->load('dataform');
 		$form = new DataForm('nomina/prenom/index/process');
 
 		$script = '
@@ -84,7 +84,7 @@ class Prenom extends Controller {
 			}else{
 
 			}
-			$this->_creaprenom($contrato, $fechac, $fechap );
+			$this->_creaprenom($contrato, $fechac, $fechap,true);
 			$this->_creapretab();  // Crea Pretabla
 			$this->calcuto();      // Calcula todos
 
@@ -103,6 +103,7 @@ class Prenom extends Controller {
 		$contrato = $this->input->post('contrato');
 		$fechac   = $this->input->post('fechac');
 		$fechap   = $this->input->post('fechap');
+		$pers     = $this->input->post('pers');
 
 		$prenom  ='prenom';
 		$pretab  ='pretab';
@@ -117,8 +118,8 @@ class Prenom extends Controller {
 		$dia    = intval(substr($fechac,6,2));
 
 		$dbcont = $this->db->escape($contrato);
-		$tipo = $this->datasis->dameval('SELECT tipo FROM noco WHERE codigo='.$dbcont);
-		if( $tipo == 'Q' ){
+		$tipo = trim($this->datasis->dameval('SELECT tipo FROM noco WHERE codigo='.$dbcont));
+		if($tipo == 'Q'){
 			if($dia != $ultdia || $dia != 15){
 				if($dia<=15){
 					$fechac = substr($fechac,0,6).'15';
@@ -130,16 +131,22 @@ class Prenom extends Controller {
 			if($dia != $ultdia){
 				$fechac = substr($fechac,0,6).$ultdia;
 			}
+			$pers = null;
 		}elseif($tipo=='S'){ //Fecha - 7
 			//$date->sub(new DateInterval('P7D'));
 			$fechac = $date->format('Ymd');
+			$pers = null;
 		}elseif($tipo=='B'){ //Fecha -14
 			//$date->sub(new DateInterval('P14D'));
 			$fechac = $date->format('Ymd');
+			$pers = null;
 		}else{
-
+			if(empty($pers)){
+				$pers = $contrato;
+			}
 		}
-		$this->_creaprenom($contrato, $fechac, $fechap );
+
+		$this->_creaprenom($contrato, $fechac, $fechap,true,$pers);
 		$this->_creapretab();  // Crea Pretabla
 		$this->calcuto();      // Calcula todos
 
@@ -216,10 +223,20 @@ class Prenom extends Controller {
 	//******************************************************************
 	//  Crea Pretab => Tabla de Prenomina Detalle
 	//
-	function _creaprenom($contrato, $fecha, $fechap, $sobrescribe = true ){
-		$contdb = $this->db->escape($contrato);
+	function _creaprenom($contrato, $fecha, $fechap, $sobrescribe = true ,$pers=null){
 		$prenom  = 'prenom';
 		$pretab  = 'pretab';
+
+		$contdb = $this->db->escape($contrato);
+		if(!empty($pers)){
+			if(is_array($pers)){
+				//Implementar
+			}else{
+				$contpr=$this->db->escape($pers);
+			}
+		}else{
+			$contpr=$contdb;
+		}
 
 		// APLICA AUMENTOS DE SUELDO
 		$mSQL  = "UPDATE ausu a JOIN pers b ON a.codigo=b.codigo ";
@@ -231,28 +248,30 @@ class Prenom extends Controller {
 		$dbFRECUEN= $this->db->escape($FRECUEN);
 		$this->db->query("UPDATE pers SET tipo=${dbFRECUEN} WHERE contrato=".$contdb);
 
-		if ($sobrescribe)
+		if($sobrescribe){
 			$this->db->query("TRUNCATE ${prenom}");
-
+		}
 
 		// ---- CONCEPTOS PARTICULARES ---- //
-		$mSQL  = "INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
+		$mSQL  = "INSERT IGNORE INTO ${prenom} (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
 		$mSQL .= "SELECT ${contdb} contrato, b.codigo, CONCAT(RTRIM(b.apellido),', ',b.nombre) nombre,";
 		$mSQL .= "a.concepto, c.grupo, a.tipo, a.descrip, a.formula, 0, '${fecha}', '${fechap}' ";
-		$mSQL .= "FROM asig a JOIN pers b ON a.codigo=b.codigo ";
-		$mSQL .= "JOIN conc c ON a.concepto=c.concepto ";
-		$mSQL .= "WHERE b.tipo=${dbFRECUEN} AND b.contrato=${contdb} AND b.status='A' ";
+		$mSQL .= "FROM asig AS a ";
+		$mSQL .= "JOIN pers AS b ON a.codigo=b.codigo ";
+		$mSQL .= "JOIN conc AS c ON a.concepto=c.concepto ";
+		$mSQL .= "WHERE b.tipo=${dbFRECUEN} AND b.contrato=${contpr} AND b.status='A' ";
 		$this->db->query($mSQL);
 
-		$mSQL  = "INSERT IGNORE INTO prenom (contrato, codigo,nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
+		$mSQL  = "INSERT IGNORE INTO ${prenom} (contrato, codigo,nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap ) ";
 		$mSQL .= "SELECT ${contdb}, b.codigo, CONCAT(RTRIM(b.apellido),', ',b.nombre) nombre, ";
 		$mSQL .= "a.concepto, a.grupo, a.tipo, a.descrip, a.formula, 0, '${fecha}', '${fechap}' ";
-		$mSQL .= "FROM conc a JOIN itnoco c ON a.concepto=c.concepto ";
-		$mSQL .= "JOIN pers b ON b.contrato=c.codigo ";
+		$mSQL .= "FROM conc   AS a ";
+		$mSQL .= "JOIN itnoco AS c ON a.concepto=c.concepto ";
+		$mSQL .= "JOIN pers   AS b ON b.contrato=${contpr} ";
 		$mSQL .= "WHERE c.codigo=${contdb} AND b.status='A' ";
 		$this->db->query($mSQL);
 
-		$this->db->query("UPDATE prenom SET trabaja=contrato");
+		$this->db->query("UPDATE ${prenom} SET trabaja=contrato");
 
 	}
 
@@ -542,12 +561,5 @@ class Prenom extends Controller {
 
 }
 /*
-
 	1.- Calcular la primera nomina desde la fecha de ingreso
-
-
-
-
 */
-
-?>

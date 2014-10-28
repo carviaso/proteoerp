@@ -1,4 +1,10 @@
 <?php
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class Sueldomin extends Controller {
 	var $mModulo = 'SUELDOMIN';
 	var $titp    = 'SUELDOS MINIMOS';
@@ -13,8 +19,7 @@ class Sueldomin extends Controller {
 	}
 
 	function index(){
-		$this->datasis->creaintramenu( $opcion = array('modulo'=>'70C','titulo'=>'Sueldo Minimo','mensaje'=>'Sueldo Minimo','panel'=>'REGISTROS','ejecutar'=>'nomina/sueldomin','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>530,'alto'=>400) );   // Crea opcion en el menu
-		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -57,7 +62,7 @@ class Sueldomin extends Controller {
 	//Funciones de los Botones
 	//
 	function bodyscript( $grid0 ){
-		$bodyscript = '		<script type="text/javascript">';
+		$bodyscript = '<script type="text/javascript">';
 
 		$bodyscript .= '
 		function sueldominadd(){
@@ -70,9 +75,9 @@ class Sueldomin extends Controller {
 
 		$bodyscript .= '
 		function sueldominedit(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
@@ -157,7 +162,7 @@ class Sueldomin extends Controller {
 									apprise("Registro Guardado");
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/SUELDOMIN').'/\'+res.id+\'/id\'').';
+									//'.$this->datasis->jwinopen(site_url('formatos/ver/SUELDOMIN').'/\'+res.id+\'/id\'').';
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -209,19 +214,17 @@ class Sueldomin extends Controller {
 			}
 		});';
 
-		$bodyscript .= '});'."\n";
-
-		$bodyscript .= "\n</script>\n";
-		$bodyscript .= "";
+		$bodyscript .= '});';
+		$bodyscript .= '</script>';
 		return $bodyscript;
 	}
 
 	//******************************************************************
-	// Definicion del Grid o Tabla 
+	// Definicion del Grid o Tabla
 	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -250,7 +253,7 @@ class Sueldomin extends Controller {
 		));
 
 		$grid->addField('aplica');
-		$grid->label('Aplicacion');
+		$grid->label('Aplicaci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -306,7 +309,7 @@ class Sueldomin extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: sueldominadd, editfunc: sueldominedit, delfunc: sueldomindel, viewfunc: sueldominshow");
+		$grid->setBarOptions('addfunc: sueldominadd, editfunc: sueldominedit, delfunc: sueldomindel, viewfunc: sueldominshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -339,62 +342,11 @@ class Sueldomin extends Controller {
 	// Guarda la Informacion del Grid o Tabla
 	//
 	function setData(){
-		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
-		$data   = $_POST;
-		$mcodp  = "??????";
-		$check  = 0;
-
-		unset($data['oper']);
-		unset($data['id']);
-		if($oper == 'add'){
-			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM sueldomin WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
-					$this->db->insert('sueldomin', $data);
-					echo "Registro Agregado";
-
-					logusu('SUELDOMIN',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
-			$nuevo  = $data[$mcodp];
-			$anterior = $this->datasis->dameval("SELECT $mcodp FROM sueldomin WHERE id=$id");
-			if ( $nuevo <> $anterior ){
-				//si no son iguales borra el que existe y cambia
-				$this->db->query("DELETE FROM sueldomin WHERE $mcodp=?", array($mcodp));
-				$this->db->query("UPDATE sueldomin SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-				$this->db->where("id", $id);
-				$this->db->update("sueldomin", $data);
-				logusu('SUELDOMIN',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-				echo "Grupo Cambiado/Fusionado en clientes";
-			} else {
-				unset($data[$mcodp]);
-				$this->db->where("id", $id);
-				$this->db->update('sueldomin', $data);
-				logusu('SUELDOMIN',"Grupo de Cliente  ".$nuevo." MODIFICADO");
-				echo "$mcodp Modificado";
-			}
-
-		} elseif($oper == 'del') {
-			$meco = $this->datasis->dameval("SELECT $mcodp FROM sueldomin WHERE id=$id");
-			//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM sueldomin WHERE id='$id' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; tiene movimiento ";
-			} else {
-				$this->db->simple_query("DELETE FROM sueldomin WHERE id=$id ");
-				logusu('SUELDOMIN',"Registro ????? ELIMINADO");
-				echo "Registro Eliminado";
-			}
-		};
+		echo 'Deshabilitado';
 	}
 
 	//******************************************************************
-	// Edicion 
+	// Edicion
 
 	function dataedit(){
 		$this->rapyd->load('dataedit');
@@ -402,8 +354,7 @@ class Sueldomin extends Controller {
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 			$(".inputnum").numeric(".");
-		});
-		';
+		});';
 
 		$edit = new DataEdit($this->tits, 'sueldomin');
 
@@ -411,35 +362,29 @@ class Sueldomin extends Controller {
 		$edit->script($script,'create');
 		$edit->on_save_redirect=false;
 
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->pre_process( 'insert', '_pre_insert');
+		$edit->pre_process( 'update', '_pre_update');
+		$edit->pre_process( 'delete', '_pre_delete');
 
-		$edit->fecha = new dateonlyField('Fecha','fecha');
-		$edit->fecha->rule='chfecha';
-		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
+		$edit->fecha = new dateonlyField('Fecha de aplicaci&oacute;n','fecha');
+		$edit->fecha->rule='chfecha|required';
+		$edit->fecha->size =12;
+		$edit->fecha->maxlength = 8;
+		$edit->fecha->calendar=false;
 
 		$edit->gaceta = new inputField('Gaceta','gaceta');
 		$edit->gaceta->rule='';
-		$edit->gaceta->size =52;
+		$edit->gaceta->size =20;
 		$edit->gaceta->maxlength =50;
 
-		$edit->fecha = new dateonlyField('Aplicacion','aplica');
-		$edit->fecha->rule='chfecha';
-		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
-
-		$edit->valor = new inputField('Valor','valor');
-		$edit->valor->rule='numeric';
+		$edit->valor = new inputField('Valor del sueldo m&iacute;nimo','valor');
+		$edit->valor->rule='numeric|required';
 		$edit->valor->css_class='inputnum';
-		$edit->valor->size =14;
-		$edit->valor->maxlength =12;
+		$edit->valor->size = 14;
+		$edit->valor->maxlength = 12;
 
 		$edit->build();
 
@@ -486,9 +431,10 @@ class Sueldomin extends Controller {
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('sueldomin')) {
-			$mSQL="
-			CREATE TABLE sueldomin (
+		$this->datasis->creaintramenu( $opcion = array('modulo'=>'70C','titulo'=>'Sueldo Minimo','mensaje'=>'Sueldo Minimo','panel'=>'REGISTROS','ejecutar'=>'nomina/sueldomin','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>530,'alto'=>400) );   // Crea opcion en el menu
+		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		if (!$this->db->table_exists('sueldomin')){
+			$mSQL="CREATE TABLE sueldomin (
 				fecha  DATE          NULL DEFAULT NULL COMMENT 'Fecha de la Gaceta',
 				gaceta VARCHAR(50)   NULL DEFAULT NULL COMMENT 'Numero de Gaceta',
 				aplica DATE          NULL DEFAULT NULL COMMENT 'Fecha de Aplicacion',
@@ -497,13 +443,10 @@ class Sueldomin extends Controller {
 			PRIMARY KEY (id)
 			)
 			COLLATE='latin1_swedish_ci'
-			ENGINE=MyISAM;
-			";
+			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
 		//$campos=$this->db->list_fields('sueldomin');
 		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
-
-?>
