@@ -473,9 +473,10 @@ class Ordi extends Controller {
 	}
 
 	function _showgeri($id,$stat='C'){
-		$this->rapyd->load('datagrid');
+		$this->rapyd->load('datagrid2');
 
-		$grid = new DataGrid('Lista de gastos internacionales');
+		$grid = new DataGrid2('Lista de gastos internacionales');
+		$grid->totalizar('monto');
 		$select=array('a.numero','a.id','a.concepto','a.monto','a.fecha',
 			'IF(LENGTH(a.proveed)=0,b.proveed,b.proveed) AS proveed',
 			'IF(LENGTH(a.proveed)=0,b.nombre,b.nombre) AS nombre'
@@ -510,7 +511,7 @@ class Ordi extends Controller {
 	}
 
 	function _showgeser($id,$stat='C'){
-		$this->rapyd->load('datagrid');
+		$this->rapyd->load('datagrid2');
 
 		$tablagrid=$pivot=array();
 		$sel= array('numero','proveed','nombre','fecha','totpre');
@@ -568,7 +569,8 @@ class Ordi extends Controller {
 			return $rt;
 		}
 
-		$grid = new DataGrid('Lista de gastos nacionales',$tablagrid);
+		$grid = new DataGrid2('Lista de gastos nacionales',$tablagrid);
+		$grid->totalizar('totpre');
 		$grid->use_function('glink');
 
 		$grid->column('N. Factura','<glink><#estima#>|<#id#>|<#numero#>|'.$id.'|'.$status.'</glink>');
@@ -592,9 +594,10 @@ class Ordi extends Controller {
 	}
 
 	function _showordiva($id,$stat='C'){
-		$this->rapyd->load('datagrid');
+		$this->rapyd->load('datagrid2');
 
-		$grid = new DataGrid('Lista de impuestos al valor agregado','ordiva');
+		$grid = new DataGrid2('Lista de impuestos al valor agregado','ordiva');
+		$grid->totalizar('montoiva');
 		$grid->db->where('ordeni',$id);
 		$grid->use_function('str_pad');
 		$grid->order_by('id','desc');
