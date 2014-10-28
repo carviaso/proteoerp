@@ -895,7 +895,7 @@ $tabla .= '
 			$vista = $this->vista($db);
 
 		// Reportes
-		$reporte = $this->genefilter( $db, $s=false, $repo=false );
+		$reporte = $this->genefilter( $db, $s=false, $repo=true );
 
 		$data['programa'] = $columna.'?>';
 		$data['vista']    = $vista;
