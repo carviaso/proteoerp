@@ -212,6 +212,7 @@ class Spre extends Controller {
 					submit:function(e,v,m,f){
 						e.preventDefault();
 						$.prompt.close();
+						grid.trigger("reloadGrid");
 					}
 				}};
 				$.prompt(mgene);
@@ -369,9 +370,7 @@ BICENTENARIO Cta. 0175-0011-2300-7305-1179
 VENEZUELA    Cta. 0102-0441-1000-0023-3563 
 BNC          Cta. 0191-0093-6721-9303-0443 
 MERCANTIL    Cta. 0105-0065-6410-6538-5552 
-
-Miguel Calello  E-84.570.975
-PROVINCIAL Cta. 0108-0120-6501-0004-1734 
+PROVINCIAL   Cta. 0108-0067-6401-0028-3544 
 
 FACUNDO CALELLO E-84.571.125
 BANESCO Cta. 0134-0030-0103-0102-9938 
@@ -392,8 +391,10 @@ web indicada en el paso 2 con el número de orden correspondiente. No se
 procesará ninguna información que sea enviada a este correo, ni se tomarán 
 datos vía telefónica.";
 
-		$this->datasis->correo( $row->email, 'Instrucciones de Compra'.$row->numero, utf8_decode($notifica) );
-		
+		$this->datasis->correo( $row->email, 'Instrucciones: Orden No. '.$row->numero, utf8_decode($notifica) );
+
+		$this->db->where('id',$id);
+		$this->db->update('spre',array('notifica'=>'S'));
 		}
 		echo $msj;
 	}
@@ -414,6 +415,7 @@ datos vía telefónica.";
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 70,
+			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
@@ -425,7 +427,7 @@ datos vía telefónica.";
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 70,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
@@ -433,12 +435,13 @@ datos vía telefónica.";
 		));
 
 
-		$grid->addField('vd');
-		$grid->label('Vendedor');
+		$grid->addField('notifica');
+		$grid->label('Notif.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 50,
+			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
@@ -511,30 +514,16 @@ datos vía telefónica.";
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-/*
-		$grid->addField('direc');
-		$grid->label('Direccion 1');
+		$grid->addField('vd');
+		$grid->label('Vendedor');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 200,
+			'width'         => 50,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:40, maxlength: 40 }',
+			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
-
-
-		$grid->addField('dire1');
-		$grid->label('Direccion 2');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:40, maxlength: 40 }',
-		));
-*/
 
 		$grid->addField('rifci');
 		$grid->label('RIF/CI');
@@ -1729,9 +1718,6 @@ datos vía telefónica.";
 		logusu($do->table,"Elimino $this->tits $primary ");
 	}
 
-
-
-
 	//******************************************************************
 	// Instalar
 	//
@@ -1742,16 +1728,17 @@ datos vía telefónica.";
 			$this->db->simple_query('ALTER TABLE spre ADD UNIQUE INDEX numero (numero)');
 			$this->db->simple_query('ALTER TABLE spre ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
-		if(!in_array('email',   $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN email    VARCHAR(100) NULL DEFAULT NULL AFTER dire1');
-		if(!in_array('telefono',$campos)) $this->db->query('ALTER TABLE spre ADD COLUMN telefono VARCHAR(30)  NULL DEFAULT NULL AFTER email');
-		if(!in_array('ciudad',  $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN ciudad   VARCHAR(40)  NULL DEFAULT NULL AFTER telefono');
-		if(!in_array('estado',  $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN estado   INT          NULL DEFAULT NULL AFTER ciudad');
-		if(!in_array('mercalib',$campos)) $this->db->query('ALTER TABLE spre ADD COLUMN mercalib VARCHAR(50)  NULL DEFAULT NULL AFTER estado');
-		if(!in_array('codbanc', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN codbanc  CHAR(2)      NULL DEFAULT NULL AFTER mercalib');
-		if(!in_array('tipo_op', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN tipo_op  CHAR(2)      NULL DEFAULT NULL AFTER codbanc');
-		if(!in_array('num_ref', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN num_ref  VARCHAR(20)  NULL DEFAULT NULL AFTER tipo_op');
-		if(!in_array('observa', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN observa  TEXT         NULL DEFAULT NULL AFTER condi2');
-		if(!in_array('fechadep',$campos)) $this->db->query('ALTER TABLE spre ADD COLUMN fechadep DATE         NULL DEFAULT NULL AFTER tipo_op');
+		if(!in_array('email',    $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN email    VARCHAR(100) NULL DEFAULT NULL AFTER dire1'   );
+		if(!in_array('telefono', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN telefono VARCHAR(30)  NULL DEFAULT NULL AFTER email'   );
+		if(!in_array('ciudad',   $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN ciudad   VARCHAR(40)  NULL DEFAULT NULL AFTER telefono');
+		if(!in_array('estado',   $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN estado   INT          NULL DEFAULT NULL AFTER ciudad'  );
+		if(!in_array('mercalib', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN mercalib VARCHAR(50)  NULL DEFAULT NULL AFTER estado'  );
+		if(!in_array('codbanc',  $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN codbanc  CHAR(2)      NULL DEFAULT NULL AFTER mercalib');
+		if(!in_array('tipo_op',  $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN tipo_op  CHAR(2)      NULL DEFAULT NULL AFTER codbanc' );
+		if(!in_array('num_ref',  $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN num_ref  VARCHAR(20)  NULL DEFAULT NULL AFTER tipo_op' );
+		if(!in_array('observa',  $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN observa  TEXT         NULL DEFAULT NULL AFTER condi2'  );
+		if(!in_array('fechadep', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN fechadep DATE         NULL DEFAULT NULL AFTER tipo_op' );
+		if(!in_array('notifica', $campos)) $this->db->query('ALTER TABLE spre ADD COLUMN notifica CHAR(1)      NULL DEFAULT NULL AFTER fechadep');
 	}
 
 }

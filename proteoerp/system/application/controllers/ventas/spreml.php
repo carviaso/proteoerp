@@ -42,6 +42,7 @@ class Spreml extends Controller {
 		$grid->wbotonadd(array("id"=>"fconfirma", "img"=>"images/engrana.png",  "alt" => "Confirmar Pago", "label"=>"Confirmar Pago"));
 		$grid->wbotonadd(array("id"=>"factura",   "img"=>"images/engrana.png",  "alt" => "Facturar",       "label"=>"Facturar"));
 		$grid->wbotonadd(array("id"=>"fenvia",    "img"=>"images/engrana.png",  "alt" => "Guia de Envio",  "label"=>"Guia de Envio"));
+		$grid->wbotonadd(array('id'=>'fetiqueta', 'img'=>'assets/default/images/print.png',   'alt' => 'Etiqueta',   'label'=>'Etiqueta'));
 
 		$Adic = '
 		<table>
@@ -219,6 +220,14 @@ class Spreml extends Controller {
 			}
 		});';
 
+		$bodyscript .= '
+		jQuery("#fetiqueta").click(function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('formatos/ver/SPREMLE').'/\'+id+\'/id\'').';
+			} else { $.prompt("<h1>Por favor Seleccione un Presupuesto</h1>");}
+		});';
 
 		$bodyscript .= '</script>';
 		return $bodyscript;
@@ -272,6 +281,9 @@ garantía, ya nosotros lo hemos hecho de manera POSITIVA (+).\n
 Saludos cordiales.\n";
 
 		$this->datasis->correo( $email, 'Notificacion de Envio '.$numero, utf8_decode($notifica) );
+
+		$this->db->where('id',$id);
+		$this->db->update('spreml',array('status'=>'E'));
 		
 
 		echo $msj.$guia." ".$fecha;
@@ -545,7 +557,6 @@ Saludos cordiales.\n";
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('290');
@@ -557,7 +568,8 @@ Saludos cordiales.\n";
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
-		$grid->setOndblClickRow('');		#show/hide navigations buttons
+		$grid->setOnSelectRow('function(id){if (id){ $("#radicional").html(detalle(id)); }}');
+
 		$grid->setAdd(    $this->datasis->sidapuede('SPREML','INCLUIR%' ));
 		$grid->setEdit(   $this->datasis->sidapuede('SPREML','MODIFICA%'));
 		$grid->setDelete( $this->datasis->sidapuede('SPREML','BORR_REG%'));
