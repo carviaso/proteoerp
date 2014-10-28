@@ -21,6 +21,7 @@ class Sinvec extends Controller {
 	function index(){
 		$this->datasis->creaintramenu(array('modulo'=>'330','titulo'=>'Estructura de Costos','mensaje'=>'ESTRUCTURA DE COSTOS','panel'=>'COSTOS','ejecutar'=>'inventario/sinvec','target'=>'popu','visible'=>'S','pertenece'=>'3','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -565,6 +566,17 @@ class Sinvec extends Controller {
 	}
 
 	function instalar(){
+		if (!$this->db->table_exists('grec')) {
+			$mSQL="CREATE TABLE `grec` (
+			  `grupo` varchar(4) NOT NULL DEFAULT '',
+			  `descrip` varchar(25) DEFAULT NULL,
+			  `cuenta` varchar(15) DEFAULT NULL,
+			  `id` int(11) NOT NULL AUTO_INCREMENT,
+			  PRIMARY KEY (`id`),
+			  UNIQUE KEY `grupo` (`grupo`)
+			) ENGINE=MyISAM  DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Grupo de Estructura de Costos'";
+			$this->db->query($mSQL);
+		}
 		if (!$this->db->table_exists('sinvec')) {
 			$mSQL="CREATE TABLE `sinvec` (
 			  `grupo` char(4) NOT NULL,
