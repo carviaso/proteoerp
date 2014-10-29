@@ -1127,7 +1127,7 @@ class Edrec extends Controller {
 		$mSQL = "SELECT grupo indice FROM grga";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0) {
-			foreach ( $query->result() as $row ){ $GRUPO[$row->indice] = 0 }
+			foreach ( $query->result() as $row ){ $GRUPO[$row->indice] = 0; }
 		}
 		//Genera los recibos
 		$mSQL = "
@@ -1210,7 +1210,7 @@ class Edrec extends Controller {
 					$data1['id_edrc']  = $id;
 					$this->db->insert('editrec',$data1);
 					$monto = $monto + $data1['cuota'];
-					$GRUPO[$row1->grupo] = $GRUPO[$row1->grupo]+ata1['cuota'];
+					$GRUPO[$row1->grupo] = $GRUPO[$row1->grupo]+$data1['cuota'];
 				}
 				$data1 = array();
 				$data1['numero']   = $numero;
@@ -1249,7 +1249,6 @@ class Edrec extends Controller {
 					$this->db->insert('editrec',$data1);
 				}
 			}
-
 			echo "Si se Guardaron";
 		}
 	}
