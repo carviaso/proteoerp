@@ -537,7 +537,6 @@ function autocod(id){
 	});
 }
 
-
 </script>
 <?php } else { ?>
 <script language="javascript" type="text/javascript">

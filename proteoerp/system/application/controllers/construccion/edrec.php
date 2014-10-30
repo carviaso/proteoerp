@@ -15,6 +15,7 @@ class Edrec extends Controller {
 	function index(){
 		$this->datasis->creaintramenu(array('modulo'=>'A07','titulo'=>'Recibos de Cobro','mensaje'=>'Recibos de Cobro','panel'=>'CONDOMINIO','ejecutar'=>'construccion/edrec','target'=>'popu','visible'=>'S','pertenece'=>'A','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -77,18 +78,32 @@ class Edrec extends Controller {
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '		<script type="text/javascript">';
 
+		$anomes = $this->datasis->dameval('SELECT MAX(anomes) FROM edrec');
+		$ano = substr($anomes,0,4);
+		$mes = substr($anomes,4,2);
+		
 		// Pide Fecha
-		$ano1 = date('Y',mktime(0,0,0,date('m'),date('d'),date('Y')));
-		$ano2 = date('Y',mktime(0,0,0,date('m'),date('d'),date('Y')-1));
-		$ano3 = date('Y',mktime(0,0,0,date('m'),date('d'),date('Y')-2));
-		$mano = '<select id=\'mano\' name=\'mano\'><option value=\''.$ano1.'\'>'.$ano1.'</option><option value=\''.$ano2.'\'>'.$ano2.'</option><option value=\''.$ano3.'\'>'.$ano3.'</option></select>';
-		$mes  = '<select id=\'mmes\' name=\'mmes\'><option value=\'01\'>01</option><option value=\'02\'>02</option><option value=\'03\'>03</option><option value=\'04\'>04</option><option value=\'05\'>05</option><option value=\'06\'>06</option><option value=\'07\'>07</option><option value=\'08\'>08</option><option value=\'09\'>09</option><option value=\'10\'>10</option><option value=\'11\'>11</option><option value=\'12\'>12</option></select>';
+		$ano0 = date('Y',mktime(0,0,0,date('m'),date('d'),date('Y')+1));
+
+		$mano  = '<select id=\'mano\' name=\'mano\'>';
+		$mano .= '<option '.($ano==$ano0   ? 'selected' : '').' value=\''.$ano0.    '\'>'.$ano0    .'</option>';
+		$mano .= '<option '.($ano==$ano0-1 ? 'selected' : '').' value=\''.($ano0-1).'\'>'.($ano0-1).'</option>';
+		$mano .= '<option '.($ano==$ano0-2 ? 'selected' : '').' value=\''.($ano0-2).'\'>'.($ano0-2).'</option>';
+		$mano .= '<option '.($ano==$ano0-3 ? 'selected' : '').' value=\''.($ano0-3).'\'>'.($ano0-3).'</option>';
+		$mano .= '</select>';
+
+		$mmes  = '<select id=\'mmes\' name=\'mmes\'>';
+		for ( $i = 1; $i < 13; $i++ ){
+			$m = str_pad($i,2,'0', STR_PAD_LEFT);
+			$mmes .= '<option '.($mes==$m ? 'selected' : '').' value=\''.$m.'\'>'.$m.'</option>';
+		}		
+		$mmes .= '</select>';
 
 		$bodyscript .= '
 		$("#generec").click(function(){
 			var mgene = {
 			state0: {
-				html:"<h1>Generar Recibos: </h1><br/><center>Fecha: '.$mano.'&nbsp; Mes: '.$mes.'</center><br/>",
+				html:"<h1>Generar Recibos: </h1><br/><center>Fecha: '.$mano.'&nbsp; Mes: '.$mmes.'</center><br/>",
 				buttons: { Cancelar: false, Aceptar: true },
 				focus: 1,
 				submit:function(e,v,m,f){
@@ -314,7 +329,7 @@ class Edrec extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 500, width: 750, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -909,23 +924,23 @@ class Edrec extends Controller {
 		$edit->fecha->calendar=false;
 		$edit->fecha->size =10;
 		$edit->fecha->maxlength =8;
+		$edit->fecha->insertValue = date('Y-m-d');
 
 		$edit->vence = new dateonlyField('Vence','vence');
 		$edit->vence->rule='chfecha';
 		$edit->vence->calendar=false;
 		$edit->vence->size =10;
 		$edit->vence->maxlength =8;
+		$edit->vence->insertValue = date('Y-m-d');
 
 		$edit->cod_cli = new inputField('Cliente','cod_cli');
 		$edit->cod_cli->rule='';
 		$edit->cod_cli->size =7;
 		$edit->cod_cli->maxlength =5;
 
-		$edit->inmueble = new inputField('Inmueble','inmueble');
-		$edit->inmueble->rule='';
-		//$edit->inmueble->css_class='inputonlynum';
-		$edit->inmueble->size =11;
-		$edit->inmueble->maxlength =11;
+		$edit->inmueble = new dropdownField('Inmueble','inmueble');
+		$edit->inmueble->style='width:550px;';
+		$edit->inmueble->options('SELECT a.codigo, CONCAT(a.codigo," ", a.descripcion, " ", b.nombre) descrip FROM edinmue a JOIN scli b ON a.ocupante=b.cliente ORDER BY a.codigo ');
 
 		$edit->total = new inputField('Total','total');
 		$edit->total->rule='numeric';
@@ -953,7 +968,7 @@ class Edrec extends Controller {
 		$edit->observa = new textareaField('Observacion','observa');
 		$edit->observa->rule='';
 		$edit->observa->cols = 40;
-		$edit->observa->rows = 4;
+		$edit->observa->rows = 2;
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
@@ -981,9 +996,8 @@ class Edrec extends Controller {
 		$edit->tipo->rel_id    = 'editrec';
 
 		$edit->codigo = new inputField('Codigo','codigo_<#i#>');
-		$edit->codigo->rule      = '';
-		$edit->codigo->size      =  8;
-		$edit->codigo->maxlength = 15;
+		$edit->codigo->size     = 7;
+		$edit->codigo->rule      = 'required';
 		$edit->codigo->db_name   = 'codigo';
 		$edit->codigo->rel_id    = 'editrec';
 
@@ -1001,14 +1015,17 @@ class Edrec extends Controller {
 		$edit->totald->maxlength  = 12;
 		$edit->totald->db_name    = 'total';
 		$edit->totald->rel_id     = 'editrec';
+		$edit->totald->onkeyup='cuotatot(<#i#>)';
 
 		$edit->alicuotad = new inputField('Alicuota','alicuota_<#i#>');
-		$edit->alicuotad->rule      = 'numeric';
-		$edit->alicuotad->css_class = 'inputnum';
-		$edit->alicuotad->size      = 12;
-		$edit->alicuotad->maxlength = 12;
-		$edit->alicuotad->db_name   = 'alicuota';
-		$edit->alicuotad->rel_id    = 'editrec';
+		$edit->alicuotad->rule        = 'numeric';
+		$edit->alicuotad->css_class   = 'inputnum';
+		$edit->alicuotad->size        = 12;
+		$edit->alicuotad->insertValue = 1;
+		$edit->alicuotad->maxlength   = 12;
+		$edit->alicuotad->db_name     = 'alicuota';
+		$edit->alicuotad->rel_id      = 'editrec';
+		$edit->alicuotad->onkeyup='cuotatot(<#i#>)';
 
 		$edit->cuotad = new inputField('Cuota','cuota_<#i#>');
 		$edit->cuotad->rule      = 'numeric';
@@ -1057,6 +1074,12 @@ class Edrec extends Controller {
 	}
 
 	function _pre_insert($do){
+		$numero=$this->datasis->fprox_numero('nedrec');
+		$do->set('numero', $numero);
+		$do->set('origen', 'M');
+		$inmueble = $this->db->escape($do->get('inmueble'));
+		$cod_cli = $this->datasis->dameval('SELECT ocupante FROM edinmue WHERE codigo='.$inmueble);
+		$do->set('cod_cli', $cod_cli);
 		$do->error_message_ar['pre_ins']='';
 		return true;
 	}
@@ -1073,7 +1096,12 @@ class Edrec extends Controller {
 
 	function _post_insert($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		$numero  = $this->db->escape($do->get('numero'));
+		$usuario = $this->db->escape($this->session->userdata('usuario'));
+		$mSQL = 'UPDATE editrec SET estampa=curdate(), hora=curtime(), usuario='.$usuario.', id_edrc='.$primary.' WHERE numero='.$numero;
+		$this->db->query($mSQL);
+		logusu('edrec',"Recibo ".$do->get('numero'));
+		return true;
 	}
 
 	function _post_update($do){
@@ -1084,6 +1112,27 @@ class Edrec extends Controller {
 	function _post_delete($do){
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits $primary ");
+	}
+
+	//******************************************************************
+	// Eliminar Recibos de Cobro
+	//
+	function borrarec( $anomes = 0){
+		if ( $anomes == 0 ) $anomes = $this->input->post('anomes');
+		if ( $anomes <= 0  ) {
+			echo 'Error en la Fecha ('.$anomes.')';
+			return false;
+		}
+		$dbanomes = $this->db->escape($anomes);
+
+		//Busca si ya se facturaron
+		$mSQL = "SELECT count(*) FROM edrec WHERE anomes=".$dbanomes;
+		if ( $this->datasis->dameval($mSQL) > 0 ){
+			$mSQL = "DELETE FROM edrec WHERE anomes=".$dbanomes;
+			$this->db->query($mSQL);
+			echo "Recibos Eliminados";
+			return true;
+		}
 	}
 
 	//******************************************************************
@@ -1199,7 +1248,7 @@ class Edrec extends Controller {
 					$data1['total']    = $row1->total;
 					$data1['alicuota'] = $row1->alicuota;
 					if ( $row1->tipo == 'CO'){
-						$data1['cuota']  = $row1->cuota;
+						$data1['cuota'] = $row1->cuota;
 					} else {
 						$data1['cuota'] = round($row1->total*($row1->alicuota/$malit[$row1->tipo]),2);
 					}
@@ -1232,21 +1281,24 @@ class Edrec extends Controller {
 				$query1 = $this->db->query($mSQL);
 				foreach( $query1->result() as  $row2 ) {
 					$UT   = $this->datasis->utri($anomes.'01');
-					$cuota = eval($row2->formula);
-					$data1 = array();
-					$data1['numero']   = $numero;
-					$data1['tipo']     = 'FO';
-					$data1['codigo']   = $row2->codbanc;
-					$data1['detalle']  = $row2->banco;
-					$data1['total']    = $monto;
-					$data1['alicuota'] = 0;
-					$data1['cuota']    = round($cuota,2);
-					$data1['fecha']    = $fecha;
-					$data1['usuario']  = $this->session->userdata('usuario');
-					$data1['estampa']  = date('Ymd');
-					$data1['hora']     = date('h:m:s');
-					$data1['id_edrc']  = $id;
-					$this->db->insert('editrec',$data1);
+					memowrite('$cuota='.$row2->formula,$row2->codbanc);
+					eval('$cuota='.$row2->formula.';');
+					if ( $cuota <> 0 ){
+						$data1 = array();
+						$data1['numero']   = $numero;
+						$data1['tipo']     = 'FO';
+						$data1['codigo']   = $row2->codbanc;
+						$data1['detalle']  = $row2->banco;
+						$data1['total']    = $monto;
+						$data1['alicuota'] = 0;
+						$data1['cuota']    = round($cuota,2);
+						$data1['fecha']    = $fecha;
+						$data1['usuario']  = $this->session->userdata('usuario');
+						$data1['estampa']  = date('Ymd');
+						$data1['hora']     = date('h:m:s');
+						$data1['id_edrc']  = $id;
+						$this->db->insert('editrec',$data1);
+					}
 				}
 			}
 			echo "Si se Guardaron";
@@ -1337,6 +1389,7 @@ class Edrec extends Controller {
 				cuota     DECIMAL(17,2)  DEFAULT NULL,
 				status    CHAR(1)        DEFAULT NULL,
 				observa   TEXT,
+				origen    CHAR(1)        DEFAULT 'A' COMMENT 'Automatico o Manual',
 				usuario   VARCHAR(12)    DEFAULT NULL,
 				estampa   DATE           DEFAULT NULL,
 				hora      VARCHAR(5)     DEFAULT NULL,
@@ -1349,29 +1402,31 @@ class Edrec extends Controller {
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->query($mSQL);
 		}
-		//$campos=$this->db->list_fields('edrec');
-		//if(!in_array('<#campo#>',$campos)){ }
+		$campos=$this->db->list_fields('edrec');
+		if(!in_array('origen',$campos)) $this->db->query("ALTER TABLE edrec ADD COLUMN origen CHAR(1) NULL DEFAULT 'A' COMMENT 'Automatico o Manual' AFTER observa");
+
 
 		if (!$this->db->table_exists('editrec')) {
-			$mSQL="CREATE TABLE `editrec` (
-			  `numero` varchar(8) DEFAULT NULL,
-			  `tipo` varchar(8) DEFAULT NULL,
-			  `codigo` char(15) DEFAULT NULL,
-			  `detalle` char(200) DEFAULT NULL,
-			  `total` decimal(12,2) DEFAULT NULL,
-			  `alicuota` decimal(12,10) DEFAULT NULL,
-			  `cuota` decimal(12,2) DEFAULT NULL,
-			  `fecha` date DEFAULT NULL,
-			  `usuario` varchar(12) DEFAULT NULL,
-			  `estampa` date DEFAULT NULL,
-			  `hora` varchar(5) DEFAULT NULL,
-			  `transac` varchar(8) DEFAULT NULL,
-			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-			  `id_edrc` int(11) DEFAULT NULL,
-			  PRIMARY KEY (`id`),
-			  KEY `numero` (`numero`),
-			  KEY `codigo` (`codigo`),
-			  KEY `transac` (`transac`)
+			$mSQL="
+			CREATE TABLE editrec (
+				numero   VARCHAR(8)     DEFAULT NULL,
+				tipo     VARCHAR(8)     DEFAULT NULL,
+				codigo   VARCHAR(15)    DEFAULT NULL,
+				detalle  VARCHAR(200)   DEFAULT NULL,
+				total    DECIMAL(12,2)  DEFAULT NULL,
+				alicuota DECIMAL(12,10) DEFAULT NULL,
+				cuota    DECIMAL(12,2)  DEFAULT NULL,
+				fecha    DATE           DEFAULT NULL,
+				usuario  VARCHAR(12)    DEFAULT NULL,
+				estampa  DATE           DEFAULT NULL,
+				hora     VARCHAR(5)     DEFAULT NULL,
+				transac  VARCHAR(8)     DEFAULT NULL,
+				id       INT(11)        unsigned NOT NULL AUTO_INCREMENT,
+				id_edrc  INT(11)        DEFAULT NULL,
+			PRIMARY KEY (id),
+			KEY numero  (numero),
+			KEY codigo  (codigo),
+			KEY transac (transac)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->query($mSQL);
 		}

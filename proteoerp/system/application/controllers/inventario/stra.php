@@ -1474,7 +1474,6 @@ class Stra extends Controller {
 			$do->set('envia' ,'PROD');
 			$do->set('recibe','APRO');
 		}
-
 		$this->_pre_insert($do);
 	}
 
@@ -1525,7 +1524,6 @@ class Stra extends Controller {
 			$itcodigo  = $do->get_rel('itstra', 'codigo'  ,$i);
 			$dbitcodigo=$this->db->escape($itcodigo);
 
-
 			if($egasto!='S'){
 				//Chequea que no este in inventario fisico antes de cargar cantidades
 				$mSQL="SELECT COUNT(*) AS cana
@@ -1536,7 +1534,6 @@ class Stra extends Controller {
 				if($chinnfis==0){
 					$this->datasis->sinvcarga($itcodigo,$envia, -1*$itcana);
 				}
-
 			}
 
 			if($rgasto!='S'){
@@ -1564,13 +1561,11 @@ class Stra extends Controller {
 
 	function _pre_delete($do){
 		if($this->secu->essuper()) return true;
-
 		$envia = $do->get('envia');
 		if($envia == 'INFI'){
 			$do->error_message_ar['pre_del']='No se puede anular un inventario fisico';
 			return false;
 		}
-
 		return true;
 	}
 
