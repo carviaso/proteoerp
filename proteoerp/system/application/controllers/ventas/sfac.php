@@ -4843,7 +4843,7 @@ class Sfac extends Controller {
 				$_POST["combo_${i}"]    = '';
 				$i++;
 			}
-			//sfpa
+			// SFPA
 			$i=0;
 			$_POST["tipo_${i}"]      = $spreml->tipo_op;
 			$_POST["sfpafecha_${i}"] = $spreml->fechadep;
@@ -4859,10 +4859,10 @@ class Sfac extends Controller {
 			$getdata=json_decode($rt,true);
 			if($getdata['status']=='A'){
 				$id = $getdata['pk']['id'];
-				$this->db->where('numero',$numero);
-				$this->db->update("spreml",array( 'status'=>'F'));
-
 				$transac = $this->datasis->damerow("SELECT usuario, transac, estampa, hora FROM sfac WHERE id=".$id);
+
+				$this->db->where('numero',$numero);
+				$this->db->update("spreml",array( 'status'=>'F','transac'=>$transac['transac']));
 
 				// Guarda el deposito
 				$sfpatipo  = $spreml->tipo_op;

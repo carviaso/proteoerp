@@ -40,7 +40,7 @@ class Spreml extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array("id"=>"fconfirma", "img"=>"images/engrana.png",  "alt" => "Confirmar Pago", "label"=>"Confirmar Pago"));
-		$grid->wbotonadd(array("id"=>"factura",   "img"=>"images/engrana.png",  "alt" => "Facturar",       "label"=>"Facturar"));
+		$grid->wbotonadd(array("id"=>"factura",   "img"=>"images/engrana.png",  "alt" => "Facturar o hacer Nota de Entrega", "label"=>"Factura/NE"));
 		$grid->wbotonadd(array("id"=>"fenvia",    "img"=>"images/engrana.png",  "alt" => "Guia de Envio",  "label"=>"Guia de Envio"));
 		$grid->wbotonadd(array('id'=>'fetiqueta', 'img'=>'assets/default/images/print.png',   'alt' => 'Etiqueta',   'label'=>'Etiqueta'));
 
@@ -147,9 +147,11 @@ class Spreml extends Controller {
 			}
 		});';
 
-		$bodyscript .= '
+/*
+		$bodyscript1 = '
 		$("#factura").click(function(){
-			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var med = "";
 			if(id){
 				var ret    = $("#newapi'.$grid0.'").getRowData(id);
 				if( ret.status == "C" ){
@@ -164,7 +166,49 @@ class Spreml extends Controller {
 				} else { $.prompt("<h1>Por favor Seleccione una Orden Confirmada</h1>");}
 			} else { $.prompt("<h1>Por favor Seleccione una Orden</h1>");}
 		});';
-
+*/
+		$bodyscript .= '
+		$("#factura").click(function(){
+			var id  = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				if( ret.status == "C" ){
+					var mgene = {
+					state0: {
+						html:"<h1>Proceder con la Orden</h1>",
+						buttons: { Cancelar: 0, Facturar: 1, N_Entrega: 2 },
+						focus: 1,
+						submit:function(e,v,m,f){
+							e.preventDefault();
+							if(v == 1){
+								$.post("'.site_url('ventas/sfac/creafromspreml').'/"+ret.numero+"/insert",
+								function(data){
+									var json = JSON.parse(data);
+									if ( json.status == "A" ) {
+										$("#newapi'.$grid0.'").trigger("reloadGrid");
+										window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+										$.prompt.close();
+									}
+								});
+							} else if(v == 2) {
+								$.post("'.site_url('ventas/snte/creafromspreml').'/"+ret.numero+"/insert",
+								function(data){
+									var json = JSON.parse(data);
+									if ( json.status == "A" ) {
+										$("#newapi'.$grid0.'").trigger("reloadGrid");
+										'.$this->datasis->jwinopen(site_url('formatos/ver/SNTE').'/\'+json.pk.id').';
+										$.prompt.close();
+									}
+								});
+							} else {
+								$.prompt.close();
+							}
+						}
+					}};
+					$.prompt(mgene);
+				} else { $.prompt("<h1>Por favor Seleccione una Orden Confirmada</h1>");}
+			} else { $.prompt("<h1>Por favor Seleccione una Orden</h1>");}
+		});';
 
 		$bodyscript .= '
 		$("#fenvia").click(function(){
@@ -221,13 +265,19 @@ class Spreml extends Controller {
 		});';
 
 		$bodyscript .= '
-		jQuery("#fetiqueta").click(function(){
+		$("#fetiqueta").click(function(){
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				'.$this->datasis->jwinopen(site_url('formatos/ver/SPREMLE').'/\'+id+\'/id\'').';
-			} else { $.prompt("<h1>Por favor Seleccione un Presupuesto</h1>");}
+			} else { $.prompt("<h1>Por favor Seleccione una Orden</h1>");}
 		});';
+
+		$bodyscript .= '
+		function dime(id){
+			return "Fino mano";
+		};';
+
 
 		$bodyscript .= '</script>';
 		return $bodyscript;
@@ -568,7 +618,7 @@ Saludos cordiales.\n";
 		$grid->setFormOptionsA('closeAfterAdd:true,  mtype: "POST", width: 520, height:300, closeOnEscape: true, top: 50, left:20, recreateForm:true, afterSubmit: function(a,b){if (a.responseText.length > 0) $.prompt(a.responseText); return [true, a ];},afterShowForm: function(frm){$("select").selectmenu({style:"popup"});} ');
 		$grid->setAfterSubmit("$('#respuesta').html('<span style=\'font-weight:bold; color:red;\'>'+a.responseText+'</span>'); return [true, a ];");
 
-		$grid->setOnSelectRow('function(id){if (id){ $("#radicional").html(detalle(id)); }}');
+		$grid->setOnSelectRow('function(id){if (id){ $("#radicional").html(dime(id)); }}');
 
 		$grid->setAdd(    $this->datasis->sidapuede('SPREML','INCLUIR%' ));
 		$grid->setEdit(   $this->datasis->sidapuede('SPREML','MODIFICA%'));
@@ -666,7 +716,7 @@ Saludos cordiales.\n";
 
 	//******************************************************************
 	// Edicion 
-
+	//
 	function dataedit(){
 		$this->rapyd->load('dataedit');
 		$script= '
@@ -817,7 +867,7 @@ Saludos cordiales.\n";
 		$edit->observa->rows = 2;
 
 		$edit->status = new dropdownField('Status','status');
-		$edit->status->options(array(''=>'--','P'=>'Pendiente','C'=>'Confirmado','F'=>'Facturado','E'=>'Enviado','N'=>'Nulo'));
+		$edit->status->options(array(''=>'--','P'=>'Pendiente','C'=>'Confirmado','F'=>'Facturado','N'=>'Nota de Entrega','E'=>'Enviado','A'=>'Anulada'));
 		$edit->status->style='width:80px';
 
 		$edit->guia = new inputField('Nro Guia','guia');
@@ -1273,6 +1323,10 @@ $(function(){
 				totalg    DECIMAL(12,2) DEFAULT NULL,
 				agencia   VARCHAR(50)   DEFAULT NULL,
 				observa   TEXT,
+				status    CHAR(1)       DEFAULT NULL,
+				guia      VARCHAR(30)   DEFAULT NULL,
+				fechaenv  DATE          DEFAULT NULL,
+				transac   VARCHAR(8)    DEFAULT NULL,
 				id        INT(11) NOT NULL AUTO_INCREMENT,
 				PRIMARY KEY (id),
 				UNIQUE KEY numero (numero)
@@ -1283,9 +1337,10 @@ $(function(){
 			$this->db->query($mSQL);
 		}
 		$campos=$this->db->list_fields('spreml');
-		if(!in_array('status',   $campos)) $this->db->query('ALTER TABLE spreml ADD COLUMN status   CHAR(1)     NULL DEFAULT NULL AFTER observa');
-		if(!in_array('guia',     $campos)) $this->db->query('ALTER TABLE spreml ADD COLUMN guia     VARCHAR(30) NULL DEFAULT NULL AFTER status');
-		if(!in_array('fechaenv', $campos)) $this->db->query('ALTER TABLE spreml ADD COLUMN fechaenv DATE        NULL DEFAULT NULL AFTER guia');
+		if(!in_array('status',   $campos)) $this->db->query('ALTER TABLE spreml ADD COLUMN status   CHAR(1)     NULL DEFAULT NULL AFTER observa' );
+		if(!in_array('guia',     $campos)) $this->db->query('ALTER TABLE spreml ADD COLUMN guia     VARCHAR(30) NULL DEFAULT NULL AFTER status'  );
+		if(!in_array('fechaenv', $campos)) $this->db->query('ALTER TABLE spreml ADD COLUMN fechaenv DATE        NULL DEFAULT NULL AFTER guia'    );
+		if(!in_array('transac',  $campos)) $this->db->query('ALTER TABLE spreml ADD COLUMN transac  VARCHAR(8)  NULL DEFAULT NULL AFTER fechaenv');
 	}
 }
 ?>

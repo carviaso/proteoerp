@@ -1608,6 +1608,136 @@ class Snte extends Controller {
 		}
 	}
 
+	//******************************************************************
+	// Crea una factura desde una Orden de Mercado Libre
+	//
+	function creafromspreml( $numero, $status=null ){
+		$this->_url= $this->url.'dataedit/insert';
+
+		$this->db->from('spreml AS a');
+		$this->db->where('a.numero',$numero);
+		$query = $this->db->get();
+		if ($query->num_rows() <> 1 ){
+			echo 'Orden no existe '.$numero;
+			return false;
+		}
+
+		// Crea Cliente si no existe
+		$spreml   = $query->row();
+		$rifci    = $spreml->rifci;
+		$mSQL = 'SELECT count(*) FROM scli WHERE rifci='.$this->db->escape($rifci);
+		$hay = $this->datasis->dameval($mSQL);
+		if ($hay == 0 ){
+			//CREA EL CLIENTE
+			$cod_cli = $this->datasis->proxcli($spreml->rifci);
+			$data = array (
+				'cliente'    => $cod_cli,
+				'rifci'      => $spreml->rifci,
+				'nombre'     => $spreml->nombre,
+				'nomfis'     => $spreml->nombre,
+				'mercalib'   => $spreml->mercalib,
+				'estado'     => $spreml->estado,
+				'tipo'       => '1',
+				'tiva'       => 'N',
+				'zona'       => $this->datasis->traevalor('ZONAXDEFECTO'),
+				'grupo'      => $this->datasis->dameval('SELECT grupo FROM grcl WHERE gr_desc like "%CONSUMIDOR%" OR gr_desc like "%FINAL%" OR gr_desc like "%PARTICULAR%"'),
+				'socio'      => $row->estado,
+				'dire11'     => substr($spreml->direccion,0,40),
+				'dire12'     => substr($spreml->direccion,40,40),
+				'ciudad1'    => $spreml->ciudad,
+				'telefono'   => $spreml->telefono,
+				'fb'         => '',
+				'pin'        => '',
+				'email'      => $spreml->email,
+				'twitter'    => '',
+				'cuenta'     => $this->datasis->dameval('SELECT cuenta FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"'),
+				'observa'    => ''
+				);
+				$this->db->insert('scli',$data);
+		} else {
+			$mSQL    = 'SELECT cliente FROM scli WHERE rifci='.$this->db->escape($rifci);
+			$cod_cli = $this->datasis->dameval($mSQL);
+		}
+		// Coloca el cliente en spre
+		$this->db->where('numero',$numero);
+		$this->db->update('spre',array('cod_cli'=>$cod_cli));
+		
+		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
+		,'a.totals','a.iva','a.totalg', 'a.observa');
+		$this->db->select($sel);
+		$this->db->from('spre AS a');
+		$this->db->join('scli AS b','a.cod_cli=b.cliente','left');
+		$this->db->where('a.numero',$numero);
+		$query = $this->db->get();
+
+		if ($query->num_rows() > 0 && $status=='insert'){
+			$row = $query->row();
+			$_POST=array(
+				'btn_submit' => 'Guardar',
+				'almacen'    => $this->secu->getalmacen(),
+				'cod_cli'    => $row->cod_cli,
+				'nombre'     => rtrim($row->nombre),
+				'dir_cli'    => rtrim($row->direc),
+				'factura'    => '',
+				'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
+				'stotal'     => $row->totals,
+				'impuesto'   => $row->iva,
+				'gtotal'     => $row->totalg,
+				'observa'    => $row->observa,
+				'orden'      => '',
+				'peso'       => 0,
+				'vende'      => $this->secu->getvendedor(),
+				'sclitipo'   => $row->tipo
+			);
+
+			$itsel=array('a.codigo','b.descrip AS desca','a.cana','a.preca','a.importe AS tota','b.iva',
+			'b.precio1','b.precio2','b.precio3','b.precio4','b.tipo','b.peso');
+			$this->db->select($itsel);
+			$this->db->from('itspre AS a');
+			$this->db->join('sinv AS b','b.codigo=a.codigo');
+			$this->db->where('a.numero',$numero);
+			$this->db->where('a.cana >','0');
+			$qquery = $this->db->get();
+			$i=0;
+			foreach ($qquery->result() as $itrow){
+				$_POST["codigo_${i}"]   = rtrim($itrow->codigo);
+				$_POST["desca_${i}"]    = rtrim($itrow->desca);
+				$_POST["cana_${i}"]     = $itrow->cana;
+				$_POST["precio_${i}"]   = $itrow->preca;
+				$_POST["importe_${i}"]  = $itrow->tota;
+				$_POST["precio1_${i}"]  = $itrow->precio1;
+				$_POST["precio2_${i}"]  = $itrow->precio2;
+				$_POST["precio3_${i}"]  = $itrow->precio3;
+				$_POST["precio4_${i}"]  = $itrow->precio4;
+				$_POST["itiva_${i}"]    = $itrow->iva;
+				$_POST["sinvpeso_${i}"] = $itrow->peso;
+				$_POST["sinvtipo_${i}"] = $itrow->tipo;
+				$i++;
+			}
+
+			ob_start();
+				$this->dataedit();
+				$rt = ob_get_contents();
+			@ob_end_clean();
+			$id=0;
+			$getdata=json_decode($rt,true);
+			if($getdata['status']=='A'){
+				$id = $getdata['pk']['id'];
+				$transac = $this->datasis->dameval("SELECT transac FROM snte WHERE id=".$id);
+				$this->db->where('numero',$numero);
+				$this->db->update("spreml",array( 'status'=>'N', 'transac'=>$transac));
+
+				echo $rt;
+			}else{
+				echo $rt;
+			}
+		}else{
+			echo 'Orden no existe';
+		}
+
+	}
+
+
 	function instalar(){
 		if(!$this->datasis->iscampo('snte','id')){
 			$this->db->simple_query('ALTER TABLE snte DROP PRIMARY KEY');
