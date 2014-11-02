@@ -358,7 +358,7 @@ class Pnomina extends fnomina {
 	function _traduce($formula){
 		$CODIGO = $this->ci->db->escape($this->CODIGO);
 
-		$qq = $this->ci->db->query("SELECT valor FROM utributa ORDER BY fecha DESC LIMIT 1");
+		$qq = $this->ci->db->query('SELECT valor FROM utributa ORDER BY fecha DESC LIMIT 1');
 		$rr = $qq->row_array();
 		$aa = each($rr);
 		$ut = $aa[1];
@@ -423,7 +423,7 @@ class Pnomina extends fnomina {
 		if ($query->num_rows() > 0){
 			$rows = $query->row_array();
 
-			foreach($rows AS $ind=>$valor){
+			foreach($rows as $ind=>$valor){
 				if($ind!='fnomina'){
 					$valor=trim($valor);
 					$ind='X'.strtoupper($ind);

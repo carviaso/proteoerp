@@ -84,6 +84,14 @@ class Notabu extends validaciones {
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
 		$bodyscript .= '
+		function varlis(){
+			$.post("'.site_url($this->url.'varlist').'",
+			function(data){
+				$("#ladicional").html(data);
+			});
+		}';
+
+		$bodyscript .= '
 		$("#addvar").click(function (){
 			$.post("'.site_url($this->url.'agregavar').'",
 			function(data){
@@ -111,6 +119,7 @@ class Notabu extends validaciones {
 			});
 		});';
 
+		$bodyscript .= 'varlis();';
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 		return $bodyscript;
@@ -355,7 +364,7 @@ class Notabu extends validaciones {
 		$form->script($script);
 
 		$form->nombre = new inputField('Nombre de la variable','nombre');
-		$form->nombre->rule = 'trim|strtolower|required|max_length[10]|callback_chvarnom';
+		$form->nombre->rule = 'trim|strtolower|required|max_length[50]|callback_chvarnom';
 
 		$form->titulo = new inputField('T&iacute;tulo', 'titulo');
 		$form->titulo->rule = 'trim|required';
@@ -398,6 +407,21 @@ class Notabu extends validaciones {
 		}
 		$this->validation->set_message('chvarnom', 'El valor introducido en el campo %s no es v&aacute;lido');
 		return false;
+	}
+
+	function varlist(){
+		echo '<p style="text-align:center;"><table align="center">';
+		echo '<tr><th colspan="2">Variables disponibles</th></tr>';
+		echo '<tr style="background-color:#E4E4E4;"><th>Nombre</th><th>T&iacute;tulo</th></tr>';
+		$mSQL='SHOW FULL COLUMNS FROM notabu';
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			if(in_array($row->Field,array('contrato','ano','mes','dia','id'))) continue;
+			$comment=(empty($row->Comment))? $row->Field : trim($row->Comment);
+			$obj=trim($row->Field);
+			echo "<tr style='font-size:1em'><td><b>${obj}</b></td><td>${comment}</td></tr>";
+		}
+		echo '</table></p>';
 	}
 
 	function quitarvar(){
@@ -474,7 +498,7 @@ class Notabu extends validaciones {
 		}
 
 		$form->nnombre = new inputField('T&iacute;tulo de la variable','nnombre');
-		$form->nnombre->rule = 'trim|strtolower|required|max_length[10]|callback_chvarnom';
+		$form->nnombre->rule = 'trim|required';
 
 		$form->defecto = new inputField('Valor por onmision', 'defecto');
 		$form->defecto->rule = 'required|numeric';
@@ -506,50 +530,6 @@ class Notabu extends validaciones {
 		}else{
 			echo $form->output;
 		}
-	}
-
-
-	function calcautilidades(){
-		$this->rapyd->load('dataform');
-
-		$script='
-			$(".inputnum").numeric(".");
-		';
-
-		$form = new DataForm('nomina/notabu/calcautilidades/process');
-		$form->back_url = site_url('nomina/notabu/filteredgrid');
-		$form->script($script);
-
-
-		$form->contrato = new dropdownField('Contrato','contrato');
-		$form->contrato->style ='width:400px;';
-		$form->contrato->options("SELECT codigo,CONCAT('',codigo,nombre)as nombre FROM noco ORDER BY codigo");
-		$form->contrato->rule='required';
-
-		$form->monto = new inputField("Monto de dias anual para calcular utilidades","monto");
-		$form->monto->style    ='width:400px;';
-		$form->monto->options("SELECT codigo,CONCAT('',codigo,nombre)as nombre FROM noco ORDER BY codigo");
-		$form->monto->rule     ='required';
-		$form->monto->size     = 10;
-		$form->monto->css_class='inputnum';
-
-		$form->submit('btnsubmit','Cambiar');
-		$form->build_form();
-
-		if($form->on_success()){
-			$contrato=$this->db->escape($form->contrato->newValue);
-			$monto   =$form->monto->newValue;
-
-			$query = "UPDATE notabu SET utilidades=IF(ano>=1,$monto,($monto/12)*mes+($monto/24)*IF(dia>=15,1,0)) WHERE contrato =${contrato}";
-			$this->db->query($query);
-		}
-
-		$salida=anchor('nomina/notabu/filteredgrid','Regresar al filtro');
-
-		$data['content'] = $form->output.$salida;
-		$data['title']   = 'Cambiar Utilidades basado a monto anual';
-		$data['head']    = script('jquery.pack.js').script('plugins/jquery.numeric.pack.js').script('plugins/jquery.floatnumber.js').$this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
 	}
 
 	function _pre_insert($do){
@@ -589,20 +569,6 @@ class Notabu extends validaciones {
 		$mes =$do->get('mes');
 		$dia =$do->get('dia');
 		logusu('notabu',"CONFIGURACION DE NOMINA ${contrato} ${anio} ${mes} ${dia}  ELIMINADA");
-	}
-
-	function calcautil(){
-		$contrato = isset($_REQUEST['contrato1'])  ? $_REQUEST['contrato1']  : '';
-		$monto    = isset($_REQUEST['monto1'])     ? $_REQUEST['monto1']     :  0;
-
-		if($contrato == '' || $monto == 0){
-			echo "{ success: false, msg: 'Valores malos'}";
-		}else{
-			$dbcontrato=$this->db->escape($contrato);
-			$query = "UPDATE notabu SET utilidades=IF(ano>=1,${monto},(${monto}/12)*mes+(${monto}/24)*IF(dia>=15,1,0)) WHERE contrato=${dbcontrato}";
-			$this->db->query($query);
-			echo "{ success: true, msg: 'Todo Bien'}";
-		}
 	}
 
 	function chmes($mes){

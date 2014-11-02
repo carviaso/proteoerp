@@ -145,7 +145,7 @@ class Sueldomin extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 700, modal: true,
+			autoOpen: false, height: 300, width: 500, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -369,18 +369,24 @@ class Sueldomin extends Controller {
 		$edit->pre_process( 'update', '_pre_update');
 		$edit->pre_process( 'delete', '_pre_delete');
 
-		$edit->fecha = new dateonlyField('Fecha de aplicaci&oacute;n','fecha');
-		$edit->fecha->rule='chfecha|required';
-		$edit->fecha->size =12;
-		$edit->fecha->maxlength = 8;
-		$edit->fecha->calendar=false;
-
 		$edit->gaceta = new inputField('Gaceta','gaceta');
 		$edit->gaceta->rule='';
 		$edit->gaceta->size =20;
 		$edit->gaceta->maxlength =50;
 
-		$edit->valor = new inputField('Valor del sueldo m&iacute;nimo','valor');
+		$edit->fecha = new dateonlyField('Fecha de la gaceta','fecha');
+		$edit->fecha->rule='chfecha|required';
+		$edit->fecha->size =12;
+		$edit->fecha->maxlength = 8;
+		$edit->fecha->calendar=false;
+
+		$edit->aplica = new dateonlyField('Fecha de aplicaci&oacute;n','aplica');
+		$edit->aplica->rule='chfecha|required';
+		$edit->aplica->size =12;
+		$edit->aplica->maxlength = 8;
+		$edit->aplica->calendar=false;
+
+		$edit->valor = new inputField('Monto del sueldo m&iacute;nimo','valor');
 		$edit->valor->rule='numeric|required';
 		$edit->valor->css_class='inputnum';
 		$edit->valor->size = 14;
@@ -441,10 +447,28 @@ class Sueldomin extends Controller {
 				valor  DECIMAL(12,2) NULL DEFAULT NULL COMMENT 'Sueldo Minimo Mensual',
 				id     INT(11)   NOT NULL AUTO_INCREMENT,
 			PRIMARY KEY (id)
+			UNIQUE INDEX `aplica` (`aplica`)
 			)
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
+
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2007-05-02', '38.674', '2007-05-01', 614.79 )");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2008-04-30', '38.921', '2008-05-01', 799.23 )");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2009-04-01', '39.151', '2009-09-01', 959.08 )");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2009-04-01', '39.151', '2009-05-01', 879.15 )");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2010-02-23', '39.372', '2010-03-01', 1064.25)");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2010-02-23', '39.372', '2010-09-01', 1223.89)");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2011-04-26', '39.660', '2011-05-01', 1407.47)");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2011-04-26', '39.660', '2011-09-01', 1548.22)");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2012-04-24', '39.908', '2012-09-01', 2047.48)");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2012-04-24', '39.908', '2012-05-01', 1780.45)");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2013-04-30', '41.157', '2013-05-01', 2457.02)");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2013-04-30', '41.157', '2013-09-01', 2702.73)");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2013-04-30', '41.275', '2013-11-01', 2973.00)");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2014-01-06', '40.327', '2014-01-01', 3270.30)");
+			$this->db->simple_query("INSERT IGNORE INTO `sueldomin` (`fecha`, `gaceta`, `aplica`, `valor`) VALUES ('2014-04-29', '4.0401', '2014-05-01', 4251.40)");
+
 		}
 		//$campos=$this->db->list_fields('sueldomin');
 		//if(!in_array('<#campo#>',$campos)){ }

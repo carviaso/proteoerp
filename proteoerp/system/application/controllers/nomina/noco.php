@@ -484,7 +484,7 @@ class Noco extends Controller {
 
 		}elseif($oper == 'del'){
 			$codigo = $this->datasis->dameval("SELECT codigo FROM noco WHERE id=${dbid}");
-			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM nomina WHERE trabaja=".$this->db->escape($codigo)." or contrato=".$this->db->escape($codigo));
+			$check =  $this->datasis->dameval("SELECT COUNT(*) AS cana FROM nomina WHERE trabaja=".$this->db->escape($codigo)." or contrato=".$this->db->escape($codigo));
 			if ($check > 0){
 				echo 'El registro no puede ser eliminado; tiene movimiento';
 			} else {
@@ -629,7 +629,7 @@ class Noco extends Controller {
 		$grid  = $this->jqdatagrid;
 		$id    = intval($this->uri->segment(4));
 		if($id == false){
-			$id = $this->datasis->dameval("SELECT MIN(id) FROM noco");
+			$id = $this->datasis->dameval("SELECT MIN(id) AS minid FROM noco");
 		}
 		$dbid   = $this->db->escape($id);
 		$codigo = $this->datasis->dameval("SELECT codigo FROM noco WHERE id=${dbid}");

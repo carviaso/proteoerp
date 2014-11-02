@@ -33,27 +33,27 @@ $filter->grupo->options('SELECT grupo, gr_desc FROM grcl ORDER BY grupo');
 $filter->zona = new dropdownField('Zona', 'zona');
 $filter->zona->db_name = 'zona';
 $filter->zona->clause='where';
-$filter->zona->operator="=";
+$filter->zona->operator='=';
 $filter->zona->option('','Todas');
 $filter->zona->options('SELECT codigo, nombre FROM zona ORDER BY codigo');
 
 $filter->ciudad = new dropdownField('Ciudad', 'ciudad');
 $filter->ciudad->db_name ='ciudad1';
-$filter->ciudad->clause="where";
+$filter->ciudad->clause='where';
 $filter->ciudad->operator='=';
 $filter->ciudad->option('','Todas');
 $filter->ciudad->options("SELECT TRIM(ciudad) AS codigo, ciudad FROM ciud ORDER BY ciudad");
 
-$filter->vendedor = new dropdownField('Vendedor', "vendedor");
+$filter->vendedor = new dropdownField('Vendedor', 'vendedor');
 $filter->vendedor->db_name = 'vendedor';
-$filter->vendedor->clause="where";
-$filter->vendedor->operator="=";
+$filter->vendedor->clause='where';
+$filter->vendedor->operator='=';
 $filter->vendedor->option('','Todos');
-$filter->vendedor->options("SELECT vendedor, nombre FROM vend ORDER BY vendedor");
+$filter->vendedor->options('SELECT vendedor, nombre FROM vend ORDER BY vendedor');
 
-$filter->tipo = new dropdownField("Tipo", "tipo");
+$filter->tipo = new dropdownField('Tipo', 'tipo');
 $filter->tipo->db_name = 'tipo';
-$filter->tipo->clause="where";
+$filter->tipo->clause='where';
 $filter->tipo->operator='=';
 $filter->tipo->option('','Todos');
 $filter->tipo->option('1','1 Precio');
@@ -62,12 +62,12 @@ $filter->tipo->option('3','3 Precio');
 $filter->tipo->option('4','4 Precio');
 $filter->tipo->option('0','Inactivo');
 
-$filter->ordenpor = new dropdownField("Ordenado por", "orden");
+$filter->ordenpor = new dropdownField('Ordenado por', 'orden');
 $filter->ordenpor->option('nombre' ,'Nombre');
 $filter->ordenpor->option('cliente','Cliente');
 $filter->ordenpor->clause ='';
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
@@ -75,12 +75,12 @@ $filter->salformat->clause = '';
 $filter->buttons('search');
 $filter->build();
 
-if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 
 	$filter->db->orderby($filter->ordenpor->newValue);
 	$mSQL=$this->rapyd->db->_compile_select();
-	$mSQL.=" limit 34000";
-		//echo $mSQL;
+	$mSQL.=' LIMIT 34000';
+	//echo $mSQL;
 
 	$sobretabla='';
 	if (!empty($filter->grupo->newValue))    $sobretabla.='Grupo: '.$filter->grupo->description;
@@ -113,6 +113,6 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
 	$data['titulo'] = '<h2 class="mainheader">Listado de Clientes</h2>';
-	$data['head'] = $this->rapyd->get_head();
+	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

@@ -144,9 +144,9 @@ class Dispmoviles extends Controller {
 			TRIM(a.repre) AS repre,TRIM(a.tipo) AS tipo,
 			COALESCE(SUM((b.monto-b.abonos)*(b.vence<=CURDATE())),0) AS vsaldo,
 			0 AS csaldo,formap
-			/*,COALESCE((SELECT SUM(aa.tipo_doc='F') FROM sfac AS aa WHERE cod_cli=a.cliente AND fecha>=CONCAT(EXTRACT(YEAR_MONTH FROM CURDATE()),'01')),0) AS numfac
+			,COALESCE((SELECT SUM(aa.tipo_doc='F') FROM sfac AS aa WHERE cod_cli=a.cliente AND fecha>=CONCAT(EXTRACT(YEAR_MONTH FROM CURDATE()),'01')),0) AS numfac
 			,COALESCE((SELECT SUM(aa.tipo_doc='D') FROM sfac AS aa WHERE cod_cli=a.cliente AND fecha>=CONCAT(EXTRACT(YEAR_MONTH FROM CURDATE()),'01')),0) AS numdev
-			*/
+
 			FROM scli AS a
 			LEFT JOIN smov AS b ON a.cliente=b.cod_cli AND b.tipo_doc NOT IN ('AB','NC','AN') AND b.monto>b.abonos
 			WHERE a.vendedor=${dbvend}

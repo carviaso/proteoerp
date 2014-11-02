@@ -277,7 +277,7 @@ function del_seri(id){
 				<th bgcolor='#7098D0'>Barras            </th>
 				<th bgcolor='#7098D0'>C&oacute;digo     </th>
 				<th bgcolor='#7098D0'>Descripci&oacute;n</th>
-				<th bgcolor='#7098D0'>Serial            </th>
+				<th bgcolor='#7098D0'>Lote              </th>
 				<th bgcolor='#7098D0'>Cantidad          </th>
 				<?php if($form->_status!='show') {?>
 				<th bgcolor='#7098D0' >&nbsp;</td>
