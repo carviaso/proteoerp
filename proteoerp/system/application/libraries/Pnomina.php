@@ -130,6 +130,7 @@ class fnomina {
 		$mTABLA   = $this->NOTABU( $XTRABAJA, $mREG[0], $mREG[1], $mREG[2] );
 		$mVALOR   = 0;
 
+		$arr=array_keys($mTABLA);
 		if(in_array(strtoupper($par),array_map('strtoupper',$arr))){
 			$mVALOR = $mTABLA[strtolower($par)];
 		}
@@ -148,12 +149,13 @@ class fnomina {
 	//
 	function NOTABU( $mCONTRATO, $mANO, $mMES, $mDIA ){
 
-		if(count($this->arr_notabu)>0){
+		if(count($this->arr_notabu)==0){
 			$mSQL='SHOW FULL COLUMNS FROM notabu';
 			$query = $this->ci->db->query($mSQL);
 			foreach($query->result() as $row){
-				if(in_array(trim($row->Field),array('contrato','ano','mes','dia','id')))
-				$this->arr_notabu[]=trim($row->Field);
+				if(!in_array(trim($row->Field),array('contrato','ano','mes','dia','id'))){
+					$this->arr_notabu[]=trim($row->Field);
+				}
 			}
 		}
 		$campos=implode(',',$this->arr_notabu);
@@ -167,7 +169,7 @@ class fnomina {
 
 		$rt  = $this->ci->datasis->damereg($mSQL);
 		if(empty($rt)){
-			foreach($campos as $val){
+			foreach($this->arr_notabu as $val){
 				$rt[$val]=0;
 			}
 		}
@@ -334,6 +336,8 @@ class Pnomina extends fnomina {
 		$SUELDO = $this->SUELDO;
 		$SPROME = $this->SPROME;
 		$DIAS   = $this->DIAS;
+		$FDESDE = $this->fdesde;
+		$FHASTA = $this->fhasta;
 
 		$VARI1 = $this->VARI1;
 		$VARI2 = $this->VARI2;
@@ -341,6 +345,9 @@ class Pnomina extends fnomina {
 		$VARI4 = $this->VARI4;
 		$VARI5 = $this->VARI5;
 		$VARI6 = $this->VARI6;
+
+		$INTFDESDE = preg_replace('/[^0-9]/','',$this->fdesde);
+		$INTFHASTA = preg_replace('/[^0-9]/','',$this->fhasta);
 
 		$SMINIMO = $this->ci->datasis->traevalor('SUELDOMINIMO');
 
@@ -415,12 +422,12 @@ class Pnomina extends fnomina {
 		//fin de if
 
 		$metodos=get_class_methods('fnomina');
-		foreach($metodos AS $metodo){
+		foreach($metodos as $metodo){
 			$formula=str_replace($metodo.'(','$this->'.$metodo.'(',$formula);
 		}
 
 		$query = $this->ci->db->query("SELECT * FROM pers WHERE codigo=${CODIGO}");
-		if ($query->num_rows() > 0){
+		if($query->num_rows() > 0){
 			$rows = $query->row_array();
 
 			foreach($rows as $ind=>$valor){
@@ -438,12 +445,16 @@ class Pnomina extends fnomina {
 		$formula=str_replace('DIAS_TRABAJADOS', '$DIAS',    $formula);
 		$formula=str_replace('SUELDO_MINIMO',   '$SMINIMO', $formula);
 
-		$formula=str_replace('XVARI1','$VARI1',$formula);
-		$formula=str_replace('XVARI2','$VARI2',$formula);
-		$formula=str_replace('XVARI3','$VARI3',$formula);
-		$formula=str_replace('XVARI4','$VARI4',$formula);
-		$formula=str_replace('XVARI5','$VARI5',$formula);
-		$formula=str_replace('XVARI6','$VARI6',$formula);
+		$formula=str_replace('XVARI1' ,'$VARI1' ,$formula);
+		$formula=str_replace('XVARI2' ,'$VARI2' ,$formula);
+		$formula=str_replace('XVARI3' ,'$VARI3' ,$formula);
+		$formula=str_replace('XVARI4' ,'$VARI4' ,$formula);
+		$formula=str_replace('XVARI5' ,'$VARI5' ,$formula);
+		$formula=str_replace('XVARI6' ,'$VARI6' ,$formula);
+		$formula=str_replace('XFDESDE','$FDESDE',$formula);
+		$formula=str_replace('XFHASTA','$FHASTA',$formula);
+		$formula=str_replace('XINTFDESDE','$INTFDESDE',$formula);
+		$formula=str_replace('XINTFHASTA','$INTFHASTA',$formula);
 
 		$formula=str_replace('XUT',$ut,$formula);
 		$formula=str_replace('VAL(','floatval(',$formula);
