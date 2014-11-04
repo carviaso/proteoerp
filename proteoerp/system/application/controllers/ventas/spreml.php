@@ -1295,7 +1295,7 @@ $(function(){
 	}
 
 	//******************************************************************
-	//
+	// 
 	function instalar(){
 		if (!$this->db->table_exists('spreml')) {
 			$mSQL="

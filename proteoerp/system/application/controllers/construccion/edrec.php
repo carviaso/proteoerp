@@ -973,22 +973,10 @@ class Edrec extends Controller {
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
-/*
-		$edit->transac = new inputField('Transac','transac');
-		$edit->transac->rule='';
-		$edit->transac->size =10;
-		$edit->transac->maxlength =8;
-*/
 
 		//**************************************************************
 		// Detalle 
-/*
-		$edit->numero = new inputField('Numero','numero_<#i#>');
-		$edit->numero->rule='';
-		$edit->numero->size =10;
-		$edit->numero->maxlength =8;
-		$edit->numero->rel_id ='editrec';
-*/
+
 		$edit->tipo = new dropdownField('Tipo','tipo_<#i#>');
 		$edit->tipo->style='width:120px;';
 		$edit->tipo->options('SELECT depto, CONCAT(depto," ", descrip) descrip FROM dpto WHERE tipo="G" AND depto <> "GP" UNION ALL SELECT codbanc, CONCAT(codbanc," ",banco) banco FROM banc WHERE tbanco="FO" AND activo="S"');
@@ -1035,26 +1023,6 @@ class Edrec extends Controller {
 		$edit->cuotad->db_name   = 'cuota';
 		$edit->cuotad->rel_id    = 'editrec';
 
-/*
-		$edit->fecha = new dateonlyField('Fecha','fecha_<#i#>');
-		$edit->fecha->rule='chfecha';
-		$edit->fecha->size =10;
-		$edit->fecha->maxlength =8;
-		$edit->fecha->rel_id ='editrec';
-
-		$edit->transac = new inputField('Transac','transac_<#i#>');
-		$edit->transac->rule='';
-		$edit->transac->size =10;
-		$edit->transac->maxlength =8;
-		$edit->transac->rel_id ='editrec';
-
-		$edit->id_edrc = new inputField('Id_edrc','id_edrc_<#i#>');
-		$edit->id_edrc->rule='integer';
-		$edit->id_edrc->css_class='inputonlynum';
-		$edit->id_edrc->size =13;
-		$edit->id_edrc->maxlength =11;
-		$edit->id_edrc->rel_id ='editrec';
-*/
 		//**************************************************************
 
 		$edit->buttons('add_rel');
@@ -1106,7 +1074,10 @@ class Edrec extends Controller {
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		$numero  = $this->db->escape($do->get('numero'));
+		$usuario = $this->db->escape($this->session->userdata('usuario'));
+		$mSQL = 'UPDATE editrec SET estampa=curdate(), hora=curtime(), usuario='.$usuario.', id_edrc='.$primary.' WHERE numero='.$numero;
+		logusu('edrec',"Modifico $this->tits $primary ");
 	}
 
 	function _post_delete($do){

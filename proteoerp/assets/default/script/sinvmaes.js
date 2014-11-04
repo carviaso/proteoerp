@@ -3,9 +3,9 @@
 //	return result;
 //}
 
-//****************************************************
-//dec: 0=decimal, 1 = unidades, 2 =decenas, 3=centenas
-//****************************************************
+//**********************************************************************
+// dec: 0=decimal, 1 = unidades, 2 =decenas, 3=centenas
+//
 function roundSup(num, dec) {
 	num=num-0.01;
 	num=roundNumber(num,2);
@@ -126,7 +126,7 @@ function redon(pertenece){
 	var i=0;
 	var costo=cost(pertenece);
  	var iva=parseFloat($("#iva").val());
- 	if(redondeo!="NO"){
+ 	if(redondeo!="N"){
 		if(redondeo=="D"){
 			for(i=1;i<5;i++){
 				precio=parseFloat($("#precio"+i).val());

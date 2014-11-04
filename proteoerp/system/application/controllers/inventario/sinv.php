@@ -3600,9 +3600,10 @@ class Sinv extends Controller {
 	}
 
 	function _pre_inserup($do){
-		$tipo   = $do->get('tipo');
-		$estampa= date('Ymd');
-		$hora   = date('H:i:s');
+		$tipo    = $do->get('tipo');
+		$estampa = date('Ymd');
+		$hora    = date('H:i:s');
+		$redecen = $do->get('redecen');
 		$usuario= $this->secu->usuario();
 		$base1  = $do->get('base1');
 		$base2  = $do->get('base2');
@@ -3613,7 +3614,7 @@ class Sinv extends Controller {
 		$codigo = $do->get('codigo');
 
 		//SINVCOMBO
-		if($tipo[0]!='C'){
+		if($tipo[0] != 'C'){
 			$do->truncate_rel('sinvcombo');
 		}else{
 			//Limpia los vacios y totaliza las bases
@@ -3700,7 +3701,7 @@ class Sinv extends Controller {
 			$mp = ($precio1 >= $precio2 && $precio2 >= $precio3 && $precio3 >= $precio4);
 
 		//if($precio1 >= $precio2 && $precio2 >= $precio3 && $precio3 >= $precio4){
-		//if($precio1 >= $precio4 && $precio2 >= $precio4 && $precio3 >= $precio4){
+		//if($precio1 >= $precio4 && $precio2 >= $precio4 && $precio3 >= $precio4){04160877377
 
 		if ( $mp ){
 			$formcal= $do->get('formcal');
@@ -3746,6 +3747,16 @@ class Sinv extends Controller {
 
 			return false;
 		}
+
+		// Ajustar segun el orden
+/*
+		if ( $redecen == 'N','No Cambiar'
+		if ( $redecen == 'M','Solo un Decimal'
+		if ( $redecen == 'F','Sin Decimales'
+		if ( $redecen == 'D','Decenas'
+		if ( $redecen == 'C','Centenas'
+*/
+
 
 		//valida las escalas
 		for($i=1;$i<4;$i++){
