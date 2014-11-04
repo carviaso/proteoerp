@@ -610,7 +610,7 @@ class DataObject{
 		} elseif ($query->num_rows()===1){
 
 			if ($this->loaded){
-				return ($this->data[$field] == $value);
+				return (trim($this->data[$field]) == trim($value));
 			} else {
 				return false;
 			}

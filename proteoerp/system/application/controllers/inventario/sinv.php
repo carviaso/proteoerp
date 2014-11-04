@@ -4861,8 +4861,8 @@ class Sinv extends Controller {
 				$codigo   =$this->validation->_dataobject->get('codigo');
 				if(!empty($codigo)) $ww=' AND codigo<>'.$this->db->escape($codigo); else $ww='';
 				$dbalterno=$this->db->escape($alterno);
-				$descrip  =$this->datasis->dameval("SELECT descrip FROM sinv WHERE alterno=$dbalterno ${ww} LIMIT 1");
-				$this->validation->set_message('chalterno',"El c&oacute;digo alterno $alterno ya existe para el producto $descrip.");
+				$descrip  =$this->datasis->dameval("SELECT descrip FROM sinv WHERE alterno=${dbalterno} ${ww} LIMIT 1");
+				$this->validation->set_message('chalterno',"El c&oacute;digo alterno $alterno ya existe para el producto ${descrip}.");
 				return false;
 			}else{
 				return true;
