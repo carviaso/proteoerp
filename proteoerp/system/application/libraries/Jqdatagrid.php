@@ -1192,26 +1192,6 @@ class Jqdatagrid
 		$response['total']    = ceil($response['records']/$limit);
 		$response['page']     = $page;
 
-		//if($qq->num_rows()<$limit){
-		//	if($qq->num_rows()>0 ) {
-		//		$total_pages = ceil($qq->num_rows()/$limit);
-		//	} else {
-		//		$total_pages = 0;
-		//	}
-        //
-		//	if($page > $total_pages){
-		//		$page=$total_pages;
-		//	}
-        //
-		//	$response['records']  = $qq->num_rows();
-		//	$response['total']    = $total_pages;
-		//	$response['page']     = $page;
-        //
-		//	$limitstart = $limit*$page - $limit; // do not put $limit*($page - 1)
-		//	$limitstart = ($limitstart < 0)?0:$limitstart;
-		//}
-
-
 		//INTENTA ver si el Problema es el escape de %
 		if(empty($rs)){
 			$lq = str_replace('\%','%',$this->CI->db->last_query());
@@ -1258,8 +1238,6 @@ class Jqdatagrid
 		$response['data'] = $rs;
 		return $response;
 	}
-
-
 
 
 	/***********************************************************************

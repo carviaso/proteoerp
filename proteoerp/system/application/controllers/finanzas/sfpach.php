@@ -297,8 +297,6 @@ class sfpach extends Controller {
 			});
 			';
 
-
-
 		$bodyscript .= '
 		});';
 		

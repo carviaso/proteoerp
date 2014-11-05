@@ -87,7 +87,6 @@ class Edinmue extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione un Inmueble</h1>");}
 		});';
 
-
 		$bodyscript .= '
 		$("#falicu").dialog({
 			autoOpen: false, height: 200, width: 400, modal: true,

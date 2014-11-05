@@ -44,10 +44,51 @@ class Scli extends validaciones {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'edocta',  'img'=>'images/pdf_logo.gif', 'alt' => 'Formato PDF',        'tema'=>'anexos', 'label'=>'Estado de Cuenta' ));
-		$grid->wbotonadd(array('id'=>'editacr', 'img'=>'images/check.png',    'alt' => 'Cr&eacute;dito',     'tema'=>'anexos', 'label'=>'L&iacute;mite de Cr&eacute;dito'));
-		$grid->wbotonadd(array('id'=>'gciud',   'img'=>'images/star.png',     'alt' => 'Gestionar ciudades', 'tema'=>'anexos', 'label'=>'Ciudades'));
-		$grid->wbotonadd(array('id'=>'gclave',  'img'=>'images/candado.png',  'alt' => 'Clave para acceso',  'tema'=>'anexos', 'label'=>'Clave'));
+		//$grid->wbotonadd(array('id'=>'edocta',  'img'=>'images/pdf_logo.gif', 'alt' => 'Formato PDF',        'tema'=>'anexos', 'label'=>'Estado de Cuenta' ));
+
+		$cabeza  = "<td style='vertical-align:top;'><div class='botones'><a style='width:94px;text-align:left;vertical-align:top;' href='#'";
+		$cabeza1 = "<td style='vertical-align:top;'><div class='botones'><a style='text-align:left;vertical-align:top;' href='#'";
+
+		$cola   = "</a></div></td>";
+		$srutas = $this->datasis->llenaopciones('SELECT ruta, CONCAT(RUTA," ",descrip," (",vende,")") FROM sclirut ORDER BY ruta', true, 'rutactual' );
+
+		$WpAdic = "
+		<tr><td><div class=\"anexos\">
+			<table cellpadding='0' cellspacing='0'>
+				<tr>
+					${cabeza} id='edocta'>".img(array('src' =>"images/pdf_logo.gif", 'height' => 15, 'alt' => 'Estado de Cuenta',          'title' => 'Estado de Cuenta',          'border'=>'0'))." E.Cta.</a></div></td>
+					${cabeza} id='editacr'>".img(array('src' =>"images/check.png",   'height' => 15, 'alt' => 'Cambiar limite de credito', 'title' => 'Cambiar limite de credito', 'border'=>'0'))." Credito</a></div></td>
+				</tr>
+				<tr>
+					${cabeza} id='gciud' >".img(array('src' =>"images/star.png",   'height' => 15, 'alt'=>'Ciudades',         'title' => 'Ciudades',        'border'=>'0'))." Ciudad</a></div></td>
+					${cabeza} id='gclave'>".img(array('src' =>"images/candado.png",'height' => 15, 'alt'=>'Cambio de Clave.', 'title' => 'Cambio de Clave', 'border'=>'0'))." Clave</a></div></td>
+				</tr>
+				";
+
+		$WpAdic .= "
+				<tr>
+					<td colspan='2'>
+						<table style='border-collapse:collapse;padding:0px;width:99%;border:1px solid #AFAFAF;'><tr>
+							<td style='vertical-align:top;'>".img(array('src' =>"images/camion.png", 'height' => 30, 'alt'=>'Asignacion de Rutas', 'title' => 'Rutas', 'border'=>'0'))."</td>
+							${cabeza1} id='rutas'>Rutas</a></div></td>
+							<td style='vertical-align:center;'><a id='sumarutas'>".img(array('src' =>"images/agrega4.png", 'height' => 26, 'alt'=>'Asignacion de Rutas', 'title' => 'Agregar cliente a ruta', 'border'=>'0'))."</a></td>
+							<td style='vertical-align:center;'><a id='restarutas'>".img(array('src' =>"images/elimina4.png", 'height' => 26, 'alt'=>'Elimina el cliente de la ruta', 'title' => 'Elimina el cliente de la ruta', 'border'=>'0'))."</a></td>
+						</tr>
+							<td colspan='4'>Ruta: ${srutas} </td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				";
+
+		$WpAdic .= "
+			</table>
+			</div>
+		</td></tr>\n
+		";
+
+		$grid->setWpAdicional($WpAdic);
+
 
 		$WestPanel = $grid->deploywestp();
 
@@ -79,7 +120,6 @@ class Scli extends validaciones {
 	//******************************************************************
 	// Despues del document ready
 	//
-	//******************************************************************
 	function postready(){
 
 		$consulrif=trim($this->datasis->traevalor('CONSULRIF'));
@@ -121,6 +161,11 @@ class Scli extends validaciones {
 		$bodyscript = '<script type="text/javascript">';
 		$ngrid = '#newapi'.$grid0;
 
+/*
+		$bodyscript .= '
+		 var rutactual = "";
+		';
+*/
 		$bodyscript .= '
 		$("#edocta").click( function(){
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -234,15 +279,64 @@ class Scli extends validaciones {
 
 		$botones ='"C.N.E.": function() { consulcne("rifci"); },';
 
-		// Marcas
+		// Ciudad
 		$bodyscript .= '
 		$("#gciud").click(function(){
-			$.post("'.site_url($this->url.'marcaform').'",
+			$.post("'.site_url($this->url.'ciuform').'",
 			function(data){
 				$("#fciud").html(data);
+				$("#fciud").dialog({height: 400, width: 320, title: "Ciudades"});
 				$("#fciud").dialog( "open" );
 			});
 		});';
+
+		// Rutas
+		$bodyscript .= '
+		$("#rutas").click(function(){
+			$.post("'.site_url($this->url.'rutasform').'",
+			function(data){
+				$("#fciud").html(data);
+				$("#fciud").dialog({height: 450, width: 610, title: "Rutas"});
+				$("#fciud").dialog( "open" );
+			});
+		});';
+
+		// Suma Rutas
+		$bodyscript .= '
+		$("#sumarutas").click(function(){
+			var id   = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			var ruta = $("#rutactual").val();
+			if(id){
+				$.post("'.site_url($this->url.'rutasuma').'/"+id+"/"+ruta,
+				function(data){
+					$("#fciud").html(data);
+					$("#fciud").dialog({height: 450, width: 610, title: "Rutas"});
+					$("#fciud").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
+
+
+		// Resta Rutas
+		$bodyscript .= '
+		$("#restarutas").click(function(){
+			var id   = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			var ruta = $("#rutactual").val();
+			if(id){
+				$.post("'.site_url($this->url.'rutaresta').'/"+id+"/"+ruta,
+				function(data){
+					$("#fciud").html(data);
+					$("#fciud").dialog({height: 450, width: 610, title: "Rutas"});
+					$("#fciud").dialog( "open" );
+				});
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
+
+
 
 		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "430", $width = "700",'','',$botones );
 
@@ -515,11 +609,9 @@ class Scli extends validaciones {
 	}
 
 
-	//***********************************
-	//
+	//******************************************************************
 	//  Definicion del Grid y la Forma
 	//
-	//***********************************
 	function defgrid( $deployed = false ){
 		$i       = 1;
 		$editar  = 'false';
@@ -875,32 +967,7 @@ class Scli extends validaciones {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
-/*
-		$linea = $linea + 1;
-		$grid->addField('repre');
-		$grid->label('Representante');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 150,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:false}',
-			'editoptions'   => '{ size:30, maxlength: 30 }',
-			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
-		));
 
-		$grid->addField('cirepre');
-		$grid->label('Rep.C.I.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 90,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:false}',
-			'editoptions'   => '{ size:10, maxlength: 13 }',
-			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
-		));
-*/
 		$linea = $linea + 1;
 		$grid->addField('email');
 		$grid->label('Email');
@@ -913,22 +980,7 @@ class Scli extends validaciones {
 			'editoptions'   => '{ size:30, maxlength: 18 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
 		));
-/*
-		$grid->addField('porcobr');
-		$grid->label('Comisi&oacute;n C %');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 40,
-			'editrules'     => '{ required:false }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }',
-			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
-		));
-*/
+
 		$linea = $linea + 1;
 		$grid->addField('url');
 		$grid->label('URL');
@@ -941,67 +993,7 @@ class Scli extends validaciones {
 			'editoptions'   => '{ size:30, maxlength: 18 }',
 			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
 		));
-/*
-		$grid->addField('fb');
-		$grid->label('facebook');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 180,
-			'edittype'      => "'text'",
-			//'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 18 }',
-			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
-		));
 
-		$linea = $linea + 1;
-		$grid->addField('pin');
-		$grid->label('PIN');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 180,
-			'edittype'      => "'text'",
-			'editoptions'   => '{ size:30, maxlength: 18 }',
-			'formoptions'   => '{ rowpos:'.$linea.', colpos:1 }'
-		));
-
-		$grid->addField('twitter');
-		$grid->label('twitter');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 180,
-			'edittype'      => "'text'",
-			'editoptions'   => '{ size:30, maxlength: 18 }',
-			'formoptions'   => '{ rowpos:'.$linea.', colpos:2 }'
-		));
-
-		$grid->addField('fecha1');
-		$grid->label('Fecha 1');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => 'false',
-			'width'         => 80,
-			'align'         => "'center'",
-			'hidden'        => 'true',
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:false,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('mensaje');
-		$grid->label('Mensaje');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => 'false',
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 40 }',
-		));
-*/
 		$grid->addField('observa');
 		$grid->label('Observaci&oacute;n');
 		$grid->params(array(
@@ -1023,20 +1015,6 @@ class Scli extends validaciones {
 			'search'        => 'false'
 		));
 
-/*
-		$grid->addField('modifi');
-		$grid->label('Modificado');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-*/
-
 		$grid->addField('sucursal');
 		$grid->label('Sucursal');
 		$grid->params(array(
@@ -1047,7 +1025,6 @@ class Scli extends validaciones {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 2 }',
 		));
-
 
 		$grid->addField('tolera');
 		$grid->label('Toleracia');
@@ -1134,7 +1111,7 @@ class Scli extends validaciones {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -1148,7 +1125,7 @@ class Scli extends validaciones {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -1189,60 +1166,58 @@ class Scli extends validaciones {
 		$mcliente = $this->datasis->proxcli($mrifci);
 		return $mcliente;
 	}
-/*
-		$mcliente = '';
-		$mvalor   = 0;
-		$mmeco    = 0;
-		$mrango   = $this->datasis->traevalor('SCLIRANGO');
-		$mpiso    = '00000';
-		$mtecho   = 'ZZZZZ';
-
-		if($mrango == 'S'){
-			$mcliente = str_pad($this->_numatri($this->datasis->prox_sql('ncodcli')),5,'0',STR_PAD_LEFT);
-		}else{
-			// GENERA POR CONVERSION DE CI
-			if ( $mrifci != ''){
-				$mmeco    = substr($mrifci,2,15);
-				$mcliente = str_pad($this->_numatri($mmeco), 5, '0', STR_PAD_LEFT );
-			}else
-				$mcliente = str_pad($this->_numatri($this->datasis->prox_sql('ncodcli')),5,'0', STR_PAD_LEFT);
-		}
-		// REVISA POR SI ESTA REPETIDO
-		while(true){
-			if ($this->datasis->dameval("SELECT COUNT(*) FROM scli WHERE cliente=".$this->db->escape($mcliente)) == 0 )
-				break;
-			$mcliente = str_pad($this->_numatri($this->datasis->prox_sql('ncodcli')),5,'0',STR_PAD_LEFT);
-		}
-		return $mcliente;
-	}
-
 
 	//******************************************************************
-	//  PARA GENERAR CODIGOS
+	//  Suma a las rutas
 	//
-	function _numatri(){
-		$numero = $this->datasis->prox_numero('ncodcli');
-		$residuo= $numero;
-		$mbase  = 36;
-		$conve='';
-		$mtempo  = $residuo % $mbase;
-		while($residuo > $mbase-1){
-			$residuo = intval($residuo/$mbase);
-			if($mtempo >9 ){
-				$conve .= chr($mtempo+55);
-			}else{
-				$conve .= $mtempo;
-			}
-			$mtempo  = $residuo % $mbase;
-		}
-		if($mtempo >9 ){
-			$conve .= chr($mtempo+55);
-		}else{
-			$conve .= $mtempo;
-		}
-		return str_pad($conve, 5, '0', STR_PAD_LEFT);
+	function rutasuma() {
+		$salida = 'Guardado';
+		$id   = $this->uri->segment($this->uri->total_segments()-1);
+		$ruta = $this->uri->segment($this->uri->total_segments());
+		$dbid   = $this->db->escape($id);
+		$dbruta = $this->db->escape($ruta);
+		// Comprueba si existe el cliente
+		$mSQL = "SELECT COUNT(*) FROM scli WHERE id=${dbid}";
+		$rcli = $this->datasis->dameval($mSQL);
+		// Comprueba si existe la Ruta
+		$mSQL = "SELECT COUNT(*) FROM sclirut WHERE ruta=${dbruta}";
+		$resta = $this->datasis->dameval($mSQL);
+		if ( $resta == 1 && $rcli == 1){
+			$mSQL = "SELECT cliente FROM scli WHERE id=${dbid}";
+			$cliente = $this->datasis->dameval($mSQL);
+			$dbcliente = $this->db->escape($cliente);
+			$mSQL = "INSERT IGNORE INTO sclitrut (cliente, ruta) VALUES ( ${dbcliente}, ${dbruta} ) ";
+			$this->db->query($mSQL);
+		} else $salida = 'Error en los datos ';
+		echo $salida;
 	}
-*/
+
+	//******************************************************************
+	//  Resta a las rutas
+	//
+	function rutaresta() {
+		$salida = 'Guardado';
+		$id   = $this->uri->segment($this->uri->total_segments()-1);
+		$ruta = $this->uri->segment($this->uri->total_segments());
+		$dbid   = $this->db->escape($id);
+		$dbruta = $this->db->escape($ruta);
+		// Comprueba si existe el cliente
+		$mSQL = "SELECT COUNT(*) FROM scli WHERE id=${dbid}";
+		$rcli = $this->datasis->dameval($mSQL);
+		// Comprueba si existe la Ruta
+		$mSQL = "SELECT COUNT(*) FROM sclirut WHERE ruta=${dbruta}";
+		$resta = $this->datasis->dameval($mSQL);
+		if ( $resta == 1 && $rcli == 1){
+			$mSQL = "SELECT cliente FROM scli WHERE id=${dbid}";
+			$cliente = $this->datasis->dameval($mSQL);
+			$dbcliente = $this->db->escape($cliente);
+			$mSQL = "DELETE FROM sclitrut WHERE cliente=${dbcliente} AND ruta=${dbruta} ";
+			$this->db->query($mSQL);
+		} else $salida = 'Error en los datos ';
+		echo $salida;
+	}
+
+
 
 	//******************************************************************
 	//  Resumen rapido
@@ -1261,15 +1236,23 @@ class Scli extends validaciones {
 		$observa  = $row['observa'];
 		$tipo     = $row['tipo'];
 
+		$dbcod_cli = $this->db->escape($cod_cli);
+		
+		$rutas = $this->datasis->dameval("SELECT GROUP_CONCAT(ruta) AS ruta FROM sclitrut WHERE cliente=${dbcod_cli}");
+
 		if( $credito == 'S')
 			$mcredito = 'Activo';
 		else
 			$mcredito = 'Suspendido';
 
 		$saldo  = 0;
-		$saldo  = $this->datasis->dameval("SELECT SUM(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM smov WHERE cod_cli=".$this->db->escape($cod_cli));
+		$saldo  = $this->datasis->dameval("SELECT SUM(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM smov WHERE cod_cli=${dbcod_cli}");
 
 		$salida = '';
+
+		if( $rutas ) 
+			$salida  .= '<table width="100%" cellspacing="0"><tr><td>Rutas: '.$rutas.'</td></tr></table>';
+
 
 		$salida  .= '<table width="100%" cellspacing="0">';
 		if ( $tipo == '0' )
@@ -2459,7 +2442,7 @@ function chrif(rif){
 	//******************************************************************
 	// Forma de Ciudades
 	//
-	function marcaform(){
+	function ciuform(){
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('id');
@@ -2513,6 +2496,166 @@ function chrif(rif){
 
 		echo $msalida;
 
+	}
+
+	//******************************************************************
+	// Forma de Rutas
+	//
+	function rutasform(){
+		$grid  = new $this->jqdatagrid;
+
+		$mSQL = "SELECT vendedor, concat( vendedor, ' ',TRIM(nombre)) nombre FROM vend ORDER BY nombre ";
+		$avende  = $this->datasis->llenajqselect($mSQL, true );
+
+		$atipo = '{"A": "Activo", "I": "Inactivo"}';
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'      => 'true',
+			'align'       => "'center'",
+			'width'       => 20,
+			'editable'    => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+			)
+		);
+
+		$grid->addField('ruta');
+		$grid->label('Codigo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:5, maxlength: 5 }',
+		));
+
+		$grid->addField('vende');
+		$grid->label('Vendedor');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 60,
+			'edittype'      => "'select'",
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ value: '.$avende.',  style:"width:120px"}',
+			'stype'         => "'text'"
+		));
+
+		$grid->addField('tipo');
+		$grid->label('Tipo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 40,
+			'edittype'      => "'select'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ value: '.$atipo.',  style:"width:70px"}',
+			'stype'         => "'text'",
+		));
+
+
+		$grid->addField('descrip');
+		$grid->label('Descrip');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 100,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:100, maxlength: 100 }',
+		));
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('590');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url($this->url.'getruta/'));
+		$grid->setUrlput(site_url($this->url.'setruta/'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+
+	}
+
+	//******************************************************************
+	// Busca la data en el Servidor por json
+	//
+	function getruta(){
+		$grid       = $this->jqdatagrid;
+		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
+		$mWHERE = $grid->geneTopWhere('sclirut');
+		$response   = $grid->getData('sclirut', array(array()), array(), false, $mWHERE );
+		$rs = $grid->jsonresult( $response);
+		echo $rs;
+	}
+
+	//******************************************************************
+	// Guarda la Informacion del Grid o Tabla
+	//
+	function setruta(){
+		$this->load->library('jqdatagrid');
+		$oper   = $this->input->post('oper');
+		$id     = $this->input->post('id');
+		$data   = $_POST;
+		$mcodp  = "ruta";
+		$check  = 0;
+
+		unset($data['oper']);
+		unset($data['id']);
+		if($oper == 'add'){
+			if(false == empty($data)){
+				$check = $this->datasis->dameval("SELECT count(*) FROM sclirut WHERE $mcodp=".$this->db->escape($data[$mcodp]));
+				if ( $check == 0 ){
+					$this->db->insert('sclirut', $data);
+					echo "Registro Agregado";
+
+					logusu('SCLIRUT',"Registro ????? INCLUIDO");
+				} else
+					echo "Ya existe un registro con ese $mcodp";
+			} else
+				echo "Fallo Agregado!!!";
+
+		} elseif($oper == 'edit') {
+			$nuevo  = $data[$mcodp];
+			unset($data[$mcodp]);
+			$this->db->where("id", $id);
+			$this->db->update('sclirut', $data);
+			logusu('SCLIRUT',"Ruta de Cliente  ".$nuevo." MODIFICADO");
+			echo "$mcodp Modificado";
+
+		} elseif($oper == 'del') {
+			$ruta  = $this->datasis->dameval("SELECT $mcodp FROM sclirut WHERE id=$id");
+			$check = $this->datasis->dameval("SELECT COUNT(*) FROM sclitrut WHERE ruta='$ruta' ");
+			if ($check > 0){
+				echo " El registro no puede ser eliminado; elimine primero los clientes asociados ";
+			} else {
+				$this->db->query("DELETE FROM sclirut WHERE id=$id ");
+				logusu('SCLIRUT',"Ruta $ruta ELIMINADO");
+				echo "Registro Eliminado";
+			}
+		};
 	}
 
 	//******************************************************************
@@ -3247,6 +3390,37 @@ function chrif(rif){
 				(24, 20, 'YARACUY ', 'San Felipe ', 7100.00, 599345, 14, 7),
 				(25, 21, 'ZULIA ', 'Maracaibo ', 63100.00, 3703640, 21, 106),
 				(27, 98, 'FRONTERA', '', 0.00, 0, 0, 0);";
+			$this->db->query($mSQL);
+		}
+
+		if (!$this->db->table_exists('sclirut')) {
+			$mSQL="
+			CREATE TABLE `sclirut` (
+				id      INT(11)    NOT NULL AUTO_INCREMENT,
+				ruta    VARCHAR(5) DEFAULT NULL,
+				vende   VARCHAR(5) DEFAULT NULL,
+				tipo    CHAR(1)    DEFAULT NULL,
+				descrip CHAR(100)  DEFAULT NULL,
+			PRIMARY KEY (id),
+			UNIQUE INDEX ruta (ruta)
+			) ENGINE=MyISAM DEFAULT CHARSET=latin1 
+			ROW_FORMAT=FIXED 
+			COMMENT='Detalle rutas de clientes'";
+			$this->db->query($mSQL);
+		}
+
+		if (!$this->db->table_exists('sclitrut')) {
+			$mSQL="
+			CREATE TABLE `sclitrut` (
+				id      INT(11)    NOT NULL AUTO_INCREMENT,
+				cliente VARCHAR(5) DEFAULT NULL,
+				ruta    VARCHAR(5) DEFAULT NULL,
+				dia     CHAR(1)    DEFAULT NULL,
+			PRIMARY KEY (id),
+			UNIQUE INDEX unico (cliente, ruta)
+			) ENGINE=MyISAM DEFAULT CHARSET=latin1 
+			ROW_FORMAT=FIXED 
+			COMMENT='Rutas de clientes'";
 			$this->db->query($mSQL);
 		}
 

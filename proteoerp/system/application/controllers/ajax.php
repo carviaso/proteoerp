@@ -2304,10 +2304,12 @@ class Ajax extends Controller {
 		$mSQL = "SELECT cajero, CONCAT(cajero, ' ', nombre) nombre FROM scaj ORDER BY nombre";
 		echo $this->datasis->llenaopciones($mSQL, true);
 	}
+
 	function ddcaub(){
 		$mSQL = "SELECT ubica, CONCAT(ubica, ' ', ubides) ubides FROM caub ORDER BY ubica ";
 		echo $this->datasis->llenaopciones($mSQL, true);
 	}
+
 	function ddvende(){
 		$mSQL = "SELECT TRIM(vendedor) vendedor, CONCAT(trim(vendedor), ' ', trim(nombre)) nombre FROM vend ORDER BY vendedor ";
 		echo $this->datasis->llenaopciones($mSQL, true);
@@ -2327,6 +2329,7 @@ class Ajax extends Controller {
 		$mSQL = "SELECT depto, CONCAT(depto,' ',descrip) descrip FROM dpto WHERE tipo='I' ORDER BY depto";
 		echo $this->datasis->llenaopciones($mSQL, true);
 	}
+
 	function ddgrcl(){
 		$mSQL = "SELECT grupo, CONCAT(grupo, ' ', gr_desc) banco FROM grcl ORDER BY grupo ";
 		echo $this->datasis->llenaopciones($mSQL, true);
