@@ -966,7 +966,7 @@ if (!$solo){
 		<td class="littletableheaderdet" align="right">%</td>
 		<td class="littletableheaderdet" align="right">Monto</td>
 		<?php if($form->_status!='show') {?>
-			<td class="littletableheaderdet" align='center'><a href='#' onclick="add_gereten()" title='Agregar otro concepto'><?php echo img('images/agrega4.png'); ?></a></td>
+			<td class="littletableheaderdet" align='center'><a href='#' onclick="add_gereten()" title='Agregar otro concepto'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 16, 'alt'=>'Agregar otro concepto', 'title' => 'Agregar otro concepto', 'border'=>'0')); ?></a></td>
 		<?php } ?>
 	</tr>
 	<?php for($i=0; $i < $form->max_rel_count['gereten']; $i++) {

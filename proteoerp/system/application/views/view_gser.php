@@ -615,7 +615,7 @@ function toggle() {
 				<td class="littletableheaderdet"              >Depto.</td>
 				<td class="littletableheaderdet"              >Suc.</td>
 				<?php if($form->_status!='show') {?>
-					<td class="littletableheaderdet"><a href='#' onclick="add_gitser()" title='Agregar una linea'><?php echo img('images/agrega4.png'); ?></a></td>
+					<td class="littletableheaderdet"><a href='#' onclick="add_gitser()" title='Agregar una linea'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 16, 'alt'=>'Agregar otra linea', 'title' => 'Agregar otra linea', 'border'=>'0')); ?></a></td>
 				<?php } ?>
 			</tr>
 			<?php for($i=0; $i < $form->max_rel_count['gitser']; $i++) {
@@ -693,7 +693,7 @@ function toggle() {
 							<td class="littletableheaderdet" align="right">Tasa%</td>
 							<td class="littletableheaderdet" align="right">Monto</td>
 							<?php if($form->_status!='show') {?>
-								<td class="littletableheaderdet"><a href='#' onclick="add_gereten()" title='Agregar otra retencion'><?php echo img('images/agrega4.png'); ?></a></td>
+								<td class="littletableheaderdet"><a href='#' onclick="add_gereten()" title='Agregar otra retencion'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 16, 'alt'=>'Agregar otra retencion', 'title' => 'Agregar otra retencion', 'border'=>'0')); ?></a></td>
 							<?php } ?>
 						</tr>
 						<?php for($i=0; $i < $form->max_rel_count['gereten']; $i++) {
