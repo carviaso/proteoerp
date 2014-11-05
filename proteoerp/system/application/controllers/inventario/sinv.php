@@ -187,7 +187,6 @@ class Sinv extends Controller {
 			})
 		}';
 
-
 		//Permite asignar a varios producto el mismo precio
 		$aprecios="<form id='setprecio'>
 		<fieldset>
@@ -239,7 +238,6 @@ class Sinv extends Controller {
 			}
 		};
 		';
-
 
 		// Redondear Precios
 		$funciones .= '
@@ -2518,7 +2516,6 @@ class Sinv extends Controller {
 		//Guarda en la BD el Where para usarlo luego
 		$querydata = array('data1' => $this->session->userdata('dtgQuery'));
 		$emp = strpos($querydata['data1'],'WHERE ');
-
 		if($emp > 0){
 			$querydata['data1'] = substr( $querydata['data1'], $emp );
 			$emp = strpos($querydata['data1'],'ORDER BY ');
@@ -3804,9 +3801,8 @@ class Sinv extends Controller {
 	}
 
 
-	// **************************************
-	//
-	// -- Aumento de Precios -- //
+	// *****************************************************************
+	// Aumento de Precios 
 	//
 	function auprec( $porcent= 0) {
 		$data = $this->datasis->damesesion();

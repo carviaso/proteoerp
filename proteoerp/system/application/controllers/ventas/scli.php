@@ -71,10 +71,11 @@ class Scli extends validaciones {
 						<table style='border-collapse:collapse;padding:0px;width:99%;border:1px solid #AFAFAF;'><tr>
 							<td style='vertical-align:top;'>".img(array('src' =>"images/camion.png", 'height' => 30, 'alt'=>'Asignacion de Rutas', 'title' => 'Rutas', 'border'=>'0'))."</td>
 							${cabeza1} id='rutas'>Rutas</a></div></td>
-							<td style='vertical-align:center;'><a id='sumarutas'>".img(array('src' =>"images/agrega4.png", 'height' => 26, 'alt'=>'Asignacion de Rutas', 'title' => 'Agregar cliente a ruta', 'border'=>'0'))."</a></td>
-							<td style='vertical-align:center;'><a id='restarutas'>".img(array('src' =>"images/elimina4.png", 'height' => 26, 'alt'=>'Elimina el cliente de la ruta', 'title' => 'Elimina el cliente de la ruta', 'border'=>'0'))."</a></td>
+							<td style='vertical-align:center;'><a id='sumarutas' >".img(array('src' =>"images/agrega4.png", 'height'     => 25, 'alt'=>'Asignacion de Rutas',           'title' => 'Agregar cliente a ruta',        'border'=>'0'))."</a></td>
+							<td style='vertical-align:center;'><a id='restarutas'>".img(array('src' =>"images/elimina4.png", 'height'    => 25, 'alt'=>'Elimina el cliente de la ruta', 'title' => 'Elimina el cliente de la ruta', 'border'=>'0'))."</a></td>
+							<td style='vertical-align:center;'><a id='todorutas' >".img(array('src' =>"images/agregatodo4.png", 'height' => 25, 'alt'=>'Agrega todo lo seleccionado',   'title' => 'Agrega todo lo seleccionado',   'border'=>'0'))."</a></td>
 						</tr>
-							<td colspan='4'>Ruta: ${srutas} </td>
+							<td colspan='5'>Ruta: ${srutas} </td>
 						</tr>
 						</table>
 					</td>
@@ -161,11 +162,6 @@ class Scli extends validaciones {
 		$bodyscript = '<script type="text/javascript">';
 		$ngrid = '#newapi'.$grid0;
 
-/*
-		$bodyscript .= '
-		 var rutactual = "";
-		';
-*/
 		$bodyscript .= '
 		$("#edocta").click( function(){
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -306,6 +302,10 @@ class Scli extends validaciones {
 		$("#sumarutas").click(function(){
 			var id   = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			var ruta = $("#rutactual").val();
+			if ( ruta == "-"){
+				$.prompt("<h1>Por favor Seleccione una Ruta</h1>");
+				return false;
+			}
 			if(id){
 				$.post("'.site_url($this->url.'rutasuma').'/"+id+"/"+ruta,
 				function(data){
@@ -318,12 +318,34 @@ class Scli extends validaciones {
 			}
 		});';
 
+		// Suma Rutas
+		$bodyscript .= '
+		$("#todorutas").click(function(){
+			var id   = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			var ruta = $("#rutactual").val();
+			if ( ruta == "-"){
+				$.prompt("<h1>Por favor Seleccione una Ruta</h1>");
+			} else {
+				$.post("'.site_url($this->url.'rutatodo').'/"+ruta,
+				function(data){
+					$("#fciud").html(data);
+					$("#fciud").dialog({height: 450, width: 610, title: "Rutas"});
+					$("#fciud").dialog( "open" );
+				});
+			}
+		});';
+
+
 
 		// Resta Rutas
 		$bodyscript .= '
 		$("#restarutas").click(function(){
 			var id   = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			var ruta = $("#rutactual").val();
+			if ( ruta == "-"){
+				$.prompt("<h1>Por favor Seleccione una Ruta</h1>");
+				return false;
+			}
 			if(id){
 				$.post("'.site_url($this->url.'rutaresta').'/"+id+"/"+ruta,
 				function(data){
@@ -1122,6 +1144,21 @@ class Scli extends validaciones {
 
 		$response   = $grid->getData('scli', array(array()), array(), false, $mWHERE );
 		$rs = $grid->jsonresult( $response);
+
+		//Guarda en la BD el Where para usarlo luego
+		$querydata = array('data1' => $this->session->userdata('dtgQuery'));
+		$emp = strpos($querydata['data1'],'WHERE ');
+		if($emp > 0){
+			$querydata['data1'] = substr( $querydata['data1'], $emp );
+			$emp = strpos($querydata['data1'],'ORDER BY ');
+			if($emp > 0){
+				$querydata['data1'] = substr( $querydata['data1'], 0, $emp );
+			}
+		}else{
+			$querydata['data1'] = '';
+		}
+		$ids = $this->datasis->guardasesion($querydata);
+
 		echo $rs;
 	}
 
@@ -1217,6 +1254,28 @@ class Scli extends validaciones {
 		echo $salida;
 	}
 
+
+	//******************************************************************
+	//  Suma a todas las rutas
+	//
+	function rutatodo() {
+		$data = $this->datasis->damesesion();
+		$where = $data['data1'];
+		$ruta = $this->uri->segment($this->uri->total_segments());
+		$dbruta = $this->db->escape($ruta);
+		$salida = 'Guardado';
+
+		// Comprueba si existe la Ruta
+		$mSQL = "SELECT COUNT(*) FROM sclirut WHERE ruta=${dbruta}";
+		$resta = $this->datasis->dameval($mSQL);
+
+		if ( $resta == 1 ){
+			$mSQL = "INSERT IGNORE INTO sclitrut (cliente, ruta) SELECT cliente, ${dbruta} ruta FROM scli ${where} ";
+			$this->db->query($mSQL);
+		} else $salida = 'Error en los datos '.$mSQL;
+
+		echo $salida;
+	}
 
 
 	//******************************************************************
