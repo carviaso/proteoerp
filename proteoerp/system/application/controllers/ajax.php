@@ -307,7 +307,7 @@ class Ajax extends Controller {
 		$data = '[{ }]';
 		if($mid !== false){
 			$retArray = $retorno = array();
-			$mSQL  = "SELECT TRIM(ubica) AS ubica
+			$mSQL  = "SELECT DISTINCT TRIM(ubica) AS ubica
 			FROM sinv
 			WHERE ubica LIKE ${qdb} AND TRIM(ubica)<>''
 			ORDER BY ubica LIMIT ".$this->autolimit;
