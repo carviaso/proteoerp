@@ -3072,7 +3072,7 @@ class Sinv extends Controller {
 		$maxiss=4;
 		for($i=1;$i<=$maxiss;$i++){
 			$objeto="margen$i";
-			$edit->$objeto = new inputField2("Margen $i", $objeto);
+			$edit->$objeto = new inputField("Margen $i", $objeto);
 			$edit->$objeto->css_class='inputnum';
 			$edit->$objeto->size=10;
 			$edit->$objeto->maxlength=6;
@@ -3082,7 +3082,7 @@ class Sinv extends Controller {
 			$edit->$objeto->tabindex=$i;
 
 			$objeto="base$i";
-			$edit->$objeto = new inputField2("Base $i", $objeto);
+			$edit->$objeto = new inputField("Base $i", $objeto);
 			$edit->$objeto->css_class='inputnum';
 			$edit->$objeto->size=10;
 			$edit->$objeto->maxlength=13;
@@ -3093,7 +3093,7 @@ class Sinv extends Controller {
 			$edit->$objeto->tabindex=$i+$maxiss;
 
 			$objeto="precio$i";
-			$edit->$objeto = new inputField2("Precio $i", $objeto);
+			$edit->$objeto = new inputField("Precio $i", $objeto);
 			$edit->$objeto->css_class='inputnum';
 			$edit->$objeto->size=10;
 			$edit->$objeto->autocomplete=false;

@@ -82,6 +82,7 @@ class inputField extends objField{
 				if(strlen($this->onchange)>0)  $attributes['onchange']  = $this->onchange;
 				if(isset($this->onfocus))      $attributes['onfocus']   = $this->onfocus;
 				if(isset($this->onkeyup))      $attributes['onkeyup']   = $this->onkeyup;
+				if(!empty($this->tabindex))    $attributes['tabindex']  = $this->tabindex;
 				if($this->readonly)            $attributes['readonly']  = 'readonly';
 				if($this->disable_paste)       $attributes['onpaste']   = 'return false;';
 				if(!$this->autocomplete)       $attributes['autocomplete']='off';
