@@ -109,8 +109,7 @@ class Marc extends Controller{
 	/**
 	* Put information
 	*/
-	function setData()
-	{
+	function setData(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
@@ -120,21 +119,23 @@ class Marc extends Controller{
 		$id = str_replace('jqg','',$id);
 		unset($data['oper']);
 		unset($data['id']);
+		if(isset($data['marca'])) $data['marca']=strtoupper($data['marca']);
 
 		// ver si puede borrar
 		if ($oper == 'del') {
 			// si tiene articulos no puede borrar
 			$id   = $this->input->post('id');
-			$mSQL = "SELECT COUNT(*) FROM sinv a JOIN marc b ON a.marca=b.marca WHERE b.id=$id";
-			if ($this->datasis->dameval($mSQL) == 0 ){
+			$mSQL = "SELECT COUNT(*) AS cana FROM sinv a JOIN marc b ON a.marca=b.marca WHERE b.id=${id}";
+			$cana = intval($this->datasis->dameval($mSQL));
+			if($cana == 0){
 				$grid     = $this->jqdatagrid;
 				$response = $grid->operations('marc','id');
 				echo 'Registro Borrado!!!';
 			} else {
 				echo 'No se puede borrar, existen productos con esta marca';
 			}
-		} elseif($oper == 'edit') {
-			$marcant = $this->datasis->dameval("SELECT marca FROM marc WHERE id=$id");
+		}elseif($oper == 'edit'){
+			$marcant = $this->datasis->dameval("SELECT marca FROM marc WHERE id=${id}");
 
 			$this->db->where('id', $id);
 			$this->db->update('marc', $data);
@@ -142,17 +143,18 @@ class Marc extends Controller{
 			$mSQL = "UPDATE sinv SET marca=".$this->db->escape($data['marca'])." WHERE marca=".$this->db->escape($marcant);
 			$this->db->query($mSQL);
 
-			logusu('MARC',"Registro $id MODIFICADO");
+			logusu('MARC',"Registro ${id} MODIFICADO");
 			//echo "Registro Modificado";
 			echo $mSQL;
 
-		} elseif($oper == 'add'){
+		}elseif($oper == 'add'){
 			if(false == empty($data)){
 				$this->db->insert('marc', $data);
 				echo "Registro Agregado";
 				logusu('MARC',"Registro  INCLUIDO");
-			} else
-			echo "Fallo Agregado!!!";
+			}else{
+				echo "Fallo Agregado!!!";
+			}
 		}
 	}
 
@@ -215,8 +217,8 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );";
 
 	// sigma grid
 	function controlador(){
-		if (isset($_POST["_gt_json"]) ) {
-			$json=json_decode(stripslashes($_POST["_gt_json"]));
+		if (isset($_POST['_gt_json']) ) {
+			$json=json_decode(stripslashes($_POST['_gt_json']));
 			if($json->{'action'} == 'load') {
 				$pageNo   = $json->{'pageInfo'}->{'pageNum'};
 				$pageSize = $json->{'pageInfo'}->{'pageSize'};
@@ -225,13 +227,13 @@ Sigma.Util.onLoad( Sigma.Grid.render(mygrid) );";
 				if(isset($json->{'sortInfo'}[0]->{'columnId'})){
 					$sortField = $json->{'sortInfo'}[0]->{'columnId'};
 				} else {
-					$sortField = "marca";
+					$sortField = 'marca';
 				}
 
 				if(isset($json->{'sortInfo'}[0]->{'sortOrder'})){
 					$sortOrder = $json->{'sortInfo'}[0]->{'sortOrder'};
 				} else {
-					$sortOrder = "ASC";
+					$sortOrder = 'ASC';
 				}
 
 				for ($i = 0; $i < count($json->{'filterInfo'}); $i++) {

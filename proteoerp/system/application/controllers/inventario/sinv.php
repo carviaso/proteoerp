@@ -3069,18 +3069,20 @@ class Sinv extends Controller {
 		$edit->lindia->insertValue='0';
 		$edit->lindia->autocomplete = false;
 
-		for($i=1;$i<=4;$i++){
+		$maxiss=4;
+		for($i=1;$i<=$maxiss;$i++){
 			$objeto="margen$i";
-			$edit->$objeto = new inputField("Margen $i", $objeto);
+			$edit->$objeto = new inputField2("Margen $i", $objeto);
 			$edit->$objeto->css_class='inputnum';
 			$edit->$objeto->size=10;
 			$edit->$objeto->maxlength=6;
 			$edit->$objeto->onkeyup = 'calculos(\'I\');';
 			$edit->$objeto->autocomplete=false;
 			$edit->$objeto->rule='required';
+			$edit->$objeto->tabindex=$i;
 
 			$objeto="base$i";
-			$edit->$objeto = new inputField("Base $i", $objeto);
+			$edit->$objeto = new inputField2("Base $i", $objeto);
 			$edit->$objeto->css_class='inputnum';
 			$edit->$objeto->size=10;
 			$edit->$objeto->maxlength=13;
@@ -3088,9 +3090,10 @@ class Sinv extends Controller {
 			$edit->$objeto->in="margen$i";
 			$edit->$objeto->onkeyup = 'cambiobase(\'I\');';
 			$edit->$objeto->rule='required|mayorcero';
+			$edit->$objeto->tabindex=$i+$maxiss;
 
 			$objeto="precio$i";
-			$edit->$objeto = new inputField("Precio $i", $objeto);
+			$edit->$objeto = new inputField2("Precio $i", $objeto);
 			$edit->$objeto->css_class='inputnum';
 			$edit->$objeto->size=10;
 			$edit->$objeto->autocomplete=false;
@@ -3098,6 +3101,7 @@ class Sinv extends Controller {
 			$edit->$objeto->in="margen$i";
 			$edit->$objeto->onkeyup = 'cambioprecio(\'I\');';
 			$edit->$objeto->rule='required|mayorcero';
+			$edit->$objeto->tabindex=$i+($maxiss*2);
 
 			//para el caso de las fraccciones
 			$objeto="cbase$i";
@@ -3802,7 +3806,7 @@ class Sinv extends Controller {
 
 
 	// *****************************************************************
-	// Aumento de Precios 
+	// Aumento de Precios
 	//
 	function auprec( $porcent= 0) {
 		$data = $this->datasis->damesesion();
