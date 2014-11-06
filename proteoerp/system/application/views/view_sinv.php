@@ -267,6 +267,35 @@ $(function(){
 	chtipo();
 
 
+	$('#ubica').autocomplete({
+		source: function( req, add){
+			$.ajax({
+				url:  "<?php echo site_url('ajax/buscaubica'); ?>",
+				type: "POST",
+				dataType: "json",
+				data: {"q":req.term},
+				success:
+					function(data){
+						var sugiere = [];
+
+
+						$.each(data,
+							function(i, val){
+								sugiere.push( val );
+							}
+						);
+						add(sugiere);
+					},
+			})
+		},
+		minLength: 0,
+		select: function( event, ui ) {
+			$("#ubica").attr("readonly", "readonly");
+			$('#ubica').val(ui.item.value);
+			setTimeout(function() {  $("#ubica").removeAttr("readonly"); }, 1500);
+		}
+	});
+
 	$("#linfe").change(function(){
 		var val=$(this).val();
 		if(val=='S'){

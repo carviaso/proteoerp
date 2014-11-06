@@ -53,6 +53,9 @@ class Reparto extends Controller {
 		$grid->wbotonadd(array('id'=>'entrega', 'img'=>'images/acuerdo.png',     'alt'=>'Entregado al Cliente', 'label'=>'Entregado al Cliente', 'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png',     'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'cobrard', 'img'=>'images/ventafon.png',    'alt'=>'Cobrar Reparto',       'label'=>'Cobrar Reparto',       'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'finalid', 'img'=>'images/recalcular.jpg',  'alt'=>'Finalizar Reparto',    'label'=>'Cobrar Reparto',       'tema'=>'anexos'));
+
 		//$grid->wbotonadd(array('id'=>'buscafc', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Buscar Faturas',      ));
 
 		$WestPanel = $grid->deploywestp();
@@ -63,7 +66,8 @@ class Reparto extends Controller {
 		$adic = array(
 			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
 			array('id'=>'fshow' , 'title'=>'Mostrar Registro'),
-			array('id'=>'fborra', 'title'=>'Eliminar Registro')
+			array('id'=>'fborra', 'title'=>'Eliminar Registro'),
+			array('id'=>'fcobro', 'title'=>'Cobrar reparto')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -71,6 +75,7 @@ class Reparto extends Controller {
 		$funciones .= '$("#cargard").hide();'."\n";
 		$funciones .= '$("#entrega").hide();'."\n";
 		$funciones .= '$("#cerrard").hide();'."\n";
+		$funciones .= '$("#cobrard").hide();'."\n";
 
 		$param['funciones']    = $funciones;
 		$param['WestPanel']    = $WestPanel;
@@ -265,6 +270,46 @@ class Reparto extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione un Reparto</h1>");}
 		});';
 
+		$bodyscript .= '
+		$("#cobrard").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				if(ret.status=="C"){
+					$.prompt("<h1>No se puede modificar una conciliaci&oacute;n cerrada.</h1>");
+				}else{
+					mId = id;
+					$.post("'.site_url($this->url.'cobrorep').'/"+id, function(data){
+						$("#fcobro").html(data);
+						$("#fcobro").dialog( "open" );
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
+
+
+		$bodyscript .= '
+		$("#finalid").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if(id){
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				if(ret.status=="C"){
+					$.prompt("<h1>No se puede modificar una conciliaci&oacute;n cerrada.</h1>");
+				}else{
+					mId = id;
+					$.post("'.site_url($this->url.'ccobro').'/"+id, function(data){
+						$("#fcobro").html(data);
+						$("#fcobro").dialog( "open" );
+					});
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		});';
+
+
 		// Agregar
 		$bodyscript .= $this->jqdatagrid->bsadd( 'reparto', $this->url );  //Por Defecto
 
@@ -317,6 +362,47 @@ class Reparto extends Controller {
 
 		// Dialogo fborra
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );  //Por Defecto
+
+		$bodyscript .= '
+		$("#fcobro").dialog({
+			autoOpen: false, height: 520, width: 715, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+
+					$.ajax({
+						type: "POST", dataType: "html", async: false,
+						url: murl,
+						//data: {monto: $("#monto").val(), idsfac: jQuery("#tcobro").jqGrid("getGridParam","selarrrow") },
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if(json.status == "A"){
+									apprise("Registro Guardado");
+									$( "#fcobro" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									//'.$this->datasis->jwinopen(site_url('formatos/ver/ORDC').'/\'+json.pk.id+\'/id\'').';
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fcobro").html(r);
+							}
+						}
+					});
+				},
+				"Cancelar": function() {
+					$("#fcobro").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fcobro").html("");
+			}
+		});';
 
 		$bodyscript .= '});';
 
@@ -390,7 +476,16 @@ class Reparto extends Controller {
 				$this->db->query("UPDATE sfac SET entregado=0, reparto=0 WHERE reparto=${id}");
 				echo 'Reparto Eliminado';
 			}else{
-				echo 'Reparto ya finaliado no se puede anular';
+				echo 'Reparto ya fue cerrado o finalizado, no se puede anular';
+			}
+		}elseif($oper == 'finalizar'){
+			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
+			if($tipo == 'F'){
+				$this->db->where('id', $id);
+				$this->db->update('reparto', array('tipo' => 'I'));
+				echo 'Reparto Finalizado';
+			}else{
+				echo 'Reparto no se puede finalizar';
 			}
 		}
 	}
@@ -614,6 +709,8 @@ class Reparto extends Controller {
 						tips = "Entregado";
 					}else if(aData.tipo=="C"){
 						tips = "Cargado";
+					}else if(aData.tipo=="F"){
+						tips = "Cerrado";
 					}else{
 						tips = "Otro";
 					}
@@ -751,16 +848,19 @@ class Reparto extends Controller {
 						$("#cargard").show();
 						$("#entrega").hide();
 						$("#cerrard").hide();
+						$("#cobrard").hide();
 					}else if( ret.tipo == \'C\'){
 						$("#agregaf").hide();
 						$("#cargard").hide();
 						$("#entrega").show();
 						$("#cerrard").hide();
+						$("#cobrard").hide();
 					}else if( ret.tipo == \'E\'){
 						$("#agregaf").hide();
 						$("#cargard").hide();
 						$("#entrega").hide();
 						$("#cerrard").show();
+						$("#cobrard").hide();
 						$("#ladicional").text("Para desincorporar una factura no entregada haga doble click sobre la factura a eliminar.");
 						$.post("'.site_url($this->url.'eliminadas').'/"+id, function(data){
 							$("#ladicional").after(data);
@@ -772,6 +872,12 @@ class Reparto extends Controller {
 						$("#entrega").hide();
 						$("#cerrard").hide();
 						$("#anulard").hide();
+
+						if( ret.tipo == \'F\' ){
+							$("#cobrard").show();
+						}else{
+							$("#cobrard").hide();
+						}
 					}
 				}
 			},
@@ -1168,7 +1274,8 @@ class Reparto extends Controller {
 		$edit->tipo->option('P','Pendiente');
 		$edit->tipo->option('C','Cargado');
 		$edit->tipo->option('D','Despachado');
-		$edit->tipo->option('F','Finalizado');
+		$edit->tipo->option('F','Cerrado');
+		$edit->tipo->option('I','Finalizado');
 		$edit->tipo->option('A','Anulado');
 		$edit->tipo->style = 'width:100px;';
 		$edit->tipo->rule='required';
@@ -1191,7 +1298,7 @@ class Reparto extends Controller {
 
 		$edit->chofer = new dropdownField('Chofer','chofer');
 		$edit->chofer->option('','Seleccionar');
-		$edit->chofer->options("SELECT codigo, nombre nombre FROM chofer ORDER BY nombre");
+		$edit->chofer->options('SELECT codigo, nombre AS nombre FROM chofer ORDER BY nombre');
 		$edit->chofer->rule='required';
 		$edit->chofer->style = 'width:300px;';
 
@@ -1274,6 +1381,184 @@ class Reparto extends Controller {
 	function _post_delete($do){
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits ${primary}");
+	}
+
+	//******************************************************************
+	// Cobro del reparto
+	//
+	function cobrorep($id){
+		$id=intval($id);
+		if($id<=0) return false;
+		$tipo     = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
+		if($tipo != 'F') return false;
+
+		$this->rapyd->load('dataform');
+
+		//Chequear si el reparto no esta cerrado
+
+
+		$edit = new DataForm($this->url.'cobrorep/'.$id.'/process');
+
+		$edit->monto = new inputField('Monto de operaci&oacute;n','monto');
+		$edit->monto->rule = 'required|numeric';
+		$edit->monto->type = 'inputhidden';
+		$edit->monto->insertValue='0.0';
+		$edit->monto->css_class='inputnum';
+
+		/*$edit->recibido = new inputField('Monto recibido','recibido');
+		$edit->recibido->rule = 'required|numeric';
+		$edit->recibido->type = 'inputhidden';
+		$edit->recibido->insertValue='0.0';
+		$edit->recibido->css_class='inputnum';*/
+		$edit->build_form();
+
+		if($edit->on_success()){
+			$itpago=$this->input->post('itpago');
+			if(is_array($itpago)){
+				$error=0;
+				foreach($itpago as $itid=>$repcob){
+					$itid=intval($itid);
+					if($repcob=='NI') $repcob=null;
+					$dbrepcob=$this->db->escape($repcob);
+					if($itid>0){
+						$mSQL="UPDATE sfac SET repcob=${dbrepcob} WHERE id=${itid}";
+						$ban=$this->db->simple_query($mSQL);
+						if($ban){
+							//logusu('reparto','Creo pago ');
+						}else{
+							$error++;
+						}
+					}
+				}
+				if($error>0){
+					$rt=array(
+						'status' =>'B',
+						'mensaje'=>'Problemas guardado',
+						'pk'     =>null
+					);
+				}else{
+					$rt=array(
+						'status' =>'A',
+						'mensaje'=>'Cambio exitoso',
+						'pk'     =>null
+					);
+				}
+
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>'Problemas guardado',
+					'pk'     =>null
+				);
+			}
+			echo json_encode($rt);
+		}
+
+		if($edit->on_error()){
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>preg_replace('/<[^>]*>/', '', $edit->error_string),
+				'pk'     =>null,
+			);
+			echo json_encode($rt);
+			$act = false;
+			return true;
+		}
+
+		if($edit->on_show()){
+			$conten['id']   =  $id;
+			$conten['form'] =&  $edit;
+			$this->load->view('view_repartocobro', $conten);
+		}
+	}
+
+	//******************************************************************
+	// C.Cobro
+	//
+	function ccobro($id){
+		$id=intval($id);
+		if($id<=0) return false;
+		$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
+		if($tipo != 'F') return false;
+
+		$this->rapyd->load('dataform');
+
+		//Chequear si el reparto no esta cerrado
+
+
+		$edit = new DataForm($this->url.'cobrorep/'.$id.'/process');
+
+		$edit->monto = new inputField('Monto de operaci&oacute;n','monto');
+		$edit->monto->rule = 'required|numeric';
+		$edit->monto->type = 'inputhidden';
+		$edit->monto->insertValue='0.0';
+		$edit->monto->css_class='inputnum';
+
+		/*$edit->recibido = new inputField('Monto recibido','recibido');
+		$edit->recibido->rule = 'required|numeric';
+		$edit->recibido->type = 'inputhidden';
+		$edit->recibido->insertValue='0.0';
+		$edit->recibido->css_class='inputnum';*/
+		$edit->build_form();
+
+		if($edit->on_success()){
+			$itpago=$this->input->post('itpago');
+			if(is_array($itpago)){
+				$error=0;
+				foreach($itpago as $itid=>$repcob){
+					$itid=intval($itid);
+					if($repcob=='NI') $repcob=null;
+					$dbrepcob=$this->db->escape($repcob);
+					if($itid>0){
+						$mSQL="UPDATE sfac SET repcob=${dbrepcob} WHERE id=${itid}";
+						$ban=$this->db->simple_query($mSQL);
+						if($ban){
+							//logusu('reparto','Creo pago ');
+						}else{
+							$error++;
+						}
+					}
+				}
+				if($error>0){
+					$rt=array(
+						'status' =>'B',
+						'mensaje'=>'Problemas guardado',
+						'pk'     =>null
+					);
+				}else{
+					$rt=array(
+						'status' =>'A',
+						'mensaje'=>'Cambio exitoso',
+						'pk'     =>null
+					);
+				}
+
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>'Problemas guardado',
+					'pk'     =>null
+				);
+			}
+			echo json_encode($rt);
+		}
+
+		if($edit->on_error()){
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>preg_replace('/<[^>]*>/', '', $edit->error_string),
+				'pk'     =>null,
+			);
+			echo json_encode($rt);
+			$act = false;
+			return true;
+		}
+
+		if($edit->on_show()){
+			$conten['id']   =  $id;
+			$conten['form'] =&  $edit;
+			$this->load->view('view_repartocobro', $conten);
+		}
 	}
 
 	function instalar(){

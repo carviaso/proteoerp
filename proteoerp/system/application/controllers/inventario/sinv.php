@@ -540,7 +540,7 @@ class Sinv extends Controller {
 								apprise("<h1>Cancelado</h1>Grupos vacios");
 							} else {
 								$.ajax({
-									url: "'.site_url("inventario/sinv/sinvcamgrup/").'",
+									url: "'.site_url('inventario/sinv/sinvcamgrup/').'",
 									global: false,
 									type: "POST",
 									data: ({ grupo : f.mgrupo, productos : s }),
@@ -580,7 +580,7 @@ class Sinv extends Controller {
 							apprise("<h1>Cancelado</h1>Tasa = 0 ");
 						} else {
 							$.ajax({
-								url: "'.site_url("inventario/sinv/recaldolar/").'",
+								url: "'.site_url('inventario/sinv/recaldolar/').'",
 								global: false,
 								type: "POST",
 								data: ({ cambio : f.mcambio }),

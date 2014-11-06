@@ -4785,7 +4785,7 @@ class Sfac extends Controller {
 		// Coloca el cliente en spre
 		$this->db->where('numero',$numero);
 		$this->db->update('spre',array('cod_cli'=>$cod_cli));
-		
+
 		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
 		,'a.totals','a.iva','a.totalg');
 		$this->db->select($sel);
@@ -4871,7 +4871,7 @@ class Sfac extends Controller {
 				$fecha     = $spreml->fechadep;
 				$num_ref   = $spreml->num_ref;
 				$dbcodbanc = $this->db->escape($codbanc);
-				
+
 				// Crea en bmov el movimiento
 				$sql ='SELECT tbanco,moneda,banco,saldo,depto,numcuent FROM banc WHERE codbanc='.$dbcodbanc;
 				$fila=$this->datasis->damerow($sql);
@@ -4895,12 +4895,12 @@ class Sfac extends Controller {
 				$itdbdata['concep2']  = '';
 				$itdbdata['status']   = 'P';
 				$itdbdata['liable']   = 'S';
-				
+
 				$itdbdata['transac']  = $transac['transac'];
 				$itdbdata['usuario']  = $transac['usuario'];
 				$itdbdata['estampa']  = $transac['estampa'];
 				$itdbdata['hora']     = $transac['hora'];
-				
+
 				$itdbdata['negreso']  = '';
 				$itdbdata['anulado']  = 'N';
 				$mSQL = $this->db->insert_string('bmov', $itdbdata);
@@ -4909,7 +4909,7 @@ class Sfac extends Controller {
 
 				$fecha=str_replace( '-', '', $fecha );
 				$this->datasis->actusal($codbanc, $fecha, $monto);
-		
+
 				echo $rt;
 			}else{
 				echo $rt;
@@ -5235,6 +5235,11 @@ class Sfac extends Controller {
 
 		if(!in_array('basecomi',$campos)){
 			$mSQL="ALTER TABLE `sfac` ADD COLUMN `basecomi` DECIMAL(17,2) NULL DEFAULT '0.00'";
+			$this->db->query($mSQL);
+		}
+
+		if(!in_array('repcob',$campos)){
+			$mSQL="ALTER TABLE `sfac` ADD COLUMN `repcob` CHAR(2) NULL DEFAULT NULL COMMENT 'Cobro en reparto' AFTER `basecomi`";
 			$this->db->query($mSQL);
 		}
 

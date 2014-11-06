@@ -299,6 +299,33 @@ class Ajax extends Controller {
 		return true;
 	}
 
+	//Busca las ubicaciones
+	function buscaubica(){
+		$mid  = $this->input->post('q');
+		$qdb  = $this->db->escape('%'.$mid.'%');
+
+		$data = '[{ }]';
+		if($mid !== false){
+			$retArray = $retorno = array();
+			$mSQL  = "SELECT TRIM(ubica) AS ubica
+			FROM sinv
+			WHERE ubica LIKE ${qdb} AND TRIM(ubica)<>''
+			ORDER BY ubica LIMIT ".$this->autolimit;
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$retArray['value']    = $this->en_utf8($row['ubica']);
+					$retArray['label']    = $this->en_utf8($row['ubica']);
+					array_push($retorno, $retArray);
+				}
+			}
+			if(count($data)>0)
+				$data = json_encode($retorno);
+		}
+		echo $data;
+	}
+
+
 	function buscastarifa(){
 		$mid  = $this->input->post('q');
 		$qdb  = $this->db->escape('%'.$mid.'%');
@@ -1725,6 +1752,7 @@ class Ajax extends Controller {
 
 	//******************************************************************
 	//Saldo de proveedor
+	//
 	function ajaxsaldosprv(){
 		$mid = $this->input->post('clipro');
 
@@ -1744,6 +1772,7 @@ class Ajax extends Controller {
 
 	//******************************************************************
 	//Saldo de cliente
+	//
 	function ajaxsaldoscli(){
 		$mid = $this->input->post('clipro');
 
@@ -1761,6 +1790,7 @@ class Ajax extends Controller {
 
 	//******************************************************************
 	//Saldo de cliente vencido
+	//
 	function ajaxsaldoscliven(){
 		$mid = $this->input->post('clipro');
 
@@ -1779,6 +1809,7 @@ class Ajax extends Controller {
 
 	//******************************************************************
 	//Saldo pendiente de proveedor
+	//
 	function ajaxsanncprov(){
 		$mid = $this->input->post('clipro');
 
@@ -1856,6 +1887,7 @@ class Ajax extends Controller {
 
 	//******************************************************************
 	//Autocomplete para buscar las reservaciones
+	//
 	function buscares(){
 		$mid   = $this->input->post('q');
 		$qdb   = $this->db->escape('%'.$mid.'%');
@@ -1910,6 +1942,7 @@ class Ajax extends Controller {
 
 	//******************************************************************
 	//Autocomplete para mgas
+	//
 	function automgas(){
 		$q   = $this->input->post('q');
 		if($q === false) $q  = $this->input->post('term');
@@ -1941,6 +1974,7 @@ class Ajax extends Controller {
 
 	//******************************************************************
 	//Autocomplete para botr
+	//
 	function autobotr($tipo=null){
 		$q   = $this->input->post('q');
 
@@ -1978,6 +2012,7 @@ class Ajax extends Controller {
 
 	//******************************************************************
 	//Autocomplete para las labores de sinv
+	//
 	function buscaordplabor(){
 		$mid   = $this->input->post('q');
 		$data = '[{ }]';
@@ -2008,6 +2043,7 @@ class Ajax extends Controller {
 
 	//******************************************************************
 	//Autocomplete para las recetas de sinv
+	//
 	function buscaordpitem(){
 		$mid   = $this->input->post('q');
 		$data = '[{ }]';
@@ -2338,7 +2374,7 @@ class Ajax extends Controller {
 
 
 	//******************************************************************
-	//          BUSCA GASTO
+	// BUSCA GASTO
 	//
 	function buscamgas(){
 		$mid  = $this->input->post('q');
@@ -2981,14 +3017,14 @@ class Ajax extends Controller {
 		$mV3MES  = 0;
 		$mV6MES  = 0;
 		$mFRACCI = 0;
-		$salida  = ''; 
-		
+		$salida  = '';
+
 		if ($mCOD == '') $mCOD = $this->input->post('mCOD');
 
 		$mCODIGO = $this->db->escape($mCOD);
 
 		$mSQL  = "
-		SELECT MID(CONCAT(TRIM(a.proveed),' ',b.nombre),1,20) proveed, a.fecha, a.cantidad, a.costo 
+		SELECT MID(CONCAT(TRIM(a.proveed),' ',b.nombre),1,20) proveed, a.fecha, a.cantidad, a.costo
 		FROM itscst a JOIN sprv b ON a.proveed=b.proveed
 		WHERE a.codigo=${mCODIGO} ORDER BY a.fecha DESC LIMIT 4";
 		$query = $this->db->query($mSQL);
@@ -3019,26 +3055,26 @@ class Ajax extends Controller {
 		}
 
 		$mSQL   = "
-		SELECT SUM(cantidad) 
-		FROM costos 
+		SELECT SUM(cantidad)
+		FROM costos
 		WHERE origen='3I' AND codigo=${mCODIGO} AND fecha >= ADDDATE(CURDATE(),-365)";
 		$mV6MES = $this->datasis->dameval($mSQL)/2;
 
 		$mSQL   = "
-		SELECT SUM(cantidad) 
-		FROM costos 
+		SELECT SUM(cantidad)
+		FROM costos
 		WHERE origen='3I' AND codigo=${mCODIGO} AND fecha >= ADDDATE(CURDATE(),-180)";
 		$mV3MES = $this->datasis->dameval($mSQL)/2;
 
 		$mSQL   = "
-		SELECT SUM(cantidad) 
-		FROM costos 
+		SELECT SUM(cantidad)
+		FROM costos
 		WHERE origen='3I' AND codigo=${mCODIGO} AND fecha >=ADDDATE(CURDATE(),-90)";
 		$mVMES  = $this->datasis->dameval($mSQL)/3;
 
 		$mSQL   = "
-		SELECT SUM(cantidad) 
-		FROM costos 
+		SELECT SUM(cantidad)
+		FROM costos
 		WHERE origen='3I' AND codigo=${mCODIGO} AND fecha >= ADDDATE(CURDATE(),-60)";
 		$mVSEMA = $this->datasis->dameval($mSQL)/8;
 
@@ -3098,5 +3134,45 @@ class Ajax extends Controller {
 			$salida .= "</table>\n";
 		}
 		echo $salida;
+	}
+
+
+	//******************************************************************
+	//Busca las facturas a repartir
+	function buscacobrep(){
+		$mid  = intval($this->input->post('id'));
+
+		$data = '[]';
+		if($mid >= 0){
+
+			$dbmid = $this->db->escape($mid);
+			$retArray = $retorno = array();
+
+			$mSQL="SELECT a.id, a.numero, a.tipo_doc AS tipo, a.fecha, c.monto-c.abonos AS monto,b.nombre, a.repcob
+			FROM sfac AS a
+			JOIN scli AS b ON a.cod_cli=b.cliente
+			JOIN smov AS c ON a.numero=c.numero AND a.transac=c.transac
+			WHERE reparto=${mid} AND c.monto-c.abonos>0 AND a.tipo_doc='F'
+			ORDER BY numero";
+
+			$query = $this->db->query($mSQL);
+			if($query->num_rows() > 0){
+				foreach( $query->result_array() as  $row ) {
+					$objdate = date_create($row['fecha']);
+
+					$retArray['id']      = $row['id'];
+					$retArray['numero']  = $row['numero'];
+					$retArray['tipo']    = $row['tipo'];
+					$retArray['fecha']   = $objdate->format('d/m/Y');
+					$retArray['nombre']  = $this->en_utf8($row['nombre']);
+					$retArray['monto']   = $row['monto'];
+					$retArray['repcob']   = trim($row['repcob']);
+
+					array_push($retorno, $retArray);
+				}
+				$data = json_encode($retorno);
+			}
+		}
+		echo $data;
 	}
 }

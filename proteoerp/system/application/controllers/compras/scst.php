@@ -92,7 +92,7 @@ class Scst extends Controller {
 
 		//Panel de pie de forma
 		$adic = array(
-			array('id'=>'fcompra' , 'title'=>'Modificar Compra'),
+			array('id'=>'fcompra' , 'title'=>'Compras'),
 			array('id'=>'factuali', 'title'=>'Actualizar'),		array('id'=>'fvehi'   , 'title'=>'Seriales Vehiculares'),
 			array('id'=>'fborra'  , 'title'=>'Eliminar Registro'),
 			array('id'=>'fcmonto' , 'title'=>'Cambiar los montos que van a CxP'),
