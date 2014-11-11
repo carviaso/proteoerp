@@ -604,7 +604,7 @@ class Sinv extends Controller {
 			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				'.$this->datasis->jwinopen(site_url('formatos/verhtml/SINVEC').'/\'+id').';
+				'.$this->datasis->jwinopen(site_url('formatos/ver/SINVEC').'/\'+id').';
 			} else {
 				$.prompt("<h1>Por favor Seleccione un registro</h1>");
 			}

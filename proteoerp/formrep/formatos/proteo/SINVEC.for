@@ -174,10 +174,6 @@ if ( isset($pdf) ) {
 									<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat($monto) ?></b></td>
 								</tr>
 								<tr>
-									<td style="text-align: right; font-size: 14px;"><b>PROPORCION APLICABLE AL COSTO (12.5%max):</b></td>
-									<td style="text-align: right; font-size: 14px;" class="change_order_total_col"><b><?php echo nformat($ultimo*(100+$porcen)/100 - $ultimo) ?></b></td>
-								</tr>
-								<tr>
 									<td style="text-align: right; font-size: 16px;"><b>COSTO TOTAL DEL PRODUCTO:</b></td>
 									<td style="text-align: right; font-size: 16px;" class="change_order_total_col"><b><?php echo nformat($ultimo*(100+$porcen)/100) ?></b></td>
 								</tr>
