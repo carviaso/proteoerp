@@ -261,15 +261,21 @@ class pfaclite extends validaciones{
 			$mSQL="SELECT SUM(c.peso*a.cana*IF(a.tipoa='F',1,-1)) AS peso FROM sitems AS a JOIN sfac AS b ON a.numa=b.numero AND a.tipoa=b.tipo_doc JOIN sinv AS c ON a.codigoa=c.codigo WHERE b.vd = ${dbvd} AND a.tipoa<>'X' AND b.fecha>=${dbfini}";
 			$ttpeso=nformat(floatval($this->datasis->dameval($mSQL))/1000,3);
 
-			$mSQL="SELECT SUM(totals*IF(tipo_doc='F',1,-1)) AS total FROM sfac WHERE vd = ${dbvd} AND fecha>=${dbfini}";
-			$monto=nformat($this->datasis->dameval($mSQL));
+			$vmonto=$this->datasis->traevalor('PFACLITEMONTO','Muestra o no el monto que ha facturado el vendedor');
+			if($vmonto=='S'){
+				$mSQL="SELECT SUM(totals*IF(tipo_doc='F',1,-1)) AS total FROM sfac WHERE vd = ${dbvd} AND fecha>=${dbfini}";
+				$monto=nformat($this->datasis->dameval($mSQL));
+				$smonto = "Monto: ${monto}";
+			}else{
+				$smonto = '';
+			}
 
 			if($clientes>0){
 				$efe = htmlnformat($atendidos*100/$clientes);
 			}else{
 				$efe = htmlnformat(0);
 			}
-			$frace = "<p style='text-align:center;font-weight: bold;'>Clientes atendidos: <span style='font-size:1.5em; color:#000063'>${atendidos}</span>/${clientes} Efectividad: <span style='font-size:1.5em; color:#000063'>${efe}%</span> Facturas: ${facturas} Peso: ${ttpeso}T Monto: ${monto}</p>";
+			$frace = "<p style='text-align:center;font-weight: bold;'>Clientes atendidos: <span style='font-size:1.5em; color:#000063'>${atendidos}</span>/${clientes} Efectividad: <span style='font-size:1.5em; color:#000063'>${efe}%</span> Facturas: ${facturas} Peso: ${ttpeso}T ${smonto}</p>";
 		}else{
 			$frace='';
 		}
