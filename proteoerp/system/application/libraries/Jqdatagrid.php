@@ -622,12 +622,11 @@ class Jqdatagrid
 	}
 
 
-	/**
+	/*******************************************************************
 	* Grouping
 	* @param text $shrink registres
 	*/
-	public function setGrouping($grupo)
-	{
+	public function setGrouping($grupo){
 		$grupo = strtolower($grupo);
 
 		if ( empty($grupo) ){
@@ -645,7 +644,7 @@ class Jqdatagrid
 		//"groupField : ['name'], groupDataSorted : true ";
 	}
 
-	/**
+	/*******************************************************************
 	* Width table
 	* @param Int $width Ancho de la pagina
 	*/
@@ -654,7 +653,7 @@ class Jqdatagrid
 		$this->width = $width;
 	}
 
-	/**
+	/*******************************************************************
 	*Height table
 	* @param Int $height Height table
 	*/
@@ -663,7 +662,7 @@ class Jqdatagrid
 		$this->height = $height;
 	}
 
-	/**
+	/*******************************************************************
 	* Table title
 	* @param String $title page title
 	* @return void
@@ -673,7 +672,7 @@ class Jqdatagrid
 		$this->title = $title;
 	}
 
-	/**
+	/*******************************************************************
 	* Generathe the HTML code
 	*/
 	public function deploy()
@@ -962,7 +961,7 @@ class Jqdatagrid
 		return $this->return;
 	}
 
-	/**
+	/*******************************************************************
 	* Show or not the pagination bar
 	* @param bool $action true/false, si muestra o no la barra de paginacion
 	* @return $return['pager'] codigo html de paginacion
@@ -972,7 +971,7 @@ class Jqdatagrid
 		$this->showpager = $action;
 	}
 
-	/**
+	/*******************************************************************
 	* Return an Array with table information:
 	* Example:
 	* $this->load->library('datagrid');
@@ -1207,7 +1206,7 @@ class Jqdatagrid
 	}
 
 
-	/**
+	/*******************************************************************
 	* Return an Array with table information:
 	* with a given select
 	*/
@@ -1240,7 +1239,7 @@ class Jqdatagrid
 	}
 
 
-	/***********************************************************************
+	/*******************************************************************
 	* Execute CRUD process
 	* @param String $table table name
 	* @param String $key primary key
@@ -1278,7 +1277,7 @@ class Jqdatagrid
 		}
 	}
 
-	/***********************************************************************
+	/*******************************************************************
 	* Return data like json
 	* @param Array $result
 	* @return object json
@@ -1289,7 +1288,7 @@ class Jqdatagrid
 	}
 
 
-	/***********************************************************************
+	/*******************************************************************
 	*
 	*
 	*/
@@ -1355,8 +1354,8 @@ class Jqdatagrid
 		}
 		return $mWHERE;
 	}
-	/***********************************************************************
-	*
+	
+	/*******************************************************************
 	*
 	*
 	*/
@@ -1381,7 +1380,7 @@ class Jqdatagrid
 	}
 
 
-	/***********************************************************************
+	/*******************************************************************
 	* Convert result to valid json
 	* @param json $json
 	*/
@@ -1397,7 +1396,7 @@ class Jqdatagrid
 	}
 
 
-	/***********************************************************************
+	/*******************************************************************
 	* Genera el codigo java para autocomplete
 	*
 	*/
@@ -1441,7 +1440,7 @@ class Jqdatagrid
 	}
 
 
-	/***********************************************************************
+	/*******************************************************************
 	* Returns the where from a table
 	*/
 	function geneTopWhere($db){
@@ -1481,7 +1480,7 @@ class Jqdatagrid
 		return $mWhere;
 	}
 
-	/***********************************************************************
+	/*******************************************************************
 	* Returns the where from a select
 	*/
 	function geneSelWhere($sel,$types=array()){
@@ -1542,7 +1541,7 @@ class Jqdatagrid
 		return $mWhere;
 	}
 
-	/***********************************************************************
+	/*******************************************************************
 	* Returns the where from a table
 	*/
 	function geneSqlWhere($tabla, $join ){
@@ -1598,7 +1597,7 @@ class Jqdatagrid
 	}
 
 
-	/***********************************************************************
+	/*******************************************************************
 	* Export data to pdf or csv
 	* @param String $type pdf/csv
 	* @return <type>
@@ -1685,16 +1684,6 @@ class Jqdatagrid
 		$frompos   = strpos($sql, 'FROM');
 		$select    = 'SELECT ';
 
-//        if(isset($this->_field['field'])){
-//            $i = 0;
-//            foreach($this->_field['field'] as $field){
-//
-//                $select .= ($i== 0)?$field:',' . $field;
-//                $i++;
-//            }
-//
-//        }
-		//echo $sql. '<hr>';
 		$query     = $sql; //substr($sql, $frompos);
 		$limitpos  = stripos($query, 'LIMIT ');
 		if($limitpos > 0){
@@ -1713,9 +1702,6 @@ class Jqdatagrid
 	}
 
 	function deploywestp(){
-
-//<div class="anexos">
-
 		$wlista = '
 <div id="LeftPane" class="ui-layout-west ui-widget ui-widget-content">
 <table id="west-grid" align="center">
@@ -1733,7 +1719,6 @@ class Jqdatagrid
 </table>
 <div id="wbotones">'."\n";
 
-//</div>
 
 		$wbotones = "<table id='west-grid' align='center'>\n";
 		foreach( $this->Wbotones as $bt  ){
@@ -1758,6 +1743,9 @@ class Jqdatagrid
 	}
 
 
+	//******************************************************************
+	// 
+	//
 	function readyLayout2( $west = 212, $south = 220, $grid0, $grid1 = ''){
 		$readyLayout = '
 		$(\'body\').layout({

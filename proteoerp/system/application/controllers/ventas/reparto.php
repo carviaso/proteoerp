@@ -344,7 +344,6 @@ class Reparto extends Controller {
 			}
 		};';
 
-
 		// Mostrar
 		$bodyscript .= $this->jqdatagrid->bsshow( 'reparto', $ngrid, $this->url );  //Por Defecto
 
@@ -429,8 +428,9 @@ class Reparto extends Controller {
 				}else{
 					$cana=intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM sfac WHERE reparto='.$id));
 					if($cana>0){
+						$rep = $this->datasis->dameval('SELECT GROUP_CONCAT(id) from sfac where reparto='.$id); 
 						$this->db->where('id', $id);
-						$this->db->update('reparto', array( 'tipo' => 'C', 'carga' => $fecha ) );
+						$this->db->update('reparto', array( 'tipo' => 'C', 'carga' => $fecha, 'eliminadas' => $rep ));
 						echo 'Guardada';
 					}else{
 						echo 'No puede cargar un reparto sin facturas asociadas';
@@ -1167,6 +1167,9 @@ class Reparto extends Controller {
 		}
 	}
 
+	//******************************************************************
+	// QUITA FACTURAS NO ENTREGADAS
+	//
 	function quita($id){
 		$dbid     = intval($id);
 		$reparto  = $this->datasis->dameval("SELECT reparto FROM sfac    WHERE id=${dbid}");
@@ -1187,8 +1190,10 @@ class Reparto extends Controller {
 		}
 	}
 
+	//******************************************************************
+	// INCORPORA FACTURAS QUITADAS
+	//
 	function incorporar($idreparto,$idsfac){
-
 		$idsfac   = intval($idsfac);
 		$idreparto= intval($idreparto);
 		$row      = $this->datasis->damerow("SELECT tipo,eliminadas FROM reparto WHERE id=${idreparto}");

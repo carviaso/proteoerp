@@ -69,11 +69,11 @@ class Scli extends validaciones {
 				<tr>
 					<td colspan='2'>
 						<table style='border-collapse:collapse;padding:0px;width:99%;border:1px solid #AFAFAF;'><tr>
-							<td style='vertical-align:top;'>".img(array('src' =>"images/camion.png", 'height' => 30, 'alt'=>'Asignacion de Rutas', 'title' => 'Rutas', 'border'=>'0'))."</td>
+							<td style='vertical-align:top;'><a id='verutas'>".img(array('src' =>"images/camion.png", 'height'=>30, 'alt'=>'Ver de Rutas', 'title'=> 'Ver Rutas', 'border'=>'0'))."</a></td>
 							${cabeza1} id='rutas'>Rutas</a></div></td>
-							<td style='vertical-align:center;'><a id='sumarutas' >".img(array('src' =>"images/agrega4.png", 'height'     => 25, 'alt'=>'Asignacion de Rutas',           'title' => 'Agregar cliente a ruta',        'border'=>'0'))."</a></td>
-							<td style='vertical-align:center;'><a id='restarutas'>".img(array('src' =>"images/elimina4.png", 'height'    => 25, 'alt'=>'Elimina el cliente de la ruta', 'title' => 'Elimina el cliente de la ruta', 'border'=>'0'))."</a></td>
-							<td style='vertical-align:center;'><a id='todorutas' >".img(array('src' =>"images/agregatodo4.png", 'height' => 25, 'alt'=>'Agrega todo lo seleccionado',   'title' => 'Agrega todo lo seleccionado',   'border'=>'0'))."</a></td>
+							<td style='vertical-align:center;'><a id='sumarutas' >".img(array('src' =>"images/agrega4.png",     'height'=> 25, 'alt'=>'Asignacion de Rutas',           'title'=>'Agregar cliente a ruta',        'border'=>'0'))."</a></td>
+							<td style='vertical-align:center;'><a id='restarutas'>".img(array('src' =>"images/elimina4.png",    'height'=> 25, 'alt'=>'Elimina el cliente de la ruta', 'title'=>'Elimina el cliente de la ruta', 'border'=>'0'))."</a></td>
+							<td style='vertical-align:center;'><a id='todorutas' >".img(array('src' =>"images/agregatodo4.png", 'height'=> 25, 'alt'=>'Agrega todo lo seleccionado',   'title'=>'Agrega todo lo seleccionado',   'border'=>'0'))."</a></td>
 						</tr>
 							<td colspan='5'>Ruta: ${srutas} </td>
 						</tr>
@@ -164,7 +164,7 @@ class Scli extends validaciones {
 
 		$bodyscript .= '
 		$("#edocta").click( function(){
-			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
 				'.$this->datasis->jwinopen(site_url('reportes/ver/SMOVECU/SCLI/').'/\'+ret.cliente').';
@@ -240,7 +240,7 @@ class Scli extends validaciones {
 							var json = JSON.parse(data);
 							if (json.status == "A"){
 								$.prompt("Registro eliminado");
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+								$("#newapi'.$grid0.'").trigger("reloadGrid");
 							}else{
 								$.prompt("Registro no se puede eliminado");
 							}
@@ -297,6 +297,22 @@ class Scli extends validaciones {
 			});
 		});';
 
+		// Ver Rutas
+		$bodyscript .= '
+		$("#verutas").click(function(){
+			var ruta = $("#rutactual").val();
+			if ( ruta == "-"){
+				$.prompt("<h1>Por favor Seleccione una Ruta para ver</h1>");
+				return false;
+			}
+			$.post("'.site_url($this->url.'rutasver').'/"+ruta,
+			function(data){
+				$("#fciud").html(data);
+				$("#fciud").dialog({height: 450, width: 460, title: "Clientes en Rutas"});
+				$("#fciud").dialog( "open" );
+			});
+		});';
+
 		// Suma Rutas
 		$bodyscript .= '
 		$("#sumarutas").click(function(){
@@ -309,16 +325,16 @@ class Scli extends validaciones {
 			if(id){
 				$.post("'.site_url($this->url.'rutasuma').'/"+id+"/"+ruta,
 				function(data){
-					$("#fciud").html(data);
-					$("#fciud").dialog({height: 450, width: 610, title: "Rutas"});
-					$("#fciud").dialog( "open" );
+					//$("#fciud").html(data);
+					//$("#fciud").dialog({height: 450, width: 610, title: "Rutas"});
+					//$("#fciud").dialog( "open" );
 				});
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
 		});';
 
-		// Suma Rutas
+		// Suma todos a la Rutas
 		$bodyscript .= '
 		$("#todorutas").click(function(){
 			var id   = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
@@ -335,8 +351,6 @@ class Scli extends validaciones {
 			}
 		});';
 
-
-
 		// Resta Rutas
 		$bodyscript .= '
 		$("#restarutas").click(function(){
@@ -349,9 +363,9 @@ class Scli extends validaciones {
 			if(id){
 				$.post("'.site_url($this->url.'rutaresta').'/"+id+"/"+ruta,
 				function(data){
-					$("#fciud").html(data);
-					$("#fciud").dialog({height: 450, width: 610, title: "Rutas"});
-					$("#fciud").dialog( "open" );
+					//$("#fciud").html(data);
+					//$("#fciud").dialog({height: 450, width: 610, title: "Rutas"});
+					//$("#fciud").dialog( "open" );
 				});
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
@@ -2614,7 +2628,6 @@ function chrif(rif){
 			'stype'         => "'text'",
 		));
 
-
 		$grid->addField('descrip');
 		$grid->label('Descrip');
 		$grid->params(array(
@@ -2716,6 +2729,181 @@ function chrif(rif){
 			}
 		};
 	}
+
+	//******************************************************************
+	// Ver Rutas
+	//
+	function rutasver(){
+		$ruta = $this->uri->segment($this->uri->total_segments());
+		$dbruta = $this->db->escape($ruta);
+
+		$nombre = 'verutatab';
+		$mSQL = 'SELECT a.cliente, a.rifci, a.nombre, a.id eli, a.id FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta;
+		$columnas = $this->datasis->jqdata($mSQL,"verutatabdat");
+		$colModel = "
+		{name:'cliente', index:'cliente', label:'Cliente', width:50 }, 
+		{name:'rifci',   index:'rifci',   label:'RIF/CI',  width:80 }, 
+		{name:'nombre',  index:'nombre',  label:'Nombre',  width:250}, 
+		{name:'eli',     index:'eli',     label:' ',       width: 25, formatter: fsele },
+		{name:'id', index:'id', label:'id', hidden:'true'} ";
+
+		$Salida  = '<script>';
+		$Salida .= '
+	$("#'.$nombre.'").jqGrid({
+		datatype: "local",
+		height: 350,
+		colModel:[{name:\'id\',index:\'id\', hidden:true},'.$colModel.'],
+		multiselect: false,
+		shrinkToFit: false,
+		hiddengrid:  false,
+		width: 440,
+		rowNum:'.$columnas['i'].',
+		loadonce: true,
+		viewrecords: true,
+		editurl: "server.php"
+   	});
+	'.$columnas['data'].'
+	for(var i=0;i<='.$nombre."dat".'.length;i++) $("#'.$nombre.'").jqGrid(\'addRowData\',i+1,'.$nombre.'dat[i]);
+	';
+
+		$Salida .= '
+	function fsele(el, val, opts){
+		var meco=\'<div><a onclick="quitaruta(\\\''.$ruta.'\\\',\'+el+\')">'.img(array('src'=>"images/elimina4.png", 'height'=> 20, 'alt'=>'Elimina el cliente de la ruta', 'title'=>'Elimina el cliente de la ruta', 'border'=>'0')).'</a></div>\';
+		return meco;
+	}
+	function quitaruta(ruta, id){
+		$.post("'.site_url($this->url.'rutaresta').'/"+id+"/"+ruta);
+		//$("#verutatab").jqGrid("delGridRow",id,{reloadAfterSubmit:false});
+	}
+</script>
+<table id="verutatab"></table>
+<div id="pnewapi_21293249"></div>
+';
+		echo $Salida;
+
+/*
+<script>
+	$("#verutatab").jqGrid({
+		datatype: "local",
+		height: 400,
+		colModel:[{name:'id',index:'id', hidden:true},{name:'cliente',index:'cliente', label:'Cliente', width:15 }, {name:'rifci',index:'rifci', label:'RIF/CI', width:25}, {name:'nombre', index:'nombre', label:'Nombre',  width:80}, {name:'id', index:'id', label:'id', hidden:'true'} ],
+		multiselect: false,
+		shrinkToFit: false,
+		hiddengrid:  false,
+		width: 500,
+		rowNum:5,
+		caption: "Clientes de la Ruta",
+	});
+	var verutatab = [
+		{ id:'0', cliente:'A-007', rifci:'V015872078', nombre:'AURA STELLA ACU�A ROSALES', id:'120706' },
+		{ id:'1', cliente:'E0037', rifci:'V18391051', nombre:'AURA ELENA', id:'122407' },
+		{ id:'2', cliente:'O-018', rifci:'V057391100', nombre:'OSCAR ALFREDO AVELLANEDA PEREZ', id:'121477' },
+	];
+	for(var i=0;i<=verutatabdat.length;i++) jQuery("#verutatab").jqGrid('addRowData',i+1,verutatabdat[i]);
+	
+</script>
+<id class="anexos"><table id="verutatabdat"></table>
+<div id="pnewapi_21293249"></div></div>
+
+
+		$grid  = new $this->jqdatagrid;
+
+		$mSQL = "SELECT vendedor, concat( vendedor, ' ',TRIM(nombre)) nombre FROM vend ORDER BY nombre ";
+		$avende  = $this->datasis->llenajqselect($mSQL, true );
+
+		$atipo = '{"A": "Activo", "I": "Inactivo"}';
+
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'      => 'true',
+			'align'       => "'center'",
+			'width'       => 20,
+			'editable'    => 'false',
+			'editoptions' => '{readonly:true,size:10}'
+			)
+		);
+
+		$grid->addField('ruta');
+		$grid->label('Codigo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:5, maxlength: 5 }',
+		));
+
+		$grid->addField('vende');
+		$grid->label('Vendedor');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 60,
+			'edittype'      => "'select'",
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ value: '.$avende.',  style:"width:120px"}',
+			'stype'         => "'text'"
+		));
+
+		$grid->addField('tipo');
+		$grid->label('Tipo');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 40,
+			'edittype'      => "'select'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ value: '.$atipo.',  style:"width:70px"}',
+			'stype'         => "'text'",
+		));
+
+
+		$grid->addField('descrip');
+		$grid->label('Descrip');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 100,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:100, maxlength: 100 }',
+		));
+
+		$grid->showpager(true);
+		$grid->setViewRecords(false);
+		$grid->setWidth('590');
+		$grid->setHeight('280');
+
+		$grid->setUrlget(site_url($this->url.'getruta/'));
+		$grid->setUrlput(site_url($this->url.'setruta/'));
+
+		$mgrid = $grid->deploy();
+
+		$msalida  = '<script type="text/javascript">'."\n";
+		$msalida .= '
+		$("#newapi'.$mgrid['gridname'].'").jqGrid({
+			ajaxGridOptions : {type:"POST"}
+			,jsonReader : { root:"data", repeatitems: false }
+			'.$mgrid['table'].'
+			,scroll: true
+			,pgtext: null, pgbuttons: false, rowList:[]
+		})
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
+		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
+		';
+
+		$msalida .= "\n</script>\n";
+		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
+		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
+
+		echo $msalida;
+*/
+	}
+
+
 
 	//******************************************************************
 	// Crea un cliente desde Pers AJAX
@@ -3485,3 +3673,143 @@ function chrif(rif){
 
 	}
 }
+
+/*
+ABA Alimentos para peces</option><option value="188" id="Con mensaje">
+ABA Animales Domésticos</option><option value="185" id="Con mensaje">
+ABA Aves</option><option value="186" id="Con mensaje">
+ABA Bovinos</option><option value="187" id="Con mensaje">
+ABA Cerdos</option><option value="65" id="Con mensaje">
+ABA Materia Prima (Alimentos Balanceados para Animales)</option><option value="488" id="Con mensaje">
+Aceite 18Lts Industrial											  </option>									  <option value="244" id="Con mensaje">
+Aceite Crudo de Soya											  </option>									  <option value="257" id="Con mensaje">
+Aceite  No Regulado 											  </option>									  <option value="256" id="Con mensaje">
+Aceite Regulado											  </option>									  <option value="281" id="Con mensaje">
+Aceite Uso Industrial											  </option>									  <option value="347" id="Con mensaje">
+Afrechillo Consumo Humano											  </option>									  <option value="346" id="Con mensaje">
+Afrecho y Afrechillo Consumo Animal 											  </option>									  <option value="108" id="Con mensaje">
+Afrecho y afrechillo para consumo humano											  </option>									  <option value="200" id="Con mensaje">
+Arroz Blanco Presentación No Regulada											  </option> 								  <option value="201" id="Con mensaje">
+Arroz Blanco Presentación Regulada											  </option>									  <option value="120" id="Con mensaje">
+Arroz de Segunda											  </option>									  <option value="264" id="Con mensaje">
+Arroz de Tercera											  </option>									  <option value="123" id="Con mensaje">
+Arvejas											  </option>									  <option value="235" id="Con mensaje">
+Atún Congelado											  </option>									  <option value="314" id="Con mensaje">
+Atún Enlatado Presentación Regulada											  </option>									  <option value="318" id="Con mensaje">
+Atún Entero 											  </option>									  <option value="51" id="Con mensaje">
+Avena											  </option>									  <option value="303" id="Con mensaje">
+Avena Despuntada										</option>									  <option value="437" id="Con mensaje">
+Avena en Granos											</option>									  <option value="374" id="Con mensaje">
+Avena Liquida											</option>									  <option value="325" id="Con mensaje">
+Azúcar Domestica										</option>									  <option value="350" id="Con mensaje">
+Azúcares y Derivados									</option>									  <option value="326" id="Con mensaje">
+Azúcar Industrial										</option>									  <option value="399" id="Con mensaje">
+Bacalao Seco											</option>									  <option value="260" id="Con mensaje">
+Cacao en granos											</option>									  <option value="261" id="Con mensaje">
+Cacao en polvo										</option>									  <option value="19" id="Con mensaje">
+Cafe Molido											  </option>									  <option value="358" id="Con mensaje">
+Café Molido Presentación No Regulada						</option>									  <option value="357" id="Con mensaje">
+Café Molido Presentación Regulada							</option>									  <option value="299" id="Con mensaje">
+Cafe Tostado en Grano										</option>									  <option value="46" id="Con mensaje">
+Caraota Negra											  </option>									  <option value="49" id="Con mensaje">
+Caraota Roja											  </option>									  <option value="48" id="Con mensaje">
+Caraota Rosada											  </option>									  <option value="47" id="Con mensaje">
+Caraotas Blanca											  </option>									  <option value="231" id="Con mensaje">
+Carne de Aves -pavo pato codorniz avestruz entre otras-		</option>									  <option value="220" id="Con mensaje">
+Carne de Bovino Despostado									</option>									  <option value="218" id="Con mensaje">
+Carne de Bovino en Canal									</option>									  <option value="84" id="Con mensaje">
+Carne de Porcino despostada									</option>									  <option value="82" id="Con mensaje">
+Carne de Porcino en Canal									</option>									  <option value="56" id="Con mensaje">
+Cebada											  </option>									  <option value="195" id="Con mensaje">
+Cebolla											  </option>									  <option value="296" id="Con mensaje">
+Ciruelas											</option><option value="401" id="Con mensaje">
+Dorado Entero 										</option><option value="250" id="Con mensaje">
+Duraznos											</option><option value="109" id="Con mensaje">
+Embutidos											</option><option value="407" id="Con mensaje">
+Filet de Mero										</option><option value="404" id="Con mensaje">
+Filetes de Dorado									</option>									  <option value="403" id="Con mensaje">
+Filetes de Merluza									</option>									  <option value="402" id="Con mensaje">
+Filetes de Salmon									</option>									  <option value="45" id="Con mensaje">
+Frijol											  </option>									  <option value="146" id="Con mensaje">
+Garbanzos											</option>									  <option value="297" id="Con mensaje">
+Girasol -  Acondicionado (TM)						</option>									  <option value="240" id="Con mensaje">
+Grasa Amarilla										</option>									  <option value="282" id="Con mensaje">
+Grasa Uso Industrial								</option>									  <option value="352" id="Con mensaje">
+Harina de Arroz										</option>									  <option value="204" id="Con mensaje">
+Harina de Maiz Precocida No Regulada				</option>									  <option value="203" id="Con mensaje">
+Harina de Maiz Precocida Regulada					</option>									  <option value="217" id="Con mensaje">
+Harina de Soya -Torta de Soya-						</option>									  <option value="221" id="Con mensaje">
+Harina de Trigo Familiar							</option>									  <option value="290" id="Con mensaje">
+Harina de Trigo Galletera							</option>									  <option value="20" id="Con mensaje">
+Harina de Trigo para Panaderia y Pastelería			</option>									  <option value="22" id="Con mensaje">
+Huevos de Consumo									</option>									  <option value="43" id="Con mensaje">
+Jurel (Enlatado)									</option>									  <option value="354" id="Con mensaje">
+Jurel Fresco										</option>									  <option value="268" id="Con mensaje">
+Kiwi												</option>									  <option value="178" id="Con mensaje">
+Leche Cruda											</option>									  <option value="476" id="Con mensaje">
+Leche en Polvo Completa - Uso Industrial MP			</option>									  <option value="233" id="Con mensaje">
+Leche en Polvo Descremada - Uso Domestico			</option>									  <option value="478" id="Con mensaje">
+Leche en Polvo Descremada - Uso Industrial MP		</option>									  <option value="360" id="Con mensaje">
+Leche Liquida Pasteurizada No Regulada				</option>									  <option value="359" id="Con mensaje">
+Leche Liquida Pasteurizada Regulada					</option>									  <option value="238" id="Con mensaje">
+Leche Liquida UHT									</option>									  <option value="38" id="Con mensaje">
+Lentejas										  </option>									  <option value="262" id="Con mensaje">
+Licor de Cacao									  </option>									  <option value="453" id="Con mensaje">
+Lomo de Atún									  </option>									  <option value="40" id="Con mensaje">
+Maiz Amarillo - Acondicionado					  </option>									  <option value="436" id="Con mensaje">
+Maiz Amarillo - Consumo Humano					  </option>									  <option value="42" id="Con mensaje">
+Maiz Blanco  - Acondicionado					  </option>									  <option value="198" id="Con mensaje">
+Maiz G X M  Blanco ABA Acondicionado			  </option>									  <option value="263" id="Con mensaje">
+Manteca de Cacao								  </option>									  <option value="32" id="Con mensaje">
+Manteca Vegetal									  </option>									  <option value="308" id="Con mensaje">
+Margarina -Consumo Doméstico-					  </option>									  <option value="309" id="Con mensaje">
+Margarina -Consumo Industrial-					  </option>									  <option value="311" id="Con mensaje">
+Mayonesa										  </option>									  <option value="310" id="Con mensaje">
+Mayonesa Presentación Regulada					  </option>									  <option value="75" id="Con mensaje">
+Melaza											  </option>									  <option value="400" id="Con mensaje">
+Merluza Entera 									  </option>									  <option value="365" id="Con mensaje">
+Oleina de Palma									  </option>									  <option value="193" id="Con mensaje">
+Papa											  </option>									  <option value="118" id="Con mensaje">
+Pasta de Especialidades									  </option>									  <option value="249" id="Con mensaje">
+Pasta de Tomate - Materia Prima							  </option>									  <option value="305" id="Con mensaje">
+Pasta de Tomate-Prod Terminado							  </option>									  <option value="313" id="Con mensaje">
+Pastas Alimenticias  No Reguladas						  </option>									  <option value="312" id="Con mensaje">
+Pastas Alimenticias Reguladas							  </option>									  <option value="362" id="Con mensaje">
+Pastas Uso Industrial									  </option>									  <option value="196" id="Con mensaje">
+Pernil - Cerdo											  </option>									  <option value="266" id="Con mensaje">
+Pescado congelado										  </option>									  <option value="341" id="Con mensaje">
+Pescado Salado											  </option>									  <option value="342" id="Con mensaje">
+Pescado Varios											  </option>									  <option value="29" id="Con mensaje">
+Pollo Beneficiado Entero									</option>									  <option value="441" id="Con mensaje">
+Pollo Despresado											</option>									  <option value="321" id="Con mensaje">
+Quesos Presentación No Regulada								</option><option value="320" id="Con mensaje">
+Quesos Presentación Regulada						</option><option value="348" id="Con mensaje">
+Quinchoncho											</option><option value="458" id="Con mensaje">
+Quinchoncho											</option><option value="553" id="Con mensaje">
+Sal Cruda											</option><option value="398" id="Con mensaje">
+Salmon Ahumado											</option><option value="397" id="Con mensaje">
+Salmon Entero 											</option><option value="30" id="Con mensaje">
+Sal Refinada											</option><option value="307" id="Con mensaje">
+Salsa de Tomate -Ketchup-								</option><option value="306" id="Con mensaje">
+Salsa de Tomate Presentación Regulada					</option><option value="317" id="Con mensaje">
+Sardina Enlatada Presentación No Regulada				</option><option value="316" id="Con mensaje">
+Sardina Enlatada Presentación Regulada					</option><option value="334" id="Con mensaje">
+Sardina Fresca											</option><option value="70" id="Con mensaje">
+Semilla de Arroz Humedo									</option><option value="286" id="Con mensaje">
+Semilla de Girasol - Acondicionado						</option><option value="223" id="Con mensaje">
+Semilla de Maíz Amarillo Acondicionado					</option><option value="224" id="Con mensaje">
+Semilla de Maíz Blanco Acondicionado					</option><option value="72" id="Con mensaje">
+Semola de Trigo											</option><option value="50" id="Con mensaje">
+Sorgo Acondicionado (TM)								</option><option value="60" id="Con mensaje">
+Soya Acondicionada (Frijol de Soya)(TM)					</option><option value="197" id="Con mensaje">
+Tomate Fresco											</option><option value="41" id="Con mensaje">Trigo Durum		</option><option value="174" id="Con mensaje">
+Trigo para Galletas										</option>										   		 
+
+
+2 	 Atún Enlatado Presentación No Regulada 	0,004
+3 	 Formula Preinfantil 	1,957
+4 	 Fórmulas Lácteas 	0,317
+5 	 Leche Condensada 	0,000
+6 	 Leche en Polvo Completa - Uso Domestico 
+
+*/

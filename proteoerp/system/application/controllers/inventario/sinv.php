@@ -599,6 +599,17 @@ class Sinv extends Controller {
 		};
 		';
 
+		$funciones .= '
+		function estrucost(){
+			var id = jQuery("#newapi'. $grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				'.$this->datasis->jwinopen(site_url('formatos/verhtml/SINVEC').'/\'+id').';
+			} else {
+				$.prompt("<h1>Por favor Seleccione un registro</h1>");
+			}
+		};';
+
 		return $funciones;
 
 	}
@@ -6331,3 +6342,7 @@ class Sinv extends Controller {
 
 	}
 }
+
+
+
+

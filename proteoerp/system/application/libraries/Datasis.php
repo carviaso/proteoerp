@@ -1351,13 +1351,10 @@ class Datasis {
 	//
 	function jqtablawest($nombre, $caption, $colModel,  $mSQL, $alto=200, $ancho=190) {
 
-		//colNames:[\'\',\'Reporte\',\'Nombre\'],
-
 		$columnas = $this->jqdata($mSQL,$nombre."dat");
-
 		//'.$columnas['colNames'].'
 		$Salida = '
-	jQuery("#'.$nombre.'").jqGrid({
+	$("#'.$nombre.'").jqGrid({
 		datatype: "local",
 		height: \''.$alto.'\',
 		colModel:[{name:\'id\',index:\'id\', hidden:true},'.$colModel.'],
@@ -1374,65 +1371,6 @@ class Datasis {
 		return $Salida;
 	}
 
-/*
-	function extjsfiltro($filtros, $tabla = ''){
-		if ( !empty($tabla)) $tabla = trim($tabla).".";
-		$where = "";
-		//Buscar posicion 0 Cero
-		$filter = json_decode($filtros, true);
-		if (is_array($filter)) {
-			$where = "";
-			//Dummy Where.
-			$qs = "";
-			for ($i=0;$i<count($filter);$i++){
-				switch($filter[$i]['type']){
-				case 'string' : $qs .= " AND  $tabla".$filter[$i]['field']." LIKE '%".$filter[$i]['value']."%'";
-					Break;
-				case 'list' :
-					if (strstr($filter[$i]['value'],',')){
-						$fi = explode(',',$filter[$i]['value']);
-						for ($q=0;$q<count($fi);$q++){
-							$fi[$q] = "'".$fi[$q]."'";
-						}
-						$filter[$i]['value'] = implode(',',$fi);
-							$qs .= " AND  $tabla".$filter[$i]['field']." IN (".$filter[$i]['value'].")";
-					}else{
-						$qs .= " AND $tabla".$filter[$i]['field']." = '".$filter[$i]['value']."'";
-					}
-					Break;
-				case 'boolean' : $qs .= " AND $tabla".$filter[$i]['field']." = ".($filter[$i]['value']);
-					Break;
-				case 'numeric' :
-					switch ($filter[$i]['comparison']) {
-						case 'ne' : $qs .= " AND $tabla".$filter[$i]['field']." != ".$filter[$i]['value'];
-							Break;
-						case 'eq' : $qs .= " AND $tabla".$filter[$i]['field']." = ".$filter[$i]['value'];
-							Break;
-						case 'lt' : $qs .= " AND $tabla".$filter[$i]['field']." < ".$filter[$i]['value'];
-							Break;
-						case 'gt' : $qs .= " AND $tabla".$filter[$i]['field']." > ".$filter[$i]['value'];
-							Break;
-					}
-					Break;
-				case 'date' :
-					switch ($filter[$i]['comparison']) {
-						case 'ne' : $qs .= " AND $tabla".$filter[$i]['field']." != '".date('Y-m-d',strtotime($filter[$i]['value']))."'";
-							Break;
-						case 'eq' : $qs .= " AND $tabla".$filter[$i]['field']." = '".date('Y-m-d',strtotime($filter[$i]['value']))."'";
-							Break;
-						case 'lt' : $qs .= " AND $tabla".$filter[$i]['field']." < '".date('Y-m-d',strtotime($filter[$i]['value']))."'";
-							Break;
-						case 'gt' : $qs .= " AND $tabla".$filter[$i]['field']." > '".date('Y-m-d',strtotime($filter[$i]['value']))."'";
-							Break;
-					}
-					Break;
-				}
-			}
-			$where .= $qs;
-		}
-		return LTRIM(substr($where,4,1000));
-	}
-*/
 	function codificautf8($query){
 		$CI =& get_instance();
 		if ( $CI->db->char_set == 'utf8' ) {

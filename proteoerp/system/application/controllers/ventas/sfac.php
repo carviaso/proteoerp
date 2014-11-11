@@ -1320,7 +1320,7 @@ class Sfac extends Controller {
 		//$grid->setEdit(  true);
 		$grid->setEdit(  $this->datasis->sidapuede('SFAC','MODIFICA%'));
 		$grid->setAdd(   $this->datasis->sidapuede('SFAC','INCLUIR%' ));
-		$grid->setDelete($this->datasis->sidapuede('SFAC','3'));
+		$grid->setDelete($this->datasis->sidapuede('SFAC','BORR_REG%'));
 		$grid->setSearch($this->datasis->sidapuede('SFAC','BUSQUEDA%'));
 
 		$grid->setRowNum(30);
