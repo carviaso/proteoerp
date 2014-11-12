@@ -2583,11 +2583,11 @@ class Sprm extends Controller {
 				$dbittipo   = $this->db->escape($ittipo);
 				$dbitnumero = $this->db->escape($itnumero);
 
-				$citfecha  = intval(str_replace('-','',$itfecha));
+				/*$citfecha  = intval(str_replace('-','',$itfecha));
 				if($citfecha>$cfecha){
 					$do->error_message_ar['pre_ins']='No puede pagar un efecto con una fecha anterior a su emision como el caso de '.$ittipo.$itnumero;
 					return false;
-				}
+				}*/
 
 				$rrow=$this->datasis->damerow("SELECT impuesto,monto,montasa,monredu,monadic,tasa,reducida,sobretasa,exento FROM sprm WHERE cod_prv=${dbcod_prv} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}");
 				if(empty($rrow)){
