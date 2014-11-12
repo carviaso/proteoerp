@@ -2634,13 +2634,13 @@ class Sprm extends Controller {
 		$this->ppimpuesto=$ppimpuesto;
 
 		if($tipo_doc=='NC'){
-			$montasa   = $do->get('montasa'  );
-			$monredu   = $do->get('monredu'  );
-			$monadic   = $do->get('monadic'  );
-			$tasa      = $do->get('tasa'     );
-			$reducida  = $do->get('reducida' );
-			$sobretasa = $do->get('sobretasa');
-			$exento    = $do->get('exento'   );
+			$montasa   = floatval($do->get('montasa'  ));
+			$monredu   = floatval($do->get('monredu'  ));
+			$monadic   = floatval($do->get('monadic'  ));
+			$tasa      = floatval($do->get('tasa'     ));
+			$reducida  = floatval($do->get('reducida' ));
+			$sobretasa = floatval($do->get('sobretasa'));
+			$exento    = floatval($do->get('exento'   ));
 
 			//Limpia la forma de pago ya que no se necesita para una NC
 			$do->set('banco'  ,'');
@@ -2656,22 +2656,22 @@ class Sprm extends Controller {
 				return false;
 			}
 
-			if($montasa<=0 && $ivadata['montasa']>0){
+			if($montasa>0 && $ivadata['montasa']<=0){
 				$do->error_message_ar['pre_ins']='No puede realizar una NC con impuesto general si los documentos afectados no tienen este impuesto.';
 				return false;
 			}
 
-			if($monredu<=0 && $ivadata['monredu']>0){
+			if($monredu>0 && $ivadata['monredu']<=0){
 				$do->error_message_ar['pre_ins']='No puede realizar una NC con impuesto reducido si los documentos afectados no tienen este impuesto.';
 				return false;
 			}
 
-			if($sobretasa<=0 && $ivadata['sobretasa']>0){
+			if($sobretasa>0 && $ivadata['sobretasa']<=0){
 				$do->error_message_ar['pre_ins']='No puede realizar una NC con impuesto adicional si los documentos afectados no tienen este impuesto.';
 				return false;
 			}
 
-			if($exento<=0 && $ivadata['exento']>0){
+			if($exento>0 && $ivadata['exento']<=0){
 				$do->error_message_ar['pre_ins']='No puede realizar una NC con monto exento si los documentos afectados no tienen este monto.';
 				return false;
 			}
