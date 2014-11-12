@@ -49,7 +49,7 @@ class Sprm extends Controller {
 
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'imprime'   ,'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir',      'label'=>'Reimprimir Documento', 'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'imprime'   ,'img'=>'assets/default/images/print.png', 'alt' => 'Reimprimir Documento',      'label'=>'Imprimir', 'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'princheque','img'=>'images/check.png'  , 'alt' => 'Emitir Cheque'   , 'label'=>'Imprimir cheque',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'pago'      ,'img'=>'images/dinero.png' , 'alt' => 'Pago a proveedor', 'label'=>'Pago a proveedor'));
 		//$grid->wbotonadd(array('id'=>'bncpro'    ,'img'=>'images/dinero.png' , 'alt' => 'NC a FC pagada'  , 'label'=>'NC a FC pagada'));
@@ -2675,6 +2675,7 @@ class Sprm extends Controller {
 				$do->error_message_ar['pre_ins']='No puede realizar una NC con monto exento si los documentos afectados no tienen este monto.';
 				return false;
 			}
+			$impuesto=$sobretasa+$reducida+$tasa;
 		}else{
 			$reteiva=0;
 		}
