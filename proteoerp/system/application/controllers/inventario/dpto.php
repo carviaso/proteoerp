@@ -516,6 +516,7 @@ class Dpto extends Controller {
 		$edit->tipo->style='width:140px;';
 		$edit->tipo->option('I','Inventario');
 		$edit->tipo->option('G','Gasto');
+		$edit->tipo->option('A','Ambos');
 
 		$edit->cu_inve =new inputField('Cuenta Inventario', 'cu_inve');
 		$edit->cu_inve->size = 18;

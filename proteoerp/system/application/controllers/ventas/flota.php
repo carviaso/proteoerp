@@ -331,7 +331,34 @@ class Flota extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
+		
+		$grid->addField('volumen');
+		$grid->label('Vol&uacute;men');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
 
+		$grid->addField('paradas');
+		$grid->label('Paradas');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+		));
 
 		$grid->addField('serialc');
 		$grid->label('Serial Carroc.');
@@ -518,16 +545,13 @@ class Flota extends Controller {
 		});
 		';
 
-		$edit = new DataEdit($this->tits, 'flota');
+		$edit = new DataEdit('', 'flota');
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
 		$edit->on_save_redirect=false;
 
-		$edit->back_url = site_url($this->url.'filteredgrid');
-
 		$edit->script($script,'create');
-
 		$edit->script($script,'modify');
 
 		$edit->post_process('insert','_post_insert');
@@ -556,7 +580,6 @@ class Flota extends Controller {
 
 		$edit->tipo = new checkboxField('Unidad Propia','tipo','P','F');
 
-
 		$edit->placa = new inputField('Placa','placa');
 		$edit->placa->rule='';
 		$edit->placa->size =12;
@@ -578,11 +601,29 @@ class Flota extends Controller {
 		$edit->ano->size =13;
 		$edit->ano->maxlength =11;
 
-		$edit->capacidad = new inputField('Capacidad','capacidad');
+		$edit->capacidad = new inputField('M&aacute;xima carga','capacidad');
 		$edit->capacidad->rule='numeric';
 		$edit->capacidad->css_class='inputnum';
 		$edit->capacidad->size =12;
 		$edit->capacidad->maxlength =10;
+		$edit->capacidad->append('Kg.');
+		$edit->capacidad->group='Capacidades';
+
+		$edit->volumen = new inputField('M&aacute;ximo vol&uacute;men','volumen');
+		$edit->volumen->rule='numeric';
+		$edit->volumen->css_class='inputnum';
+		$edit->volumen->size =12;
+		$edit->volumen->maxlength =10;
+		$edit->volumen->append('cm<sup>3</sup>.');
+		$edit->volumen->group='Capacidades';
+
+		$edit->paradas = new inputField('M&aacute;ximo de paradas','paradas');
+		$edit->paradas->rule='numeric';
+		$edit->paradas->css_class='inputnum';
+		$edit->paradas->size =12;
+		$edit->paradas->maxlength =10;
+		$edit->paradas->append('N&uacute;mero m&aacute;ximo de paradas que puede realizar por cada reparto.');
+		$edit->paradas->group='Capacidades';
 
 		$edit->serialc = new inputField('Serial de Carroceria','serialc');
 		$edit->serialc->rule='';
@@ -599,15 +640,17 @@ class Flota extends Controller {
 		$edit->color->size =52;
 		$edit->color->maxlength =50;
 
-		$edit->propietario = new inputField('Propietario','propietario');
+		$edit->propietario = new inputField('Nombre','propietario');
 		$edit->propietario->rule='';
 		$edit->propietario->size =52;
 		$edit->propietario->maxlength =50;
+		$edit->propietario->group='Propietario';
 
 		$edit->cedula = new inputField('C&eacute;dula','cedula');
 		$edit->cedula->rule='';
 		$edit->cedula->size =17;
 		$edit->cedula->maxlength =15;
+		$edit->cedula->group='Propietario';
 
 		$edit->build();
 
@@ -656,26 +699,39 @@ class Flota extends Controller {
 	function instalar(){
 		if (!$this->db->table_exists('flota')) {
 			$mSQL="CREATE TABLE `flota` (
-			  `codigo` varchar(10) NOT NULL DEFAULT '' COMMENT 'Cod de Autobus',
-			  `descrip` varchar(30) NOT NULL DEFAULT '' COMMENT 'Accionista -> tbaccio',
-			  `tipo` varchar(10) NOT NULL DEFAULT '' COMMENT 'Tipo de unidad ->tbmodbus',
-			  `placa` varchar(10) NOT NULL DEFAULT '' COMMENT 'Nro Matricula',
-			  `marca` varchar(20) NOT NULL DEFAULT '' COMMENT 'Marca',
-			  `modelo` varchar(40) NOT NULL DEFAULT '' COMMENT 'Modelo',
-			  `ano` int(11) NOT NULL DEFAULT '2001' COMMENT 'Anno',
-			  `capacidad` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Nro de Asientos',
-			  `serialc` varchar(50) NOT NULL DEFAULT '' COMMENT 'Serial Carroceria',
-			  `serialm` varchar(50) NOT NULL DEFAULT '' COMMENT 'Serial Motor',
-			  `color` varchar(50) NOT NULL DEFAULT '' COMMENT 'Serial Motor',
-			  `propietario` varchar(50) NOT NULL DEFAULT '' COMMENT 'Propietario',
-			  `cedula` varchar(15) NOT NULL DEFAULT '' COMMENT 'C.I.',
-			  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Serial Motor',
-			  PRIMARY KEY (`id`),
-			  UNIQUE KEY `codigo` (`codigo`)
-			) ENGINE=MyISAM AUTO_INCREMENT=189 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC COMMENT='Flota '";
+				`codigo` VARCHAR(10) NOT NULL DEFAULT '' COMMENT 'Cod de Autobus',
+				`descrip` VARCHAR(30) NOT NULL DEFAULT '' COMMENT 'Accionista -> tbaccio',
+				`tipo` VARCHAR(10) NOT NULL DEFAULT '' COMMENT 'Tipo de unidad ->tbmodbus',
+				`placa` VARCHAR(10) NOT NULL DEFAULT '' COMMENT 'Nro Matricula',
+				`marca` VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'Marca',
+				`modelo` VARCHAR(40) NOT NULL DEFAULT '' COMMENT 'Modelo',
+				`ano` INT(11) NOT NULL DEFAULT '2001' COMMENT 'Anno',
+				`capacidad` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Capacidad de carga',
+				`volumen` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Capacidad volumetrica',
+				`paradas` INT(11) NOT NULL DEFAULT '0' COMMENT 'Cantidad de paradas por reparto',
+				`serialc` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Serial Carroceria',
+				`serialm` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Serial Motor',
+				`color` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Serial Motor',
+				`propietario` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Propietario',
+				`cedula` VARCHAR(15) NOT NULL DEFAULT '' COMMENT 'C.I.',
+				`id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'Serial Motor',
+				PRIMARY KEY (`id`),
+				UNIQUE INDEX `codigo` (`codigo`)
+			)
+			COMMENT='Flota '
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM
+			ROW_FORMAT=DYNAMIC
+			AUTO_INCREMENT=1";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('flota');
-		//if(!in_array('<#campo#>',$campos)){ }
+
+		$campos=$this->db->list_fields('flota');
+		if(!in_array('volumen',$campos)){
+			$mSQL="ALTER TABLE `flota`
+			ADD COLUMN `volumen` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Capacidad volumetrica' AFTER `capacidad`,
+			ADD COLUMN `paradas` INT NOT NULL DEFAULT '0.00' COMMENT 'Cantidad de paradas por reparto' AFTER `volumen`";
+			$this->db->simple_query($mSQL);
+		}
 	}
 }

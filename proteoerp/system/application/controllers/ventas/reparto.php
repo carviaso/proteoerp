@@ -573,6 +573,16 @@ class Reparto extends Controller {
 		$cana = floatval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfac WHERE peso IS NOT NULL AND reparto=${id}"));
 		if(!$cana) $cana = 0;
 
+		$paradas = floatval($this->datasis->dameval("SELECT COUNT(DISTINCT cod_cli) AS cana FROM sfac WHERE reparto=${id}"));
+		if(!$paradas) $paradas = 0;
+
+		$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana 
+		FROM sfac   AS a 
+		JOIN sitems AS b ON a.id=b.id_sfac 
+		JOIN sinv   AS c ON b.codigoa=c.codigo 
+		WHERE a.reparto=${id} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
+		if(!$volumen) $volumen = 0;
+
 		$msalida .= '</script>';
 		$capacidad= floatval($reg['capacidad']);
 
@@ -591,8 +601,8 @@ class Reparto extends Controller {
 			</tr><tr>
 				<td bgcolor='#DFDFDF'>CAPACIDAD Kg.</td>
 			</tr><tr>
-				<td align='center' style='font-size:14pt;font-weight:bold;'>".nformat($reg['capacidad'])."
-				<p id='sobrepeso' title='Sobrepeso' style='text-align:center;font-size:0.7em;color:${sobrecolo}'>".nformat($sobrepeso)."</p>
+				<td align='center' style='font-size:14pt;font-weight:bold;'>".str_replace(',00','',nformat($reg['capacidad']))."
+				<p id='sobrepeso' title='Sobrepeso' style='text-align:center;font-size:0.7em;color:${sobrecolo};margin:0px'>".str_replace(',00','',nformat($sobrepeso))."</p>
 				</td>
 			</tr>
 		</table>
@@ -600,7 +610,7 @@ class Reparto extends Controller {
 			<tr>
 				<td bgcolor='#DFDFDF'>TOTAL SELECCI&Oacute;N</td>
 			</tr><tr>
-				<td align='center' style='font-size:14pt;font-weight:bold;'><span id='totpeso'>".nformat($peso)."</span></td>
+				<td align='center' style='font-size:14pt;font-weight:bold;'><span id='totpeso'>".str_replace(',00','',nformat($peso))."</span></td>
 			</tr>
 		</table>
 		<br><br>
