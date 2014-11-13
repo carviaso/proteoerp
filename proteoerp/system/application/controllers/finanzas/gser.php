@@ -3152,7 +3152,7 @@ class gser extends Controller {
 
 		$edit->departa =  new dropdownField('Departamento <#o#>', 'departa_<#i#>');
 		$edit->departa->option('','Seleccionar');
-		$edit->departa->options("SELECT TRIM(depto) AS codigo, CONCAT_WS('-',depto,TRIM(descrip)) AS label FROM dpto WHERE tipo='G' ORDER BY depto");
+		$edit->departa->options("SELECT TRIM(depto) AS codigo, CONCAT_WS('-',depto,TRIM(descrip)) AS label FROM dpto WHERE tipo IN ('G','A') ORDER BY depto");
 		$edit->departa->db_name='departa';
 		$edit->departa->rule='required';
 		$edit->departa->style = 'width:100px';
