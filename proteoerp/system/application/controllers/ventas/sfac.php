@@ -3803,7 +3803,7 @@ class Sfac extends Controller {
 		}
 
 		//Marca si la factura viene de otro lado
-		$this->snte = $_POST['snte'];
+		$this->snte = (isset($_POST['snte']))? $_POST['snte'] : '';
 		$do->rm_get('snte');
 		if(empty($this->snte) && substr($numero,0,1)=='_'){
 			$dbfactura=$this->db->escape($numero);
@@ -3818,7 +3818,7 @@ class Sfac extends Controller {
 			}
 		}
 
-		$this->pfac = $_POST['pfac'];
+		$this->pfac = (isset($_POST['pfac']))? $_POST['pfac'] : '';
 		$do->rm_get('pfac');
 		if(empty($this->pfac) && substr($numero,0,1)=='_'){
 			$dbfactura=$this->db->escape($numero);

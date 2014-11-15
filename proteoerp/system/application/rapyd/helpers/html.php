@@ -22,33 +22,31 @@ define('TAG_BUTTON',             '<input type="%s" name="%s" value="%s" onclick=
 }
 
 class HTML{
-  
-  function cssTag($path){
+
+  static function cssTag($path){
     return sprintf(TAG_CSS, $path)."\n";
   }
-  
-  function cssLinkTag($path){
+
+  static function cssLinkTag($path){
     return sprintf(TAG_CSS_LINK, $path)."\n";
   }
 
-  function charsetTag($charset){
+  static function charsetTag($charset){
     return sprintf(TAG_CHARSET, $charset)."\n";
   }
 
-  function javascriptTag($script){
+  static function javascriptTag($script){
     return sprintf(TAG_JAVASCRIPT, $script)."\n";
   }
 
-  function javascriptLinkTag($path){
+  static function javascriptLinkTag($path){
     return sprintf(TAG_JAVASCRIPT_LINK, $path)."\n";
   }
-  
-    
-  function button($name, $value, $onclick="", $type="button", $class="button"){
+
+  static function button($name, $value, $onclick="", $type="button", $class="button"){
     return sprintf(TAG_BUTTON, $type, $name, $value, $onclick, $class)."\n";
   }
-  
-  
+
 }
 
 ?>

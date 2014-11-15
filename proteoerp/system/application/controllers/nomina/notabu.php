@@ -42,6 +42,8 @@ class Notabu extends validaciones {
 		$grid->wbotonadd(array('id'=>'addvar', 'img'=>'images/circuloverde.png'   ,'alt' => 'Agregar variable', 'label'=>'Agregar variable'));
 		$grid->wbotonadd(array('id'=>'delvar', 'img'=>'images/circulorojo.png'    ,'alt' => 'Quitar variable' , 'label'=>'Quitar variable'));
 		$grid->wbotonadd(array('id'=>'modvar', 'img'=>'images/circuloamarillo.png','alt' => 'Modificar variable' , 'label'=>'Modificar variable'));
+		$grid->wbotonadd(array('id'=>'remvar', 'img'=>'images/circulonaranja.png' ,'alt' => 'Reemplazar valor' , 'label'=>'Reemplazar valor'));
+
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -100,6 +102,17 @@ class Notabu extends validaciones {
 				$("#fedita").dialog( "open" );
 			});
 		});';
+
+		$bodyscript .= '
+		$("#remvar").click(function (){
+			$.post("'.site_url($this->url.'reemplazar').'",
+			function(data){
+				$("#fedita").html(data);
+				//$("#fedita").dialog( { title:"PRINCIPIOS ACTIVOS", width: 350, height: 400, modal: true } );
+				$("#fedita").dialog( "open" );
+			});
+		});';
+
 
 		$bodyscript .= '
 		$("#delvar").click(function (){
@@ -400,6 +413,73 @@ class Notabu extends validaciones {
 			echo $form->output;
 		}
 	}
+
+	function reemplazar(){
+		$this->rapyd->load('dataform');
+
+		$script ='
+		$(function() {
+			$(".inputnum").numeric(".");
+		});
+		';
+
+		$form = new DataForm($this->url.'reemplazar/process');
+		$form->script($script);
+
+		$form->contrato = new dropdownField('Contrato','contrato');
+		$form->contrato->style ='width:380px;';
+		$form->contrato->option('','Seleccionar');
+		$form->contrato->options('SELECT TRIM(a.codigo) AS codigo,CONCAT(\'\',TRIM(a.codigo),TRIM(a.nombre)) AS nombre FROM noco AS a ORDER BY codigo');
+
+		$form->nombre = new dropdownField('Variable','nombre');
+		$form->nombre->style ='width:380px;';
+		$form->nombre->option('','Seleccionar');
+		$form->nombre->rule='required';
+		$mSQL='SHOW FULL COLUMNS FROM notabu';
+		$query = $this->db->query($mSQL);
+		foreach($query->result() as $row){
+			if(in_array($row->Field,array('contrato','ano','mes','dia','id'))) continue;
+			$comment=(empty($row->Comment))? $row->Field : trim($row->Comment);
+			$obj=trim($row->Field);
+			$form->nombre->option($obj,"${obj}-${comment}");
+		}
+
+		$form->anterior = new inputField('Valor anterior','anterior');
+		$form->anterior->rule = 'required';
+
+		$form->nuevo = new inputField('Valor nuevo','nuevo');
+		$form->nuevo->rule = 'required';
+
+		$form->build_form();
+
+		if($form->on_success()){
+			$dbnuevo    = $this->db->escape($form->nuevo->newValue);
+			$dbanterior = $this->db->escape($form->anterior->newValue);
+			$dbcontrato = $this->db->escape($form->contrato->newValue);
+			$nombre     = $form->nombre->newValue;
+
+			$mSQL="UPDATE notabu SET `${nombre}`= ${dbnuevo} WHERE `contrato`=${dbcontrato} AND `${nombre}`= ${dbanterior}";
+			$ban=$this->db->simple_query($mSQL);
+			if($ban){
+				$rt=array(
+					'status' =>'A',
+					'mensaje'=>'Variable guardado',
+					'pk'     =>null
+				);
+				logusu('notabu','Realizo reemplazo '.$nombre);
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>'Problemas guardado',
+					'pk'     =>null
+				);
+			}
+			echo json_encode($rt);
+		}else{
+			echo $form->output;
+		}
+	}
+
 
 	function chvarnom($val){
 		if(preg_match_all('/^[a-zA-Z0-9]+$/i', $val)>0){

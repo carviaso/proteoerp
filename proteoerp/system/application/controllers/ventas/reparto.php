@@ -54,7 +54,7 @@ class Reparto extends Controller {
 		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png',     'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'cobrard', 'img'=>'images/ventafon.png',    'alt'=>'Cobrar Reparto',       'label'=>'Cobrar Reparto',       'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'finalid', 'img'=>'images/recalcular.jpg',  'alt'=>'Finalizar Reparto',    'label'=>'Cobrar Reparto',       'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'finalid', 'img'=>'images/recalcular.jpg',  'alt'=>'Liquidar Reparto',     'label'=>'Liquidar Reparto',       'tema'=>'anexos'));
 
 		//$grid->wbotonadd(array('id'=>'buscafc', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Buscar Faturas',      ));
 
@@ -1496,84 +1496,28 @@ class Reparto extends Controller {
 		$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
 		if($tipo != 'F') return false;
 
-		$this->rapyd->load('dataform');
-
-		//Chequear si el reparto no esta cerrado
-
-
-		$edit = new DataForm($this->url.'cobrorep/'.$id.'/process');
-
-		$edit->monto = new inputField('Monto de operaci&oacute;n','monto');
-		$edit->monto->rule = 'required|numeric';
-		$edit->monto->type = 'inputhidden';
-		$edit->monto->insertValue='0.0';
-		$edit->monto->css_class='inputnum';
-
-		/*$edit->recibido = new inputField('Monto recibido','recibido');
-		$edit->recibido->rule = 'required|numeric';
-		$edit->recibido->type = 'inputhidden';
-		$edit->recibido->insertValue='0.0';
-		$edit->recibido->css_class='inputnum';*/
-		$edit->build_form();
-
-		if($edit->on_success()){
-			$itpago=$this->input->post('itpago');
-			if(is_array($itpago)){
-				$error=0;
-				foreach($itpago as $itid=>$repcob){
-					$itid=intval($itid);
-					if($repcob=='NI') $repcob=null;
-					$dbrepcob=$this->db->escape($repcob);
-					if($itid>0){
-						$mSQL="UPDATE sfac SET repcob=${dbrepcob} WHERE id=${itid}";
-						$ban=$this->db->simple_query($mSQL);
-						if($ban){
-							//logusu('reparto','Creo pago ');
-						}else{
-							$error++;
-						}
-					}
-				}
-				if($error>0){
-					$rt=array(
-						'status' =>'B',
-						'mensaje'=>'Problemas guardado',
-						'pk'     =>null
-					);
+		$mixto=$cheque=array();
+		$mSQL="SELECT c.id, a.numero, a.tipo_doc AS tipo, a.fecha, c.monto-c.abonos AS monto,b.nombre, a.repcob,b.cliente
+			FROM sfac AS a
+			JOIN scli AS b ON a.cod_cli=b.cliente
+			JOIN smov AS c ON a.numero=c.numero AND a.transac=c.transac
+			WHERE reparto=${id} AND c.monto-c.abonos>0 AND a.tipo_doc='F' AND a.repcob IN ('CH','MI')
+			ORDER BY numero";
+		$query = $this->db->query($mSQL);
+		if($query->num_rows() > 0){
+			foreach( $query->result_array() as $row){
+				$cliente=trim($row['cliente']);
+				$numero =trim($row['numero']);
+				$smovid =$row['id'];
+				if($row['repcob']=='MI'){
+					$mixto[] = "<button onclick=\"selcli('${cliente}','${numero}','F',${smovid})\">".$numero.'</button>';
 				}else{
-					$rt=array(
-						'status' =>'A',
-						'mensaje'=>'Cambio exitoso',
-						'pk'     =>null
-					);
+					$cheque[]= "<button onclick=\"selcli('${cliente}','${numero}','F',${smovid})\">".$numero.'</button>';
 				}
-
-			}else{
-				$rt=array(
-					'status' =>'B',
-					'mensaje'=>'Problemas guardado',
-					'pk'     =>null
-				);
 			}
-			echo json_encode($rt);
 		}
-
-		if($edit->on_error()){
-			$rt=array(
-				'status' =>'B',
-				'mensaje'=>preg_replace('/<[^>]*>/', '', $edit->error_string),
-				'pk'     =>null,
-			);
-			echo json_encode($rt);
-			$act = false;
-			return true;
-		}
-
-		if($edit->on_show()){
-			$conten['id']   =  $id;
-			$conten['form'] =&  $edit;
-			$this->load->view('view_repartocobro', $conten);
-		}
+		$conten = array('mixto'=>$mixto,'cheque'=>$cheque);
+		$this->load->view('view_repartocc', $conten);
 	}
 
 	function instalar(){
