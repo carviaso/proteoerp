@@ -447,6 +447,10 @@ class Sfac extends Controller {
 				autoOpen: false, height: 480, width: 850, modal: true,
 				buttons: {
 					"Guardar": function() {
+						if($("#scliexp").dialog( "isOpen" )===true) {
+							$("#scliexp").dialog("close");
+						}
+
 						if($("#df1").length > 0){
 							var bValid = true;
 							var murl = $("#df1").attr("action");
@@ -488,6 +492,10 @@ class Sfac extends Controller {
 						}
 					},
 					"Guardar y Seguir": function() {
+						if($("#scliexp").dialog( "isOpen" )===true) {
+							$("#scliexp").dialog("close");
+						}
+
 						if($("#df1").length > 0){
 							var murl = $("#df1").attr("action");
 							limpiavacio();
@@ -529,10 +537,16 @@ class Sfac extends Controller {
 						$("#fedita").html("");
 						$( this ).dialog( "close" );
 						$("#newapi'.$grid0.'").trigger("reloadGrid");
+						if($("#scliexp").dialog( "isOpen" )===true) {
+							$("#scliexp").dialog("close");
+						}
 					}
 				},
 				close: function() {
 					$("#fedita").html("");
+					if($("#scliexp").dialog( "isOpen" )===true) {
+						$("#scliexp").dialog("close");
+					}
 				}
 			});';
 
@@ -612,7 +626,7 @@ class Sfac extends Controller {
 
 		$bodyscript .= '
 		$("#scliexp").dialog({
-			autoOpen:false, modal:false, width:500, height:350,
+			autoOpen:false, modal:true, width:500, height:350,
 			buttons: {
 				"Guardar": function(){
 					var murl = $("#sclidialog").attr("action");
@@ -622,7 +636,7 @@ class Sfac extends Controller {
 						data: $("#sclidialog").serialize(),
 						success: function(r,s,x){
 							if(r.status=="B"){
-								$(".alert").html(r.mensaje);
+								$("#sclidialog").find(".alert").html(r.mensaje);
 							}else{
 								$("#scliexp").dialog( "close" );
 

@@ -2112,13 +2112,13 @@ class Scli extends validaciones {
 		$edit->email->maxlength =100;
 
 		$edit->tipo = new autoUpdateField('tipo','1', '1');
-		$edit->build();
 
 		$script ='
-		<script type="text/javascript" >
 		$(function() {
-			$("#rifci").focusout(function(){
-				rif=$(this).val();
+			$("#sclidialogrifci").focusout(function(){
+
+				rif=$(this).val().toUpperCase();
+				$("#sclidialogrifci").val(rif);
 				if(!chrif(rif)){
 					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
 					return true;
@@ -2130,8 +2130,8 @@ class Scli extends validaciones {
 						data: {rifci: rif},
 						success: function(data){
 							if(data.error==0){
-								if($("#nombre").val()==""){
-									$("#nombre").val(data.nombre);
+								if($("#sclidialognombre").val()==""){
+									$("#sclidialognombre").val(data.nombre);
 								}
 							}
 						}
@@ -2152,7 +2152,7 @@ class Scli extends validaciones {
 										$("#nombre").focus();
 									}
 								});
-								$("#rifci").unbind("focusout");
+								$("#sclidialogrifci").unbind("focusout");
 							}
 						}
 					});
@@ -2192,8 +2192,9 @@ class Scli extends validaciones {
 			}else{
 				return true;
 			}
-		}
-		</script>';
+		}';
+		$edit->script($script);
+		$edit->build();
 
 		if($edit->on_show()){
 			echo $edit->output;

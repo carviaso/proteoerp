@@ -1,24 +1,7 @@
 <style>
 .tooltip{position: absolute;	background: #c0df71;color: #FFFFFF;border-radius:5px;font-family: "Lucida Grande", Lucida, Verdana, sans-serif;font-weight: bold;padding: 10px;margin-top: -10px;margin-left: 10px;z-index: 3;display: none;background-color: #B45F04;}
 </style>
-<script type="text/javascript">
-$(document).ready(function() {
-	$("#nombre_val").mouseover(function(){
-		$("#nombre_val").mousemove(function(e){
-			$(this).next().css({left : e.pageX-80 , top: e.pageY-40});
-		});
-		eleOffset = $(this).offset();
-		$(this).next().fadeIn("fast").css({
-			left: eleOffset.left + $(this).outerWidth(),
-			top: eleOffset.top
-		});
-	}).mouseout(function(){
-		$(this).next().fadeOut("fast");
-	});
-});
-</script>
 <?php
-
 $container_bl=join('&nbsp;', $form->_button_container['BL']);
 $container_br=join('&nbsp;', $form->_button_container['BR']);
 $container_tr=join('&nbsp;', $form->_button_container['TR']);
@@ -77,9 +60,28 @@ var sfpa_cont  =<?php echo $form->max_rel_count['sfpa'];?>;
 var sclidescu  =0; <?php // Porcentaje de descuento mayor dado en ficha de cliente ?>
 
 $(function(){
+	//Title direccion
+	$("#nombre_val").mouseover(function(){
+		var dirr = $(this).next().text();
+		if( dirr.trim()!= "" ){
+			$("#nombre_val").mousemove(function(e){
+				var ppos=$(this).offset();
+				$(this).next().css({left : ppos.left-80 , top: ppos.top-40});
+				//$(this).next().css({left : e.pageX-80 , top: e.pageY-40});
+			});
+			eleOffset = $(this).offset();
+			$(this).next().fadeIn("fast").css({
+				left: eleOffset.left + $(this).outerWidth(),
+				top: eleOffset.top
+			});
+		}
+	}).mouseout(function(){
+		$(this).next().fadeOut("fast");
+	});
+
 	$('#factura').attr('type', 'hidden');
 	var manual = $("#manual").val();
-	if( manual=='S'){
+	if(manual=='S'){
 		$("#fecha").datepicker({ dateFormat: "dd/mm/yy" });
 	}
 	$(".inputnum").numeric(".");
@@ -215,7 +217,6 @@ $(function(){
 		},
 		minLength: 2,
 		select: function( event, ui ) {
-			var meco;
 			$('#factura').attr("readonly", "readonly");
 			$('#factura').val(ui.item.value);
 
@@ -306,7 +307,7 @@ $(function(){
 	});
 
 	chreferen();
-	$("#scliexp").dialog({ autoOpen: false, height: 420, width: 400, modal: true });
+	//$("#scliexp").dialog({ autoOpen: false, height: 420, width: 400, modal: true });
 
 <?php
 	if(isset($form->error_string)) {
@@ -443,9 +444,8 @@ function aplicadesc(){
 function scliadd() {
 	$.post("<?php echo site_url('ventas/scli/dataeditdialog/create') ?>", function(data){
 		$('#scliexp').html(data);
+		$('#scliexp').dialog('open');
 	});
-
-	$('#scliexp').dialog('open');
 };
 
 function limpiavacio(){
@@ -680,6 +680,7 @@ function post_modbus_scli(){
 	});
 	totalizar();
 	saldoven();
+	$('input[id^="codigoa_"]').first().focus();
 }
 
 function saldoven(){
@@ -694,7 +695,10 @@ function saldoven(){
 				if(data>0){
 					$.prompt("<span style='font-size:1.5em'>Cliente presenta saldo vencido de <b>"+nformat(data,2)+" Bs.</b> debe ponerse al d&iacute;a.</span>", {
 						title: "Saldo vencido",
-						buttons: { "Continuar": true }
+						buttons: { "Continuar": true },
+						submit: function(e,v,m,f){
+							$('input[id^="codigoa_"]').first().focus();
+						}
 					});
 				}
 			},
@@ -1069,11 +1073,9 @@ function apldes(){
 			<table style="width:100%;border-collapse:collapse;padding:0px;background:#EFEFEF;" border='0'>
 				<tr>
 					<td class="littletableheader" width='20px' style='background:#EFEFEF;'>
-					<?php
-						if($form->_status!='show'){
-					?>
-						<a href="#" onClick="scliadd();" title="Agregar cliente"><?php echo image('add1-.png'); ?></a>
-					<?php } ?>
+						<?php if($form->_status!='show'){ ?>
+						<a href="#" title="Agregar nuevo cliente" onClick="scliadd();" ><?php echo image('add1-.png','Agregar nuevo cliente',array('title'=>'Agregar nuevo cliente')); ?></a>
+						<?php } ?>
 					</td>
 					<td class="littletablerow"  style='width:45px;align;right'><?php echo $form->cliente->label; ?>*</td>
 					<td class="littletablerow"  style='width:75px;' align='center'><?php echo $form->cliente->output,$form->sclitipo->output.$form->upago->output; ?></td>
@@ -1101,7 +1103,7 @@ function apldes(){
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Precio</b></td>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Importe</b></td>
 				<?php if($form->_status!='show') {?>
-					<td bgcolor='#0B3861'><a href='#' id='addlink' onclick="add_sitems()" title='Agregar otro articulo'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 26, 'alt'=>'Agregar otro concepto', 'title' => 'Agregar otro concepto', 'border'=>'0')); ?></a></td>
+					<td bgcolor='#0B3861'><a href='#' id='addlink' onclick="add_sitems()" title='Agregar otro articulo'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 26, 'alt'=>'Agregar otro producto', 'title' => 'Agregar otro producto', 'border'=>'0')); ?></a></td>
 				<?php } ?>
 			</tr>
 			<?php for($i=0;$i<$form->max_rel_count['sitems'];$i++) {
@@ -1142,7 +1144,7 @@ function apldes(){
 
 				<?php if($form->_status!='show') {?>
 				<td class="littletablerow">
-					<a href='#' onclick='del_sitems(<?php echo $i ?>);return false;'><?php echo img('images/delete.jpg'); ?></a>
+					<a href='#' title='Eliminar fila' onclick='del_sitems(<?php echo $i ?>);return false;'><?php echo img('images/delete.jpg'); ?></a>
 				</td>
 				<?php } ?>
 			</tr>
@@ -1284,7 +1286,6 @@ function apldes(){
 		</td>
 	</tr>
 </table>
-<div id='scliexp'></div>
 
 <?php echo $form_end; ?>
 
