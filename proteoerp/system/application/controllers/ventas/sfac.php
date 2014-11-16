@@ -76,7 +76,7 @@ class Sfac extends Controller {
 			array('id'=>'scliexp', 'title'=>'Ficha de Cliente' ),
 			array('id'=>'fshow'  , 'title'=>'Mostrar registro' ),
 			array('id'=>'fborra' , 'title'=>'Anula Factura'    ),
-			array('id'=>'fncob'    , 'title'=>'NC a factura cobrada')
+			array('id'=>'fncob'  , 'title'=>'NC a factura cobrada')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -609,6 +609,52 @@ class Sfac extends Controller {
 					$("#fncob").html("");
 				}
 			});';
+
+		$bodyscript .= '
+		$("#scliexp").dialog({
+			autoOpen:false, modal:false, width:500, height:350,
+			buttons: {
+				"Guardar": function(){
+					var murl = $("#sclidialog").attr("action");
+					$.ajax({
+						type: "POST", dataType: "json", async: false,
+						url: murl,
+						data: $("#sclidialog").serialize(),
+						success: function(r,s,x){
+							if(r.status=="B"){
+								$(".alert").html(r.mensaje);
+							}else{
+								$("#scliexp").dialog( "close" );
+
+								$("#cod_cli").val(r.data.cliente);
+
+								$("#nombre").val(r.data.nombre);
+								$("#nombre_val").text(r.data.nombre);
+
+								$("#rifci").val(r.data.rifci);
+								$("#rifci_val").text(r.data.rifci);
+
+								$("#sclitipo").val(r.data.tipo);
+
+								$("#direc").val(r.data.direc);
+								$("#direc_val").text(r.data.direc);
+
+								$("#descuento").val("0");
+								return true;
+							}
+						}
+					});
+
+				},
+				"Cancelar": function(){
+					$("#scliexp").html("");
+					$(this).dialog("close");
+				}
+			},
+			close: function(){
+				$("#scliexp").html("");
+			}
+		});';
 
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';

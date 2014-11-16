@@ -1310,7 +1310,7 @@ class Scli extends validaciones {
 		$tipo     = $row['tipo'];
 
 		$dbcod_cli = $this->db->escape($cod_cli);
-		
+
 		$rutas = $this->datasis->dameval("SELECT GROUP_CONCAT(ruta) AS ruta FROM sclitrut WHERE cliente=${dbcod_cli}");
 
 		if( $credito == 'S')
@@ -1323,7 +1323,7 @@ class Scli extends validaciones {
 
 		$salida = '';
 
-		if( $rutas ) 
+		if( $rutas )
 			$salida  .= '<table width="100%" cellspacing="0"><tr><td>Rutas: '.$rutas.'</td></tr></table>';
 
 
@@ -1929,7 +1929,7 @@ class Scli extends validaciones {
 		$edit->zona->option('','Seleccionar');
 		$edit->zona->options('SELECT codigo, CONCAT(codigo," ", nombre) nombre FROM zona ORDER BY nombre');
 		$edit->zona->style = 'width:166px';
-		$edit->zona->insertValue = $this->datasis->traevalor("ZONAXDEFECTO");
+		$edit->zona->insertValue = $this->datasis->traevalor('ZONAXDEFECTO');
 
 		$edit->email = new inputField('E-mail', 'email');
 		$edit->email->rule = 'trim|valid_email';
@@ -2028,6 +2028,204 @@ class Scli extends validaciones {
 		$data['script'] .= $script;
 		$data['title']   = '';
 		$this->load->view('view_ventanas_sola', $data);
+
+	}
+
+	//********************************
+	// Dialog de clientes
+	//
+	function dataeditdialog(){
+		$this->rapyd->load('dataedit');
+
+		$edit = new DataEdit('', 'scli');
+		$edit->on_save_redirect=false;
+		$edit->cid = 'sclidialog';
+
+		$edit->pre_process( 'delete','_pre_del');
+		$edit->pre_process( 'insert','_pre_ins');
+		$edit->pre_process( 'update','_pre_udp');
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+
+		$edit->rifci = new inputField('RIF/CI', 'sclidialogrifci');
+		$edit->rifci->db_name='rifci';
+		$edit->rifci->rule = 'trim|strtoupper|required|callback_chci';
+		$edit->rifci->maxlength =13;
+		$edit->rifci->size =13;
+
+		$edit->nombre = new inputField('Nombre', 'sclidialognombre');
+		$edit->nombre->db_name='nombre';
+		$edit->nombre->rule = 'trim|strtoupper|required';
+		$edit->nombre->size = 55;
+		$edit->nombre->maxlength = 45;
+		$edit->nombre->style = 'width:95%;';
+
+		$edit->grupo = new dropdownField('Grupo', 'sclidialoggrupo');
+		$edit->grupo->db_name='grupo';
+		$edit->grupo->option('','Seleccione un grupo');
+		$edit->grupo->options('SELECT grupo, CONCAT(grupo," ",gr_desc) gr_desc FROM grcl ORDER BY gr_desc');
+		$edit->grupo->rule = 'required';
+		$edit->grupo->size = 6;
+		$edit->grupo->maxlength = 4;
+		$edit->grupo->style = 'width:220px';
+		$edit->grupo->insertValue = $this->datasis->dameval('SELECT grupo FROM grcl WHERE gr_desc like "CONSUMIDOR FINAL%"');
+
+		$edit->dire11 = new inputField('Direcci&oacute;n','sclidialogdire11');
+		$edit->dire11->db_name='dire11';
+		$edit->dire11->rule = 'trim';
+		$edit->dire11->size      = 45;
+		$edit->dire11->maxlength = 40;
+		$edit->dire11->style = 'width:95%;';
+
+		$edit->ciudad1 = new dropdownField('Ciudad','sclidialogciudad1');
+		$edit->ciudad1->db_name='ciudad1';
+		$edit->ciudad1->rule = 'trim';
+		$edit->ciudad1->option('','Seleccionar');
+		$edit->ciudad1->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
+		$edit->ciudad1->style = 'width:200px';
+		$edit->ciudad1->insertValue = $this->datasis->traevalor('CIUDAD');
+
+		$edit->tiva = new dropdownField('Tipo Fiscal', 'sclidialogtiva');
+		$edit->tiva->db_name='tiva';
+		$edit->tiva->option('N','No Contribuyente');
+		$edit->tiva->option('C','Contribuyente');
+		$edit->tiva->option('E','Especial');
+		$edit->tiva->option('R','Regimen Exento');
+		$edit->tiva->option('O','Otro');
+		$edit->tiva->style = 'width:110px';
+		$edit->tiva->insertValue = 'N';
+		$edit->tiva->rule='required|enum[N,C,E,R,O]';
+
+		$edit->zona = new dropdownField('Zona', 'sclidialogzona');
+		$edit->zona->db_name='zona';
+		$edit->zona->rule = 'trim|required';
+		$edit->zona->option('','Seleccionar');
+		$edit->zona->options('SELECT codigo, CONCAT(codigo," ", nombre) nombre FROM zona ORDER BY nombre');
+		$edit->zona->style = 'width:166px';
+		$edit->zona->insertValue = $this->datasis->traevalor('ZONAXDEFECTO');
+
+		$edit->email = new inputField('E-mail', 'sclidialogemail');
+		$edit->email->db_name='email';
+		$edit->email->rule = 'trim|valid_email';
+		$edit->email->size =40;
+		$edit->email->maxlength =100;
+
+		$edit->tipo = new autoUpdateField('tipo','1', '1');
+		$edit->build();
+
+		$script ='
+		<script type="text/javascript" >
+		$(function() {
+			$("#rifci").focusout(function(){
+				rif=$(this).val();
+				if(!chrif(rif)){
+					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
+					return true;
+				}else{
+					$.ajax({
+						type: "POST",
+						url: "'.site_url('ajax/traerif').'",
+						dataType: "json",
+						data: {rifci: rif},
+						success: function(data){
+							if(data.error==0){
+								if($("#nombre").val()==""){
+									$("#nombre").val(data.nombre);
+								}
+							}
+						}
+					});
+
+					//Chequea si esta repetido
+					$.ajax({
+						type: "POST",
+						url: "'.site_url('ajax/rifrep/C').'",
+						dataType: "json",
+						data: {rifci: rif, codigo: '.json_encode($edit->get_from_dataobjetct('cliente')).'},
+						success: function(data){
+							if(data.rt){
+								$.prompt(data.msj,{
+									buttons: { Continuar: true },
+									focus: 1,
+									submit:function(e,v,m,f){
+										$("#nombre").focus();
+									}
+								});
+								$("#rifci").unbind("focusout");
+							}
+						}
+					});
+					//Fin del chequeo repetido
+
+				}
+
+			});
+		});
+
+		function chrif(rif){
+			rif.toUpperCase();
+			var patt=/[EJPGV][0-9]{9} * /g;
+			if(patt.test(rif)){
+				var factor= new Array(4,3,2,7,6,5,4,3,2);
+				var v=0;
+				if(rif[0]=="V"){
+					v=1;
+				}else if(rif[0]=="E"){
+					v=2;
+				}else if(rif[0]=="J"){
+					v=3;
+				}else if(rif[0]=="P"){
+					v=4;
+				}else if(rif[0]=="G"){
+					v=5;
+				}
+				acum=v*factor[0];
+				for(i=1;i<9;i++){
+					acum=acum+parseInt(rif[i])*factor[i];
+				}
+				acum=11-acum%11;
+				if(acum>=10 || acum<=0){
+					acum=0;
+				}
+				return (acum==parseInt(rif[9]));
+			}else{
+				return true;
+			}
+		}
+		</script>';
+
+		if($edit->on_show()){
+			echo $edit->output;
+		}
+
+		if($edit->on_success()){
+			$data=array(
+				'cliente'  => $edit->_dataobject->get('cliente'),
+				'nombre'   => $edit->_dataobject->get('nombre'),
+				'rifci'    => $edit->_dataobject->get('rifci'),
+				'tipo'     => $edit->_dataobject->get('tipo'),
+				'direc'    => $edit->_dataobject->get('dire11'),
+				'descuento'=> 0
+			);
+
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'data'   => $data,
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}
+
+		if($edit->on_error()){
+			$rt=array(
+				'status' => 'B',
+				'mensaje'=>  $edit->error_string,
+				'pk'     => $edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}
 
 	}
 
@@ -2741,9 +2939,9 @@ function chrif(rif){
 		$mSQL = 'SELECT a.cliente, a.rifci, a.nombre, a.id eli, a.id FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta;
 		$columnas = $this->datasis->jqdata($mSQL,"verutatabdat");
 		$colModel = "
-		{name:'cliente', index:'cliente', label:'Cliente', width:50 }, 
-		{name:'rifci',   index:'rifci',   label:'RIF/CI',  width:80 }, 
-		{name:'nombre',  index:'nombre',  label:'Nombre',  width:250}, 
+		{name:'cliente', index:'cliente', label:'Cliente', width:50 },
+		{name:'rifci',   index:'rifci',   label:'RIF/CI',  width:80 },
+		{name:'nombre',  index:'nombre',  label:'Nombre',  width:250},
 		{name:'eli',     index:'eli',     label:' ',       width: 25, formatter: fsele },
 		{name:'id', index:'id', label:'id', hidden:'true'} ";
 
@@ -2800,7 +2998,7 @@ function chrif(rif){
 		{ id:'2', cliente:'O-018', rifci:'V057391100', nombre:'OSCAR ALFREDO AVELLANEDA PEREZ', id:'121477' },
 	];
 	for(var i=0;i<=verutatabdat.length;i++) jQuery("#verutatab").jqGrid('addRowData',i+1,verutatabdat[i]);
-	
+
 </script>
 <id class="anexos"><table id="verutatabdat"></table>
 <div id="pnewapi_21293249"></div></div>
@@ -3650,8 +3848,8 @@ function chrif(rif){
 				descrip CHAR(100)  DEFAULT NULL,
 			PRIMARY KEY (id),
 			UNIQUE INDEX ruta (ruta)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1 
-			ROW_FORMAT=FIXED 
+			) ENGINE=MyISAM DEFAULT CHARSET=latin1
+			ROW_FORMAT=FIXED
 			COMMENT='Detalle rutas de clientes'";
 			$this->db->query($mSQL);
 		}
@@ -3665,8 +3863,8 @@ function chrif(rif){
 				dia     CHAR(1)    DEFAULT NULL,
 			PRIMARY KEY (id),
 			UNIQUE INDEX unico (cliente, ruta)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1 
-			ROW_FORMAT=FIXED 
+			) ENGINE=MyISAM DEFAULT CHARSET=latin1
+			ROW_FORMAT=FIXED
 			COMMENT='Rutas de clientes'";
 			$this->db->query($mSQL);
 		}
@@ -3803,13 +4001,13 @@ Semola de Trigo											</option><option value="50" id="Con mensaje">
 Sorgo Acondicionado (TM)								</option><option value="60" id="Con mensaje">
 Soya Acondicionada (Frijol de Soya)(TM)					</option><option value="197" id="Con mensaje">
 Tomate Fresco											</option><option value="41" id="Con mensaje">Trigo Durum		</option><option value="174" id="Con mensaje">
-Trigo para Galletas										</option>										   		 
+Trigo para Galletas										</option>
 
 
 2 	 Atún Enlatado Presentación No Regulada 	0,004
 3 	 Formula Preinfantil 	1,957
 4 	 Fórmulas Lácteas 	0,317
 5 	 Leche Condensada 	0,000
-6 	 Leche en Polvo Completa - Uso Domestico 
+6 	 Leche en Polvo Completa - Uso Domestico
 
 */

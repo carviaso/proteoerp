@@ -324,7 +324,7 @@ $(function(){
 	}
 ?>
 
-	$("#cod_cli").keypress(function(e) {
+	$('#cod_cli').keypress(function(e) {
 		if(e.keyCode == 13) {
 		    $('input[name^="codigoa_"]').first().focus();
 			return false;
@@ -335,7 +335,7 @@ $(function(){
 
 function itdevolver(numero){
 	truncate();
-	$("#tipo_doc").val('D');
+	$('#tipo_doc').val('D');
 
 	$('input[name="referen"]:radio').each(function(){
 		if($(this).val() == 'M'){
@@ -441,13 +441,11 @@ function aplicadesc(){
 }
 
 function scliadd() {
-	$("#scliexp").dialog({
-		autoOpen:false, modal:false, width:500, height:350,
-		open: function(ev, ui){
-			$('#scliexp').html('<iframe src="<?php echo site_url('ventas/scli/dataeditexpress/create'); ?>" width="100%", height="100%" seamless></iframe>');
-		}
+	$.post("<?php echo site_url('ventas/scli/dataeditdialog/create') ?>", function(data){
+		$('#scliexp').html(data);
 	});
-	$("#scliexp").dialog( "open" );
+
+	$('#scliexp').dialog('open');
 };
 
 function limpiavacio(){
@@ -1074,7 +1072,7 @@ function apldes(){
 					<?php
 						if($form->_status!='show'){
 					?>
-						<a href="#" onClick="scliadd();"><?php echo image('add1-.png'); ?></a>
+						<a href="#" onClick="scliadd();" title="Agregar cliente"><?php echo image('add1-.png'); ?></a>
 					<?php } ?>
 					</td>
 					<td class="littletablerow"  style='width:45px;align;right'><?php echo $form->cliente->label; ?>*</td>
