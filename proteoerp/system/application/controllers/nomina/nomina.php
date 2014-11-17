@@ -74,7 +74,6 @@ class Nomina extends Controller {
 		};
 		';
 
-
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel'] = $EastPanel;
 		$param['SouthPanel']  = $SouthPanel;
@@ -89,9 +88,9 @@ class Nomina extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	// Funciones de los Botones
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
 
@@ -238,39 +237,6 @@ class Nomina extends Controller {
 		};
 		';
 
-/*
-		$bodyscript .= '
-		function nominadel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				$.prompt(
-				if(confirm("Seguro desea eliminar el registro?")){
-					var ret    = $("#newapi'.$grid0.'").getRowData(id);
-					mId = id;
-					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
-						try{
-							var json = JSON.parse(data);
-							if (json.status == "A"){
-								apprise("Registro eliminado");
-								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-							}else{
-								apprise("Registro no se puede eliminado");
-							}
-						}catch(e){
-							$("#fborra").html(data);
-							$("#fborra").dialog( "open" );
-						}
-					});
-				}
-
-
-
-			}else{
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
-*/
-
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function(){
@@ -367,9 +333,9 @@ class Nomina extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -601,7 +567,7 @@ class Nomina extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -638,8 +604,8 @@ class Nomina extends Controller {
 		}
 	}
 
-	//******************************
-	//      REVERSAR NOMINA
+	//******************************************************************
+	//  REVERSAR NOMINA
 	//
 	function nomirev( $nomina = 0 ) {
 		if ( $nomina == 0)

@@ -44,7 +44,7 @@ class Sfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'boton1',   'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento','tema'=>'anexos', 'label'=>'Reimprimir'));
+		$grid->wbotonadd(array('id'=>'fimprime',   'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento','tema'=>'anexos', 'label'=>'Imprimir'));
 		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png',              'alt' => 'Cierre de Caja',      'tema'=>'anexos', 'label'=>'Cierre de Caja'));
 		$grid->wbotonadd(array('id'=>'fmanual',  'img'=>'images/mano.png',                'alt' => 'Factura Manual',      'tema'=>'anexos', 'label'=>'Factura Manual'));
 		$grid->wbotonadd(array('id'=>'bdevolu',  'img'=>'images/dinero.png',              'alt' => 'Devolver Factura',    'tema'=>'anexos', 'label'=>'Devolver'));
@@ -313,14 +313,41 @@ class Sfac extends Controller {
 				})
 			});';
 
-		$bodyscript .= '
-			$("#boton1").click( function(){
+		// Para imprimir despacho desde aqui
+		$ndespa = $this->datasis->dameval('SELECT COUNT(*) FROM formatos WHERE nombre="NDESPACHO" AND proteo IS NOT NULL');
+		if ( $ndespa == 0)
+			$bodyscript .= '
+			$("#fimprime").click( function(){
 				var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 				if (id)	{
 					var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
 					window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
-				} else { $.prompt("<h1>Por favor Seleccione una Factura</h1>");}
+				} else { 
+					$.prompt("<h1>Por favor Seleccione una Factura</h1>");
+				}
 			});';
+		else
+			$bodyscript .= '
+			$("#fimprime").click( function(){
+				var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+				if (id){
+					var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
+					$.prompt("<h1>Imprimir Documento</h1>Cliente: <b>"+ret.nombre+"</b><br>Factura Nro: <b>"+ret.numero+"</b><br><br> ",{
+					buttons: { Factura: 1, Despacho: 2, Salir: 0},
+					submit: function(e,v,m,f){
+						if ( v == 1 ){
+							window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+						} else if( v == 2 ){
+							window.open(\''.site_url('formatos/ver/NDESPACHO').'/\'+id, \'_blank\', \'width=800,height=600,scrollbars=yes,status=yes,resizable=yes\');
+						}
+					}
+					});
+				} else { 
+					$.prompt("<h1>Por favor Seleccione una Factura</h1>");
+				}
+			});';
+
+
 
 		$bodyscript .= '
 			$("#boton2").click( function(){
