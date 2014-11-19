@@ -125,7 +125,7 @@ class ingresos{
 			JOIN scli c ON a.cod_cli=c.cliente
 			JOIN sfac d ON a.transac=d.transac
 			WHERE a.f_factura BETWEEN ${fdesde} AND ${fhasta} AND a.tipo='RI' AND b.tipo_doc='ND'
-			UNICON ALL
+			UNION ALL
 			SELECT b.fecha, a.numero, c.nombre, c.rifci, COALESCE(c.cliente,a.cod_cli) AS cod_cli, a.numero AS afecta, a.fecha AS fafecta, (a.reteiva) reteiva, a.transac, a.nroriva, a.emiriva, if(a.recriva IS NULL, a.estampa, a.recriva) recriva, e.nfiscal
 			FROM itccli AS a
 			JOIN smov AS b ON a.transac=b.transac
