@@ -125,6 +125,15 @@ class ingresos{
 			JOIN scli c ON a.cod_cli=c.cliente
 			JOIN sfac d ON a.transac=d.transac
 			WHERE a.f_factura BETWEEN ${fdesde} AND ${fhasta} AND a.tipo='RI' AND b.tipo_doc='ND'
+			UNICON ALL
+			SELECT b.fecha, a.numero, c.nombre, c.rifci, COALESCE(c.cliente,a.cod_cli) AS cod_cli, a.numero AS afecta, a.fecha AS fafecta, (a.reteiva) reteiva, a.transac, a.nroriva, a.emiriva, if(a.recriva IS NULL, a.estampa, a.recriva) recriva, e.nfiscal
+			FROM itccli AS a
+			JOIN smov AS b ON a.transac=b.transac
+			LEFT JOIN scli AS c ON a.cod_cli=c.cliente
+			JOIN smov AS d ON a.numero=d.numero AND d.tipo_doc = 'ND'
+			JOIN sfac AS e ON d.transac=e.transac AND e.tipo_doc='T'
+			WHERE b.cod_cli='REIVA' AND a.reteiva>0 AND b.fecha BETWEEN ${fdesde} AND ${fhasta} AND a.nroriva IS NOT NULL AND a.nroriva IS NOT NULL
+
 		";
 		$query = $this->db->query($mSQL);
 
