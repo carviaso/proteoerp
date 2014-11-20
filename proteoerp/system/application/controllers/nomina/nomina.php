@@ -739,39 +739,44 @@ class Nomina extends Controller {
 		$trabaja  = $mreg['trabaja'];
 		$frec     = $mreg['frecuencia'];
 
+		$dbcontrato= $this->db->escape($contrato);
+		$dbtrabaja = $this->db->escape($trabaja);
+		$dbnomina  = $this->db->escape($nomina);
+		$dbfecha   = $this->db->escape($fecha);
+		$dbfechap  = $this->db->escape($fechap);
+		$dbfrec    = $this->db->escape($frec);
+
 		// MANDA LA NOMINA DE REGRESO A PRENOM
 		$mSQL = "TRUNCATE prenom ";
 		$this->db->query($mSQL);
 
 		$mSQL ="INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, tipo, descrip, grupo, formula, monto, fecha, valor,fechap, trabaja )
-				SELECT contrato, codigo, nombre, concepto, tipo, descrip, grupo, formula, monto, fecha, valor, fechap, trabaja FROM nomina
-				WHERE numero='".$nomina."' AND concepto<>'PRES' ";
+			SELECT contrato, codigo, nombre, concepto, tipo, descrip, grupo, formula, monto, fecha, valor, fechap, trabaja
+			FROM nomina
+			WHERE numero=${dbnomina} AND concepto<>'PRES' ";
 		$this->db->query($mSQL);
 
-		$mSQL = "
-			INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap )
-			SELECT '".$contrato."', b.codigo, CONCAT(RTRIM(b.apellido),'/',b.nombre) nombre,
-			a.concepto, c.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fechap."'
+		$mSQL = "INSERT IGNORE INTO prenom (contrato, codigo, nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap )
+			SELECT ${dbcontrato}, b.codigo, CONCAT(RTRIM(b.apellido),'/',b.nombre) nombre,
+			a.concepto, c.grupo, a.tipo, a.descrip, a.formula, 0, ${dbfecha}, ${dbfechap}
 			FROM asig a JOIN pers b ON a.codigo=b.codigo
 			JOIN conc c ON a.concepto=c.concepto
-			WHERE b.tipo='".$frec."' AND b.contrato='".$contrato."' AND b.status='A' ";
+			WHERE b.tipo=${dbfrec} AND b.contrato=${dbcontrato} AND b.status='A' ";
 		$this->db->query($mSQL);
 
-		$mSQL = "
-			INSERT IGNORE INTO prenom (contrato, codigo,nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap )
-			SELECT '".$contrato."', b.codigo, CONCAT(RTRIM(b.apellido),'/',b.nombre) nombre,
-				a.concepto, a.grupo, a.tipo, a.descrip, a.formula, 0, '".$fecha."', '".$fecha."'
+		$mSQL = "INSERT IGNORE INTO prenom (contrato, codigo,nombre, concepto, grupo, tipo, descrip, formula, monto, fecha, fechap )
+			SELECT ${dbcontrato}, b.codigo, CONCAT(RTRIM(b.apellido),'/',b.nombre) nombre,
+				a.concepto, a.grupo, a.tipo, a.descrip, a.formula, 0, ${dbfecha}, ${dbfecha}
 			FROM conc a JOIN itnoco c ON a.concepto=c.concepto
-			JOIN pers b ON b.contrato=c.codigo WHERE c.codigo='".$contrato."' AND b.status='A' ";
+			JOIN pers b ON b.contrato=c.codigo
+			WHERE c.codigo=${dbcontrato} AND b.status='A' ";
 		$this->db->query($mSQL);
 
-		$this->db->query("UPDATE prenom SET trabaja='".$trabaja."'");
+		$this->db->query("UPDATE prenom SET trabaja=${dbtrabaja}");
 
 		$this->load->library('pnomina');
 		$this->pnomina->creapretab();
 		$this->pnomina->llenapretab();
-
-
 	}
 
 
@@ -782,13 +787,14 @@ class Nomina extends Controller {
 	function nomirege( $nomina ) {
 
 		$mNOMI = $this->datasis->dameval("SELECT ctaac FROM conc WHERE formula='XSUELDO' ");
+		$dbnomina  = $this->db->escape($nomina);
 
 		//COLOCAR + LAS NOMINAS
 		$mSQL = "UPDATE nomina SET valor=ABS(valor) WHERE MID(concepto,1,1)='9' ";
 		$this->db->query($mSQL);
 
-		$mSQL = 'SELECT COUNT(*) FROM nomina WHERE numero="'.$nomina.'"';
-		if ($this->datasis->dameval($mSQL) == 0 ) {
+		$mSQL = "SELECT COUNT(*) FROM nomina WHERE numero=${dbnomina}";
+		if($this->datasis->dameval($mSQL) == 0){
 			$rt=array(
 				'status' =>'B',
 				'mensaje'=>'NO EXISTE NINGUNA NOMINA CON EL NUMERO '.$nomina,
@@ -798,7 +804,7 @@ class Nomina extends Controller {
 			return true;
 		}
 
-		$mreg = $this->datasis->damereg('SELECT transac, fecha FROM nomina WHERE numero="'.$nomina.'"');
+		$mreg = $this->datasis->damereg("SELECT transac, fecha FROM nomina WHERE numero=${dbnomina}");
 		$mTRANSAC = $mreg['transac'];
 		$FECHA    = $mreg['fecha'];
 
@@ -808,7 +814,7 @@ class Nomina extends Controller {
 		$mSQL= "INSERT INTO gitser (fecha, numero, proveed, codigo, descrip, precio, iva, importe, unidades, fraccion, almacen, departa, sucursal, usuario, estampa, transac)
 				SELECT a.fechap fecha, a.numero, b.ctaac proveed, b.ctade codigo,   CONCAT(RTRIM(b.descrip),' ',d.depadesc) descrip, SUM(a.valor), 0, SUM(a.valor), 0, 0, '', d.enlace, c.sucursal, a.usuario, a.estampa, a.transac
 				FROM nomina a JOIN conc b ON a.concepto=b.concepto JOIN pers c ON a.codigo=c.codigo JOIN depa d ON c.depto=d.departa
-				WHERE valor<>0 AND tipod='G' AND a.numero='".$nomina."' GROUP BY ctade, d.enlace ";
+				WHERE valor<>0 AND tipod='G' AND a.numero=${dbnomina} GROUP BY ctade, d.enlace ";
 		$this->db->query($mSQL);
 
 		//GENERA EL ENCABEZADO DE GSER
@@ -818,17 +824,17 @@ class Nomina extends Controller {
 		$mSQL= "INSERT INTO gser (fecha, numero, proveed, nombre, vence, totpre,  totiva, totbruto, reten, totneto, codb1, tipo1, cheque1, monto1, credito, anticipo, orden, tipo_doc, usuario, estampa, transac)
 				SELECT a.fechap fecha, a.numero numero, b.ctaac proveed, d.nombre, a.fechap vence, SUM(a.valor) totpre, 0 totiva, SUM(a.valor) totbruto, 0 reten, SUM(a.valor) totneto, '' codb1, '' tipo1, '' cheque1,
 					(
-						SELECT ABS(SUM(bbb.monto)) FROM (SELECT sum(d.valor) monto FROM nomina d JOIN conc e ON d.concepto=e.concepto JOIN pers f ON d.codigo=f.codigo WHERE d.valor<>0 AND e.tipod!='G' AND d.numero='".$nomina."'
+						SELECT ABS(SUM(bbb.monto)) FROM (SELECT sum(d.valor) monto FROM nomina d JOIN conc e ON d.concepto=e.concepto JOIN pers f ON d.codigo=f.codigo WHERE d.valor<>0 AND e.tipod!='G' AND d.numero=${dbnomina}
 						UNION ALL
-						SELECT SUM(valor) monto FROM nomina g WHERE g.numero='".$nomina."' AND g.concepto='PRES' ) bbb)*(b.ctaac='".$mNOMI."'
+						SELECT SUM(valor) monto FROM nomina g WHERE g.numero=${dbnomina} AND g.concepto='PRES' ) bbb)*(b.ctaac='".$mNOMI."'
 					) monto1,
 					sum(a.valor)+(
 						SELECT SUM(valor) FROM (SELECT sum(valor) valor FROM nomina a JOIN conc b ON a.concepto=b.concepto JOIN pers c ON a.codigo=c.codigo WHERE valor<>0 AND tipod!='G' AND a.numero='".$nomina."'
 						UNION ALL
-						SELECT SUM(valor) FROM nomina a WHERE a.numero='".$nomina."' AND concepto='PRES' ) aaa)*(b.ctaac='".$mNOMI."') credito,
+						SELECT SUM(valor) FROM nomina a WHERE a.numero=${dbnomina} AND concepto='PRES' ) aaa)*(b.ctaac='".$mNOMI."') credito,
 					0 anticipo, '', 'GA', a.usuario, a.estampa, a.transac FROM nomina a JOIN conc b ON a.concepto=b.concepto
 				JOIN pers c ON a.codigo=c.codigo JOIN sprv d ON ctaac=d.proveed
-				WHERE valor<>0 AND tipod='G' AND a.numero='".$nomina."' GROUP BY ctaac ";
+				WHERE valor<>0 AND tipod='G' AND a.numero=${dbnomina} GROUP BY ctaac ";
 		$this->db->query($mSQL);
 
 		//Borras los que empiezan por N

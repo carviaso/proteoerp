@@ -525,7 +525,7 @@ class Ajax extends Controller {
 				if($this->db->table_exists('sinvpromo')){
 					$mSQL="
 					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.unidad,
-					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo,c.margen AS dgrupo,d.margen AS promo, a.existen, a.marca, a.ubica
+					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo,c.margen AS dgrupo,d.margen AS promo, a.existen, a.marca, a.ubica,a.id
 					FROM sinv AS a
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
 					LEFT JOIN grup AS c ON a.grupo=c.grupo
@@ -535,7 +535,7 @@ class Ajax extends Controller {
 				}else{
 					$mSQL="
 					SELECT DISTINCT TRIM(a.descrip) AS descrip, TRIM(a.codigo) AS codigo, a.unidad,
-					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo, c.margen AS dgrupo,0 AS promo, a.existen, a.marca, a.ubica
+					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo, c.margen AS dgrupo,0 AS promo, a.existen, a.marca, a.ubica,a.id
 					FROM sinv AS a
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
 					LEFT JOIN grup AS c ON a.grupo=c.grupo
@@ -547,7 +547,7 @@ class Ajax extends Controller {
 				if($this->db->table_exists('sinvpromo')){
 					$mSQL="
 					SELECT DISTINCT TRIM(a.descrip) descrip, TRIM(a.codigo) codigo, a.marca, a.ubica, a.unidad,
-					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo,c.margen AS dgrupo,d.margen AS promo, COALESCE(e.existen,0) existen
+					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo,c.margen AS dgrupo,d.margen AS promo, COALESCE(e.existen,0) existen,a.id
 					FROM sinv AS a
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
 					LEFT JOIN grup      AS c ON a.grupo=c.grupo
@@ -558,7 +558,7 @@ class Ajax extends Controller {
 				}else{
 					$mSQL="
 					SELECT DISTINCT TRIM(a.descrip) descrip, TRIM(a.codigo) codigo, a.marca, a.ubica, a.unidad,
-					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo, c.margen AS dgrupo,0 AS promo, COALESCE(e.existen,0) existen
+					a.precio1,precio2,precio3,precio4, a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond, a.barras, ${colnom} AS descufijo, c.margen AS dgrupo,0 AS promo, COALESCE(e.existen,0) existen,a.id
 					FROM sinv AS a
 					LEFT JOIN barraspos AS b ON a.codigo=b.codigo
 					LEFT JOIN grup      AS c ON a.grupo=c.grupo
@@ -607,6 +607,7 @@ class Ajax extends Controller {
 					$retArray['marca']   = $row['marca'];
 					$retArray['ubica']   = $row['ubica'];
 					$retArray['unidad']  = $row['unidad'];
+					$retArray['id']      = intval($row['id']);
 					array_push($retorno, $retArray);
 				}
 				$data = json_encode($retorno);
@@ -2590,6 +2591,43 @@ class Ajax extends Controller {
 		echo json_encode($t);
 	}
 
+	//******************************************************************
+	//  CONSULTA INTELIGENTE DE RIF/CEDULA
+	//
+	function intelirifci(){
+		$rifci = $this->input->post('rifci');
+		$t=array(
+			'error' =>1,
+			'msj'   =>'Cedula o rif no valido',
+			'data'  =>array(),
+		);
+		if($rifci == false) echo json_encode($t);
+
+		$dbrifci=$this->db->escape($rifci);
+		$mSQL="SELECT cliente, nombre, tipo FROM scli WHERE rifci=${dbrifci}";
+		$query = $this->db->query($mSQL);
+		if($query->num_rows()>0){
+			foreach ($query->result() as $row){
+				$t['data'][]=array('codigo'=>$row->cliente,'nombre'=>$row->nombre,'tipo'=>$row->tipo);
+			}
+			$t['error']=0;
+			$t['msj']='Resultados encontrados: '.$query->num_rows();
+		}else{
+			if(preg_match("/(^[VEJG][0-9]{9}[[:blank:]]*$)/", $rifci)>0){
+				$r=$this->_crif($rifci);
+			}elseif(preg_match("/(^[VE][0-9]+[[:blank:]]*$)/", $rifci)>0){
+				$r=$this->_cced($rifci);
+			}
+			if($r['error']==0){
+				$t['error']=0;
+				$t['data'][]=array('codigo'=>'','nombre'=>$r['nombre'],'tipo'=>1);
+				$t['msj']='Resultados encontrados: 1';
+			}else{
+				$t['msj']='No se encontraron resultados';
+			}
+		}
+		echo json_encode($t);
+	}
 
 	//******************************************************************
 	//  CONSULTA LA CEDULA O RIF EN INTERNET

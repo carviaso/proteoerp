@@ -23,13 +23,42 @@ class secu{
 
 	function es_logeado(){
 		if($this->ci->session->userdata('logged_in')){
-			return TRUE;
+			return true;
 		}
-		return FALSE;
+		return false;
 	}
 
 	function usuario(){
 		return $this->ci->session->userdata('usuario');
+	}
+
+	function autentifica($usr,$pws){
+		if(empty($usr)) return false;
+		$dbusr=$this->ci->db->escape($usr);
+		$dbpws=sha1($pws);
+
+		if($this->es_interno()){
+			$ww='';
+		}else{
+			$ww=' AND remoto=\'S\'';
+		}
+
+		$mSQL="SELECT us_nombre FROM usuario WHERE us_codigo=${dbusr} AND SHA(us_clave)='${dbpws}' AND activo='S' ${ww}";
+		$cursor=$this->ci->db->query($mSQL);
+		if($cursor->num_rows() > 0){
+			$rr  = $cursor->row_array();
+			$sal = each($rr);
+			$sess_data = array('usuario' => $usr,'nombre'  => $sal[1],'logged_in'=> true );
+		}else{
+			$sess_data = array('logged_in'=> false);
+		}
+		$this->ci->session->set_userdata($sess_data);
+		if($sess_data['logged_in']){
+			logusu('MENU','Entro en Proteo');
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 	function login_uuid($uuid){

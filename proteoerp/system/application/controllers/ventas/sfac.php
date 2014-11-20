@@ -3521,8 +3521,12 @@ class Sfac extends Controller {
 			$dbcodigo = $this->db->escape($codigo);
 			$dbalmacen= $this->db->escape($almacen);
 			$tipo     = trim($this->datasis->dameval("SELECT tipo FROM sinv WHERE codigo=${dbcodigo}"));
-			if($tipo[0]=='S') return true;
-
+			if(!empty($tipo)){
+				if($tipo[0]=='S') return true;
+			}else{
+				$this->validation->set_message('chcananeg', 'El art&iacute;culo '.htmlspecialchars($codigo).' no tiene existe');
+				return false;
+			}
 			$mSQL    = "SELECT SUM(a.existen) AS cana FROM itsinv AS a JOIN caub AS b ON a.alma=b.ubica AND b.tipo='S' WHERE a.codigo=${dbcodigo} AND b.ubica=${dbalmacen}";
 			$existen = floatval($this->datasis->dameval($mSQL));
 			$val     = floatval($val);
@@ -5182,6 +5186,114 @@ class Sfac extends Controller {
 		}else{
 			echo 'Nota de entrega no encontrada';
 		}
+	}
+
+	//******************************************************************
+	// Crea una factura desde una nota de entrega
+	function creafrommovil($manual,$status=null){
+		$this->_url= $this->url.'dataedit/insert';
+		$this->genesal=false;
+
+		$rt=array(
+			'status' => 'B',
+			'mensaje'=> 'Debe asignarle un cajero al usuario',
+			'pk'     => '',
+			'manual' => $manual,
+			'vuelto' => 0.00
+		);
+
+		$cajero = $this->secu->getcajero();
+		$vende  = $this->secu->getvendedor();
+		$almace = $this->secu->getalmacen();
+
+		if(empty($cajero )){
+			$rt['mensaje'] = 'Debe asignarle un cajero al usuario';
+			echo json_encode($rt);
+			return false;
+		}
+
+		if(empty($vende )){
+			$rt['mensaje'] = 'Debe asignarle un vendedor al usuario';
+			echo json_encode($rt);
+			return false;
+		}
+
+		if(empty($almace)){
+			$rt['mensaje'] = 'Debe asignarle un almacen al usuario';
+			echo json_encode($rt);
+			return false;
+		}
+
+		$post  = $_POST;
+		$_POST=array(
+			'btn_submit' => 'Guardar',
+			'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
+			'cajero'     => $cajero,
+			'vd'         => $vende ,
+			'almacen'    => $almace,
+			'tipo_doc'   => 'F',
+			'factura'    => '',
+			'referen'    => 'P',
+			'cod_cli'    => $post['scli']['cliente'],
+			'sclitipo'   => $post['scli']['tipo'],
+			'nombre'     => $post['scli']['nombre'],
+			'rifci'      => $post['scli']['rifci'],
+			'direc'      => $post['scli']['direc'],
+			'totals'     => 0,
+			'iva'        => 0,
+			'totalg'     => 0,
+		);
+		$tipop=intval($post['scli']['tipo']);
+
+		$i=$totals=$totalg=$iva=0;
+		foreach($post['sitems'] as $val){
+			if($tipop==4){
+				$preca=floatval($val['base4']);
+			}elseif($tipop==3){
+				$preca=floatval($val['base3']);
+			}elseif($tipop==2){
+				$preca=floatval($val['base4']);
+			}else{
+				$preca=floatval($val['base1']);
+			}
+			$tota = round($preca*floatval($val['cana']),2);
+
+			$iiva   = round($tota*($val['iva']/100),2);
+			$iva    += $iiva;
+			$totals += $tota;
+			$totalg += $tota+$iiva ;
+
+			$_POST["codigoa_${i}"]  = rtrim($val['codigo']);
+			$_POST["desca_${i}"]    = rtrim($val['descrip']);
+			$_POST["cana_${i}"]     = $val['cana'];
+			$_POST["preca_${i}"]    = $preca;
+			$_POST["tota_${i}"]     = $tota;
+			$_POST["precio1_${i}"]  = $val['base1'];
+			$_POST["precio2_${i}"]  = $val['base2'];
+			$_POST["precio3_${i}"]  = $val['base3'];
+			$_POST["precio4_${i}"]  = $val['base4'];
+			$_POST["itiva_${i}"]    = $val['iva'];
+			$_POST["sinvpeso_${i}"] = $val['sinvpeso'];
+			$_POST["sinvtipo_${i}"] = $val['sinvtipo'];
+			$_POST["detalle_${i}"]  = '';
+			$_POST["combo_${i}"]    = '';
+			$i++;
+		}
+
+		$_POST['totals'] = $totals;
+		$_POST['iva']    = $iva;
+		$_POST['totalg'] = $totalg;
+
+		//sfpa
+		$i=0;
+		$_POST["tipo_${i}"]      = '';
+		$_POST["num_ref_${i}"]   = '';
+		$_POST["banco_${i}"]     = '';
+		$_POST["monto_${i}"]     = $totals;
+
+		//print_r($_POST);
+
+		$this->dataedit();
 	}
 
 	// Factura Mensualidades

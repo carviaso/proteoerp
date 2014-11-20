@@ -428,7 +428,7 @@ class Reparto extends Controller {
 				}else{
 					$cana=intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM sfac WHERE reparto='.$id));
 					if($cana>0){
-						$rep = $this->datasis->dameval('SELECT GROUP_CONCAT(id) from sfac where reparto='.$id); 
+						$rep = $this->datasis->dameval('SELECT GROUP_CONCAT(id) from sfac where reparto='.$id);
 						$this->db->where('id', $id);
 						$this->db->update('reparto', array( 'tipo' => 'C', 'carga' => $fecha, 'eliminadas' => $rep ));
 						echo 'Guardada';
@@ -553,7 +553,7 @@ class Reparto extends Controller {
 				$.post("'.site_url($this->url.'agregaf').'/"+mid+"/"+id, function(data){
 					var json = JSON.parse(data);
 					$("#totpeso").text(nformat(json.peso    ,2));
-					$("#totcana").text(nformat(json.cantidad,2));
+					$("#totcana").text(json.cantidad);
 					$("#bpos1").trigger("reloadGrid");
 					if(json.peso>capacidad){
 						$("#sobrepeso").text(nformat(json.peso-capacidad,2));
@@ -576,10 +576,10 @@ class Reparto extends Controller {
 		$paradas = floatval($this->datasis->dameval("SELECT COUNT(DISTINCT cod_cli) AS cana FROM sfac WHERE reparto=${id}"));
 		if(!$paradas) $paradas = 0;
 
-		$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana 
-		FROM sfac   AS a 
-		JOIN sitems AS b ON a.id=b.id_sfac 
-		JOIN sinv   AS c ON b.codigoa=c.codigo 
+		$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
+		FROM sfac   AS a
+		JOIN sitems AS b ON a.id=b.id_sfac
+		JOIN sinv   AS c ON b.codigoa=c.codigo
 		WHERE a.reparto=${id} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
 		if(!$volumen) $volumen = 0;
 
@@ -616,9 +616,9 @@ class Reparto extends Controller {
 		<br><br>
 		<table width='100%' align='center'>
 			<tr>
-				<td bgcolor='#DFDFDF'>TOTAL FACTURAS</td>
+				<td bgcolor='#DFDFDF'>TOTAL FACT.</td>
 			</tr><tr>
-				<td align='center' style='font-size:14pt;font-weight:bold;'><span id='totcana'>".nformat($cana)."</span></td>
+				<td align='center' style='font-size:14pt;font-weight:bold;'><span id='totcana'>".str_replace(',00','',nformat($cana))."</span></td>
 			</tr>
 		</table>
 		</td></tr>
@@ -646,17 +646,26 @@ class Reparto extends Controller {
 			$this->db->query($mSQL);
 			$msj = 'Factura Desmarcada';
 		}
-		$row = $this->datasis->damereg("SELECT SUM(peso) peso, COUNT(*) cana FROM sfac WHERE peso IS NOT NULL AND reparto=${dbreparto}");
 
-		$peso = floatval($row['peso']);
-		$cana = floatval($row['cana']);
+		$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada FROM sfac WHERE reparto=${dbreparto}");
+		$peso    = floatval($row['peso']);
+		$paradas = floatval($row['parada']);
+		$cana    = floatval($row['cana']);
+
+		$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
+		FROM sfac   AS a
+		JOIN sitems AS b ON a.id=b.id_sfac
+		JOIN sinv   AS c ON b.codigoa=c.codigo
+		WHERE a.reparto=${dbreparto} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
 
 		$this->db->where('id',$reparto);
-		$this->db->update('reparto',array('peso'=>$row['peso'], 'facturas'=>$row['cana']) );
+		$this->db->update('reparto',array('peso'=>$row['peso'], 'facturas'=>$row['cana'], 'volumen' =>$volumen, 'paradas'=>$paradas) );
 		$rt=array(
 			'mensaje' =>$msj,
 			'peso'    =>$peso,
-			'cantidad'=>$cana
+			'cantidad'=>$cana,
+			'volumen' =>$volumen,
+			'pardas'  =>$paradas,
 		);
 
 		echo json_encode($rt);
@@ -1190,10 +1199,19 @@ class Reparto extends Controller {
 			$this->db->update('sfac',array('reparto' => 0));
 			$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS(',',TRIM(eliminadas),${dbid}) WHERE id=${dbreparto}");
 
-			$row = $this->datasis->damereg("SELECT SUM(peso) AS peso, COUNT(*) AS cana FROM sfac WHERE peso IS NOT NULL AND reparto=${dbreparto}");
+			$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada FROM sfac WHERE reparto=${dbreparto}");
+			$peso    = floatval($row['peso']);
+			$paradas = floatval($row['parada']);
+			$cana    = floatval($row['cana']);
+
+			$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
+			FROM sfac   AS a
+			JOIN sitems AS b ON a.id=b.id_sfac
+			JOIN sinv   AS c ON b.codigoa=c.codigo
+			WHERE a.reparto=${dbreparto} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
 
 			$this->db->where('id',$reparto);
-			$this->db->update('reparto',array('peso'=>floatval($row['peso']), 'facturas'=>$row['cana']) );
+			$this->db->update('reparto',array('peso'=>$peso, 'facturas'=>$cana, 'volumen'=>$volumen, 'paradas'=>$paradas ));
 
 			logusu('reparto',"Retiro factura id: ${id} reparto ${reparto}");
 			echo 'Factura retirada';
@@ -1220,10 +1238,19 @@ class Reparto extends Controller {
 			$this->db->where('id',$idsfac);
 			$this->db->update('sfac',array('reparto' => $idreparto));
 
-			$row = $this->datasis->damerow("SELECT SUM(peso) AS peso, COUNT(*) AS cana FROM sfac WHERE peso IS NOT NULL AND reparto=${idreparto}");
+			$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada FROM sfac WHERE reparto=${dbreparto}");
+			$peso    = floatval($row['peso']);
+			$paradas = floatval($row['parada']);
+			$cana    = floatval($row['cana']);
+
+			$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
+			FROM sfac   AS a
+			JOIN sitems AS b ON a.id=b.id_sfac
+			JOIN sinv   AS c ON b.codigoa=c.codigo
+			WHERE a.reparto=${idreparto} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
 
 			$this->db->where('id',$idreparto);
-			$this->db->update('reparto',array('peso'=>floatval($row['peso']), 'facturas'=>$row['cana']) );
+			$this->db->update('reparto',array('peso'=>$peso, 'facturas'=>$cana , 'paradas'=>$paradas, 'volumen'=>$volumen));
 
 			logusu('reparto',"Incorporacion factura id: ${idsfac} reparto ${idreparto}");
 			echo 'Factura incorporada';
@@ -1506,13 +1533,14 @@ class Reparto extends Controller {
 		$query = $this->db->query($mSQL);
 		if($query->num_rows() > 0){
 			foreach( $query->result_array() as $row){
-				$cliente=trim($row['cliente']);
-				$numero =trim($row['numero']);
-				$smovid =$row['id'];
+				$cliente =trim($row['cliente']);
+				$numero  =trim($row['numero']);
+				$smovid  =$row['id'];
+				$tipo_doc=trim($row['tipo']);
 				if($row['repcob']=='MI'){
-					$mixto[] = "<button onclick=\"selcli('${cliente}','${numero}','F',${smovid})\">".$numero.'</button>';
+					$mixto[] = "<button onclick=\"selcli('${cliente}','${numero}','FC',${numero})\">".$numero.'</button>';
 				}else{
-					$cheque[]= "<button onclick=\"selcli('${cliente}','${numero}','F',${smovid})\">".$numero.'</button>';
+					$cheque[]= "<button onclick=\"selcli('${cliente}','${numero}','FC',${numero})\">".$numero.'</button>';
 				}
 			}
 		}
@@ -1523,20 +1551,28 @@ class Reparto extends Controller {
 	function instalar(){
 		if (!$this->db->table_exists('reparto')){
 			$mSQL="CREATE TABLE `reparto` (
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `tipo` char(1) NOT NULL COMMENT 'Tipo Pendiente, Cargado, Despachado, Finalizado, Anulado',
-			  `fecha` date DEFAULT NULL COMMENT 'Fecha de Despacho',
-			  `retorno` date DEFAULT NULL COMMENT 'Fecha que regresa',
-			  `chofer` char(5) DEFAULT NULL COMMENT 'Chofer tabla chofer',
-			  `vehiculo` char(10) DEFAULT NULL COMMENT 'Vehiculo => flota',
-			  `observa` text,
-			  `peso` decimal(10,2) DEFAULT NULL COMMENT 'Peso total',
-			  `facturas` int(11) DEFAULT NULL COMMENT 'Nro de Faturas',
-			  `estampa` date DEFAULT NULL,
-			  `usuario` char(12) DEFAULT NULL,
-			  `hora` char(8) DEFAULT NULL,
-			  PRIMARY KEY (`id`)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`tipo` CHAR(1) NOT NULL COMMENT 'Tipo Pendiente, Cargado, Despachado, Finalizado, Anulado',
+				`fecha` DATE NULL DEFAULT NULL COMMENT 'Fecha de Despacho',
+				`retorno` DATE NULL DEFAULT NULL COMMENT 'Fecha que regresa',
+				`chofer` CHAR(5) NULL DEFAULT NULL COMMENT 'Chofer tabla chofer',
+				`vehiculo` CHAR(10) NULL DEFAULT NULL COMMENT 'Vehiculo => flota',
+				`observa` TEXT NULL,
+				`peso` DECIMAL(10,2) NULL DEFAULT NULL COMMENT 'Peso total',
+				`facturas` INT(11) NULL DEFAULT NULL COMMENT 'Nro de Faturas',
+				`carga` DATE NULL DEFAULT NULL COMMENT 'Carga el Reparto',
+				`entregado` DATE NULL DEFAULT NULL COMMENT 'Entregado al Cliente',
+				`estampa` DATE NULL DEFAULT NULL,
+				`usuario` CHAR(12) NULL DEFAULT NULL,
+				`hora` CHAR(8) NULL DEFAULT NULL,
+				`eliminadas` VARCHAR(200) NULL DEFAULT '',
+				`volumen` DECIMAL(10,2) NULL DEFAULT '0.00',
+				`paradas` INT(11) NULL DEFAULT '0',
+				PRIMARY KEY (`id`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM
+			AUTO_INCREMENT=1";
 			$this->db->simple_query($mSQL);
 		}
 
@@ -1549,6 +1585,13 @@ class Reparto extends Controller {
 		$campos=$this->db->list_fields('reparto');
 		if(!in_array('eliminadas',$campos)){
 			$mSQL="ALTER TABLE reparto ADD COLUMN eliminadas varchar(200) NULL DEFAULT ''";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('volumen',$campos)){
+			$mSQL="ALTER TABLE `reparto`
+			ADD COLUMN `volumen` DECIMAL(10,2) NULL DEFAULT '0' AFTER `eliminadas`,
+			ADD COLUMN `paradas` INT(11) NULL DEFAULT '0' AFTER `volumen`";
 			$this->db->simple_query($mSQL);
 		}
 	}

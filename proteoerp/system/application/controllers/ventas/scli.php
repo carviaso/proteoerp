@@ -2064,7 +2064,7 @@ class Scli extends validaciones {
 		$edit->grupo = new dropdownField('Grupo', 'sclidialoggrupo');
 		$edit->grupo->db_name='grupo';
 		$edit->grupo->option('','Seleccione un grupo');
-		$edit->grupo->options('SELECT grupo, CONCAT(grupo," ",gr_desc) gr_desc FROM grcl ORDER BY gr_desc');
+		$edit->grupo->options('SELECT TRIM(grupo) AS grupo, CONCAT(grupo," ",gr_desc) gr_desc FROM grcl ORDER BY gr_desc');
 		$edit->grupo->rule = 'required';
 		$edit->grupo->size = 6;
 		$edit->grupo->maxlength = 4;
@@ -2078,11 +2078,17 @@ class Scli extends validaciones {
 		$edit->dire11->maxlength = 40;
 		$edit->dire11->style = 'width:95%;';
 
+		$edit->telefono = new inputField('Tel&eacute;fonos', 'sclidialogtelefono');
+		$edit->telefono->db_name = 'telefono';
+		$edit->telefono->rule = 'trim';
+		$edit->telefono->size=22;
+		$edit->telefono->maxlength =30;
+
 		$edit->ciudad1 = new dropdownField('Ciudad','sclidialogciudad1');
 		$edit->ciudad1->db_name='ciudad1';
 		$edit->ciudad1->rule = 'trim';
 		$edit->ciudad1->option('','Seleccionar');
-		$edit->ciudad1->options('SELECT ciudad codigo, ciudad FROM ciud ORDER BY ciudad');
+		$edit->ciudad1->options('SELECT TRIM(ciudad) AS codigo, ciudad FROM ciud ORDER BY ciudad');
 		$edit->ciudad1->style = 'width:200px';
 		$edit->ciudad1->insertValue = $this->datasis->traevalor('CIUDAD');
 
@@ -2101,7 +2107,7 @@ class Scli extends validaciones {
 		$edit->zona->db_name='zona';
 		$edit->zona->rule = 'trim|required';
 		$edit->zona->option('','Seleccionar');
-		$edit->zona->options('SELECT codigo, CONCAT(codigo," ", nombre) nombre FROM zona ORDER BY nombre');
+		$edit->zona->options('SELECT TRIM(codigo) AS codigo, CONCAT(codigo," ", nombre) nombre FROM zona ORDER BY nombre');
 		$edit->zona->style = 'width:166px';
 		$edit->zona->insertValue = $this->datasis->traevalor('ZONAXDEFECTO');
 
@@ -2111,13 +2117,16 @@ class Scli extends validaciones {
 		$edit->email->size =40;
 		$edit->email->maxlength =100;
 
-		$edit->tipo = new autoUpdateField('tipo','1', '1');
+		$edit->tipo    = new autoUpdateField('tipo'   ,'1', '1');
+		$edit->credito = new autoUpdateField('credito','N', 'N');
+		$edit->limite  = new autoUpdateField('limite' ,'0', '0');
 
 		$script ='
 		$(function() {
 			$("#sclidialogrifci").focusout(function(){
 
 				rif=$(this).val().toUpperCase();
+				$(this).val(rif);
 				$("#sclidialogrifci").val(rif);
 				if(!chrif(rif)){
 					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
@@ -2159,7 +2168,6 @@ class Scli extends validaciones {
 					//Fin del chequeo repetido
 
 				}
-
 			});
 		});
 
@@ -3332,7 +3340,7 @@ function chrif(rif){
 		$this->limitsant = $this->datasis->dameval('SELECT limite FROM scli WHERE cliente='.$dbcliente);
 	}
 
-	function _pre_ins($do) {
+	function _pre_ins($do){
 		$do->set('riffis',trim($do->get('rifci')));
 		$nomfis = $do->get('nomfis');
 		if(empty($nomfis)){
