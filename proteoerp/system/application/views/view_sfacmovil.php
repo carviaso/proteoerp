@@ -220,7 +220,7 @@ $(document).on("pagecreate", "#mainpage", function(){
 			html   = "";
 		var base, precio;
 		$ul.html("");
-		if(value && value.length > 2){
+		if(value && value.length >= 2){
 			$ul.html( "<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>" );
 			$ul.listview( "refresh" );
 			$.ajax({
