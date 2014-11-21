@@ -95,7 +95,7 @@ class Edrec extends Controller {
 		$mmes  = '<select id=\'mmes\' name=\'mmes\'>';
 		for ( $i = 1; $i < 13; $i++ ){
 			$m = str_pad($i,2,'0', STR_PAD_LEFT);
-			$mmes .= '<option '.($mes==$m ? 'selected' : '').' value=\''.$m.'\'>'.$m.'</option>';
+			$mmes .= '<option '.($mes==$m ? 'selected':'').' value=\''.$m.'\'>'.$m.'</option>';
 		}		
 		$mmes .= '</select>';
 
@@ -149,7 +149,7 @@ class Edrec extends Controller {
 		$("#genecobro").click(function(){
 			var mgene = {
 			state0: {
-				html:"<h1>Recibos al Cobro: </h1><br/><center>Fecha: '.$mano.'&nbsp; Mes: '.$mes.'</center><br/>",
+				html:"<h1>Recibos al Cobro: </h1><br/><center>Fecha: '.$mano.'&nbsp; Mes: '.$mmes.'</center><br/>",
 				buttons: { Cancelar: false, Aceptar: true },
 				focus: 1,
 				submit:function(e,v,m,f){
@@ -1300,7 +1300,7 @@ class Edrec extends Controller {
 				a.usuario,a.estampa, a.hora,a.transac, 'NOCON' codigo, 0 montasa, 0 monredu, 
 				0 monadic, 0 tasa, 0 reducida, 0 sobretasa, 0 exento
 			FROM edrec a JOIN scli b ON a.cod_cli=b.cliente
-			WHERE a.status = 'P' AND a.anomes = ".$dbanomes;
+			WHERE a.status = 'P' AND ( a.anomes <= ".$dbanomes." OR a.anomes IS NULL)";
 		
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
