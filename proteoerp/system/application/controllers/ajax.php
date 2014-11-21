@@ -1322,7 +1322,7 @@ class Ajax extends Controller {
 				aa.descrip,aa.cana,SUM(COALESCE(d.cana,0)) AS dev,aa.codigo, aa.precio1,aa.precio2,aa.precio3,aa.precio4,
 				aa.iva,aa.existen,aa.tipo,aa.peso, aa.ultimo, aa.pond,aa.preca,aa.detalle
 				FROM (SELECT TRIM(a.descrip) AS descrip,SUM(b.cana) AS cana,TRIM(a.codigo) AS codigo, a.precio1,a.precio2,a.precio3,a.precio4,
-				a.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond,b.preca,b.numa,b.detalle
+				b.iva,a.existen,a.tipo,a.peso, a.ultimo, a.pond,b.preca,b.numa,b.detalle
 				FROM sinv AS a
 				JOIN sitems AS b ON a.codigo=b.codigoa
 				WHERE b.numa=$dbfactura AND b.tipoa='F'

@@ -32,11 +32,23 @@ class Sfacmovil extends Controller {
 		header('Content-Type: application/json');
 		$usr=$this->input->post('usr');
 		$pws=$this->input->post('pws');
-		echo json_encode(($this->secu->autentifica($usr,$pws)));
+
+		$r=array(
+			'autent' => $this->secu->autentifica($usr,$pws),
+			'nombre' => $this->secu->getnombre()
+		);
+
+		echo json_encode($r);
+	}
+
+	function cese(){
+		header('Content-Type: application/json');
+		$this->secu->cese();
+		echo json_encode(true);
 	}
 
 	function chlogin(){
 		header('Content-Type: application/json');
-		echo json_encode(($this->secu->es_logeado()));
+		echo json_encode($this->secu->es_logeado());
 	}
 }

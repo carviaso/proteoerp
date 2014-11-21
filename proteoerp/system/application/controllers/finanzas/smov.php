@@ -2539,6 +2539,7 @@ class Smov extends Controller {
 			$cod_cli = $this->datasis->dameval("SELECT cod_cli FROM sfac WHERE transac=".$transac);
 			$nombre  = $this->datasis->dameval("SELECT nombre  FROM sfac WHERE transac=".$transac);
 			$monto   = $this->datasis->dameval("SELECT totalg  FROM sfac WHERE transac=".$transac);
+			if($numero[0]=='_') return false;
 		}
 		$this->rapyd->load('dataedit');
 		$script= '

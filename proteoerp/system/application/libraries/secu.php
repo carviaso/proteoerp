@@ -61,6 +61,10 @@ class secu{
 		}
 	}
 
+	function cese(){
+		$this->ci->session->sess_destroy();
+	}
+
 	function login_uuid($uuid){
 		$sel=array('cajero','vendedor','almacen','sucursal','us_nombre');
 		$this->db->select($sel);

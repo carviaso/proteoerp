@@ -124,12 +124,13 @@
 </div>
 
 <div data-theme="a" data-role="header" data-id="mainHeader">
-	<?php echo (isset($header))? $header:''; ?>
+	<span id='usrnom'></span><a href="#" class="ui-btn ui-corner-all ui-shadow ui-mini ui-btn-inline ui-icon-delete ui-btn-icon-left ui-btn-right" onclick='logout()'>Salir</a>
 </div>
 
 <div data-role="content">
 
 	<h3>Art&iacute;culos</h3>
+
 	<a href="#presumen" class="ui-btn ui-icon-bars ui-btn-icon-left ui-shadow-icon" >Ver Res&uacute;men</a>
 	<form class="ui-filterable">
 		<input id="autocomplete-input" data-type="search" placeholder="Buscar art&iacute;culo...">
@@ -379,8 +380,19 @@ function cana_add(este,id,row){
 	localStorage.setItem("data",JSON.stringify(db_data));
 }
 
+function logout(){
+	$.getJSON( "<?php echo site_url('ventas/sfacmovil/cese'); ?>", function( data ) {
+		if(data){
+			$('#usrnom').text('');
+			chlogin();
+		}
+	});
+}
+
 function prefact(){
-	$('#dialogfac').popup('open');
+	if(Object.keys(db_data).length > 0){
+		$('#dialogfac').popup('open');
+	}
 }
 
 function chrif(rif){
@@ -478,11 +490,13 @@ function login(){
 		url: '<?php echo site_url($this->url.'autentificar'); ?>',
 		data: $('#popuplogin').find("form").serialize(),
 		success: function(r,s,x){
-			if(!r){
+			if(!r.autent){
 				$('#popuplogin').find(".alert").html('Usuario o clave no valida');
 				return false;
 			}else{
+				$('#popuplogin').find("form")[0].reset();
 				$('#popuplogin').popup('close');
+				$('#usrnom').text(r.nombre);
 				return true;
 			}
 		}
@@ -499,8 +513,8 @@ function chlogin(){
 		data: $("#popuplogin").find("form").serialize(),
 		success: function(r,s,x){
 			if(!r){
-
 				$('#popuplogin').popup('open');
+				$('#usrnom').text('');
 				return false;
 			}else{
 				return true;

@@ -264,14 +264,17 @@ class Sfac extends Controller {
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("'.$ngrid.'").getRowData(id);
-
-				$.post("'.site_url('finanzas/smov/ncfac').'/"+ret.numero+"/create",
-					function(data){
-						$("#fncob").html(data);
-						//$("#fncob").dialog({ height: 300, width: 500 });
-						$("#fncob").dialog("open");
-					}
-				);
+				if(ret.numero.substr(0,1)!="_" && ret.tipo_doc=="F"){
+					$.post("'.site_url('finanzas/smov/ncfac').'/"+ret.numero+"/create",
+						function(data){
+							$("#fncob").html(data);
+							//$("#fncob").dialog({ height: 300, width: 500 });
+							$("#fncob").dialog("open");
+						}
+					);
+				}else{
+					$.prompt("<h1>No puede realizar esta operaci&oacute;n con el documento seleccionado</h1>");
+				}
 			}else{
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
 			}
@@ -285,6 +288,11 @@ class Sfac extends Controller {
 			var id = jQuery("'. $ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("'.$ngrid.'").getRowData(id);
+				if(ret.numero.substr(0,1)=="_"){
+					alert("Debe seleccionar una factura.");
+					return false;
+				}
+
 				if(ret.tipo_doc!="F"){
 					alert("Debe seleccionar una factura.");
 					return false;
@@ -322,7 +330,7 @@ class Sfac extends Controller {
 				if (id)	{
 					var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
 					window.open(\''.site_url('ventas/sfac/dataprint/modify').'/\'+id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
-				} else { 
+				} else {
 					$.prompt("<h1>Por favor Seleccione una Factura</h1>");
 				}
 			});';
@@ -342,7 +350,7 @@ class Sfac extends Controller {
 						}
 					}
 					});
-				} else { 
+				} else {
 					$.prompt("<h1>Por favor Seleccione una Factura</h1>");
 				}
 			});';
@@ -3618,8 +3626,18 @@ class Sfac extends Controller {
 		$referen= $do->get('referen');
 		$cajero = $do->get('cajero');
 		$numero = $do->get('numero');
+		$tipo_doc = $do->get('tipo_doc');
 		$descuento=floatval($do->get('descuento'));
 		$globaldes=$descuento/100;
+
+		if($tipo_doc=='D'){
+			$factura = trim($do->get('factura'));
+			if($factura[0]=='_'){
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='No puede devolver una prefactura';
+				return false;
+			}
+		}
+
 
 		$dbcliente=$this->db->escape($cliente);
 		if(empty($cajero) && $referen<>'C' && $referen<>'P'){
