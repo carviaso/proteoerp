@@ -2074,7 +2074,7 @@ class Scli extends validaciones {
 		$edit->dire11 = new inputField('Direcci&oacute;n','sclidialogdire11');
 		$edit->dire11->db_name='dire11';
 		$edit->dire11->rule = 'trim';
-		$edit->dire11->size      = 45;
+		$edit->dire11->size      = 90;
 		$edit->dire11->maxlength = 40;
 		$edit->dire11->style = 'width:95%;';
 

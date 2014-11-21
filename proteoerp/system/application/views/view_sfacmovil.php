@@ -270,7 +270,7 @@ $(document).on("pagecreate", "#mainpage", function(){
 
 	$("#sclidialogrifci").focusout(function(){
 
-		rif=$(this).val().toUpperCase().replace(/[^VEPG0-9]+/g, '');
+		rif=$(this).val().toUpperCase().replace(/[^VEPJG0-9]+/g, '');
 		$(this).val(rif);
 		$("#sclidialogrifci").val(rif);
 		if(!chrif(rif)){
