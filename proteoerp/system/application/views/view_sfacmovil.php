@@ -32,7 +32,7 @@
 	<form>
 		<div style="padding:10px 20px;">
 			<h3>Por favor ingrese</h3>
-			<div class='alert' style='color:red;'></div>
+			<div class='alert' style='color:red;padding-bottom:0px;font-size:0.6em'></div>
 			<label for="un" class="ui-hidden-accessible">Usuario:</label>
 			<input name="usr" id="un" value="" placeholder="usuario" data-theme="a" type="text">
 			<label for="pw" class="ui-hidden-accessible">Clave:</label>
@@ -44,21 +44,21 @@
 </div>
 
 
-<div data-role="popup" id="dialogfac" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
+<div data-role="popup" id="dialogfac" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:500px;">
 	<div data-role="header" data-theme="a">
 	<h1>Pre-Facturar pedido</h1>
 	</div>
 	<div role="main" class="ui-content">
 		<h3 class="ui-title"></h3>
-		<div style='color:red' id='alertscli'></div>
+		<div style='color:red;padding-bottom:0px;font-size:0.6em' id='alertscli'></div>
 		<form id='sclidialog'>
 		<input type="hidden" name="sclidialogcliente" id="sclidialogcliente" >
 
 		<label for="sclidialogrifci">Rif/CI:</label>
-		<input name="sclidialogrifci" id="sclidialogrifci" placeholder="" value="" type="text" />
+		<input name="sclidialogrifci" id="sclidialogrifci" placeholder="Ej: V12345678 J0000000...." value="" type="text" />
 
 		<label for="sclidialognombre">Nombre:</label>
-		<input name="sclidialognombre" id="sclidialognombre" placeholder="" value="" type="text" />
+		<input name="sclidialognombre" id="sclidialognombre" placeholder="Nombre" value="" type="text" />
 
 		<div id='sclires'>
 			<label for="sclidialogdire11">Direcci&oacute;n:</label>
@@ -190,7 +190,6 @@ $(document).on("pagecreate", "#mainpage", function(){
 				precio = base*(1+(val.iva/100));
 				ccodigo= val.codigo.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
 
-
 				html += "<li><a href='#' onclick='buscaart(\""+ccodigo+"\")'>";
 				html += "<h2 style='font-size:0.8em'>"+val.descrip+"";
 				html += "</h2>";
@@ -278,6 +277,7 @@ $(document).on("pagecreate", "#mainpage", function(){
 			alert("Al parecer el RIF colocado no es correcto, por favor verifiquelo.");
 			return true;
 		}else{
+			$.mobile.loading('show');
 			$.ajax({
 				type: "POST",
 				url: "<?php echo site_url('ajax/intelirifci') ?>",
@@ -285,6 +285,7 @@ $(document).on("pagecreate", "#mainpage", function(){
 				data: {rifci: rif},
 				success: function(response){
 					if(response.error==0){
+
 						if(response.data.length==1){
 							$("#sclidialognombre").val(response.data[0].nombre);
 							$("#sclidialogcliente").val(response.data[0].codigo);
@@ -297,7 +298,10 @@ $(document).on("pagecreate", "#mainpage", function(){
 							$('#sclires').show();
 						}
 					}
+					$.mobile.loading('hide');
 				}
+			}).fail(function(){
+				$.mobile.loading('hide');
 			});
 		}
 	});
@@ -314,6 +318,7 @@ $(document).on("pagecreate", "#mainpage", function(){
 
 	$('#dialogfac').on({
 		popupafteropen: function (){
+			$('.ui-popup-container').css({top: 0});
 			if($('#sclicliente').val()!=''){
 				$('#sclires').hide();
 			}else{
@@ -390,8 +395,11 @@ function logout(){
 }
 
 function prefact(){
-	if(Object.keys(db_data).length > 0){
-		$('#dialogfac').popup('open');
+	if(chlogin()){
+		if(Object.keys(db_data).length > 0){
+			$('#alertscli').html('');
+			$('#dialogfac').popup('open');
+		}
 	}
 }
 
@@ -430,6 +438,7 @@ function guarda(){
 
 	var cod_cli=$('#sclidialogcliente').val();
 	if(cod_cli==null || cod_cli=='' || cod_cli==false){
+		$.mobile.loading('show');
 		$.ajax({
 			type: "POST", dataType: "json", async: false,
 			url: '<?php echo site_url('ventas/scli/dataeditdialog/insert'); ?>',
@@ -446,11 +455,15 @@ function guarda(){
 						'direc'    : r.data.direc,
 						'descuento': 0
 					}
+					tipop = r.data.tipo;
 					localStorage.setItem("scli",JSON.stringify(db_scli));
 					prefac();
+					$.mobile.loading('hide');
 					return true;
 				}
 			}
+		}).fail(function(){
+				$.mobile.loading('hide');
 		});
 	}else{
 		db_scli={
@@ -468,23 +481,30 @@ function guarda(){
 }
 
 function prefac(){
-	$.ajax({
-		type: "POST", dataType: "json", async: false,
-		url: '<?php echo site_url('ventas/sfac/creafrommovil/N/insert'); ?>',
-		data: {'scli': db_scli ,'sitems': db_data},
-		success: function(r,s,x){
-			if(r.status=="B"){
-				$('#alertscli').html(r.mensaje);
-			}else{
-				limpiar();
-				$('#dialogfac').popup('close');
-				return true;
+	if(chlogin()){
+		$.mobile.loading('show');
+		$.ajax({
+			type: "POST", dataType: "json", async: false,
+			url: '<?php echo site_url('ventas/sfac/creafrommovil/N/insert'); ?>',
+			data: {'scli': db_scli ,'sitems': db_data},
+			success: function(r,s,x){
+				if(r.status=="B"){
+					$('#alertscli').html(r.mensaje);
+				}else{
+					limpiar();
+					$('#dialogfac').popup('close');
+					return true;
+				}
+				$.mobile.loading('hide');
 			}
-		}
-	});
+		}).fail(function(){
+			$.mobile.loading('hide');
+		});
+	}
 }
 
 function login(){
+	$.mobile.loading('show');
 	$.ajax({
 		type: "POST", dataType: "json", async: false,
 		url: '<?php echo site_url($this->url.'autentificar'); ?>',
@@ -499,14 +519,17 @@ function login(){
 				$('#usrnom').text(r.nombre);
 				return true;
 			}
+			$.mobile.loading('hide');
 		}
 	}).fail(function( jqXHR, textStatus ) {
 		$("#popuplogin").find(".alert").html('Sin respuesta del servidor');
+		$.mobile.loading('hide');
 		return false;
 	});
 }
 
 function chlogin(){
+	var rt;
 	$.ajax({
 		type: "POST", dataType: "json", async: false,
 		url: '<?php echo site_url($this->url.'chlogin'); ?>',
@@ -514,13 +537,18 @@ function chlogin(){
 		success: function(r,s,x){
 			if(!r){
 				$('#popuplogin').popup('open');
+				$('#dialogfac').popup('close');
+				$('#presumen').panel('close');
 				$('#usrnom').text('');
+				rt=false;
 				return false;
 			}else{
+				rt=true;
 				return true;
 			}
 		}
 	});
+	return rt;
 }
 
 </script>
