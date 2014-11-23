@@ -807,14 +807,14 @@ class Cierre extends Controller {
 			$esta->cell(18,3,$row->cedula, 0, 0, 'L',1);
 			$esta->cell(45,3,$row->nombre, 0, 0, 'L',1);
 			$esta->cell(24,3,number_format($row->exento,2), 0, 0, 'R',1);
-			$esta->cell(24,3,number_format($row->gtotal-$row->impuesto,2), 0, 0, 'R',1);
+			$esta->cell(24,3,number_format($row->gtotal - $row->impuesto - $row->exento, 2), 0, 0, 'R',1);
 			$esta->cell(24,3,number_format($row->impuesto,2), 0, 0, 'R',1);
 			$esta->cell(20,3,number_format($row->ivarete,2), 0, 0, 'R',1);
 			$esta->cell(24,3,number_format($row->gtotal,2), 0, 0, 'R',1);
 			$esta->ln(3);
 
 			$exento   += $row->exento;
-			$base     += $row->gtotal-$row->impuesto;
+			$base     += $row->gtotal - $row->impuesto - $row->exento;
 			$impuesto += $row->impuesto;
 			$ivarete  += $row->ivarete;
 			$gtotal   += $row->gtotal;
