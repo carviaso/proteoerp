@@ -83,6 +83,7 @@ class Sinv extends Controller {
 		//Panel Central y Sur
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'] );
 
+
 		$param['script']      = script('sinvmaes.js');
 		$param['WestPanel']   = $WestPanel;
 		$param['funciones']   = $funciones;
@@ -189,7 +190,7 @@ class Sinv extends Controller {
 
 		//Permite asignar a varios producto el mismo precio
 		$aprecios="<form id='setprecio'>
-		<fieldset>
+-		<fieldset>
 			<legend>Cambio de precios:</legend>
 			Precio1: <input name='_p1' id='_p1' style='text-align: right;width: 100px' type='text'>
 			Precio3: <input name='_p3' id='_p3' style='text-align: right;width: 100px' type='text'><br>
@@ -662,6 +663,7 @@ class Sinv extends Controller {
 	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
+
 		$ngrid = '#newapi'.$grid0;
 		$bodyscript .= '
 		var verinactivos = 0;
@@ -1152,6 +1154,7 @@ class Sinv extends Controller {
 
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
+
 		return $bodyscript;
 	}
 

@@ -9,6 +9,7 @@
 *
 *
 **********************************************************************/
+$this->load->library('jsmin');
 
 //Por compatibilidad con version anterior
 if( isset($tema)   == false) $tema    = 'proteo';
@@ -68,6 +69,7 @@ if ( isset($readyLayout) == false ){
 	};
 ';
 }
+$readyLayout = JSMin::minify($readyLayout);
 
 // Procesa los grids
 if ( isset($grids) == false ) $grids = array();
@@ -93,10 +95,11 @@ if ( count($grids) > 0 ){
 		$i++;
 	}
 }
+$depgrids = JSMin::minify($depgrids);
+
 
 if (isset($listados)) {
 	if (!empty($listados)) {
-
 		$ListGrid ='
 	//Listados del Modulo
 	jQuery("#listados").jqGrid({
@@ -123,6 +126,8 @@ if (isset($listados)) {
 ';
 	} else $ListGrid = '';
 } else $ListGrid = '';
+$ListGrid = JSMin::minify($ListGrid);
+
 
 if (isset($otros)) {
 	if (!empty($otros)) {
@@ -155,6 +160,8 @@ if (isset($otros)) {
 ';
 	} else $OtrGrid  = '';
 } else $OtrGrid  = '';
+$OtrGrid = JSMin::minify($OtrGrid);
+
 
 /* ***************************************************************************************************************** */
 ?>
@@ -240,31 +247,17 @@ echo "\n";
 </style>
 
 <script type="text/javascript">
-var base_url = '<?php echo base_url() ?>';
-var site_url = '<?php echo site_url() ?>';
-var url = '';
-var idactual = 0;
-
-$(function(){$(".inputnum").numeric(".");});
-
-$(function() {$( "input:submit, a, button", ".botones",".otros" ).button();});
-
-
-$(document).ready(function() {
-	var lastsel2=0;
-	var _cargo = "";
-<?php
+var base_url = '<?php echo base_url() ?>';var site_url = '<?php echo site_url() ?>';var url = '';var idactual = 0;
+$(function(){$(".inputnum").numeric(".");});$(function() {$( "input:submit, a, button", ".botones",".otros" ).button();});
+$(document).ready(function() {var lastsel2=0;var _cargo = "";<?php
 	echo $readyscript;
-
 	//Layout por defecto
 	echo $readyLayout;
 	//Grids
 	echo $depgrids;
-
 	echo $ListGrid;
 	echo $OtrGrid;
-
-if (isset($funciones))  echo $funciones;
+if (isset($funciones))  echo JSMin::minify($funciones);
 
 //Busca Tamano
 if ( isset($tamano) )
@@ -272,29 +265,10 @@ if ( isset($tamano) )
 		echo "\n\twindow.resizeTo(".$tamano[0].",".$tamano[1].");\n";
 
 ?>
-	$('.clearsearchclass').css('padding-right','0');
-	$('.clearsearchclass').css('padding-left' ,'0');
-});
-
-<?php if (isset($postready))  echo $postready; ?>
-
-//Funcion para bloquear y esperar
-function esperar(url){
-	$.blockUI({
-		message: $('#displayBox'),
-		css: {
-			top:  ($(window).height() - 400) /2 + 'px',
-			left: ($(window).width()  - 400) /2 + 'px',
-			width: '300px'
-		}
-	});
-	$.get(url, function(data) {
-		setTimeout($.unblockUI, 2);
-		$.prompt(data);
-	});
-	return false;
-};
-
+$('.clearsearchclass').css('padding-right','0');$('.clearsearchclass').css('padding-left' ,'0');});
+<?php if (isset($postready))  echo $postready; 
+//Funcion para bloquear y esperar ?>
+function esperar(url){$.blockUI({message: $('#displayBox'),css: {top:  ($(window).height()-400)/2+'px',left: ($(window).width()-400)/2+'px',width: '300px'}});$.get(url, function(data) {setTimeout($.unblockUI, 2);$.prompt(data);});return false;};
 </script>
 </head>
 <body  id="dt_proteo">
@@ -321,7 +295,6 @@ if (isset($SouthPanel) == true ){
 	}
 }
 ?>
-
 <div id="dtg_dialog" title="Exporta Datos">
 	<ul>
        <?php echo (isset($grid['export']['pdf'])   && $grid['export']['pdf']   == true)?"<li><a href='javascript:void(0);' onClick=\"dtgExport('pdf'," . $grid['querystring'] . ");\" >Pdf</a></li>":''; ?>
@@ -332,7 +305,7 @@ if (isset($SouthPanel) == true ){
 	</ul>
 </div>
 
-<?php if(isset($bodyscript)) echo $bodyscript; ?>
+<?php if(isset($bodyscript)) echo JSMin::minify($bodyscript); ?>
 
 <div id="displayBox" style="display:none" ><p>Disculpe por la espera.....</p><img  src="<?php echo base_url() ?>images/doggydig.gif" width="131px" height="79px"/></div>
 </body>

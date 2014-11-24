@@ -15,9 +15,9 @@ class Electores extends Controller {
 
 	}
 
-	//***************************************
-	//           Auto complete
-	//***************************************
+	//******************************************************************
+	//    Auto complete
+	//
 	function busca(){
 		$papellido  = $this->uri->segment($this->uri->total_segments());
 		$pnombre    = $this->uri->segment($this->uri->total_segments()-1);
