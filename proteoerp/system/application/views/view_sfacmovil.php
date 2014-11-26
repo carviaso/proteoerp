@@ -295,12 +295,17 @@ $(document).on("pagecreate", "#mainpage", function(){
 								$('#sclires').show();
 							}
 						}else{
+							//Implementar cuando son varios
 							$('#sclires').show();
 						}
+
+					}else{ //si no consigue el cliente
+						$('#sclires').show();
 					}
 					$.mobile.loading('hide');
 				}
 			}).fail(function(){
+				$('#sclires').show();
 				$.mobile.loading('hide');
 			});
 		}
