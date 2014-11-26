@@ -510,6 +510,7 @@ function login(){
 		url: '<?php echo site_url($this->url.'autentificar'); ?>',
 		data: $('#popuplogin').find("form").serialize(),
 		success: function(r,s,x){
+			$.mobile.loading('hide');
 			if(!r.autent){
 				$('#popuplogin').find(".alert").html('Usuario o clave no valida');
 				return false;
@@ -519,7 +520,7 @@ function login(){
 				$('#usrnom').text(r.nombre);
 				return true;
 			}
-			$.mobile.loading('hide');
+
 		}
 	}).fail(function( jqXHR, textStatus ) {
 		$("#popuplogin").find(".alert").html('Sin respuesta del servidor');

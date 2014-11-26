@@ -374,6 +374,7 @@ class Rete extends Controller {
 		$edit->pama1->maxlength=13;
 		$edit->pama1->css_class='inputnum';
 		$edit->pama1->rule='numeric';
+		$edit->pama1->append('Usado para el c&aacute;lculo del sustraendo.');
 
 		$edit->concepto = new inputField('C&oacute;digo Concepto', 'concepto');
 		$edit->concepto->size =5;
