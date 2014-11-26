@@ -501,6 +501,13 @@ class Ajax extends Controller {
 		$alma   = $this->input->post('alma');
 		$vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
 
+		if($alma=='--'){ //Extrae el almacen del usuario
+			$alma=$this->secu->getalmacen();
+			if(empty($alma)){
+				$alma=false;
+			}
+		}
+
 		if($vnega=='N'){
 			$wvnega=' AND IF(MID(a.tipo,1,1) IN ("S","C"),1,e.existen>0) ';
 		}else{

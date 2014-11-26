@@ -124,7 +124,7 @@
 </div>
 
 <div data-theme="a" data-role="header" data-id="mainHeader">
-	<span id='usrnom'></span><a href="#" class="ui-btn ui-corner-all ui-shadow ui-mini ui-btn-inline ui-icon-delete ui-btn-icon-left ui-btn-right" onclick='logout()'>Salir</a>
+	<span id='usrnom'><?php if($this->secu->es_logeado()) echo $this->secu->getnombre(); ?></span><a href="#" class="ui-btn ui-corner-all ui-shadow ui-mini ui-btn-inline ui-icon-delete ui-btn-icon-left ui-btn-right" onclick='logout()'>Salir</a>
 </div>
 
 <div data-role="content">
@@ -230,7 +230,7 @@ $(document).on("pagecreate", "#mainpage", function(){
 				crossDomain: false,
 				data: {
 					q   : $input.val(),
-					alma: "<?php echo $this->secu->getalmacen(); ?>"
+					alma: "--"
 				}
 			}).then(function(response){
 				$.each(response, function ( i, val ){
