@@ -7,28 +7,28 @@
 */
 class Common extends controller {
 
-	function _traetipo($codigo){
+	static function _traetipo($codigo){
 		$sql='SELECT tbanco FROM banc WHERE codbanc='.$this->db->escape($codigo);
 		return $this->datasis->dameval($sql);
 	}
 
-	function _traemoneda($codigo){
+	static function _traemoneda($codigo){
 		$sql='SELECT moneda FROM banc WHERE codbanc='.$this->db->escape($codigo);
 		return $this->datasis->dameval($sql);
 	}
 
-	function _traebandata($codigo){
+	static function _traebandata($codigo){
 		$sql='SELECT tbanco,moneda,banco,saldo,depto,numcuent FROM banc WHERE codbanc='.$this->db->escape($codigo);
 		return $this->datasis->damerow($sql);
 	}
 
-	function _traedatausr(){
+	static function _traedatausr(){
 		$usr=$this->session->userdata('usuario');
 		$sql='SELECT vendedor,cajero,sucursal,almacen FROM usuario WHERE us_codigo='.$this->db->escape($usr);
 		return $this->datasis->damerow($sql);
 	}
 
-	function _scajstatus($cajero){
+	static function _scajstatus($cajero){
 		$dbcajero=$this->db->escape($cajero);
 		$mSQL = 'SELECT fechac,status FROM scaj WHERE cajero='.$dbcajero;
 		$row  = $this->datasis->damerow($mSQL);
@@ -45,6 +45,6 @@ class Common extends controller {
 	}
 
 	//Para el autocomplete
-	function _automgas(){
+	static function _automgas(){
 	}
 }
