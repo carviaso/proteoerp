@@ -23,10 +23,9 @@ class Bmov extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
-	//Layout en la Ventana
+	//******************************************************************
+	// Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -85,10 +84,10 @@ class Bmov extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
-	//Funciones de los Botones
-	//fuera del doc ready
-	//***************************
+	//******************************************************************
+	// Funciones de los Botones
+	// fuera del doc ready
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
 
@@ -114,12 +113,9 @@ class Bmov extends Controller {
 		return $bodyscript;
 	}
 
-
-
-
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -441,7 +437,7 @@ class Bmov extends Controller {
 		$grid->label('Conciliado');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => 'false',
+			'editable'      => 'true',
 			'width'         => 80,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
@@ -449,19 +445,6 @@ class Bmov extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-/*
-		$grid->addField('posdata');
-		$grid->label('Posdata');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-*/
 
 		$grid->addField('abanco');
 		$grid->label('A.Banco');
@@ -493,16 +476,6 @@ class Bmov extends Controller {
 			'edittype'      => "'text'",
 		));
 
-/*
-		$grid->addField('susti');
-		$grid->label('Susti');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 160,
-			'edittype'      => "'text'",
-		));
-*/
 
 		$grid->addField('ndebito');
 		$grid->label('N.D&eacute;bito');
@@ -638,7 +611,7 @@ class Bmov extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -652,7 +625,7 @@ class Bmov extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -755,7 +728,6 @@ class Bmov extends Controller {
 			//$salida .= "<tr bgcolor='#d7c3c7'><td colspan='4' align='center'>Saldo : ".nformat($saldo). "</td></tr>";
 			$salida .= "</table></td>";
 		}
-
 
 		echo $salida.'</tr></table>';
 	}

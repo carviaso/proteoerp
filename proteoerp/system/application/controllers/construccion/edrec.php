@@ -1135,6 +1135,7 @@ class Edrec extends Controller {
 			FROM edinmue a ) aa
 		WHERE aa.aplicacion IS NOT NULL AND aa.aplicacion NOT IN ('CO','')";
 		$query = $this->db->query($mSQL);
+
 		$malit = array();
 		$malit['CO'] = 0;
 		if ($query->num_rows() > 0){
@@ -1289,13 +1290,13 @@ class Edrec extends Controller {
 
 		$tasa = $this->datasis->traevalor('CONDOADM','COMISION DE GASTOS ADMINISTRATIVOS');
 		if ($tasa == '') $tasa = 10; 
-	
+
 		//Genera los recibos
 		$mSQL = "
 			SELECT 
 				a.cod_cli, b.nombre, 'ND' tipo_doc, CONCAT('RC',MID(a.numero,3,6)) numero,
 				a.fecha, a.cuota monto, 0 impuesto, 0 abonos, a.vence, 'RC' tipo_ref, 
-				a.numero num_ref, 'RECIBO DE CONDOMINIO' observa1, a.id,
+				a.numero num_ref, 'RECIBO DE CONDOMINIO ${dbanomes}' observa1, a.id,
 				CONCAT('CORRESPONDIENTE AL MES ',MID(a.anomes,5,2),'-',MID(a.anomes,1,4)) observa2,
 				a.usuario,a.estampa, a.hora,a.transac, 'NOCON' codigo, 0 montasa, 0 monredu, 
 				0 monadic, 0 tasa, 0 reducida, 0 sobretasa, 0 exento
@@ -1403,4 +1404,4 @@ class Edrec extends Controller {
 		}
 	}
 }
-?>
+

@@ -1,7 +1,7 @@
 $filter = new DataFilter("Filtro del Reporte");
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$filter->db->select(array("fecha","tipo_op","numero", "CONCAT(TRIM(a.concepto),' ',a.nombre) concepto", "(tipo_op NOT IN ('CH','ND'))*monto as debitos", "(tipo_op IN ('CH','ND'))*monto as creditos", "(tipo_op IN ('CH','ND'))*monto as saldo"));
+$filter->db->select(array("fecha","tipo_op","numero", "CONCAT(TRIM(a.concepto),' ',a.nombre) concepto", "(tipo_op NOT IN ('CH','ND'))*monto as debitos", "(tipo_op IN ('CH','ND'))*monto as creditos", "if(tipo_op IN ('CH','ND'),-1,1)*monto as saldo"));
 $filter->db->from('bmov as a');
 $filter->db->join('banc as b','a.codbanc=b.codbanc');
 //$filter->db->orderby('fecha');
@@ -33,14 +33,17 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 	$mSQL=$filter->db->_compile_select();
 	$mSQL=$mSQL."UNION ALL
 
-	SELECT DATE_ADD('".$filter->fecha->newValue."01',INTERVAL -1 DAY) AS fecha, NULL, 'SI', 'SALDO ANTERIOR',
-	((tipo_op NOT IN ('CH', 'D'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))>0) as debitos,
-	((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))*(((tipo_op NOT IN ('CH', 'ND'))*monto-((tipo_op IN ('CH', 'ND'))*monto))<0)*(-1) as creditos, 0 as saldo
+	SELECT DATE_ADD('20141101',INTERVAL -1 DAY) AS fecha, 
+		'SA' tipo_doc, 'SA', 'SALDO ANTERIOR', 
+		if(SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as debitos, 
+		if(SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,0,SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto))*(-1) as creditos, 
+		SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto) as saldo 
 	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc
-	WHERE EXTRACT(YEAR_MONTH FROM fecha) < ' ".$filter->fecha->newValue." ' AND a.codbanc = ' ".$filter->banco->newValue."'
+	WHERE EXTRACT(YEAR_MONTH FROM fecha) < '".$filter->fecha->newValue."' AND a.codbanc = '".$filter->banco->newValue."' AND anulado<>'S'
 	GROUP BY a.codbanc
 	ORDER BY fecha";
 
+	//echo $mSQL;
 	$mSALDOANT=$this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE EXTRACT(YEAR_MONTH FROM fecha) <".$filter->fecha->newValue."  AND codbanc = '".$filter->banco->newValue."' AND anulado<>'S' ");
 	$mSALDOACT=0;
 
