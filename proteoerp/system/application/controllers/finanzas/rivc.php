@@ -1198,7 +1198,6 @@ class Rivc extends Controller {
 
 	function dataedit(){
 		$this->rapyd->load('datadetails','dataobject');
-		$usrdata=common::_traedatausr();
 
 		$do = new DataObject('rivc');
 		//$do->pointer('scli' ,'scli.cliente=rivc.cod_cli','sprv.tipo AS sprvtipo, sprv.reteiva AS sprvreteiva','left');
