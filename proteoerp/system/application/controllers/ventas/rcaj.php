@@ -238,7 +238,7 @@ class Rcaj extends validaciones {
 		foreach ($query->result() as $i=>$row){
 			$c_otrp++;
 			$arr=array('cOTR');
-			foreach($arr AS $o=>$nobj){
+			foreach($arr as $o=>$nobj){
 				$obj = $nobj.$row->tipo;
 				$form->$obj = new inputField($row->nombre, $obj);
 				$form->$obj->style='text-align:right';
@@ -258,7 +258,7 @@ class Rcaj extends validaciones {
 
 		//Inicio tabla Resumen
 		$arr=array('TOTR'=>'Total de otras formas de pago','TEFE'=>'Total Efectivo','TGLOB'=>'Total Global','UFAC'=>'Ultima Factura');
-		foreach($arr AS $obj=>$titulo){
+		foreach($arr as $obj=>$titulo){
 			$form->$obj = new inputField($titulo, $obj);
 			$form->$obj->style='text-align:right';
 			$form->$obj->css_class='efectivo';
@@ -329,7 +329,7 @@ class Rcaj extends validaciones {
 				(SELECT b.tipo, b.monto AS monto
 				FROM sfac AS a
 				JOIN sfpa AS b ON a.transac=b.transac
-				WHERE a.fecha=${dbfecha} AND a.referen='E' AND b.cobrador=${dbcajero} AND a.tipo_doc<>'X' AND MID(a.numero,1,1)<>'_' AND b.tipo<>'RP'
+				WHERE a.fecha=${dbfecha} AND (a.referen='E' OR a.inicial>0) AND b.cobrador=${dbcajero} AND a.tipo_doc<>'X' AND MID(a.numero,1,1)<>'_' AND b.tipo<>'RP'
 				UNION ALL
 				SELECT e.tipo,e.monto AS monto
 				FROM sfpa AS e
