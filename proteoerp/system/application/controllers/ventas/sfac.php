@@ -3517,6 +3517,8 @@ class Sfac extends Controller {
 
 	//Chequea el cajero
 	function chcajero($scaj){
+		return true;
+		
 		$referen=$this->input->post('referen');
 
 		if($referen===false) return true; //En estos caso se evalua en el pre-process
@@ -3531,6 +3533,7 @@ class Sfac extends Controller {
 		}else{
 			return true;
 		}
+		
 	}
 
 	//Chequea si puede o no vender negativo
