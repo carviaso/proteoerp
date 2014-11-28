@@ -2858,9 +2858,9 @@ class Sfac extends Controller {
 		$edit->direc->readonly =true;
 		$edit->direc->size = 40;
 
-		$cajero = $this->datasis->dameval('SELECT a.cajero FROM usuario a JOIN scaj b ON a.cajero=b.cajero WHERE a.us_codigo='.$this->db->escape( $this->session->userdata('usuario')) );
 		$edit->cajero= new hiddenField('Cajero', 'cajero');
-		$edit->cajero->inputValue = $cajero;
+		$edit->cajero->insertValue = $this->secu->getcajero();
+		$edit->cajero->rule = 'condi_required|callback_chcajero';
 
 /*
 		$edit->cajero= new dropdownField('Cajero', 'cajero');
@@ -3515,6 +3515,24 @@ class Sfac extends Controller {
 		return false;
 	}
 
+	//Chequea el cajero
+	function chcajero($scaj){
+		$referen=$this->input->post('referen');
+
+		if($referen===false) return true; //En estos caso se evalua en el pre-process
+		if($referen=='E' || $referen=='M'){
+			if(empty($scaj)){
+				$this->validation->set_message('chcajero', 'No posee cajero asignado');
+				return false;
+			}
+			$rt=$this->validation->cajerostatus($scaj);
+			$this->validation->set_message('chcajero', 'El cajero ya fue cerrado para esta fecha');
+			return $rt;
+		}else{
+			return true;
+		}
+	}
+
 	//Chequea si puede o no vender negativo
 	function chcananeg($val,$i){
 		$tipo_doc = $this->input->post('tipo_doc');
@@ -3647,6 +3665,11 @@ class Sfac extends Controller {
 				return false;
 			}
 			$do->set('cajero',$cajero);
+			$chcaj=$this->validation->cajerostatus($cajero);
+			if(!$chcaj){
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Cajero inexistente o cerrado para la fecha';
+				return false;
+			}
 		}
 
 		//Totaliza la factura
