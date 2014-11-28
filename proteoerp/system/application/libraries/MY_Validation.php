@@ -262,6 +262,11 @@ class MY_Validation extends CI_Validation{
 	function cajerostatus($scaj){
 		$dbscaj=$this->CI->db->escape($scaj);
 		$mSQL  = "SELECT fechac,status FROM scaj WHERE cajero=${dbscaj}";
+		$rcaj  = trim($this->CI->datasis->dameval("SELECT tipo FROM rcaj WHERE fecha=CURDATE() AND cajero=${dbscaj}"));
+		if(!empty($rcaj)){
+			$this->set_message('cajerostatus', "Ya hay un procedimiento de cierre para el cajero ${scaj}");
+			return false;
+		}
 		$query = $this->CI->db->query($mSQL);
 		if($query->num_rows() > 0){
 			$this->set_message('cajerostatus', 'El cajero ya fue cerrado para esta fecha');
@@ -288,7 +293,8 @@ class MY_Validation extends CI_Validation{
 	}
 
 	function porcent($porcen){
-		if ($porcen<=100 AND $porcen>=0) return true;
+		$porcen=floatval($porcen);
+		if ($porcen<=100 && $porcen>=0) return true;
 		$this->set_message('porcent', 'El valor del campo <b>%s</b> debe estar entre 0 y 100');
 		return false;
 	}
