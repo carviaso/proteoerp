@@ -657,9 +657,9 @@ class Sinv extends Controller {
 			}
 		}
 	}
+
 	//******************************************************************
 	// Funciones de los Botones
-	//
 	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
@@ -2653,10 +2653,8 @@ class Sinv extends Controller {
 
 
 	//******************************************************************
+	// Dataedit
 	//
-	//   DATAEDIT
-	//
-	//******************************************************************
 	function dataedit($status='',$id='' ) {
 		$this->rapyd->load('dataedit','datadetails');
 
@@ -3598,8 +3596,6 @@ class Sinv extends Controller {
 		if(empty($meco)) $do->set('exdes',0);
 		$meco = $do->get('garantia');
 		if(empty($meco)) $do->set('garantia',0);
-
-
 
 		if(empty($codigo)){
 			$size='6';
@@ -5234,8 +5230,7 @@ class Sinv extends Controller {
 	}
 
 	function _post_insert($do){
-		$codigo=$do->get('codigo');
-
+		$codigo =$do->get('codigo');
 		$precio1=$do->get('precio1');
 		$precio2=$do->get('precio2');
 		$precio3=$do->get('precio3');
@@ -5256,17 +5251,21 @@ class Sinv extends Controller {
 				$this->db->simple_query($sql);
 			}
 		}
+		// Redondear
+		$this->datasis->sinvredondear($codigo);
 
 		logusu('sinv',"Creo  ${codigo} precios: ${precio1}, ${precio2}, ${precio3}, ${precio4}");
 	}
 
 	function _post_update($do){
 		$codigo=$do->get('codigo');
-
 		$precio1=$do->get('precio1');
 		$precio2=$do->get('precio2');
 		$precio3=$do->get('precio3');
 		$precio4=$do->get('precio4');
+		// Redondear
+		$this->datasis->sinvredondear($codigo);
+
 		logusu('sinv',"Modifico $codigo precios: ${precio1},${precio2},${precio3}, ${precio4}");
 	}
 

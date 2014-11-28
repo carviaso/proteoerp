@@ -1627,8 +1627,10 @@ class Datasis {
 	//******************************************************************
 	// Redondear Precios en SINV
 	//
-	function sinvredondear(){
+	function sinvredondear( $codigo = ''){
 		$CI =& get_instance();
+
+		$dbcodigo = $CI->db->escape($codigo);
 
 		$mSQL = "
 		UPDATE sinv SET
@@ -1636,7 +1638,8 @@ class Datasis {
 			precio2=TRUNCATE(precio2/100,0)*100 +IF(MOD(precio2,100)>70,100,IF(MOD(precio2,100)>30,50,0)),
 			precio3=TRUNCATE(precio3/100,0)*100 +IF(MOD(precio3,100)>70,100,IF(MOD(precio3,100)>30,50,0)),
 			precio4=TRUNCATE(precio4/100,0)*100 +IF(MOD(precio4,100)>70,100,IF(MOD(precio4,100)>30,50,0))
-		WHERE redecen='C' ;";
+		WHERE redecen='C' ";
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1645,7 +1648,8 @@ class Datasis {
 			precio2=TRUNCATE(precio2/10,0)*10 +IF(MOD(precio2,10)>7,10,IF(MOD(precio2,10)>3,5,0)),
 			precio3=TRUNCATE(precio3/10,0)*10 +IF(MOD(precio3,10)>7,10,IF(MOD(precio3,10)>3,5,0)),
 			precio4=TRUNCATE(precio4/10,0)*10 +IF(MOD(precio4,10)>7,10,IF(MOD(precio4,10)>3,5,0))
-		WHERE redecen='D' ;";
+		WHERE redecen='D' ";
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1654,7 +1658,8 @@ class Datasis {
 			precio2=ROUND(precio2,0),
 			precio3=ROUND(precio3,0),
 			precio4=ROUND(precio4,0)
-		WHERE redecen='F' ;";
+		WHERE redecen='F' ";
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1663,7 +1668,8 @@ class Datasis {
 			precio2=ROUND(precio2,1),
 			precio3=ROUND(precio3,1),
 			precio4=ROUND(precio4,1)
-		WHERE redecen='M' ;";
+		WHERE redecen='M' ";
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1671,7 +1677,8 @@ class Datasis {
 			base1=ROUND(precio1*100/(100+iva),2),
 			base2=ROUND(precio2*100/(100+iva),2),
 			base3=ROUND(precio3*100/(100+iva),2),
-			base4=ROUND(precio4*100/(100+iva),2) ;";
+			base4=ROUND(precio4*100/(100+iva),2) ";
+		if ($codigo <> '' ) $mSQL .= ' WHERE codigo='.$dbcodigo; 
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1680,7 +1687,8 @@ class Datasis {
 			margen2=100-ROUND(pond*100/base2,2),
 			margen3=100-ROUND(pond*100/base3,2),
 			margen4=100-ROUND(pond*100/base4,2)
-		WHERE formcal='P' ;";
+		WHERE formcal='P' ";
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1689,7 +1697,8 @@ class Datasis {
 			margen2=100-ROUND(ultimo*100/base2,2),
 			margen3=100-ROUND(ultimo*100/base3,2),
 			margen4=100-ROUND(ultimo*100/base4,2)
-		WHERE formcal='U' ;";
+		WHERE formcal='U' ";
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1698,7 +1707,8 @@ class Datasis {
 			margen2=100-ROUND(GREATEST(ultimo,pond)*100/base2,2),
 			margen3=100-ROUND(GREATEST(ultimo,pond)*100/base3,2),
 			margen4=100-ROUND(GREATEST(ultimo,pond)*100/base4,2)
-		WHERE formcal='M' ;";
+		WHERE formcal='M' ";
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1707,7 +1717,8 @@ class Datasis {
 			margen2=100-ROUND(standard*100/base2,2),
 			margen3=100-ROUND(standard*100/base3,2),
 			margen4=100-ROUND(standard*100/base4,2)
-		WHERE formcal='S' ;";
+		WHERE formcal='S' ";
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
 		$CI->db->query($mSQL);
 
 	}
