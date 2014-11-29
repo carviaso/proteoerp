@@ -621,7 +621,7 @@ class Nomina extends Controller {
 			return true;
 		}
 
-		if ($this->datasis->dameval('SELECT COUNT(*) FROM nomina WHERE numero="'.$nomina.'"') == 0 ) {
+		if (intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM nomina WHERE numero="'.$nomina.'"')) == 0 ) {
 			$rt=array(
 				'status' =>'B',
 				'mensaje'=>'NO EXISTE NINGUNA NOMINA CON ESE NUMERO!',
@@ -631,7 +631,7 @@ class Nomina extends Controller {
 			return true;
 		}
 
-		if ($this->datasis->dameval("SELECT COUNT(*) FROM nomina") == 0 ){
+		if (intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM nomina')) == 0 ){
 			$rt=array(
 				'status' =>'B',
 				'mensaje'=>'No hay ninguna Nomina Generada; genere una primero',
@@ -710,10 +710,10 @@ class Nomina extends Controller {
 
 		$this->nomprenom($nomina);
 
-		$mSQL  = "DELETE FROM nomina WHERE numero='".$nomina."'";
+		$mSQL  = "DELETE FROM nomina WHERE numero='${nomina}'";
 		$this->db->query($mSQL);
 
-		logusu('NOMI',"NOMINA $nomina REVERSADA");
+		logusu('NOMI',"NOMINA ${nomina} REVERSADA");
 
 		$rt=array(
 			'status' =>'A',
@@ -874,8 +874,8 @@ class Nomina extends Controller {
 				$mSQL = "SELECT COUNT(*) FROM sprm WHERE transac='".$mTRANSAC."' AND cod_prv='".$row->ctaac."' AND tipo_doc='ND' AND fecha='".$row->fecha."' AND numero<>'".$nomina."'";
 				if ( $this->datasis->dameval($mSQL) == 0 ){
 					//SI NO ESTA
-					$mCONTROL = $this->datasis->fprox_numero("nsprm");
-					$mNOTADEB = $this->datasis->fprox_numero("num_nd");
+					$mCONTROL = $this->datasis->fprox_numero('nsprm');
+					$mNOTADEB = $this->datasis->fprox_numero('num_nd');
 
 					$data["numero"]  = $mNOTADEB;
 					$data["abonos"]  = 0;
@@ -974,7 +974,7 @@ class Nomina extends Controller {
 			}
 		}
 
-		logusu('NOMI',"NOMINA $nomina REGENERADA");
+		logusu('NOMI',"NOMINA ${nomina} REGENERADA");
 
 		$rt=array(
 			'status' =>'A',

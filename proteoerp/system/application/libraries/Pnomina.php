@@ -323,6 +323,8 @@ class Pnomina extends fnomina {
 	var $VARI5 = 0;
 	var $VARI6 = 0;
 
+	var $error=array();
+
 
 	function pnomina(){
 		parent::fnomina();
@@ -353,12 +355,17 @@ class Pnomina extends fnomina {
 
 		$fformula = $this->_traduce($formula);
 
-		if ( strpos($formula,'REPOSO') )
-			memowrite($formula.' == >> '.$fformula, 'Formula');
+		//if(strpos($formula,'REPOSO')) memowrite($formula.' == >> '.$fformula, 'Formula');
 
 		$retorna='$rt='.$fformula.';';
 
-		eval($retorna);
+		$eval_ret = @eval($retorna);
+		if($eval_ret === false){
+			$rt=0;
+			memowrite($formula.' => '.$fformula,'prenom');
+			$this->error[]=$formula;
+		}
+
 		return $rt;
 	}
 
@@ -467,6 +474,17 @@ class Pnomina extends fnomina {
 		$formula=str_replace('.F.'  ,'false',$formula);
 
 		return $formula;
+	}
+
+	//Retorna los errores durante la generacion de la nomina
+	function get_error(){
+		if(count($this->error)==0){
+			return false;
+		}else{
+			$err=$this->error;
+			$this->error=array();
+			return $err;
+		}
 	}
 
 	//******************************************************************

@@ -147,7 +147,7 @@ class Pretab extends Controller {
 			var mrege =
 			{
 				state0: {
-					html: "<h1>Regenerar Pre Nomina </h1>Regenra la nomina si se hicieron cambios en los trabajadores, contratos o conceptos.",
+					html: "<h1>Regenerar Pre Nomina </h1>Regenera la nomina si se hicieron cambios en los trabajadores, contratos o conceptos.",
 					buttons: { Regenerar: true, Cancelar: false },
 					submit: function(e,v,m,f){
 						if (v) {

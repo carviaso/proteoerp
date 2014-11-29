@@ -148,9 +148,13 @@ class Prenom extends Controller {
 
 		$this->_creaprenom($contrato, $fechac, $fechap,true,$pers);
 		$this->_creapretab();  // Crea Pretabla
-		$this->calcuto();      // Calcula todos
+		$cresul = $this->calcuto();      // Calcula todos
 
-		echo 'Prenomina Generada exitosamente, Contrato: '.$contrato.' Fecha de Corte: '.dbdate_to_human($fechac).' Fecha de pago: '.dbdate_to_human($fechap) ;
+		if(empty($cresul)){
+			echo 'Prenomina Generada exitosamente, Contrato: '.$contrato.' Fecha de Corte: '.dbdate_to_human($fechac).' Fecha de pago: '.dbdate_to_human($fechap) ;
+		}else{
+			echo 'Hubo problemas generando la pre-nomina: '.$cresul;
+		}
 	}
 
 	//******************************************************************
@@ -167,6 +171,12 @@ class Prenom extends Controller {
 		$prenom  ='prenom';
 		$pretab  ='pretab';
 
+		$rt=array(
+			'status'  => 'A',
+			'mensaje' => 'Nomina Regenerada Contrato: '.$contrato.' Fecha de Corte: '.$fechac.' Fecha de pago: '.$fechap,
+			'pk'      => $contrato
+		);
+
 		$dbcont = $this->db->escape($contrato);
 		$tipo = $this->datasis->dameval('SELECT tipo FROM noco WHERE codigo='.$dbcont);
 
@@ -180,13 +190,13 @@ class Prenom extends Controller {
 
 		$this->_creaprenom($contrato, $fechac, $fechap, false );
 		$this->_creapretab();  // Crea Pretabla
-		$this->calcuto();      // Calcula todos
+		$cresul = $this->calcuto();      // Calcula todos
 
-		$rt=array(
-			'status'  => 'A',
-			'mensaje' => 'Nomina Regenerada Contrato: '.$contrato.' Fecha de Corte: '.$fechac.' Fecha de pago: '.$fechap,
-			'pk'      => $contrato
-		);
+		if(!empty($cresul)){
+			$rt['status']  = 'b';
+			$rt['mensaje'] = 'Hubo problemas generando la pre-nomina: '.$cresul;
+		}
+
 		echo json_encode($rt);
 
 	}
@@ -288,10 +298,15 @@ class Prenom extends Controller {
 	// Calcula un Trabajador
 	//
 	function calcula( $codigo = '' ) {
-		if ( !$codigo ) {
-			echo 'Vacio';
-			return false;
+		$retorna=array('error'=>0,'msj'=>'');
+
+		if(!$codigo){
+			$retorna['error']= 1;
+			$retorna['msj']  = 'Codigo vacio';
+			return $retorna;
 		}
+
+		$dbcodigo=$this->db->escape($codigo);
 
 		$this->load->library('pnomina');
 		$this->pnomina->CODIGO = $codigo;
@@ -305,29 +320,29 @@ class Prenom extends Controller {
 		$mFREC = $this->datasis->dameval("SELECT tipo FROM noco WHERE codigo=".$this->db->escape($mCONTRATO));
 
 		// Busca la fecha inical
-		if ( $mFREC == 'Q' ){        // Quincenal
+		if($mFREC == 'Q'){        // Quincenal
 			if ( substr($fhasta,8,2) > 15 ) {
 				$this->pnomina->fdesde = substr($fhasta,0,8).'16' ;
 			} else
 				$this->pnomina->fdesde = substr($fhasta,0,8).'01' ;
 
-		} elseif ( $mFREC == 'M'){   // Mensual
+		}elseif($mFREC == 'M'){   // Mensual
 			$this->pnomina->fdesde = substr($fhasta,0,8).'01' ;
 
-		} elseif ( $mFREC == 'S'){   // Semanal
+		}elseif($mFREC == 'S'){   // Semanal
 			$d = new DateTime($fhasta);
 			$d->sub(new DateInterval('P7D'));
 			$this->pnomina->fdesde = $d->format('Y-m-d');
 
-		} elseif ( $mFREC == 'B'){   // Bisemanal
+		}elseif($mFREC == 'B'){   // Bisemanal
 			$d = new DateTime($fhasta);
 			$d->sub(new DateInterval('P14D'));
 			$this->pnomina->fdesde = $d->format('Y-m-d');
 		}
 
 		$query = $this->db->query('SELECT a.*, b.*, c.dias, c.psueldo FROM prenom a JOIN pers b ON a.codigo=b.codigo JOIN conc c ON a.concepto=c.concepto WHERE a.codigo='.$this->db->escape($codigo).' ORDER BY a.tipo, a.concepto');
-		if ($query->num_rows() > 0) {
-			$this->db->query("UPDATE pretab SET total=0 WHERE codigo=".$this->db->escape($codigo) );
+		if($query->num_rows() > 0) {
+			$this->db->query("UPDATE pretab SET total=0 WHERE codigo=${dbcodigo}");
 			$SPROME = 0;
 			$DIAS   = 0;
 			foreach ($query->result() as $row){
@@ -344,30 +359,37 @@ class Prenom extends Controller {
 				$this->pnomina->VARI6  = $row->vari6;
 
 				$valor = $this->pnomina->evalform($row->formula);
-				$this->db->query("UPDATE prenom SET valor=${valor} WHERE concepto='".$row->concepto."' AND codigo=".$this->db->escape($codigo) );
+				$errfo = $this->pnomina->get_error();
+				if($errfo !== false){
+					$retorna['error']= 1;
+					$retorna['msj']  = 'Error en la formula del conceptooo '.$row->concepto.' : '.$row->formula;
+					return $retorna;
+				}
+				$this->db->query("UPDATE prenom SET valor=${valor} WHERE concepto='".$row->concepto."' AND codigo=${dbcodigo}");
 
-				$this->db->query("UPDATE pretab SET c".$row->concepto."=${valor} WHERE codigo=".$this->db->escape($codigo) );
+				$this->db->query("UPDATE pretab SET c".$row->concepto."=${valor} WHERE codigo=${dbcodigo}");
 
-				if ( substr($row->concepto,0,1) != '9' )
-					$this->db->query("UPDATE pretab SET total=total+${valor} WHERE codigo=".$this->db->escape($codigo) );
+				if(substr($row->concepto,0,1) != '9'){
+					$this->db->query("UPDATE pretab SET total=total+${valor} WHERE codigo=${dbcodigo}");
+				}
 
 				// Calcula los dias Trabajados
 				$mSQL = "SELECT dias FROM conc WHERE concepto=".$this->db->escape($row->concepto);
-				if ( $valor <> 0 ){
-					if ($row->monto <> 0)
+				if($valor <> 0){
+					if($row->monto <> 0){
 						$DIAS += $this->datasis->dameval($mSQL)*$row->monto;
-					else
+					}else{
 						$DIAS += $this->datasis->dameval($mSQL);
+					}
 				}
 				// Calcula Sueldo Promedio
-				if ( $row->psueldo == 'S' )
+				if($row->psueldo == 'S'){
 					$SPROME += $valor;
-
-
+				}
 			}
 
-			$this->db->query("UPDATE pretab SET total=0 WHERE codigo=".$this->db->escape($codigo) );
-			foreach ($query->result() as $row){
+			$this->db->query("UPDATE pretab SET total=0 WHERE codigo=${dbcodigo}");
+			foreach($query->result() as $row){
 				$this->pnomina->MONTO   = $row->monto;
 				$this->pnomina->SUELDO  = $row->sueldo;
 				$this->pnomina->SPROME  = $SPROME;
@@ -381,26 +403,43 @@ class Prenom extends Controller {
 				$this->pnomina->VARI6  = $row->vari6;
 
 				$valor = $this->pnomina->evalform($row->formula);
-				$this->db->query("UPDATE prenom SET valor=${valor} WHERE concepto='".$row->concepto."' AND codigo=".$this->db->escape($codigo) );
+				$errfo = $this->pnomina->get_error();
+				if($errfo !== false){
+					$retorna['error']= 1;
+					$retorna['msj']  = 'Error en la formula del concepto '.$row->concepto.' : '.$row->formula;
+					return $retorna;
+				}
 
-				$this->db->query("UPDATE pretab SET c".$row->concepto."=${valor} WHERE codigo=".$this->db->escape($codigo) );
+				$this->db->query("UPDATE prenom SET valor=${valor} WHERE concepto='".$row->concepto."' AND codigo=${dbcodigo}");
 
-				if ( substr($row->concepto,0,1) != '9' )
-					$this->db->query("UPDATE pretab SET total=total+${valor} WHERE codigo=".$this->db->escape($codigo) );
+				$this->db->query("UPDATE pretab SET c".$row->concepto."=${valor} WHERE codigo=${dbcodigo}");
+
+				if(substr($row->concepto,0,1) != '9'){
+					$this->db->query("UPDATE pretab SET total=total+${valor} WHERE codigo=${dbcodigo}");
+				}
 			}
 		}
+		return $retorna;
 	}
 
 	//******************************************************************
 	// Calcula todos los Trabajadores
 	//
 	function calcuto(){
+		$rt = '';
 		$query = $this->db->query('SELECT codigo FROM prenom GROUP BY codigo');
 		if ($query->num_rows() > 0){
 			foreach ($query->result() as $row){
-				$this->calcula($row->codigo);
+				$_rt=$this->calcula($row->codigo);
+				if($_rt['error']>0){
+					$rt = $_rt['msj'];
+					break;
+				}
 			}
+		}else{
+			$rt='Prenomina sin trabajadores';
 		}
+		return $rt;
 	}
 
 
@@ -408,14 +447,14 @@ class Prenom extends Controller {
 		$this->rapyd->load('datagrid','fields','datafilter');
 
 		$error='';
-		if($this->input->post('pros')!==FALSE){
+		if($this->input->post('pros')!==false){
 			$concepto = $this->db->escape($this->input->post('concepto'));
 			$pmontos  = $this->input->post('monto');
 
 			$this->load->library('pnomina');
 			$formula=$this->datasis->dameval("SELECT formula FROM conc WHERE concepto=$concepto");
 
-			foreach($pmontos AS $cod=>$cant){
+			foreach($pmontos as $cod=>$cant){
 				if(!is_numeric($cant)){
 					$error.="$cant no es un valor num&eacute;rico<br>";
 				}else{
