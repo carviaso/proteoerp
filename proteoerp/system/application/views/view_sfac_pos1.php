@@ -102,6 +102,7 @@ $(function(){
 	}
 	for(var i=0;i < <?php echo $form->max_rel_count['sfpa']; ?>;i++){
 		sfpatipo(i);
+		//$('#monto_'+i.toString()).focus(function (){ fresto(i.toString()); });
 	}
 
 	$('#cod_cli').autocomplete({
@@ -481,6 +482,13 @@ function importe(id){
 	totalizar();
 }
 
+function fresto(can){
+	//var val =Number($('#monto_'+can).val());
+	//var fal =faltante()+val;
+	//$('#monto_'+can).val(fal);
+	//$('#monto_'+can).select();
+}
+
 //Totaliza el monto por pagar
 function apagar(){
 	var pago=0;
@@ -589,6 +597,9 @@ function add_sfpa(){
 	$("#__ITPL__sfpa").after(htm);
 	falta =faltante();
 	$("#monto_"+can).val(roundNumber(falta,2));
+
+	//$('#monto_'+can).focus(function (){ fresto(can); });
+
 	sfpa_cont=sfpa_cont+1;
 	return can;
 }

@@ -261,15 +261,15 @@ class MY_Validation extends CI_Validation{
 
 	function cajerostatus($scaj){
 		$dbscaj=$this->CI->db->escape($scaj);
-		$mSQL  = "SELECT fechac,status FROM scaj WHERE cajero=${dbscaj}";
 		$rcaj  = trim($this->CI->datasis->dameval("SELECT tipo FROM rcaj WHERE fecha=CURDATE() AND cajero=${dbscaj}"));
 		if(!empty($rcaj)){
 			$this->set_message('cajerostatus', "Ya hay un procedimiento de cierre para el cajero ${scaj}");
 			return false;
 		}
+		$mSQL  = "SELECT fechac,status FROM scaj WHERE cajero=${dbscaj}";
 		$query = $this->CI->db->query($mSQL);
 		if($query->num_rows() > 0){
-			$this->set_message('cajerostatus', 'El cajero ya fue cerrado para esta fecha');
+			$this->set_message('cajerostatus', "El cajero ${scaj} ya fue cerrado para esta fecha");
 			$row = $query->row();
 			if($row->status=='C'){
 				$tmc=timestampFromDBDate($row->fechac); //momento de cierre
@@ -287,7 +287,7 @@ class MY_Validation extends CI_Validation{
 				return true;
 			}
 		}else{
-			$this->set_message('cajerostatus', 'Cajero inexistente');
+			$this->set_message('cajerostatus', "Cajero inexistente ${scaj}");
 			return false;
 		}
 	}

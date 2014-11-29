@@ -2858,9 +2858,11 @@ class Sfac extends Controller {
 		$edit->direc->readonly =true;
 		$edit->direc->size = 40;
 
-		$edit->cajero= new hiddenField('Cajero', 'cajero');
-		$edit->cajero->insertValue = $this->secu->getcajero();
-		$edit->cajero->rule = 'condi_required|callback_chcajero';
+		//$edit->cajero= new hiddenField('Cajero', 'cajero');
+		//$edit->cajero->insertValue = $this->secu->getcajero();
+		//$edit->cajero->updateValue = $this->secu->getcajero();
+		//$edit->cajero->rule = 'condi_required|callback_chcajero';
+		$edit->cajero = new autoUpdateField('cajero' ,$this->secu->getcajero(), $this->secu->getcajero());
 
 /*
 		$edit->cajero= new dropdownField('Cajero', 'cajero');
@@ -3517,8 +3519,6 @@ class Sfac extends Controller {
 
 	//Chequea el cajero
 	function chcajero($scaj){
-		return true;
-		
 		$referen=$this->input->post('referen');
 
 		if($referen===false) return true; //En estos caso se evalua en el pre-process
@@ -3528,12 +3528,16 @@ class Sfac extends Controller {
 				return false;
 			}
 			$rt=$this->validation->cajerostatus($scaj);
-			$this->validation->set_message('chcajero', 'El cajero ya fue cerrado para esta fecha');
+			if(isset($this->validation->_error_messages['cajerostatus'])){
+				$this->validation->set_message('chcajero', $this->validation->_error_messages['cajerostatus']);
+			}else{
+				$this->validation->set_message('chcajero', "El cajero ${scaj} ya fue cerrado para esta fecha");
+			}
 			return $rt;
 		}else{
 			return true;
 		}
-		
+
 	}
 
 	//Chequea si puede o no vender negativo
@@ -3661,18 +3665,13 @@ class Sfac extends Controller {
 
 
 		$dbcliente=$this->db->escape($cliente);
-		if(empty($cajero) && $referen<>'C' && $referen<>'P'){
+		if(empty($cajero) && $referen!='C' && $referen!='P'){
 			$cajero=$this->secu->getcajero();
 			if(empty($cajero)){
 				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='El usuario debe tener un cajero asignado';
 				return false;
 			}
 			$do->set('cajero',$cajero);
-			$chcaj=$this->validation->cajerostatus($cajero);
-			if(!$chcaj){
-				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Cajero inexistente o cerrado para la fecha';
-				return false;
-			}
 		}
 
 		//Totaliza la factura
@@ -3733,6 +3732,20 @@ class Sfac extends Controller {
 		}
 		$sfpa=round($sfpa,2);
 		//Fin de la totalizacion del pago
+
+		//Valida el cajero (obligado si hay forma de pago)
+		if(round(abs($sfpa-$tcredito),2)>0){
+			$chcaj=$this->validation->cajerostatus($cajero);
+			if(!$chcaj){
+				if(isset($this->validation->_error_messages['cajerostatus'])){
+					$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']=$this->validation->_error_messages['cajerostatus'];
+				}else{
+					$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Cajero inexistente o cerrado para la fecha';
+				}
+				return false;
+			}
+		}
+		//fin de la validacion del cajero
 
 		//Validaciones del pago
 		if(abs($sfpa-$totalg)>0.02 && $referen!='P'){
