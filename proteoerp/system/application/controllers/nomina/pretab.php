@@ -41,7 +41,7 @@ class Pretab extends Controller {
 		$grid->wbotonadd(array('id'=>'respalda', 'img'=>'images/database_link.png',        'alt'=>'Respaldar Prenominas',  'label'=>'Respaldar/Recuperar',   'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'irecibos', 'img'=>'assets/default/images/print.png', 'alt'=>'Imprimir Recibos',      'label'=>'Imprimir Recibos',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'genenom',  'img'=>'images/databaseadd.png',          'alt'=>'Guardar la Pre-Nomina', 'label'=>'Guardar la Pre-Nomina', 'tema'=>'anexos'));
-		$grid->wbotonadd(array("id"=>"regene",   "img"=>"images/repara.png",               'alt'=>'Regenerar Pre Nomina',  'label'=>'Regenerar Pre Nomina',  'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'regene',   'img'=>'images/repara.png',               'alt'=>'Regenerar Pre Nomina',  'label'=>'Regenerar Pre Nomina',  'tema'=>'anexos'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -119,7 +119,10 @@ class Pretab extends Controller {
 			state1: {
 				html: "<h1>Resultado</h1><span id=\'in_prome2\'></span>",
 				focus: 1,
-				buttons: { Ok:true }
+				buttons: { Ok:true },
+				submit: function(e,v,m,f){
+					window.location.reload();
+				}
 			}
 		};
 		';

@@ -362,7 +362,7 @@ class Prenom extends Controller {
 				$errfo = $this->pnomina->get_error();
 				if($errfo !== false){
 					$retorna['error']= 1;
-					$retorna['msj']  = 'Error en la formula del conceptooo '.$row->concepto.' : '.$row->formula;
+					$retorna['msj']  = 'Error en la formula del concepto '.$row->concepto.' : '.$row->formula;
 					return $retorna;
 				}
 				$this->db->query("UPDATE prenom SET valor=${valor} WHERE concepto='".$row->concepto."' AND codigo=${dbcodigo}");

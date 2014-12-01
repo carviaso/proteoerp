@@ -896,7 +896,7 @@ class Ordi extends Controller {
 			if(empty($conci)){
 				return form_checkbox($proveed.$fecha.$numero, serialize($arr));
 			}else{
-				return form_checkbox($proveed.$fecha.$numero, serialize($arr),TRUE);
+				return form_checkbox($proveed.$fecha.$numero, serialize($arr),true);
 			}
 		}
 

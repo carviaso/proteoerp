@@ -4632,9 +4632,9 @@ class Scst extends Controller {
 						$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']="El producto ${itcodigo} presenta problema con los márgenes, por favor cambielos por el módulo de maestro de inventario.";
 						return false;
 					}
-				}else{
-					$pp=(($costo*100)/(100-$cmargen))*(1+($itiva/100));
 				}
+
+				$pp=(($costo*100)/(100-$cmargen))*(1+($itiva/100));
 
 				if($o==1){
 					$itpvp1 = $pp;
