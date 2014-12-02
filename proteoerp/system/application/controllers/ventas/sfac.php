@@ -3378,7 +3378,7 @@ class Sfac extends Controller {
 		$ccopia=intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM formatos WHERE nombre=\'FACTURA\' AND proteo LIKE \'%$copia%\''));
 		$nfiscal = $edit->get_from_dataobjetct('nfiscal');
 		if(!empty($nfiscal) && $ccopia>0){
-			$edit->container2 = new containerField('copia','<p style="font-size:0.8em; text-align:center;margin:0">Si desea una copia con encabezado haga click '.anchor('formatos/'.$sfacforma.'/FACTURA/'.$uid.'/COPIA','aqui').'</p>');
+			$edit->container2 = new containerField('copia','<p style="font-size:0.8em; text-align:center;margin:0">Si desea una copia con encabezado haga click '.anchor('formatos/descargar/FACTURA/'.$uid.'/COPIA','aqui').'</p>');
 		}
 
 		$edit->buttons('save');
