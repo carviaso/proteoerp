@@ -1605,7 +1605,7 @@ class Sprm extends Controller {
 		//Fin de la eliminacion de los movimientos de banco
 
 		//Anula la retencion de IVA
-		if($this->datasis->dameval("SELECT COUNT(*) FROM riva WHERE transac=${dbtransac}") > 0){
+		if(intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM riva WHERE transac=${dbtransac}")) > 0){
 			$mTRANULA = '_'.$this->datasis->fprox_numero('rivanula',7);
 			$this->db->simple_query("UPDATE riva SET transac='${mTRANULA}' WHERE transac=${dbtransac}");
 		}
