@@ -1144,17 +1144,21 @@ class Edrec extends Controller {
 				$malit['CO'] = $malit['CO'] + $row->valor;
 			}
 		}
+
+		// GRUPO DE GASTOS
 		$GRUPO = array();
 		$mSQL = "SELECT grupo indice FROM grga";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0) {
 			foreach ( $query->result() as $row ){ $GRUPO[$row->indice] = 0; }
 		}
+		$GRUPOORG = $GRUPO;
+
 		//Genera los recibos
 		$mSQL = "
-			SELECT '000001' numero, CURDATE() fecha, CURDATE() + INTERVAL 5 DAY vence, cliente cod_cli, inmueble, total, alicuota, cuota, 'P' status, 'Recibo' observa, '321' usuario, CURDATE() estampa, CURTIME() hora, 0 transac, 0 id, grupo, area
+			SELECT '000001' numero, CURDATE() fecha, CURDATE() + INTERVAL 5 DAY vence, cliente cod_cli, inmueble, total, alicuota, cuota, 'P' status, 'Recibo' observa, '321' usuario, CURDATE() estampa, CURTIME() hora, 0 transac, 0 id, grupo, area, depto
 			FROM (
-				SELECT d.id, a.aplicacion, d.codigo inmueble, b.codigo, b.descrip, sum(a.total) total, mm.alicuota, ROUND(mm.alicuota*sum(a.total)/100,2) cuota, e.cliente, e.nombre, a.detalle, f.descrip aplidesc, b.grupo, d.area
+				SELECT d.id, a.aplicacion, d.codigo inmueble, b.codigo, b.descrip, sum(a.total) total, mm.alicuota, ROUND(mm.alicuota*sum(a.total)/100,2) cuota, e.cliente, e.nombre, a.detalle, f.descrip aplidesc, b.grupo, d.area, d.aplicacion depto
 				FROM edgasto   a
 				JOIN mgas      b ON a.partida = b.id
 				JOIN edinmue   d
@@ -1194,9 +1198,9 @@ class Edrec extends Controller {
 				$id = $this->db->insert_id();
 				// Agrega el detalle
 				$mSQL = "
-				SELECT '000001' numero, tipo, codigo, detalle, total, alicuota, cuota, curdate() fecha, '321' usuario, curdate() estampa, curtime() hora, 0 transac, 0 id, 0 id_edrc
+				SELECT '000001' numero, tipo, codigo, detalle, total, alicuota, cuota, curdate() fecha, '321' usuario, curdate() estampa, curtime() hora, 0 transac, 0 id, 0 id_edrc, grupo
 				FROM (
-					SELECT d.id, a.aplicacion tipo, d.codigo inmueble, b.codigo, b.descrip, sum(a.total) total, mm.alicuota, ROUND(mm.alicuota*sum(a.total)/100,2) cuota, e.cliente, e.nombre, a.detalle, f.descrip aplidesc
+					SELECT d.id, a.aplicacion tipo, d.codigo inmueble, b.codigo, b.descrip, sum(a.total) total, mm.alicuota, ROUND(mm.alicuota*sum(a.total)/100,2) cuota, e.cliente, e.nombre, a.detalle, f.descrip aplidesc, b.grupo
 					FROM edgasto a
 					JOIN mgas    b ON a.partida = b.id
 					JOIN edinmue d
@@ -1209,6 +1213,9 @@ class Edrec extends Controller {
 					WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${anomes} AND d.codigo = ${inmueble} AND (a.aplicacion='CO' OR a.aplicacion=d.aplicacion)
 				GROUP BY d.codigo, a.partida ) aa
 				";
+
+				// Reinicia Contadores
+				$GRUPO = $GRUPORG;
 				$monto = 0;
 				$query1 = $this->db->query($mSQL);
 				foreach( $query1->result() as  $row1 ) {
@@ -1251,9 +1258,12 @@ class Edrec extends Controller {
 				// Agrega los Fondos
 				$mSQL = "SELECT codbanc, banco, formula, depto, id FROM banc WHERE tbanco = 'FO' AND activo='S' ";
 				$query1 = $this->db->query($mSQL);
+				$UT     = $this->datasis->utri($anomes.'01');
 				foreach( $query1->result() as  $row2 ) {
-					$UT   = $this->datasis->utri($anomes.'01');
-					memowrite('$cuota='.$row2->formula,$row2->codbanc);
+					memowrite('$cuota='.$row2->formula.' GR='.$GRUPO['0000'], $row2->codbanc );
+					if ( $row2->depto != 'CO' ){  
+						if ($row->depto != $row2->depto ) continue;
+					}
 					eval('$cuota='.$row2->formula.';');
 					if ( $cuota <> 0 ){
 						$data1 = array();
