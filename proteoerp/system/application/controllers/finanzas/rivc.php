@@ -2486,7 +2486,7 @@ class Rivc extends Controller {
 		$nrocomp = $do->get('nrocomp');
 
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits ID $primary ${periodo }${nrocomp}");
+		logusu($do->table,"Creo $this->tits ID ${primary} ${periodo}${nrocomp}");
 
 		return true;
 	}
