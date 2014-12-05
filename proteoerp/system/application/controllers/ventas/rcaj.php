@@ -36,7 +36,6 @@ class Rcaj extends validaciones {
 			'screeny'    => '0');
 
 		$recep = anchor('ventas/rcaj/forcierre/','Recepcion de Caja');
-		//$filter = new DataFilter($titulo);
 		$filter = new DataFilter('');
 		$filter->fecha = new dateonlyField('Fecha','fecha','d/m/Y');
 		$filter->fecha->db_name='c.f_factura';
@@ -45,12 +44,6 @@ class Rcaj extends validaciones {
 		$filter->fecha->operator='=';
 		$filter->fecha->insertValue=date('Y-m-d');
 
-/*
-		$filter->cajero = new dropdownField('Cajero', 'cajero');
-		$filter->cajero->db_name='c.cobrador';
-		$filter->cajero->option('','Todos');
-		$filter->cajero->options('SELECT cajero, nombre FROM scaj ORDER BY nombre');
-*/
 		$filter->buttons('reset','search');
 		$filter->build();
 
@@ -62,8 +55,6 @@ class Rcaj extends validaciones {
 			$numero=trim($numero);
 			$caja  =trim($caja);
 			if(empty($caja)) $caja='99';
-			//echo $cajero;
-			//var_dump(empty($numero));
 
 			$atts=array('align'=>'LEFT','border'=>'0');
 			$fecha=str_replace('-','',$fecha);
@@ -75,17 +66,33 @@ class Rcaj extends validaciones {
 
 			$CI =& get_instance();
 			if(empty($numero)){
-
 				return image('caja_abierta.gif',"Cajero Abierto: $cajero",$atts).'<h3>Abierto</h3><center>'.anchor("ventas/rcaj/precierre/${caja}/${cajero}/${fecha}", 'Pre-cerrar cajero').'</center>';
 			}else{
 				$reversar=($reve==1) ? anchor('ventas/rcaj/reversar/'.$numero, 'Reversar'):'';
 				if($tipo=='T'){
-					return image('caja_precerrada.gif',"Cajero Pre-Cerrado: ${cajero}",$atts).'<h3>'.anchor("ventas/rcaj/forcierre/${numero}/", 'Cerrar cajero').'</h3><center>'.anchor('formatos/ver/RECAJA/'.$numero, ' Ver cuadre de caja').br().$reversar.'</center>';
+					//return image('caja_precerrada.gif',"Cajero Pre-Cerrado: ${cajero}",$atts).'<h3>'.anchor("ventas/rcaj/forcierre/${numero}/", 'Cerrar cajero').'</h3><center>'.anchor('formatos/ver/RECAJA/'.$numero, ' Ver cuadre de caja').br().$reversar.'</center>';
+					return image('caja_precerrada.gif',"Cajero Pre-Cerrado: ${cajero}",$atts).'<h3>'.anchor("ventas/rcaj/forcierre/${numero}/", 'Cerrar cajero').'</h3>';
 				}else{
 					return image('caja_cerrada.gif',"Cajero Cerrado: ${cajero}",$atts).'<h3>Cerrado</h3><center>'.anchor('formatos/ver/RECAJA/'.$numero, ' Ver cuadre de caja').br().$reversar.'</center>';
 				}
 			}
 		}
+
+		function verpan( $numero='', $tipo='', $url){
+			$numero=trim($numero);
+			$CI =& get_instance();
+			if(empty($numero)){
+				return '-----';
+			}else{
+				if($tipo=='T'){
+					return '-----';
+				}else{
+					return $url;
+				}
+			}
+		}
+		
+		
 		$data['forma'] ='';
 		if($this->rapyd->uri->is_set('search') && !empty($filter->fecha->value)){
 			$fecha=$filter->fecha->value;
@@ -106,14 +113,16 @@ class Rcaj extends validaciones {
 			$grid->db->join('rcaj AS a','a.cajero=c.cobrador AND a.fecha=c.f_factura','left');
 			$grid->db->groupby('c.cobrador');
 			$grid->use_function('iconcaja');
+			$grid->use_function('verpan');
 
 			$reve=$this->secu->puede('12A0');
 			$grid->column('Numero'     ,'<sinulo><#numero#>|---</sinulo>','align=\'center\'');
 			$grid->column('Fecha'      ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
 			$grid->column('Cajero'     ,'<#cajero#>-<#nombre#>','align=\'center\'');
-			$grid->column('Entregado por el cajero'   ,'<sinulo><nformat><#recibido#></nformat>|0.00</sinulo>','align=\'right\'');
+			$grid->column('Total Entregado','<sinulo><nformat><#recibido#></nformat>|0.00</sinulo>','align=\'right\'');
 			$grid->column('Status/Caja','<iconcaja><#cajero#>|<#fecha#>|<#numero#>|<#tipo#>|<#caja#>|'.$reve.'</iconcaja>','align="center"');
-			$grid->column('Ver html'   ,"<siinulo><#numero#>|---|$urih</siinulo>",'align=\'center\'');
+			//$grid->column('Ver html'   ,"<siinulo><#numero#>|---|$urih</siinulo>",'align=\'center\'');
+			$grid->column('Ver html'   ,"<verpan><#numero#>|<#tipo#>|$urih</verpan>",'align=\'center\'');
 			$grid->build();
 			$data['content'] .= $grid->output;
 		}

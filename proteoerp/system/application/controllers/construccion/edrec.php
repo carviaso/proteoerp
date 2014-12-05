@@ -98,6 +98,7 @@ class Edrec extends Controller {
 			$mmes .= '<option '.($mes==$m ? 'selected':'').' value=\''.$m.'\'>'.$m.'</option>';
 		}		
 		$mmes .= '</select>';
+		$mes  = '<select id=\'mmes\' name=\'mmes\'><option value=\'01\'>01</option><option value=\'02\'>02</option><option value=\'03\'>03</option><option value=\'04\'>04</option><option value=\'05\'>05</option><option value=\'06\'>06</option><option value=\'07\'>07</option><option value=\'08\'>08</option><option value=\'09\'>09</option><option value=\'10\'>10</option><option value=\'11\'>11</option><option value=\'12\'>12</option></select>';
 
 		$bodyscript .= '
 		$("#generec").click(function(){
@@ -238,6 +239,7 @@ class Edrec extends Controller {
 			};
 			$.prompt(mgene);
 		});';
+
 
 		$bodyscript .= '
 		$("#imprime").click( function(){
@@ -1211,7 +1213,7 @@ class Edrec extends Controller {
 						WHERE aa.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=${anomes} ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
 						FROM edinmue aa) mm ON d.id = mm.id
 					WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${anomes} AND d.codigo = ${inmueble} AND (a.aplicacion='CO' OR a.aplicacion=d.aplicacion)
-				GROUP BY d.codigo, a.partida ) aa
+				GROUP BY a.aplicacion, d.codigo, a.partida ) aa
 				";
 
 				// Reinicia Contadores
@@ -1254,6 +1256,7 @@ class Edrec extends Controller {
 				$data1['hora']     = date('h:m:s');
 				$data1['id_edrc']  = $id;
 				$this->db->insert('editrec',$data1);
+				$monto = $monto + $data1['cuota'];
 
 				// Agrega los Fondos
 				$mSQL = "SELECT codbanc, banco, formula, depto, id FROM banc WHERE tbanco = 'FO' AND activo='S' ";
