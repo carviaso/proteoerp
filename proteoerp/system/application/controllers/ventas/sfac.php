@@ -5386,8 +5386,8 @@ class Sfac extends Controller {
 					$saldo= $rrow->debe-$rrow->haber;
 				}
 				$saldo += $row->base*(1+($row->iva/100))+1;
-				$sql="UPDATE scli SET credito='S',tolera=10,maxtole=10,limite=${saldo},formap=30 WHERE cliente=${dbcliente}";
-				$this->db->simple_query($sql);
+				$sql="UPDATE scli SET credito='S',tolera=10,maxtole=10,limite=${saldo},formap=if(formap=0,30,formap) WHERE cliente=${dbcliente}";
+				$this->db->query($sql);
 
 				$upago = $row->upago;
 
@@ -5409,6 +5409,7 @@ class Sfac extends Controller {
 				$_POST['rifci']       = $row->rifci;
 				$_POST['direc']       = $row->direc;
 				$_POST['upago']       = $row->upago;
+
 				//$_POST['observ1']     = $upago;
 
 				$_POST['codigoa_0']   = $row->codigo;
