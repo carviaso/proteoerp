@@ -68,7 +68,7 @@ class Pretab extends Controller {
 	//  Funciones de los Botones
 	//
 	function bodyscript( $grid0 ){
-		$bodyscript = '<script type="text/javascript">';
+		$bodyscript = '<script>';
 
 		// Prepara Prenomina
 		$mSQL="SELECT a.codigo, CONCAT(a.codigo,' ', a.tipo, ' ', a.nombre) AS descrip
