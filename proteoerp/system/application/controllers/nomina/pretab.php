@@ -211,7 +211,6 @@ class Pretab extends Controller {
 				buttons: { Ok:true }
 			}
 		};
-
 		$("#genenom").click( function()
 		{
 			$.prompt(mguardanom);
@@ -430,8 +429,6 @@ class Pretab extends Controller {
 				allFields.val( "" ).removeClass( "ui-state-error" );
 			}
 		});';
-
-//									'.$this->datasis->jwinopen(site_url('formatos/ver/PRETAB').'/\'+res.id+\'/id\'').';
 
 
 		$bodyscript .= '
@@ -742,7 +739,7 @@ class Pretab extends Controller {
 		$oper   = $this->input->post('oper');
 		$id     = $this->input->post('id');
 		$data   = $_POST;
-		$mcodp  = '??????';
+		$mcodp  = 'numero';
 		$check  = 0;
 
 		unset($data['oper']);
@@ -754,7 +751,7 @@ class Pretab extends Controller {
 					$this->db->insert('pretab', $data);
 					echo "Registro Agregado";
 
-					logusu('PRETAB',"Registro ????? INCLUIDO");
+					logusu('PRETAB',"Registro numero INCLUIDO");
 				} else
 					echo "Ya existe un registro con ese $mcodp";
 			} else
@@ -786,7 +783,7 @@ class Pretab extends Controller {
 				echo " El registro no puede ser eliminado; tiene movimiento ";
 			} else {
 				$this->db->simple_query("DELETE FROM pretab WHERE id=$id ");
-				logusu('PRETAB',"Registro ????? ELIMINADO");
+				logusu('PRETAB',"Registro numero ELIMINADO");
 				echo "Registro Eliminado";
 			}
 		}

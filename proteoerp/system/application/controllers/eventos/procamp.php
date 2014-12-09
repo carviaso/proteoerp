@@ -21,6 +21,7 @@ class Procamp extends Controller {
 	function index(){
 		$this->datasis->creaintramenu(array('modulo'=>'160','titulo'=>'Campanas','mensaje'=>'Campanas de promocion','panel'=>'PROMOCIONES','ejecutar'=>'eventos/procamp','target'=>'popu','visible'=>'S','pertenece'=>'1','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) ); 
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -567,8 +568,6 @@ class Procamp extends Controller {
 			) ENGINE=MyISAM COMMENT='Eventos de captacion'";
 			$this->db->query($mSQL);
 		}
-		//$campos=$this->db->list_fields('procamp');
-		//if(!in_array('<#campo#>',$campos)){ }
 	}
 }
 

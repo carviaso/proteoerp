@@ -65,8 +65,8 @@ class Consultas extends Controller {
 
 		$contenido = $out;
 		if(!empty($cod)){
-			$data2=$this->rprecios($cod);
-			if($data2!==false){
+			$data2 = $this->rprecios($cod);
+			if($data2 !== false){
 				$contenido .=$this->load->view('view_rprecios', $data2,true);
 			}else{
 				$t=array();
@@ -92,11 +92,8 @@ class Consultas extends Controller {
 	function rprecios($cod_bar=NULL){
 		if(!$cod_bar)$cod_bar=$this->input->post('barras');
 
-		//$sinv= ($this->db->table_exists('sinv')) ? $this->datasis->dameval('SELECT COUNT(*) FROM sinv'): 0;
-		//$maes= ($this->db->table_exists('maes')) ? $this->datasis->dameval('SELECT COUNT(*) FROM maes'): 0;
-
 		if($this->tipo=='maes'){
-			$mSQL_p = 'SELECT precio1, precio2, precio3, precio4,codigo, referen, barras, descrip, corta, codigo, marca,  dvolum1, dvolum2, existen, mempaq, dempaq,unidad,iva, 0 AS id FROM maes';
+			$mSQL_p = 'SELECT precio1, precio2, precio3, precio4, codigo, referen, barras, descrip, corta, codigo, marca,  dvolum1, dvolum2, existen, mempaq, dempaq, unidad, iva, 0 AS id, fprv1 FROM maes';
 			$bbus   = array('codigo','barras','referen');
 			$suple  = 'codigo';
 			$aplica = 'maes';
@@ -163,6 +160,8 @@ class Consultas extends Controller {
 				$data['corta']     = $row->corta;
 				$data['referen']   = $row->referen;
 				$data['existen']   = $this->datasis->dameval("SELECT SUM(a.cantidad*b.fracxuni+a.fraccion) FROM ubic a JOIN maes b ON a.codigo=b.codigo WHERE a.codigo='".$row->codigo."' AND a.ubica IN ('DE00','DE01')");
+				$data['fecha']     = $row->fprv1;
+
 			}else{
 				$data['alterno']   = $row->alterno;
 				$data['base1']     = nformat($row->base1);
