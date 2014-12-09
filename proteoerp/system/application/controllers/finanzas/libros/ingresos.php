@@ -1,11 +1,12 @@
 <?php
 class ingresos{
-	function genesmov($mes) {
+	static function genesmov($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
 
-		$this->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='MC' ");
+		$CI->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='MC' ");
 
 		$mSQL= "SELECT a.*,b.rifci, c.numero AS afecta, c.fecha AS fafecta
 				FROM smov AS a LEFT JOIN scli AS b ON a.cod_cli=b.cliente
@@ -19,7 +20,7 @@ class ingresos{
 				AND a.codigo!='' AND a.cod_cli<>'REIVA'";
 
 		//Procesando CxC smov    "
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 		$mNUMERO  = 'ASDFGHJK';
 		$mTIPO_DOC = 'XX';
 
@@ -33,8 +34,8 @@ class ingresos{
 			$registro = '01';
 			if ( !empty($row->afecta) ) {
 				$referen = $row->afecta;
-				$aaa = $this->datasis->ivaplica($row->fafecta);
-				$bbb = $this->datasis->ivaplica($row->fecha);
+				$aaa = $CI->datasis->ivaplica($row->fafecta);
+				$bbb = $CI->datasis->ivaplica($row->fecha);
 				if ( $aaa != $bbb )  $registro='04';
 			}
 
@@ -68,8 +69,8 @@ class ingresos{
 			$data['fafecta']  = $row->fafecta;
 			$data['nfiscal']  = $row->nfiscal;
 
-			$mSQL = $this->db->insert_string('siva', $data);
-			$flag=$this->db->simple_query($mSQL);
+			$mSQL = $CI->db->insert_string('siva', $data);
+			$flag=$CI->db->simple_query($mSQL);
 			if(!$flag){ memowrite($mSQL,'genesmov'); }
 		}
 
@@ -85,7 +86,7 @@ class ingresos{
 		$querE b.fecha BETWEEN $fdesde AND $fhasta AND b.cod_cli='REIVA'
 		foreach ( $query->result() as $row ){
 			$mSQL = "UPDATE siva SET reiva=$row->reteiva, comprobante=$row->nroriva WHERE tipo='FC' AND numero='$row->numero' AND libro='V' AND EXTRACT(YEAR_MONTH FROM fechal)=$mes ";
-			$flag=$this->db->simple_query($mSQL);
+			$flag=$CI->db->simple_query($mSQL);
 			if(!$flag) memowrite($mSQL,'genesmov');
 		}*/
 
@@ -135,7 +136,7 @@ class ingresos{
 			WHERE b.cod_cli='REIVA' AND a.reteiva>0 AND b.fecha BETWEEN ${fdesde} AND ${fhasta} AND a.nroriva IS NOT NULL AND a.nroriva IS NOT NULL
 
 		";
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 
 		$data=array();
 		foreach ( $query->result() as $row ){
@@ -170,15 +171,15 @@ class ingresos{
 			$data['fafecta']    =$row->fafecta;
 			$data['afecta']     =$row->afecta;
 
-			$mSQL = $this->db->insert_string('siva', $data);
+			$mSQL = $CI->db->insert_string('siva', $data);
 
-			$flag=$this->db->simple_query($mSQL);
+			$flag=$CI->db->simple_query($mSQL);
 			if(!$flag) memowrite($mSQL,'genesmov');
 		}
 
 		//Retenciones de rivc
 		/*
-		if($this->db->table_exists('rivc')){
+		if($CI->db->table_exists('rivc')){
 			$data=array();
 			$mSQL="SELECT a.fecha, CONCAT(a.periodo,a.nrocomp) AS nroriva, c.nombre, c.rifci, a.cod_cli,
 					b.numero AS afecta, b.fecha AS fafecta, b.reiva AS reteiva, a.transac, a.emision,
@@ -188,7 +189,7 @@ class ingresos{
 				LEFT JOIN scli AS c ON a.cod_cli=c.cliente
 				WHERE a.anulado='N' AND b.reiva>0
 					AND a.fecha BETWEEN $fdesde AND $fhasta";
-			$query = $this->db->query($mSQL);
+			$query = $CI->db->query($mSQL);
 
 			foreach ( $query->result() as $row ){
 				$factor=($row->tipo_doc=='F')? 1:-1;
@@ -223,8 +224,8 @@ class ingresos{
 				$data['fafecta']    =$row->fafecta;
 				$data['afecta']     =$row->afecta;
 
-				$mSQL = $this->db->insert_string('siva', $data);
-				$flag=$this->db->simple_query($mSQL);
+				$mSQL = $CI->db->insert_string('siva', $data);
+				$flag=$CI->db->simple_query($mSQL);
 				if(!$flag) memowrite($mSQL,'genesmov');
 			}
 		}*/
@@ -232,18 +233,18 @@ class ingresos{
 		//RETENCIONES ANTERIORES PENDIENTES
 		/*$mSQL = "SELECT * FROM smov WHERE fecha<".$mes."01 AND cod_cli='REIVA'
 				 AND control IS NULL AND monto>abonos AND (tipo_ref<>'PR' OR tipo_ref IS NULL) ";
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 
 		foreach ( $query->result() as $row ){
 			$mSQL = "SELECT COUNT(*) FROM sfpa WHERE tipo_doc='FE' AND tipo='RI'
 					AND fecha='".$row->fecha."' AND '$row->observa1' LIKE CONCAT('%',numero,'%')";
-			if ( $this->datasis->dameval($mSQL) <= 0 ) continue;
+			if ( $CI->datasis->dameval($mSQL) <= 0 ) continue;
 			$mSQL = "SELECT numero, cod_cli, transac
 					FROM sfpa
 					WHERE tipo_doc='FE' AND tipo='RI' AND fecha='".$row->fecha."' AND
 					'".$row->observa1."' LIKE CONCAT('%',numero,'%')";
 
-			$query1 = $this->db->query($mSQL);
+			$query1 = $CI->db->query($mSQL);
 			$mREG   = $query1->result();
 			$transac = $mREG->transac;
 			$nombre = dameval("select nombre from sfac where transac='$transac'");
@@ -275,17 +276,18 @@ class ingresos{
 						stotal   = 0,
 						reiva    = ".$row->monto.",
 						fechal   = ".$mes."01 ";
-			$flag=$this->db->simple_query($mSQL);
+			$flag=$CI->db->simple_query($mSQL);
 			if(!$flag) memowrite($mSQL,'genesmov');
 		}*/
 	}
 
-	function geneotin($mes) {
+	static function geneotin($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
 
-		$this->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='OT' ");
+		$CI->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='OT' ");
 		$mSQL = "INSERT INTO siva
 				(id, libro, tipo, fuente, sucursal, fecha, numero, numhasta,  caja, nfiscal,  nhfiscal,
 				referen, planilla, clipro, nombre, contribu, rif, registro,
@@ -330,7 +332,7 @@ class ingresos{
 				b.fecha BETWEEN ${fdesde} AND ${fhasta}
 				AND (b.iva > 0 OR b.tipo_doc IN ('FC','ND') )
 				GROUP BY a.tipo_doc,a.numero ";
-		$flag=$this->db->simple_query($mSQL);
+		$flag=$CI->db->simple_query($mSQL);
 		if(!$flag) memowrite($mSQL,'geneotin');
 	}
 }

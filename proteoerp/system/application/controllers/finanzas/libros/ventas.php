@@ -7,7 +7,8 @@
 */
 class ventas{
 	//Libro de ventas basado en Z
-	function wlvcierrez($mes) {
+	static function wlvcierrez($mes){
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
@@ -15,31 +16,31 @@ class ventas{
 		set_time_limit(300);
 		$ameses = array( 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
 		$anomeses = array( '01' => 'ENERO', '02' => 'FEBRERO', '03' => 'MARZO', '04' => 'ABRIL', '05' => 'MAYO', '06' => 'JUNIO', '07' => 'JULIO', '08' => 'AGOSTO', '09' => 'SEPTIEMBRE', '10' => 'OCTBRE', '11' => 'NOVIEMBRE', '12' => 'DICIEMBRE');
-		$aaa = $this->datasis->ivaplica($mes.'02');
+		$aaa = $CI->datasis->ivaplica($mes.'02');
 		$tasa      = $aaa['tasa'];
 		$redutasa  = $aaa['redutasa'];
 		$sobretasa = $aaa['sobretasa'];
 
 		// ARREGLA SIVA PORSIA
 		$mSQL = "UPDATE siva SET impuesto=0, geneimpu=0, exento=gtotal, stotal=gtotal, general=0 where geneimpu<0 and general>=0 ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		$mSQL = "UPDATE siva SET geneimpu=0, exento=exento+general, stotal=exento+general, general=0 WHERE geneimpu=0 and general<0";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		$mSQL = "UPDATE siva SET tipo='FC' WHERE tipo='FE'";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL="SELECT fecha,registro,referen,nfiscal,nhfiscal,numero,serial,rif,nombre,'' AS debito,'' AS credito,
-		tipo,fafecta,exento,gtotal,general,'$tasa' AS tgeneral ,geneimpu,reducida,'$redutasa' AS treducida ,reduimpu,adicional,'$sobretasa' tadicional,adicimpu,0 AS reiva,
+		tipo,fafecta,exento,gtotal,general,'${tasa}' AS tgeneral ,geneimpu,reducida,'${redutasa}' AS treducida ,reduimpu,adicional,'${sobretasa}' tadicional,adicimpu,0 AS reiva,
 		comprobante,'' AS percibido,'' AS importacion,contribu,fuente,IF(tipo='CZ',0,1) AS ord
 		FROM siva
-		WHERE fechal BETWEEN $fdesde AND $fhasta AND libro='V' AND tipo<>'FA'  AND tipo IN ('FE','FC','NC','CZ')
+		WHERE fechal BETWEEN ${fdesde} AND ${fhasta} AND libro='V' AND tipo<>'FA'  AND tipo IN ('FE','FC','NC','CZ')
 		ORDER BY fecha, serial,numero,ord,nfiscal";
 		//memowrite($mSQL);
 
-		$export = $this->db->query($mSQL);
+		$export = $CI->db->query($mSQL);
 		$fname = tempnam('/tmp','lventas.xls');
-		$this->load->library('workbook',array('fname' => $fname));
-		$wb =& $this->workbook;
+		$CI->load->library('workbook',array('fname' => $fname));
+		$wb =& $CI->workbook;
 		$ws =& $wb->addworksheet($mes);
 
 		// ANCHO DE LAS COLUMNAS
@@ -64,8 +65,8 @@ class ventas{
 		$nomes = substr($mes,4,2);
 		$nomes1 = $anomeses[$nomes];
 		$hs = 'LIBRO DE VENTAS FISCAL CORRESPONDIENTE AL MES DE '.$anomeses[$nomes].' DEL '.substr($mes,0,4);
-		$ws->write(1, 0, $this->datasis->traevalor('TITULO1') , $h1 );
-		$ws->write(2, 0, 'RIF: '.$this->datasis->traevalor('RIF') , $h1 );
+		$ws->write(1, 0, $CI->datasis->traevalor('TITULO1') , $h1 );
+		$ws->write(2, 0, 'RIF: '.$CI->datasis->traevalor('RIF') , $h1 );
 
 		$ws->write(4,0, $hs, $h );
 		for ( $i=1; $i<23; $i++ ) {
@@ -75,49 +76,49 @@ class ventas{
 		$mm=6;
 		$mcel = 0;
 		// TITULOS
-		$ws->write_string( $mm,   $mcel, "", $titulo );
-		$ws->write_string( $mm+1, $mcel, "Fecha", $titulo );
-		$ws->write_string( $mm+2, $mcel, "", $titulo );
+		$ws->write_string( $mm,   $mcel, '', $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Fecha', $titulo );
+		$ws->write_string( $mm+2, $mcel, '', $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,   $mcel, "Identificacion del Documento", $titulo );
-		$ws->write_string( $mm+1, $mcel, "Nro. De", $titulo );
-		$ws->write_string( $mm+2, $mcel, "CierreZ", $titulo );
+		$ws->write_string( $mm,   $mcel, 'Identificacion del Documento', $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Nro. De', $titulo );
+		$ws->write_string( $mm+2, $mcel, 'CierreZ', $titulo );
 		$mcel++;
 
 		$ws->write_blank( $mm,   $mcel,  $titulo );
-		$ws->write_string( $mm+1, $mcel, "Tipo", $titulo );
-		$ws->write_string( $mm+2, $mcel, "Doc.", $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Tipo', $titulo );
+		$ws->write_string( $mm+2, $mcel, 'Doc.', $titulo );
 		$mcel++;
 
 		$ws->write_blank( $mm,   $mcel, $titulo );
-		$ws->write_string( $mm+1, $mcel, "Contribuyentes", $titulo );
-		$ws->write_string( $mm+2, $mcel, "Numero", $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Contribuyentes', $titulo );
+		$ws->write_string( $mm+2, $mcel, 'Numero', $titulo );
 		$mcel++;
 
 		$ws->write_blank( $mm,   $mcel, $titulo );
-		$ws->write_string( $mm+1, $mcel, "No Contribuyentes", $titulom );
-		$ws->write_string( $mm+2, $mcel, "Inicial", $titulo );
+		$ws->write_string( $mm+1, $mcel, 'No Contribuyentes', $titulom );
+		$ws->write_string( $mm+2, $mcel, 'Inicial', $titulo );
 		$mcel++;
 
 		$ws->write_blank( $mm,   $mcel, $titulo );
 		$ws->write_blank( $mm+1, $mcel, $titulom );
-		$ws->write_string( $mm+2, $mcel, "Final", $titulo );
+		$ws->write_string( $mm+2, $mcel, 'Final', $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,   $mcel, "Nombre, Razon Social", $titulo );
-		$ws->write_string( $mm+1, $mcel, "o Denominacion del ", $titulo );
-		$ws->write_string( $mm+2, $mcel, "Comprador", $titulo );
+		$ws->write_string( $mm,   $mcel, 'Nombre, Razon Social', $titulo );
+		$ws->write_string( $mm+1, $mcel, 'o Denominacion del ', $titulo );
+		$ws->write_string( $mm+2, $mcel, 'Comprador', $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,   $mcel, "Numero", $titulo );
-		$ws->write_string( $mm+1, $mcel, "del", $titulo );
-		$ws->write_string( $mm+2, $mcel, "R.I.F.", $titulo );
+		$ws->write_string( $mm,   $mcel, 'Numero', $titulo );
+		$ws->write_string( $mm+1, $mcel, 'del', $titulo );
+		$ws->write_string( $mm+2, $mcel, 'R.I.F.', $titulo );
 		$mcel++;
 
-		$ws->write_string( $mm,   $mcel, "Total Ventas", $titulo );
-		$ws->write_string( $mm+1, $mcel, "Incluyendo el", $titulo );
-		$ws->write_string( $mm+2, $mcel, "I.V.A.", $titulo );
+		$ws->write_string( $mm,   $mcel, 'Total Ventas', $titulo );
+		$ws->write_string( $mm+1, $mcel, 'Incluyendo el', $titulo );
+		$ws->write_string( $mm+2, $mcel, 'I.V.A.', $titulo );
 		$mcel++;
 
 		$ws->write_string( $mm,   $mcel, 'Ventas',    $titulo );
@@ -131,7 +132,7 @@ class ventas{
 		$mcel++;
 
 		$ws->write_string( $mm,  $mcel, 'VENTAS GRAVADAS', $titulo );
-		$ws->write_string( $mm+1,$mcel, "ALICUOTA GENERAL $tasa%", $titulo );
+		$ws->write_string( $mm+1,$mcel, "ALICUOTA GENERAL ${tasa}%", $titulo );
 		$ws->write_string( $mm+2,$mcel, 'Base', $titulo );
 		$mcel++;
 
@@ -141,7 +142,7 @@ class ventas{
 		$mcel++;
 
 		$ws->write_blank(  $mm,  $mcel, $titulo );
-		$ws->write_string( $mm+1,$mcel, "ALICUOTA ADICIONAL $sobretasa%", $titulo );
+		$ws->write_string( $mm+1,$mcel, "ALICUOTA ADICIONAL ${sobretasa}%", $titulo );
 		$ws->write_string( $mm+2,$mcel, 'Base', $titulo );
 		$mcel++;
 
@@ -151,7 +152,7 @@ class ventas{
 		$mcel++;
 
 		$ws->write_blank(  $mm,  $mcel, $titulo );
-		$ws->write_string( $mm+1,$mcel, "ALICUOTA REDUCIDA $redutasa%", $titulo );
+		$ws->write_string( $mm+1,$mcel, "ALICUOTA REDUCIDA ${redutasa}%", $titulo );
 		$ws->write_string( $mm+2,$mcel, 'Base', $titulo );
 		$mcel++;
 
@@ -476,7 +477,8 @@ class ventas{
 	}
 
 	//Libro de ventas agrupado fiscal y no fiscal
-	function _wlvexcel($mes,$fiscal=false) {
+	static function _wlvexcel($mes,$fiscal=false) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
@@ -485,7 +487,7 @@ class ventas{
 		$ameses = array( 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
 		$anomeses = array( '01' => 'ENERO', '02' => 'FEBRERO', '03' => 'MARZO', '04' => 'ABRIL', '05' => 'MAYO', '06' => 'JUNIO', '07' => 'JULIO', '08' => 'AGOSTO', '09' => 'SEPTIEMBRE', '10' => 'OCTBRE', '11' => 'NOVIEMBRE', '12' => 'DICIEMBRE');
 
-		$aaa = $this->datasis->ivaplica($mes.'02');
+		$aaa = $CI->datasis->ivaplica($mes.'02');
 		$tasa      = $aaa['tasa'];
 		$redutasa  = $aaa['redutasa'];
 		$sobretasa = $aaa['sobretasa'];
@@ -499,11 +501,11 @@ class ventas{
 
 		// ARREGLA SIVA PORSIA
 		$mSQL = "UPDATE siva SET impuesto=0, geneimpu=0, exento=gtotal, stotal=gtotal, general=0 where geneimpu<0 and general>=0 ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		$mSQL = "UPDATE siva SET geneimpu=0, exento=exento+general, stotal=exento+general, general=0 WHERE geneimpu=0 and general<0  ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		$mSQL = "UPDATE siva SET tipo='FC' WHERE tipo='FE' ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL  = "SELECT
 				a.fecha,IF(a.tipo='NC',referen,'') AS referen,
@@ -555,11 +557,11 @@ class ventas{
 			GROUP BY a.fecha, a.tipo, a.registro, a.manual $group
 			ORDER BY fecha $order, numero ";
 
-		$export = $this->db->query($mSQL);
+		$export = $CI->db->query($mSQL);
 
 		$fname = tempnam('/tmp','lventas.xls');
-		$this->load->library('workbook',array('fname' => $fname));
-		$wb =& $this->workbook;
+		$CI->load->library('workbook',array('fname' => $fname));
+		$wb =& $CI->workbook;
 		$ws =& $wb->addworksheet($mes);
 
 		// ANCHO DE LAS COLUMNAS
@@ -592,8 +594,8 @@ class ventas{
 		$nomes1 = $anomeses[$nomes];
 		$hs = 'LIBRO DE VENTAS CORRESPONDIENTE AL MES DE '.$anomeses[$nomes].' DEL '.substr($mes,0,4);
 
-		$ws->write(1, 0, $this->datasis->traevalor('TITULO1') , $h1 );
-		$ws->write(2, 0, "RIF: ".$this->datasis->traevalor('RIF') , $h1 );
+		$ws->write(1, 0, $CI->datasis->traevalor('TITULO1') , $h1 );
+		$ws->write(2, 0, "RIF: ".$CI->datasis->traevalor('RIF') , $h1 );
 
 		$ws->write(4,0, $hs, $h );
 		for ( $i=1; $i<20; $i++ ) {
@@ -719,7 +721,7 @@ class ventas{
 		$ws->write_string( $mm+2, $mcel, '', $titulo );
 		$mcel++;
 
-		if ($this->db->field_exists('sprv', 'sfac')){
+		if ($CI->db->field_exists('sprv', 'sfac')){
 			$ws->write_string( $mm,   $mcel, 'Facturacion', $titulo );
 			$ws->write_string( $mm+1, $mcel, 'A', $titulo );
 			$ws->write_string( $mm+2, $mcel, 'Terceros', $titulo );
@@ -803,13 +805,13 @@ class ventas{
 				$ws->write_string( $mm,19,($row->tipo=='CR') ? $row->numero:'', $cuerpo );	// NRO COMPROBANTE
 				if($row->tipo=='CR'){
 					if($fiscal)
-						$afecta=$this->datasis->dameval("SELECT nfiscal FROM sfac WHERE tipo_doc='F' AND numero=".$this->db->escape($row->afecta));
+						$afecta=$CI->datasis->dameval("SELECT nfiscal FROM sfac WHERE tipo_doc='F' AND numero=".$CI->db->escape($row->afecta));
 					else
 						$afecta=$row->afecta;
 					$ws->write_string( $mm,22, $afecta , $numero ); //NRO FACT AFECTA
 				}else{
 					if($fiscal)
-						$afecta=$this->datasis->dameval("SELECT nfiscal FROM sfac WHERE tipo_doc='F' AND numero=".$this->db->escape($row->referen));
+						$afecta=$CI->datasis->dameval("SELECT nfiscal FROM sfac WHERE tipo_doc='F' AND numero=".$CI->db->escape($row->referen));
 					else
 						$afecta=$row->referen;
 					$ws->write_string( $mm,22, $afecta, $numero ); //NRO FACT AFECTA
@@ -870,7 +872,7 @@ class ventas{
 		$ws->write_blank( $mm, 20,  $Tnumero );
 		$ws->write_blank( $mm, 21,  $Tnumero );
 		$ws->write_blank( $mm, 22,  $Tnumero );
-		if ($this->db->field_exists('sprv', 'sfac')){
+		if ($CI->db->field_exists('sprv', 'sfac')){
 			$ws->write_formula( $mm,23, "=SUM(X$ii:X$mm)", $Tnumero );   //Venta a tercero
 		}
 
@@ -1057,7 +1059,8 @@ class ventas{
 	}
 
 	//Libro de ventas no agrupado
-	function wlvexcel1($mes) {
+	static function wlvexcel1($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
@@ -1066,16 +1069,16 @@ class ventas{
 		$ameses = array( 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
 		$anomeses = array( '01' => 'ENERO', '02' => 'FEBRERO', '03' => 'MARZO', '04' => 'ABRIL', '05' => 'MAYO', '06' => 'JUNIO', '07' => 'JULIO', '08' => 'AGOSTO', '09' => 'SEPTIEMBRE', '10' => 'OCTBRE', '11' => 'NOVIEMBRE', '12' => 'DICIEMBRE');
 
-		$aaa = $this->datasis->ivaplica($mes."02");
+		$aaa = $CI->datasis->ivaplica($mes."02");
 		$tasa      = $aaa['tasa'];
 		$redutasa  = $aaa['redutasa'];
 		$sobretasa = $aaa['sobretasa'];
 
 		// ARREGLA SIVA PORSIA
 		$mSQL = "UPDATE siva SET impuesto=0, geneimpu=0, exento=gtotal, stotal=gtotal, general=0 where geneimpu<0 and general>=0 ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		$mSQL = "UPDATE siva SET geneimpu=0, exento=exento+general, stotal=exento+general, general=0 WHERE geneimpu=0 and general<0  ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL  = "SELECT
 				a.fecha,
@@ -1102,10 +1105,10 @@ class ventas{
 			WHERE a.fechal BETWEEN $fdesde AND $fhasta AND a.libro='V' AND a.tipo<>'FA'
 			ORDER BY a.fecha, IF(a.tipo IN ('FC','XE','XC'),1,2), numero ";
 
-		$export = $this->db->query($mSQL);
+		$export = $CI->db->query($mSQL);
 		$fname = tempnam("/tmp","lventas.xls");
-		$this->load->library("workbook",array("fname" => $fname));;
-		$wb =& $this->workbook;
+		$CI->load->library("workbook",array("fname" => $fname));;
+		$wb =& $CI->workbook;
 		$ws =& $wb->addworksheet($mes);
 
 		# ANCHO DE LAS COLUMNAS
@@ -1139,8 +1142,8 @@ class ventas{
 		$nomes1 = $anomeses[$nomes];
 		$hs = "LIBRO DE VENTAS CORRESPONDIENTE AL MES DE ".$anomeses[$nomes]." DEL ".substr($mes,0,4);
 
-		$ws->write(1, 0, $this->datasis->traevalor('TITULO1') , $h1 );
-		$ws->write(2, 0, "RIF: ".$this->datasis->traevalor('RIF') , $h1 );
+		$ws->write(1, 0, $CI->datasis->traevalor('TITULO1') , $h1 );
+		$ws->write(2, 0, "RIF: ".$CI->datasis->traevalor('RIF') , $h1 );
 
 		$ws->write(4,0, $hs, $h );
 		for ( $i=1; $i<20; $i++ ) {
@@ -1523,7 +1526,8 @@ class ventas{
 	}
 
 	//Libro de ventas no agrupado version 2
-	function wlvexcel2($mes) {
+	static function wlvexcel2($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
@@ -1532,19 +1536,19 @@ class ventas{
 		$ameses = array( 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
 		$anomeses = array( '01' => 'ENERO', '02' => 'FEBRERO', '03' => 'MARZO', '04' => 'ABRIL', '05' => 'MAYO', '06' => 'JUNIO', '07' => 'JULIO', '08' => 'AGOSTO', '09' => 'SEPTIEMBRE', '10' => 'OCTBRE', '11' => 'NOVIEMBRE', '12' => 'DICIEMBRE');
 
-		$aaa = $this->datasis->ivaplica($mes.'02');
+		$aaa = $CI->datasis->ivaplica($mes.'02');
 		$tasa      = $aaa['tasa'];
 		$redutasa  = $aaa['redutasa'];
 		$sobretasa = $aaa['sobretasa'];
 
 		// ARREGLA SIVA PORSIA
 		$mSQL = "UPDATE siva SET impuesto=0, geneimpu=0, exento=gtotal, stotal=gtotal, general=0 where geneimpu<0 and general>=0 ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		$mSQL = "UPDATE siva SET geneimpu=0, exento=exento+general, stotal=exento+general, general=0 WHERE geneimpu=0 and general<0  ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL = "UPDATE siva SET tipo='FC' WHERE tipo='FE' ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL  = "SELECT
 				a.fecha,IF(a.tipo='NC',referen,'')referen,
@@ -1570,11 +1574,11 @@ class ventas{
 			WHERE a.fechal BETWEEN $fdesde AND $fhasta AND a.libro='V' AND a.tipo<>'FA'
 			ORDER BY a.fecha, IF(a.tipo IN ('FE','FC','XE','XC'),1,2), a.numero ";
 
-		$export = $this->db->query($mSQL);
+		$export = $CI->db->query($mSQL);
 
 		$fname = tempnam('/tmp','lventas.xls');
-		$this->load->library('workbook',array('fname' => $fname));
-		$wb =& $this->workbook;
+		$CI->load->library('workbook',array('fname' => $fname));
+		$wb =& $CI->workbook;
 		$ws =& $wb->addworksheet($mes);
 
 		// ANCHO DE LAS COLUMNAS
@@ -1603,8 +1607,8 @@ class ventas{
 		$nomes1 = $anomeses[$nomes];
 		$hs = 'LIBRO DE VENTAS CORRESPONDIENTE AL MES DE '.$anomeses[$nomes].' DEL '.substr($mes,0,4);
 
-		$ws->write(1, 0, $this->datasis->traevalor('TITULO1') , $h1 );
-		$ws->write(2, 0, 'RIF: '.$this->datasis->traevalor('RIF') , $h1 );
+		$ws->write(1, 0, $CI->datasis->traevalor('TITULO1') , $h1 );
+		$ws->write(2, 0, 'RIF: '.$CI->datasis->traevalor('RIF') , $h1 );
 
 		$ws->write(4,0, $hs, $h );
 		for ( $i=1; $i<20; $i++ ) {
@@ -2050,7 +2054,8 @@ class ventas{
 		unlink($fname);
 	}
 
-	function wlvexcelfiscal($mes) {
+	static function wlvexcelfiscal($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
@@ -2059,19 +2064,19 @@ class ventas{
 		$ameses = array( 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
 		$anomeses = array( '01' => 'ENERO', '02' => 'FEBRERO', '03' => 'MARZO', '04' => 'ABRIL', '05' => 'MAYO', '06' => 'JUNIO', '07' => 'JULIO', '08' => 'AGOSTO', '09' => 'SEPTIEMBRE', '10' => 'OCTBRE', '11' => 'NOVIEMBRE', '12' => 'DICIEMBRE');
 
-		$aaa = $this->datasis->ivaplica($mes."02");
+		$aaa = $CI->datasis->ivaplica($mes."02");
 		$tasa      = $aaa['tasa'];
 		$redutasa  = $aaa['redutasa'];
 		$sobretasa = $aaa['sobretasa'];
 
 		// ARREGLA SIVA PORSIA
 		$mSQL = "UPDATE siva SET impuesto=0, geneimpu=0, exento=gtotal, stotal=gtotal, general=0 where geneimpu<0 and general>=0 ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		$mSQL = "UPDATE siva SET geneimpu=0, exento=exento+general, stotal=exento+general, general=0 WHERE geneimpu=0 and general<0  ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL = "UPDATE siva SET tipo='FC' WHERE tipo='FE' ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL  = "SELECT
 				a.fecha,
@@ -2120,11 +2125,11 @@ class ventas{
 			WHERE a.fechal BETWEEN $fdesde AND $fhasta AND a.libro='V' AND a.tipo<>'FA' AND a.contribu='NO' AND a.tipo IN ('FE','FC','NC')
 			GROUP BY a.fecha, a.tipo
 			ORDER BY fecha, IF(tipo IN ('FE','FC','XE','XC'),1,2), numero ";
-		$export = $this->db->query($mSQL);
+		$export = $CI->db->query($mSQL);
 
 		$fname = tempnam("/tmp","lventas.xls");
-		$this->load->library("workbook",array("fname" => $fname));;
-		$wb =& $this->workbook;
+		$CI->load->library("workbook",array("fname" => $fname));;
+		$wb =& $CI->workbook;
 		$ws =& $wb->addworksheet($mes);
 
 		// ANCHO DE LAS COLUMNAS
@@ -2152,8 +2157,8 @@ class ventas{
 		$nomes1 = $anomeses[$nomes];
 		$hs = "LIBRO DE VENTAS CORRESPONDIENTE AL MES DE ".$anomeses[$nomes]." DEL ".substr($mes,0,4);
 
-		$ws->write(1, 0, $this->datasis->traevalor('TITULO1') , $h1 );
-		$ws->write(2, 0, "RIF: ".$this->datasis->traevalor('RIF') , $h1 );
+		$ws->write(1, 0, $CI->datasis->traevalor('TITULO1') , $h1 );
+		$ws->write(2, 0, "RIF: ".$CI->datasis->traevalor('RIF') , $h1 );
 
 		$ws->write(4,0, $hs, $h );
 		for ( $i=1; $i<20; $i++ ) {
@@ -2570,7 +2575,8 @@ class ventas{
 	}
 
 	//libro de ventas separado por sucursal
-	function wlvexcelsucu($mes) {
+	static function wlvexcelsucu($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
@@ -2579,19 +2585,19 @@ class ventas{
 		$ameses = array( 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
 		$anomeses = array( '01' => 'ENERO', '02' => 'FEBRERO', '03' => 'MARZO', '04' => 'ABRIL', '05' => 'MAYO', '06' => 'JUNIO', '07' => 'JULIO', '08' => 'AGOSTO', '09' => 'SEPTIEMBRE', '10' => 'OCTBRE', '11' => 'NOVIEMBRE', '12' => 'DICIEMBRE');
 
-		$aaa = $this->datasis->ivaplica($mes."02");
+		$aaa = $CI->datasis->ivaplica($mes."02");
 		$tasa      = $aaa['tasa'];
 		$redutasa  = $aaa['redutasa'];
 		$sobretasa = $aaa['sobretasa'];
 
 		// ARREGLA SIVA PORSIA
 		$mSQL = "UPDATE siva SET impuesto=0, geneimpu=0, exento=gtotal, stotal=gtotal, general=0 where geneimpu<0 and general>=0 ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		$mSQL = "UPDATE siva SET geneimpu=0, exento=exento+general, stotal=exento+general, general=0 WHERE geneimpu=0 and general<0  ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL = "UPDATE siva SET tipo='FC' WHERE tipo='FE' ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL  = "SELECT
 				a.fecha,
@@ -2641,11 +2647,11 @@ class ventas{
 			GROUP BY MID(a.numero,1,1),a.fecha, a.tipo
 			ORDER BY fecha, IF(tipo IN ('FE','FC','XE','XC'),1,2), numero ";
 
-		$export = $this->db->query($mSQL);
+		$export = $CI->db->query($mSQL);
 
 		$fname = tempnam("/tmp","lventas.xls");
-		$this->load->library("workbook",array("fname" => $fname));;
-		$wb =& $this->workbook;
+		$CI->load->library("workbook",array("fname" => $fname));;
+		$wb =& $CI->workbook;
 		$ws =& $wb->addworksheet($mes);
 
 		// ANCHO DE LAS COLUMNAS
@@ -2674,8 +2680,8 @@ class ventas{
 		$nomes1 = $anomeses[$nomes];
 		$hs = "LIBRO DE VENTAS CORRESPONDIENTE AL MES DE ".$anomeses[$nomes]." DEL ".substr($mes,0,4);
 
-		$ws->write(1, 0, $this->datasis->traevalor('TITULO1') , $h1 );
-		$ws->write(2, 0, "RIF: ".$this->datasis->traevalor('RIF') , $h1 );
+		$ws->write(1, 0, $CI->datasis->traevalor('TITULO1') , $h1 );
+		$ws->write(2, 0, "RIF: ".$CI->datasis->traevalor('RIF') , $h1 );
 
 		$ws->write(4,0, $hs, $h );
 		for ( $i=1; $i<20; $i++ ) {
@@ -3106,7 +3112,8 @@ class ventas{
 	//LIBROS DE VENTAS FISCAL
 	//************************
 
-	function wlvexcel3($mes) {
+	static function wlvexcel3($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
@@ -3115,18 +3122,18 @@ class ventas{
 		$ameses = array( 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
 		$anomeses = array( '01' => 'ENERO', '02' => 'FEBRERO', '03' => 'MARZO', '04' => 'ABRIL', '05' => 'MAYO', '06' => 'JUNIO', '07' => 'JULIO', '08' => 'AGOSTO', '09' => 'SEPTIEMBRE', '10' => 'OCTBRE', '11' => 'NOVIEMBRE', '12' => 'DICIEMBRE');
 
-		$aaa = $this->datasis->ivaplica($mes."02");
+		$aaa = $CI->datasis->ivaplica($mes."02");
 		$tasa      = $aaa['tasa'];
 		$redutasa  = $aaa['redutasa'];
 		$sobretasa = $aaa['sobretasa'];
 
 		// ARREGLA SIVA PORSIA
 		$mSQL = "UPDATE siva SET impuesto=0, geneimpu=0, exento=gtotal, stotal=gtotal, general=0 where geneimpu<0 and general>=0 ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		$mSQL = "UPDATE siva SET geneimpu=0, exento=exento+general, stotal=exento+general, general=0 WHERE geneimpu=0 and general<0  ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		$mSQL = "UPDATE siva SET tipo='FC' WHERE tipo='FE' ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL  = "SELECT
 				a.fecha,IF(a.tipo='NC',a.referen,'')referen,
@@ -3178,11 +3185,11 @@ class ventas{
 			GROUP BY a.fecha, a.registro,c.maqfiscal
 			ORDER BY fecha, IF(tipo IN ('FE','FC','XE','XC'),1,2), numero ";
 		//}
-		$export = $this->db->query($mSQL);
+		$export = $CI->db->query($mSQL);
 
 		$fname = tempnam("/tmp","lventas.xls");
-		$this->load->library("workbook",array("fname" => $fname));
-		$wb =& $this->workbook;
+		$CI->load->library("workbook",array("fname" => $fname));
+		$wb =& $CI->workbook;
 		$ws =& $wb->addworksheet($mes);
 
 		// ANCHO DE LAS COLUMNAS
@@ -3211,8 +3218,8 @@ class ventas{
 		$nomes1 = $anomeses[$nomes];
 		$hs = "LIBRO DE VENTAS CORRESPONDIENTE AL MES DE ".$anomeses[$nomes]." DEL ".substr($mes,0,4);
 
-		$ws->write(1, 0, $this->datasis->traevalor('TITULO1') , $h1 );
-		$ws->write(2, 0, "RIF: ".$this->datasis->traevalor('RIF') , $h1 );
+		$ws->write(1, 0, $CI->datasis->traevalor('TITULO1') , $h1 );
+		$ws->write(2, 0, "RIF: ".$CI->datasis->traevalor('RIF') , $h1 );
 
 		$ws->write(4,0, $hs, $h );
 		for ( $i=1; $i<20; $i++ ) {
@@ -3657,20 +3664,21 @@ class ventas{
 	// GENERACION
 	//***********************************************
 
-	function geneventasfiscal($mes) {
+	static function geneventasfiscal($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
 
-		$this->db->simple_query("DELETE FROM siva WHERE fechal = $fdesde AND fuente='FP'");
+		$CI->db->simple_query("DELETE FROM siva WHERE fechal = $fdesde AND fuente='FP'");
 
-		$tasas = $this->_tasas($mes);
+		$tasas = $CI->_tasas($mes);
 		$mivag = $tasas['general'];
 		$mivar = $tasas['reducida'];
 		$mivaa = $tasas['adicional'];
 
-		$this->db->simple_query("UPDATE fiscalz SET caja='MAYO' WHERE caja='0001'");
-		$this->db->simple_query("UPDATE fiscalz SET hora=CONCAT_WS(':',MINUTE(hora),SECOND(hora),'00') WHERE caja='MAYO' AND HOUR(hora)=0");
+		$CI->db->simple_query("UPDATE fiscalz SET caja='MAYO' WHERE caja='0001'");
+		$CI->db->simple_query("UPDATE fiscalz SET hora=CONCAT_WS(':',MINUTE(hora),SECOND(hora),'00') WHERE caja='MAYO' AND HOUR(hora)=0");
 
 		$mSQL="SELECT
 			caja,
@@ -3697,7 +3705,7 @@ class ventas{
 			MAX(ncnumero) AS ncnumero
 		FROM fiscalz WHERE fecha BETWEEN $fdesde AND $fhasta";
 
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$data['libro']     ='V';
 			$data['fuente']    ='FP';
@@ -3717,12 +3725,12 @@ class ventas{
 					if($row->fecha1 == $row->fecha){
 						$hdesde='0';
 					}else{
-						$hdesde=$this->datasis->dameval("SELECT MAX(hora) FROM fiscalz WHERE fecha='{$row->fecha1}' AND serial='{$row->serial}'");
+						$hdesde=$CI->datasis->dameval("SELECT MAX(hora) FROM fiscalz WHERE fecha='{$row->fecha1}' AND serial='{$row->serial}'");
 						if(empty($hora))
 							$hdesde='0';
 					}
 
-					$cur=$this->datasis->damerow("SELECT MAX(factura) AS ff, MAX(ncnumero) AS nc FROM fiscalz WHERE fecha<'{$row->fecha}' AND serial='{$row->serial}'");
+					$cur=$CI->datasis->damerow("SELECT MAX(factura) AS ff, MAX(ncnumero) AS nc FROM fiscalz WHERE fecha<'{$row->fecha}' AND serial='{$row->serial}'");
 					if(count($cur)>0){
 						$ncdesde =(empty($cur['nc'])) ? '00000001' : $cur['nc'];
 						$ffdesde =(empty($cur['ff'])) ? '00000001' : $cur['ff'];
@@ -3730,7 +3738,7 @@ class ventas{
 						$ncdesde ='00000001';
 						$ffdesde ='00000001';
 					}
-					$frealnum=$this->datasis->dameval("SELECT MIN(numero) AS numero FROM viefac WHERE fecha BETWEEN '$row->fecha1' AND '$row->fecha' AND caja='$row->caja' AND hora>='$hdesde' AND hora<'$hhasta'");
+					$frealnum=$CI->datasis->dameval("SELECT MIN(numero) AS numero FROM viefac WHERE fecha BETWEEN '$row->fecha1' AND '$row->fecha' AND caja='$row->caja' AND hora>='$hdesde' AND hora<'$hhasta'");
 					$factor=$ffdesde-$frealnum;
 					$ddesde[$row->caja]['factor']=$factor;
 				}else{
@@ -3783,36 +3791,37 @@ class ventas{
 				LEFT JOIN scli AS c ON a.cod_cli=c.cliente
 				WHERE a.fecha BETWEEN $fdesde AND $fhasta AND MID(a.numero,1,1)<>'_' AND c.tiva IN ('C','E')";
 
-			$flag=$this->db->simple_query($mSQL);
+			$flag=$CI->db->simple_query($mSQL);
 			if(!$flag) memowrite($mSQL,'genesfac');
 		}
 	}
 
 	//Genera libro de ventas fiscal o no fiscal
-	function _genesfac($mes,$fiscal=false) {
+	static function _genesfac($mes,$fiscal=false) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
 
 		//Fecha del ultimo cambio de iva
-		$mFECHAF = $this->datasis->dameval("SELECT max(fecha) FROM civa WHERE fecha<=${mes}01");
+		$mFECHAF = $CI->datasis->dameval("SELECT max(fecha) FROM civa WHERE fecha<=${mes}01");
 		// BORRA LA GENERADA ANTERIOR
-		$this->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='FA' ");
+		$CI->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='FA' ");
 		// ARREGLA LAS TASAS NULAS EN SFAC
-		$this->db->simple_query("UPDATE sfac SET tasa=0, montasa=0, reducida=0, monredu=0, sobretasa=0, monadic=0, exento=0 WHERE (tasa IS NULL OR montasa IS NULL) AND EXTRACT(YEAR_MONTH FROM fecha)=$mes ");
+		$CI->db->simple_query("UPDATE sfac SET tasa=0, montasa=0, reducida=0, monredu=0, sobretasa=0, monadic=0, exento=0 WHERE (tasa IS NULL OR montasa IS NULL) AND EXTRACT(YEAR_MONTH FROM fecha)=$mes ");
 		// Arregla las factras malas
-		$query = $this->db->query("SELECT transac FROM sfac WHERE abs(exento+montasa+monredu+monadic-totals)>0.2 AND EXTRACT(YEAR_MONTH FROM fecha)=$mes ");
+		$query = $CI->db->query("SELECT transac FROM sfac WHERE abs(exento+montasa+monredu+monadic-totals)>0.2 AND EXTRACT(YEAR_MONTH FROM fecha)=$mes ");
 		if ($query->num_rows() > 0)
-			foreach ( $query->result() AS $row ) $this->_arreglatasa($row->transac);
+			foreach ( $query->result() AS $row ) $CI->_arreglatasa($row->transac);
 
 		// ARREGLA LAS QUE TIENEN UNA SOLA TASA
 		$mSQL = "UPDATE sfac SET tasa=iva, montasa=totals
 			WHERE reducida=0 AND sobretasa=0 AND exento=0 AND EXTRACT(YEAR_MONTH FROM fecha)=$mes";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 		//consulta tipo que fue remplazada: IF(MID(a.numero,1,LOCATE('D',a.numero))='D','NC',CONCAT('F',a.tipo)) AS tipo
 		if($fiscal){
-			$mSQL = 'UPDATE sfac SET nfiscal  =null WHERE LENGTH(TRIM(nfiscal))  =0'; $this->db->simple_query($mSQL);
-			$mSQL = 'UPDATE sfac SET maqfiscal=null WHERE LENGTH(TRIM(maqfiscal))=0'; $this->db->simple_query($mSQL);
+			$mSQL = 'UPDATE sfac SET nfiscal  =null WHERE LENGTH(TRIM(nfiscal))  =0'; $CI->db->simple_query($mSQL);
+			$mSQL = 'UPDATE sfac SET maqfiscal=null WHERE LENGTH(TRIM(maqfiscal))=0'; $CI->db->simple_query($mSQL);
 
 			$nfiscal   ='a.nfiscal';
 			#$where     =' AND a.nfiscal IS NOT NULL AND a.maqfiscal IS NOT NULL';
@@ -3826,7 +3835,7 @@ class ventas{
 			$sfacinsert='';
 		}
 
-		if ($this->db->field_exists('sprv', 'sfac')){
+		if ($CI->db->field_exists('sprv', 'sfac')){
 			$seltipo="IF(a.sprv IS NULL OR LENGTH(TRIM(a.sprv))=0 ,IF(a.tipo_doc='D','NC',CONCAT(a.tipo_doc,'C')),'FT') AS tipo";
 		}else{
 			$seltipo="IF(a.tipo_doc='D','NC',CONCAT(a.tipo_doc,'C')) AS tipo";
@@ -3878,16 +3887,16 @@ class ventas{
 				LEFT JOIN scli AS c ON a.cod_cli=c.cliente
 				WHERE a.fecha BETWEEN $fdesde AND $fhasta AND MID(a.numero,1,1)<>'_' $where";
 
-		$flag=$this->db->simple_query($mSQL);
+		$flag=$CI->db->simple_query($mSQL);
 		if(!$flag) memowrite($mSQL,'genesfac');
 
 		// CARGA LAS RETENCIONES DE IVA DE CONTADO
 		/*$mSQL = "SELECT * FROM sfpa WHERE tipo='RI' AND	EXTRACT(YEAR_MONTH FROM f_factura)=$mes AND tipo_doc='FE' ";
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 		if ($query->num_rows() > 0) {
 			foreach ( $query->result() AS $row ) {
 				$mSQL = "UPDATE siva SET reiva=".$row->monto.", comprobante='20".$row->num_ref."' WHERE tipo='".$row->tipo_doc."' AND numero='".$row->numero."' AND libro='V' AND EXTRACT(YEAR_MONTH FROM fechal)=$mes ";
-				$this->db->simple_query($mSQL);
+				$CI->db->simple_query($mSQL);
 			}
 		}*/
 
@@ -3898,31 +3907,32 @@ class ventas{
 				LEFT JOIN scli AS c ON a.cod_cli=c.cliente
 			WHERE b.fecha BETWEEN $fdesde AND $fhasta AND b.cod_cli='REIVA'
 				AND a.reteiva>0 AND b.monto>b.abonos ";
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 		if ($query->num_rows() > 0) {
 			foreach ( $query->result() AS $row ) {
 				$mSQL = "UPDATE siva SET reiva=".$row->reteiva.", comprobante='".$row->nroriva."', fecharece='$row->recriva'  WHERE tipo='".$row->tipo_doc."' AND numero='".$row->numero."' AND libro='V' AND EXTRACT(YEAR_MONTH FROM fechal)=$mes ";
-				$this->db->simple_query($mSQL);
+				$CI->db->simple_query($mSQL);
 			}
 		}*/
 	}
 
-	function genesfaccierrez($mes) {
+	static function genesfaccierrez($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
-		$this->db->simple_query("UPDATE sfac SET nfiscal=TRIM(nfiscal), maqfiscal=TRIM(maqfiscal) WHERE fecha BETWEEN $fdesde AND $fhasta");
-		$this->db->simple_query("DELETE FROM siva WHERE fechal = $fdesde AND libro='V'");
+		$CI->db->simple_query("UPDATE sfac SET nfiscal=TRIM(nfiscal), maqfiscal=TRIM(maqfiscal) WHERE fecha BETWEEN $fdesde AND $fhasta");
+		$CI->db->simple_query("DELETE FROM siva WHERE fechal = $fdesde AND libro='V'");
 
-		//$this->db->simple_query("DELETE FROM siva WHERE fechal = $fdesde AND fuente='FA'");
-		$mFECHAF = $this->datasis->dameval("SELECT max(fecha) FROM civa WHERE fecha<=$mes"."01");
-		$tasas = $this->_tasas($mes);
+		//$CI->db->simple_query("DELETE FROM siva WHERE fechal = $fdesde AND fuente='FA'");
+		$mFECHAF = $CI->datasis->dameval("SELECT max(fecha) FROM civa WHERE fecha<=$mes"."01");
+		$tasas = $CI->_tasas($mes);
 		$mivag = $tasas['general'];
 		$mivar = $tasas['reducida'];
 		$mivaa = $tasas['adicional'];
 
-		//$this->db->simple_query("UPDATE fiscalz SET caja='MAYO' WHERE caja='0001'");
-		//$this->db->simple_query("UPDATE fiscalz SET hora=CONCAT_WS(':',MINUTE(hora),SECOND(hora),'00') WHERE caja='MAYO' AND HOUR(hora)=0");
+		//$CI->db->simple_query("UPDATE fiscalz SET caja='MAYO' WHERE caja='0001'");
+		//$CI->db->simple_query("UPDATE fiscalz SET hora=CONCAT_WS(':',MINUTE(hora),SECOND(hora),'00') WHERE caja='MAYO' AND HOUR(hora)=0");
 
 		$mSQL="SELECT caja,serial,numero,fecha,factura,fecha1,hora,
 		exento  ,base  ,iva  ,base1  ,iva1  ,base2  ,iva2,
@@ -3930,7 +3940,7 @@ class ventas{
 		FROM fiscalz WHERE fecha BETWEEN $fdesde AND $fhasta ORDER BY fecha,serial,numero";
 		//echo $mSQL;
 
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$data['libro']     ='V';
 			$data['fuente']    ='FP';
@@ -3951,7 +3961,7 @@ class ventas{
 				//echo $sql."\n";
 				//echo $row->numero."\n";
 
-				$cur=$this->datasis->damerow($sql);
+				$cur=$CI->datasis->damerow($sql);
 				if(count($cur)>0){
 					$ncdesde =(empty($cur['nc'])) ? '00000001' : $cur['nc'];
 					$ffdesde =(empty($cur['ff'])) ? '00000001' : $cur['ff'];
@@ -4008,12 +4018,12 @@ class ventas{
 				$tt['adicimpu'] =0;
 				$tt['reducida'] =0;
 				$tt['reduimpu'] =0;
-				$qquery = $this->db->query($mmSQL);
+				$qquery = $CI->db->query($mmSQL);
 				if ($qquery->num_rows() > 0){
 					foreach ($qquery->result_array() as $rrow){
 						$rrow['serial']=$row->serial;
-						$m = $this->db->insert_string('siva', $rrow);
-						$q = $this->db->query($m);
+						$m = $CI->db->insert_string('siva', $rrow);
+						$q = $CI->db->query($m);
 						$fac=($rrow['tipo']=='NC') ? -1 : 1;
 						//$fac=1;
 						$tt['exento']   +=$fac*$rrow['exento']   ;
@@ -4036,8 +4046,8 @@ class ventas{
 				$data['reducida'] =$row->base1 -$tt['reducida'] -$row->ncbase1 ;
 				$data['reduimpu'] =$row->iva1  -$tt['reduimpu'] -$row->nciva1  ;
 				$data['gtotal']   =$data['reduimpu']+$data['reducida']+$data['adicimpu']+$data['adicional']+$data['geneimpu']+$data['general']+$data['exento'];
-				$mSQL_2 = $this->db->insert_string('siva', $data);
-				$this->db->simple_query($mSQL_2);
+				$mSQL_2 = $CI->db->insert_string('siva', $data);
+				$CI->db->simple_query($mSQL_2);
 			}
 		}
 	}

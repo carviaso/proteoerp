@@ -1,26 +1,27 @@
 <?php
 class gastosycxp{
 
-	function genegastos($mes){
+	static function genegastos($mes){
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
 
 		//Procesando Compras gser
-		$this->db->simple_query("UPDATE gser SET cajachi='N' WHERE cajachi='' or cajachi IS NULL");
-		$this->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = ${mes} AND fuente='GS' ");
+		$CI->db->simple_query("UPDATE gser SET cajachi='N' WHERE cajachi='' or cajachi IS NULL");
+		$CI->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = ${mes} AND fuente='GS' ");
 
 		// REVISA GSER A VER SI HAY PROBLEMAS
-		$this->db->simple_query("UPDATE gser SET exento=totbruto WHERE exento<>totbruto and totiva=0");
+		$CI->db->simple_query("UPDATE gser SET exento=totbruto WHERE exento<>totbruto and totiva=0");
 
-		if($this->db->field_exists('serie', 'gser')){
+		if($CI->db->field_exists('serie', 'gser')){
 			$iserie =',serie';
 			$serie =',a.serie';
 		}else{
 			$iserie =$serie='';
 		}
 
-		$fciva=$this->datasis->dameval("SELECT MAX(fecha) FROM civa");
+		$fciva=$CI->datasis->dameval("SELECT MAX(fecha) FROM civa");
 		$fciva = str_replace('-', '', $fciva);
 		// Procesando Gastos
 		$mSQL = "INSERT INTO siva
@@ -65,11 +66,11 @@ class gastosycxp{
 			AND a.cajachi='N' AND tipo_doc<>'XX'
 			AND (c.tipo NOT IN ('5') OR a.totiva<>0 )
 			ORDER BY a.fecha, a.proveed, a.numero ";
-		$flag=$this->db->simple_query($mSQL);
+		$flag=$CI->db->simple_query($mSQL);
 		if(!$flag) memowrite($mSQL,'genegastos');
 
 		// GASTOS DE  CAJACHICA
-		$mATASAS = $this->datasis->ivaplica($mes.'02');
+		$mATASAS = $CI->datasis->ivaplica($mes.'02');
 		$tolerancia=0.03;
 		$mSQL = "INSERT INTO siva
 			(id, libro, tipo, fuente, sucursal, fecha, numero, numhasta,  caja, nfiscal,  nhfiscal,
@@ -114,23 +115,24 @@ class gastosycxp{
 			WHERE b.fecha BETWEEN ${fdesde} AND ${fhasta}
 			AND b.tipo_doc='FC' AND b.cajachi='S'
 			ORDER BY a.fecha";
-		$flag=$this->db->simple_query($mSQL);
+		$flag=$CI->db->simple_query($mSQL);
 		if(!$flag) memowrite($mSQL,'genegastoscchi');
 
 		$mSQL = "UPDATE siva SET gtotal=exento+general+geneimpu+adicional+reduimpu+reducida+adicimpu
 			WHERE fuente='GS' AND libro='C' AND registro!='05'";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 	}
 
-	function genecxp($mes) {
+	static function genecxp($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
 
 		//Procesando Compras scst
-		$this->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='MP' ");
-		$this->db->simple_query("UPDATE sprv SET nomfis=nombre WHERE nomfis='' OR nomfis IS NULL ");
-		$mFECHAF = $this->datasis->dameval("SELECT max(fecha) FROM civa WHERE fecha<=$mes"."01");
+		$CI->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='MP' ");
+		$CI->db->simple_query("UPDATE sprv SET nomfis=nombre WHERE nomfis='' OR nomfis IS NULL ");
+		$mFECHAF = $CI->datasis->dameval("SELECT max(fecha) FROM civa WHERE fecha<=$mes"."01");
 		$mFECHAF = preg_replace('/[^0-9]+/','', $mFECHAF);
 
 		$mSQL = "SELECT a.cod_prv, a.tipo_doc, a.numero,a.nfiscal,a.transac,a.montasa,a.tasa,a.monredu,a.reducida,a.monadic,
@@ -143,13 +145,13 @@ class gastosycxp{
 		WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5'
 		AND a.tipo_doc='NC' AND  a.codigo NOT IN ('NOCON','')
 		GROUP BY cod_prv,tipo_doc,numero";
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 
 		if ( $query->num_rows() > 0 ){
 			foreach( $query->result() as $row ) {
 				if($row->impuesto == 0 && empty($row->codigo) ) continue;
-				$referen = $this->datasis->dameval("SELECT numero FROM itppro WHERE transac=".$row->transac." LIMIT 1") ;
-				$fafecta = $this->datasis->dameval("SELECT fecha  FROM itppro WHERE transac=".$row->transac." LIMIT 1") ;
+				$referen = $CI->datasis->dameval("SELECT numero FROM itppro WHERE transac=".$row->transac." LIMIT 1") ;
+				$fafecta = $CI->datasis->dameval("SELECT fecha  FROM itppro WHERE transac=".$row->transac." LIMIT 1") ;
 				$stotal = $row->monto-$row->impuesto;
 				$fecha  = ($row->fecapl==null) ? $row->fecha : $row->fecapl;
 				$fecha  = preg_replace('/[^0-9]+/', '',$fecha);
@@ -185,8 +187,8 @@ class gastosycxp{
 				$data['afecta']   = $row->afecta;
 				$data['fafecta']  = $fafecta;
 
-				$mSQL = $this->db->insert_string('siva', $data);
-				$flag=$this->db->simple_query($mSQL);
+				$mSQL = $CI->db->insert_string('siva', $data);
+				$flag=$CI->db->simple_query($mSQL);
 				if(!$flag) memowrite($mSQL,'genecxp');
 			}
 		}
@@ -228,7 +230,7 @@ class gastosycxp{
 
 
 
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 		if ( $query->num_rows() > 0 ){
 			foreach( $query->result() as $row ) {
 				if($row->impuesto == 0 && empty($row->codigo) ) continue;
@@ -266,8 +268,8 @@ class gastosycxp{
 				$data['afecta']   = $row->afecta;
 				$data['fafecta']  = '';
 
-				$mSQL = $this->db->insert_string('siva', $data);
-				$flag=$this->db->simple_query($mSQL);
+				$mSQL = $CI->db->insert_string('siva', $data);
+				$flag=$CI->db->simple_query($mSQL);
 				if(!$flag) memowrite($mSQL,'genecxp');
 			}
 		}
@@ -291,7 +293,7 @@ class gastosycxp{
 			LEFT JOIN itppro AS c ON a.numero=c.numppro AND a.tipo_doc=c.tipoppro AND a.cod_prv=c.cod_prv
 			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo<>'NOCON' AND c.transac IS NULL";
 
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 		if ( $query->num_rows() > 0 ){
 			foreach( $query->result() as $row ) {
 				if($row->impuesto == 0 && empty($row->codigo) ) continue;
@@ -330,8 +332,8 @@ class gastosycxp{
 				$data['fafecta']  = '';
 				$data['serie']    = $row->serie;
 
-				$mSQL = $this->db->insert_string('siva', $data);
-				$flag=$this->db->simple_query($mSQL);
+				$mSQL = $CI->db->insert_string('siva', $data);
+				$flag=$CI->db->simple_query($mSQL);
 				if(!$flag) memowrite($mSQL,'genecxp');
 			}
 		}
@@ -355,7 +357,7 @@ class gastosycxp{
 			LEFT JOIN scst   AS d ON c.tipo_doc=d.tipo_doc AND c.numero=d.numero
 			WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo<>'5' AND a.tipo_doc='NC' AND a.codigo='DESPP' AND c.transac IS NULL AND c.numero IS NULL";
 
-		$query = $this->db->query($mSQL);
+		$query = $CI->db->query($mSQL);
 
 		if ( $query->num_rows() > 0 ){
 			foreach( $query->result() as $row ) {
@@ -394,8 +396,8 @@ class gastosycxp{
 				$data['afecta']   = $row->afecta;
 				$data['fafecta']  = '';
 
-				$mSQL = $this->db->insert_string('siva', $data);
-				$flag=$this->db->simple_query($mSQL);
+				$mSQL = $CI->db->insert_string('siva', $data);
+				$flag=$CI->db->simple_query($mSQL);
 				if(!$flag) memowrite($mSQL,'genecxp');
 			}
 		}*/
@@ -403,6 +405,6 @@ class gastosycxp{
 		// Procesando Compras scst
 		$mSQL = "UPDATE siva SET gtotal=exento+general+geneimpu+adicional+reduimpu+reducida+adicimpu
 				WHERE fuente='MP' AND libro='C' ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 	}
 }

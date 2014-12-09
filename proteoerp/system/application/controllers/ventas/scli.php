@@ -182,7 +182,7 @@ class Scli extends validaciones {
 				$.post("'.site_url('ventas/scli/creditoedit/modify').'/"+id, function(data){
 					$("#fedita").html("");
 					$("#feditcr").html(data);
-					$("#feditcr").dialog({height: 320, width: 500});
+					$("#feditcr").dialog({height: 370, width: 500});
 					$("#feditcr").dialog( "open" );
 				});
 			} else { $.prompt("<h1>Por favor Seleccione un Registro</h1>");}

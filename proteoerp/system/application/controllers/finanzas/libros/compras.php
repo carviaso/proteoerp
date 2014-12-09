@@ -1,7 +1,8 @@
 <?php
 class compras{
 	//Libro de compras contribuyente normal
-	function wlcexcel($mes) {
+	static function wlcexcel($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
@@ -12,17 +13,17 @@ class compras{
 
 		// ARREGLA SIVA PORSIA
 		$mSQL = "UPDATE siva SET impuesto=0, geneimpu=0, exento=gtotal, stotal=gtotal, general=0 where geneimpu<0 and general>=0 ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
 		$mSQL = "UPDATE siva SET geneimpu=0, exento=exento+general, stotal=exento+general, general=0 WHERE geneimpu=0 and general<0  ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 
-		$aa = $this->datasis->ivaplica($mes.'02');
+		$aa = $CI->datasis->ivaplica($mes.'02');
 		$tasa      = $aa['tasa'];
 		$redutasa  = $aa['redutasa'];
 		$sobretasa = $aa['sobretasa'];
 
-		if($this->db->field_exists('serie', 'siva') && $this->db->field_exists('serie', 'siva')){
+		if($CI->db->field_exists('serie', 'siva') && $CI->db->field_exists('serie', 'siva')){
 			$dbcampo='COALESCE(a.serie,a.numero)';
 		}else{
 			$dbcampo='a.numero';
@@ -88,8 +89,8 @@ class compras{
 		    ORDER BY fecha,numo ";
 
 		$fname = tempnam('/tmp','lcompras.xls');
-		$this->load->library('workbook', array('fname'=>$fname));
-		$wb = & $this->workbook ;
+		$CI->load->library('workbook', array('fname'=>$fname));
+		$wb = & $CI->workbook ;
 		$ws = & $wb->addworksheet($mes);
 
 		# ANCHO DE LAS COLUMNAS
@@ -119,8 +120,8 @@ class compras{
 		$nomes1 = $anomeses[$nomes];
 		$hs = "LIBRO DE COMPRAS CORRESPONDIENTE AL MES DE ".$anomeses[$nomes]." DEL ".substr($mes,0,4)."   ".$mes;
 
-		$ws->write(1, 0, $this->datasis->traevalor('TITULO1') , $h1 );
-		$ws->write(2, 0, "RIF: ".$this->datasis->traevalor('RIF') , $h1 );
+		$ws->write(1, 0, $CI->datasis->traevalor('TITULO1') , $h1 );
+		$ws->write(2, 0, "RIF: ".$CI->datasis->traevalor('RIF') , $h1 );
 
 		$ws->write(4,0, $hs, $h );
 		for ( $i=1; $i<26; $i++ ) {
@@ -217,7 +218,7 @@ class compras{
 		$tventas = $texenta = $tbase = $timpue = $treiva = $tperci = 0 ;
 		$dd=$mm;  // desde
 
-		$mc = $this->db->query($mSQL);
+		$mc = $CI->db->query($mSQL);
 		if ( $mc->num_rows() > 0 ) {
 			foreach( $mc->result() as $row ) {
 				$ws->write_string( $mm,  0, $ii, $cuerpo );
@@ -405,39 +406,40 @@ class compras{
 	// GENERACION
 	//***********************************************
 
-	function genecompras($mes) {
+	static function genecompras($mes) {
+		$CI =& get_instance();
 		$udia=days_in_month(substr($mes,4),substr($mes,0,4));
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
 
 		//Procesando Compras scst
-		$this->db->simple_query('UPDATE scst SET montasa=0, tasa =0     WHERE montasa IS NULL');
-		$this->db->simple_query('UPDATE scst SET monredu=0, reducida=0  WHERE monredu IS NULL');
-		$this->db->simple_query('UPDATE scst SET monadic=0, sobretasa=0 WHERE monadic IS NULL');
+		$CI->db->simple_query('UPDATE scst SET montasa=0, tasa =0     WHERE montasa IS NULL');
+		$CI->db->simple_query('UPDATE scst SET monredu=0, reducida=0  WHERE monredu IS NULL');
+		$CI->db->simple_query('UPDATE scst SET monadic=0, sobretasa=0 WHERE monadic IS NULL');
 
-		$this->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='CP' ");
+		$CI->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='CP' ");
 		$sql="UPDATE scst SET
 		cexento=null,cgenera=null, civagen=null,cadicio=null, civaadi=null,creduci=null,civared=null,cstotal=null, cimpuesto=null,ctotal=null
 		WHERE (cexento+cgenera+civagen+cadicio+civaadi+creduci+civared+cstotal+cimpuesto+ctotal=0 OR
 		       cexento+cgenera+civagen+cadicio+civaadi+creduci+civared+cstotal+cimpuesto+ctotal IS NULL) AND recep BETWEEN $fdesde AND $fhasta";
-		$this->db->simple_query($sql);
+		$CI->db->simple_query($sql);
 
 		// REVISAR COMPRAS
-		$query = $this->db->query("SELECT control FROM scst WHERE abs(exento+montasa+monredu+monadic-montotot)>0.1 AND EXTRACT(YEAR_MONTH FROM fecha)=$mes ");
+		$query = $CI->db->query("SELECT control FROM scst WHERE abs(exento+montasa+monredu+monadic-montotot)>0.1 AND EXTRACT(YEAR_MONTH FROM fecha)=$mes ");
 
 		// Procesando Compra
-		if ($query->num_rows() > 0) foreach ($query->result() as $row) $this->scstarretasa( $row->control );
+		if ($query->num_rows() > 0) foreach ($query->result() as $row) $CI->scstarretasa( $row->control );
 		// VER LO DE FACTURAS RECIBIDAS CON FECHA ANTERIOR
-		//$mFECHAA = $this->datasis->dameval("SELECT fecha FROM civa WHERE fecha < (SELECT MAX(fecha) FROM siva) ORDER BY fecha DESC LIMIT 1");
-		$mFECHAF = $this->datasis->dameval("SELECT max(fecha) FROM civa WHERE fecha<=$mes"."01");
+		//$mFECHAA = $CI->datasis->dameval("SELECT fecha FROM civa WHERE fecha < (SELECT MAX(fecha) FROM siva) ORDER BY fecha DESC LIMIT 1");
+		$mFECHAF = $CI->datasis->dameval("SELECT max(fecha) FROM civa WHERE fecha<=$mes"."01");
 
-		$tasas = $this->_tasas($mes);
+		$tasas = $CI->_tasas($mes);
 		$mivag = $tasas['general'];
 		$mivar = $tasas['reducida'];
 		$mivaa = $tasas['adicional'];
 
-		$campos = $this->db->list_fields('scst');
-		$chsiva = $this->db->field_exists('serie', 'siva');
+		$campos = $CI->db->list_fields('scst');
+		$chsiva = $CI->db->field_exists('serie', 'siva');
 		if(in_array('serie'  ,$campos) && $chsiva){
 			$msqlnum=',IF(LENGTH(b.serie)>0,b.serie,b.numero) AS serie';
 			$addcamp=',serie';
@@ -495,14 +497,14 @@ class compras{
 		GROUP BY b.control";
 
 		// Procesando Compras scst
-		$flag=$this->db->simple_query($mSQL);
+		$flag=$CI->db->simple_query($mSQL);
 		if(!$flag) memowrite($mSQL,'genecompras');
 
 		$iivag=$mivag/100;
 		$iivar=$mivar/100;
 		$iivaa=$mivaa/100;
 
-		if($this->db->table_exists('ordi')){
+		if($CI->db->table_exists('ordi')){
 			$jjoin = 'LEFT JOIN ordi AS d ON a.control=d.control';
 			$dua   = 'd.dua AS planilla';
 		}else{
@@ -555,10 +557,10 @@ class compras{
 		WHERE b.recep BETWEEN ${fdesde} AND ${fhasta} AND b.actuali >= b.fecha AND c.tiva='I'
 		GROUP BY b.control";
 
-		$flag=$this->db->simple_query($mSQL);
+		$flag=$CI->db->simple_query($mSQL);
 		if(!$flag) memowrite($mSQL,'genecompras');
 
 		$mSQL = "UPDATE siva SET gtotal=exento+general+geneimpu+adicional+reduimpu+reducida+adicimpu WHERE fuente='CP' AND libro='C' ";
-		$this->db->simple_query($mSQL);
+		$CI->db->simple_query($mSQL);
 	}
 }
