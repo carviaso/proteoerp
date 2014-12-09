@@ -44,7 +44,7 @@
 				</tr>
 				<tr>
 					<td style="font-size:18pt;" align='left'><b>Existencia:</b> <?php echo $existen ?></td>
-					<td style="font-size:14pt;" align='left'><b>Iva:</b> <?php echo $iva ?></td>
+					<td style="font-size:14pt;" align='left'><b>Fecha:</b> <?php echo dbdate_to_human($fecha) ?></td>
 				</tr>
 			</table>
 		</td>
