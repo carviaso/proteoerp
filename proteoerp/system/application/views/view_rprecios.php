@@ -20,7 +20,7 @@
 				<tr><td align='center'><b STYLE="font-size:24pt;color:red">Descuento <?php echo $descufijo; ?>%:</b> &nbsp;<b STYLE="font-size:30pt;color:red"><?php echo $pdescu; ?></b><b STYLE="font-size:16pt;color:red"> <?php echo $moneda;?></b></td></tr>
 				<tr><td align='center'><b STYLE="font-size:8pt;color:red"> <?php echo $descurazon;?></td></tr>
 				<?php }else{ ?>
-				<tr><td align='center'><b STYLE="font-size:18pt;color:black">I.V.A.: <?php echo $iva; ?><b>%</b> Precio Base : <?php echo round($precio2*100/(100+$iva),2); ?></b><b><?php echo $moneda;  ?></b></td></tr>
+				<tr><td align='center'><b STYLE="font-size:18pt;color:black">I.V.A.: <?php echo  $precio2 - round($precio2*100/(100+$iva),2); ?><b>Bs.F.</b> Precio Base : <?php echo round($precio2*100/(100+$iva),2); ?></b><b><?php echo $moneda;  ?></b></td></tr>
 				<tr><td align='center'><b STYLE="font-size:32pt;color:red">Precio de venta : <?php echo $precio2; ?></b><b><?php echo $moneda;  ?></b></td></tr>
 				<?php } ?>
 				<?php if(isset($dvolum1) && $dvolum1>0){ ?>

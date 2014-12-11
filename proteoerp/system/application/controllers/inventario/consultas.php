@@ -160,7 +160,8 @@ class Consultas extends Controller {
 				$data['corta']     = $row->corta;
 				$data['referen']   = $row->referen;
 				$data['existen']   = $this->datasis->dameval("SELECT SUM(a.cantidad*b.fracxuni+a.fraccion) FROM ubic a JOIN maes b ON a.codigo=b.codigo WHERE a.codigo='".$row->codigo."' AND a.ubica IN ('DE00','DE01')");
-				$data['fecha']     = $row->fprv1;
+				$data['fecha']     = $this->datasis->dameval("SELECT b.recep FROM itscst a JOIN scst b ON a.control=b.control WHERE a.codigo='".$row->codigo."' ORDER BY b.recep DESC LIMIT 1");
+				//$data['fecha']     = $row->fprv1;
 
 			}else{
 				$data['alterno']   = $row->alterno;
