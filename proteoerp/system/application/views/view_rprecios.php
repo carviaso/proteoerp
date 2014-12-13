@@ -14,14 +14,14 @@
 	<tr>
 		<td width='100%' >
 			<table width='100%' border='0'>
-				<tr><td align='center'><b STYLE="font-size:24pt;color:blue">Precio de Venta Justo: <?php echo round($precio2*100/(100+$iva),2); ?></b> <b><?php echo $moneda  ?></b></td></tr>
+				<tr><td align='center'><b STYLE="font-size:24pt;color:blue">Precio de Venta Justo: <?php echo nformat($precio2*100/(100+$iva)); ?></b> <b><?php echo $moneda  ?></b></td></tr>
 				<?php $descufijo=(isset($descufijo)?$descufijo:0);
 				if($descufijo>0){?>
 				<tr><td align='center'><b STYLE="font-size:24pt;color:red">Descuento <?php echo $descufijo; ?>%:</b> &nbsp;<b STYLE="font-size:30pt;color:red"><?php echo $pdescu; ?></b><b STYLE="font-size:16pt;color:red"> <?php echo $moneda;?></b></td></tr>
 				<tr><td align='center'><b STYLE="font-size:8pt;color:red"> <?php echo $descurazon;?></td></tr>
 				<?php }else{ ?>
-				<tr><td align='center'><b STYLE="font-size:18pt;color:black">I.V.A.: <?php echo  $precio2 - round($precio2*100/(100+$iva),2); ?></b><b><?php echo $moneda;  ?></b></td></tr>
-				<tr><td align='center'><b STYLE="font-size:32pt;color:red">Precio con IVA : <?php echo $precio2; ?></b><b><?php echo $moneda;  ?></b></td></tr>
+				<tr><td align='center'><b STYLE="font-size:18pt;color:black">I.V.A.: <?php echo  nformat($precio2 - $precio2*100/(100+$iva)); ?></b><b><?php echo $moneda;  ?></b></td></tr>
+				<tr><td align='center'><b STYLE="font-size:32pt;color:red">Precio con IVA : <?php echo nformat($precio2); ?></b><b><?php echo $moneda;  ?></b></td></tr>
 				<?php } ?>
 				<?php if(isset($dvolum1) && $dvolum1>0){ ?>
 				<tr><td align='right' colspan=2 ><b STYLE="font-size:20pt;color:green">+ de <?php echo $dvolum1 ?> unidades: <?php echo $precio3 ?></b> <b><?php echo $moneda  ?></b></td></tr>

@@ -135,7 +135,7 @@ class Consultas extends Controller {
 
 			$data['precio1']   = nformat($row->precio1);
 			$data['pdescu']    = ($descufijo !=0) ? nformat($row->precio1-($row->precio1*$descufijo/100)): 0;
-			$data['precio2']   = nformat($row->precio2);
+			$data['precio2']   = $row->precio2;
 			$data['precio3']   = nformat($row->precio3);
 			$data['descrip']   = $row->descrip;
 			$data['codigo']    = $row->codigo;
@@ -146,7 +146,7 @@ class Consultas extends Controller {
 			$data['marca']     = $row->marca;
 			$data['existen']   = nformat($row->existen);
 			$data['barras']    = $row->barras;
-			$data['iva']       = nformat($row->iva);
+			$data['iva']       = $row->iva;
 			$data['referen']   = (isset($row->referen)) ? $row->referen : 'No disponible';
 			$data['moneda']    = 'Bs.F.';
 
