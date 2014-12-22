@@ -13,7 +13,7 @@ class XLSXReporte {
 	var $DBfieldsMax_lengt;
 	var $workbook;
 	var $worksheet;
-	var $fname;
+	var $fname='';
 	var $cols;
 	var $ccols;
 	var $crows;

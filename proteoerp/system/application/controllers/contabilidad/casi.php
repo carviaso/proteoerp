@@ -1846,17 +1846,23 @@ class Casi extends Controller {
 			foreach ($tables as $table){
 				if (preg_match("/^view_.*$|^sp_.*$|^viemovinxventas$|^vietodife$/i",$table)) continue;
 
+				$valasi=($cc=='transac' && ($table=='casi' || $table=='itcasi'));
 				$fields = $this->db->list_fields($table);
-				if (in_array($cc, $fields)){
-					$mSQL="SELECT COUNT(*) AS cana FROM `${table}` WHERE ${cc} = ${valor}";
+				if (in_array($cc, $fields) || $valasi){
+					if($valasi){
+						$ccc='comprob';
+					}else{
+						$ccc=$cc;
+					}
 
-					$cana=$this->datasis->dameval($mSQL);
+					$mSQL="SELECT COUNT(*) AS cana FROM `${table}` WHERE ${ccc} = ${valor}";
+
+					$cana=intval($this->datasis->dameval($mSQL));
 					if($cana>0){
-
 						$grid = new DataGrid("${table}: ${cana}");
 						//$grid->per_page = $cana;
 						$grid->db->from($table);
-						$grid->db->where("${cc} = ${valor}");
+						$grid->db->where("${ccc} = ${valor}");
 						$grid->db->limit(200);
 						if(in_array('id', $fields)){
 							$grid->db->orderby('id','desc');
@@ -1866,6 +1872,7 @@ class Casi extends Controller {
 							$grid->column($ff , $ff);
 						}
 						$grid->build();
+						//echo $grid->db->last_query();
 						$sal.=$grid->output;
 					}
 				}

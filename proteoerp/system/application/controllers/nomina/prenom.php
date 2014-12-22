@@ -127,6 +127,7 @@ class Prenom extends Controller {
 					$fechac = substr($fechac,0,6).$ultdia;
 				}
 			}
+			$pers = null;
 		}elseif($tipo=='M'){
 			if($dia != $ultdia){
 				$fechac = substr($fechac,0,6).$ultdia;

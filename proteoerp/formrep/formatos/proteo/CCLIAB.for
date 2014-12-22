@@ -1,5 +1,5 @@
 <?php
-$maxlin=33; //Maximo de lineas de items.
+$maxlin=30; //Maximo de lineas de items.
 
 if(count($parametros) < 0) show_error('Faltan parametros');
 $id=$parametros[0];
@@ -53,7 +53,7 @@ $this->db->where('a.transac',$transac);
 $mSQL_3 = $this->db->get();
 $detalle2 = $mSQL_3->result();
 
-$det3encab = 5; //Tamanio del encadezado de la segunda tabla
+$det3encab = 6; //Tamanio del encadezado de la segunda tabla
 $npagos=$mSQL_3->num_rows()+$det3encab;
 
 $ittot['monto']=$ittot['reten']=$ittot['ppago']=$ittot['cambio']=$ittot['mora']=$ittot['reteiva']=$ittot['abono']=$lineas=0;
@@ -201,7 +201,7 @@ $pie_continuo=<<<piecontinuo
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="6" style="text-align: right;">CONTINUA...</td>
+				<td colspan="9" style="text-align: right;">CONTINUA...</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -213,7 +213,7 @@ $mod     = $clinea = false;
 $npagina = true;
 $i       = 0;
 
-foreach ($detalle AS $items){ $i++;
+foreach ($detalle as $items){ $i++;
 	do {
 		if($npagina){
 			$this->incluir('X_CINTILLO');
@@ -235,7 +235,7 @@ foreach ($detalle AS $items){ $i++;
 				<td style="text-align: right"><?php $ittot['abono']   += $items->abono  ; echo nformat($items->abono  ,2); ?></td>
 				<?php
 				$lineas++;
-				if($lineas >= $maxlin){
+				if($lineas >= $maxlin && count($detalle)!=$i){
 					$lineas =0;
 					$npagina=true;
 					echo $pie_continuo;
@@ -304,7 +304,7 @@ piecontinuo;
 //Fin Pie Pagina
 
 echo $encabezado_tabla;
-foreach ($detalle2 AS $items2){ $i++;
+foreach($detalle2 as $items2){ $i++;
 	do {
 		if($npagina){
 			$this->incluir('X_CINTILLO');
@@ -315,14 +315,14 @@ foreach ($detalle2 AS $items2){ $i++;
 ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 
-				<td style="text-align: center" ><?php echo $items2->tipo;            ?></td>
+				<td style="text-align: center"><?php echo $items2->tipo;             ?></td>
 				<td style="text-align: center"><?php echo dbdate_to_human($items2->fecha); ?></td>
-				<td style="text-align: left"  ><?php echo $items2->banco;           ?></td>
-				<td style="text-align: left"  ><?php echo $items2->num_ref;         ?></td>
+				<td style="text-align: left"  ><?php echo $items2->banco;            ?></td>
+				<td style="text-align: left"  ><?php echo $items2->num_ref;          ?></td>
 				<td style="text-align: right" ><?php echo nformat($items2->monto,2); ?></td>
 				<?php
 				$lineas++;
-				if($lineas > $maxlin){
+				if($lineas >= $maxlin && count($detalle2)!=$i){
 					$lineas =0;
 					$npagina=true;
 					break;
@@ -337,7 +337,7 @@ foreach ($detalle2 AS $items2){ $i++;
 		}
 	} while ($clinea);
 }
-
+/*
 for(1;$lineas<$maxlin;$lineas++){ ?>
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 				<td>&nbsp;</td>
@@ -349,6 +349,7 @@ for(1;$lineas<$maxlin;$lineas++){ ?>
 <?php
 	$mod = ! $mod;
 }
+*/
 echo $pie_final;
 ?></body>
 </html>

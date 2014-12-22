@@ -40,7 +40,9 @@ class Reportes extends Controller{
 			$mc=$this->_crearep($repo,'proteo');
 		}else{
 			if(($this->db->char_set=='latin1') && ($this->config->item('charset')=='UTF-8') && $_formato!='PDF'){
-				$mc=utf8_encode($mc);
+				if(!$this->is_utf8($mc)){
+					$mc=utf8_encode($mc);
+				}
 			}
 		}
 		if(!empty($mc)){
@@ -50,24 +52,28 @@ class Reportes extends Controller{
 			$data['regresar'] = '<a href='.site_url('/reportes/enlistar/'.$esta).'>'.image('go-previous.png','Regresar',array('border'=>0)).'Regresar'.'</a>';
 			$data['regresar'].= '<p style="font-size:0.6em;text-align:center;padding:0">..::'.$repo.'::..</p>';
 
+			$fname = strtoupper($repo);
 			switch ($_formato) {
 				case 'XLS':
 					$_mclase='XLSReporte';
+					$fname .= '.xls';
 					break;
 				case 'PDF':
 					$_mclase='PDFReporte';
+					$fname .= '.pdf';
 					break;
 				case 'plano':
-					//$_mclase='XLSReporteplano';
-					//$mc=str_replace('new PDFReporte(','new XLSReporteplano(',$mc);
 					$_mclase='XLSXReporte';
 					$mc=str_replace('new PDFReporte(','new XLSXReporte(',$mc);
+					$fname .= '.xlsx';
 					break;
 				case 'HTML':
 					$_mclase='HTMLReporte';
+					$fname .= '.html';
 					break;
 				default:
 					$_mclase='PDFReporte';
+					$fname .= '.pdf';
 			}
 
 			$this->load->library($_mclase);
@@ -232,6 +238,32 @@ class Reportes extends Controller{
 		}else{
 			return '';
 		}
+	}
+
+	function is_utf8($str){
+		$c=0; $b=0;
+		$bits=0;
+		$len=strlen($str);
+		for($i=0; $i<$len; $i++){
+			$c=ord($str[$i]);
+			if($c > 128){
+				if(($c >= 254)) return false;
+				elseif($c >= 252) $bits=6;
+				elseif($c >= 248) $bits=5;
+				elseif($c >= 240) $bits=4;
+				elseif($c >= 224) $bits=3;
+				elseif($c >= 192) $bits=2;
+				else return false;
+				if(($i+$bits) > $len) return false;
+				while($bits > 1){
+					$i++;
+					$b=ord($str[$i]);
+					if($b < 128 || $b > 191) return false;
+					$bits--;
+				}
+			}
+		}
+		return true;
 	}
 
 	function instalar(){
