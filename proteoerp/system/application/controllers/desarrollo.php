@@ -213,7 +213,7 @@ $tabla .= '
 			&& $field['Name'] != 'tmenus' 
 			&& $field['Name'] != 'usuario' 
 			&& $field['Name'] != 'sida' 
-
+			&& ctype_lower($field['Name'])
 		)
 		$tabla .= "\t<li class='ui-widget-content' id='".$field['Name']."' > ".$field['Name'].'</li>';
 	}
@@ -882,17 +882,11 @@ $tabla .= '
 
 		// Programa
 		$path = 'system/application/controllers/';
-		//if ( is_file($path.$contro.'/'.$db.'.php') )
-			//$columna = file_get_contents('system/application/controllers/'.$contro.'/'.$db.'.php');
-		//else
 			$columna = $this->programa($db,$contro);
 
 		// Vistas
 		$path = 'system/application/views/';
-		//if ( is_file($path.'view_'.$db.'.php') )
-		//	$vista = file_get_contents('system/application/views/view_'.$db.'.php');
-		//else
-			$vista = $this->vista($db);
+		$vista = $this->vista($db);
 
 		// Reportes
 		$reporte = $this->genefilter( $db, $s=false, $repo=true );
@@ -1734,7 +1728,7 @@ $tabla .= '
 		$str .= $tab2.'parent::Controller();'."\n";
 		$str .= $tab2.'$this->load->library(\'rapyd\');'."\n";
 		$str .= $tab2.'$this->load->library(\'jqdatagrid\');'."\n";
-		$str .= $tab2.'$this->datasis->modulo_nombre( \''.strtoupper($db).'\', $ventana=0 );'."\n";
+		$str .= $tab2.'$this->datasis->modulo_nombre( \''.strtoupper($db).'\', $ventana=0, $this->titp  );'."\n";
 		$str .= $tab1.'}'."\n\n";
 
 		$str .= $tab1.'function index(){'."\n";

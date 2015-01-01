@@ -16,7 +16,7 @@ class Sprv extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		$this->datasis->modulo_nombre( 'SPRV', $ventana=0 );
+		$this->datasis->modulo_nombre( 'SPRV', $ventana=0, $this->titp );
 	}
 
 	function index(){
@@ -80,10 +80,10 @@ class Sprv extends Controller {
 		$funciones .= '
 		function fusionar(){
 			var yurl = "";
-			var id   = jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
+			var id   = $("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var mnuevo = "";
-				var ret = jQuery("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
+				var ret = $("#newapi'.$param['grids'][0]['gridname'].'").jqGrid(\'getRowData\',id);
 				var mviejo = ret.proveed;
 				$.prompt("<h1>Cambiar Codigo</h1>Proveedor: <b>"+ret.nombre+"</b><br>Codigo Actual: <b>"+ret.proveed+"</b><br><br>Codigo Nuevo <input type=\'text\' id=\'codnuevo\' name=\'mcodigo\' size=\'6\' maxlength=\'5\' >",{
 					buttons: { Cambiar:true, Salir:false},
@@ -118,7 +118,7 @@ class Sprv extends Controller {
 					function(v){
 						if (v) {
 							sprvfusdef(mnuevo, mviejo)
-							jQuery(gridId1).trigger("reloadGrid");
+							$(gridId1).trigger("reloadGrid");
 						}
 					}
 				);
@@ -128,7 +128,7 @@ class Sprv extends Controller {
 					function(v){
 						if (v) {
 							sprvfusdef(mnuevo, mviejo);
-							jQuery(gridId1).trigger("reloadGrid");
+							$(gridId1).trigger("reloadGrid");
 						}
 					}
 				)
@@ -202,18 +202,18 @@ class Sprv extends Controller {
 
 /*
 		$bodyscript .= '
-		jQuery("#edocta").click( function(){
+		$("#edocta").click( function(){
 			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
+				var ret = $("'.$ngrid.'").jqGrid(\'getRowData\',id);
 				'.$this->datasis->jwinopen(site_url('reportes/ver/SPRMECU/SPRM/').'/\'+ret.proveed').';
 			} else { $.prompt("<h1>Por favor Seleccione un Proveedor</h1>");}
 		});';
 
 		// Pagina Web
 		$bodyscript .= '
-		jQuery("#pagweb").click( function(){
-			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+		$("#pagweb").click( function(){
+			var id     = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret  = $("'.$ngrid.'").getRowData(id);
 				if ( ret.url.length > 10 )
@@ -269,18 +269,18 @@ class Sprv extends Controller {
 */
 
 		$bodyscript .= '
-		jQuery("#edocta").click( function(){
+		$("#edocta").click( function(){
 			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
+				var ret = $("'.$ngrid.'").jqGrid(\'getRowData\',id);
 				'.$this->datasis->jwinopen(site_url('reportes/ver/SPRMECU/SPRM/').'/\'+ret.proveed').';
 			} else { $.prompt("<h1>Por favor Seleccione un Proveedor</h1>");}
 		});';
 
 		// Pagina Web
 		$bodyscript .= '
-		jQuery("#pagweb").click( function(){
-			var id     = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+		$("#pagweb").click( function(){
+			var id     = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret  = $("'.$ngrid.'").getRowData(id);
 				if ( ret.url.length > 10 )
@@ -668,7 +668,7 @@ class Sprv extends Controller {
 
 		$grid->setOnSelectRow(' function(id){
 			if (id){
-				var ret = jQuery(gridId1).jqGrid(\'getRowData\',id);
+				var ret = $(gridId1).jqGrid(\'getRowData\',id);
 				$(gridId1).jqGrid("setCaption", ret.nombre);
 				$.ajax({
 					url: "'.site_url($this->url).'/resumen/"+id,

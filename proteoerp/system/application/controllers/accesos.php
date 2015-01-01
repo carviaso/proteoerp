@@ -14,19 +14,11 @@ class Accesos extends Controller{
 	function index(){
 		$this->session->set_userdata('panel', 9);
 		$this->datasis->modulo_id(904,1);
+		redirect($this->url.'accesos/crear');
 
+/*
 		$mSQL='SELECT us_codigo, CONCAT( us_codigo,\' - \' ,us_nombre ) FROM usuario WHERE us_nombre != \'SUPERVISOR\' ORDER BY us_codigo';
 		$dropdown=$this->datasis->consularray($mSQL);
-/*
-		$data['content']  = form_open('accesos/crear');
-		$data['content'] .= form_dropdown('usuario',$dropdown);
-		$data['content'] .= form_submit('pasa','Aceptar');
-		$data['content'] .= form_close();
-		$data['head']    = '';
-		$data['title']   = '<h1>Administraci&oacute;n de accesos</h1>';
-		$this->load->view('view_ventanas', $data);
-*/
-
 		$content  = form_open('accesos/crear');
 		$content .= form_dropdown('usuario',$dropdown);
 		$content .= form_submit('pasa','Aceptar');
@@ -35,9 +27,12 @@ class Accesos extends Controller{
 		$title   = '<h1>Administraci&oacute;n de accesos</h1>';
 		//$this->load->view('view_ventanas', $data);
 		echo $content;
-
+*/
 	}
 
+	//****************************************************************** 
+	// Administra los accesos
+	//
 	function crear(){
 		$this->datasis->modulo_id(904,1);
 
@@ -45,68 +40,359 @@ class Accesos extends Controller{
 			$usuario = $_POST['usuario'];
 		else
 			$usuario = $this->uri->segment(3);
-		if (empty($usuario)) 
-			redirect('/accesos');
+			
 		if(isset($_POST['copia']))
 			$copia=$_POST['copia'];
 		else
 			$copia='';
 
+
+		$script = '';
 		$mSQL='SELECT us_codigo, CONCAT( us_codigo,\' - \' ,us_nombre ) FROM usuario WHERE us_nombre != \'SUPERVISOR\' ORDER BY us_codigo';
-		$dropdown=$this->datasis->consularray($mSQL);
-		$data['title'] = '<h1>Accesos del usuario: '.$usuario.'</h1>';
-		$data['content']  = form_open('accesos/crear');
-		$data['content'] .= 'Copiar de: '.form_dropdown('copia',$dropdown,$copia);
-		$data['content'] .= form_submit('pasa','Copiar');
-		$data['content'] .= form_hidden('usuario',$usuario).form_close();
+		$dropdown = $this->datasis->consularray($mSQL);
+
+		$salida  = '';
+		$salida .= '<table width="100%"><tr>';
+		$salida .= '<td align="right"><label>Usuario:                  </label></td><td>'.form_dropdown('usuario',$dropdown,$usuario,'id="usuario" style="font-size:12px;"').'</td>';
+		$salida .= '<td align="right"><a href="#" onclick="copiaac()">Copiar</a> accesos de: </td><td>'.form_dropdown('copia',  $dropdown,$copia,  'id="copia"   style="font-size:12px;"').'</td>';
+		$salida .= '</tr></table>';
 
 		$query = $this->db->query("SELECT us_nombre FROM usuario WHERE us_codigo='$usuario'");
-		if($query->num_rows() == 1){
-			if(!empty($copia))
-				$acceso=$copia;
-			else
-				$acceso=$usuario;
 
-			$mSQL="SELECT aa.modulo,aa.titulo, aa.acceso,bb.panel FROM
-			(SELECT a.modulo,a.titulo, IFNULL(b.acceso,'N') AS acceso ,a.panel 
-			FROM intramenu AS a
-			LEFT JOIN intrasida AS b ON a.modulo=b.modulo AND b.usuario=".$this->db->escape($acceso)."
-			WHERE MID(a.modulo,1,1)!='0') AS aa
-			JOIN intramenu AS bb ON MID(aa.modulo,1,3)=bb.modulo
-			ORDER BY MID(aa.modulo,1,1), IF(LENGTH(aa.modulo)=1,0,1),bb.panel,MID(aa.modulo,2,2), MID(aa.modulo,2)";
+		if(!empty($copia))
+			$acceso = $copia;
+		else
+			$acceso = $usuario;
 
-			$mc = $this->db->query($mSQL);
-			$data['content'].=form_open('accesos/guardar').form_hidden('usuario',$usuario).'<div id=\'ContenedoresDeData\'><table width=100% cellspacing="0">';
-			$i=0;
+		// Opciones del Menu
+		$mSQL="
+		SELECT a.modulo,a.titulo FROM intramenu AS a
+		WHERE MID(a.modulo,1,1)!='0' AND LENGTH(a.modulo) = 1
+		ORDER BY a.modulo";
+		$mc1 = $this->db->query($mSQL);
+		//$salida .= form_open('accesos/guardar').form_hidden('usuario',$usuario);
+		$salida .='<table width="100%"><tr><td>
+		<div id=\'ContenedoresTitulo\' style=\'width:140px;\'>
+			<table width=100% cellspacing="0">
+			<tr><th>Grupos</th></tr>';
+
+		foreach( $mc1->result() as $row ){
+			$salida .= '<tr><td><a href="#" onclick="traeitem( $(\'#usuario\').val() ,\''.$row->modulo.'\')">'.$row->titulo.'</a></td></tr>';
 			$panel = '';
-			foreach( $mc->result() as $row ){
-				if($row->acceso=='S') $row->acceso=TRUE; else $row->acceso=FALSE;
-				
-				if(strlen($row->modulo)==1) {
-					$data['content'] .= '<tr><th colspan=2>'.$row->titulo.'</th></tr>';
-					$panel = '';
-				}elseif( strlen($row->modulo)==3 ) {
-					if ($panel <> $row->panel ) {
-						$data['content'] .= '<tr><td colspan=2 bgcolor="#CCDDCC">'.$row->panel.'</td></tr>';
-						$panel = $row->panel ;
-					};
+		}
+		$salida .= "</table>\n";
+		$salida .= "</div>\n";
+		$salida .= "</td><td>\n";
+		
+		$salida .= '
+		<div id=\'ContenedoresDedata\' style=\'width:270px;\'>
+			<p style="font: bold 18px;">Seleccione un Grupo del panel izquierdo</p>
+		</div>';
+		$salida .= "</td><td>\n";
 
-					$data['content'] .= '<tr><td>'.$row->modulo.'-'.$row->titulo.'</td><td>'.form_checkbox('accesos['.$i.']',$row->modulo,$row->acceso).'</td></tr>';
-					$i++;
-				}else{
-					$data['content'] .= '<tr><td><b>&nbsp;&nbsp;-&nbsp;</b>'.$row->titulo.'</td><td>'.form_checkbox('accesos['.$i.']',$row->modulo,$row->acceso).'</td></tr>';
-					$i++;
+		// Opciones del Modulos
+		$mSQL = "
+		SELECT CONCAT(substr(a.modulo,1,4), replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS','')) modulo, b.nombre
+		FROM tmenus a JOIN modulos b ON TRIM(a.modulo)=TRIM(b.modulo)
+		WHERE (a.modulo <> 'MENUINT') AND a.modulo regexp '^[^0-9]+$' 
+		GROUP BY concat(substr(a.modulo,1,4),replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS',''))  
+		ORDER BY modulo,secu";
+
+		$mc1 = $this->db->query($mSQL);
+		//$salida .= form_open('accesos/guardar').form_hidden('usuario',$usuario);
+		$salida .='<table width="100%"><tr><td>
+		<div id=\'ContenedoresModulo\' style=\'width:260px;\'>
+			<table width=100% cellspacing="0">
+			<tr><th colspan="2">Modulos</th></tr>';
+
+		foreach( $mc1->result() as $row ){
+			$salida .= '<tr><td>'.$row->modulo.'</td><td><a style="font:10px;" href="#" onclick="traetmenu( $(\'#usuario\').val() ,\''.$row->modulo.'\')">'.$row->nombre.'</a></td></tr>';
+			$panel = '';
+		}
+		$salida .= "</table>\n";
+		$salida .= "</div>\n";
+		$salida .= "</td><td>\n";
+	
+		$salida .= '
+		<div id=\'ContenedoresDatasis\' style=\'width:230px;\'>
+			<p style="font: bold 18px;">Seleccione un Modulo del panel izquierdo</p>
+		</div>';
+
+		$salida .= '</td></tr></table>';
+		//$salida .= anchor('/accesos','Regresar');;     
+
+		$script = '
+		<style>
+			#ContenedoresDedata {overflow: auto; height: 400px;border: thin solid #E4E4E4;}
+			#ContenedoresDedata table td{ border-bottom: thin solid #E4E4E4;}
+			#ContenedoresDedata a:link, a:visited{text-decoration: none;font-weight: bold;color: #2E4B70;}
+			#ContenedoresDedata a:hover{text-decoration: none;font-weight: bold;color: #0066FF;}
+			#ContenedoresDedata table th{background:url(../assets/default/css/accor_tbg.gif);}
+
+			#ContenedoresModulo {overflow: auto; height: 400px;border: thin solid #E4E4E4;}
+			#ContenedoresModulo table td{ border-bottom: thin solid #E4E4E4; font-size:11px}
+			#ContenedoresModulo a:link, a:visited{text-decoration: none;font-weight: bold;color: #2E4B70;}
+			#ContenedoresModulo a:hover{text-decoration: none;font-weight: bold;color: #0066FF;}
+			#ContenedoresModulo table th{background:url(../assets/default/css/accor_tbg.gif);}
+
+			#ContenedoresTitulo {overflow: auto; height: 400px;border: thin solid #E4E4E4;}
+			#ContenedoresTitulo table td{ border-bottom: thin solid #E4E4E4;}
+			#ContenedoresTitulo a:link, a:visited{text-decoration: none;font-weight: bold;color: #2E4B70;}
+			#ContenedoresTitulo a:hover{text-decoration: none;font-weight: bold;color: #0066FF;}
+			#ContenedoresTitulo table th{background:url(../assets/default/css/accor_tbg.gif);}
+
+			#ContenedoresDatasis {overflow: auto; height: 400px;border: thin solid #E4E4E4;}
+			#ContenedoresDatasis table td{ border-bottom: thin solid #E4E4E4;}
+			#ContenedoresDatasis a:link, a:visited{text-decoration: none;font-weight: bold;color: #2E4B70;}
+			#ContenedoresDatasis a:hover{text-decoration: none;font-weight: bold;color: #0066FF;}
+			#ContenedoresDatasis table th{background:url(../assets/default/css/accor_tbg.gif);}
+
+			.overflow { height: 400px; font-size:11px; }
+			.select { width:350px;}
+			.ui-selectmenu-text { font-size:11px;}
+		</style>
+		<script>
+		$(function() {
+			$("#usuario").selectmenu({select: function( event, ui ) { limpia();}})
+			.selectmenu("menuWidget").addClass("overflow");
+			$("#copia"  ).selectmenu().selectmenu("menuWidget").addClass("overflow");
+		});
+		function traeitem( usuario, modulo ){
+			$.post( "'.site_url("accesos/traeitem/").'", { usuario: usuario, modulo: modulo })
+			.done(function( data ) {
+				$("#ContenedoresDedata").html(data);
+			});
+		}
+		function traetmenu( usuario, modulo ){
+			$.post( "'.site_url("accesos/traetmenu/").'", { usuario: usuario, modulo: modulo })
+			.done(function( data ) {
+				$("#ContenedoresDatasis").html(data);
+			});
+		}
+		function guardainter(usuario, modulo){
+			$.post( "'.site_url("accesos/guardainter/").'", { usuario: usuario, modulo: modulo });
+		}
+		function guardatmenu(usuario, modulo){
+			$.post( "'.site_url("accesos/guardatmenu/").'", { usuario: usuario, modulo: modulo });
+		}
+
+		function copiaac(){
+			var temp = {
+			state0: {
+				html:"<h1>Desea copiar los acceso "+$("#copia").val()+" a "+$("#usuario").val()+" </h1>",
+				buttons: { Cancelar: false, Copiar: true },
+				focus: 1,
+				submit:function(e,v,m,f){
+					if(v){
+						e.preventDefault();
+						$.post("'.site_url("accesos/copiaac/").'", { usuario: $("#usuario").val(), copia: $("#copia").val() })
+						.done(function(data){
+							$.prompt.getStateContent("state1").find("#resultado").html(data);
+						});
+						limpia();
+						$.prompt.goToState("state1");
+						return false;
+					}
+					$.prompt.close();
 				}
-			}
-			$data['content'].='</table></div>';
-			$data['content'].=form_hidden('usuario',$usuario).form_submit('pasa','Guardar').form_close().anchor('/accesos','Regresar');;     
-		}else
-			$data['content']='Usuario no V&aacute;lido, por favor selecione un usuario correcto.';
+			},
+			state1: {
+				html:"<span id=\'resultado\'></span>",
+				buttons: { Salir: 0 },
+				focus: 1,
+				submit:function(e,v,m,f){
+					e.preventDefault();
+					if(v==0)
+						$.prompt.close();
+					}
+				}
+			};
+			$.prompt(temp);
+		}
 
-		$data['head']    = style('estilos.css');
+		function limpia(){ 
+			$("#ContenedoresDedata").html("Seleccione un Grupo");
+			$("#ContenedoresDatasis").html("Seleccione un Modulo");
+		}
+		</script>
+		';
+
+		$data['script']  = $script;
+		$data['content'] = $salida;
+		$data['head']    = script('jquery-min.js');
+		$data['head']   .= script('jquery-ui.min.js');
+		$data['head']   .= script('jquery-impromptu.js');
+		$data['head']   .= style('jquery-ui.min.css');
+		$data['head']   .= style('themes/proteo/proteo.css');
+		$data['head']   .= style('estilos.css');
+		$data['head']   .= style('impromptu/default.css');
+
+
+		
+		$data['title']   = '<h1>Accesos del usuario:</h1>';
 		$data['title']   = "<h1>Administraci&oacute;n de accesos, usuario <b>$usuario</b></h1>";
 		$this->load->view('view_ventanas', $data);
 	}
+
+	//******************************************************************
+	// Copia los accesso
+	//
+	function copiaac(){ 
+		$usuario = $this->input->post('usuario');
+		$copia   = $this->input->post('copia');
+
+		if ( $usuario <> $copia && $usuario<>'' && $copia<>'' ){
+			$mSQL="DELETE FROM intrasida WHERE usuario=".$this->db->escape($usuario);
+			$this->db->query($mSQL);
+
+			//Copia desde el usuario copia
+			$mSQL = "INSERT INTO intrasida (usuario, modulo, acceso) SELECT ? usuario, modulo, acceso FROM intrasida WHERE usuario=? ";
+			$this->db->query($mSQL, array($usuario, $copia ));
+			echo "Insertados Nuevos Accesos <br>";
+
+			//Borra los del usuario
+			$mSQL = "DELETE FROM sida WHERE usuario=? ";
+			$this->db->query($mSQL, array($usuario));
+			echo "Eliminado Accesos anteriores<br>";
+
+			//Porsia Agrega desde tmenus
+			$mSQL = "INSERT IGNORE INTO sida (usuario, modulo, acceso) SELECT ? usuario, codigo modulo, 'N' FROM tmenus ";
+			$this->db->query($mSQL, array($copia));
+			echo 'Insertados Accesos Faltantes<br>';
+
+			//Copia desde el usuario copia
+			$mSQL = "INSERT INTO sida (usuario, modulo, acceso) SELECT ? usuario, modulo, acceso FROM sida WHERE usuario=? ";
+			$this->db->query($mSQL, array($usuario, $copia ));
+			echo "Insertados Nuevos Accesos <br>";
+
+			echo "<h1>El Usuario ${usuario} ahora tiene los accesos de ${copia}</h1>";
+			logusu('SIDA',"Copiado accesos de ${usuario} a  ${copia}");
+		} else {
+			echo "<h1>Usuarios origen y destino iguales ${usuario} = ${copia}</h1>";
+		}
+
+	}
+
+
+	//******************************************************************
+	// Trae intramenu por ajax
+	//
+	function traeitem(){
+		$usuario = $this->input->post('usuario');
+		$modulo  = $this->input->post('modulo');
+		$i       = 0;
+		$panel   = '';
+		
+		$salida = '<table width=100% cellspacing="0" style="font-size:0.8em;">';
+
+		$mSQL="SELECT aa.modulo,aa.titulo, aa.acceso, bb.panel FROM
+			(SELECT a.modulo,a.titulo, IFNULL(b.acceso,'N') AS acceso ,a.panel 
+			FROM intramenu AS a
+			LEFT JOIN intrasida AS b ON a.modulo=b.modulo AND b.usuario=".$this->db->escape($usuario)."
+			WHERE MID(a.modulo,1,1) = ".$this->db->escape($modulo)." AND LENGTH(TRIM(a.modulo)>1 ) ) AS aa
+			JOIN intramenu AS bb ON MID(aa.modulo,1,3)=bb.modulo
+			ORDER BY MID(aa.modulo,1,1), IF(LENGTH(aa.modulo)=1,0,1),bb.panel,MID(aa.modulo,2,2), MID(aa.modulo,2)";
+
+		$mc = $this->db->query($mSQL);
+		foreach( $mc->result() as $row ){
+			if($row->acceso=='S') $row->acceso='checked'; else $row->acceso='';
+				
+			if(strlen($row->modulo)==1) {
+				$salida .= '<tr><th colspan=2>'.$row->titulo.'</th></tr>';
+				$panel = '';
+			}elseif( strlen($row->modulo)==3 ) {
+				if ($panel <> $row->panel ) {
+					$salida .= '<tr><td colspan=2 bgcolor="#CCDDCC">'.$row->panel.'</td></tr>';
+					$panel = $row->panel;
+				};
+
+				$salida .= '<tr><td>'.$row->modulo.'-'.$row->titulo.'</td><td><input type="checkbox" name="accesos['.$i.']" value="'.$row->modulo.'" '.$row->acceso.' onchange="guardainter(\''.$usuario.'\',\''.$row->modulo.'\')"></td></tr>'."\n";
+				$i++;
+			}else{
+				$salida .= '<tr><td><b>&nbsp;&nbsp;-&nbsp;</b>'.$row->titulo.'</td><td><input type="checkbox" name="accesos['.$i.']" value="'.$row->modulo.'" '.$row->acceso.' onchange=\'guardainter("'.$usuario.'","'.$row->modulo.'")\'></td></tr>'."\n";
+				$i++;
+			}
+		}
+		$salida .='</table>';
+		echo $salida;
+	}
+
+	//******************************************************************
+	// Cambia los accesos
+	//
+	function guardainter(){
+		$usuario = $this->input->post('usuario');
+		$modulo  = $this->input->post('modulo');
+
+		$mSQL = "SELECT COUNT(*) FROM intrasida WHERE usuario=".$this->db->escape($usuario)." AND modulo=".$this->db->escape($modulo) ;
+		if ( $this->datasis->dameval($mSQL) == 0 ){
+			$mSQL="INSERT IGNORE INTO intrasida (usuario,modulo,acceso) VALUES(".$this->db->escape($usuario).", ".$this->db->escape($modulo)." ,'S')";
+			$this->db->query($mSQL);
+		} else {
+			$mSQL="UPDATE intrasida SET acceso=IF(acceso='N','S','N') WHERE usuario=".$this->db->escape($usuario)." AND modulo=".$this->db->escape($modulo) ;
+			$this->db->query($mSQL);
+		}
+		echo $mSQL;
+	}
+
+	//******************************************************************
+	// Trae intramenu por ajax
+	//
+	function traetmenu(){
+		$usuario = $this->input->post('usuario');
+		$modulo  = $this->input->post('modulo');
+		$i       = 0;
+		$panel   = $modulo;
+
+		$salida = '<table width=100% cellspacing="0" style="font-size:0.8em;">';
+		$salida .= '<tr><th colspan=2>'.$modulo.'</th></tr>';
+
+		$mSQL  = "
+			SELECT a.codigo, a.modulo, a.secu, a.titulo, b.acceso, b.usuario 
+			FROM tmenus a LEFT JOIN sida b ON a.codigo = b.modulo 
+				AND b.usuario=".$this->db->escape($usuario)." 
+			WHERE a.modulo <> 'MENUINT' AND a.modulo regexp '^[^0-9]+$' 
+				AND a.modulo IN (".$this->db->escape($modulo).",".$this->db->escape($modulo.'LIS').",".$this->db->escape($modulo.'OTR').")
+				AND a.titulo NOT IN ('Prox','Ante','Busca','Tabla')
+				AND a.ejecutar!=''
+			ORDER BY modulo,secu";
+
+		$mc = $this->db->query($mSQL);
+		foreach( $mc->result() as $row ){
+			if($row->acceso=='S') $row->acceso='checked'; else $row->acceso='';
+			if( $panel != $row->modulo){
+				if ( substr($row->modulo,-3) == 'LIS' )
+					$salida .= '<tr><td colspan=2 bgcolor="#CCDDCC">REPORTES</td></tr>';
+				else
+					$salida .= '<tr><td colspan=2 bgcolor="#CCDDCC">FUNCIONES</td></tr>';
+
+				$panel = $row->modulo;
+			}
+			$salida .= '<tr><td>'.$row->titulo.'</td><td><input type="checkbox" name="accesos['.$i.']" value="'.$row->modulo.'" '.$row->acceso.' onchange="guardatmenu(\''.$usuario.'\',\''.$row->codigo.'\')"></td></tr>'."\n";
+			$i++;
+		}
+		$salida .='</table>';
+		echo $salida;
+	}
+
+	//******************************************************************
+	// Cambia los accesos
+	//
+	function guardatmenu(){
+		$usuario = $this->input->post('usuario');
+		$modulo  = $this->input->post('modulo');
+
+		$mSQL = "SELECT COUNT(*) FROM sida WHERE usuario=".$this->db->escape($usuario)." AND modulo=".$this->db->escape($modulo) ;
+		if ( $this->datasis->dameval($mSQL) == 0 ){
+			$mSQL="INSERT IGNORE INTO sida (usuario,modulo,acceso) VALUES(".$this->db->escape($usuario).", ".$this->db->escape($modulo)." ,'S')";
+			$this->db->query($mSQL);
+		} else {
+			$mSQL="UPDATE sida SET acceso=IF(acceso='N','S','N') WHERE usuario=".$this->db->escape($usuario)." AND modulo=".$this->db->escape($modulo) ;
+			$this->db->query($mSQL);
+		}
+		echo $mSQL;
+	}
+
 
 	function guardar(){
 		$this->datasis->modulo_id(904001);
@@ -126,7 +412,6 @@ class Accesos extends Controller{
 				$this->db->simple_query($mSQL);
 			}
 		}
-
 		$data['head']    = style('estilos.css');
 		$data['title']   = heading('Accesos Guardados para el usuario: '.$usuario);
 		$data['content'] = anchor('/accesos','Regresar');
@@ -147,109 +432,6 @@ class Accesos extends Controller{
 		$results = $query->num_rows(); 
 		$arr = $this->datasis->codificautf8($query->result_array());
 		echo '{success:true, message:"Loaded data" ,results:'. $results.', data:'.json_encode($arr).'}';
-	}
-
-
-	function accextjs(){
-
-		$encabeza = '<table width="100%" bgcolor="#2067B5"><tr><td align="left" width="100px"><img src="'.base_url().'assets/default/css/templete_01.jpg" width="120"></td><td align="center"><h1 style="font-size: 20px; color: rgb(255, 255, 255);" onclick="history.back()">ACCESO DE USUARIOS</h1></td><td align="right" width="100px"><img src="'.base_url().'assets/default/images/cerrar.png" alt="Cerrar Ventana" title="Cerrar Ventana" onclick="parent.window.close()" width="25"></td></tr></table>';
-		$modulo = 'usuario';
-		$urlajax = 'accesos/';
-
-		$script = "
-Ext.define('usuarioMod', {
-	extend: 'Ext.data.Model',
-	fields: [".$this->datasis->extjscampos("usuario")."],
-	proxy: {type: 'ajax',noCache: false,
-		api: {	read   : urlApp+'accesos/usuarios',method: 'POST'},
-		reader: {type: 'json',root: 'data',successProperty: 'success',messageProperty: 'message',totalProperty: 'results'}}
-});
-
-//////////////////////////////////////////////////////////
-//
-var usuarioCol = [
-	{ header: 'Codigo',   width: 80, sortable: true, dataIndex: 'us_codigo',  field: { type: 'textfield' }, filter: { type: 'string' }},
-	{ header: 'Nombre',   width:140, sortable: true, dataIndex: 'us_nombre',  field: { type: 'textfield' }, filter: { type: 'string' }},
-	{ header: 'Sup.',     width: 30, sortable: true, dataIndex: 'supervisor', field: { type: 'textfield' }, filter: { type: 'string' }},
-	{ header: 'Vende',    width: 40, sortable: true, dataIndex: 'vendedor',   field: { type: 'textfield' }, filter: { type: 'string' }},
-	{ header: 'Cajero',   width: 40, sortable: true, dataIndex: 'cajero',     field: { type: 'textfield' }, filter: { type: 'string' }},
-	{ header: 'Almacen',  width: 40, sortable: true, dataIndex: 'almacen',    field: { type: 'textfield' }, filter: { type: 'string' }},
-	{ header: 'Sucursal', width: 40, sortable: true, dataIndex: 'sucursal',   field: { type: 'textfield' }, filter: { type: 'string' }},
-	{ header: 'Activo',   width: 30, sortable: true, dataIndex: 'activo',     field: { type: 'textfield' }, filter: { type: 'string' }},
-];
-
-
-// create the Data Store
-var usuarioStore = Ext.create('Ext.data.Store', {
-	model: 'usuarioMod',
-	autoLoad: false,
-	autoSync: true,
-	method: 'POST'
-});
-
-
-
-Ext.onReady(function() {
-
-	//
-	var usuarioGrid = Ext.create('Ext.grid.Panel', {
-		width:   '100%',
-		height:  '100%',
-		store:   usuarioStore,
-		title:   'Usuarios',
-		iconCls: 'icon-grid',
-		frame:   true,
-		features: [ { ftype: 'filters', encode: 'json', local: false } ],
-		columns: usuarioCol
-	});
-
-
-	Ext.create('Ext.container.Viewport', {
-		layout: 'border',
-		items: [
-			{
-				region: 'north',
-				html: '".$encabeza."',
-				autoHeight: true,
-				border: false,
-				margins: '0 0 5 0'
-			},
-			{
-				region: 'west',
-				collapsible: true,
-				title: 'Usuarios',
-				width: 300,
-				items: usuarioGrid
-
-			},
-			{
-				region: 'south',
-				title: 'South Panel',
-				collapsible: true,
-				html: 'Information goes here',
-				split: true,
-				height: 100,
-				minHeight: 100
-			},
-			{
-				region: 'center',
-				title:'Listados',
-				border:false,
-				layout: 'fit',
-				html: '<h1>aaa</h1>'
-			}
-		]
-	});
-	usuarioStore.load();
-
-});
-
-	";
-		$data['encabeza']    = "ACCESOS";
-		$data['script']  = $script;
-		$data['title']  = heading('Accesos');
-		$this->load->view('extjs/ventana',$data);
-		
 	}
 
 }

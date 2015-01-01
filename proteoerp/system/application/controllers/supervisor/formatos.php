@@ -126,14 +126,42 @@ class formatos extends validaciones {
 
 		$edit = new DataEdit('Proteo', 'formatos');
 		$id=$edit->_dataobject->pk['nombre'];
-		$script='$("#df1").submit(function(){
-		$.post("'.site_url('supervisor/formatos/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
+		$script='
+		$("#df1").submit(function(){
+			$.post("'.site_url('supervisor/formatos/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
 			function(data){
-				alert("Reporte guardado" + data);
+				alert("Formato guardado" + data);
 			},
 			"application/x-www-form-urlencoded;charset='.$this->config->item('charset').'");
 			return false;
-		});';
+		});
+		
+		function guarda(){
+			$("#proteo").val(editor.getValue()); 
+			$.post("'.site_url('supervisor/formatos/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
+			function(data){
+				alert("Formato guardado" + data);
+			},
+			"application/x-www-form-urlencoded;charset='.$this->config->item('charset').'");
+			return false;
+		};
+		
+		function fcargar(){
+			$.post("'.site_url('supervisor/formatos/cargar/').'", { nombre:"'.$id.'"},
+			function(data){
+				if (data){ $("#proteo").val(editor.setValue(data)); } else { alert("Archivo vacio");}
+			});
+			return false;
+		};
+
+		function fguardar(){
+			$("#proteo").val(editor.getValue()); 
+			$.post("'.site_url('supervisor/formatos/guardar/').'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
+			function(data){
+				alert(data);
+			});
+			return false;
+		};';
 
 		$edit->script($script,'modify');
 		$edit->back_save  =true;
@@ -141,30 +169,62 @@ class formatos extends validaciones {
 		$edit->back_cancel_save=true;
 		$edit->back_url = site_url('supervisor/formatos/filteredgrid');
 
-		$edit->proteo= new htmlField('', 'proteo');
+		//$edit->proteo= new htmlField('', 'proteo');
+		$edit->proteo= new textareaField('', 'proteo');
 		$edit->proteo->rows =30;
 		$edit->proteo->cols=130;
 		//$edit->proteo->css_class='codepress php linenumbers-on readonly-off';
 
-		$edit->buttons('modify', 'save', 'undo','back');
+		//$edit->buttons('modify', 'save', 'undo','back');
 		$edit->build();
 
-		$this->rapyd->jquery[]='$("#proteo").tabby();';
-		$this->rapyd->jquery[]='$("#proteo").linedtextarea();';
-		$this->rapyd->jquery[]='estilo=$("#proteo").attr("style"); $("#proteo").attr("style",estilo+"-moz-tab-size:2 !important; tab-size:2 !important;")';
+		//$this->rapyd->jquery[]='$("#proteo").tabby();';
+		//$this->rapyd->jquery[]='$("#proteo").linedtextarea();';
+		//$this->rapyd->jquery[]='estilo=$("#proteo").attr("style"); $("#proteo").attr("style",estilo+"-moz-tab-size:2 !important; tab-size:2 !important;")';
 
 		if($this->genesal){
 			$data['content'] = $edit->output;
-			$data['title']   = "<h1>Formato '$id'</h1>";
+			$data['title']   = "$id";
 			$data['head']    = $this->rapyd->get_head();
-			$data['head']   .= script('plugins/jquery-linedtextarea.js').script('plugins/jquery.textarea.js').style('jquery-linedtextarea.css');
-			//$data['head']   .= script('codepress/codepress.js');
+			//$data['head']   .= script('plugins/jquery-linedtextarea.js').script('plugins/jquery.textarea.js').style('jquery-linedtextarea.css');
 
-			$this->load->view('view_ventanas_sola', $data);
+			$this->load->view('editform', $data);
+			//$this->load->view('view_ventanas_sola', $data);
 		}else{
 			echo $edit->error_string;
 		}
 	}
+
+	function guardar(){
+		$rs = false;
+		$nombre=$this->input->post('nombre');
+		$proteo=$this->input->post('proteo');
+		if($proteo !== false && $nombre !== false){
+			if(stripos($this->config->item('charset'), 'UTF')===false){
+				$rs = file_put_contents('formrep/formatos/proteo/'.trim($nombre).'.for', $proteo);
+			}
+		}
+		if ($rs)
+			echo 'Reporte Guardado';
+		else
+			echo 'Error al guardar "formrep/formatos/proteo/'.trim($nombre).'.for"';
+
+	}
+
+	function cargar(){
+		$nombre=$this->input->post('nombre');
+		if($nombre){
+			if(file_exists('formrep/reportes/proteo/'.$nombre.'.for')){
+				$leer = file_get_contents('formrep/formatos/proteo/'.$nombre.'.for');
+				if($leer) echo $leer;
+			}elseif(file_exists('formrep/reportes/proteo/'.$nombre.'.FOR') ){
+				$leer = file_get_contents('formrep/formatos/proteo/'.$nombre.'.FOR');
+				if($leer) echo $leer;
+			}
+		}
+	}
+
+
 
 	function txt(){
 		$this->rapyd->uri->keep_persistence();

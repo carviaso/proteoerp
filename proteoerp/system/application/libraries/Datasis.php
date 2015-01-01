@@ -358,12 +358,27 @@ class Datasis {
 	// Identifica el modulo por nombre admite o niega el acceso
 	// Si tiene alguna opcion en S en tmenus-sida pemite entrar
 	//
-	function modulo_nombre( $modulo, $ventana=0 ){
+	function modulo_nombre( $modulo, $ventana=0, $nombre='' ){
 		$CI =& get_instance();
 		$CI->load->database( 'default',TRUE );
 
 		if ( empty($modulo)) {
 			return false;
+		}
+
+		// Crea la entrada en la tabla modulos
+		$campos = $CI->db->list_fields('modulos');
+		if (!in_array('id',$campos)){
+			$CI->db->query('ALTER TABLE modulos DROP PRIMARY KEY');
+			$CI->db->query('ALTER TABLE modulos ADD UNIQUE INDEX modulo (modulo)');
+			$CI->db->query('ALTER TABLE modulos ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+		$mSQL  = "INSERT IGNORE INTO modulos SET modulo=".$CI->db->escape($modulo);
+		$CI->db->query($mSQL);
+
+		if ( $nombre <> '' ){
+			$mSQL  = 'UPDATE modulos SET nombre='.$CI->db->escape($nombre).' WHERE modulo='.$CI->db->escape($modulo);
+			$CI->db->query($mSQL);
 		}
 
 		//Arregla las secuencias si estan mal
@@ -1279,7 +1294,12 @@ class Datasis {
 	//*******************************
 	function menuMod(){
 		$CI =& get_instance();
-		$mSQL = "SELECT (`a`.`codigo` + 10000) AS `id`, concat(substr(`a`.`modulo`,1,4), replace(replace(substr(`a`.`modulo`,5,16),'OTR',''),'LIS',''))  `modulo`, -(1) AS `secu`, (select `b`.`mensaje` from `tmenus` `b` where ((`b`.`modulo` regexp '^[1-9][0-9]*$') and (`b`.`ejecutar` like concat('%',substr(`a`.`modulo`,1,4),replace(replace(substr(`a`.`modulo`,5,16),'OTR',''),'LIS',''),'%'))) limit 1) AS `nombre` from `tmenus` `a` where ((`a`.`modulo` <> 'MENUINT') and (not((`a`.`modulo` regexp '^[1-9][0-9]*$')))) group by concat(substr(`a`.`modulo`,1,4),replace(replace(substr(`a`.`modulo`,5,16),'OTR',''),'LIS',''))  order by `modulo`,`secu`";
+		$mSQL = "
+		SELECT (a.codigo+10000) AS id, concat(substr(a.modulo,1,4), replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS','')) modulo, -(1) AS secu, (select b.mensaje from tmenus b where ((b.modulo regexp '^[1-9][0-9]*$') and (b.ejecutar like concat('%',substr(a.modulo,1,4),replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS',''),'%'))) limit 1) AS nombre from tmenus a where ((a.modulo <> 'MENUINT') and (not((a.modulo regexp '^[1-9][0-9]*$')))) 
+		GROUP BY concat(substr(a.modulo,1,4),replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS','')) 
+		HAVING CONCAT('', modulo * 1 ) <> modulo
+		ORDER BY modulo,secu
+		";
 		$query = $CI->db->query($mSQL);
 		$Salida  = '';
 		$Salida .= "\t\t{ id:'10000', modulo:'MENUDTS', nombre:'MENUS PRINCIPAL DATASIS' },\n";

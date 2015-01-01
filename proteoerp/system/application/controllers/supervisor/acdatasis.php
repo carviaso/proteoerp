@@ -42,7 +42,7 @@ class acdatasis extends Controller {
 			$( "input:submit, a, button", ".otros" ).button();
 		});
 
-		jQuery("#bcopiar").click( function(){
+		$("#bcopiar").click( function(){
 			var usuario = $("#usuario").val();
 			var ucopia  = $("#copia").val();
 			if ( ucopia == usuario ){
@@ -99,7 +99,7 @@ class acdatasis extends Controller {
 			</div> <!-- #BottomPanel -->';
 
 		$funciones = '
-			jQuery("#titulos").jqGrid({
+			$("#titulos").jqGrid({
 				datatype: "local",
 				height: \'360\',
 				colNames:[\'Id\',\'Modulo\',\'Nombre\'],

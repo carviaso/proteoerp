@@ -227,6 +227,8 @@ class repomenu extends validaciones {
 
 		$script='
 		$("#df1").submit(function(){
+			$("#proteo").val(editor.getValue()); 
+
 			$.post("'.site_url('supervisor/repomenu/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
 				function(data){
 					//alert("Reporte guardado" + data);
@@ -235,15 +237,26 @@ class repomenu extends validaciones {
 			return false;
 		});
 
+		function guarda() {
+			$("#proteo").val(editor.getValue()); 
+			$.post("'.site_url('supervisor/repomenu/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
+				function(data){
+					//alert("Reporte guardado" + data);
+				}
+			);
+			return false;
+		};
+
 		function fcargar(){
 			$.post("'.site_url('supervisor/repomenu/cargar/').'", { nombre:"'.$id.'"},
 			function(data){
-				if (data){ $("#proteo").val(data); } else { alert("Archivo vacio");}
+				if (data){ $("#proteo").val(editor.setValue(data)); } else { alert("Archivo vacio");}
 			});
 			return false;
 		};
 
 		function fguardar(){
+			$("#proteo").val(editor.getValue()); 
 			$.post("'.site_url('supervisor/repomenu/guardar/').'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
 			function(data){
 				alert(data);
@@ -260,34 +273,48 @@ class repomenu extends validaciones {
 		$edit->proteo= new textareaField('', 'proteo');
 		$edit->proteo->rows =30;
 		$edit->proteo->cols =130;
-		$edit->proteo->css_class='text-indent:100px;';
+		$edit->proteo->css_class='text-indent:100px;width:90%;11';
 
-		$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
+		//$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 
-		$accion=$this->datasis->jwinopen(site_url('reportes/ver/'.$id."'"));
-		$edit->button_status('btn_probar','Probar Reporte',$accion,'TL','modify');
+		//$accion=$this->datasis->jwinopen(site_url('reportes/ver/'.$id."'"));
+		//$edit->button_status('btn_probar','Probar Reporte',$accion,'TL','modify');
 
-		$accion=$this->datasis->jwinopen(site_url('supervisor/mantenimiento/centinelas'));
-		$edit->button_status('btn_centinela','Centinelas',$accion,'TL','modify');
-		$edit->button_status('btn_guardar'  ,'Guardar a Archivo'   ,'fguardar()','TL','modify');
-		$edit->button_status('btn_cargar'   ,'Cargar desde Archivo','fcargar()' ,'TL','modify');
+		//$accion=$this->datasis->jwinopen(site_url('supervisor/mantenimiento/centinelas'));
+		//$edit->button_status('btn_centinela','Centinelas',$accion,'TL','modify');
+		//$edit->button_status('btn_guardar'  ,'Guardar a Archivo'   ,'fguardar()','TL','modify');
+		//$edit->button_status('btn_cargar'   ,'Cargar desde Archivo','fcargar()' ,'TL','modify');
 
 		$edit->build();
 
-		$this->rapyd->jquery[]='$("#proteo").tabby();';
-		$this->rapyd->jquery[]='$("#proteo").linedtextarea();';
+		$rt=array('status'=>'','msj'=>'','pk'=>'');
+		
+		if($edit->on_success()){
+			$rt['status'] = 'A';
+			$rt['msj']   = 'Guardado';
+			echo json_encode($rt);
+		}
+		if($edit->on_error()){
+			$rt['status']= 'B';
+			$rt['msj']   = $edit->error_string;
+			echo json_encode($rt);
+		}
 
-		if($this->genesal){
+		//$this->rapyd->jquery[]='$("#proteo").tabby();';
+		//$this->rapyd->jquery[]='$("#proteo").linedtextarea();';
+
+		if($edit->on_show()){
 			$data['content'] = $edit->output;
-			$data['title']   = heading('Editando Reporte '.$id);
+			$data['title']   = $id;
 			$data['head']    = $this->rapyd->get_head();
+
+/*
 			$data['head']   .= script('plugins/jquery-linedtextarea.js');
 			$data['head']   .= script('plugins/jquery.textarea.js');
 			$data['head']   .= style('jquery-linedtextarea.css');
+*/
 
-			$this->load->view('view_ventanas_sola', $data);
-		}else{
-			echo $edit->error_string;
+			$this->load->view('editorep', $data);
 		}
 	}
 
@@ -297,13 +324,9 @@ class repomenu extends validaciones {
 		$proteo=$this->input->post('proteo');
 
 		if($proteo !== false && $nombre !== false){
-			//if(stripos($this->config->item('charset'), 'utf')===false){
-			//	$_POST['nombre']=utf8_decode($nombre);
-			//	$_POST['proteo']=utf8_decode($proteo);
-			//}
-
 			$this->reporte();
 		}
+
 	}
 
 	function rtcpdf($status,$nombre){
@@ -385,14 +408,14 @@ class repomenu extends validaciones {
 		$nombre=$this->input->post('nombre');
 		$proteo=$this->input->post('proteo');
 		if($proteo !== false && $nombre !== false){
-			if(stripos($this->config->item('charset'), 'utf')===false){
+			if(stripos($this->config->item('charset'), 'UTF')===false){
 				$rs = file_put_contents('formrep/reportes/proteo/'.trim($nombre).'.rep', $proteo);
 			}
 		}
 		if ($rs)
 			echo 'Reporte Guardado';
 		else
-			echo 'Error al guardar '.$nombre.'.rep';
+			echo 'Error al guardar "formrep/reportes/proteo/'.trim($nombre).'.rep"';
 
 	}
 

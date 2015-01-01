@@ -18,7 +18,7 @@ class Scst extends Controller {
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
 		$this->back_dataedit='compras/scst/datafilter';
-		$this->datasis->modulo_nombre( 'SCST', $ventana=0 );
+		$this->datasis->modulo_nombre( 'SCST', $ventana=0, $this->titp );
 	}
 
 	function index(){
