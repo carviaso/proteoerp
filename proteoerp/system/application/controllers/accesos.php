@@ -14,20 +14,9 @@ class Accesos extends Controller{
 	function index(){
 		$this->session->set_userdata('panel', 9);
 		$this->datasis->modulo_id(904,1);
+		$this->datasis->modintramenu( 950, 540, 'accesos' );
 		redirect($this->url.'accesos/crear');
 
-/*
-		$mSQL='SELECT us_codigo, CONCAT( us_codigo,\' - \' ,us_nombre ) FROM usuario WHERE us_nombre != \'SUPERVISOR\' ORDER BY us_codigo';
-		$dropdown=$this->datasis->consularray($mSQL);
-		$content  = form_open('accesos/crear');
-		$content .= form_dropdown('usuario',$dropdown);
-		$content .= form_submit('pasa','Aceptar');
-		$content .= form_close();
-		$head    = '';
-		$title   = '<h1>Administraci&oacute;n de accesos</h1>';
-		//$this->load->view('view_ventanas', $data);
-		echo $content;
-*/
 	}
 
 	//****************************************************************** 
@@ -226,7 +215,6 @@ class Accesos extends Controller{
 		$data['head']   .= style('themes/proteo/proteo.css');
 		$data['head']   .= style('estilos.css');
 		$data['head']   .= style('impromptu/default.css');
-
 
 		
 		$data['title']   = '<h1>Accesos del usuario:</h1>';

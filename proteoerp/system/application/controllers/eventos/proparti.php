@@ -51,7 +51,6 @@ class Proparti extends Controller {
 		//$param['EastPanel'] = $EastPanel;
 		$param['SouthPanel']  = $SouthPanel;
 
-
 		$param['listados']    = $this->datasis->listados('PROPARTI', 'JQ');
 		$param['otros']       = $this->datasis->otros('PROPARTI', 'JQ');
 		$param['temas']       = array('proteo','darkness','anexos1');
@@ -97,30 +96,25 @@ class Proparti extends Controller {
 	function email(){
 
 		$notifica  = "		
-Amigos,\n\n
-Abajo le envío el afiche de convocatoria para la Concentración que haremos en la Plaza\n 
-Glorias Patrias de la ciudad de Mérida a las 9am, el próximo miércoles 10 de diciembre\n
-con motivo del día internacional de los Derechos Humanos.\n\n
-Sirva este encuentro para exigir a una sola voz  el respeto a los Derechos Humanos en\n 
-Venezuela. Las violaciones son tantas y conocidas por todos que consideramos, desde el\n 
-Congreso Ciudadano, que este es un momento propicio para unirnos en tan urgente propósito.\n\n
-Agradeciendo de antemano su participación y la mayor difusión que pueda brindar a esta\n
-actividad\n\n
-Un gran abrazo\n
-Martha Hernández\n
-Congreso Ciudadano Mérida\n\n
-Afiche: http://www.somosmayoria.org/wp-content/uploads/2014/12/IMG-20141208-WA0005.jpg
+Amigos, en el siguiente enlace les dejo con mucho cariño, mi mensaje de fin de año, Feliz 2015!
+\n
+
+https://soundcloud.com/marthahernandez-2/mi-mensaje-de-fin-de-ano
+\n
+Un gran abrazo!
+\n
+Su amiga
 ";
 
 		set_time_limit(0); // I added unlimited time limit here, because the records I imported were in the hundreds of thousands.
 
-		$titulo = utf8_decode('CONCENTRACIÓN EN DEFENSA DE LOS DERECHOS HUMANOS EN MÉRIDA');
+		$titulo = utf8_decode('Mi mensaje de fin de año');
 		$query = $this->db->query('SELECT * FROM test.correos');
 		if ($query->num_rows() > 0){
 			foreach ($query->result() as $row){
 				$msj = 'Envio Confirmado ';
 				$email = trim($row->correo); 
-				$this->datasis->correo( $email, $titulo, utf8_decode($notifica), array('/proteoerp/uploads/invitacionDDHH.jpg') );
+				$this->datasis->correo( $email, $titulo, utf8_decode($notifica) );
 			}
 		}
 	

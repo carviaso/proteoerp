@@ -1105,7 +1105,7 @@ function apldes(){
 <table style="width:100%;border-collapse:collapse;padding:0px;">
 	<tr>
 		<td align='left'>
-		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:335px;width:630px;'>
+		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:335px;width:650px;'>
 		<table width='100%' border='0' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL__'>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>C&oacute;digo</b></td>
@@ -1114,7 +1114,7 @@ function apldes(){
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Precio</b></td>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Importe</b></td>
 				<?php if($form->_status!='show') {?>
-					<td bgcolor='#0B3861'><a href='#' id='addlink' onclick="add_sitems()" title='Agregar otro articulo'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 26, 'alt'=>'Agregar otro producto', 'title' => 'Agregar otro producto', 'border'=>'0')); ?></a></td>
+					<td bgcolor='#0B3861'><a href='#' id='addlink' onclick="add_sitems()" title='Agregar otro articulo'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 18, 'alt'=>'Agregar otro producto', 'title' => 'Agregar otro producto', 'border'=>'0')); ?></a></td>
 				<?php } ?>
 			</tr>
 			<?php for($i=0;$i<$form->max_rel_count['sitems'];$i++) {
@@ -1166,7 +1166,7 @@ function apldes(){
 		</table>
 		</div>
 
-		<div id='formapago' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:630px;'>
+		<div id='formapago' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:650px;'>
 		<table style="border-collapse:collapse;padding:0px;border: 1px solid #0B3861;">
 			<tr>
 				<td>
@@ -1179,7 +1179,7 @@ function apldes(){
 						<td class="littletableheaderdet">Banco</td>
 						<td class="littletableheaderdet">Monto</td>
 						<?php if($form->_status!='show') {?>
-							<td class="littletableheaderdet"><a href='#' onclick="add_sfpa()" title='Agregar otro pago'><?php echo img('images/agrega4.png'); ?></a></td>
+							<td class="littletableheaderdet"><a href='#' onclick="add_sfpa()" title='Agregar otro pago'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 18, 'alt'=>'Agregar otro producto', 'title' => 'Agregar otro producto', 'border'=>'0')); ?></a></td>
 						<?php } ?>
 					</tr>
 					<?php
@@ -1222,7 +1222,7 @@ function apldes(){
 			</tr>
 		</table>
 		</div>
-		<div id='fpefectivo' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:630px;'>
+		<div id='fpefectivo' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:650px;'>
 		<table style="border-collapse:collapse;padding:0px;border: 1px solid #0B3861;">
 			<tr><td class="littletableheaderdet" colspan='3' style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;'>PAGO EN EFECTIVO</td></tr>
 			<tr>
@@ -1273,7 +1273,7 @@ function apldes(){
 		</td>
 	</tr><tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;width:630px;'>
+		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;width:650px;'>
 		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
 				<td class="littletablerow"    align='left'   style='background:#CFCFCF;width:30px;'><span><?php echo $form->descuento->label;  ?></span></td>
