@@ -37,7 +37,7 @@ funciones
 	login()                               // MARCA LOGGED EN USERDATA
 	puede($id)                            // SI TIENE ACCESO A id
 	modulo_id( $modulo, $ventana=0 )      // Identifica el modulo y controla el acceso
-	modulo_nombre( $modulo, $ventana=0 )  //
+	modulo_nombre( $modulo, $ventana=0, modulo )  //
 	sidapuede($modulo, $opcion)           //
 	puede_ejecuta($nombre)                // si tiene acceso a un modulo por nombre de ejecucion
 
@@ -366,6 +366,10 @@ class Datasis {
 			return false;
 		}
 
+		//Si no esta la tabla la crea
+		$mSQL = "CREATE TABLE IF NOT EXISTS modulos (modulo VARCHAR(20) NOT NULL DEFAULT '', nombre VARCHAR(50) NULL DEFAULT NULL, id INT(11) NOT NULL AUTO_INCREMENT,PRIMARY KEY (id), UNIQUE INDEX modulo (modulo)) COLLATE='latin1_swedish_ci' ENGINE=MyISAM;";
+		$CI->db->query($mSQL);
+
 		// Crea la entrada en la tabla modulos
 		$campos = $CI->db->list_fields('modulos');
 		if (!in_array('id',$campos)){
@@ -378,8 +382,12 @@ class Datasis {
 
 		if ( $nombre <> '' ){
 			$mSQL  = 'UPDATE modulos SET nombre='.$CI->db->escape($nombre).' WHERE modulo='.$CI->db->escape($modulo);
-			$CI->db->query($mSQL);
+		} else {
+			$mSQL  = 'UPDATE modulos SET nombre="Por Definir" WHERE nombre IS NULL AND modulo='.$CI->db->escape($modulo);
 		}
+		$CI->db->query($mSQL);
+
+
 
 		//Arregla las secuencias si estan mal
 		$secu = $CI->datasis->dameval("SELECT SUM(secu) FROM tmenus WHERE modulo='MENUINT'");

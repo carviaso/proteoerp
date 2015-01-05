@@ -15,6 +15,7 @@ class Accesos extends Controller{
 		$this->session->set_userdata('panel', 9);
 		$this->datasis->modulo_id(904,1);
 		$this->datasis->modintramenu( 950, 540, 'accesos' );
+		$this->instalar();
 		redirect($this->url.'accesos/crear');
 
 	}
@@ -412,6 +413,108 @@ class Accesos extends Controller{
 			$mSQL="ALTER TABLE `intrasida`  CHANGE COLUMN `modulo` `modulo` VARCHAR(11) NOT NULL DEFAULT '0' AFTER `usuario`";
 			$this->db->simple_query($mSQL);
 		}
+
+		//Si no esta la tabla la crea
+		$mSQL = "CREATE TABLE IF NOT EXISTS modulos (modulo VARCHAR(20) NOT NULL DEFAULT '', nombre VARCHAR(50) NULL DEFAULT NULL, id INT(11) NOT NULL AUTO_INCREMENT,PRIMARY KEY (id), UNIQUE INDEX modulo (modulo)) COLLATE='latin1_swedish_ci' ENGINE=MyISAM;";
+		$this->db->query($mSQL);
+
+		// Crea la entrada en la tabla modulos
+		$campos = $this->db->list_fields('modulos');
+		if (!in_array('id',$campos)){
+			$this->db->query('ALTER TABLE modulos DROP PRIMARY KEY');
+			$this->db->query('ALTER TABLE modulos ADD UNIQUE INDEX modulo (modulo)');
+			$this->db->query('ALTER TABLE modulos ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		$mSQL = "
+		INSERT IGNORE INTO modulos (modulo, nombre) VALUES
+		('PERS',      'Trabajadores'),
+		('SCST',      'Compras de Productos'),
+		('SPRV',      'Proveedores'),
+		('APAN',      'Aplicacion anticipos'),
+		('ARAN',      'Aranceles'),
+		('ASIG',      'Asignaciones de Nomina'),
+		('AUSU',      'Aumento de Sueldos'),
+		('BANC',      'Caja y Bancos'),
+		('BCAJ',      'Depositos de caja a bancos'),
+		('BCONCI',    'Conciliacion Bancaria'),
+		('BMOV',      'Movimiento de Bancos'),
+		('BOTR',      'Otros Conceptos de Ingresos y Gastos'),
+		('CAJA',      'Parametrizacion de Cajas'),
+		('CARG',      'Cargos de trabajadores'),
+		('CASI',      'Asientos Contables'),
+		('CAUB',      'Almacenes.'),
+		('CHOFER',    'Choferes'),
+		('CIVA',      'Libros Contables'),
+		('CLUB',      'Club de clientes'),
+		('CONC',      'Conceptos de Nomina'),
+		('CONV',      'Conversion de inventario'),
+		('CPLA',      'Plan de Cuentas'),
+		('CRUC',      'Cruce de cuentas'),
+		('DEPA',      'Departamentos de Nomina'),
+		('DIVI',      'Divisiones de Nomina'),
+		('DPTO',      'Departamentos de Inventario'),
+		('EDGASTO',   'Gastos de Inmobiliaria'),
+		('EDINMUE',   'Inmuebles'),
+		('EDREC',     'Recibos de cobro'),
+		('FLOTA',     'Flota de Vehiculos'),
+		('GRCL',      'Grupos de Clientes.'),
+		('GRGA',      'Grupos de Gastos.'),
+		('GRPR',      'Grupos de Proveedores.'),
+		('GRUP',      'Grupos de Inventario.'),
+		('GSER',      'Gastos y servicios'),
+		('GSERCHI',   'Caja chica'),
+		('ICON',      'Conceptos de Ajustes'),
+		('INVRESU',   'Libro de Inventario'),
+		('LINE',      'Lineas de Inventario.'),
+		('MAES',      'Inventario supermercado'),
+		('MGAS',      'Maestro de Gastos y Servicios.'),
+		('MODPOS',    'POS'),
+		('MVCERTI',   'Certificados MV'),
+		('NOCO',      'Contratos de Nomina'),
+		('NOMI',      'Historico de Nomina'),
+		('NOTABU',    'Tabla de Prestaciones'),
+		('ORDC',      'Pedido a Proveedores'),
+		('ORDS',      'Ordenes de servicio.'),
+		('OTIN',      'Otros Ingresos y Notas de Debito Cliente'),
+		('PROASISTE', 'Asistencia a Promociones'),
+		('PFAC',      'Pedidos de los Clientes.'),
+		('PRES',      'Prestamos de Nomina'),
+		('PRETAB',    'Prenomina'),
+		('PRMO',      'Otros Movimientos de Caja y Bancos'),
+		('PROVOCA',   'Proveedores ocacionales'),
+		('REPARTO',   'Control de Reparto'),
+		('RETE',      'Retenciones de I.S.L.R.'),
+		('RIVA',      'Retenciones de IVA a pagos'),
+		('RIVC',      'Retenciones de IVA de clientes'),
+		('SCAJ',      'Cajeros.'),
+		('SCLI',      'Clientes'),
+		('SCON',      'Consignaciones'),
+		('SFAC',      'Facturacion.'),
+		('SINV',      'Inventario y Servicios'),
+		('SINVEC',    'Estructura de Costos'),
+		('SIVA',      'Movimientos de proveedores.'),
+		('SMOV',      'Movimientos de clientes.'),
+		('SNOT',      'Notas de despacho'),
+		('SNTE',      'Notas de entrega'),
+		('SPRE',      'Presupuesto.'),
+		('SPREML',    'Presupuesto ML'),
+		('SPRM',      'Movimientos de proveedores.'),
+		('SSAL',      'Ajustes de Inventario'),
+		('STRA',      'Transferencia de Inventarios'),
+		('TARDET',    'Detalle de forma de pago'),
+		('TARJETA',   'Formas de Pago.'),
+		('TBAN',      'Instituciones Bancarias'),
+		('TMENUS',    'Menus de Datasis'),
+		('TMGA',      'Movimiento de inventarios, activos y suministros'),
+		('USERS',     'Usuarios'),
+		('USOL',      'Transferencia de Inventarios entre Almacenes'),
+		('UTRIBUTA',  'Unidades tributarias'),
+		('VEND',      'Vendedores.'),
+		('ZONA',      'Zonas de Clientes'),
+		('PROPARTI',  'Participantes en Promociones');";
+		$this->db->query($mSQL);
+
 	}
 
 	function usuarios(){
