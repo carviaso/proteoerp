@@ -17,7 +17,7 @@ class Sfac extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		$this->datasis->modulo_nombre( 'SFAC', 0 );
+		$this->datasis->modulo_nombre( 'SFAC', 0, 'Facturacion' );
 		$this->vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
 	}
 
@@ -44,7 +44,7 @@ class Sfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'fimprime',   'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento','tema'=>'anexos', 'label'=>'Imprimir'));
+		$grid->wbotonadd(array('id'=>'fimprime',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir Documento','tema'=>'anexos', 'label'=>'Imprimir'));
 		$grid->wbotonadd(array('id'=>'precierre','img'=>'images/dinero.png',              'alt' => 'Cierre de Caja',      'tema'=>'anexos', 'label'=>'Cierre de Caja'));
 		$grid->wbotonadd(array('id'=>'fmanual',  'img'=>'images/mano.png',                'alt' => 'Factura Manual',      'tema'=>'anexos', 'label'=>'Factura Manual'));
 		$grid->wbotonadd(array('id'=>'bdevolu',  'img'=>'images/dinero.png',              'alt' => 'Devolver Factura',    'tema'=>'anexos', 'label'=>'Devolver'));
@@ -187,8 +187,6 @@ class Sfac extends Controller {
 			}
 		};';
 
-
-
 		$bodyscript .= $this->jqdatagrid->bsshow('sfac', $ngrid, $this->url );
 
 		$bodyscript .= '
@@ -259,16 +257,15 @@ class Sfac extends Controller {
 
 
 		$bodyscript .= '
-		jQuery("#nccob").click( function(){
+		$("#nccob").click( function(){
 			var id  = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
-			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("'.$ngrid.'").getRowData(id);
 				if(ret.numero.substr(0,1)!="_" && ret.tipo_doc=="F"){
 					$.post("'.site_url('finanzas/smov/ncfac').'/"+ret.numero+"/create",
 						function(data){
 							$("#fncob").html(data);
-							//$("#fncob").dialog({ height: 300, width: 500 });
 							$("#fncob").dialog("open");
 						}
 					);
@@ -479,7 +476,7 @@ class Sfac extends Controller {
 		//Agregar Factura
 		$bodyscript .= '
 			$("#fedita").dialog({
-				autoOpen: false, height: 480, width: 850, modal: true,
+				autoOpen: false, height: 550, width: 870, modal: true,
 				buttons: {
 					"Guardar": function() {
 						if($("#scliexp").dialog( "isOpen" )===true) {

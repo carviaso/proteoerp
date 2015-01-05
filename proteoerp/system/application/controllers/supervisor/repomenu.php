@@ -307,13 +307,6 @@ class repomenu extends validaciones {
 			$data['content'] = $edit->output;
 			$data['title']   = $id;
 			$data['head']    = $this->rapyd->get_head();
-
-/*
-			$data['head']   .= script('plugins/jquery-linedtextarea.js');
-			$data['head']   .= script('plugins/jquery.textarea.js');
-			$data['head']   .= style('jquery-linedtextarea.css');
-*/
-
 			$this->load->view('editorep', $data);
 		}
 	}
