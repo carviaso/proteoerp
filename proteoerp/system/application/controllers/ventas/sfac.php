@@ -1507,7 +1507,8 @@ class Sfac extends Controller {
 					$this->db->update('sfpa', array('vendedor'=>$data['vd']));
 				}
 
-				logusu('SFAC',"Factura ${id} MODIFICADO");
+				$numero=$row['numero'];
+				logusu('sfac',"Factura ${numero} ${id} MODIFICADO");
 				echo 'Registro Modificado';
 
 			} elseif($oper == 'del') {

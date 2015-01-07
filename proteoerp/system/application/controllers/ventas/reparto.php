@@ -54,7 +54,7 @@ class Reparto extends Controller {
 		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png',     'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'cobrard', 'img'=>'images/ventafon.png',    'alt'=>'Cobrar Reparto',       'label'=>'Cobrar Reparto',       'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'finalid', 'img'=>'images/recalcular.jpg',  'alt'=>'Liquidar Reparto',     'label'=>'Liquidar Reparto',       'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'finalid', 'img'=>'images/recalcular.jpg',  'alt'=>'Liquidar Reparto',     'label'=>'Liquidar Reparto',     'tema'=>'anexos'));
 
 		//$grid->wbotonadd(array('id'=>'buscafc', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Buscar Faturas',      ));
 
@@ -418,10 +418,10 @@ class Reparto extends Controller {
 		$fecha = human_to_dbdate($this->input->post('fecha'));
 		$hoy   = intval(date('Ymd'));
 		$fc    = intval(str_replace('-','',$fecha));
+		$tipo  = strtoupper(trim($this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}")));
 
-		$oper  = $this->input->post('oper');
+		$oper  = trim($this->input->post('oper'));
 		if($oper == 'carga'){
-			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
 			if($tipo == 'P'){
 				if($fc>$hoy){
 					echo 'No puede cargar a una fecha futura';
@@ -440,7 +440,6 @@ class Reparto extends Controller {
 				echo 'No esta Pendiente';
 			}
 		}elseif($oper == 'entrega'){
-			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
 			if($tipo == 'C'){
 				if($fc>$hoy){
 					echo 'No puede cargar a una fecha futura';
@@ -453,7 +452,6 @@ class Reparto extends Controller {
 				echo 'No esta Cargada';
 			}
 		}elseif($oper == 'cierre'){
-			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
 			if($tipo == 'E'){
 				if($fc>$hoy){
 					echo 'No puede cargar a una fecha futura';
@@ -469,7 +467,6 @@ class Reparto extends Controller {
 				echo 'No esta Entregada';
 			}
 		}elseif($oper == 'anular'){
-			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
 			if($tipo != 'F'){
 				$this->db->where('id', $id);
 				$this->db->update('reparto', array('tipo' => 'A'));
@@ -479,7 +476,6 @@ class Reparto extends Controller {
 				echo 'Reparto ya fue cerrado o finalizado, no se puede anular';
 			}
 		}elseif($oper == 'finalizar'){
-			$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
 			if($tipo == 'F'){
 				$this->db->where('id', $id);
 				$this->db->update('reparto', array('tipo' => 'I'));
@@ -487,6 +483,8 @@ class Reparto extends Controller {
 			}else{
 				echo 'Reparto no se puede finalizar';
 			}
+		}else{
+			echo 'Operacion invalidad '.$oper;
 		}
 	}
 
@@ -494,9 +492,9 @@ class Reparto extends Controller {
 	//******************************************************************
 	// Formato de la ventana
 	//
-	function factuforma( $id = 0 ){
-		$id = intval($id);
-		$reg  = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=${id}");
+	function factuforma($id = 0){
+		$id  = intval($id);
+		$reg = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=${id}");
 		if(empty($reg)){
 			echo 'Reparto inexistente';
 			return false;
@@ -625,7 +623,6 @@ class Reparto extends Controller {
 		</table>\n";
 
 		echo $msalida;
-
 	}
 
 	//******************************************************************
@@ -665,7 +662,7 @@ class Reparto extends Controller {
 			'peso'    =>$peso,
 			'cantidad'=>$cana,
 			'volumen' =>$volumen,
-			'pardas'  =>$paradas,
+			'paradas' =>$paradas,
 		);
 
 		echo json_encode($rt);
@@ -675,9 +672,9 @@ class Reparto extends Controller {
 	//******************************************************************
 	// Factura
 	//
-	function facturas( $id = 0 ){
+	function facturas($id = 0){
 		$this->load->library('jqdatagrid');
-		$grid       = $this->jqdatagrid;
+		$grid = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('sfac');
@@ -935,9 +932,9 @@ class Reparto extends Controller {
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdata/'));
 
-		if ($deployed) {
+		if($deployed){
 			return $grid->deploy();
-		} else {
+		}else{
 			return $grid;
 		}
 	}
@@ -946,7 +943,7 @@ class Reparto extends Controller {
 	// Busca la data en el Servidor por json
 	//
 	function getdata(){
-		$grid       = $this->jqdatagrid;
+		$grid = $this->jqdatagrid;
 
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('reparto');
@@ -973,7 +970,6 @@ class Reparto extends Controller {
 			echo 'deshabilitado';
 		}elseif($oper == 'edit') {
 			echo 'deshabilitado';
-
 		}elseif($oper == 'del') {
 			echo 'deshabilitado';
 		}
@@ -1190,31 +1186,33 @@ class Reparto extends Controller {
 	// QUITA FACTURAS NO ENTREGADAS
 	//
 	function quita($id){
-		$dbid     = intval($id);
-		$reparto  = $this->datasis->dameval("SELECT reparto FROM sfac    WHERE id=${dbid}");
-		$dbreparto= intval($reparto);
-		$tipo     = $this->datasis->dameval("SELECT tipo    FROM reparto WHERE id=${dbreparto}");
-		if($tipo == 'E'){
-			$this->db->where('id',$dbid);
-			$this->db->update('sfac',array('reparto' => 0));
-			$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS(',',TRIM(eliminadas),${dbid}) WHERE id=${dbreparto}");
+		$dbid = intval($id);
+		if($dbid>0){
+			$reparto  = $this->datasis->dameval("SELECT reparto FROM sfac WHERE id=${dbid}");
+			$dbreparto= intval($reparto);
+			$tipo     = strtoupper(trim($this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${dbreparto}")));
+			if($tipo == 'E'){
+				$this->db->where('id',$dbid);
+				$this->db->update('sfac',array('reparto' => 0));
+				$this->db->query("UPDATE reparto SET eliminadas=CONCAT_WS(',',TRIM(eliminadas),${dbid}) WHERE id=${dbreparto}");
 
-			$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada FROM sfac WHERE reparto=${dbreparto}");
-			$peso    = floatval($row['peso']);
-			$paradas = floatval($row['parada']);
-			$cana    = floatval($row['cana']);
+				$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada FROM sfac WHERE reparto=${dbreparto}");
+				$peso    = floatval($row['peso']);
+				$paradas = floatval($row['parada']);
+				$cana    = floatval($row['cana']);
 
-			$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
-			FROM sfac   AS a
-			JOIN sitems AS b ON a.id=b.id_sfac
-			JOIN sinv   AS c ON b.codigoa=c.codigo
-			WHERE a.reparto=${dbreparto} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
+				$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
+				FROM sfac   AS a
+				JOIN sitems AS b ON a.id=b.id_sfac
+				JOIN sinv   AS c ON b.codigoa=c.codigo
+				WHERE a.reparto=${dbreparto} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
 
-			$this->db->where('id',$reparto);
-			$this->db->update('reparto',array('peso'=>$peso, 'facturas'=>$cana, 'volumen'=>$volumen, 'paradas'=>$paradas ));
+				$this->db->where('id',$reparto);
+				$this->db->update('reparto',array('peso'=>$peso, 'facturas'=>$cana, 'volumen'=>$volumen, 'paradas'=>$paradas ));
 
-			logusu('reparto',"Retiro factura id: ${id} reparto ${reparto}");
-			echo 'Factura retirada';
+				logusu('reparto',"Retiro factura id: ${id} reparto ${reparto}");
+				echo 'Factura retirada';
+			}
 		}
 	}
 

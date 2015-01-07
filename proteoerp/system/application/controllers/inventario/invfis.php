@@ -132,7 +132,7 @@ class Invfis extends Controller {
 		$data['content'] .= '<div style="background-color:#FFD582;">'.$form3->output.'</div>';
 		$data['content'] .= '</div>';
 		$data['title']   = '<h1>Inventario F&iacute;sico</h1>';
-		$data['head']    = $this->rapyd->get_head().script('jquery.js').script("plugins/jquery.numeric.pack.js").script("plugins/jquery.json.min.js");
+		$data['head']    = $this->rapyd->get_head().script('jquery.js').script('plugins/jquery.numeric.pack.js');//.script("plugins/jquery.json.min.js");
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -530,17 +530,18 @@ class Invfis extends Controller {
 		$fecha  = substr($tabla,-8);
 		$nstra  = $this->db->escape($this->datasis->fprox_numero('nstra'));
 		$alma   = substr($tabla,3,strlen($tabla)-11);
-		$alma   = $this->db->escape($alma);
+		$dbalma = $this->db->escape($alma);
+		$dbfecha= $this->db->escape(str_replace('-','',$fecha));
 		$error  ='';
 
-		if($tipo)
+		if($tipo){
 			$where='a.modificado IS NOT NULL AND a.actualizado IS NULL'; //no asume ceros
-		else
+		}else{
 			$where='a.actualizado IS NULL'; //asume ceros
-		$fromwhere="FROM $tabla a JOIN sinv b ON a.codigo=b.codigo WHERE $where";
+		}
+		$fromwhere="FROM ${tabla} a JOIN sinv b ON a.codigo=b.codigo WHERE ${where}";
 
-		$cana=$this->datasis->dameval("SELECT COUNT(*) $fromwhere");
-
+		$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana ${fromwhere}"));
 		if($cana>0){
 			$id=$this->_idsem($tabla);
 			$seg=sem_get($id,1,0666,-1);
@@ -550,24 +551,41 @@ class Invfis extends Controller {
 				SELECT ${nstra},a.codigo,CONCAT_WS(' ',b.descrip,b.descrip2)descrip,IF(a.modificado IS NULL,-1*a.existen,a.contado-a.existen),a.existen ${fromwhere}";
 
 			$ban = $this->db->simple_query($mSQL);
-			if(!$ban){$error.="No se pudo crear el registro en stra"; memowrite($mSQL,'INVFIS');}
+			if(!$ban){$error.='No se pudo crear el registro en stra'; memowrite($mSQL,'INVFIS');}
 
 			$mSQL="INSERT INTO stra (`numero`,`fecha`,`envia`,`recibe`,`observ1`,`usuario`,`estampa`,`hora`)
-				VALUES (${nstra},'${fecha}','INFI',${alma},'INVENTARIO FISICO',${dbusr},'${estampa}','${hora}')";
+				VALUES (${nstra},'${fecha}','INFI',${dbalma},'INVENTARIO FISICO',${dbusr},'${estampa}','${hora}')";
 
 			$ban = $this->db->simple_query($mSQL);
-			if(!$ban) {$error.="No se pudo crear el registro en stra "; memowrite($mSQL,'INVFIS'); }
+			if(!$ban) {$error.='No se pudo crear el registro en stra'; memowrite($mSQL,'INVFIS'); }
 
 			if(strlen($error)==0){
-				$mSQL="DROP TABLE $tabla";
+				$mSQL="DROP TABLE ${tabla}";
 				$ban = $this->db->simple_query($mSQL);
-				if(!$ban) {$error.="No se pudo limpiar la base de datos"; memowrite($mSQL,'INVFIS');}
+				if(!$ban) {$error.='No se pudo limpiar la base de datos'; memowrite($mSQL,'INVFIS');}
 				sem_release($seg);
 				sem_remove($seg);
-				logusu('INVFIS',"Se creo transferencia de Inventario Fisico $nstra");
+				logusu('INVFIS',"Se creo transferencia de Inventario Fisico ${nstra}");
 			}else{
 				sem_release($seg);
 			}
+
+			//Actualiza las cantidades
+			$query = $this->db->query("SELECT codigo,cantidad FROM itstra WHERE cantidad>0 AND numero=${nstra}");
+			foreach ($query->result() as $row){
+				$dbitcodigo=$this->db->escape($row->codigo);
+				$mSQL="SELECT COUNT(*) AS cana
+					FROM stra   AS a
+					JOIN itstra AS b ON a.numero=b.numero
+					WHERE a.envia='INFI' AND a.recibe=${dbalma} AND b.codigo=${dbitcodigo} AND a.fecha>${dbfecha}";
+				$chinnfis=intval($this->datasis->dameval($mSQL));
+				if($chinnfis==0){
+					$itcana = floatval($row->cantidad);
+					$this->datasis->sinvcarga($row->codigo,$alma,$itcana);
+				}
+			}
+			//Fin de la actualizacion de cantidades
+
 			logusu('invfis',"Inventario ${nstra} guardado");
 		}else{
 			$error='No hay productos contados para cerrar el inventario';

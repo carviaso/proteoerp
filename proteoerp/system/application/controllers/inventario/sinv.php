@@ -4924,7 +4924,7 @@ class Sinv extends Controller {
 		if(!empty($codigo)){
 			$mSQL  = "SELECT a.codigo, a.alma, a.existen, IF(b.ubides IS NULL,'SIN ALMACEN',b.ubides) AS nombre ";
 			$mSQL .= "FROM itsinv AS a LEFT JOIN caub as b ON a.alma=b.ubica ";
-			$mSQL .= "WHERE codigo=".$this->db->escape($codigo);
+			$mSQL .= "WHERE a.existen>0 AND codigo=".$this->db->escape($codigo);
 
 			$query = $this->db->query($mSQL);
 
@@ -6344,7 +6344,3 @@ class Sinv extends Controller {
 
 	}
 }
-
-
-
-
