@@ -2885,6 +2885,16 @@ class Sfac extends Controller {
 		$edit->codigoa->rel_id   = 'sitems';
 		$edit->codigoa->rule     = 'required';
 
+		$edit->lote = new inputField('Lote <#o#>', 'lote_<#i#>');
+		$edit->lote->db_name  = 'lote';
+		$edit->lote->css_class= 'inputnum';
+		$edit->lote->rel_id   = 'sitems';
+		$edit->lote->maxlength= 10;
+		$edit->lote->size     = 6;
+		$edit->lote->autocomplete=false;
+		//$edit->lote->showformat ='decimal';
+		$edit->lote->disable_paste=true;
+
 		$edit->desca = new inputField('Descripci&oacute;n <#o#>', 'desca_<#i#>');
 		$edit->desca->size=40;
 		$edit->desca->db_name='desca';
@@ -2913,6 +2923,18 @@ class Sfac extends Controller {
 		$edit->preca->onkeyup   = 'post_precioselec(<#i#>,this);';
 		//$edit->preca->readonly  = true;
 		$edit->preca->showformat ='decimal';
+
+		$edit->descu = new inputField('Descuento <#o#>', 'descu_<#i#>');
+		$edit->descu->db_name  = 'descu';
+		$edit->descu->css_class= 'inputnum';
+		$edit->descu->rel_id   = 'sitems';
+		$edit->descu->maxlength= 10;
+		$edit->descu->size     = 6;
+		//$edit->descu->rule     = 'required|positive|callback_chcanadev[<#i#>]|callback_chcananeg[<#i#>]';
+		$edit->descu->autocomplete=false;
+		$edit->descu->onkeyup  ='importe(<#i#>)';
+		$edit->descu->showformat ='decimal';
+		$edit->descu->disable_paste=true;
 
 		$edit->detalle = new hiddenField('', 'detalle_<#i#>');
 		$edit->detalle->db_name  = 'detalle';
@@ -5510,6 +5532,16 @@ class Sfac extends Controller {
 			$this->db->simple_query('ALTER TABLE sfac DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE sfac ADD UNIQUE INDEX tipo_doc, numero (numero)');
 			$this->db->simple_query('ALTER TABLE sfac ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		$campos = $this->db->list_fields('sitems');
+
+		if(!in_array('descu',$campos)){
+			$this->db->query("ALTER TABLE sitems ADD descu DECIMAL(10,2) DEFAULT '0' AFTER descuento");
+		}
+
+		if(!in_array('lote',$campos)){
+			$this->db->query("ALTER TABLE sitems ADD lote INT(11) DEFAULT '0' AFTER descu");
 		}
 
 	}
