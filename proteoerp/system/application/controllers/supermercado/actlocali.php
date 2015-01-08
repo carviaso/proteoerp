@@ -66,8 +66,7 @@ class actlocali extends Controller {
 			$dblocali=$this->db->escape($locali);
 			$dboper  =$this->db->escape($oper  );
 
-			$bool=$this->db->query("CALL sp_maes_actlocali(${dbnumero},${dblocali},${dboper})");
-
+			$bool=$this->db->simple_query("CALL sp_maes_actlocali(${dbnumero},${dblocali},${dboper})");
 			if($bool){
 				$salida='Se actualizo correctamente';
 			}else{
@@ -110,8 +109,7 @@ class actlocali extends Controller {
 			$numero   = $form->numero->newValue;
 			$dbnumero = $this->db->escape($numero);
 
-			$bool=$this->db->query("CALL sp_maes_maesfis0(${dbnumero})");
-
+			$bool=$this->db->simple_query("CALL sp_maes_maesfis0(${dbnumero})");
 			if($bool){
 				$salida='Se colocaron TODOS los productos de inventario <b>NO CONTADOS</b> en cero (0)';
 			}else{
