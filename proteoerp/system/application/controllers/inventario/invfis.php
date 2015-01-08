@@ -518,6 +518,9 @@ class Invfis extends Controller {
 		}else{
 			$error.="Ya existe un inventario creado para el almac&eacute;n $alma y la fecha seleccionada";
 		}
+		if(empty($error)){
+			logusu('invfis',"Conteo ${tabla} creado");
+		}
 		return $error;
 	}
 
@@ -608,6 +611,9 @@ class Invfis extends Controller {
 		}
 		sem_release($seg);
 		sem_remove($seg);
+		if(empty($error)){
+			logusu('invfis',"Conteo ${tabla} descartado");
+		}
 		return $error;
 	}
 

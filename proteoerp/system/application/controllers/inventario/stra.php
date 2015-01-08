@@ -535,7 +535,7 @@ class Stra extends Controller {
 	//
 	function defgridit( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
@@ -765,7 +765,7 @@ class Stra extends Controller {
 		$edit->cantidad->db_name  ='cantidad';
 		$edit->cantidad->css_class='inputnum';
 		$edit->cantidad->rel_id   ='itstra';
-		$edit->cantidad->rule     ='numeric|mayorcero|required';
+		$edit->cantidad->rule     ='numeric|callback_chcananeg[<#i#>]|mayorcero|required';
 		$edit->cantidad->maxlength=10;
 		$edit->cantidad->autocomplete=false;
 		$edit->cantidad->size     =10;
@@ -913,7 +913,7 @@ class Stra extends Controller {
 		$edit->cantidad->db_name  ='cantidad';
 		$edit->cantidad->css_class='inputnum';
 		$edit->cantidad->rel_id   ='itstra';
-		$edit->cantidad->rule     ='numeric|mayorcero|required';
+		$edit->cantidad->rule     ='numeric|callback_chcananeg[<#i#>]|mayorcero|required';
 		$edit->cantidad->maxlength=10;
 		$edit->cantidad->autocomplete=false;
 		$edit->cantidad->size     =10;
@@ -1447,6 +1447,33 @@ class Stra extends Controller {
 		}
 	}
 
+	//Chequea si puede o no vender negativo
+	function chcananeg($val,$i){
+		$almacen  = $this->input->post('envia');
+		$codigo   = $this->input->post('codigo_'.$i);
+		$dbcodigo = $this->db->escape($codigo);
+		$dbalmacen= $this->db->escape($almacen);
+		$tipo     = trim($this->datasis->dameval("SELECT tipo FROM sinv WHERE codigo=${dbcodigo}"));
+		if(empty($tipo)){
+			$this->validation->set_message('chcananeg', 'El art&iacute;culo '.htmlspecialchars($codigo).' no tiene existe');
+			return false;
+		}
+
+		if($tipo[0]=='A' || $tipo[0]=='F'){
+			$mSQL    = "SELECT SUM(a.existen) AS cana FROM itsinv AS a JOIN caub AS b ON a.alma=b.ubica AND b.tipo='S' WHERE a.codigo=${dbcodigo} AND b.ubica=${dbalmacen}";
+			$existen = floatval($this->datasis->dameval($mSQL));
+			$val     = floatval($val);
+			if($val>$existen){
+				$this->validation->set_message('chcananeg', 'El art&iacute;culo '.htmlspecialchars($codigo).' no tiene cantidad suficiente para transferirse ('.nformat($existen).')');
+				return false;
+			}
+		}else{
+			$this->validation->set_message('chcananeg', 'El art&iacute;culo '.htmlspecialchars($codigo).' no se puede transferir por el tipo, solo se permite articulo y fraccion');
+			return false;
+		}
+		return true;
+	}
+
 	function chalma($val){
 		$dbalma=$this->db->escape($val);
 		$invfis=$this->datasis->dameval('SELECT invfis FROM caub WHERE ubica='.$dbalma);
@@ -1484,16 +1511,15 @@ class Stra extends Controller {
 			return false;
 		}
 
-		$numero=$this->datasis->fprox_numero('nstra');
-		$do->set('numero',$numero);
-		$transac = $this->datasis->fprox_numero('ntransa');
-		$do->set('transac', $transac);
-
 		$cana = $do->count_rel('itstra'); $error=0;
 		for($i = 0;$i < $cana;$i++){
 			$itcodigo  = $do->get_rel('itstra', 'codigo'  ,$i);
 			$dbitcodigo=$this->db->escape($itcodigo);
 			$sinvrow=$this->datasis->damerow('SELECT iva,precio1,precio2,precio3,precio4,ultimo,descrip FROM sinv WHERE codigo='.$dbitcodigo);
+			if(empty($sinvrow)){
+				$do->error_message_ar['pre_ins']='Producto no '.$itcodigo.' valido';
+				return false;
+			}
 
 			$do->set_rel('itstra', 'precio1',  $sinvrow['precio1'], $i);
 			$do->set_rel('itstra', 'precio2',  $sinvrow['precio2'], $i);
@@ -1503,6 +1529,12 @@ class Stra extends Controller {
 			$do->set_rel('itstra', 'costo'  ,  $sinvrow['ultimo'] , $i);
 			$do->set_rel('itstra', 'descrip',  $sinvrow['descrip'], $i);
 		}
+
+		$numero  = $this->datasis->fprox_numero('nstra');
+		$transac = $this->datasis->fprox_numero('ntransa');
+		$do->set('numero' , $numero );
+		$do->set('transac', $transac);
+
 		return true;
 	}
 
@@ -1513,7 +1545,6 @@ class Stra extends Controller {
 		$dbenvia = $this->db->escape($envia);
 		$dbrecibe= $this->db->escape($recibe);
 		$dbfecha = $this->db->escape($fecha);
-
 
 		$factor = ($accion=='CREADO')? 1:-1;
 		$egasto=$this->datasis->dameval('SELECT gasto FROM caub WHERE ubica='.$dbenvia);

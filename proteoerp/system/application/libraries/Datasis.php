@@ -84,6 +84,9 @@ funciones
 
 class Datasis {
 
+	function Datasis(){
+		$this->valores=array();
+	}
 // FUNCIONES DE BD
 
 	// TRAE EL PRIMER CAMPO DEL PRIMER REGISTRO DE LA CONSULTA
@@ -135,18 +138,29 @@ class Datasis {
 
 	// Trae valor de la table VALORES
 	function traevalor($nombre,$descrip=''){
-		$CI =& get_instance();
-		$dbnombre=$CI->db->escape($nombre);
+		$nombre   =  trim($nombre);
+		$CI       =& get_instance();
+		$dbnombre =  $CI->db->escape($nombre);
+
+		if(isset($this->valores[$nombre])){
+			$dbdescrip = $CI->db->escape($descrip);
+			if($this->valores[$nombre]['descrip']!=$descrip){
+				$CI->db->simple_query("UPDATE valores SET descrip=${dbdescrip} WHERE nombre=${dbnombre}");
+			}
+			return $this->valores[$nombre]['valor'];
+		}
 
 		$qq = $CI->db->query("SELECT valor,descrip FROM valores WHERE nombre=${dbnombre}");
 		if($qq->num_rows() > 0){
 			$rr = $qq->row_array();
 			$rt = $rr['valor'];
 			if(!empty($descrip)){
-				if($rr['valor']!=$descrip){
+				if($rr['descrip']!=$descrip){
 					$dbdescrip = $CI->db->escape($descrip);
 					$CI->db->simple_query("UPDATE valores SET descrip=${dbdescrip} WHERE nombre=${dbnombre}");
 				}
+				$this->valores[$nombre]['valor']   = $rr['valor'];
+				$this->valores[$nombre]['descrip'] = $rr['descrip'];
 			}
 		}else{
 			$dbdescri=$CI->db->escape($descrip);
@@ -1303,8 +1317,8 @@ class Datasis {
 	function menuMod(){
 		$CI =& get_instance();
 		$mSQL = "
-		SELECT (a.codigo+10000) AS id, concat(substr(a.modulo,1,4), replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS','')) modulo, -(1) AS secu, (select b.mensaje from tmenus b where ((b.modulo regexp '^[1-9][0-9]*$') and (b.ejecutar like concat('%',substr(a.modulo,1,4),replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS',''),'%'))) limit 1) AS nombre from tmenus a where ((a.modulo <> 'MENUINT') and (not((a.modulo regexp '^[1-9][0-9]*$')))) 
-		GROUP BY concat(substr(a.modulo,1,4),replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS','')) 
+		SELECT (a.codigo+10000) AS id, concat(substr(a.modulo,1,4), replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS','')) modulo, -(1) AS secu, (select b.mensaje from tmenus b where ((b.modulo regexp '^[1-9][0-9]*$') and (b.ejecutar like concat('%',substr(a.modulo,1,4),replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS',''),'%'))) limit 1) AS nombre from tmenus a where ((a.modulo <> 'MENUINT') and (not((a.modulo regexp '^[1-9][0-9]*$'))))
+		GROUP BY concat(substr(a.modulo,1,4),replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS',''))
 		HAVING CONCAT('', modulo * 1 ) <> modulo
 		ORDER BY modulo,secu
 		";
@@ -1667,7 +1681,7 @@ class Datasis {
 			precio3=TRUNCATE(precio3/100,0)*100 +IF(MOD(precio3,100)>70,100,IF(MOD(precio3,100)>30,50,0)),
 			precio4=TRUNCATE(precio4/100,0)*100 +IF(MOD(precio4,100)>70,100,IF(MOD(precio4,100)>30,50,0))
 		WHERE redecen='C' ";
-		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo;
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1677,7 +1691,7 @@ class Datasis {
 			precio3=TRUNCATE(precio3/10,0)*10 +IF(MOD(precio3,10)>7,10,IF(MOD(precio3,10)>3,5,0)),
 			precio4=TRUNCATE(precio4/10,0)*10 +IF(MOD(precio4,10)>7,10,IF(MOD(precio4,10)>3,5,0))
 		WHERE redecen='D' ";
-		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo;
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1687,7 +1701,7 @@ class Datasis {
 			precio3=ROUND(precio3,0),
 			precio4=ROUND(precio4,0)
 		WHERE redecen='F' ";
-		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo;
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1697,7 +1711,7 @@ class Datasis {
 			precio3=ROUND(precio3,1),
 			precio4=ROUND(precio4,1)
 		WHERE redecen='M' ";
-		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo;
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1706,7 +1720,7 @@ class Datasis {
 			base2=ROUND(precio2*100/(100+iva),2),
 			base3=ROUND(precio3*100/(100+iva),2),
 			base4=ROUND(precio4*100/(100+iva),2) ";
-		if ($codigo <> '' ) $mSQL .= ' WHERE codigo='.$dbcodigo; 
+		if ($codigo <> '' ) $mSQL .= ' WHERE codigo='.$dbcodigo;
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1716,7 +1730,7 @@ class Datasis {
 			margen3=100-ROUND(pond*100/base3,2),
 			margen4=100-ROUND(pond*100/base4,2)
 		WHERE formcal='P' ";
-		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo;
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1726,7 +1740,7 @@ class Datasis {
 			margen3=100-ROUND(ultimo*100/base3,2),
 			margen4=100-ROUND(ultimo*100/base4,2)
 		WHERE formcal='U' ";
-		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo;
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1736,7 +1750,7 @@ class Datasis {
 			margen3=100-ROUND(GREATEST(ultimo,pond)*100/base3,2),
 			margen4=100-ROUND(GREATEST(ultimo,pond)*100/base4,2)
 		WHERE formcal='M' ";
-		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo;
 		$CI->db->query($mSQL);
 
 		$mSQL = "
@@ -1746,7 +1760,7 @@ class Datasis {
 			margen3=100-ROUND(standard*100/base3,2),
 			margen4=100-ROUND(standard*100/base4,2)
 		WHERE formcal='S' ";
-		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo; 
+		if ($codigo <> '' ) $mSQL .= ' AND codigo='.$dbcodigo;
 		$CI->db->query($mSQL);
 
 	}
@@ -1816,7 +1830,7 @@ class Datasis {
 				});
 			}
 		};
-		';		
+		';
 		return $mandale;
 	}
 
