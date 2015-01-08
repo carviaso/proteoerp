@@ -39,7 +39,7 @@ class actlocali extends Controller {
 		$form->numero->style='width:230px;';
 		$form->numero->option('','Seleccionar');
 		$form->numero->rule ='callback_chinvfis|required';
-		$form->numero->options('SELECT CONCAT_WS(\'-\',numero,ubica,DATE_FORMAT(fecha,\'%d/%m/%Y\')), numero FROM maesfisico  GROUP BY numero ORDER BY fecha DESC LIMIT '.$this->limite);
+		$form->numero->options('SELECT numero,CONCAT_WS(\'-\',numero,ubica,DATE_FORMAT(fecha,\'%d/%m/%Y\')) AS val FROM maesfisico  GROUP BY numero ORDER BY fecha DESC LIMIT '.$this->limite);
 
 		$form->locali = new inputField('Localizaci&oacute;n a colocar', 'locali');
 		$form->locali->size = 10;
@@ -92,7 +92,7 @@ class actlocali extends Controller {
 		$form->numero->style='width:230px;';
 		$form->numero->option('','Seleccionar');
 		$form->numero->rule ='callback_chinvfis|required';
-		$form->numero->options('SELECT CONCAT_WS(\'-\',numero,ubica,DATE_FORMAT(fecha,\'%d/%m/%Y\')), numero FROM maesfisico  GROUP BY numero ORDER BY fecha DESC LIMIT '.$this->limite);
+		$form->numero->options('SELECT numero,CONCAT_WS(\'-\',numero,ubica,DATE_FORMAT(fecha,\'%d/%m/%Y\')) AS val FROM maesfisico  GROUP BY numero ORDER BY fecha DESC LIMIT '.$this->limite);
 
 		/*$form->numero = new inputField('Inventario F&iacute;sico', 'numero');
 		$form->numero->rule      ='callback_chinvfis|required';
