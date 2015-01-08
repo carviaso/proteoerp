@@ -1527,7 +1527,7 @@ class Stra extends Controller {
 			$do->set_rel('itstra', 'precio4',  $sinvrow['precio4'], $i);
 			$do->set_rel('itstra', 'iva'    ,  $sinvrow['iva']    , $i);
 			$do->set_rel('itstra', 'costo'  ,  $sinvrow['ultimo'] , $i);
-			$do->set_rel('itstra', 'descrip',  $sinvrow['descrip'], $i);
+			$do->set_rel('itstra', 'descrip',  trim($sinvrow['descrip']), $i);
 		}
 
 		$numero  = $this->datasis->fprox_numero('nstra');
