@@ -1,6 +1,11 @@
 <?php
-
-//almacenes
+/**
+ * ProteoERP
+ *
+ * @autor    Ender Ochoa
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 class actlocali extends Controller {
 
 	var $url  ='supermercado/actlocali';
@@ -40,6 +45,7 @@ class actlocali extends Controller {
 		$form->numero->option('','Seleccionar');
 		$form->numero->rule ='callback_chinvfis|required';
 		$form->numero->options('SELECT numero,CONCAT_WS(\'-\',numero,ubica,DATE_FORMAT(fecha,\'%d/%m/%Y\')) AS val FROM maesfisico  GROUP BY numero ORDER BY fecha DESC LIMIT '.$this->limite);
+		$form->numero->append('N&uacute;mero-Almac&eacute;n-Fecha');
 
 		$form->locali = new inputField('Localizaci&oacute;n a colocar', 'locali');
 		$form->locali->size = 10;
@@ -64,15 +70,22 @@ class actlocali extends Controller {
 			$oper    =$form->oper->newValue;
 			$dbnumero=$this->db->escape($numero);
 			$dblocali=$this->db->escape($locali);
-			$dboper  =$this->db->escape($oper  );
+			$dboper  =intval($oper);
 
-			$bool=$this->db->simple_query("CALL sp_maes_actlocali(${dbnumero},${dblocali},${dboper})");
+			$mSQL="UPDATE
+			maesfisico AS a
+			JOIN ubic  AS b ON a.codigo = b.codigo AND a.ubica=b.ubica
+			SET b.locali=${dblocali}
+			WHERE a.numero=${dbnumero} AND
+			((a.fraccion>0)*(${dboper}=1)+(a.fraccion=0)*(${dboper}=0)+(a.fraccion>=0)*(${dboper}=2))";
+
+			$bool=$this->db->simple_query($mSQL);
 			if($bool){
+				logusu('actlocali',"Se actualizaron las localizaciones ${numero}");
 				$salida='Se actualizo correctamente';
 			}else{
 				$salida='Hubo problemas con la operaci&oacute;n, consulte soporte t&eacute;cnico';
 			}
-			//redirect($this->url."/actualiza/".$numero.'/'.$oper."/".raencode($locali));
 		}
 
 		$data['content'] = $form->output.'<p style="text-align:center">'.$salida.'</p>';
@@ -92,12 +105,7 @@ class actlocali extends Controller {
 		$form->numero->option('','Seleccionar');
 		$form->numero->rule ='callback_chinvfis|required';
 		$form->numero->options('SELECT numero,CONCAT_WS(\'-\',numero,ubica,DATE_FORMAT(fecha,\'%d/%m/%Y\')) AS val FROM maesfisico  GROUP BY numero ORDER BY fecha DESC LIMIT '.$this->limite);
-
-		/*$form->numero = new inputField('Inventario F&iacute;sico', 'numero');
-		$form->numero->rule      ='callback_chinvfis|required';
-		$form->numero->size      =10;
-		$form->numero->maxlength = 8;
-		$form->numero->minlength = 8;*/
+		$form->numero->append('N&uacute;mero-Almac&eacute;n-Fecha');
 
 		$back_url=site_url($this->url.'/index');
 		$form->button('btn_regre','Regresar',"javascript:window.location='${back_url}'",'BL');
@@ -109,11 +117,43 @@ class actlocali extends Controller {
 			$numero   = $form->numero->newValue;
 			$dbnumero = $this->db->escape($numero);
 
-			$bool=$this->db->simple_query("CALL sp_maes_maesfis0(${dbnumero})");
-			if($bool){
-				$salida='Se colocaron TODOS los productos de inventario <b>NO CONTADOS</b> en cero (0)';
+			$row=$this->datasis->damerow("SELECT fecha, ubica FROM maesfisico WHERE numero=${dbnumero} LIMIT 1");
+			if(!empty($row)){
+				$ubica    = $row['ubica'];
+				$fecha    = $row['fecha'];
+				$dbubica  = $this->db->escape($ubica);
+				$dbfecha  = $this->db->escape($fecha);
+				$dbusr    = $this->db->escape($this->secu->usuario());
+
+				$mSQL="INSERT INTO maesfisico
+				(id,codigo,ubica,locali,cantidad,fraccion,acantidad,afraccion,fecha,numero,usuario,estanpa,hora)
+				SELECT
+					NULL AS id,
+					a.codigo,
+					${ubica}    AS ubica,
+					'BLANCO'    AS locali,
+					0           AS cantidad,
+					0           AS fraccion,
+					0           AS acantidad,
+					0           AS afraccion,
+					${dbfecha}  AS fecha,
+					${dbnumero} AS numero,
+					${dbusr}    AS usuario,
+					CURDATE()   AS fecha,
+					CURTIME()   AS hora
+				FROM maes AS a
+				LEFT JOIN maesfisico AS b ON a.codigo=b.codigo AND a.numero=${dbnumero}
+				WHERE b.codigo IS NULL";
+
+				$bool=$this->db->simple_query($mSQL);
+				if($bool){
+					logusu('actlocali',"Se pasaron los no contados a cero ${numero}");
+					$salida='Se colocaron TODOS los productos de inventario <b>NO CONTADOS</b> en cero (0)';
+				}else{
+					$salida='Hubo problemas con la operaci&oacute;n, consulte soporte t&eacute;cnico';
+				}
 			}else{
-				$salida='Hubo problemas con la operaci&oacute;n, consulte soporte t&eacute;cnico';
+				$salida='Inventario inexistente';
 			}
 		}
 
@@ -133,68 +173,5 @@ class actlocali extends Controller {
 		}
 		$this->validation->set_message('chinvfis', "No existe el numero de inventario indicado ${numero}");
 		return false;
-	}
-
-	/*function mfisicoactualiza($numero){
-		$numero  =$this->db->escape($numero);
-
-		$cant = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM maesfisico WHERE numero=${numero}"));
-		if($cant>0){
-			$bool=$this->db->query("CALL sp_maes_maesfis0(${numero})");
-
-			if($bool)$salida="Se colocaron TODOS los productos de inventario NO CONTADOS en cero (0)</br>";
-			else $salida="<div class='alert'>No se pudo actualizar</div>";
-		}else{
-			$salida="<div class='alert'>No existe el numero de inventario indicado $numero</div>";
-		}
-		$data['content'] = $salida.anchor($this->url.'/mfisicocero','Regresar');
-		$data['title']   = '<h1>'.$this->tits.'</h1>';
-		$data['script']  = '';
-		$data['head']    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
-	}
-
-	function actualiza($numero,$oper,$locali=''){
-		$locali=radecode($locali);
-		$numero=$this->db->escape($numero);
-		$locali=$this->db->escape($locali);
-
-		$cant = $this->datasis->dameval("SELECT COUNT(*) FROM maesfisico WHERE numero=$numero");
-		if($cant>0){
-			$bool=$this->db->query("CALL sp_maes_actlocali($numero,$locali,$oper)");
-
-			if($bool)$salida="Se actualizo correctamente</br>";
-			else $salida="<div class='alert'>No se pudo actualizar la localizacion</div>";
-		}else{
-			$salida="<div class='alert'>No existe el numero de inventario indicado $numero</div>";
-		}
-		$data['content'] = $salida.anchor($this->url.'/locali','Regresar');
-		$data['title']   = '<h1>'.$this->tits.'</h1>';
-		$data['script']  = '';
-		$data['head']    = $this->rapyd->get_head();
-		$this->load->view('view_ventanas', $data);
-	}*/
-
-	function instalar(){
-		$mSQL="
-		CREATE PROCEDURE `sp_maes_actlocali`(IN `Numero` VARCHAR(50), IN `Locali` VARCHAR(50), IN `Oper` INT)  LANGUAGE SQL  NOT DETERMINISTIC  CONTAINS SQL  SQL SECURITY DEFINER  COMMENT '' BEGIN UPDATE maesfisico a JOIN ubic b ON a.codigo = b.codigo AND a.ubica=b.ubica SET b.locali=Locali WHERE a.numero=Numero AND ((a.fraccion>0)*(Oper=1)+(a.fraccion=0)*(Oper=0)+(a.fraccion>=0)*(Oper=2)); END;
-		";
-		var_dump($this->db->simple_query($mSQL));
-
-		$mSQL="
-		BEGIN
-		DECLARE mALMA CHAR(4) ;
-		DECLARE mFECHA DATE ;
-
-		SELECT ubica FROM maesfisico WHERE numero=mNUMERO LIMIT 1  INTO mALMA;
-		SELECT fecha FROM maesfisico WHERE numero=mNUMERO LIMIT 1 INTO mFECHA;
-
-		INSERT INTO maesfisico
-		SELECT 0 id,codigo,mALMA,'2011',0,0,0,0,mFECHA, mNUMERO, 'BLANCO',CURDATE(),CURTIME()
-		FROM maes a WHERE (SELECT COUNT(*) FROM maesfisico b WHERE a.codigo=b.codigo AND b.numero=mNUMERO)=0;
-
-		END
-		";
-		var_dump($this->db->simple_query($mSQL));
 	}
 }
