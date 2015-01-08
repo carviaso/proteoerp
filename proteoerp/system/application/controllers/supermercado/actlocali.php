@@ -10,6 +10,7 @@ class actlocali extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->datasis->modulo_id('31E',1);
+		$this->limite = 100;
 	}
 
 	function index(){
@@ -38,7 +39,7 @@ class actlocali extends Controller {
 		$form->numero->style='width:230px;';
 		$form->numero->option('','Seleccionar');
 		$form->numero->rule ='callback_chinvfis|required';
-		$form->numero->options('SELECT CONCAT_WS('-',numero,ubica,DATE_FORMAT(fecha,\'%d/%m/%Y\')), numero FROM maesfisico  GROUP BY numero ORDER BY fecha DESC LIMIT 100');
+		$form->numero->options('SELECT CONCAT_WS(\'-\',numero,ubica,DATE_FORMAT(fecha,\'%d/%m/%Y\')), numero FROM maesfisico  GROUP BY numero ORDER BY fecha DESC LIMIT '.$this->limite);
 
 		$form->locali = new inputField('Localizaci&oacute;n a colocar', 'locali');
 		$form->locali->size = 10;
@@ -91,7 +92,7 @@ class actlocali extends Controller {
 		$form->numero->style='width:230px;';
 		$form->numero->option('','Seleccionar');
 		$form->numero->rule ='callback_chinvfis|required';
-		$form->numero->options('SELECT CONCAT_WS('-',numero,ubica,DATE_FORMAT(fecha,\'%d/%m/%Y\')), numero FROM maesfisico  GROUP BY numero ORDER BY fecha DESC LIMIT 100');
+		$form->numero->options('SELECT CONCAT_WS(\'-\',numero,ubica,DATE_FORMAT(fecha,\'%d/%m/%Y\')), numero FROM maesfisico  GROUP BY numero ORDER BY fecha DESC LIMIT '.$this->limite);
 
 		/*$form->numero = new inputField('Inventario F&iacute;sico', 'numero');
 		$form->numero->rule      ='callback_chinvfis|required';
