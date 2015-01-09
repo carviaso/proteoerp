@@ -81,6 +81,7 @@ class Kardex extends Controller {
 		$filter = new DataFilter('Kardex de Inventario ('.anchor_popup('/supermercado/lfisico','Resumen de inventarios',$atts).') '.$corte);
 		$filter->codigo = new inputField('C&oacute;digo de Producto', 'codigo');
 		$filter->codigo->size = '10';
+		$filter->codigo->rule = 'required';
 		$filter->codigo->append($boton);
 		$filter->codigo->group = 'UNO';
 
@@ -104,14 +105,16 @@ class Kardex extends Controller {
 		$filter->fechah->group = 'DOS';
 
 		$filter->fechah->clause=$filter->fechad->clause=$filter->codigo->clause='where';
+		$filter->fechah->rule=$filter->fechad->rule='required|chfecha';
 		$filter->fechah->size=$filter->fechad->size=10;
 
 		$filter->buttons('reset','search');
 		$filter->build('dataformfiltro');
 
 		$data['content'] =  $filter->output;
-		if(isset($_POST['codigo'])){
-			$code   = $_POST['codigo'];
+
+		$code=$this->input->post('codigo');
+		if($code  && $filter->is_valid()){
 			$dbcode = $this->db->escape($code);
 			$mSQL   = "SELECT descrip FROM maes WHERE codigo=${dbcode}";
 			$ffinal  = $this->datasis->dameval("SELECT MAX(fecha) AS fecha FROM costos WHERE codigo=${dbcode}");
