@@ -78,7 +78,15 @@ class Kardex extends Controller {
 
 		$boton=$this->datasis->modbus($modbus);
 
-		$filter = new DataFilter('Kardex de Inventario');
+		$maxfecha = $this->datasis->dameval("SELECT MAX(fecha) AS fecha FROM costos");
+		if(!empty($maxfecha)){
+			$corte = ' corte: <b>'.dbdate_to_human($maxfecha).'</b>';
+		}else{
+			$corte = '';
+		}
+
+
+		$filter = new DataFilter('Kardex de Inventario '.$corte);
 		//$script= '$(function(){ $("#kardextabla").columnHover(); });';
 		//$filter->script($script);
 		$filter->codigo = new inputField('C&oacute;digo ', 'codigo');

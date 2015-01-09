@@ -71,7 +71,14 @@ class Kardex extends Controller {
 
 		$boton=$this->datasis->modbus($modbus);
 
-		$filter = new DataFilter('Kardex de Inventario ('.anchor_popup('/supermercado/lfisico','Resumen de inventarios',$atts).')');
+		$maxfecha = $this->datasis->dameval("SELECT MAX(fecha) AS fecha FROM costos");
+		if(!empty($maxfecha)){
+			$corte = ' corte: <b>'.dbdate_to_human($maxfecha).'</b>';
+		}else{
+			$corte = '';
+		}
+
+		$filter = new DataFilter('Kardex de Inventario ('.anchor_popup('/supermercado/lfisico','Resumen de inventarios',$atts).') '.$corte);
 		$filter->codigo = new inputField('C&oacute;digo de Producto', 'codigo');
 		$filter->codigo->size = '10';
 		$filter->codigo->append($boton);
@@ -132,7 +139,7 @@ class Kardex extends Controller {
 			$grid->db->orderby('almacen, fecha, origen');
 			$grid->per_page = 20;
 			$grid->column('Fecha'        ,'<dbdate_to_human><#fecha#></dbdate_to_human>');
-			$grid->column('Or&iacute;gen',"<convierte><#origen#>|$link</convierte>",'align=left');
+			$grid->column('Or&iacute;gen',"<convierte><#origen#>|${link}</convierte>",'align=left');
 			$grid->column('Cantidad'     ,'<nformat><#cantidad#></nformat>','align=right');
 			$grid->column('Acumulado'    ,'<nformat><#salcant#></nformat>' ,'align=right');
 			$grid->column('Monto'        ,'<nformat><#monto#></nformat>'   ,'align=right');
@@ -140,6 +147,8 @@ class Kardex extends Controller {
 			$grid->column('Costo Prom.'  ,'<nformat><#promedio#></nformat>','align=right');
 			$grid->column('Ventas'       ,'<nformat><#venta#></nformat>'   ,'align=right');
 			$grid->build();
+
+			$data['content'] .= $grid->output;
 
 			//echo $grid->db->last_query();
 		}
@@ -181,7 +190,7 @@ class Kardex extends Controller {
 			$optadd='';
 		}
 
-		$data['content'] .= $grid->output.$optadd;
+		$data['content'].= $optadd;
 		$data['title']   = heading('Kardex de Inventario');
 		$data['head']    = $this->rapyd->get_head();
 		$this->load->view('view_ventanas', $data);
