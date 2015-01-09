@@ -153,7 +153,7 @@ class actlocali extends Controller {
 					CURDATE()   AS fecha,
 					CURTIME()   AS hora
 				FROM maes AS a
-				LEFT JOIN maesfisico AS b ON a.codigo=b.codigo AND a.numero=${dbnumero}
+				LEFT JOIN maesfisico AS b ON a.codigo=b.codigo AND b.numero=${dbnumero}
 				WHERE b.codigo IS NULL";
 
 				$bool=$this->db->simple_query($mSQL);
