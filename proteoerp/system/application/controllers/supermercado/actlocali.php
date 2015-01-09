@@ -94,6 +94,7 @@ class actlocali extends Controller {
 				logusu('actlocali',"Se actualizaron las localizaciones ${numero}");
 				$salida='Se actualizo correctamente';
 			}else{
+				memowrite($mSQL,'actlocali');
 				$salida='Hubo problemas con la operaci&oacute;n, consulte soporte t&eacute;cnico';
 			}
 		}
@@ -160,6 +161,7 @@ class actlocali extends Controller {
 					logusu('actlocali',"Se pasaron los no contados a cero ${numero}");
 					$salida='Se colocaron TODOS los productos de inventario <b>NO CONTADOS</b> en cero (0)';
 				}else{
+					memowrite($mSQL,'actlocali');
 					$salida='Hubo problemas con la operaci&oacute;n, consulte soporte t&eacute;cnico';
 				}
 			}else{
