@@ -1567,7 +1567,7 @@ class Rivc extends Controller {
 		if(empty($cajero) || $op!='R'){
 			return true;
 		}
-		$ch    = $this->datasis->dameval("SELECT COUNT(*) FROM scaj WHERE cajero=${dbcajero} AND clave=${dbclave}");
+		$ch = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM scaj WHERE cajero=${dbcajero} AND clave=${dbclave}"));
 		if($ch>0){
 			return true;
 		}
@@ -1577,9 +1577,9 @@ class Rivc extends Controller {
 
 	function chdupli($numero){
 		$scli=$this->input->post('cod_cli');
-		$mSQL='SELECT COUNT(*) FROM rivc WHERE nrocomp='.$this->db->escape($numero).' AND cod_cli='.$this->db->escape($scli);
-		$cana=$this->datasis->dameval($mSQL);
-		if($cana >0 ){
+		$mSQL='SELECT COUNT(*) AS cana FROM rivc WHERE nrocomp='.$this->db->escape($numero).' AND cod_cli='.$this->db->escape($scli);
+		$cana=intval($this->datasis->dameval($mSQL));
+		if($cana > 0){
 			$this->validation->set_message('chdupli', 'Ya existe un registro guardado con el mismo numero de comprobante y al mismo cliente.');
 			return false;
 		}

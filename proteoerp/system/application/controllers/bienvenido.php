@@ -61,7 +61,7 @@ class Bienvenido extends Controller {
 			$sess_data = array('logged_in'=> FALSE);
 		}
 		$this->session->set_userdata($sess_data);
-		if($sess_data['logged_in']) logusu('MENU','Entro en Proteo');
+		if($sess_data['logged_in']) logusu('MENU','Entro en Proteo IP '.$_SERVER['REMOTE_ADDR']);
 		redirect($this->session->userdata('estaba'));
 	}
 
