@@ -9,13 +9,14 @@ $container_tr=join('&nbsp;', $form->_button_container['TR']);
 if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record' || strlen($form->output)==0):
 	echo $form->output;
 else:
-
 $campos=$form->template_details('sitems');
 $scampos  ='<tr id="tr_sitems_<#i#>" ondblclick="marcar(this)">';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['codigoa']['field'].'</td>';
+$scampos .='<td class="littletablerow" align="left" >'.$campos['lote']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['desca']['field'].$campos['detalle']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['cana']['field'].  '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['preca']['field']. '</td>';
+$scampos .='<td class="littletablerow" align="right">'.$campos['descu']['field']. '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['tota']['field'];
 for($o=1;$o<5;$o++){
 	$it_obj   = "precio${o}";
@@ -52,6 +53,8 @@ if($form->_status!='show'){
 	foreach ($query->result() as $row){
 		$sfpade.="<option value='".trim($row->cod_banc)."'>".trim($row->nomb_banc)."</option>";
 	}
+
+	$pidescu = $this->datasis->traevalor('SFACDESCU','ApLica Descuentos en facturacio');
 ?>
 
 <script language="javascript" type="text/javascript">
@@ -102,7 +105,6 @@ $(function(){
 	}
 	for(var i=0;i < <?php echo $form->max_rel_count['sfpa']; ?>;i++){
 		sfpatipo(i);
-		//$('#monto_'+i.toString()).focus(function (){ fresto(i.toString()); });
 	}
 
 	$('#cod_cli').autocomplete({
@@ -249,9 +251,11 @@ $(function(){
 							function(id, val){
 								add_sitems();
 								$('#codigoa_'+id).val(val.codigo);
+								$('#lote_'+id).val(0);
 								$('#detalle_'+id).val(val.detalle);
 								$('#desca_'+id).val(val.descrip);
 								$('#preca_'+id).val(val.preca);
+								$('#descu_'+id).val(0);
 								$('#precio1_'+id).val(val.base1);
 								$('#precio2_'+id).val(val.base2);
 								$('#precio3_'+id).val(val.base3);
@@ -387,6 +391,7 @@ function itdevolver(numero){
 						$('#detalle_'+id).val(val.detalle);
 						$('#desca_'+id).val(val.descrip);
 						$('#preca_'+id).val(val.preca);
+						$('#descu_'+id).val(0);
 						$('#precio1_'+id).val(val.base1);
 						$('#precio2_'+id).val(val.base2);
 						$('#precio3_'+id).val(val.base3);
@@ -476,6 +481,12 @@ function importe(id){
 	var preca   = Number($("#preca_"+ind).val());
 	var iimporte= roundNumber(cana*preca,2);
 	var itiva   = Number($('#itiva_'+ind).val());
+	var itdescu = Number($('#descu_'+ind).val());
+
+	if ( itdescu > 0 ){
+		iimporte    = roundNumber(iimporte*(100-itdescu)/100,2)
+	}
+
 	$("#tota_"+ind).val(iimporte);
 	$("#tota_"+ind+"_val").text(nformat(iimporte*(1+(itiva/100)),2));
 
@@ -507,37 +518,60 @@ function faltante(){
 }
 
 function totalizar(){
-	var iva    =0;
-	var totalg =0;
-	var itiva  =0;
-	var itpeso =0;
-	var totals =0;
-	var importe=0;
-	var peso   =0;
-	var cana   =0;
-	var descu  =aplicadesc()/100;
+	var iva    = 0;
+	var totalg = 0;
+	var itiva  = 0;
+	var itpeso = 0;
+	var totals = 0;
+	var importe= 0;
+	var peso   = 0;
+	var cana   = 0;
+	var descui = 0;
+	var descu  = aplicadesc()/100;
+
+	// Descuentos escalados
+	var descu1 = Number($("#descu1").val());
+	var descu2 = Number($("#descu2").val());
+
+
 	var descuento=0;
 	var arr=$('input[name^="tota_"]');
 	jQuery.each(arr, function() {
-		nom=this.name;
-		pos=this.name.lastIndexOf('_');
+		nom = this.name;
+		pos = this.name.lastIndexOf('_');
 		if(pos>0){
 			ind     = this.name.substring(pos+1);
 			cana    = Number($("#cana_"+ind).val());
 			itiva   = Number($("#itiva_"+ind).val());
 			itpeso  = Number($("#sinvpeso_"+ind).val());
 			importe = Number(this.value);
+			descui  = Number($("#descu_"+ind).val());
 
-			if(descu>0){
+			if(descui>0){
 				itpreca = Number($("#preca_"+ind).val());
 				if(!isNaN(itpreca)){
-					nimporte  = roundNumber(itpreca*(1-descu),2)*cana;
+					nimporte  = roundNumber(itpreca*(100-descui)/100,2)*cana;
 					nimporte  = roundNumber(nimporte,2);
-					descuento = descuento+(importe-nimporte);
 					importe   = roundNumber(nimporte,2);
 				}else{
 					importe   = 0;
 				}
+			}
+
+			if(descu1 > 0){
+				nimporte  = roundNumber(importe*(100-descu1)/100,2);
+				importe   = roundNumber(nimporte,2);
+			}
+
+			if(descu2 > 0){
+				nimporte  = roundNumber(importe*(100-descu2)/100,2);
+				importe   = roundNumber(nimporte,2);
+			}
+
+
+			if(descu>0){
+				nimporte  = roundNumber(importe*(100-descu)/100,2);
+				importe   = roundNumber(nimporte,2);
 			}
 
 			peso    = peso+(itpeso*cana);
@@ -547,12 +581,11 @@ function totalizar(){
 	});
 
 	if(descuento>0){
-		//descuento = roundNumber(descuento,2);
 		$("#descuentomon_val").text(nformat(descuento,2));
 	}else{
 		$("#descuentomon_val").text(nformat(0,2));
 	}
-	totalg=totals+iva;
+	totalg = totals + iva;
 	$("#peso").val(roundNumber(peso,2));
 	$("#totalg").val(roundNumber(totals+iva,2));
 	$("#totals").val(roundNumber(totals,2));
@@ -1078,7 +1111,7 @@ function apldes(){
 	echo $form->nombre->output;
 	echo $form->factura->output;
 ?>
-<table style="width:100%;border-collapse:collapse;padding:0px;" >
+<table style="width:100%;border-collapse:collapse;padding:0px;background:#EFEFEF;">
 	<tr>
 		<td>
 			<table style="width:100%;border-collapse:collapse;padding:0px;background:#EFEFEF;" border='0'>
@@ -1088,30 +1121,57 @@ function apldes(){
 						<a href="#" title="Agregar nuevo cliente" onClick="scliadd();" ><?php echo image('add1-.png','Agregar nuevo cliente',array('title'=>'Agregar nuevo cliente')); ?></a>
 						<?php } ?>
 					</td>
-					<td class="littletablerow"  style='width:45px;align;right'><?php echo $form->cliente->label; ?>*</td>
-					<td class="littletablerow"  style='width:75px;' align='center'><?php echo $form->cliente->output,$form->sclitipo->output.$form->upago->output; ?></td>
-					<td class="littletablerow"  style='background:#E0E6F8;'> <div id='nombre_val' style='font-weight:bold;white-space:nowrap;'><?php echo $form->nombre->value;  ?>&nbsp;</div><div id='direc_val' class='tooltip'><?php echo $form->direc->value.$form->direc->output ?></div></td>
-					<td class="littletablerow"  style='width:25px;background:#E0E6F8;text-align:right;'>RIF:</td>
-					<td class="littletablerow"  style='width:75px;background:#E0E6F8;'  ><b id='rifci_val'><?php echo $form->rifci->value; ?></b><?php echo $form->rifci->output;   ?>&nbsp;</td>
-					<td class="littletablerow"  style='width:35px;background:#EFEFEF;'>Vende</td>
-					<td class="littletablerow"  style='width:80px;background:#EAFAEA;'><?php echo $form->vd->output; ?></td>
+					<td class="littletablerow" style='width:45px;align;right'><?php echo $form->cliente->label; ?>*</td>
+					<td class="littletablerow" style='width:75px;' align='center'><?php echo $form->cliente->output,$form->sclitipo->output.$form->upago->output; ?></td>
+					<td class="littletablerow" style='background:#E0E6F8;'> <div id='nombre_val' style='font-weight:bold;white-space:nowrap;'><?php echo $form->nombre->value;  ?>&nbsp;</div><div id='direc_val' class='tooltip'><?php echo $form->direc->value.$form->direc->output ?></div></td>
+					<td class="littletablerow" style='width:25px;background:#E0E6F8;text-align:right;'>RIF:</td>
+					<td class="littletablerow" style='width:75px;background:#E0E6F8;'  ><b id='rifci_val'><?php echo $form->rifci->value; ?></b><?php echo $form->rifci->output;   ?>&nbsp;</td>
+					<td class="littletablerow" style='width:35px;background:#EFEFEF;'>Vende</td>
+					<td class="littletablerow" style='width:80px;background:#EAFAEA;'><?php echo $form->vd->output; ?></td>
+				</tr>
+				<tr>
+					<td class="littletablerow" colspan='2'><?php echo $form->almacen->label;  ?></td>
+					<td class="littletablerow" colspan='2'><?php echo $form->almacen->output; ?></td>
+					<td class="littletablerow"><?php echo $form->fecha->label;    ?></td>
+					<td class="littletablerow"><?php echo $form->fecha->output;   ?></td>
+					<td class="littletablerow"><?php echo $form->orden->label;    ?></td>
+					<td class="littletablerow"><?php echo $form->orden->output;   ?></td>
 				</tr>
 			</table>
 		</td>
 	</tr>
+	<!--tr>
+		<td>
+			<table style="width:100%;border-collapse:collapse;padding:0px;background:#EFEFEF;">
+				<tr>
+					<td class="littletableheader"><b><?php echo $form->almacen->label;  ?></b></td>
+					<td class="littletablerow"   ><?php echo $form->almacen->output; ?></td>
+					<td class="littletableheader"><?php echo $form->fecha->label;    ?></td>
+					<td class="littletablerow"   ><?php echo $form->fecha->output;   ?></td>
+					<td class="littletableheader"><?php echo $form->orden->label;    ?></td>
+					<td class="littletablerow"   ><?php echo $form->orden->output;   ?></td>
+				</tr>
+			</table>
+		</td>
+	</tr-->
 </table>
+
+
+
 
 <div id='efecha' style='display:none;'></div>
 <table style="width:100%;border-collapse:collapse;padding:0px;">
 	<tr>
 		<td align='left'>
-		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:335px;width:650px;'>
+		<div id='ditems01' style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;height:335px;width:680px;'>
 		<table width='100%' border='0' cellpadding='0' cellspacing='0'>
 			<tr id='__INPL__'>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>C&oacute;digo</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>Lote</b></td>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Descripci&oacute;n</b></td>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Cant.</b></td>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Precio</b></td>
+				<td class="littletableheaderdet" style='background:#0B3861;'><b>-%</b></td>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Importe</b></td>
 				<?php if($form->_status!='show') {?>
 					<td bgcolor='#0B3861'><a href='#' id='addlink' onclick="add_sitems()" title='Agregar otro articulo'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 18, 'alt'=>'Agregar otro producto', 'title' => 'Agregar otro producto', 'border'=>'0')); ?></a></td>
@@ -1119,9 +1179,11 @@ function apldes(){
 			</tr>
 			<?php for($i=0;$i<$form->max_rel_count['sitems'];$i++) {
 				$it_codigo  = "codigoa_${i}";
+				$it_lote    = "lote_${i}";
 				$it_desca   = "desca_${i}";
 				$it_cana    = "cana_${i}";
 				$it_preca   = "preca_${i}";
+				$it_descu   = "descu_${i}";
 				$it_importe = "tota_${i}";
 				$it_iva     = "itiva_${i}";
 				$it_peso    = "sinvpeso_${i}";
@@ -1142,6 +1204,9 @@ function apldes(){
 			?>
 			<tr id='tr_sitems_<?php echo $i; ?>' ondblclick="marcar(this)">
 				<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
+				<td class="littletablerow" align="left" ><?php echo $form->$it_lote->output; ?></td>
+
+
 				<td class="littletablerow" align="left" ><?php
 					if($form->_status=='show' && strlen($form->$it_detalle->value)>0){
 						echo  '<pre>'.htmlspecialchars($form->$it_detalle->value).'</pre>';
@@ -1151,6 +1216,7 @@ function apldes(){
 				?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_cana->output;   ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_preca->output;  ?></td>
+				<td class="littletablerow" align="right"><?php echo $form->$it_descu->output;  ?></td>
 				<td class="littletablerow" align="right"><?php echo $form->$it_importe->output.$pprecios;?></td>
 
 				<?php if($form->_status!='show') {?>
@@ -1166,7 +1232,7 @@ function apldes(){
 		</table>
 		</div>
 
-		<div id='formapago' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:650px;'>
+		<div id='formapago' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:680px;'>
 		<table style="border-collapse:collapse;padding:0px;border: 1px solid #0B3861;">
 			<tr>
 				<td>
@@ -1222,7 +1288,7 @@ function apldes(){
 			</tr>
 		</table>
 		</div>
-		<div id='fpefectivo' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:650px;'>
+		<div id='fpefectivo' style='display:none;overflow:auto;background: #FAFAFA;height:280px;width:680px;'>
 		<table style="border-collapse:collapse;padding:0px;border: 1px solid #0B3861;">
 			<tr><td class="littletableheaderdet" colspan='3' style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;'>PAGO EN EFECTIVO</td></tr>
 			<tr>
@@ -1243,20 +1309,32 @@ function apldes(){
 		</div>
 		</td>
 		<td valign='top'>
+<?php
+	if ( $pidescu == 'S' ){ ?>
+			<table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
+				<tr>
+					<td class="littletablerow"    align='center' colspan='3'   style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>Descuentos % </td>
+				</tr><tr>
+					<td class="littletablerow"    align='center' style='background:#CFCFCF;'><?php echo $form->descu1->output; ?></td>
+					<td class="littletablerow"    align='center' style='background:#CFCFCF;'>+</td>
+					<td class="littletablerow"    align='center' style='background:#CFCFCF;'><?php echo $form->descu2->output; ?></td>
+				</tr>
+			</table>
+<?php } ?>
 			<table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
 			<tr>
 				<td colspan='2' style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>FORMA DE PAGO</td>
 			</tr><tr>
 				<?php $referen=$form->referen->value; ?>
-				<td><input name="referen" value="P" type="radio" onchange='chreferen()' <?php echo ($referen=='P' || empty($referen))? 'checked="checked"':''; ?>>Pendiente&nbsp;</td>
-				<td><input name="referen" value="E" type="radio" onchange='chreferen()' <?php echo ($referen=='E')? 'checked="checked"':''; ?>>Efectivo&nbsp;</td>
+				<td><input name="referen" value="P" type="radio" onchange='chreferen()' <?php echo ($referen=='P' || empty($referen))? 'checked="checked"':''; ?>>Pendiente</td>
+				<td><input name="referen" value="E" type="radio" onchange='chreferen()' <?php echo ($referen=='E')? 'checked="checked"':''; ?>>Efectivo</td>
 			</tr><tr>
-				<td><input name="referen" value="M" type="radio" onchange='chreferen()' <?php echo ($referen=='M')? 'checked="checked"':''; ?>>Multiple/Otros&nbsp;</td>
-				<td><input name="referen" value="C" type="radio" onchange='chreferen()' <?php echo ($referen=='C')? 'checked="checked"':''; ?>>Credito&nbsp;</td>
+				<td><input name="referen" value="M" type="radio" onchange='chreferen()' <?php echo ($referen=='M')? 'checked="checked"':''; ?>>Multiple</td>
+				<td><input name="referen" value="C" type="radio" onchange='chreferen()' <?php echo ($referen=='C')? 'checked="checked"':''; ?>>Credito</td>
 			</tr>
 		</table>
 		<br>
-		<table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
+		<!--table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
 			<tr>
 				<td class="littletableheader"><b><?php echo $form->almacen->label;  ?></b></td>
 				<td class="littletablerow"   ><?php echo $form->almacen->output; ?></td>
@@ -1268,17 +1346,16 @@ function apldes(){
 				<td class="littletableheader"><?php echo $form->orden->label;    ?></td>
 				<td class="littletablerow"   ><?php echo $form->orden->output;   ?></td>
 			</tr>
-		</table>
+		</table-->
 		<div id='informa'></div>
 		</td>
 	</tr><tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;width:650px;'>
+		<div style='overflow:auto;border: 1px solid #0B3861;background: #FAFAFA;width:680px;'>
 		<table style="width:100%;border-collapse:collapse;padding:0px;">
 			<tr>
 				<td class="littletablerow"    align='left'   style='background:#CFCFCF;width:30px;'><span><?php echo $form->descuento->label;  ?></span></td>
 				<td class="littletablerow"    align='center' style='background:#CFCFCF;'><b id='descuentomon_val' ondblclick='apldes();' style='cursor: hand'></b><?php echo $form->descuento->output; ?></td>
-
 				<td class="littletableheader" align='right'><?php echo $form->totals->label; ?></td>
 				<td class="littletablerow"    align='right' style='font-size:16px;'><b id='totals_val'><?php echo nformat($form->totals->value); ?></b><?php echo $form->totals->output; ?></td>
 				<td class="littletableheader" align='right'><?php echo $form->ivat->label;    ?></td>

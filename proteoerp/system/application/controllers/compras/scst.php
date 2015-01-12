@@ -1387,10 +1387,10 @@ class Scst extends Controller {
 		$grid->setAfterSubmit("$.prompt('Respuesta:'+a.responseText); return [true, a];");
 
 		#show/hide navigations buttons
-		$grid->setAdd(    $this->datasis->sidapuede('SCST','1'));
-		$grid->setEdit(   $this->datasis->sidapuede('SCST','2'));
-		$grid->setDelete( $this->datasis->sidapuede('SCST','5'));
-		$grid->setSearch( $this->datasis->sidapuede('SCST','6'));
+		$grid->setAdd(    $this->datasis->sidapuede('SCST','INCLUIR%'));
+		$grid->setEdit(   $this->datasis->sidapuede('SCST','MODIFICA%'));
+		$grid->setDelete( $this->datasis->sidapuede('SCST','BORR_REG%'));
+		$grid->setSearch( $this->datasis->sidapuede('SCST','BUSQUEDA%'));
 
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');

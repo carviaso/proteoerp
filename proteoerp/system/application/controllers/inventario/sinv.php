@@ -6221,12 +6221,6 @@ class Sinv extends Controller {
 			$this->db->query($mSQL);
 		}
 
-/*
-			$mSQL="ALTER TABLE sinvpitem
-			ADD COLUMN unidad VARCHAR(12)   NULL AFTER cantidad,
-			ADD COLUMN factor DECIMAL(12,4) NULL DEFAULT '1' AFTER unidad;";
-*/
-
 		if(!$this->db->table_exists('sinvplabor')){
 			$mSQL="CREATE TABLE `sinvplabor` (
 				`producto` VARCHAR(15) NULL DEFAULT '' COMMENT 'Producto Terminado',
@@ -6326,13 +6320,13 @@ class Sinv extends Controller {
 
 		if(!$this->db->table_exists('sinvlote')){
 			$mSQL="CREATE TABLE sinvlote (
-				`id` INT(11) NOT NULL AUTO_INCREMENT,
-				`codigo` VARCHAR(15) NULL,
+				`id`       INT(11) NOT NULL AUTO_INCREMENT,
+				`codigo`   VARCHAR(15) NULL,
 				`cantidad` DECIMAL(10,2) NULL,
-				`precio` DECIMAL(12,2) NULL,
-				`costo` DECIMAL(12,2) NULL,
-				`vence` DATE NULL,
-				`estampa` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+				`precio`   DECIMAL(12,2) NULL,
+				`costo`    DECIMAL(12,2) NULL,
+				`vence`    DATE NULL,
+				`estampa`  TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
 				PRIMARY KEY (`id`),
 				INDEX `codigo` (`codigo`),
 				UNIQUE INDEX `codigo_costo_vence` (`codigo`, `costo`, `vence`)
@@ -6340,6 +6334,8 @@ class Sinv extends Controller {
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
 		}
+
+
 
 
 	}

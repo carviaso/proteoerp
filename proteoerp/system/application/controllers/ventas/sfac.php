@@ -2873,6 +2873,19 @@ class Sfac extends Controller {
 		$edit->descuento = new hiddenField('Desc.','descuento');
 		$edit->descuento->insertValue = '0';
 
+		$edit->descu1 = new inputField('Descuento 1', 'descu1');
+		$edit->descu1->css_class   = 'inputnum';
+		$edit->descu1->size        = 5;
+		$edit->descu1->insertValue = '0';
+		$edit->descu1->onkeyup     ='totalizar()';
+
+		$edit->descu2 = new inputField('Descuento 2', 'descu2');
+		$edit->descu2->css_class   = 'inputnum';
+		$edit->descu2->size        = 5;
+		$edit->descu2->insertValue = '0';
+		$edit->descu2->onkeyup     ='totalizar()';
+
+
 		$edit->orden = new inputField ('Orden', 'orden');
 		$edit->orden->size = 12;
 
@@ -2889,8 +2902,8 @@ class Sfac extends Controller {
 		$edit->lote->db_name  = 'lote';
 		$edit->lote->css_class= 'inputnum';
 		$edit->lote->rel_id   = 'sitems';
-		$edit->lote->maxlength= 10;
-		$edit->lote->size     = 6;
+		$edit->lote->maxlength= 5;
+		$edit->lote->size     = 4;
 		$edit->lote->autocomplete=false;
 		//$edit->lote->showformat ='decimal';
 		$edit->lote->disable_paste=true;
@@ -2921,20 +2934,28 @@ class Sfac extends Controller {
 		$edit->preca->size      = 9;
 		$edit->preca->rule      = 'required|positive|callback_chpreca[<#i#>]';
 		$edit->preca->onkeyup   = 'post_precioselec(<#i#>,this);';
-		//$edit->preca->readonly  = true;
 		$edit->preca->showformat ='decimal';
 
-		$edit->descu = new inputField('Descuento <#o#>', 'descu_<#i#>');
-		$edit->descu->db_name  = 'descu';
-		$edit->descu->css_class= 'inputnum';
-		$edit->descu->rel_id   = 'sitems';
-		$edit->descu->maxlength= 10;
-		$edit->descu->size     = 6;
-		//$edit->descu->rule     = 'required|positive|callback_chcanadev[<#i#>]|callback_chcananeg[<#i#>]';
-		$edit->descu->autocomplete=false;
-		$edit->descu->onkeyup  ='importe(<#i#>)';
-		$edit->descu->showformat ='decimal';
-		$edit->descu->disable_paste=true;
+		$pidescu = $this->datasis->traevalor('SFACDESCU','ApLica Descuentos en facturacio');
+
+		if ( $pidescu == 'S' ){
+			$edit->descu = new inputField('Descuento <#o#>', 'descu_<#i#>');
+			$edit->descu->db_name  = 'descu';
+			$edit->descu->css_class= 'inputnum';
+			$edit->descu->rel_id   = 'sitems';
+			$edit->descu->maxlength= 6;
+			$edit->descu->size     = 4;
+			$edit->descu->autocomplete=false;
+			$edit->descu->onkeyup  ='importe(<#i#>)';
+			$edit->descu->showformat ='decimal';
+			$edit->descu->disable_paste=true;
+			$edit->descu->insertValue = 0;
+		} else {
+			$edit->descu = new hiddenField('Descuento <#o#>', 'descu_<#i#>');
+			$edit->descu->db_name  = 'descu';
+			$edit->descu->rel_id   = 'sitems';
+		}
+
 
 		$edit->detalle = new hiddenField('', 'detalle_<#i#>');
 		$edit->detalle->db_name  = 'detalle';
@@ -3671,16 +3692,20 @@ class Sfac extends Controller {
 
 	function _pre_insert($do,$action='I'){
 
-		$cliente= $do->get('cod_cli');
-		$tipoa  = $do->get('tipo_doc');
-		$manual = $do->get('manual');
-		$fecha  = $do->get('fecha');
-		$estampa= $do->get('estampa');
-		$referen= $do->get('referen');
-		$cajero = $do->get('cajero');
-		$numero = $do->get('numero');
+		$cliente  = $do->get('cod_cli');
+		$tipoa    = $do->get('tipo_doc');
+		$manual   = $do->get('manual');
+		$fecha    = $do->get('fecha');
+		$estampa  = $do->get('estampa');
+		$referen  = $do->get('referen');
+		$cajero   = $do->get('cajero');
+		$numero   = $do->get('numero');
 		$tipo_doc = $do->get('tipo_doc');
-		$descuento=floatval($do->get('descuento'));
+		$descuento= floatval($do->get('descuento'));
+
+		$descu1   = floatval($do->get('descu1'));
+		$descu2   = floatval($do->get('descu2'));
+
 		$globaldes=$descuento/100;
 
 		if($tipo_doc=='D'){
@@ -3690,7 +3715,6 @@ class Sfac extends Controller {
 				return false;
 			}
 		}
-
 
 		$dbcliente=$this->db->escape($cliente);
 		if(empty($cajero) && $referen!='C' && $referen!='P'){
@@ -3703,20 +3727,30 @@ class Sfac extends Controller {
 		}
 
 		//Totaliza la factura
-		$totalg=0;
-		$cana=$do->count_rel('sitems');
-		if($cana<=0){
+		$totalg = 0;
+		$cana   = $do->count_rel('sitems');
+		if($cana <= 0){
 			$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Debe tener al menos un producto';
 			return false;
 		}
 		for($i=0;$i<$cana;$i++){
 			$itcana    = $do->get_rel('sitems','cana' ,$i);
 			$itpreca   = $do->get_rel('sitems','preca',$i);
-			if($descuento>0){
-				$itpreca = round($itpreca*(1-$globaldes),2);
+			$itiva     = $do->get_rel('sitems','iva'  ,$i);
+
+			if( $descuento > 0 || $descu1 > 0 || $descu2 > 0 ){
+				if( $descuento > 0 ){
+					$itpreca = round($itpreca*(1-$globaldes),2);
+				}
+				if( $descu1 > 0 ){
+					$itpreca = round($itpreca*(100-$descu1)/100,2);
+				}
+				if( $descu1 > 0 ){
+					$itpreca = round($itpreca*(100-$descu2)/100,2);
+				}
 				$do->set_rel('sitems','preca',$itpreca,$i);
 			}
-			$itiva     = $do->get_rel('sitems','iva'  ,$i);
+
 			$itimporte = $itpreca*$itcana;
 			$iva       = $itimporte*($itiva/100);
 
@@ -5526,6 +5560,14 @@ class Sfac extends Controller {
 		if(!in_array('repcob',$campos)){
 			$mSQL="ALTER TABLE `sfac` ADD COLUMN `repcob` CHAR(2) NULL DEFAULT NULL COMMENT 'Cobro en reparto' AFTER `basecomi`";
 			$this->db->query($mSQL);
+		}
+
+		if(!in_array('descu1',$campos)){
+			$this->db->query("ALTER TABLE sfac ADD COLUMN descu1 DECIMAL(10,2) NULL DEFAULT '0' AFTER descuento ");
+		}
+
+		if(!in_array('descu2',$campos)){
+			$this->db->query("ALTER TABLE sfac ADD COLUMN descu2 DECIMAL(10,2) NULL DEFAULT '0' AFTER descu1 ");
 		}
 
 		if(!in_array('id'  ,$campos)){
