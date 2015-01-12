@@ -56,7 +56,6 @@ if($form->_status!='show'){
 
 	$pidescu = $this->datasis->traevalor('SFACDESCU','ApLica Descuentos en facturacio');
 ?>
-
 <script language="javascript" type="text/javascript">
 var sitems_cont=<?php echo $form->max_rel_count['sitems']; ?>;
 var sfpa_cont  =<?php echo $form->max_rel_count['sfpa'];?>;
@@ -70,7 +69,6 @@ $(function(){
 			$("#nombre_val").mousemove(function(e){
 				var ppos=$(this).offset();
 				$(this).next().css({left : ppos.left-80 , top: ppos.top-40});
-				//$(this).next().css({left : e.pageX-80 , top: e.pageY-40});
 			});
 			eleOffset = $(this).offset();
 			$(this).next().fadeIn("fast").css({
@@ -533,10 +531,9 @@ function totalizar(){
 	var descu1 = Number($("#descu1").val());
 	var descu2 = Number($("#descu2").val());
 
-
-	var descuento=0;
+	var descuento = 0;
 	var arr=$('input[name^="tota_"]');
-	jQuery.each(arr, function() {
+	$.each(arr, function() {
 		nom = this.name;
 		pos = this.name.lastIndexOf('_');
 		if(pos>0){
@@ -544,36 +541,34 @@ function totalizar(){
 			cana    = Number($("#cana_"+ind).val());
 			itiva   = Number($("#itiva_"+ind).val());
 			itpeso  = Number($("#sinvpeso_"+ind).val());
+			itpreca = Number($("#preca_"+ind).val());
 			importe = Number(this.value);
+			iimporte = roundNumber(cana*itpreca,2)
 			descui  = Number($("#descu_"+ind).val());
-
 			if(descui>0){
-				itpreca = Number($("#preca_"+ind).val());
 				if(!isNaN(itpreca)){
-					nimporte  = roundNumber(itpreca*(100-descui)/100,2)*cana;
-					nimporte  = roundNumber(nimporte,2);
+					nimporte  = roundNumber(itpreca*(100-descui)/100,8)*cana;
+					//nimporte  = roundNumber(nimporte,2);
 					importe   = roundNumber(nimporte,2);
+					iimporte  = roundNumber(nimporte,2);
 				}else{
 					importe   = 0;
 				}
 			}
-
 			if(descu1 > 0){
 				nimporte  = roundNumber(importe*(100-descu1)/100,2);
 				importe   = roundNumber(nimporte,2);
+				nimporte  = roundNumber(iimporte*(100-descu1)/100,2);
+				iimporte  = roundNumber(nimporte,2);
 			}
-
 			if(descu2 > 0){
 				nimporte  = roundNumber(importe*(100-descu2)/100,2);
 				importe   = roundNumber(nimporte,2);
 			}
-
-
 			if(descu>0){
 				nimporte  = roundNumber(importe*(100-descu)/100,2);
 				importe   = roundNumber(nimporte,2);
 			}
-
 			peso    = peso+(itpeso*cana);
 			iva     = iva+importe*(itiva/100);
 			totals  = totals+importe;
@@ -587,11 +582,14 @@ function totalizar(){
 	}
 	totalg = totals + iva;
 	$("#peso").val(roundNumber(peso,2));
+
 	$("#totalg").val(roundNumber(totals+iva,2));
-	$("#totals").val(roundNumber(totals,2));
-	$("#iva").val(roundNumber(iva,2));
 	$("#totalg_val").text(nformat(totalg,2));
+
+	$("#totals").val(roundNumber(totals,2));
 	$("#totals_val").text(nformat(totals,2));
+
+	$("#iva").val(roundNumber(iva,2));
 	$("#ivat_val").text(nformat(iva,2));
 
 	resto=faltante();

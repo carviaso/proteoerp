@@ -906,7 +906,7 @@ class Ajax extends Controller {
 			if(!empty($sprv)){
 				$dbsprv = $this->db->escape($sprv);
 				$mSQL.="LEFT JOIN sinvprov  AS c ON c.proveed=${dbsprv} AND c.codigo=a.codigo";
-				$ww = 'OR c.codigop='.$qdb;
+				$ww = 'OR c.codigop LIKE '.$qdb;
 			}else{
 				$ww ='';
 			}
@@ -939,7 +939,7 @@ class Ajax extends Controller {
 				$data = json_encode($retorno);
 	        }
 		}
-		echo $data;
+		echo $data.$mSQL;
 	}
 
 	//Busca sinv solo articulos
