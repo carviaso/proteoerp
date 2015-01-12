@@ -2885,6 +2885,11 @@ class Sfac extends Controller {
 		$edit->descu2->insertValue = '0';
 		$edit->descu2->onkeyup     ='totalizar()';
 
+		$edit->descu3 = new inputField('Descuento 3', 'descu3');
+		$edit->descu3->css_class   = 'inputnum';
+		$edit->descu3->size        = 5;
+		$edit->descu3->insertValue = '0';
+		$edit->descu3->onkeyup     ='totalizar()';
 
 		$edit->orden = new inputField ('Orden', 'orden');
 		$edit->orden->size = 12;
@@ -3705,6 +3710,7 @@ class Sfac extends Controller {
 
 		$descu1   = floatval($do->get('descu1'));
 		$descu2   = floatval($do->get('descu2'));
+		$descu3   = floatval($do->get('descu3'));
 
 		$globaldes=$descuento/100;
 
@@ -3738,16 +3744,20 @@ class Sfac extends Controller {
 			$itpreca   = $do->get_rel('sitems','preca',$i);
 			$itiva     = $do->get_rel('sitems','iva'  ,$i);
 
-			if( $descuento > 0 || $descu1 > 0 || $descu2 > 0 ){
+			if( $descuento > 0 || $descu1 > 0 || $descu2 > 0 || $descu3 > 0 ){
 				if( $descuento > 0 ){
 					$itpreca = round($itpreca*(1-$globaldes),2);
 				}
 				if( $descu1 > 0 ){
 					$itpreca = round($itpreca*(100-$descu1)/100,2);
 				}
-				if( $descu1 > 0 ){
+				if( $descu2 > 0 ){
 					$itpreca = round($itpreca*(100-$descu2)/100,2);
 				}
+				if( $descu3 > 0 ){
+					$itpreca = round($itpreca*(100-$descu3)/100,2);
+				}
+
 				$do->set_rel('sitems','preca',$itpreca,$i);
 			}
 
@@ -5562,13 +5572,10 @@ class Sfac extends Controller {
 			$this->db->query($mSQL);
 		}
 
-		if(!in_array('descu1',$campos)){
-			$this->db->query("ALTER TABLE sfac ADD COLUMN descu1 DECIMAL(10,2) NULL DEFAULT '0' AFTER descuento ");
-		}
+		if(!in_array('descu1',$campos)) $this->db->query("ALTER TABLE sfac ADD COLUMN descu1 DECIMAL(10,2) NULL DEFAULT '0' AFTER descuento ");
+		if(!in_array('descu2',$campos)) $this->db->query("ALTER TABLE sfac ADD COLUMN descu2 DECIMAL(10,2) NULL DEFAULT '0' AFTER descu1 ");
+		if(!in_array('descu3',$campos))	$this->db->query("ALTER TABLE sfac ADD COLUMN descu3 DECIMAL(10,2) NULL DEFAULT '0' AFTER descu2 ");
 
-		if(!in_array('descu2',$campos)){
-			$this->db->query("ALTER TABLE sfac ADD COLUMN descu2 DECIMAL(10,2) NULL DEFAULT '0' AFTER descu1 ");
-		}
 
 		if(!in_array('id'  ,$campos)){
 			$this->db->simple_query('ALTER TABLE sfac DROP PRIMARY KEY');

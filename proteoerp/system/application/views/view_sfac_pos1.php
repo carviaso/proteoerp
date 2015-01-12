@@ -530,6 +530,7 @@ function totalizar(){
 	// Descuentos escalados
 	var descu1 = Number($("#descu1").val());
 	var descu2 = Number($("#descu2").val());
+	var descu3 = Number($("#descu3").val());
 
 	var descuento = 0;
 	var arr=$('input[name^="tota_"]');
@@ -545,35 +546,38 @@ function totalizar(){
 			importe = Number(this.value);
 			iimporte = roundNumber(cana*itpreca,2)
 			descui  = Number($("#descu_"+ind).val());
+
+			if(descu>0){
+				nimporte  = roundNumber(importe*(100-descu)/100,4);
+				importe   = roundNumber(nimporte,4);
+			}
 			if(descui>0){
 				if(!isNaN(itpreca)){
-					nimporte  = roundNumber(itpreca*(100-descui)/100,8)*cana;
-					//nimporte  = roundNumber(nimporte,2);
+					nimporte  = roundNumber(itpreca*(100-descui)*cana/100,4);
 					importe   = roundNumber(nimporte,2);
-					iimporte  = roundNumber(nimporte,2);
 				}else{
 					importe   = 0;
 				}
 			}
 			if(descu1 > 0){
-				nimporte  = roundNumber(importe*(100-descu1)/100,2);
-				importe   = roundNumber(nimporte,2);
-				nimporte  = roundNumber(iimporte*(100-descu1)/100,2);
-				iimporte  = roundNumber(nimporte,2);
+				nimporte  = roundNumber(importe*(100-descu1)/100,4);
+				importe   = roundNumber(nimporte,4);
 			}
 			if(descu2 > 0){
-				nimporte  = roundNumber(importe*(100-descu2)/100,2);
-				importe   = roundNumber(nimporte,2);
+				nimporte  = roundNumber(importe*(100-descu2)/100,4);
+				importe   = roundNumber(nimporte,4);
 			}
-			if(descu>0){
-				nimporte  = roundNumber(importe*(100-descu)/100,2);
-				importe   = roundNumber(nimporte,2);
+			if(descu3 > 0){
+				nimporte  = roundNumber(importe*(100-descu3)/100,4);
+				importe   = roundNumber(nimporte,4);
 			}
+			importe = roundNumber(importe,2);
 			peso    = peso+(itpeso*cana);
 			iva     = iva+importe*(itiva/100);
 			totals  = totals+importe;
 		}
 	});
+	iva   = roundNumber(iva,2);
 
 	if(descuento>0){
 		$("#descuentomon_val").text(nformat(descuento,2));
@@ -1311,11 +1315,13 @@ function apldes(){
 	if ( $pidescu == 'S' ){ ?>
 			<table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
 				<tr>
-					<td class="littletablerow"    align='center' colspan='3'   style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>Descuentos % </td>
+					<td class="littletablerow"    align='center' colspan='5'   style='text-align:center;font-size:18px;font-weight:bold;background:#0B3861;color:#FFF;'>Descuentos % </td>
 				</tr><tr>
 					<td class="littletablerow"    align='center' style='background:#CFCFCF;'><?php echo $form->descu1->output; ?></td>
 					<td class="littletablerow"    align='center' style='background:#CFCFCF;'>+</td>
 					<td class="littletablerow"    align='center' style='background:#CFCFCF;'><?php echo $form->descu2->output; ?></td>
+					<td class="littletablerow"    align='center' style='background:#CFCFCF;'>+</td>
+					<td class="littletablerow"    align='center' style='background:#CFCFCF;'><?php echo $form->descu3->output; ?></td>
 				</tr>
 			</table>
 <?php } ?>
