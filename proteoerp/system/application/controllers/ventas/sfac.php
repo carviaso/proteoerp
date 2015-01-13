@@ -3740,32 +3740,102 @@ class Sfac extends Controller {
 			return false;
 		}
 		for($i=0;$i<$cana;$i++){
-			$itcana    = $do->get_rel('sitems','cana' ,$i);
-			$itpreca   = $do->get_rel('sitems','preca',$i);
-			$itiva     = $do->get_rel('sitems','iva'  ,$i);
+			$itcana   = $do->get_rel('sitems', 'cana' , $i);
+			$itpreca  = $do->get_rel('sitems', 'preca', $i);
+			$itiva    = $do->get_rel('sitems', 'iva'  , $i);
+			$itdescu  = $do->get_rel('sitems', 'descu', $i);
 
-			if( $descuento > 0 || $descu1 > 0 || $descu2 > 0 || $descu3 > 0 ){
+			if( $descuento > 0 || $itdescu > 0 || $descu1 > 0 || $descu2 > 0 || $descu3 > 0 ){
 				if( $descuento > 0 ){
-					$itpreca = round($itpreca*(1-$globaldes),2);
+					$itpreca = round($itpreca*(1-$globaldes),8);
+				}
+				if( $itdescu > 0 ){
+					$itpreca = round($itpreca*(100-$itdescu)/100,8);
 				}
 				if( $descu1 > 0 ){
-					$itpreca = round($itpreca*(100-$descu1)/100,2);
+					$itpreca = round($itpreca*(100-$descu1)/100,8);
 				}
 				if( $descu2 > 0 ){
-					$itpreca = round($itpreca*(100-$descu2)/100,2);
+					$itpreca = round($itpreca*(100-$descu2)/100,8);
 				}
 				if( $descu3 > 0 ){
-					$itpreca = round($itpreca*(100-$descu3)/100,2);
+					$itpreca = round($itpreca*(100-$descu3)/100,8);
 				}
-
 				$do->set_rel('sitems','preca',$itpreca,$i);
 			}
-
-			$itimporte = $itpreca*$itcana;
+			$itimporte = round($itpreca*$itcana,2);
 			$iva       = $itimporte*($itiva/100);
+
+//echo $do->get_rel('sitems', 'codigoa' , $i)." Precio: ".$itpreca." tot: ".$itimporte." X ".$itcana." ";
 
 			$totalg   += $itimporte+$iva;
 		}
+
+//echo round($totalg,2);
+//return false;
+
+		
+/*
+			ind     = this.name.substring(pos+1);
+			cana    = Number($("#cana_"+ind).val());
+			itiva   = Number($("#itiva_"+ind).val());
+			itpeso  = Number($("#sinvpeso_"+ind).val());
+			itpreca = Number($("#preca_"+ind).val());
+			importe = Number(this.value);
+			descui  = Number($("#descu_"+ind).val());
+
+			if(descu>0){
+				nimporte  = roundNumber(importe*(100-descu)/100,4);
+				importe   = roundNumber(nimporte,4);
+			}
+			if(descui>0){
+				if(!isNaN(itpreca)){
+					nimporte  = roundNumber(itpreca*(100-descui)*cana/100,4);
+					importe   = roundNumber(nimporte,2);
+				}else{
+					importe   = 0;
+				}
+			}
+			if(descu1 > 0){
+				nimporte  = roundNumber(importe*(100-descu1)/100,4);
+				importe   = roundNumber(nimporte,4);
+			}
+			if(descu2 > 0){
+				nimporte  = roundNumber(importe*(100-descu2)/100,4);
+				importe   = roundNumber(nimporte,4);
+			}
+			if(descu3 > 0){
+				nimporte  = roundNumber(importe*(100-descu3)/100,4);
+				importe   = roundNumber(nimporte,4);
+			}
+			importe = roundNumber(importe,2);
+			peso    = peso+(itpeso*cana);
+			iva     = iva+importe*(itiva/100);
+			totals  = totals+importe;
+		}
+	});
+	iva   = roundNumber(iva,2);
+
+	if(descuento>0){
+		$("#descuentomon_val").text(nformat(descuento,2));
+	}else{
+		$("#descuentomon_val").text(nformat(0,2));
+	}
+	totalg = totals + iva;
+	$("#peso").val(roundNumber(peso,2));
+
+	$("#totalg").val(roundNumber(totals+iva,2));
+	$("#totalg_val").text(nformat(totalg,2));
+
+	$("#totals").val(roundNumber(totals,2));
+	$("#totals_val").text(nformat(totals,2));
+
+	$("#iva").val(roundNumber(iva,2));
+	$("#ivat_val").text(nformat(iva,2));
+*/		
+		
+		
+		
 		$totalg = round($totalg,2);
 		//Fin de la totalizacion de facturas
 

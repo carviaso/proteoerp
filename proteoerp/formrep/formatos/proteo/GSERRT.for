@@ -2,9 +2,9 @@
 if(count($parametros)==0) show_error('Faltan parametros ');
 $id   = $parametros[0];
 $dbid = $this->db->escape($id);
-$mSQL_1 = $this->db->query('SELECT a.serie,
-	a.fecha,a.numero,b.nomfis,a.proveed,a.nombre,a.breten,a.tipo_doc,a.reten,a.creten,a.nombre,
-	b.direc1,b.direc2,b.direc3,b.telefono,b.rif,c.activida,c.base1,c.tari1, a.ffactura,a.nfiscal
+$mSQL_1 = $this->db->query('SELECT
+	a.fecha,a.numero,TRIM(b.nomfis) nomfis, a.proveed, TRIM(a.nombre) nombre, a.breten,a.tipo_doc,a.reten,a.creten,a.nombre,
+	b.direc1,b.direc2,b.direc3,b.telefono,b.rif,c.activida,c.base1,c.tari1, a.ffactura
 FROM gser AS a
 JOIN sprv AS b ON a.proveed=b.proveed
 LEFT JOIN rete AS c ON c.codigo=a.creten
@@ -15,20 +15,19 @@ $row = $mSQL_1->row();
 $fecha    = dbdate_to_human($row->fecha);
 $ffecha   = dbdate_to_human($row->ffactura);
 
-$numero   = (!empty($row->serie))? trim($row->serie): trim($row->numero);
-$proveed  = $this->us_ascii2html($row->proveed);
+$numero   = trim($row->numero);
+$proveed  = htmlspecialchars(trim($row->proveed));
 $tipo_doc = trim($row->tipo_doc);
 $breten   = $row->breten;
 $reten    = $row->reten;
 $creten   = trim($row->creten);
-$nombre   = (empty($row->nomfis))? $this->us_ascii2html($row->nombre) : $this->us_ascii2html($row->nomfis);
-$direc1   = $this->us_ascii2html($row->direc1);
-$direc2   = $this->us_ascii2html($row->direc2);
-$direc3   = $this->us_ascii2html($row->direc3);
+$nombre   = (empty($row->nomfis))? htmlspecialchars(trim($row->nombre)) : htmlspecialchars($row->nomfis);
+$direc1   = htmlspecialchars(trim($row->direc1));
+$direc2   = htmlspecialchars(trim($row->direc2));
+$direc3   = htmlspecialchars(trim($row->direc3));
 $telefono = htmlspecialchars(trim($row->telefono));
 $rif      = htmlspecialchars(trim($row->rif));
-$activida = $this->us_ascii2html($row->activida);
-$nfiscal  = htmlspecialchars(trim($row->nfiscal));
+$activida = htmlspecialchars(trim($row->activida));
 $base1    = $row->base1;
 $tari1    = $row->tari1;
 
@@ -37,18 +36,11 @@ e.codigorete,c.activida,e.base,e.porcen,e.monto
 FROM gereten AS e
 JOIN rete AS c ON c.codigo=e.codigorete
 WHERE e.idd='.$dbid);
-
-if(!empty($nfiscal)){
-	$titcontrol = '<b>Nro. CONTROL:</b> '.$nfiscal;
-}else{
-	$titcontrol = '';
-}
 ?>
 <html>
 <head>
-<meta http-equiv="Content-type" content="text/html; charset=<?php echo $this->config->item('charset'); ?>" >
 <title>DATOS DEL CONTRIBUYENTE SUJETO A RETENCION DE I.S.L.R. <?php echo $numero ?></title>
-<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
+<link rel="STYLESHEET" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" />
 </head>
 <body>
 <script type="text/php">
@@ -103,7 +95,7 @@ if ( isset($pdf) ) {
 			</tr>
 			</table>
 			<table style="width: 100%; font-size: 8pt;">
-				<tr><td>Raz&oacute;n Social:</td><td><b><?php echo $proveed." ".$nombre; ?></b></td></tr>
+				<tr><td>Raz&oacute;n Social:</td><td><b><?php echo $nombre." (".$proveed.")"; ?></b></td></tr>
 				<tr><td>Direcci&oacute;n:</td><td><b><?php echo $direc1." ".$direc2." ".$direc3; ?></b></td></tr>
 				<tr><td>Tel&eacute;fono:</td><td><b><?php echo $telefono; ?></b>R.I.F. :<b><?php echo $rif; ?></b></td></tr>
 			</table>
@@ -116,11 +108,12 @@ if ( isset($pdf) ) {
 			<td><div align="left" style="font-size: 11pt;"><b>DATOS DE LA RETENCI&Oacute;N:</b></div></td>
 		</tr>
 	</table>
+	<!--/div -->
 
 	<table style="width: 80%;" class="header" align='center' -->
 		<tr>
 			<td><div align="left"  style="font-size: 8pt"><b>DOCUMENTO:</b></div></td>
-			<td><div align="rigth" style="font-size: 8pt"><?php echo $tipo_doc.$numero.' '.$titcontrol;  ?></div></td>
+			<td><div align="rigth" style="font-size: 8pt"><?php echo $tipo_doc.$numero  ?></div></td>
 		 </tr><tr>
 			<td><div align="left"  style="font-size: 8pt"><b>FECHA DE EMISION.:</b></div></td>
 			<td><div align="rigth" style="font-size: 8pt"><?php echo $ffecha ?></div></td>
@@ -177,16 +170,16 @@ if ( isset($pdf) ) {
 		</tr>
 	</table>
 	<p style='height:20px'> </p>
-
+	
 	<div style='height:70px;width: 100%;align:center;'>
 	<p style='height: 50px;'> </p>
 	<table style="width:90%;border-top:1px solid;"  class="header" align='center' >
 		<tr>
-			<td><b><div align="center" style="font-size: 8pt"><b>Agente de Retenci&oacute;n:</b></div></td>
-			<td><b><div align="center" style="font-size: 8pt"><b>Firma y Sello:</b></div></td>
+			<td><b><div align="center" style="font-size: 8pt"><b>Firma y sello del agente de retenci&oacute;n:</b></div></td>
+			<td><b><div align="center" style="font-size: 8pt"><b>Firma y sello del agente de retenido:</b></div></td>
 		</tr>
 	</table>
 	</div>
 </div>
- </body>
+</body>
 </html>
