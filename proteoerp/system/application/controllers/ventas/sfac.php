@@ -898,6 +898,20 @@ class Sfac extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		$grid->addField('bultos');
+		$grid->label('Bultos');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
 		$grid->addField('orden');
 		$grid->label('Orden');
 		$grid->params(array(
@@ -1474,7 +1488,7 @@ class Sfac extends Controller {
 			if($oper == 'edit') {
 				if(empty($data['entregado'])) unset($data['entregado']);
 
-				$posibles=array('entregado','nfiscal','maqfiscal','comiadi','observa','observ1','dmaqfiscal','vd');
+				$posibles=array('entregado','bultos','nfiscal','maqfiscal','comiadi','observa','observ1','dmaqfiscal','vd');
 				foreach($data as $ind=>$val){
 					if(!in_array($ind,$posibles)){
 						echo 'Campo no permitido ('.$ind.')';
@@ -5646,6 +5660,8 @@ class Sfac extends Controller {
 		if(!in_array('descu2',$campos)) $this->db->query("ALTER TABLE sfac ADD COLUMN descu2 DECIMAL(10,2) NULL DEFAULT '0' AFTER descu1 ");
 		if(!in_array('descu3',$campos))	$this->db->query("ALTER TABLE sfac ADD COLUMN descu3 DECIMAL(10,2) NULL DEFAULT '0' AFTER descu2 ");
 
+		if(!in_array('bultos',$campos)) $this->db->query("ALTER TABLE sfac ADD COLUMN bultos INT(10) NULL DEFAULT '0' ");
+
 
 		if(!in_array('id'  ,$campos)){
 			$this->db->simple_query('ALTER TABLE sfac DROP PRIMARY KEY');
@@ -5662,6 +5678,5 @@ class Sfac extends Controller {
 		if(!in_array('lote',$campos)){
 			$this->db->query("ALTER TABLE sitems ADD lote INT(11) DEFAULT '0' AFTER descu");
 		}
-
 	}
 }

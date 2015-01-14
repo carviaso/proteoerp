@@ -149,6 +149,71 @@ class Formatos extends Controller{
 		}
 	}
 
+	function vertxt(){
+		$parametros= func_get_args();
+		if (count($parametros)>0){
+			$_fnombre=array_shift($parametros);
+			$_dbfnombre=$this->db->escape($_fnombre);
+			$query = $this->db->query('SELECT txt FROM formatos WHERE nombre='.$_dbfnombre);
+			if ($query->num_rows() > 0){
+				$row = $query->row();
+				$forma= $row->txt;
+
+				if(empty($forma)){
+					$forma=$this->_crearep($_fnombre,'txt');
+				}
+
+				ob_start();
+					echo eval('?>'.preg_replace('/;*\s*\?>/', '; ?>', str_replace('<?=', '<?php echo ', $forma)).'<?php ');
+					$_txt=ob_get_contents();
+				@ob_end_clean();
+
+				if(strlen($_txt)>0){
+
+$salida = '
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset="'.$this->config->item("charset").'" >
+<title><?php echo $documento." ".$numero ?></title>
+<link rel="stylesheet" href="<?php echo $this->_direccion ?>/assets/default/css/formatos.css" type="text/css" >
+</head>
+<body style="margin-left: 30px;margin-right:30px;font-family: \'Courier New\', Courier, monospace;font-size:18px;">
+<style>
+span { font-size:11px; }
+</style>
+<script type="text/php">
+	if (isset($pdf)) {
+		$font = Font_Metrics::get_font("verdana");
+		$size = 6;
+		$color = array(0,0,0);
+		$text_height = Font_Metrics::get_font_height($font, $size);
+	}
+</script>
+';
+
+					$_txt = str_replace("\n",'<br>',$_txt);
+					$_txt = str_replace(" ",'&nbsp;',$_txt);
+					$_txt = str_replace(chr(15).chr(14),'<span style="font-size:18px; font-weight:bold;">',$_txt);
+					$_txt = str_replace(chr(15),'<span>',$_txt);
+					$_txt = str_replace(chr(18),'</span>',$_txt);
+
+
+					$_txt = $salida.$_txt;
+					echo $_txt.'</body></html>';
+
+				}else{
+					$forma=$this->_crearep($_fnombre,'txt');
+					echo 'Formato no definido';
+				}
+			}else{
+				$forma=$this->_crearep($_fnombre,'txt');
+				echo 'Formato no existe';
+			}
+		}else{
+			echo 'Faltan parametros';
+		}
+	}
+
 	function incluir($nombre){
 		$_dbfnombre=$this->db->escape($nombre);
 		$query = $this->db->query('SELECT proteo FROM formatos WHERE nombre='.$_dbfnombre);
