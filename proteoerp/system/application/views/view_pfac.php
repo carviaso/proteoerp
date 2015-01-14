@@ -455,7 +455,9 @@ function autocod(id){
 					<td class="littletablerow"   ><?php echo $form->rifci->output; ?>&nbsp;</td>
 				</tr><tr>
 					<td class="littletableheader"><?php echo $form->direc->label;  ?>&nbsp;</td>
-					<td class="littletablerow" colspan='3'><?php echo $form->direc->output; ?></td>
+					<td class="littletablerow" ><?php echo $form->direc->output; ?></td>
+					<td class="littletableheader"><?php echo $form->bultos->label;  ?>*&nbsp;</td>
+					<td class="littletablerow"   ><?php echo $form->bultos->output; ?>&nbsp;</td>
 				</tr>
 			</table>
 		</fieldset>

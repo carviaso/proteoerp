@@ -266,7 +266,7 @@ class Pfac extends Controller {
 		//Convierte Factura
 		$bodyscript .= '
 			$("#ffact").dialog({
-				autoOpen: false, height: 550, width: 840, modal: true,
+				autoOpen: false, height: 550, width: 870, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;
@@ -478,32 +478,6 @@ class Pfac extends Controller {
 			'editoptions'   => '{ size:40, maxlength: 40 }',
 		));
 
-/*
-		$grid->addField('direc');
-		$grid->label('Direc');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:40, maxlength: 40 }',
-		));
-
-
-		$grid->addField('dire1');
-		$grid->label('Dire1');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 200,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:40, maxlength: 40 }',
-		));
-
-*/
-
 		$grid->addField('referen');
 		$grid->label('Referencia');
 		$grid->params(array(
@@ -514,7 +488,6 @@ class Pfac extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:12, maxlength: 12 }',
 		));
-
 
 		$grid->addField('totals');
 		$grid->label('Base');
@@ -551,6 +524,20 @@ class Pfac extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
+		$grid->addField('bultos');
+		$grid->label('Bultos');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
 			'align'         => "'right'",
 			'edittype'      => "'text'",
 			'width'         => 100,
@@ -1264,6 +1251,10 @@ class Pfac extends Controller {
 		$edit->peso->size = 10;
 		$edit->peso->type ='inputhidden';
 
+		$edit->bultos = new inputField('Bultos', 'bultos');
+		$edit->bultos->css_class = 'inputnum';
+		$edit->bultos->size      = 10;
+
 		$edit->cliente = new inputField('Cliente', 'cod_cli');
 		$edit->cliente->size = 6;
 		$edit->cliente->rule = 'required';
@@ -1334,13 +1325,6 @@ class Pfac extends Controller {
 		$edit->preca->size = 10;
 		$edit->preca->rule = 'required|positive|callback_chpreca[<#i#>]';
 		$edit->preca->readonly = true;
-
-		//$edit->dxapli = new inputField('Descuento <#o#>', 'dxapli_<#i#>');
-		//$edit->dxapli->db_name = 'dxapli';
-		//$edit->dxapli->rel_id = 'itpfac';
-		//$edit->dxapli->size = 1;
-		//$edit->dxapli->rule = 'trim';
-		//$edit->dxapli->onchange="cal_dxapli(<#i#>)";
 
 		$edit->tota = new inputField('importe <#o#>', 'tota_<#i#>');
 		$edit->tota->db_name = 'tota';
@@ -1755,17 +1739,10 @@ class Pfac extends Controller {
 			$this->db->simple_query('ALTER TABLE pfac ADD UNIQUE INDEX numero (numero)');
 		}
 
-		if(!in_array('fenvia',$campos)){
-			$this->db->query("ALTER TABLE `pfac`  ADD COLUMN `fenvia` DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que el vendedor termino el pedido'");
-		}
-
-		if(!in_array('faplica',$campos)){
-			$this->db->query("ALTER TABLE `pfac`  ADD COLUMN `faplica` DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que se aplicaron los descuentos'");
-		}
-
-		if(!in_array('reserva',$campos)){
-			$this->db->query("ALTER TABLE `pfac`  ADD COLUMN `reserva` CHAR(1) NOT NULL DEFAULT 'N'");
-		}
+		if(!in_array('fenvia',$campos))  $this->db->query("ALTER TABLE pfac ADD COLUMN fenvia  DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que el vendedor termino el pedido'");
+		if(!in_array('faplica',$campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN faplica DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que se aplicaron los descuentos'");
+		if(!in_array('reserva',$campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN reserva CHAR(1) NOT NULL DEFAULT 'N'");
+		if(!in_array('bultos', $campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN bultos  INT(10) NULL DEFAULT '0' ");
 
 		$itcampos=$this->db->list_fields('itpfac');
 		if(!in_array('dxapli',$itcampos)){

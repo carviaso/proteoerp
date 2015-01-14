@@ -2798,12 +2798,6 @@ class Sfac extends Controller {
 		$edit->tipo_doc = new  hiddenField('Documento', 'tipo_doc');
 		$edit->tipo_doc->insertValue = 'F';
 
-		//$edit->tipo_doc->option('F','Factura');
-		//$edit->tipo_doc->option('D','Devoluci&oacute;n');
-		//$edit->tipo_doc->style='width:80px;';
-		//$edit->tipo_doc->size = 5;
-		//$edit->tipo_doc->rule='required';
-
 		$edit->manual = new hiddenField('Manual', 'manual');
 		$edit->manual->insertValue = $manual;
 
@@ -2850,6 +2844,10 @@ class Sfac extends Controller {
 		$edit->cliente->autocomplete=false;
 		$edit->cliente->rule='required|trim|existescli';
 
+		$edit->bultos = new inputField('Bultos', 'bultos');
+		$edit->bultos->css_class = 'inputnum';
+		$edit->bultos->size = 10;
+
 		$edit->nombre = new hiddenField('Nombre', 'nombre');
 		$edit->nombre->size = 25;
 		$edit->nombre->maxlength=40;
@@ -2870,19 +2868,8 @@ class Sfac extends Controller {
 		$edit->direc->readonly =true;
 		$edit->direc->size = 40;
 
-		//$edit->cajero= new hiddenField('Cajero', 'cajero');
-		//$edit->cajero->insertValue = $this->secu->getcajero();
-		//$edit->cajero->updateValue = $this->secu->getcajero();
-		//$edit->cajero->rule = 'condi_required|callback_chcajero';
 		$edit->cajero = new autoUpdateField('cajero' ,$this->secu->getcajero(), $this->secu->getcajero());
 
-/*
-		$edit->cajero= new dropdownField('Cajero', 'cajero');
-		$edit->cajero->options('SELECT cajero,nombre FROM scaj ORDER BY nombre');
-		$edit->cajero->rule ='required|cajerostatus';
-		$edit->cajero->style='width:150px;';
-		$edit->cajero->insertValue=$this->secu->getcajero();
-*/
 
 		$edit->descuento = new hiddenField('Desc.','descuento');
 		$edit->descuento->insertValue = '0';
@@ -4880,7 +4867,7 @@ class Sfac extends Controller {
 		$this->_url= $this->url.'dataedit/insert';
 
 		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
-		,'a.totals','a.iva','a.totalg','TRIM(a.factura) AS factura','a.vd','c.almacen');
+		,'a.totals','a.iva','a.totalg','TRIM(a.factura) AS factura','a.vd','c.almacen','a.bultos');
 		$this->db->select($sel);
 		$this->db->from('pfac AS a');
 		$this->db->join('scli AS b','a.cod_cli=b.cliente');
@@ -4910,6 +4897,7 @@ class Sfac extends Controller {
 					'totalg'     => $row->totalg,
 					'pfac'       => $numero,
 				);
+				$_POST['bultos'] = $row->bultos;
 
 				$itsel=array('a.codigoa','b.descrip AS desca','a.cana - a.entregado AS cana','a.preca','a.tota','b.iva',
 				'ROUND(b.precio1*100/(100+b.iva),2) AS precio1',
@@ -4944,7 +4932,7 @@ class Sfac extends Controller {
 					$i++;
 				}
 
-				//sfpa
+				// SFAC
 				$i=0;
 				$_POST["tipo_${i}"]      = '';
 				//$_POST["sfpafecha_${i}"] = '';
