@@ -4864,7 +4864,7 @@ class Sfac extends Controller {
 	// Crea una factura desde un pedido
 	//
 	function creafrompfac($manual,$numero,$status=null){
-		$this->_url= $this->url.'dataedit/insert';
+		$this->_url = $this->url.'dataedit/insert';
 
 		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
 		,'a.totals','a.iva','a.totalg','TRIM(a.factura) AS factura','a.vd','c.almacen','a.bultos');
@@ -4897,7 +4897,7 @@ class Sfac extends Controller {
 					'totalg'     => $row->totalg,
 					'pfac'       => $numero,
 				);
-				$_POST['bultos'] = $row->bultos;
+				//$_POST['bultos'] = $row->bultos;
 
 				$itsel=array('a.codigoa','b.descrip AS desca','a.cana - a.entregado AS cana','a.preca','a.tota','b.iva',
 				'ROUND(b.precio1*100/(100+b.iva),2) AS precio1',
@@ -4933,6 +4933,7 @@ class Sfac extends Controller {
 				}
 
 				// SFAC
+				$_POST['bultos'] = $row->bultos;
 				$i=0;
 				$_POST["tipo_${i}"]      = '';
 				//$_POST["sfpafecha_${i}"] = '';

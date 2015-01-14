@@ -939,7 +939,7 @@ class Ajax extends Controller {
 				$data = json_encode($retorno);
 	        }
 		}
-		echo $data.$mSQL;
+		echo $data;
 	}
 
 	//Busca sinv solo articulos
