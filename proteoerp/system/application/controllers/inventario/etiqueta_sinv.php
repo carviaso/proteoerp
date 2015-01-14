@@ -1,13 +1,12 @@
-<?php require_once(APPPATH.'/controllers/inventario/consultas.php');
-//require_once(BASEPATH.'application/controllers/');
-/*****
- * Realizado por Judelvis A. Rivas
- * Modulo para generar etiquetas de productos de la tabla sinv
- * Uso:
- * 1)La función filteredgrid(): genera etiquetas por medio de un filtro de productos por departamento,linea,grupo,marca
- * 2)La función num_control():genera etiquetas a traves de un filtro de numero de control de compra...
- * 3)La función lee_barras():genera etiquetas por medio de insercion de codigo de barras por el teclado
- */
+<?php
+/**
+ * ProteoERP
+ *
+ * @autor Judelvis A. Rivas
+ * @autor Andres Hocevar
+ * @license  GNU GPL v3
+*/
+require_once(APPPATH.'/controllers/inventario/consultas.php');
 
 class etiqueta_sinv extends Controller {
 
@@ -15,6 +14,7 @@ class etiqueta_sinv extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 	}
+
 	function index(){
 		redirect('inventario/etiqueta_sinv/menu');
 	}
@@ -27,7 +27,7 @@ class etiqueta_sinv extends Controller {
 		$html[]=anchor('inventario/etiqueta_sinv/filteredgrid','Por filtro de productos'    ).': permite generar los habladores filtrandolos por cacter&iacute;sticas comunes';
 
 		$data['title']  = '<h1>Men&uacute; de Habladores</h1>';
-		$data['content']=$thtml.ul($html);
+		$data['content']=$thtml.ul($html).'<p style="font-size:0.5em;text-align:center">Formato: <b>ETIQUETA1</b></p>';
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -37,14 +37,7 @@ class etiqueta_sinv extends Controller {
 		$html[]=anchor('inventario/etiqueta_sinv/num_compra'  ,'Por n&uacute;mero compra'   ).': generar habladores con todos los productos pertenecientes a una compra';
 		$html[]=anchor('inventario/etiqueta_sinv/lee_barras'  ,'Por c&oacute;digo de barras').': permite generar habladores por productos seleccionados';
 		$html[]=anchor('inventario/etiqueta_sinv/filteredgrid','Por filtro de productos'    ).': permite generar los habladores filtrandolos por cacter&iacute;sticas comunes';
-
-		//$data['title']  = '<h1>Men&uacute; de Habladores</h1>';
-		//$data['content']= $thtml.ul($html);
-		//$this->load->view('view_ventanas', $data);
-		//echo ul($html);
-		
 	}
-
 
 	function filteredgrid(){
 		$this->rapyd->load('datafilter2','datagrid');
@@ -114,7 +107,7 @@ class etiqueta_sinv extends Controller {
 		$filter->linea2->option('','Seleccione un Departamento primero');
 
 		$depto=$filter->getval('depto');
-		if($depto!==FALSE){
+		if($depto!==false){
 			$filter->linea2->options("SELECT linea, descrip FROM line WHERE depto='$depto' ORDER BY descrip");
 		}else{
 			$filter->linea2->option('','Seleccione un Departamento primero');
@@ -125,7 +118,7 @@ class etiqueta_sinv extends Controller {
 		$filter->grupo->option('','Seleccione una L&iacute;nea primero');
 
 		$linea=$filter->getval('linea2');
-		if($linea!==FALSE){
+		if($linea!==false){
 			$filter->grupo->options("SELECT grupo, nom_grup FROM grup WHERE linea='$linea' ORDER BY nom_grup");
 		}else{
 			$filter->grupo->option('','Seleccione un Departamento primero');
@@ -148,14 +141,30 @@ class etiqueta_sinv extends Controller {
 		$filter->buttons('reset','search');
 		$filter->build();
 
-		
-		if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
+
+		if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 			$tabla=form_open('forma/ver/etiqueta1');
+
+			$select=array(
+				'a.tipo',
+				'a.id',
+				'a.codigo',
+				'a.descrip',
+				'a.precio1 AS precio',
+				'a.precio2 AS precio2',
+				'a.precio3 AS precio3',
+				'a.barras',
+				'b.nom_grup',
+				'b.grupo   AS grupoid',
+				'c.descrip AS nom_linea',
+				'c.linea',
+				'd.descrip AS nom_depto',
+				'd.depto   AS depto',
+				'a.fecha1  AS cfecha'
+			);
 
 			$grid = new DataGrid('Lista de Art&iacute;culos para imprimir');
 			$grid->per_page = 15;
-			$select=array('a.tipo','a.id','a.codigo','a.descrip','a.precio1 AS precio','a.precio2 AS precio2','a.precio3 AS precio3','a.barras','b.nom_grup',
-			'b.grupo AS grupoid','c.descrip AS nom_linea', 'c.linea','d.descrip AS nom_depto', 'd.depto AS depto');
 
 			$grid->db->select($select);
 			$grid->db->from('sinv AS a');
@@ -174,7 +183,7 @@ class etiqueta_sinv extends Controller {
 			$grid->build();
 
 			$limite=300;
-			if($grid->recordCount>0 AND $grid->recordCount<=$limite){
+			if($grid->recordCount>0 && $grid->recordCount<=$limite){
 				$consul=$this->db->last_query();
 				$mSQL=substr($consul,0,strpos($consul, 'LIMIT'));
 
@@ -250,8 +259,20 @@ class etiqueta_sinv extends Controller {
 		$dbcontrol=$this->db->escape($control);
 		$tabla=form_open('forma/ver/etiqueta1');
 
+		$sel=array(
+			'a.barras  AS barras' ,
+			'a.precio2 AS precio2',
+			'a.grupo   AS grupoid',
+			'a.precio3 AS precio3',
+			'a.codigo  AS codigo' ,
+			'a.descrip AS descrip',
+			'a.precio1 AS precio' ,
+			'b.control AS control',
+			'a.fecha1  AS cfecha'
+		);
+
 		$grid = new DataGrid('Lista de art&iacute;culos a imprimir');
-		$grid->db->select(array('a.barras AS  barras','a.precio2 AS precio2','a.grupo AS grupoid','a.precio3 AS precio3','a.codigo AS codigo','a.descrip AS descrip','a.precio1 AS precio','b.control AS control'));
+		$grid->db->select($sel);
 		$grid->db->from('sinv AS a');
 		$grid->db->join('itscst AS b','a.codigo=b.codigo');
 		$grid->db->where('b.control',$control);
@@ -356,7 +377,7 @@ class etiqueta_sinv extends Controller {
 
 			if(count($campos)>0){
 				$campos = implode(',',$campos);
-				$consul="SELECT codigo,barras,descrip,precio1 AS precio, precio2, precio3 ,grupo AS grupoid FROM sinv WHERE codigo IN ($campos)";
+				$consul="SELECT codigo,barras,descrip,precio1 AS precio, precio2, precio3 ,grupo AS grupoid,fecha1 AS cfecha FROM sinv WHERE codigo IN (${campos})";
 
 				$data = array(
 					'name'      => 'cant',
