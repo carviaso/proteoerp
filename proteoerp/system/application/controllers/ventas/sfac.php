@@ -4926,6 +4926,7 @@ class Sfac extends Controller {
 
 				foreach ($qquery->result() as $itrow){
 					$_POST["codigoa_${i}"]  = rtrim($itrow->codigoa);
+					$_POST["lote_${i}"]     = '0';
 					$_POST["desca_${i}"]    = rtrim($itrow->desca);
 					$_POST["cana_${i}"]     = $itrow->cana;
 					$_POST["preca_${i}"]    = $itrow->preca;
@@ -4934,6 +4935,7 @@ class Sfac extends Controller {
 					$_POST["precio2_${i}"]  = $itrow->precio2;
 					$_POST["precio3_${i}"]  = $itrow->precio3;
 					$_POST["precio4_${i}"]  = $itrow->precio4;
+					$_POST["descu_${i}"]    = 0;
 					$_POST["itiva_${i}"]    = $itrow->iva;
 					$_POST["sinvpeso_${i}"] = $itrow->peso;
 					$_POST["sinvtipo_${i}"] = $itrow->tipo;
