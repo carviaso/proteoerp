@@ -160,7 +160,7 @@ class etiqueta_sinv extends Controller {
 				'c.linea',
 				'd.descrip AS nom_depto',
 				'd.depto   AS depto',
-				'a.fecha1  AS cfecha',
+				'a.pfecha1  AS cfecha',
 				'a.iva'
 			);
 
@@ -269,7 +269,7 @@ class etiqueta_sinv extends Controller {
 			'a.descrip AS descrip',
 			'a.precio1 AS precio' ,
 			'b.control AS control',
-			'a.fecha1  AS cfecha',
+			'a.pfecha1  AS cfecha',
 			'a.iva'
 		);
 
@@ -379,7 +379,7 @@ class etiqueta_sinv extends Controller {
 
 			if(count($campos)>0){
 				$campos = implode(',',$campos);
-				$consul="SELECT codigo,barras,descrip,precio1 AS precio, precio2, precio3 ,grupo AS grupoid,fecha1 AS cfecha, iva FROM sinv WHERE codigo IN (${campos})";
+				$consul="SELECT codigo,barras,descrip,precio1 AS precio, precio2, precio3 ,grupo AS grupoid,pfecha1 AS cfecha, iva FROM sinv WHERE codigo IN (${campos})";
 
 				$data = array(
 					'name'      => 'cant',
