@@ -86,6 +86,7 @@ function chtipodoc(){
 		$('input[name^="ppago_"]').hide('');
 		$('#ppagotit').hide();
 		$('#trcodigo').show();
+		$('#trvende').hide();
 		totaliza();
 	}else if(tipo=='AN'){
 		$('#aplefectos').hide();
@@ -94,6 +95,7 @@ function chtipodoc(){
 		totaliza();
 		$('#aplpago').show();
 		$('#trcodigo').hide();
+		$('#trvende').hide();
 		fitmonto();
 	}else{
 		$('#aplefectos').show();
@@ -101,6 +103,7 @@ function chtipodoc(){
 		$('input[name^="ppago_"]').show('');
 		$('#ppagotit').show();
 		$('#trcodigo').hide();
+		$('#trvende').show();
 		totaliza();
 	}
 	$("#observa1").val('');
@@ -269,7 +272,8 @@ echo $title;
 	<tr>
 		<td><?php echo $form->tipo_doc->label;  ?></td>
 		<td><?php echo $form->tipo_doc->output; ?></td>
-		<td><span id='trcodigo'><?php echo $form->codigo->label; ?> <?php echo $form->codigo->output; ?></span></td>
+		<td><span id='trcodigo'><?php echo $form->codigo->label;  ?> <?php echo $form->codigo->output;  ?></span></td>
+		<td><span id='trvende' ><?php echo $form->vendedor->label;?> <?php echo $form->vendedor->output;?></span></td>
 		<td><?php echo $form->fecdoc->label;    ?></td>
 		<td><?php echo $form->fecdoc->output;   ?></td>
 	</tr>

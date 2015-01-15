@@ -1157,9 +1157,7 @@ function apldes(){
 		</td>
 	</tr-->
 </table>
-
-
-
+<?php echo $form->bultos->output; ?>
 
 <div id='efecha' style='display:none;'></div>
 <table style="width:100%;border-collapse:collapse;padding:0px;">

@@ -2844,7 +2844,7 @@ class Sfac extends Controller {
 		$edit->cliente->autocomplete=false;
 		$edit->cliente->rule='required|trim|existescli';
 
-		$edit->bultos = new inputField('Bultos', 'bultos');
+		$edit->bultos = new hiddenField('Bultos', 'bultos');
 		$edit->bultos->css_class = 'inputnum';
 		$edit->bultos->size = 10;
 
@@ -4897,7 +4897,6 @@ class Sfac extends Controller {
 					'totalg'     => $row->totalg,
 					'pfac'       => $numero,
 				);
-				//$_POST['bultos'] = $row->bultos;
 
 				$itsel=array('a.codigoa','b.descrip AS desca','a.cana - a.entregado AS cana','a.preca','a.tota','b.iva',
 				'ROUND(b.precio1*100/(100+b.iva),2) AS precio1',
