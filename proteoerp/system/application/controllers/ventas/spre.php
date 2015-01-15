@@ -264,7 +264,7 @@ class Spre extends Controller {
 		//Convertir Factura
 		$bodyscript .= '
 			$("#ffact").dialog({
-				autoOpen: false, height: 600, width: 800, modal: true,
+				autoOpen: false, height: 550, width: 870, modal: true,
 				buttons: {
 					"Guardar": function() {
 						var bValid = true;

@@ -4983,6 +4983,7 @@ class Sfac extends Controller {
 				'iva'        => $row->iva,
 				'totalg'     => $row->totalg,
 				'pfac'       => $numero,
+				'bultos'     => 0,
 			);
 
 			$itsel=array('a.codigo','b.descrip AS desca','a.cana','a.preca','a.importe AS tota','b.iva',
@@ -4997,6 +4998,7 @@ class Sfac extends Controller {
 
 			foreach ($qquery->result() as $itrow){
 				$_POST["codigoa_${i}"]  = rtrim($itrow->codigo);
+				$_POST["lote_${i}"]     = '0';
 				$_POST["desca_${i}"]    = rtrim($itrow->desca);
 				$_POST["cana_${i}"]     = $itrow->cana;
 				$_POST["preca_${i}"]    = $itrow->preca;
@@ -5005,6 +5007,7 @@ class Sfac extends Controller {
 				$_POST["precio2_${i}"]  = $itrow->precio2;
 				$_POST["precio3_${i}"]  = $itrow->precio3;
 				$_POST["precio4_${i}"]  = $itrow->precio4;
+				$_POST["descu_${i}"]    = 0;
 				$_POST["itiva_${i}"]    = $itrow->iva;
 				$_POST["sinvpeso_${i}"] = $itrow->peso;
 				$_POST["sinvtipo_${i}"] = $itrow->tipo;
@@ -5122,6 +5125,7 @@ class Sfac extends Controller {
 			$i=0;
 			foreach ($qquery->result() as $itrow){
 				$_POST["codigoa_${i}"]  = rtrim($itrow->codigo);
+				$_POST["lote_${i}"]     = '0';
 				$_POST["desca_${i}"]    = rtrim($itrow->desca);
 				$_POST["cana_${i}"]     = $itrow->cana;
 				$_POST["preca_${i}"]    = $itrow->preca;
@@ -5130,6 +5134,7 @@ class Sfac extends Controller {
 				$_POST["precio2_${i}"]  = $itrow->precio2;
 				$_POST["precio3_${i}"]  = $itrow->precio3;
 				$_POST["precio4_${i}"]  = $itrow->precio4;
+				$_POST["descu_${i}"]    = 0;
 				$_POST["itiva_${i}"]    = $itrow->iva;
 				$_POST["sinvpeso_${i}"] = $itrow->peso;
 				$_POST["sinvtipo_${i}"] = $itrow->tipo;
@@ -5263,6 +5268,7 @@ class Sfac extends Controller {
 
 				foreach ($qquery->result() as $itrow){
 					$_POST["codigoa_${i}"]  = rtrim($itrow->codigoa);
+					$_POST["lote_${i}"]     = 0;
 					$_POST["desca_${i}"]    = rtrim($itrow->desca);
 					$_POST["cana_${i}"]     = $itrow->cana;
 					$_POST["preca_${i}"]    = $itrow->preca;
@@ -5271,6 +5277,7 @@ class Sfac extends Controller {
 					$_POST["precio2_${i}"]  = $itrow->precio2;
 					$_POST["precio3_${i}"]  = $itrow->precio3;
 					$_POST["precio4_${i}"]  = $itrow->precio4;
+					$_POST["descu_${i}"]    = 0;
 					$_POST["itiva_${i}"]    = $itrow->iva;
 					$_POST["sinvpeso_${i}"] = $itrow->peso;
 					$_POST["sinvtipo_${i}"] = $itrow->tipo;
@@ -5358,6 +5365,7 @@ class Sfac extends Controller {
 					$preca=round($itrow->tota/$itrow->cana,2);
 
 					$_POST["codigoa_${i}"]  = rtrim($itrow->codigoa);
+					$_POST["lote_${i}"]     = 0;
 					$_POST["desca_${i}"]    = rtrim($itrow->desca);
 					$_POST["cana_${i}"]     = $itrow->cana;
 					$_POST["preca_${i}"]    = $preca;
@@ -5366,6 +5374,7 @@ class Sfac extends Controller {
 					$_POST["precio2_${i}"]  = $itrow->precio2;
 					$_POST["precio3_${i}"]  = $itrow->precio3;
 					$_POST["precio4_${i}"]  = $itrow->precio4;
+					$_POST["descu_${i}"]    = 0;
 					$_POST["itiva_${i}"]    = $itrow->iva;
 					$_POST["sinvpeso_${i}"] = $itrow->peso;
 					$_POST["sinvtipo_${i}"] = $itrow->tipo;
@@ -5467,6 +5476,7 @@ class Sfac extends Controller {
 			$totalg += $tota+$iiva ;
 
 			$_POST["codigoa_${i}"]  = rtrim($val['codigo']);
+			$_POST["lote_${i}"]     = 0;
 			$_POST["desca_${i}"]    = rtrim($val['descrip']);
 			$_POST["cana_${i}"]     = $val['cana'];
 			$_POST["preca_${i}"]    = $preca;
@@ -5475,6 +5485,7 @@ class Sfac extends Controller {
 			$_POST["precio2_${i}"]  = $val['base2'];
 			$_POST["precio3_${i}"]  = $val['base3'];
 			$_POST["precio4_${i}"]  = $val['base4'];
+			$_POST["descu_${i}"]    = 0;
 			$_POST["itiva_${i}"]    = $val['iva'];
 			$_POST["sinvpeso_${i}"] = $val['sinvpeso'];
 			$_POST["sinvtipo_${i}"] = $val['sinvtipo'];
@@ -5551,6 +5562,7 @@ class Sfac extends Controller {
 				//$_POST['observ1']     = $upago;
 
 				$_POST['codigoa_0']   = $row->codigo;
+				$_POST["lote_0"]      = 0;
 				$_POST['desca_0']     = $row->descrip;
 				$_POST['detalle_0']   = "Contrato Nro. ${contrato} correspondiente al mes ${desde}";
 				$_POST['cana_0']      = $row->cantidad;
@@ -5560,6 +5572,7 @@ class Sfac extends Controller {
 				$_POST['precio2_0']   = 0;
 				$_POST['precio3_0']   = 0;
 				$_POST['precio4_0']   = 0;
+				$_POST["descu_0"]     = 0;
 				$_POST['itiva_0']     = $row->iva;
 				$_POST['sinvpeso_0']  = 0;
 				$_POST['sinvtipo_0']  = 'Servicio';
