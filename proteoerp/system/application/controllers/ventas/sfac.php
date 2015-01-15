@@ -445,7 +445,7 @@ class Sfac extends Controller {
 
 		$bodyscript .= '
 			$("#fshow").dialog({
-				autoOpen: false, height: 500, width: 700, modal: true,
+				autoOpen: false, height: 550, width: 870, modal: true,
 				buttons: {
 					"Aceptar": function() {
 						$("#fshow").html("");

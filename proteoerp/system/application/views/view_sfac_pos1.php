@@ -38,6 +38,8 @@ $sfpa_scampos .='<td class="littletablerow" align="left" >'.$sfpa_campos['banco'
 $sfpa_scampos .='<td class="littletablerow" align="right">'.$sfpa_campos['monto']['field']. '</td>';
 $sfpa_scampos .='<td class="littletablerow"><a href=# onclick="del_sfpa(<#i#>);return false;">'.img('images/delete.jpg').'</a></td></tr>';
 $sfpa_campos=$form->js_escape($sfpa_scampos);
+$pidescu = $this->datasis->traevalor('SFACDESCU','ApLica Descuentos en facturacio');
+
 
 echo $form_begin;
 if($form->_status!='show'){
@@ -54,7 +56,6 @@ if($form->_status!='show'){
 		$sfpade.="<option value='".trim($row->cod_banc)."'>".trim($row->nomb_banc)."</option>";
 	}
 
-	$pidescu = $this->datasis->traevalor('SFACDESCU','ApLica Descuentos en facturacio');
 ?>
 <script language="javascript" type="text/javascript">
 var sitems_cont=<?php echo $form->max_rel_count['sitems']; ?>;

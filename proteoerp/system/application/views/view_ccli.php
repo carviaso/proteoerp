@@ -259,6 +259,12 @@ function sfpatipo(id){
 	$("#banco_"+id).val(banco);
 	return true;
 }
+
+function fconsulta(transac){
+	window.open('<?php echo site_url('ventas/sfac/dataedit/show'); ?>/'+transac, '_blank', 'width=870, height=600, scrollbars=yes, status=yes, resizable=yes,screenx=((screen.availHeight/2)-300), screeny=((screen.availWidth/2)-400)');
+}
+
+
 </script>
 <?php } ?>
 <?php
@@ -306,14 +312,20 @@ echo $title;
 		$it_abono    = "abono_${i}";
 		$it_saldo    = "saldo_${i}";
 		$it_ppago    = "ppago_${i}";
+		$link = '';
+		if ($form->$it_tipo_doc->value == 'FC'){
+			$num  = $this->db->escape($form->$it_numero->value);
+			$tran = $this->datasis->dameval("SELECT id FROM sfac WHERE tipo_doc='F' AND numero=".$num);
+			$link = "onclick='fconsulta(".$tran.")'";
+		}
 	?>
 	<tr id='tr_itccli_<?php echo $i; ?>' <?php echo ($i%2 == 0) ? 'class="odd"' : '';?> >
-		<td><?php echo $form->$it_tipo_doc->output;?>-<?php echo $form->$it_numero->output;?></td>
+		<td <?php echo $link; ?>><?php echo $form->$it_tipo_doc->output;?>-<?php echo $form->$it_numero->output;?></td>
 		<td align="center"><?php echo $form->$it_fecha->output; ?></td>
-		<td align="right"><?php echo $form->$it_monto->output; ?></td>
-		<td align="right"><?php echo $form->$it_saldo->output; ?></td>
-		<td align="right"><?php echo $form->$it_abono->output; ?></td>
-		<td align="right"><?php echo $form->$it_ppago->output; ?></td>
+		<td align="right" ><?php echo $form->$it_monto->output; ?></td>
+		<td align="right" ><?php echo $form->$it_saldo->output; ?></td>
+		<td align="right" ><?php echo $form->$it_abono->output; ?></td>
+		<td align="right" ><?php echo $form->$it_ppago->output; ?></td>
 	</tr>
 	<?php } ?>
 	</tbody>
