@@ -1466,6 +1466,7 @@ class Smov extends Controller {
 		$edit->codigo->rule ='';
 
 		$edit->vendedor = new  dropdownField ('Cabrador', 'vd');
+		$edit->vendedor->option('','Seleccione cobrador');
 		$edit->vendedor->options('SELECT TRIM(vendedor) AS vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend WHERE tipo <> "V" ORDER BY vendedor');
 		$edit->vendedor->style='width:200px;';
 		$edit->vendedor->insertValue=trim($this->secu->getvendedor());
