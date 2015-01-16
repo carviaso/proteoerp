@@ -2897,6 +2897,9 @@ class Sfac extends Controller {
 
 		//***********************************
 		//  Campos para el detalle 1 sitems
+		// todo campo que se agrege aqui debe
+		// tomarse en cuenta en el post_process
+		// seccion maxlin ****
 		//***********************************
 		$edit->codigoa = new inputField('C&oacute;digo <#o#>', 'codigoa_<#i#>');
 		$edit->codigoa->size     = 12;
@@ -3766,77 +3769,10 @@ class Sfac extends Controller {
 			}
 			$itimporte = round($itpreca*$itcana,2);
 			$iva       = $itimporte*($itiva/100);
-
-//echo $do->get_rel('sitems', 'codigoa' , $i)." Precio: ".$itpreca." tot: ".$itimporte." X ".$itcana." ";
-
 			$totalg   += $itimporte+$iva;
 		}
 
-//echo round($totalg,2);
-//return false;
 
-		
-/*
-			ind     = this.name.substring(pos+1);
-			cana    = Number($("#cana_"+ind).val());
-			itiva   = Number($("#itiva_"+ind).val());
-			itpeso  = Number($("#sinvpeso_"+ind).val());
-			itpreca = Number($("#preca_"+ind).val());
-			importe = Number(this.value);
-			descui  = Number($("#descu_"+ind).val());
-
-			if(descu>0){
-				nimporte  = roundNumber(importe*(100-descu)/100,4);
-				importe   = roundNumber(nimporte,4);
-			}
-			if(descui>0){
-				if(!isNaN(itpreca)){
-					nimporte  = roundNumber(itpreca*(100-descui)*cana/100,4);
-					importe   = roundNumber(nimporte,2);
-				}else{
-					importe   = 0;
-				}
-			}
-			if(descu1 > 0){
-				nimporte  = roundNumber(importe*(100-descu1)/100,4);
-				importe   = roundNumber(nimporte,4);
-			}
-			if(descu2 > 0){
-				nimporte  = roundNumber(importe*(100-descu2)/100,4);
-				importe   = roundNumber(nimporte,4);
-			}
-			if(descu3 > 0){
-				nimporte  = roundNumber(importe*(100-descu3)/100,4);
-				importe   = roundNumber(nimporte,4);
-			}
-			importe = roundNumber(importe,2);
-			peso    = peso+(itpeso*cana);
-			iva     = iva+importe*(itiva/100);
-			totals  = totals+importe;
-		}
-	});
-	iva   = roundNumber(iva,2);
-
-	if(descuento>0){
-		$("#descuentomon_val").text(nformat(descuento,2));
-	}else{
-		$("#descuentomon_val").text(nformat(0,2));
-	}
-	totalg = totals + iva;
-	$("#peso").val(roundNumber(peso,2));
-
-	$("#totalg").val(roundNumber(totals+iva,2));
-	$("#totalg_val").text(nformat(totalg,2));
-
-	$("#totals").val(roundNumber(totals,2));
-	$("#totals_val").text(nformat(totals,2));
-
-	$("#iva").val(roundNumber(iva,2));
-	$("#ivat_val").text(nformat(iva,2));
-*/		
-		
-		
-		
 		$totalg = round($totalg,2);
 		//Fin de la totalizacion de facturas
 
@@ -3856,7 +3792,7 @@ class Sfac extends Controller {
 			$do->set_rel('sfpa','monto',$totalg,0);
 		}
 
-		$con=$this->db->query("SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1");
+		$con=$this->db->query('SELECT tasa,redutasa,sobretasa FROM civa ORDER BY fecha desc LIMIT 1');
 		if($con->num_rows() > 0){
 			$t=$con->row('tasa');$rt=$con->row('redutasa');$st=$con->row('sobretasa');
 		}else{
@@ -4186,7 +4122,8 @@ class Sfac extends Controller {
 
 			$rowval = $this->datasis->damerow('SELECT pond, base1,precio4,peso FROM sinv WHERE codigo='.$this->db->escape($itcodigo));
 			if(empty($rowval)){
-				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Producto no encontrado ('.$itcodigo.')';
+				$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='Producto no encontrado ('.$itcodigo.') '.$cana;
+				//$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']=print_r($do->data_rel,true);
 				return false;
 			}
 			$tpeso += floatval($rowval['peso'])*$itcana;
@@ -4762,7 +4699,7 @@ class Sfac extends Controller {
 		logusu($do->table,"Creo $this->tits ${tipo_doc}${numero}");
 
 		if($this->_creanfac){
-			//Realiza el corte por maxlin
+			//Realiza el corte por maxlin ****
 			$maxlin=intval($this->datasis->traevalor('MAXLIN'));
 			for($i=0;$i<$maxlin;$i++){
 				unset($_POST["codigoa_$i"]);
@@ -4779,6 +4716,10 @@ class Sfac extends Controller {
 				unset($_POST["sinvpeso_$i"]);
 				unset($_POST["sinvtipo_$i"]);
 				unset($_POST["combo_$i"]);
+				unset($_POST["lote_$i"]);
+				unset($_POST["descu_$i"]);
+				unset($_POST["mostrado_$i"]);
+				unset($_POST["tota_$i"]);
 			}
 			//Fin del corte por maxlin
 
