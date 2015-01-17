@@ -1460,6 +1460,11 @@ class Stra extends Controller {
 		}
 
 		if($tipo[0]=='A' || $tipo[0]=='F'){
+			$gasto=trim($this->datasis->dameval('SELECT gasto FROM caub WHERE ubica='.$dbalmacen));
+			if($gasto=='S'){
+				return true;
+			}
+
 			$mSQL    = "SELECT SUM(a.existen) AS cana FROM itsinv AS a JOIN caub AS b ON a.alma=b.ubica AND b.tipo='S' WHERE a.codigo=${dbcodigo} AND b.ubica=${dbalmacen}";
 			$existen = floatval($this->datasis->dameval($mSQL));
 			$val     = floatval($val);
