@@ -251,7 +251,7 @@ class DataDetails extends DataForm{
 			// this check the unicity of PK with the new DO function
 
 			$pk_check_unique=array();
-			foreach($pk_check AS $keyfield => $keyvalue){
+			foreach($pk_check as $keyfield => $keyvalue){
 				if(!array_key_exists($keyfield,$hiddens)){
 					$pk_check_unique[$keyfield]=$keyvalue;
 				}

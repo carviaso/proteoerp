@@ -559,8 +559,30 @@ class Sinv extends Controller {
 					}
 				});
 			}
-		};
-		';
+		};';
+
+		//Prepara los productos para un conteo de auditoria
+		$funciones .= '
+		function sinvaudit(){
+			var s = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selarrrow\');
+			if(s.length == 0 ){
+				$.prompt("<h1>Debe seleccionar al menos un Producto</h1>");
+			}else{
+				$.ajax({
+					url: "'.site_url('inventario/sinv/sinvaudit/').'",
+					global: false,
+					type: "POST",
+					data: ({ sinvs : s }),
+					dataType: "text",
+					async: false,
+					success: function(data) {
+						alert(data);
+						//$("#newapi'.$grid0.'").trigger("reloadGrid");
+					},
+					error: function(h,t,e) { apprise("Error en la respuesta",e) }
+				});
+			}
+		};';
 
 		// Busca si estan la opcion en tmenus
 		$mSQL = "SELECT COUNT(*) FROM tmenus WHERE modulo='SINVOTR' AND proteo='recaldolar'";
@@ -2067,7 +2089,7 @@ class Sinv extends Controller {
 
 
 		$grid->addField('standard');
-		$grid->label('Standard');
+		$grid->label('C.Estandar');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -5988,6 +6010,61 @@ class Sinv extends Controller {
 		}
 	}
 
+	function sinvaudit(){
+		//print_r($_POST);
+		$arr_sinvs=$this->input->post('sinvs');
+		if(is_array($arr_sinvs)){
+			foreach($arr_sinvs as $id_sinv){
+				$sql="SELECT a.codigo, a.descrip ,SUM(b.existen) AS existen FROM sinv AS a JOIN itsinv AS b ON a.codigo=b.codigo WHERE a.id=${id_sinv}";
+				$rowval = $this->datasis->damerow($sql);
+				if(empty($rowval)){
+					continue;
+				}
+
+				$data = array();
+				$data['id_sinv'] = $id_sinv;
+				$data['status']  = 'P';
+				$data['codigo']  = $rowval['codigo'];
+				$data['descrip'] = $rowval['descrip'];
+				$data['corte']   = date('Y-m-d H:i:s');
+				$data['existen'] = $rowval['existen'];
+				$data['usuario'] = $this->session->userdata('usuario');
+				$dbcodigo = $this->db->escape($rowval['codigo']);
+
+				$mSQL = $this->db->insert_string('sinvaudit', $data);
+				$ban=$this->db->simple_query($mSQL);
+				if(!$ban){ memowrite($mSQL,'sinv'); $error++;}
+				$id_sinvaudit = $this->db->insert_id();
+
+				$sql="SELECT
+				c.ubica AS alma,COALESCE(b.existen,0) AS existen
+				FROM sinv AS a
+				JOIN itsinv AS b ON a.codigo=b.codigo AND a.id=${id_sinv}
+				RIGHT JOIN caub AS c ON b.alma=c.ubica
+				WHERE c.invfis='N' AND c.gasto='N'";
+				$query = $this->db->query($sql);
+				if ($query->num_rows() > 0){
+					foreach ($query->result() as $row){
+						$mSQL="SELECT SUM(b.cana) FROM sfac AS a JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa WHERE b.codigoa=${dbcodigo} AND reparto=0";
+						$reparto = floatval($this->datasis->dameval($mSQL));
+
+						$data=array();
+						$data['id_sinvaudit']= $id_sinvaudit ;
+						$data['almacen']     = $row->alma;
+						$data['existen']     = $row->existen;
+						$data['pendiente']   = $reparto;
+						$data['contado']     = null;
+
+						$mSQL = $this->db->insert_string('itsinvaudit', $data);
+						$ban=$this->db->simple_query($mSQL);
+						if(!$ban){ memowrite($mSQL,'sinv'); $error++;}
+					}
+				}
+			}
+			echo 'Auditoria creada';
+		}
+	}
+
 /*
 	// Principios Activos
 	function prinactivo() {
@@ -6334,9 +6411,5 @@ class Sinv extends Controller {
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
 		}
-
-
-
-
 	}
 }

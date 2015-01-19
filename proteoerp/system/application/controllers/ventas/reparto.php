@@ -120,7 +120,7 @@ class Reparto extends Controller {
 				mId = id;
 				$.post("'.site_url($this->url.'factuforma').'/"+id, function(data){
 					$("#fshow").html(data);
-					$("#fshow").dialog( { title:"SELECCIONAR FACTURAS", width: 600, height: 450 } );
+					$("#fshow").dialog( { title:"AGREGAR/QUITAR FACTURAS", width: 750, height: 450 } );
 					$("#fshow").dialog( "open" );
 				});
 
@@ -198,7 +198,6 @@ class Reparto extends Controller {
 
 			} else { $.prompt("<h1>Por favor Seleccione un Reparto</h1>");}
 		});';
-
 
 		// Cierre
 		$bodyscript .= '
@@ -404,7 +403,6 @@ class Reparto extends Controller {
 		});';
 
 		$bodyscript .= '});';
-
 		$bodyscript .= '</script>';
 
 		return $bodyscript;
@@ -494,7 +492,7 @@ class Reparto extends Controller {
 	//
 	function factuforma($id = 0){
 		$id  = intval($id);
-		$reg = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=${id}");
+		$reg = $this->datasis->damereg("SELECT b.descrip, b.capacidad, b.volumen, b.paradas, b.placa FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=${id}");
 		if(empty($reg)){
 			echo 'Reparto inexistente';
 			return false;
@@ -520,15 +518,15 @@ class Reparto extends Controller {
 			width:  420,
 			hiddengrid: false,
 			postdata: { tboficiid: "wapi"},
-			colNames:[\'id\', \'Numero\',\'Fecha\', \'Cliente\',\'Vend.\', \'Zona\', \'Rep\', \'Peso\'],
+			colNames:[\'id\', \'N&uacute;mero\',\'Fecha\', \'Cliente\',\'Vend.\', \'Zona\', \'Rep\', \'Peso\'],
 			colModel:[
 				{name:\'id\',      index:\'id\',      width: 10, hidden:true},
 				{name:\'numero\',  index:\'numero\',  width: 35, editable:false, search: true},
-				{name:\'fecha\',   index:\'fecha\',   width: 35, editable:false, search: true, align:\'center\',edittype:\'text\', editoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}, defaultValue:\'2013-05-01\'}, searchoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}}},
-				{name:\'cod_cli\', index:\'cod_cli\', width: 20, editable:false, search: true },
-				{name:\'vd\',      index:\'vd\',      width: 22, editable:false, search: true },
-				{name:\'zona\',    index:\'zona\',    width: 20, editable:false, search: true, align:\'center\' },
-				{name:\'reparto\', index:\'reparto\', width: 20, editable:false, search: true, formatter: fsele },
+				{name:\'fecha\',   index:\'fecha\',   width: 40, editable:false, search: true, align:\'center\',edittype:\'text\', editoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}, defaultValue:\'2013-05-01\'}, searchoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}}},
+				{name:\'cod_cli\', index:\'cod_cli\', width: 40, editable:false, search: true },
+				{name:\'vd\',      index:\'vd\',      width: 35, editable:false, search: true },
+				{name:\'zona\',    index:\'zona\',    width: 30, editable:false, search: true, align:\'center\' },
+				{name:\'reparto\', index:\'reparto\', width: 25, editable:false, search: true, formatter: fsele,align:\'center\' },
 				{name:\'peso\',    index:\'peso\',    width: 40, editable:false, search: true, editoptions: {size:10,maxlength:10,dataInit:function(elem){$(elem).numeric();}},formatter:\'number\',formatoptions:{decimalSeparator:".",thousandsSeparator:",",decimalPlaces:2}, align:\'right\' }
 			],
 		});
@@ -544,26 +542,69 @@ class Reparto extends Controller {
 			return meco;
 		}
 
+		function _showval(json){
+			var capacidad='.floatval($reg['capacidad']).';
+			var volumen  ='.floatval($reg['volumen']).';
+			var paradas  ='.floatval($reg['paradas']).';
+
+			$("#totcana").text(json.cantidad);
+
+			//Volumen
+			$("#totvolu").text(nformat(json.volumen ,2).replace(",00", ""));
+			if(json.volumen>volumen){
+				$("#sobrevolu").text(nformat(json.volumen-volumen,2).replace(",00", ""));
+				$("#sobrevolu").css("color","#FF2C14");
+			}else{
+				$("#sobrevolu").text(nformat(0,2).replace(",00", ""));
+				$("#sobrevolu").css("color","black");
+			}
+
+			//Paradas
+			$("#totpara").text(json.paradas);
+			if(json.paradas>paradas){
+				$("#sobrepara").text(nformat(json.paradas-paradas,2).replace(",00", ""));
+				$("#sobrepara").css("color","#FF2C14");
+			}else{
+				$("#sobrepara").text(nformat(0,2).replace(",00", ""));
+				$("#sobrepara").css("color","black");
+			}
+
+			//Peso
+			$("#totpeso").text(nformat(json.peso,2).replace(",00", ""));
+			if(json.peso>capacidad){
+				$("#sobrepeso").text(nformat(json.peso-capacidad,2).replace(",00", ""));
+				$("#sobrepeso").css("color","#FF2C14");
+			}else{
+				$("#sobrepeso").text(nformat(0,2).replace(",00", ""));
+				$("#sobrepeso").css("color","black");
+			}
+		}
+
+		function auto(){
+			var vd   = $("#gs_vd").val();
+			var zona = $("#gs_zona").val();
+			if(vd!="" || zona!=""){
+				var postdata    = {vd : vd, zona : zona};
+				$.post("'.site_url($this->url.'autollenar/'.$id).'/", postdata,function(data){
+					var json = JSON.parse(data);
+					_showval(json);
+					$("#bpos1").trigger("reloadGrid");
+				});
+			}else{
+				alert("Debe filtar por al menos una zona o un vendedor");
+			}
+		}
+
 		function pasa(){
-			var capacidad='.$reg['capacidad'].';
 			var id = $("#bpos1").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				$.post("'.site_url($this->url.'agregaf').'/"+mid+"/"+id, function(data){
 					var json = JSON.parse(data);
-					$("#totpeso").text(nformat(json.peso    ,2));
-					$("#totcana").text(json.cantidad);
+					_showval(json);
 					$("#bpos1").trigger("reloadGrid");
-					if(json.peso>capacidad){
-						$("#sobrepeso").text(nformat(json.peso-capacidad,2));
-						$("#sobrepeso").css("color","#FF2C14");
-					}else{
-						$("#sobrepeso").text(nformat(0,2));
-						$("#sobrepeso").css("color","black");
-					}
 				});
 			}
-		}
-		';
+		}';
 
 		$peso = floatval($this->datasis->dameval("SELECT SUM(peso) AS peso FROM sfac WHERE peso IS NOT NULL AND reparto=${id}"));
 		if(!$peso) $peso = 0;
@@ -583,40 +624,61 @@ class Reparto extends Controller {
 
 		$msalida .= '</script>';
 		$capacidad= floatval($reg['capacidad']);
+		$cvolumen = floatval($reg['volumen']);
+		$cparadas = floatval($reg['paradas']);
 
-		$sobrepeso=($peso>$capacidad)? $peso-$capacidad:0;
-		$sobrecolo=($peso>$capacidad)? '#FF2C14':'black';
+		$sobrepeso=($peso>$capacidad)?   $peso-$capacidad:0;
+		$sobrecolo=($peso>$capacidad)?   '#FF2C14':'black';
+		$sobrevolu=($volumen>$cvolumen)? $volumen-$cvolumen:0;
+		$sobrecolv=($volumen>$cvolumen)? '#FF2C14':'black';
+		$sobrepara=($paradas>$cparadas)? $paradas-$cparadas:0;
+		$sobrecolp=($paradas>$cparadas)? '#FF2C14':'black';
+
+		$show_capacidad    = str_replace(',00','',nformat($capacidad));
+		$show_sobrepeso    = str_replace(',00','',nformat($sobrepeso));
+
+		$show_volumen      = str_replace(',00','',nformat($cvolumen ));
+		$show_sobrevolumen = str_replace(',00','',nformat($sobrevolu));
+
 		$msalida .= "<table width='100%'><tr><td>
 		<div class=\"tema1\"><table id=\"bpos1\"></table></div>
 		<div id='pbpos1'></div>\n
 		</td><td align='center' valign='top'>
 		<p style='background:#ABE278;font-size:10pt;text-align:left;'>Para agregar o quitar facturas haga doble click sobre las mismas</p>\n
-		<table width='100%' align='center'>
+		<table style='border-spacing: 0;border-collapse: collapse;width:100%' align='center'>
 			<tr>
-				<td bgcolor='#DFDFDF'>VEH&Iacute;CULO</td>
+				<td colspan='3' bgcolor='#DFDFDF'>VEH&Iacute;CULO</td>
 			</tr><tr>
-				<td style='font-size:10pt;font-weight:bold;'>".$reg['descrip'].' '.$reg['placa']."</td>
+				<td colspan='3' style='font-weight:bold;'>".$reg['descrip'].' '.$reg['placa']."</td>
+			</tr><tr style='font-size:1.2em;font-weight:bold'>
+				<td style='text-align:center;'><b >Peso Kg.</b></td>
+				<td style='text-align:center;background-color:#E3DCB2'><b>Vol&uacute;men.</b></td>
+				<td style='text-align:center;'><b>Paradas.</b></td>
 			</tr><tr>
-				<td bgcolor='#DFDFDF'>CAPACIDAD Kg.</td>
-			</tr><tr>
-				<td align='center' style='font-size:14pt;font-weight:bold;'>".str_replace(',00','',nformat($reg['capacidad']))."
-				<p id='sobrepeso' title='Sobrepeso' style='text-align:center;font-size:0.7em;color:${sobrecolo};margin:0px'>".str_replace(',00','',nformat($sobrepeso))."</p>
+				<td colspan='3' bgcolor='#DFDFDF'>CAPACIDAD DE VEH&Iacute;CULO</td>
+			</tr><tr style='font-size:1.6em'>
+				<td style='text-align: center;'>
+					${show_capacidad}<p id='sobrepeso' title='Sobrepeso' style='text-align:center;font-size:0.7em;color:${sobrecolo};margin:0px'>${show_sobrepeso}</p>
+				</td><td style='text-align: center;background-color:#E3DCB2'>
+					${show_volumen}  <p id='sobrevolu' title='Sobrevolumen' style='text-align:center;font-size:0.7em;color:${sobrecolv};margin:0px'>${show_sobrevolumen}</p>
+				</td><td style='text-align: center;'>
+					${cparadas} <p id='sobrepara' title='Sobrrparadas' style='text-align:center;font-size:0.7em;color:${sobrecolp};margin:0px'>${sobrepara}</p>
 				</td>
-			</tr>
-		</table>
-		<table width='100%' align='center'>
-			<tr>
-				<td bgcolor='#DFDFDF'>TOTAL SELECCI&Oacute;N</td>
 			</tr><tr>
-				<td align='center' style='font-size:14pt;font-weight:bold;'><span id='totpeso'>".str_replace(',00','',nformat($peso))."</span></td>
-			</tr>
-		</table>
-		<br><br>
-		<table width='100%' align='center'>
-			<tr>
-				<td bgcolor='#DFDFDF'>TOTAL FACT.</td>
+				<td colspan='3' bgcolor='#DFDFDF'>TOTAL SELECCI&Oacute;N</td>
+			</tr><tr style='font-size:1.7em'>
+				<td style='text-align: center;'>
+					<span id='totpeso'>".str_replace(',00','',nformat($peso))."</span>
+				</td><td style='text-align: center;background-color:#E3DCB2'>
+					<span id='totvolu'>".str_replace(',00','',nformat($volumen))."</span>
+				</td><td style='text-align: center;'>
+					<span id='totpara'>${paradas}</span>
+				</td>
 			</tr><tr>
-				<td align='center' style='font-size:14pt;font-weight:bold;'><span id='totcana'>".str_replace(',00','',nformat($cana))."</span></td>
+				<td colspan='3' bgcolor='#DFDFDF'>TOTAL FACT.</td>
+			</tr><tr>
+				<td colspan='2' ><button style='padding: .5em 1em;' title='Selecciona automaticamente las facturas hasta completar las capacidades' class='ui-state-default ui-corner-all ui-corner-bl' onclick='auto()'>Auto-Completar</button></td>
+				<td align='center' style='font-size:1.5em;font-weight:bold;'><span id='totcana'>".str_replace(',00','',nformat($cana))."</span></td>
 			</tr>
 		</table>
 		</td></tr>
@@ -666,7 +728,144 @@ class Reparto extends Controller {
 		);
 
 		echo json_encode($rt);
+	}
 
+
+	function autollenar($id){
+		$id=intval($id);
+		if($id>0){
+			$zona = $this->input->post('zona');
+			$vd   = $this->input->post('vd');
+
+			if($zona!==false || $vd!==false){
+				$this->_autollenar($id,$vd,$zona);
+
+				$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada FROM sfac WHERE reparto=${id}");
+				$peso    = floatval($row['peso']);
+				$paradas = floatval($row['parada']);
+				$cana    = floatval($row['cana']);
+
+				$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
+				FROM sfac   AS a
+				JOIN sitems AS b ON a.id=b.id_sfac
+				JOIN sinv   AS c ON b.codigoa=c.codigo
+				WHERE a.reparto=${id} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
+
+				$rt=array(
+					'mensaje' =>'Completado',
+					'peso'    =>$peso,
+					'cantidad'=>$cana,
+					'volumen' =>$volumen,
+					'paradas' =>$paradas,
+				);
+
+				echo json_encode($rt);
+			}
+		}
+	}
+
+	function _autollenar($id,$vd,$zona){
+		$dbreparto= intval($id);
+
+		$reg = $this->datasis->damereg("SELECT b.capacidad, b.volumen, b.paradas FROM reparto a JOIN flota b ON a.vehiculo=b.codigo WHERE a.id=${dbreparto}");
+		if(empty($reg)){
+			echo 'Reparto inexistente';
+			return false;
+		}
+
+		$cpeso    = floatval($reg['capacidad']);
+		$cvolumen = floatval($reg['volumen']);
+		$cparadas = floatval($reg['paradas']);
+
+		if($cpeso+$cvolumen+$cparadas==0){
+			echo 'No existen limites defindos en la unidad';
+			return false;
+		}
+
+		$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada FROM sfac WHERE reparto=${dbreparto}");
+		$peso    = floatval($row['peso']);
+		$paradas = floatval($row['parada']);
+		$cana    = floatval($row['cana']);
+		$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
+		FROM sfac   AS a
+		JOIN sitems AS b ON a.id=b.id_sfac
+		JOIN sinv   AS c ON b.codigoa=c.codigo
+		WHERE a.reparto=${dbreparto} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
+
+		$sel=array('a.cod_cli','SUM(b.cana*c.alto*c.ancho*c.largo) AS volumen','SUM(COALESCE(c.peso,0)*b.cana) peso','a.id');
+		$this->db->select($sel);
+		$this->db->from('sfac   AS a');
+		$this->db->join('sitems AS b','a.numero=b.numa AND a.tipo_doc=b.tipoa');
+		$this->db->join('sinv   AS c','b.codigoa=c.codigo');
+		$this->db->where('a.reparto',0);
+		$this->db->where('a.tipo_doc','F');
+		$this->db->orderby('a.fecha','desc');
+		$this->db->groupby('a.id');
+		if($cparadas>0) $this->db->limit($cparadas*10); else $this->db->limit(100);
+
+		if(!empty($vd)){   $this->db->where('a.vd'  ,$vd);   }
+		if(!empty($zona)){ $this->db->where('a.zona',$zona); }
+
+		$arr_not=array();
+		$query = $this->db->get();
+		if($query->num_rows() > 0){
+			foreach ($query->result() as $row){
+				$itid      = intval($row->id);
+				if(in_array($itid, $arr_not)){ continue; }
+
+				$dbcod_cli = $this->db->escape($row->cod_cli);
+				$canapar   = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfac WHERE reparto=${dbreparto} AND cod_cli=${dbcod_cli}"));
+				if($canapar<=0){
+					$itparadas=1;
+				}else{
+					$itparadas=0;
+				}
+				$peso    += floatval($row->peso);
+				$volumen += floatval($row->volumen);
+				$paradas += $itparadas;
+
+				if( (($cpeso>0)?$peso>$cpeso:false) || (($cvolumen>0)?$volumen>$cvolumen:false) || (($cparadas>0)?$paradas>$cparadas:false) ){
+					$peso    -= floatval($row->peso);
+					$volumen -= floatval($row->volumen);
+					$paradas -= $itparadas;
+				}else{
+					$mSQL="UPDATE sfac SET reparto=${dbreparto} WHERE tipo_doc='F' AND id=${itid}";
+					$ban = $this->db->simple_query($mSQL);
+
+					//Busca las del mismo cliente otras rutas
+					$this->db->select($sel);
+					$this->db->from('sfac   AS a');
+					$this->db->join('sitems AS b','a.numero=b.numa AND a.tipo_doc=b.tipoa');
+					$this->db->join('sinv   AS c','b.codigoa=c.codigo');
+					$this->db->where('a.reparto',0);
+					$this->db->where('a.tipo_doc','F');
+					$this->db->orderby('a.fecha','desc');
+					$this->db->groupby('a.id');
+					$this->db->where('a.cod_cli',$row->cod_cli);
+					if($cparadas>0) $this->db->limit($cparadas*10); else $this->db->limit(100);
+					$qquery = $this->db->get();
+					if($qquery->num_rows() > 0){
+						foreach ($qquery->result() as $rrow){
+							$iitid = intval($rrow->id);
+							$arr_not[]=$iitid;
+
+							$peso    += floatval($rrow->peso);
+							$volumen += floatval($rrow->volumen);
+
+							if( (($cpeso>0)?$peso>$cpeso:false) || (($cvolumen>0)?$volumen>$cvolumen:false) || (($cparadas>0)?$paradas>$cparadas:false) ){
+								$peso    -= floatval($row->peso);
+								$volumen -= floatval($row->volumen);
+							}else{
+								$mSQL="UPDATE sfac SET reparto=${dbreparto} WHERE tipo_doc='F' AND id=${iitid}";
+								$ban = $this->db->simple_query($mSQL);
+							}
+						}
+					}
+					//Fin de la busqueda del mismo cliente
+				}
+			}
+		}
+		return true;
 	}
 
 	//******************************************************************
@@ -1590,6 +1789,14 @@ class Reparto extends Controller {
 			$mSQL="ALTER TABLE `reparto`
 			ADD COLUMN `volumen` DECIMAL(10,2) NULL DEFAULT '0' AFTER `eliminadas`,
 			ADD COLUMN `paradas` INT(11) NULL DEFAULT '0' AFTER `volumen`";
+			$this->db->simple_query($mSQL);
+		}
+
+		$campos=$this->db->list_fields('flota');
+		if(!in_array('volumen',$campos)){
+			$mSQL="ALTER TABLE `flota`
+			ADD COLUMN `volumen` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Capacidad volumetrica' AFTER `capacidad`,
+			ADD COLUMN `paradas` INT NOT NULL DEFAULT '0.00' COMMENT 'Cantidad de paradas por reparto' AFTER `volumen`";
 			$this->db->simple_query($mSQL);
 		}
 	}

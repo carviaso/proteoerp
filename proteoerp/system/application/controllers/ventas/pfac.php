@@ -1487,6 +1487,9 @@ class Pfac extends Controller {
 			$do->set('status' , 'P');
 		}
 		$modoiva = $this->datasis->traevalor('MODOIVA');
+		$estampa = $do->get('estampa');
+		$usuario = $do->get('usuario');
+		$hora    = $do->get('hora');
 
 		$fecha = $do->get('fecha');
 		$vd    = $do->get('vd');
@@ -1511,13 +1514,17 @@ class Pfac extends Controller {
 		$iva = $totals = 0;
 		$cana = $do->count_rel('itpfac');
 		for($i = 0;$i < $cana;$i++){
-			$itcana  = $do->get_rel('itpfac', 'cana', $i);
-			$itpreca = $do->get_rel('itpfac', 'preca', $i);
-			$itiva   = $do->get_rel('itpfac', 'iva', $i);
+			$itcana  = floatval($do->get_rel('itpfac', 'cana' ,$i));
+			$itpreca = floatval($do->get_rel('itpfac', 'preca',$i));
+			$itiva   = floatval($do->get_rel('itpfac', 'iva'  ,$i));
+
 			$ittota  = $itpreca * $itcana;
-			$do->set_rel('itpfac', 'tota'    , $ittota, $i);
-			$do->set_rel('itpfac', 'fecha'   , $fecha , $i);
-			$do->set_rel('itpfac', 'vendedor', $vd , $i);
+			$do->set_rel('itpfac','tota'    ,$ittota ,$i);
+			$do->set_rel('itpfac','fecha'   ,$fecha  ,$i);
+			$do->set_rel('itpfac','vendedor',$vd     ,$i);
+			$do->set_rel('itpfac','usuario' ,$usuario,$i);
+			$do->set_rel('itpfac','estampa' ,$estampa,$i);
+			$do->set_rel('itpfac','hora'    ,$hora   ,$i);
 
 			$iva    += $ittota * ($itiva / 100);
 			$totals += $ittota;
@@ -1548,6 +1555,9 @@ class Pfac extends Controller {
 		$vd     = $do->get('vd');
 		$fenvia = $do->get('fenvia');
 		$faplica= $do->get('faplica');
+		$estampa= $do->get('estampa');
+		$usuario= $do->get('usuario');
+		$hora   = $do->get('hora');
 
 		$iva = $totals = 0;
 		$cana = $do->count_rel('itpfac');
@@ -1560,22 +1570,24 @@ class Pfac extends Controller {
 			if(($faplica < $fenvia)){
 				$itdxapli = $do->get_rel('itpfac', 'dxapli', $i);
 				$itprecat = $this->input->post("precat_$i");
-				if(!$itdxapli)
-				$itdxapli=' ';
+				if(!$itdxapli) $itdxapli=' ';
 
 				$itpreca  = $this->cal_dxapli($itprecat,$itdxapli);
 				if(1*$itpreca>0){
 					$do->set_rel('itpfac', 'preca'  , $itpreca, $i);
 					$do->set('faplica',date('Y-m-d'));
 				}else{
-					$error.="Error. El descuento por aplicar es incorrecto para el codigo $codigoa</br>";
+					$error.="Error. El descuento por aplicar es incorrecto para el codigo ${codigoa}</br>";
 				}
 			}
 
 			$ittota  = $itpreca * $itcana;
-			$do->set_rel('itpfac', 'tota'    , $ittota, $i);
-			$do->set_rel('itpfac', 'fecha'   , $fecha , $i);
-			$do->set_rel('itpfac', 'vendedor', $vd    , $i);
+			$do->set_rel('itpfac', 'tota'    ,$ittota ,$i);
+			$do->set_rel('itpfac', 'fecha'   ,$fecha  ,$i);
+			$do->set_rel('itpfac', 'vendedor',$vd     ,$i);
+			$do->set_rel('itpfac','usuario'  ,$usuario,$i);
+			$do->set_rel('itpfac','estampa'  ,$estampa,$i);
+			$do->set_rel('itpfac','hora'     ,$hora   ,$i);
 
 			$iva    += $ittota*$itiva/100;
 			$totals += $ittota;
@@ -1604,7 +1616,7 @@ class Pfac extends Controller {
 	}
 
 	function chcodigoa($codigo){
-		$cana=$this->datasis->dameval('SELECT COUNT(*) AS val FROM sinv WHERE activo=\'S\' AND MID(tipo,1,1)="A" AND codigo='.$this->db->escape($codigo));
+		$cana=intval($this->datasis->dameval('SELECT COUNT(*) AS val FROM sinv WHERE activo=\'S\' AND MID(tipo,1,1)="A" AND codigo='.$this->db->escape($codigo)));
 		if(empty($cana) || $cana==0){
 			$this->validation->set_message('chcodigoa', 'El campo %s contiene un codigo de producto no v&aacute;lido o inactivo');
 			return false;
@@ -1654,8 +1666,8 @@ class Pfac extends Controller {
 	function _post_update($do){
 		$cana = $do->count_rel('itpfac');
 		for($i=0;$i<$cana;$i++){
-			$itcodigo= $do->get_rel('itpfac', 'codigoa', $i);
-			$itcana  = $do->get_rel('itpfac', 'cana', $i);
+			$itcodigo= $do->get_rel('itpfac','codigoa',$i);
+			$itcana  = $do->get_rel('itpfac','cana'   ,$i);
 			$mSQL = "UPDATE sinv SET exdes=exdes+${itcana} WHERE codigo=".$this->db->escape($itcodigo);
 
 			$ban=$this->db->simple_query($mSQL);
