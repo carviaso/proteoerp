@@ -1509,6 +1509,11 @@ class Smov extends Controller {
 		$edit->codigo->style='width:200px;';
 		$edit->codigo->rule ='condi_required|callback_chobligatipo[NC]';
 
+		$edit->nroex = new inputField('Referencia Externa','nroex');
+		$edit->nroex->rule='max_length[15]';
+		$edit->nroex->size =15;
+		$edit->nroex->maxlength =15;
+
 		$edit->usuario = new autoUpdateField('usuario' ,$this->secu->usuario(),$this->secu->usuario());
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora'    ,date('H:i:s'), date('H:i:s'));
@@ -2967,6 +2972,10 @@ class Smov extends Controller {
 			$this->db->simple_query('ALTER TABLE `smov` ADD UNIQUE INDEX `unico` (`cod_cli`, `tipo_doc`, `numero`, `fecha`)');
 			$this->db->simple_query('ALTER TABLE `smov` ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		}
+
+		if(!in_array('nroex',$campos)) $this->db->simple_query('ALTER TABLE smov ADD COLUMN nroex CHAR(15) NULL AFTER ncredito');
+		
+
 
 		$itcampos=$this->db->list_fields('itccli');
 		if(!in_array('id',$itcampos)){

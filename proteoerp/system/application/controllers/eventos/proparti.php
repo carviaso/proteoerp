@@ -96,43 +96,25 @@ class Proparti extends Controller {
 	function email(){
 
 		$notifica  = "		
-Caracas, 14 de enero de 2015, Día de la Divina Pastora.
+Mérida Marcha eI 23 de enero
 
-A comienzos del 2014 el cambio político era necesario. Nosotros lo veíamos urgente. Y en razón de ello alertamos al país sobre un peligroso agravamiento de la crisis nacional si no se producía ese cambio político.
+El Congreso Ciudadano del estado Mérida convoca a todos los ciudadanos de Mérida a Marchar pacíficamente el 23 de enero.
 
-Junto con nuestro reclamo del cambio político llamamos al pueblo a manifestar, pacífica y democráticamente, dentro de los límites de la Constitución Nacional, en demanda del respeto a sus derechos y en rechazo del intento de consolidar un modelo político-económico empobrecedor, diseñado a contrapelo de nuestra tradición democrática, de nuestra Constitución, y de nuestro bienestar y el de las futuras generaciones.
+Los ciudadanos acompañaremos a nuestros estudiantes en este día emblemático y recorreremos las calles ratificando: Tenemos derecho a la comida, Tenemos derecho a la seguridad, Tenemos derecho a la salud, Tenemos derecho a defender nuestros derechos!!!
 
-La respuesta del pueblo fue formidable: una verdadera rebelión democrática, pacífica, y civilista sacudió al país por semanas, reclamando un cambio político urgente. La respuesta del gobierno fue de sordera y protagonizo la  represión más brutal y masiva  de nuestra historia ante el reclamo popular.
+Marchemos juntos este 23 de enero, como el pueblo digno que somos.
 
-Cuando el gobierno comprendió que la represión no acallaría la protesta, convocó a un falso diálogo, cuya verdadero objetivo, como bien lo  dijo, con su autoridad y sabiduría la Conferencia Episcopal, era “enfriar la calle”.
+Lugar de concentración: frente a FACES
+Hora: 10am
 
-2014 transcurrió completo sin un solo atisbo de rectificación ni de cambio por parte del régimen. Y en consecuencia, con un empeoramiento dramático de la situación general.
+#InvitaALosDemas
 
-Al hacer aquel llamado,  la dictadura quedó en evidencia frente al mundo y todos los venezolanos. Hoy Maduro no llega ni a 30% de respaldo popular, el 60% del pueblo exige su inmediata renuncia y 80% exige un cambio de gobierno.  Ese llamado, lo hicimos para evitar los inmensos costos humanos, sociales, económicos, políticos e institucionales que hemos pagado como país durante ese negativo 2014.
-
-Ahora, a comienzos del 2015, todos nuestros reclamos han sido más que refrendados por la realidad de una crisis agravada hasta extremos insoportables para el pueblo. La economía nacional esta quebrada. Las finanzas públicas han sido saqueadas. Las colas, la escasez, la inflación y la violencia son los signos más sobresalientes de una tensa situación social que reclama, con urgencia, salidas políticas dentro de la Constitución.
-
-A comienzos del 2014 el cambio político era urgente. A comienzos del 2015 es impostergable. Al liderazgo democrático corresponde la intransferible responsabilidad de articular una respuesta y encontrar una salida a la crisis, que hoy es sistémica, es decir total.
-
-Es claro para la mayoría del país, que Nicolás Maduro carece de claridad de ideas, del respaldo popular, de moral  y de la fuerza de voluntad para sacar al país del peligroso estado al que lo ha conducido. Su mejor contribución al país en este momento es apartarse para que la sociedad venezolana pueda iniciar un proceso de reconstrucción. Su mejor contribución sería la renuncia.
-
-Por eso, hacemos un llamado patriótico a todas las fuerzas democráticas a construir juntos, dentro del mayor espíritu de unidad nacional y actuando estrictamente apegados  a la Constitución Nacional, una alternativa que saque al país del rumbo de colapso en que la incompetencia, la corrupción y el dogmatismo ideológico de un fracasado modelo extranjero lo han colocado.
-
-Estamos a tiempo de hacerlo. El problema venezolano no es el petróleo a $40. Es la corrupción y la incompetencia del gobierno de Nicolás Maduro y la inviabilidad del modelo cubano que tratan de imponernos, contrariando la voluntad de los venezolanos.
-
-A todos nuestros compañero de la Unidad democrática, queremos decirles que vemos con mucho optimismo como, desde nuestras visiones distintas, hemos ido convergiendo en la reivindicación de la protesta pacífica y constitucional y en la movilización popular como mecanismo de presión frente a una dictadura que no le aportará nada a la sociedad democrática.
-
-Ha llegado la hora del cambio. El inmenso sufrimiento de nuestro pueblo no admite más dilaciones.
-
-Leopoldo López                          
-María Corina Machado                                
-Antonio Ledezma
-
+#LucharHastaVencer
 ";
 
 		set_time_limit(0); // I added unlimited time limit here, because the records I imported were in the hundreds of thousands.
 
-		$titulo = utf8_decode('Comunicado conjunto de LL, MCM y AL ');
+		$titulo = utf8_decode('Mérida Marcha eI 23 de enero');
 		$query = $this->db->query('SELECT * FROM test.correos '); 
 		//$query = $this->db->query('SELECT * FROM test.correos WHERE correo LIKE "marthay%" ');
 

@@ -341,7 +341,11 @@ echo $title;
 </table>
 <?php } ?>
 
-<?php echo $container_br.$container_bl;?>
+<table style="width:100%;border-collapse:collapse;padding:0px;bACKGROUND: #D7D7D7; "><tr>
+<td width='70%'><?php echo $container_br.$container_bl;?></td>
+	<td  ><b><?php echo $form->nroex->label; ?></b></td>
+	<td ><?php echo $form->nroex->output; ?></td>
+</tr></table>
 <table width='100%' id='aplpago'>
 	<tr id='__ITPL__sfpa'>
 		<td class="littletableheaderdet">Tipo<ds/td>
