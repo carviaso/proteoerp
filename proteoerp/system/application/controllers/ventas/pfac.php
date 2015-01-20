@@ -185,10 +185,10 @@ class Pfac extends Controller {
 			';
 
 		$bodyscript .= '
-		jQuery("#imprime").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+		$("#imprime").click( function(){
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 
 				if(ret.factura != null && ret.factura != false){
 					$.prompt("<h2>Qu&eacute; documento dese imprimir?</h2>",{
@@ -224,7 +224,7 @@ class Pfac extends Controller {
 
 		$bodyscript .= '
 		$("#fedita").dialog({
-			autoOpen: false, height: 500, width: 800, modal: true,
+			autoOpen: false, height: 550, width: 850, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -1297,7 +1297,7 @@ class Pfac extends Controller {
 		$edit->codigoa->rule = 'required|callback_chcodigoa';
 		//$edit->codigoa->onkeyup = 'OnEnter(event,<#i#>)';
 		if(!($faplica < $fenvia))
-		$edit->codigoa->append($btn);
+		//$edit->codigoa->append($btn);
 
 		$edit->desca = new inputField('Descripci&oacute;n <#o#>', 'desca_<#i#>');
 		$edit->desca->size = 32;

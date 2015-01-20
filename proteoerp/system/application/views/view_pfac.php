@@ -483,16 +483,16 @@ function autocod(id){
 		</td>
 	</tr><tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:195px'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:195px;width:620px;'>
 			<table width='100%'>
-				<tr id='__INPL__'>
-					<td bgcolor='#7098D0'><b>C&oacute;digo</b></td>
-					<td bgcolor='#7098D0'><b>Descripci&oacute;n</b></td>
-					<td bgcolor='#7098D0'><b>Cantidad</b></td>
-					<td bgcolor='#7098D0'><b>Precio</b></td>
-					<td bgcolor='#7098D0'><b>Importe</b></td>
+				<tr id='__INPL__' style='background:#7098D0;'>
+					<td style='width:90px;text-align:center;' ><b>C&oacute;digo</b></td>
+					<td ><b>Descripci&oacute;n</b></td>
+					<td style='width:45px;text-align:center;'><b>Cant.</b></td>
+					<td style='width:90px;text-align:center;'><b>Precio</b></td>
+					<td style='width:80px;text-align:center;'><b>Importe</b></td>
 					<?php if($form->_status!='show'  && !($faplica < $fenvia)) {?>
-						<td bgcolor='#7098D0' align='center'><a href='#' onclick="add_itpfac()" title='Agregar otro producto'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 18, 'alt'=>'Agregar otro producto', 'title' => 'Agregar otro producto', 'border'=>'0')); ?></a></td>
+						<td style='width:25px;' bgcolor='#7098D0' align='center'><a href='#' onclick="add_itpfac()" title='Agregar otro producto'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 18, 'alt'=>'Agregar otro producto', 'title' => 'Agregar otro producto', 'border'=>'0')); ?></a></td>
 					<?php } ?>
 				</tr>
 
