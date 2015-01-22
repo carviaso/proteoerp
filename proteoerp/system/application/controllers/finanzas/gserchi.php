@@ -1492,13 +1492,13 @@ class Gserchi extends Controller {
 		$edit->numfac = new inputField('Factura','numfac');
 		$edit->numfac->rule='max_length[8]|required';
 		$edit->numfac->size =12;
-		$edit->numfac->maxlength =8;
+		$edit->numfac->maxlength =20;
 		$edit->numfac->autocomplete =false;
 
 		$edit->nfiscal = new inputField('Control fiscal','nfiscal');
 		$edit->nfiscal->rule='max_length[12]|required';
 		$edit->nfiscal->size =14;
-		$edit->nfiscal->maxlength =12;
+		$edit->nfiscal->maxlength =20;
 		$edit->nfiscal->autocomplete =false;
 
 		//$lriffis='<a href="javascript:consulrif();" title="Consultar RIF en el SENIAT" onclick="">Consultar RIF en el SENIAT</a>';

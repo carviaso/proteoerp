@@ -92,7 +92,7 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 	$pdf->setGrupoLabel('Contribuyente sujeto a retención: <#nombre#>  R.I.F: <#rif#>');
 	$pdf->setGrupo('proveed');
 	$pdf->Table();
-	$//pdf->add_fila('','',$f_RESU[0],$f_RESU[1],$f_RESU[2],$f_RESU[3]);
+	//$pdf->add_fila('','',$f_RESU[0],$f_RESU[1],$f_RESU[2],$f_RESU[3]);
 	$pdf->Output();
 }else{
 	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
