@@ -109,13 +109,24 @@ $(function(){
 				ui.item.tipo=4;
 			}
 			$('#sclitipo').val(ui.item.tipo);
-
 			$('#direc').val(ui.item.direc);
 			$('#direc_val').text(ui.item.direc);
 
 			$('#vd').val(ui.item.vendedor);
 
 			$('#direc').val(ui.item.direc);
+
+			ihtml  = '<table style="width:100%;border-collapse:collapse;padding:0px;background:#EDEDFD">';
+			ihtml += '<tr><td>Grupo:<b>'+ui.item.grupo+   '</b></td></tr>';
+			ihtml += '<tr><td><b>'      +ui.item.observa+'</b></td></tr>';
+			ihtml += '<tr><td><b>'      +ui.item.contacto+    '</b></td></tr>';
+			ihtml += '</table>';
+
+
+			$('#informa').html(ihtml);
+
+
+
 
 			setTimeout(function() {  $("#cod_cli").removeAttr("readonly"); }, 1500);
 		}
@@ -483,8 +494,9 @@ function autocod(id){
 		</td>
 	</tr><tr>
 		<td>
+		<table width='100%' border='0'><tr><td style='width:622px;'>
 		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:195px;width:620px;'>
-			<table width='100%'>
+			<table style='width:100%;'>
 				<tr id='__INPL__' style='background:#7098D0;'>
 					<td style='width:90px;text-align:center;' ><b>C&oacute;digo</b></td>
 					<td ><b>Descripci&oacute;n</b></td>
@@ -552,6 +564,11 @@ function autocod(id){
 				</tr>
 			</table>
 		</div>
+		</td><td>
+		<div id='informa' style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:195px;width:100;'>
+		</div>
+		</td></tr></table>
+
 		<?php echo $container_bl ?>
 		</td>
 	</tr>

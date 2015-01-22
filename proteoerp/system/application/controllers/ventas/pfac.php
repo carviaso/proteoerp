@@ -957,7 +957,6 @@ class Pfac extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('preca');
 		$grid->label('Precio');
 		$grid->params(array(
@@ -971,7 +970,6 @@ class Pfac extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
-
 
 		$grid->addField('tota');
 		$grid->label('Total');
@@ -987,7 +985,6 @@ class Pfac extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('iva');
 		$grid->label('Tasa');
 		$grid->params(array(
@@ -1002,7 +999,6 @@ class Pfac extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
 		$grid->addField('fecha');
 		$grid->label('Fecha');
 		$grid->params(array(
@@ -1015,7 +1011,6 @@ class Pfac extends Controller {
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
 		));
-
 
 		$grid->addField('vendedor');
 		$grid->label('Vendedor');
@@ -1258,7 +1253,7 @@ class Pfac extends Controller {
 		$edit->cliente = new inputField('Cliente', 'cod_cli');
 		$edit->cliente->size = 6;
 		$edit->cliente->rule = 'required';
-		$edit->cliente->maxlength = 5;
+		$edit->cliente->maxlength = 25;
 		if(!($faplica < $fenvia)) $edit->cliente->append($boton);
 		$edit->cliente->autocomplete=false;
 

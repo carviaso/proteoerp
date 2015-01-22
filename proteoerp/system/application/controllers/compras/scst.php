@@ -1388,7 +1388,11 @@ class Scst extends Controller {
 
 		#show/hide navigations buttons
 		$grid->setAdd(    $this->datasis->sidapuede('SCST','INCLUIR%'));
-		$grid->setEdit(   $this->datasis->sidapuede('SCST','MODIFICA%'));
+
+		$mod = ($this->datasis->sidapuede('SCST','MODIFICA%') || $this->datasis->sidapuede('SCST','SCSTMODI%'));
+
+		$grid->setEdit( $mod ); //  $this->datasis->sidapuede('SCST','MODIFICA%'));
+
 		$grid->setDelete( $this->datasis->sidapuede('SCST','BORR_REG%'));
 		$grid->setSearch( $this->datasis->sidapuede('SCST','BUSQUEDA%'));
 

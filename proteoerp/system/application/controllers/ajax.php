@@ -205,7 +205,7 @@ class Ajax extends Controller {
 		$data = '[ ]';
 		if($mid !== false){
 			$retArray = $retorno = array();
-			$sel ='id,TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo, CONCAT(TRIM(dire11)," ",dire12) AS direc, CONCAT(TRIM(telefono)," ",telefon2) telefono, mmargen, ciudad1, estado, vendedor';
+			$sel ='id,TRIM(nombre) AS nombre, TRIM(rifci) AS rifci, cliente, tipo, CONCAT(TRIM(dire11)," ",dire12) AS direc, CONCAT(TRIM(telefono)," ",telefon2) telefono, mmargen, ciudad1, estado, vendedor, observa, grupo, contacto';
 
 			//Mira si existe el codigo
 			$mSQL="SELECT ${sel}
@@ -226,6 +226,9 @@ class Ajax extends Controller {
 				$retArray['ciudad']  = $this->en_utf8($row['ciudad1']);
 				$retArray['estado']  = $this->en_utf8($row['estado']);
 				$retArray['vendedor']= $row['vendedor'];
+				$retArray['observa'] = $row['observa'];
+				$retArray['contacto']= $row['contacto'];
+				$retArray['grupo']   = $row['grupo'];
 				$retArray['id']      = $row['id'];
 				array_push($retorno, $retArray);
 				$ww=" AND cliente<>${qmid}";
@@ -253,6 +256,9 @@ class Ajax extends Controller {
 					$retArray['ciudad']  = $this->en_utf8($row['ciudad1']);
 					$retArray['estado']  = $this->en_utf8($row['estado']);
 					$retArray['vendedor']= $row['vendedor'];
+					$retArray['observa'] = $row['observa'];
+					$retArray['contacto']= $row['contacto'];
+					$retArray['grupo']   = $row['grupo'];
 					$retArray['id']      = $row['id'];
 					array_push($retorno, $retArray);
 				}

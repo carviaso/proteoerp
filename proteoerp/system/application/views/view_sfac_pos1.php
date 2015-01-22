@@ -1001,7 +1001,6 @@ function autocod(id){
 			ihtml += '<tr><td align="right">EMPAQUE:</td><td><b>'  +ui.item.unidad+  '</b></td></tr>';
 			ihtml += '</table>';
 
-
 			$('#informa').html(ihtml);
 
 			setTimeout(function() {  $('#codigoa_'+id).removeAttr("readonly"); }, 1500);
@@ -1337,19 +1336,6 @@ function apldes(){
 			</tr>
 		</table>
 		<br>
-		<!--table style="width:100%;border-collapse:collapse;padding:0px;border: 1px outset #9AC8DA">
-			<tr>
-				<td class="littletableheader"><b><?php echo $form->almacen->label;  ?></b></td>
-				<td class="littletablerow"   ><?php echo $form->almacen->output; ?></td>
-			</tr><tr>
-				<td class="littletableheader"><?php echo $form->fecha->label;    ?></td>
-				<td class="littletablerow"   ><?php echo $form->fecha->output;   ?></td>
-			</tr>
-			<tr>
-				<td class="littletableheader"><?php echo $form->orden->label;    ?></td>
-				<td class="littletablerow"   ><?php echo $form->orden->output;   ?></td>
-			</tr>
-		</table-->
 		<div id='informa'></div>
 		</td>
 	</tr><tr>
