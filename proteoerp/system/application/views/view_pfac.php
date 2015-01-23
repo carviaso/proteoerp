@@ -121,12 +121,20 @@ $(function(){
 			ihtml += '<tr><td><b>'      +ui.item.observa+'</b></td></tr>';
 			ihtml += '<tr><td><b>'      +ui.item.contacto+    '</b></td></tr>';
 			ihtml += '</table>';
-
-
 			$('#informa').html(ihtml);
 
+			$.ajax({
+				url: "<?php echo site_url('ajax/ajaxsaldoscliven'); ?>",
+				dataType: 'json',
+				type: 'POST',
+				data: {'clipro' : ui.item.cod_cli},
+				success: function(data){
+					if(data>0){
+						$('#informa').append("Saldo: "+nformat(data,2));
 
-
+					}
+				},
+			});
 
 			setTimeout(function() {  $("#cod_cli").removeAttr("readonly"); }, 1500);
 		}
@@ -158,9 +166,7 @@ function cal_dxapli(nind){
 			imp=Math.round(imp*100)/100;
 			$("#preca_"+ind).val(data);
 			$("#tota_"+ind).val(imp);
-
 		}
-
 	})
 }
 
