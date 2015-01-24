@@ -965,11 +965,12 @@ class Banc extends Controller {
 	// Crea el proveedor
 	//
 	function bacsprv($do){
-		$rif    = $this->input->post('rif');
-		$tbanco = $do->get('tbanco');
+		$rif     = $this->input->post('rif');
+		$tbanco  = $do->get('tbanco');
+		$codbanc = $do->get('codbanc');
 		$do->rm_get('rif');
 		// Si es banco revisa si existe el Proveedor
-		if ( $tbanco <> 'CAJ' ){
+		if ( strpos($tbanco, 'CAJ/FON') == 0 ){
 			$tbrif = $this->datasis->dameval('SELECT rif FROM tban WHERE cod_banc="'.$tbanco.'"');
 			if ( empty($tbrif) ){
 				$this->db->query("UPDATE tban SET rif='".$rif."' WHERE cod_banc='".$tbanco."'");
@@ -1010,6 +1011,27 @@ class Banc extends Controller {
 			$do->set('codprv',$codprv);
 		} else {
 			$do->set('rif', '');
+			if ( $tbanco == 'FON'){
+				$data = array();
+				$data['proveed']  = $codbanc;
+				$data['rif']      = '';
+
+				$data['nombre']   = $do->get('banco');
+				$data['nomfis']   = $do->get('banco');
+				$data['contacto'] = $do->get('nombre');
+				$data['direc1']   = $do->get('dire1');
+				$data['direc2']   = $do->get('dire2');
+				$data['telefono'] = $do->get('telefono');
+
+				$data['grupo']    = $grpr;
+				$data['prefpago'] = 'T';
+				$data['reteiva']  = 0.00;
+				$data['tipo']     = '5';
+				$data['tiva']     = 'N';
+
+				$this->db->insert('sprv',$data);
+
+			}
 
 		}
 		return true;

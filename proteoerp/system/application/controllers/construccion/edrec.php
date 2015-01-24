@@ -1286,6 +1286,9 @@ class Edrec extends Controller {
 					}
 				}
 			}
+			$mSQL = 'UPDATE edrec a SET a.cuota = (SELECT SUM(b.cuota) FROM editrec b WHERE a.numero = b.numero)';
+			$this->db->query($mSQL);
+
 			echo "Si se Guardaron";
 		}
 	}
