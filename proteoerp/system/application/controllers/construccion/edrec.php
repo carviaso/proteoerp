@@ -1309,7 +1309,7 @@ class Edrec extends Controller {
 			SELECT 
 				a.cod_cli, b.nombre, 'ND' tipo_doc, CONCAT('RC',MID(a.numero,3,6)) numero,
 				a.fecha, a.cuota monto, 0 impuesto, 0 abonos, a.vence, 'RC' tipo_ref, 
-				a.numero num_ref, 'RECIBO DE CONDOMINIO ${dbanomes}' observa1, a.id,
+				a.numero num_ref, 'RECIBO DE CONDOMINIO ${anomes}' observa1, a.id,
 				CONCAT('CORRESPONDIENTE AL MES ',MID(a.anomes,5,2),'-',MID(a.anomes,1,4)) observa2,
 				a.usuario,a.estampa, a.hora,a.transac, 'NOCON' codigo, 0 montasa, 0 monredu, 
 				0 monadic, 0 tasa, 0 reducida, 0 sobretasa, 0 exento

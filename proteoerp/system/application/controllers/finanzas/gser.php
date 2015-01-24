@@ -2874,16 +2874,12 @@ class gser extends Controller {
 
 		$mSPRV=array(
 			'tabla'   =>'sprv',
-			'columnas'=>array(
-				'proveed' =>'Coodigo',
-				'nombre'=>'Nombre',
-				'rif'=>'Rif'
-			),
-			'filtro'  => array('proveed'=>'Codigo','nombre'=>'Nombre'),
-			'retornar'=> array('proveed'=>'proveed','nombre'=>'nombre','tipo'=>'sprvtipo','reteiva'=>'sprvreteiva'),
+			'columnas'=> array('proveed' =>'Coodigo', 'nombre'=>'Nombre', 'rif'=>'Rif'),
+			'filtro'  => array('proveed' =>'Codigo',  'nombre'=>'Nombre'),
+			'retornar'=> array('proveed' =>'proveed', 'nombre'=>'nombre','tipo'=>'sprvtipo','reteiva'=>'sprvreteiva'),
 			'script'  => array('post_sprv_modbus()'),
-			'titulo'  =>'Buscar Proveedor');
-		$bSPRV=$this->datasis->modbus($mSPRV);
+			'titulo'  => 'Buscar Proveedor');
+		$bSPRV = $this->datasis->modbus($mSPRV);
 
 		$do = new DataObject('gser');
 		$do->pointer('sprv' ,'sprv.proveed=gser.proveed','sprv.tipo AS sprvtipo, sprv.reteiva AS sprvreteiva','left');
@@ -2900,9 +2896,6 @@ class gser extends Controller {
 		}
 
 		$edit->set_rel_title('gitser','Gasto <#o#>');
-
-		//$edit->script($script,'create');
-		//$edit->script($script,'modify');
 
 		$edit->pre_process( 'insert','_pre_insert' );
 		$edit->pre_process( 'update','_pre_update' );
@@ -2926,7 +2919,6 @@ class gser extends Controller {
 		$edit->ffactura->size = 12;
 		$edit->ffactura->rule = 'required';
 		$edit->ffactura->calendar = false;
-		//$edit->ffactura->insertValue = date("Y-m-d");
 
 		$edit->fecha = new DateonlyField('Registro', 'fecha');
 		$edit->fecha->insertValue = date('Y-m-d');
@@ -2937,7 +2929,6 @@ class gser extends Controller {
 		$edit->vence = new DateonlyField('Vence', 'vence','d/m/Y');
 		$edit->vence->insertValue = date('Y-m-d');
 		$edit->vence->size = 12;
-		//$edit->vence->insertValue = date("Y-m-d");
 		$edit->vence->calendar = false;
 
 		$edit->compra = new inputField('Doc.Asociado','compra');
@@ -3073,6 +3064,9 @@ class gser extends Controller {
 		$edit->reteiva->autocomplete=false;
 		//$edit->reteiva->onkeyup="reteiva()";
 
+		$edit->checkbox = new checkboxField("C.N.D.", "cnd", "S","N");   
+		$edit->-checkbox->insertValue = "y";  
+		
 		$edit->reteica = new inputField('Ret. ICA','reteica');
 		$edit->reteica->size = 10;
 		$edit->reteica->maxlength=10;
@@ -3093,9 +3087,9 @@ class gser extends Controller {
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 
-		//***************************
-		//Campos para el detalle 1
-		//***************************
+		//**************************************************************
+		//   Campos para el detalle 1
+		//
 		$edit->codigo = new inputField('Codigo <#o#>', 'codigo_<#i#>');
 		$edit->codigo->size=7;
 		$edit->codigo->db_name='codigo';
@@ -3168,13 +3162,12 @@ class gser extends Controller {
 
 		$edit->sucursal->rel_id   ='gitser';
 		$edit->sucursal->onchange="gsucursal(this.value)";
-		//*****************************
-		//Fin de campos para detalle
-		//*****************************
+		//================= Fin de campos para detalle =================
+	
 
-		//*****************************
-		//Campos para el detalle reten
-		//****************************
+		//**************************************************************
+		//   Campos para el detalle reten
+		//
 		$edit->itorigen = new autoUpdateField('origen','GSER','GSER');
 		$edit->itorigen->rel_id ='gereten';
 
@@ -4302,13 +4295,13 @@ class gser extends Controller {
 	}
 
 	function instalar(){
-
 		$campos=$this->db->list_fields('gser');
 		if(!in_array('reteica',   $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN reteica    DECIMAL(12,2) NULL DEFAULT NULL");
 		if(!in_array('retesimple',$campos)) $this->db->query("ALTER TABLE gser ADD COLUMN retesimple DECIMAL(12,2) NULL DEFAULT NULL");
-		if(!in_array('negreso',   $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN negreso  CHAR(8)    NULL DEFAULT NULL");
-		if(!in_array('ncausado',  $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN ncausado VARCHAR(8) NULL DEFAULT NULL");
-		if(!in_array('fondo',     $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN fondo    CHAR(2)    NULL DEFAULT NULL");
+		if(!in_array('negreso',   $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN negreso    CHAR(8)    NULL DEFAULT NULL");
+		if(!in_array('ncausado',  $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN ncausado   VARCHAR(8) NULL DEFAULT NULL");
+		if(!in_array('fondo',     $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN fondo      CHAR(2)    NULL DEFAULT NULL");
+		if(!in_array('cnd',       $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN cnd        CHAR(1)    NULL DEFAULT NULL COMMENT 'Credito no deducible'");
 
 		if(!in_array('id',$campos)){
 			$query="ALTER TABLE `gser` DROP PRIMARY KEY";
@@ -4330,7 +4323,7 @@ class gser extends Controller {
 		}
 
 		if(!in_array('idgser',$itcampos)){
-			$query="ALTER TABLE `gitser` ADD COLUMN `idgser` INT(15) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`, ADD INDEX `idgser` (`idgser`)";
+			$query="ALTER TABLE gitser ADD COLUMN idgser INT(15) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`, ADD INDEX `idgser` (`idgser`)";
 			$this->db->query($query);
 		}
 
@@ -4397,16 +4390,17 @@ class gser extends Controller {
 		}
 
 		$gcampos=$this->db->list_fields('gserchi');
-		if(!in_array('ngasto',  $gcampos)) $this->db->query("ALTER TABLE `gserchi` ADD COLUMN `ngasto` VARCHAR(8) NULL DEFAULT NULL AFTER `departa`");
-		if(!in_array('aceptado',$gcampos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN aceptado CHAR(1) NULL DEFAULT NULL");
+		if(!in_array('ngasto',  $gcampos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN ngasto   VARCHAR(8) NULL DEFAULT NULL AFTER departa");
+		if(!in_array('aceptado',$gcampos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN aceptado CHAR(1)    NULL DEFAULT NULL AFTER ngasto");
+		if(!in_array('cnd',     $gcampos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN cnd      CHAR(1)    NULL DEFAULT NULL AFTER aceptado COMMENT 'Credito no deducible'");
 
 		if (!$this->db->table_exists('rica')) {
-			$query="CREATE TABLE `rica` (
-				`codigo` CHAR(5)    NOT  NULL,
-				`activi` CHAR(14)   NULL DEFAULT NULL,
-				`aplica` CHAR(100)  NULL DEFAULT NULL,
-				`tasa` DECIMAL(8,2) NULL DEFAULT NULL,
-				PRIMARY KEY (`codigo`)
+			$query="CREATE TABLE rica (
+				codigo CHAR(5)      NOT  NULL,
+				activi CHAR(14)     NULL DEFAULT NULL,
+				aplica CHAR(100)    NULL DEFAULT NULL,
+				tasa   DECIMAL(8,2) NULL DEFAULT NULL,
+				PRIMARY KEY (codigo)
 				) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->query($query);
 		}
