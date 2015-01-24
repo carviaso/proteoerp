@@ -2034,7 +2034,7 @@ class Smov extends Controller {
 				$dbdata['exento']     = $this->ppagodata['exento'   ];
 
 				$mSQL = $this->db->insert_string('smov', $dbdata);
-				$ban=$this->db->simple_query($mSQL);
+				$ban  = $this->db->simple_query($mSQL);
 				if($ban==false){ memowrite($mSQL,'ccli'); }
 
 				$itdbdata=array();
@@ -2051,6 +2051,7 @@ class Smov extends Controller {
 				$itdbdata['mora']     = 0;
 
 				unset($dbdata);
+		
 			}
 
 			foreach($do->data_rel[$rel_id] AS $i=>$data){
@@ -2075,7 +2076,6 @@ class Smov extends Controller {
 					$ban=$this->db->simple_query($mSQL);
 					if($ban==false){ memowrite($mSQL,'ccli'); }
 				}
-
 				if($ppago > 0){
 					$itdbdata['tipo_doc'] = $tipo_doc;
 					$itdbdata['numero']   = $numero;
@@ -2087,6 +2087,20 @@ class Smov extends Controller {
 					$ban=$this->db->simple_query($mSQL);
 					if($ban==false){ memowrite($mSQL,'ccli'); }
 				}
+				
+				// VER SI EXISTE EN EDREC
+				if( $tipo_doc=='ND' && substr($numero,0,1) == 'R' ){
+					$an = $this->datasis->dameval('SELECT numero FROM edrec WHERE numero='.$dbnumero);
+					if ( $an > 0 ){
+						//Crea la ND cxp y en bmov una ND
+						
+						
+						
+					}
+				} 
+				
+				
+
 			}
 		}
 
@@ -2136,6 +2150,10 @@ class Smov extends Controller {
 				$this->datasis->actusal($codbanc, $sfecha, $monto);
 			}
 		}
+
+		// Inmobiliaria
+		
+
 		logusu('smov',"Cobro a cliente ${ttipo_doc}${numero} creado");
 	}
 

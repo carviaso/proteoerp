@@ -970,7 +970,7 @@ class Banc extends Controller {
 		$codbanc = $do->get('codbanc');
 		$do->rm_get('rif');
 		// Si es banco revisa si existe el Proveedor
-		if ( strpos($tbanco, 'CAJ/FON') == 0 ){
+		if ( strpos($tbanco, 'CAJ/FO') == 0 ){
 			$tbrif = $this->datasis->dameval('SELECT rif FROM tban WHERE cod_banc="'.$tbanco.'"');
 			if ( empty($tbrif) ){
 				$this->db->query("UPDATE tban SET rif='".$rif."' WHERE cod_banc='".$tbanco."'");
@@ -1011,7 +1011,7 @@ class Banc extends Controller {
 			$do->set('codprv',$codprv);
 		} else {
 			$do->set('rif', '');
-			if ( $tbanco == 'FON'){
+			if ( $tbanco == 'FO'){
 				$data = array();
 				$data['proveed']  = $codbanc;
 				$data['rif']      = '';
