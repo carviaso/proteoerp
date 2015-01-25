@@ -2087,20 +2087,94 @@ class Smov extends Controller {
 					$ban=$this->db->simple_query($mSQL);
 					if($ban==false){ memowrite($mSQL,'ccli'); }
 				}
-				
+				//echo 'Numero: '.$numero.' Tipo: '.$tipo_doc;
 				// VER SI EXISTE EN EDREC
 				if( $tipo_doc=='ND' && substr($numero,0,1) == 'R' ){
-					$an = $this->datasis->dameval('SELECT numero FROM edrec WHERE numero='.$dbnumero);
+					$numref = $this->datasis->dameval('SELECT num_ref FROM smov WHERE tipo_doc="ND" AND numero='.$dbnumero);
+					$an = $this->datasis->dameval('SELECT COUNT(*) FROM edrec WHERE numero='.$this->db->escape($numref));
 					if ( $an > 0 ){
-						//Crea la ND cxp y en bmov una ND
-						
-						
-						
-					}
-				} 
-				
-				
+						$mSQL = "SELECT * FROM editrec WHERE tipo='FO' AND numero=".$this->db->escape($numref);
+						$editr = $this->db->query($mSQL);
+						if ($editr->num_rows() > 0){
+							foreach( $editr->result() as  $row ) {
+								$dbcodbanc = $this->db->escape($row->codigo);
+								$prove     = $this->datasis->damereg("SELECT * FROM sprv WHERE proveed=".$dbcodbanc);
+								//Crea la NC al fondo
+								$mnsprm  = $this->datasis->fprox_numero('num_nd');
+								$control = $this->datasis->fprox_numero('nsprm');
+								$data=array();
+								$data['cod_prv']    = $prove['proveed'];
+								$data['nombre']     = $prove['nombre'];
+								$data['tipo_doc']   = 'ND';
+								$data['numero']     = $mnsprm;
+								$data['fecha']      = $do->get('fecha');
+								$data['monto']      = $row->cuota;
+								$data['impuesto']   = 0;
+								$data['abonos']     = 0;
+								$data['vence']      = $do->get('fecha');
+								$data['tipo_ref']   = 'AB';
+								$data['num_ref']    = $do->get('numero');
+								$data['observa1']   = 'PREVISION';
+								$data['observa2']   = '';
+								$data['estampa']    = $do->get('estampa');
+								$data['hora']       = $do->get('hora');
+								$data['transac']    = $do->get('transac');
+								$data['usuario']    = $do->get('usuario');
+								$data['reteiva']    = 0;
+								$data['montasa']    = 0;
+								$data['monredu']    = 0;
+								$data['monadic']    = 0;
+								$data['tasa']       = 0;
+								$data['reducida']   = 0;
+								$data['sobretasa']  = 0;
+								$data['exento']     = 0;
+								$data['control']    = $control;
+								$data['codigo']     = 'NOCON';
+								$data['descrip']    = 'NOTA DE CONTABILIDAD';
+								$sql=$this->db->insert_string('sprm', $data);
+								$ban=$this->db->simple_query($sql);
+								if($ban==false){ memowrite($sql,'smov_edrec');}
+								
+								// Crea la NC en Bancos
+								$mSQL ='SELECT tbanco,moneda,banco,saldo,depto,numcuent FROM banc WHERE codbanc='.$dbcodbanc;
+								$fila=$this->datasis->damerow($mSQL);
 
+								$data=array();
+								$data['codbanc']  = $prove['proveed'];
+								$data['moneda']   = $fila['moneda'];
+								$data['numcuent'] = $fila['numcuent'];
+								$data['banco']    = $fila['banco'];
+								$data['saldo']    = $fila['saldo']+$row->cuota;
+								$data['tipo_op']  = 'NC';
+								$data['numero']   = str_pad($numref, 12,'0', STR_PAD_LEFT);
+								$data['fecha']    = $fecha;
+								$data['clipro']   = 'P';
+								$data['codcp']    = $prove['proveed'];
+								$data['nombre']   = $prove['nombre'];
+								$data['monto']    = $row->cuota;
+								$data['bruto']    = $row->cuota;
+								$data['concepto'] = 'INGRESO POR COBRANZA';
+								$data['concep2']  = 'REPOSICION';
+								$data['status']   = 'P';
+								$data['liable']   = 'S';
+								$data['estampa']  = $do->get('estampa');
+								$data['hora']     = $do->get('hora');
+								$data['transac']  = $do->get('transac');
+								$data['usuario']  = $do->get('usuario');
+
+								//$data['negreso']  = $ningreso;
+								$data['anulado']  = 'N';
+								$mSQL = $this->db->insert_string('bmov', $data);
+								$ban=$this->db->simple_query($mSQL);
+								if($ban==false){ memowrite($mSQL,'smov_edrc'); }
+
+								$sfecha=str_replace('-','',$ffecha);
+								$this->datasis->actusal($prove['proveed'], $fecha, $row->cuota);
+
+							}
+						}
+					} 
+				}
 			}
 		}
 
