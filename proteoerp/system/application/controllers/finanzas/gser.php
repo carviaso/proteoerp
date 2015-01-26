@@ -3065,7 +3065,7 @@ class gser extends Controller {
 		//$edit->reteiva->onkeyup="reteiva()";
 
 		$edit->checkbox = new checkboxField("C.N.D.", "cnd", "S","N");   
-		$edit->-checkbox->insertValue = "y";  
+		$edit->checkbox->insertValue = "y";  
 		
 		$edit->reteica = new inputField('Ret. ICA','reteica');
 		$edit->reteica->size = 10;
