@@ -4392,7 +4392,7 @@ class gser extends Controller {
 		$gcampos=$this->db->list_fields('gserchi');
 		if(!in_array('ngasto',  $gcampos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN ngasto   VARCHAR(8) NULL DEFAULT NULL AFTER departa");
 		if(!in_array('aceptado',$gcampos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN aceptado CHAR(1)    NULL DEFAULT NULL AFTER ngasto");
-		if(!in_array('cnd',     $gcampos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN cnd      CHAR(1)    NULL DEFAULT NULL AFTER aceptado COMMENT 'Credito no deducible'");
+		if(!in_array('cnd',     $gcampos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN cnd      CHAR(1)    NULL DEFAULT NULL AFTER aceptado");
 
 		if (!$this->db->table_exists('rica')) {
 			$query="CREATE TABLE rica (
