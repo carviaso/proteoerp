@@ -2093,6 +2093,8 @@ class Smov extends Controller {
 					$numref = $this->datasis->dameval('SELECT num_ref FROM smov WHERE tipo_doc="ND" AND numero='.$dbnumero);
 					$an = $this->datasis->dameval('SELECT COUNT(*) FROM edrec WHERE numero='.$this->db->escape($numref));
 					if ( $an > 0 ){
+						$anomes = $this->datasis->dameval('SELECT anomes FROM edrec WHERE numero='.$this->db->escape($numref));
+
 						$mSQL = "SELECT * FROM editrec WHERE tipo='FO' AND numero=".$this->db->escape($numref);
 						$editr = $this->db->query($mSQL);
 						if ($editr->num_rows() > 0){
@@ -2114,7 +2116,7 @@ class Smov extends Controller {
 								$data['vence']      = $do->get('fecha');
 								$data['tipo_ref']   = 'AB';
 								$data['num_ref']    = $do->get('numero');
-								$data['observa1']   = 'PREVISION';
+								$data['observa1']   = 'FONDO RESERVA MES '.substr($anomes,4,2).' DEL '.substr($anomes,0,4);
 								$data['observa2']   = '';
 								$data['estampa']    = $do->get('estampa');
 								$data['hora']       = $do->get('hora');
@@ -2153,8 +2155,8 @@ class Smov extends Controller {
 								$data['nombre']   = $prove['nombre'];
 								$data['monto']    = $row->cuota;
 								$data['bruto']    = $row->cuota;
-								$data['concepto'] = 'INGRESO POR COBRANZA';
-								$data['concep2']  = 'REPOSICION';
+								$data['concepto'] = 'FONDO RESERVA MES '.substr($anomes,4,2).' DEL '.substr($anomes,0,4);
+								$data['concep2']  = '';
 								$data['status']   = 'P';
 								$data['liable']   = 'S';
 								$data['estampa']  = $do->get('estampa');
