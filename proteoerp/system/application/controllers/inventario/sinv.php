@@ -705,7 +705,7 @@ class Sinv extends Controller {
 				$("#fborra").html("");
 				$("#fedita").html(data);
 				$("#fedita").dialog({
-					autoOpen: false, height: 450, width: 700, modal: true,
+					autoOpen: false, height: 460, width: 700, modal: true,
 					buttons: {
 						"Guardar y Cerrar": function(){
 							var murl = $("#df1").attr("action");
@@ -788,7 +788,7 @@ class Sinv extends Controller {
 				$.post("'.site_url('inventario/sinv/dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog({
-						autoOpen: false, height: 450, width: 700, modal: true,
+						autoOpen: false, height: 460, width: 700, modal: true,
 						buttons: {
 							"Guardar": function(){
 								var murl = $("#df1").attr("action");
@@ -3201,6 +3201,13 @@ class Sinv extends Controller {
 		$edit->bonifica->maxlength=12;
 		$edit->bonifica->css_class='inputonlynum';
 		$edit->bonifica->rule='numeric|callback_positivo|trim';
+
+		$edit->sada = new dropdownField('Rubro SADA', 'sada');
+		$edit->sada->style='width:110px;';
+		$edit->sada->option('','Seleccionar');
+		$edit->sada->options('SELECT id,descrip FROM sadacod ORDER BY descrip');
+		$edit->sada->style='width:400px;';
+
 
 		if($this->datasis->traevalor('SUNDECOP') == 'S'){
 			$edit->mpps = new inputField('MPPS','mpps');
@@ -6214,6 +6221,8 @@ class Sinv extends Controller {
 		if (!in_array('linfe'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `linfe`       CHAR(1)       NULL DEFAULT 'N' ");
 		if (!in_array('lindia'     ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `lindia`      INT(5)        NULL DEFAULT '0'");
 		if (!in_array('margenu'    ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `margenu`     DECIMAL(10,2) NULL DEFAULT '0'");
+		if (!in_array('sada'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `sada`        INT(11)       NULL DEFAULT NULL");
+
 
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
 			if (!in_array('dcomercial', $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `dcomercial`  INT(6)     NULL  COMMENT 'Destino Comercial'");
@@ -6411,5 +6420,151 @@ class Sinv extends Controller {
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM";
 		}
+
+		if(!$this->db->table_exists('sadacod')){
+			$mSQL="CREATE TABLE `sadacod` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`codigo` VARCHAR(50) NOT NULL DEFAULT '0',
+				`descrip` VARCHAR(100) NOT NULL DEFAULT '0',
+				PRIMARY KEY (`id`)
+			)
+			COMMENT='Codigos Sada'
+			ENGINE=MyISAM
+			AUTO_INCREMENT=1";
+			$this->db->simple_query($mSQL);
+
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('500','ABAAlimentosparapeces')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('188','ABAAnimalesDomésticos')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('185','ABAAves')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('186','ABABovinos')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('187','ABACerdos')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('65','ABAMateriaPrima(AlimentosBalanceadosparaAnimales)')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('488','Aceite18LtsIndustrial')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('244','AceiteCrudodeSoya')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('257','AceiteNoRegulado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('256','AceiteRegulado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('281','AceiteUsoIndustrial')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('347','AfrechilloConsumoHumano')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('346','AfrechoyAfrechilloConsumoAnimal')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('108','Afrechoyafrechilloparaconsumohumano')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('200','ArrozBlancoPresentaciónNoRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('201','ArrozBlancoPresentaciónRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('120','ArrozdeSegunda')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('264','ArrozdeTercera')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('123','Arvejas')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('235','AtúnCongelado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('314','AtúnEnlatadoPresentaciónRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('318','AtúnEntero')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('51' ,'Avena')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('303','AvenaDespuntada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('437','AvenaenGranos')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('374','AvenaLiquida')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('325','AzúcarDomestica')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('350','AzúcaresyDerivados')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('326','AzúcarIndustrial')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('399','BacalaoSeco')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('260','Cacaoengranos')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('261','Cacaoenpolvo')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('19' ,'CafeMolido')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('358','CaféMolidoPresentaciónNoRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('357','CaféMolidoPresentaciónRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('299','CafeTostadoenGrano')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('46' ,'CaraotaNegra')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('49' ,'CaraotaRoja')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('48' ,'CaraotaRosada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('47' ,'CaraotasBlanca')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('231','CarnedeAves-pavopatocodornizavestruzentreotras-')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('220','CarnedeBovinoDespostado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('218','CarnedeBovinoenCanal')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('84' ,'CarnedePorcinodespostada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('82' ,'CarnedePorcinoenCanal')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('56' ,'Cebada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('195','Cebolla')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('296','Ciruelas')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('401','DoradoEntero')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('250','Duraznos')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('109','Embutidos')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('407','FiletdeMero')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('404','FiletesdeDorado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('403','FiletesdeMerluza')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('402','FiletesdeSalmon')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('45' ,'Frijol')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('146','Garbanzos')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('297','Girasol-Acondicionado(TM)')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('240','GrasaAmarilla')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('282','GrasaUsoIndustrial')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('352','HarinadeArroz')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('204','HarinadeMaizPrecocidaNoRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('203','HarinadeMaizPrecocidaRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('217','HarinadeSoya-TortadeSoya-')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('221','HarinadeTrigoFamiliar')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('290','HarinadeTrigoGalletera')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('20' ,'HarinadeTrigoparaPanaderiayPastelería')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('22' ,'HuevosdeConsumo')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('43' ,'Jurel(Enlatado)')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('354','JurelFresco')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('268','Kiwi')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('178','LecheCruda')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('476','LecheenPolvoCompleta-UsoIndustrialMP')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('233','LecheenPolvoDescremada-UsoDomestico')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('478','LecheenPolvoDescremada-UsoIndustrialMP')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('360','LecheLiquidaPasteurizadaNoRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('359','LecheLiquidaPasteurizadaRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('238','LecheLiquidaUHT')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('38' ,'Lentejas')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('262','LicordeCacao')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('453','LomodeAtún')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('40' ,'MaizAmarillo-Acondicionado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('436','MaizAmarillo-ConsumoHumano')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('42' ,'MaizBlanco-Acondicionado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('198','MaizGXMBlancoABAAcondicionado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('263','MantecadeCacao')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('32' ,'MantecaVegetal')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('308','Margarina-ConsumoDoméstico-')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('309','Margarina-ConsumoIndustrial-')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('311','Mayonesa')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('310','MayonesaPresentaciónRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('75' ,'Melaza')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('400','MerluzaEntera')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('365','OleinadePalma')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('193','Papa')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('118','PastadeEspecialidades')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('249','PastadeTomate-MateriaPrima')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('305','PastadeTomate-ProdTerminado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('313','PastasAlimenticiasNoReguladas')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('312','PastasAlimenticiasReguladas')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('362','PastasUsoIndustrial')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('196','Pernil-Cerdo')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('266','Pescadocongelado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('341','PescadoSalado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('342','PescadoVarios')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('29' ,'PolloBeneficiadoEntero')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('441','PolloDespresado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('321','QuesosPresentaciónNoRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('320','QuesosPresentaciónRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('348','Quinchoncho')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('458','Quinchoncho')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('553','SalCruda')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('398','SalmonAhumado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('397','SalmonEntero')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('30' ,'SalRefinada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('307','SalsadeTomate-Ketchup-')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('306','SalsadeTomatePresentaciónRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('317','SardinaEnlatadaPresentaciónNoRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('316','SardinaEnlatadaPresentaciónRegulada')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('334','SardinaFresca')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('70' ,'SemilladeArrozHumedo')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('286','SemilladeGirasol-Acondicionado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('223','SemilladeMaízAmarilloAcondicionado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('224','SemilladeMaízBlancoAcondicionado')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('72' ,'SemoladeTrigo')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('50' ,'SorgoAcondicionado(TM)')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('60' ,'SoyaAcondicionada(FrijoldeSoya)(TM)')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('197','TomateFresco')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('41' ,'TrigoDurum')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('174','TrigoparaGalletas')");
+		}
+
+
 	}
 }

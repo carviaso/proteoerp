@@ -564,8 +564,18 @@ class Scli extends validaciones {
 				},
 				error: function(h,t,e) {alert("Error..","Finalizado con Error" )}
 			});
-		};
-		';
+		};';
+
+		// Fusionar Cliente
+		$funciones .= '
+		function mapa(){
+			var id = jQuery("#newapi'.$grid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				window.open("'.site_url('ventas/scli/mapa').'/"+id, "mapa", "directories=no, location=no, menubar=no, scrollbars=yes, statusbar=no, tittlebar=no, width=605, height=610");
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Cliente</h1>");
+			}
+		};';
 
 		// Memo del cliente
 		$funciones .= '
@@ -3673,6 +3683,121 @@ function chrif(rif){
 		}
 	}
 
+	function ajaxcoor($id){
+		$id  = intval($id);
+		$lat = floatval($this->input->post('lat'));
+		$lon = floatval($this->input->post('lon'));
+
+		if($id > 0){
+			$data = array(
+				'latitud' =>$lat,
+				'longitud'=>$lon,
+			);
+			$this->db->where('id', $id);
+			$this->db->update('scli', $data);
+
+			echo 1;
+		}else{
+			echo 0;
+		}
+
+	}
+
+	function mapa($id){
+		$dbid= intval($id);
+		$sql = "SELECT nombre,dire11,latitud,longitud FROM scli WHERE id=${dbid} LIMIT 1";
+		$row = $this->datasis->damerow($sql);
+		if(empty($row)){ return false; }
+		if(empty($row['nombre'])){ return false; }
+
+		$direc = addcslashes($row['nombre'].' '.$row['dire11'],'"');
+		$lat   = floatval($row['latitud']);
+		$lon   = floatval($row['longitud']);
+		if($lat*$lon!=0){
+			$markplace="
+			marker = new google.maps.Marker({
+				map: map,
+				position: new google.maps.LatLng(${lat},${lon})
+			});
+			infowindow = new google.maps.InfoWindow({
+				content:
+				\"${direc}\"
+			});
+			infowindow.open(map,marker);
+			markers.push(marker);";
+			$clat = $lat;
+			$clon = $lon;
+			$zoon = 15;
+
+		}else{
+			$markplace='';
+			$clat = 6.795535025719518;
+			$clon = -66.1376953125;
+			$zoon = 6;
+		}
+
+		$url = site_url('ventas/scli/ajaxcoor/'.$id);
+		$mapscript=<<<MAPGO
+		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+		<div style="overflow:hidden;height:500px;width:600px;">
+			<div id="gmap_canvas" style="height:500px;width:600px;"></div>
+			<style>#gmap_canvas img{max-width:none!important;background:none!important}</style>
+
+		</div>
+		<script type="text/javascript">
+		var markers = [];
+
+		function init_map(){
+			var myOptions = {
+				zoom:${zoon},
+				center:new google.maps.LatLng(${clat},${clon}),
+				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				mapTypeControl:false,
+				scaleControl:true,
+				streetViewControl:false,
+			};
+
+			map = new google.maps.Map(document.getElementById("gmap_canvas"), myOptions);
+
+			google.maps.event.addListener(map, 'click', function(event) {
+				placeMarker(event.latLng);
+			});
+
+			${markplace}
+
+		}
+
+		google.maps.event.addDomListener(window, 'load', init_map);
+
+		function placeMarker(location) {
+			for (var i = 0; i < markers.length; i++) {
+				markers[i].setMap(null);
+			}
+
+			var marker = new google.maps.Marker({
+				position: location,
+				map: map,
+			});
+			var infowindow = new google.maps.InfoWindow({
+				content: 'Lat.: ' + location.lat() +
+				'<br>Long.: ' + location.lng()
+			});
+			$.post( "${url}", { 'lat': location.lat(), 'lon':location.lng()},function(data){
+				if(data=="0")
+				alert("Hubo un problema actualizando la data");
+			});
+			infowindow.open(map,marker);
+			markers.push(marker);
+		}
+		</script>
+MAPGO;
+
+		$data = array();
+		$data['content'] = $mapscript.'<p style="text-align:center">'.$direc.'</p>';
+		$data['title']   = '<h1>Mapa cliente</h1>';
+		$data['head']    = script('jquery.js').$this->rapyd->get_head();
+		$this->load->view('view_ventanas', $data);
+	}
 
 	function instalar(){
 		$seniat=$this->db->escape('http://contribuyente.seniat.gob.ve/BuscaRif/BuscaRif.jsp');
@@ -3750,7 +3875,8 @@ function chrif(rif){
 		if(!in_array('estado',     $campos)) $this->db->query("ALTER TABLE scli ADD COLUMN estado      INT(11) NULL DEFAULT 0 COMMENT 'Estados o Entidades'");
 		if(!in_array('aniversario',$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN aniversario DATE NULL DEFAULT NULL');
 		if(!in_array('registrado', $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN registrado  DATE NULL DEFAULT NULL AFTER aniversario');
-
+		if(!in_array('latitud'   , $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN `latitud`  FLOAT NULL DEFAULT NULL');
+		if(!in_array('longitud'   ,$campos)) $this->db->query('ALTER TABLE scli ADD COLUMN `longitud` FLOAT NULL DEFAULT NULL');
 
 
 		if(!$this->db->table_exists('tarifa')){
@@ -3880,139 +4006,7 @@ function chrif(rif){
 
 	}
 }
-
 /*
-ABA Alimentos para peces</option><option value="188" id="Con mensaje">
-ABA Animales Domésticos</option><option value="185" id="Con mensaje">
-ABA Aves</option><option value="186" id="Con mensaje">
-ABA Bovinos</option><option value="187" id="Con mensaje">
-ABA Cerdos</option><option value="65" id="Con mensaje">
-ABA Materia Prima (Alimentos Balanceados para Animales)</option><option value="488" id="Con mensaje">
-Aceite 18Lts Industrial											  </option>									  <option value="244" id="Con mensaje">
-Aceite Crudo de Soya											  </option>									  <option value="257" id="Con mensaje">
-Aceite  No Regulado 											  </option>									  <option value="256" id="Con mensaje">
-Aceite Regulado											  </option>									  <option value="281" id="Con mensaje">
-Aceite Uso Industrial											  </option>									  <option value="347" id="Con mensaje">
-Afrechillo Consumo Humano											  </option>									  <option value="346" id="Con mensaje">
-Afrecho y Afrechillo Consumo Animal 											  </option>									  <option value="108" id="Con mensaje">
-Afrecho y afrechillo para consumo humano											  </option>									  <option value="200" id="Con mensaje">
-Arroz Blanco Presentación No Regulada											  </option> 								  <option value="201" id="Con mensaje">
-Arroz Blanco Presentación Regulada											  </option>									  <option value="120" id="Con mensaje">
-Arroz de Segunda											  </option>									  <option value="264" id="Con mensaje">
-Arroz de Tercera											  </option>									  <option value="123" id="Con mensaje">
-Arvejas											  </option>									  <option value="235" id="Con mensaje">
-Atún Congelado											  </option>									  <option value="314" id="Con mensaje">
-Atún Enlatado Presentación Regulada											  </option>									  <option value="318" id="Con mensaje">
-Atún Entero 											  </option>									  <option value="51" id="Con mensaje">
-Avena											  </option>									  <option value="303" id="Con mensaje">
-Avena Despuntada										</option>									  <option value="437" id="Con mensaje">
-Avena en Granos											</option>									  <option value="374" id="Con mensaje">
-Avena Liquida											</option>									  <option value="325" id="Con mensaje">
-Azúcar Domestica										</option>									  <option value="350" id="Con mensaje">
-Azúcares y Derivados									</option>									  <option value="326" id="Con mensaje">
-Azúcar Industrial										</option>									  <option value="399" id="Con mensaje">
-Bacalao Seco											</option>									  <option value="260" id="Con mensaje">
-Cacao en granos											</option>									  <option value="261" id="Con mensaje">
-Cacao en polvo										</option>									  <option value="19" id="Con mensaje">
-Cafe Molido											  </option>									  <option value="358" id="Con mensaje">
-Café Molido Presentación No Regulada						</option>									  <option value="357" id="Con mensaje">
-Café Molido Presentación Regulada							</option>									  <option value="299" id="Con mensaje">
-Cafe Tostado en Grano										</option>									  <option value="46" id="Con mensaje">
-Caraota Negra											  </option>									  <option value="49" id="Con mensaje">
-Caraota Roja											  </option>									  <option value="48" id="Con mensaje">
-Caraota Rosada											  </option>									  <option value="47" id="Con mensaje">
-Caraotas Blanca											  </option>									  <option value="231" id="Con mensaje">
-Carne de Aves -pavo pato codorniz avestruz entre otras-		</option>									  <option value="220" id="Con mensaje">
-Carne de Bovino Despostado									</option>									  <option value="218" id="Con mensaje">
-Carne de Bovino en Canal									</option>									  <option value="84" id="Con mensaje">
-Carne de Porcino despostada									</option>									  <option value="82" id="Con mensaje">
-Carne de Porcino en Canal									</option>									  <option value="56" id="Con mensaje">
-Cebada											  </option>									  <option value="195" id="Con mensaje">
-Cebolla											  </option>									  <option value="296" id="Con mensaje">
-Ciruelas											</option><option value="401" id="Con mensaje">
-Dorado Entero 										</option><option value="250" id="Con mensaje">
-Duraznos											</option><option value="109" id="Con mensaje">
-Embutidos											</option><option value="407" id="Con mensaje">
-Filet de Mero										</option><option value="404" id="Con mensaje">
-Filetes de Dorado									</option>									  <option value="403" id="Con mensaje">
-Filetes de Merluza									</option>									  <option value="402" id="Con mensaje">
-Filetes de Salmon									</option>									  <option value="45" id="Con mensaje">
-Frijol											  </option>									  <option value="146" id="Con mensaje">
-Garbanzos											</option>									  <option value="297" id="Con mensaje">
-Girasol -  Acondicionado (TM)						</option>									  <option value="240" id="Con mensaje">
-Grasa Amarilla										</option>									  <option value="282" id="Con mensaje">
-Grasa Uso Industrial								</option>									  <option value="352" id="Con mensaje">
-Harina de Arroz										</option>									  <option value="204" id="Con mensaje">
-Harina de Maiz Precocida No Regulada				</option>									  <option value="203" id="Con mensaje">
-Harina de Maiz Precocida Regulada					</option>									  <option value="217" id="Con mensaje">
-Harina de Soya -Torta de Soya-						</option>									  <option value="221" id="Con mensaje">
-Harina de Trigo Familiar							</option>									  <option value="290" id="Con mensaje">
-Harina de Trigo Galletera							</option>									  <option value="20" id="Con mensaje">
-Harina de Trigo para Panaderia y Pastelería			</option>									  <option value="22" id="Con mensaje">
-Huevos de Consumo									</option>									  <option value="43" id="Con mensaje">
-Jurel (Enlatado)									</option>									  <option value="354" id="Con mensaje">
-Jurel Fresco										</option>									  <option value="268" id="Con mensaje">
-Kiwi												</option>									  <option value="178" id="Con mensaje">
-Leche Cruda											</option>									  <option value="476" id="Con mensaje">
-Leche en Polvo Completa - Uso Industrial MP			</option>									  <option value="233" id="Con mensaje">
-Leche en Polvo Descremada - Uso Domestico			</option>									  <option value="478" id="Con mensaje">
-Leche en Polvo Descremada - Uso Industrial MP		</option>									  <option value="360" id="Con mensaje">
-Leche Liquida Pasteurizada No Regulada				</option>									  <option value="359" id="Con mensaje">
-Leche Liquida Pasteurizada Regulada					</option>									  <option value="238" id="Con mensaje">
-Leche Liquida UHT									</option>									  <option value="38" id="Con mensaje">
-Lentejas										  </option>									  <option value="262" id="Con mensaje">
-Licor de Cacao									  </option>									  <option value="453" id="Con mensaje">
-Lomo de Atún									  </option>									  <option value="40" id="Con mensaje">
-Maiz Amarillo - Acondicionado					  </option>									  <option value="436" id="Con mensaje">
-Maiz Amarillo - Consumo Humano					  </option>									  <option value="42" id="Con mensaje">
-Maiz Blanco  - Acondicionado					  </option>									  <option value="198" id="Con mensaje">
-Maiz G X M  Blanco ABA Acondicionado			  </option>									  <option value="263" id="Con mensaje">
-Manteca de Cacao								  </option>									  <option value="32" id="Con mensaje">
-Manteca Vegetal									  </option>									  <option value="308" id="Con mensaje">
-Margarina -Consumo Doméstico-					  </option>									  <option value="309" id="Con mensaje">
-Margarina -Consumo Industrial-					  </option>									  <option value="311" id="Con mensaje">
-Mayonesa										  </option>									  <option value="310" id="Con mensaje">
-Mayonesa Presentación Regulada					  </option>									  <option value="75" id="Con mensaje">
-Melaza											  </option>									  <option value="400" id="Con mensaje">
-Merluza Entera 									  </option>									  <option value="365" id="Con mensaje">
-Oleina de Palma									  </option>									  <option value="193" id="Con mensaje">
-Papa											  </option>									  <option value="118" id="Con mensaje">
-Pasta de Especialidades									  </option>									  <option value="249" id="Con mensaje">
-Pasta de Tomate - Materia Prima							  </option>									  <option value="305" id="Con mensaje">
-Pasta de Tomate-Prod Terminado							  </option>									  <option value="313" id="Con mensaje">
-Pastas Alimenticias  No Reguladas						  </option>									  <option value="312" id="Con mensaje">
-Pastas Alimenticias Reguladas							  </option>									  <option value="362" id="Con mensaje">
-Pastas Uso Industrial									  </option>									  <option value="196" id="Con mensaje">
-Pernil - Cerdo											  </option>									  <option value="266" id="Con mensaje">
-Pescado congelado										  </option>									  <option value="341" id="Con mensaje">
-Pescado Salado											  </option>									  <option value="342" id="Con mensaje">
-Pescado Varios											  </option>									  <option value="29" id="Con mensaje">
-Pollo Beneficiado Entero									</option>									  <option value="441" id="Con mensaje">
-Pollo Despresado											</option>									  <option value="321" id="Con mensaje">
-Quesos Presentación No Regulada								</option><option value="320" id="Con mensaje">
-Quesos Presentación Regulada						</option><option value="348" id="Con mensaje">
-Quinchoncho											</option><option value="458" id="Con mensaje">
-Quinchoncho											</option><option value="553" id="Con mensaje">
-Sal Cruda											</option><option value="398" id="Con mensaje">
-Salmon Ahumado											</option><option value="397" id="Con mensaje">
-Salmon Entero 											</option><option value="30" id="Con mensaje">
-Sal Refinada											</option><option value="307" id="Con mensaje">
-Salsa de Tomate -Ketchup-								</option><option value="306" id="Con mensaje">
-Salsa de Tomate Presentación Regulada					</option><option value="317" id="Con mensaje">
-Sardina Enlatada Presentación No Regulada				</option><option value="316" id="Con mensaje">
-Sardina Enlatada Presentación Regulada					</option><option value="334" id="Con mensaje">
-Sardina Fresca											</option><option value="70" id="Con mensaje">
-Semilla de Arroz Humedo									</option><option value="286" id="Con mensaje">
-Semilla de Girasol - Acondicionado						</option><option value="223" id="Con mensaje">
-Semilla de Maíz Amarillo Acondicionado					</option><option value="224" id="Con mensaje">
-Semilla de Maíz Blanco Acondicionado					</option><option value="72" id="Con mensaje">
-Semola de Trigo											</option><option value="50" id="Con mensaje">
-Sorgo Acondicionado (TM)								</option><option value="60" id="Con mensaje">
-Soya Acondicionada (Frijol de Soya)(TM)					</option><option value="197" id="Con mensaje">
-Tomate Fresco											</option><option value="41" id="Con mensaje">Trigo Durum		</option><option value="174" id="Con mensaje">
-Trigo para Galletas										</option>
-
-
 2 	 Atún Enlatado Presentación No Regulada 	0,004
 3 	 Formula Preinfantil 	1,957
 4 	 Fórmulas Lácteas 	0,317

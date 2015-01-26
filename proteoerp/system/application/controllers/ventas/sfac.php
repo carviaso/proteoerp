@@ -3615,10 +3615,10 @@ class Sfac extends Controller {
 			if(!empty($tipo)){
 				if($tipo[0]=='S') return true;
 			}else{
-				$this->validation->set_message('chcananeg', 'El art&iacute;culo '.htmlspecialchars($codigo).' no tiene existe');
+				$this->validation->set_message('chcananeg', 'El art&iacute;culo '.htmlspecialchars($codigo).' no tiene existencia');
 				return false;
 			}
-			$mSQL    = "SELECT SUM(a.existen) AS cana FROM itsinv AS a JOIN caub AS b ON a.alma=b.ubica AND b.tipo='S' WHERE a.codigo=${dbcodigo} AND b.ubica=${dbalmacen}";
+			$mSQL    = "SELECT SUM(a.existen) AS cana FROM itsinv AS a JOIN caub AS b ON a.alma=b.ubica AND b.tipo<>'N' WHERE a.codigo=${dbcodigo} AND b.ubica=${dbalmacen}";
 			$existen = floatval($this->datasis->dameval($mSQL));
 			$val     = floatval($val);
 			if($val>$existen){

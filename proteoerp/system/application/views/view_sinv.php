@@ -1387,6 +1387,9 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 	<tr>
 		<td class='littletableheaderc'><?php echo $form->url->label ?></td>
 		<td class="littletablerow"><?php echo $form->url->output; ?></td>
+	</tr><tr>
+		<td class='littletableheaderc'><?php echo $form->sada->label ?></td>
+		<td class="littletablerow"><?php echo $form->sada->output; ?></td>
 	</tr>
 	</table>
 </div>
@@ -1903,7 +1906,7 @@ if ($query->num_rows()>0 ) {
 </div>
 
 <div id="sinvprv" title="Agregar c&oacute;digo de Proveedor">
-	<p class="validateTips">Codigo del proveedor para este producto</p>
+	<p class="validateTips">C&oacute;digo del proveedor para este producto</p>
 	<form>
 	<fieldset>
 		<label for="proveedor">Proveedor</label>

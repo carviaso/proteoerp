@@ -148,8 +148,8 @@ class Reparto extends Controller {
 							if (v) {
 								$.post("'.site_url('ventas/reparto/cambiatipo').'/", { fecha: f.mfecha, mid: id, oper: \'carga\' },
 									function(data){
-										$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
 										$.prompt.goToState(\'state1\');
+										$(\'#in_prome2\').text(data);
 										$("#newapi'.$grid0.'").trigger("reloadGrid");
 								});
 								return false;
@@ -183,8 +183,8 @@ class Reparto extends Controller {
 							if (v) {
 								$.post("'.site_url('ventas/reparto/cambiatipo').'/", { fecha: f.mfecha, mid: id, oper: \'cierre\' },
 									function(data){
-										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(data);
 										$.prompt.goToState(\'state1\');
+										$(\'#in_prome3\').text(data);
 										$("#newapi'.$grid0.'").trigger("reloadGrid");
 								});
 								return false;
@@ -217,8 +217,8 @@ class Reparto extends Controller {
 							if (v) {
 								$.post("'.site_url('ventas/reparto/cambiatipo').'/", { mid: id, oper: \'anular\' },
 									function(data){
-										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(data);
 										$.prompt.goToState(\'state1\');
+										$(\'#in_prome3\').text(data);
 										$("#newapi'.$grid0.'").trigger("reloadGrid");
 								});
 								return false;
@@ -253,8 +253,8 @@ class Reparto extends Controller {
 							if (v) {
 								$.post("'.site_url('ventas/reparto/cambiatipo').'/", { fecha: f.mfecha, mid: id, oper: \'entrega\' },
 									function(data){
-										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(data);
 										$.prompt.goToState(\'state1\');
+										$(\'#in_prome3\').text(data);
 										$("#newapi'.$grid0.'").trigger("reloadGrid");
 								});
 								return false;
@@ -455,7 +455,7 @@ class Reparto extends Controller {
 					echo 'No puede cargar a una fecha futura';
 				}else{
 					$this->db->where('id', $id);
-					$this->db->update('reparto', array('tipo' => 'F', 'retorno' => $fecha));
+					$this->db->update('reparto', array('tipo' => 'F', 'retorno' => $fecha, 'tcierre'=>date('Y-m-d H:i:s')));
 					$entrega  = $this->datasis->dameval("SELECT entregado FROM reparto WHERE id=${id}");
 					$dbentrega= $this->db->escape($entrega);
 					$this->db->query("UPDATE sfac SET entregado=${dbentrega} WHERE reparto=${id}");
@@ -1564,7 +1564,7 @@ class Reparto extends Controller {
 		$edit->facturas->size =13;
 		$edit->facturas->maxlength =11;
 */
-		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+		$edit->estampa = new autoUpdateField('estampa' ,date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 		$edit->hora    = new autoUpdateField('hora',   date('H:i:s'), date('H:i:s'));
 
@@ -1776,6 +1776,13 @@ class Reparto extends Controller {
 		$campos=$this->db->list_fields('sfac');
 		if(!in_array('reparto',$campos)){
 			$mSQL="ALTER TABLE sfac ADD COLUMN reparto INT(11) NULL DEFAULT 0 AFTER manual";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('tcierre',$campos)){
+			$mSQL="ALTER TABLE `reparto` CHANGE COLUMN `estampa` `estampa` DATETIME NULL DEFAULT NULL AFTER `entregado`;";
+			$this->db->simple_query($mSQL);
+			$mSQL="ALTER TABLE `reparto` ADD COLUMN `tcierre` DATETIME NULL DEFAULT NULL";
 			$this->db->simple_query($mSQL);
 		}
 

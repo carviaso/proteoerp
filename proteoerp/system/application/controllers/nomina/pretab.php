@@ -108,8 +108,8 @@ class Pretab extends Controller {
 					if (v) {
 						$.post("'.site_url('nomina/prenom/geneprenom').'/", { contrato: f.mcontrato, fechac: f.mfechac, fechap: f.mfechac, pers: f.mpers },
 							function(data){
-								$.prompt.getStateContent(\'state1\').find(\'#in_prome2\').text(data);
 								$.prompt.goToState(\'state1\');
+								$(\'#in_prome2\').text(data);
 								$("#newapi'.$grid0.'").trigger("reloadGrid");
 						});
 						return false;
@@ -158,11 +158,11 @@ class Pretab extends Controller {
 								//try{
 									var json = JSON.parse(data);
 									if (json.status == "A"){
-										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(json.mensaje);
+										$(\'#in_prome3\').text(json.mensaje);
 										$.prompt.goToState(\'state1\');
 										$("#newapi'.$grid0.'").trigger("reloadGrid");
 									}else{
-										$.prompt.getStateContent(\'state1\').find(\'#in_prome3\').text(json.mensaje);
+										$(\'#in_prome3\').text(json.mensaje);
 										$.prompt.goToState(\'state1\');
 									}
 								//}catch(e){
@@ -197,8 +197,8 @@ class Pretab extends Controller {
 					if (v) {
 						$.post("'.site_url($this->url.'nomina').'/",
 							function(data){
-								jQuery.prompt.getStateContent(\'state1\').find(\'#in_prome1\').text(data);
 								jQuery.prompt.goToState(\'state1\');
+								$(\'#in_prome1\').text(data);
 								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 						});
 						return false;
@@ -257,8 +257,8 @@ class Pretab extends Controller {
 					if (v == 1 ) {
 						$.post("'.site_url($this->url.'respalda').'/",
 							function(data){
-								jQuery.prompt.getStateContent(\'state1\').find(\'#in_prom\').text(data);
 								jQuery.prompt.goToState(\'state1\');
+								$(\'#in_prom\').text(data);
 								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 						});
 						return false;
@@ -266,8 +266,8 @@ class Pretab extends Controller {
 					} else if ( v == 2 ) {
 						$.post("'.site_url($this->url.'recupera').'/"+f.mtabla,
 							function(data){
-								$.prompt.getStateContent(\'state1\').find(\'#in_prome\').text(data);
 								$.prompt.goToState(\'state1\');
+								$(\'#in_prome\').text(data);
 								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 						});
 						return false;
@@ -281,8 +281,7 @@ class Pretab extends Controller {
 			}
 		};
 
-		$("#respalda").click( function()
-		{
+		$("#respalda").click( function(){
 			$.prompt(mcontenido);
 		});
 		';
