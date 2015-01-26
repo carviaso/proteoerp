@@ -4301,7 +4301,7 @@ class gser extends Controller {
 		if(!in_array('negreso',   $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN negreso    CHAR(8)    NULL DEFAULT NULL");
 		if(!in_array('ncausado',  $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN ncausado   VARCHAR(8) NULL DEFAULT NULL");
 		if(!in_array('fondo',     $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN fondo      CHAR(2)    NULL DEFAULT NULL");
-		if(!in_array('cnd',       $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN cnd        CHAR(1)    NULL DEFAULT NULL COMMENT 'Credito no deducible'");
+		if(!in_array('cnd',       $campos)) $this->db->query("ALTER TABLE gser ADD COLUMN cnd        CHAR(1)    NULL DEFAULT NULL");
 
 		if(!in_array('id',$campos)){
 			$query="ALTER TABLE `gser` DROP PRIMARY KEY";
