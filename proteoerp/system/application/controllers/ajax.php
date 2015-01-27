@@ -256,8 +256,8 @@ class Ajax extends Controller {
 					$retArray['ciudad']  = $this->en_utf8($row['ciudad1']);
 					$retArray['estado']  = $this->en_utf8($row['estado']);
 					$retArray['vendedor']= $row['vendedor'];
-					$retArray['observa'] = $row['observa'];
-					$retArray['contacto']= $row['contacto'];
+					$retArray['observa'] = $this->en_utf8($row['observa']);
+					$retArray['contacto']= $this->en_utf8($row['contacto']);
 					$retArray['grupo']   = $row['grupo'];
 					$retArray['id']      = $row['id'];
 					array_push($retorno, $retArray);
