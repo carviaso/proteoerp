@@ -2589,14 +2589,28 @@ class Sprm extends Controller {
 					return false;
 				}*/
 
-				$rrow=$this->datasis->damerow("SELECT impuesto,monto,montasa,monredu,monadic,tasa,reducida,sobretasa,exento FROM sprm WHERE cod_prv=${dbcod_prv} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}");
+				$rrow=$this->datasis->damerow("SELECT impuesto,monto,montasa,monredu,monadic,tasa,reducida,sobretasa,exento,noabonable,monto-abonos AS saldo FROM sprm WHERE cod_prv=${dbcod_prv} AND tipo_doc=${dbittipo} AND numero=${dbitnumero}");
 				if(empty($rrow)){
 					$do->error_message_ar['pre_ins']='Efecto inexistente '.$ittipo.$itnumero;
 					return false;
 				}
 				$itimpuesto = floatval($rrow['impuesto']);
 				$itmonto    = floatval($rrow['monto']);
+				$itnoabonale= floatval($rrow['noabonable']);
+				$itsaldo    = floatval($rrow['saldo']);
 				$arr_itimpuestos[$i]=round($itabono*$itimpuesto/$itmonto,2);
+
+				if($itabono+$itpppago > $itsaldo){
+					$do->error_message_ar['pre_ins']='No se puede abonar un monto mayor al saldo para el efecto '.$ittipo.$itnumero;
+					return false;
+				}
+
+				if($tipo_doc=='AB' && $itnoabonale>0){
+					if($itsaldo-$itabono-$itpppago<=$itnoabonale){
+						$do->error_message_ar['pre_ins']='El efecto '.$ittipo.$itnumero.' tiene un saldo bloqueado de '.nformat($itnoabonale).' que solo puede ser pagado con una NC';
+						return false;
+					}
+				}
 
 				if($tipo_doc=='NC'){
 
@@ -3149,6 +3163,11 @@ class Sprm extends Controller {
 
 		if(!in_array('modificado',$itcampos)){
 			$mSQL="ALTER TABLE `itppro` ADD COLUMN `modificado` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `id`, ADD INDEX `modificado` (`modificado`)";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('noabonable',$itcampos)){
+			$mSQL="ALTER TABLE `sprm` ADD COLUMN `noabonable` DECIMAL(17,2) NULL DEFAULT '0' COMMENT 'Monto no abonable' AFTER `id`";
 			$this->db->simple_query($mSQL);
 		}
 	}

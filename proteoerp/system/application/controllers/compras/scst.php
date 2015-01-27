@@ -1847,7 +1847,45 @@ class Scst extends Controller {
 		if($oper == 'add'){
 			echo 'Deshabilitado';
 		}elseif($oper == 'edit'){
-			echo 'Deshabilitado';
+
+			$posibles=array('devcant');
+			foreach($data as $ind=>$val){
+				if(!in_array($ind,$posibles)){
+					echo 'Campo no permitido ('.$ind.')';
+					return false;
+				}
+			}
+
+			$row  = $this->datasis->damerow("SELECT control,cantidad FROM itscst WHERE id=${id}");
+			if(!empty($row)){
+				$dbcontrol= $this->db->escape($row['control']);
+				$cantidad = floatval($row['cantidad']);
+			}else{
+				echo 'No existe el registro';
+				return false;
+			}
+
+			if(isset($data['devcant'])){
+				if(!is_numeric($data['devcant'])){
+					echo 'Datos invalidos';
+					return false;
+				}else{
+					$data['devcant']=floatval($data['devcant']);
+					if($data['devcant'] > $cantidad){
+						echo 'No se puede devolver todo el producto';
+						return false;
+					}
+				}
+			}
+
+			$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM scst WHERE control=${dbcontrol} AND (actuali < fecha OR actuali IS NULL)"));
+			if($cana>0){
+				$this->db->where('id'   , $id);
+				$this->db->update('itscst', $data);
+			}else{
+				echo 'No se actualizar una compra actualizada';
+				return false;
+			}
 
 		} elseif($oper == 'del') {
 			echo 'Deshabilitado';
@@ -3383,10 +3421,10 @@ class Scst extends Controller {
 					WHERE c.serial='V' AND b.control=".$this->db->escape($control);
 				$cana = $this->datasis->dameval($SQL);
 				if($cana>0){
-					$SQL="SELECT COUNT(*) AS cana FROM sinvehiculo WHERE id_scst=${id} AND (motor IS NULL OR motor='' OR carroceria IS NULL OR carroceria='')";
-					$cana = $this->datasis->dameval($SQL);
-					$SQL="SELECT COUNT(*) AS cana FROM sinvehiculo WHERE id_scst=${id}";
-					$cana2 = $this->datasis->dameval($SQL);
+					$SQL   = "SELECT COUNT(*) AS cana FROM sinvehiculo WHERE id_scst=${id} AND (motor IS NULL OR motor='' OR carroceria IS NULL OR carroceria='')";
+					$cana  = intval($this->datasis->dameval($SQL));
+					$SQL   = "SELECT COUNT(*) AS cana FROM sinvehiculo WHERE id_scst=${id}";
+					$cana2 = intval($this->datasis->dameval($SQL));
 					if($cana > 0 || $cana2==0){
 						$this->error_string='Debe cargar los seriales de los veh&iacute;culos para poder recibir la compra ';
 						return false;
@@ -3431,10 +3469,12 @@ class Scst extends Controller {
 					}
 					if(empty($actuali)) $actuali=date('Ymd');
 
+					$dfaltante=0;
 					$itdata=array();
-					$sql='SELECT a.codigo,a.cantidad,a.importe,a.importe/a.cantidad AS costo,a.id,
+					$sql='SELECT a.codigo,IF(a.devcant<=a.cantidad, a.cantidad-a.devcant,a.cantidad) AS cantidad,
+						a.importe,a.importe/a.cantidad AS costo,a.id,
 						a.precio1,a.precio2,a.precio3,a.precio4,b.formcal,b.ultimo,b.standard,b.pond,b.existen,b.fracci,
-						a.rmargen,b.margen1,b.margen2,b.margen3,b.margen4
+						a.rmargen,b.margen1,b.margen2,b.margen3,b.margen4,a.devcant
 						FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE a.control=?';
 					$qquery=$this->db->query($sql,array($control));
 					if($qquery->num_rows()>0){
@@ -3464,6 +3504,7 @@ class Scst extends Controller {
 
 							}
 							//Fin modalidad de bulto
+							$dfaltante+=$itrow->devcant*$itrow->costo;
 
 							$pond     = $this->_pond($itrow->existen,$itrow->cantidad,$itrow->pond,$itrow->costo);
 							$dbcodigo = $this->db->escape($itrow->codigo);
@@ -3854,6 +3895,9 @@ class Scst extends Controller {
 					$sprm['monredu']  = $row['creduci'];
 					$sprm['reducida'] = $row['civared'];
 					$sprm['exento']   = $row['cexento'];
+					if($dfaltante>0){
+						$sprm['noabonable']=$dfaltante;
+					}
 
 					$mSQL=$this->db->insert_string('sprm', $sprm);
 					$ban =$this->db->simple_query($mSQL);
@@ -4335,7 +4379,7 @@ class Scst extends Controller {
 		// DESACTUALIZA INVENTARIO
 		$dbdepo   = $this->db->escape($mALMA);
 		$dbrecep= $this->db->escape($recep);
-		$query = $this->db->query("SELECT a.codigo, a.cantidad, a.id, a.precio1, a.precio2, a.precio3, a.precio4,a.costo, b.fracci FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE control=${dbcontrol}");
+		$query = $this->db->query("SELECT a.codigo, IF(a.devcant<=a.cantidad, a.cantidad-a.devcant,a.cantidad) AS cantidad, a.id, a.precio1, a.precio2, a.precio3, a.precio4,a.costo, b.fracci FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE control=${dbcontrol}");
 		foreach($query->result() as $row){
 			$itdbcodigo= $this->db->escape($row->codigo);
 			$mTIPO = $this->datasis->dameval("SELECT MID(tipo,1,1) AS tipo FROM sinv WHERE codigo=${itdbcodigo}");

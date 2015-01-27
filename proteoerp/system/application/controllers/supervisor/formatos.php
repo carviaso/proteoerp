@@ -135,9 +135,9 @@ class formatos extends validaciones {
 			"application/x-www-form-urlencoded;charset='.$this->config->item('charset').'");
 			return false;
 		});
-		
+
 		function guarda(){
-			$("#proteo").val(editor.getValue()); 
+			$("#proteo").val(editor.getValue());
 			$.post("'.site_url('supervisor/formatos/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
 			function(data){
 				alert("Formato guardado" + data);
@@ -145,7 +145,7 @@ class formatos extends validaciones {
 			"application/x-www-form-urlencoded;charset='.$this->config->item('charset').'");
 			return false;
 		};
-		
+
 		function fcargar(){
 			$.post("'.site_url('supervisor/formatos/cargar/').'", { nombre:"'.$id.'"},
 			function(data){
@@ -155,7 +155,7 @@ class formatos extends validaciones {
 		};
 
 		function fguardar(){
-			$("#proteo").val(editor.getValue()); 
+			$("#proteo").val(editor.getValue());
 			$.post("'.site_url('supervisor/formatos/guardar/').'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
 			function(data){
 				alert(data);
@@ -214,10 +214,10 @@ class formatos extends validaciones {
 	function cargar(){
 		$nombre=$this->input->post('nombre');
 		if($nombre){
-			if(file_exists('formrep/reportes/proteo/'.$nombre.'.for')){
+			if(file_exists('formrep/formatos/proteo/'.$nombre.'.for')){
 				$leer = file_get_contents('formrep/formatos/proteo/'.$nombre.'.for');
 				if($leer) echo $leer;
-			}elseif(file_exists('formrep/reportes/proteo/'.$nombre.'.FOR') ){
+			}elseif(file_exists('formrep/formatos/proteo/'.$nombre.'.FOR') ){
 				$leer = file_get_contents('formrep/formatos/proteo/'.$nombre.'.FOR');
 				if($leer) echo $leer;
 			}

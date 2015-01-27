@@ -1465,7 +1465,7 @@ class Smov extends Controller {
 		$edit->codigo->style='width:200px;';
 		$edit->codigo->rule ='';
 
-		$edit->vendedor = new  dropdownField ('Cabrador', 'vd');
+		$edit->vendedor = new  dropdownField ('Cobrador', 'vd');
 		$edit->vendedor->option('','Seleccione cobrador');
 		$edit->vendedor->options('SELECT TRIM(vendedor) AS vendedor, CONCAT(vendedor,\' \',nombre) nombre FROM vend WHERE tipo <> "V" ORDER BY vendedor');
 		$edit->vendedor->style='width:200px;';
@@ -2051,7 +2051,7 @@ class Smov extends Controller {
 				$itdbdata['mora']     = 0;
 
 				unset($dbdata);
-		
+
 			}
 
 			foreach($do->data_rel[$rel_id] AS $i=>$data){
@@ -2136,7 +2136,7 @@ class Smov extends Controller {
 								$sql=$this->db->insert_string('sprm', $data);
 								$ban=$this->db->simple_query($sql);
 								if($ban==false){ memowrite($sql,'smov_edrec');}
-								
+
 								// Crea la NC en Bancos
 								$mSQL ='SELECT tbanco,moneda,banco,saldo,depto,numcuent FROM banc WHERE codbanc='.$dbcodbanc;
 								$fila=$this->datasis->damerow($mSQL);
@@ -2175,7 +2175,7 @@ class Smov extends Controller {
 
 							}
 						}
-					} 
+					}
 				}
 			}
 		}
@@ -2228,7 +2228,7 @@ class Smov extends Controller {
 		}
 
 		// Inmobiliaria
-		
+
 
 		logusu('smov',"Cobro a cliente ${ttipo_doc}${numero} creado");
 	}
@@ -3068,7 +3068,7 @@ class Smov extends Controller {
 		}
 
 		if(!in_array('nroex',$campos)) $this->db->simple_query('ALTER TABLE smov ADD COLUMN nroex CHAR(15) NULL AFTER ncredito');
-		
+
 
 
 		$itcampos=$this->db->list_fields('itccli');

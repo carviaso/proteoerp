@@ -60,7 +60,7 @@ if($row->tipo_doc=='FC'){
 }
 $dbcontrol=$this->db->escape($control);
 //ARTICULOS
-$mSQL_2 = $this->db->query("SELECT numero,codigo,descrip,cantidad,costo,importe, precio2, if(costo>=precio2,'===>>','     ') alerta FROM itscst WHERE control=${dbcontrol}");
+$mSQL_2 = $this->db->query("SELECT numero,codigo,descrip,cantidad,costo,importe, precio2, devcant ,IF(costo>=precio2,'===>>','     ') alerta FROM itscst WHERE control=${dbcontrol}");
 $detalle =$mSQL_2->result();
 
 $pagina = 0;
@@ -115,6 +115,7 @@ $encatabla = '
 				<th>C&oacute;digo</th>
 				<th>Descripci&oacute;n</th>
 				<th>Cantidad</th>
+				<th>Faltante</th>
 				<th>Costo</th>
 				<th>Asignado</th>
 				<th>Importe</th>
@@ -176,6 +177,7 @@ foreach ($detalle AS $items){
 					<td style="text-align:left"><?php echo $this->us_ascii2html($items->codigo) ?></td>
 					<td><?php echo $this->us_ascii2html($items->descrip) ?></td>
 					<td style="text-align: center"><?php echo str_replace(',00','',nformat($items->cantidad,2)); ?></td>
+					<td style="text-align: center"><?php echo str_replace(',00','',nformat($items->devcant,2)); ?></td>
 					<td style="text-align: right;"><?php echo nformat($items->costo).$moneda  ?></td>
 					<td style="text-align: right;"><?php echo "<b>".$items->alerta."</b>".nformat($items->precio2) ?></td>
 					<td style="text-align: right;"><?php echo  nformat($items->importe).$moneda;   ?></td>
@@ -187,7 +189,7 @@ foreach ($detalle AS $items){
 			</tbody>
 			<tfoot>
 			<tr>
-				<td colspan="6" style="text-align: right;font-size:16px"><b>Continua.........</b></td>
+				<td colspan="7" style="text-align: right;font-size:16px"><b>Continua.........</b></td>
 			</tr>
 			</tfoot>
 			</table>
@@ -214,6 +216,7 @@ while ( $i%$maxlinea != 0) {
 ?>
 				<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 					<td style="text-align:left"> </td>
+					<td> </td>
 					<td> </td>
 					<td style="text-align: center;"> </td>
 					<td style="text-align: center;"> </td>
@@ -247,7 +250,7 @@ while ( $i%$maxlinea != 0) {
 				</tr>
 			</table>
 			</td></tr>
-			<tr><td colspan="6">
+			<tr><td colspan="7">
 			<table width="100%">
 				<tr>
 					<td style="text-align:center;"><b>Exento</b></td>

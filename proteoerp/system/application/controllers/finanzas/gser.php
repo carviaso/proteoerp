@@ -3064,9 +3064,9 @@ class gser extends Controller {
 		$edit->reteiva->autocomplete=false;
 		//$edit->reteiva->onkeyup="reteiva()";
 
-		$edit->checkbox = new checkboxField("C.N.D.", "cnd", "S","N");   
-		$edit->checkbox->insertValue = "y";  
-		
+		$edit->checkbox = new checkboxField("C.N.D.", "cnd", "S","N");
+		$edit->checkbox->insertValue = "y";
+
 		$edit->reteica = new inputField('Ret. ICA','reteica');
 		$edit->reteica->size = 10;
 		$edit->reteica->maxlength=10;
@@ -3163,7 +3163,7 @@ class gser extends Controller {
 		$edit->sucursal->rel_id   ='gitser';
 		$edit->sucursal->onchange="gsucursal(this.value)";
 		//================= Fin de campos para detalle =================
-	
+
 
 		//**************************************************************
 		//   Campos para el detalle reten
@@ -4178,7 +4178,7 @@ class gser extends Controller {
 		}elseif($monto==0 && $iva==0){
 			return true;
 		}else{
-			$this->validation->set_message('chtasa', "Si la base general es mayor que cero debe generar impuesto");
+			$this->validation->set_message('chtasa', 'Si la base general es mayor que cero debe generar impuesto');
 			return false;
 		}
 	}
@@ -4197,7 +4197,7 @@ class gser extends Controller {
 		}elseif($monto==0 && $iva==0){
 			return true;
 		}else{
-			$this->validation->set_message('chreducida', "Si la base reducida es mayor que cero debe generar impuesto");
+			$this->validation->set_message('chreducida', 'Si la base reducida es mayor que cero debe generar impuesto');
 			return false;
 		}
 	}
@@ -4216,7 +4216,7 @@ class gser extends Controller {
 		}elseif($monto==0 && $iva==0){
 			return true;
 		}else{
-			$this->validation->set_message('chsobretasa', "Si la base adicional es mayor que cero debe generar impuesto");
+			$this->validation->set_message('chsobretasa', 'Si la base adicional es mayor que cero debe generar impuesto');
 			return false;
 		}
 	}
@@ -4237,8 +4237,9 @@ class gser extends Controller {
 	}
 
 	function sprvbu(){
-		$control = $this->uri->segment(4);
-		$id = $this->datasis->dameval("SELECT b.id FROM gser a JOIN sprv b ON a.proveed=b.proveed WHERE control='$control'");
+		$control  = $this->uri->segment(4);
+		$dbcontrol= $this->db->escape($control);
+		$id = $this->datasis->dameval("SELECT b.id FROM gser a JOIN sprv b ON a.proveed=b.proveed WHERE control=${dbcontrol}");
 		redirect('compras/sprv/dataedit/show/'.$id);
 	}
 
