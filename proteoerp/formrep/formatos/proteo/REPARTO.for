@@ -1,5 +1,6 @@
 <?php
-$maxlin=40; //Maximo de lineas de items.
+$maxlin=38;    //Maximo de lineas de items.
+$subica=false; //Separar por ubicacion
 
 if(count($parametros)==0) show_error('Faltan parametros');
 $id = $parametros[0];
@@ -8,7 +9,7 @@ $dbid=$this->db->escape($id);
 $mSQL_1 = $this->db->query("SELECT
 	a.tipo, a.fecha, a.retorno, a.chofer,b.nombre AS cnombre, a.vehiculo, a.observa, a.peso,
 	a.facturas, a.hora,c.placa,c.ano,c.marca,
-	c.modelo,c.descrip,c.capacidad
+	c.modelo,c.descrip,c.capacidad,a.volumen,a.paradas,c.volumen AS cvolumen, c.paradas AS cparadas
 FROM reparto AS a
 JOIN chofer  AS b ON a.chofer=b.codigo
 JOIN flota   AS c ON a.vehiculo=c.codigo
@@ -22,7 +23,11 @@ $numero    = str_pad($id, 8, '0', STR_PAD_LEFT);
 $cnombre   = $this->us_ascii2html(trim($row->cnombre));
 
 $peso      = nformat($row->peso);
+$volumen   = nformat($row->volumen);
+$paradas   = nformat($row->paradas);
 $capacidad = nformat($row->capacidad);
+$cparadas  = nformat($row->cparadas);
+$cvolumen  = nformat($row->cvolumen);
 $tipo      = $this->us_ascii2html(trim($row->tipo     ));
 $chofer    = $this->us_ascii2html(trim($row->chofer   ));
 $cnombre   = $this->us_ascii2html(trim($row->cnombre  ));
@@ -41,9 +46,14 @@ $vvehiculo = $placa.' '.$marca.' '.$modelo.' '.$ano.' '.$descrip;
 $lineas = 0;
 $uline  = array();
 
+if(!empty($observa)){
+	$obser="Observaci&oacute;n: <b>${observa}</b>";
+}else{
+	$obser='';
+}
 
 $mSQL_3 = $this->db->query("SELECT
-c.codigo,c.descrip, SUM(b.cana) AS cana, SUM(b.cana*c.peso) AS peso,c.peso AS punitario
+c.codigo,c.descrip, SUM(b.cana) AS cana, SUM(b.cana*c.peso) AS peso,c.peso AS punitario,c.ubica
 FROM sfac   AS a
 JOIN sitems AS b ON a.tipo_doc=b.tipoa AND a.numero=b.numa
 JOIN sinv   AS c ON b.codigoa=c.codigo
@@ -81,11 +91,21 @@ $encabezado = <<<encabezado
 			<td valign='bottom'><h1 style="text-align: right">N&uacute;mero: ${numero}</h1></td>
 		</tr><tr>
 			<td>Chofer:<b>(${chofer}) ${cnombre}</b></td>
-			<td>Fecha: <b>${fecha}</b></td>
+			<td style='text-align:right'>Fecha: <b>${fecha}</b></td>
 		</tr><tr>
 			<td colspan='2'>Veh&iacute;culo: <b>${vvehiculo}</b></td>
 		</tr><tr>
-			<td colspan='2'>Observaci&oacute;n: <b>${observa}</b></td>
+			<td colspan='2' style='text-align:center;'>
+				<table align='center'>
+					<tr>
+						<td>Peso:    <b>${peso}   /<span style='font-size:0.8em'>${capacidad}</span></b></td>
+						<td>Volumen: <b>${volumen}/<span style='font-size:0.8em'>${cvolumen} </span></b></td>
+						<td>Paradas: <b>${paradas}/<span style='font-size:0.8em'>${cparadas} </span></b></td>
+					</tr>
+				</table>
+			</td>
+		</tr><tr>
+			<td colspan='2'>${obser}</td>
 		</tr>
 	</table>
 encabezado;
@@ -141,7 +161,8 @@ $mod     = $clinea = false;
 $npagina = true;
 $canat   = $pesot = 0;
 $i       = 0;
-foreach ($detalle2 AS $items){ $i++;
+$ubica   = '';
+foreach ($detalle2 as $items){ $i++;
 	$canat += $items->cana;
 	$pesot += $items->peso;
 	do {
@@ -150,9 +171,16 @@ foreach ($detalle2 AS $items){ $i++;
 			echo $encabezado;
 			echo $encabezado_tabla;
 			$npagina=false;
-
 		}
 ?>
+			<?php if(($ubica!=trim($items->ubica) && strlen(trim($items->ubica))>0) && $subica){  $i++; ?>
+			<tr>
+			   <td colspan='5'>Ubicaci&oacute;n: <?php echo (!empty($items->ubica))?  $this->us_ascii2html($items->ubica):'No asignada'; ?></td>
+			</tr>
+			<?php
+				$ubica=$items->ubica;
+			} ?>
+
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 				<td style="text-align: center;"><?php echo ($clinea)? '': $items->codigo; ?></td>
 				<td>
@@ -264,7 +292,7 @@ $i = 0;
 echo '<h2>Lista de Facturas</h2>';
 echo $encabezado_tabla;
 
-foreach ($detalle AS $items){ $i++; $nsitems=$nsitems-1;
+foreach ($detalle as $items){ $i++; $nsitems=$nsitems-1;
 	do {
 		if($npagina){
 			$this->incluir('X_CINTILLO');

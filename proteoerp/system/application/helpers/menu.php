@@ -34,11 +34,12 @@ function s_menu(){
 	$CI->load->database('default',TRUE);
 	if ($CI->session->userdata('logged_in')){
 		$retval['menu'] .= "\t<ul>\n";
-		$usr=$CI->session->userdata('usuario');
+		$usr  =$CI->session->userdata('usuario');
+		$dbusr=$CI->db->usuario($usr);
 		if ($CI->datasis->essuper())
 			$mSQL = "SELECT modulo, titulo, mensaje,target  FROM intramenu  WHERE  CHAR_LENGTH(modulo)=1 AND visible='S' ORDER BY modulo";
 		else
-			$mSQL = "SELECT a.modulo, a.titulo, a.mensaje, a.target  FROM intramenu AS a JOIN intrasida AS b ON a.modulo=b.modulo AND a.visible='S' WHERE CHAR_LENGTH(a.modulo)=1 AND b.usuario='$usr' AND b.acceso='S' ORDER BY a.modulo";
+			$mSQL = "SELECT a.modulo, a.titulo, a.mensaje, a.target  FROM intramenu AS a JOIN intrasida AS b ON a.modulo=b.modulo AND a.visible='S' WHERE CHAR_LENGTH(a.modulo)=1 AND b.usuario=${dbusr} AND b.acceso='S' ORDER BY a.modulo";
 		$query = $CI->db->query($mSQL);
 
 		$retorna=$query->result_array();

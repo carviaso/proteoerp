@@ -47,7 +47,7 @@ $anio     = substr($fecha,0,4);
 $dbfecha  = $this->db->escape($fecha);
 $dbbanco  = $this->db->escape($row->codbanc);
 $bsal     = floatval($this->datasis->dameval("SELECT saldo FROM bsal WHERE ano=${anio} AND codbanc=${dbbanco}"));
-$mSALDOANT= floatval($this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE anulado='N' AND fecha<=$dbfecha  AND EXTRACT(YEAR_MONTH FROM fecha)>=".$anio."01 AND codbanc = ${dbbanco}"));
+$mSALDOANT= floatval($this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE anulado='N' AND fecha<=${dbfecha}  AND EXTRACT(YEAR_MONTH FROM fecha)>=${anio}01 AND codbanc = ${dbbanco}"));
 $ssmonto  = $bsal+$mSALDOANT;
 
 $diff    = htmlnformat($row->saldof-$ssmonto);

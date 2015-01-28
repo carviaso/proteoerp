@@ -1,8 +1,8 @@
 <?php
-/** 
- * ProteoERP 
- * 
- * @autor    Andres Hocevar 
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
  * @license  GNU GPL v3
 */
 class Accesos extends Controller{
@@ -20,7 +20,7 @@ class Accesos extends Controller{
 
 	}
 
-	//****************************************************************** 
+	//******************************************************************
 	// Administra los accesos
 	//
 	function crear(){
@@ -30,7 +30,7 @@ class Accesos extends Controller{
 			$usuario = $_POST['usuario'];
 		else
 			$usuario = $this->uri->segment(3);
-			
+
 		if(isset($_POST['copia']))
 			$copia=$_POST['copia'];
 		else
@@ -73,7 +73,7 @@ class Accesos extends Controller{
 		$salida .= "</table>\n";
 		$salida .= "</div>\n";
 		$salida .= "</td><td>\n";
-		
+
 		$salida .= '
 		<div id=\'ContenedoresDedata\' style=\'width:270px;\'>
 			<p style="font: bold 18px;">Seleccione un Grupo del panel izquierdo</p>
@@ -84,8 +84,8 @@ class Accesos extends Controller{
 		$mSQL = "
 		SELECT CONCAT(substr(a.modulo,1,4), replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS','')) modulo, b.nombre
 		FROM tmenus a JOIN modulos b ON TRIM(a.modulo)=TRIM(b.modulo)
-		WHERE (a.modulo <> 'MENUINT') AND a.modulo regexp '^[^0-9]+$' 
-		GROUP BY concat(substr(a.modulo,1,4),replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS',''))  
+		WHERE (a.modulo <> 'MENUINT') AND a.modulo regexp '^[^0-9]+$'
+		GROUP BY concat(substr(a.modulo,1,4),replace(replace(substr(a.modulo,5,16),'OTR',''),'LIS',''))
 		ORDER BY modulo,secu";
 
 		$mc1 = $this->db->query($mSQL);
@@ -102,14 +102,14 @@ class Accesos extends Controller{
 		$salida .= "</table>\n";
 		$salida .= "</div>\n";
 		$salida .= "</td><td>\n";
-	
+
 		$salida .= '
 		<div id=\'ContenedoresDatasis\' style=\'width:230px;\'>
 			<p style="font: bold 18px;">Seleccione un Modulo del panel izquierdo</p>
 		</div>';
 
 		$salida .= '</td></tr></table>';
-		//$salida .= anchor('/accesos','Regresar');;     
+		//$salida .= anchor('/accesos','Regresar');;
 
 		$script = '
 		<style>
@@ -143,9 +143,9 @@ class Accesos extends Controller{
 		</style>
 		<script>
 		$(function() {
-			$("#usuario").selectmenu({select: function( event, ui ) { limpia();}})
-			.selectmenu("menuWidget").addClass("overflow");
-			$("#copia"  ).selectmenu().selectmenu("menuWidget").addClass("overflow");
+			//$("#usuario").selectmenu({select: function( event, ui ) { limpia();}})
+			//.selectmenu("menuWidget").addClass("overflow");
+			//$("#copia"  ).selectmenu().selectmenu("menuWidget").addClass("overflow");
 		});
 		function traeitem( usuario, modulo ){
 			$.post( "'.site_url("accesos/traeitem/").'", { usuario: usuario, modulo: modulo })
@@ -200,7 +200,7 @@ class Accesos extends Controller{
 			$.prompt(temp);
 		}
 
-		function limpia(){ 
+		function limpia(){
 			$("#ContenedoresDedata").html("Seleccione un Grupo");
 			$("#ContenedoresDatasis").html("Seleccione un Modulo");
 		}
@@ -217,7 +217,7 @@ class Accesos extends Controller{
 		$data['head']   .= style('estilos.css');
 		$data['head']   .= style('impromptu/default.css');
 
-		
+
 		$data['title']   = '<h1>Accesos del usuario:</h1>';
 		$data['title']   = "<h1>Administraci&oacute;n de accesos, usuario <b>$usuario</b></h1>";
 		$this->load->view('view_ventanas', $data);
@@ -226,7 +226,7 @@ class Accesos extends Controller{
 	//******************************************************************
 	// Copia los accesso
 	//
-	function copiaac(){ 
+	function copiaac(){
 		$usuario = $this->input->post('usuario');
 		$copia   = $this->input->post('copia');
 
@@ -271,11 +271,11 @@ class Accesos extends Controller{
 		$modulo  = $this->input->post('modulo');
 		$i       = 0;
 		$panel   = '';
-		
+
 		$salida = '<table width=100% cellspacing="0" style="font-size:0.8em;">';
 
 		$mSQL="SELECT aa.modulo,aa.titulo, aa.acceso, bb.panel FROM
-			(SELECT a.modulo,a.titulo, IFNULL(b.acceso,'N') AS acceso ,a.panel 
+			(SELECT a.modulo,a.titulo, IFNULL(b.acceso,'N') AS acceso ,a.panel
 			FROM intramenu AS a
 			LEFT JOIN intrasida AS b ON a.modulo=b.modulo AND b.usuario=".$this->db->escape($usuario)."
 			WHERE MID(a.modulo,1,1) = ".$this->db->escape($modulo)." AND LENGTH(TRIM(a.modulo)>1 ) ) AS aa
@@ -285,7 +285,7 @@ class Accesos extends Controller{
 		$mc = $this->db->query($mSQL);
 		foreach( $mc->result() as $row ){
 			if($row->acceso=='S') $row->acceso='checked'; else $row->acceso='';
-				
+
 			if(strlen($row->modulo)==1) {
 				$salida .= '<tr><th colspan=2>'.$row->titulo.'</th></tr>';
 				$panel = '';
@@ -312,16 +312,32 @@ class Accesos extends Controller{
 	function guardainter(){
 		$usuario = $this->input->post('usuario');
 		$modulo  = $this->input->post('modulo');
+		$dbusr   = $this->db->escape($usuario);
+		$dbmodulo= $this->db->escape($modulo);
 
-		$mSQL = "SELECT COUNT(*) FROM intrasida WHERE usuario=".$this->db->escape($usuario)." AND modulo=".$this->db->escape($modulo) ;
-		if ( $this->datasis->dameval($mSQL) == 0 ){
-			$mSQL="INSERT IGNORE INTO intrasida (usuario,modulo,acceso) VALUES(".$this->db->escape($usuario).", ".$this->db->escape($modulo)." ,'S')";
+		$mSQL = "SELECT COUNT(*) AS cana FROM intrasida WHERE usuario=${dbusr} AND modulo=${dbmodulo}";
+		$cana = intval($this->datasis->dameval($mSQL));
+		if($cana == 0 ){
+			$mSQL="INSERT IGNORE INTO intrasida (usuario,modulo,acceso) VALUES(${dbusr}, ${dbmodulo} ,'S')";
 			$this->db->query($mSQL);
-		} else {
-			$mSQL="UPDATE intrasida SET acceso=IF(acceso='N','S','N') WHERE usuario=".$this->db->escape($usuario)." AND modulo=".$this->db->escape($modulo) ;
+		}else{
+			$mSQL="UPDATE intrasida SET acceso=IF(acceso='N','S','N') WHERE usuario=${dbusr} AND modulo=${dbmodulo}";
 			$this->db->query($mSQL);
 		}
-		echo $mSQL;
+		$modprin  =$modulo[0];
+		$dbmodprin=$this->db->escape($modprin);
+		$dbmodprib=$this->db->escape($modprin.'%');
+		$mSQL = "SELECT COUNT(*) AS cana FROM intrasida WHERE usuario=${dbusr} AND modulo LIKE ${dbmodprib} AND acceso='S' AND CHAR_LENGTH(modulo)>1";
+
+		$cana = intval($this->datasis->dameval($mSQL));
+		if($cana>0){
+			$mSQL="REPLACE INTO intrasida (usuario,modulo,acceso) VALUES(${dbusr},${dbmodprin},'S')";
+			$this->db->simple_query($mSQL);
+		}else{
+			$mSQL="REPLACE INTO intrasida (usuario,modulo,acceso) VALUES(${dbusr},${dbmodprin},'N')";
+			$this->db->simple_query($mSQL);
+		}
+
 	}
 
 	//******************************************************************
@@ -337,10 +353,10 @@ class Accesos extends Controller{
 		$salida .= '<tr><th colspan=2>'.$modulo.'</th></tr>';
 
 		$mSQL  = "
-			SELECT a.codigo, a.modulo, a.secu, a.titulo, b.acceso, b.usuario 
-			FROM tmenus a LEFT JOIN sida b ON a.codigo = b.modulo 
-				AND b.usuario=".$this->db->escape($usuario)." 
-			WHERE a.modulo <> 'MENUINT' AND a.modulo regexp '^[^0-9]+$' 
+			SELECT a.codigo, a.modulo, a.secu, a.titulo, b.acceso, b.usuario
+			FROM tmenus a LEFT JOIN sida b ON a.codigo = b.modulo
+				AND b.usuario=".$this->db->escape($usuario)."
+			WHERE a.modulo <> 'MENUINT' AND a.modulo regexp '^[^0-9]+$'
 				AND a.modulo IN (".$this->db->escape($modulo).",".$this->db->escape($modulo.'LIS').",".$this->db->escape($modulo.'OTR').")
 				AND a.titulo NOT IN ('Prox','Ante','Busca','Tabla')
 				AND a.ejecutar!=''
@@ -520,7 +536,7 @@ class Accesos extends Controller{
 	function usuarios(){
 		$mSQL = "SELECT * FROM usuario ORDER BY us_nombre";
 		$query = $this->db->query($mSQL);
-		$results = $query->num_rows(); 
+		$results = $query->num_rows();
 		$arr = $this->datasis->codificautf8($query->result_array());
 		echo '{success:true, message:"Loaded data" ,results:'. $results.', data:'.json_encode($arr).'}';
 	}

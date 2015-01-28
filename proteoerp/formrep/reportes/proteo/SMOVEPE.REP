@@ -38,14 +38,13 @@ $filter = new DataFilter2('Filtro del Reporte');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
 $select=array('a.cod_cli','a.tipo_doc','a.fecha','a.transac','a.monto','a.numero','a.vence','a.abonos','b.cliente','b.nombre',
-"DATEDIFF(NOW(),a.vence) AS dv",
+"DATEDIFF(CURDATE(),a.vence) AS dv",'b.rifci',
 "(monto)*IF(tipo_doc IN ('AN','NC'),-1,1) AS monto2",
 "(monto-abonos)*IF(tipo_doc IN ('AN','NC'),-1,1) AS saldo");
-
 $filter->db->select($select );
 $filter->db->from('smov AS a');
 $filter->db->join('scli AS b','a.cod_cli=b.cliente');
-$filter->db->where("`abonos`<>`monto` AND a.tipo_doc IN ('AN','FC','ND','GI','NC')");
+$filter->db->where("`a`.`abonos`<>`a`.`monto` AND `a`.`tipo_doc` IN ('AN','FC','ND','GI','NC')");
 $filter->db->orderby('a.cod_cli,a.fecha,a.transac');
 
 $filter->cod_cli = new inputField('Cliente', 'cod_cli');
@@ -60,6 +59,14 @@ $filter->socio->clause ='in';
 $filter->socio->db_name='(socio,cod_cli) ';
 $filter->socio->append($bsocio.' No se tomará en cuenta el cliente');
 
+$filter->activos = new checkboxField('Solo clientes activos', 'activos', 'S','N');
+$filter->activos->insertValue = 'N';
+$filter->activos->clause='';
+
+$filter->vencido = new checkboxField('Solo saldos Vencidos', 'vencidos', 'S','N');
+$filter->vencido->insertValue = 'N';
+$filter->vencido->clause='';
+
 $filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
@@ -69,6 +76,14 @@ $filter->buttons('search');
 $filter->build();
 
 if($this->rapyd->uri->is_set('search')){
+
+	if($filter->activos->newValue=='S'){
+		$filter->db->where('`b`.`tipo` > 0');
+	}
+
+	if($filter->vencido->newValue=='S'){
+		$filter->db->where('CURDATE() >= a.vence');
+	}
 
 	$mSQL=$this->rapyd->db->_compile_select();
 	//echo $mSQL;
@@ -95,7 +110,7 @@ if($this->rapyd->uri->is_set('search')){
 	$pdf->AddCol('monto2'  ,30,'Importe',  'R',9);
  	$pdf->AddCol('saldo'   ,30,'Saldo',    'R',9);
 	$pdf->setTotalizar('dv','monto2','saldo');
- 	$pdf->setGrupoLabel('Cliente  <#cod_cli#>  <#nombre#> ');
+ 	$pdf->setGrupoLabel('Cliente  <#cod_cli#>  <#nombre#> <#rifci#>');
 	$pdf->setGrupo('cod_cli');
 
 	$pdf->Table();
