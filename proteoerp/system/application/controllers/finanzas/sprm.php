@@ -1674,11 +1674,17 @@ class Sprm extends Controller {
 
 								$('#saldo_val').text('');
 							}else{
+								if(data[0].proveed==$('#cod_prv').val()){
+									$('#cod_prv').data('ui-autocomplete')._trigger('select', 'autocompleteselect', {item : data[0]});
+									$('#cod_prv').autocomplete('close');
+								}
+
 								$.each(data,
 									function(i, val){
 										sugiere.push( val );
 									}
 								);
+
 							}
 							add(sugiere);
 						},

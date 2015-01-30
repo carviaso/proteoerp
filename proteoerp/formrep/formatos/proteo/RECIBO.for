@@ -75,9 +75,17 @@ foreach ($_query->result() as $_row){
 	if($interval->d >1 ) $antiguedad .= $interval->d.' d&iacute;as '; else $antiguedad .= $interval->d.' d&iacute;a ';
 
 	if($tipo=='M'){
-		$dias = 30;
+		$dias = $datetime2->format('d')-1;
 	}elseif($tipo=='Q'){
-		$dias = 15;
+		if($datetime2->format('d')==31){
+			$dias = 15;
+		}elseif($datetime2->format('d')==29){
+			$dias = 13;
+		}elseif($datetime2->format('d')==28){
+			$dias = 12;
+		}else{
+			$dias = 14;
+		}
 	}elseif($tipo=='S'){
 		$dias = 7;
 	}elseif($tipo=='B'){
