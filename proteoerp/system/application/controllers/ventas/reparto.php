@@ -276,7 +276,7 @@ class Reparto extends Controller {
 			if(id){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				if(ret.status=="C"){
-					$.prompt("<h1>No se puede modificar una conciliaci&oacute;n cerrada.</h1>");
+					$.prompt("<h1>No se puede modificar un reparto cerrado.</h1>");
 				}else{
 					mId = id;
 					$.post("'.site_url('finanzas/smov/cobrorep').'/"+id, function(data){
@@ -369,29 +369,30 @@ class Reparto extends Controller {
 				"Guardar": function() {
 					var bValid = true;
 					var murl = $("#df1").attr("action");
-
-					$.ajax({
-						type: "POST", dataType: "html", async: false,
-						url: murl,
-						//data: {monto: $("#monto").val(), idsfac: jQuery("#tcobro").jqGrid("getGridParam","selarrrow") },
-						data: $("#df1").serialize(),
-						success: function(r,s,x){
-							try{
-								var json = JSON.parse(r);
-								if(json.status == "A"){
-									apprise("Registro Guardado");
-									$( "#fcobro" ).dialog( "close" );
-									grid.trigger("reloadGrid");
-									//'.$this->datasis->jwinopen(site_url('formatos/ver/ORDC').'/\'+json.pk.id+\'/id\'').';
-									return true;
-								} else {
-									apprise(json.mensaje);
+					if(confirm("Confirma realizar la cobranza efectivo?")){
+						$.ajax({
+							type: "POST", dataType: "html", async: false,
+							url: murl,
+							//data: {monto: $("#monto").val(), idsfac: jQuery("#tcobro").jqGrid("getGridParam","selarrrow") },
+							data: $("#df1").serialize(),
+							success: function(r,s,x){
+								try{
+									var json = JSON.parse(r);
+									if(json.status == "A"){
+										apprise("Registro Guardado");
+										$( "#fcobro" ).dialog( "close" );
+										grid.trigger("reloadGrid");
+										//'.$this->datasis->jwinopen(site_url('formatos/ver/ORDC').'/\'+json.pk.id+\'/id\'').';
+										return true;
+									} else {
+										apprise(json.mensaje);
+									}
+								}catch(e){
+									$("#fcobro").html(r);
 								}
-							}catch(e){
-								$("#fcobro").html(r);
 							}
-						}
-					});
+						});
+					}
 				},
 				"Cancelar": function() {
 					$("#fcobro").html("");

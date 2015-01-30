@@ -3173,7 +3173,7 @@ class Smov extends Controller {
 			}else{
 				$rt=array(
 					'status' =>'B',
-					'mensaje'=>'Problemas guardado',
+					'mensaje'=>'No hubo cambios',
 					'pk'     =>null
 				);
 			}
