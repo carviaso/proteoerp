@@ -54,7 +54,7 @@ class Reparto extends Controller {
 		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png',     'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'cobrard', 'img'=>'images/ventafon.png',    'alt'=>'Cobrar Reparto',       'label'=>'Cobrar Reparto',       'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'finalid', 'img'=>'images/recalcular.jpg',  'alt'=>'Liquidar CH/MI',     'label'=>'Liquidar Reparto',     'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'finalid', 'img'=>'images/recalcular.jpg',  'alt'=>'Liquidar CH/MI',       'label'=>'Liquidar CH/MI',     'tema'=>'anexos'));
 
 		//$grid->wbotonadd(array('id'=>'buscafc', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Buscar Faturas',      ));
 
@@ -76,6 +76,7 @@ class Reparto extends Controller {
 		$funciones .= '$("#entrega").hide();'."\n";
 		$funciones .= '$("#cerrard").hide();'."\n";
 		$funciones .= '$("#cobrard").hide();'."\n";
+		$funciones .= '$("#finalid").hide();'."\n";
 
 		$param['funciones']    = $funciones;
 		$param['WestPanel']    = $WestPanel;
@@ -1064,18 +1065,20 @@ class Reparto extends Controller {
 						$("#entrega").hide();
 						$("#cerrard").hide();
 						$("#cobrard").hide();
+						$("#finalid").hide();
 					}else if( ret.tipo == \'C\'){
 						$("#agregaf").hide();
 						$("#cargard").hide();
 						$("#entrega").show();
 						$("#cerrard").hide();
-						$("#cobrard").hide();
+						$("#cobrard").show();
+						$("#finalid").show();
 					}else if( ret.tipo == \'E\'){
 						$("#agregaf").hide();
 						$("#cargard").hide();
 						$("#entrega").hide();
 						$("#cerrard").show();
-						$("#cobrard").hide();
+						$("#cobrard").show();
 						$("#ladicional").text("Para desincorporar una factura no entregada haga doble click sobre la factura a eliminar.");
 						$.post("'.site_url($this->url.'eliminadas').'/"+id, function(data){
 							$("#ladicional").after(data);
@@ -1090,8 +1093,10 @@ class Reparto extends Controller {
 
 						if( ret.tipo == \'F\' ){
 							$("#cobrard").show();
+							$("#finalid").show();
 						}else{
 							$("#cobrard").hide();
+							$("#finalid").hide();
 						}
 					}
 				}
@@ -1629,7 +1634,7 @@ class Reparto extends Controller {
 		$id=intval($id);
 		if($id<=0) return false;
 		$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
-		if($tipo != 'F') return false;
+		if($tipo != 'F' || $tipo == 'C' || $tipo == 'E'){ echo 'Reparto no se puede cobrar con tipo '.$tipo; return false; }
 
 		$mixto=$cheque=array();
 		$mSQL="SELECT c.id, a.numero, c.tipo_doc AS tipo, a.fecha, c.monto-c.abonos AS monto,b.nombre, a.repcob,b.cliente,b.id AS sclid

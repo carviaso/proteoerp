@@ -36,20 +36,30 @@ function selcli(cliente,numero,tipo,pago){
 				}
 			}
 		});
-
-		//$("[id^='tr_itccli_']").not("#tr_itccli_"+smovid).remove();
 	});
 }
 </script>
 <div style='text-align:center;background-color:#E4E4E4' class='ui-corner-all'>
-<?php if(count($cheque)>0){ ?>
+<?php
+$cch=count($cheque);
+$cmi=count($mixto);
+if($cch>0){ ?>
  <b>Cheques</b>: <?php foreach($cheque as $num){ echo ' '.$num; }?>
 <?php
 }
-if(count($mixto)>0){ ?>
+if($cmi>0){ ?>
  <b>Mixtos</b>:  <?php foreach($mixto  as $num){ echo ' '.$num; } ?>
-<?php } ?>
+<?php }
+if($cch+$cmi ==0 ){
+	echo 'No se han marcado efectos para pago, seleccionelos en el bot&oacute;n de <b>Cobrar Reparto</b>';
+}
+?>
 </div>
-<div id='fsclisel'>
+<div id='fsclisel' style='text-align:center;'>
+<?php
+if($cch+$cmi >0 ){
+	echo 'Seleccione el efecto que desea cancelar.';
+}
+?>
 
 </div>
