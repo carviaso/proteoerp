@@ -54,7 +54,7 @@ class Reparto extends Controller {
 		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png',     'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'cobrard', 'img'=>'images/ventafon.png',    'alt'=>'Cobrar Reparto',       'label'=>'Cobrar Reparto',       'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'finalid', 'img'=>'images/recalcular.jpg',  'alt'=>'Liquidar Reparto',     'label'=>'Liquidar Reparto',     'tema'=>'anexos'));
+		$grid->wbotonadd(array('id'=>'finalid', 'img'=>'images/recalcular.jpg',  'alt'=>'Liquidar CH/MI',     'label'=>'Liquidar Reparto',     'tema'=>'anexos'));
 
 		//$grid->wbotonadd(array('id'=>'buscafc', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Buscar Faturas',      ));
 
@@ -278,7 +278,7 @@ class Reparto extends Controller {
 					$.prompt("<h1>No se puede modificar una conciliaci&oacute;n cerrada.</h1>");
 				}else{
 					mId = id;
-					$.post("'.site_url($this->url.'cobrorep').'/"+id, function(data){
+					$.post("'.site_url('finanzas/smov/cobrorep').'/"+id, function(data){
 						$("#fcobro").html(data);
 						$("#fcobro").dialog( "open" );
 					});
@@ -363,7 +363,7 @@ class Reparto extends Controller {
 
 		$bodyscript .= '
 		$("#fcobro").dialog({
-			autoOpen: false, height: 520, width: 715, modal: true,
+			autoOpen: false, height: 520, width: 730, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -1623,95 +1623,6 @@ class Reparto extends Controller {
 	}
 
 	//******************************************************************
-	// Cobro del reparto
-	//
-	function cobrorep($id){
-		$id=intval($id);
-		if($id<=0) return false;
-		$tipo     = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
-		if($tipo != 'F') return false;
-
-		$this->rapyd->load('dataform');
-
-		//Chequear si el reparto no esta cerrado
-
-
-		$edit = new DataForm($this->url.'cobrorep/'.$id.'/process');
-
-		$edit->monto = new inputField('Monto de operaci&oacute;n','monto');
-		$edit->monto->rule = 'required|numeric';
-		$edit->monto->type = 'inputhidden';
-		$edit->monto->insertValue='0.0';
-		$edit->monto->css_class='inputnum';
-
-		/*$edit->recibido = new inputField('Monto recibido','recibido');
-		$edit->recibido->rule = 'required|numeric';
-		$edit->recibido->type = 'inputhidden';
-		$edit->recibido->insertValue='0.0';
-		$edit->recibido->css_class='inputnum';*/
-		$edit->build_form();
-
-		if($edit->on_success()){
-			$itpago=$this->input->post('itpago');
-			if(is_array($itpago)){
-				$error=0;
-				foreach($itpago as $itid=>$repcob){
-					$itid=intval($itid);
-					if($repcob=='NI') $repcob=null;
-					$dbrepcob=$this->db->escape($repcob);
-					if($itid>0){
-						$mSQL="UPDATE sfac SET repcob=${dbrepcob} WHERE id=${itid}";
-						$ban=$this->db->simple_query($mSQL);
-						if($ban){
-							//logusu('reparto','Creo pago ');
-						}else{
-							$error++;
-						}
-					}
-				}
-				if($error>0){
-					$rt=array(
-						'status' =>'B',
-						'mensaje'=>'Problemas guardado',
-						'pk'     =>null
-					);
-				}else{
-					$rt=array(
-						'status' =>'A',
-						'mensaje'=>'Cambio exitoso',
-						'pk'     =>null
-					);
-				}
-
-			}else{
-				$rt=array(
-					'status' =>'B',
-					'mensaje'=>'Problemas guardado',
-					'pk'     =>null
-				);
-			}
-			echo json_encode($rt);
-		}
-
-		if($edit->on_error()){
-			$rt=array(
-				'status' =>'B',
-				'mensaje'=>preg_replace('/<[^>]*>/', '', $edit->error_string),
-				'pk'     =>null,
-			);
-			echo json_encode($rt);
-			$act = false;
-			return true;
-		}
-
-		if($edit->on_show()){
-			$conten['id']   =  $id;
-			$conten['form'] =&  $edit;
-			$this->load->view('view_repartocobro', $conten);
-		}
-	}
-
-	//******************************************************************
 	// C.Cobro
 	//
 	function ccobro($id){
@@ -1721,7 +1632,7 @@ class Reparto extends Controller {
 		if($tipo != 'F') return false;
 
 		$mixto=$cheque=array();
-		$mSQL="SELECT c.id, a.numero, a.tipo_doc AS tipo, a.fecha, c.monto-c.abonos AS monto,b.nombre, a.repcob,b.cliente
+		$mSQL="SELECT c.id, a.numero, c.tipo_doc AS tipo, a.fecha, c.monto-c.abonos AS monto,b.nombre, a.repcob,b.cliente,b.id AS sclid
 			FROM sfac AS a
 			JOIN scli AS b ON a.cod_cli=b.cliente
 			JOIN smov AS c ON a.numero=c.numero AND a.transac=c.transac
@@ -1734,14 +1645,18 @@ class Reparto extends Controller {
 				$numero  =trim($row['numero']);
 				$smovid  =$row['id'];
 				$tipo_doc=trim($row['tipo']);
+				$sclid   =$row['sclid'];
+				$repcob  =strtoupper($row['repcob']);
+
+				$btn="<button onclick=\"selcli('${sclid}','${numero}','${tipo_doc}','${repcob}')\" class='ui-state-default ui-corner-all'>".$tipo_doc.$numero.'</button>';
 				if($row['repcob']=='MI'){
-					$mixto[] = "<button onclick=\"selcli('${cliente}','${numero}','FC',${numero})\">".$numero.'</button>';
+					$mixto[] = $btn;
 				}else{
-					$cheque[]= "<button onclick=\"selcli('${cliente}','${numero}','FC',${numero})\">".$numero.'</button>';
+					$cheque[]= $btn;
 				}
 			}
 		}
-		$conten = array('mixto'=>$mixto,'cheque'=>$cheque);
+		$conten = array('mixto'=>$mixto,'cheque'=>$cheque,'id'=>$id);
 		$this->load->view('view_repartocc', $conten);
 	}
 

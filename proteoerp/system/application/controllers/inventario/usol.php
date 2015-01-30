@@ -493,6 +493,11 @@ class Usol extends Controller {
 			  PRIMARY KEY (`codigo`)
 			) ENGINE=MyISAM DEFAULT CHARSET=latin1";
 			$this->db->simple_query($mSQL);
+
+			$this->db->simple_query("INSERT INTO `usol` (`codigo`, `nombre`, `gasto`, `depto`, `sucursal`) VALUES ('01', 'PERDIDAS, ROBOS Y DESTRUCCION', '', '', '01')");
+			$this->db->simple_query("INSERT INTO `usol` (`codigo`, `nombre`, `gasto`, `depto`, `sucursal`) VALUES ('02', 'COMPRAS Y COSTEOS'            , '', '', '01')");
+			$this->db->simple_query("INSERT INTO `usol` (`codigo`, `nombre`, `gasto`, `depto`, `sucursal`) VALUES ('03', 'SOBRANTE DE INVENTARIO'       , '', '', '01')");
+
 		}
 
 		$campos=$this->db->list_fields('usol');

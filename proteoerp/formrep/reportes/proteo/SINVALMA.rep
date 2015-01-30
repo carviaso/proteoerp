@@ -1,20 +1,26 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
 
 $filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, 'search'));
 $filter->title('Elija un formato de salida');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-	$this->db->select(array('TRIM(ubica) AS ubica','TRIM(ubides) AS ubides'));
-	$this->db->from('caub AS a');
-	$this->db->where('gasto' ,'N');
-	$this->db->where('invfis','N');
-	$query = $this->db->get();
+$this->db->select(array('TRIM(ubica) AS ubica','TRIM(ubides) AS ubides'));
+$this->db->from('caub AS a');
+$this->db->where('gasto' ,'N');
+$this->db->where('invfis','N');
+$query = $this->db->get();
 
-	foreach($query->result() as $row){
-		$obj='caub_'.$row->ubica;
-		$filter->$obj = new checkboxField($row->ubica.' '.$row->ubides, $obj, 'S','N');
-		$filter->$obj->insertValue = 'N';
-	}
+foreach($query->result() as $row){
+	$obj='caub_'.$row->ubica;
+	$filter->$obj = new checkboxField($row->ubica.' '.$row->ubides, $obj, 'S','N');
+	$filter->$obj->insertValue = 'N';
+}
 
 $filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
@@ -53,7 +59,7 @@ if($this->rapyd->uri->is_set('search')){
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
-	$pdf->setTitulo("Inventario por almacenes");
+	$pdf->setTitulo('Inventario por Almacenes');
 	//$pdf->setSobreTabla($sobretabla,9);
 	//$pdf->setSubTitulo("Para la fecha: ".$this->input->post('fechad'));
 	//$pdf->seType('fecha','date');
@@ -73,9 +79,9 @@ if($this->rapyd->uri->is_set('search')){
 	$pdf->Table();
 	$pdf->Output();
 }else{
-	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Inventario por almacenes</h2>';
+	$data['titulo'] = '<h2 class="mainheader">Inventario por Almacenes</h2>';
 	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

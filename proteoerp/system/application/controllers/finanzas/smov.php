@@ -16,6 +16,7 @@ class Smov extends Controller {
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
 		$this->datasis->modulo_id('525',1);
+		$this->genesal=true;
 	}
 
 	function index(){
@@ -1226,6 +1227,7 @@ class Smov extends Controller {
 					success:
 						function(data){
 							var sugiere = [];
+
 							if(data.length==0){
 								$('#id_scli').val('');
 
@@ -1240,6 +1242,11 @@ class Smov extends Controller {
 
 								$('#saldo_val').text('');
 							}else{
+								if(data[0].cod_cli==$('#cod_cli').val()){
+									$('#cod_cli').data('ui-autocomplete')._trigger('select', 'autocompleteselect', {item : data[0]});
+									$('#cod_cli').autocomplete('close');
+								}
+
 								$.each(data,
 									function(i, val){
 										sugiere.push( val );
@@ -1247,11 +1254,12 @@ class Smov extends Controller {
 								);
 							}
 							add(sugiere);
+
 						},
 				})
 			},
 			minLength: 2,
-			select: function( event, ui ) {
+			select: function( event, ui ){
 				$('#cod_cli').attr('readonly', 'readonly');
 
 				$('#id_scli').val(ui.item.id);
@@ -1708,16 +1716,37 @@ class Smov extends Controller {
 
 			echo json_encode($rt);
 		}else{
-			$conten['cana']  = $i;
-			$conten['form']  = & $edit;
-			$conten['title'] = heading("Cobro a cliente: (${cliente}) ${scli_nombre} ${scli_rif}");
 
-			$data['content'] = $this->load->view('view_ccli.php', $conten);
+			if($this->genesal){
+				$conten['cana']  = $i;
+				$conten['form']  = & $edit;
+				$conten['title'] = heading("Cobro a cliente: (${cliente}) ${scli_nombre} ${scli_rif}");
+
+				$data['content'] = $this->load->view('view_ccli.php', $conten);
+			}else{
+				if($edit->on_error()){
+					$rt=array(
+						'status' =>'B',
+						'mensaje'=>preg_replace('/<[^>]*>/', '', $edit->error_string),
+						'pk'     =>null,
+					);
+					echo json_encode($rt);
+				}
+
+				 if($edit->on_success()){
+					$rt=array(
+						'status' =>'A',
+						'mensaje'=>'Registro guardado',
+						'pk'     =>null,
+					);
+					echo json_encode($rt);
+				}
+
+			}
 		}
 	}
 
 	function _pre_ccli_insert($do){
-
 		$cliente  =$do->get('cod_cli');
 		$estampa = $do->get('estampa');
 		$hora    = $do->get('hora');
@@ -2270,7 +2299,7 @@ class Smov extends Controller {
 		if(empty($tipo)) return true;
 		$this->validation->set_message('chtipo', 'El campo %s es obligatorio');
 
-		if(empty($val) && ($tipo=='NC' || $tipo=='DP' || $tipo=='DE'))
+		if(empty($val) && ($tipo=='NC' || $tipo=='DP' || $tipo=='DE' || $tipo=='CH'))
 			return false;
 		else
 			return true;
@@ -3043,6 +3072,132 @@ class Smov extends Controller {
 		$this->load->view('view_ventanas_sola', $data);
 	}
 
+	//******************************************************************
+	// Cobro del reparto
+	//
+	function cobrorep($id){
+		$id=intval($id);
+		if($id<=0) return false;
+		$tipo     = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
+		if($tipo != 'F') return false;
+
+		$this->rapyd->load('dataform');
+
+		$edit = new DataForm($this->url.'cobrorep/'.$id.'/insert');
+
+		$edit->monto = new inputField('Monto total recibido','monto');
+		$edit->monto->rule = 'required|numeric';
+		$edit->monto->type = 'inputhidden';
+		$edit->monto->insertValue='0.0';
+		$edit->monto->css_class='inputnum';
+
+		$edit->build_form();
+
+		if($edit->on_success()){
+			$errno='';
+			$itpago=$this->input->post('itpago');
+			if(is_array($itpago)){
+				$error=0;
+				foreach($itpago as $itid=>$repcob){
+					$itid=intval($itid);
+					if($repcob=='EF' || $repcob=='CH' || $repcob=='MI'){
+						$dbrepcob=$this->db->escape($repcob);
+						if($itid>0){
+							$sql="SELECT a.repcob, c.id AS idcli,a.cod_cli,b.numero,b.tipo_doc,b.fecha,b.monto-b.abonos AS saldo,b.monto
+								FROM sfac AS a
+								JOIN smov AS b ON a.transac=b.transac AND a.numero=b.numero
+								JOIN scli AS c ON a.cod_cli=c.cliente
+								WHERE a.id=${itid}";
+							$row=$this->datasis->damerow($sql);
+							if(empty($row)) continue;
+
+							if($row['repcob']!=$repcob){
+								$mSQL="UPDATE sfac SET repcob=${dbrepcob} WHERE id=${itid}";
+								$ban=$this->db->simple_query($mSQL);
+								if(!$ban){ $error++; }
+							}
+
+							if($repcob=='EF'){
+								$_POST = array(
+									'cod_cli'     => $row['cod_cli'],
+									'tipo_doc'    => 'AB',
+									'codigo'      => '',
+									'vd'          => '',
+									'fecdoc'      => dbdate_to_human(date('y-m-d')),
+									'tipo_doc_0'  => $row['tipo_doc'],
+									'numero_0'    => $row['numero'],
+									'fecha_0'     => dbdate_to_human(date($row['fecha'])),
+									'monto_0'     => $row['monto'],
+									'abono_0'     => $row['saldo'],
+									'ppago_0'     => '',
+									'monto'       => $row['saldo'],
+									'nroex'       => '',
+									'tipo_0'      => 'EF',
+									'sfpafecha_0' => '',
+									'num_ref_0'   => '',
+									'banco_0'     => '',
+									'itmonto_0'   => $row['saldo'],
+									'observa1'    => 'PAGA '.$row['tipo_doc'].$row['numero'].' DESDE REPARTO '.$id,
+									'observa2'    => ''
+								);
+								$this->genesal=false;
+								ob_start();
+									$this->ccli($row['idcli']);
+									$rt=ob_get_contents();
+								@ob_end_clean();
+								$rt=json_decode($rt);
+								if($rt->status =='B'){
+									$error++;
+									$errno=br().$rt->mensaje;
+								}
+							}
+
+						}
+					}
+				}
+				if($error>0){
+					$rt=array(
+						'status' =>'B',
+						'mensaje'=>'Problemas guardado '.$errno,
+						'pk'     =>null
+					);
+				}else{
+					$rt=array(
+						'status' =>'A',
+						'mensaje'=>'Cambio exitoso',
+						'pk'     =>null
+					);
+				}
+
+			}else{
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>'Problemas guardado',
+					'pk'     =>null
+				);
+			}
+			echo json_encode($rt);
+		}
+
+		if($edit->on_error()){
+			$rt=array(
+				'status' =>'B',
+				'mensaje'=>preg_replace('/<[^>]*>/', '', $edit->error_string),
+				'pk'     =>null,
+			);
+			echo json_encode($rt);
+			$act = false;
+			return true;
+		}
+
+		if($edit->on_show()){
+			$conten['id']   =  $id;
+			$conten['form'] =& $edit;
+			$this->load->view('view_repartocobro', $conten);
+		}
+	}
+	//fin de cobro del reparto
+
 	function _post_print_update(){
 		return false;
 	}
@@ -3068,8 +3223,6 @@ class Smov extends Controller {
 		}
 
 		if(!in_array('nroex',$campos)) $this->db->simple_query('ALTER TABLE smov ADD COLUMN nroex CHAR(15) NULL AFTER ncredito');
-
-
 
 		$itcampos=$this->db->list_fields('itccli');
 		if(!in_array('id',$itcampos)){

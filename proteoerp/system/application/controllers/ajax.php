@@ -3199,7 +3199,8 @@ class Ajax extends Controller {
 			$dbmid = $this->db->escape($mid);
 			$retArray = $retorno = array();
 
-			$mSQL="SELECT a.id, a.numero, a.tipo_doc AS tipo, a.fecha, c.monto-c.abonos AS monto,b.nombre, a.repcob
+			$mSQL="SELECT a.id, a.numero, a.tipo_doc AS tipo, a.fecha,
+				c.monto-c.abonos AS monto,b.nombre, a.repcob, a.cod_cli AS cliente
 			FROM sfac AS a
 			JOIN scli AS b ON a.cod_cli=b.cliente
 			JOIN smov AS c ON a.numero=c.numero AND a.transac=c.transac
@@ -3217,7 +3218,8 @@ class Ajax extends Controller {
 					$retArray['fecha']   = $objdate->format('d/m/Y');
 					$retArray['nombre']  = $this->en_utf8($row['nombre']);
 					$retArray['monto']   = $row['monto'];
-					$retArray['repcob']   = trim($row['repcob']);
+					$retArray['repcob']  = trim($row['repcob']);
+					$retArray['cliente'] = trim($row['cliente']);
 
 					array_push($retorno, $retArray);
 				}
