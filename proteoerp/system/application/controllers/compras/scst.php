@@ -2090,7 +2090,7 @@ class Scst extends Controller {
 		$edit->tipo = new dropdownField('Tipo', 'tipo_doc');
 		$edit->tipo->option('FC','Factura a Cr&eacute;dito');
 		$edit->tipo->option('NC','Nota de Cr&eacute;dito');
-		//$edit->tipo->option('NE','Nota de Entrega'); //Falta implementar los metodos post para este caso
+		$edit->tipo->option('NE','Nota de Entrega'); //Falta implementar los metodos post para este caso
 		$edit->tipo->rule = 'required';
 		$edit->tipo->style='width:130px;';
 		$edit->tipo->onchange='chtipodoc()';
@@ -2905,7 +2905,7 @@ class Scst extends Controller {
 
 			$form->tablafo = new containerField('tablafo',$htmltabla);
 
-			if($scstrow['tipo_doc']=='FC'){
+			if( in_array($scstrow['tipo_doc'], array('FC','NE') )){
 				$opt_arr=array(
 					'D' => 'Dejar el precio mayor',
 					'N' => 'No',
@@ -3411,8 +3411,6 @@ class Scst extends Controller {
 		if($pasa==0){
 			$control=$this->datasis->dameval('SELECT control FROM scst WHERE  id='.$id);
 
-			//$msql = "'UPDATE scst SET credito=ctotal-reten-anticipo WHERE id='.$id";
-
 			//Chequea si tiene vehiculos y estan registrados los seriales
 			if($this->db->table_exists('sinvehiculo')){
 				$SQL="SELECT COUNT(*) AS cana
@@ -3457,7 +3455,7 @@ class Scst extends Controller {
 				$dbactuali= $this->db->escape($actuali);
 				$dbdepo   = $this->db->escape($depo);
 
-				if($row['tipo_doc']=='FC'){
+				if( in_array($row['tipo_doc'], array('FC','NE'))){
 					$transac = $row['transac'];
 					$proveed = $row['proveed'];
 					$fecha   = str_replace('-','',$row['fecha']);
@@ -3657,252 +3655,254 @@ class Scst extends Controller {
 					$contribu= $this->datasis->traevalor('CONTRIBUYENTE');
 					$rif     = $this->datasis->traevalor('RIF');
 
-					if($reteiva>0 && $contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
-						//Crea la nota de credito
-						$mnumnc = $this->datasis->fprox_numero('num_nc');
+					if($row['tipo_doc']=='FC'){
+						if($reteiva>0 && $contribu=='ESPECIAL' && strtoupper($rif[0])!='V'){
+							//Crea la nota de credito
+							$mnumnc = $this->datasis->fprox_numero('num_nc');
+							$sprm=array();
+							$sprm['cod_prv']    = $proveed;
+							$sprm['nombre']     = $row['nombre'];
+							$sprm['tipo_doc']   = 'NC';
+							$sprm['numero']     = $mnumnc;
+							$sprm['fecha']      = $actuali;
+							$sprm['monto']      = $reteiva;
+							$sprm['impuesto']   = 0;
+							$sprm['abonos']     = $reteiva;
+							$sprm['vence']      = $actuali;
+							$sprm['tipo_ref']   = 'FC';
+							$sprm['num_ref']    = $row['numero'];
+							$sprm['observa1']   = 'RET/IVA CAUSADA A FC'.$row['numero'];
+							$sprm['estampa']    = $estampa;
+							$sprm['hora']       = $hora;
+							$sprm['transac']    = $transac;
+							$sprm['usuario']    = $usuario;
+							$sprm['codigo']     = 'NOCON';
+							$sprm['descrip']    = 'NOTA DE CONTABILIDAD';
+							$mSQL = $this->db->insert_string('sprm', $sprm);
+							$ban=$this->db->simple_query($mSQL);
+							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+	
+							//Aplica la NC a la FC
+							$itppro=array();
+							$itppro['numppro']    = $mnumnc;
+							$itppro['tipoppro']   = 'NC';
+							$itppro['cod_prv']    = $proveed;
+							$itppro['tipo_doc']   = 'FC';
+							$itppro['numero']     = $row['numero'];
+							$itppro['fecha']      = $actuali;
+							$itppro['monto']      = $reteiva;
+							$itppro['abono']      = $reteiva;
+							$itppro['ppago']      = 0;
+							$itppro['reten']      = 0;
+							$itppro['cambio']     = 0;
+							$itppro['mora']       = 0;
+							$itppro['transac']    = $transac;
+							$itppro['estampa']    = $estampa;
+							$itppro['hora']       = $hora;
+							$itppro['usuario']    = $usuario;
+							$itppro['preten']     = 0;
+							$itppro['creten']     = 0;
+							$itppro['breten']     = 0;
+							$itppro['reteiva']    = 0;
+							$mSQL = $this->db->insert_string('itppro', $itppro);
+							$ban=$this->db->simple_query($mSQL);
+							if(!$ban){ memowrite($mSQL,'scst'); $error++;}
+	
+							//Crea la nota de debito
+							$mnumnd = $this->datasis->fprox_numero('num_nd');
+							$sprm=array();
+							$sprm['cod_prv']   = 'REIVA';
+							$sprm['nombre']    = 'RETENCION DE I.V.A. POR COMPENSAR';
+							$sprm['tipo_doc']  = 'ND';
+							$sprm['numero']    = $mnumnd;
+							$sprm['fecha']     = $actuali;
+							$sprm['monto']     = $reteiva;
+							$sprm['impuesto']  = 0;
+							$sprm['abonos']    = 0;
+							$sprm['vence']     = $actuali;
+							$sprm['tipo_ref']  = 'FC';
+							$sprm['num_ref']   = $row['numero'];
+							$sprm['observa1']  = 'RET/IVA DE '.$proveed.' A DOC. FC'.$row['numero'];
+							$sprm['estampa']   = $estampa;
+							$sprm['hora']      = $hora;
+							$sprm['transac']   = $transac;
+							$sprm['usuario']   = $usuario;
+							$sprm['codigo']    = 'NOCON';
+							$sprm['descrip']   = 'NOTA DE CONTABILIDAD';
+							$mSQL = $this->db->insert_string('sprm', $sprm);
+							$ban=$this->db->simple_query($mSQL);
+							if(!$ban){ memowrite($mSQL,'scst'); $error++;}
+	
+							//Crea la retencion
+							$niva    = $this->datasis->fprox_numero('niva');
+							$ivaplica= $this->datasis->ivaplica($fecha);
+	
+							$riva['nrocomp']    = $niva;
+							$riva['emision']    = ($fecha > $actuali) ? $fecha : $actuali;
+							$riva['periodo']    = substr($riva['emision'],0,6) ;
+							$riva['tipo_doc']   = $row['tipo_doc'];
+							$riva['fecha']      = $fecha;
+							$riva['numero']     = $row['numero'];
+							$riva['nfiscal']    = $row['nfiscal'];
+							$riva['afecta']     = $row['fafecta'];
+							$riva['clipro']     = $proveed;
+							$riva['nombre']     = $row['nombre'];
+							$riva['rif']        = $this->datasis->dameval('SELECT rif FROM sprv WHERE proveed='.$this->db->escape($proveed));
+							$riva['exento']     = $row['cexento'];
+							$riva['tasa']       = $ivaplica['tasa'];
+							$riva['tasaadic']   = $ivaplica['sobretasa'];
+							$riva['tasaredu']   = $ivaplica['redutasa'];
+							$riva['general']    = $row['cgenera'];
+							$riva['geneimpu']   = $row['civagen'];
+							$riva['adicional']  = $row['cadicio'];
+							$riva['adicimpu']   = $row['civaadi'];
+							$riva['reducida']   = $row['creduci'];
+							$riva['reduimpu']   = $row['civared'];
+							$riva['stotal']     = $row['cstotal'];
+							$riva['impuesto']   = $row['cimpuesto'];
+							$riva['gtotal']     = $row['ctotal'];
+							$riva['reiva']      = $reteiva;
+							$riva['transac']    = $transac;
+							$riva['estampa']    = $estampa;
+							$riva['hora']       = $hora;
+							$riva['usuario']    = $usuario;
+							$mSQL=$this->db->insert_string('riva', $riva);
+							$ban =$this->db->simple_query($mSQL);
+							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+						}else{
+							$reteiva=0;
+						}//Fin de la retencion
+
+						//Inicio de la retencion ISLR
+						$reten=floatval($row['reten']);
+						if($reten>0){
+							//Crea la nota de credito
+							$mnumnc = $this->datasis->fprox_numero('num_nc');
+							$sprm=array();
+							$sprm['cod_prv']    = $proveed;
+							$sprm['nombre']     = $row['nombre'];
+							$sprm['tipo_doc']   = 'NC';
+							$sprm['numero']     = $mnumnc;
+							$sprm['fecha']      = $actuali;
+							$sprm['monto']      = $reten;
+							$sprm['impuesto']   = 0;
+							$sprm['abonos']     = $reten;
+							$sprm['vence']      = $actuali;
+							$sprm['tipo_ref']   = $row['tipo_doc'];
+							$sprm['num_ref']    = $row['numero'];
+							$sprm['observa1']   = 'RETENCION DE I.S.L.R. CAUSADA EN';
+							$sprm['observa2']   = $row['tipo_doc'].$row['numero'].' DE FECHA '.dbdate_to_human($row['fecha']);
+							$sprm['estampa']    = $estampa;
+							$sprm['hora']       = $hora;
+							$sprm['transac']    = $transac;
+							$sprm['usuario']    = $usuario;
+							$sprm['codigo']     = 'NOCON';
+							$sprm['descrip']    = 'NOTA DE CONTABILIDAD';
+							$mSQL = $this->db->insert_string('sprm', $sprm);
+							$ban=$this->db->simple_query($mSQL);
+							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
+	
+							//Aplica la NC a la FC
+							$itppro=array();
+							$itppro['numppro']    = $mnumnc;
+							$itppro['tipoppro']   = 'NC';
+							$itppro['cod_prv']    = $proveed;
+							$itppro['tipo_doc']   = 'FC';
+							$itppro['numero']     = $row['numero'];
+							$itppro['fecha']      = $actuali;
+							$itppro['monto']      = $reten;
+							$itppro['abono']      = $reten;
+							$itppro['ppago']      = 0;
+							$itppro['reten']      = 0;
+							$itppro['cambio']     = 0;
+							$itppro['mora']       = 0;
+							$itppro['transac']    = $transac;
+							$itppro['estampa']    = $estampa;
+							$itppro['hora']       = $hora;
+							$itppro['usuario']    = $usuario;
+							$itppro['preten']     = 0;
+							$itppro['creten']     = 0;
+							$itppro['breten']     = 0;
+							$itppro['reteiva']    = 0;
+							$mSQL = $this->db->insert_string('itppro', $itppro);
+							$ban=$this->db->simple_query($mSQL);
+							if(!$ban){ memowrite($mSQL,'scst'); $error++;}
+	
+							//Crea la nota de debito
+							$mnsprm   = $this->datasis->fprox_numero('num_nd');
+							$ccontrol = $this->datasis->fprox_numero('nsprm');
+	
+							$data=array();
+							$data['cod_prv']    = 'RETEN';
+							$data['nombre']     = 'RETENCIONES POR ENTERAR';
+							$data['tipo_doc']   = 'ND';
+							$data['numero']     = $mnsprm;
+							$data['fecha']      = $actuali;
+							$data['monto']      = $reten;
+							$data['impuesto']   = 0;
+							$data['abonos']     = 0;
+							$data['vence']      = $actuali;
+							$data['tipo_ref']   = $row['tipo_doc'];
+							$data['num_ref']    = $row['numero'];
+							$data['observa1']   = 'RETENCION DE I.S.L.R. CAUSADA EN';
+							$data['observa2']   = $row['tipo_doc'].$row['numero'].' DE FECHA '.dbdate_to_human($row['fecha']);
+							$data['transac']    = $transac;
+							$data['estampa']    = $estampa;
+							$data['hora']       = $hora;
+							$data['usuario']    = $usuario;
+							$data['reteiva']    = 0;
+							$data['montasa']    = 0;
+							$data['monredu']    = 0;
+							$data['monadic']    = 0;
+							$data['tasa']       = 0;
+							$data['reducida']   = 0;
+							$data['sobretasa']  = 0;
+							$data['exento']     = 0;
+							$data['control']    = $ccontrol;
+							$data['codigo']     = 'NOCON';
+							$data['descrip']    = 'NOTA DE CONTABILIDAD';
+	
+							$sql=$this->db->insert_string('sprm', $data);
+							$ban=$this->db->simple_query($sql);
+							if($ban==false){ memowrite($sql,'gser');}
+	
+						}//Fin de la retencion ISLR
+
+						//Carga la CxP
 						$sprm=array();
-						$sprm['cod_prv']    = $proveed;
-						$sprm['nombre']     = $row['nombre'];
-						$sprm['tipo_doc']   = 'NC';
-						$sprm['numero']     = $mnumnc;
-						$sprm['fecha']      = $actuali;
-						$sprm['monto']      = $reteiva;
-						$sprm['impuesto']   = 0;
-						$sprm['abonos']     = $reteiva;
-						$sprm['vence']      = $actuali;
-						$sprm['tipo_ref']   = 'FC';
-						$sprm['num_ref']    = $row['numero'];
-						$sprm['observa1']   = 'RET/IVA CAUSADA A FC'.$row['numero'];
-						$sprm['estampa']    = $estampa;
-						$sprm['hora']       = $hora;
-						$sprm['transac']    = $transac;
-						$sprm['usuario']    = $usuario;
-						$sprm['codigo']     = 'NOCON';
-						$sprm['descrip']    = 'NOTA DE CONTABILIDAD';
-						$mSQL = $this->db->insert_string('sprm', $sprm);
-						$ban=$this->db->simple_query($mSQL);
-						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
-
-						//Aplica la NC a la FC
-						$itppro=array();
-						$itppro['numppro']    = $mnumnc;
-						$itppro['tipoppro']   = 'NC';
-						$itppro['cod_prv']    = $proveed;
-						$itppro['tipo_doc']   = 'FC';
-						$itppro['numero']     = $row['numero'];
-						$itppro['fecha']      = $actuali;
-						$itppro['monto']      = $reteiva;
-						$itppro['abono']      = $reteiva;
-						$itppro['ppago']      = 0;
-						$itppro['reten']      = 0;
-						$itppro['cambio']     = 0;
-						$itppro['mora']       = 0;
-						$itppro['transac']    = $transac;
-						$itppro['estampa']    = $estampa;
-						$itppro['hora']       = $hora;
-						$itppro['usuario']    = $usuario;
-						$itppro['preten']     = 0;
-						$itppro['creten']     = 0;
-						$itppro['breten']     = 0;
-						$itppro['reteiva']    = 0;
-						$mSQL = $this->db->insert_string('itppro', $itppro);
-						$ban=$this->db->simple_query($mSQL);
-						if(!$ban){ memowrite($mSQL,'scst'); $error++;}
-
-						//Crea la nota de debito
-						$mnumnd = $this->datasis->fprox_numero('num_nd');
-						$sprm=array();
-						$sprm['cod_prv']   = 'REIVA';
-						$sprm['nombre']    = 'RETENCION DE I.V.A. POR COMPENSAR';
-						$sprm['tipo_doc']  = 'ND';
-						$sprm['numero']    = $mnumnd;
-						$sprm['fecha']     = $actuali;
-						$sprm['monto']     = $reteiva;
-						$sprm['impuesto']  = 0;
-						$sprm['abonos']    = 0;
-						$sprm['vence']     = $actuali;
-						$sprm['tipo_ref']  = 'FC';
-						$sprm['num_ref']   = $row['numero'];
-						$sprm['observa1']  = 'RET/IVA DE '.$proveed.' A DOC. FC'.$row['numero'];
-						$sprm['estampa']   = $estampa;
-						$sprm['hora']      = $hora;
-						$sprm['transac']   = $transac;
-						$sprm['usuario']   = $usuario;
-						$sprm['codigo']    = 'NOCON';
-						$sprm['descrip']   = 'NOTA DE CONTABILIDAD';
-						$mSQL = $this->db->insert_string('sprm', $sprm);
-						$ban=$this->db->simple_query($mSQL);
-						if(!$ban){ memowrite($mSQL,'scst'); $error++;}
-
-						//Crea la retencion
-						$niva    = $this->datasis->fprox_numero('niva');
-						$ivaplica= $this->datasis->ivaplica($fecha);
-
-						$riva['nrocomp']    = $niva;
-						$riva['emision']    = ($fecha > $actuali) ? $fecha : $actuali;
-						$riva['periodo']    = substr($riva['emision'],0,6) ;
-						$riva['tipo_doc']   = $row['tipo_doc'];
-						$riva['fecha']      = $fecha;
-						$riva['numero']     = $row['numero'];
-						$riva['nfiscal']    = $row['nfiscal'];
-						$riva['afecta']     = $row['fafecta'];
-						$riva['clipro']     = $proveed;
-						$riva['nombre']     = $row['nombre'];
-						$riva['rif']        = $this->datasis->dameval('SELECT rif FROM sprv WHERE proveed='.$this->db->escape($proveed));
-						$riva['exento']     = $row['cexento'];
-						$riva['tasa']       = $ivaplica['tasa'];
-						$riva['tasaadic']   = $ivaplica['sobretasa'];
-						$riva['tasaredu']   = $ivaplica['redutasa'];
-						$riva['general']    = $row['cgenera'];
-						$riva['geneimpu']   = $row['civagen'];
-						$riva['adicional']  = $row['cadicio'];
-						$riva['adicimpu']   = $row['civaadi'];
-						$riva['reducida']   = $row['creduci'];
-						$riva['reduimpu']   = $row['civared'];
-						$riva['stotal']     = $row['cstotal'];
-						$riva['impuesto']   = $row['cimpuesto'];
-						$riva['gtotal']     = $row['ctotal'];
-						$riva['reiva']      = $reteiva;
-						$riva['transac']    = $transac;
-						$riva['estampa']    = $estampa;
-						$riva['hora']       = $hora;
-						$riva['usuario']    = $usuario;
-						$mSQL=$this->db->insert_string('riva', $riva);
+						$causado = $this->datasis->fprox_numero('ncausado');
+						$sprm['cod_prv']  = $proveed;
+						$sprm['nombre']   = $row['nombre'];
+						$sprm['tipo_doc'] = $row['tipo_doc'];
+						$sprm['numero']   = $row['numero'];
+						$sprm['fecha']    = $actuali;
+						$sprm['vence']    = $vence;
+						$sprm['monto']    = $row['ctotal'];
+						$sprm['impuesto'] = $row['cimpuesto'];
+						$sprm['abonos']   = $reteiva+$reten;
+						$sprm['observa1'] = 'FACTURA DE COMPRA';
+						$sprm['reteiva']  = $reteiva;
+						$sprm['causado']  = $causado;
+						$sprm['estampa']  = $estampa;
+						$sprm['usuario']  = $usuario;
+						$sprm['hora']     = $hora;
+						$sprm['transac']  = $transac;
+						$sprm['montasa']  = $row['cgenera'];
+						$sprm['tasa']     = $row['civagen'];
+						$sprm['monadic']  = $row['cadicio'];
+						$sprm['sobretasa']= $row['civaadi'];
+						$sprm['monredu']  = $row['creduci'];
+						$sprm['reducida'] = $row['civared'];
+						$sprm['exento']   = $row['cexento'];
+						if($dfaltante>0){
+							$sprm['noabonable']=$dfaltante;
+						}
+						$mSQL=$this->db->insert_string('sprm', $sprm);
 						$ban =$this->db->simple_query($mSQL);
 						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
-					}else{
-						$reteiva=0;
-					}//Fin de la retencion
+						//Fin de la carga de la CxP
 
-					//Inicio de la retencion ISLR
-					$reten=floatval($row['reten']);
-					if($reten>0){
-						//Crea la nota de credito
-						$mnumnc = $this->datasis->fprox_numero('num_nc');
-						$sprm=array();
-						$sprm['cod_prv']    = $proveed;
-						$sprm['nombre']     = $row['nombre'];
-						$sprm['tipo_doc']   = 'NC';
-						$sprm['numero']     = $mnumnc;
-						$sprm['fecha']      = $actuali;
-						$sprm['monto']      = $reten;
-						$sprm['impuesto']   = 0;
-						$sprm['abonos']     = $reten;
-						$sprm['vence']      = $actuali;
-						$sprm['tipo_ref']   = $row['tipo_doc'];
-						$sprm['num_ref']    = $row['numero'];
-						$sprm['observa1']   = 'RETENCION DE I.S.L.R. CAUSADA EN';
-						$sprm['observa2']   = $row['tipo_doc'].$row['numero'].' DE FECHA '.dbdate_to_human($row['fecha']);
-						$sprm['estampa']    = $estampa;
-						$sprm['hora']       = $hora;
-						$sprm['transac']    = $transac;
-						$sprm['usuario']    = $usuario;
-						$sprm['codigo']     = 'NOCON';
-						$sprm['descrip']    = 'NOTA DE CONTABILIDAD';
-						$mSQL = $this->db->insert_string('sprm', $sprm);
-						$ban=$this->db->simple_query($mSQL);
-						if(!$ban){ memowrite($mSQL,'scst'); $error++; }
-
-						//Aplica la NC a la FC
-						$itppro=array();
-						$itppro['numppro']    = $mnumnc;
-						$itppro['tipoppro']   = 'NC';
-						$itppro['cod_prv']    = $proveed;
-						$itppro['tipo_doc']   = 'FC';
-						$itppro['numero']     = $row['numero'];
-						$itppro['fecha']      = $actuali;
-						$itppro['monto']      = $reten;
-						$itppro['abono']      = $reten;
-						$itppro['ppago']      = 0;
-						$itppro['reten']      = 0;
-						$itppro['cambio']     = 0;
-						$itppro['mora']       = 0;
-						$itppro['transac']    = $transac;
-						$itppro['estampa']    = $estampa;
-						$itppro['hora']       = $hora;
-						$itppro['usuario']    = $usuario;
-						$itppro['preten']     = 0;
-						$itppro['creten']     = 0;
-						$itppro['breten']     = 0;
-						$itppro['reteiva']    = 0;
-						$mSQL = $this->db->insert_string('itppro', $itppro);
-						$ban=$this->db->simple_query($mSQL);
-						if(!$ban){ memowrite($mSQL,'scst'); $error++;}
-
-						//Crea la nota de debito
-						$mnsprm   = $this->datasis->fprox_numero('num_nd');
-						$ccontrol = $this->datasis->fprox_numero('nsprm');
-
-						$data=array();
-						$data['cod_prv']    = 'RETEN';
-						$data['nombre']     = 'RETENCIONES POR ENTERAR';
-						$data['tipo_doc']   = 'ND';
-						$data['numero']     = $mnsprm;
-						$data['fecha']      = $actuali;
-						$data['monto']      = $reten;
-						$data['impuesto']   = 0;
-						$data['abonos']     = 0;
-						$data['vence']      = $actuali;
-						$data['tipo_ref']   = $row['tipo_doc'];
-						$data['num_ref']    = $row['numero'];
-						$data['observa1']   = 'RETENCION DE I.S.L.R. CAUSADA EN';
-						$data['observa2']   = $row['tipo_doc'].$row['numero'].' DE FECHA '.dbdate_to_human($row['fecha']);
-						$data['transac']    = $transac;
-						$data['estampa']    = $estampa;
-						$data['hora']       = $hora;
-						$data['usuario']    = $usuario;
-						$data['reteiva']    = 0;
-						$data['montasa']    = 0;
-						$data['monredu']    = 0;
-						$data['monadic']    = 0;
-						$data['tasa']       = 0;
-						$data['reducida']   = 0;
-						$data['sobretasa']  = 0;
-						$data['exento']     = 0;
-						$data['control']    = $ccontrol;
-						$data['codigo']     = 'NOCON';
-						$data['descrip']    = 'NOTA DE CONTABILIDAD';
-
-						$sql=$this->db->insert_string('sprm', $data);
-						$ban=$this->db->simple_query($sql);
-						if($ban==false){ memowrite($sql,'gser');}
-
-					}//Fin de la retencion ISLR
-
-					//Carga la CxP
-					$sprm=array();
-					$causado = $this->datasis->fprox_numero('ncausado');
-					$sprm['cod_prv']  = $proveed;
-					$sprm['nombre']   = $row['nombre'];
-					$sprm['tipo_doc'] = $row['tipo_doc'];
-					$sprm['numero']   = $row['numero'];
-					$sprm['fecha']    = $actuali;
-					$sprm['vence']    = $vence;
-					$sprm['monto']    = $row['ctotal'];
-					$sprm['impuesto'] = $row['cimpuesto'];
-					$sprm['abonos']   = $reteiva+$reten;
-					$sprm['observa1'] = 'FACTURA DE COMPRA';
-					$sprm['reteiva']  = $reteiva;
-					$sprm['causado']  = $causado;
-					$sprm['estampa']  = $estampa;
-					$sprm['usuario']  = $usuario;
-					$sprm['hora']     = $hora;
-					$sprm['transac']  = $transac;
-					$sprm['montasa']  = $row['cgenera'];
-					$sprm['tasa']     = $row['civagen'];
-					$sprm['monadic']  = $row['cadicio'];
-					$sprm['sobretasa']= $row['civaadi'];
-					$sprm['monredu']  = $row['creduci'];
-					$sprm['reducida'] = $row['civared'];
-					$sprm['exento']   = $row['cexento'];
-					if($dfaltante>0){
-						$sprm['noabonable']=$dfaltante;
 					}
-
-					$mSQL=$this->db->insert_string('sprm', $sprm);
-					$ban =$this->db->simple_query($mSQL);
-					if(!$ban){ memowrite($mSQL,'scst'); $error++; }
-					//Fin de la carga de la CxP
 
 					//Si viene de ordc
 					$qquery = $this->db->query('SELECT orden FROM scstordc WHERE compra=?',array($control));
@@ -5295,16 +5295,11 @@ class Scst extends Controller {
 		}
 
 		$campos=$this->db->list_fields('itscst');
-		if(!in_array('id',$campos)){
-			$this->db->query('ALTER TABLE itscst ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		}
+		if(!in_array('id',      $campos)) $this->db->query('ALTER TABLE itscst ADD COLUMN id       INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		if(!in_array('rmargen', $campos)) $this->db->query("ALTER TABLE itscst ADD COLUMN rmargen  CHAR(1) NULL DEFAULT 'N'  COMMENT 'Respeta el margen al actualizar' AFTER `usuario`");
+		if(!in_array('nentrega',$campos)) $this->db->query("ALTER TABLE itscst ADD COLUMN nentrega CHAR(8) NULL DEFAULT NULL COMMENT 'Respeta el margen al actualizar' AFTER `usuario`");
 
-		if(!in_array('rmargen',$campos)){
-			$this->db->query("ALTER TABLE `itscst` ADD COLUMN `rmargen` CHAR(1) NULL DEFAULT 'N' COMMENT 'Respeta el margen al actualizar' AFTER `usuario`");
-		}
-
-
-		//para islr
+		//Para islr
 		if(!$this->db->table_exists('gereten')){
 			$mSQL="CREATE TABLE `gereten` (
 				`id` INT(10) NOT NULL AUTO_INCREMENT,

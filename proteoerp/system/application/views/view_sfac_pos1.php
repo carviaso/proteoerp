@@ -549,7 +549,7 @@ function totalizar(){
 			descui  = Number($("#descu_"+ind).val());
 
 			if(descu>0){
-				nimporte  = roundNumber(importe*(100-descu)/100,4);
+				nimporte  = roundNumber(importe*(1-descu),4);
 				importe   = roundNumber(nimporte,4);
 			}
 			if(descui>0){
@@ -1083,7 +1083,7 @@ function chreferen(){
 }
 
 function apldes(){
-	var descu=aplicadesc();
+	var descu = aplicadesc();
 	if(descu > 0){
 		if(confirm("Seguro desea quitar el descuento de "+descu+"%?")){
 			$('#descuento').val('0');

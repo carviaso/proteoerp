@@ -200,7 +200,14 @@ else:
 	<tr>
 		<td class="littletableheaderc"><?php echo $form->mmargen->label;  ?></td>
 		<td class="littletablerow"    ><?php echo $form->mmargen->output; ?>%</td>
+		<td class="littletableheaderc"><?php echo $form->fpago->label;  ?></td>
+		<td class="littletablerow"    ><?php echo $form->fpago->output; ?></td>
 	</tr>
+	<tr>
+		<td class="littletableheaderc"><?php echo $form->sada->label;  ?></td>
+		<td class="littletablerow"    ><?php echo $form->sada->output; ?></td>
+	</tr>
+
 	</table>
 	</div>
 
