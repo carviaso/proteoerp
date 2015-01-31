@@ -6479,6 +6479,7 @@ class Sinv extends Controller {
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('235','AtúnCongelado')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('314','AtúnEnlatadoPresentaciónRegulada')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('318','AtúnEntero')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('315','AtúnNoRegulado')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('51' ,'Avena')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('303','AvenaDespuntada')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('437','AvenaenGranos')");
