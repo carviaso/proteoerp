@@ -4438,10 +4438,6 @@ class Sfac extends Controller {
 			foreach($arr_pfac as $pfac){
 				if(strlen($pfac)>7){
 					$dbpfac=$this->db->escape($pfac);
-					$this->db->where('numero', $pfac);
-					$this->db->update('pfac', array('factura' => $maestra,'status' => 'C'));
-
-					$dbpfac=$this->db->escape($pfac);
 					$sql="UPDATE itpfac AS c JOIN sinv   AS d ON d.codigo=c.codigoa
 					SET d.exdes=IF(d.exdes>c.cana,d.exdes-c.cana,0)
 					WHERE c.numa = ${dbpfac}";
@@ -4479,6 +4475,17 @@ class Sfac extends Controller {
 							if($ban==false){ memowrite($sql,'sfac'); $error++;}
 						}
 					}
+
+					//Cierra o deja el pedido en backorder
+					$pfacresta = floatval($this->datasis->dameval("SELECT SUM(cana>entregado) AS saldo FROM itpfac WHERE numa=${dbpfac}"));
+					if($pfacresta>0){
+						$pfacstatus='B';
+					}else{
+						$pfacstatus='C';
+					}
+					$this->db->where('numero', $pfac);
+					$this->db->update('pfac', array('factura' => $maestra,'status' => $pfacstatus));
+
 
 				}
 			}
@@ -4807,19 +4814,19 @@ class Sfac extends Controller {
 	function creafrompfac($manual,$numero,$status=null){
 		$this->_url = $this->url.'dataedit/insert';
 
-		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc'
+		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc','a.status'
 		,'a.totals','a.iva','a.totalg','TRIM(a.factura) AS factura','a.vd','c.almacen','a.bultos');
 		$this->db->select($sel);
 		$this->db->from('pfac AS a');
 		$this->db->join('scli AS b','a.cod_cli=b.cliente');
 		$this->db->join('vend AS c','c.vendedor=a.vd','left');
 		$this->db->where('a.numero',$numero);
-		$this->db->where_in('a.status',array('P','A'));
+		$this->db->where_in('a.status',array('P','A','B'));
 		$query = $this->db->get();
 
 		if ($query->num_rows() > 0 && $status=='create'){
 			$row = $query->row();
-			if(empty($row->factura)){
+			if(empty($row->factura) || $row->status=='B'){
 				$_POST=array(
 					'btn_submit' => 'Guardar',
 					'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
@@ -4849,6 +4856,7 @@ class Sfac extends Controller {
 				$this->db->join('sinv AS b','b.codigo=a.codigoa');
 				$this->db->where('a.numa',$numero);
 				$this->db->where('a.cana >',0);
+				$this->db->where('a.cana > a.entregado');
 				$qquery = $this->db->get();
 				$i=0;
 

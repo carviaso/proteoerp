@@ -24,6 +24,7 @@ class dropdownField extends objField{
 	var $clause      = 'where';
 	var $css_class   = 'select';
 	var $multiple    = false;
+	var $add_extra   = array();
 
 	//costruttore
 	function dropdownField($label, $name, $options=array(), $selected=''){
@@ -151,6 +152,9 @@ class dropdownField extends objField{
 				$form .= '</optgroup>'."\n";
 			}else{
 				$sel = (in_array(trim($key), $selected,true)) ? ' selected="selected"' : '';
+				if(isset($this->add_extra[$key])){
+					$sel .= ' '.$this->add_extra[$key];
+				}
 
 				$form .= '<option value="'.$key.'"'.$sel.'>'.(string) $val."</option>\n";
 			}
@@ -159,6 +163,12 @@ class dropdownField extends objField{
 		$form .= '</select>';
 
 		return $form;
+	}
+
+	function add_extra($extra){
+		if(is_array($extra)){
+			$this->add_extra=$extra;
+		}
 	}
 
 }

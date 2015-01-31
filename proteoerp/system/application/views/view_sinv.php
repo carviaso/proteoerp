@@ -1386,10 +1386,12 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 	<table width="100%" border='0'>
 	<tr>
 		<td class='littletableheaderc'><?php echo $form->url->label ?></td>
-		<td class="littletablerow"><?php echo $form->url->output; ?></td>
+		<td class="littletablerow" colspan='3'><?php echo $form->url->output;   ?></td>
 	</tr><tr>
 		<td class='littletableheaderc'><?php echo $form->sada->label ?></td>
-		<td class="littletablerow"><?php echo $form->sada->output; ?></td>
+		<td class="littletablerow"><?php echo $form->sada->output;   ?></td>
+		<td class='littletableheaderc'><?php echo $form->color->label ?></td>
+		<td class="littletablerow"><?php echo $form->color->output;   ?></td>
 	</tr>
 	</table>
 </div>

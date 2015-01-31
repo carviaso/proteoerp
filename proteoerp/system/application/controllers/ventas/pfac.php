@@ -170,6 +170,16 @@ class Pfac extends Controller {
 			}
 		}';
 
+		$bodyscript .= '
+		function f_pedido(numero,idata){
+			$.post("'.site_url('ventas/sfac/creafrompfac/N').'/"+numero+"/create",idata,
+			function(data){
+				$("#ffact").html(data);
+				$("#ffact").dialog( "open" );
+			});
+		}';
+
+
 		//Wraper de javascript
 		$bodyscript .= '
 		$(function() {
@@ -191,7 +201,7 @@ class Pfac extends Controller {
 				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 
 				if(ret.factura != null && ret.factura != false){
-					$.prompt("<h2>Qu&eacute; documento dese imprimir?</h2>",{
+					$.prompt("<h2>Qu&eacute; documento desea imprimir?</h2>",{
 						buttons: { Pedido: true, Factura: false },
 						submit: function(e,v,m,f){
 							if(v){
@@ -213,12 +223,33 @@ class Pfac extends Controller {
 		$("#bffact").click(function(){
 			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				$.post("'.site_url('ventas/sfac/creafrompfac/N').'/"+ret.numero+"/create",
-				function(data){
-					$("#ffact").html(data);
-					$("#ffact").dialog( "open" );
-				});
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
+				var colores = JSON.parse($.ajax({ type: "POST", url: "'.site_url($this->url.'getcolor').'/"+id ,dataType: "json",async: false }).responseText);
+				if(colores.length<=0){
+					$.post("'.site_url('ventas/sfac/creafrompfac/N').'/"+ret.numero+"/create",
+					function(data){
+						$("#ffact").html(data);
+						$("#ffact").dialog( "open" );
+					});
+				}else{
+					var strdiv="";
+					for(var i=0;i<colores.length;i++){
+						strdiv = strdiv + "<div style=\'width:2em;height:2em;float:left;background-color: #"+colores[i]+"\' onclick=\\"f_pedido(\'"+ret.numero+"\',{color:\'"+colores[i]+"\' })\\"> </div> ";
+					}
+
+					$.prompt("<h2>Facturar color</h2>"+strdiv,{
+						buttons: { Todos: true, Cancelar: false },
+						submit: function(e,v,m,f){
+							if(v){
+								$.post("'.site_url('ventas/sfac/creafrompfac/N').'/"+ret.numero+"/create",
+								function(data){
+									$("#ffact").html(data);
+									$("#ffact").dialog( "open" );
+								});
+							}
+						}
+					});
+				}
 			} else { $.prompt("<h1>Por favor Seleccione un pedido</h1>");}
 		});';
 
@@ -1703,7 +1734,28 @@ class Pfac extends Controller {
 			if(empty($error) && 1*$precio>0)
 			return $precio;
 		}
+	}
 
+	function getcolor($id=0){
+		$dbid=intval($id);
+		if($dbid>0){
+			$colores=array();
+			$numa   = $this->datasis->dameval("SELECT numero FROM pfac WHERE id=${dbid}");
+			$dbnuma = $this->db->escape($numa);
+			$mSQL="SELECT b.color
+			FROM itpfac AS a
+			JOIN sinv   AS b ON a.codigoa=b.codigo
+			WHERE numa=${dbnuma}
+			GROUP BY b.color";
+			$query = $this->db->query($mSQL);
+			if($query->num_rows() > 0){
+				foreach ($query->result() as $row){
+					if(!empty($row->color))
+						$colores[]=$row->color;
+				}
+			}
+			echo json_encode($colores);
+		}
 	}
 
 	function _pre_delete($do){

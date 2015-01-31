@@ -1,4 +1,10 @@
-      $mPrvd=array(
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$mPrvd=array(
 	'tabla'   =>'sprv',
 	'columnas'=>array(
 		'proveed' =>'Código Proveedor',
@@ -20,62 +26,65 @@ $filter->attributes=array('onsubmit'=>'is_loaded()');
 //("MONTO")*IF(("TIPO_DOC")='AN',-1,1) mIMPORTE
 //(("MONTO")-("ABONOS"))*IF(("TIPO_DOC")='AN',-1,1) mSALDOS
 
-$filter->db->select(array(
-	'cod_prv','observa1','tipo_doc','numero',"fecha","a.nombre",
-	"vence","DATEDIFF(NOW(),vence) AS dias",
-	'monto*IF(tipo_doc='AN',-1,1) AS haber',
-	"(monto-abonos)*IF(tipo_doc='AN',-1,1) AS saldo"));
+$sel = array(
+	'cod_prv','observa1','tipo_doc','numero','fecha','a.nombre',
+	'vence','DATEDIFF(CURDATE(),vence) AS dias',
+	'monto*IF(tipo_doc=\'AN\',-1,1) AS haber',
+	'(monto-abonos)*IF(tipo_doc=\'AN\',-1,1) AS saldo'
+);
+
+$filter->db->select($sel);
 $filter->db->from('sprm AS a');
-$filter->db->join("sprv AS b" ,"cod_prv=proveed");
-$filter->db->where("tipo_doc IN ('FC','GI','ND','AN','NE') AND abonos<>monto");
-$filter->db->orderby("cod_prv,vence");
+$filter->db->join('sprv AS b' ,'cod_prv=proveed');
+$filter->db->where('tipo_doc IN (\'FC\',\'GI\',\'ND\',\'AN\',\'NE\') AND abonos<>monto');
+$filter->db->orderby('cod_prv,vence');
 
-$filter->cod_prvd = new inputField("Desde", "cod_prvd");
-$filter->cod_prvd->clause="where";
-$filter->cod_prvd->db_name="a.cod_prv";
-$filter->cod_prvd->operator=">=";
+$filter->cod_prvd = new inputField('Desde', 'cod_prvd');
+$filter->cod_prvd->clause='where';
+$filter->cod_prvd->db_name='a.cod_prv';
+$filter->cod_prvd->operator='>=';
 $filter->cod_prvd->append($bPrvd);
-$filter->cod_prvd->group="Proveedor";
+$filter->cod_prvd->group='Proveedor';
 
-$filter->cod_prvh = new inputField("Hasta", "cod_prvh");
-$filter->cod_prvh->clause="where";
-$filter->cod_prvh->db_name="a.cod_prv";
-$filter->cod_prvh->operator="<=";
+$filter->cod_prvh = new inputField('Hasta', 'cod_prvh');
+$filter->cod_prvh->clause='where';
+$filter->cod_prvh->db_name='a.cod_prv';
+$filter->cod_prvh->operator='<=';
 $filter->cod_prvh->append($bPrvh);
-$filter->cod_prvh->group="Proveedor";
+$filter->cod_prvh->group='Proveedor';
 
-$filter->tipo = new dropdownField("Tipo de Documento", "tipo_doc");
-$filter->tipo->option("","Todos");
+$filter->tipo = new dropdownField('Tipo de Documento', 'tipo_doc');
+$filter->tipo->option('','Todos');
 $filter->tipo->options("SELECT tipo_doc, tipo_doc as value FROM sprm  ORDER BY tipo_doc");
 $filter->tipo->db_name='tipo_doc';
-$filter->tipo->style="width:90px";
+$filter->tipo->style='width:90px';
 
-$filter->grupo = new dropdownField("Grupo", "grupo");
-$filter->grupo->option("","");
-$filter->grupo->options("SELECT grupo, gr_desc FROM grpr ORDER BY gr_desc");
+$filter->grupo = new dropdownField('Grupo', 'grupo');
+$filter->grupo->option('','Todos');
+$filter->grupo->options('SELECT grupo, gr_desc FROM grpr ORDER BY gr_desc');
 $filter->grupo->db_name='b.grupo';
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons("search");
+$filter->buttons('search');
 $filter->build();
 
-if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
+if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
 	$mSQL=$this->rapyd->db->_compile_select();
 	//echo $mSQL;
 
  	$sobretabla='';
- 	if (!empty($filter->cod_prvd->newValue)) $sobretabla.='                Proveedor desde: ('.$filter->cod_prvd->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed="'.$filter->cod_prvd->newValue.'"');
+ 	if (!empty($filter->cod_prvd->newValue)) $sobretabla.='   Proveedor desde: ('.$filter->cod_prvd->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed="'.$filter->cod_prvd->newValue.'"');
  	if (!empty($filter->cod_prvh->newValue)) $sobretabla.='  Hasta: ('.$filter->cod_prvh->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed="'.$filter->cod_prvh->newValue.'"');
  	if (!empty($filter->grupo->newValue))    $sobretabla.='  Grupo: '.$filter->grupo->description;
 
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
-	$pdf->setTitulo("Efectos por Pagar",11);
+	$pdf->setTitulo('Efectos por Pagar',11);
 	//$pdf->setSubTitulo("Desde la fecha: ".$_POST['fechad']." Hasta ".$_POST['fechah']);
 	$pdf->setSobreTabla($sobretabla,9);
 

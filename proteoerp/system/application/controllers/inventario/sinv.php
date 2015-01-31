@@ -2933,12 +2933,12 @@ class Sinv extends Controller {
 		$edit->descrip = new inputField('Descripci&oacute;n', 'descrip');
 		$edit->descrip->size=45;
 		$edit->descrip->maxlength=45;
-		$edit->descrip->rule = 'trim|required|strtoupper';
+		$edit->descrip->rule = 'trim|required';
 
 		$edit->descrip2 = new inputField('Descripci&oacute;n adicional', 'descrip2');
 		$edit->descrip2->size=45;
 		$edit->descrip2->maxlength=45;
-		$edit->descrip2->rule = 'trim|strtoupper';
+		$edit->descrip2->rule = 'trim';
 
 		$edit->url = new inputField('Sitio Web', 'url');
 		$edit->url->size=80;
@@ -3206,7 +3206,29 @@ class Sinv extends Controller {
 		$edit->sada->style='width:110px;';
 		$edit->sada->option('','Seleccionar');
 		$edit->sada->options('SELECT id,descrip FROM sadacod ORDER BY descrip');
-		$edit->sada->style='width:400px;';
+		$edit->sada->style='width:320px;';
+
+		$edit->color = new dropdownField('Color', 'color');
+		$edit->color->style='width:150px;';
+		$edit->color->option('','Ninguno');
+		$edit->color->option('FFFF00','Amarillo');
+		$edit->color->option('FFD700','Dorado');
+		$edit->color->option('0000FF','Azul');
+		$edit->color->option('00008B','Azul Oscuro');
+		$edit->color->option('FF0000','Rojo');
+		$edit->color->option('B22222','Ladrillo');
+		$edit->color->option('00FF00','Verde');
+		$edit->color->option('808000','Oliva');
+		$edit->color->add_extra(array(
+			'FFFF00' => 'style="background:#FFFF00"',
+		    'FFD700' => 'style="background:#FFD700"',
+		    '0000FF' => 'style="background:#0000FF"',
+		    '00008B' => 'style="background:#00008B"',
+		    'FF0000' => 'style="background:#FF0000"',
+		    'B22222' => 'style="background:#B22222"',
+		    '00FF00' => 'style="background:#00FF00"',
+		    '808000' => 'style="background:#808000"',
+		));
 
 
 		if($this->datasis->traevalor('SUNDECOP') == 'S'){
@@ -6222,6 +6244,8 @@ class Sinv extends Controller {
 		if (!in_array('lindia'     ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `lindia`      INT(5)        NULL DEFAULT '0'");
 		if (!in_array('margenu'    ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `margenu`     DECIMAL(10,2) NULL DEFAULT '0'");
 		if (!in_array('sada'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `sada`        INT(11)       NULL DEFAULT NULL");
+		if (!in_array('color'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `color`       VARCHAR(10)   NULL DEFAULT ''");
+
 
 
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
@@ -6329,7 +6353,7 @@ class Sinv extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
-		if ($this->db->field_exists('minutos', 'sinvplabor')){
+		if($this->db->field_exists('minutos', 'sinvplabor')){
 			$mSQL="ALTER TABLE `sinvplabor`
 			ADD COLUMN `tiempo` DECIMAL(10,2) NULL DEFAULT '0' AFTER `actividad`,
 			ADD COLUMN `tunidad` CHAR(1) NULL DEFAULT 'H' COMMENT 'Unidad de tiempo Horas Dias Semanas' AFTER `tiempo`,
@@ -6382,7 +6406,7 @@ class Sinv extends Controller {
 			$this->db->query('ALTER TABLE barraspos DROP PRIMARY KEY');
 			$this->db->query('ALTER TABLE barraspos ADD UNIQUE INDEX codigo (codigo, suplemen)');
 			$this->db->query('ALTER TABLE barraspos ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
+		}
 
 		if(!$this->db->table_exists('invfelr')){
 			$query="CREATE TABLE `invfelr` (
@@ -6433,12 +6457,12 @@ class Sinv extends Controller {
 			AUTO_INCREMENT=1";
 			$this->db->simple_query($mSQL);
 
-			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('500','ABAAlimentosparapeces')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('384','ABAAlimentosparapeces')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('188','ABAAnimalesDomésticos')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('185','ABAAves')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('186','ABABovinos')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('187','ABACerdos')");
-			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('65','ABAMateriaPrima(AlimentosBalanceadosparaAnimales)')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('65' ,'ABAMateriaPrima(AlimentosBalanceadosparaAnimales)')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('488','Aceite18LtsIndustrial')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('244','AceiteCrudodeSoya')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('257','AceiteNoRegulado')");
