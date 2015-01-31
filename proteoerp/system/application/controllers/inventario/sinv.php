@@ -4029,11 +4029,11 @@ class Sinv extends Controller {
 			precio2=ROUND(precio1*dolar*${cambio}/standard,2),
 			precio3=ROUND(precio1*dolar*${cambio}/standard,2),
 			precio4=ROUND(precio1*dolar*${cambio}/standard,2) ";
-			$this->db->query("UPDATE sinv a ".$mSQL." ".$where." AND dolar > 0 AND formcal='S'");
+			$this->db->query("UPDATE sinv ".$mSQL." ".$where." AND dolar > 0 AND formcal='S'");
 
 
 			$mSQL = "SET standard=ROUND( dolar*${cambio},2) ";
-			$this->db->query("UPDATE sinv a ".$mSQL." ".$where." AND dolar > 0 AND formcal='S'");
+			$this->db->query("UPDATE sinv ".$mSQL." ".$where." AND dolar > 0 AND formcal='S'");
 
 
 			$this->datasis->sinvrecalcular("P");
