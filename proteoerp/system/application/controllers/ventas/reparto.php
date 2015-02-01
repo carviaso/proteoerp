@@ -642,6 +642,12 @@ class Reparto extends Controller {
 		$show_volumen      = str_replace(',00','',nformat($cvolumen ));
 		$show_sobrevolumen = str_replace(',00','',nformat($sobrevolu));
 
+		ob_start();
+			$this->ajaxpen();
+			$resuven = ob_get_contents();
+		@ob_end_clean();
+		if(empty($resuven )) $resuven = 'No hay pendientes';
+
 		$msalida .= "<table width='100%'><tr><td>
 		<div class=\"tema1\"><table id=\"bpos1\"></table></div>
 		<div id='pbpos1'></div>\n
@@ -682,9 +688,16 @@ class Reparto extends Controller {
 				<td colspan='2' ><button style='padding: .5em 1em;' title='Selecciona automaticamente las facturas hasta completar las capacidades' class='ui-state-default ui-corner-all ui-corner-bl' onclick='auto()'>Auto-Completar</button></td>
 				<td align='center' style='font-size:1.5em;font-weight:bold;'><span id='totcana'>".str_replace(',00','',nformat($cana))."</span></td>
 			</tr>
+			<tr>
+				<td colspan='3'>
+				<div id='resuven' style='width:300px;height:115px; text-align:center;' >
+					${resuven}
+				</div>
+				</td>
+			</tr>
 		</table>
 		</td></tr>
-		</table>\n";
+		</table>";
 
 		echo $msalida;
 	}
@@ -1664,6 +1677,28 @@ class Reparto extends Controller {
 		}
 		$conten = array('mixto'=>$mixto,'cheque'=>$cheque,'id'=>$id);
 		$this->load->view('view_repartocc', $conten);
+	}
+
+	//Monto pendiente
+	function ajaxpen(){
+		$mSQL="SELECT a.vd ,SUM(b.cana*c.peso) AS peso
+			FROM sfac   AS a
+			JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
+			JOIN sinv   AS c ON b.codigoa=c.codigo
+			WHERE a.reparto=0
+			GROUP BY a.vd";
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			echo '<table style="font-size:1em;" align="center">';
+			echo '<tr><th>Vend.</th><th>Peso</th><th>Vend.</th><th>Peso</th></tr>';
+			foreach ($query->result() as $i=>$row){
+				if(!$i%2) echo '<tr>';
+				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->vd.'</td><td style="text-align:right">'.nformat($row->peso).'</td>';
+				if($i%2) echo '</tr>';
+			}
+			if(!$i%2) echo '</tr>';
+			echo '</table>';
+		}
 	}
 
 	function instalar(){

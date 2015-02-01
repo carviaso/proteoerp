@@ -6509,6 +6509,8 @@ class Sinv extends Controller {
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('401','DoradoEntero')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('250','Duraznos')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('109','Embutidos')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('52' ,'FormulaPreinfantil')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('259','FormulaLacteas')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('407','FiletdeMero')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('404','FiletesdeDorado')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('403','FiletesdeMerluza')");
