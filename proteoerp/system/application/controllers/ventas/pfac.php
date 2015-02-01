@@ -170,15 +170,6 @@ class Pfac extends Controller {
 			}
 		}';
 
-		$bodyscript .= '
-		function f_pedido(numero,idata){
-			$.post("'.site_url('ventas/sfac/creafrompfac/N').'/"+numero+"/create",idata,
-			function(data){
-				$("#ffact").html(data);
-				$("#ffact").dialog( "open" );
-			});
-		}';
-
 
 		//Wraper de javascript
 		$bodyscript .= '
@@ -232,20 +223,45 @@ class Pfac extends Controller {
 						$("#ffact").dialog( "open" );
 					});
 				}else{
-					var strdiv="";
+					var btns = {};
 					for(var i=0;i<colores.length;i++){
-						strdiv = strdiv + "<div style=\'width:2em;height:2em;float:left;background-color: #"+colores[i]+"\' onclick=\\"f_pedido(\'"+ret.numero+"\',{color:\'"+colores[i]+"\' })\\"> </div> ";
+						//btns["<div style=\'width:1.7em;height:1.7em;background-color:#"+colores[i]+"\'> o</div>"]= colores[i];
+						btns[colores[i]]= colores[i];
 					}
+					btns["Todos"]   ="T";
+					btns["Cancelar"]="C";
 
-					$.prompt("<h2>Facturar color</h2>"+strdiv,{
-						buttons: { Todos: true, Cancelar: false },
+					$.prompt("<h2>Separa por color?</h2> Si lo desea puede facturar cada color por separado",{
+						buttons: btns,
+						loaded:function(event){
+							for(var i=0;i<colores.length;i++){
+								col=colores[i];
+								$("button[name=jqi_state0_button"+col+"]").css("color","#"+col);
+								$("button[name=jqi_state0_button"+col+"]").css("backgrund-color","#"+col);
+
+							}
+						},
 						submit: function(e,v,m,f){
-							if(v){
-								$.post("'.site_url('ventas/sfac/creafrompfac/N').'/"+ret.numero+"/create",
+							var uurl="'.site_url('ventas/sfac/creafrompfac/N').'/"+ret.numero+"/create";
+							if(v=="T"){
+								$.post(uurl,
 								function(data){
 									$("#ffact").html(data);
 									$("#ffact").dialog( "open" );
 								});
+							}else if(v!="C"){
+
+								$.ajax({
+									type: "POST",
+									url: uurl,
+									data: {color:v},
+									success: function(data){
+										$("#ffact").html(data);
+										$("#ffact").dialog( "open" );
+									}
+								});
+
+
 							}
 						}
 					});

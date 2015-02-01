@@ -3317,6 +3317,8 @@ class Sfac extends Controller {
 			$edit->nromanual->maxlength =14;
 			$edit->nromanual->autocomplete=false;
 		}
+		$usr  = $this->secu->usuario();
+		$dbusr= $this->db->escape($usr);
 
 		$chkval   = false;
 		$mmsj     = 'Dato sugerido por el sistema, no esta guardado';
@@ -3327,10 +3329,10 @@ class Sfac extends Controller {
 		$fiscal   = $this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S' && $manual!='S'){
 			if(empty($numfis)){
-				$num      = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_'");
+				$num      = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND usuario=${dbusr} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_'");
 				if($tipo=='D'){
 					$nums = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM smov WHERE tipo_doc IN ('NC') AND fecha=CURDATE() AND nfiscal IS NOT NULL"));
-					if($nums>$num){
+					if(intval($nums)>intval($num)){
 						$num=$nums;
 					}
 				}
@@ -3348,7 +3350,8 @@ class Sfac extends Controller {
 
 			$smaqfiscal=trim($edit->get_from_dataobjetct('maqfiscal'));
 			if(empty($smaqfiscal)){
-				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=${dbcajero} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_' ORDER BY id DESC LIMIT 1");
+				$dbid = intval($uid);
+				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=${dbcajero} AND usuario=${dbusr} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_' AND id<>${dbid} ORDER BY id DESC LIMIT 1");
 				$edit->maqfiscal->updateValue=trim($maqfiscal);
 				$edit->maqfiscal->style = 'background-color:#FFDD00';
 				$edit->maqfiscal->title = $mmsj;
@@ -3364,7 +3367,7 @@ class Sfac extends Controller {
 				$dmaqfiscal=trim($edit->get_from_dataobjetct('dmaqfiscal'));
 				if(empty($dmaqfiscal)){
 					$dbnumero=$this->db->escape($edit->get_from_dataobjetct('factura'));
-					$mfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE numero=${dbnumero} AND tipo_doc='F'");
+					$mfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE numero=${dbnumero} AND usuario=${dbusr} AND tipo_doc='F'");
 					$edit->dmaqfiscal->updateValue=$mfiscal;
 					$edit->dmaqfiscal->style = 'background-color:#FFDD00';
 					$edit->dmaqfiscal->title = $mmsj;
@@ -4813,6 +4816,7 @@ class Sfac extends Controller {
 	//
 	function creafrompfac($manual,$numero,$status=null){
 		$this->_url = $this->url.'dataedit/insert';
+		$color = $this->input->post('color');
 
 		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc','a.status'
 		,'a.totals','a.iva','a.totalg','TRIM(a.factura) AS factura','a.vd','c.almacen','a.bultos');
@@ -4857,6 +4861,9 @@ class Sfac extends Controller {
 				$this->db->where('a.numa',$numero);
 				$this->db->where('a.cana >',0);
 				$this->db->where('a.cana > a.entregado');
+				if($color!=false){
+					$this->db->where('b.color',$color);
+				}
 				$qquery = $this->db->get();
 				$i=0;
 
