@@ -1635,11 +1635,20 @@ class Stra extends Controller {
 			$this->db->query($mSQL);
 		}
 
-		$esta = $this->datasis->dameval('SELECT count(*) FROM tmenus WHERE modulo="STRA" AND secu=5 ');
+		$esta = intval($this->datasis->dameval('SELECT count(*) AS cana FROM tmenus WHERE modulo="STRA" AND secu=5 '));
 		if( $esta == 0 ){
 			$mSQL="INSERT INTO tmenus (modulo, secu, titulo, mensaje, ejecutar) VALUES ('STRA',5,'Eliminar','Eliminar Registro', 'BORR_REG()')";
 			$this->db->query($mSQL);
 		}
+
+		$itcampos=$this->db->list_fields('itstra');
+		if(!in_array('id',$itcampos)){
+			$mSQL="ALTER TABLE `itstra` ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT AFTER `costo`, ADD PRIMARY KEY (`id`)";
+			$this->db->simple_query($mSQL);
+			$mSQL="ALTER TABLE `itstra` ADD UNIQUE INDEX `numero_codigo` (`numero`, `codigo`)";
+			$this->db->simple_query($mSQL);
+		}
+
 
 	}
 }

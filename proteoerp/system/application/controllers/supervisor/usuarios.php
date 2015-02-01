@@ -231,26 +231,38 @@ class Usuarios extends Controller {
 			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = jQuery("'.$ngrid.'").jqGrid(\'getRowData\',id);
-				$.get(\''.base_url().'supervisor/usuarios/cclave/\'+id ,function(data){
+				$.get(\''.site_url('supervisor/usuarios/cclave').'/\'+id ,function(data){
 					$.prompt(data,{
 						buttons: { Guardar: true, Cancelar: false },
 						focus: 1,
 						submit: function(e,v,m,f){
-							if ( v == true ){
-								if ( f.us_clave1 == f.us_clave ){
-									$(\'#fclave\').submit();
-								} else {
+							if(v == true){
+								if(f.us_clave1 == f.us_clave){
+
+									$.ajax({
+										type: "POST",
+										url:  $("#fclave").attr("action"),
+										data: $("#fclave").serialize(),
+										dataType: "json",
+										success: function(data){
+											if(data.status=="B"){
+												alert(data.msj);
+											}
+										}
+									});
+
+								}else{
 									m.children(\'#error\').html("ERROR: Claves Diferentes!!! intente de nuevo...");
 									return false;
 								}
 							}
 						}
 					});
-				})
-			} else {
-				$.prompt("<h2>Por favor Seleccione un Usuario</h2>");}
-		});
-		';
+				});
+			}else{
+				$.prompt("<h2>Por favor Seleccione un Usuario</h2>");
+			}
+		});';
 
 		$bodyscript .= '</script>';
 		return $bodyscript;
@@ -716,15 +728,15 @@ class Usuarios extends Controller {
 	}
 
 	function cclave(){
-		$id     = $this->uri->segment($this->uri->total_segments());
+		$id     = intval($this->uri->segment($this->uri->total_segments()));
 
-		$us_codigo = $this->datasis->dameval("SELECT us_codigo FROM usuario WHERE id=$id");
-		$us_nombre = $this->datasis->dameval("SELECT us_nombre FROM usuario WHERE id=$id");
+		$us_codigo = $this->datasis->dameval("SELECT us_codigo FROM usuario WHERE id=${id}");
+		$us_nombre = $this->datasis->dameval("SELECT us_nombre FROM usuario WHERE id=${id}");
 
 		$salir = '
 		<h2>Cambio de Clave:</h2><center><h1>'.$us_nombre.'</h1></center>
 		<p id="error" style="color:red"></p>
-		<form action="'.base_url().'supervisor/usuarios/cclaveg" method="post" id="fclave">
+		<form action="'.site_url('supervisor/usuarios/cclaveg').'" method="post" id="fclave">
 			<table style="margin: 0pt; width: 98%;">
 				<tbody>
 				<tr id="tr_us_codigo">
@@ -751,6 +763,7 @@ class Usuarios extends Controller {
 		$us_clave1 = $this->input->post('us_clave1');
 		$id        = $this->input->post('id');
 
+		$rt=array('status'=>'A','msj'=>'');
 		if($us_clave == $us_clave1){
 			$clave = $this->db->escape($us_clave);
 			if($id > 0){
@@ -759,22 +772,31 @@ class Usuarios extends Controller {
 					$codigo = $row['us_codigo'];
 					$super  = $row['supervisor'];
 					if($super == 'S' && !$this->secu->essuper()){
-						echo 'Solo un usuario supervisor le puede cambiar la clave a otro un supervisor';
+						$rt['status']= 'B';
+						$rt['msj']   = 'Solo un usuario supervisor le puede cambiar la clave a otro un supervisor';
 					}else{
-						$this->db->simple_query("UPDATE usuario SET us_clave=${clave} WHERE id=${id}");
-						logusu('usuario',"CAMBIO LA CLAVE DEL USUARIO ${codigo}");
+						$ban=$this->db->simple_query("UPDATE usuario SET us_clave=${clave} WHERE id=${id}");
+						if($ban){
+							logusu('usuario',"CAMBIO LA CLAVE DEL USUARIO ${codigo}");
+							$rt['status']= 'A';
+							$rt['msj']   = 'Clave cambiada';
+						}else{
+							$rt['status']= 'B';
+							$rt['msj']   = 'Problemas en el cambio';
+						}
 					}
 				}
 			}
 		}
-		redirect($this->url.'jqdatag');
+
+		echo json_encode($rt);
 	}
 
 
 	function ccclave(){
 		$us_codigo =  $this->secu->usuario();
 		$id        = $this->datasis->dameval('SELECT id FROM usuario WHERE us_codigo='.$this->db->escape($us_codigo));
-		$us_nombre = $this->datasis->dameval("SELECT us_nombre FROM usuario WHERE id=$id");
+		$us_nombre = $this->datasis->dameval("SELECT us_nombre FROM usuario WHERE id=${id}");
 
 		$salir = '
 		<h2>Cambio de Clave:</h2><center><h1>'.$us_nombre.'</h1></center>
