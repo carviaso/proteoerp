@@ -6468,6 +6468,7 @@ class Sinv extends Controller {
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('257','AceiteNoRegulado')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('256','AceiteRegulado')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('281','AceiteUsoIndustrial')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('490','AceiteOtrosSoyaCanolaOliva')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('347','AfrechilloConsumoHumano')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('346','AfrechoyAfrechilloConsumoAnimal')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('108','Afrechoyafrechilloparaconsumohumano')");
@@ -6511,10 +6512,14 @@ class Sinv extends Controller {
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('109','Embutidos')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('52' ,'FormulaPreinfantil')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('259','FormulaLacteas')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('116','ComplementosAlimenticiosDiteticos')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('24','LecheCondensada')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('407','FiletdeMero')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('404','FiletesdeDorado')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('403','FiletesdeMerluza')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('402','FiletesdeSalmon')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('148','Alpiste')");
+			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('373','PreparacionBaseCereales')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('45' ,'Frijol')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('146','Garbanzos')");
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('297','Girasol-Acondicionado(TM)')");

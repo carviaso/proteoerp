@@ -52,14 +52,28 @@ if(!empty($observa)){
 	$obser='';
 }
 
-$mSQL_3 = $this->db->query("SELECT
+$mSQL_3 = $this->db->query("SELECT aa.codigo,aa.descrip,SUM(aa.cana) AS cana,SUM(aa.peso) AS peso,aa.punitario,aa.ubica
+FROM (
+SELECT
 c.codigo,c.descrip, SUM(b.cana) AS cana, SUM(b.cana*c.peso) AS peso,c.peso AS punitario,c.ubica
 FROM sfac   AS a
 JOIN sitems AS b ON a.tipo_doc=b.tipoa AND a.numero=b.numa
 JOIN sinv   AS c ON b.codigoa=c.codigo
 WHERE a.reparto=${dbid}
 GROUP BY c.codigo
-ORDER BY c.peso DESC");
+
+UNION ALL
+
+SELECT
+c.codigo,c.descrip, (-1)*SUM(b.cana) AS cana, (-1)*SUM(b.cana*c.peso) AS peso,c.peso AS punitario,c.ubica
+FROM sfac   AS a
+JOIN sfac   AS d ON d.factura=a.numero AND a.tipo_doc='F'
+JOIN sitems AS b ON d.tipo_doc=b.tipoa AND d.numero=b.numa
+JOIN sinv   AS c ON b.codigoa=c.codigo
+WHERE a.reparto=${dbid}
+GROUP BY c.codigo
+) AS aa
+ORDER BY aa.ubica,aa.codigo DESC");
 $detalle2 = $mSQL_3->result();
 
 
@@ -67,6 +81,13 @@ $mSQL_2 = $this->db->query("SELECT
 a.tipo_doc, a.numero, a.fecha, a.zona, b.nombre AS nzona, a.totalg, a.cod_cli, a.nombre, a.vd, a.almacen,a.peso
 FROM sfac AS a
 LEFT JOIN zona AS b ON a.zona=b.codigo
+WHERE a.reparto=${dbid}
+UNION ALL
+SELECT
+c.tipo_doc, c.numero, c.fecha, a.zona, b.nombre AS nzona, c.totalg, c.cod_cli, c.nombre, c.vd, c.almacen,c.peso
+FROM sfac AS a
+LEFT JOIN zona AS b ON a.zona=b.codigo
+JOIN sfac AS c ON c.factura=a.numero AND a.tipo_doc='F'
 WHERE a.reparto=${dbid}");
 $detalle  = $mSQL_2->result();
 

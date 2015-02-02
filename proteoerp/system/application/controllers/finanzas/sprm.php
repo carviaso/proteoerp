@@ -995,8 +995,8 @@ class Sprm extends Controller {
 		));
 */
 
-		$mSQL = "SELECT cod_banc, CONCAT(cod_banc, ' ', nomb_banc) descrip FROM tban ORDER BY cod_banc ";
-		$tbanco  = $this->datasis->llenajqselect($mSQL, true );
+		$mSQL   = "SELECT cod_banc, CONCAT(cod_banc, ' ', nomb_banc) descrip FROM tban ORDER BY cod_banc ";
+		$tbanco = $this->datasis->llenajqselect($mSQL, true );
 
 		$grid->addField('tbanco');
 		$grid->label('Banco');
