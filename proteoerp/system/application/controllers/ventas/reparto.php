@@ -1681,11 +1681,11 @@ class Reparto extends Controller {
 
 	//Monto pendiente
 	function ajaxpen(){
-		$mSQL="SELECT a.vd ,SUM((a.tipo_doc='D',-1,1)*b.cana*c.peso) AS peso
+		$mSQL="SELECT a.vd ,SUM(IF(a.tipo_doc='D',-1,1)*b.cana*c.peso) AS peso
 			FROM sfac   AS a
 			JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
 			JOIN sinv   AS c ON b.codigoa=c.codigo
-			WHERE a.reparto=0 AND a.tipo_doc<>'X'
+			WHERE a.reparto=0 AND a.tipo_doc='F'
 			GROUP BY a.vd";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){

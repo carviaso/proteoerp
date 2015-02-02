@@ -1056,9 +1056,18 @@ class Sprm extends Controller {
 						$("#radicional").html(msg);
 					}
 				});
+			},
+			afterInsertRow:
+			function( rid, aData, rowe){
+				if(aData.tipo_doc=="FC" || aData.tipo_doc=="ND"){
+					if(aData.monto >  aData.abonos){
+						$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#FF0000" });
+					}else{
+						$(this).jqGrid( "setCell", rid, "tipo_doc","", {color:"#FFFFFF", background:"#0000CD" });
+					}
+				}
 			}
 		');
-
 
 		#show/hide navigations buttons
 		$grid->setAdd(false);
