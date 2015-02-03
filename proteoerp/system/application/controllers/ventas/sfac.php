@@ -1371,6 +1371,15 @@ class Sfac extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 8 }',
 		));
 
+		$grid->addField('reparto');
+		$grid->label('Reparto');
+		$grid->params(array(
+			'search'        => 'true',
+			'align'         => "'center'",
+			'width'         => 60,
+			'editable'      => 'false',
+		));
+
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(

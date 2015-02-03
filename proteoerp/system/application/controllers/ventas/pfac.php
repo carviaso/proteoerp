@@ -1776,9 +1776,14 @@ class Pfac extends Controller {
 
 	function _pre_delete($do){
 		$codigo = $do->get('numero');
-		$mSQL='UPDATE sinv JOIN itpfac ON sinv.codigo=itpfac.codigoa SET sinv.exdes=sinv.exdes-itpfac.cana WHERE itpfac.numa='.$this->db->escape($codigo);
-		$ban=$this->db->simple_query($mSQL);
-		if($ban==false){ memowrite($mSQL,'pfac'); }
+		$status = $do->get('status');
+
+		if($status!='C'){
+			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='No se puede elimnar este pedido';
+			$mSQL='UPDATE sinv JOIN itpfac ON sinv.codigo=itpfac.codigoa SET sinv.exdes=IF(sinv.exdes>(itpfac.cana-itpfac.entregado),sinv.exdes-(itpfac.cana-itpfac.entregado),0) WHERE itpfac.numa='.$this->db->escape($codigo);
+			$ban=$this->db->simple_query($mSQL);
+			if($ban==false){ memowrite($mSQL,'pfac'); }
+		}
 		return true;
 	}
 

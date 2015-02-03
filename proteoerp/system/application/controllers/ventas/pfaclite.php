@@ -822,14 +822,18 @@ class pfaclite extends validaciones{
 		//Fin del peso del pedido
 
 
-		logusu('pfac', "Pedido $codigo MODIFICADO");
+		logusu('pfac', "Pedido ${codigo} MODIFICADO");
 	}
 
 	function _pre_delete($do){
 		$status = $do->get('status');
 		$codigo = $do->get('numero');
+		$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='No se puede eliminar este pedido';
+		if($status!='P'){
+			return false;
+		}
 		if($status!='C'){
-			$mSQL='UPDATE sinv JOIN itpfac ON sinv.codigo=itpfac.codigoa SET sinv.exdes=IF(sinv.exdes>itpfac.cana,sinv.exdes-itpfac.cana,0) WHERE itpfac.numa='.$this->db->escape($codigo);
+			$mSQL='UPDATE sinv JOIN itpfac ON sinv.codigo=itpfac.codigoa SET sinv.exdes=IF(sinv.exdes>(itpfac.cana-itpfac.entregado),sinv.exdes-(itpfac.cana-itpfac.entregado),0) WHERE itpfac.numa='.$this->db->escape($codigo);
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){ memowrite($mSQL,'pfaclite'); }
 		}

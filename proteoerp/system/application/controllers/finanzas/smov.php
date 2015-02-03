@@ -3100,7 +3100,6 @@ class Smov extends Controller {
 		$tipo     = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
 		if($tipo != 'F' || $tipo == 'C' || $tipo == 'E'){ echo 'Reparto no se puede cobrar con tipo '.$tipo; return false; }
 
-
 		$this->rapyd->load('dataform');
 
 		$edit = new DataForm($this->url.'cobrorep/'.$id.'/insert');

@@ -1,0 +1,114 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$modbus=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_cli'),
+	'titulo'  =>'Buscar Cliente');
+
+$boton=$this->datasis->modbus($modbus);
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('CONCAT(a.tipo_doc,a.numero) AS doc', 'a.tipo', 'b.nombre', 'a.cobrador', 'b.nombre AS nomcaja','a.f_factura', 'a.banco', 'MID(c.nomb_banc,1,26) nombanco',
+"IF(SUBSTRING(a.tipo_doc,2,1) ='X',0,a.monto) as monto",
+"IF(SUBSTRING(a.tipo_doc,2,1)!='X' AND a.tipo ='EF',a.monto,0) AS efectivo",
+"IF(SUBSTRING(a.tipo_doc,2,1)!='X' AND a.tipo ='CH',a.monto,0) AS cheques",
+"IF(SUBSTRING(a.tipo_doc,2,1)!='X' AND a.tipo NOT IN ('EF','CH','TD','VI','MC'),a.monto,0) AS efectos",
+"IF(SUBSTRING(a.tipo_doc,2,1)!='X' AND a.tipo ='TD',a.monto,0) AS tdebito",
+"IF(SUBSTRING(a.tipo_doc,2,1)!='X' AND a.tipo ='VI',a.monto,0) AS visa",
+"IF(SUBSTRING(a.tipo_doc,2,1)!='X' AND a.tipo ='MC',a.monto,0) AS mc",
+"IF(SUBSTRING(a.tipo_doc,2,1) ='X',a.monto,0) AS anulado",'CONCAT(a.tipo,\' \',a.num_ref) AS num');
+
+$filter->db->select($select);
+$filter->db->from('sfpa AS a');
+$filter->db->join('scaj AS b' ,'a.cobrador=b.cajero','LEFT');
+$filter->db->join('tban AS c' ,'a.banco=c.cod_banc' ,'LEFT');
+$filter->db->orderby('a.cobrador,f_factura');
+
+$filter->fechad = new dateField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause='where';
+$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d');
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechad->operator='>=';
+$filter->fechah->operator='<=';
+
+$filter->cajero = new dropdownField('Cajero', 'cajero');
+$filter->cajero->db_name = 'b.cajero';
+$filter->cajero->clause='where';
+$filter->cajero->option('','Todos');
+$filter->cajero->options('SELECT TRIM(cajero) AS cajero, nombre FROM scaj ORDER BY cajero');
+$filter->cajero->operator='=';
+
+$filter->nombre = new dropdownField('Tipo', 'nombre');
+$filter->nombre->db_name = 'a.tipo';
+$filter->nombre->clause='where';
+$filter->nombre->option('','Todos');
+$filter->nombre->options('SELECT tipo, nombre FROM tarjeta ORDER BY nombre');
+$filter->nombre->operator='=';
+
+$filter->banco = new dropdownField('Banco', 'banco');
+$filter->banco->db_name='banco';
+$filter->banco->clause='where';
+$filter->banco->option('','Todos');
+$filter->banco->options('SELECT tbanco AS clave, banco FROM banc WHERE CHAR_LENGTH(tbanco)>0 ORDER BY banco');
+$filter->banco->operator='=';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$sobretabla='';
+	if (!empty($filter->cajero->newValue)) $sobretabla.='Cajero: '.$filter->cajero->description;
+	if (!empty($filter->nombre->newValue)) $sobretabla.='Tipo: '.$filter->nombre->description;
+	if (!empty($filter->banco->newValue))  $sobretabla.='Banco: '.$filter->banco->description;
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Formas de Pago');
+	$pdf->setSubTitulo('Desde la fecha: '.$_POST['fechad'].' Hasta '.$_POST['fechah'],12);
+	$pdf->setSobreTabla($sobretabla,8);
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+
+	$pdf->AddCol('doc'     ,20,'Documento'      ,'L',8);
+	$pdf->AddCol('monto'   ,25,'Cobrado'        ,'R',8);
+	$pdf->AddCol('efectivo',25,'Efectivo'       ,'R',8);
+	$pdf->AddCol('cheques' ,25,'Cheques'        ,'R',8);
+	$pdf->AddCol('efectos' ,25,'Depósitos/Otros','R',8);
+	$pdf->AddCol('tdebito' ,25,'T Débito'       ,'R',8);
+	$pdf->AddCol('visa'    ,25,'Visa'           ,'R',8);
+	$pdf->AddCol('mc'      ,25,'Master Card'    ,'R',8);
+	$pdf->AddCol('num'     ,23,'Número'         ,'C',8);
+	$pdf->AddCol('nombanco',50,'Banco'          ,'L',8);
+	$pdf->setTotalizar('monto','efectivo','cheques','efectos','tdebito','visa','mc');
+	$pdf->setGrupoLabel('Caja: (<#cobrador#>) <#nomcaja#>','Fecha: <#f_factura#>');
+	$pdf->setGrupo('cobrador','f_factura');
+	$pdf->Table();
+	$pdf->Output();
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Formas de pago</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

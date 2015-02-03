@@ -1,0 +1,75 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$sel=array('a.cod_cli', 'a.nombre', 'a.fecha AS fechapago',
+	'a.numero AS sfact','abono', 'b.fecha AS fechafact', 'b.tipo_doc',
+	'b.numero AS factura','a.monto'
+);
+
+$filter->db->select($sel);
+$filter->db->from('smov   AS a');
+$filter->db->join('itccli AS b','a.tipo_doc=b.tipoccli');
+$filter->db->where('a.numero = b.numccli');
+$filter->db->where('a.tipo_doc','AB');
+//$filter->db->groupby('cod_cli');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechad->clause  ='where';
+$filter->fechad->db_name ='a.fecha';
+$filter->fechad->operator='>=';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30, date('Y')));
+$filter->fechad->group = 'Fecha';
+
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->clause='where';
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechah->db_name='a.fecha';
+$filter->fechah->operator='<=';
+$filter->fechah->group = 'Fecha';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+	$mSQL=$this->rapyd->db->_compile_select();
+	$subtitu='';
+	if(isset($_POST['fechad'])) $subtitu.=' Desde la fecha '.$_POST['fechad'];
+	if(isset($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Relación de facturas pagadas en meses anteriores');
+	$pdf->setSubTitulo($subtitu);
+
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+	$pdf->AddCol('fechapago',20, 'Fecha'          ,'L',7);
+	$pdf->AddCol('sfact'    ,25, 'Nº de CH o N/D' ,'L',7);
+	$pdf->AddCol('nombre'   ,75, 'Proveedor'      ,'L',7);
+	$pdf->AddCol('factura'  ,15, 'Nº Fact'        ,'R',7);
+	$pdf->AddCol('monto'    ,25, 'Monto Fact.'    ,'R',7);
+	$pdf->AddCol('abono'    ,25, 'Abono Fact..'   ,'R',7);
+
+	$pdf->setTotalizar('abono');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Relación de cobranzas meses anteriores</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

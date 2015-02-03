@@ -52,7 +52,7 @@ if(!empty($observa)){
 	$obser='';
 }
 
-$mSQL_3 = $this->db->query("SELECT aa.codigo,aa.descrip,SUM(aa.cana) AS cana,SUM(aa.peso) AS peso,aa.punitario,aa.ubica
+$mSQL_3 = $this->db->query("SELECT aa.codigo,aa.descrip,aa.cana AS cana,aa.peso AS peso,aa.punitario,aa.ubica
 FROM (
 SELECT
 c.codigo,c.descrip, SUM(b.cana) AS cana, SUM(b.cana*c.peso) AS peso,c.peso AS punitario,c.ubica

@@ -607,24 +607,14 @@ class Reparto extends Controller {
 				});
 			}
 		}';
-
-		$peso = floatval($this->datasis->dameval("SELECT SUM(peso) AS peso FROM sfac WHERE peso IS NOT NULL AND reparto=${id}"));
-		if(!$peso) $peso = 0;
-
-		$cana = floatval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfac WHERE peso IS NOT NULL AND reparto=${id}"));
-		if(!$cana) $cana = 0;
-
-		$paradas = floatval($this->datasis->dameval("SELECT COUNT(DISTINCT cod_cli) AS cana FROM sfac WHERE reparto=${id}"));
-		if(!$paradas) $paradas = 0;
-
-		$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
-		FROM sfac   AS a
-		JOIN sitems AS b ON a.id=b.id_sfac
-		JOIN sinv   AS c ON b.codigoa=c.codigo
-		WHERE a.reparto=${id} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
-		if(!$volumen) $volumen = 0;
-
 		$msalida .= '</script>';
+
+		$vals = $this->_repavalores($id);
+		$peso    = $vals['peso'];
+		$paradas = $vals['paradas'];
+		$cana    = $vals['cana'];
+		$volumen = $vals['volumen'];
+
 		$capacidad= floatval($reg['capacidad']);
 		$cvolumen = floatval($reg['volumen']);
 		$cparadas = floatval($reg['paradas']);
@@ -702,6 +692,44 @@ class Reparto extends Controller {
 		echo $msalida;
 	}
 
+	function _repavalores($id){
+		$dbreparto=$this->db->escape($id);
+
+		$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada FROM sfac WHERE reparto=${dbreparto}");
+		$peso    = floatval($row['peso']);
+		$paradas = floatval($row['parada']);
+		$cana    = floatval($row['cana']);
+
+		$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
+		FROM sfac   AS a
+		JOIN sitems AS b ON a.id=b.id_sfac
+		JOIN sinv   AS c ON b.codigoa=c.codigo
+		WHERE a.reparto=${dbreparto} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
+
+		//Toma devoluciones para restarlas
+		$row = $this->datasis->damereg("SELECT SUM(COALESCE(a.peso,0)) peso, COUNT(a.totals=b.totals) cana, 0 AS parada FROM sfac AS a JOIN sfac AS b ON a.factura=b.numero AND b.tipo_doc='F' WHERE b.reparto=${dbreparto} AND a.tipo_doc='D'");
+		$dpeso    = floatval($row['peso']);
+		$dparadas = floatval($row['parada']);
+		$dcana    = floatval($row['cana']);
+
+		$dvolumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
+		FROM sfac   AS a
+		JOIN sfac   AS d ON d.factura=a.numero AND a.tipo_doc='F'
+		JOIN sitems AS b ON d.tipo_doc=b.tipoa AND d.numero=b.numa
+		JOIN sinv   AS c ON b.codigoa=c.codigo
+		WHERE a.reparto=${dbreparto} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
+		//Fin de las devoluciones
+
+		$rt = array(
+			'peso'    => $peso    -$dpeso,
+			'paradas' => $paradas -$dparadas,
+			'cana'    => $cana    -$dcana,
+			'volumen' => $volumen -$dvolumen
+		);
+
+		return $rt;
+	}
+
 	//******************************************************************
 	// Agrega Factura
 	//
@@ -721,19 +749,14 @@ class Reparto extends Controller {
 			$msj = 'Factura Desmarcada';
 		}
 
-		$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada FROM sfac WHERE reparto=${dbreparto}");
-		$peso    = floatval($row['peso']);
-		$paradas = floatval($row['parada']);
-		$cana    = floatval($row['cana']);
-
-		$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
-		FROM sfac   AS a
-		JOIN sitems AS b ON a.id=b.id_sfac
-		JOIN sinv   AS c ON b.codigoa=c.codigo
-		WHERE a.reparto=${dbreparto} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
+		$vals = $this->_repavalores($reparto);
+		$peso    = $vals['peso'];
+		$paradas = $vals['paradas'];
+		$cana    = $vals['cana'];
+		$volumen = $vals['volumen'];
 
 		$this->db->where('id',$reparto);
-		$this->db->update('reparto',array('peso'=>$row['peso'], 'facturas'=>$row['cana'], 'volumen' =>$volumen, 'paradas'=>$paradas) );
+		$this->db->update('reparto',array('peso'=>$peso, 'facturas'=>$cana, 'volumen' =>$volumen, 'paradas'=>$paradas) );
 		$rt=array(
 			'mensaje' =>$msj,
 			'peso'    =>$peso,
@@ -917,7 +940,7 @@ class Reparto extends Controller {
 			'frozen'        => 'true',
 			'width'         => 80,
 			'editable'      => 'false',
-			'search'        => 'false'
+			'search'        => 'true'
 		));
 
 		$grid->addField('tipo');
@@ -940,7 +963,7 @@ class Reparto extends Controller {
 					}else if(aData.tipo=="C"){
 						tips = "Cargado";
 					}else if(aData.tipo=="F"){
-						tips = "Cerrado";
+						tips = "Cerrado/Finalizado";
 					}else{
 						tips = "Otro";
 					}
@@ -1648,7 +1671,7 @@ class Reparto extends Controller {
 		$id=intval($id);
 		if($id<=0) return false;
 		$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
-		if($tipo != 'F' || $tipo == 'C' || $tipo == 'E'){ echo 'Reparto no se puede cobrar con tipo '.$tipo; return false; }
+		if($tipo != 'F' || $tipo != 'C' || $tipo != 'E'){ echo 'Reparto no se puede cobrar con tipo '.$tipo; return false; }
 
 		$mixto=$cheque=array();
 		$mSQL="SELECT c.id, a.numero, c.tipo_doc AS tipo, a.fecha, c.monto-c.abonos AS monto,b.nombre, a.repcob,b.cliente,b.id AS sclid
@@ -1685,15 +1708,17 @@ class Reparto extends Controller {
 			FROM sfac   AS a
 			JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
 			JOIN sinv   AS c ON b.codigoa=c.codigo
-			WHERE a.reparto=0 AND a.tipo_doc='F'
+			WHERE a.reparto=0 AND a.tipo_doc<>'X'
 			GROUP BY a.vd";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			echo '<table style="font-size:1em;" align="center">';
 			echo '<tr><th>Vend.</th><th>Peso</th><th>Vend.</th><th>Peso</th></tr>';
 			foreach ($query->result() as $i=>$row){
+				$peso = floatval($row->peso);
+				if($peso<0) $peso=0;
 				if(!$i%2) echo '<tr>';
-				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->vd.'</td><td style="text-align:right">'.nformat($row->peso).'</td>';
+				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->vd.'</td><td style="text-align:right">'.nformat($peso).'</td>';
 				if($i%2) echo '</tr>';
 			}
 			if(!$i%2) echo '</tr>';

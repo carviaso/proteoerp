@@ -184,7 +184,7 @@ piecontinuo;
 $mod     = $clinea = false;
 $npagina = true;
 $i       = 0;
-foreach ($detalle2 AS $items2){ $i++;
+foreach ($detalle2 as $items2){ $i++;
 	do {
 		if($npagina){
 			$this->incluir('X_CINTILLO');

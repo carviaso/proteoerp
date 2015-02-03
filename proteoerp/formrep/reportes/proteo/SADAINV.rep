@@ -1,0 +1,97 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$mSCLId=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_cli'),
+	'titulo'  =>'Buscar Cliente');
+
+$bsclid =$this->datasis->modbus($mSCLId);
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array('a.numero','a.fecha','d.descrip','FORMAT(SUM(c.peso*b.cana)/1000,3) AS peso',
+'e.rifci','e.nombre','SUM(b.cana) AS cana','a.reparto');
+$filter->db->select($select);
+$filter->db->from('sfac    AS a');
+$filter->db->join('sitems  AS b','a.numero=b.numa AND a.tipo_doc=b.tipoa');
+$filter->db->join('sinv    AS c','c.codigo=b.codigoa');
+$filter->db->join('sadacod AS d','d.id=c.sada');
+$filter->db->join('scli    AS e','e.cliente=a.cod_cli');
+$filter->db->where("tipo_doc<>'X' AND  tipo_doc<>'D'");
+$filter->db->groupby('a.numero,c.sada');
+$filter->db->orderby('a.numero');
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechad->clause  = 'where';
+$filter->fechad->db_name = 'a.fecha';
+$filter->fechad->operator='>=';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30,   date('Y')));
+
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->clause = 'where';
+$filter->fechah->db_name = 'a.fecha';
+$filter->fechah->operator='<=';
+$filter->fechah->insertValue = date('Y-m-d');
+
+$filter->cliente = new inputField('Cliente', 'cod_cli');
+$filter->cliente->clause='where';
+$filter->cliente->append($bsclid);
+$filter->cliente->db_name = 'a.cod_cli';
+$filter->cliente->operator='=';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+	$subtitu='';
+	if(isset($_POST['fechad'])) $subtitu.=' Desde '.$_POST['fechad'];
+	if(isset($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
+
+	$sobretabla='';
+	if (!empty($filter->cliente->newValue)) $sobretabla.='       Cliente: ('.$filter->cliente->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cliente->newValue.'"');
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Resumen de Guias SADA');
+	$pdf->setSubTitulo($subtitu);
+	$pdf->setSobreTabla($sobretabla);
+
+	$pdf->AddPage();
+	//$pdf->setTableTitu(10,'Times');
+	$pdf->AddCol('factura' ,25,'Factura'    ,'L',8);
+	$pdf->AddCol('descrip' ,80,'Rubro SADA' ,'L',8);
+   	$pdf->AddCol('cana'    ,20,'Cant.'      ,'R',8);
+	$pdf->AddCol('peso'    ,35,'Peso T.'    ,'R',8);
+
+   	$pdf->setGrupoLabel('Factura <#numero#>, Cliente <#rifci#> <#nombre#>, Reparto <#reparto#>');
+	$pdf->setGrupo('numero');
+
+	//$pdf->setTotalizar('monto','cant','uni');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if (strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Res&uacute;men de guias SADA</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
