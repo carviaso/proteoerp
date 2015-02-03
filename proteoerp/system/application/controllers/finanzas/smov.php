@@ -1826,7 +1826,13 @@ class Smov extends Controller {
 		$rel='sfpa';
 		$cana = $do->count_rel($rel);
 		for($i = 0;$i < $cana;$i++){
-			$sfpamonto+=$do->get_rel($rel, 'monto', $i);
+			$sfpatipo  = $do->get_rel($rel, 'tipo', $i);
+			$sfpamonto+= $do->get_rel($rel, 'monto', $i);
+
+			if($sfpatipo=='EF'){
+				$do->set_rel($rel, 'banco' ,'', $i);
+				$do->set_rel($rel, 'numero','', $i);
+			}
 		}
 		$sfpamonto=round($sfpamonto,2);
 
@@ -2102,7 +2108,7 @@ class Smov extends Controller {
 
 			}
 
-			foreach($do->data_rel[$rel_id] AS $i=>$data){
+			foreach($do->data_rel[$rel_id] as $i=>$data){
 				$tipo_doc = $data['tipo_doc'];
 				$numero   = $data['numero'];
 				$fecha    = $data['fecha'];

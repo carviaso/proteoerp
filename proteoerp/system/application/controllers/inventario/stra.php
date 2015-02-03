@@ -10,6 +10,7 @@ class Stra extends Controller {
 	var $titp    = 'Transferencias de Inventario';
 	var $tits    = 'Transferencias de Inventario';
 	var $url     = 'inventario/stra/';
+	var $chrepetidos=array();
 	var $genesal=true;
 
 	function Stra(){
@@ -17,6 +18,7 @@ class Stra extends Controller {
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
 		$this->datasis->modulo_nombre( 'STRA', $ventana=0 );
+		$this->chrepetidos=array();
 	}
 
 	function index(){
@@ -749,7 +751,7 @@ class Stra extends Controller {
 		$edit->codigo = new inputField('C&oacute;digo <#o#>', 'codigo_<#i#>');
 		$edit->codigo->db_name='codigo';
 		$edit->codigo->append($btn);
-		$edit->codigo->rule = 'trim|required';
+		$edit->codigo->rule = 'callback_chrepe|trim|required';
 		$edit->codigo->rel_id='itstra';
 		$edit->codigo->maxlength=15;
 		$edit->codigo->size     =15;
@@ -1109,6 +1111,16 @@ class Stra extends Controller {
 				$rt= html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string));
 			}
 			return $rt;
+		}
+	}
+
+	function chrepe($cod){
+		if(array_search($cod, $this->chrepetidos)===false){
+			$this->chrepetidos[]=$cod;
+			return true;
+		}else{
+			$this->validation->set_message('chrepe', 'El producto '.$cod.' esta repetido');
+			return false;
 		}
 	}
 
