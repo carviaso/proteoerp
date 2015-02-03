@@ -917,6 +917,7 @@ class Reparto extends Controller {
 		$mWHERE = $grid->geneTopWhere('sfac');
 		$mWHERE[] = array('', 'reparto', array($id,'0'), '' );
 		$mWHERE[] = array('', 'tipo_doc', 'F', '' );
+		$mWHERE[] = array('', 'MID(numero,1,1) !=', '_', '' );
 
 		$response   = $grid->getData('sfac', array(array()), array('id', 'numero','fecha', 'cod_cli','zona', 'vd', 'reparto', 'peso'), false, $mWHERE, 'id','desc' );
 		$rs = $grid->jsonresult( $response);
