@@ -613,7 +613,7 @@ class Sinv extends Controller {
 									alert("Informacion: "+sino);
 									$("#newapi'.$grid0.'").trigger("reloadGrid");
 								},
-								error: function(h,t,e)  { apprise("Error..grupo="+f.mgrupo+" ",e) }
+								error: function(h,t,e)  { apprise("Error..grupo="+h+" ",e) }
 							});
 						}
 					}

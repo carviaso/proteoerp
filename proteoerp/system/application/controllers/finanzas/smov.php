@@ -655,6 +655,14 @@ class Smov extends Controller {
 			'edittype'      => "'text'",
 		));
 
+		$grid->addField('nroex');
+		$grid->label('Referencia');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'width'         => 80,
+			'edittype'      => "'text'",
+		));
 
 		$grid->addField('montasa');
 		$grid->label('Base G.');
@@ -959,7 +967,7 @@ class Smov extends Controller {
 		if($oper == 'add'){
 			echo '';
 			return '';
-		}elseif($oper == 'edit') {
+		} elseif ($oper == 'edit') {
 			//unset($data['ubica']);
 			$monto =  $this->datasis->dameval("SELECT monto FROM smov WHERE id=${dbid}");
 			$data['abonos'] = abs($data['abonos']);
@@ -967,7 +975,7 @@ class Smov extends Controller {
 			$this->db->where('id', $id);
 			$this->db->update('smov', $data);
 			return 'Movimiento Modificado';
-		}elseif($oper == 'del'){
+		} elseif ($oper == 'del'){
 			return 'Deshabilidado';
 		};
 	}

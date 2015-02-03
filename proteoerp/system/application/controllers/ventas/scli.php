@@ -1639,7 +1639,6 @@ class Scli extends validaciones {
 		$edit->sada->size=20;
 		$edit->sada->maxlength =20;
 
-
 		$edit->cobrador = new dropdownField('Cobrador', 'cobrador');
 		$edit->cobrador->option('','Ninguno');
 		$edit->cobrador->options("SELECT TRIM(vendedor) AS vd, CONCAT(vendedor,'-',nombre) nombre FROM vend WHERE tipo IN ('C','A') ORDER BY vendedor");

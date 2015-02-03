@@ -40,8 +40,9 @@ class Sprv extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'edocta',   'img'=>'images/pdf_logo.gif' ,  'alt' => 'Estado de cuenta' , 'label'=>'Estado de Cuenta'));
-		$grid->wbotonadd(array('id'=>'pagweb',   'img'=>'images/html_icon.gif',  'alt' => 'P&aacute;gina Web', 'label'=>'P&aacute;gina Web'));
+		$grid->wbotonadd(array('id'=>'edocta', 'img'=>'images/pdf_logo.gif' ,  'alt' => 'Estado de cuenta' , 'label'=>'Estado de Cuenta'));
+		$grid->wbotonadd(array('id'=>'pagweb', 'img'=>'images/html_icon.gif',  'alt' => 'P&aacute;gina Web', 'label'=>'P&aacute;gina Web'));
+		$grid->wbotonadd(array('id'=>'pislr',  'img'=>'images/pdf_logo.gif',   'alt' => 'Resumen de retenciones de ISLR', 'label'=>'ARC ISLR'));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
@@ -152,7 +153,6 @@ class Sprv extends Controller {
 		};
 		';
 
-
 		$param['WestPanel']   = $WestPanel;
 		//$param['EastPanel']  = $EastPanel;
 		$param['funciones']   = $funciones;
@@ -166,8 +166,9 @@ class Sprv extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-
+	//******************************************************************
 	// Revisa si existe el codigo
+	//
 	function sprvexiste(){
 		$cliente  = rawurldecode($this->input->post('codigo'));
 		$dbcliente= $this->db->escape($cliente);
@@ -196,7 +197,7 @@ class Sprv extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '380', '680' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '450', '680' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '190', '360' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '200', '300' );
 
@@ -289,6 +290,38 @@ class Sprv extends Controller {
 				$.prompt("<h1>Por favor Seleccione un Proveedor</h1>");
 			}
 		});';
+
+		// ARC ISLR
+		$bodyscript .= '
+		$("#pislr").click( function(){
+			var id    = $("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			var forma = "";
+			if (id)	{
+				forma = {
+					state0: {
+						title: "PLANILLA ARC/ISLR",
+						html:\'<label>Desde <input type="text" name="fdesde" value=""></label><br />\'+
+							\'<label>Hasta  <input type="text" name="lhasta" value=""></label><br />\',
+						buttons: { Emitir: 1 },
+						//focus: "input[name=\'fname\']",
+						submit:function(e,v,m,f){ 
+							console.log(f);
+							'.$this->datasis->jwinopen(site_url('formatos/verhtml/ARCISLR/').'/\'+id').';
+							e.preventDefault();
+						}
+					}
+				};
+				$.prompt(forma);
+				
+				var ret  = $("'.$ngrid.'").getRowData(id);
+
+				if ( ret.url.length > 10 )
+					window.open(ret.url);
+			} else {
+				$.prompt("<h1>Por favor Seleccione un Proveedor</h1>");
+			}
+		});';
+
 
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
