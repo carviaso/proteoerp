@@ -1672,7 +1672,7 @@ class Reparto extends Controller {
 		$id=intval($id);
 		if($id<=0) return false;
 		$tipo = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
-		if($tipo != 'F' || $tipo != 'C' || $tipo != 'E'){ echo 'Reparto no se puede cobrar con tipo '.$tipo; return false; }
+		if($tipo != 'F' && $tipo != 'C' && $tipo != 'E'){ echo 'Reparto no se puede cobrar con tipo '.$tipo; return false; }
 
 		$mixto=$cheque=array();
 		$mSQL="SELECT c.id, a.numero, c.tipo_doc AS tipo, a.fecha, c.monto-c.abonos AS monto,b.nombre, a.repcob,b.cliente,b.id AS sclid

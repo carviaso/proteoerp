@@ -3098,7 +3098,7 @@ class Smov extends Controller {
 		$id=intval($id);
 		if($id<=0) return false;
 		$tipo     = $this->datasis->dameval("SELECT tipo FROM reparto WHERE id=${id}");
-		if($tipo != 'F' || $tipo == 'C' || $tipo == 'E'){ echo 'Reparto no se puede cobrar con tipo '.$tipo; return false; }
+		if($tipo != 'F' && $tipo != 'C' && $tipo != 'E'){ echo 'Reparto no se puede cobrar con tipo '.$tipo; return false; }
 
 		$this->rapyd->load('dataform');
 
