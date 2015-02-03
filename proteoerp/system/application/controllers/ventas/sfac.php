@@ -4269,8 +4269,10 @@ class Sfac extends Controller {
 
 		if($fecha != $hoy){
 			if($referen!='C'){
-				$do->error_message_ar['pre_del']='No se puede anular documentos de dias pasados.';
-				return false;
+				if(!$this->secu->es_super()){
+					$do->error_message_ar['pre_del']='No se puede anular documentos de dias pasados.';
+					return false;
+				}
 			}elseif($inicial>0 || $abono>0){
 				$do->error_message_ar['pre_del']='No se puede anular el documento por tener abonos.';
 				return false;

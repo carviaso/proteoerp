@@ -91,8 +91,8 @@ class Rcaj extends validaciones {
 				}
 			}
 		}
-		
-		
+
+
 		$data['forma'] ='';
 		if($this->rapyd->uri->is_set('search') && !empty($filter->fecha->value)){
 			$fecha=$filter->fecha->value;
@@ -843,9 +843,7 @@ class Rcaj extends validaciones {
 						$data['numcuent']='DIFERENCIA EN CAJA';
 						$data['activo']  ='S';
 						$data['tipocta'] ='C';
-						$data['monto']   = 0;
 						$data['saldo']   = 0;
-						$data['concepto'] ="SOBRANTE EN CAJERO ${cajero} DIA ".dbdate_to_human($fecha);
 
 						$mSQL = $this->db->insert_string('banc', $data);
 						$ban=$this->db->query($mSQL);
