@@ -4269,7 +4269,7 @@ class Sfac extends Controller {
 
 		if($fecha != $hoy){
 			if($referen!='C'){
-				if(!$this->secu->es_super()){
+				if(!$this->secu->essuper()){
 					$do->error_message_ar['pre_del']='No se puede anular documentos de dias pasados.';
 					return false;
 				}
