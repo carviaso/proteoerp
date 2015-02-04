@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $modbus=array(
 	'tabla'   =>'scli',
 	'columnas'=>array(
@@ -13,13 +19,14 @@ $boton=$this->datasis->modbus($modbus);
 $filter = new DataFilter('Filtro del Reporte');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$select=array('tipo_doc','numero','a.fecha','a.nombre','hora',
-"SUM(totals*IF(tipo_doc='D',-1,1)) AS subtotal",
-"SUM(iva*IF(tipo_doc='D',-1,1)) AS impuesto",
-"SUM(totalg*IF(tipo_doc='D',-1,1)) AS grantotal",
-"SUM(totalg*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1) ) AS contado",
-"SUM(totalg*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1) ) AS credito",
-"COUNT(*) AS numfac");
+$select=array(
+	"SUM(totals*IF(tipo_doc='D',-1,1))  AS subtotal",
+	"SUM(iva*IF(tipo_doc='D',-1,1))     AS impuesto",
+	"SUM(totalg*IF(tipo_doc='D',-1,1))  AS grantotal",
+	"SUM(totalg*(referen IN ('E','M'))*IF(tipo_doc='D',-1,1))     AS contado",
+	"SUM(totalg*(referen NOT IN ('E','M'))*IF(tipo_doc='D',-1,1)) AS credito",
+	"COUNT(*) AS numfac"
+);
 
 $filter->db->select($select);
 $filter->db->from('sfac a');
@@ -49,7 +56,7 @@ $filter->vd = new dropdownField('Vendedor', 'vd');
 $filter->vd->db_name ='vd';
 $filter->vd->clause='where';
 $filter->vd->option('','Todos');
-$filter->vd->options("SELECT vendedor, CONCAT(vendedor,' ',nombre) nombre FROM vend ORDER BY vendedor");
+$filter->vd->options("SELECT TRIM(vendedor) AS vend, CONCAT(vendedor,' ',nombre) nombre FROM vend ORDER BY vendedor");
 $filter->vd->operator='=';
 
 $filter->cod_cli = new inputField('Cliente', 'cod_cli');
@@ -62,7 +69,7 @@ $filter->gscli = new dropdownField('Grupo de Cliente', 'grupo');
 $filter->gscli->clause='where';
 $filter->gscli->db_name ='b.grupo';
 $filter->gscli->option('','Todos');
-$filter->gscli->options('SELECT grupo, gr_desc FROM grcl ORDER BY gr_desc');
+$filter->gscli->options('SELECT TRIM(grupo) AS grupo, gr_desc FROM grcl ORDER BY gr_desc');
 $filter->gscli->operator='=';
 
 $filter->agrupado = new dropdownField('Agrupado por', 'agrupado');
@@ -70,6 +77,7 @@ $filter->agrupado->option('D','Dia');
 $filter->agrupado->option('M','Mes');
 $filter->agrupado->option('H','Hora');
 $filter->agrupado->clause='';
+$filter->agrupado->rule='required|enum[D,M,H]';
 
 $filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
@@ -81,16 +89,22 @@ $filter->build();
 
 if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 
-	if(ISSET($_POST['agrupado']))
-	switch($_POST['agrupado']){
-	case 'H' :
-		$filter->db->groupby('MID(hora,1,4)');
+	$frow='Titu.';
+	switch($filter->agrupado->newValue){
+		case 'H' :
+			$frow='Hora';
+			$filter->db->select('MID(hora,1,4) AS frow');
+			$filter->db->groupby('MID(hora,1,4)');
 		break;
-	case 'D' :
-		$filter->db->groupby('fecha');
+		case 'D' :
+			$frow='Fecha';
+			$filter->db->select('a.fecha AS frow');
+			$filter->db->groupby('fecha');
 		break;
-	case 'M' :
-		$filter->db->groupby('EXTRACT(YEAR_MONTH FROM fecha)');
+		case 'M' :
+			$frow='Mes';
+			$filter->db->select('EXTRACT(YEAR_MONTH FROM fecha) AS frow');
+			$filter->db->groupby('EXTRACT(YEAR_MONTH FROM fecha)');
 		break;
 	};
 
@@ -99,11 +113,11 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	//echo $mSQL;
 
 	$sobretabla='';
-	if (!empty($filter->cajero->newValue))   $sobretabla.='       Cajero: '.$filter->cajero->description;
-	if (!empty($filter->vd->newValue))       $sobretabla.='       Vendedor: '.$filter->vd->description;
-	if (!empty($filter->gscli->newValue))    $sobretabla.='       Grupo Cliente: '.$filter->gscli->description;
-	if (!empty($filter->agrupado->newValue)) $sobretabla.='       Agrupado por: '.$filter->agrupado->description;
-	if (!empty($filter->cod_cli->newValue))  $sobretabla.='       Cliente: ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_cli->newValue.'"');
+	if (!empty($filter->cajero->newValue))   $sobretabla.='    Cajero: '.$filter->cajero->description;
+	if (!empty($filter->vd->newValue))       $sobretabla.='    Vendedor: '.$filter->vd->description;
+	if (!empty($filter->gscli->newValue))    $sobretabla.='    Grupo Cliente: '.$filter->gscli->description;
+	if (!empty($filter->agrupado->newValue)) $sobretabla.='    Agrupado por: '.$filter->agrupado->description;
+	if (!empty($filter->cod_cli->newValue))  $sobretabla.='    Cliente: ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente="'.$filter->cod_cli->newValue.'"');
 
 	$subtitu='';
 	if(!empty($_POST['fechad'])) $subtitu.=' Desde la fecha '.$_POST['fechad'];
@@ -112,20 +126,19 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$pdf = new PDFReporte($mSQL);
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
-	$pdf->setTitulo("Listado de Ventas por Fecha");
+	$pdf->setTitulo("Resumen de ventas por ${frow}");
 	$pdf->setSubTitulo($subtitu);
 	$pdf->setSobreTabla($sobretabla,7);
 	$pdf->AddPage();
 	$pdf->setTableTitu(9,'Times');
 
-	$pdf->AddCol('fecha'    ,20,'Fecha',    'C',8);
-	$pdf->AddCol('subtotal' ,26,'Ventas',   'R',8);
-	$pdf->AddCol('impuesto' ,26,'IVA',      'R',8);
+	$pdf->AddCol('frow'     ,15,$frow      ,'C',8);
+	$pdf->AddCol('subtotal' ,26,'Ventas'   ,'R',8);
+	$pdf->AddCol('impuesto' ,26,'IVA'      ,'R',8);
 	$pdf->AddCol('grantotal',26,'Facturado','R',8);
-	$pdf->AddCol('contado'  ,26,'Contado',  'R',8);
-	$pdf->AddCol('credito'  ,26,'Crédito',  'R',8);
-	$pdf->AddCol('numfac'   ,18,'# Fact' ,  'R',8);
-	$pdf->AddCol('hora'     ,15,'Hora',     'R',8);
+	$pdf->AddCol('contado'  ,26,'Contado'  ,'R',8);
+	$pdf->AddCol('credito'  ,26,'Crédito'  ,'R',8);
+	$pdf->AddCol('numfac'   ,18,'# Fact'   ,'R',8);
 
 	$pdf->setTotalizar('subtotal','impuesto','grantotal','contado','credito','numfac');
 	$pdf->Table();
@@ -134,7 +147,7 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 }else{
 	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Ventas por Fecha Determinada</h2>';
+	$data['titulo'] = '<h2 class="mainheader">Res&uacute;menes de venta</h2>';
 	$data['head'] = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

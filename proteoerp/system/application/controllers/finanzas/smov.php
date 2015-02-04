@@ -1695,7 +1695,7 @@ class Smov extends Controller {
 		$edit->numref->size     = 15;
 		$edit->numref->db_name  = 'num_ref';
 		$edit->numref->rel_id   = 'sfpa';
-		$edit->numref->rule     = 'trim|condi_required|callback_chtipo[<#i#>]';
+		$edit->numref->rule     = 'trim|condi_required|callback_chtipo[<#i#>]|callback_chnumrep[<#i#>]';
 
 		$edit->banco = new dropdownField('Banco <#o#>', 'banco_<#i#>');
 		$edit->banco->option('','Ninguno');
@@ -2319,6 +2319,25 @@ class Smov extends Controller {
 		return true;
 	}
 
+	function chnumrep($numero,$i){
+		$codban = $this->input->post('banco_'.$i);
+		$tipo   = $this->input->post('tipo_'.$i);
+		$itmonto= round(floatval($this->input->post('itmonto_'.$i)),2);
+		if($tipo=='CH' || $tipo='DE' || $tipo='NC'){
+			$dbcodban = $this->db->escape($codban);
+			$dbnumero = $this->db->escape($numero);
+			$dbcodban = $this->db->escape($codban);
+			$sql="SELECT COUNT(*) AS cana FROM sfpa WHERE num_ref=${dbnumero} AND banco=${dbcodban} AND monto=${itmonto}";
+			$cant= intval($this->datasis->dameval($sql));
+			if($cant>0){
+
+
+				return false;
+			}
+		}
+		return true;
+	}
+
 	function chtipo($val,$i){
 		$tipo=$this->input->post('tipo_'.$i);
 		if(empty($tipo)) return true;
@@ -2355,6 +2374,7 @@ class Smov extends Controller {
 			return true;
 		}
 	}
+
 
 	function chmontosfpa($monto){
 		$tipo   = $this->input->post('tipo_doc');
@@ -3143,6 +3163,8 @@ class Smov extends Controller {
 							}
 
 							if($repcob=='EF'){
+								$chofer=trim($this->datasis->dameval("SELECT b.nombre FROM reparto AS a JOIN chofer AS b ON b.codigo=a.chofer WHERE a.id=${id}"));
+
 								$_POST = array(
 									'cod_cli'     => $row['cod_cli'],
 									'tipo_doc'    => 'AB',
@@ -3162,8 +3184,8 @@ class Smov extends Controller {
 									'num_ref_0'   => '',
 									'banco_0'     => '',
 									'itmonto_0'   => $row['saldo'],
-									'observa1'    => 'PAGA '.$row['tipo_doc'].$row['numero'].' DESDE REPARTO '.$id,
-									'observa2'    => ''
+									'observa1'    => 'PAGA '.$row['tipo_doc'].$row['numero'].' DESDE REPARTO '.$id.' ',
+									'observa2'    => 'CHOFER '.$chofer
 								);
 								$this->genesal=false;
 								ob_start();
