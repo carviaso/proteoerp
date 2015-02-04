@@ -702,10 +702,13 @@ class Rcaj extends validaciones {
 
 				//cierra el cajero
 
-				$cajero=$this->datasis->dameval('SELECT cajero FROM rcaj WHERE numero='.$dbnumero);
-				$sifact=$this->datasis->dameval("SELECT COUNT(*) FROM sfac WHERE cajero=".$this->db->escape($cajero)." AND fecha > ${rcajfecha}");
+				$cajero  =$this->datasis->dameval('SELECT cajero FROM rcaj WHERE numero='.$dbnumero);
+				$dbcajero=$this->db->escape($cajero);
+				$sifact =intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfac WHERE cajero  =${dbcajero} AND fecha > ${rcajfecha}"));
+				$sifact+=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfpa WHERE cobrador=${dbcajero} AND fecha > ${rcajfecha}"));
 				if($sifact==0){
-					$arr= array('status'=>'C',
+					$arr= array(
+						'status'=>'C',
 						'fechac'=>date('Ymd'),
 						'horac' =>date('h:i:s'),
 						'cierre'=>$rrecibido+$depositos,
