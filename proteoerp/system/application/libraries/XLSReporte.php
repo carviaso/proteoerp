@@ -44,6 +44,7 @@ class XLSReporte extends writeexcel_workbookbig  {
 	var $colum=0;
 	var $rows=array();
 	var $fCols=array();
+	var $footer = true;
 
 	function XLSReporte($mSQL=''){
 		$this->ccols=0;

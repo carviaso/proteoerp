@@ -42,6 +42,7 @@ class HTMLReporte {
 	var $colum=0;
 	var $rows=array();
 	var $fCols=array();
+	var $footer = true;
 
 	function HTMLReporte($mSQL=''){
 		$this->ccols=0;

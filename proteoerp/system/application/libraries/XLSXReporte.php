@@ -42,6 +42,7 @@ class XLSXReporte {
 	var $colum=0;
 	var $rows=array();
 	var $fCols=array();
+	var $footer = true;
 
 	function XLSXReporte($mSQL=''){
 		$this->ci = & get_instance();

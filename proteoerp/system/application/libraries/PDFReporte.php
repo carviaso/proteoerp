@@ -66,6 +66,7 @@ class PDFReporte extends Fpdf {
 									'StablaTituFont'=>'Arial',
 									'StablaTituSize'=>8
 									);
+	var $footer = true;
 
 /*##########################################################################################################
 # orientation: Orientaci?n de p?gina por defecto. Los posibles valores son (case insensitive)              #
@@ -276,6 +277,7 @@ class PDFReporte extends Fpdf {
 	function Footer(){
 		$this->Ln();
 		$this->SetFont('Arial','B',6);
+		if($this->footer)
 		$this->Cell(0,6,$this->Titulo.'::'.$this->sistema,'T',1,'C');
 		$this->Ln();
 		//Ensure table header is output
