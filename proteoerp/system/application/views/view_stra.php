@@ -28,7 +28,6 @@ if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'<
 echo $form_begin;
 if($form->_status!='show'){
 ?>
-
 <script language="javascript" type="text/javascript">
 itstra_cont=<?php echo $form->max_rel_count['itstra'] ?>;
 
@@ -76,6 +75,9 @@ function autocod(id){
 					},
 			})
 		},
+		open: function(){
+			$('.ui-autocomplete').css('width', '400px');
+		},
 		minLength: 2,
 		select: function( event, ui ) {
 			$('#codigo_'+id).attr('readonly','readonly');
@@ -86,9 +88,11 @@ function autocod(id){
 
 			setTimeout(function(){ $('#codigo_'+id).removeAttr('readonly'); }, 1500);
 		}
-	}).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
+	}).data( "ui-autocomplete" )._renderItem = function( ul, item ){
+
+
 		return $( "<li>" )
-		.append( "<a><table style='width:100%;border-collapse:collapse;padding:0px;'><tr><td colspan='6' style='font-size:12px;color:#0B0B61;'><b>" + item.descrip + "</b></td></tr><tr><td>Codigo:</td><td>" + item.codigo + "</td><td>Precio: </td><td><b>" + item.base1 + "</b></td><td>Existencia:</td><td>" + item.existen + "</td><td></td></tr></table></a>" )
+		.append( "<a><table style='width:100%;border-collapse:collapse;padding:0px;'><tr><td colspan='6' style='font-size:12px;color:#0B0B61;'><b>" + item.descrip + "</b></td></tr><tr><td>Codigo:</td><td>" + item.codigo + "</td><td>Precio: </td><td><b>" + item.base1 + "</b></td><td>Existencia:</td><td style='text-align:right'><b>" + item.existen + "</b></td><td></td></tr></table></a>" )
 		.appendTo( ul );
 	};
 }
@@ -99,7 +103,7 @@ function add_itstra(){
 	con = (itstra_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
 	htm = htm.replace(/<#o#>/g,con);
-	$("#__UTPL__").before(htm);
+	$("#__PTPL__").after(htm);
 	$("#cantidad_"+can).numeric(".");
 	$("#codigo_"+can).focus();
 	autocod(can);
@@ -146,7 +150,7 @@ function del_itstra(id){
 		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:250px'>
 
 		<table width='100%'>
-			<tr>
+			<tr id='__PTPL__'>
 				<td width="160" bgcolor='#7098D0'>C&oacute;digo</td>
 				<td bgcolor='#7098D0'>Descripci&oacute;n</td>
 				<td width="110" align="center" bgcolor='#7098D0'>Cantidad</td>

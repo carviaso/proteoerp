@@ -3923,6 +3923,7 @@ class Sfac extends Controller {
 			return false;
 		}
 
+		$do->set('entregable','S'      );
 		$do->set('exento'   ,$exento   );
 		$do->set('tasa'     ,$tasa     );
 		$do->set('reducida' ,$reducida );
@@ -4687,6 +4688,19 @@ class Sfac extends Controller {
 					$ban=$this->db->simple_query($sql);
 					if($ban==false){ memowrite($sql,'sfac'); $error++;}
 				}
+
+				//Revisa si se devolvio completa para macarla no entregable
+				$dbfactura=$this->db->escape($factura);
+				$mdev = floatval($this->datasis->dameval("SELECT SUM(totalg) AS suma FROM sfac WHERE factura=${dbfactura} AND tipo_doc='D'"));
+				$mfac = floatval($this->datasis->dameval("SELECT totalg FROM sfac WHERE numero=${dbfactura} AND tipo_doc='F'"));
+				if(round($mdev-$mfac,2)==0){
+					$this->db->simple_query("UPDATE sfac SET entregable='N' WHERE tipo_doc='F' AND numero=${dbfactura}");
+
+				}
+				//fin de la marca de no entregable
+
+
+
 			}
 		}
 
@@ -5632,6 +5646,10 @@ class Sfac extends Controller {
 
 		if(!in_array('bultos',$campos)) $this->db->query("ALTER TABLE sfac ADD COLUMN bultos INT(10) NULL DEFAULT '0' ");
 
+		if(!in_array('entregable',$campos)){
+			$mSQL="ALTER TABLE `sfac` ADD COLUMN `entregable` CHAR(1) NULL DEFAULT 'S' COMMENT 'Si la factura se puede entregar o repartir'";
+			$this->db->simple_query($mSQL);
+		}
 
 		if(!in_array('id'  ,$campos)){
 			$this->db->simple_query('ALTER TABLE sfac DROP PRIMARY KEY');

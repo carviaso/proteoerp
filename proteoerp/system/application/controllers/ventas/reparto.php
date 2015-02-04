@@ -916,8 +916,9 @@ class Reparto extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('sfac');
 		$mWHERE[] = array('', 'reparto', array($id,'0'), '' );
-		$mWHERE[] = array('', 'tipo_doc', 'F', '' );
+		$mWHERE[] = array('', 'tipo_doc'          , 'F', '' );
 		$mWHERE[] = array('', 'MID(numero,1,1) !=', '_', '' );
+		$mWHERE[] = array('', 'entregable'        , 'S', '' );
 
 		$response   = $grid->getData('sfac', array(array()), array('id', 'numero','fecha', 'cod_cli','zona', 'vd', 'reparto', 'peso'), false, $mWHERE, 'id','desc' );
 		$rs = $grid->jsonresult( $response);
@@ -1705,7 +1706,7 @@ class Reparto extends Controller {
 
 	//Monto pendiente
 	function ajaxpen(){
-		$mSQL="SELECT a.vd ,SUM(IF(a.tipo_doc='D',-1,1)*b.cana*c.peso) AS peso
+		$mSQL="SELECT a.vd ,SUM(IF(a.tipo_doc='D',-1,1)*b.cana*c.peso) AS peso,SUM(IF(a.tipo_doc='D',-1,1)) AS cana
 			FROM sfac   AS a
 			JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
 			JOIN sinv   AS c ON b.codigoa=c.codigo
@@ -1714,12 +1715,13 @@ class Reparto extends Controller {
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			echo '<table style="font-size:1em;" align="center">';
-			echo '<tr><th>Vend.</th><th>Peso</th><th>Vend.</th><th>Peso</th></tr>';
+			echo '<tr><th>Vend.</th><th>Peso</th><th>Vend.</th><th>Peso/Can.</th></tr>';
 			foreach ($query->result() as $i=>$row){
+				$cana = intval($row->cana);
 				$peso = floatval($row->peso);
 				if($peso<0) $peso=0;
 				if(!$i%2) echo '<tr>';
-				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->vd.'</td><td style="text-align:right">'.nformat($peso).'</td>';
+				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->vd.'</td><td style="text-align:right"><b style="font-size:1.2em">'.nformat($peso).'</b>/'.$cana.'</td>';
 				if($i%2) echo '</tr>';
 			}
 			if(!$i%2) echo '</tr>';
