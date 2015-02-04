@@ -85,16 +85,37 @@ function autocod(id){
 			$('#codigo_'+id).val(ui.item.codigo);
 			$('#descrip_'+id).val(ui.item.descrip);
 			post_modbus(id);
-
+			buscarep(id,ui.item.codigo);
 			setTimeout(function(){ $('#codigo_'+id).removeAttr('readonly'); }, 1500);
 		}
 	}).data( "ui-autocomplete" )._renderItem = function( ul, item ){
-
-
 		return $( "<li>" )
 		.append( "<a><table style='width:100%;border-collapse:collapse;padding:0px;'><tr><td colspan='6' style='font-size:12px;color:#0B0B61;'><b>" + item.descrip + "</b></td></tr><tr><td>Codigo:</td><td>" + item.codigo + "</td><td>Precio: </td><td><b>" + item.base1 + "</b></td><td>Existencia:</td><td style='text-align:right'><b>" + item.existen + "</b></td><td></td></tr></table></a>" )
 		.appendTo( ul );
 	};
+}
+
+function buscarep(id,codigo){
+    codigo=codigo.trim();
+    var arr=$('input[name^="codigo_"]');
+    jQuery.each(arr, function() {
+        nom=this.name
+        pos=this.name.lastIndexOf('_');
+        if(pos>0){
+            if(this.value!=''){
+                ind     = this.name.substring(pos+1);
+                if(ind!=id){
+                    itcodigo= this.value.trim();
+                    if(itcodigo==codigo){
+                        alert('El codigo introducido ya esta repetido ('+codigo+')');
+                        $('#codigo_'+ind).focus();
+                        $('#codigo_'+ind).select();
+                        $('#tr_itstra_'+id).css("background-color", "#FFFF28");
+                    }
+                }
+            }
+        }
+    });
 }
 
 function add_itstra(){
