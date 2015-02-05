@@ -3330,6 +3330,7 @@ class Sfac extends Controller {
 		$dbusr= $this->db->escape($usr);
 
 		$chkval   = false;
+		$dbid     = intval($uid);
 		$mmsj     = 'Dato sugerido por el sistema, no esta guardado';
 		$tipo     = $edit->get_from_dataobjetct('tipo_doc');
 		$dbtipo   = $this->db->escape($tipo );
@@ -3359,7 +3360,6 @@ class Sfac extends Controller {
 
 			$smaqfiscal=trim($edit->get_from_dataobjetct('maqfiscal'));
 			if(empty($smaqfiscal)){
-				$dbid = intval($uid);
 				$maqfiscal=$this->datasis->dameval("SELECT maqfiscal FROM sfac WHERE cajero=${dbcajero} AND usuario=${dbusr} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_' AND id<>${dbid} ORDER BY id DESC LIMIT 1");
 				$edit->maqfiscal->updateValue=trim($maqfiscal);
 				$edit->maqfiscal->style = 'background-color:#FFDD00';

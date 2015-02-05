@@ -210,7 +210,7 @@ class notifica extends controller {
 
 	function ejecutor(){
 		session_write_close();
-		if($this->secu->es_shell() || true){
+		if($this->secu->es_shell()){
 			$mSQL='SELECT *,UNIX_TIMESTAMP(`disparo`) AS utime FROM eventos WHERE activo="S"';
 			$query = $this->db->query($mSQL);
 			$time=time();
