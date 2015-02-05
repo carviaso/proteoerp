@@ -308,7 +308,7 @@ class Scli extends validaciones {
 			$.post("'.site_url($this->url.'rutasver').'/"+ruta,
 			function(data){
 				$("#fciud").html(data);
-				$("#fciud").dialog({height: 470, width: 500, title: "Clientes en Rutas"});
+				$("#fciud").dialog({height: 470, width: 520, title: "Clientes en Rutas"});
 				$("#fciud").dialog( "open" );
 			});
 		});';
@@ -2987,9 +2987,8 @@ function chrif(rif){
 			return;
 		}
 
-
 		$nombre = 'verutatab';
-		$mSQL = 'SELECT a.cliente, a.rifci, a.nombre, b.dia , a.id eli, a.id FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta;
+		$mSQL = 'SELECT a.cliente, a.rifci, a.nombre, b.dia , a.id eli, a.id FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta.' ORDER BY b.dia, a.nombre';
 		$columnas = $this->datasis->jqdata($mSQL,"verutatabdat");
 		$colModel = "
 		{name:'cliente', index:'cliente', label:'Cliente', width:50 },
@@ -3008,7 +3007,7 @@ function chrif(rif){
 		multiselect: false,
 		shrinkToFit: false,
 		hiddengrid:  false,
-		width: 460,
+		width: 480,
 		rowNum:'.$columnas['i'].',
 		loadonce: true,
 		viewrecords: true,
