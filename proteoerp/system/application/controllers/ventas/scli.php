@@ -308,7 +308,7 @@ class Scli extends validaciones {
 			$.post("'.site_url($this->url.'rutasver').'/"+ruta,
 			function(data){
 				$("#fciud").html(data);
-				$("#fciud").dialog({height: 450, width: 460, title: "Clientes en Rutas"});
+				$("#fciud").dialog({height: 470, width: 480, title: "Clientes en Rutas"});
 				$("#fciud").dialog( "open" );
 			});
 		});';
@@ -2982,10 +2982,11 @@ function chrif(rif){
 		$dbruta = $this->db->escape($ruta);
 
 		$nombre = 'verutatab';
-		$mSQL = 'SELECT a.cliente, a.rifci, a.nombre, a.id eli, a.id FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta;
+		$mSQL = 'SELECT a.cliente, a.rifci, a.nombre, b.dia , a.id eli, a.id FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta;
 		$columnas = $this->datasis->jqdata($mSQL,"verutatabdat");
 		$colModel = "
 		{name:'cliente', index:'cliente', label:'Cliente', width:50 },
+		{name:'dia',     index:'dia',     label:'Dia',     width:20 },
 		{name:'rifci',   index:'rifci',   label:'RIF/CI',  width:80 },
 		{name:'nombre',  index:'nombre',  label:'Nombre',  width:250},
 		{name:'eli',     index:'eli',     label:' ',       width: 25, formatter: fsele },
@@ -3000,11 +3001,11 @@ function chrif(rif){
 		multiselect: false,
 		shrinkToFit: false,
 		hiddengrid:  false,
-		width: 440,
+		width: 460,
 		rowNum:'.$columnas['i'].',
 		loadonce: true,
 		viewrecords: true,
-		editurl: "server.php"
+		editurl: ""
    	});
 	'.$columnas['data'].'
 	for(var i=0;i<='.$nombre."dat".'.length;i++) $("#'.$nombre.'").jqGrid(\'addRowData\',i+1,'.$nombre.'dat[i]);
@@ -3023,128 +3024,24 @@ function chrif(rif){
 <table id="verutatab"></table>
 <div id="pnewapi_21293249"></div>
 ';
+
+		$detalle = '<table width="100%"><tr><td>Lunes</td><td>Martes</td><td>Miercoles</td><td>Jueves</td><td>Viernes</td><td>Total</td></tr><tr>';
+		$total = 0;
+		$mSQL = "SELECT dia, count(*) total FROM sclitrut WHERE ruta='".$ruta."' GROUP BY dia";
+		$query=$this->db->query($mSQL);
+		if($query->num_rows() > 0){
+			foreach($query->result() AS $row){
+				$total = $total+$row->total;
+				$detalle .= "<td>".$row->total."</td>";
+			}
+		}
+		$detalle .= '<td>'.$total.'</td></tr></table>';
+
+		$Salida .= '
+<div id="resumenruta">'.$detalle.'</div>
+';
 		echo $Salida;
 
-/*
-<script>
-	$("#verutatab").jqGrid({
-		datatype: "local",
-		height: 400,
-		colModel:[{name:'id',index:'id', hidden:true},{name:'cliente',index:'cliente', label:'Cliente', width:15 }, {name:'rifci',index:'rifci', label:'RIF/CI', width:25}, {name:'nombre', index:'nombre', label:'Nombre',  width:80}, {name:'id', index:'id', label:'id', hidden:'true'} ],
-		multiselect: false,
-		shrinkToFit: false,
-		hiddengrid:  false,
-		width: 500,
-		rowNum:5,
-		caption: "Clientes de la Ruta",
-	});
-	var verutatab = [
-		{ id:'0', cliente:'A-007', rifci:'V015872078', nombre:'AURA STELLA ACU�A ROSALES', id:'120706' },
-		{ id:'1', cliente:'E0037', rifci:'V18391051', nombre:'AURA ELENA', id:'122407' },
-		{ id:'2', cliente:'O-018', rifci:'V057391100', nombre:'OSCAR ALFREDO AVELLANEDA PEREZ', id:'121477' },
-	];
-	for(var i=0;i<=verutatabdat.length;i++) jQuery("#verutatab").jqGrid('addRowData',i+1,verutatabdat[i]);
-
-</script>
-<id class="anexos"><table id="verutatabdat"></table>
-<div id="pnewapi_21293249"></div></div>
-
-
-		$grid  = new $this->jqdatagrid;
-
-		$mSQL = "SELECT vendedor, concat( vendedor, ' ',TRIM(nombre)) nombre FROM vend ORDER BY nombre ";
-		$avende  = $this->datasis->llenajqselect($mSQL, true );
-
-		$atipo = '{"A": "Activo", "I": "Inactivo"}';
-
-		$grid->addField('id');
-		$grid->label('Id');
-		$grid->params(array(
-			'hidden'      => 'true',
-			'align'       => "'center'",
-			'width'       => 20,
-			'editable'    => 'false',
-			'editoptions' => '{readonly:true,size:10}'
-			)
-		);
-
-		$grid->addField('ruta');
-		$grid->label('Codigo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => 'true',
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:5, maxlength: 5 }',
-		));
-
-		$grid->addField('vende');
-		$grid->label('Vendedor');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => 'true',
-			'width'         => 60,
-			'edittype'      => "'select'",
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ value: '.$avende.',  style:"width:120px"}',
-			'stype'         => "'text'"
-		));
-
-		$grid->addField('tipo');
-		$grid->label('Tipo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => 'true',
-			'width'         => 40,
-			'edittype'      => "'select'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ value: '.$atipo.',  style:"width:70px"}',
-			'stype'         => "'text'",
-		));
-
-
-		$grid->addField('descrip');
-		$grid->label('Descrip');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => 'true',
-			'width'         => 100,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:100, maxlength: 100 }',
-		));
-
-		$grid->showpager(true);
-		$grid->setViewRecords(false);
-		$grid->setWidth('590');
-		$grid->setHeight('280');
-
-		$grid->setUrlget(site_url($this->url.'getruta/'));
-		$grid->setUrlput(site_url($this->url.'setruta/'));
-
-		$mgrid = $grid->deploy();
-
-		$msalida  = '<script type="text/javascript">'."\n";
-		$msalida .= '
-		$("#newapi'.$mgrid['gridname'].'").jqGrid({
-			ajaxGridOptions : {type:"POST"}
-			,jsonReader : { root:"data", repeatitems: false }
-			'.$mgrid['table'].'
-			,scroll: true
-			,pgtext: null, pgbuttons: false, rowList:[]
-		})
-		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'navGrid\',  "#pnewapi'.$mgrid['gridname'].'",{edit:false, add:false, del:true, search: false});
-		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'inlineNav\',"#pnewapi'.$mgrid['gridname'].'");
-		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
-		';
-
-		$msalida .= "\n</script>\n";
-		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
-		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
-
-		echo $msalida;
-*/
 	}
 
 
