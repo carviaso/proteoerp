@@ -1720,6 +1720,7 @@ class Reparto extends Controller {
 				$cana = intval($row->cana);
 				$peso = floatval($row->peso);
 				if($peso<0) $peso=0;
+				if($cana<0) $cana=0;
 				if(!$i%2) echo '<tr>';
 				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->vd.'</td><td style="text-align:right"><b style="font-size:1.2em">'.nformat($peso).'</b>/'.$cana.'</td>';
 				if($i%2) echo '</tr>';

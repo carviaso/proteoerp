@@ -101,8 +101,8 @@ class pfaclite extends validaciones{
 				}
 			}elseif($status=='B'){   //BackOrder
 				$rt = 'BackOrder';
-			}elseif($status=='A'){   //Anulado
-				$rt = 'Anulado';
+			}elseif($status=='A'){   //Internet
+				$rt = 'Internet';
 			}elseif($status=='T'){   //Temporal
 				$rt = 'Temporal';
 			}elseif($status=='E' || $status=='U'){ //Estatus locales de vendores ambulantes (Enviado y por enviar )
