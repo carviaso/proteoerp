@@ -292,7 +292,7 @@ class Scli extends validaciones {
 			$.post("'.site_url($this->url.'rutasform').'",
 			function(data){
 				$("#fciud").html(data);
-				$("#fciud").dialog({height: 450, width: 610, title: "Rutas"});
+				$("#fciud").dialog({height: 450, width: 650, title: "Rutas"});
 				$("#fciud").dialog( "open" );
 			});
 		});';
@@ -308,7 +308,7 @@ class Scli extends validaciones {
 			$.post("'.site_url($this->url.'rutasver').'/"+ruta,
 			function(data){
 				$("#fciud").html(data);
-				$("#fciud").dialog({height: 470, width: 480, title: "Clientes en Rutas"});
+				$("#fciud").dialog({height: 470, width: 500, title: "Clientes en Rutas"});
 				$("#fciud").dialog( "open" );
 			});
 		});';
@@ -2980,6 +2980,13 @@ function chrif(rif){
 	function rutasver(){
 		$ruta = $this->uri->segment($this->uri->total_segments());
 		$dbruta = $this->db->escape($ruta);
+
+		$mSQL = 'SELECT count(*) FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta;
+		if( $this->datasis->dameval($mSQL) == 0 ) {
+			echo '<h1>No hay Clientes asignados a esta ruta...</h1h1>';
+			return;
+		}
+
 
 		$nombre = 'verutatab';
 		$mSQL = 'SELECT a.cliente, a.rifci, a.nombre, b.dia , a.id eli, a.id FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta;
