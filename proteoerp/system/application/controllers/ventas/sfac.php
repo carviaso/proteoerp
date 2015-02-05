@@ -2597,7 +2597,7 @@ class Sfac extends Controller {
 			$referen   = $row['referen'];
 			$tipo_doc  = $row['tipo_doc'].'C';
 			$numero    = $row['numero'];
-			$reparto   = $row['reparto'];
+			$reparto   = intval($row['reparto']);
 			$fecha     = $row['fecha'];
 		}else{
 			return false;
@@ -2737,7 +2737,10 @@ class Sfac extends Controller {
 
 		// Revisa los repartos
 		if(!empty($reparto)){
-			$salida .= '<p style=\'text-align:center\'>Reparto: '.str_pad($reparto,8,'0',0).'</p>';
+			$rrow = $this->datasis->damerow("SELECT b.nombre  FROM reparto AS a JOIN chofer AS b ON a.chofer=b.id WHERE a.id=${reparto}");
+			if(!empty($rrow)){
+				$salida .= '<p style=\'text-align:center\'>Reparto: <b>'.str_pad($reparto,8,'0',0).'</b> Chofer: <b>'.$rrow['nombre'].'</b></p>';
+			}
 		}
 
 		$row=$this->datasis->damerow("SELECT SUM(tipo_doc IN ('F','T')) AS fac,SUM(tipo_doc='D') AS dev,SUM(tipo_doc='X') AS anu FROM sfac WHERE fecha=${dbfecha} AND MID(numero,1,1)<>'_'");

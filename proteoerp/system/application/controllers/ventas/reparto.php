@@ -121,7 +121,7 @@ class Reparto extends Controller {
 				mId = id;
 				$.post("'.site_url($this->url.'factuforma').'/"+id, function(data){
 					$("#fshow").html(data);
-					$("#fshow").dialog( { title:"AGREGAR/QUITAR FACTURAS", width: 750, height: 450 } );
+					$("#fshow").dialog( { title:"AGREGAR/QUITAR FACTURAS", width: 790, height: 490 } );
 					$("#fshow").dialog( "open" );
 				});
 
@@ -512,24 +512,25 @@ class Reparto extends Controller {
 			datatype: "json",
 			rowNum:12,
 
-			height: 280,
+			height: 300,
 			pager: \'#pbpos1\',
 			rowList:[],
 			toolbar: [false],
 
-			width:  420,
+			width:  440,
 			hiddengrid: false,
 			postdata: { tboficiid: "wapi"},
-			colNames:[\'id\', \'N&uacute;mero\',\'Fecha\', \'Cliente\',\'Vend.\', \'Zona\', \'Rep\', \'Peso\'],
+			colNames:[\'id\', \'N&uacute;mero\',\'Fecha\', \'Cliente\',\'Vend.\', \'Zona\', \'Rep\', \'Peso\',\'Nombre\'],
 			colModel:[
 				{name:\'id\',      index:\'id\',      width: 10, hidden:true},
-				{name:\'numero\',  index:\'numero\',  width: 35, editable:false, search: true},
-				{name:\'fecha\',   index:\'fecha\',   width: 40, editable:false, search: true, align:\'center\',edittype:\'text\', editoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}, defaultValue:\'2013-05-01\'}, searchoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}}},
+				{name:\'numero\',  index:\'numero\',  width: 50, editable:false, search: true},
+				{name:\'fecha\',   index:\'fecha\',   width: 60, editable:false, search: true, align:\'center\',edittype:\'text\', editoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}, defaultValue:\'2013-05-01\'}, searchoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}}},
 				{name:\'cod_cli\', index:\'cod_cli\', width: 40, editable:false, search: true },
 				{name:\'vd\',      index:\'vd\',      width: 35, editable:false, search: true },
 				{name:\'zona\',    index:\'zona\',    width: 30, editable:false, search: true, align:\'center\' },
-				{name:\'reparto\', index:\'reparto\', width: 25, editable:false, search: true, formatter: fsele,align:\'center\' },
-				{name:\'peso\',    index:\'peso\',    width: 40, editable:false, search: true, editoptions: {size:10,maxlength:10,dataInit:function(elem){$(elem).numeric();}},formatter:\'number\',formatoptions:{decimalSeparator:".",thousandsSeparator:",",decimalPlaces:2}, align:\'right\' }
+				{name:\'reparto\', index:\'reparto\', width: 25, editable:false, search: false, formatter: fsele,align:\'center\' },
+				{name:\'peso\',    index:\'peso\',    width: 40, editable:false, search: true, editoptions: {size:10,maxlength:10,dataInit:function(elem){$(elem).numeric();}},formatter:\'number\',formatoptions:{decimalSeparator:".",thousandsSeparator:",",decimalPlaces:2}, align:\'right\' },
+				{name:\'nombre\',  index:\'nombre\',  width: 85, editable:false, search: true,hidden:false },
 			],
 		});
 		$("#bpos1").jqGrid(\'navGrid\',"#pbpos1",{edit:false, add:false, del:false, search: true });
@@ -580,6 +581,9 @@ class Reparto extends Controller {
 				$("#sobrepeso").text(nformat(0,2).replace(",00", ""));
 				$("#sobrepeso").css("color","black");
 			}
+
+			//monto
+			$("#monto").text(nformat(json.monto,2).replace(",00", ""));
 		}
 
 		function auto(){
@@ -614,6 +618,7 @@ class Reparto extends Controller {
 		$paradas = $vals['paradas'];
 		$cana    = $vals['cana'];
 		$volumen = $vals['volumen'];
+		$monto   = $vals['monto'];
 
 		$capacidad= floatval($reg['capacidad']);
 		$cvolumen = floatval($reg['volumen']);
@@ -640,21 +645,21 @@ class Reparto extends Controller {
 
 		$msalida .= "<table width='100%'><tr><td>
 		<div class=\"tema1\"><table id=\"bpos1\"></table></div>
-		<div id='pbpos1'></div>\n
-		</td><td align='center' valign='top'>
-		<p style='background:#ABE278;font-size:10pt;text-align:left;'>Para agregar o quitar facturas haga doble click sobre las mismas</p>\n
+		<div id='pbpos1'></div>
+		</td><td align='center' valign='top' style='font-size:0.9em'>
+		<p style='background:#ABE278;font-size:10pt;text-align:center;padding:0;margin:0'>Para agregar o quitar facturas haga doble click sobre las mismas</p>\n
 		<table style='border-spacing: 0;border-collapse: collapse;width:100%' align='center'>
 			<tr>
 				<td colspan='3' bgcolor='#DFDFDF'>VEH&Iacute;CULO</td>
 			</tr><tr>
 				<td colspan='3' style='font-weight:bold;'>".$reg['descrip'].' '.$reg['placa']."</td>
-			</tr><tr style='font-size:1.2em;font-weight:bold'>
+			</tr><tr style='font-size:1.1em;font-weight:bold'>
 				<td style='text-align:center;'><b >Peso Kg.</b></td>
 				<td style='text-align:center;background-color:#E3DCB2'><b>Vol&uacute;men.</b></td>
 				<td style='text-align:center;'><b>Paradas.</b></td>
 			</tr><tr>
 				<td colspan='3' bgcolor='#DFDFDF'>CAPACIDAD DE VEH&Iacute;CULO</td>
-			</tr><tr style='font-size:1.6em'>
+			</tr><tr style='font-size:1.5em'>
 				<td style='text-align: center;'>
 					${show_capacidad}<p id='sobrepeso' title='Sobrepeso' style='text-align:center;font-size:0.7em;color:${sobrecolo};margin:0px'>${show_sobrepeso}</p>
 				</td><td style='text-align: center;background-color:#E3DCB2'>
@@ -664,7 +669,7 @@ class Reparto extends Controller {
 				</td>
 			</tr><tr>
 				<td colspan='3' bgcolor='#DFDFDF'>TOTAL SELECCI&Oacute;N</td>
-			</tr><tr style='font-size:1.7em'>
+			</tr><tr style='font-size:1.6em'>
 				<td style='text-align: center;'>
 					<span id='totpeso'>".str_replace(',00','',nformat($peso))."</span>
 				</td><td style='text-align: center;background-color:#E3DCB2'>
@@ -676,11 +681,12 @@ class Reparto extends Controller {
 				<td colspan='3' bgcolor='#DFDFDF'>TOTAL FACT.</td>
 			</tr><tr>
 				<td colspan='2' ><button style='padding: .5em 1em;' title='Selecciona automaticamente las facturas hasta completar las capacidades' class='ui-state-default ui-corner-all ui-corner-bl' onclick='auto()'>Auto-Completar</button></td>
-				<td align='center' style='font-size:1.5em;font-weight:bold;'><span id='totcana'>".str_replace(',00','',nformat($cana))."</span></td>
-			</tr>
-			<tr>
+				<td align='center' style='font-size:1.4em;font-weight:bold;'><span id='totcana'>".str_replace(',00','',nformat($cana))."</span></td>
+			</tr><tr>
+				<td colspan='3' style='text-align:center;font-size:1.2em'>Total: <span id='monto'>".str_replace(',00','',nformat($monto))."</span></td>
+			</tr><tr>
 				<td colspan='3'>
-				<div id='resuven' style='width:300px;height:115px; text-align:center;' >
+				<div id='resuven' style='width:300px;height:115px;text-align:center;' >
 					${resuven}
 				</div>
 				</td>
@@ -695,10 +701,11 @@ class Reparto extends Controller {
 	function _repavalores($id){
 		$dbreparto=$this->db->escape($id);
 
-		$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada FROM sfac WHERE reparto=${dbreparto}");
+		$row = $this->datasis->damereg("SELECT SUM(COALESCE(peso,0)) peso, COUNT(*) cana, COUNT(DISTINCT cod_cli) AS parada,SUM(totalg) AS monto FROM sfac WHERE reparto=${dbreparto}");
 		$peso    = floatval($row['peso']);
 		$paradas = floatval($row['parada']);
 		$cana    = floatval($row['cana']);
+		$monto   = floatval($row['monto']);
 
 		$volumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
 		FROM sfac   AS a
@@ -707,10 +714,11 @@ class Reparto extends Controller {
 		WHERE a.reparto=${dbreparto} AND c.alto IS NOT NULL AND c.ancho IS NOT NULL AND c.largo IS NOT NULL"));
 
 		//Toma devoluciones para restarlas
-		$row = $this->datasis->damereg("SELECT SUM(COALESCE(a.peso,0)) peso, COUNT(a.totals=b.totals) cana, 0 AS parada FROM sfac AS a JOIN sfac AS b ON a.factura=b.numero AND b.tipo_doc='F' WHERE b.reparto=${dbreparto} AND a.tipo_doc='D'");
+		$row = $this->datasis->damereg("SELECT SUM(COALESCE(a.peso,0)) peso, COUNT(a.totals=b.totals) cana, 0 AS parada,SUM(a.totalg) AS monto FROM sfac AS a JOIN sfac AS b ON a.factura=b.numero AND b.tipo_doc='F' WHERE b.reparto=${dbreparto} AND a.tipo_doc='D'");
 		$dpeso    = floatval($row['peso']);
 		$dparadas = floatval($row['parada']);
 		$dcana    = floatval($row['cana']);
+		$dmonto   = floatval($row['monto']);
 
 		$dvolumen = floatval($this->datasis->dameval("SELECT SUM(b.cana*c.alto*c.ancho*c.largo) AS cana
 		FROM sfac   AS a
@@ -724,7 +732,8 @@ class Reparto extends Controller {
 			'peso'    => $peso    -$dpeso,
 			'paradas' => $paradas -$dparadas,
 			'cana'    => $cana    -$dcana,
-			'volumen' => $volumen -$dvolumen
+			'volumen' => $volumen -$dvolumen,
+			'monto'   => $monto   -$dmonto,
 		);
 
 		return $rt;
@@ -754,15 +763,17 @@ class Reparto extends Controller {
 		$paradas = $vals['paradas'];
 		$cana    = $vals['cana'];
 		$volumen = $vals['volumen'];
+		$monto   = $vals['monto'];
 
 		$this->db->where('id',$reparto);
-		$this->db->update('reparto',array('peso'=>$peso, 'facturas'=>$cana, 'volumen' =>$volumen, 'paradas'=>$paradas) );
+		$this->db->update('reparto',array('peso'=>$peso, 'facturas'=>$cana, 'volumen' =>$volumen, 'paradas'=>$paradas, 'monto'=>$monto));
 		$rt=array(
 			'mensaje' =>$msj,
 			'peso'    =>$peso,
 			'cantidad'=>$cana,
 			'volumen' =>$volumen,
 			'paradas' =>$paradas,
+			'monto'   =>$monto,
 		);
 
 		echo json_encode($rt);
@@ -920,7 +931,7 @@ class Reparto extends Controller {
 		$mWHERE[] = array('', 'MID(numero,1,1) !=', '_', '' );
 		$mWHERE[] = array('', 'entregable'        , 'S', '' );
 
-		$response   = $grid->getData('sfac', array(array()), array('id', 'numero','fecha', 'cod_cli','zona', 'vd', 'reparto', 'peso'), false, $mWHERE, 'id','desc' );
+		$response   = $grid->getData('sfac', array(array()), array('id', 'numero','fecha', 'cod_cli','zona', 'vd', 'reparto', 'peso','nombre'), false, $mWHERE, 'id','desc' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -1587,7 +1598,7 @@ class Reparto extends Controller {
 
 		$edit->vehiculo = new dropdownField('Veh&iacute;culo','vehiculo');
 		$edit->vehiculo->option('','Seleccionar');
-		$edit->vehiculo->options("SELECT codigo, CONCAT_WS(' ',codigo, descrip, capacidad) FROM flota ORDER BY descrip");
+		$edit->vehiculo->options("SELECT codigo, CONCAT_WS(' ',codigo,descrip,capacidad,placa) FROM flota ORDER BY descrip");
 		$edit->vehiculo->rule='required';
 		$edit->vehiculo->style = 'width:300px;';
 
@@ -1706,23 +1717,35 @@ class Reparto extends Controller {
 
 	//Monto pendiente
 	function ajaxpen(){
-		$mSQL="SELECT a.vd ,SUM(IF(a.tipo_doc='D',-1,1)*b.cana*c.peso) AS peso,SUM(IF(a.tipo_doc='D',-1,1)) AS cana
+		$mSQL="SELECT a.vd ,
+			SUM(IF(a.tipo_doc='D',-1,1)*b.cana*c.peso) AS peso,
+			SUM(IF(a.tipo_doc='D',-1,1)) AS cana,
+			SUM(IF(a.tipo_doc='D',-1,1)*b.tota*(1+(b.iva/100))) AS monto
 			FROM sfac   AS a
 			JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
 			JOIN sinv   AS c ON b.codigoa=c.codigo
 			WHERE a.reparto=0 AND a.tipo_doc<>'X' AND a.entregable='S'
+				AND a.tipo_doc='F' AND a.referen<>'P'
 			GROUP BY a.vd";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			echo '<table style="font-size:1em;" align="center">';
-			echo '<tr><th>Vend.</th><th>Peso</th><th>Vend.</th><th>Peso/Can.</th></tr>';
+			echo '<tr><th>Vend.</th><th>Monto</th><th>Peso</th><th>#Fac.</th>';
+			if($query->num_rows() >1){
+				echo '<th>Vend.</th><th>Monto</th><th>Peso</th><th>#Fac.</th>';
+			}
+			echo '</tr>';
 			foreach ($query->result() as $i=>$row){
 				$cana = intval($row->cana);
 				$peso = floatval($row->peso);
+				$monto= floatval($row->monto);
 				if($peso<0) $peso=0;
 				if($cana<0) $cana=0;
 				if(!$i%2) echo '<tr>';
-				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->vd.'</td><td style="text-align:right"><b style="font-size:1.2em">'.nformat($peso).'</b>/'.$cana.'</td>';
+				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->vd.'</td>';
+				echo '<td style="text-align:right">'.nformat($monto).'</td>';
+				echo '<td style="text-align:right;color:#2E8B57">'.nformat($peso).'</td>';
+				echo '<td style="text-align:right">'.$cana.'</td>';
 				if($i%2) echo '</tr>';
 			}
 			if(!$i%2) echo '</tr>';
@@ -1781,6 +1804,11 @@ class Reparto extends Controller {
 			$mSQL="ALTER TABLE `reparto`
 			ADD COLUMN `volumen` DECIMAL(10,2) NULL DEFAULT '0' AFTER `eliminadas`,
 			ADD COLUMN `paradas` INT(11) NULL DEFAULT '0' AFTER `volumen`";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('monto',$campos)){
+			$mSQL="ALTER TABLE `reparto` ADD COLUMN `monto` DECIMAL(12,2) NULL DEFAULT '0' COMMENT 'Monto recibido' AFTER `tcierre`";
 			$this->db->simple_query($mSQL);
 		}
 
