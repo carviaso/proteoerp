@@ -81,7 +81,7 @@ class Vend extends Controller {
 		//Wraper de javascript
 		$bodyscript .= $this->jqdatagrid->bswrapper($ngrid);
 
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '400', '450' );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, '400', '500' );
 		$bodyscript .= $this->jqdatagrid->bsfshow( '250', '500' );
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );
 
@@ -479,7 +479,7 @@ class Vend extends Controller {
 		$edit->direc1->rule='trim';
 		$edit->direc1->maxlength=35;
 
-		$edit->direc2 = new inputField("", "direc2");
+		$edit->direc2 = new inputField('', 'direc2');
 		$edit->direc2->size=40;
 		$edit->direc2->rule='trim';
 		$edit->direc2->maxlength=35;
@@ -514,6 +514,12 @@ class Vend extends Controller {
 		$edit->comicob->css_class='inputnum';
 		$edit->comicob->rule='trim|numeric';
 		$edit->comicob->group='Comisiones';
+
+		$edit->vendsup = new dropdownField('Supervisor', 'vendsup');
+		$edit->vendsup->option('','Seleccionar');
+		$edit->vendsup->options('SELECT id, nombre FROM vendsup ORDER BY nombre');
+		$edit->vendsup->style='width:180px';
+		$edit->vendsup->rule ='required';
 
 		//$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 
@@ -808,6 +814,10 @@ class Vend extends Controller {
 			$this->db->simple_query('ALTER TABLE `vend`	ADD COLUMN `grupo` INT(11) NOT NULL DEFAULT \'1\' AFTER `id`');
 		}
 
+		if(!in_array('vendsup',$campos)){
+			$this->db->simple_query("ALTER TABLE `vend` ADD COLUMN `vendsup` INT(11) NOT NULL DEFAULT '1' COMMENT 'Supervisor de venta'");
+		}
+
 		if(!$this->db->table_exists('grvd')){
 			$mSQL="CREATE TABLE `grvd` (
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -820,5 +830,20 @@ class Vend extends Controller {
 			$mSQL="INSERT INTO `grvd` (`nombre`) VALUES ('UNICO')";
 			$this->db->simple_query($mSQL);
 		}
+
+		if(!$this->db->table_exists('vendsup')){
+			$mSQL="CREATE TABLE `vendsup` (
+				`id` INT(11) NOT NULL AUTO_INCREMENT,
+				`nombre` VARCHAR(50) NULL DEFAULT '',
+				`cedula` VARCHAR(20) NULL DEFAULT '',
+				`telefono` VARCHAR(50) NULL DEFAULT '',
+				`email` VARCHAR(200) NULL DEFAULT '',
+				PRIMARY KEY (`id`)
+			)
+			COMMENT='supervidores de ventas'
+			ENGINE=MyISAM";
+			$this->db->simple_query($mSQL);
+		}
+
 	}
 }
