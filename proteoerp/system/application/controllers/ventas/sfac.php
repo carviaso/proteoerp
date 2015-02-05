@@ -3338,9 +3338,9 @@ class Sfac extends Controller {
 		$fiscal   = $this->datasis->traevalor('IMPFISCAL','Indica si se usa o no impresoras fiscales, esto activa opcion para cierre X y Z');
 		if($fiscal=='S' && $manual!='S'){
 			if(empty($numfis)){
-				$num      = $this->datasis->dameval("SELECT MAX(nfiscal) FROM sfac WHERE cajero=${dbcajero} AND usuario=${dbusr} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_'");
+				$num      = $this->datasis->dameval("SELECT nfiscal FROM sfac WHERE cajero=${dbcajero} AND usuario=${dbusr} AND tipo_doc=${dbtipo} AND MID(numero,1,1)!='_' AND id<>${dbid} ORDER BY numero DESC LIMIT 1");
 				if($tipo=='D'){
-					$nums = trim($this->datasis->dameval("SELECT MAX(nfiscal) AS nf FROM smov WHERE tipo_doc IN ('NC') AND fecha=CURDATE() AND nfiscal IS NOT NULL"));
+					$nums = trim($this->datasis->dameval("SELECT nfiscal AS nf FROM smov WHERE tipo_doc IN ('NC') AND fecha=CURDATE() AND id<>${dbid}  ORDER BY numero DESC LIMIT 1"));
 					if(intval($nums)>intval($num)){
 						$num=$nums;
 					}
