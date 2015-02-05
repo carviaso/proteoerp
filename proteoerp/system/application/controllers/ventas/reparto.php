@@ -133,7 +133,7 @@ class Reparto extends Controller {
 		// Modificar Destino
 		$bodyscript .= '
 		$("#cargard").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				var mcome1 = "<h1>Fecha de Carga</h1><table align=\'center\'><tr>"+
@@ -203,7 +203,7 @@ class Reparto extends Controller {
 		// Cierre
 		$bodyscript .= '
 		$("#anulard").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				var mcome1 = "<h1>Eliminar Reparto?</h1><table align=\'center\'><tr>"+
@@ -238,7 +238,7 @@ class Reparto extends Controller {
 		// Entrega
 		$bodyscript .= '
 		$("#entrega").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				var mcome1 = "<h1>Fecha de Entrega</h1><table align=\'center\'><tr>"+
@@ -272,7 +272,7 @@ class Reparto extends Controller {
 
 		$bodyscript .= '
 		$("#cobrard").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				if(ret.status=="C"){
@@ -292,7 +292,7 @@ class Reparto extends Controller {
 
 		$bodyscript .= '
 		$("#finalid").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				if(ret.status=="C"){

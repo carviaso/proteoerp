@@ -313,6 +313,8 @@ class Scli extends validaciones {
 			});
 		});';
 
+		$dias = $this->datasis->llenadias();
+
 		// Suma Rutas
 		$bodyscript .= '
 		$("#sumarutas").click(function(){
@@ -323,11 +325,15 @@ class Scli extends validaciones {
 				return false;
 			}
 			if(id){
-				$.post("'.site_url($this->url.'rutasuma').'/"+id+"/"+ruta,
-				function(data){
-					//$("#fciud").html(data);
-					//$("#fciud").dialog({height: 450, width: 610, title: "Rutas"});
-					//$("#fciud").dialog( "open" );
+				$.prompt("<b>Agregar cliente a Ruta para el Dia: </b> '.$dias.' ",{
+				buttons: { Aceptar: 1, Salir: 0},
+				submit: function(e,v,m,f){
+					if ( v == 1 ){
+						$.post("'.site_url($this->url.'rutasuma').'/"+id+"/"+ruta+"/"+f.fdias,
+						function(data){
+						});
+						}
+					}
 				});
 			} else {
 				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
@@ -1232,10 +1238,14 @@ class Scli extends validaciones {
 	//
 	function rutasuma() {
 		$salida = 'Guardado';
-		$id   = $this->uri->segment($this->uri->total_segments()-1);
-		$ruta = $this->uri->segment($this->uri->total_segments());
+		$id   = $this->uri->segment($this->uri->total_segments()-2);
+		$ruta = $this->uri->segment($this->uri->total_segments()-1);
+		$dia  = $this->uri->segment($this->uri->total_segments());
+
 		$dbid   = $this->db->escape($id);
 		$dbruta = $this->db->escape($ruta);
+		$dbdia  = $this->db->escape($dia);
+		
 		// Comprueba si existe el cliente
 		$mSQL = "SELECT COUNT(*) FROM scli WHERE id=${dbid}";
 		$rcli = $this->datasis->dameval($mSQL);
@@ -1246,7 +1256,7 @@ class Scli extends validaciones {
 			$mSQL = "SELECT cliente FROM scli WHERE id=${dbid}";
 			$cliente = $this->datasis->dameval($mSQL);
 			$dbcliente = $this->db->escape($cliente);
-			$mSQL = "INSERT IGNORE INTO sclitrut (cliente, ruta) VALUES ( ${dbcliente}, ${dbruta} ) ";
+			$mSQL = "INSERT IGNORE INTO sclitrut (cliente, ruta, dia) VALUES ( ${dbcliente}, ${dbruta}, ${dbdia} ) ";
 			$this->db->query($mSQL);
 		} else $salida = 'Error en los datos ';
 		echo $salida;
@@ -3824,7 +3834,7 @@ MAPGO;
 		$campos = array();
 		$fields = $this->db->field_data('scli');
 		foreach ($fields as $field){
-			if  ($field->name=='formap' && $field->type!='int')     $this->db->simple_query('ALTER TABLE `scli`  CHANGE COLUMN `formap` `formap` INT(6) NULL DEFAULT 0');
+			if  ($field->name=='formap' && $field->type!='int')  $this->db->simple_query('ALTER TABLE `scli`  CHANGE COLUMN `formap` `formap` INT(6) NULL DEFAULT 0');
 			elseif($field->name=='email'  && $field->max_length!=100) $this->db->simple_query('ALTER TABLE `scli`  CHANGE COLUMN `email` `email` VARCHAR(100) NULL DEFAULT NULL');
 			elseif($field->name=='clave'  && $field->max_length!=50)  $this->db->simple_query('ALTER TABLE `scli`  CHANGE COLUMN `clave` `clave` VARCHAR(50) NULL DEFAULT NULL');
 			$campos[]=$field->name;
@@ -3896,6 +3906,7 @@ MAPGO;
 		if(!in_array('longitud',   $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN longitud    FLOAT       NULL DEFAULT NULL');
 		if(!in_array('fpago',      $campos)) $this->db->query("ALTER TABLE scli ADD COLUMN fpago       VARCHAR(20) NULL DEFAULT NULL");
 		if(!in_array('sada',       $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN sada        VARCHAR(20) NULL');
+		if(!in_array('visita',     $campos)) $this->db->query('ALTER TABLE scli ADD COLUMN visita      VARCHAR(40) NULL');
 
 		if(!$this->db->table_exists('tarifa')){
 			$mSQL="CREATE TABLE `tarifa` (
@@ -3993,7 +4004,7 @@ MAPGO;
 
 		if (!$this->db->table_exists('sclirut')) {
 			$mSQL="
-			CREATE TABLE `sclirut` (
+			CREATE TABLE sclirut (
 				id      INT(11)    NOT NULL AUTO_INCREMENT,
 				ruta    VARCHAR(5) DEFAULT NULL,
 				vende   VARCHAR(5) DEFAULT NULL,
@@ -4009,7 +4020,7 @@ MAPGO;
 
 		if (!$this->db->table_exists('sclitrut')) {
 			$mSQL="
-			CREATE TABLE `sclitrut` (
+			CREATE TABLE sclitrut (
 				id      INT(11)    NOT NULL AUTO_INCREMENT,
 				cliente VARCHAR(5) DEFAULT NULL,
 				ruta    VARCHAR(5) DEFAULT NULL,

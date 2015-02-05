@@ -869,6 +869,19 @@ class Datasis {
 		}
 	}
 
+	function llenadias( $id = "fdias"){
+		$select  = "<select id='".$id."' name='".$id."'>";
+		$select .= "<option value='2'>Lunes    </option>";
+		$select .= "<option value='3'>Martes   </option>";
+		$select .= "<option value='4'>Miercoles</option>";
+		$select .= "<option value='5'>Jueves   </option>";
+		$select .= "<option value='6'>Viernes  </option>";
+		$select .= "<option value='7'>Sabado   </option>";
+		$select .= "<option value='1'>Domingo  </option>";
+		$select .= '</select>';
+		return $select;
+	}
+
 	function llenajqselect($mSQL, $todos=false ){
 		$CI =& get_instance();
 		$query = $CI->db->query($mSQL);
