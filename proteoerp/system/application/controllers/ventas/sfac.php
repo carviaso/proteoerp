@@ -5641,6 +5641,8 @@ class Sfac extends Controller {
 		if(!in_array('repcob',$campos)){
 			$mSQL="ALTER TABLE `sfac` ADD COLUMN `repcob` CHAR(2) NULL DEFAULT NULL COMMENT 'Cobro en reparto' AFTER `basecomi`";
 			$this->db->query($mSQL);
+			$mSQL="ALTER TABLE `sfac` CHANGE COLUMN `entregado` `entregado` DATETIME NULL DEFAULT NULL AFTER `maestra`;";
+			$this->db->query($mSQL);
 		}
 
 		if(!in_array('descu1',$campos)) $this->db->query("ALTER TABLE sfac ADD COLUMN descu1 DECIMAL(10,2) NULL DEFAULT '0' AFTER descuento ");

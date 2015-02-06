@@ -365,7 +365,7 @@ class Reparto extends Controller {
 
 		$bodyscript .= '
 		$("#fcobro").dialog({
-			autoOpen: false, height: 520, width: 730, modal: true,
+			autoOpen: false, height: 520, width: 740, modal: true,
 			buttons: {
 				"Guardar": function() {
 					var bValid = true;
@@ -475,7 +475,7 @@ class Reparto extends Controller {
 				}else{
 					$cana=intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM sfac WHERE reparto='.$id));
 					if($cana>0){
-						$rep = $this->datasis->dameval('SELECT GROUP_CONCAT(id) from sfac where reparto='.$id);
+						$rep = $this->datasis->dameval('SELECT GROUP_CONCAT(id) FROM sfac WHERE reparto='.$id);
 						$this->db->where('id', $id);
 						$this->db->update('reparto', array( 'tipo' => 'C', 'carga' => $fecha, 'eliminadas' => $rep ));
 						echo 'Guardada';
@@ -507,7 +507,7 @@ class Reparto extends Controller {
 					$this->db->update('reparto', array('tipo' => 'F', 'retorno' => $fecha, 'tcierre'=>date('Y-m-d H:i:s')));
 					$entrega  = $this->datasis->dameval("SELECT entregado FROM reparto WHERE id=${id}");
 					$dbentrega= $this->db->escape($entrega);
-					$this->db->query("UPDATE sfac SET entregado=${dbentrega} WHERE reparto=${id}");
+					$this->db->query("UPDATE sfac SET entregado=${dbentrega} WHERE reparto=${id} AND repcob NOT IN ('EF','MI','CH','FP')");
 					echo 'Guardada';
 				}
 			}else{

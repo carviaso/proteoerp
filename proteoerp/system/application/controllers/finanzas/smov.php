@@ -3145,7 +3145,7 @@ class Smov extends Controller {
 				$error=0;
 				foreach($itpago as $itid=>$repcob){
 					$itid=intval($itid);
-					if($repcob=='EF' || $repcob=='CH' || $repcob=='MI'){
+					if($repcob=='EF' || $repcob=='CH' || $repcob=='MI' || $repcob=='FP'){
 						$dbrepcob=$this->db->escape($repcob);
 						if($itid>0){
 							$sql="SELECT a.repcob, c.id AS idcli,a.cod_cli,b.numero,b.tipo_doc,b.fecha,b.monto-b.abonos AS saldo,b.monto
@@ -3157,7 +3157,7 @@ class Smov extends Controller {
 							if(empty($row)) continue;
 
 							if($row['repcob']!=$repcob){
-								$mSQL="UPDATE sfac SET repcob=${dbrepcob} WHERE id=${itid}";
+								$mSQL="UPDATE sfac SET repcob=${dbrepcob}, entregado = NOW() WHERE id=${itid}";
 								$ban=$this->db->simple_query($mSQL);
 								if(!$ban){ $error++; }
 							}

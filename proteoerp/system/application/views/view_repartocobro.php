@@ -26,11 +26,12 @@ $(function(){
 			},
 			{name:"cliente", index:"cliente", width:50  , align:"center"},
 			{name:"nombre" , index:"nombre" , width:210 , align:"left"  },
-			{name:"repcob" , index:"repcob" , width:180 , align:"center",
+			{name:"repcob" , index:"repcob" , width:210 , align:"center",
 				formatter: function (cellvalue, options, rowObject){
 					var chef = '';
 					var chch = '';
 					var chmi = '';
+					var chfp = '';
 					var rt   = '';
 
 					if(rowObject.repcob=='EF'){
@@ -39,11 +40,14 @@ $(function(){
 						chch='checked';
 					} else if(rowObject.repcob=='MI'){
 						chmi='checked';
+					} else if(rowObject.repcob=='FP'){
+						chfp='checked';
 					}
 
-					rt=rt+'<input type="radio" id="itpagoef_'+rowObject.id+'"  name="itpago['+rowObject.id+']" value="EF" onchange="totalizar()" ondblclick="this.checked=false;totalizar();" '+chef+'> <b style="font-size:0.8em;font-weight: bold;color:green;" >Efectivo </b>';
-					rt=rt+'<input type="radio" id="itpagoch_'+rowObject.id+'"  name="itpago['+rowObject.id+']" value="CH" onchange="totalizar()" ondblclick="this.checked=false;totalizar();" '+chch+'> <b style="font-size:0.8em;font-weight: bold;color:blue;"  >Cheque   </b>';
-					rt=rt+'<input type="radio" id="itpagomi_'+rowObject.id+'"  name="itpago['+rowObject.id+']" value="MI" onchange="totalizar()" ondblclick="this.checked=false;totalizar();" '+chmi+'> <b style="font-size:0.8em;font-weight: bold;color:black;" >Mixto    </b>';
+					rt=rt+'<input type="radio" id="itpagoef_'+rowObject.id+'"  name="itpago['+rowObject.id+']" value="EF" onchange="totalizar()" ondblclick="this.checked=false;totalizar();" '+chef+'> <b style="font-size:0.8em;font-weight: bold;color:green;" >Efec.</b>';
+					rt=rt+'<input type="radio" id="itpagoch_'+rowObject.id+'"  name="itpago['+rowObject.id+']" value="CH" onchange="totalizar()" ondblclick="this.checked=false;totalizar();" '+chch+'> <b style="font-size:0.8em;font-weight: bold;color:blue;"  >Cheq.</b>';
+					rt=rt+'<input type="radio" id="itpagomi_'+rowObject.id+'"  name="itpago['+rowObject.id+']" value="MI" onchange="totalizar()" ondblclick="this.checked=false;totalizar();" '+chmi+'> <b style="font-size:0.8em;font-weight: bold;color:black;" >Mixto</b>';
+					rt=rt+'<input type="radio" id="itpagofp_'+rowObject.id+'"  name="itpago['+rowObject.id+']" value="FP" onchange="totalizar()" ondblclick="this.checked=false;totalizar();" '+chfp+'> <b style="font-size:0.8em;font-weight: bold;color:brown;" >Cred.</b>';
 
 					return rt;
 				}
@@ -118,6 +122,7 @@ function totalizar(){
 	var mi    = 0;
 	var ef    = 0;
 	var ch    = 0;
+	var fp    = 0;
 	var falta = 0;
 
 	var arr=$("input[name^='itpago']:radio");
@@ -140,6 +145,9 @@ function totalizar(){
 				}else if(tipo=='MI'){
 					mi = mi + monto;
 					total  = total + monto;
+				}else if(tipo=='FP'){
+					fp = fp + monto;
+					total  = total + monto;
 				}else{
 					falta= falta + monto;
 				}
@@ -151,6 +159,7 @@ function totalizar(){
 	$("#ch_val").text(nformat(ch,2));
 	$("#ef_val").text(nformat(ef,2));
 	$("#mi_val").text(nformat(mi,2));
+	$("#fp_val").text(nformat(fp,2));
 	$("#fa_val").text(nformat(falta,2));
 
 	$("#monto_val" ).text(nformat(total,2));
@@ -165,13 +174,15 @@ function totalizar(){
 
 <table style='font-size:1.5em; width:80%' align='center'>
 	<tr>
-		<td>Efectivo  </td><td style='text-align:right'><span id='ef_val'style='color:green'></span></td>
-		<td>Cheque    </td><td style='text-align:right'><span id='ch_val'style='color:blue' ></span></td>
+		<td>Efectivo   </td><td style='text-align:right'><span id='ef_val'style='color:green'  ></span></td>
+		<td>Cheque     </td><td style='text-align:right'><span id='ch_val'style='color:blue'   ></span></td>
 	</tr><tr>
-		<td>Mixto     </td><td style='text-align:right'><span id='mi_val'style='color:black'></span></td>
-		<td>Por cobrar</td><td style='text-align:right'><span id='fa_val'style='color:red'  ></span></td>
+		<td>Mixto      </td><td style='text-align:right'><span id='mi_val'style='color:black'  ></span></td>
+		<td>Cr&eacute;dito</td><td style='text-align:right'><span id='fp_val'style='color:brown'  ></span></td>
 	</tr><tr>
 		<td colspan='4' style='font-size:1.5em;font-weight: bold;text-align:center'><?php echo $form->monto->label;  ?> <?php echo $form->monto->output; ?></td>
+	</tr><tr>
+		<td colspan='4' style='text-align:center'>Pendiente: <span id='fa_val'style='color:red'  ></span></td>
 	</tr>
 </table>
 <p style='text-align:center;font-size:0.8em'>Para desincorporar haga doble click en la forma de pago seleccionada.</p>
