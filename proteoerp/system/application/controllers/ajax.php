@@ -956,6 +956,9 @@ class Ajax extends Controller {
 	//Busca sinv solo articulos
 	function buscasinvart($activo='S',$chneg='N'){
 		$alma   = $this->input->post('alma');
+		$dbalma = $this->db->escape($alma);
+
+		$gasto  = $this->datasis->dameval("SELECT gasto FROM caub WHERE ubica=${dbalma}");
 
 		if($activo=='S'){
 			$activo=' AND a.activo=\'S\'';
@@ -981,14 +984,23 @@ class Ajax extends Controller {
 				$mcana='a.existen';
 				$mjoin='';
 			}else{
-				$mcana='c.existen';
-				$mjoin='LEFT JOIN itsinv AS c ON a.codigo=c.codigo AND c.alma='.$this->db->escape($alma);
+				if($gasto<>'S'){
+					$mcana='c.existen';
+					$mjoin='LEFT JOIN itsinv AS c ON a.codigo=c.codigo AND c.alma='.$dbalma;
+				}else{
+					$mcana='a.existen';
+					$mjoin='';
+				}
 			}
 
 			if($chneg!='S'){
 				$vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
 				if($vnega=='N'){
-					$wvnega=" AND ${mcana}>0 ";
+					if($gasto<>'S'){
+						$wvnega=" AND ${mcana}>0 ";
+					}else{
+						$wvnega='';
+					}
 				}else{
 					$wvnega='';
 				}
