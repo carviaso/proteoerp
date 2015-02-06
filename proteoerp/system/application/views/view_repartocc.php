@@ -14,6 +14,7 @@ $(function(){
 function selcli(cliente,numero,tipo,pago){
 	$.get("<?php echo site_url('finanzas/smov/ccli'); ?>/"+cliente+"/create", function(data) {
 		$("#fsclisel").html(data);
+		$("#sselcli").val('b'+tipo+numero);
 
 		$("[id^='tr_itccli_']").each(function(){
 			nom=this.id;
@@ -39,6 +40,7 @@ function selcli(cliente,numero,tipo,pago){
 	});
 }
 </script>
+<input type="hidden" id="sselcli" >
 <div style='text-align:center;background-color:#E4E4E4' class='ui-corner-all'>
 <?php
 $cch=count($cheque);
@@ -55,11 +57,10 @@ if($cch+$cmi ==0 ){
 }
 ?>
 </div>
-<div id='fsclisel' style='text-align:center;'>
+<div id='fsclisel'>
 <?php
 if($cch+$cmi >0 ){
-	echo 'Seleccione el efecto que desea cancelar.';
+	echo '<p style="text-align:center;">Seleccione el efecto que desea cancelar.</p>';
 }
 ?>
-
 </div>

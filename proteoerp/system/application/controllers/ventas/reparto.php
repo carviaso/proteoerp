@@ -67,7 +67,8 @@ class Reparto extends Controller {
 			array('id'=>'fedita', 'title'=>'Agregar/Editar Registro'),
 			array('id'=>'fshow' , 'title'=>'Mostrar Registro'),
 			array('id'=>'fborra', 'title'=>'Eliminar Registro'),
-			array('id'=>'fcobro', 'title'=>'Cobrar reparto')
+			array('id'=>'fcobro', 'title'=>'Cobrar reparto'),
+			array('id'=>'fliqui', 'title'=>'Liquidar CH/MI')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -300,8 +301,8 @@ class Reparto extends Controller {
 				}else{
 					mId = id;
 					$.post("'.site_url($this->url.'ccobro').'/"+id, function(data){
-						$("#fcobro").html(data);
-						$("#fcobro").dialog( "open" );
+						$("#fliqui").html(data);
+						$("#fliqui").dialog( "open" );
 					});
 				}
 			}else{
@@ -392,6 +393,52 @@ class Reparto extends Controller {
 								}
 							}
 						});
+					}
+				},
+				"Cancelar": function() {
+					$("#fcobro").html("");
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("#fcobro").html("");
+			}
+		});';
+
+		$bodyscript .= '
+		$("#fliqui").dialog({
+			autoOpen: false, height: 520, width: 730, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					if($("#df1").length >0){
+						var murl = $("#df1").attr("action");
+						if(confirm("Confirma realizar la cobranza?")){
+							$.ajax({
+								type: "POST", dataType: "html", async: false,
+								url: murl,
+								data: $("#df1").serialize(),
+								success: function(r,s,x){
+									try{
+										var json = JSON.parse(r);
+										if(json.status == "A"){
+											//$( "#fliqui" ).dialog( "close" );
+											$("#fsclisel").html("");
+											grid.trigger("reloadGrid");
+											var ssel=$("#sselcli").val();
+											$("#"+ssel).remove();
+											return true;
+										} else {
+											apprise(json.mensaje);
+										}
+									}catch(e){
+										$("#fsclisel").html(r);
+									}
+								}
+							});
+						}
+					}else{
+						alert("No ha seleccionado ningun efecto para cobrar");
 					}
 				},
 				"Cancelar": function() {
@@ -1703,7 +1750,7 @@ class Reparto extends Controller {
 				$sclid   =$row['sclid'];
 				$repcob  =strtoupper($row['repcob']);
 
-				$btn="<button onclick=\"selcli('${sclid}','${numero}','${tipo_doc}','${repcob}')\" class='ui-state-default ui-corner-all'>".$tipo_doc.$numero.'</button>';
+				$btn="<button id='b${tipo_doc}${numero}' onclick=\"selcli('${sclid}','${numero}','${tipo_doc}','${repcob}')\" class='ui-state-default ui-corner-all'>".$tipo_doc.$numero.'</button>';
 				if($row['repcob']=='MI'){
 					$mixto[] = $btn;
 				}else{
