@@ -1766,7 +1766,7 @@ class Reparto extends Controller {
 	function ajaxpen(){
 		$mSQL="SELECT a.vd ,
 			SUM(IF(a.tipo_doc='D',-1,1)*b.cana*c.peso) AS peso,
-			SUM(IF(a.tipo_doc='D',-1,1)) AS cana,
+			COUNT(DISTINCT a.numero) AS cana,
 			SUM(IF(a.tipo_doc='D',-1,1)*b.tota*(1+(b.iva/100))) AS monto
 			FROM sfac   AS a
 			JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
