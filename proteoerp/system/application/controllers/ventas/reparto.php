@@ -60,6 +60,21 @@ class Reparto extends Controller {
 
 		$WestPanel = $grid->deploywestp();
 
+		$WestPanel=substr($WestPanel,0,strripos($WestPanel, '</div>'));
+
+		$WestPanel .= '<div>';
+		ob_start();
+			$this->ajaxcholeyen();
+			$chof = ob_get_contents();
+		@ob_end_clean();
+		if(empty($chof)){
+			$WestPanel .= 'Debe primero registrar choferes.';
+		}else{
+			$WestPanel .= $chof;
+		}
+		$WestPanel .= '</div></div> <!-- #LeftPane -->';
+
+
 		//Panel Central
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
@@ -68,7 +83,8 @@ class Reparto extends Controller {
 			array('id'=>'fshow' , 'title'=>'Mostrar Registro'),
 			array('id'=>'fborra', 'title'=>'Eliminar Registro'),
 			array('id'=>'fcobro', 'title'=>'Cobrar reparto'),
-			array('id'=>'fliqui', 'title'=>'Liquidar CH/MI')
+			array('id'=>'fliqui', 'title'=>'Liquidar CH/MI'),
+			array('id'=>'fsfac' , 'title'=>'Mostrar factura'),
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -102,6 +118,15 @@ class Reparto extends Controller {
 	function bodyscript( $grid0, $grid1 ){
 		$bodyscript = '<script type="text/javascript">';
 		$ngrid = '#newapi'.$grid0;
+
+		$bodyscript .= 'function msfac(id){
+			$.post("'.site_url($this->url.'ajaxsfac').'/"+id, function(data){
+				$("#fsfac").html(data);
+				$("#fsfac").dialog( "open" );
+			});
+
+			//alert(id);
+		}';
 
 		$bodyscript .= '
 		jQuery("#imprime").click( function(){
@@ -363,6 +388,8 @@ class Reparto extends Controller {
 		// Dialogo fborra
 		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '300', '400' );  //Por Defecto
 
+		$bodyscript .= '$("#fsfac").dialog({ autoOpen: false, height: 350, width: 440, modal: true });';
+
 		$bodyscript .= '
 		$("#fcobro").dialog({
 			autoOpen: false, height: 520, width: 740, modal: true,
@@ -570,7 +597,11 @@ class Reparto extends Controller {
 			colNames:[\'id\', \'N&uacute;mero\',\'Fecha\', \'Cliente\',\'Vend.\', \'Zona\', \'Rep\', \'Peso\',\'Nombre\'],
 			colModel:[
 				{name:\'id\',      index:\'id\',      width: 10, hidden:true},
-				{name:\'numero\',  index:\'numero\',  width: 50, editable:false, search: true},
+				{name:\'numero\',  index:\'numero\',  width: 50, editable:false, search: true,
+					cellattr: function(rowId, tv, aData, cm, rdata){
+						return "onclick=\'msfac("+aData.id+")\'";
+					}
+				},
 				{name:\'fecha\',   index:\'fecha\',   width: 60, editable:false, search: true, align:\'center\',edittype:\'text\', editoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}, defaultValue:\'2013-05-01\'}, searchoptions: {size: 10, maxlengh: 10, dataInit: function(element) { $(element).datepicker({dateFormat: \'yy-mm-dd\',changeMonth: true,changeYear: true,yearRange: \'1983:2023\'})}}},
 				{name:\'cod_cli\', index:\'cod_cli\', width: 40, editable:false, search: true },
 				{name:\'vd\',      index:\'vd\',      width: 35, editable:false, search: true },
@@ -1760,6 +1791,43 @@ class Reparto extends Controller {
 		}
 		$conten = array('mixto'=>$mixto,'cheque'=>$cheque,'id'=>$id);
 		$this->load->view('view_repartocc', $conten);
+	}
+
+	//Contenido de la factura
+	function ajaxsfac($id){
+		$dbid=intval($id);
+		$mSQL="SELECT codigoa,desca,cana FROM sitems WHERE id_sfac=${dbid} ORDER BY codigoa";
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			echo '<table style="font-size:1em;" align="center">';
+			echo '<tr><th>C&oacute;digo</th><th>Descripci&oacute;n</th><th>Cantidad</th></tr>';
+			foreach ($query->result() as $i=>$row){
+				echo '<tr>';
+				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->codigoa.'</td>';
+				echo '<td style="text-align:left" >'.htmlentities(ucwords(strtolower($row->desca))).'</td>';
+				echo '<td style="text-align:right">'.$row->cana.'</td>';
+				echo '</tr>';
+			}
+			echo '</table>';
+		}
+	}
+
+	//Leyenda de choferes
+	function ajaxcholeyen(){
+		$mSQL="SELECT codigo,nombre  FROM chofer ORDER BY codigo";
+		$query = $this->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			echo '<table style="font-size:1em;" align="center">';
+			echo '<tr><th colspan="2">Lista de Choferes</th></tr>';
+			echo '<tr><th>C&oacute;digo</th><th>Nombre</th></tr>';
+			foreach ($query->result() as $i=>$row){
+				echo '<tr>';
+				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->codigo.'</td>';
+				echo '<td style="text-align:right">'.htmlentities(ucwords(strtolower($row->nombre))).'</td>';
+				echo '</tr>';
+			}
+			echo '</table>';
+		}
 	}
 
 	//Monto pendiente

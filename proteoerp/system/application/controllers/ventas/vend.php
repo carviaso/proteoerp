@@ -547,15 +547,16 @@ class Vend extends Controller {
 		return true;
 	}
 
-	function _pre_delete($do) {
+	function _pre_delete($do){
 		$codigo=$do->get('vendedor');
 		$dbcodigo=$this->db->escape($codigo);
-		$check = $this->datasis->dameval("SELECT count(*) FROM sfac WHERE vd=${dbcodigo}");
+		$check  = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sfac    WHERE vd=${dbcodigo}"));
+		$check += intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sclirut WHERE vende=${dbcodigo}"));
 		if ($check > 0){
-			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Vendedor relacionado con una o mas facturas no puede ser eliminado';
-			return False;
-		}else	{
-			return True;
+			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Vendedor relacionado con una o mas rutas o facturas y no puede ser eliminado';
+			return false;
+		}else{
+			return true;
 		}
 	}
 

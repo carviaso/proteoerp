@@ -220,11 +220,16 @@ class pfaclite extends validaciones{
 		$dbvd = $this->db->escape($vd);
 
 		$dbfini=$this->db->escape(date('Y-m-d', mktime(0, 0, 0, date('n'),1)));
-		$sel=array('a.cliente','a.nombre','a.rifci','SUM(b.numero IS NOT NULL) AS rayado');
+		$sel=array('a.cliente','a.nombre','a.rifci',
+		//'SUM(b.numero IS NOT NULL) AS rayado'
+		'COUNT(DISTINCT b.numero)  AS rayado'
+		);
 		$filter->db->select($sel);
-		$filter->db->from('scli AS a');
-		$filter->db->join('sfac AS b',"b.cod_cli=a.cliente AND b.vd=${dbvd} AND b.fecha>=${dbfini} AND b.tipo_doc='F' ",'left');
-		$filter->db->where("( a.vendedor = ${dbvd} OR a.cobrador=${dbvd} )");
+		$filter->db->from('scli     AS a');
+		$filter->db->join('sfac     AS b',"b.cod_cli=a.cliente AND b.vd=${dbvd} AND b.fecha>=${dbfini} AND b.tipo_doc='F' AND b.entregable = 'S'",'left');
+		$filter->db->join('sclitrut AS c','a.cliente=c.cliente','left');
+		$filter->db->join('sclirut  AS d','c.ruta=d.ruta','left');
+		$filter->db->where("( a.vendedor = ${dbvd} OR a.cobrador=${dbvd} OR d.vende=${dbvd})");
 		$filter->db->where('a.tipo <>','0');
 		$filter->db->groupby('a.cliente');
 
@@ -243,29 +248,40 @@ class pfaclite extends validaciones{
 		$filter->build();
 
 		if(!empty($vd)){
-			$mSQL="SELECT COUNT(*) AS cana FROM scli WHERE ( vendedor = ${dbvd} OR cobrador=${dbvd} ) AND tipo<>0";
+			$mSQL="SELECT COUNT(DISTINCT a.cliente) AS cana
+				FROM scli AS a
+				LEFT JOIN sclitrut AS c ON a.cliente=c.cliente
+				LEFT JOIN sclirut  AS d ON c.ruta=d.ruta
+				WHERE ( vendedor = ${dbvd} OR cobrador=${dbvd} OR d.vende=${dbvd}) AND a.tipo<>0";
 			$clientes=intval($this->datasis->dameval($mSQL));
 
-			$mSQL="SELECT COUNT(*) AS cana FROM sfac WHERE vd = ${dbvd} AND fecha>=${dbfini}";
-			$facturas=$this->datasis->dameval($mSQL);
+			$mSQL="SELECT COUNT(*) AS cana FROM sfac WHERE vd = ${dbvd} AND fecha>=${dbfini} AND referen<>'P' AND tipo_doc<>'X' AND tipo_doc='F'";
+			$facturas=intval($this->datasis->dameval($mSQL));
 
 			$mSQL="SELECT SUM(aa.cana) AS cca FROM (
 				SELECT IF(b.tipo_doc='F',1,IF(b.totals=c.totals,-1,0)) AS cana
 				FROM scli AS a
 				JOIN sfac AS b ON b.cod_cli=a.cliente
 				LEFT JOIN sfac AS c ON b.factura=c.numero AND c.tipo_doc='F'
-				WHERE b.fecha>=${dbfini} AND b.vd=${dbvd} AND (a.vendedor=b.vd OR a.cobrador=b.vd) AND b.tipo_doc<>'X'
+				LEFT JOIN sclitrut AS d ON a.cliente=d.cliente
+				LEFT JOIN sclirut  AS e ON d.ruta=e.ruta
+				WHERE b.fecha>=${dbfini} AND b.vd=${dbvd} AND (a.vendedor=b.vd OR a.cobrador=b.vd OR e.vende=b.vd)
+					AND b.tipo_doc='F' AND b.entregable='S'
 				GROUP BY a.cliente
 			) AS aa";
-			$atendidos=$this->datasis->dameval($mSQL);
+			$atendidos=intval($this->datasis->dameval($mSQL));
 
-			$mSQL="SELECT SUM(c.peso*a.cana*IF(a.tipoa='F',1,-1)) AS peso FROM sitems AS a JOIN sfac AS b ON a.numa=b.numero AND a.tipoa=b.tipo_doc JOIN sinv AS c ON a.codigoa=c.codigo WHERE b.vd = ${dbvd} AND a.tipoa<>'X' AND b.fecha>=${dbfini}";
+			$mSQL="SELECT SUM(c.peso*a.cana*IF(a.tipoa='F',1,-1)) AS peso
+				FROM sitems AS a
+				JOIN sfac AS b ON a.numa=b.numero AND a.tipoa=b.tipo_doc
+				JOIN sinv AS c ON a.codigoa=c.codigo
+				WHERE b.vd = ${dbvd} AND a.tipoa<>'X' AND b.fecha>=${dbfini}";
 			$ttpeso=nformat(floatval($this->datasis->dameval($mSQL))/1000,3);
 
 			$vmonto=$this->datasis->traevalor('PFACLITEMONTO','Muestra o no el monto que ha facturado el vendedor');
 			if($vmonto=='S'){
-				$mSQL="SELECT SUM(totals*IF(tipo_doc='F',1,-1)) AS total FROM sfac WHERE vd = ${dbvd} AND fecha>=${dbfini}";
-				$monto=nformat($this->datasis->dameval($mSQL));
+				$mSQL="SELECT SUM(totals*IF(tipo_doc='F',1,-1)) AS total FROM sfac WHERE vd = ${dbvd} AND fecha>=${dbfini} AND tipo_doc<>'X'";
+				$monto=nformat(floatval($this->datasis->dameval($mSQL)));
 				$smonto = "Monto: ${monto}";
 			}else{
 				$smonto = '';

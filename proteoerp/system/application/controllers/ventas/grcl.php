@@ -382,7 +382,7 @@ class Grcl extends Controller {
 	function _pre_delete($do) {
 		$grupo  =$do->get('grupo');
 		$dbgrupo=$this->db->escape($grupo);
-		$check = $this->datasis->dameval("SELECT COUNT(*) FROM scli WHERE grupo=${dbgrupo}");
+		$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM scli WHERE grupo=${dbgrupo}"));
 		if ($check > 0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Grupo con clientes asociados, no puede ser Borrado';
 			return false;
