@@ -193,7 +193,8 @@ class extimpor extends Controller {
 			$set=array();
 			foreach($def as $campo){
 				if('ultimo'==$campo || 'pond'==$campo || 'standard'==$campo){
-					$set[]="a.${campo} = ROUND(b.${campo},2)";
+					$set[]="a.${campo} =IF(b.${campo}>a.${campo},ROUND(b.${campo},2),a.${campo})";
+					//$set[]="a.${campo} = ROUND(b.${campo},2)";
 					$cprecio=true;
 				}else{
 					$set[]="a.${campo} = b.${campo}";

@@ -149,7 +149,11 @@ class Dispmoviles extends Controller {
 
 			FROM scli AS a
 			LEFT JOIN smov AS b ON a.cliente=b.cod_cli AND b.tipo_doc NOT IN ('AB','NC','AN') AND b.monto>b.abonos
-			WHERE a.vendedor=${dbvend}
+
+			LEFT JOIN sclitrut AS d ON a.cliente=d.cliente
+			LEFT JOIN sclirut  AS e ON d.ruta=e.ruta
+
+			WHERE (a.vendedor=${dbvend} OR a.cobrador=${dbvend} OR e.vende=${dbvend})
 			GROUP BY a.cliente
 			ORDER BY a.nombre LIMIT 1000";
 
