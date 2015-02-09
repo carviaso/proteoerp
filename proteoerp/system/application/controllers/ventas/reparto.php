@@ -1796,18 +1796,36 @@ class Reparto extends Controller {
 	//Contenido de la factura
 	function ajaxsfac($id){
 		$dbid=intval($id);
-		$mSQL="SELECT codigoa,desca,cana FROM sitems WHERE id_sfac=${dbid} ORDER BY codigoa";
+		$row=$this->datasis->damerow("SELECT b.nombre,b.rifci,a.fecha FROM sfac AS a JOIN scli AS b ON a.cod_cli=b.cliente WHERE a.id=${dbid}");
+		if(empty($row)) return false;
+
+		echo '<p style="text-align:center">Nombre: ('.$row['rifci'].')'.htmlentities(ucwords(strtolower($row['nombre']))).' Fecha:'.dbdate_to_human($row['fecha']).'</p>';
+
+		$mSQL="SELECT codigoa,desca,cana,b.peso*a.cana AS peso
+		FROM sitems AS a
+		JOIN sinv AS b ON a.codigoa=b.codigo WHERE id_sfac=${dbid} ORDER BY codigoa";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
+			$peso=0;
 			echo '<table style="font-size:1em;" align="center">';
-			echo '<tr><th>C&oacute;digo</th><th>Descripci&oacute;n</th><th>Cantidad</th></tr>';
+			echo '<tr><th>C&oacute;digo</th><th>Descripci&oacute;n</th><th>Cantidad</th><th>Peso</th></tr>';
 			foreach ($query->result() as $i=>$row){
 				echo '<tr>';
 				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->codigoa.'</td>';
 				echo '<td style="text-align:left" >'.htmlentities(ucwords(strtolower($row->desca))).'</td>';
 				echo '<td style="text-align:right">'.$row->cana.'</td>';
+				echo '<td style="text-align:right">'.nformat($row->peso).'</td>';
 				echo '</tr>';
+				$peso += $row->peso;
 			}
+
+			echo '<tr>';
+			echo '<td></td>';
+			echo '<td></td>';
+			echo '<td></td>';
+			echo '<td style="text-align:right">'.nformat($peso).'</td>';
+			echo '</tr>';
+
 			echo '</table>';
 		}
 	}
