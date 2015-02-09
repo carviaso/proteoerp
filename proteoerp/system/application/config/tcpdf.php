@@ -208,7 +208,7 @@
 	 * description string, and logo
 	 ***********************************************************/
 	
-	$tcpdf['header_on'] = TRUE;
+	$tcpdf['header_on'] = FALSE;
 	$tcpdf['header_font'] = $tcpdf['page_font'];
 	$tcpdf['header_font_size'] = 10;
 	$tcpdf['header_margin'] = 5;
