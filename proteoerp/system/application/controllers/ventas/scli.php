@@ -1564,6 +1564,11 @@ class Scli extends validaciones {
 		$edit->pais->size =20;
 		$edit->pais->maxlength =30;
 
+		$edit->visita = new inputField('Hora de visita','visita');
+		$edit->visita->rule = 'trim';
+		$edit->visita->size =20;
+		$edit->visita->maxlength =20;
+
 		$edit->email = new inputField('E-mail', 'email');
 		$edit->email->rule = 'trim|valid_email';
 		$edit->email->size =22;

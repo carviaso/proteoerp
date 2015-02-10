@@ -172,7 +172,7 @@ class Sfac extends Controller {
 	}
 
 	//******************************************************************
-	//Funciones de los Botones
+	// Funciones de los Botones
 	//
 	function bodyscript($grid0, $grid1){
 		$bodyscript = '<script type="text/javascript">';
@@ -3590,6 +3590,7 @@ class Sfac extends Controller {
 		return false;
 	}
 
+	//******************************************************************
 	//Chequea el cajero
 	function chcajero($scaj){
 		$referen=$this->input->post('referen');
@@ -3613,6 +3614,7 @@ class Sfac extends Controller {
 
 	}
 
+	//******************************************************************
 	//Chequea si puede o no vender negativo
 	function chcananeg($val,$i){
 		$tipo_doc = $this->input->post('tipo_doc');
@@ -3644,6 +3646,7 @@ class Sfac extends Controller {
 		return true;
 	}
 
+	//******************************************************************
 	//Chequea que la cantidad devuelta no sea mayor que la facturada
 	function chcanadev($val,$i){
 		$tipo_doc = $this->input->post('tipo_doc');
@@ -3691,8 +3694,9 @@ class Sfac extends Controller {
 		return true;
 	}
 
-	//Chequea los campos de numero y fecha en las formas de pago
-	//cuando deban corresponder
+	//******************************************************************
+	// Chequea los campos de numero y fecha en las formas de pago
+	// cuando deban corresponder
 	function chtipo($val,$i){
 		$tipo=$this->input->post('tipo_'.$i);
 		if(empty($tipo)) return true;
@@ -3704,7 +3708,8 @@ class Sfac extends Controller {
 			return true;
 	}
 
-	//Chequea que la factura a devolver exista
+	//******************************************************************
+	// Chequea que la factura a devolver exista
 	function chfactura($factura){
 		$tipo_doc=$this->input->post('tipo_doc');
 		$this->validation->set_message('chfactura', 'El campo %s debe contener un numero de factura v&aacute;lido');
@@ -3714,6 +3719,8 @@ class Sfac extends Controller {
 		return true;
 	}
 
+	//******************************************************************
+	//
 	function _pre_insert($do,$action='I'){
 
 		$cliente  = $do->get('cod_cli');

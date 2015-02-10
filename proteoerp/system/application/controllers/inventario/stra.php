@@ -48,8 +48,10 @@ class Stra extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'boton1','img'=>'assets/default/images/print.png','alt'=> 'Imprimir transferencia', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'boton1','img'=>'assets/default/images/print.png','alt'=> 'Imprimir transferencia', 'label'=>'Reimprimir'));
 		$grid->wbotonadd(array('id'=>'brma'  ,'img'=>'images/caja-cerrada.png','alt'=> 'Movimiento por RMA', 'label'=>'Traslado por RMA'));
+		$grid->wbotonadd(array('id'=>'bprodu','img'=>'images/caja-cerrada.png','alt'=> 'Cargar Produccion', 'label'=>'Cargar Produccion'));
+
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -164,11 +166,67 @@ class Stra extends Controller {
 			});
 		});';
 
+
+		$desde = date('d/m/Y');
+		$hasta = date('d/m/Y');
 		$bodyscript .= '
-		jQuery("#boton1").click( function(){
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+		$("#bprodu").click(function(){
+			var mcome1 = "<h1>Generar produccion desde la Venta</h1>"+
+				"<table align=\'center\'>"+
+				"<tr><td style=\'font-weight: bold;\'>Fecha desde: </td><td><input id=\'mdesde\' name=\'mdesde\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
+				"<tr><td style=\'font-weight: bold;\'>hasta:  </td><td><input id=\'mhasta\' name=\'mhasta\' size=\'10\' class=\'input\' value=\''.date('d/m/Y').'\'></td></tr>"+
+				"</table>";
+
+			var mgene = {
+			state0: {
+				html: mcome1,
+				buttons: { Cancelar: false, Aceptar: true },
+				focus: 1,
+				submit:function(e,v,m,f){
+					if(v){
+						e.preventDefault();
+						$.ajax({
+							url: \''.site_url('inventario/stra/creaprod').'\',
+							global: false,
+							type: "POST",
+							data: ({ desde: f.mdesde, hasta: f.mhasta} ),
+							dataType: "text",
+							async: false,
+							success: function(sino) {
+								if (sino.substring(0,1)=="S"){
+									$.prompt.goToState("state1");
+								} else {
+									$.prompt.close();
+								}
+							},
+							error: function(h,t,e) { alert("Error.. ",e) }
+						});
+						return false;
+					}
+				}
+			},
+			state1: {
+				html:"Resultado !?",
+				buttons: { Salir: 0 },
+				focus: 1,
+				submit:function(e,v,m,f){
+					e.preventDefault();
+					$.prompt.close();
+				}
+			}
+			};
+			$.prompt(mgene);
+			$("#mdesde").datepicker({dateFormat:"dd/mm/yy"});
+			$("#mhasta").datepicker({dateFormat:"dd/mm/yy"});
+		});';
+
+
+
+		$bodyscript .= '
+		$("#boton1").click( function(){
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
 				window.open(\''.site_url('formatos/ver/STRA').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
 			} else { $.prompt("<h1>Por favor Seleccione una tranferencia</h1>");}
 		});';
@@ -671,7 +729,9 @@ class Stra extends Controller {
 		$this->_post_insert($do,'ELIMINADO');
 	}
 
-
+	//******************************************************************
+	//
+	//
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
 		$modbus=array(
@@ -747,7 +807,6 @@ class Stra extends Controller {
 
 		//**************************************************************
 		// Comienza el Detalle
-		//**************************************************************
 		$edit->codigo = new inputField('C&oacute;digo <#o#>', 'codigo_<#i#>');
 		$edit->codigo->db_name='codigo';
 		$edit->codigo->append($btn);
@@ -958,7 +1017,7 @@ class Stra extends Controller {
 
 	//******************************************************************
 	//  Aparta Mercancia en Ordenes de Produccion
-	//******************************************************************
+	//
 	function dataeditordp($numero,$esta){
 		if(!isset($_POST['codigo_0'])){
 			//SELECT c.codigo
@@ -1356,8 +1415,8 @@ class Stra extends Controller {
 	}
 
 	//******************************************************************
-	//Termina la produccion
-	//******************************************************************
+	// Termina la produccion
+	//
 	function creadordpt($id_ordp){
 		$error=0;
 		$url='inventario/ordp/dataedit/show/'.$id_ordp;
@@ -1459,7 +1518,8 @@ class Stra extends Controller {
 		}
 	}
 
-	//Chequea si puede o no vender negativo
+	//******************************************************************
+	// Chequea si tiene existencia
 	function chcananeg($val,$i){
 		$almacen  = $this->input->post('envia');
 		$codigo   = $this->input->post('codigo_'.$i);
@@ -1617,6 +1677,46 @@ class Stra extends Controller {
 		return true;
 	}
 
+	//******************************************************************
+	// Crea una produccion de la venta 
+	//
+	function creaprod(){
+		$mdesde = $this->input->post('desde');
+		$mhasta = $this->input->post('hasta');
+		$this->_url= $this->url.'dataedit/insert';
+		echo "$mdesde  $mhasta";
+
+		$_POST=array(
+			'btn_submit' => 'Guardar',
+			'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
+			'envia'      => 'PROD',
+			'recibe'     => '0001',
+			'observ1'    => "PRODUCCION DESDE ".$mdesde.' HASTA '.$mhasta
+		);
+
+		$itsel=array('a.codigoa', 'b.descrip', 'sum(a.cana*IF(a.tipoa="F",1,-1)) cana');
+		$this->db->select($itsel);
+		$this->db->from('sitems AS a');
+		$this->db->join('sinv AS b','b.codigo=a.codigoa');
+		$this->db->where('a.feha>=',$desde);
+		$this->db->where('a.feha<=',$hasta);
+		$this->db->where('tipoa<>','X');
+		$this->db->where('tipoa<>','X');
+		$this->db->where('mid(b.tipo,1,1)<>','S');
+		$this->db->groupby('a.codigoa');
+		$qquery = $this->db->get();
+		$i=0;
+		foreach ($qquery->result() as $itrow){
+			$_POST["codigoa_${i}"]  = rtrim($itrow->codigoa);
+			$_POST["descrip_${i}"]  = rtrim($itrow->descrip);
+			$_POST["cantidad_${i}"] = $itrow->cana;
+			$i++;
+		}
+		$this->dataedit();
+	}
+
+	//******************************************************************
+	// Instalador
 	function instalar(){
 		$campos=$this->db->list_fields('stra');
 

@@ -347,7 +347,7 @@ class Pretab extends Controller {
 
 		$bodyscript .= '
 		function pretabdel() {
-			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				if(confirm(" Seguro desea eliminar el registro?")){
 					var ret    = $("#newapi'.$grid0.'").getRowData(id);

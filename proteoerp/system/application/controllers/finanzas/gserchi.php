@@ -413,7 +413,7 @@ class Gserchi extends Controller {
 		function gserchidel() {
 			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
-				var act  = jQuery("#newapi'.$grid0.'").jqGrid (\'getCell\', id, \'aceptado\');
+				var act  = $("#newapi'.$grid0.'").jqGrid (\'getCell\', id, \'aceptado\');
 				if(act!="S"){
 					if(confirm(" Seguro desea eliminar el registro?")){
 						var ret    = $("#newapi'.$grid0.'").getRowData(id);
@@ -423,7 +423,7 @@ class Gserchi extends Controller {
 								var json = JSON.parse(r);
 								if (json.status == "A"){
 									$.prompt("Registro Eliminado");
-									jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+									$("#newapi'.$grid0.'").trigger("reloadGrid");
 									return true;
 								} else {
 									$.prompt(json.mensaje);
@@ -645,9 +645,9 @@ class Gserchi extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -786,17 +786,6 @@ class Gserchi extends Controller {
 			'formatter'     => "'number'",
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
-
-		//$grid->addField('moneda');
-		//$grid->label('Moneda');
-		//$grid->params(array(
-		//	'search'        => 'true',
-		//	'editable'      => $editar,
-		//	'width'         => 40,
-		//	'edittype'      => "'text'",
-		//	'editrules'     => '{ required:true}',
-		//	'editoptions'   => '{ size:2, maxlength: 2 }',
-		//));
 
 		$grid->addField('montasa');
 		$grid->label('Base G.');
@@ -1269,7 +1258,7 @@ class Gserchi extends Controller {
 
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -1283,7 +1272,7 @@ class Gserchi extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -1616,16 +1605,10 @@ class Gserchi extends Controller {
 			);
 
 			echo json_encode($rt);
-		}else{
+		} else {
 			$conten['form']  =&  $edit;
 			$data['content'] = $this->load->view('view_gserchi', $conten);
-
-			//$data['script'] = $script;
-			//$this->load->view('view_gserchi', $data);
-
-			//echo $edit->output;
 		}
-
 	}
 
 	function _pre_insert($do){

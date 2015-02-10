@@ -415,9 +415,9 @@ class Bcaj extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i = 1;
 		$editar = 'false';
@@ -850,7 +850,7 @@ class Bcaj extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -865,7 +865,7 @@ class Bcaj extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -926,11 +926,9 @@ class Bcaj extends Controller {
 	}
 
 
-	//************************************************
+	//******************************************************************
+	// Definicion del Grid de las Formas de Pago
 	//
-	//Definicion del Grid de las Formas de Pago
-	//
-	//************************************************
 	function defgridit( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -986,7 +984,6 @@ class Bcaj extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-
 		$grid->addField('banco');
 		$grid->label('Banco');
 		$grid->params(array(
@@ -997,7 +994,6 @@ class Bcaj extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 3 }',
 		));
-
 
 		$grid->addField('num_ref');
 		$grid->label('Num.Ref');
@@ -1024,34 +1020,6 @@ class Bcaj extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
-/*
-		$grid->addField('clave');
-		$grid->label('Clave');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 12 }',
-		));
-*/
-
-/*
-		$grid->addField('f_factura');
-		$grid->label('F_factura');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-*/
 		$grid->addField('cod_cli');
 		$grid->label('Cliente');
 		$grid->params(array(
@@ -1062,7 +1030,6 @@ class Bcaj extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 5 }',
 		));
-
 
 		$grid->addField('vendedor');
 		$grid->label('Vendedor');
@@ -1075,19 +1042,6 @@ class Bcaj extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 5 }',
 		));
 
-/*
-		$grid->addField('cobrador');
-		$grid->label('Cobrador');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 50,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 5 }',
-		));
-*/
-
 		$grid->addField('status');
 		$grid->label('Estatus');
 		$grid->params(array(
@@ -1099,121 +1053,6 @@ class Bcaj extends Controller {
 			'editoptions'   => '{ size:30, maxlength: 1 }',
 		));
 
-/*
-		$grid->addField('cobro');
-		$grid->label('Cobro');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('cambio');
-		$grid->label('Cambio');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('almacen');
-		$grid->label('Almacen');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 40,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 4 }',
-		));
-
-
-		$grid->addField('transac');
-		$grid->label('Transac');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 8 }',
-		));
-
-
-		$grid->addField('usuario');
-		$grid->label('Usuario');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 12 }',
-		));
-
-
-		$grid->addField('estampa');
-		$grid->label('Estampa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('hora');
-		$grid->label('Hora');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 8 }',
-		));
-
-
-		$grid->addField('modificado');
-		$grid->label('Modificado');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('cierre');
-		$grid->label('Cierre');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:30, maxlength: 8 }',
-		));
-*/
-
 		$grid->addField('deposito');
 		$grid->label('Deposito');
 		$grid->params(array(
@@ -1224,7 +1063,6 @@ class Bcaj extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 12 }',
 		));
-
 
 		$grid->addField('id');
 		$grid->label('Id');
@@ -1759,7 +1597,6 @@ class Bcaj extends Controller {
 	}
 
 	//******************************************************************
-	//
 	// Elimina Movimiento
 	//
 	function bcajdevo(){
@@ -1807,7 +1644,6 @@ class Bcaj extends Controller {
 		$data['content'].= '<p>'.anchor('finanzas/bcaj/depositoefe'  ,'Deposito de efectivo: ');
 		$data['content'].= 'Esta opci&oacute;n se utiliza para depositar lo recaudado en efectivo desde
 		                    las cajas para los bancos, debe tener a mano el n&uacute;mero del deposito.</p>';
-
 
 		$data['content'].= '</td></tr><tr><td><img src="'.base_url().'images/tarjetas.jpg'.'" height="100px"></td><td>';
 		$data['content'].= '<p>'.anchor('finanzas/bcaj/depositotar'  ,'Deposito de tarjetas: ');
@@ -1885,9 +1721,6 @@ class Bcaj extends Controller {
 
 		$script='';
 
-		//$this->rapyd->jquery[]='$("#cheques,#efectivo").bind("keyup",function() { totaliza(); });';
-		//$edit->script($script);
-
 		$obj = 'monto';
 		$edit->$obj = new inputField("Monto Bruto: ", $obj);
 		$edit->$obj->css_class='inputnum';
@@ -1897,20 +1730,13 @@ class Bcaj extends Controller {
 		$edit->$obj->group = 'Montos';
 		$edit->$obj->autocomplete=false;
 
-
-		//$edit->$obj->readonly=true;
-		//$edit->recibe->style = 'width:180px';
-
-
 		$back_url = site_url('finanzas/bcaj/agregar');
 		$edit->button('btn_undo', 'Regresar', "javascript:window.location='${back_url}'", 'TR');
 
 		$edit->submit('btnsubmit','Guardar');
 		$edit->build_form();
 
-		//**************************************************************
 		//  Guarda el efecto
-		//
 		if ($edit->on_success()){
 			$fecha   = $edit->fecha->newValue;
 			$envia   = $edit->envia->newValue;
@@ -1933,6 +1759,9 @@ class Bcaj extends Controller {
 		$this->load->view('view_ventanas', $data);
 	}
 
+	//******************************************************************
+	//  Transferencia
+	//
 	function transferencia(){
 		$this->rapyd->load('dataform');
 
@@ -2041,8 +1870,6 @@ class Bcaj extends Controller {
 		$edit->concepto = new inputField('Concepto', 'concepto');
 		$edit->concepto->rule='trim';
 		$edit->concepto->autocomplete=false;
-		//$edit->concepto->maxlength =15;
-		//$edit->concepto->size = 12;
 
 		$edit->envia->rule   = 'required';
 		$edit->envia->style  = 'width:220px';
@@ -2080,17 +1907,13 @@ class Bcaj extends Controller {
 			return true;
 		}
 
-		//$this->rapyd->jquery[]='$(".inputnum").numeric(".");';
-		//$data['content'] = $edit->output;
-		//$data['title']   = heading('Transferencias');
-		//$data['head']    = $this->rapyd->get_head().phpscript('nformat.js');
-
-		//$this->load->view('view_ventanas', $data);
-
 		$conten['form'] =&  $edit;
 		$this->load->view('view_bcaj', $conten);
 	}
 
+	//******************************************************************
+	// Deposito en Efectivo
+	//
 	function depositoefe(){
 		$this->rapyd->load('dataform');
 
@@ -2156,18 +1979,13 @@ class Bcaj extends Controller {
 		$edit->envia->style  = 'width:180px';
 		$edit->recibe->style .= 'width:180px';
 
-		//$edit->container = new containerField('','<div id=\'chequelist\'>Lista de cheques</div>');
-		//$edit->container->group = 'Montos';
-
 		$back_url = site_url('finanzas/bcaj/agregar');
 		$edit->button('btn_undo', 'Regresar', "javascript:window.location='${back_url}'", 'TR');
 
 		$edit->submit('btnsubmit','Guardar');
 		$edit->build_form();
 
-		//**************************************************************
 		//  Guarda el efecto
-		//
 		if ($edit->on_success()){
 			$fecha   = $edit->fecha->newValue;
 			$envia   = $edit->envia->newValue;
@@ -2204,6 +2022,9 @@ class Bcaj extends Controller {
 
 
 
+	//******************************************************************
+	//  Lista de Cheques
+	//
 	function chequelist(){
 		$recibe=$this->input->post('recibe');
 		if(!empty($recibe)){
@@ -2237,6 +2058,9 @@ class Bcaj extends Controller {
 		}
 	}
 
+	//******************************************************************
+	// Deposito con Tarjeta
+	//
 	function depositotar(){
 		$this->rapyd->load('dataform');
 
@@ -2343,21 +2167,12 @@ class Bcaj extends Controller {
 		}
 		$edit->$obj->readonly=true;
 
-
-		//$edit->tipor = new dropdownField('Tipo','tipor');
-
 		$edit->tipo = new hiddenField('Tipo','tipo');
 		$edit->tipo->insertValue = 'DE';
 
-		//$back_url = site_url('finanzas/bcaj/agregar');
-		//$edit->button('btn_undo', 'Regresar', "javascript:window.location='${back_url}'", 'TR');
-
-		//$edit->submit('btnsubmit','Guardar');
 		$edit->build_form();
 
-		//**************************************************************
 		//  Guarda el efecto
-		//
 		if ($edit->on_success()){
 			$fecha   =$edit->fecha->newValue;
 			$envia   =$edit->envia->newValue;
@@ -2395,7 +2210,9 @@ class Bcaj extends Controller {
 	}
 
 
-	//Auto transferencia
+	//******************************************************************
+	// Auto transferencia
+	//
 	function autotranfer(){
 		$this->rapyd->load('dataform');
 		$edit = new DataForm('finanzas/bcaj/autotranfer/process');
@@ -2594,17 +2411,9 @@ class Bcaj extends Controller {
 				$sql="DELETE FROM bmov WHERE transac=$transac";
 				$ban=$this->db->simple_query($sql);
 				if($ban==false){ memowrite($sql,'bcaj'); $error++; }
-
 				$monto=$row->monto;
 				$this->datasis->actusal($row->envia,$sp_fecha, $monto);
-				//$sql='CALL sp_actusal('.$this->db->escape($row->envia).",'$sp_fecha',$monto)";
-				//$ban=$this->db->simple_query($sql);
-				//if($ban==false){ memowrite($sql,'bcaj'); $error++; }
-
 				$this->datasis->actusal($row->recibe,$sp_fecha, (-1)*$monto);
-				//$sql='CALL sp_actusal('.$this->db->escape($row->recibe).",'$sp_fecha',-$monto)";
-				//$ban=$this->db->simple_query($sql);
-				//if($ban==false){ memowrite($sql,'bcaj'); $error++; }
 			}
 		}
 		$sql="DELETE FROM bcaj WHERE fecha=$dbfecha AND concep2='AUTOTRANFER'";
@@ -2762,10 +2571,7 @@ class Bcaj extends Controller {
 		$estampa = date('Y-m-d');
 		$hora    = date('H:i:s');
 		$benefi  = trim($this->datasis->traevalor('TITULO1'));
-		//$numeror = ($_numeror===false)? str_pad($numeror, 12, '0', STR_PAD_LEFT): $_numeror;
 
-
-		//$numeror= $this->datasis->banprox($recibe);
 		$sp_fecha= str_replace('-','',$fecha);
 		$error  = 0;
 		$this->bcajnumero=$numero;
@@ -2822,9 +2628,6 @@ class Bcaj extends Controller {
 
 		//Crea el egreso en el banco
 		$this->datasis->actusal($envia,$sp_fecha, (-1)*$monto);
-		//$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$monto)";
-		//$ban=$this->db->simple_query($mSQL);
-		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $envia;
@@ -2854,9 +2657,6 @@ class Bcaj extends Controller {
 
 		//Crea el ingreso la otra caja
 		$this->datasis->actusal($recibe,$sp_fecha, $monto);
-		//$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$monto)";
-		//$ban=$this->db->simple_query($mSQL);
-		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $recibe;
@@ -2986,9 +2786,6 @@ class Bcaj extends Controller {
 		if($ban==false){ memowrite($sql,'bcaj'); $error++; }
 
 		$this->datasis->actusal($envia,$sp_fecha, (-1)*$data['monto']);
-		//$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$data[monto])";
-		//$ban=$this->db->simple_query($mSQL);
-		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		//Crea el ingreso la otra caja
 
@@ -3244,9 +3041,6 @@ class Bcaj extends Controller {
 		//Crea el egreso en el banco
 
 		$this->datasis->actusal($envia,$sp_fecha, (-1)*$monto);
-		//$mSQL='CALL sp_actusal('.$this->db->escape($envia).",'$sp_fecha',-$monto)";
-		//$ban=$this->db->simple_query($mSQL);
-		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $envia;
@@ -3273,9 +3067,6 @@ class Bcaj extends Controller {
 
 		//Crea el ingreso la otra caja
 		$this->datasis->actusal($recibe,$sp_fecha, $monto);
-		//$mSQL='CALL sp_actusal('.$this->db->escape($recibe).",'$sp_fecha',$monto)";
-		//$ban=$this->db->simple_query($mSQL);
-		//if($ban==false){ memowrite($mSQL,'bcaj'); $error++; }
 
 		$data=array();
 		$data['codbanc']  = $recibe;

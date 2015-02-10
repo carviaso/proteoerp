@@ -206,6 +206,8 @@ else:
 	<tr>
 		<td class="littletableheaderc"><?php echo $form->sada->label;  ?></td>
 		<td class="littletablerow"    ><?php echo $form->sada->output; ?></td>
+		<td class="littletableheaderc"><?php echo $form->visita->label;  ?></td>
+		<td class="littletablerow"    ><?php echo $form->visita->output; ?></td>
 	</tr>
 
 	</table>
