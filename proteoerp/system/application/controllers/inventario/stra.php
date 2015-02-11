@@ -166,7 +166,7 @@ class Stra extends Controller {
 			});
 		});';
 
-
+		// Ventas a Produccion
 		$desde = date('d/m/Y');
 		$hasta = date('d/m/Y');
 		$bodyscript .= '
@@ -186,14 +186,16 @@ class Stra extends Controller {
 					if(v){
 						e.preventDefault();
 						$.ajax({
-							url: \''.site_url('inventario/stra/creaprod').'\',
+							url: \''.site_url('inventario/stra/creaprod/insert').'\',
 							global: false,
 							type: "POST",
 							data: ({ desde: f.mdesde, hasta: f.mhasta} ),
 							dataType: "text",
 							async: false,
 							success: function(sino) {
-								if (sino.substring(0,1)=="S"){
+								var json = JSON.parse(sino);
+								if (json.status == "A") {
+									grid.trigger("reloadGrid");
 									$.prompt.goToState("state1");
 								} else {
 									$.prompt.close();
@@ -206,7 +208,7 @@ class Stra extends Controller {
 				}
 			},
 			state1: {
-				html:"Resultado !?",
+				html:"<h1>Transferencia de produccion creada!</h1>",
 				buttons: { Salir: 0 },
 				focus: 1,
 				submit:function(e,v,m,f){
@@ -249,9 +251,7 @@ class Stra extends Controller {
 								if (json.status == "A"){
 									$( "#fedita" ).dialog( "close" );
 									grid.trigger("reloadGrid");
-									//window.open(\''.site_url('formatos/ver/STRA').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
 									'.$this->datasis->jwinopen(site_url('formatos/ver/STRA').'/\'+json.pk.id+\'/id\'').';
-									//apprise("Registro Guardado");
 									return true;
 								} else {
 									apprise(json.mensaje);
@@ -838,25 +838,32 @@ class Stra extends Controller {
 
 		$edit->buttons('save', 'undo', 'add','back','add_rel');
 
-		if($this->genesal){
-			$edit->on_save_redirect=false;
-			$edit->build();
+		$edit->on_save_redirect=false;
+		$edit->build();
 
+
+		if($this->genesal){
 			if($edit->on_success()){
 				$rt=array(
 					'status' =>'A',
 					'mensaje'=>'Registro guardado',
 					'pk'     =>$edit->_dataobject->pk
 				);
-
 				echo json_encode($rt);
-			}else{
-				$conten['form']  =& $edit;
-				$data['content'] = $this->load->view('view_stra', $conten, false);
+				return true;
 			}
-		}else{
-			$edit->on_save_redirect=false;
-			$edit->build();
+			
+			if($edit->on_error()){
+				$rt=array(
+					'status' =>'B',
+					'mensaje'=>preg_replace('/<[^>]*>/', '', $edit->error_string),
+					'pk'     =>$edit->_dataobject->pk
+				);
+				echo json_encode($rt);
+				return false;
+			}
+
+		} else {
 			if($edit->on_success()){
 				$rt= 'Transferencia Guardada';
 			}elseif($edit->on_error()){
@@ -864,6 +871,7 @@ class Stra extends Controller {
 			}
 			return $rt;
 		}
+
 	}
 
 	function dataeditrma(){
@@ -954,7 +962,6 @@ class Stra extends Controller {
 
 		//**************************************************************
 		// Comienza el Detalle
-		//**************************************************************
 		$edit->codigo = new inputField('C&oacute;digo <#o#>', 'codigo_<#i#>');
 		$edit->codigo->db_name='codigo';
 		$edit->codigo->append($btn);
@@ -1196,8 +1203,8 @@ class Stra extends Controller {
 	}
 
 	//******************************************************************
-	//Hace la consolidacion del cierre de los productos lacteos
-	//******************************************************************
+	// Hace la consolidacion del cierre de los productos lacteos
+	//
 	function consolidar($id=null){
 		if(empty($id)){
 			$rt=array(
@@ -1350,7 +1357,7 @@ class Stra extends Controller {
 
 	//******************************************************************
 	//Hace la reservacion del material para una orden de produccion
-	//******************************************************************
+	//
 	function creadordp($id_ordp){
 		$url='inventario/ordp/dataedit/show/'.$id_ordp;
 		$this->rapyd->uri->keep_persistence();
@@ -1588,16 +1595,17 @@ class Stra extends Controller {
 			return false;
 		}
 
-		$cana = $do->count_rel('itstra'); $error=0;
+		$cana = $do->count_rel('itstra'); 
+
+		$error=0;
 		for($i = 0;$i < $cana;$i++){
-			$itcodigo  = $do->get_rel('itstra', 'codigo'  ,$i);
+			$itcodigo  = $do->get_rel('itstra', 'codigo', $i);
 			$dbitcodigo=$this->db->escape($itcodigo);
 			$sinvrow=$this->datasis->damerow('SELECT iva,precio1,precio2,precio3,precio4,ultimo,descrip FROM sinv WHERE codigo='.$dbitcodigo);
 			if(empty($sinvrow)){
-				$do->error_message_ar['pre_ins']='Producto no '.$itcodigo.' valido';
+				$do->error_message_ar['pre_ins']='Producto no ('.$i.')'.$itcodigo.' valido';
 				return false;
 			}
-
 			$do->set_rel('itstra', 'precio1',  $sinvrow['precio1'], $i);
 			$do->set_rel('itstra', 'precio2',  $sinvrow['precio2'], $i);
 			$do->set_rel('itstra', 'precio3',  $sinvrow['precio3'], $i);
@@ -1683,31 +1691,35 @@ class Stra extends Controller {
 	function creaprod(){
 		$mdesde = $this->input->post('desde');
 		$mhasta = $this->input->post('hasta');
-		$this->_url= $this->url.'dataedit/insert';
-		echo "$mdesde  $mhasta";
 
+		$mdesde = substr(human_to_dbdate($mdesde),0,10); 
+		$mhasta = substr(human_to_dbdate($mhasta),0,10); 
+
+		$dbmdesde = $this->db->escape($mdesde); 
+		$dbmhasta = $this->db->escape($mhasta); 
+
+		$this->_url= $this->url.'dataedit/insert';
+
+		//echo "$mdesde  $mhasta";
 		$_POST=array(
 			'btn_submit' => 'Guardar',
 			'fecha'      => inputDateFromTimestamp(mktime(0,0,0)),
 			'envia'      => 'PROD',
 			'recibe'     => '0001',
-			'observ1'    => "PRODUCCION DESDE ".$mdesde.' HASTA '.$mhasta
+			'observ1'    => "PRODUCCION  ".$mdesde.' AL '.$mhasta
 		);
+		$mSQL = 'SELECT a.codigoa, b.descrip, sum(a.cana*IF(a.tipoa="F",1,-1)) cana
+		FROM sitems AS a
+		JOIN sinv AS b ON b.codigo=a.codigoa 
+		AND a.fecha >= '.$dbmdesde.'
+		AND a.fecha <= '.$dbmhasta.' AND tipoa <> "X" AND mid(b.tipo,1,1) <> "S"
+		GROUP BY a.codigoa
+		HAVING cana > 0 ';
 
-		$itsel=array('a.codigoa', 'b.descrip', 'sum(a.cana*IF(a.tipoa="F",1,-1)) cana');
-		$this->db->select($itsel);
-		$this->db->from('sitems AS a');
-		$this->db->join('sinv AS b','b.codigo=a.codigoa');
-		$this->db->where('a.feha>=',$desde);
-		$this->db->where('a.feha<=',$hasta);
-		$this->db->where('tipoa<>','X');
-		$this->db->where('tipoa<>','X');
-		$this->db->where('mid(b.tipo,1,1)<>','S');
-		$this->db->groupby('a.codigoa');
-		$qquery = $this->db->get();
+		$qquery = $this->db->query($mSQL);
 		$i=0;
 		foreach ($qquery->result() as $itrow){
-			$_POST["codigoa_${i}"]  = rtrim($itrow->codigoa);
+			$_POST["codigo_${i}"]   = rtrim($itrow->codigoa);
 			$_POST["descrip_${i}"]  = rtrim($itrow->descrip);
 			$_POST["cantidad_${i}"] = $itrow->cana;
 			$i++;
