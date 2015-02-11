@@ -1458,8 +1458,7 @@ class Smov extends Controller {
 		$do->rel_one_to_many('sfpa'  , 'sfpa'  , array(
 			'transac' =>'transac',
 			'numero'  =>'numero',
-			'tipo_doc'=>'tipo_doc',
-			'fecha'   =>'fecha')
+			'tipo_doc'=>'tipo_doc')
 		);
 		$do->order_by('itccli','itccli.fecha');
 
@@ -1766,6 +1765,7 @@ class Smov extends Controller {
 	}
 
 	function _pre_ccli_insert($do){
+
 		$cliente  =$do->get('cod_cli');
 		$estampa = $do->get('estampa');
 		$hora    = $do->get('hora');
