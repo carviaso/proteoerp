@@ -97,6 +97,7 @@ class Scst extends Controller {
 			array('id'=>'fborra'  , 'title'=>'Eliminar Registro'),
 			array('id'=>'fcmonto' , 'title'=>'Cambiar los montos que van a CxP'),
 			array('id'=>'fshow'   , 'title'=>'Mostrar Compra'),
+			array('id'=>'fcprecio', 'title'=>'Cambio de precios'),
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -242,8 +243,8 @@ class Scst extends Controller {
 					$.post("'.site_url('compras/scst/dataeditit/modify').'/"+iid, function(data){
 						$("#factuali").html("");
 						$("#fvehi").html("");
-						$("#fcompra").html(data);
-						$("#fcompra" ).dialog( "open" );
+						$("#fcprecio").html(data);
+						$("#fcprecio" ).dialog( "open" );
 					});
 				}
 			}else{
@@ -520,7 +521,48 @@ class Scst extends Controller {
 			});';
 
 		$post = $this->datasis->jwinopen(site_url('formatos/ver/COMPRA').'/\'+idactual+\'/id\'').';';
-		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = "580", $width = "860", 'fcompra', $post );
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = '580', $width = '860', 'fcompra', $post );
+
+		$bodyscript .= "\n".'
+			$( "#fcprecio" ).dialog({
+				autoOpen: false, height: 500, width: 850, modal: true,
+				buttons: {
+					"Guardar": function() {
+						var bValid = true;
+						var murl = $("#df1").attr("action");
+						if ( bValid ) {
+							$.ajax({
+								type: "POST", dataType: "html", async: false,
+								url: murl,
+								data: $("#df1").serialize(),
+								success: function(r,s,x){
+									try{
+										var json = JSON.parse(r);
+										if(json.status == "A"){
+											$( "#fcprecio" ).dialog( "close" );
+											jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
+											$("#fcprecio").html("");
+											$.prompt("Precios guardados");
+											return true;
+										} else {
+											$.prompt(json.mensaje);
+										}
+									}catch(e){
+										$("#fcprecio").html(r);
+									}
+								}
+							});
+						}
+					},
+					Cancelar: function() {
+						$( this ).dialog( "close" );
+						$( "#fcprecio" ).html("");
+					}
+				},
+				close: function() {
+					$("#fcprecio").html("");
+				}
+			});';
 
 		$bodyscript .= "\n".'
 			$( "#fcmonto" ).dialog({
@@ -2086,6 +2128,7 @@ class Scst extends Controller {
 		$edit->almacen->options('SELECT ubica, CONCAT(ubica," ",ubides) nombre FROM caub WHERE gasto<>"S" AND invfis="N" ORDER BY ubica');
 		$edit->almacen->rule = 'required';
 		$edit->almacen->style='width:130px;';
+		$edit->almacen->insertValue=trim($this->datasis->traevalor('ALMACEN'));
 
 		$edit->tipo = new dropdownField('Tipo', 'tipo_doc');
 		$edit->tipo->option('FC','Factura a Cr&eacute;dito');
@@ -3681,7 +3724,7 @@ class Scst extends Controller {
 							$mSQL = $this->db->insert_string('sprm', $sprm);
 							$ban=$this->db->simple_query($mSQL);
 							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
-	
+
 							//Aplica la NC a la FC
 							$itppro=array();
 							$itppro['numppro']    = $mnumnc;
@@ -3707,7 +3750,7 @@ class Scst extends Controller {
 							$mSQL = $this->db->insert_string('itppro', $itppro);
 							$ban=$this->db->simple_query($mSQL);
 							if(!$ban){ memowrite($mSQL,'scst'); $error++;}
-	
+
 							//Crea la nota de debito
 							$mnumnd = $this->datasis->fprox_numero('num_nd');
 							$sprm=array();
@@ -3732,11 +3775,11 @@ class Scst extends Controller {
 							$mSQL = $this->db->insert_string('sprm', $sprm);
 							$ban=$this->db->simple_query($mSQL);
 							if(!$ban){ memowrite($mSQL,'scst'); $error++;}
-	
+
 							//Crea la retencion
 							$niva    = $this->datasis->fprox_numero('niva');
 							$ivaplica= $this->datasis->ivaplica($fecha);
-	
+
 							$riva['nrocomp']    = $niva;
 							$riva['emision']    = ($fecha > $actuali) ? $fecha : $actuali;
 							$riva['periodo']    = substr($riva['emision'],0,6) ;
@@ -3801,7 +3844,7 @@ class Scst extends Controller {
 							$mSQL = $this->db->insert_string('sprm', $sprm);
 							$ban=$this->db->simple_query($mSQL);
 							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
-	
+
 							//Aplica la NC a la FC
 							$itppro=array();
 							$itppro['numppro']    = $mnumnc;
@@ -3827,11 +3870,11 @@ class Scst extends Controller {
 							$mSQL = $this->db->insert_string('itppro', $itppro);
 							$ban=$this->db->simple_query($mSQL);
 							if(!$ban){ memowrite($mSQL,'scst'); $error++;}
-	
+
 							//Crea la nota de debito
 							$mnsprm   = $this->datasis->fprox_numero('num_nd');
 							$ccontrol = $this->datasis->fprox_numero('nsprm');
-	
+
 							$data=array();
 							$data['cod_prv']    = 'RETEN';
 							$data['nombre']     = 'RETENCIONES POR ENTERAR';
@@ -3861,11 +3904,11 @@ class Scst extends Controller {
 							$data['control']    = $ccontrol;
 							$data['codigo']     = 'NOCON';
 							$data['descrip']    = 'NOTA DE CONTABILIDAD';
-	
+
 							$sql=$this->db->insert_string('sprm', $data);
 							$ban=$this->db->simple_query($sql);
 							if($ban==false){ memowrite($sql,'gser');}
-	
+
 						}//Fin de la retencion ISLR
 
 						//Carga la CxP
