@@ -52,7 +52,9 @@ class Reparto extends Controller {
 		$grid->wbotonadd(array('id'=>'cargard', 'img'=>'images/camion.png',      'alt'=>'Cargar Vehiculo',      'label'=>'Cargar Vehiculo',      'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'entrega', 'img'=>'images/acuerdo.png',     'alt'=>'Entregado al Cliente', 'label'=>'Entregado al Cliente', 'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'cerrard', 'img'=>'images/candado.png',     'alt'=>'Cerrar Despacho',      'label'=>'Cerrar Despacho',      'tema'=>'anexos'));
-		$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
+		if($this->datasis->sidapuede('REPARTO','BORR_REG%')){
+			$grid->wbotonadd(array('id'=>'anulard', 'img'=>'images/delete.png',      'alt'=>'Anular Despacho',      'label'=>'Anular Despacho',      'tema'=>'anexos'));
+		}
 		$grid->wbotonadd(array('id'=>'cobrard', 'img'=>'images/ventafon.png',    'alt'=>'Cobrar Reparto',       'label'=>'Cobrar Reparto',       'tema'=>'anexos'));
 		$grid->wbotonadd(array('id'=>'finalid', 'img'=>'images/recalcular.jpg',  'alt'=>'Liquidar CH/MI',       'label'=>'Liquidar CH/MI',     'tema'=>'anexos'));
 
@@ -1801,6 +1803,11 @@ class Reparto extends Controller {
 
 		echo '<p style="text-align:center">Nombre: ('.$row['rifci'].')'.htmlentities(ucwords(strtolower($row['nombre']))).' Fecha:'.dbdate_to_human($row['fecha']).'</p>';
 
+		if($this->config->item('charset')=='UTF-8' && $this->db->char_set=='latin1'){
+			$encod='ISO-8859-1';
+		}else{
+			$encod='UTF-8';
+		}
 		$mSQL="SELECT codigoa,desca,cana,b.peso*a.cana AS peso
 		FROM sitems AS a
 		JOIN sinv AS b ON a.codigoa=b.codigo WHERE id_sfac=${dbid} ORDER BY codigoa";
@@ -1812,7 +1819,7 @@ class Reparto extends Controller {
 			foreach ($query->result() as $i=>$row){
 				echo '<tr>';
 				echo '<td style="text-align:center;background-color:#C8DAFF;font-weight:bold">'.$row->codigoa.'</td>';
-				echo '<td style="text-align:left" >'.htmlentities(ucwords(strtolower($row->desca))).'</td>';
+				echo '<td style="text-align:left" >'.htmlentities(ucwords(strtolower($row->desca)), ENT_COMPAT | ENT_HTML401,$encod).'</td>';
 				echo '<td style="text-align:right">'.$row->cana.'</td>';
 				echo '<td style="text-align:right">'.nformat($row->peso).'</td>';
 				echo '</tr>';
