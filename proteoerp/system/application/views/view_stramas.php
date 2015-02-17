@@ -15,6 +15,36 @@ var htm ="<tr id='tr_itstra_<#i#>'>";
     htm =htm+"<td><span id='existen_val_<#i#>'></span><input type='hidden' name='existen_<#i#>' id='existen_<#i#>'></td>";
 	htm =htm+"</tr>";
 
+var htc = "<td title='<#title#>' style='text-align:center;'><input type='text' style='text-align:right' size='5' name='<#idnom#>' id='<#idnom#>'  onfocus='focusexist(this,<#i#>)'></td>";
+
+function focusexist(obj,id){
+	var can     = id.toString();
+	var existen = Number($('#existen_'+can).val());
+	if(existen>0){
+		var sumexis = totalrow(can);
+		var diff    = existen-sumexis;
+		if(diff>0){
+			obj.value   = diff;
+			$(obj).select();
+			$(obj).css('background');
+		}else{
+			$(obj).css('background','red');
+		}
+	}
+}
+
+function totalrow(can){
+	total = 0;
+	$("#caubcol col").each(function(){
+		if(this.title!=''){
+			idnom  = this.title+"_"+can;
+			valor  = Number($('#'+idnom).val());
+			total  = total+valor;
+		}
+	});
+	return total;
+}
+
 function add_itstra(){
 	var can = itstra_cont.toString();
 	var con = (itstra_cont+1).toString();
@@ -30,11 +60,24 @@ function add_itstra(){
 		}
 	});
 	itstra_cont=itstra_cont+1;
+
+	//Agrega las columnas de los almacenes
+	$("#caubcol col").each(function(){
+		if(this.title!=''){
+			idnom  = this.title+"_"+can;
+			cont = htc;
+			cont = cont.replace(/<#title#>/g,this.title);
+			cont = cont.replace(/<#idnom#>/g,idnom);
+			cont = cont.replace(/<#i#>/g,can);
+			$('#tr_itstra_'+can).append(cont);
+		}
+	});
 }
 
 function add_caub(caub){
 	var cont ='';
 	var idnom='';
+	var col  ='';
 	if(caub.checked){
 		$("#itstras tr").each(function(){
 			var id  = this.id;
@@ -45,7 +88,12 @@ function add_caub(caub){
 				if(pos>0){
 					ind    = id.substring(pos+1);
 					idnom  = caub.value+"_"+ind;
-					cont="<td title='"+caub.value+"' style='text-align:center;'><input type='text' style='text-align:right' size='5' name='"+idnom+"' id='"+idnom+"'></td>";
+					cont   = htc;
+					cont   = cont.replace(/<#title#>/g,caub.value);
+					cont   = cont.replace(/<#idnom#>/g,idnom);
+					cont   = cont.replace(/<#i#>/g,ind);
+
+					col    = "<col style='background:#FFFFE0;' title='"+caub.value+"'>";
 				}else{
 					cont="";
 				}
@@ -53,8 +101,12 @@ function add_caub(caub){
 			$(this).append(cont);
 			$("#"+idnom).numeric(".");
 		});
+		if(col!=''){
+			$('#caubcol').append(col);
+		}
 	}else{
 		$("#itstras [title='"+caub.value+"']").remove();
+		$("col [title='"+caub.value+"']").remove();
 	}
 }
 
@@ -134,7 +186,7 @@ $(function(){
 });
 </script>
 
-<form>
+<form id='df1' action='<?php echo site_url('inventario/stra/masspros');?>'>
 <div>
 <?php
 $check   = array();
@@ -152,6 +204,9 @@ echo 'Almacen que envia: '.form_dropdown('envia', $options,trim($this->datasis->
 echo '<p style="font-size:0.8em">'.implode(' ',$check).'</p>';
 ?>
 <table style='' id='itstras'>
+	<colgroup id='caubcol'>
+		<col span='3'>
+	</colgroup>
 	<tr id='_PTPL_'>
 		<th style='background:#F5FFFA;'><a href='#' id='addlink' onclick='add_itstra()' title='Agregar otro producto'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 18, 'alt'=>'Agregar otro producto', 'title' => 'Agregar otro producto', 'border'=>'0')); ?></a></th>
 		<th style='background:#E4E4E4;'>Producto</th>
