@@ -40,12 +40,12 @@ class fnomina {
 		$mFRECU  = $this->ci->datasis->dameval("SELECT b.tipo FROM pers a JOIN noco b ON a.contrato=b.codigo WHERE a.codigo=${CODIGO}");
 		$mMONTO  = floatval($this->ci->datasis->dameval("SELECT sueldo FROM pers WHERE codigo=${CODIGO}"));
 
-		if($mFRECU == 'O') $mFRECU = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=$CODIGO");
+		if($mFRECU == 'O') $mFRECU  = $this->ci->datasis->dameval("SELECT tipo FROM pers WHERE codigo=${CODIGO}");
 		if($mFRECU == 'S') $SUELDOA = $mMONTO*52/24;
 		if($mFRECU == 'B') $SUELDOA = $mMONTO*26/24;
 		if($mFRECU == 'Q') $SUELDOA = $mMONTO;
 		if($mFRECU == 'M') $SUELDOA = $mMONTO/2;
-		//return $SUELDOA;
+		return $SUELDOA;
 	}
 
 	function SUELDO_SEM(){
