@@ -51,15 +51,18 @@ class Stra extends Controller {
 		$grid->wbotonadd(array('id'=>'boton1','img'=>'assets/default/images/print.png','alt'=> 'Imprimir transferencia', 'label'=>'Reimprimir'));
 		$grid->wbotonadd(array('id'=>'brma'  ,'img'=>'images/caja-cerrada.png','alt'=> 'Movimiento por RMA', 'label'=>'Traslado por RMA'));
 		$grid->wbotonadd(array('id'=>'bprodu','img'=>'images/caja-cerrada.png','alt'=> 'Cargar Produccion', 'label'=>'Cargar Produccion'));
+		$grid->wbotonadd(array('id'=>'btmas' ,'img'=>'images/caja-cerrada.png','alt'=> 'T. Masivo'        , 'label'=>'T.Masivos'));
+
 
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
-		$centerpanel = $grid->centerpanel( $id = "radicional", $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
+		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar Transferencia'),
-			array('id'=>'fshow' ,  'title'=>'Ver Transferencia')
+			array('id'=>'fedita', 'title'=>'Agregar Transferencia'),
+			array('id'=>'fshow' , 'title'=>'Ver Transferencia'),
+			array('id'=>'fmass' , 'title'=>'Ver Transferencia Masivas')
 		);
 
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
@@ -222,7 +225,15 @@ class Stra extends Controller {
 			$("#mhasta").datepicker({dateFormat:"dd/mm/yy"});
 		});';
 
-
+		$bodyscript .= '
+		$("#btmas").click( function(){
+			$.post("'.site_url('inventario/stra/stramas/create').'",
+			function(data){
+				$("#fmass").html(data);
+				$("#fmass").dialog( { title:"Transferencias masivas", width: 790, height: 500 } );
+				$("#fmass").dialog( "open" );
+			});
+		});';
 
 		$bodyscript .= '
 		$("#boton1").click( function(){
@@ -232,6 +243,46 @@ class Stra extends Controller {
 				window.open(\''.site_url('formatos/ver/STRA').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
 			} else { $.prompt("<h1>Por favor Seleccione una tranferencia</h1>");}
 		});';
+
+		$bodyscript .= '
+		$("#fmass").dialog({
+			autoOpen: false, height: 500, width: 700, modal: true,
+			buttons: {
+				"Guardar": function() {
+					var bValid = true;
+					var murl = $("#df1").attr("action");
+					allFields.removeClass( "ui-state-error" );
+					$.ajax({
+						type: "POST", dataType: "text", async: false,
+						url: murl,
+						data: $("#df1").serialize(),
+						success: function(r,s,x){
+							try{
+								var json = JSON.parse(r);
+								if (json.status == "A"){
+									$( "#fmass" ).dialog( "close" );
+									grid.trigger("reloadGrid");
+									return true;
+								} else {
+									apprise(json.mensaje);
+								}
+							}catch(e){
+								$("#fedita").html(r);
+							}
+						}
+					})
+				},
+				"Cancelar": function() {
+					$("#fmass").html("");
+					$(this).dialog("close");
+				}
+			},
+			close: function() {
+				$("#fmass").html("");
+				allFields.val( "" ).removeClass( "ui-state-error" );
+			}
+		});';
+
 
 		$bodyscript .= '
 		$("#fedita").dialog({
@@ -852,7 +903,7 @@ class Stra extends Controller {
 				echo json_encode($rt);
 				return true;
 			}
-			
+
 			if($edit->on_error()){
 				$rt=array(
 					'status' =>'B',
@@ -863,11 +914,18 @@ class Stra extends Controller {
 				return false;
 			}
 
+			if($edit->on_show()){
+				$conten['form'] =& $edit;
+				$data['content'] = $this->load->view('view_stra', $conten, false);
+			}
+
 		} else {
 			if($edit->on_success()){
 				$rt= 'Transferencia Guardada';
 			}elseif($edit->on_error()){
 				$rt= html_entity_decode(preg_replace('/<[^>]*>/', '', $edit->error_string));
+			}else{
+				$rt= 'Error en la tranasferencia';
 			}
 			return $rt;
 		}
@@ -1525,6 +1583,12 @@ class Stra extends Controller {
 		}
 	}
 
+	//Stra masivo
+	function stramas(){
+		$data = array();
+		$this->load->view('view_stramas', $data);
+	}
+
 	//******************************************************************
 	// Chequea si tiene existencia
 	function chcananeg($val,$i){
@@ -1595,7 +1659,7 @@ class Stra extends Controller {
 			return false;
 		}
 
-		$cana = $do->count_rel('itstra'); 
+		$cana = $do->count_rel('itstra');
 
 		$error=0;
 		for($i = 0;$i < $cana;$i++){
@@ -1686,17 +1750,16 @@ class Stra extends Controller {
 	}
 
 	//******************************************************************
-	// Crea una produccion de la venta 
-	//
+	// Crea una produccion de la venta
 	function creaprod(){
 		$mdesde = $this->input->post('desde');
 		$mhasta = $this->input->post('hasta');
 
-		$mdesde = substr(human_to_dbdate($mdesde),0,10); 
-		$mhasta = substr(human_to_dbdate($mhasta),0,10); 
+		$mdesde = substr(human_to_dbdate($mdesde),0,10);
+		$mhasta = substr(human_to_dbdate($mhasta),0,10);
 
-		$dbmdesde = $this->db->escape($mdesde); 
-		$dbmhasta = $this->db->escape($mhasta); 
+		$dbmdesde = $this->db->escape($mdesde);
+		$dbmhasta = $this->db->escape($mhasta);
 
 		$this->_url= $this->url.'dataedit/insert';
 
@@ -1710,7 +1773,7 @@ class Stra extends Controller {
 		);
 		$mSQL = 'SELECT a.codigoa, b.descrip, sum(a.cana*IF(a.tipoa="F",1,-1)) cana
 		FROM sitems AS a
-		JOIN sinv AS b ON b.codigo=a.codigoa 
+		JOIN sinv AS b ON b.codigo=a.codigoa
 		AND a.fecha >= '.$dbmdesde.'
 		AND a.fecha <= '.$dbmhasta.' AND tipoa <> "X" AND mid(b.tipo,1,1) <> "S"
 		GROUP BY a.codigoa
@@ -1725,6 +1788,85 @@ class Stra extends Controller {
 			$i++;
 		}
 		$this->dataedit();
+	}
+
+	//******************************************************************
+	// Realiza las transferencias masivas
+	function masspros(){
+		//$this->genesal=false;
+		$rt=array('status'=>'B','mensaje'=>'','caub'=>array());
+
+		$propos = $_POST;
+		$arrind = array();
+
+		if(!is_array($propos['caub']) && count($propos['caub'])>0){
+			$rt['mensaje']='No ha seleccionado almacenes';
+			echo json_encode($rt);
+			return false;
+		}
+
+		$can = 0;
+		$keys=array_keys($propos);
+		foreach($keys as $val){
+			if(preg_match('/^codigo_(?P<ind>\d+)/',$val,$matches)){
+				if(!empty($propos[$val])){
+					$arrind[]=$matches['ind'];
+					$can++;
+				}
+			}
+		}
+
+		if($can == 0){
+			$rt['mensaje']='No hay productos';
+			echo json_encode($rt);
+			return false;
+		}
+
+		$rt['status']= 'A';
+		$fecha = dbdate_to_human(date('Y-m-d'));
+		foreach($propos['caub'] as $recibe){
+			$_POST=array();
+			$_POST['envia']   = $propos['envia'];
+			$_POST['fecha']   = $fecha;
+			$_POST['observ1'] = 'Transferencia masiva';
+			$_POST['recibe']  = $recibe;
+
+			$can = 0;
+			foreach($arrind as $i){
+				$cnd = "${recibe}_${i}";
+				$ind = "codigo_${i}";
+				if(isset($propos[$ind]) && isset($propos[$cnd])){
+					$cana=  floatval($propos[$cnd]);
+					if(!empty($propos[$ind]) && $cana>0){
+						$_POST[$ind] = $propos[$ind];
+						$ind = 'cantidad_'.$i;
+						$_POST[$ind] = $cana;
+						$ind = 'descrip_'.$i;
+						if(isset($propos[$ind])){
+							$_POST[$ind] = $propos[$ind];
+						}
+						$can++;
+					}
+				}
+			}
+			if($can>0){
+				ob_start();
+					$this->dataedit();
+					$sal=ob_get_contents();
+				@ob_end_clean();
+				$jsal=json_decode($sal);
+				if($jsal->status=='B'){
+					$rt['status']  = 'B';
+					$rt['mensaje'].= 'Problemas al transferir al almacen '.$recibe.': '.$jsal->mensaje;
+				}else{
+					$rt['caub'][] = $recibe;
+				}
+				$this->chrepetidos=array();
+				$this->validation->clean();
+			}
+		}
+		echo json_encode($rt);
+		return true;
 	}
 
 	//******************************************************************

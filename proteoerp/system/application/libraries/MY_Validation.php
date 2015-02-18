@@ -564,4 +564,16 @@ class MY_Validation extends CI_Validation{
 
 		return FALSE;
 	}
+
+	function clean(){
+		$this->error_string		= '';
+		$this->_error_array		= array();
+		$this->_rules			= array();
+		$this->_fields			= array();
+		$this->_error_messages	= array();
+		$this->_current_field  	= '';
+		$this->_safe_form_data 	= false;
+		$this->_error_prefix	= '<p>';
+		$this->_error_suffix	= '</p>';
+	}
 }

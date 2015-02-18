@@ -11,8 +11,8 @@ var itstra_cont=0;
 
 var htm ="<tr id='tr_itstra_<#i#>'>";
     htm =htm+"<td valign='center' style='background:#F5FFFA;text-align:center'><a style='text-decoration:none' href='#' title='Eliminar' onclick='del_itstra(\"<#i#>\");return false;'><span style='color:red;font-wigth:bold;text-decoration:none;font-family:verdana;font-size:1.3em'>X</span></a></td>";
-    htm =htm+"<td><input type='text' name='codigo_<#i#>' id='codigo_<#i#>'><p id='descrip_<#i#>' style='margin:0;padding:0;border:0'></p></td>";
-    htm =htm+"<td><span id='existen_val_<#i#>'></span><input type='hidden' name='existen_<#i#>' id='existen_<#i#>'></td>";
+    htm =htm+"<td><input type='text' name='codigo_<#i#>' id='codigo_<#i#>'><p id='descrip_val_<#i#>' style='margin:0;padding:0;border:0'></p></td>";
+    htm =htm+"<td><span id='existen_val_<#i#>'></span><input type='hidden' name='existen_<#i#>' id='existen_<#i#>'><input type='hidden' name='descrip_<#i#>' id='descrip_<#i#>'></td>";
 	htm =htm+"</tr>";
 
 var htc = "<td title='<#title#>' style='text-align:center;'><input type='text' style='text-align:right' size='5' name='<#idnom#>' id='<#idnom#>'  onfocus='focusexist(this,<#i#>)'></td>";
@@ -23,12 +23,17 @@ function focusexist(obj,id){
 	if(existen>0){
 		var sumexis = totalrow(can);
 		var diff    = existen-sumexis;
-		if(diff>0){
-			obj.value   = diff;
+		var val     = obj.value;
+		if(diff>=0){
+			if(val==''){
+				obj.value   = diff;
+			}
 			$(obj).select();
-			$(obj).css('background');
+			//$(obj).css('background','transparent');
+			$(obj).css('background','white');
 		}else{
 			$(obj).css('background','red');
+			$(obj).one( 'focusout', function (rel){ $('#'+obj.id).css('background','transparent'); } );
 		}
 	}
 }
@@ -139,7 +144,8 @@ function autocod(id){
 			$('#codigo_'+id).attr('readonly','readonly');
 
 			$('#codigo_'+id).val(ui.item.codigo);
-			$('#descrip_'+id).text(ui.item.descrip);
+			$('#descrip_'+id).val(ui.item.descrip);
+			$('#descrip_val_'+id).text(ui.item.descrip);
 			$('#existen_'+id).val(ui.item.existen);
 			$('#existen_val_'+id).text(ui.item.existen);
 			//post_modbus(id);
@@ -186,7 +192,7 @@ $(function(){
 });
 </script>
 
-<form id='df1' action='<?php echo site_url('inventario/stra/masspros');?>'>
+<form id='df1' action='<?php echo site_url('inventario/stra/masspros/insert');?>'>
 <div>
 <?php
 $check   = array();
@@ -196,7 +202,7 @@ if ($query->num_rows() > 0){
 	foreach ($query->result() as $i=>$row){
 		$color= ($i%2==0)? '#9ACD32':'#FAF0E6';
 		$options[$row->ubica]=trim($row->ubides);
-		$check[] = '<nobr style="background-color:'.$color.';">'.$row->ubica.' '.form_checkbox($row->ubica, $row->ubica, false,'onclick="add_caub(this)"').'</nobr>';
+		$check[] = '<nobr style="background-color:'.$color.';">'.$row->ubica.' '.form_checkbox('caub[]', $row->ubica, false,'onclick="add_caub(this)"').'</nobr>';
 	}
 }
 

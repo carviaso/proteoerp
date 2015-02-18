@@ -93,7 +93,7 @@ class Kardex extends Controller {
 		$filter->codigo->db_name ='a.codigo';
 		$filter->codigo->rule = 'required';
 		$filter->codigo->operator='=';
-		$filter->codigo->size    = 10;
+		$filter->codigo->size    = 25;
 		$filter->codigo->clause  ='where';
 		$filter->codigo->append($boton);
 		$filter->codigo->group = 'UNO';

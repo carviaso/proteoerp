@@ -1,0 +1,125 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+//Nota:
+//Reporte para inventario rapido en punto de venta
+//no confundir con INVFEL que esta descartado
+
+$sinv=array(
+	'tabla'   =>'sinv',
+	'columnas'=>array(
+		'codigo' =>'Código',
+		'descrip'=>'descrip'),
+	'filtro'  =>array('codigo' =>'Código','descrip'=>'descrip'),
+	'retornar'=>array('codigo'=>'codigoa'),
+	'titulo'  =>'Buscar Articulo');
+
+$iboton=$this->datasis->modbus($sinv);
+
+$filter = new DataFilter2('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$sel=array(
+	'a.codigo','b.barras','b.descrip',
+	'a.fecha','a.precio','a.existen',
+	'a.anterior','a.parcial','a.tipo',
+	'a.usuario','a.ubica'
+);
+
+$filter->db->select($sel);
+$filter->db->from('invfel AS a ');
+$filter->db->join('sinv   AS b','a.codigo=b.codigo');
+$filter->db->orderby('a.fecha, a.ubica, b.descrip');
+
+$filter->fechad = new dateField('Desde', 'fechad');
+$filter->fechah = new dateField('Hasta', 'fechah');
+$filter->fechad->clause  = $filter->fechah->clause='where';
+$filter->fechad->db_name = $filter->fechah->db_name='a.fecha';
+$filter->fechad->operator= '>=';
+$filter->fechah->operator= '<=';
+$filter->fechah->group   = 'Fecha';
+$filter->fechad->group   = 'Fecha';
+$filter->fechad->append('Dejar vacio para traer el pendiente');
+$filter->fechah->append('Dejar vacio para traer el pendiente');
+
+$filter->codigo = new inputField('C&oacute;digo', 'codigoa');
+$filter->codigo->clause='where';
+$filter->codigo->db_name='b.codigo';
+$filter->codigo->operator='=';
+$filter->codigo->size=10;
+$filter->codigo ->append($iboton);
+
+$filter->usuario =new dropdownField('Usuario','usuario');
+$filter->usuario->option('','Todos');
+$filter->usuario->db_name='a.usuario';
+$filter->usuario->options('SELECT usuario,usuario a FROM invfel GROUP BY usuario');
+$filter->usuario->operator='=';
+$filter->usuario->clause  ='where';
+
+$filter->ubica =new dropdownField('Ubicaci&oacute;n','ubica');
+$filter->ubica->option('','Todos');
+$filter->ubica->db_name='a.ubica';
+$filter->ubica->options('SELECT ubica,ubica a FROM invfel GROUP BY ubica');
+$filter->ubica->operator='=';
+$filter->ubica->clause='where';
+
+$filter->alma =new dropdownField('Almac&eacute;n','alma');
+$filter->alma->option('','Todos');
+$filter->alma->options('SELECT TRIM(alma) AS cod,alma FROM invfel GROUP BY alma');
+
+$filter->mostrar =new dropdownField('Primera columna','mostrar');
+$filter->mostrar->option('barras','Barras');
+$filter->mostrar->option('codigo','Codigo');
+$filter->mostrar->operator='';
+$filter->mostrar->clause='';
+$filter->mostrar->rule='enum[barras,codigo]';
+$filter->mostrar->append('Campo a mostrar en la primera columna');
+$filter->mostrar->style='width:150px';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+$filter->salformat->group = 'Opciones';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$mostrar= $filter->mostrar->newValue;
+	$fechad = $this->input->post('fechad');
+	$fechah = $this->input->post('fechah');
+
+	if(empty($fechad) && empty($fechah)) $this->db->where('fecha','00000000');
+
+	$mSQL=$this->rapyd->db->_compile_select();
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Inventario Fisico por Estante");
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	$pdf->AddCol($mostrar  , 30,'Código'     ,'L',10);
+	$pdf->AddCol('descrip' ,100,'Descripción','L',10);
+	$pdf->AddCol('unidad'  , 15,'Unidad'     ,'R',10);
+	$pdf->AddCol('fecha'   , 15,'Fecha'      ,'C',10);
+	$pdf->AddCol('precio'  , 20,'Precio'     ,'R',10);
+	$pdf->AddCol('anterior', 15,'Anterior'   ,'R',10);
+	$pdf->AddCol('parcial' , 20,'Parcial'    ,'R',10);
+	$pdf->setGrupoLabel('Ubicación:<#ubica#>');
+	$pdf->setGrupo('ubica');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Inventario F&iacute;sico por Estante</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
