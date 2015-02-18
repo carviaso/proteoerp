@@ -1894,7 +1894,7 @@ class Reparto extends Controller {
 			FROM sfac   AS a
 			JOIN sitems AS b ON a.numero=b.numa AND a.tipo_doc=b.tipoa
 			JOIN sinv   AS c ON b.codigoa=c.codigo
-			JOIN vend   AS d ON d.cendedor=a.vd
+			JOIN vend   AS d ON d.vendedor=a.vd
 			WHERE a.reparto=0 AND a.tipo_doc<>'X' AND a.entregable='S'
 				AND a.tipo_doc='F' AND a.referen<>'P'
 			GROUP BY a.vd";
