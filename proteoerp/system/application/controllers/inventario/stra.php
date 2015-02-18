@@ -51,7 +51,7 @@ class Stra extends Controller {
 		$grid->wbotonadd(array('id'=>'boton1','img'=>'assets/default/images/print.png','alt'=> 'Imprimir transferencia', 'label'=>'Reimprimir'));
 		$grid->wbotonadd(array('id'=>'brma'  ,'img'=>'images/caja-cerrada.png','alt'=> 'Movimiento por RMA', 'label'=>'Traslado por RMA'));
 		$grid->wbotonadd(array('id'=>'bprodu','img'=>'images/caja-cerrada.png','alt'=> 'Cargar Produccion', 'label'=>'Cargar Produccion'));
-		$grid->wbotonadd(array('id'=>'btmas' ,'img'=>'images/caja-cerrada.png','alt'=> 'T. Masivo'        , 'label'=>'T.Masivos'));
+		$grid->wbotonadd(array('id'=>'btmas' ,'img'=>'images/caja-cerrada.png','alt'=> 'Transf.Lote'        , 'label'=>'Transf.Lote'));
 
 
 		$WestPanel = $grid->deploywestp();
@@ -62,7 +62,7 @@ class Stra extends Controller {
 		$adic = array(
 			array('id'=>'fedita', 'title'=>'Agregar Transferencia'),
 			array('id'=>'fshow' , 'title'=>'Ver Transferencia'),
-			array('id'=>'fmass' , 'title'=>'Ver Transferencia Masivas')
+			array('id'=>'fmass' , 'title'=>'Transferencia en Lote')
 		);
 
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
@@ -257,17 +257,30 @@ class Stra extends Controller {
 						url: murl,
 						data: $("#df1").serialize(),
 						success: function(r,s,x){
-							try{
-								var json = JSON.parse(r);
-								if (json.status == "A"){
-									$( "#fmass" ).dialog( "close" );
-									grid.trigger("reloadGrid");
-									return true;
-								} else {
-									apprise(json.mensaje);
+							act=valida();
+							if(act){
+								try{
+									var json = JSON.parse(r);
+									if (json.status == "A"){
+										$( "#fmass" ).dialog( "close" );
+										grid.trigger("reloadGrid");
+										return true;
+									}else{
+										var caub="";
+										apprise(json.mensaje);
+										for(var ele in json.caub){
+											caub=json.caub[ele];
+											if($("#c"+caub).is(":checked")){
+												$("#c"+caub).click();
+												$("#c"+caub).prop("checked", false);
+											}
+										}
+									}
+								}catch(e){
+									$("#fedita").html(r);
 								}
-							}catch(e){
-								$("#fedita").html(r);
+							}else{
+								apprise("No hay cantidad suficiente para algunos productos");
 							}
 						}
 					})
@@ -1828,7 +1841,7 @@ class Stra extends Controller {
 			$_POST=array();
 			$_POST['envia']   = $propos['envia'];
 			$_POST['fecha']   = $fecha;
-			$_POST['observ1'] = 'Transferencia masiva';
+			$_POST['observ1'] = 'Transferencia en lotes';
 			$_POST['recibe']  = $recibe;
 
 			$can = 0;

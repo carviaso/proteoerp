@@ -187,6 +187,28 @@ function del_itstra(id){
 	$('#tr_itstra_'+id).remove();
 }
 
+function valida(){
+	var rt=true;
+	$("#itstras tr").each(function(){
+		var id  = this.id;
+		if(id!='_PTPL_'){
+			pos=id.lastIndexOf('_');
+			if(pos>0){
+				ind    = id.substring(pos+1);
+				exist  = Number($("#existen_"+ind).val());
+				tota   = totalrow(ind);
+				if(tota>exist){
+					rt=false;
+					$('#existen_val_'+ind).css('color','red');
+				}else{
+					$('#existen_val_'+ind).css('color','black');
+				}
+			}
+		}
+	});
+	return rt;
+}
+
 $(function(){
 	add_itstra();
 });
@@ -202,11 +224,11 @@ if ($query->num_rows() > 0){
 	foreach ($query->result() as $i=>$row){
 		$color= ($i%2==0)? '#9ACD32':'#FAF0E6';
 		$options[$row->ubica]=trim($row->ubides);
-		$check[] = '<nobr style="background-color:'.$color.';">'.$row->ubica.' '.form_checkbox('caub[]', $row->ubica, false,'onclick="add_caub(this)"').'</nobr>';
+		$check[] = '<nobr style="background-color:'.$color.';">'.$row->ubica.' '.form_checkbox('caub[]', $row->ubica, false,'onclick="add_caub(this)" id="'.addslashes('c'.$row->ubica).'"').'</nobr>';
 	}
 }
 
-echo 'Almacen que envia: '.form_dropdown('envia', $options,trim($this->datasis->traevalor('ALMACEN')));
+echo 'Almac&eacute;n que envia: '.form_dropdown('envia', $options,trim($this->datasis->traevalor('ALMACEN')));
 echo '<p style="font-size:0.8em">'.implode(' ',$check).'</p>';
 ?>
 <table style='' id='itstras'>
