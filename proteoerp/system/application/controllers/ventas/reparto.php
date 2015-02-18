@@ -234,17 +234,20 @@ class Reparto extends Controller {
 			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if (id)	{
 				var ret = $("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
-				var mcome1 = "<h1>Eliminar Reparto?</h1><table align=\'center\'><tr>"+
-					"<td>Eliminar Reparto y desmarcar las facturas?</td>"+
-					"</tr></table>";
+				var mcome1 = "<h1>Anular Reparto?</h1>"+
+					"<table align=\'center\'><tr>"+
+					"<td>Anular Reparto y desmarcar las facturas?</td>"+
+					"</tr><tr><td><label for=\'razon\'>Raz&oacute;n por la cual anula el despacho: </label><br><textarea id=\'razon\' name=\'razon\'  rows=\'2\' cols=\'30\'></textarea></td></tr></table>";
 				var mprepanom =
 				{
 					state0: {
 						html: mcome1,
-						buttons: { Eliminar: true, Cancelar: false },
+						buttons: { Anular: true, Cancelar: false },
 						submit: function(e,v,m,f){
-							if (v) {
-								$.post("'.site_url('ventas/reparto/cambiatipo').'/", { mid: id, oper: \'anular\' },
+							if(v){
+								var razon = $(\'#razon\').val();
+								//if(razon!=\'\'){}
+								$.post("'.site_url('ventas/reparto/cambiatipo').'/", { mid: id, oper: \'anular\',razon: razon },
 									function(data){
 										$.prompt.goToState(\'state1\');
 										$(\'#in_prome3\').text(data);
@@ -259,7 +262,7 @@ class Reparto extends Controller {
 				$.prompt(mprepanom);
 				$("#mfecha").datepicker({dateFormat:"dd/mm/yy"});
 
-			} else { $.prompt("<h1>Por favor Seleccione un Reparto</h1>");}
+			}else{ $.prompt("<h1>Por favor Seleccione un Reparto</h1>");}
 		});';
 
 
@@ -544,10 +547,23 @@ class Reparto extends Controller {
 			}
 		}elseif($oper == 'anular'){
 			if($tipo != 'F'){
-				$this->db->where('id', $id);
-				$this->db->update('reparto', array('tipo' => 'A'));
-				$this->db->query("UPDATE sfac SET entregado=0, reparto=0 WHERE reparto=${id}");
-				echo 'Reparto Eliminado';
+				$razon = $this->input->post('razon');
+				$mSQL  = "SELECT COUNT(*) AS cana FROM sfac WHERE reparto=${id} AND repcob IN ('EF','MI','CH','FP')";
+				$cana=intval($this->datasis->dameval($mSQL));
+				if($cana == 0){
+					$upd = array('tipo' => 'A');
+					if($razon!==false){
+						$upd['razon'] = $razon;
+					}
+
+					$this->db->where('id', $id);
+					$this->db->update('reparto', $upd);
+					$this->db->query("UPDATE sfac SET entregado=0, reparto=0 WHERE reparto=${id}");
+					echo 'Reparto Anulado';
+				}else{
+					echo 'No se puede anular el reparto por tener efectos cobrados';
+				}
+
 			}else{
 				echo 'Reparto ya fue cerrado o finalizado, no se puede anular';
 			}
@@ -1174,6 +1190,16 @@ class Reparto extends Controller {
 			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
 
+		$grid->addField('razon');
+		$grid->label('Raz&oacute;n');
+		$grid->params(array(
+			'hidden'        => 'true',
+			'search'        => 'false',
+			'editable'      => 'false',
+			'width'         => 80,
+			'edittype'      => "'text'",
+		));
+
 		$grid->showpager(true);
 		$grid->setWidth('');
 		$grid->setHeight('290');
@@ -1196,6 +1222,7 @@ class Reparto extends Controller {
 						$("#cerrard").hide();
 						$("#cobrard").hide();
 						$("#finalid").hide();
+						$("#anulard").show();
 					}else if( ret.tipo == \'C\'){
 						$("#agregaf").hide();
 						$("#cargard").hide();
@@ -1203,12 +1230,14 @@ class Reparto extends Controller {
 						$("#cerrard").hide();
 						$("#cobrard").show();
 						$("#finalid").show();
+						$("#anulard").show();
 					}else if( ret.tipo == \'E\'){
 						$("#agregaf").hide();
 						$("#cargard").hide();
 						$("#entrega").hide();
 						$("#cerrard").show();
 						$("#cobrard").show();
+						$("#anulard").show();
 						$("#ladicional").text("Para desincorporar una factura no entregada haga doble click sobre la factura a eliminar.");
 						$.post("'.site_url($this->url.'eliminadas').'/"+id, function(data){
 							$("#ladicional").after(data);
@@ -1225,6 +1254,7 @@ class Reparto extends Controller {
 							$("#cobrard").show();
 							$("#finalid").show();
 						}else{
+							$("#ladicional").text(ret.razon);
 							$("#cobrard").hide();
 							$("#finalid").hide();
 						}
@@ -1894,7 +1924,7 @@ class Reparto extends Controller {
 	}
 
 	function instalar(){
-		if (!$this->db->table_exists('reparto')){
+		if(!$this->db->table_exists('reparto')){
 			$mSQL="CREATE TABLE `reparto` (
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
 				`tipo` CHAR(1) NOT NULL COMMENT 'Tipo Pendiente, Cargado, Despachado, Finalizado, Anulado',
@@ -1907,12 +1937,15 @@ class Reparto extends Controller {
 				`facturas` INT(11) NULL DEFAULT NULL COMMENT 'Nro de Faturas',
 				`carga` DATE NULL DEFAULT NULL COMMENT 'Carga el Reparto',
 				`entregado` DATE NULL DEFAULT NULL COMMENT 'Entregado al Cliente',
-				`estampa` DATE NULL DEFAULT NULL,
+				`estampa` DATETIME NULL DEFAULT NULL,
 				`usuario` CHAR(12) NULL DEFAULT NULL,
 				`hora` CHAR(8) NULL DEFAULT NULL,
 				`eliminadas` VARCHAR(200) NULL DEFAULT '',
 				`volumen` DECIMAL(10,2) NULL DEFAULT '0.00',
 				`paradas` INT(11) NULL DEFAULT '0',
+				`tcierre` DATETIME NULL DEFAULT NULL,
+				`monto` DECIMAL(12,2) NULL DEFAULT '0.00' COMMENT 'Monto recibido',
+				`razon` TEXT NULL COMMENT 'razon por la que se anulo',
 				PRIMARY KEY (`id`)
 			)
 			COLLATE='latin1_swedish_ci'
@@ -1921,12 +1954,7 @@ class Reparto extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
-		$campos=$this->db->list_fields('sfac');
-		if(!in_array('reparto',$campos)){
-			$mSQL="ALTER TABLE sfac ADD COLUMN reparto INT(11) NULL DEFAULT 0 AFTER manual";
-			$this->db->simple_query($mSQL);
-		}
-
+		$campos=$this->db->list_fields('reparto');
 		if(!in_array('tcierre',$campos)){
 			$mSQL="ALTER TABLE `reparto` CHANGE COLUMN `estampa` `estampa` DATETIME NULL DEFAULT NULL AFTER `entregado`;";
 			$this->db->simple_query($mSQL);
@@ -1934,9 +1962,13 @@ class Reparto extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
-		$campos=$this->db->list_fields('reparto');
 		if(!in_array('eliminadas',$campos)){
 			$mSQL="ALTER TABLE reparto ADD COLUMN eliminadas varchar(200) NULL DEFAULT ''";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('razon',$campos)){
+			$mSQL="ALTER TABLE `reparto` ADD COLUMN `razon` TEXT NULL DEFAULT NULL COMMENT 'razon por la que se anulo'";
 			$this->db->simple_query($mSQL);
 		}
 
@@ -1952,6 +1984,14 @@ class Reparto extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
+		//Campos en sfac
+		$campos=$this->db->list_fields('sfac');
+		if(!in_array('reparto',$campos)){
+			$mSQL="ALTER TABLE sfac ADD COLUMN reparto INT(11) NULL DEFAULT 0 AFTER manual";
+			$this->db->simple_query($mSQL);
+		}
+
+		//Campos en flota
 		$campos=$this->db->list_fields('flota');
 		if(!in_array('volumen',$campos)){
 			$mSQL="ALTER TABLE `flota`

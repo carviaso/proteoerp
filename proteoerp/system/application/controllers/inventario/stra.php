@@ -44,15 +44,16 @@ class Stra extends Controller {
 		//Funciones que ejecutan los botones
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
-		#Set url
+		#Set url $this->datasis->sidapuede('STRA','INCLUIR%' )
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'boton1','img'=>'assets/default/images/print.png','alt'=> 'Imprimir transferencia', 'label'=>'Reimprimir'));
 		$grid->wbotonadd(array('id'=>'brma'  ,'img'=>'images/caja-cerrada.png','alt'=> 'Movimiento por RMA', 'label'=>'Traslado por RMA'));
 		$grid->wbotonadd(array('id'=>'bprodu','img'=>'images/caja-cerrada.png','alt'=> 'Cargar Produccion', 'label'=>'Cargar Produccion'));
-		$grid->wbotonadd(array('id'=>'btmas' ,'img'=>'images/caja-cerrada.png','alt'=> 'Transf.Lote'        , 'label'=>'Transf.Lote'));
-
+		if($this->datasis->sidapuede('STRA','INCLUIR%' )){
+			$grid->wbotonadd(array('id'=>'btmas' ,'img'=>'images/caja-cerrada.png','alt'=> 'Transf.Lote'        , 'label'=>'Transf.Lote'));
+		}
 
 		$WestPanel = $grid->deploywestp();
 
@@ -1811,6 +1812,12 @@ class Stra extends Controller {
 
 		$propos = $_POST;
 		$arrind = array();
+
+		if(!$this->datasis->sidapuede('STRA','INCLUIR%' )){
+			$rt['mensaje']='No tiene privilegios para realizar esta operacion';
+			echo json_encode($rt);
+			return false;
+		}
 
 		if(!is_array($propos['caub']) && count($propos['caub'])>0){
 			$rt['mensaje']='No ha seleccionado almacenes';
