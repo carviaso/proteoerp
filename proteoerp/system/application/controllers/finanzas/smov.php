@@ -1832,8 +1832,8 @@ class Smov extends Controller {
 			if($sfpatipo=='EF'){
 				$do->set_rel($rel, 'banco' ,'', $i);
 				$do->set_rel($rel, 'numero','', $i);
+				$do->set_rel($rel, 'fecha',$fecha, $i);
 			}
-			$do->set_rel($rel, 'fecha',$fecha, $i);
 		}
 		$sfpamonto=round($sfpamonto,2);
 
