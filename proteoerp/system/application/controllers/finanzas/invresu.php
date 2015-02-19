@@ -18,10 +18,9 @@ class Invresu extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
-	//Layout en la Ventana
+	//******************************************************************
+	// Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -55,9 +54,9 @@ class Invresu extends Controller {
 		$this->load->view('jqgrid/crud2',$param);
 	}
 
-	//***************************
-	//Funciones de los Botones
-	//***************************
+	//******************************************************************
+	// Funciones de los Botones
+	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '		<script type="text/javascript">';
 
@@ -209,9 +208,9 @@ class Invresu extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -565,7 +564,7 @@ class Invresu extends Controller {
 		}
 	}
 
-	/**
+	/*******************************************************************
 	* Busca la data en el Servidor por json
 	*/
 	function getdata(){
@@ -577,7 +576,7 @@ class Invresu extends Controller {
 		echo $rs;
 	}
 
-	/**
+	/*******************************************************************
 	* Guarda la Informacion
 	*/
 	function setData(){
@@ -1092,73 +1091,84 @@ class Invresu extends Controller {
 	}
 
 	function _calcula( $mes){
-
 		//Borra lo que hay
 		$this->db->query("DELETE FROM invresu WHERE mes=${mes}");
 
-		// Carga desde costos
-		$mSQL = "
-		INSERT INTO invresu ( mes, codigo, descrip, inicial, compras, conver, ventas, trans, ajuste, fisico, notas, final, minicial, mcompras, mconver, mventas, mtrans, majuste, mfisico, mnotas, mfinal, mpventa )
-		SELECT
-		EXTRACT(YEAR_MONTH FROM a.fecha) AS mes, a.codigo, b.descrip,
-		0                                                                AS inicial,
-		sum(a.cantidad*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1)) AS compras,
-		sum(a.cantidad*(a.origen IN ('6C') ))                            AS conver,
-		sum(a.cantidad*(a.origen IN ('3I','3M') ))                       AS ventas,
-		sum(a.cantidad*(a.origen IN ('1T') ))                            AS trans,
-		sum(a.cantidad*(a.origen IN ('5C') ))                            AS ajuste,
-		sum((a.cantidad-a.anteri)*(a.origen IN ('0F','8F')))             AS fisico,
-		sum(a.cantidad*(a.origen='4N'))                                  AS notas,
-		0                                                                AS final,
-		0                                                                AS minicial,
-		sum(a.monto*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1))    AS mcompras,
-		sum(a.cantidad*a.promedio*(a.origen IN ('6C') ))                 AS mconver,
-		sum(a.cantidad*a.promedio*(a.origen IN ('3I','3M')))             AS mventas,
-		sum(a.cantidad*a.promedio*(a.origen IN ('1T','6C','5C') ))       AS mtrans,
-		sum(a.cantidad*a.promedio*(a.origen IN ('5C') ))                 AS majuste,
-		sum((a.cantidad-a.anteri)*a.promedio*(a.origen IN ('0F','8F')))  AS mfisico,
-		sum(a.cantidad*a.promedio*(a.origen='4N'))                       AS mnotas,
-		0                                                                AS mfinal,
-		sum(venta)                                                       AS mpventas
-		FROM costos AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo
-		WHERE EXTRACT(YEAR_MONTH FROM a.fecha)=${mes} AND MID(b.tipo,1,1) != 'S'
-		GROUP BY EXTRACT(YEAR_MONTH FROM a.fecha),a.codigo";
-		$this->db->query($mSQL);
-
-		// Trae saldos Iniciales
-		$mesante = $this->datasis->dameval("SELECT mes FROM invresu WHERE mes < ${mes} ORDER BY mes DESC LIMIT 1");
-
-		if($mesante){
-
-			// Agrega codigos desde los anteriores
+		// Chequea si existe le sp
+		$bd   = $this->db->database;
+		$mSQL = '
+			SELECT COUNT(*) 
+			FROM INFORMATION_SCHEMA.ROUTINES 
+			WHERE ROUTINE_SCHEMA = "'.$bd.'"    AND 
+				  ROUTINE_NAME   = "sp_invresu" AND 
+				  ROUTINE_TYPE   = "PROCEDURE"
+		';
+		$tipo = $this->datasis->dameval($mSQL);
+		if ( $tipo == 1 ){
+			$this->db->query('CALL sp_invresu('.$mes.',0)');
+		} else {
+			// Carga desde costos
 			$mSQL = "
-			INSERT IGNORE INTO invresu ( mes, codigo, descrip, inicial,   compras,   conver,   ventas,   trans,   ajuste,   fisico,   notas,   final,   minicial,   mcompras,   mconver,   mventas,   mtrans,   majuste,   mfisico,   mnotas,   mfinal,    mpventa )
-			SELECT ${mes}                mes, codigo, '',    0 inicial, 0 compras, 0 conver, 0 ventas, 0 trans, 0 ajuste, 0 fisico, 0 notas, 0 final, 0 minicial, 0 mcompras, 0 mconver, 0 mventas, 0 mtrans, 0 majuste, 0 mfisico, 0 mnotas, 0 mfiscal, 0 mpventas FROM invresu WHERE mes=${mesante};
-			";
+			INSERT INTO invresu ( mes, codigo, descrip, inicial, compras, conver, ventas, trans, ajuste, fisico, notas, final, minicial, mcompras, mconver, mventas, mtrans, majuste, mfisico, mnotas, mfinal, mpventa )
+			SELECT
+			EXTRACT(YEAR_MONTH FROM a.fecha) AS mes, a.codigo, b.descrip,
+			0                                                                AS inicial,
+			sum(a.cantidad*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1)) AS compras,
+			sum(a.cantidad*(a.origen IN ('6C') ))                            AS conver,
+			sum(a.cantidad*(a.origen IN ('3I','3M') ))                       AS ventas,
+			sum(a.cantidad*(a.origen IN ('1T') ))                            AS trans,
+			sum(a.cantidad*(a.origen IN ('5C') ))                            AS ajuste,
+			sum((a.cantidad-a.anteri)*(a.origen IN ('0F','8F')))             AS fisico,
+			sum(a.cantidad*(a.origen='4N'))                                  AS notas,
+			0                                                                AS final,
+			0                                                                AS minicial,
+			sum(a.monto*(a.origen IN ('2C','2D'))*IF(a.origen='2D',-1,1))    AS mcompras,
+			sum(a.cantidad*a.promedio*(a.origen IN ('6C') ))                 AS mconver,
+			sum(a.cantidad*a.promedio*(a.origen IN ('3I','3M')))             AS mventas,
+			sum(a.cantidad*a.promedio*(a.origen IN ('1T','6C','5C') ))       AS mtrans,
+			sum(a.cantidad*a.promedio*(a.origen IN ('5C') ))                 AS majuste,
+			sum((a.cantidad-a.anteri)*a.promedio*(a.origen IN ('0F','8F')))  AS mfisico,
+			sum(a.cantidad*a.promedio*(a.origen='4N'))                       AS mnotas,
+			0                                                                AS mfinal,
+			sum(venta)                                                       AS mpventas
+			FROM costos AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo
+			WHERE EXTRACT(YEAR_MONTH FROM a.fecha)=${mes} AND MID(b.tipo,1,1) != 'S'
+			GROUP BY EXTRACT(YEAR_MONTH FROM a.fecha),a.codigo";
 			$this->db->query($mSQL);
 
-			// Coloca saldos anteriores
+			// Trae saldos Iniciales
+			$mesante = $this->datasis->dameval("SELECT mes FROM invresu WHERE mes < ${mes} ORDER BY mes DESC LIMIT 1");
+
+			if($mesante){
+				// Agrega codigos desde los anteriores
+				$mSQL = "
+				INSERT IGNORE INTO invresu ( mes, codigo, descrip, inicial,   compras,   conver,   ventas,   trans,   ajuste,   fisico,   notas,   final,   minicial,   mcompras,   mconver,   mventas,   mtrans,   majuste,   mfisico,   mnotas,   mfinal,    mpventa )
+				SELECT ${mes}                mes, codigo, '',    0 inicial, 0 compras, 0 conver, 0 ventas, 0 trans, 0 ajuste, 0 fisico, 0 notas, 0 final, 0 minicial, 0 mcompras, 0 mconver, 0 mventas, 0 mtrans, 0 majuste, 0 mfisico, 0 mnotas, 0 mfiscal, 0 mpventas FROM invresu WHERE mes=${mesante};
+				";
+				$this->db->query($mSQL);
+
+				// Coloca saldos anteriores
+				$mSQL = "
+				UPDATE invresu a JOIN  invresu b ON a.codigo=b.codigo AND a.mes=${mes} AND b.mes=${mesante}
+				SET a.inicial=b.final, a.minicial=b.mfinal;";
+				$this->db->query($mSQL);
+			}
+
+			// Recalcula saldo final
 			$mSQL = "
-			UPDATE invresu a JOIN  invresu b ON a.codigo=b.codigo AND a.mes=${mes} AND b.mes=${mesante}
-			SET a.inicial=b.final, a.minicial=b.mfinal;";
+			UPDATE invresu SET
+			final  =  inicial + compras  + conver  - ventas  - notas  + trans  + ajuste  + fisico,
+			mfinal = minicial + mcompras + mconver - mventas - mnotas + mtrans + majuste + mfisico
+			WHERE mes = ${mes} ";
 			$this->db->query($mSQL);
 		}
-
-		// Recalcula saldo final
-		$mSQL = "
-		UPDATE invresu SET
-		final  =  inicial + compras  + conver  - ventas  - notas  + trans  + ajuste  + fisico,
-		mfinal = minicial + mcompras + mconver - mventas - mnotas + mtrans + majuste + mfisico
-		WHERE mes = ${mes} ";
-		$this->db->query($mSQL);
-
+/*
 		$mSQL = "
 SELECT mes INTO @mPAPA FROM invresu WHERE mes < mFECHA ORDER BY mes DESC LIMIT 1;
 IF @mPAPA > 0 THEN
 	REPLACE INTO invresu ( mes, codigo, descrip, inicial, compras, ventas, trans, fisico, notas, final, minicial, mcompras, mventas, mtrans, mfisico, mnotas, mfinal, mpventa )
 	SELECT mFECHA mes, codigo, '',       final,  0 compras, 0 ventas, 0 trans, 0 fisico, 0 notas, final, mfinal, 0 mcompras, 0 mventas, 0 mtrans, 0 mfisico, 0 mnotas, 0 mfiscal, 0 mpventas  FROM invresu WHERE mes=@mPAPA;
 END IF;
-
 DROP TABLE IF EXISTS INVRESUTEM;
 CREATE TABLE INVRESUTEM
 SELECT EXTRACT(YEAR_MONTH FROM a.fecha) AS mes, a.codigo, b.descrip, 0 AS inicial,
@@ -1176,14 +1186,13 @@ sum(a.cantidad*a.promedio*(a.origen='4N')) AS mnotas,
 FROM costos AS a LEFT JOIN sinv AS b ON a.codigo=b.codigo
 WHERE EXTRACT(YEAR_MONTH FROM a.fecha) = mFECHA AND MID(b.tipo,1,1)!='S'
 GROUP BY EXTRACT(YEAR_MONTH FROM a.fecha),a.codigo ;
-
 UPDATE invresu a JOIN INVRESUTEM b ON a.mes=b.mes AND a.codigo=b.codigo
 SET a.compras=b.compras, a.ventas = b.ventas,a.notas = b.notas,a.trans = b.trans,a.fisico = b.fisico,
 a.mcompras = b.mcompras,a.mventas = b.mventas,a.mnotas = b.mnotas,a.mtrans = b.mtrans,
 a.mfisico = b.mfisico ;
 DROP TABLE IF EXISTS INVRESUTEM;
 UPDATE invresu SET final=inicial+compras-ventas-notas+trans+fisico,mfinal=minicial+mcompras-mventas-mnotas+mtrans+mfisico WHERE mes=mFECHA;";
-
+*/
 	}
 
 	function recalcula(){
