@@ -889,7 +889,7 @@ class Nomina extends Controller {
 					$data["abonos"]  = $mREG['abonos'];
 					$data["control"] = $mREG['control'];
 
-					$this->db->update('sprm', $data, "id=".$mREG['id']);
+					$this->db->update('sprm', $data, "id = ".$mREG['id']);
 				}
 				$this->db->query($mSQL);
 			}
