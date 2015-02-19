@@ -1312,11 +1312,29 @@ class Scli extends validaciones {
 
 
 	//******************************************************************
+	//  Resumen rapido desde Pedidos pfac
+	//
+	function respfac() {
+		$id    = $this->uri->segment($this->uri->total_segments());
+		$dbid  = $this->db->escape($id);
+		$idcli = $this->datasis->dameval("SELECT b.id FROM pfac a JOIN scli b ON a.cod_cli=b.cliente WHERE a.id=${dbid}");
+
+		//$this->_uri = $this->url.'/'.$idcli;
+		$this->_resumen($idcli);
+
+
+	}
+
+
+	//******************************************************************
 	//  Resumen rapido
 	//
 	function resumen() {
 		$id = $this->uri->segment($this->uri->total_segments());
+		$this->_resumen($id);
+	}
 
+	function _resumen($id){
 		$row = $this->datasis->damereg("SELECT cliente, credito, formap, limite, tolera, maxtole, observa, tipo FROM scli WHERE id=$id");
 
 		$cod_cli  = $row['cliente'];
@@ -1340,6 +1358,9 @@ class Scli extends validaciones {
 		$saldo  = 0;
 		$saldo  = $this->datasis->dameval("SELECT SUM(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM smov WHERE cod_cli=${dbcod_cli}");
 
+		$pedido = $this->datasis->dameval("SELECT SUM(totalg) saldo FROM pfac WHERE status<>'C' AND cod_cli=${dbcod_cli}");
+
+
 		$salida = '';
 
 		if( $rutas )
@@ -1360,6 +1381,11 @@ class Scli extends validaciones {
 		$salida .= "<tr style='background-color:#FFFFFF;'><td>Maxima Tolerancia </td><td align='right'>$maxtole </td></tr>\n";
 		$salida .= "<tr style='background-color:#EEEEEE;'><td>Saldo Actual      </td><td align='right'>".nformat($saldo)."   </td></tr>\n";
 		$salida .= "<tr style='background-color:#FBEC88;'><td>Credito Disponible</td><td align='right'><b>".nformat($limite-$saldo)."</b></td></tr>\n";
+		$salida .= "<tr style='background-color:#FFFFFF;'><td>Pedidos           </td><td align='right'>".nformat($pedido)."  </td></tr>\n";
+		$salida .= "<tr style='background-color:#FAA78F;'><td>Saldo - Pedidos   </td><td align='right'>".nformat($limite-$saldo-$pedido)."  </td></tr>\n";
+
+
+
 		$salida .= "</table>\n";
 
 		if ( !empty($observa) )

@@ -25,10 +25,9 @@ class Pfac extends Controller {
 		redirect($this->url.'jqdatag');
 	}
 
-	//***************************
-	//Layout en la Ventana
+	//******************************************************************
+	// Layout en la Ventana
 	//
-	//***************************
 	function jqdatag(){
 
 		$grid = $this->defgrid();
@@ -397,9 +396,9 @@ class Pfac extends Controller {
 		return $bodyscript;
 	}
 
-	//***************************
-	//Definicion del Grid y la Forma
-	//***************************
+	//******************************************************************
+	// Definicion del Grid y la Forma
+	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
 		$editar = 'false';
@@ -848,13 +847,46 @@ class Pfac extends Controller {
 		$grid->setfilterToolbar(true);
 		$grid->setToolbar('false', '"top"');
 
+
+/*
+		$grid->setOnSelectRow('
+		function(id){
+			if (id){
+				var ret = jQuery(gridId1).jqGrid(\'getRowData\',id);
+				$(gridId1).jqGrid("setCaption", ret.nombre+" U. Venta "+ret.fecha1);
+				$.ajax({
+					url: "'.base_url().$this->url.'resumen/"+id,
+					success: function(msg){
+						msg += "<center><img src=\''.site_url($this->url.'vcard').'/'.'"+id+"\' alt=\'vCard\' height=\'160\' width=\'160\'></center>";
+						$("#ladicional").html(msg);
+					}
+				});
+			}
+		},
+		afterInsertRow: function( rid, aData, rowe){
+			if ( aData.tipo == "0" ){
+				$(this).jqGrid( "setCell", rid, "cliente","", {color:"#FFFFFF", \'background-color\':"#AF1001" });
+				$(this).jqGrid( "setCell", rid, "nombre", "", {color:"#FFFFFF", \'background-color\':"#AF1001" });
+			}
+		}'
+		);
+*/
+
 		$grid->setOnSelectRow('
 			function(id){
 				if (id){
-					jQuery(gridId2).jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
-					jQuery(gridId2).trigger("reloadGrid");
+					$(gridId2).jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
+					$(gridId2).trigger("reloadGrid");
 					var ret = $(this).getRowData(id);
-					$("#ladicional").text(ret.observa+ret.observ1);
+					$.ajax({
+						url: "'.site_url('ventas/scli/respfac/').'/"+id,
+						success: function(msg){
+							$("#ladicional").html(ret.observa+ret.observ1+msg);
+						}
+					});
+					//$("#ladicional").text(ret.observa+ret.observ1);
+
+
 				}
 			},
 			afterInsertRow:
