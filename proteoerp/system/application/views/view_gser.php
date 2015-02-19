@@ -747,11 +747,8 @@ function toggle() {
 			<input name="btn_creten"      value="Calcular" onclick="calcularete()" class="button" type="button">
 		<?php } ?>
 <?php } ?>
-
 		<?php echo $form_end     ?>
 		</td>
-
-
 	</tr>
 	<tr>
 		<td align='center'>
@@ -773,8 +770,10 @@ function toggle() {
 				<tr>
 					<td>&nbsp;</td>
 					<td class="littletableheader"><?php echo $form->benefi->label   ?>&nbsp;</td>
-					<td colspan='4' class="littletablerow"><?php echo $form->benefi->output  ?>&nbsp;</td>
-					<td colspan='2'class="littletableheader" align='right'>           <?php echo $form->credito->label  ?>&nbsp;</td>
+					<td colspan='3' class="littletablerow"><?php echo $form->benefi->output  ?>&nbsp;</td>
+					<td class="littletablerow"><?php echo $form->cnd->label  ?>&nbsp;</td>
+					<td class="littletablerow"><?php echo $form->cnd->output ?>&nbsp;</td>
+					<td class="littletableheader" align='right'>           <?php echo $form->credito->label  ?>&nbsp;</td>
 					<td class="littletablerow" align='left'><?php echo $form->credito->output ?>&nbsp;</td>
 				</tr>
 			</table>
@@ -799,7 +798,6 @@ function toggle() {
 					<?php
 						$mSQL="SELECT us_nombre FROM usuario WHERE us_codigo='".trim($form->_dataobject->get('usuario'))."'";
 						$us_nombre = $this->datasis->dameval($mSQL);
-
 					?>
 					<td class="littletablerow" align='center'><?php echo $form->_dataobject->get('usuario'); ?>&nbsp;</td>
 					<td class="littletablerow" align='center'><?php echo $us_nombre ?>&nbsp;</td>
@@ -811,7 +809,6 @@ function toggle() {
 			</fieldset>
 		</td>
 	</tr>
-
 	<tr>
 		<td align='center'>
 			<a id="mostrasocio" href="javascript:toggle();">Mostrar Complementos</a>
@@ -867,7 +864,6 @@ function toggle() {
 			</table>
 			</fieldset>
 				<?php }; ?>
-
 			<?php
 				$mSQL = "SELECT CONCAT(tipo_doc, numero) numero, CONCAT(cod_prv,'-',nombre) cod_prv, monto*(tipo_doc IN ('FC','ND','GI')) debe, monto*(tipo_doc NOT IN ('FC','ND','GI')) haber , monto-abonos saldo FROM sprm WHERE transac=? ";
 				$query = $this->db->query($mSQL, array(trim($form->_dataobject->get('transac'))) );
@@ -882,9 +878,8 @@ function toggle() {
 					<td align='center'>Haber &nbsp;</td>
 					<td align='center'>Saldo &nbsp;</td>
 				</tr>
-						<?php foreach( $query->result() as $row ){ ?>
+					<?php foreach( $query->result() as $row ){ ?>
 				<tr>
-
 					<td class="littletablerow" align='center'><?php echo $row->numero ?>&nbsp;</td>
 					<td class="littletablerow" align='left'>  <?php echo $row->cod_prv ?>&nbsp;</td>
 					<td class="littletablerow" align='right'> <?php echo nformat($row->debe) ?>&nbsp;</td>

@@ -3064,8 +3064,8 @@ class gser extends Controller {
 		$edit->reteiva->autocomplete=false;
 		//$edit->reteiva->onkeyup="reteiva()";
 
-		$edit->checkbox = new checkboxField("C.N.D.", "cnd", "S","N");
-		$edit->checkbox->insertValue = "y";
+		$edit->cnd = new checkboxField("IVA Deducible", "cnd", "S","N");
+		$edit->cnd->insertValue = "S";
 
 		$edit->reteica = new inputField('Ret. ICA','reteica');
 		$edit->reteica->size = 10;
@@ -3212,9 +3212,9 @@ class gser extends Controller {
 		$edit->monto->maxlength =8;
 		$edit->monto->showformat ='decimal';
 		$edit->monto->type='inputhidden';
-		//*****************************
-		//Fin de campos para detalle
-		//*****************************
+		//********************************
+		// Fin de campos para detalle
+		//
 
 		$edit->buttons('add_rel');
 
@@ -4319,7 +4319,7 @@ class gser extends Controller {
 
 		$itcampos=$this->db->list_fields('gitser');
 		if(!in_array('id',$itcampos)){
-			$query="ALTER TABLE gitser ADD COLUMN `id` INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`);";
+			$query="ALTER TABLE gitser ADD COLUMN id INT(15) UNSIGNED NULL AUTO_INCREMENT,  ADD PRIMARY KEY (`id`);";
 			$this->db->query($query);
 		}
 

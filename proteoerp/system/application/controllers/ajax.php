@@ -1839,6 +1839,27 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
+	//Saldo de cliente vencido
+	//
+	function ajaxsaldoscliped(){
+		$mid = $this->input->post('clipro');
+		if( $mid !== false ){
+
+			$this->db->select_sum('a.totalg','saldo');
+			$this->db->from('pfac AS a');
+			$this->db->where('a.cod_cli',$mid);
+			$this->db->where('a.status <>','C');
+			$q = $this->db->get();
+			$row = $q->row_array();
+			echo (empty($row['saldo']))? 0: $row['saldo'];
+
+		}else{
+			echo 0;
+		}
+	}
+
+
+	//******************************************************************
 	//Saldo pendiente de proveedor
 	//
 	function ajaxsanncprov(){

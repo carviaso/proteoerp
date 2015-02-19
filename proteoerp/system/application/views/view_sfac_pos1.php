@@ -750,6 +750,10 @@ function saldoven(){
 				}
 			},
 		});
+		$.post( "<?php echo site_url('ajax/ajaxsaldoscliped'); ?>", { 'clipro' : codcli })
+		.done(function( data ) {
+			$('#pedpen').html( "Monto de Pedidos pendientes: <b>"+nformat(data,2)+"</b>" );
+		});
 	}
 }
 
@@ -1365,6 +1369,7 @@ function apldes(){
 </table>
 
 <?php echo $form_end; ?>
+<div id='pedpen'></div>
 
 <?php
 if($form->_status=='show'){
