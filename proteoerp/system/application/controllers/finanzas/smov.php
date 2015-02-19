@@ -1833,6 +1833,7 @@ class Smov extends Controller {
 				$do->set_rel($rel, 'banco' ,'', $i);
 				$do->set_rel($rel, 'numero','', $i);
 			}
+			$do->set_rel($rel, 'fecha',$fecha, $i);
 		}
 		$sfpamonto=round($sfpamonto,2);
 
