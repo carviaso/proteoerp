@@ -253,7 +253,7 @@ class Proveedores extends Controller {
 
 		$proveed=raencode($proveed);
 
-		$grafico = open_flash_chart_object(680,350, site_url("compras/proveedores/gdiarias/$anio/$proveed/$mes"));
+		$grafico = open_flash_chart_object(680,350, site_url("compras/proveedores/gdiarias/${anio}/${proveed}/${mes}"));
 		$data['content']  = $grafico;
 		$data['content'] .=  $filter->output.$grid->output;
 		$data['head']     = $this->rapyd->get_head();
@@ -279,7 +279,7 @@ class Proveedores extends Controller {
 		WHERE tipo_doc<>'NE' AND fecha>=${dbfechai} AND fecha<=${dbfechaf}
 			AND actuali >= fecha
 		GROUP BY proveed ORDER BY grantotal DESC LIMIT 10";
-		//echo $mSQL;
+		echo $mSQL;
 
 		$maxval=0;
 		$query = $this->db->query($mSQL);
@@ -287,28 +287,28 @@ class Proveedores extends Controller {
 			if ($row->grantotal>$maxval) $maxval=$row->grantotal;
 			$proveed[]=$row->proveed;
 			$nombre[]=$row->nombre;
-			$data_1[]=$row->contado;
-			$data_2[]=$row->credito;
+			//$data_1[]=$row->contado;
+			//$data_2[]=$row->credito;
 			$data_3[]=$row->grantotal;
 		}
 
 		$om=1;while($maxval/$om>100) $om=$om*10;
 
-		$bar_1 = new bar(75, '#0053A4');
-		$bar_2 = new bar(75, '#9933CC');
+		//$bar_1 = new bar(75, '#0053A4');
+		//$bar_2 = new bar(75, '#9933CC');
 		$bar_3 = new bar(75, '#639F45');
 
-		$bar_1->key('Contado',10);
-		$bar_2->key('Credito',10);
-		$bar_3->key('Total'  ,10);
+		//$bar_1->key('Contado',10);
+		//$bar_2->key('Credito',10);
+		$bar_3->key('Monto Bs.'  ,10);
 
-		for($i=0;$i<count($data_1);$i++ ){
-			$bar_1->add_data_tip($data_1[$i]/$om, graph::esc( number_format($data_1[$i],2,',','.')));
-			$bar_2->add_data_tip($data_2[$i]/$om, graph::esc( number_format($data_2[$i],2,',','.')));
+		for($i=0;$i<count($data_3);$i++ ){
+			//$bar_1->add_data_tip($data_1[$i]/$om, graph::esc( number_format($data_1[$i],2,',','.')));
+			//$bar_2->add_data_tip($data_2[$i]/$om, graph::esc( number_format($data_2[$i],2,',','.')));
 			$bar_3->add_data_tip($data_3[$i]/$om, graph::esc( number_format($data_3[$i],2,',','.')));
 
-			$bar_1->links[]= site_url("/compras/proveedores/mensuales/${anio}/".raencode($proveed[$i]));
-			$bar_2->links[]= site_url("/compras/proveedores/mensuales/${anio}/".raencode($proveed[$i]));
+			//$bar_1->links[]= site_url("/compras/proveedores/mensuales/${anio}/".raencode($proveed[$i]));
+			//$bar_2->links[]= site_url("/compras/proveedores/mensuales/${anio}/".raencode($proveed[$i]));
 			$bar_3->links[]= site_url("/compras/proveedores/mensuales/${anio}/".raencode($proveed[$i]));
 		}
 
@@ -316,8 +316,8 @@ class Proveedores extends Controller {
 		$g->set_is_decimal_separator_comma(1);
 		if($maxval>0){
 			$g->title('Los 10 proveedores a los que mas se le a comprado en el a&ntilde;o '.$anio,'{font-size: 16px; color:#0F3054}' );
-			$g->data_sets[] = $bar_1;
-			$g->data_sets[] = $bar_2;
+			//$g->data_sets[] = $bar_1;
+			//$g->data_sets[] = $bar_2;
 			$g->data_sets[] = $bar_3;
 
 			$g->set_x_labels($nombre);
@@ -368,24 +368,24 @@ class Proveedores extends Controller {
 			$nmes[]  =$this->lang->line('cal_'.strtolower($row->mes));
 			$mmes[]  =$row->mmes;
 			$nombre  =$row->nombre;
-			$data_1[]=$row->contado;
-			$data_2[]=$row->credito;
+			//$data_1[]=$row->contado;
+			//$data_2[]=$row->credito;
 			$data_3[]=$row->grantotal;
 		}
 
 		$om=1;while($maxval/$om>100) $om=$om*10;
 
-		$bar_1 = new bar(75, '#0053A4');
-		$bar_2 = new bar(75, '#9933CC');
+		//$bar_1 = new bar(75, '#0053A4');
+		//$bar_2 = new bar(75, '#9933CC');
 		$bar_3 = new bar(75, '#639F45');
 
-		$bar_1->key('Contado',10);
-		$bar_2->key('Credito',10);
-		$bar_3->key('Total'  ,10);
+		//$bar_1->key('Contado',10);
+		//$bar_2->key('Credito',10);
+		$bar_3->key('Total Bs.'  ,10);
 
-		for($i=0;$i<count($data_1);$i++ ){
-			$bar_1->add_data_tip($data_1[$i]/$om, graph::esc( number_format($data_1[$i],2,',','.')));
-			$bar_2->add_data_tip($data_2[$i]/$om, graph::esc( number_format($data_2[$i],2,',','.')));
+		for($i=0;$i<count($data_3);$i++ ){
+			//$bar_1->add_data_tip($data_1[$i]/$om, graph::esc( number_format($data_1[$i],2,',','.')));
+			//$bar_2->add_data_tip($data_2[$i]/$om, graph::esc( number_format($data_2[$i],2,',','.')));
 			$bar_3->add_data_tip($data_3[$i]/$om, graph::esc( number_format($data_3[$i],2,',','.')));
 
 			$mes=$mmes[$i];
@@ -398,8 +398,8 @@ class Proveedores extends Controller {
 		$g->set_is_decimal_separator_comma(1);
 		if($maxval>0){
 			$g->title( 'Compras a '.$nombre.' en el a&ntilde;o '.$anio,'{font-size: 16px; color:#0F3054}' );
-			$g->data_sets[] = $bar_1;
-			$g->data_sets[] = $bar_2;
+			//$g->data_sets[] = $bar_1;
+			//$g->data_sets[] = $bar_2;
 			$g->data_sets[] = $bar_3;
 
 			$g->set_x_labels($nmes);
@@ -450,24 +450,24 @@ class Proveedores extends Controller {
 			if ($row->grantotal>$maxval) $maxval=$row->grantotal;
 			$fecha[]=$row->dia;
 			$nombre=$row->nombre;
-			$data_1[]=$row->contado;
-			$data_2[]=$row->credito;
+			//$data_1[]=$row->contado;
+			//$data_2[]=$row->credito;
 			$data_3[]=$row->grantotal;
 		}
 
 		$om=1;while($maxval/$om>100) $om=$om*10;
 
-		$bar_1 = new bar(75, '#0053A4');
-		$bar_2 = new bar(75, '#9933CC');
+		//$bar_1 = new bar(75, '#0053A4');
+		//$bar_2 = new bar(75, '#9933CC');
 		$bar_3 = new bar(75, '#639F45');
 
-		$bar_1->key('Contado',10);
-		$bar_2->key('Credito',10);
-		$bar_3->key('Total'  ,10);
+		//$bar_1->key('Contado',10);
+		//$bar_2->key('Credito',10);
+		$bar_3->key('Total Bs.'  ,10);
 
-		for($i=0;$i<count($data_1);$i++ ){
-			$bar_1->add_data_tip($data_1[$i]/$om, graph::esc( number_format($data_1[$i],2,',','.')));
-			$bar_2->add_data_tip($data_2[$i]/$om, graph::esc( number_format($data_2[$i],2,',','.')));
+		for($i=0;$i<count($data_3);$i++ ){
+			//$bar_1->add_data_tip($data_1[$i]/$om, graph::esc( number_format($data_1[$i],2,',','.')));
+			//$bar_2->add_data_tip($data_2[$i]/$om, graph::esc( number_format($data_2[$i],2,',','.')));
 			$bar_3->add_data_tip($data_3[$i]/$om, graph::esc( number_format($data_3[$i],2,',','.')));
 		}
 
@@ -475,8 +475,8 @@ class Proveedores extends Controller {
 		$g->set_is_decimal_separator_comma(1);
 		if($maxval>0){
 			$g->title( 'Compras a '.$nombre.'  en el mes '.$mes.'/'.$anio,'{font-size: 16px; color:##00264A}' );
-			$g->data_sets[] = $bar_1;
-			$g->data_sets[] = $bar_2;
+			//$g->data_sets[] = $bar_1;
+			//$g->data_sets[] = $bar_2;
 			$g->data_sets[] = $bar_3;
 
 			$g->set_x_labels($fecha);
