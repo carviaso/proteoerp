@@ -640,9 +640,10 @@ class Usuarios extends Controller {
 	//
 	function accesos($usr){
 		$this->rapyd->load('datagrid2');
+		$dbusr = $this->db->escape($usr);
 		$mSQL="SELECT a.modulo,a.titulo, IFNULL(b.acceso,'N') AS acceso,a.panel,MID(a.modulo,1,1) AS pertenece
 			FROM intramenu AS a
-			LEFT JOIN intrasida AS b ON a.modulo=b.modulo AND b.usuario='$usr'
+			LEFT JOIN intrasida AS b ON a.modulo=b.modulo AND b.usuario=${dbusr}
 			WHERE MID(a.modulo,1,1)!=0 ORDER BY MID(a.modulo,1,1), a.panel,a.modulo";
 		$select=array('a.modulo','a.titulo', "IFNULL(b.acceso,'N') AS acceso",'a.panel',"MID(a.modulo,1,1) AS pertenece");
 
@@ -658,9 +659,9 @@ class Usuarios extends Controller {
 
 			elseif( strlen($row->modulo)==3 ) {
 				if ($panel <> $row->panel ) {
-				    $tabla .= '<tr><td colspan=2 bgcolor="#CCDDCC">'.$row->panel.'</td></tr>';
-				    $panel = $row->panel ;
-				};
+					$tabla .= '<tr><td colspan=2 bgcolor="#CCDDCC">'.$row->panel.'</td></tr>';
+					$panel = $row->panel ;
+				}
 
 				$tabla .= '<tr><td>'.$row->titulo.'</td><td>'.form_checkbox('accesos['.$i.']',$row->modulo,$row->acceso).'</td></tr>';
 				$i++;
@@ -709,21 +710,21 @@ class Usuarios extends Controller {
 		$dbcodigo=$this->db->escape($codigo);
 		$mSQL="DELETE FROM intrasida WHERE usuario=${dbcodigo}";
 		$this->db->query($mSQL);
-		logusu('USUARIOS',"BORRADO EL USUARIO ${codigo}");
+		logusu('usuarios',"BORRADO EL USUARIO ${codigo}");
 		return true;
 	}
 
 	function _pos_insert($do){
 		$codigo=$do->get('us_codigo');
 		$superv=$do->get('supervisor');
-		logusu('USUARIOS',"CREADO EL USUARIO ".$this->db->escape($codigo).", SUPERVISOR '$superv'");
+		logusu('usuarios',"CREADO EL USUARIO ".$this->db->escape($codigo).", SUPERVISOR '$superv'");
 		return true;
 	}
 
 	function _pos_update($do){
 		$codigo=$do->get('us_codigo');
 		$superv=$do->get('supervisor');
-		logusu('USUARIOS',"MODIFICADO EL USUARIO ".$this->db->escape($codigo).", SUPERVISOR $superv");
+		logusu('usuarios',"MODIFICADO EL USUARIO ".$this->db->escape($codigo).", SUPERVISOR $superv");
 		return true;
 	}
 
@@ -777,7 +778,7 @@ class Usuarios extends Controller {
 					}else{
 						$ban=$this->db->simple_query("UPDATE usuario SET us_clave=${clave} WHERE id=${id}");
 						if($ban){
-							logusu('usuario',"CAMBIO LA CLAVE DEL USUARIO ${codigo}");
+							logusu('usuarios',"CAMBIO LA CLAVE DEL USUARIO ${codigo}");
 							$rt['status']= 'A';
 							$rt['msj']   = 'Clave cambiada';
 						}else{
@@ -841,9 +842,9 @@ class Usuarios extends Controller {
 				$clave = $this->db->escape($us_clave);
 				$codigo = $this->datasis->dameval("SELECT us_codigo FROM usuario WHERE id=${id}");
 				$this->db->query("UPDATE usuario SET us_clave=${clave} WHERE id=${id}");
-				logusu('USUARIOS',"El Usuario (${codigo}) cambio su clave");
-			} else $msg = 'Calves no coinciden!!!';
-		} else $msg = 'Calve actual incorrecta!!!';
+				logusu('usuarios',"El Usuario (${codigo}) cambio su clave");
+			} else $msg = 'Claves no coinciden!!!';
+		} else $msg = 'Clave actual incorrecta!!!';
 		echo $msg;
 	}
 
