@@ -279,14 +279,14 @@ class Proveedores extends Controller {
 		WHERE tipo_doc<>'NE' AND fecha>=${dbfechai} AND fecha<=${dbfechaf}
 			AND actuali >= fecha
 		GROUP BY proveed ORDER BY grantotal DESC LIMIT 10";
-		echo $mSQL;
+		//echo $mSQL;
 
 		$maxval=0;
 		$query = $this->db->query($mSQL);
 		foreach($query->result() as $row ){
 			if ($row->grantotal>$maxval) $maxval=$row->grantotal;
 			$proveed[]=$row->proveed;
-			$nombre[]=$row->nombre;
+			$nombre[] =str_replace('&','',$row->nombre);
 			//$data_1[]=$row->contado;
 			//$data_2[]=$row->credito;
 			$data_3[]=$row->grantotal;
@@ -315,7 +315,7 @@ class Proveedores extends Controller {
 		$g = new graph();
 		$g->set_is_decimal_separator_comma(1);
 		if($maxval>0){
-			$g->title('Los 10 proveedores a los que mas se le a comprado en el a&ntilde;o '.$anio,'{font-size: 16px; color:#0F3054}' );
+			$g->title('Los 10 proveedores a los que mas se le a comprado en el '.$anio,'{font-size: 16px; color:#0F3054}' );
 			//$g->data_sets[] = $bar_1;
 			//$g->data_sets[] = $bar_2;
 			$g->data_sets[] = $bar_3;
@@ -367,7 +367,7 @@ class Proveedores extends Controller {
 		foreach($query->result() as $row ){ if ($row->grantotal>$maxval) $maxval=$row->grantotal;
 			$nmes[]  =$this->lang->line('cal_'.strtolower($row->mes));
 			$mmes[]  =$row->mmes;
-			$nombre  =$row->nombre;
+			$nombre  =str_replace('&','',$row->nombre);
 			//$data_1[]=$row->contado;
 			//$data_2[]=$row->credito;
 			$data_3[]=$row->grantotal;
@@ -389,8 +389,8 @@ class Proveedores extends Controller {
 			$bar_3->add_data_tip($data_3[$i]/$om, graph::esc( number_format($data_3[$i],2,',','.')));
 
 			$mes=$mmes[$i];
-			$bar_1->links[]= site_url("/compras/proveedores/diarias/${anio}/".raencode($proveed)."/${mes}");
-			$bar_2->links[]= site_url("/compras/proveedores/diarias/${anio}/".raencode($proveed)."/${mes}");
+			//$bar_1->links[]= site_url("/compras/proveedores/diarias/${anio}/".raencode($proveed)."/${mes}");
+			//$bar_2->links[]= site_url("/compras/proveedores/diarias/${anio}/".raencode($proveed)."/${mes}");
 			$bar_3->links[]= site_url("/compras/proveedores/diarias/${anio}/".raencode($proveed)."/${mes}");
 		}
 
@@ -449,7 +449,7 @@ class Proveedores extends Controller {
 		foreach($query->result() as $row ){
 			if ($row->grantotal>$maxval) $maxval=$row->grantotal;
 			$fecha[]=$row->dia;
-			$nombre=$row->nombre;
+			$nombre =str_replace('&','',$row->nombre);;
 			//$data_1[]=$row->contado;
 			//$data_2[]=$row->credito;
 			$data_3[]=$row->grantotal;
