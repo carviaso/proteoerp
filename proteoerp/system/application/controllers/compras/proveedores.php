@@ -315,7 +315,7 @@ class Proveedores extends Controller {
 		$g = new graph();
 		$g->set_is_decimal_separator_comma(1);
 		if($maxval>0){
-			$g->title('Los 10 proveedores a los que mas se le a comprado en el '.$anio,'{font-size: 16px; color:#0F3054}' );
+			$g->title('Los 10 mejores proveedores del '.$anio,'{font-size: 16px; color:#0F3054}' );
 			//$g->data_sets[] = $bar_1;
 			//$g->data_sets[] = $bar_2;
 			$g->data_sets[] = $bar_3;
