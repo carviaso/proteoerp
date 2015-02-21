@@ -1386,7 +1386,7 @@ class Datasis {
 				$m = 0;
 				foreach($titulos as $tt) {
 
-					$Tempo .= ", $tt:'".$valores[$m]."'";
+					$Tempo .= ", ${tt}:'".addslashes($valores[$md])."'";
 					$m++;
 				}
 				$Tempo .= " },\n";

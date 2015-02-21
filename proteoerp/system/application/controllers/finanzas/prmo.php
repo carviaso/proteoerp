@@ -769,7 +769,7 @@ class Prmo extends Controller {
 			//	logusu('PRMO',"Grupo de Cliente  ".$nuevo." MODIFICADO");
 			//	echo "$mcodp Modificado";
 			//}
-			echo "Deshabilitado";
+			echo 'Deshabilitado';
 		} elseif($oper == 'del') {
 			echo 'Deshabilitado';
 		}
@@ -1196,7 +1196,7 @@ class Prmo extends Controller {
 		$edit->codban = new dropdownField('Banco','codban');
 		$edit->codban->option('','Seleccionar');
 		$edit->codban->options("SELECT codbanc, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE activo='S' AND codbanc>'00' AND tbanco!='CAJ' ORDER BY codbanc");
-		$edit->codban->style = "width:210px;";
+		$edit->codban->style = 'width:210px;';
 
 
 		$this->dataedit($edit);
@@ -1539,12 +1539,12 @@ class Prmo extends Controller {
 	function _pre_delete($do){
 		$transac   = $do->get('transac');
 		$transacdb = $this->db->escape($transac);
-		
+
 		$reg = $this->datasis->damereg("SELECT * FROM prmo WHERE transac=${transacdb}");
-		
+
 		$codban    = $reg['codban'];
 		$codbancdb = $this->db->escape($codban);
-		
+
 		$fecha     = $reg['fecha'];
 		$tipo      = $reg['fecha'];
 
@@ -1572,7 +1572,7 @@ class Prmo extends Controller {
 			$this->datasis->actusal($codban, $reg['fecha'], $reg['monto'] );
 		else
 			$this->datasis->actusal($codban, $reg['fecha'], -1*$reg['monto'] );
-		
+
 		$mSQL = "DELETE FROM bmov WHERE transac=${transacdb}";
 		$this->db->query($mSQL);
 

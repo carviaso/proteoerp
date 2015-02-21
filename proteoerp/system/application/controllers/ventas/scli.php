@@ -1236,29 +1236,45 @@ class Scli extends validaciones {
 	//******************************************************************
 	//  Suma a las rutas
 	//
-	function rutasuma() {
+	function rutasuma(){
 		$salida = 'Guardado';
-		$id   = $this->uri->segment($this->uri->total_segments()-2);
-		$ruta = $this->uri->segment($this->uri->total_segments()-1);
-		$dia  = $this->uri->segment($this->uri->total_segments());
-
+		$id     = $this->uri->segment($this->uri->total_segments()-2);
+		$ruta   = $this->uri->segment($this->uri->total_segments()-1);
+		$dia    = $this->uri->segment($this->uri->total_segments());
 		$dbid   = $this->db->escape($id);
 		$dbruta = $this->db->escape($ruta);
 		$dbdia  = $this->db->escape($dia);
-		
+
 		// Comprueba si existe el cliente
-		$mSQL = "SELECT COUNT(*) FROM scli WHERE id=${dbid}";
-		$rcli = $this->datasis->dameval($mSQL);
+		$mSQL = "SELECT COUNT(*) AS cana FROM scli WHERE id=${dbid}";
+		$rcli = intval($this->datasis->dameval($mSQL));
 		// Comprueba si existe la Ruta
-		$mSQL = "SELECT COUNT(*) FROM sclirut WHERE ruta=${dbruta}";
-		$resta = $this->datasis->dameval($mSQL);
-		if ( $resta == 1 && $rcli == 1){
-			$mSQL = "SELECT cliente FROM scli WHERE id=${dbid}";
-			$cliente = $this->datasis->dameval($mSQL);
+		$vend = $this->datasis->dameval("SELECT TRIM(vende) AS vende FROM sclirut WHERE ruta=${dbruta}");
+		if(!empty($vend)){
+			$resta = 1;
+		}else{
+			$resta = 0;
+		}
+		if($resta == 1 && $rcli == 1){
+			$mSQL      = "SELECT cliente FROM scli WHERE id=${dbid}";
+			$cliente   = $this->datasis->dameval($mSQL);
 			$dbcliente = $this->db->escape($cliente);
-			$mSQL = "INSERT IGNORE INTO sclitrut (cliente, ruta, dia) VALUES ( ${dbcliente}, ${dbruta}, ${dbdia} ) ";
-			$this->db->query($mSQL);
-		} else $salida = 'Error en los datos ';
+			$mSQL="SELECT b.vende,a.ruta FROM sclitrut AS a JOIN sclirut AS b ON a.ruta=b.ruta WHERE a.cliente=${dbcliente} AND b.ruta<>${dbruta}";
+			$query = $this->db->query($mSQL);
+			$cherr=false;
+			foreach($query->result() as $row){
+				if($row->vende==$vend){
+					$cherr  = true;
+					$salida = 'El cliente ya pertenece a la ruta '.$row->ruta.' asignada al vendedor '.$vend;
+				}
+			}
+			if(!$cherr){
+				$mSQL = "INSERT IGNORE INTO sclitrut (cliente, ruta, dia) VALUES ( ${dbcliente}, ${dbruta}, ${dbdia} ) ";
+				$this->db->query($mSQL);
+			}
+		}else{
+			$salida = 'Error en los datos ';
+		}
 		echo $salida;
 	}
 
@@ -1272,18 +1288,20 @@ class Scli extends validaciones {
 		$dbid   = $this->db->escape($id);
 		$dbruta = $this->db->escape($ruta);
 		// Comprueba si existe el cliente
-		$mSQL = "SELECT COUNT(*) FROM scli WHERE id=${dbid}";
-		$rcli = $this->datasis->dameval($mSQL);
+		$mSQL = "SELECT COUNT(*) AS cana FROM scli WHERE id=${dbid}";
+		$rcli = intval($this->datasis->dameval($mSQL));
 		// Comprueba si existe la Ruta
-		$mSQL = "SELECT COUNT(*) FROM sclirut WHERE ruta=${dbruta}";
-		$resta = $this->datasis->dameval($mSQL);
-		if ( $resta == 1 && $rcli == 1){
+		$mSQL = "SELECT COUNT(*) AS cana FROM sclirut WHERE ruta=${dbruta}";
+		$resta = intval($this->datasis->dameval($mSQL));
+		if($resta == 1 && $rcli == 1){
 			$mSQL = "SELECT cliente FROM scli WHERE id=${dbid}";
 			$cliente = $this->datasis->dameval($mSQL);
 			$dbcliente = $this->db->escape($cliente);
 			$mSQL = "DELETE FROM sclitrut WHERE cliente=${dbcliente} AND ruta=${dbruta} ";
 			$this->db->query($mSQL);
-		} else $salida = 'Error en los datos ';
+		}else{
+			$salida = 'Error en los datos';
+		}
 		echo $salida;
 	}
 
@@ -1292,20 +1310,26 @@ class Scli extends validaciones {
 	//  Suma a todas las rutas
 	//
 	function rutatodo() {
-		$data = $this->datasis->damesesion();
-		$where = $data['data1'];
-		$ruta = $this->uri->segment($this->uri->total_segments());
-		$dbruta = $this->db->escape($ruta);
-		$salida = 'Guardado';
+		$data   = $this->datasis->damesesion();
+		if(isset($data['data1'])){
+			$where  = $data['data1'];
+			$ruta   = $this->uri->segment($this->uri->total_segments());
+			$dbruta = $this->db->escape($ruta);
+			$salida = 'Guardado';
 
-		// Comprueba si existe la Ruta
-		$mSQL = "SELECT COUNT(*) FROM sclirut WHERE ruta=${dbruta}";
-		$resta = $this->datasis->dameval($mSQL);
+			// Comprueba si existe la Ruta
+			$mSQL  = "SELECT COUNT(*) AS cana FROM sclirut WHERE ruta=${dbruta}";
+			$resta = intval($this->datasis->dameval($mSQL));
 
-		if ( $resta == 1 ){
-			$mSQL = "INSERT IGNORE INTO sclitrut (cliente, ruta) SELECT cliente, ${dbruta} ruta FROM scli ${where} ";
-			$this->db->query($mSQL);
-		} else $salida = 'Error en los datos '.$mSQL;
+			if($resta == 1){
+				$mSQL = "INSERT IGNORE INTO sclitrut (cliente, ruta) SELECT cliente, ${dbruta} ruta FROM scli ${where} ";
+				$this->db->query($mSQL);
+			}else{
+				$salida = 'Error en los datos '.$mSQL;
+			}
+		}else{
+			$salida = 'No hay clientes seleccionados';
+		}
 
 		echo $salida;
 	}
@@ -3020,7 +3044,7 @@ function chrif(rif){
 
 		$nombre = 'verutatab';
 		$mSQL = 'SELECT a.cliente, a.rifci, a.nombre, b.dia , a.id eli, a.id FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta.' ORDER BY b.dia, a.nombre';
-		$columnas = $this->datasis->jqdata($mSQL,"verutatabdat");
+		$columnas = $this->datasis->jqdata($mSQL,'verutatabdat');
 		$colModel = "
 		{name:'cliente', index:'cliente', label:'Cliente', width:50 },
 		{name:'dia',     index:'dia',     label:'Dia',     width:20 },
@@ -3063,24 +3087,20 @@ function chrif(rif){
 ';
 
 		$detalle = '<table width="100%"><tr><td>Lunes</td><td>Martes</td><td>Miercoles</td><td>Jueves</td><td>Viernes</td><td>Total</td></tr><tr>';
-		$total = 0;
-		$mSQL = "SELECT dia, count(*) total FROM sclitrut WHERE ruta='".$ruta."' GROUP BY dia";
-		$query=$this->db->query($mSQL);
+		$total   = 0;
+		$mSQL    = "SELECT dia, COUNT(*) total FROM sclitrut WHERE ruta='".$ruta."' GROUP BY dia";
+		$query   = $this->db->query($mSQL);
 		if($query->num_rows() > 0){
-			foreach($query->result() AS $row){
+			foreach($query->result() as $row){
 				$total = $total+$row->total;
-				$detalle .= "<td>".$row->total."</td>";
+				$detalle .= '<td>'.$row->total.'</td>';
 			}
 		}
 		$detalle .= '<td>'.$total.'</td></tr></table>';
 
-		$Salida .= '
-<div id="resumenruta">'.$detalle.'</div>
-';
+		$Salida .= '<div id="resumenruta">'.$detalle.'</div>';
 		echo $Salida;
-
 	}
-
 
 
 	//******************************************************************
