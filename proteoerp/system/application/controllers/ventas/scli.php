@@ -1321,11 +1321,17 @@ class Scli extends validaciones {
 			$mSQL  = "SELECT COUNT(*) AS cana FROM sclirut WHERE ruta=${dbruta}";
 			$resta = intval($this->datasis->dameval($mSQL));
 
-			if($resta == 1){
-				$mSQL = "INSERT IGNORE INTO sclitrut (cliente, ruta) SELECT cliente, ${dbruta} ruta FROM scli ${where} ";
-				$this->db->query($mSQL);
+			$cana = intval("SELECT COUNT(*) AS cana FROM scli ${where} ");
+
+			if($cana <=100){
+				if($resta == 1){
+					$mSQL = "INSERT IGNORE INTO sclitrut (cliente, ruta) SELECT cliente, ${dbruta} ruta FROM scli ${where} ";
+					$this->db->query($mSQL);
+				}else{
+					$salida = 'Error en los datos '.$mSQL;
+				}
 			}else{
-				$salida = 'Error en los datos '.$mSQL;
+				$salida = 'Demaciados resultados para agregar en una ruta, max 100.';
 			}
 		}else{
 			$salida = 'No hay clientes seleccionados';
