@@ -1105,7 +1105,7 @@ class Invresu extends Controller {
 		';
 		$tipo = $this->datasis->dameval($mSQL);
 		if ( $tipo == 1 ){
-			$this->db->query('CALL sp_invresu('.$mes.',0)');
+			$this->db->query('CALL sp_invresu('.$mes.',1)');
 		} else {
 			// Carga desde costos
 			$mSQL = "
