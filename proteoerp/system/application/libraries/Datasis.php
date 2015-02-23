@@ -893,13 +893,13 @@ class Datasis {
 		foreach( $query->list_fields() as $campo ) {
 			$colu[] = $campo;
 		}
-		if ($query->num_rows() > 0){
+		if($query->num_rows() > 0){
 			foreach ($query->result_array() as $row){
-				$arreglo .= "\"".$row[$colu[0]]."\":\"".utf8_encode(trim($row[$colu[1]]))."\", ";
+				$arreglo .= "\"".addslashes(trim($row[$colu[0]]))."\":\"".addslashes(utf8_encode(trim($row[$colu[1]])))."\", ";
 			}
 		}
 		$query->free_result();
-		$arreglo .= " }";
+		$arreglo .= ' }';
 		return $arreglo;
 	}
 

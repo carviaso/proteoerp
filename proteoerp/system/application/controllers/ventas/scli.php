@@ -326,12 +326,13 @@ class Scli extends validaciones {
 			}
 			if(id){
 				$.prompt("<b>Agregar cliente a Ruta para el Dia: </b> '.$dias.' ",{
-				buttons: { Aceptar: 1, Salir: 0},
-				submit: function(e,v,m,f){
-					if ( v == 1 ){
-						$.post("'.site_url($this->url.'rutasuma').'/"+id+"/"+ruta+"/"+f.fdias,
-						function(data){
-						});
+					buttons: { Aceptar: 1, Salir: 0},
+					submit: function(e,v,m,f){
+						if ( v == 1 ){
+							$.post("'.site_url($this->url.'rutasuma').'/"+id+"/"+ruta+"/"+f.fdias,
+							function(data){
+
+							});
 						}
 					}
 				});
@@ -457,7 +458,7 @@ class Scli extends validaciones {
 			} else {
 				$forma .= "<table align=\'center\' width=\'95%\'>";
 				$forma .= "<tr><td width=\'40%\'>Tiene Credito:</td><td>\"+mcredito+\"</td></tr>";
-				$forma .= "<tr><td>Dias de Credito:</td><td><input class=\'inputnum\' type=\'text\' id=\'formap\' name=\'formap\' value=\'\"+ret.formap+\"\' size=\'3\' style=\'text-align:right;\'></td></tr>";
+				$forma .= "<tr><td>Dias de Cr&eacute;dito:</td><td><input class=\'inputnum\' type=\'text\' id=\'formap\' name=\'formap\' value=\'\"+ret.formap+\"\' size=\'3\' style=\'text-align:right;\'></td></tr>";
 				$forma .= "<tr><td>Monto Limite:</td><td><span  style=\'text-align:right;font-size:130%;\'>\"+ret.limite+\"</td></tr>";
 				$forma .= "<tr><td>Margen de Tolerancia:</td><td><span style=\'text-align:right;font-size:130%;\'>\"+ret.tolera+\"%</td></tr>";
 				$forma .= "<tr><td>Maxima Tolerancia:</td><td><span style=\'text-align:right;font-size:130%;\'>\"+ret.maxtole+\"%</td></tr>";
@@ -1309,7 +1310,7 @@ class Scli extends validaciones {
 	//******************************************************************
 	//  Suma a todas las rutas
 	//
-	function rutatodo() {
+	function rutatodo(){
 		$data   = $this->datasis->damesesion();
 		if(isset($data['data1'])){
 			$where  = $data['data1'];
@@ -1317,11 +1318,10 @@ class Scli extends validaciones {
 			$dbruta = $this->db->escape($ruta);
 			$salida = 'Guardado';
 
-			// Comprueba si existe la Ruta
+			// Comprueba si existe la Ruta y son menos de 100
 			$mSQL  = "SELECT COUNT(*) AS cana FROM sclirut WHERE ruta=${dbruta}";
 			$resta = intval($this->datasis->dameval($mSQL));
-
-			$cana = intval("SELECT COUNT(*) AS cana FROM scli ${where} ");
+			$cana  = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM scli ${where}"));
 
 			if($cana <=100){
 				if($resta == 1){
@@ -1331,7 +1331,7 @@ class Scli extends validaciones {
 					$salida = 'Error en los datos '.$mSQL;
 				}
 			}else{
-				$salida = 'Demaciados resultados para agregar en una ruta, max 100.';
+				$salida = 'Demaciados resultados para agregar en una ruta, max 100. ('.$cana.')';
 			}
 		}else{
 			$salida = 'No hay clientes seleccionados';
@@ -1365,61 +1365,64 @@ class Scli extends validaciones {
 	}
 
 	function _resumen($id){
-		$row = $this->datasis->damereg("SELECT cliente, credito, formap, limite, tolera, maxtole, observa, tipo FROM scli WHERE id=$id");
+		$id  = intval($id);
+		if($id <= 0){return false; }
+		$row = $this->datasis->damereg("SELECT cliente, credito, formap, limite, tolera, maxtole, observa, tipo FROM scli WHERE id=${id}");
 
 		$cod_cli  = $row['cliente'];
-		$credito  = $row['credito'];
+		$credito  = floatval($row['credito']);
 		$formap   = $row['formap'];
-		$limite   = $row['limite'];
-		$tolera   = $row['tolera'];
-		$maxtole  = $row['maxtole'];
+		$limite   = floatval($row['limite']);
+		$tolera   = floatval($row['tolera']);
+		$maxtole  = floatval($row['maxtole']);
 		$observa  = $row['observa'];
 		$tipo     = $row['tipo'];
 
 		$dbcod_cli = $this->db->escape($cod_cli);
 
-		$rutas = $this->datasis->dameval("SELECT GROUP_CONCAT(ruta) AS ruta FROM sclitrut WHERE cliente=${dbcod_cli}");
-
-		if( $credito == 'S')
+		if($credito == 'S'){
 			$mcredito = 'Activo';
-		else
+		}else{
 			$mcredito = 'Suspendido';
+		}
 
-		$saldo  = 0;
-		$saldo  = $this->datasis->dameval("SELECT SUM(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM smov WHERE cod_cli=${dbcod_cli}");
-
-		$pedido = $this->datasis->dameval("SELECT SUM(totalg) saldo FROM pfac WHERE status<>'C' AND cod_cli=${dbcod_cli}");
-
-
+		$saldo  = floatval($this->datasis->dameval("SELECT SUM(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM smov WHERE cod_cli=${dbcod_cli}"));
+		$pedido = floatval($this->datasis->dameval("SELECT SUM(totalg) saldo FROM pfac WHERE status<>'C' AND cod_cli=${dbcod_cli}"));
 		$salida = '';
 
-		if( $rutas )
-			$salida  .= '<table width="100%" cellspacing="0"><tr><td>Rutas: '.$rutas.'</td></tr></table>';
-
+		$rutas = $this->datasis->dameval("SELECT GROUP_CONCAT(ruta) AS ruta FROM sclitrut WHERE cliente=${dbcod_cli}");
+		if(!empty($rutas)){
+			$trut='';
+			$arrutas = explode(',',$rutas);
+			foreach($arrutas as $rut){
+				$trut.='<a href="#" onclick="$(\'#rutactual\').val(\''.addslashes($rut).'\');$(\'#verutas\').click();return false;">'.$rut.'</a> ';
+			}
+			$salida  .= '<table width="100%" cellspacing="0"><tr><td>Rutas: '.$trut.'</td></tr></table>';
+		}
 
 		$salida  .= '<table width="100%" cellspacing="0">';
-		if ( $tipo == '0' )
+		if($tipo == '0'){
 			$salida .= '<tr style="background-color:#AF1001; color:#FFFFFF; font-size:14px;font-weight:bold;"><td colspan="2" align="center">CLIENTE INACTIVO</td></tr>'."\n";
+		}
 
-		if ($tipo == 'S')
-			$salida .= "<tr style='background-color:#AAEEAA;'><td colspan='2' align='center'><b>Credito $mcredito</b></td></tr>\n";
-		else
-			$salida .= "<tr style='background-color:#CCCCBB;'><td colspan='2' align='center'><b>Credito $mcredito</b></td></tr>\n";
+		if($tipo == 'S'){
+			$salida .= "<tr style='background-color:#AAEEAA;'><td colspan='2' align='center'><b>Cr&eacute;dito ${mcredito}</b></td></tr>\n";
+		}else{
+			$salida .= "<tr style='background-color:#CCCCBB;'><td colspan='2' align='center'><b>Cr&eacute;dito ${mcredito}</b></td></tr>\n";
+		}
 
-		$salida .= "<tr style='background-color:#FFFFFF;'><td>Limite            </td><td align='right'>".nformat($limite)."  </td></tr>\n";
-		$salida .= "<tr style='background-color:#EEEEEE;'><td>Tolerancia        </td><td align='right'>$tolera  </td></tr>\n";
-		$salida .= "<tr style='background-color:#FFFFFF;'><td>Maxima Tolerancia </td><td align='right'>$maxtole </td></tr>\n";
+		$salida .= "<tr style='background-color:#FFFFFF;'><td>L&iacute;mite     </td><td align='right'>".nformat($limite)."  </td></tr>\n";
+		$salida .= "<tr style='background-color:#EEEEEE;'><td>Tolerancia        </td><td align='right'>${tolera}%  </td></tr>\n";
+		$salida .= "<tr style='background-color:#FFFFFF;'><td>M&aacute;xima Tolerancia </td><td align='right'>${maxtole}% </td></tr>\n";
 		$salida .= "<tr style='background-color:#EEEEEE;'><td>Saldo Actual      </td><td align='right'>".nformat($saldo)."   </td></tr>\n";
-		$salida .= "<tr style='background-color:#FBEC88;'><td>Credito Disponible</td><td align='right'><b>".nformat($limite-$saldo)."</b></td></tr>\n";
+		$salida .= "<tr style='background-color:#FBEC88;'><td>Cr&eacute;dito Disponible</td><td align='right'><b>".nformat($limite-$saldo)."</b></td></tr>\n";
 		$salida .= "<tr style='background-color:#FFFFFF;'><td>Pedidos           </td><td align='right'>".nformat($pedido)."  </td></tr>\n";
 		$salida .= "<tr style='background-color:#FAA78F;'><td>Saldo - Pedidos   </td><td align='right'>".nformat($limite-$saldo-$pedido)."  </td></tr>\n";
-
-
-
 		$salida .= "</table>\n";
 
-		if ( !empty($observa) )
-			$salida .= "<br><b>Observaciones:</b><textarea cols='28' rows='4' readonly='readonly'>$observa</textarea>\n";
+		if(!empty($observa)){
+			$salida .= "<br><b>Observaciones:</b><textarea cols='28' rows='4' readonly='readonly'>${observa}</textarea>\n";
+		}
 
 		echo $salida;
 	}
@@ -2882,7 +2885,7 @@ function chrif(rif){
 	function rutasform(){
 		$grid  = new $this->jqdatagrid;
 
-		$mSQL = "SELECT vendedor, concat( vendedor, ' ',TRIM(nombre)) nombre FROM vend ORDER BY nombre ";
+		$mSQL = "SELECT TRIM(vendedor) AS vendedor, CONCAT( vendedor, ' ',TRIM(nombre)) nombre FROM vend ORDER BY nombre";
 		$avende  = $this->datasis->llenajqselect($mSQL, true );
 
 		$atipo = '{"A": "Activo", "I": "Inactivo"}';
@@ -2899,7 +2902,7 @@ function chrif(rif){
 		);
 
 		$grid->addField('ruta');
-		$grid->label('Codigo');
+		$grid->label('C&oacute;digo');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'true',
@@ -2917,7 +2920,7 @@ function chrif(rif){
 			'width'         => 60,
 			'edittype'      => "'select'",
 			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ value: '.$avende.',  style:"width:120px"}',
+			'editoptions'   => '{ value: '.$avende.',  style:"width:120px",onchange:"alert(\'Si cambia el vendedor se elminaran los clientes repetidos de otras rutas del mismo vendedor\');"}',
 			'stype'         => "'text'"
 		));
 
@@ -2934,7 +2937,7 @@ function chrif(rif){
 		));
 
 		$grid->addField('descrip');
-		$grid->label('Descrip');
+		$grid->label('Descripci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'true',
@@ -2968,7 +2971,7 @@ function chrif(rif){
 		$("#newapi'.$mgrid['gridname'].'").jqGrid(\'filterToolbar\');
 		';
 
-		$msalida .= "\n</script>\n";
+		$msalida .= '</script>';
 		$msalida .= '<id class="anexos"><table id="newapi'.$mgrid['gridname'].'"></table>';
 		$msalida .= '<div   id="pnewapi'.$mgrid['gridname'].'"></div></div>';
 
@@ -2994,45 +2997,62 @@ function chrif(rif){
 	function setruta(){
 		$this->load->library('jqdatagrid');
 		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
+		$id     = intval($this->input->post('id'));
 		$data   = $_POST;
-		$mcodp  = "ruta";
+		$mcodp  = 'ruta';
 		$check  = 0;
+		if($id<=0){ return false; }
 
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
 			if(false == empty($data)){
-				$check = $this->datasis->dameval("SELECT count(*) FROM sclirut WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-				if ( $check == 0 ){
+				$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sclirut WHERE `${mcodp}`=".$this->db->escape($data[$mcodp])));
+				if($check == 0){
 					$this->db->insert('sclirut', $data);
-					echo "Registro Agregado";
+					echo 'Registro Agregado';
 
-					logusu('SCLIRUT',"Registro ????? INCLUIDO");
-				} else
-					echo "Ya existe un registro con ese $mcodp";
-			} else
-				echo "Fallo Agregado!!!";
-
-		} elseif($oper == 'edit') {
+					logusu('sclirut','Registro '.$data[$mcodp].' INCLUIDO');
+				}else{
+					echo "Ya existe un registro con esa ${mcodp}";
+				}
+			}else{
+				echo 'Fallo Agregado!!!';
+			}
+		}elseif($oper == 'edit'){
 			$nuevo  = $data[$mcodp];
 			unset($data[$mcodp]);
-			$this->db->where("id", $id);
+			$this->db->where('id', $id);
 			$this->db->update('sclirut', $data);
-			logusu('SCLIRUT',"Ruta de Cliente  ".$nuevo." MODIFICADO");
-			echo "$mcodp Modificado";
-
-		} elseif($oper == 'del') {
-			$ruta  = $this->datasis->dameval("SELECT $mcodp FROM sclirut WHERE id=$id");
-			$check = $this->datasis->dameval("SELECT COUNT(*) FROM sclitrut WHERE ruta='$ruta' ");
-			if ($check > 0){
-				echo " El registro no puede ser eliminado; elimine primero los clientes asociados ";
-			} else {
-				$this->db->query("DELETE FROM sclirut WHERE id=$id ");
-				logusu('SCLIRUT',"Ruta $ruta ELIMINADO");
-				echo "Registro Eliminado";
+			$dbnuevo=$this->db->escape($nuevo);
+			$mSQL="SELECT  d.id
+			FROM sclitrut AS a
+			JOIN sclirut  AS b ON a.ruta=b.ruta AND b.ruta=${dbnuevo}
+			JOIN sclirut  AS c ON c.vende=b.vende
+			JOIN sclitrut AS d ON c.ruta=d.ruta AND d.cliente=a.cliente  AND c.ruta!=${dbnuevo}";
+			$query = $this->db->query($mSQL);
+			if ($query->num_rows() > 0){
+				foreach ($query->result() as $row){
+					$sql='DELETE FROM sclitrut WHERE id='.$row->id;
+					$this->db->simple_query($sql);
+				}
 			}
-		};
+
+			logusu('sclirut','Ruta de Cliente  '.$nuevo.' MODIFICADO');
+			echo "${mcodp} Modificada";
+
+		}elseif($oper == 'del'){
+			$ruta  = $this->datasis->dameval("SELECT ${mcodp} FROM sclirut WHERE id=${id}");
+			$dbruta= $this->db->dameval($ruta);
+			$check = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sclitrut WHERE ruta=${dbruta}"));
+			if($check > 0){
+				echo 'El registro no puede ser eliminado; elimine primero los clientes asociados';
+			}else{
+				$this->db->query("DELETE FROM sclirut WHERE id=${id}");
+				logusu('sclirut',"Ruta ${ruta} ELIMINADO");
+				echo 'Registro Eliminado';
+			}
+		}
 	}
 
 	//******************************************************************
@@ -3042,9 +3062,9 @@ function chrif(rif){
 		$ruta = $this->uri->segment($this->uri->total_segments());
 		$dbruta = $this->db->escape($ruta);
 
-		$mSQL = 'SELECT count(*) FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta;
-		if( $this->datasis->dameval($mSQL) == 0 ) {
-			echo '<h1>No hay Clientes asignados a esta ruta...</h1h1>';
+		$mSQL = 'SELECT COUNT(*) AS cana FROM scli a JOIN sclitrut b ON a.cliente=b.cliente WHERE b.ruta='.$dbruta;
+		if( intval($this->datasis->dameval($mSQL)) == 0 ) {
+			echo '<h1>No hay Clientes asignados a esta ruta...</h1>';
 			return;
 		}
 
@@ -3061,50 +3081,68 @@ function chrif(rif){
 
 		$Salida  = '<script>';
 		$Salida .= '
-	$("#'.$nombre.'").jqGrid({
-		datatype: "local",
-		height: 350,
-		colModel:[{name:\'id\',index:\'id\', hidden:true},'.$colModel.'],
-		multiselect: false,
-		shrinkToFit: false,
-		hiddengrid:  false,
-		width: 480,
-		rowNum:'.$columnas['i'].',
-		loadonce: true,
-		viewrecords: true,
-		editurl: ""
-   	});
-	'.$columnas['data'].'
-	for(var i=0;i<='.$nombre."dat".'.length;i++) $("#'.$nombre.'").jqGrid(\'addRowData\',i+1,'.$nombre.'dat[i]);
-	';
+		$("#'.$nombre.'").jqGrid({
+			datatype: "local",
+			height: 350,
+			colModel:[{name:\'id\',index:\'id\', hidden:true},'.$colModel.'],
+			multiselect: false,
+			shrinkToFit: false,
+			hiddengrid:  false,
+			width: 480,
+			rowNum:'.$columnas['i'].',
+			loadonce: true,
+			viewrecords: true,
+			editurl: ""
+		});
+		'.$columnas['data'].'
+		for(var i=0;i<='.$nombre."dat".'.length;i++) $("#'.$nombre.'").jqGrid(\'addRowData\',i+1,'.$nombre.'dat[i]);
+		';
 
-		$Salida .= '
-	function fsele(el, val, opts){
-		var meco=\'<div><a onclick="quitaruta(\\\''.$ruta.'\\\',\'+el+\')">'.img(array('src'=>"images/elimina4.png", 'height'=> 20, 'alt'=>'Elimina el cliente de la ruta', 'title'=>'Elimina el cliente de la ruta', 'border'=>'0')).'</a></div>\';
-		return meco;
-	}
-	function quitaruta(ruta, id){
-		$.post("'.site_url($this->url.'rutaresta').'/"+id+"/"+ruta);
-		//$("#verutatab").jqGrid("delGridRow",id,{reloadAfterSubmit:false});
-	}
-</script>
-<table id="verutatab"></table>
-<div id="pnewapi_21293249"></div>
-';
+			$Salida .= '
+		function fsele(el, val, opts){
+			var meco=\'<div><a onclick="quitaruta(\\\''.$ruta.'\\\',\'+el+\')">'.img(array('src'=>"images/elimina4.png", 'height'=> 20, 'alt'=>'Elimina el cliente de la ruta', 'title'=>'Elimina el cliente de la ruta', 'border'=>'0')).'</a></div>\';
+			return meco;
+		}
+		function quitaruta(ruta, id){
+			$.post("'.site_url($this->url.'rutaresta').'/"+id+"/"+ruta);
+			//$("#verutatab").jqGrid("delGridRow",id,{reloadAfterSubmit:false});
+		}';
+		$Salida .= '</script><table id="verutatab"></table><div id="pnewapi_21293249"></div>';
 
-		$detalle = '<table width="100%"><tr><td>Lunes</td><td>Martes</td><td>Miercoles</td><td>Jueves</td><td>Viernes</td><td>Total</td></tr><tr>';
+		$detalle = '<table width="100%"><tr>
+			<td style="text-align:center;background:#E1F0FE"><b>Domingo</b></td>
+			<td style="text-align:center;background:#E1F0FE">Lunes</td>
+			<td style="text-align:center;background:#E1F0FE">Martes</td>
+			<td style="text-align:center;background:#E1F0FE">Mi&eacute;rcoles</td>
+			<td style="text-align:center;background:#E1F0FE">Jueves</td>
+			<td style="text-align:center;background:#E1F0FE">Viernes</td>
+			<td style="text-align:center;background:#E1F0FE"><b>S&aacute;bado</b></td>
+			<td style="text-align:center;background:#E1F0FE">Total</td>
+		</tr><tr>';
 		$total   = 0;
-		$mSQL    = "SELECT dia, COUNT(*) total FROM sclitrut WHERE ruta='".$ruta."' GROUP BY dia";
+		$mSQL    = "SELECT dia, COUNT(*) AS total FROM sclitrut WHERE ruta=${dbruta} GROUP BY dia";
+		$arrsclis= array();
 		$query   = $this->db->query($mSQL);
 		if($query->num_rows() > 0){
 			foreach($query->result() as $row){
-				$total = $total+$row->total;
-				$detalle .= '<td>'.$row->total.'</td>';
+				$ind      = intval($row->dia);
+				$total    = $total+$row->total;
+				$arrsclis[$ind]=+$row->total;
 			}
 		}
-		$detalle .= '<td>'.$total.'</td></tr></table>';
 
-		$Salida .= '<div id="resumenruta">'.$detalle.'</div>';
+		for($i=1;$i<8;$i++){
+			$detalle .= '<td style="text-align:center">';
+			if(isset($arrsclis[$i])){
+				$detalle .= $arrsclis[$i];
+			}else{
+				$detalle .= '0';
+			}
+			$detalle .= '</td>';
+		}
+
+		$detalle .= '<td style="text-align:center">'.$total.'</td></tr></table>';
+		$Salida  .= '<div id="resumenruta">'.$detalle.'</div>';
 		echo $Salida;
 	}
 
