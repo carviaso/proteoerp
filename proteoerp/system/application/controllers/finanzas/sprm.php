@@ -2980,7 +2980,8 @@ class Sprm extends Controller {
 			$sprm['fecha']      = $fecha;
 			$sprm['monto']      = $reteiva;
 			$sprm['impuesto']   = 0;
-			$sprm['abonos']     = $reteiva;
+			$sprm['abonos']     = 0;
+			//$sprm['abonos']     = $reteiva; //Ver nota de abajo
 			$sprm['vence']      = $fecha;
 			$sprm['tipo_ref']   = $tipo_doc;
 			$sprm['num_ref']    = $mnumero;
@@ -2996,50 +2997,56 @@ class Sprm extends Controller {
 			$ban=$this->db->simple_query($mSQL);
 			if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
 
-			//Abona la Factura
-			$mSQL = 'UPDATE sprm SET abonos=abonos+'.$reteiva.' WHERE cod_prv="'.$cod_prv.'" AND tipo_doc="'.$tipo_doc.'" AND numero="'.$mnumero.'"';
-			$ban=$this->db->simple_query($mSQL);
-			if(!$ban){ memowrite($mSQL,'scst'); $error++;}
 
-			$cana = $do->count_rel($rel);
-			for($i = 0;$i < $cana;$i++){
-				$itabono  = floatval($do->get_rel($rel, 'abono'   , $i));
-				$ittipo   = $do->get_rel($rel, 'tipo_doc', $i);
-				$itnumero = $do->get_rel($rel, 'numero'  , $i);
-				$itfecha  = $do->get_rel($rel, 'fecha'   , $i);
-				$abono    = $do->get_rel($rel, 'reteiva'   , $i);
+			//**************************************************
+			// Nota, esto provoca que la NC quede sobreabonada
+			// y no se tiene claro a que facturas afectada
+			// se les va a rebajar la retencion en caso de ser varias
 
-				//$itpppago = $do->get_rel($rel, 'ppago'   , $i);
+			////Abona la Factura
+			//$mSQL = 'UPDATE sprm SET abonos=abonos+'.$reteiva.' WHERE cod_prv="'.$cod_prv.'" AND tipo_doc="'.$tipo_doc.'" AND numero="'.$mnumero.'"';
+			//$ban=$this->db->simple_query($mSQL);
+			//if(!$ban){ memowrite($mSQL,'scst'); $error++;}
+            //
+			//$cana = $do->count_rel($rel);
+			//for($i = 0;$i < $cana;$i++){
+			//	$itabono  = floatval($do->get_rel($rel, 'abono'   , $i));
+			//	$ittipo   = $do->get_rel($rel, 'tipo_doc', $i);
+			//	$itnumero = $do->get_rel($rel, 'numero'  , $i);
+			//	$itfecha  = $do->get_rel($rel, 'fecha'   , $i);
+			//	$abono    = $do->get_rel($rel, 'reteiva'   , $i);
+            //
+			//	//$itpppago = $do->get_rel($rel, 'ppago'   , $i);
+            //
+			//	$dbittipo   = $this->db->escape($ittipo  );
+			//	$dbitnumero = $this->db->escape($itnumero);
+			//	$dbitfecha  = $this->db->escape($itfecha );
+            //
+			//	$sprm=array();
+			//	$sprm['numppro']    = $mnumnd;
+			//	$sprm['tipoppro']   = 'ND';
+			//	$sprm['cod_prv']    = $cod_prv;
+			//	$sprm['tipo_doc']   = $ittipo;
+			//	$sprm['numero']     = $itnumero;
+			//	$sprm['fecha']      = $fecha;
+			//	$sprm['monto']      = $reteiva;
+			//	$sprm['abono']      = $abono;
+            //
+			//	$sprm['estampa']    = $estampa;
+			//	$sprm['hora']       = $hora;
+			//	$sprm['transac']    = $transac;
+			//	$sprm['usuario']    = $usuario;
+			//	$mSQL = $this->db->insert_string('itppro', $sprm);
+            //
+			//	$ban=$this->db->query($mSQL);
+			//	if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
+            //
+			//	//$mSQL = "UPDATE sprm SET abonos=abonos+${itabono}, preabono=0, preppago=0
+			//	//WHERE tipo_doc=${dbittipo} AND numero=${dbitnumero} AND cod_prv=${dbcod_prv}";
+			//	//$this->db->query($mSQL);
+			//}
 
-				$dbittipo   = $this->db->escape($ittipo  );
-				$dbitnumero = $this->db->escape($itnumero);
-				$dbitfecha  = $this->db->escape($itfecha );
-
-				$sprm=array();
-				$sprm['numppro']    = $mnumnd;
-				$sprm['tipoppro']   = 'ND';
-				$sprm['cod_prv']    = $cod_prv;
-				$sprm['tipo_doc']   = $ittipo;
-				$sprm['numero']     = $itnumero;
-				$sprm['fecha']      = $fecha;
-				$sprm['monto']      = $reteiva;
-				$sprm['abono']      = $abono;
-
-				$sprm['estampa']    = $estampa;
-				$sprm['hora']       = $hora;
-				$sprm['transac']    = $transac;
-				$sprm['usuario']    = $usuario;
-				$mSQL = $this->db->insert_string('itppro', $sprm);
-
-				$ban=$this->db->query($mSQL);
-				if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
-
-				//$mSQL = "UPDATE sprm SET abonos=abonos+${itabono}, preabono=0, preppago=0
-				//WHERE tipo_doc=${dbittipo} AND numero=${dbitnumero} AND cod_prv=${dbcod_prv}";
-				//$this->db->query($mSQL);
-		}
-
-/*
+			/*
 			$sprm=array();
 			$sprm['numppro']    = $mnumnd;
 			$sprm['tipoppro']   = 'ND';
@@ -3058,7 +3065,7 @@ class Sprm extends Controller {
 
 			$ban=$this->db->query($mSQL);
 			if(!$ban){ memowrite($mSQL,'sprm'); $error++; }
-*/
+			*/
 
 
 			//Crea la nota de credito
