@@ -90,14 +90,10 @@ class Configurar extends Controller {
 		$formato    = trim($this->datasis->formato_cpla());
 		$arr_formato= explode(',',$formato);
 
-
-
 		$mSQL="SELECT codigo FROM cpla ORDER BY codigo";
 		foreach ($query->result() as $row){
 			echo $row->codigo;
 		}
-
-
 	}
 
 	function _post_insert($do){

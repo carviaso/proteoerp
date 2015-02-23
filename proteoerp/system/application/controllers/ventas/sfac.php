@@ -4278,9 +4278,11 @@ class Sfac extends Controller {
 
 		$mSQL ="SELECT abonos FROM smov WHERE numero=${dbnumero} AND fecha=${dbfecha} AND transac=${dbtransac}";
 		$abono=floatval($this->datasis->dameval($mSQL));
-		if($abono-$inicial>0){
-			$do->error_message_ar['pre_del']='No se puede anular el documento por tener abonos.';
-			return false;
+		if( $abono-$inicial > 0 ){
+			if( $tipo_doc=='F' ){
+				$do->error_message_ar['pre_del']='No se puede anular el documento por tener abonos. (1)';
+				return false;
+			}
 		}
 
 		if($fecha != $hoy){
@@ -4290,8 +4292,10 @@ class Sfac extends Controller {
 					return false;
 				}
 			}elseif($inicial>0 || $abono>0){
-				$do->error_message_ar['pre_del']='No se puede anular el documento por tener abonos.';
-				return false;
+				if( $tipo_doc=='F' ){
+					$do->error_message_ar['pre_del']='No se puede anular el documento por tener abonos. (2)';
+					return false;
+				}
 			}
 		}
 

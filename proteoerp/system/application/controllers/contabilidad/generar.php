@@ -23,7 +23,6 @@ class Generar extends Metodos {
 		$control=$this->uri->segment(4);
 		$checkbox =  '<input type="checkbox" name="genera[]" value="<#modulo#>" CHECKED>';
 
-		//$seltodos='<a id="todos" href=# >Todos</a> <a id="nada" href=# >Ninguno</a> <a id="alter" href=# >Invertir</a>';
 		$grid = new DataGrid('Seleccione los m&oacute;dulos que desea generar ');
 		$grid->db->select('modulo, descripcion');
 		$grid->db->from('`reglascont`');
@@ -37,12 +36,15 @@ class Generar extends Metodos {
 
 		$form = new DataForm('contabilidad/generar/procesar');
 		$form->title('Rango de fecha para la Generaci&oacute;n');
+
 		$form->fechai = new dateonlyField("Fecha Desde", "fechai","d/m/Y");
 		$form->fechaf = new dateonlyField("Fecha Hasta", "fechaf","d/m/Y");
+
 		$form->fechaf->size = $form->fechai->size=10;
 
 		$form->fechai->insertValue =($this->input->post('fechai') ? $this->input->post('fechai') : date("Ymd"));
 		$form->fechaf->insertValue =($this->input->post('fechaf') ? $this->input->post('fechaf') : date("Ymd"));
+
 		$form->tabla= new containerField('tabla',$grid->output);
 		if ($control) $form->control= new containerField('control','Contabilidad Generada');
 		//$form->submit("btn_submit","Generar Depurado");
@@ -65,10 +67,10 @@ class Generar extends Metodos {
 			new Effect.toggle('preloader', 'appear');
 			new Effect.Opacity('contenido', {duration:0.5, from:1.0, to:0.3});
 			new Ajax.Request('".site_url('contabilidad/generar/procesar')."',{
-			 method: 'post',
-			 parameters : Form.serialize('df1'),
-			 onSuccess:handlerFunc,
-			 onFailure:errFunc});
+			method: 'post',
+			parameters : Form.serialize('df1'),
+			onSuccess:handlerFunc,
+			onFailure:errFunc});
 		}
 		</script>";
 
@@ -78,7 +80,10 @@ class Generar extends Metodos {
 			</center>
 		</div>";
 		$data['content'] = $form->output."<input type=button value='Generar' onclick='generar()'>";
-		$data["head"]    = $this->rapyd->get_head().script("prototype.js").script("scriptaculous.js").script("effects.js");
+		$data["head"]    = $this->rapyd->get_head();
+		$data["head"]   .= script("prototype.js");
+		$data["head"]   .= script("scriptaculous.js");
+		$data["head"]   .= script("effects.js");
 		$data['title']   ="<h1>Generar Contabilidad</h1>";
 		$this->load->view('view_ventanas', $data);
 	}
@@ -90,12 +95,20 @@ class Generar extends Metodos {
 		$fechai=$this->input->post('fechai');
 		$fechaf=$this->input->post('fechaf');
 
+		$fechamin = $this->datasis->dameval('SELECT inicio FROM cemp LIMIT 1');
+
+		if ( $fechamin > substr(human_to_dbdate($fechai),0,10) ){
+			echo 'Error: Fecha inicial menor a la permitida '.substr(human_to_dbdate($fechai),0,10); 
+			return false;
+		}
+
 		$ban=0;
 		$ban+=$this->validation->chfecha($fechai);
 		$ban+=$this->validation->chfecha($fechaf);
 
 		if($ban!=2) {echo 'Error: Fechas erroneas'; return false;}
 		session_write_close();
+
 		$qfechai=date("Ymd",timestampFromInputDate($fechai, 'd/m/Y'));
 		$qfechaf=date("Ymd",timestampFromInputDate($fechaf, 'd/m/Y'));
 		$generar=$this->input->post('genera');
