@@ -140,7 +140,7 @@ class Sfacfiscal extends Controller{
 		$filter->buttons('reset','search');
 		$filter->build();
 
-		if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
+		if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 			$fecha=$filter->fecha->newValue;
 
 			$fields = $this->db->field_data('sfac');
@@ -227,7 +227,7 @@ class Sfacfiscal extends Controller{
 
 	function traereferen(){
 		$numero=$this->db->escape($this->input->post('referen'));
-		$query = $this->db->query("SELECT fecha,cajero FROM sfac WHERE numero=$numero AND tipo_doc='F'");
+		$query = $this->db->query("SELECT fecha,cajero FROM sfac WHERE numero=${numero} AND tipo_doc='F'");
 		if ($query->num_rows() > 0){
 			$row = $query->row();
 			echo 'Fecha: '.dbdate_to_human($row->fecha).' Cajero: "'.$row->cajero.'"';
@@ -280,7 +280,7 @@ class Sfacfiscal extends Controller{
 		$nnumero=ltrim($numero,'0');
 		$wwhere="`fecha` = $fecha AND `cajero` = $cajero AND `tipo_doc`= 'F'";
 		if($nulos=='s') $wwhere.=' AND maqfiscal IS NOT NULL';
-		$mSQL="SELECT TRIM(nfiscal) AS nfiscal,tipo_doc,numero FROM (`sfac`) WHERE $wwhere ORDER BY `numero`";
+		$mSQL="SELECT TRIM(nfiscal) AS nfiscal,tipo_doc,numero FROM (`sfac`) WHERE ${wwhere} ORDER BY `numero`";
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$c=false;
