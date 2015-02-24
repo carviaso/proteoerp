@@ -9,7 +9,7 @@ class Sfacfiscal extends Controller{
 	function index(){
 		$this->rapyd->load('datafilter','datagrid');
 
-		$link=site_url('supervisor/sfacfiscal/arreglaserial');
+		$link =site_url('supervisor/sfacfiscal/arreglaserial');
 		$linkd=site_url('supervisor/sfacfiscal/arreglaserialdev');
 		$link2=site_url('supervisor/sfacfiscal/arreglanfiscal');
 		$link4=site_url('supervisor/sfacfiscal/arreglanfiscaldev');
@@ -123,7 +123,7 @@ class Sfacfiscal extends Controller{
 
 		$filter->usuario = new dropdownField('Usuario', 'usuario');
 		$filter->usuario->option('','Todos');
-		$filter->usuario->options('SELECT us_codigo,us_codigo FROM usuario ORDER BY us_codigo');
+		$filter->usuario->options('SELECT us_codigo AS cod,us_codigo FROM usuario ORDER BY us_codigo');
 
 		$filter->tipo_doc = new dropdownField('Tipo Doc.', 'tipo_doc');
 		$filter->tipo_doc->option('F','Facturas');
@@ -267,7 +267,7 @@ class Sfacfiscal extends Controller{
 		$numero=$this->input->post('numero');
 		$nulos =$this->input->post('nulos');
 
-		if($cajero===false or $fecha===false or $numero===false) {
+		if($cajero===false || $fecha===false || $numero===false) {
 			echo 'Error en los parametros';
 			return false;
 		}
@@ -278,7 +278,7 @@ class Sfacfiscal extends Controller{
 		$numero=trim($numero);
 
 		$nnumero=ltrim($numero,'0');
-		$wwhere="`fecha` = $fecha AND `cajero` = $cajero AND `tipo_doc`= 'F'";
+		$wwhere="`fecha` = ${fecha} AND `cajero` = ${cajero} AND `tipo_doc`= 'F'";
 		if($nulos=='s') $wwhere.=' AND maqfiscal IS NOT NULL';
 		$mSQL="SELECT TRIM(nfiscal) AS nfiscal,tipo_doc,numero FROM (`sfac`) WHERE ${wwhere} ORDER BY `numero`";
 		$query = $this->db->query($mSQL);
