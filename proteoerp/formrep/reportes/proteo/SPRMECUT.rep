@@ -1,0 +1,98 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$modbus=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código Proveedor',
+		'nombre'=>'Nombre',
+		'rif'=>'RIF'),
+	'filtro'  =>array('proveed'=>'Código Proveedor','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'cod_prv'),
+	'titulo'  =>'Buscar Proveedor');
+
+$boton=$this->datasis->modbus($modbus);
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$sel = array(
+	'a.tipo_doc', 'a.numero', 'a.fecha', 'a.nombre', 'a.vence',
+	'a.monto*(a.tipo_doc NOT IN ("FC","GI","ND"))   AS debe',
+	'a.monto*(a.tipo_doc     IN ("FC","GI","ND"))   AS haber',
+	'(a.monto*(a.tipo_doc NOT IN ("FC", "GI", "ND")))-(a.monto*(a.tipo_doc IN ("FC", "GI", "ND"))) AS saldo',
+	'CONCAT_WS(" ", TRIM(a.observa1), a.observa2) concepto', 'cod_prv'
+);
+
+$filter->db->select($sel);
+$filter->db->from('sprm AS a');
+$filter->db->join('sprv AS b' ,'b.proveed=a.cod_prv','left');
+$filter->db->orderby('cod_prv');
+
+$filter->cod_prv = new inputField('Proveedor', 'cod_prv');
+$filter->cod_prv->clause  = 'where';
+$filter->cod_prv->operator= '=';
+$filter->cod_prv->append($boton);
+
+$filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
+$filter->fechad->clause  = 'where';
+$filter->fechad->db_name = 'fecha';
+$filter->fechad->operator= '>=';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'),date('d')-30,date('Y')));
+$filter->fechad->rule = 'chfecha';
+
+$filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
+$filter->fechah->clause  = 'where';
+$filter->fechah->db_name = 'fecha';
+$filter->fechah->operator= '<=';
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechah->rule = 'chfecha';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$mSQL=$filter->db->_compile_select();
+
+	$subtitu='';
+	if($this->input->post('fechad')) $subtitu.=' Desde '.$this->input->post('fechad');
+	if($this->input->post('fechah')) $subtitu.=' Hasta '.$this->input->post('fechah');
+	//echo $mSQL;exit();
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Estado de Cuenta por pagar',16);
+	$pdf->setSubTitulo($subtitu);
+
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+	$pdf->AddCol('tipo_doc', 10,'Tipo'    ,'C',8);
+	$pdf->AddCol('numero'  , 19,'Número'  ,'L',8);
+	$pdf->AddCol('fecha'   , 19,'Emisión' ,'C',8);
+	$pdf->AddCol('vence'   , 19,'Vence'   ,'C',8);
+	$pdf->AddCol('debe'    , 25,'Debe'    ,'R',8);
+	$pdf->AddCol('haber'   , 25,'Haber'   ,'R',8);
+	$pdf->AddCol('saldo'   , 25,'Saldo'   ,'R',8);
+	$pdf->AddCol('concepto',115,'Concepto','L',7);
+
+	$pdf->setGrupoLabel('Proveedor (<#cod_prv#>) <#nombre#>');
+	$pdf->setGrupo('cod_prv');
+	$pdf->setTotalizar('debe','haber','saldo');
+	$pdf->Table();
+	$pdf->Output();
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Estado de cuentas por pagar todos</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

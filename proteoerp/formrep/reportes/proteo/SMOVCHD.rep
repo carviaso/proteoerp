@@ -1,0 +1,104 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$mSCLId=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'  =>'Nombre',
+		'contacto'=>'Contacto'
+	),
+	'filtro'  => array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=> array('cliente'=>'cod_clid'),
+	'titulo'  => 'Buscar Cliente');
+
+$bsclid =$this->datasis->modbus($mSCLId);
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array(
+	'a.tipo_doc','a.numero','a.fecha',
+	'a.vence','a.cod_cli','b.nombre AS nomcli',
+	'a.monto','a.abonos',
+	'DATEDIFF(CURDATE(),a.vence) AS dv',
+	'IF(tipo_doc IN (\'FC\',\'GI\',\'ND\'), monto, 0) AS importe',
+	'(a.monto-a.abonos) AS saldo'
+);
+
+$filter->db->select($select);
+$filter->db->from('smov AS a');
+$filter->db->join('scli AS b','a.cod_cli=b.cliente');
+$filter->db->join('prmo AS c','a.transac=c.transac');
+$filter->db->where('a.abonos < a.monto');
+$filter->db->where('a.tipo_doc','ND');
+$filter->db->where('c.tipop','3');
+//$filter->db->where("(a.observa1 LIKE '%CH_DEV%' OR a.observa1 LIKE '%CHEQUE DEV%')");
+$filter->db->orderby('a.cod_cli');
+
+$filter->cod_cli = new inputField('Cliente', 'cod_cli');
+$filter->cod_cli->clause='where';
+$filter->cod_cli->db_name='a.cod_cli';
+$filter->cod_cli->append($bsclid);
+$filter->cod_cli->operator='=';
+
+$filter->fechad = new dateField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause='where';
+$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
+$fitter->fechad->rule    =$fitter->fechah->rule='required';
+$filter->fechad->insertValue = date('Y-m-d');
+$filter->fechah->insertValue = date('Y-m-d');
+$filter->fechad->operator = '>=';
+$filter->fechah->operator = '<=';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+
+	$mSQL=$this->rapyd->db->_compile_select();
+	//echo $mSQL;
+
+	$sobretabla='';
+	if (!empty($filter->cod_cli->newValue)){
+		$dbcodcli   = $this->db->escape($filter->cod_cli->newValue);
+		$sobretabla.='  Cliente : ('.$filter->cod_cli->newValue.') '.$this->datasis->dameval('SELECT nombre FROM scli WHERE cliente='.$dbcodcli);
+	}
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Cheques de clientes devueltos',16);
+  	$pdf->setSubTitulo($sobretabla);
+	$pdf->AddPage();
+	$pdf->setTableTitu(10,'Times');
+
+	$pdf->AddCol('tipo_doc',20,'Tipo'    ,'L',9);
+	$pdf->AddCol('numero'  ,32,'Número'  ,'L',9);
+	$pdf->AddCol('fecha'   ,32,'Emisión' ,'C',9);
+	$pdf->AddCol('vence'   ,32,'Vence'   ,'C',9);
+	$pdf->AddCol('dv'      ,15,'Dias Vto','R',9);
+	$pdf->AddCol('importe' ,28,'Importe' ,'R',9);
+	$pdf->AddCol('saldo'   ,28,'Saldo'   ,'R',9);
+	$pdf->setTotalizar('importe','saldo');
+	$pdf->setGrupoLabel('Cliente  <#nomcli#>   [<#cod_cli#>]',12);
+	$pdf->setGrupo('cod_cli');
+ 	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Cheques de cliente devueltos</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

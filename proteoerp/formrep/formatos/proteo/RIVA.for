@@ -257,6 +257,11 @@ Firma Y Sello:
 <br />
 <br />
 
+<!--
+<div style='position: absolute;left:<?php echo ceil(rand(20,180))?>px;bottom:210px;transform:rotate(-<?php echo ceil(rand(0,4))?>deg);'>
+	<img src="<?php echo $this->_direccion.'/images/sello.jpg'; ?>"  width="260" alt="firma">
+</div>
+-->
 <table align='center' style="width: 90%;" colspacing='4' colspan='4'>
 		<tr>
 			<td><hr></td>

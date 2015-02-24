@@ -1,0 +1,117 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$modbus=array(
+	'tabla'   =>'scli',
+	'columnas'=>array(
+		'cliente' =>'Código Cliente',
+		'nombre'=>'Nombre',
+		'contacto'=>'Contacto'),
+	'filtro'  =>array('cliente'=>'Código Cliente','nombre'=>'Nombre'),
+	'retornar'=>array('cliente'=>'cod_cli'),
+	'titulo'  =>'Buscar Cliente');
+
+$boton=$this->datasis->modbus($modbus);
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+$sel=array(
+	'a.nombre','a.cliente',
+	'a.rifci','a.tipo','a.dire11',
+	'a.latitud','a.longitud',
+	''
+);
+
+$filter->db->select($sel);
+$filter->db->from('scli     AS a');
+$filter->db->join('sclitrut AS b','a.cliente=b.cliente','left');
+$filter->db->join('sclirut  AS c','b.ruta=c.ruta'      ,'left');
+$filter->db->where('a.latitud*a.longitud != 0');
+
+$filter->grupo = new dropdownField('Grupo de cliente', 'grupo');
+$filter->grupo->db_name = 'a.grupo';
+$filter->grupo->clause='where';
+$filter->grupo->operator='=';
+$filter->grupo->option('','Todos');
+$filter->grupo->options('SELECT grupo, gr_desc FROM grcl ORDER BY grupo');
+
+$filter->zona = new dropdownField('Zona de venta', 'zona');
+$filter->zona->db_name = 'a.zona';
+$filter->zona->clause='where';
+$filter->zona->operator='=';
+$filter->zona->option('','Todas');
+$filter->zona->options('SELECT codigo, nombre FROM zona ORDER BY codigo');
+
+$filter->ruta = new dropdownField('Ruta', 'ruta');
+$filter->ruta->db_name ='c.ruta';
+$filter->ruta->clause='where';
+$filter->ruta->operator='=';
+$filter->ruta->option('','Todas');
+$filter->ruta->options("SELECT a.ruta,a.descrip FROM sclirut AS a ORDER BY a.ruta");
+
+$filter->ciudad = new dropdownField('Ciudad', 'ciudad');
+$filter->ciudad->db_name ='a.ciudad1';
+$filter->ciudad->clause='where';
+$filter->ciudad->operator='=';
+$filter->ciudad->option('','Todas');
+$filter->ciudad->options("SELECT TRIM(ciudad) AS codigo, ciudad FROM ciud ORDER BY ciudad");
+
+/*$filter->vendedor = new dropdownField('Vendedor', 'vendedor');
+$filter->vendedor->db_name = 'a.vendedor';
+$filter->vendedor->clause='where';
+$filter->vendedor->operator='=';
+$filter->vendedor->option('','Todos');
+$filter->vendedor->options('SELECT TRIM(vendedor) AS vendedor, nombre FROM vend ORDER BY vendedor');
+*/
+
+$filter->tipo = new dropdownField('Tipo de cliente', 'tipo');
+$filter->tipo->db_name = 'a.tipo';
+$filter->tipo->clause='where';
+$filter->tipo->operator='=';
+$filter->tipo->option('','Todos');
+$filter->tipo->option('1','1 Precio');
+$filter->tipo->option('2','2 Precio');
+$filter->tipo->option('3','3 Precio');
+$filter->tipo->option('4','4 Precio');
+$filter->tipo->option('0','Inactivo');
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
+	$this->load->helper('download');
+	$mSQL=$this->rapyd->db->_compile_select();
+	$mSQL.=' LIMIT 34000';
+	//echo $mSQL;
+
+	$query=$this->db->query($mSQL);
+	$line='<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://earth.google.com/kml/2.2"><Document><name>CLientes</name><open>1</open><description>Clientes</description>';
+
+	if($query->num_rows() > 0){
+		$rem=array('.','-');
+		$rif=str_replace($rem,'',$this->datasis->traevalor('RIF'));
+		foreach($query->result_array() as $ddata){
+			$line .= "<Placemark>\n";
+			$line .= "<name>".htmlspecialchars($ddata['nombre'].' '.$ddata['rifci'])."</name>\n";
+			$line .= "<description>".htmlspecialchars($ddata['dire11'].' '.$ddata['telefono'])."</description>\n";
+			$line .= "<Point>\n";
+			$line .= "<coordinates>$ddata[longitud],$ddata[latitud],0</coordinates>\n";
+			$line .= "</Point>\n";
+			$line .= "</Placemark>\n";
+		}
+	}
+
+	$line.='</Document></kml>';
+	$nombre='placemark'.'.kml';
+	force_download($nombre,$line);
+	return;
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Puntos Geogr&aacute;ficos</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

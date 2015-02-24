@@ -47,6 +47,21 @@ class Sprm extends Controller {
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
+		$WpAdic = "
+		<tr><td><div class=\"anexos\"><table id=\"bpos1\"></table></div><div id='pbpos1'></div></td></tr>\n
+		<tr><td><div class=\"anexos\">
+			<table cellpadding='0' cellspacing='0' style='width:100%;' align='center'>
+				<tr>
+					<td style='vertical-align:center;border:1px solid #AFAFAF;'><div class='botones'>".img(array('src' =>"assets/default/images/print.png",  'height'=>18, 'alt'=>'Imprimir', 'title'=>'Imprimir', 'border'=>'0'))."</div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:78px;text-align:left;vertical-align:top;' href='#' id='reteprint'>R.I.V.A.</a></div></td>
+					<td style='vertical-align:top;text-align:center;'><div class='botones'><a style='width:78px;text-align:left;vertical-align:top;' href='#' id='reteislrprint'>R.I.S.L.R.</a></div></td>
+				</tr>
+			</table>
+			</div>
+		</td></tr>";
+
+		$grid->setWpAdicional($WpAdic);
+
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'imprime'   ,'img'=>'assets/default/images/print.png', 'alt' => 'Reimprimir Documento',      'label'=>'Imprimir', 'tema'=>'anexos'));
@@ -184,6 +199,37 @@ class Sprm extends Controller {
 			var tips = $( ".validateTips" );
 			s = grid.getGridParam(\'selarrrow\');
 			';
+
+
+		//Imprimir retencion
+		$bodyscript .= '
+		jQuery("#reteprint").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if(Number(ret.reteiva) > 0){
+					window.open(\''.site_url($this->url.'printrete').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+				}else{
+					$.prompt("<h1>El efecto seleccionado no tiene retenci&oacute;n de iva</h1>");
+				}
+			} else {
+				$.prompt("<h1>Por favor Seleccione un efecto</h1>");
+			}
+		});';
+
+		//Imprime retencion islr
+		$bodyscript .= '
+		jQuery("#reteislrprint").click( function(){
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id){
+				var ret = jQuery("#newapi'.$grid0.'").jqGrid(\'getRowData\',id);
+				if(Number(ret.reten) > 0){
+					window.open(\''.site_url($this->url.'printreteislr').'/\'+ret.transac, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
+				}else{
+					$.prompt("<h1>El efecto seleccionado no tiene retenci&oacute;n ISLR</h1>");
+				}
+			} else { $.prompt("<h1>Por favor Seleccione un efecto</h1>");}
+		});';
 
 		$bodyscript .= '
 		jQuery("#princheque").click( function(){
@@ -2498,6 +2544,40 @@ class Sprm extends Controller {
 		return true;
 	}
 
+	function printrete($id_sprm){
+		$sel=array('b.id');
+		$this->db->select($sel);
+		$this->db->from('sprm AS a');
+		$this->db->join('riva AS b','a.transac=b.transac');
+		$this->db->where('a.id' , $id_sprm);
+		$mSQL_1 = $this->db->get();
+
+		if ($mSQL_1->num_rows() == 0){ show_error('Retención no encontrada');}
+
+		$row = $mSQL_1->row();
+		$id  = $row->id;
+		redirect("formatos/ver/RIVA/${id}");
+	}
+
+	function printreteislr($transac){
+		$ecto=false;
+		$dbtransac=$this->db->escape($transac);
+		$id = intval('SELECT id FROM scst WHERE transac='.$dbtransac);
+		if($id>0){
+			$ecto=true;
+			redirect("formatos/ver/SCSTRT/${id}");
+		}
+
+		$id = intval('SELECT id FROM gser WHERE transac='.$dbtransac);
+		if($id>0){
+			$ecto=true;
+			redirect("formatos/ver/GSERRT/${id}");
+		}
+		if(!$ecto){
+			show_error('Retención no encontrada');
+		}
+	}
+
 	function chtipoop($val){
 		$tipo  = $this->input->post('tipo_doc');
 		if($tipo=='NC') return true;
@@ -3133,7 +3213,7 @@ class Sprm extends Controller {
 
 		}//Fin de la retencion
 
-		logusu('PPRO',"Abono a proveedor CREADO Prov=${cod_prv}  Numero=${numero}");
+		logusu('ppro',"Abono a proveedor CREADO Prov=${cod_prv}  Numero=${numero}");
 	}
 
 	//**********************************************

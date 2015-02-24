@@ -1,0 +1,98 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$filter = new DataFilter2('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$select=array(
+	'b.numero','b.fecha','b.cod_cli','b.totalg AS monto',
+	'HOUR(TIMEDIFF(a.tcierre,a.estampa)) AS hora','c.nombre AS cnombre',
+	'd.nombre AS chnombre'
+);
+
+$filter->db->select($select);
+$filter->db->from('reparto AS a');
+$filter->db->join('sfac    AS b','a.id=b.reparto');
+$filter->db->join('scli    AS c','b.cod_cli=c.cliente');
+$filter->db->join('chofer  AS d','a.chofer=d.codigo');
+$filter->db->orderby('a.chofer');
+
+$filter->fechad = new dateonlyField("Desde", "fechad",'d/m/Y');
+$filter->fechah = new dateonlyField("Hasta", "fechah",'d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause="where";
+$filter->fechad->db_name =$filter->fechah->db_name='a.entregado';
+$filter->fechad->insertValue = date("Y-m-d");
+$filter->fechah->insertValue = date("Y-m-d");
+$filter->fechad->operator=">=";
+$filter->fechah->operator="<=";
+$filter->fechad->group="Fecha";
+$filter->fechah->group="Fecha";
+
+$filter->vd = new dropdownField('Vendedor', 'vd');
+$filter->vd->db_name='vd';
+$filter->vd->clause='where';
+$filter->vd->option('','Todos');
+$filter->vd->options('SELECT TRIM(vendedor) AS vend, nombre FROM vend ORDER BY vendedor');
+$filter->vd->operator='=';
+
+$filter->chofer = new dropdownField('Chofer','chofer');
+$filter->chofer->option('','Todos');
+$filter->chofer->options('SELECT codigo, nombre nombre FROM chofer ORDER BY nombre');
+$filter->chofer->rule  = 'required';
+$filter->chofer->style = 'width:300px;';
+
+$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set('search')){
+	$mSQL=$filter->db->_compile_select();
+	//echo $mSQL;
+
+	$subtitu='';
+	if(!empty($_POST['fechad'])) $subtitu.=' Desde la fecha '.$_POST['fechad'];
+	if(!empty($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
+
+	$sobretabla='';
+	if (!empty($filter->vd->newValue))      $sobretabla.=' Vendedor: ('.$filter->vd->newValue.') '.$filter->vd->description;
+	if (!empty($filter->chofer->newValue))  $sobretabla.=' Chofer: ('.$filter->chofer->newValue.') '.$filter->chofer->description;
+
+	$pdf = new PDFReporte($mSQL,'L');
+	$pdf->setType('id','string');
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Tiempos de Reparto');
+	$pdf->setSubTitulo($subtitu);
+	$pdf->setSobreTabla($sobretabla,6);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+
+	//$pdf->AddCol('chofer' ,20,'Chofer'    ,'L',9);
+	$pdf->AddCol('id'       ,30,'Reparto'   ,'R',9);
+	$pdf->AddCol('numero'   ,30,'Numero'    ,'R',9);
+	$pdf->AddCol('cod_cli'  ,30,'Cliente'   ,'R',9);
+	$pdf->AddCol('cnombre'  ,60,'Nombre'    ,'L',9);
+	$pdf->AddCol('chnombre' ,60,'Chofer'    ,'L',9);
+   	$pdf->AddCol('monto'    ,30,'Monto'     ,'R',9);
+   	$pdf->AddCol('hora'     ,30,'Hora'      ,'R',9);
+	//$pdf->AddCol('peso'     ,30,'Peso'      ,'R',9);
+
+	$pdf->setGrupoLabel('Chofer: (<#chofer#>) <#cnombre#>');
+	$pdf->setGrupo('chofer');
+	$pdf->setTotalizar('peso','totals');
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Tiempo de reparto</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
