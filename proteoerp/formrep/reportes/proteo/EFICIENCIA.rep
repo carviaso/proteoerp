@@ -1,0 +1,71 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, 'search'));
+$filter->title('Elija un formato de salida');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->fechad = new dateField('Desde', 'fechad','d/m/Y');
+$filter->fechah = new dateField('Hasta', 'fechah','d/m/Y');
+$filter->fechad->clause  =$filter->fechah->clause='where';
+$filter->fechad->db_name =$filter->fechah->db_name='a.fecha';
+$filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n')-1,1));
+$filter->fechah->insertValue = date('Y-m-d',mktime(0, 0, 0, date('n')  ,0));
+$filter->fechah->rule='required';
+$filter->fechad->rule='required';
+$filter->fechah->operator='<=';
+$filter->fechad->operator='>=';
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit','Descargar');
+$filter->build_form();
+
+if($this->rapyd->uri->is_set('search') && $filter->on_success()){
+
+	$fdesde=$this->db->escape($filter->fechad->newValue);
+	$fhasta=$this->db->escape($filter->fechah->newValue);
+
+	$mSQL ="SELECT aa.grupo,aa.vd, aa.nombre, aa.atendidos, aa.clientes,
+	ROUND(aa.atendidos*100/aa.clientes,2) AS porcen
+	FROM
+	(SELECT d.nombre AS grupo,b.vd,c.nombre, COUNT(DISTINCT a.cliente) AS atendidos,
+	(SELECT COUNT(*) FROM scli AS aa WHERE (aa.vendedor=b.vd OR aa.cobrador=b.vd) AND aa.tipo<>0) AS clientes
+	FROM scli AS a
+	JOIN sfac AS b ON b.cod_cli=a.cliente
+	JOIN vend AS c ON b.vd=c.vendedor
+	JOIN grvd AS d ON c.grupo=d.id
+	WHERE b.fecha BETWEEN ${fdesde} AND ${fhasta} AND b.tipo_doc<>'X'
+	GROUP BY b.vd) AS aa
+	ORDER BY grupo,vd";
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Eficiencia de atención entre las fechas '.$filter->fechad->value.' - '.$filter->fechah->value);
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+	$pdf->AddCol('vd'       ,20,'Vendedor'     ,'L',8);
+	$pdf->AddCol('nombre'   ,50,'Nombre'       ,'L',8);
+	$pdf->AddCol('atendidos',20,'C.Atendidos'  ,'R',8);
+	$pdf->AddCol('clientes' ,20,'Clientes'     ,'R',8);
+	$pdf->AddCol('porcen'   ,20,'Pocentaje'    ,'R',8);
+	$pdf->setTotalizar('clientes','atendidos');
+	$pdf->setGrupoLabel('Linea: <#grupo#>');
+	$pdf->setGrupo('grupo');
+	$pdf->Table();
+	$pdf->Output();
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">C&aacute;lculo del porcentaje de eficiencia de atencion</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

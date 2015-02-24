@@ -1435,7 +1435,7 @@ class Sfac extends Controller {
 		//$grid->setEdit(  true);
 		$grid->setEdit(  $this->datasis->sidapuede('SFAC','MODIFICA%'));
 		$grid->setAdd(   $this->datasis->sidapuede('SFAC','INCLUIR%' ));
-		$grid->setDelete($this->datasis->sidapuede('SFAC','BORR_REG%'));
+		$grid->setDelete($this->datasis->sidapuede('SFAC','BORR_REG%') || $this->datasis->sidapuede('SFAC','SFACANU%'));
 		$grid->setSearch($this->datasis->sidapuede('SFAC','BUSQUEDA%'));
 
 		$grid->setRowNum(30);
@@ -4899,8 +4899,8 @@ class Sfac extends Controller {
 
 				// Actualiza los precios al del dia
 				if ( $cprecio ){
-			
-		
+
+
 				}
 
 				$itsel=array('a.codigoa','b.descrip AS desca','a.cana - a.entregado AS cana','a.preca','a.tota','b.iva',
@@ -4936,7 +4936,7 @@ class Sfac extends Controller {
 						$_POST["preca_${i}"]    = $itrow->preca;
 						$_POST["tota_${i}"]     = $itrow->tota;
 					}
-					
+
 					$_POST["precio1_${i}"]  = $itrow->precio1;
 					$_POST["precio2_${i}"]  = $itrow->precio2;
 					$_POST["precio3_${i}"]  = $itrow->precio3;

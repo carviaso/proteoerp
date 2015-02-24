@@ -6450,11 +6450,13 @@ class Sinv extends Controller {
 				`id` INT(11) NOT NULL AUTO_INCREMENT,
 				`codigo` VARCHAR(50) NOT NULL DEFAULT '0',
 				`descrip` VARCHAR(100) NOT NULL DEFAULT '0',
-				PRIMARY KEY (`id`)
+				PRIMARY KEY (`id`),
+				UNIQUE INDEX `codigo` (`codigo`)
 			)
 			COMMENT='Codigos Sada'
+			COLLATE='utf8_general_ci'
 			ENGINE=MyISAM
-			AUTO_INCREMENT=1";
+			AUTO_INCREMENT=1;";
 			$this->db->simple_query($mSQL);
 
 			$this->db->simple_query("INSERT INTO sadacod (codigo,descrip) VALUE ('384','ABAAlimentosparapeces')");

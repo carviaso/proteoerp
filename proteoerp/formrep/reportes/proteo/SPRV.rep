@@ -1,0 +1,92 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$mPrvd=array(
+	'tabla'   =>'sprv',
+	'columnas'=>array(
+		'proveed' =>'Código Proveedor',
+		'nombre'=>'Nombre',
+		'rif'=>'RIF'),
+	'filtro'  =>array('proveed'=>'Código Proveedor','nombre'=>'Nombre'),
+	'retornar'=>array('proveed'=>'cod_prvd'),
+	'titulo'  =>'Buscar Proveedor');
+$mPrvh=$mPrvd;
+$mPrvh['retornar']=array('proveed'=>'cod_prvh');
+$bPrvd=$this->datasis->modbus($mPrvd);
+$bPrvh=$this->datasis->modbus($mPrvh,'sprvh');
+
+$filter = new DataFilter('Filtro del Reporte');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$sel=array(
+	'a.proveed','a.nombre','a.rif',
+	'a.grupo AS grupo','b.gr_desc AS gr_desc',
+	'a.direc1','a.direc2','a.telefono',
+	'a.contacto','a.cliente'
+);
+
+$filter->db->select($sel);
+$filter->db->from('sprv AS a');
+$filter->db->join('grpr AS b','proveed=proveed');
+$filter->db->where('a.grupo=b.grupo');
+//$filter->db->orderby('proveed');
+
+/*
+$filter->cod_prvd = new inputField('Desde el Proveedor', 'cod_prvd');
+$filter->cod_prvd->db_name='proveed';
+$filter->cod_prvd->clause='where';
+$filter->cod_prvd->operator='>=';
+$filter->cod_prvd->append($bPrvd);
+
+$filter->cod_prvh = new inputField('Hasta', 'cod_prvh');
+$filter->cod_prvh->db_name='proveed';
+$filter->cod_prvh->clause ='where';
+$filter->cod_prvh->operator='<=';
+$filter->cod_prvh->append($bPrvh);
+*/
+
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->buttons('search');
+$filter->build();
+
+if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
+	$mSQL=$this->rapyd->db->_compile_select();
+	$subtitu='';
+	if (!empty($filter->cod_prvd->newValue)) $subtitu.='  Desde el Proveedor: ('.$filter->cod_prvd->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed="'.$filter->cod_prvd->newValue.'"');
+	if (!empty($filter->cod_prvh->newValue)) $subtitu.='  Hasta: ('.$filter->cod_prvh->newValue.') '.$this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed="'.$filter->cod_prvh->newValue.'"');
+	//if(isset($_POST['cod_prvd'])) $subtitu.=' Desde el proveedor '.$_POST['cod_prvd'];
+	//if(isset($_POST['cod_prvh'])) $subtitu.=' Hasta '.$_POST['cod_prvh'];
+	//echo $mSQL;
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo('Listado de Proveedores',14);
+	$pdf->setSubTitulo($subtitu,10);
+
+	$pdf->AddPage();
+	$pdf->setTableTitu(8,'Times');
+	$pdf->AddCol('proveed' ,15,'Codigo'  ,'L',6);
+	$pdf->AddCol('nombre'  ,45,'Nombre'  ,'L',5);
+	$pdf->AddCol('rif'     ,25,'Rif'     ,'C',6);
+	$pdf->AddCol('grupo'   ,8, 'Grupo'   ,'C',6);
+	$pdf->AddCol('contacto',55,'Contacto','L',6);
+	$pdf->AddCol('telefono',55,'Telefono','L',6);
+
+	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Listado de Proveedores</h2>';
+	$data['head']   = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}
