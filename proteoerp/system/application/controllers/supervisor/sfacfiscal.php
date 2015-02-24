@@ -123,7 +123,7 @@ class Sfacfiscal extends Controller{
 
 		$filter->usuario = new dropdownField('Usuario', 'usuario');
 		$filter->usuario->option('','Todos');
-		$filter->usuario->options('SELECT usuario,usuario FROM sfac GROUP BY usuario');
+		$filter->usuario->options('SELECT us_codigo,us_codigo FROM usuario ORDER BY us_codigo');
 
 		$filter->tipo_doc = new dropdownField('Tipo Doc.', 'tipo_doc');
 		$filter->tipo_doc->option('F','Facturas');
@@ -161,6 +161,8 @@ class Sfacfiscal extends Controller{
 			$grid->column('Fecha'      ,'<dbdate_to_human><#fecha#></dbdate_to_human>' ,'fecha');
 			$grid->column('Nombre'     ,'nombre');
 			$grid->column('Referencia' ,$llink);
+			$grid->column('Usuario'    ,'usuario');
+			$grid->column('Cajero'     ,'cajero');
 			$grid->column('Monto'      ,'<nformat><#totalg#></nformat>','align="right"');
 			$grid->column('N.Fiscal'   ,'<exissinv><#nfiscal#>|2|<#tipo_doc#></exissinv>'  ,'align="center"');
 			$grid->column('Serial Maq.','<exissinv><#maqfiscal#>|1|<#tipo_doc#></exissinv>','align="center"');
@@ -168,7 +170,7 @@ class Sfacfiscal extends Controller{
 			$grid->build();
 			//echo $grid->db->last_query();
 			$mSQL=$grid->db->last_query();
-			$mSQL=str_replace("*", "SUM(totalg)",$mSQL );
+			$mSQL=str_replace('*', 'SUM(totalg)',$mSQL );
 			$corte=stripos($mSQL, 'ORDER');
 			if($corte!==false) $mSQL=substr($mSQL,0,$corte);
 			$monto=$this->datasis->dameval($mSQL);
@@ -185,7 +187,7 @@ class Sfacfiscal extends Controller{
 		}
 
 		$data['content']  = $filter->output.$tabla;
-		$data['title']    = "<h1>Arreglos de consistencias fiscal en facturas</h1>";
+		$data['title']    = '<h1>Arreglos de consistencias fiscal en facturas</h1>';
 		$data['head']     = $this->rapyd->get_head().script('jquery.js');
 		$this->load->view('view_ventanas', $data);
 	}
