@@ -120,7 +120,10 @@ class Sfacfiscal extends Controller{
 		$filter->cajero->option('','Seleccionar');
 		$filter->cajero->option(' ','Creditos');
 		$filter->cajero->options('SELECT cajero, CONCAT_WS("-",cajero,nombre) FROM scaj ORDER BY cajero');
-		//$filter->cajero->rule    ='required';
+
+		$filter->usuario = new dropdownField('Usuario', 'usuario');
+		$filter->usuario->option('','Todos');
+		$filter->usuario->options('SELECT usuario,usuario FROM sfac GROUP BY usuario');
 
 		$filter->tipo_doc = new dropdownField('Tipo Doc.', 'tipo_doc');
 		$filter->tipo_doc->option('F','Facturas');
@@ -139,7 +142,7 @@ class Sfacfiscal extends Controller{
 
 		if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 			$fecha=$filter->fecha->newValue;
-			
+
 			$fields = $this->db->field_data('sfac');
 			$ppk=array();
 			foreach ($fields as $field){
@@ -226,7 +229,7 @@ class Sfacfiscal extends Controller{
 		if ($query->num_rows() > 0){
 			$row = $query->row();
 			echo 'Fecha: '.dbdate_to_human($row->fecha).' Cajero: "'.$row->cajero.'"';
-			
+
 			//echo json_encode($row);
 		}else{
 			echo 'Referencia no encontrada';
@@ -280,7 +283,7 @@ class Sfacfiscal extends Controller{
 		if ($query->num_rows() > 0){
 			$c=false;
 			foreach ($query->result() as $row){
-				if($numero==$row->nfiscal){ 
+				if($numero==$row->nfiscal){
 					$c=true;
 					continue;
 				}
@@ -305,7 +308,7 @@ class Sfacfiscal extends Controller{
 		if ($query->num_rows() > 0){
 			$c=false;
 			foreach ($query->result() as $row){
-				if($numero==$row->nfiscal){ 
+				if($numero==$row->nfiscal){
 					$c=true;
 					continue;
 				}
@@ -374,7 +377,7 @@ class Sfacfiscal extends Controller{
 		if ($query->num_rows() > 0){
 			$c=false;
 			foreach ($query->result() as $row){
-				if($numero==$row->nfiscal){ 
+				if($numero==$row->nfiscal){
 					$c=true;
 					continue;
 				}
@@ -399,7 +402,7 @@ class Sfacfiscal extends Controller{
 		if ($query->num_rows() > 0){
 			$c=false;
 			foreach ($query->result() as $row){
-				if($numero==$row->nfiscal){ 
+				if($numero==$row->nfiscal){
 					$c=true;
 					continue;
 				}
