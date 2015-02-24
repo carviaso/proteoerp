@@ -45,11 +45,10 @@ class Pfac extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'imprime', 'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Pedido'));
 		$grid->wbotonadd(array('id'=>'bffact' , 'img'=>'images/star.png'                ,'alt' => 'Facturar'  , 'label'=>'Facturar'));
 
 		$WestPanel = $grid->deploywestp();
-
 
 		//Panel Central
 		$centerpanel = $grid->centerpanel( $id = 'radicional', $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
@@ -211,15 +210,29 @@ class Pfac extends Controller {
 
 		$bodyscript .= '
 		$("#bffact").click(function(){
-			var id = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id   = $("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
 				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				var colores = JSON.parse($.ajax({ type: "POST", url: "'.site_url($this->url.'getcolor').'/"+id ,dataType: "json",async: false }).responseText);
+				var uurl = "'.site_url('ventas/sfac/creafrompfac/N').'/"+ret.numero+"/create";
 				if(colores.length<=0){
-					$.post("'.site_url('ventas/sfac/creafrompfac/N').'/"+ret.numero+"/create",
-					function(data){
-						$("#ffact").html(data);
-						$("#ffact").dialog( "open" );
+					$.prompt("<h1>Usar los precios del pedido o del inventario?</h1>", {
+					buttons: { Pedido: 1, Inventario: 2, Salir: 0},
+					submit: function(e,v,m,f){
+						if ( v == 1 ){
+							$.post(uurl, { cprecio: "N" }).done(
+							function(data){
+								$("#ffact").html(data);
+								$("#ffact").dialog( "open" );
+							});
+						} else if( v == 2 ){
+							$.post(uurl, { cprecio: "S" }).done(
+							function(data){
+								$("#ffact").html(data);
+								$("#ffact").dialog( "open" );
+							});
+						}
+					}
 					});
 				}else{
 					var btns = {};
@@ -249,7 +262,6 @@ class Pfac extends Controller {
 									$("#ffact").dialog( "open" );
 								});
 							}else if(v!="C"){
-
 								$.ajax({
 									type: "POST",
 									url: uurl,

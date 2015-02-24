@@ -4860,7 +4860,10 @@ class Sfac extends Controller {
 	//
 	function creafrompfac($manual,$numero,$status=null){
 		$this->_url = $this->url.'dataedit/insert';
-		$color = $this->input->post('color');
+		$color   = $this->input->post('color');
+		$cprecio = $this->input->post('cprecio');
+		if ( $cprecio <> 'S' ) $cprecio = 'N';
+
 
 		$sel=array('a.cod_cli','b.nombre','b.tipo','b.rifci','b.dire11 AS direc','a.status'
 		,'a.totals','a.iva','a.totalg','TRIM(a.factura) AS factura','a.vd','c.almacen','a.bultos');
@@ -4894,11 +4897,19 @@ class Sfac extends Controller {
 					'pfac'       => $numero,
 				);
 
+				// Actualiza los precios al del dia
+				if ( $cprecio ){
+			
+		
+				}
+
 				$itsel=array('a.codigoa','b.descrip AS desca','a.cana - a.entregado AS cana','a.preca','a.tota','b.iva',
 				'ROUND(b.precio1*100/(100+b.iva),2) AS precio1',
 				'ROUND(b.precio2*100/(100+b.iva),2) AS precio2',
 				'ROUND(b.precio3*100/(100+b.iva),2) AS precio3',
 				'ROUND(b.precio4*100/(100+b.iva),2) AS precio4','b.tipo','b.peso');
+
+
 				$this->db->select($itsel);
 				$this->db->from('itpfac AS a');
 				$this->db->join('sinv AS b','b.codigo=a.codigoa');
@@ -4916,8 +4927,16 @@ class Sfac extends Controller {
 					$_POST["lote_${i}"]     = '0';
 					$_POST["desca_${i}"]    = rtrim($itrow->desca);
 					$_POST["cana_${i}"]     = $itrow->cana;
-					$_POST["preca_${i}"]    = $itrow->preca;
-					$_POST["tota_${i}"]     = $itrow->tota;
+
+					// Actualiza los precios al del dia
+					if ( $cprecio == 'S' ) {
+						$_POST["preca_${i}"]    = $itrow->precio1;
+						$_POST["tota_${i}"]     = $itrow->precio1*$itrow->cana;
+					} else {
+						$_POST["preca_${i}"]    = $itrow->preca;
+						$_POST["tota_${i}"]     = $itrow->tota;
+					}
+					
 					$_POST["precio1_${i}"]  = $itrow->precio1;
 					$_POST["precio2_${i}"]  = $itrow->precio2;
 					$_POST["precio3_${i}"]  = $itrow->precio3;

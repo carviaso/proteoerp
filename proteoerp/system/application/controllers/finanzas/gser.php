@@ -4066,22 +4066,24 @@ class gser extends Controller {
 		$this->db->where('transac',$transac);
 		$query = $this->db->get();
 
-		$verif=true;
-		$abs=$fcs=0;
+		$verif = true;
+		$abs   = 0;
+		$fcs   = 0;
 		if ($query->num_rows() > 0){
+
 			foreach ($query->result() as $row){
-				if($row->tipo_doc=='NC' || $row->tipo_doc=='AB'){
-					$abs+=$row->monto;
+				if( $row->tipo_doc=='NC' || $row->tipo_doc=='AB'){
+					$abs += $row->monto;
 				}
-				if($row->tipo_doc=='ND' && $row->abonos!=0 && $row->cod_prv!=$cod_prv){
-					$verif=false;
+				if( $row->tipo_doc == 'ND' && $row->abonos != 0 && $row->cod_prv != $cod_prv ){
+					$verif = false;
 					break;
 				}
 				if($row->tipo_doc==$tipo_doc && $row->cod_prv==$cod_prv){
-					$fcs=$row->abonos;
+					$fcs = $row->abonos;
 				}
 			}
-			if(round($fcs-$abs,2)!=0.00){
+			if(round( $fcs-$abs,2) != 0.00){
 				$verif=false;
 			}
 		}
