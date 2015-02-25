@@ -43,7 +43,7 @@ $descrip   = $this->us_ascii2html(trim($row->descrip  ));
 
 $vvehiculo = $placa.' '.$marca.' '.$modelo.' '.$ano.' '.$descrip;
 
-$lineas = 0;
+$lineas = $pgrup=0;
 $uline  = array();
 
 if(!empty($observa)){
@@ -192,6 +192,7 @@ foreach ($detalle2 as $items){ $i++;
 			echo $encabezado;
 			echo $encabezado_tabla;
 			$npagina=false;
+			$pgrup=0;
 		}
 ?>
 			<?php if(($ubica!=trim($items->ubica) && strlen(trim($items->ubica))>0) && $subica){  $i++; ?>
@@ -200,6 +201,7 @@ foreach ($detalle2 as $items){ $i++;
 			</tr>
 			<?php
 				$ubica=$items->ubica;
+				$pgrup++;
 			} ?>
 
 			<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
@@ -238,7 +240,7 @@ foreach ($detalle2 as $items){ $i++;
 			</tr>
 <?php
 		if($npagina){
-			if($lineas!=$maxlin){
+			if($lineas+$pgrup!=$maxlin){
 				echo $pie_continuo;
 			}
 		}else{

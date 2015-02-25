@@ -2961,7 +2961,7 @@ class Sinv extends Controller {
 		$edit->pesoneto->maxlength=12;
 		$edit->pesoneto->css_class='inputnum';
 		$edit->pesoneto->rule='numeric|callback_positivo';
-		$edit->pesoneto->insertValue = 0;
+		$edit->pesoneto->insertValue ='0';
 
 		$edit->alto = new inputField('Alto', 'alto');
 		$edit->alto->size=10;
@@ -6254,7 +6254,7 @@ class Sinv extends Controller {
 		if (!in_array('color'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `color`       VARCHAR(10)   NULL DEFAULT ''");
 
 		if (!in_array('pesoneto'    ,$campos)){
-			$this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pesoneto`  DECIMAL(12,3) 0 DEFAULT NULL COMMENT 'Peso neto del producto' AFTER `peso`");
+			$this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pesoneto`  DECIMAL(12,3) DEFAULT NULL COMMENT 'Peso neto del producto' AFTER `peso`");
 			$mSQL='UPDATE sinv SET pesoneto=peso';
 			$this->db->simple_query($mSQL);
 		}

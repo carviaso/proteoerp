@@ -1380,6 +1380,15 @@ class Sfac extends Controller {
 			'editable'      => 'false',
 		));
 
+		$grid->addField('entregable');
+		$grid->label('Entregable');
+		$grid->params(array(
+			'search'        => 'true',
+			'align'         => "'center'",
+			'width'         => 60,
+			'editable'      => 'false',
+		));
+
 		$grid->addField('id');
 		$grid->label('Id');
 		$grid->params(array(
