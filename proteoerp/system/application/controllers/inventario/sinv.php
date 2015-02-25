@@ -705,7 +705,7 @@ class Sinv extends Controller {
 				$("#fborra").html("");
 				$("#fedita").html(data);
 				$("#fedita").dialog({
-					autoOpen: false, height: 460, width: 700, modal: true,
+					autoOpen: false, height: 480, width: 700, modal: true,
 					buttons: {
 						"Guardar y Cerrar": function(){
 							var murl = $("#df1").attr("action");
@@ -788,7 +788,7 @@ class Sinv extends Controller {
 				$.post("'.site_url('inventario/sinv/dataedit/modify').'/"+id, function(data){
 					$("#fedita").html(data);
 					$("#fedita").dialog({
-						autoOpen: false, height: 460, width: 700, modal: true,
+						autoOpen: false, height: 480, width: 700, modal: true,
 						buttons: {
 							"Guardar": function(){
 								var murl = $("#df1").attr("action");
@@ -2949,12 +2949,19 @@ class Sinv extends Controller {
 		$edit->ficha->cols = 85;
 		$edit->ficha->rows = 9;
 
-		$edit->peso  = new inputField('Peso', 'peso');
+		$edit->peso  = new inputField('Peso Bruto', 'peso');
 		$edit->peso->size=10;
 		$edit->peso->maxlength=12;
 		$edit->peso->css_class='inputnum';
 		$edit->peso->rule='numeric|callback_positivo';
 		$edit->peso->insertValue = 0;
+
+		$edit->pesoneto  = new inputField('Peso Neto', 'pesoneto');
+		$edit->pesoneto->size=10;
+		$edit->pesoneto->maxlength=12;
+		$edit->pesoneto->css_class='inputnum';
+		$edit->pesoneto->rule='numeric|callback_positivo';
+		$edit->pesoneto->insertValue = 0;
 
 		$edit->alto = new inputField('Alto', 'alto');
 		$edit->alto->size=10;
@@ -6246,7 +6253,11 @@ class Sinv extends Controller {
 		if (!in_array('sada'       ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `sada`        INT(11)       NULL DEFAULT NULL");
 		if (!in_array('color'      ,$campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `color`       VARCHAR(10)   NULL DEFAULT ''");
 
-
+		if (!in_array('pesoneto'    ,$campos)){
+			$this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `pesoneto`  DECIMAL(12,3) 0 DEFAULT NULL COMMENT 'Peso neto del producto' AFTER `peso`");
+			$mSQL='UPDATE sinv SET pesoneto=peso';
+			$this->db->simple_query($mSQL);
+		}
 
 		if ( $this->datasis->traevalor('SUNDECOP') == 'S') {
 			if (!in_array('dcomercial', $campos)) $this->db->simple_query("ALTER TABLE `sinv` ADD COLUMN `dcomercial`  INT(6)     NULL  COMMENT 'Destino Comercial'");

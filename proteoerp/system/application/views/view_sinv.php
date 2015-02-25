@@ -1302,16 +1302,17 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			<table border='0'  width='100%' cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->fracci->label ?></td>
-					<td class="littletablerow"><?php echo $form->fracci->output   ?></td>
-				</tr>
-				<tr>
+					<td class="littletablerow" colspan='2'><?php echo $form->fracci->output   ?></td>
+				</tr><tr>
 					<td class='littletableheaderc'><?php echo $form->peso->label ?></td>
 					<td class="littletablerow"><?php echo $form->peso->output   ?></td>
 					<td class="littletablerow"><?php echo $this->datasis->traevalor('SINVPESO','Kg.') ?></td>
-				</tr>
-				<tr>
+				</tr><tr>
+					<td class='littletableheaderc'><?php echo $form->pesoneto->label ?></td>
+					<td class="littletablerow" colspan='2'><?php echo $form->pesoneto->output   ?></td>
+				</tr><tr>
 					<td class='littletableheaderc'><?php echo $form->unidad->label ?></td>
-					<td class="littletablerow"><?php echo $form->unidad->output   ?></td>
+					<td class="littletablerow" colspan='2'><?php echo $form->unidad->output   ?></td>
 				</tr>
 			</table>
 		</td>
@@ -1373,7 +1374,7 @@ if(isset($form->error_string))echo '<div class="alert">'.$form->error_string.'</
 			<table border='0' width="100%" cellpadding='0' cellspacing='0'>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->linfe->label ?></td>
-					<td class="littletablerow" style='width:90px'>    <?php echo $form->linfe->output.$form->lindia->output   ?></td>
+					<td class='littletablerow' style='width:90px'> <?php echo $form->linfe->output.$form->lindia->output   ?></td>
 				</tr>
 				<tr>
 					<td class='littletableheaderc'><?php echo $form->comision->label ?></td>

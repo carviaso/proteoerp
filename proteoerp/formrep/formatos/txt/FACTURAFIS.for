@@ -26,23 +26,24 @@ $mSQL_1 = $this->db->query($mSQL);
 if($mSQL_1->num_rows()==0) show_error('Registro no encontrado');
 $row = $mSQL_1->row();
 
-$fecha    = dbdate_to_human($row->fecha);
-$vence    = dbdate_to_human($row->vence);
-$numero   = $row->numero;
-$cod_cli  = trim($row->cod_cli);
-$rifci    = trim($row->rifci);
-$nombre   = trim($row->nombre);
-$stotal   = nformat($row->totals);
-$gtotal   = nformat($row->totalg);
-$peso     = nformat($row->peso);
-$impuesto = nformat($row->iva);
-$direccion= trim($row->direccion);
-$tipo_doc = $row->tipo_doc;
-$referen  = $row->referen;
-$telefono = trim($row->telefono);
-$nomvend  = $row->nomvend;
-$factura  = ($tipo_doc=='D')? $row->factura :'';
-$vd       = $row->vd;
+$fecha     = dbdate_to_human($row->fecha);
+$vence     = dbdate_to_human($row->vence);
+$numero    = $row->numero;
+$cod_cli   = trim($row->cod_cli);
+$rifci     = trim($row->rifci);
+$nombre    = trim($row->nombre);
+$stotal    = nformat($row->totals);
+$gtotal    = nformat($row->totalg);
+$peso      = nformat($row->peso);
+$impuesto  = nformat($row->iva);
+$direccion = trim($row->direccion);
+$tipo_doc  = $row->tipo_doc;
+$referen   = $row->referen;
+$telefono  = trim($row->telefono);
+$nomvend   = $row->nomvend;
+$factura   = ($tipo_doc=='D')? $row->factura :'';
+$vd        = $row->vd;
+$factnumero= $tipo_doc.$numero;
 
 $dbtipo_doc = $this->db->escape($tipo_doc);
 $dbnumero   = $this->db->escape($numero);
@@ -74,7 +75,7 @@ WHERE numa=${dbnumero} AND tipoa=${dbtipo_doc}";
 $mSQL_2 = $this->db->query($mSQL);
 $detalle  = $mSQL_2->result();
 
-$encab  = 'CLIENTE: '.str_pad($cod_cli,9).' REF: '.$numero."\n";
+$encab  = 'CLIENTE: '.str_pad($cod_cli,9).' REF.:'.$factnumero."\n";
 $encab .= $nombre."\n";
 $encab .= 'RIF:'.str_pad($rifci,14).' Vende: '.$vd."\n";
 $encab .= $direccion."\n";
@@ -89,7 +90,7 @@ foreach($arr_lin as $i=>$linea){
 	}
 }
 
-foreach ($detalle AS $items){
+foreach ($detalle as $items){
 
 	//Tasa
 	echo $doc;
