@@ -4722,7 +4722,7 @@ class Sfac extends Controller {
 				$mdev = floatval($this->datasis->dameval("SELECT SUM(totalg) AS suma FROM sfac WHERE factura=${dbfactura} AND tipo_doc='D'"));
 				$mfac = floatval($this->datasis->dameval("SELECT totalg FROM sfac WHERE numero=${dbfactura} AND tipo_doc='F'"));
 				if(round($mdev-$mfac,2)==0){
-					$this->db->simple_query("UPDATE sfac SET entregable='N' WHERE tipo_doc='F' AND numero=${dbfactura}");
+					$this->db->simple_query("UPDATE sfac SET entregable='N', reparto=0 WHERE tipo_doc='F' AND numero=${dbfactura}");
 
 				}
 				//fin de la marca de no entregable
