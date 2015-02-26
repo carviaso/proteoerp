@@ -110,8 +110,9 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 	$pdf->AddCol('saldodoc', 23,'Saldo Doc.','R',8);
 	$pdf->AddCol('saldo'   , 23,'Saldo'     ,'R',8);
 	$pdf->AddCol('concepto',100,'Concepto'  ,'L',8);
+	$pdf->setAcumulador('saldo');
 
-	$pdf->setTotalizar('debe','haber','saldo','saldodoc');
+	$pdf->setTotalizar('debe','haber','saldodoc');
 	$pdf->Table();
 	$pdf->Output();
 

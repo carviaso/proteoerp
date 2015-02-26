@@ -640,7 +640,7 @@ class Smov extends Controller {
 		$grid->label('Vendedor');
 		$grid->params(array(
 			'search'        => 'true',
-			'editable'      => 'false',
+			'editable'      => 'true',
 			'width'         => 50,
 			'edittype'      => "'text'",
 		));

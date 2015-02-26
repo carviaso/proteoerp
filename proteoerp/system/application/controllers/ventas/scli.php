@@ -1331,12 +1331,11 @@ class Scli extends validaciones {
 					$salida = 'Error en los datos '.$mSQL;
 				}
 			}else{
-				$salida = 'Demaciados resultados para agregar en una ruta, max 100. ('.$cana.')';
+				$salida = 'Demasiados resultados para agregar en una ruta, max 100. ('.$cana.')';
 			}
 		}else{
 			$salida = 'No hay clientes seleccionados';
 		}
-
 		echo $salida;
 	}
 
@@ -1351,8 +1350,6 @@ class Scli extends validaciones {
 
 		//$this->_uri = $this->url.'/'.$idcli;
 		$this->_resumen($idcli);
-
-
 	}
 
 

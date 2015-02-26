@@ -463,6 +463,31 @@ class Pfac extends Controller {
 			}'
 		));
 
+		$grid->addField('autoriza');
+		$grid->label('*');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => 'true',
+			'align'         => "'center'",
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:1, maxlength: 1 }',
+			'cellattr'      => 'function(rowId, tv, aData, cm, rdata){
+				var tips = "";
+				if(aData.status !== undefined){
+					if(aData.status=="S"){
+						tips = "Autorizado";
+					}else{
+						tips = "No autorizado";
+					}
+				}
+				return \'title="\'+tips+\'"\';
+			}'
+		));
+
+
+
 		$grid->addField('fecha');
 		$grid->label('Fecha');
 		$grid->params(array(
@@ -936,7 +961,7 @@ class Pfac extends Controller {
 		$grid->setSearch( $this->datasis->sidapuede('PFAC','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
-		$grid->setOndblClickRow('');
+		//$grid->setOndblClickRow('');
 
 		$grid->setBarOptions('addfunc: pfacadd, editfunc: pfacedit, delfunc: pfacdel, viewfunc: pfacshow');
 
@@ -972,12 +997,31 @@ class Pfac extends Controller {
 	*/
 	function setData(){
 		$this->load->library('jqdatagrid');
-		$oper   = $this->input->post('oper');
-		$id     = $this->input->post('id');
+		$oper     = $this->input->post('oper');
+		$id       = $this->input->post('id');
+
+		$autoriza = strtoupper($this->input->post('autoriza'));
+		$bultos   = $this->input->post('bultos');
+
+
 		$data   = $_POST;
 		$mcodp  = 'numero';
 		$check  = 0;
 
+		unset($data['oper']);
+		unset($data['id']);
+
+		if ($oper == 'edit') {
+			if ( $autoriza != 'S' ) $data['autoriza'] == 'N';
+			$this->db->where("id", $id);
+			$this->db->update('pfac', $data);
+			logusu('INVRESU',"Pedido Autorizado  ".$id." MODIFICADO");
+			echo "Pedido Modificado";
+
+		}
+
+
+/*
 		unset($data['oper']);
 		unset($data['id']);
 		if($oper == 'add'){
@@ -987,6 +1031,7 @@ class Pfac extends Controller {
 		} elseif($oper == 'del') {
 			echo 'Deshabilitado';
 		}
+*/
 	}
 
 
@@ -1863,10 +1908,11 @@ class Pfac extends Controller {
 			$this->db->simple_query('ALTER TABLE pfac ADD UNIQUE INDEX numero (numero)');
 		}
 
-		if(!in_array('fenvia',$campos))  $this->db->query("ALTER TABLE pfac ADD COLUMN fenvia  DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que el vendedor termino el pedido'");
-		if(!in_array('faplica',$campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN faplica DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que se aplicaron los descuentos'");
-		if(!in_array('reserva',$campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN reserva CHAR(1) NOT NULL DEFAULT 'N'");
-		if(!in_array('bultos', $campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN bultos  INT(10) NULL DEFAULT '0' ");
+		if(!in_array('fenvia',  $campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN fenvia   DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que el vendedor termino el pedido'");
+		if(!in_array('faplica', $campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN faplica  DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que se aplicaron los descuentos'");
+		if(!in_array('reserva', $campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN reserva  CHAR(1) NOT NULL DEFAULT 'N'");
+		if(!in_array('bultos',  $campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN bultos   INT(10) NULL DEFAULT '0' ");
+		if(!in_array('autoriza',$campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN autoriza CHAR(1) NOT NULL DEFAULT 'N'");
 
 		$itcampos=$this->db->list_fields('itpfac');
 		if(!in_array('dxapli',$itcampos)){
