@@ -844,7 +844,11 @@ class Vend extends Controller {
 			COMMENT='supervidores de ventas'
 			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
+
 		}
+
+		$mSQL="INSERT IGNORE INTO `vendsup` (`id`,`nombre`) VALUES (1,'SIN SUPERVISOR')";
+		$this->db->simple_query($mSQL);
 
 	}
 }
