@@ -516,10 +516,10 @@ class Vend extends Controller {
 		$edit->comicob->group='Comisiones';
 
 		$edit->vendsup = new dropdownField('Supervisor', 'vendsup');
-		$edit->vendsup->option('','Seleccionar');
+		$edit->vendsup->option('','Ninguno');
 		$edit->vendsup->options('SELECT id, nombre FROM vendsup ORDER BY nombre');
 		$edit->vendsup->style='width:180px';
-		$edit->vendsup->rule ='required';
+		//$edit->vendsup->rule ='required';
 
 		//$edit->buttons('modify', 'save', 'undo', 'delete', 'back');
 
@@ -846,9 +846,6 @@ class Vend extends Controller {
 			$this->db->simple_query($mSQL);
 
 		}
-
-		$mSQL="INSERT IGNORE INTO `vendsup` (`id`,`nombre`) VALUES (1,'SIN SUPERVISOR')";
-		$this->db->simple_query($mSQL);
 
 	}
 }
