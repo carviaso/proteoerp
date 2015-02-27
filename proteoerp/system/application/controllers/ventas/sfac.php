@@ -3299,14 +3299,20 @@ class Sfac extends Controller {
 			redirect('formatos/descargar/FACTURA/'.$uid);
 		}
 
-		$this->rapyd->load('dataedit');
-
-		$edit = new DataEdit('Imprimir factura', 'sfac');
-
 		$sfacforma=$this->datasis->traevalor('FORMATOSFAC','Especifica el metodo a ejecutar para descarga de formato de factura en Proteo Ej. descargartxt...');
 
 		if(empty($sfacforma)) $sfacforma='descargar';
-			$url=site_url('formatos/'.$sfacforma.'/FACTURA/'.$uid);
+		$_url = 'formatos/'.$sfacforma.'/FACTURA/'.$uid;
+		$url=site_url($_url);
+
+		$sfacimpven = trim($this->datasis->traevalor('SFACIMPVEN','Especifica si muestra o no la pantalla que pide control fiscal (S/N)'));
+		if($sfacimpven == 'N'){
+			redirect($_url);
+		}
+
+		$this->rapyd->load('dataedit');
+
+		$edit = new DataEdit('Imprimir factura', 'sfac');
 
 		if(isset($this->back_url))
 			$edit->back_url = site_url($this->back_url);
