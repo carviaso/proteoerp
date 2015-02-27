@@ -16,6 +16,7 @@ class venta extends sfac {
 		parent::Controller();
 		$this->back_dataedit='compras/scst/datafilter';
 		$this->load->library('rapyd');
+		$this->vnega  = trim(strtoupper($this->datasis->traevalor('VENTANEGATIVA')));
 		//$this->datasis->modulo_id(216,1);
 	}
 
@@ -332,7 +333,7 @@ class venta extends sfac {
 
 			if(isset($_POST['vh_placa'])){
 				$dbplaca=$this->db->escape(strtoupper($_POST['vh_placa']));
-				$mSQL="UPDATE sinvehiculo SET placa=$dbplaca WHERE id=".$this->db->escape($id);
+				$mSQL="UPDATE sinvehiculo SET placa=${dbplaca} WHERE id=".$this->db->escape($id);
 				$this->db->simple_query($mSQL);
 			}
 
@@ -351,6 +352,7 @@ class venta extends sfac {
 			$_POST['nombre']      = $edit->nombre->newValue;
 			$_POST['rifci']       = $rifci ;
 			$_POST['direc']       = $dire11;
+			$_POST['referen']     = '';
 
 			$_POST['codigoa_0']   = 'PLACA';
 			$_POST['desca_0']     = (empty($descrip))? 'PLACA':$descrip;
@@ -404,7 +406,7 @@ class venta extends sfac {
 			$_POST['totalg']      = $totalg;
 
 			ob_start();
-				parent::$this->dataedit();
+				$this->dataedit();
 				$rt=ob_get_contents();
 			@ob_end_clean();
 			$ret=json_decode($rt);
@@ -415,7 +417,7 @@ class venta extends sfac {
 				$mSQL = $this->db->update_string('sinvehiculo', $data,'id='.$this->db->escape($id));
 				$this->db->simple_query($mSQL);
 
-				redirect($this->url.'dataprint/modify/'.$data['id_sfac']);
+				redirect($this->url.'ddataprint/modify/'.$data['id_sfac']);
 				return;
 			}else{
 				$edit->error_string = htmlentities(utf8_decode($ret->mensaje));
@@ -509,8 +511,8 @@ class venta extends sfac {
 
 	}
 
-	function dataprint($st,$uid){
+	function ddataprint($st,$uid){
 		$this->back_url='concesionario/inicio/index';
-		parent::dataprint($st,$uid);
+		$this->dataprint($st,$uid);
 	}
 }
