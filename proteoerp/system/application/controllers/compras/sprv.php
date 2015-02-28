@@ -304,7 +304,7 @@ class Sprv extends Controller {
 							\'<label>Hasta  <input type="text" name="lhasta" value=""></label><br />\',
 						buttons: { Emitir: 1 },
 						//focus: "input[name=\'fname\']",
-						submit:function(e,v,m,f){ 
+						submit:function(e,v,m,f){
 							console.log(f);
 							'.$this->datasis->jwinopen(site_url('formatos/verhtml/ARCISLR/').'/\'+id').';
 							e.preventDefault();
@@ -312,7 +312,7 @@ class Sprv extends Controller {
 					}
 				};
 				$.prompt(forma);
-				
+
 				var ret  = $("'.$ngrid.'").getRowData(id);
 
 				if ( ret.url.length > 10 )
@@ -899,6 +899,8 @@ class Sprv extends Controller {
 		$edit = new DataEdit('', 'sprv');
 		$edit->on_save_redirect=false;
 		$script ='
+			var rif_ci="";
+
 			$(function() {
 				$("#tr_gr_desc").hide();
 				$("#grupo").change(function(){grupo();}).change();
@@ -933,24 +935,27 @@ class Sprv extends Controller {
 							});
 
 						//Chequea si esta repetido
-						$.ajax({
-							type: "POST",
-							url: "'.site_url('ajax/rifrep/P').'",
-							dataType: "json",
-							data: {rifci: rif, codigo: '.json_encode($edit->_dataobject->get('proveed')).'},
-							success: function(data){
-								if(data.rt){
-									$.prompt(data.msj,{
-										buttons: { Continuar: true },
-										focus: 1,
-										submit:function(e,v,m,f){
+						if(rif_ci!=rif){
+							$.ajax({
+								type: "POST",
+								url: "'.site_url('ajax/rifrep/P').'",
+								dataType: "json",
+								data: {rifci: rif, codigo: '.json_encode($edit->_dataobject->get('proveed')).'},
+								success: function(data){
+									if(data.rt){
+										$.prompt(data.msj,{
+											buttons: { Continuar: true },
+											focus: 1,
+											submit:function(e,v,m,f){
 
-											$("#nombre").focus();
-										}
-									});
+												$("#nombre").focus();
+											}
+										});
+									}
 								}
-							}
-						});
+							});
+							rif_ci = rif;
+						}
 						//Fin del chequeo repetido
 
 						}

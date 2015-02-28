@@ -1297,7 +1297,7 @@ class Ordc extends Controller {
 		$edit->status->option('CE','Cerrado');
 		$edit->status->option('BA','BackOrder');
 		$edit->status->style='width:100px;';
-		//$edit->status->when=array('show');
+		$edit->status->when=array('show');
 
 		$edit->almacen = new  dropdownField ('Almac&eacute;n', 'almacen');
 		$edit->almacen->options('SELECT ubica, CONCAT(ubica,\' \',ubides) nombre FROM caub ORDER BY ubica');
@@ -1664,7 +1664,7 @@ class Ordc extends Controller {
 		}
 		$totalg = $totals+$iva;
 
-		$do->set('peso'     ,round($tpeso ,2));
+		$do->set('peso'     ,round($tpeso  ,2));
 		$do->set('montonet' ,round($totals ,2));
 		$do->set('montotot' ,round($totalg ,2));
 		$do->set('montoiva' ,round($iva    ,2));

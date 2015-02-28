@@ -2941,15 +2941,32 @@ class Ajax extends Controller {
 		echo $monto;
 	}
 
+	//Trae Ordenes de compra y Notas de Entrega
 	function traeordc(){
 		$cod_prv = $this->input->post('cod_prv');
 		header('Content-Type: application/json');
 		if(!empty($cod_prv)){
+			$rt=array();
 			$dbcod_prv = $this->db->escape($cod_prv);
-			$mSQL="SELECT id,numero,fecha,montotot AS monto,peso  FROM ordc WHERE status IN ('PE','BA') AND proveed=${dbcod_prv} ORDER BY fecha DESC LIMIT 10";
+
+			$mSQL="SELECT CONCAT('OC_', id) AS id,numero,fecha,montotot AS monto,peso,'OC' AS tipo  FROM ordc WHERE status IN ('PE','BA') AND proveed=${dbcod_prv} ORDER BY fecha DESC LIMIT 10";
 			$query = $this->db->query($mSQL);
 			if($query->num_rows()>0){
-				echo json_encode($query->result());
+				foreach ($query->result() as $row){
+					$rt[] = $row;
+				}
+			}
+
+			//$mSQL="SELECT CONCAT('NE_', id) AS id,numero,fecha,montotot AS monto,peso,'NE' AS tipo  FROM scst WHERE tipo_doc='NE' AND proveed=${dbcod_prv} ORDER BY fecha DESC LIMIT 10";
+			//$query = $this->db->query($mSQL);
+			//if($query->num_rows()>0){
+			//	foreach ($query->result() as $row){
+			//		$rt[] = $row;
+			//	}
+			//}
+
+			if(count($rt)>0){
+				echo json_encode($rt);
 			}else{
 				echo json_encode(null);
 			}
@@ -2959,31 +2976,68 @@ class Ajax extends Controller {
 	}
 
 	function traeitordc(){
+		header('Content-Type: application/json');
 		$ids = $this->input->post('ids');
 		if(is_array($ids)){
-			header('Content-Type: application/json');
-			$sel=array('TRIM(c.descrip) AS descrip', 'TRIM(c.codigo) AS codigo', 'c.precio1', 'c.precio2', 'c.precio3', 'c.precio4',
-				'c.iva','c.existen','c.tipo','c.peso','c.ultimo', 'c.pond','c.activo','SUM(b.cantidad-b.recibido) AS cantidad');
-			$this->db->select($sel);
-			$this->db->from('ordc   AS a');
-			$this->db->join('itordc AS b','a.numero=b.numero');
-			$this->db->join('sinv   AS c','b.codigo=c.codigo');
-			$this->db->where_in('a.id',$ids);
-			$this->db->group_by('c.codigo');
-			$this->db->where_in('a.status',array('PE','BA'));
+			$rt=array();
+			$ids_ords=$ids_scst=array();
 
-			$query = $this->db->get();
-			if($query->num_rows() > 0){
-				$rt=array();
-				foreach ($query->result_array() as $row){
-					$row['descrip']=$this->en_utf8($row['descrip']);
-					$rt[]=$row;
+			foreach($ids as $val){
+
+				if(preg_match('/^(?P<tipo>(OC|NE))_(?P<id>[0-9]+)$/', $val, $matches)>0){
+					if($matches['tipo']=='NE'){
+						$ids_scst[]=$matches['id'];
+					}elseif($matches['tipo']=='OC'){
+						$ids_ords[]=$matches['id'];
+					}
 				}
+			}
 
+			if(count($ids_ords)>0){
+				$sel=array('TRIM(c.descrip) AS descrip', 'TRIM(c.codigo) AS codigo', 'c.precio1', 'c.precio2', 'c.precio3', 'c.precio4',
+					'c.iva','c.existen','c.tipo','c.peso','c.ultimo', 'c.pond','c.activo','SUM(b.cantidad-b.recibido) AS cantidad');
+				$this->db->select($sel);
+				$this->db->from('ordc   AS a');
+				$this->db->join('itordc AS b','a.numero=b.numero');
+				$this->db->join('sinv   AS c','b.codigo=c.codigo');
+				$this->db->where_in('a.id',$ids_ords);
+				$this->db->group_by('c.codigo');
+				$this->db->where_in('a.status',array('PE','BA'));
+
+				$query = $this->db->get();
+				if($query->num_rows() > 0){
+					foreach ($query->result_array() as $row){
+						$row['descrip']=$this->en_utf8($row['descrip']);
+						$rt[]=$row;
+					}
+				}
+			}
+
+			if(count($ids_scst)>0){
+				$sel=array('TRIM(c.descrip) AS descrip', 'TRIM(c.codigo) AS codigo', 'c.precio1', 'c.precio2', 'c.precio3', 'c.precio4',
+					'c.iva','c.existen','c.tipo','c.peso','c.ultimo', 'c.pond','c.activo','b.cantidad AS cantidad');
+				$this->db->select($sel);
+				$this->db->from('scst   AS a');
+				$this->db->join('itscst AS b','a.control=b.control');
+				$this->db->join('sinv   AS c','b.codigo=c.codigo');
+				$this->db->where_in('a.id',$ids_scst);
+				$this->db->where_in('a.tipo_doc',array('NE'));
+
+				$query = $this->db->get();
+				if($query->num_rows() > 0){
+					foreach ($query->result_array() as $row){
+						$row['descrip']=$this->en_utf8($row['descrip']);
+						$rt[]=$row;
+					}
+				}
+			}
+
+			if(count($rt)>0){
 				echo json_encode($rt);
 			}else{
 				echo json_encode(null);
 			}
+
 		}else{
 			echo json_encode(null);
 		}

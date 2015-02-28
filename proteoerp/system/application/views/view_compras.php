@@ -267,7 +267,8 @@ function chtipodoc(){
 		$('#td_fafecta').hide();
 		$('#fafecta').attr('type','hidden');
 	}else{
-
+		$('#td_fafecta').hide();
+		$('#fafecta').attr('type','hidden');
 	}
 }
 
@@ -561,7 +562,8 @@ function post_modbus_sprv(){
 					var pant  = "<table id='tordc'></table>";
 
 					var promt = $.prompt(pant, {
-						title: "El proveedor posee la siguiente lista de ordenes",
+						position: { width: 450 },
+						title: "El proveedor posee la siguiente lista de ordenes y notas de entrega",
 						buttons: { "Continuar": true },
 						submit: function(e,v,m,f){
 							var srows = jQuery("#tordc").jqGrid('getGridParam','selarrrow');
@@ -621,18 +623,27 @@ function post_modbus_sprv(){
 
 					jQuery("#tordc").jqGrid({
 						datatype: "local",
-						height: 200,
-						colNames:["id","N&uacute;mero","Fecha", "Peso","Monto"],
+						height: 230,
+						colNames:["id","Tipo","N&uacute;mero","Fecha", "Peso","Monto"],
 						colModel:[
 							{name:"id"     , index:"id"     , key: true, hidden: true },
+							{name:"tipo"   , index:"tipo"   , width:30 , align:"center"},
 							{name:"numero" , index:"numero" , width:80 , align:"center"},
 							{name:"fecha"  , index:"fecha"  , width:70 , align:"center"},
 							{name:"peso"   , index:"peso"   , width:90 , align:"right"  , sorttype:"float"},
 							{name:"monto"  , index:"monto"  , width:100, align:"right"  , sorttype:"float"}
 						],
 						multiselect: true,
-						caption: "Seleccione las que desee importar",
+						caption: "Seleccione los efectos que desee importar",
 						rowNum:10,
+						afterInsertRow:
+							function( rid, aData, rowe){
+								if(aData.tipo == 'OC'){
+									$(this).jqGrid( "setCell", rid, "tipo","", {color:"#FFFFFF", background:"#166D05" });
+								}else{
+									$(this).jqGrid( "setCell", rid, "tipo","", {color:"#FFFFFF", background:"#95ACFE" });
+								}
+							},
 					});
 
 					for(var i=0;i<data.length;i++){

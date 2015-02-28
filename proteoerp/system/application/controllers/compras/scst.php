@@ -206,6 +206,7 @@ class Scst extends Controller {
 				$("#fvehi").html("");
 				$("#fcompra").html(data);
 				$("#fcompra").dialog( "open" );
+				$("#proveed").focus();
 			});
 		};';
 

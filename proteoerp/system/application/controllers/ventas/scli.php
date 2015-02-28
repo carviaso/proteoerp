@@ -1800,6 +1800,7 @@ class Scli extends validaciones {
 			$script ='
 			<script type="text/javascript" >
 			var rifrep=false;
+			var rif_ci="";
 			$(function() {
 				$("#aniversario").datepicker({ dateFormat: "dd/mm/yy" });
 
@@ -1857,6 +1858,7 @@ class Scli extends validaciones {
 					alert("Al parecer el RIF colocado no es correcto, por favor verifique con el SENIAT.");
 					return true;
 				}else{
+
 					$.ajax({
 						type: "POST",
 						url: "'.site_url('ajax/traerif').'",
@@ -1875,28 +1877,31 @@ class Scli extends validaciones {
 					});
 
 					//Chequea si esta repetido
-					$.ajax({
-						type: "POST",
-						url: "'.site_url('ajax/rifrep/C').'",
-						dataType: "json",
-						data: {rifci: rif, codigo: '.json_encode($do->get('cliente')).'},
-						success: function(data){
-							if(data.rt){
-								$.prompt(data.msj,{
-									buttons: { Continuar: true },
-									focus: 1,
-									submit:function(e,v,m,f){
-										$("#rifci").unbind("focusout");
-										$("#nombre").focus();
-										//$("#rifci").bind("focusout",function(){ frifrep(); });
-									}
-								});
-								$("#rifci").unbind("focusout");
-								$("#nombre").focus();
-								//$("#rifci").bind("focusout",function(){ frifrep(); });
+					if(rif_ci!=rif){
+						$.ajax({
+							type: "POST",
+							url: "'.site_url('ajax/rifrep/C').'",
+							dataType: "json",
+							data: {rifci: rif, codigo: '.json_encode($do->get('cliente')).'},
+							success: function(data){
+								if(data.rt){
+									$.prompt(data.msj,{
+										buttons: { Continuar: true },
+										focus: 1,
+										submit:function(e,v,m,f){
+											$("#rifci").unbind("focusout");
+											$("#nombre").focus();
+											//$("#rifci").bind("focusout",function(){ frifrep(); });
+										}
+									});
+									$("#rifci").unbind("focusout");
+									$("#nombre").focus();
+									//$("#rifci").bind("focusout",function(){ frifrep(); });
+								}
 							}
-						}
-					});
+						});
+						rif_ci = rif;
+					}
 					//Fin del chequeo repetido
 				}
 				return true;
