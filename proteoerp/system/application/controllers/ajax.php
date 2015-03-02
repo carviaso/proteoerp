@@ -1839,7 +1839,40 @@ class Ajax extends Controller {
 	}
 
 	//******************************************************************
-	//Saldo de cliente vencido
+	//Saldo de cliente vencido y ch devueltos
+	//
+	function ajaxsaldosclivench(){
+		header('Content-Type: application/json');
+		$mid = $this->input->post('clipro');
+
+		$rt=array('saldo'=>0,'chedev'=>0);
+
+		if($mid !== false){
+
+			ob_start();
+				$this->ajaxsaldoscliven();
+				$saldo=ob_get_contents();
+			@ob_end_clean();
+			$rt['saldo'] = $saldo;
+
+			$this->db->select_sum('a.monto','saldo');
+			$this->db->from('smov AS a');
+			$this->db->join('prmo AS c','a.transac=c.transac');
+			$this->db->where('a.cod_cli',$mid);
+			$this->db->where('a.abonos < a.monto');
+			$this->db->where('a.tipo_doc','ND');
+			$this->db->where('c.tipop','3');
+
+			$q=$this->db->get();
+			$row = $q->row_array();
+			$rt['chedev'] = (empty($row['saldo']))? 0: $row['saldo'];
+		}
+		echo json_encode($rt);
+	}
+
+
+	//******************************************************************
+	//Saldo de pedido de cliente
 	//
 	function ajaxsaldoscliped(){
 		$mid = $this->input->post('clipro');
@@ -3007,6 +3040,7 @@ class Ajax extends Controller {
 				$query = $this->db->get();
 				if($query->num_rows() > 0){
 					foreach ($query->result_array() as $row){
+						$row['control']=null;
 						$row['descrip']=$this->en_utf8($row['descrip']);
 						$rt[]=$row;
 					}
@@ -3015,13 +3049,14 @@ class Ajax extends Controller {
 
 			if(count($ids_scst)>0){
 				$sel=array('TRIM(c.descrip) AS descrip', 'TRIM(c.codigo) AS codigo', 'c.precio1', 'c.precio2', 'c.precio3', 'c.precio4',
-					'c.iva','c.existen','c.tipo','c.peso','c.ultimo', 'c.pond','c.activo','b.cantidad AS cantidad');
+					'c.iva','c.existen','c.tipo','c.peso','c.ultimo', 'c.pond','c.activo','b.cantidad AS cantidad','a.control');
 				$this->db->select($sel);
 				$this->db->from('scst   AS a');
 				$this->db->join('itscst AS b','a.control=b.control');
 				$this->db->join('sinv   AS c','b.codigo=c.codigo');
 				$this->db->where_in('a.id',$ids_scst);
 				$this->db->where_in('a.tipo_doc',array('NE'));
+				$this->db->orderby('a.control');
 
 				$query = $this->db->get();
 				if($query->num_rows() > 0){

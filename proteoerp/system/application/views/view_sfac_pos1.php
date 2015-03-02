@@ -734,13 +734,19 @@ function saldoven(){
 	var codcli=$('#cod_cli').val();
 	if(codcli!=''){
 		$.ajax({
-			url: "<?php echo site_url('ajax/ajaxsaldoscliven'); ?>",
+			url: "<?php echo site_url('ajax/ajaxsaldosclivench'); ?>",
 			dataType: 'json',
 			type: 'POST',
 			data: {'clipro' : codcli},
 			success: function(data){
-				if(data>0){
-					$.prompt("<span style='font-size:1.5em'>Cliente presenta saldo vencido de <b>"+nformat(data,2)+" Bs.</b> debe ponerse al d&iacute;a.</span>", {
+				if(data.saldo > 0 || data.chedev > 0){
+					var sch = ''
+					if(data.chedev>0){
+						sch= " y <b style='color: orange; animation: blink 1s steps(2, start) infinite;font-size:1.2em'>"+nformat(data.chedev,2)+"</b> en <span style='color: orange; animation: blink 1s steps(2, start) infinite;'>cheques devueltos</span>,";
+					}
+
+					var str ="<style>@keyframes blink { to { color: red;} }</style>Cliente presenta saldo vencido de <b>"+nformat(data.saldo,2)+" Bs.</b> "+sch+" debe ponerse al d&iacute;a.";
+					$.prompt("<span style='font-size:1.5em'>"+str+"</span>", {
 						title: "Saldo vencido",
 						buttons: { "Continuar": true },
 						submit: function(e,v,m,f){
@@ -750,6 +756,7 @@ function saldoven(){
 				}
 			},
 		});
+
 		$.post( "<?php echo site_url('ajax/ajaxsaldoscliped'); ?>", { 'clipro' : codcli })
 		.done(function( data ) {
 			$('#pedpen').html( "Monto de Pedidos pendientes: <b>"+nformat(data,2)+"</b>" );
@@ -861,7 +868,7 @@ function cdescrip(nind){
 		ddetalle.setAttribute("id"    , "detalle_"+ind);
 		ddetalle.setAttribute("name"  , "detalle_"+ind);
 		ddetalle.setAttribute("class" , "textarea");
-		ddetalle.setAttribute("cols"  , 43);
+		ddetalle.setAttribute("cols"  , 40);
 		ddetalle.setAttribute("rows"  , 2);
 		$("#detalle_"+ind).replaceWith(ddetalle);
 
@@ -1178,7 +1185,7 @@ function apldes(){
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>-%</b></td>
 				<td class="littletableheaderdet" style='background:#0B3861;'><b>Importe</b></td>
 				<?php if($form->_status!='show') {?>
-					<td bgcolor='#0B3861'><a href='#' id='addlink' onclick="add_sitems()" title='Agregar otro articulo'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 18, 'alt'=>'Agregar otro producto', 'title' => 'Agregar otro producto', 'border'=>'0')); ?></a></td>
+					<td  class="littletableheaderdet"  style='background:#0B3861;'><a href='#' id='addlink' onclick="add_sitems()" title='Agregar otro articulo'><?php echo img(array('src' =>"images/agrega4.png", 'height' => 18, 'alt'=>'Agregar otro producto', 'title' => 'Agregar otro producto', 'border'=>'0')); ?></a></td>
 				<?php } ?>
 			</tr>
 			<?php for($i=0;$i<$form->max_rel_count['sitems'];$i++) {

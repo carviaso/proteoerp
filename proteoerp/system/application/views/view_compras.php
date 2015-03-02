@@ -21,9 +21,9 @@ $scampos .='<td class="littletablerow" align="left" ><b id="it_descrip_val_<#i#>
 $scampos .='<td class="littletablerow" align="right">'.$campos['cantidad']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['costo']['field']. '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['importe']['field'];
-$scampos .= $campos['sinvpeso']['field'].$campos['iva']['field'].'</td>';
+$scampos .= $campos['sinvpeso']['field'].$campos['iva']['field'].$campos['nentrega']['field'].'</td>';
 //$scampos .='<td class="littletablerow" align="right">'.$campos['precio1']['field'].'</td>';
-$scampos .='<td class="littletablerow"><a href=# onclick="del_itscst(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
+$scampos .='<td class="littletablerow"><a href=# onclick="del_itscst(<#i#>);return false;">'.img('images/delete.jpg').'</a></td></tr>';
 $campos=$form->js_escape($scampos);
 
 $ccampos=$form->detail_fields['gereten'];
@@ -33,7 +33,7 @@ $cgereten.=' <td class="littletablerow" nowrap>       '.$ccampos['codigorete']['
 $cgereten.=' <td class="littletablerow" align="right">'.$ccampos['base']['field']      .'</td>';
 $cgereten.=' <td class="littletablerow" align="right">'.$ccampos['porcen']['field']    .'</td>';
 $cgereten.=' <td class="littletablerow" align="right">'.$ccampos['monto']['field']     .'</td>';
-$cgereten.=' <td class="littletablerow" align="center"><a href=\'#\' onclick="del_gereten(<#i#>);return false;">'.img("images/delete.jpg").'</a></td></tr>';
+$cgereten.=' <td class="littletablerow" align="center"><a href=\'#\' onclick="del_gereten(<#i#>);return false;">'.img('images/delete.jpg').'</a></td></tr>';
 $cgereten=$form->js_escape($cgereten);
 
 $cscstordc = $form->detail_fields['scstordc']['ordc']['field'];
@@ -247,7 +247,31 @@ $(function(){
 		}
 	});
 
+	pintane();
 });
+
+function pintane(){
+	var arr=$('input[name^="nentrega_"]');
+	jQuery.each(arr, function() {
+		nom=this.name
+		pos=this.name.lastIndexOf('_');
+		if(pos>0){
+			if(this.value!=''){
+				ind = this.name.substring(pos+1);
+				if(ind!=id){
+					itnentrega= this.value.trim();
+					if(itnentrega!=null){
+						$('#codigo_'+ind).attr('readonly','readonly');
+						$('#codigo_'+ind).attr('title'   ,'Nota de entrega');
+						$('#codigo_'+ind).css('background','#95ACFE');
+					}else{
+						$('#codigo_'+ind).css('background','#FFFFFF');
+					}
+				}
+			}
+		}
+	});
+}
 
 function marcar(obj){
 	var color = $(obj).css("background-color");
@@ -571,7 +595,9 @@ function post_modbus_sprv(){
 								var arr_num = [];
 								for(var i=0;i < srows.length;i++){
 									ret  = $("#tordc").getRowData(srows[i]);
-									arr_num.push(ret.numero);
+									if(ret.id.search(/^OC_[0-9]+$/i) >= 0){
+										arr_num.push(ret.numero);
+									}
 								}
 
 								$.ajax({
@@ -597,6 +623,10 @@ function post_modbus_sprv(){
 												$('#costo_'+id).val(item.pond);
 												$('#precio1_'+id).val(item.precio1);
 												$('#cantidad_'+id).val(item.cantidad);
+												if(item.control!=null){
+													$('#nentrega_'+id).val(item.control);
+												}
+
 												importe(parseInt(id));
 												if(item.activo=='N'){
 													$('#tr_itscst_'+id).css("background-color","#FF7A46");
@@ -614,6 +644,7 @@ function post_modbus_sprv(){
 												$("#divgereten").after(html);
 												$("#ordc_"+can).val(arr_num[i]);
 											}
+											pintane();
 										}
 									},
 								});
@@ -635,7 +666,7 @@ function post_modbus_sprv(){
 						],
 						multiselect: true,
 						caption: "Seleccione los efectos que desee importar",
-						rowNum:10,
+						rowNum:20,
 						afterInsertRow:
 							function( rid, aData, rowe){
 								if(aData.tipo == 'OC'){
@@ -925,6 +956,7 @@ if (!$solo){
 		$it_peso    = "sinvpeso_${i}";
 		$it_iva     = "iva_${i}";
 		$it_pvp     = "precio1_${i}";
+		$it_nentrega= "nentrega_${i}";
 	?>
 
 	<tr id='tr_itscst_<?php echo $i; ?>'  ondblclick="marcar(this)">
@@ -935,7 +967,7 @@ if (!$solo){
 		<td class="littletablerow" align="right"><?php echo $form->$it_cana->output;   ?></td>
 		<td class="littletablerow" align="right"><?php echo $form->$it_precio->output; ?></td>
 		<td class="littletablerow" align="right"><?php echo $form->$it_importe->output; ?>
-		<?php echo $form->$it_peso->output.$form->$it_iva->output; ?>
+		<?php echo $form->$it_peso->output.$form->$it_iva->output.$form->$it_nentrega->output; ?>
 		</td>
 		<?php if($form->_status!='show') {?>
 		<td class="littletablerow">

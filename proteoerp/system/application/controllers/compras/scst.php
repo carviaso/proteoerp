@@ -2271,6 +2271,12 @@ class Scst extends Controller {
 		$edit->iva->db_name           = 'iva';
 		$edit->iva->rel_id            = 'itscst';
 		$edit->iva->showformat        = 'decimal';
+
+		$edit->nentrega = new hiddenField('Nota de entrega', 'nentrega_<#i#>');
+		$edit->nentrega->autocomplete=false;
+		$edit->nentrega->rule     = 'callback_chnentrega[<#i#>]';
+		$edit->nentrega->db_name  = 'nentrega';
+		$edit->nentrega->rel_id   = 'itscst';
 		//fin de campos para detalle
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
@@ -2793,7 +2799,7 @@ class Scst extends Controller {
 		$this->db->where($campo,$valor);
 		$cana=$this->db->count_all_results('sinvehiculo');
 		if($cana>0){
-			$this->validation->set_message('chrepetido', "Ya existe un veh&iacute;culo con el mismo $campo registrado.");
+			$this->validation->set_message('chrepetido', "Ya existe un veh&iacute;culo con el mismo ${campo} registrado.");
 			return false;
 		}
 		return true;
@@ -3516,7 +3522,7 @@ class Scst extends Controller {
 					$sql='SELECT a.codigo,IF(a.devcant<=a.cantidad, a.cantidad-a.devcant,a.cantidad) AS cantidad,
 						a.importe,a.importe/a.cantidad AS costo,a.id,
 						a.precio1,a.precio2,a.precio3,a.precio4,b.formcal,b.ultimo,b.standard,b.pond,b.existen,b.fracci,
-						a.rmargen,b.margen1,b.margen2,b.margen3,b.margen4,a.devcant
+						a.rmargen,b.margen1,b.margen2,b.margen3,b.margen4,a.devcant,a.nentrega
 						FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE a.control=?';
 					$qquery=$this->db->query($sql,array($control));
 					if($qquery->num_rows()>0){
@@ -3565,14 +3571,16 @@ class Scst extends Controller {
 							$ban=$this->db->simple_query($mSQL);
 							if(!$ban){ memowrite($mSQL,'scst'); $error++; }
 
-							//Chequea que no este in inventario fisico antes de cargar cantidades
+
+							//Chequea que no este in inventario fisico antes de cargar cantidades y que no venga de una NE
+							$nentrega = trim($itrow->nentrega);
 							$dbcodigo = $this->db->escape($itrow->codigo);
 							$mSQL="SELECT COUNT(*) AS cana
 								FROM stra   AS a
 								JOIN itstra AS b ON a.numero=b.numero
 								WHERE a.envia='INFI' AND a.recibe=${dbdepo} AND b.codigo=${dbcodigo} AND a.fecha>${dbactuali}";
 							$chinnfis=intval($this->datasis->dameval($mSQL));
-							if($chinnfis==0){
+							if($chinnfis==0 && empty($nentrega)){
 								$this->datasis->sinvcarga($itrow->codigo,$depo, $itrow->cantidad );
 							}
 
@@ -4423,13 +4431,13 @@ class Scst extends Controller {
 		// DESACTUALIZA INVENTARIO
 		$dbdepo   = $this->db->escape($mALMA);
 		$dbrecep= $this->db->escape($recep);
-		$query = $this->db->query("SELECT a.codigo, IF(a.devcant<=a.cantidad, a.cantidad-a.devcant,a.cantidad) AS cantidad, a.id, a.precio1, a.precio2, a.precio3, a.precio4,a.costo, b.fracci FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE control=${dbcontrol}");
+		$query = $this->db->query("SELECT a.codigo, IF(a.devcant<=a.cantidad, a.cantidad-a.devcant,a.cantidad) AS cantidad, a.id, a.precio1, a.precio2, a.precio3, a.precio4,a.costo, b.fracci,a.nentrega FROM itscst AS a JOIN sinv AS b ON a.codigo=b.codigo WHERE control=${dbcontrol}");
 		foreach($query->result() as $row){
 			$itdbcodigo= $this->db->escape($row->codigo);
 			$mTIPO = $this->datasis->dameval("SELECT MID(tipo,1,1) AS tipo FROM sinv WHERE codigo=${itdbcodigo}");
 
-			//Chequea que no este in inventario fisico antes de cargar cantidades
-
+			//Chequea que no este in inventario fisico antes de cargar cantidades y no tenga NE
+			$nentrega  = $row->nentrega;
 			$dbcodigo = $this->db->escape($row->codigo);
 			$mSQL="SELECT COUNT(*) AS cana
 				FROM stra   AS a
@@ -4439,7 +4447,7 @@ class Scst extends Controller {
 
 			if($tipo_doc == 'FC' || $tipo_doc =='NE'){
 
-				if($chinnfis==0){
+				if($chinnfis==0 && empty($nentrega)){
 					$this->datasis->sinvcarga($row->codigo,  $mALMA, (-1)*$row->cantidad);
 				}
 
@@ -4860,6 +4868,12 @@ class Scst extends Controller {
 
 		$opera   = ($tipo_doc=='FC')? 'Compra':'Devolucion';
 		logusu('scst',"${opera} ${codigo} control ${control} MODIFICADA");
+	}
+
+	function chnentrega($val,$i){
+		$codigo   = $this->input->post('codigo_'.$i);
+		$cantidad = floatval($this->input->post('cantidad_'.$i));
+
 	}
 
 	function chddate($fecha){
@@ -5341,7 +5355,21 @@ class Scst extends Controller {
 		$campos=$this->db->list_fields('itscst');
 		if(!in_array('id',      $campos)) $this->db->query('ALTER TABLE itscst ADD COLUMN id       INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		if(!in_array('rmargen', $campos)) $this->db->query("ALTER TABLE itscst ADD COLUMN rmargen  CHAR(1) NULL DEFAULT 'N'  COMMENT 'Respeta el margen al actualizar' AFTER `usuario`");
-		if(!in_array('nentrega',$campos)) $this->db->query("ALTER TABLE itscst ADD COLUMN nentrega CHAR(8) NULL DEFAULT NULL COMMENT 'Respeta el margen al actualizar' AFTER `usuario`");
+		if(!in_array('nentrega',$campos)) $this->db->query("ALTER TABLE itscst ADD COLUMN nentrega CHAR(8) NULL DEFAULT NULL COMMENT 'Nota de entrega' AFTER `usuario`");
+
+		//if(!$this->db->table_exists('itscstne')){
+		//	$mSQL="CREATE TABLE `itscstne` (
+		//		`id` INT(11) NOT NULL AUTO_INCREMENT,
+		//		`nentrega` CHAR(8) NULL DEFAULT NULL,
+		//		`compra` CHAR(8) NULL DEFAULT NULL,
+		//		`codigo` VARCHAR(15) NULL DEFAULT NULL,
+		//		`cantidad` DECIMAL(10,3) NULL DEFAULT NULL,
+		//		PRIMARY KEY (`id`),
+		//		UNIQUE INDEX `nentrega_compra_codigo` (`nentrega`, `compra`, `codigo`)
+		//	)
+		//	ENGINE=MyISAM";
+		//	$this->db->query($mSQL);
+		//}
 
 		//Para islr
 		if(!$this->db->table_exists('gereten')){
