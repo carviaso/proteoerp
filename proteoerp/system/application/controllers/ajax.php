@@ -2990,13 +2990,13 @@ class Ajax extends Controller {
 				}
 			}
 
-			//$mSQL="SELECT CONCAT('NE_', id) AS id,numero,fecha,montotot AS monto,peso,'NE' AS tipo  FROM scst WHERE tipo_doc='NE' AND proveed=${dbcod_prv} ORDER BY fecha DESC LIMIT 10";
-			//$query = $this->db->query($mSQL);
-			//if($query->num_rows()>0){
-			//	foreach ($query->result() as $row){
-			//		$rt[] = $row;
-			//	}
-			//}
+			$mSQL="SELECT CONCAT('NE_', id) AS id,numero,fecha,montotot AS monto,peso,'NE' AS tipo  FROM scst WHERE tipo_doc='NE' AND proveed=${dbcod_prv}  AND factura IS NULL ORDER BY fecha DESC LIMIT 10";
+			$query = $this->db->query($mSQL);
+			if($query->num_rows()>0){
+				foreach ($query->result() as $row){
+					$rt[] = $row;
+				}
+			}
 
 			if(count($rt)>0){
 				echo json_encode($rt);
@@ -3048,19 +3048,44 @@ class Ajax extends Controller {
 			}
 
 			if(count($ids_scst)>0){
-				$sel=array('TRIM(c.descrip) AS descrip', 'TRIM(c.codigo) AS codigo', 'c.precio1', 'c.precio2', 'c.precio3', 'c.precio4',
-					'c.iva','c.existen','c.tipo','c.peso','c.ultimo', 'c.pond','c.activo','b.cantidad AS cantidad','a.control');
+
+				$canexis=array();
+				$sel=array('a.id','TRIM(b.codigo) AS codigo','SUM(b.cantidad) AS cantidad','a.control');
+				$this->db->select($sel);
+				$this->db->from('scst   AS a');
+				$this->db->join('itscst AS b','a.control=b.nentrega');
+				$this->db->where_in('a.id',$ids_scst);
+				$this->db->where('a.tipo_doc','NE');
+				$this->db->groupby('a.id,b.codigo');
+				$this->db->orderby('a.control');
+				$query = $this->db->get();
+				if($query->num_rows() > 0){
+					foreach ($query->result() as $row){
+						$canexis[$row->id][$row->codigo]=floatval($row->cantidad);
+					}
+				}
+
+				$sel=array('a.id','TRIM(c.descrip) AS descrip', 'TRIM(c.codigo) AS codigo', 'c.precio1', 'c.precio2', 'c.precio3', 'c.precio4',
+					'c.iva','c.existen','c.tipo','c.peso','c.ultimo', 'c.pond','c.activo','SUM(b.cantidad) AS cantidad','a.control');
 				$this->db->select($sel);
 				$this->db->from('scst   AS a');
 				$this->db->join('itscst AS b','a.control=b.control');
 				$this->db->join('sinv   AS c','b.codigo=c.codigo');
 				$this->db->where_in('a.id',$ids_scst);
-				$this->db->where_in('a.tipo_doc',array('NE'));
+				$this->db->where('a.tipo_doc','NE');
+				$this->db->groupby('a.id,b.codigo');
 				$this->db->orderby('a.control');
 
 				$query = $this->db->get();
 				if($query->num_rows() > 0){
 					foreach ($query->result_array() as $row){
+						$row['cantidad']=floatval($row['cantidad']);
+						$rid=$row['id'];
+						$rco=$row['codigo'];
+						if(isset($canexis[$rid][$rco])){
+							$row['cantidad'] = $row['cantidad']-$canexis[$rid][$rco];
+							if($row['cantidad']<=0) continue;
+						}
 						$row['descrip']=$this->en_utf8($row['descrip']);
 						$rt[]=$row;
 					}

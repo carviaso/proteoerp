@@ -2134,7 +2134,7 @@ class Scst extends Controller {
 		$edit->tipo = new dropdownField('Tipo', 'tipo_doc');
 		$edit->tipo->option('FC','Factura a Cr&eacute;dito');
 		$edit->tipo->option('NC','Nota de Cr&eacute;dito');
-		$edit->tipo->option('NE','Nota de Entrega'); //Falta implementar los metodos post para este caso
+		$edit->tipo->option('NE','Nota de Entrega');
 		$edit->tipo->rule = 'required';
 		$edit->tipo->style='width:130px;';
 		$edit->tipo->onchange='chtipodoc()';
@@ -4617,13 +4617,17 @@ class Scst extends Controller {
 
 
 		//Saca la relacion con ordc
-		$ordc_real=0;
-		$ordc_cana=$do->count_rel('scstordc');
-		for($i=0;$i<$ordc_cana;$i++){
-			$numeroordc = $do->get_rel('scstordc','orden',$i);
-			if(!empty($numeroordc)) $ordc_real++;
-		}
-		if($ordc_real<=0){
+		if($tipo_doc=='FC'){
+			$ordc_real=0;
+			$ordc_cana=$do->count_rel('scstordc');
+			for($i=0;$i<$ordc_cana;$i++){
+				$numeroordc = $do->get_rel('scstordc','orden',$i);
+				if(!empty($numeroordc)) $ordc_real++;
+			}
+			if($ordc_real<=0){
+				$do->unset_rel('scstordc');
+			}
+		}else{
 			$do->unset_rel('scstordc');
 		}
 		//Fin de la relacion ordc
@@ -4859,21 +4863,74 @@ class Scst extends Controller {
 		return true;
 	}
 
-	//Chequea que el dia no sea superior a hoy
-
 	function _post_update($do){
-		$codigo  = $do->get('numero');
-		$control = $do->get('control');
-		$tipo_doc= $do->get('tipo_doc');
+		$codigo    = $do->get('numero');
+		$control   = $do->get('control');
+		$tipo_doc  = $do->get('tipo_doc');
+		$dbcontrol = $this->db->escape($control);
+
+		//Marca la NE como facturada
+		$arr_ne = array();
+		$cana=$do->count_rel('itscst');
+		for($i=0;$i<$cana;$i++){
+			$itnentrega = $do->get_rel('itscst','nentrega',$i);
+			if(!empty($itnentrega)){
+				if (in_array($itnentrega, $arr_ne)){
+					continue;
+				}
+				$dbnentrega=$this->db->escape($itnentrega);
+
+				$mSQL="SELECT aa.codigo, SUM(aa.cana) AS cana FROM (
+					SELECT a.codigo,-1*SUM(a.cantidad) AS cana FROM itscst AS a WHERE a.nentrega=${dbnentrega} GROUP BY a.codigo
+					UNION ALL
+					SELECT a.codigo,   SUM(a.cantidad) AS cana FROM itscst AS a WHERE a.control=${dbnentrega}  GROUP BY a.codigo
+				) AS aa
+				HAVING cana>0";
+				$query = $this->db->query($mSQL);
+				if($query->num_rows() == 0){
+					$dbcontrol = $this->db->escape($control);
+					$sql="UPDATE scst SET factura=${dbcontrol} WHERE control=${dbnentrega}";
+					$this->db->simple_query($sql);
+				}else{
+					$sql="UPDATE scst SET factura=NULL WHERE control=${dbnentrega}";
+					$this->db->simple_query($sql);
+				}
+				$arr_ne[]=$itnentrega;
+			}
+		}
+		//Fin de la marca de la NE
 
 		$opera   = ($tipo_doc=='FC')? 'Compra':'Devolucion';
 		logusu('scst',"${opera} ${codigo} control ${control} MODIFICADA");
 	}
 
 	function chnentrega($val,$i){
-		$codigo   = $this->input->post('codigo_'.$i);
-		$cantidad = floatval($this->input->post('cantidad_'.$i));
+		$tipo_doc  = $this->input->post('tipo_doc');
+		if($tipo_doc!='FC'){
+			$this->validation->set_message('chnentrega', 'Solo puede recibir notas de entregas en facturas');
+			return false;
+		}
 
+		$codigo    = $this->input->post('codigo_'.$i);
+		$cantidad  = floatval($this->input->post('cantidad_'.$i));
+		$id = $this->rapyd->uri->get_edited_id(false);
+		$ww='';
+		if(is_array($id)){
+			$ww = ' AND b.id<>'.intval($id[0]);
+		}else{
+			$ww = '';
+		}
+
+		$dbcodigo  = $this->db->escape($codigo);
+		$dbnentrega= $this->db->escape($val);
+		$recibido  = floatval($this->datasis->dameval("SELECT SUM(a.cantidad) AS cana FROM itscst AS a JOIN scst AS b ON a.control=b.control WHERE a.codigo=${dbcodigo} AND a.nentrega=${dbnentrega} ${ww}"));
+		$puede     = floatval($this->datasis->dameval("SELECT SUM(a.cantidad) AS cana FROM itscst AS a WHERE a.codigo=${dbcodigo} AND a.control=${dbnentrega}"));
+		if($cantidad+$recibido>$puede){
+			$this->validation->set_message('chnentrega', 'Esta facturando mas productos '.$codigo.' que los que fueron entregados. ('.($puede-$recibido).')');
+			return false;
+		}
+
+		return true;
 	}
 
 	function chddate($fecha){
@@ -4937,6 +4994,37 @@ class Scst extends Controller {
 		$control = $do->get('control');
 		$tipo_doc= $do->get('tipo_doc');
 
+		//Marca la NE como facturada
+		$arr_ne = array();
+		$cana=$do->count_rel('itscst');
+		for($i=0;$i<$cana;$i++){
+			$itnentrega = $do->get_rel('itscst','nentrega',$i);
+			if(!empty($itnentrega)){
+				if (in_array($itnentrega, $arr_ne)){
+					continue;
+				}
+				$dbnentrega=$this->db->escape($itnentrega);
+
+				$mSQL="SELECT aa.codigo, SUM(aa.cana) AS cana FROM (
+					SELECT a.codigo,-1*SUM(a.cantidad) AS cana FROM itscst AS a WHERE a.nentrega=${dbnentrega} GROUP BY a.codigo
+					UNION ALL
+					SELECT a.codigo,   SUM(a.cantidad) AS cana FROM itscst AS a WHERE a.control=${dbnentrega}  GROUP BY a.codigo
+				) AS aa
+				HAVING cana>0";
+				$query = $this->db->query($mSQL);
+				if($query->num_rows() == 0){
+					$dbcontrol = $this->db->escape($control);
+					$sql="UPDATE scst SET factura=${dbcontrol} WHERE control=${dbnentrega}";
+					$this->db->simple_query($sql);
+				}else{
+					$sql="UPDATE scst SET factura=NULL WHERE control=${dbnentrega}";
+					$this->db->simple_query($sql);
+				}
+				$arr_ne[]=$itnentrega;
+			}
+		}
+		//Fin de la marca de la NE
+
 		$opera   = ($tipo_doc=='FC')? 'Compra':'Devolucion';
 		logusu('scst',"${opera} ${codigo} control ${control} CREADA");
 	}
@@ -4986,6 +5074,14 @@ class Scst extends Controller {
 	}
 
 	function _pre_update($do){
+		$id= intval($do->get('id'));
+		$tipo_doc   = trim($do->get('tipo_doc'));
+		$tipo_docsan=trim($this->datasis->dameval("SELECT tipo_doc FROM scst WHERE id=${id}"));
+		if($tipo_doc!=$tipo_docsan){
+			$do->error_message_ar['pre_upd'] = $do->error_message_ar['update']='No puede cambiar el tipo de documento, se debe eliminar y crear otro';
+			return false;
+		}
+
 		$aactuali = $do->get('actuali');
 		if(!empty($aactuali)){
 			$actuali= new DateTime($aactuali);
@@ -5013,6 +5109,24 @@ class Scst extends Controller {
 		//	$dbcontrol=$this->db->escape($control);
 		//	$this->db->simple_query('UPDATE ordi SET status="A", control=NULL WHERE control='.$dbcontrol);
 		//}
+
+		//Marca la NE como disponible
+		$arr_ne=array();
+		$cana=$do->count_rel('itscst');
+		for($i=0;$i<$cana;$i++){
+			$itnentrega = $do->get_rel('itscst','nentrega',$i);
+			if(!empty($itnentrega)){
+				if (in_array($itnentrega, $arr_ne)){
+					continue;
+				}
+				$dbnentrega=$this->db->escape($itnentrega);
+				$sql="UPDATE scst SET factura=NULL WHERE control=${dbnentrega}";
+				$this->db->simple_query($sql);
+				$arr_ne[]=$itnentrega;
+
+			}
+		}
+		//Fin de la marca de la NE
 
 		$opera   = ($tipo_doc=='FC')? 'Compra':'Devolucion';
 		logusu('scst',"${opera} ${codigo} Control ${control} ELIMINADA");
@@ -5356,20 +5470,6 @@ class Scst extends Controller {
 		if(!in_array('id',      $campos)) $this->db->query('ALTER TABLE itscst ADD COLUMN id       INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
 		if(!in_array('rmargen', $campos)) $this->db->query("ALTER TABLE itscst ADD COLUMN rmargen  CHAR(1) NULL DEFAULT 'N'  COMMENT 'Respeta el margen al actualizar' AFTER `usuario`");
 		if(!in_array('nentrega',$campos)) $this->db->query("ALTER TABLE itscst ADD COLUMN nentrega CHAR(8) NULL DEFAULT NULL COMMENT 'Nota de entrega' AFTER `usuario`");
-
-		//if(!$this->db->table_exists('itscstne')){
-		//	$mSQL="CREATE TABLE `itscstne` (
-		//		`id` INT(11) NOT NULL AUTO_INCREMENT,
-		//		`nentrega` CHAR(8) NULL DEFAULT NULL,
-		//		`compra` CHAR(8) NULL DEFAULT NULL,
-		//		`codigo` VARCHAR(15) NULL DEFAULT NULL,
-		//		`cantidad` DECIMAL(10,3) NULL DEFAULT NULL,
-		//		PRIMARY KEY (`id`),
-		//		UNIQUE INDEX `nentrega_compra_codigo` (`nentrega`, `compra`, `codigo`)
-		//	)
-		//	ENGINE=MyISAM";
-		//	$this->db->query($mSQL);
-		//}
 
 		//Para islr
 		if(!$this->db->table_exists('gereten')){

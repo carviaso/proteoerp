@@ -258,16 +258,16 @@ function pintane(){
 		if(pos>0){
 			if(this.value!=''){
 				ind = this.name.substring(pos+1);
-				if(ind!=id){
-					itnentrega= this.value.trim();
-					if(itnentrega!=null){
-						$('#codigo_'+ind).attr('readonly','readonly');
-						$('#codigo_'+ind).attr('title'   ,'Nota de entrega');
-						$('#codigo_'+ind).css('background','#95ACFE');
-					}else{
-						$('#codigo_'+ind).css('background','#FFFFFF');
-					}
+
+				itnentrega= this.value.trim();
+				if(itnentrega!=null){
+					$('#codigo_'+ind).attr('readonly','readonly');
+					$('#codigo_'+ind).attr('title'   ,'Nota de entrega control '+this.value);
+					$('#codigo_'+ind).css('background','#95ACFE');
+				}else{
+					$('#codigo_'+ind).css('background','#FFFFFF');
 				}
+
 			}
 		}
 	});

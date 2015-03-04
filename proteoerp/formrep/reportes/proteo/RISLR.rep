@@ -1,3 +1,9 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $mPrv=array(
 	'tabla'   =>'sprv',
 	'columnas'=>array(
@@ -12,7 +18,7 @@ $bPrv =$this->datasis->modbus($mPrv);
 
 $this->rapyd->load('datafilter');
 
-$base_process_uri   = $this->rapyd->uri->implode_uri("base_uri","gfid","orderby");
+$base_process_uri   = $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
 
 $filter = new DataForm('');
 $filter->_process_uri  = $this->rapyd->uri->add_clause($base_process_uri, 'search');
@@ -45,29 +51,72 @@ $filter->salformat->clause = '';
 $filter->submit('btnsubmit',RAPYD_BUTTON_SEARCH);
 $filter->build_form();
 
-if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
+if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 
-	$dbsprv   = $this->db->escape($filter->proveed->newValue);
+	$sprv     = $filter->proveed->newValue;
+	$dbsprv   = $this->db->escape($sprv);
 	$dbfechad = $this->db->escape($filter->fechad->newValue);
 	$dbfechah = $this->db->escape($filter->fechah->newValue);
 
-	$mSQL = 'SELECT  d.nombre, d.rif, b.proveed ,b.fecha, b.numero, b.breten,  (b.breten/c.tari1)  AS   basere ,  b.reten,  b.creten, c.codigo, c.tari1 ';
-	$mSQL.= ' FROM  gser AS b   LEFT JOIN  rete AS c  ON  b.creten=c.codigo LEFT JOIN sprv as d   ON b.proveed=d.proveed ';
-	$mSQL.= " WHERE b.fecha BETWEEN ${dbfechad} AND ${dbfechah} AND b.reten > 0 ";
-	if(!empty($dbsprv))
+	$mSQL='';
+/*
+	//Retenciones en gasto legado
+	$mSQL .= "SELECT  d.nombre, d.rif, b.proveed ,b.fecha, b.serie AS numero,b.nfiscal AS control, b.breten, (b.breten/c.tari1)  AS  basere,  b.reten,  b.creten, c.codigo, c.tari1
+		FROM  gser AS b
+		LEFT JOIN rete    AS c ON b.creten=c.codigo
+		LEFT JOIN sprv    AS d ON b.proveed=d.proveed
+		LEFT JOIN gereten AS e ON b.transac=e.transac
+	WHERE b.fecha BETWEEN ${dbfechad} AND ${dbfechah} AND e.transac IS NULL AND b.reten > 0";
+	if(!empty($sprv))
 		$mSQL.= " AND b.proveed=${dbsprv}";
 	$mSQL.= ' UNION ';
-	$mSQL.= "SELECT  d.nombre, d.rif, b.proveed ,b.fecha, b.numero, b.flete,  (b.flete/c.tari1)  AS   basere ,  b.reten,  c.codigo, c.codigo, c.tari1  ";
-	$mSQL.= " FROM  scst AS b  LEFT JOIN sprv AS d   ON b.proveed=d.proveed  LEFT JOIN  rete AS c  ON  c.codigo=IF(d.tipo='1','115','215' ) ";
-	$mSQL.= " WHERE b.fecha BETWEEN ${dbfechad} AND ${dbfechah} AND b.reten > 0 ";
-	if(!empty($dbsprv))
+
+	//Retenciones en gasto legado
+	$mSQL.= "SELECT  d.nombre, d.rif, b.proveed ,b.fecha, b.serie AS numero,b.nfiscal AS control, b.flete,  (b.flete/c.tari1)  AS   basere ,  b.reten,  c.codigo, c.codigo, c.tari1
+		FROM  scst AS b
+		LEFT JOIN sprv    AS d ON b.proveed=d.proveed
+		LEFT JOIN rete    AS c ON c.codigo=IF(d.tipo='1','115','215' )
+		LEFT JOIN gereten AS e ON b.transac=e.transac
+	WHERE b.fecha BETWEEN ${dbfechad} AND ${dbfechah} AND e.transac IS NULL AND b.reten > 0";
+	if(!empty($sprv))
 		$mSQL.= " AND b.proveed=${dbsprv}";
 	$mSQL.= ' UNION ';
-	$mSQL.= 'SELECT  d.nombre, d.rif, d.proveed , e.fecha, a.numero, a.monto,  a.breten  AS   basere ,  a.reten,  b.codigo, b.codigo, b.tari1 ';
-	$mSQL.= "FROM itppro a JOIN rete b ON b.codigo=a.creten LEFT JOIN sprv d ON a.cod_prv=d.proveed LEFT JOIN sprm AS e ON a.transac=e.transac AND e.tipo_doc='AB' AND e.numero=a.numppro ";
-	$mSQL.= "WHERE a.tipoppro='AB'  AND a.reten>0 AND e.fecha BETWEEN ${dbfechad} AND ${dbfechah}";
-	if(!empty($dbsprv))
+
+	//Retenciones en pagos legado
+	$mSQL.= "SELECT  d.nombre, d.rif, d.proveed , e.fecha, a.numero,'' AS control, a.monto,  a.breten  AS   basere ,  a.reten,  b.codigo, b.codigo, b.tari1
+		FROM itppro AS a
+		JOIN rete         AS b ON b.codigo=a.creten
+		LEFT JOIN sprv    AS d ON a.cod_prv=d.proveed
+		LEFT JOIN sprm    AS e ON a.transac=e.transac AND e.tipo_doc='AB' AND e.numero=a.numppro
+		LEFT JOIN gereten AS f ON a.transac=f.transac
+	WHERE a.tipoppro='AB'  AND a.reten>0 AND f.transac IS NULL AND e.fecha BETWEEN ${dbfechad} AND ${dbfechah}";
+	if(!empty($sprv))
 		$mSQL.= " AND d.proveed=${dbsprv}";
+*/
+
+	if(!empty($sprv)){
+		$gsprv= ' AND e.proveed='.$dbsprv;
+		$ssprv= ' AND d.proveed='.$dbsprv;
+	}else{
+		$gsprv=$ssprv='';
+	}
+
+	$mSQL.= "SELECT bb.nombre, bb.rif, aa.proveed, aa.fecha, aa.numero, aa.control, aa.monto, aa.basere, aa.reten, aa.codigo, aa.concepto, aa.tari1
+	FROM(
+	SELECT
+		COALESCE(d.proveed,e.proveed) AS proveed,
+		COALESCE(d.recep,e.fecha)     AS fecha,
+		COALESCE(d.serie,e.serie)     AS numero,
+		COALESCE(d.nfiscal,e.nfiscal) AS control,
+		COALESCE(d.montotot,e.totpre)	AS monto,
+		a.base AS basere, a.monto AS reten, c.codigo, c.concepto, a.porcen AS tari1
+	FROM  gereten  AS a
+	JOIN rete      AS c ON c.codigo=a.codigorete
+	LEFT JOIN scst AS d ON d.id=a.idd AND a.origen='SCST' AND d.actuali>=d.fecha AND d.recep BETWEEN ${dbfechad} AND ${dbfechah} ${ssprv}
+	LEFT JOIN gser AS e ON e.id=a.idd AND a.origen='GSER' AND e.fecha BETWEEN ${dbfechad} AND ${dbfechah} ${gsprv}
+	) AS aa
+	JOIN sprv AS bb ON aa.proveed=bb.proveed
+	WHERE aa.fecha BETWEEN ${dbfechad} AND ${dbfechah}";
 
 	$mSQL.= 'ORDER BY proveed,fecha ';
 
@@ -83,12 +132,15 @@ if($this->rapyd->uri->is_set('search') AND $filter->is_valid()){
 	$pdf->AddPage();
 	$pdf->setTableTitu(8,'Times');
 
-	$pdf->AddCol('fecha'  ,30,'Fecha'     ,'L',8);
-	$pdf->AddCol('numero' ,65,'Número'    ,'L',8);
-	$pdf->AddCol('breten' ,25,'Monto'     ,'R',8);
-	$pdf->AddCol('basere' ,25,'Base'      ,'R',8);
-	$pdf->AddCol('tari1'  ,25,'Tasa'      ,'R',8);
-	$pdf->AddCol('reten'  ,25,'Impuesto'  ,'R',8);
+	$pdf->AddCol('rif'     ,20,'RIF'       ,'L',8);
+	$pdf->AddCol('numero'  ,25,'Número'    ,'L',8);
+	$pdf->AddCol('control' ,30,'Control'   ,'L',8);
+	$pdf->AddCol('fecha'   ,25,'Fecha'     ,'L',8);
+	$pdf->AddCol('concepto',15,'Codigo'    ,'L',8);
+	$pdf->AddCol('breten'  ,25,'Monto'     ,'R',8);
+	$pdf->AddCol('basere'  ,25,'Base'      ,'R',8);
+	$pdf->AddCol('tari1'   ,15,'%Ret.'     ,'R',8);
+	$pdf->AddCol('reten'   ,20,'Retenido'  ,'R',8);
 	$pdf->setGrupoLabel('Contribuyente sujeto a retención: <#nombre#>  R.I.F: <#rif#>');
 	$pdf->setGrupo('proveed');
 	$pdf->Table();
