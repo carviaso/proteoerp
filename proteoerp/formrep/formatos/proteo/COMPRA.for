@@ -58,9 +58,30 @@ if($row->tipo_doc=='FC'){
 }else{
 	$tit1 = 'Documento';
 }
+$rowspan=7;
 $dbcontrol=$this->db->escape($control);
 //ARTICULOS
-$mSQL_2 = $this->db->query("SELECT numero,codigo,descrip,cantidad,costo,importe, precio2, devcant ,IF(costo>=precio2,'===>>','     ') alerta FROM itscst WHERE control=${dbcontrol}");
+if($row->tipo_doc=='FC'){
+	$canaent = intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM itscst AS a JOIN scst AS b ON a.nentrega=b.control WHERE a.control=${dbcontrol}"));
+	$mSQL_2 = $this->db->query("SELECT a.numero,a.codigo,a.descrip,a.cantidad,a.costo,a.importe, a.precio2,
+	a.devcant , b.serie AS nentrega, IF(a.costo>=a.precio2,'===>>','     ') AS alerta
+	FROM itscst AS a
+	LEFT JOIN scst   AS b ON a.nentrega=b.control
+	WHERE a.control=${dbcontrol}");
+}else{
+	$canaent=0;
+	$mSQL_2 = $this->db->query("SELECT a.numero,a.codigo,a.descrip,a.cantidad,a.costo,a.importe, a.precio2,
+	a.devcant , NULL AS nentrega, IF(a.costo>=a.precio2,'===>>','     ') AS alerta
+	FROM itscst AS a
+	WHERE a.control=${dbcontrol}");
+}
+
+if($canaent>0){
+	$rowspan = 8;
+}else{
+	$rowspan = 7;
+}
+
 $detalle =$mSQL_2->result();
 
 $pagina = 0;
@@ -117,10 +138,12 @@ $encatabla = '
 				<th>Cantidad</th>
 				<th>Faltante</th>
 				<th>Costo</th>
-				<th>Asignado</th>
-				<th>Importe</th>
-			</tr>
-';
+				<th>Asignado</th>';
+if($canaent>0){
+	$encatabla .= '<th>N.Entrega</th>';
+}
+$encatabla .=    '<th>Importe</th>
+			</tr>';
 
 ?><html>
 <head>
@@ -153,10 +176,10 @@ if ( isset($pdf) ) {
 <div id="body">
 
 <?php
-$mod=FALSE;
+$mod=false;
 $i=0;
 $pagina = 0 ;
-foreach ($detalle AS $items){
+foreach ($detalle as $items){
 	$i++;
 	if ( $pagina == 0 ) {
 ?>
@@ -176,10 +199,21 @@ foreach ($detalle AS $items){
 				<tr class="<?php if(!$mod) echo 'even_row'; else  echo 'odd_row'; ?>">
 					<td style="text-align:left"><?php echo $this->us_ascii2html($items->codigo) ?></td>
 					<td><?php echo $this->us_ascii2html($items->descrip) ?></td>
-					<td style="text-align: center"><?php echo str_replace(',00','',nformat($items->cantidad,2)); ?></td>
+					<td style="text-align: center"><?php
+						if(!empty($items->nentrega)){
+	   						$color='#95ACFE';
+							echo 'N.E. ';
+						}else{
+							$color='black';
+						}
+						echo '<span style="color:'.$color.'">'.str_replace(',00','',nformat($items->cantidad,2)).'<span>';
+					?></td>
 					<td style="text-align: center"><?php echo str_replace(',00','',nformat($items->devcant,2)); ?></td>
 					<td style="text-align: right;"><?php echo nformat($items->costo).$moneda  ?></td>
 					<td style="text-align: right;"><?php echo "<b>".$items->alerta."</b>".nformat($items->precio2) ?></td>
+					<?php if($canaent>0){ ?>
+						<td style="text-align: right;"><?php echo  $items->nentrega;   ?></td>
+					<?php } ?>
 					<td style="text-align: right;"><?php echo  nformat($items->importe).$moneda;   ?></td>
 				</tr>
 <?php
@@ -189,7 +223,7 @@ foreach ($detalle AS $items){
 			</tbody>
 			<tfoot>
 			<tr>
-				<td colspan="7" style="text-align: right;font-size:16px"><b>Continua.........</b></td>
+				<td colspan="<?php echo $rowspan; ?>" style="text-align: right;font-size:16px"><b>Continua.........</b></td>
 			</tr>
 			</tfoot>
 			</table>
@@ -197,7 +231,7 @@ foreach ($detalle AS $items){
 		</div></td>
 	</tr>
 </table>
-<p STYLE='page-break-after: always'></p>
+<p style='page-break-after: always'></p>
 <table style="width: 100%;">
 		<thead><tr>
 			<td><?php echo $encabeza." ".$encabeza1p ?></td>
@@ -221,6 +255,9 @@ while ( $i%$maxlinea != 0) {
 					<td style="text-align: center;"> </td>
 					<td style="text-align: center;"> </td>
 					<td style="text-align: center;"> </td>
+					<?php if($canaent>0){ ?>
+						<td style="text-align: center;"> </td>
+					<?php } ?>
 					<td class="change_order_total_col"> . </td>
 				</tr>
 <?php
@@ -230,7 +267,7 @@ while ( $i%$maxlinea != 0) {
 ?>
 			</tbody>
 			<tfoot>
-			<tr><td colspan="7">
+			<tr><td colspan="<?php echo $rowspan; ?>">
 			<table width="100%">
 				<tr>
 					<td style="text-align:center;"><b>Preparado por:</b></td>
@@ -250,7 +287,7 @@ while ( $i%$maxlinea != 0) {
 				</tr>
 			</table>
 			</td></tr>
-			<tr><td colspan="7">
+			<tr><td colspan="<?php echo $rowspan; ?>">
 			<table width="100%">
 				<tr>
 					<td style="text-align:center;"><b>Exento</b></td>

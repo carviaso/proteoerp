@@ -1779,12 +1779,24 @@ class Scst extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-		$grid->addField('rmargen');
-		$grid->label('R.Margen');
+		$grid->addField('nentrega');
+		$grid->label('N.Entrega');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => 'false',
-			'width'         => 40,
+			'width'         => 60,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:30, maxlength: 1 }',
+		));
+
+		$grid->addField('rmargen');
+		$grid->label('R.Margen');
+		$grid->params(array(
+			'align'         => "'center'",
+			'search'        => 'true',
+			'editable'      => 'false',
+			'width'         => 60,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:30, maxlength: 1 }',
@@ -1813,6 +1825,15 @@ class Scst extends Controller {
 				cellsubmit: "remote",
 				cellurl: "'.site_url($this->url.'setdatait/').'"
 		');
+
+		$grid->setAfterInsertRow('
+			function( rid, aData, rowe){
+				if(aData.nentrega!=""){
+					$(this).jqGrid( "setCell", rid, "codigo","", {color:"#FFFFFF", background:"#95ACFE" });
+				}
+			}
+		');
+
 		$grid->setOndblClickRow('
 		,ondblClickRow: function(id, row, col, e){
 			itscstedit();
