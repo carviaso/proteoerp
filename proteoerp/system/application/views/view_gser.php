@@ -5,15 +5,15 @@
  * @autor    Andres Hocevar
  * @license  GNU GPL v3
 */
-$container_bl=join("&nbsp;", $form->_button_container['BL']);
-$container_br=join("&nbsp;", $form->_button_container['BR']);
-$container_tr=join("&nbsp;", $form->_button_container['TR']);
+$container_bl=join('&nbsp;', $form->_button_container['BL']);
+$container_br=join('&nbsp;', $form->_button_container['BR']);
+$container_tr=join('&nbsp;', $form->_button_container['TR']);
 
 if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unknow_record'):
 	echo $form->output;
 else:
 
-$tipo_rete=$this->datasis->traevalor('CONTRIBUYENTE');
+$tipo_rete=strtoupper($this->datasis->traevalor('CONTRIBUYENTE'));
 
 $ccampos=$form->detail_fields['gitser'];
 $campos='<tr id="tr_gitser_<#i#>">';
@@ -245,7 +245,7 @@ function gsucursal(val){
 //Calcula la retencion del iva
 function reteiva(){
 	<?php
-	$rif = trim($this->datasis->traevalor('RIF'));
+	$rif = strtoupper(trim($this->datasis->traevalor('RIF')));
 	if($tipo_rete=='ESPECIAL' && strtoupper($rif[0])!='V'){ ?>
 
 		if($('#_rivaex').attr('checked')){

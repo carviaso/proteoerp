@@ -3568,9 +3568,9 @@ class gser extends Controller {
 		}
 
 		//Calcula la retencion del iva si aplica
-		$rif      = $this->datasis->traevalor('RIF');
-		$contribu = $this->datasis->traevalor('CONTRIBUYENTE');
-		if($contribu=='ESPECIAL' && $rif!='V' &&  $rivaex!='S'){
+		$rif      = strtoupper(trim($this->datasis->traevalor('RIF')));
+		$contribu = strtoupper($this->datasis->traevalor('CONTRIBUYENTE'));
+		if($contribu=='ESPECIAL' && $rif[0]!='V' &&  $rivaex!='S'){
 			$prete=floatval($this->datasis->dameval('SELECT reteiva FROM sprv WHERE proveed='.$this->db->escape($proveed)));
 			if(empty($prete)) $prete=75;
 			$reteiva=$ivat*$prete/100;
