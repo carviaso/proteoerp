@@ -1,0 +1,42 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
+$base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, 'search'));
+$filter->title('Elija un formato de salida');
+$filter->attributes=array('onsubmit'=>'is_loaded()');
+
+$filter->salformat = new radiogroupField('Formato de salida',"salformat");
+$filter->salformat->options($this->opciones);
+$filter->salformat->insertValue ='PDF';
+$filter->salformat->clause = '';
+
+$filter->submit('btnsubmit','Descargar');
+$filter->build_form();
+
+if($this->rapyd->uri->is_set('search')){
+
+$mSQL ='SELECT codigo,descrip,ccosto FROM cpla ORDER BY codigo';
+
+	$pdf = new PDFReporte($mSQL);
+	$pdf->setHeadValores('TITULO1');
+	$pdf->setSubHeadValores('TITULO2','TITULO3');
+	$pdf->setTitulo("Listado de Plan de cuentas");
+	$pdf->AddPage();
+	$pdf->setTableTitu(9,'Times');
+	$pdf->AddCol('codigo' ,30,'Código',         'L',8);
+	$pdf->AddCol('descrip',60,'Descripción'    ,'L',8);
+	$pdf->AddCol('ccosto' ,30,'Centro de Costo','L',8);
+      	$pdf->Table();
+	$pdf->Output();
+
+}else{
+	$data['filtro'] = $filter->output;
+	$data['titulo'] = '<h2 class="mainheader">Plan de cuentas</h2>';
+	$data['head'] = $this->rapyd->get_head();
+	$this->load->view('view_freportes', $data);
+}

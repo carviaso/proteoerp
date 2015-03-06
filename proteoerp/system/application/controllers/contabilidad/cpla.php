@@ -416,8 +416,7 @@ class Cpla extends Controller {
 			$mSQL .= " limit $start, $limit ";
 			$query = $this->db->query($mSQL);
 			$arr = array();
-			foreach ($query->result_array() as $row)
-			{
+			foreach ($query->result_array() as $row){
 				$meco = array();
 				foreach( $row as $idd=>$campo ) {
 					$meco[$idd] = utf8_encode($campo);
@@ -434,6 +433,10 @@ class Cpla extends Controller {
 			$this->db->simple_query('ALTER TABLE cpla DROP PRIMARY KEY');
 			$this->db->simple_query('ALTER TABLE cpla ADD UNIQUE INDEX codigo (codigo)');
 			$this->db->simple_query('ALTER TABLE cpla ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		}
+
+		if(!in_array('ccosto',$campos)){
+			$this->db->simple_query("ALTER TABLE `cpla` ADD COLUMN `ccosto` CHAR(1) NULL DEFAULT 'N' AFTER `departa`");
 		}
 	}
 }
