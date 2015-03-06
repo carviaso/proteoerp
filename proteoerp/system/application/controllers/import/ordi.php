@@ -1696,6 +1696,8 @@ class Ordi extends Controller {
 	}
 
 	function _pre_insert($do){
+		$do->rm_get('numero'); //necesario cuando el campo se muestra en la ficha y es autoincremental
+
 		$transac= $this->datasis->fprox_numero('ntransa');
 		$usuario= $this->session->userdata('usuario');
 		$sprv   = $do->get('proveed');
@@ -1738,13 +1740,14 @@ class Ordi extends Controller {
 
 	function _post_insert($do){
 		$codigo=$do->get('numero');
+
 		$peso=$this->datasis->dameval("SELECT SUM(b.peso) AS peso FROM itordi AS a JOIN sinv AS b ON a.codigo=b.codigo AND a.numero=${codigo}");
 		if(empty($peso)) $peso=0;
 		$data  = array('peso' => $peso);
 		$where = "numero= ${codigo}";
 		$str = $this->db->update_string('ordi', $data, $where);
 		$this->db->simple_query($str);
-		logusu('ordi',"ORDI $codigo CREADO");
+		logusu('ordi',"ORDI ${codigo} CREADO");
 		return true;
 	}
 
@@ -1777,9 +1780,10 @@ class Ordi extends Controller {
 	}
 
 	function instalar(){
-		if(!$this->db->field_exists('ordeni', 'gser')){
+		$gsercampos=$this->db->list_fields('gser');
+		if(!in_array('ordeni',$gsercampos)){
 			$mSQL='ALTER TABLE `gser`  ADD COLUMN `ordeni` INT(15) UNSIGNED NULL DEFAULT NULL AFTER `compra`';
-			var_dump($this->db->simple_query($mSQL));
+			$this->db->simple_query($mSQL);
 		}
 
 		if(!$this->db->table_exists('itordi')){
@@ -1823,7 +1827,18 @@ class Ordi extends Controller {
 			ENGINE=MyISAM
 			ROW_FORMAT=FIXED
 			AUTO_INCREMENT=1";
-			var_dump($this->db->simple_query($mSQL));
+			$this->db->simple_query($mSQL);
+		}
+
+		$itcampos=$this->db->list_fields('itordi');
+		if(!in_array('importecifreal',$itcampos)){
+			$mSQL="ALTER TABLE `itordi`  ADD COLUMN `importecifreal` DECIMAL(17,2) NULL DEFAULT NULL COMMENT 'importe cif en moneda local al cambio real' AFTER `importeciflocal`";
+			$this->db->simple_query($mSQL);
+		}
+
+		if(!in_array('costoreal',$itcampos)){
+			$mSQL="ALTER TABLE `itordi`  ADD COLUMN `costoreal` DECIMAL(17,2) NULL DEFAULT NULL COMMENT 'costo unitario al dolar real' AFTER `importefinal`,  ADD COLUMN `importereal` DECIMAL(17,2) NULL DEFAULT NULL COMMENT 'importe al dolar real' AFTER `costoreal`";
+			$this->db->simple_query($mSQL);
 		}
 
 		if (!$this->db->table_exists('ordi')) {
@@ -1864,7 +1879,13 @@ class Ordi extends Controller {
 			ENGINE=MyISAM
 			ROW_FORMAT=DYNAMIC
 			AUTO_INCREMENT=1";
-			var_dump($this->db->simple_query($mSQL));
+			$this->db->simple_query($mSQL);
+		}
+
+		$campos=$this->db->list_fields('ordi');
+		if(!in_array('estimadif',$campos)){
+			$mSQL="ALTER TABLE `ordi`ADD COLUMN `estimadif` DECIMAL(10,2) NULL DEFAULT '0' COMMENT 'Diferencia en la estimacion' AFTER `crm`";
+			$this->db->simple_query($mSQL);
 		}
 
 		if(!$this->db->table_exists('ordiva')){
@@ -1881,8 +1902,8 @@ class Ordi extends Controller {
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM
 			ROW_FORMAT=DEFAULT
-			AUTO_INCREMENT=0";
-			var_dump($this->db->simple_query($mSQL));
+			AUTO_INCREMENT=1";
+			$this->db->simple_query($mSQL);
 		}
 
 		if(!$this->db->table_exists('gseri')){
@@ -1903,23 +1924,8 @@ class Ordi extends Controller {
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM
 			ROW_FORMAT=DYNAMIC
-			AUTO_INCREMENT=0";
-			var_dump($this->db->simple_query($mSQL));
-		}
-
-		if(!$this->db->field_exists('importecifreal', 'itordi')){
-			$mSQL="ALTER TABLE `itordi`  ADD COLUMN `importecifreal` DECIMAL(17,2) NULL DEFAULT NULL COMMENT 'importe cif en moneda local al cambio real' AFTER `importeciflocal`";
-			var_dump($this->db->simple_query($mSQL));
-		}
-
-		if(!$this->db->field_exists('costoreal', 'itordi')){
-			$mSQL="ALTER TABLE `itordi`  ADD COLUMN `costoreal` DECIMAL(17,2) NULL DEFAULT NULL COMMENT 'costo unitario al dolar real' AFTER `importefinal`,  ADD COLUMN `importereal` DECIMAL(17,2) NULL DEFAULT NULL COMMENT 'importe al dolar real' AFTER `costoreal`";
-			var_dump($this->db->simple_query($mSQL));
-		}
-
-		if(!$this->db->field_exists('estimadif', 'ordi')){
-			$mSQL="ALTER TABLE `ordi`ADD COLUMN `estimadif` DECIMAL(10,2) NULL DEFAULT '0' COMMENT 'Diferencia en la estimacion' AFTER `crm`";
-			var_dump($this->db->simple_query($mSQL));
+			AUTO_INCREMENT=1";
+			$this->db->simple_query($mSQL);
 		}
 
 		if(!$this->db->table_exists('ordiestima')){
@@ -1934,7 +1940,7 @@ class Ordi extends Controller {
 			COLLATE='latin1_swedish_ci'
 			ENGINE=MyISAM
 			ROW_FORMAT=DEFAULT";
-			var_dump($this->db->simple_query($mSQL));
+			$this->db->simple_query($mSQL);
 		}
 
 		$this->prefijo='crm_';
