@@ -1294,9 +1294,9 @@ class Ordi extends Controller {
 			$SQL='SELECT fecha, fecha AS recep,factura AS numero,proveed,nombre,fecha AS vence,peso,montocif AS mdolar,montoexc AS exento,cambioofi, cambioreal,dua,transac FROM ordi WHERE numero=?';
 			$query=$this->db->query($SQL,array($id));
 			if($query->num_rows()==1){
+				$row     = $query->row_array();
 				$control = $this->datasis->fprox_numero('nscst');
 				$transac = $row['transac'];
-				$row     = $query->row_array();
 				$numero  = substr($row['numero'],-8);
 				$serie   = $row['numero'];
 				$fecha   = $row['fecha'];
