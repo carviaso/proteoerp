@@ -43,7 +43,7 @@ class Smov extends Controller {
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'bimpri', 'img'=>'assets/default/images/print.png', 'alt' => 'Formato PDF'    , 'label'=>'Reimprimir Documento'));
+		$grid->wbotonadd(array('id'=>'bimpri', 'img'=>'assets/default/images/print.png', 'alt' => 'Formato PDF'    , 'label'=>'Imprimir Doc.'));
 		$grid->wbotonadd(array('id'=>'cobro' , 'img'=>'images/dinero.png' , 'alt' => 'Cobro a cliente', 'label'=>'Cobro a Cliente'     ));
 		//$grid->wbotonadd(array('id'=>'nccob' , 'img'=>'images/check.png'  , 'alt' => 'Nota de credito a factura pagada', 'label'=>'NC a Factura Cobrada'));
 		$WestPanel = $grid->deploywestp();
@@ -635,6 +635,8 @@ class Smov extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
+		$mSQL = "SELECT vendedor, CONCAT(vendedor, ' ', nombre) descrip FROM vend ORDER BY vendedor ";
+		$vende = $this->datasis->llenajqselect($mSQL, true );
 
 		$grid->addField('vendedor');
 		$grid->label('Vendedor');
@@ -642,7 +644,9 @@ class Smov extends Controller {
 			'search'        => 'true',
 			'editable'      => 'true',
 			'width'         => 50,
-			'edittype'      => "'text'",
+			'edittype'      => "'select'",
+			'editoptions'   => '{ value: '.$vende.',  style:"width:210px"}',
+			'stype'         => "'text'",
 		));
 
 
@@ -1318,6 +1322,9 @@ class Smov extends Controller {
 		echo $form->output;
 	}
 
+	//******************************************************************
+	// Imprime Documentos
+	//
 	function smovprint($id){
 		$dbid = $this->db->escape($id);
 		$tipo = $this->datasis->dameval('SELECT tipo_doc FROM smov WHERE id='.$dbid);

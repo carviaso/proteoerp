@@ -1475,8 +1475,6 @@ sueldo integral * descanso
 sueldo integral * feriados
 
 
-
-
 dias
 
 
