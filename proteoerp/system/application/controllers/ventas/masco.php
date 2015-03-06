@@ -19,6 +19,7 @@ class Masco extends Controller {
 	}
 
 	function index(){
+		$this->instalar();
 		//$this->datasis->creaintramenu(array('modulo'=>'000','titulo'=>'<#titulo#>','mensaje'=>'<#mensaje#>','panel'=>'<#panal#>','ejecutar'=>'<#ejecuta#>','target'=>'popu','visible'=>'S','pertenece'=>'<#pertenece#>','ancho'=>900,'alto'=>600));
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
@@ -606,30 +607,28 @@ class Masco extends Controller {
 
 	function instalar(){
 		if (!$this->db->table_exists('masco')) {
-			$mSQL="CREATE TABLE `masco` (
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `id_scli` int(11) DEFAULT NULL,
-			  `nombre` varchar(200) DEFAULT NULL,
-			  `sexo` char(1) DEFAULT NULL,
-			  `nacimiento` date DEFAULT NULL,
-			  `fbaja` date DEFAULT NULL,
-			  `falta` date DEFAULT NULL,
-			  `caracter` varchar(20) DEFAULT NULL,
-			  `id_habitat` int(11) DEFAULT NULL,
-			  `id_raza` int(11) DEFAULT NULL,
-			  `pedigri` char(1) DEFAULT NULL,
-			  PRIMARY KEY (`id`)
+			$mSQL="CREATE TABLE masco (
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  id_scli    INT(11)      DEFAULT NULL,
+			  nombre     VARCHAR(200) DEFAULT NULL,
+			  sexo       CHAR(1)      DEFAULT NULL,
+			  nacimiento DATE         DEFAULT NULL,
+			  fbaja      DATE         DEFAULT NULL,
+			  falta      DATE         DEFAULT NULL,
+			  caracter   VARCHAR(20)  DEFAULT NULL,
+			  id_habitat INT(11)      DEFAULT NULL,
+			  id_raza    INT(11)      DEFAULT NULL,
+			  pedigri    CHAR(1)      DEFAULT NULL,
+			  PRIMARY KEY (id)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8";
 			$this->db->query($mSQL);
 		}
-		//$campos=$this->db->list_fields('masco');
-		//if(!in_array('<#campo#>',$campos)){ }
 
 		if(!$this->db->table_exists('mascohabitat')){
 			$mSQL="CREATE TABLE `mascohabitat` (
-				`id` INT(11) NOT NULL AUTO_INCREMENT,
-				`nombre` VARCHAR(50) NULL DEFAULT NULL,
-				`descrip` VARCHAR(200) NULL DEFAULT NULL,
+				id      INT(11)      NOT NULL AUTO_INCREMENT,
+				nombre  VARCHAR(50)  NULL DEFAULT NULL,
+				descrip VARCHAR(200) NULL DEFAULT NULL,
 				PRIMARY KEY (`id`)
 			)
 			COMMENT='Habitat de mascotas'
@@ -647,26 +646,28 @@ class Masco extends Controller {
 		}
 
 		if(!$this->db->table_exists('mascoespecies')){
-			$mSQL="CREATE TABLE `mascoespecies` (
-				`id` INT(11) NOT NULL AUTO_INCREMENT,
-				`nombre` VARCHAR(50) NOT NULL,
-				`descrip` VARCHAR(200) NOT NULL,
+			$mSQL="
+			CREATE TABLE `mascoespecies` (
+				id       INT(11)      NOT NULL AUTO_INCREMENT,
+				nombre   VARCHAR(50)  NOT NULL,
+				descrip  VARCHAR(200) NOT NULL,
 				PRIMARY KEY (`id`)
 			)
 			COMMENT='Especies de mascota'
 			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 
-			$this->db->simple_query("INSERT INTO `mascoespecies` (`nombre`, `descrip`) VALUES ('CANINA', '')");
-			$this->db->simple_query("INSERT INTO `mascoespecies` (`nombre`, `descrip`) VALUES ('FELINA', '')");
+			$this->db->simple_query("INSERT INTO mascoespecies (nombre, descrip) VALUES ('CANINA', '')");
+			$this->db->simple_query("INSERT INTO mascoespecies (nombre, descrip) VALUES ('FELINA', '')");
 		}
 
 		if(!$this->db->table_exists('mascorazas')){
-			$mSQL="CREATE TABLE `mascorazas` (
-				`id` INT(11) NOT NULL AUTO_INCREMENT,
-				`id_mascoespecies` INT(11) NULL DEFAULT NULL,
-				`nombre` VARCHAR(50) NULL DEFAULT NULL,
-				PRIMARY KEY (`id`)
+			$mSQL="
+			CREATE TABLE `mascorazas` (
+				id               INT(11)     NOT NULL AUTO_INCREMENT,
+				id_mascoespecies INT(11)     NULL DEFAULT NULL,
+				nombre           VARCHAR(50) NULL DEFAULT NULL,
+				PRIMARY KEY (id)
 			)
 			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
