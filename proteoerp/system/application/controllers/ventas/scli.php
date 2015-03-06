@@ -2313,6 +2313,7 @@ class Scli extends validaciones {
 
 		if($edit->on_success()){
 			$data=array(
+				'id'       => $edit->_dataobject->get('id'),
 				'cliente'  => $edit->_dataobject->get('cliente'),
 				'nombre'   => $edit->_dataobject->get('nombre'),
 				'rifci'    => $edit->_dataobject->get('rifci'),
