@@ -1785,20 +1785,20 @@ class Stra extends Controller {
 			'recibe'     => '0001',
 			'observ1'    => "PRODUCCION  ".$mdesde.' AL '.$mhasta
 		);
-		$mSQL = 'SELECT a.codigoa, b.descrip, sum(a.cana*IF(a.tipoa="F",1,-1)) cana
+		$mSQL = 'SELECT a.codigoa, b.descrip, sum(a.cana*IF(a.tipoa="F",1,-1)) cana, b.existen
 		FROM sitems AS a
 		JOIN sinv AS b ON b.codigo=a.codigoa
 		AND a.fecha >= '.$dbmdesde.'
 		AND a.fecha <= '.$dbmhasta.' AND tipoa <> "X" AND mid(b.tipo,1,1) <> "S"
 		GROUP BY a.codigoa
-		HAVING cana > 0 ';
+		HAVING cana > 0 AND b.existen < 0';
 
 		$qquery = $this->db->query($mSQL);
 		$i=0;
 		foreach ($qquery->result() as $itrow){
 			$_POST["codigo_${i}"]   = rtrim($itrow->codigoa);
 			$_POST["descrip_${i}"]  = rtrim($itrow->descrip);
-			$_POST["cantidad_${i}"] = $itrow->cana;
+			$_POST["cantidad_${i}"] = $itrow->cana + $itrow->existen ;
 			$i++;
 		}
 		$this->dataedit();

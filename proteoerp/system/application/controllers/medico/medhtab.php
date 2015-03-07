@@ -49,7 +49,6 @@ class Medhtab extends Controller {
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
 		$param['WestPanel']   = $WestPanel;
-		//$param['EastPanel'] = $EastPanel;
 		$param['SouthPanel']  = $SouthPanel;
 		$param['listados']    = $this->datasis->listados('MEDHTAB', 'JQ');
 		$param['otros']       = $this->datasis->otros('MEDHTAB', 'JQ');

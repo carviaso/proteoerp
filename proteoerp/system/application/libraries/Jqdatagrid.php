@@ -1873,11 +1873,11 @@ class Jqdatagrid
 							try{
 								var json = JSON.parse(r);
 								if (json.status == "A"){
-									$.prompt("<h1>Registro Guardado</h1>",{
+									/*$.prompt("<h1>Registro Guardado</h1>",{
 										submit: function(e,v,m,f){
 											setTimeout(function(){ $("'.$ngrid.'").jqGrid(\'setSelection\',json.pk.id);}, 500);
 										}}
-									);
+									);*/
 									$( "#'.$dialogo.'" ).dialog( "close" );
 									grid.trigger("reloadGrid");
 									idactual = json.pk.id;'.$post.'
