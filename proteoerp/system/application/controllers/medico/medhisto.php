@@ -36,15 +36,15 @@ class Medhisto extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname']);
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array("id"=>"phistoria", "img"=>"images/pdf_logo.gif",  "alt" => "Formato PDF", "label"=>"Historia"));
-		$grid->wbotonadd(array("id"=>"gvisitas",  "img"=>"images/pdf_logo.gif",  "alt" => "Visistas",    "label"=>"Visitas"));
+		$grid->wbotonadd(array('id'=>'phistoria', 'img'=>'images/circuloazul.png'  ,'alt' => 'Formato PDF', 'label'=>'Historia'));
+		$grid->wbotonadd(array('id'=>'gvisitas' , 'img'=>'images/circuloverde.png' ,'alt' => 'Visistas'   , 'label'=>'Visitas' ));
 		$WestPanel = $grid->deploywestp();
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fedita' ,  'title'=>'Agregar/Editar Registro'),
 			array('id'=>'fvisita',  'title'=>'Agregar/Editar Visita'),
-			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
-			array('id'=>'fborra',  'title'=>'Eliminar Registro')
+			array('id'=>'fshow'  ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra' ,  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -105,7 +105,6 @@ class Medhisto extends Controller {
 			} else { $.prompt("<h1>Por favor Seleccione una Historia</h1>");}
 		});';
 
-
 		$bodyscript .= '
 		$("#fvisita").dialog({
 			autoOpen: false, height: 500, width: 600, modal: true,
@@ -162,7 +161,7 @@ class Medhisto extends Controller {
 								$("#fvisita").html(r);
 							}
 						}
-					})				
+					})
 				},
 				"Cancelar": function() {
 					$("#fvisita").html("");
@@ -181,16 +180,16 @@ class Medhisto extends Controller {
 	}
 
 	//******************************************************************
-	// Definicion del Grid o Tabla 
+	// Definicion del Grid o Tabla
 	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
-		$editar = "false";
+		$editar = 'false';
 
 		$grid  = new $this->jqdatagrid;
 
 		$grid->addField('numero');
-		$grid->label('Numero');
+		$grid->label('N&uacute;mero');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -200,7 +199,7 @@ class Medhisto extends Controller {
 			'editoptions'   => '{ size:20, maxlength: 20 }',
 		));
 
-		$grid->addField('nacional');
+		/*$grid->addField('nacional');
 		$grid->label('Nac');
 		$grid->params(array(
 			'search'        => 'true',
@@ -211,10 +210,10 @@ class Medhisto extends Controller {
 			'width'         => 40,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:1, maxlength: 1 }',
-		));
+		));*/
 
 
-		$grid->addField('cedula');
+		/*$grid->addField('cedula');
 		$grid->label('Cedula');
 		$grid->params(array(
 			'search'        => 'true',
@@ -223,7 +222,7 @@ class Medhisto extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:20, maxlength: 20 }',
-		));
+		));*/
 
 
 		$grid->addField('nombre');
@@ -238,7 +237,7 @@ class Medhisto extends Controller {
 		));
 
 
-		$grid->addField('papellido');
+		/*$grid->addField('papellido');
 		$grid->label('Apellidos');
 		$grid->params(array(
 			'search'        => 'true',
@@ -247,7 +246,7 @@ class Medhisto extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:50, maxlength: 50 }',
-		));
+		));*/
 
 /*
 		$grid->addField('sapellido');
@@ -262,7 +261,7 @@ class Medhisto extends Controller {
 		));
 */
 
-		$grid->addField('sexo');
+		/*$grid->addField('sexo');
 		$grid->label('Sexo');
 		$grid->params(array(
 			'search'        => 'true',
@@ -273,7 +272,7 @@ class Medhisto extends Controller {
 			'align'         => "'center'",
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:1, maxlength: 1  }',
-		));
+		));*/
 
 		$grid->addField('ingreso');
 		$grid->label('Ingreso');
@@ -287,7 +286,7 @@ class Medhisto extends Controller {
 			'formoptions'   => '{ label:"Fecha" }'
 		));
 
-		$grid->addField('nacio');
+		/*$grid->addField('nacio');
 		$grid->label('F.Nacio');
 		$grid->params(array(
 			'search'        => 'true',
@@ -297,10 +296,10 @@ class Medhisto extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
-		));
+		));*/
 
 
-		$grid->addField('estado');
+		/*$grid->addField('estado');
 		$grid->label('Estado');
 		$grid->params(array(
 			'search'        => 'true',
@@ -309,10 +308,9 @@ class Medhisto extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:50, maxlength: 50 }',
-		));
+		));*/
 
-/*
-		$grid->addField('ciudad');
+		/*$grid->addField('ciudad');
 		$grid->label('Ciudad');
 		$grid->params(array(
 			'search'        => 'true',
@@ -321,10 +319,9 @@ class Medhisto extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:50, maxlength: 50 }',
-		));
-*/
+		));*/
 
-		$grid->addField('ecivil');
+		/*$grid->addField('ecivil');
 		$grid->label('Edo.civil');
 		$grid->params(array(
 			'search'        => 'true',
@@ -394,7 +391,7 @@ class Medhisto extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:100, maxlength: 100 }',
-		));
+		));*/
 
 
 		$grid->addField('usuario');
@@ -434,7 +431,7 @@ class Medhisto extends Controller {
 		));
 
 
-		$grid->addField('edad');
+		/*$grid->addField('edad');
 		$grid->label('Edad');
 		$grid->params(array(
 			'search'        => 'true',
@@ -443,7 +440,7 @@ class Medhisto extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:255, maxlength: 255 }',
-		));
+		));*/
 
 
 		$grid->addField('id');
@@ -476,7 +473,7 @@ class Medhisto extends Controller {
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
 
-		$grid->setBarOptions("addfunc: medhistoadd, editfunc: medhistoedit, delfunc: medhistodel, viewfunc: medhistoshow");
+		$grid->setBarOptions('addfunc: medhistoadd, editfunc: medhistoedit, delfunc: medhistodel, viewfunc: medhistoshow');
 
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
@@ -564,10 +561,10 @@ class Medhisto extends Controller {
 	}
 
 	//******************************************************************
-	// Edicion 
+	// Edicion
 
 	function dataedit(){
-		$this->rapyd->load('dataedit');
+		$this->rapyd->load('dataedit','datadetails');
 		$script= '
 		$(function() {
 			$("#ingreso").datepicker({dateFormat:"dd/mm/yy"});
@@ -576,7 +573,10 @@ class Medhisto extends Controller {
 		});
 		';
 
-		$edit = new DataEdit('', 'medhisto');
+		$do = new DataObject('medhisto');
+		//$do->rel_one_to_many('medhvisita', 'medhvisita', array('numero'=>'historia'));
+
+		$edit = new DataEdit('', $do);
 
 		$edit->script($script,'modify');
 		$edit->script($script,'create');
@@ -587,16 +587,23 @@ class Medhisto extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
-		$edit->pre_process('insert', '_pre_insert' );
-		$edit->pre_process('update', '_pre_update' );
-		$edit->pre_process('delete', '_pre_delete' );
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
 
 		$edit->numero = new inputField('Historia Nro','numero');
 		$edit->numero->rule='';
 		$edit->numero->size =22;
 		$edit->numero->maxlength =20;
 		$edit->numero->readonly = true;
-		$edit->numero->hidden = true;
+		$edit->numero->mode = 'autohide';
+		$edit->numero->when = array('modify');
+		//$edit->numero->hidden = true;
+
+		$edit->nombre = new inputField('Nombre','nombre');
+		$edit->nombre->rule='strtoupper|required';
+		$edit->nombre->size =52;
+		$edit->nombre->maxlength =50;
 
 		$edit->ingreso = new dateonlyField('Ingreso','ingreso');
 		$edit->ingreso->rule='chfecha';
@@ -605,95 +612,51 @@ class Medhisto extends Controller {
 		$edit->ingreso->maxlength =8;
 		$edit->ingreso->insertValue = date('Y-m-d');
 
-		$edit->nombre = new inputField('Nombre','nombre');
-		$edit->nombre->rule='strtoupper';
-		$edit->nombre->size =52;
-		$edit->nombre->maxlength =50;
+		//************************************************
+		//inicio detalle
+		//************************************************
+		$i=0;
+		$sel=array('a.id','a.nombre','b.descripcion AS value','b.id AS itid');
+		$this->db->from('medhtab AS a');
+		$this->db->where('a.grupo','1');
+		$historia=$edit->get_from_dataobjetct('numero');
+		$dbhistoria = $this->db->escape($historia);
+		$this->db->join('medhvisita AS b',"a.id=b.tabula AND b.historia = ${dbhistoria}",'left');
 
-		$edit->papellido = new inputField('Apellidos','papellido');
-		$edit->papellido->rule='strtoupper';
-		$edit->papellido->size =52;
-		$edit->papellido->maxlength =50;
+		$this->db->select($sel);
+		$this->db->order_by('a.indice');
+		$query = $this->db->get();
+		foreach ($query->result() as $row){
+			$obj='descripcion_'.$i;
+			$edit->$obj = new inputField($row->nombre,'itdetalle['.$row->id.']');
+			$edit->$obj->db_name     = '-';
+			$edit->$obj->data        = null;
+			$edit->$obj->size        = 20;
+			$edit->$obj->maxlength   = 20;
+			$edit->$obj->value       = $row->value;
+			$edit->$obj->insertValue = $row->value;
+			$edit->$obj->updateValue = $row->value;
+			$edit->$obj->pointer     = true;
 
-/*
-		$edit->sapellido = new inputField('Segundo Apellido','sapellido');
-		$edit->sapellido->rule='';
-		$edit->sapellido->size =52;
-		$edit->sapellido->maxlength =50;
-*/
+			$obj='itid_'.$i;
+			$edit->$obj = new hiddenField('','itid['.$row->id.']');
+			$edit->$obj->db_name     = '-';
+			$edit->$obj->value       = $row->itid;
+			$edit->$obj->insertValue = $row->itid;
+			$edit->$obj->updateValue = $row->itid;
+			$edit->$obj->pointer     = true;
+			$edit->$obj->data        = null;
+			$edit->$obj->in          = 'descripcion_'.$i;
 
-		$edit->nacional = new dropdownField('Nacionalidad','nacional');
-	   	$edit->nacional->option('V','Venezolano');
-	  	$edit->nacional->option('E','Extranjero');
-	   	$edit->nacional->option('P','Pasaporte');
-	   	$edit->nacional->option('M','Menor sin cedula');
-		$edit->nacional->style='width:120px;';
-	   	
-		$edit->cedula = new inputField('Cedula','cedula');
-		$edit->cedula->rule='';
-		$edit->cedula->size =22;
-		$edit->cedula->maxlength =20;
-
-		$edit->sexo = new dropdownField('Sexo','sexo');
-	   	$edit->sexo->option('F','Femenino');
-	   	$edit->sexo->option('M','Masculino');
-	   	$edit->sexo->option('3','Otro');
-		$edit->sexo->style='width:120px;';
-
-		$edit->nacio = new dateonlyField('Fecha de Nacimiento','nacio');
-		$edit->nacio->rule='chfecha';
-		$edit->nacio->calendar=false;
-		$edit->nacio->size =10;
-		$edit->nacio->maxlength =8;
-
-		$edit->estado = new inputField('Lugar de Nacimiento','estado');
-		$edit->estado->rule='strtoupper';
-		$edit->estado->size =52;
-		$edit->estado->maxlength =50;
-		
-		$edit->ecivil = new dropdownField('Estado civil','ecivil');
-	   	$edit->ecivil->option('S','Soltero/a');        //0
-	   	$edit->ecivil->option('C','Casado/a');         //1
-	   	$edit->ecivil->option('D','Divorciado/a');     //2
-	   	$edit->ecivil->option('V','Viudo/a');          //3
-	   	$edit->ecivil->option('R','Relacion estable'); //4
-		$edit->ecivil->style='width:120px;';
-	   
-		$edit->ocupacion = new inputField('Ocupacion','ocupacion');
-		$edit->ocupacion->rule='strtoupper';
-		$edit->ocupacion->size =52;
-		$edit->ocupacion->maxlength =50;
-
-		$edit->direccion = new textareaField('Direccion','direccion');
-		$edit->direccion->rule='strtoupper';
-		$edit->direccion->cols = 50;
-		$edit->direccion->rows = 2;
-
-		$edit->telefono = new inputField('Telefono','telefono');
-		$edit->telefono->rule='strtoupper';
-		$edit->telefono->size =52;
-		$edit->telefono->maxlength =50;
-
-		$edit->referido = new inputField('Referido','referido');
-		$edit->referido->rule='strtoupper';
-		$edit->referido->size =52;
-		$edit->referido->maxlength =50;
-
-		$edit->email = new inputField('Email','email');
-		$edit->email->rule='';
-		$edit->email->size =52;
-		$edit->email->maxlength =100;
+			$i++;
+		}
+		//************************************************
+		//fin de campos para detalle
+		//************************************************
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
-
-/*
-		$edit->edad = new inputField('Edad','edad');
-		$edit->edad->rule='';
-		$edit->edad->size =52;
-		$edit->edad->maxlength =255;
-*/
 
 		$edit->build();
 
@@ -710,27 +673,38 @@ class Medhisto extends Controller {
 	}
 
 	function _pre_insert($do){
+		$mSQL = 'SELECT COUNT(*) AS cana FROM medhisto WHERE numero=';
+		do {
+			$numero   = $this->datasis->fprox_numero('nmedhis');
+			$dbnumero = $this->db->escape($numero);
+			$cuantos  = intval($this->datasis->dameval($mSQL.$dbnumero));
+		} while ($cuantos != 0);
+
+		$do->set('numero',$numero);
+		$do->error_message_ar['pre_ins']='';
+		return true;
+
 		// Busca Cedula repetida
-		$cedula = $do->get('cedula');
-		$mSQL = "SELECT count(*) FROM medhisto WHERE cedula=".$cedula;
-		$cuantos = $this->datasis->dameval($mSQL);
-		if ( $cuantos > 0 ) {
-			$error='ERROR. Cedula Repetida!!!!';
-			$do->error_message_ar['pre_ins']=$error;
-			return false;
-		} else {
-			$numero = $this->datasis->fprox_numero('nmedhis');
-			// REVISA SI EXISTE EL NRO
-			$mSQL = "SELECT count(*) FROM medhisto WHERE numero=";
-			$cuantos = $this->datasis->dameval($mSQL.$numero);
-			while ($cuantos <> 0) {
-				$numero = $this->datasis->fprox_numero('nmedhis');
-				$cuantos = $this->datasis->dameval($mSQL.$numero);
-			}
-			$do->set('numero',$numero);
-			$do->error_message_ar['pre_ins']='';
-			return true;
-		}
+		//$cedula = $do->get('cedula');
+		//$mSQL = "SELECT count(*) FROM medhisto WHERE cedula=".$cedula;
+		//$cuantos = $this->datasis->dameval($mSQL);
+		//if ( $cuantos > 0 ) {
+		//	$error='ERROR. Cedula Repetida!!!!';
+		//	$do->error_message_ar['pre_ins']=$error;
+		//	return false;
+		//} else {
+		//	$numero = $this->datasis->fprox_numero('nmedhis');
+		//	// REVISA SI EXISTE EL NRO
+		//	$mSQL = "SELECT count(*) FROM medhisto WHERE numero=";
+		//	$cuantos = $this->datasis->dameval($mSQL.$numero);
+		//	while ($cuantos <> 0) {
+		//		$numero = $this->datasis->fprox_numero('nmedhis');
+		//		$cuantos = $this->datasis->dameval($mSQL.$numero);
+		//	}
+		//	$do->set('numero',$numero);
+		//	$do->error_message_ar['pre_ins']='';
+		//	return true;
+		//}
 	}
 
 	function _pre_update($do){
@@ -744,13 +718,59 @@ class Medhisto extends Controller {
 	}
 
 	function _post_insert($do){
+		$historia = $do->get('numero');
+		$fecha    = date('Y-m-d');
+
+		$itdetalle = $this->input->post('itdetalle');
+		if(is_array($itdetalle)){
+			$data = array('historia' => $historia, 'fecha' => $fecha);
+			foreach($itdetalle as $tabula=>$descrip){
+				$tabula = intval($tabula);
+				if($tabula>0 && !empty($descrip)){
+					$data['descripcion']= $descrip;
+					$data['tabula']     = $tabula;
+
+					$sql = $this->db->insert_string('medhvisita', $data);
+					$this->db->simple_query($sql);
+				}
+			}
+		}
+
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits ${primary}");
 	}
 
 	function _post_update($do){
+		$historia = $do->get('numero');
+		$fecha    = date('Y-m-d');
+
+		$itid      = $this->input->post('itid');
+		$itdetalle = $this->input->post('itdetalle');
+		if(is_array($itdetalle)){
+			$data = array('historia' => $historia, 'fecha' => $fecha);
+			foreach($itdetalle as $tabula=>$descrip){
+				$tabula = intval($tabula);
+				if($tabula>0 && !empty($descrip)){
+					$data['descripcion']= $descrip;
+					$data['tabula']     = $tabula;
+
+					if(isset($itid[$tabula])){
+						$iitid = intval($itid[$tabula]);
+					}else{
+						$iitid = 0;
+					}
+
+					if($iitid>0){
+						$sql   = $this->db->update_string('medhvisita', $data, 'id='.$iitid );
+					}else{
+						$sql = $this->db->insert_string('medhvisita', $data);
+					}
+					$this->db->simple_query($sql);
+				}
+			}
+		}
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${primary} ");
 	}
 
 	function _post_delete($do){
@@ -787,7 +807,7 @@ class Medhisto extends Controller {
 			  PRIMARY KEY (`id`),
 			  KEY `numero` (`numero`)
 			) ENGINE=InnoDB AUTO_INCREMENT=27260 DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT COMMENT='Historias Medicas'
-			
+
 			";
 			$this->db->query($mSQL);
 		}

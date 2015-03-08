@@ -86,7 +86,7 @@ class Medhvisita extends Controller {
 	}
 
 	//******************************************************************
-	// Definicion del Grid o Tabla 
+	// Definicion del Grid o Tabla
 	//
 	function defgrid( $deployed = false ){
 		$i      = 1;
@@ -261,7 +261,7 @@ class Medhvisita extends Controller {
 	}
 
 	//******************************************************************
-	// Edicion 
+	// Edicion
 
 	function dataedit(){
 		$this->rapyd->load('dataedit');
@@ -326,13 +326,13 @@ class Medhvisita extends Controller {
 	}
 
 	//******************************************************************
-	// Edicion 
+	// Edicion
 
 	function dataefla(){
 
 		$idhistoria = intval($this->uri->segment(5));
 		$idanterior = intval($this->uri->segment(6));
-		
+
 		$fecha     = date('Y-m-d');
 		$historia  = '';
 		$cedula    = '';
@@ -341,9 +341,9 @@ class Medhvisita extends Controller {
 
 		if ( $idhistoria == 'insert'){
 			$idhistoria = intval($this->uri->segment(4));
-			$idanterior = 0;			
-		} 
-		
+			$idanterior = 0;
+		}
+
 
 		if ( $idhistoria ){
 			$ante  = $this->datasis->damerow("SELECT numero, CONCAT(nacional,cedula) cedula, nombre, papellido FROM medhisto WHERE id=$idhistoria");
@@ -351,15 +351,15 @@ class Medhvisita extends Controller {
 			$cedula    = $ante['cedula'];
 			$nombres   = $ante['nombre'];
 			$apellidos = $ante['papellido'];
-		} 
+		}
 
 
 		if ( $idanterior ){
 			$ante  = $this->datasis->damerow("SELECT historia, fecha FROM medhvisita WHERE id=$idanterior");
 			$historia = $ante['historia'];
 			$fecha    = $ante['fecha'];
-			
-		} 
+
+		}
 
 		$this->rapyd->load('dataedit');
 		$script= '
@@ -368,7 +368,7 @@ class Medhvisita extends Controller {
 			$(".inputnum").numeric(".");
 			$.post(\''.site_url('medico/medhvisita/get_tabula').'\',{ historia:"'.$historia.'", fecha:$("#fecha").val() },function(data){$("#tabulados").html(data);})
 		});
-		
+
 		$("#descripcion").focus(function(){
 			$.post(\''.site_url('medico/medhvisita/get_tabula').'\',{ historia:"'.$historia.'", fecha:$("#fecha").val() },function(data){$("#tabulados").html(data);})
 		});
@@ -384,8 +384,8 @@ class Medhvisita extends Controller {
 				submit: function(e,v,m,f){
 					if (v) {
 						$.ajax({ url: "'.site_url('medico/medhvisita/elimina').'/"+id,
-							complete: function(){ 
-								//alert(("Entrada Eliminada")) 
+							complete: function(){
+								//alert(("Entrada Eliminada"))
 								$.post(\''.site_url('medico/medhvisita/get_tabula').'\',{ historia:"'.$historia.'", fecha:$("#fecha").val() },function(data){$("#tabulados").html(data);})
 							}
 						});
@@ -411,14 +411,27 @@ class Medhvisita extends Controller {
 		$edit->pre_process('delete', '_pre_delete' );
 
 		$html = '<table width="100%" style="background-color:#BCF5A9;font-size:14px;"><tr><td>Historia: </td><td style="font-weight:bold;">'.$historia.'</td><td>Nombre:</td><td style="font-weight:bold;">'.$nombres.' '.$apellidos.'</td><td>C.I.:</td><td style="font-weight:bold;">'.$cedula.'</td></td></tr></table>';
-		$edit->cabeza = new containerField('cabeza',$html);  
+		$edit->cabeza = new containerField('cabeza',$html);
 
 		$edit->historia = new hiddenField('','historia');
 		$edit->historia->insertValue = $historia;
 
-		$edit->tabula = new dropdownField('Tabula','tabula');
-		$edit->tabula->option('','Seleccionar');
-		$edit->tabula->options('SELECT id, CONCAT(indice," ",nombre ) tabu FROM medhtab WHERE grupo > 1 ORDER BY indice');
+
+		$tabula=array();
+		$mSQL='SELECT a.id, b.nombre AS grupo ,CONCAT(a.indice," ",a.nombre ) tabu
+			FROM medhtab  AS a
+			JOIN medhgrup AS b ON a.grupo=b.id
+		WHERE a.grupo > 1 ORDER BY b.nombre,a.indice';
+		$query = $this->db->query($mSQL);
+		foreach ($query->result() as $row){
+			$tabula[$row->grupo][$row->id]=$row->tabu;
+		}
+
+
+		$edit->tabula = new dropdownField('Tabula','tabula',$tabula);
+		//$edit->tabula->option('','Seleccionar');
+		//$edit->tabula->options('SELECT id, CONCAT(indice," ",nombre ) tabu FROM medhtab WHERE grupo > 1 ORDER BY indice');
+		//$edit->tabula->options($tabula);
 		$edit->tabula->rule ='required';
 		$edit->tabula->style='width:350px;';
 
@@ -427,7 +440,7 @@ class Medhvisita extends Controller {
 		$edit->fecha->calendar=false;
 		$edit->fecha->size =10;
 		$edit->fecha->maxlength =8;
-		$edit->fecha->insertValue = $fecha; 
+		$edit->fecha->insertValue = $fecha;
 
 		$edit->descripcion = new textareaField('Descripcion','descripcion');
 		$edit->descripcion->rule='';
@@ -435,7 +448,7 @@ class Medhvisita extends Controller {
 		$edit->descripcion->rows = 4;
 
 		$div = "<br><div style='overflow:auto;border: 1px solid #9AC8DA;background: #EAEAEA;height:210px' id='tabulados'></div>";
-		$edit->contenedor = new containerField('contenedor',$div);  
+		$edit->contenedor = new containerField('contenedor',$div);
 
 
 		$edit->build();
@@ -469,11 +482,11 @@ class Medhvisita extends Controller {
 				$mod = 0;
 				foreach($mSQL->result() AS $fila ){
 					$msalida .= "<tr bgcolor='";
-					if(!$mod) 
-						$msalida .= '#CFFFFF'; 
+					if(!$mod)
+						$msalida .= '#CFFFFF';
 					else
 						$msalida .= '#00FFFF';
-	
+
 					$msalida .= "'><td>".$fila->indice."</td><td>".$fila->descripcion."</td><td align='right'><a onclick='elivisita(".$fila->id.")'>".img(array('src'=>"images/delete.png", 'height'=>15, 'alt'=>'Eliminar', 'title'=>'Eliminar', 'border'=>'0'))."</a></td></tr>";
 					$mod = !$mod;
 				}
