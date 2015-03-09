@@ -45,7 +45,7 @@ WHERE e.idd='.$dbid);
 <body>
 <script type="text/php">
 if ( isset($pdf) ) {
-	$font = Font_Metrics::get_font("verdana");;
+	$font = Font_Metrics::get_font("verdana");
 	$size = 6;
 	$color = array(0,0,0);
 	$text_height = Font_Metrics::get_font_height($font, $size);
@@ -97,7 +97,7 @@ if ( isset($pdf) ) {
 			<table style="width: 100%; font-size: 8pt;">
 				<tr><td>Raz&oacute;n Social:</td><td><b><?php echo $nombre." (".$proveed.")"; ?></b></td></tr>
 				<tr><td>Direcci&oacute;n:</td><td><b><?php echo $direc1." ".$direc2." ".$direc3; ?></b></td></tr>
-				<tr><td>Tel&eacute;fono:</td><td><b><?php echo $telefono; ?></b>R.I.F. :<b><?php echo $rif; ?></b></td></tr>
+				<tr><td>Tel&eacute;fono:</td><td><b><?php echo $telefono; ?></b> R.I.F. :<b><?php echo $rif; ?></b></td></tr>
 			</table>
 			</div>
 	</thead>
@@ -140,7 +140,7 @@ if ( isset($pdf) ) {
 		<?php }else{
 			$reten=0;
 			$detalle = $mSQL_2->result();
-			foreach ($detalle AS $items){
+			foreach ($detalle as $items){
 				$reten+=$items->monto;
 		?>
 			<tr style='color: #111111;background: #EEEEEE;'>
@@ -170,7 +170,7 @@ if ( isset($pdf) ) {
 		</tr>
 	</table>
 	<p style='height:20px'> </p>
-	
+
 	<div style='height:70px;width: 100%;align:center;'>
 	<p style='height: 50px;'> </p>
 	<table style="width:90%;border-top:1px solid;"  class="header" align='center' >

@@ -1506,7 +1506,7 @@ class Rivc extends Controller {
 			$ww=' WHERE numero='.$this->db->escape($numero).' AND cod_cli='.$this->db->escape($cod_cli).' AND tipo_doc='.$this->db->escape($tipo_doc);
 			$mSQL='SELECT COUNT(*) FROM sfac '.$ww;
 		}
-		$cana=$this->datasis->dameval($mSQL);
+		$cana=intval($this->datasis->dameval($mSQL));
 
 		if($cana!=1){
 			$this->validation->set_message('chfac', 'El documento '.$numero.' no pertenece al cliente '.$cod_cli);
@@ -2038,7 +2038,6 @@ class Rivc extends Controller {
 		$cod_cli   = $do->get('cod_cli');
 		$nombre    = $do->get('nombre');
 		$estampa   = $do->get('estampa');
-		$periodo   = $do->get('periodo');
 		$usuario   = $do->get('usuario');
 		$hora      = $do->get('hora');
 		$operacion = $do->get('operacion');
@@ -2052,7 +2051,6 @@ class Rivc extends Controller {
 		$efecha   = $do->get('emision');
 		$fecha    = $do->get('fecha');
 		$ex_fecha = explode('-',$fecha);
-		$numero   = $do->get('nrocomp');
 		$vence    = $ex_fecha[0].$ex_fecha[1].days_in_month($ex_fecha[1],$ex_fecha[0]);
 
 		$mSQL = "DELETE FROM smov WHERE transac='${transac}'";

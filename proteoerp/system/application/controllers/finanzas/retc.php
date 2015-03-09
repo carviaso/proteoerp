@@ -10,8 +10,8 @@ include('common.php');
 
 class Retc extends Controller {
 	var $mModulo = 'RETC';
-	var $titp    = 'Modulo de Retenciones a clientes';
-	var $tits    = 'Modulo de Retenciones a clientes';
+	var $titp    = 'Modulo de Retenciones ISLR de clientes';
+	var $tits    = 'Modulo de Retenciones ISLR de clientes';
 	var $url     = 'finanzas/retc/';
 
 	function Retc(){
@@ -22,7 +22,7 @@ class Retc extends Controller {
 	}
 
 	function index(){
-
+		$this->instalar();
 		$this->datasis->modintramenu( 800, 600, substr($this->url,0,-1) );
 		redirect($this->url.'jqdatag');
 	}
@@ -48,7 +48,7 @@ class Retc extends Controller {
 		$bodyscript = $this->bodyscript( $param['grids'][0]['gridname'], $param['grids'][1]['gridname'] );
 
 		//Botones Panel Izq
-		$grid->wbotonadd(array('id'=>'imprime',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
+		//$grid->wbotonadd(array('id'=>'imprime',  'img'=>'assets/default/images/print.png','alt' => 'Reimprimir', 'label'=>'Reimprimir Documento'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -186,7 +186,7 @@ class Retc extends Controller {
 								$.prompt("Registro Guardado");
 								$( "#fedita" ).dialog( "close" );
 								grid.trigger("reloadGrid");
-								'.$this->datasis->jwinopen(site_url('formatos/ver/RETC').'/\'+json.pk.id+\'/id\'').';
+								//'.$this->datasis->jwinopen(site_url('formatos/ver/RETC').'/\'+json.pk.id+\'/id\'').';
 								return true;
 							} else {
 								$.prompt(json.mensaje);
@@ -262,26 +262,15 @@ class Retc extends Controller {
 
 		$grid  = new $this->jqdatagrid;
 
-		//$grid->addField('id');
-		//$grid->label('Id');
-		//$grid->params(array(
-		//	'align'         => "'center'",
-		//	'frozen'        => 'true',
-		//	'width'         => 40,
-		//	'editable'      => 'false',
-		//	'search'        => 'false'
-		//));
-
-
-		$grid->addField('nrocomp');
-		$grid->label('Comprobante');
+		$grid->addField('id');
+		$grid->label('Id');
 		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
+			'hidden'        => 'true',
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
 		));
 
 
@@ -295,18 +284,6 @@ class Retc extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
 			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('periodo');
-		$grid->label('Per&iacute;odo');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
 		));
 
 
@@ -359,36 +336,23 @@ class Retc extends Controller {
 		));
 
 
+		//$grid->addField('stotal');
+		//$grid->label('Stotal');
+		//$grid->params(array(
+		//	'search'        => 'true',
+		//	'editable'      => $editar,
+		//	'align'         => "'right'",
+		//	'edittype'      => "'text'",
+		//	'width'         => 100,
+		//	'editrules'     => '{ required:true }',
+		//	'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+		//	'formatter'     => "'number'",
+		//	'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		//));
+
+
 		$grid->addField('impuesto');
 		$grid->label('Impuesto');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-		$grid->addField('reiva');
-		$grid->label('Ret.IVA');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-		$grid->addField('stotal');
-		$grid->label('Importe');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -416,141 +380,9 @@ class Retc extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-		$grid->addField('exento');
-		$grid->label('Exento');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
 
-
-		$grid->addField('tasa');
-		$grid->label('Tasa G.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('general');
-		$grid->label('Base G.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('geneimpu');
-		$grid->label('Impuesto G.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-		$grid->addField('tasaredu');
-		$grid->label('Tasa R.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('reducida');
-		$grid->label('Base R.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('reduimpu');
-		$grid->label('Impuesto R.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-		$grid->addField('tasaadic');
-		$grid->label('Tasa A.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('adicional');
-		$grid->label('Base A.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('adicimpu');
-		$grid->label('Impuesto A.');
+		$grid->addField('monto');
+		$grid->label('Retenido');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -615,20 +447,20 @@ class Retc extends Controller {
 
 
 		$grid->addField('transac');
-		$grid->label('Transaci&oacute;n');
+		$grid->label('Transacci&oacute;n');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
 			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
+			'editoptions'   => '{ size:30, maxlength: 8 }',
 			'formatter'     => 'ltransac'
 		));
 
 
 		$grid->addField('origen');
-		$grid->label('Or&iacute;gen');
+		$grid->label('Origen');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -640,7 +472,7 @@ class Retc extends Controller {
 
 
 		$grid->addField('codbanc');
-		$grid->label('Banco');
+		$grid->label('Codbanc');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -652,7 +484,7 @@ class Retc extends Controller {
 
 
 		$grid->addField('tipo_op');
-		$grid->label('Tipo Op.');
+		$grid->label('Tipo_op');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -664,7 +496,7 @@ class Retc extends Controller {
 
 
 		$grid->addField('numche');
-		$grid->label('Num.Cheq');
+		$grid->label('Numche');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -676,7 +508,7 @@ class Retc extends Controller {
 
 
 		$grid->addField('sprmreinte');
-		$grid->label('Reintegro');
+		$grid->label('Sprmreinte');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -700,7 +532,7 @@ class Retc extends Controller {
 
 
 		$grid->addField('operacion');
-		$grid->label('Operaci&oacute;n');
+		$grid->label('Operacion');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -815,8 +647,36 @@ class Retc extends Controller {
 
 		$grid  = new $this->jqdatagrid;
 
+		$grid->addField('id');
+		$grid->label('Id');
+		$grid->params(array(
+			'hidden'        => 'true',
+			'align'         => "'center'",
+			'frozen'        => 'true',
+			'width'         => 40,
+			'editable'      => 'false',
+			'search'        => 'false'
+		));
+
+
+		$grid->addField('idretc');
+		$grid->label('Idretc');
+		$grid->params(array(
+			'hidden'        => 'true',
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 0 }'
+		));
+
+
 		$grid->addField('tipo_doc');
-		$grid->label('Tipo');
+		$grid->label('Tipo Doc.');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -852,8 +712,20 @@ class Retc extends Controller {
 		));
 
 
+		$grid->addField('codigorete');
+		$grid->label('Codigo Ret.');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 40,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:4, maxlength: 4 }',
+		));
+
+
 		$grid->addField('nfiscal');
-		$grid->label('N&uacute;mero fiscal');
+		$grid->label('N.Fiscal');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -862,6 +734,22 @@ class Retc extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:12, maxlength: 12 }',
 		));
+
+
+		$grid->addField('stotal');
+		$grid->label('Sub-total');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'align'         => "'right'",
+			'edittype'      => "'text'",
+			'width'         => 100,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
+		));
+
 
 		$grid->addField('impuesto');
 		$grid->label('Impuesto');
@@ -877,33 +765,6 @@ class Retc extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-		$grid->addField('reiva');
-		$grid->label('Ret.IVA');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-		$grid->addField('stotal');
-		$grid->label('Importe');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
 
 		$grid->addField('gtotal');
 		$grid->label('Total');
@@ -919,8 +780,9 @@ class Retc extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-		$grid->addField('exento');
-		$grid->label('Exento');
+
+		$grid->addField('monto');
+		$grid->label('Retenido');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
@@ -933,212 +795,6 @@ class Retc extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
-		$grid->addField('tasa');
-		$grid->label('Tasa G.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('general');
-		$grid->label('Base G.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('geneimpu');
-		$grid->label('Impuesto G.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-		$grid->addField('tasaredu');
-		$grid->label('Tasa R.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('reducida');
-		$grid->label('Base R.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('reduimpu');
-		$grid->label('Impuesto R.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-		$grid->addField('tasaadic');
-		$grid->label('Tasa A.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('adicional');
-		$grid->label('Base A.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-
-		$grid->addField('adicimpu');
-		$grid->label('Impuesto A.');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
-
-		$grid->addField('transac');
-		$grid->label('Transaci&oacute;n');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('estampa');
-		$grid->label('Estampa');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('hora');
-		$grid->label('Hora');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:8, maxlength: 8 }',
-		));
-
-
-		$grid->addField('usuario');
-		$grid->label('Usuario');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 120,
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:12, maxlength: 12 }',
-		));
-
-
-		$grid->addField('ffactura');
-		$grid->label('Fec.Factura');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		//$grid->addField('modificado');
-		//$grid->label('Modificado');
-		//$grid->params(array(
-		//	'search'        => 'true',
-		//	'editable'      => $editar,
-		//	'width'         => 80,
-		//	'align'         => "'center'",
-		//	'edittype'      => "'text'",
-		//	'editrules'     => '{ required:true,date:true}',
-		//	'formoptions'   => '{ label:"Fecha" }'
-		//));
 
 		$grid->setShrinkToFit('false');
 		#Set url
@@ -1206,30 +862,18 @@ class Retc extends Controller {
 		$edit->post_process('insert','_post_insert');
 		$edit->post_process('update','_post_update');
 		$edit->post_process('delete','_post_delete');
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
 
-		$edit->pre_process('insert','_pre_insert');
-		$edit->pre_process('update','_pre_update');
-		$edit->pre_process('delete','_pre_delete');
 
-		$edit->nrocomp = new inputField('Comprobante','nrocomp');
-		$edit->nrocomp->rule='max_length[8]|required';
-		$edit->nrocomp->size =10;
-		$edit->nrocomp->maxlength = '8';
-		$edit->nrocomp->autocomplete = false;
-
-		$edit->emision = new dateField('Fecha de Emisi&oacute;n','emision');
+		$edit->emision = new dateField('F.Emisi&oacute;n','emision');
 		$edit->emision->rule='chfecha|required';
 		$edit->emision->size =12;
 		$edit->emision->maxlength =8;
 		$edit->emision->calendar=false;
 
-		$edit->periodo = new inputField('Per&iacute;odo','periodo');
-		$edit->periodo->rule='max_length[6]|required';
-		$edit->periodo->size =7;
-		$edit->periodo->insertValue=date('Ym');
-		$edit->periodo->maxlength =6;
-
-		$edit->fecha = new dateField('Fecha de Recepci&oacute;n','fecha');
+		$edit->fecha = new dateField('F.Recepci&oacute;n','fecha');
 		$edit->fecha->rule='chfecha|required';
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->size =12;
@@ -1252,69 +896,9 @@ class Retc extends Controller {
 		$edit->rif->maxlength =14;
 		$edit->rif->autocomplete = false;
 
-		$edit->operacion = new radiogroupField('Operaci&oacute;n', 'operacion', array('R'=>'Reintegrar','A'=>'Crear anticipo','P'=>'Crear CxP'));
+		$edit->operacion = new radiogroupField('Operaci&oacute;n', 'operacion', array('R'=>'Reintegrar','A'=>'Anticipo','P'=>'CxP'));
 		$edit->operacion->insertValue='A';
 		$edit->operacion->rule='required';
-
-		$edit->exento = new inputField('Monto Exento','exento');
-		$edit->exento->rule='max_length[15]|numeric';
-		$edit->exento->css_class='inputnum';
-		$edit->exento->size =17;
-		$edit->exento->maxlength =15;
-
-		$edit->tasa = new inputField('tasa','tasa');
-		$edit->tasa->rule='max_length[5]|numeric';
-		$edit->tasa->css_class='inputnum';
-		$edit->tasa->size =7;
-		$edit->tasa->maxlength =5;
-
-		$edit->general = new inputField('general','general');
-		$edit->general->rule='max_length[15]|numeric';
-		$edit->general->css_class='inputnum';
-		$edit->general->size =17;
-		$edit->general->maxlength =15;
-
-		$edit->geneimpu = new inputField('geneimpu','geneimpu');
-		$edit->geneimpu->rule='max_length[15]|numeric';
-		$edit->geneimpu->css_class='inputnum';
-		$edit->geneimpu->size =17;
-		$edit->geneimpu->maxlength =15;
-
-		$edit->tasaadic = new inputField('tasaadic','tasaadic');
-		$edit->tasaadic->rule='max_length[5]|numeric';
-		$edit->tasaadic->css_class='inputnum';
-		$edit->tasaadic->size =7;
-		$edit->tasaadic->maxlength =5;
-
-		$edit->adicional = new inputField('adicional','adicional');
-		$edit->adicional->rule='max_length[15]|numeric';
-		$edit->adicional->css_class='inputnum';
-		$edit->adicional->size =17;
-		$edit->adicional->maxlength =15;
-
-		$edit->adicimpu = new inputField('adicimpu','adicimpu');
-		$edit->adicimpu->rule='max_length[15]|numeric';
-		$edit->adicimpu->css_class='inputnum';
-		$edit->adicimpu->size =17;
-		$edit->adicimpu->maxlength =15;
-
-		$edit->tasaredu = new inputField('tasaredu','tasaredu');
-		$edit->tasaredu->rule='max_length[5]|numeric';
-		$edit->tasaredu->css_class='inputnum';
-		$edit->tasaredu->size =7;
-		$edit->tasaredu->maxlength =5;
-
-		$edit->reducida = new inputField('reducida','reducida');
-		$edit->reducida->rule='max_length[15]|numeric';
-		$edit->reducida->css_class='inputnum';
-		$edit->reducida->size =17;
-		$edit->reducida->maxlength =15;
-
-		$edit->reduimpu = new inputField('reduimpu','reduimpu');
-		$edit->reduimpu->rule='max_length[15]|numeric';
-		$edit->reduimpu->css_class='inputnum';
-		$edit->reduimpu->size =17;
-		$edit->reduimpu->maxlength =15;
 
 		$edit->stotal = new hiddenField('Sub-total','stotal');
 		$edit->stotal->rule='max_length[15]|numeric';
@@ -1334,11 +918,11 @@ class Retc extends Controller {
 		$edit->gtotal->size =17;
 		$edit->gtotal->maxlength =15;
 
-		$edit->reiva = new hiddenField('Total Retenido','reiva');
-		$edit->reiva->rule='max_length[15]|numeric';
-		$edit->reiva->css_class='inputnum';
-		$edit->reiva->size =17;
-		$edit->reiva->maxlength =15;
+		$edit->monto = new hiddenField('Total Retenido','monto');
+		$edit->monto->rule='max_length[15]|numeric';
+		$edit->monto->css_class='inputnum';
+		$edit->monto->size =17;
+		$edit->monto->maxlength =15;
 
 		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
@@ -1360,31 +944,32 @@ class Retc extends Controller {
 		$edit->it_tipo_doc->maxlength =1;
 		$edit->it_tipo_doc->rel_id ='itretc';
 
-		$edit->it_fecha = new dateonlyField('fecha','fecha_<#i#>');
-		$edit->it_fecha->db_name='fecha';
-		$edit->it_fecha->rule='required|chfecha';
-		$edit->it_fecha->size =11;
-		$edit->it_fecha->maxlength =10;
-		$edit->it_fecha->rel_id ='itretc';
-		$edit->it_fecha->type='inputhidden';
-
 		$edit->it_numero = new inputField('numero','numero_<#i#>');
 		$edit->it_numero->db_name='numero';
-		$edit->it_numero->rule='max_length[12]|required|callback_chrepetidos|callback_chfac[<#i#>]|callback_chriva[<#i#>]';
+		$edit->it_numero->rule='max_length[12]|required|callback_chrepetidos|callback_chfac[<#i#>]';
 		$edit->it_numero->size =14;
 		$edit->it_numero->maxlength =12;
 		$edit->it_numero->title = 'Para mejorar la b&uacute;squeda coloque el tipo de documento seguido del n&uacute;mero, Ej D000001 si es una devoluci&oacute;n, F12345 si es una factura o NC0001 si una nota de cre&dacute;ito';
 		$edit->it_numero->rel_id ='itretc';
 		$edit->it_numero->autocomplete = false;
 
-		$edit->it_stotal = new inputField('stotal','stotal_<#i#>');
-		$edit->it_stotal->db_name='stotal';
-		$edit->it_stotal->rule='max_length[15]|numeric';
-		$edit->it_stotal->css_class='inputnum';
-		$edit->it_stotal->size =17;
-		$edit->it_stotal->maxlength =15;
-		$edit->it_stotal->rel_id ='itretc';
-		$edit->it_stotal->showformat ='decimal';
+		$edit->it_codigorete = new dropdownField('','codigorete_<#i#>');
+		$edit->it_codigorete->option('','Seleccionar');
+		$edit->it_codigorete->options('SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",tipo,codigo,activida)) AS activida FROM rete ORDER BY tipo,codigo');
+		$edit->it_codigorete->db_name='codigorete';
+		$edit->it_codigorete->rule   ='required';
+		$edit->it_codigorete->style  ='width: 200px';
+		$edit->it_codigorete->rel_id ='itretc';
+		$edit->it_codigorete->onchange='post_codigoreteselec(<#i#>,this.value)';
+
+		$edit->it_base = new inputField('base','base_<#i#>');
+		$edit->it_base->db_name='base';
+		$edit->it_base->rule='max_length[15]|numeric';
+		$edit->it_base->css_class='inputnum';
+		$edit->it_base->size =15;
+		$edit->it_base->maxlength =15;
+		$edit->it_base->showformat ='decimal';
+		$edit->it_base->rel_id ='itretc';
 
 		$edit->it_impuesto = new hiddenField('impuesto','impuesto_<#i#>');
 		$edit->it_impuesto->db_name='impuesto';
@@ -1405,17 +990,17 @@ class Retc extends Controller {
 		$edit->it_gtotal->showformat ='decimal';
 		$edit->it_gtotal->autocomplete = false;
 
-		$edit->it_reiva = new inputField('reiva','reiva_<#i#>');
-		$edit->it_reiva->db_name='reiva';
-		$edit->it_reiva->rule='max_length[15]|nocero|numeric';
-		$edit->it_reiva->css_class='inputnum';
-		$edit->it_reiva->size =17;
-		$edit->it_reiva->maxlength =15;
-		$edit->it_reiva->rel_id ='itretc';
-		$edit->it_reiva->onkeyup ='totalizar()';
-		$edit->it_reiva->autocomplete = false;
-		$edit->it_reiva->disable_paste= true;
-		$edit->it_reiva->showformat ='decimal';
+		$edit->it_monto = new inputField('monto','itmonto_<#i#>');
+		$edit->it_monto->db_name='monto';
+		$edit->it_monto->rule='max_length[15]|nocero|numeric';
+		$edit->it_monto->css_class='inputnum';
+		$edit->it_monto->size =17;
+		$edit->it_monto->maxlength =15;
+		$edit->it_monto->rel_id ='itretc';
+		$edit->it_monto->onkeyup ='totalizar()';
+		$edit->it_monto->autocomplete = false;
+		$edit->it_monto->disable_paste= true;
+		$edit->it_monto->showformat ='decimal';
 		//****************************
 		//Fin del Detalle
 		//****************************
@@ -1470,26 +1055,6 @@ class Retc extends Controller {
 		return true;
 	}
 
-	//Chequea que no se repita la retencion cuando se hace por DataSIS
-	function chriva($numero,$ind){
-		$cod_cli = $this->input->post('cod_cli');
-		$tipo_doc= $this->input->post('tipo_doc_'.$ind);
-		$fecha   = $this->input->post('fecha');
-		$tipo_doc=($tipo_doc=='F')? 'FC':'NC';
-
-		$this->db->where('numero'  , $numero  );
-		$this->db->where('tipo_doc', $tipo_doc);
-		$this->db->where('nroriva >', 0);
-		$this->db->from('itccli');
-		$cana=$this->db->count_all_results();
-
-		if($cana>0){
-			$this->validation->set_message('chriva', 'El documento '.$numero.' ya le fue aplicada una retenci&oacute;n de iva');
-			return false;
-		}
-		return true;
-	}
-
 	function chfac($numero,$ind){
 		$cod_cli = $this->input->post('cod_cli');
 		$tipo_doc= $this->input->post('tipo_doc_'.$ind);
@@ -1509,27 +1074,6 @@ class Retc extends Controller {
 			return false;
 		}
 
-		$mSQL='SELECT COUNT(*) AS cana FROM retc AS a JOIN itretc AS b ON a.id=b.idretc WHERE a.anulado=\'N\' AND b.numero='.$this->db->escape($numero).' AND b.tipo_doc='.$this->db->escape($tipo_doc);
-		$cana=$this->datasis->dameval($mSQL);
-		if($cana>0){
-			$this->validation->set_message('chfac', 'El documento '.$numero.' ya se le aplico una retenci&oacute;n');
-			return false;
-		}
-
-		/*if($tipo_doc=='D'){
-			$mSQL  = 'SELECT fecha FROM sfac '.$ww;
-			$ffech = $this->datasis->dameval($mSQL);
-			$ar_dfech = explode('-',$ffech);
-			$ar_rfech = explode('/',$fecha);
-
-			$d_dfech=(ceil($ar_dfech[2]/15)>2)? 2 : 1;
-			$d_rfech=(ceil($ar_rfech[0]/15)>2)? 2 : 1;
-
-			if($ar_dfech[0]!=$ar_rfech[2] || $ar_dfech[1]!=$ar_rfech[1] || $d_dfech!=$d_rfech){
-				$this->validation->set_message('chfac', 'El documento '.$numero.' esta fuera de per&iacute;odo');
-				return false;
-			}
-		}*/
 		return true;
 	}
 
@@ -1598,7 +1142,6 @@ class Retc extends Controller {
 			$retArray[0]['label']   = 'Debe seleccionar un cliente primero';
 			$retArray[0]['value']   = '';
 			$retArray[0]['gtotal']  = 0;
-			$retArray[0]['reiva']   = 0;
 			$retArray[0]['impuesto']= 0;
 			$retArray[0]['fecha']   = '';
 			$retArray[0]['tipo_doc']= '';
@@ -1610,7 +1153,6 @@ class Retc extends Controller {
 			$retArray[0]['label']   = 'Parametro de busqueda no valido';
 			$retArray[0]['value']   = '';
 			$retArray[0]['gtotal']  = 0;
-			$retArray[0]['reiva']   = 0;
 			$retArray[0]['impuesto']= 0;
 			$retArray[0]['fecha']   = '';
 			$retArray[0]['tipo_doc']= '';
@@ -1639,7 +1181,7 @@ class Retc extends Controller {
 
 			$mSQLs=array();
 			if(empty($match['tipo']) || $match['tipo']=='F' || $match['tipo']=='D' || $match['tipo']=='T'){
-				$mSQLs[] = "SELECT a.tipo_doc, a.numero, a.totalg, a.fecha,a.iva, a.iva*${rete} AS reiva
+				$mSQLs[] = "SELECT a.tipo_doc, a.numero, a.totalg, a.fecha,a.iva
 				FROM  retc AS c
 				JOIN itretc AS b ON c.id=b.idretc AND c.anulado='N'
 				RIGHT JOIN sfac AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
@@ -1647,7 +1189,7 @@ class Retc extends Controller {
 			}
 
 			if(empty($match['tipo']) || $match['tipo']=='NC' || $match['tipo']=='ND'){
-				$mSQLs[] = "SELECT a.tipo_doc, a.numero, a.monto AS totalg, a.fecha, a.impuesto AS iva,a.impuesto*${rete} AS reiva
+				$mSQLs[] = "SELECT a.tipo_doc, a.numero, a.monto AS totalg, a.fecha, a.impuesto AS iva
 				FROM  retc AS c
 				JOIN itretc AS b ON c.id=b.idretc AND c.anulado='N'
 				RIGHT JOIN smov AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
@@ -1666,7 +1208,6 @@ class Retc extends Controller {
 						$retArray['label']   = $row['tipo_doc'].'-'.$row['numero'].' '.$row['totalg'].' Bs.';
 						$retArray['value']   = $row['numero'];
 						$retArray['gtotal']  = $row['totalg'];
-						$retArray['reiva']   = (($row['tipo_doc']=='D' || $row['tipo_doc']=='NC')? -1: 1)*round($row['reiva'],2);
 						$retArray['impuesto']= $row['iva'];
 						$retArray['fecha']   = dbdate_to_human($row['fecha']);
 						$retArray['tipo_doc']= $row['tipo_doc'];
@@ -1680,7 +1221,6 @@ class Retc extends Controller {
 					$retArray[0]['cod_cli'] = '';
 					$retArray[0]['nombre']  = '';
 					$retArray[0]['gtotal']  = 0;
-					$retArray[0]['reiva']   = 0;
 					$retArray[0]['impuesto']= 0;
 					$retArray[0]['fecha']   = '';
 					$retArray[0]['tipo_doc']= '';
@@ -1763,7 +1303,7 @@ class Retc extends Controller {
 			$do->set('rif'   ,$rrow['rifci']);
 		}
 
-		$exento=$general=$geneimpu=$adicional=$adicimpu=$reducida=$reduimpu=$stotal=$impuesto=$gtotal=$reiva=0;
+		$stotal=$impuesto=$gtotal=$monto=0;
 
 		//Borra la clave ya que solo se usa para comprobar
 		$do->rm_get('clave');
@@ -1781,91 +1321,42 @@ class Retc extends Controller {
 		$cana = $do->count_rel($rel);
 		for($i = 0;$i < $cana;$i++){
 			$ittipo_doc   = $do->get_rel($rel, 'tipo_doc', $i);
-			$itreiva      = abs($do->get_rel($rel, 'reiva', $i));
+			$itmonto      = abs($do->get_rel($rel, 'monto', $i));
 			$dbitnumero   = $this->db->escape($do->get_rel($rel, 'numero'  , $i));
 			$dbittipo_doc = $this->db->escape($ittipo_doc);
 
 			if($ittipo_doc=='F' || $ittipo_doc=='D'){
-				$sql="SELECT exento,tasa,reducida,sobretasa,montasa,monredu,monadic,nfiscal,totals,totalg,iva FROM sfac WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
+				$sql="SELECT nfiscal,totals,totalg,iva,fecha FROM sfac WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
 				$query = $this->db->query($sql);
 				if ($query->num_rows() > 0){
 					$row = $query->row();
 
-					$do->set_rel($rel, 'exento'   , $row->exento , $i);
-
-					$do->set_rel($rel, 'tasa'     , ($row->montasa>0)? round($row->tasa *100/$row->montasa,2) : 0, $i);
-					$do->set_rel($rel, 'general'  , $row->montasa, $i);
-					$do->set_rel($rel, 'geneimpu' , $row->tasa   , $i);
-
-					$do->set_rel($rel, 'tasaadic' , ($row->monadic>0)? round($row->sobretasa*100/$row->monadic,2) : 0, $i);
-					$do->set_rel($rel, 'adicional', $row->monadic  , $i);
-					$do->set_rel($rel, 'adicimpu' , $row->sobretasa, $i);
-
-					$do->set_rel($rel, 'tasaredu' , ($row->monredu>0)? round($row->reducida*100/ $row->monredu,2) : 0, $i);
-					$do->set_rel($rel, 'reducida' , $row->monredu , $i);
-					$do->set_rel($rel, 'reduimpu' , $row->reducida, $i);
-
+					$do->set_rel($rel, 'fecha'   , $row->fecha  , $i);
 					$do->set_rel($rel, 'nfiscal' , $row->nfiscal, $i);
-					$do->set_rel($rel, 'reiva'   , $itreiva     , $i);
-
-					$exento   =$exento+$row->exento;
-
-					$general  =$general+$row->montasa;
-					$geneimpu =$geneimpu+$row->tasa;
-
-					$adicional=$adicional+$row->monadic;
-					$adicimpu =$adicimpu+$row->sobretasa;
-
-					$reducida =$reducida+$row->monredu;
-					$reduimpu =$reduimpu+$row->reducida;
+					//$do->set_rel($rel, 'stotal ' , $row->totalg-$row->iva, $i);
+					$do->set_rel($rel, 'monto'   , $itmonto     , $i);
 
 					//Totales del encabezado
 					$fac=($ittipo_doc=='D')? -1:1; //Para restar las devoluciones
-					$stotal   =$stotal+($fac*$row->totals);
-					$impuesto =$impuesto+($fac*$row->iva);
-					$gtotal   =$gtotal+($fac*$row->totalg);
-					$reiva    =$reiva+($fac*$itreiva);
+					$impuesto += ($fac*$row->iva);
+					$gtotal   += ($fac*$row->totalg);
+					$monto    += ($fac*$itmonto);
 				}
 			}else{ //Para el caso en que sean notas de credito por algun otro concepto fuera de sfac
-				$sql="SELECT exento,tasa,reducida,sobretasa,montasa,monredu,monadic,nfiscal,monto AS totals, monto AS totalg,impuesto AS iva FROM smov WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
+				$sql="SELECT nfiscal,monto AS totals, monto AS totalg,impuesto AS iva,fecha FROM smov WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
 				$query = $this->db->query($sql);
 				if ($query->num_rows() > 0){
 					$row = $query->row();
 
-					$do->set_rel($rel, 'exento'   , $row->exento , $i);
-
-					$do->set_rel($rel, 'tasa'     , ($row->montasa>0)? round($row->tasa *100/$row->montasa,2) : 0, $i);
-					$do->set_rel($rel, 'general'  , $row->montasa, $i);
-					$do->set_rel($rel, 'geneimpu' , $row->tasa   , $i);
-
-					$do->set_rel($rel, 'tasaadic' , ($row->monadic>0)? round($row->sobretasa*100/$row->monadic,2) : 0, $i);
-					$do->set_rel($rel, 'adicional', $row->monadic  , $i);
-					$do->set_rel($rel, 'adicimpu' , $row->sobretasa, $i);
-
-					$do->set_rel($rel, 'tasaredu' , ($row->monredu>0)? round($row->reducida*100/ $row->monredu,2) : 0, $i);
-					$do->set_rel($rel, 'reducida' , $row->monredu , $i);
-					$do->set_rel($rel, 'reduimpu' , $row->reducida, $i);
-
+					$do->set_rel($rel, 'fecha'   , $row->fecha  , $i);
 					$do->set_rel($rel, 'nfiscal' , $row->nfiscal, $i);
-					$do->set_rel($rel, 'reiva'    , $itreiva    , $i);
-
-					$exento   =$exento+$row->exento;
-
-					$general  =$general+$row->montasa;
-					$geneimpu =$geneimpu+$row->tasa;
-
-					$adicional=$adicional+$row->monadic;
-					$adicimpu =$adicimpu+$row->sobretasa;
-
-					$reducida =$reducida+$row->monredu;
-					$reduimpu =$reduimpu+$row->reducida;
+					$do->set_rel($rel, 'monto'   , $itmonto     , $i);
 
 					//Totales del encabezado
 					$fac=($ittipo_doc=='NC')? -1:1; //Para restar las devoluciones
-					$stotal   =$stotal+($fac*$row->totals);
-					$impuesto =$impuesto+($fac*$row->iva);
-					$gtotal   =$gtotal+($fac*$row->totalg);
-					$reiva    =$reiva+($fac*$itreiva);
+					$impuesto += ($fac*$row->iva);
+					$gtotal   += ($fac*$row->totalg);
+					$monto    += ($fac*$itmonto);
 				}
 			}
 
@@ -1875,17 +1366,10 @@ class Retc extends Controller {
 			$do->set_rel($rel, 'transac', $transac, $i);
 		}
 
-		$do->set('exento'   ,$exento);
-		$do->set('general'  ,$general);
-		$do->set('geneimpu' ,$geneimpu);
-		$do->set('adicional',$adicional);
-		$do->set('adicimpu' ,$adicimpu);
-		$do->set('reducida' ,$reducida);
-		$do->set('reduimpu' ,$reduimpu);
-		$do->set('stotal'   ,$stotal);
 		$do->set('impuesto' ,$impuesto);
 		$do->set('gtotal'   ,$gtotal);
-		$do->set('reiva'    ,$reiva);
+		$do->set('stotal'   ,$gtotal-$impuesto);
+		$do->set('monto'    ,$monto);
 
 		return true;
 	}
@@ -1901,7 +1385,7 @@ class Retc extends Controller {
 		$error=0;
 
 		$dbtransac= $this->db->escape($transac);
-		$mSQL="SELECT a.cod_cli,a.nombre,a.tipo_doc,a.numero,a.fecha,a.monto,a.impuesto,a.abonos,a.vence,a.tipo_ref,a.num_ref,a.fecdoc,a.nroriva,a.ningreso FROM smov AS a WHERE transac=${dbtransac}";
+		$mSQL="SELECT a.cod_cli,a.nombre,a.tipo_doc,a.numero,a.fecha,a.monto,a.impuesto,a.abonos,a.vence,a.tipo_ref,a.num_ref,a.fecdoc,a.ningreso FROM smov AS a WHERE transac=${dbtransac}";
 		$query = $this->db->query($mSQL);
 
 		$rel='itretc';
@@ -1940,8 +1424,6 @@ class Retc extends Controller {
 							$fecha        = $restodat[$iind];
 							$dbfecha = $this->db->escape($fecha);
 
-
-							$sqls[] = "UPDATE sfac SET reiva=0, creiva=NULL, freiva=NULL, ereiva=NULL WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
 							$sqls[] = "UPDATE smov SET abonos=abonos-(${itmonto}) WHERE numero=${dbitnumero}  AND cod_cli=${dbcod_cli} AND tipo_doc='${tiposfac}' AND fecha=${dbfecha}";
 						}else{
 							$error++;
@@ -2011,11 +1493,8 @@ class Retc extends Controller {
 		if($error>0){
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Hubo problemas en la trasaccion, se generar&acute;n centinelas';
 		}else{
-			$periodo = $do->get('periodo');
-			$nrocomp = $do->get('nrocomp');
-
 			$primary =implode(',',$do->pk);
-			logusu($do->table,"Anulo Retencion de cliente id: ${primary}  ${periodo }${nrocomp}");
+			logusu($do->table,"Anulo Retencion de cliente id: ${primary}");
 			$do->error_message_ar['pre_del'] = $do->error_message_ar['delete']='Retencion anulada';
 		}
 		return false;
@@ -2026,7 +1505,6 @@ class Retc extends Controller {
 		$error   = 0;
 		$montan  = 0; //Monto para anticipar
 		$sobrante= 0; //Monto sobrante para anticipar, reitegrar o pagar
-		$rp      = false; //Bandera para indicar retencion pendiente
 
 		$transac   = $do->get('transac');
 		$estampa   = $do->get('estampa');
@@ -2034,21 +1512,16 @@ class Retc extends Controller {
 		$cod_cli   = $do->get('cod_cli');
 		$nombre    = $do->get('nombre');
 		$estampa   = $do->get('estampa');
-		$periodo   = $do->get('periodo');
 		$usuario   = $do->get('usuario');
 		$hora      = $do->get('hora');
 		$operacion = $do->get('operacion');
-		$periodo   = $do->get('periodo');
 		$id        = $do->get('id');
-		$numero    = $do->get('nrocomp');
-		$comprob   = $periodo.$numero;
 		$dbcod_cli = $this->db->escape($cod_cli);
 
 		//$reinte  = $this->uri->segment($this->uri->total_segments());
 		$efecha   = $do->get('emision');
 		$fecha    = $do->get('fecha');
 		$ex_fecha = explode('-',$fecha);
-		$numero   = $do->get('nrocomp');
 		$vence    = $ex_fecha[0].$ex_fecha[1].days_in_month($ex_fecha[1],$ex_fecha[0]);
 
 		$mSQL = "DELETE FROM smov WHERE transac='${transac}'";
@@ -2060,8 +1533,8 @@ class Retc extends Controller {
 		for($i = 0;$i < $cana;$i++){
 			$ittipo_doc  = $do->get_rel($rel, 'tipo_doc', $i);
 			$itnumero    = $do->get_rel($rel, 'numero'  , $i);
-			$itmonto     = $do->get_rel($rel, 'reiva'  , $i);
-			$itfecha     = $do->get_rel($rel, 'fecha'  , $i);
+			$itmonto     = $do->get_rel($rel, 'monto'   , $i);
+			$itfecha     = $do->get_rel($rel, 'fecha'   , $i);
 
 			$dbitnumero   = $this->db->escape($itnumero);
 			$dbittipo_doc = $this->db->escape($ittipo_doc);
@@ -2078,16 +1551,8 @@ class Retc extends Controller {
 					$itfactura = $row->factura;
 				}
 
-				if($anterior == 0){
-					$mSQL = "UPDATE sfac SET reiva=${itmonto}, creiva='${periodo}${numero}', freiva='${fecha}', ereiva='${efecha}' WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc}";
-					$ban=$this->db->simple_query($mSQL);
-					if($ban==false){ memowrite($mSQL,'retc'); }
-				}
 			}else{//En caso de provenir de smov
 				if($ittipo_doc=='NC'){
-					$mSQL = "UPDATE smov SET reteiva=${itmonto}, nroriva='${periodo}${numero}', emiriva='${efecha}' WHERE numero=${dbitnumero} AND tipo_doc=${dbittipo_doc} AND cod_cli=${dbcod_cli} LIMIT 1";
-					$ban=$this->db->simple_query($mSQL);
-					if($ban==false){ memowrite($mSQL,'retc'); }
 					$itreferen = 'E';
 				}else{
 					$itreferen = 'C';
@@ -2098,34 +1563,9 @@ class Retc extends Controller {
 			if($itreferen=='C'){
 				$iittipo_doc   = ($ittipo_doc=='F')? 'FC' : $ittipo_doc;
 				$dbiittipo_doc = $this->db->escape($iittipo_doc);
-				$saldo = floatval($this->datasis->dameval("SELECT monto-abonos FROM smov WHERE tipo_doc=${dbiittipo_doc} AND numero=${dbitnumero}"));
+				$saldo = floatval($this->datasis->dameval("SELECT monto-abonos AS val FROM smov WHERE tipo_doc=${dbiittipo_doc} AND numero=${dbitnumero}"));
 			}else{
-
-				if($ittipo_doc=='F'){
-					//Busca un tipo de pago RP
-					$sel=array('b.monto - b.abonos AS saldo','b.numero');
-					$this->db->select($sel);
-					$this->db->from('sfac AS a');
-					$this->db->join('smov AS b','a.cod_cli=b.cod_cli AND a.transac=b.transac AND a.fecha=b.fecha');
-					$this->db->where('a.tipo_doc','F');
-					$this->db->where('b.tipo_doc','ND');
-					$this->db->where('a.numero'  ,$itnumero);
-					$query = $this->db->get();
-
-					if ($query->num_rows() > 0){
-						$row = $query->row();
-
-						$ittipo_doc = 'ND';
-						$itnumero   = $row->numero;
-
-						$saldo=$row->saldo;
-						$rp=true;
-					}else{
-						$saldo = 0;
-					}
-				}else{
-					$saldo = 0;
-				}
+				$saldo = 0;
 			}
 
 			//Si es una factura o una nota de debito por causa o no causa de una RP
@@ -2147,9 +1587,9 @@ class Retc extends Controller {
 					$data['impuesto']   = 0;
 					$data['abonos']     = $itmonto;
 					$data['vence']      = $fecha;
-					$data['tipo_ref']   = ($rp || $ittipo_doc == 'F')? 'FC' : $ittipo_doc;
+					$data['tipo_ref']   = $ittipo_doc;
 					$data['num_ref']    = $do->get_rel($rel,'numero',$i);
-					$data['observa1']   = 'APLICACION DE RET/IVA A FC'.$do->get_rel($rel,'numero',$i);
+					$data['observa1']   = 'APLICACION DE RET/ISLR A FC'.$do->get_rel($rel,'numero',$i);
 					$data['estampa']    = $estampa;
 					$data['hora']       = $hora;
 					$data['transac']    = $transac;
@@ -2157,8 +1597,6 @@ class Retc extends Controller {
 					$data['codigo']     = 'NOCON';
 					$data['descrip']    = 'NOTA DE CONTABILIDAD';
 					$data['fecdoc']     = $itfecha;
-					$data['nroriva']    = $comprob;
-					$data['emiriva']    = $efecha;
 
 					$mSQL = $this->db->insert_string('smov', $data);
 					$ban=$this->db->simple_query($mSQL);
@@ -2183,9 +1621,6 @@ class Retc extends Controller {
 					$data['hora']       = $hora;
 					$data['usuario']    = $usuario;
 					$data['reteiva']    = 0;
-					$data['nroriva']    = '';
-					$data['emiriva']    = '';
-					$data['recriva']    = '';
 
 					$mSQL = $this->db->insert_string('itccli', $data);
 					$ban=$this->db->simple_query($mSQL);
@@ -2200,8 +1635,8 @@ class Retc extends Controller {
 
 				$mnumnd = $this->datasis->fprox_numero('ndcli');
 				$data=array();
-				$data['cod_cli']    = 'REIVA';
-				$data['nombre']     = 'RETENCION DE I.V.A. POR COMPENSAR';
+				$data['cod_cli']    = 'RETEN';
+				$data['nombre']     = 'RETENCION DE I.S.L.R.';
 				$data['tipo_doc']   = 'ND';
 				$data['numero']     = $mnumnd;
 				$data['fecha']      = $fecha;
@@ -2211,15 +1646,14 @@ class Retc extends Controller {
 				$data['vence']      = $vence;
 				$data['tipo_ref']   = 'FC';
 				$data['num_ref']    = $do->get_rel($rel, 'numero'  , $i);
-				$data['observa1']   = 'RET/IVA DE '.$cod_cli.' A DOC. FC'.$do->get_rel($rel,'numero', $i);
+				$data['observa1']   = 'RET/ISLR DE '.$cod_cli.' A DOC. FC'.$do->get_rel($rel,'numero', $i);
 				$data['estampa']    = $estampa;
 				$data['hora']       = $hora;
 				$data['transac']    = $transac;
 				$data['usuario']    = $usuario;
 				$data['codigo']     = 'NOCON';
 				$data['descrip']    = 'NOTA DE CONTABILIDAD';
-				$data['nroriva']    = $comprob;
-				$data['emiriva']    = $efecha;
+
 
 				$mSQL = $this->db->insert_string('smov', $data);
 				$ban=$this->db->simple_query($mSQL);
@@ -2239,13 +1673,11 @@ class Retc extends Controller {
 				$data['vence']      = $fecha;
 				$data['tipo_ref']   = ($ittipo_doc=='F')? 'FC' : 'DV';
 				$data['num_ref']    = $itnumero;
-				$data['observa1']   = 'RET/IVA DE '.$cod_cli.' A DOC. '.$ittipo_doc.$itnumero;
+				$data['observa1']   = 'RET/ISLR DE '.$cod_cli.' A DOC. '.$ittipo_doc.$itnumero;
 				$data['estampa']    = $estampa;
 				$data['hora']       = $hora;
 				$data['transac']    = $transac;
 				$data['usuario']    = $usuario;
-				$data['nroriva']    = $comprob;
-				$data['emiriva']    = $efecha;
 
 				$mSQL = $this->db->insert_string('smov', $data);
 				$ban=$this->db->simple_query($mSQL);
@@ -2254,8 +1686,8 @@ class Retc extends Controller {
 				//Devoluciones debe crear un NC si esta en el periodo
 				$mnumnc = $this->datasis->fprox_numero('nccli');
 				$data=array();
-				$data['cod_cli']    = 'REIVA';
-				$data['nombre']     = 'RETENCION DE I.V.A. POR COMPENSAR';
+				$data['cod_cli']    = 'RETEN';
+				$data['nombre']     = 'RETENCION DE I.S.L.R. POR COMPENSAR';
 				$data['tipo_doc']   = 'NC';
 				$data['numero']     = $mnumnc;
 				$data['fecha']      = $fecha;
@@ -2272,8 +1704,6 @@ class Retc extends Controller {
 				$data['usuario']    = $usuario;
 				$data['codigo']     = 'NOCON';
 				$data['descrip']    = 'NOTA DE CONTABILIDAD';
-				$data['nroriva']    = $comprob;
-				$data['emiriva']    = $efecha;
 
 				$mSQL = $this->db->insert_string('smov', $data);
 				$ban=$this->db->simple_query($mSQL);
@@ -2281,7 +1711,7 @@ class Retc extends Controller {
 
 
 				if($ittipo_doc <> 'NC'){
-					//Aplica la NC a la ND si es posible a REIVA
+					//Aplica la NC a la ND si es posible a RETEN
 					//$mnumnd; $fecha;
 					$this->db->select(array('a.numero','a.fecha','a.monto - a.abonos AS saldo'));
 					$this->db->from('smov   AS a');
@@ -2289,7 +1719,7 @@ class Retc extends Controller {
 					$this->db->where('b.numero'   , $itfactura);
 					$this->db->where('b.tipo_doc' , 'F');
 					$this->db->where('a.tipo_doc' , 'ND');
-					$this->db->where('a.cod_cli'  , 'REIVA');
+					$this->db->where('a.cod_cli'  , 'RETEN');
 					$qquery=$this->db->get();
 
 					if ($qquery->num_rows() == 1){
@@ -2313,9 +1743,6 @@ class Retc extends Controller {
 							$data['hora']       = $hora;
 							$data['usuario']    = $usuario;
 							$data['reteiva']    = 0;
-							$data['nroriva']    = '';
-							$data['emiriva']    = '';
-							$data['recriva']    = '';
 
 							$mSQL = $this->db->insert_string('itccli', $data);
 							$ban=$this->db->simple_query($mSQL);
@@ -2326,7 +1753,7 @@ class Retc extends Controller {
 							$dbnumero=$this->db->escape($rrrow->numero);
 							$mSQL="UPDATE smov SET abonos=abonos+${itmonto}
 							WHERE
-							cod_cli ='REIVA' AND
+							cod_cli ='RETEN' AND
 							tipo_doc='ND' AND
 							numero  = ${dbnumero} AND
 							fecha   = ${dbfecha}";
@@ -2338,7 +1765,7 @@ class Retc extends Controller {
 							$dbnumero=$this->db->escape($mnumnc);
 							$mSQL="UPDATE smov SET abonos=monto
 							WHERE
-							cod_cli ='REIVA' AND
+							cod_cli ='RETEN' AND
 							tipo_doc='NC' AND
 							numero  = ${dbnumero} AND
 							fecha   = ${dbfecha}";
@@ -2367,14 +1794,12 @@ class Retc extends Controller {
 				$data['vence']      = $fecha;
 				$data['tipo_ref']   = 'CR';
 				$data['num_ref']    = $numero;
-				$data['observa1']   = 'RET/ISLR DE '.$cod_cli.' A CR'.$comprob;
+				$data['observa1']   = 'RET/ISLR DE '.$cod_cli;
 				$data['usuario']    = $usuario;
 				$data['estampa']    = $estampa;
 				$data['hora']       = $hora;
 				$data['transac']    = $transac;
 				$data['fecdoc']     = $fecha;
-				$data['nroriva']    = $comprob;
-				$data['emiriva']    = $efecha;
 
 				$mSQL = $this->db->insert_string('smov', $data);
 				$ban=$this->db->simple_query($mSQL);
@@ -2413,7 +1838,7 @@ class Retc extends Controller {
 				$data['nombre']     = $nombre;
 				$data['monto']      = $sobrante;
 				$data['concepto']   = 'REINTEGRO RET/ISLR DE '.$cod_cli;
-				$data['concep2']    = ' CR'.$comprob;
+				$data['concep2']    = '';
 				$data['benefi']     = '';
 				$data['posdata']    = '';
 				$data['abanco']     = '';
@@ -2449,7 +1874,7 @@ class Retc extends Controller {
 				$data['impuesto']   = 0;
 				$data['abonos']     = 0;
 				$data['vence']      = $fecha;
-				$data['observa1']   = 'CARGO A CXC RET/IVA CR '.$comprob;
+				$data['observa1']   = 'CARGO A CXC RET/ISLR ';
 				$data['observa2']   = 'DEL CLIENTE '.$cod_cli;
 				$data['tipo_ref']   = 'CR';
 				$data['num_ref']    = $numero;
@@ -2478,119 +1903,93 @@ class Retc extends Controller {
 				if($ban==false){ memowrite($sql,'retc'); $error++;}
 			}
 		}
-		$periodo = $do->get('periodo');
-		$nrocomp = $do->get('nrocomp');
 
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits ID ${primary} ${periodo}${nrocomp}");
+		logusu($do->table,"Creo $this->tits ID ${primary}");
 
 		return true;
 	}
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${primary}");
 	}
 
 	function _post_delete($do){
-		$periodo = $do->get('periodo');
-		$nrocomp = $do->get('nrocomp');
-
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Anulo $this->tits $primary  ${periodo }${nrocomp}");
+		logusu($do->table,"Anulo $this->tits ${primary}");
 	}
 
 	function instalar(){
+		$this->datasis->creaintramenu(array('modulo'=>'52E','titulo'=>'Retenciones de ISLR Clientes','mensaje'=>'Registro de retenciones ISLR de clientes','panel'=>'CLIENTES','ejecutar'=>'finanzas/retc','target'=>'popu','visible'=>'S','pertenece'=>'5','ancho'=>900,'alto'=>600));
+
 		if (!$this->db->table_exists('retc')) {
 			$mSQL="CREATE TABLE `retc` (
-			`id` int(6) NOT NULL AUTO_INCREMENT,
-			`nrocomp` varchar(8) NOT NULL DEFAULT '',
-			`emision` date DEFAULT NULL,
-			`periodo` char(8) DEFAULT NULL,
-			`fecha` date DEFAULT NULL,
-			`cod_cli` varchar(5) DEFAULT NULL,
-			`nombre` varchar(200) DEFAULT NULL,
-			`rif` varchar(14) DEFAULT NULL,
-			`exento` decimal(15,2) DEFAULT NULL,
-			`tasa` decimal(5,2) DEFAULT NULL,
-			`general` decimal(15,2) DEFAULT NULL,
-			`geneimpu` decimal(15,2) DEFAULT NULL,
-			`tasaadic` decimal(5,2) DEFAULT NULL,
-			`adicional` decimal(15,2) DEFAULT NULL,
-			`adicimpu` decimal(15,2) DEFAULT NULL,
-			`tasaredu` decimal(5,2) DEFAULT NULL,
-			`reducida` decimal(15,2) DEFAULT NULL,
-			`reduimpu` decimal(15,2) DEFAULT NULL,
-			`stotal` decimal(15,2) DEFAULT NULL,
-			`impuesto` decimal(15,2) DEFAULT NULL,
-			`gtotal` decimal(15,2) DEFAULT NULL,
-			`reiva` decimal(15,2) DEFAULT NULL,
-			`estampa` date DEFAULT NULL,
-			`hora` char(8) DEFAULT NULL,
-			`usuario` varchar(12) DEFAULT NULL,
-			`modificado` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-			`transac` varchar(8) DEFAULT NULL,
-			`origen` char(1) DEFAULT NULL,
-			`codbanc` char(2) DEFAULT NULL,
-			`tipo_op` char(2) DEFAULT NULL,
-			`numche` varchar(12) DEFAULT NULL,
-			`sprmreinte` varchar(8) DEFAULT NULL,
-			PRIMARY KEY (`id`),
-			KEY `modificado` (`modificado`),
-			KEY `nrocomp_cod_cli` (`nrocomp`,`cod_cli`)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=FIXED";
+				`id` INT(6) NOT NULL AUTO_INCREMENT,
+				`emision` DATE NULL DEFAULT NULL,
+				`fecha` DATE NULL DEFAULT NULL,
+				`cod_cli` VARCHAR(5) NULL DEFAULT NULL,
+				`nombre` VARCHAR(200) NULL DEFAULT NULL,
+				`rif` VARCHAR(14) NULL DEFAULT NULL,
+				`stotal` DECIMAL(15,2) NULL DEFAULT NULL,
+				`impuesto` DECIMAL(15,2) NULL DEFAULT NULL,
+				`gtotal` DECIMAL(15,2) NULL DEFAULT NULL,
+				`monto` DECIMAL(15,2) NULL DEFAULT NULL,
+				`estampa` DATE NULL DEFAULT NULL,
+				`hora` CHAR(8) NULL DEFAULT NULL,
+				`usuario` VARCHAR(12) NULL DEFAULT NULL,
+				`modificado` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+				`transac` VARCHAR(8) NULL DEFAULT NULL,
+				`origen` CHAR(1) NULL DEFAULT NULL,
+				`codbanc` CHAR(2) NULL DEFAULT NULL,
+				`tipo_op` CHAR(2) NULL DEFAULT NULL,
+				`numche` VARCHAR(12) NULL DEFAULT NULL,
+				`sprmreinte` VARCHAR(8) NULL DEFAULT NULL,
+				`cajero` VARCHAR(5) NULL DEFAULT NULL,
+				`operacion` CHAR(1) NOT NULL,
+				`anulado` CHAR(1) NULL DEFAULT 'N',
+				PRIMARY KEY (`id`),
+				INDEX `modificado` (`modificado`),
+				INDEX `nrocomp_cod_cli` (`cod_cli`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
 
-		if (!$this->db->field_exists('operacion', 'retc')){
+		/*if (!$this->db->field_exists('', 'retc')){
 			$mSQL="ALTER TABLE retc ADD COLUMN operacion CHAR(1) NOT NULL AFTER sprmreinte";
 			$this->db->simple_query($mSQL);
-		}
+		}*/
 
-		if (!$this->db->field_exists('anulado', 'retc')){
-			$mSQL="ALTER TABLE `retc`  ADD COLUMN `anulado` CHAR(1) NULL DEFAULT 'N' AFTER `operacion`";
-			$this->db->simple_query($mSQL);
-		}
-
-		if (!$this->db->field_exists('cajero', 'retc')){
-			$mSQL="ALTER TABLE retc ADD COLUMN cajero VARCHAR(5) NULL DEFAULT NULL AFTER sprmreinte";
-			$this->db->simple_query($mSQL);
-		}
 
 		if (!$this->db->table_exists('itretc')) {
 			$mSQL="CREATE TABLE `itretc` (
-			`id` int(6) NOT NULL AUTO_INCREMENT,
-			`idretc` int(6) DEFAULT NULL,
-			`tipo_doc` char(2) DEFAULT NULL,
-			`fecha` date DEFAULT NULL,
-			`numero` varchar(8) DEFAULT NULL,
-			`nfiscal` char(12) DEFAULT NULL,
-			`exento` decimal(15,2) DEFAULT NULL,
-			`tasa` decimal(5,2) DEFAULT NULL,
-			`general` decimal(15,2) DEFAULT NULL,
-			`geneimpu` decimal(15,2) DEFAULT NULL,
-			`tasaadic` decimal(5,2) DEFAULT NULL,
-			`adicional` decimal(15,2) DEFAULT NULL,
-			`adicimpu` decimal(15,2) DEFAULT NULL,
-			`tasaredu` decimal(5,2) DEFAULT NULL,
-			`reducida` decimal(15,2) DEFAULT NULL,
-			`reduimpu` decimal(15,2) DEFAULT NULL,
-			`stotal` decimal(15,2) DEFAULT NULL,
-			`impuesto` decimal(15,2) DEFAULT NULL,
-			`gtotal` decimal(15,2) DEFAULT NULL,
-			`reiva` decimal(15,2) DEFAULT NULL,
-			`transac` char(8) DEFAULT NULL,
-			`estampa` date DEFAULT NULL,
-			`hora` char(8) DEFAULT NULL,
-			`usuario` char(12) DEFAULT NULL,
-			`ffactura` date DEFAULT '0000-00-00',
-			`modificado` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-			PRIMARY KEY (`id`),
-			KEY `tipo_doc_numero` (`tipo_doc`,`numero`),
-			KEY `Numero` (`numero`),
-			KEY `modificado` (`modificado`),
-			KEY `rivatra` (`transac`)
-			) ENGINE=MyISAM DEFAULT CHARSET=latin1 ROW_FORMAT=FIXED";
+				`id` INT(6) NOT NULL AUTO_INCREMENT,
+				`idretc` INT(6) NULL DEFAULT NULL,
+				`tipo_doc` CHAR(2) NULL DEFAULT NULL,
+				`fecha` DATE NULL DEFAULT NULL,
+				`numero` VARCHAR(8) NULL DEFAULT NULL,
+				`codigorete` VARCHAR(4) NULL DEFAULT NULL,
+				`nfiscal` CHAR(12) NULL DEFAULT NULL,
+				`base` DECIMAL(15,2) NULL DEFAULT NULL,
+				`impuesto` DECIMAL(15,2) NULL DEFAULT NULL,
+				`gtotal` DECIMAL(15,2) NULL DEFAULT NULL,
+				`monto` DECIMAL(15,2) NULL DEFAULT NULL,
+				`transac` CHAR(8) NULL DEFAULT NULL,
+				`estampa` DATE NULL DEFAULT NULL,
+				`hora` CHAR(8) NULL DEFAULT NULL,
+				`usuario` CHAR(12) NULL DEFAULT NULL,
+				`ffactura` DATE NULL DEFAULT '0000-00-00',
+				`modificado` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+				PRIMARY KEY (`id`),
+				INDEX `tipo_doc_numero` (`tipo_doc`, `numero`),
+				INDEX `Numero` (`numero`),
+				INDEX `modificado` (`modificado`),
+				INDEX `rivatra` (`transac`)
+			)
+			COLLATE='latin1_swedish_ci'
+			ENGINE=MyISAM;";
 			$this->db->simple_query($mSQL);
 		}
 	}
