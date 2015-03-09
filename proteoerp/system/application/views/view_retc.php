@@ -7,14 +7,15 @@ if ($form->_status=='delete' || $form->_action=='delete' || $form->_status=='unk
 	echo $form->output;
 else:
 
-$campos=$form->template_details('itrivc');
-$scampos  ='<tr id="tr_itrivc_<#i#>">';
+$campos=$form->template_details('itretc');
+$scampos  ='<tr id="tr_itretc_<#i#>">';
 $scampos .='<td class="littletablerow" align="left" ><b id="tipo_doc_val_<#i#>"></b>'.$campos['it_tipo_doc']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['it_numero']['field'].'</td>';
-$scampos .='<td class="littletablerow" align="right"><b id="gtotal_val_<#i#>"></b>'.$campos['it_gtotal']['field'].'</td>';
-$scampos .='<td class="littletablerow" align="right">'.'</td>';
+$scampos .='<td class="littletablerow" align="right"><b id="gtotal_val_<#i#>"></b>'.$campos['it_gtotal']['field'].$campos['it_impuesto']['field'].'</td>';
+$scampos .='<td class="littletablerow" align="right">'.$campos['it_base']['field'].'</td>';
+$scampos .='<td class="littletablerow" align="right">'.$campos['it_codigorete']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['it_monto']['field'].'</td>';
-$scampos .='<td class="littletablerow"><a href=# onclick="del_itrivc(<#i#>);return false;">'.img('images/delete.jpg').'</a></td></tr>';
+$scampos .='<td class="littletablerow"><a href=# onclick="del_itretc(<#i#>);return false;">'.img('images/delete.jpg').'</a></td></tr>';
 $campos=$form->js_escape($scampos);
 
 if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'</div>';
@@ -36,7 +37,7 @@ $(function(){
 			return false;
 		}
 		if (com && (e.which == 61 || e.which == 107)) {
-			add_itrivc();
+			add_itretc();
 			com=false;
 			return false;
 		}else if (com && e.which != 16 && e.which == 17){
@@ -57,7 +58,7 @@ $(function(){
 		autoFocus: true,
 		source: function( req, add){
 			$.ajax({
-				url:  "<?php echo site_url('finanzas/rivc/buscascli'); ?>",
+				url:  "<?php echo site_url('finanzas/retc/buscascli'); ?>",
 				type: "POST",
 				dataType: "json",
 				data: {"q":req.term},
@@ -137,8 +138,8 @@ function totalizar(){
 
 function add_itretc(){
 	var htm = <?php echo $campos; ?>;
-	can = itrivc_cont.toString();
-	con = (itrivc_cont+1).toString();
+	can = itretc_cont.toString();
+	con = (itretc_cont+1).toString();
 	htm = htm.replace(/<#i#>/g,can);
 	htm = htm.replace(/<#o#>/g,con);
 	$("#__INPL__").after(htm);

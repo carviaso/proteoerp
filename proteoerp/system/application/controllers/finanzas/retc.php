@@ -590,6 +590,14 @@ class Retc extends Controller {
 
 		$grid->setBarOptions('addfunc: retcadd, editfunc: retcedit, delfunc: retcdel, viewfunc: retcshow');
 
+		$grid->setAfterInsertRow('
+			function( rid, aData, rowe){
+				if(aData.anulado=="S"){
+					$(this).jqGrid( "setCell", rid, "emision","", {color:"#FFFFFF", background:"#FF2C14" });
+				}
+			}'
+		);
+
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
@@ -733,21 +741,6 @@ class Retc extends Controller {
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:12, maxlength: 12 }',
-		));
-
-
-		$grid->addField('stotal');
-		$grid->label('Sub-total');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
 
@@ -958,7 +951,7 @@ class Retc extends Controller {
 		$edit->it_codigorete->options('SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",tipo,codigo,activida)) AS activida FROM rete ORDER BY tipo,codigo');
 		$edit->it_codigorete->db_name='codigorete';
 		$edit->it_codigorete->rule   ='required';
-		$edit->it_codigorete->style  ='width: 200px';
+		$edit->it_codigorete->style  ='width: 300px';
 		$edit->it_codigorete->rel_id ='itretc';
 		$edit->it_codigorete->onchange='post_codigoreteselec(<#i#>,this.value)';
 
@@ -966,7 +959,7 @@ class Retc extends Controller {
 		$edit->it_base->db_name='base';
 		$edit->it_base->rule='max_length[15]|numeric';
 		$edit->it_base->css_class='inputnum';
-		$edit->it_base->size =15;
+		$edit->it_base->size =12;
 		$edit->it_base->maxlength =15;
 		$edit->it_base->showformat ='decimal';
 		$edit->it_base->rel_id ='itretc';
@@ -994,7 +987,7 @@ class Retc extends Controller {
 		$edit->it_monto->db_name='monto';
 		$edit->it_monto->rule='max_length[15]|nocero|numeric';
 		$edit->it_monto->css_class='inputnum';
-		$edit->it_monto->size =17;
+		$edit->it_monto->size =12;
 		$edit->it_monto->maxlength =15;
 		$edit->it_monto->rel_id ='itretc';
 		$edit->it_monto->onkeyup ='totalizar()';
@@ -1185,7 +1178,7 @@ class Retc extends Controller {
 				FROM  retc AS c
 				JOIN itretc AS b ON c.id=b.idretc AND c.anulado='N'
 				RIGHT JOIN sfac AS a ON a.tipo_doc=b.tipo_doc AND a.numero=b.numero
-				WHERE a.cod_cli=${sclidb} AND a.numero LIKE ${dbnumero} ${wwtipo} AND b.numero IS NULL AND a.tipo_doc <> 'X' AND a.iva>0";
+				WHERE a.cod_cli=${sclidb} AND a.numero LIKE ${dbnumero} ${wwtipo} AND b.numero IS NULL AND a.tipo_doc <> 'X'";
 			}
 
 			if(empty($match['tipo']) || $match['tipo']=='NC' || $match['tipo']=='ND'){
@@ -1289,8 +1282,6 @@ class Retc extends Controller {
 	//    Pre y Pos procesos
 	//*****************************
 	function _pre_insert($do){
-		$transac = $this->datasis->fprox_numero('ntransa');
-		$do->set('transac', $transac);
 		$estampa = $do->get('estampa');
 		$hora    = $do->get('hora');
 		$usuario = $do->get('usuario');
@@ -1321,8 +1312,10 @@ class Retc extends Controller {
 		$cana = $do->count_rel($rel);
 		for($i = 0;$i < $cana;$i++){
 			$ittipo_doc   = $do->get_rel($rel, 'tipo_doc', $i);
+			$itbase       = abs($do->get_rel($rel, 'base', $i));
 			$itmonto      = abs($do->get_rel($rel, 'monto', $i));
-			$dbitnumero   = $this->db->escape($do->get_rel($rel, 'numero'  , $i));
+			$itttnumero   = $do->get_rel($rel, 'numero'  , $i);
+			$dbitnumero   = $this->db->escape($itttnumero );
 			$dbittipo_doc = $this->db->escape($ittipo_doc);
 
 			if($ittipo_doc=='F' || $ittipo_doc=='D'){
@@ -1330,6 +1323,11 @@ class Retc extends Controller {
 				$query = $this->db->query($sql);
 				if ($query->num_rows() > 0){
 					$row = $query->row();
+
+					if($itbase>($row->totalg-$row->iva)){
+						$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='No puede tener una base mayor al monto del efecto '.$ittipo_doc.$itttnumero.' ('.nformat($row->totalg-$row->iva).')';
+						return false;
+					}
 
 					$do->set_rel($rel, 'fecha'   , $row->fecha  , $i);
 					$do->set_rel($rel, 'nfiscal' , $row->nfiscal, $i);
@@ -1348,6 +1346,11 @@ class Retc extends Controller {
 				if ($query->num_rows() > 0){
 					$row = $query->row();
 
+					if($itbase>($row->totalg-$row->iva)){
+						$do->error_message_ar['pre_ins']=$do->error_message_ar['pre_upd']='No puede tener una base mayor al monto del efecto '.$ittipo_doc.$itttnumero.' ('.nformat($row->totalg-$row->iva).')';
+						return false;
+					}
+
 					$do->set_rel($rel, 'fecha'   , $row->fecha  , $i);
 					$do->set_rel($rel, 'nfiscal' , $row->nfiscal, $i);
 					$do->set_rel($rel, 'monto'   , $itmonto     , $i);
@@ -1363,8 +1366,17 @@ class Retc extends Controller {
 			$do->set_rel($rel, 'estampa', $estampa, $i);
 			$do->set_rel($rel, 'hora'   , $hora   , $i);
 			$do->set_rel($rel, 'usuario', $usuario, $i);
+		}
+
+		$transac = $this->datasis->fprox_numero('ntransa');
+		$do->set('transac', $transac);
+
+		$rel='itretc';
+		$cana = $do->count_rel($rel);
+		for($i = 0;$i < $cana;$i++){
 			$do->set_rel($rel, 'transac', $transac, $i);
 		}
+
 
 		$do->set('impuesto' ,$impuesto);
 		$do->set('gtotal'   ,$gtotal);
@@ -1474,7 +1486,7 @@ class Retc extends Controller {
 		}
 		$sqls[]="UPDATE retc SET anulado='S' WHERE id=".$this->db->escape($id);
 
-		$mSQL = "DELETE FROM itccli WHERE transac=${dbtransac}";
+		$sqls[]="DELETE FROM itccli WHERE transac=${dbtransac}";
 
 		if($error==0){
 			foreach($sqls as $sql){
@@ -1793,7 +1805,7 @@ class Retc extends Controller {
 				$data['impuesto']   = 0;
 				$data['vence']      = $fecha;
 				$data['tipo_ref']   = 'CR';
-				$data['num_ref']    = $numero;
+				$data['num_ref']    = '';
 				$data['observa1']   = 'RET/ISLR DE '.$cod_cli;
 				$data['usuario']    = $usuario;
 				$data['estampa']    = $estampa;
@@ -1877,7 +1889,7 @@ class Retc extends Controller {
 				$data['observa1']   = 'CARGO A CXC RET/ISLR ';
 				$data['observa2']   = 'DEL CLIENTE '.$cod_cli;
 				$data['tipo_ref']   = 'CR';
-				$data['num_ref']    = $numero;
+				$data['num_ref']    = '';
 				$data['transac']    = $transac;
 				$data['estampa']    = $estampa;
 				$data['hora']       = $hora;

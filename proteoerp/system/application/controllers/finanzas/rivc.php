@@ -1996,7 +1996,7 @@ class Rivc extends Controller {
 		}
 		$sqls[]="UPDATE rivc SET anulado='S' WHERE id=".$this->db->escape($id);
 
-		$mSQL = "DELETE FROM itccli WHERE transac=${dbtransac}";
+		$sqls[]="DELETE FROM itccli WHERE transac=${dbtransac}";
 
 		if($error==0){
 			foreach($sqls as $sql){
