@@ -1342,6 +1342,14 @@ function elminacenti(cual){
 						$mSQL="UPDATE valores SET valor=${dbver} WHERE nombre='SVNVER'";
 						$this->db->simple_query($mSQL);
 						//$this->db->simple_query('TRUNCATE modbus');
+						$usr=$CI->session->userdata('usuario');
+						if($usr){
+							$usr='_NU_';
+						}
+						$dbusr= $CI->db->escape($usr);
+						$mSQL = "INSERT INTO logusu (usuario,fecha,hora,modulo,comenta) VALUES (${dbusr},CURDATE(),CURTIME(),'svnup','ACTUALIZADO A LA VERSION ${dbver} ANTERIOR ${antes}')";
+						$CI->db->simple_query($mSQL);
+
 					}else{
 						$responde .= 'Ya estaba la ultima versi&oacute;n instalada '.$aver;
 					}
