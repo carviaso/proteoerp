@@ -1343,7 +1343,7 @@ function elminacenti(cual){
 						$this->db->simple_query($mSQL);
 						//$this->db->simple_query('TRUNCATE modbus');
 						$usr=$this->session->userdata('usuario');
-						if($usr){
+						if(empty($usr)){
 							$usr='_NU_';
 						}
 						$dbusr= $this->db->escape($usr);
