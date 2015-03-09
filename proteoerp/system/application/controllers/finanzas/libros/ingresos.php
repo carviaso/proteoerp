@@ -12,12 +12,16 @@ class ingresos{
 				FROM smov AS a LEFT JOIN scli AS b ON a.cod_cli=b.cliente
 				LEFT JOIN itccli AS c ON a.numero=c.numccli AND a.tipo_doc=c.tipoccli
 				LEFT JOIN grcl AS d ON b.grupo=d.grupo
+				LEFT JOIN sfac AS e ON a.transac = e.transac AND e.tipo_doc='D' AND a.tipo_doc='NC'
 				WHERE a.fecha BETWEEN $fdesde AND $fhasta
 				AND a.tipo_doc IN ('NC')
 				AND d.clase!='I'
-				AND a.observa1 NOT LIKE '%DEVOLUCION%'
+				AND e.tipo_doc IS NULL
 				AND a.codigo!='NOCON'
 				AND a.codigo!='' AND a.cod_cli<>'REIVA'";
+
+				//AND a.observa1 NOT LIKE '%DEVOLUCION%'
+
 
 		//Procesando CxC smov    "
 		$query = $CI->db->query($mSQL);
