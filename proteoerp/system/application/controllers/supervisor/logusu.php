@@ -344,7 +344,7 @@ class Logusu extends Controller {
 		// CREA EL WHERE PARA LA BUSQUEDA EN EL ENCABEZADO
 		$mWHERE = $grid->geneTopWhere('logusu');
 
-		$response   = $grid->getData('logusu', array(array("table" => "usuario", "join" => "logusu.usuario=usuario.us_codigo", "fields" => array("us_nombre"))), array(), false, $mWHERE, 'id', 'desc' );
+		$response   = $grid->getData('logusu', array(array('table' => 'usuario', 'join' => 'logusu.usuario=usuario.us_codigo','type'=>'left', "fields" => array("us_nombre"))), array(), false, $mWHERE, 'id', 'desc' );
 		$rs = $grid->jsonresult( $response);
 		echo $rs;
 	}
@@ -358,7 +358,7 @@ class Logusu extends Controller {
 	}
 
 	//******************************************************************
-	//   Dataedit 
+	//   Dataedit
 	//
 	function dataedit(){
 		$this->rapyd->load('dataedit');
@@ -387,7 +387,7 @@ class Logusu extends Controller {
 		$edit->pre_process('update', '_pre_update' );
 		$edit->pre_process('delete', '_pre_delete' );
 
-		$script= ' 
+		$script= '
 		$(function() {
 			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
 		});		';
