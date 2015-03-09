@@ -1503,25 +1503,22 @@ class Gserchi extends Controller {
 		$edit->fechafac->calendar=false;
 
 		$edit->numfac = new inputField('Factura','numfac');
-		$edit->numfac->rule='max_length[8]|required';
-		$edit->numfac->size =12;
+		$edit->numfac->rule='max_length[20]|required';
+		$edit->numfac->size =20;
 		$edit->numfac->maxlength =20;
 		$edit->numfac->autocomplete =false;
 
 		$edit->nfiscal = new inputField('Control fiscal','nfiscal');
-		$edit->nfiscal->rule='max_length[12]|required';
-		$edit->nfiscal->size =14;
+		$edit->nfiscal->rule='max_length[20]|required';
+		$edit->nfiscal->size =20;
 		$edit->nfiscal->maxlength =20;
 		$edit->nfiscal->autocomplete =false;
 
-		//$lriffis='<a href="javascript:consulrif();" title="Consultar RIF en el SENIAT" onclick="">Consultar RIF en el SENIAT</a>';
 		$edit->rif = new inputField('RIF','rif');
 		$edit->rif->rule='max_length[13]|required';
 		$edit->rif->size =13;
 		$edit->rif->maxlength =13;
 		$edit->rif->group='Datos del proveedor';
-		//$edit->rif->append(HTML::button('traesprv', 'SENIAT', '', 'button', 'button'));
-		//$edit->rif->append($lriffis);
 
 		$edit->proveedor = new inputField('Nombre','proveedor');
 		$edit->proveedor->rule='max_length[40]|strtoupper';
@@ -1583,12 +1580,12 @@ class Gserchi extends Controller {
 		$edit->sucursal = new dropdownField('Sucursal','sucursal');
 		$edit->sucursal->options('SELECT codigo,sucursal FROM sucu ORDER BY sucursal');
 		$edit->sucursal->rule ='max_length[2]|required';
-		$edit->sucursal->style= "width:300px";
+		$edit->sucursal->style= "width:180px";
 
 		$edit->departa = new dropdownField('Departamento','departa');
 		$edit->departa->options("SELECT TRIM(depto) AS codigo, CONCAT_WS('-',depto,TRIM(descrip)) AS label FROM dpto WHERE tipo='G' ORDER BY depto");
 		$edit->departa->rule ='max_length[2]';
-		$edit->departa->style= "width:300px";
+		$edit->departa->style= "width:180px";
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 		$edit->estampa = new autoUpdateField('estampa' ,date('YmD'), date('Ymd'));
@@ -1700,34 +1697,35 @@ class Gserchi extends Controller {
 
 	function instalar(){
 		if (!$this->db->table_exists('gserchi')) {
-			$mSQL="CREATE TABLE `gserchi` (
-			  `codbanc` varchar(5) NOT NULL DEFAULT '',
-			  `fechafac` date DEFAULT NULL,
-			  `numfac` varchar(8) DEFAULT NULL,
-			  `nfiscal` varchar(12) DEFAULT NULL,
-			  `rif` varchar(13) DEFAULT NULL,
-			  `proveedor` varchar(40) DEFAULT NULL,
-			  `codigo` varchar(6) DEFAULT NULL,
-			  `descrip` varchar(50) DEFAULT NULL,
-			  `moneda` char(2) DEFAULT NULL,
-			  `montasa` decimal(17,2) DEFAULT '0.00',
-			  `tasa` decimal(17,2) DEFAULT NULL,
-			  `monredu` decimal(17,2) DEFAULT '0.00',
-			  `reducida` decimal(17,2) DEFAULT NULL,
-			  `monadic` decimal(17,2) DEFAULT '0.00',
-			  `sobretasa` decimal(17,2) DEFAULT NULL,
-			  `exento` decimal(17,2) DEFAULT '0.00',
-			  `importe` decimal(12,2) DEFAULT NULL,
-			  `sucursal` char(2) DEFAULT NULL,
-			  `departa` char(2) DEFAULT NULL,
-			  `ngasto` varchar(8) DEFAULT NULL,
-			  `usuario` varchar(12) DEFAULT NULL,
-			  `estampa` date DEFAULT NULL,
-			  `hora` varchar(8) DEFAULT NULL,
-			  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-			  `aceptado` char(1) DEFAULT NULL,
-			  PRIMARY KEY (`id`)
-			) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC";
+			$mSQL="
+			CREATE TABLE gserchi (
+			  codbanc   VARCHAR(5)       NOT NULL DEFAULT '',
+			  fechafac  DATE             DEFAULT NULL,
+			  numfac    VARCHAR(20)      DEFAULT NULL,
+			  nfiscal   VARCHAR(20)      DEFAULT NULL,
+			  rif       VARCHAR(13)      DEFAULT NULL,
+			  proveedor VARCHAR(40)      DEFAULT NULL,
+			  codigo    VARCHAR(6)       DEFAULT NULL,
+			  descrip   VARCHAR(50)      DEFAULT NULL,
+			  moneda    CHAR(2)          DEFAULT NULL,
+			  montasa   DECIMAL(17,2)    DEFAULT '0.00',
+			  tasa      DECIMAL(17,2)    DEFAULT NULL,
+			  monredu   DECIMAL(17,2)    DEFAULT '0.00',
+			  reducida  DECIMAL(17,2)    DEFAULT NULL,
+			  monadic   DECIMAL(17,2)    DEFAULT '0.00',
+			  sobretasa DECIMAL(17,2)    DEFAULT NULL,
+			  exento    DECIMAL(17,2)    DEFAULT '0.00',
+			  importe   DECIMAL(12,2)    DEFAULT NULL,
+			  sucursal  CHAR(2)          DEFAULT NULL,
+			  departa   CHAR(2)          DEFAULT NULL,
+			  ngasto    VARCHAR(8)       DEFAULT NULL,
+			  usuario   VARCHAR(12)      DEFAULT NULL,
+			  estampa   DATE             DEFAULT NULL,
+			  hora      VARCHAR(8)       DEFAULT NULL,
+			  id        INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+			  aceptado  CHAR(1)          DEFAULT NULL,
+			  PRIMARY KEY (id)
+			) ENGINE=MyISAM CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->simple_query($mSQL);
 		}
 		//$campos=$this->db->list_fields('gserchi');

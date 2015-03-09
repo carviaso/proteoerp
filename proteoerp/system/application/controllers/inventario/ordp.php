@@ -13,7 +13,7 @@ class ordp extends Controller {
 	function ordp(){
 		parent::Controller();
 		$this->load->library('rapyd');
-		$this->datasis->modulo_id('324',1);
+		//$this->datasis->modulo_id('324',1);
 		$this->instalar();
 	}
 
