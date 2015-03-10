@@ -196,7 +196,8 @@ class Sfacfiscal extends Controller{
 
 	function chusuario($val){
 		$cajero = trim($this->input->post('cajero'));
-		if(empty($cajero) && empty(trim($val))){
+		$val    = trim($val);
+		if(empty($cajero) && empty($val)){
 			$this->validation->set_message('chusuario','El usuario es necesario cuando el cajero es credito');
 			return false;
 		}
