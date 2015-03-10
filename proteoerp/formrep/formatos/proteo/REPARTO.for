@@ -272,6 +272,7 @@ $encabezado_tabla=<<<encabezado_tabla
 				<th ${estilo}'>Zona</th>
 				<th ${estilo}'>Cliente</th>
 				<th ${estilo}'>Peso</th>
+				<th ${estilo}'>Monto</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -286,6 +287,7 @@ $pie_final=<<<piefinal
 		<tfoot>
 			<tr>
 				<td colspan="4" style="text-align: right;">&nbsp;</td>
+				<td style="text-align: right;">%s</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -295,7 +297,7 @@ $pie_continuo=<<<piecontinuo
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="4" style="text-align: right;">CONTINUA...</td>
+				<td colspan="5" style="text-align: right;">CONTINUA...</td>
 			</tr>
 		</tfoot>
 	</table>
@@ -310,12 +312,13 @@ if($npagina){
 	$lineas=0;
 }
 
+$totalg=0;
 $lineas+=$det2encab;
 $i = 0;
 echo '<h2>Lista de Facturas</h2>';
 echo $encabezado_tabla;
 
-foreach ($detalle as $items){ $i++; $nsitems=$nsitems-1;
+foreach ($detalle as $items){ $i++; $nsitems=$nsitems-1; $totalg+=$items->totalg;
 	do {
 		if($npagina){
 			$this->incluir('X_CINTILLO');
@@ -357,7 +360,8 @@ foreach ($detalle as $items){ $i++; $nsitems=$nsitems-1;
 					if(count($arr_des)==0 && $clinea) $clinea=false;
 					?>
 				</td>
-				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->peso  ,2); ?></td>
+				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->peso   ,2); ?></td>
+				<td style="text-align: right;"><?php echo ($clinea)? '': nformat($items->totalg ,2); ?></td>
 			</tr>
 <?php
 		if($npagina && $nsitems>0){
@@ -374,11 +378,12 @@ for(1;$lineas<$maxlin;$lineas++){ ?>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
 				<td>&nbsp;</td>
+				<td>&nbsp;</td>
 			</tr>
 <?php
 	$mod = ! $mod;
 }
-echo $pie_final;
+echo sprintf($pie_final,nformat($totalg));
 ?>
 </body>
 </html>

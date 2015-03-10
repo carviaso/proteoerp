@@ -17,7 +17,7 @@ $aplrete=false;
 $campos=$form->template_details('itscst');
 $scampos  ='<tr id="tr_itscst_<#i#>"  ondblclick="marcar(this)">';
 $scampos .='<td class="littletablerow" align="left" >'.$campos['codigo']['field'].'</td>';
-$scampos .='<td class="littletablerow" align="left" ><b id="it_descrip_val_<#i#>"></b>'.$campos['descrip']['field'].'</td>';
+$scampos .='<td class="littletablerow" align="left" ><b id="it_descrip_val_<#i#>"></b> <span id="it_tiva_<#i#>"></span>'.$campos['descrip']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['cantidad']['field'].'</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['costo']['field']. '</td>';
 $scampos .='<td class="littletablerow" align="right">'.$campos['importe']['field'];
@@ -377,6 +377,15 @@ function totalizar(taca){
 				itiva   = Number($("#iva_"+ind).val());
 				importe = Number(this.value);
 				itpeso  = Number($("#sinvpeso_"+ind).val());
+				if(itiva==0){
+					$("#it_tiva_"+ind).text('(E)');
+				}else if(itiva==tasa_general){
+					$("#it_tiva_"+ind).text('(G)');
+				}else if(itiva==tasa_reducid){
+					$("#it_tiva_"+ind).text('(R)');
+				}else if(itiva==tasa_adicion){
+					$("#it_tiva_"+ind).text('(A)');
+				}
 
 				peso    = peso+(itpeso*cana);
 				iva     = importe*(itiva/100);
@@ -961,7 +970,7 @@ if (!$solo){
 
 	<tr id='tr_itscst_<?php echo $i; ?>'  ondblclick="marcar(this)">
 		<td class="littletablerow" align="left" ><?php echo $form->$it_codigo->output; ?></td>
-		<td class="littletablerow" align="left" ><b id='it_descrip_val_<?php echo $i; ?>'><?php echo $form->$it_desca->value; ?></b>
+		<td class="littletablerow" align="left" ><b id='it_descrip_val_<?php echo $i; ?>'><?php echo $form->$it_desca->value; ?></b> <span id="it_tiva_<?php echo $i; ?>"></span>
 		<?php echo $form->$it_desca->output;  ?>
 		</td>
 		<td class="littletablerow" align="right"><?php echo $form->$it_cana->output;   ?></td>

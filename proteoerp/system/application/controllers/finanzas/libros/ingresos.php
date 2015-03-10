@@ -6,14 +6,14 @@ class ingresos{
 		$fdesde=$mes.'01';
 		$fhasta=$mes.$udia;
 
-		$CI->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = $mes AND fuente='MC' ");
+		$CI->db->simple_query("DELETE FROM siva WHERE EXTRACT(YEAR_MONTH FROM fechal) = ${mes} AND fuente='MC' ");
 
 		$mSQL= "SELECT a.*,b.rifci, c.numero AS afecta, c.fecha AS fafecta
 				FROM smov AS a LEFT JOIN scli AS b ON a.cod_cli=b.cliente
 				LEFT JOIN itccli AS c ON a.numero=c.numccli AND a.tipo_doc=c.tipoccli
 				LEFT JOIN grcl AS d ON b.grupo=d.grupo
 				LEFT JOIN sfac AS e ON a.transac = e.transac AND e.tipo_doc='D' AND a.tipo_doc='NC'
-				WHERE a.fecha BETWEEN $fdesde AND $fhasta
+				WHERE a.fecha BETWEEN ${fdesde} AND ${fhasta}
 				AND a.tipo_doc IN ('NC')
 				AND d.clase!='I'
 				AND e.tipo_doc IS NULL
@@ -30,7 +30,7 @@ class ingresos{
 
 		foreach ( $query->result() as $row ){
 			if ( $row->tipo_doc == 'NC' ){
-				if ($mTIPO_DOC == $row->tipo_doc AND $mNUMERO == $row->numero ) continue;
+				if ($mTIPO_DOC == $row->tipo_doc && $mNUMERO == $row->numero ) continue;
 				$mNUMERO = $row->numero;
 				$mTIPO_DOC = $row->tipo_doc;
 			}
@@ -68,7 +68,8 @@ class ingresos{
 			$data['impuesto'] = (empty($row->impuesto))? 0 :$row->impuesto;
 			$data['gtotal']   = (empty($row->monto))?    0 :$row->monto;
 			$data['stotal']   = $stotal;
-			$data['reiva']    = $row->reteiva;
+			//$data['reiva']    = $row->reteiva;
+			$data['reiva']    = 0; //Eliminado porque tomaba 2 veces las retenciones a las NC ya que salen como CR
 			$data['fechal']   = $mes.'01';
 			$data['fafecta']  = $row->fafecta;
 			$data['nfiscal']  = $row->nfiscal;
