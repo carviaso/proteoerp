@@ -226,7 +226,11 @@ function truncate(id){
 <fieldset  style='border: 1px outset #FEB404;background: #FFFCE8;'>
 <table width='100%'>
 	<tr>
-		<td><b class="littletablerowth"><?php echo $form->clipro->label;?></b><?php echo $form->clipro->output; ?><?php echo $form->nombre->output; ?></td>
+		<td>
+			<b class="littletablerowth"><?php echo $form->clipro->label;?></b><?php echo $form->clipro->output; ?><?php echo $form->nombre->output; ?></td>
+		</td><td>
+			<b class="littletablerowth"><?php echo $form->fecha->label;?></b><?php echo $form->fecha->output; ?>
+		</td>
 		<td style='text-align:right;'>
 			<b class="littletablerowth"><?php echo $form->preinte->label;?></b><?php echo $form->preinte->output;?>
 		</td>

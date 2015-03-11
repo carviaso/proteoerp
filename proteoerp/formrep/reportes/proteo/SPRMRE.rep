@@ -10,7 +10,11 @@ $sel=array(
 	'CONCAT_WS(\' \',a.observa1,a.observa2) obser', 'e.concepto AS creten','e.tari1 AS prete',
 	'b.creten AS viejo'
 );
-
+/*
+mSQL := "SELECT a.fecha,  a.abonos, a.monto,a.transac,a.numero,a.num_ref,b.transac ,a.observa1 ,a.observa2 ,  b.creten "
+mSQL += " FROM sprm   AS a LEFT JOIN gser AS b ON a.transac=b.transac   WHERE a.fecha<="+DTOS(f_FechaF)+" AND a.fecha>="+DTOS(f_FechaI)
+mSQL += " AND a.tipo_doc='ND' AND a.cod_prv='RETEN' AND a.abonos<a.monto ORDER BY  b.creten "
+*/
 $filter = new DataFilter('Filtro del Reporte');
 $filter->db->select($sel);
 $filter->db->from('sprm AS a');

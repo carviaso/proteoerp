@@ -1384,11 +1384,15 @@ class Apan extends Controller {
 		$numero  = $this->datasis->fprox_numero('napan');
 		$do->set('transac',$transac);
 		$do->set('numero' ,$numero );
-		$do->set('fecha'  ,date('Y-m-d'));
+		$fecha   = $do->get('fecha');
+		if(empty($fecha)){
+			$fecha = date('Y-m-d');
+			$do->set('fecha'  ,$fecha);
+		}
 
 		$mSQLs = array();
 		if($preinte=='S'){
-			$fecha    = $do->get('fecha');
+
 			if($ttipo=='P'){ //Aplica a proveedor
 				$mNOMBRE  = $this->datasis->dameval('SELECT nombre FROM sprv WHERE proveed='.$dbclipro);
 				$mNUMERO = $this->datasis->fprox_numero('num_nd');
