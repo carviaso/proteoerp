@@ -4,70 +4,120 @@
  * @autor    Andres Hocevar
  * @license  GNU GPL v3
 */
-$sel=array(
-	'a.fecha','d.rif','a.abonos','a.control', 'b.breten AS monto',
-	'a.transac','a.numero','a.num_ref', 'b.serie', 'IF(b.nfiscal=\'\',b.serie,b.nfiscal) nfiscal',
-	'CONCAT_WS(\' \',a.observa1,a.observa2) obser', 'e.concepto AS creten','e.tari1 AS prete',
-	'b.creten AS viejo'
-);
+
 /*
-mSQL := "SELECT a.fecha,  a.abonos, a.monto,a.transac,a.numero,a.num_ref,b.transac ,a.observa1 ,a.observa2 ,  b.creten "
-mSQL += " FROM sprm   AS a LEFT JOIN gser AS b ON a.transac=b.transac   WHERE a.fecha<="+DTOS(f_FechaF)+" AND a.fecha>="+DTOS(f_FechaI)
-mSQL += " AND a.tipo_doc='ND' AND a.cod_prv='RETEN' AND a.abonos<a.monto ORDER BY  b.creten "
+SELECT a.fecha,  a.abonos, a.monto,a.transac,a.numero,a.num_ref,b.transac ,a.observa1 ,a.observa2 ,  b.creten
+	FROM sprm AS a
+	LEFT JOIN gser AS b ON a.transac=b.transac
+WHERE
+	a.fecha<=20150101 AND
+	a.fecha>=20150131 AND
+	a.tipo_doc='ND' AND a.cod_prv='RETEN' AND a.abonos<a.monto
+ORDER BY  b.creten
 */
-$filter = new DataFilter('Filtro del Reporte');
-$filter->db->select($sel);
-$filter->db->from('sprm AS a');
-$filter->db->join('sprm AS c', 'a.transac=c.transac AND c.tipo_doc=\'FC\'');
-$filter->db->join('gser AS b', 'a.transac=b.transac','LEFT');
-$filter->db->join('rete AS e', 'b.creten=e.codigo');
-$filter->db->join('sprv AS d', 'c.cod_prv=d.proveed');
-$filter->db->where('a.tipo_doc =','ND');
-$filter->db->where('a.cod_prv  =','RETEN');
-$filter->db->where('a.abonos < a.monto');
-//$filter->db->orderby('b.creten');
+
+$base_process_uri= $this->rapyd->uri->implode_uri('base_uri','gfid','orderby');
+$filter = new DataForm($this->rapyd->uri->add_clause($base_process_uri, "search"));
+$filter->title('Filtro del reporte');
 
 $filter->fechad = new dateonlyField('Desde', 'fechad','d/m/Y');
 $filter->fechah = new dateonlyField('Hasta', 'fechah','d/m/Y');
-$filter->fechad->clause = $filter->fechah->clause ='where';
-$filter->fechad->db_name= $filter->fechah->db_name='a.fecha';
 $filter->fechad->insertValue = date('Y-m-d',mktime(0, 0, 0, date('m'), date('d')-30,   date('Y')));
 $filter->fechah->insertValue = date('Y-m-d');
-$filter->fechad->operator='>=';
-$filter->fechah->operator='<=';
 $filter->fechad->group = 'Fecha';
 $filter->fechah->group = 'Fecha';
 $filter->fechad->rule= 'required|chfecha';
 $filter->fechah->rule= 'required|chfecha';
-
 
 $filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons('search');
-$filter->build();
+$filter->submit('btnsubmit','Busca');
+$filter->build_form();
 
 if($this->rapyd->uri->is_set('search') && $filter->on_success()){
-	$mSQL=$this->rapyd->db->_compile_select();
-	$dbfechad = $this->db->escape($filter->fechad->newValue);
-	$dbfechah = $this->db->escape($filter->fechah->newValue);
-
+	$dbfdesde = $this->db->escape($filter->fechad->newValue);
+	$dbfhasta = $this->db->escape($filter->fechah->newValue);
 
 	$subtitu='';
 	if(isset($_POST['fechad'])) $subtitu.=' Desde la fecha '.$_POST['fechad'];
 	if(isset($_POST['fechah'])) $subtitu.=' Hasta '.$_POST['fechah'];
-	//echo $mSQL;
 
-	$mSQL .= "UNION ALL
-	SELECT a.fecha, d.rif, a.abonos, a.control, b.breten AS monto, a.transac, a.numero, a.num_ref, b.serie, b.nfiscal, CONCAT_WS(' ', a.observa1, a.observa2) obser, e.concepto AS creten, e.tari1 AS prete,b.creten AS viejo
-	FROM sprm AS a
-	LEFT JOIN gser AS b ON a.transac=b.transac
-		JOIN rete AS e ON b.creten=e.codigo
-		JOIN sprv AS d ON b.proveed=d.proveed
-	WHERE a.tipo_doc='ND' AND a.cod_prv='RETEN' AND a.abonos < a.monto AND a.fecha >= ${dbfechad} AND a.fecha <= ${dbfechah} AND b.credito = 0
-	ORDER BY creten ";
+	$sql=array();
+
+	//Retenciones proteo
+	$sql[]="SELECT
+			COALESCE(d.rif,e.rif) AS rif,
+			COALESCE(b.serie,c.serie) AS serie,
+			COALESCE(b.fecha,c.fecha) AS fecha,
+			f.concepto AS creten,
+			a.monto,
+			a.porcen AS prete,
+			a.codigorete AS viejo
+		FROM gereten AS a
+		JOIN rete AS f ON a.codigorete=f.codigo
+		JOIN sprm AS g ON a.transac=g.transac
+		LEFT JOIN gser AS b ON a.origen='GSER' AND a.idd=b.id
+		LEFT JOIN scst AS c ON a.origen='SCST' AND a.idd-c.id
+		LEFT JOIN sprv AS d ON b.proveed=d.proveed
+		LEFT JOIN sprv AS e ON c.proveed=e.proveed
+		WHERE g.monto>g.abonos AND g.fecha BETWEEN ${dbfdesde} AND ${dbfhasta}";
+
+	//Retenciones por nomina
+	$sql[]="SELECT
+			IF(LENGTH(TRIM(c.rif))>0,c.rif,c.cedula) AS rif,
+			'00000' AS serie,
+			b.fecha,
+			'001' AS creten,
+			ABS(a.valor) AS monto,
+			'' AS prete,
+			'' AS viejo
+		FROM nomina AS a
+		JOIN sprm   AS b ON a.transac=b.transac AND b.cod_prv='RETEN'
+		JOIN pers   AS c ON a.codigo=c.codigo
+		WHERE a.concepto='650' AND b.monto>b.abonos AND
+			b.fecha BETWEEN ${dbfdesde} AND ${dbfhasta}";
+
+	//Retenciones gasto legado
+	$sql[]="SELECT
+			c.rif,
+			b.serie,
+			a.fecha,
+			d.concepto AS creten,
+			a.monto,
+			d.tari1 AS prete,
+			b.creten AS viejo
+		FROM sprm    AS a
+		JOIN gser    AS b ON a.transac=b.transac
+		JOIN sprv    AS c ON b.proveed=c.proveed
+		JOIN rete    AS d ON b.creten=d.codigo
+		LEFT JOIN gereten AS e ON e.transac=a.transac
+		WHERE e.transac IS NULL AND a.tipo_doc='ND' AND a.cod_prv='RETEN' AND
+			a.abonos<a.monto AND
+			a.fecha BETWEEN ${dbfdesde} AND ${dbfhasta}";
+
+	//Retenciones Compras legado
+	$conce  =$this->datasis->dameval("SELECT concepto FROM rete WHERE codigo='115'");
+	$dbconce=$this->db->escape($conce);
+	$sql[]="SELECT
+			c.rif,
+			b.serie,
+			a.fecha,
+			${dbconce} AS creten,
+			a.monto,
+			'3' AS prete,
+			'115' AS viejo
+		FROM sprm    AS a
+		JOIN scst    AS b ON a.transac=b.transac
+		JOIN sprv    AS c ON b.proveed=c.proveed
+		LEFT JOIN gereten AS e ON e.transac=a.transac
+		WHERE e.transac IS NULL AND a.tipo_doc='ND' AND a.cod_prv='RETEN'
+			AND a.abonos<a.monto AND
+			a.fecha BETWEEN ${dbfdesde} AND ${dbfhasta}";
+
+	$mSQL = implode(' UNION ALL ',$sql).' ORDER BY creten';
 
 	$pdf = new PDFReporte($mSQL,'L');
 	$pdf->setHeadValores('TITULO1');
@@ -91,9 +141,9 @@ if($this->rapyd->uri->is_set('search') && $filter->on_success()){
 	$pdf->Output();
 
 }else{
-	if(strlen($filter->error_string)) $data['error']=$filter->error_string;
+	//if(strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Listado General de Retenciones de ISLR</h2>';
+	$data['titulo'] = '<h2 class="mainheader">Listado General de Retenciones de ISLR pendientes</h2>';
 	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

@@ -163,7 +163,7 @@ class Bcaj extends Controller {
 						buttons: { Guardar: true, Cancelar: false },
 						submit: function(e,v,m,f){
 							if(v){
-								$.post("'.site_url("finanzas/sfpach/efectivo").'",
+								$.post("'.site_url('finanzas/sfpach/efectivo').'",
 								{ caja: f.efcaja, banco: f.efbanco, monto: f.efmonto },
 								function(data) {
 									try{
@@ -211,7 +211,7 @@ class Bcaj extends Controller {
 						if ( bValid ) {
 							$.ajax({
 								type: "POST",
-								url:"'.site_url("finanzas/sfpach/efectivo").'",
+								url:"'.site_url('finanzas/sfpach/efectivo').'",
 								processData: true,
 								data: "caja="+escape(efcaja.val())+"&banco="+escape(efbanco.val())+"&monto="+escape(efmonto.val()),
 								success: function(a){
@@ -343,7 +343,7 @@ class Bcaj extends Controller {
 							$.ajax({
 								type: "POST",
 								dataType: "html",
-								url:"'.site_url("finanzas/bcaj/cerrardpt").'",
+								url:"'.site_url('finanzas/bcaj/cerrardpt').'",
 								async: false,
 								data: $("#cierreforma").serialize(),
 								success: function(r,s,x){
@@ -807,12 +807,16 @@ class Bcaj extends Controller {
 		$grid->setToolbar('false', '"top"');
 		$grid->setOndblClickRow('');
 
-
 		$grid->setOnSelectRow(' function(id){
-				if (id){
+				if(id){
 					var ret = $("#titulos").getRowData(id);
 					jQuery(gridId2).jqGrid(\'setGridParam\',{url:"'.site_url($this->url.'getdatait/').'/"+id+"/", page:1});
 					jQuery(gridId2).trigger("reloadGrid");
+				}
+			},afterInsertRow:
+			function( rid, aData, rowe){
+				if(aData.status =="P"){
+					$(this).jqGrid( "setCell", rid, "status","", {color:"#FFFFFF", background:"#166D05" });
 				}
 			}'
 		);
@@ -880,7 +884,7 @@ class Bcaj extends Controller {
 			if(false == empty($data)){
 				//$this->db->insert('caub', $data);
 			}
-			echo "No se puede agregar";
+			echo 'No se puede agregar';
 
 		} elseif($oper == 'edit') {
 			if ( $data['islr']+$data['comision'] == 0 ){
@@ -891,38 +895,40 @@ class Bcaj extends Controller {
 				unset($data['tarjeta']);
 				unset($data['tdebito']);
 				unset($data['tipo']);
+				$data['monto']=floatval($data['monto']);
 				$this->db->where('id', $id);
 				$this->db->update('bcaj', $data);
 
-				$transac = $this->datasis->dameval("SELECT transac FROM bcaj WHERE id=$id ");
-				$monto   = $this->datasis->dameval("SELECT monto   FROM bcaj WHERE id=$id ");
-				$envia   = $this->datasis->dameval("SELECT envia   FROM bcaj WHERE id=$id ");
-				$recibe  = $this->datasis->dameval("SELECT recibe  FROM bcaj WHERE id=$id ");
-				$fecha   = $this->datasis->dameval("SELECT fecha   FROM bcaj WHERE id=$id ");
-				$this->datasis->actusal($envia,  $fecha,  $monto);
-				$this->datasis->actusal($recibe, $fecha, -$monto);
 
-				$this->datasis->actusal($envia,  $fecha, -$data['monto']);
-				$this->datasis->actusal($recibe, $fecha,  $data['monto']);
+				$row = $this->datasis->damerow("SELECT transac,monto,envia,recibe,fecha FROM bcaj WHERE id=${id}");
+				if(!empty($row)){
+					$transac = $row['transac'];
+					$monto   = floatval($row['monto']);
+					$envia   = $row['envia'];
+					$recibe  = $row['recibe'];
+					$fecha   = $row['fecha'];
+				}else{
+					echo 'Registro no encontrado';
+					return false;
+				}
 
-				$mSQL = "UPDATE bmov SET monto=".$data['monto']." WHERE transac='".$transac."'";
+				$this->datasis->actusal($envia,  $fecha,   $monto);
+				$this->datasis->actusal($recibe, $fecha,-1*$monto);
+
+				$this->datasis->actusal($envia,  $fecha,-1*$data['monto']);
+				$this->datasis->actusal($recibe, $fecha,   $data['monto']);
+
+				$dbtransac = $this->db->escape($transac);
+				$mSQL = "UPDATE bmov SET monto=".$data['monto']." WHERE transac=${dbtransac}";
 				$this->db->simple_query($mSQL);
 				echo 'Registro Modificado';
 			} else {
 				echo 'No se puede modificar si tiene comision o ISLR';
 			}
 
-
 		} elseif($oper == 'del') {
-			$check =  $this->datasis->dameval("SELECT COUNT(*) FROM itsinv WHERE alma='$codigo' AND existen>0");
-			if ($check > 0){
-				echo " El almacen no fuede ser eliminado; tiene movimiento ";
-			} else {
-				//$this->db->simple_query("DELETE FROM caub WHERE id=$id ");
-				logusu('BCAJ',"Almacen $codigo ELIMINADO");
-				echo "{ success: true, message: 'Registro Eliminado'}";
-			}
-		};
+			echo 'Inhabilitado';
+		}
 	}
 
 

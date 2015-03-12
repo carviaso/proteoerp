@@ -144,7 +144,7 @@ if ( isset($pdf) ) {
 		<?php }else{
 			$reten=0;
 			$detalle = $mSQL_2->result();
-			foreach ($detalle AS $items){
+			foreach ($detalle as $items){
 				$reten+=$items->monto;
 		?>
 			<tr style='color: #111111;background: #EEEEEE;'>
