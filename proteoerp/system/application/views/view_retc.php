@@ -22,10 +22,22 @@ if(isset($form->error_string)) echo '<div class="alert">'.$form->error_string.'<
 
 echo $form_begin;
 $anulado='N';
-if($form->_status!='show'){ ?>
+if($form->_status!='show'){
 
+	$rete=array();
+	$mSQL='SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",codigo,activida)) AS activida ,base1,tari1,pama1,TRIM(tipo) AS tipo FROM rete ORDER BY codigo';
+	$query = $this->db->query($mSQL);
+	if ($query->num_rows() > 0){
+		foreach ($query->result() as $row){
+			$ind='_'.$row->codigo;
+			$rete[$ind]=array($row->activida,$row->base1,$row->tari1,$row->pama1,$row->tipo);
+		}
+	}
+	$json_rete=json_encode($rete);
+?>
 <script language="javascript" type="text/javascript">
-var itretc_cont =<?php echo $form->max_rel_count['itretc']; ?>;
+var itretc_cont = <?php echo $form->max_rel_count['itretc']; ?>;
+var rete        = <?php echo $json_rete;  ?>;
 
 $(function(){
 	$("#emision").datepicker({ dateFormat: "dd/mm/yy" });
@@ -157,8 +169,30 @@ function del_itretc(id){
 	totalizar();
 }
 
-function post_codigoreteselec(){
+function importerete(nind){
+	var ind=nind.toString();
+	var codigo  = $("#codigorete_"+ind).val();
+	if(codigo.length>0){
+		var importe = Number($("#base_"+ind).val());
+		var base1   = Number(eval('rete._'+codigo+'[1]'));
+		var tari1   = Number(eval('rete._'+codigo+'[2]'));
+		var pama1   = Number(eval('rete._'+codigo+'[3]'));
 
+		var tt=codigo.substring(0,1);
+		if(tt=='1')
+			monto=(importe*base1*tari1)/10000;
+		else if(importe>pama1)
+			monto=((importe-pama1)*base1*tari1)/10000;
+		else
+			monto = 0;
+
+		$("#itmonto_"+ind).val(roundNumber(monto,2));
+	}
+	totalizar();
+}
+
+function post_codigoreteselec(nind,obj){
+	importerete(nind);
 }
 
 //Agrega el autocomplete

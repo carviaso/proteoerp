@@ -963,6 +963,7 @@ class Retc extends Controller {
 		$edit->it_base->maxlength =15;
 		$edit->it_base->showformat ='decimal';
 		$edit->it_base->rel_id ='itretc';
+		$edit->it_base->onkeyup='importerete(<#i#>)';
 
 		$edit->it_impuesto = new hiddenField('impuesto','impuesto_<#i#>');
 		$edit->it_impuesto->db_name='impuesto';
