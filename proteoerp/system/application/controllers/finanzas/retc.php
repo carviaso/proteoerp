@@ -18,7 +18,7 @@ class Retc extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		$this->datasis->modulo_nombre( 'RETC', $ventana=0 );
+		$this->datasis->modulo_nombre( 'RETC', $ventana=0, 'Retenciones de ISLR' );
 	}
 
 	function index(){
@@ -1969,12 +1969,6 @@ class Retc extends Controller {
 			ENGINE=MyISAM";
 			$this->db->simple_query($mSQL);
 		}
-
-		/*if (!$this->db->field_exists('', 'retc')){
-			$mSQL="ALTER TABLE retc ADD COLUMN operacion CHAR(1) NOT NULL AFTER sprmreinte";
-			$this->db->simple_query($mSQL);
-		}*/
-
 
 		if (!$this->db->table_exists('itretc')) {
 			$mSQL="CREATE TABLE `itretc` (

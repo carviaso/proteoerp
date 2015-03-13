@@ -234,8 +234,8 @@ class pfaclite extends validaciones{
 		$filter->db->groupby('a.cliente');
 
 		$filter->cliente = new inputField('C&oacute;digo', 'cliente');
-		$filter->cliente->size = 8;
-		//$filter->cliente->append($boton);
+		$filter->cliente->size    = 8;
+		$filter->cliente->db_name = 'a.cliente';
 
 		$filter->nombre= new inputField('Nombre','nombre');
 		$filter->nombre->db_name = 'a.nombre';

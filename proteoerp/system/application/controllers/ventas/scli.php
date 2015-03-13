@@ -1347,9 +1347,8 @@ class Scli extends validaciones {
 		$id    = $this->uri->segment($this->uri->total_segments());
 		$dbid  = $this->db->escape($id);
 		$idcli = $this->datasis->dameval("SELECT b.id FROM pfac a JOIN scli b ON a.cod_cli=b.cliente WHERE a.id=${dbid}");
-
-		//$this->_uri = $this->url.'/'.$idcli;
-		$this->_resumen($idcli);
+		$salida = $this->_resumen($idcli);
+		echo $salida;
 	}
 
 
@@ -1358,11 +1357,13 @@ class Scli extends validaciones {
 	//
 	function resumen() {
 		$id = $this->uri->segment($this->uri->total_segments());
-		$this->_resumen($id);
+		$salida = $this->_resumen($id);
+		echo $salida;
 	}
 
 	function _resumen($id){
 		$id  = intval($id);
+
 		if($id <= 0){return false; }
 		$row = $this->datasis->damereg("SELECT cliente, credito, formap, limite, tolera, maxtole, observa, tipo FROM scli WHERE id=${id}");
 
@@ -1385,6 +1386,8 @@ class Scli extends validaciones {
 
 		$saldo  = floatval($this->datasis->dameval("SELECT SUM(monto*IF(tipo_doc IN ('FC','ND','GI'),1,-1)) saldo FROM smov WHERE cod_cli=${dbcod_cli}"));
 		$pedido = floatval($this->datasis->dameval("SELECT SUM(totalg) saldo FROM pfac WHERE status<>'C' AND cod_cli=${dbcod_cli}"));
+		$pauto  = floatval($this->datasis->dameval("SELECT SUM(totalg) saldo FROM pfac WHERE status<>'C' AND autoriza='S' AND cod_cli=${dbcod_cli}"));
+
 		$salida = '';
 
 		$rutas = $this->datasis->dameval("SELECT GROUP_CONCAT(ruta) AS ruta FROM sclitrut WHERE cliente=${dbcod_cli}");
@@ -1413,15 +1416,25 @@ class Scli extends validaciones {
 		$salida .= "<tr style='background-color:#FFFFFF;'><td>M&aacute;xima Tolerancia </td><td align='right'>${maxtole}% </td></tr>\n";
 		$salida .= "<tr style='background-color:#EEEEEE;'><td>Saldo Actual      </td><td align='right'>".nformat($saldo)."   </td></tr>\n";
 		$salida .= "<tr style='background-color:#FBEC88;'><td>Cr&eacute;dito Disponible</td><td align='right'><b>".nformat($limite-$saldo)."</b></td></tr>\n";
-		$salida .= "<tr style='background-color:#FFFFFF;'><td>Pedidos           </td><td align='right'>".nformat($pedido)."  </td></tr>\n";
-		$salida .= "<tr style='background-color:#FAA78F;'><td>Saldo - Pedidos   </td><td align='right'>".nformat($limite-$saldo-$pedido)."  </td></tr>\n";
+
+		if ( $pedido <> 0){
+			$salida .= "<tr style='background-color:#FFFFFF;'><td>Pedidos           </td><td align='right'>".nformat($pedido)."  </td></tr>\n";
+			$salida .= "<tr style='background-color:#FAA78F;'><td>Saldo - Pedidos   </td><td align='right'>".nformat($limite-$saldo-$pedido)."  </td></tr>\n";
+		}
+
+		if ( $pauto <> 0){
+			$salida .= "<tr style='background-color:#FFFFFF;'><td>Pedidos Autorizado</td><td align='right'>".nformat($pauto)."  </td></tr>\n";
+			$salida .= "<tr style='background-color:#FAD78F;'><td>Saldo Disponible   </td><td align='right'>".nformat($limite-$saldo-$pauto)."  </td></tr>\n";
+		}
+
+
 		$salida .= "</table>\n";
 
 		if(!empty($observa)){
 			$salida .= "<br><b>Observaciones:</b><textarea cols='28' rows='4' readonly='readonly'>${observa}</textarea>\n";
 		}
 
-		echo $salida;
+		return $salida;
 	}
 
 	//******************************************************************

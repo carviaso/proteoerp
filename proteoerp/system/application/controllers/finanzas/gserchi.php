@@ -623,10 +623,10 @@ class Gserchi extends Controller {
 
 		$bodyscript .= '
 		function sumamonto(){
-			var grid = jQuery("#newapi'.$grid0.'");
+			var grid = $("#newapi'.$grid0.'");
 			var s;
 			var total = 0;
-			var rowcells=new Array();
+			var rowcells = new Array();
 			s = grid.getGridParam(\'selarrrow\');
 			$("#ladicional").html("");
 			if(s.length){
@@ -682,7 +682,8 @@ class Gserchi extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 50,
+			'width'         => 40,
+			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
@@ -694,7 +695,7 @@ class Gserchi extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 70,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
@@ -719,7 +720,7 @@ class Gserchi extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 120,
+			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:12, maxlength: 12 }',
@@ -731,7 +732,7 @@ class Gserchi extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 130,
+			'width'         => 70,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:13, maxlength: 13 }',
@@ -906,17 +907,6 @@ class Gserchi extends Controller {
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:2, maxlength: 2 }',
 		));
-
-		//$grid->addField('ngasto');
-		//$grid->label('Ngasto');
-		//$grid->params(array(
-		//	'search'        => 'true',
-		//	'editable'      => $editar,
-		//	'width'         => 80,
-		//	'edittype'      => "'text'",
-		//	'editrules'     => '{ required:true}',
-		//	'editoptions'   => '{ size:8, maxlength: 8 }',
-		//));
 
 		$grid->addField('usuario');
 		$grid->label('Usuario');
@@ -1282,52 +1272,6 @@ class Gserchi extends Controller {
 		$data   = $_POST;
 		$mcodp  = '??????';
 		$check  = 0;
-
-		//unset($data['oper']);
-		//unset($data['id']);
-		//if($oper == 'add'){
-		//	if(false == empty($data)){
-		//		$check = $this->datasis->dameval("SELECT count(*) FROM gserchi WHERE $mcodp=".$this->db->escape($data[$mcodp]));
-		//		if ( $check == 0 ){
-		//			$this->db->insert('gserchi', $data);
-		//			echo "Registro Agregado";
-        //
-		//			logusu('gserchi',"Registro ????? INCLUIDO");
-		//		} else
-		//			echo "Ya existe un registro con ese $mcodp";
-		//	} else
-		//		echo "Fallo Agregado!!!";
-        //
-		//} elseif($oper == 'edit') {
-		//	$nuevo  = $data[$mcodp];
-		//	$anterior = $this->datasis->dameval("SELECT $mcodp FROM gserchi WHERE id=$id");
-		//	if ( $nuevo <> $anterior ){
-		//		//si no son iguales borra el que existe y cambia
-		//		$this->db->query("DELETE FROM gserchi WHERE $mcodp=?", array($mcodp));
-		//		$this->db->query("UPDATE gserchi SET $mcodp=? WHERE $mcodp=?", array( $nuevo, $anterior ));
-		//		$this->db->where("id", $id);
-		//		$this->db->update("gserchi", $data);
-		//		logusu('gserchi',"$mcodp Cambiado/Fusionado Nuevo:".$nuevo." Anterior: ".$anterior." MODIFICADO");
-		//		echo "Grupo Cambiado/Fusionado en clientes";
-		//	} else {
-		//		unset($data[$mcodp]);
-		//		$this->db->where("id", $id);
-		//		$this->db->update('gserchi', $data);
-		//		logusu('gserchi',"Caja chica  ".$nuevo." MODIFICADO");
-		//		echo "$mcodp Modificado";
-		//	}
-        //
-		//} elseif($oper == 'del') {
-		//	$meco = $this->datasis->dameval("SELECT $mcodp FROM gserchi WHERE id=$id");
-		//	//$check =  $this->datasis->dameval("SELECT COUNT(*) FROM gserchi WHERE id='$id' ");
-		//	if ($check > 0){
-		//		echo " El registro no puede ser eliminado; tiene movimiento ";
-		//	} else {
-		//		$this->db->simple_query("DELETE FROM gserchi WHERE id=$id ");
-		//		logusu('GSERCHI',"Registro ????? ELIMINADO");
-		//		echo "Registro Eliminado";
-		//	}
-		//};
 	}
 
 	function gserchiajax(){
@@ -1399,17 +1343,23 @@ class Gserchi extends Controller {
 		}
 
 		function totaliza(){
-			if($('#montasa').val().length>0)   montasa  =parseFloat($('#montasa').val());   else  montasa  =0;
-			if($('#tasa').val().length>0)      tasa     =parseFloat($('#tasa').val());      else  tasa     =0;
-			if($('#monredu').val().length>0)   monredu  =parseFloat($('#monredu').val());   else  monredu  =0;
-			if($('#reducida').val().length>0)  reducida =parseFloat($('#reducida').val());  else  reducida =0;
-			if($('#monadic').val().length>0)   monadic  =parseFloat($('#monadic').val());   else  monadic  =0;
-			if($('#sobretasa').val().length>0) sobretasa=parseFloat($('#sobretasa').val()); else  sobretasa=0;
-			if($('#exento').val().length>0)    exento   =parseFloat($('#exento').val());    else  exento   =0;
+			if($('#montasa').val().length>0)   montasa  = parseFloat($('#montasa').val());   else  montasa  = 0;
+			if($('#tasa').val().length>0)      tasa     = parseFloat($('#tasa').val());      else  tasa     = 0;
+			if($('#monredu').val().length>0)   monredu  = parseFloat($('#monredu').val());   else  monredu  = 0;
+			if($('#reducida').val().length>0)  reducida = parseFloat($('#reducida').val());  else  reducida = 0;
+			if($('#monadic').val().length>0)   monadic  = parseFloat($('#monadic').val());   else  monadic  = 0;
+			if($('#sobretasa').val().length>0) sobretasa= parseFloat($('#sobretasa').val()); else  sobretasa= 0;
+			if($('#exento').val().length>0)    exento   = parseFloat($('#exento').val());    else  exento   = 0;
+			//if($('#reten').val().length>0)     reten    = parseFloat($('#reten').val());     else  reten    = 0;
 
 			total=roundNumber(montasa+tasa+monredu+reducida+monadic+sobretasa+exento,2);
 			$('#importe').val(total);
 			$('#importe_val').text(nformat(total,2));
+
+			//tapagar = roundNumber(total - reten,2);
+			//$('#apagar').val(tapagar);
+			//$('#apagar_val').text(nformat(tapagar,2));
+			
 		}
 
 		$(function(){
@@ -1449,8 +1399,12 @@ class Gserchi extends Controller {
 			});
 
 			$('#fechafac').datepicker({ dateFormat: 'dd/mm/yy' });
-			$('#importe_val').css('font-size','2em');
+			$('#importe_val').css('font-size','1.5em');
 			$('#importe_val').css('font-weight','bold');
+
+			$('#apagar_val').css('font-size','1.5em');
+			$('#apagar_val').css('font-weight','bold');
+
 
 			$('.inputnum').numeric('.');
 			$('#exento'   ).bind('keyup',function() { totaliza(); });
@@ -1493,7 +1447,7 @@ class Gserchi extends Controller {
 		$edit->codbanc->option('','Seleccionar');
 		$edit->codbanc->options("SELECT TRIM(codbanc) AS codbanc, CONCAT_WS('-',codbanc,banco) AS label FROM banc WHERE tbanco IN ('CAJ','CHI') AND codbanc!='00' AND tipocta='Q' ORDER BY codbanc");
 		$edit->codbanc->rule='max_length[2]|required';
-		$edit->codbanc->style = 'width:180px';
+		$edit->codbanc->style = 'width:100px';
 
 		$edit->fechafac = new dateField('Fecha','fechafac');
 		$edit->fechafac->rule='max_length[10]|required';
@@ -1510,11 +1464,11 @@ class Gserchi extends Controller {
 
 		$edit->nfiscal = new inputField('Control fiscal','nfiscal');
 		$edit->nfiscal->rule='max_length[20]|required';
-		$edit->nfiscal->size =20;
+		$edit->nfiscal->size =18;
 		$edit->nfiscal->maxlength =20;
 		$edit->nfiscal->autocomplete =false;
 
-		$edit->rif = new inputField('RIF','rif');
+		$edit->rif = new inputField('RIF del Proveedor','rif');
 		$edit->rif->rule='max_length[13]|required';
 		$edit->rif->size =13;
 		$edit->rif->maxlength =13;
@@ -1522,11 +1476,11 @@ class Gserchi extends Controller {
 
 		$edit->proveedor = new inputField('Nombre','proveedor');
 		$edit->proveedor->rule='max_length[40]|strtoupper';
-		$edit->proveedor->size =40;
+		$edit->proveedor->size =52;
 		$edit->proveedor->group='Datos del proveedor';
 		$edit->proveedor->maxlength =40;
 
-		$edit->codigo = new inputField('Gasto','codigo');
+		$edit->codigo = new inputField('Concepto de Gasto','codigo');
 		$edit->codigo->rule ='max_length[6]|required';
 		$edit->codigo->size =6;
 		$edit->codigo->maxlength =8;
@@ -1547,7 +1501,10 @@ class Gserchi extends Controller {
 			'reducida' =>'IVA R. '.htmlnformat($ivas['redutasa']).'%|Monto del IVA',
 			'monadic'  =>'Base Tasa A. '.htmlnformat($ivas['sobretasa']).'%|Base imponible',
 			'sobretasa'=>'IVA A. '.htmlnformat($ivas['sobretasa']).'%|Monto del IVA',
-			'importe'  =>'Importe total');
+			'importe'  =>'Importe total',
+			'apagar'   =>'Total a Pagar'
+			
+			);
 
 		foreach($arr AS $obj=>$label){
 			$pos = strrpos($label, '|');
@@ -1564,28 +1521,68 @@ class Gserchi extends Controller {
 			$edit->$obj->insertValue =0;
 			$edit->$obj->size =12;
 			$edit->$obj->maxlength =12;
-			//$edit->$obj->group=$grupo;
 			$edit->$obj->autocomplete=false;
 		}
 		$edit->$obj->readonly=true;
 
-		$edit->tasa->rule     ='condi_required|max_length[17]|callback_chtasa';
-		$edit->reducida->rule ='condi_required|max_length[17]|callback_chreducida';
-		$edit->sobretasa->rule='condi_required|max_length[17]|callback_chsobretasa';
-		$edit->importe->rule  ='max_length[17]|numeric|positive';
-		$edit->importe->type  ='inputhidden';
-		$edit->importe->label ='<b style="font-size:2em">Total</b>';
-		$edit->importe->showformat ='decimal';
+		$edit->tasa->rule      = 'condi_required|max_length[17]|callback_chtasa';
+		$edit->reducida->rule  = 'condi_required|max_length[17]|callback_chreducida';
+		$edit->sobretasa->rule = 'condi_required|max_length[17]|callback_chsobretasa';
+		
+		$edit->importe->rule       = 'max_length[17]|numeric|positive';
+		$edit->importe->type       = 'inputhidden';
+		$edit->importe->label      = '<b style="font-size:1.5em">Total Factura</b>';
+		$edit->importe->showformat = 'decimal';
 
 		$edit->sucursal = new dropdownField('Sucursal','sucursal');
 		$edit->sucursal->options('SELECT codigo,sucursal FROM sucu ORDER BY sucursal');
 		$edit->sucursal->rule ='max_length[2]|required';
-		$edit->sucursal->style= "width:180px";
+		$edit->sucursal->style= "width:100px";
 
 		$edit->departa = new dropdownField('Departamento','departa');
 		$edit->departa->options("SELECT TRIM(depto) AS codigo, CONCAT_WS('-',depto,TRIM(descrip)) AS label FROM dpto WHERE tipo='G' ORDER BY depto");
 		$edit->departa->rule ='max_length[2]';
 		$edit->departa->style= "width:180px";
+
+/*
+		$edit->codigorete = new dropdownField('Retencion','codigorete');
+		$edit->codigorete->option('','Seleccionar');
+		$edit->codigorete->options('SELECT TRIM(codigo) AS codigo,TRIM(CONCAT_WS("-",tipo,codigo,activida)) AS activida FROM rete ORDER BY tipo,codigo');
+		$edit->codigorete->rule   ='max_length[4]';
+		$edit->codigorete->style  ='width: 250px';
+		$edit->codigorete->onchange='post_codigoreteselec(this.value)';
+
+		$edit->base = new inputField('Base','base');
+		$edit->base->rule='max_length[10]|numeric|positive';
+		$edit->base->css_class='inputnum';
+		$edit->base->size =12;
+		$edit->base->autocomplete=false;
+		$edit->base->maxlength =10;
+		$edit->base->onkeyup   ='importerete()';
+		$edit->base->showformat ='decimal';
+
+		$edit->porcen = new inputField('%','porcen');
+		$edit->porcen->rule='max_length[5]|numeric|positive';
+		$edit->porcen->css_class='inputnum';
+		$edit->porcen->size =7;
+		$edit->porcen->readonly  = true;
+		$edit->porcen->maxlength =5;
+		$edit->porcen->showformat ='decimal';
+		$edit->porcen->type='inputhidden';
+
+		$edit->reten = new inputField('Monto','reten');
+		$edit->reten->rule='max_length[10]|numeric|positive';
+		$edit->reten->css_class='inputnum';
+		$edit->reten->size =12;
+		$edit->reten->maxlength =8;
+		$edit->reten->readonly  = true;
+		$edit->reten->showformat ='decimal';
+
+		$edit->apagar->rule       = 'max_length[17]|numeric|positive';
+		$edit->apagar->type       = 'inputhidden';
+		$edit->apagar->label      = '<b style="font-size:1.5em">Total a Pagar</b>';
+		$edit->apagar->showformat = 'decimal';
+*/
 
 		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
 		$edit->estampa = new autoUpdateField('estampa' ,date('YmD'), date('Ymd'));
@@ -1609,17 +1606,16 @@ class Gserchi extends Controller {
 	}
 
 	function _pre_insert($do){
-		$rif   =$do->get('rif');
-		$dbrif = $this->db->escape($rif);
-		$nombre=$do->get('proveedor');
-		$fecha =date('Y-m-d');
-		$csprv  =intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM sprv WHERE rif='.$dbrif));
-		$csprv +=intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM provoca WHERE rif='.$dbrif));
+		$rif    = $do->get('rif');
+		$dbrif  = $this->db->escape($rif);
+		$nombre = $do->get('proveedor');
+		$fecha  = date('Y-m-d');
+		$csprv  = intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM sprv WHERE rif='.$dbrif));
+		$csprv += intval($this->datasis->dameval('SELECT COUNT(*) AS cana FROM provoca WHERE rif='.$dbrif));
 		if($csprv==0){
 			$mSQL ='INSERT IGNORE INTO provoca (rif,nombre,fecha) VALUES ('.$dbrif.','.$this->db->escape($nombre).','.$this->db->escape($fecha).')';
 			$this->db->simple_query($mSQL);
 		}
-
 		$total  = 0;
 		$total += $do->get('exento')   ;
 		$total += $do->get('montasa')  ;
@@ -1628,6 +1624,21 @@ class Gserchi extends Controller {
 		$total += $do->get('reducida') ;
 		$total += $do->get('monadic')  ;
 		$total += $do->get('sobretasa');
+
+/*
+		$base = 0;
+		$base += $do->get('exento')   ;
+		$base += $do->get('montasa')  ;
+		$base += $do->get('monredu')  ;
+		$base += $do->get('monadic')  ;
+
+		$basert = $do->get('base');
+		if( $basert > $base ){
+			$do->error_message_ar['pre_ins'] ='El monto base de la retencion no puede ser mayor que la base de la factura';
+			$do->error_message_ar['pre_upd'] ='El monto base de la retencion no puede ser mayor que la base de la factura';
+			return false;
+		}
+*/
 
 		if($total>0){
 			$do->set('importe',$total);
@@ -1654,13 +1665,12 @@ class Gserchi extends Controller {
 	function _pre_update($do){
 		$aceptado = $do->get('aceptado');
 		if($aceptado!='S'){
-			return true;
+			$rt=$this->_pre_insert($do);
+			return $rt;
 		}else{
 			$do->error_message_ar['pre_upd'] = 'No se puede modificar un gasto aceptado';
 			return false;
 		}
-		$rt=$this->_pre_insert($do);
-		return $rt;
 	}
 
 	function _pre_delete($do){
@@ -1674,8 +1684,57 @@ class Gserchi extends Controller {
 	}
 
 	function _post_insert($do){
-		$primary =implode(',',$do->pk);
-		$numero  = $do->get('numero');
+		$primary  = implode(',',$do->pk);
+		$numero   = $do->get('numero');
+
+		$estampa  = $do->get('estampa');
+		$usuario  = $do->get('usuario');
+		$reten    = $do->get('reten');
+		$fecha    = date('Y-m-d');
+		$fechafac = $do->get('fechafac');
+
+/*
+		//Crea el movimiento para la retencion ISLR
+		if($reten>0){
+			$mnsprm  = $this->datasis->fprox_numero('num_nd');
+			$control = $this->datasis->fprox_numero('nsprm');
+			
+			$data=array();
+			$data['cod_prv']    = 'RETEN';
+			$data['nombre']     = 'RETENCIONES POR ENTERAR';
+			$data['tipo_doc']   = 'ND';
+			$data['numero']     = $mnsprm;
+			$data['fecha']      = $fecha;
+			$data['monto']      = $reten;
+			$data['impuesto']   = 0;
+			$data['abonos']     = 0;
+			$data['vence']      = $fecha;
+			$data['tipo_ref']   = $tipo;
+			$data['num_ref']    = $numero;
+			$data['observa1']   = 'RET/I.S.L.R. CAUSADA EN';
+			$data['observa2']   = 'FACTURA # '.$numero.' DE FECHA '.$fechafac;
+			$data['transac']    = '';  //$transac;
+			$data['estampa']    = $estampa;
+			$data['hora']       = $hora;
+			$data['usuario']    = $usuario;
+			$data['reteiva']    = 0;
+			$data['montasa']    = 0;
+			$data['monredu']    = 0;
+			$data['monadic']    = 0;
+			$data['tasa']       = 0;
+			$data['reducida']   = 0;
+			$data['sobretasa']  = 0;
+			$data['exento']     = 0;
+			$data['control']    = $control;
+			$data['codigo']     = 'NOCON';
+			$data['descrip']    = 'NOTA DE CONTABILIDAD';
+
+			$sql=$this->db->insert_string('sprm', $data);
+			$ban=$this->db->simple_query($sql);
+			if($ban==false){ memowrite($sql,'gser');}
+		}
+*/
+
 		logusu($do->table,"Creo factura caja chica numero ${numero} id $primary ");
 	}
 
@@ -1699,37 +1758,47 @@ class Gserchi extends Controller {
 		if (!$this->db->table_exists('gserchi')) {
 			$mSQL="
 			CREATE TABLE gserchi (
-			  codbanc   VARCHAR(5)       NOT NULL DEFAULT '',
-			  fechafac  DATE             DEFAULT NULL,
-			  numfac    VARCHAR(20)      DEFAULT NULL,
-			  nfiscal   VARCHAR(20)      DEFAULT NULL,
-			  rif       VARCHAR(13)      DEFAULT NULL,
-			  proveedor VARCHAR(40)      DEFAULT NULL,
-			  codigo    VARCHAR(6)       DEFAULT NULL,
-			  descrip   VARCHAR(50)      DEFAULT NULL,
-			  moneda    CHAR(2)          DEFAULT NULL,
-			  montasa   DECIMAL(17,2)    DEFAULT '0.00',
-			  tasa      DECIMAL(17,2)    DEFAULT NULL,
-			  monredu   DECIMAL(17,2)    DEFAULT '0.00',
-			  reducida  DECIMAL(17,2)    DEFAULT NULL,
-			  monadic   DECIMAL(17,2)    DEFAULT '0.00',
-			  sobretasa DECIMAL(17,2)    DEFAULT NULL,
-			  exento    DECIMAL(17,2)    DEFAULT '0.00',
-			  importe   DECIMAL(12,2)    DEFAULT NULL,
-			  sucursal  CHAR(2)          DEFAULT NULL,
-			  departa   CHAR(2)          DEFAULT NULL,
-			  ngasto    VARCHAR(8)       DEFAULT NULL,
-			  usuario   VARCHAR(12)      DEFAULT NULL,
-			  estampa   DATE             DEFAULT NULL,
-			  hora      VARCHAR(8)       DEFAULT NULL,
-			  id        INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-			  aceptado  CHAR(1)          DEFAULT NULL,
+				codbanc    VARCHAR(5)       NOT NULL DEFAULT '',
+				fechafac   DATE             DEFAULT NULL,
+				numfac     VARCHAR(20)      DEFAULT NULL,
+				nfiscal    VARCHAR(20)      DEFAULT NULL,
+				rif        VARCHAR(13)      DEFAULT NULL,
+				proveedor  VARCHAR(40)      DEFAULT NULL,
+				codigo     VARCHAR(6)       DEFAULT NULL,
+				descrip    VARCHAR(50)      DEFAULT NULL,
+				moneda     CHAR(2)          DEFAULT NULL,
+				montasa    DECIMAL(17,2)    DEFAULT '0.00',
+				tasa       DECIMAL(17,2)    DEFAULT NULL,
+				monredu    DECIMAL(17,2)    DEFAULT '0.00',
+				reducida   DECIMAL(17,2)    DEFAULT NULL,
+				monadic    DECIMAL(17,2)    DEFAULT '0.00',
+				sobretasa  DECIMAL(17,2)    DEFAULT NULL,
+				exento     DECIMAL(17,2)    DEFAULT '0.00',
+				importe    DECIMAL(12,2)    DEFAULT NULL,
+				sucursal   CHAR(2)          DEFAULT NULL,
+				departa    CHAR(2)          DEFAULT NULL,
+				ngasto     VARCHAR(8)       DEFAULT NULL,
+				usuario    VARCHAR(12)      DEFAULT NULL,
+				estampa    DATE             DEFAULT NULL,
+				hora       VARCHAR(8)       DEFAULT NULL,
+				aceptado   CHAR(1)          DEFAULT NULL,
+				codigorete CHAR(4)          NULL DEFAULT NULL,
+				base       DECIMAL(12,2)    NULL DEFAULT NULL,
+				porcen     DECIMAL(12,2)    NULL DEFAULT NULL,
+				reten      DECIMAL(12,2)    NULL DEFAULT NULL,
+				apagar     DECIMAL(12,2)    NULL DEFAULT NULL,
+				id        INT(11) UNSIGNED  NOT NULL AUTO_INCREMENT,
 			  PRIMARY KEY (id)
 			) ENGINE=MyISAM CHARSET=latin1 ROW_FORMAT=DYNAMIC";
 			$this->db->simple_query($mSQL);
 		}
-		//$campos=$this->db->list_fields('gserchi');
-		//if(!in_array('<#campo#>',$campos)){ }
+		$campos=$this->db->list_fields('gserchi');
+		if(!in_array('codigorete', $campos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN codigorete CHAR(4)       NULL DEFAULT NULL");
+		if(!in_array('base',       $campos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN base       DECIMAL(12,2) NULL DEFAULT NULL");
+		if(!in_array('porcen',     $campos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN porcen     DECIMAL(12,2) NULL DEFAULT NULL");
+		if(!in_array('reten',      $campos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN reten      DECIMAL(12,2) NULL DEFAULT NULL");
+		if(!in_array('apagar',     $campos)) $this->db->query("ALTER TABLE gserchi ADD COLUMN apagar     DECIMAL(12,2) NULL DEFAULT NULL");
+
 	}
 
 }

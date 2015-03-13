@@ -3212,10 +3212,10 @@ class gser extends Controller {
 		$edit->monto->maxlength =8;
 		$edit->monto->showformat ='decimal';
 		$edit->monto->type='inputhidden';
+
 		//********************************
 		// Fin de campos para detalle
 		//
-
 		$edit->buttons('add_rel');
 
 		$edit->on_save_redirect=false;
@@ -3563,7 +3563,7 @@ class gser extends Controller {
 		$ivat=round($ivat,2);
 
 		if($retebase>$subt){
-			$do->error_message_ar['pre_ins'] ='El monto base de la retencion es no puede ser mayor que la base de la factura';
+			$do->error_message_ar['pre_ins'] ='El monto base de la retencion no puede ser mayor que la base de la factura';
 			return false;
 		}
 

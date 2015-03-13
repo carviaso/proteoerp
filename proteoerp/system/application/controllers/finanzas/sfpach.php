@@ -8,25 +8,11 @@ class sfpach extends Controller {
 		parent::Controller();
 		$this->load->library('rapyd');
 		$this->load->library('jqdatagrid');
-		//$this->datasis->modulo_id('A00',1);
-		//$this->instalar();
+		$this->datasis->modulo_nombre( 'SFPACH', $ventana=0 );
 	}
 
 	function index(){
-		//redirect($this->url.'filteredgrid');
-		 if ( !$this->datasis->iscampo('sfpa','id') ) {
-			$this->db->simple_query('ALTER TABLE sfpa ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
-		};
-		if ( !$this->datasis->iscampo('sfpa','deposito') ) {
-			$this->db->query('ALTER TABLE sfpa ADD COLUMN deposito CHAR(12) NULL DEFAULT NULL ');
-		};
-		if ( !$this->datasis->iscampo('sfpa','cuentach') ) {
-			$this->db->query('ALTER TABLE sfpa ADD COLUMN cuentach CHAR(22) NULL DEFAULT NULL ');
-		};
-		if ( !$this->datasis->iscampo('bcaj','codbanc') ) {
-			$this->db->query('ALTER TABLE bcaj ADD COLUMN codbanc CHAR(2) NULL DEFAULT NULL ');
-		};
-		$this->db->query("INSERT IGNORE INTO banc SET codbanc='00', tbanco='CAJ', proxch='000000000000', saldo=0, numcuent='CAJA TRANSITO', banco='CAJA TRANSITO', activo='S', tipocta='K'");
+		$this->instalar();
 		redirect($this->url.'jqdatag');
 	}
 
@@ -868,6 +854,15 @@ class sfpach extends Controller {
 
 
 	function instalar(){
+		$campos = $this->db->list_fields('sfpa');
+		if(!in_array('id',      $campos)) $this->db->query('ALTER TABLE sfpa ADD COLUMN id INT(11) NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)');
+		if(!in_array('deposito',$campos)) $this->db->query('ALTER TABLE sfpa ADD COLUMN deposito CHAR(12) NULL DEFAULT NULL ');
+		if(!in_array('cuentach',$campos)) $this->db->query('ALTER TABLE sfpa ADD COLUMN cuentach CHAR(22) NULL DEFAULT NULL ');
+
+		if ( !$this->datasis->iscampo('bcaj','codbanc') ) {
+			$this->db->query('ALTER TABLE bcaj ADD COLUMN codbanc CHAR(2) NULL DEFAULT NULL ');
+		};
+		$this->db->query("INSERT IGNORE INTO banc SET codbanc='00', tbanco='CAJ', proxch='000000000000', saldo=0, numcuent='CAJA TRANSITO', banco='CAJA TRANSITO', activo='S', tipocta='K'");
 	
 	}
 

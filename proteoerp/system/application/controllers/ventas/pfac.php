@@ -422,7 +422,7 @@ class Pfac extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 70,
+			'width'         => 60,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:8, maxlength: 8 }',
@@ -470,13 +470,14 @@ class Pfac extends Controller {
 			'editable'      => 'true',
 			'align'         => "'center'",
 			'width'         => 40,
-			'edittype'      => "'text'",
+			'edittype'      => "'select'",
+			'editoptions'   => '{ value: {"S":"Autorizar","N":"No Autorizar"},  style:"width:120px"}',
 			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:1, maxlength: 1 }',
+			'stype'         => "'text'",
 			'cellattr'      => 'function(rowId, tv, aData, cm, rdata){
 				var tips = "";
-				if(aData.status !== undefined){
-					if(aData.status=="S"){
+				if(aData.autoriza !== undefined){
+					if(aData.autoriza=="S"){
 						tips = "Autorizado";
 					}else{
 						tips = "No autorizado";
@@ -493,20 +494,7 @@ class Pfac extends Controller {
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 80,
-			'align'         => "'center'",
-			'edittype'      => "'text'",
-			'editrules'     => '{ required:true,date:true}',
-			'formoptions'   => '{ label:"Fecha" }'
-		));
-
-
-		$grid->addField('vence');
-		$grid->label('Vence');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'width'         => 80,
+			'width'         => 60,
 			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true,date:true}',
@@ -515,11 +503,12 @@ class Pfac extends Controller {
 
 
 		$grid->addField('vd');
-		$grid->label('Vendedor');
+		$grid->label('Vende');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 50,
+			'width'         => 40,
+			'align'         => "'center'",
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:5, maxlength: 5 }',
@@ -537,19 +526,19 @@ class Pfac extends Controller {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-
+/*
 		$grid->addField('rifci');
 		$grid->label('RIF/CI');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 90,
+			'width'         => 80,
 			'edittype'      => "'text'",
 			'editrules'     => '{ required:true}',
 			'editoptions'   => '{ size:13, maxlength: 13 }',
 		));
 
-
+*/
 		$grid->addField('nombre');
 		$grid->label('Nombre');
 		$grid->params(array(
@@ -561,15 +550,18 @@ class Pfac extends Controller {
 			'editoptions'   => '{ size:40, maxlength: 40 }',
 		));
 
-		$grid->addField('referen');
-		$grid->label('Referencia');
+		$grid->addField('totalg');
+		$grid->label('Total');
 		$grid->params(array(
 			'search'        => 'true',
 			'editable'      => $editar,
-			'width'         => 110,
+			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'editrules'     => '{ required:true}',
-			'editoptions'   => '{ size:12, maxlength: 12 }',
+			'width'         => 90,
+			'editrules'     => '{ required:true }',
+			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
+			'formatter'     => "'number'",
+			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
 		$grid->addField('totals');
@@ -579,7 +571,7 @@ class Pfac extends Controller {
 			'editable'      => $editar,
 			'align'         => "'right'",
 			'edittype'      => "'text'",
-			'width'         => 100,
+			'width'         => 90,
 			'editrules'     => '{ required:true }',
 			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
 			'formatter'     => "'number'",
@@ -601,20 +593,6 @@ class Pfac extends Controller {
 			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
 		));
 
-
-		$grid->addField('totalg');
-		$grid->label('Total');
-		$grid->params(array(
-			'search'        => 'true',
-			'editable'      => $editar,
-			'align'         => "'right'",
-			'edittype'      => "'text'",
-			'width'         => 100,
-			'editrules'     => '{ required:true }',
-			'editoptions'   => '{ size:10, maxlength: 10, dataInit: function (elem) { $(elem).numeric(); }  }',
-			'formatter'     => "'number'",
-			'formatoptions' => '{decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2 }'
-		));
 
 		$grid->addField('bultos');
 		$grid->label('Bultos');
@@ -654,6 +632,29 @@ class Pfac extends Controller {
 			'editoptions'   => '{ size:50, maxlength: 50 }',
 		));
 
+		$grid->addField('referen');
+		$grid->label('Referencia');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 70,
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true}',
+			'editoptions'   => '{ size:12, maxlength: 12 }',
+		));
+
+/*
+		$grid->addField('vence');
+		$grid->label('Vence');
+		$grid->params(array(
+			'search'        => 'true',
+			'editable'      => $editar,
+			'width'         => 80,
+			'align'         => "'center'",
+			'edittype'      => "'text'",
+			'editrules'     => '{ required:true,date:true}',
+			'formoptions'   => '{ label:"Fecha" }'
+		));
 
 		$grid->addField('cajero');
 		$grid->label('Cajero');
@@ -666,7 +667,7 @@ class Pfac extends Controller {
 			'editoptions'   => '{ size:5, maxlength: 5 }',
 		));
 
-
+*/
 		$grid->addField('peso');
 		$grid->label('Peso');
 		$grid->params(array(
@@ -1912,7 +1913,7 @@ class Pfac extends Controller {
 		if(!in_array('faplica', $campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN faplica  DATE NULL DEFAULT '0000-00-00' COMMENT 'fecha en que se aplicaron los descuentos'");
 		if(!in_array('reserva', $campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN reserva  CHAR(1) NOT NULL DEFAULT 'N'");
 		if(!in_array('bultos',  $campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN bultos   INT(10) NULL DEFAULT '0' ");
-		if(!in_array('autoriza',$campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN autoriza CHAR(1) NOT NULL DEFAULT 'N'");
+		if(!in_array('autoriza',$campos)) $this->db->query("ALTER TABLE pfac ADD COLUMN autoriza CHAR(1) NOT NULL DEFAULT 'N'   COMMENT 'Autoriza facturar'");
 
 		$itcampos=$this->db->list_fields('itpfac');
 		if(!in_array('dxapli',$itcampos)){
