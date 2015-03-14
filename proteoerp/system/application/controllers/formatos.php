@@ -351,7 +351,7 @@ span { font-size:11px; }
 		if (file_exists($arch)){
 			$forma=file_get_contents($arch);
 			$data = array('nombre' => $nombre, $tipo => $forma);
-			$mSQL = $this->db->insert_string('formatos', $data).' ON DUPLICATE KEY UPDATE proteo=VALUES(proteo)';
+			$mSQL = $this->db->insert_string('formatos', $data)." ON DUPLICATE KEY UPDATE ${tipo}=VALUES(${tipo})";
 			$ban=$this->db->simple_query($mSQL);
 			if($ban==false){
 				return '';
