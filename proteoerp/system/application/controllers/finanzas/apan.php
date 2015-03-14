@@ -48,8 +48,10 @@ class Apan extends Controller {
 
 		//Botones Panel Izq
 		$grid->wbotonadd(array('id'=>'fimprime', 'img'=>'assets/default/images/print.png','alt' => 'Formato PDF',      'label'=>'Reimprimir Documento'));
-		$grid->wbotonadd(array('id'=>'fcliente', 'img'=>'images/agrega4.png' , 'alt' => 'Anticipo de Cliente'  , 'label'=>'Anticipo de Cliente'   ));
-		$grid->wbotonadd(array('id'=>'fproveed', 'img'=>'images/agrega4.png' , 'alt' => 'Anticipo de Proveedor', 'label'=>'Anticipo de Proveedor' ));
+		if($this->datasis->sidapuede('APAN','INCLUIR%')){
+			$grid->wbotonadd(array('id'=>'fcliente', 'img'=>'images/agrega4.png' , 'alt' => 'Anticipo de Cliente'  , 'label'=>'Anticipo de Cliente'   ));
+			$grid->wbotonadd(array('id'=>'fproveed', 'img'=>'images/agrega4.png' , 'alt' => 'Anticipo de Proveedor', 'label'=>'Anticipo de Proveedor' ));
+		}
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central
@@ -101,35 +103,14 @@ class Apan extends Controller {
 			}
 		};';
 
-		$bodyscript .= '
-		function apanadd(){
-			$.post("'.site_url($this->url.'dataedit/create').'",
-			function(data){
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		};';
-
-		$bodyscript .= '
-		function apanedit(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
-			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
-				mId = id;
-				$.post("'.site_url($this->url.'dataedit/modify').'/"+id, function(data){
-					$("#fedita").html(data);
-					$("#fedita").dialog( "open" );
-				});
-			} else {
-				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
-			}
-		};';
+		$bodyscript .= 'function apanadd(){ };';
+		$bodyscript .= 'function apanedit(){ };';
 
 		$bodyscript .= '
 		function apanshow(){
-			var id     = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
+			var id = jQuery("#newapi'.$grid0.'").jqGrid(\'getGridParam\',\'selrow\');
 			if(id){
-				var ret    = $("#newapi'.$grid0.'").getRowData(id);
+				var ret = $("#newapi'.$grid0.'").getRowData(id);
 				mId = id;
 				$.post("'.site_url($this->url.'dataedit/show').'/"+id, function(data){
 					$("#fshow").html(data);
@@ -182,26 +163,28 @@ class Apan extends Controller {
 			';
 
 		// Anticipo a Cliente
-		$bodyscript .= '
-		$("#fcliente").click( function() {
-			$.post("'.site_url($this->url.'decliente/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 500, width: 750, title: "Aplicacion de Anticipo a Cliente"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});';
+		if($this->datasis->sidapuede('APAN','INCLUIR%')){
+			$bodyscript .= '
+			$("#fcliente").click( function() {
+				$.post("'.site_url($this->url.'decliente/create').'",
+				function(data){
+					$("#fedita").dialog( {height: 500, width: 750, title: "Aplicacion de Anticipo a Cliente"} );
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			});';
 
-		// Anticipo a Cliente
-		$bodyscript .= '
-		$("#fproveed").click( function() {
-			$.post("'.site_url($this->url.'deproveed/create').'",
-			function(data){
-				$("#fedita").dialog( {height: 500, width: 750, title: "Aplicacion de Anticipo a Proveedor"} );
-				$("#fedita").html(data);
-				$("#fedita").dialog( "open" );
-			})
-		});';
+			// Anticipo a Cliente
+			$bodyscript .= '
+			$("#fproveed").click( function() {
+				$.post("'.site_url($this->url.'deproveed/create').'",
+				function(data){
+					$("#fedita").dialog( {height: 500, width: 750, title: "Aplicacion de Anticipo a Proveedor"} );
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				});
+			});';
+		}
 
 		$bodyscript .= '
 		jQuery("#fimprime").click( function(){
@@ -508,8 +491,8 @@ class Apan extends Controller {
 		#show/hide navigations buttons
 		$grid->setEdit(false);
 		$grid->setAdd(false);
-		$grid->setDelete(true);
-		//$grid->setDelete($this->datasis->sidapuede('APAN','ELIMINA%'));
+		//$grid->setDelete(true);
+		$grid->setDelete($this->datasis->sidapuede('APAN','ELIMINA%') || $this->datasis->sidapuede('APAN','BORR_REG%'));
 		$grid->setSearch($this->datasis->sidapuede('APAN','BUSQUEDA%'));
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
@@ -897,6 +880,11 @@ class Apan extends Controller {
 									$("#nombre_val").text("");
 									$("#saldo_val").text("");
 								}else{
+									if(data[0].cod_cli==$("#clipro").val()){
+										$("#clipro").data("ui-autocomplete")._trigger("select", "autocompleteselect", {item : data[0]});
+										$("#clipro").autocomplete("close");
+									}
+
 									$.each(data,
 										function(i, val){
 											sugiere.push( val );
@@ -1077,6 +1065,11 @@ class Apan extends Controller {
 
 									$("#saldo_val").text("");
 								}else{
+									if(data[0].proveed==$("#clipro").val()){
+										$("#clipro").data("ui-autocomplete")._trigger("select", "autocompleteselect", {item : data[0]});
+										$("#clipro").autocomplete("close");
+									}
+
 									$.each(data,
 										function(i, val){
 											sugiere.push( val );

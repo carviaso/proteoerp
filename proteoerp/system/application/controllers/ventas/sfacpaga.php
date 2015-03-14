@@ -10,7 +10,7 @@ class sfacpaga extends Controller {
 	}
 
 	function index(){
-		redirect($this->url."principal");
+		redirect($this->url.'principal');
 	}
 
 	function filteredgrid(){

@@ -55,7 +55,7 @@ if($this->rapyd->uri->is_set('search') && $filter->is_valid()){
 
 	$pdf->setTotalizar('reiva');
 
-      	$pdf->Table();
+	$pdf->Table();
 	$pdf->Output();
 
 }else{

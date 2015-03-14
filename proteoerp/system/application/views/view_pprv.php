@@ -242,8 +242,8 @@ function chtipodoc(){
 		$('#ncadic').hide();
 		$('#fpago').show();
 		$('#trnd2').hide();
-		totaliza();
-		desmarcariva()
+		/*totaliza();*/
+		desmarcariva();
 	}else{
 		$('#aplefectos').show();
 		$('#aplpago').show();
@@ -258,9 +258,14 @@ function chtipodoc(){
 		$('#trnd2').hide();
 		desmarcariva();
 	}
+	totaliza();
 }
 
 function totaliza(){
+	var tipo=$('#tipo_doc').val();
+	if(tipo=='AN'){
+		return true;
+	}
 	var stota =0;
 	var sppago=0;
 	var i=0;
@@ -273,7 +278,6 @@ function totaliza(){
 	var exento   =0;
 	var arr  = $('input[name^="abono_"]');
 	var mascara= "PAGA ";
-	var tipo=$('#tipo_doc').val();
 
 	jQuery.each(arr, function(){
 		nom=this.name;

@@ -196,9 +196,12 @@ class Smov extends Controller {
 								try{
 									var json = JSON.parse(r);
 									if(json.status == "A"){
+										var esapan = $("#clipro").length;
 										$("#fedita").dialog("close");
 										jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
-										window.open(\''.site_url($this->url.'smovprint').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+										if(!esapan){
+											window.open(\''.site_url($this->url.'smovprint').'/\'+json.pk.id, \'_blank\', \'width=400,height=420,scrollbars=yes,status=yes,resizable=yes\');
+										}
 										return true;
 									}else{
 										apprise(json.mensaje);
@@ -1223,18 +1226,19 @@ class Smov extends Controller {
 
 	function _post_insert($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Creo $this->tits $primary ");
+		logusu($do->table,"Creo $this->tits ${primary} ");
 	}
 
 	function _post_update($do){
 		$primary =implode(',',$do->pk);
-		logusu($do->table,"Modifico $this->tits $primary ");
+		logusu($do->table,"Modifico $this->tits ${primary} ");
 	}
 
 
 	function selscli(){
 		$this->rapyd->load('dataform');
 
+		$apanpuede=$this->datasis->sidapuede('APAN','INCLUIR%');
 		$script="
 		$('#df1').keypress(function(e){
 			if(e.which == 13) return false;
@@ -1299,13 +1303,19 @@ class Smov extends Controller {
 				$('#direc_val').text(ui.item.direc);
 				setTimeout(function() {  $('#cod_cli').removeAttr('readonly'); }, 1500);
 
-				var saldo= $.ajax({ type: 'POST', url: '".site_url($this->url.'ajaxsaldo')."/'+ui.item.id, async: false, data: {cod_cli: ui.item.cod_cli } }).responseText;
-				$('#saldo_val').text(nformat(saldo,2));
-			}
-		});";
+				var saldo= jQuery.parseJSON($.ajax({ type: 'POST',dataType: 'json', url: '".site_url($this->url.'ajaxsaldo')."/'+ui.item.id, async: false, data: {cod_cli: ui.item.cod_cli } }).responseText);
+
+				$('#saldo_val').text(nformat(saldo.debe,2));
+
+				$('#haber_val').text(nformat(saldo.haber,2));";
+				if($apanpuede){
+					$script.="if(saldo.haber > 0){ $('#info').html('El cliente presenta AN/NC pendiente por <a href=\'#\' onclick=\'aplcli()\'>aplicar</a>'); }";
+				}else{
+					$script.="if(saldo.haber > 0){ $('#info').html('El cliente presenta AN/NC pendiente por aplicar'); }";
+				}
+			$script.="} });";
 
 		$form = new DataForm($this->url.'sclise/process');
-		$form->script($script);
 
 		$form->cliente = new inputField('Cliente', 'cod_cli');
 
@@ -1315,8 +1325,32 @@ class Smov extends Controller {
 		$form->nombre = new freeField('Nombre','nombre','<b id=\'nombre_val\'></b>');
 		$form->rif    = new freeField('RIF/CI','rif','<b id=\'rifci_val\'></b>');
 		$form->direc  = new freeField('Direcci&oacute;n','direc','<b id=\'direc_val\'></b>');
-		$form->saldo  = new freeField('Saldo','saldo','<b style="font-size:2em" id=\'saldo_val\'></b>');
+		$form->haber  = new freeField('Monto aplicable','aplsando','<b style="font-size:1em;color:#04B404;" id=\'haber_val\'></b>');
+		$form->saldo  = new freeField('Monto de la deuda','saldo','<b style="font-size:2em" id=\'saldo_val\'></b>');
+		$form->container = new containerField('info','<div style="text-align:center" id="info"></div>');
 
+		if($apanpuede){
+
+			$script .= '
+			function aplcli(){
+				$.post("'.site_url('finanzas/apan/decliente/create').'",
+				function(data){
+					$("#fedita").dialog( {height: 500, width: 750, title: "Aplicacion de Anticipo a Cliente"} );
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+
+					var cod_cli = $("#cod_cli").val();
+					$("#clipro").val(cod_cli);
+					$("#clipro").val(cod_cli);
+					$("#clipro").focus();
+					$("#clipro").autocomplete("search", cod_cli);
+
+					$("#fsclisel").dialog( "close" );
+				});
+			};';
+		}
+
+		$form->script($script);
 		$form->build_form();
 
 		echo $form->output;
@@ -1417,6 +1451,7 @@ class Smov extends Controller {
 	function ajaxsaldo(){
 		$cod_cli = $this->input->post('cod_cli');
 
+		$rt=array('debe'=>0,'haber'=>0);
 		if($cod_cli!==false){
 			$this->db->select_sum('a.monto - a.abonos','saldo');
 			$this->db->from('smov AS a');
@@ -1425,10 +1460,19 @@ class Smov extends Controller {
 			$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
 			$q=$this->db->get();
 			$row = $q->row_array();
-			echo (empty($row['saldo']))? 0: $row['saldo'];
-		}else{
-			echo 0;
+			$rt['debe']= floatval($row['saldo']);
+
+			$this->db->select_sum('a.monto - a.abonos','haber');
+			$this->db->from('smov AS a');
+			$this->db->where('a.cod_cli',$cod_cli);
+			$this->db->where('a.monto > a.abonos');
+			$this->db->where_in('a.tipo_doc',array('NC','AN'));
+			$q=$this->db->get();
+			$row = $q->row_array();
+			$rt['haber']= floatval($row['haber']);
 		}
+		header('Content-Type: application/json');
+		echo json_encode($rt);
 	}
 
 	//******************************************************************

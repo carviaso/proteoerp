@@ -379,10 +379,13 @@ class Sprm extends Controller {
 							try{
 								var json = JSON.parse(r);
 								if (json.status == "A"){
+									var esapan = $("#clipro").length;
 									$.prompt("Registro Guardado");
 									$("#fedita").dialog( "close" );
 									grid.trigger("reloadGrid");
-									'.$this->datasis->jwinopen(site_url('formatos/ver/SPRM').'/\'+res.pk.id+\'/id\'').';
+									if(!esapan){
+										'.$this->datasis->jwinopen(site_url('formatos/ver/SPRM').'/\'+res.pk.id+\'/id\'').';
+									}
 									return true;
 								} else {
 									$.prompt(json.mensaje);
@@ -1699,6 +1702,7 @@ class Sprm extends Controller {
 
 	function selsprv(){
 		$this->rapyd->load('dataform');
+		$apanpuede=$this->datasis->sidapuede('APAN','INCLUIR%');
 
 		$script="
 		$('#df1').keypress(function(e){
@@ -1763,13 +1767,20 @@ class Sprm extends Controller {
 				$('#direc_val').text(ui.item.direc);
 				setTimeout(function() {  $('#cod_prv').removeAttr('readonly'); }, 1500);
 
-				var saldo= $.ajax({ type: 'POST', url: '".site_url($this->url.'ajaxsaldo')."', async: false, data: {cod_prv: ui.item.proveed} }).responseText;
-				$('#saldo_val').text(nformat(saldo,2));
-			}
-		});";
+				var saldo= jQuery.parseJSON($.ajax({ type: 'POST',dataType: 'json', url: '".site_url($this->url.'ajaxsaldo')."/'+ui.item.id, async: false, data: {cod_prv: ui.item.proveed}}).responseText);
+
+				$('#saldo_val').text(nformat(saldo.debe,2));
+
+				$('#haber_val').text(nformat(saldo.haber,2));";
+				if($apanpuede){
+					$script.="if(saldo.haber > 0){ $('#info').html('El proveedor presenta AN/NC pendiente por <a href=\'#\' onclick=\'aplcli()\'>aplicar</a>'); }";
+				}else{
+					$script.="if(saldo.haber > 0){ $('#info').html('El proveedor presenta AN/NC pendiente por aplicar'); }";
+				}
+			$script.="} });";
+
 
 		$form = new DataForm($this->url.'sclise/process');
-		$form->script($script);
 
 		$form->proveed = new inputField('Proveedor', 'cod_prv');
 
@@ -1777,13 +1788,34 @@ class Sprm extends Controller {
 		$form->id->in='proveed';
 
 		$form->nombre = new freeField('Nombre','nombre','<b id=\'nombre_val\'></b>');
-
 		$form->rif    = new freeField('RIF','rif','<b id=\'rifci_val\'></b>');
-
 		$form->direc  = new freeField('Direcci&oacute;n','direc','<b id=\'direc_val\'></b>');
-
+		$form->haber  = new freeField('Monto aplicable','aplsando','<b style="font-size:1em;color:#04B404;" id=\'haber_val\'></b>');
 		$form->saldo  = new freeField('Saldo','saldo','<b style="font-size:2em" id=\'saldo_val\'></b>');
+		$form->container = new containerField('info','<div style="text-align:center" id="info"></div>');
 
+		if($apanpuede){
+
+			$script .= '
+			function aplcli(){
+				$.post("'.site_url('finanzas/apan/deproveed/create').'",
+				function(data){
+					$("#fedita").dialog( {height: 500, width: 750, title: "Aplicacion de Anticipo a Proveedor"} );
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+
+					var cod_prv = $("#cod_prv").val();
+					$("#clipro").val(cod_prv);
+					$("#clipro").val(cod_prv);
+					$("#clipro").focus();
+					$("#clipro").autocomplete("search", cod_prv);
+
+					$("#fsprvsel").dialog( "close" );
+				});
+			};';
+		}
+
+		$form->script($script);
 		$form->build_form();
 
 		echo $form->output;
@@ -1791,6 +1823,8 @@ class Sprm extends Controller {
 
 	function ajaxsaldo(){
 		$cod_prv = $this->input->post('cod_prv');
+
+		$rt=array('debe'=>0,'haber'=>0);
 		if($cod_prv!==false){
 			$this->db->select_sum('a.monto - a.abonos','saldo');
 			$this->db->from('sprm AS a');
@@ -1799,10 +1833,20 @@ class Sprm extends Controller {
 			$this->db->where_in('a.tipo_doc',array('FC','ND','GI'));
 			$q=$this->db->get();
 			$row = $q->row_array();
-			echo (empty($row['saldo']))? 0: $row['saldo'];
-		}else{
-			echo 0;
+			$rt['debe']= floatval($row['saldo']);
+
+			$this->db->select_sum('a.monto - a.abonos','haber');
+			$this->db->from('sprm AS a');
+			$this->db->where('a.cod_prv',$cod_prv);
+			$this->db->where('a.monto > a.abonos');
+			$this->db->where_in('a.tipo_doc',array('AN','NC'));
+			$q=$this->db->get();
+			$row = $q->row_array();
+			$rt['haber']= floatval($row['haber']);
 		}
+
+		header('Content-Type: application/json');
+		echo json_encode($rt);
 	}
 
 	//*****************************************
@@ -2317,7 +2361,7 @@ class Sprm extends Controller {
 
 		$edit->numche = new inputField('N&uacute;mero', 'numche');
 		$edit->numche->size     = 12;
-		$edit->numche->rule     = 'condi_required|callback_chtipo';
+		$edit->numche->rule     = 'condi_required|callback_chbmovrep';
 
 		$edit->benefi = new inputField('Beneficiario', 'benefi');
 		$edit->benefi->size       = 12;
@@ -2542,6 +2586,36 @@ class Sprm extends Controller {
 			}
 		}
 		return true;
+	}
+
+	function chbmovrep($numref){
+		$doctipo = $this->input->post('tipo_doc');
+
+		if($doctipo=='NC') return true;
+
+		$codban = $this->input->post('banco');
+		$tipo   = $this->input->post('tipo_op');
+		$numero = str_pad(trim($numref), 12,'0', STR_PAD_LEFT);
+
+		if(empty($numref) && $tipo=='CH'){
+			$this->validation->set_message('chbmovrep', 'El campo %s es obligatorio');
+			return false;
+		}else{
+			$this->validation->set_message('chbmovrep', 'Ya existe un movimiento en banco con las mismas caracteristicas dadas previamente registrado.');
+		}
+
+		$dbtipo   = $this->db->escape($tipo);
+		$dbnumero = $this->db->escape($numero);
+		$dbcodban = $this->db->escape($codban);
+
+		$mSQL = "SELECT COUNT(*) AS cana FROM bmov WHERE tipo_op=${dbtipo} AND numero=${dbnumero} AND codbanc=${dbcodban}";
+		$cana = intval($this->datasis->dameval($mSQL));
+
+		if($cana>0){
+			return false;
+		}else{
+			return true;
+		}
 	}
 
 	function printrete($id_sprm){
@@ -2876,10 +2950,12 @@ class Sprm extends Controller {
 		}
 
 		$observa=$do->get('observa1');
-		$do->set('observa1',substr($observa,0 ,50));
-		$obs2 =  substr($observa,50,50);
-		if($obs2!==false){
-			$do->set('observa2',$obs2);
+		if(strlen($observa)>50){
+			$do->set('observa1',substr($observa,0 ,50));
+			$obs2 =  substr($observa,50,50);
+			if($obs2!==false){
+				$do->set('observa2',$obs2);
+			}
 		}
 
 		$do->set('vence'   , $fecha);
