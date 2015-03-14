@@ -1669,6 +1669,7 @@ class Cruc extends Controller {
 
 			$ittipo_doc=substr($onumero,0,2);
 			$itnumero  =substr($onumero,2);
+			
 			$dbittipo_doc= $this->db->escape($ittipo_doc);
 			$dbitnumero  = $this->db->escape($itnumero  );
 			$dbitofecha  = $this->db->escape($itofecha);
@@ -1687,13 +1688,13 @@ class Cruc extends Controller {
 
 				if($ittipo=='ADE'){
 					$adech=trim($this->datasis->dameval("SELECT cod_cli FROM smov WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero} AND fecha=${dbitofecha}"));
-					if($proveed!=$adech){
+					if( $proveed != $adech ){
 						$do->error_message_ar['pre_ins']='El efecto '.$onumero.' no pertenece al deudor '.$proveed;
 						return false;
 					}
 				}
 				if($ittipo=='APA'){
-					$adech=trim($this->datasis->dameval("SELECT cod_prv FROM sprm WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero} AND fecha=${dbitofecha} AND monto=${monto}"));
+					$adech=trim($this->datasis->dameval("SELECT cod_prv FROM sprm WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero} AND fecha=${dbitofecha}"));
 					if($cliente!=$adech){
 						$do->error_message_ar['pre_ins']='El efecto '.$onumero.' no pertenece al acreedor '.$cliente;
 						return false;
@@ -1703,7 +1704,7 @@ class Cruc extends Controller {
 			}elseif($tipo=='P-P' || $tipo=='P-C'){
 
 				if($ittipo=='ADE'){
-					$adech=trim($this->datasis->dameval("SELECT cod_prv FROM sprm WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero} AND fecha=${dbitofecha} AND monto=${monto}"));
+					$adech=trim($this->datasis->dameval("SELECT cod_prv FROM sprm WHERE tipo_doc=${dbittipo_doc} AND numero=${dbitnumero} AND fecha=${dbitofecha} "));
 					if($proveed!=$adech){
 						$do->error_message_ar['pre_ins']='El efecto '.$onumero.' no pertenece al acreedor '.$proveed;
 						return false;
