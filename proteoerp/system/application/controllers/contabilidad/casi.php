@@ -2068,7 +2068,7 @@ class Casi extends Controller {
 			$this->db->simple_query($mSQL);
 		}
 
-		if(!in_array('idcasi',$campos)){
+		if(!in_array('id',$campos)){
 			$mSQL="ALTER TABLE `itcasi` ADD COLUMN `id` INT(11) NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (`id`)";
 			$this->db->simple_query($mSQL);
 		}
