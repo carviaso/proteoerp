@@ -135,6 +135,7 @@ class Prmo extends Controller {
 							var json = JSON.parse(data);
 							if (json.status == "A"){
 								apprise("Registro eliminado");
+								jQuery("#newapi'.$grid0.'").trigger("reloadGrid");
 							}else{
 								apprise("Registro no se puede eliminado");
 							}
