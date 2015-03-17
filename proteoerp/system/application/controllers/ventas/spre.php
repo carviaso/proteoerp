@@ -225,6 +225,10 @@ class Spre extends Controller {
 			autoOpen: false, height: 550, width: 800, modal: true,
 			buttons: {
 				"Guardar": function() {
+					if($("#scliexp").dialog( "isOpen" )===true) {
+						$("#scliexp").dialog("close");
+					}
+
 					var bValid = true;
 					var murl = $("#df1").attr("action");
 					allFields.removeClass( "ui-state-error" );
@@ -251,11 +255,18 @@ class Spre extends Controller {
 					})
 				},
 				"Cancelar": function() {
+					if($("#scliexp").dialog( "isOpen" )===true) {
+						$("#scliexp").dialog("close");
+					}
+
 					$("#fedita").html("");
 					$( this ).dialog( "close" );
 				}
 			},
 			close: function() {
+				if($("#scliexp").dialog( "isOpen" )===true) {
+					$("#scliexp").dialog("close");
+				}
 				$("#fedita").html("");
 				allFields.val( "" ).removeClass( "ui-state-error" );
 			}
@@ -343,6 +354,51 @@ class Spre extends Controller {
 			}
 		});';
 
+		$bodyscript .= '
+		$("#scliexp").dialog({
+			autoOpen:false, modal:true, width:500, height:350,
+			buttons: {
+				"Guardar": function(){
+					var murl = $("#sclidialog").attr("action");
+					$.ajax({
+						type: "POST", dataType: "json", async: false,
+						url: murl,
+						data: $("#sclidialog").serialize(),
+						success: function(r,s,x){
+							if(r.status=="B"){
+								$("#sclidialog").find(".alert").html(r.mensaje);
+							}else{
+								$("#scliexp").dialog( "close" );
+
+								$("#cod_cli").val(r.data.cliente);
+
+								$("#nombre").val(r.data.nombre);
+								//$("#nombre_val").text(r.data.nombre);
+
+								$("#rifci").val(r.data.rifci);
+								//$("#rifci_val").text(r.data.rifci);
+
+								$("#sclitipo").val(r.data.tipo);
+
+								$("#direc").val(r.data.direc);
+								//$("#direc_val").text(r.data.direc);
+
+								return true;
+							}
+						}
+					});
+
+				},
+				"Cancelar": function(){
+					$("#scliexp").html("");
+					$(this).dialog("close");
+				}
+			},
+			close: function(){
+				$("#scliexp").html("");
+			}
+		});';
+
 		$bodyscript .= '});';
 		$bodyscript .= '</script>';
 		return $bodyscript;
@@ -362,33 +418,33 @@ class Spre extends Controller {
 			$notifica = "
 Muchas gracias por su compra. Su número de orden es: ".$row->numero."
 
-Estos son los pasos para concretar su compra. 
+Estos son los pasos para concretar su compra.
 1) Puede depositar o transferir a las siguientes cuentas:
 
 COEX TRADE C.A. J-40386086-6
-BICENTENARIO Cta. 0175-0011-2300-7305-1179 
-VENEZUELA    Cta. 0102-0441-1000-0023-3563 
-BNC          Cta. 0191-0093-6721-9303-0443 
-MERCANTIL    Cta. 0105-0065-6410-6538-5552 
-PROVINCIAL   Cta. 0108-0067-6401-0028-3544 
+BICENTENARIO Cta. 0175-0011-2300-7305-1179
+VENEZUELA    Cta. 0102-0441-1000-0023-3563
+BNC          Cta. 0191-0093-6721-9303-0443
+MERCANTIL    Cta. 0105-0065-6410-6538-5552
+PROVINCIAL   Cta. 0108-0067-6401-0028-3544
 
 FACUNDO CALELLO E-84.571.125
-BANESCO Cta. 0134-0030-0103-0102-9938 
+BANESCO Cta. 0134-0030-0103-0102-9938
 
 El monto a depositar es de Bs: ".$row->totalg."
 
-2) Ingresar a la página: www.tecbloom.com y registre todos los datos 
-solicitados, su número de orden está al comienzo de este correo. Los datos 
-ingresados son los mismos que se procesarán, por favor llenar los campos 
-indicados cuidadosamente. Si se encuentra en la ciudad de Mérida o desea retirar 
-personalmente en nuestra tienda, la dirección es la siguiente: Av. 2 Lora, esquina 
-calle 18, C.C. Las Pirámides, planta baja, local 14, pasos arriba de Corredor 
-Hermanos. Mérida, estado Mérida, de Lunes a Sábado en horario comprendido 
+2) Ingresar a la página: www.tecbloom.com y registre todos los datos
+solicitados, su número de orden está al comienzo de este correo. Los datos
+ingresados son los mismos que se procesarán, por favor llenar los campos
+indicados cuidadosamente. Si se encuentra en la ciudad de Mérida o desea retirar
+personalmente en nuestra tienda, la dirección es la siguiente: Av. 2 Lora, esquina
+calle 18, C.C. Las Pirámides, planta baja, local 14, pasos arriba de Corredor
+Hermanos. Mérida, estado Mérida, de Lunes a Sábado en horario comprendido
 de 9:00 am a 1:00 pm y de 2:00 pm a 6:00 pm.
 
-No responder a este correo, debe obligatoriamente llenar sus datos en la página 
-web indicada en el paso 2 con el número de orden correspondiente. No se 
-procesará ninguna información que sea enviada a este correo, ni se tomarán 
+No responder a este correo, debe obligatoriamente llenar sus datos en la página
+web indicada en el paso 2 con el número de orden correspondiente. No se
+procesará ninguna información que sea enviada a este correo, ni se tomarán
 datos vía telefónica.";
 
 		$this->datasis->correo( $row->email, 'Instrucciones: Orden No. '.$row->numero, utf8_decode($notifica) );
@@ -1552,7 +1608,7 @@ datos vía telefónica.";
 
 
 	//******************************************************************
-	// Edicion 
+	// Edicion
 
 	function dataeditc(){
 		$this->rapyd->load('dataedit');

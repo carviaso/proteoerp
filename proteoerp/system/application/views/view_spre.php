@@ -100,6 +100,12 @@ $(function(){
 	});
 });
 
+function scliadd() {
+	$.post("<?php echo site_url('ventas/scli/dataeditdialog/create') ?>", function(data){
+		$('#scliexp').html(data);
+		$('#scliexp').dialog('open');
+	});
+};
 function importe(id){
 	var ind     = id.toString();
 	var cana    = Number($("#cana_"+ind).val());
@@ -418,7 +424,11 @@ function del_itspre(id){
 				<td>
 				<table width="100%" style="margin: 0; width: 100%;border:1px solid #9AC8DA;">
 					<tr>
-						<td class="littletableheader"><?php echo $form->cliente->label;  ?></td>
+						<td class="littletableheader"><?php echo $form->cliente->label;  ?>
+						<?php if($form->_status!='show'){ ?>
+						<a href="#" title="Agregar nuevo cliente" onClick="scliadd();" ><?php echo image('add1-.png','Agregar nuevo cliente',array('title'=>'Agregar nuevo cliente')); ?></a>
+						<?php } ?>
+						</td>
 						<td class="littletablerow"   ><?php echo $form->cliente->output,$form->sclitipo->output; ?></td>
 						<td class="littletableheader"         ><?php echo $form->rifci->label; ?>&nbsp;</td>
 						<td class="littletablerow"            ><?php echo $form->rifci->output;   ?>&nbsp;</td>
@@ -459,7 +469,7 @@ function del_itspre(id){
 		</td>
 	</tr><tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px;width:550px;'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;height:200px;width:100%;'>
 		<table width='100%' border='0'>
 			<tr id='__INPL__'>
 				<th bgcolor='#7098D0'><strong>C&oacute;digo</strong></th>
@@ -528,7 +538,7 @@ function del_itspre(id){
 	</tr>
 	<tr>
 		<td>
-		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;width:550px;'>
+		<div style='overflow:auto;border: 1px solid #9AC8DA;background: #FAFAFA;width:100%;'>
 		<table width='100%' border='0'>
 			<tr>
 				<td><?php if($form->_status!='show'){?>
@@ -560,14 +570,14 @@ function del_itspre(id){
 		<table width='100%' border='0'>
 			<tr>
 				<td colspan='6'><b>ANTICIPO</b></td>
-				<td class="littletableheader"><?php echo $form->codbanc->label;  ?></td>
-				<td class="littletablerow"   ><?php echo $form->codbanc->output; ?></td>
-				<td class="littletableheader"><?php echo $form->tipo_op->label;  ?></td>
-				<td class="littletablerow"   ><?php echo $form->tipo_op->output; ?></td>
+				<td class="littletableheader"><?php echo $form->codbanc->label;   ?></td>
+				<td class="littletablerow"   ><?php echo $form->codbanc->output;  ?></td>
+				<td class="littletableheader"><?php echo $form->tipo_op->label;   ?></td>
+				<td class="littletablerow"   ><?php echo $form->tipo_op->output;  ?></td>
 				<td class="littletableheader"><?php echo $form->fechadep->label;  ?></td>
 				<td class="littletablerow"   ><?php echo $form->fechadep->output; ?></td>
-				<td class="littletableheader"><?php echo $form->num_ref->label;  ?></td>
-				<td class="littletablerow"   ><?php echo $form->num_ref->output; ?></td-->
+				<td class="littletableheader"><?php echo $form->num_ref->label;   ?></td>
+				<td class="littletablerow"   ><?php echo $form->num_ref->output;  ?></td>
 			</tr>
 		</table>
 		</div>
