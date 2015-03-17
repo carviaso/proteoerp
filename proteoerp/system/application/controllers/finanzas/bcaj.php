@@ -317,7 +317,7 @@ class Bcaj extends Controller {
 									function(data){
 										var res = $.parseJSON(data);
 										if ( res.status == "A"){
-											grid.trigger("reloadGrid");
+											jQuery("#newapi'. $grid0.'").trigger("reloadGrid");
 											apprise("Movimiento Eliminado");
 										} else {
 											apprise(res.mensaje);

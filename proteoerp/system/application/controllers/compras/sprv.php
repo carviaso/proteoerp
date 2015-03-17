@@ -906,8 +906,11 @@ class Sprv extends Controller {
 				$("#grupo").change(function(){grupo();}).change();
 				$(".inputnum").numeric(".");
 				$("#banco1").change(function () { acuenta(); }).change();
-				$("#banco2").change(function () { acuenta(); }).change();
+				$("#banco2").change(function () { acuenta(); }).change();';
 
+
+				if($this->datasis->traevalor('VELCED')!='N'){
+				$script .='
 				$("#rif").focusout(function(){
 					rif = $(this).val().toUpperCase();
 					$(this).val(rif);
@@ -964,8 +967,10 @@ class Sprv extends Controller {
 						return false;
 					}
 				});
-			});
-			'.$this->datasis->validarif().'
+			});';
+			}
+
+			$script .= $this->datasis->validarif().'
 			function grupo(){
 				t=$("#grupo").val();
 				a=$("#grupo :selected").text();
@@ -1179,7 +1184,7 @@ class Sprv extends Controller {
 		$edit->cuenta2->size = 22;
 		$edit->cuenta2->rule = 'trim';
 		$edit->cuenta2->maxlength = 25;
-		$edit->cuenta2->group = "Cuentas Bancarias";
+		$edit->cuenta2->group = 'Cuentas Bancarias';
 
 		$edit->cliente  = new inputField('Como Cliente', 'cliente');
 		$edit->cliente->size =7;
