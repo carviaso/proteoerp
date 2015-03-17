@@ -2066,27 +2066,27 @@ class Scst extends Controller {
 
 		//$edit->back_url = $this->back_dataedit;
 
-		$edit->fecha = new DateonlyField('Fecha', 'fecha','d/m/Y');
+		$edit->fecha = new DateonlyField('Fecha', 'fecha');
 		$edit->fecha->insertValue = date('Y-m-d');
 		$edit->fecha->size = 10;
 		$edit->fecha->rule ='required|chfecha';
 		$edit->fecha->calendar=false;
 		//$transac=$edit->get_from_dataobjetct('transac');
 
-		$edit->vence = new DateonlyField('Vence', 'vence','d/m/Y');
+		$edit->vence = new DateonlyField('Vence', 'vence');
 		$edit->vence->insertValue = date('Y-m-d');
 		$edit->vence->size = 10;
 		$edit->vence->rule ='required|chfecha';
 		$edit->vence->calendar=false;
 
-		$edit->actuali = new DateonlyField('Actualizado', 'actuali','d/m/Y');
+		$edit->actuali = new DateonlyField('Actualizado', 'actuali');
 		//$edit->actuali->insertValue = date('Y-m-d');
 		$edit->actuali->when=array('show');
 		$edit->actuali->size = 10;
 		$edit->actuali->mode ='autohide';
 		$edit->actuali->calendar=false;
 
-		$edit->recep = new DateonlyField('recibido', 'v','d/m/Y');
+		$edit->recep = new DateonlyField('recibido', 'recibido');
 		//$edit->recep->insertValue = date('Y-m-d');
 		$edit->recep->size = 10;
 		$edit->recep->mode = 'autohide';
@@ -3019,7 +3019,7 @@ class Scst extends Controller {
 				$htmltabla='';
 			}
 
-			$form->fecha = new dateonlyField('Fecha de recepci&oacute;n del documento', 'fecha','d/m/Y');
+			$form->fecha = new dateonlyField('Fecha de recepci&oacute;n del documento', 'fecha');
 			$form->fecha->insertValue = date('Y-m-d');
 			$form->fecha->rule='required|callback_chddate';
 			$form->fecha->calendar = false;
