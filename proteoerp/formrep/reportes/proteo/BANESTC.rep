@@ -1,7 +1,13 @@
+/**
+ * ProteoERP
+ *
+ * @autor    Andres Hocevar
+ * @license  GNU GPL v3
+*/
 $filter = new DataFilter("Filtro del Reporte");
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$filter->db->select(array("fecha","tipo_op","numero", "CONCAT(TRIM(a.concepto),' ',a.nombre) concepto", "(tipo_op NOT IN ('CH','ND'))*monto as debitos", "(tipo_op IN ('CH','ND'))*monto as creditos", "if(tipo_op IN ('CH','ND'),-1,1)*monto as saldo"));
+$filter->db->select(array('a.fecha','a.tipo_op','a.numero', "CONCAT(TRIM(a.concepto),' ',a.nombre) concepto", "(a.tipo_op NOT IN ('CH','ND'))*monto AS debitos", "(tipo_op IN ('CH','ND'))*monto AS creditos", "IF(tipo_op IN ('CH','ND'),-1,1)*monto AS saldo"));
 $filter->db->from('bmov as a');
 $filter->db->join('banc as b','a.codbanc=b.codbanc');
 //$filter->db->orderby('fecha');
@@ -16,28 +22,28 @@ $filter->fecha->size=7;
 $filter->fecha->append(' mes/año');
 $filter->fecha->rule = "required";
 
-$filter->banco = new dropdownField("Caja/Banco", "codbanc");
-$filter->banco->db_name="a.codbanc";
-$filter->banco->option("","");
+$filter->banco = new dropdownField('Caja/Banco', 'codbanc');
+$filter->banco->db_name='a.codbanc';
+$filter->banco->option('','Seleccionar');
 $filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");
-$filter->banco->rule = "required";
+$filter->banco->rule = 'required';
 
 $filter->salformat = new radiogroupField("Formato de salida","salformat");
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
-$filter->buttons("search");
+$filter->buttons('search');
 $filter->build();
-if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
+if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
 	$mSQL=$filter->db->_compile_select();
 	$mSQL=$mSQL."UNION ALL
 
-	SELECT DATE_ADD('20141101',INTERVAL -1 DAY) AS fecha, 
-		'SA' tipo_doc, 'SA', 'SALDO ANTERIOR', 
-		if(SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as debitos, 
-		if(SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,0,SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto))*(-1) as creditos, 
-		SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto) as saldo 
+	SELECT DATE_ADD('20141101',INTERVAL -1 DAY) AS fecha,
+		'SA' tipo_doc, 'SA', 'SALDO ANTERIOR',
+		if(SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as debitos,
+		if(SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,0,SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto))*(-1) as creditos,
+		SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto) as saldo
 	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc
 	WHERE EXTRACT(YEAR_MONTH FROM fecha) < '".$filter->fecha->newValue."' AND a.codbanc = '".$filter->banco->newValue."' AND anulado<>'S'
 	GROUP BY a.codbanc
@@ -79,7 +85,7 @@ if($this->rapyd->uri->is_set("search")  AND $filter->is_valid()){
 }else{
 	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
 	$data['filtro'] = $filter->output;
-	$data['titulo'] = '<h2 class="mainheader">Estado de Cuenta<h2>';
+	$data['titulo'] = '<h2 class="mainheader">Estado de Cuenta</h2>';
 	$data['head']   = $this->rapyd->get_head();
 	$this->load->view('view_freportes', $data);
 }

@@ -966,9 +966,9 @@ class Sprv extends Controller {
 						alert("El RIF o Cedula introducida no es correcta, por favor verifique e intente de nuevo.");
 						return false;
 					}
-				});
-			});';
-			}
+				});';
+				}
+			$script .='});';
 
 			$script .= $this->datasis->validarif().'
 			function grupo(){
