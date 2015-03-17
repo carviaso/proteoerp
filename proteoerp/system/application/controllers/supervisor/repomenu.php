@@ -21,6 +21,7 @@ class repomenu extends validaciones {
 
 	function filteredgrid(){
 		$this->rapyd->load('datafilter','datagrid');
+		$this->rapyd->uri->keep_persistence();
 
 		function llink($nombre,$alternativo,$modulo){
 			if(!empty($nombre))
@@ -162,7 +163,7 @@ class repomenu extends validaciones {
 
 	function dataedit($nombre){
 		$this->rapyd->load('dataedit');
-		//$this->rapyd->uri->keep_persistence();
+		$this->rapyd->uri->keep_persistence();
 
 		$edit = new DataEdit('Menu de Reportes', 'intrarepo');
 		$edit->back_url = site_url('supervisor/repomenu/filteredgrid');
@@ -227,7 +228,7 @@ class repomenu extends validaciones {
 
 		$script='
 		$("#df1").submit(function(){
-			$("#proteo").val(editor.getValue()); 
+			$("#proteo").val(editor.getValue());
 
 			$.post("'.site_url('supervisor/repomenu/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
 				function(data){
@@ -238,7 +239,7 @@ class repomenu extends validaciones {
 		});
 
 		function guarda() {
-			$("#proteo").val(editor.getValue()); 
+			$("#proteo").val(editor.getValue());
 			$.post("'.site_url('supervisor/repomenu/gajax_proteo/update/'.$id).'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
 				function(data){
 					//alert("Reporte guardado" + data);
@@ -256,7 +257,7 @@ class repomenu extends validaciones {
 		};
 
 		function fguardar(){
-			$("#proteo").val(editor.getValue()); 
+			$("#proteo").val(editor.getValue());
 			$.post("'.site_url('supervisor/repomenu/guardar/').'", {nombre: "'.$id.'", proteo: $("#proteo").val()},
 			function(data){
 				alert(data);
@@ -288,7 +289,7 @@ class repomenu extends validaciones {
 		$edit->build();
 
 		$rt=array('status'=>'','msj'=>'','pk'=>'');
-		
+
 		if($edit->on_success()){
 			$rt['status'] = 'A';
 			$rt['msj']   = 'Guardado';

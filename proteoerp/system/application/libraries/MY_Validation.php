@@ -74,7 +74,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if($row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -90,7 +91,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if($row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -104,7 +106,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if($row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -120,7 +123,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if($row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -137,7 +141,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if($row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -153,7 +158,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if($row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -169,7 +175,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if($row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -183,7 +190,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if( $row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -197,7 +205,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if($query->num_rows() > 0){
 			$row = $query->row();
-			if( $row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -211,7 +220,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if( $row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -225,7 +235,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if( $row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -239,7 +250,8 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if($query->num_rows()>0){
 			$row = $query->row();
-			if($row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}
@@ -253,7 +265,25 @@ class MY_Validation extends CI_Validation{
 		$query = $this->CI->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-			if( $row->cana>0) return true; else return false;
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
+		}else{
+			return false;
+		}
+	}
+
+	function existemgas($mgas){
+		$mgas  =trim($mgas);
+		if(strlen($mgas)==0) return true;
+		$dbmgas=$this->CI->db->escape($mgas);
+		$mSQL = "SELECT COUNT(*) AS cana FROM mgas WHERE codigo=${dbmgas}";
+		$this->set_message('existemgas', 'El vendedor introducido en el campo %s no es v&aacute;lido');
+
+		$query = $this->CI->db->query($mSQL);
+		if ($query->num_rows() > 0){
+			$row = $query->row();
+			$cana=intval($row->cana);
+			if($cana>0) return true; else return false;
 		}else{
 			return false;
 		}

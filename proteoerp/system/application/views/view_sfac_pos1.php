@@ -236,6 +236,8 @@ $(function(){
 
 			$('#vd').val(ui.item.vd);
 
+			$('#almacen').val(ui.item.almacen);
+
 			$('#descuento').val('0');
 
 			truncate();
@@ -372,6 +374,8 @@ function itdevolver(numero){
 			$('#direc_val').text(val.direc);
 
 			$('#vd').val(val.vd);
+
+			$('#almacen').val(val.almacen);
 
 			$('#descuento').val('0');
 		},

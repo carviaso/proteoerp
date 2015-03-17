@@ -3094,7 +3094,7 @@ class gser extends Controller {
 		$edit->codigo->size=7;
 		$edit->codigo->db_name='codigo';
 		//$edit->codigo->append($btn);
-		$edit->codigo->rule  = 'required';
+		$edit->codigo->rule  = 'required|existemgas';
 		$edit->codigo->rel_id= 'gitser';
 
 		$edit->descrip = new inputField('Descripcion <#o#>', 'descrip_<#i#>');

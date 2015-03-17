@@ -1184,9 +1184,9 @@ class Ajax extends Controller {
 
 			$retArray = $retorno = array();
 
-			$mSQL="SELECT a.numero, a.totalg, a.cod_cli, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.tipo, b.dire11 AS direc,a.fecha,vd
+			$mSQL="SELECT a.numero, a.totalg, a.cod_cli, TRIM(b.nombre) AS nombre, TRIM(b.rifci) AS rifci, b.tipo, b.dire11 AS direc,a.fecha,vd,a.almacen
 				FROM  sfac AS a
-				JOIN scli AS b ON a.cod_cli=b.cliente
+				JOIN  scli AS b ON a.cod_cli=b.cliente
 				WHERE a.numero LIKE ${qdb} AND a.tipo_doc='F' AND MID(a.numero,1,1)<>'_'
 				ORDER BY numero DESC LIMIT ".$this->autolimit;
 
@@ -1203,6 +1203,7 @@ class Ajax extends Controller {
 					$retArray['nombre']  = $this->en_utf8($row['nombre']);
 					$retArray['totalg']  = $row['totalg'];
 					$retArray['vd']      = $row['vd'];
+					$retArray['almacen'] = $row['almacen'];
 
 					array_push($retorno, $retArray);
 				}
@@ -1216,7 +1217,8 @@ class Ajax extends Controller {
 				$retArray[0]['tipo']    = '';
 				$retArray[0]['nombre']  = '';
 				$retArray[0]['direc']   = '';
-				$retArray['vd']         = '';
+				$retArray[0]['vd']      = '';
+				$retArray[0]['almacen'] = '';
 				$data = json_encode($retArray);
 			}
 		}

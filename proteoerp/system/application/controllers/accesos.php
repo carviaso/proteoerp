@@ -6,9 +6,10 @@
  * @license  GNU GPL v3
 */
 class Accesos extends Controller{
+	var $url ='/';
+
 	function Accesos(){
 		parent::Controller();
-		$this->instalar();
 	}
 
 	function index(){
@@ -17,7 +18,6 @@ class Accesos extends Controller{
 		$this->datasis->modintramenu( 950, 540, 'accesos' );
 		$this->instalar();
 		redirect($this->url.'accesos/crear');
-
 	}
 
 	//******************************************************************

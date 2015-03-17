@@ -32,9 +32,9 @@ class Reglas extends Metodos {
 		$grid->db->from('`reglascont`');
 		$grid->db->groupby('modulo');
 		$grid->db->orderby('modulo,regla');
-		$grid->column('Modulo'     , "modulo"     );
-		$grid->column('Descripcion', "descripcion");
-		$grid->column('Reglas'     , "cant",'align="center"');
+		$grid->column('Modulo'     , 'modulo'     );
+		$grid->column('Descripcion', 'descripcion');
+		$grid->column('Reglas'     , 'cant','align="center"');
 		$grid->column(''           , $link ,'align="center"');
 		$grid->column(''           , $link2,'align="center"');
 		//$grid->column(''           , "Explicar",'align="center"');
@@ -60,17 +60,17 @@ class Reglas extends Metodos {
 	}
 
 	function detalle() {
-		$this->rapyd->load("datagrid","dataform");
+		$this->rapyd->load('datagrid','dataform');
 		$modulo=($this->uri->segment(4) ? $this->uri->segment(4) : $this->input->post('modulo'));
 		if(!$modulo) redirect('/contabilidad/reglas');
 
 		$form = new DataForm('contabilidad/reglas/ejecutar');
 		$form->title('Fecha para la ejecuci&oacute;n');
-		$form->fecha = new dateonlyField("Fecha", "fecha","d/m/Y");
+		$form->fecha = new dateonlyField('Fecha', 'fecha','d/m/Y');
 		$form->fecha->size = 10;
-		$form->fecha->insertValue =($this->input->post('fecha') ? $this->input->post('fecha') : date("Ymd"));
-		$form->fecha->append("<input type='hidden' name='modulo' value='$modulo' id='modulo'>");
-		$form->submit = new submitField("Ejecutar","btn_submit");
+		$form->fecha->insertValue =($this->input->post('fecha') ? $this->input->post('fecha') : date('Ymd'));
+		$form->fecha->append("<input type='hidden' name='modulo' value='${modulo}' id='modulo'>");
+		$form->submit = new submitField('Ejecutar','btn_submit');
 		$form->submit->in='fecha';
 		$form->build_form();
 
@@ -78,23 +78,23 @@ class Reglas extends Metodos {
 		$link2=anchor('/contabilidad/reglas/duplicar/<#modulo#>/<#regla#>','Duplicar');
 		$action = "javascript:window.location='" . site_url('contabilidad/reglas') . "'";
 		$grid = new DataGrid();
-		$grid->add("contabilidad/reglas/dataedit/$modulo/create",'Agregar Regla');
+		$grid->add("contabilidad/reglas/dataedit/${modulo}/create",'Agregar Regla');
 		$grid->button('cancelar', RAPYD_BUTTON_BACK, $action);
 		$grid->db->select('modulo, regla, tabla, descripcion');
 		$grid->db->from('`reglascont`');
 		$grid->db->where('modulo',$modulo);
 		$grid->db->orderby('modulo,tabla,regla');
-		$grid->column("Modulo"     , "modulo"     );
-		$grid->column("Regla"      , "regla"      );
-		$grid->column("Tabla"      , "tabla"      );
-		$grid->column("Descripcion", "descripcion");
+		$grid->column('Modulo'     , 'modulo'     );
+		$grid->column('Regla'      , 'regla'      );
+		$grid->column('Tabla'      , 'tabla'      );
+		$grid->column('Descripcion', 'descripcion');
 		$grid->column(''           , $link ,'align="center"');
 		$grid->column(''           , $link2,'align="center"');
 		$grid->build();
 
 		$data['content'] =$form->output.$grid->output;
-		$data["head"]    = $this->rapyd->get_head();
-		$data['title']   ="<h1>Detalle de regla $modulo</h1>";
+		$data['head']    = $this->rapyd->get_head();
+		$data['title']   ="<h1>Detalle de regla ${modulo}</h1>";
 		$this->load->view('view_ventanas', $data);
 	}
 
@@ -299,10 +299,13 @@ class Reglas extends Metodos {
 	}
 
 	function duplicar(){
-		$modulo=$this->uri->segment(4);
-		$regla =$this->uri->segment(5);
-		$dispon=$this->_rdisponible($modulo);
-		$mSQL  ="INSERT INTO `reglascont` SELECT modulo, '$dispon',tabla,descripcion,fecha,comprob,origen,condicion,agrupar,cuenta,referen,concepto,debe,haber,ccosto,sucursal,fuente,control FROM `reglascont` WHERE modulo='$modulo' AND regla='$regla'";
+		$modulo  = $this->uri->segment(4);
+		$regla   = $this->uri->segment(5);
+		$dbmodulo= $this->db->escape($modulo);
+		$dbregla = $this->db->escape($regla);
+		$dispon  = $this->_rdisponible($modulo);
+		$dbdispon= $this->db->escape($dispon);
+		$mSQL  ="INSERT INTO `reglascont` SELECT modulo, ${dbdispon},tabla,descripcion,fecha,comprob,origen,condicion,agrupar,cuenta,referen,concepto,debe,haber,ccosto,sucursal,fuente,control FROM `reglascont` WHERE modulo=${dbmodulo} AND regla=${dbregla}";
 		$this->db->query($mSQL);
 		redirect('/contabilidad/reglas/detalle/'.$modulo);
 		//if($modulo AND $regla ) redirect('/contabilidad/reglas/detalle');
@@ -310,7 +313,8 @@ class Reglas extends Metodos {
 
 	function _rdisponible($modulo=''){
 		if(empty($modulo)) return FALSE;
-		$query = $this->db->query("SELECT regla FROM `reglascont` WHERE modulo='$modulo'");
+		$dbmodulo= $this->db->escape($modulo);
+		$query   = $this->db->query("SELECT regla FROM `reglascont` WHERE modulo=${dbmodulo}");
 		$i=0;
 		foreach ($query->result() as $row){ $i++;
 			if ($row->regla!=$i) return $i;
