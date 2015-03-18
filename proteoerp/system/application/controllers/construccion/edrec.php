@@ -1356,18 +1356,19 @@ class Edrec extends Controller {
 
 					$this->db->insert('smov',$data);
 
-					// Actualiza edrec
-					$data = array();
-					$data['transac'] = $transac;
-					$data['status']  = 'F';
-					$this->db->where('id', $row->id);
-					$this->db->update('edrec',$data);
 				}else{
 					$transac   = $row->transac;
 
 					$this->db->where('id', $row->smovid);
 					$this->db->update('smov',$data);
 				}
+
+				// Actualiza edrec
+				$data = array();
+				$data['transac'] = $transac;
+				$data['status']  = 'F';
+				$this->db->where('id', $row->id);
+				$this->db->update('edrec',$data);
 
 			}
 			echo 'Si se Guardaron';
