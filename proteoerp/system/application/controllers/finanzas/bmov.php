@@ -49,14 +49,16 @@ class Bmov extends Controller {
 		$grid->setWpAdicional($WpAdic);
 
 		//Botones Panel Izq
-		//$grid->wbotonadd(array('id'=>'bimpriau', 'img'=>'assets/default/images/print.png', 'alt' => 'Imprimir Auditoria', 'label'=>'Imprimir Auditoria' ));
+		$grid->wbotonadd(array('id'=>'capital',   'img'=>'images/engrana.png',  'alt' => 'Capital inicial', 'label'=>'Capital inicial'));
 		$WestPanel = $grid->deploywestp();
 
 		//Panel Central y Sur
 		$centerpanel = $grid->centerpanel( $id = 'adicional', $param['grids'][0]['gridname'] );
 
 		$adic = array(
-			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro')
+			array('id'=>'fedita',  'title'=>'Agregar/Editar Registro'),
+			array('id'=>'fshow' ,  'title'=>'Mostrar Registro'),
+			array('id'=>'fborra',  'title'=>'Eliminar Registro')
 		);
 		$SouthPanel = $grid->SouthPanel($this->datasis->traevalor('TITULO1'), $adic);
 
@@ -90,6 +92,7 @@ class Bmov extends Controller {
 	//
 	function bodyscript( $grid0 ){
 		$bodyscript = '<script type="text/javascript">';
+		$ngrid      = "#newapi".$grid0;
 
 		$bodyscript .= '
 		function tconsulta(transac){
@@ -108,6 +111,39 @@ class Bmov extends Controller {
 				window.open(\''.site_url('formatos/ver/BMOV/').'/\'+id, \'_blank\', \'width=900,height=800,scrollbars=yes,status=yes,resizable=yes,screenx=((screen.availHeight/2)-450), screeny=((screen.availWidth/2)-400)\');
 			} else { $.prompt("<h1>Por favor Seleccione un Movimiento</h1>");}
 		});';
+
+		$bodyscript .= '
+		jQuery("#capital").click( function(){
+			$.post("'.site_url($this->url.'dataedit/create').'",
+				function(data){
+					$("#fedita").html(data);
+					$("#fedita").dialog( "open" );
+				}
+			);
+
+		});';
+
+		$bodyscript .= '
+		function bmovdel() {
+			var id = jQuery("'.$ngrid.'").jqGrid(\'getGridParam\',\'selrow\');
+			if (id)	{
+				if(confirm(" Seguro desea eliminar el registro?")){
+					var ret    = $("'.$ngrid.'").getRowData(id);
+					mId = id;
+					$.post("'.site_url($this->url.'dataedit/do_delete').'/"+id, function(data){
+						$("#fborra").html(data);
+						$("#fborra").dialog( "open" );
+					});
+					jQuery("'.$ngrid.'").trigger("reloadGrid");
+				}
+			}else{
+				$.prompt("<h1>Por favor Seleccione un Registro</h1>");
+			}
+		};';
+
+
+		$bodyscript .= $this->jqdatagrid->bsfedita( $ngrid, $height = '250', $width = '450' );
+		$bodyscript .= $this->jqdatagrid->bsfborra( $ngrid, '250', '300' );
 
 		$bodyscript .= '</script>';
 		return $bodyscript;
@@ -576,7 +612,7 @@ class Bmov extends Controller {
 		#show/hide navigations buttons
 		$grid->setAdd(false);
 		$grid->setEdit(false);
-		$grid->setDelete(false);
+		$grid->setDelete($this->datasis->sidapuede('BMOV','BORR_REG%'));
 		$grid->setSearch(true);
 		$grid->setRowNum(30);
 		$grid->setShrinkToFit('false');
@@ -598,17 +634,186 @@ class Bmov extends Controller {
 			}'
 		);
 
+		$grid->setBarOptions('delfunc: bmovdel');
+
+
 		#Set url
 		$grid->setUrlput(site_url($this->url.'setdata/'));
 
 		#GET url
 		$grid->setUrlget(site_url($this->url.'getdata/'));
 
+
 		if ($deployed) {
 			return $grid->deploy();
 		} else {
 			return $grid;
 		}
+	}
+
+
+	function dataedit(){
+		$this->rapyd->load('dataedit');
+		$script= '
+		$(function() {
+			$("#fecha").datepicker({dateFormat:"dd/mm/yy"});
+			$(".inputnum").numeric(".");
+		});
+		';
+
+		$edit = new DataEdit('', 'bmov');
+
+		$edit->script($script,'modify');
+		$edit->script($script,'create');
+		$edit->on_save_redirect=false;
+
+		$edit->back_url = site_url($this->url.'filteredgrid');
+
+		$edit->post_process('insert','_post_insert');
+		$edit->post_process('update','_post_update');
+		$edit->post_process('delete','_post_delete');
+		$edit->pre_process( 'insert','_pre_insert' );
+		$edit->pre_process( 'update','_pre_update' );
+		$edit->pre_process( 'delete','_pre_delete' );
+
+		$edit->codbanc = new dropdownField('Banco','codbanc');
+		$edit->codbanc->rule='required';
+		$edit->codbanc->options("SELECT codbanc, CONCAT(codbanc, ' ', TRIM(banco), IF(tbanco='CAJ',' ',numcuent) ) banco FROM banc WHERE tbanco<>'CAJ' AND activo='S' AND codbanc<>'00' ORDER BY codbanc");
+
+		$edit->fecha = new dateonlyField('Fecha','fecha');
+		$edit->fecha->rule='required|chfecha';
+		$edit->fecha->calendar=false;
+		$edit->fecha->size =10;
+		$edit->fecha->maxlength =8;
+		$edit->fecha->insertValue =date('Y-m-d');
+
+		$edit->numero = new inputField('N&uacute;mero de deposito','numero');
+		$edit->numero->rule='';
+		$edit->numero->size =14;
+		$edit->numero->maxlength =12;
+		$edit->numero->rule ='required';
+
+		$edit->monto = new inputField('Monto','monto');
+		$edit->monto->rule='numeric|required';
+		$edit->monto->css_class='inputnum';
+		$edit->monto->size =19;
+		$edit->monto->maxlength =17;
+		$edit->monto->style='font-size:1.3em';
+
+		$edit->clipro  = new autoUpdateField('clipro','O','O');
+		$edit->tipo_op = new autoUpdateField('tipo_op','DE','DE');
+		$edit->usuario = new autoUpdateField('usuario',$this->session->userdata('usuario'),$this->session->userdata('usuario'));
+		$edit->estampa = new autoUpdateField('estampa' ,date('Ymd'), date('Ymd'));
+		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
+		$edit->anulado = new autoUpdateField('anulado','N','N');
+
+
+		$edit->build();
+
+		if($edit->on_success()){
+			$rt=array(
+				'status' =>'A',
+				'mensaje'=>'Registro guardado',
+				'pk'     =>$edit->_dataobject->pk
+			);
+			echo json_encode($rt);
+		}else{
+			echo $edit->output;
+		}
+	}
+
+
+	function _pre_insert($do){
+		$tipo_op   = $do->get('tipo_op');
+		$codbanc   = $do->get('codbanc');
+		$numero    = $do->get('numero');
+		$monto     = floatval($do->get('monto'));
+		$fecha     = $do->get('fecha');
+
+		$dbfecha   = $this->db->escape($fecha);
+		$dbcodbanc = $this->db->escape($codbanc);
+		$dbnumero  = $this->db->escape($numero);
+		$dbtipo_op = $this->db->escape($tipo_op);
+
+		$cana=intval($this->datasis->dameval("SELECT (MIN(fecha)<${dbfecha}) AS val FROM bmov WHERE codbanc=${dbcodbanc}"));
+		if($cana>0){
+			$do->error_message_ar['pre_ins']='El deposito inicial debe ser anterior a todos los movimientos';
+			return false;
+		}
+
+
+		$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM bmov WHERE codbanc=${dbcodbanc} AND documen='INICIAL'"));
+		if($cana>0){
+			$do->error_message_ar['pre_ins']='Ya existe un deposito inicial para este banco';
+			return false;
+		}
+
+		$cana=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM bmov WHERE codbanc=${dbcodbanc} AND tipo_op=${dbtipo_op} AND numero=${dbnumero}"));
+		if($cana>0){
+			$do->error_message_ar['pre_ins']='Ya existe un deposito con el mismo numero y banco';
+			return false;
+		}
+
+		$rowban  = $this->datasis->damerow('SELECT numcuent,banco,saldo,moneda FROM banc WHERE codbanc='.$dbcodbanc);
+		if(empty($rowban)){
+			$do->error_message_ar['pre_ins']='Banco no encontrado';
+			return false;
+		}
+
+		$do->set('numcuent',$rowban['numcuent']);
+		$do->set('moneda'  ,$rowban['moneda']  );
+		$do->set('saldo'   ,$rowban['saldo']   );
+		$do->set('bruto'   ,$monto  );
+
+		//$do->set('numero' ,str_pad($numero, 12, '0', STR_PAD_LEFT));
+
+		$transac=$this->datasis->fprox_numero('ntransa');
+		$do->set('concepto','DEPOSITO INICIAL');
+		$do->set('transac' ,$transac);
+		$do->set('documen' ,'INICIAL');
+
+		return true;
+	}
+
+	function _pre_update($do){
+		$do->error_message_ar['pre_upd']='No se puede modificar';
+		return false;
+	}
+
+	function _pre_delete($do){
+		$documen = $do->get('documen');
+		if($documen == 'INICIAL'){
+			return true;
+		}
+
+		$do->error_message_ar['pre_del']='No se puede eliminar el efecto';
+		return false;
+	}
+
+	function _post_insert($do){
+		$banco   = $do->get('codbanc');
+		$monto   = floatval($do->get('monto'));
+		$ffecha  = $do->get('fecha');
+
+		$this->datasis->actusal($banco, $ffecha, $monto);
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Creo deposito inicial $this->tits $primary ");
+	}
+
+	function _post_update($do){
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Modifico deposito inicial $this->tits $primary ");
+	}
+
+	function _post_delete($do){
+		$banco   = $do->get('codbanc');
+		$monto   = floatval($do->get('monto'));
+		$ffecha  = $do->get('fecha');
+
+		$this->datasis->actusal($banco, $ffecha, -1*$monto);
+
+		$primary =implode(',',$do->pk);
+		logusu($do->table,"Elimino deposito inicial $this->tits $primary ");
 	}
 
 	/*******************************************************************
