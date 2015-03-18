@@ -1804,32 +1804,6 @@ class Otin extends Controller {
 				if($ban==false){ memowrite($mSQL,'OTIN'); }
 
 				$this->datasis->actusal($mcaja, $ffecha, $mMonto);
-
-/*
-			ACTUSAL(mCAJA, mFECHA, mMONTO)
-			aLISTA := {}
-			AADD(aLISTA, {"CODBANC",  mCAJA })
-			AADD(aLISTA, {"NUMCUENT", mREG[1] })
-			AADD(aLISTA, {"BANCO",    mREG[2] })
-			AADD(aLISTA, {"MONEDA",   mREG[3] })
-			AADD(aLISTA, {"SALDO",    mREG[4] })
-			AADD(aLISTA, {"FECHA",    mFECHA })
-			AADD(aLISTA, {"BENEFI",   '' })
-			AADD(aLISTA, {"TIPO_OP",  "NC" })
-			AADD(aLISTA, {"NUMERO",   mNUMERO })
-			AADD(aLISTA, {"CONCEPTO", mOBSERVA1 })
-			AADD(aLISTA, {"CONCEP2",  mOBSERVA2 })
-			AADD(aLISTA, {"CONCEP3",  '' })
-			AADD(aLISTA, {"MONTO",    mMONTO })
-			AADD(aLISTA, {"CLIPRO",   'C' })
-			AADD(aLISTA, {"CODCP",    mCOD_CLI })
-			AADD(aLISTA, {"NOMBRE",   mNOMBRE })
-			AADD(aLISTA, {"NEGRESO",  mINGRESO })
-	mSQL := "INSERT INTO bmov SET "
-	aVALORES := {}
-	LLENASQL(@mSQL, @aVALORES, aLISTA, mTRANSAC )
-	EJECUTASQL(mSQL,aVALORES)
-*/
 			}
 
 		}
@@ -1844,7 +1818,7 @@ class Otin extends Controller {
 		$dbtransac = $this->db->escape($transac);
 		$dbfecha   = $this->db->escape($fecha);
 
-		$mSQL= 'SELECT COUNT(*) FROM smov WHERE abonos>0 AND transac='.$dbtransac;
+		$mSQL= 'SELECT COUNT(*) AS cana FROM smov WHERE abonos>0 AND transac='.$dbtransac;
 		$cana= $this->datasis->dameval($mSQL);
 		if(!empty($cana)){
 			$do->error_message_ar['pre_del']='El registro tiene efectos abonado, debe reversar primero el abono antes de anular';
@@ -1858,21 +1832,20 @@ class Otin extends Controller {
 		}
 
 		if($sfpa_cana>0){
-			$mSQL= 'SELECT COUNT(*) FROM bmov WHERE (concilia IS NOT NULL OR concilia<>\'0000-00-00\') AND transac='.$dbtransac;
+			$mSQL= 'SELECT COUNT(*) AS cana FROM bmov WHERE concilia<>\'0000-00-00\' AND transac='.$dbtransac;
 			$cana= $this->datasis->dameval($mSQL);
 			if(!empty($cana)){
 				$do->error_message_ar['pre_del']='El registro tiene movimientos en bancos conciliados, debe reversar primero el abono antes de anular';
 				return false;
 			}
 
-			$mSQL = "SELECT COUNT(*) FROM rcaj WHERE fecha=${dbfecha} AND cajero=".$this->db->escape($cajero);
+			$mSQL = "SELECT COUNT(*) AS cana FROM rcaj WHERE fecha=${dbfecha} AND cajero=".$this->db->escape($cajero);
 			$cana = $this->datasis->dameval($mSQL);
 			if(!empty($cana)){
 				$do->error_message_ar['pre_del']="El cajero ${cajero} ya fue cerrado para la fecha del registro, debe revesar al cierre primero";
 				return false;
 			}
 		}
-
 		return true;
 	}
 
@@ -1882,13 +1855,15 @@ class Otin extends Controller {
 	}
 
 	function _post_delete($do){
+		$cod_cli  = $do->get('cod_cli');
 		$tipo_doc = $do->get('tipo_doc');
 		$numero   = $do->get('numero');
 		$transac  = $do->get('transac');
 		$codbanc  = $do->get('codbanc');
 		$dbtransac= $this->db->escape($transac);
+		$dbcod_cli= $this->db->escape($cod_cli);
 
-		$mSQL='SELECT codbanc,fecha,monto FROM bmov WHERE transac='.$dbtransac;
+		$mSQL="SELECT codbanc,fecha,monto FROM bmov WHERE transac=${dbtransac} AND ";
 		$query = $this->db->query($mSQL);
 		foreach ($query->result() as $row){
 			$fecha  = $row->fecha;
@@ -1896,6 +1871,12 @@ class Otin extends Controller {
 			$codbanc= $row->codbanc;
 			$this->datasis->actusal($codbanc, $fecha, $monto);
 		}
+
+		$sql="DELETE FROM bmov WHERE transac=${dbtransac} AND codcp=${dbcod_cli}";
+		$this->db->simple_query($sql);
+
+		$sql="DELETE FROM smov WHERE transac=${dbtransac} AND cod_cli=${dbcod_cli}";
+		$this->db->simple_query($sql);
 
 		$primary =implode(',',$do->pk);
 		logusu($do->table,"Elimino $this->tits numero:${tipo_doc}${numero} ${primary}");

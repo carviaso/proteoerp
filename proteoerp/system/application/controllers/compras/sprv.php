@@ -1288,7 +1288,7 @@ class Sprv extends Controller {
 	function chexiste($codigo){
 		$dbcodigo= $this->db->escape($codigo);
 		$rif=$this->input->post('rif');
-		$check=$this->datasis->dameval("SELECT COUNT(*) FROM sprv WHERE proveed=${dbcodigo}");
+		$check=intval($this->datasis->dameval("SELECT COUNT(*) AS cana FROM sprv WHERE proveed=${dbcodigo}"));
 		if ($check > 0){
 			$nombre=$this->datasis->dameval("SELECT nombre FROM sprv WHERE proveed=${dbcodigo}");
 			$this->validation->set_message('chexiste',"El codigo ${codigo} ya existe para el proveedor ${nombre}");

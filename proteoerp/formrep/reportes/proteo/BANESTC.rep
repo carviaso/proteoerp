@@ -4,23 +4,32 @@
  * @autor    Andres Hocevar
  * @license  GNU GPL v3
 */
-$filter = new DataFilter("Filtro del Reporte");
+$filter = new DataFilter('Filtro del Reporte');
 $filter->attributes=array('onsubmit'=>'is_loaded()');
 
-$filter->db->select(array('a.fecha','a.tipo_op','a.numero', "CONCAT(TRIM(a.concepto),' ',a.nombre) concepto", "(a.tipo_op NOT IN ('CH','ND'))*monto AS debitos", "(tipo_op IN ('CH','ND'))*monto AS creditos", "IF(tipo_op IN ('CH','ND'),-1,1)*monto AS saldo"));
-$filter->db->from('bmov as a');
-$filter->db->join('banc as b','a.codbanc=b.codbanc');
+$sel=array(
+	'a.fecha',
+	'a.tipo_op',
+	'a.numero',
+	"CONCAT(TRIM(a.concepto),' ',a.nombre)     AS concepto",
+	"(a.tipo_op NOT IN ('CH','ND'))*a.monto    AS debitos",
+	"(a.tipo_op IN ('CH','ND'))*a.monto        AS creditos",
+	"IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto AS saldo"
+);
+$filter->db->select($sel);
+$filter->db->from('bmov AS a');
+$filter->db->join('banc AS b','a.codbanc=b.codbanc');
 //$filter->db->orderby('fecha');
 
-$filter->fecha = new dateonlyField("Desde", "fechad",'m/Y');
-$filter->fecha->clause  ='where';
-$filter->fecha->db_name ="EXTRACT(YEAR_MONTH FROM fecha)";
-$filter->fecha->insertValue = date("Y-m-d");
-$filter->fecha->operator="=";
-$filter->fecha->dbformat='Ym';
-$filter->fecha->size=7;
+$filter->fecha = new dateonlyField('Desde', 'fechad','m/Y');
+$filter->fecha->clause      = 'where';
+$filter->fecha->db_name     = 'EXTRACT(YEAR_MONTH FROM fecha)';
+$filter->fecha->insertValue = date('Y-m-d');
+$filter->fecha->operator    = '=';
+$filter->fecha->dbformat    = 'Ym';
+$filter->fecha->size        = 7;
+$filter->fecha->rule        = 'required';
 $filter->fecha->append(' mes/año');
-$filter->fecha->rule = "required";
 
 $filter->banco = new dropdownField('Caja/Banco', 'codbanc');
 $filter->banco->db_name='a.codbanc';
@@ -28,31 +37,36 @@ $filter->banco->option('','Seleccionar');
 $filter->banco->options("SELECT codbanc,CONCAT_WS('  ',codbanc,banco,numcuent) AS numcuent FROM banc ORDER BY codbanc ");
 $filter->banco->rule = 'required';
 
-$filter->salformat = new radiogroupField("Formato de salida","salformat");
+$filter->salformat = new radiogroupField('Formato de salida','salformat');
 $filter->salformat->options($this->opciones);
 $filter->salformat->insertValue ='PDF';
 $filter->salformat->clause = '';
 
 $filter->buttons('search');
 $filter->build();
-if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
-	$mSQL=$filter->db->_compile_select();
-	$mSQL=$mSQL."UNION ALL
+if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
+	$dbfecha = $this->db->escape($filter->fecha->newValue);
+	$dbbanco = $this->db->escape($filter->banco->newValue);
+	$dbifecha= $this->db->escape($filter->fecha->newValue.'01');
 
-	SELECT DATE_ADD('20141101',INTERVAL -1 DAY) AS fecha,
+	$mSQL=$filter->db->_compile_select();
+	$mSQL=$mSQL." UNION ALL
+
+	SELECT DATE_ADD(${dbifecha},INTERVAL -1 DAY) AS fecha,
 		'SA' tipo_doc, 'SA', 'SALDO ANTERIOR',
-		if(SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto),0) as debitos,
-		if(SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto)>0,0,SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto))*(-1) as creditos,
-		SUM(if(tipo_op IN ('CH','ND'),-1,1)*monto) as saldo
-	FROM bmov as a JOIN banc as b ON a.codbanc=b.codbanc
-	WHERE EXTRACT(YEAR_MONTH FROM fecha) < '".$filter->fecha->newValue."' AND a.codbanc = '".$filter->banco->newValue."' AND anulado<>'S'
+		IF(SUM(IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto)>0,SUM(IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto),0)      AS debitos,
+		IF(SUM(IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto)>0,0,SUM(IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto))*(-1) AS creditos,
+		SUM(IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto) AS saldo
+	FROM bmov AS a
+	JOIN banc AS b ON a.codbanc=b.codbanc
+	WHERE EXTRACT(YEAR_MONTH FROM a.fecha) < ${dbfecha} AND a.codbanc = ${dbbanco} AND a.anulado<>'S'
 	GROUP BY a.codbanc
 	ORDER BY fecha";
 
-	//echo $mSQL;
-	$mSALDOANT=$this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE EXTRACT(YEAR_MONTH FROM fecha) <".$filter->fecha->newValue."  AND codbanc = '".$filter->banco->newValue."' AND anulado<>'S' ");
-	$mSALDOACT=0;
+	//$bsal     = floatval($this->datasis->dameval("SELECT saldo FROM bsal WHERE ano=${anio} AND codbanc=${dbbanco}"));
+	//$mSALDOANT= floatval($this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE anulado='N' AND fecha<=${dbfecha}  AND EXTRACT(YEAR_MONTH FROM fecha)>=${anio}01 AND codbanc = ${dbbanco}"));
 
+	//echo $mSQL; exit();
 	$sobretabla='';
 
 	if (!empty($filter->banco->newValue))   $sobretabla.='     Caja o Banco: '.$filter->banco->description;
@@ -63,9 +77,9 @@ if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
 	$pdf->setType('fecha','date');
 	$pdf->setHeadValores('TITULO1');
 	$pdf->setSubHeadValores('TITULO2','TITULO3');
-	$pdf->setTitulo("Estado de Cuenta");
+	$pdf->setTitulo('Estado de Cuenta');
 	$pdf->setSobreTabla($sobretabla,9);
-	$pdf->setSubTitulo("Para la fecha: ".$this->input->post('fechad'));
+	$pdf->setSubTitulo('Para la fecha: '.$this->input->post('fechad'));
 	//$pdf->seType('fecha','date');
 	$pdf->AddPage();
 
@@ -83,7 +97,7 @@ if($this->rapyd->uri->is_set('search')  AND $filter->is_valid()){
 	//$pdf->add_fila('','','','Saldo actual','100');
 	$pdf->Output();
 }else{
-	if (strlen($filter->error_string)) $data["error"]=$filter->error_string;
+	if (strlen($filter->error_string)) $data['error']=$filter->error_string;
 	$data['filtro'] = $filter->output;
 	$data['titulo'] = '<h2 class="mainheader">Estado de Cuenta</h2>';
 	$data['head']   = $this->rapyd->get_head();
