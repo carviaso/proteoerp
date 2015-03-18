@@ -1332,7 +1332,6 @@ class Edrec extends Controller {
 				$data['fecha']     = $row->fecha;
 				$data['monto']     = $row->monto;
 				$data['impuesto']  = $row->impuesto;
-				$data['abonos']    = $row->abonos;
 				$data['vence']     = $row->vence;
 				$data['tipo_ref']  = $row->tipo_ref;
 				$data['num_ref']   = $row->num_ref;
@@ -1353,6 +1352,7 @@ class Edrec extends Controller {
 				if(empty($row->smovid)){
 					$transac   = $this->datasis->fprox_numero('ntransa');
 					$data['transac']   = $transac;
+					$data['abonos']    = $row->abonos;
 
 					$this->db->insert('smov',$data);
 
