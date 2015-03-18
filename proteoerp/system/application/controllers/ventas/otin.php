@@ -1863,7 +1863,7 @@ class Otin extends Controller {
 		$dbtransac= $this->db->escape($transac);
 		$dbcod_cli= $this->db->escape($cod_cli);
 
-		$mSQL="SELECT codbanc,fecha,monto FROM bmov WHERE transac=${dbtransac} AND ";
+		$mSQL="SELECT codbanc,fecha,monto FROM bmov WHERE transac=${dbtransac} AND codcp=${dbcod_cli}";
 		$query = $this->db->query($mSQL);
 		foreach ($query->result() as $row){
 			$fecha  = $row->fecha;
