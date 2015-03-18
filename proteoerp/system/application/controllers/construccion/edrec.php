@@ -1317,7 +1317,7 @@ class Edrec extends Controller {
 			JOIN scli  AS b ON a.cod_cli=b.cliente
 			LEFT JOIN smov  AS c ON c.transac=a.transac AND c.cod_cli=a.cod_cli AND c.tipo_doc='ND' AND c.fecha=a.fecha
 			WHERE
-				#a.status = 'P' AND
+				a.status = 'P' AND
 				( a.anomes <= ".$dbanomes." OR a.anomes IS NULL)";
 
 		$query = $this->db->query($mSQL);
