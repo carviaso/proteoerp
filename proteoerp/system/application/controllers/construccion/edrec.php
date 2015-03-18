@@ -81,7 +81,7 @@ class Edrec extends Controller {
 		$anomes = $this->datasis->dameval('SELECT MAX(anomes) FROM edrec');
 		$ano = substr($anomes,0,4);
 		$mes = substr($anomes,4,2);
-		
+
 		// Pide Fecha
 		$ano0 = date('Y',mktime(0,0,0,date('m'),date('d'),date('Y')+1));
 
@@ -96,7 +96,7 @@ class Edrec extends Controller {
 		for ( $i = 1; $i < 13; $i++ ){
 			$m = str_pad($i,2,'0', STR_PAD_LEFT);
 			$mmes .= '<option '.($mes==$m ? 'selected':'').' value=\''.$m.'\'>'.$m.'</option>';
-		}		
+		}
 		$mmes .= '</select>';
 		$mes  = '<select id=\'mmes\' name=\'mmes\'><option value=\'01\'>01</option><option value=\'02\'>02</option><option value=\'03\'>03</option><option value=\'04\'>04</option><option value=\'05\'>05</option><option value=\'06\'>06</option><option value=\'07\'>07</option><option value=\'08\'>08</option><option value=\'09\'>09</option><option value=\'10\'>10</option><option value=\'11\'>11</option><option value=\'12\'>12</option></select>';
 
@@ -884,7 +884,7 @@ class Edrec extends Controller {
 	}
 
 	//******************************************************************
-	// DataEdit  
+	// DataEdit
 	//
 	function dataedit(){
 		$this->rapyd->load('dataobject','datadetails');
@@ -977,7 +977,7 @@ class Edrec extends Controller {
 		$edit->hora    = new autoUpdateField('hora',date('H:i:s'), date('H:i:s'));
 
 		//**************************************************************
-		// Detalle 
+		// Detalle
 
 		$edit->tipo = new dropdownField('Tipo','tipo_<#i#>');
 		$edit->tipo->style='width:120px;';
@@ -1127,12 +1127,12 @@ class Edrec extends Controller {
 		}
 
 		$tasa = $this->datasis->traevalor('CONDOADM','COMISION DE GASTOS ADMINISTRATIVOS');
-		if ($tasa == '') $tasa = 10; 
+		if ($tasa == '') $tasa = 10;
 
 		// Calculas las alicuotas por tipo
 		$mSQL = "
 		SELECT aplicacion indice, sum(alicuota) valor FROM (
-			SELECT a.aplicacion, 
+			SELECT a.aplicacion,
 				(SELECT bb.alicuota FROM edalicuota bb WHERE a.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=${dbanomes} ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
 			FROM edinmue a ) aa
 		WHERE aa.aplicacion IS NOT NULL AND aa.aplicacion NOT IN ('CO','')";
@@ -1166,8 +1166,8 @@ class Edrec extends Controller {
 				JOIN edinmue   d
 				LEFT JOIN scli e ON IF(d.ocupante='' OR d.ocupante IS NULL, d.propietario,d.ocupante) = e.cliente
 				JOIN dpto f ON a.aplicacion=f.depto
-				JOIN ( 
-					SELECT aa.id,  aa.codigo, (SELECT bb.alicuota FROM edalicuota bb 
+				JOIN (
+					SELECT aa.id,  aa.codigo, (SELECT bb.alicuota FROM edalicuota bb
 					WHERE aa.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=${dbanomes} ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
 					FROM edinmue aa) mm ON d.id = mm.id
 				WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${dbanomes}
@@ -1178,7 +1178,7 @@ class Edrec extends Controller {
 		if ($query->num_rows() > 0){
 			foreach( $query->result() as  $row ) {
 				$numero = $this->datasis->fprox_numero('nedrec');
-				$fecha  = date('Ymd'); 
+				$fecha  = date('Ymd');
 				$inmueble = $this->db->escape($row->inmueble);
 				$AREA = $row->area;
 				$data = array();
@@ -1208,8 +1208,8 @@ class Edrec extends Controller {
 					JOIN edinmue d
 					LEFT JOIN scli    e ON IF(d.ocupante='' OR d.ocupante IS NULL, d.propietario,d.ocupante) = e.cliente
 					JOIN dpto f ON a.aplicacion=f.depto
-					JOIN ( 
-						SELECT aa.id,  aa.codigo, (SELECT bb.alicuota FROM edalicuota bb 
+					JOIN (
+						SELECT aa.id,  aa.codigo, (SELECT bb.alicuota FROM edalicuota bb
 						WHERE aa.id=bb.inmueble AND EXTRACT(YEAR_MONTH FROM bb.fecha)<=${anomes} ORDER BY bb.fecha DESC LIMIT 1 ) alicuota
 						FROM edinmue aa) mm ON d.id = mm.id
 					WHERE EXTRACT(YEAR_MONTH FROM a.causado)=${anomes} AND d.codigo = ${inmueble} AND (a.aplicacion='CO' OR a.aplicacion=d.aplicacion)
@@ -1264,7 +1264,7 @@ class Edrec extends Controller {
 				$UT     = $this->datasis->utri($anomes.'01');
 				foreach( $query1->result() as  $row2 ) {
 					memowrite('$cuota='.$row2->formula.' GR='.$GRUPO['0000'], $row2->codbanc );
-					if ( $row2->depto != 'CO' ){  
+					if ( $row2->depto != 'CO' ){
 						if ($row->depto != $row2->depto ) continue;
 					}
 					eval('$cuota='.$row2->formula.';');
@@ -1304,26 +1304,26 @@ class Edrec extends Controller {
 		}
 		$dbanomes = $this->db->escape($anomes);
 
-		$tasa = $this->datasis->traevalor('CONDOADM','COMISION DE GASTOS ADMINISTRATIVOS');
-		if ($tasa == '') $tasa = 10; 
-
 		//Genera los recibos
 		$mSQL = "
-			SELECT 
+			SELECT
 				a.cod_cli, b.nombre, 'ND' tipo_doc, CONCAT('RC',MID(a.numero,3,6)) numero,
-				a.fecha, a.cuota monto, 0 impuesto, 0 abonos, a.vence, 'RC' tipo_ref, 
+				a.fecha, a.cuota monto, 0 impuesto, 0 abonos, a.vence, 'RC' tipo_ref,
 				a.numero num_ref, 'RECIBO DE CONDOMINIO ${anomes}' observa1, a.id,
 				CONCAT('CORRESPONDIENTE AL MES ',MID(a.anomes,5,2),'-',MID(a.anomes,1,4)) observa2,
-				a.usuario,a.estampa, a.hora,a.transac, 'NOCON' codigo, 0 montasa, 0 monredu, 
-				0 monadic, 0 tasa, 0 reducida, 0 sobretasa, 0 exento
-			FROM edrec a JOIN scli b ON a.cod_cli=b.cliente
-			WHERE a.status = 'P' AND ( a.anomes <= ".$dbanomes." OR a.anomes IS NULL)";
-		
+				a.usuario,a.estampa, a.hora,a.transac, 'NOCON' codigo, 0 montasa, 0 monredu,
+				0 monadic, 0 tasa, 0 reducida, 0 sobretasa, 0 exento, c.id AS smovid
+			FROM edrec AS a
+			JOIN scli  AS b ON a.cod_cli=b.cliente
+			LEFT JOIN smov  AS c ON c.transac=a.transac AND c.cod_cli=a.cod_cli AND c.tipo_doc='ND' AND c.fecha=a.fecha
+			WHERE
+				#a.status = 'P' AND
+				( a.anomes <= ".$dbanomes." OR a.anomes IS NULL)";
+
 		$query = $this->db->query($mSQL);
 		if ($query->num_rows() > 0){
 			foreach( $query->result() as  $row ) {
-				$transac   = $this->datasis->fprox_numero('ntransa');
-				$fecha     = date('Ymd'); 
+
 				$data = array();
 				$data['cod_cli']   = $row->cod_cli;
 				$data['nombre']    = $row->nombre;
@@ -1341,7 +1341,6 @@ class Edrec extends Controller {
 				$data['usuario']   = $row->usuario;
 				$data['estampa']   = date('h:m:s');
 				$data['hora']      = date('h:m:s');
-				$data['transac']   = $transac;
 				$data['codigo']    = $row->codigo;
 				$data['montasa']   = $row->montasa;
 				$data['monredu']   = $row->monredu;
@@ -1350,16 +1349,28 @@ class Edrec extends Controller {
 				$data['reducida']  = $row->reducida;
 				$data['sobretasa'] = $row->sobretasa;
 				$data['exento']    = $row->exento;
-				$this->db->insert('smov',$data);
 
-				// Actualiza edrec
-				$data = array();
-				$data['transac'] = $transac;
-				$data['status']  = 'F';
-				$this->db->where("id", $row->id);
-				$this->db->update('edrec',$data);
+				if(empty($row->smovid)){
+					$transac   = $this->datasis->fprox_numero('ntransa');
+					$data['transac']   = $transac;
+
+					$this->db->insert('smov',$data);
+
+					// Actualiza edrec
+					$data = array();
+					$data['transac'] = $transac;
+					$data['status']  = 'F';
+					$this->db->where('id', $row->id);
+					$this->db->update('edrec',$data);
+				}else{
+					$transac   = $row->transac;
+
+					$this->db->where('id', $row->smovid);
+					$this->db->update('smov',$data);
+				}
+
 			}
-			echo "Si se Guardaron";
+			echo 'Si se Guardaron';
 		}
 	}
 
@@ -1420,4 +1431,3 @@ class Edrec extends Controller {
 		}
 	}
 }
-

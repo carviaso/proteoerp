@@ -49,9 +49,11 @@ if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
 	$dbbanco = $this->db->escape($filter->banco->newValue);
 	$dbifecha= $this->db->escape($filter->fecha->newValue.'01');
 
+	//$bsal     = floatval($this->datasis->dameval("SELECT saldo FROM bsal WHERE ano=${anio} AND codbanc=${dbbanco}"));
+	//$mSALDOANT= floatval($this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE anulado='N' AND fecha<=${dbfecha}  AND EXTRACT(YEAR_MONTH FROM fecha)>=${anio}01 AND codbanc = ${dbbanco}"));
+
 	$mSQL=$filter->db->_compile_select();
 	$mSQL=$mSQL." UNION ALL
-
 	SELECT DATE_ADD(${dbifecha},INTERVAL -1 DAY) AS fecha,
 		'SA' tipo_doc, 'SA', 'SALDO ANTERIOR',
 		IF(SUM(IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto)>0,SUM(IF(a.tipo_op IN ('CH','ND'),-1,1)*a.monto),0)      AS debitos,
@@ -62,9 +64,6 @@ if($this->rapyd->uri->is_set('search')  && $filter->is_valid()){
 	WHERE EXTRACT(YEAR_MONTH FROM a.fecha) < ${dbfecha} AND a.codbanc = ${dbbanco} AND a.anulado<>'S'
 	GROUP BY a.codbanc
 	ORDER BY fecha";
-
-	//$bsal     = floatval($this->datasis->dameval("SELECT saldo FROM bsal WHERE ano=${anio} AND codbanc=${dbbanco}"));
-	//$mSALDOANT= floatval($this->datasis->dameval("SELECT SUM(IF(tipo_op IN ('CH', 'ND'),-1,1)*monto) AS saldo FROM bmov WHERE anulado='N' AND fecha<=${dbfecha}  AND EXTRACT(YEAR_MONTH FROM fecha)>=${anio}01 AND codbanc = ${dbbanco}"));
 
 	//echo $mSQL; exit();
 	$sobretabla='';

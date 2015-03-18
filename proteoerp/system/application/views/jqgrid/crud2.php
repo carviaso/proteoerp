@@ -266,7 +266,7 @@ if ( isset($tamano) )
 
 ?>
 $('.clearsearchclass').css('padding-right','0');$('.clearsearchclass').css('padding-left' ,'0');});
-<?php if (isset($postready))  echo $postready; 
+<?php if (isset($postready))  echo $postready;
 //Funcion para bloquear y esperar ?>
 function esperar(url){$.blockUI({message: $('#displayBox'),css: {top:  ($(window).height()-400)/2+'px',left: ($(window).width()-400)/2+'px',width: '300px'}});$.get(url, function(data) {setTimeout($.unblockUI, 2);$.prompt(data);});return false;};
 </script>
